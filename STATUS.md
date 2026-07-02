@@ -9,6 +9,16 @@ The one-line summary for any new reader or AI:
 Do not let AI-to-AI review re-open the items under "Done." If you believe one is
 wrong, cite the Zano source file/line and stop — do not rewrite it.
 
+## Repo state — last known good
+
+One line per milestone; newest first. This section, not any AI's memory, is the
+authoritative record of where `origin/main` sits.
+
+- `2026-07-02` — `8797d66` initial commit (16 files: chain-zano, docs, proto,
+  workspace config) pushed to private `github.com/beehive-nature/beehive-nature`,
+  `main` tracking `origin/main`. Staged diff scanned for secret material before
+  commit (grep + long-hex pass): clean. **Next file: escrow-core.**
+
 ## Done — source-confirmed (staked against `hyle-team/zano/src/crypto`)
 
 - **Key derivation, end to end**
