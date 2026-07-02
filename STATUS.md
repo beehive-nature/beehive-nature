@@ -14,6 +14,10 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-02` — pre-commit secret guard: `.githooks/pre-commit` blocks 48+ char
+  hex runs, PEM private-key blocks, and secret-extension files (even `add -f`)
+  from entering history. Enable per clone: `git config core.hooksPath .githooks`
+  (in README Quickstart). Deliberate exceptions: eyeball, then `--no-verify`.
 - `2026-07-02` — `8797d66` initial commit (16 files: chain-zano, docs, proto,
   workspace config) pushed to private `github.com/beehive-nature/beehive-nature`,
   `main` tracking `origin/main`. Staged diff scanned for secret material before
