@@ -1,0 +1,14 @@
+[package]
+name = "escrow-core"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "bNature escrow state machine — pure logic, no chain I/O (brief §9.1–9.2)"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+time = { version = "0.3", features = ["serde-human-readable"] }
+
+[dev-dependencies]
+time = { version = "0.3", features = ["serde-human-readable", "macros"] }
+serde_json = "1"

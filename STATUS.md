@@ -14,6 +14,15 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-02` — **escrow-core: state machine + exhaustive tests green.**
+  `crates/escrow-core` per brief §9.1–9.2: `EscrowState`, `Escrow` (with
+  `fee_buffer_zano` and dual-balance funding check), `transition()` enforcing
+  the full table + timeouts, time only via events (hermetic tests). 27 tests:
+  every valid transition, exhaustive 9×7 state/event rejection matrix,
+  timeout boundaries, partial-funding rejection, dispute-window edge, serde.
+  clippy + fmt clean. First `Cargo.lock` committed (tracked per decision).
+  Brief + CONSTITUTION now versioned in `docs/`. Next: canonical event types
+  (§9.3) or Zano findings follow-up.
 - `2026-07-02` — secret scan is now remote-enforced: shared rules live in
   `scripts/secret-scan.sh` (hook delegates in `diff` mode; CI runs `tree` mode
   on every push/PR via `.github/workflows/secret-scan.yml`). Fresh clones that
