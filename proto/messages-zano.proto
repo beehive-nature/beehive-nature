@@ -1,0 +1,272 @@
+syntax = "proto2";
+package hw.trezor.messages.zano;
+
+option java_outer_classname = "TrezorMessageZano";
+option java_package = "com.satoshilabs.trezor.lib.protobuf";
+
+// =============================================================================
+// messages-zano.proto  —  AUTHORITATIVE DRAFT v0.3
+//
+// Multi-round host <-> Trezor-firmware contract for ON-DEVICE Zano signing.
+//
+// CHANGES FROM v0.2:
+//   * CLSAG signing round PROMOTED from TBD to CONFIRMED against clsag.cpp
+//     (generate_CLSAG_GGX body, lines 189-330). Single-pass per input; no
+//     pre-commitment round needed (K1/K2 computed on-device before challenge).
+//   * Added oneof request/ack wrappers (matches Trezor firmware dispatch).
+//   * 1/8 rule made explicit: host sends RAW points; firmware applies 1/8 / mul8
+//     internally. Sending pre-scaled points double-scales -> silent bad sig.
+//   * Confirmed: generate_CLSAG_GGX does NOT read BP+ data. CLSAG and range
+//     proof are independent. No bppe_link on the signing round.
+//
+// SECURITY INVARIANT (load-bearing, re-verified against clsag.cpp asserts):
+//   The spend secret s and the per-input secrets secret_0_xp/secret_1_f/
+//   secret_2_t are derived and used ONLY inside firmware and NEVER appear on
+//   the wire. Confirmed relationships (firmware-internal):
+//     secret_0_xp * G = stealth_address
+//     secret_1_f  * G = 8*amount_commitment  - pseudo_out_amount_commitment
+//     secret_2_t  * X = 8*blinded_asset_id    - pseudo_out_blinded_asset_id
+//
+// SOURCE-GROUNDED against hyle-team/zano/src/crypto:
+//   clsag.cpp (generate_CLSAG_GGX), clsag.h, range_proof_bppe.h, crypto.cpp.
+//
+// Firmware-internal derivation (NOT on the wire):
+//   s = sc_reduce(SLIP-0010 leaf, m/44'/1018'/account'/change'/index', hardened)
+//   v = keccak256(s) mod l
+//   I = s * Hp(P),  Hp(P) = mul8(ge_fromfe_frombytes_vartime(keccak256(P)))
+//
+// proto2, Trezor conventions. Message IDs assigned by SatoshiLabs.
+//
+// 1/8 (torsion) CONVENTION — confirmed at the generate_CLSAG_GGX call site:
+//   * ring.blinded_asset_id : host sends it as T premultiplied by 1/8 (clsag.h)
+//   * ring.stealth_address / ring.amount_commitment : host sends RAW; firmware
+//     applies mul8 internally (A_i = mul8(amount_commitment))
+//   * pseudo_out_* : host sends RAW; firmware applies 1/8 in the transcript
+//   DO NOT pre-scale pseudo_out_* or stealth/amount fields on the host.
+// =============================================================================
+
+enum ZanoNetworkType {
+    MAINNET = 0;
+    TESTNET = 1;
+}
+
+// ---------------------------------------------------------------------------
+// Address / view-key export  (no spend material ever leaves the device)
+// ---------------------------------------------------------------------------
+
+/** @start @next ZanoAddress */
+message ZanoGetAddress {
+    repeated uint32 address_n = 1;              // m/44'/1018'/account'/change'/index' (all hardened)
+    optional bool   show_display = 2;
+    optional ZanoNetworkType network_type = 3 [default = MAINNET];
+    optional bool   auditable = 4;
+}
+/** @end */
+message ZanoAddress { required bytes address = 1; }   // encoded {S, V} (+ flags)
+
+/** @start @next ZanoWatchKey */
+message ZanoGetWatchKey {
+    repeated uint32 address_n = 1;
+    optional ZanoNetworkType network_type = 2 [default = MAINNET];
+}
+/** @end */
+message ZanoWatchKey {
+    required bytes view_secret = 1;            // v = keccak256(s) mod l (safe to expose)
+    required bytes address = 2;
+}
+
+// ---------------------------------------------------------------------------
+// Key-image sync  (I = s*Hp(P), on-device only; host cannot compute it)
+// ---------------------------------------------------------------------------
+
+/** @start @next ZanoKeyImageSyncStep */
+message ZanoKeyImageSyncInit {
+    repeated uint32 address_n = 1;
+    required uint64 count = 2;
+    optional ZanoNetworkType network_type = 3 [default = MAINNET];
+}
+/** @next ZanoKeyImageSyncStepAck */
+message ZanoKeyImageSyncStep {
+    repeated ZanoOwnedOutput outputs = 1;
+    message ZanoOwnedOutput {
+        required bytes  out_pub_key = 1;       // P (one-time stealth output pubkey)
+        required bytes  tx_pub_key = 2;
+        required uint64 out_index = 3;
+    }
+}
+/** @next ZanoKeyImageSyncStep @next ZanoKeyImageSyncFinal */
+message ZanoKeyImageSyncStepAck { repeated bytes key_images = 1; }   // I per output, in order
+/** @start @next ZanoKeyImageSyncFinalAck */
+message ZanoKeyImageSyncFinal {}
+/** @end */
+message ZanoKeyImageSyncFinalAck {}
+
+// ---------------------------------------------------------------------------
+// Transaction signing — staged, stateful. s stays on-device throughout.
+//   Init -> (SetInput)* -> (SetOutput)* -> RangeProof -> BalanceProof
+//        -> (SignInput)* -> Final
+// ---------------------------------------------------------------------------
+
+/** @next ZanoSignInitAck */
+message ZanoSignInit {
+    repeated uint32 address_n = 1;             // identity fixed ONCE here, HMAC-bound
+    optional ZanoNetworkType network_type = 2 [default = MAINNET];
+    required uint32 num_inputs = 3;
+    required uint32 num_outputs = 4;
+    required uint32 ring_size = 5;             // 16 on current mainnet
+    required uint64 fee = 6;
+    optional uint32 hard_fork = 7;
+    // NOTE: derivation path lives here ONLY. Never re-sent per input.
+}
+/** @next ZanoSignSetInput */
+message ZanoSignInitAck { repeated bytes input_hmac_keys = 1; }
+
+/** @next ZanoSignSetInputAck */
+message ZanoSignSetInput {
+    required uint32 input_index = 1;
+    repeated ZanoRingMember ring = 2;          // full ring incl. decoys (ring_size members)
+    required uint32 real_output_index = 3;     // index within `ring` (public info)
+
+    message ZanoRingMember {
+        required bytes stealth_address = 1;    // P   — RAW (firmware mul8s internally)
+        required bytes amount_commitment = 2;  //      — RAW (firmware mul8s -> A_i)
+        required bytes blinded_asset_id = 3;   // [1/8] T premultiplied by 1/8 (clsag.h)
+        optional uint64 global_index = 4;
+    }
+}
+/** @next ZanoSignSetInput @next ZanoSignSetOutput */
+message ZanoSignSetInputAck {
+    required bytes key_image = 1;              // I = s*Hp(P)
+    required bytes pseudo_out_amount_commitment = 2;  // RAW (NOT 1/8-scaled)
+    required bytes pseudo_out_asset_id = 3;           // RAW (NOT 1/8-scaled)
+    required bytes hmac = 4;
+}
+
+/** @next ZanoSignSetOutputAck */
+message ZanoSignSetOutput {
+    required uint32 output_index = 1;
+    required bytes  dest_address = 2;
+    required uint64 amount = 3;                // shown on trusted display; firmware re-blinds
+    optional bytes  asset_id = 4;             // native ZANO for v1
+    optional bool   is_change = 5;
+}
+/** @next ZanoSignSetOutput @next ZanoSignRangeProof */
+message ZanoSignSetOutputAck {
+    required bytes out_pub_key = 1;
+    required bytes amount_commitment = 2;
+    required bytes concealing_point = 3;       // Zarcanum Q
+    required bytes ecdh_info = 4;
+    optional bytes blinded_asset_id = 5;       // multi-asset; v2+
+}
+
+/**
+ * Range proof (bppe — Zarcanum double-blinded BP+).
+ * <=2 outputs: firmware computes bppe_gen fully.
+ *  >2 outputs: host offloads; firmware verifies (bppe_verify).
+ * @next ZanoSignRangeProofAck
+ */
+message ZanoSignRangeProof {
+    optional bool  offloaded = 1;
+    optional bytes offloaded_proof = 2;        // serialized bppe_signature when offloaded
+}
+/** @next ZanoSignBalanceProof */
+message ZanoSignRangeProofAck {
+    optional ZanoBppeSignature range_proof = 1;
+    // bppe_signature (source: range_proof_bppe.h)
+    message ZanoBppeSignature {
+        repeated bytes L = 1;      // size = log_2(m*n)
+        repeated bytes R = 2;      // size = log_2(m*n)
+        required bytes A0 = 3;
+        required bytes A = 4;
+        required bytes B = 5;
+        required bytes r = 6;
+        required bytes s = 7;
+        required bytes delta_1 = 8;
+        required bytes delta_2 = 9;
+    }
+}
+
+/**
+ * Balance proof — double-Schnorr over G/X (zarcanum.h; check_tx_balance).
+ * @next ZanoSignBalanceProofAck
+ */
+message ZanoSignBalanceProof {}
+/** @next ZanoSignInput */
+message ZanoSignBalanceProofAck {
+    required bytes balance_proof = 1;
+    // TBD: confirm exact serialization of generic_double_schnorr_sig (zarcanum.cpp)
+}
+
+/**
+ * dv-CLSAG signature for one input.  CONFIRMED single-pass against clsag.cpp
+ * (generate_CLSAG_GGX): firmware computes K1/K2 from on-device secrets, builds
+ * the transcript over m + ring + pseudo_out(x1/8) + ki + K1 + K2, derives the
+ * three layer aggregation coefficients, and runs the ring loop in ONE pass.
+ * No pre-commitment round. Does NOT read BP+ data.
+ * @next ZanoSignInputAck
+ */
+message ZanoSignInput {
+    required uint32 input_index = 1;
+    required bytes  hmac = 2;                   // must match ZanoSignSetInputAck.hmac
+    required bytes  tx_prefix_hash = 3;         // message m (byte-identical to daemon)
+    // Ring + pseudo_out are already device-side (sealed from SetInput); not re-sent.
+}
+/**
+ * Return: CLSAG_GGX_signature — EXACT fields from clsag.h. r_g and r_x together
+ * are the COMPLETE response set (confirmed: no extra_responses exist).
+ * @next ZanoSignInput @next ZanoSignFinal
+ */
+message ZanoSignInputAck {
+    required ZanoClsagGgxSignature signature = 1;
+    message ZanoClsagGgxSignature {
+        required bytes c = 1;        // scalar (initial challenge)
+        repeated bytes r_g = 2;      // scalar_vec, size = ring_size (G-layers 0,1)
+        repeated bytes r_x = 3;      // scalar_vec, size = ring_size (X-layer 2)
+        required bytes K1 = 4;       // aux key image, layer 1 (G) — device-computed
+        required bytes K2 = 5;       // aux key image, layer 2 (X) — device-computed
+    }
+}
+
+/** @start @next ZanoSignFinalAck */
+message ZanoSignFinal {}
+/** @end */
+message ZanoSignFinalAck { optional bytes tx_secret_keys = 1; }
+
+// ---------------------------------------------------------------------------
+// Dispatch wrappers (matches Trezor firmware request/ack routing)
+// ---------------------------------------------------------------------------
+
+message ZanoSignRequest {
+    oneof request {
+        ZanoSignInit             init            = 1;
+        ZanoSignSetInput         set_input       = 2;
+        ZanoSignSetOutput        set_output      = 3;
+        ZanoSignRangeProof       range_proof     = 4;
+        ZanoSignBalanceProof     balance_proof   = 5;
+        ZanoSignInput            sign_input      = 6;
+        ZanoSignFinal            final           = 7;
+    }
+}
+message ZanoSignAck {
+    oneof ack {
+        ZanoSignInitAck          init            = 1;
+        ZanoSignSetInputAck      set_input       = 2;
+        ZanoSignSetOutputAck     set_output      = 3;
+        ZanoSignRangeProofAck    range_proof     = 4;
+        ZanoSignBalanceProofAck  balance_proof   = 5;
+        ZanoSignInputAck         sign_input      = 6;
+        ZanoSignFinalAck         final           = 7;
+    }
+}
+
+// =============================================================================
+// REMAINING TBD (down from 5 in v0.2 -> 2; CLSAG round CLOSED):
+//   A. Exact serialization of the balance proof double-Schnorr. [zarcanum.cpp]
+//   B. Multi-asset context fields for Confidential Assets (v2+). Native-only
+//      v1 uses the single explicit-asset path. [tx-builder]
+//   (OUT OF BAND) tx_prefix_hash must be byte-identical to the daemon —
+//   serialization contract, vector-tested, not defined here.
+//
+// CLOSED in v0.3 (was TBD #1): generate_CLSAG_GGX is single-pass, computes
+// K1/K2 before the challenge, reads no BP+ data, expects RAW pseudo_out points.
+// =============================================================================

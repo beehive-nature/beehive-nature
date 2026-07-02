@@ -1,0 +1,17 @@
+[workspace]
+resolver = "2"
+members = ["crates/chain-zano"]
+
+[workspace.package]
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+# Pinned per the crypto delta spec. Verify exact API spellings on first build
+# (see STATUS.md — curve25519-dalek 4.x basepoint-mul syntax may need adjustment).
+[workspace.dependencies]
+curve25519-dalek = "4"
+sha3 = "0.10"
+sha2 = "0.10"
+hmac = "0.12"
+zeroize = "1"
+hex-literal = "0.4"

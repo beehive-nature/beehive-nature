@@ -1,0 +1,16 @@
+[package]
+name = "chain-zano"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "Host-side Zano key derivation + firmware-spec modules for the Beehive Nature Trezor-native architecture."
+
+[dependencies]
+curve25519-dalek = { workspace = true }
+sha3 = { workspace = true }
+sha2 = { workspace = true }
+hmac = { workspace = true }
+zeroize = { workspace = true }
+
+[dev-dependencies]
+hex-literal = { workspace = true }

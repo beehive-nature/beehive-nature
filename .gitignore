@@ -1,0 +1,21 @@
+# Rust
+/target
+**/target
+**/*.rs.bk
+*.pdb
+
+# Secrets — NEVER commit keys, seeds, or real test vectors
+*.seed
+*.key
+*.pem
+*.secret
+secrets/
+*vector*.local.*
+.env
+.env.*
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
