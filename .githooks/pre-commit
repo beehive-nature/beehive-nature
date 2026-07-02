@@ -1,44 +1,5 @@
 #!/bin/sh
-# Pre-commit guard: block secret-shaped material from entering history.
-#
-# Fires only on hard signals — words like "spend_secret" appear legitimately
-# throughout this codebase and are NOT blocked:
-#   1. staged files with secret-bearing extensions (even if forced past .gitignore)
-#   2. hex runs of 48+ chars in added lines (key/seed/vector-shaped)
-#   3. PEM private-key blocks in added lines
-#
-# Deliberate exception (e.g. a throwaway-testnet vector going into the
-# #[ignore]'d compat tests): review the diff by eye, then `git commit --no-verify`.
-
-fail=0
-
-banned=$(git diff --cached --name-only --diff-filter=ACM |
-    grep -Ei '\.(seed|key|pem|secret)$|(^|/)secrets/|(^|/)\.env(\.|$)')
-if [ -n "$banned" ]; then
-    echo "BLOCKED: staged files with secret-bearing names:" >&2
-    echo "$banned" >&2
-    fail=1
-fi
-
-added=$(git diff --cached --diff-filter=ACM | grep '^+' | grep -v '^+++')
-
-hexhits=$(printf '%s\n' "$added" | grep -cE '[0-9a-fA-F]{48,}')
-if [ "$hexhits" -gt 0 ]; then
-    echo "BLOCKED: $hexhits added line(s) contain a 48+ char hex run (key/seed/vector-shaped):" >&2
-    printf '%s\n' "$added" | grep -nE '[0-9a-fA-F]{48,}' | head -10 >&2
-    fail=1
-fi
-
-# [Y] bracket trick: matches PRIVATE KEY in content without matching this line itself
-pemhits=$(printf '%s\n' "$added" | grep -cE 'BEGIN .*PRIVATE KE[Y]')
-if [ "$pemhits" -gt 0 ]; then
-    echo "BLOCKED: added lines contain a PEM private-key block." >&2
-    fail=1
-fi
-
-if [ "$fail" -ne 0 ]; then
-    echo "" >&2
-    echo "If this is a deliberate, eyeballed exception: git commit --no-verify" >&2
-    exit 1
-fi
-exit 0
+# Pre-commit: delegate to the shared secret scan (rules, exemptions, and the
+# TESTNET-ONLY vector path are documented in scripts/secret-scan.sh).
+# CI runs the same script in `tree` mode on every push as the remote backstop.
+exec sh scripts/secret-scan.sh diff

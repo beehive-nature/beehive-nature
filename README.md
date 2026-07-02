@@ -50,7 +50,7 @@ this repo. This repo is the host side.
 ## Quickstart
 
 ```bash
-git config core.hooksPath .githooks   # one-time per clone: enable the secret-scan pre-commit hook
+git config core.hooksPath .githooks   # one-time per clone: local secret-scan hook (CI re-runs the same scan on every push)
 cargo build           # step 1 tonight: resolve exact curve25519-dalek 4.x API
 cargo test            # passing tests are internal-consistency only
 cargo test -- --ignored   # compatibility tests: RED until a real Zano vector is pasted

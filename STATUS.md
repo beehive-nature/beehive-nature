@@ -14,6 +14,13 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-02` — secret scan is now remote-enforced: shared rules live in
+  `scripts/secret-scan.sh` (hook delegates in `diff` mode; CI runs `tree` mode
+  on every push/PR via `.github/workflows/secret-scan.yml`). Fresh clones that
+  skip hook setup are caught server-side. Exemptions: `Cargo.lock` (public
+  sha256 checksums), and a **same-line `TESTNET-ONLY` marker** — the sanctioned
+  path for the future compat-test vector (an unmarked vector fails CI even if
+  committed with `--no-verify`).
 - `2026-07-02` — pre-commit secret guard: `.githooks/pre-commit` blocks 48+ char
   hex runs, PEM private-key blocks, and secret-extension files (even `add -f`)
   from entering history. Enable per clone: `git config core.hooksPath .githooks`
