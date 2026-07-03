@@ -15,6 +15,19 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-03` — **🏁 ITEM 4 COMPLETE — LIVE: chain bytes drive escrow-core.**
+  New `crates/escrow-engine`: bus consumer replaying CanonicalEvents into
+  `escrow_core::transition` (OrderFunded/Shipped/Delivered/Completed →
+  BuyerFunded/SellerShipped/DeliveryConfirmed/BuyerReleased; dispute
+  family gates on the DRO milestone; Timeout stays timer-driven). Schema:
+  `OrderEvent.fee_buffer_zano: Option<u64>` added (§9.2 dual-balance —
+  unobserved = 0, never guessed). 5 unit tests + integration test (mock
+  SHIP → state machine: full funding → Funded, partial → refused, state
+  untouched). **LIVE PROOF on the real dev chain**: codeless `zano`
+  account + on-chain ABI → real `zano::transfer` tx `8f8395be…` in block
+  2832 → streamed, extracted, ABI-decoded, normalized, bused →
+  `ESCROW order-live: Ok(Funded)`. Recipe in runbook §4b. The five-item
+  sequence is now 5/5 ✅.
 - `2026-07-03` — **✅ §1.7 FEE BUFFER VERIFIED LIVE WITH fUSD.** Local synced
   testnet + API faucet (dispenses fUSD): buyer held 100 fully-unlocked fUSD
   and exactly 0 native ZANO → fUSD transfer FAILS at the wallet layer

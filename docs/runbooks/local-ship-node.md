@@ -83,6 +83,25 @@ chain-eos will print `eosio.token::create`, `eosio.token::issue` in its
 action lines; feeding those through `chain_eos::abi` with the token ABI
 (`cleos get abi eosio.token`) is the first real-data decode.
 
+## 4b. Drive the escrow engine from the live chain (item 4 proof)
+
+The dev chain can stand in for the future Zano watcher: a codeless
+account named `zano` with the transfer ABI set produces real on-chain
+actions the normalizer maps to `OrderFunded`.
+
+```bash
+cleos create account eosio zano <DEV_PUBKEY> <DEV_PUBKEY>
+cleos set abi zano /root/zano-abi.json     # ABI in escrow-engine's example
+SHIP_WS_URL=ws://127.0.0.1:8080 cargo run -p escrow-engine --example live_pipeline &
+cleos push action zano transfer \
+  '["order-live","did:plc:buyer","did:plc:seller",5000000,"fusd-asset-id",10000000,"msig-addr-1","2026-07-03T12:00:00"]' \
+  -p zano@active
+# expect: ESCROW order-live: Ok(Funded)  +  "LIVE PROOF" line, exit 0
+```
+
+First proven 2026-07-03: tx `8f8395be…` in block 2832 →
+`ESCROW order-live: Ok(Funded)`.
+
 ## Verification checklist (all four = milestone done)
 
 - [x] nodeos producing blocks — DONE 2026-07-03 (Spring v1.2.2, WSL Ubuntu 26.04)

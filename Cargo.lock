@@ -131,6 +131,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "escrow-engine"
+version = "0.1.0"
+dependencies = [
+ "chain-eos",
+ "escrow-core",
+ "event-bus",
+ "futures-util",
+ "normalizer",
+ "serde_json",
+ "shared-types",
+ "time",
+ "tokio",
+ "tokio-tungstenite",
+]
+
+[[package]]
 name = "event-bus"
 version = "0.1.0"
 dependencies = [

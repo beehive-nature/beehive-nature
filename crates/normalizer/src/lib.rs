@@ -84,6 +84,9 @@ pub fn normalize(action: RawChainAction) -> Result<Option<CanonicalEvent>, Norma
                 seller_did: req_str(&action, "seller_did")?,
                 amount: req_u64(&action, "amount")?,
                 asset_id: req_str(&action, "asset_id")?,
+                // §9.2: the watcher reports the multisig's native balance
+                // alongside the asset; absent = not observed (never guessed).
+                fee_buffer_zano: opt_u64(&action, "fee_buffer_zano")?,
                 escrow_wallet_id: opt_str(&action.data, "multisig_address"),
                 tracking: None,
                 carrier: None,
@@ -229,6 +232,7 @@ mod tests {
                 "seller_did": "did:plc:seller",
                 "amount": 5_000_000u64,
                 "asset_id": "fusd-asset-id",
+                "fee_buffer_zano": 10_000_000u64,
                 "multisig_address": "msig-addr-1",
                 "timestamp": 1_782_000_100i64,
             }),
@@ -248,6 +252,7 @@ mod tests {
         assert_eq!(o.buyer_did, "did:plc:buyer");
         assert_eq!(o.amount, 5_000_000);
         assert_eq!(o.asset_id, "fusd-asset-id");
+        assert_eq!(o.fee_buffer_zano, Some(10_000_000));
         assert_eq!(o.escrow_wallet_id.as_deref(), Some("msig-addr-1"));
         assert_eq!(o.tracking, None);
     }

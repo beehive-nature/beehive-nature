@@ -95,6 +95,11 @@ pub struct OrderEvent {
     pub seller_did: String,
     pub amount: u64,
     pub asset_id: String,
+    /// Observed native-ZANO balance alongside the asset (§9.2 fee buffer).
+    /// The escrow funding check needs BOTH balances; absent means the
+    /// watcher did not observe one (treated as 0 — partial funding).
+    #[serde(default)]
+    pub fee_buffer_zano: Option<u64>,
     pub escrow_wallet_id: Option<String>,
     pub tracking: Option<String>,
     pub carrier: Option<String>,
@@ -205,6 +210,7 @@ mod tests {
                 seller_did: "did:plc:seller".into(),
                 amount: 5_000_000,
                 asset_id: "fusd-asset-id".into(),
+                fee_buffer_zano: Some(10_000_000),
                 escrow_wallet_id: Some("msig-1".into()),
                 tracking: Some("1Z999".into()),
                 carrier: Some("UPS".into()),
