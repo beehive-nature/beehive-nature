@@ -14,6 +14,13 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-03` — **local SHIP node runbook written** —
+  `docs/runbooks/local-ship-node.md`: WSL install → Spring/nodeos single
+  producer with `state_history_plugin` on `ws://127.0.0.1:8080` →
+  chain-eos against it → deploy eosio.token for real action data (first
+  live ABI decode). Four-point verification checklist. Blocked only on
+  the owner's `wsl --install` + reboot (attempted from the session:
+  needs elevation).
 - `2026-07-03` — **THE SEAM IS GLUED: Antelope ABI decoder (`chain_eos::abi`).**
   Binary action data → JSON: aliases, struct bases, optionals, arrays, and
   the marketplace-relevant built-ins (name/string/asset/symbol/checksums/
