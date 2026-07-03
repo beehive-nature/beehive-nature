@@ -125,6 +125,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "event-bus"
+version = "0.1.0"
+dependencies = [
+ "shared-types",
+ "tokio",
+]
+
+[[package]]
 name = "fiat-crypto"
 version = "0.2.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"

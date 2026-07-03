@@ -14,6 +14,16 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-03` — **event-bus: in-memory CanonicalEvent fan-out green.**
+  `crates/event-bus` — `EventBus` over `tokio::sync::broadcast`:
+  publish/subscribe, no-subscriber publishes drop silently, laggards get
+  `Lagged` and skip ahead without blocking anyone, late subscribers see
+  only future events (all pinned by 6 tests). `BusError` is an empty enum
+  — the in-memory bus has no failure modes; the type keeps `publish`'s
+  contract stable for a networked backend (bus choice = Phase 3 per §6).
+  Runtime nervous system is now complete in pure logic: chain-eos →
+  normalizer → event-bus → consumers. **Pivot point: reality.** Next work
+  requires a live SHIP endpoint or Zano testnet, not more logic crates.
 - `2026-07-03` — **normalizer: raw actions → CanonicalEvents green (§9.3).**
   `crates/normalizer` — `RawChainAction` + `normalize()` with the two §9.3
   mappings (`lovismarket:addlisting → ProductListed`, `zano:transfer →

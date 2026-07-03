@@ -4,6 +4,7 @@ members = [
     "crates/chain-eos",
     "crates/chain-zano",
     "crates/escrow-core",
+    "crates/event-bus",
     "crates/normalizer",
     "crates/shared-types",
 ]

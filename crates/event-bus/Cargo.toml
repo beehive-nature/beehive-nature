@@ -1,0 +1,10 @@
+[package]
+name = "event-bus"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "bNature in-memory event bus: fan-out of CanonicalEvents to consumers"
+
+[dependencies]
+shared-types = { path = "../shared-types" }
+tokio = { version = "1", features = ["sync", "macros", "rt"] }
