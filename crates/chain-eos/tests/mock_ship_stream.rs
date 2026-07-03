@@ -74,7 +74,7 @@ async fn stream_ship_speaks_the_full_handshake_against_a_mock_server() {
     let server = tokio::spawn(mock_ship_server(listener));
 
     let mut events = Vec::new();
-    stream_ship(&format!("ws://{addr}"), |e| events.push(e))
+    stream_ship(&format!("ws://{addr}"), None, |e| events.push(e))
         .await
         .expect("clean close is Ok");
     server.await.expect("server task asserts passed");
@@ -107,5 +107,62 @@ async fn stream_ship_speaks_the_full_handshake_against_a_mock_server() {
             block_num: HEAD + 1,
             block: None
         }
+    );
+}
+
+/// Watermark resume (§6 stretch): with an explicit start block the client
+/// must skip the status round trip and ask for blocks immediately.
+async fn mock_resume_server(listener: TcpListener, expected_start: u32) {
+    let (stream, _) = listener.accept().await.expect("client connects");
+    let mut ws = tokio_tungstenite::accept_async(stream)
+        .await
+        .expect("ws handshake");
+
+    ws.send(Message::Text(
+        r#"{"version":"eosio::state_history"}"#.into(),
+    ))
+    .await
+    .unwrap();
+
+    // FIRST client message must already be get_blocks — no status request.
+    let msg = ws.next().await.unwrap().unwrap();
+    let req = msg.into_data();
+    assert_eq!(req[0], 1, "resume path must skip get_status");
+    assert_eq!(
+        &req[1..5],
+        &expected_start.to_le_bytes(),
+        "resumes at watermark+1"
+    );
+
+    ws.send(Message::Binary(
+        blocks_result_blob(expected_start, None).into(),
+    ))
+    .await
+    .unwrap();
+    ws.close(None).await.unwrap();
+}
+
+#[tokio::test]
+async fn resume_from_watermark_skips_status_round_trip() {
+    let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let addr = listener.local_addr().unwrap();
+    let server = tokio::spawn(mock_resume_server(listener, 7_001));
+
+    let mut events = Vec::new();
+    stream_ship(&format!("ws://{addr}"), Some(7_001), |e| events.push(e))
+        .await
+        .expect("clean close is Ok");
+    server.await.expect("server task asserts passed");
+
+    assert_eq!(
+        events,
+        vec![
+            StreamEvent::AbiReceived { bytes: 34 },
+            StreamEvent::Head { block_num: 7_001 },
+            StreamEvent::Block {
+                block_num: 7_001,
+                block: None
+            },
+        ]
     );
 }

@@ -14,6 +14,14 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-03` — **§6 stretch complete: checkpoint/watermark.** The binary
+  persists the last processed block (`SHIP_WATERMARK_FILE`, default
+  `chain-eos.watermark`) and resumes from watermark+1 on restart;
+  `stream_ship(url, Some(n), …)` skips the status round trip entirely —
+  asserted by a second mock-server test (server rejects any first message
+  that isn't get_blocks at exactly n). chain-eos: 14 tests. Every §6
+  Phase 1 + stretch item is now done except the Redpanda bus (superseded
+  locally by event-bus; networked bus = Phase 3 decision).
 - `2026-07-03` — **§6 mock-server integration test: the handshake is proven.**
   The stream engine moved out of `main.rs` into the lib (`stream_ship()`,
   event-callback API; binary keeps only retry policy + printing) and is now

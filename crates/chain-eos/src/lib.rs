@@ -562,13 +562,18 @@ pub enum StreamEvent {
     },
 }
 
-/// Connect to a SHIP endpoint, perform the handshake (ABI → status →
-/// get_blocks from head), and stream blocks until the server closes.
+/// Connect to a SHIP endpoint, perform the handshake, and stream blocks
+/// until the server closes.
+///
+/// `start_block: None` asks the server for its head first (status round
+/// trip) and streams from there; `Some(n)` resumes directly from `n` — the
+/// checkpoint/watermark path (§6 stretch) — skipping the status request.
 ///
 /// Returns `Ok(())` on a clean server close, `Err` on protocol violations
 /// or transport failure. Reconnect/backoff policy belongs to the caller.
 pub async fn stream_ship(
     url: &str,
+    start_block: Option<u32>,
     mut on_event: impl FnMut(StreamEvent),
 ) -> Result<(), Box<dyn std::error::Error>> {
     use futures_util::SinkExt;
@@ -583,29 +588,33 @@ pub async fn stream_ship(
         None => return Err("connection ended before ABI".into()),
     }
 
-    // 2. Learn the head block.
-    ws.send(Message::Binary(encode_get_status_request().into()))
-        .await?;
-    let head = loop {
-        match next_message(&mut ws).await? {
-            Some(Message::Binary(bin)) => match decode_result(&bin)? {
-                ShipResult::Status(s) => break s.head,
-                other => return Err(format!("expected status result, got {other:?}").into()),
-            },
-            Some(Message::Ping(p)) => ws.send(Message::Pong(p)).await?,
-            Some(Message::Close(_)) | None => return Err("closed during handshake".into()),
-            Some(_) => {}
+    // 2. Resume from the watermark, or ask the server for its head.
+    let start = match start_block {
+        Some(n) => n,
+        None => {
+            ws.send(Message::Binary(encode_get_status_request().into()))
+                .await?;
+            let head = loop {
+                match next_message(&mut ws).await? {
+                    Some(Message::Binary(bin)) => match decode_result(&bin)? {
+                        ShipResult::Status(s) => break s.head,
+                        other => {
+                            return Err(format!("expected status result, got {other:?}").into())
+                        }
+                    },
+                    Some(Message::Ping(p)) => ws.send(Message::Pong(p)).await?,
+                    Some(Message::Close(_)) | None => return Err("closed during handshake".into()),
+                    Some(_) => {}
+                }
+            };
+            head.block_num
         }
     };
-    on_event(StreamEvent::Head {
-        block_num: head.block_num,
-    });
+    on_event(StreamEvent::Head { block_num: start });
 
-    // 3. Stream blocks from head until the server closes.
-    ws.send(Message::Binary(
-        encode_get_blocks_request(head.block_num).into(),
-    ))
-    .await?;
+    // 3. Stream blocks from `start` until the server closes.
+    ws.send(Message::Binary(encode_get_blocks_request(start).into()))
+        .await?;
 
     loop {
         match next_message(&mut ws).await? {
