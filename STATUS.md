@@ -14,6 +14,12 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-03` — **tests now gate every push (CI `tests` workflow).** Build +
+  test + fmt on ubuntu runners. Motivated by a real failure: Windows Smart
+  App Control intermittently blocks freshly built unsigned test exes
+  (os error 4551), so local verification on the dev machine is best-effort
+  and **CI is authoritative** for test state. (SAC fix is a one-way door —
+  owner's call, undecided.)
 - `2026-07-03` — **§6 prereq check answered: no public SHIP endpoint exists
   for jungle4.** Verified against the Jungle Monitor, the testnet install
   docs (State History section is empty), and every producer's on-chain

@@ -1,0 +1,25 @@
+name: tests
+
+# Build + test the whole workspace on Linux runners. This exists for two
+# reasons: (1) tests should gate every push, and (2) the Windows dev machine
+# runs Smart App Control, which intermittently blocks freshly built unsigned
+# test executables (os error 4551) — local verification there is best-effort,
+# CI is authoritative.
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build workspace
+        run: cargo build --workspace --locked
+      - name: Test workspace
+        run: cargo test --workspace --locked
+      - name: Check formatting
+        run: cargo fmt --all --check
