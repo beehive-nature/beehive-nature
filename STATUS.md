@@ -14,6 +14,16 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-03` — **§6 prereq check answered: no public SHIP endpoint exists
+  for jungle4.** Verified against the Jungle Monitor, the testnet install
+  docs (State History section is empty), and every producer's on-chain
+  bp.json (`ship_disclosure` there means *ownership*, not SHIP). Options,
+  cheapest first: (a) local single-node Antelope chain with
+  `state_history_plugin` via Docker/WSL — full SHIP handshake, zero testnet
+  dependency; (b) ask in the Jungle Telegram — operators share SHIP URLs on
+  request; (c) paid SHIP (EOS USA) or Pinax substreams (different protocol,
+  needs an adapter). Note for (b)/(c): endpoints will be wss:// — add
+  tokio-tungstenite's `native-tls` feature (schannel on Windows, no cmake).
 - `2026-07-03` — **chain-zano compiles; internal tests green (7 + 3 ignored).**
   The STATUS "do first" `cargo build` item resolved with ZERO code changes —
   the curve25519-dalek 4.x spellings were right all along. Doc-comment lint
