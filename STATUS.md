@@ -15,6 +15,12 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-03` — **DRO signing path DECIDED: Option 2** — the DRO is a full
+  transaction constructor on the proto v0.3 coordinator path (same as buyer
+  and seller), building its own co-signing txs through its attestation tier.
+  No bridge custody, no external RPC dependency, no wallet2 linkage. Scoped
+  future milestone: `crates/dro-signer` (after live ingestion). escrow-core
+  unchanged — the refutation was about *how* the DRO signs, never *when*.
 - `2026-07-03` — **⚠ MULTISIG RPC CLAIM REFUTED + testnet live.** Source
   verification of the §8 claim "DRO signs via standard
   `sign_multisig_proposal` RPC": **that RPC does not exist in master** — no

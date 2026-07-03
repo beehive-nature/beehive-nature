@@ -30,13 +30,24 @@ multisig_id, `wallet2.h:558` `build_escrow_release_templates`). The
 capability exists; the *stock RPC surface* for an external co-signer does
 not.
 
-**Consequences for the DRO design** (decision needed, not tonight):
-1. Integrate at the wallet2 C++ API layer (link the wallet lib) — heavier,
-   but the host is already a tx-building coordinator under proto v0.3;
-2. construct/co-sign multisig spends with our own tx code (consistent with
-   the Trezor-native architecture, most work);
-3. contribute a raw-multisig RPC upstream to Zano;
-4. NOT an option: the built-in contracts (two-party, ZANO-only).
+**DRO design — DECIDED 2026-07-03: Option 2.** The DRO is a full
+transaction constructor using the same `messages-zano.proto` v0.3
+coordinator path as buyer and seller: it builds its co-signing
+transactions, routes them through its own attestation tier, and
+broadcasts. The refuted RPC was a convenience layer, not architecture —
+removing it changes who builds the co-signing bytes, not the data flow.
+Scoped future milestone: `crates/dro-signer` (after live ingestion).
+
+Options considered and rejected:
+1. wallet2 C++ linkage — couples the DRO to Zano's non-stable internal
+   API and defeats the adapter model;
+3. upstream RPC contribution — right long-term, wrong launch gate (file
+   the issue; do not wait on someone else's merge);
+4. built-in contracts — disproven above (two-party, ZANO-only).
+
+`escrow-core` is unchanged by all of this: the refutation was about *how*
+the DRO signs, never *when*. Transition table, fee buffer, funding check —
+all validated by this verification pass.
 
 ## The three native mechanisms
 
