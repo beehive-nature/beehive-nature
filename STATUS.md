@@ -14,6 +14,16 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-03` — **normalizer: raw actions → CanonicalEvents green (§9.3).**
+  `crates/normalizer` — `RawChainAction` + `normalize()` with the two §9.3
+  mappings (`lovismarket:addlisting → ProductListed`, `zano:transfer →
+  OrderFunded`). Unmapped actions `Ok(None)` by design; recognized-but-
+  malformed payloads are typed errors (missing field / bad type), never
+  guesses. 7 tests: both mappings, ignore path, both malformed paths,
+  timestamp default, serde round-trip. Ingestion pipeline is now complete
+  end-to-end in pure logic: SHIP bytes → decode (chain-eos) → normalize →
+  CanonicalEvent (shared-types). Next: wire chain-eos action unpacking to
+  RawChainAction against a real SHIP endpoint, or Zano findings follow-up.
 - `2026-07-02` — **chain-eos Phase 1: SHIP ingest + block decode green (§6).**
   `crates/chain-eos` — hand-rolled minimal SHIP codec (Verification
   Principle: crates.io check showed the `eosio` crate is a contract SDK

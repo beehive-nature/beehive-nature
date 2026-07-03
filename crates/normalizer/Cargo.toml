@@ -1,0 +1,10 @@
+[package]
+name = "normalizer"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "bNature normalizer: raw chain actions → CanonicalEvents (brief §9.3)"
+
+[dependencies]
+shared-types = { path = "../shared-types" }
+serde_json = "1"

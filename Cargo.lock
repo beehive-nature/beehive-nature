@@ -271,6 +271,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "normalizer"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+ "shared-types",
+]
+
+[[package]]
 name = "num-conv"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
