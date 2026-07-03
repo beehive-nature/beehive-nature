@@ -85,7 +85,12 @@ action lines; feeding those through `chain_eos::abi` with the token ABI
 
 ## Verification checklist (all four = milestone done)
 
-- [ ] nodeos producing blocks (log)
-- [ ] `get_info` answers over localhost from Windows
-- [ ] chain-eos prints climbing block numbers from the real socket
-- [ ] a pushed action appears in chain-eos output by name
+- [x] nodeos producing blocks — DONE 2026-07-03 (Spring v1.2.2, WSL Ubuntu 26.04)
+- [x] `get_info` answers over localhost — DONE (client runs in WSL beside the node;
+      Windows-side cargo is SAC-blocked, so the WSL fallback below is the live path)
+- [x] chain-eos prints climbing block numbers from the real socket — DONE
+      (real 35,704-byte SHIP ABI frame, head 586, consecutive blocks at
+      production rate, zero decode errors)
+- [x] a pushed action appears in chain-eos output by name — DONE:
+      `cleos create account eosio bnaturetest1 …` →
+      `Block Number: 682, Action Count: 1 / actions: eosio::newaccount`

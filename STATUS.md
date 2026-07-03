@@ -15,6 +15,18 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-03` — **🔗 LIVE SHIP INGESTION: real blocks through our codec.**
+  Sequence items 2+3. WSL installed (owner reboot) → Ubuntu 26.04 → Spring
+  v1.2.2 single-producer nodeos with state_history on `127.0.0.1:8080` →
+  chain-eos (built and run inside WSL — Windows cargo is now fully
+  SAC-blocked, runbook fallback is the live path) completed the real
+  handshake: 35,704-byte SHIP ABI frame, head status, consecutive blocks
+  at production rate, ZERO decode errors from the hand-rolled codec. Real
+  action proof: `cleos create account` → `Block 682, Action Count: 1,
+  actions: eosio::newaccount` — extraction + name codec verified on live
+  bytes. All four runbook checklist items ticked. Zano vector tests also
+  re-verified on the WSL toolchain (third independent environment):
+  9 passed / 1 ignored.
 - `2026-07-03` — **DRO signing path DECIDED: Option 2** — the DRO is a full
   transaction constructor on the proto v0.3 coordinator path (same as buyer
   and seller), building its own co-signing txs through its attestation tier.
