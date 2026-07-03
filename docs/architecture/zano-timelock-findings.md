@@ -95,12 +95,29 @@ Beehive design does not use.)
 - **`unlock_time` is not useful as an escrow timeout** (it delays, never
   reverts) — do not reach for it when wiring timeouts.
 
-## Fee-buffer half of the checklist (status)
+## Fee-buffer half of the checklist — ✅ VERIFIED LIVE WITH fUSD (2026-07-03)
 
-Already a **confirmed constraint** (brief §8, §9.2 amendment): a multisig
-wallet cannot spend an asset without holding native ZANO for the fee;
-escrow funding = `amount + fee_buffer_zano`; the DRO never needs a balance.
-Still open on the testnet track: re-run the §1.7 asset-multisig flow **with
-the fUSD asset id specifically**. Requires a synced testnet daemon plus
-faucet-funded wallets (testnet build v2.2.0.489 verified by SHA256 against
-docs.zano.org and syncing as of this writing; faucet step needs a human).
+Executed on a local, fully-synced Zano testnet node (official testnet build
+v2.2.0.489, SHA256-verified; faucet at `faucet.testnet.zano.org/api/drip`
+is API-automatable and dispenses fUSD):
+
+- **Testnet fUSD asset id:**
+  `625829188fa787fb71153aa09d251c162be072eaf5402888032d014d7ad4bf9e` <!-- PUBLIC-CONSTANT: testnet fUSD asset id -->
+  (differs from the mainnet id in brief §1, as expected — the
+  `(amount, asset_id)` schema absorbs this with zero code changes).
+  Native ZANO itself also carries an asset id on-chain
+  (`d6329b…a6498a`), confirming the everything-is-an-asset model.
+- **Setup:** buyer wallet faucet-funded 100 fUSD + 5 tZANO; native balance
+  then drained to exactly 0 (tx `f8f2dc18…`, 4.99 out + 0.01 fee).
+- **The test:** with 100 *fully unlocked* fUSD and 0 ZANO, an fUSD
+  transfer fails at the wallet layer:
+  `not_enough_money … available: 0.0, required: 0.01 = 0.01 + 0.0 (fee)`
+  (`wallet2.cpp:7793`). **Assets cannot move without native ZANO for the
+  fee — the §9.2 fee-buffer constraint holds for fUSD specifically.**
+  escrow-core's dual-balance funding check is validated against the real
+  marketplace denomination.
+
+Remaining beyond stock tooling: the *full* 2-of-3 multisig funding flow
+with fUSD cannot be driven from simplewallet/wallet-RPC (no raw multisig
+surface — see the refutation above); it lands with `crates/dro-signer`
+(Option 2), which owns multisig tx construction.

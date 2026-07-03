@@ -15,6 +15,15 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-03` — **✅ §1.7 FEE BUFFER VERIFIED LIVE WITH fUSD.** Local synced
+  testnet + API faucet (dispenses fUSD): buyer held 100 fully-unlocked fUSD
+  and exactly 0 native ZANO → fUSD transfer FAILS at the wallet layer
+  (`not_enough_money … required: 0.01 (fee)`, wallet2.cpp:7793). The §9.2
+  constraint holds for the real marketplace denomination; escrow-core's
+  dual-balance funding check is validated against reality. Testnet fUSD
+  asset id recorded (differs from mainnet, absorbed by `(amount,
+  asset_id)` — zero code changes). Remaining: full 2-of-3 multisig flow
+  needs `crates/dro-signer` (no stock RPC surface — see refutation entry).
 - `2026-07-03` — **🔗 LIVE SHIP INGESTION: real blocks through our codec.**
   Sequence items 2+3. WSL installed (owner reboot) → Ubuntu 26.04 → Spring
   v1.2.2 single-producer nodeos with state_history on `127.0.0.1:8080` →
