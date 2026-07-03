@@ -6,9 +6,16 @@ license.workspace = true
 description = "bNature b-indexer sense adapter, Phase 1: SHIP WebSocket ingest + block header decode (brief §6)"
 
 [dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
 sha2 = { workspace = true }
 tokio = { version = "1", features = ["macros", "net", "rt-multi-thread", "time"] }
 # ws:// only for Phase 1 — TLS (rustls) needs cmake/NASM on windows-gnu; add
 # a TLS feature when a real wss:// endpoint exists.
 tokio-tungstenite = "0.29"
 futures-util = "0.3"
+
+[dev-dependencies]
+event-bus = { path = "../event-bus" }
+normalizer = { path = "../normalizer" }
+shared-types = { path = "../shared-types" }

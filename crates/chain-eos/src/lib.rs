@@ -17,6 +17,8 @@
 
 #![forbid(unsafe_code)]
 
+pub mod abi;
+
 use std::fmt;
 
 use sha2::{Digest, Sha256};
@@ -123,6 +125,16 @@ impl<'a> Reader<'a> {
     pub fn length_prefixed(&mut self) -> Result<&'a [u8], DecodeError> {
         let len = self.varuint32()? as usize;
         self.take(len)
+    }
+
+    /// Read exactly `n` raw bytes (fixed-width fields like checksums).
+    pub fn take_n(&mut self, n: usize) -> Result<&'a [u8], DecodeError> {
+        self.take(n)
+    }
+
+    /// Bytes not yet consumed.
+    pub fn remaining(&self) -> usize {
+        self.buf.len() - self.pos
     }
 
     fn optional<T>(
@@ -444,7 +456,7 @@ fn collect_actions(
     Ok(())
 }
 
-fn to_hex(bytes: &[u8]) -> String {
+pub(crate) fn to_hex(bytes: &[u8]) -> String {
     let mut s = String::with_capacity(bytes.len() * 2);
     for b in bytes {
         s.push_str(&format!("{b:02x}"));

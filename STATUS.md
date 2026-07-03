@@ -14,6 +14,18 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-03` — **THE SEAM IS GLUED: Antelope ABI decoder (`chain_eos::abi`).**
+  Binary action data → JSON: aliases, struct bases, optionals, arrays, and
+  the marketplace-relevant built-ins (name/string/asset/symbol/checksums/
+  time_point_sec/ints); exotic types (128-bit, keys, variants, binary
+  extensions) are typed `Unsupported` errors, never guesses; leftover bytes
+  after decode = `TrailingBytes` error (a wrong ABI cannot silently
+  mis-decode). 8 unit tests + `tests/full_pipeline.rs`: SHIP block bytes →
+  extract → ABI decode → RawChainAction → normalize → event-bus → consumer
+  asserts field values traced from the binary payload. chain-eos: 23 tests.
+  The pipeline is now COMPLETE in code; runtime ABI *fetching* (get_abi
+  RPC or pinned files) lands with the real endpoint. Remaining milestones
+  are all reality: WSL/endpoint, live events, escrow wiring, Zano vectors.
 - `2026-07-03` — **§6 stretch complete: checkpoint/watermark.** The binary
   persists the last processed block (`SHIP_WATERMARK_FILE`, default
   `chain-eos.watermark`) and resumes from watermark+1 on restart;
