@@ -28,6 +28,7 @@ name = "chain-eos"
 version = "0.1.0"
 dependencies = [
  "futures-util",
+ "sha2",
  "tokio",
  "tokio-tungstenite",
 ]
@@ -282,8 +283,10 @@ dependencies = [
 name = "normalizer"
 version = "0.1.0"
 dependencies = [
+ "event-bus",
  "serde_json",
  "shared-types",
+ "tokio",
 ]
 
 [[package]]

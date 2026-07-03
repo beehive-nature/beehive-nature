@@ -14,6 +14,18 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-03` — **§6 stretch: action extraction + name codec + bus proof.**
+  chain-eos now *produces* actions, not just counts: EOSIO name codec
+  (u64 ↔ "lovismarket", verified against the known `eosio` vector) and
+  `extract_actions()` → account/name/tx_id(sha256)/raw data, sharing one
+  receipt walker with the summary (4 new tests, 12 total). Integration
+  test `normalizer/tests/pipeline_to_bus.rs` proves the nervous system
+  end-to-end: RawChainAction → normalize → event-bus → two independent
+  consumers see the same CanonicalEvent; chain noise never enters the bus.
+  **The one unglued seam is now precisely the ABI decoder** (binary action
+  data → JSON fields) — everything on either side of it is built and
+  tested. Machine note: no WSL/Docker on this host; the local-SHIP-node
+  option needs `wsl --install` + reboot (owner action).
 - `2026-07-03` — **tests now gate every push (CI `tests` workflow).** Build +
   test + fmt on ubuntu runners. Motivated by a real failure: Windows Smart
   App Control intermittently blocks freshly built unsigned test exes

@@ -17,8 +17,8 @@ use tokio_tungstenite::connect_async;
 use tokio_tungstenite::tungstenite::Message;
 
 use chain_eos::{
-    decode_result, encode_get_blocks_request, encode_get_status_request, summarize_signed_block,
-    ShipResult,
+    decode_result, encode_get_blocks_request, encode_get_status_request, extract_actions,
+    summarize_signed_block, ShipResult,
 };
 
 const DEFAULT_WS_URL: &str = "ws://127.0.0.1:8080";
@@ -89,15 +89,30 @@ async fn run(url: &str) -> Result<(), Box<dyn std::error::Error>> {
                 let Some(this_block) = b.this_block else {
                     continue; // head-only heartbeat
                 };
-                match b.block.as_deref().map(summarize_signed_block) {
-                    Some(Ok(summary)) => println!(
-                        "Block Number: {}, Action Count: {}",
-                        this_block.block_num, summary.action_count
-                    ),
-                    Some(Err(e)) => eprintln!(
-                        "chain-eos: block {} decode error: {e}",
-                        this_block.block_num
-                    ),
+                match b.block.as_deref() {
+                    Some(bytes) => match summarize_signed_block(bytes) {
+                        Ok(summary) => {
+                            println!(
+                                "Block Number: {}, Action Count: {}",
+                                this_block.block_num, summary.action_count
+                            );
+                            if summary.action_count > 0 {
+                                if let Ok(actions) = extract_actions(bytes) {
+                                    let shown: Vec<String> = actions
+                                        .iter()
+                                        .take(3)
+                                        .map(|a| format!("{}::{}", a.account, a.name))
+                                        .collect();
+                                    let more = if actions.len() > 3 { ", …" } else { "" };
+                                    eprintln!("  actions: {}{more}", shown.join(", "));
+                                }
+                            }
+                        }
+                        Err(e) => eprintln!(
+                            "chain-eos: block {} decode error: {e}",
+                            this_block.block_num
+                        ),
+                    },
                     None => println!(
                         "Block Number: {}, Action Count: [block body not sent]",
                         this_block.block_num

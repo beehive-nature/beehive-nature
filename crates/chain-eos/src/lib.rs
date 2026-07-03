@@ -19,6 +19,8 @@
 
 use std::fmt;
 
+use sha2::{Digest, Sha256};
+
 // ---------------------------------------------------------------------------
 // errors
 // ---------------------------------------------------------------------------
@@ -218,12 +220,20 @@ pub struct BlockSummary {
     pub id_only_receipts: u32,
 }
 
-/// Walk a packed `signed_block` far enough to count transactions and (for
-/// uncompressed packed transactions) their actions.
-pub fn summarize_signed_block(block: &[u8]) -> Result<BlockSummary, DecodeError> {
-    let mut r = Reader::new(block);
+/// One transaction receipt, positioned for whichever consumer wants it.
+enum ReceiptBody<'a> {
+    /// Receipt carries only the transaction id — body not in this block.
+    IdOnly,
+    Packed {
+        compression: u8,
+        packed_trx: &'a [u8],
+    },
+}
 
-    // block_header
+/// Parse the block header, returning the header-derived block number and a
+/// reader positioned at the transaction-receipt count.
+fn open_block_body<'a>(block: &'a [u8]) -> Result<(u32, Reader<'a>), DecodeError> {
+    let mut r = Reader::new(block);
     let _timestamp = r.u32_le()?;
     let _producer = r.u64_le()?;
     let _confirmed = r.u16_le()?;
@@ -241,8 +251,41 @@ pub fn summarize_signed_block(block: &[u8]) -> Result<BlockSummary, DecodeError>
     }
     skip_signature(&mut r)?;
 
-    let block_num_from_header =
-        u32::from_be_bytes(previous[0..4].try_into().unwrap()).wrapping_add(1);
+    let block_num = u32::from_be_bytes(previous[0..4].try_into().unwrap()).wrapping_add(1);
+    Ok((block_num, r))
+}
+
+/// transaction_receipt: status, cpu_usage_us, net_usage_words, trx variant.
+fn read_receipt<'a>(r: &mut Reader<'a>) -> Result<ReceiptBody<'a>, DecodeError> {
+    let _status = r.u8()?;
+    let _cpu_usage_us = r.u32_le()?;
+    let _net_usage_words = r.varuint32()?;
+    match r.varuint32()? {
+        0 => {
+            r.checksum256()?;
+            Ok(ReceiptBody::IdOnly)
+        }
+        1 => {
+            let sig_count = r.varuint32()?;
+            for _ in 0..sig_count {
+                skip_signature(r)?;
+            }
+            let compression = r.u8()?;
+            r.length_prefixed()?; // packed_context_free_data
+            let packed_trx = r.length_prefixed()?;
+            Ok(ReceiptBody::Packed {
+                compression,
+                packed_trx,
+            })
+        }
+        _ => Err(DecodeError::Unsupported("unknown trx variant")),
+    }
+}
+
+/// Walk a packed `signed_block` far enough to count transactions and (for
+/// uncompressed packed transactions) their actions.
+pub fn summarize_signed_block(block: &[u8]) -> Result<BlockSummary, DecodeError> {
+    let (block_num_from_header, mut r) = open_block_body(block)?;
 
     let transaction_count = r.varuint32()?;
     let mut action_count = 0u32;
@@ -250,33 +293,18 @@ pub fn summarize_signed_block(block: &[u8]) -> Result<BlockSummary, DecodeError>
     let mut id_only_receipts = 0u32;
 
     for _ in 0..transaction_count {
-        // transaction_receipt: status, cpu_usage_us, net_usage_words, trx
-        let _status = r.u8()?;
-        let _cpu_usage_us = r.u32_le()?;
-        let _net_usage_words = r.varuint32()?;
-        match r.varuint32()? {
-            // variant transaction_id: receipt carries only the id — the
-            // transaction body (and its action count) is not in this block.
-            0 => {
-                r.checksum256()?;
-                id_only_receipts += 1;
-            }
-            // variant packed_transaction
-            1 => {
-                let sig_count = r.varuint32()?;
-                for _ in 0..sig_count {
-                    skip_signature(&mut r)?;
-                }
-                let compression = r.u8()?;
-                r.length_prefixed()?; // packed_context_free_data
-                let packed_trx = r.length_prefixed()?;
+        match read_receipt(&mut r)? {
+            ReceiptBody::IdOnly => id_only_receipts += 1,
+            ReceiptBody::Packed {
+                compression,
+                packed_trx,
+            } => {
                 if compression == 0 {
                     action_count += count_actions(packed_trx)?;
                 } else {
                     compressed_skipped += 1;
                 }
             }
-            _ => return Err(DecodeError::Unsupported("unknown trx variant")),
         }
     }
     // block_extensions may follow; Phase 1 has what it needs.
@@ -330,6 +358,149 @@ fn skip_action(r: &mut Reader) -> Result<(), DecodeError> {
     }
     r.length_prefixed()?; // data
     Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// action extraction (§6 stretch: feed the normalizer)
+// ---------------------------------------------------------------------------
+
+/// One action lifted out of a block, ready to become the normalizer's
+/// `RawChainAction`. `data` is the raw ABI-encoded payload — decoding it to
+/// JSON needs the contract ABI, which is deliberately NOT implemented yet
+/// (see STATUS: the ABI decoder is the one unglued seam in the pipeline).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ExtractedAction {
+    /// Contract account, decoded from its u64 name (e.g. "lovismarket").
+    pub account: String,
+    /// Action name, decoded from its u64 name (e.g. "addlisting").
+    pub name: String,
+    /// Transaction id: hex sha256 of the packed transaction.
+    pub tx_id: String,
+    /// Raw ABI-encoded action data (undecoded).
+    pub data: Vec<u8>,
+}
+
+/// Extract every action from the uncompressed packed transactions of a
+/// `signed_block`. Compressed and id-only receipts are skipped (the summary
+/// counters report those); this never guesses at content it cannot read.
+pub fn extract_actions(block: &[u8]) -> Result<Vec<ExtractedAction>, DecodeError> {
+    let (_block_num, mut r) = open_block_body(block)?;
+
+    let transaction_count = r.varuint32()?;
+    let mut out = Vec::new();
+
+    for _ in 0..transaction_count {
+        match read_receipt(&mut r)? {
+            ReceiptBody::IdOnly => {}
+            ReceiptBody::Packed {
+                compression,
+                packed_trx,
+            } => {
+                if compression != 0 {
+                    continue;
+                }
+                let tx_id = to_hex(&Sha256::digest(packed_trx));
+                collect_actions(packed_trx, &tx_id, &mut out)?;
+            }
+        }
+    }
+    Ok(out)
+}
+
+/// Like `count_actions`, but reads the action bodies.
+fn collect_actions(
+    packed_trx: &[u8],
+    tx_id: &str,
+    out: &mut Vec<ExtractedAction>,
+) -> Result<(), DecodeError> {
+    let mut r = Reader::new(packed_trx);
+    let _expiration = r.u32_le()?;
+    let _ref_block_num = r.u16_le()?;
+    let _ref_block_prefix = r.u32_le()?;
+    let _max_net_usage_words = r.varuint32()?;
+    let _max_cpu_usage_ms = r.u8()?;
+    let _delay_sec = r.varuint32()?;
+    let cf_count = r.varuint32()?;
+    for _ in 0..cf_count {
+        skip_action(&mut r)?;
+    }
+    let action_count = r.varuint32()?;
+    for _ in 0..action_count {
+        let account = r.u64_le()?;
+        let name = r.u64_le()?;
+        let auth_count = r.varuint32()?;
+        for _ in 0..auth_count {
+            let _actor = r.u64_le()?;
+            let _permission = r.u64_le()?;
+        }
+        let data = r.length_prefixed()?;
+        out.push(ExtractedAction {
+            account: u64_to_name(account),
+            name: u64_to_name(name),
+            tx_id: tx_id.to_string(),
+            data: data.to_vec(),
+        });
+    }
+    Ok(())
+}
+
+fn to_hex(bytes: &[u8]) -> String {
+    let mut s = String::with_capacity(bytes.len() * 2);
+    for b in bytes {
+        s.push_str(&format!("{b:02x}"));
+    }
+    s
+}
+
+// ---------------------------------------------------------------------------
+// EOSIO/Antelope name codec (base32, 12 chars + 4-bit 13th)
+// ---------------------------------------------------------------------------
+
+const NAME_CHARMAP: &[u8; 32] = b".12345abcdefghijklmnopqrstuvwxyz";
+
+/// Encode an account/action name to its u64 (None if not a valid name:
+/// only `.1-5a-z`, max 13 chars, 13th char restricted to `.1-5a-j`).
+pub fn name_to_u64(s: &str) -> Option<u64> {
+    let bytes = s.as_bytes();
+    if bytes.is_empty() || bytes.len() > 13 {
+        return None;
+    }
+    let mut value: u64 = 0;
+    for (i, &b) in bytes.iter().enumerate() {
+        let sym = u64::from(char_to_symbol(b)?);
+        if i < 12 {
+            value |= (sym & 0x1f) << (64 - 5 * (i as u32 + 1));
+        } else {
+            // 13th character carries only the low 4 bits.
+            if sym > 0x0f {
+                return None;
+            }
+            value |= sym;
+        }
+    }
+    Some(value)
+}
+
+fn char_to_symbol(b: u8) -> Option<u8> {
+    match b {
+        b'.' => Some(0),
+        b'1'..=b'5' => Some(b - b'1' + 1),
+        b'a'..=b'z' => Some(b - b'a' + 6),
+        _ => None,
+    }
+}
+
+/// Decode a u64 name to its canonical string (trailing dots trimmed).
+pub fn u64_to_name(value: u64) -> String {
+    let mut out = [b'.'; 13];
+    let mut v = value;
+    for i in 0..13 {
+        let (mask, shift) = if i == 0 { (0x0f, 4) } else { (0x1f, 5) };
+        out[12 - i] = NAME_CHARMAP[(v & mask) as usize];
+        v >>= shift;
+    }
+    let full = std::str::from_utf8(&out).expect("charmap is ASCII");
+    full.trim_end_matches('.').to_string()
 }
 
 // ---------------------------------------------------------------------------
@@ -601,5 +772,108 @@ mod tests {
         assert_eq!(&req[9..13], &u32::MAX.to_le_bytes()); // max_in_flight
         assert_eq!(&req[13..], &[0, 0, 1, 0, 0]); // have_positions, flags
         assert_eq!(encode_get_status_request(), vec![0]);
+    }
+
+    // -- name codec --------------------------------------------------------
+
+    #[test]
+    fn name_codec_matches_known_eosio_vector() {
+        assert_eq!(name_to_u64("eosio"), Some(0x5530_EA00_0000_0000));
+        assert_eq!(u64_to_name(0x5530_EA00_0000_0000), "eosio");
+    }
+
+    #[test]
+    fn name_codec_roundtrips() {
+        for n in ["eosio", "lovismarket", "eosio.token", "a", "zzzzzzzzzzzzj"] {
+            let v = name_to_u64(n).unwrap_or_else(|| panic!("{n} should encode"));
+            assert_eq!(u64_to_name(v), n, "roundtrip for {n}");
+        }
+    }
+
+    #[test]
+    fn name_codec_rejects_invalid_names() {
+        assert_eq!(name_to_u64(""), None);
+        assert_eq!(name_to_u64("EOS"), None); // uppercase
+        assert_eq!(name_to_u64("has6digit"), None); // '6' not in charmap
+        assert_eq!(name_to_u64("morethanthirteen"), None); // too long
+        assert_eq!(name_to_u64("zzzzzzzzzzzzz"), None); // 13th char must be .1-5a-j
+    }
+
+    // -- action extraction --------------------------------------------------
+
+    /// Packed action with real (account, name) u64s and given data bytes.
+    fn put_named_action(out: &mut Vec<u8>, account: &str, name: &str, data: &[u8]) {
+        out.extend_from_slice(&name_to_u64(account).expect("valid account").to_le_bytes());
+        out.extend_from_slice(&name_to_u64(name).expect("valid name").to_le_bytes());
+        put_varuint32(out, 1); // one authorization
+        out.extend_from_slice(&name_to_u64("seller").unwrap().to_le_bytes());
+        out.extend_from_slice(&name_to_u64("active").unwrap().to_le_bytes());
+        put_bytes_field(out, data);
+    }
+
+    /// Packed `transaction` containing the given named actions.
+    fn packed_trx_named(actions: &[(&str, &str, &[u8])]) -> Vec<u8> {
+        let mut t = Vec::new();
+        t.extend_from_slice(&0u32.to_le_bytes());
+        t.extend_from_slice(&0u16.to_le_bytes());
+        t.extend_from_slice(&0u32.to_le_bytes());
+        put_varuint32(&mut t, 0);
+        t.push(0);
+        put_varuint32(&mut t, 0);
+        put_varuint32(&mut t, 0); // no context-free actions
+        put_varuint32(&mut t, actions.len() as u32);
+        for (account, name, data) in actions {
+            put_named_action(&mut t, account, name, data);
+        }
+        put_varuint32(&mut t, 0);
+        t
+    }
+
+    #[test]
+    fn extract_actions_yields_named_actions_with_tx_id() {
+        let inner = packed_trx_named(&[
+            ("lovismarket", "addlisting", &[0xDE, 0xAD, 0xBE, 0xEF]),
+            ("eosio.token", "transfer", &[]),
+        ]);
+        let expected_tx_id = to_hex(&Sha256::digest(&inner));
+
+        // Receipt wrapping that packed transaction, plus noise the extractor
+        // must skip: one id-only receipt and one compressed receipt.
+        let mut named_receipt = Vec::new();
+        named_receipt.push(0);
+        named_receipt.extend_from_slice(&100u32.to_le_bytes());
+        put_varuint32(&mut named_receipt, 1);
+        put_varuint32(&mut named_receipt, 1); // packed_transaction variant
+        put_varuint32(&mut named_receipt, 1); // one signature
+        named_receipt.push(0);
+        named_receipt.extend_from_slice(&[0u8; 65]);
+        named_receipt.push(0); // compression: none
+        put_bytes_field(&mut named_receipt, &[]);
+        put_bytes_field(&mut named_receipt, &inner);
+
+        let mut id_only = Vec::new();
+        put_id_only_receipt(&mut id_only);
+        let mut compressed = Vec::new();
+        put_packed_receipt(&mut compressed, 3, 1);
+
+        let block = signed_block(42, &[id_only, named_receipt, compressed]);
+        let actions = extract_actions(&block).unwrap();
+
+        assert_eq!(actions.len(), 2);
+        assert_eq!(actions[0].account, "lovismarket");
+        assert_eq!(actions[0].name, "addlisting");
+        assert_eq!(actions[0].data, vec![0xDE, 0xAD, 0xBE, 0xEF]);
+        assert_eq!(actions[0].tx_id, expected_tx_id);
+        assert_eq!(actions[1].account, "eosio.token");
+        assert_eq!(actions[1].name, "transfer");
+        assert_eq!(actions[1].data, Vec::<u8>::new());
+        assert_eq!(actions[1].tx_id, expected_tx_id); // same transaction
+
+        // The summary over the same block stays consistent with extraction.
+        let summary = summarize_signed_block(&block).unwrap();
+        assert_eq!(summary.transaction_count, 3);
+        assert_eq!(summary.action_count, 2);
+        assert_eq!(summary.compressed_skipped, 1);
+        assert_eq!(summary.id_only_receipts, 1);
     }
 }

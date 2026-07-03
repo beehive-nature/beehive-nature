@@ -8,3 +8,7 @@ description = "bNature normalizer: raw chain actions → CanonicalEvents (brief 
 [dependencies]
 shared-types = { path = "../shared-types" }
 serde_json = "1"
+
+[dev-dependencies]
+event-bus = { path = "../event-bus" }
+tokio = { version = "1", features = ["macros", "rt"] }
