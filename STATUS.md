@@ -2,9 +2,10 @@
 
 The one-line summary for any new reader or AI:
 
-> **The cryptographic design is source-confirmed and the wire contract is frozen.
-> The firmware, the compatibility proof, and the legal review are the unstarted
-> work between here and anything a user touches.**
+> **The cryptographic design is source-confirmed, the wire contract is frozen,
+> and the host-side derivation is PROVEN against stock Zano (real vector,
+> 2026-07-03). The firmware and the legal review are the unstarted work
+> between here and anything a user touches.**
 
 Do not let AI-to-AI review re-open the items under "Done." If you believe one is
 wrong, cite the Zano source file/line and stop — do not rewrite it.
@@ -14,6 +15,14 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-03` — **DERIVATION PROVEN AGAINST STOCK ZANO.** Sequence item 5,
+  done from the session: stock simplewallet v2.2.1.501 downloaded (official
+  build server), throwaway never-funded wallet generated offline, secrets
+  exported, vector committed (`testvec.rs`, TESTNET-ONLY markers). keys.rs +
+  view.rs compatibility tests un-ignored and GREEN — `dependent_key`, S, and
+  V all reproduce stock outputs, with expected publics decoded from the
+  wallet's own address (CN-base58 + Keccak checksum) for zero circularity.
+  chain-zano: 9 passed / 1 ignored (slip0010 e2e, gates on firmware track).
 - `2026-07-03` — **local SHIP node runbook written** —
   `docs/runbooks/local-ship-node.md`: WSL install → Spring/nodeos single
   producer with `state_history_plugin` on `ws://127.0.0.1:8080` →
@@ -172,11 +181,16 @@ authoritative record of where `origin/main` sits.
 ## Not done — the real remaining work
 
 ### Highest value, cheapest, do first
-- [ ] **Un-ignore the compatibility tests.** Generate one keypair in the stock
-      Zano CLI, export `(spend_secret -> spend_public, view_public)`, paste hex
-      into the `#[ignore]`d tests in `keys.rs` / `view.rs`, remove `#[ignore]`,
-      run `cargo test`. Green = every derivation claim here is PROVEN, not
-      asserted. **Use a throwaway testnet key; never commit a real secret.**
+- [x] **Un-ignore the compatibility tests.** DONE 2026-07-03: throwaway wallet
+      generated with stock simplewallet v2.2.1.501 (offline), secrets exported
+      via `spendkey`/`viewkey`, vector committed with TESTNET-ONLY markers
+      (`chain-zano/src/testvec.rs`, incl. a CN-base58 address decoder so the
+      expected publics come from stock's own address, independent of our code).
+      Both tests GREEN: `dependent_key` (v = keccak256(s) mod l) and S/V match
+      stock. **Derivation claims are now PROVEN, not asserted.** Still ignored
+      (correctly): `slip0010::composes_with_keys_module` — the Beehive-specific
+      end-to-end (Trezor seed → Zano keys) has no external reference tool; it
+      gates on the firmware track.
 - [x] **`cargo build` pass.** DONE 2026-07-03: compiled clean on the first
       attempt — the dalek 4.x spellings were correct as written; zero code
       changes needed. 7 internal-consistency tests green, 3 vector tests

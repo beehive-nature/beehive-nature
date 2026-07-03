@@ -145,19 +145,36 @@ mod tests {
         );
     }
 
-    /// COMPATIBILITY REGRESSION — #[ignore] until a real stock-Zano vector is
-    /// inserted. A green test on a fabricated vector is the split-brain bug
-    /// wearing a passing checkmark.
+    /// COMPATIBILITY REGRESSION against the stock-Zano vector in
+    /// [`crate::testvec`].
     ///
-    /// TODO: from stock Zano, take a known `keys_seed_binary[0..32]` and its
-    /// resulting spend_public + view_public, paste hex, remove #[ignore].
+    /// `seed32` here is the stock wallet's exported spend secret, which is
+    /// already a canonical scalar — and `sc_reduce` is the identity on
+    /// canonical scalars, so `keys_from_default(s)` must reproduce exactly
+    /// the stock account. This proves the whole view-only restore path
+    /// (`seed -> {S, v, V}`) against stock outputs. The non-canonical
+    /// reduce branch (`seed >= l`) is exercised by unit tests; stock parity
+    /// for it would need a raw pre-reduce `keys_seed_binary`, which
+    /// simplewallet does not export (it lives inside the 25-word mnemonic —
+    /// see the `mnemonic_encoding` port on the STATUS list).
     #[test]
-    #[ignore = "insert a verified stock-Zano (seed32 -> S,V) vector before enabling"]
     fn matches_stock_zano_vector() {
-        // let seed32: [u8;32] = hex!("...");                 // TODO
-        // let acct = view_account_from_seed(&seed32);
-        // assert_eq!(acct.spend_public, hex!("..."));        // TODO expected S
-        // assert_eq!(acct.view_public,  hex!("..."));        // TODO expected V
-        todo!("insert verified stock-Zano reference vector");
+        use crate::testvec;
+
+        let acct = view_account_from_seed(&testvec::SPEND_SECRET);
+
+        let expected_v = Option::<Scalar>::from(Scalar::from_canonical_bytes(testvec::VIEW_SECRET))
+            .expect("stock view secret is a canonical scalar");
+        assert_eq!(acct.view_secret, expected_v, "v mismatch vs stock Zano");
+
+        let (expected_spend_public, expected_view_public) = testvec::address_publics();
+        assert_eq!(
+            acct.spend_public, expected_spend_public,
+            "S mismatch vs stock address"
+        );
+        assert_eq!(
+            acct.view_public, expected_view_public,
+            "V mismatch vs stock address"
+        );
     }
 }

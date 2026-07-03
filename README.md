@@ -5,8 +5,9 @@ Zano integration, built as the identity/settlement layer of the Beehive Nature
 coordination kernel.
 
 > **Status:** cryptographic design source-confirmed; wire contract frozen (proto
-> v0.3). Firmware, the compatibility proof, and legal review are the unstarted
-> work between here and anything a user touches. See [`STATUS.md`](./STATUS.md).
+> v0.3); host-side derivation **proven against stock Zano** (real vector,
+> 2026-07-03). Firmware and legal review are the unstarted work between here
+> and anything a user touches. See [`STATUS.md`](./STATUS.md).
 
 ## The one rule everything depends on
 

@@ -142,23 +142,39 @@ mod tests {
     }
 
     /// COMPATIBILITY REGRESSION TEST — the one that actually proves we match
-    /// stock Zano. It is #[ignore]d until a REAL vector is inserted, because a
-    /// green test built on a fabricated vector is worse than no test: it is the
-    /// split-brain bug wearing a passing checkmark.
+    /// stock Zano. Vector provenance and the address decoder live in
+    /// [`crate::testvec`] (generated 2026-07-03 with stock simplewallet
+    /// v2.2.1.501, throwaway never-funded wallet, committed deliberately).
     ///
-    /// TODO: Insert a verified Zano test vector, then remove `#[ignore]`.
-    ///   Obtain it by generating a keypair in the stock Zano wallet/CLI and
-    ///   exporting (spend_secret, view_public) — or from Zano's own crypto
-    ///   unit-test vectors — and paste the hex below.
+    /// What this proves, with zero circularity:
+    /// - `v = keccak256(s) mod l` against the stock-exported view secret —
+    ///   the exact `dependent_key` relation the split-brain bug got wrong.
+    /// - `S = s*G`, `V = v*G` against the publics decoded from the stock
+    ///   wallet's own address (CN-base58 + checksum), a path fully
+    ///   independent of this module.
     #[test]
-    #[ignore = "insert a verified Zano (spend_secret -> view_public) vector before enabling"]
     fn matches_zano_reference_vector() {
-        // let spend_secret: [u8; 32] = hex!("...");            // TODO
-        // let expected_view_public: [u8; 32] = hex!("...");    // TODO
-        // let expected_spend_public: [u8; 32] = hex!("...");   // TODO
-        // let keys = derive_from_spend_secret(&spend_secret);
-        // assert_eq!(keys.view_public,  expected_view_public,  "view key mismatch vs stock Zano");
-        // assert_eq!(keys.spend_public, expected_spend_public, "spend key mismatch vs stock Zano");
-        todo!("insert verified Zano reference vector");
+        use crate::testvec;
+
+        let keys = derive_from_spend_secret(&testvec::SPEND_SECRET);
+
+        // The Zano-specific hash relation, against stock's own export:
+        let expected_v = Option::<Scalar>::from(Scalar::from_canonical_bytes(testvec::VIEW_SECRET))
+            .expect("stock view secret is a canonical scalar");
+        assert_eq!(
+            keys.view_secret, expected_v,
+            "dependent_key mismatch vs stock Zano"
+        );
+
+        // The public keys, against the address payload:
+        let (expected_spend_public, expected_view_public) = testvec::address_publics();
+        assert_eq!(
+            keys.spend_public, expected_spend_public,
+            "S mismatch vs stock address"
+        );
+        assert_eq!(
+            keys.view_public, expected_view_public,
+            "V mismatch vs stock address"
+        );
     }
 }

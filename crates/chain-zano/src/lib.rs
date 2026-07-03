@@ -29,3 +29,6 @@
 pub mod keys; // firmware-spec (handles s)
 pub mod slip0010;
 pub mod view; // host-safe // firmware-spec (handles seed)
+
+#[cfg(test)]
+pub(crate) mod testvec; // stock-Zano reference vector (TESTNET-ONLY throwaway)
