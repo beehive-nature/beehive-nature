@@ -19,10 +19,11 @@
 //!   * The HMAC message for a hardened child is  0x00 || k_par || ser32(index),
 //!     using the parent PRIVATE key. It does NOT use the parent public key.
 //!     (Using the pubkey is the secp256k1 rule and yields silent garbage.)
-//!   * Master:  I = HMAC-SHA512(key = "ed25519 seed", data = seed)
-//!              k = I[0..32], c = I[32..64].  IL is used directly; NOT reduced.
+//!   * Master:  I = HMAC-SHA512(key = "ed25519 seed", data = seed),
+//!     k = I[0..32], c = I[32..64].  IL is used directly; NOT reduced.
 //!   * In standard SLIP-0010, IL (32 bytes) is the Ed25519 private key used
 //!     directly as a signing seed and is NEVER reduced mod l.
+//!
 //! ============================================================================
 //!
 //! ZANO-SPECIFIC STEP (deliberate divergence, see `derive_spend_secret`):
@@ -54,8 +55,7 @@ struct Node {
 
 /// Master node from a seed:  I = HMAC-SHA512("ed25519 seed", seed).
 fn master_node(seed: &[u8]) -> Node {
-    let mut mac = HmacSha512::new_from_slice(b"ed25519 seed")
-        .expect("HMAC accepts any key length");
+    let mut mac = HmacSha512::new_from_slice(b"ed25519 seed").expect("HMAC accepts any key length");
     mac.update(seed);
     let i = mac.finalize().into_bytes();
 
@@ -71,8 +71,8 @@ fn master_node(seed: &[u8]) -> Node {
 fn derive_hardened(parent: &Node, index: u32) -> Node {
     debug_assert!(index >= HARDENED, "SLIP-0010 Ed25519 is hardened-only");
 
-    let mut mac = HmacSha512::new_from_slice(&parent.chain_code)
-        .expect("HMAC accepts any key length");
+    let mut mac =
+        HmacSha512::new_from_slice(&parent.chain_code).expect("HMAC accepts any key length");
     mac.update(&[0x00]); // NOT the parent public key — the 0x00 || k_par form
     mac.update(&parent.key);
     mac.update(&index.to_be_bytes()); // ser32(index), big-endian
@@ -149,7 +149,10 @@ mod tests {
         );
         // Every level hardened — no non-hardened level is valid on Ed25519.
         for level in zano_path(3, 1, 7) {
-            assert!(level >= HARDENED, "all SLIP-0010 Ed25519 levels are hardened");
+            assert!(
+                level >= HARDENED,
+                "all SLIP-0010 Ed25519 levels are hardened"
+            );
         }
     }
 

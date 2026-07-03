@@ -26,6 +26,6 @@
 //! (`crypto.cpp`, `clsag.cpp`, `clsag.h`, `range_proof_bppe.h`). See
 //! `docs/architecture/handoff-v1.3.md` and `STATUS.md`.
 
-pub mod view; // host-safe
 pub mod keys; // firmware-spec (handles s)
-pub mod slip0010; // firmware-spec (handles seed)
+pub mod slip0010;
+pub mod view; // host-safe // firmware-spec (handles seed)

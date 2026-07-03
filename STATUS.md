@@ -14,6 +14,12 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-03` — **chain-zano compiles; internal tests green (7 + 3 ignored).**
+  The STATUS "do first" `cargo build` item resolved with ZERO code changes —
+  the curve25519-dalek 4.x spellings were right all along. Doc-comment lint
+  fixes + rustfmt only (semantics untouched per the no-reopening rule). The
+  full six-crate workspace now builds clean; README quickstart is literally
+  true. The three `#[ignore]`d vector tests remain the reality gate.
 - `2026-07-03` — **event-bus: in-memory CanonicalEvent fan-out green.**
   `crates/event-bus` — `EventBus` over `tokio::sync::broadcast`:
   publish/subscribe, no-subscriber publishes drop silently, laggards get
@@ -105,9 +111,10 @@ authoritative record of where `origin/main` sits.
       into the `#[ignore]`d tests in `keys.rs` / `view.rs`, remove `#[ignore]`,
       run `cargo test`. Green = every derivation claim here is PROVEN, not
       asserted. **Use a throwaway testnet key; never commit a real secret.**
-- [ ] **`cargo build` pass.** Resolve exact `curve25519-dalek` 4.x API spellings
-      (basepoint mul, `Scalar` constructors) — modules were written against v4
-      but not compiled here.
+- [x] **`cargo build` pass.** DONE 2026-07-03: compiled clean on the first
+      attempt — the dalek 4.x spellings were correct as written; zero code
+      changes needed. 7 internal-consistency tests green, 3 vector tests
+      still `#[ignore]`d awaiting reality (correct). Full workspace builds.
 
 ### Known, scoped, larger
 - [ ] **Trezor firmware app** — on-device `CLSAG_GGX` implementing the proto.

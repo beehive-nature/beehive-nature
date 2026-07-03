@@ -77,7 +77,11 @@ pub fn view_account_from_seed(seed32: &[u8; 32]) -> ZanoViewAccount {
     // transient spend secret does not outlive this function
     s.zeroize();
 
-    ZanoViewAccount { view_secret: v, spend_public, view_public }
+    ZanoViewAccount {
+        view_secret: v,
+        spend_public,
+        view_public,
+    }
 }
 
 /// Import an already-exported view secret `v` (hex) for scanning — the ONLY
@@ -91,7 +95,9 @@ pub fn view_account_from_view_secret_hex(v_hex: &str) -> Result<Scalar, &'static
 
 fn decode_hex_32(s: &str) -> Option<[u8; 32]> {
     let s = s.strip_prefix("0x").unwrap_or(s);
-    if s.len() != 64 { return None; }
+    if s.len() != 64 {
+        return None;
+    }
     let mut out = [0u8; 32];
     for (i, chunk) in s.as_bytes().chunks(2).enumerate() {
         let hi = (chunk[0] as char).to_digit(16)?;
@@ -121,15 +127,22 @@ mod tests {
         use sha3::Sha3_256;
         let s = Scalar::from_bytes_mod_order([9u8; 32]);
         let keccak = {
-            let mut h = Keccak256::new(); h.update(s.to_bytes());
-            let d: [u8; 32] = h.finalize().into(); d
+            let mut h = Keccak256::new();
+            h.update(s.to_bytes());
+            let d: [u8; 32] = h.finalize().into();
+            d
         };
         let sha3 = {
-            let mut h = Sha3_256::new(); h.update(s.to_bytes());
-            let d: [u8; 32] = h.finalize().into(); d
+            let mut h = Sha3_256::new();
+            h.update(s.to_bytes());
+            let d: [u8; 32] = h.finalize().into();
+            d
         };
         assert_ne!(keccak, sha3);
-        assert_eq!(dependent_view_secret(&s), Scalar::from_bytes_mod_order(keccak));
+        assert_eq!(
+            dependent_view_secret(&s),
+            Scalar::from_bytes_mod_order(keccak)
+        );
     }
 
     /// COMPATIBILITY REGRESSION — #[ignore] until a real stock-Zano vector is

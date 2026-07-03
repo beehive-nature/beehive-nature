@@ -43,7 +43,11 @@ pub const ZANO_SLIP44_COIN_TYPE: u32 = 1018;
 /// SLIP-0010 layer, not here.)
 pub fn derivation_path(account: u32) -> [u32; 3] {
     const HARDENED: u32 = 0x8000_0000;
-    [44 | HARDENED, ZANO_SLIP44_COIN_TYPE | HARDENED, account | HARDENED]
+    [
+        44 | HARDENED,
+        ZANO_SLIP44_COIN_TYPE | HARDENED,
+        account | HARDENED,
+    ]
 }
 
 /// A Zano keypair set derived from a single spend secret.
@@ -85,7 +89,12 @@ pub fn derive_from_spend_secret(spend_secret_bytes: &[u8; 32]) -> ZanoKeys {
     let spend_public = (&s * ED25519_BASEPOINT_TABLE).compress().to_bytes();
     let view_public = (&v * ED25519_BASEPOINT_TABLE).compress().to_bytes();
 
-    ZanoKeys { spend_secret: s, view_secret: v, spend_public, view_public }
+    ZanoKeys {
+        spend_secret: s,
+        view_secret: v,
+        spend_public,
+        view_public,
+    }
 }
 
 #[cfg(test)]
