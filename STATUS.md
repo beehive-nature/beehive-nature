@@ -14,6 +14,17 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-03` — **§6 mock-server integration test: the handshake is proven.**
+  The stream engine moved out of `main.rs` into the lib (`stream_ship()`,
+  event-callback API; binary keeps only retry policy + printing) and is now
+  exercised by `tests/mock_ship_stream.rs`: a real tokio-tungstenite SERVER
+  speaks the SHIP protocol over a live local socket — ABI frame, asserts
+  the client's status request, answers head, asserts the get_blocks request
+  starts at that head, streams two blocks, closes. Both protocol directions
+  tested; blob builders promoted to `pub mod blobs` (one mirror encoder,
+  shared by unit tests, the mock server, and future capture tooling).
+  chain-eos: 13 tests. When a real endpoint exists, `main` is a thin shell
+  over an engine that has already spoken the protocol end-to-end.
 - `2026-07-03` — **§6 stretch: action extraction + name codec + bus proof.**
   chain-eos now *produces* actions, not just counts: EOSIO name codec
   (u64 ↔ "lovismarket", verified against the known `eosio` vector) and

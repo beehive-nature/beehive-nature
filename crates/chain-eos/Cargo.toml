@@ -7,7 +7,7 @@ description = "bNature b-indexer sense adapter, Phase 1: SHIP WebSocket ingest +
 
 [dependencies]
 sha2 = { workspace = true }
-tokio = { version = "1", features = ["macros", "rt-multi-thread", "time"] }
+tokio = { version = "1", features = ["macros", "net", "rt-multi-thread", "time"] }
 # ws:// only for Phase 1 — TLS (rustls) needs cmake/NASM on windows-gnu; add
 # a TLS feature when a real wss:// endpoint exists.
 tokio-tungstenite = "0.29"

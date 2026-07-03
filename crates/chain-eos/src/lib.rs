@@ -543,33 +543,154 @@ pub fn encode_get_blocks_request(start_block_num: u32) -> Vec<u8> {
 }
 
 // ---------------------------------------------------------------------------
-// tests — synthetic SHIP blobs built by a mirror encoder
+// stream engine — SHIP handshake + block stream over WebSocket
 // ---------------------------------------------------------------------------
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+/// What the stream emits to its caller as the protocol progresses.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum StreamEvent {
+    /// The server's opening ABI text frame arrived (size only; Phase 1
+    /// does not parse the ABI).
+    AbiReceived { bytes: usize },
+    /// `get_status_result_v0` answered: this is the head we stream from.
+    Head { block_num: u32 },
+    /// One `get_blocks_result_v0` with a `this_block`. `block` carries the
+    /// raw packed `signed_block` when the server sent it.
+    Block {
+        block_num: u32,
+        block: Option<Vec<u8>>,
+    },
+}
 
-    fn put_block_position(out: &mut Vec<u8>, block_num: u32, fill: u8) {
+/// Connect to a SHIP endpoint, perform the handshake (ABI → status →
+/// get_blocks from head), and stream blocks until the server closes.
+///
+/// Returns `Ok(())` on a clean server close, `Err` on protocol violations
+/// or transport failure. Reconnect/backoff policy belongs to the caller.
+pub async fn stream_ship(
+    url: &str,
+    mut on_event: impl FnMut(StreamEvent),
+) -> Result<(), Box<dyn std::error::Error>> {
+    use futures_util::SinkExt;
+    use tokio_tungstenite::tungstenite::Message;
+
+    let (mut ws, _response) = tokio_tungstenite::connect_async(url).await?;
+
+    // 1. Server speaks first: the state-history ABI as a text frame.
+    match next_message(&mut ws).await? {
+        Some(Message::Text(t)) => on_event(StreamEvent::AbiReceived { bytes: t.len() }),
+        Some(other) => return Err(format!("expected ABI text frame, got {other:?}").into()),
+        None => return Err("connection ended before ABI".into()),
+    }
+
+    // 2. Learn the head block.
+    ws.send(Message::Binary(encode_get_status_request().into()))
+        .await?;
+    let head = loop {
+        match next_message(&mut ws).await? {
+            Some(Message::Binary(bin)) => match decode_result(&bin)? {
+                ShipResult::Status(s) => break s.head,
+                other => return Err(format!("expected status result, got {other:?}").into()),
+            },
+            Some(Message::Ping(p)) => ws.send(Message::Pong(p)).await?,
+            Some(Message::Close(_)) | None => return Err("closed during handshake".into()),
+            Some(_) => {}
+        }
+    };
+    on_event(StreamEvent::Head {
+        block_num: head.block_num,
+    });
+
+    // 3. Stream blocks from head until the server closes.
+    ws.send(Message::Binary(
+        encode_get_blocks_request(head.block_num).into(),
+    ))
+    .await?;
+
+    loop {
+        match next_message(&mut ws).await? {
+            Some(Message::Binary(bin)) => {
+                let ShipResult::Blocks(b) = decode_result(&bin)? else {
+                    continue;
+                };
+                let Some(this_block) = b.this_block else {
+                    continue; // head-only heartbeat
+                };
+                on_event(StreamEvent::Block {
+                    block_num: this_block.block_num,
+                    block: b.block,
+                });
+            }
+            Some(Message::Ping(p)) => ws.send(Message::Pong(p)).await?,
+            Some(Message::Close(_)) | None => return Ok(()), // clean end
+            Some(_) => {}
+        }
+    }
+}
+
+async fn next_message<S>(
+    ws: &mut tokio_tungstenite::WebSocketStream<S>,
+) -> Result<Option<tokio_tungstenite::tungstenite::Message>, Box<dyn std::error::Error>>
+where
+    S: tokio::io::AsyncRead + tokio::io::AsyncWrite + Unpin,
+{
+    use futures_util::StreamExt;
+    match ws.next().await {
+        Some(msg) => Ok(Some(msg?)),
+        None => Ok(None),
+    }
+}
+
+// ---------------------------------------------------------------------------
+// blobs — synthetic SHIP blob builders (mirror encoders)
+// ---------------------------------------------------------------------------
+
+/// Builders for synthetic SHIP wire blobs. This is the "pre-recorded SHIP
+/// blob" toolkit from brief §6: unit tests, the mock WS server integration
+/// test, and any future capture tooling all construct protocol-shaped bytes
+/// from these instead of each keeping a private mirror encoder.
+pub mod blobs {
+    use super::{name_to_u64, put_varuint32};
+
+    pub fn put_block_position(out: &mut Vec<u8>, block_num: u32, fill: u8) {
         out.extend_from_slice(&block_num.to_le_bytes());
         out.extend_from_slice(&[fill; 32]);
     }
 
-    fn put_bytes_field(out: &mut Vec<u8>, data: &[u8]) {
+    pub fn put_bytes_field(out: &mut Vec<u8>, data: &[u8]) {
         put_varuint32(out, data.len() as u32);
         out.extend_from_slice(data);
     }
 
-    /// Well-formed packed `action` (account, name, empty auth, empty data).
-    fn put_action(out: &mut Vec<u8>) {
+    /// Well-formed packed `action` (fixed account/name, empty auth + data).
+    pub fn put_action(out: &mut Vec<u8>) {
         out.extend_from_slice(&0x1122334455667788u64.to_le_bytes());
         out.extend_from_slice(&0x8877665544332211u64.to_le_bytes());
         put_varuint32(out, 0);
         put_varuint32(out, 0);
     }
 
-    /// Packed `transaction` with `n_actions` actions.
-    fn packed_trx(n_actions: u32) -> Vec<u8> {
+    /// Packed action with real (account, name) u64s and given data bytes.
+    pub fn put_named_action(out: &mut Vec<u8>, account: &str, name: &str, data: &[u8]) {
+        out.extend_from_slice(&name_to_u64(account).expect("valid account").to_le_bytes());
+        out.extend_from_slice(&name_to_u64(name).expect("valid name").to_le_bytes());
+        put_varuint32(out, 1); // one authorization
+        out.extend_from_slice(&name_to_u64("seller").unwrap().to_le_bytes());
+        out.extend_from_slice(&name_to_u64("active").unwrap().to_le_bytes());
+        put_bytes_field(out, data);
+    }
+
+    /// Packed `transaction` with `n_actions` anonymous actions.
+    pub fn packed_trx(n_actions: u32) -> Vec<u8> {
+        packed_trx_body(n_actions, &[])
+    }
+
+    /// Packed `transaction` containing the given named actions.
+    pub fn packed_trx_named(actions: &[(&str, &str, &[u8])]) -> Vec<u8> {
+        packed_trx_body(0, actions)
+    }
+
+    fn packed_trx_body(n_anon: u32, named: &[(&str, &str, &[u8])]) -> Vec<u8> {
         let mut t = Vec::new();
         t.extend_from_slice(&0u32.to_le_bytes()); // expiration
         t.extend_from_slice(&0u16.to_le_bytes()); // ref_block_num
@@ -578,16 +699,19 @@ mod tests {
         t.push(0); // max_cpu_usage_ms
         put_varuint32(&mut t, 0); // delay_sec
         put_varuint32(&mut t, 0); // context_free_actions: none
-        put_varuint32(&mut t, n_actions);
-        for _ in 0..n_actions {
+        put_varuint32(&mut t, n_anon + named.len() as u32);
+        for _ in 0..n_anon {
             put_action(&mut t);
+        }
+        for (account, name, data) in named {
+            put_named_action(&mut t, account, name, data);
         }
         put_varuint32(&mut t, 0); // transaction_extensions
         t
     }
 
-    /// Receipt wrapping a packed transaction.
-    fn put_packed_receipt(out: &mut Vec<u8>, n_actions: u32, compression: u8) {
+    /// Receipt wrapping an arbitrary packed transaction.
+    pub fn put_receipt_for(out: &mut Vec<u8>, packed_trx: &[u8], compression: u8) {
         out.push(0); // status: executed
         out.extend_from_slice(&100u32.to_le_bytes()); // cpu_usage_us
         put_varuint32(out, 1); // net_usage_words
@@ -597,10 +721,15 @@ mod tests {
         out.extend_from_slice(&[0u8; 65]);
         out.push(compression);
         put_bytes_field(out, &[]); // packed_context_free_data
-        put_bytes_field(out, &packed_trx(n_actions));
+        put_bytes_field(out, packed_trx);
     }
 
-    fn put_id_only_receipt(out: &mut Vec<u8>) {
+    /// Receipt wrapping a packed transaction of `n_actions` anonymous actions.
+    pub fn put_packed_receipt(out: &mut Vec<u8>, n_actions: u32, compression: u8) {
+        put_receipt_for(out, &packed_trx(n_actions), compression);
+    }
+
+    pub fn put_id_only_receipt(out: &mut Vec<u8>) {
         out.push(0);
         out.extend_from_slice(&0u32.to_le_bytes());
         put_varuint32(out, 0);
@@ -608,9 +737,8 @@ mod tests {
         out.extend_from_slice(&[0xAB; 32]);
     }
 
-    /// Packed `signed_block` for block `block_num` containing the receipts
-    /// appended by `fill_receipts`.
-    fn signed_block(block_num: u32, receipts: &[Vec<u8>]) -> Vec<u8> {
+    /// Packed `signed_block` for block `block_num` containing `receipts`.
+    pub fn signed_block(block_num: u32, receipts: &[Vec<u8>]) -> Vec<u8> {
         let mut b = Vec::new();
         b.extend_from_slice(&1000u32.to_le_bytes()); // timestamp
         b.extend_from_slice(&0x5530ea0000000000u64.to_le_bytes()); // producer
@@ -633,8 +761,18 @@ mod tests {
         b
     }
 
+    /// Full binary `get_status_result_v0` message.
+    pub fn status_result_blob(head: u32, last_irreversible: u32) -> Vec<u8> {
+        let mut m = Vec::new();
+        put_varuint32(&mut m, 0); // result variant: get_status_result_v0
+        put_block_position(&mut m, head, 0xAA);
+        put_block_position(&mut m, last_irreversible, 0xBB);
+        m.extend_from_slice(&[0u8; 16]); // trace / chain-state ranges
+        m
+    }
+
     /// Full binary `get_blocks_result_v0` message ("pre-recorded SHIP blob").
-    fn blocks_result_blob(block_num: u32, block: Option<&[u8]>) -> Vec<u8> {
+    pub fn blocks_result_blob(block_num: u32, block: Option<&[u8]>) -> Vec<u8> {
         let mut m = Vec::new();
         put_varuint32(&mut m, 1); // result variant: get_blocks_result_v0
         put_block_position(&mut m, block_num + 10, 0x11); // head
@@ -654,6 +792,16 @@ mod tests {
         m.push(0); // deltas: none
         m
     }
+}
+
+// ---------------------------------------------------------------------------
+// tests
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod tests {
+    use super::blobs::*;
+    use super::*;
 
     // -- acceptance criterion: blob in, block number out ------------------
 
@@ -801,34 +949,6 @@ mod tests {
 
     // -- action extraction --------------------------------------------------
 
-    /// Packed action with real (account, name) u64s and given data bytes.
-    fn put_named_action(out: &mut Vec<u8>, account: &str, name: &str, data: &[u8]) {
-        out.extend_from_slice(&name_to_u64(account).expect("valid account").to_le_bytes());
-        out.extend_from_slice(&name_to_u64(name).expect("valid name").to_le_bytes());
-        put_varuint32(out, 1); // one authorization
-        out.extend_from_slice(&name_to_u64("seller").unwrap().to_le_bytes());
-        out.extend_from_slice(&name_to_u64("active").unwrap().to_le_bytes());
-        put_bytes_field(out, data);
-    }
-
-    /// Packed `transaction` containing the given named actions.
-    fn packed_trx_named(actions: &[(&str, &str, &[u8])]) -> Vec<u8> {
-        let mut t = Vec::new();
-        t.extend_from_slice(&0u32.to_le_bytes());
-        t.extend_from_slice(&0u16.to_le_bytes());
-        t.extend_from_slice(&0u32.to_le_bytes());
-        put_varuint32(&mut t, 0);
-        t.push(0);
-        put_varuint32(&mut t, 0);
-        put_varuint32(&mut t, 0); // no context-free actions
-        put_varuint32(&mut t, actions.len() as u32);
-        for (account, name, data) in actions {
-            put_named_action(&mut t, account, name, data);
-        }
-        put_varuint32(&mut t, 0);
-        t
-    }
-
     #[test]
     fn extract_actions_yields_named_actions_with_tx_id() {
         let inner = packed_trx_named(&[
@@ -840,16 +960,7 @@ mod tests {
         // Receipt wrapping that packed transaction, plus noise the extractor
         // must skip: one id-only receipt and one compressed receipt.
         let mut named_receipt = Vec::new();
-        named_receipt.push(0);
-        named_receipt.extend_from_slice(&100u32.to_le_bytes());
-        put_varuint32(&mut named_receipt, 1);
-        put_varuint32(&mut named_receipt, 1); // packed_transaction variant
-        put_varuint32(&mut named_receipt, 1); // one signature
-        named_receipt.push(0);
-        named_receipt.extend_from_slice(&[0u8; 65]);
-        named_receipt.push(0); // compression: none
-        put_bytes_field(&mut named_receipt, &[]);
-        put_bytes_field(&mut named_receipt, &inner);
+        put_receipt_for(&mut named_receipt, &inner, 0);
 
         let mut id_only = Vec::new();
         put_id_only_receipt(&mut id_only);
