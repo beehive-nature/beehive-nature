@@ -14,6 +14,14 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-02` — **shared-types: canonical event schema green (§9.3).**
+  `crates/shared-types` — `CanonicalEvent` envelope, `SourceChain`, flat
+  `EventType` (16 variants, `DIDLinked` JSON rename), family `EventPayload`
+  (adjacently tagged `{"type","data"}`). DIDs not raw keys; `(amount,
+  asset_id)` never a hardcoded currency; message content never on the bus
+  (Autonomi ref only). 5 tests: full round-trips + mock Vaulta
+  `lovismarket:addlisting → ProductListed`. Next: normalizer or chain-eos
+  Phase 1 (§6), or Zano findings follow-up.
 - `2026-07-02` — **escrow-core: state machine + exhaustive tests green.**
   `crates/escrow-core` per brief §9.1–9.2: `EscrowState`, `Escrow` (with
   `fee_buffer_zano` and dual-balance funding check), `transition()` enforcing
