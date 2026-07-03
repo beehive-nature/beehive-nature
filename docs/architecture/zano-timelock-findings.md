@@ -1,9 +1,42 @@
-# Zano time-lock / expiration findings (source-verified)
+# Zano escrow-primitive findings (source-verified)
 
-Answers brief §8's open question — *"still unverified whether Zano supports
-native unlock_time/timeout on multisig proposals"* — against
-`hyle-team/zano` `master` (checked 2026-07-03). Staked file/line citations
-per the STATUS rules for "Done" claims.
+Answers brief §8's open questions — time-locks/timeouts AND the multisig
+co-signing surface — against `hyle-team/zano` `master` (checked 2026-07-03).
+Staked file/line citations per the STATUS rules for "Done" claims.
+
+## ⚠ REFUTED: "DRO signs via standard `sign_multisig_proposal` RPC"
+
+Brief §8 records this as confirmed. **Per current master it is not**: the
+wallet RPC dispatch (`wallet_rpc_server.cpp`) contains **no**
+`sign_multisig_proposal`, and no raw N-of-M multisig methods at all
+(`grep sign_multisig` = 0 hits). What the wallet RPC actually exposes is
+the built-in two-party escrow-contract flow: `contracts_send_proposal`,
+`contracts_accept_proposal`, `contracts_get_all`, `contracts_release`,
+`contracts_request_cancel`, `contracts_accept_cancel`
+(`wallet_rpc_server.cpp:1226–1277`).
+
+Two further constraints on those built-in contracts:
+- **Two-party only.** `contract_private_details` has `a_addr` (buyer) /
+  `b_addr` (seller) and pledges — no third-party arbiter slot
+  (`bc_escrow_service.h:25-33`).
+- **ZANO-only.** `amount_to_pay` / pledges are bare `uint64` — **no
+  `asset_id` field**, so they cannot carry fUSD.
+
+**What still stands:** consensus fully supports raw N-of-M multisig outputs
+(`txout_multisig { minimum_sigs, keys[] }`, `currency_basic.h:310`), and
+the wallet C++ layer builds and spends them internally
+(`wallet2.h:135` `m_multisig_transfers`, `wallet2.h:542` transfer-with-
+multisig_id, `wallet2.h:558` `build_escrow_release_templates`). The
+capability exists; the *stock RPC surface* for an external co-signer does
+not.
+
+**Consequences for the DRO design** (decision needed, not tonight):
+1. Integrate at the wallet2 C++ API layer (link the wallet lib) — heavier,
+   but the host is already a tx-building coordinator under proto v0.3;
+2. construct/co-sign multisig spends with our own tx code (consistent with
+   the Trezor-native architecture, most work);
+3. contribute a raw-multisig RPC upstream to Zano;
+4. NOT an option: the built-in contracts (two-party, ZANO-only).
 
 ## The three native mechanisms
 

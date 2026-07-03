@@ -15,6 +15,19 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-03` — **⚠ MULTISIG RPC CLAIM REFUTED + testnet live.** Source
+  verification of the §8 claim "DRO signs via standard
+  `sign_multisig_proposal` RPC": **that RPC does not exist in master** — no
+  raw multisig RPC at all; only the built-in two-party escrow contracts
+  (`contracts_*`), which are ZANO-only (no `asset_id`) and have no arbiter
+  slot. Consensus `txout_multisig` + wallet-internal machinery DO exist —
+  the capability is real, the stock external co-signer API is not. Four
+  DRO-integration options recorded in
+  `docs/architecture/zano-timelock-findings.md` (decision pending). Also:
+  local testnet node UP (official v2.2.0.489, RPC :12111, syncing to
+  ~83.6k), buyer wallet faucet-funded with **100 fUSD + 5 tZANO** (faucet
+  carries fUSD on testnet — §1.7 fUSD-specific flow is runnable). Seller
+  faucet-blocked 24h per IP (escrow funding only needs the buyer).
 - `2026-07-03` — **TIME-LOCK QUESTION ANSWERED (source-verified).** Brief §8's
   open item closed against `hyle-team/zano` master with file/line citations —
   `docs/architecture/zano-timelock-findings.md`. Answer: multisig proposals
