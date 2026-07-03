@@ -51,6 +51,10 @@ this repo. This repo is the host side.
 
 ```bash
 git config core.hooksPath .githooks   # one-time per clone: local secret-scan hook (CI re-runs the same scan on every push)
+# Windows/GNU toolchain note: crates using raw-dylib (tokio deps) need full
+# mingw binutils. WinLibs is installed via winget; put its bin dir and
+# ~/.cargo/bin on PATH (neither is added automatically):
+#   $LOCALAPPDATA/Microsoft/WinGet/Packages/BrechtSanders.WinLibs.POSIX.UCRT_*/mingw64/bin
 cargo build           # step 1 tonight: resolve exact curve25519-dalek 4.x API
 cargo test            # passing tests are internal-consistency only
 cargo test -- --ignored   # compatibility tests: RED until a real Zano vector is pasted

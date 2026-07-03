@@ -14,6 +14,18 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-02` — **chain-eos Phase 1: SHIP ingest + block decode green (§6).**
+  `crates/chain-eos` — hand-rolled minimal SHIP codec (Verification
+  Principle: crates.io check showed the `eosio` crate is a contract SDK
+  dead since 2020-02, `eosio-shipper` nonexistent). Decodes result
+  envelope, block_position, signed_block walk → tx + action counts (block
+  num cross-derived from header `previous`). Binary: tokio-tungstenite
+  handshake (ABI → status → stream), retry/backoff, `SHIP_WS_URL` env.
+  ws:// only (rustls needs cmake/NASM on windows-gnu — TLS deferred).
+  8 tests vs synthetic blobs inc. truncation + bad-flag paths. No live
+  node tonight → mock path per §6 prereq. Toolchain note: raw-dylib deps
+  need mingw binutils — WinLibs installed; add its bin + ~/.cargo/bin to
+  PATH (see README). Next: run vs real SHIP endpoint, then normalizer.
 - `2026-07-02` — **shared-types: canonical event schema green (§9.3).**
   `crates/shared-types` — `CanonicalEvent` envelope, `SourceChain`, flat
   `EventType` (16 variants, `DIDLinked` JSON rename), family `EventPayload`

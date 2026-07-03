@@ -1,6 +1,11 @@
 [workspace]
 resolver = "2"
-members = ["crates/chain-zano", "crates/escrow-core", "crates/shared-types"]
+members = [
+    "crates/chain-eos",
+    "crates/chain-zano",
+    "crates/escrow-core",
+    "crates/shared-types",
+]
 
 [workspace.package]
 edition = "2021"
