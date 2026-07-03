@@ -15,6 +15,19 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-03` — **TIME-LOCK QUESTION ANSWERED (source-verified).** Brief §8's
+  open item closed against `hyle-team/zano` master with file/line citations —
+  `docs/architecture/zano-timelock-findings.md`. Answer: multisig proposals
+  are off-chain objects → **no native proposal timeout exists; escrow-core's
+  off-chain timeout model is confirmed required** (assumption → verified
+  fact). `unlock_time`/`unlock_time2` are spend-delay locks (never refund).
+  Bonus: consensus-enforced **transaction expiration**
+  (`etc_tx_details_expiration_time`, checked at tx pool AND block inclusion)
+  → pre-signed release/refund txs can be made unbroadcastable after a
+  deadline — race-condition hardening for the future Zano action adapter.
+  Fee-buffer half: already confirmed (§9.2); the fUSD-specific §1.7 rerun
+  still needs the testnet (official testnet build v2.2.0.489 downloaded,
+  SHA256-verified vs docs.zano.org, daemon syncing; faucet needs a human).
 - `2026-07-03` — **DERIVATION PROVEN AGAINST STOCK ZANO.** Sequence item 5,
   done from the session: stock simplewallet v2.2.1.501 downloaded (official
   build server), throwaway never-funded wallet generated offline, secrets
