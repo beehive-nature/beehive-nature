@@ -26,10 +26,13 @@ authoritative record of where `origin/main` sits.
   **LIVE**: served a **watch-only** export of the funded testnet buyer
   (spend-incapable — safe to serve auth-off, bound to the WSL vNIC only)
   over real wallet RPC; the WSL-built watcher read **100 fUSD** off it,
-  normalized to OrderFunded, and escrow-core **correctly refused** while
-  the native tZANO was still lock-maturing (zano_provided:0 — the
-  never-invent principle on live state). Funded re-run pending native
-  unlock. Next: `crates/dro-signer`.
+  normalized to OrderFunded. **Both halves of the §9.2 check proven on
+  live chain state:** (1) while native tZANO was lock-maturing, observed
+  `fee_buffer_zano: 0` → escrow-core **refused** (`InsufficientFunding
+  zano_provided:0`); (2) after the native unlocked (1 tZANO = 1e12
+  atomic), re-observed → escrow-core **accepted** → `Ok(Funded)`.
+  Refusal-when-absent AND acceptance-when-present, both real, no mock.
+  Next: `crates/dro-signer`.
 - `2026-07-03` — **🏁 ITEM 4 COMPLETE — LIVE: chain bytes drive escrow-core.**
   New `crates/escrow-engine`: bus consumer replaying CanonicalEvents into
   `escrow_core::transition` (OrderFunded/Shipped/Delivered/Completed →
