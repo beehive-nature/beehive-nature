@@ -15,6 +15,15 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-04` — **§9.3 example set complete: third mapping landed.**
+  `arweave:order_shipped → OrderShipped` (the brief's own third example) —
+  shipment records from the future arweave watcher carry order context +
+  tracking/carrier; `fee_buffer_zano: None` (a shipment is not a funding
+  observation). 2 new tests (field-by-field + missing-order_id error).
+  All three §9.3-cited mappings now implemented. Chain-reachable escrow
+  lifecycle is now Funded + Shipped; Delivered arrives via the carrier
+  path, Completed/terminal mappings await schema decisions beyond the
+  brief (deliberately NOT invented). **139 tests.**
 - `2026-07-04` — **composition: the runtime daemon — the kernel becomes one
   process.** New `crates/composition` (lib + thin binary): EventBus(1024)
   + four wired tasks — ingest (SHIP → extract → embedded zano ABI →

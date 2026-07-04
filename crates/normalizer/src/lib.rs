@@ -92,6 +92,23 @@ pub fn normalize(action: RawChainAction) -> Result<Option<CanonicalEvent>, Norma
                 carrier: None,
             }),
         ),
+        // Arweave tx tagged order_shipped = shipment record (§9.3) —
+        // emitted by the future arweave watcher; the permanent shipment
+        // receipt carries the order context and tracking reference.
+        ("arweave", "order_shipped") => (
+            EventType::OrderShipped,
+            EventPayload::Order(OrderEvent {
+                order_id: req_str(&action, "order_id")?,
+                buyer_did: req_str(&action, "buyer_did")?,
+                seller_did: req_str(&action, "seller_did")?,
+                amount: req_u64(&action, "amount")?,
+                asset_id: req_str(&action, "asset_id")?,
+                fee_buffer_zano: None, // not a funding observation
+                escrow_wallet_id: opt_str(&action.data, "multisig_address"),
+                tracking: opt_str(&action.data, "tracking"),
+                carrier: opt_str(&action.data, "carrier"),
+            }),
+        ),
         // Everything else on-chain is noise to the kernel.
         _ => return Ok(None),
     };
@@ -255,6 +272,61 @@ mod tests {
         assert_eq!(o.fee_buffer_zano, Some(10_000_000));
         assert_eq!(o.escrow_wallet_id.as_deref(), Some("msig-addr-1"));
         assert_eq!(o.tracking, None);
+    }
+
+    #[test]
+    fn arweave_order_shipped_normalizes_to_order_shipped() {
+        let action = RawChainAction {
+            source_chain: SourceChain::Arweave,
+            contract: "arweave".into(),
+            action_name: "order_shipped".into(),
+            data: json!({
+                "order_id": "order-7",
+                "buyer_did": "did:plc:buyer",
+                "seller_did": "did:plc:seller",
+                "amount": 5_000_000u64,
+                "asset_id": "fusd-asset-id",
+                "tracking": "1Z999AA10123456784",
+                "carrier": "UPS",
+                "timestamp": 1_782_000_200i64,
+            }),
+            block_num: 0,
+            tx_id: "ar-tx-1".into(),
+        };
+
+        let event = normalize(action).unwrap().unwrap();
+        assert_eq!(event.event_type, EventType::OrderShipped);
+        assert_eq!(event.event_id, "arweave-ar-tx-1-order_shipped");
+        assert_eq!(event.source_chain, SourceChain::Arweave);
+
+        let EventPayload::Order(o) = event.payload else {
+            panic!("expected Order payload");
+        };
+        assert_eq!(o.tracking.as_deref(), Some("1Z999AA10123456784"));
+        assert_eq!(o.carrier.as_deref(), Some("UPS"));
+        assert_eq!(
+            o.fee_buffer_zano, None,
+            "a shipment is not a funding observation"
+        );
+    }
+
+    #[test]
+    fn arweave_shipment_missing_order_id_errors() {
+        let action = RawChainAction {
+            source_chain: SourceChain::Arweave,
+            contract: "arweave".into(),
+            action_name: "order_shipped".into(),
+            data: json!({"buyer_did": "b", "seller_did": "s", "amount": 1u64, "asset_id": "a"}),
+            block_num: 0,
+            tx_id: "ar-tx-2".into(),
+        };
+        assert_eq!(
+            normalize(action),
+            Err(NormalizerError::MissingField {
+                action: "arweave:order_shipped".into(),
+                field: "order_id",
+            })
+        );
     }
 
     #[test]
