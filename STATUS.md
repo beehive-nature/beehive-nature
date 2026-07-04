@@ -153,6 +153,19 @@ authoritative record of where `origin/main` sits.
   2832 → streamed, extracted, ABI-decoded, normalized, bused →
   `ESCROW order-live: Ok(Funded)`. Recipe in runbook §4b. The five-item
   sequence is now 5/5 ✅.
+- `2026-07-04` — **fUSD peg monitor: intention → mechanism (§8).**
+  `docs/fusd-peg-monitor.md` (research lane, run zero; reviewed and
+  committed through the one-door convention now codified in
+  CONTRIBUTING.md). Weekly public-data watch on the two things that can
+  break an escrow's value: solvency (collateral ratio) and exit
+  liquidity (ZANO⇄fUSD DEX depth), with Green/Amber/Red thresholds and
+  a founder-attention gate: any Red or double-Amber → pause NEW fUSD
+  escrow creation (more conservative lever than §8's suggested
+  auto-enforce pause). Baseline 2026-07-04: peg tight ($0.9992); the
+  **canonical collateral ratio is UNRESOLVED** — secondary sources span
+  1.18×–10×, and the low end already sits Amber/Red — first weekly run
+  must pin it from freedomdollar.com's reserve page; if that page won't
+  yield a number, the opacity is itself the Amber signal.
 - `2026-07-04` — precision amendment to the §1.7 line below: the asset was
   the **official testnet deployment of fUSD** — dispensed by Zano's own
   testnet faucet (`faucet.testnet.zano.org`, ticker FUSD, name "Freedom
