@@ -795,4 +795,29 @@ mod tests {
             "no blind signing when unverifiable"
         );
     }
+
+    /// GAP, pinned (risk-register R-005): overfunding is accepted but only the
+    /// agreed `amount` is ever settled. The surplus the buyer deposited is not
+    /// refunded and is recorded nowhere. This is a founder ECONOMIC decision
+    /// (record observed balance / refund surplus / reject overfunding), not a
+    /// mechanism bug — pinned here so the behavior is visible and any change is
+    /// deliberate, never accidental.
+    #[test]
+    fn overfunding_excess_is_not_settled_documented_gap() {
+        let mut e = escrow(); // agreed amount = AMOUNT
+        e.transition(EscrowEvent::BuyerFunded {
+            asset_amount: AMOUNT + 1_000, // buyer over-deposits
+            zano_amount: FEE_BUFFER,
+            at: t0() + Duration::hours(1),
+        })
+        .unwrap();
+        e.transition(EscrowEvent::Timeout {
+            now: t0() + Duration::hours(1) + escrow_core::FUNDED_TIMEOUT,
+        })
+        .unwrap();
+        assert_eq!(e.state, EscrowState::Expired);
+        let intent = settlement_intent(&e, EscrowState::Expired).unwrap();
+        // Refund is the agreed amount — the surplus 1_000 is stranded.
+        assert_eq!(intent.payouts[0].amount, AMOUNT);
+    }
 }

@@ -37,6 +37,24 @@ authoritative record of where `origin/main` sits.
   yet constitution); email/PGP placeholders dropped (PVR needs
   neither). The hemp-seed compliance briefing stays UNTRACKED —
   FOR-COUNSEL founder material, not published.
+- `2026-07-04` — **Adversarial hardening sprint — capstone + R-005 pinned.**
+  Six commits (C1–C6) hardening the settlement-critical core against an
+  attacker's tests, driven by a 5-lens adversarial red-team workflow whose
+  every finding was verified against the compiler (not reasoning) before a
+  fix was written. Panic-safety: the escrow machine is now **total** — no
+  crafted timestamp (overflow) and no forged/deserialized record (missing
+  anchor) can panic `transition`; a proptest proves it over 2048 generated
+  adversarial inputs per run. Integrity: non-decreasing lifecycle timestamps
+  (window-relocation closed), closed serde schema, and the settlement seam
+  refuses caller-decoupled or unfunded payouts. R-004 is now a **type
+  boundary** (C5). Method note for reviewers: the sprint corrected *itself*
+  twice on the record — C3's funding-monotonicity was over-strict (caught by
+  composition's daemon, refined in C4), and the overfunding gap is **pinned,
+  not silently fixed** because it is a founder economic decision (R-005: add
+  `funded_asset_amount` / reject overfunding / treat surplus as tip). Net:
+  **escrow-core 43 unit + 5 property, dro-signer 15, full workspace green,
+  clippy + fmt clean.** No shipped-path `todo!()`; every reality gate still
+  behind its named trait seam.
 - `2026-07-04` — **dro-signer C5: R-004 made a type boundary — the DRO cannot
   sign what it hasn't independently confirmed.** Sprint item 2 (R-004's
   structural consequence). New `IndependentChainView` trait — the DRO's own
