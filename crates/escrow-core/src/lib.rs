@@ -162,6 +162,18 @@ pub enum EscrowError {
     /// anchor; callers replaying untrusted streams should treat it as a
     /// corrupt record.
     InconsistentState { state: EscrowState },
+    /// An event's timestamp precedes the anchor it must follow (funding
+    /// before creation, shipping before funding, delivery before shipping,
+    /// a dispute before delivery). The lifecycle's stored timestamps must be
+    /// non-decreasing; a backwards stamp is rejected so it cannot relocate a
+    /// timeout/dispute window into the past. (The machine is clock-free and
+    /// so cannot bound a timestamp's *future* — that plausibility check
+    /// belongs to the ingestion layer, which has a real clock.)
+    NonMonotonicTime {
+        event: &'static str,
+        at: OffsetDateTime,
+        not_before: OffsetDateTime,
+    },
 }
 
 impl std::fmt::Display for EscrowError {
@@ -195,6 +207,14 @@ impl std::fmt::Display for EscrowError {
             EscrowError::InconsistentState { state } => {
                 write!(f, "state {state:?} is missing a required anchor timestamp (corrupt escrow)")
             }
+            EscrowError::NonMonotonicTime {
+                event,
+                at,
+                not_before,
+            } => write!(
+                f,
+                "event {event} timestamp {at} precedes the anchor it must follow ({not_before})"
+            ),
         }
     }
 }
@@ -271,6 +291,7 @@ impl Escrow {
                     at,
                 },
             ) => {
+                Self::require_monotonic(at, self.created_at, "BuyerFunded")?;
                 if asset_amount >= self.amount && zano_amount >= self.fee_buffer_zano {
                     self.funded_at = Some(at);
                     Funded
@@ -292,6 +313,8 @@ impl Escrow {
             // Funded --seller marks shipped--> Shipped (72h else Expired,
             // which obligates a DRO-co-signed refund — see module docs)
             (Funded, EscrowEvent::SellerShipped { at, .. }) => {
+                let funded_at = Self::require(self.funded_at, Funded)?;
+                Self::require_monotonic(at, funded_at, "SellerShipped")?;
                 self.shipped_at = Some(at);
                 Shipped
             }
@@ -305,6 +328,8 @@ impl Escrow {
             // Shipped --carrier scan / buyer confirm--> Delivered
             // (14d else auto-Disputed; AI monitors tracking)
             (Shipped, EscrowEvent::DeliveryConfirmed { timestamp, .. }) => {
+                let shipped_at = Self::require(self.shipped_at, Shipped)?;
+                Self::require_monotonic(timestamp, shipped_at, "DeliveryConfirmed")?;
                 self.delivered_at = Some(timestamp);
                 Delivered
             }
@@ -327,6 +352,7 @@ impl Escrow {
             // auto-release deadline ("disputes must open before timeout")
             (Delivered, EscrowEvent::DisputeOpened { reason_hash, at }) => {
                 let delivered_at = Self::require(self.delivered_at, Delivered)?;
+                Self::require_monotonic(at, delivered_at, "DisputeOpened")?;
                 let deadline = Self::deadline(delivered_at, DELIVERED_TIMEOUT, Delivered)?;
                 if at >= deadline {
                     return Err(EscrowError::DisputeWindowClosed {
@@ -394,6 +420,24 @@ impl Escrow {
         state: EscrowState,
     ) -> Result<OffsetDateTime, EscrowError> {
         anchor.ok_or(EscrowError::InconsistentState { state })
+    }
+
+    /// Reject an event timestamp that precedes the anchor it must follow, so
+    /// no stored timestamp can move a window into the past.
+    fn require_monotonic(
+        at: OffsetDateTime,
+        not_before: OffsetDateTime,
+        event: &'static str,
+    ) -> Result<(), EscrowError> {
+        if at >= not_before {
+            Ok(())
+        } else {
+            Err(EscrowError::NonMonotonicTime {
+                event,
+                at,
+                not_before,
+            })
+        }
     }
 }
 
@@ -975,16 +1019,17 @@ mod tests {
     }
 
     #[test]
-    fn delivered_dispute_overflow_is_err_not_panic_regardless_of_at() {
-        // The deadline is computed BEFORE the window check, so even an
-        // in-window `at` must not panic — it must surface DeadlineOverflow.
+    fn delivered_dispute_overflow_is_err_not_panic() {
+        // With a monotonic `at` (>= delivered_at, so the C3 floor passes) the
+        // deadline `delivered_at + DELIVERED_TIMEOUT` is computed before the
+        // window check and must surface DeadlineOverflow, never panic.
         let mut e = escrow();
         e.state = EscrowState::Delivered;
         e.delivered_at = Some(near_time_max());
         assert_eq!(
             e.transition(EscrowEvent::DisputeOpened {
                 reason_hash: "h".into(),
-                at: datetime!(2026-01-01 0:00 UTC),
+                at: near_time_max(),
             }),
             Err(EscrowError::DeadlineOverflow {
                 state: EscrowState::Delivered
@@ -1059,5 +1104,110 @@ mod tests {
                 state: EscrowState::Delivered
             })
         );
+    }
+
+    // ---- adversarial: stored timestamps must be non-decreasing (C3) ------
+    //
+    // A stored anchor set backwards relocates a timeout/dispute window into
+    // the past — e.g. a delivery stamped before shipping, or a dispute
+    // stamped before delivery. Each storing arm rejects a backwards stamp.
+
+    #[test]
+    fn funding_before_creation_is_rejected() {
+        let mut e = escrow(); // created_at = t0()
+        let before = e.clone();
+        let ev = EscrowEvent::BuyerFunded {
+            asset_amount: AMOUNT,
+            zano_amount: FEE_BUFFER,
+            at: t0() - Duration::seconds(1),
+        };
+        assert!(matches!(
+            e.transition(ev),
+            Err(EscrowError::NonMonotonicTime {
+                event: "BuyerFunded",
+                ..
+            })
+        ));
+        assert_eq!(e, before); // unchanged on Err
+    }
+
+    #[test]
+    fn shipping_before_funding_is_rejected() {
+        let mut e = escrow_in(EscrowState::Funded); // funded_at = fund_at()
+        let ev = EscrowEvent::SellerShipped {
+            tracking: "t".into(),
+            carrier: "c".into(),
+            at: fund_at() - Duration::seconds(1),
+        };
+        assert!(matches!(
+            e.transition(ev),
+            Err(EscrowError::NonMonotonicTime {
+                event: "SellerShipped",
+                ..
+            })
+        ));
+        assert_eq!(e.state, EscrowState::Funded);
+        assert_eq!(e.shipped_at, None);
+    }
+
+    #[test]
+    fn delivery_before_shipping_is_rejected() {
+        let mut e = escrow_in(EscrowState::Shipped); // shipped_at = ship_at()
+        let ev = EscrowEvent::DeliveryConfirmed {
+            timestamp: ship_at() - Duration::seconds(1),
+            source: DeliverySource::CarrierScan,
+        };
+        assert!(matches!(
+            e.transition(ev),
+            Err(EscrowError::NonMonotonicTime {
+                event: "DeliveryConfirmed",
+                ..
+            })
+        ));
+        assert_eq!(e.state, EscrowState::Shipped);
+        assert_eq!(e.delivered_at, None);
+    }
+
+    #[test]
+    fn dispute_before_delivery_is_rejected() {
+        let mut e = escrow_in(EscrowState::Delivered); // delivered_at = deliver_at()
+        let ev = EscrowEvent::DisputeOpened {
+            reason_hash: "h".into(),
+            at: deliver_at() - Duration::seconds(1),
+        };
+        assert!(matches!(
+            e.transition(ev),
+            Err(EscrowError::NonMonotonicTime {
+                event: "DisputeOpened",
+                ..
+            })
+        ));
+        assert_eq!(e.state, EscrowState::Delivered);
+        assert_eq!(e.dispute_id, None);
+    }
+
+    /// The window-relocation attack (delivery stamped far in the future to
+    /// keep the dispute window "open" for a past date): a delivery at year
+    /// 2999 is monotonic w.r.t. shipping, so it is accepted, but a dispute
+    /// filed at a *realistic* (earlier) date is now rejected as non-monotonic
+    /// — the buyer can no longer dispute "before" the relocated delivery.
+    /// (The residual — a far-future delivery freezes the escrow's clock —
+    /// is inherent to the clock-free machine and is bounded at the ingestion
+    /// layer, not here; see the NonMonotonicTime docs.)
+    #[test]
+    fn future_delivery_cannot_admit_an_earlier_dispute() {
+        let mut e = escrow_in(EscrowState::Shipped);
+        e.transition(EscrowEvent::DeliveryConfirmed {
+            timestamp: datetime!(2999-01-01 0:00 UTC),
+            source: DeliverySource::CarrierScan,
+        })
+        .unwrap();
+        assert!(matches!(
+            e.transition(EscrowEvent::DisputeOpened {
+                reason_hash: "h".into(),
+                at: datetime!(2027-01-01 0:00 UTC),
+            }),
+            Err(EscrowError::NonMonotonicTime { .. })
+        ));
     }
 }

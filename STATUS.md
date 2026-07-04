@@ -37,6 +37,21 @@ authoritative record of where `origin/main` sits.
   yet constitution); email/PGP placeholders dropped (PVR needs
   neither). The hemp-seed compliance briefing stays UNTRACKED —
   FOR-COUNSEL founder material, not published.
+- `2026-07-04` — **escrow-core hardening C3: lifecycle timestamps must be
+  non-decreasing.** Red-team (reachability lens) found the stored anchors
+  (`funded_at`/`shipped_at`/`delivered_at`) took the event's timestamp
+  verbatim with no ordering check — so a delivery stamped before shipping,
+  or a delivery stamped far in the future, relocated the 7-day dispute /
+  auto-release window (compiler-confirmed: delivery@2999 then a 2027 dispute
+  both accepted). Fix: `require_monotonic(at, anchor, event)` on all four
+  storing arms (funding≥creation, shipping≥funding, delivery≥shipping,
+  dispute≥delivery) → new `EscrowError::NonMonotonicTime`. Now a backwards
+  stamp is rejected and a future-dated delivery can no longer admit an
+  earlier dispute. Honest residual, documented in the error's doc: the
+  machine is **clock-free** so it cannot bound a timestamp's *future* — that
+  plausibility check belongs to the ingestion layer, which has a real clock.
+  +5 tests. (The C1 dispute-overflow test now uses a monotonic `at`, since
+  the floor is checked before the deadline.) **41 tests.**
 - `2026-07-04` — **escrow-core hardening C2: a forged/deserialized escrow can
   no longer panic transition().** `Escrow` derives `Deserialize` with public
   fields, so the DRO replaying a stream can hold `state = Funded,
