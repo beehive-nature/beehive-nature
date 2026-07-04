@@ -17,6 +17,15 @@ secrets/
 # Runtime artifacts
 chain-eos.watermark
 
+# Research-lane draft staging (one-door). Drafts live untracked under docs/;
+# an adopted finding graduates to docs/ or docs/architecture/ with its own
+# STATUS ledger line (as did-autonomi-spec.md did). These pens also hold
+# FOR-COUNSEL (legal) and founder-decision drafts (tokenomics, governance
+# parameters, peg ratios) the builder must not publish unilaterally.
+# Non-destructive: files stay on disk; `git add -f` to adopt a specific one.
+docs/findings/
+docs/design/
+
 # Editor / OS
 .DS_Store
 .idea/
