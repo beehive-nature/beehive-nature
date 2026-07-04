@@ -74,5 +74,12 @@ The compatibility tests being green is the milestone that converts "compiles" to
 
 ## License
 
-Choose one before publishing (workspace declares `MIT OR Apache-2.0` as a
-placeholder). Add the corresponding `LICENSE` file(s).
+Code: **AGPL-3.0-only** ([LICENSE](./LICENSE)) — copyleft at the kernel,
+by design; see [docs/LICENSING.md](./docs/LICENSING.md) for the
+anti-capture rationale and the standing intent that client SDK crates
+ship MIT OR Apache-2.0 when split out.
+
+Documents: `CONSTITUTION.md` and `docs/` are **CC-BY-4.0**.
+
+Contributions: DCO sign-off (`git commit -s`), no CLA — see
+[CONTRIBUTING.md](./CONTRIBUTING.md).

@@ -19,7 +19,7 @@ members = [
 
 [workspace.package]
 edition = "2021"
-license = "MIT OR Apache-2.0"
+license = "AGPL-3.0-only"
 
 # Pinned per the crypto delta spec. Verify exact API spellings on first build
 # (see STATUS.md — curve25519-dalek 4.x basepoint-mul syntax may need adjustment).
