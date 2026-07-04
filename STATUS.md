@@ -15,6 +15,19 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-04` — **dro-signer v1: the DRO's decision authority, built at the
+  honest seam.** New `crates/dro-signer` per the committed brief:
+  `settlement_intent()` — pure function, escrow + new state → payouts
+  (Completed→seller, Refunded→buyer, Expired→buyer IFF funded, Resolved→
+  50/50 split with odd unit to buyer, everything else → None; fee buffer
+  never a payout per §9.2). `ZanoSigner` trait = the typed seam where
+  CLSAG_GGX/BP+/tx-serialization plug in when the firmware track exists;
+  `MockSigner` proves orchestration with labelled placeholders. 10 tests:
+  exhaustive decision table (incl. unfunded-expiry-settles-nothing and
+  split conservation), rejected-transition-never-settles, wrong-wallet
+  refusal, and the engine→intent→signer full circle (4-transition
+  lifecycle → exactly 1 settlement). Zero `todo!()` — unbuilt crypto
+  lives behind the trait, not a panic. 9 crates now.
 - `2026-07-03` — **zano-watcher: the Zano sense adapter, LIVE-observed.**
   New `crates/zano-watcher` — a **view-only wallet-RPC scanner** (Zano is
   confidential; you scan with a view key, you don't parse blocks). RPC

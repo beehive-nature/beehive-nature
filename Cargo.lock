@@ -139,6 +139,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "dro-signer"
+version = "0.1.0"
+dependencies = [
+ "escrow-core",
+ "escrow-engine",
+ "shared-types",
+ "time",
+]
+
+[[package]]
 name = "escrow-core"
 version = "0.1.0"
 dependencies = [

@@ -3,6 +3,7 @@ resolver = "2"
 members = [
     "crates/chain-eos",
     "crates/chain-zano",
+    "crates/dro-signer",
     "crates/escrow-core",
     "crates/escrow-engine",
     "crates/event-bus",
