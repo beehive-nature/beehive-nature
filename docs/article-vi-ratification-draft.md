@@ -163,4 +163,13 @@ supermajority.**
    forbids it ("bootstrap is temporary; decentralization is permanent"). So this
    document must name that brake's **own exit condition now**, however distant and
    demanding — a *measurable* state, never an unstated "someday." Candidate
-   release gate: reputation-engine maturity thresholds sustain
+   release gate: reputation-engine maturity thresholds sustained across **N
+   incident-free years of meta-governance**, **plus** a `K_meta` supermajority,
+   **plus** founder assent — culminating in **ceremonial destruction of the
+   guardian keys**. This is the honest resolution of the tension between
+   "legitimacy cannot be added retroactively" and "no permanent captor": settle
+   it in writing while there is still one author to settle it. **This is the
+   last structural gap in the amendment mechanism.**
+
+---
+_Governance design for founder decision and review; not legal advice._
