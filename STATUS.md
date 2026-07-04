@@ -37,6 +37,21 @@ authoritative record of where `origin/main` sits.
   yet constitution); email/PGP placeholders dropped (PVR needs
   neither). The hemp-seed compliance briefing stays UNTRACKED —
   FOR-COUNSEL founder material, not published.
+- `2026-07-04` — **Tree cleaned; test count re-pinned to the live number.**
+  Inventory at HEAD `1a2eb20`: **zero tracked modifications** (C1–C6 already
+  committed the dirty tracked files the doc-audit F2 flagged); the only
+  uncommitted paths were research-lane DRAFTS under `docs/findings/` and
+  `docs/design/`. Routed per one-door: those dirs are the untracked draft
+  staging pen — an adopted finding graduates to `docs/`/`docs/architecture/`
+  with its own ledger line — so they are now `.gitignore`d (non-destructive;
+  files stay on disk). FOR-COUNSEL (hemp) and founder-decision drafts
+  (tokenomics emission, Article VI parameters, fUSD ratio) are deliberately
+  NOT published by the builder. `git status` now clean. **Actual count
+  re-pinned: `cargo test --workspace` → 179 passed, 1 ignored** (the
+  firmware-gated `slip0010` e2e) — the public "146" was pinned to a
+  pre-hardening run; the adversarial-hardening sprint grew it to 179.
+  doc-audit **F2 retired**: the number now matches a re-run at the committed
+  HEAD.
 - `2026-07-04` — **escrow-core: snapshot-resumption durability + named vector
   guards.** Re-issued "Century Durability" directive re-ran the C1–C6 sprint's
   three Task-1 vectors (funding overflow, out-of-order reachability, replay
