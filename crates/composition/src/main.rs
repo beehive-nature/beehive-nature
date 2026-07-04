@@ -12,6 +12,9 @@ async fn main() {
         std::env::var("SHIP_WS_URL").unwrap_or_else(|_| "ws://127.0.0.1:8080".to_string());
     eprintln!("composition: starting against {ship_url} (Ctrl-C for graceful shutdown)");
     eprintln!("composition: no escrows registered (order-flow integration is future work)");
+    eprintln!(
+        "composition: zano ingest idle - watch targets come from order flow (tests exercise it)"
+    );
 
     let (shutdown_tx, shutdown_rx) = tokio::sync::watch::channel(false);
     tokio::spawn(async move {
@@ -25,6 +28,7 @@ async fn main() {
 
     eprintln!("composition: ---- exit report ----");
     eprintln!("composition: blocks seen          {}", report.blocks_seen);
+    eprintln!("composition: zano scans           {}", report.zano_scans);
     eprintln!(
         "composition: events published     {}",
         report.events_published

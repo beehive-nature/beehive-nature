@@ -7,6 +7,7 @@ description = "bNature runtime daemon: wires the proven crates (ingest → norma
 
 [dependencies]
 chain-eos = { path = "../chain-eos" }
+zano-watcher = { path = "../zano-watcher" }
 dro-signer = { path = "../dro-signer" }
 escrow-core = { path = "../escrow-core" }
 escrow-engine = { path = "../escrow-engine" }

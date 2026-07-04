@@ -70,6 +70,8 @@ pub struct PipelineConfig {
     /// binary starts empty, tests register what they expect).
     pub escrows: Vec<Escrow>,
     pub bus_capacity: usize,
+    /// Optional second sense organ: the Zano view-only wallet scanner.
+    pub zano: Option<ZanoIngestConfig>,
 }
 
 impl PipelineConfig {
@@ -78,8 +80,33 @@ impl PipelineConfig {
             ship_url: ship_url.into(),
             escrows: Vec::new(),
             bus_capacity: 1024,
+            zano: None,
         }
     }
+}
+
+/// Zano ingest configuration. Deviation from the prompt, API-forced: no
+/// `view_key` field — the view key belongs to the wallet-RPC process
+/// that opened the view-only wallet, not to this HTTP client; config
+/// carries exactly what `ZanoWatcher::observe_funding` consumes.
+#[derive(Debug, Clone)]
+pub struct ZanoIngestConfig {
+    /// Wallet RPC endpoint, e.g. `http://127.0.0.1:12233/json_rpc`.
+    pub rpc_url: String,
+    pub poll_interval_secs: u64,
+    /// Escrow asset id (hex) the watched orders are denominated in.
+    pub asset_id: String,
+    /// Orders to watch (the order, not the chain, knows identities —
+    /// see zano-watcher's module docs).
+    pub watch: Vec<ZanoWatchTarget>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ZanoWatchTarget {
+    pub order_id: String,
+    pub buyer_did: String,
+    pub seller_did: String,
+    pub multisig_address: String,
 }
 
 /// What one pipeline run saw and decided — the daemon's exit summary and
@@ -87,6 +114,8 @@ impl PipelineConfig {
 #[derive(Debug, Default)]
 pub struct PipelineReport {
     pub blocks_seen: u64,
+    /// Zano wallet-RPC polls performed (success or failure).
+    pub zano_scans: u64,
     pub events_published: u64,
     /// Every event the escrow task consumed (drain proof: == published).
     pub escrow_events_seen: u64,
@@ -120,6 +149,13 @@ pub async fn run(config: PipelineConfig, mut shutdown: watch::Receiver<bool>) ->
     let dro_task = tokio::spawn(dro_loop(applied_rx));
     let reputation_task = tokio::spawn(reputation_loop(bus.subscribe(), stop_rx.clone()));
 
+    // Second sense organ: the Zano poll task (both organs feed the same
+    // bus; consumers never learn which chain produced an event).
+    let zano_task = config
+        .zano
+        .clone()
+        .map(|zc| tokio::spawn(zano_loop(zc, bus.clone(), stop_rx.clone())));
+
     // ---- ingest (this task) ---------------------------------------------
     let mut blocks_seen = 0u64;
     let mut events_published = 0u64;
@@ -152,13 +188,18 @@ pub async fn run(config: PipelineConfig, mut shutdown: watch::Receiver<bool>) ->
     let _ = stop_tx.send(true);
     drop(bus);
 
+    let (zano_scans, zano_published) = match zano_task {
+        Some(task) => task.await.expect("zano task"),
+        None => (0, 0),
+    };
     let (escrow_events_seen, applied) = escrow_task.await.expect("escrow task");
     let settlement_intents = dro_task.await.expect("dro task");
     let (reputation_events_seen, reputation) = reputation_task.await.expect("reputation task");
 
     PipelineReport {
         blocks_seen,
-        events_published,
+        zano_scans,
+        events_published: events_published + zano_published,
         escrow_events_seen,
         applied,
         settlement_intents,
@@ -166,6 +207,78 @@ pub async fn run(config: PipelineConfig, mut shutdown: watch::Receiver<bool>) ->
         reputation,
         shutdown_requested,
     }
+}
+
+/// Zano sense organ: poll the view-only wallet RPC per target; a funding
+/// observation becomes a canonical event on the same bus the EOS path
+/// feeds. Each order emits at most once per run (balance observation is
+/// level- not edge-triggered; the state machine would reject duplicates
+/// anyway, this just keeps the bus quiet). RPC outages are logged and
+/// retried on the next tick — a Zano outage never stops the EOS path.
+/// Returns (scans_performed, events_published).
+async fn zano_loop(
+    config: ZanoIngestConfig,
+    bus: EventBus,
+    mut stop: watch::Receiver<bool>,
+) -> (u64, u64) {
+    use std::sync::Arc;
+    let watcher = Arc::new(zano_watcher::ZanoWatcher::new(&config.rpc_url));
+    let mut emitted: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
+    let mut scans = 0u64;
+    let mut published = 0u64;
+    let mut tick = tokio::time::interval(std::time::Duration::from_secs(
+        config.poll_interval_secs.max(1),
+    ));
+
+    loop {
+        tokio::select! {
+            _ = tick.tick() => {
+                for target in &config.watch {
+                    if emitted.contains(&target.order_id) {
+                        continue;
+                    }
+                    scans += 1;
+                    let ctx = zano_watcher::OrderContext {
+                        order_id: target.order_id.clone(),
+                        buyer_did: target.buyer_did.clone(),
+                        seller_did: target.seller_did.clone(),
+                        multisig_address: target.multisig_address.clone(),
+                        asset_id: config.asset_id.clone(),
+                    };
+                    let now = std::time::SystemTime::now()
+                        .duration_since(std::time::UNIX_EPOCH)
+                        .map(|d| d.as_secs() as i64)
+                        .unwrap_or(0);
+                    // ureq is blocking; keep the runtime threads free.
+                    let w = Arc::clone(&watcher);
+                    let observed = tokio::task::spawn_blocking(move || {
+                        w.observe_funding(&ctx, now)
+                    })
+                    .await
+                    .expect("watcher poll task");
+                    match observed {
+                        Ok(Some(raw)) => match normalize(raw) {
+                            Ok(Some(event)) => {
+                                println!(
+                                    "composition: {} ({:?}) [zano]",
+                                    event.event_id, event.event_type
+                                );
+                                let _ = bus.publish(event);
+                                emitted.insert(target.order_id.clone());
+                                published += 1;
+                            }
+                            Ok(None) => {}
+                            Err(e) => eprintln!("composition: zano normalizer: {e}"),
+                        },
+                        Ok(None) => {}
+                        Err(e) => eprintln!("composition: zano rpc: {e} (will retry)"),
+                    }
+                }
+            }
+            _ = stop.changed() => break,
+        }
+    }
+    (scans, published)
 }
 
 /// Decode a block's zano::transfer actions and publish their canonical

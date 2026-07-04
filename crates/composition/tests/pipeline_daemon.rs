@@ -141,6 +141,164 @@ async fn full_pipeline_flows_and_drains_on_stream_end() {
     assert!(!report.shutdown_requested);
 }
 
+/// Minimal HTTP/1.1 mock for the Zano wallet RPC: answers every POST
+/// with the configured body (or 500). Connection-per-request.
+async fn mock_wallet_rpc(listener: TcpListener, response: Result<String, ()>) {
+    use tokio::io::{AsyncReadExt, AsyncWriteExt};
+    loop {
+        let Ok((mut stream, _)) = listener.accept().await else {
+            return;
+        };
+        let response = response.clone();
+        tokio::spawn(async move {
+            let mut buf = vec![0u8; 4096];
+            let mut read = 0;
+            // Read until end of headers (the tiny request fits one buffer).
+            loop {
+                match stream.read(&mut buf[read..]).await {
+                    Ok(0) => return,
+                    Ok(n) => {
+                        read += n;
+                        if buf[..read].windows(4).any(|w| w == b"\r\n\r\n") {
+                            break;
+                        }
+                        if read == buf.len() {
+                            return;
+                        }
+                    }
+                    Err(_) => return,
+                }
+            }
+            let reply = match &response {
+                Ok(body) => format!(
+                    "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+                    body.len(),
+                    body
+                ),
+                Err(()) =>
+                    "HTTP/1.1 500 Internal Server Error\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"
+                        .to_string(),
+            };
+            let _ = stream.write_all(reply.as_bytes()).await;
+        });
+    }
+}
+
+fn zano_balance_json(asset_unlocked: u64, native_unlocked: u64) -> String {
+    format!(
+        r#"{{"id":"0","jsonrpc":"2.0","result":{{"balance":{native_unlocked},"unlocked_balance":{native_unlocked},"balances":[{{"asset_info":{{"asset_id":"fusd-asset-id","ticker":"FUSD","decimal_point":4}},"total":{asset_unlocked},"unlocked":{asset_unlocked}}}]}}}}"#
+    )
+}
+
+fn zano_config(rpc_addr: std::net::SocketAddr, order_id: &str) -> composition::ZanoIngestConfig {
+    composition::ZanoIngestConfig {
+        rpc_url: format!("http://{rpc_addr}/json_rpc"),
+        poll_interval_secs: 1,
+        asset_id: "fusd-asset-id".into(),
+        watch: vec![composition::ZanoWatchTarget {
+            order_id: order_id.into(),
+            buyer_did: "did:plc:buyer".into(),
+            seller_did: "did:plc:seller".into(),
+            multisig_address: "msig-comp".into(),
+        }],
+    }
+}
+
+#[tokio::test]
+async fn dual_chain_ingestion_feeds_one_bus() {
+    // EOS side: one funding block, then the socket is held open.
+    let ship_listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let ship_addr = ship_listener.local_addr().unwrap();
+    let ship = tokio::spawn(mock_server(
+        ship_listener,
+        vec![funding_block(HEAD, "order-a", Some(FEE_BUFFER))],
+        false,
+    ));
+
+    // Zano side: wallet RPC reporting a fully funded balance.
+    let rpc_listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let rpc_addr = rpc_listener.local_addr().unwrap();
+    let rpc = tokio::spawn(mock_wallet_rpc(
+        rpc_listener,
+        Ok(zano_balance_json(AMOUNT, FEE_BUFFER)),
+    ));
+
+    let mut config = PipelineConfig::new(format!("ws://{ship_addr}"));
+    config.escrows = vec![escrow("order-a"), escrow("order-z")];
+    config.zano = Some(zano_config(rpc_addr, "order-z"));
+
+    let (tx, rx) = tokio::sync::watch::channel(false);
+    tokio::spawn(async move {
+        tokio::time::sleep(std::time::Duration::from_millis(1_500)).await;
+        let _ = tx.send(true);
+    });
+    let report = tokio::time::timeout(std::time::Duration::from_secs(8), run(config, rx))
+        .await
+        .expect("dual-chain run must end on shutdown");
+    ship.abort();
+    rpc.abort();
+
+    // Both sense organs fed the same bus; both escrows funded.
+    assert_eq!(report.blocks_seen, 1);
+    assert!(report.zano_scans >= 1);
+    assert_eq!(report.events_published, 2);
+    assert_eq!(report.escrow_events_seen, 2);
+    assert_eq!(report.reputation_events_seen, 2);
+    let funded: Vec<_> = report
+        .applied
+        .iter()
+        .filter(|a| a.result == Ok(EscrowState::Funded))
+        .map(|a| a.order_id.clone())
+        .collect();
+    assert!(
+        funded.contains(&"order-a".to_string()),
+        "EOS-fed escrow funded"
+    );
+    assert!(
+        funded.contains(&"order-z".to_string()),
+        "Zano-fed escrow funded"
+    );
+}
+
+#[tokio::test]
+async fn zano_outage_never_stops_the_eos_path() {
+    let ship_listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let ship_addr = ship_listener.local_addr().unwrap();
+    let ship = tokio::spawn(mock_server(
+        ship_listener,
+        vec![funding_block(HEAD, "order-a", Some(FEE_BUFFER))],
+        false,
+    ));
+
+    // Zano wallet RPC is down hard: every request answers 500.
+    let rpc_listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let rpc_addr = rpc_listener.local_addr().unwrap();
+    let rpc = tokio::spawn(mock_wallet_rpc(rpc_listener, Err(())));
+
+    let mut config = PipelineConfig::new(format!("ws://{ship_addr}"));
+    config.escrows = vec![escrow("order-a"), escrow("order-z")];
+    config.zano = Some(zano_config(rpc_addr, "order-z"));
+
+    let (tx, rx) = tokio::sync::watch::channel(false);
+    tokio::spawn(async move {
+        tokio::time::sleep(std::time::Duration::from_millis(1_500)).await;
+        let _ = tx.send(true);
+    });
+    let report = tokio::time::timeout(std::time::Duration::from_secs(8), run(config, rx))
+        .await
+        .expect("outage must not hang the daemon");
+    ship.abort();
+    rpc.abort();
+
+    // The EOS path was untouched by the Zano outage.
+    assert_eq!(report.events_published, 1);
+    assert_eq!(report.applied.len(), 1);
+    assert_eq!(report.applied[0].order_id, "order-a");
+    assert_eq!(report.applied[0].result, Ok(EscrowState::Funded));
+    // The Zano task kept retrying instead of dying.
+    assert!(report.zano_scans >= 1);
+}
+
 #[tokio::test]
 async fn shutdown_signal_drains_and_exits_without_hanging() {
     let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();

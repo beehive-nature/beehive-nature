@@ -15,6 +15,23 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-04` — **dual-chain daemon + permanence anchor.** (1) `composition`
+  now ingests from BOTH sense organs: a `zano_loop` polls the view-only
+  wallet RPC per watch target (spawn_blocking around the sync client;
+  once-per-order emission; outages logged and retried) feeding the SAME
+  bus — consumers never learn which chain produced an event. Deviation,
+  API-forced: no `view_key` in config (it belongs to the wallet-RPC
+  process, not this client); watch targets carry the order context the
+  watcher actually consumes. 2 new integration tests: dual-chain (EOS
+  block + Zano balance → both escrows Funded on one bus) and
+  Zano-outage-500 (EOS path unaffected, poll task retries, no crash).
+  (2) `adapter-arweave` (permanence.anchor, built by the review session
+  via connected folder, reviewed + adopted here): domain-separated
+  Merkle bundles, time-bound versioned header, tamper-refusing mock
+  weave; real Arweave gates on gateway + funded AR wallet. Repairs made
+  during adoption: the root manifest arrived truncated (whole
+  `[workspace.dependencies]` section gone — restored) + one clippy nit.
+  **15 crates, 146 tests, 1 ignored.**
 - `2026-07-04` — **§9.3 example set complete: third mapping landed.**
   `arweave:order_shipped → OrderShipped` (the brief's own third example) —
   shipment records from the future arweave watcher carry order context +
