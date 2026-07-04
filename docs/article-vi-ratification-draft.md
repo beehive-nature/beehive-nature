@@ -1,6 +1,6 @@
 <!--
 STATUS: REVIEWED & VERSIONED 2026-07-04 (one-door) — awaiting FOUNDER DECISIONS
-1–4 below; this is draft amendment text, NOT ratified constitution. It retires
+1–5 below; this is draft amendment text, NOT ratified constitution. It retires
 the Article VI §3 "[TO DEFINE ...]" placeholder only upon founder ratification.
 Review fixes applied on adoption: OREC citation pinned to upstream commit; one
 blocking-fraction arithmetic error corrected (K_meta=8 blocks at a NINTH of
@@ -145,7 +145,7 @@ supermajority.**
    **safety** (weakening an invariant like the funding check or the auto-enforce
    gate → higher `K`), and **meta** (reputation-engine / attestation flows /
    Article VI → `K_meta`, the strictest). Confirm the ladder and its values.
-   (Three-tier recommended.)
+   (Three-tier recommended.) **Decide the meta-tier's intended *blocking fraction* explicitly**, not inherited from the arithmetic correction: `K_meta = 8` lets one-ninth of turnout block; `K_meta = 3` one-quarter; `K_meta = 4` one-fifth. The strength of the hardest brake in the building must be a deliberate choice.
 4. **Optimistic vs. affirmative at constitutional altitude.** OREC's
    pass-unless-vetoed design is the right cure for *operational* voter-apathy —
    but a veto-based constitution assumes enough live, attentive Respect to veto,
@@ -163,13 +163,4 @@ supermajority.**
    forbids it ("bootstrap is temporary; decentralization is permanent"). So this
    document must name that brake's **own exit condition now**, however distant and
    demanding — a *measurable* state, never an unstated "someday." Candidate
-   release gate: reputation-engine maturity thresholds sustained across **N
-   incident-free years of meta-governance**, **plus** a `K_meta` supermajority,
-   **plus** founder assent — culminating in **ceremonial destruction of the
-   guardian keys**. This is the honest resolution of the tension between
-   "legitimacy cannot be added retroactively" and "no permanent captor": settle
-   it in writing while there is still one author to settle it. **This is the
-   last structural gap in the amendment mechanism.**
-
----
-_Governance design for founder decision and review; not legal advice._
+   release gate: reputation-engine maturity thresholds sustain
