@@ -1,5 +1,9 @@
 # Beehive Nature — Zano × Trezor host stack
 
+[![tests](https://github.com/beehive-nature/beehive-nature/actions/workflows/tests.yml/badge.svg)](https://github.com/beehive-nature/beehive-nature/actions/workflows/tests.yml)
+[![secret-scan](https://github.com/beehive-nature/beehive-nature/actions/workflows/secret-scan.yml/badge.svg)](https://github.com/beehive-nature/beehive-nature/actions/workflows/secret-scan.yml)
+[![license: AGPL-3.0-only](https://img.shields.io/badge/license-AGPL--3.0--only-blue)](./LICENSE)
+
 Host-side cryptography, wire contract, and architecture for a **Trezor-native**
 Zano integration, built as the identity/settlement layer of the Beehive Nature
 coordination kernel.
@@ -71,6 +75,26 @@ The compatibility tests being green is the milestone that converts "compiles" to
 - `I = s·Hp(P)`, `Hp(P) = mul8(ge_fromfe_frombytes_vartime(keccak256(P)))`
 - SLIP-44 coin type `1018` (verified against the registry)
 - `generate_CLSAG_GGX` is single-pass; returns `{c, r_g[], r_x[], K1, K2}`
+
+## For reviewers
+
+This repo is built to be audited. The fastest orientation:
+
+1. **[`STATUS.md`](./STATUS.md)** — the authoritative ledger: every claim
+   is dated and staked to a commit, a source citation, or captured live
+   output. What's proven, what was refuted, what's decided, what's gated.
+2. **Run it:** `git config core.hooksPath .githooks && cargo test --workspace`
+   — expect **146 passed, 1 ignored** (the ignored test is firmware-gated
+   and says so).
+3. **The claims most worth attacking:** the escrow state machine's
+   dual-balance funding check ([escrow-core](./crates/escrow-core)), the
+   stock-Zano derivation vector proof ([chain-zano](./crates/chain-zano),
+   vector provenance in `src/testvec.rs`), the provenance-weighted
+   adjudication ([dispute-engine](./crates/dispute-engine) — popularity
+   must never auto-enforce), and the SHIP wire codec proven against live
+   nodeos ([chain-eos](./crates/chain-eos)).
+4. Findings → issues welcome; contributions → [CONTRIBUTING.md](./CONTRIBUTING.md)
+   (DCO sign-off, one-door review, no CLA).
 
 ## License
 

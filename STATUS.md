@@ -153,6 +153,21 @@ authoritative record of where `origin/main` sits.
   2832 → streamed, extracted, ABI-decoded, normalized, bused →
   `ESCROW order-live: Ok(Funded)`. Recipe in runbook §4b. The five-item
   sequence is now 5/5 ✅.
+- `2026-07-04` — **🌍 PUBLIC.** Repository flipped public at HEAD `792f6df`
+  on the founder's direct instruction ("we need the repo public today"),
+  under the founder's standing interpretation that the §8 legal-review
+  flag attaches to **operating the venue**, not to publishing code —
+  open-sourcing escrow state machines, DID specs, and indexer code that
+  will someday serve a marketplace is ordinary open source, and §8's
+  flag remains open for the venue itself. What published: 14 crates
+  (146 tests, 1 firmware-gated ignore), the constitution (draft, five
+  founder decisions pending), all findings and runbooks, and the
+  sanctioned TESTNET-ONLY vectors. Pre-flip audit: full-history secret
+  scan clean, single deliberate author identity, licensing structural
+  (AGPL-3.0-only / DCO / CC-BY-4.0). Post-flip: GitHub secret scanning
+  + push protection ENABLED (now free on public); description + topics
+  set; README gained CI badges and a "For reviewers" section. **Peer
+  review is open.**
 - `2026-07-04` — **Article VI §3 ratification draft versioned (awaiting founder
   decisions — NOT ratified).** `docs/article-vi-ratification-draft.md`:
   OREC adapted to kernel amendments (Proof gate before any vote; staged
