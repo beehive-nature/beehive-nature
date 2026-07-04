@@ -139,6 +139,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "dispute-engine"
+version = "0.1.0"
+dependencies = [
+ "dro-signer",
+ "escrow-core",
+ "sha2",
+ "time",
+]
+
+[[package]]
 name = "dro-signer"
 version = "0.1.0"
 dependencies = [

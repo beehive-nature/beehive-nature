@@ -125,6 +125,37 @@ pub fn settlement_intent(escrow: &Escrow, new_state: EscrowState) -> Option<Sett
     })
 }
 
+/// Settlement for a `Resolved` escrow carrying a REAL adjudicated ratio
+/// (the dispute engine's verdict), retiring this crate's documented
+/// 50/50 default whenever a verdict exists. `split` is
+/// `(buyer_amount, seller_amount)` in atomic units.
+///
+/// Conservation is non-negotiable: if the ratio does not sum exactly to
+/// the escrow amount this returns `None` — money math is never
+/// normalized or guessed on the DRO's behalf.
+pub fn settlement_intent_for_split(escrow: &Escrow, split: (u64, u64)) -> Option<SettlementIntent> {
+    let (buyer, seller) = split;
+    if buyer.checked_add(seller)? != escrow.amount {
+        return None;
+    }
+    Some(SettlementIntent {
+        order_id: escrow.order_id.clone(),
+        multisig_wallet_id: escrow.multisig_wallet_id.clone(),
+        asset_id: escrow.asset_id.clone(),
+        payouts: vec![
+            Payout {
+                to: Party::Buyer,
+                amount: buyer,
+            },
+            Payout {
+                to: Party::Seller,
+                amount: seller,
+            },
+        ],
+        triggered_by: EscrowState::Resolved,
+    })
+}
+
 // ---------------------------------------------------------------------------
 // The signer seam
 // ---------------------------------------------------------------------------

@@ -15,6 +15,24 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-04` — **dispute-engine v1: Tier-1 adjudication, provenance over
+  popularity.** New `crates/dispute-engine`: pure `resolve(&Dispute,
+  &[Evidence]) → DisputeVerdict` implementing §5 — provenance-weighted
+  confidence (ChainProof .95 > DeviceAttestation .90 > CarrierApi .85 >
+  AiInference .60 > UserClaim .30; signed/verified modifiers), same-class
+  conflict halves confidence and forces escalation, auto-enforce only at
+  conf > 0.95 with an all-high-provenance winning side (AI and user
+  claims can support, never authorize — constitution). Split ratios in
+  integer math, conservation-guaranteed. Reality (AI inference, vault
+  decryption, carrier APIs) gates behind `EvidenceProvider`/`MockProvider`.
+  One forced addition to the prompt's structs: `Evidence.favors` (no
+  function exists from undirected evidence to a verdict). One flagged
+  deviation: additive `dro_signer::settlement_intent_for_split` (ratio →
+  payouts, refuses non-conserving ratios) — acceptance #4 required the
+  50/50 default to be replaceable, which no integration test could do
+  without it. 13 tests incl. ten-claims-vs-one-chain-proof
+  (popularity never auto-enforces) and the verdict→settlement full
+  circle. **10 crates, 114 tests, 1 ignored.**
 - `2026-07-04` — **dro-signer v1: the DRO's decision authority, built at the
   honest seam.** New `crates/dro-signer` per the committed brief:
   `settlement_intent()` — pure function, escrow + new state → payouts
