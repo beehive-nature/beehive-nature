@@ -3,7 +3,7 @@
 //! receive exactly the fund-moving intents and nothing else — the escrow
 //! lifecycle's quiet steps (funded, shipped, delivered) settle nothing.
 
-use dro_signer::{settle_transition, MockSigner, Party};
+use dro_signer::{settle_transition, MockChainView, MockSigner, Party};
 use escrow_core::{Escrow, PublicKey, FEE_BUFFER};
 use escrow_engine::EscrowEngine;
 use shared_types::{CanonicalEvent, EventPayload, EventType, OrderEvent, SourceChain};
@@ -51,6 +51,7 @@ fn happy_path_yields_exactly_one_settlement_release_to_seller() {
     let mut engine = EscrowEngine::new();
     engine.register(escrow("order-e2e"));
     let mut signer = MockSigner::new();
+    let view = MockChainView::solvent();
 
     let lifecycle = [
         (EventType::OrderFunded, 1_782_000_100),
@@ -65,7 +66,7 @@ fn happy_path_yields_exactly_one_settlement_release_to_seller() {
             .expect("registered order");
         // Every applied transition is offered to the DRO; it decides.
         let escrow = engine.get("order-e2e").unwrap().clone();
-        settle_transition(&escrow, &applied.result, &mut signer);
+        settle_transition(&escrow, &applied.result, &view, &mut signer);
     }
 
     // Four transitions happened; exactly ONE moved funds.
@@ -82,6 +83,7 @@ fn rejected_partial_funding_never_reaches_the_signer() {
     let mut engine = EscrowEngine::new();
     engine.register(escrow("order-partial"));
     let mut signer = MockSigner::new();
+    let view = MockChainView::solvent();
 
     // No fee buffer observed → engine applies, state machine refuses.
     let mut ev = order_event("order-partial", EventType::OrderFunded, 1_782_000_100);
@@ -92,6 +94,6 @@ fn rejected_partial_funding_never_reaches_the_signer() {
     assert!(applied.result.is_err(), "partial funding is refused");
 
     let escrow = engine.get("order-partial").unwrap().clone();
-    assert!(settle_transition(&escrow, &applied.result, &mut signer).is_none());
+    assert!(settle_transition(&escrow, &applied.result, &view, &mut signer).is_none());
     assert!(signer.signed.is_empty(), "refusals never settle");
 }

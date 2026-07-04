@@ -33,7 +33,7 @@
 
 use chain_eos::abi::Abi;
 use chain_eos::{extract_actions, stream_ship, StreamEvent};
-use dro_signer::{settle_transition, MockSigner, SettlementIntent};
+use dro_signer::{settle_transition, MockChainView, MockSigner, SettlementIntent};
 use escrow_core::Escrow;
 use escrow_engine::{Applied, EscrowEngine};
 use event_bus::EventBus;
@@ -368,14 +368,18 @@ async fn escrow_loop(
     (seen, applied_log)
 }
 
-/// DRO consumer: fund-moving transitions become settlement intents
-/// (MockSigner in v1 — the firmware gate).
+/// DRO consumer: fund-moving transitions become settlement intents, each
+/// confirmed against an independent chain view before signing (R-004).
+/// v1 uses `MockChainView` + `MockSigner` — the firmware/indexer gate.
 async fn dro_loop(
     mut applied_rx: mpsc::UnboundedReceiver<(Escrow, Applied)>,
 ) -> Vec<SettlementIntent> {
     let mut signer = MockSigner::new();
+    // v1 stub view (firmware/indexer gate): proves the R-004 seam, not
+    // independence — a real view queries nodes disjoint from the ingest path.
+    let view = MockChainView::solvent();
     while let Some((escrow, applied)) = applied_rx.recv().await {
-        if let Some(outcome) = settle_transition(&escrow, &applied.result, &mut signer) {
+        if let Some(outcome) = settle_transition(&escrow, &applied.result, &view, &mut signer) {
             match outcome {
                 Ok(signed) => println!(
                     "composition: DRO settlement for {} signed_by={}",

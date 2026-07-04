@@ -37,6 +37,30 @@ authoritative record of where `origin/main` sits.
   yet constitution); email/PGP placeholders dropped (PVR needs
   neither). The hemp-seed compliance briefing stays UNTRACKED —
   FOR-COUNSEL founder material, not published.
+- `2026-07-04` — **dro-signer C5: R-004 made a type boundary — the DRO cannot
+  sign what it hasn't independently confirmed.** Sprint item 2 (R-004's
+  structural consequence). New `IndependentChainView` trait — the DRO's own
+  eye, a seam deliberately DISJOINT from `zano-watcher`/the event bus — plus
+  `ConfirmedMultisigState`, an unforgeable token (private fields, sole
+  constructor is the sealed `confirm` wrapper). `ZanoSigner::sign_settlement`
+  now REQUIRES that token, so "sign off the indexed/escrow view alone" is
+  unrepresentable. The shared `reconcile()` every signer runs: wallet + asset
+  must match the intent and the independently-observed balance must cover the
+  payouts (checked-sum) — a valid signature over a balance that isn't there
+  (the Kelp-DAO failure) can no longer be produced. `settle_transition` takes
+  the view and **fails closed** (`Unavailable`) if chain can't be reached —
+  never signs blind. Honest boundary, documented on the trait: the type
+  enforces *that* a confirmation happened; it CANNOT enforce the view's nodes
+  are truly disjoint from the pipeline — that's the deployment contract in
+  risk-register R-004, not a compile-time guarantee. Also closed two
+  DRO-trusts-caller holes the red-team found (compiler-confirmed): the
+  decision now refuses a `new_state` decoupled from `escrow.state`, and
+  refuses any terminal payout for an escrow with no `funded_at`. `MockChainView`
+  stub (proves the seam, not independence — the firmware/indexer gate).
+  Rippled through composition's daemon + both integration tests. +6 dro-signer
+  tests (unbacked-refused, asset-mismatch, exact-backed-signs, fail-closed,
+  state-decoupled-refused, unfunded-refused). **Full workspace green;
+  clippy clean.**
 - `2026-07-04` — **escrow-core hardening C4: property-based invariants +
   closed schema; C3 monotonic floor refined (funding exempt).** New
   `tests/properties.rs` (proptest, 2048 cases each): **totality** —
