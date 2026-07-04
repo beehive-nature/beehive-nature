@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
+    "crates/adapter-arweave",
     "crates/adapter-carrier",
     "crates/chain-eos",
     "crates/chain-zano",
