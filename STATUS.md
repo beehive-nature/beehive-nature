@@ -153,6 +153,20 @@ authoritative record of where `origin/main` sits.
   2832 → streamed, extracted, ABI-decoded, normalized, bused →
   `ESCROW order-live: Ok(Funded)`. Recipe in runbook §4b. The five-item
   sequence is now 5/5 ✅.
+- `2026-07-04` — **Article VI §3 ratification draft versioned (awaiting founder
+  decisions — NOT ratified).** `docs/article-vi-ratification-draft.md`:
+  OREC adapted to kernel amendments (Proof gate before any vote; staged
+  founder→OREC→sovereign epochs on measurable triggers; steering
+  relinquished before the brake) plus the draft's sharpest idea — a
+  strictly-hardest **meta-tier** for anything touching reputation-engine,
+  its evidence flows, or Article VI itself, because *the component whose
+  capture hides itself gets the hardest supermajority*. Door-review fixes:
+  OREC citation **pinned** (sim31/ordao@4a10ee55a413, GPL-3.0, cited not
+  vendored) and one blocking-fraction arithmetic error corrected
+  (K_meta=8 blocks at a ninth of turnout, not a quarter). Four founder
+  decisions enumerated in the draft; the placeholder retires only when
+  they're made. Conventions hardened alongside: **single-writer per
+  draft** and **cite-and-pin, never vendor** (CONTRIBUTING.md).
 - `2026-07-04` — **did:autonomi method spec v1 adopted (research lane, one-door
   review).** `docs/architecture/did-autonomi-spec.md` — retires the brief's
   L0 open item ("exact DID linkage proof format"): self-certifying genesis-

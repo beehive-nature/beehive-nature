@@ -24,6 +24,17 @@ Research findings enter the repo through exactly one door:
 3. Every committed finding gets its own `STATUS.md` ledger line naming
    the question it retires or the mechanism it adds.
 
+4. **Single writer per draft.** The research lane owns a file until it
+   is submitted for review; the builder owns it during review. Edits
+   wanted from the other lane travel as notes, never as concurrent
+   writes — two lanes editing one file in the same minute is a merge
+   conflict wearing a process costume, even when it happens to land.
+5. **External references are cited and pinned, never vendored.** Design
+   documents under other licenses (e.g. GPL-3.0 specs) stay out of this
+   CC-BY-4.0 tree; cite them by repo + commit hash (or dated URL) so
+   the reference cannot drift. The one-door rule governs findings this
+   project authors; provenance honesty governs everything it reads.
+
 The repo stays the single source of truth only if things enter it
 through one door.
 
