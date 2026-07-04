@@ -1,12 +1,12 @@
-# Beehive Nature — Zano × Trezor host stack
+# Beehive Nature Reserve Kernel — Zano × Trezor host stack
 
 [![tests](https://github.com/beehive-nature/beehive-nature/actions/workflows/tests.yml/badge.svg)](https://github.com/beehive-nature/beehive-nature/actions/workflows/tests.yml)
 [![secret-scan](https://github.com/beehive-nature/beehive-nature/actions/workflows/secret-scan.yml/badge.svg)](https://github.com/beehive-nature/beehive-nature/actions/workflows/secret-scan.yml)
 [![license: AGPL-3.0-only](https://img.shields.io/badge/license-AGPL--3.0--only-blue)](./LICENSE)
 
 Host-side cryptography, wire contract, and architecture for a **Trezor-native**
-Zano integration, built as the identity/settlement layer of the Beehive Nature
-coordination kernel.
+Zano integration, built as the identity/settlement layer of the **Beehive
+Nature Reserve Kernel**.
 
 > **Status:** cryptographic design source-confirmed; wire contract frozen (proto
 > v0.3); host-side derivation **proven against stock Zano** (real vector,

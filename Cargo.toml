@@ -1,3 +1,6 @@
+# Beehive Nature Reserve Kernel — Rust workspace.
+# A coordination kernel (private-commerce settlement, escrow, disputes,
+# reputation, multi-chain indexing). See docs/CONSTITUTION.md.
 [workspace]
 resolver = "2"
 members = [
@@ -16,6 +19,9 @@ members = [
     "crates/shared-types",
     "crates/zano-watcher",
 ]
+
+[workspace.metadata]
+name = "Beehive Nature Reserve Kernel"
 
 [workspace.package]
 edition = "2021"

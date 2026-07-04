@@ -37,6 +37,15 @@ authoritative record of where `origin/main` sits.
   yet constitution); email/PGP placeholders dropped (PVR needs
   neither). The hemp-seed compliance briefing stays UNTRACKED —
   FOR-COUNSEL founder material, not published.
+- `2026-07-04` — **Renamed to "Beehive Nature Reserve Kernel".** Proper-noun
+  name adopted in the three canonical places: CONSTITUTION.md title + preamble
+  (the categorical "is a coordination kernel" stays — accurate, lowercase),
+  README title + lede, and workspace `Cargo.toml` (header comment +
+  `[workspace.metadata].name`; the `[workspace]` table has no `name` field of
+  its own). Manifest re-validated (`cargo metadata` resolves). Descriptive
+  lowercase "coordination kernel" left intact in SECURITY.md/REVIEWING.md —
+  out of the rename's scope and still accurate. No crate/repo identifier
+  changed (still `beehive-nature`); this is a display-name change only.
 - `2026-07-04` — **Tree cleaned; test count re-pinned to the live number.**
   Inventory at HEAD `1a2eb20`: **zero tracked modifications** (C1–C6 already
   committed the dirty tracked files the doc-audit F2 flagged); the only

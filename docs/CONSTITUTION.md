@@ -1,4 +1,4 @@
-# CONSTITUTION.md — Beehive Nature Coordination Kernel
+# CONSTITUTION.md — Beehive Nature Reserve Kernel
 
 **Status: DRAFT v0.1 — for founder review. Amendment process (Article VI) contains decisions only the founder can make.**
 
@@ -6,7 +6,7 @@
 
 ## Preamble
 
-> **Beehive Nature is a coordination kernel, not an application framework.**
+> **The Beehive Nature Reserve Kernel is a coordination kernel, not an application framework.**
 
 The kernel defines immutable *semantics* — not implementations. Storage networks, blockchains, AI systems, hardware devices, databases, transport layers, and user interfaces are **adapters** that may evolve independently, and will be replaced over decades, so long as they preserve the kernel's contracts. This document freezes semantics, never technology. Its model is POSIX: specify behavior, outlive every implementation.
 
