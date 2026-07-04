@@ -153,6 +153,25 @@ authoritative record of where `origin/main` sits.
   2832 → streamed, extracted, ABI-decoded, normalized, bused →
   `ESCROW order-live: Ok(Funded)`. Recipe in runbook §4b. The five-item
   sequence is now 5/5 ✅.
+- `2026-07-04` — **did:autonomi method spec v1 adopted (research lane, one-door
+  review).** `docs/architecture/did-autonomi-spec.md` — retires the brief's
+  L0 open item ("exact DID linkage proof format"): self-certifying genesis-
+  hash identifier, append-only signed rotation log on Autonomi, mandatory
+  per-op `keyAlg` (crypto-agility as data), bidirectional-only persona
+  links, and a recovery **contest window** (recovery must be slower than
+  theft-detection). Standout design move: §6 step 4 cross-checks the log
+  head against the daily Arweave anchor and HARD-FAILS on mismatch — which
+  downgrades "are Autonomi registers truly append-only?" from load-bearing
+  vendor claim to nice-to-know. Review found one §6/§11 contradiction;
+  resolved concurrently by the research lane.
+- `2026-07-04` — **risk register seeded** (`docs/risk-register.md`, adopted +
+  relocated per its own header). Headline: **R-001 — DRO liveness IS the
+  refund guarantee** (no chain timeout exists; a vanished seller means
+  refund = buyer + DRO signatures, so DRO downtime during a timeout window
+  strands buyer funds). Mitigation shape recorded for the future
+  `bnature.dro` build: threshold-held signer key, monitored uptime,
+  published liveness SLO. R-002 fUSD peg (mechanism live), R-003 off-chain
+  timeout is safety-critical code (hermetic, keep it so).
 - `2026-07-04` — **fUSD peg monitor: intention → mechanism (§8).**
   `docs/fusd-peg-monitor.md` (research lane, run zero; reviewed and
   committed through the one-door convention now codified in
