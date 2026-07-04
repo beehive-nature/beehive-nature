@@ -149,6 +149,11 @@ pub enum EscrowError {
         opened_at: OffsetDateTime,
         deadline: OffsetDateTime,
     },
+    /// A deadline (`anchor + window`) would fall outside the representable
+    /// `OffsetDateTime` range. Reachable from an adversarial far-future
+    /// timestamp (crafted event or a deserialized/replayed escrow). The
+    /// machine must return this, never panic on the arithmetic.
+    DeadlineOverflow { state: EscrowState },
 }
 
 impl std::fmt::Display for EscrowError {
@@ -175,6 +180,9 @@ impl std::fmt::Display for EscrowError {
                 deadline,
             } => {
                 write!(f, "dispute opened at {opened_at} after deadline {deadline}")
+            }
+            EscrowError::DeadlineOverflow { state } => {
+                write!(f, "deadline for state {state:?} overflows the representable time range")
             }
         }
     }
@@ -265,7 +273,8 @@ impl Escrow {
                 }
             }
             (Created, EscrowEvent::Timeout { now }) => {
-                self.check_deadline(Created, now, self.created_at + CREATED_TIMEOUT)?;
+                let deadline = Self::deadline(self.created_at, CREATED_TIMEOUT, Created)?;
+                self.check_deadline(Created, now, deadline)?;
                 Expired
             }
 
@@ -279,7 +288,8 @@ impl Escrow {
                 let funded_at = self
                     .funded_at
                     .expect("state Funded is only reachable by setting funded_at");
-                self.check_deadline(Funded, now, funded_at + FUNDED_TIMEOUT)?;
+                let deadline = Self::deadline(funded_at, FUNDED_TIMEOUT, Funded)?;
+                self.check_deadline(Funded, now, deadline)?;
                 Expired
             }
 
@@ -293,7 +303,8 @@ impl Escrow {
                 let shipped_at = self
                     .shipped_at
                     .expect("state Shipped is only reachable by setting shipped_at");
-                self.check_deadline(Shipped, now, shipped_at + SHIPPED_TIMEOUT)?;
+                let deadline = Self::deadline(shipped_at, SHIPPED_TIMEOUT, Shipped)?;
+                self.check_deadline(Shipped, now, deadline)?;
                 Disputed // auto-dispute: no opener, dispute_id stays None
             }
 
@@ -303,7 +314,8 @@ impl Escrow {
                 let delivered_at = self
                     .delivered_at
                     .expect("state Delivered is only reachable by setting delivered_at");
-                self.check_deadline(Delivered, now, delivered_at + DELIVERED_TIMEOUT)?;
+                let deadline = Self::deadline(delivered_at, DELIVERED_TIMEOUT, Delivered)?;
+                self.check_deadline(Delivered, now, deadline)?;
                 Completed // auto-release (DRO co-signs)
             }
             // Delivered --buyer disputes--> Disputed, only before the
@@ -312,7 +324,7 @@ impl Escrow {
                 let delivered_at = self
                     .delivered_at
                     .expect("state Delivered is only reachable by setting delivered_at");
-                let deadline = delivered_at + DELIVERED_TIMEOUT;
+                let deadline = Self::deadline(delivered_at, DELIVERED_TIMEOUT, Delivered)?;
                 if at >= deadline {
                     return Err(EscrowError::DisputeWindowClosed {
                         opened_at: at,
@@ -356,6 +368,19 @@ impl Escrow {
         } else {
             Err(EscrowError::TimeoutNotReached { state })
         }
+    }
+
+    /// `anchor + window`, but total: an out-of-range result is a typed error,
+    /// never the panic that `OffsetDateTime`'s `Add` produces. Every deadline
+    /// in the machine goes through here so no crafted timestamp can panic.
+    fn deadline(
+        anchor: OffsetDateTime,
+        window: Duration,
+        state: EscrowState,
+    ) -> Result<OffsetDateTime, EscrowError> {
+        anchor
+            .checked_add(window)
+            .ok_or(EscrowError::DeadlineOverflow { state })
     }
 }
 
@@ -870,5 +895,87 @@ mod tests {
             let back: EscrowState = serde_json::from_str(&json).unwrap();
             assert_eq!(s, back);
         }
+    }
+
+    // ---- adversarial: deadline arithmetic must never panic (C1) ----------
+    //
+    // `OffsetDateTime + Duration` panics on overflow. A far-future anchor —
+    // crafted event timestamp or a deserialized/replayed escrow — must yield
+    // a typed `DeadlineOverflow`, never abort the DRO's replay by panicking.
+    // (Pre-fix behavior confirmed to PANIC via the red-team harness.)
+
+    /// One second inside the representable ceiling: any window overflows.
+    fn near_time_max() -> OffsetDateTime {
+        datetime!(9999-12-31 23:59:59 UTC)
+    }
+
+    #[test]
+    fn created_timeout_overflow_is_err_not_panic() {
+        let mut e = escrow();
+        e.created_at = near_time_max();
+        assert_eq!(
+            e.transition(EscrowEvent::Timeout { now: near_time_max() }),
+            Err(EscrowError::DeadlineOverflow {
+                state: EscrowState::Created
+            })
+        );
+        assert_eq!(e.state, EscrowState::Created); // unchanged on Err
+    }
+
+    #[test]
+    fn funded_timeout_overflow_is_err_not_panic() {
+        let mut e = escrow();
+        e.state = EscrowState::Funded;
+        e.funded_at = Some(near_time_max());
+        assert_eq!(
+            e.transition(EscrowEvent::Timeout { now: near_time_max() }),
+            Err(EscrowError::DeadlineOverflow {
+                state: EscrowState::Funded
+            })
+        );
+    }
+
+    #[test]
+    fn shipped_timeout_overflow_is_err_not_panic() {
+        let mut e = escrow();
+        e.state = EscrowState::Shipped;
+        e.shipped_at = Some(near_time_max());
+        assert_eq!(
+            e.transition(EscrowEvent::Timeout { now: near_time_max() }),
+            Err(EscrowError::DeadlineOverflow {
+                state: EscrowState::Shipped
+            })
+        );
+    }
+
+    #[test]
+    fn delivered_timeout_overflow_is_err_not_panic() {
+        let mut e = escrow();
+        e.state = EscrowState::Delivered;
+        e.delivered_at = Some(near_time_max());
+        assert_eq!(
+            e.transition(EscrowEvent::Timeout { now: near_time_max() }),
+            Err(EscrowError::DeadlineOverflow {
+                state: EscrowState::Delivered
+            })
+        );
+    }
+
+    #[test]
+    fn delivered_dispute_overflow_is_err_not_panic_regardless_of_at() {
+        // The deadline is computed BEFORE the window check, so even an
+        // in-window `at` must not panic — it must surface DeadlineOverflow.
+        let mut e = escrow();
+        e.state = EscrowState::Delivered;
+        e.delivered_at = Some(near_time_max());
+        assert_eq!(
+            e.transition(EscrowEvent::DisputeOpened {
+                reason_hash: "h".into(),
+                at: datetime!(2026-01-01 0:00 UTC),
+            }),
+            Err(EscrowError::DeadlineOverflow {
+                state: EscrowState::Delivered
+            })
+        );
     }
 }

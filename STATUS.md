@@ -37,6 +37,18 @@ authoritative record of where `origin/main` sits.
   yet constitution); email/PGP placeholders dropped (PVR needs
   neither). The hemp-seed compliance briefing stays UNTRACKED —
   FOR-COUNSEL founder material, not published.
+- `2026-07-04` — **escrow-core hardening C1: deadline arithmetic can no longer
+  panic.** Red-team (5-lens adversarial workflow + compiler-confirmed) found
+  `anchor + WINDOW` uses `OffsetDateTime`'s panicking `Add`: a far-future
+  timestamp (crafted event `at`, or a deserialized/replayed escrow near the
+  year-9999 ceiling) aborts the DRO's replay by panic instead of erroring —
+  a liveness DoS in a machine that must fold a century of events. Fix: a
+  total `deadline(anchor, window, state)` helper using `checked_add`, routed
+  through all 5 sites (Created/Funded/Shipped/Delivered timeouts + the
+  Delivered→DisputeOpened deadline, which is computed before the window
+  check so even an in-window dispute panicked). New typed
+  `EscrowError::DeadlineOverflow { state }`. +5 tests (each confirmed
+  PANIC pre-fix via the red-team harness, Err post-fix). **32 tests.**
 - `2026-07-04` — **Peer review begun.** Pinned issue #1 ("Peer review open —
   start here") is the front door: ledger-first orientation, the one-command
   verification run, and the claims most worth attacking. GitHub Discussions
