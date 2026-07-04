@@ -154,6 +154,14 @@ pub enum EscrowError {
     /// timestamp (crafted event or a deserialized/replayed escrow). The
     /// machine must return this, never panic on the arithmetic.
     DeadlineOverflow { state: EscrowState },
+    /// The escrow's state requires an anchor timestamp that is absent — an
+    /// internally-inconsistent record. `new()` + `transition` can never
+    /// produce this, but `Escrow` derives `Deserialize` with public fields,
+    /// so a replayed/forged escrow (e.g. `state = Funded, funded_at = None`)
+    /// can. The machine returns this instead of panicking on the missing
+    /// anchor; callers replaying untrusted streams should treat it as a
+    /// corrupt record.
+    InconsistentState { state: EscrowState },
 }
 
 impl std::fmt::Display for EscrowError {
@@ -183,6 +191,9 @@ impl std::fmt::Display for EscrowError {
             }
             EscrowError::DeadlineOverflow { state } => {
                 write!(f, "deadline for state {state:?} overflows the representable time range")
+            }
+            EscrowError::InconsistentState { state } => {
+                write!(f, "state {state:?} is missing a required anchor timestamp (corrupt escrow)")
             }
         }
     }
@@ -285,9 +296,7 @@ impl Escrow {
                 Shipped
             }
             (Funded, EscrowEvent::Timeout { now }) => {
-                let funded_at = self
-                    .funded_at
-                    .expect("state Funded is only reachable by setting funded_at");
+                let funded_at = Self::require(self.funded_at, Funded)?;
                 let deadline = Self::deadline(funded_at, FUNDED_TIMEOUT, Funded)?;
                 self.check_deadline(Funded, now, deadline)?;
                 Expired
@@ -300,9 +309,7 @@ impl Escrow {
                 Delivered
             }
             (Shipped, EscrowEvent::Timeout { now }) => {
-                let shipped_at = self
-                    .shipped_at
-                    .expect("state Shipped is only reachable by setting shipped_at");
+                let shipped_at = Self::require(self.shipped_at, Shipped)?;
                 let deadline = Self::deadline(shipped_at, SHIPPED_TIMEOUT, Shipped)?;
                 self.check_deadline(Shipped, now, deadline)?;
                 Disputed // auto-dispute: no opener, dispute_id stays None
@@ -311,9 +318,7 @@ impl Escrow {
             // Delivered --buyer releases--> Completed (7d auto-release)
             (Delivered, EscrowEvent::BuyerReleased { .. }) => Completed,
             (Delivered, EscrowEvent::Timeout { now }) => {
-                let delivered_at = self
-                    .delivered_at
-                    .expect("state Delivered is only reachable by setting delivered_at");
+                let delivered_at = Self::require(self.delivered_at, Delivered)?;
                 let deadline = Self::deadline(delivered_at, DELIVERED_TIMEOUT, Delivered)?;
                 self.check_deadline(Delivered, now, deadline)?;
                 Completed // auto-release (DRO co-signs)
@@ -321,9 +326,7 @@ impl Escrow {
             // Delivered --buyer disputes--> Disputed, only before the
             // auto-release deadline ("disputes must open before timeout")
             (Delivered, EscrowEvent::DisputeOpened { reason_hash, at }) => {
-                let delivered_at = self
-                    .delivered_at
-                    .expect("state Delivered is only reachable by setting delivered_at");
+                let delivered_at = Self::require(self.delivered_at, Delivered)?;
                 let deadline = Self::deadline(delivered_at, DELIVERED_TIMEOUT, Delivered)?;
                 if at >= deadline {
                     return Err(EscrowError::DisputeWindowClosed {
@@ -381,6 +384,16 @@ impl Escrow {
         anchor
             .checked_add(window)
             .ok_or(EscrowError::DeadlineOverflow { state })
+    }
+
+    /// The anchor a state relies on, or `InconsistentState` if a forged/
+    /// deserialized record left it absent. Replaces the `.expect()` that a
+    /// `new()`-built escrow could never trip but a replayed one can.
+    fn require(
+        anchor: Option<OffsetDateTime>,
+        state: EscrowState,
+    ) -> Result<OffsetDateTime, EscrowError> {
+        anchor.ok_or(EscrowError::InconsistentState { state })
     }
 }
 
@@ -974,6 +987,75 @@ mod tests {
                 at: datetime!(2026-01-01 0:00 UTC),
             }),
             Err(EscrowError::DeadlineOverflow {
+                state: EscrowState::Delivered
+            })
+        );
+    }
+
+    // ---- adversarial: a forged/deserialized escrow must not panic (C2) ---
+    //
+    // `Escrow` derives `Deserialize` with public fields, so the DRO replaying
+    // a stream can hold `state = Funded, funded_at = None` etc. — a
+    // combination `new()` + `transition` never produces. The missing anchor
+    // must surface `InconsistentState`, never the `.expect()` panic.
+    // (Pre-fix behavior confirmed to PANIC via the red-team harness.)
+
+    /// Build an escrow directly in `state` with the matching anchor absent,
+    /// exactly as `serde_json::from_value` of a forged record would.
+    fn forged_missing_anchor(state: EscrowState) -> Escrow {
+        let mut e = escrow();
+        e.state = state;
+        e.funded_at = None;
+        e.shipped_at = None;
+        e.delivered_at = None;
+        // Round-trip through serde to prove this is a genuinely deserializable
+        // value, not just a hand-poked struct.
+        let json = serde_json::to_string(&e).unwrap();
+        serde_json::from_str(&json).unwrap()
+    }
+
+    #[test]
+    fn forged_funded_without_funded_at_timeout_is_err_not_panic() {
+        let mut e = forged_missing_anchor(EscrowState::Funded);
+        assert_eq!(
+            e.transition(EscrowEvent::Timeout { now: t0() }),
+            Err(EscrowError::InconsistentState {
+                state: EscrowState::Funded
+            })
+        );
+    }
+
+    #[test]
+    fn forged_shipped_without_shipped_at_timeout_is_err_not_panic() {
+        let mut e = forged_missing_anchor(EscrowState::Shipped);
+        assert_eq!(
+            e.transition(EscrowEvent::Timeout { now: t0() }),
+            Err(EscrowError::InconsistentState {
+                state: EscrowState::Shipped
+            })
+        );
+    }
+
+    #[test]
+    fn forged_delivered_without_delivered_at_timeout_is_err_not_panic() {
+        let mut e = forged_missing_anchor(EscrowState::Delivered);
+        assert_eq!(
+            e.transition(EscrowEvent::Timeout { now: t0() }),
+            Err(EscrowError::InconsistentState {
+                state: EscrowState::Delivered
+            })
+        );
+    }
+
+    #[test]
+    fn forged_delivered_without_delivered_at_dispute_is_err_not_panic() {
+        let mut e = forged_missing_anchor(EscrowState::Delivered);
+        assert_eq!(
+            e.transition(EscrowEvent::DisputeOpened {
+                reason_hash: "h".into(),
+                at: t0(),
+            }),
+            Err(EscrowError::InconsistentState {
                 state: EscrowState::Delivered
             })
         );

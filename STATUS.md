@@ -37,6 +37,17 @@ authoritative record of where `origin/main` sits.
   yet constitution); email/PGP placeholders dropped (PVR needs
   neither). The hemp-seed compliance briefing stays UNTRACKED —
   FOR-COUNSEL founder material, not published.
+- `2026-07-04` — **escrow-core hardening C2: a forged/deserialized escrow can
+  no longer panic transition().** `Escrow` derives `Deserialize` with public
+  fields, so the DRO replaying a stream can hold `state = Funded,
+  funded_at = None` (and the Shipped/Delivered analogues) — a combination
+  `new()` + `transition` can never produce. Four `.expect("state X is only
+  reachable by setting X_at")` calls turned that corrupt record into a panic
+  that aborts the replay. Fix: a total `require(anchor, state)` helper
+  returning the new `EscrowError::InconsistentState { state }` instead of
+  `.expect()`. +4 tests, each round-tripping a forged record through serde
+  and asserting Err (confirmed PANIC pre-fix via the red-team harness).
+  **36 tests.**
 - `2026-07-04` — **escrow-core hardening C1: deadline arithmetic can no longer
   panic.** Red-team (5-lens adversarial workflow + compiler-confirmed) found
   `anchor + WINDOW` uses `OffsetDateTime`'s panicking `Add`: a far-future
