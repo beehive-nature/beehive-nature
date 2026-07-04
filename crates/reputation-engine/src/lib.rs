@@ -1,0 +1,503 @@
+//! Emergent reputation — deterministically recomputed from evidence and
+//! events, never written directly.
+//!
+//! ## The constitutional invariant, honored precisely
+//! The constitution says reputation is *"never reduced to a single
+//! universal score by the kernel."* The canonical artifact here is the
+//! **component vector**: every point of reputation traces to a named
+//! source with a commitment hash. The `score` field is **one
+//! deterministic projection** of those components — a convenience
+//! aggregate applications MAY use; they are equally free to re-weight
+//! the components themselves. The kernel computes the projection; it
+//! never mandates it. Nothing in this crate lets anyone *write* a score:
+//! the only path to reputation is [`compute`] over inputs that are
+//! themselves derived from events and evidence.
+//!
+//! ## Scope seams (same discipline as dispute-engine / dro-signer)
+//! - [`compute`] is pure and total: same input → same output, bit for bit.
+//! - Real attestation signature verification gates behind
+//!   [`SignatureVerifier`] ([`MockVerifier`] in v1).
+//! - Historical event replay gates behind [`EventStore`] ([`MockStore`]).
+//! - No `todo!()` in shipped paths.
+//!
+//! ## Two forced additions to the prompt's structs (flagged)
+//! - `ReputationInput.as_of_unix`: `computed_at` must come from the
+//!   input, not an ambient clock, or determinism dies.
+//! - Aggregate components (e.g. completed-escrow count) carry a
+//!   *commitment* hash — sha256 over a canonical `source:value` string —
+//!   so the transparency rule ("every point has an evidence hash") holds
+//!   for contributions that summarize counts rather than cite one item.
+//!
+//! ## Scoring model (deterministic, documented, integer contributions)
+//! - completed escrow: **+25** each; disputed escrow: **−40** each;
+//!   DRO resolved-favorable: **+30** each.
+//! - evidence submitted, by provenance: ChainProof/DeviceAttestation
+//!   **+15**, CarrierApi **+10**, AiInference **+4**, UserClaim **+2** —
+//!   machine-attested contribution outranks claims by design.
+//! - attestations: **+20 per unique valid attester** — deduplicated by
+//!   `attester_did` (Sybil rule: N attestations from one DID count once),
+//!   self-attestation counts zero, invalid signatures count zero.
+//! - `score` = Σ contributions clamped to **[0, 1000]**; components keep
+//!   the raw pre-clamp contributions so the projection is auditable.
+
+#![forbid(unsafe_code)]
+
+use std::collections::BTreeSet;
+
+use dispute_engine::{Evidence, Provenance};
+use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
+
+pub const SCORE_MAX: u64 = 1000;
+
+pub const COMPLETED_ESCROW_POINTS: i64 = 25;
+pub const DISPUTED_ESCROW_POINTS: i64 = -40;
+pub const RESOLVED_FAVORABLE_POINTS: i64 = 30;
+pub const ATTESTATION_POINTS: i64 = 20;
+
+/// One traceable contribution to a reputation projection.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ReputationComponent {
+    /// Named source, e.g. `completed_escrows` or `evidence:ChainProof`.
+    pub source: String,
+    /// Relative weight of this component class in the projection.
+    pub weight: f32,
+    /// Signed points contributed (pre-clamp).
+    pub contribution: i64,
+    /// Hex commitment: the cited evidence's payload hash, or for
+    /// aggregates a sha256 over the canonical `source:value` string.
+    pub evidence_hash: String,
+}
+
+/// The computed artifact. `components` is canonical; `score` is one
+/// deterministic projection of it (see module docs).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ReputationScore {
+    pub did: String,
+    pub score: u64,
+    pub components: Vec<ReputationComponent>,
+    pub computed_at: i64,
+}
+
+/// A third-party attestation about a DID.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Attestation {
+    pub attester_did: String,
+    pub attested_did: String,
+    pub claim: String,
+    pub timestamp: i64,
+    /// Set by a [`SignatureVerifier`]; invalid attestations contribute 0.
+    pub signature_valid: bool,
+}
+
+/// Everything reputation is recomputed FROM. Derived from events and
+/// evidence upstream (via an [`EventStore`]); never hand-authored in
+/// production paths.
+#[derive(Debug, Clone, PartialEq)]
+pub struct ReputationInput {
+    pub did: String,
+    pub completed_escrows: u64,
+    pub disputed_escrows: u64,
+    /// Disputes the DRO resolved in this party's favor.
+    pub resolved_favorable: u64,
+    pub evidence_submitted: Vec<Evidence>,
+    pub attestations_received: Vec<Attestation>,
+    /// Observation time carried in the input — determinism forbids an
+    /// ambient clock (forced addition, see module docs).
+    pub as_of_unix: i64,
+}
+
+/// Deterministic emergent reputation. Total: never panics, including on
+/// a DID with zero history (score 0, empty components).
+pub fn compute(input: &ReputationInput) -> ReputationScore {
+    let mut components = Vec::new();
+
+    push_aggregate(
+        &mut components,
+        "completed_escrows",
+        input.completed_escrows,
+        COMPLETED_ESCROW_POINTS,
+        1.0,
+    );
+    push_aggregate(
+        &mut components,
+        "disputed_escrows",
+        input.disputed_escrows,
+        DISPUTED_ESCROW_POINTS,
+        1.0,
+    );
+    push_aggregate(
+        &mut components,
+        "resolved_favorable",
+        input.resolved_favorable,
+        RESOLVED_FAVORABLE_POINTS,
+        1.0,
+    );
+
+    // Evidence: machine-attested provenance contributes more than claims.
+    for item in &input.evidence_submitted {
+        let (points, label) = evidence_points(item.provenance);
+        components.push(ReputationComponent {
+            source: format!("evidence:{label}"),
+            weight: 1.0,
+            contribution: points,
+            evidence_hash: hex(&item.payload_hash),
+        });
+    }
+
+    // Attestations: one per unique attester (Sybil rule), no self-vouching,
+    // no invalid signatures. BTreeSet keeps iteration deterministic.
+    let mut counted: BTreeSet<&str> = BTreeSet::new();
+    for att in &input.attestations_received {
+        if !att.signature_valid
+            || att.attester_did == input.did
+            || att.attested_did != input.did
+            || !counted.insert(att.attester_did.as_str())
+        {
+            continue;
+        }
+        components.push(ReputationComponent {
+            source: format!("attestation:{}", att.attester_did),
+            weight: 1.0,
+            contribution: ATTESTATION_POINTS,
+            evidence_hash: hex(&commitment(&format!(
+                "attestation:{}:{}:{}",
+                att.attester_did, att.attested_did, att.claim
+            ))),
+        });
+    }
+
+    let total: i64 = components.iter().map(|c| c.contribution).sum();
+    let score = total.clamp(0, SCORE_MAX as i64) as u64;
+
+    ReputationScore {
+        did: input.did.clone(),
+        score,
+        components,
+        computed_at: input.as_of_unix,
+    }
+}
+
+fn evidence_points(provenance: Provenance) -> (i64, &'static str) {
+    match provenance {
+        Provenance::ChainProof => (15, "ChainProof"),
+        Provenance::DeviceAttestation => (15, "DeviceAttestation"),
+        Provenance::CarrierApi => (10, "CarrierApi"),
+        Provenance::AiInference => (4, "AiInference"),
+        Provenance::UserClaim => (2, "UserClaim"),
+    }
+}
+
+/// Zero-count aggregates contribute nothing and emit no component —
+/// a DID with no history gets an empty component list, not padding.
+fn push_aggregate(
+    components: &mut Vec<ReputationComponent>,
+    source: &str,
+    count: u64,
+    per_item: i64,
+    weight: f32,
+) {
+    if count == 0 {
+        return;
+    }
+    let contribution = per_item.saturating_mul(count.min(i64::MAX as u64) as i64);
+    components.push(ReputationComponent {
+        source: source.to_string(),
+        weight,
+        contribution,
+        evidence_hash: hex(&commitment(&format!("{source}:{count}"))),
+    });
+}
+
+fn commitment(canonical: &str) -> [u8; 32] {
+    let mut h = Sha256::new();
+    h.update(canonical.as_bytes());
+    h.finalize().into()
+}
+
+fn hex(bytes: &[u8; 32]) -> String {
+    bytes.iter().map(|b| format!("{b:02x}")).collect()
+}
+
+// ---------------------------------------------------------------------------
+// Reality seams
+// ---------------------------------------------------------------------------
+
+/// Real signature verification (DID key resolution + curve math) lands
+/// with the identity adapters; v1 mocks it.
+pub trait SignatureVerifier {
+    fn verify(&self, attestation: &Attestation) -> bool;
+}
+
+/// Stamp `signature_valid` on a batch via a verifier. `compute` honors
+/// the flag; this is the only sanctioned way to set it in production.
+pub fn verify_attestations(
+    mut attestations: Vec<Attestation>,
+    verifier: &impl SignatureVerifier,
+) -> Vec<Attestation> {
+    for att in &mut attestations {
+        att.signature_valid = verifier.verify(att);
+    }
+    attestations
+}
+
+/// v1 mock: valid iff the attester is on the allowlist.
+#[derive(Debug, Default)]
+pub struct MockVerifier {
+    pub valid_attesters: Vec<String>,
+}
+
+impl SignatureVerifier for MockVerifier {
+    fn verify(&self, attestation: &Attestation) -> bool {
+        self.valid_attesters
+            .iter()
+            .any(|d| d == &attestation.attester_did)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum StoreError {
+    Unavailable(String),
+}
+
+impl std::fmt::Display for StoreError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            StoreError::Unavailable(why) => write!(f, "event store unavailable: {why}"),
+        }
+    }
+}
+
+impl std::error::Error for StoreError {}
+
+/// Where inputs really come from: replaying the DID's CanonicalEvents
+/// (b-indexer). Gated; v1 mocks it.
+pub trait EventStore {
+    fn input_for(&self, did: &str, as_of_unix: i64) -> Result<ReputationInput, StoreError>;
+}
+
+/// v1 mock: preloaded inputs keyed by DID; unknown DIDs yield the honest
+/// zero-history input rather than an error.
+#[derive(Debug, Default)]
+pub struct MockStore {
+    pub inputs: Vec<ReputationInput>,
+}
+
+impl EventStore for MockStore {
+    fn input_for(&self, did: &str, as_of_unix: i64) -> Result<ReputationInput, StoreError> {
+        Ok(self
+            .inputs
+            .iter()
+            .find(|i| i.did == did)
+            .cloned()
+            .unwrap_or(ReputationInput {
+                did: did.to_string(),
+                completed_escrows: 0,
+                disputed_escrows: 0,
+                resolved_favorable: 0,
+                evidence_submitted: vec![],
+                attestations_received: vec![],
+                as_of_unix,
+            }))
+    }
+}
+
+/// Convenience recompute-from-store composition.
+pub fn recompute(
+    did: &str,
+    as_of_unix: i64,
+    store: &impl EventStore,
+) -> Result<ReputationScore, StoreError> {
+    Ok(compute(&store.input_for(did, as_of_unix)?))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use dispute_engine::Side;
+
+    const DID: &str = "did:plc:subject";
+    const AS_OF: i64 = 1_782_100_000;
+
+    fn evidence(provenance: Provenance, tag: u8) -> Evidence {
+        Evidence {
+            provenance,
+            confidence: 1.0,
+            signed: true,
+            verified: true,
+            payload_hash: [tag; 32],
+            favors: Side::Buyer, // direction is dispute-scoped; irrelevant here
+        }
+    }
+
+    fn attestation(attester: &str, valid: bool) -> Attestation {
+        Attestation {
+            attester_did: attester.into(),
+            attested_did: DID.into(),
+            claim: "reliable-counterparty".into(),
+            timestamp: AS_OF - 100,
+            signature_valid: valid,
+        }
+    }
+
+    fn input() -> ReputationInput {
+        ReputationInput {
+            did: DID.into(),
+            completed_escrows: 4,
+            disputed_escrows: 1,
+            resolved_favorable: 1,
+            evidence_submitted: vec![
+                evidence(Provenance::ChainProof, 1),
+                evidence(Provenance::UserClaim, 2),
+            ],
+            attestations_received: vec![attestation("did:plc:peer", true)],
+            as_of_unix: AS_OF,
+        }
+    }
+
+    #[test]
+    fn deterministic_bit_for_bit() {
+        assert_eq!(compute(&input()), compute(&input()));
+    }
+
+    #[test]
+    fn zero_history_scores_zero_with_empty_components() {
+        let empty = ReputationInput {
+            did: DID.into(),
+            completed_escrows: 0,
+            disputed_escrows: 0,
+            resolved_favorable: 0,
+            evidence_submitted: vec![],
+            attestations_received: vec![],
+            as_of_unix: AS_OF,
+        };
+        let score = compute(&empty);
+        assert_eq!(score.score, 0);
+        assert!(score.components.is_empty());
+        assert_eq!(score.computed_at, AS_OF);
+    }
+
+    #[test]
+    fn score_is_bounded_above_and_below() {
+        let mut whale = input();
+        whale.completed_escrows = 1_000_000;
+        assert_eq!(compute(&whale).score, SCORE_MAX);
+
+        let mut pariah = input();
+        pariah.completed_escrows = 0;
+        pariah.resolved_favorable = 0;
+        pariah.evidence_submitted.clear();
+        pariah.attestations_received.clear();
+        pariah.disputed_escrows = 1_000;
+        assert_eq!(compute(&pariah).score, 0, "clamped, never negative");
+    }
+
+    #[test]
+    fn high_provenance_evidence_outweighs_low() {
+        let base = ReputationInput {
+            did: DID.into(),
+            completed_escrows: 0,
+            disputed_escrows: 0,
+            resolved_favorable: 0,
+            evidence_submitted: vec![],
+            attestations_received: vec![],
+            as_of_unix: AS_OF,
+        };
+        let mut chain = base.clone();
+        chain.evidence_submitted = vec![evidence(Provenance::ChainProof, 1)];
+        let mut claim = base;
+        claim.evidence_submitted = vec![evidence(Provenance::UserClaim, 1)];
+        assert!(compute(&chain).score > compute(&claim).score);
+    }
+
+    #[test]
+    fn disputes_reduce_and_favorable_resolutions_increase() {
+        let base = compute(&input());
+
+        let mut worse = input();
+        worse.disputed_escrows += 2;
+        assert!(compute(&worse).score < base.score);
+
+        let mut better = input();
+        better.resolved_favorable += 2;
+        assert!(compute(&better).score > base.score);
+    }
+
+    #[test]
+    fn transparency_every_point_traces_to_a_hashed_component() {
+        let score = compute(&input());
+        let total: i64 = score.components.iter().map(|c| c.contribution).sum();
+        assert_eq!(
+            score.score as i64,
+            total.clamp(0, SCORE_MAX as i64),
+            "the projection is exactly the clamped component sum"
+        );
+        for c in &score.components {
+            assert!(!c.source.is_empty());
+            assert_eq!(c.evidence_hash.len(), 64, "sha256 hex on {}", c.source);
+        }
+    }
+
+    #[test]
+    fn sybil_ten_attestations_from_one_did_do_not_outweigh_one_from_another() {
+        let mut sybil = input();
+        sybil.attestations_received = (0..10)
+            .map(|_| attestation("did:plc:sybil", true))
+            .collect();
+
+        let mut honest = input();
+        honest.attestations_received = vec![attestation("did:plc:peer", true)];
+
+        assert!(compute(&sybil).score <= compute(&honest).score);
+        // And the dedupe is visible in the audit trail: one component.
+        let att_components = compute(&sybil)
+            .components
+            .iter()
+            .filter(|c| c.source.starts_with("attestation:"))
+            .count();
+        assert_eq!(att_components, 1);
+    }
+
+    #[test]
+    fn self_attestation_counts_zero() {
+        let mut vain = input();
+        vain.attestations_received = vec![attestation(DID, true)];
+        let mut none = input();
+        none.attestations_received = vec![];
+        assert_eq!(compute(&vain).score, compute(&none).score);
+    }
+
+    #[test]
+    fn invalid_signature_counts_zero_and_verifier_stamps_validity() {
+        let mut unverified = input();
+        unverified.attestations_received = vec![attestation("did:plc:peer", false)];
+        let mut none = input();
+        none.attestations_received = vec![];
+        assert_eq!(compute(&unverified).score, compute(&none).score);
+
+        // The verifier is the sanctioned validity source.
+        let verifier = MockVerifier {
+            valid_attesters: vec!["did:plc:peer".into()],
+        };
+        let stamped = verify_attestations(
+            vec![
+                attestation("did:plc:peer", false),
+                attestation("did:plc:evil", true),
+            ],
+            &verifier,
+        );
+        assert!(stamped[0].signature_valid, "allowlisted attester verifies");
+        assert!(!stamped[1].signature_valid, "unknown attester is stripped");
+    }
+
+    #[test]
+    fn recompute_composes_store_and_unknown_did_is_zero_history() {
+        let store = MockStore {
+            inputs: vec![input()],
+        };
+        assert!(recompute(DID, AS_OF, &store).unwrap().score > 0);
+        let ghost = recompute("did:plc:ghost", AS_OF, &store).unwrap();
+        assert_eq!(ghost.score, 0);
+        assert!(ghost.components.is_empty());
+    }
+}

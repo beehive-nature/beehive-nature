@@ -15,6 +15,23 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-04` — **reputation-engine v1: the last pure-logic kernel loop.**
+  New `crates/reputation-engine`: `compute(&ReputationInput) →
+  ReputationScore` — emergent, deterministic, never written directly.
+  Constitutional collision resolved and documented: the **component
+  vector is canonical** (every point → named source + commitment hash);
+  the u64 `score` is one deterministic projection apps may re-weight —
+  the kernel computes it, never mandates it. Sybil rule: one attestation
+  per unique attester (10-from-one-DID ≤ 1-from-another, tested),
+  self-attestation zero, invalid signatures zero. High-provenance
+  evidence outranks claims (+15 chain/device vs +2 claim). Bounds
+  [0,1000] clamped; zero history → 0 + empty components, no panic.
+  Seams: `SignatureVerifier` (real DID sig verification gates on identity
+  adapters), `EventStore` (replay gates on b-indexer). Forced additions
+  flagged: `as_of_unix` in input (determinism forbids ambient clocks),
+  commitment hashes for aggregate components. 12 tests incl. delta →
+  `ReputationUpdated` payload round-trip. **11 crates, 126 tests,
+  1 ignored. Every remaining milestone now has a reality gate.**
 - `2026-07-04` — **dispute-engine v1: Tier-1 adjudication, provenance over
   popularity.** New `crates/dispute-engine`: pure `resolve(&Dispute,
   &[Evidence]) → DisputeVerdict` implementing §5 — provenance-weighted

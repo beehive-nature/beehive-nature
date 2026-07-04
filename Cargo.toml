@@ -9,6 +9,7 @@ members = [
     "crates/escrow-engine",
     "crates/event-bus",
     "crates/normalizer",
+    "crates/reputation-engine",
     "crates/shared-types",
     "crates/zano-watcher",
 ]

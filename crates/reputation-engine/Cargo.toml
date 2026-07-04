@@ -1,0 +1,15 @@
+[package]
+name = "reputation-engine"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "bNature emergent reputation: deterministically recomputed from evidence and events, never written directly (v1: pure compute; signatures and event replay gate behind traits)"
+
+[dependencies]
+dispute-engine = { path = "../dispute-engine" }
+serde = { version = "1", features = ["derive"] }
+sha2 = { workspace = true }
+
+[dev-dependencies]
+shared-types = { path = "../shared-types" }
+serde_json = "1"
