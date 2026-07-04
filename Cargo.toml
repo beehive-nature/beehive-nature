@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
+    "crates/adapter-carrier",
     "crates/chain-eos",
     "crates/chain-zano",
     "crates/dispute-engine",

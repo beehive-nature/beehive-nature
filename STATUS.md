@@ -15,6 +15,21 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-04` — **adapter-carrier v1: the first real-world evidence sense,
+  mock-first.** New `crates/adapter-carrier`: `CarrierApi` trait +
+  `MockCarrierApi` (pre-recorded JSON, failure switch) + `map_to_evidence`
+  into the dispute engine, and a `CarrierEvidenceProvider` implementing
+  the existing `EvidenceProvider` seam. §5's carrier trust model encoded
+  as arithmetic, not prose: carrier responses are unsigned →
+  `signed:false` caps a lone Delivered scan at effective weight 0.90,
+  BELOW the 0.95 auto-enforce gate — one centralized API record supports
+  a verdict but can never move money alone; corroborated by a device
+  attestation the gate opens (both facts tested). Direction: delivered →
+  seller, lost/damaged/returned → buyer, pending/in-transit/unknown →
+  weak (0.30) and never promoted. Typed errors for HTTP failure, unknown
+  tracking, malformed bodies. Real HTTP client gates on carrier API
+  credentials (the named reality gate). 9 tests. **12 crates, 135 tests,
+  1 ignored.**
 - `2026-07-04` — **reputation-engine v1: the last pure-logic kernel loop.**
   New `crates/reputation-engine`: `compute(&ReputationInput) →
   ReputationScore` — emergent, deterministic, never written directly.
