@@ -12,3 +12,4 @@ time = { version = "0.3", features = ["serde-human-readable"] }
 [dev-dependencies]
 time = { version = "0.3", features = ["serde-human-readable", "macros"] }
 serde_json = "1"
+proptest = "1"

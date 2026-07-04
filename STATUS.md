@@ -37,6 +37,27 @@ authoritative record of where `origin/main` sits.
   yet constitution); email/PGP placeholders dropped (PVR needs
   neither). The hemp-seed compliance briefing stays UNTRACKED —
   FOR-COUNSEL founder material, not published.
+- `2026-07-04` — **escrow-core hardening C4: property-based invariants +
+  closed schema; C3 monotonic floor refined (funding exempt).** New
+  `tests/properties.rs` (proptest, 2048 cases each): **totality** —
+  `transition` never panics for any forged escrow × any event with
+  near-ceiling timestamps (the invariant C1/C2/C3 restore; the machine-
+  generated adversary a century of contributors won't hand-write);
+  **legal-edge** — every accepted transition follows the §9.1 graph and
+  terminals absorb; **error-leaves-unchanged**; **replay determinism** —
+  identical streams fold byte-identical; **funding is a pure comparison** —
+  no overflow/rounding at any u64. Plus `#[serde(deny_unknown_fields)]` on
+  Escrow + EscrowEvent (closed schema: an unknown key is rejected, not
+  silently dropped — a cross-implementation canonical-parse hazard for
+  replay) with 2 tests. **Refinement, named:** the C4 full-workspace run
+  caught that C3's `funded_at ≥ created_at` check was over-strict — it
+  broke composition's daemon, because `created_at` is the record's
+  bookkeeping time while the funding `at` is the observed on-chain
+  confirmation, which legitimately predates the record on catch-up/replay.
+  Funding is now exempt from the monotonic floor (the lifecycle checks
+  ship/deliver/dispute — the window-relocation-relevant ones — stay).
+  composition daemon green again. **43 unit + 5 property tests; full
+  workspace green.**
 - `2026-07-04` — **escrow-core hardening C3: lifecycle timestamps must be
   non-decreasing.** Red-team (reachability lens) found the stored anchors
   (`funded_at`/`shipped_at`/`delivered_at`) took the event's timestamp

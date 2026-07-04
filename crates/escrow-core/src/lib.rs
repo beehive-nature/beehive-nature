@@ -79,6 +79,7 @@ pub enum Verdict {
 /// Driving events (§9.1). All carry the wall-time they occurred at where the
 /// machine needs it — there is no other source of time.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub enum EscrowEvent {
     /// Observed multisig balances at funding time. Both the asset amount and
     /// the native-ZANO fee buffer must be present to transition (§9.2).
@@ -162,13 +163,14 @@ pub enum EscrowError {
     /// anchor; callers replaying untrusted streams should treat it as a
     /// corrupt record.
     InconsistentState { state: EscrowState },
-    /// An event's timestamp precedes the anchor it must follow (funding
-    /// before creation, shipping before funding, delivery before shipping,
-    /// a dispute before delivery). The lifecycle's stored timestamps must be
-    /// non-decreasing; a backwards stamp is rejected so it cannot relocate a
-    /// timeout/dispute window into the past. (The machine is clock-free and
-    /// so cannot bound a timestamp's *future* — that plausibility check
-    /// belongs to the ingestion layer, which has a real clock.)
+    /// A lifecycle event's timestamp precedes the anchor it must follow
+    /// (shipping before funding, delivery before shipping, a dispute before
+    /// delivery). These stored timestamps must be non-decreasing; a backwards
+    /// stamp is rejected so it cannot relocate a timeout/dispute window into
+    /// the past. (Funding is exempt — `created_at` is record bookkeeping, not
+    /// a lifecycle event, so on-chain funding may predate it. And the machine
+    /// is clock-free, so it cannot bound a timestamp's *future* — that
+    /// plausibility check belongs to the ingestion layer, which has a clock.)
     NonMonotonicTime {
         event: &'static str,
         at: OffsetDateTime,
@@ -202,10 +204,16 @@ impl std::fmt::Display for EscrowError {
                 write!(f, "dispute opened at {opened_at} after deadline {deadline}")
             }
             EscrowError::DeadlineOverflow { state } => {
-                write!(f, "deadline for state {state:?} overflows the representable time range")
+                write!(
+                    f,
+                    "deadline for state {state:?} overflows the representable time range"
+                )
             }
             EscrowError::InconsistentState { state } => {
-                write!(f, "state {state:?} is missing a required anchor timestamp (corrupt escrow)")
+                write!(
+                    f,
+                    "state {state:?} is missing a required anchor timestamp (corrupt escrow)"
+                )
             }
             EscrowError::NonMonotonicTime {
                 event,
@@ -223,6 +231,7 @@ impl std::error::Error for EscrowError {}
 
 /// §9.2 amended escrow record (plus `funded_at`, see module docs).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Escrow {
     pub order_id: String,
     pub multisig_wallet_id: String,
@@ -291,7 +300,13 @@ impl Escrow {
                     at,
                 },
             ) => {
-                Self::require_monotonic(at, self.created_at, "BuyerFunded")?;
+                // NOTE: funding is deliberately NOT required to follow
+                // `created_at`. `created_at` is when the escrow *record* was
+                // created (the daemon's bookkeeping); the funding `at` is the
+                // observed on-chain confirmation time, which legitimately
+                // predates the record when the daemon catches up on / replays
+                // history. Monotonicity applies to the lifecycle events that
+                // drive windows (ship/deliver/dispute), not to this seam.
                 if asset_amount >= self.amount && zano_amount >= self.fee_buffer_zano {
                     self.funded_at = Some(at);
                     Funded
@@ -971,7 +986,9 @@ mod tests {
         let mut e = escrow();
         e.created_at = near_time_max();
         assert_eq!(
-            e.transition(EscrowEvent::Timeout { now: near_time_max() }),
+            e.transition(EscrowEvent::Timeout {
+                now: near_time_max()
+            }),
             Err(EscrowError::DeadlineOverflow {
                 state: EscrowState::Created
             })
@@ -985,7 +1002,9 @@ mod tests {
         e.state = EscrowState::Funded;
         e.funded_at = Some(near_time_max());
         assert_eq!(
-            e.transition(EscrowEvent::Timeout { now: near_time_max() }),
+            e.transition(EscrowEvent::Timeout {
+                now: near_time_max()
+            }),
             Err(EscrowError::DeadlineOverflow {
                 state: EscrowState::Funded
             })
@@ -998,7 +1017,9 @@ mod tests {
         e.state = EscrowState::Shipped;
         e.shipped_at = Some(near_time_max());
         assert_eq!(
-            e.transition(EscrowEvent::Timeout { now: near_time_max() }),
+            e.transition(EscrowEvent::Timeout {
+                now: near_time_max()
+            }),
             Err(EscrowError::DeadlineOverflow {
                 state: EscrowState::Shipped
             })
@@ -1011,7 +1032,9 @@ mod tests {
         e.state = EscrowState::Delivered;
         e.delivered_at = Some(near_time_max());
         assert_eq!(
-            e.transition(EscrowEvent::Timeout { now: near_time_max() }),
+            e.transition(EscrowEvent::Timeout {
+                now: near_time_max()
+            }),
             Err(EscrowError::DeadlineOverflow {
                 state: EscrowState::Delivered
             })
@@ -1112,23 +1135,22 @@ mod tests {
     // the past — e.g. a delivery stamped before shipping, or a dispute
     // stamped before delivery. Each storing arm rejects a backwards stamp.
 
+    /// Funding is exempt from the monotonic floor: `created_at` is the
+    /// record's bookkeeping timestamp, but the funding `at` is the observed
+    /// on-chain confirmation, which legitimately predates the record when the
+    /// daemon replays/catches up on history (the composition pipeline does
+    /// exactly this — created_at = observed-now, funded_at = earlier chain
+    /// time). So funding BEFORE created_at must still succeed.
     #[test]
-    fn funding_before_creation_is_rejected() {
+    fn funding_may_predate_record_creation() {
         let mut e = escrow(); // created_at = t0()
-        let before = e.clone();
         let ev = EscrowEvent::BuyerFunded {
             asset_amount: AMOUNT,
             zano_amount: FEE_BUFFER,
-            at: t0() - Duration::seconds(1),
+            at: t0() - Duration::days(10),
         };
-        assert!(matches!(
-            e.transition(ev),
-            Err(EscrowError::NonMonotonicTime {
-                event: "BuyerFunded",
-                ..
-            })
-        ));
-        assert_eq!(e, before); // unchanged on Err
+        assert_eq!(e.transition(ev), Ok(EscrowState::Funded));
+        assert_eq!(e.funded_at, Some(t0() - Duration::days(10)));
     }
 
     #[test]
@@ -1209,5 +1231,27 @@ mod tests {
             }),
             Err(EscrowError::NonMonotonicTime { .. })
         ));
+    }
+
+    // ---- canonical parse: closed schema (C4) ----------------------------
+    //
+    // The event stream is replayed by independent DROs; an unknown field
+    // must not be silently dropped (a canonicalization hazard across JSON
+    // libraries). `deny_unknown_fields` makes the schema closed.
+
+    #[test]
+    fn escrow_rejects_unknown_fields() {
+        let e = escrow();
+        let mut v: serde_json::Value = serde_json::to_value(&e).unwrap();
+        v["totally_unknown_field"] = serde_json::json!(1);
+        assert!(serde_json::from_value::<Escrow>(v).is_err());
+    }
+
+    #[test]
+    fn event_rejects_unknown_fields() {
+        let ev = full_funding(fund_at());
+        let mut v: serde_json::Value = serde_json::to_value(&ev).unwrap();
+        v["BuyerFunded"]["totally_unknown_field"] = serde_json::json!(1);
+        assert!(serde_json::from_value::<EscrowEvent>(v).is_err());
     }
 }
