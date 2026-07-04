@@ -8,6 +8,7 @@ members = [
     "crates/event-bus",
     "crates/normalizer",
     "crates/shared-types",
+    "crates/zano-watcher",
 ]
 
 [workspace.package]

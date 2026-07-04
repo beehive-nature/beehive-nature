@@ -15,6 +15,21 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-03` — **zano-watcher: the Zano sense adapter, LIVE-observed.**
+  New `crates/zano-watcher` — a **view-only wallet-RPC scanner** (Zano is
+  confidential; you scan with a view key, you don't parse blocks). RPC
+  shape source-verified (`getbalance` per wallet_rpc_server.h /
+  COMMAND_RPC_GET_BALANCE); maps an observed balance → `RawChainAction`
+  (contract "zano"/transfer) carrying asset amount AND observed native
+  ZANO as `fee_buffer_zano` (zero stays zero — never invented). 6 unit
+  tests (source-shaped responses, error typing, normalize round-trip).
+  **LIVE**: served a **watch-only** export of the funded testnet buyer
+  (spend-incapable — safe to serve auth-off, bound to the WSL vNIC only)
+  over real wallet RPC; the WSL-built watcher read **100 fUSD** off it,
+  normalized to OrderFunded, and escrow-core **correctly refused** while
+  the native tZANO was still lock-maturing (zano_provided:0 — the
+  never-invent principle on live state). Funded re-run pending native
+  unlock. Next: `crates/dro-signer`.
 - `2026-07-03` — **🏁 ITEM 4 COMPLETE — LIVE: chain bytes drive escrow-core.**
   New `crates/escrow-engine`: bus consumer replaying CanonicalEvents into
   `escrow_core::transition` (OrderFunded/Shipped/Delivered/Completed →
