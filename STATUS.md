@@ -15,6 +15,22 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-04` — **composition: the runtime daemon — the kernel becomes one
+  process.** New `crates/composition` (lib + thin binary): EventBus(1024)
+  + four wired tasks — ingest (SHIP → extract → embedded zano ABI →
+  normalize → publish), escrow consumer (apply + forward Applied), DRO
+  consumer (settle_transition + MockSigner over an internal channel: the
+  bus carries facts, the channel carries decisions), reputation consumer
+  (accumulate → compute at drain). Shutdown discipline: signal stops
+  ingest, consumers DRAIN before exit, and the exit report proves it
+  (published == escrow_seen == reputation_seen). 2 integration tests
+  drive the whole daemon in-process against a mock SHIP server: full
+  flow + rejected-second-funding on stream-end, and signal-shutdown
+  under a held-open socket exiting in <5s with nothing dropped. Honest
+  boundary asserted in-test: only OrderFunded is reachable from chain
+  ingest today (§9.3 has two mappings), so settlement intents are
+  expected EMPTY — not invented. Binary: `SHIP_WS_URL=… cargo run -p
+  composition`. **13 crates, 137 tests, 1 ignored.**
 - `2026-07-04` — **adapter-carrier v1: the first real-world evidence sense,
   mock-first.** New `crates/adapter-carrier`: `CarrierApi` trait +
   `MockCarrierApi` (pre-recorded JSON, failure switch) + `map_to_evidence`

@@ -4,6 +4,7 @@ members = [
     "crates/adapter-carrier",
     "crates/chain-eos",
     "crates/chain-zano",
+    "crates/composition",
     "crates/dispute-engine",
     "crates/dro-signer",
     "crates/escrow-core",
