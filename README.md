@@ -93,7 +93,9 @@ This repo is built to be audited. The fastest orientation:
    adjudication ([dispute-engine](./crates/dispute-engine) — popularity
    must never auto-enforce), and the SHIP wire codec proven against live
    nodeos ([chain-eos](./crates/chain-eos)).
-4. Findings → issues welcome; contributions → [CONTRIBUTING.md](./CONTRIBUTING.md)
+4. House rules and scope boundary: [REVIEWING.md](./REVIEWING.md). Anything
+   exploitable goes through the private channel in [SECURITY.md](./SECURITY.md),
+   never a public issue. Contributions → [CONTRIBUTING.md](./CONTRIBUTING.md)
    (DCO sign-off, one-door review, no CLA).
 
 ## License

@@ -15,6 +15,28 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-04` — **Reviewer contract adopted: SECURITY.md + REVIEWING.md at
+  root, R-004 in the register.** Cowork drafts, one-door reviewed and
+  adopted. SECURITY.md: the private channel is GitHub Private
+  Vulnerability Reporting — ENABLED, API-verified `true` (no email to
+  publish or leak); scope is the fund-moving/ledger-integrity workspace;
+  good-faith safe harbor excludes live funds and sanctions-violating
+  tests. REVIEWING.md: the authority hierarchy (ledger beats memory,
+  including the author's), the mechanism-not-worldview boundary per
+  Art. VII, the three-way response norm, the absent/lie-to/become-it
+  audit lens. risk-register **R-004 adopted** (Cowork edit to a tracked
+  file, reviewed): the DRO must never trust the indexer's view alone —
+  Kelp DAO class, Apr 2026, INDEPENDENTLY VERIFIED before adoption
+  (~$290M; poisoned RPC binaries + DDoS-forced failover behind a 1-of-1
+  DVN confirmed an rsETH mint that never happened; Chainalysis/SlowMist/
+  Chainstack post-mortems concur). Adoption repairs, named: crate list
+  completed against the tree (draft missed `escrow-engine` +
+  `shared-types` — 2 of 14); dangling references removed (untracked
+  hemp briefing → generic sanctions wording; `docs/findings/` →
+  `docs/`); meta-tier citation corrected to the ratification DRAFT (not
+  yet constitution); email/PGP placeholders dropped (PVR needs
+  neither). The hemp-seed compliance briefing stays UNTRACKED —
+  FOR-COUNSEL founder material, not published.
 - `2026-07-04` — **Peer review begun.** Pinned issue #1 ("Peer review open —
   start here") is the front door: ledger-first orientation, the one-command
   verification run, and the claims most worth attacking. GitHub Discussions
