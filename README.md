@@ -9,9 +9,10 @@ Zano integration, built as the identity/settlement layer of the **Beehive
 Nature Reserve Kernel**.
 
 > **Status:** cryptographic design source-confirmed; wire contract frozen (proto
-> v0.3); host-side derivation **proven against stock Zano** (real vector,
-> 2026-07-03). Firmware and legal review are the unstarted work between here
-> and anything a user touches. See [`STATUS.md`](./STATUS.md).
+> v0.3); host-side derivation **proven against stock Zano** — *reproducible*: run
+> `cargo test -p chain-zano` (committed vector, `src/testvec.rs`). Firmware and
+> legal review are the unstarted work between here and anything a user touches.
+> See [`STATUS.md`](./STATUS.md).
 
 ## The one rule everything depends on
 
@@ -83,16 +84,18 @@ This repo is built to be audited. The fastest orientation:
 1. **[`STATUS.md`](./STATUS.md)** — the authoritative ledger: every claim
    is dated and staked to a commit, a source citation, or captured live
    output. What's proven, what was refuted, what's decided, what's gated.
-2. **Run it:** `git config core.hooksPath .githooks && cargo test --workspace`
-   — expect **146 passed, 1 ignored** (the ignored test is firmware-gated
-   and says so).
+2. **Run it** (the count is a command, not a claim):
+   `git config core.hooksPath .githooks && cargo test --workspace` →
+   **`179 passed; 1 ignored`** (the ignored test is the firmware-gated
+   `slip0010` end-to-end, and says so).
 3. **The claims most worth attacking:** the escrow state machine's
    dual-balance funding check ([escrow-core](./crates/escrow-core)), the
    stock-Zano derivation vector proof ([chain-zano](./crates/chain-zano),
    vector provenance in `src/testvec.rs`), the provenance-weighted
    adjudication ([dispute-engine](./crates/dispute-engine) — popularity
-   must never auto-enforce), and the SHIP wire codec proven against live
-   nodeos ([chain-eos](./crates/chain-eos)).
+   must never auto-enforce), and the SHIP wire codec ([chain-eos](./crates/chain-eos)
+   — reproducible against a mock SHIP server via `cargo test -p chain-eos`;
+   also dev-chain observed against a local nodeos, per `STATUS.md`).
 4. House rules and scope boundary: [REVIEWING.md](./REVIEWING.md). Anything
    exploitable goes through the private channel in [SECURITY.md](./SECURITY.md),
    never a public issue. Contributions → [CONTRIBUTING.md](./CONTRIBUTING.md)

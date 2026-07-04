@@ -3,9 +3,10 @@
 The one-line summary for any new reader or AI:
 
 > **The cryptographic design is source-confirmed, the wire contract is frozen,
-> and the host-side derivation is PROVEN against stock Zano (real vector,
-> 2026-07-03). The firmware and the legal review are the unstarted work
-> between here and anything a user touches.**
+> and the host-side derivation is PROVEN against stock Zano — publicly
+> reproducible: `cargo test -p chain-zano` (committed vector, 2026-07-03). The
+> firmware and the legal review are the unstarted work between here and
+> anything a user touches.**
 
 Do not let AI-to-AI review re-open the items under "Done." If you believe one is
 wrong, cite the Zano source file/line and stop — do not rewrite it.
@@ -14,6 +15,22 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
+
+**Evidence tiers (read the vocabulary before the claims).** Per the doc-audit
+F5 finding, this ledger distinguishes two kinds of evidence, and the word
+choice is deliberate:
+- **PROVEN / reproducible** — anyone can re-run it and get the same result.
+  Each such claim names its command (e.g. `cargo test --workspace`;
+  `cargo test -p chain-zano` for the stock-Zano derivation vector). A command
+  can't lie; run it and trust rises.
+- **LIVE / dev-chain observed** — observed against a *local* dev or testnet
+  node (real bytes, real chain state) but **not publicly reproducible**: a
+  stranger has no access to that node. These entries are marked
+  `(dev-chain observed)`. They are real and were captured, but they are
+  weaker than a proof a reviewer can re-run, and are labelled so no reader
+  mistakes one for the other.
+Counts follow the same rule: a number is stated as the command that produces
+it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
 - `2026-07-04` — **Reviewer contract adopted: SECURITY.md + REVIEWING.md at
   root, R-004 in the register.** Cowork drafts, one-door reviewed and
@@ -37,6 +54,18 @@ authoritative record of where `origin/main` sits.
   yet constitution); email/PGP placeholders dropped (PVR needs
   neither). The hemp-seed compliance briefing stays UNTRACKED —
   FOR-COUNSEL founder material, not published.
+- `2026-07-04` — **Reproduction-command rule adopted (doc-audit F1 + F5).** A
+  count is now stated as the command that produces it, and a "proven" declares
+  its reproduction path or is downgraded to "dev-chain observed." Applied:
+  README reviewer count `146 → cargo test --workspace → 179 passed; 1 ignored`,
+  with the stock-Zano claim given its repro (`cargo test -p chain-zano`) and
+  the SHIP codec split into reproducible (mock server) vs dev-chain observed
+  (local nodeos). STATUS header gained an **evidence-tiers legend** defining
+  PROVEN/reproducible vs LIVE/dev-chain observed, and the four dev-chain LIVE
+  entries (zano-watcher, item-4 block 2832, fUSD fee buffer, SHIP ingestion)
+  are tagged `(dev-chain observed)` — additive labels, the dated facts stand.
+  REVIEWING.md carries the standing rule. Historical dated counts left intact
+  (they record the true number at their commit; the legend reframes them).
 - `2026-07-04` — **Renamed to "Beehive Nature Reserve Kernel".** Proper-noun
   name adopted in the three canonical places: CONSTITUTION.md title + preamble
   (the categorical "is a coordination kernel" stays — accurate, lowercase),
@@ -315,6 +344,7 @@ authoritative record of where `origin/main` sits.
   lifecycle → exactly 1 settlement). Zero `todo!()` — unbuilt crypto
   lives behind the trait, not a panic. 9 crates now.
 - `2026-07-03` — **zano-watcher: the Zano sense adapter, LIVE-observed.**
+  `(dev-chain observed — local testnet, not publicly reproducible)`
   New `crates/zano-watcher` — a **view-only wallet-RPC scanner** (Zano is
   confidential; you scan with a view key, you don't parse blocks). RPC
   shape source-verified (`getbalance` per wallet_rpc_server.h /
@@ -333,6 +363,7 @@ authoritative record of where `origin/main` sits.
   Refusal-when-absent AND acceptance-when-present, both real, no mock.
   Next: `crates/dro-signer`.
 - `2026-07-03` — **🏁 ITEM 4 COMPLETE — LIVE: chain bytes drive escrow-core.**
+  `(dev-chain observed — local dev chain, block 2832; not publicly reproducible)`
   New `crates/escrow-engine`: bus consumer replaying CanonicalEvents into
   `escrow_core::transition` (OrderFunded/Shipped/Delivered/Completed →
   BuyerFunded/SellerShipped/DeliveryConfirmed/BuyerReleased; dispute
@@ -405,7 +436,8 @@ authoritative record of where `origin/main` sits.
   Dollar"), carrying the distinct testnet asset id already recorded — not
   a self-minted stand-in. Same contract semantics, testnet instance;
   mainnet-id observation remains a mainnet-only follow-up.
-- `2026-07-03` — **✅ §1.7 FEE BUFFER VERIFIED LIVE WITH fUSD.** Local synced
+- `2026-07-03` — **✅ §1.7 FEE BUFFER VERIFIED LIVE WITH fUSD.**
+  `(dev-chain observed — local synced testnet node, not publicly reproducible)` Local synced
   testnet + API faucet (dispenses fUSD): buyer held 100 fully-unlocked fUSD
   and exactly 0 native ZANO → fUSD transfer FAILS at the wallet layer
   (`not_enough_money … required: 0.01 (fee)`, wallet2.cpp:7793). The §9.2
@@ -415,6 +447,8 @@ authoritative record of where `origin/main` sits.
   asset_id)` — zero code changes). Remaining: full 2-of-3 multisig flow
   needs `crates/dro-signer` (no stock RPC surface — see refutation entry).
 - `2026-07-03` — **🔗 LIVE SHIP INGESTION: real blocks through our codec.**
+  (dev-chain observed — local nodeos; the codec itself is unit-reproducible:
+  `cargo test -p chain-eos`)
   Sequence items 2+3. WSL installed (owner reboot) → Ubuntu 26.04 → Spring
   v1.2.2 single-producer nodeos with state_history on `127.0.0.1:8080` →
   chain-eos (built and run inside WSL — Windows cargo is now fully

@@ -25,6 +25,21 @@ to be replaced while the invariants hold.
    `STATUS.md` + `cargo test --workspace`, never from prose. Don't trust a
    number in a doc; run the tree.
 
+## The reproduction-command rule (house standard)
+
+A number can drift and a label can overclaim; a command can't lie. So:
+
+- **Every count is stated as the command that verifies it.** Not "179 tests"
+  but `cargo test --workspace` → **`179 passed; 1 ignored`** (the ignored one
+  is the firmware-gated `slip0010` end-to-end). Run it; if it doesn't match,
+  that's a finding.
+- **Every "proven" declares its reproduction path, or it is "dev-chain
+  observed."** *Proven* means anyone can re-run it — e.g. the stock-Zano
+  derivation vector, `cargo test -p chain-zano`. *Dev-chain observed* means it
+  was seen against a local dev/testnet node that a stranger can't reach; those
+  entries in `STATUS.md` are tagged `(dev-chain observed)` precisely so the
+  two are never confused. Hold us to the distinction — it is the credibility.
+
 ## In scope for review
 
 The code and its specifications: the crates listed in `STATUS.md`,
