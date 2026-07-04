@@ -31,7 +31,9 @@ authoritative record of where `origin/main` sits.
   weave; real Arweave gates on gateway + funded AR wallet. Repairs made
   during adoption: the root manifest arrived truncated (whole
   `[workspace.dependencies]` section gone — restored) + one clippy nit.
-  **15 crates, 146 tests, 1 ignored.**
+  **14 crates, 146 tests, 1 ignored.** (An earlier version of this entry
+  said 15 — arithmetic error, caught by the review session against the
+  directory listing; `ls -d crates/*/ | wc -l` = 14.)
 - `2026-07-04` — **§9.3 example set complete: third mapping landed.**
   `arweave:order_shipped → OrderShipped` (the brief's own third example) —
   shipment records from the future arweave watcher carry order context +
