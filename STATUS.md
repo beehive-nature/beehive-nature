@@ -15,6 +15,30 @@ wrong, cite the Zano source file/line and stop — do not rewrite it.
 One line per milestone; newest first. This section, not any AI's memory, is the
 authoritative record of where `origin/main` sits.
 
+- `2026-07-04` — **Peer review begun.** Pinned issue #1 ("Peer review open —
+  start here") is the front door: ledger-first orientation, the one-command
+  verification run, and the claims most worth attacking. GitHub Discussions
+  enabled as the second channel. Post-flip CI green on the public repo
+  (tests + secret-scan both ✓ on `d94cd57`); README badges live. (Ledger
+  repair in this same commit: the PUBLIC entry below was first committed
+  mid-file — a mis-anchored insert, same failure class as the d8dd5d7
+  blind commit: trusting an edit's anchor instead of checking the result.
+  Moved to the top per this section's newest-first rule.)
+- `2026-07-04` — **🌍 PUBLIC.** Repository flipped public at HEAD `792f6df`
+  on the founder's direct instruction ("we need the repo public today"),
+  under the founder's standing interpretation that the §8 legal-review
+  flag attaches to **operating the venue**, not to publishing code —
+  open-sourcing escrow state machines, DID specs, and indexer code that
+  will someday serve a marketplace is ordinary open source, and §8's
+  flag remains open for the venue itself. What published: 14 crates
+  (146 tests, 1 firmware-gated ignore), the constitution (draft, five
+  founder decisions pending), all findings and runbooks, and the
+  sanctioned TESTNET-ONLY vectors. Pre-flip audit: full-history secret
+  scan clean, single deliberate author identity, licensing structural
+  (AGPL-3.0-only / DCO / CC-BY-4.0). Post-flip: GitHub secret scanning
+  + push protection ENABLED (now free on public); description + topics
+  set; README gained CI badges and a "For reviewers" section. **Peer
+  review is open.**
 - `2026-07-04` — **dual-chain daemon + permanence anchor.** (1) `composition`
   now ingests from BOTH sense organs: a `zano_loop` polls the view-only
   wallet RPC per watch target (spawn_blocking around the sync client;
@@ -153,21 +177,6 @@ authoritative record of where `origin/main` sits.
   2832 → streamed, extracted, ABI-decoded, normalized, bused →
   `ESCROW order-live: Ok(Funded)`. Recipe in runbook §4b. The five-item
   sequence is now 5/5 ✅.
-- `2026-07-04` — **🌍 PUBLIC.** Repository flipped public at HEAD `792f6df`
-  on the founder's direct instruction ("we need the repo public today"),
-  under the founder's standing interpretation that the §8 legal-review
-  flag attaches to **operating the venue**, not to publishing code —
-  open-sourcing escrow state machines, DID specs, and indexer code that
-  will someday serve a marketplace is ordinary open source, and §8's
-  flag remains open for the venue itself. What published: 14 crates
-  (146 tests, 1 firmware-gated ignore), the constitution (draft, five
-  founder decisions pending), all findings and runbooks, and the
-  sanctioned TESTNET-ONLY vectors. Pre-flip audit: full-history secret
-  scan clean, single deliberate author identity, licensing structural
-  (AGPL-3.0-only / DCO / CC-BY-4.0). Post-flip: GitHub secret scanning
-  + push protection ENABLED (now free on public); description + topics
-  set; README gained CI badges and a "For reviewers" section. **Peer
-  review is open.**
 - `2026-07-04` — **Article VI §3 ratification draft versioned (awaiting founder
   decisions — NOT ratified).** `docs/article-vi-ratification-draft.md`:
   OREC adapted to kernel amendments (Proof gate before any vote; staged
