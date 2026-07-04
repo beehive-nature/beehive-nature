@@ -100,7 +100,9 @@ meta-tier requires *all* of:
   §Parameters and open decision 4); and
 - through **Epoch 1 at minimum**, a founder/guardian co-sign that does *not*
   sunset on the ordinary Epoch-2 trigger — the governance-of-governance brake is
-  the last one released, not among the first.
+  the last one released, not among the first. But "last" is **not "never"**: its
+  release is governed by its own named exit condition (open decision 5), because
+  a brake with no exit condition has merely renamed the captor.
 
 Rule of thumb: **the component whose capture hides itself gets the hardest
 supermajority.**
@@ -129,7 +131,14 @@ supermajority.**
   re-amending, provided the two-stage optimistic-veto semantics hold.
 
 ## Open founder decisions (the parts only you can set)
-1. The parameter values above — especially `K` and the epoch triggers.
+1. The parameter values above — especially `K`, the epoch triggers, and the
+   **meta-tier blocking fraction**. On the last: review corrected a prose/value
+   divergence (the draft said "K_meta=8 — a quarter of turnout blocks"; by the
+   `no ≥ turnout/(K+1)` arithmetic, K=8 means a *ninth* blocks and "a quarter"
+   would be K=3). The surviving value is K=8, but which was the *intent* is now
+   unknowable from the text — and the strength of the hardest brake in the
+   building must not be whichever side of a typo survived review. **Choose the
+   blocking fraction first; derive K from it.**
 2. Whether Epoch-1 founder veto is **absolute** or itself Respect-overridable by
    a supermajority (recommend overridable, so the brake isn't a permanent veto).
 3. The tier structure. At minimum three tiers: **feature** (ordinary `K`),
@@ -147,6 +156,20 @@ supermajority.**
    (approval, not mere absence of objection), while routine governance stays
    optimistic? **Recommended: yes** — friction is a bug in operations and a
    feature in constitutions.
+5. **The last brake's own exit condition.** The meta-tier founder/guardian
+   co-sign is a Ulysses pact — correct during bootstrap (a Ulysses pact requires
+   a Ulysses), but a constitution whose anti-capture mechanism terminates in a
+   *permanent* single-holder veto has only **named its captor**, and Article V
+   forbids it ("bootstrap is temporary; decentralization is permanent"). So this
+   document must name that brake's **own exit condition now**, however distant and
+   demanding — a *measurable* state, never an unstated "someday." Candidate
+   release gate: reputation-engine maturity thresholds sustained across **N
+   incident-free years of meta-governance**, **plus** a `K_meta` supermajority,
+   **plus** founder assent — culminating in **ceremonial destruction of the
+   guardian keys**. This is the honest resolution of the tension between
+   "legitimacy cannot be added retroactively" and "no permanent captor": settle
+   it in writing while there is still one author to settle it. **This is the
+   last structural gap in the amendment mechanism.**
 
 ---
 _Governance design for founder decision and review; not legal advice._

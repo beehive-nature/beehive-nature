@@ -163,9 +163,17 @@ authoritative record of where `origin/main` sits.
   capture hides itself gets the hardest supermajority*. Door-review fixes:
   OREC citation **pinned** (sim31/ordao@4a10ee55a413, GPL-3.0, cited not
   vendored) and one blocking-fraction arithmetic error corrected
-  (K_meta=8 blocks at a ninth of turnout, not a quarter). Four founder
-  decisions enumerated in the draft; the placeholder retires only when
-  they're made. Conventions hardened alongside: **single-writer per
+  (K_meta=8 blocks at a ninth of turnout, not a quarter) — with the
+  *intent* behind that divergence (ninth vs quarter, K=8 vs K=3)
+  escalated into the decisions list rather than silently resolved by
+  whichever side of the typo survived. **Five founder decisions**
+  enumerated in the draft — the fifth added on review: the meta-tier
+  founder co-sign is a Ulysses pact and must carry its own *named,
+  measurable* exit condition (candidate: maturity thresholds + N
+  incident-free years + K_meta supermajority + founder assent →
+  ceremonial guardian-key destruction), because a brake with no exit
+  condition has merely renamed the captor. The placeholder retires only
+  when all five are made. Conventions hardened alongside: **single-writer per
   draft** and **cite-and-pin, never vendor** (CONTRIBUTING.md).
 - `2026-07-04` — **did:autonomi method spec v1 adopted (research lane, one-door
   review).** `docs/architecture/did-autonomi-spec.md` — retires the brief's
