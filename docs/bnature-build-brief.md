@@ -205,6 +205,11 @@ pub struct Escrow {
     pub asset_id: Option<String>, // fUSD asset id: 86143388bd056a8f0bab669f78f14873fac8e2dd8d57898cdb725a2d5e2e4f8f (PUBLIC-CONSTANT: public chain data)
     pub fee_buffer_zano: u64,     // NEW: native ZANO for tx fee, funded by buyer
     pub created_at: OffsetDateTime,
+    pub funded_at: Option<OffsetDateTime>, // AMENDED 2026-07-04: the 72h Funded
+                                           // timeout measures from funding; the
+                                           // original struct had no funding epoch —
+                                           // spec deficiency caught by the shipped
+                                           // implementation (escrow-core, f2e2b1e)
     pub shipped_at: Option<OffsetDateTime>,
     pub delivered_at: Option<OffsetDateTime>,
     pub dispute_id: Option<String>,
@@ -222,7 +227,7 @@ Normalizer: separate crate (`crates/normalizer`) consuming raw IndexedEvents fro
 - **Coding env**: build `crates/escrow-core` — pure logic, no node needed. Opening prompt (paste into Claude Code):
 
 > I'm building the bNature.social escrow system. [Paste §9.1 + §9.2 of this brief.]
-> Task: create the Rust crate `crates/escrow-core` in my existing Cargo workspace, containing: the `EscrowState` enum (Serialize/Deserialize), the `Escrow` struct **including `fee_buffer_zano`**, and a `transition` method taking `&mut self` and an `EscrowEvent`, returning `Result<EscrowState, EscrowError>`, enforcing the transition table, timeouts, and the funding check (asset amount AND fee buffer both present). Unit tests for every valid transition, every invalid transition, every timeout, and partial-funding rejection. Use mockable time. Do not add any other files or discuss architecture. Start with `crates/escrow-core/Cargo.toml` and `src/lib.rs`.
+> Task: create the Rust crate `crates/escrow-core` in my existing Cargo workspace, containing: the `EscrowState` enum (Serialize/Deserialize), the `Escrow` struct **including `fee_buffer_zano`**, and a `transition` method taking `&mut self` and an `EscrowEvent`, returning `Result<EscrowState, EscrowError>`, enforcing the transition table, timeouts, and the funding check (asset amount AND fee buffer both present). Unit tests for every valid transition, every invalid transition, every timeout, and partial-funding rejection. Time enters only through events — no clock anywhere in the crate (AMENDED 2026-07-04 from "use mockable time": the shipped design is strictly stronger, and required for DRO replay determinism — an ambient clock, even mocked, is state a CanonicalEvent replay cannot reproduce). Do not add any other files or discuss architecture. Start with `crates/escrow-core/Cargo.toml` and `src/lib.rs`.
 
 - After tests pass: commit `feat(escrow-core): state machine with fee-buffer funding check`, then choose next: canonical event types (§9.3) or Zano findings follow-up.
 

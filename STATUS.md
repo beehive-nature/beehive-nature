@@ -153,6 +153,12 @@ authoritative record of where `origin/main` sits.
   2832 → streamed, extracted, ABI-decoded, normalized, bused →
   `ESCROW order-live: Ok(Funded)`. Recipe in runbook §4b. The five-item
   sequence is now 5/5 ✅.
+- `2026-07-04` — precision amendment to the §1.7 line below: the asset was
+  the **official testnet deployment of fUSD** — dispensed by Zano's own
+  testnet faucet (`faucet.testnet.zano.org`, ticker FUSD, name "Freedom
+  Dollar"), carrying the distinct testnet asset id already recorded — not
+  a self-minted stand-in. Same contract semantics, testnet instance;
+  mainnet-id observation remains a mainnet-only follow-up.
 - `2026-07-03` — **✅ §1.7 FEE BUFFER VERIFIED LIVE WITH fUSD.** Local synced
   testnet + API faucet (dispenses fUSD): buyer held 100 fully-unlocked fUSD
   and exactly 0 native ZANO → fUSD transfer FAILS at the wallet layer
