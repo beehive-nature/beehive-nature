@@ -55,6 +55,12 @@ Any single **Red**, or two simultaneous **Amber**, is a founder-attention flag: 
 fUSD-denominated escrow creation until it clears. (Existing escrows are already exposed —
 this gates *new* risk, it can't unwind old.)
 
+**Both levers, not one** (per brief §8): alongside gating new escrows, **pause DRO
+auto-enforce** for the duration — automated verdicts must not execute on distorted dollar
+values mid-crisis; existing disputes escalate to human (Tier 2) review instead of
+auto-releasing at a broken peg. New-escrow gating stops fresh exposure; auto-enforce pause
+protects the exposure that already exists.
+
 ---
 
 ## Baseline snapshot — 2026-07-04
