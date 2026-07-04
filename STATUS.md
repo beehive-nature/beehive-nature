@@ -37,6 +37,27 @@ authoritative record of where `origin/main` sits.
   yet constitution); email/PGP placeholders dropped (PVR needs
   neither). The hemp-seed compliance briefing stays UNTRACKED —
   FOR-COUNSEL founder material, not published.
+- `2026-07-04` — **escrow-core: snapshot-resumption durability + named vector
+  guards.** Re-issued "Century Durability" directive re-ran the C1–C6 sprint's
+  three Task-1 vectors (funding overflow, out-of-order reachability, replay
+  determinism) — all already closed and property-proven, so **no red→green**
+  here. Additive, honest: (1) one genuinely-new property,
+  `snapshot_resumption_is_deterministic` — persist an escrow mid-stream,
+  reload from bytes across a simulated restart, resume, and demand equality
+  with the uninterrupted fold; proves `Escrow` is a lossless state snapshot
+  (the persistence boundary a 100-year replay actually lives on). (2) Four
+  explicit **named** guards for the directive's exact vectors —
+  deliver-before-shipped, refund-after-completed (terminal absorption),
+  u64::MAX funding no-overflow, and overfunded-fee-cannot-mask-underfunded-asset
+  (independent thresholds, no cross-subsidy). All PASS on arrival; they pin
+  the named cases so a future change can't reopen them silently. Task 2 (DRO
+  interface boundary) was already delivered as C5. One file
+  (`tests/properties.rs`). **escrow-core 43 unit + 10 property; fmt clean.**
+  Open consideration flagged to founder: `deny_unknown_fields` (C4) closes the
+  schema for replay-determinism, but Article VI mandates *additive* evolution —
+  the two pull opposite ways for `EscrowEvent` if it is ever cross-version
+  persisted (it isn't today; `CanonicalEvent` is the wire format). Founder call,
+  not changed unilaterally.
 - `2026-07-04` — **Adversarial hardening sprint — capstone + R-005 pinned.**
   Six commits (C1–C6) hardening the settlement-critical core against an
   attacker's tests, driven by a 5-lens adversarial red-team workflow whose
