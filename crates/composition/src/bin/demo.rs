@@ -18,7 +18,13 @@
 //! bus-consumer `escrow-engine` is happy-path-only by its own design, so the
 //! dispute transitions drive `escrow-core` directly.
 //!
-//! Exits 0 only if BOTH scenarios complete clean; nonzero on any invariant
+//! **Scenario 3 — reputation flow.** The three lifecycle outcomes drive the
+//! real `reputation-engine`: reputation is EMERGENT (recomputed from
+//! event-derived inputs via `recompute`/`MockStore`, never written), the
+//! component vector is canonical (`score` is one projection of it), and
+//! attestations are Sybil-deduplicated per attester.
+//!
+//! Exits 0 only if ALL THREE scenarios complete clean; nonzero on any invariant
 //! failure.  `cargo run -p composition --bin demo`
 
 use dispute_engine::{adjudicate, Dispute, Evidence, MockProvider, Provenance, Side, VerdictType};
@@ -31,6 +37,10 @@ use escrow_core::{
 };
 use escrow_engine::EscrowEngine;
 use event_bus::EventBus;
+use reputation_engine::{
+    recompute, verify_attestations, Attestation, MockStore, MockVerifier, ReputationInput,
+    SCORE_MAX,
+};
 use shared_types::{CanonicalEvent, EventPayload, EventType, OrderEvent, SourceChain};
 use time::OffsetDateTime;
 
@@ -132,7 +142,12 @@ async fn run() -> i32 {
         return fail(&e);
     }
 
-    println!("\nboth scenarios complete clean - exit 0");
+    println!("\n=== SCENARIO 3 — reputation flow (emergent · recomputed · Sybil-resistant) ===");
+    if let Err(e) = reputation_flow() {
+        return fail(&e);
+    }
+
+    println!("\nall three scenarios complete clean - exit 0");
     0
 }
 
@@ -543,6 +558,174 @@ fn dispute_branch() -> Result<(), String> {
             signed.signed_by
         );
     }
+
+    Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// Scenario 3 — reputation flow: the lifecycle outcomes drive the real
+// reputation-engine. Reputation is EMERGENT (recomputed from event-derived
+// inputs, never written), the component vector is canonical (`score` is one
+// projection), and attestations are Sybil-deduplicated per attester.
+// ---------------------------------------------------------------------------
+
+/// A third-party attestation; `signature_valid` is left false and stamped by a
+/// verifier below (the only sanctioned validity path), never hand-set here.
+fn attestation(attester: &str, subject: &str) -> Attestation {
+    Attestation {
+        attester_did: attester.into(),
+        attested_did: subject.into(),
+        claim: "reliable-counterparty".into(),
+        timestamp: BASE_TS + 500,
+        signature_valid: false,
+    }
+}
+
+fn reputation_flow() -> Result<(), String> {
+    const AS_OF: i64 = BASE_TS + 1000;
+    const SELLER: &str = "did:plc:seller";
+    const BUYER: &str = "did:plc:buyer";
+
+    // The b-indexer would replay each DID's CanonicalEvents into a
+    // ReputationInput; here we load the inputs THIS demo's three lifecycle
+    // outcomes produce, then drive the real engine. Attributing an escrow
+    // outcome to a DID is an indexer/app-layer choice (the kernel's
+    // reputation-engine is agnostic) — the demo's attribution is stated inline.
+
+    // Seller: S1 completed (delivered -> released); 2a and 2b both went to
+    // dispute and neither resolved in the seller's favor; the seller's only
+    // evidence was a UserClaim in 2b.
+    let seller_input = ReputationInput {
+        did: SELLER.into(),
+        completed_escrows: 1,
+        disputed_escrows: 2,
+        resolved_favorable: 0,
+        evidence_submitted: vec![ev(Provenance::UserClaim, Side::Seller, false)],
+        attestations_received: vec![],
+        as_of_unix: AS_OF,
+    };
+
+    // Buyer: 2a resolved in the buyer's favor (RefundBuyer); high-provenance
+    // evidence across 2a/2b. Plus a Sybil probe on the attestations: ten from
+    // ONE attester DID and one from another — validity stamped by the verifier,
+    // dedup enforced by compute.
+    let verifier = MockVerifier {
+        valid_attesters: vec!["did:plc:sybil-ring".into(), "did:plc:honest-peer".into()],
+    };
+    let mut raw_atts: Vec<Attestation> = (0..10)
+        .map(|_| attestation("did:plc:sybil-ring", BUYER))
+        .collect();
+    raw_atts.push(attestation("did:plc:honest-peer", BUYER));
+    let buyer_atts = verify_attestations(raw_atts, &verifier);
+
+    let buyer_input = ReputationInput {
+        did: BUYER.into(),
+        completed_escrows: 0,
+        disputed_escrows: 2,
+        resolved_favorable: 1,
+        evidence_submitted: vec![
+            ev(Provenance::ChainProof, Side::Buyer, true),
+            ev(Provenance::CarrierApi, Side::Buyer, true),
+            ev(Provenance::DeviceAttestation, Side::Buyer, true),
+        ],
+        attestations_received: buyer_atts,
+        as_of_unix: AS_OF,
+    };
+
+    // Reputation is RECOMPUTED from the store, never written into it.
+    let store = MockStore {
+        inputs: vec![seller_input, buyer_input],
+    };
+    let seller =
+        recompute(SELLER, AS_OF, &store).map_err(|e| format!("3: seller recompute: {e}"))?;
+    let buyer = recompute(BUYER, AS_OF, &store).map_err(|e| format!("3: buyer recompute: {e}"))?;
+
+    // Trace the emergent projections + their canonical component vectors.
+    for who in [&seller, &buyer] {
+        println!(
+            "[reputation] {} -> score {} / {}  ({} components)",
+            who.did,
+            who.score,
+            SCORE_MAX,
+            who.components.len()
+        );
+        for c in &who.components {
+            println!(
+                "             {:<28} {:+}  (hash {}…)",
+                c.source,
+                c.contribution,
+                &c.evidence_hash[..8]
+            );
+        }
+    }
+
+    // (1) Emergent + deterministic: recompute is bit-for-bit repeatable.
+    let seller_again =
+        recompute(SELLER, AS_OF, &store).map_err(|e| format!("3: seller recompute: {e}"))?;
+    if seller_again != seller {
+        return Err("3: reputation is not deterministic across recompute".into());
+    }
+
+    // (2) The score is exactly one projection: the clamped component sum.
+    for who in [&seller, &buyer] {
+        let sum: i64 = who.components.iter().map(|c| c.contribution).sum();
+        let projected = sum.clamp(0, SCORE_MAX as i64) as u64;
+        if who.score != projected {
+            return Err(format!(
+                "3: {} score {} != clamped component sum {}",
+                who.did, who.score, projected
+            ));
+        }
+    }
+
+    // (3) Transparency: every point traces to a 64-hex commitment.
+    for who in [&seller, &buyer] {
+        for c in &who.components {
+            if c.evidence_hash.len() != 64 {
+                return Err(format!(
+                    "3: {} component {} lacks a sha256 commitment",
+                    who.did, c.source
+                ));
+            }
+        }
+    }
+
+    // (4) Sybil resistance: ten attestations from one DID + one from another
+    // yield exactly TWO attestation components (deduped per attester), not
+    // eleven — a ring of one identity cannot manufacture reputation.
+    let att_components = buyer
+        .components
+        .iter()
+        .filter(|c| c.source.starts_with("attestation:"))
+        .count();
+    if att_components != 2 {
+        return Err(format!(
+            "3: expected 2 deduped attestation components, got {att_components}"
+        ));
+    }
+
+    // (5) Never assigned: a DID with no history is zero, not fabricated.
+    let ghost = recompute("did:plc:ghost", AS_OF, &store).map_err(|e| format!("3: {e}"))?;
+    if ghost.score != 0 || !ghost.components.is_empty() {
+        return Err("3: an unknown DID must be zero-history, not fabricated".into());
+    }
+
+    // The disputes sink the seller to the floor (25 - 80 + 2 -> clamped 0); the
+    // buyer's favorable resolution + high-provenance evidence + two honest
+    // attesters net positive (-80 + 30 + 40 + 40 = 30).
+    if seller.score != 0 {
+        return Err(format!(
+            "3: expected seller floored at 0, got {}",
+            seller.score
+        ));
+    }
+    if buyer.score != 30 {
+        return Err(format!("3: expected buyer 30, got {}", buyer.score));
+    }
+    println!(
+        "[reputation] invariants ✓  (emergent · projection = clamped Σ · every point hashed · Sybil-deduped · unknown DID = 0)  seller floored {} / buyer {}",
+        seller.score, buyer.score
+    );
 
     Ok(())
 }
