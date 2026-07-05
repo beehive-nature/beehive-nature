@@ -32,6 +32,35 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-05` — **Away-relay solo session: amount-zero hardening, rung 2
+  (reputation flow), Trezor vector-test spec. Hard holds honored; audits
+  queued.** Executed under the founder's away-relay rules (hard holds replace
+  escalate-then-execute; no cross-seat loop; land on green or in the pen).
+  **`942757e`** — escrow-core hardened against a zero-amount (valueless) escrow:
+  the §9.2 check `asset_amount >= self.amount` is trivially satisfied when
+  `self.amount == 0`, so a zero-value escrow funded to Funded on `asset_amount
+  0`. Test-first (red captured: `Ok(Funded)` vs `Err(ZeroAmountEscrow)`); green
+  via a new `EscrowError::ZeroAmountEscrow` guard before the comparison; `new()`
+  stays a total constructor (no caller ripple). Unit test
+  `zero_amount_escrow_cannot_be_funded` + proptest `funding_is_a_pure_comparison`
+  refined ("fundable" now requires `amount > 0`). Repro: `cargo test -p
+  escrow-core`; `cargo test --workspace --locked` → **180 passed / 1 ignored**.
+  CI green. **`5f4e335`** — composition/demo rung 2: Scenario 3 drives the real
+  reputation-engine from the three lifecycle outcomes; reputation emergent
+  (recomputed via `recompute`/`MockStore`, never written), component vector
+  canonical (score = one clamped projection), attestations Sybil-deduped per
+  attester (10-from-one + 1-from-another → 2 components), unknown DID → 0; seller
+  floored 0 / buyer 30, all asserted (nonzero exit on any breach). Rung-1
+  audited code untouched. Repro: `cargo run -p composition --bin demo` (exit 0).
+  CI green. **Audit docket** packaged + QUEUED (no cross-seat loop while dark):
+  `docs/findings/rung-2-audit-docket.md` (gitignored pen, self-contained per the
+  C-1 lesson). **Trezor vector-test procedure** written spec-only to
+  `docs/findings/trezor-vector-test-procedure.md` (companion to Cowork's delta
+  brief) — **BLOCKED on the §3 seed-class pin** (SLIP39 vs BIP39;
+  founder/firmware decision); no CLI/firmware download (spec-only, per orders).
+  Founder one-word items still open + HELD: `.gitattributes` `* text=auto
+  eol=lf`; seat attribution for the pre-landing review.
+
 - `2026-07-05` — **Rung-1 dispute-branch audit closed; bidirectional
   verification demonstrated live.** `5b994c2` hardened
   `composition/src/bin/demo.rs` against GLM's adversarial audit: **4 findings
