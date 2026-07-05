@@ -78,6 +78,22 @@ has earned its **own future task**: define what *independence* means (no shared 
 infrastructure, no shared operator, Sybil-resistant identity) and set a **minimum N**.
 Deferred, but tracked as a first-class cross-cutting item, not a footnote.
 
+**CD-8 — Public API surface — CAPTURED, NOT SCHEDULED** *(the `api` crate deferred out of the
+2026-07-05 demo sprint — no net-new architecture under demo pressure; the demo proved the
+lifecycle runs headless through the engines + bus with zero API).* A query (and possibly
+command) surface over the runtime, to be **decided deliberately by the founder, never
+scaffolded reflexively.** **Open contract questions — all founder-decided before any
+scaffolding:** **(1) transport** — HTTP/REST, gRPC, WebSocket, or a local IPC seam? **(2)
+exposed operations** — read-only projections of escrow/order/reputation state, or also command
+intake (submit intent, attach evidence)? **(3) bus events consumed** — which `CanonicalEvent`
+families the surface subscribes to / projects (Order, Dispute, Reputation, …)? **(4) authn
+posture** — anonymous read, DID-authenticated, or capability-gated writes (ties the reserved
+Capability primitive)? **Status: captured, not scheduled; requires a founder contract before
+any scaffolding.** Per Art. III an API is an **additive consumer of bus facts, never a
+prerequisite** — consumers subscribe, they never gate the kernel. *(Numbering note: the
+dispatch called this "CD-9"; the committed file runs CD-1…CD-7, so this is CD-8 — flag if a
+CD-8 was intended elsewhere.)*
+
 ## Standing rules for this file
 
 - New visions get **routed here first** (which layer owns it, which
