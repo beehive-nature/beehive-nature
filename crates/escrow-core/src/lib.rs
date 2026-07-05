@@ -176,6 +176,13 @@ pub enum EscrowError {
         at: OffsetDateTime,
         not_before: OffsetDateTime,
     },
+    /// The escrow's denominated `amount` is zero — a valueless record. The
+    /// §9.2 funding check `asset_amount >= self.amount` is trivially satisfied
+    /// by an `amount == 0` escrow for ANY `asset_amount` (including 0), so
+    /// without this guard an empty escrow reads as Funded. `new()` stays a
+    /// total constructor; funding refuses a zero-amount escrow here so the
+    /// degenerate record can never hold or move value.
+    ZeroAmountEscrow,
 }
 
 impl std::fmt::Display for EscrowError {
@@ -223,6 +230,12 @@ impl std::fmt::Display for EscrowError {
                 f,
                 "event {event} timestamp {at} precedes the anchor it must follow ({not_before})"
             ),
+            EscrowError::ZeroAmountEscrow => {
+                write!(
+                    f,
+                    "escrow amount is zero: a valueless escrow cannot be funded"
+                )
+            }
         }
     }
 }
@@ -300,6 +313,14 @@ impl Escrow {
                     at,
                 },
             ) => {
+                // A zero-amount escrow is valueless: the §9.2 comparison below
+                // (`asset_amount >= self.amount`) would be trivially satisfied
+                // for any asset_amount, including 0, funding an empty escrow.
+                // Refuse it before the comparison so the degenerate record can
+                // never reach Funded.
+                if self.amount == 0 {
+                    return Err(EscrowError::ZeroAmountEscrow);
+                }
                 // NOTE: funding is deliberately NOT required to follow
                 // `created_at`. `created_at` is when the escrow *record* was
                 // created (the daemon's bookkeeping); the funding `at` is the
@@ -520,6 +541,55 @@ mod tests {
             verdict,
             resolution_id: "res-1".into(),
         }
+    }
+
+    #[test]
+    fn zero_amount_escrow_cannot_be_funded() {
+        // A zero-amount escrow is degenerate — it holds no value. Because the
+        // §9.2 check is `asset_amount >= self.amount`, an `amount == 0` escrow
+        // would satisfy funding for ANY asset_amount (including 0), reading an
+        // empty escrow as Funded. Funding must refuse it and leave it Created.
+        let mut zero = Escrow::new(
+            "order-zero",
+            "msig-zero",
+            PublicKey([0x01; 32]),
+            PublicKey([0x02; 32]),
+            PublicKey([0x03; 32]),
+            0,
+            Some("fusd-asset-id".into()),
+            FEE_BUFFER,
+            t0(),
+        );
+
+        // The trivial-satisfy case: zero asset against a zero requirement.
+        let empty = EscrowEvent::BuyerFunded {
+            asset_amount: 0,
+            zano_amount: FEE_BUFFER,
+            at: fund_at(),
+        };
+        assert_eq!(
+            zero.transition(empty),
+            Err(EscrowError::ZeroAmountEscrow),
+            "amount==0 must not fund on asset_amount 0"
+        );
+        assert_eq!(
+            zero.state,
+            EscrowState::Created,
+            "a refused funding leaves the escrow Created"
+        );
+
+        // And a positive asset amount cannot bring a valueless escrow to life.
+        let overfunded = EscrowEvent::BuyerFunded {
+            asset_amount: AMOUNT,
+            zano_amount: FEE_BUFFER,
+            at: fund_at(),
+        };
+        assert_eq!(
+            zero.transition(overfunded),
+            Err(EscrowError::ZeroAmountEscrow),
+            "amount==0 must not fund even on a positive asset_amount"
+        );
+        assert_eq!(zero.state, EscrowState::Created);
     }
 
     /// Drive a fresh escrow into `state` through real transitions only.

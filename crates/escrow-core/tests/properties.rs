@@ -236,8 +236,10 @@ proptest! {
     }
 
     /// The dual-balance funding check is a pure comparison — no overflow or
-    /// rounding seam. A Created escrow funds iff both balances meet their
-    /// thresholds, for every u64 including the extremes, and never panics.
+    /// rounding seam. A Created escrow with a positive `amount` funds iff both
+    /// balances meet their thresholds, for every u64 including the extremes,
+    /// and never panics. A zero-amount escrow is valueless and never funds (the
+    /// `ZeroAmountEscrow` guard), so "fundable" requires `amount > 0`.
     #[test]
     fn funding_is_a_pure_comparison(
         amount in any_amount(),
@@ -256,7 +258,9 @@ proptest! {
             zano_amount: zano,
             at: datetime!(2026-07-02 13:00 UTC),
         });
-        let sufficient = asset >= amount && zano >= fee;
+        // A zero-amount escrow is valueless and never funds (hardened);
+        // otherwise funding is a pure comparison of the two balances.
+        let sufficient = amount > 0 && asset >= amount && zano >= fee;
         prop_assert_eq!(res.is_ok(), sufficient);
         prop_assert_eq!(e.state == EscrowState::Funded, sufficient);
     }
