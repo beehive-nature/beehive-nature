@@ -94,6 +94,34 @@ prerequisite** — consumers subscribe, they never gate the kernel. *(Numbering 
 dispatch called this "CD-9"; the committed file runs CD-1…CD-7, so this is CD-8 — flag if a
 CD-8 was intended elsewhere.)*
 
+**CD-9 — Tiered dispute-resolution pricing ("bSAFE") — CAPTURED, NOT SCHEDULED.** A
+pricing layer over the dispute lane (`dispute-engine` verdict → DRO settlement). **Elective
+escalation is priced at a premium** — a party may *buy up* to a higher review tier (more or
+more-independent adjudicators, deeper evidence review) as a paid, opt-in service. **System-
+mandated review is NOT a taxable event:** where the protocol *itself* compels a human look —
+every `Split` verdict and every `UserClaim`-driven escalation, i.e. exactly the `auto_enforce
+= false` path the demo's 2b case traces — the party is **never charged for a review they did
+not elect.** Paying only for what you *choose*, never for what the protocol *compels*, keeps
+the fee off the fairness-critical path (a mandated review that costs money would let the
+protocol profit from its own escalations — barred here by construction). **Open mechanism
+question (founder-decided, NOT resolved here): who pays for an elective escalation?**
+Candidates — **loser-pays** (escalator refunded iff the higher tier moves the verdict their
+way) and **bonded appeals** (escalation posts a bond, forfeited if the appeal fails); both
+must resist **griefing** (endless paid appeals to exhaust the process) and **capture** (a
+richer party paying to bleed a poorer counterparty). **Routes through the TE invariants and
+Article VI:** any fee slice is subject to **TE-6 (no self-dealing)** + demand-linkage — a
+review fee is earned service, never a rent — and because it introduces a protocol-level
+charge, its existence and rate are an **Article VI meta-tier governance decision** (same bar
+as the tokenomics emission-split and CD-4: an ungoverned, un-proof-gated fee is a rent
+wearing a service robe). **Motivation (why it earns capture at all):** high-value **cross-
+language commodity adjudication** — oil-class resource trades across jurisdictions where the
+parties share neither language nor legal venue — is precisely where premium-tier neutral
+adjudication has real willingness-to-pay, and where *mandated-review neutrality* (never
+charging for the compelled look) is what makes the venue trustworthy to both sides at once.
+**Gate:** needs the human-arbitration tier to exist at all — ties **CD-4** (LOVErnment
+arbitration treasury) and **CD-7** (attester-independence / minimum-N); pure capture until
+then. **Status: captured, not scheduled.**
+
 ## Standing rules for this file
 
 - New visions get **routed here first** (which layer owns it, which
