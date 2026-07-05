@@ -34,12 +34,17 @@ it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
 - `2026-07-05` — **Captured designs (07-04 session) committed to the
   quarantine; clean tree before the next work session.** `feature-backlog.md`
-  gains CD-1…CD-8 (bLoveRai bounded affect companion; the cross-cutting
+  gains **CD-1…CD-7** (bLoveRai bounded affect companion; the cross-cutting
   privacy invariant as a candidate Art. VI amendment; proof-gated earn-classes;
   LOVErnment emission-split; the health-biomarker reward-trigger **BAR**) —
   all DEFERRED, orientation-only, under the standing scope-defense rules; none
   is an implementation target. Verified intact (ends on the pre-existing
-  Standing-rules section, 59 additive lines) before commit. Docs only. *(Noted,
+  Standing-rules section, 59 additive lines) before commit. Docs only.
+  *(Self-correction, 2026-07-05: this line originally read "CD-1…CD-8" — a
+  miscount. `git show 29cfdb6` confirms the commit added seven entries,
+  CD-1…CD-7; no design was dropped. The api surface added later is the
+  legitimate CD-8; the "CD-9" some dispatches used descended from this
+  miscount.)* *(Noted,
   not fixed this turn: this section's newest-first ordering has drifted — the
   "Reviewer contract adopted" entry below sits above newer ones from a stale
   insert anchor; a cleanup pass is due.)*
