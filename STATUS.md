@@ -32,6 +32,34 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-05` — **Rung-1 dispute-branch audit closed; bidirectional
+  verification demonstrated live.** `5b994c2` hardened
+  `composition/src/bin/demo.rs` against GLM's adversarial audit: **4 findings
+  fixed** — R-1 (2b now proves each payout leg matches the adjudicated split
+  ratio *before* the trace claims it, closing a 50/50-masking vector), Y-2
+  (converse half of the §9.2 dual-balance AND — a zero-asset/fee-present funding
+  is refused), Y-1 (literal error, no asserted cause), C-2 (`escrow_to_disputed`
+  returns `Result`, one failure contract) — and **1 rejected on source-cited
+  evidence**: C-1 claimed `reconcile()` was nonexistent; it exists (`pub fn
+  reconcile`, `dro-signer/src/lib.rs:393`, invoked by `sign_settlement:444`), so
+  the accurate reference was kept, not the false "fix." GLM ruling:
+  R-1/Y-1/Y-2/C-2 **CLOSED**, C-1 **OVERTURNED as a false positive** (auditor
+  owned it plainly). The loop ran both directions — auditor caught the
+  implementer's unverified trace claim (R-1); implementer caught the auditor's
+  unverified nonexistence claim (C-1); symmetric, evidence-ruled, no seat grading
+  its own work. Citations adversarially re-verified (8 agents, 0 disagreements):
+  `escrow-engine` apply OrderFunded arm `lib.rs:69-74` (`asset_amount ←
+  order.amount`, `zano_amount ← order.fee_buffer_zano.unwrap_or(0)`),
+  `escrow-core` funding guard `lib.rs:310`, `dro-signer` `Payout`/`Party` `:46-57`
+  + `settlement_intent_for_split` (buyer,seller) `:161-187`. Repro: `cargo run -p
+  composition --bin demo` (exit 0); `cargo test --workspace --locked` → **179
+  passed; 1 ignored**. CI green (tests + secret-scan) on `5b994c2`. **`15bee80`** —
+  CD-9 capture (tiered dispute-resolution pricing, "bSAFE") added to the backlog
+  quarantine, capture-only, separate commit; CI green on `15bee80`. Open (founder
+  one-word calls, HELD): `.gitattributes` `* text=auto eol=lf` (CRLF relay-churn
+  recurs until added); seat attribution for the pre-landing review. DEMO.md
+  founder-eyes vs this post-fix trace is the last gate.
+
 - `2026-07-05` — **Captured designs (07-04 session) committed to the
   quarantine; clean tree before the next work session.** `feature-backlog.md`
   gains **CD-1…CD-7** (bLoveRai bounded affect companion; the cross-cutting
