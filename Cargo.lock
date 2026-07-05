@@ -106,6 +106,7 @@ name = "composition"
 version = "0.1.0"
 dependencies = [
  "chain-eos",
+ "dispute-engine",
  "dro-signer",
  "escrow-core",
  "escrow-engine",
