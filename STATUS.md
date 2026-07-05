@@ -54,6 +54,17 @@ it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
   yet constitution); email/PGP placeholders dropped (PVR needs
   neither). The hemp-seed compliance briefing stays UNTRACKED —
   FOR-COUNSEL founder material, not published.
+- `2026-07-04` — **Affect-inference layer routed to the quarantine (parked, not
+  built).** Per scope-defense + GLM/founder sign-off, the affect/emotion-
+  inference design goes into `feature-backlog.md` as one routing row (L5
+  `interpretation.affect`, Capability-gated), capturing the cross-cutting
+  privacy invariant — *minimum-sufficient derived inference; raw signal never
+  leaves the vault; derivation is a capability-gated operation; the derived
+  class carries provenance, not source* ("help you without seeing you"). Named
+  the F5 correction in the row: the "evidence-vault / threshold-encryption" it
+  would reuse is spec-stage, NOT built (`dispute-engine` is pure adjudication
+  + an `EvidenceProvider` seam). Constitution promotion = Article VI amendment
+  (founder's, not builder's). No code; vision stays quarantined.
 - `2026-07-04` — **Reproduction-command rule adopted (doc-audit F1 + F5).** A
   count is now stated as the command that produces it, and a "proven" declares
   its reproduction path or is downgraded to "dev-chain observed." Applied:
