@@ -44,11 +44,14 @@ fn ts(unix: i64) -> OffsetDateTime {
 }
 
 /// An Order-family `CanonicalEvent` — the shape the normalizer emits (§9.3).
+/// `amount` is a parameter so the funding guard can drive the zero-asset case;
+/// every other call site passes `AMOUNT`.
 fn order_event(
     order_id: &str,
     event_type: EventType,
     ts_secs: i64,
     fee: Option<u64>,
+    amount: u64,
 ) -> CanonicalEvent {
     CanonicalEvent {
         event_id: format!("evt-{order_id}-{ts_secs}"),
@@ -60,7 +63,7 @@ fn order_event(
             order_id: order_id.into(),
             buyer_did: "did:plc:buyer".into(),
             seller_did: "did:plc:seller".into(),
-            amount: AMOUNT,
+            amount,
             asset_id: ASSET.into(),
             fee_buffer_zano: fee,
             escrow_wallet_id: Some(WALLET.into()),
@@ -139,7 +142,7 @@ async fn run() -> i32 {
 async fn happy_path() -> Result<(), String> {
     let order = "demo-order-1";
     let bus = EventBus::default();
-    let mut rx = bus.subscribe(); // subscribe before publishing (broadcast semantics)
+    let mut rx = bus.subscribe();
     let mut engine = EscrowEngine::new();
 
     // intent: the order exists (registered by order flow); OrderPlaced is the
@@ -148,7 +151,7 @@ async fn happy_path() -> Result<(), String> {
     let placed = flow(
         &bus,
         &mut rx,
-        order_event(order, EventType::OrderPlaced, BASE_TS, None),
+        order_event(order, EventType::OrderPlaced, BASE_TS, None, AMOUNT),
     )
     .await;
     if engine.apply(&placed).is_some() {
@@ -159,23 +162,51 @@ async fn happy_path() -> Result<(), String> {
     }
     trace("intent", &placed, "order registered · escrow @ Created");
 
-    // funding guard: §9.2 dual-balance is respected — partial funding refused.
-    let partial = flow(
+    // funding guard, half 1 — §9.2 dual-balance: fee buffer absent (native
+    // ZANO 0) → refused, escrow untouched.
+    let no_fee = flow(
         &bus,
         &mut rx,
-        order_event(order, EventType::OrderFunded, BASE_TS + 100, None),
+        order_event(order, EventType::OrderFunded, BASE_TS + 100, None, AMOUNT),
     )
     .await;
-    match engine.apply(&partial).map(|a| a.result) {
+    match engine.apply(&no_fee).map(|a| a.result) {
         Some(Err(EscrowError::InsufficientFunding { .. })) => trace(
             "guard",
-            &partial,
-            "partial funding REFUSED (no fee buffer) · escrow stays Created ✓",
+            &no_fee,
+            "no-fee funding REFUSED (native balance 0) · escrow stays Created ✓",
         ),
-        other => return Err(format!("guard: partial funding not refused ({other:?})")),
+        other => return Err(format!("guard: no-fee funding not refused ({other:?})")),
     }
     if engine.get(order).map(|e| e.state) != Some(EscrowState::Created) {
         return Err("guard: a rejected funding must leave the escrow Created".into());
+    }
+
+    // funding guard, half 2 — the converse: asset amount 0 with fee present is
+    // ALSO refused (the AND needs BOTH halves), proving the check isn't
+    // one-sided.
+    let no_asset = flow(
+        &bus,
+        &mut rx,
+        order_event(
+            order,
+            EventType::OrderFunded,
+            BASE_TS + 105,
+            Some(FEE_BUFFER),
+            0,
+        ),
+    )
+    .await;
+    match engine.apply(&no_asset).map(|a| a.result) {
+        Some(Err(EscrowError::InsufficientFunding { .. })) => trace(
+            "guard",
+            &no_asset,
+            "zero-asset funding REFUSED (asset amount 0) · escrow stays Created ✓",
+        ),
+        other => return Err(format!("guard: zero-asset funding not refused ({other:?})")),
+    }
+    if engine.get(order).map(|e| e.state) != Some(EscrowState::Created) {
+        return Err("guard: a rejected zero-asset funding must leave the escrow Created".into());
     }
 
     // funding: both balances present -> Funded.
@@ -187,6 +218,7 @@ async fn happy_path() -> Result<(), String> {
             EventType::OrderFunded,
             BASE_TS + 110,
             Some(FEE_BUFFER),
+            AMOUNT,
         ),
     )
     .await;
@@ -203,7 +235,7 @@ async fn happy_path() -> Result<(), String> {
     let shipped = flow(
         &bus,
         &mut rx,
-        order_event(order, EventType::OrderShipped, BASE_TS + 200, None),
+        order_event(order, EventType::OrderShipped, BASE_TS + 200, None, AMOUNT),
     )
     .await;
     match engine.apply(&shipped).map(|a| a.result) {
@@ -217,7 +249,13 @@ async fn happy_path() -> Result<(), String> {
     let delivered = flow(
         &bus,
         &mut rx,
-        order_event(order, EventType::OrderDelivered, BASE_TS + 300, None),
+        order_event(
+            order,
+            EventType::OrderDelivered,
+            BASE_TS + 300,
+            None,
+            AMOUNT,
+        ),
     )
     .await;
     match engine.apply(&delivered).map(|a| a.result) {
@@ -233,7 +271,13 @@ async fn happy_path() -> Result<(), String> {
     let completed = flow(
         &bus,
         &mut rx,
-        order_event(order, EventType::OrderCompleted, BASE_TS + 400, None),
+        order_event(
+            order,
+            EventType::OrderCompleted,
+            BASE_TS + 400,
+            None,
+            AMOUNT,
+        ),
     )
     .await;
     let completed_result = match engine.apply(&completed) {
@@ -291,32 +335,34 @@ fn ev(provenance: Provenance, favors: Side, strong: bool) -> Evidence {
     }
 }
 
-/// Drive a fresh escrow to `Disputed` through the real state machine.
-fn escrow_to_disputed(order_id: &str) -> Escrow {
+/// Drive a fresh escrow to `Disputed` through the real state machine. Returns
+/// `Result` so a setup failure surfaces through the binary's one error contract
+/// rather than a panic.
+fn escrow_to_disputed(order_id: &str) -> Result<Escrow, String> {
     let mut e = demo_escrow(order_id);
     e.transition(EscrowEvent::BuyerFunded {
         asset_amount: AMOUNT,
         zano_amount: FEE_BUFFER,
         at: ts(BASE_TS + 100),
     })
-    .expect("fund");
+    .map_err(|err| format!("fund: {err}"))?;
     e.transition(EscrowEvent::SellerShipped {
         tracking: "1Z999-DEMO".into(),
         carrier: "UPS".into(),
         at: ts(BASE_TS + 200),
     })
-    .expect("ship");
+    .map_err(|err| format!("ship: {err}"))?;
     e.transition(EscrowEvent::DeliveryConfirmed {
         timestamp: ts(BASE_TS + 300),
         source: DeliverySource::CarrierScan,
     })
-    .expect("deliver");
+    .map_err(|err| format!("deliver: {err}"))?;
     e.transition(EscrowEvent::DisputeOpened {
         reason_hash: "damaged-goods".into(),
         at: ts(BASE_TS + 400),
     })
-    .expect("dispute opens");
-    e
+    .map_err(|err| format!("dispute open: {err}"))?;
+    Ok(e)
 }
 
 fn dispute_for(order_id: &str) -> Dispute {
@@ -344,7 +390,7 @@ fn dispute_branch() -> Result<(), String> {
     // -- 2a: uncontested high-provenance buyer evidence -> RefundBuyer, AUTO-ENFORCES.
     {
         let order = "dispute-A";
-        let mut e = escrow_to_disputed(order);
+        let mut e = escrow_to_disputed(order)?;
         let provider = MockProvider {
             evidence: vec![
                 ev(Provenance::ChainProof, Side::Buyer, true),
@@ -399,7 +445,7 @@ fn dispute_branch() -> Result<(), String> {
     // -- 2b: buyer device-attestation vs seller user-claim -> Split, ESCALATES.
     {
         let order = "dispute-B";
-        let mut e = escrow_to_disputed(order);
+        let mut e = escrow_to_disputed(order)?;
         let provider = MockProvider {
             evidence: vec![
                 ev(Provenance::DeviceAttestation, Side::Buyer, true),
@@ -433,11 +479,14 @@ fn dispute_branch() -> Result<(), String> {
             return Err(format!("2b: escrow did not reach Resolved ({applied:?})"));
         }
 
-        // Settle the ADJUDICATED split (not the 50/50 default), through R-004:
-        // build the intent from the verdict's ratio, confirm the balance via the
-        // independent chain view, then sign — reconcile() is the gate.
+        // Settle the ADJUDICATED split (not the 50/50 default) through the R-004
+        // gate: build the intent from the verdict's ratio, confirm the balance
+        // via the independent chain view, then sign — `sign_settlement` runs the
+        // shared `dro_signer::reconcile` check (wallet + asset + covering
+        // balance) before it produces bytes. The error string stays literal: a
+        // `None` here has several possible causes, so it does not assert one.
         let intent = settlement_intent_for_split(&e, (buyer_amt, seller_amt))
-            .ok_or("2b: adjudicated split did not conserve")?;
+            .ok_or("2b: settlement_intent_for_split returned None")?;
         let ctx = MultisigContext {
             multisig_wallet_id: e.multisig_wallet_id.clone(),
             asset_id: e.asset_id.clone(),
@@ -450,14 +499,47 @@ fn dispute_branch() -> Result<(), String> {
         let signed = signer
             .sign_settlement(&intent, &confirmed)
             .map_err(|err| format!("2b: R-004 refused the settlement: {err}"))?;
+
+        // Prove each payout leg matches the adjudicated verdict BEFORE the trace
+        // is allowed to claim it: a 50/50 fallback that ignored the ratio would
+        // fail here rather than print a false "honored the verdict".
         let total: u64 = intent.payouts.iter().map(|p| p.amount).sum();
         if total != AMOUNT {
             return Err(format!(
                 "2b: split payouts sum {total} != escrow amount {AMOUNT}"
             ));
         }
+        if intent.payouts.len() != 2 {
+            return Err(format!(
+                "2b: expected 2 payout legs, got {}",
+                intent.payouts.len()
+            ));
+        }
+        let buyer_payout = intent
+            .payouts
+            .iter()
+            .find(|p| p.to == Party::Buyer)
+            .ok_or("2b: no buyer payout leg")?;
+        let seller_payout = intent
+            .payouts
+            .iter()
+            .find(|p| p.to == Party::Seller)
+            .ok_or("2b: no seller payout leg")?;
+        if buyer_payout.amount != buyer_amt {
+            return Err(format!(
+                "2b: buyer payout {} != adjudicated buyer_amt {buyer_amt} — verdict ratio not honored",
+                buyer_payout.amount
+            ));
+        }
+        if seller_payout.amount != seller_amt {
+            return Err(format!(
+                "2b: seller payout {} != adjudicated seller_amt {seller_amt} — verdict ratio not honored",
+                seller_payout.amount
+            ));
+        }
+
         println!(
-            "[dispute-2b] settle  ->  adjudicated split {buyer_amt} buyer / {seller_amt} seller (sum {total} ✓)  signed_by={}  (R-004 ✓ · honors the verdict, retires the 50/50 default)",
+            "[dispute-2b] settle  ->  adjudicated split {buyer_amt} buyer / {seller_amt} seller (sum {total} ✓)  signed_by={}  (R-004 ✓ · verdict ratio verified, not assumed)",
             signed.signed_by
         );
     }
