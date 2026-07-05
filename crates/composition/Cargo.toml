@@ -16,8 +16,11 @@ normalizer = { path = "../normalizer" }
 reputation-engine = { path = "../reputation-engine" }
 shared-types = { path = "../shared-types" }
 tokio = { version = "1", features = ["macros", "net", "rt-multi-thread", "signal", "sync", "time"] }
+# Promoted from dev-deps: the `demo` bin builds an escrow via the existing
+# `escrow_core::Escrow::new(created_at: time::OffsetDateTime)` — bins build
+# against [dependencies], not dev-deps. Not a new crate (already in the tree).
+time = { version = "0.3", features = ["macros"] }
 
 [dev-dependencies]
 futures-util = "0.3"
-time = { version = "0.3", features = ["macros"] }
 tokio-tungstenite = "0.29"
