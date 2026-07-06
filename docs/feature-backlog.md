@@ -286,6 +286,36 @@ SHIP stream (earned-emission provable from the pipeline, not asserted) — confi
 the tokenomics spec; if the spec is silent on host chain, this note flags the pin for a
 deliberate spec amendment, it does not make one.
 
+**CD-14 — App Emission Interface ("apps attest and collect — never mint") — CAPTURED,
+NOT SCHEDULED.** Two-sided interface between dApps/plugins and the metabolic loop.
+**Inbound (attestation):** builders register action types (e.g., fulfilled listing,
+verified delivery, completed match) with the kernel's emission engine; users' verified
+actions flow in as evidence; the kernel scores emission against the operant curve.
+Emission rates and registered action types are **Article VI-governed, never per-app
+knobs**; attestation gated on **CD-7** independence and the tokenomics served-query gate.
+Apps hold no mint, ever. **Outbound (fee-split, founder direction 2026-07-06):** users
+spend b on app services; the fee **splits by protocol-level, Article VI-governed ratio**
+among builder share (earned service — builders profit because people use what they
+built), LOVErnment treasury share (**CD-4** — the governed founder/DAO income lane), and
+an optional burn component (**deferred to the tokenomics spec** — the only deflationary
+sink that creates no redemption claim, but its rate interacts with the emission curve;
+not decided here). Vocabulary law: it is a **fee, never a tax** — an ungoverned levy is a
+rent wearing a governance robe (CD-4 test). **Optionality bar:** b-fees are
+payable-or-discounted, never mandatory; the fUSD path stays alive so no user is walled
+out pending b holdings (composes with CD-12's stranger and the front-loaded curve — first
+actions earn the fee before it's needed). **Sybil geometry note:** under fee-split,
+app-farming is lossy by construction (a fake app's fake fees are paid by the farmer to
+himself minus treasury and burn slices) — the red-team still runs, but the economics stop
+subsidizing the attack. **Demand-linkage:** with b's candidate Vaulta pin, every fee
+event is a CanonicalEvent — organic b demand becomes provable from the stream, satisfying
+the TE demand-linkage requirement by construction. **Constitutional flag for founder
+declaration:** apps requesting emission-trigger capability appears to be the **third
+independent sighting of the Capability primitive** (prior: AI delegation, capability
+budgets) — per the constitution, the third sighting forces promotion via the amendment
+process; this entry flags, the founder declares. **Gates: CD-4, CD-7, Article VI
+split-ratio decision, Sybil/generosity-war red-team, tokenomics-spec burn decision.**
+**Status: captured, not scheduled.**
+
 ## Standing rules for this file
 
 - New visions get **routed here first** (which layer owns it, which
