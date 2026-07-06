@@ -1,0 +1,5 @@
+# Normalize all text files to LF in both the index and the working tree.
+# Prevents CRLF churn from Windows editors in the multi-OS relay (WSL + Windows),
+# and keeps shell hooks (.githooks/*, scripts/*.sh) LF so bash executes them.
+# Binary files are left untouched (text=auto detects them).
+* text=auto eol=lf
