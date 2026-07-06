@@ -32,6 +32,31 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-06` — **Sprint's last gate shut: public front door published +
+  rung-2 audit closed (bidirectional loop, second cycle); repo hygiene locked.**
+  **`49fb19d` — `DEMO.md` published** to repo root: a command-per-claim front
+  door ("built to be checked, not believed"). Freshness pass re-ran every
+  command-claim against `main`; one mechanical correction (workspace **179 → 180
+  passed / 1 ignored**, the amount-zero test), all four per-crate commands green,
+  all eight internal links resolve, proptest case count (2048) confirmed; pen
+  envelope stripped. Repro: `git clone … && cargo test --workspace --locked` →
+  180 passed / 1 ignored. **`34e3161` — rung-2 audit CLOSED.** Docket packaged to
+  the pen during the away-session; GLM 5.2 red-team returned **0 red / 2 yellow /
+  1 cosmetic** (Y-1 Scenario-3 "flow" overclaim; Y-2 header "Sybil-resistant" vs
+  the invariants line's "Sybil-deduped"; C-1 truncated-hash display). Remediation
+  **wording-only** — objective diff filter showed only comments + string literals
+  changed (one blank line), zero assertion or value touched, cross-checked by an
+  intra-Code adversarial pass (honesty + completeness, both PASS). GLM
+  verification: **all three closed, no new overclaim** — the audit loop's second
+  live round this sprint. Repro: `cargo run -p composition --bin demo` (exit 0);
+  `cargo test --workspace --locked` (180 passed / 1 ignored). **`53a870c` —
+  `.gitattributes` `* text=auto eol=lf`** enforces LF repo-wide (`git add
+  --renormalize .` was a no-op — index already 100% LF), closing the recurring
+  CRLF relay churn; hook chain confirmed post-switch. **`f78c1f5` — CD-9
+  annotated** with the GLM 5.2 red-team as its stress-test of record (verbatim
+  R-2 sentence + Q-1–Q-4 from the pen source; capture status UNCHANGED, not
+  scheduled). All four commits CI-green (tests + secret-scan).
+
 - `2026-07-05` — **Away-relay solo session: amount-zero hardening, rung 2
   (reputation flow), Trezor vector-test spec. Hard holds honored; audits
   queued.** Executed under the founder's away-relay rules (hard holds replace
