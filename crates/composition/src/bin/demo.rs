@@ -28,6 +28,13 @@
 //!
 //! Exits 0 only if ALL THREE scenarios complete clean; nonzero on any invariant
 //! failure.  `cargo run -p composition --bin demo`
+//!
+//! **`--json`** emits the same three scenarios as one machine-readable JSON
+//! document — the events are the REAL serde-serialized §9.3 shapes and every
+//! value is computed by the same engines at run time (nothing transcribed).
+//! Dispute verdicts, evidence, and settlement payouts are mapped with their
+//! real field names (dispute-engine / dro-signer do not derive Serialize).
+//! Same exit contract: nonzero on any invariant failure.
 
 use dispute_engine::{adjudicate, Dispute, Evidence, MockProvider, Provenance, Side, VerdictType};
 use dro_signer::{
@@ -43,6 +50,7 @@ use reputation_engine::{
     recompute, verify_attestations, Attestation, MockStore, MockVerifier, ReputationInput,
     SCORE_MAX,
 };
+use serde_json::json;
 use shared_types::{CanonicalEvent, EventPayload, EventType, OrderEvent, SourceChain};
 use time::OffsetDateTime;
 
@@ -127,7 +135,12 @@ async fn flow(
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() {
-    std::process::exit(run().await);
+    let json_mode = std::env::args().any(|a| a == "--json");
+    std::process::exit(if json_mode {
+        run_json().await
+    } else {
+        run().await
+    });
 }
 
 async fn run() -> i32 {
@@ -738,4 +751,422 @@ fn reputation_flow() -> Result<(), String> {
     );
 
     Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// --json mode: the same three scenarios, computed through the same engines,
+// emitted as one machine-readable JSON document. Events / escrow states /
+// escrow errors / reputation scores are serde-serialized from the real types
+// (shared-types §9.3, escrow-core, reputation-engine); dispute verdicts,
+// evidence, and settlement payouts are mapped with their REAL field names
+// (dispute-engine and dro-signer do not derive Serialize — adding derives
+// there is out of this change's bounds). Every invariant the human trace
+// asserts is asserted here too: a broken fixture cannot be emitted silently.
+// ---------------------------------------------------------------------------
+
+async fn run_json() -> i32 {
+    match json_fixture().await {
+        Ok(doc) => {
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&doc).expect("fixture document serializes")
+            );
+            0
+        }
+        Err(e) => fail(&e),
+    }
+}
+
+/// Serialize any `Serialize` value into the fixture, with a string error.
+fn jval<T: serde::Serialize>(t: &T) -> Result<serde_json::Value, String> {
+    serde_json::to_value(t).map_err(|e| format!("json: serialize: {e}"))
+}
+
+/// dispute-engine `Evidence` mapped with its real field names.
+fn evidence_json(items: &[Evidence]) -> serde_json::Value {
+    items
+        .iter()
+        .map(|e| {
+            json!({
+                "provenance": format!("{:?}", e.provenance),
+                "confidence": e.confidence,
+                "signed": e.signed,
+                "verified": e.verified,
+                "payload_hash": e.payload_hash.iter().map(|b| format!("{b:02x}")).collect::<String>(),
+                "favors": format!("{:?}", e.favors),
+            })
+        })
+        .collect::<Vec<_>>()
+        .into()
+}
+
+/// dro-signer `Payout` legs mapped with their real field names.
+fn payouts_json(payouts: &[dro_signer::Payout]) -> serde_json::Value {
+    payouts
+        .iter()
+        .map(|p| json!({ "to": format!("{:?}", p.to), "amount": p.amount }))
+        .collect::<Vec<_>>()
+        .into()
+}
+
+async fn json_fixture() -> Result<serde_json::Value, String> {
+    // -- Scenario 1: bus -> engine -> DRO release, with both §9.2 guard halves.
+    let order = "demo-order-1";
+    let bus = EventBus::default();
+    let mut rx = bus.subscribe();
+    let mut engine = EscrowEngine::new();
+    engine.register(demo_escrow(order));
+    let mut steps = Vec::new();
+
+    let placed = flow(
+        &bus,
+        &mut rx,
+        order_event(order, EventType::OrderPlaced, BASE_TS, None, AMOUNT),
+    )
+    .await;
+    if engine.apply(&placed).is_some() {
+        return Err("json/1: OrderPlaced must not drive a transition".into());
+    }
+    steps.push(json!({
+        "event": jval(&placed)?,
+        "outcome": { "ignored_by_engine": true, "escrow_state": jval(&EscrowState::Created)? },
+    }));
+
+    // Guard half 1: fee buffer absent -> refused.
+    let no_fee = flow(
+        &bus,
+        &mut rx,
+        order_event(order, EventType::OrderFunded, BASE_TS + 100, None, AMOUNT),
+    )
+    .await;
+    match engine.apply(&no_fee).map(|a| a.result) {
+        Some(Err(err)) if matches!(err, EscrowError::InsufficientFunding { .. }) => {
+            steps.push(json!({
+                "event": jval(&no_fee)?,
+                "outcome": { "refused": jval(&err)?, "escrow_state": jval(&EscrowState::Created)? },
+            }));
+        }
+        other => return Err(format!("json/1: no-fee funding not refused ({other:?})")),
+    }
+
+    // Guard half 2: asset amount 0 with fee present -> also refused.
+    let no_asset = flow(
+        &bus,
+        &mut rx,
+        order_event(
+            order,
+            EventType::OrderFunded,
+            BASE_TS + 105,
+            Some(FEE_BUFFER),
+            0,
+        ),
+    )
+    .await;
+    match engine.apply(&no_asset).map(|a| a.result) {
+        Some(Err(err)) if matches!(err, EscrowError::InsufficientFunding { .. }) => {
+            steps.push(json!({
+                "event": jval(&no_asset)?,
+                "outcome": { "refused": jval(&err)?, "escrow_state": jval(&EscrowState::Created)? },
+            }));
+        }
+        other => {
+            return Err(format!(
+                "json/1: zero-asset funding not refused ({other:?})"
+            ))
+        }
+    }
+
+    // Full funding, then the lifecycle to Completed.
+    let lifecycle: [(EventType, i64, Option<u64>, EscrowState); 4] = [
+        (
+            EventType::OrderFunded,
+            BASE_TS + 110,
+            Some(FEE_BUFFER),
+            EscrowState::Funded,
+        ),
+        (
+            EventType::OrderShipped,
+            BASE_TS + 200,
+            None,
+            EscrowState::Shipped,
+        ),
+        (
+            EventType::OrderDelivered,
+            BASE_TS + 300,
+            None,
+            EscrowState::Delivered,
+        ),
+        (
+            EventType::OrderCompleted,
+            BASE_TS + 400,
+            None,
+            EscrowState::Completed,
+        ),
+    ];
+    for (event_type, ts_secs, fee, expected) in lifecycle {
+        let ev = flow(
+            &bus,
+            &mut rx,
+            order_event(order, event_type, ts_secs, fee, AMOUNT),
+        )
+        .await;
+        match engine.apply(&ev).map(|a| a.result) {
+            Some(Ok(state)) if state == expected => steps.push(json!({
+                "event": jval(&ev)?,
+                "outcome": { "transition": jval(&state)? },
+            })),
+            other => return Err(format!("json/1: expected {expected:?} ({other:?})")),
+        }
+    }
+
+    let escrow = engine
+        .get(order)
+        .ok_or("json/1: registered escrow missing")?;
+    let view = MockChainView::solvent();
+    let mut signer = MockSigner::new();
+    let settlement_1 =
+        match settle_transition(escrow, &Ok(EscrowState::Completed), &view, &mut signer) {
+            Some(Ok(signed)) => {
+                let intent = signer
+                    .signed
+                    .first()
+                    .ok_or("json/1: no settlement recorded")?;
+                let payout = intent.payouts.first().ok_or("json/1: no payout leg")?;
+                if intent.payouts.len() != 1
+                    || payout.to != Party::Seller
+                    || payout.amount != AMOUNT
+                {
+                    return Err(format!(
+                        "json/1: expected sole release {AMOUNT} to Seller, got {:?}",
+                        intent.payouts
+                    ));
+                }
+                json!({ "payouts": payouts_json(&intent.payouts), "signed_by": signed.signed_by })
+            }
+            other => return Err(format!("json/1: DRO did not sign a release ({other:?})")),
+        };
+
+    // -- Scenario 2a: high-provenance refund, auto-enforced.
+    let case_2a = {
+        let order = "dispute-A";
+        let mut e = escrow_to_disputed(order).map_err(|err| format!("json/2a: {err}"))?;
+        let evidence = vec![
+            ev(Provenance::ChainProof, Side::Buyer, true),
+            ev(Provenance::CarrierApi, Side::Buyer, true),
+        ];
+        let evidence_doc = evidence_json(&evidence);
+        let provider = MockProvider { evidence };
+        let verdict =
+            adjudicate(&dispute_for(order), &provider).map_err(|e| format!("json/2a: {e}"))?;
+        if verdict.verdict != VerdictType::RefundBuyer || !verdict.auto_enforce {
+            return Err(format!(
+                "json/2a: expected auto-enforced RefundBuyer, got {:?} auto_enforce={}",
+                verdict.verdict, verdict.auto_enforce
+            ));
+        }
+        let applied = e.transition(EscrowEvent::DisputeResolved {
+            verdict: to_escrow_verdict(verdict.verdict),
+            resolution_id: "res-A".into(),
+        });
+        if applied != Ok(EscrowState::Refunded) {
+            return Err(format!(
+                "json/2a: escrow did not reach Refunded ({applied:?})"
+            ));
+        }
+        let view = MockChainView::solvent();
+        let mut signer = MockSigner::new();
+        let settlement = match settle_transition(&e, &Ok(EscrowState::Refunded), &view, &mut signer)
+        {
+            Some(Ok(signed)) => {
+                let intent = signer
+                    .signed
+                    .first()
+                    .ok_or("json/2a: no settlement recorded")?;
+                let payout = intent.payouts.first().ok_or("json/2a: no payout leg")?;
+                if payout.to != Party::Buyer || payout.amount != AMOUNT {
+                    return Err(format!(
+                        "json/2a: expected full refund to Buyer, got {:?}",
+                        intent.payouts
+                    ));
+                }
+                json!({ "payouts": payouts_json(&intent.payouts), "signed_by": signed.signed_by })
+            }
+            other => return Err(format!("json/2a: settlement failed ({other:?})")),
+        };
+        json!({
+            "evidence": evidence_doc,
+            "verdict": {
+                "verdict": format!("{:?}", verdict.verdict),
+                "confidence": verdict.confidence,
+                "auto_enforce": verdict.auto_enforce,
+                "split_ratio": verdict.split_ratio.map(|(b, s)| json!([b, s])),
+            },
+            "escrow_state": jval(&EscrowState::Refunded)?,
+            "settlement": settlement,
+        })
+    };
+
+    // -- Scenario 2b: contested claim, escalated split settled at the ratio.
+    let case_2b = {
+        let order = "dispute-B";
+        let mut e = escrow_to_disputed(order).map_err(|err| format!("json/2b: {err}"))?;
+        let evidence = vec![
+            ev(Provenance::DeviceAttestation, Side::Buyer, true),
+            ev(Provenance::UserClaim, Side::Seller, false),
+        ];
+        let evidence_doc = evidence_json(&evidence);
+        let provider = MockProvider { evidence };
+        let verdict =
+            adjudicate(&dispute_for(order), &provider).map_err(|e| format!("json/2b: {e}"))?;
+        if verdict.verdict != VerdictType::Split || verdict.auto_enforce {
+            return Err(format!(
+                "json/2b: expected escalated Split, got {:?} auto_enforce={}",
+                verdict.verdict, verdict.auto_enforce
+            ));
+        }
+        let (buyer_amt, seller_amt) = verdict
+            .split_ratio
+            .ok_or("json/2b: split verdict carries no ratio")?;
+        let applied = e.transition(EscrowEvent::DisputeResolved {
+            verdict: to_escrow_verdict(verdict.verdict),
+            resolution_id: "res-B".into(),
+        });
+        if applied != Ok(EscrowState::Resolved) {
+            return Err(format!(
+                "json/2b: escrow did not reach Resolved ({applied:?})"
+            ));
+        }
+        let intent = settlement_intent_for_split(&e, (buyer_amt, seller_amt))
+            .ok_or("json/2b: settlement_intent_for_split returned None")?;
+        let ctx = MultisigContext {
+            multisig_wallet_id: e.multisig_wallet_id.clone(),
+            asset_id: e.asset_id.clone(),
+        };
+        let view = MockChainView::solvent();
+        let confirmed = view
+            .confirm(&ctx)
+            .map_err(|err| format!("json/2b: chain view unavailable: {err}"))?;
+        let mut signer = MockSigner::new();
+        let signed = signer
+            .sign_settlement(&intent, &confirmed)
+            .map_err(|err| format!("json/2b: R-004 refused the settlement: {err}"))?;
+        let total: u64 = intent.payouts.iter().map(|p| p.amount).sum();
+        if total != AMOUNT || intent.payouts.len() != 2 {
+            return Err(format!(
+                "json/2b: split payouts malformed (sum {total}, {} legs)",
+                intent.payouts.len()
+            ));
+        }
+        let buyer_leg = intent
+            .payouts
+            .iter()
+            .find(|p| p.to == Party::Buyer)
+            .ok_or("json/2b: no buyer payout leg")?;
+        let seller_leg = intent
+            .payouts
+            .iter()
+            .find(|p| p.to == Party::Seller)
+            .ok_or("json/2b: no seller payout leg")?;
+        if buyer_leg.amount != buyer_amt || seller_leg.amount != seller_amt {
+            return Err("json/2b: verdict ratio not honored in payouts".into());
+        }
+        json!({
+            "evidence": evidence_doc,
+            "verdict": {
+                "verdict": format!("{:?}", verdict.verdict),
+                "confidence": verdict.confidence,
+                "auto_enforce": verdict.auto_enforce,
+                "split_ratio": [buyer_amt, seller_amt],
+            },
+            "escrow_state": jval(&EscrowState::Resolved)?,
+            "settlement": { "payouts": payouts_json(&intent.payouts), "signed_by": signed.signed_by },
+        })
+    };
+
+    // -- Scenario 3: reputation recomputed from the modeled lifecycle outcomes.
+    const AS_OF: i64 = BASE_TS + 1000;
+    const SELLER: &str = "did:plc:seller";
+    const BUYER: &str = "did:plc:buyer";
+    let seller_input = ReputationInput {
+        did: SELLER.into(),
+        completed_escrows: 1,
+        disputed_escrows: 2,
+        resolved_favorable: 0,
+        evidence_submitted: vec![ev(Provenance::UserClaim, Side::Seller, false)],
+        attestations_received: vec![],
+        as_of_unix: AS_OF,
+    };
+    let verifier = MockVerifier {
+        valid_attesters: vec!["did:plc:sybil-ring".into(), "did:plc:honest-peer".into()],
+    };
+    let mut raw_atts: Vec<Attestation> = (0..10)
+        .map(|_| attestation("did:plc:sybil-ring", BUYER))
+        .collect();
+    raw_atts.push(attestation("did:plc:honest-peer", BUYER));
+    let buyer_input = ReputationInput {
+        did: BUYER.into(),
+        completed_escrows: 0,
+        disputed_escrows: 2,
+        resolved_favorable: 1,
+        evidence_submitted: vec![
+            ev(Provenance::ChainProof, Side::Buyer, true),
+            ev(Provenance::CarrierApi, Side::Buyer, true),
+            ev(Provenance::DeviceAttestation, Side::Buyer, true),
+        ],
+        attestations_received: verify_attestations(raw_atts, &verifier),
+        as_of_unix: AS_OF,
+    };
+    let store = MockStore {
+        inputs: vec![seller_input, buyer_input],
+    };
+    let seller = recompute(SELLER, AS_OF, &store).map_err(|e| format!("json/3: {e}"))?;
+    let buyer = recompute(BUYER, AS_OF, &store).map_err(|e| format!("json/3: {e}"))?;
+    let ghost = recompute("did:plc:ghost", AS_OF, &store).map_err(|e| format!("json/3: {e}"))?;
+    // The same invariants the human trace asserts.
+    if recompute(SELLER, AS_OF, &store).map_err(|e| format!("json/3: {e}"))? != seller {
+        return Err("json/3: reputation is not deterministic across recompute".into());
+    }
+    for who in [&seller, &buyer] {
+        let sum: i64 = who.components.iter().map(|c| c.contribution).sum();
+        if who.score != sum.clamp(0, SCORE_MAX as i64) as u64 {
+            return Err(format!(
+                "json/3: {} score is not the clamped component sum",
+                who.did
+            ));
+        }
+        if who.components.iter().any(|c| c.evidence_hash.len() != 64) {
+            return Err(format!(
+                "json/3: {} has a component without a 64-hex commitment",
+                who.did
+            ));
+        }
+    }
+    let att_components = buyer
+        .components
+        .iter()
+        .filter(|c| c.source.starts_with("attestation:"))
+        .count();
+    if att_components != 2 || seller.score != 0 || buyer.score != 30 || ghost.score != 0 {
+        return Err(format!(
+            "json/3: expected att=2 seller=0 buyer=30 ghost=0, got att={att_components} seller={} buyer={} ghost={}",
+            seller.score, buyer.score, ghost.score
+        ));
+    }
+
+    // Provenance: the binary cannot know its own commit, so fixture writers
+    // pass it in — `DEMO_GENERATED_FROM=$(git rev-parse HEAD) cargo run …`.
+    // Unset (ad-hoc runs) records that fact rather than inventing one.
+    let generated_from = std::env::var("DEMO_GENERATED_FROM").unwrap_or_else(|_| {
+        "unset — set DEMO_GENERATED_FROM=$(git rev-parse HEAD) when writing fixtures/".into()
+    });
+
+    Ok(json!({
+        "schema": "shared-types §9.3 CanonicalEvent (versioned)",
+        "generated_by": "DEMO_GENERATED_FROM=$(git rev-parse HEAD) cargo run -p composition --bin demo -- --json",
+        "generated_from": generated_from,
+        "serialization_note": "events, escrow states/errors, and reputation scores are serde-serialized from the real types; dispute verdicts, evidence, and settlement payouts are mapped with their real field names (dispute-engine and dro-signer do not derive Serialize)",
+        "scenario_1_happy_path": { "steps": steps, "settlement": settlement_1 },
+        "scenario_2_dispute": { "case_2a_auto_enforced_refund": case_2a, "case_2b_escalated_split": case_2b },
+        "scenario_3_reputation": { "seller": jval(&seller)?, "buyer": jval(&buyer)?, "unknown_did": jval(&ghost)? },
+    }))
 }

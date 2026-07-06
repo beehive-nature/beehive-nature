@@ -114,6 +114,8 @@ dependencies = [
  "futures-util",
  "normalizer",
  "reputation-engine",
+ "serde",
+ "serde_json",
  "shared-types",
  "time",
  "tokio",

@@ -21,6 +21,11 @@ tokio = { version = "1", features = ["macros", "net", "rt-multi-thread", "signal
 # `escrow_core::Escrow::new(created_at: time::OffsetDateTime)` — bins build
 # against [dependencies], not dev-deps. Not a new crate (already in the tree).
 time = { version = "0.3", features = ["macros"] }
+# The demo bin's --json mode serializes the real §9.3 event types; serde and
+# serde_json were already in the lock (shared-types / escrow-core edges) —
+# exact-edge additions (serde only for naming the Serialize bound).
+serde = "1"
+serde_json = "1"
 
 [dev-dependencies]
 futures-util = "0.3"
