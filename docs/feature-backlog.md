@@ -237,6 +237,14 @@ zero-prompt/session-key tie-in; (5) default-with-options pattern for funding sou
 **Gates: R-002 launch gate, CD-13, jurisdiction review, fee measurement.** **Status:
 captured, not scheduled.**
 
+**Funding-source matrix (founder direction 2026-07-06):** the ramp is a vending machine —
+many coin slots, one product (a provisioned, ready account). Reference slot: USDC-on-Base.
+Expansion set: USDC-on-Solana, USDT on low-hanging adapter chains, and USDT/USDC-on-Vaulta
+(special case: kernel chain already — no new external dependency; likely cheapest slot,
+measure first). Every slot is an app-layer edge worker, individually gated on fee-path
+measurement + jurisdiction review; slots share one product contract so adding a slot never
+touches the kernel.
+
 **CD-13 — Resource Paymaster (the Resource primitive's first organ) — CAPTURED, NOT
 SCHEDULED.** Standing metabolic service acquiring and provisioning chain resources behind
 zero-prompt UX: RAM/CPU/A (Vaulta), ZANO (network fees + §9.2 fee buffers — the paymaster
