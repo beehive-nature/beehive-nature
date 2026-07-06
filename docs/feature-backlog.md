@@ -223,6 +223,22 @@ model and horizon; "eternal/infinite" barred from specs by construction. **Gates
 (funding), CD-7 (coverage attestation), measurement pass.** **Status: captured, not
 scheduled.**
 
+**CD-13 — Resource Paymaster (the Resource primitive's first organ) — CAPTURED, NOT
+SCHEDULED.** Standing metabolic service acquiring and provisioning chain resources behind
+zero-prompt UX: RAM/CPU/A (Vaulta), ZANO (network fees + §9.2 fee buffers — the paymaster
+is who fills `fee_buffer_zano` so users never learn it exists), ANT (Autonomi writes), AR
+(Arweave permanence). User sees "$10 loaded, ready"; five tokens, four chains, zero
+prompts. Session-key budgets are the blast radius (per-user hard resource budgets;
+root-policy burn-rate caps on the pool) per standing zero-prompt law. **Explicitly not
+bToken** — L4 metabolic energy and external resource procurement are separate ledgers,
+never blurred. **Open questions:** (1) drain/Sybil red-team — a resource pool is a faucet
+and faucets get farmed; reputation-engine dedupe as counter; (2) cost-per-onboarded-user
+measurement across all five resources before belief; (3) treasury funding under TE lens,
+earned-service framing (CD-4-gated); (4) operator decentralization — single-operator
+barred (CD-7 class), custody + legal-exposure pinch named; (5) jurisdiction review rides
+with CD-12. First customer: CD-12. **Gates: CD-4, CD-7, drain red-team, cost
+measurement.** **Status: captured, not scheduled.**
+
 ## Standing rules for this file
 
 - New visions get **routed here first** (which layer owns it, which
