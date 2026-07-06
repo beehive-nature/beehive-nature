@@ -172,6 +172,20 @@ R-1/Y-3 close or harden into CD-9's central constraint):**
 >
 > **Q-4.** Does the founder intend a merit gate on mandated reviews (e.g., a minimal evidence-threshold check before a UserClaim triggers free human review), or is the current design intentional — any UserClaim, regardless of merit, gets free human review? R-1 and Y-3 assume no merit gate; if one exists, both findings weaken or close.
 
+**Q-4 — FOUNDER DIRECTION (2026-07-06), question narrowed not closed:** merit gates on
+mandated review become a **configurable escrow term** chosen from a small standardized
+pre-red-teamed menu of named regimes (e.g., **DR-0 no-gate / DR-1 evidence-gate / DR-2
+rate-limit+bond**), disclosed prominently at listing time, deviation-from-default displayed
+loudly, never free-form terms. **Constitutional invariants are not on the menu** —
+"UserClaims never auto-enforce" and "Splits always get a human look" bind all regimes; only
+the pricing/merit layer in front of mandated review varies. The protocol default protects
+the weaker party; the default updates via Article VI on observed usage evidence
+("most-used" is the governance rule for evolving the default, not the bootstrap). A
+seller's habitual regime choice is itself reputation signal. **Residual open:** which named
+regime is the launch default (lead recommends rate-limit+bond; undecided). **R-1/Y-3
+disposition under this direction:** the free-riding lane is bounded per-regime rather than
+resolved globally — each menu regime gets its own red-team before the menu ships.
+
 **CD-10 — Zano chain-on-Autonomi mirror ("store once, verify anywhere") — CAPTURED, NOT
 SCHEDULED.** A mirror worker (sibling to zano-watcher) publishes canonical Zano blocks to
 Autonomi content-addressed storage once, with the chain tip maintained as a signed Autonomi
