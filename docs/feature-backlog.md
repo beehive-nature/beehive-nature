@@ -191,6 +191,24 @@ treasury, TE lens, same bar as CD-9; (5) unmeasured: Zano chain size, Autonomi a
 economics, mobile scan cost. **Gates:** CD-7 (hard, tip attestation); measurement pass on
 (5) before any brief. **Status: captured, not scheduled.**
 
+**CD-11 — Multi-chain anchor lattice for bIndex + DID continuity ("survivability
+horizons") — CAPTURED, NOT SCHEDULED.** Periodic commitments (Merkle root of canonical
+bIndex state + DID rotation-log heads) anchored to independent external chains at
+cost-graded cadences — candidate: BCH daily / ETH weekly / BTC monthly (OpenTimestamps
+aggregation for the BTC leg) — generalizing the existing Arweave anchor cross-check into a
+lattice. Two tiers, never conflated: **data replication** (Autonomi/Arweave) and
+**commitment anchoring** (external chains, roots only); a "backup" claim requires both.
+Anchor targets are **write-only** — no new chain adapters enter the kernel's read path;
+implementation, if ever scheduled, is a worker, not a layer. **Open questions:** (1)
+anchor-worker trust and coverage — a missed anchor must be detectable; single-anchorer
+barred (CD-7 class); (2) restore drill — an anchor never restored from is theater; define
+the periodic recovery test; (3) funding — perpetual anchor fees via LOVErnment treasury,
+gated on **CD-4**, TE lens, earned-service-never-rent; (4) measurement — state size,
+per-chain fee curves, cadence economics; (5) language — durability claims name threat
+model and horizon; "eternal/infinite" barred from specs by construction. **Gates: CD-4
+(funding), CD-7 (coverage attestation), measurement pass.** **Status: captured, not
+scheduled.**
+
 ## Standing rules for this file
 
 - New visions get **routed here first** (which layer owns it, which
