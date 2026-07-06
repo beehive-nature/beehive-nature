@@ -14,4 +14,59 @@ the finding that raised it and the current control.
 | **R-004** | **The DRO trusts the Event Runtime's view of reality.** The `b-indexer` is an off-chain verification layer; a poisoned or lying RPC source could feed the DRO falsified chain state and induce it to co-sign a settlement against a forged reality (**Kelp DAO class**, Apr 2026 — a correct transaction executed on a false view, via 1-of-1 verification). | **High** (once DRO is live) | Adversarial review 2026-07-04 — **derived from the Kelp DAO post-mortem, April 2026** (valid signature, forged view) | **Mitigation shape:** (a) **N-of-M independent node sources** for settlement-critical `CanonicalEvent`s — no single RPC trusted for money-moving state; (b) the DRO **independently re-verifies the multisig balance/state on-chain** immediately before any co-sign, never trusting the indexed view alone, **through its own direct chain access that shares no node infrastructure with the event pipeline it checks** — re-verifying via the same RPC set the indexer reads is asking the same possibly-poisoned oracle twice (Kelp's poisoned nodes would have happily confirmed themselves), which promotes `bnature.dro` from *a consumer on the bus* to *a consumer on the bus with its own eyes*; (c) **single-source events are never auto-enforce grade** — they may inform, never trigger. Composes with the auto-enforce gate: settlement-critical evidence must be high-provenance **and** multiply-sourced. **Structural down payment landed 2026-07-04** (`dro-signer` C5): the R-004 obligation is now a **type boundary** — `IndependentChainView` is a seam disjoint from the event bus, `sign_settlement` requires an unforgeable `ConfirmedMultisigState`, and `reconcile()` refuses any payout the independently-observed balance doesn't cover. The type enforces *that* confirmation happened; the *node-disjointness* (a) and multi-sourcing remain this deployment contract. |
 | **R-005** | **Overfunding is accepted but only `amount` is settled — the excess is stranded.** `escrow-core` accepts a `BuyerFunded` with `asset_amount > amount` (an explicit, tested choice), but every settlement pays the agreed `escrow.amount`; the escrow never records the observed deposit. So the surplus the buyer put into the multisig is paid to nobody, and on a refund the buyer is under-refunded by exactly that surplus. | **Medium** | Adversarial review 2026-07-04 (money-conservation lens) | **Documented gap, pinned by a test** (`dro-signer::overfunding_excess_is_not_settled_documented_gap`) — NOT silently changed, because it is a **founder economic decision**, not a mechanism bug. Options: (a) record the observed funded balance (add `funded_asset_amount`) and refund/settle the surplus; (b) reject overfunding (`==` instead of `>=`), making deposited always equal `amount`; (c) treat surplus as a non-refundable tip. Compose with R-004: the on-chain balance the DRO now confirms is exactly where the true deposited amount would be read. |
 
+## R-006 — Wrapped-asset redemption dependence (per-asset_id trust assumptions)
+
+Class: external peg / bridge liveness. Sibling of R-002 (fUSD peg); distinct
+from R-005 (overfunding-stranding); governed by the R-004 independence
+discipline (no shared-infrastructure assumptions).
+
+Statement: An escrow denominated in a bridged confidential asset (BTCX
+`040a180a…`, ETHX `93da6815…`, DAIX `24819c4b…`) SETTLES correctly on Zano
+regardless of bridge state — transfers never touch the bridge. The asset's
+VALUE, however, depends on redemption liveness of Confidential Layer /
+Bridgeless, whose "decentralized, non-custodial, distributed key
+architecture" is a documentation-grade claim: UNVERIFIED until proven from
+source, on-chain evidence, or reproducible test. WZANO (outbound,
+wrapped.zano.org) is explicitly custodial (team wallet, attestation-grade
+solvency, staked custody) and is policy-excluded as a BNR rail —
+onboarding-footnote status only, permanently.
+
+Kernel facts (lead-verified against public record at `498904e`):
+`OrderEvent.asset_id` is an opaque String in the §9.3 schema; escrow-core
+stores `asset_id: Option<String>` uninterpreted (`None` = native ZANO);
+`fee_buffer_zano` is native-denominated regardless of escrowed asset; split
+arithmetic is native-unit u64. The R-004 boundary is already asset-aware:
+`dro_signer::reconcile` (dro-signer/src/lib.rs:393) refuses settlement on
+WrongWallet, AssetMismatch, or UnbackedSettlement, with checked_add /
+PayoutOverflow guarding the summation itself. Any wrapped asset_id inherits
+the confirm-before-sign gate with no new code.
+
+Kernel doctrine (binding): the kernel never assumes a peg. Amounts are
+denominated in their asset_id; any USD display is UI; adjudication splits
+are native-unit. No wrapped asset is described as "supported" anywhere until
+the integration checklist passes.
+
+Integration checklist (gates any listing):
+1. asset_id cross-verified from ≥2 independent sources, one on-chain
+   (whitelist record / explorer).
+2. Testnet escrow round-trip in the t-asset (faucet dispenses tBTCX) —
+   reproducible command and output banked; this is the fact that converts
+   the claim.
+3. Bridge key-architecture facts (node set, threshold, shared-infra status)
+   established from source or on-chain evidence; else user-facing
+   disclosure carries UNVERIFIED explicitly.
+4. Per-asset risk disclosure text founder-approved; language never stronger
+   than "sound by construction / isolated by design."
+
+Monitor: fold into the Monday fUSD monitor → "peg & redemption monitor":
+fUSD peg, listed-asset redemption spread, bridge status. HF6 watch item:
+whether HF6 touches tx format or signing is UNVERIFIED — re-gate through
+the vector-compatibility test (keys.rs vs stock post-HF6 Zano CLI) before
+firmware work proceeds past the gate.
+
+Trigger/response: redemption halt or sustained depeg on a listed asset →
+delist from new-escrow denominations (existing escrows unaffected;
+settlement is on-chain), founder notice, disclosure update. Threshold X%
+and window: founder-gated, set at first listing.
+
 _Not legal or security advice; an internal tracking artifact for design review._

@@ -368,6 +368,37 @@ treatment: an exit path that can't clear is a gate condition, learned live 2026-
 **Gates: jurisdiction review (hard), CD-7 harvest attestation, venue viability research,
 redemption-liquidity design.** **Status: captured, not scheduled.**
 
+## CD-16 — Wrapped confidential assets as settlement denominations
+Status: QUARANTINED — capture only. No build, no listing, no schedule claim.
+
+What: Marketplace-level listing of bridged confidential assets (BTCX, ETHX,
+DAIX, fUSD) as escrow denominations. Zero kernel change — asset_id opacity
+is demonstrated in the public record by the `--json` output contract landed
+at `498904e` (fixture file public at `520f154`, `generated_from=498904e`,
+per the founder's exempt-fixtures ruling). Zero architecture change — layer stack closed;
+this is listing policy plus R-006 compliance, nothing else.
+
+Value thesis: widens the addressable market (hold-BTC, pay-privately buyers
+escrow BTCX without surrendering price exposure); taps existing Zano Trade
+liquidity (BTCX/ETHX/SOLX pairs, ionic swaps ~1 block); fungibility posture
+(no tainted coins) matches BNR doctrine. WZANO is out of scope as a rail —
+custodial, Ethereum-transparent — onboarding footnote only.
+
+Blocked on: R-006 integration checklist (all four gates), founder listing
+decision per asset, post-sprint scheduling.
+
+Founder-gated questions (verbatim, unresolved):
+Q-1: Which assets at first listing — BTCX only, or +DAIX/fUSD?
+Q-2: Disclosure standard — confirm bridge claims carry UNVERIFIED until
+     proven; no security language beyond "sound by construction."
+Q-3: Does Zano MCP (45+ tools, third-party) enter the dev toolchain for
+     testnet probes? Supply-chain surface; hold-and-ask class.
+Q-4: Fee/price display policy — native-unit everywhere, UI conversion
+     allowed, or founder-set hybrid?
+
+First reproducible fact when scheduled: tBTCX escrow round-trip on testnet,
+command + output banked in the pen.
+
 ## Standing rules for this file
 
 - New visions get **routed here first** (which layer owns it, which
