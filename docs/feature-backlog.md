@@ -223,6 +223,20 @@ model and horizon; "eternal/infinite" barred from specs by construction. **Gates
 (funding), CD-7 (coverage attestation), measurement pass.** **Status: captured, not
 scheduled.**
 
+**CD-12 — $10 USDC-on-Base onboarding ramp ("try the OS for ten dollars") — CAPTURED,
+NOT SCHEDULED.** App-layer acquisition flow: a stranger loads ~$10 USDC on Base; edge
+routing swaps/bridges to fUSD on Zano; the kernel sees an ordinary fUSD funding event.
+**Base does not enter the kernel** — no new chain adapter, no read-path entry; edge worker
+only (CD-11 pattern). **Governed by the R-002 launch gate by construction** — no stranger
+onboards into fUSD while DEX exit liquidity is 🔴. Engine: CD-13 (resource provisioning
+behind the flow). **Open questions:** (1) non-custodial routing — platform never touches
+funds vs anything custodial = software vs money transmitter; (2) sanctions/jurisdiction
+review (US-touching onramp × Venezuelan operations, named risk); (3) fee-path measurement
+— $10 must survive bridge+swap costs (naive routing eats 20–40%); (4) wallet UX —
+zero-prompt/session-key tie-in; (5) default-with-options pattern for funding sources.
+**Gates: R-002 launch gate, CD-13, jurisdiction review, fee measurement.** **Status:
+captured, not scheduled.**
+
 **CD-13 — Resource Paymaster (the Resource primitive's first organ) — CAPTURED, NOT
 SCHEDULED.** Standing metabolic service acquiring and provisioning chain resources behind
 zero-prompt UX: RAM/CPU/A (Vaulta), ZANO (network fees + §9.2 fee buffers — the paymaster
