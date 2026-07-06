@@ -316,6 +316,26 @@ process; this entry flags, the founder declares. **Gates: CD-4, CD-7, Article VI
 split-ratio decision, Sybil/generosity-war red-team, tokenomics-spec burn decision.**
 **Status: captured, not scheduled.**
 
+**CD-15 — Crop-Share Prefunding Market ("Seed Money") — CAPTURED, NOT SCHEDULED.**
+Farmers pre-sell verified shares of a coming crop to finance production; buyers hold
+claims settling on harvest. Exercises every kernel primitive at once (Intent = offering,
+Evidence = harvest attestation, Settlement = payout; Identity/Reputation throughout) and
+aligns with founding operations (hemp, Margarita + Yucatán). **The hard gate is legal,
+not technical:** crop shares sold to fund production with profit expectation are textbook
+investment contracts (Howey) and/or commodity forwards — SEC/CFTC territory in the US
+with mirrored MX/VE regimes; **securities/commodities jurisdiction review is the gate,
+not a checkbox.** **Harvest settlement is an oracle problem** — who attests the crop came
+in — gated on **CD-7** (its fifth dependent). **Venue decision open:** BitShares
+researched as candidate (purpose-built UIA/MPA + DEX machinery; repos maintained as of
+July 2026; BUT ~$3M market cap, ~$0.001 BTS, ~$71k daily volume — a DPoS chain capturable
+for pocket change, R-004 class risk; never a kernel layer regardless — edge integration
+only, CD-11/CD-12 pattern) **vs. the native-stack null hypothesis** (Vaulta assets +
+kernel escrow + Zano settlement — security already trusted); Cowork viability task
+pre-scoped for a deliberate day. **Share-redemption liquidity** gets R-002-class
+treatment: an exit path that can't clear is a gate condition, learned live 2026-07-06.
+**Gates: jurisdiction review (hard), CD-7 harvest attestation, venue viability research,
+redemption-liquidity design.** **Status: captured, not scheduled.**
+
 ## Standing rules for this file
 
 - New visions get **routed here first** (which layer owns it, which
