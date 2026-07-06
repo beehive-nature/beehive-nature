@@ -782,9 +782,12 @@ fn jval<T: serde::Serialize>(t: &T) -> Result<serde_json::Value, String> {
     serde_json::to_value(t).map_err(|e| format!("json: serialize: {e}"))
 }
 
-/// dispute-engine `Evidence` mapped with its real field names.
-fn evidence_json(items: &[Evidence]) -> serde_json::Value {
-    items
+/// dispute-engine `Evidence` mapped with its real field names, then
+/// round-trip-verified: every mapped field is read back out of the built
+/// Value and compared to the source struct, so a wrong-field `json!` swap
+/// refuses (nonzero exit) instead of emitting a plausible-but-wrong fixture.
+fn evidence_json(ctx: &str, items: &[Evidence]) -> Result<serde_json::Value, String> {
+    let built: Vec<serde_json::Value> = items
         .iter()
         .map(|e| {
             json!({
@@ -796,17 +799,58 @@ fn evidence_json(items: &[Evidence]) -> serde_json::Value {
                 "favors": format!("{:?}", e.favors),
             })
         })
-        .collect::<Vec<_>>()
-        .into()
+        .collect();
+    for (doc, e) in built.iter().zip(items) {
+        if doc.get("provenance").and_then(|v| v.as_str())
+            != Some(format!("{:?}", e.provenance).as_str())
+        {
+            return Err(format!("{ctx}: evidence round-trip: provenance mismatch"));
+        }
+        if doc.get("confidence").and_then(|v| v.as_f64()) != Some(f64::from(e.confidence)) {
+            return Err(format!("{ctx}: evidence round-trip: confidence mismatch"));
+        }
+        if doc.get("signed").and_then(|v| v.as_bool()) != Some(e.signed) {
+            return Err(format!("{ctx}: evidence round-trip: signed mismatch"));
+        }
+        if doc.get("verified").and_then(|v| v.as_bool()) != Some(e.verified) {
+            return Err(format!("{ctx}: evidence round-trip: verified mismatch"));
+        }
+        if doc.get("favors").and_then(|v| v.as_str()) != Some(format!("{:?}", e.favors).as_str()) {
+            return Err(format!("{ctx}: evidence round-trip: favors mismatch"));
+        }
+        let hash = doc
+            .get("payload_hash")
+            .and_then(|v| v.as_str())
+            .ok_or_else(|| format!("{ctx}: evidence round-trip: payload_hash missing"))?;
+        let reencoded: String = e.payload_hash.iter().map(|b| format!("{b:02x}")).collect();
+        if hash.len() != 64
+            || !hash.bytes().all(|b| matches!(b, b'0'..=b'9' | b'a'..=b'f'))
+            || hash != reencoded
+        {
+            return Err(format!(
+                "{ctx}: evidence round-trip: payload_hash is not 64 lowercase hex matching the source bytes"
+            ));
+        }
+    }
+    Ok(built.into())
 }
 
-/// dro-signer `Payout` legs mapped with their real field names.
-fn payouts_json(payouts: &[dro_signer::Payout]) -> serde_json::Value {
-    payouts
+/// dro-signer `Payout` legs mapped with their real field names, then
+/// round-trip-verified per leg (same refusal contract as `evidence_json`).
+fn payouts_json(ctx: &str, payouts: &[dro_signer::Payout]) -> Result<serde_json::Value, String> {
+    let built: Vec<serde_json::Value> = payouts
         .iter()
         .map(|p| json!({ "to": format!("{:?}", p.to), "amount": p.amount }))
-        .collect::<Vec<_>>()
-        .into()
+        .collect();
+    for (doc, p) in built.iter().zip(payouts) {
+        if doc.get("to").and_then(|v| v.as_str()) != Some(format!("{:?}", p.to).as_str()) {
+            return Err(format!("{ctx}: payout round-trip: to mismatch"));
+        }
+        if doc.get("amount").and_then(|v| v.as_u64()) != Some(p.amount) {
+            return Err(format!("{ctx}: payout round-trip: amount mismatch"));
+        }
+    }
+    Ok(built.into())
 }
 
 async fn json_fixture() -> Result<serde_json::Value, String> {
@@ -924,27 +968,28 @@ async fn json_fixture() -> Result<serde_json::Value, String> {
         .ok_or("json/1: registered escrow missing")?;
     let view = MockChainView::solvent();
     let mut signer = MockSigner::new();
-    let settlement_1 =
-        match settle_transition(escrow, &Ok(EscrowState::Completed), &view, &mut signer) {
-            Some(Ok(signed)) => {
-                let intent = signer
-                    .signed
-                    .first()
-                    .ok_or("json/1: no settlement recorded")?;
-                let payout = intent.payouts.first().ok_or("json/1: no payout leg")?;
-                if intent.payouts.len() != 1
-                    || payout.to != Party::Seller
-                    || payout.amount != AMOUNT
-                {
-                    return Err(format!(
-                        "json/1: expected sole release {AMOUNT} to Seller, got {:?}",
-                        intent.payouts
-                    ));
-                }
-                json!({ "payouts": payouts_json(&intent.payouts), "signed_by": signed.signed_by })
+    let settlement_1 = match settle_transition(
+        escrow,
+        &Ok(EscrowState::Completed),
+        &view,
+        &mut signer,
+    ) {
+        Some(Ok(signed)) => {
+            let intent = signer
+                .signed
+                .first()
+                .ok_or("json/1: no settlement recorded")?;
+            let payout = intent.payouts.first().ok_or("json/1: no payout leg")?;
+            if intent.payouts.len() != 1 || payout.to != Party::Seller || payout.amount != AMOUNT {
+                return Err(format!(
+                    "json/1: expected sole release {AMOUNT} to Seller, got {:?}",
+                    intent.payouts
+                ));
             }
-            other => return Err(format!("json/1: DRO did not sign a release ({other:?})")),
-        };
+            json!({ "payouts": payouts_json("json/1", &intent.payouts)?, "signed_by": signed.signed_by })
+        }
+        other => return Err(format!("json/1: DRO did not sign a release ({other:?})")),
+    };
 
     // -- Scenario 2a: high-provenance refund, auto-enforced.
     let case_2a = {
@@ -954,7 +999,7 @@ async fn json_fixture() -> Result<serde_json::Value, String> {
             ev(Provenance::ChainProof, Side::Buyer, true),
             ev(Provenance::CarrierApi, Side::Buyer, true),
         ];
-        let evidence_doc = evidence_json(&evidence);
+        let evidence_doc = evidence_json("json/2a", &evidence)?;
         let provider = MockProvider { evidence };
         let verdict =
             adjudicate(&dispute_for(order), &provider).map_err(|e| format!("json/2a: {e}"))?;
@@ -989,18 +1034,33 @@ async fn json_fixture() -> Result<serde_json::Value, String> {
                         intent.payouts
                     ));
                 }
-                json!({ "payouts": payouts_json(&intent.payouts), "signed_by": signed.signed_by })
+                json!({ "payouts": payouts_json("json/2a", &intent.payouts)?, "signed_by": signed.signed_by })
             }
             other => return Err(format!("json/2a: settlement failed ({other:?})")),
         };
+        // A RefundBuyer verdict must not carry a split ratio — asserted here
+        // rather than mapping the raw Option unexamined.
+        if verdict.split_ratio.is_some() {
+            return Err("json/2a: RefundBuyer verdict unexpectedly carries a split_ratio".into());
+        }
+        let verdict_doc = json!({
+            "verdict": format!("{:?}", verdict.verdict),
+            "confidence": verdict.confidence,
+            "auto_enforce": verdict.auto_enforce,
+            "split_ratio": verdict.split_ratio.map(|(b, s)| json!([b, s])),
+        });
+        let c = verdict_doc
+            .get("confidence")
+            .and_then(|v| v.as_f64())
+            .ok_or("json/2a: verdict round-trip: confidence missing")?;
+        if !c.is_finite() || c <= 0.0 || c > 1.0 || c != f64::from(verdict.confidence) {
+            return Err(format!(
+                "json/2a: verdict round-trip: confidence {c} out of range or mismatched"
+            ));
+        }
         json!({
             "evidence": evidence_doc,
-            "verdict": {
-                "verdict": format!("{:?}", verdict.verdict),
-                "confidence": verdict.confidence,
-                "auto_enforce": verdict.auto_enforce,
-                "split_ratio": verdict.split_ratio.map(|(b, s)| json!([b, s])),
-            },
+            "verdict": verdict_doc,
             "escrow_state": jval(&EscrowState::Refunded)?,
             "settlement": settlement,
         })
@@ -1014,7 +1074,7 @@ async fn json_fixture() -> Result<serde_json::Value, String> {
             ev(Provenance::DeviceAttestation, Side::Buyer, true),
             ev(Provenance::UserClaim, Side::Seller, false),
         ];
-        let evidence_doc = evidence_json(&evidence);
+        let evidence_doc = evidence_json("json/2b", &evidence)?;
         let provider = MockProvider { evidence };
         let verdict =
             adjudicate(&dispute_for(order), &provider).map_err(|e| format!("json/2b: {e}"))?;
@@ -1070,16 +1130,26 @@ async fn json_fixture() -> Result<serde_json::Value, String> {
         if buyer_leg.amount != buyer_amt || seller_leg.amount != seller_amt {
             return Err("json/2b: verdict ratio not honored in payouts".into());
         }
+        let verdict_doc = json!({
+            "verdict": format!("{:?}", verdict.verdict),
+            "confidence": verdict.confidence,
+            "auto_enforce": verdict.auto_enforce,
+            "split_ratio": [buyer_amt, seller_amt],
+        });
+        let c = verdict_doc
+            .get("confidence")
+            .and_then(|v| v.as_f64())
+            .ok_or("json/2b: verdict round-trip: confidence missing")?;
+        if !c.is_finite() || c <= 0.0 || c > 1.0 || c != f64::from(verdict.confidence) {
+            return Err(format!(
+                "json/2b: verdict round-trip: confidence {c} out of range or mismatched"
+            ));
+        }
         json!({
             "evidence": evidence_doc,
-            "verdict": {
-                "verdict": format!("{:?}", verdict.verdict),
-                "confidence": verdict.confidence,
-                "auto_enforce": verdict.auto_enforce,
-                "split_ratio": [buyer_amt, seller_amt],
-            },
+            "verdict": verdict_doc,
             "escrow_state": jval(&EscrowState::Resolved)?,
-            "settlement": { "payouts": payouts_json(&intent.payouts), "signed_by": signed.signed_by },
+            "settlement": { "payouts": payouts_json("json/2b", &intent.payouts)?, "signed_by": signed.signed_by },
         })
     };
 
