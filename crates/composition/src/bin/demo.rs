@@ -18,11 +18,13 @@
 //! bus-consumer `escrow-engine` is happy-path-only by its own design, so the
 //! dispute transitions drive `escrow-core` directly.
 //!
-//! **Scenario 3 — reputation flow.** The three lifecycle outcomes drive the
-//! real `reputation-engine`: reputation is EMERGENT (recomputed from
+//! **Scenario 3 — reputation (independent scenario).** The three lifecycle
+//! outcomes are *modeled as inputs* here (not piped from scenarios 1–2) and
+//! drive the real `reputation-engine`: reputation is EMERGENT (recomputed from
 //! event-derived inputs via `recompute`/`MockStore`, never written), the
 //! component vector is canonical (`score` is one projection of it), and
-//! attestations are Sybil-deduplicated per attester.
+//! attestations are Sybil-deduplicated per attester (per-DID dedup;
+//! distinct-identity rings are out of scope for this demo).
 //!
 //! Exits 0 only if ALL THREE scenarios complete clean; nonzero on any invariant
 //! failure.  `cargo run -p composition --bin demo`
@@ -142,7 +144,7 @@ async fn run() -> i32 {
         return fail(&e);
     }
 
-    println!("\n=== SCENARIO 3 — reputation flow (emergent · recomputed · Sybil-resistant) ===");
+    println!("\n=== SCENARIO 3 — reputation (independent scenario: lifecycle outcomes modeled as inputs, not piped from 1–2 · emergent · Sybil-deduped) ===");
     if let Err(e) = reputation_flow() {
         return fail(&e);
     }
@@ -563,10 +565,12 @@ fn dispute_branch() -> Result<(), String> {
 }
 
 // ---------------------------------------------------------------------------
-// Scenario 3 — reputation flow: the lifecycle outcomes drive the real
+// Scenario 3 — reputation (independent scenario): the lifecycle outcomes are
+// modeled as inputs here (not piped from scenarios 1–2) and drive the real
 // reputation-engine. Reputation is EMERGENT (recomputed from event-derived
 // inputs, never written), the component vector is canonical (`score` is one
-// projection), and attestations are Sybil-deduplicated per attester.
+// projection), and attestations are Sybil-deduplicated per attester (per-DID
+// dedup; distinct-identity rings are out of scope for this demo).
 // ---------------------------------------------------------------------------
 
 /// A third-party attestation; `signature_valid` is left false and stamped by a
@@ -639,6 +643,12 @@ fn reputation_flow() -> Result<(), String> {
     let seller =
         recompute(SELLER, AS_OF, &store).map_err(|e| format!("3: seller recompute: {e}"))?;
     let buyer = recompute(BUYER, AS_OF, &store).map_err(|e| format!("3: buyer recompute: {e}"))?;
+
+    // Stated once in the trace itself (not only in source): the hash-display
+    // caveat and the Sybil-dedup scope boundary.
+    println!(
+        "[reputation] note: component hashes below are shown as the first 8 of 64 hex chars (display only — the transparency check asserts the full 64-hex commitment); Sybil dedup is per-DID, so distinct-identity rings are out of scope for this demo."
+    );
 
     // Trace the emergent projections + their canonical component vectors.
     for who in [&seller, &buyer] {
