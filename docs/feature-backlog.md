@@ -172,6 +172,25 @@ R-1/Y-3 close or harden into CD-9's central constraint):**
 >
 > **Q-4.** Does the founder intend a merit gate on mandated reviews (e.g., a minimal evidence-threshold check before a UserClaim triggers free human review), or is the current design intentional — any UserClaim, regardless of merit, gets free human review? R-1 and Y-3 assume no merit gate; if one exists, both findings weaken or close.
 
+**CD-10 — Zano chain-on-Autonomi mirror ("store once, verify anywhere") — CAPTURED, NOT
+SCHEDULED.** A mirror worker (sibling to zano-watcher) publishes canonical Zano blocks to
+Autonomi content-addressed storage once, with the chain tip maintained as a signed Autonomi
+mutable register; user devices on any platform fetch chain data from Autonomi instead of
+P2P-syncing, verifying locally to their tier. **Motivation:** chain data is a public good
+currently paid for redundantly per-device (founder-observed: 4+ full downloads on one
+phone); dedup + Autonomi permanence give low-tech users reference-grade wallets without
+running infrastructure — "everything complex hidden" as a UX layer, never as a trust claim.
+**Open questions (founder-decided, not resolved here):** (1) tip-signing trust — **gated
+hard on CD-7** (N independent mirror attesters, no shared infrastructure); a single
+tip-signer is barred by construction, R-004 class; (2) reorg handling in permanent storage
+— append forks and move the signed pointer, never pretend immutability where the chain has
+none; (3) verification-tier honesty — the UX may hide complexity but must surface which
+verification tier the device actually runs (full / header+sampling / view-key scan); the
+label may not outrun the proof; (4) funding of perpetual block appends — earned service vs
+treasury, TE lens, same bar as CD-9; (5) unmeasured: Zano chain size, Autonomi append
+economics, mobile scan cost. **Gates:** CD-7 (hard, tip attestation); measurement pass on
+(5) before any brief. **Status: captured, not scheduled.**
+
 ## Standing rules for this file
 
 - New visions get **routed here first** (which layer owns it, which
