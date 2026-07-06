@@ -245,6 +245,13 @@ measure first). Every slot is an app-layer edge worker, individually gated on fe
 measurement + jurisdiction review; slots share one product contract so adding a slot never
 touches the kernel.
 
+**Output-distribution config (founder direction 2026-07-06):** the ramp dispenses a
+configurable basket — protocol-default allocation across the CD-13 resource set carries
+the traffic (the $10 stranger never sees a dial); user/exchanger may override the final
+distribution, deviation-from-default displayed, subject always to CD-13's creation-floor
+minimums (an override below floor is refused with the failing minimum named). Same
+default-with-options pattern as the Q-4 dispute menu.
+
 **CD-13 — Resource Paymaster (the Resource primitive's first organ) — CAPTURED, NOT
 SCHEDULED.** Standing metabolic service acquiring and provisioning chain resources behind
 zero-prompt UX: RAM / CPU / NET + A (Vaulta), ZANO (network fees + §9.2 fee buffers — the paymaster
