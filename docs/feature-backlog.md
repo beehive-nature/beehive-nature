@@ -336,6 +336,18 @@ process; this entry flags, the founder declares. **Gates: CD-4, CD-7, Article VI
 split-ratio decision, Sybil/generosity-war red-team, tokenomics-spec burn decision.**
 **Status: captured, not scheduled.**
 
+**Boot doctrine (founder ruling 2026-07-06, "100%"):** "The OS boots on money, comes
+alive on b, and the OS itself hands you your first b." **Money buys function;
+contribution buys standing.** Core commerce — account creation, escrow, settlement,
+mandated dispute review — **never requires b**; b gates enhancement and standing only
+(elective escalation per CD-9, fee-split services and discounts per CD-14, reputation
+weight, eventual Article VI voice). b cannot be bought, only earned — so full citizenship
+is reachable only by using the OS, and the front-loaded operant curve mints a new user's
+first b on their first verified actions. **Entrenchment clause:** reclassifying any
+core-commerce function as b-gated is a **meta-tier constitutional amendment (Article VI
+K_meta class), never an ordinary vote** — the mandatory-fuel wall may not return through
+governance.
+
 **CD-15 — Crop-Share Prefunding Market ("Seed Money") — CAPTURED, NOT SCHEDULED.**
 Farmers pre-sell verified shares of a coming crop to finance production; buyers hold
 claims settling on harvest. Exercises every kernel primitive at once (Intent = offering,
