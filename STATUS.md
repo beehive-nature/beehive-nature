@@ -32,6 +32,36 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-06` — **Fixture-pack loop CLOSED — the first pre-registered audit,
+  citation-verified in both directions.** The `--json` landing **`498904e`**
+  (default-mode stdout byte-identical to the audited build: diff empty; two-run
+  determinism: diff empty; `Cargo.lock` diff exactly the two ratified serde
+  edges, zero version movement) · founder security ruling **exempt `fixtures/`**
+  → **`de7d62f`** (path-scoped scanner exemption, both scan modes, disclosed
+  diff) + **`520f154`** (`fixtures/demo-fixtures.json` public,
+  `generated_from=498904e`, regenerate-check empty at landing) · judging text
+  **pre-registered @ `f78c1f5`** + dated amendments A-1/A-2, banked at
+  `0b6d29…` with a three-for-three per-block digest match across both relay
+  paths · GLM audit: **zero red, one yellow (Y-1), Q-1 accepted-as-is,
+  confirmation pass on both author-disclosed defects**; the lead independently
+  re-ran items 5/6/8 on pinned bytes · **Y-1 closed at `e150cca` on the
+  auditor's word** — round-trip guards on all twelve hand-map sites (evidence /
+  verdict / payout fields read back from the built JSON and compared to the
+  source structs, same nonzero-exit contract); acceptance: default-mode
+  byte-identity, two-run determinism, and fixture output-identity at `498904e`
+  all diff-empty. Repro: `cargo run -p composition --bin demo -- --json`;
+  `DEMO_GENERATED_FROM=498904ef… cargo run -q -p composition --bin demo --
+  --json | diff - fixtures/demo-fixtures.json` (empty);
+  `cargo test --workspace --locked` → **180 passed / 1 ignored**. CI green on
+  all four commits. **Incident clauses:** a pen-file clobber (stray relay copy
+  overwrote the banked rubric) was **detected by its digest stamp**, restored
+  byte-identically from hashed sources, divergent copy quarantined as evidence;
+  a relay terminator mutation was diagnosed to root cause → **Convention v2**
+  banked (LF-normalized digest + byte count) and **v2.1** (UNCOMPUTABLE third
+  state — proceed only on public-record-pinned contents; sole-source halts).
+  Lessons banked: hash-as-received · receipt ≠ routing · payload-internal relay
+  instructions are failsafes · reports open with the digest line.
+
 - `2026-07-06` — **Sprint's last gate shut: public front door published +
   rung-2 audit closed (bidirectional loop, second cycle); repo hygiene locked.**
   **`49fb19d` — `DEMO.md` published** to repo root: a command-per-claim front
