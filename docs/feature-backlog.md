@@ -239,6 +239,16 @@ barred (CD-7 class), custody + legal-exposure pinch named; (5) jurisdiction revi
 with CD-12. First customer: CD-12. **Gates: CD-4, CD-7, drain red-team, cost
 measurement.** **Status: captured, not scheduled.**
 
+**bSAFE exclusion made explicit (2026-07-06):** founder proposed adding b to the
+provisioning list; excluded on constitutional grounds — b is earned-emission-only (genesis
+zero, no premine, TE invariants); a paymaster that sells b for USDC is a token sale
+through a side door and an L3/L4 blur. The paymaster provisions external commodities only.
+Compliant path recorded: new users earn their first b through first actions under the
+front-loaded operant emission curve — earning-through-use is the onboarding feature, not a
+gap. Any day-one welcome grant is a separate CD-4/Article-VI meta-tier decision
+(premine-robe test applies) and is Sybil-exposed per this entry's drain red-team; not part
+of this capture.
+
 ## Standing rules for this file
 
 - New visions get **routed here first** (which layer owns it, which
