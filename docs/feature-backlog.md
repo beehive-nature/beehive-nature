@@ -122,6 +122,56 @@ charging for the compelled look) is what makes the venue trustworthy to both sid
 arbitration treasury) and **CD-7** (attester-independence / minimum-N); pure capture until
 then. **Status: captured, not scheduled.**
 
+**Red-teamed 2026-07-05 (GLM 5.2) — stress-test of record. Capture status
+UNCHANGED: still captured, not scheduled; every finding below is an open concern,
+not a work item, and nothing here advances CD-9 toward build.** GLM 5.2
+adversarially red-teamed the *reasoning* of this captured design (not an
+implementation). Findings faithfully condensed from the verbatim memo (source:
+`docs/findings/cd-9-redteam-verbatim.md`, sha256 `71297d6e…`; Y-3 supplied
+verbatim by the founder and slotted, not reconstructed):
+
+- **R-1 (RED) — UserClaim griefing lane.** The mandated/elective partition is
+  clean *taxonomically* (mandated vs elective) but not *economically*: a
+  fabricated UserClaim produces the same `auto_enforce = false` mandated path as
+  a legitimate one, so any party can trigger free human review at will, its cost
+  borne by the CD-4 treasury rather than the filer — the free-riding lane the
+  pricing was meant to prevent.
+- **R-2 (RED) — elective buy-up purchases verdict quality, not just service
+  speed.** If independence correlates with verdict accuracy, wealth correlates
+  with outcome quality on the elective path, and the wealth-gradient the mandated
+  carve-out solved reappears on the other path. Verbatim: **"more-independent" is
+  a quality attribute, not a latency attribute.**
+- **Y-1 (YELLOW) — loser-pays is weakest against judgment-proof serial
+  griefers.** A zero-bSAFE escalator can file endless losing appeals, never pay,
+  and bleed the counterparty; loser-pays shields the *system* from unpaid
+  invoices, not the *counterparty* from exhaustion.
+- **Y-2 (YELLOW) — bonded appeals protect the system, not the counterparty.** A
+  bond sized to adjudicator cost and forfeited to the treasury (not the
+  counterparty) still lets a richer party bleed a poorer one when the bond is far
+  smaller than the counterparty's actual defense burden.
+- **Y-3 (YELLOW) — free mandated review incentivizes weak UserClaims as lottery
+  tickets.** The dispute-engine invariant removes the AI path to victory; CD-9's
+  free mandated review removes the cost of the human path — so the rational move
+  after losing at the AI tier is always to file a UserClaim (cost 0, upside =
+  human discretion, downside = none), flooding the mandated path with
+  low-provenance evidence.
+- **C-1 (COSMETIC) — "premium-tier neutral adjudication" is self-contradictory
+  wording** ("premium" implies tiered access, "neutral" implies equal treatment)
+  — a framing fix, not a mechanism error.
+- **Gating logic:** CD-4 (treasury) and CD-7 (independence definition) are correct
+  and necessary; no missing dependency is visible from the docket. Clean.
+
+**Open founder decisions — Q-1–Q-4, verbatim from the memo (these gate whether
+R-1/Y-3 close or harden into CD-9's central constraint):**
+
+> **Q-1.** CD-9 says "a review fee is earned service, never a rent" and routes through TE-6 (no self-dealing) + demand-linkage. If the fee flows to the CD-4 treasury rather than directly to the adjudicator who performed the service, does demand-linkage require direct payment to the service provider? Or is treasury intermediation consistent with "earned service"? (Requires TE invariant text to answer.)
+>
+> **Q-2.** CD-9 says fee existence and rate are an "Article VI meta-tier governance decision." Is Article VI itself defined enough to govern this, or is it also a capture? The docket contains a CONSTITUTION.md noted as "draft; founder decisions pending." (Requires Article VI draft text to answer.)
+>
+> **Q-3.** CD-9 prices "elective escalation" but never defines the tier structure. What is the baseline mandated tier (single adjudicator? panel?), and what does "more" escalate to? The griefing and wealth-gradient findings above change shape depending on whether the baseline is already multi-adjudicator or single.
+>
+> **Q-4.** Does the founder intend a merit gate on mandated reviews (e.g., a minimal evidence-threshold check before a UserClaim triggers free human review), or is the current design intentional — any UserClaim, regardless of merit, gets free human review? R-1 and Y-3 assume no merit gate; if one exists, both findings weaken or close.
+
 ## Standing rules for this file
 
 - New visions get **routed here first** (which layer owns it, which
