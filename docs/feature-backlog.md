@@ -247,7 +247,7 @@ touches the kernel.
 
 **CD-13 — Resource Paymaster (the Resource primitive's first organ) — CAPTURED, NOT
 SCHEDULED.** Standing metabolic service acquiring and provisioning chain resources behind
-zero-prompt UX: RAM/CPU/A (Vaulta), ZANO (network fees + §9.2 fee buffers — the paymaster
+zero-prompt UX: RAM / CPU / NET + A (Vaulta), ZANO (network fees + §9.2 fee buffers — the paymaster
 is who fills `fee_buffer_zano` so users never learn it exists), ANT (Autonomi writes), AR
 (Arweave permanence). User sees "$10 loaded, ready"; five tokens, four chains, zero
 prompts. Session-key budgets are the blast radius (per-user hard resource budgets;
@@ -285,6 +285,19 @@ pinned as *candidate* home for b, making every emission event a CanonicalEvent v
 SHIP stream (earned-emission provable from the pipeline, not asserted) — confirm against
 the tokenomics spec; if the spec is silent on host chain, this note flags the pin for a
 deliberate spec amendment, it does not make one.
+
+**Creation-floor invariant (founder direction 2026-07-06):** provisioning must satisfy
+clearly-stated per-resource minimums for a functioning account (existence: RAM; action:
+CPU/NET; settlement: ZANO fee buffer per §9.2; storage: ANT/AR minimums); an allocation
+below any floor is **refused pre-purchase with the failing minimum named** — the §9.2
+dual-balance guard generalized to N resources; no half-born accounts. **Fully autonomous
+per standing zero-prompt law:** root signs the allocation policy once; session keys
+execute acquisition/provisioning silently within budget; prompts only at policy
+boundaries. **b remains excluded** per the two-loop law (this entry, 2026-07-06) —
+founder re-raised b for the basket same day; exclusion reaffirmed, overrule route
+unchanged (tokenomics constitutional amendment + GLM red-team only). *(Resource-list
+correction, same direction: NET added — an account without NET cannot transact; list now
+RAM / CPU / NET + A.)*
 
 **CD-14 — App Emission Interface ("apps attest and collect — never mint") — CAPTURED,
 NOT SCHEDULED.** Two-sided interface between dApps/plugins and the metabolic loop.
