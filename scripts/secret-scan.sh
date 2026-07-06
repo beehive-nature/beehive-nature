@@ -9,6 +9,11 @@
 #
 # Exemptions:
 #   - Cargo.lock: its sha256 checksums are 64-char hex and public by nature
+#   - fixtures/: generated demo fixtures (`--json` output). Their 64-hex values
+#     are commitment hashes computed by the demo at run time — public by
+#     construction, never key material — and the file regenerates
+#     byte-identically via DEMO_GENERATED_FROM=<head>. Path-scoped exemption,
+#     founder-ruled 2026-07-06.
 #   - lines carrying a same-line TESTNET-ONLY marker — the sanctioned way to
 #     commit a throwaway testnet vector for the compat tests, e.g.:
 #       let s: [u8; 32] = hex!("...");  // TESTNET-ONLY throwaway compat vector
@@ -34,14 +39,14 @@ MARK2='PUBLIC-CONSTANT'
 case "$mode" in
 diff)
     names=$(git diff --cached --name-only --diff-filter=ACM | grep -Ei "$NAME_RE")
-    added=$(git diff --cached --diff-filter=ACM -- . ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' |
+    added=$(git diff --cached --diff-filter=ACM -- . ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' |
         grep '^+' | grep -v '^+++')
     hex=$(printf '%s\n' "$added" | grep -vF -e "$MARK" -e "$MARK2" | grep -nE "$HEX_RE")
     pem=$(printf '%s\n' "$added" | grep -nE "$PEM_RE")
     ;;
 tree)
     names=$(git ls-files | grep -Ei "$NAME_RE")
-    hex=$(git grep -InE "$HEX_RE" -- ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' | grep -vF -e "$MARK" -e "$MARK2")
+    hex=$(git grep -InE "$HEX_RE" -- ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' | grep -vF -e "$MARK" -e "$MARK2")
     pem=$(git grep -InE "$PEM_RE")
     ;;
 *)
