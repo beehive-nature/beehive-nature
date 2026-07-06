@@ -1,0 +1,402 @@
+{
+  "generated_by": "DEMO_GENERATED_FROM=$(git rev-parse HEAD) cargo run -p composition --bin demo -- --json",
+  "generated_from": "498904ef2df2fd2875c6950f1e071c56d19daa73",
+  "scenario_1_happy_path": {
+    "settlement": {
+      "payouts": [
+        {
+          "amount": 5000000,
+          "to": "Seller"
+        }
+      ],
+      "signed_by": "MockSigner"
+    },
+    "steps": [
+      {
+        "event": {
+          "canonicalized_by": "demo",
+          "event_id": "evt-demo-order-1-1782000000",
+          "event_type": {
+            "type": "OrderPlaced"
+          },
+          "payload": {
+            "data": {
+              "amount": 5000000,
+              "asset_id": "fusd-asset-id",
+              "buyer_did": "did:plc:buyer",
+              "carrier": "UPS",
+              "escrow_wallet_id": "demo-msig",
+              "fee_buffer_zano": null,
+              "order_id": "demo-order-1",
+              "seller_did": "did:plc:seller",
+              "tracking": "1Z999-DEMO"
+            },
+            "type": "Order"
+          },
+          "source_chain": "Zano",
+          "source_ref": "demo:1782000000",
+          "timestamp": 1782000000
+        },
+        "outcome": {
+          "escrow_state": "Created",
+          "ignored_by_engine": true
+        }
+      },
+      {
+        "event": {
+          "canonicalized_by": "demo",
+          "event_id": "evt-demo-order-1-1782000100",
+          "event_type": {
+            "type": "OrderFunded"
+          },
+          "payload": {
+            "data": {
+              "amount": 5000000,
+              "asset_id": "fusd-asset-id",
+              "buyer_did": "did:plc:buyer",
+              "carrier": "UPS",
+              "escrow_wallet_id": "demo-msig",
+              "fee_buffer_zano": null,
+              "order_id": "demo-order-1",
+              "seller_did": "did:plc:seller",
+              "tracking": "1Z999-DEMO"
+            },
+            "type": "Order"
+          },
+          "source_chain": "Zano",
+          "source_ref": "demo:1782000100",
+          "timestamp": 1782000100
+        },
+        "outcome": {
+          "escrow_state": "Created",
+          "refused": {
+            "InsufficientFunding": {
+              "asset_provided": 5000000,
+              "asset_required": 5000000,
+              "zano_provided": 0,
+              "zano_required": 10000000
+            }
+          }
+        }
+      },
+      {
+        "event": {
+          "canonicalized_by": "demo",
+          "event_id": "evt-demo-order-1-1782000105",
+          "event_type": {
+            "type": "OrderFunded"
+          },
+          "payload": {
+            "data": {
+              "amount": 0,
+              "asset_id": "fusd-asset-id",
+              "buyer_did": "did:plc:buyer",
+              "carrier": "UPS",
+              "escrow_wallet_id": "demo-msig",
+              "fee_buffer_zano": 10000000,
+              "order_id": "demo-order-1",
+              "seller_did": "did:plc:seller",
+              "tracking": "1Z999-DEMO"
+            },
+            "type": "Order"
+          },
+          "source_chain": "Zano",
+          "source_ref": "demo:1782000105",
+          "timestamp": 1782000105
+        },
+        "outcome": {
+          "escrow_state": "Created",
+          "refused": {
+            "InsufficientFunding": {
+              "asset_provided": 0,
+              "asset_required": 5000000,
+              "zano_provided": 10000000,
+              "zano_required": 10000000
+            }
+          }
+        }
+      },
+      {
+        "event": {
+          "canonicalized_by": "demo",
+          "event_id": "evt-demo-order-1-1782000110",
+          "event_type": {
+            "type": "OrderFunded"
+          },
+          "payload": {
+            "data": {
+              "amount": 5000000,
+              "asset_id": "fusd-asset-id",
+              "buyer_did": "did:plc:buyer",
+              "carrier": "UPS",
+              "escrow_wallet_id": "demo-msig",
+              "fee_buffer_zano": 10000000,
+              "order_id": "demo-order-1",
+              "seller_did": "did:plc:seller",
+              "tracking": "1Z999-DEMO"
+            },
+            "type": "Order"
+          },
+          "source_chain": "Zano",
+          "source_ref": "demo:1782000110",
+          "timestamp": 1782000110
+        },
+        "outcome": {
+          "transition": "Funded"
+        }
+      },
+      {
+        "event": {
+          "canonicalized_by": "demo",
+          "event_id": "evt-demo-order-1-1782000200",
+          "event_type": {
+            "type": "OrderShipped"
+          },
+          "payload": {
+            "data": {
+              "amount": 5000000,
+              "asset_id": "fusd-asset-id",
+              "buyer_did": "did:plc:buyer",
+              "carrier": "UPS",
+              "escrow_wallet_id": "demo-msig",
+              "fee_buffer_zano": null,
+              "order_id": "demo-order-1",
+              "seller_did": "did:plc:seller",
+              "tracking": "1Z999-DEMO"
+            },
+            "type": "Order"
+          },
+          "source_chain": "Zano",
+          "source_ref": "demo:1782000200",
+          "timestamp": 1782000200
+        },
+        "outcome": {
+          "transition": "Shipped"
+        }
+      },
+      {
+        "event": {
+          "canonicalized_by": "demo",
+          "event_id": "evt-demo-order-1-1782000300",
+          "event_type": {
+            "type": "OrderDelivered"
+          },
+          "payload": {
+            "data": {
+              "amount": 5000000,
+              "asset_id": "fusd-asset-id",
+              "buyer_did": "did:plc:buyer",
+              "carrier": "UPS",
+              "escrow_wallet_id": "demo-msig",
+              "fee_buffer_zano": null,
+              "order_id": "demo-order-1",
+              "seller_did": "did:plc:seller",
+              "tracking": "1Z999-DEMO"
+            },
+            "type": "Order"
+          },
+          "source_chain": "Zano",
+          "source_ref": "demo:1782000300",
+          "timestamp": 1782000300
+        },
+        "outcome": {
+          "transition": "Delivered"
+        }
+      },
+      {
+        "event": {
+          "canonicalized_by": "demo",
+          "event_id": "evt-demo-order-1-1782000400",
+          "event_type": {
+            "type": "OrderCompleted"
+          },
+          "payload": {
+            "data": {
+              "amount": 5000000,
+              "asset_id": "fusd-asset-id",
+              "buyer_did": "did:plc:buyer",
+              "carrier": "UPS",
+              "escrow_wallet_id": "demo-msig",
+              "fee_buffer_zano": null,
+              "order_id": "demo-order-1",
+              "seller_did": "did:plc:seller",
+              "tracking": "1Z999-DEMO"
+            },
+            "type": "Order"
+          },
+          "source_chain": "Zano",
+          "source_ref": "demo:1782000400",
+          "timestamp": 1782000400
+        },
+        "outcome": {
+          "transition": "Completed"
+        }
+      }
+    ]
+  },
+  "scenario_2_dispute": {
+    "case_2a_auto_enforced_refund": {
+      "escrow_state": "Refunded",
+      "evidence": [
+        {
+          "confidence": 1.0,
+          "favors": "Buyer",
+          "payload_hash": "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
+          "provenance": "ChainProof",
+          "signed": true,
+          "verified": true
+        },
+        {
+          "confidence": 1.0,
+          "favors": "Buyer",
+          "payload_hash": "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
+          "provenance": "CarrierApi",
+          "signed": true,
+          "verified": true
+        }
+      ],
+      "settlement": {
+        "payouts": [
+          {
+            "amount": 5000000,
+            "to": "Buyer"
+          }
+        ],
+        "signed_by": "MockSigner"
+      },
+      "verdict": {
+        "auto_enforce": true,
+        "confidence": 0.9900000095367432,
+        "split_ratio": null,
+        "verdict": "RefundBuyer"
+      }
+    },
+    "case_2b_escalated_split": {
+      "escrow_state": "Resolved",
+      "evidence": [
+        {
+          "confidence": 1.0,
+          "favors": "Buyer",
+          "payload_hash": "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
+          "provenance": "DeviceAttestation",
+          "signed": true,
+          "verified": true
+        },
+        {
+          "confidence": 1.0,
+          "favors": "Seller",
+          "payload_hash": "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
+          "provenance": "UserClaim",
+          "signed": false,
+          "verified": false
+        }
+      ],
+      "settlement": {
+        "payouts": [
+          {
+            "amount": 3835000,
+            "to": "Buyer"
+          },
+          {
+            "amount": 1165000,
+            "to": "Seller"
+          }
+        ],
+        "signed_by": "MockSigner"
+      },
+      "verdict": {
+        "auto_enforce": false,
+        "confidence": 0.759767472743988,
+        "split_ratio": [
+          3835000,
+          1165000
+        ],
+        "verdict": "Split"
+      }
+    }
+  },
+  "scenario_3_reputation": {
+    "buyer": {
+      "components": [
+        {
+          "contribution": -80,
+          "evidence_hash": "c455d3359af319db046a083f794d34133444bf3e4e2ad47b1a1e0b18b1877156",
+          "source": "disputed_escrows",
+          "weight": 1.0
+        },
+        {
+          "contribution": 30,
+          "evidence_hash": "d3f69f4fda7a896bf2d7e6450db0727f250caa0698d4db64a20dad55a61e483e",
+          "source": "resolved_favorable",
+          "weight": 1.0
+        },
+        {
+          "contribution": 15,
+          "evidence_hash": "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
+          "source": "evidence:ChainProof",
+          "weight": 1.0
+        },
+        {
+          "contribution": 10,
+          "evidence_hash": "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
+          "source": "evidence:CarrierApi",
+          "weight": 1.0
+        },
+        {
+          "contribution": 15,
+          "evidence_hash": "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
+          "source": "evidence:DeviceAttestation",
+          "weight": 1.0
+        },
+        {
+          "contribution": 20,
+          "evidence_hash": "cd70ab610b1de3c77a22b406e26b3b61272f80e4449651d1a11c540d5c500951",
+          "source": "attestation:did:plc:sybil-ring",
+          "weight": 1.0
+        },
+        {
+          "contribution": 20,
+          "evidence_hash": "f235fee65c15d081c0b8431ccc0e3d6d59ef25d34af3fd4c57922cab9f020cd9",
+          "source": "attestation:did:plc:honest-peer",
+          "weight": 1.0
+        }
+      ],
+      "computed_at": 1782001000,
+      "did": "did:plc:buyer",
+      "score": 30
+    },
+    "seller": {
+      "components": [
+        {
+          "contribution": 25,
+          "evidence_hash": "23e4bb76d400fa22af3376ae1bc7f5d12f0eb36a135bfcdcf43b34c120a0cfa0",
+          "source": "completed_escrows",
+          "weight": 1.0
+        },
+        {
+          "contribution": -80,
+          "evidence_hash": "c455d3359af319db046a083f794d34133444bf3e4e2ad47b1a1e0b18b1877156",
+          "source": "disputed_escrows",
+          "weight": 1.0
+        },
+        {
+          "contribution": 2,
+          "evidence_hash": "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
+          "source": "evidence:UserClaim",
+          "weight": 1.0
+        }
+      ],
+      "computed_at": 1782001000,
+      "did": "did:plc:seller",
+      "score": 0
+    },
+    "unknown_did": {
+      "components": [],
+      "computed_at": 1782001000,
+      "did": "did:plc:ghost",
+      "score": 0
+    }
+  },
+  "schema": "shared-types §9.3 CanonicalEvent (versioned)",
+  "serialization_note": "events, escrow states/errors, and reputation scores are serde-serialized from the real types; dispute verdicts, evidence, and settlement payouts are mapped with their real field names (dispute-engine and dro-signer do not derive Serialize)"
+}
