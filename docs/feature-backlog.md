@@ -271,6 +271,21 @@ gap. Any day-one welcome grant is a separate CD-4/Article-VI meta-tier decision
 (premine-robe test applies) and is Sybil-exposed per this entry's drain red-team; not part
 of this capture.
 
+**Two-loop law (founder direction 2026-07-06):** the money loop (external assets →
+paymaster → chain commodities → fUSD settlement) and the metabolic loop (verified actions
+→ b emission → b spent/burned on internal services) **never touch**. b is neither a coin
+slot, nor a dispensed product, nor a redemption ticket in the paymaster — b redeeming for
+treasury-held commodities would create a claim on the treasury (farm-to-drain, steepest at
+launch under the front-loaded curve), de facto purchasability via secondary pricing, and
+the L3/L4 blur, all barred. b's utility extends to the **service layer** of all platform
+functions — fees, discounts, priority routing, dispute tiers (per CD-9) payable or
+discounted in b as earned service — never the commodity layer. Universal fuel for what the
+platform *does*; never a claim on what the treasury *holds*. **Host-chain note:** Vaulta
+pinned as *candidate* home for b, making every emission event a CanonicalEvent via the
+SHIP stream (earned-emission provable from the pipeline, not asserted) — confirm against
+the tokenomics spec; if the spec is silent on host chain, this note flags the pin for a
+deliberate spec amendment, it does not make one.
+
 ## Standing rules for this file
 
 - New visions get **routed here first** (which layer owns it, which
