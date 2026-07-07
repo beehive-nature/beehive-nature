@@ -64,7 +64,10 @@ a:hover { color: var(--magenta-deep); }
   padding: 2px 9px;
 }
 
-.tabs { display: flex; gap: 8px; margin-left: auto; }
+/* T-3.2: pills never break (T-3.1 nowrap stands) — the ROW yields
+   instead: it wraps to extra lines at narrow widths, packed to the tab
+   row's right anchor. No pill ever clips mid-label. */
+.tabs { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-left: auto; }
 .tab {
   appearance: none;
   white-space: nowrap;
