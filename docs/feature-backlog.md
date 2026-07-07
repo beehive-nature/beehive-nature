@@ -434,7 +434,12 @@ dotless form is an X constraint) · GitHub org "skaists" PARKED —
 github.com/skaists created 2026-07-07, empty by design, lead-verified
 resolving (404→200 same-instrument pair; Code's own pair closed identically:
 `gh api users/skaists` 404 in the sweep → 200 Organization,
-created_at 2026-07-07T17:51:11Z). LANE RULING RESTATED:
+created_at 2026-07-07T17:51:11Z). VISUAL IDENTITY — founder-favored logo
+candidate pinned: green→teal→purple-center mandala, sha256
+`64f35bee7a3a2275771ba75ce7356fcd86b6ee93baba674d0b9caa2a620b1d16` @ 15269 B <!-- PUBLIC-CONSTANT: skaists logo-candidate content hash -->
+— family geometry, distinct colorway (kinship honest, identity distinct;
+neutrality satisfied by differentiation within the family); formal Design
+lap remains founder-gated. LANE RULING RESTATED:
 did:plc:gnsiwyuiw4swvqnjlnacytaz is skaists' social-presence identity ONLY;
 the kernel identity root remains did:autonomi; the social DID will reference,
 never replace, a future kernel-native genesis identity.
@@ -503,12 +508,22 @@ no player's gain requiring another's loss; the anti-extraction stance of the
 frozen tokenomics (earned-emission-only, TE-1..TE-7) expressed as gameplay.
 Elements: quest engine (ties CD-19 "quests" / plur.earth) · cooperative reward
 taxonomy on the operant emission curve · SOVEREIGNTY SCORE — multi-factor
-personhood credential: DNA + heartbeat (ECG) + MoC (founder-defined, pending)
-+ Human Design, proven via zero-knowledge; candidate answer to CD-17 Q-3
+personhood credential: DNA + heartbeat (ECG) + MoC + Human Design, proven
+via zero-knowledge; candidate answer to CD-17 Q-3
 (7777 authentication / sybil resistance) · community co-development of
 bLoveRai (teal lane; brand asset pinned: teal mandala sha256
 `4df6bf3204ec0ac18f5a191393468149be729c4507f5a5cdde3c958ff7a5ccec` @ 82678 B <!-- PUBLIC-CONSTANT: teal mandala brand-asset content hash -->
 — purple=human, green=Biomass, teal=AI now a complete trinity).
+
+Q-1 CLOSED (2026-07-07): MoC = the Map of Consciousness (David R. Hawkins
+MD, logarithmic 0–1000 scale; reference image pinned 884bb405…). PLACEMENT
+RULING: MoC and HD enter as INTERPRETIVE-SYSTEM attestations —
+self/community-attested provenance class, kernel-weighted per the
+constitution's provenance-confidence law; valued by the vertical, never
+presented as biometric or instrument-verified. IP NOTE: MoC is
+Hawkins-estate IP — naming/licensing check gates any shipped MoC branding.
+(Coincidence on record, no meaning claimed: Hawkins' 0–1000 range = the
+reputation engine's [0,1000] clamp.)
 
 PROPOSED INVARIANT (founder ratification requested): BIO-1 — raw biometric
 data never leaves the person's device; the kernel receives only
@@ -523,7 +538,7 @@ POLICY composed on kernel attestation primitives (provenance-weighted
 confidence, per constitution) — not a kernel primitive; each LOVErnment may
 define its own personhood recipe.
 
-OPEN, founder-gated: Q-1 MoC definition · Q-2 BIO-1 ratification · Q-3 PQC
+OPEN, founder-gated: Q-2 BIO-1 ratification · Q-3 PQC
 algorithm intent · Q-4 Sovereignty Score vs reputation score separation
 (personhood ≠ behavior; never conflate) · Q-5 is the Sovereignty Score THE
 7777 admission credential (closing CD-17 Q-3) or one input to it.

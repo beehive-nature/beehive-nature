@@ -32,6 +32,13 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-07` — **CD-21 Q-1 CLOSED (MoC = Hawkins' Map of Consciousness,
+  filed as an interpretive-system attestation, never
+  biometric/instrument-verified; Hawkins-estate IP check gates branding) +
+  CD-17 visual-identity candidate pinned** (family geometry, distinct
+  colorway; formal Design lap founder-gated). Full text:
+  docs/feature-backlog.md CD-21 / CD-17.
+
 - `2026-07-07` — **CD-21 registered — the quest has a constitution.**
   Cooperative GameFi under skaists: non-zero-sum quest economy, the
   Sovereignty Score as a vertical attestation policy (not a kernel
