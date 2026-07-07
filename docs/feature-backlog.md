@@ -665,6 +665,11 @@ correction: blocking at 4-of-6 requires three dissenters, not two; and
 (does the achiever sit and vote?) is a distinct unruled parameter →
 founder-gate A-1. Tally: 2 RED · 4 YELLOW · 2 QUESTION.
 
+SURFACE NAMED 2026-07-07: Beehive Nature Quest — the individual-facing
+lane where members unlock personal b (Design lab quest cards = earliest
+render). Topology: circle = community lane, Quest = personal lane, both
+routed through the b distribution model.
+
 ## CD-24 — LOVErnment treasury inflows (CAPTURED 2026-07-07, NOT SCHEDULED)
 
 Founder-directed 2026-07-07, genesis instance skaists: (1) escrow
@@ -730,6 +735,44 @@ the draft participation charter for a non-human seat.
 
 Cross-refs: CD-1, CD-7, CD-14, CD-17, TE spec, boot doctrine,
 R-register.
+
+## CD-26 — fractally engine as OS feature (CAPTURED 2026-07-07, NOT SCHEDULED)
+
+Founder direction 2026-07-07 (post whitepaper re-read): the full
+fractal-governance engine offered as a BNROS capability — weekly
+fractal consensus as an earn-channel, adapted from Antelope-family
+reference code (Eden contracts pinned @ 2d779d4; same VM lineage as the
+coordination ledger — adaptation not translation). COMPOSITION LAW:
+engine proposes, monetary law disposes — all payouts route through the
+b distribution model; fractally's own token economics NOT imported
+(lineage doc S-1 not-imported line stands). LEAN NOTE: if ranking pays
+b this answers founder-gate F-8(a) toward the headwater (ranking IS
+emission); F-8(a) remains gated pending explicit ruling. STEP
+(read-only, executed 2026-07-07): report license files of the cloned
+Eden repo and gofractally/fractally — "use all the code" gates on the
+license audit; AGPL-3.0-only tree can consume permissive, never the
+reverse.
+
+## CD-27 — b distribution evolution: lifetime cap + genesis leg (CAPTURED 2026-07-07 AS FOUNDER PROPOSAL, "what if" — NOT RULED)
+
+(a) 420 b lifetime maximum per deeply-authenticated unique human.
+Property: population-anchored supply — total b grows only with verified
+souls; deep authentication becomes the monetary security; per-identity
+attack payoff bounded at 420 (strengthens F-1/F-2/F-6 posture). OPENS:
+at-cap semantics (earning stops; does Respect/rank continue?);
+machine-seat EXCLUSION explicit (per-soul = human; L4 machine wage is a
+separate channel or the cap is routable-around via agent seats);
+succession at death (default per earned-only law: unearned remainder
+dies with the DID); the number 420 ships cited or founder-ruled, per
+the D-3 precedent. (b) First-auth genesis leg per the front-loaded
+operant curve: proof-of-life/DID genesis carries the up-front unlock;
+~10 USDC via Base rails as the boots-on-money leg (mechanism TBD —
+research docketed); QueenBee hands the first b (cross-ref anchor
+"QueenBee", CD-25). FENCE: Base is an app-edge on-ramp only — no new
+kernel adapter, no new read path (CD-11 law); fUSD remains settlement
+denomination. GATES: TE-1..TE-7 reconciliation; Article VI meta-tier
+(curve-parameter law, GLM binding constraint); GLM red-team before any
+promotion.
 
 ## Standing rules for this file
 

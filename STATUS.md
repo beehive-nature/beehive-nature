@@ -32,6 +32,14 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-07` — **CD-26 fractally-engine-as-OS-feature + CD-27
+  b-distribution evolution captured** (420 lifetime cap + genesis leg,
+  founder what-if NOT RULED); CD-23 surface named: Beehive Nature Quest
+  (circle = community lane, Quest = personal lane). License STEP
+  executed: Eden = MIT (consumable); gofractally/fractally = NO license
+  file (unconsumable until relicensed). Full text:
+  docs/feature-backlog.md CD-26 / CD-27 / CD-23.
+
 - `2026-07-07` — **M-1 mobile fix landed — instrument-verified 7/7,
   HOLDING for founder device re-gate** (the eyes-gate belongs to the
   eyes-holder). Root causes: Dispute/Profiles 430px + Listings 380px grid
