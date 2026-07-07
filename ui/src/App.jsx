@@ -7,6 +7,7 @@ import Dispute from './views/Dispute.jsx'
 import Reputation from './views/Reputation.jsx'
 import Listings from './views/Listings.jsx'
 import Profiles from './views/Profiles.jsx'
+import Orders from './views/Orders.jsx'
 
 const VIEWS = [
   ['escrow', 'Escrow lifecycle', EscrowLifecycle],
@@ -14,6 +15,7 @@ const VIEWS = [
   ['reputation', 'Reputation', Reputation],
   ['listings', 'Listings', Listings],
   ['profiles', 'Profiles', Profiles],
+  ['orders', 'Orders', Orders],
 ]
 
 export default function App() {

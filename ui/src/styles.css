@@ -242,3 +242,7 @@ tr:last-child td { border-bottom: none; }
 .mini-title { font: 600 14px var(--sans); letter-spacing: -0.01em; }
 .mini-price { font: 600 14px var(--mono); }
 .mini-meta { display: flex; gap: 3px 14px; flex-wrap: wrap; font: 400 11px var(--mono); color: var(--muted); word-break: break-all; }
+
+/* orders (T-4) */
+.order { display: grid; gap: 14px; margin-top: 16px; }
+.order .timeline { margin-top: 0; }
