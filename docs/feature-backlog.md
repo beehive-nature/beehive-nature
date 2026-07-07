@@ -399,6 +399,55 @@ Q-4: Fee/price display policy — native-unit everywhere, UI conversion
 First reproducible fact when scheduled: tBTCX escrow round-trip on testnet,
 command + output banked in the pen.
 
+## CD-17 — Genesis LOVErnment + the LOVErnment market (AMENDED, founder-ruled 2026-07-06/07)
+
+Doctrine: a LOVErnment is a vertical-flavored commerce community that
+adjudicates the trade it understands — the DRO layer as a competitive market
+of sovereign verticals, none owning the kernel, the kernel neutral among all.
+Genesis LOVErnment: name RULED — skaists ("beautiful", Latvian); governance
+home skaists.social; jurisdiction RULED — the metaphysical + creative
+vertical (human design, astrology, gene keys, genealogy, wellness, plus the
+CD-19 creative economy), as one entity: community, marketplace, adjudication;
+capped at 7777 unique authenticated humans. Domain split: bnature.social =
+platform + commodities lane; skaists.social = the vertical's governance home.
+Persona ruling: developer mode = the audit dashboard (the seven landed tabs);
+consumer lenses are the next UI arc on the same audited substrate. Lane
+ruling: Bluesky did:plc is skaists' SOCIAL-PRESENCE layer only; kernel
+identity remains did:autonomi; the fixtures' did:plc:* strings are demo
+vocabulary. OPEN: Q-2 what 7777 counts (citizens / adjudicators / governors)
+· Q-3 authentication + sybil resistance (ties did:autonomi + attestation
+semantics; the sybil-ring fixture is the problem drawn in miniature) · Q-4
+at-capacity behavior · Q-5 commodities' governance home
+(bNature-as-LOVErnment vs commons-until-one-forms vs a future named
+LOVErnment; house-vs-participant neutrality consideration on the record).
+
+## CD-18 — The Indigo Index (REGISTERED)
+
+Founder thesis: the measured value of a region by its level of creativity —
+an economy with instruments sensitive enough to count the people the
+traditional economy leaves out (artists, light workers, healers).
+Architectural gold: the index need not be a survey — it is DERIVABLE at
+render time from public settlement events in creative verticals, per region:
+computed, never asserted, auditable by anyone with the event stream (the
+computation-vs-invention law at macro scale). OPEN: Q-1 inputs (settled
+creative transactions / active creators per capita / emission earned in
+creative verticals) · Q-2 regional attribution method · Q-3 platform metric
+vs published civic artifact.
+
+## CD-19 — The creative/festival economy under skaists (REGISTERED)
+
+EDM (DJs, production, fans/tickets), dancers, live artists at festivals —
+three distinct commerce shapes: (a) TICKETS as an identity-bound asset class
+— anti-scalping via authenticated humans + escrow + provenance-verified
+resale, attacking the capture economy at its root; strongest product-market
+fit in the vision; (b) DIGITAL PRODUCTION GOODS (sample packs, tracks, stems)
+delivered THROUGH Autonomi — escrow releases on access-grant; the storage
+layer becomes the fulfillment layer; (c) PERFORMANCE BOOKINGS (sets, dancers,
+live art) — promotes the service-escrow semantics question to priority: the
+goods-shaped escrow state machine has no Shipped for a DJ set; kernel-roadmap
+item, the architecture stays closed. OPEN: Q-1 ticket asset design · Q-2
+access-grant release semantics · Q-3 service-escrow state machine.
+
 ## Standing rules for this file
 
 - New visions get **routed here first** (which layer owns it, which
