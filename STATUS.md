@@ -32,6 +32,12 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-07` — **M-1 FOUNDER-PASSED** (device eyes, all seven tabs):
+  verdict verbatim — "no appreciable bugs." GLM consumption audit pending
+  (T-3.1 pattern + the new mobile-law section in ui/src/styles.css).
+  Gate sequence: FAILED 5-of-7 → fix cfab957 → instrument 7/7 → founder
+  device PASS.
+
 - `2026-07-07` — **fractally whitepaper retrieved founder-hands,
   hash-pinned (efe0698d…7663696); D-1 closing final.** The 55→5 Respect
   conflict resolved against BOTH candidates — canonical schedule is

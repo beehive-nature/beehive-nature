@@ -52,6 +52,14 @@ through one door.
   file crossings always stand alone.
 - A screenshot is a partial witness — one scroll position, no
   interaction; the eyes-gate belongs to the eyes-holder.
+- Desktop eyes and mobile eyes are separate gates; no surface ships
+  consumer-facing without both.
+
+## Tooling notes
+
+- Vite served from `/mnt/c` does not see Windows-side edits (its module
+  cache survives page reloads); UI iteration requires a server restart
+  per change.
 
 ## Ground rules
 
