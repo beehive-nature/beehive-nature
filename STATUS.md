@@ -32,6 +32,35 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-07` — **ARC CLOSED — A→Profiles, B→Orders, C→Browse, plus two
+  eyes-forced micro-laps.** Seven public tabs, three fixtures, three pins,
+  five consumption audits, **0/0/0 across the entire arc** — one coffee
+  question to a connected marketplace in one continuous run. The stranger's
+  demo now runs: `git clone` → `cargo test --workspace --locked` (180 passed /
+  1 ignored) → `npm run dev` in `ui/` → walk the marketplace: browse the
+  storefront, open a listing, meet the seller's composed profile, follow an
+  order's whole life through its guards, watch a dispute split settle to the
+  adjudicated ratio. Checked, not believed, at every layer.
+
+- `2026-07-07` — **T-5 loop CLOSED — the storefront.** `a003a8c` (four files,
+  founder-eyed interactive pass, CI-green): 24 cards in fixture order,
+  render-time filters/sort labeled while active in the blue transformation
+  banner, censuses computed from the loaded fixture. **GLM audit: CLEAN
+  (0/0/0)** with **computed-census independence proven** — all five counts
+  derived from the loaded fixture, zero references to the fixture's own
+  `variety` block. Third pin `BROWSE_PIN` lawful (R1-class). **Cross-asset
+  sort doctrine on the record:** ordering integers is computation; pretending
+  they're one currency would be invention.
+
+- `2026-07-07` — **T-4 loop CLOSED — Orders.** `3f82cf7` (three files,
+  founder-eyed, CI-green): one order, whole life — seven events with both
+  guard refusals in-timeline (the Q-D10 identity-vs-order distinction),
+  settlement reconciliation computed at render, scenario_2's caselessness an
+  honest labeled absence. **GLM audit: CLEAN (0/0/0)** — one-subject
+  composition confirmed as fixture truth, unexercised dispute branches
+  **disclosed-not-discovered**, and the seven-count correction crediting
+  founder eyes (the implementer's "eight" died against `len(steps)=7`).
+
 - `2026-07-06` — **T-3.2 CLOSED — the tab row yields.** `8f53965` (+4/−1,
   `ui/src/styles.css` only, founder-eyed): the render-in-full law applied one
   layer up — pills stay unbreakable (T-3.1), the ROW yields instead, wrapping
