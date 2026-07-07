@@ -516,7 +516,9 @@ bLoveRai (teal lane; brand asset pinned: teal mandala sha256
 — purple=human, green=Biomass, teal=AI now a complete trinity).
 
 Q-1 CLOSED (2026-07-07): MoC = the Map of Consciousness (David R. Hawkins
-MD, logarithmic 0–1000 scale; reference image pinned 884bb405…). PLACEMENT
+MD, logarithmic 0–1000 scale). MoC reference image pinned: sha256
+`884bb405f5751a061b470ee4c11c2197e5b7f60f3833023b6657a7785ba28ee7` <!-- PUBLIC-CONSTANT: MoC reference-image content hash -->
+PLACEMENT
 RULING: MoC and HD enter as INTERPRETIVE-SYSTEM attestations —
 self/community-attested provenance class, kernel-weighted per the
 constitution's provenance-confidence law; valued by the vertical, never

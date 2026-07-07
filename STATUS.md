@@ -32,6 +32,12 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-07` — **CD-21 MoC reference-image pin landed in full** (re-serve;
+  the prior cut carried the hash ellipsized — relay elision). The CD-17
+  visual-identity addendum from the same re-serve was HELD as already
+  landed: the lead's partial-landing check ran against `7b53796` while the
+  tree of record stood at `a394168` (relay crossing, nothing lost).
+
 - `2026-07-07` — **CD-21 Q-1 CLOSED (MoC = Hawkins' Map of Consciousness,
   filed as an interpretive-system attestation, never
   biometric/instrument-verified; Hawkins-estate IP check gates branding) +
