@@ -32,6 +32,41 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-06` — **T-3.2 CLOSED — the tab row yields.** `8f53965` (+4/−1,
+  `ui/src/styles.css` only, founder-eyed): the render-in-full law applied one
+  layer up — pills stay unbreakable (T-3.1), the ROW yields instead, wrapping
+  whole to right-anchored lines at narrow widths; masthead composes, no
+  mid-label clipping. CI green.
+
+- `2026-07-06` — **T-3.1 micro-lap CLOSED, with its lesson.** v1 (CSS-only
+  nowrap) cured the mid-string wrap but **lied by clipping** on narrow cards —
+  **REFUSED at founder eyes**, and the law refined in refusal: **THE COLLAPSED
+  FORM RENDERS IN FULL OR THE LAYOUT CHANGES** (mid-string wrap forbidden AND
+  clipping forbidden). The pre-authorized layout clause fired; **v2 landed
+  `f337f13`** (four files: the comp-row rules + row markup in Reputation /
+  Dispute / Profiles — the hash on its own full-width row wearing its verbatim
+  §9.3 name inline). Crossing gated 4/4 per-file sha256 + whole-pack concat
+  MATCH. **GLM audit: CLEAN (0/0/0)**, the no-datum-lost check verified
+  colSpan-by-colSpan. **Derivation-gating doctrine banked:** deriving a
+  crossing file once from a digest-verified base and gating against the
+  author's digest is sound — the hash arbitrates; iterating edits until a
+  digest passes is forgery. CI green.
+
+- `2026-07-06` — **T-3 loop CLOSED — the machine's first cross-fixture
+  composition.** Design's pack landed on the **third serve** (two in-channel
+  paste serves REFUSED at the digest gates — elision, then newline
+  destruction; fenced per-file chunks landed 3/3 with the body-concat pin
+  exact; **channel law banked**: fenced/file couriers earn their MATCHes,
+  naked paste is a paraphraser). Landed **`2747b44`** founder-eyed (Profiles:
+  reputation ∪ listings joined on exact DID string equality, per-datum
+  provenance chips, the ghost's honest zero) after a delta-audit triage
+  cleared the T-3 delta of a flagged rendering issue (pre-existing, filed
+  T-3.1). **GLM audit: CLEAN (0/0/0)** including independent combinator-scope
+  confirmation — auditor walked the DOM ancestry from scratch and met the
+  implementer's triage verdict. The night's arc: **the eyes-gate caught three
+  defects the digest gates never could** — bytes can be faithful while the
+  rendering lies. CI green on all heads.
+
 - `2026-07-06` — **T-2 loop CLOSED — the marketplace surface, second full lap,
   second clean audit.** Design crossing pack **6/6 digest-verified**
   (whole-pack `7862c35d…` @ 22195 B) · landed **`2868c26`** (six files,
