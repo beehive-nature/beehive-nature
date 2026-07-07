@@ -32,6 +32,16 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-07` — **CD-17 identity claims executed and verified — genesis
+  LOVErnment skaists is now publicly resolvable.** Domain skaists.social
+  owned + active, email live, Bluesky handle @skaists.social verified via
+  `_atproto` DNS TXT (social-layer DID `did:plc:gnsiwyuiw4swvqnjlnacytaz`,
+  lead-verified by profile resolution AND Code-verified independently via
+  public XRPC — the R-006 double-verification standard applied to an
+  identity), X handle claimed (founder-attested), GitHub org pending on a
+  confirmed-free namespace. Social DID is presence-layer only; kernel root
+  remains did:autonomi. Full text: docs/feature-backlog.md CD-17.
+
 - `2026-07-07` — **CD-19 REGISTERED — the creative/festival economy under
   skaists.** Tickets as an identity-bound asset class (anti-scalping via
   authenticated humans + escrow + provenance-verified resale), digital

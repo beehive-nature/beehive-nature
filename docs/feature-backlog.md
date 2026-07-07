@@ -421,6 +421,21 @@ at-capacity behavior · Q-5 commodities' governance home
 (bNature-as-LOVErnment vs commons-until-one-forms vs a future named
 LOVErnment; house-vs-participant neutrality consideration on the record).
 
+IDENTITY CLAIMS (2026-07-07, founder-executed, lead-verified from the public
+record): governance domain skaists.social OWNED + ACTIVE (Namecheap, expires
+2027-07-03 — identity-anchor note: auto-renew required; a lapsed domain
+breaks the handle though the DID survives) · email hello@skaists.social LIVE
+(forwarder, send-test confirmed) · Bluesky handle @skaists.social VERIFIED
+via _atproto DNS TXT — social-layer DID: did:plc:gnsiwyuiw4swvqnjlnacytaz
+(lead-verified by public profile resolution; Code-verified independently via
+public XRPC resolveHandle, HTTP 200, DID byte-identical) · X handle
+@skaistssocial CLAIMED (founder-attested; X blocks automated verification;
+dotless form is an X constraint) · GitHub org "skaists" PENDING (namespace
+confirmed free as of today, 404). LANE RULING RESTATED:
+did:plc:gnsiwyuiw4swvqnjlnacytaz is skaists' social-presence identity ONLY;
+the kernel identity root remains did:autonomi; the social DID will reference,
+never replace, a future kernel-native genesis identity.
+
 ## CD-18 — The Indigo Index (REGISTERED)
 
 Founder thesis: the measured value of a region by its level of creativity —
