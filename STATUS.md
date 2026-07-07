@@ -32,6 +32,10 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-07` — **CD-22 registered — proof-of-unique-personhood grounded
+  in current literature; the honest path is fusion + on-device + ZK-dedup,
+  not one-sensor magic.** Full text: docs/feature-backlog.md CD-22.
+
 - `2026-07-07` — **CD-21 MoC reference-image pin landed in full** (re-serve;
   the prior cut carried the hash ellipsized — relay elision). The CD-17
   visual-identity addendum from the same re-serve was HELD as already

@@ -545,6 +545,56 @@ algorithm intent · Q-4 Sovereignty Score vs reputation score separation
 (personhood ≠ behavior; never conflate) · Q-5 is the Sovereignty Score THE
 7777 admission credential (closing CD-17 Q-3) or one input to it.
 
+## CD-22 — Proof of Unique Personhood: the Sovereignty Score's verification substrate (REGISTERED 2026-07-07, literature-grounded)
+
+GOAL: prove uniqueness at ~1-in-10^10 so each verified human unlocks the
+identical lifetime b-emission — one human, one equal share.
+
+GROUNDED FINDINGS (cited in session):
+- Phone camera+flash captures PPG (photoplethysmography): STRONG liveness
+  factor, WEAK identity factor. Real-world PPG identification is validated
+  only on tens of subjects in controlled settings; degrades with skin tone
+  (melanin/green-light bias), motion, illness, age. CANNOT reach 10^10
+  alone. (Dec-2025 survey "What the Heart Can(not) Tell.")
+- No single commodity-phone modality reaches 10^10: iris ~10^6–10^7,
+  fingerprint ~10^5, ECG-biometric ~10^3s, DNA clears it but needs
+  physical sampling + is irrevocable + can't do liveness/twins.
+- FUSION multiplies power and is the ACCESSIBILITY mechanism: multimodal
+  systems reach ~0.01% FAR and explicitly address non-universality (a
+  subset of users lack any given trait) — so fusion must be designed so
+  NO single trait is mandatory. This is the equality-of-access guarantee.
+- SOVEREIGN DEDUP EXISTS (the "corps can't own it" path, validated):
+  local-only biometrics + ZK proofs (Hedera 2026 demo: creds in user
+  wallets, biometrics never leave device); vOPRF over decentralized
+  threshold networks so no single entity reconstructs data (Human
+  Passport's Unique Humanity Score — structurally our Sovereignty Score);
+  Encointer ceremony dedup (in-person attestation, no biometrics at all —
+  a human can't be in two places at once) — on-brand for a
+  festival/community platform. Polkadot (Gavin Wood, Web3 Summit 2025)
+  and World ID confirm the direction; World's central-storage criticism
+  IS our design spec — skaists is the decentralized, self-custodied
+  version World isn't.
+
+ARCHITECTURE (proposed, founder-gated): enroll-once-hard (multimodal,
+possibly + in-person ceremony) → verify-often-cheap (phone PPG liveness
+vs enrolled template) → global uniqueness proven by privacy-preserving
+dedup (ZK/vOPRF), never a central biometric store. Reaffirms BIO-1: raw
+biometrics never leave device.
+
+OPEN, founder-gated / research frontier: Q-1 the on-device-privacy vs
+global-dedup tension is the SHARPEST unsolved problem — solvable in
+principle (vOPRF/ZK), unproven at billions-scale · Q-2
+permanent-exclusion risk: biometric-gated money excludes anyone
+unenrollable; fusion-with-no-mandatory-trait is the mitigation, must be
+designed in day one · Q-3 legal — biometric-gated money touches
+BIPA/GDPR Art.9 across US/MX/VE; WANTS NON-AI COUNSEL before build ·
+Q-4 ceremony vs pure-cryptographic dedup, or both · Q-5 relation to
+CD-17 Q-3/Q-5 (is this THE 7777 credential).
+
+LANGUAGE: no accuracy claim stated as fact; all figures are
+controlled-study ceilings, real-world lower. No "quantum/unhackable" —
+PQC pending per house law.
+
 ## Standing rules for this file
 
 - New visions get **routed here first** (which layer owns it, which
