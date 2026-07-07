@@ -45,29 +45,38 @@ export default function Dispute() {
                       <th>favors</th>
                       <th>conf.</th>
                       <th>badges</th>
-                      <th>payload_hash</th>
                     </tr>
                   </thead>
                   <tbody>
+                    {/* T-3.1 v2 (founder law): the hash takes its own
+                        full-width row — the collapsed form renders in
+                        full; mid-string wrap and clipping both forbidden. */}
                     {c.evidence.map((ev, i) => (
-                      <tr key={i}>
-                        <td>{ev.provenance}</td>
-                        <td>
-                          <span className="chip chip-outline">{ev.favors}</span>
-                        </td>
-                        <td>{show(ev.confidence)}</td>
-                        <td>
-                          <span className={'chip ' + (ev.signed ? 'chip-blue' : 'chip-outline')}>
-                            {ev.signed ? 'signed' : 'unsigned'}
-                          </span>{' '}
-                          <span className={'chip ' + (ev.verified ? 'chip-green' : 'chip-outline')}>
-                            {ev.verified ? 'verified' : 'unverified'}
-                          </span>
-                        </td>
-                        <td>
-                          <HashChip hash={ev.payload_hash} />
-                        </td>
-                      </tr>
+                      <React.Fragment key={i}>
+                        <tr className="comp-main">
+                          <td>{ev.provenance}</td>
+                          <td>
+                            <span className="chip chip-outline">{ev.favors}</span>
+                          </td>
+                          <td>{show(ev.confidence)}</td>
+                          <td>
+                            <span className={'chip ' + (ev.signed ? 'chip-blue' : 'chip-outline')}>
+                              {ev.signed ? 'signed' : 'unsigned'}
+                            </span>{' '}
+                            <span className={'chip ' + (ev.verified ? 'chip-green' : 'chip-outline')}>
+                              {ev.verified ? 'verified' : 'unverified'}
+                            </span>
+                          </td>
+                        </tr>
+                        <tr className="comp-hash">
+                          <td colSpan={4}>
+                            <div className="hash-row">
+                              <span className="k">payload_hash</span>
+                              <HashChip hash={ev.payload_hash} />
+                            </div>
+                          </td>
+                        </tr>
+                      </React.Fragment>
                     ))}
                   </tbody>
                 </table>

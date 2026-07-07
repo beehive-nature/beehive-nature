@@ -40,22 +40,31 @@ export default function Reputation() {
                       <th>source</th>
                       <th>contrib.</th>
                       <th>weight</th>
-                      <th>evidence_hash</th>
                     </tr>
                   </thead>
                   <tbody>
+                    {/* T-3.1 v2 (founder law): the hash takes its own
+                        full-width row — the collapsed form renders in
+                        full; mid-string wrap and clipping both forbidden. */}
                     {r.components.map((c, i) => (
-                      <tr key={i}>
-                        <td>{c.source}</td>
-                        <td style={{ color: c.contribution >= 0 ? 'var(--green)' : 'var(--violet)' }}>
-                          {c.contribution > 0 ? '+' : ''}
-                          {c.contribution}
-                        </td>
-                        <td>{show(c.weight)}</td>
-                        <td>
-                          <HashChip hash={c.evidence_hash} />
-                        </td>
-                      </tr>
+                      <React.Fragment key={i}>
+                        <tr className="comp-main">
+                          <td>{c.source}</td>
+                          <td style={{ color: c.contribution >= 0 ? 'var(--green)' : 'var(--violet)' }}>
+                            {c.contribution > 0 ? '+' : ''}
+                            {c.contribution}
+                          </td>
+                          <td>{show(c.weight)}</td>
+                        </tr>
+                        <tr className="comp-hash">
+                          <td colSpan={3}>
+                            <div className="hash-row">
+                              <span className="k">evidence_hash</span>
+                              <HashChip hash={c.evidence_hash} />
+                            </div>
+                          </td>
+                        </tr>
+                      </React.Fragment>
                     ))}
                   </tbody>
                 </table>
