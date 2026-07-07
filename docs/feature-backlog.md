@@ -617,6 +617,11 @@ named in D-1). SUPERSEDES same-day circles-of-eight ruling; reversal on
 D-3 evidence (research optimum ~5, band 4-7; Eden contract computes 4-6
 — triple anchor). Geometry: 6^5=7,776 resolves 1,296→216→36→6→1 in five
 rounds; cap = cascade + 1; the +1 seat UNNAMED, founder-gated.
+SOURCE-PINNED 2026-07-07: 7,776 is the headwater's own canonical
+community cap (fractally WP 1.0 p.37 + glossary; artifact sha256
+efe0698d…7663696, founder-retrieved). skaists cap = headwater cap + 1 —
+the +1 seat remains UNNAMED, founder-gated; evidence strengthened,
+ruling unchanged.
 
 Circles are decision AND co-creation containers: members unlock
 personal b via circle-attested achievements aligned to member-declared
@@ -635,7 +640,9 @@ achievement-definition gaming RED · F-2 attestation bribery RED
 (compounding pair) · F-3 collusion-vs-rotation YELLOW · F-4
 rotation-RNG YELLOW (independently answered same-day by the QueenBee
 capture's public-entropy-beacon ruling, CD-25; GLM SE-4 = its
-construction) · F-5 ZK circuit/replay/linkage-leakage YELLOW · F-6
+construction) (headwater construction: participant commit-reveal
+collective-hash grouping, single-bit grinding surface acknowledged
+in-source, WP p.20 — SE-4/beacon ruling is its hardening) · F-5 ZK circuit/replay/linkage-leakage YELLOW · F-6
 reward-axis super-linearity YELLOW · F-7 milestone timing QUESTION ·
 F-8 governance-emission feedback + attestation
 mechanical-vs-witnessing + dissent-DoS QUESTION. CANDIDATE INVARIANTS
@@ -644,7 +651,9 @@ peer-declared milestones — NOTED TENSION with self-declared sacred-arc
 principle; candidate synthesis on the table: member declares the arc,
 governance-ratified bounded milestone-class registry (per SE-5) prices
 emission value — autonomy at meaning layer, gaming closed at value
-layer. SE-2 attestation bond + dispute window. SE-3 pair co-occurrence
+layer. SE-2 attestation bond + dispute window (prior art in-source:
+pending-Respect escrow bond, 5%/wk over 20 wks, fineable, WP p.17).
+SE-3 pair co-occurrence
 cap per epoch. SE-4 VRF/epoch entropy. SE-5 proof binding
 type+epoch+nullifier. SE-6 sub-linear per-axis emission scaling. SCOPE
 FLAG: memo audited circles of EIGHT (pre-senary docket); GLM
@@ -751,7 +760,8 @@ emission); F-8(a) remains gated pending explicit ruling. STEP
 (read-only, executed 2026-07-07): report license files of the cloned
 Eden repo and gofractally/fractally — "use all the code" gates on the
 license audit; AGPL-3.0-only tree can consume permissive, never the
-reverse.
+reverse. Source invitation pinned: "all code…open source and can be
+self-hosted" (WP p.41, p.46). License audit still gates.
 
 ## CD-27 — b distribution evolution: lifetime cap + genesis leg (CAPTURED 2026-07-07 AS FOUNDER PROPOSAL, "what if" — NOT RULED)
 
@@ -772,7 +782,8 @@ research docketed); QueenBee hands the first b (cross-ref anchor
 kernel adapter, no new read path (CD-11 law); fUSD remains settlement
 denomination. GATES: TE-1..TE-7 reconciliation; Article VI meta-tier
 (curve-parameter law, GLM binding constraint); GLM red-team before any
-promotion.
+promotion. Named divergence: headwater issuance is perpetual (6% floor,
+WP p.15); the 420 lifetime cap breaks from the headwater by design.
 
 ## Standing rules for this file
 

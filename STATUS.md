@@ -32,6 +32,14 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-07` — **fractally whitepaper retrieved founder-hands,
+  hash-pinned (efe0698d…7663696); D-1 closing final.** The 55→5 Respect
+  conflict resolved against BOTH candidates — canonical schedule is
+  2,3,5,8,13,21 (WP source). Geometry source-pinned (7,776 = headwater's
+  own cap); GLM F-4/SE-2 prior-art appends landed; CD-26/CD-27
+  whitepaper appends landed (source invitation pinned; 420 cap named as
+  deliberate divergence from perpetual issuance).
+
 - `2026-07-07` — **CD-26 fractally-engine-as-OS-feature + CD-27
   b-distribution evolution captured** (420 lifetime cap + genesis leg,
   founder what-if NOT RULED); CD-23 surface named: Beehive Nature Quest
