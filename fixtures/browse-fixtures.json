@@ -1,0 +1,1098 @@
+{
+  "browse": [
+    {
+      "case": "success_bl-01",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 600,
+        "contract": "lovismarket",
+        "data": {
+          "amount": 5000000,
+          "asset_id": "fusd-asset-id",
+          "category": "hemp-seeds",
+          "listing_id": "listing-42",
+          "seller_did": "did:plc:seller",
+          "timestamp": 1782000000,
+          "title": "Heirloom hemp seeds"
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "bl-01"
+      },
+      "outcome": {
+        "event": {
+          "canonicalized_by": "normalizer",
+          "event_id": "vaulta-bl-01-addlisting",
+          "event_type": {
+            "type": "ProductListed"
+          },
+          "payload": {
+            "data": {
+              "amount": 5000000,
+              "asset_id": "fusd-asset-id",
+              "category": "hemp-seeds",
+              "listing_id": "listing-42",
+              "seller_did": "did:plc:seller",
+              "title": "Heirloom hemp seeds"
+            },
+            "type": "Product"
+          },
+          "source_chain": "Vaulta",
+          "source_ref": "600:bl-01",
+          "timestamp": 1782000000
+        }
+      }
+    },
+    {
+      "case": "success_bl-02",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 601,
+        "contract": "lovismarket",
+        "data": {
+          "amount": 12500000,
+          "asset_id": "fusd-asset-id",
+          "category": "hemp-flower",
+          "listing_id": "listing-101",
+          "seller_did": "did:plc:seller",
+          "timestamp": 1782000500,
+          "title": "Sun-grown hemp flower, 10g"
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "bl-02"
+      },
+      "outcome": {
+        "event": {
+          "canonicalized_by": "normalizer",
+          "event_id": "vaulta-bl-02-addlisting",
+          "event_type": {
+            "type": "ProductListed"
+          },
+          "payload": {
+            "data": {
+              "amount": 12500000,
+              "asset_id": "fusd-asset-id",
+              "category": "hemp-flower",
+              "listing_id": "listing-101",
+              "seller_did": "did:plc:seller",
+              "title": "Sun-grown hemp flower, 10g"
+            },
+            "type": "Product"
+          },
+          "source_chain": "Vaulta",
+          "source_ref": "601:bl-02",
+          "timestamp": 1782000500
+        }
+      }
+    },
+    {
+      "case": "success_bl-03",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 602,
+        "contract": "lovismarket",
+        "data": {
+          "amount": 250000000,
+          "asset_id": "fusd-asset-id",
+          "category": "textiles",
+          "listing_id": "listing-102",
+          "seller_did": "did:plc:mariposa-textiles",
+          "timestamp": 1782001000,
+          "title": "Handwoven hemp rug 2x3m"
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "bl-03"
+      },
+      "outcome": {
+        "event": {
+          "canonicalized_by": "normalizer",
+          "event_id": "vaulta-bl-03-addlisting",
+          "event_type": {
+            "type": "ProductListed"
+          },
+          "payload": {
+            "data": {
+              "amount": 250000000,
+              "asset_id": "fusd-asset-id",
+              "category": "textiles",
+              "listing_id": "listing-102",
+              "seller_did": "did:plc:mariposa-textiles",
+              "title": "Handwoven hemp rug 2x3m"
+            },
+            "type": "Product"
+          },
+          "source_chain": "Vaulta",
+          "source_ref": "602:bl-03",
+          "timestamp": 1782001000
+        }
+      }
+    },
+    {
+      "case": "success_bl-04",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 603,
+        "contract": "lovismarket",
+        "data": {
+          "amount": 50000000,
+          "asset_id": "fusd-asset-id",
+          "category": "honey",
+          "listing_id": "listing-103",
+          "seller_did": "did:plc:yucatan-grower",
+          "timestamp": 1782001500,
+          "title": "Melipona honey, 250ml"
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "bl-04"
+      },
+      "outcome": {
+        "event": {
+          "canonicalized_by": "normalizer",
+          "event_id": "vaulta-bl-04-addlisting",
+          "event_type": {
+            "type": "ProductListed"
+          },
+          "payload": {
+            "data": {
+              "amount": 50000000,
+              "asset_id": "fusd-asset-id",
+              "category": "honey",
+              "listing_id": "listing-103",
+              "seller_did": "did:plc:yucatan-grower",
+              "title": "Melipona honey, 250ml"
+            },
+            "type": "Product"
+          },
+          "source_chain": "Vaulta",
+          "source_ref": "603:bl-04",
+          "timestamp": 1782001500
+        }
+      }
+    },
+    {
+      "case": "success_bl-05",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 604,
+        "contract": "lovismarket",
+        "data": {
+          "amount": 750000,
+          "asset_id": "zano-asset-id",
+          "category": "crafts",
+          "listing_id": "listing-104",
+          "seller_did": "did:plc:isla-crafts",
+          "timestamp": 1782002000,
+          "title": "Carved driftwood bowl"
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "bl-05"
+      },
+      "outcome": {
+        "event": {
+          "canonicalized_by": "normalizer",
+          "event_id": "vaulta-bl-05-addlisting",
+          "event_type": {
+            "type": "ProductListed"
+          },
+          "payload": {
+            "data": {
+              "amount": 750000,
+              "asset_id": "zano-asset-id",
+              "category": "crafts",
+              "listing_id": "listing-104",
+              "seller_did": "did:plc:isla-crafts",
+              "title": "Carved driftwood bowl"
+            },
+            "type": "Product"
+          },
+          "source_chain": "Vaulta",
+          "source_ref": "604:bl-05",
+          "timestamp": 1782002000
+        }
+      }
+    },
+    {
+      "case": "success_bl-06",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 605,
+        "contract": "lovismarket",
+        "data": {
+          "amount": 50000,
+          "asset_id": "zano-asset-id",
+          "category": "herbal-tea",
+          "listing_id": "listing-105",
+          "seller_did": "did:plc:andes-herbs",
+          "timestamp": 1782002500,
+          "title": "Coca-mint infusion, 50 bags"
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "bl-06"
+      },
+      "outcome": {
+        "event": {
+          "canonicalized_by": "normalizer",
+          "event_id": "vaulta-bl-06-addlisting",
+          "event_type": {
+            "type": "ProductListed"
+          },
+          "payload": {
+            "data": {
+              "amount": 50000,
+              "asset_id": "zano-asset-id",
+              "category": "herbal-tea",
+              "listing_id": "listing-105",
+              "seller_did": "did:plc:andes-herbs",
+              "title": "Coca-mint infusion, 50 bags"
+            },
+            "type": "Product"
+          },
+          "source_chain": "Vaulta",
+          "source_ref": "605:bl-06",
+          "timestamp": 1782002500
+        }
+      }
+    },
+    {
+      "case": "success_bl-07",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 606,
+        "contract": "lovismarket",
+        "data": {
+          "amount": 1000000000,
+          "asset_id": "fusd-asset-id",
+          "category": "hemp-oil",
+          "listing_id": "listing-106",
+          "seller_did": "did:plc:seller",
+          "timestamp": 1782003000,
+          "title": "Cold-pressed hemp oil 100ml"
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "bl-07"
+      },
+      "outcome": {
+        "event": {
+          "canonicalized_by": "normalizer",
+          "event_id": "vaulta-bl-07-addlisting",
+          "event_type": {
+            "type": "ProductListed"
+          },
+          "payload": {
+            "data": {
+              "amount": 1000000000,
+              "asset_id": "fusd-asset-id",
+              "category": "hemp-oil",
+              "listing_id": "listing-106",
+              "seller_did": "did:plc:seller",
+              "title": "Cold-pressed hemp oil 100ml"
+            },
+            "type": "Product"
+          },
+          "source_chain": "Vaulta",
+          "source_ref": "606:bl-07",
+          "timestamp": 1782003000
+        }
+      }
+    },
+    {
+      "case": "success_bl-08",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 607,
+        "contract": "lovismarket",
+        "data": {
+          "amount": 125000000,
+          "asset_id": "fusd-asset-id",
+          "category": "textiles",
+          "listing_id": "listing-107",
+          "seller_did": "did:plc:mariposa-textiles",
+          "timestamp": 1782003500,
+          "title": "Hemp-cotton hammock"
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "bl-08"
+      },
+      "outcome": {
+        "event": {
+          "canonicalized_by": "normalizer",
+          "event_id": "vaulta-bl-08-addlisting",
+          "event_type": {
+            "type": "ProductListed"
+          },
+          "payload": {
+            "data": {
+              "amount": 125000000,
+              "asset_id": "fusd-asset-id",
+              "category": "textiles",
+              "listing_id": "listing-107",
+              "seller_did": "did:plc:mariposa-textiles",
+              "title": "Hemp-cotton hammock"
+            },
+            "type": "Product"
+          },
+          "source_chain": "Vaulta",
+          "source_ref": "607:bl-08",
+          "timestamp": 1782003500
+        }
+      }
+    },
+    {
+      "case": "success_bl-09",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 608,
+        "contract": "lovismarket",
+        "data": {
+          "amount": 8000000,
+          "asset_id": "fusd-asset-id",
+          "category": "hemp-seeds",
+          "listing_id": "listing-108",
+          "seller_did": "did:plc:yucatan-grower",
+          "timestamp": 1782004000,
+          "title": "Regional landrace seed pack"
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "bl-09"
+      },
+      "outcome": {
+        "event": {
+          "canonicalized_by": "normalizer",
+          "event_id": "vaulta-bl-09-addlisting",
+          "event_type": {
+            "type": "ProductListed"
+          },
+          "payload": {
+            "data": {
+              "amount": 8000000,
+              "asset_id": "fusd-asset-id",
+              "category": "hemp-seeds",
+              "listing_id": "listing-108",
+              "seller_did": "did:plc:yucatan-grower",
+              "title": "Regional landrace seed pack"
+            },
+            "type": "Product"
+          },
+          "source_chain": "Vaulta",
+          "source_ref": "608:bl-09",
+          "timestamp": 1782004000
+        }
+      }
+    },
+    {
+      "case": "success_bl-10",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 609,
+        "contract": "lovismarket",
+        "data": {
+          "amount": 300000,
+          "asset_id": "zano-asset-id",
+          "category": "crafts",
+          "listing_id": "listing-109",
+          "seller_did": "did:plc:isla-crafts",
+          "timestamp": 1782004500,
+          "title": "Shell wind chime"
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "bl-10"
+      },
+      "outcome": {
+        "event": {
+          "canonicalized_by": "normalizer",
+          "event_id": "vaulta-bl-10-addlisting",
+          "event_type": {
+            "type": "ProductListed"
+          },
+          "payload": {
+            "data": {
+              "amount": 300000,
+              "asset_id": "zano-asset-id",
+              "category": "crafts",
+              "listing_id": "listing-109",
+              "seller_did": "did:plc:isla-crafts",
+              "title": "Shell wind chime"
+            },
+            "type": "Product"
+          },
+          "source_chain": "Vaulta",
+          "source_ref": "609:bl-10",
+          "timestamp": 1782004500
+        }
+      }
+    },
+    {
+      "case": "success_bl-11",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 610,
+        "contract": "lovismarket",
+        "data": {
+          "category": "herbal-tea",
+          "listing_id": "listing-110",
+          "seller_did": "did:plc:andes-herbs",
+          "timestamp": 1782005000,
+          "title": "Ask about bulk maté"
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "bl-11"
+      },
+      "outcome": {
+        "event": {
+          "canonicalized_by": "normalizer",
+          "event_id": "vaulta-bl-11-addlisting",
+          "event_type": {
+            "type": "ProductListed"
+          },
+          "payload": {
+            "data": {
+              "amount": null,
+              "asset_id": null,
+              "category": "herbal-tea",
+              "listing_id": "listing-110",
+              "seller_did": "did:plc:andes-herbs",
+              "title": "Ask about bulk maté"
+            },
+            "type": "Product"
+          },
+          "source_chain": "Vaulta",
+          "source_ref": "610:bl-11",
+          "timestamp": 1782005000
+        }
+      }
+    },
+    {
+      "case": "success_bl-12",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 611,
+        "contract": "lovismarket",
+        "data": {
+          "category": "hemp-flower",
+          "listing_id": "listing-111",
+          "seller_did": "did:plc:seller",
+          "timestamp": 1782005500,
+          "title": "Pre-order: autumn harvest"
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "bl-12"
+      },
+      "outcome": {
+        "event": {
+          "canonicalized_by": "normalizer",
+          "event_id": "vaulta-bl-12-addlisting",
+          "event_type": {
+            "type": "ProductListed"
+          },
+          "payload": {
+            "data": {
+              "amount": null,
+              "asset_id": null,
+              "category": "hemp-flower",
+              "listing_id": "listing-111",
+              "seller_did": "did:plc:seller",
+              "title": "Pre-order: autumn harvest"
+            },
+            "type": "Product"
+          },
+          "source_chain": "Vaulta",
+          "source_ref": "611:bl-12",
+          "timestamp": 1782005500
+        }
+      }
+    },
+    {
+      "case": "success_bl-13",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 612,
+        "contract": "lovismarket",
+        "data": {
+          "category": "textiles",
+          "listing_id": "listing-112",
+          "seller_did": "did:plc:mariposa-textiles",
+          "timestamp": 1782006000,
+          "title": "Custom weave — quote on ask"
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "bl-13"
+      },
+      "outcome": {
+        "event": {
+          "canonicalized_by": "normalizer",
+          "event_id": "vaulta-bl-13-addlisting",
+          "event_type": {
+            "type": "ProductListed"
+          },
+          "payload": {
+            "data": {
+              "amount": null,
+              "asset_id": null,
+              "category": "textiles",
+              "listing_id": "listing-112",
+              "seller_did": "did:plc:mariposa-textiles",
+              "title": "Custom weave — quote on ask"
+            },
+            "type": "Product"
+          },
+          "source_chain": "Vaulta",
+          "source_ref": "612:bl-13",
+          "timestamp": 1782006000
+        }
+      }
+    },
+    {
+      "case": "success_bl-14",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 613,
+        "contract": "lovismarket",
+        "data": {
+          "amount": 15000000,
+          "asset_id": "fusd-asset-id",
+          "listing_id": "listing-113",
+          "seller_did": "did:plc:yucatan-grower",
+          "timestamp": 1782006500,
+          "title": "Uncategorized: propolis tincture"
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "bl-14"
+      },
+      "outcome": {
+        "event": {
+          "canonicalized_by": "normalizer",
+          "event_id": "vaulta-bl-14-addlisting",
+          "event_type": {
+            "type": "ProductListed"
+          },
+          "payload": {
+            "data": {
+              "amount": 15000000,
+              "asset_id": "fusd-asset-id",
+              "category": null,
+              "listing_id": "listing-113",
+              "seller_did": "did:plc:yucatan-grower",
+              "title": "Uncategorized: propolis tincture"
+            },
+            "type": "Product"
+          },
+          "source_chain": "Vaulta",
+          "source_ref": "613:bl-14",
+          "timestamp": 1782006500
+        }
+      }
+    },
+    {
+      "case": "success_bl-15",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 614,
+        "contract": "lovismarket",
+        "data": {
+          "amount": 2000000,
+          "asset_id": "fusd-asset-id",
+          "category": "crafts",
+          "listing_id": "listing-114",
+          "seller_did": "did:plc:isla-crafts",
+          "timestamp": 1782007000
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "bl-15"
+      },
+      "outcome": {
+        "event": {
+          "canonicalized_by": "normalizer",
+          "event_id": "vaulta-bl-15-addlisting",
+          "event_type": {
+            "type": "ProductListed"
+          },
+          "payload": {
+            "data": {
+              "amount": 2000000,
+              "asset_id": "fusd-asset-id",
+              "category": "crafts",
+              "listing_id": "listing-114",
+              "seller_did": "did:plc:isla-crafts",
+              "title": null
+            },
+            "type": "Product"
+          },
+          "source_chain": "Vaulta",
+          "source_ref": "614:bl-15",
+          "timestamp": 1782007000
+        }
+      }
+    },
+    {
+      "case": "success_bl-16",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 615,
+        "contract": "lovismarket",
+        "data": {
+          "listing_id": "listing-115",
+          "seller_did": "did:plc:seller"
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "bl-16"
+      },
+      "outcome": {
+        "event": {
+          "canonicalized_by": "normalizer",
+          "event_id": "vaulta-bl-16-addlisting",
+          "event_type": {
+            "type": "ProductListed"
+          },
+          "payload": {
+            "data": {
+              "amount": null,
+              "asset_id": null,
+              "category": null,
+              "listing_id": "listing-115",
+              "seller_did": "did:plc:seller",
+              "title": null
+            },
+            "type": "Product"
+          },
+          "source_chain": "Vaulta",
+          "source_ref": "615:bl-16",
+          "timestamp": 0
+        }
+      }
+    },
+    {
+      "case": "success_bl-17",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 616,
+        "contract": "lovismarket",
+        "data": {
+          "listing_id": "listing-116",
+          "seller_did": "did:plc:andes-herbs"
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "bl-17"
+      },
+      "outcome": {
+        "event": {
+          "canonicalized_by": "normalizer",
+          "event_id": "vaulta-bl-17-addlisting",
+          "event_type": {
+            "type": "ProductListed"
+          },
+          "payload": {
+            "data": {
+              "amount": null,
+              "asset_id": null,
+              "category": null,
+              "listing_id": "listing-116",
+              "seller_did": "did:plc:andes-herbs",
+              "title": null
+            },
+            "type": "Product"
+          },
+          "source_chain": "Vaulta",
+          "source_ref": "616:bl-17",
+          "timestamp": 0
+        }
+      }
+    },
+    {
+      "case": "success_bl-18",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 617,
+        "contract": "lovismarket",
+        "data": {
+          "listing_id": "listing-117",
+          "seller_did": "did:plc:isla-crafts"
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "bl-18"
+      },
+      "outcome": {
+        "event": {
+          "canonicalized_by": "normalizer",
+          "event_id": "vaulta-bl-18-addlisting",
+          "event_type": {
+            "type": "ProductListed"
+          },
+          "payload": {
+            "data": {
+              "amount": null,
+              "asset_id": null,
+              "category": null,
+              "listing_id": "listing-117",
+              "seller_did": "did:plc:isla-crafts",
+              "title": null
+            },
+            "type": "Product"
+          },
+          "source_chain": "Vaulta",
+          "source_ref": "617:bl-18",
+          "timestamp": 0
+        }
+      }
+    },
+    {
+      "case": "success_bl-19",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 618,
+        "contract": "lovismarket",
+        "data": {
+          "amount": 90000000,
+          "asset_id": "fusd-asset-id",
+          "category": "textiles",
+          "listing_id": "listing-118",
+          "seller_did": "did:plc:mariposa-textiles",
+          "title": "Undated: indigo table runner"
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "bl-19"
+      },
+      "outcome": {
+        "event": {
+          "canonicalized_by": "normalizer",
+          "event_id": "vaulta-bl-19-addlisting",
+          "event_type": {
+            "type": "ProductListed"
+          },
+          "payload": {
+            "data": {
+              "amount": 90000000,
+              "asset_id": "fusd-asset-id",
+              "category": "textiles",
+              "listing_id": "listing-118",
+              "seller_did": "did:plc:mariposa-textiles",
+              "title": "Undated: indigo table runner"
+            },
+            "type": "Product"
+          },
+          "source_chain": "Vaulta",
+          "source_ref": "618:bl-19",
+          "timestamp": 0
+        }
+      }
+    },
+    {
+      "case": "success_bl-20",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 619,
+        "contract": "lovismarket",
+        "data": {
+          "amount": 60000000,
+          "asset_id": "zano-asset-id",
+          "category": "honey",
+          "listing_id": "listing-119",
+          "seller_did": "did:plc:yucatan-grower",
+          "title": "Undated: comb honey slab"
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "bl-20"
+      },
+      "outcome": {
+        "event": {
+          "canonicalized_by": "normalizer",
+          "event_id": "vaulta-bl-20-addlisting",
+          "event_type": {
+            "type": "ProductListed"
+          },
+          "payload": {
+            "data": {
+              "amount": 60000000,
+              "asset_id": "zano-asset-id",
+              "category": "honey",
+              "listing_id": "listing-119",
+              "seller_did": "did:plc:yucatan-grower",
+              "title": "Undated: comb honey slab"
+            },
+            "type": "Product"
+          },
+          "source_chain": "Vaulta",
+          "source_ref": "619:bl-20",
+          "timestamp": 0
+        }
+      }
+    },
+    {
+      "case": "success_bl-21",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 620,
+        "contract": "lovismarket",
+        "data": {
+          "amount": 6500000,
+          "asset_id": "fusd-asset-id",
+          "category": "hemp-seeds",
+          "listing_id": "listing-120",
+          "seller_did": "did:plc:seller",
+          "timestamp": 1782008000,
+          "title": "Feminized seed trio"
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "bl-21"
+      },
+      "outcome": {
+        "event": {
+          "canonicalized_by": "normalizer",
+          "event_id": "vaulta-bl-21-addlisting",
+          "event_type": {
+            "type": "ProductListed"
+          },
+          "payload": {
+            "data": {
+              "amount": 6500000,
+              "asset_id": "fusd-asset-id",
+              "category": "hemp-seeds",
+              "listing_id": "listing-120",
+              "seller_did": "did:plc:seller",
+              "title": "Feminized seed trio"
+            },
+            "type": "Product"
+          },
+          "source_chain": "Vaulta",
+          "source_ref": "620:bl-21",
+          "timestamp": 1782008000
+        }
+      }
+    },
+    {
+      "case": "success_bl-22",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 621,
+        "contract": "lovismarket",
+        "data": {
+          "amount": 4200000,
+          "asset_id": "zano-asset-id",
+          "category": "hemp-oil",
+          "listing_id": "listing-121",
+          "seller_did": "did:plc:andes-herbs",
+          "timestamp": 1782008500,
+          "title": "Salve, travel tin"
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "bl-22"
+      },
+      "outcome": {
+        "event": {
+          "canonicalized_by": "normalizer",
+          "event_id": "vaulta-bl-22-addlisting",
+          "event_type": {
+            "type": "ProductListed"
+          },
+          "payload": {
+            "data": {
+              "amount": 4200000,
+              "asset_id": "zano-asset-id",
+              "category": "hemp-oil",
+              "listing_id": "listing-121",
+              "seller_did": "did:plc:andes-herbs",
+              "title": "Salve, travel tin"
+            },
+            "type": "Product"
+          },
+          "source_chain": "Vaulta",
+          "source_ref": "621:bl-22",
+          "timestamp": 1782008500
+        }
+      }
+    },
+    {
+      "case": "success_bl-23",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 622,
+        "contract": "lovismarket",
+        "data": {
+          "amount": 95000000,
+          "asset_id": "fusd-asset-id",
+          "category": "honey",
+          "listing_id": "listing-122",
+          "seller_did": "did:plc:isla-crafts",
+          "timestamp": 1782009000,
+          "title": "Honey + comb gift box"
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "bl-23"
+      },
+      "outcome": {
+        "event": {
+          "canonicalized_by": "normalizer",
+          "event_id": "vaulta-bl-23-addlisting",
+          "event_type": {
+            "type": "ProductListed"
+          },
+          "payload": {
+            "data": {
+              "amount": 95000000,
+              "asset_id": "fusd-asset-id",
+              "category": "honey",
+              "listing_id": "listing-122",
+              "seller_did": "did:plc:isla-crafts",
+              "title": "Honey + comb gift box"
+            },
+            "type": "Product"
+          },
+          "source_chain": "Vaulta",
+          "source_ref": "622:bl-23",
+          "timestamp": 1782009000
+        }
+      }
+    },
+    {
+      "case": "success_bl-24",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 623,
+        "contract": "lovismarket",
+        "data": {
+          "amount": 22000000,
+          "asset_id": "fusd-asset-id",
+          "category": "hemp-flower",
+          "listing_id": "listing-123",
+          "seller_did": "did:plc:mariposa-textiles",
+          "timestamp": 1782009500,
+          "title": "Grower collab: flower + wrap"
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "bl-24"
+      },
+      "outcome": {
+        "event": {
+          "canonicalized_by": "normalizer",
+          "event_id": "vaulta-bl-24-addlisting",
+          "event_type": {
+            "type": "ProductListed"
+          },
+          "payload": {
+            "data": {
+              "amount": 22000000,
+              "asset_id": "fusd-asset-id",
+              "category": "hemp-flower",
+              "listing_id": "listing-123",
+              "seller_did": "did:plc:mariposa-textiles",
+              "title": "Grower collab: flower + wrap"
+            },
+            "type": "Product"
+          },
+          "source_chain": "Vaulta",
+          "source_ref": "623:bl-24",
+          "timestamp": 1782009500
+        }
+      }
+    },
+    {
+      "case": "refusal_br-01",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 700,
+        "contract": "lovismarket",
+        "data": {
+          "listing_id": "listing-r1",
+          "timestamp": 1782010000,
+          "title": "No seller on record"
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "br-01"
+      },
+      "outcome": {
+        "refused": {
+          "action": "lovismarket:addlisting",
+          "display": "lovismarket:addlisting: required field `seller_did` is missing",
+          "error": "MissingField",
+          "field": "seller_did"
+        }
+      }
+    },
+    {
+      "case": "refusal_br-02",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 701,
+        "contract": "lovismarket",
+        "data": {
+          "seller_did": "did:plc:seller",
+          "timestamp": 1782010500,
+          "title": "No listing id"
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "br-02"
+      },
+      "outcome": {
+        "refused": {
+          "action": "lovismarket:addlisting",
+          "display": "lovismarket:addlisting: required field `listing_id` is missing",
+          "error": "MissingField",
+          "field": "listing_id"
+        }
+      }
+    },
+    {
+      "case": "refusal_br-03",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 702,
+        "contract": "lovismarket",
+        "data": {
+          "amount": "not-a-number",
+          "listing_id": "listing-r3",
+          "seller_did": "did:plc:seller"
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "br-03"
+      },
+      "outcome": {
+        "refused": {
+          "action": "lovismarket:addlisting",
+          "display": "lovismarket:addlisting: field `amount` is not a u64",
+          "error": "BadFieldType",
+          "expected": "u64",
+          "field": "amount"
+        }
+      }
+    },
+    {
+      "case": "refusal_br-04",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 703,
+        "contract": "lovismarket",
+        "data": {
+          "amount": -5,
+          "listing_id": "listing-r4",
+          "seller_did": "did:plc:seller"
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "br-04"
+      },
+      "outcome": {
+        "refused": {
+          "action": "lovismarket:addlisting",
+          "display": "lovismarket:addlisting: field `amount` is not a u64",
+          "error": "BadFieldType",
+          "expected": "u64",
+          "field": "amount"
+        }
+      }
+    }
+  ],
+  "generated_by": "DEMO_GENERATED_FROM=$(git rev-parse HEAD) cargo run -q -p composition --bin browse-fixture",
+  "generated_from": "41b19f64037e65c86380a8b505dfd45974a963bc",
+  "schema": "shared-types §9.3 CanonicalEvent (versioned) — Product family via normalizer",
+  "serialization_note": "success events are serde-serialized from the real CanonicalEvent structs; inputs echo the identical RawChainAction instances the normalizer consumed (zero transcription); refusals are hand-mapped with the error's real field names and round-trip-verified; variety is explicitly constructed (no RNG) and asserted before emission",
+  "source_of_truth": "normalizer::normalize — (\"lovismarket\",\"addlisting\") arm → EventType::ProductListed (crates/normalizer/src/lib.rs); typed refusals NormalizerError::{MissingField, BadFieldType}",
+  "variety": {
+    "amount_max": 1000000000,
+    "amount_min": 50000,
+    "distinct_asset_ids": 2,
+    "distinct_categories": 7,
+    "distinct_sellers": 5,
+    "minimal_required_only": 3,
+    "refusals": 4,
+    "successes": 24,
+    "unpriced": 6,
+    "zero_timestamp_sentinel": 5
+  }
+}
