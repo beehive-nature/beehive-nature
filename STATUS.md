@@ -32,6 +32,23 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-06` — **T-2 loop CLOSED — the marketplace surface, second full lap,
+  second clean audit.** Design crossing pack **6/6 digest-verified**
+  (whole-pack `7862c35d…` @ 22195 B) · landed **`2868c26`** (six files,
+  +240/−2, founder-eyed with a T-1 regression glance, CI-green, **R2 closed**:
+  index.html SPDX rider) · **GLM consumption audit: CLEAN (0/0/0)** — the
+  format.js truncation guard **PROVEN behavior-preserving** for 64-hex, all
+  founder rulings Q-D8–Q-D11 verified with citations (timestamp sentinel as
+  labeled absence, null optionals as first-class states, refusals as a guards
+  panel never as cards, raw atomic units labeled) · seal proceeded under
+  **v2.2 MISMATCH-PP** (93 B attributed gateway whitespace drift; docket
+  `0ea5fed6…` public-pinned). **Convention v2.2 banked:** seal verification
+  returns MATCH / UNCOMPUTABLE / MISMATCH, and a MISMATCH-PP proceed requires
+  public-pinned artifacts plus an attributed delta — never an unexplained one.
+  Also this commit: docs sweep replacing short-sha regeneration commands with
+  the `$(git rev-parse <short>)` form (state-freshness class, founder-hit —
+  an ellipsized sha in a repro command is a command that cannot be pasted).
+
 - `2026-07-06` — **T-2 fixture minted — the marketplace listing substrate,
   computed through the real normalizer.** **`5595492`** — new
   `listings-fixture` bin (demo.rs untouched, **zero dependency movement**);
@@ -85,7 +102,7 @@ it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
   source structs, same nonzero-exit contract); acceptance: default-mode
   byte-identity, two-run determinism, and fixture output-identity at `498904e`
   all diff-empty. Repro: `cargo run -p composition --bin demo -- --json`;
-  `DEMO_GENERATED_FROM=498904ef… cargo run -q -p composition --bin demo --
+  `DEMO_GENERATED_FROM=$(git rev-parse 498904e) cargo run -q -p composition --bin demo --
   --json | diff - fixtures/demo-fixtures.json` (empty);
   `cargo test --workspace --locked` → **180 passed / 1 ignored**. CI green on
   all four commits. **Incident clauses:** a pen-file clobber (stray relay copy
