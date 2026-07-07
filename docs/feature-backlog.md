@@ -444,7 +444,10 @@ candidate pinned: green→teal→purple-center mandala, sha256
 — family geometry, distinct colorway (kinship honest, identity distinct;
 neutrality satisfied by differentiation within the family); formal Design
 lap remains founder-gated. FILE-VERIFIED 2026-07-07: original file hashed
-to pin exactly (15,269 B). LANE RULING RESTATED:
+to pin exactly (15,269 B). Visual-identity doctrine (articulated at the
+Code seat, founder-affirmed in relay): the sibling marks invert — each
+tree carries the other's color at its heart; kinship honest, identity
+distinct; teal is the bLoveRai intelligence band. LANE RULING RESTATED:
 did:plc:gnsiwyuiw4swvqnjlnacytaz is skaists' social-presence identity ONLY;
 the kernel identity root remains did:autonomi; the social DID will reference,
 never replace, a future kernel-native genesis identity.

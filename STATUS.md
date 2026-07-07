@@ -49,8 +49,10 @@ it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
 - `2026-07-07` — **Second tree registered: skaists/LOVErnment-DAO** —
   genesis bd37420 → research crossing 8502cfa (D-1/D-2/D-3 landed,
-  landing-instrument digests final) → scaffold 4f9f4bb. First out-of-tree
-  consumer: 1 passed / 0 failed / 0 ignored against pinned kernel-v0.1.0,
+  landing-instrument digests final) → scaffold 4f9f4bb → logo 6f5cef2
+  (founder-opened gate: skaists mark landed at assets/, README header;
+  byte-exact to the 64f35bee pin; formal Design lap remains gated). First
+  out-of-tree consumer: 1 passed / 0 failed / 0 ignored against pinned kernel-v0.1.0,
   CI green on the tree's first run. The tree is the relay of record — now
   trees, plural; every seat-stamp names its tree.
 
