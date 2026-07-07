@@ -32,6 +32,22 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-07` — **First mobile gate FAILED 5-of-7** (founder device eyes,
+  2026-07-07): Escrow, Dispute, Listings, Profiles, Orders broken; Browse,
+  Reputation clean. M-1 investigate→fix→re-gate queued.
+
+- `2026-07-07` — **Second tree registered: skaists/LOVErnment-DAO** —
+  genesis bd37420 → research crossing 8502cfa (D-1/D-2/D-3 landed,
+  landing-instrument digests final) → scaffold 4f9f4bb. First out-of-tree
+  consumer: 1 passed / 0 failed / 0 ignored against pinned kernel-v0.1.0,
+  CI green on the tree's first run. The tree is the relay of record — now
+  trees, plural; every seat-stamp names its tree.
+
+- `2026-07-07` — **kernel-v0.1.0 cut @ 590832d.** TRUE-UP: live CI (run
+  28900422647) counts 180 passed / 0 failed / 1 ignored — prior STATUS
+  said 179; one test added since last count. Live counts rule; 180/0/1 is
+  the number of record.
+
 - `2026-07-07` — **CD-25 QueenBee capture banked, frame founder-gated**
   (genesis Aigentic seat: organ-not-member candidate frame, zero votes,
   never an attester, supersedure law; boundary law vs CD-1 bLoveRai).

@@ -432,16 +432,19 @@ via _atproto DNS TXT — social-layer DID: did:plc:gnsiwyuiw4swvqnjlnacytaz
 (lead-verified by public profile resolution; Code-verified independently via
 public XRPC resolveHandle, HTTP 200, DID byte-identical) · X handle
 @skaistssocial CLAIMED (founder-attested; X blocks automated verification;
-dotless form is an X constraint) · GitHub org "skaists" PARKED —
-github.com/skaists created 2026-07-07, empty by design, lead-verified
-resolving (404→200 same-instrument pair; Code's own pair closed identically:
-`gh api users/skaists` 404 in the sweep → 200 Organization,
-created_at 2026-07-07T17:51:11Z). VISUAL IDENTITY — founder-favored logo
+dotless form is an X constraint) · GitHub org "skaists" OPERATIONAL
+2026-07-07 — first repository skaists/LOVErnment-DAO (private), genesis
+bd374202f74a87cf1be86f9bdab62a36e1e92d72, lead-verified same day. "Empty
+by design" closed the day it was written; the org now carries the genesis
+LOVErnment's own tree. Tag interlock: consumes kernel-v0.1.0 (tag object
+6621e1b → commit 590832d, publicly resolvable, lead-verified from the
+public record). VISUAL IDENTITY — founder-favored logo
 candidate pinned: green→teal→purple-center mandala, sha256
 `64f35bee7a3a2275771ba75ce7356fcd86b6ee93baba674d0b9caa2a620b1d16` @ 15269 B <!-- PUBLIC-CONSTANT: skaists logo-candidate content hash -->
 — family geometry, distinct colorway (kinship honest, identity distinct;
 neutrality satisfied by differentiation within the family); formal Design
-lap remains founder-gated. LANE RULING RESTATED:
+lap remains founder-gated. FILE-VERIFIED 2026-07-07: original file hashed
+to pin exactly (15,269 B). LANE RULING RESTATED:
 did:plc:gnsiwyuiw4swvqnjlnacytaz is skaists' social-presence identity ONLY;
 the kernel identity root remains did:autonomi; the social DID will reference,
 never replace, a future kernel-native genesis identity.
@@ -516,10 +519,14 @@ via zero-knowledge; candidate answer to CD-17 Q-3
 bLoveRai (teal lane; brand asset pinned: teal mandala sha256
 `4df6bf3204ec0ac18f5a191393468149be729c4507f5a5cdde3c958ff7a5ccec` @ 82678 B <!-- PUBLIC-CONSTANT: teal mandala brand-asset content hash -->
 — purple=human, green=Biomass, teal=AI now a complete trinity).
+FILE-VERIFIED 2026-07-07: original file hashed to pin exactly (82,678 B).
 
 Q-1 CLOSED (2026-07-07): MoC = the Map of Consciousness (David R. Hawkins
 MD, logarithmic 0–1000 scale). MoC reference image pinned: sha256
 `884bb405f5751a061b470ee4c11c2197e5b7f60f3833023b6657a7785ba28ee7` <!-- PUBLIC-CONSTANT: MoC reference-image content hash -->
+FILE-VERIFIED 2026-07-07: original file hashed to pin exactly, including
+the corrected e5 byte from the lead's strike — confirmed against the
+actual image.
 PLACEMENT
 RULING: MoC and HD enter as INTERPRETIVE-SYSTEM attestations —
 self/community-attested provenance class, kernel-weighted per the

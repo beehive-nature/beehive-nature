@@ -38,6 +38,21 @@ Research findings enter the repo through exactly one door:
 The repo stays the single source of truth only if things enter it
 through one door.
 
+## Process law (relay + verification)
+
+- Captures are cited by grep-able content anchor; numbers are hints,
+  never authority.
+- Content anchors are authored verbatim from source; anchor semantics
+  are words-in-order under whitespace normalization unless
+  byte-exactness is explicitly demanded.
+- A digest is certified only by an instrument not currently
+  contradicting itself; route stamps to the landing instrument.
+- Digests are identity; staging lines are conveniences.
+- One paste = one courier action; manifests carry numbered checkboxes;
+  file crossings always stand alone.
+- A screenshot is a partial witness — one scroll position, no
+  interaction; the eyes-gate belongs to the eyes-holder.
+
 ## Ground rules
 
 - Read `STATUS.md` first — the repo is self-orienting, and its ledger is
