@@ -8,6 +8,7 @@ import Reputation from './views/Reputation.jsx'
 import Listings from './views/Listings.jsx'
 import Profiles from './views/Profiles.jsx'
 import Orders from './views/Orders.jsx'
+import Browse from './views/Browse.jsx'
 
 const VIEWS = [
   ['escrow', 'Escrow lifecycle', EscrowLifecycle],
@@ -16,6 +17,7 @@ const VIEWS = [
   ['listings', 'Listings', Listings],
   ['profiles', 'Profiles', Profiles],
   ['orders', 'Orders', Orders],
+  ['browse', 'Browse', Browse],
 ]
 
 export default function App() {

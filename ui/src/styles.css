@@ -246,3 +246,19 @@ tr:last-child td { border-bottom: none; }
 /* orders (T-4) */
 .order { display: grid; gap: 14px; margin-top: 16px; }
 .order .timeline { margin-top: 0; }
+
+/* browse (T-5) — the storefront. Palette law: active filter chips read
+   magenta (primary interactive); the view-transformation banner reads
+   blue (informational); violet stays guards-only; teal reserved. */
+.browse-bar { display: flex; align-items: center; gap: 8px 10px; flex-wrap: wrap; margin-top: 14px; }
+.browse-input { font: 400 12.5px var(--mono); color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 7px 14px; min-width: 220px; }
+.browse-input:focus { outline: none; border-color: var(--magenta); }
+.browse-select { font: 500 12px var(--mono); color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 7px 10px; cursor: pointer; }
+.chip-btn { appearance: none; cursor: pointer; }
+.chip-btn:hover { border-color: var(--magenta); color: var(--magenta); }
+.chip-btn.on { background: var(--magenta); border-color: var(--magenta); color: #fff; font-style: normal; }
+.xform { margin-top: 12px; font: 500 11.5px var(--mono); color: var(--blue); background: var(--blue-tint); border: 1px solid var(--blue); border-radius: 8px; padding: 8px 12px; word-break: break-word; }
+.store-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; margin-top: 14px; }
+.store-card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.store-title { font: 600 15.5px var(--sans); letter-spacing: -0.01em; margin: 0; color: var(--ink); text-transform: none; }
+.store-foot { display: flex; gap: 3px 12px; flex-wrap: wrap; font: 400 10.5px var(--mono); color: var(--muted); word-break: break-all; }
