@@ -496,6 +496,38 @@ evaluation (BitShares-class vs kernel-native) · OPS NOTE: all five domains
 renew 2027-07-03 — one renewal event for the whole estate; calendar +
 auto-renew discipline.
 
+## CD-21 — Cooperative GameFi: the skaists Quest (REGISTERED 2026-07-07, founder vision text banked)
+
+Thesis: non-zero-sum, community-driven quest economy — collaboration rewarded,
+no player's gain requiring another's loss; the anti-extraction stance of the
+frozen tokenomics (earned-emission-only, TE-1..TE-7) expressed as gameplay.
+Elements: quest engine (ties CD-19 "quests" / plur.earth) · cooperative reward
+taxonomy on the operant emission curve · SOVEREIGNTY SCORE — multi-factor
+personhood credential: DNA + heartbeat (ECG) + MoC (founder-defined, pending)
++ Human Design, proven via zero-knowledge; candidate answer to CD-17 Q-3
+(7777 authentication / sybil resistance) · community co-development of
+bLoveRai (teal lane; brand asset pinned: teal mandala sha256
+`4df6bf3204ec0ac18f5a191393468149be729c4507f5a5cdde3c958ff7a5ccec` @ 82678 B <!-- PUBLIC-CONSTANT: teal mandala brand-asset content hash -->
+— purple=human, green=Biomass, teal=AI now a complete trinity).
+
+PROPOSED INVARIANT (founder ratification requested): BIO-1 — raw biometric
+data never leaves the person's device; the kernel receives only
+zero-knowledge proofs; biometrics are irrevocable and therefore unstorable
+by law.
+
+LANGUAGE RULING APPLIED: "quantum secure" capped per house law → the claim
+files as "post-quantum cryptography, algorithm selection UNVERIFIED/pending."
+
+ARCHITECTURAL PLACEMENT: Sovereignty Score = a skaists-vertical attestation
+POLICY composed on kernel attestation primitives (provenance-weighted
+confidence, per constitution) — not a kernel primitive; each LOVErnment may
+define its own personhood recipe.
+
+OPEN, founder-gated: Q-1 MoC definition · Q-2 BIO-1 ratification · Q-3 PQC
+algorithm intent · Q-4 Sovereignty Score vs reputation score separation
+(personhood ≠ behavior; never conflate) · Q-5 is the Sovereignty Score THE
+7777 admission credential (closing CD-17 Q-3) or one input to it.
+
 ## Standing rules for this file
 
 - New visions get **routed here first** (which layer owns it, which

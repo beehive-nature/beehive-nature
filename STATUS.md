@@ -32,6 +32,14 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-07` — **CD-21 registered — the quest has a constitution.**
+  Cooperative GameFi under skaists: non-zero-sum quest economy, the
+  Sovereignty Score as a vertical attestation policy (not a kernel
+  primitive), BIO-1 proposed (raw biometrics never leave the device —
+  irrevocable therefore unstorable), "quantum secure" capped to
+  PQC-pending per house law. Q-1–Q-5 open. Full text:
+  docs/feature-backlog.md CD-21.
+
 - `2026-07-07` — **CD-17 identity claims COMPLETE — all five anchors live**
   (domain · email · Bluesky handle+DID · X handle · GitHub org, the last
   parked empty by design with both seats' 404→200 instrument pairs closed).
