@@ -32,6 +32,11 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-07` — **CD-25 QueenBee capture banked, frame founder-gated**
+  (genesis Aigentic seat: organ-not-member candidate frame, zero votes,
+  never an attester, supersedure law; boundary law vs CD-1 bLoveRai).
+  Full text: docs/feature-backlog.md CD-25.
+
 - `2026-07-07` — **GLM red-team return + senary delta appended to CD-23**
   (2 RED / 4 YELLOW / 2 QUESTION; SE-1..SE-6 candidate invariants
   founder-gated, none promoted; F-8(c) reopened — attestation quorum +

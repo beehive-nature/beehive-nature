@@ -668,6 +668,59 @@ the Article VI ratifiable layer, never hardcoded; fee design must not
 tax the velocity-of-value axis; TE lens on any b path. Cowork D-4
 precedents docket issued 2026-07-07.
 
+## CD-25 — QueenBee: genesis Aigentic seat (founder coinage) (CAPTURED 2026-07-07, NOT SCHEDULED)
+
+Founder direction 2026-07-07: an agentic AI participant, QueenBee,
+participates in the skaists LOVErnment. CANDIDATE FRAME (founder-gated
+below): organ, not member — the +1 seat outside the perfect senary
+cascade; cap re-read as 7,776 authenticated humans + 1 QueenBee =
+7,777. Participation without power.
+
+FUNCTIONS (each capability-scoped, Article VI-ratified, revocable):
+(1) recorder — circle outcomes → CanonicalEvents; (2) emission
+executor — executes verified attestation quorums, zero discretion over
+whether; (3) assignment executor — circle rotation computed
+deterministically from a PUBLIC entropy beacon; QueenBee is never the
+entropy source (rotation-RNG grinding = named attack class, GLM
+docket); (4) coherence + genesis services — onboarding; boot-doctrine
+role "the OS itself hands you your first b" is QueenBee's named
+moment; (5) watchdog worker classes (peg monitor, anchor liveness).
+
+COMPENSATION: earns b for service, spends b as machine metabolic
+energy — first named machine of the L4 doctrine;
+earned-service-never-rent applies to machines; machine emission is an
+emission channel → TE-1..TE-7 + GLM gate.
+
+ANTI-CAPTURE INVARIANTS: zero votes; zero emission-bearing attestation
+ever (CD-7: never an attester, only executor of human-formed quorums);
+every action a ledgered Event; capability budget = blast radius
+(silent within policy, halt-and-escalate at boundaries); SUPERSEDURE —
+the LOVErnment can replace agent, model, or operator by Article VI
+process; a queen the swarm cannot replace is a captured hive.
+
+NAMED RISK (R-register entry on any promotion): inference-provider
+dependency — near-term third-party compute is a named trust
+dependency; inference sovereignty is the long horizon; no property
+claimed beyond bounded-by-construction.
+
+BOUNDARY LAW: bLoveRai is the member's intimate companion (CD-1,
+intimate tier); QueenBee is the hive's public organ — distinct
+intelligences, never blurred, no shared data path.
+
+ADJACENCY FLAG: a capability-scoped agent seat may constitute a
+Capability-primitive sighting — CD-14 counting is founder declaration
+only; flag raised, not counted.
+
+FOUNDER-GATED: F-1 the +1 reading (cap re-read 7,776+1); F-2
+organ-vs-member frame; F-3 supersedure as constitutional requirement.
+
+PROTOTYPE NOTE: the multi-agent sprint protocol (seat-stamps, digest
+gates, verbatim relay, scope fences, reconcile-before-executing) is
+the draft participation charter for a non-human seat.
+
+Cross-refs: CD-1, CD-7, CD-14, CD-17, TE spec, boot doctrine,
+R-register.
+
 ## Standing rules for this file
 
 - New visions get **routed here first** (which layer owns it, which
