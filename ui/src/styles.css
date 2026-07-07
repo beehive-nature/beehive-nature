@@ -195,3 +195,18 @@ tr:last-child td { border-bottom: none; }
 .colophon { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--line); display: grid; gap: 6px; }
 .colophon div { font: 400 11px var(--mono); color: var(--muted); word-break: break-word; }
 .colophon .k2 { color: var(--ink); font-weight: 600; }
+
+/* listings (T-2) */
+.listing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 18px; margin-top: 16px; }
+.listing { display: grid; gap: 10px; align-content: start; }
+.card h3.listing-title { font: 600 20px var(--sans); letter-spacing: -0.01em; margin: 0; text-transform: none; color: var(--ink); }
+.absent { color: var(--muted); font-style: italic; font-weight: 400; }
+.price-row { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.price { font: 600 17px var(--mono); }
+.unit { font: 400 11px var(--mono); color: var(--muted); }
+.env { font: 400 11px var(--mono); color: var(--muted); border-top: 1px solid var(--line-soft); padding-top: 9px; display: flex; flex-wrap: wrap; gap: 3px 14px; word-break: break-all; }
+.env-label { color: var(--ink); font-weight: 600; }
+.guards { margin-top: 22px; background: var(--violet-tint); border: 1px solid var(--violet-line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 14px; }
+.guards .refusal-title { margin: 0; }
+.guard-item { background: var(--card); border: 1px solid var(--violet-line); border-radius: 8px; padding: 14px 16px; display: grid; gap: 10px; }
+.guard-display { font: 500 12.5px var(--mono); background: var(--violet-tint); border-radius: 6px; padding: 8px 10px; word-break: break-word; }

@@ -6,8 +6,10 @@
 
 export const iso = (ts) => new Date(ts * 1000).toISOString().replace('.000Z', 'Z')
 
-// Truncation is display-only; the full 64-hex value stays in state.
-export const truncHash = (h) => h.slice(0, 10) + '…' + h.slice(-8)
+// Truncation is display-only; the full value stays in state. Values short
+// enough to show whole (e.g. DIDs under the hash-chip treatment) pass
+// through untruncated.
+export const truncHash = (h) => (h.length <= 20 ? h : h.slice(0, 10) + '…' + h.slice(-8))
 
 export const sum = (xs) => xs.reduce((a, b) => a + b, 0)
 

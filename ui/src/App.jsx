@@ -5,11 +5,13 @@ import logo from './assets/bn-logo.jpg'
 import EscrowLifecycle from './views/EscrowLifecycle.jsx'
 import Dispute from './views/Dispute.jsx'
 import Reputation from './views/Reputation.jsx'
+import Listings from './views/Listings.jsx'
 
 const VIEWS = [
   ['escrow', 'Escrow lifecycle', EscrowLifecycle],
   ['dispute', 'Dispute branch', Dispute],
   ['reputation', 'Reputation', Reputation],
+  ['listings', 'Listings', Listings],
 ]
 
 export default function App() {
@@ -50,6 +52,9 @@ export default function App() {
       </main>
 
       <footer className="colophon">
+        <div>
+          <span className="k2">fixture</span> fixtures/demo-fixtures.json @ {FIXTURE_PIN}
+        </div>
         <div>
           <span className="k2">schema</span> {fixtures.schema}
         </div>
