@@ -32,6 +32,13 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-07` — **CD-23 fractal co-creation circles captured (circle
+  size RULED six — fractally original design, triple-anchored; supersedes
+  same-day eight) + CD-24 LOVErnment treasury inflows captured + CD-1
+  bLoveRai amended** (instrument named "bLoveRai stock"; jurisdiction
+  review extended to instrument characterization). Full text:
+  docs/feature-backlog.md CD-23 / CD-24 / CD-1.
+
 - `2026-07-07` — **CD-22 registered — proof-of-unique-personhood grounded
   in current literature; the honest path is fusion + on-device + ZK-dedup,
   not one-sensor magic.** Full text: docs/feature-backlog.md CD-22.

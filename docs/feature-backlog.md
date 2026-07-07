@@ -32,7 +32,9 @@ leaves the vault. Optimizes the **human's own stated goals**, never a fixed exte
 (Art. VII — no protocol-imposed objective). **Reward couples to authorized valued *service*,
 never to health outcomes or biomarkers** — decoupled by design to defeat reward-hacking /
 Goodhart. **Gate:** needs the affect layer, which needs a *second concrete use case* before
-any generic build (standing rule).
+any generic build (standing rule). **RULING 2026-07-07:** instrument name founder-ruled
+"bLoveRai stock." Reward axes: operant conditioning, network effect, velocity of value
+(cross-ref TE spec). Jurisdiction review scope EXTENDED to instrument characterization.
 
 **CD-2 — Cross-cutting privacy invariant** *(candidate future Article VI amendment — NOT
 added now).* Proposed text: *"A system helps by acting on the inference and cannot see you
@@ -594,6 +596,42 @@ CD-17 Q-3/Q-5 (is this THE 7777 credential).
 LANGUAGE: no accuracy claim stated as fact; all figures are
 controlled-study ceilings, real-world lower. No "quantum/unhackable" —
 PQC pending per house law.
+
+## CD-23 — Fractal co-creation circles + achievement-unlock emission (CAPTURED 2026-07-07, NOT SCHEDULED)
+
+Circle size RULED 2026-07-07: fractally original design (per Cowork D-1
+pins: circles of six, 4/6 ranking consensus, Respect schedule
+1,2,3,5,8,13 with flagged 55→5 source conflict pending whitepaper;
+remainder algorithm + averaging window UNVERIFIED, retrieval actions
+named in D-1). SUPERSEDES same-day circles-of-eight ruling; reversal on
+D-3 evidence (research optimum ~5, band 4-7; Eden contract computes 4-6
+— triple anchor). Geometry: 6^5=7,776 resolves 1,296→216→36→6→1 in five
+rounds; cap = cascade + 1; the +1 seat UNNAMED, founder-gated.
+
+Circles are decision AND co-creation containers: members unlock
+personal b via circle-attested achievements aligned to member-declared
+presoul-contract arcs (opt-in lenses per the bLoveRai capture, CD-1;
+interpretive-not-authoritative law applies; circle attests the
+milestone, never sees the contract).
+
+CANDIDATE (not ruled): rotating circles carry all emission-bearing
+attestation; stable companion circles carry zero.
+
+GATES: attester-independence (CD-7), TE-1..TE-7 + GLM pass before
+promotion, intimate-tier spec.
+
+## CD-24 — LOVErnment treasury inflows (CAPTURED 2026-07-07, NOT SCHEDULED)
+
+Founder-directed 2026-07-07, genesis instance skaists: (1) escrow
+dispute-adjudication fees — earned-service class, doctrine-clean; (2)
+market fee — founder instinct ~1% ad-valorem WITH absolute cap
+(uncapped percentage on commodity notionals is rent); (3) commodity DEX
+variable (tiered/spread), sized to service rendered. OPEN Q
+founder-gated: fee denomination fUSD-vs-b (b path requires
+transferability ruling, unpinned). INVARIANTS: fee parameters live in
+the Article VI ratifiable layer, never hardcoded; fee design must not
+tax the velocity-of-value axis; TE lens on any b path. Cowork D-4
+precedents docket issued 2026-07-07.
 
 ## Standing rules for this file
 
