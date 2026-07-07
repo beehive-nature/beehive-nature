@@ -247,6 +247,22 @@ tr:last-child td { border-bottom: none; }
 .order { display: grid; gap: 14px; margin-top: 16px; }
 .order .timeline { margin-top: 0; }
 
+/* ── M-1: mobile layer (founder device gate 2026-07-07 failed 5-of-7).
+   Render-in-full law holds by its LAYOUT-CHANGES clause: grid tracks
+   release their desktop minimums to one full-width column (Dispute /
+   Profiles 430px and Listings 380px forced page-level panning); the
+   fixture-path breadcrumbs gain overflow-wrap so long dotted paths stop
+   bleeding across card borders (data labels, same idiom as the landed
+   .env/.mini-meta break rules — hash-chip nowrap law untouched); tables
+   become their own horizontal scroll surface (defensive — every byte
+   reachable, no clip, no mid-string wrap, page never pans). ── */
+@media (max-width: 640px) {
+  .app { padding: 0 14px 56px; }
+  .dispute-grid, .profile-grid, .listing-grid, .rep-grid { grid-template-columns: 1fr; }
+  .path { overflow-wrap: anywhere; }
+  table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+}
+
 /* browse (T-5) — the storefront. Palette law: active filter chips read
    magenta (primary interactive); the view-transformation banner reads
    blue (informational); violet stays guards-only; teal reserved. */

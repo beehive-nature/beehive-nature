@@ -32,6 +32,17 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-07` — **M-1 mobile fix landed — instrument-verified 7/7,
+  HOLDING for founder device re-gate** (the eyes-gate belongs to the
+  eyes-holder). Root causes: Dispute/Profiles 430px + Listings 380px grid
+  minimums forced page-level panning; Escrow/Orders fixture-path
+  breadcrumbs bled across card borders. Fix is one mobile media layer
+  (≤640px): grids release to one column, paths gain overflow-wrap,
+  tables become their own scroll surfaces — render-in-full law holds by
+  its layout-changes clause, hash-chip nowrap law untouched. At 375px
+  all seven tabs: page scroll-width = viewport, zero elements clipping
+  own content; desktop untouched by media-query construction.
+
 - `2026-07-07` — **First mobile gate FAILED 5-of-7** (founder device eyes,
   2026-07-07): Escrow, Dispute, Listings, Profiles, Orders broken; Browse,
   Reputation clean. M-1 investigate→fix→re-gate queued.
