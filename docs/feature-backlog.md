@@ -620,6 +620,41 @@ attestation; stable companion circles carry zero.
 GATES: attester-independence (CD-7), TE-1..TE-7 + GLM pass before
 promotion, intimate-tier spec.
 
+GLM RED-TEAM RETURN (2026-07-07): 2 RED / 4 YELLOW / 2 QUESTION. F-1
+achievement-definition gaming RED · F-2 attestation bribery RED
+(compounding pair) · F-3 collusion-vs-rotation YELLOW · F-4
+rotation-RNG YELLOW (independently answered same-day by the QueenBee
+capture's public-entropy-beacon ruling, CD-25; GLM SE-4 = its
+construction) · F-5 ZK circuit/replay/linkage-leakage YELLOW · F-6
+reward-axis super-linearity YELLOW · F-7 milestone timing QUESTION ·
+F-8 governance-emission feedback + attestation
+mechanical-vs-witnessing + dissent-DoS QUESTION. CANDIDATE INVARIANTS
+SE-1..SE-6 (GLM-proposed, FOUNDER-GATED, none promoted): SE-1
+peer-declared milestones — NOTED TENSION with self-declared sacred-arc
+principle; candidate synthesis on the table: member declares the arc,
+governance-ratified bounded milestone-class registry (per SE-5) prices
+emission value — autonomy at meaning layer, gaming closed at value
+layer. SE-2 attestation bond + dispute window. SE-3 pair co-occurrence
+cap per epoch. SE-4 VRF/epoch entropy. SE-5 proof binding
+type+epoch+nullifier. SE-6 sub-linear per-axis emission scaling. SCOPE
+FLAG: memo audited circles of EIGHT (pre-senary docket); GLM
+size-delta OWED — F-2 bribe count and F-3 quorum odds named
+size-dependent; block updates on delta receipt. FOUNDER-GATE QUEUE
+grows: F-7 timing feature-or-exploit; F-8a governance carries emission
+weight? (headwater note: in fractally the ranking IS the emission —
+skaists rules same-or-split); F-8b attestation = proof-check or
+witness.
+
+SENARY DELTA (2026-07-07, GLM filed): F-2 RED holds — bribe count 7→5,
+per-rotation capture cheaper, SE-2 more necessary. F-3 YELLOW holds —
+per-pair co-occurrence 5/7776, more circles/week, quorum fraction 67%,
+absolute quorum four; SE-3 unchanged. F-4/SE-4 convergence with
+public-entropy-beacon ruling confirmed. F-8(c) REOPENED by lead
+correction: blocking at 4-of-6 requires three dissenters, not two; and
+4/6 is the RANKING threshold — the ATTESTATION quorum + voter set
+(does the achiever sit and vote?) is a distinct unruled parameter →
+founder-gate A-1. Tally: 2 RED · 4 YELLOW · 2 QUESTION.
+
 ## CD-24 — LOVErnment treasury inflows (CAPTURED 2026-07-07, NOT SCHEDULED)
 
 Founder-directed 2026-07-07, genesis instance skaists: (1) escrow
