@@ -430,8 +430,11 @@ via _atproto DNS TXT — social-layer DID: did:plc:gnsiwyuiw4swvqnjlnacytaz
 (lead-verified by public profile resolution; Code-verified independently via
 public XRPC resolveHandle, HTTP 200, DID byte-identical) · X handle
 @skaistssocial CLAIMED (founder-attested; X blocks automated verification;
-dotless form is an X constraint) · GitHub org "skaists" PENDING (namespace
-confirmed free as of today, 404). LANE RULING RESTATED:
+dotless form is an X constraint) · GitHub org "skaists" PARKED —
+github.com/skaists created 2026-07-07, empty by design, lead-verified
+resolving (404→200 same-instrument pair; Code's own pair closed identically:
+`gh api users/skaists` 404 in the sweep → 200 Organization,
+created_at 2026-07-07T17:51:11Z). LANE RULING RESTATED:
 did:plc:gnsiwyuiw4swvqnjlnacytaz is skaists' social-presence identity ONLY;
 the kernel identity root remains did:autonomi; the social DID will reference,
 never replace, a future kernel-native genesis identity.
