@@ -1,0 +1,136 @@
+{
+  "generated_by": "DEMO_GENERATED_FROM=$(git rev-parse HEAD) cargo run -q -p composition --bin listings-fixture",
+  "generated_from": "5595492270d983bba726a8df8f91c67571c1926b",
+  "listings": [
+    {
+      "case": "fully_populated",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 500,
+        "contract": "lovismarket",
+        "data": {
+          "amount": 5000000,
+          "asset_id": "fusd-asset-id",
+          "category": "hemp-seeds",
+          "listing_id": "listing-42",
+          "seller_did": "did:plc:seller",
+          "timestamp": 1782000000,
+          "title": "Heirloom hemp seeds"
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "lst-tx-1"
+      },
+      "outcome": {
+        "event": {
+          "canonicalized_by": "normalizer",
+          "event_id": "vaulta-lst-tx-1-addlisting",
+          "event_type": {
+            "type": "ProductListed"
+          },
+          "payload": {
+            "data": {
+              "amount": 5000000,
+              "asset_id": "fusd-asset-id",
+              "category": "hemp-seeds",
+              "listing_id": "listing-42",
+              "seller_did": "did:plc:seller",
+              "title": "Heirloom hemp seeds"
+            },
+            "type": "Product"
+          },
+          "source_chain": "Vaulta",
+          "source_ref": "500:lst-tx-1",
+          "timestamp": 1782000000
+        }
+      }
+    },
+    {
+      "case": "minimal_required_only",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 500,
+        "contract": "lovismarket",
+        "data": {
+          "listing_id": "listing-43",
+          "seller_did": "did:plc:seller"
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "lst-tx-2"
+      },
+      "outcome": {
+        "event": {
+          "canonicalized_by": "normalizer",
+          "event_id": "vaulta-lst-tx-2-addlisting",
+          "event_type": {
+            "type": "ProductListed"
+          },
+          "payload": {
+            "data": {
+              "amount": null,
+              "asset_id": null,
+              "category": null,
+              "listing_id": "listing-43",
+              "seller_did": "did:plc:seller",
+              "title": null
+            },
+            "type": "Product"
+          },
+          "source_chain": "Vaulta",
+          "source_ref": "500:lst-tx-2",
+          "timestamp": 0
+        }
+      }
+    },
+    {
+      "case": "refusal_missing_field",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 500,
+        "contract": "lovismarket",
+        "data": {
+          "listing_id": "listing-44",
+          "timestamp": 1782000300,
+          "title": "No seller on this one"
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "lst-tx-3"
+      },
+      "outcome": {
+        "refused": {
+          "action": "lovismarket:addlisting",
+          "display": "lovismarket:addlisting: required field `seller_did` is missing",
+          "error": "MissingField",
+          "field": "seller_did"
+        }
+      }
+    },
+    {
+      "case": "refusal_bad_field_type",
+      "input": {
+        "action_name": "addlisting",
+        "block_num": 500,
+        "contract": "lovismarket",
+        "data": {
+          "amount": "not-a-number",
+          "listing_id": "listing-45",
+          "seller_did": "did:plc:seller",
+          "timestamp": 1782000400
+        },
+        "source_chain": "Vaulta",
+        "tx_id": "lst-tx-4"
+      },
+      "outcome": {
+        "refused": {
+          "action": "lovismarket:addlisting",
+          "display": "lovismarket:addlisting: field `amount` is not a u64",
+          "error": "BadFieldType",
+          "expected": "u64",
+          "field": "amount"
+        }
+      }
+    }
+  ],
+  "schema": "shared-types §9.3 CanonicalEvent (versioned) — Product family via normalizer",
+  "serialization_note": "success events are serde-serialized from the real CanonicalEvent structs; inputs are echoed from the same RawChainAction instances the normalizer consumed (data embeds the identical serde_json::Value, zero transcription); refusals are hand-mapped with the error's real field names and round-trip-verified",
+  "source_of_truth": "normalizer::normalize — (\"lovismarket\",\"addlisting\") arm → EventType::ProductListed (crates/normalizer/src/lib.rs); typed refusals NormalizerError::{MissingField, BadFieldType}"
+}
