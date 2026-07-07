@@ -32,6 +32,12 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-07` — **CD-20 registered — the estate has a map.** Five domains,
+  five roles (study central · governance home · the marketplace · the
+  biologic futures exchange · the rave ecosystem), two cross-domain
+  mechanisms, four founder-gated questions, one estate-wide renewal date.
+  Full text: docs/feature-backlog.md CD-20.
+
 - `2026-07-07` — **CD-17 identity claims executed and verified — genesis
   LOVErnment skaists is now publicly resolvable.** Domain skaists.social
   owned + active, email live, Bluesky handle @skaists.social verified via

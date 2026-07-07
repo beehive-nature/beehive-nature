@@ -463,6 +463,36 @@ goods-shaped escrow state machine has no Shipped for a DJ set; kernel-roadmap
 item, the architecture stays closed. OPEN: Q-1 ticket asset design · Q-2
 access-grant release semantics · Q-3 service-escrow state machine.
 
+## CD-20 — The Domain Estate (REGISTERED 2026-07-07, founder-ruled)
+
+Five domains, five roles: bnature.social = lifelong-longevity study central —
+scientists + patients hub, education/courses (open-source Canvas) ·
+skaists.social = genesis LOVErnment governance home (CD-17) ·
+beehivenature.com = THE MARKETPLACE (the landed seven-tab kernel's public
+home) + front door linking study/courses + about BNR OS and dApps ·
+bnature.bio = dCommodities futures exchange for everything biologic (backend
+candidate: BitShares-class DEX — UNVERIFIED, evaluation gated) · plur.earth =
+the full rave ecosystem — artists, dancers, DJs, global EDM, festivals,
+quests, harm reduction + education (the CD-19 economy's public face).
+
+Cross-domain mechanisms captured: (m1) farmer-funding loop — seed funding
+negotiated in the Marketplace, the future instrument living on bnature.bio,
+with AI assisting farmers autonomously creating and operating crop futures —
+promotes the question of AUTONOMOUS AGENTS OPERATING FINANCIAL INSTRUMENTS
+WITHIN CAPABILITY BUDGETS ("the budget is the blast radius," now pointed at
+crop finance) · (m2) the study↔marketplace link (beehivenature.com ↔
+bnature.social).
+
+Promoted questions, founder-gated: Q-1 patient-data governance — the
+longevity study makes longitudinal health data the platform's most sensitive
+class; the Zano/Autonomi/DID stack is the fit, the governance model is the
+open work · Q-2 autonomous-agent finance semantics (m1) · Q-3 harm-reduction
+liability posture — provides-vs-hosts distinction, jurisdiction-aware
+(US/MX/VE), wants non-AI counsel before build · Q-4 futures-exchange backend
+evaluation (BitShares-class vs kernel-native) · OPS NOTE: all five domains
+renew 2027-07-03 — one renewal event for the whole estate; calendar +
+auto-renew discipline.
+
 ## Standing rules for this file
 
 - New visions get **routed here first** (which layer owns it, which
