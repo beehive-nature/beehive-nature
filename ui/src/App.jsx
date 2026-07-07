@@ -6,12 +6,14 @@ import EscrowLifecycle from './views/EscrowLifecycle.jsx'
 import Dispute from './views/Dispute.jsx'
 import Reputation from './views/Reputation.jsx'
 import Listings from './views/Listings.jsx'
+import Profiles from './views/Profiles.jsx'
 
 const VIEWS = [
   ['escrow', 'Escrow lifecycle', EscrowLifecycle],
   ['dispute', 'Dispute branch', Dispute],
   ['reputation', 'Reputation', Reputation],
   ['listings', 'Listings', Listings],
+  ['profiles', 'Profiles', Profiles],
 ]
 
 export default function App() {
