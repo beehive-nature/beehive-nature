@@ -32,6 +32,41 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-06` — **T-2 fixture minted — the marketplace listing substrate,
+  computed through the real normalizer.** **`5595492`** — new
+  `listings-fixture` bin (demo.rs untouched, **zero dependency movement**);
+  **`b42c25b`** — `fixtures/listings-fixtures.json` (`b69a1992…` @ 136 lines,
+  **double-verified lead-from-public-record + author-from-disk**), four cases
+  mirroring proven normalizer tests: fully-populated, minimal (absent
+  timestamp → documented 0 default), and two typed REFUSALS as first-class
+  outcomes (`MissingField: seller_did`, `BadFieldType: amount/u64`). Y-1 law
+  carried forward: inputs echo the identical `RawChainAction` instances
+  consumed (zero transcription), hand-mapped scalars round-trip-verified,
+  nonzero-exit contract. Provenance `generated_from=5595492` (full sha);
+  regenerate-at-named-head diff empty; two-run determinism diff empty. Repro:
+  `DEMO_GENERATED_FROM=$(git rev-parse HEAD) cargo run -q -p composition --bin
+  listings-fixture | diff - fixtures/listings-fixtures.json` (empty at
+  `5595492`). Display questions **Q-D8–Q-D11 filed, not improvised**
+  (timestamp-0 sentinel, null optionals, refusal surface, native-unit display)
+  and founder-ruled same day. CI green.
+
+- `2026-07-06` — **T-1 loop CLOSED — the kernel's first frontend, five seats,
+  every gate exercised.** Design's crossing pack **15/15 digest-verified**
+  (whole-pack `0517309f…`, per-file manifest, one extraction-side terminator
+  fix, no re-serve needed) · landed **`0572efd`** — 16 files (15-file manifest
+  + `package-lock.json` as the lead-ruled disclosed artifact), founder-eyed on
+  the live dev server, CI-green, rulings R1 (FIXTURE_PIN accepted as
+  provenance literal), R2 (index.html SPDX joins Design's next pack), R3
+  (toolchain-prerequisite doctrine ratified) carried in the commit message ·
+  battery: zero fixture values hardcoded, single-source fixture import,
+  `vite build` 39 modules / three views, dev boot HTTP 200, workspace
+  `--locked` untouched (`cargo test --workspace --locked` → 180 passed / 1
+  ignored) · **GLM consumption audit: CLEAN (0 red / 0 yellow / 0 cosmetic)**,
+  seal-verified against docket `96759bd5…`, four surfaces, confirmation-pass
+  on P1–P4, lead spot-verified citations. **First full five-seat lap** —
+  founder, lead, Design, Code, GLM — every handoff digest-pinned, every gate
+  exercised, nothing landed unaudited.
+
 - `2026-07-06` — **Fixture-pack loop CLOSED — the first pre-registered audit,
   citation-verified in both directions.** The `--json` landing **`498904e`**
   (default-mode stdout byte-identical to the audited build: diff empty; two-run
