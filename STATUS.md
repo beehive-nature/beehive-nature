@@ -32,6 +32,34 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-07` — **CD-19 REGISTERED — the creative/festival economy under
+  skaists.** Tickets as an identity-bound asset class (anti-scalping via
+  authenticated humans + escrow + provenance-verified resale), digital
+  production goods delivered through Autonomi (the storage layer as the
+  fulfillment layer), and performance bookings — which **promote the
+  service-escrow semantics question to priority** (the goods-shaped state
+  machine has no Shipped for a DJ set; kernel-roadmap item, architecture
+  stays closed). Q-1–Q-3 open. Full text: docs/feature-backlog.md CD-19.
+
+- `2026-07-07` — **CD-18 REGISTERED — the Indigo Index.** Creativity-measured
+  regional value, **derivable at render time from public settlement events in
+  creative verticals — computed, never asserted** (the
+  computation-vs-invention law at macro scale). Q-1–Q-3 open (inputs,
+  regional attribution, platform metric vs civic artifact). Full text:
+  docs/feature-backlog.md CD-18.
+
+- `2026-07-07` — **CD-17 AMENDED per tonight's founder rulings.** Genesis
+  LOVErnment named (**skaists** · skaists.social), jurisdiction ruled (the
+  metaphysical + creative vertical as ONE entity: community, marketplace,
+  adjudication; capped 7777 authenticated humans), **LOVErnment doctrine
+  banked** (a vertical-flavored commerce community that adjudicates the trade
+  it understands; the DRO layer as a competitive market of sovereign
+  verticals, the kernel neutral among all), **persona direction ruled** (dev
+  mode = the audit dashboard; consumer lenses are the next UI arc on the same
+  audited substrate), and the **did:plc / did:autonomi lane ruling** (Bluesky
+  did:plc = skaists' social-presence layer only; kernel identity remains
+  did:autonomi). Q-2–Q-5 open. Full text: docs/feature-backlog.md CD-17.
+
 - `2026-07-07` — **ARC CLOSED — A→Profiles, B→Orders, C→Browse, plus two
   eyes-forced micro-laps.** Seven public tabs, three fixtures, three pins,
   five consumption audits, **0/0/0 across the entire arc** — one coffee
