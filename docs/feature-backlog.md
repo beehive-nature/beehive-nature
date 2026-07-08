@@ -613,13 +613,23 @@ Circle size RULED 2026-07-07: fractally original design (per Cowork D-1
 pins: circles of six, 4/6 ranking consensus, Respect schedule
 1,2,3,5,8,13 with flagged 55→5 source conflict pending whitepaper;
 remainder algorithm + averaging window UNVERIFIED, retrieval actions
-named in D-1). SUPERSEDES same-day circles-of-eight ruling; reversal on
+named in D-1). SCHEDULE CORRECTED 2026-07-07 on whitepaper retrieval
+(artifact efe0698d…7663696): canonical Round-1 schedule is 2,3,5,8,13,21
+(WP p.22), cumulative Fibonacci continuation across rounds (pp.22-23),
+amounts relative-by-fractal-consensus (p.17). Both prior candidates
+resolved against; the 55→5 conflict is CLOSED. Remainder rule (short
+groups of five rank 2-6, no rank-1) and averaging windows (12-week vote
+weight; 20-week council/removal/liquidity) now source-pinned — see W-4
+STATUS. SUPERSEDES same-day circles-of-eight ruling; reversal on
 D-3 evidence (research optimum ~5, band 4-7; Eden contract computes 4-6
 — triple anchor). Geometry: 6^5=7,776 resolves 1,296→216→36→6→1 in five
 rounds; cap = cascade + 1; the +1 seat UNNAMED, founder-gated.
 SOURCE-PINNED 2026-07-07: 7,776 is the headwater's own canonical
 community cap (fractally WP 1.0 p.37 + glossary; artifact sha256
-efe0698d…7663696, founder-retrieved). skaists cap = headwater cap + 1 —
+efe0698d…7663696, founder-retrieved) (full form, dual-instrument
+verified 2026-07-07:
+`efe0698dd0d1ad16797878e98ed98b6470d39584f308575f2be6a119a7663696` @ 7,735,268 B <!-- PUBLIC-CONSTANT: fractally whitepaper artifact content hash -->
+— lead instrument + this seat's ext4, matching). skaists cap = headwater cap + 1 —
 the +1 seat remains UNNAMED, founder-gated; evidence strengthened,
 ruling unchanged.
 
