@@ -54,6 +54,9 @@ through one door.
   interaction; the eyes-gate belongs to the eyes-holder.
 - Desktop eyes and mobile eyes are separate gates; no surface ships
   consumer-facing without both.
+- Ordered ledger lines land verbatim; enrichment goes beside the
+  phrase, never inside it — an anchor you improve is an anchor you
+  broke. (Code-seat authored 2026-07-08.)
 
 ## Tooling notes
 

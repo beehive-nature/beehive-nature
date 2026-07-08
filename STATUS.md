@@ -32,6 +32,15 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-08` — **Machine-economy vision batch captured:** QueenBee
+  420-quantum direction (TE collision named, F-Q1 founder-gated);
+  CD-27 machine-seat OPEN answered (singular machine quantum;
+  companions custody, never mint; supply 420 × (verified humans + 1));
+  CD-1 jurisdiction docket extended (custody = money-transmission-class
+  surface); CD-28 inference-provider adapter doctrine captured
+  (intimate-tier inference self-hostable-only; D-6 docketed). Margin
+  law banked: anchors land verbatim, enrichment beside never inside.
+
 - `2026-07-08` — **M-1 GLM consumption audit CLEAN 0/0/0** (transport:
   arbiter-verified reconstruction). The A-B-C developer arc closes:
   seven audits, zero findings (T-1, T-2, T-3, T-3.1v2, T-4, T-5, M-1).

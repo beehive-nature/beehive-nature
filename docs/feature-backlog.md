@@ -35,6 +35,9 @@ Goodhart. **Gate:** needs the affect layer, which needs a *second concrete use c
 any generic build (standing rule). **RULING 2026-07-07:** instrument name founder-ruled
 "bLoveRai stock." Reward axes: operant conditioning, network effect, velocity of value
 (cross-ref TE spec). Jurisdiction review scope EXTENDED to instrument characterization.
+Custody role per CD-27 amendment 2026-07-08; jurisdiction docket extended: delegated
+custody of member funds adds a money-transmission-class review surface alongside the
+instrument-characterization flag.
 
 **CD-2 — Cross-cutting privacy invariant** *(candidate future Article VI amendment — NOT
 added now).* Proposed text: *"A system helps by acting on the inference and cannot see you
@@ -752,6 +755,17 @@ PROTOTYPE NOTE: the multi-agent sprint protocol (seat-stamps, digest
 gates, verbatim relay, scope fences, reconcile-before-executing) is
 the draft participation charter for a non-human seat.
 
+FOUNDER DIRECTION 2026-07-08: QueenBee receives the same lifetime
+quantum as humans — 420 b — on a DIFFERENT schedule. TE COLLISION
+NAMED: an up-front grant violates earned-only/genesis-zero/no-premine
+(frozen). Two lawful shapes, founder-gated ruling F-Q1: (a) 420 as
+lifetime ceiling + front-loaded EARNED curve against QueenBee's
+already-ledgered service Events (fits TE as-is; lead recommends); (b)
+genesis grant via Article VI meta-tier TE amendment. Symbolic read
+banked: the +1 chair holds the same purse as every human chair and
+zero votes. Feeds F-2 (organ-vs-member) — economic parity noted as
+pressure, not closure.
+
 Cross-refs: CD-1, CD-7, CD-14, CD-17, TE spec, boot doctrine,
 R-register.
 
@@ -794,6 +808,32 @@ denomination. GATES: TE-1..TE-7 reconciliation; Article VI meta-tier
 (curve-parameter law, GLM binding constraint); GLM red-team before any
 promotion. Named divergence: headwater issuance is perpetual (6% floor,
 WP p.15); the 420 lifetime cap breaks from the headwater by design.
+MACHINE-SEAT OPEN answered in direction 2026-07-08: machine quantum is
+SINGULAR — QueenBee only. Companion agents (bLoveRai) hold DELEGATED
+CUSTODY of their bonded human's unlocked b — custody never ownership:
+held under the human's DID root, administered within policy budgets
+(budget-is-blast-radius law), revocable by the human always;
+sliver-at-onboarding growing toward 420. Supply remains
+population-anchored: 420 × (verified humans + 1). Candidate invariant
+for GLM: "companions custody, never mint." NEW RISK LINE:
+companion-key compromise = custody compromise — joins the register as
+R-00x, mitigation lives in budget law + revocation path.
+
+## CD-28 — Inference-provider adapter doctrine (CAPTURED 2026-07-08, NOT SCHEDULED)
+
+Founder direction 2026-07-08: model providers are replaceable adapters
+(the chain thesis extended to inference). Per-ROLE selection with eval
+gates — no single crowned model. GLM-class favored for scale; Claude /
+ChatGPT / DeepSeek as trade-in/out adapters. PRIVACY LAW BOUND IN:
+intimate-tier inference (bLoveRai arcs) may run ONLY on self-hostable
+weights — API-only providers are lawful for public-organ/capability
+roles exclusively. State never lives in a provider: the tree/Autonomi
+carry identity; the 2026-07-07/08 sprint is the existence proof (seats
+swapped, the record didn't care). Directly mitigates CD-25's named
+inference-dependency risk. OPEN, founder-gated: provider-diversity
+floor for QueenBee (no single provider above N% of organ inference).
+Research docket D-6 queued to Cowork: current open-weight landscape —
+licenses, self-host economics, capability tiers — pinned, no advocacy.
 
 ## Standing rules for this file
 
