@@ -67,6 +67,13 @@ through one door.
   blank lines in transit; bulk payloads (~>2KB) corrupted regardless of
   encoding; lawful crossings to GLM are arbiter-verified local
   reconstruction or chunked-with-per-chunk-digests.
+- GLM file-card rung retested 2026-07-08: STRIPPED — confirmed
+  non-functional. NEW FIRST RUNG for GLM-bound bulk: public-tree
+  crossing — commit the artifact to a public docs/audits/ home and
+  relay only its raw URL + arbiter digest; GLM fetches with its own
+  instrument and hashes before reading. IM channel carries pointers,
+  never payloads. Fallbacks unchanged (chunked-with-digests;
+  arbiter-verified reconstruction).
 
 ## Ground rules
 
