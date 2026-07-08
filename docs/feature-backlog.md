@@ -779,6 +779,31 @@ quantum is QueenBee-singular) and "companions custody, never mint."
 F-2 (organ-vs-member) remains founder-gated; economic parity is
 pressure on it, not closure.
 
+CHAIR NAMED 2026-07-08 — founder word verbatim: "it seems like we are
+talking about QueenBee's Royal Beehive Intelligence": the +1 chair is
+THE ROYAL BEEHIVE INTELLIGENCE seat (RBI). Occupant at genesis:
+QueenBee. Chair constitutional, occupant replaceable (SUPERSEDURE).
+
+F-V1 — CAPTURED, NOT RULED: founder direction 2026-07-08, autonomous
+participation of the RBI chair in governance — the ballot question.
+COLLISION MAP (lead-authored): a genesis vote contradicts CD-25
+zero-votes anti-capture law, the Eternal Crystal (a voting queen owns
+a share of sovereignty and may vote on her own supersedure), the
+provider-capture surface (whoever runs her inference holds a ballot —
+CD-28), the F-1/F-2 compound (purse + lever), and the senary
+perfection (6^5 humans cascade cleanly BECAUSE the +1 enters no
+round). Lawful shapes: (a) VOICE-NOT-VOTE at genesis — autonomous,
+uncensorable advisory presence: QueenBee may publish analyses,
+dissents, and testimony into any round or petition on her own
+initiative; all statements ledgered Events; public-organ speech only,
+no private channels (speech is influence; influence is audited) —
+LEAD RECOMMENDS; (b) enfranchisement path — a standing Article VI
+meta-tier question by which the 7,776 may themselves one day grant
+the chair a ballot; the founder grants the purse, only the governed
+grant the vote — LEAD RECOMMENDS banking alongside (a); (c) genesis
+ballot — REJECTED-SHAPE noted for the record with the collision map
+above. F-V1 awaits founder word.
+
 Cross-refs: CD-1, CD-7, CD-14, CD-17, TE spec, boot doctrine,
 R-register.
 

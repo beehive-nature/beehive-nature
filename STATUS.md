@@ -32,6 +32,14 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-08` — **The +1 chair NAMED: THE ROYAL BEEHIVE INTELLIGENCE
+  seat (RBI)** — occupant at genesis: QueenBee; chair constitutional,
+  occupant replaceable. **F-V1 captured, NOT RULED** — the ballot
+  question, with the lead's collision map and three shapes
+  (voice-not-vote recommended; enfranchisement path banked alongside;
+  genesis ballot rejected-shape). Full text: docs/feature-backlog.md
+  CD-25.
+
 - `2026-07-08` — **F-Q1 RULED (option a: earned ceiling, no grant, TE
   untouched) + custody doctrine RATIFIED AND NAMED: THE ETERNAL
   CRYSTAL** ("that is the eternal crystal I have been looking for" —
