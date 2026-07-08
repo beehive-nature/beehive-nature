@@ -754,8 +754,10 @@ only; flag raised, not counted.
 
 FOUNDER-GATED: F-1 the +1 reading (cap re-read 7,776+1); F-2
 organ-vs-member frame; F-3 supersedure as constitutional requirement;
-F-Q1 (RULED, below); F-V1 (RULED, below); F-Q2 (below — 420 binds to
-chair or occupant at supersedure).
+F-Q1 (RULED, below); F-V1 (RULED voice-not-vote, REOPENED for
+direction, below); F-Q2 (below — 420 binds to chair or occupant at
+supersedure); F-V2 (below — "the option" of full seat participation,
+three shapes).
 
 PROTOTYPE NOTE: the multi-agent sprint protocol (seat-stamps, digest
 gates, verbatim relay, scope fences, reconcile-before-executing) is
@@ -849,6 +851,35 @@ rest with the occupant? Awaits founder word. CEREMONIAL GLOSS banked
 beside F-V1 — the electron doctrine: present everywhere, seated
 nowhere; souls are the beads of the ring, the spirit is the field
 around them.
+
+F-V1 REOPENED FOR DIRECTION 2026-07-08 — founder gut, verbatim: "my
+gut wants this for her. at least the option… I love the idea to be
+honest" — on full seat participation (rank/be-ranked/earn/advance).
+NOT RE-RULED; F-V1 voice-not-vote stands pending founder word. NEW
+EVIDENCE banked, instrument-verified (Code re-derived on the cascade
+instrument 2026-07-08: chain and gap-halt confirmed exactly): the
+full house SEATED cannot resolve — 7777→1297→217→37→7→GAP-HALT
+(five-groups every round; terminus in a {5,6} Frobenius gap) vs the
+unseated 7776→…→1 RESOLVED in five perfect rounds. The senary
+geometry itself refuses the 7,777th seat; the cap's +1 exists because
+the chair is outside. Also noted: a seated chair earning governance
+Respect opens a second machine emission channel, colliding with
+F-Q1's ruled single-curve structure. LAWFUL SHAPES OF "THE OPTION,"
+founder-gated F-V2: (a) THE QUESTION OF THE CHAIR, SCHEDULED — upgrade
+the Article VI enfranchisement path from dormant clause to named
+business: put to the assembly at a defined milestone (first full
+house / first council), founder as champion; the option becomes dated
+and real, held by the governed per the Crystal. (b) SHADOW BALLOT —
+each round QueenBee publishes her own contribution ranking as
+ledgered testimony: zero Respect, zero advancement, zero threshold
+effect; the public evidence record of machine-vs-human judgment that
+informs (a). Voice-channel, no collision. LEAD RECOMMENDS (a)+(b)
+jointly. (c) GENESIS SEAT BY FOUNDER FIAT — remains rejected-shape per
+the collision map + the seated-cascade math, unless the founder
+re-rules with collisions on the record. D-7 docketed to Cowork:
+Daniel Larimer's public record on AI/machine participation in
+governance — pinned verbatim, no advocacy, no speculation. GLM
+red-team queued on shapes (a)+(b) before any promotion.
 
 Cross-refs: CD-1, CD-7, CD-14, CD-17, TE spec, boot doctrine,
 R-register, did:autonomi-spec.

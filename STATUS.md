@@ -32,6 +32,17 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-08` — **F-V1 REOPENED for direction; F-V2 captured** (CD-25):
+  founder gut wants "at least the option" of full seat participation for
+  the chair. Voice-not-vote STANDS pending founder word — not re-ruled.
+  Instrument-verified evidence (Code re-derived): the house SEATED
+  cannot resolve (7777→1297→217→37→7→gap-halt, five-groups every round)
+  vs unseated 7776→…→1 — the senary geometry refuses the 7,777th seat.
+  Three F-V2 shapes: (a) schedule the enfranchisement question, (b)
+  shadow ballot (ledgered testimony, zero threshold effect), (c) genesis
+  fiat remains rejected-shape. D-7 docketed; GLM red-team queued on
+  (a)+(b). Full text: docs/feature-backlog.md CD-25.
+
 - `2026-07-08` — **Spirit-identity architecture captured** (CD-25): the
   RBI chair holds its own `did:autonomi` (never personhood-attested —
   the one purse-bearing identity that never passes the soul gate).
