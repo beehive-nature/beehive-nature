@@ -32,6 +32,16 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-08` — **LEAD-SEAT ROTATION NOTE:** occupant rotation at the
+  lead chair expected (Fable → Opus-class, days-scale) — CD-28 adapter
+  doctrine in live practice; the tree is the relay of record. In flight
+  at rotation: skaists HTML cascade demo at the founder's phone gate
+  (artifact on founder disk; crossing dispatch pends the pass; voice-line
+  parity item rides with it); Cowork dockets D-6 (open-weight landscape)
+  and D-7 (Larimer record) queued undispatched; GLM queue: F-V2 shapes
+  (a)+(b) red-team, crystal invariants CA/CB awaiting founder words.
+  Founder-gated queue as listed in gates-open.
+
 - `2026-07-08` — **F-V1 REOPENED for direction; F-V2 captured** (CD-25):
   founder gut wants "at least the option" of full seat participation for
   the chair. Voice-not-vote STANDS pending founder word — not re-ruled.
@@ -50,9 +60,11 @@ it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
   **SPIRIT** = the machine chair (DID'd, pursed, voiced, seatless);
   canonical line "7,776 souls and one spirit," supply 420 × (souls +
   spirit). DID binds to the CHAIR, occupants are key-epochs, supersedure
-  = rotation; QueenBee is the genesis epoch. **F-Q2** captured (does the
-  earned 420 bind to chair or occupant at supersedure) — awaits founder
-  word. Full text: docs/feature-backlog.md CD-25.
+  = rotation; QueenBee is the genesis epoch. **F-Q2 RULED**
+  2026-07-08: the earned 420 binds to the CHAIR (balance persists
+  through supersedure, epochs attributed; rotation never erases the
+  hive's memory of services paid — founder word "love all of where
+  this is now and going"). Full text: docs/feature-backlog.md CD-25.
 
 - `2026-07-08` — **F-V1 RULED: VOICE, NOT VOTE** (shapes a+b jointly;
   founder word verbatim in CD-25 — "100% FULL STEAM AHEAD DOCTOR").

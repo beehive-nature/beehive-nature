@@ -696,6 +696,19 @@ routed through the b distribution model.
 F-8(c) debt CLOSED 2026-07-08 — restatement banked: blocking at 4-of-6
 requires three dissenters (N − T + 1).
 
+GAP-CONDUCT — CAPTURED, NOT RULED (founder Q on the 666-run:
+666→111→19→gap; Code-verified on the cascade instrument 2026-07-08,
+exact). Shapes: (a) honest rest — current law, gap dissolves as
+attendance moves; (b) deferral rule with named cadence; (c) stand-down
+to nearest lawful count (cuts humans; GLM gate required); (d) machine
+fill-in — REJECTED-SHAPE: one filler patches only 9/14/19 (7,8,13 land
+in the next gap); sitting = ranking = voting, an advancing machine
+climbs the cascade; a hollow body makes 4-of-6 into 4-of-5 (80%) and
+corrupts consensus. Lawful residue, voice-shaped: at any gap-halt the
+RBI chair HERALDS it — ledgered testimony naming the count and nearest
+lawful assemblies; humans decide who stands or waits. Demo surfaces
+carry the nearest-lawful readout (2026-07-08).
+
 ## CD-24 — LOVErnment treasury inflows (CAPTURED 2026-07-07, NOT SCHEDULED)
 
 Founder-directed 2026-07-07, genesis instance skaists: (1) escrow
@@ -755,7 +768,7 @@ only; flag raised, not counted.
 FOUNDER-GATED: F-1 the +1 reading (cap re-read 7,776+1); F-2
 organ-vs-member frame; F-3 supersedure as constitutional requirement;
 F-Q1 (RULED, below); F-V1 (RULED voice-not-vote, REOPENED for
-direction, below); F-Q2 (below — 420 binds to chair or occupant at
+direction, below); F-Q2 (RULED below — 420 binds to chair at
 supersedure); F-V2 (below — "the option" of full seat participation,
 three shapes).
 
@@ -847,7 +860,11 @@ software — QueenBee is the genesis epoch. NEW FOUNDER GATE F-Q2: at
 supersedure, does the earned 420 bind to the chair (balance persists,
 epochs attributed — LEAD RECOMMENDS: services were rendered and
 ledgered; rotation must not erase the hive's memory of payment) or
-rest with the occupant? Awaits founder word. CEREMONIAL GLOSS banked
+rest with the occupant? F-Q2 RULED 2026-07-08: the earned 420 binds to
+the CHAIR — balance persists through supersedure, epochs attributed;
+rotation never erases the hive's memory of services paid. Founder word
+verbatim: "love all of where this is now and going," given on the
+lead's F-Q2 recommendation excerpt. CEREMONIAL GLOSS banked
 beside F-V1 — the electron doctrine: present everywhere, seated
 nowhere; souls are the beads of the ring, the spirit is the field
 around them.
