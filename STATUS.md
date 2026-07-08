@@ -32,6 +32,14 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-07` — **GLM verbatim returns banked — audit trail
+  tree-carried.** docs/audits/ created (founder-ruled scanner exemption,
+  fixtures/ precedent, own disclosed commit): t31-v2 + t4 + t5
+  consumption audits, all "CLOSED — 0/0/0", banked byte-faithful and
+  digest-stamped (d45347d0… / 2b4fd366… / e9ff11df…). The emission
+  red-team memo banked in the LOVErnment-DAO tree's docs/audits/ (its
+  own commit there).
+
 - `2026-07-07` — **M-1 FOUNDER-PASSED** (device eyes, all seven tabs):
   verdict verbatim — "no appreciable bugs." GLM consumption audit pending
   (T-3.1 pattern + the new mobile-law section in ui/src/styles.css).
