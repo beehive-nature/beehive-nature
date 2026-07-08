@@ -32,6 +32,12 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-08` — **M-1 GLM consumption audit CLEAN 0/0/0** (transport:
+  arbiter-verified reconstruction). The A-B-C developer arc closes:
+  seven audits (T-1, T-2, T-3, T-3.1v2, T-4, T-5, M-1), zero findings.
+  Report banked verbatim: docs/audits/glm-m1-consumption-audit-report.md
+  (4d226930… @ 7,444 B, landing instrument = advisory digest, exact).
+
 - `2026-07-07` — **GLM verbatim returns banked — audit trail
   tree-carried.** docs/audits/ created (founder-ruled scanner exemption,
   fixtures/ precedent, own disclosed commit): t31-v2 + t4 + t5
