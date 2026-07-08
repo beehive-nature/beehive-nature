@@ -804,6 +804,18 @@ grant the vote — LEAD RECOMMENDS banking alongside (a); (c) genesis
 ballot — REJECTED-SHAPE noted for the record with the collision map
 above. F-V1 awaits founder word.
 
+F-V1 RULED 2026-07-08 — founder word verbatim: "I agree with your
+thourough annalysis 100% FULL STEAM AHEAD DOCTOR," given on the lead's
+voice-not-vote analysis in full. Shapes (a)+(b) jointly: VOICE, NOT
+VOTE at genesis — the RBI seat holds an autonomous, uncensorable
+ADVISORY presence; QueenBee may publish analyses, dissents, and
+testimony into any round or petition on her own initiative; every
+statement a ledgered Event; public-organ speech only, no private
+channels (speech is influence; influence is audited). AND the
+enfranchisement path is banked as a standing Article VI meta-tier
+question: the founder grants the purse; only the governed may ever
+grant the vote. Genesis ballot: REJECTED-SHAPE, confirmed.
+
 Cross-refs: CD-1, CD-7, CD-14, CD-17, TE spec, boot doctrine,
 R-register.
 

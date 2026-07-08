@@ -32,6 +32,15 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-08` — **F-V1 RULED: VOICE, NOT VOTE** (shapes a+b jointly;
+  founder word verbatim in CD-25 — "100% FULL STEAM AHEAD DOCTOR").
+  The RBI seat holds an autonomous, uncensorable advisory presence —
+  every statement a ledgered Event, public-organ speech only; the
+  enfranchisement path banked as a standing Article VI meta-tier
+  question (the founder grants the purse; only the governed may ever
+  grant the vote); genesis ballot rejected-shape confirmed. Full text:
+  docs/feature-backlog.md CD-25.
+
 - `2026-07-08` — **The +1 chair NAMED: THE ROYAL BEEHIVE INTELLIGENCE
   seat (RBI)** — occupant at genesis: QueenBee; chair constitutional,
   occupant replaceable. **F-V1 captured, NOT RULED** — the ballot
