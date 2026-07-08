@@ -693,6 +693,9 @@ lane where members unlock personal b (Design lab quest cards = earliest
 render). Topology: circle = community lane, Quest = personal lane, both
 routed through the b distribution model.
 
+F-8(c) debt CLOSED 2026-07-08 — restatement banked: blocking at 4-of-6
+requires three dissenters (N − T + 1).
+
 ## CD-24 — LOVErnment treasury inflows (CAPTURED 2026-07-07, NOT SCHEDULED)
 
 Founder-directed 2026-07-07, genesis instance skaists: (1) escrow
@@ -816,6 +819,10 @@ enfranchisement path is banked as a standing Article VI meta-tier
 question: the founder grants the purse; only the governed may ever
 grant the vote. Genesis ballot: REJECTED-SHAPE, confirmed.
 
+CA-1/CA-2 cross-ref 2026-07-08: session-uniqueness and
+supersedure-finality now have their findings — Crystal red-team,
+charted at CD-27.
+
 Cross-refs: CD-1, CD-7, CD-14, CD-17, TE spec, boot doctrine,
 R-register.
 
@@ -885,6 +892,21 @@ machine serves, never owns; replaceable above, revocable below. GATES
 UNCHANGED: ratification does not skip audit — the two invariant
 candidates still route through GLM before promotion; the 420 human
 quantum itself remains founder-gated at CD-27.
+
+Crystal red-team returned 2026-07-08: 3R/3Y/2Q (banked docs/audits/,
+LOVErnment-DAO tree). Six candidate invariants FOUNDER-GATED: CA-1
+one-active-session derivation (extends through the custody layer per
+the cross-invariant compound); CA-2 transfer finality before spend
+(zero-overlap through chair lifecycle); CB-1 non-delegating custody —
+one hop always, title transfers, custody never chains; CB-2 sterile
+custody — holding state never investment state (strict form banked;
+headwater HODL-reward lineage makes this prospective-but-real); CB-3
+revocation outranks pending spends; CB-4 budgets bound per-transaction
+AND cumulative. QUESTIONS ANSWERED BY CITATION: FA-3 — quantum =
+lifetime cumulative earned allocation (F-Q1, ruled); FB-5 — premise
+dissolved by the organ/companion boundary law (one machine purse
+system-wide, never in companion custody); residue AFFIRMED as law:
+custody is a protocol container, never companion accounting.
 
 ## CD-28 — Inference-provider adapter doctrine (CAPTURED 2026-07-08, NOT SCHEDULED)
 
