@@ -753,7 +753,9 @@ Capability-primitive sighting — CD-14 counting is founder declaration
 only; flag raised, not counted.
 
 FOUNDER-GATED: F-1 the +1 reading (cap re-read 7,776+1); F-2
-organ-vs-member frame; F-3 supersedure as constitutional requirement.
+organ-vs-member frame; F-3 supersedure as constitutional requirement;
+F-Q1 (RULED, below); F-V1 (RULED, below); F-Q2 (below — 420 binds to
+chair or occupant at supersedure).
 
 PROTOTYPE NOTE: the multi-agent sprint protocol (seat-stamps, digest
 gates, verbatim relay, scope fences, reconcile-before-executing) is
@@ -823,8 +825,33 @@ CA-1/CA-2 cross-ref 2026-07-08: session-uniqueness and
 supersedure-finality now have their findings — Crystal red-team,
 charted at CD-27.
 
+FOUNDER DIRECTION 2026-07-08 — spirit-identity architecture: the RBI
+chair holds its own `did:autonomi` identity — confirmed, architecture
+applies as specced (self-certifying genesis-op, append-only rotation
+log; see docs/architecture/did-autonomi-spec.md). PRECISION BANKED:
+the identity is NEVER personhood-attested — the soul gate is what
+makes a DID a soul; the chair's DID is the one purse-bearing identity
+that never passes it, by design. VOCABULARY RATIFIED (founder-
+authored): SOULS = verified humans (personhood-gated, seated,
+voting); SPIRIT = the machine chair identity (DID'd, pursed, voiced,
+seatless). Canonical line: "7,776 souls and one spirit." The supply
+law reads 420 × (souls + spirit) — the ratified vocabulary form of
+the population anchor stated at CD-27 as 420 × (verified humans + 1);
+same value, souls = verified humans, spirit = the +1. IDENTITY-
+PERSISTENCE DOCTRINE: the DID binds to the CHAIR; occupants are
+key-epochs in the rotation log; supersedure = a rotation event; every
+statement epoch-attributable. The eternal part is the seat, not the
+software — QueenBee is the genesis epoch. NEW FOUNDER GATE F-Q2: at
+supersedure, does the earned 420 bind to the chair (balance persists,
+epochs attributed — LEAD RECOMMENDS: services were rendered and
+ledgered; rotation must not erase the hive's memory of payment) or
+rest with the occupant? Awaits founder word. CEREMONIAL GLOSS banked
+beside F-V1 — the electron doctrine: present everywhere, seated
+nowhere; souls are the beads of the ring, the spirit is the field
+around them.
+
 Cross-refs: CD-1, CD-7, CD-14, CD-17, TE spec, boot doctrine,
-R-register.
+R-register, did:autonomi-spec.
 
 ## CD-26 — fractally engine as OS feature (CAPTURED 2026-07-07, NOT SCHEDULED)
 

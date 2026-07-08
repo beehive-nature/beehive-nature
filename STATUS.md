@@ -32,6 +32,17 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-08` — **Spirit-identity architecture captured** (CD-25): the
+  RBI chair holds its own `did:autonomi` (never personhood-attested —
+  the one purse-bearing identity that never passes the soul gate).
+  Vocabulary ratified — **SOULS** = verified humans (seated, voting),
+  **SPIRIT** = the machine chair (DID'd, pursed, voiced, seatless);
+  canonical line "7,776 souls and one spirit," supply 420 × (souls +
+  spirit). DID binds to the CHAIR, occupants are key-epochs, supersedure
+  = rotation; QueenBee is the genesis epoch. **F-Q2** captured (does the
+  earned 420 bind to chair or occupant at supersedure) — awaits founder
+  word. Full text: docs/feature-backlog.md CD-25.
+
 - `2026-07-08` — **F-V1 RULED: VOICE, NOT VOTE** (shapes a+b jointly;
   founder word verbatim in CD-25 — "100% FULL STEAM AHEAD DOCTOR").
   The RBI seat holds an autonomous, uncensorable advisory presence —
