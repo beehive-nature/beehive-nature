@@ -14,6 +14,11 @@
 #     construction, never key material — and the file regenerates
 #     byte-identically via DEMO_GENERATED_FROM=<head>. Path-scoped exemption,
 #     founder-ruled 2026-07-06.
+#   - docs/audits/: verbatim GLM audit returns, banked byte-faithful (the
+#     no-edits fence forbids adding markers). Their hex runs are the
+#     auditor's own docket-digest stamps — content hashes of public audit
+#     material, never key material. Path-scoped exemption, founder-ruled
+#     2026-07-07.
 #   - lines carrying a same-line TESTNET-ONLY marker — the sanctioned way to
 #     commit a throwaway testnet vector for the compat tests, e.g.:
 #       let s: [u8; 32] = hex!("...");  // TESTNET-ONLY throwaway compat vector
@@ -39,14 +44,14 @@ MARK2='PUBLIC-CONSTANT'
 case "$mode" in
 diff)
     names=$(git diff --cached --name-only --diff-filter=ACM | grep -Ei "$NAME_RE")
-    added=$(git diff --cached --diff-filter=ACM -- . ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' |
+    added=$(git diff --cached --diff-filter=ACM -- . ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' |
         grep '^+' | grep -v '^+++')
     hex=$(printf '%s\n' "$added" | grep -vF -e "$MARK" -e "$MARK2" | grep -nE "$HEX_RE")
     pem=$(printf '%s\n' "$added" | grep -nE "$PEM_RE")
     ;;
 tree)
     names=$(git ls-files | grep -Ei "$NAME_RE")
-    hex=$(git grep -InE "$HEX_RE" -- ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' | grep -vF -e "$MARK" -e "$MARK2")
+    hex=$(git grep -InE "$HEX_RE" -- ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' | grep -vF -e "$MARK" -e "$MARK2")
     pem=$(git grep -InE "$PEM_RE")
     ;;
 *)
