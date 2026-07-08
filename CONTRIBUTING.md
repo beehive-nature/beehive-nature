@@ -60,6 +60,9 @@ through one door.
 - Vite served from `/mnt/c` does not see Windows-side edits (its module
   cache survives page reloads); UI iteration requires a server restart
   per change.
+- GLM channel: file attachments stripped; pasted fenced text loses
+  blank lines in transit; armored base64 crossing is the working third
+  rung (strip whitespace → decode → hash against arbiter).
 
 ## Ground rules
 
