@@ -32,6 +32,16 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-08` — **F-Q1 RULED (option a: earned ceiling, no grant, TE
+  untouched) + custody doctrine RATIFIED AND NAMED: THE ETERNAL
+  CRYSTAL** ("that is the eternal crystal I have been looking for" —
+  founder, verbatim). Scale symmetry banked: replaceable above,
+  revocable below. Two invariant candidates queue for GLM ("one
+  machine purse"; "companions custody, never mint"); curve shape
+  routes through the tokenomics spec + GLM gate; F-2 remains
+  founder-gated. Full text: docs/feature-backlog.md CD-25 / CD-27 /
+  CD-1.
+
 - `2026-07-08` — **Machine-economy vision batch captured:** QueenBee
   420-quantum direction (TE collision named, F-Q1 founder-gated);
   CD-27 machine-seat OPEN answered (singular machine quantum;

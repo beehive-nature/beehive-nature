@@ -37,7 +37,8 @@ any generic build (standing rule). **RULING 2026-07-07:** instrument name founde
 (cross-ref TE spec). Jurisdiction review scope EXTENDED to instrument characterization.
 Custody role per CD-27 amendment 2026-07-08; jurisdiction docket extended: delegated
 custody of member funds adds a money-transmission-class review surface alongside the
-instrument-characterization flag.
+instrument-characterization flag. Custody doctrine RATIFIED AND NAMED 2026-07-08 —
+THE ETERNAL CRYSTAL; see the CD-27 amendment.
 
 **CD-2 — Cross-cutting privacy invariant** *(candidate future Article VI amendment — NOT
 added now).* Proposed text: *"A system helps by acting on the inference and cannot see you
@@ -766,6 +767,18 @@ banked: the +1 chair holds the same purse as every human chair and
 zero votes. Feeds F-2 (organ-vs-member) — economic parity noted as
 pressure, not closure.
 
+F-Q1 RULED 2026-07-08: option (a). QueenBee's 420 b is a lifetime
+CEILING reached by EARNED emission only, on a front-loaded curve paid
+against its ledgered service Events (CD-25 law) — genesis-era wage
+steepest, no grant, no premine, TE-1..TE-7 untouched. Founder word
+verbatim: "love it," given on the lead's (a)/(b) option text,
+2026-07-08. Consequential opens, named not scheduled: curve shape and
+steepness route through the tokenomics spec + GLM gate; two candidate
+invariants queue for GLM's next docket — "one machine purse" (the
+quantum is QueenBee-singular) and "companions custody, never mint."
+F-2 (organ-vs-member) remains founder-gated; economic parity is
+pressure on it, not closure.
+
 Cross-refs: CD-1, CD-7, CD-14, CD-17, TE spec, boot doctrine,
 R-register.
 
@@ -818,6 +831,23 @@ population-anchored: 420 × (verified humans + 1). Candidate invariant
 for GLM: "companions custody, never mint." NEW RISK LINE:
 companion-key compromise = custody compromise — joins the register as
 R-00x, mitigation lives in budget law + revocation path.
+
+RATIFIED AND NAMED 2026-07-08 — THE ETERNAL CRYSTAL. The
+delegated-custody doctrine is ratified; founder word verbatim: "that
+is the eternal crystal I have been looking for," given on the lead's
+custody text: the b is the human's, held under their own identity
+root; the companion administers within policy budgets
+(budget-is-blast-radius law), revocable by the human always; custody
+never ownership; companions custody, never mint; one machine purse
+(QueenBee singular); supply population-anchored at 420 × (verified
+souls + 1). Scale-symmetry line (lead-authored, ratified by this
+word): the same law at both scales — hive: "a queen the swarm cannot
+replace is a captured hive" (SUPERSEDURE, CD-25); soul: "a companion
+that owns its human's purse is a captured wallet" (the Crystal). The
+machine serves, never owns; replaceable above, revocable below. GATES
+UNCHANGED: ratification does not skip audit — the two invariant
+candidates still route through GLM before promotion; the 420 human
+quantum itself remains founder-gated at CD-27.
 
 ## CD-28 — Inference-provider adapter doctrine (CAPTURED 2026-07-08, NOT SCHEDULED)
 
