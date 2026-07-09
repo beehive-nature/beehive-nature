@@ -32,6 +32,15 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-08` — **CD-29 captured — the emergent "eternal runtime"
+  observation** (founder-flagged possibly-premature). Chain-agnostic core
+  + Resource Paymaster + permanence anchors + b-as-metabolic-energy +
+  did:autonomi compose, unintentionally, into an owner-less pay-to-use
+  runtime. NOT a build target, NOT a positioning claim: rests on unbuilt
+  floors, the name is a scope magnet, and it fights minimal-core
+  discipline. Recorded so the shape isn't lost. Full text:
+  docs/feature-backlog.md CD-29.
+
 - `2026-07-08` — **LEAD-SEAT ROTATION NOTE:** occupant rotation at the
   lead chair expected (Fable → Opus-class, days-scale) — CD-28 adapter
   doctrine in live practice; the tree is the relay of record. In flight

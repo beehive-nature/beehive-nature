@@ -999,6 +999,40 @@ floor for QueenBee (no single provider above N% of organ inference).
 Research docket D-6 queued to Cowork: current open-weight landscape —
 licenses, self-host economics, capability tiers — pinned, no advocacy.
 
+## CD-29 — Emergent "eternal runtime" observation (CAPTURED 2026-07-08, NOT SCHEDULED; founder-flagged possibly-premature)
+
+Founder observation 2026-07-08, verbatim in spirit: "we seem to have a
+potential eternal runtime / internet-computer in the kernel — we pay b
+to use the OS. Seems like something there, but maybe too soon."
+
+THE SHAPE (emergent, not designed): five pieces built for other reasons
+compose, unintentionally, into a runtime with no owner and no off-switch
+that you pay to use — the honest definition of an internet computer.
+(1) the chain-agnostic coordination core (adapters swap, the heart
+doesn't); (2) the Resource Paymaster (CD-13) — metered RAM/CPU/NET +
+compute/storage/permanence behind "$10 loaded, ready"; (3) permanence
+anchors (Autonomi, Arweave — state that doesn't expire); (4) b as
+metabolic energy (QueenBee already spec'd to SPEND b to run; "money
+buys function"); (5) did:autonomi — identity no one hosts. Nobody set
+out to build an internet computer; the parts rhyme into one.
+
+WHY "TOO SOON" IS WISDOM, NOT HESITATION (founder instinct, affirmed):
+(a) it rests on unbuilt floors — the paymaster and Autonomi 2.0 are the
+very pieces that would make it a runtime, and they are gated/unbuilt;
+you cannot name a computer whose CPU isn't wired; (b) the name is a
+scope magnet — "internet computer" is world-computer-sized positioning
+that trades a credible small thing for an unbelievable big one; the
+honest-commerce-kernel identity stays credible precisely because it
+does not claim to be one; (c) discipline is the moat — the edge is the
+minimal, unmoving core, and this framing pulls toward accretion (more
+in the kernel, not less), fighting the exact discipline that makes the
+kernel good.
+
+DISPOSITION: recorded so the shape isn't lost; NOT a build target, NOT
+a positioning claim, NOT to appear in any public-facing description.
+Revisit only when the floors exist (paymaster built, Autonomi 2.0
+integration reviewed). The quarantine remembers what it's for.
+
 ## Standing rules for this file
 
 - New visions get **routed here first** (which layer owns it, which
