@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/bnature-logo.jpg" alt="Beehive Nature mandala — purple through blue to a green center" width="220">
+</p>
+
 # Beehive Nature Reserve Kernel — Zano × Trezor host stack
 
 [![tests](https://github.com/beehive-nature/beehive-nature/actions/workflows/tests.yml/badge.svg)](https://github.com/beehive-nature/beehive-nature/actions/workflows/tests.yml)
