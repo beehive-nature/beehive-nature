@@ -130,3 +130,7 @@ Documents: `CONSTITUTION.md` and `docs/` are **CC-BY-4.0**.
 
 Contributions: DCO sign-off (`git commit -s`), no CLA — see
 [CONTRIBUTING.md](./CONTRIBUTING.md).
+
+---
+
+🎧 **Built to this** — [a set of my own making](https://www.youtube.com/playlist?list=PLkUQHd8CpZKngAYcM7R0Zy4d8cGfzzwL5), the soundtrack behind the code.
