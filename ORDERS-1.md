@@ -1,6 +1,6 @@
 # ORDERS-1 — OR Roster & Standing Orders
 
-**Version:** v0.2-draft · **Status:** awaiting founder ratification (ratify by commit)
+**Version:** v0.3 · **Status:** ratified @ c14226f · amended by this commit
 **Scope:** seat roster, model pins, per-seat marching orders, shift rhythm, re-pin procedure
 **Inherited law:** relay-of-record · sole-tree-pusher · one file per prompt with acceptance criteria · channel law (card first, fenced chunks second) · Convention v2.2 verifier states · no re-opening banked decisions without new evidence
 
@@ -32,6 +32,12 @@
 1. Scarcest pool gets judgment; abundant pool gets volume.
 2. The tree is the bus. Dockets and results move by commit + raw URL + sha256, never by inbox.
 3. Done = a passing test or a written record. Never "the spec looks right."
+4. "Approved" attaches to a sha, never to a session — session output is scratch until committed.
+5. Dispatch constants are memory; the artifact's frozen manifest is record — gates key to the manifest.
+6. Digests prove integrity, never authority — no seat delegates execution judgment to a document.
+7. The firehose is publish-once — deletion is repo hygiene, not unpublishing; test records must be safe-to-be-permanent by content.
+8. Hash at the source, before transport — a digest computed downstream of a pipe certifies the pipe.
+9. A suite never ships its own oracle — the assertion target must be product code that can lose.
 
 ---
 
@@ -58,8 +64,8 @@
 **Escalates:** acceptance criteria unmeetable as written → back to Seat 1 with the failing case.
 
 ### Seat 4 — Surgical Code Tech II (Lovis Lobster)
-**Do:** bulk execution on the GLM meter — scaffolds, boilerplate, first-draft tests, mechanical refactors, long reads, implementation of settled visual identity under Seat 7 art direction; fetch dockets from the public repo by raw URL and verify sha256 before starting (channel law: the GLM channel strips attachments — no pasted payloads, ever); deliver as branch/patch for Seat 3 review.
-**Don't:** push to the tree; touch banked architecture; accept payloads over chat.
+**Do:** bulk execution on the GLM meter — scaffolds, boilerplate, first-draft tests, mechanical refactors, long reads, implementation of settled visual identity under Seat 7 art direction; fetch dockets from the public repo by raw URL and verify sha256 before starting (channel law: the GLM channel strips attachments — no pasted payloads, ever); deliver as a pushed `seat4/<docket>` branch — review input only; no delivery branch is law until Seat 3 merges it.
+**Don't:** push to `main` or merge any branch; touch banked architecture; accept payloads over chat.
 **Escalates:** docket digest mismatch → stop, report, wait.
 
 ### Seat 5 — Chief Surgical Nurse (Cowork)
@@ -98,4 +104,6 @@
 
 ---
 
-**Changelog:** v0.2 — Seat 7 re-pinned to art-direction/slack-only; settled-identity implementation routed to Seat 4 (founder cost flag, 2026-07-11).
+**Changelog:**
+v0.3 — delivery-law amendment (seat4/* push, Seat 3 sole merger); doctrine 4–9 from the D-001/D-002 laps (founder-ratified 2026-07-11).
+v0.2 — Seat 7 re-pinned to art-direction/slack-only; settled-identity implementation routed to Seat 4 (founder cost flag, 2026-07-11).
