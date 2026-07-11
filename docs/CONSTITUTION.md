@@ -91,7 +91,7 @@ Documentation, whitepapers, and marketing are provisional. Testnet behavior, sou
 
 1. **Stability over freezing.** Enduring protocols (TCP/IP, HTTP, Git) evolved by explicit versioning, not immutability. Canonical objects carry versions; new versions must not break existing consumers (additive evolution; deprecation windows measured in years).
 2. **The kernel evolves slower than everything above it.** Applications iterate freely; adapters iterate with their networks; primitives and invariants change only by amendment.
-3. **Amendment process** *(founder decisions required — placeholders)*:
+3. **Amendment process** *(ratified — see §3 pointer below)*:
    - Proposal: written RFC stating the invariant affected, the motivation, and the migration path.
    - Proof: a working reference implementation and tests before adoption.
    - Ratification: Ratified 2026-07-11 (Epoch-0). The full §3 mechanism lives at docs/article-vi-s3.md (sha256 d6960ddf…cc9c) and is constitution, not commentary. Changing it is a meta-tier amendment under its own §3.3(c).
