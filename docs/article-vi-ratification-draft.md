@@ -1,3 +1,4 @@
+SUPERSEDED 2026-07-11 by docs/article-vi-s3.md — retained as record.
 <!--
 STATUS: REVIEWED & VERSIONED 2026-07-04 (one-door) — awaiting FOUNDER DECISIONS
 1–5 below; this is draft amendment text, NOT ratified constitution. It retires

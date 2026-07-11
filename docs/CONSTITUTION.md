@@ -94,7 +94,7 @@ Documentation, whitepapers, and marketing are provisional. Testnet behavior, sou
 3. **Amendment process** *(founder decisions required — placeholders)*:
    - Proposal: written RFC stating the invariant affected, the motivation, and the migration path.
    - Proof: a working reference implementation and tests before adoption.
-   - Ratification: **[TO DEFINE: who ratifies — founder, council, token-weighted vote, or staged transition between these over time. Define while there is one author; legitimacy cannot be added retroactively.]**
+   - Ratification: Ratified 2026-07-11 (Epoch-0). The full §3 mechanism lives at docs/article-vi-s3.md (sha256 d6960ddf…cc9c) and is constitution, not commentary. Changing it is a meta-tier amendment under its own §3.3(c).
 4. **Reference implementations are not the protocol.** Autonomi, Zano, Vaulta, Arweave, Trezor, the b-token, and the Rust workspace are today's implementations of constitutional semantics. Any may be replaced without amendment, provided invariants hold.
 
 ---
