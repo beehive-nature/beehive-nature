@@ -1,6 +1,6 @@
 # ORDERS-1 — OR Roster & Standing Orders
 
-**Version:** v0.4 · **Status:** ratified @ c14226f · amended by this commit
+**Version:** v0.5 · **Status:** ratified @ c14226f · amended by this commit
 **Scope:** seat roster, model pins, per-seat marching orders, shift rhythm, re-pin procedure
 **Inherited law:** relay-of-record · sole-tree-pusher · one file per prompt with acceptance criteria · channel law (card first, fenced chunks second) · Convention v2.2 verifier states · no re-opening banked decisions without new evidence
 
@@ -83,6 +83,8 @@
 **Don't:** run during push-critical windows; implement settled identity (volume work — routes to Seat 4); introduce off-palette variants.
 **Escalates:** brand or identity questions → Seat 0 (identity is founder-class).
 
+**ONE SEAT, ONE WORKING TREE** — Seat 4 executes in its own clone; the shared working directory belongs to Seat 3, the merger. A seat that finds a live writer in its tree stands clear and reports, never reclaims mid-write.
+
 ---
 
 ## §4 Shift Rhythm
@@ -105,6 +107,7 @@
 ---
 
 **Changelog:**
+v0.5 — §3 corollary: one-seat-one-tree (Seat 4 in its own clone; the shared tree is Seat 3's; a seat finding a live writer stands clear, never reclaims mid-write). Founder-authorized 2026-07-11.
 v0.4 — Seat 3 re-pinned: escalation pin promoted to primary (§1 table); effective 2026-07-11 (founder-authorized).
 v0.3 — delivery-law amendment (seat4/* push, Seat 3 sole merger); doctrine 4–9 from the D-001/D-002 laps (founder-ratified 2026-07-11).
 v0.2 — Seat 7 re-pinned to art-direction/slack-only; settled-identity implementation routed to Seat 4 (founder cost flag, 2026-07-11).
