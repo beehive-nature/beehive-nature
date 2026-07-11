@@ -1,6 +1,6 @@
 # ORDERS-1 — OR Roster & Standing Orders
 
-**Version:** v0.5 · **Status:** ratified @ c14226f · amended by this commit
+**Version:** v0.6 · **Status:** ratified @ c14226f · amended by this commit
 **Scope:** seat roster, model pins, per-seat marching orders, shift rhythm, re-pin procedure
 **Inherited law:** relay-of-record · sole-tree-pusher · one file per prompt with acceptance criteria · channel law (card first, fenced chunks second) · Convention v2.2 verifier states · no re-opening banked decisions without new evidence
 
@@ -15,13 +15,11 @@
 | 0 | Attending Code Surgeon | King Bee | wetware | — | attention (non-fungible) |
 | 1 | Surgeon Fellow | Fable | Claude Fable 5 (claude.ai) | — top of judgment chain | Anthropic Max |
 | 2 | Resident Surgeon | zResident | GLM 5.2 (chat) | defers to Seat 1 at window-open | GLM Pro |
-| 3 | Chief Surgical Code Tech I | Claude Code | Opus 4.8 (primary) | Opus 4.8 (`/model opus`), judgment-class files only | Anthropic Max |
+| 3 | Chief Surgical Code Tech I | Claude Code | Opus 4.8 (primary) | — | Anthropic Max |
 | 4 | Surgical Code Tech II | Lovis Lobster | GLM Code 5.2 via openclaw | — | GLM Pro |
 | 5 | Chief Surgical Nurse | Cowork | app default (Fable-class) | — | Anthropic Max |
 | 6 | Pathologist | zPATH | GLM 5.2 | — | GLM Pro |
 | 7 | Anesthesiologist | Design | app default | — | Anthropic Max — slack-only, art direction |
-
-**Judgment-class files (Seat 3 escalation trigger):** crypto seams, escrow/state machines, invariant-bearing code (TE-x, §9.2 guards), anything adjacent to banked architecture. All other files run the primary pin.
 
 **Re-pin procedure:** edit the row, commit. One-line diff, no other section changes.
 
@@ -107,6 +105,7 @@
 ---
 
 **Changelog:**
+v0.6 — Seat 3 escalation column + its §1 judgment-class trigger note retired: subsumed by the v0.4 primary (nothing higher to escalate to); a live no-op trigger is a fossil. Founder-authorized 2026-07-11.
 v0.5 — §3 corollary: one-seat-one-tree (Seat 4 in its own clone; the shared tree is Seat 3's; a seat finding a live writer stands clear, never reclaims mid-write). Founder-authorized 2026-07-11.
 v0.4 — Seat 3 re-pinned: escalation pin promoted to primary (§1 table); effective 2026-07-11 (founder-authorized).
 v0.3 — delivery-law amendment (seat4/* push, Seat 3 sole merger); doctrine 4–9 from the D-001/D-002 laps (founder-ratified 2026-07-11).
