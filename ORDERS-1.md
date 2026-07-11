@@ -1,6 +1,6 @@
 # ORDERS-1 — OR Roster & Standing Orders
 
-**Version:** v0.6 · **Status:** ratified @ c14226f · amended by this commit
+**Version:** v0.7 · **Status:** ratified @ c14226f · amended by this commit
 **Scope:** seat roster, model pins, per-seat marching orders, shift rhythm, re-pin procedure
 **Inherited law:** relay-of-record · sole-tree-pusher · one file per prompt with acceptance criteria · channel law (card first, fenced chunks second) · Convention v2.2 verifier states · no re-opening banked decisions without new evidence
 
@@ -57,7 +57,7 @@
 **Escalates:** divergence with Seat 1 → Seat 0, both positions with cited lines.
 
 ### Seat 3 — Chief Surgical Code Tech I (Claude Code)
-**Do:** sole tree-pusher — the law stands; execute the docket as written; commit checkpoints immediately; run `cargo test` — the only reviewer left whose opinion matters; review and land Seat 4 branches; escalate model per §1 on judgment-class files only.
+**Do:** sole tree-pusher — the law stands; execute the docket as written; commit checkpoints immediately; run `cargo test` — the only reviewer left whose opinion matters; review and land Seat 4 branches.
 **Don't:** design; add unsolicited features — scope-defense applies: "That is out of scope. Execute the prompt as written."; push anything that has not met the compiler.
 **Escalates:** acceptance criteria unmeetable as written → back to Seat 1 with the failing case.
 
@@ -105,6 +105,7 @@
 ---
 
 **Changelog:**
+v0.7 — Seat 3 §3 marching-orders escalation clause ("escalate model per §1 on judgment-class files only") retired: the last reference to the mechanism removed in v0.6; the fossil a fresh instance reads first. Founder-authorized 2026-07-11.
 v0.6 — Seat 3 escalation column + its §1 judgment-class trigger note retired: subsumed by the v0.4 primary (nothing higher to escalate to); a live no-op trigger is a fossil. Founder-authorized 2026-07-11.
 v0.5 — §3 corollary: one-seat-one-tree (Seat 4 in its own clone; the shared tree is Seat 3's; a seat finding a live writer stands clear, never reclaims mid-write). Founder-authorized 2026-07-11.
 v0.4 — Seat 3 re-pinned: escalation pin promoted to primary (§1 table); effective 2026-07-11 (founder-authorized).
