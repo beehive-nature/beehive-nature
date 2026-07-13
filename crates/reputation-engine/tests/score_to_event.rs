@@ -4,7 +4,7 @@
 //! event announces recomputation, it never IS the score), with the
 //! recomputation's audit trail referenced via `basis_ref`.
 
-use dispute_engine::{Provenance, Side};
+use dispute_engine::{Provenance, Side, ViewGrade};
 use reputation_engine::{compute, Attestation, ReputationInput, ReputationScore};
 use shared_types::{EventPayload, ReputationEvent};
 
@@ -20,6 +20,10 @@ fn input(completed: u64, as_of: i64) -> ReputationInput {
             signed: true,
             verified: true,
             payload_hash: [3; 32],
+            subject_did: None,
+            source_ref: None,
+            validator_digest: None,
+            view_grade: ViewGrade::Informational,
             favors: Side::Buyer,
         }],
         attestations_received: vec![Attestation {

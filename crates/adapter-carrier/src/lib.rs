@@ -25,7 +25,7 @@
 use std::collections::BTreeMap;
 use std::fmt;
 
-use dispute_engine::{Dispute, Evidence, EvidenceProvider, Provenance, ProviderError, Side};
+use dispute_engine::{Dispute, Evidence, EvidenceProvider, Provenance, ProviderError, Side, ViewGrade};
 use sha2::{Digest, Sha256};
 
 /// One tracking scan as reported by a carrier.
@@ -133,6 +133,10 @@ pub fn map_to_evidence(event: &CarrierEvent) -> Evidence {
         signed: false,
         verified: true,
         payload_hash: h.finalize().into(),
+        subject_did: None,
+        source_ref: None,
+        validator_digest: None,
+        view_grade: ViewGrade::Informational,
         favors,
     }
 }
@@ -294,6 +298,10 @@ mod tests {
             signed: true,
             verified: true,
             payload_hash: [8; 32],
+            subject_did: None,
+            source_ref: None,
+            validator_digest: None,
+            view_grade: ViewGrade::Informational,
             favors: Side::Seller,
         };
         let verdict = resolve(&dispute(), &[map_to_evidence(&event), corroboration]);

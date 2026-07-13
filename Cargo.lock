@@ -212,6 +212,7 @@ dependencies = [
  "dro-signer",
  "escrow-core",
  "sha2",
+ "shared-types",
  "time",
 ]
 

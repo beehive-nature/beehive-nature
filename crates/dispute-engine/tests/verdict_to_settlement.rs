@@ -5,7 +5,7 @@
 //! escrow-core transitions the state, dispute-engine adjudicates,
 //! dro-signer decides the payouts.
 
-use dispute_engine::{resolve, Dispute, Evidence, Provenance, Side, VerdictType};
+use dispute_engine::{resolve, Dispute, Evidence, Provenance, Side, VerdictType, ViewGrade};
 use dro_signer::{settlement_intent, settlement_intent_for_split, Party};
 use escrow_core::{
     DeliverySource, Escrow, EscrowEvent, EscrowState, PublicKey, Verdict, FEE_BUFFER,
@@ -78,6 +78,10 @@ fn item(provenance: Provenance, favors: Side, strong: bool) -> Evidence {
         signed: strong,
         verified: strong,
         payload_hash: [11; 32],
+        subject_did: None,
+        source_ref: None,
+        validator_digest: None,
+        view_grade: ViewGrade::Informational,
         favors,
     }
 }

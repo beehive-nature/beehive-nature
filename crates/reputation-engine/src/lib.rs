@@ -184,6 +184,8 @@ fn evidence_points(provenance: Provenance) -> (i64, &'static str) {
         Provenance::DeviceAttestation => (15, "DeviceAttestation"),
         Provenance::CarrierApi => (10, "CarrierApi"),
         Provenance::AiInference => (4, "AiInference"),
+        // BIND-1 G-1: between AiInference and UserClaim.
+        Provenance::SignedSelfAttestation => (3, "SignedSelfAttestation"),
         Provenance::UserClaim => (2, "UserClaim"),
     }
 }
@@ -314,7 +316,7 @@ pub fn recompute(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use dispute_engine::Side;
+    use dispute_engine::{Side, ViewGrade};
 
     const DID: &str = "did:plc:subject";
     const AS_OF: i64 = 1_782_100_000;
@@ -326,6 +328,10 @@ mod tests {
             signed: true,
             verified: true,
             payload_hash: [tag; 32],
+            subject_did: None,
+            source_ref: None,
+            validator_digest: None,
+            view_grade: ViewGrade::Informational,
             favors: Side::Buyer, // direction is dispute-scoped; irrelevant here
         }
     }

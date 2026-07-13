@@ -5,6 +5,14 @@
 //! drops confidence and escalates to Tier 2 (a human) instead of
 //! auto-enforcing.
 //!
+//! ## BIND-1 K-6: Evidence promotion
+//!
+//! `Evidence` and `Provenance` now live in `shared-types` as the general
+//! primitive. Dispute-engine wraps the general type, restoring `favors:
+//! Side` as a domain field. `Provenance` is re-exported from
+//! `shared-types` so all consumers see the same enum (including
+//! `SignedSelfAttestation`).
+//!
 //! Scope seams (same discipline as `dro-signer`):
 //! - [`resolve`] is a pure function `(&Dispute, &[Evidence]) → DisputeVerdict`.
 //!   Everything that touches reality — AI inference, threshold-decrypted
@@ -16,17 +24,13 @@
 //!   `dro_signer::settlement_intent_for_split`, retiring that crate's
 //!   documented 50/50 default whenever a real verdict exists.
 //!
-//! One addition to the prompt's structs, forced by logic: evidence must
-//! carry a direction ([`Evidence::favors`]) — there is no function from
-//! undirected evidence to a verdict.
-//!
 //! ## Confidence model (deterministic, documented)
 //! Each item's effective weight = provenance base weight, +0.05 if
 //! `signed`, +0.05 if `verified` (capped 0.99), × the provider's own
 //! `confidence` in the item. Bases: ChainProof 0.95, DeviceAttestation
-//! 0.90, CarrierApi 0.85, AiInference 0.60, UserClaim 0.30 — AI is a
-//! sense adapter, "never truth, never authority" (constitution), so it
-//! can support but never auto-enforce on its own.
+//! 0.90, CarrierApi 0.85, AiInference 0.60, SignedSelfAttestation 0.55,
+//! UserClaim 0.30 — AI is a sense adapter, "never truth, never authority"
+//! (constitution), so it can support but never auto-enforce on its own.
 //! Verdict = the heavier side; overall confidence = (winning share of
 //! total weight) × (peak effective weight on the winning side), halved
 //! on any same-class conflict. `auto_enforce` requires confidence > 0.95
@@ -35,9 +39,9 @@
 
 #![forbid(unsafe_code)]
 
-use sha2::{Digest, Sha256};
+pub use shared_types::{Hash, Provenance, ViewGrade};
 
-pub type Hash = [u8; 32];
+use sha2::{Digest, Sha256};
 
 /// Who a piece of evidence supports.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -46,49 +50,45 @@ pub enum Side {
     Seller,
 }
 
-/// Evidence source class (§5 provenance field; subset relevant to v1).
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Provenance {
-    UserClaim,
-    DeviceAttestation,
-    CarrierApi,
-    ChainProof,
-    AiInference,
-}
-
-impl Provenance {
-    fn base_weight(self) -> f32 {
-        match self {
-            Provenance::ChainProof => 0.95,
-            Provenance::DeviceAttestation => 0.90,
-            Provenance::CarrierApi => 0.85,
-            Provenance::AiInference => 0.60,
-            Provenance::UserClaim => 0.30,
-        }
-    }
-
-    /// High-provenance classes may auto-enforce; claims and AI may not.
-    fn is_high(self) -> bool {
-        matches!(
-            self,
-            Provenance::ChainProof | Provenance::DeviceAttestation | Provenance::CarrierApi
-        )
-    }
-}
-
+/// Dispute-domain Evidence: wraps `shared_types::Evidence` (the general
+/// primitive per BIND-1 K-6), adding `favors: Side` — the direction this
+/// evidence supports in a dispute.
+///
+/// The core fields (`provenance`, `confidence`, `signed`, `verified`,
+/// `payload_hash`) and seam extensions (`subject_did`, `source_ref`,
+/// `validator_digest`, `view_grade`) are inherited from the general
+/// type. Dispute-engine adds only `favors` as domain flavor.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Evidence {
+    /// Source class of this evidence item.
     pub provenance: Provenance,
     /// The producing adapter's own confidence in this item, in [0, 1].
     pub confidence: f32,
+    /// Whether the source was cryptographically signed.
     pub signed: bool,
+    /// Whether a verification check passed.
     pub verified: bool,
+    /// SHA-256 of the evidence payload.
     pub payload_hash: Hash,
+
+    // --- Seam extensions (inherited from shared-types Evidence) ---
+    /// The DID this evidence is about.
+    pub subject_did: Option<String>,
+    /// Canonical reference to the source.
+    pub source_ref: Option<String>,
+    /// Digest of the product validator.
+    pub validator_digest: Option<Hash>,
+    /// Trust grade — informational / confirmed / settlement.
+    pub view_grade: ViewGrade,
+
+    // --- Domain field ---
     /// Direction: which party this evidence supports.
     pub favors: Side,
 }
 
 impl Evidence {
+    /// Effective weight: base provenance weight, +0.05 if signed, +0.05 if
+    /// verified (capped 0.99), × the provider's own confidence.
     fn effective_weight(&self) -> f32 {
         let mut w = self.provenance.base_weight();
         if self.signed {
@@ -98,6 +98,22 @@ impl Evidence {
             w += 0.05;
         }
         w.min(0.99) * self.confidence.clamp(0.0, 1.0)
+    }
+
+    /// Convert to a `shared_types::Evidence` (the general primitive),
+    /// dropping the domain-specific `favors` field.
+    pub fn to_shared(&self) -> shared_types::Evidence {
+        shared_types::Evidence {
+            provenance: self.provenance,
+            confidence: self.confidence,
+            signed: self.signed,
+            verified: self.verified,
+            payload_hash: self.payload_hash,
+            subject_did: self.subject_did.clone(),
+            source_ref: self.source_ref.clone(),
+            validator_digest: self.validator_digest,
+            view_grade: self.view_grade,
+        }
     }
 }
 
@@ -233,12 +249,13 @@ pub fn resolve(dispute: &Dispute, evidence: &[Evidence]) -> DisputeVerdict {
 }
 
 fn has_same_class_conflict(evidence: &[Evidence]) -> bool {
-    const CLASSES: [Provenance; 5] = [
+    const CLASSES: [Provenance; 6] = [
         Provenance::UserClaim,
         Provenance::DeviceAttestation,
         Provenance::CarrierApi,
         Provenance::ChainProof,
         Provenance::AiInference,
+        Provenance::SignedSelfAttestation,
     ];
     CLASSES.iter().any(|class| {
         let buyer = evidence
@@ -270,6 +287,7 @@ fn reasoning_hash(
                 Provenance::CarrierApi => 2,
                 Provenance::ChainProof => 3,
                 Provenance::AiInference => 4,
+                Provenance::SignedSelfAttestation => 5,
             },
             e.favors as u8,
             u8::from(e.signed),
@@ -363,7 +381,12 @@ mod tests {
                 Provenance::CarrierApi => 3,
                 Provenance::ChainProof => 4,
                 Provenance::AiInference => 5,
+                Provenance::SignedSelfAttestation => 6,
             }; 32],
+            subject_did: None,
+            source_ref: None,
+            validator_digest: None,
+            view_grade: ViewGrade::Informational,
             favors,
         }
     }
@@ -406,6 +429,24 @@ mod tests {
         let v = resolve(&dispute(1_000_000), &ev);
         assert_eq!(v.verdict, VerdictType::ReleaseToSeller);
         assert!(!v.auto_enforce, "AI is never authority (constitution)");
+    }
+
+    #[test]
+    fn signed_self_attestation_supports_but_cannot_auto_enforce() {
+        // BIND-1 G-1: SignedSelfAttestation is below AiInference; it can
+        // support a verdict but never auto-enforce on its own.
+        let ev = vec![item(
+            Provenance::SignedSelfAttestation,
+            Side::Seller,
+            true,
+            true,
+        )];
+        let v = resolve(&dispute(1_000_000), &ev);
+        assert_eq!(v.verdict, VerdictType::ReleaseToSeller);
+        assert!(
+            !v.auto_enforce,
+            "self-attestation is never auto-enforce authority"
+        );
     }
 
     #[test]
@@ -511,5 +552,43 @@ mod tests {
         };
         let v = adjudicate(&dispute(10), &provider).unwrap();
         assert_eq!(v.verdict, VerdictType::ReleaseToSeller);
+    }
+
+    // ---- BIND-1 K-6: evidence promotion seam ------------------------------
+
+    #[test]
+    fn evidence_to_shared_drops_favors_and_keeps_core_fields() {
+        let ev = item(Provenance::SignedSelfAttestation, Side::Buyer, true, false);
+        let shared = ev.to_shared();
+        assert_eq!(shared.provenance, Provenance::SignedSelfAttestation);
+        assert_eq!(shared.confidence, 1.0);
+        assert!(shared.signed);
+        assert!(!shared.verified);
+        assert_eq!(shared.payload_hash, [6; 32]);
+    }
+
+    #[test]
+    fn evidence_includes_seam_extension_fields() {
+        let ev = Evidence {
+            provenance: Provenance::ChainProof,
+            confidence: 0.9,
+            signed: true,
+            verified: true,
+            payload_hash: [0xff; 32],
+            subject_did: Some("did:plc:witness".into()),
+            source_ref: Some("at://did:plc:abc/coll/rkey#cid".into()),
+            validator_digest: Some([0xee; 32]),
+            view_grade: ViewGrade::Settlement,
+            favors: Side::Seller,
+        };
+        // Seam extensions are accessible on dispute-engine Evidence.
+        assert_eq!(ev.subject_did.as_deref(), Some("did:plc:witness"));
+        assert_eq!(ev.view_grade, ViewGrade::Settlement);
+
+        // And they survive conversion to shared.
+        let shared = ev.to_shared();
+        assert_eq!(shared.subject_did.as_deref(), Some("did:plc:witness"));
+        assert_eq!(shared.view_grade, ViewGrade::Settlement);
+        assert_eq!(shared.validator_digest, Some([0xee; 32]));
     }
 }
