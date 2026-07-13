@@ -591,4 +591,46 @@ mod tests {
         assert_eq!(shared.view_grade, ViewGrade::Settlement);
         assert_eq!(shared.validator_digest, Some([0xee; 32]));
     }
+
+    // ---- K-D5 coverage gap: is_high gate at the decision layer --------
+
+    #[test]
+    fn lone_low_provenance_on_high_side_blocks_auto_enforce() {
+        // High-provenance items push confidence > 0.95, but a lone
+        // SignedSelfAttestation on the same side means NOT all winners
+        // are high-provenance. The is_high gate must block auto-enforce.
+        let ev = vec![
+            item(Provenance::CarrierApi, Side::Seller, true, true),
+            item(Provenance::DeviceAttestation, Side::Seller, true, true),
+            item(Provenance::SignedSelfAttestation, Side::Seller, true, true),
+        ];
+        let v = resolve(&dispute(1_000_000), &ev);
+        assert_eq!(v.verdict, VerdictType::ReleaseToSeller);
+        assert!(
+            v.confidence > AUTO_ENFORCE_THRESHOLD,
+            "confidence should be high: {}",
+            v.confidence
+        );
+        assert!(
+            !v.auto_enforce,
+            "is_high gate must block: a lone SignedSelfAttestation prevents auto-enforce even on a >0.95 side"
+        );
+    }
+
+    #[test]
+    fn lone_ai_inference_on_high_side_blocks_auto_enforce() {
+        // Same gate, AiInference variant.
+        let ev = vec![
+            item(Provenance::CarrierApi, Side::Seller, true, true),
+            item(Provenance::DeviceAttestation, Side::Seller, true, true),
+            item(Provenance::AiInference, Side::Seller, true, true),
+        ];
+        let v = resolve(&dispute(1_000_000), &ev);
+        assert_eq!(v.verdict, VerdictType::ReleaseToSeller);
+        assert!(v.confidence > AUTO_ENFORCE_THRESHOLD);
+        assert!(
+            !v.auto_enforce,
+            "is_high gate must block: AiInference is not high-provenance"
+        );
+    }
 }
