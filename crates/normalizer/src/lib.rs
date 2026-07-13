@@ -140,6 +140,9 @@ fn chain_slug(chain: SourceChain) -> &'static str {
         SourceChain::Arweave => "arweave",
         SourceChain::Zano => "zano",
         SourceChain::Autonomi => "autonomi",
+        SourceChain::AtProto => "atproto",
+        // #[non_exhaustive] — future chain additions map here.
+        _ => "unknown",
     }
 }
 
