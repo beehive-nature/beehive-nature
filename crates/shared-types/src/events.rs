@@ -13,12 +13,16 @@ use serde::{Deserialize, Serialize};
 
 /// Where a raw event was observed before normalization.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[non_exhaustive]
 pub enum SourceChain {
     Eos,
     Vaulta,
     Arweave,
     Zano,
     Autonomi,
+    /// BIND-1 K-6: the ATProto social layer (signed repos, records,
+    /// firehose). `source_ref` convention: `at://<did>/<collection>/<rkey>#<cid>`.
+    AtProto,
 }
 
 /// The envelope every consumer reads. `payload` carries the family-specific
@@ -38,8 +42,12 @@ pub struct CanonicalEvent {
 }
 
 /// Flat event discriminant — one variant per concrete event.
+///
+/// BIND-1 K-6: `#[non_exhaustive]` going forward. Variants version by
+/// addition, never mutation — no existing variant is renamed or removed.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "type", content = "data")]
+#[non_exhaustive]
 pub enum EventType {
     ProductListed,
     ProductUpdated,
@@ -58,6 +66,19 @@ pub enum EventType {
     #[serde(rename = "DIDLinked")]
     DidLinked,
     ReputationUpdated,
+    // --- BIND-1 K-6 seam variants (additive) ---
+    /// A performance set was published on the social layer.
+    /// `canonicalized_by`: `"sense-atproto"`.
+    PerformanceSetPublished,
+    /// A social record was retracted (deleted after crossing).
+    /// References the original; the original stands immutable (K-7).
+    SocialRecordRetracted,
+    /// A circle protocol action concluded.
+    CircleConcluded,
+    /// An emission was minted (settlement-class, GOV-3 one-way bridge).
+    EmissionMinted,
+    /// An agent publication was logged (e.g. bQueenBee Q-6 audit).
+    AgentPublicationLogged,
 }
 
 /// Family-specific payload data, adjacently tagged for clean JSON
@@ -158,7 +179,7 @@ pub struct ReputationEvent {
 mod tests {
     use super::*;
 
-    const ALL_EVENT_TYPES: [EventType; 16] = [
+    const ALL_EVENT_TYPES: [EventType; 21] = [
         EventType::ProductListed,
         EventType::ProductUpdated,
         EventType::ProductDelisted,
@@ -175,6 +196,12 @@ mod tests {
         EventType::DisputeResolved,
         EventType::DidLinked,
         EventType::ReputationUpdated,
+        // BIND-1 K-6 seam variants
+        EventType::PerformanceSetPublished,
+        EventType::SocialRecordRetracted,
+        EventType::CircleConcluded,
+        EventType::EmissionMinted,
+        EventType::AgentPublicationLogged,
     ];
 
     #[test]
@@ -299,5 +326,101 @@ mod tests {
         let back: CanonicalEvent = serde_json::from_str(&json).unwrap();
         assert_eq!(event, back);
         assert_eq!(back.event_type, EventType::ProductListed);
+    }
+
+    // ---- BIND-1 K-D2: seam variants + AtProto + non_exhaustive -------
+
+    #[test]
+    fn source_chain_atproto_roundtrips_through_json() {
+        let json = serde_json::to_string(&SourceChain::AtProto).unwrap();
+        assert_eq!(json, r#""AtProto""#);
+        let back: SourceChain = serde_json::from_str(&json).unwrap();
+        assert_eq!(back, SourceChain::AtProto);
+    }
+
+    #[test]
+    fn all_source_chain_variants_roundtrip_through_json() {
+        let all = [
+            SourceChain::Eos,
+            SourceChain::Vaulta,
+            SourceChain::Arweave,
+            SourceChain::Zano,
+            SourceChain::Autonomi,
+            SourceChain::AtProto,
+        ];
+        for sc in all {
+            let json = serde_json::to_string(&sc).unwrap();
+            let back: SourceChain = serde_json::from_str(&json).unwrap();
+            assert_eq!(sc, back, "lossy roundtrip for {json}");
+        }
+    }
+
+    #[test]
+    fn seam_event_type_variants_roundtrip_through_json() {
+        let seam_types = [
+            EventType::PerformanceSetPublished,
+            EventType::SocialRecordRetracted,
+            EventType::CircleConcluded,
+            EventType::EmissionMinted,
+            EventType::AgentPublicationLogged,
+        ];
+        for et in seam_types {
+            let json = serde_json::to_string(&et).unwrap();
+            let back: EventType = serde_json::from_str(&json).unwrap();
+            assert_eq!(et, back, "lossy roundtrip for {json}");
+        }
+    }
+
+    #[test]
+    fn seam_event_type_json_tags_match_variant_names() {
+        // No rename — additive variants use their Rust names directly.
+        assert_eq!(
+            serde_json::to_string(&EventType::PerformanceSetPublished).unwrap(),
+            r#"{"type":"PerformanceSetPublished"}"#
+        );
+        assert_eq!(
+            serde_json::to_string(&EventType::SocialRecordRetracted).unwrap(),
+            r#"{"type":"SocialRecordRetracted"}"#
+        );
+        assert_eq!(
+            serde_json::to_string(&EventType::CircleConcluded).unwrap(),
+            r#"{"type":"CircleConcluded"}"#
+        );
+        assert_eq!(
+            serde_json::to_string(&EventType::EmissionMinted).unwrap(),
+            r#"{"type":"EmissionMinted"}"#
+        );
+        assert_eq!(
+            serde_json::to_string(&EventType::AgentPublicationLogged).unwrap(),
+            r#"{"type":"AgentPublicationLogged"}"#
+        );
+    }
+
+    #[test]
+    fn atproto_source_ref_convention_documented() {
+        // K-D2: source_ref convention for AtProto is
+        // at://<did>/<collection>/<rkey>#<cid>
+        let event = CanonicalEvent {
+            event_id: "evt-atproto-1".into(),
+            event_type: EventType::PerformanceSetPublished,
+            timestamp: 1_782_000_000,
+            source_chain: SourceChain::AtProto,
+            source_ref: "at://did:plc:abc/social.skaists.alpha.performance.set/rkey123#bafyfakecid".into(),
+            payload: EventPayload::Product(ProductEvent {
+                listing_id: "set-1".into(),
+                seller_did: "did:plc:abc".into(),
+                category: None,
+                title: Some("Live at the Teal Room".into()),
+                amount: None,
+                asset_id: None,
+            }),
+            canonicalized_by: "sense-atproto".into(),
+        };
+        let json = serde_json::to_string(&event).unwrap();
+        assert!(json.contains(r#""source_chain":"AtProto""#));
+        assert!(json.contains(r#""canonicalized_by":"sense-atproto""#));
+        assert!(json.contains("at://did:plc:abc/"));
+        let back: CanonicalEvent = serde_json::from_str(&json).unwrap();
+        assert_eq!(event, back);
     }
 }
