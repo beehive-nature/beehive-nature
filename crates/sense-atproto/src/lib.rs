@@ -426,6 +426,11 @@ impl IndependentSocialView {
         at_uri: &str,
         binding: Option<&DidBinding>,
     ) {
+        // at_uri pin: a grade may only be raised using corroboration
+        // for the SAME record. A witness for a different at_uri is a no-op.
+        if at_uri != existing.at_uri {
+            return;
+        }
         if let Some(fresh) = self.witness(at_uri, binding) {
             if fresh.grade > existing.grade {
                 existing.grade = fresh.grade;
@@ -480,9 +485,18 @@ pub struct RetractionRecord {
 /// Returns `None` if the retraction does not cross (unsigned).
 pub fn process_retraction(
     retraction: &RetractionRecord,
+    original_seller_did: &str,
 ) -> Option<(CanonicalEvent, Evidence)> {
-    // Gate: retraction must be signed.
+    // Gate 1: retraction must be signed.
     if !retraction.commit_signature_verified {
+        return None;
+    }
+
+    // Gate 2 (k003): signer authorization lives HERE, at the low level —
+    // not only in WitnessLog::retract(). The retraction's signer_did
+    // must match the original event's seller_did. A foreign-DID
+    // retraction is refused no matter which pub entry point is used.
+    if retraction.signer_did != original_seller_did {
         return None;
     }
 
@@ -550,6 +564,11 @@ impl WitnessLog {
     /// K-7). Returns `true` if a new event was inserted, `false` if it
     /// was a re-witness that collapsed to the existing entry.
     pub fn ingest(&mut self, event: CanonicalEvent, evidence: Evidence) -> bool {
+        // k003 Fix 2: retractions must enter through retract(), not ingest().
+        // This prevents bypassing signer auth via process_retraction() + ingest().
+        if event.event_type == EventType::SocialRecordRetracted {
+            return false;
+        }
         let event_id = event.event_id.clone();
         if let Some(existing) = self.events.get_mut(&event_id) {
             if evidence.view_grade > existing.1.view_grade {
@@ -582,23 +601,19 @@ impl WitnessLog {
             None => return false,
         };
 
-        // Signer authorization: the retraction's signer_did must match
-        // the original event's seller_did. A foreign-DID retraction
-        // is refused.
+        // Extract the original seller_did for the signer auth check
+        // (now enforced inside process_retraction — k003 Fix 2).
         let original_seller_did = match &original.0.payload {
-            shared_types::EventPayload::Product(p) => &p.seller_did,
+            shared_types::EventPayload::Product(p) => p.seller_did.clone(),
             _ => return false,
         };
-        if retraction.signer_did != *original_seller_did {
-            return false;
-        }
 
         // Already retracted?
         if self.retractions.contains_key(&original_event_id) {
             return false;
         }
 
-        match process_retraction(retraction) {
+        match process_retraction(retraction, &original_seller_did) {
             Some((event, evidence)) => {
                 let retraction_event_id = event.event_id.clone();
                 // Guarded insert: a colliding event_id must NOT overwrite
@@ -1076,6 +1091,31 @@ mod tests {
         assert_eq!(w.at_uri(), "at://did:plc:abc/coll/rkey#cid");
     }
 
+    // ---- k003 Fix 1: rewitness at_uri pinning ---------------------------
+
+    #[test]
+    fn k003_marquee_rewitness_cannot_raise_grade_for_different_at_uri() {
+        // Record X: single source, Informational.
+        let mut witness_x = IndependentSocialView::new(vec![source("pds", "cid-a")])
+            .witness("at://record-x", None)
+            .unwrap();
+        assert_eq!(witness_x.grade(), ViewGrade::Informational);
+
+        // Record Y: two sources, Confirmed. rewitness for Y must NOT
+        // raise X's grade — different at_uri.
+        let view_y = IndependentSocialView::new(vec![
+            source("pds", "cid-b"),
+            source("relay", "cid-b"),
+        ]);
+        view_y.rewitness(&mut witness_x, "at://record-y", None);
+
+        assert_eq!(
+            witness_x.grade(),
+            ViewGrade::Informational,
+            "rewitness for a DIFFERENT at_uri must not raise the grade"
+        );
+    }
+
     // =====================================================================
     // K-D5: Retraction + WitnessLog — guarded insert + signer authorization
     // =====================================================================
@@ -1249,6 +1289,48 @@ mod tests {
         assert_eq!(log.len(), 1); // only the original
     }
 
+    // ---- k003 Fix 2: signer auth not bypassable at low level -----------
+
+    #[test]
+    fn k003_marquee_process_retraction_refuses_foreign_signer() {
+        // process_retraction() must refuse a foreign-DID retraction when
+        // the original seller's DID is provided — the check lives in the
+        // low-level function, not only in retract().
+        let foreign_retraction = RetractionRecord {
+            signer_did: "did:plc:attacker".into(),
+            original_at_uri: "at://did:plc:performer123/coll/rkey#cid".into(),
+            retraction_at_uri: "at://did:plc:attacker/coll/retract#rkey".into(),
+            commit_signature_verified: true,
+        };
+        let result = process_retraction(&foreign_retraction, "did:plc:performer123");
+        assert!(
+            result.is_none(),
+            "process_retraction must refuse a foreign-DID retraction"
+        );
+    }
+
+    #[test]
+    fn k003_marquee_ingest_refuses_social_record_retracted_event() {
+        // ingest() must refuse a SocialRecordRetracted event — retractions
+        // must enter through retract(), not ingest().
+        let retraction = RetractionRecord {
+            signer_did: "did:plc:performer123".into(),
+            original_at_uri: "at://did:plc:performer123/coll/rkey#cid".into(),
+            retraction_at_uri: "at://did:plc:performer123/coll/retract#rkey".into(),
+            commit_signature_verified: true,
+        };
+        // process_retraction with the CORRECT owner still produces an event —
+        // the point is that ingest() must refuse it.
+        let (rt_event, rt_evidence) =
+            process_retraction(&retraction, "did:plc:performer123").unwrap();
+        assert_eq!(rt_event.event_type, EventType::SocialRecordRetracted);
+
+        let mut log = WitnessLog::new();
+        let inserted = log.ingest(rt_event, rt_evidence);
+        assert!(!inserted, "ingest() must refuse SocialRecordRetracted events");
+        assert_eq!(log.len(), 0);
+    }
+
     // ---- Additional K-D5 -------------------------------------------------
 
     #[test]
@@ -1284,17 +1366,17 @@ mod tests {
         assert_eq!(orig.0.event_type, EventType::PerformanceSetPublished);
     }
 
-    // ---- K-D5 generative interleaving property test ---------------------
+    // ---- K-D5 generative interleaving property test (k003 repaired) -----
 
     use proptest::prelude::*;
 
     /// Actions that can be applied to a WitnessLog in any order.
     #[derive(Debug, Clone)]
     enum Action {
-        /// Ingest the original event.
+        /// Ingest the original event at Informational grade.
         IngestOriginal,
-        /// Ingest the original event again (duplicate sighting).
-        IngestDuplicate,
+        /// Ingest the original event at a RAISED grade (Confirmed or Settlement).
+        RaiseGrade,
         /// Retract the original (signed by the rightful seller).
         Retract,
         /// Retract a never-crossed record (emits nothing).
@@ -1305,7 +1387,7 @@ mod tests {
         fn arb_action()(idx in 0u8..4) -> Action {
             match idx {
                 0 => Action::IngestOriginal,
-                1 => Action::IngestDuplicate,
+                1 => Action::RaiseGrade,
                 2 => Action::Retract,
                 _ => Action::RetractNonexistent,
             }
@@ -1314,32 +1396,53 @@ mod tests {
 
     proptest! {
         #[test]
-        fn interleaving_invariants_hold(actions in prop::collection::vec(arb_action(), 1..=12)) {
-            let (original_event, original_evidence) = crossed_event();
+        fn interleaving_invariants_hold(actions in prop::collection::vec(arb_action(), 1..=16)) {
+            let (original_event, mut evidence) = crossed_event();
             let original_id = original_event.event_id.clone();
             let original_uri = valid_record().at_uri;
-            let original_payload_hash = original_evidence.payload_hash;
-            let original_grade = original_evidence.view_grade;
+            let original_payload_hash = evidence.payload_hash;
+
+            // The grade starts at Informational and only rises.
+            let baseline_grade = evidence.view_grade; // Informational
 
             let mut log = WitnessLog::new();
+            let mut highest_grade = baseline_grade;
 
             for action in &actions {
                 match action {
                     Action::IngestOriginal => {
-                        log.ingest(original_event.clone(), original_evidence.clone());
+                        evidence.view_grade = baseline_grade;
+                        log.ingest(original_event.clone(), evidence.clone());
                     }
-                    Action::IngestDuplicate => {
-                        log.ingest(original_event.clone(), original_evidence.clone());
+                    Action::RaiseGrade => {
+                        // Alternate between Confirmed and Settlement to exercise
+                        // the monotonic grade path.
+                        evidence.view_grade = if highest_grade < ViewGrade::Confirmed {
+                            ViewGrade::Confirmed
+                        } else {
+                            ViewGrade::Settlement
+                        };
+                        log.ingest(original_event.clone(), evidence.clone());
                     }
                     Action::Retract => {
                         log.retract(&signed_retraction(&original_uri));
                     }
                     Action::RetractNonexistent => {
+                        let size_before = log.len();
                         let r = signed_retraction(
                             "at://did:plc:abc/social.skaists.alpha.performance.set/nonexistent#cid"
                         );
-                        log.retract(&r);
+                        let result = log.retract(&r);
+                        // Repair 4: explicit assertion that never-crossed
+                        // retraction emits nothing — log did not grow.
+                        prop_assert!(!result, "RetractNonexistent must return false");
+                        prop_assert_eq!(log.len(), size_before, "RetractNonexistent must not grow the log");
                     }
+                }
+
+                // Track the highest grade we've seen.
+                if let Some(entry) = log.get(&original_id) {
+                    highest_grade = highest_grade.max(entry.1.view_grade);
                 }
 
                 // Invariant 1: if the original was ever ingested, it exists
@@ -1348,28 +1451,25 @@ mod tests {
                     if let Some(entry) = log.get(&original_id) {
                         prop_assert_eq!(entry.1.payload_hash, original_payload_hash);
                         prop_assert_eq!(entry.0.event_type, EventType::PerformanceSetPublished);
-                        // Grade only rises.
-                        prop_assert!(entry.1.view_grade >= original_grade);
+                        // Repair 3: grade is >= baseline AND == highest we've
+                        // ever raised it to — non-vacuous because RaiseGrade
+                        // actually varies the grade.
+                        prop_assert!(entry.1.view_grade >= baseline_grade);
+                        prop_assert_eq!(entry.1.view_grade, highest_grade);
                     }
                 }
 
                 // Invariant 2: the original is never mutated by retraction.
-                // If retracted, the original event_type is still PerformanceSetPublished.
                 if log.is_retracted(&original_id) {
                     let orig = log.get(&original_id).unwrap();
                     prop_assert_eq!(orig.0.event_type, EventType::PerformanceSetPublished);
                 }
 
-                // Invariant 3: RetractNonexistent never adds events.
-                // (hard to isolate, but the log size never exceeds 2:
-                // one original + one retraction.)
+                // Invariant 3: log size never exceeds 2 (original + retraction).
                 prop_assert!(log.len() <= 2);
 
                 // Invariant 4: at most one retraction for one original.
                 if log.is_retracted(&original_id) {
-                    // A second retract must be a no-op (already tested in
-                    // double_retraction_is_idempotent, but verify here too:
-                    // the log size must not grow from further retracts).
                     let size_before = log.len();
                     log.retract(&signed_retraction(&original_uri));
                     prop_assert_eq!(log.len(), size_before);
