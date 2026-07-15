@@ -1,6 +1,32 @@
 <!--
-STATUS: DRAFT v0.3 — specification only. No implementation exists. No Solidity
+STATUS: DRAFT v0.3.1 — specification only. No implementation exists. No Solidity
 is authored here and none is authorised by this document.
+v0.3.1: §7.2 adds `MAX_EPOCH_LENGTH`, frozen at deploy and not governable at any
+  tier — same status as `epochGenesis` and for the same reason pointed the other
+  way. v0.3 closed the **shortening** hole (rate derivation makes 30d→1h strictly
+  safer) but left the **lengthening** direction ungoverned: a Feature-tier vote
+  setting `epochLength = 100y` would put a century of budget in one bucket,
+  widening F-10's blast radius proportionally while the long-run average still
+  read `rate`. The spec acknowledged this at §7.2's F-10 note and §8's F-10 row
+  but as documentation, not mechanism. `MAX_EPOCH_LENGTH` converts the sentence
+  into a predicate (P-17): `epochLength <= MAX_EPOCH_LENGTH`, which the
+  implementation MUST enforce on every governance action. Set to the intended
+  operating value (30 days), not a headroom multiple — governance can only
+  shorten from here, which the spec calls "the safe direction." This is the k001
+  lesson applied preventively: a document that asserts a safety property the code
+  doesn't enforce is the same defect class as a false comment.
+v0.3.1 also promotes `budgetRateWeiPerSecond` from Feature tier (K=2, 8%) to
+  Safety tier (K=4, 13% affirmative). It is the treasury-rate primitive — the
+  actual knob that moves the pool's burn per unit time — and was left at the
+  lowest bar in v0.3's tier table despite v0.3's own §7.2 identifying it as "the
+  governed object." Meta (K=8, 21%) was considered and rejected: Meta's subject
+  scope (article-vi-s3.md §3.3) is textually limited to reputation-engine,
+  attestation/evidence flows, and Article VI itself — a paymaster burn rate is
+  none of those. Safety is consequence-shaped ("weakening any invariant"), and
+  changing the burn rate weakens the Article V.1 funding invariant if set above
+  what users fund. Governance tier follows consequence, not category. The
+  operating budget MUST remain adjustable (a DAO that can't change its own burn
+  rate is broken, not safe) — this is a promotion up the ladder, not off it.
 v0.3 (revision of record): §7.2 closes the **rate** hole v0.2 left open — v0.2
   deleted `currentEpoch` as an unauthorised pool-refill primitive (§6.3) and then
   left the same primitive standing under the name `epochLength`: a Feature-tier
@@ -690,10 +716,10 @@ un-earned credit is not.
 ### 6.1 The rule
 
 **DEFAULT-DENY.** The paymaster sponsors an operation **if and only if every
-predicate P-1 … P-16 below holds.** Any predicate that fails, any predicate that
+predicate P-1 … P-17 below holds.** Any predicate that fails, any predicate that
 cannot be evaluated, any input that does not parse, any path not enumerated here
 — **denies**. There is no `else { sponsor }` anywhere in this design, and a code
-path that reaches sponsorship without traversing all of P-1 … P-16 is a defect
+path that reaches sponsorship without traversing all of P-1 … P-17 is a defect
 regardless of what it returns.
 
 ### 6.2 The predicates (ALL must hold)
@@ -716,6 +742,7 @@ regardless of what it returns.
 | **P-14** | **pool reserve (§6.2.1):** `epochReservedWei[voucher.epoch] + epochSettledWei[voucher.epoch] + maxCost <= epochBudgetWei`, where `epochBudgetWei = budgetRateWeiPerSecond × epochLength` — **derived, never set** (§7.2) — **and** validation **writes** the reservation | an exhausted **or over-committed** pool — including by ops already in flight, in this same bundle |
 | **P-15** | **per-account reserve (§6.2.1):** `accountReservedWei[voucher.epoch][account] + accountSettledWei[voucher.epoch][account] + maxCost <= perAccountEpochCapWei` (§7.1), **and** validation **writes** the reservation | one account eating the pool — across nonces, and across a bundle |
 | **P-16** | `!paused` (§7.5) | the pause switch is the last brake |
+| **P-17** | **`epochLength <= MAX_EPOCH_LENGTH`** (§7.2). Both are storage reads in v0.3 (`epochLength` is governable; `MAX_EPOCH_LENGTH` is frozen at deploy). The predicate denies any governance action that would set `epochLength` above the ceiling. | a governance vote lengthening `epochLength` past `MAX_EPOCH_LENGTH` — which would widen F-10's blast radius (§7.2, §8 F-10) beyond the hard ceiling the spec MUST enforce |
 
 ### 6.2.1 The reservation — why a read is not a cap
 
@@ -1104,14 +1131,16 @@ root-policy burn-rate caps on the pool)."
 
 ### 7.2 Per-epoch caps (the pool)
 
-- An **epoch** is a fixed wall-clock window, defined by two pinned parameters:
+- An **epoch** is a fixed wall-clock window, defined by three pinned parameters:
   **`epochGenesis`** (a unix second, **frozen at deploy — not governable**, see
-  below) and **`epochLength`** (§7.4). `epochOf(t) = (t - epochGenesis) /
-  epochLength`. `voucher.epoch` binds an op to one, and P-13 checks that binding
-  **by arithmetic over the voucher's own signed window** — there is no
-  `currentEpoch` variable, no rollover event, and no actor who advances one. §6.3
-  gives the full reasoning; the short version is that a rollover actuator is a
-  pool-refill primitive and nobody is authorised to hold one.
+  below), **`epochLength`** (§7.4), and **`MAX_EPOCH_LENGTH`** (the ceiling on
+  `epochLength`, **frozen at deploy — not governable at any tier**, see below).
+  `epochOf(t) = (t - epochGenesis) / epochLength`. `voucher.epoch` binds an op to
+  one, and P-13 checks that binding **by arithmetic over the voucher's own signed
+  window** — there is no `currentEpoch` variable, no rollover event, and no actor
+  who advances one. §6.3 gives the full reasoning; the short version is that a
+  rollover actuator is a pool-refill primitive and nobody is authorised to hold
+  one.
 
 - **The budget is a RATE. `epochBudgetWei` is derived, never set:**
 
@@ -1119,7 +1148,7 @@ root-policy burn-rate caps on the pool)."
   epochBudgetWei := budgetRateWeiPerSecond × epochLength
   ```
 
-  **`budgetRateWeiPerSecond` is the governed object** (§7.4); `epochLength` sets
+  **`budgetRateWeiPerSecond` is the governed object** (§7.4, Safety tier); `epochLength` sets
   bucket *granularity* and `epochBudgetWei` follows it. `epochBudgetWei` remains
   exactly what §7.2 has always called it — a **hard ceiling on total BTC the pool
   fronts in an epoch**, enforced by P-14 — and it is now also the thing that
@@ -1174,15 +1203,18 @@ root-policy burn-rate caps on the pool)."
 - **The cost, stated rather than hidden** (§6.3's convention). Rate invariance does
   not make `epochLength` inert, and two effects remain, both stated so no reader
   infers a property this does not have:
-  1. **F-10's blast radius scales with `epochLength`.** A compromised signer is
-     bounded to *one epoch budget* = `budgetRateWeiPerSecond × epochLength`, so
-     **lengthening** the epoch widens that bound proportionally (30 days → 60 days
-     doubles it) even though the long-run burn rate is unchanged. This is a real
-     Feature-tier effect on a Safety-tier concern. It is **not** the deleted
-     primitive — it is linear, not a step change, and it widens the *compromise*
-     bound while leaving the *pool* rate fixed — but a vote that lengthens the epoch
-     is a vote that lengthens F-10's exposure window, and should be read that way.
-     **Shortening** `epochLength` tightens F-10's bound: the safe direction.
+  1. **F-10's blast radius scales with `epochLength`, bounded by `MAX_EPOCH_LENGTH`.**
+     A compromised signer is bounded to *one epoch budget* = `budgetRateWeiPerSecond
+     × epochLength`, so **lengthening** the epoch widens that bound proportionally
+     (30 days → 60 days doubles it) even though the long-run burn rate is unchanged.
+     This is a real Feature-tier effect on a Safety-tier concern. It is **not** the
+     deleted primitive — it is linear, not a step change, and it widens the
+     *compromise* bound while leaving the *pool* rate fixed. **`MAX_EPOCH_LENGTH`
+     caps the widening**: governance may shorten `epochLength` (the safe direction,
+     which tightens F-10's bound) but cannot lengthen it past `MAX_EPOCH_LENGTH`,
+     so F-10's exposure window has a hard ceiling the spec MUST enforce rather
+     than merely documents. The value is set to the intended operating value (30 days),
+     not a headroom multiple — governance can only move in the safe direction.
   2. **`epochLength` bounds the maximum voucher window.** P-13 forces a window
      inside one epoch, so a shorter epoch means shorter vouchers and more boundary
      refusals (§5.3.9, §6.3's stated cost) — a UX regression of at most one
@@ -1234,13 +1266,29 @@ Per `docs/article-vi-s3.md` §3.3 (tier ladder) and §3.4 (quorums):
 
 | Change | Tier | K | Quorum |
 |---|---|---|---|
-| **`budgetRateWeiPerSecond`** (the pool's burn rate — the object that *was* "epoch budget"), per-account caps, **`epochLength`** (granularity only — the budget follows it, §7.2), voucher window length (`policyVersion` bump) | **Feature** | 2 | 8% `YES` floor |
+| per-account caps, **`epochLength`** (granularity only — the budget follows it, §7.2; bounded by `MAX_EPOCH_LENGTH`, see below), voucher window length (`policyVersion` bump) | **Feature** | 2 | 8% `YES` floor |
 | adding a target/selector to the allowlist | **Feature** | 2 | 8% `YES` floor |
+| **`budgetRateWeiPerSecond`** (the pool's burn rate — the treasury-rate primitive) | **Safety** | 4 | **13% affirmative** |
 | **`epochGenesis`** | **— not governable at any tier.** Frozen at deploy (§7.2). There is no path that changes it, so there is no tier to name; a shiftable genesis is a pool-refill primitive (§7.2, §6.3) and this table's job is to not hand one out. | — | — |
+| **`MAX_EPOCH_LENGTH`** | **— not governable at any tier.** Frozen at deploy (§7.2). Same status as `epochGenesis` and for the same reason pointed the other way: a lengthenable `epochLength` widens F-10's blast radius (§7.2, §8 F-10), and a constant can't be voted around. Set to the intended operating value (30 days), not a headroom multiple — governance can only shorten `epochLength` from here, which the spec calls "the safe direction." | — | — |
 | **`epochBudgetWei` directly** | **— not a knob.** Derived: `budgetRateWeiPerSecond × epochLength` (§7.2). A governance action that set it directly would be re-creating the per-epoch bucket whose decoupling from time *was* the hole. | — | — |
 | removing a target, tightening a cap, pausing | see §7.5 — immediate, no vote. **The principal is NOT named in this document and cannot be — §10 Q-7.** | — | — |
 | changing the signer set; changing the acceptance predicate (§6); anything that weakens an invariant in §0, §2, or §3 | **Safety** | 4 | **13% affirmative** |
 | anything that would let the paymaster feed the reputation engine, or that touches evidence flows feeding Respect | **Meta** | 8 | **21% affirmative** |
+
+**Why `budgetRateWeiPerSecond` is Safety, not Meta.** Meta's subject scope
+(article-vi-s3.md §3.3) is textually limited to (a) `reputation-engine` code or
+parameters, (b) attestation and evidence flows that feed it, and (c) Article VI
+itself. A paymaster burn rate is none of those. Safety is consequence-shaped —
+"weakening any invariant" — and changing the burn rate weakens the Article V.1
+funding invariant ("the paymaster abstracts user-funded payment; it must never
+absorb cost") if set above what users fund. Governance tier follows consequence,
+not category: the blast radius is treasury-rate, and the tier that matches a
+treasury-rate consequence is Safety. The operating budget MUST remain adjustable
+— a DAO that can't change its own burn rate is broken, not safe — so this is a
+promotion up the ladder, not off it. Contrast `MAX_EPOCH_LENGTH` (frozen at
+deploy): a ceiling that exists only to bound a compromised signer never needs to
+move, so freeze it; the operating budget must remain governable.
 
 **The epoch calendar is not an ordinary parameter, and it fails in TWO ways that
 need TWO answers.** `epochGenesis` is now out of reach entirely (frozen at deploy,
@@ -1354,7 +1402,7 @@ the safe default points **opposite ways** for the two:
 | **F-7** | Epoch budget exhausted mid-epoch | P-14 denies (reserved + settled would exceed `epochBudgetWei`); all users fall to T1/T0 (§2) | borrowing next epoch's budget; a "grace" overdraft; releasing reservations to make room |
 | **F-8** | Voucher issued, op never lands (expired, dropped, out-bid) | voucher expires (`validUntil`); **kernel-side b refund on reconciliation, under §5.6.** Expiry alone does **not** authorise the credit — R-1 requires positive evidence the op did not land. The refund is a kernel ledger operation and touches no chain (§3.1 step 4). | on-chain compensation; a b transfer of any kind; **treating an expired voucher as proof of a missed op** |
 | **F-9** | `postOp` reverts / accounting update fails | **U-3** — version-specific; MUST be specified against the deployed EntryPoint's source before implementation. Counters that can be made to fail cheaply are counters that lie (§6.7). A failed **release** under-sponsors (safe); a failed **settle** makes the pool forget a spend (unsafe) — §6.2.1. | assuming a failed accounting update is harmless; splitting release from settle |
-| **F-10** | Kernel signer key compromised | on-chain caps bound the loss to **one epoch budget = `budgetRateWeiPerSecond × epochLength`** (§7.2) — and that bound holds only because P-14/P-15 **reserve** at validation (§6.2.1; a read-only cap does not bound a bundle) and because P-13 forces a voucher's window inside its own epoch, so future-epoch vouchers cannot execute early (§6.3). **Note what the bound is made of:** `epochLength` is Feature-tier, so **a vote lengthening the epoch widens this bound proportionally** (§7.2's stated cost) — it does not change the pool's long-run burn rate, but F-10's exposure window is not rate-invariant and must not be read as though it were. Signer rotation is Safety-tier. **The immediate brake (pause, §7.5) has no named principal — §10 Q-7.** | relying on the kernel's own caps — the compromised component's opinion of its own limits is worthless; **claiming a read-only cap bounds anything**; reading "one epoch budget" as a fixed quantity when `epochLength` is governable |
+| **F-10** | Kernel signer key compromised | on-chain caps bound the loss to **one epoch budget = `budgetRateWeiPerSecond × epochLength`** (§7.2) — and that bound holds only because P-14/P-15 **reserve** at validation (§6.2.1; a read-only cap does not bound a bundle) and because P-13 forces a voucher's window inside its own epoch, so future-epoch vouchers cannot execute early (§6.3). **The bound is itself bounded:** `epochLength <= MAX_EPOCH_LENGTH` (P-17, §7.2), frozen at deploy, so F-10's exposure window cannot be widened past 30 days by any vote. Signer rotation is Safety-tier. **The immediate brake (pause, §7.5) has no named principal — §10 Q-7.** | relying on the kernel's own caps — the compromised component's opinion of its own limits is worthless; **claiming a read-only cap bounds anything**; reading "one epoch budget" as a fixed quantity when `epochLength` is governable (it is — but only downward from `MAX_EPOCH_LENGTH`, never upward) |
 | **F-11** | bLOVErAi offline / wrong / hostile | **nothing changes.** §6 is unaffected. T0/T1 open. On anomaly it warns and declines to sponsor; it never blocks the human. | the companion becoming a chokepoint; contracts depending on it |
 | **F-12** | Bundler censors, drops, or reorders our ops | T0 remains open (§2). Censorship-resistance of the sponsored path is a **bundler** property — **U-8** | claiming the sponsored path is censorship-resistant |
 | **F-13** | EntryPoint on exSat turns out to be non-stock (modified nonce/validation semantics) | **U-5** — Layer 1 replay defence is void; Layer 2 (§4.5) carries it; **the deployment does not proceed** until the EntryPoint's actual source is read | assuming stock semantics because the address or the docs look familiar |
