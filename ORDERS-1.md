@@ -1,6 +1,6 @@
 # ORDERS-1 — OR Roster & Standing Orders
 
-**Version:** v0.7 · **Status:** ratified @ c14226f · amended by this commit
+**Version:** v0.8 · **Status:** ratified @ c14226f · amended by this commit
 **Scope:** seat roster, model pins, per-seat marching orders, shift rhythm, re-pin procedure
 **Inherited law:** relay-of-record · sole-tree-pusher · one file per prompt with acceptance criteria · channel law (card first, fenced chunks second) · Convention v2.2 verifier states · no re-opening banked decisions without new evidence
 
@@ -83,6 +83,8 @@
 
 **ONE SEAT, ONE WORKING TREE** — Seat 4 executes in its own clone; the shared working directory belongs to Seat 3, the merger. A seat that finds a live writer in its tree stands clear and reports, never reclaims mid-write.
 
+**§ DCO SIGN-OFF AUTHORITY** — Machine seats never emit `Signed-off-by:` under their own identity — a model cannot make the DCO's certification. Seat 3 appends `Signed-off-by: loVis waTer <loviswater44@gmail.com>` **only** to merges King Bee has explicitly gated. Seats are credited via `Co-authored-by:` in the commit body, or in prose where a seat has no real address — no address is invented to carry credit. This is a standing, scoped authorization from Seat 0 — not inference, not per-commit consent. Fixed forward, never retroactively: unsigned history stays unsigned, and the three `Signed-off-by: Lovis Lobster <lovis-lobster@beehive-nature>` commits (`3f920e9`, `e2d1551`, `07b0987`) stand as the precedent this clause ends, not as an example of it.
+
 ---
 
 ## §4 Shift Rhythm
@@ -105,6 +107,7 @@
 ---
 
 **Changelog:**
+v0.8 — §3 corollary: DCO sign-off authority (machine seats never sign; Seat 3 appends the founder trailer only to founder-gated merges; seats credited via Co-authored-by or prose; fixed forward, never retroactively). Founder-authorized 2026-07-15.
 v0.7 — Seat 3 §3 marching-orders escalation clause ("escalate model per §1 on judgment-class files only") retired: the last reference to the mechanism removed in v0.6; the fossil a fresh instance reads first. Founder-authorized 2026-07-11.
 v0.6 — Seat 3 escalation column + its §1 judgment-class trigger note retired: subsumed by the v0.4 primary (nothing higher to escalate to); a live no-op trigger is a fossil. Founder-authorized 2026-07-11.
 v0.5 — §3 corollary: one-seat-one-tree (Seat 4 in its own clone; the shared tree is Seat 3's; a seat finding a live writer stands clear, never reclaims mid-write). Founder-authorized 2026-07-11.
