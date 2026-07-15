@@ -647,13 +647,16 @@ impl Indexer {
                     }
                     return Ok(());
                 }
-                // Nothing held for that height: the block already drained. Only
-                // the positions that *emitted* are behind the cursor — a block
-                // that drained carrying no matching log leaves the cursor
-                // entirely behind it, and every log of a divergent re-delivery
-                // would then be one the drain would have emitted. So compare
-                // against what the drain would have done rather than against a
-                // log set no longer held.
+                // Nothing held for that height: the block already drained, and
+                // no logs are retained for drained blocks, so there is no held
+                // set to compare against. Compare instead against what the
+                // drain would have done — a log ahead of the cursor, from a
+                // listed contract, carrying a known topic0 would have emitted.
+                // The block drained without emitting it, so its arrival now is
+                // a contradiction.
+                //
+                // This catches divergence ahead of the cursor only. What it
+                // does not catch, and why, is stated in the residue note below.
                 for log in &logs {
                     if self.would_have_emitted(block.number, log) {
                         return Err(IndexError::DrainedBlockLogWouldHaveEmitted {
