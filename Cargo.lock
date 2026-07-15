@@ -90,6 +90,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "chain-exsat-evm"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "sha3",
+ "shared-types",
+]
+
+[[package]]
 name = "chain-zano"
 version = "0.1.0"
 dependencies = [

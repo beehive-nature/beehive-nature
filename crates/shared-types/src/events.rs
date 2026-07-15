@@ -23,6 +23,16 @@ pub enum SourceChain {
     /// BIND-1 K-6: the ATProto social layer (signed repos, records,
     /// firehose). `source_ref` convention: `at://<did>/<collection>/<rkey>#<cid>`.
     AtProto,
+    /// C-1: the exSat EVM execution layer, observed as contract logs.
+    ///
+    /// `source_ref` convention: `<block_number>:<tx_hash>#<log_index>` — the
+    /// `<block>:<tx>` shape follows the normalizer's convention, and the `#`
+    /// fragment follows the AtProto precedent above. The fragment is
+    /// load-bearing, not decoration: one EVM transaction can emit many logs
+    /// of the same event type, so `log_index` is what makes the reference
+    /// identify a single log. Gas on exSat is BTC; `b` is never gas, and no
+    /// `b` accounting rides this variant.
+    ExSatEvm,
 }
 
 /// The envelope every consumer reads. `payload` carries the family-specific
@@ -79,6 +89,36 @@ pub enum EventType {
     EmissionMinted,
     /// An agent publication was logged (e.g. bQueenBee Q-6 audit).
     AgentPublicationLogged,
+    // --- C-1: BNRi genesis set on the exSat EVM (additive) ---
+    // `canonicalized_by`: `"chain-exsat-evm"`. These name the ten founder-named
+    // BNRi genesis events. The names are settled; the on-chain event signatures
+    // that map onto them are NOT — no BNRi contract exists yet. See
+    // `chain-exsat-evm`'s signature table, where every entry is marked
+    // UNVERIFIED pending the real BNRi ABI.
+    //
+    // BNRi is an EVM-layer artifact. It is not `b`: `b` is earned-only
+    // metabolic energy accounted kernel-side (SPIRIT-1), never an EVM token,
+    // never bridged, never gas.
+    /// A BNRi inscription was minted.
+    BnriInscriptionMinted,
+    /// A BNRi inscription was locked.
+    BnriInscriptionLocked,
+    /// A BNRi inscription was unlocked.
+    BnriInscriptionUnlocked,
+    /// A BNRi inscription changed holder.
+    BnriInscriptionTransferred,
+    /// A BNRi inscription was rerolled.
+    BnriInscriptionRerolled,
+    /// A BNRi inscription entered farming lock.
+    BnriFarmingLocked,
+    /// A BNRi inscription left farming lock.
+    BnriFarmingUnlocked,
+    /// Farming tickets accrued.
+    BnriTicketAccrued,
+    /// A draw commitment was published (commit phase).
+    BnriDrawCommitted,
+    /// A draw commitment was opened (reveal phase).
+    BnriDrawRevealed,
 }
 
 /// Family-specific payload data, adjacently tagged for clean JSON
@@ -93,6 +133,47 @@ pub enum EventPayload {
     #[serde(rename = "DIDLinked")]
     DidLinked(DidLinkedEvent),
     Reputation(ReputationEvent),
+    /// C-1: BNRi inscription / farming / draw data observed as an exSat EVM log.
+    ///
+    /// Deliberately its own family: Product/Order/Message/Dispute/DidLinked/
+    /// Reputation model private-commerce settlement, and a BNRi log is none of
+    /// those. Reusing one of them would make the payload lie about what it is.
+    Bnri(BnriEvent),
+}
+
+/// A decoded BNRi contract log from the exSat EVM (C-1).
+///
+/// **Field-level semantics are deliberately absent.** No BNRi contract exists
+/// yet, so this struct does NOT claim to know that word 0 is an inscription id
+/// or word 1 an amount — inventing those names would be a fabricated ABI
+/// wearing a struct's clothing. What it carries instead is exactly what the
+/// EVM ABI specification guarantees is recoverable from a log without the
+/// contract's source: the emitting address, the matched signature string, the
+/// topic0 that matched it, and the raw 32-byte words.
+///
+/// When the real BNRi ABI lands, named fields can be added to this struct
+/// additively, and the raw words stay as the audit trail.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct BnriEvent {
+    /// 0x-prefixed lowercase hex of the 20-byte emitting contract address.
+    pub contract: String,
+    /// The event signature string whose keccak256 matched `topic0`.
+    ///
+    /// Until the real BNRi ABI lands this is a clearly-marked placeholder from
+    /// the adapter's UNVERIFIED table — it is recorded here precisely so a
+    /// consumer can tell which table entry produced this event.
+    pub signature: String,
+    /// 0x-prefixed lowercase hex of `topics[0]` = keccak256(`signature`).
+    pub topic0: String,
+    /// `topics[1..]` — the indexed parameters, one 32-byte word each,
+    /// 0x-prefixed lowercase hex.
+    ///
+    /// Per the ABI spec, an indexed parameter of *dynamic* type stores
+    /// keccak256 of the value here, not the value.
+    pub indexed_words: Vec<String>,
+    /// The non-indexed parameters decoded from `data`, one 32-byte word each,
+    /// 0x-prefixed lowercase hex, in declaration order.
+    pub data_words: Vec<String>,
 }
 
 /// Product family (Listed / Updated / Delisted).
