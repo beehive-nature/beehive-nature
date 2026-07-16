@@ -95,11 +95,7 @@ fn lock_log(block: &BlockRef, tx: u8, log_index: u64, id: u8) -> RawLog {
 /// Fixtures exercise the placeholder table, so they must opt in explicitly —
 /// exactly the gate that keeps production from doing the same.
 fn test_config(confirmation_depth: u64) -> IndexerConfig {
-    let mut c = IndexerConfig::new(
-        EXSAT_MAINNET_CHAIN_ID,
-        confirmation_depth,
-        vec![CONTRACT],
-    );
+    let mut c = IndexerConfig::new(EXSAT_MAINNET_CHAIN_ID, confirmation_depth, vec![CONTRACT]);
     c.allow_unverified_signatures = true;
     c
 }
@@ -140,7 +136,9 @@ impl FixtureSource {
 }
 
 impl LogSource for FixtureSource {
-    fn next_block(&mut self) -> Result<Option<(BlockRef, Vec<RawLog>)>, Box<dyn std::error::Error>> {
+    fn next_block(
+        &mut self,
+    ) -> Result<Option<(BlockRef, Vec<RawLog>)>, Box<dyn std::error::Error>> {
         if self.fail_after == Some(self.served) {
             return Err("simulated transport failure".into());
         }
@@ -269,8 +267,7 @@ fn many_logs_of_one_event_type_in_one_tx_get_distinct_event_ids() {
     let events = ix.drive(&mut FixtureSource::new(blocks)).unwrap();
 
     assert_eq!(events.len(), 3);
-    let ids: std::collections::HashSet<&str> =
-        events.iter().map(|e| e.event_id.as_str()).collect();
+    let ids: std::collections::HashSet<&str> = events.iter().map(|e| e.event_id.as_str()).collect();
     assert_eq!(ids.len(), 3, "log_index must disambiguate: {ids:?}");
     let refs: std::collections::HashSet<&str> =
         events.iter().map(|e| e.source_ref.as_str()).collect();
@@ -348,7 +345,10 @@ fn reorg_of_depth_n_emits_no_contradictory_event() {
         .collect();
     assert_eq!(mints.len(), 1, "exactly one mint at block 108, not two");
     assert!(data_words(mints[0]).iter().any(|w| w.ends_with("bb")));
-    assert_eq!(mints[0].source_ref, format!("108:{}#0", hex0x(&[0xB1u8; 32])));
+    assert_eq!(
+        mints[0].source_ref,
+        format!("108:{}#0", hex0x(&[0xB1u8; 32]))
+    );
 
     // And no event_id was ever emitted twice.
     let ids: Vec<&str> = all.iter().map(|e| e.event_id.as_str()).collect();
@@ -562,7 +562,11 @@ fn a_drained_block_re_delivered_with_a_log_it_did_not_carry_is_refused() {
     ix.drive(&mut FixtureSource::new(chain_with(100, 110, &|_| vec![])))
         .unwrap();
     assert_eq!(ix.cursor().last_emitted, None);
-    assert_eq!(ix.pending_blocks(), vec![108, 109, 110], "100..=107 drained");
+    assert_eq!(
+        ix.pending_blocks(),
+        vec![108, 109, 110],
+        "100..=107 drained"
+    );
 
     // A lagging second per-address `eth_getLogs` filter re-delivers 105 with a
     // log the first delivery lacked. Had it arrived in time it would have
@@ -600,8 +604,11 @@ fn a_drained_block_re_delivered_identically_is_still_a_noop() {
     assert!(!ix.pending_blocks().contains(&105), "105 drained");
 
     let b = linear(105);
-    ix.observe_block(b, vec![mint_log(&b, 0xA1, 0, 7, 0xAA), lock_log(&b, 0xA2, 1, 7)])
-        .unwrap();
+    ix.observe_block(
+        b,
+        vec![mint_log(&b, 0xA1, 0, 7, 0xAA), lock_log(&b, 0xA2, 1, 7)],
+    )
+    .unwrap();
 
     // Noise in a drained block is not a contradiction either: an unlisted
     // address and an unknown topic0 are logs the drain would not have emitted
@@ -701,7 +708,13 @@ fn history_changing_under_the_cursor_blocks() {
     // event sits on is gone.
     let err = ix.observe_block(blk(105, 205, 104), vec![]).unwrap_err();
     assert!(
-        matches!(err, IndexError::HistoryChangedUnderCursor { block_number: 105, .. }),
+        matches!(
+            err,
+            IndexError::HistoryChangedUnderCursor {
+                block_number: 105,
+                ..
+            }
+        ),
         "got {err:?}"
     );
 }
@@ -814,7 +827,10 @@ fn a_fresh_process_resuming_from_a_finished_cursor_emits_nothing() {
     let again = restarted
         .drive(&mut FixtureSource::new(chain_with(100, 110, &logs_at)))
         .unwrap();
-    assert!(again.is_empty(), "a full backfill replay re-emitted {again:?}");
+    assert!(
+        again.is_empty(),
+        "a full backfill replay re-emitted {again:?}"
+    );
 }
 
 // ---------------------------------------------------------------------------
@@ -828,7 +844,14 @@ fn a_recognized_event_with_a_malformed_payload_halts_and_moves_nothing() {
     // A lock log carrying one word too many: recognized topic0, wrong arity.
     let blocks = chain_with(100, 110, &|b| {
         if b.number == 105 {
-            vec![log_on(b, 0x51, 0, SIG_LOCK, &[word(0x01)], &[word(5), word(6)])]
+            vec![log_on(
+                b,
+                0x51,
+                0,
+                SIG_LOCK,
+                &[word(0x01)],
+                &[word(5), word(6)],
+            )]
         } else {
             vec![]
         }

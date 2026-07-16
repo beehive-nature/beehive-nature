@@ -36,7 +36,9 @@
 //! real field names (dispute-engine / dro-signer do not derive Serialize).
 //! Same exit contract: nonzero on any invariant failure.
 
-use dispute_engine::{adjudicate, Dispute, Evidence, MockProvider, Provenance, Side, VerdictType, ViewGrade};
+use dispute_engine::{
+    adjudicate, Dispute, Evidence, MockProvider, Provenance, Side, VerdictType, ViewGrade,
+};
 use dro_signer::{
     settle_transition, settlement_intent_for_split, IndependentChainView, MockChainView,
     MockSigner, MultisigContext, Party, ZanoSigner,

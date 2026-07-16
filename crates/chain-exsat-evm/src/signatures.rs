@@ -198,7 +198,10 @@ impl std::fmt::Display for TableError {
                 topic0,
                 first,
                 second,
-            } => write!(f, "topic0 {topic0} claimed by both `{first}` and `{second}`"),
+            } => write!(
+                f,
+                "topic0 {topic0} claimed by both `{first}` and `{second}`"
+            ),
             TableError::BadEntry { signature, reason } => {
                 write!(f, "`{signature}` is not usable: {reason}")
             }
@@ -310,7 +313,10 @@ mod tests {
             EventType::BnriDrawCommitted,
             EventType::BnriDrawRevealed,
         ] {
-            assert!(types.contains(&expected), "genesis set missing {expected:?}");
+            assert!(
+                types.contains(&expected),
+                "genesis set missing {expected:?}"
+            );
         }
     }
 

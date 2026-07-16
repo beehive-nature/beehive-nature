@@ -221,10 +221,7 @@ pub enum IndexError {
     /// from one that already emitted — this adapter retains no logs for drained
     /// blocks, so there is nothing left to compare against. See README,
     /// "Operational consequences".
-    DrainedBlockLogWouldHaveEmitted {
-        block_number: u64,
-        log_index: u64,
-    },
+    DrainedBlockLogWouldHaveEmitted { block_number: u64, log_index: u64 },
     /// The block the cursor was written against no longer has the hash it had.
     /// The chain reorganized below the cursor while the process was down.
     HistoryChangedUnderCursor {

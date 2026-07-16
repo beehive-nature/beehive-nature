@@ -253,11 +253,7 @@ impl ChainTracker {
 
     /// Drop every retained block above `fork_point`.
     fn rollback_above(&mut self, fork_point: u64) {
-        while self
-            .blocks
-            .back()
-            .is_some_and(|b| b.number > fork_point)
-        {
+        while self.blocks.back().is_some_and(|b| b.number > fork_point) {
             self.blocks.pop_back();
         }
     }
@@ -356,7 +352,10 @@ mod tests {
         // window now holds only 101, 102.
         // A block claiming to build on something at height 99 — unretained.
         let err = t.observe(blk(100, 7, 6)).unwrap_err();
-        assert!(matches!(err, ReorgError::AmbiguousReorg { observed: 100, .. }));
+        assert!(matches!(
+            err,
+            ReorgError::AmbiguousReorg { observed: 100, .. }
+        ));
     }
 
     #[test]
@@ -365,7 +364,10 @@ mod tests {
         // 103 claims a parent hash we have never seen: we cannot tell what
         // was orphaned. Must block, must not guess.
         let err = t.observe(blk(103, 9, 99)).unwrap_err();
-        assert!(matches!(err, ReorgError::AmbiguousReorg { observed: 103, .. }));
+        assert!(matches!(
+            err,
+            ReorgError::AmbiguousReorg { observed: 103, .. }
+        ));
         // And the tracker must not have mutated on a refusal.
         assert_eq!(t.tip().unwrap().number, 102);
         assert_eq!(t.len(), 3);
@@ -396,7 +398,10 @@ mod tests {
         t.observe(blk(0, 1, 0)).unwrap();
         // A competing block 0 has no parent to link against.
         let err = t.observe(blk(0, 2, 0)).unwrap_err();
-        assert!(matches!(err, ReorgError::AmbiguousReorg { observed: 0, .. }));
+        assert!(matches!(
+            err,
+            ReorgError::AmbiguousReorg { observed: 0, .. }
+        ));
     }
 
     #[test]

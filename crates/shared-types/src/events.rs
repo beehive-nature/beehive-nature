@@ -486,7 +486,8 @@ mod tests {
             event_type: EventType::PerformanceSetPublished,
             timestamp: 1_782_000_000,
             source_chain: SourceChain::AtProto,
-            source_ref: "at://did:plc:abc/social.skaists.alpha.performance.set/rkey123#bafyfakecid".into(),
+            source_ref: "at://did:plc:abc/social.skaists.alpha.performance.set/rkey123#bafyfakecid"
+                .into(),
             payload: EventPayload::Product(ProductEvent {
                 listing_id: "set-1".into(),
                 seller_did: "did:plc:abc".into(),

@@ -63,9 +63,7 @@ impl Provenance {
     pub fn is_high(self) -> bool {
         matches!(
             self,
-            Provenance::ChainProof
-                | Provenance::DeviceAttestation
-                | Provenance::CarrierApi
+            Provenance::ChainProof | Provenance::DeviceAttestation | Provenance::CarrierApi
         )
     }
 }
@@ -160,9 +158,7 @@ mod tests {
     #[test]
     fn provenance_weights_are_ordered_as_specified() {
         assert!(Provenance::ChainProof.base_weight() > Provenance::DeviceAttestation.base_weight());
-        assert!(
-            Provenance::DeviceAttestation.base_weight() > Provenance::CarrierApi.base_weight()
-        );
+        assert!(Provenance::DeviceAttestation.base_weight() > Provenance::CarrierApi.base_weight());
         // G-1: SignedSelfAttestation is below AiInference, above UserClaim.
         assert!(
             Provenance::AiInference.base_weight() > Provenance::SignedSelfAttestation.base_weight()
@@ -217,7 +213,9 @@ mod tests {
             verified: true,
             payload_hash: [0xab; 32],
             subject_did: Some("did:plc: performer".into()),
-            source_ref: Some("at://did:plc:abc/social.skaists.alpha.performance.set/rkey#cid123".into()),
+            source_ref: Some(
+                "at://did:plc:abc/social.skaists.alpha.performance.set/rkey#cid123".into(),
+            ),
             validator_digest: Some([0xcd; 32]),
             view_grade: ViewGrade::Confirmed,
         };
@@ -273,7 +271,7 @@ mod tests {
         let e = Evidence {
             provenance: Provenance::ChainProof, // 0.95
             confidence: 1.0,
-            signed: true,  // +0.05
+            signed: true,   // +0.05
             verified: true, // +0.05
             payload_hash: [0; 32],
             subject_did: None,

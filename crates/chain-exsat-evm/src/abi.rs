@@ -186,10 +186,7 @@ pub fn is_static_value_type(ty: &str) -> bool {
         "address" | "bool" => return true,
         _ => {}
     }
-    if let Some(bits) = ty
-        .strip_prefix("uint")
-        .or_else(|| ty.strip_prefix("int"))
-    {
+    if let Some(bits) = ty.strip_prefix("uint").or_else(|| ty.strip_prefix("int")) {
         return matches!(
             bits.parse::<u32>(),
             Ok(n) if (8..=256).contains(&n) && n.is_multiple_of(8)
@@ -381,10 +378,18 @@ mod tests {
     #[test]
     fn dynamic_and_noncanonical_types_are_rejected() {
         for ty in [
-            "string", "bytes", "uint256[]", "bytes33", "uint7", "uint0", "uint512", "",
+            "string",
+            "bytes",
+            "uint256[]",
+            "bytes33",
+            "uint7",
+            "uint0",
+            "uint512",
+            "",
             // Non-canonical: a canonical signature spells these uint256/int256.
             // Hashing them would produce a topic0 no contract ever emits.
-            "uint", "int",
+            "uint",
+            "int",
         ] {
             assert!(!is_static_value_type(ty), "{ty} must not be static");
         }
@@ -431,7 +436,10 @@ mod tests {
 
     #[test]
     fn missing_topic0_is_refused() {
-        assert_eq!(decode_log(&[], &[], SIG).unwrap_err(), AbiError::MissingTopic0);
+        assert_eq!(
+            decode_log(&[], &[], SIG).unwrap_err(),
+            AbiError::MissingTopic0
+        );
     }
 
     #[test]

@@ -25,7 +25,9 @@
 use std::collections::BTreeMap;
 use std::fmt;
 
-use dispute_engine::{Dispute, Evidence, EvidenceProvider, Provenance, ProviderError, Side, ViewGrade};
+use dispute_engine::{
+    Dispute, Evidence, EvidenceProvider, Provenance, ProviderError, Side, ViewGrade,
+};
 use sha2::{Digest, Sha256};
 
 /// One tracking scan as reported by a carrier.

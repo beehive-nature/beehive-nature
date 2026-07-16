@@ -131,7 +131,10 @@ mod tests {
 
         assert!(!c.is_ahead(100, 3), "the emitted position itself is behind");
         assert!(!c.is_ahead(100, 2), "earlier log in same block is behind");
-        assert!(!c.is_ahead(99, 999), "any log in an earlier block is behind");
+        assert!(
+            !c.is_ahead(99, 999),
+            "any log in an earlier block is behind"
+        );
         assert!(c.is_ahead(100, 4), "later log in same block is ahead");
         assert!(c.is_ahead(101, 0), "any log in a later block is ahead");
     }
@@ -156,7 +159,10 @@ mod tests {
     fn fresh_cursor_roundtrips_through_json() {
         let c = Cursor::new();
         assert_eq!(Cursor::from_json(&c.to_json()).unwrap(), c);
-        assert!(Cursor::from_json(&c.to_json()).unwrap().last_emitted.is_none());
+        assert!(Cursor::from_json(&c.to_json())
+            .unwrap()
+            .last_emitted
+            .is_none());
     }
 
     #[test]
