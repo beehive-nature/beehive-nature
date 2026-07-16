@@ -207,6 +207,127 @@ impl EvidenceClass {
     }
 }
 
+/// T5 live authority as a **set**, not a device.
+///
+/// Founder ruling (2026-07-16): T5 is 2-of-3 across independent isolated
+/// signers. That is why this type exists at all — [`Tier::of`] maps *one*
+/// device's evidence to one tier, and a quorum is not a property any single
+/// device has. The scalar path is untouched: a caller that never enrolls a
+/// policy sees exactly the v1 behaviour.
+///
+/// **Genesis honesty.** The founder holds one Safe 7 today, so `threshold: 1,
+/// enrolled: [safe7]` is a legitimate policy — 1-of-1 — raised to 2-of-3 as
+/// signers enrol. This type does not pretend the third signer exists; it lets
+/// the policy say truthfully how many there are. Changing threshold or
+/// enrolment is itself a T5 act: the current quorum authorises its successor.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct QuorumPolicy {
+    /// How many enrolled isolated signers must present to reach [`Tier::T5`].
+    pub threshold: u8,
+    /// The enrolled signers, by DID. Membership is by DID, never by public key
+    /// — a signer rotating its key stays the same principal (the crate's
+    /// identity rule).
+    pub enrolled: Vec<Did>,
+}
+
+impl QuorumPolicy {
+    /// A policy requiring `threshold` of `enrolled`.
+    pub fn new(threshold: u8, enrolled: Vec<Did>) -> Self {
+        QuorumPolicy {
+            threshold,
+            enrolled,
+        }
+    }
+
+    /// The 1-of-1 genesis policy: one signer, and the truth about it.
+    pub fn genesis(anchor: Did) -> Self {
+        QuorumPolicy::new(1, vec![anchor])
+    }
+
+    /// Is `did` currently enrolled?
+    pub fn is_enrolled(&self, did: &Did) -> bool {
+        self.enrolled.iter().any(|e| e == did)
+    }
+
+    /// How many of `presented` count toward quorum: enrolled **and** carrying
+    /// [`EvidenceClass::IsolatedSigner`]. A duplicate DID counts once — three
+    /// presentations of one signer are one signer.
+    pub fn counted(&self, presented: &[(Did, EvidenceClass)]) -> usize {
+        let mut seen: Vec<&Did> = Vec::new();
+        for (did, class) in presented {
+            if *class == EvidenceClass::IsolatedSigner
+                && self.is_enrolled(did)
+                && !seen.contains(&did)
+            {
+                seen.push(did);
+            }
+        }
+        seen.len()
+    }
+
+    /// The tier this set of presented devices actually earns.
+    ///
+    /// Quorum met → [`Tier::T5`]. Otherwise the **best single-device tier among
+    /// presented** — which is the whole point of the ruling: a lone Safe 7
+    /// under a 2-of-3 policy is still an isolated signer, but it is not the
+    /// quorum, so it does not carry T5 authority. It falls back to what one
+    /// device can honestly claim.
+    ///
+    /// Note the deliberate asymmetry: the fallback uses [`Tier::of`] on each
+    /// presented device *regardless of enrolment*, because a non-enrolled
+    /// phone is still a phone — enrolment gates the T5 quorum, not a device's
+    /// own evidence. Empty `presented` → [`Tier::T1`], the floor: nothing
+    /// presented earns nothing.
+    pub fn effective_tier(&self, presented: &[(Did, EvidenceClass)]) -> Tier {
+        if self.threshold > 0 && self.counted(presented) >= self.threshold as usize {
+            return Tier::T5;
+        }
+        presented
+            .iter()
+            .map(|(_, class)| {
+                // A lone isolated signer under an unmet quorum cannot claim the
+                // tier the quorum exists to guard. T4 is the honest ceiling for
+                // one device: everything a strong device does, minus what the
+                // set was made to authorise.
+                match Tier::of(*class) {
+                    Tier::T5 => Tier::T4,
+                    t => t,
+                }
+            })
+            .max()
+            .unwrap_or(Tier::T1)
+    }
+
+    /// Remove `did` from the enrolled set. **Always succeeds.**
+    ///
+    /// Founder ruling (2026-07-16): revoke-wins. Revoking a signer is never
+    /// blocked by what it does to quorum — a compromised signer that cannot be
+    /// revoked *because* revoking it would break quorum is an attacker holding
+    /// the quorum hostage, and every hour of hesitation is an hour they still
+    /// hold the key. So this is arithmetic, not a decision: the DID leaves the
+    /// set, and if that drops the policy below threshold, the policy is below
+    /// threshold. §7's timelocked restore is the availability path back, and it
+    /// is loud and vetoable by design.
+    ///
+    /// Returns whether `did` was enrolled — information, not permission.
+    pub fn revoke(&mut self, did: &Did) -> bool {
+        let before = self.enrolled.len();
+        self.enrolled.retain(|e| e != did);
+        self.enrolled.len() != before
+    }
+
+    /// Can this policy still reach [`Tier::T5`] at all — i.e. are there enough
+    /// enrolled signers left to meet the threshold?
+    ///
+    /// Diagnostic only. It never gates [`QuorumPolicy::revoke`]; a caller may
+    /// use it to *warn* that a revocation will drop the quorum, but the
+    /// revocation proceeds regardless.
+    pub fn is_satisfiable(&self) -> bool {
+        self.threshold > 0 && self.enrolled.len() >= self.threshold as usize
+    }
+}
+
 /// A UCAN-shaped delegation from `issuer` to `audience`.
 ///
 /// The `signature` is `None` in v1 (the capability core is exercised unsigned).
@@ -666,6 +787,196 @@ mod tests {
         let back: Delegation = serde_json::from_str(&serde_json::to_string(&d).unwrap()).unwrap();
         assert_eq!(d, back);
         assert_eq!(back.tier_ceiling, Some(Tier::T4));
+    }
+
+    // ── T5 quorum policy ─────────────────────────────────────────────────
+
+    fn safe7() -> Did {
+        Did::new("did:autonomi:safe7-anchor")
+    }
+    fn signer_b() -> Did {
+        Did::new("did:autonomi:signer-b")
+    }
+    fn signer_c() -> Did {
+        Did::new("did:autonomi:signer-c")
+    }
+    fn two_of_three() -> QuorumPolicy {
+        QuorumPolicy::new(2, vec![safe7(), signer_b(), signer_c()])
+    }
+
+    #[test]
+    fn quorum_met_reaches_t5() {
+        let p = two_of_three();
+        let presented = [
+            (safe7(), EvidenceClass::IsolatedSigner),
+            (signer_b(), EvidenceClass::IsolatedSigner),
+        ];
+        assert_eq!(p.counted(&presented), 2);
+        assert_eq!(p.effective_tier(&presented), Tier::T5);
+    }
+
+    #[test]
+    fn lone_isolated_signer_under_a_2_of_3_policy_is_not_t5() {
+        // The point of the ruling. One Safe 7 is still an isolated signer, but
+        // it is not the quorum — so it cannot carry the authority the quorum
+        // exists to guard.
+        let p = two_of_three();
+        let presented = [(safe7(), EvidenceClass::IsolatedSigner)];
+        assert_eq!(p.counted(&presented), 1);
+        assert_eq!(p.effective_tier(&presented), Tier::T4);
+        assert_ne!(p.effective_tier(&presented), Tier::T5);
+    }
+
+    #[test]
+    fn non_enrolled_signer_does_not_count_toward_quorum() {
+        let p = two_of_three();
+        let stranger = Did::new("did:autonomi:not-ours");
+        let presented = [
+            (safe7(), EvidenceClass::IsolatedSigner),
+            (stranger, EvidenceClass::IsolatedSigner),
+        ];
+        assert_eq!(
+            p.counted(&presented),
+            1,
+            "a stranger's Trezor is not our quorum"
+        );
+        assert_eq!(p.effective_tier(&presented), Tier::T4);
+    }
+
+    #[test]
+    fn enrolled_but_not_isolated_signer_does_not_count() {
+        // An enrolled DID presenting weaker evidence is not a T5 signer that
+        // day. Enrolment is not a standing claim about the device in hand.
+        let p = two_of_three();
+        let presented = [
+            (safe7(), EvidenceClass::IsolatedSigner),
+            (signer_b(), EvidenceClass::HardwareKeyVerifiedBoot),
+        ];
+        assert_eq!(p.counted(&presented), 1);
+        assert_eq!(p.effective_tier(&presented), Tier::T4);
+    }
+
+    #[test]
+    fn one_signer_presented_thrice_is_still_one_signer() {
+        let p = two_of_three();
+        let presented = [
+            (safe7(), EvidenceClass::IsolatedSigner),
+            (safe7(), EvidenceClass::IsolatedSigner),
+            (safe7(), EvidenceClass::IsolatedSigner),
+        ];
+        assert_eq!(p.counted(&presented), 1, "replay is not a second signer");
+        assert_ne!(p.effective_tier(&presented), Tier::T5);
+    }
+
+    #[test]
+    fn effective_tier_falls_back_to_best_single_device() {
+        let p = two_of_three();
+        // Nothing presented: the floor.
+        assert_eq!(p.effective_tier(&[]), Tier::T1);
+        // A phone and a browser: best of the two, unaffected by enrolment.
+        let presented = [
+            (Did::new("did:plc:browser"), EvidenceClass::SessionOnly),
+            (
+                Did::new("did:plc:phone"),
+                EvidenceClass::HardwareKeyVerifiedBoot,
+            ),
+        ];
+        assert_eq!(p.effective_tier(&presented), Tier::T4);
+        let weak = [(Did::new("did:plc:vps"), EvidenceClass::ProvisionedSoftware)];
+        assert_eq!(p.effective_tier(&weak), Tier::T2);
+    }
+
+    #[test]
+    fn revoke_wins_even_when_it_breaks_quorum() {
+        // THE ruling, as arithmetic. A compromised signer is removed; the fact
+        // that removal drops the set below threshold does not block it.
+        let mut p = two_of_three();
+        assert!(p.is_satisfiable());
+
+        assert!(p.revoke(&signer_b()));
+        assert!(
+            p.is_satisfiable(),
+            "2 of 2 remaining still meets a threshold of 2"
+        );
+
+        // Revoke again: now only one signer remains and 2-of-3 is unreachable.
+        assert!(p.revoke(&signer_c()));
+        assert!(
+            !p.is_satisfiable(),
+            "quorum is now broken — and the revoke still happened"
+        );
+        assert_eq!(p.enrolled, vec![safe7()]);
+
+        // Even the last signer can be revoked. Being the only one left is not
+        // a defence for a compromised device.
+        assert!(p.revoke(&safe7()));
+        assert!(p.enrolled.is_empty());
+        assert!(!p.is_satisfiable());
+        // And with nothing enrolled, no presentation reaches T5.
+        assert_ne!(
+            p.effective_tier(&[(safe7(), EvidenceClass::IsolatedSigner)]),
+            Tier::T5
+        );
+    }
+
+    #[test]
+    fn revoking_an_unenrolled_did_is_a_no_op_not_an_error() {
+        let mut p = two_of_three();
+        assert!(!p.revoke(&Did::new("did:autonomi:never-enrolled")));
+        assert_eq!(p.enrolled.len(), 3);
+    }
+
+    #[test]
+    fn genesis_is_one_of_one_and_raises_to_two_of_three() {
+        // Genesis honesty: the founder has ONE Safe 7 today. The policy says so
+        // rather than pretending the other two exist.
+        let mut p = QuorumPolicy::genesis(safe7());
+        assert_eq!(p.threshold, 1);
+        assert_eq!(p.enrolled, vec![safe7()]);
+        assert!(p.is_satisfiable());
+        // At 1-of-1 the lone anchor DOES reach T5 — it is the whole quorum.
+        assert_eq!(
+            p.effective_tier(&[(safe7(), EvidenceClass::IsolatedSigner)]),
+            Tier::T5
+        );
+
+        // Signers enrol; the current quorum authorises its successor.
+        p.enrolled.push(signer_b());
+        p.enrolled.push(signer_c());
+        p.threshold = 2;
+        assert!(p.is_satisfiable());
+
+        // The same lone anchor that was T5 a moment ago is now T4 — the raise
+        // took effect, and that is the transition working.
+        assert_eq!(
+            p.effective_tier(&[(safe7(), EvidenceClass::IsolatedSigner)]),
+            Tier::T4
+        );
+        assert_eq!(
+            p.effective_tier(&[
+                (safe7(), EvidenceClass::IsolatedSigner),
+                (signer_c(), EvidenceClass::IsolatedSigner),
+            ]),
+            Tier::T5
+        );
+    }
+
+    #[test]
+    fn zero_threshold_never_reaches_t5() {
+        // A degenerate policy must not make T5 free.
+        let p = QuorumPolicy::new(0, vec![safe7()]);
+        assert!(!p.is_satisfiable());
+        assert_ne!(
+            p.effective_tier(&[(safe7(), EvidenceClass::IsolatedSigner)]),
+            Tier::T5
+        );
+    }
+
+    #[test]
+    fn quorum_policy_roundtrips_through_json() {
+        let p = two_of_three();
+        let back: QuorumPolicy = serde_json::from_str(&serde_json::to_string(&p).unwrap()).unwrap();
+        assert_eq!(p, back);
     }
 
     #[test]
