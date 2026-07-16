@@ -488,8 +488,50 @@ pub trait Verifier {
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum DeviceEvidence {
-    /// Trezor device certificate + signature (OPTIGA-backed on current models).
-    Trezor { cert: Vec<u8>, signature: Vec<u8> },
+    /// A Trezor `AuthenticityProof`, as the device actually returns it.
+    ///
+    /// Shaped from the wire protocol
+    /// (`trezor-firmware/common/protob/messages-management.proto`), not from a
+    /// guess: `AuthenticateDevice { challenge }` answers with **up to three
+    /// independent chains**, each with its own signature — Optiga, Tropic, and
+    /// MCU. The earlier `{ cert, signature }` singular could not represent a
+    /// Safe 7's answer at all.
+    ///
+    /// Each signature is DER, over `"\x13AuthenticateDevice:" || len-prefixed
+    /// challenge` — so `challenge` is carried here too. A proof is only
+    /// meaningful against the challenge it answers; without it a verifier
+    /// cannot tell a fresh proof from a replayed one.
+    ///
+    /// `tropic_*` and `mcu_*` are optional because the protobuf marks them so —
+    /// the field set is a property of the model, and older units answer with
+    /// Optiga alone. `internal_model` is the device's own identifier (`T3W1` on
+    /// a Safe 7, observed in a real device log) rather than a marketing name,
+    /// because that is what a verifier can actually match on.
+    ///
+    /// **Raw bytes only, no field semantics.** Nothing here has been parsed
+    /// against real hardware by this seat — the `trezorctl device authenticate
+    /// --raw` capture has not happened. The `chain-exsat-evm` precedent holds:
+    /// carry the blob, name its origin, invent nothing about its interior until
+    /// something has read one.
+    Trezor {
+        /// The challenge that was sent; every signature below is over it.
+        challenge: Vec<u8>,
+        /// Chain starting with the Optiga device certificate, DER.
+        optiga_certificates: Vec<Vec<u8>>,
+        /// DER signature from the Optiga secure element.
+        optiga_signature: Vec<u8>,
+        /// Chain starting with the Tropic device certificate (Safe 7's
+        /// TROPIC01). Empty on models without one.
+        tropic_certificates: Vec<Vec<u8>>,
+        /// DER signature from Tropic; `None` on models without one.
+        tropic_signature: Option<Vec<u8>>,
+        /// MCU device certificate chain, signed by the vendor root CA.
+        mcu_certificates: Vec<Vec<u8>>,
+        /// DER signature from the MCU; `None` where the model omits it.
+        mcu_signature: Option<Vec<u8>>,
+        /// The device's own model identifier, e.g. `T3W1` (Safe 7).
+        internal_model: String,
+    },
     /// Android Key Attestation certificate chain, leaf-first, DER.
     AndroidKeyAttestation { chain: Vec<Vec<u8>> },
     /// Apple App Attest attestation object (CBOR).
