@@ -8,3 +8,8 @@ description = "bNature identity.root + Capability primitive (Phase 2 scaffold): 
 [dependencies]
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+# Rider 1 (founder, 2026-07-16): floor at >=2.0 HARD. 1.x carries
+# RUSTSEC-2022-0093 — a signing oracle: its API let a caller supply a public key
+# unrelated to the signing key, leaking the private key over repeated signatures.
+# Rider 2: `zeroize` so signing keys scrub on drop; the workspace already pins it.
+ed25519-dalek = { version = "2", features = ["zeroize"] }

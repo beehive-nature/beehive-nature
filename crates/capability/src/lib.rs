@@ -518,6 +518,119 @@ pub trait EvidenceVerifier {
     fn classify(&self, evidence: &DeviceEvidence) -> Result<EvidenceClass, CapabilityError>;
 }
 
+/// Ed25519 verification of [`Delegation`] signatures — the crypto step v1
+/// deferred, now built.
+///
+/// # Why `verify_strict`, not `verify`
+///
+/// Deliberate, per the founder rider (2026-07-16), and the difference is not
+/// cosmetic. Ed25519's original definition left both scalar and **group
+/// element** malleability open: a public key or signature component can lie in
+/// a small-order subgroup, so more than one `(key, sig)` pair can verify the
+/// same message. `verify_strict` rejects small-order/non-canonical points and
+/// applies the cofactor-less equation; `verify` does not.
+///
+/// For a delegation token that is exactly the wrong property. `signing_payload`
+/// is the token's identity, and a caller must be able to treat "this verified"
+/// as "this issuer, and no other, authorised these bytes". Under plain
+/// `verify`, a malleable variant of a token could verify too — the token stops
+/// being unique, which is the whole premise of a capability grant. The crate's
+/// own upstream doc names this: group-element malleability became a concern
+/// specifically for "unique identities". A delegation is a unique identity.
+///
+/// The cost is that a signature some other library produced loosely might be
+/// refused here. That is the correct direction for this crate: fail-closed, and
+/// a token we cannot uniquely attribute is a token we do not honour.
+///
+/// # What this verifier does NOT do
+///
+/// It answers one question: did this issuer sign these bytes? It does not check
+/// capabilities, tiers, or quorum — a real gate composes all of them:
+/// `verify(&d)? && d.allows_at_tier(…)`. Time bounds ARE checked, because an
+/// expired token is not one this crate should report as verified.
+pub struct Ed25519Verifier {
+    /// The issuer's public key, by DID. Keyed on DID because that is the
+    /// crate's principal — a signer rotating its key stays the same principal,
+    /// and this map is what gets updated on rotation.
+    keys: std::collections::BTreeMap<Did, ed25519_dalek::VerifyingKey>,
+    /// Unix seconds, supplied by the caller. This crate reads no clock: a
+    /// verifier that consults `SystemTime` is untestable and, in a kernel that
+    /// bars clock reads in some paths, unusable. The caller owns the time.
+    now: i64,
+}
+
+impl Ed25519Verifier {
+    /// A verifier that knows `keys` and evaluates time bounds at `now`.
+    pub fn new(
+        keys: std::collections::BTreeMap<Did, ed25519_dalek::VerifyingKey>,
+        now: i64,
+    ) -> Self {
+        Ed25519Verifier { keys, now }
+    }
+
+    /// Sign `delegation`'s canonical payload, returning the delegation with its
+    /// `signature` filled.
+    ///
+    /// Test/issuer helper. The signing key is borrowed, never stored — and
+    /// `ed25519_dalek::SigningKey` is `ZeroizeOnDrop` (its `Drop` calls
+    /// `secret_key.zeroize()`), so it scrubs when the caller drops it. That is
+    /// the `zeroize` feature earning its place, not decoration.
+    pub fn sign(delegation: &Delegation, key: &ed25519_dalek::SigningKey) -> Delegation {
+        use ed25519_dalek::Signer;
+        let sig = key.sign(&delegation.signing_payload());
+        let mut signed = delegation.clone();
+        signed.signature = Some(hex_lower(&sig.to_bytes()));
+        signed
+    }
+}
+
+/// Lowercase hex, no prefix — the signature's wire form in `Delegation`.
+fn hex_lower(bytes: &[u8]) -> String {
+    let mut s = String::with_capacity(bytes.len() * 2);
+    for b in bytes {
+        s.push_str(&format!("{b:02x}"));
+    }
+    s
+}
+
+fn hex_decode(s: &str) -> Option<Vec<u8>> {
+    if !s.len().is_multiple_of(2) {
+        return None;
+    }
+    (0..s.len())
+        .step_by(2)
+        .map(|i| u8::from_str_radix(&s[i..i + 2], 16).ok())
+        .collect()
+}
+
+impl Verifier for Ed25519Verifier {
+    fn verify(&self, delegation: &Delegation) -> Result<(), CapabilityError> {
+        let sig_hex = delegation
+            .signature
+            .as_deref()
+            .ok_or(CapabilityError::Unsigned)?;
+
+        if !delegation.valid_at(self.now) {
+            return Err(CapabilityError::Expired);
+        }
+
+        let key = self
+            .keys
+            .get(&delegation.issuer)
+            .ok_or(CapabilityError::UnknownIssuer)?;
+
+        // Every malformed input below is BadSignature, not a distinct error:
+        // a caller must not be able to tell "wrong length" from "wrong bytes"
+        // by the error alone.
+        let raw = hex_decode(sig_hex).ok_or(CapabilityError::BadSignature)?;
+        let bytes: [u8; 64] = raw.try_into().map_err(|_| CapabilityError::BadSignature)?;
+        let sig = ed25519_dalek::Signature::from_bytes(&bytes);
+
+        key.verify_strict(&delegation.signing_payload(), &sig)
+            .map_err(|_| CapabilityError::BadSignature)
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CapabilityError {
     /// The delegation carried no signature.
@@ -530,6 +643,13 @@ pub enum CapabilityError {
     /// chain did not verify. Fail-closed: a blob that cannot be classified
     /// earns no tier, rather than falling back to a weak one.
     UnclassifiableEvidence,
+    /// No public key is known for the delegation's issuer.
+    ///
+    /// Distinct from `BadSignature` on purpose: "I cannot check this" and "I
+    /// checked this and it is forged" are different facts, and collapsing them
+    /// would let an operator read an un-enrolled issuer as an attack. Both
+    /// still deny — fail-closed either way.
+    UnknownIssuer,
 }
 
 impl std::fmt::Display for CapabilityError {
@@ -540,6 +660,9 @@ impl std::fmt::Display for CapabilityError {
             CapabilityError::Expired => write!(f, "delegation is outside its time bounds"),
             CapabilityError::UnclassifiableEvidence => {
                 write!(f, "device evidence did not classify")
+            }
+            CapabilityError::UnknownIssuer => {
+                write!(f, "no public key known for the delegation's issuer")
             }
         }
     }
@@ -977,6 +1100,174 @@ mod tests {
         let p = two_of_three();
         let back: QuorumPolicy = serde_json::from_str(&serde_json::to_string(&p).unwrap()).unwrap();
         assert_eq!(p, back);
+    }
+
+    // ── Ed25519 verifier ─────────────────────────────────────────────────
+
+    fn test_key() -> ed25519_dalek::SigningKey {
+        // A fixed seed: deterministic tests, and no RNG dependency. This is a
+        // TEST key and never leaves this module.
+        ed25519_dalek::SigningKey::from_bytes(&[7u8; 32])
+    }
+
+    fn keyring(did: Did, k: &ed25519_dalek::SigningKey) -> Ed25519Verifier {
+        let mut m = std::collections::BTreeMap::new();
+        m.insert(did, k.verifying_key());
+        Ed25519Verifier::new(m, 1_000)
+    }
+
+    fn unsigned_grant() -> Delegation {
+        Delegation::grant(
+            Did::new("did:autonomi:root"),
+            Did::new("did:plc:design"),
+            vec![Capability::new("storage.sovereign", "farm/read")],
+        )
+    }
+
+    #[test]
+    fn signs_and_verifies_a_real_signature() {
+        let k = test_key();
+        let d = Ed25519Verifier::sign(&unsigned_grant(), &k);
+        assert!(d.is_signed());
+        let v = keyring(Did::new("did:autonomi:root"), &k);
+        assert_eq!(v.verify(&d), Ok(()));
+    }
+
+    #[test]
+    fn unsigned_is_rejected_as_unsigned() {
+        let k = test_key();
+        let v = keyring(Did::new("did:autonomi:root"), &k);
+        assert_eq!(v.verify(&unsigned_grant()), Err(CapabilityError::Unsigned));
+    }
+
+    #[test]
+    fn tampering_with_the_payload_breaks_the_signature() {
+        // THE property. The signature covers signing_payload(); mutate any
+        // signed field and verification must fail — this is what stops a holder
+        // widening their own grant.
+        let k = test_key();
+        let v = keyring(Did::new("did:autonomi:root"), &k);
+
+        let signed = Ed25519Verifier::sign(&unsigned_grant(), &k);
+        assert_eq!(v.verify(&signed), Ok(()));
+
+        // Escalate the capability: farm/read -> wallet/spend.
+        let mut escalated = signed.clone();
+        escalated.capabilities = vec![Capability::new("settlement.private", "wallet/spend")];
+        assert_eq!(v.verify(&escalated), Err(CapabilityError::BadSignature));
+
+        // Redirect the audience.
+        let mut redirected = signed.clone();
+        redirected.audience = Did::new("did:plc:attacker");
+        assert_eq!(v.verify(&redirected), Err(CapabilityError::BadSignature));
+
+        // Strip a tier ceiling — the attack the skip_serializing_if invariant
+        // exists to make detectable.
+        let ceilinged = Ed25519Verifier::sign(&unsigned_grant().with_tier_ceiling(Tier::T5), &k);
+        assert_eq!(v.verify(&ceilinged), Ok(()));
+        let mut stripped = ceilinged.clone();
+        stripped.tier_ceiling = None;
+        assert_eq!(
+            v.verify(&stripped),
+            Err(CapabilityError::BadSignature),
+            "stripping a ceiling must invalidate the token"
+        );
+    }
+
+    #[test]
+    fn a_different_key_does_not_verify() {
+        let signer = test_key();
+        let other = ed25519_dalek::SigningKey::from_bytes(&[9u8; 32]);
+        let d = Ed25519Verifier::sign(&unsigned_grant(), &signer);
+        // The verifier holds the WRONG key for this issuer.
+        let v = keyring(Did::new("did:autonomi:root"), &other);
+        assert_eq!(v.verify(&d), Err(CapabilityError::BadSignature));
+    }
+
+    #[test]
+    fn unknown_issuer_is_distinct_from_bad_signature() {
+        let k = test_key();
+        let d = Ed25519Verifier::sign(&unsigned_grant(), &k);
+        // Verifier knows a different DID entirely.
+        let v = keyring(Did::new("did:autonomi:somebody-else"), &k);
+        assert_eq!(
+            v.verify(&d),
+            Err(CapabilityError::UnknownIssuer),
+            "'I cannot check this' must not read as 'this is forged'"
+        );
+    }
+
+    #[test]
+    fn expired_is_rejected_even_with_a_valid_signature() {
+        let k = test_key();
+        let mut d = unsigned_grant();
+        d.expires_at = Some(500);
+        let d = Ed25519Verifier::sign(&d, &k);
+        // Verifier's clock is 1000 — past expiry.
+        let v = keyring(Did::new("did:autonomi:root"), &k);
+        assert_eq!(v.verify(&d), Err(CapabilityError::Expired));
+
+        // Same token, earlier clock: fine.
+        let mut m = std::collections::BTreeMap::new();
+        m.insert(Did::new("did:autonomi:root"), k.verifying_key());
+        assert_eq!(Ed25519Verifier::new(m, 400).verify(&d), Ok(()));
+    }
+
+    #[test]
+    fn malformed_signature_bytes_are_bad_signature_not_a_panic() {
+        let k = test_key();
+        let v = keyring(Did::new("did:autonomi:root"), &k);
+        for junk in ["", "zz", "abc", &"ab".repeat(63), &"ab".repeat(65)] {
+            let mut d = unsigned_grant();
+            d.signature = Some(junk.to_string());
+            assert_eq!(
+                v.verify(&d),
+                Err(CapabilityError::BadSignature),
+                "junk signature {junk:?} must deny, never panic"
+            );
+        }
+    }
+
+    #[test]
+    fn a_small_order_signature_r_is_refused() {
+        // Rider 3, probed at the one place `verify_strict` and `verify`
+        // actually differ. Reading the upstream source (verifying.rs:357):
+        // verify_strict rejects when `signature_R.is_small_order()` OR the key
+        // is small-order — a property of the SIGNATURE's R component. Plain
+        // verify performs no such check.
+        //
+        // Honest limit, stated rather than implied: this test pins that a
+        // small-order R denies, which is the behaviour we want. It does NOT by
+        // itself distinguish verify from verify_strict — constructing a
+        // signature that verify accepts and verify_strict rejects requires
+        // forging against a small-order key, which `VerifyingKey::from_bytes`
+        // refuses to build in 2.x. The strict choice is defended by the source
+        // reading and the doc comment above `Ed25519Verifier`, not by this
+        // assertion. Recording that so the test is not mistaken for a proof it
+        // is not.
+        let k = test_key();
+        let v = keyring(Did::new("did:autonomi:root"), &k);
+        let mut d = unsigned_grant();
+        // R = the all-zeros compressed point (small order), s = 0.
+        d.signature = Some(hex_lower(&[0u8; 64]));
+        assert_eq!(v.verify(&d), Err(CapabilityError::BadSignature));
+    }
+
+    #[test]
+    fn verifying_key_rejects_the_all_zeros_point() {
+        // Why the test above cannot distinguish the two verifiers: 2.x refuses
+        // to even construct a small-order VerifyingKey, so that attack surface
+        // is closed before either verify path is reached. Pinned because if a
+        // future version relaxes this, the strict choice starts carrying weight
+        // this crate currently gets for free — and that is worth noticing.
+        let vk = ed25519_dalek::VerifyingKey::from_bytes(&[0u8; 32]);
+        match vk {
+            Err(_) => {}
+            Ok(k) => assert!(
+                k.is_weak(),
+                "if 2.x ever builds this key, it must at least report it weak"
+            ),
+        }
     }
 
     #[test]
