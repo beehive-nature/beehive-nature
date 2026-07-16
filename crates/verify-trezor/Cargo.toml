@@ -1,0 +1,9 @@
+[package]
+name = "verify-trezor"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "Classifies a Trezor AuthenticityProof into an EvidenceClass. Structural validation ships; chain-to-root verification gates on a sourced production root, so a Safe 7 classifies E3 today (the E5 ruling, enforced)."
+
+[dependencies]
+capability = { path = "../capability" }
