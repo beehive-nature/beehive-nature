@@ -207,6 +207,133 @@ impl EvidenceClass {
     }
 }
 
+/// A signature root that firmware may chain to.
+///
+/// `label` is for humans. **Matching is on `key`, never on `label`** — see
+/// [`FirmwarePolicy::trusts`]. A label is a convenience; if it were load-bearing,
+/// enrolling a root called "SatoshiLabs" would be an attack rather than a typo.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct TrustedRoot {
+    /// Human-readable name. Never matched on, never authoritative.
+    pub label: String,
+    /// The root public key bytes. This — and only this — is the identity.
+    ///
+    /// Raw bytes, no field semantics: no chain has been parsed against real
+    /// hardware by this crate, so nothing here interprets a certificate's
+    /// interior. The verifier that eventually parses one supplies these bytes;
+    /// this crate only decides whether they are trusted.
+    pub key: Vec<u8>,
+}
+
+impl TrustedRoot {
+    pub fn new(label: impl Into<String>, key: Vec<u8>) -> Self {
+        TrustedRoot {
+            label: label.into(),
+            key,
+        }
+    }
+}
+
+/// Which firmware signature roots this DID trusts — **policy data, not a
+/// hardcode**.
+///
+/// Founder ruling (2026-07-16): E5 requires *both* properties — the key cannot
+/// leave the signer, **and** the running firmware chains to a root listed here.
+/// Genuine hardware running unverifiable firmware is [`EvidenceClass::HardwareKey`]
+/// (E3), not [`EvidenceClass::IsolatedSigner`] (E5), because an untrusted screen
+/// can lie about what it signs — which breaks the isolation property itself, not
+/// merely the boot proof. **Non-stock is never "failed"; unverifiable is.**
+///
+/// This is [`QuorumPolicy`]'s doctrine applied a second time: signer trust is
+/// policy data, and so is firmware trust. Both say what they assume rather than
+/// hiding it — the vendor root is an enrolled, *revocable* row, not a constant
+/// compiled in. That is what makes leaving the vendor possible without making
+/// mystery firmware acceptable: adding a root is adding a row, and the day
+/// BNRi-signed firmware exists, ratifying it is a T5-quorum act
+/// (Article-VI-class), not a patch.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct FirmwarePolicy {
+    /// The roots firmware may chain to. **Empty trusts nothing** — a policy with
+    /// no roots yields E3 for every device, which is the fail-closed direction.
+    pub trusted_roots: Vec<TrustedRoot>,
+}
+
+impl FirmwarePolicy {
+    pub fn new(trusted_roots: Vec<TrustedRoot>) -> Self {
+        FirmwarePolicy { trusted_roots }
+    }
+
+    /// Genesis: the vendor root, enrolled **explicitly**.
+    ///
+    /// The caller supplies the key because this crate does not know it. The real
+    /// SatoshiLabs root is **UNVERIFIED here** — it has not been captured from a
+    /// device or read from a published source by this seat, and hardcoding a
+    /// guessed root would be exactly the invented-semantics failure the
+    /// chain-exsat-evm precedent exists to prevent. `trezorctl device
+    /// authenticate` carries a default root (its `--p256-root` flag implies
+    /// one), so a real value is obtainable; until it is obtained, the caller
+    /// owns it.
+    ///
+    /// Mirrors [`QuorumPolicy::genesis`]: it states its assumption instead of
+    /// pretending. "We trust SatoshiLabs" is a visible row that can be read,
+    /// audited, and revoked — not an assumption buried in a match arm.
+    pub fn genesis(vendor_root: TrustedRoot) -> Self {
+        FirmwarePolicy::new(vec![vendor_root])
+    }
+
+    /// Is `key` a trusted root?
+    ///
+    /// Compares **bytes**. A root's label has no authority: two roots may share
+    /// a label and be different keys, and an attacker's key labelled
+    /// "SatoshiLabs" is an attacker's key.
+    pub fn trusts(&self, key: &[u8]) -> bool {
+        self.trusted_roots.iter().any(|r| r.key == key)
+    }
+
+    /// Enrol a root. A T5-quorum act at the policy layer above this one; this
+    /// type stores the decision, it does not authorise it.
+    pub fn enroll(&mut self, root: TrustedRoot) {
+        if !self.trusts(&root.key) {
+            self.trusted_roots.push(root);
+        }
+    }
+
+    /// Remove a root. **Always succeeds** — revoke-wins, as with
+    /// [`QuorumPolicy::revoke`], and for the same reason: a root you cannot
+    /// revoke because revoking it would strand your devices is an attacker's
+    /// root. Devices chaining to it fall to E3 immediately; they are not
+    /// bricked, they are demoted, and the §7 restore path is how a T5 comes
+    /// back. Returns whether it was present — information, not permission.
+    pub fn revoke(&mut self, key: &[u8]) -> bool {
+        let before = self.trusted_roots.len();
+        self.trusted_roots.retain(|r| r.key != key);
+        self.trusted_roots.len() != before
+    }
+
+    /// The E5 gate: what an isolated-signer device *actually* classifies as,
+    /// given the root its firmware chains to.
+    ///
+    /// `chains_to`:
+    /// - `Some(key)` that this policy trusts → [`EvidenceClass::IsolatedSigner`]
+    ///   (E5). Both properties hold.
+    /// - `Some(key)` it does not trust → [`EvidenceClass::HardwareKey`] (E3).
+    ///   Non-stock, verified, not ours — demoted, not rejected.
+    /// - `None` — the chain did not verify, or nothing parsed it → E3. This is
+    ///   the unverifiable case, and it is the one the ruling names: the screen
+    ///   could be lying, so the isolation claim is gone.
+    ///
+    /// The caller supplies `chains_to`; this crate does not parse certificates.
+    /// That seam is deliberate — the verifier reads the chain, the policy
+    /// decides trust, and neither pretends to be the other.
+    pub fn classify_signer(&self, chains_to: Option<&[u8]>) -> EvidenceClass {
+        match chains_to {
+            Some(key) if self.trusts(key) => EvidenceClass::IsolatedSigner,
+            _ => EvidenceClass::HardwareKey,
+        }
+    }
+}
+
 /// T5 live authority as a **set**, not a device.
 ///
 /// Founder ruling (2026-07-16): T5 is 2-of-3 across independent isolated
@@ -952,6 +1079,162 @@ mod tests {
         let back: Delegation = serde_json::from_str(&serde_json::to_string(&d).unwrap()).unwrap();
         assert_eq!(d, back);
         assert_eq!(back.tier_ceiling, Some(Tier::T4));
+    }
+
+    // ── firmware policy (E5 = isolation AND attested firmware) ───────────
+
+    // Stand-ins. The real SatoshiLabs root is UNVERIFIED — not captured from a
+    // device or read from a published source by this seat — so these are
+    // labelled placeholders, never a guessed root presented as real.
+    const VENDOR_KEY: &[u8] = b"PLACEHOLDER-vendor-root-key-UNVERIFIED";
+    const BNRI_KEY: &[u8] = b"PLACEHOLDER-bnri-firmware-root-UNVERIFIED";
+    const ATTACKER_KEY: &[u8] = b"PLACEHOLDER-attacker-root";
+
+    fn vendor_policy() -> FirmwarePolicy {
+        FirmwarePolicy::genesis(TrustedRoot::new("SatoshiLabs", VENDOR_KEY.to_vec()))
+    }
+
+    #[test]
+    fn genesis_enrolls_the_vendor_root_explicitly() {
+        // The doctrine: genesis says what it trusts rather than hiding it.
+        let p = vendor_policy();
+        assert_eq!(p.trusted_roots.len(), 1);
+        assert_eq!(p.trusted_roots[0].label, "SatoshiLabs");
+        assert!(p.trusts(VENDOR_KEY));
+    }
+
+    #[test]
+    fn stock_firmware_on_an_isolated_signer_is_e5() {
+        let p = vendor_policy();
+        assert_eq!(
+            p.classify_signer(Some(VENDOR_KEY)),
+            EvidenceClass::IsolatedSigner
+        );
+        assert_eq!(p.classify_signer(Some(VENDOR_KEY)).tier(), Tier::T5);
+    }
+
+    #[test]
+    fn unverifiable_firmware_never_yields_isolated_signer() {
+        // THE ruling. An untrusted screen can lie about what it signs, so the
+        // isolation claim is gone — not the boot proof, the isolation itself.
+        let p = vendor_policy();
+        assert_eq!(p.classify_signer(None), EvidenceClass::HardwareKey);
+        assert_eq!(p.classify_signer(None).tier(), Tier::T3);
+        assert_ne!(p.classify_signer(None), EvidenceClass::IsolatedSigner);
+    }
+
+    #[test]
+    fn non_stock_is_demoted_not_rejected() {
+        // "Non-stock is never 'failed'; unverifiable is." A device chaining to
+        // a real-but-unenrolled root still holds its key in hardware — E3, not
+        // nothing.
+        let p = vendor_policy();
+        assert_eq!(
+            p.classify_signer(Some(BNRI_KEY)),
+            EvidenceClass::HardwareKey,
+            "an unenrolled root is demoted to E3, not refused outright"
+        );
+        assert_eq!(p.classify_signer(Some(BNRI_KEY)).tier(), Tier::T3);
+    }
+
+    #[test]
+    fn ratifying_a_root_is_adding_a_row() {
+        // The day BNRi-signed firmware exists, this is the whole change.
+        let mut p = vendor_policy();
+        assert_eq!(
+            p.classify_signer(Some(BNRI_KEY)),
+            EvidenceClass::HardwareKey
+        );
+
+        p.enroll(TrustedRoot::new("BNRi firmware", BNRI_KEY.to_vec()));
+
+        assert_eq!(
+            p.classify_signer(Some(BNRI_KEY)),
+            EvidenceClass::IsolatedSigner
+        );
+        // and the vendor root is untouched — both are trusted, neither special
+        assert_eq!(
+            p.classify_signer(Some(VENDOR_KEY)),
+            EvidenceClass::IsolatedSigner
+        );
+    }
+
+    #[test]
+    fn revoking_the_vendor_root_drops_its_devices_to_e3() {
+        // Revoke-wins, again arithmetic rather than a special case. Leaving the
+        // vendor is a supported act, and it demotes rather than bricks.
+        let mut p = vendor_policy();
+        assert_eq!(
+            p.classify_signer(Some(VENDOR_KEY)),
+            EvidenceClass::IsolatedSigner
+        );
+
+        assert!(p.revoke(VENDOR_KEY));
+
+        assert_eq!(
+            p.classify_signer(Some(VENDOR_KEY)),
+            EvidenceClass::HardwareKey,
+            "revoking the root demotes its devices to E3 — not bricked, demoted"
+        );
+        // Even the last root can go. An empty policy trusts nothing: fail-closed.
+        assert!(p.trusted_roots.is_empty());
+        assert_eq!(
+            p.classify_signer(Some(BNRI_KEY)),
+            EvidenceClass::HardwareKey
+        );
+    }
+
+    #[test]
+    fn an_empty_policy_trusts_nothing() {
+        let p = FirmwarePolicy::new(vec![]);
+        assert_eq!(
+            p.classify_signer(Some(VENDOR_KEY)),
+            EvidenceClass::HardwareKey
+        );
+        assert_eq!(p.classify_signer(None), EvidenceClass::HardwareKey);
+    }
+
+    #[test]
+    fn trust_is_by_key_not_by_label() {
+        // The reason `label` is documented as never-matched. An attacker who
+        // enrols their own key under the vendor's NAME must not inherit the
+        // vendor's standing — otherwise "SatoshiLabs" is a password.
+        let p = FirmwarePolicy::genesis(TrustedRoot::new("SatoshiLabs", VENDOR_KEY.to_vec()));
+        assert!(
+            !p.trusts(ATTACKER_KEY),
+            "a key is trusted by its bytes, never by what it is called"
+        );
+        assert_eq!(
+            p.classify_signer(Some(ATTACKER_KEY)),
+            EvidenceClass::HardwareKey
+        );
+
+        // And the same bytes under a different label are still the same root.
+        let relabelled = FirmwarePolicy::genesis(TrustedRoot::new("anything", VENDOR_KEY.to_vec()));
+        assert!(relabelled.trusts(VENDOR_KEY));
+    }
+
+    #[test]
+    fn enrolling_a_duplicate_key_is_a_no_op() {
+        let mut p = vendor_policy();
+        p.enroll(TrustedRoot::new("SatoshiLabs (again)", VENDOR_KEY.to_vec()));
+        assert_eq!(p.trusted_roots.len(), 1, "a root enrols once");
+    }
+
+    #[test]
+    fn revoking_an_unenrolled_root_is_a_no_op_not_an_error() {
+        let mut p = vendor_policy();
+        assert!(!p.revoke(ATTACKER_KEY));
+        assert_eq!(p.trusted_roots.len(), 1);
+    }
+
+    #[test]
+    fn firmware_policy_roundtrips_through_json() {
+        let mut p = vendor_policy();
+        p.enroll(TrustedRoot::new("BNRi firmware", BNRI_KEY.to_vec()));
+        let back: FirmwarePolicy =
+            serde_json::from_str(&serde_json::to_string(&p).unwrap()).unwrap();
+        assert_eq!(p, back);
     }
 
     // ── T5 quorum policy ─────────────────────────────────────────────────

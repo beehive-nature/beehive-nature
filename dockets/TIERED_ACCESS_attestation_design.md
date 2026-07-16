@@ -30,6 +30,15 @@ the authority — no platform account, no central attestor as a single point.
 | **E1 · Session-only** | someone holds the DID's recovery/passphrase right now | browser https session after self-auth, no device enrollment |
 | **E-bio · Liveness/wearable (modifier, not a class)** | a live human is present at the device *now* | biometric unlock gating the E4/E5 key's use (Secure Enclave/StrongBox biometric-bound keys); wearables: today's consumer bands generally expose **no open attestation API** — treat as presence signal paired through the phone's E4, never as a key root. FOUNDER-HONEST: a wearable-rooted tier is speculative until a device with verifiable attestation is chosen. |
 
+**E5 definition (founder-ratified 2026-07-16):** E5 requires both properties:
+the key cannot leave the signer, AND the running firmware chains to a signature
+root listed in the DID's explicit firmware policy (SatoshiLabs enrolled as a
+visible, revocable genesis entry; additional roots — e.g. future BNRi-signed
+firmware — only by T5-quorum ratification, Article-VI-class). Genuine hardware
+running unverifiable firmware is E3, not E5: an untrusted screen can lie about
+what it signs, which breaks the isolation property itself. Non-stock is never
+"failed"; unverifiable is.
+
 ## 3. The tier ladder → capability ceilings (what the UCAN may contain)
 Tier = the **maximum capability set** a `Delegation` issued to that device may
 carry. The `capability` crate enforces the rest (audience, time, wildcards).
