@@ -281,6 +281,16 @@ impl Delegation {
 
     /// Canonical bytes to sign / verify: a stable JSON serialization with the
     /// signature field cleared. Deterministic, so issuer and verifier agree.
+    ///
+    /// **INVARIANT — signed-byte stability.** Every field of [`Delegation`] is
+    /// inside these bytes, so adding one changes what a signature covers. Any
+    /// new field MUST either carry `skip_serializing_if` (so its absent/default
+    /// state emits no key and old payloads stay byte-identical) or live outside
+    /// this payload entirely. Without that, `serde_json` writes e.g.
+    /// `"new_field":null`, the payload for an unchanged delegation moves, and
+    /// **every signature minted before the field existed stops verifying.**
+    /// `tier_ceiling` is the worked example; `none_ceiling_emits_no_key_so_old_signatures_survive`
+    /// is the test that fails if this is forgotten.
     pub fn signing_payload(&self) -> Vec<u8> {
         let unsigned = Delegation {
             signature: None,
