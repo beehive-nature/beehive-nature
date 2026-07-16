@@ -12,6 +12,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "adapter-autonomi"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "adapter-carrier"
 version = "0.1.0"
 dependencies = [
@@ -25,6 +33,15 @@ name = "autocfg"
 version = "1.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f2032f911046de80f0a198e0901378627c33f59ea0ac00e363d481118bd70a53"
+
+[[package]]
+name = "b-token"
+version = "0.1.0"
+dependencies = [
+ "capability",
+ "serde",
+ "serde_json",
+]
 
 [[package]]
 name = "base64"
@@ -67,6 +84,14 @@ name = "bytes"
 version = "1.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8ae3f5d315924270530207e2a68396c3cc547f6dca3fbdca317cfb1a51edb593"
+
+[[package]]
+name = "capability"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
 
 [[package]]
 name = "cfg-if"
@@ -131,6 +156,16 @@ dependencies = [
  "tokio",
  "tokio-tungstenite",
  "zano-watcher",
+]
+
+[[package]]
+name = "console-api"
+version = "0.1.0"
+dependencies = [
+ "adapter-autonomi",
+ "serde",
+ "serde_json",
+ "shared-types",
 ]
 
 [[package]]

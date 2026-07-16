@@ -1,0 +1,10 @@
+[package]
+name = "capability"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "bNature identity.root + Capability primitive (Phase 2 scaffold): DID principals and UCAN-shaped delegable capability tokens. v1 ships the capability-match + time-bound authorization CORE (pure, tested). Signature issuance/verification (Ed25519 over the canonical form) gates behind the Verifier trait — the pending crypto step."
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"

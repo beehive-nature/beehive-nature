@@ -1,0 +1,42 @@
+{
+  "_comment": "Pinned antctl-status fixture for adapter-autonomi (storage.sovereign, P1 farming). UNVERIFIED: field names/units mirror the DOCUMENTED Node Launchpad data set (per-node status, memory, bandwidth, storage, records, rewards address, ANT earned, connection) but the exact JSON keys of a live `antctl status --json` are not yet confirmed. When a real node is running, replace this with captured output and reconcile the NodeStatus struct. No datum here is invented beyond the shape antctl is documented to expose. Addresses are non-spendable placeholders — never fund them.",
+  "as_of": 1782200000,
+  "nodes": [
+    {
+      "node_id": "12D3KooW-fixture-node-a",
+      "status": "running",
+      "memory_mb": 142,
+      "bandwidth_in_kbps": 812,
+      "bandwidth_out_kbps": 934,
+      "storage_used_mb": 2048,
+      "records_stored": 15342,
+      "rewards_address": "0xFIXTURErewardsAddressDoNotFund0000000000",
+      "ant_earned": "3.1400",
+      "connection": "upnp"
+    },
+    {
+      "node_id": "12D3KooW-fixture-node-b",
+      "status": "running",
+      "memory_mb": 138,
+      "bandwidth_in_kbps": 604,
+      "bandwidth_out_kbps": 721,
+      "storage_used_mb": 1792,
+      "records_stored": 12987,
+      "rewards_address": "0xFIXTURErewardsAddressDoNotFund0000000000",
+      "ant_earned": "2.6700",
+      "connection": "upnp"
+    },
+    {
+      "node_id": "12D3KooW-fixture-node-c",
+      "status": "starting",
+      "memory_mb": 96,
+      "bandwidth_in_kbps": 120,
+      "bandwidth_out_kbps": 88,
+      "storage_used_mb": 256,
+      "records_stored": 41,
+      "rewards_address": "0xFIXTURErewardsAddressDoNotFund0000000000",
+      "ant_earned": "0.0000",
+      "connection": "home_network"
+    }
+  ]
+}

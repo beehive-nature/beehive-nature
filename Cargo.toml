@@ -5,11 +5,15 @@
 resolver = "2"
 members = [
     "crates/adapter-arweave",
+    "crates/adapter-autonomi",
     "crates/adapter-carrier",
+    "crates/b-token",
+    "crates/capability",
     "crates/chain-eos",
     "crates/chain-exsat-evm",
     "crates/chain-zano",
     "crates/composition",
+    "crates/console-api",
     "crates/dispute-engine",
     "crates/dro-signer",
     "crates/escrow-core",
