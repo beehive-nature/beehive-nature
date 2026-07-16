@@ -99,6 +99,46 @@ Two advisory domains, one law:
   advisory — bLOVErAi is not a physician and says so. No harm includes: no
   coercive framing of health "scores," no third-party disclosure, ever.
 
+## 7. T5 anti-lockout & anti-harvest recovery policy (founder-directed, 2026-07-16)
+
+**Two threats, named plainly:** *remote view* (any screen, vault, or camera that
+ever shows seed words) and *hippocampal harvesting* (anything a human has seen
+or memorized can be extracted from the human — coercion today, worse later).
+**The invariant that defeats both: the complete seed never exists on any
+screen, in any single vault, in any single place, or in any single head.**
+
+- **Never-whole-seed (SLIP-39 2-of-3 per signer).** The Trezor seed is born as
+  three shares, threshold two: **Share A** metal plate, location 1 · **Share B**
+  paper/metal, location 2 · **Share C** a *sealed digital share* in the vault
+  (Bitwarden interim → Autonomi Vault). Any one share alone is cryptographically
+  worthless — a burgled site, a harvested memory, or a fully compromised vault
+  each yields nothing.
+- **Remote-view defense.** Shares are generated and, at restore, entered **only
+  on the signer's own screen** (Safe 7 touchscreen; SLIP-39 staggered recovery =
+  one share per session/location, so the full set is never assembled in one
+  sitting or one room). The vault share is encrypted *before* vaulting — a
+  vault "view" event shows ciphertext, not words. No host screen, no camera,
+  no clipboard ever carries a share in the clear.
+- **Hippocampal defense.** No human ever sees or memorizes the whole seed —
+  only the **passphrase** (hidden-wallet 25th word) lives in a head, and the
+  two channels are useless apart: harvest the head → passphrase without shares
+  opens nothing; harvest sites/vault → shares without passphrase open only the
+  decoy/base wallet. Extraction of any single point — including the owner —
+  is insufficient by construction.
+- **Timelocked restore ritual (catastrophic loss only).** Request the vault
+  share → **adjustable wait time** (founder-set; Bitwarden Emergency Access
+  provides wait + veto natively; the Autonomi Vault enforces it kernel-side as
+  a timelock delegation required to fetch the datamap) → the request lands as
+  a **settlement-class alarm on the event bus to every enrolled device** →
+  during the window, any T4 device vetoes (reject + `id/revoke`). After the
+  window: staggered restore onto a new Safe 7, then **rotate under the same
+  DID** — new delegations issued, lost signer revoked, identity persists
+  (DID-not-keys). Lockout-forever is architecturally impossible; theft-by-
+  restore is loudly announced and vetoable.
+- **Nests inside T5-as-a-set.** This is the *per-signer* recovery scheme; T5
+  live authority remains an M-of-N policy over multiple independent signers
+  (open question below), so no single restored device is ever the whole tier.
+
 ## Open founder questions (do not design past)
 1. ~~T4 spend caps — values?~~ **Resolved in shape** (§6: bLOVErAi-proposed,
    statistics-anchored, human-ratified). Remaining: approve the p95/daily÷3
