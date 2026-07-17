@@ -7,6 +7,7 @@ members = [
     "crates/adapter-arweave",
     "crates/adapter-autonomi",
     "crates/adapter-carrier",
+    "crates/adapter-lti",
     "crates/b-token",
     "crates/capability",
     "crates/chain-eos",

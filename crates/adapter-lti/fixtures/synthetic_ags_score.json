@@ -1,0 +1,16 @@
+{
+  "iss": "https://canvas.test/",
+  "aud": "bnri-lti-tool",
+  "sub": "lti|course-42|user-abc",
+  "nonce": "n-synthetic-0001",
+  "iat": 1789000000,
+  "quest_id": "coa-total-thc",
+  "depth": 3,
+  "scarcity_ppm": 120000,
+  "score": {
+    "scoreGiven": 1.0,
+    "scoreMaximum": 1.0,
+    "activityProgress": "Completed",
+    "gradingProgress": "FullyGraded"
+  }
+}
