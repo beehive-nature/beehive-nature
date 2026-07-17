@@ -207,6 +207,154 @@ impl EvidenceClass {
     }
 }
 
+/// One device presenting its evidence, with **when it last proved it**.
+///
+/// The `attested_at` is the whole point: an [`EvidenceClass`] on its own is a
+/// claim with no age, and a tier is a *living* claim. This is the input shape
+/// for [`QuorumPolicy::effective_tier_fresh`].
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Presentation {
+    pub did: Did,
+    pub class: EvidenceClass,
+    /// Unix seconds when this class was last proven. Caller-supplied, like every
+    /// other clock in this crate.
+    pub attested_at: i64,
+}
+
+impl Presentation {
+    pub fn new(did: Did, class: EvidenceClass, attested_at: i64) -> Self {
+        Presentation {
+            did,
+            class,
+            attested_at,
+        }
+    }
+}
+
+/// A tier, plus whether **decay** is why it is not higher.
+///
+/// The distinction is a design contract, not a nicety: *"you never had this"*
+/// and *"this lapsed"* must not render identically. A browser at T1 was always
+/// T1 (`decayed: false`); a Safe 7 whose attestation went stale is at T1 having
+/// held T5 an hour ago (`decayed: true`) — that one gets the violet guard-state
+/// and a re-attest prompt, never a lockout scare.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct TierAssessment {
+    pub tier: Tier,
+    /// True iff freshness is what lowered the tier.
+    pub decayed: bool,
+}
+
+/// How recently each [`EvidenceClass`] must have been re-proven — **freshness as
+/// policy data**.
+///
+/// The third instance of the doctrine. [`QuorumPolicy`] made signer trust policy
+/// data; [`FirmwarePolicy`] made firmware trust policy data; this makes
+/// *freshness* policy data. Same shape: [`ReattestationPolicy::genesis`] states
+/// its assumptions rather than hiding them, every value is tunable, and changing
+/// one is a T5/Article-VI act.
+///
+/// **This is a second clock, and it is not the delegation's.**
+/// [`Delegation::not_before`]/[`Delegation::expires_at`] bound the *grant* — how
+/// long the authority lasts. This bounds how recently the *device* re-proved its
+/// class. A perfectly valid, unexpired delegation held by a device whose
+/// attestation went stale is still an authority the device can no longer
+/// exercise at its old tier, because the evidence behind the tier has aged out.
+///
+/// Past cadence, the effective tier decays to [`Tier::T1`] — **a quiet fall,
+/// re-attest to restore, never a lockout.**
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct ReattestationPolicy {
+    /// Max age in seconds, per class. **A class with no entry is never fresh** —
+    /// fail-closed. If a class is added later and nobody sets its cadence, it
+    /// decays to T1 rather than being trusted forever by omission.
+    pub max_age_by_class: std::collections::BTreeMap<EvidenceClass, i64>,
+    /// How far ahead of `now` an `attested_at` may sit before it is refused, in
+    /// seconds. A visible row rather than a hidden constant: clock skew is a
+    /// policy decision, and 0 is the fail-closed default.
+    pub max_future_skew: i64,
+}
+
+impl ReattestationPolicy {
+    pub fn new(
+        max_age_by_class: std::collections::BTreeMap<EvidenceClass, i64>,
+        max_future_skew: i64,
+    ) -> Self {
+        ReattestationPolicy {
+            max_age_by_class,
+            max_future_skew,
+        }
+    }
+
+    /// Genesis cadences — **stated, not hidden, and every number is
+    /// founder-tunable rather than law.**
+    ///
+    /// The shapes come from how each class can actually re-prove itself:
+    /// - **E5 · 15 min** — a signer re-proves per connection; it is in your hand
+    ///   or it is not.
+    /// - **E4 · 24 h** — continuous attestation (App Attest assertions, an
+    ///   Auditor schedule) makes a day cheap to meet.
+    /// - **E3 · 7 d** — no boot proof to refresh; the key's residency is the
+    ///   claim, and it does not change hourly.
+    /// - **E2 · 24 h** — a VPS re-proves per boot with a config hash.
+    ///
+    /// **E1 is deliberately absent.** With no entry it is never fresh, so it
+    /// decays to T1 — and E1 *is* T1, so the decay is a no-op. The floor cannot
+    /// fall further, and inventing a number for it would be a knob that changes
+    /// nothing.
+    pub fn genesis() -> Self {
+        let mut m = std::collections::BTreeMap::new();
+        m.insert(EvidenceClass::IsolatedSigner, 15 * 60);
+        m.insert(EvidenceClass::HardwareKeyVerifiedBoot, 24 * 60 * 60);
+        m.insert(EvidenceClass::HardwareKey, 7 * 24 * 60 * 60);
+        m.insert(EvidenceClass::ProvisionedSoftware, 24 * 60 * 60);
+        ReattestationPolicy::new(m, 0)
+    }
+
+    /// The configured max age for `class`, if any.
+    pub fn max_age(&self, class: EvidenceClass) -> Option<i64> {
+        self.max_age_by_class.get(&class).copied()
+    }
+
+    /// Is `class`, proven at `attested_at`, still fresh at `now`?
+    ///
+    /// Fresh iff the attestation is not future-dated beyond
+    /// [`ReattestationPolicy::max_future_skew`] **and** its age does not exceed
+    /// the class's max. A class with no configured max is never fresh
+    /// (fail-closed). The boundary is inclusive: age exactly equal to the max is
+    /// still fresh.
+    pub fn is_fresh(&self, class: EvidenceClass, attested_at: i64, now: i64) -> bool {
+        if attested_at > now.saturating_add(self.max_future_skew) {
+            // Attested in the future. Either a clock is wrong or someone is
+            // lying; both mean the claim is not evidence.
+            return false;
+        }
+        match self.max_age(class) {
+            Some(max) => now.saturating_sub(attested_at) <= max,
+            None => false,
+        }
+    }
+
+    /// The class a device **still counts as**, given how long ago it proved it.
+    ///
+    /// The pre-filter: stale evidence collapses to [`EvidenceClass::SessionOnly`]
+    /// — T1 — for every downstream use. Not an error and not a rejection: the
+    /// device is still there, it just has not re-proved lately.
+    pub fn effective_class(
+        &self,
+        class: EvidenceClass,
+        attested_at: i64,
+        now: i64,
+    ) -> EvidenceClass {
+        if self.is_fresh(class, attested_at, now) {
+            class
+        } else {
+            EvidenceClass::SessionOnly
+        }
+    }
+}
+
 /// A signature root that firmware may chain to.
 ///
 /// `label` is for humans. **Matching is on `key`, never on `label`** — see
@@ -424,6 +572,48 @@ impl QuorumPolicy {
             })
             .max()
             .unwrap_or(Tier::T1)
+    }
+
+    /// [`QuorumPolicy::effective_tier`], with attestation freshness applied
+    /// first — and a flag saying whether decay is why the answer is low.
+    ///
+    /// Additive: `effective_tier` keeps its exact semantics, and this composes
+    /// with it rather than replacing it. The freshness filter runs *before* the
+    /// quorum count, which is the whole point — **a stale signer drops out of
+    /// the 2-of-3.** An old attestation cannot hold up the quorum, or "2-of-3
+    /// independent signers" would quietly mean "2-of-3 signers, one of which
+    /// might have been in a drawer since March".
+    ///
+    /// `decayed` is computed by asking the same question twice — once with
+    /// freshness, once without — and comparing. That is what lets the UI tell
+    /// *"this lapsed"* from *"you never had this"*.
+    pub fn effective_tier_fresh(
+        &self,
+        presented: &[Presentation],
+        reattest: &ReattestationPolicy,
+        now: i64,
+    ) -> TierAssessment {
+        let filtered: Vec<(Did, EvidenceClass)> = presented
+            .iter()
+            .map(|p| {
+                (
+                    p.did.clone(),
+                    reattest.effective_class(p.class, p.attested_at, now),
+                )
+            })
+            .collect();
+        let tier = self.effective_tier(&filtered);
+
+        // What the same devices would have earned had every attestation been
+        // fresh. If that is higher, freshness is the reason — and only then.
+        let ignoring_freshness: Vec<(Did, EvidenceClass)> =
+            presented.iter().map(|p| (p.did.clone(), p.class)).collect();
+        let undecayed = self.effective_tier(&ignoring_freshness);
+
+        TierAssessment {
+            tier,
+            decayed: tier < undecayed,
+        }
     }
 
     /// Remove `did` from the enrolled set. **Always succeeds.**
@@ -1079,6 +1269,220 @@ mod tests {
         let back: Delegation = serde_json::from_str(&serde_json::to_string(&d).unwrap()).unwrap();
         assert_eq!(d, back);
         assert_eq!(back.tier_ceiling, Some(Tier::T4));
+    }
+
+    // ── re-attestation freshness / tier decay ────────────────────────────
+
+    const HOUR: i64 = 3600;
+    const DAY: i64 = 24 * HOUR;
+    const NOW: i64 = 1_000_000_000;
+
+    fn reattest() -> ReattestationPolicy {
+        ReattestationPolicy::genesis()
+    }
+
+    #[test]
+    fn genesis_states_its_cadences_rather_than_hiding_them() {
+        let p = reattest();
+        assert_eq!(p.max_age(EvidenceClass::IsolatedSigner), Some(15 * 60));
+        assert_eq!(p.max_age(EvidenceClass::HardwareKeyVerifiedBoot), Some(DAY));
+        assert_eq!(p.max_age(EvidenceClass::HardwareKey), Some(7 * DAY));
+        assert_eq!(p.max_age(EvidenceClass::ProvisionedSoftware), Some(DAY));
+        assert_eq!(p.max_future_skew, 0, "no skew tolerated by default");
+        // E1 deliberately absent — see the doc. Its decay is a no-op.
+        assert_eq!(p.max_age(EvidenceClass::SessionOnly), None);
+    }
+
+    #[test]
+    fn fresh_evidence_keeps_its_class() {
+        let p = reattest();
+        assert!(p.is_fresh(EvidenceClass::IsolatedSigner, NOW - 60, NOW));
+        assert_eq!(
+            p.effective_class(EvidenceClass::IsolatedSigner, NOW - 60, NOW),
+            EvidenceClass::IsolatedSigner
+        );
+    }
+
+    #[test]
+    fn stale_evidence_decays_to_t1() {
+        let p = reattest();
+        // A Safe 7 attested an hour ago: past its 15-minute cadence.
+        assert!(!p.is_fresh(EvidenceClass::IsolatedSigner, NOW - HOUR, NOW));
+        assert_eq!(
+            p.effective_class(EvidenceClass::IsolatedSigner, NOW - HOUR, NOW),
+            EvidenceClass::SessionOnly
+        );
+        assert_eq!(
+            p.effective_class(EvidenceClass::IsolatedSigner, NOW - HOUR, NOW)
+                .tier(),
+            Tier::T1
+        );
+    }
+
+    #[test]
+    fn the_freshness_boundary_is_inclusive() {
+        let p = reattest();
+        let max = p.max_age(EvidenceClass::IsolatedSigner).unwrap();
+        assert!(
+            p.is_fresh(EvidenceClass::IsolatedSigner, NOW - max, NOW),
+            "age exactly == max_age is still fresh"
+        );
+        assert!(
+            !p.is_fresh(EvidenceClass::IsolatedSigner, NOW - max - 1, NOW),
+            "one second past is stale"
+        );
+    }
+
+    #[test]
+    fn cadence_diverges_by_class() {
+        // The same age, two verdicts — which is the reason cadence is per-class
+        // rather than one number.
+        let p = reattest();
+        let an_hour_ago = NOW - HOUR;
+        assert!(
+            p.is_fresh(EvidenceClass::HardwareKey, an_hour_ago, NOW),
+            "an hour is nothing for E3 (7 days)"
+        );
+        assert!(
+            !p.is_fresh(EvidenceClass::IsolatedSigner, an_hour_ago, NOW),
+            "an hour is stale for E5 (15 minutes)"
+        );
+    }
+
+    #[test]
+    fn future_dated_attestation_is_never_fresh() {
+        // A clock is wrong or someone is lying; either way it is not evidence.
+        let p = reattest();
+        assert!(!p.is_fresh(EvidenceClass::IsolatedSigner, NOW + 1, NOW));
+        assert_eq!(
+            p.effective_class(EvidenceClass::IsolatedSigner, NOW + 1, NOW),
+            EvidenceClass::SessionOnly
+        );
+        // ...unless the policy explicitly tolerates skew — a visible row.
+        let tolerant = ReattestationPolicy::new(reattest().max_age_by_class, 5);
+        assert!(tolerant.is_fresh(EvidenceClass::IsolatedSigner, NOW + 5, NOW));
+        assert!(!tolerant.is_fresh(EvidenceClass::IsolatedSigner, NOW + 6, NOW));
+    }
+
+    #[test]
+    fn a_class_with_no_cadence_is_never_fresh() {
+        // Fail-closed by omission: forget to configure a class and it decays,
+        // rather than being trusted forever because nobody said otherwise.
+        let p = ReattestationPolicy::new(std::collections::BTreeMap::new(), 0);
+        assert!(!p.is_fresh(EvidenceClass::IsolatedSigner, NOW, NOW));
+        assert_eq!(
+            p.effective_class(EvidenceClass::IsolatedSigner, NOW, NOW),
+            EvidenceClass::SessionOnly
+        );
+    }
+
+    #[test]
+    fn freshness_is_policy_data_shrinking_the_cadence_reclassifies() {
+        // The doctrine, demonstrated: change the row, change the answer.
+        let ten_min_ago = NOW - 10 * 60;
+        let p = reattest();
+        assert!(p.is_fresh(EvidenceClass::IsolatedSigner, ten_min_ago, NOW));
+
+        let mut tighter = reattest();
+        tighter
+            .max_age_by_class
+            .insert(EvidenceClass::IsolatedSigner, 5 * 60);
+        assert!(
+            !tighter.is_fresh(EvidenceClass::IsolatedSigner, ten_min_ago, NOW),
+            "the same presentation, re-judged by a tighter policy"
+        );
+    }
+
+    #[test]
+    fn stale_isolated_signer_decays_out_of_t5() {
+        // THE invariant this whole section exists for. An old attestation must
+        // not hold up the quorum.
+        let p = two_of_three();
+        let r = reattest();
+
+        let fresh_both = [
+            Presentation::new(safe7(), EvidenceClass::IsolatedSigner, NOW - 60),
+            Presentation::new(signer_b(), EvidenceClass::IsolatedSigner, NOW - 60),
+        ];
+        assert_eq!(p.effective_tier_fresh(&fresh_both, &r, NOW).tier, Tier::T5);
+
+        // One goes stale: one fresh signer left, quorum unmet -> the lone-signer
+        // clamp, T4.
+        let one_stale = [
+            Presentation::new(safe7(), EvidenceClass::IsolatedSigner, NOW - 60),
+            Presentation::new(signer_b(), EvidenceClass::IsolatedSigner, NOW - HOUR),
+        ];
+        let a = p.effective_tier_fresh(&one_stale, &r, NOW);
+        assert_ne!(a.tier, Tier::T5, "a stale signer cannot hold up the 2-of-3");
+        assert_eq!(a.tier, Tier::T4);
+        assert!(a.decayed, "and the UI must know decay is why");
+    }
+
+    #[test]
+    fn a_third_fresh_signer_restores_the_quorum() {
+        // 2-of-3 with one stale is still T5 when two others are fresh — the
+        // point of a quorum.
+        let p = two_of_three();
+        let r = reattest();
+        let presented = [
+            Presentation::new(safe7(), EvidenceClass::IsolatedSigner, NOW - HOUR), // stale
+            Presentation::new(signer_b(), EvidenceClass::IsolatedSigner, NOW - 60),
+            Presentation::new(signer_c(), EvidenceClass::IsolatedSigner, NOW - 60),
+        ];
+        let a = p.effective_tier_fresh(&presented, &r, NOW);
+        assert_eq!(a.tier, Tier::T5);
+        assert!(!a.decayed, "the quorum held; nothing was lost to decay");
+    }
+
+    #[test]
+    fn all_stale_falls_to_t1() {
+        let p = two_of_three();
+        let r = reattest();
+        let presented = [
+            Presentation::new(safe7(), EvidenceClass::IsolatedSigner, NOW - HOUR),
+            Presentation::new(signer_b(), EvidenceClass::IsolatedSigner, NOW - HOUR),
+        ];
+        let a = p.effective_tier_fresh(&presented, &r, NOW);
+        assert_eq!(a.tier, Tier::T1, "a quiet fall to the floor");
+        assert!(a.decayed);
+    }
+
+    #[test]
+    fn decayed_distinguishes_lapsed_from_never_had_it() {
+        // The design contract. Same tier, different reason, different UI.
+        let p = two_of_three();
+        let r = reattest();
+
+        // Never had it: a browser is T1 and always was.
+        let browser = [Presentation::new(
+            Did::new("did:plc:browser"),
+            EvidenceClass::SessionOnly,
+            NOW,
+        )];
+        let a = p.effective_tier_fresh(&browser, &r, NOW);
+        assert_eq!(a.tier, Tier::T1);
+        assert!(!a.decayed, "you never had this — no violet guard");
+
+        // Lapsed: a Safe 7 that held T5 an hour ago is T1 now.
+        let lapsed = [Presentation::new(
+            safe7(),
+            EvidenceClass::IsolatedSigner,
+            NOW - HOUR,
+        )];
+        let b = p.effective_tier_fresh(&lapsed, &r, NOW);
+        assert_eq!(b.tier, Tier::T1);
+        assert!(
+            b.decayed,
+            "this lapsed — violet guard, re-attest to restore"
+        );
+    }
+
+    #[test]
+    fn reattestation_policy_roundtrips_through_json() {
+        let p = reattest();
+        let back: ReattestationPolicy =
+            serde_json::from_str(&serde_json::to_string(&p).unwrap()).unwrap();
+        assert_eq!(p, back);
     }
 
     // ── firmware policy (E5 = isolation AND attested firmware) ───────────

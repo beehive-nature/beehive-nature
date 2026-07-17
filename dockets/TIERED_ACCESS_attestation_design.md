@@ -148,6 +148,17 @@ screen, in any single vault, in any single place, or in any single head.**
   live authority remains an M-of-N policy over multiple independent signers
   (open question below), so no single restored device is ever the whole tier.
 
+## 8. Re-attestation freshness & tier decay (founder-directed, 2026-07-16)
+
+A tier is a living claim, not a one-time grant. Two clocks, not one: a
+Delegation's own time-bounds gate the *grant*; **attestation freshness** gates
+how recently a device re-proved its evidence class. Past the class's cadence,
+the device's effective tier **decays to T1 — a quiet fall, violet guard-state,
+re-attest to restore, never a lockout scare.** Cadence is policy data
+(`ReattestationPolicy`, per-class max age), not a hardcoded constant; defaults
+are founder-tunable. A stale signer also drops out of the T5 quorum count — an
+old attestation cannot hold up the 2-of-3.
+
 ## Open founder questions (do not design past)
 1. ~~T4 spend caps — values?~~ **Resolved in shape** (§6: bLOVErAi-proposed,
    statistics-anchored, human-ratified). Remaining: approve the p95/daily÷3
