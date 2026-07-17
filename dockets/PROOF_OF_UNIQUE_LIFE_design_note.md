@@ -111,21 +111,15 @@ the constants.
    rendered coherent-vs-fragmented, not a score. Math: base per independent class
    + a coherence term, without letting coherence backdoor correlated signals.
 2. Signal families in v1 vs. a walled frontier shelf? (open)
-3. **Ceilings — 
-<!-- ══════════════════════════════════════════════════════════════════════
-     TRUNCATED — THIS DOCUMENT IS INCOMPLETE.
+3. **Ceilings — RULED: PoUL raises ceilings, as a tool in bLOVErAi's toolbox.**
+   Sustained confidence lets bLOVErAi *propose* higher caps/velocity, human-
+   ratified (§6). **Anti-coercion guardrail (load-bearing):** it may *offer* more;
+   declining caps nothing held, costs nothing — no sell-your-privacy-for-b
+   gradient, never pressure.
+4. **Independence metric — RULED (indicated): hand-set classes now, learned/graph
+   measure later, with the data commons as the training ground.**
 
-     The mount corrupted this file on write (Seat 1 reported it; verified
-     host-side 2026-07-16: 6989 bytes, no trailing newline, ends mid-word at
-     "3. **Ceilings —"). Sections 1-9 and open questions 1-2 are intact.
-     Open question 3 onward — and anything after it — are GONE, not omitted.
-
-     Committed in this state deliberately rather than held: this note existed
-     only on a mount that has destroyed work three times this session, and 9
-     complete sections in version control beat 10 sections on a disk that eats
-     them. The marker is here so no reader mistakes a wound for an ending.
-
-     TO REPAIR: Seat 1 re-sends the tail from "3. **Ceilings" onward as message
-     text (the channel with a clean record — the mount is not to be used for
-     this). Splice, integrity-check host-side, delete this marker.
-     ══════════════════════════════════════════════════════════════════════ -->
+## Cross-refs
+`TIERED_ACCESS` (device evidence, §6 consent, §7 recovery, §8 freshness) ·
+`B_EMISSION_operant_reward_model` (Respect+confidence = unlock weight) ·
+`DATA_COMMONS_phase_charter` · P4 bLOVErAi charter · `capability` crate.
