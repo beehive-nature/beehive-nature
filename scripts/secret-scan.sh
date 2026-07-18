@@ -60,6 +60,20 @@ tree)
     ;;
 esac
 
+# Fail closed. Every branch above enumerates through git, so outside a repository — or if
+# git errors for any reason — names/hex/pem all come back empty, `fail` stays 0, and this
+# script reports "secret-scan: clean" having inspected NOTHING. A guard that passes
+# without looking is worse than no guard, because it produces a receipt.
+# In tree mode a repository always has tracked files, so an empty listing means the
+# enumeration failed rather than that the tree is clean. diff mode is left alone: an empty
+# staged set legitimately means there is nothing to check, and refusing there would break
+# the pre-commit hook on ordinary commits.
+if [ "$mode" = tree ] && [ -z "$(git ls-files 2>/dev/null)" ]; then
+    echo "  secret-scan: REFUSING — git ls-files returned nothing." >&2
+    echo "  Not a git repository, or git failed. A scan of zero files is not a pass." >&2
+    exit 2
+fi
+
 if [ -n "$names" ]; then
     echo "BLOCKED: secret-bearing file names:" >&2
     echo "$names" >&2
