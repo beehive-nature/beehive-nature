@@ -6,11 +6,17 @@ wall test passing, not an oversight.**
 
 ## The source, and how it is used
 
-Christoph Jentzsch, Slock.it, 2016 — the DAO whitepaper (recorded in the founder's library
-as *Decentralized Autonomous Organization to Manage a Trust*; the commonly published title
-is *…to Automate Governance*, and the discrepancy is noted rather than silently resolved).
-Its **§4, "Majority robs minority attack,"** names the failure mode this document answers,
-and proposes a *split* as the remedy for it.
+Christoph Jentzsch, Slock.it, 2016. Its **§4, "Majority robs minority attack,"** names the
+failure mode this document answers, and proposes a *split* as the remedy for it.
+
+Two titles are in circulation and **both are correct**, because they are two states of one
+paper. The copy held in this project's library is headed, verbatim,
+*DECENTRALIZED AUTONOMOUS ORGANIZATION TO MANAGE A TRUST*, marked **FINAL DRAFT — UNDER
+REVIEW**. The released paper carries *Decentralized Autonomous Organization to Automate
+Governance*. The draft title is what the artifact on the shelf says; the published title is
+what a reader will find. Cite whichever you are actually holding, and say which — a
+disagreement between two people reading two states of the same document is the cheapest
+possible provenance failure to prevent, and the most annoying to unpick later.
 
 **It is cited as the source of a failure mode, nothing more.** This document does not
 narrate any subsequent event, does not characterize any party's conduct, and alleges no
