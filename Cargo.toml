@@ -25,6 +25,7 @@ members = [
     "crates/reputation-engine",
     "crates/sense-atproto",
     "crates/shared-types",
+    "crates/type-bindings",
     "crates/verify-trezor",
     "crates/zano-watcher",
 ]

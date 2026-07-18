@@ -107,6 +107,7 @@ dependencies = [
  "ed25519-dalek",
  "serde",
  "serde_json",
+ "type-bindings",
 ]
 
 [[package]]
@@ -1210,6 +1211,13 @@ dependencies = [
  "rand",
  "sha1",
  "thiserror",
+]
+
+[[package]]
+name = "type-bindings"
+version = "0.1.0"
+dependencies = [
+ "serde",
 ]
 
 [[package]]

@@ -1,0 +1,13 @@
+[package]
+name = "type-bindings"
+version = "0.1.0"
+edition.workspace = true
+# PERMISSIVE, on purpose: this is the "type bindings" SDK edge LICENSING.md anticipates.
+# MIT OR Apache-2.0 (NOT the workspace AGPL) so a permissive downstream crate can reuse
+# the canonical types without AGPL infection. The first — and so far only — permissive
+# crate in this workspace; everything that links kernel INTERNALS stays AGPL.
+license = "MIT OR Apache-2.0"
+description = "Permissive canonical wire types shared by the AGPL BNR kernel and its MIT/Apache SDK edges. v0.1: the Did principal. Lets a permissive downstream crate (e.g. beehive-WELLness/health-vault) reuse the canonical Did without linking the AGPL kernel."
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }

@@ -29,27 +29,11 @@
 
 use serde::{Deserialize, Serialize};
 
-/// A decentralized identifier used as an authorization principal.
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
-pub struct Did(pub String);
-
-impl Did {
-    pub fn new(s: impl Into<String>) -> Self {
-        Did(s.into())
-    }
-    /// The DID method segment (`autonomi`, `plc`, …), if well-formed
-    /// (`did:<method>:<id>`).
-    pub fn method(&self) -> Option<&str> {
-        let mut it = self.0.split(':');
-        match (it.next(), it.next()) {
-            (Some("did"), Some(method)) if !method.is_empty() => Some(method),
-            _ => None,
-        }
-    }
-    pub fn is_root(&self) -> bool {
-        self.method() == Some("autonomi")
-    }
-}
+/// A decentralized identifier used as an authorization principal. The canonical
+/// definition moved to the permissive `type-bindings` crate so SDK edges can reuse it
+/// without AGPL infection; re-exported here so `capability::Did` stays the path every
+/// caller already uses.
+pub use type_bindings::Did;
 
 /// A UCAN-shaped capability: an ability over a resource.
 ///
