@@ -20,6 +20,7 @@ members = [
     "crates/escrow-core",
     "crates/escrow-engine",
     "crates/event-bus",
+    "crates/mastery-ledger",
     "crates/normalizer",
     "crates/reputation-engine",
     "crates/sense-atproto",

@@ -132,12 +132,12 @@ claim could be stored even by a future careless writer.
 
 ## 9. Open edges (parked, not hidden)
 
-- **Two `MasteryEvent` types.** *(Third flag:)* `adapter-lti` already defines a
-  `MasteryEvent` — the transient, writer-side parse of an LTI payload — and this docket
-  defines another: the canonical, signed *ledger record*. Same name, different roles
-  (input vs. record). At integration they must be reconciled to avoid a K-D1-style
-  type-fork — likely `adapter_lti::MasteryEvent` (input) → `mastery_ledger::MasteryEvent`
-  (record) via an explicit write step. Named here so the collision isn't discovered late.
+- **The `MasteryEvent` name collision — RESOLVED (was the third flag).** `adapter-lti`
+  had a `MasteryEvent` (the transient, writer-side parse of an LTI payload); this crate
+  owns the canonical, signed *ledger record*. To avoid a K-D1-style type-fork,
+  `adapter-lti`'s was renamed **`MasteryClaim`** while it was cheap — so the pipeline now
+  reads clean: a platform's `MasteryClaim` is verified and weighted, and *recording* it
+  yields a `mastery_ledger::MasteryEvent`. Claim → (verify · weight · request) → Event.
 - **`ConsentRef` shape** — what a machine-readable, revocable consent object *is*
   (a DID-signed grant with a revocation check) is DATA_COMMONS territory; referenced here,
   specced there.

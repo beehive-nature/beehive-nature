@@ -1,0 +1,14 @@
+[package]
+name = "mastery-ledger"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "M-2 commons-first mastery ledger: the signed, DID-bound, consent-carrying record of who proved what — the source of truth that makes the LMS replaceable furniture. Pure types + MockLedger; L2 commons append (via adapter-arweave) gates on a real substrate. Records THAT comprehension occurred, never WHAT — governance/economics, wall-clean by construction."
+
+[dependencies]
+# Canonical Did (no type-fork; K-D1 discipline). Signature VERIFICATION is a seam
+# (mock-first) — capability's Verifier is Delegation-specific, so it is not reused here.
+capability = { path = "../capability" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = { workspace = true }

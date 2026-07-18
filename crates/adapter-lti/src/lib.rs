@@ -70,7 +70,7 @@ impl std::error::Error for LtiError {}
 /// produces one — an unverified event cannot reach the weight or request stages
 /// because [`process`] takes raw bytes and calls the verifier first.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct MasteryEvent {
+pub struct MasteryClaim {
     pub platform_id: String,
     /// LTI subject — a per-platform pseudonym, NOT a person.
     pub subject: String,
@@ -113,7 +113,7 @@ struct RawScore {
 /// Stage 1 signature/claim boundary. The real impl verifies the platform JWT against
 /// JWKS pinned at tool registration; v1 ships mock verifiers.
 pub trait JwtVerifier {
-    fn admit(&self, raw: &[u8]) -> Result<MasteryEvent, LtiError>;
+    fn admit(&self, raw: &[u8]) -> Result<MasteryClaim, LtiError>;
 }
 
 /// Replay protection.
@@ -276,7 +276,7 @@ pub struct MockJwtVerifier {
 }
 
 impl JwtVerifier for MockJwtVerifier {
-    fn admit(&self, raw: &[u8]) -> Result<MasteryEvent, LtiError> {
+    fn admit(&self, raw: &[u8]) -> Result<MasteryClaim, LtiError> {
         let p: RawAgs = serde_json::from_slice(raw).map_err(|_| LtiError::Parse("not AGS JSON"))?;
         if p.iss != self.pinned_iss {
             return Err(LtiError::BadSignature("iss not the pinned platform"));
@@ -289,7 +289,7 @@ impl JwtVerifier for MockJwtVerifier {
                 "score not a completed, fully-graded mastery",
             ));
         }
-        Ok(MasteryEvent {
+        Ok(MasteryClaim {
             platform_id: p.iss,
             subject: p.sub,
             quest_id: p.quest_id,
@@ -304,7 +304,7 @@ impl JwtVerifier for MockJwtVerifier {
 /// Models a failed signature (unknown `kid` / bad sig): admits nothing.
 pub struct RejectingJwtVerifier;
 impl JwtVerifier for RejectingJwtVerifier {
-    fn admit(&self, _raw: &[u8]) -> Result<MasteryEvent, LtiError> {
+    fn admit(&self, _raw: &[u8]) -> Result<MasteryClaim, LtiError> {
         Err(LtiError::BadSignature("no pinned key admitted this token"))
     }
 }
