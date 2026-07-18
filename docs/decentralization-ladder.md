@@ -217,6 +217,26 @@ means L0.** Never displayed, never granted.
 1. A level is granted by a **read-only auditor**, never by the author of what it grades.
    **This applies to the negative control as well as the test** — an author's execution
    demonstrates well-formedness only.
+
+   **§5.1a · Provisional grants.** A read-only auditor spawned **inside the author's own
+   session** — same host, same principal — satisfies §5.1 on the letter and issues a
+   **provisional** grant only.
+
+   A provisional grant is a *real* grant: it records a level, it is keyed by digest, and a
+   byte change voids it. It is **not third-party verification and may never be described as
+   such.** The distinction is institutional, not technical: such an auditor holds no write
+   tools and cannot silently edit what it grades, but its isolation is a matter of its own
+   configuration rather than of separation between parties. It is a structured self-check.
+
+   **Any grant may be superseded — never amended — by one issued from outside the issuing
+   session.** Superseding replaces the record and leaves the original legible; amending
+   would let a weak grant quietly acquire a strength it was never given, which is the
+   failure §5.4 and §5.5 exist to prevent one level down.
+
+   This clause exists because the first grant issued under this ladder was provisional, and
+   *"file it as-is"* would otherwise have drifted into the working definition of what a
+   read-only auditor is. Bounding it at the moment it was set costs one paragraph; bounding
+   it later costs an argument about what everyone had assumed.
 2. The grant records: level, all three axis values, commit, **digest of the graded bytes**,
    date, negative-control result, granting party, **and per Law 1b, for each
    collection-ranging requirement: the collection size, or the subsuming requirement that
