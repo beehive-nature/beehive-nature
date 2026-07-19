@@ -138,12 +138,24 @@ pub enum ReadingLevel {
 /// the most friction, a privacy violation (disability status is health data, and BNR holds
 /// no PII), and unnecessary — accessible rendering costs nothing extra to offer universally,
 /// and plenty of people who are not disabled want audio, larger text, or simpler language.
+///
+/// `currency_metric` (D-14) joins the set: the currency the user reads value in. Same law
+/// as the rest — **a display preference, never a credential.** Adding a preference never
+/// adds a profile field, and the test below bars the whole credential vocabulary regardless
+/// of how many preferences the struct grows.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Preferences {
     pub language: LanguageId,
     pub modality: Vec<Modality>,
     pub reading_level: Option<ReadingLevel>,
+    /// The currency the user reads value in — a denomination for display, nothing more.
+    /// `None` means "not stated"; it never means a profile is incomplete.
+    pub currency_metric: Option<CurrencyId>,
 }
+
+/// A currency the user reads value in (D-14). A **display preference**, never a profile.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CurrencyId(pub String);
 
 /// Whether a modality exists. **`NotAvailable` is honest** — if no braille rendering exists,
 /// say so rather than machine-generating something unusable and calling it access.
@@ -457,6 +469,7 @@ mod tests {
             language: LanguageId("xyz".into()),
             modality: vec![Modality::Audio, Modality::Braille],
             reading_level: Some(ReadingLevel::Plain),
+            currency_metric: Some(CurrencyId("MXN".into())),
         };
         let j = serde_json::to_string(&p).unwrap().to_lowercase();
         for forbidden in [
@@ -469,14 +482,25 @@ mod tests {
             "diagnosis",
             "proof",
             "eligible",
+            // D-14: currency_metric is a display denomination, not a profile. The bar
+            // extends to its vocabulary so the new preference cannot smuggle one in.
+            "income",
+            "credit",
+            "profile",
+            "tier",
         ] {
             assert!(
                 !j.contains(forbidden),
-                "Preferences must not serialise `{forbidden}` — access is a preference, \
-                 never a credential, and a system storing who is disabled has become a \
-                 health-data custodian through the back door"
+                "Preferences must not serialise `{forbidden}` — access and currency are \
+                 preferences, never credentials, and a system storing who is disabled or \
+                 how much they earn has become a data custodian through the back door"
             );
         }
+        // and currency_metric round-trips as pure display data
+        assert!(
+            j.contains("mxn"),
+            "the currency preference is present as a denomination"
+        );
     }
 
     /// A rendering cannot exist without stated provenance.
@@ -522,6 +546,7 @@ mod tests {
                 variety: "ASL".into(),
             }],
             reading_level: None,
+            currency_metric: None,
         };
         let j = serde_json::to_string(&p).unwrap();
         assert_eq!(p, serde_json::from_str::<Preferences>(&j).unwrap());
