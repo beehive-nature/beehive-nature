@@ -626,6 +626,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "language-authority"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "libc"
 version = "0.2.186"
 source = "registry+https://github.com/rust-lang/crates.io-index"
