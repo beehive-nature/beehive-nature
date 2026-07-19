@@ -237,6 +237,36 @@ means L0.** Never displayed, never granted.
    *"file it as-is"* would otherwise have drifted into the working definition of what a
    read-only auditor is. Bounding it at the moment it was set costs one paragraph; bounding
    it later costs an argument about what everyone had assumed.
+
+   **§5.1b · Independence tiers.** Named so they cannot be fudged. The ordering is the
+   argument.
+
+   | Tier | Grader | Strength | Honest description |
+   |---|---|---|---|
+   | **P** | read-only auditor inside the author's own session | provisional | real, digest-keyed, never third-party verification |
+   | **I** | separate session, **same principal and host** | **weak** | feels independent, largely is not — same operator, same machine, same failure modes |
+   | **X** | different principal, different host | independent | a genuine third party. Rests on that party's care and continued existence |
+   | **R** | **reproducible by any reader from published inputs** | **strongest** | needs no trust in any grader, including us |
+
+   **R dominates X, and the intuition that says otherwise is wrong.** An X grant nobody can
+   reproduce is weaker than an R grant nobody has yet re-run: the R grant is *checkable on
+   demand*, and the X grant never becomes so. X rests on a party being careful, honest, and
+   still present in ten years. R survives every grader being wrong, compromised, bored, or
+   gone. For a project measuring its horizon in centuries, that difference is the whole
+   argument.
+
+   This is also the honest reading of §5.1. The clause exists so a grant does not rest on
+   the grader's word. **Reproducibility satisfies its purpose more completely than any
+   choice of grader satisfies its letter.**
+
+   **Tier I carries a warning label**, because it is the tier most likely to be quietly
+   overclaimed — it is the easiest to reach and it *feels* like independence. A separate
+   session under the same principal on the same host shares every operator-level failure
+   mode with the author. Record it as weak; do not inflate it.
+
+   **An R-tier grant must publish the procedure**: the exact command, the expected output,
+   and the verifier pinned by commit so the tool is as fixed as the artifacts. A grant that
+   says "reproducible" without shipping the means is a P-tier grant wearing an R label.
 2. The grant records: level, all three axis values, commit, **digest of the graded bytes**,
    date, negative-control result, granting party, **and per Law 1b, for each
    collection-ranging requirement: the collection size, or the subsuming requirement that
