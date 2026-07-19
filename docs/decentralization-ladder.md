@@ -40,6 +40,20 @@ have nothing to hand over.** The witness is *produced*, never asserted.
   demonstrated non-vacuously.
 - **1c · In checks on the levels.** Satisfiability is shown by exhibiting a witness, never
   by failing to find a counterexample.
+- **1d · In the subject itself.** **Before asserting a property of a thing, assert you are
+  looking at the thing.** A verdict over an empty set is a true statement about nothing; a
+  verdict over the *wrong* set is worse — it is a confident measurement of something else,
+  and it carries no signal that anything went wrong. Any check that reaches outside its own
+  process for its subject — a browser tab, a fetched document, a cloned tree, a rendered
+  page — MUST first assert the subject's identity and refuse if it cannot.
+
+  *Three instances in one working session, all caught only because a control failed:*
+  *an extractor that manufactured quotations out of ordinary prose, so two pages quoting*
+  *nothing would have been reported as agreeing; a contrast probe that read*
+  *`color-mix(…, transparent)` at full strength instead of compositing its alpha, measuring*
+  *against a colour not on screen and nearly prompting a "fix" to a token that passed; and a*
+  *browser tab that silently held a previous page, so a reading of one document was almost*
+  *reported as a verification of another.*
 
 *Law 1 is itself a universal and subject to itself. Its witness set is the universally
 quantified claims in this document — §2.2, §2.4, O4 and O5 populate it. **Non-empty. The law
@@ -229,9 +243,23 @@ means L0.** Never displayed, never granted.
    configuration rather than of separation between parties. It is a structured self-check.
 
    **Any grant may be superseded — never amended — by one issued from outside the issuing
-   session.** Superseding replaces the record and leaves the original legible; amending
-   would let a weak grant quietly acquire a strength it was never given, which is the
-   failure §5.4 and §5.5 exist to prevent one level down.
+   session.** Superseding replaces the record and leaves the original legible.
+
+   **Why this is mechanical rather than discretionary, stated precisely.** The obvious
+   reason is that amending would let a weak grant quietly acquire a strength it was never
+   given. That reason is true and it is not sufficient, because it invites the exception:
+   *"this particular edit only narrows the claim, so it cannot be a strength-gain."*
+
+   The rule admits no such exception, and the reason is that **the judgement of whether an
+   edit adds strength cannot be left to the party making the edit.** A motivated author
+   will always find their own change modest. An author acting in good faith will sometimes
+   be wrong about it. Neither is detectable from the outside, which is exactly why the
+   test is "was this record edited after issuance", a question with a mechanical answer,
+   rather than "did the edit make it stronger", a question with an interested one.
+
+   This clause was written the weaker way first and corrected after a grant in a downstream
+   tree was appended to, then superseded, and then a second edit — one that genuinely only
+   narrowed the claim — declined the exception on these grounds.
 
    This clause exists because the first grant issued under this ladder was provisional, and
    *"file it as-is"* would otherwise have drifted into the working definition of what a
