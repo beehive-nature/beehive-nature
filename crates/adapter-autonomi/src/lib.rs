@@ -1,4 +1,4 @@
-//! `storage.sovereign` farming adapter — turn Autonomi node telemetry
+//! `storage.sovereign` node-ops adapter — turn Autonomi node telemetry
 //! (`antctl status`) into a deterministic, panel-ready [`FarmSnapshot`].
 //!
 //! This is Panel 1 of the SKAISTS LOVErnment console ("is my node network
@@ -11,10 +11,10 @@
 //!   never becomes a [`shared_types::CanonicalEvent`] and never rides the bus.
 //!   The event schema's payload families model private-commerce settlement, and
 //!   `shared_types::events` states plainly that reusing a family for data it
-//!   does not describe "would make the payload lie." A farming stat is none of
+//!   does not describe "would make the payload lie." A node-ops stat is none of
 //!   those families, so this adapter yields a *view type the console reads
-//!   directly* — mirroring the farming design brief §6: "aggregated node stats
-//!   are a derived view (R-004 tier) ... never the indexer."
+//!   directly* — mirroring the `storage.sovereign` design brief §6: "aggregated
+//!   node stats are a derived view (R-004 tier) ... never the indexer."
 //! - **No datum is invented.** Every [`NodeStatus`] field comes from `antctl` /
 //!   Node Launchpad output. A number `antctl` does not emit is a founder
 //!   question, not a placeholder (the brief's no-fake-number rule; the house
@@ -116,7 +116,7 @@ pub struct StatusReport {
     pub nodes: Vec<NodeStatus>,
 }
 
-/// The one-glance hero state of the farming panel (brief §3A):
+/// The one-glance hero state of the node-ops panel (brief §3A):
 /// green *earning* / amber *idle* / red *down*.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum FarmHealth {
@@ -128,7 +128,7 @@ pub enum FarmHealth {
     Down,
 }
 
-/// The derived view the console's farming panel renders. Pure function of a
+/// The derived view the console's node-ops panel renders. Pure function of a
 /// [`StatusReport`]: identical reports produce identical snapshots.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct FarmSnapshot {

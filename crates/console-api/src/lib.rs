@@ -11,7 +11,7 @@
 //!   for display. "Your balance / your keys" must be read from authoritative
 //!   sources (chain, wallet) — never from this projection. This type exists to
 //!   render activity and standing, not to be trusted as a ledger.
-//! - **Panels bind to capabilities, not chains.** The farming slot holds a
+//! - **Panels bind to capabilities, not chains.** The node-ops slot holds a
 //!   `FarmSnapshot` (the `storage.sovereign` view); it does not know or care
 //!   that Autonomi produced it. Swap the storage network, keep the panel.
 //!
@@ -42,12 +42,12 @@ pub struct ActivityItem {
 }
 
 /// The whole console's derived state. Assembled once and updated by folding
-/// each new bus event through [`ConsoleView::fold`]; the farming panel is
+/// each new bus event through [`ConsoleView::fold`]; the node-ops panel is
 /// attached separately via [`ConsoleView::set_farm`] because node telemetry is
 /// a derived view, not a bus event (see `adapter-autonomi`).
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct ConsoleView {
-    /// P1 farming panel (`storage.sovereign`). `None` until a snapshot is set.
+    /// P1 node-ops panel (`storage.sovereign`). `None` until a snapshot is set.
     pub farm: Option<FarmSnapshot>,
     /// Most-recent-last activity feed (Order/Product events).
     pub activity: Vec<ActivityItem>,
@@ -63,7 +63,7 @@ impl ConsoleView {
         Self::default()
     }
 
-    /// Attach / replace the P1 farming snapshot (from `adapter-autonomi`).
+    /// Attach / replace the P1 node-ops snapshot (from `adapter-autonomi`).
     pub fn set_farm(&mut self, farm: FarmSnapshot) {
         self.farm = Some(farm);
     }

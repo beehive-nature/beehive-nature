@@ -33,6 +33,7 @@ members = [
     "crates/treasury-t0",
     "crates/type-bindings",
     "crates/verify-trezor",
+    "crates/vocabulary",
     "crates/zano-watcher",
 ]
 
