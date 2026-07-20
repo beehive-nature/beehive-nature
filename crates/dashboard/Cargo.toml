@@ -1,0 +1,13 @@
+[package]
+name = "dashboard"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "Read-only analytics surface (sprint v1). Composes what the kernel already measures — Respect standings, b supply & minted-to-date, collateral positions & floor headroom — and states its absences honestly rather than waiting for completeness: the circle panel ships honest-empty (the lexicon gates outcomes CROSSING the seam, not a read) and SPIRIT-1 renders NotMeasured (undefined in-tree, dispatch-carried), never as a fact. Read-only by construction; the COSMIC rendering is the shell's Linux view."
+
+[dependencies]
+reputation-engine = { path = "../reputation-engine" }
+b-token = { path = "../b-token" }
+treasury-t0 = { path = "../treasury-t0" }
+capability = { path = "../capability" }
+serde = { version = "1", features = ["derive"] }

@@ -5,6 +5,7 @@
 resolver = "2"
 members = [
     "crates/adapter-arweave",
+    "crates/dashboard",
     "crates/denomination",
     "crates/language-authority",
     "crates/adapter-autonomi",

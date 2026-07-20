@@ -248,6 +248,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "dashboard"
+version = "0.1.0"
+dependencies = [
+ "b-token",
+ "capability",
+ "reputation-engine",
+ "serde",
+ "treasury-t0",
+]
+
+[[package]]
 name = "data-encoding"
 version = "2.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
