@@ -507,3 +507,73 @@ mod tests {
         assert!(ghost.components.is_empty());
     }
 }
+
+/// NC-VII1 (ratified, meta-tier — Article VII §1): interpretive / subjective worldviews
+/// (Human Design, PLUR, Hawkins, physiocracy) live in interpretation plugins and **never become
+/// consensus mechanisms**. So **no such value may reach this engine's input graph** — the
+/// attestation and evidence flows that feed reputation (§3.3(b)). Trivially true today; ratcheted
+/// **while uncontroversial**, so weakening it later costs a meta-tier amendment (K=8 + 21% quorum)
+/// rather than a quiet PR under pressure from a stakeholder who resents it.
+#[cfg(test)]
+mod nc_vii1 {
+    /// Subjective-worldview vocabulary forbidden in the reputation input graph. Deliberately does
+    /// NOT include "respect" — that is the legitimate reputation unit, and PLUR's R must not be
+    /// allowed to shadow it.
+    const FORBIDDEN: &[&str] = &[
+        "human_design",
+        "humandesign",
+        "human design",
+        "energy_type",
+        "energytype",
+        "plur",
+        "hawkins",
+        "physiocracy",
+        "indigo",
+        "hexagram",
+        "incarnation_cross",
+    ];
+
+    /// Scan source for forbidden vocabulary, skipping comment lines (prose about the rule is not
+    /// an input type).
+    fn hd_plur_findings(source: &str) -> Vec<String> {
+        let mut hits = Vec::new();
+        for line in source.lines() {
+            let t = line.trim();
+            if t.starts_with("//") {
+                continue;
+            }
+            let l = t.to_lowercase();
+            for f in FORBIDDEN {
+                if l.contains(f) {
+                    hits.push(format!("{f}: {t}"));
+                }
+            }
+        }
+        hits
+    }
+
+    #[test]
+    fn no_subjective_worldview_reaches_the_reputation_input_graph() {
+        // Scan the LIBRARY (inputs + compute), excluding the test modules where this list and the
+        // decoy below live (split at the first `#[cfg(test)]`).
+        let src = include_str!("lib.rs");
+        let lib = src.split("#[cfg(test)]").next().unwrap();
+        assert_eq!(
+            hd_plur_findings(lib),
+            Vec::<String>::new(),
+            "NC-VII1: no Human-Design / PLUR / Hawkins / physiocracy value in the reputation input graph"
+        );
+        // Decoy positive control — a deliberate violation MUST be caught, or this is a lint never
+        // shown to fail, which by our own rule is not a lint.
+        let decoy = "    pub indigo_energy_type: f32,";
+        assert!(
+            !hd_plur_findings(decoy).is_empty(),
+            "the guard must catch an HD/PLUR-derived reputation input"
+        );
+        // And the legitimate reputation unit survives: Respect is not a forbidden worldview.
+        assert!(
+            hd_plur_findings("pub respect: u64,").is_empty(),
+            "Respect is the reputation unit — PLUR's R must not shadow it out of the input graph"
+        );
+    }
+}
