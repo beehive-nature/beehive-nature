@@ -78,6 +78,11 @@ pub struct BLedger {
     /// the recipient's base. It is the honest base for any minted-to-date policy.
     #[serde(default)]
     minted_to_date: BTreeMap<Did, Amount>,
+    /// The witness time (unix seconds) of a DID's **first** mint — its `EmissionMinted` genesis
+    /// on the bus. Settles to the earliest and never moves later. This is the immutable anchor a
+    /// higher crate derives "time in system" from (RELAY_16): the thread supplies no age.
+    #[serde(default)]
+    first_minted_at: BTreeMap<Did, i64>,
 }
 
 impl BLedger {
@@ -96,15 +101,16 @@ impl BLedger {
             .fold(0u128, |acc, v| acc.saturating_add(*v))
     }
 
-    /// Mint `amount` of `b` to `who` on a verified ResourceProof (mint-on-
-    /// ResourceProof). Verification is the verifier's job; this refuses to mint
-    /// on an unverified proof.
+    /// Mint `amount` of `b` to `who` on a verified ResourceProof (mint-on-ResourceProof), at the
+    /// emission's witness time `at` (unix seconds — the `EmissionMinted` event's timestamp).
+    /// Verification is the verifier's job; this refuses to mint on an unverified proof.
     pub fn mint(
         &mut self,
         who: &Did,
         amount: Amount,
         proof: &ResourceProof,
         verifier: &dyn ProofVerifier,
+        at: i64,
     ) -> Result<(), LedgerError> {
         if !verifier.verify(proof) {
             return Err(LedgerError::UnprovenMint);
@@ -115,12 +121,23 @@ impl BLedger {
         // this is the ONLY place minted-to-date rises, and nothing lowers it.
         let m = self.minted_to_date.entry(who.clone()).or_insert(0);
         *m = m.saturating_add(amount);
+        // The genesis anchor: the EARLIEST mint witness time, settled once and never moved later.
+        self.first_minted_at
+            .entry(who.clone())
+            .and_modify(|t| *t = (*t).min(at))
+            .or_insert(at);
         Ok(())
     }
 
     /// `b` held (reserved) against `who`'s balance — not spendable, still theirs.
     pub fn reserved_of(&self, who: &Did) -> Amount {
         self.reserved.get(who).copied().unwrap_or(0)
+    }
+
+    /// The witness time of `who`'s first mint (their `EmissionMinted` genesis), if any. The
+    /// immutable anchor for "time in system" — a higher crate derives age from `now − this`.
+    pub fn first_minted_at_of(&self, who: &Did) -> Option<i64> {
+        self.first_minted_at.get(who).copied()
     }
 
     /// `b` `who` may actually spend: balance minus what is held. Every spend checks this.
@@ -294,18 +311,21 @@ mod tests {
         }
     }
 
+    /// A fixed mint witness time for tests not concerned with genesis timing.
+    const AT: i64 = 1_700_000_000;
+
     #[test]
     fn b_mints_only_on_a_verified_proof() {
         let mut l = BLedger::new();
         let v = AcceptNonEmptyProof;
         // empty evidence → unproven → refused
         assert_eq!(
-            l.mint(&did("did:autonomi:a"), 500, &proof(""), &v),
+            l.mint(&did("did:autonomi:a"), 500, &proof(""), &v, AT),
             Err(LedgerError::UnprovenMint)
         );
         assert_eq!(l.balance_of(&did("did:autonomi:a")), 0);
         // valid proof → minted
-        l.mint(&did("did:autonomi:a"), 500, &proof("evidence-1"), &v)
+        l.mint(&did("did:autonomi:a"), 500, &proof("evidence-1"), &v, AT)
             .unwrap();
         assert_eq!(l.balance_of(&did("did:autonomi:a")), 500);
     }
@@ -314,7 +334,7 @@ mod tests {
     fn b_burns_on_use_and_guards_balance() {
         let mut l = BLedger::new();
         let v = AcceptNonEmptyProof;
-        l.mint(&did("did:autonomi:a"), 100, &proof("e"), &v)
+        l.mint(&did("did:autonomi:a"), 100, &proof("e"), &v, AT)
             .unwrap();
         l.burn(&did("did:autonomi:a"), 40).unwrap();
         assert_eq!(l.balance_of(&did("did:autonomi:a")), 60);
@@ -328,7 +348,7 @@ mod tests {
     fn b_is_transferable() {
         let mut l = BLedger::new();
         let v = AcceptNonEmptyProof;
-        l.mint(&did("did:autonomi:a"), 100, &proof("e"), &v)
+        l.mint(&did("did:autonomi:a"), 100, &proof("e"), &v, AT)
             .unwrap();
         l.transfer(&did("did:autonomi:a"), &did("did:autonomi:b"), 30)
             .unwrap();
@@ -378,7 +398,7 @@ mod tests {
     fn ledger_roundtrips_through_json() {
         let mut l = BLedger::new();
         let v = AcceptNonEmptyProof;
-        l.mint(&did("did:autonomi:a"), 100, &proof("e"), &v)
+        l.mint(&did("did:autonomi:a"), 100, &proof("e"), &v, AT)
             .unwrap();
         let json = serde_json::to_string(&l).unwrap();
         let back: BLedger = serde_json::from_str(&json).unwrap();
@@ -393,7 +413,7 @@ mod tests {
         let v = AcceptNonEmptyProof;
         let a = did("did:autonomi:a");
         let b = did("did:autonomi:b");
-        l.mint(&a, 100, &proof("e"), &v).unwrap();
+        l.mint(&a, 100, &proof("e"), &v, AT).unwrap();
         l.reserve(&a, 60).unwrap();
         assert_eq!(l.spendable_of(&a), 40);
         assert_eq!(
@@ -443,7 +463,7 @@ mod tests {
         let log = [(&a, 100u128), (&b, 50), (&a, 25), (&a, 75), (&b, 10)];
         let mut replay: BTreeMap<Did, Amount> = BTreeMap::new();
         for (who, amt) in log {
-            l.mint(who, amt, &proof("e"), &v).unwrap();
+            l.mint(who, amt, &proof("e"), &v, AT).unwrap();
             *replay.entry((*who).clone()).or_insert(0) += amt;
         }
         // counter == replay-sum, per DID.
@@ -472,11 +492,45 @@ mod tests {
             "a gift raises balance, never the base"
         );
         // an unproven mint raises nothing.
-        let _ = l.mint(&a, 999, &proof(""), &v);
+        let _ = l.mint(&a, 999, &proof(""), &v, AT);
         assert_eq!(
             l.minted_to_date_of(&a),
             200,
             "an unproven mint raises no base"
+        );
+    }
+
+    #[test]
+    fn first_minted_at_settles_to_the_earliest_emission_and_never_moves() {
+        // The genesis anchor (RELAY_16, corrected): the DID's FIRST EmissionMinted witness time.
+        // It equals the minimum mint timestamp — even if mints arrive out of order — and no later
+        // mint, burn, or transfer moves it.
+        let mut l = BLedger::new();
+        let v = AcceptNonEmptyProof;
+        let a = did("did:autonomi:a");
+        assert_eq!(l.first_minted_at_of(&a), None, "no mint, no genesis");
+        l.mint(&a, 100, &proof("e"), &v, 5_000).unwrap();
+        assert_eq!(l.first_minted_at_of(&a), Some(5_000));
+        // a later mint does not move the genesis forward.
+        l.mint(&a, 50, &proof("e"), &v, 9_000).unwrap();
+        assert_eq!(
+            l.first_minted_at_of(&a),
+            Some(5_000),
+            "a later mint never moves genesis"
+        );
+        // an EARLIER mint (out-of-order replay) settles it back to the true earliest.
+        l.mint(&a, 10, &proof("e"), &v, 2_000).unwrap();
+        assert_eq!(
+            l.first_minted_at_of(&a),
+            Some(2_000),
+            "genesis is the minimum, not the first call"
+        );
+        // spending does not touch it.
+        l.burn(&a, 20).unwrap();
+        assert_eq!(
+            l.first_minted_at_of(&a),
+            Some(2_000),
+            "burning never moves genesis"
         );
     }
 }

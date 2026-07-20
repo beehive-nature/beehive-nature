@@ -23,9 +23,9 @@
 //!
 //! # Phase 2 — the protective constraints (RELAY_15), the half that guards the human
 //!
-//! The caps are **unconditional** — [`LienBook::lock`] cannot be called without the thread's
-//! age, and it reads the collateral base ([`ThreadStanding`]) from the ledger, so neither the
-//! base nor the caps can be bypassed. Stronger than a feature gate: they cannot be compiled out.
+//! The caps are **unconditional** — [`LienBook::lock`] reads the collateral base *and* the thread
+//! age from the ledger (the only caller input is `now`), so neither can be bypassed or forged.
+//! Stronger than a feature gate: they cannot be compiled out.
 //!
 //! - **The 20% function floor (LAW, RELAY_05 §T-0):** 20% of minted-to-date can **never** be
 //!   collateralized — no one can be liquidated out of operating their own OSe. 80% ceiling,
@@ -47,10 +47,12 @@
 //!   reserved` on every spend, so reserved `b` **cannot be spent out from under a lien — from any
 //!   crate.** Bypass is *impossible*, not *forbidden-by-lint*: the guarded-spend wrappers and the
 //!   source lint of phase 2 are **deleted**, because there is no unguarded path left to guard.
-//! - **The collateral base is read from the ledger, never passed.** [`ThreadStanding::from_ledger`]
-//!   reads `minted_to_date` from `b-token` (monotonic, minted-only), so a caller cannot inflate
-//!   their own cap. The one number still supplied by the caller — thread age — is the next
-//!   anchoring dependency (it should come from the identity root's genesis Event).
+//! - **Base AND age are read from the ledger, never passed.** [`ThreadStanding::from_ledger`]
+//!   reads `minted_to_date` (monotonic, minted-only) and derives thread age as `now − first-mint`,
+//!   the mint being the DID's immutable `EmissionMinted` genesis. The corrected ruling closed the
+//!   `thread_age` hole: it was the same defect one field over. Now the only caller input is `now`
+//!   — a clock, not a capability. **Reserved, minted-to-date, and thread-age: one defect wearing
+//!   three hats; all three derived, none accepted.**
 
 #![forbid(unsafe_code)]
 
@@ -151,6 +153,10 @@ impl SettlementAuthorization {
 /// DAO-tunable — the guarantee that no one is liquidated out of operating their own OSe.
 pub const UNCOLLATERALIZABLE_FLOOR_PCT: u32 = 20;
 
+/// Whole-year length in seconds (365 days) for the maturation curve. Thread age is derived as
+/// `(now − first-mint) / this` — see [`ThreadStanding::from_ledger`].
+pub const SECONDS_PER_YEAR: i64 = 365 * 24 * 3600;
+
 /// A thread's standing for the collateral caps. **Built from the ledger, never passed**
 /// (RELAY_16): `minted_to_date` is read from `b-token`, so a thread cannot inflate its own cap.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -163,10 +169,19 @@ pub struct ThreadStanding {
 }
 
 impl ThreadStanding {
-    /// Read the collateral base from the ledger (RELAY_16). The only constructor: the base is
-    /// the ledger's authoritative `minted_to_date`, not a caller-supplied number. `age_years`
-    /// is still a parameter — the next anchoring dependency (identity-root genesis Event).
-    pub fn from_ledger(ledger: &BLedger, who: &Did, age_years: u32) -> Self {
+    /// Read the collateral base AND the age anchor from the ledger (RELAY_16, corrected). Neither
+    /// number crosses the boundary as a caller parameter: `minted_to_date` is the ledger's
+    /// monotonic mint total, and thread age is **derived** as `now − first-mint`, the mint being
+    /// the DID's immutable `EmissionMinted` genesis on the bus. The ONLY input is `now` — a clock
+    /// is not a capability, and the restrained thread supplies none of the three numbers.
+    ///
+    /// First-mint is at-or-after the identity-root genesis, so it can only make the cap TIGHTER,
+    /// never looser — a conservative anchor. A thread that never minted has age 0 and a zero base,
+    /// so it can collateralize nothing (correct: no `b`, no collateral).
+    pub fn from_ledger(ledger: &BLedger, who: &Did, now: i64) -> Self {
+        let genesis = ledger.first_minted_at_of(who).unwrap_or(now);
+        let seconds_in_system = now.saturating_sub(genesis).max(0);
+        let age_years = (seconds_in_system / SECONDS_PER_YEAR) as u32;
         ThreadStanding {
             minted_to_date: ledger.minted_to_date_of(who),
             age_years,
@@ -316,16 +331,18 @@ impl LienBook {
     /// 2. **Spendable** — the ledger's [`reserve`](b_token::BLedger::reserve) refuses a hold
     ///    above `balance − reserved`, so the collateral is genuinely locked from any spend path.
     ///
-    /// `thread_age` is the one caller-supplied number (the next anchoring dependency).
+    /// The only caller input beyond the amount is `now` (unix seconds); base and age are read
+    /// from the ledger (RELAY_16). A clock is not a capability — the thread supplies no number
+    /// that decides its own cap.
     pub fn lock(
         &mut self,
         ledger: &mut BLedger,
         debtor: &Did,
         amount: Amount,
-        thread_age: u32,
+        now: i64,
         maturation: &MaturationParams,
     ) -> Result<LienId, T0Refusal> {
-        let standing = ThreadStanding::from_ledger(ledger, debtor, thread_age);
+        let standing = ThreadStanding::from_ledger(ledger, debtor, now);
         // caps first (no ledger mutation) — report the binding one.
         let would_lock = self.collateralized_of(debtor).saturating_add(amount);
         let floor_bound = standing.floor_bound();
@@ -491,20 +508,34 @@ mod tests {
             evidence_ref: "seed".into(),
         }
     }
-    /// phase-1 funding: liquid balance `bal`, with minted-to-date drawn far above it, so the
-    /// caps do not bind and these tests exercise the spendable gate (their original intent).
+    const YEAR: i64 = SECONDS_PER_YEAR;
+    const NOW: i64 = 2_000_000_000;
+    /// A genesis (first-mint) timestamp that puts a thread at `age_years` as of `NOW`.
+    fn genesis_for(age_years: i64) -> i64 {
+        NOW - age_years * YEAR
+    }
+    /// phase-1 funding: liquid balance `bal`, minted-to-date drawn far above it (caps do not bind)
+    /// and a mature genesis (age 8 at NOW), so these tests exercise the spendable gate.
     fn funded(who: &Did, bal: Amount) -> BLedger {
         let mut l = BLedger::new();
         let minted = bal.saturating_mul(100).max(100);
-        l.mint(who, minted, &proof(), &AcceptNonEmptyProof).unwrap();
+        l.mint(who, minted, &proof(), &AcceptNonEmptyProof, genesis_for(8))
+            .unwrap();
         l.burn(who, minted - bal).unwrap();
         l
     }
-    /// phase-2 funding: minted exactly `amt` (== balance), to exercise the caps against a
-    /// known base.
-    fn minted_exact(who: &Did, amt: Amount) -> BLedger {
+    /// phase-2 funding: minted exactly `amt` (== balance) at a genesis giving `age_years` at NOW,
+    /// to exercise the caps against a known base and a known (derived) age.
+    fn minted_at_age(who: &Did, amt: Amount, age_years: i64) -> BLedger {
         let mut l = BLedger::new();
-        l.mint(who, amt, &proof(), &AcceptNonEmptyProof).unwrap();
+        l.mint(
+            who,
+            amt,
+            &proof(),
+            &AcceptNonEmptyProof,
+            genesis_for(age_years),
+        )
+        .unwrap();
         l
     }
     fn ev(source: &str, grade: ViewGrade) -> Evidence {
@@ -539,7 +570,7 @@ mod tests {
         let mut led = funded(&a, 1000);
         let mut book = LienBook::new();
         assert_eq!(led.spendable_of(&a), 1000);
-        let id = book.lock(&mut led, &a, 300, 8, &mat()).unwrap();
+        let id = book.lock(&mut led, &a, 300, NOW, &mat()).unwrap();
         assert_eq!(led.reserved_of(&a), 300);
         assert_eq!(led.spendable_of(&a), 700, "locked b is not spendable");
         book.release(&mut led, id, &settle_auth(&["lab-x", "lab-y"]))
@@ -557,16 +588,16 @@ mod tests {
         let a = did("a");
         let mut led = funded(&a, 100);
         let mut book = LienBook::new();
-        book.lock(&mut led, &a, 60, 8, &mat()).unwrap();
+        book.lock(&mut led, &a, 60, NOW, &mat()).unwrap();
         // a second lien can only take what is still spendable (40), never the reserved 60.
         assert_eq!(
-            book.lock(&mut led, &a, 50, 8, &mat()),
+            book.lock(&mut led, &a, 50, NOW, &mat()),
             Err(T0Refusal::InsufficientSpendable {
                 spendable: 40,
                 need: 50
             })
         );
-        book.lock(&mut led, &a, 40, 8, &mat()).unwrap();
+        book.lock(&mut led, &a, 40, NOW, &mat()).unwrap();
         assert_eq!(led.spendable_of(&a), 0);
     }
 
@@ -575,7 +606,7 @@ mod tests {
         let a = did("a");
         let mut led = funded(&a, 100);
         let mut book = LienBook::new();
-        let id = book.lock(&mut led, &a, 10, 8, &mat()).unwrap();
+        let id = book.lock(&mut led, &a, 10, NOW, &mat()).unwrap();
         book.release(&mut led, id, &settle_auth(&["s1", "s2"]))
             .unwrap();
         assert_eq!(
@@ -597,7 +628,7 @@ mod tests {
         let before_rate = respect.unlock_rate(&a, &params);
 
         let mut book = LienBook::new();
-        let id = book.lock(&mut led, &a, 500, 8, &mat()).unwrap();
+        let id = book.lock(&mut led, &a, 500, NOW, &mat()).unwrap();
         assert_eq!(
             respect.standing_of(&a),
             before_standing,
@@ -633,9 +664,9 @@ mod tests {
         // the ledger refuses it — so C-ii strengthens from "refuse the shortfall" to "no
         // shortfall can occur." (This is a control changing to pass = a finding, per §4.)
         let a = did("a");
-        let mut led = minted_exact(&a, 100); // balance 100, minted 100
+        let mut led = minted_at_age(&a, 100, 8); // balance 100, minted 100
         let mut book = LienBook::new();
-        let id = book.lock(&mut led, &a, 80, 8, &mat()).unwrap(); // 80% floor at age 8
+        let id = book.lock(&mut led, &a, 80, NOW, &mat()).unwrap(); // 80% floor at age 8
         assert_eq!(led.reserved_of(&a), 80);
         assert_eq!(led.spendable_of(&a), 20);
         // the debtor CANNOT drain into the reserved 80 — the ledger refuses (structural, cross-crate).
@@ -669,7 +700,7 @@ mod tests {
         let a = did("a");
         let mut led = funded(&a, 1000);
         let mut book = LienBook::new();
-        let id = book.lock(&mut led, &a, 300, 8, &mat()).unwrap();
+        let id = book.lock(&mut led, &a, 300, NOW, &mat()).unwrap();
         let burned = book
             .forfeit(&mut led, id, &settle_auth(&["s1", "s2"]))
             .unwrap();
@@ -742,7 +773,7 @@ mod tests {
         let a = did("a");
         let mut led = funded(&a, 500);
         let mut book = LienBook::new();
-        let id = book.lock(&mut led, &a, 200, 8, &mat()).unwrap();
+        let id = book.lock(&mut led, &a, 200, NOW, &mat()).unwrap();
         assert_eq!(book.forfeit(&mut led, id, &auth).unwrap(), 200);
         assert_eq!(led.balance_of(&a), 300);
     }
@@ -753,11 +784,11 @@ mod tests {
     fn p2_maturation_limit_caps_by_age() {
         // a 2-year thread: 10% + 2·10% = 30% of minted 1000 = 300 collateralizable.
         let a = did("a");
-        let mut led = minted_exact(&a, 1000);
+        let mut led = minted_at_age(&a, 1000, 2);
         let mut book = LienBook::new();
-        book.lock(&mut led, &a, 300, 2, &mat()).unwrap(); // positive: within the cap
+        book.lock(&mut led, &a, 300, NOW, &mat()).unwrap(); // positive: within the cap
         assert_eq!(
-            book.lock(&mut led, &a, 1, 2, &mat()), // cumulative — 300 already
+            book.lock(&mut led, &a, 1, NOW, &mat()), // cumulative — 300 already
             Err(T0Refusal::ExceedsMaturationLimit {
                 would_lock: 301,
                 limit: 300,
@@ -769,16 +800,16 @@ mod tests {
     #[test]
     fn p2_function_floor_is_law_even_when_maturation_mis_tuned() {
         let a = did("a");
-        let mut led = minted_exact(&a, 1000);
+        let mut led = minted_at_age(&a, 1000, 8);
         let wide_open = MaturationParams {
             year_one_pct: 100,
             per_year_points: 0,
             ceiling_pct: 100,
         };
         let mut book = LienBook::new();
-        book.lock(&mut led, &a, 800, 8, &wide_open).unwrap(); // positive: exactly the 80% floor
+        book.lock(&mut led, &a, 800, NOW, &wide_open).unwrap(); // positive: exactly the 80% floor
         assert_eq!(
-            book.lock(&mut led, &a, 1, 8, &wide_open),
+            book.lock(&mut led, &a, 1, NOW, &wide_open),
             Err(T0Refusal::BreachesFunctionFloor {
                 would_lock: 801,
                 floor_bound: 800
@@ -789,17 +820,17 @@ mod tests {
     #[test]
     fn p2_cumulative_locks_cannot_step_over_the_floor() {
         let a = did("a");
-        let mut led = minted_exact(&a, 1000);
+        let mut led = minted_at_age(&a, 1000, 8);
         let wide_open = MaturationParams {
             year_one_pct: 100,
             per_year_points: 0,
             ceiling_pct: 100,
         };
         let mut book = LienBook::new();
-        book.lock(&mut led, &a, 500, 8, &wide_open).unwrap();
-        book.lock(&mut led, &a, 300, 8, &wide_open).unwrap(); // total 800 = floor
+        book.lock(&mut led, &a, 500, NOW, &wide_open).unwrap();
+        book.lock(&mut led, &a, 300, NOW, &wide_open).unwrap(); // total 800 = floor
         assert_eq!(
-            book.lock(&mut led, &a, 1, 8, &wide_open),
+            book.lock(&mut led, &a, 1, NOW, &wide_open),
             Err(T0Refusal::BreachesFunctionFloor {
                 would_lock: 801,
                 floor_bound: 800
@@ -811,10 +842,10 @@ mod tests {
     fn p2_day_one_thread_cannot_lock_its_whole_grant() {
         // THE anti-predation case (RELAY_15 §2b): a day-one 2-b grant → 10% of 2 rounds to 0.
         let a = did("newcomer");
-        let mut led = minted_exact(&a, 2);
+        let mut led = minted_at_age(&a, 2, 0);
         let mut book = LienBook::new();
         assert_eq!(
-            book.lock(&mut led, &a, 2, 0, &mat()),
+            book.lock(&mut led, &a, 2, NOW, &mat()),
             Err(T0Refusal::ExceedsMaturationLimit {
                 would_lock: 2,
                 limit: 0,
@@ -823,11 +854,11 @@ mod tests {
         );
         // positive control: a day-one thread with a larger grant can lock within its 10%, not past.
         let b = did("bigger");
-        let mut led2 = minted_exact(&b, 100);
+        let mut led2 = minted_at_age(&b, 100, 0);
         let mut book2 = LienBook::new();
-        book2.lock(&mut led2, &b, 10, 0, &mat()).unwrap();
+        book2.lock(&mut led2, &b, 10, NOW, &mat()).unwrap();
         assert_eq!(
-            book2.lock(&mut led2, &b, 1, 0, &mat()),
+            book2.lock(&mut led2, &b, 1, NOW, &mat()),
             Err(T0Refusal::ExceedsMaturationLimit {
                 would_lock: 11,
                 limit: 10,
@@ -867,9 +898,9 @@ mod tests {
         // crate, which depends on b-token. Bypass is impossible, not forbidden-by-lint.
         let a = did("a");
         let b = did("b");
-        let mut led = minted_exact(&a, 100);
+        let mut led = minted_at_age(&a, 100, 8);
         let mut book = LienBook::new();
-        book.lock(&mut led, &a, 80, 8, &mat()).unwrap();
+        book.lock(&mut led, &a, 80, NOW, &mat()).unwrap();
         assert!(led.burn(&a, 21).is_err(), "burn cannot touch reserved b");
         assert!(
             led.transfer(&a, &b, 21).is_err(),
@@ -883,25 +914,57 @@ mod tests {
         // RELAY_16: the base is the ledger's monotonic minted-to-date. Spending down does not
         // shrink it, so future capacity is preserved; a caller cannot inflate it.
         let a = did("a");
-        let mut led = minted_exact(&a, 1000); // minted 1000
+        let mut led = minted_at_age(&a, 1000, 8); // minted 1000
         led.burn(&a, 900).unwrap(); // balance 100, minted still 1000
-        let s = ThreadStanding::from_ledger(&led, &a, 8);
+        let s = ThreadStanding::from_ledger(&led, &a, NOW);
         assert_eq!(
             s.minted_to_date(),
             1000,
             "base is minted-to-date, not the drawn-down balance"
+        );
+        assert_eq!(
+            s.age_years(),
+            8,
+            "age derived from now − first-mint, not passed"
         );
         assert_eq!(s.floor_bound(), 800);
         // so a mature thread may still collateralize up to 80% of what it ever minted — but only
         // as far as it can actually reserve (spendable 100), the ledger being the harder gate here.
         let mut book = LienBook::new();
         assert_eq!(
-            book.lock(&mut led, &a, 200, 8, &mat()),
+            book.lock(&mut led, &a, 200, NOW, &mat()),
             Err(T0Refusal::InsufficientSpendable {
                 spendable: 100,
                 need: 200
             })
         );
+    }
+
+    #[test]
+    fn p2_age_derives_from_genesis_the_thread_cannot_supply_it() {
+        // RELAY_16 (corrected): thread age is DERIVED (now − first-mint), never a parameter — the
+        // same defect as the base, one field over. A just-minted thread is age 0 regardless of any
+        // wish; the only input is the trusted clock, and the genesis is the ledger's immutable
+        // first-mint, which the restrained thread cannot move.
+        let a = did("a");
+        let led = minted_at_age(&a, 100, 0); // genesis = NOW → age 0 at NOW
+        assert_eq!(
+            ThreadStanding::from_ledger(&led, &a, NOW).age_years(),
+            0,
+            "a just-minted thread is age 0"
+        );
+        // age advances only with the clock (infra), not with anything the thread controls.
+        assert_eq!(
+            ThreadStanding::from_ledger(&led, &a, NOW + 3 * YEAR).age_years(),
+            3,
+            "age = now − genesis; genesis is fixed at first mint"
+        );
+        // a thread that never minted has no genesis and no base — it can collateralize nothing.
+        let stranger = did("never-minted");
+        let s = ThreadStanding::from_ledger(&led, &stranger, NOW);
+        assert_eq!(s.age_years(), 0);
+        assert_eq!(s.minted_to_date(), 0);
+        assert_eq!(s.collateral_cap(&mat()), 0);
     }
 
     #[test]
