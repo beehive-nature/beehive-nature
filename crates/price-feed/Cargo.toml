@@ -1,0 +1,9 @@
+[package]
+name = "price-feed"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "USDA AMS hemp price series + the computed small-package penalty (RELAY_11 deltas 1-2). Tier R applied to a price feed: sourced to the free, official, weekly FVHEMP report — reproducible by any stranger from the same PDF, not a licensed benchmark. A failed OR stale fetch is NotMeasured, never last week's price rendered as this week's; the package-size penalty is computed, carrying its full derivation so a reader re-divides USDA's own numbers and gets the same premium."
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }

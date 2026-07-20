@@ -26,6 +26,7 @@ members = [
     "crates/event-bus",
     "crates/mastery-ledger",
     "crates/normalizer",
+    "crates/price-feed",
     "crates/reputation-engine",
     "crates/sense-atproto",
     "crates/shared-types",
