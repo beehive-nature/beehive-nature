@@ -175,9 +175,18 @@ impl ThreadStanding {
     /// the DID's immutable `EmissionMinted` genesis on the bus. The ONLY input is `now` — a clock
     /// is not a capability, and the restrained thread supplies none of the three numbers.
     ///
-    /// First-mint is at-or-after the identity-root genesis, so it can only make the cap TIGHTER,
-    /// never looser — a conservative anchor. A thread that never minted has age 0 and a zero base,
-    /// so it can collateralize nothing (correct: no `b`, no collateral).
+    /// **First-mint is the deliberate anchor, not a provisional stand-in for identity genesis
+    /// (founder ruling on RELAY_16).** The maturation curve protects the *onboarding moment* —
+    /// when a person first holds `b` that can be taken. A five-year-old DID that just earned its
+    /// first `b` is new in exactly the sense that matters; identity age would only be counting.
+    /// So the clock starts at first mint on purpose, and it targets the actual risk. **Do NOT
+    /// "correct" this to identity-root genesis: that would loosen the cap for precisely the people
+    /// the curve exists to protect.**
+    ///
+    /// A thread that never minted has age 0 and a zero base, so it collateralizes nothing
+    /// (correct: no `b`, no collateral). Note [`b_token::BLedger::first_minted_at_of`] returns
+    /// `None` here, never a `0` default — a `0` would read as 1970, an ancient thread with a
+    /// maximal cap for someone who has minted nothing.
     pub fn from_ledger(ledger: &BLedger, who: &Did, now: i64) -> Self {
         let genesis = ledger.first_minted_at_of(who).unwrap_or(now);
         let seconds_in_system = now.saturating_sub(genesis).max(0);
