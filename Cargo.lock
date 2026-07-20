@@ -95,6 +95,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "bnr-shell"
+version = "0.1.0"
+dependencies = [
+ "b-token",
+ "capability",
+ "denomination",
+ "serde",
+]
+
+[[package]]
 name = "bytes"
 version = "1.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

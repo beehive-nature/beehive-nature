@@ -1,0 +1,19 @@
+[package]
+name = "bnr-shell"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "BNR OSe shell (Lane A, RELAY_19 §6c): the OSe frame that carries D-14 — reads b balances (kernel-side, so AGPL) and denominates every surface in BOTH gauges, with the one b↔currency rate confined to the draw facility and a stale b gauge saying so (Law 1d). The D-14 model lives in `denomination`; this crate wires it to the ledger. No Pop/apt/System76 coupling — negative-controlled (RELAY_19 §6a). The libcosmic COSMIC view is the next commit, built on Linux (libcosmic does not build on Windows)."
+
+[dependencies]
+denomination = { path = "../denomination" }
+b-token = { path = "../b-token" }
+capability = { path = "../capability" }
+serde = { version = "1", features = ["derive"] }
+
+# The COSMIC view layer is the NEXT commit, built on Linux. libcosmic does not build on this
+# Windows host (accesskit_winit E0782), so it is deferred rather than shipped unverified — a
+# passing build is a fact, unbuilt GUI code is not. When it lands it mirrors bnri-cosmic's gating:
+#   [features]
+#   default = []                 # frame + controls only; no GUI toolkit, no vulnerable transitive
+#   gui = ["dep:libcosmic"]      # the COSMIC window, default-off until built and audited on Linux

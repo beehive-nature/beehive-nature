@@ -11,6 +11,7 @@ members = [
     "crates/adapter-carrier",
     "crates/adapter-lti",
     "crates/b-token",
+    "crates/bnr-shell",
     "crates/capability",
     "crates/chain-eos",
     "crates/chain-exsat-evm",
