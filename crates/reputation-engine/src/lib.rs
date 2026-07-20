@@ -518,9 +518,14 @@ mod tests {
 /// **Two scans, because the rule forbids reaching the inputs by *any* path — including indirectly.**
 /// A vocabulary scan of this crate's source catches a field like `indigo_energy_type`, but is blind
 /// to a dependency EDGE: a `plur-index` crate in Cargo.toml leaves no vocabulary in the source. So
-/// a second check asserts the dependency graph (this crate's manifest **and** the workspace lock)
-/// carries no interpretive-framework crate. Both have decoys. Strengthening the firewall is
-/// ordinary-tier, so this second scan was added directly.
+/// a second check asserts the dependency graph carries no interpretive-framework crate — this
+/// crate's manifest, and **reputation-engine's own transitive closure** of the workspace lock.
+/// **Scoped to the closure, not the whole lock, on purpose:** NC-VII1 keeps the interpretive work
+/// itself standing in the plugin layer, so a PLUR crate *elsewhere* in the workspace is permitted;
+/// only reputation-engine's own dependency path is forbidden. A whole-lock scan would over-block
+/// and fire the day the PLUR plugin is built — the exact moment loosening the ratchet tempts. The
+/// decoys prove both directions: a PLUR crate on the path is caught; one off it is permitted.
+/// Strengthening the firewall is ordinary-tier, so this was done directly.
 ///
 /// **Recorded constraint on the future PLUR plugin (Law 1d, in concept space).** PLUR's "R" is
 /// *Respect* — the same word as the constitution's Respect, which is the governance/reputation
@@ -604,6 +609,71 @@ mod nc_vii1 {
         hits
     }
 
+    /// Package names reachable from `root` in a Cargo.lock's dependency graph — `root`'s TRANSITIVE
+    /// CLOSURE, **not** the whole lock. This is the scope NC-VII1 actually names: a PLUR crate on
+    /// reputation-engine's path is forbidden; one elsewhere in the workspace (the plugin layer) is
+    /// permitted.
+    fn closure_names(lock: &str, root: &str) -> std::collections::BTreeSet<String> {
+        use std::collections::{BTreeMap, BTreeSet};
+        let mut graph: BTreeMap<String, Vec<String>> = BTreeMap::new();
+        let mut cur: Option<String> = None;
+        let mut in_deps = false;
+        for line in lock.lines() {
+            let t = line.trim();
+            if t == "[[package]]" {
+                cur = None;
+                in_deps = false;
+                continue;
+            }
+            if in_deps {
+                if t.starts_with(']') {
+                    in_deps = false;
+                    continue;
+                }
+                let dep = t.trim_matches(|c: char| c == '"' || c == ',' || c.is_whitespace());
+                let name = dep.split(' ').next().unwrap_or("");
+                if !name.is_empty() {
+                    if let Some(c) = &cur {
+                        graph.entry(c.clone()).or_default().push(name.to_string());
+                    }
+                }
+                continue;
+            }
+            if let Some(rest) = t.strip_prefix("name = \"") {
+                let name = rest.split('"').next().unwrap_or("").to_string();
+                graph.entry(name.clone()).or_default();
+                cur = Some(name);
+                continue;
+            }
+            // A non-empty `dependencies = [` opens a multi-line list; `dependencies = []` does not.
+            if t.starts_with("dependencies = [") && !t.contains(']') {
+                in_deps = true;
+            }
+        }
+        let mut seen = BTreeSet::new();
+        let mut stack = vec![root.to_string()];
+        while let Some(n) = stack.pop() {
+            if seen.insert(n.clone()) {
+                if let Some(deps) = graph.get(&n) {
+                    stack.extend(deps.iter().cloned());
+                }
+            }
+        }
+        seen
+    }
+
+    /// The interpretive-framework crate names present in a set (empty = clean).
+    fn interpretive_in(names: &std::collections::BTreeSet<String>) -> Vec<String> {
+        names
+            .iter()
+            .filter(|n| {
+                let l = n.to_lowercase();
+                FORBIDDEN.iter().any(|f| l.contains(f))
+            })
+            .cloned()
+            .collect()
+    }
+
     #[test]
     fn no_subjective_worldview_reaches_the_reputation_input_graph() {
         // Scan the LIBRARY (inputs + compute), excluding the test modules where this list and the
@@ -632,27 +702,47 @@ mod nc_vii1 {
     #[test]
     fn no_interpretive_framework_crate_in_the_reputation_dependency_graph() {
         // The vocabulary scan is blind to a dependency EDGE; this closes the indirection path.
-        // Real graph: this crate's manifest and the whole workspace lock (its transitive closure
-        // is a subset of the workspace's resolved graph) carry no interpretive-framework crate.
+        // (1) Direct deps — this crate's own manifest — correctly scoped already.
         assert_eq!(
             graph_findings(include_str!("../Cargo.toml")),
             Vec::<String>::new(),
             "reputation-engine depends on no interpretive-framework crate directly"
         );
-        assert_eq!(
-            graph_findings(include_str!("../../../Cargo.lock")),
-            Vec::<String>::new(),
-            "no interpretive-framework crate is anywhere in the kernel's resolved dependency graph"
-        );
-        // Decoy positive controls — a dependency edge, in each format, MUST be caught.
         assert!(
             !graph_findings("[dependencies]\nplur-index = \"1\"\nserde = \"1\"\n").is_empty(),
-            "a plur-index dependency must be flagged"
+            "a plur-index direct dependency must be flagged"
+        );
+        // (2) TRANSITIVE CLOSURE of reputation-engine ONLY — not the whole workspace lock. NC-VII1
+        // keeps interpretive work in the plugin layer, so a PLUR crate elsewhere is permitted.
+        let reached = closure_names(include_str!("../../../Cargo.lock"), "reputation-engine");
+        assert!(
+            reached.len() > 1,
+            "the closure walk found reputation-engine's real deps, not just itself"
+        );
+        assert_eq!(
+            interpretive_in(&reached),
+            Vec::<String>::new(),
+            "no interpretive-framework crate in reputation-engine's transitive closure"
+        );
+        // Positive control — a PLUR crate ON reputation-engine's path IS caught.
+        let on_path = "[[package]]\nname = \"reputation-engine\"\ndependencies = [\n \"plur-index\",\n]\n\n[[package]]\nname = \"plur-index\"\ndependencies = []\n";
+        assert!(
+            !interpretive_in(&closure_names(on_path, "reputation-engine")).is_empty(),
+            "a PLUR crate on reputation-engine's path must be caught"
+        );
+        // THE SCOPING CONTROL (the fix): a PLUR crate reputation-engine does NOT depend on — a
+        // legitimate plugin — must be PERMITTED. The old whole-lock scan wrongly fired here, which
+        // would have bitten the day the PLUR plugin was built.
+        let off_path = "[[package]]\nname = \"reputation-engine\"\ndependencies = [\n \"dispute-engine\",\n]\n\n[[package]]\nname = \"dispute-engine\"\ndependencies = []\n\n[[package]]\nname = \"plur-index\"\ndependencies = []\n";
+        let sibling = closure_names(off_path, "reputation-engine");
+        assert_eq!(
+            interpretive_in(&sibling),
+            Vec::<String>::new(),
+            "a PLUR plugin NOT on reputation-engine's path must be permitted (interpretive work lives in the plugin layer)"
         );
         assert!(
-            !graph_findings("[[package]]\nname = \"human-design\"\nversion = \"0.1.0\"\n")
-                .is_empty(),
-            "an interpretive-framework crate in the lock must be flagged"
+            sibling.contains("dispute-engine"),
+            "but reputation-engine's real deps ARE in its closure"
         );
     }
 }
