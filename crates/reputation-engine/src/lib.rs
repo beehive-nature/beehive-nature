@@ -510,10 +510,25 @@ mod tests {
 
 /// NC-VII1 (ratified, meta-tier — Article VII §1): interpretive / subjective worldviews
 /// (Human Design, PLUR, Hawkins, physiocracy) live in interpretation plugins and **never become
-/// consensus mechanisms**. So **no such value may reach this engine's input graph** — the
-/// attestation and evidence flows that feed reputation (§3.3(b)). Trivially true today; ratcheted
-/// **while uncontroversial**, so weakening it later costs a meta-tier amendment (K=8 + 21% quorum)
-/// rather than a quiet PR under pressure from a stakeholder who resents it.
+/// consensus mechanisms**. So **no such value may reach this engine's input graph, by any path** —
+/// the attestation and evidence flows that feed reputation (§3.3(b)). Trivially true today;
+/// ratcheted **while uncontroversial**, so weakening it later costs a meta-tier amendment (K=8 +
+/// 21% quorum) rather than a quiet PR under pressure from a stakeholder who resents it.
+///
+/// **Two scans, because the rule forbids reaching the inputs by *any* path — including indirectly.**
+/// A vocabulary scan of this crate's source catches a field like `indigo_energy_type`, but is blind
+/// to a dependency EDGE: a `plur-index` crate in Cargo.toml leaves no vocabulary in the source. So
+/// a second check asserts the dependency graph (this crate's manifest **and** the workspace lock)
+/// carries no interpretive-framework crate. Both have decoys. Strengthening the firewall is
+/// ordinary-tier, so this second scan was added directly.
+///
+/// **Recorded constraint on the future PLUR plugin (Law 1d, in concept space).** PLUR's "R" is
+/// *Respect* — the same word as the constitution's Respect, which is the governance/reputation
+/// unit this firewall exists to protect. Same word, two meanings, one of them the thing being
+/// protected. The guard therefore **cannot** forbid "respect" (it would block the governance unit),
+/// which means **if PLUR is ever built as a plugin, its "Respect" must be RENAMED** — otherwise the
+/// firewall can neither over-block the governance unit nor under-block the interpretive one by name.
+/// The collision is in the concepts, not just the lint.
 #[cfg(test)]
 mod nc_vii1 {
     /// Subjective-worldview vocabulary forbidden in the reputation input graph. Deliberately does
@@ -521,9 +536,11 @@ mod nc_vii1 {
     /// allowed to shadow it.
     const FORBIDDEN: &[&str] = &[
         "human_design",
+        "human-design",
         "humandesign",
         "human design",
         "energy_type",
+        "energy-type",
         "energytype",
         "plur",
         "hawkins",
@@ -531,6 +548,7 @@ mod nc_vii1 {
         "indigo",
         "hexagram",
         "incarnation_cross",
+        "incarnation-cross",
     ];
 
     /// Scan source for forbidden vocabulary, skipping comment lines (prose about the rule is not
@@ -547,6 +565,40 @@ mod nc_vii1 {
                 if l.contains(f) {
                     hits.push(format!("{f}: {t}"));
                 }
+            }
+        }
+        hits
+    }
+
+    /// Scan a Cargo manifest's dependency sections OR a Cargo.lock's package names for an
+    /// interpretive-framework crate. Catches the indirection the source scan cannot — a dependency
+    /// EDGE leaves no vocabulary in this crate's own source.
+    fn graph_findings(text: &str) -> Vec<String> {
+        let mut hits = Vec::new();
+        let mut in_deps = false;
+        for line in text.lines() {
+            let t = line.trim();
+            if t.starts_with('#') {
+                continue;
+            }
+            if let Some(sec) = t.strip_prefix('[') {
+                in_deps = sec.contains("dependencies");
+                continue;
+            }
+            // A Cargo.lock package name (`name = "X"`) in any section, or a Cargo.toml dep name.
+            let name = if let Some(rest) = t.strip_prefix("name = \"") {
+                rest.split('"').next().unwrap_or("").to_lowercase()
+            } else if in_deps && !t.is_empty() {
+                t.split(['=', ' ', '.'])
+                    .next()
+                    .unwrap_or("")
+                    .trim()
+                    .to_lowercase()
+            } else {
+                continue;
+            };
+            if !name.is_empty() && FORBIDDEN.iter().any(|f| name.contains(f)) {
+                hits.push(name);
             }
         }
         hits
@@ -574,6 +626,33 @@ mod nc_vii1 {
         assert!(
             hd_plur_findings("pub respect: u64,").is_empty(),
             "Respect is the reputation unit — PLUR's R must not shadow it out of the input graph"
+        );
+    }
+
+    #[test]
+    fn no_interpretive_framework_crate_in_the_reputation_dependency_graph() {
+        // The vocabulary scan is blind to a dependency EDGE; this closes the indirection path.
+        // Real graph: this crate's manifest and the whole workspace lock (its transitive closure
+        // is a subset of the workspace's resolved graph) carry no interpretive-framework crate.
+        assert_eq!(
+            graph_findings(include_str!("../Cargo.toml")),
+            Vec::<String>::new(),
+            "reputation-engine depends on no interpretive-framework crate directly"
+        );
+        assert_eq!(
+            graph_findings(include_str!("../../../Cargo.lock")),
+            Vec::<String>::new(),
+            "no interpretive-framework crate is anywhere in the kernel's resolved dependency graph"
+        );
+        // Decoy positive controls — a dependency edge, in each format, MUST be caught.
+        assert!(
+            !graph_findings("[dependencies]\nplur-index = \"1\"\nserde = \"1\"\n").is_empty(),
+            "a plur-index dependency must be flagged"
+        );
+        assert!(
+            !graph_findings("[[package]]\nname = \"human-design\"\nversion = \"0.1.0\"\n")
+                .is_empty(),
+            "an interpretive-framework crate in the lock must be flagged"
         );
     }
 }
