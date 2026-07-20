@@ -1,0 +1,12 @@
+[package]
+name = "treasury-t0"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "Treasury smartCONTRACT T-0: b as collateral, lock-and-burn (RELAY_08). The one treasury leg that touches b, so it is kernel-side (SPIRIT-1); the accord treasury (T-1..T-5) holds no b. A lien on the thread's OWN b balance; forfeit BURNS the locked b; no pool purse. RELAY_09's three constitutional conditions — GOV-1 zero governance, Art V non-absorption, BIND-1 Settlement-grade + no lone trigger — are encoded as pre-compile negative controls."
+
+[dependencies]
+capability = { path = "../capability" }
+b-token = { path = "../b-token" }
+shared-types = { path = "../shared-types" }
+serde = { version = "1", features = ["derive"] }

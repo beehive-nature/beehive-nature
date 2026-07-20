@@ -1214,6 +1214,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "treasury-t0"
+version = "0.1.0"
+dependencies = [
+ "b-token",
+ "capability",
+ "serde",
+ "shared-types",
+]
+
+[[package]]
 name = "tungstenite"
 version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
