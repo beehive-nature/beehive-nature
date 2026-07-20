@@ -23,6 +23,7 @@ use b_token::{Amount, BLedger};
 use capability::Did;
 use reputation_engine::ReputationScore;
 use serde::{Deserialize, Serialize};
+use std::cmp::Ordering;
 use treasury_t0::{LienBook, MaturationParams, ThreadStanding};
 
 /// A panel value: **measured** from a named, tested source, or honestly **absent with its reason**
@@ -55,6 +56,42 @@ pub struct RespectStanding {
     pub score: u64,
 }
 
+/// Standing under the 80% function floor — and crucially, a **breach** of the floor is a distinct
+/// arm from being *at* the cap, because on the dashboard the two must not look alike.
+///
+/// The floor is enforced at [`treasury_t0::LienBook::lock`], so `Breach` is unreachable while the
+/// kernel invariant holds. That is exactly why it must be its own loud arm and never a saturated
+/// `0`: **the dashboard is the surface where an impossible state must be unmissable.** A violation
+/// and a boundary must not render alike — the same family as `<LOQ` ≠ `0` and a stale gauge ≠ a
+/// number. If `Breach` ever renders, a floor-law invariant in the kernel has broken.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum Headroom {
+    /// `n` more `b` may be collateralized before the floor.
+    Available(Amount),
+    /// Collateralization exactly equals the floor bound — legitimately no room left.
+    AtCap,
+    /// Collateralization **exceeds** the floor by `n` `b`. Unreachable if the kernel holds; if it
+    /// renders, the floor law failed and the surface must show it unmissably — never as "0".
+    Breach(Amount),
+}
+
+impl Headroom {
+    /// Classify collateralization against the floor bound. `collateralized > floor_bound` is the
+    /// breach — **surfaced, not saturated away.** Carries the overage so the alarm is quantified.
+    pub fn classify(floor_bound: Amount, collateralized: Amount) -> Headroom {
+        match collateralized.cmp(&floor_bound) {
+            Ordering::Less => Headroom::Available(floor_bound - collateralized),
+            Ordering::Equal => Headroom::AtCap,
+            Ordering::Greater => Headroom::Breach(collateralized - floor_bound),
+        }
+    }
+
+    /// Is the floor law breached? A dashboard renderer keys its alarm off this.
+    pub fn is_breach(&self) -> bool {
+        matches!(self, Headroom::Breach(_))
+    }
+}
+
 /// A thread's `b` position — everything read from the ledger and the lien book, none fabricated.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ThreadPosition {
@@ -66,8 +103,10 @@ pub struct ThreadPosition {
     pub collateralized: Amount,
     /// The eternal 80% function-floor bound at this thread's derived age.
     pub floor_bound: Amount,
-    /// How much more may be collateralized before the floor — never negative.
-    pub floor_headroom: Amount,
+    /// Standing under the floor: room left, at the cap, or a (should-be-impossible) breach — the
+    /// three distinguished, never collapsed to a number. Carries its inputs (`floor_bound` and
+    /// `collateralized` are right here) so a reader re-derives it.
+    pub headroom: Headroom,
 }
 
 /// What a circle-activity panel WOULD carry once the lexicon lands (v1 renders none).
@@ -135,9 +174,10 @@ impl Dashboard {
                     minted_to_date: ledger.minted_to_date_of(did),
                     collateralized,
                     floor_bound,
-                    // Never negative: liens can never exceed the floor (lock enforces it), and
-                    // saturating_sub is the belt to that suspenders.
-                    floor_headroom: floor_bound.saturating_sub(collateralized),
+                    // Not a saturated difference: a breach must not read as "0 headroom". The floor
+                    // is enforced at lock(), so Breach should be unreachable — and the dashboard is
+                    // exactly where that impossible state must be loud if it ever occurs.
+                    headroom: Headroom::classify(floor_bound, collateralized),
                 }
             })
             .collect();
@@ -236,7 +276,11 @@ mod tests {
         assert_eq!(p.collateralized, 300);
         assert_eq!(p.spendable, 700, "reserved b is not spendable");
         assert_eq!(p.floor_bound, 800, "80% of minted-to-date");
-        assert_eq!(p.floor_headroom, 500, "800 floor − 300 collateralized");
+        assert_eq!(
+            p.headroom,
+            Headroom::Available(500),
+            "800 floor − 300 collateralized, carrying its inputs"
+        );
     }
 
     #[test]
@@ -290,8 +334,10 @@ mod tests {
     }
 
     #[test]
-    fn floor_headroom_is_never_negative() {
-        // Even a thread collateralized to its cap shows 0 headroom, never a negative/underflow.
+    fn at_the_cap_reads_atcap_not_a_number() {
+        // A thread collateralized to exactly the floor is AtCap — a legitimate boundary, and a
+        // DISTINCT arm from a breach. It must never render as a bare "0" that a breach could also
+        // wear.
         let a = did("did:example:a");
         let mut led = funded(&a, 1000);
         let mut liens = LienBook::new();
@@ -301,8 +347,31 @@ mod tests {
         let d = Dashboard::build(NOW, &[], &led, &liens, &[a], &MaturationParams::default());
         assert_eq!(d.threads[0].collateralized, 800);
         assert_eq!(
-            d.threads[0].floor_headroom, 0,
-            "at the cap, headroom is 0 — not negative"
+            d.threads[0].headroom,
+            Headroom::AtCap,
+            "at the cap is AtCap, not a number"
+        );
+        assert!(!d.threads[0].headroom.is_breach());
+    }
+
+    #[test]
+    fn a_floor_breach_is_loud_not_a_quiet_zero() {
+        // Positive control for the alarm. lock() enforces the floor, so this state is unreachable
+        // through the real API — but an alarm never shown to fire isn't an alarm. If
+        // collateralization ever exceeds the floor, the classifier must surface Breach(overage),
+        // never AtCap and never a saturated 0. And the boundary and the breach must be
+        // distinguishable — that is the whole finding.
+        assert_eq!(
+            Headroom::classify(800, 950),
+            Headroom::Breach(150),
+            "a breach surfaces its overage, not a saturated 0"
+        );
+        assert!(Headroom::classify(800, 950).is_breach());
+        assert_eq!(Headroom::classify(800, 800), Headroom::AtCap);
+        assert_ne!(
+            Headroom::classify(800, 800),
+            Headroom::classify(800, 801),
+            "at-cap and one-over must not look alike"
         );
     }
 
