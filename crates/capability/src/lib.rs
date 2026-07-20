@@ -7,7 +7,7 @@
 //!   Events and authorization key off DIDs, never raw public keys, so key
 //!   rotation never orphans access (the constitution's identity rule).
 //! - A [`Capability`] is a UCAN-shaped `(with, can)` pair: *which resource* and
-//!   *which ability*. "Give the design seat read on the farm panel" is a
+//!   *which ability*. "Give the design seat read on the node panel" is a
 //!   capability; "the wallet may spend" is another.
 //! - A [`Delegation`] is a signed, delegable, revocable grant from an issuer
 //!   DID to an audience DID, optionally time-bound. This is the UCAN token; it
@@ -39,9 +39,9 @@ pub use type_bindings::Did;
 ///
 /// `with` is a resource URI — a capability name from the constitution's
 /// adapter table (`storage.sovereign`, `settlement.private`, …) or a scoped
-/// resource (`farm:node-a`). `can` is an ability path (`farm/read`,
-/// `farm/toggle`, `wallet/spend`), matched hierarchically: `farm/*` grants
-/// every `farm/…` ability, and `*` grants all.
+/// resource (`node:node-a`). `can` is an ability path (`node/read`,
+/// `node/toggle`, `wallet/spend`), matched hierarchically: `node/*` grants
+/// every `node/…` ability, and `*` grants all.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Capability {
     pub with: String,
@@ -70,7 +70,7 @@ fn resource_matches(pattern: &str, resource: &str) -> bool {
 }
 
 /// Ability match: `*` matches anything; `a/b/*` matches `a/b` and any
-/// `a/b/…`; otherwise exact. Segment-wise so `farm/*` does not match `farmx`.
+/// `a/b/…`; otherwise exact. Segment-wise so `node/*` does not match `nodex`.
 fn ability_matches(pattern: &str, ability: &str) -> bool {
     if pattern == "*" {
         return true;
@@ -1028,20 +1028,20 @@ mod tests {
 
     #[test]
     fn exact_capability_match() {
-        let c = Capability::new("storage.sovereign", "farm/read");
-        assert!(c.permits("storage.sovereign", "farm/read"));
-        assert!(!c.permits("storage.sovereign", "farm/toggle"));
-        assert!(!c.permits("settlement.private", "farm/read"));
+        let c = Capability::new("storage.sovereign", "node/read");
+        assert!(c.permits("storage.sovereign", "node/read"));
+        assert!(!c.permits("storage.sovereign", "node/toggle"));
+        assert!(!c.permits("settlement.private", "node/read"));
     }
 
     #[test]
     fn ability_wildcards_are_segment_wise() {
-        let c = Capability::new("storage.sovereign", "farm/*");
-        assert!(c.permits("storage.sovereign", "farm"));
-        assert!(c.permits("storage.sovereign", "farm/read"));
-        assert!(c.permits("storage.sovereign", "farm/toggle"));
+        let c = Capability::new("storage.sovereign", "node/*");
+        assert!(c.permits("storage.sovereign", "node"));
+        assert!(c.permits("storage.sovereign", "node/read"));
+        assert!(c.permits("storage.sovereign", "node/toggle"));
         // must not leak across a non-slash boundary
-        assert!(!c.permits("storage.sovereign", "farmx"));
+        assert!(!c.permits("storage.sovereign", "nodex"));
         assert!(!c.permits("storage.sovereign", "wallet/spend"));
     }
 
@@ -1059,7 +1059,7 @@ mod tests {
         let mut d = Delegation::grant(
             Did::new("did:autonomi:root"),
             Did::new("did:plc:design"),
-            vec![Capability::new("storage.sovereign", "farm/read")],
+            vec![Capability::new("storage.sovereign", "node/read")],
         );
         d.not_before = Some(100);
         d.expires_at = Some(200);
@@ -1076,18 +1076,18 @@ mod tests {
         let mut d = Delegation::grant(
             Did::new("did:autonomi:root"),
             design.clone(),
-            vec![Capability::new("storage.sovereign", "farm/*")],
+            vec![Capability::new("storage.sovereign", "node/*")],
         );
         d.expires_at = Some(500);
 
-        assert!(d.allows(&design, "storage.sovereign", "farm/read", 100));
-        assert!(d.allows(&design, "storage.sovereign", "farm/toggle", 100));
+        assert!(d.allows(&design, "storage.sovereign", "node/read", 100));
+        assert!(d.allows(&design, "storage.sovereign", "node/toggle", 100));
         // wrong audience
-        assert!(!d.allows(&other, "storage.sovereign", "farm/read", 100));
+        assert!(!d.allows(&other, "storage.sovereign", "node/read", 100));
         // wrong resource
-        assert!(!d.allows(&design, "settlement.private", "farm/read", 100));
+        assert!(!d.allows(&design, "settlement.private", "node/read", 100));
         // expired
-        assert!(!d.allows(&design, "storage.sovereign", "farm/read", 501));
+        assert!(!d.allows(&design, "storage.sovereign", "node/read", 501));
     }
 
     #[test]
@@ -1111,7 +1111,7 @@ mod tests {
             Did::new("did:autonomi:root"),
             Did::new("did:plc:design"),
             vec![
-                Capability::new("storage.sovereign", "farm/read"),
+                Capability::new("storage.sovereign", "node/read"),
                 Capability::new("settlement.private", "wallet/view"),
             ],
         );
@@ -1184,15 +1184,15 @@ mod tests {
         let d = Delegation::grant(
             Did::new("did:autonomi:root"),
             Did::new("did:plc:design"),
-            vec![Capability::new("storage.sovereign", "farm/read")],
+            vec![Capability::new("storage.sovereign", "node/read")],
         );
         let aud = Did::new("did:plc:design");
         assert!(d.tier_ceiling.is_none());
         // identical to allows() at every tier, including the weakest
         for t in [Tier::T1, Tier::T3, Tier::T5] {
             assert_eq!(
-                d.allows_at_tier(&aud, "storage.sovereign", "farm/read", 0, t),
-                d.allows(&aud, "storage.sovereign", "farm/read", 0),
+                d.allows_at_tier(&aud, "storage.sovereign", "node/read", 0, t),
+                d.allows(&aud, "storage.sovereign", "node/read", 0),
             );
         }
     }
@@ -1205,7 +1205,7 @@ mod tests {
         let old = r#"{
             "issuer": "did:autonomi:root",
             "audience": "did:plc:design",
-            "capabilities": [{"with":"storage.sovereign","can":"farm/read"}],
+            "capabilities": [{"with":"storage.sovereign","can":"node/read"}],
             "not_before": null,
             "expires_at": null,
             "signature": null
@@ -1215,7 +1215,7 @@ mod tests {
         assert!(d.allows(
             &Did::new("did:plc:design"),
             "storage.sovereign",
-            "farm/read",
+            "node/read",
             0
         ));
     }
@@ -1229,7 +1229,7 @@ mod tests {
         let d = Delegation::grant(
             Did::new("did:autonomi:root"),
             Did::new("did:plc:design"),
-            vec![Capability::new("storage.sovereign", "farm/read")],
+            vec![Capability::new("storage.sovereign", "node/read")],
         );
         let json = serde_json::to_string(&d).unwrap();
         assert!(
@@ -1833,7 +1833,7 @@ mod tests {
         Delegation::grant(
             Did::new("did:autonomi:root"),
             Did::new("did:plc:design"),
-            vec![Capability::new("storage.sovereign", "farm/read")],
+            vec![Capability::new("storage.sovereign", "node/read")],
         )
     }
 
@@ -1864,7 +1864,7 @@ mod tests {
         let signed = Ed25519Verifier::sign(&unsigned_grant(), &k);
         assert_eq!(v.verify(&signed), Ok(()));
 
-        // Escalate the capability: farm/read -> wallet/spend.
+        // Escalate the capability: node/read -> wallet/spend.
         let mut escalated = signed.clone();
         escalated.capabilities = vec![Capability::new("settlement.private", "wallet/spend")];
         assert_eq!(v.verify(&escalated), Err(CapabilityError::BadSignature));

@@ -3,7 +3,7 @@ name = "adapter-autonomi"
 version = "0.1.0"
 edition.workspace = true
 license.workspace = true
-description = "bNature storage.sovereign node-ops adapter: wrap `antctl status` node telemetry into a deterministic, panel-ready FarmSnapshot derived view (v1 mock/fixture-first; real antctl spawn gates behind the AntctlClient trait). Node telemetry is a derived view (R-004), never a CanonicalEvent."
+description = "bNature storage.sovereign node-ops adapter: wrap `antctl status` node telemetry into a deterministic, panel-ready NodeSnapshot derived view (v1 mock/fixture-first; real antctl spawn gates behind the AntctlClient trait). Node telemetry is a derived view (R-004), never a CanonicalEvent."
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }

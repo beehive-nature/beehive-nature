@@ -93,6 +93,14 @@ the domain you mean:
 | **Crypto / infrastructure** | `node ops`, `mining` |
 | **Agricultural** | `grow ops`, `cultivation` |
 
+**And the bare noun `farm` resolves the same direction, asymmetrically (2026-07-20 extension).**
+BNR genuinely has both senses — `NodeSnapshot` is Autonomi storage; a farm is a field in Michoacán
+with a soil panel. **The word `farm` belongs to agriculture; the crypto side gives it up.** So an
+Autonomi node type/path is `node …` (`NodeSnapshot`, `NodeHealth`, `node/read`), and **agricultural
+uses keep `farm` — because that is what they are** (`farmer` stays untouched for the same reason).
+Same asymmetry as the parent ruling: crypto took `node ops`/`mining`, agriculture took `grow
+ops`/`cultivation`, and the noun follows.
+
 A qualifier immediately preceding the word (`yield …`, `crop …`) passes, per the founder's
 "unqualified" wording — but the four approved terms cover every real case, so a qualified use is a
 smell, not a need.
@@ -103,27 +111,41 @@ collision of the set; same defect as `BNRi` and `Respect`.
 
 **Enforcement.** **Live**, in [`crates/vocabulary`](../crates/vocabulary): `farming_findings(text)`
 flags bare, unqualified, word-boundaried uses. Word boundaries mean glued identifiers
-(`FarmSnapshot`, `BnriFarmingLocked`) are **not** token-matches — those carry the ambiguity in a
-different form and migrate under their own rename, not this lint. Two escape hatches: the
+(`BnriFarmingLocked`, `cropfarming`) are **not** token-matches — those carry the ambiguity in a
+different form and migrate under their own rename, not this `farming`-token lint (the bare-`farm`
+noun above is a one-time migration, not a blanket lint, because agriculture legitimately keeps the
+word). Two escape hatches: the
 `yield`/`crop` qualifier carve-out, and an inline **`vocab-allow`** marker for a line that must
 *name* the term definitionally (a doc quoting the rule, a test decoy). The repo selftest asserts the
 kernel sources are clean except an explicit `PENDING` worklist — each entry must still match a real
 finding, so the worklist cannot silently rot.
 
-**Pending migrations (in the lint's `PENDING` list, tracked, not silent):**
+**Migrated (2026-07-20):**
+
+- **Autonomi node-ops** — `adapter-autonomi` + `console-api` prose → `node ops`; and the noun
+  extension: `FarmSnapshot`→`NodeSnapshot`, `FarmHealth`→`NodeHealth`, `set_farm`→`set_node`, the
+  `farm/…` capability paths → `node/…` (all on `storage.sovereign`, i.e. Autonomi node — no
+  agricultural `farm/` path existed to preserve).
+- **`anti-farming` → `anti-gaming`** in `mastery-ledger` and the LTI spec. **Not** `anti-sybil`:
+  sybil-resistance is PoUL's job (one human, one root, 420 cap), and the mechanism *delegates*
+  uniqueness to PoUL-thread identity rather than re-implementing it — its own concern is a real
+  unique human inflating their record via self-loops or alias rings, which is gaming. Verified the
+  mechanism is not a PoUL duplicate.
+
+**Pending migration (in the lint's `PENDING` list, tracked, not silent):**
 
 - **BNRi / exSat yield sense** — `chain-exsat-evm::BnriFamily::Farming`, and the `BnriFarming*`
   event docs in `shared-types`. One coherent BNRi rename; migrates *with* the exSat scoping (no BNRi
-  contract exists yet), so the vocabulary is not left half-renamed.
-- **A third sense — `anti-farming`** (anti-sybil) in `mastery-ledger` / the LTI adapter spec. RELAY_22
-  named two senses; this is a third. **Open ruling needed:** suggest `anti-sybil` / `anti-gaming`.
+  contract exists yet), so the vocabulary is not left half-renamed. **Likely landing word `Yield`** —
+  it is EVM yield-farming, not node ops and not mining — chosen with full context when the crate is
+  real.
 
-**Note not settled by the ruling:** the `Farm*` type family (`FarmSnapshot`, `FarmHealth`,
-`set_farm`) and the `farm/…` capability paths are the `farm`-noun, which RELAY_22 left untouched (as
-it left `farmer`). They are outside this lint. If the type family should also move to `node …`, that
-is a clean follow-on rename on a founder word — not presumed here.
+**Open, not a code issue:** `dockets/DATA_COMMONS_phase_charter.md` uses "anti-farming" in the
+*sybil* sense (coupled with "unique human" and the 420 cap) — where PoUL is the owner. Reword to
+sybil-resistance / PoUL, or leave; a docket-wording call, not code.
 
-**Source.** RELAY_22 §134–149. Lint landed 2026-07-20.
+**Source.** RELAY_22 §134–149; noun extension + `anti-gaming` ruled 2026-07-20. Lint + migration
+landed 2026-07-20.
 
 ---
 

@@ -53,8 +53,8 @@ fn is_word_char(c: char) -> bool {
 
 /// Does `prefix` (everything on the line before an occurrence) end in a ratified qualifier — i.e.
 /// is the word "qualified"? Strips trailing separators (space, tab, hyphen), then reads the last
-/// word. `anti-⟨word⟩` does NOT pass: "anti" is not a domain qualifier, so the anti-sybil sense is
-/// surfaced as a finding rather than silently blessed.
+/// word. `anti-⟨word⟩` does NOT pass: "anti" is not a domain qualifier, so the anti-gaming sense
+/// (mastery-ledger) is surfaced as a finding rather than silently blessed.
 fn preceded_by_qualifier(prefix: &str) -> bool {
     let trimmed = prefix.trim_end_matches([' ', '\t', '-']);
     let last_word: String = trimmed
@@ -69,7 +69,7 @@ fn preceded_by_qualifier(prefix: &str) -> bool {
 }
 
 /// True if `line` contains at least one bare, unqualified, word-boundaried occurrence of the banned
-/// noun. Word boundaries mean glued identifiers (`FarmSnapshot`, `BnriFarmingLocked`) do NOT match —
+/// noun. Word boundaries mean glued identifiers (`BnriFarmingLocked`, `cropfarming`) do NOT match —
 /// they carry the ambiguity in a different form and are handled by their own rename, not this token
 /// lint.
 fn line_has_bare_needle(line: &str) -> bool {
@@ -126,8 +126,8 @@ mod lint_controls {
 
     #[test]
     fn a_hyphen_prefixed_use_is_caught_surfacing_the_third_sense() {
-        // "anti-<noun>" (the anti-sybil sense) is NOT a ratified qualifier, so it is flagged — which
-        // is how the third meaning gets surfaced for a ruling instead of quietly blessed.
+        // "anti-<noun>" (the anti-gaming sense) is NOT a ratified qualifier, so it is flagged —
+        // which is how the third meaning gets surfaced for a ruling instead of quietly blessed.
         assert_eq!(
             farming_findings("the anti-farming property lives on identity").len(),
             1
@@ -162,7 +162,12 @@ mod lint_controls {
     fn glued_identifiers_are_not_token_matches() {
         // These carry the ambiguity, but not as this token — no word boundary. They are handled by
         // their own (deferred) rename, not by this lint. Documenting the boundary is the point.
-        for id in ["FarmSnapshot", "BnriFarmingLocked", "set_farm", "farmx"] {
+        for id in [
+            "BnriFarmingLocked",
+            "farmington",
+            "refarming",
+            "cropfarming",
+        ] {
             assert!(
                 farming_findings(id).is_empty(),
                 "glued identifier wrongly token-matched: {id}"
@@ -206,7 +211,8 @@ mod repo_selftest {
         (
             "chain-exsat-evm",
             "Farming,",
-            "BnriFamily::Farming variant + uses — one coherent BNRi rename, with the exSat scoping",
+            "BnriFamily::Farming variant + uses — one coherent BNRi rename, with the exSat scoping \
+             (likely landing word `Yield`: it is EVM yield-farming, not node ops or mining)",
         ),
         (
             "shared-types",
@@ -227,11 +233,6 @@ mod repo_selftest {
             "shared-types",
             "/ farming / draw data",
             "BNRi event-family doc — renames with the exSat/BNRi vocabulary as a whole",
-        ),
-        (
-            "mastery-ledger",
-            "anti-farming property",
-            "THIRD sense (anti-sybil), not covered by RELAY_22 — pending a ruling on the term",
         ),
     ];
 

@@ -132,7 +132,7 @@ carrying **both DIDs** (verifier + verified / teacher + learner). `EdgeFactor` (
 
 - Same-thread, self-loop, or an unbindable counterparty → `edge_yield = 0`. No factor.
   A ring of one person's aliases verifying each other yields nothing — the distinctness
-  test is the anti-farming property, and it lives on **PoUL-thread identity**, not on
+  test is the anti-gaming property, and it lives on **PoUL-thread identity**, not on
   account identity (accounts are cheap; PoUL threads are not).
 - `EdgeFactor`'s value is §1-ratified policy data, gated exactly like `QuestParams`.
 

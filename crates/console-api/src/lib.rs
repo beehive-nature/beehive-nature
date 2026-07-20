@@ -4,7 +4,7 @@
 //! The kernel's inner spine (event bus, escrow, reputation) already produces
 //! facts. This crate is the *read surface* over those facts: a pure reducer
 //! that folds [`CanonicalEvent`]s into panel-ready state, plus a slot for the
-//! P1 [`FarmSnapshot`] that comes from `adapter-autonomi`.
+//! P1 [`NodeSnapshot`] that comes from `adapter-autonomi`.
 //!
 //! Two disciplines from the constitution and the design briefs are load-bearing:
 //! - **Derived, never authoritative (R-004).** A `ConsoleView` is a projection
@@ -12,7 +12,7 @@
 //!   sources (chain, wallet) — never from this projection. This type exists to
 //!   render activity and standing, not to be trusted as a ledger.
 //! - **Panels bind to capabilities, not chains.** The node-ops slot holds a
-//!   `FarmSnapshot` (the `storage.sovereign` view); it does not know or care
+//!   `NodeSnapshot` (the `storage.sovereign` view); it does not know or care
 //!   that Autonomi produced it. Swap the storage network, keep the panel.
 //!
 //! The fold reads only event families that already exist in `shared_types`:
@@ -26,7 +26,7 @@ use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
 use shared_types::{CanonicalEvent, EventPayload, EventType};
 
-pub use adapter_autonomi::FarmSnapshot;
+pub use adapter_autonomi::NodeSnapshot;
 
 /// One line in the console's activity feed — a compact projection of a
 /// settlement event. Carries the flat `event_type` (what happened) and the
@@ -43,12 +43,12 @@ pub struct ActivityItem {
 
 /// The whole console's derived state. Assembled once and updated by folding
 /// each new bus event through [`ConsoleView::fold`]; the node-ops panel is
-/// attached separately via [`ConsoleView::set_farm`] because node telemetry is
+/// attached separately via [`ConsoleView::set_node`] because node telemetry is
 /// a derived view, not a bus event (see `adapter-autonomi`).
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct ConsoleView {
     /// P1 node-ops panel (`storage.sovereign`). `None` until a snapshot is set.
-    pub farm: Option<FarmSnapshot>,
+    pub node: Option<NodeSnapshot>,
     /// Most-recent-last activity feed (Order/Product events).
     pub activity: Vec<ActivityItem>,
     /// P5 standing signal: subject DID → cumulative reputation delta, from
@@ -64,8 +64,8 @@ impl ConsoleView {
     }
 
     /// Attach / replace the P1 node-ops snapshot (from `adapter-autonomi`).
-    pub fn set_farm(&mut self, farm: FarmSnapshot) {
-        self.farm = Some(farm);
+    pub fn set_node(&mut self, node: NodeSnapshot) {
+        self.node = Some(node);
     }
 
     /// Fold one canonical event into the view. Total and deterministic: the
@@ -184,7 +184,7 @@ mod tests {
     #[test]
     fn empty_view_is_default() {
         let v = ConsoleView::new();
-        assert!(v.farm.is_none());
+        assert!(v.node.is_none());
         assert!(v.activity.is_empty());
         assert!(v.standing.is_empty());
         assert_eq!(v.standing_of("did:plc:nobody"), 0);
@@ -232,12 +232,12 @@ mod tests {
     }
 
     #[test]
-    fn farm_panel_attaches_from_adapter() {
+    fn node_panel_attaches_from_adapter() {
         let report = MockAntctlClient::pinned().unwrap().status().unwrap();
         let mut v = ConsoleView::new();
-        v.set_farm(FarmSnapshot::from_report(&report));
-        let farm = v.farm.expect("farm set");
-        assert_eq!(farm.nodes_total, 3);
+        v.set_node(NodeSnapshot::from_report(&report));
+        let node = v.node.expect("node set");
+        assert_eq!(node.nodes_total, 3);
     }
 
     #[test]

@@ -1,5 +1,5 @@
 //! `storage.sovereign` node-ops adapter — turn Autonomi node telemetry
-//! (`antctl status`) into a deterministic, panel-ready [`FarmSnapshot`].
+//! (`antctl status`) into a deterministic, panel-ready [`NodeSnapshot`].
 //!
 //! This is Panel 1 of the SKAISTS LOVErnment console ("is my node network
 //! healthy and earning?"). It is the first in-repo seam for `storage.sovereign`;
@@ -119,7 +119,7 @@ pub struct StatusReport {
 /// The one-glance hero state of the node-ops panel (brief §3A):
 /// green *earning* / amber *idle* / red *down*.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum FarmHealth {
+pub enum NodeHealth {
     /// At least one node running and the network is storing records.
     Earning,
     /// Nodes present and running, but nothing stored yet (warming up).
@@ -131,7 +131,7 @@ pub enum FarmHealth {
 /// The derived view the console's node-ops panel renders. Pure function of a
 /// [`StatusReport`]: identical reports produce identical snapshots.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct FarmSnapshot {
+pub struct NodeSnapshot {
     pub nodes: Vec<NodeStatus>,
     pub nodes_total: usize,
     pub nodes_running: usize,
@@ -139,15 +139,15 @@ pub struct FarmSnapshot {
     pub storage_used_mb: u64,
     /// Sum of `records_stored` across nodes (integers — safe to sum).
     pub records_stored: u64,
-    pub health: FarmHealth,
+    pub health: NodeHealth,
     /// Carried from the report's `as_of` (the network's clock).
     pub as_of: i64,
 }
 
-impl FarmSnapshot {
+impl NodeSnapshot {
     /// Fold a report into the panel view. Total, deterministic, never panics —
     /// including on an empty node set (which is a valid, `Down` snapshot).
-    pub fn from_report(report: &StatusReport) -> FarmSnapshot {
+    pub fn from_report(report: &StatusReport) -> NodeSnapshot {
         let nodes_total = report.nodes.len();
         let nodes_running = report
             .nodes
@@ -164,14 +164,14 @@ impl FarmSnapshot {
         }
 
         let health = if nodes_total == 0 || nodes_running == 0 {
-            FarmHealth::Down
+            NodeHealth::Down
         } else if records_stored > 0 {
-            FarmHealth::Earning
+            NodeHealth::Earning
         } else {
-            FarmHealth::Idle
+            NodeHealth::Idle
         };
 
-        FarmSnapshot {
+        NodeSnapshot {
             nodes: report.nodes.clone(),
             nodes_total,
             nodes_running,
@@ -282,10 +282,10 @@ mod tests {
     #[test]
     fn pinned_fixture_snapshot_is_earning() {
         let report = MockAntctlClient::pinned().unwrap().status().unwrap();
-        let snap = FarmSnapshot::from_report(&report);
+        let snap = NodeSnapshot::from_report(&report);
         assert_eq!(snap.nodes_total, 3);
         assert_eq!(snap.nodes_running, 2);
-        assert_eq!(snap.health, FarmHealth::Earning);
+        assert_eq!(snap.health, NodeHealth::Earning);
         // storage/records are integer sums of the three fixture nodes.
         assert_eq!(snap.storage_used_mb, 2048 + 1792 + 256);
         assert_eq!(snap.records_stored, 15342 + 12987 + 41);
@@ -298,12 +298,12 @@ mod tests {
             as_of: 42,
             nodes: vec![],
         };
-        let snap = FarmSnapshot::from_report(&report);
+        let snap = NodeSnapshot::from_report(&report);
         assert_eq!(snap.nodes_total, 0);
         assert_eq!(snap.nodes_running, 0);
         assert_eq!(snap.storage_used_mb, 0);
         assert_eq!(snap.records_stored, 0);
-        assert_eq!(snap.health, FarmHealth::Down);
+        assert_eq!(snap.health, NodeHealth::Down);
         assert_eq!(snap.as_of, 42);
     }
 
@@ -313,7 +313,7 @@ mod tests {
             as_of: 1,
             nodes: vec![node("a", NodeState::Running, 10, 0)],
         };
-        assert_eq!(FarmSnapshot::from_report(&report).health, FarmHealth::Idle);
+        assert_eq!(NodeSnapshot::from_report(&report).health, NodeHealth::Idle);
     }
 
     #[test]
@@ -326,16 +326,16 @@ mod tests {
             ],
         };
         // Starting does not count as running; nothing is Running → Down.
-        let snap = FarmSnapshot::from_report(&report);
+        let snap = NodeSnapshot::from_report(&report);
         assert_eq!(snap.nodes_running, 0);
-        assert_eq!(snap.health, FarmHealth::Down);
+        assert_eq!(snap.health, NodeHealth::Down);
     }
 
     #[test]
     fn snapshot_is_deterministic() {
         let report = MockAntctlClient::pinned().unwrap().status().unwrap();
-        let a = FarmSnapshot::from_report(&report);
-        let b = FarmSnapshot::from_report(&report);
+        let a = NodeSnapshot::from_report(&report);
+        let b = NodeSnapshot::from_report(&report);
         assert_eq!(a, b);
     }
 
@@ -349,9 +349,9 @@ mod tests {
             ],
         };
         // Hostile/buggy telemetry must not panic the console.
-        let snap = FarmSnapshot::from_report(&report);
+        let snap = NodeSnapshot::from_report(&report);
         assert_eq!(snap.storage_used_mb, u64::MAX);
-        assert_eq!(snap.health, FarmHealth::Earning);
+        assert_eq!(snap.health, NodeHealth::Earning);
     }
 
     #[test]

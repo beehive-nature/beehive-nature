@@ -227,7 +227,10 @@ impl MasteryEvent {
     /// §4/§6 — the distinct-counterparty edge, on PoUL-thread (`Did`) distinctness.
     /// Counts attestors distinct from the subject and from each other; a self-loop or an
     /// alias ring yields 0. The engine applies EdgeFactor only when this is `> 0` — the
-    /// anti-farming property lives on thread identity, not on cheap accounts.
+    /// anti-gaming property lives on thread identity, not on cheap accounts. (Sybil-resistance
+    /// itself is PoUL's job — one human, one root; this edge stops a real, unique human inflating
+    /// their own record via self-loops or alias rings, and delegates uniqueness to PoUL rather
+    /// than re-implementing it.)
     pub fn distinct_attestors(&self) -> usize {
         self.body
             .attested_by
