@@ -98,14 +98,28 @@ mod tests {
     /// flagship fixture for the machinery.
     fn beef_proximate_panel() -> Vec<Analyte> {
         vec![
-            Analyte { name: "protein_g_per_100g", result: Measurement::Measured(26.1) },
-            Analyte { name: "fat_g_per_100g", result: Measurement::Measured(15.0) },
-            Analyte { name: "moisture_g_per_100g", result: Measurement::Measured(58.0) },
-            Analyte { name: "ash_g_per_100g", result: Measurement::Measured(1.0) },
+            Analyte {
+                name: "protein_g_per_100g",
+                result: Measurement::Measured(26.1),
+            },
+            Analyte {
+                name: "fat_g_per_100g",
+                result: Measurement::Measured(15.0),
+            },
+            Analyte {
+                name: "moisture_g_per_100g",
+                result: Measurement::Measured(58.0),
+            },
+            Analyte {
+                name: "ash_g_per_100g",
+                result: Measurement::Measured(1.0),
+            },
             // B12 needs a dedicated assay nobody ordered on a proximate panel — silent, not zero.
             Analyte {
                 name: "vitamin_b12_ug_per_100g",
-                result: Measurement::NotMeasured { basis: Absence::NotRequested },
+                result: Measurement::NotMeasured {
+                    basis: Absence::NotRequested,
+                },
             },
         ]
     }
@@ -127,7 +141,10 @@ mod tests {
 
         // the analytes that WERE ordered read as real values, so the panel is not empty — the point
         // is the *contrast* between measured rows and the silent one.
-        let protein = panel.iter().find(|a| a.name == "protein_g_per_100g").unwrap();
+        let protein = panel
+            .iter()
+            .find(|a| a.name == "protein_g_per_100g")
+            .unwrap();
         assert_eq!(protein.result.value(), Some(&26.1));
     }
 
@@ -137,10 +154,15 @@ mod tests {
         // zero" are different records and must never collapse together. Had B12 actually been
         // assayed and come back 0.0, that is a *measured* value — a different, stronger claim than
         // "no one looked", and only one of the two carries a number.
-        let not_asked: Measurement<f64> = Measurement::NotMeasured { basis: Absence::NotRequested };
+        let not_asked: Measurement<f64> = Measurement::NotMeasured {
+            basis: Absence::NotRequested,
+        };
         let measured_zero: Measurement<f64> = Measurement::Measured(0.0);
 
-        assert_ne!(not_asked, measured_zero, "absence of a test is not a measured zero");
+        assert_ne!(
+            not_asked, measured_zero,
+            "absence of a test is not a measured zero"
+        );
         assert_eq!(not_asked.value(), None);
         assert_eq!(
             measured_zero.value(),
@@ -155,7 +177,9 @@ mod tests {
         // µg/g floor against a ~0.29 µg/g literature mean — blind, not zero. The LOQ travels with
         // the result so the same "<LOQ" is not misread across different floors.
         let below: Measurement<f64> = Measurement::NotMeasured {
-            basis: Absence::BelowLoq { loq: "100 µg/g".to_string() },
+            basis: Absence::BelowLoq {
+                loq: "100 µg/g".to_string(),
+            },
         };
         assert_eq!(below.value(), None, "<LOQ is not a zero");
         match below.absence() {
