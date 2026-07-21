@@ -52,10 +52,20 @@ Compile-gate note for that ruling — the existing variants (measured):
 
 A FIDO2 assertion proves **possession of a portable token**, never platform integrity and never
 presence-of-a-person — so it must **not** reuse `DeviceAttestation` (0.90, high, auto-enforce
-capable). RELAY_17's recommended band: **above `SignedSelfAttestation` (0.55), below the high /
-settlement-carrying tier** (i.e. in `(0.55, 0.85)`), by the same discount logic G-1 applied to
-self-attestation. The founder's ruling sets the exact value and confirms the semantic split from
-`DeviceAttestation`.
+capable). RELAY_17's recommended band was **above `SignedSelfAttestation` (0.55), below the high /
+settlement-carrying tier**, by the same discount logic G-1 applied to self-attestation.
+
+**Founder ruling — 2026-07-19 (RELAY_17), meta-tier: `Provenance::HardwareAttestation = 0.58`.**
+Placed **above `SignedSelfAttestation` (0.55)** because the secret cannot be exfiltrated from a
+secure element — the assertion cannot be produced without the physical device; and **below
+`AiInference` (0.60)** because it attests an *authentication event* — possession of a device, never
+presence of a person, and never validated content. Ladder:
+`UserClaim 0.30 → SignedSelfAttestation 0.55 → HardwareAttestation 0.58 → AiInference 0.60`. Two
+significant figures, deliberately — `0.58` is a *placed* position and its roundness says so honestly
+(Article VI §3.9; false four-digit precision is the `<LOQ`-as-zero defect). It is **not** high /
+auto-enforcing. This docket is the durable record of the value (RELAY_17 is untracked); **Seat 3
+still does not set it in code** — the constant lands in `shared-types::evidence::base_weight` beside
+G-1's arms only when the FIDO2 adapter is built (§3), never as a bare constant in a PR before then.
 
 ## Blocked — and the prerequisite that is out of order
 
