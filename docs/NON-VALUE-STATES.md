@@ -53,10 +53,16 @@ Remove all colour and the surface must still read.
    measured zero ≠ an unmeasured field** (see the value states — this pair is
    the one most easily collapsed, and the one the WELLness `none`/`not measured`
    defect in Part 5 collapses in practice).
-4. **Colour is never the sole channel (§3).** Every colour-encoded distinction
-   also carries a label, a value, or a pattern. **Corollary the review forces: a
-   single *word* is not a sufficient sole channel either** — two states that
-   share fill, colour, and glyph and differ only by a word have failed this.
+4. **Two states that differ *in kind* must differ in more than one channel
+   (§3, generalised — founder ruling 2026-07-21).** Colour is never the sole
+   channel — every colour-encoded distinction also carries a label, a value, or
+   a pattern — **and a single *word* is never the sole channel either.** Word-as-
+   sole-channel fails for exactly the reason colour-as-sole-channel fails.
+   `none` (a measurement that *found* absence) and `not measured` (no
+   measurement) are different in kind — the Axis A distinction at the atom
+   level — so they must differ in pattern or shape *as well as* text, exactly as
+   `AtCap` and `Breach` do. **The test:** remove all colour *and* squint past
+   the words; the two states must still be distinguishable.
 5. **Semantic colours may not be repainted to fix contrast (§4).** Step within
    the ramp or invert to a chip; never change the hue. Prove contrast with a
    *pair check* on the composited background, not a token-level claim.
@@ -224,16 +230,17 @@ render this state. "—" = not applicable.
 
 ## Part 5 — findings for Fable (surfaced by the sweep + review)
 
-1. **A measured absence must not wear the not-measured hatch (real defect).** In
-   `d12_fat_scan_result.html`, SCFA/MCFA `none` — a *measured* genuine-absence —
-   is rendered with the same `.tag.nm` diagonal-hatch pill as the genuinely
-   *unmeasured* GLA `not measured`, differing **only by the word**. This
-   collapses `Measured(0)` and `NotMeasured`, which invariant 3 forbids, and it
-   contradicts this catalog's own Measured-zero contract (a measured zero is a
-   plain `0 g`, as the same surface already does for EPA/DHA). **Fix (preferred):
-   render `none` as a plain `0`, reserving the hatch strictly for unmeasured
-   values.** A second glyph is *not* sufficient — the state belongs in the value
-   family, not the absence family.
+1. **A measured absence must not wear the not-measured hatch — FIXED
+   2026-07-21.** In `d12_fat_scan_result.html`, SCFA/MCFA `none` — a *measured*
+   genuine-absence — was rendered with the same `.tag.nm` diagonal-hatch pill as
+   the genuinely *unmeasured* GLA `not measured`, differing **only by the word**
+   — a violation of invariant 4 (word-as-sole-channel) that collapsed
+   `Measured(0)` and `NotMeasured`. **Resolved** in `beehive-WELLness` (commit
+   `37a952f`): SCFA/MCFA now render as plain `0 g`, identical to the sibling
+   measured-zeros EPA/DHA, so the hatch is reserved strictly for unmeasured
+   values and the two states differ in pattern *and* word. (A second glyph was
+   considered and rejected — the state belongs in the value family, not the
+   absence family.)
 2. **The DAO `UnshowableBGauge` and `MissingRequiredGauge` panels are legend-only**
    — named in the technical legend, no card drawn. A docket reported Fable
    shipped their design, but it is **not in any accessible design project** (see
