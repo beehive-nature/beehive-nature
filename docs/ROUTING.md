@@ -52,7 +52,20 @@
 
 > **⚠ CORRECTED 2026-07-21.** This section previously read *"Every ruling inside them is already mirrored into a committed home… scaffolding around finished buildings."* **That claim was false and I never verified it.** Code gated the deletion behind one adversarial verifier per file: **11 of 18 confirmed mirrored, 7 came back `HOLD_UNMIRRORED`.** Executing my instruction as written would have permanently destroyed seven rulings — untracked files have no git history to recover from. **One of the seven (RELAY_22 §5a) is a live gap in the shipped `onboarding` crate, not merely an undocumented decision.**
 
-**11 files deleted after their mirrors were exhibited. 7 held:** `RELAY_11 · 12 · 14 · 19 · 21 · 22 · 24`.
+**11 files deleted after their mirrors were exhibited.** The 7 held —
+`RELAY_11 · 12 · 14 · 19 · 21 · 22 · 24` — were then **mirrored to committed
+homes and deleted (2026-07-21)**, each witness `git grep`-verified against the
+tracked tree first. Two of the seven were not documentation moves:
+
+| Held file | Ruling | Committed home | Kind |
+|---|---|---|---|
+| RELAY_22 §5a | PDS-custody must be disclosed on an ATProto/PLC binding | `crates/onboarding` (`InformedConsent.discloses_pds_custody`, `PersonaBinding::bind`, negative control) | **code fix — live gap in shipped crate** |
+| RELAY_14 | B12-in-beef `NotMeasured{NotRequested}` teaching fixture | `crates/coa` (built as running tests) | **fixture built, not filed** |
+| RELAY_24 | four ratified data-commons answers | `dockets/DATA_COMMONS_phase_charter.md` | doc |
+| RELAY_11 d3–5 | ImportProvenance · DisclosurePair · claim-drawer scope | `crates/price-feed` module doc | doc |
+| RELAY_12 | `NutrientRecord` record shape | `SPEC_hulled_hemp_hearts_COA_tri_jurisdictional.md` §5a | doc |
+| RELAY_19 | surviving reproducibility constraints | `docs/architecture/bnr-ose-spec.md` | doc |
+| RELAY_21 §4 | Vega-Lite spec as a serde struct | `docs/adr/0001-…md` | doc |
 
 **`RELAY_25_BIGEN_architecture.md`** → moved to `LOVErnment-DAO` as `bigen/ARCHITECTURE.md`.
 
@@ -83,6 +96,15 @@
 1. **Backup zip → Drive.** Gates the legacy sweep above.
 2. **Authorize the GitHub connector** (`plugin:engineering:github`, in connector settings). **Removes most of the remaining courier burden** — the design seat could then read repo state directly instead of asserting about trees it cannot see.
 3. **Fiscal sponsor emails** · **lab RFQ** · **farmer's number** · **the four private letters** · **`mro-jl22-ajin` posting** · **a Linux machine for the COSMIC window.**
+
+### Contact-in-future
+
+**PanLex** (The Long Now Foundation, 501(c)(3)) — **written permission for commercial use of the lexical database.**
+
+- **Why it's needed:** the database is **CC BY-NC-SA 4.0**, not CC0. *(A web search reported CC0; the license page itself says BY-NC-SA — verified by direct fetch. Treat BY-NC-SA as operative until PanLex confirms otherwise in writing.)* **NonCommercial collides with the Capital-Business-For-Profit arm, and ShareAlike is viral** — a derived lexicon layer would inherit BY-NC-SA and conflict with the public-commons-anyone-can-fork architecture.
+- **Why it's winnable:** nonprofit to nonprofit. Their mission — *"nobody should have their rights restricted because of the language they speak"* — is bTONGUES' thesis, and they explicitly name **land rights and agriculture** among the fields they support. Their license page states commercial use is available by written permission, and their site invites custom arrangements. **This is a letter, not a negotiation.**
+- **Why it's worth the letter:** PanLex independently built our provenance ladder. **`distance-1` = attested by a source; `distance-n` = inferred from chains, n = shortest chain** — that is `Confirmed` vs `Informational` with confidence decaying by chain length, and every translation carries a source label. Integration would be structural, not a mapping layer.
+- **Open:** Purépecha (`tsz`) coverage unverified — the API query returned empty through the fetch tool, which is a tooling limit, not evidence of absence. Check `vocab.panlex.org` before writing.
 
 **Aug 21 is the only clock.**
 
