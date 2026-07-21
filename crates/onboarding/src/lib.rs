@@ -10,7 +10,10 @@
 //!   preference, never a credential). The [`RootIdentity`] keypair is generated *locally* here — it
 //!   costs nothing, so the identity exists from the first moment.
 //! - **Step 2 — anchor the root.** The `did:autonomi` is anchored ([`RootIdentity::anchored`]). This
-//!   is the adoption gate: without it, a person caps below Settlement grade **forever** (§4).
+//!   is the adoption gate: without it, a person caps below Settlement grade **forever** (§4). A
+//!   Settlement gate consumes a [`GradeDisclosure`] witness that only [`disclose_grade`] can mint,
+//!   so a surface cannot gate without first showing the user their grade — it fails to compile,
+//!   not at runtime.
 //! - **Step 3 — personas.** Plural, optional, each a [`persona::PersonaBinding`] whose disclosure
 //!   mode is its own (never global) and whose default is the reversible, private side.
 //!
@@ -258,12 +261,72 @@ pub fn reachable_grade(enrolment: &Enrolment, binding: Option<&SettlementBinding
     }
 }
 
+/// A witness that the user was shown their current grade — §4's protection made **structural**, not
+/// remembered. Its field is private, there is no other constructor, and it derives **no
+/// `Deserialize`**, so a caller cannot fabricate one: the only way to obtain a `GradeDisclosure` is
+/// [`disclose_grade`], which produces the very status the user sees. A surface therefore cannot gate
+/// on Settlement without having rendered the grade first — it is not a check it can forget to pass,
+/// it is a value it cannot conjure. (Same idiom as `treasury_t0::SettlementAuthorization`; the old
+/// `grade_was_shown: bool` was the `thread_age` defect — a protection decided by a value the
+/// restrained party hands in.)
+///
+/// The private field is why this cannot be built from outside the crate:
+/// ```compile_fail
+/// use onboarding::GradeDisclosure;
+/// use shared_types::ViewGrade;
+/// // `shown` is private — a surface cannot conjure a disclosure it never made.
+/// let _forged = GradeDisclosure { shown: ViewGrade::Settlement };
+/// ```
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GradeDisclosure {
+    shown: ViewGrade,
+}
+
+impl GradeDisclosure {
+    /// The grade that was disclosed to the user.
+    pub fn shown(&self) -> ViewGrade {
+        self.shown
+    }
+}
+
+/// The user-facing grade status: where the person stands and what raises it — rendered in the same
+/// honest register as the `b` gauge, never a nag. Producing this is the **only** way to mint a
+/// [`GradeDisclosure`], so §4's disclosure obligation cannot be skipped.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GradeStatus {
+    pub current: ViewGrade,
+    /// What raises the grade — empty once already at Settlement.
+    pub raises_it: &'static str,
+}
+
+const RAISES_SETTLEMENT: &str =
+    "anchor the did:autonomi root and establish a bidirectional did:plc binding";
+
+/// Render the user's grade status **and** mint the disclosure witness. Call this on the surface that
+/// shows the person their grade; pass the returned [`GradeDisclosure`] to [`gate_on_settlement`].
+/// There is no path to the witness that does not also produce the status — that is the point.
+pub fn disclose_grade(current: ViewGrade) -> (GradeStatus, GradeDisclosure) {
+    let raises_it = if current < ViewGrade::Settlement {
+        RAISES_SETTLEMENT
+    } else {
+        ""
+    };
+    (
+        GradeStatus { current, raises_it },
+        GradeDisclosure { shown: current },
+    )
+}
+
 /// Why a Settlement-gated action refused.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum GateRefusal {
-    /// §4: the action gated on Settlement without the user having been shown their grade first.
-    /// Discovering the ceiling at the moment you hit it is the worst possible time.
-    GradeNotShown,
+    /// The disclosure attests a **different** grade than the one being gated — a stale or mismatched
+    /// witness is not a disclosure of the current grade (grades only rise, so a stale witness shows
+    /// a lower one). Re-disclose the current grade before gating.
+    StaleDisclosure {
+        shown: ViewGrade,
+        current: ViewGrade,
+    },
     /// Below Settlement — carrying what raises it, so the ceiling is legible, not a dead end.
     BelowSettlement {
         current: ViewGrade,
@@ -271,18 +334,25 @@ pub enum GateRefusal {
     },
 }
 
-/// Gate an action that requires Settlement grade. Refuses in two honest ways (§4): if the user's
-/// grade was **not previously shown to them**, and if their grade is **below Settlement** (with what
-/// raises it). A surface that gates on Settlement without ever having shown the grade fails the
-/// first check by construction — it cannot pass `grade_was_shown = false`.
-pub fn gate_on_settlement(current: ViewGrade, grade_was_shown: bool) -> Result<(), GateRefusal> {
-    if !grade_was_shown {
-        return Err(GateRefusal::GradeNotShown);
+/// Gate an action that requires Settlement grade. Takes a [`GradeDisclosure`] — the user was shown
+/// their grade — **not a bool the caller asserts**. Refuses if the disclosure does not attest the
+/// grade actually being gated (stale/mismatched), and if that grade is below Settlement (with what
+/// raises it). The "gated without disclosing" case is not a runtime refusal here: it does not
+/// compile, because there is no [`GradeDisclosure`] to pass without calling [`disclose_grade`].
+pub fn gate_on_settlement(
+    current: ViewGrade,
+    disclosure: &GradeDisclosure,
+) -> Result<(), GateRefusal> {
+    if disclosure.shown != current {
+        return Err(GateRefusal::StaleDisclosure {
+            shown: disclosure.shown,
+            current,
+        });
     }
     if current < ViewGrade::Settlement {
         return Err(GateRefusal::BelowSettlement {
             current,
-            raises_it: "anchor the did:autonomi root and establish a bidirectional did:plc binding",
+            raises_it: RAISES_SETTLEMENT,
         });
     }
     Ok(())
@@ -388,23 +458,44 @@ mod tests {
     }
 
     #[test]
-    fn a_settlement_gate_refuses_if_the_grade_was_never_shown() {
-        // §4 negative control: even at Settlement grade, gating without having shown the user their
-        // grade first is a refusal — the ceiling must never be discovered at the moment it is hit.
-        assert_eq!(
-            gate_on_settlement(ViewGrade::Settlement, false),
-            Err(GateRefusal::GradeNotShown)
+    fn a_settlement_gate_needs_a_matching_grade_disclosure() {
+        // §4 made structural: the "gated without disclosing" case is a COMPILE error, not a runtime
+        // refusal (there is no bool to pass; the witness only comes from disclose_grade — see the
+        // compile_fail doctest on GradeDisclosure). What remains testable is that a stale or
+        // mismatched disclosure does not pass, and that a proper one gates correctly.
+
+        // a real disclosure of Settlement, gated at Settlement → allowed, and the status is honest.
+        let (status, seen) = disclose_grade(ViewGrade::Settlement);
+        assert_eq!(status.current, ViewGrade::Settlement);
+        assert!(
+            status.raises_it.is_empty(),
+            "at Settlement, nothing raises it"
         );
-        // shown + below settlement: refuses, but tells them what raises it.
-        match gate_on_settlement(ViewGrade::Confirmed, true) {
+        assert!(gate_on_settlement(ViewGrade::Settlement, &seen).is_ok());
+
+        // a disclosure of Confirmed carries what raises it, and reused against a Settlement gate it
+        // is stale — refused, not silently accepted.
+        let (below, seen_confirmed) = disclose_grade(ViewGrade::Confirmed);
+        assert!(
+            !below.raises_it.is_empty(),
+            "below Settlement, the status names the next step"
+        );
+        assert_eq!(
+            gate_on_settlement(ViewGrade::Settlement, &seen_confirmed),
+            Err(GateRefusal::StaleDisclosure {
+                shown: ViewGrade::Confirmed,
+                current: ViewGrade::Settlement,
+            })
+        );
+
+        // properly disclosed but below settlement → refuses, telling them what raises it.
+        match gate_on_settlement(ViewGrade::Confirmed, &seen_confirmed) {
             Err(GateRefusal::BelowSettlement { current, raises_it }) => {
                 assert_eq!(current, ViewGrade::Confirmed);
                 assert!(!raises_it.is_empty());
             }
             other => panic!("expected BelowSettlement, got {other:?}"),
         }
-        // shown + at settlement: allowed.
-        assert!(gate_on_settlement(ViewGrade::Settlement, true).is_ok());
     }
 
     // ── containment: the identity path never consults the action-level age type ──
