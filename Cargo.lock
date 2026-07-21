@@ -164,6 +164,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "coa"
+version = "0.1.0"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "composition"
 version = "0.1.0"
 dependencies = [
