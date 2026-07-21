@@ -169,6 +169,31 @@ Results publish as an open dataset — **`trait_name` columns × lot rows**, ali
 
 ---
 
+## 5a. THE RECORD SHAPE — how any food's composition scales (RELAY_12)
+
+**The scalable part of this work is not hemp — it is the record shape that lets any food drop into the same panel.** Add a food by adding determinations; the shape does not change. That is the jewel; the seed is the first entry.
+
+```
+NutrientRecord {
+  nutrient, serving_basis,
+  determinations: Vec<Determination { value, method, source, country, tier }>,
+  spread,                         // disagreement across sources, made visible — never averaged away
+  bioavailability_modifiers,      // phytate, oxalate, tannins — SEPARATE from content
+}
+```
+
+**Five properties, each with a negative control that lands when the surface does (recorded here, queued behind F-4 with the rest):**
+
+1. **Serving-normalised.** 100 g of hemp and 10 g of a supplement compare only when the denominator is declared. *Negative control: a chart comparing unequal servings without declaring them → fail.*
+2. **Multi-source by construction** — `Vec<Determination>`, so disagreement is carried as `spread`, not resolved by picking one. The shipped source-disagreement fixture is **GRAS-765's "no known anti-nutritional properties" against a primary measurement of phytate ~4 g/100 g** — a notifier's "none known" contradicted by a quantified primary study, rendered side by side.
+3. **Bioavailability is a field distinct from content** — the phytate lesson generalised (oxalate in spinach, tannins in legumes are the same shape). *Negative control: a %DV rendering for Fe or Zn without the phytate/bioavailability modifier attached → fail.* Composition (what is in the thing) and absorption (what a body gets) are different measurements; the panel plots the first and must say so.
+4. **`SourceTier { OfficialDatabase | PrimaryStudy | Unverified }` is carried, not assumed** — a USDA database entry, a primary study, and an unverified founder's sheet must be visually distinguishable and never merged.
+5. **`BelowLoq { loq }` is not zero, and carries its floor** — the 54 PREE certificates report every cannabinoid `<LOQ` at LOQ = 100 µg/g against a literature mean of ~0.29 µg/g (blind by ~345×), so they are the fixture for this case. *Negative control: a `<LOQ` result rendered as `0` or "none detected" → fail* (§2.9 and Acceptance Criteria 3/10 are the same rule at commissioning time). This is why these certificates cannot be cited as evidence that seed contains no cannabinoids — they are blind at the relevant concentration.
+
+**These are the record's honesty disciplines, generalised from the acceptance criteria in §3: an absence carries its reason, a spread is shown not averaged, and a modifier that changes what a number *means* travels with the number.**
+
+---
+
 ## 6. WHAT THIS DOES NOT DO
 
 **This specification measures composition. It makes no health, nutritional-adequacy, or therapeutic claim, and none may be derived from it without separate, separately-graded evidence.**

@@ -33,6 +33,30 @@
 //! COSMIC window — and any live fetch of the federal PDF is gated on a founder go. What is
 //! guaranteed *today* is the contract: whatever the fetcher does, a failed or stale result is
 //! NotMeasured by the return type, so the honesty cannot be dropped when the fetcher lands.
+//!
+//! ## Deferred RELAY_11 rulings (deltas 3–5) — recorded here, queued behind F-4
+//!
+//! Deltas 1–2 are built above. Deltas 3–5 are **ruled and recorded here** (this crate is their
+//! committed home, so the ruling survives the relay that produced it), pending their surfaces:
+//!
+//! - **Delta 3 · `ImportProvenance`** — origin, kilograms, and declared customs value from the
+//!   HTS-1207990360 tables (RELAY_11 §2/§10). The finding to surface is a concentration risk:
+//!   **Manitoba is ~87% of US consumption-seed imports by weight** — one province is the price. Same
+//!   Tier-R discipline as the retail series: physical kilograms at declared values, reproducible by a
+//!   stranger from the public tables, not a licensed benchmark.
+//! - **Delta 4 · `DisclosurePair`** — the two-column *"what the authority's own filings say vs the
+//!   gap to policy"* device, carrying a **mandatory control that is the whole point of it**: the
+//!   shipped set must contain at least one finding that resolves *for* the authority (drug-testing
+//!   risk, carryover contamination, heavy-metal uptake are the honest ones), or it is advocacy with
+//!   extra steps. Negative control: a shipped `DisclosurePair` set with **zero authority-correct
+//!   findings → fail** — Law 2 applied to rhetoric, a device that cannot find for the other side
+//!   proves nothing (RELAY_11 §9).
+//! - **Delta 5 · claim-drawer citation scope** — Epidiolex-grade evidence may be cited **only**
+//!   against Epidiolex's own indications and doses (purified pharmaceutical CBD, ~10–20 mg/kg/day),
+//!   **never attached to a food-composition record** (hulled hearts carry ~0). Negative control: a
+//!   serialisation that lets a pharmaceutical-grade citation attach to a food-composition record →
+//!   **fail**. Composition is the strong ground; the health overclaim is the attack surface — the
+//!   two never share a visual or serialised layer.
 
 #![forbid(unsafe_code)]
 
