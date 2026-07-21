@@ -25,6 +25,10 @@ chain-eos.watermark
 # Non-destructive: files stay on disk; `git add -f` to adopt a specific one.
 docs/findings/
 docs/design/
+# ...except the shared non-value-state spec: it is the ONE canonical home both
+# surfaces + Fable's pointers reference, and implementation reads from it. The
+# rest of docs/design/ stays a deferred holding pen.
+!docs/design/non-value-states.md
 
 # Editor / OS
 .DS_Store
