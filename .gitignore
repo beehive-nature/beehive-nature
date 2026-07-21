@@ -24,7 +24,9 @@ chain-eos.watermark
 # parameters, peg ratios) the builder must not publish unilaterally.
 # Non-destructive: files stay on disk; `git add -f` to adopt a specific one.
 docs/findings/
-docs/design/
+# docs/design/* (not docs/design/) so the exception below can re-include one
+# file — git cannot un-ignore a file whose PARENT DIR is excluded.
+docs/design/*
 # ...except the shared non-value-state spec: it is the ONE canonical home both
 # surfaces + Fable's pointers reference, and implementation reads from it. The
 # rest of docs/design/ stays a deferred holding pen.

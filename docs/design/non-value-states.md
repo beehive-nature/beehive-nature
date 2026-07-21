@@ -63,15 +63,25 @@ Remove all colour and the surface must still read.
    level — so they must differ in pattern or shape *as well as* text, exactly as
    `AtCap` and `Breach` do. **The test:** remove all colour *and* squint past
    the words; the two states must still be distinguishable.
-5. **Semantic colours may not be repainted to fix contrast (§4).** Step within
-   the ramp or invert to a chip; never change the hue. Prove contrast with a
-   *pair check* on the composited background, not a token-level claim.
+5. **Semantic colours may not be repainted to fix contrast (§4) — and there is
+   no AA pass without a composited pair check.** Step within the ramp or invert
+   to a chip; never change the hue. **Contrast is a pair check, not a judgment
+   call:** an AA claim requires measuring the *actual* foreground against the
+   *actual composited* background — gradients and alpha overlays included — per
+   surface. **A token being "in the ramp" is not a pass** — that assumption has
+   concealed two real failures this project (Part 5 #3).
 6. **Claims arrive graded, or as `Ungraded · No source attached` (§6).**
    Composition (what a thing *is*) and effect (what it *does*) never share a
    visual layer.
 7. **Show the ceiling before someone hits it (§7).** A gated action discloses
    the user's standing *before* refusal is possible — enforced in code by a
    witness only the render path can mint.
+8. **Integrity tone: the common case sets the default (§6).** A provenance or
+   composition state renders in the neutral `measurement` tone by default. The
+   alarm `flag` tone is reserved for *severe* facts — a retraction, a live
+   expression of concern — and **never for provenance**. Provenance is the
+   common case, so a routine determination-count or source badge never wears an
+   alarm colour.
 
 ---
 
@@ -246,11 +256,16 @@ render this state. "—" = not applicable.
    shipped their design, but it is **not in any accessible design project** (see
    `surfaces/dao-dashboard/README.md`). Held, not invented, pending the design's
    location.
-3. **Contrast is a pair check, not a token claim.** The breach diagonal-fill
-   panel was re-verified composited: every text pair passes, tightest `+140 PAST
-   CAP` at 6.97:1; the `--dk-guard` hazard hue at 8.86:1 on the dark card.
-   "Within the ink ramp" is a token-level statement; the composited pair check is
-   the one that binds.
+3. **Contrast is a pair check — two failures it caught, logged.** On the DAO
+   dashboard's diagonal-fill refusal panel, `#68726A` (`--ink-dim`) measured
+   **4.30:1** (header on the `#EBEFE9` void stripe) and **3.77:1** (slot label on
+   `rgba(87,101,95,.10)` over `#EBEFE9`) — both *below* AA while correctly "in the
+   ink ramp", the second such concealment this session. Remedy: step to `#57655F`
+   (`--ink-mut`) → **5.26 / 4.61:1**, §4-compliant (a darker step in the same
+   neutral ramp, never a repaint). Separately, the *implementation's* breach panel
+   — a dark-card variant (`--dk-mut` on `#0C1412`) — was independently
+   pair-checked and passes (tightest `+140 PAST CAP` at 6.97:1). Both confirm
+   invariant 5: the composited pair check binds; "in the ramp" does not.
 4. **Most WELLness states have no kernel type yet** (all `(proposed)` rows), and
    two proposed names would collide with real, unrelated types if taken
    literally: `shared_types::Provenance` (an evidence-source-weight enum) and
