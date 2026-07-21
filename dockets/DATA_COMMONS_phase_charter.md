@@ -72,15 +72,83 @@ to get wrong by default.
 - **Research gating** — legitimacy and harm are governance, not code; the DAO
   must decide who queries and what's forbidden, before the commons opens.
 
-## Open founder questions
-1. First data domain: healthspan/biometric (ties P4), behavioral, environmental,
-   or founder's own device signals as the pilot?
-2. Anonymity floor for v1: federated-only (nothing leaves), or allow
-   differential-privacy aggregate release?
-3. Reward unit: does contribution emit b directly, or earn Respect (which then
-   modulates b unlock)? (touches the emission algo's qualifying-action set)
-4. Governance of research access: DAO-gated allowlist, open with ethics review,
-   or tiered by PoUL-of-the-researcher too?
+## Founder questions — RULED 2026-07-19 (RELAY_24)
+
+*The four questions below were open at charter time. All four are now ruled;
+the answers and their binding negative controls are folded in here — this is
+the committed home (do not open a parallel document). The control sets are
+**spec, not build**: they land when the data-commons phase is built.*
+
+**Delegation boundary (the limit on "benefit outweighs risk, your call").**
+Delegated: technical choices that are **reversible** — a scanner rule, a type
+shape, a crate boundary, a refactor. Escalated regardless of delegation:
+anything **irreversible**, anything that **spends**, anything that **binds a
+third party** — publishing to a public repo, money, a person's name, a
+ratified constitutional parameter. The test is reversibility, not subject
+matter.
+
+**Q1 · First data domain — healthspan/biometric pilot, accumulating over time.
+Hard limit: it may never become the authenticator.** Biometric continuity is a
+PoUL signal family — opt-in, one of four; it may *raise* confidence, never be
+*required* (RELAY_17 §2). Not caution but arithmetic: the modalities fail
+systematically for identifiable people (field-worn hands, arrhythmias,
+pacemakers, ear anatomy, amputation), and a biometric authenticator would
+exclude them permanently from the mechanism that mints `b`. Ratified wordings:
+*"the biometric unlocks a rotatable hardware key locally — it never becomes the
+key and never leaves the device"*; *"flash proves live, the hardware key proves
+who, the template never leaves the device"*; *"the fusion output is Evidence at
+0.60, never auto-enforce."*
+
+  Negative controls: a key derived from or recoverable from a biometric →
+  **fail** (a face cannot be rotated; Art. II identity survives key
+  compromise). Any biometric template, raw capture, or historical series
+  leaving the device → **fail**. A correlator output auto-enforcing rather than
+  informing → **fail** (BIND-1 §4, `AiInference` informational floor). Absence
+  of a biometric signal reducing what a person may do, hold, mint, or draw →
+  **fail** (the accessibility floor). What may cross the device boundary: a
+  confidence score with its provenance — never the signal.
+
+**Q2 · Anonymity floor — federated-only is the DEFAULT; differential-privacy
+aggregate release is an explicit, per-release opt-in.** *"Freedom equals
+options, but it cannot be taken back"* — the same irreversibility asymmetry
+that sets the `DisclosureMode` default: a release cannot be recalled, so the
+reversible side is the default. bLOVErAi **computes and presents** the release
+statistics (re-identification risk, ε budget, cohort size, k-anonymity) as
+Evidence at 0.60; **the human reads them and decides** — validation is the
+person's act, not the machine's.
+
+  Negative controls: a release consented without the statistics rendered *on
+  the consent surface* → **fail**. Statistics shown only as a link, a log
+  entry, or on request → **fail** (available is not shown). A release path
+  where a bLOVErAi output alone authorises disclosure → **fail** (it informs;
+  the human decides). Consent recorded without a digest of the statistics
+  actually displayed → **fail**. The number has to be in the room when the
+  choice is made.
+
+**Q3 · Reward unit — contribution emits `b` directly, weighted from Respect.**
+Constitutionally sanctioned in that direction: BIND-1 §4 records emission mints
+as Settlement-class Events under GOV-3's one-way bridge; Respect → emission is
+permitted, and GOV-1's prohibition (`b` confers zero governance weight) is
+unchanged. Consequence to hold in view: **Respect now carries economic value,
+not only governance weight** — so the `anti-gaming` machinery in
+`mastery-ledger` (`distinct_attestors`, the EdgeFactor) now guards a mint, and
+NC-VII1 (interpretive vocabulary out of `reputation-engine`) now protects a
+mint, not only an electorate. Nothing to change; both are simply more
+load-bearing.
+
+**Q4 · Research access — two separate mechanisms.** Listing moderation is the
+**DAO's** job: a gate on what may appear on the market. Researcher PoUL is the
+**consumer's**: *not* a gate — a disclosure the reader weighs. BNR exhibits the
+researcher's standing and lets the reader judge; it does not rank, certify, or
+score researchers (same rule as `Attestor` having no `Verified` variant). Every
+listed research artifact names a **PoUL-verified human origin** — no anonymous
+or institution-only listings.
+
+  Negative controls: a listed research artifact with no human source →
+  **fail**. A surface displaying a researcher's work without their PoUL
+  standing available → **fail** (the disclosure is the point). A BNR-assigned
+  quality score on a researcher → **fail** (that is ranking, and it is not ours
+  to do).
 
 ## Cross-refs
 `PROOF_OF_UNIQUE_LIFE` (the sensing engine + gestalt) · b-emission Operant Reward
