@@ -256,16 +256,23 @@ render this state. "—" = not applicable.
    shipped their design, but it is **not in any accessible design project** (see
    `surfaces/dao-dashboard/README.md`). Held, not invented, pending the design's
    location.
-3. **Contrast is a pair check — two failures it caught, logged.** On the DAO
-   dashboard's diagonal-fill refusal panel, `#68726A` (`--ink-dim`) measured
+3. **Contrast is a pair check — the rule, and an evidence anchor that needs
+   confirming.** As a *method*, invariant 5 stands on its own: measure the
+   composited pair; "in the ramp" is never a pass. Fable logged two supporting
+   measurements on a **diagonal-fill refusal panel** — `#68726A` (`--ink-dim`) at
    **4.30:1** (header on the `#EBEFE9` void stripe) and **3.77:1** (slot label on
-   `rgba(87,101,95,.10)` over `#EBEFE9`) — both *below* AA while correctly "in the
-   ink ramp", the second such concealment this session. Remedy: step to `#57655F`
-   (`--ink-mut`) → **5.26 / 4.61:1**, §4-compliant (a darker step in the same
-   neutral ramp, never a repaint). Separately, the *implementation's* breach panel
-   — a dark-card variant (`--dk-mut` on `#0C1412`) — was independently
-   pair-checked and passes (tightest `+140 PAST CAP` at 6.97:1). Both confirm
-   invariant 5: the composited pair check binds; "in the ramp" does not.
+   `rgba(87,101,95,.10)` over `#EBEFE9`), both below AA while "in the ink ramp",
+   remedied by stepping to `#57655F` (`--ink-mut`) → **5.26 / 4.61:1**,
+   §4-compliant. **⚠ Anchor unconfirmed:** that refusal panel is **not present in
+   the reachable durable design artifact** — a 2026-07-21 re-fetch of
+   `DAO Dashboard.dc.html` found no such panel (481 lines = the original; the
+   three-panel specimen band absent). The colour-pair *ratios* are arithmetic
+   facts and the remedy is sound token advice, but the panel they were measured on
+   is not yet reachable — pending Fable locating where it lives (see the routing
+   design-delivery gate). **Independently anchored and verified:** the
+   *implementation's* breach panel — a dark-card variant (`--dk-mut` on `#0C1412`)
+   — was pair-checked in the shipped surface and passes (tightest `+140 PAST CAP`
+   at 6.97:1). That one is real; the `#68726A` one awaits its artifact.
 4. **Most WELLness states have no kernel type yet** (all `(proposed)` rows), and
    two proposed names would collide with real, unrelated types if taken
    literally: `shared_types::Provenance` (an evidence-source-weight enum) and
