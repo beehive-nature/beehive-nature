@@ -48,11 +48,27 @@
 |---|---|
 | `bigen-pickup/CORRECTIONS-01.md` | the BIGEN seat |
 
-### Delete — correspondence, nothing is lost
+### Delete — ONLY against an exhibited mirror
 
-**`RELAY_08` through `RELAY_25`, plus `RELAY_SEED_*`, `RELAY_UI_*`, `RELAY_BNRi_*` — 23 files.** Every ruling inside them is already mirrored into a committed home (`VOCABULARY.md`, the crate docs, the test suites, `DESIGN-CONSTRAINTS.md`). **They are scaffolding around finished buildings.**
+> **⚠ CORRECTED 2026-07-21.** This section previously read *"Every ruling inside them is already mirrored into a committed home… scaffolding around finished buildings."* **That claim was false and I never verified it.** Code gated the deletion behind one adversarial verifier per file: **11 of 18 confirmed mirrored, 7 came back `HOLD_UNMIRRORED`.** Executing my instruction as written would have permanently destroyed seven rulings — untracked files have no git history to recover from. **One of the seven (RELAY_22 §5a) is a live gap in the shipped `onboarding` crate, not merely an undocumented decision.**
 
-**`RELAY_25_BIGEN_architecture.md` is the one exception** — it is the architecture reasoning for the bigen tree. Move it to `LOVErnment-DAO` as `bigen/ARCHITECTURE.md`, not as a `RELAY_`.
+**11 files deleted after their mirrors were exhibited. 7 held:** `RELAY_11 · 12 · 14 · 19 · 21 · 22 · 24`.
+
+**`RELAY_25_BIGEN_architecture.md`** → moved to `LOVErnment-DAO` as `bigen/ARCHITECTURE.md`.
+
+---
+
+## ⚠ THE DELETE GATE — standing, and it outranks any instruction in this file
+
+**Nothing is deleted on an assertion that it is mirrored. The mirror must be exhibited: a tracked file and the line that carries the ruling.**
+
+**Law 1 applied to deletion.** *"Every ruling in these files is mirrored"* is a universal claim, and a universal claim requires an exhibited witness. A seat asserting it — **including the design seat, including in this document** — is not a witness.
+
+**Why this was the hole:** every other destination in this file carries a verification step. Commit gets read-and-clear. Publish gets read-and-clear. **Delete had none — and for untracked files it is the only irreversible one.** That was backwards.
+
+> **The gate:** for each file, `git grep` the ruling in the tracked tree. **Found → delete. Not found → HOLD and mirror first.** Cost of an over-cautious hold: a file sits on the mount. Cost of a wrong delete: a ratified ruling ceases to exist.
+
+**A seat that refuses a delete instruction pending verification is performing correctly and requires no further authority to do so.**
 
 ### Hold — not this session's problem
 

@@ -101,19 +101,37 @@ isolate                  —          dronabinol·nabilone
 
 **Every trial sits on one diagonal. None crosses it.** The empty cells are the finding — this is the clearest case in the whole system of *absence rendered as information*.
 
-### An integrity block
+### Two integrity blocks — and they must be two, not one
+
+> **⚠ CORRECTED 2026-07-21.** The first version of this section was a **chimera**: it paired LiBBY's registration (`NCT05644262`) with a results-vs-conclusions quote-pair taken from **Hussein 2014**. Two different studies in one block. The design session implemented it faithfully, which put a **false `conclusion_overstates` flag on a real registered trial.** *That is the symmetry law failing in the other direction, and falsely flagging someone is worse than missing one.* Corrected below — the defect was mine.
+
+**Block 1 — a registered trial, manufacturer-funded, NO gap.** This is the more important specimen:
 
 ```
-funding:     manufacturer_funded: true    sources: [Producer X]
-retraction:  none          last_checked: 2026-07-21
-registration: NCT05644262  outcome_switching: no
+study:        LiBBY · NCT05644262
+funding:      manufacturer_funded: true
+retraction:   none              last_checked: 2026-07-21
+registration: registered_before_enrollment: true   outcome_switching: no
+results_vs_conclusions: aligned
+```
+
+> **A manufacturer-funded trial whose conclusions match its results is the whole argument.** It proves `manufacturer_funded` is a **provenance stamp, not a verdict** — the flag is present, the study is sound, and both facts render without contradiction. **Design this one first**; if it reads as an accusation here, the tone is wrong everywhere.
+
+**Block 2 — an unregistered mechanistic study, WITH a gap.** Lives on the evidence-map side, where Hussein actually sits:
+
+```
+study:        Hussein 2014 · in vivo · mouse · UNREGISTERED
+funding:      manufacturer_funded: false
+indirectness: HIGH — ~2:1 THC-dominant (67.9/32.1), inverse of the CBD-dominant corpus
 results_vs_conclusions: conclusion_overstates
-  table:  "TERT mRNA 116.13 → 2.29"
-  claim:  "leads to down regulation of telomerase activity"
-  note:   no telomerase activity assay was run
+  MEASURED: "TERT mRNA 116.13 → 2.29 copies"
+  CLAIMED:  "leads to down regulation of telomerase activity"
+  NOTE:     no telomerase activity assay (TRAP) was run
 ```
 
-**That `conclusion_overstates` verdict quotes both sides so a reader can check us.** Design it so the quote pair is the substance, not a tooltip.
+**The MEASURED/CLAIMED/NOTE triple is the substance, not a tooltip** — it quotes both sides so a stranger can check us without special access.
+
+**Hard rule that falls out of the correction: an integrity block belongs to exactly one study.** Registration, funding, and the conclusions-gap must all describe the same record. *Negative control: an integrity field sourced from a different study than the one it renders on → fail.*
 
 ---
 
