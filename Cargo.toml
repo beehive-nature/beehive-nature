@@ -17,6 +17,7 @@ members = [
     "crates/chain-eos",
     "crates/chain-exsat-evm",
     "crates/chain-zano",
+    "crates/coa",
     "crates/composition",
     "crates/console-api",
     "crates/dispute-engine",

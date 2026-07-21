@@ -1,0 +1,9 @@
+[package]
+name = "coa"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "Honest-absence machinery for a composition/COA record, and the B12-in-beef teaching fixture (RELAY_14). An analyte that was never assayed is not one that came back zero: Measurement<T> is Measured(v) or NotMeasured{basis} — NotRequested / MethodUnavailable / <LOQ-with-its-floor — with no path from a non-value to a number, so a renderer cannot turn 'no one looked' into '0'."
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
