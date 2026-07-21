@@ -1,0 +1,11 @@
+[package]
+name = "onboarding"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "The identity onboarding ladder (RELAY_22) with age assurance folded in as a structurally separate concern (RELAY_23). WebAuthn authenticates a key that authorises the did:autonomi root but is never the identity; personas are plural, optional, and each carries its own disclosure mode defaulting to the private side; the written recovery code is a mandatory floor; Settlement grade has an adoption gate that must be shown before it is hit. Age is an attribute of an action, never a gate on a person: no type in the age path can hold a birthdate, document number, or scan, and the identity ladder cannot consult it (both proven by source-scan controls with positive decoys)."
+
+[dependencies]
+shared-types = { path = "../shared-types" }
+type-bindings = { path = "../type-bindings" }
+serde = { version = "1", features = ["derive"] }
