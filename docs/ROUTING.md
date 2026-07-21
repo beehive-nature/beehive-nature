@@ -89,6 +89,18 @@ tracked tree first. Two of the seven were not documentation moves:
 
 ---
 
+## ⚠ THE DESIGN-DELIVERY GATE — standing (added 2026-07-21)
+
+**A design artifact is not *delivered* until it exists in a project the implementing seat can read.** A seat reporting "shipped" is not delivery; the artifact appearing in a readable design project is.
+
+**Why this was a hole:** this file governs *repo* artifacts — it says nothing about *design-project* artifacts. So a design seat could report shipping three DAO state panels (MoneyGauge stale · UnshowableBGauge · MissingRequiredGauge) while they exist in **no project the implementing seat can open** — the `DAO Dashboard.dc.html` in the shared project has neither, and the writable "Design System" project is empty. The implementing seat then cannot build without inventing, which the scope law forbids.
+
+> **The gate:** before a design artifact is treated as buildable, the implementing seat opens it in an accessible design project and confirms the named components are present. **Present → build from it. Absent → HOLD and report; do not reconstruct the visual language from a description.** Cost of a hold: a panel waits. Cost of inventing: the surface ships a design nobody ratified.
+
+**A seat that refuses to implement an absent design pending its delivery is performing correctly.** Locating a design that was reported-but-not-found is a founder-manual step (ask the shipping seat where it actually lives) — see below.
+
+---
+
 ## FOUNDER-MANUAL — only these actually need hands
 
 **Nothing on this list can be done by any seat. Everything else has an owner.**
@@ -96,6 +108,7 @@ tracked tree first. Two of the seven were not documentation moves:
 1. **Backup zip → Drive.** Gates the legacy sweep above.
 2. **Authorize the GitHub connector** (`plugin:engineering:github`, in connector settings). **Removes most of the remaining courier burden** — the design seat could then read repo state directly instead of asserting about trees it cannot see.
 3. **Fiscal sponsor emails** · **lab RFQ** · **farmer's number** · **the four private letters** · **`mro-jl22-ajin` posting** · **a Linux machine for the COSMIC window.**
+4. **Ask Fable where the three DAO state panels live** (MoneyGauge stale · UnshowableBGauge · MissingRequiredGauge). Reported shipped, but present in no design project the implementing seat can read (per the design-delivery gate above). Code holds — will build from the design once it lands in a readable project.
 
 ### Contact-in-future
 
