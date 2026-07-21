@@ -28,6 +28,14 @@
 #     Markers must be on the SAME line as the hex; CI re-scans the whole
 #     tree on every push, so an unmarked hex run fails remotely even if it
 #     was committed locally with --no-verify.
+#   - lines matching proptest's regression-seed SHAPE `cc <64-hex>` — a FORMAT
+#     exemption, deliberately NOT a path exemption. proptest-regressions/*.txt
+#     seeds are 64-hex RNG cases the file's own header says to commit. Exempting
+#     the shape (not the folder) keeps every other line in those files scanned:
+#     a real secret pasted there in any other form (`key = <hex>`, a raw blob)
+#     is still caught. And a proptest format change fails LOUD — the seed stops
+#     matching this shape and the scan flags it — rather than silently opening a
+#     gap under a folder nobody watches. Founder-ruled 2026-07-20.
 #
 # usage: secret-scan.sh diff   # scan the staged diff (pre-commit hook)
 #        secret-scan.sh tree   # scan all tracked files (CI backstop)
@@ -40,18 +48,21 @@ HEX_RE='[0-9a-fA-F]{48,}'
 PEM_RE='BEGIN .*PRIVATE KE[Y]'   # [Y] bracket trick: never matches this file itself
 MARK='TESTNET-ONLY'
 MARK2='PUBLIC-CONSTANT'
+# proptest regression-seed shape: `cc <exactly-64-hex>` at line/diff/grep start.
+# Matches only the seed shape, so anything else in those files is still scanned.
+PROPTEST_RE='(^|[+:])cc [0-9a-fA-F]{64}([^0-9a-fA-F]|$)'
 
 case "$mode" in
 diff)
     names=$(git diff --cached --name-only --diff-filter=ACM | grep -Ei "$NAME_RE")
     added=$(git diff --cached --diff-filter=ACM -- . ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' |
         grep '^+' | grep -v '^+++')
-    hex=$(printf '%s\n' "$added" | grep -vF -e "$MARK" -e "$MARK2" | grep -nE "$HEX_RE")
+    hex=$(printf '%s\n' "$added" | grep -vF -e "$MARK" -e "$MARK2" | grep -vE "$PROPTEST_RE" | grep -nE "$HEX_RE")
     pem=$(printf '%s\n' "$added" | grep -nE "$PEM_RE")
     ;;
 tree)
     names=$(git ls-files | grep -Ei "$NAME_RE")
-    hex=$(git grep -InE "$HEX_RE" -- ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' | grep -vF -e "$MARK" -e "$MARK2")
+    hex=$(git grep -InE "$HEX_RE" -- ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' | grep -vF -e "$MARK" -e "$MARK2" | grep -vE "$PROPTEST_RE")
     pem=$(git grep -InE "$PEM_RE")
     ;;
 *)
