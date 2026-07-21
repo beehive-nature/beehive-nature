@@ -86,6 +86,26 @@ pub mod persona {
         Nostr(String),
     }
 
+    impl PersonaRef {
+        /// Is this persona **PDS-custodial** by default — an identity a third party can seize?
+        ///
+        /// did:plc / ATProto personas live on a PDS that, on account creation, holds the signing
+        /// keys: per the PLC docs "a rogue PDS operator could overtake your account" unless the user
+        /// has registered their own rotation key — and almost nobody does (RELAY_22 §5a). That is the
+        /// sharper reason the Constitution rules did:plc *"never the root"*: not just that PLC is
+        /// someone else's directory, but that the keys are someone else's custody. Key-based personas
+        /// — EVM, Zano, Nostr — are self-custodial: the user holds the key, there is no PDS in the
+        /// loop. The custody-disclosure obligation on [`InformedConsent`] falls exactly on the `true`
+        /// cases. (Explicit match, not a wildcard: a new persona variant must decide its own custody
+        /// status here rather than defaulting to "no disclosure needed".)
+        pub fn is_pds_custodial(&self) -> bool {
+            match self {
+                PersonaRef::Plc(_) | PersonaRef::AtProto(_) => true,
+                PersonaRef::Evm(_) | PersonaRef::Zano(_) | PersonaRef::Nostr(_) => false,
+            }
+        }
+    }
+
     /// How a binding references the root — the variable that sets correlation exposure.
     ///
     /// **Public is irreversible in one direction:** once a binding is public, correlation has
@@ -116,14 +136,42 @@ pub mod persona {
         }
     }
 
-    /// Consent as an artifact **on the binding**: the digest of the exact text shown, and when it
-    /// was accepted — so what a user consented to is reconstructible, not asserted. The shown text
-    /// must state the correlation consequence of the chosen mode (a UI-copy control checked where
-    /// the text is composed; here we bind the digest so the claim is auditable).
+    /// Consent as an artifact **on the binding**: the digest of the exact text shown, when it was
+    /// accepted, and — for a PDS-custodial persona — whether that text disclosed the custody risk.
+    /// So what a user consented to is reconstructible, not asserted.
+    ///
+    /// **Two disclosure obligations, not one** — a binding consent must cover both, and for an
+    /// ATProto/PLC persona covering only the first is the negative-control failure:
+    ///
+    /// 1. **Correlation** (RELAY_22 §2a): the shown text must state the correlation consequence of
+    ///    the chosen [`DisclosureMode`] in that mode's own terms (a UI-copy control checked where the
+    ///    text is composed; the digest binds it so the claim is auditable).
+    /// 2. **Custody** (RELAY_22 §5a): for a **PDS-custodial** persona
+    ///    ([`PersonaRef::is_pds_custodial`] — did:plc / ATProto), the text must *also* disclose that
+    ///    the persona is held in its PDS operator's custody unless the user has registered their own
+    ///    rotation key — i.e. the binding is to an identity someone else can seize.
+    ///    [`discloses_pds_custody`](InformedConsent::discloses_pds_custody) records that this was
+    ///    shown, and [`PersonaBinding::bind`] refuses a PDS-custodial binding without it, so a user
+    ///    cannot learn afterwards that the thing they bound to their sovereign root was never
+    ///    sovereign.
     #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
     pub struct InformedConsent {
         pub shown_text_digest: Hash,
         pub accepted_at: i64,
+        /// Whether the shown text disclosed PDS-custody (§5a). **Required `true`** for a PDS-custodial
+        /// persona; for a self-custodial one (EVM / Zano / Nostr — the user holds the key, there is
+        /// no PDS) it carries no obligation and its value is not consulted.
+        pub discloses_pds_custody: bool,
+    }
+
+    /// Why a persona binding was refused.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub enum BindingError {
+        /// §5a: a PDS-custodial persona (did:plc / ATProto) was bound with consent that discloses
+        /// correlation but **not custody**. An ATProto binding consent that discloses correlation but
+        /// not custody is the negative-control failure — the user would not have been told the
+        /// identity they bound to their sovereign root is seizable by whoever runs its PDS.
+        CustodyUndisclosed,
     }
 
     /// One persona binding. Its disclosure mode is **per-binding**, carried right here — never read
@@ -137,16 +185,25 @@ pub mod persona {
     }
 
     impl PersonaBinding {
-        pub fn new(
+        /// Bind a persona, or **refuse**. A PDS-custodial persona ([`PersonaRef::is_pds_custodial`])
+        /// whose consent does not disclose custody is [`BindingError::CustodyUndisclosed`] — RELAY_22
+        /// §5a made structural, the same shape as [`super::Enrolment::complete`] refusing without the
+        /// recovery floor: the binding cannot be built through the sanctioned path without the
+        /// custody disclosure. A self-custodial persona (EVM / Zano / Nostr) carries no custody
+        /// obligation and binds freely.
+        pub fn bind(
             persona: PersonaRef,
             disclosure: DisclosureMode,
             consent: InformedConsent,
-        ) -> Self {
-            PersonaBinding {
+        ) -> Result<PersonaBinding, BindingError> {
+            if persona.is_pds_custodial() && !consent.discloses_pds_custody {
+                return Err(BindingError::CustodyUndisclosed);
+            }
+            Ok(PersonaBinding {
                 persona,
                 disclosure,
                 consent,
-            }
+            })
         }
     }
 }
@@ -420,6 +477,63 @@ mod tests {
     fn disclosure_default_is_private_never_public() {
         assert_eq!(DisclosureMode::default(), DisclosureMode::Selective);
         assert!(!DisclosureMode::default().is_public());
+    }
+
+    // ── §5a · a PDS-custodial persona must disclose custody, not only correlation ──
+
+    fn consent(discloses_pds_custody: bool) -> InformedConsent {
+        InformedConsent {
+            shown_text_digest: hash(7),
+            accepted_at: 1_700_000_000,
+            discloses_pds_custody,
+        }
+    }
+
+    #[test]
+    fn pds_custodial_binding_refuses_when_custody_is_undisclosed() {
+        // The negative control (RELAY_22 §5a): a did:plc / ATProto binding whose consent discloses
+        // correlation but NOT custody is refused — a user must not learn afterwards that the identity
+        // they bound to their sovereign root is seizable by whoever runs its PDS.
+        for p in [
+            PersonaRef::Plc("did:plc:abc".into()),
+            PersonaRef::AtProto("alice.bsky.social".into()),
+        ] {
+            assert!(p.is_pds_custodial(), "did:plc / ATProto are PDS-custodial");
+            assert_eq!(
+                PersonaBinding::bind(p, DisclosureMode::Selective, consent(false)),
+                Err(BindingError::CustodyUndisclosed),
+                "correlation disclosed but custody not → refused",
+            );
+        }
+    }
+
+    #[test]
+    fn pds_custodial_binding_completes_once_custody_is_disclosed() {
+        let b = PersonaBinding::bind(
+            PersonaRef::Plc("did:plc:abc".into()),
+            DisclosureMode::Selective,
+            consent(true),
+        )
+        .expect("a PLC binding with custody disclosed is allowed");
+        assert!(b.consent.discloses_pds_custody);
+    }
+
+    #[test]
+    fn self_custodial_persona_carries_no_custody_obligation() {
+        // Positive control the other way: EVM / Zano / Nostr are key-based and self-custodial — no
+        // PDS in the loop — so a missing custody disclosure is not a refusal. The obligation falls
+        // exactly on the PDS-custodial cases, not on every binding.
+        for p in [
+            PersonaRef::Evm("0xabc".into()),
+            PersonaRef::Zano("zano:abc".into()),
+            PersonaRef::Nostr("npub1abc".into()),
+        ] {
+            assert!(!p.is_pds_custodial());
+            assert!(
+                PersonaBinding::bind(p, DisclosureMode::Selective, consent(false)).is_ok(),
+                "a self-custodial persona binds without a custody disclosure",
+            );
+        }
     }
 
     // ── §4 · the adoption gate and the visibility obligation ──
