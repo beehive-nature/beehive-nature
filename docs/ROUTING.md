@@ -101,10 +101,11 @@ tracked tree first. Two of the seven were not documentation moves:
 
 **PanLex** (The Long Now Foundation, 501(c)(3)) — **written permission for commercial use of the lexical database.**
 
+- **⚠ STATUS — BLOCKED, do not build against it yet (2026-07-21).** No integration, adapter, or derived lexicon layer is authored until the written-permission letter lands. The licence, not our restraint, is the gate: see below.
 - **Why it's needed:** the database is **CC BY-NC-SA 4.0**, not CC0. *(A web search reported CC0; the license page itself says BY-NC-SA — verified by direct fetch. Treat BY-NC-SA as operative until PanLex confirms otherwise in writing.)* **NonCommercial collides with the Capital-Business-For-Profit arm, and ShareAlike is viral** — a derived lexicon layer would inherit BY-NC-SA and conflict with the public-commons-anyone-can-fork architecture.
 - **Why it's winnable:** nonprofit to nonprofit. Their mission — *"nobody should have their rights restricted because of the language they speak"* — is bTONGUES' thesis, and they explicitly name **land rights and agriculture** among the fields they support. Their license page states commercial use is available by written permission, and their site invites custom arrangements. **This is a letter, not a negotiation.**
 - **Why it's worth the letter:** PanLex independently built our provenance ladder. **`distance-1` = attested by a source; `distance-n` = inferred from chains, n = shortest chain** — that is `Confirmed` vs `Informational` with confidence decaying by chain length, and every translation carries a source label. Integration would be structural, not a mapping layer.
-- **Open:** Purépecha (`tsz`) coverage unverified — the API query returned empty through the fetch tool, which is a tooling limit, not evidence of absence. Check `vocab.panlex.org` before writing.
+- **Coverage:** **Latvian Romani (`rml-001`) confirmed present in their inventory** (2026-07-21). Purépecha (`tsz`) coverage still unverified — the API query returned empty through the fetch tool, which is a tooling limit, not evidence of absence. Check `vocab.panlex.org` before writing.
 
 **Aug 21 is the only clock.**
 
