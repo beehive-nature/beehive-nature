@@ -262,9 +262,27 @@ Order matters. It follows mirror-by-law: **the owned rail first, the mirror seco
 
 **Step 4 may be omitted entirely.** A receipt whose anchors exist on Arweave and Hive is complete and verifiable without any atproto record at all. The atproto record exists for *discovery* within the Atmosphere. This is what makes the design fail-safe rather than fail-dependent.
 
-### 7.1 Resource budgeting
+### 7.1 Hard limits on the Hive leg (confirmed from live chain config)
 
-Hive `custom_json` is feeless but RC-metered; RC regenerates linearly to full over 432,000 s (≈20 %/day). Anchor-class operations are cheap relative to post-class operations, so a modest stake sustains a meaningful daily anchor cadence. **Exact live cost must be measured, not estimated** — the RC-estimate-versus-receipt error has already been made once on this project and the lesson is ledgered. See acceptance criterion **A7**.
+Read from `database_api.get_config` (api.hive.blog, 2026-07-25T15:38:03Z, chain 1.28.7 / HF 1.28.0) — chain constants, not documentation:
+
+| Constant | Value | Binds |
+|---|---|---|
+| `HIVE_CUSTOM_OP_ID_MAX_LENGTH` | **32** chars | The `id` namespace. `bnr.anchor` = 10. |
+| `HIVE_CUSTOM_OP_DATA_MAX_LENGTH` | **8,192** bytes | **The real ceiling on a single anchor payload.** Distinct from — and far below — the 65,536-byte block limit. |
+| `HIVE_CUSTOM_OP_BLOCK_LIMIT` | **5** ops | Per block, per account. Bounds burst anchoring at ~5 per 3-second block. |
+
+**Design consequence of the 8,192-byte ceiling:** an anchor payload carries hashes, never content. A receipt referencing many media blobs could approach the ceiling if it inlines every `sha256`. If a batch would exceed it, anchor a **merkle root** over the receipt set and publish the leaf list to Arweave — one anchor, unbounded set. This is the same batching shape the founder design law already forces for user-scale writes.
+
+### 7.2 Resource budgeting
+
+Hive `custom_json` is feeless but RC-metered. **Exact live cost must be measured, not estimated** — the RC-estimate-versus-receipt error has already been made once on this project and the lesson is ledgered. See acceptance criterion **A7**.
+
+Two figures remain open and must not be assumed:
+- **RC regeneration rate.** A community-documented 432,000 s (5-day, ≈20 %/day) figure and a chain-parameter-derived ~21.6-day figure are both in circulation. They may describe different mechanisms — resource-pool decay versus per-account manabar regeneration. Unresolved; do not build cadence math on either until settled.
+- **Cost of a 150-byte payload.** Currently a proportional estimate scaled from the one measured data point (620 bytes / 368,692,399 RC at genesis). Not a measurement.
+
+Both resolve with a single operation: broadcast one 150-byte anchor, wait 24 hours, measure the mana delta. Two unknowns, one action, no formula.
 
 ---
 
@@ -329,7 +347,7 @@ Marked rather than asserted, per standing law.
 
 | Item | Status |
 |---|---|
-| Hive `custom_json` **`id` maximum length** | UNVERIFIED against canonical chain constants. `maxLength: 32` in §4 is provisional. Confirm before publishing. |
+| Hive `custom_json` **`id` maximum length** | ✅ **CONFIRMED — `HIVE_CUSTOM_OP_ID_MAX_LENGTH = 32`**, read from live chain config (`database_api.get_config`, api.hive.blog, 2026-07-25T15:38:03Z, chain 1.28.7 / HF 1.28.0). `maxLength: 32` in §4 is no longer provisional. `bnr.anchor` is 10 chars. |
 | Live per-operation **RC cost** of the anchor | UNVERIFIED — load-dependent. Must be measured (A7). |
 | Whether `community.lexicon.*` ratifies a shared provenance schema | Open. If it merges, **align to it rather than minting ours** and re-issue under that namespace. |
 | Native atproto **timestamping** (upstream discussion, unresolved) | Open. If it ships, fold into it. |
@@ -357,4 +375,18 @@ Explicitly not covered by this spec, to prevent scope drift:
 
 ---
 
-*End SPEC_LEXICON-1 v0.1 — draft, awaiting ratification.*
+---
+
+## 13. v0.2 additive fields — RATIFIED (spec authority, no founder decision required)
+
+Proposed by the `crates/atmirror` implementation. All three are **optional additive** fields, which §9's evolution policy permits without a new NSID. Ratified as spec-authority; they do not require a founder ruling.
+
+- `mediaPointer.byteLength` (integer, optional) — byte length of the blob. Lets a verifier detect a truncated fetch before hashing.
+- Per-artifact `sha256` on the Arweave anchor (optional) — complements `txId` so the anchored bytes are verifiable independent of gateway behaviour.
+- `autonomi` anchor def (optional) — mirrors `#arweaveAnchor` for the Autonomi rail, carrying a DataMap address plus `sha256`. Scheme `ant`, consistent with `#mediaPointer.scheme`.
+
+None are required; a v0.1 receipt remains valid under v0.2. Implementations MUST NOT reject a receipt for omitting them.
+
+---
+
+*End SPEC_LEXICON-1 v0.2 — draft, awaiting founder ratification of the document as a whole.*
