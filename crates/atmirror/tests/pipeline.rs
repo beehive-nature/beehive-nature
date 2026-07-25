@@ -533,6 +533,52 @@ fn restore_without_key_runs_steps_1_to_5_and_reports_step_6_not_performed() {
     ));
 }
 
+#[test]
+fn v01_receipt_without_v02_fields_validates_unchanged() {
+    // CC-2 constraint: a v0.1 receipt — no byteLength anywhere, no sha256
+    // on the anchor, no autonomi def — MUST remain valid under v0.2.
+    // Deserialization accepts it, binding holds, and restore runs §8 steps
+    // 1–5 to the extent the receipt's own fields allow: the CAR verifies by
+    // its CID chain (root == contentCid) even with no anchor sha256; a blob
+    // pointer with no sha256 is reported unverifiable-refused, which is a
+    // verification outcome, not a schema rejection.
+    let f = fixture();
+    let pds = FakePds::from_fixture(&f);
+    let mut rail = MemRail::default();
+    let mut state = State {
+        did: DID.into(),
+        ..State::default()
+    };
+    let report = mirror(&pds, &f.identity, &mut rail, &mut state, NOW).unwrap();
+    let full = serde_json::to_value(&report.receipt).unwrap();
+
+    // Strip every v0.2 additive field, keeping pure v0.1 §4 shape.
+    let mut v01 = full.clone();
+    let ar = v01["arweave"].as_object_mut().unwrap();
+    ar.remove("sha256");
+    ar.remove("byteLength");
+    for m in v01["media"].as_array_mut().unwrap() {
+        m.as_object_mut().unwrap().remove("byteLength");
+    }
+    let receipt: atmirror::receipt::Receipt = serde_json::from_value(v01).unwrap();
+    assert!(receipt.binding_ok(), "v0.1 receipt must not be rejected");
+
+    let outcome = restore(&receipt, &rail, Some(&f.identity.signing_key)).unwrap();
+    assert_eq!(outcome.authorship, Authorship::Verified);
+    assert_eq!(outcome.records, 2);
+    assert_eq!(
+        outcome.car_bytes, f.car,
+        "CAR verifies with no anchor sha256"
+    );
+    // Blob pointers still carry sha256 in this receipt (v0.1 had it), so
+    // they verify; drop one to prove omission degrades to a named failure,
+    // not a rejection of the receipt.
+    let mut no_sha = receipt.clone();
+    no_sha.media[0].sha256 = None;
+    let outcome = restore(&no_sha, &rail, Some(&f.identity.signing_key)).unwrap();
+    assert_eq!(outcome.blob_failures.len(), 1);
+    assert!(outcome.blob_failures[0].contains("unverifiable"));
+}
 
 #[test]
 fn restore_rejects_wrong_key_and_bad_binding() {
