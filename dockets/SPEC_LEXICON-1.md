@@ -92,7 +92,7 @@ If this table's sha256 and the artifact's actual hash ever disagree, **the artif
 
 **Read the artifact for anything you intend to implement.** This paragraph exists to orient, not to specify.
 
-### 4.1 Why only three required fields
+### 4.2 Why only three required fields
 
 `subject`, `contentCid`, `createdAt` are required. **`arweave` and `hive` are deliberately optional.**
 
