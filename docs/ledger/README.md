@@ -15,7 +15,7 @@ one record instead of asking one agent to recite it.
 | File | Role | Mutability | Status |
 |---|---|---|---|
 | [`pirate-haul-rulings.md`](./pirate-haul-rulings.md) | Closed quarter — 2026 Q1–Q3 through 07-25 | Append-only, now sealed | ✅ Mirrored — `299412f` |
-| `pirate-haul-rulings-2026q3.md` | Active quarter — continues the above | Append-only | ⏳ Not yet mirrored |
+| [`pirate-haul-rulings-2026q3.md`](./pirate-haul-rulings-2026q3.md) | Active quarter — continues the above | Append-only | ✅ Mirrored — `672feba` |
 | `pirate-haul-candidates.md` | Targets under evaluation, not yet ruled | Mutable | ⏳ Not yet mirrored |
 | `pirate-haul.md` | Operational — raid procedure | Operational | ⏳ Not yet mirrored |
 
@@ -67,3 +67,42 @@ not an agent's call, so it is recorded here as open rather than assumed either w
 
 Until it is ruled: treat this mirror as authoritative only as of each file's commit date, and
 confirm against the store before relying on it for a new adoption decision.
+
+### Evidence bearing on that ruling: transcription is non-deterministic
+
+This is not speculative. It was measured while mirroring `pirate-haul-rulings-2026q3.md`.
+
+The first export of that file (A, 23,472 bytes, `9AFDF6DE…BB0D8`) carried a 47-byte discrepancy
+against the store. It was **rejected rather than committed**, and a single-pass re-export (B,
+27,110 bytes, `A18FA76D…8AA2`) was requested. A was preserved so the two could be diffed instead
+of one silently replacing the other.
+
+The diff located the gap exactly — one shared entry, differing by exactly 48 bytes:
+
+```
+A:  ...blocked on that machine by Application Control, so commits sit local...
+B:  ...blocked on that machine by the same Application Control policy that
+    blocked the crawl4ai clone, so commits sit local...
+```
+
+Byte accounting then closed with no residue: A content minus trailing LF = 23,471 against a store
+reading of 23,519 (delta 48); B content minus trailing LF = 27,109 against a store reading of
+27,109 (exact). The 1-byte offset in both is the trailing newline the store does not count.
+
+**The difference is a paraphrase, not a truncation.** The same entry, transcribed twice, was
+re-composed with different wording. Nothing was lost — text was rewritten. The predicted cause
+(an assembly step dropping bytes from appended entries) was wrong; the divergence is in an entry
+that came through the store *read*.
+
+Two consequences follow, and both bear on the ruling above:
+
+1. **Single-pass export does not fix this.** It removes the assembly variable, not the
+   transcription variable. Two exports of an *unchanged* store will not be byte-identical.
+2. **Therefore no export is reproducible, and the store cannot be verified against any export.**
+   chat-Opus has stated plainly that it has no mechanical copy path — every export passes through
+   re-typing. This is the measured confirmation of that.
+
+A non-reproducible transcription pipeline cannot be the authoritative source for a record other
+agents depend on. That argues for ruling this directory the record. If it is so ruled, the
+paired requirement is that exports are single-pass, never assembled, and every one is round-trip
+verified before it lands — otherwise the record inherits the drift it was meant to escape.
