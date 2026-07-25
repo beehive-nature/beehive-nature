@@ -295,9 +295,11 @@ A verifier holding only a receipt MUST be able to complete this unaided:
 3. **Confirm the binding** — assert `contentCid` equals `subject.cid`.
 4. **Confirm existence and ordering** — read the Hive `custom_json` at `hive.trxId` / `hive.blockNum` via any public Hive API node; assert the payload's `cid` matches. The Hive block timestamp is the public existence proof.
 5. **Verify media** — for each `mediaPointer`, fetch by `address`, compute SHA-256, assert equality with `sha256`.
-6. *(Optional)* **Verify authorship** — resolve `subject.uri`'s DID, fetch the signed commit, verify the Schnorr/ECDSA signature chain to `subject.cid`.
+6. *(Optional)* **Verify authorship** — verify the ECDSA signature chain to `subject.cid` against the account's signing key. The key comes from one of two places, and the difference is the finding: **pinned offline** (a key the verifier already holds — in the reference tool, `--signing-key <zMultibase>`), or **network-resolved** (a DID directory such as `plc.directory` — in the reference tool, explicit opt-in via `--resolve-did`). A resolver is a party the verifier is choosing to trust for this step.
 
 Steps 1–5 require **no BNR infrastructure, no account, and no cooperation from any party.** That is the test of the no-incarceration law, and it is the acceptance bar.
+
+**Step 6 is optional and mode-honest (ratified 2026-07-25, DISPATCH-2026-07-25-B CC-1).** A conforming verifier's default is **offline-or-fail**: with no key supplied, it completes steps 1–5 and reports step 6 as **not performed** — it does not silently resolve a DID over the network and then present the result as if it were offline. The report must state which mode ran, so a green result is legible as independence **proven** (pinned key) versus **granted** (a resolver was trusted). The defect this rule closes is epistemic, not cryptographic: a verifier who cannot tell those apart has not measured what this section exists to measure.
 
 ### 8.1 Security-property language
 

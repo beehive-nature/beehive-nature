@@ -1,14 +1,19 @@
 //! Reconstruction from the permanence rail **alone** — acceptance A of the
 //! mirror docket. No PDS is contacted: the CAR comes back from the rail by
 //! content address, every block re-hashes, the MST re-walks complete, and
-//! the commit signature re-verifies against a key the caller supplies
-//! (from the DID directory, or pinned offline). Every blob re-hashes
-//! against the receipt's `sha256` and its `sourceBlobCid`.
+//! every blob re-hashes against the receipt's `sha256` and its
+//! `sourceBlobCid` (§8 steps 1–5). Step 6 — authorship — runs only against
+//! a key the **caller** supplies; with none, the outcome says NOT
+//! PERFORMED instead of silently phoning a resolver (offline-or-fail
+//! default, founder-ratified: a verifier must be able to tell whether
+//! independence was proven or granted).
 //!
-//! This is also SPEC_LEXICON-1 §8 steps 1–3 and 5–6 in executable form; a
-//! third party needs none of this code to do the same with curl and
-//! sha256sum (§8 is the acceptance bar, and the docket receipt ships the
-//! transcript).
+//! Structurally: this module imports no DID resolver and no PDS client —
+//! there is no code path here that *could* reach Bluesky infrastructure.
+//!
+//! This is SPEC_LEXICON-1 §8 in executable form; a third party needs none
+//! of this code to do the same with curl and sha256sum (§8 is the
+//! acceptance bar, and the docket receipt ships the transcript).
 
 use sha2::{Digest, Sha256};
 
@@ -37,6 +42,21 @@ impl std::fmt::Display for RestoreError {
 
 impl std::error::Error for RestoreError {}
 
+/// §8 step 6 (authorship), as an explicit tri-state the caller must
+/// surface. The epistemic rule (founder-ratified, DISPATCH-2026-07-25-B
+/// CC-1): a green verify must say whether independence was **proven**
+/// (offline pinned key) or **granted** (a network resolver was trusted) —
+/// or that the step was **not performed** at all. Silence is the defect.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Authorship {
+    /// Signature verified against a caller-supplied key. The caller states
+    /// where that key came from; this library never resolves one.
+    Verified,
+    /// No key supplied; §8 steps 1–5 ran, step 6 did not. Not a failure —
+    /// a scoped result, reported as exactly that.
+    NotPerformed,
+}
+
 #[derive(Debug)]
 pub struct RestoreOutcome {
     pub did: String,
@@ -44,6 +64,10 @@ pub struct RestoreOutcome {
     pub rev: String,
     pub blocks: usize,
     pub records: usize,
+    /// §8 step 6 status. [`Authorship::Verified`] only when a key was
+    /// supplied and the commit signature checked out (a bad signature is a
+    /// hard [`RestoreError::Rejected`], never a soft state here).
+    pub authorship: Authorship,
     pub car_bytes: Vec<u8>,
     /// Verified blobs, in receipt order.
     pub blobs: Vec<(MediaPointer, Vec<u8>)>,
@@ -53,11 +77,15 @@ pub struct RestoreOutcome {
 }
 
 /// Rebuild and re-verify a mirrored repo from `rail`, trusting only the
-/// receipt's hashes and `key`.
+/// receipt's hashes — and, when `key` is supplied, verify authorship
+/// against it (§8 step 6). With `key: None`, steps 1–5 still run at full
+/// strictness and the outcome reports step 6 as not performed. This
+/// module deliberately imports no DID resolver and no PDS client: the
+/// only way a key exists here is that the caller handed one in.
 pub fn restore(
     receipt: &Receipt,
     rail: &dyn Rail,
-    key: &SigningKey,
+    key: Option<&SigningKey>,
 ) -> Result<RestoreOutcome, RestoreError> {
     // §5 MUST / A5: contentCid == subject.cid, right type.
     if !receipt.binding_ok() {
@@ -149,9 +177,15 @@ pub fn restore(
             commit.did
         )));
     }
-    commit
-        .verify_signature(key)
-        .map_err(|e| RestoreError::Rejected(format!("commit signature: {e}")))?;
+    let authorship = match key {
+        Some(key) => {
+            commit
+                .verify_signature(key)
+                .map_err(|e| RestoreError::Rejected(format!("commit signature: {e}")))?;
+            Authorship::Verified
+        }
+        None => Authorship::NotPerformed,
+    };
     let records = mst::walk(&car, &commit.data)
         .map_err(|e| RestoreError::Rejected(format!("MST completeness: {e}")))?;
 
@@ -229,6 +263,7 @@ pub fn restore(
         rev: commit.rev.clone(),
         blocks: car.block_count(),
         records: records.len(),
+        authorship,
         car_bytes,
         blobs,
         blob_failures,

@@ -24,7 +24,7 @@ use atmirror::did::{identity_from_document, DidDirectory, HttpDirectory};
 use atmirror::mirror::{mirror, MirrorError};
 use atmirror::rail::Rail;
 use atmirror::receipt::Receipt;
-use atmirror::restore::{restore, RestoreError};
+use atmirror::restore::{restore, Authorship, RestoreError};
 use atmirror::state::State;
 use atmirror::xrpc::{resolve_handle, HttpPds, Pds};
 
@@ -82,17 +82,21 @@ USAGE:
                    [--out DIR] [--plc URL] [--appview URL]
                    [--bundler URL] [--gateway URL]... [--ant-bin PATH]
   atmirror restore --manifest FILE --out DIR
-                   [--signing-key zMULTIBASE] [--plc URL]
+                   [--signing-key zMULTIBASE | --resolve-did] [--plc URL]
                    [--gateway URL]... [--ant-bin PATH]
-  atmirror verify  --manifest FILE [--signing-key zMULTIBASE] [--plc URL]
+  atmirror verify  --manifest FILE
+                   [--signing-key zMULTIBASE | --resolve-did] [--plc URL]
                    [--gateway URL]... [--ant-bin PATH]
 
 Notes:
   --ephemeral-key generates a throwaway RSA-4096 signer in-process (client-side
   signing; no custody anywhere). Fine for free-tier uploads: permanence binds to
   content hashes, not signer identity. Use --wallet for a persistent uploader id.
-  restore/verify contact only the rail and (unless --signing-key pins the key)
-  the DID directory — never the PDS.";
+  restore/verify DEFAULT IS OFFLINE-OR-FAIL: they contact only the rail; s8
+  steps 1-5 run, and step 6 (authorship) is reported NOT PERFORMED unless you
+  pass --signing-key (offline, proven) or --resolve-did (explicit opt-in to a
+  network DID resolver - independence granted by it, not proven). The PDS is
+  never contacted on this path in any mode.";
 
 enum CliError {
     Usage(String),
@@ -114,6 +118,9 @@ struct Flags {
     ant_bin: Option<String>,
     manifest: Option<String>,
     signing_key: Option<String>,
+    /// Explicit opt-in to network DID resolution on the verify/restore
+    /// path (CC-1). Named so the user knows what they are permitting.
+    resolve_did: bool,
 }
 
 impl Flags {
@@ -139,6 +146,7 @@ impl Flags {
                 "--ant-bin" => f.ant_bin = Some(take("--ant-bin")?),
                 "--manifest" => f.manifest = Some(take("--manifest")?),
                 "--signing-key" => f.signing_key = Some(take("--signing-key")?),
+                "--resolve-did" => f.resolve_did = true,
                 other => return Err(format!("unknown flag {other:?}")),
             }
         }
@@ -382,39 +390,79 @@ fn cmd_restore(flags: &Flags, write_out: bool) -> Result<(), CliError> {
         ));
     };
 
-    // The signing key: pinned offline, or from the DID directory. Never
-    // from any PDS.
-    let key = match &flags.signing_key {
-        Some(mb) => SigningKey::from_multibase(mb)
-            .map_err(|e| CliError::Refused(format!("--signing-key: {e}")))?,
-        None => {
+    // §8 step 6 key source — DEFAULT IS OFFLINE-OR-FAIL (CC-1, ratified).
+    // Three legible modes, stated in the output so a green result says
+    // whether independence was PROVEN or GRANTED:
+    //   --signing-key  → offline, pinned key. PROVEN.
+    //   --resolve-did  → explicit opt-in to a network DID resolver. GRANTED
+    //                    (the resolver is a trusted party in this mode).
+    //   neither        → steps 1–5 only; step 6 reported NOT PERFORMED.
+    // The resolver is constructed ONLY inside the opt-in branch — grep
+    // `HttpDirectory` in this file: on the verify/restore path it appears
+    // nowhere else.
+    let (key, mode_line) = match (&flags.signing_key, flags.resolve_did) {
+        (Some(_), true) => {
+            return Err(CliError::Usage(
+                "--signing-key and --resolve-did are mutually exclusive: pin the key \
+                 (offline, proven) or permit network resolution (granted) — not both"
+                    .into(),
+            ))
+        }
+        (Some(mb), false) => {
+            let key = SigningKey::from_multibase(mb)
+                .map_err(|e| CliError::Refused(format!("--signing-key: {e}")))?;
+            (
+                Some(key),
+                "authorship (§8 step 6): key pinned via --signing-key — OFFLINE mode, \
+                 independence PROVEN if it verifies"
+                    .to_string(),
+            )
+        }
+        (None, true) => {
             let did = receipt
                 .subject
                 .uri
                 .strip_prefix("at://")
                 .unwrap_or_default()
                 .to_string();
-            let directory = HttpDirectory::new(flags.plc.as_deref().unwrap_or(DEFAULT_PLC));
+            let plc = flags.plc.as_deref().unwrap_or(DEFAULT_PLC);
+            let directory = HttpDirectory::new(plc);
             let doc = directory
                 .did_document(&did)
                 .map_err(|e| CliError::Infra(e.to_string()))?;
             let identity =
                 identity_from_document(&did, &doc).map_err(|e| CliError::Refused(e.to_string()))?;
-            println!(
-                "signing key from DID directory: {}",
-                identity.signing_key_multibase
-            );
-            identity.signing_key
+            (
+                Some(identity.signing_key),
+                format!(
+                    "authorship (§8 step 6): key NETWORK-RESOLVED from {plc} (--resolve-did) \
+                     — independence GRANTED by that resolver, not proven; resolved key {}",
+                    identity.signing_key_multibase
+                ),
+            )
         }
+        (None, false) => (
+            None,
+            "authorship (§8 step 6): NOT PERFORMED — no key supplied and network DID \
+             resolution not permitted (default is offline-or-fail). Steps 1–5 ran against \
+             the rail alone. To check authorship: --signing-key <zMultibase> (offline, \
+             proven) or --resolve-did (network, granted)"
+                .to_string(),
+        ),
     };
 
-    let outcome = restore(&receipt, rail.as_ref(), &key).map_err(|e| match e {
+    let outcome = restore(&receipt, rail.as_ref(), key.as_ref()).map_err(|e| match e {
         RestoreError::Rejected(_) => CliError::Refused(e.to_string()),
         RestoreError::Rail(_) => CliError::Infra(e.to_string()),
     })?;
 
+    let step6 = match outcome.authorship {
+        Authorship::Verified => "step 6 PASSED (commit signature verified)",
+        Authorship::NotPerformed => "step 6 NOT PERFORMED",
+    };
     println!(
-        "RESTORE-VERIFY {}: commit {} rev {}\n  blocks: {}  records: {}  \
+        "RESTORE-VERIFY {}: commit {} rev {}\n  {mode_line}\n  §8 steps 1–5 PASSED \
+         (fetch, re-hash, binding, media) · {step6}\n  blocks: {}  records: {}  \
          blobs verified: {}  blob failures: {}",
         outcome.did,
         outcome.commit_cid,

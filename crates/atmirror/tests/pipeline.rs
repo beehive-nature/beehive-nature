@@ -12,7 +12,7 @@ use atmirror::did::{identity_from_document, AccountIdentity};
 use atmirror::mirror::{mirror, MirrorError};
 use atmirror::rail::testrail::MemRail;
 use atmirror::rail::Rail;
-use atmirror::restore::{restore, RestoreError};
+use atmirror::restore::{restore, Authorship, RestoreError};
 use atmirror::state::State;
 use atmirror::xrpc::{Pds, XrpcError};
 
@@ -487,13 +487,52 @@ fn restore_round_trips_from_rail_alone() {
     let report = mirror(&pds, &f.identity, &mut rail, &mut state, NOW).unwrap();
 
     // No PDS from here on. Rail + receipt + signing key only.
-    let outcome = restore(&report.receipt, &rail, &f.identity.signing_key).unwrap();
+    let outcome = restore(&report.receipt, &rail, Some(&f.identity.signing_key)).unwrap();
     assert_eq!(outcome.did, DID);
     assert_eq!(outcome.records, 2);
     assert_eq!(outcome.car_bytes, f.car);
     assert_eq!(outcome.blobs.len(), 2);
     assert!(outcome.blob_failures.is_empty());
+    assert_eq!(outcome.authorship, Authorship::Verified);
 }
+
+#[test]
+fn restore_without_key_runs_steps_1_to_5_and_reports_step_6_not_performed() {
+    // CC-1 (offline-or-fail default), empirical leg: with NO key, §8 steps
+    // 1–5 still run at full strictness and the outcome carries an explicit
+    // NOT PERFORMED for step 6 — never a silent resolve, never a spurious
+    // failure. The structural leg is the module boundary itself: restore.rs
+    // imports no DID resolver and no PDS client.
+    let f = fixture();
+    let pds = FakePds::from_fixture(&f);
+    let mut rail = MemRail::default();
+    let mut state = State {
+        did: DID.into(),
+        ..State::default()
+    };
+    let report = mirror(&pds, &f.identity, &mut rail, &mut state, NOW).unwrap();
+
+    let outcome = restore(&report.receipt, &rail, None).unwrap();
+    assert_eq!(outcome.authorship, Authorship::NotPerformed);
+    // Steps 1–5 all ran: CAR re-hashed and complete, blobs verified.
+    assert_eq!(outcome.records, 2);
+    assert_eq!(outcome.car_bytes, f.car);
+    assert_eq!(outcome.blobs.len(), 2);
+    assert!(outcome.blob_failures.is_empty());
+
+    // And steps 1–5 keep their teeth without a key: a tampered rail copy
+    // is still rejected in keyless mode.
+    let addr = report.receipt.arweave.as_ref().unwrap().tx_id.clone();
+    let mut tampered = rail.stored.get(&addr).unwrap().clone();
+    let last = tampered.len() - 1;
+    tampered[last] ^= 0x01;
+    rail.stored.insert(addr, tampered);
+    assert!(matches!(
+        restore(&report.receipt, &rail, None),
+        Err(RestoreError::Rejected(_))
+    ));
+}
+
 
 #[test]
 fn restore_rejects_wrong_key_and_bad_binding() {
@@ -509,14 +548,14 @@ fn restore_rejects_wrong_key_and_bad_binding() {
     let other = k256::ecdsa::SigningKey::from_slice(&[9u8; 32]).unwrap();
     let wrong = SigningKey::Secp256k1(*other.verifying_key());
     assert!(matches!(
-        restore(&report.receipt, &rail, &wrong),
+        restore(&report.receipt, &rail, Some(&wrong)),
         Err(RestoreError::Rejected(_))
     ));
 
     let mut bad = report.receipt.clone();
     bad.content_cid = "bafyreiwrong".into();
     assert!(matches!(
-        restore(&bad, &rail, &f.identity.signing_key),
+        restore(&bad, &rail, Some(&f.identity.signing_key)),
         Err(RestoreError::Rejected(_))
     ));
 }
@@ -539,7 +578,7 @@ fn restore_flags_tampered_rail_copy() {
     tampered[last] ^= 0x01;
     rail.stored.insert(addr, tampered);
 
-    match restore(&report.receipt, &rail, &f.identity.signing_key) {
+    match restore(&report.receipt, &rail, Some(&f.identity.signing_key)) {
         Err(RestoreError::Rejected(why)) => assert!(why.contains("sha256"), "{why}"),
         other => panic!("expected rejection, got {other:?}"),
     }
