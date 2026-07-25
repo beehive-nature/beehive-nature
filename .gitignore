@@ -32,6 +32,24 @@ docs/design/*
 # rest of docs/design/ stays a deferred holding pen.
 !docs/design/non-value-states.md
 
+# Relay / working drafts marked DO_NOT_COMMIT in the filename. The marker was
+# the ONLY thing protecting these, and a filename is not an access control:
+# before this rule, 17 such files plus a docs backup zip sat untracked but
+# fully stageable in a public repo — one `git add -A` from publication.
+# Matches the marker anywhere in the path so a rename keeps the protection.
+# Non-destructive: files stay on disk; `git add -f` to adopt a specific one.
+*DO_NOT_COMMIT*
+
+# Local archives / backups — never publish a bundle by accident. Nothing
+# matching these is tracked today, so the rule costs nothing; `git add -f`
+# remains the escape hatch if a fixture archive is ever deliberately adopted.
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+BACKUP_*
+
 # Editor / OS
 .DS_Store
 .idea/
