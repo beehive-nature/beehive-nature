@@ -1,0 +1,32 @@
+# atmirror — AT Protocol repo → permanence-rail mirror.
+# The CAR-file permanence mirror SPEC_LEXICON-1 §12 ruled a separate TAKE.
+# Verify-then-mirror: nothing is uploaded that did not first re-hash and
+# re-verify locally (hash at the source, before transport — ORDERS-1 §2.8).
+[package]
+name = "atmirror"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "Mirror an AT Protocol repo (CAR + blobs) to a permanence rail (Arweave/Autonomi); emit com.beehivenature.receipt manifests"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# House transport: ureq (synchronous) + rustls — the founder-selected supply
+# chain (LOVErnment-DAO D-009c, 2026-07-12). Tests never touch the network.
+ureq = { version = "2", features = ["json"] }
+sha2 = "0.10"
+chrono = "0.4"
+# Commit-signature verification: atproto signing keys are secp256k1 (ES256K)
+# or NIST P-256 (ES256), compressed, multibase/multicodec-wrapped. Pure Rust.
+k256 = { version = "0.13", features = ["ecdsa"] }
+p256 = { version = "0.13", features = ["ecdsa"] }
+# Arweave ANS-104 DataItem signing: RSA-PSS-SHA256 over the deep-hash, with
+# the wallet JWK loaded (or generated) locally. Client-side signing only —
+# no key ever leaves the process; no custody by any third party (A8).
+rsa = "0.9"
+rand = "0.8"
+base64 = "0.22"
+
+[dev-dependencies]
+# none — fixtures are built in-test; no network in any test

@@ -16,6 +16,8 @@ secrets/
 
 # Runtime artifacts
 chain-eos.watermark
+# atmirror default output (CARs, blobs, state; receipts graduate to dockets/)
+mirror-out/
 
 # Research-lane draft staging (one-door). Drafts live untracked under docs/;
 # an adopted finding graduates to docs/ or docs/architecture/ with its own
