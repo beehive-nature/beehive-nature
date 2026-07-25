@@ -32,6 +32,29 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-25` — **DISPATCH-B executed: offline-or-fail is atmirror's
+  default; v0.2 conformance proven; canonical manifest tracked; CC-4
+  escalated on law.** CC-1 (`85dbc7f`): verify/restore no longer silently
+  resolve DIDs — with no key, §8 steps 1–5 run and step 6 reports NOT
+  PERFORMED; `--resolve-did` is the explicit network opt-in; output names
+  the mode (PROVEN offline / GRANTED by resolver / not performed);
+  structural guarantee: restore.rs imports no resolver, `HttpDirectory`
+  exists on that path only inside the opt-in branch; spec §8 amended;
+  live receipts A–D pasted in dockets/atproto-car-mirror/
+  RECEIPT-2026-07-25-B.md. CC-2 (`7a28f1c`): §13 fields were already
+  shipped at 0b770b9; new test proves a stripped v0.1 receipt validates
+  unchanged (omission degrades to named blob failure, never schema
+  rejection); anchor-byteLength addendum flagged for the spec author.
+  CC-3 (`598437f`): path-scoped scanner exemption `dockets/*/receipt-*.json`
+  (fixtures-class, founder-ruled) — planted-hex tripwire BLOCKED outside
+  the path *before* the exemption commit, tree-scan clean after; the
+  canonical bQueenBee manifest is now tracked, flag-7 closed. **CC-4
+  ESCALATED, not executed:** blanket `format.signOff` collides verbatim
+  with ORDERS-1 v0.8 §DCO (machine seats never sign; founder trailer only
+  on founder-gated merges) — the unsigned atmirror commits are the lawful
+  state; dispatch/ledger-a44a2ed vs §DCO is a founder one-line resolution.
+  43 tests green; CI authoritative.
+
 - `2026-07-25` — **atmirror landed — the ATProto repo → permanence mirror,
   first live lap PROVEN on bQueenBee.** New `crates/atmirror` (verify-then-
   mirror: every CAR block re-hashed, commit signature verified against the
