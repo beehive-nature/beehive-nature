@@ -32,6 +32,32 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-07-25` — **atmirror landed — the ATProto repo → permanence mirror,
+  first live lap PROVEN on bQueenBee.** New `crates/atmirror` (verify-then-
+  mirror: every CAR block re-hashed, commit signature verified against the
+  DID-directory key — low-S strict, unsigned bytes by surgical sig-splice,
+  never re-encoded — MST completeness walk, blob set = verified-record scan
+  ∪ listBlobs so a lying host cannot hide a referenced blob; refusal is a
+  first-class outcome and nothing uploads after one). Rails behind one
+  trait: Arweave ANS-104 with client-side RSA-PSS (DataItem id computed
+  locally BEFORE upload; the bundler must agree or the upload is refused),
+  Autonomi via the `ant` CLI subprocess (GPL-3.0 crate NOT linked — D-2
+  gate). 41 tests, no network in any test; adversarial suite proves the
+  refusal gates. **LIVE:** bQueenBee's repo (rev `3mqicxzdw7o22`, 9 blocks,
+  4 records incl. the D-009c first-word/audit pair) mirrored to Arweave via
+  Turbo free tier — status CONFIRMED, `winc: 0` (SPEC A8 confirmed live:
+  client-side signing, no custody, free under 100 KiB) — avatar blob
+  included; **RESTORED from the rail alone with the commit signature
+  re-verified** (acceptance A); immediate re-run reused everything, zero
+  uploads (idempotency live). Manifest = `com.beehivenature.receipt`
+  (§4/§5.1 repo-state form) ledgered at `dockets/atproto-car-mirror/`
+  (canonical JSON untracked beside its annotated copy pending the RECEIPT's
+  flag-7 scanner ruling). SPEC_LEXICON-1 v0.1 (DRAFT) landed byte-faithful
+  from the Downloads mount — ratification still pending. Open flags: Hive
+  anchor + PDS publish (founder keys), Autonomi live lap (funded `ant`
+  wallet + founder go), proposed v0.2 additive optional fields. Repro:
+  `cargo test -p atmirror`; the full lap's commands are in the RECEIPT.
+
 - `2026-07-08` — **CD-29 captured — the emergent "eternal runtime"
   observation** (founder-flagged possibly-premature). Chain-agnostic core
   + Resource Paymaster + permanence anchors + b-as-metabolic-energy +
