@@ -72,130 +72,25 @@ Primary type: **`com.beehivenature.receipt`**
 
 ## 4. Schema
 
-```json
-{
-  "lexicon": 1,
-  "id": "com.beehivenature.receipt",
-  "description": "A permanent, independently verifiable receipt anchoring an AT Protocol record to Arweave permanence and a Hive custom_json ledger entry.",
-  "defs": {
-    "main": {
-      "type": "record",
-      "description": "Binds one atproto record to its content hash and its external anchors.",
-      "key": "tid",
-      "record": {
-        "type": "object",
-        "required": ["subject", "contentCid", "createdAt"],
-        "properties": {
-          "subject": {
-            "type": "ref",
-            "ref": "com.atproto.repo.strongRef",
-            "description": "Strong reference (uri + cid) to the exact version of the record being receipted."
-          },
-          "contentCid": {
-            "type": "string",
-            "format": "cid",
-            "description": "CIDv1 (dag-cbor 0x71, sha-256 0x12) over the canonical DAG-CBOR encoding of the subject record. MUST equal subject.cid."
-          },
-          "arweave": {
-            "type": "ref",
-            "ref": "#arweaveAnchor",
-            "description": "Arweave anchor holding the exact receipted bytes. Omitted until settled."
-          },
-          "hive": {
-            "type": "ref",
-            "ref": "#hiveAnchor",
-            "description": "Hive custom_json anchor. Omitted until broadcast."
-          },
-          "media": {
-            "type": "array",
-            "items": { "type": "ref", "ref": "#mediaPointer" },
-            "description": "Content-address pointers for every blob referenced by the subject record."
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "datetime",
-            "description": "When this receipt was created. RFC 3339, uppercase T, timezone REQUIRED, 'Z' preferred."
-          }
-        }
-      }
-    },
+**The normative schema is the artifact, not this document.**
 
-    "arweaveAnchor": {
-      "type": "object",
-      "required": ["txId"],
-      "properties": {
-        "txId": {
-          "type": "string",
-          "minLength": 43,
-          "maxLength": 43,
-          "description": "Arweave transaction or ANS-104 DataItem id. 43-character Base64URL."
-        },
-        "bundled": {
-          "type": "boolean",
-          "description": "True if this is an ANS-104 DataItem inside a bundle rather than a base-layer transaction."
-        },
-        "settledAt": {
-          "type": "string",
-          "format": "datetime",
-          "description": "When the transaction was observed mined. Advisory only; not a consensus fact."
-        }
-      }
-    },
+| | |
+|---|---|
+| File | `dockets/lexicon/com.beehivenature.receipt.json` |
+| sha256 | `76119cb4e35f73eaf1b270b5096b21fe5db818926e6d44cd500f8f338b298dd9` | <!-- PUBLIC-CONSTANT: sha256 of the public Lexicon schema artifact -->
+| Bytes | 6,501 |
+| Landed | commit `1001e07` |
+| License | CC0-1.0 (`dockets/lexicon/LICENSE-CC0`), schema file only |
 
-    "hiveAnchor": {
-      "type": "object",
-      "required": ["account", "customJsonId"],
-      "properties": {
-        "account": {
-          "type": "string",
-          "maxLength": 16,
-          "description": "Hive account that broadcast the anchor."
-        },
-        "customJsonId": {
-          "type": "string",
-          "maxLength": 32,
-          "description": "The custom_json id namespace. For this spec: 'bnr.anchor'."
-        },
-        "trxId": {
-          "type": "string",
-          "description": "Hive transaction id, lowercase hex."
-        },
-        "blockNum": {
-          "type": "integer",
-          "minimum": 1,
-          "description": "Block containing the anchor transaction."
-        }
-      }
-    },
+**Why a pointer and not an inline copy.** An earlier draft of this spec carried the schema inline. Within one session the artifact and the inline copy disagreed — the artifact gained anchor `byteLength` and an `autonomi` ref that the markdown did not. Two copies of a schema drift; one copy and a pointer cannot. This is the same instinct as preferring an absent import to a present test: make the property structural rather than maintained.
 
-    "mediaPointer": {
-      "type": "object",
-      "required": ["scheme", "address"],
-      "properties": {
-        "scheme": {
-          "type": "string",
-          "knownValues": ["ar", "ant"],
-          "description": "Permanence rail. 'ar' = Arweave TXID. 'ant' = Autonomi DataMap address."
-        },
-        "address": {
-          "type": "string",
-          "description": "Content address on that rail."
-        },
-        "sha256": {
-          "type": "string",
-          "description": "SHA-256 of the blob bytes, lowercase hex. Lets a verifier confirm the fetched blob without trusting the rail."
-        },
-        "mimeType": { "type": "string" },
-        "sourceBlobCid": {
-          "type": "string",
-          "format": "cid",
-          "description": "The blob's CID in the subject's PDS, if it originated there."
-        }
-      }
-    }
-  }
-}
-```
+If this table's sha256 and the artifact's actual hash ever disagree, **the artifact is correct and this table is stale.** Fix the table.
+
+### 4.1 Shape, for readers (non-normative)
+
+`main` is a `record` with `key: "tid"`. Required: `subject` (a `com.atproto.repo.strongRef`), `contentCid` (`format: cid`), `createdAt` (`format: datetime`). Optional: `arweave`, `hive`, `autonomi`, `media`. Five defs: `main`, `#arweaveAnchor`, `#hiveAnchor`, `#autonomiAnchor`, `#mediaPointer`.
+
+**Read the artifact for anything you intend to implement.** This paragraph exists to orient, not to specify.
 
 ### 4.1 Why only three required fields
 
@@ -328,6 +223,8 @@ Everything else — removing a field, renaming, changing a type, adding a requir
 
 The spec is satisfied when all of the following hold. Each is independently checkable.
 
+**Each criterion states its STRUCTURAL half and its DEMONSTRABLE half separately.** Ruled 2026-07-25 after the first full audit of these criteria found that six of ten had a structural half and **not one was fully structural** — every greppable form carried a residual needing demonstration. The split does not run between criteria; it runs through the middle of each one. The two halves are verified by different people at different times, and the structural half can usually be checked today.
+
 | # | Criterion |
 |---|---|
 | **A1** | The Lexicon JSON validates against the AT Protocol Lexicon spec: `lexicon: 1`, valid NSID, at least one def, `main` is a `record` with `key: "tid"`. |
@@ -340,6 +237,7 @@ The spec is satisfied when all of the following hold. Each is independently chec
 | **A8** | Arweave upload path confirmed to require no key custody by any third party, and confirmed free for payloads under 100 KiB. |
 | **A9** | A receipt with `arweave` and `hive` present but **no** atproto record still verifies (§7 step 4 omitted). Proves fail-safe independence. |
 | **A10** | Schema published under CC0; license text archived at the pinned revision. |
+| **A11** | `verify --car FILE` completes §8 steps 2–5 with **zero outbound network calls**, given a CAR file already in hand. **Structural half:** no network client of any kind in scope on that code path. **Demonstrable half:** a run with the network unavailable exits 0. Ruled 2026-07-25 as a criterion distinct from A9 — A9 is *independent of Bluesky*, A11 is *independent of all networks*, and neither may borrow the other's evidence. A9's scope is unchanged. |
 
 ---
 
@@ -384,6 +282,7 @@ Explicitly not covered by this spec, to prevent scope drift:
 Proposed by the `crates/atmirror` implementation. All three are **optional additive** fields, which §9's evolution policy permits without a new NSID. Ratified as spec-authority; they do not require a founder ruling.
 
 - `mediaPointer.byteLength` (integer, optional) — byte length of the blob. Lets a verifier detect a truncated fetch before hashing.
+- `byteLength` on **anchors** (integer, optional) — same truncation-detection rationale, on `#arweaveAnchor`, `#hiveAnchor` and `#autonomiAnchor`. On `#hiveAnchor` it is bounded at **8192**, the confirmed `HIVE_CUSTOM_OP_DATA_MAX_LENGTH`. Ruled 2026-07-25: the implementation already emitted these and the pinned bQueenBee manifest already carries them, so the spec describes what is true rather than making a committed artifact non-conformant with its own schema.
 - Per-artifact `sha256` on the Arweave anchor (optional) — complements `txId` so the anchored bytes are verifiable independent of gateway behaviour.
 - `autonomi` anchor def (optional) — mirrors `#arweaveAnchor` for the Autonomi rail, carrying a DataMap address plus `sha256`. Scheme `ant`, consistent with `#mediaPointer.scheme`.
 
