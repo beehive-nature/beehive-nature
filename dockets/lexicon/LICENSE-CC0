@@ -1,0 +1,31 @@
+CC0 1.0 Universal — Public Domain Dedication
+
+Applies to: com.beehivenature.receipt.json (the Lexicon schema artifact)
+
+The person who associated a work with this deed has dedicated the work to the
+public domain by waiving all of his or her rights to the work worldwide under
+copyright law, including all related and neighboring rights, to the extent
+allowed by law.
+
+You can copy, modify, distribute and perform the work, even for commercial
+purposes, all without asking permission.
+
+Full legal text: https://creativecommons.org/publicdomain/zero/1.0/legalcode
+
+---
+
+Why CC0 for this artifact specifically
+--------------------------------------
+
+A schema is an interface. Maximum permissionless adoption is the entire point
+of publishing it — any application in the Atmosphere must be able to emit or
+read a com.beehivenature.receipt without asking anyone, without attribution
+obligations, and without a license review.
+
+CC0 is also what Bluesky chose for its own atproto interop test vectors, so
+this matches the ecosystem's existing precedent for interface artifacts.
+
+Note the scope boundary: CC0 covers THIS SCHEMA FILE only. Accompanying
+reference implementations ship dual MIT / Apache-2.0, mirroring the atproto
+reference implementation and carrying its patent grant. Do not read this
+dedication as covering any code.

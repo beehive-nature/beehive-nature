@@ -1,0 +1,177 @@
+{
+  "lexicon": 1,
+  "id": "com.beehivenature.receipt",
+  "description": "A permanent, independently verifiable receipt anchoring an AT Protocol record to Arweave permanence and a Hive custom_json ledger entry. Schema is CC0-1.0; see LICENSE-CC0 alongside this file.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "Binds one atproto record to its content hash and its external anchors. A receipt carrying anchors but no atproto record is complete and verifiable on its own.",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["subject", "contentCid", "createdAt"],
+        "properties": {
+          "subject": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Strong reference (uri + cid) to the exact version of the record being receipted."
+          },
+          "contentCid": {
+            "type": "string",
+            "format": "cid",
+            "description": "CIDv1 (dag-cbor 0x71, sha-256 0x12) over the canonical DAG-CBOR encoding of the subject record. MUST equal subject.cid; a verifier MUST reject a receipt where they differ."
+          },
+          "arweave": {
+            "type": "ref",
+            "ref": "#arweaveAnchor",
+            "description": "Arweave anchor holding the exact receipted bytes. Optional: omitted until settled."
+          },
+          "hive": {
+            "type": "ref",
+            "ref": "#hiveAnchor",
+            "description": "Hive custom_json anchor. Optional: omitted until broadcast."
+          },
+          "autonomi": {
+            "type": "ref",
+            "ref": "#autonomiAnchor",
+            "description": "Autonomi anchor. Optional. Added in v0.2."
+          },
+          "media": {
+            "type": "array",
+            "items": { "type": "ref", "ref": "#mediaPointer" },
+            "description": "Content-address pointers for every blob referenced by the subject record."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "When this receipt was created. RFC 3339, uppercase T, timezone REQUIRED, 'Z' preferred."
+          }
+        }
+      }
+    },
+
+    "arweaveAnchor": {
+      "type": "object",
+      "required": ["txId"],
+      "properties": {
+        "txId": {
+          "type": "string",
+          "minLength": 43,
+          "maxLength": 43,
+          "description": "Arweave transaction or ANS-104 DataItem id. 43-character Base64URL."
+        },
+        "sha256": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64,
+          "description": "SHA-256 of the anchored bytes, lowercase hex. Makes the anchored content verifiable independent of gateway behaviour. Optional. Added in v0.2."
+        },
+        "byteLength": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Byte length of the anchored payload. Lets a verifier detect a truncated fetch before hashing. Optional. Added in v0.2."
+        },
+        "bundled": {
+          "type": "boolean",
+          "description": "True if this is an ANS-104 DataItem inside a bundle rather than a base-layer transaction."
+        },
+        "settledAt": {
+          "type": "string",
+          "format": "datetime",
+          "description": "When the transaction was observed mined. Advisory only; not a consensus fact."
+        }
+      }
+    },
+
+    "hiveAnchor": {
+      "type": "object",
+      "required": ["account", "customJsonId"],
+      "properties": {
+        "account": {
+          "type": "string",
+          "maxLength": 16,
+          "description": "Hive account that broadcast the anchor."
+        },
+        "customJsonId": {
+          "type": "string",
+          "maxLength": 32,
+          "description": "The custom_json id namespace. For this spec: 'bnr.anchor'. Ceiling confirmed from live chain config: HIVE_CUSTOM_OP_ID_MAX_LENGTH = 32."
+        },
+        "trxId": {
+          "type": "string",
+          "description": "Hive transaction id, lowercase hex."
+        },
+        "blockNum": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Block containing the anchor transaction."
+        },
+        "byteLength": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 8192,
+          "description": "Byte length of the custom_json payload. Ceiling confirmed from live chain config: HIVE_CUSTOM_OP_DATA_MAX_LENGTH = 8192. Optional. Added in v0.2."
+        }
+      }
+    },
+
+    "autonomiAnchor": {
+      "type": "object",
+      "description": "Added in v0.2. Mirrors #arweaveAnchor for the Autonomi rail.",
+      "required": ["address"],
+      "properties": {
+        "address": {
+          "type": "string",
+          "description": "Autonomi DataMap address."
+        },
+        "sha256": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64,
+          "description": "SHA-256 of the anchored bytes, lowercase hex."
+        },
+        "byteLength": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Byte length of the anchored payload."
+        }
+      }
+    },
+
+    "mediaPointer": {
+      "type": "object",
+      "required": ["scheme", "address"],
+      "properties": {
+        "scheme": {
+          "type": "string",
+          "knownValues": ["ar", "ant"],
+          "description": "Permanence rail. 'ar' = Arweave TXID. 'ant' = Autonomi DataMap address."
+        },
+        "address": {
+          "type": "string",
+          "description": "Content address on that rail."
+        },
+        "sha256": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64,
+          "description": "SHA-256 of the blob bytes, lowercase hex. Lets a verifier confirm the fetched blob without trusting the rail. A pointer omitting this is unverifiable, and an implementation MAY refuse it rather than skip verification."
+        },
+        "byteLength": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Byte length of the blob. Lets a verifier detect a truncated fetch before hashing. Optional. Added in v0.2."
+        },
+        "mimeType": {
+          "type": "string",
+          "description": "MIME type of the blob, advisory."
+        },
+        "sourceBlobCid": {
+          "type": "string",
+          "format": "cid",
+          "description": "The blob's CID in the subject's PDS, if it originated there."
+        }
+      }
+    }
+  }
+}
