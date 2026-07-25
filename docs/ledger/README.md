@@ -16,7 +16,7 @@ one record instead of asking one agent to recite it.
 |---|---|---|---|
 | [`pirate-haul-rulings.md`](./pirate-haul-rulings.md) | Closed quarter — 2026 Q1–Q3 through 07-25 | Append-only, now sealed | ✅ Mirrored — `299412f` |
 | [`pirate-haul-rulings-2026q3.md`](./pirate-haul-rulings-2026q3.md) | Active quarter — continues the above | Append-only | ✅ Mirrored — `672feba` |
-| `pirate-haul-candidates.md` | Targets under evaluation, not yet ruled | Mutable | ⏳ Not yet mirrored |
+| [`pirate-haul-candidates.md`](./pirate-haul-candidates.md) | Targets under evaluation, not yet ruled | **Mutable** | ✅ Mirrored — `129b6f2` |
 | `pirate-haul.md` | Operational — raid procedure | Operational | ⏳ Not yet mirrored |
 
 Pending rows are listed because the set is known, **not** because placeholder files exist.
@@ -52,6 +52,43 @@ Each file is committed **verbatim** — not reformatted, not summarized, not rec
 frontmatter preserved. Fidelity is verified rather than assumed, by a source → working-tree →
 git-blob round trip: the blob is extracted back out of git with `git cat-file` and its sha256
 compared against the source. A commit is only claimed when those match.
+
+**Know exactly what that proves, and what it does not.** The round trip covers
+*source → working tree → git blob*. It says **nothing** about *store → source*. Byte counts are
+checked against the store where available, but a byte check is *necessary, not sufficient* —
+paraphrase is the demonstrated failure mode, and a paraphrase that happens to preserve length
+passes silently. `pirate-haul-rulings.md` at `299412f` was mirrored before this was understood
+and had no second export to diff against, so it may contain paraphrases that will never be
+detected. That is **not** an argument to re-export it: a second export would produce a third
+variant, not a verification.
+
+## Export procedure — export once, then deltas only
+
+This follows directly from the finding below, and exists so the flaw cannot recur.
+
+1. **Each file is exported from the store exactly once**, single-pass, never assembled from
+   multiple operations. That export is committed after round-trip verification.
+2. **After a file lands here, it is never re-exported.** New rulings arrive as **append-only
+   deltas** — one entry at a time, small enough to read in full — appended to the committed file
+   rather than regenerating it.
+3. A delta **cannot silently reword an existing entry, because it never touches one.** Full
+   re-export is the operation that carries the risk, so it happens once per file and never again.
+
+The property that makes this work: appending to a committed file means `git diff` shows exactly
+the new bytes, and everything prior is byte-identical **by construction rather than by
+assertion**. The residual risk becomes bounded and visible, and review collapses to the delta
+alone.
+
+### The mutable file needs one extra convention
+
+`pirate-haul-candidates.md` is the only file here that legitimately *loses* entries — an entry
+leaves when it is promoted to rulings, or dropped. Deltas alone will not keep it accurate, and
+re-export is the operation we just established as unsafe.
+
+Convention, already precedented by the `attie.ai` entry when it moved to rulings:
+**promotions are recorded, not erased.** A promoted entry stays in place with a one-line pointer
+replacing its body. The file becomes append-and-amend-in-place rather than regenerate, and every
+amendment stays small enough to read in full.
 
 ## Open question for the founder — which copy is the record of truth?
 
