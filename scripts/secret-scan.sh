@@ -19,6 +19,13 @@
 #     auditor's own docket-digest stamps — content hashes of public audit
 #     material, never key material. Path-scoped exemption, founder-ruled
 #     2026-07-07.
+#   - dockets/*/receipt-*.json: canonical com.beehivenature.receipt
+#     manifests. Their sha256 fields are 64-hex content hashes of PUBLIC
+#     artifacts (a repo CAR, its blobs) — never key material — and
+#     canonical JSON has nowhere to carry a same-line marker without
+#     changing the artifact the receipt pins. Path-scoped (this glob only;
+#     the 64-hex pattern stays armed everywhere else), founder-ruled
+#     2026-07-25 (DISPATCH-2026-07-25-B CC-3, on the fixtures/ basis).
 #   - lines carrying a same-line TESTNET-ONLY marker — the sanctioned way to
 #     commit a throwaway testnet vector for the compat tests, e.g.:
 #       let s: [u8; 32] = hex!("...");  // TESTNET-ONLY throwaway compat vector
@@ -55,14 +62,14 @@ PROPTEST_RE='(^|[+:])cc [0-9a-fA-F]{64}([^0-9a-fA-F]|$)'
 case "$mode" in
 diff)
     names=$(git diff --cached --name-only --diff-filter=ACM | grep -Ei "$NAME_RE")
-    added=$(git diff --cached --diff-filter=ACM -- . ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' |
+    added=$(git diff --cached --diff-filter=ACM -- . ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' |
         grep '^+' | grep -v '^+++')
     hex=$(printf '%s\n' "$added" | grep -vF -e "$MARK" -e "$MARK2" | grep -vE "$PROPTEST_RE" | grep -nE "$HEX_RE")
     pem=$(printf '%s\n' "$added" | grep -nE "$PEM_RE")
     ;;
 tree)
     names=$(git ls-files | grep -Ei "$NAME_RE")
-    hex=$(git grep -InE "$HEX_RE" -- ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' | grep -vF -e "$MARK" -e "$MARK2" | grep -vE "$PROPTEST_RE")
+    hex=$(git grep -InE "$HEX_RE" -- ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' | grep -vF -e "$MARK" -e "$MARK2" | grep -vE "$PROPTEST_RE")
     pem=$(git grep -InE "$PEM_RE")
     ;;
 *)

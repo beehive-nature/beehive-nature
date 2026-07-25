@@ -1,0 +1,25 @@
+{
+  "$type": "com.beehivenature.receipt",
+  "subject": {
+    "uri": "at://did:plc:77xbxwg7vh3wh5pmzvid65hc",
+    "cid": "bafyreiajejx7wg72eixbjpvip7lq4ml47qve7axbn45xtrut6z3uhd75lq"
+  },
+  "contentCid": "bafyreiajejx7wg72eixbjpvip7lq4ml47qve7axbn45xtrut6z3uhd75lq",
+  "arweave": {
+    "txId": "55ICOKgVH8Q3G91fSxwxOH_XosMMcbx5yUSqWowtdTU",
+    "bundled": true,
+    "sha256": "c2912a079f8a8c8a86ef781db31fd11f822c697a5dd62e536b079fd75fdfb0ba",
+    "byteLength": 2391
+  },
+  "media": [
+    {
+      "scheme": "ar",
+      "address": "Wh6UzLsP1raIAT3OwRHmQlkKT0V1Dxk46BAcLf9Ztgs",
+      "sha256": "112765e9500560ca0be045a83a43e30bf99146c6e02fdb90f82a194daf6a86a2",
+      "mimeType": "image/jpeg",
+      "sourceBlobCid": "bafkreiare5s6suafmdfaxycfva5ehyyl7giunrxaf7nzb6bkdfg262ugui",
+      "byteLength": 90302
+    }
+  ],
+  "createdAt": "2026-07-25T15:44:44Z"
+}
