@@ -47,9 +47,11 @@ this on every commit and push.
 
 ## What's in here
 
-Fourteen crates over one event bus. `cargo test --workspace` →
-**180 passed / 0 failed / 1 ignored** (the ignored test is the firmware-gated
-`slip0010` end-to-end, and says so). The kernel is deliberately layered:
+Thirty-four crates over one event bus. `cargo test --workspace` →
+**570 passed / 0 failed / 3 ignored** (each ignored test names its own blocker;
+see [TREE-CENSUS.md](./docs/TREE-CENSUS.md)). A per-crate inventory — LOC, test
+counts, maturity, and which crate names promise more than their code delivers —
+lives in that census. The kernel is deliberately layered:
 
 - **Settlement & escrow** — `escrow-core` (the state machine + funding check),
   `escrow-engine` (the bus consumer that drives it), `dro-signer`
@@ -78,7 +80,7 @@ git config core.hooksPath .githooks   # one-time per clone: local secret-scan ho
 # mingw binutils. WinLibs is installed via winget; put its bin dir and
 # ~/.cargo/bin on PATH (neither is added automatically):
 #   $LOCALAPPDATA/Microsoft/WinGet/Packages/BrechtSanders.WinLibs.POSIX.UCRT_*/mingw64/bin
-cargo test --workspace       # 180 passed / 0 failed / 1 ignored
+cargo test --workspace       # 570 passed / 0 failed / 3 ignored
 cargo test -p chain-zano     # the stock-Zano derivation proof (committed vector)
 ```
 
@@ -104,8 +106,8 @@ This repo is built to be audited. The fastest orientation:
    output. What's proven, what was refuted, what's decided, what's gated.
 2. **Run it** (the count is a command, not a claim):
    `git config core.hooksPath .githooks && cargo test --workspace` →
-   **`180 passed; 1 ignored`** (the ignored test is the firmware-gated
-   `slip0010` end-to-end, and says so).
+   **`570 passed; 0 failed; 3 ignored`** (each ignored test names its own
+   blocker — see [TREE-CENSUS.md](./docs/TREE-CENSUS.md)).
 3. **The claims most worth attacking:** the escrow state machine's
    dual-balance funding check ([escrow-core](./crates/escrow-core)), the
    stock-Zano derivation vector proof ([chain-zano](./crates/chain-zano),
