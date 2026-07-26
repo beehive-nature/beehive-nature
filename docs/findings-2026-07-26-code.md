@@ -451,3 +451,93 @@ function:
    `"Must pay the exact account creation fee"` — an over- or under-paying
    `account_create` fails. The hopper must read the live median before each
    creation, not hardcode 3 HIVE.
+
+---
+
+## Addendum 2 — 2026-07-26 · SPEC-BNROSE-ONBOARD gates G2, G4, G7
+
+### G2 — what the b economics crates actually implement (the "code seat read")
+
+Read: `b-token` (536 LOC), `treasury-t0` (1,000 LOC), `denomination` (474 LOC).
+The one-line answer: **the ledger mechanics exist and are strong; the economic
+constants do not exist in code at all.**
+
+What exists, quoted from source:
+
+- **The only mint path is proof-gated.** `BLedger::mint(who, amount, at,
+  proof: &ResourceProof, verifier: &dyn ProofVerifier)` — an unverified proof
+  is `LedgerError::UnprovenMint` (*"resource proof did not verify; mint
+  refused"*). There is **no grant/airdrop mint** and no unconditional mint.
+  The `ProofVerifier` trait is the pending seam (*"the pending step (real
+  proof verification) is adapter work"*); the in-tree impl is a labelled
+  test stand-in (`AcceptNonEmptyProof`).
+- **The amount is caller-supplied under the proof** — no emission schedule,
+  no epoch machinery, no per-soul constant. Grep for `420|emission|epoch`
+  in `b-token`: the 420-quantum supply law (CD-25/CD-27) exists in the
+  feature backlog's prose only. **"What the denomination scheme actually is"
+  — the question G2 asks — is answered nowhere in code.** Sizing the grant
+  is a green-field constants decision, not a read-off.
+- **Respect is a separate, untransferable type** that modulates unlock rate —
+  no transfer method exists on `RespectBook` by design.
+- **`treasury-t0` already anticipates onboarding grants at the lien layer:**
+  the maturation schedule's own doc says *"A day-one onboardee **cannot**
+  lock their whole grant"* — 10% collateralizable in year one, +10 pts/year,
+  80% ceiling, 20% function floor forever. Note the limit governs
+  **collateralization, not transfer** — `b` stays freely transferable from
+  day one, so the spec's sybil inequality (grant value < walk cost) is
+  carried entirely by grant sizing; the maturation schedule does not slow a
+  farmer who transfers out.
+- **`denomination` is display law**, and it bears on grant *sizing language*:
+  `b` renders in function units (*"enough for three deployments"*), never as
+  a priced amount; the only conversion venue is the draw facility. A grant
+  spec'd in dollars on-surface would violate D-14 — the dollar bound (sybil
+  inequality) is a sizing input, not a display.
+
+**Structural fit for R3's completion grant, flagged not ruled:** the clean
+path through the existing types is to define *verified completion of the
+walk* as a `ResourceProof` class — BNRoSE's chain-side verifications become
+the proof payload, and the grant mints through the same `UnprovenMint` gate
+as everything else, keeping "granted-never-sold" AND "minted-on-proof" both
+true. The alternative — a new unconditional grant-mint path — would be the
+first mint in the system not gated on a proof, and it brushes the banked
+F-Q1 "earned ceiling, no grant" ruling's territory (that ruling was about
+the machine quantum; whether its principle extends to user onboarding is a
+founder question, named here so it is decided rather than drifted into).
+
+Also noted against the founder's b definition (tradable, auto-pays and
+coordinates payouts across adapters): the **auto-pay half is a designed seam,
+not built** — b-token's docs name *"the paymaster basket that acquires
+external resources (Vaulta RAM/CPU/NET, ZANO, AR, ANT)"* as pending adapter
+work behind traits.
+
+### G4 — Autonomi put cost: **measured quote, 0.1063 ANT + gas, for 100 KiB**
+
+`ant file cost` (v0.3.1, live network, quote only — **nothing uploaded,
+nothing spent**), 100 KiB random probe file:
+
+```json
+{"file_size":102400,"chunk_count":3,
+ "storage_cost_atto":"106295141601562500",
+ "estimated_gas_cost_wei":"150000000000000",
+ "payment_mode":"single","confidence":"priced_sample"}
+```
+
+= **0.10630 ANT storage + 0.00015 ETH-denominated gas** (Arbitrum One per the
+CLI default). Two components, and at plausible spots the **gas leg rivals or
+exceeds the storage leg** — the $1.50 slice's real constraint is L2 gas, not
+ANT. (A CoinGecko spot read returned empty from this lane; dollarization is
+left to a seat with a working price feed. At any ANT spot below ~$14 the
+storage leg alone is under the slice.) Store cost is demand-priced —
+`priced_sample` — so re-quote at onboard time, same discipline as the Hive
+fee's A43 pre-flight.
+
+### G7 — correction to "the adapter side exists"
+
+`chain-eos` is PROVEN **for reading**: it is a SHIP (state-history-plugin)
+binary codec and stream ingester. It contains **no transaction construction,
+no signing, no account creation, no token contract, and no write path of any
+kind** — nothing in this tree can provision a Vaulta account or move a
+Vaulta-native asset. If b settles on Vaulta, the write side (account
+provisioning or wallet-bring, token contract, transfer construction) is new
+work on both the chain and the tree, whichever G7 branch is chosen. The
+PROVEN label should not be read as "Vaulta capability exists."
