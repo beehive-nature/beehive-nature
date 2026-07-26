@@ -393,3 +393,61 @@ population-average caveat. **B7** → A40. **B8** → derived, awaiting broadcas
 **B11/B12** → remain UNVERIFIED, reasons stated above. **B14** → §D-04, no
 contradictions found. **B15** → `docs/TREE-CENSUS.md`; note the register's own
 "35 crates" is off by one — the tree has **34**.
+
+---
+
+## Addendum 2026-07-26 — B16 and B17 (ONBOARDING-OPTIONS promotion tests)
+
+### B16 — `account_creation_fee`, live config. **CONFIRMED: 3.000 HIVE.**
+
+The promotion curl from ONBOARDING-OPTIONS.md, run from this chain-connected
+seat, `api.hive.blog`:
+
+```json
+{"jsonrpc":"2.0","result":{"account_creation_fee":"3.000 HIVE",
+ "maximum_block_size":65536,"hbd_interest_rate":1000,
+ "account_subsidy_budget":797,"account_subsidy_decay":347321},"id":1}
+```
+
+Matches the developer-portal figure exactly. (A second node, `anyx.io`,
+answered 502 during the window — single-node read, primary + portal
+corroboration. It is a witness-voted median; re-read before committing budget.)
+
+### B17 — where the 3 HIVE goes. **BURNED — and the burn buys the new account a permanent RC floor.**
+
+Tier-1 source, `libraries/chain/hive_evaluator_account.cpp` (master),
+`account_create_evaluator::do_apply`:
+
+```cpp
+_db.adjust_balance( creator, -o_fee );                       // creator pays
+...
+if( _db.has_hardfork( HIVE_HARDFORK_0_20__1762 ) )
+  _db.adjust_balance( _db.get< account_object, by_name >( HIVE_NULL_ACCOUNT ), o_fee );  // → @null
+else if( o_fee.amount > 0 )
+  initial_vesting_shares = _db.create_vesting( new_account, o_fee );   // pre-HF20 path, dead on mainnet
+```
+
+Post-HF20 (2018) the fee is transferred to `@null` — **a burn, so Option 1's
+"budget as if burned" assumption is correct**. Two riders from the same
+function:
+
+1. **The burn is not economically lost to the new account.** `create_account`
+   converts the fee at the vesting share price into
+   `rc_adjustment_from_fee`, stored as the account's
+   **`max_rc_creation_adjustment`**:
+
+   ```cpp
+   if( db.has_hardfork( HIVE_HARDFORK_0_20 ) )
+     rc_adjustment_from_fee = ( fee_for_rc_adjustment * dgpo.get_vesting_share_price() ).amount.value;
+   ```
+
+   This is precisely the `max_rc_creation_adjustment = 5,622,320,093` observed
+   live on `loviswater` — the fee-derived RC grant from that account's own
+   creation. A fee-created account therefore arrives with a built-in RC
+   baseline, which reduces (not eliminates) Option 1's need for an immediate
+   `delegate_rc` top-up.
+
+2. **The fee must be exact, not minimum**, post-HF20__1771:
+   `"Must pay the exact account creation fee"` — an over- or under-paying
+   `account_create` fails. The hopper must read the live median before each
+   creation, not hardcode 3 HIVE.
