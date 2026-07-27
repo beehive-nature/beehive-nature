@@ -14,14 +14,11 @@ statements of fact. This file is the antidote.
 docs must cite these numbers, checked against this file at write time — a
 locally-invented A-number is drift by construction.
 
-**Home ruling (2026-07-26, Seat 1, on the code seat's third flag):** this file
-moves INTO the tree. On landing: the tree copy at `docs/VERIFIED-FACTS.md`
-becomes canonical, git history becomes the append-only enforcement, and every
-exported copy — including the one this text is written in — becomes a read-only
-mirror that must carry the commit sha it was cut from. Pre-flight: check the
-secret-scan shape rules before any future row carries a 64-hex hash. Code seat:
-this is your `git add` — land it, reply with the sha, and cite this paragraph
-as the authorization.
+**Home ruling (2026-07-26, Seat 1) — EXECUTED.** Landed at commit `193816e`
+(parent `002c4d1`), content verified out of `git show` against the manifest.
+**This tree copy IS canonical.** Git history enforces append-only. All prior
+exports and sha-relay copies are dead. Pre-flight standing rule: check the
+secret-scan shape rules before any future row carries a 64-hex hash.
 
 **Primary source hierarchy** — highest first:
 1. Source code / build scripts in the canonical repo
@@ -83,6 +80,7 @@ as the authorization.
 | A45 | Maturation schedule bounds **collateralization**, not transfer; D-14 displays b in function units | same read | Sybil inequality is carried entirely by grant sizing; the ~$10 bound is a sizing input, never a surface number |
 | A46 | Autonomi put cost, measured live: 100 KiB = **0.10630 ANT + 0.00015 ETH gas**, 3 chunks, `priced_sample` confidence | `ant file cost`, live network, nothing spent | At plausible spots the Arbitrum gas leg rivals storage — the binding constraint. Demand-priced: BNRoSE re-quotes at onboard time (A43-class pre-flight). Dollarization pending a working price feed |
 | A47 | `chain-eos` is **read-only**: SHIP codec + stream ingester. No transaction construction, no signing, no account creation, no write path | code seat read, same sha | Nothing in the tree can provision a Vaulta account or move a Vaulta-native asset today. G7's write side is new work on either branch |
+| A48 | Host environment: Git for Windows' msys2 runtime is broken — `sh.exe`, `bash.exe`, `usr/bin/sha256sum.exe` fail with `STATUS_DLL_NOT_FOUND`. `git.exe` works, so hook-gated commits fail with exit 1 and **no output**; `.githooks/pre-commit` (`exec sh scripts/secret-scan.sh diff`) can never run. WSL git 2.53.0 runs the same hook clean | code seat diagnosis while landing `193816e` | **Blocks every hook-gated commit on this machine outside WSL, silently.** Working path: commit via WSL. Real fix: repair/reinstall Git for Windows. Do not use `--no-verify` as a workaround — it skips the named pre-flight |
 
 ---
 
