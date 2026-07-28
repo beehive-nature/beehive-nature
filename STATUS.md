@@ -141,6 +141,24 @@ it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
   genesis ballot rejected-shape). Full text: docs/feature-backlog.md
   CD-25.
 
+- `2026-07-28` — **TE GATES GRADUATED: the earned-emission tokenomics
+  spec is ADOPTED** and moved out of the `docs/findings/` one-door pen to
+  `docs/tokenomics-earned-emission.md` (founder authorization, verbatim:
+  "Lets graduate these gates"). Closes the citation-vs-status gap where
+  tracked files called an un-graduated draft "the frozen tokenomics"
+  (feature-backlog.md:520) and gated features on TE-1..TE-7 (:649, :746,
+  :939). **Adopted: the RULE + invariants TE-1..TE-7, verbatim and
+  unchanged. NOT adopted: the numbers** — all six "Open decisions for
+  Dispatch", the curve parameters (Article VI meta-tier per C1), and the
+  ⚠ DEFERRED adversarial ResourceProof analysis, which leaves TE-3's
+  strength UNPROVEN for those classes. Consequence: TE-1 (genesis == 0),
+  TE-2 (zero allocation) and TE-5 (no vesting/unlock) are binding law;
+  any genesis grant, premine, founder allocation or unlock schedule now
+  requires a formal Article VI meta-tier amendment — the price F-Q1
+  already named. Two reconciliation debts logged, not closed:
+  B_EMISSION's vesting language vs TE-5, and U-11. Prompted by
+  RELAY_ANALYSIS_b_architecture_0444_DO_NOT_COMMIT.md.
+
 - `2026-07-08` — **F-Q1 RULED (option a: earned ceiling, no grant, TE
   untouched) + custody doctrine RATIFIED AND NAMED: THE ETERNAL
   CRYSTAL** ("that is the eternal crystal I have been looking for" —
