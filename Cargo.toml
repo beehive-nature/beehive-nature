@@ -13,6 +13,7 @@ members = [
     "crates/adapter-lti",
     "crates/atmirror",
     "crates/b-token",
+    "crates/bsigner",
     "crates/bnr-shell",
     "crates/capability",
     "crates/chain-eos",
