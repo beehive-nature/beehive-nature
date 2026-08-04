@@ -7,10 +7,22 @@
 #[derive(Debug)]
 pub enum RailError {
     Transport(String),
-    /// The rail refused the upload (insufficient funds, too large, …).
+    /// The rail refused the upload (malformed item, blocklisted, too large, …).
     Rejected {
         status: u16,
         body: String,
+    },
+    /// **Terminal, not a retry.** Turbo has one route: the free-tier check and
+    /// the credit reservation both happen inside `POST /v1/tx`. A 402 therefore
+    /// already means *free did not cover this AND the signer's credits did not
+    /// either*, so re-POSTing identical bytes fails identically. The only
+    /// in-process recovery is an `x-paid-by` delegate; `delegate_tried` records
+    /// whether one was configured and attempted.
+    PaymentRequired {
+        /// Encoded DataItem size — what Turbo actually meters (Content-Length),
+        /// not the payload, so RSA-4096's ~1 KiB of signature+owner counts.
+        item_bytes: usize,
+        delegate_tried: bool,
     },
     /// Output that could not be interpreted — surfaced verbatim, never
     /// guessed at.
@@ -36,6 +48,20 @@ impl std::fmt::Display for RailError {
             RailError::Rejected { status, body } => {
                 write!(f, "rail rejected upload: HTTP {status}: {body}")
             }
+            RailError::PaymentRequired {
+                item_bytes,
+                delegate_tried,
+            } => write!(
+                f,
+                "rail requires payment for {item_bytes} encoded bytes: over the free tier and \
+                 the signer has insufficient credits{} — fund the wallet or configure a paying \
+                 delegate; retrying the same bytes will not help",
+                if *delegate_tried {
+                    ", and the configured x-paid-by delegate did not cover it either"
+                } else {
+                    ""
+                }
+            ),
             RailError::Unparseable(out) => write!(f, "rail output unparseable: {out}"),
             RailError::Missing(addr) => write!(f, "rail address {addr} not retrievable"),
             RailError::AddressMismatch { local, remote } => write!(

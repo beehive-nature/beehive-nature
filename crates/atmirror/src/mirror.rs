@@ -252,6 +252,28 @@ pub fn mirror(
                 refused_uploads.push(cid_str);
                 continue;
             }
+            // Out-of-funds used to arrive here as Rejected{status:402} and
+            // degrade gracefully — skip this blob, keep mirroring the repo.
+            // PaymentRequired must preserve that: a full run must not abort
+            // because one blob crossed the free tier.
+            Err(RailError::PaymentRequired {
+                item_bytes,
+                delegate_tried,
+            }) => {
+                warnings.push(format!(
+                    "blob {cid_str} ({} bytes, {item_bytes} encoded): over the free tier and the \
+                     signer has no credits{} — excluded from receipt; fund the wallet (or set a \
+                     paying delegate) and re-run to complete media",
+                    bytes.len(),
+                    if delegate_tried {
+                        ", and the configured delegate did not cover it"
+                    } else {
+                        ""
+                    }
+                ));
+                refused_uploads.push(cid_str);
+                continue;
+            }
             Err(e) => return Err(MirrorError::Upload(e)),
         };
         blobs_uploaded += 1;

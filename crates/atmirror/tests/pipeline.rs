@@ -454,6 +454,88 @@ fn denied_blob_is_reported_not_fatal() {
     assert_eq!(report.receipt.media.len(), 1);
 }
 
+/// A rail that refuses **blob** puts only, so the CAR still lands and the run
+/// reaches the blob loop. `MemRail` always succeeds, so before this existed
+/// nothing in the suite exercised a rail refusal at all — which is exactly how
+/// the `PaymentRequired` abort regression got in.
+struct RefusingRail {
+    inner: MemRail,
+    how: fn(usize) -> atmirror::rail::RailError,
+}
+
+impl Rail for RefusingRail {
+    fn scheme(&self) -> &'static str {
+        "ar"
+    }
+    fn put(
+        &mut self,
+        bytes: &[u8],
+        tags: &[(String, String)],
+    ) -> Result<String, atmirror::rail::RailError> {
+        if tags.iter().any(|(k, _)| k == "Blob-CID") {
+            return Err((self.how)(bytes.len()));
+        }
+        self.inner.put(bytes, tags)
+    }
+    fn get(&self, a: &str) -> Result<Vec<u8>, atmirror::rail::RailError> {
+        self.inner.get(a)
+    }
+    fn probe(&self, a: &str) -> Result<bool, atmirror::rail::RailError> {
+        self.inner.probe(a)
+    }
+}
+
+fn mirror_with_refusing_rail(
+    how: fn(usize) -> atmirror::rail::RailError,
+) -> atmirror::mirror::MirrorReport {
+    let f = fixture();
+    let pds = FakePds::from_fixture(&f);
+    let mut rail = RefusingRail {
+        inner: MemRail::default(),
+        how,
+    };
+    let mut state = State {
+        did: DID.into(),
+        ..State::default()
+    };
+    mirror(&pds, &f.identity, &mut rail, &mut state, NOW)
+        .expect("a rail refusing blobs must not abort the whole run")
+}
+
+#[test]
+fn payment_required_is_reported_not_fatal() {
+    // The regression this guards: out-of-funds used to arrive as
+    // Rejected{status:402} and degrade gracefully — warn, skip the blob, keep
+    // mirroring. Introducing RailError::PaymentRequired without its own arm in
+    // mirror() made one over-free-tier blob abort the entire repo mirror.
+    let report = mirror_with_refusing_rail(|n| atmirror::rail::RailError::PaymentRequired {
+        item_bytes: n + 1024, // encoded item carries ~1 KiB of RSA sig + owner
+        delegate_tried: false,
+    });
+    assert!(
+        !report.refused_uploads.is_empty(),
+        "the refused blob must be reported, not silently dropped"
+    );
+    assert_eq!(report.blobs_uploaded, 0);
+    assert!(
+        report.warnings.iter().any(|w| w.contains("free tier")),
+        "the warning must name the cause so it is actionable: {:?}",
+        report.warnings
+    );
+}
+
+#[test]
+fn rail_rejection_is_reported_not_fatal() {
+    // The pre-existing Rejected path, which was also untested.
+    let report = mirror_with_refusing_rail(|_| atmirror::rail::RailError::Rejected {
+        status: 400,
+        body: "Invalid Data Item!".into(),
+    });
+    assert!(!report.refused_uploads.is_empty());
+    assert_eq!(report.blobs_uploaded, 0);
+    assert!(report.warnings.iter().any(|w| w.contains("400")));
+}
+
 #[test]
 fn lying_blob_bytes_are_refused_per_blob() {
     let f = fixture();

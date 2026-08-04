@@ -45,7 +45,59 @@ pub struct ArweaveRail {
     /// True when the signer was generated in-process this run (reported —
     /// a reader of the receipt trail deserves to know).
     pub ephemeral: bool,
+    /// Optional `x-paid-by` delegate. Turbo exposes exactly ONE upload route:
+    /// the free-tier short-circuit and the credit reservation both live inside
+    /// `POST /v1/tx`, so a 402 already means "free missed AND your credits
+    /// missed". There is no paid endpoint to retry against. A delegate that has
+    /// granted this signer an approval is the only automatic recovery, so the
+    /// fallback is one retry carrying this header — not a second POST of hope.
+    paid_by: Option<String>,
+    /// `winc` charged by the last successful put: `0` = served on the free
+    /// tier, non-zero = credits were spent. Callers that must not silently
+    /// start paying can assert on this.
+    pub last_winc: Option<String>,
 }
+
+/// What to do about an upload response. Pure, so the whole policy is testable
+/// with no network — see the tests at the foot of this file.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Disposition {
+    /// Accepted. 202 is an in-flight duplicate of an item already queued: the
+    /// SDK allowlists it (`allowedStatuses = [200, 202]`) and its body is
+    /// EMPTY, so parsing it as JSON reports a successful upload as a failure.
+    Accepted,
+    /// 5xx / 429 / transport. 429 is edge infrastructure — the upload service
+    /// ships no rate limiter — so it is a transport signal, never a money one.
+    Retry,
+    /// 402 only. Terminal unless a delegate pays.
+    Payment,
+    /// 4xx that money cannot fix. A 400 here usually means OUR encoder is
+    /// wrong (`"Data item parsing error!"` / `"Invalid Data Item!"`).
+    Permanent,
+}
+
+/// Classify an upload status. Anything unrecognised fails closed as
+/// `Permanent`: never retried, never charged.
+pub fn classify(status: u16) -> Disposition {
+    match status {
+        200..=202 => Disposition::Accepted,
+        402 => Disposition::Payment,
+        429 => Disposition::Retry,
+        s if s >= 500 => Disposition::Retry,
+        _ => Disposition::Permanent,
+    }
+}
+
+/// One POST's outcome: `Ok(Ok((id, winc)))` accepted · `Ok(Err((status, detail)))`
+/// a classified HTTP refusal · `Err(_)` a terminal local or transport failure.
+type PostOutcome = Result<Result<(String, Option<String>), (u16, String)>, RailError>;
+
+/// SDK backoff: 1s, 2s, 4s, 8s, 16s, capped at 30s.
+pub fn backoff_ms(attempt: u32) -> u64 {
+    (1000u64 << attempt.min(20)).min(30_000)
+}
+
+const MAX_ATTEMPTS: u32 = 5;
 
 impl ArweaveRail {
     pub fn from_jwk_file(
@@ -101,9 +153,23 @@ impl ArweaveRail {
             gateways,
             agent: ureq::AgentBuilder::new()
                 .timeout_connect(std::time::Duration::from_secs(30))
+                // ureq 2's POST-redirect behaviour is not pinned here; a
+                // silently method-converted GET surfaces as a mysterious 4xx.
+                .redirects(0)
                 .build(),
             ephemeral: false,
+            paid_by: None,
+            last_winc: None,
         }
+    }
+
+    /// Set the `x-paid-by` delegate that pays when the free tier and this
+    /// signer's own credits both miss. The delegate must have granted this
+    /// signer an approval on the payment service; without one the retry
+    /// returns 402 again and the error records `delegate_tried: true`.
+    pub fn paid_by(mut self, delegate_address: impl Into<String>) -> Self {
+        self.paid_by = Some(delegate_address.into());
+        self
     }
 
     fn from_key(
@@ -131,9 +197,68 @@ impl ArweaveRail {
             gateways,
             agent: ureq::AgentBuilder::new()
                 .timeout_connect(std::time::Duration::from_secs(30))
+                .redirects(0)
                 .build(),
             ephemeral,
+            paid_by: None,
+            last_winc: None,
         })
+    }
+
+    /// One POST attempt. Returns the accepted id, or the classified outcome.
+    /// Error bodies on this route are empty — `errorResponse` sets the status
+    /// and the reason phrase but never a body — so the reason phrase is
+    /// captured BEFORE consuming the response, or the diagnosis is blank.
+    fn post_once(&self, item: &[u8], local_id: &str, with_delegate: bool) -> PostOutcome {
+        let url = format!("{}/v1/tx", self.bundler);
+        let mut req = self
+            .agent
+            .post(&url)
+            .set("Content-Type", "application/octet-stream");
+        if with_delegate {
+            if let Some(d) = &self.paid_by {
+                req = req.set("x-paid-by", d);
+            }
+        }
+        match req.send_bytes(item) {
+            Ok(r) => {
+                let status = r.status();
+                // 202 = in-flight duplicate: EMPTY body, no `id`. Parsing it as
+                // JSON is what turned a successful upload into `Unparseable`.
+                if status == 202 || status == 201 {
+                    return Ok(Ok((local_id.to_string(), None)));
+                }
+                let body: serde_json::Value = r
+                    .into_json()
+                    .map_err(|e| RailError::Unparseable(format!("bundler response: {e}")))?;
+                let remote_id = body
+                    .get("id")
+                    .and_then(serde_json::Value::as_str)
+                    .ok_or_else(|| RailError::Unparseable(body.to_string()))?;
+                if remote_id != local_id {
+                    return Err(RailError::AddressMismatch {
+                        local: local_id.to_string(),
+                        remote: remote_id.to_string(),
+                    });
+                }
+                let winc = body
+                    .get("winc")
+                    .and_then(serde_json::Value::as_str)
+                    .map(str::to_string);
+                Ok(Ok((local_id.to_string(), winc)))
+            }
+            Err(ureq::Error::Status(status, r)) => {
+                let reason = r.status_text().to_string();
+                let body = r.into_string().unwrap_or_default();
+                let detail = if body.trim().is_empty() {
+                    reason
+                } else {
+                    body.chars().take(300).collect()
+                };
+                Ok(Err((status, detail)))
+            }
+            Err(e) => Err(RailError::Transport(e.to_string())),
+        }
     }
 
     /// Build + sign one ANS-104 DataItem. Returns `(id, bytes)`.
@@ -191,36 +316,60 @@ impl Rail for ArweaveRail {
 
     fn put(&mut self, bytes: &[u8], tags: &[(String, String)]) -> Result<String, RailError> {
         let (local_id, item) = self.data_item(bytes, tags)?;
-        let url = format!("{}/v1/tx", self.bundler);
-        let resp = self
-            .agent
-            .post(&url)
-            .set("Content-Type", "application/octet-stream")
-            .send_bytes(&item);
-        match resp {
-            Ok(r) => {
-                let body: serde_json::Value = r
-                    .into_json()
-                    .map_err(|e| RailError::Unparseable(format!("bundler response: {e}")))?;
-                let remote_id = body
-                    .get("id")
-                    .and_then(serde_json::Value::as_str)
-                    .ok_or_else(|| RailError::Unparseable(body.to_string()))?;
-                if remote_id != local_id {
-                    return Err(RailError::AddressMismatch {
-                        local: local_id,
-                        remote: remote_id.to_string(),
-                    });
+        let item_bytes = item.len(); // what Turbo meters: Content-Length, not payload
+        let mut delegate_tried = false;
+        let mut last: Option<RailError> = None;
+
+        for attempt in 0..MAX_ATTEMPTS {
+            let use_delegate = delegate_tried;
+            match self.post_once(&item, &local_id, use_delegate)? {
+                Ok((id, winc)) => {
+                    self.last_winc = winc;
+                    return Ok(id);
                 }
-                Ok(local_id)
+                Err((status, detail)) => match classify(status) {
+                    Disposition::Accepted => {
+                        // post_once handles 2xx; reaching here means an
+                        // unrecognised success code carried an error shape.
+                        self.last_winc = None;
+                        return Ok(local_id);
+                    }
+                    Disposition::Payment => {
+                        // One route, one shot: the free check and the credit
+                        // reservation both already ran server-side. Only a
+                        // delegate can change the answer.
+                        if self.paid_by.is_some() && !delegate_tried {
+                            delegate_tried = true;
+                            continue; // retry immediately, carrying x-paid-by
+                        }
+                        return Err(RailError::PaymentRequired {
+                            item_bytes,
+                            delegate_tried,
+                        });
+                    }
+                    Disposition::Permanent => {
+                        return Err(RailError::Rejected {
+                            status,
+                            body: detail,
+                        })
+                    }
+                    Disposition::Retry => {
+                        last = Some(RailError::Rejected {
+                            status,
+                            body: detail,
+                        });
+                        if attempt + 1 < MAX_ATTEMPTS {
+                            std::thread::sleep(std::time::Duration::from_millis(backoff_ms(
+                                attempt,
+                            )));
+                        }
+                    }
+                },
             }
-            Err(ureq::Error::Status(status, r)) => {
-                let body = r.into_string().unwrap_or_default();
-                let body = body.chars().take(300).collect();
-                Err(RailError::Rejected { status, body })
-            }
-            Err(e) => Err(RailError::Transport(e.to_string())),
         }
+        Err(last.unwrap_or_else(|| {
+            RailError::Transport(format!("{MAX_ATTEMPTS} attempts exhausted with no response"))
+        }))
     }
 
     fn get(&self, address: &str) -> Result<Vec<u8>, RailError> {
@@ -338,6 +487,77 @@ fn b64url_nopad(data: &[u8]) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn status_202_is_success_not_a_parse_failure() {
+        // The live bug this patch fixes. Turbo returns 202 for an in-flight
+        // duplicate — the item IS accepted — with an EMPTY body and no `id`.
+        // The old code called into_json() on it and reported a successful
+        // upload as RailError::Unparseable. The SDK allowlists [200, 202].
+        assert_eq!(classify(202), Disposition::Accepted);
+        assert_eq!(classify(200), Disposition::Accepted);
+        assert_eq!(classify(201), Disposition::Accepted);
+    }
+
+    #[test]
+    fn only_402_is_a_payment_signal() {
+        // 402 is the ONLY money status. Turbo has one route: the free-tier
+        // short-circuit and the credit reservation both run inside POST /v1/tx,
+        // so 402 already means free missed AND credits missed.
+        assert_eq!(classify(402), Disposition::Payment);
+        // 429 is edge infrastructure — the upload service ships no rate
+        // limiter — so it must never be read as "out of credits".
+        assert_eq!(classify(429), Disposition::Retry);
+        for s in [400, 403, 404, 405, 413, 415] {
+            assert_eq!(classify(s), Disposition::Permanent, "HTTP {s}");
+        }
+    }
+
+    #[test]
+    fn server_errors_retry_and_client_errors_never_do() {
+        for s in [500, 502, 503, 504] {
+            assert_eq!(classify(s), Disposition::Retry, "HTTP {s}");
+        }
+        // 413 does not exist in the upload service (oversize is 400), so any
+        // 413 came from a proxy — and paying cannot shrink a payload.
+        assert_eq!(classify(413), Disposition::Permanent);
+        // Fail closed: an unrecognised status is never retried, never charged.
+        assert_eq!(classify(418), Disposition::Permanent);
+        assert_eq!(classify(499), Disposition::Permanent);
+    }
+
+    #[test]
+    fn backoff_matches_the_sdk_schedule() {
+        // turbo-sdk: min(1000 * 2^n, 30_000) → 1s, 2s, 4s, 8s, 16s.
+        assert_eq!(backoff_ms(0), 1_000);
+        assert_eq!(backoff_ms(1), 2_000);
+        assert_eq!(backoff_ms(2), 4_000);
+        assert_eq!(backoff_ms(3), 8_000);
+        assert_eq!(backoff_ms(4), 16_000);
+        // capped, and no overflow at absurd attempt counts
+        assert_eq!(backoff_ms(5), 30_000);
+        assert_eq!(backoff_ms(64), 30_000);
+        assert_eq!(backoff_ms(u32::MAX), 30_000);
+    }
+
+    #[test]
+    fn payment_required_says_retrying_will_not_help() {
+        // The error must not read like a transient failure: re-POSTing the
+        // same bytes after a 402 fails identically, forever.
+        let e = RailError::PaymentRequired {
+            item_bytes: 102_400,
+            delegate_tried: false,
+        };
+        let msg = e.to_string();
+        assert!(msg.contains("102400"), "{msg}");
+        assert!(msg.contains("will not help"), "{msg}");
+        let d = RailError::PaymentRequired {
+            item_bytes: 1,
+            delegate_tried: true,
+        }
+        .to_string();
+        assert!(d.contains("delegate"), "{d}");
+    }
 
     #[test]
     fn avro_tags_golden_bytes() {
