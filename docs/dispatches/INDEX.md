@@ -13,7 +13,7 @@ Last updated: 2026-08-07, at commit of this file.
 | `GO_ORDER_THREE_BUGS_2026-08-07.md` | Code | Go-order (3 fixes) | founder "go" — **GIVEN** | **OPEN — awaiting Code execution.** Each fix needs its named test (fail→pass), receipts pasted, all three land before any tokenomics constant | — |
 | `A1_LAYER1_AMENDMENT_2026-08-07.md` | Code | Spec amendment | founder "A1 go" — **GIVEN** | **LIFTED.** R8 Layer-1 rewritten to frozen-selection wording; collision closed on paper, register closes on Code's COURSE_SYNC | — |
 | `DISPATCH_CLAUDECODE_BDOMAIN_ADDENDUM_R8.md` | Code | Addendum | — | RAM receipt **COMPLETE** (commit 8840740); Layer-1 hold **LIFTED** by A1 | 8840740 |
-| `DISPATCH_CLAUDECODE_BNROSE_ADDENDUM_R7.md` | Code | Addendum | — | OPEN — awaiting Code | — |
+| `DISPATCH_CLAUDECODE_BNROSE_ADDENDUM_R7.md` | **Cowork** (reassigned from Code, founder word "INDEX row 4 → Cowork" 2026-08-07) | Addendum (spec skeletons) | — | **DRAFTED** — `SPEC-BNROSE-0-CHARTER.md` (Item A) + `SPEC-BNROSE-3-ETERNAL-DATA-ARCHIVAL.md` (Items B, C). Acceptance met for A/B/C draftable parts; cold-start-verifier + COURSE_SYNC owed to committing/Code seat | pending commit |
 | `FABLE_STANDING_LAWS_S2.md` | Fable/all | Standing laws | — | ADOPTED — CLAUDE.md §2 slot; ledger authoritative on conflict | — |
 | `ACK_COWORK_SEAT_2026-08-07.md` | Seat 0 | Seat ACK | — | FILED — Cowork seat wired, fences on record | 3f12c7d |
 
