@@ -10,8 +10,9 @@ Last updated: 2026-08-07, at commit of this file.
 
 | File | To | Kind | Gating word | Status | Receipt |
 |---|---|---|---|---|---|
-| `GO_ORDER_THREE_BUGS_2026-08-07.md` | Code | Go-order (3 fixes) | founder "go" — **GIVEN** | **OPEN — awaiting Code execution.** Each fix needs its named test (fail→pass), receipts pasted, all three land before any tokenomics constant | — |
+| `GO_ORDER_THREE_BUGS_2026-08-07.md` | Code | Go-order (3 fixes) | founder "go" — **GIVEN** | **OPEN — awaiting Code execution.** Each fix needs its named test (fail→pass), receipts pasted, all three land before any tokenomics constant. **Bug #2 now has constitutional backing — `RULING_REPLAY_WORLD_A`: fail-closed refusal is canon, no replay lane.** These fixes lift the push hold (below) | — |
 | `A1_LAYER1_AMENDMENT_2026-08-07.md` | Code | Spec amendment | founder "A1 go" — **GIVEN** | **LIFTED.** R8 Layer-1 rewritten to frozen-selection wording; collision closed on paper, register closes on Code's COURSE_SYNC | — |
+| `RULING_REPLAY_WORLD_A_2026-08-07.md` | Code | **Constitutional ruling** | founder "World A" — **GIVEN** | **CANON.** Forward-only time; backdated/out-of-order `EmissionMinted` refused always; no replay lane. Backs go-order bug #2 (`first_minted_at`) — Code's fail-closed refusal is now constitutional, not just a bug fix. **Closes the last open escalation (bug 2, 70f812b)** | committed here |
 | `DISPATCH_CLAUDECODE_BDOMAIN_ADDENDUM_R8.md` | Code | Addendum | — | RAM receipt **COMPLETE** (commit 8840740); Layer-1 hold **LIFTED** by A1 | 8840740 |
 | `DISPATCH_CLAUDECODE_BNROSE_ADDENDUM_R7.md` | **Cowork** (reassigned from Code, founder word "INDEX row 4 → Cowork" 2026-08-07) | Addendum (spec skeletons) | — | **DRAFTED** — `SPEC-BNROSE-0-CHARTER.md` (Item A) + `SPEC-BNROSE-3-ETERNAL-DATA-ARCHIVAL.md` (Items B, C). Acceptance met for A/B/C draftable parts; cold-start-verifier + COURSE_SYNC owed to committing/Code seat | pending commit |
 | `FABLE_STANDING_LAWS_S2.md` | Fable/all | Standing laws | — | ADOPTED — CLAUDE.md §2 slot; ledger authoritative on conflict | — |
