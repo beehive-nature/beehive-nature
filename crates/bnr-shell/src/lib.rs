@@ -24,7 +24,7 @@
 
 #![forbid(unsafe_code)]
 
-use b_token::{Amount, BLedger};
+use b_token::{Amount, BLedger, MintGate};
 use capability::Did;
 use denomination::{BGauge, Hud, HudRefusal, SurfaceKind};
 
@@ -148,21 +148,20 @@ pub mod dependency {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use b_token::{AcceptNonEmptyProof, ResourceProof};
+    use b_token::{ResourceProof};
     use denomination::{CurrencyId, Money};
 
     fn did(s: &str) -> Did {
         Did::new(s)
     }
     fn funded(who: &Did, amt: Amount) -> BLedger {
-        let mut l = BLedger::new();
+        let mut l = BLedger::with_gate(MintGate::AcceptNonEmptyEvidence);
         l.mint(
             who,
             amt,
             &ResourceProof {
                 evidence_ref: "seed".into(),
             },
-            &AcceptNonEmptyProof,
             1_700_000_000,
         )
         .unwrap();

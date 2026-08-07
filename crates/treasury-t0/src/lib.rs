@@ -58,7 +58,7 @@
 
 use std::collections::BTreeSet;
 
-use b_token::{Amount, BLedger, LedgerError};
+use b_token::{Amount, BLedger, LedgerError, MintGate};
 use capability::Did;
 use serde::{Deserialize, Serialize};
 use shared_types::{Evidence, ViewGrade};
@@ -506,7 +506,7 @@ pub mod dependency {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use b_token::{AcceptNonEmptyProof, ResourceProof, RespectBook, UnlockParams};
+    use b_token::{ResourceProof, RespectBook, UnlockParams};
     use shared_types::Provenance;
 
     fn did(s: &str) -> Did {
@@ -526,9 +526,9 @@ mod tests {
     /// phase-1 funding: liquid balance `bal`, minted-to-date drawn far above it (caps do not bind)
     /// and a mature genesis (age 8 at NOW), so these tests exercise the spendable gate.
     fn funded(who: &Did, bal: Amount) -> BLedger {
-        let mut l = BLedger::new();
+        let mut l = BLedger::with_gate(MintGate::AcceptNonEmptyEvidence);
         let minted = bal.saturating_mul(100).max(100);
-        l.mint(who, minted, &proof(), &AcceptNonEmptyProof, genesis_for(8))
+        l.mint(who, minted, &proof(), genesis_for(8))
             .unwrap();
         l.burn(who, minted - bal).unwrap();
         l
@@ -536,12 +536,11 @@ mod tests {
     /// phase-2 funding: minted exactly `amt` (== balance) at a genesis giving `age_years` at NOW,
     /// to exercise the caps against a known base and a known (derived) age.
     fn minted_at_age(who: &Did, amt: Amount, age_years: i64) -> BLedger {
-        let mut l = BLedger::new();
+        let mut l = BLedger::with_gate(MintGate::AcceptNonEmptyEvidence);
         l.mint(
             who,
             amt,
             &proof(),
-            &AcceptNonEmptyProof,
             genesis_for(age_years),
         )
         .unwrap();

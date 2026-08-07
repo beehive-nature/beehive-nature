@@ -41,6 +41,10 @@ pub enum LedgerError {
     InsufficientReserved { reserved: Amount, need: Amount },
     /// A proof of resource contribution did not verify (mint refused).
     UnprovenMint,
+    /// The emission witness time precedes one this ledger has already accepted.
+    /// Genesis is the anchor a higher crate derives "time in system" from, so a
+    /// mint that moves it earlier manufactures tenure. Refused, never clamped.
+    BackdatedMint { at: i64, watermark: i64 },
 }
 
 impl std::fmt::Display for LedgerError {
@@ -53,6 +57,11 @@ impl std::fmt::Display for LedgerError {
                 write!(f, "cannot unreserve {need}: only {reserved} reserved")
             }
             LedgerError::UnprovenMint => write!(f, "resource proof did not verify; mint refused"),
+            LedgerError::BackdatedMint { at, watermark } => write!(
+                f,
+                "mint witness time {at} precedes the ledger watermark {watermark}; \
+                 genesis is not backdatable"
+            ),
         }
     }
 }
@@ -67,6 +76,11 @@ impl std::error::Error for LedgerError {}
 /// hold placed by a higher crate (e.g. a `treasury-t0` lien) cannot be spent out from under —
 /// from any crate, present or future. `reserved` is **purpose-blind**: the ledger records *that*
 /// `b` is held, never *why*. The dependency edge stays downward (Article III Rule 4).
+/// The proof gate is **ledger state chosen at construction, not a call argument**, so it
+/// shows up in a diff at one greppable place and a caller cannot hand in a permissive one
+/// at the point of minting. It defaults to [`MintGate::Refuse`], so a ledger built without
+/// an explicit decision — including one deserialised from bytes that omit the field —
+/// mints nothing.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct BLedger {
     balances: BTreeMap<Did, Amount>,
@@ -79,15 +93,44 @@ pub struct BLedger {
     #[serde(default)]
     minted_to_date: BTreeMap<Did, Amount>,
     /// The witness time (unix seconds) of a DID's **first** mint — its `EmissionMinted` genesis
-    /// on the bus. Settles to the earliest and never moves later. This is the immutable anchor a
-    /// higher crate derives "time in system" from (RELAY_16): the thread supplies no age.
+    /// on the bus. **Write-once: the first accepted mint sets it and nothing moves it.** This is
+    /// the immutable anchor a higher crate derives "time in system" from (RELAY_16): the thread
+    /// supplies no age. It previously settled to the *minimum* `at` seen, which is how one extra
+    /// mint of one atomic unit could manufacture twenty years of tenure.
     #[serde(default)]
     first_minted_at: BTreeMap<Did, i64>,
+    /// Highest emission witness time this ledger has ever accepted. `mint` refuses any
+    /// `at` below it, so genesis moves forward with the bus and never backwards.
+    #[serde(default)]
+    genesis_watermark: Option<i64>,
+    /// The proof gate. Absent from older serialised ledgers, so it defaults to `Refuse`.
+    #[serde(default)]
+    gate: MintGate,
 }
 
 impl BLedger {
+    /// A ledger that mints nothing. Choosing a gate is [`BLedger::with_gate`] — an
+    /// explicit, greppable act, not a default anyone inherits by accident.
     pub fn new() -> Self {
         Self::default()
+    }
+
+    /// Build a ledger with `gate` as its proof gate for its whole life.
+    pub fn with_gate(gate: MintGate) -> Self {
+        BLedger {
+            gate,
+            ..Self::default()
+        }
+    }
+
+    /// The gate this ledger mints under.
+    pub fn gate(&self) -> MintGate {
+        self.gate
+    }
+
+    /// The highest emission witness time accepted so far, if any mint has landed.
+    pub fn genesis_watermark(&self) -> Option<i64> {
+        self.genesis_watermark
     }
 
     pub fn balance_of(&self, who: &Did) -> Amount {
@@ -109,23 +152,31 @@ impl BLedger {
         who: &Did,
         amount: Amount,
         proof: &ResourceProof,
-        verifier: &dyn ProofVerifier,
         at: i64,
     ) -> Result<(), LedgerError> {
-        if !verifier.verify(proof) {
+        // The gate is the ledger's own, fixed at construction. There is no parameter
+        // here for a caller to satisfy it with.
+        if !self.gate.admits(proof) {
             return Err(LedgerError::UnprovenMint);
         }
+        // Genesis moves forward with the bus, never backwards. Refused, not clamped:
+        // silently taking the minimum is what let a later mint rewrite tenure.
+        if let Some(w) = self.genesis_watermark {
+            if at < w {
+                return Err(LedgerError::BackdatedMint { at, watermark: w });
+            }
+        }
+        self.genesis_watermark = Some(at);
         let e = self.balances.entry(who.clone()).or_insert(0);
         *e = e.saturating_add(amount);
         // EmissionMinted is settlement-class; the per-DID mint total is its cache. Monotonic:
         // this is the ONLY place minted-to-date rises, and nothing lowers it.
         let m = self.minted_to_date.entry(who.clone()).or_insert(0);
         *m = m.saturating_add(amount);
-        // The genesis anchor: the EARLIEST mint witness time, settled once and never moved later.
-        self.first_minted_at
-            .entry(who.clone())
-            .and_modify(|t| *t = (*t).min(at))
-            .or_insert(at);
+        // The genesis anchor: WRITE-ONCE. The previous `.and_modify(|t| *t = (*t).min(at))`
+        // meant any later mint carrying an earlier `at` rewrote it, so one extra mint of a
+        // single atomic unit could move a DID's "time in system" back two decades.
+        self.first_minted_at.entry(who.clone()).or_insert(at);
         Ok(())
     }
 
@@ -286,9 +337,50 @@ pub trait ProofVerifier {
     fn verify(&self, proof: &ResourceProof) -> bool;
 }
 
+/// Which proof gate a [`BLedger`] mints under — **its own state, set once at
+/// construction.** A closed enum rather than an injected trait object, so the set of
+/// gates that exist anywhere is enumerable at a glance and a caller has no argument
+/// position through which to supply one.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MintGate {
+    /// Refuses every proof. The default, including for a ledger deserialised from
+    /// bytes that predate this field.
+    #[default]
+    Refuse,
+    /// Dev/test gate: admits any non-empty evidence reference. NOT production —
+    /// reaching it requires writing `BLedger::with_gate(MintGate::AcceptNonEmptyEvidence)`,
+    /// one greppable line where the ledger is built.
+    AcceptNonEmptyEvidence,
+}
+
+impl MintGate {
+    fn admits(self, proof: &ResourceProof) -> bool {
+        match self {
+            MintGate::Refuse => RefusingVerifier.verify(proof),
+            MintGate::AcceptNonEmptyEvidence => AcceptNonEmptyProof.verify(proof),
+        }
+    }
+}
+
+/// The verifier behind [`MintGate::Refuse`]: refuses every proof. Real verification is
+/// adapter work and lands as its own `ProofVerifier` plus a `MintGate` variant.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct RefusingVerifier;
+
+impl ProofVerifier for RefusingVerifier {
+    fn verify(&self, _proof: &ResourceProof) -> bool {
+        false
+    }
+}
+
 /// Test/dev verifier that accepts any non-empty evidence reference. NOT for
 /// production — a real verifier checks the evidence against the kernel.
-#[derive(Debug, Default)]
+///
+/// Deliberately **not** `#[cfg]`-gated: gating it would break three dependent crates,
+/// which is outside the GO order's scope fence. Reaching it now requires writing
+/// `BLedger::with_gate(MintGate::AcceptNonEmptyEvidence)` — one greppable line at construction,
+/// which is what the fix is for. Gating it is a candidate for its own dispatch.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub struct AcceptNonEmptyProof;
 
 impl ProofVerifier for AcceptNonEmptyProof {
@@ -314,27 +406,93 @@ mod tests {
     /// A fixed mint witness time for tests not concerned with genesis timing.
     const AT: i64 = 1_700_000_000;
 
+    /// A ledger whose gate accepts non-empty evidence — the shape most tests want.
+    fn dev_ledger() -> BLedger {
+        BLedger::with_gate(MintGate::AcceptNonEmptyEvidence)
+    }
+
+    // ── GO_ORDER_THREE_BUGS_2026-08-07 · guards ──────────────────────────────
+    // Each replaces an exploit test that PASSED against the pre-fix code. The
+    // exploit output is in the receipt; these are what stand watch now.
+
+    #[test]
+    fn genesis_cannot_be_backdated() {
+        // BUG 2. Was: `first_minted_at` took `(*t).min(at)`, so ANY later mint with an
+        // earlier `at` rewrote genesis — one extra mint of a single atomic unit moved a
+        // DID's "time in system" back twenty years. Now: refused at the watermark, and
+        // the anchor is write-once so it could not move even if the mint were allowed.
+        let mut l = dev_ledger();
+        let a = did("did:autonomi:a");
+        const TWENTY_YEARS: i64 = 20 * 365 * 24 * 3600;
+
+        l.mint(&a, 1, &proof("honest"), AT).unwrap();
+        assert_eq!(l.first_minted_at_of(&a), Some(AT));
+
+        assert_eq!(
+            l.mint(&a, 1, &proof("backdated"), AT - TWENTY_YEARS),
+            Err(LedgerError::BackdatedMint {
+                at: AT - TWENTY_YEARS,
+                watermark: AT
+            })
+        );
+        assert_eq!(l.first_minted_at_of(&a), Some(AT), "anchor did not move");
+        assert_eq!(l.balance_of(&a), 1, "the backdated mint did not land either");
+
+        // Forward is fine, and does not disturb the anchor.
+        l.mint(&a, 1, &proof("later"), AT + 60).unwrap();
+        assert_eq!(l.first_minted_at_of(&a), Some(AT));
+        assert_eq!(l.genesis_watermark(), Some(AT + 60));
+    }
+
+    #[test]
+    fn mint_gate_is_not_caller_supplied() {
+        // BUG 3. Was: `mint` took `verifier: &dyn ProofVerifier` from the caller, so the
+        // calling crate supplied the invariant meant to constrain it — pass anything that
+        // returns true and mint 420e18 against empty evidence. Now the gate is a type
+        // parameter fixed at construction; there is no argument to satisfy it with.
+        let mut l = BLedger::new(); // default gate
+        let a = did("did:autonomi:a");
+        assert_eq!(
+            l.mint(&a, 420_000_000_000_000_000_000, &proof("looks-fine"), AT),
+            Err(LedgerError::UnprovenMint),
+            "a ledger built without an explicit gate mints nothing"
+        );
+        assert_eq!(l.balance_of(&a), 0);
+
+        // A ledger deserialised from bytes that predate the gate field comes back
+        // refusing, not permissive — `#[serde(default)]` over `MintGate::Refuse`. An
+        // older ledger restored into newer code does not silently acquire a gate.
+        let legacy = r#"{"balances":{"did:autonomi:a":10},"reserved":{},
+                         "minted_to_date":{"did:autonomi:a":10},
+                         "first_minted_at":{"did:autonomi:a":1700000000}}"#;
+        let mut restored: BLedger = serde_json::from_str(legacy).unwrap();
+        assert_eq!(restored.balance_of(&a), 10, "balances survive");
+        assert_eq!(restored.gate(), MintGate::Refuse, "and the gate fails closed");
+        assert_eq!(
+            restored.mint(&a, 1, &proof("e"), AT + 1),
+            Err(LedgerError::UnprovenMint)
+        );
+    }
+
     #[test]
     fn b_mints_only_on_a_verified_proof() {
-        let mut l = BLedger::new();
-        let v = AcceptNonEmptyProof;
+        let mut l = dev_ledger();
         // empty evidence → unproven → refused
         assert_eq!(
-            l.mint(&did("did:autonomi:a"), 500, &proof(""), &v, AT),
+            l.mint(&did("did:autonomi:a"), 500, &proof(""), AT),
             Err(LedgerError::UnprovenMint)
         );
         assert_eq!(l.balance_of(&did("did:autonomi:a")), 0);
         // valid proof → minted
-        l.mint(&did("did:autonomi:a"), 500, &proof("evidence-1"), &v, AT)
+        l.mint(&did("did:autonomi:a"), 500, &proof("evidence-1"), AT)
             .unwrap();
         assert_eq!(l.balance_of(&did("did:autonomi:a")), 500);
     }
 
     #[test]
     fn b_burns_on_use_and_guards_balance() {
-        let mut l = BLedger::new();
-        let v = AcceptNonEmptyProof;
-        l.mint(&did("did:autonomi:a"), 100, &proof("e"), &v, AT)
+        let mut l = dev_ledger();
+        l.mint(&did("did:autonomi:a"), 100, &proof("e"), AT)
             .unwrap();
         l.burn(&did("did:autonomi:a"), 40).unwrap();
         assert_eq!(l.balance_of(&did("did:autonomi:a")), 60);
@@ -346,9 +504,8 @@ mod tests {
 
     #[test]
     fn b_is_transferable() {
-        let mut l = BLedger::new();
-        let v = AcceptNonEmptyProof;
-        l.mint(&did("did:autonomi:a"), 100, &proof("e"), &v, AT)
+        let mut l = dev_ledger();
+        l.mint(&did("did:autonomi:a"), 100, &proof("e"), AT)
             .unwrap();
         l.transfer(&did("did:autonomi:a"), &did("did:autonomi:b"), 30)
             .unwrap();
@@ -396,11 +553,12 @@ mod tests {
 
     #[test]
     fn ledger_roundtrips_through_json() {
-        let mut l = BLedger::new();
-        let v = AcceptNonEmptyProof;
-        l.mint(&did("did:autonomi:a"), 100, &proof("e"), &v, AT)
+        let mut l = dev_ledger();
+        l.mint(&did("did:autonomi:a"), 100, &proof("e"), AT)
             .unwrap();
         let json = serde_json::to_string(&l).unwrap();
+        // The gate rides along as ordinary state; what matters for this test is that the
+        // accounting fields survive intact.
         let back: BLedger = serde_json::from_str(&json).unwrap();
         assert_eq!(l, back);
     }
@@ -409,11 +567,10 @@ mod tests {
 
     #[test]
     fn reserved_b_is_held_and_no_spend_can_touch_it() {
-        let mut l = BLedger::new();
-        let v = AcceptNonEmptyProof;
+        let mut l = dev_ledger();
         let a = did("did:autonomi:a");
         let b = did("did:autonomi:b");
-        l.mint(&a, 100, &proof("e"), &v, AT).unwrap();
+        l.mint(&a, 100, &proof("e"), AT).unwrap();
         l.reserve(&a, 60).unwrap();
         assert_eq!(l.spendable_of(&a), 40);
         assert_eq!(
@@ -456,14 +613,13 @@ mod tests {
         // minted_to_date is the per-DID cache of EmissionMinted; the log here is the mint
         // sequence. The counter must equal the replay-sum and never fall — burning, transferring,
         // reserving, or an unproven mint must not change it.
-        let mut l = BLedger::new();
-        let v = AcceptNonEmptyProof;
+        let mut l = dev_ledger();
         let a = did("did:autonomi:a");
         let b = did("did:autonomi:b");
         let log = [(&a, 100u128), (&b, 50), (&a, 25), (&a, 75), (&b, 10)];
         let mut replay: BTreeMap<Did, Amount> = BTreeMap::new();
         for (who, amt) in log {
-            l.mint(who, amt, &proof("e"), &v, AT).unwrap();
+            l.mint(who, amt, &proof("e"), AT).unwrap();
             *replay.entry((*who).clone()).or_insert(0) += amt;
         }
         // counter == replay-sum, per DID.
@@ -492,7 +648,7 @@ mod tests {
             "a gift raises balance, never the base"
         );
         // an unproven mint raises nothing.
-        let _ = l.mint(&a, 999, &proof(""), &v, AT);
+        let _ = l.mint(&a, 999, &proof(""), AT);
         assert_eq!(
             l.minted_to_date_of(&a),
             200,
@@ -501,35 +657,48 @@ mod tests {
     }
 
     #[test]
-    fn first_minted_at_settles_to_the_earliest_emission_and_never_moves() {
-        // The genesis anchor (RELAY_16, corrected): the DID's FIRST EmissionMinted witness time.
-        // It equals the minimum mint timestamp — even if mints arrive out of order — and no later
-        // mint, burn, or transfer moves it.
-        let mut l = BLedger::new();
-        let v = AcceptNonEmptyProof;
+    fn first_minted_at_is_write_once_and_nothing_moves_it() {
+        // The genesis anchor: the DID's FIRST EmissionMinted witness time, WRITE-ONCE.
+        //
+        // CHANGED by GO_ORDER_THREE_BUGS_2026-08-07. This test previously asserted that
+        // "an EARLIER mint (out-of-order replay) settles it back to the true earliest"
+        // and that "genesis is the minimum, not the first call". That rule and the
+        // backdating vector are the SAME mechanism: taking the minimum is exactly how a
+        // caller manufactures twenty years of tenure with one extra mint of one atomic
+        // unit. The rule is recorded here rather than deleted, because the out-of-order
+        // replay case it was written for is real and is ESCALATED, not resolved — see the
+        // receipt. Refusal fails closed: a rejected replay surfaces as an error someone
+        // can look at, where silent minimum-taking surfaced as nothing.
+        let mut l = dev_ledger();
         let a = did("did:autonomi:a");
         assert_eq!(l.first_minted_at_of(&a), None, "no mint, no genesis");
-        l.mint(&a, 100, &proof("e"), &v, 5_000).unwrap();
+        l.mint(&a, 100, &proof("e"), 5_000).unwrap();
         assert_eq!(l.first_minted_at_of(&a), Some(5_000));
         // a later mint does not move the genesis forward.
-        l.mint(&a, 50, &proof("e"), &v, 9_000).unwrap();
+        l.mint(&a, 50, &proof("e"), 9_000).unwrap();
         assert_eq!(
             l.first_minted_at_of(&a),
             Some(5_000),
             "a later mint never moves genesis"
         );
-        // an EARLIER mint (out-of-order replay) settles it back to the true earliest.
-        l.mint(&a, 10, &proof("e"), &v, 2_000).unwrap();
+        // an EARLIER mint is now REFUSED rather than silently rewriting the anchor.
+        assert_eq!(
+            l.mint(&a, 10, &proof("e"), 2_000),
+            Err(LedgerError::BackdatedMint {
+                at: 2_000,
+                watermark: 9_000
+            })
+        );
         assert_eq!(
             l.first_minted_at_of(&a),
-            Some(2_000),
-            "genesis is the minimum, not the first call"
+            Some(5_000),
+            "genesis is the first call, and it did not move"
         );
         // spending does not touch it.
         l.burn(&a, 20).unwrap();
         assert_eq!(
             l.first_minted_at_of(&a),
-            Some(2_000),
+            Some(5_000),
             "burning never moves genesis"
         );
     }

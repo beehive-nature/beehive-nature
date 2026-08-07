@@ -19,7 +19,7 @@
 
 #![forbid(unsafe_code)]
 
-use b_token::{Amount, BLedger};
+use b_token::{Amount, BLedger, MintGate};
 use capability::Did;
 use reputation_engine::ReputationScore;
 use serde::{Deserialize, Serialize};
@@ -206,7 +206,7 @@ impl Dashboard {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use b_token::{AcceptNonEmptyProof, ResourceProof};
+    use b_token::{ResourceProof};
     use reputation_engine::{compute, ReputationInput};
 
     const NOW: i64 = 2_000_000_000;
@@ -217,14 +217,13 @@ mod tests {
     }
     /// Mint `amt` to `who` at a genesis giving age 8 (mature) as of NOW.
     fn funded(who: &Did, amt: Amount) -> BLedger {
-        let mut l = BLedger::new();
+        let mut l = BLedger::with_gate(MintGate::AcceptNonEmptyEvidence);
         l.mint(
             who,
             amt,
             &ResourceProof {
                 evidence_ref: "seed".into(),
             },
-            &AcceptNonEmptyProof,
             NOW - 8 * YEAR,
         )
         .unwrap();
