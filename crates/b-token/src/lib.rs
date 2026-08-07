@@ -160,7 +160,10 @@ impl BLedger {
             return Err(LedgerError::UnprovenMint);
         }
         // Genesis moves forward with the bus, never backwards. Refused, not clamped:
-        // silently taking the minimum is what let a later mint rewrite tenure.
+        // silently taking the minimum is what let a later mint rewrite tenure. Founder
+        // ruling 2026-08-05 (World A): time never moves backward here, so an earlier `at`
+        // is a violation of the bTiMeLiNe keystone rather than a replay to accommodate.
+        // There is deliberately no legitimate-replay lane — see the test for the wording.
         if let Some(w) = self.genesis_watermark {
             if at < w {
                 return Err(LedgerError::BackdatedMint { at, watermark: w });
@@ -665,10 +668,18 @@ mod tests {
         // and that "genesis is the minimum, not the first call". That rule and the
         // backdating vector are the SAME mechanism: taking the minimum is exactly how a
         // caller manufactures twenty years of tenure with one extra mint of one atomic
-        // unit. The rule is recorded here rather than deleted, because the out-of-order
-        // replay case it was written for is real and is ESCALATED, not resolved — see the
-        // receipt. Refusal fails closed: a rejected replay surfaces as an error someone
-        // can look at, where silent minimum-taking surfaced as nothing.
+        // unit. The old rule is recorded here rather than deleted.
+        //
+        // FOUNDER RULING 2026-08-05 (World A, chronological) — the escalation this seat
+        // raised is CLOSED: "b records identity tenure chronologically, forward-only; time
+        // never moves backward. An EmissionMinted claiming an earlier start than what is
+        // recorded is refused, always — it is not a legitimate replay, it is a violation of
+        // the bTiMeLiNe keystone. No replay lane is built; building one would put a door in
+        // the one wall that must have none."
+        //
+        // So backdating and "out-of-order arrival" are the same thing wearing different
+        // clothes, and both are what an eternally-forward runtime must reject. The refusal
+        // is not a conservative default awaiting a better answer — it enforces the keystone.
         let mut l = dev_ledger();
         let a = did("did:autonomi:a");
         assert_eq!(l.first_minted_at_of(&a), None, "no mint, no genesis");
