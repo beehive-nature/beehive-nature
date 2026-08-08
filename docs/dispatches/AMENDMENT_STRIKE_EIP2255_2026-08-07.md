@@ -38,6 +38,29 @@ Both are Seat 0 ruled text and are **left verbatim**; each now carries a pointer
 amendment. The rulings' *substance* (scoped delegation is the shape) survives intact —
 only the named mechanism was wrong.
 
+> **⛔ SECTION REFUTED 2026-08-08 — the finite-allowance claim below is DEAD.**
+> goose's source read (`ant-client` pinned `81a0a24`) refutes it: **ant-core's only public
+> wrapper, `approve_token_spend()`, hardcodes `U256::MAX`** (`payment.rs:141`; the doc
+> comment at `:130` reads *"Approves U256::MAX (unlimited) spending"*). **Both paths are
+> unlimited** — the finite-vs-merkle distinction this section rests on **does not exist as
+> shipped.** Confirmed independently by Code's self-attack: an agent holding the wallet's
+> signing authority can simply call `approve_token_spend()` again and re-approve to MAX, so
+> a binding ceiling needs **both** custom finite-amount code **and** a re-approval guard —
+> **neither ships.**
+> **SURVIVES:** the **external-signer seam is real** (`mod.rs:453`, *"private key lives
+> outside Rust"*; `alloy = "1"` in `ant-protocol`). Keys **can** live outside the process.
+> That is the piece to build on — and it is the only piece.
+> **Consequence:** the Stage-2 `pay` verb has **no verified custody mechanism.** That is now
+> a receipt, not a caution. Text below is preserved unedited as the record of a refuted
+> recommendation (promote-don't-erase); **do not build against it.**
+>
+> **Also UNRESOLVED, not killed:** the ERC-7710 / ERC-7715 status named in this amendment.
+> ERCs were **split out of `ethereum/EIPs` into `github.com/ethereum/ERCs`** — a 404 in the
+> old repo is consistent with the split, not with non-existence. Recheck `ERCS/erc-7710.md`
+> and `ERCS/erc-7715.md` **there** before any verdict enters the law book. **If that recheck
+> fails, this amendment needs a second correction, because it names ERC-7710 as the real
+> primitive.** (goose's item.)
+
 ## AUTONOMI CUSTODY — the way through is NOT the framework
 
 Recorded here because it resolves the `pay`-verb blocker the same day the primitive was

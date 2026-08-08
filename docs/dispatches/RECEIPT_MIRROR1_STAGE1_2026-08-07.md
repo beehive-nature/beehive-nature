@@ -124,10 +124,50 @@ git tag -a mirror-pin-02f640bc 02f640bc4559c48ac0c2ec595ef34dd2c294b0db \
 git push origin mirror-pin-02f640bc
 ```
 
-Cowork cannot create the tag — no GitHub write tools in this non-interactive session
-(twice confirmed). Founder or a seat with live tools runs the above; then the pin is a ref
-in the repo, not a sentence in a file, and Stage 1's mirror-by-law obligation is satisfied
-by construction rather than by claim.
+## ✅ PIN ENFORCED — tag created and pushed (Cowork, 2026-08-08)
+
+Founder ordered clone-and-tag; **no GitHub connector was needed** — plain git over HTTPS.
+Executed and verified end to end:
+
+```
+$ git tag -a mirror-pin-02f640bc 02f640bc4559c48ac0c2ec595ef34dd2c294b0db \
+    -m "MIRROR-1 pin: upstream block/buzz main HEAD at L-VERIFY 2026-08-07"
+$ git push origin mirror-pin-02f640bc
+To https://github.com/skaists/buzz
+ * [new tag]  mirror-pin-02f640bc -> mirror-pin-02f640bc
+
+$ git ls-remote --tags origin
+1b70b05d6f621e267164f4517243e7fe0035f992  refs/tags/mirror-pin-02f640bc
+02f640bc4559c48ac0c2ec595ef34dd2c294b0db  refs/tags/mirror-pin-02f640bc^{}   ← peels to the pin
+```
+
+`1b70b05d…` is the **annotated tag object**; the peeled ref `^{}` resolves to
+**`02f640bc…`**, the intended pin. Checked on the remote, not just locally — the pin is now
+enforced by a ref in the repo rather than asserted in README prose. **Mirror-by-law
+satisfied by construction.**
+
+**Tagger identity:** `Claude Cowork <noreply@anthropic.com>`, set **local to a throwaway
+clone only** — no global git config touched, and no machine seat signing under the
+founder's identity (ORDERS-1 law 7 discipline). Re-tag under a founder identity any time if
+preferred.
+
+### Inference from 2026-08-08 — now CLOSED by local verification
+The earlier parent-link check was rate-limited by the unauthenticated GitHub API. The clone
+answered it without authentication:
+
+```
+$ git log --oneline --first-parent -3 60dbdaaf
+60dbdaaf Update README with project and license details      ← founder's mirror-by-law edit
+02f640bc feat(desktop): unify add agent flows (#5015)         ← THE PIN
+c7b66368 fix(buzz-agent): budget summarizer reasoning separately…
+
+$ git rev-parse 60dbdaaf^1
+02f640bc4559c48ac0c2ec595ef34dd2c294b0db
+```
+
+**VERIFIED, no longer inferred:** the fork's HEAD is exactly one commit above the pin, and
+that commit is the README mirror-by-law edit. Upstream never drifted. **Stage 1 fully
+closed with the pin enforced.**
 
 **Standing instruction captured, ready to fire:** when a session has the live GitHub
 connector, fork `block/buzz` into the `beehive-nature` org **pinned at
