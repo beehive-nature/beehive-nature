@@ -115,7 +115,7 @@ appears in this document.**
 | Whether receipts are per-operation or per-epoch-batched | Cost and privacy tradeoff; unruled |
 | Signature / attestation over the receipt | Depends on the passkey succession question, explicitly still open |
 | On-chain vs off-chain receipt storage | Touches the multi-asset escrow and BNRoSe-3 archival decisions |
-| Privacy posture | A per-bDiD spend record is a behavioural trace; the multipersona ruling implies persona-scoping, but the receipt-visibility rule is **not** ruled |
+| Privacy posture | **SURFACED 2026-08-08** → [`dispatches/SURFACED_SPEND_RECEIPT_PRIVACY_2026-08-08.md`](./dispatches/SURFACED_SPEND_RECEIPT_PRIVACY_2026-08-08.md). Key reframing: rails already publish the individual spends, so the decision is about concealing the **linkage**, not the spends. Five options (public / private-revealable / aggregate-public-itemized-private / persona-scoped / delayed), awaiting founder ruling. **This schema is posture-agnostic — it serves any of them without a schema change.** |
 
 ## 6. Inherited invariants
 
