@@ -92,6 +92,15 @@ amendment stays small enough to read in full.
 
 ## Open question for the founder — which copy is the record of truth?
 
+> **RESOLVED 2026-08-07 — `RULING_REPO_IS_THE_RECORD` (Seat 0, King Bee).**
+> Founder's words: **"repo is the record."** `docs/ledger/` in the repo tree **IS** the
+> record of truth for raid rulings; the chat-Opus/Fable memory store is the **working
+> copy** — the drafting surface, never the authority. **On any disagreement, the repo
+> wins.** New rulings land as append-only deltas; no file is ever re-exported whole; the
+> sealed Q1–Q3 file is left alone. The question body below is preserved as the record of
+> what was asked (promote-don't-erase), not deleted.
+> Canonical ruling: [`../dispatches/RULING_REPO_IS_THE_RECORD_2026-08-07.md`](../dispatches/RULING_REPO_IS_THE_RECORD_2026-08-07.md).
+
 This directory is described as a *mirror*, which implies chat-Opus's memory store is upstream.
 That leaves a divergence hazard: if a ruling is appended to the store, this mirror is silently
 stale, and an agent reading the repo gets an incomplete record while believing it is complete.
