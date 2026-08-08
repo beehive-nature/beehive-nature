@@ -25,3 +25,17 @@ The escalation assumed the mirror agent was a keyless supplicant needing the fou
 3. **Earning→spending loop** — the node-operation revenue path per rail (ANT via Autonomi nodes, b via meshLLM RAM, b/$tithe via bAiGents), and how earned balances are held under a bDiD without any agent touching root key material.
 
 **Scope fence:** this rules the hierarchy and the authority axis. The tiering, attenuation mechanism, and earning loop are **research + options**, not seat design decisions. **Execute the prompt as written.**
+
+---
+> **⚠ AMENDMENT POINTER (appended 2026-08-07 by Cowork; ruled text above is unchanged).**
+> §4.2's named primitive — *"caveat-based delegation, the EIP-2255 fork"* — is **STRUCK**.
+> EIP-2255 is not a delegation/attenuation standard, no fork exists, and
+> `wallet_grantPermissions` was renamed. Real attenuation = **ERC-7710 redemption +
+> Delegation Manager enforcer set** (a caveat is a **contract address + calldata**, not a
+> JSON string). **ERC-7715 is human-gated by spec — do not use it**; ERC-7710 grants can be
+> signed programmatically. §1's "earn b by running nodes" is also bounded: only
+> **Autonomi/ANT** is a verified permissionless contribute-to-earn rail; Vaulta/A has none
+> (b issuance there is beehive-internal, not a chain rail).
+> **The ruling's substance — scoped delegation under a bDiD — survives; only the named
+> mechanism was wrong.** Do not write spec text against the old name.
+> See [`AMENDMENT_STRIKE_EIP2255_2026-08-07.md`](./AMENDMENT_STRIKE_EIP2255_2026-08-07.md).

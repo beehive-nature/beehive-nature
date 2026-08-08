@@ -18,6 +18,7 @@ Last updated: 2026-08-07, at commit of this file.
 | `RULING_B_SPEND_BOUNDARY_MULTIASSET_ESCROW_2026-08-07.md` | all seats | Ruling | Seat 0 | **CANON.** b spent ONLY where a function consumes physical resources (kernel/RAM/CPU/NET/DATA); A-first for MVP; "free at point of use" governs ACCESS not consumption. Escrow must be multi-asset/multi-rail. **b/A denominate as RESOURCE QUANTITIES, never fiat-pegged** | committed here |
 | `RULINGS_TESTNET_A_MVP_CUSTODY_2026-08-07.md` | all seats | Ruling | Seat 0 | **CANON.** TESTNET-FIRST standing law (nothing touches live before Vaulta testnet); MVP denominates in `A`; self-heal-to-10^10-users/1000-yr test reaffirmed. Autonomi custody reframe = research (scoped-delegation premise UNVERIFIED, cite-or-stop before any `pay`-verb spec) | committed here |
 | `RULING_REPO_IS_THE_RECORD_2026-08-07.md` | all seats | Ruling | Seat 0 | **CANON.** `docs/ledger/` in the tree IS record-of-truth; memory store is working copy; repo wins on conflict; append-only deltas, never re-export whole. **Cowork closed the ledger README open question this turn** | committed here |
+| `AMENDMENT_STRIKE_EIP2255_2026-08-07.md` | all seats | **Law-book amendment** | Seat 0 (on goose/Fable finding) | **IN FORCE.** EIP-2255 STRUCK as the named attenuation primitive (not a delegation standard, no fork exists, `wallet_grantPermissions` renamed). Real = **ERC-7710 + Delegation Manager enforcers**; caveat = contract address + calldata, not JSON. **ERC-7715 human-gated — do not use.** Autonomi seam = finite ERC-20 allowance + remote KMS signer (EOA, not 4337); **never the merkle path (≥64 chunks = infinite allowance)**. 3 blockers open: autonomi repo archived, gas unsolved, succession. Earning-loop bound: only ANT is a verified earn rail. Pointer notes appended to both citing rulings; ruled text left verbatim | committed here |
 | `RULING_CREDIT_FORMAT_2026-08-07.md` | Code / all | Ruling | Seat 0 | **CANON (answers Code §3).** `Co-authored-by: Claude Opus 5 <noreply@anthropic.com>` is compliant, keep it. `.social`/bDiD-handle credit + surgical-masthead titles are DIRECTION, not canon — no trailer change until bDiD handles are real and ruled | committed here |
 | `RULING_BIO1_V02_2026-08-07.md` · `RULING_COMMIT_ATTRIBUTION_2026-08-07.md` | Code / all | Rulings | Seat 0 | Landed to tree this turn (were couriered, uncommitted). BIO-1 execution commit still unverified from this seat (see push-state note) | committed here |
 | `DISPATCH_CLAUDECODE_BDOMAIN_ADDENDUM_R8.md` | Code | Addendum | — | RAM receipt **COMPLETE** (commit 8840740); Layer-1 hold **LIFTED** by A1 | 8840740 |
@@ -58,6 +59,23 @@ caller-supplied). Their doc descriptions are therefore publishable — fix has l
 it opens on Code's next fresh sitting against the Antelope contract. The docs describing
 bug 1's vector must not reach the PUBLIC remote (A52) ahead of its fix.
 
-**Release condition (single pin):** bug 1 lands tests-green in the same tree. Then the
-whole ~12-ahead range pushes in one clean flip and the cadence rule self-executes from
-that point on. No history surgery; concealing an open vuln is not a hands-seat move.
+**Release condition — SUPERSEDED 2026-08-07, and the seat holding the gate says so.**
+The old condition ("bug 1 lands tests-green") assumed bug 1's fix was a fee handler.
+**The fee verdict rejected that: NO fee on `.b`** — all five jobs fail, WAX's 81–85%
+collapse is the empirical case, and `renew` makes any `registeracc`-only fee decorative.
+Namespace bounding went to founder as a **menu** (per-bDiD cap / contested-name auction /
+expiry / structural off-chain). **So bug 1 no longer has a code fix pending — it has a
+founder design decision pending, and the old release condition can never be met as
+written.**
+
+**Current basis for lifting, verified by Cowork:**
+- Fable's "registration closed by policy" was **withdrawn** — goose is right, `registeracc`
+  carries `require_auth(registrant)` only, **no gate**. The vector is reachable.
+- Code's argument stands instead: **`beehive-nature/b-domain` is a PUBLIC repo** —
+  independently verified via GitHub API (`"private": false`, `"visibility": "public"`),
+  so the contract source is already world-readable.
+
+**Honest residual, stated once for the founder's word:** public *source* is not the same as
+a published *worked exploit analysis with magnitudes*, which is what the held docs contain,
+and registration is open. The gap is real but small, and it is a founder call, not a seat
+call. **Push remains HELD pending Seat 0's one word.** No history surgery either way.

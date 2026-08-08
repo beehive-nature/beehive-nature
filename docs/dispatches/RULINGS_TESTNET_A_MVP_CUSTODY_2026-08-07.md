@@ -22,3 +22,20 @@ Founder: *"is it a matter of cross-chain/atomic, or — since the ANT adapter ra
 - **If FALSE:** the honest fallback is a **scoped hot key with a hard spend ceiling + short rotation**, ruled explicitly as a named exception with its ceiling stated — never smuggled in as if it satisfied the standing law.
 
 **Scope fence:** verify the premise and report; do not spec the `pay` verb past it. **Execute the prompt as written.**
+
+---
+> **⚠ AMENDMENT POINTER (appended 2026-08-07 by Cowork; ruled text above is unchanged).**
+> §4's named primitive — *"caveat-based delegation, FORK EIP-2255"* — is **STRUCK**; no such
+> fork exists and EIP-2255 is not a delegation standard. Real attenuation = **ERC-7710 +
+> Delegation Manager enforcer set** (caveat = contract address + calldata). **ERC-7715 is
+> human-gated by spec — do not use it.**
+> **§4's UNVERIFIED premise is now ANSWERED, and the answer is not the framework:**
+> `approve_to_spend_tokens(spender, finite_amount)` sets a **finite ERC-20 allowance the
+> token contract enforces as a hard ceiling**; Autonomi accepts a **remote KMS/HSM signer**
+> (`alloy Arc<dyn TxSigner>`, AwsSigner shipped) — an **EOA-signing seam, not 4337**.
+> **HARD FENCE: never engage the merkle path (≥64 chunks) — it grants INFINITE allowance.**
+> **Still BLOCKING (no `pay`-verb spec past these):** `maidsafe/autonomi` **archived
+> 2026-05-22** (successor "WithAutonomi", external-signer survival UNVERIFIED); **gas
+> unsolved** (Arbitrum gas is ETH, agent earns ANT, no sponsorship); **succession** —
+> SUPERVISED = one named human, escalated to founder.
+> See [`AMENDMENT_STRIKE_EIP2255_2026-08-07.md`](./AMENDMENT_STRIKE_EIP2255_2026-08-07.md).
