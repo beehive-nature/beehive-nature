@@ -87,7 +87,47 @@ in one pass:
    `Mirror of block/buzz, pinned at upstream commit 02f640bc4559c48ac0c2ec595ef34dd2c294b0db. License: Apache-2.0 (LICENSE carried; upstream has no NOTICE, so Apache §4(d) is N/A).`
 3. Hand the mirror URL back; Cowork appends the one closing line below.
 
-**MIRROR-URL (Part B closing line — pending):** _not yet issued_
+**MIRROR-URL (Part B closing line):** **https://github.com/skaists/buzz** — founder forked
+manually 2026-08-08. Org is **`skaists`**, not `beehive-nature` as the dispatch named;
+founder's choice among his own orgs, recorded as-is and **not "corrected."** Verified by the
+research seat: public, `fork: true`, parent/network-root `block/buzz`, mirror-by-law header
+present verbatim atop `README.md`. **Stage 1 CLOSED.**
+
+## ⚠ PIN VERIFICATION — the README pin is NOT enforced by the repo (Cowork, 2026-08-08)
+
+The order asked whether the fork's actual `main` HEAD matches the declared pin. **It does
+not.**
+
+| | sha | how |
+|---|---|---|
+| **Declared pin (README prose)** | `02f640bc4559c48ac0c2ec595ef34dd2c294b0db` | Part A verification |
+| **`skaists/buzz` main HEAD (actual)** | **`60dbdaaf48ca73fc1229f71632f460d40d3d59cd`** | `GET /repos/skaists/buzz/commits/main` (Accept: sha) |
+| **`block/buzz` main HEAD (upstream, now)** | `02f640bc4559c48ac0c2ec595ef34dd2c294b0db` | `GET /repos/block/buzz/commits/main` |
+
+**What this means, precisely.** Upstream has **not** drifted — it is still exactly at the
+pin. So the fork's extra commit is almost certainly the founder's own README edit (the
+mirror-by-law header) sitting on top of the pinned commit. **INFERRED, NOT VERIFIED:** the
+parent-link check (`60dbdaaf` → parent `02f640bc`) was **rate-limited by the GitHub API
+before it could run** (unauthenticated shared-IP limit). Recorded as inference under
+cite-or-stop; one authenticated call closes it.
+
+**The substantive point stands regardless of that inference:** a fork tracks a branch, so
+the pin currently lives only in **prose in a README**. Prose is an assertion; a ref is
+enforcement. Mirror-by-law wants the latter.
+
+**Recommended fix — annotated tag, so the repo enforces the pin:**
+
+```
+git clone https://github.com/skaists/buzz && cd buzz
+git tag -a mirror-pin-02f640bc 02f640bc4559c48ac0c2ec595ef34dd2c294b0db \
+  -m "MIRROR-1 pin: upstream block/buzz main HEAD at L-VERIFY, 2026-08-07. Apache-2.0, no NOTICE."
+git push origin mirror-pin-02f640bc
+```
+
+Cowork cannot create the tag — no GitHub write tools in this non-interactive session
+(twice confirmed). Founder or a seat with live tools runs the above; then the pin is a ref
+in the repo, not a sentence in a file, and Stage 1's mirror-by-law obligation is satisfied
+by construction rather than by claim.
 
 **Standing instruction captured, ready to fire:** when a session has the live GitHub
 connector, fork `block/buzz` into the `beehive-nature` org **pinned at
