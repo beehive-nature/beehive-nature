@@ -4,12 +4,13 @@
 **Rule:** the bus carries its own state. A seat opening this directory reads status here
 before acting, killing the stale-board error class at the root.
 
-Last updated: 2026-08-07, at commit of this file.
+Last updated: 2026-08-08, at commit of this file.
 
 ## Live dispatches
 
 | File | To | Kind | Gating word | Status | Receipt |
 |---|---|---|---|---|---|
+| `DISPATCH_BNR_INVITE_ONBOARD_2026-08-08.md` | **unrouted** — Seat 0/1 to docket the spec draft | Dispatch (6 invite/onboard directives, creatormagic recon of Buzz) | — | **LANDED 2026-08-08** by Seat 3 (founder relay; verbatim; provenance grep clean). Items 3/4/6 ALIGNED with CD-13 / `identity.mobile` Tier-1 / KISS canon. **2 escalations open:** E1 — adopted invite-rationing-by-rank (`b-tokenomics.md` §2.10) vs owner-set use-count sliders (items 1b/5): does rationing govern Buzz-surface invites?; E2 — invite-join identity mint lands on the funded-wallet composition question **in flight** ("no seat builds against either reading"). Fences recorded: F1 P-13 (invite gates a community's door, never THE door), F2 P-1 (redemption emits nothing), F3 Art. V.1 (service-layer, never subsidized). **No implementation until routed + E1/E2 worded** | `RECEIPT_COURSE_SYNC_INVITE_2026-08-08.md` |
 | `GO_ORDER_THREE_BUGS_2026-08-07.md` | Code | Go-order (3 fixes) | founder "go" — **GIVEN** | **OPEN — awaiting Code execution.** Each fix needs its named test (fail→pass), receipts pasted, all three land before any tokenomics constant. **Bug #2 now has constitutional backing — `RULING_REPLAY_WORLD_A`: fail-closed refusal is canon, no replay lane.** These fixes lift the push hold (below) | — |
 | `A1_LAYER1_AMENDMENT_2026-08-07.md` | Code | Spec amendment | founder "A1 go" — **GIVEN** | **LIFTED.** R8 Layer-1 rewritten to frozen-selection wording; collision closed on paper, register closes on Code's COURSE_SYNC | — |
 | `RULING_REPLAY_WORLD_A_2026-08-07.md` | Code | **Constitutional ruling** | founder "World A" — **GIVEN** | **CANON.** Forward-only time; backdated/out-of-order `EmissionMinted` refused always; no replay lane. Backs go-order bug #2 (`first_minted_at`) — Code's fail-closed refusal is now constitutional, not just a bug fix. **Closes the last open escalation (bug 2, 70f812b)** | committed here |
