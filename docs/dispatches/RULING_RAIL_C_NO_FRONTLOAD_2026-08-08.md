@@ -43,6 +43,12 @@ figure assumed.
 Still short of 10^10, but **a different problem** than the one the depth finding described.
 
 ### Four questions to settle — ASSUME NONE
+> **PROVENANCE (corrected 2026-08-08):** these four questions were **authored by Fable**
+> and **addressed to Code**. The section heading above ("HYPOTHESIS FOR CODE") means
+> *for Code to answer*, **not** *originated by Code* — an ambiguity in my courier framing,
+> corrected here. Fable later described them as "Code's"; Code flagged rather than absorbed
+> it. The measurements cited (~$0.019/cycle) are Code's; the questions are Fable's.
+> **Provenance must survive the relay.**
 1. Does an Autonomi node's **earned ANT settle to an address the same identity can spend
    from**, with **no conversion step**?
 2. Is USDC needed **per-cycle at all**, or can the paymaster be covered by a **dust USDC
@@ -54,6 +60,44 @@ Still short of 10^10, but **a different problem** than the one the depth finding
    **structural deficit** that forces a swap regardless?
 
 **Stamp crate + ref per LAW 8a. Report what survives citation.**
+
+## UPDATE 2026-08-08 — CODE'S REFRAME ACCEPTED, AND WHAT SURVIVES
+
+**Code's reframe (volunteered against its own headline — credited):** the swap exists
+**only to fund gas**; the **ANT economy never touches USDC**. A genesis gas float
+(~$0.01/payment; $10 ≈ 1,000 payments) plausibly lasts years — so **the ANT/USDC pool may
+never enter the design at all**, and the 10³ ceiling may not bind.
+
+### ⭐ THE SURVIVING CONSTRAINT IS FLOAT, NOT DEPTH
+
+| At 10^10 identities | ANT required |
+|---|---|
+| **One** payment's worth of ANT each | **≈ 9.8% of total ANT supply** |
+| **A hundred** payments' worth each | **≈ 10× more ANT than exists** |
+
+**Read this as "PER-IDENTITY FLOAT IS THE WRONG SHAPE," not "no rail clears this."** The
+distinction is load-bearing: a bigger-supply rail **moves the number without changing the
+form.** Any design that pre-positions a resource-token balance per identity fails at 10^10
+on arithmetic alone, on *any* rail. That is a **shape** problem, and shape problems are not
+solved by rail shopping.
+
+**Required in the depth workflow either way:** state the **market-cap vs
+acquirable-liquidity** check explicitly. Market cap is not purchasable supply, and
+conflating them would make a float look affordable when it is not.
+
+## ⏳ FOUNDER QUESTION IN FLIGHT — DO NOT BUILD AGAINST EITHER READING
+
+**The apparent conflict:** the KISS ruling says the wallet ships **funded**; rail ruling (C)
+says **do not front-load**.
+
+**Candidate reconciliation (Fable's hypothesis — NOT a ruling):**
+- **Front-load the GAS** — it scales: 10^10 × a penny.
+- **Never front-load the RESOURCE TOKEN** — it does not: 10^10 × one payment ≈ 9.8% of all ANT.
+- **The resource token is EARNED, not issued.**
+
+That reading would dissolve the conflict cleanly — genesis funds the *gas float* only, and
+the ANT side is earned by running nodes, exactly as the earn→spend loop requires. **But it
+is a hypothesis awaiting founder word. No seat builds against either reading yet.**
 
 ## STANDING LAW ENGAGED
 **LAW 8b — adapter-rail selection is upstream of design.** This ruling is that law
