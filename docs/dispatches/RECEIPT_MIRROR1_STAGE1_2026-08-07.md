@@ -67,6 +67,28 @@ claude.ai session. **As of this session the fork/create tools are still NOT pres
 verified by tool search (`+github fork` returns no GitHub tool). Connector auth from a
 separate session does not retroactively surface tools in this non-interactive one.
 
+## Update 2026-08-08 — second attempt, still blocked (Cowork)
+Re-searched tools on founder's "ready" signal per `ORDER_MIRROR1_PARTB_READY_2026-08-08.md`.
+**GitHub write tools are NOT present in this session.** Tool search `+github` returns one
+match — a Slack tool whose *description* mentions GitHub link previews — and no fork,
+repo-create, or GitHub API surface. Per the order's fence, **no blind org write attempted;
+stopped.**
+
+Root cause is structural, not timing: `plugin:engineering:github` requires authentication
+and **this session is non-interactive**, so the OAuth handshake cannot complete here.
+Authorizing the connector in an interactive claude.ai session does not propagate tools into
+this one. **Cowork cannot execute Part B from this seat under the current session type** —
+this is now a twice-confirmed limit, not a wait.
+
+**Recommended: founder forks manually** (the order's stated fallback). Steps, so it closes
+in one pass:
+1. GitHub UI → `github.com/block/buzz` → **Fork** → owner `beehive-nature`.
+2. In the fork, add to `README.md` (mirror-by-law):
+   `Mirror of block/buzz, pinned at upstream commit 02f640bc4559c48ac0c2ec595ef34dd2c294b0db. License: Apache-2.0 (LICENSE carried; upstream has no NOTICE, so Apache §4(d) is N/A).`
+3. Hand the mirror URL back; Cowork appends the one closing line below.
+
+**MIRROR-URL (Part B closing line — pending):** _not yet issued_
+
 **Standing instruction captured, ready to fire:** when a session has the live GitHub
 connector, fork `block/buzz` into the `beehive-nature` org **pinned at
 `02f640bc4559c48ac0c2ec595ef34dd2c294b0db`**, record that SHA in the mirror README
