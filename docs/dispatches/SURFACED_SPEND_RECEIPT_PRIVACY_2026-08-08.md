@@ -6,6 +6,46 @@ nothing.** Per standing fence: bring options, do not design.
 
 ---
 
+> # ⚠ NARROWED 2026-08-08 — READ THIS FIRST; MOST OF THIS DOCUMENT IS NOW MOOT
+>
+> Code's narrowing was **accepted**, and it collapses the option space. **Do not research
+> or design the settled parts.** What is now settled:
+>
+> 1. **Accounting exists and the spender sees it** — already ruled: *"autonomy hides the
+>    mechanism, never the accounting."* So **suppressing the receipt was never on the
+>    table.** Options B (private-by-default) and E (delayed disclosure) are moot as
+>    *privacy* mechanisms — they would suppress the spender's own accounting, which the
+>    KISS ruling forbids.
+> 2. **Financial privacy comes from RAIL SELECTION, not from hiding receipts** — founder:
+>    *"if I don't want people to see my balance/transfers I use zano."* This supersedes my
+>    §1 framing. I argued the decision was about concealing **linkage**; the sharper truth
+>    is that a user wanting financial privacy **chooses a private rail**, and the receipt
+>    then faithfully records a spend that was already private at the rail. **The receipt is
+>    not the privacy instrument. The rail is.** Option C (aggregate-public /
+>    itemized-private) is therefore solving a problem the rail already solves — and solving
+>    it worse, since §3's invertibility caveat applies.
+> 3. **Persona-scoping (Option D)** remains the house pattern by the `.b` privacy law and
+>    the multipersona ruling — it is not in question and needs no new decision here.
+>
+> ## THE SINGLE OPEN QUESTION — awaiting founder word
+>
+> **VISIBLE TO WHOM?** Three candidates, nothing else:
+>
+> | | Visibility | Note |
+> |---|---|---|
+> | **1** | **Spending bDiD only** | Maximum confinement. The spender's own accounting is guaranteed either way, so this is the floor, not a compromise |
+> | **2** | **Spending bDiD + parent** | Follows `RULING_BDID_HIERARCHY` — agents root under `bQueenBee` or a human bDiD; a parent funding an agent arguably needs sight of what its agent spent |
+> | **3** | **Public** | Maximum auditability; matches the receipt-rail doctrine |
+>
+> **The one carry-forward from §4 below that still applies:** *the asymmetry is not
+> symmetric.* Narrowing visibility later works for **new** receipts; widening it later
+> cannot un-publish receipts already written. That property is unaffected by the narrowing.
+>
+> Everything below is **preserved unedited** as the record of the wider survey
+> (promote-don't-erase). Read it as history, not as a live menu.
+
+---
+
 ## 1. The finding that reframes the question
 
 The instinct is to ask *"should spend receipts be private?"* That is **not the live

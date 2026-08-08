@@ -115,7 +115,7 @@ appears in this document.**
 | Whether receipts are per-operation or per-epoch-batched | Cost and privacy tradeoff; unruled |
 | Signature / attestation over the receipt | Depends on the passkey succession question, explicitly still open |
 | On-chain vs off-chain receipt storage | Touches the multi-asset escrow and BNRoSe-3 archival decisions |
-| Privacy posture | **SURFACED 2026-08-08** → [`dispatches/SURFACED_SPEND_RECEIPT_PRIVACY_2026-08-08.md`](./dispatches/SURFACED_SPEND_RECEIPT_PRIVACY_2026-08-08.md). Key reframing: rails already publish the individual spends, so the decision is about concealing the **linkage**, not the spends. Five options (public / private-revealable / aggregate-public-itemized-private / persona-scoped / delayed), awaiting founder ruling. **This schema is posture-agnostic — it serves any of them without a schema change.** |
+| Privacy posture | **NARROWED 2026-08-08** → [`dispatches/SURFACED_SPEND_RECEIPT_PRIVACY_2026-08-08.md`](./dispatches/SURFACED_SPEND_RECEIPT_PRIVACY_2026-08-08.md). **Settled:** the spender always sees its own accounting (KISS ruling), and **financial privacy comes from RAIL SELECTION, not from hiding receipts** — a user wanting privacy picks a private rail (e.g. Zano); the receipt then faithfully records a spend already private at the rail. Persona-scoping remains the house pattern. **Single open question: VISIBLE TO WHOM** — spending bDiD only / bDiD + parent / public. Awaiting founder word. Schema is unaffected either way: visibility is an access-control property of receipt *storage*, not a field. |
 
 ## 6. Inherited invariants
 
