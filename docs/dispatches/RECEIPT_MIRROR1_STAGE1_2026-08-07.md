@@ -60,3 +60,16 @@ seat there yet — recorded so the order isn't mistaken for pending Cowork work.
 - Part A: **complete, receipted.** Apache-2.0, pin `02f640bc…`, no NOTICE, named docs present.
 - Part B: **blocked on GitHub write auth** — one interactive authorization or one founder
   fork away, and the receipt closes.
+
+## Update 2026-08-07 (founder authorizing connector)
+Founder reports authorizing the `engineering:github` connector in an interactive
+claude.ai session. **As of this session the fork/create tools are still NOT present** —
+verified by tool search (`+github fork` returns no GitHub tool). Connector auth from a
+separate session does not retroactively surface tools in this non-interactive one.
+
+**Standing instruction captured, ready to fire:** when a session has the live GitHub
+connector, fork `block/buzz` into the `beehive-nature` org **pinned at
+`02f640bc4559c48ac0c2ec595ef34dd2c294b0db`**, record that SHA in the mirror README
+(mirror-by-law), carry the LICENSE (Apache-2.0; no NOTICE to carry), and append the
+resulting mirror URL here to close Part B. Custody question is already closed by
+`RULING_BDID_HIERARCHY` — this step is purely the repo fork.
