@@ -26,7 +26,7 @@ Last updated: 2026-08-07, at commit of this file.
 | 2 | A1 Layer-1 rewording | founder word — GIVEN | CLOSED — executed |
 | 3 | INDEX manifest | founder word — GIVEN | CLOSED — this file, self-maintaining |
 | 4 | ORDERS-1 v0.8 re-commit | founder keyboard | **CLOSED — ratified `49803b9`, founder's hand** |
-| 5 | BIO-1 v0.2 read + ratify | Code | **CLOSED — ratified, editorial bump (founder board 2026-08-07)** |
+| 5 | BIO-1 v0.2 read + ratify | Code | **RATIFIED (founder board 2026-08-07).** Executing commit reported as `23f03ff` — **NOT present in this tree** (`cat-file`: malformed object name; BIO-1 spec here still reads "proposed", `7b53796`). Ruling made ≠ verified-executed from this seat. Reconciliation owed by Code/Fable — see push-state note |
 | 6 | w / T0 + Design D picks | Code presents | **CLOSED — w = attested-capture full weight; T0 = 45-min interim; Design D = 0%/defer canon (founder board 2026-08-07)** |
 | 7 | (row-7 gate) | founder word | **CLOSED — dual-currency: b for compute, stablecoin for service; commit-format kept as-is (founder board 2026-08-07)** |
 
@@ -34,7 +34,15 @@ Last updated: 2026-08-07, at commit of this file.
 
 ## Push state — HELD, and why (cadence rule working as designed)
 
-`main` is ahead of `origin/main` by ~12. **The push is HELD, and the hold has narrowed to bug 1 only.**
+`main` is ahead of `origin/main` by **13** (verified `git rev-list --count`, 2026-08-07). **The push is HELD, and the hold has narrowed to bug 1 only.**
+
+**Open reconciliation (flagged by Cowork, owned by Code/Fable):** the BIO-1 executing
+commit `23f03ff` reported on the board is **absent from this working tree** — `cat-file`
+returns *malformed object name*, and it is not in the ahead-13 log, though other Code
+commits (`efad970`, `70f812b`, `49803b9`) are present. Either the hash was mis-transcribed
+in relay, or the commit lives in a copy that hasn't reached this mount. Until it resolves,
+BIO-1 is ratified-but-execution-unverified here. Not Cowork's to fix — recorded so no seat
+reads it as landed.
 
 Update 2026-08-07: `70f812b` fixed **bug 2** (`first_minted_at` not backdatable —
 now constitutional under `RULING_REPLAY_WORLD_A`) **and bug 3** (mint gate no longer
