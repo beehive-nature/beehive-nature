@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>skaists.social — BNR DAO dashboard</title>
+<meta name="description" content="Read-only BNR DAO dashboard — what you know is measured; what isn't measured says so. Readable without an account.">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 38 38"><rect width="38" height="38" rx="10" fill="%230C1412"/><text x="19" y="26" font-family="monospace" font-size="19" font-weight="700" fill="%23E8B54B" text-anchor="middle">b</text></svg>'>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================================
+   AUDITED TOKEN LAYER — docs/TOKENS.md (post-F-4). Semantic hues are fixed:
+   fix contrast by stepping within the ramp or inverting to a chip, never by
+   repainting (DESIGN-CONSTRAINTS.md §4). Honey --b-value clears AA only on the
+   dark chip — it never renders on paper.
+   ========================================================================== */
+:root{
+  --ink:#1A2320;        /* primary text */
+  --ink-mut:#57655F;    /* secondary text */
+  --ink-dim:#68726A;    /* muted text */
+  --paper:#F6F8F1;      /* page */
+  --card:#FFFFFF;       /* card surface */
+  --line:#E4EBDC;       /* hairline */
+  --biomass:#5FA544;    /* DATUM fill only — never text */
+  --biomass-ink:#487D34;/* AA-clean text derivative of biomass */
+  --ai:#0B7A89;         /* accent text */
+  --info:#2A73AE;       /* info text */
+  --guard:#7D5FB0;      /* flags and badges */
+  --b-value:#E8B54B;    /* honey — dark chip only */
+  /* dark-chip surface (bqueenbee family, TOKENS.md dark table) */
+  --dk-card:#0C1412; --dk-line:#1E2B26; --dk-ink:#E9F2EC; --dk-mut:#8FA79C;
+  --dk-guard:#B7A8F7;
+  /* breach locals (guard family, from the ratified design) */
+  --breach-bg:#4A3670; --breach-edge:#2E1F4D; --breach-ink:#F1EAFE; --breach-mut:#DDD2F3;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:'IBM Plex Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--info);text-decoration:none}
+a:hover{color:var(--ai);text-decoration:underline}
+:focus-visible{outline:2px solid var(--info);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1280px;margin-inline:auto;padding-block:22px 30px;padding-inline:28px;display:flex;flex-direction:column}
+.spacer{flex:1}
+
+/* masthead */
+.masthead{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.logo-tile{width:38px;height:38px;background:var(--dk-card);border-radius:10px;display:grid;place-items:center;flex:none;font:700 19px/1 'IBM Plex Mono',monospace;color:var(--b-value)}
+.masthead-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.site-name{margin:0;font:700 17px/1.2 'IBM Plex Sans',sans-serif;color:var(--ink)}
+.commons-chip{font:600 10px/1 'IBM Plex Mono',monospace;letter-spacing:.08em;color:var(--biomass-ink);border:1px solid #C4D5BB;padding:3px 9px;border-radius:99px}
+.tagline{margin:3px 0 0;font:400 12.5px/1.4 'IBM Plex Sans',sans-serif;color:var(--ink-mut)}
+.toggles{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.toggle{display:flex;align-items:center;gap:8px}
+.toggle-label{font:600 10px/1 'IBM Plex Mono',monospace;letter-spacing:.08em;color:var(--ink-dim)}
+.seg-group{display:flex;gap:2px;background:var(--card);border:1px solid var(--line);border-radius:9px;padding:2px}
+.seg{padding:5px 12px;border:none;cursor:pointer;border-radius:7px;font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:12px;font-weight:600;background:transparent;color:var(--ink-mut)}
+.seg[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+
+/* denomination HUD */
+.hud{margin-block-start:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.hud-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding-inline:2px;padding-block-end:10px}
+.hud-label{font:600 10.5px/1 'IBM Plex Mono',monospace;letter-spacing:.09em;color:var(--ink-dim)}
+.hud-sub{font:400 12.5px/1.4 'IBM Plex Sans',sans-serif;color:var(--ink-mut)}
+.hud-time{font:400 11px/1 'IBM Plex Mono',monospace;color:var(--ink-dim)}
+.hud-grid{display:grid;grid-template-columns:1.1fr 1fr .9fr;gap:12px;align-items:stretch}
+.gauge{border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:7px}
+.gauge-b{background:var(--dk-card);border:1px solid var(--dk-line)}
+.gauge-b.stale{gap:8px}
+.gauge-money{background:var(--paper);border:1px solid var(--line)}
+.gauge-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.gauge-tag-b{font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.09em;color:var(--b-value)}
+.gauge-tag-money{font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.09em;color:var(--ink-dim)}
+.chip{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.06em;padding:3px 8px;border-radius:99px;line-height:1}
+.chip-known-dark{color:var(--dk-mut);border:1px solid var(--dk-line)}
+.chip-known-light{color:var(--ink-mut);border:1px solid var(--line)}
+.chip-stale{font-weight:600;color:var(--b-value);border:1px solid rgba(232,181,75,.55)}
+.gauge-num{font:600 30px/1 'IBM Plex Mono',monospace}
+.gauge-num.on-dark{color:var(--b-value)}
+.gauge-num.on-light{color:var(--ink)}
+.gauge-num .unit{font:500 16px/1 'IBM Plex Mono',monospace}
+.gauge-fn-b{font:400 13.5px/1.4 'IBM Plex Sans',sans-serif;color:var(--dk-ink)}
+.gauge-fn-money{font:400 13.5px/1.4 'IBM Plex Sans',sans-serif;color:var(--ink-mut)}
+.gauge-meta-b{font:400 11px/1.4 'IBM Plex Mono',monospace;color:var(--dk-mut)}
+.gauge-meta-money{font:400 11px/1.4 'IBM Plex Mono',monospace;color:var(--ink-dim)}
+/* stale renders the STATE — a hatched withholding, never a number (§2) */
+.stale-box{background:repeating-linear-gradient(45deg,rgba(232,181,75,.15) 0 6px,transparent 6px 12px);border:1px dashed rgba(232,181,75,.45);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+.stale-title{font:600 14.5px/1.3 'IBM Plex Sans',sans-serif;color:var(--dk-ink)}
+.stale-body{font:400 12.5px/1.45 'IBM Plex Sans',sans-serif;color:var(--dk-mut)}
+/* the rate refusal — the only room with a rate is the draw facility (D-14) */
+.rate-card{border:1px dashed #C9D2C6;border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;justify-content:center}
+.rate-title{font:600 13px/1.3 'IBM Plex Sans',sans-serif;color:var(--ink)}
+.rate-body{font:400 12.5px/1.5 'IBM Plex Sans',sans-serif;color:var(--ink-mut);text-wrap:pretty}
+.rate-link{font:500 12.5px/1 'IBM Plex Sans',sans-serif}
+
+/* breach banner — a violation, unmissable, never mistakable for a boundary */
+.breach-banner{margin-block-start:14px;background:var(--breach-bg);border:2px solid var(--breach-edge);border-radius:12px;overflow:hidden;display:flex;align-items:stretch}
+.breach-hatch{width:44px;flex:none;background:repeating-linear-gradient(135deg,var(--dk-guard) 0 9px,var(--breach-bg) 9px 18px)}
+.breach-body{padding:14px 18px;display:flex;flex-direction:column;gap:6px}
+.breach-headline{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.breach-badge{font:700 11px/1 'IBM Plex Mono',monospace;letter-spacing:.09em;background:var(--breach-ink);color:var(--breach-edge);padding:4px 9px;border-radius:6px}
+.breach-title{margin:0;font:600 15px/1.3 'IBM Plex Sans',sans-serif;color:var(--breach-ink)}
+.breach-text{font:400 13px/1.5 'IBM Plex Sans',sans-serif;color:var(--breach-mut);max-width:78ch;text-wrap:pretty}
+.breach-meta{font:400 11px/1.5 'IBM Plex Mono',monospace;color:var(--dk-guard)}
+
+/* panel grid */
+.grid{margin-block-start:14px;display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.c4{grid-column:span 4}.c5{grid-column:span 5}.c7{grid-column:span 7}
+.panel-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.panel-head.center{align-items:center}
+.panel-title{margin:0;font:600 14px/1.3 'IBM Plex Sans',sans-serif;color:var(--ink)}
+.panel-stamp{font:400 10.5px/1 'IBM Plex Mono',monospace;color:var(--ink-dim)}
+.panel-sub{font:400 12.5px/1.45 'IBM Plex Sans',sans-serif;color:var(--ink-mut);margin-block-start:-6px}
+
+/* respect standings */
+.respect-rows{display:flex;flex-direction:column;gap:10px}
+.respect-row{display:grid;grid-template-columns:92px 1fr 46px 44px;gap:10px;align-items:center}
+.respect-name{font:500 13px/1.2 'IBM Plex Sans',sans-serif;color:var(--ink)}
+.track{height:8px;background:#EFF3E9;border-radius:4px;position:relative;overflow:hidden}
+.fill{position:absolute;inset-block:0;inset-inline-start:0;border-radius:4px;background:var(--info)}
+.respect-val{font:600 12.5px/1 'IBM Plex Mono',monospace;color:var(--ink);text-align:end}
+.delta{font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:500;text-align:end}
+.delta.up{color:var(--biomass-ink)}
+.delta.down{color:var(--ink-mut)}
+
+/* commissioning */
+.prop-rows{display:flex;flex-direction:column;gap:11px}
+.prop-row{display:grid;grid-template-columns:58px 1fr 132px 118px;gap:12px;align-items:center}
+.prop-id{font:500 11.5px/1 'IBM Plex Mono',monospace;color:var(--ink-dim)}
+.prop-title{font:500 13.5px/1.3 'IBM Plex Sans',sans-serif;color:var(--ink)}
+.status-chip{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.05em;padding:4px 9px;border-radius:99px;justify-self:start;white-space:nowrap}
+/* wash alphas stepped .13→.08 / .10→.07: the .dc.html values composite the
+   audited text tokens to 4.34/4.43 on white — under AA. Hue untouched (§4);
+   the wash, not the token, is the free variable. */
+.status-chip.commissioned{background:rgba(95,165,68,.08);color:var(--biomass-ink);border:1px solid rgba(72,125,52,.35)}
+.status-chip.invote{background:rgba(42,115,174,.07);color:var(--info);border:1px solid rgba(42,115,174,.35)}
+.status-chip.filed{background:transparent;color:var(--ink-mut);border:1px solid #C9D2C6}
+.votes-cell{display:flex;flex-direction:column;gap:4px}
+.votes{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;color:var(--ink)}
+.votes-na{font:italic 400 12px 'IBM Plex Sans',sans-serif;color:var(--ink-dim)}
+.prog{height:6px;background:#EFF3E9;border-radius:3px;position:relative;overflow:hidden}
+.prog .fill{border-radius:3px}
+.fill.green{background:var(--biomass)}
+.fill.blue{background:var(--info)}
+
+/* emission headroom */
+.hr-box{background:var(--dk-card);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:9px}
+.hr-track{position:relative;height:14px;background:var(--dk-line);border-radius:7px}
+.hr-fill{position:absolute;inset-block:0;inset-inline-start:0;background:var(--b-value);border-start-start-radius:7px;border-end-start-radius:7px}
+.hr-cap-tick{position:absolute;inset-block:-3px;inset-inline-start:85.7%;width:2px;background:var(--dk-ink)}
+.hr-cap-lab{position:absolute;inset-block-start:-4px;inset-inline-start:87.5%;font:600 9.5px/1 'IBM Plex Mono',monospace;color:var(--dk-mut)}
+.hr-line{font:500 12px/1.4 'IBM Plex Mono',monospace;color:var(--dk-ink)}
+.hr-note{font:400 11.5px/1.4 'IBM Plex Sans',sans-serif;color:var(--dk-mut)}
+/* breach variant — AtCap and Breach must never look alike */
+.panel.hr-breach{border:2px solid var(--guard);padding:15px 17px}
+.hr-breach-badge{font:700 10px/1 'IBM Plex Mono',monospace;letter-spacing:.08em;background:var(--breach-bg);color:var(--breach-ink);padding:3px 8px;border-radius:6px}
+/* overshoot width is the same scale as the fill: 140/14,000 = 1% (ruled
+   2026-07-21) — the hazard stripe and the +140 PAST CAP label carry the alarm */
+.hr-over{position:absolute;inset-block:0;inset-inline-start:85.7%;width:1%;background:repeating-linear-gradient(135deg,var(--dk-guard) 0 4px,var(--breach-bg) 4px 8px)}
+.hr-cap-tick.breach{inset-block:0;background:var(--breach-ink)}
+.hr-past-lab{position:absolute;inset-block-start:-4px;inset-inline-start:88.5%;font:700 9.5px/1 'IBM Plex Mono',monospace;color:var(--dk-guard);white-space:nowrap}
+.atcap-demo-row{display:flex;align-items:center;gap:10px}
+.atcap-demo{position:relative;height:8px;width:92px;background:var(--dk-line);border-radius:4px;border-inline-end:3px double var(--dk-ink);flex:none}
+.atcap-demo .fill-full{position:absolute;inset:0;background:var(--b-value);border-radius:4px}
+.atcap-note{font:400 11px/1.4 'IBM Plex Mono',monospace;color:var(--dk-mut)}
+
+/* commons price feed */
+.price-row{display:grid;grid-template-columns:110px 1fr 118px;gap:12px;align-items:center}
+.price-name{font:500 13px/1.2 'IBM Plex Sans',sans-serif;color:var(--ink)}
+.price-val{font:600 13px/1 'IBM Plex Mono',monospace;color:var(--ink);text-align:end}
+.finding{display:flex;gap:10px;align-items:center;padding:9px 12px;background:rgba(125,95,176,.07);border:1px solid rgba(125,95,176,.35);border-radius:8px}
+.finding-badge{font:700 10px/1 'IBM Plex Mono',monospace;letter-spacing:.08em;color:var(--guard);border:1px solid var(--guard);padding:3px 8px;border-radius:6px;flex:none}
+.finding-text{font:400 13px/1.4 'IBM Plex Sans',sans-serif;color:var(--ink)}
+.finding-delta{font:600 13px/1 'IBM Plex Mono',monospace;color:var(--guard);flex:none}
+
+/* network */
+.net-rows{display:flex;flex-direction:column;gap:9px}
+.net-row{display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:center}
+.net-k{font:400 12px/1.3 'IBM Plex Sans',sans-serif;color:var(--ink-dim)}
+.net-v{font:500 12.5px/1 'IBM Plex Mono',monospace;color:var(--ink)}
+.dots-on{color:var(--biomass-ink);letter-spacing:2px}
+.dots-sync{color:var(--ink-mut);letter-spacing:2px}
+
+/* circles (measured) */
+.circle-row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.circle-name{font:500 13px/1.2 'IBM Plex Sans',sans-serif;color:var(--ink)}
+.circle-n{font:500 12.5px/1 'IBM Plex Mono',monospace;color:var(--ink-mut)}
+
+/* spirit (measured) */
+.spirit-num{font:600 34px/1 'IBM Plex Mono',monospace;color:var(--ink)}
+.spirit-method{font:400 11px/1.4 'IBM Plex Mono',monospace;color:var(--ink-dim)}
+
+/* honest absence — deliberately not shown, with the reason in the room */
+.panel.absent-a{background:transparent;border:1.5px dashed #AEBBA7;gap:9px}
+.panel.absent-b{gap:9px}
+.absent-title{margin:0;font:600 14px/1.3 'IBM Plex Sans',sans-serif}
+.absent-title.dim{color:var(--ink-mut)}
+.absent-chip{font:600 9.5px/1 'IBM Plex Mono',monospace;letter-spacing:.08em;color:var(--ink-mut);border:1px solid #AEBBA7;padding:3px 8px;border-radius:99px;white-space:nowrap}
+.not-drawn{font:500 13px/1 'IBM Plex Mono',monospace;color:var(--ink-dim);padding-block:6px}
+.absent-reason{text-wrap:pretty}
+.absent-reason.fwd{font:400 13.5px/1.5 'IBM Plex Sans',sans-serif;color:var(--ink)}
+.absent-reason.quiet{font:400 12.5px/1.5 'IBM Plex Sans',sans-serif;color:var(--ink-mut)}
+.absent-lands{font:500 11.5px/1.4 'IBM Plex Mono',monospace;color:var(--info)}
+
+/* legend — how this surface says "I don't know" */
+.legend{margin-block-start:22px;border-block-start:1px solid var(--line);padding-block-start:14px;display:flex;flex-direction:column;gap:11px}
+.legend-title{font:600 10.5px/1 'IBM Plex Mono',monospace;letter-spacing:.09em;color:var(--ink-dim)}
+.legend-items{display:flex;flex-wrap:wrap;gap:20px;row-gap:10px;align-items:center}
+.legend-item{display:flex;align-items:center;gap:8px}
+.lchip{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.06em;padding:4px 9px;border-radius:6px;line-height:1;white-space:nowrap}
+.lchip.stale{color:var(--b-value);background:var(--dk-card)}
+.lchip.absent{color:var(--ink-mut);border:1px dashed #AEBBA7}
+.lchip.refused{color:var(--ink-mut);border:1px solid #9AA69B}
+.lchip.atcap{color:var(--b-value);background:var(--dk-card);border-inline-end:3px double var(--dk-ink)}
+.lchip.breach{font-weight:700;color:var(--breach-ink);background:var(--breach-bg) repeating-linear-gradient(135deg,rgba(183,168,247,.4) 0 6px,transparent 6px 12px)}
+.legend-text{font:400 12px/1.3 'IBM Plex Sans',sans-serif;color:var(--ink-mut)}
+.legend-enums{font:400 11px/1.6 'IBM Plex Mono',monospace;color:var(--ink-dim)}
+.legend-note{font:400 12px/1.5 'IBM Plex Sans',sans-serif;color:var(--ink-mut)}
+
+.noscript-note{margin-block-start:18px;font:400 13px/1.5 'IBM Plex Sans',sans-serif;color:var(--ink-mut)}
+
+/* single-column collapse for narrow viewports (PWA delivery target, RELAY_21 §1) */
+@media (max-width:880px){
+  .hud-grid{grid-template-columns:1fr}
+  .grid{grid-template-columns:1fr}
+  .c4,.c5,.c7{grid-column:auto}
+  .prop-row{grid-template-columns:58px 1fr;row-gap:6px}
+  .prop-row .status-chip,.prop-row .votes-cell{grid-column:2}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<noscript><div class="wrap"><p class="noscript-note">This surface renders with JavaScript — read-only, no account, no network calls beyond fonts. Enable JavaScript to read it.</p></div></noscript>
+<script>
+'use strict';
+/* ============================================================================
+   skaists.social DAO dashboard — implementation of "DAO Dashboard.dc.html"
+   (claude.ai/design project ac80c130, "Inverted governance, component specs").
+
+   State model mirrors crates/dashboard + the design component exactly:
+     scenario  'measured' | 'mixed' | 'breach'   — data condition (URL ?scenario=)
+     absence   'reason-forward' | 'quiet-ledger' — Panel::Absent rendering (?absence=)
+     level     'plain' | 'standard' | 'technical'— reading preference (header toggle)
+     currency  'USD' | 'MXN'                     — money-gauge denomination (header toggle)
+
+   Ratified constraints load-bearing here:
+   - D-14: two gauges on every value surface; the only rate lives in the draw
+     facility — this page renders a refusal card in that slot.
+   - §2: a stale gauge renders the state, never a number, never 0.
+   - §5: reading level changes prose only. Everything level-varying comes from
+     COPY and is tagged data-copy; page text minus [data-copy] must be
+     byte-identical across levels (the negative control in verify/).
+   - Headroom::AtCap and Headroom::Breach(n) must never look alike.
+   ========================================================================== */
+
+const SCENARIOS = ['measured', 'mixed', 'breach'];
+const ABSENCE_STYLES = ['reason-forward', 'quiet-ledger'];
+const LEVELS = ['plain', 'standard', 'technical'];
+const CURRENCIES = ['USD', 'MXN'];
+
+/* Reading-level prose — verbatim from the ratified design. Prose only: no
+   displayed gauge value may live in here (§5). */
+const COPY = {
+  plain: {
+    hudSub: 'Two dials: what the treasury can do, and what that means in your money.',
+    rateTitle: 'No exchange rate here',
+    rateBody: 'b and money sit side by side, but this page never says what one is worth in the other. One room does that, on purpose.',
+    staleTitle: "We won't repeat an old number",
+    staleBody: "This dial was last checked 47 minutes ago. That's too old to trust, so no number is shown.",
+    respectSub: 'Who has earned standing this cycle.',
+    commSub: 'Work the DAO is deciding on, or has ordered.',
+    headSub: 'How much more b may be created this cycle.',
+    headOkNote: 'There is room left before the cap.',
+    priceSub: 'What hemp hearts cost in shops. Anyone can read this.',
+    findingBody: 'Small bags cost 23% more per pound than big ones.',
+    netSub: 'The machines that keep this ledger running.',
+    circleReason: "Not shown, on purpose. The shared word-list circles need isn't agreed yet, so there is nothing true to draw here.",
+    circleLands: 'Will appear when: the circle word-list (v0.3) is agreed.',
+    spiritReason: 'Not shown, on purpose. Nobody has yet defined how this would be measured.',
+    spiritLands: 'Will appear when: SPIRIT-1 is defined and agreed.',
+    breachTitle: 'This should be impossible',
+    breachBody: '140 more b were created this cycle than the rule allows. That rule failing is serious. It is being investigated, and this notice stays until it is resolved.',
+    atCapNote: 'full is allowed — over is not'
+  },
+  standard: {
+    hudSub: 'Both gauges, always — function on one side, money on the other.',
+    rateTitle: 'No rate in this room',
+    rateBody: 'This surface never prices b in money. The only rate between them lives in the draw facility, on its own surface.',
+    staleTitle: "Can't vouch for a figure",
+    staleBody: 'Balance is stale — last verified 47 minutes ago. No number is shown, and no function reading is derived from it.',
+    respectSub: 'Standing earned by worker-bees, cycle 41.',
+    commSub: 'Worker-bee proposals: filed → in vote → commissioned.',
+    headSub: "Emission remaining under this cycle's cap.",
+    headOkNote: 'Comfortably under the cap.',
+    priceSub: 'Commons retail scan — readable without an account.',
+    findingBody: 'Small-package penalty: 8 oz bags run 23% more per pound.',
+    netSub: 'Node quorum and chain state.',
+    circleReason: "Absent — the circle lexicon hasn't landed. Nothing is drawn until it does.",
+    circleLands: 'Lands when: circle lexicon v0.3 ratifies.',
+    spiritReason: 'Absent — SPIRIT-1 is undefined. There is no method to measure against yet.',
+    spiritLands: 'Lands when: SPIRIT-1 is defined and ratified.',
+    breachTitle: 'Emission breached the cycle cap',
+    breachBody: 'Emitted b exceeded the cap by 140. This is not a full gauge — it is a floor law failing, and it stays unmissable until resolved.',
+    atCapNote: 'at cap is a boundary — breach is a violation'
+  },
+  technical: {
+    hudSub: 'denomination::Hud — both gauges render, or the HUD mints a refusal. A one-gauge HUD does not construct.',
+    rateTitle: 'RateOutsideDrawFacility',
+    rateBody: 'HudRefusal::RateOutsideDrawFacility — no b↔fiat ratio renders on this surface. Single rate surface: the protocol draw facility.',
+    staleTitle: 'BGauge::stale()',
+    staleBody: 'BBalance::Stale { last_verified: 47 min }. function_reading: Option<String> = None, by construction.',
+    respectSub: 'respect_standings(cycle: 41) — crates/dashboard, read-only.',
+    commSub: 'commissioning pipeline: Filed → InVote → Commissioned.',
+    headSub: 'headroom = cap − emitted, per cycle.',
+    headOkNote: 'Headroom::Ok(3120).',
+    priceSub: 'price_feed: public read, unauthenticated. Source: USDA retail scan.',
+    findingBody: 'unit-price delta, 8 oz vs 16 oz: +23% per lb.',
+    netSub: 'quorum 7/8 · gossip healthy · no forks observed.',
+    circleReason: 'Panel::Absent { reason: "circle lexicon not landed" }',
+    circleLands: 'requires: circle/lexicon ≥ v0.3 (ratification pending).',
+    spiritReason: 'Panel::Absent { reason: "SPIRIT-1 undefined" }',
+    spiritLands: 'requires: SPIRIT-1 method definition + ratification.',
+    breachTitle: 'Headroom::Breach(140)',
+    breachBody: 'cap = 12,000 b · emitted = 12,140 b · invariant EMISSION_FLOOR violated at height 1,204,991. Distinct from Headroom::AtCap by construction.',
+    atCapNote: 'AtCap ≙ Ok(0), legitimate · Breach(n > 0), invariant failure'
+  }
+};
+
+/* Money gauge — denomination choice, not a rate (D-14). */
+const MONEY = {
+  USD: { num: '$4,812.30', name: 'United States dollars', p16: '$10.39', p8: '$12.80' },
+  MXN: { num: 'MX$88,546.32', name: 'Mexican pesos', p16: 'MX$191.18', p8: 'MX$235.52' }
+};
+
+const RESPECT_ROWS = [
+  { name: 'marisol.m', pct: 100, val: '1,240', delta: '▲ 12', dir: 'up' },
+  { name: 'tomás.q', pct: 79, val: '980', delta: '▲ 4', dir: 'up' },
+  { name: 'vera.k', pct: 58, val: '715', delta: '▼ 3', dir: 'down' },
+  { name: 'ilya.b', pct: 44, val: '540', delta: '▲ 9', dir: 'up' }
+];
+
+const PROPOSALS = [
+  { id: 'WB-014', title: 'Cold-press oil line', status: 'COMMISSIONED', glyph: '●', kind: 'commissioned', votes: '18 / 24 for', bar: { pct: 75, tone: 'green' } },
+  { id: 'WB-017', title: 'Node relay — Uruapan', status: 'IN VOTE', glyph: '◐', kind: 'invote', votes: '9 / 24 so far', bar: { pct: 38, tone: 'blue' } },
+  { id: 'WB-019', title: 'Community seed library', status: 'FILED', glyph: '○', kind: 'filed', votes: 'not yet in vote', bar: null }
+];
+
+const CIRCLE_ROWS = [
+  { name: 'Growers', n: '23' },
+  { name: 'Pollinators', n: '17' },
+  { name: 'Keepers', n: '12' },
+  { name: 'Archive', n: '9' }
+];
+
+const state = { scenario: 'mixed', absence: 'reason-forward', level: 'standard', currency: 'USD' };
+
+const params = new URLSearchParams(location.search);
+if (SCENARIOS.includes(params.get('scenario'))) state.scenario = params.get('scenario');
+if (ABSENCE_STYLES.includes(params.get('absence'))) state.absence = params.get('absence');
+
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+/* Level-varying prose is always emitted through cp() so the data-copy tag can
+   never be forgotten — the §5 negative control subtracts [data-copy] and
+   asserts the remainder identical across levels. */
+const cp = s => `<span data-copy>${esc(s)}</span>`;
+
+function segButton(group, value, label, pressed) {
+  return `<button type="button" class="seg" id="seg-${group}-${value}" data-${group}="${value}" aria-pressed="${pressed}">${label}</button>`;
+}
+
+function masthead(copy) {
+  const lv = state.level, cur = state.currency;
+  return `
+  <header class="masthead">
+    <div class="logo-tile" aria-hidden="true">b</div>
+    <div>
+      <div class="masthead-line">
+        <h1 class="site-name">skaists.social</h1>
+        <span class="commons-chip">COMMONS · OPEN READ</span>
+      </div>
+      <p class="tagline">BNR DAO — what you know is measured; what isn't measured says so.</p>
+    </div>
+    <div class="spacer"></div>
+    <div class="toggles">
+      <div class="toggle">
+        <span class="toggle-label" id="lab-reading">READING</span>
+        <div class="seg-group" role="group" aria-labelledby="lab-reading">
+          ${segButton('level', 'plain', 'Plain', lv === 'plain')}
+          ${segButton('level', 'standard', 'Standard', lv === 'standard')}
+          ${segButton('level', 'technical', 'Technical', lv === 'technical')}
+        </div>
+      </div>
+      <div class="toggle">
+        <span class="toggle-label" id="lab-money">MONEY</span>
+        <div class="seg-group" role="group" aria-labelledby="lab-money">
+          ${segButton('currency', 'USD', 'USD', cur === 'USD')}
+          ${segButton('currency', 'MXN', 'MXN', cur === 'MXN')}
+        </div>
+      </div>
+    </div>
+  </header>`;
+}
+
+function bGaugeKnown() {
+  return `
+  <div class="gauge gauge-b">
+    <div class="gauge-head">
+      <span class="gauge-tag-b">b · TREASURY</span>
+      <span class="chip chip-known-dark">KNOWN</span>
+    </div>
+    <div class="gauge-num on-dark">4,120 <span class="unit">b</span></div>
+    <div class="gauge-fn-b">enough for 2 node deployments</div>
+    <div class="gauge-meta-b">verified 3 min ago · height 1,204,882</div>
+  </div>`;
+}
+
+function bGaugeStale(copy) {
+  /* §2: the state renders. No number, no zero, no function reading. */
+  return `
+  <div class="gauge gauge-b stale">
+    <div class="gauge-head">
+      <span class="gauge-tag-b">b · TREASURY</span>
+      <span class="chip chip-stale">◷ STALE</span>
+    </div>
+    <div class="stale-box">
+      <span class="stale-title">${cp(copy.staleTitle)}</span>
+      <span class="stale-body">${cp(copy.staleBody)}</span>
+    </div>
+    <div class="gauge-meta-b">last verified 47 min ago · refresh queued</div>
+  </div>`;
+}
+
+function moneyGauge(money) {
+  return `
+  <div class="gauge gauge-money">
+    <div class="gauge-head">
+      <span class="gauge-tag-money">MONEY · TREASURY</span>
+      <span class="chip chip-known-light">KNOWN</span>
+    </div>
+    <div class="gauge-num on-light">${esc(money.num)}</div>
+    <div class="gauge-fn-money">${esc(money.name)} — chosen denomination</div>
+    <div class="gauge-meta-money">verified 3 min ago · custodial account</div>
+  </div>`;
+}
+
+function rateCard(copy) {
+  return `
+  <div class="rate-card">
+    <span class="rate-title">${cp(copy.rateTitle)}</span>
+    <span class="rate-body">${cp(copy.rateBody)}</span>
+    <a class="rate-link" href="#draw-facility">Draw facility →</a>
+  </div>`;
+}
+
+function hud(copy, money, bStale) {
+  return `
+  <section class="hud" aria-labelledby="hud-label">
+    <div class="hud-head">
+      <span class="hud-label" id="hud-label">DENOMINATION HUD</span>
+      <span class="hud-sub">${cp(copy.hudSub)}</span>
+      <span class="spacer"></span>
+      <span class="hud-time">read 12:04 UTC · 20 Jul 2026</span>
+    </div>
+    <div class="hud-grid">
+      ${bStale ? bGaugeStale(copy) : bGaugeKnown()}
+      ${moneyGauge(money)}
+      ${rateCard(copy)}
+    </div>
+  </section>`;
+}
+
+function breachBanner(copy) {
+  return `
+  <section class="breach-banner" aria-labelledby="breach-title">
+    <div class="breach-hatch" aria-hidden="true"></div>
+    <div class="breach-body">
+      <div class="breach-headline">
+        <span class="breach-badge">BREACH</span>
+        <h2 class="breach-title" id="breach-title">${cp(copy.breachTitle)}</h2>
+      </div>
+      <div class="breach-text">${cp(copy.breachBody)}</div>
+      <div class="breach-meta">cap 12,000 b · emitted 12,140 b · height 1,204,991 · ${cp(copy.atCapNote)}</div>
+    </div>
+  </section>`;
+}
+
+function respectPanel(copy) {
+  const rows = RESPECT_ROWS.map(r => `
+      <div class="respect-row">
+        <span class="respect-name">${esc(r.name)}</span>
+        <div class="track" aria-hidden="true"><div class="fill" style="width:${r.pct}%"></div></div>
+        <span class="respect-val">${esc(r.val)}</span>
+        <span class="delta ${r.dir}">${esc(r.delta)}</span>
+      </div>`).join('');
+  return `
+  <section class="panel c5" aria-labelledby="t-respect">
+    <div class="panel-head">
+      <h2 class="panel-title" id="t-respect">Respect standings</h2>
+      <span class="panel-stamp">CYCLE 41 · 2 min ago</span>
+    </div>
+    <div class="panel-sub">${cp(copy.respectSub)}</div>
+    <div class="respect-rows">${rows}</div>
+  </section>`;
+}
+
+function commissioningPanel(copy) {
+  const rows = PROPOSALS.map(p => `
+      <div class="prop-row">
+        <span class="prop-id">${esc(p.id)}</span>
+        <span class="prop-title">${esc(p.title)}</span>
+        <span class="status-chip ${p.kind}">${esc(p.glyph)} ${esc(p.status)}</span>
+        <div class="votes-cell">
+          <span class="${p.bar ? 'votes' : 'votes-na'}">${esc(p.votes)}</span>
+          ${p.bar ? `<div class="prog" aria-hidden="true"><div class="fill ${p.bar.tone}" style="width:${p.bar.pct}%"></div></div>` : ''}
+        </div>
+      </div>`).join('');
+  return `
+  <section class="panel c7" aria-labelledby="t-comm">
+    <div class="panel-head">
+      <h2 class="panel-title" id="t-comm">Commissioning</h2>
+      <span class="panel-stamp">4 min ago</span>
+    </div>
+    <div class="panel-sub">${cp(copy.commSub)}</div>
+    <div class="prop-rows">${rows}</div>
+  </section>`;
+}
+
+function headroomOkPanel(copy) {
+  return `
+  <section class="panel c5" aria-labelledby="t-head">
+    <div class="panel-head">
+      <h2 class="panel-title" id="t-head">Emission headroom</h2>
+      <span class="panel-stamp">3 min ago</span>
+    </div>
+    <div class="panel-sub">${cp(copy.headSub)}</div>
+    <div class="hr-box">
+      <div class="hr-track">
+        <div class="hr-fill" style="width:63.4%" aria-hidden="true"></div>
+        <div class="hr-cap-tick" aria-hidden="true"></div>
+        <span class="hr-cap-lab">CAP</span>
+      </div>
+      <div class="hr-line">8,880 / 12,000 b this cycle · headroom 3,120 b</div>
+      <div class="hr-note">${cp(copy.headOkNote)}</div>
+    </div>
+  </section>`;
+}
+
+function headroomBreachPanel(copy) {
+  /* Breach(n): fill past the cap tick, hatched overshoot, quantified — plus the
+     AtCap comparison gauge so the boundary and the violation are side by side. */
+  return `
+  <section class="panel c5 hr-breach" aria-labelledby="t-head">
+    <div class="panel-head center">
+      <h2 class="panel-title" id="t-head">Emission headroom</h2>
+      <span class="hr-breach-badge">BREACH</span>
+    </div>
+    <div class="panel-sub">${cp(copy.headSub)}</div>
+    <div class="hr-box">
+      <div class="hr-track">
+        <div class="hr-fill" style="width:85.7%" aria-hidden="true"></div>
+        <div class="hr-over" aria-hidden="true"></div>
+        <div class="hr-cap-tick breach" aria-hidden="true"></div>
+        <span class="hr-past-lab">+140 PAST CAP</span>
+      </div>
+      <div class="hr-line">12,140 / 12,000 b this cycle · overshoot +140 b</div>
+      <div class="atcap-demo-row">
+        <div class="atcap-demo" aria-hidden="true"><div class="fill-full"></div></div>
+        <span class="atcap-note">AT CAP, for contrast — ${cp(copy.atCapNote)}</span>
+      </div>
+    </div>
+  </section>`;
+}
+
+function pricePanel(copy, money) {
+  return `
+  <section class="panel c7" aria-labelledby="t-price">
+    <div class="panel-head">
+      <h2 class="panel-title" id="t-price">Commons price feed — hemp hearts</h2>
+      <span class="panel-stamp">USDA RETAIL SCAN · 2026-W28 · n=42</span>
+    </div>
+    <div class="panel-sub">${cp(copy.priceSub)}</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="price-row">
+        <span class="price-name">16 oz package</span>
+        <div class="track" aria-hidden="true"><div class="fill green" style="width:81%"></div></div>
+        <span class="price-val">${esc(money.p16)} /lb</span>
+      </div>
+      <div class="price-row">
+        <span class="price-name">8 oz package</span>
+        <div class="track" aria-hidden="true"><div class="fill green" style="width:100%"></div></div>
+        <span class="price-val">${esc(money.p8)} /lb</span>
+      </div>
+    </div>
+    <div class="finding">
+      <span class="finding-badge">FINDING</span>
+      <span class="finding-text">${cp(copy.findingBody)}</span>
+      <span class="spacer"></span>
+      <span class="finding-delta">+23% /lb</span>
+    </div>
+  </section>`;
+}
+
+function networkPanel(copy) {
+  return `
+  <section class="panel c4" aria-labelledby="t-net">
+    <div class="panel-head">
+      <h2 class="panel-title" id="t-net">Network</h2>
+      <span class="panel-stamp">1 min ago</span>
+    </div>
+    <div class="panel-sub">${cp(copy.netSub)}</div>
+    <div class="net-rows">
+      <div class="net-row">
+        <span class="net-k">Nodes online</span>
+        <span class="net-v"><span class="dots-on" aria-hidden="true">●●●●●●●</span><span class="dots-sync" aria-hidden="true">◐</span> 7 / 8 · one syncing</span>
+      </div>
+      <div class="net-row">
+        <span class="net-k">Chain height</span>
+        <span class="net-v">1,204,882</span>
+      </div>
+      <div class="net-row">
+        <span class="net-k">Last accord</span>
+        <span class="net-v">signed 6 h ago · 12 signers</span>
+      </div>
+    </div>
+  </section>`;
+}
+
+function circlesMeasuredPanel() {
+  const rows = CIRCLE_ROWS.map(c => `
+      <div class="circle-row">
+        <span class="circle-name">${esc(c.name)}</span>
+        <span class="circle-n">${esc(c.n)} members</span>
+      </div>`).join('');
+  return `
+  <section class="panel c4" aria-labelledby="t-circles">
+    <div class="panel-head">
+      <h2 class="panel-title" id="t-circles">Circles</h2>
+      <span class="panel-stamp">2 min ago</span>
+    </div>
+    <div class="panel-sub">4 circles · 61 members</div>
+    <div style="display:flex;flex-direction:column;gap:8px">${rows}</div>
+  </section>`;
+}
+
+function spiritMeasuredPanel() {
+  return `
+  <section class="panel c4" aria-labelledby="t-spirit">
+    <div class="panel-head">
+      <h2 class="panel-title" id="t-spirit">Spirit</h2>
+      <span class="panel-stamp">this cycle</span>
+    </div>
+    <div class="panel-sub">SPIRIT-1 index, DAO-wide</div>
+    <div class="spirit-num">0.72</div>
+    <div class="spirit-method">method SPIRIT-1 v1 · n=38 · 2026-W29</div>
+  </section>`;
+}
+
+/* Panel::Absent { reason } — deliberately not shown, and the reason is in the
+   room. Never an empty box, a spinner, or a zero. */
+function absentPanel(id, title, reason, lands) {
+  if (state.absence === 'reason-forward') {
+    return `
+  <section class="panel c4 absent-a" aria-labelledby="t-${id}">
+    <div class="panel-head center">
+      <h2 class="absent-title dim" id="t-${id}">${esc(title)}</h2>
+      <span class="absent-chip">ABSENT · ON PURPOSE</span>
+    </div>
+    <div class="absent-reason fwd">${cp(reason)}</div>
+    <div class="absent-lands">${cp(lands)}</div>
+  </section>`;
+  }
+  return `
+  <section class="panel c4 absent-b" aria-labelledby="t-${id}">
+    <div class="panel-head center">
+      <h2 class="absent-title" id="t-${id}">${esc(title)}</h2>
+      <span class="absent-chip">ABSENT · ON PURPOSE</span>
+    </div>
+    <div class="not-drawn">— not drawn —</div>
+    <div class="absent-reason quiet">${cp(reason)}</div>
+    <div class="absent-lands">${cp(lands)}</div>
+  </section>`;
+}
+
+function legend(copy, isTech) {
+  return `
+  <footer class="legend">
+    <div class="legend-title">HOW THIS SURFACE SAYS "I DON'T KNOW"</div>
+    <div class="legend-items">
+      <div class="legend-item"><span class="lchip stale">◷ STALE</span><span class="legend-text">a real gauge, an old number — withheld</span></div>
+      <div class="legend-item"><span class="lchip absent">ABSENT</span><span class="legend-text">not shown on purpose, reason given</span></div>
+      <div class="legend-item"><span class="lchip refused">REFUSED</span><span class="legend-text">renders nothing rather than something wrong — never your fault</span></div>
+      <div class="legend-item"><span class="lchip atcap">AT CAP</span><span class="legend-text">a boundary — legitimate</span></div>
+      <div class="legend-item"><span class="lchip breach">BREACH</span><span class="legend-text">a violation — unmissable</span></div>
+    </div>
+    ${isTech ? `<div class="legend-enums" data-copy>BGauge::stale() · Panel::Absent { reason } · HudRefusal::UnshowableBGauge · HudRefusal::MissingRequiredGauge { which } · HudRefusal::RateOutsideDrawFacility · Headroom::AtCap · Headroom::Breach(n)</div>` : ''}
+    <div class="legend-note">Numbers never change with reading level · colour never carries meaning alone · readable without an account</div>
+  </footer>`;
+}
+
+function render() {
+  const copy = COPY[state.level];
+  const money = MONEY[state.currency];
+  const isMeasured = state.scenario === 'measured';
+  const bStale = state.scenario === 'mixed';
+  const isBreach = state.scenario === 'breach';
+
+  const focusId = document.activeElement && document.activeElement.id;
+
+  document.getElementById('app').innerHTML = `
+  <div class="wrap">
+    ${masthead(copy)}
+    ${hud(copy, money, bStale)}
+    ${isBreach ? breachBanner(copy) : ''}
+    <main class="grid" aria-label="DAO panels">
+      ${respectPanel(copy)}
+      ${commissioningPanel(copy)}
+      ${isBreach ? headroomBreachPanel(copy) : headroomOkPanel(copy)}
+      ${pricePanel(copy, money)}
+      ${networkPanel(copy)}
+      ${isMeasured ? circlesMeasuredPanel() : absentPanel('circles', 'Circles', copy.circleReason, copy.circleLands)}
+      ${isMeasured ? spiritMeasuredPanel() : absentPanel('spirit', 'Spirit', copy.spiritReason, copy.spiritLands)}
+    </main>
+    ${legend(copy, state.level === 'technical')}
+  </div>`;
+
+  if (focusId) {
+    const el = document.getElementById(focusId);
+    if (el) el.focus();
+  }
+}
+
+document.getElementById('app').addEventListener('click', e => {
+  const btn = e.target.closest('[data-level],[data-currency]');
+  if (!btn) return;
+  if (btn.dataset.level) state.level = btn.dataset.level;
+  if (btn.dataset.currency) state.currency = btn.dataset.currency;
+  render();
+});
+
+/* Test seam for verify/ probes (read-only surface; drives the negative
+   controls — never used by the page itself). */
+window.__dao = {
+  get state() { return { ...state }; },
+  set(patch) {
+    if (patch.scenario && SCENARIOS.includes(patch.scenario)) state.scenario = patch.scenario;
+    if (patch.absence && ABSENCE_STYLES.includes(patch.absence)) state.absence = patch.absence;
+    if (patch.level && LEVELS.includes(patch.level)) state.level = patch.level;
+    if (patch.currency && CURRENCIES.includes(patch.currency)) state.currency = patch.currency;
+    render();
+  }
+};
+
+render();
+</script>
+</body>
+</html>
