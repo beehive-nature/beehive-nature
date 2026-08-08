@@ -22,29 +22,27 @@ Last updated: 2026-08-07, at commit of this file.
 
 | # | Item | Needs | State |
 |---|---|---|---|
-| 1 | Cadence rule (docs-only push when scan clean) | founder word — **GIVEN** | **ACTIVE — first run HELD, see below** |
-| 2 | A1 Layer-1 rewording | founder word — GIVEN | Executed (Fable courier) |
-| 3 | INDEX manifest | founder word — GIVEN | **This file** |
-| 4 | ORDERS-1 v0.8 re-commit | founder keyboard (self-bootstrapping clause) | Parked |
-| 5 | BIO-1 v0.2 read + ratify | Code prints path/text | Parked on Code |
-| 6 | w / T0 + Design D picks | Code presents plain-language options | Parked on Code |
-| 7 | (row-7 gate, goose/Code) | founder word | Parked |
+| 1 | Cadence rule (docs-only push when scan clean) | founder word — GIVEN | **ACTIVE — held on bug 1 only, see below** |
+| 2 | A1 Layer-1 rewording | founder word — GIVEN | CLOSED — executed |
+| 3 | INDEX manifest | founder word — GIVEN | CLOSED — this file, self-maintaining |
+| 4 | ORDERS-1 v0.8 re-commit | founder keyboard | **CLOSED — ratified `49803b9`, founder's hand** |
+| 5 | BIO-1 v0.2 read + ratify | Code | **CLOSED — ratified, editorial bump (founder board 2026-08-07)** |
+| 6 | w / T0 + Design D picks | Code presents | **CLOSED — w = attested-capture full weight; T0 = 45-min interim; Design D = 0%/defer canon (founder board 2026-08-07)** |
+| 7 | (row-7 gate) | founder word | **CLOSED — dual-currency: b for compute, stablecoin for service; commit-format kept as-is (founder board 2026-08-07)** |
+
+*Word-stack closures above are recorded from Seat 0's board of 2026-08-07; canonical text lives in the Fable ledger / Code filings. This table is the pointer, not the canon.*
 
 ## Push state — HELD, and why (cadence rule working as designed)
 
-`main` is ahead of `origin/main` by 7 (incl. this INDEX). **The push is HELD, not clean.**
+`main` is ahead of `origin/main` by ~12. **The push is HELD, and the hold has narrowed to bug 1 only.**
 
-Commits `77bb420`, `4c6eabc`, `df197de` contain full descriptions of the three
-genesis-integrity bugs — including exploit magnitudes (backdated `first_minted_at`
-→ 374 b; `AcceptNonEmptyProof` → mint 420e18 in one call). The go-order's fixes have
-**not** landed. Repo is PUBLIC (A52). Go-order condition #3 forbids bug-docs reaching
-the public remote before their fixes.
+Update 2026-08-07: `70f812b` fixed **bug 2** (`first_minted_at` not backdatable —
+now constitutional under `RULING_REPLAY_WORLD_A`) **and bug 3** (mint gate no longer
+caller-supplied). Their doc descriptions are therefore publishable — fix has landed.
+**Bug 1** (`registration_fee` never read → unbounded RAM vector) is **not yet fixed** —
+it opens on Code's next fresh sitting against the Antelope contract. The docs describing
+bug 1's vector must not reach the PUBLIC remote (A52) ahead of its fix.
 
-**The cadence rule's precondition ("scan is clean") is therefore not met.** Holding IS
-the rule executing — the bug-doc carve-out riding along exactly as ruled. No history
-surgery to selectively hide commits (the bug-doc commits are mid-range; and concealing
-vulns is not a hands-seat move).
-
-**Release condition:** the go-order's three fixes land in the same tree, tests green
-under their own names. Then docs and fixes push together in one clean range, and the
-cadence rule self-executes from that point on.
+**Release condition (single pin):** bug 1 lands tests-green in the same tree. Then the
+whole ~12-ahead range pushes in one clean flip and the cadence rule self-executes from
+that point on. No history surgery; concealing an open vuln is not a hands-seat move.

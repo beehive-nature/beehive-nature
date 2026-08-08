@@ -24,9 +24,12 @@
 | Seat | Read repo | Write mount | Commit | Push |
 |---|---|---|---|---|
 | **Code** | yes | yes | **yes** | **yes** |
-| **Cowork/design** | yes (public repos, via clone) | yes | **no** | **no** |
+| **Cowork/design** (claude.ai clone-only) | yes (public repos, via clone) | yes | **no** | **no** |
+| **Cowork (desktop app, this room)** | yes | yes | **yes** — Windows-side git via shell, hook-gated | **yes** — but push is founder-gated by ruling, not by capability |
 
-**Verified, not assumed:** `.git` is read-only to the Cowork seat — `git add` fails. **LOVErnment-DAO is public and clonable anonymously; `beehive-nature` requires auth.**
+**Verified, not assumed:** the `.git`-read-only claim held for the **claude.ai clone-only** Cowork seat, where `git add` fails. It does **NOT** hold for the **desktop-app Cowork** in this room: it commits and pushes through Windows-side git via the shell, hook-gated, demonstrated across this session (e.g. `3f12c7d`, `79a20a5`). The two are different seats with the same name — do not read one's limits onto the other. Corrected by desktop-Cowork under founder commit-rule authorization, 2026-08-07. **LOVErnment-DAO is public and clonable anonymously; `beehive-nature` requires auth.**
+
+> **Push is founder-gated, not capability-gated.** Desktop-Cowork *can* push; by standing ruling it does not push without the founder's word and a clean carve-out scan. Capability and authorization are separate — this line records the capability; the cadence ruling governs the authorization.
 
 > **Consequence: the design seat can produce and stage, never land. Every durable artifact needs exactly one line to Code.** That is the whole courier cost, and it is one line, not a pile.
 
