@@ -34,8 +34,13 @@ SpendReceipt {
   operation        : OperationRef      // WHAT caused the spend
   total            : Amount            // (a) — see §4, computed not stored
   line_items       : [LineItem]        // (b) — one per adapter-rail-resource triple
+  visibility       : Visibility        // RULED 2026-08-08 — see §3a
   provenance       : Provenance        // (d)
 }
+
+Visibility = private       // (A) spending bDiD only
+           | parent        // (B) spending bDiD + its parent in the bDiD hierarchy
+           | public        // (C) world-readable
 
 LineItem {
   adapter          : string            // the BNR adapter that consumed the resource
@@ -77,6 +82,44 @@ lesson as the mint gate: a caller-supplied classification is not a classificatio
 **It is never fiat-pegged and never rewritten.** If b appreciates 100×, a receipt saying
 *"3,600 mesh_seconds"* remains exactly as true as the day it was written. This is why the
 resource quantity — not the price — is the durable field.
+
+## 3a. Visibility (RULED 2026-08-08) — three options, user-selected by intent
+
+**All three ship.** Founder: *"Having all available options seems optimal depending on the
+various intentions users will need/want."* The `visibility` field carries the per-receipt
+choice; a bDiD-level **policy default** supplies it when the caller does not.
+
+| Value | Visible to | Typical intent |
+|---|---|---|
+| `private` | spending bDiD only | Default posture for personal/persona spend |
+| `parent` | spending bDiD + its parent in the hierarchy | An agent funded by a parent bDiD; parent needs sight of what it funded |
+| `public` | world | Auditability, public accountability, published work |
+
+**Two properties that constrain the implementation:**
+1. **Visibility is an access-control property of receipt STORAGE, not merely a label.**
+   Marking a receipt `private` while writing it to a public store publishes it. The field
+   is a *directive to the storage layer*, and validation must check they agree.
+2. **Visibility is not retroactive.** Widening a receipt from `private` to `public` is a
+   new disclosure; narrowing from `public` to `private` **cannot un-publish** what was
+   already readable. Changes apply to future receipts and to future reads — never to what
+   has already been seen. Record a visibility change as a **new** receipt referencing the
+   prior one (§6 append-only), never as an edit.
+
+### ⛔ DEFAULT — NOT YET RULED. VALIDATION MUST FAIL UNTIL IT IS.
+
+The founder ruled **which options exist**, not **which one a new bDiD starts in.** That
+word is outstanding.
+
+**Implementation requirement, deliberate:** the bDiD-level default is
+`visibility_default: unset` at issuance, and **a receipt whose `visibility` is unset MUST
+fail validation.** No silent default is permitted.
+
+*Why this is a hard failure rather than a fallback:* the default **is** the decision —
+receipts are auto-generated and defaults are rarely changed, so whatever value ships
+becomes the posture of nearly every receipt ever written. And the asymmetry runs one way:
+**a default-private posture can be relaxed later; a default-public posture can never be
+retracted for receipts already written.** A convenient fallback here would quietly make
+the decision that the founder explicitly reserved.
 
 ## 4. ⚠ STRUCTURAL FINDING — the total requires a rate, and the rate is unruled
 
@@ -137,3 +180,6 @@ appears in this document.**
 - [ ] Round-trip: serialize → deserialize → re-serialize is byte-identical (needed before
       `receipt_id` can be content-addressed at all).
 - [ ] No fiat currency field exists anywhere in the schema.
+- [ ] **A receipt with `visibility` unset FAILS validation** — no silent default (§3a).
+- [ ] `visibility` and the store the receipt is written to **agree**; a mismatch fails.
+- [ ] A visibility change emits a **new** receipt referencing the prior one; it never edits.
