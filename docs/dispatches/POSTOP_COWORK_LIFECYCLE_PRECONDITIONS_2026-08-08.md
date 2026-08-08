@@ -46,6 +46,17 @@ proof: the bulk of the work is **producing and verifying signed records**, and t
 interaction is a single anchor call per epoch. **REPORTED** as the ruled design; the record
 format that makes it executable does not exist yet (D1).
 
+> **✅ F3 ANSWERED 2026-08-08 by ruled law — no new decision was needed.** **WORLD A** makes
+> bTiMeLiNe forward-only and chronological, so validity evaluates against a **RECORD-CARRIED
+> SIGNED TIMESTAMP**, with the **epoch root as the ordering witness**. **Wall-clock is
+> advisory only**, and a resolver **must never accept a record whose signed timestamp
+> precedes the prior revision's**.
+> **Consequence for this proof, and it is a real unblock:** because time is record-carried
+> rather than wall-clock, the 28-day and 365-day intervals are **exercised by signing
+> records with the intended timestamps, not by waiting or by faking a clock.** The harness
+> needs no time-travel machinery at all — the thing I flagged as a design risk turns out to
+> be the design's own answer. Nothing here escalates; no vector is broken by it.
+
 **F3 — Simulated time is required and is a design decision, not a convenience.** The proof
 must exercise a **28-day** change interval and a **365-day** term. These cannot be waited
 out. Whether validity intervals are evaluated against **wall-clock**, **epoch sequence**, or
