@@ -54,12 +54,46 @@ only the named mechanism was wrong.
 > a receipt, not a caution. Text below is preserved unedited as the record of a refuted
 > recommendation (promote-don't-erase); **do not build against it.**
 >
-> **Also UNRESOLVED, not killed:** the ERC-7710 / ERC-7715 status named in this amendment.
-> ERCs were **split out of `ethereum/EIPs` into `github.com/ethereum/ERCs`** — a 404 in the
-> old repo is consistent with the split, not with non-existence. Recheck `ERCS/erc-7710.md`
-> and `ERCS/erc-7715.md` **there** before any verdict enters the law book. **If that recheck
-> fails, this amendment needs a second correction, because it names ERC-7710 as the real
-> primitive.** (goose's item.)
+> ### ⭐ RECONCILED 2026-08-08 — THE CONVERGENCE (build Stage 2 on this)
+>
+> The two source reads were **both true, at different layers** — not a conflict:
+>
+> | Read | Crate + ref | Finding |
+> |---|---|---|
+> | goose | `ant-core` @ `ant-client 81a0a24` | `approve_token_spend()` hardcodes `U256::MAX` (`payment.rs:141`; doc `:130`) |
+> | Code | `evmlib` @ `main` | `Wallet::approve_to_spend_tokens` accepts an **arbitrary** amount |
+>
+> **What settles it:** **BOTH payment paths AUTO-TOP-UP to `U256::MAX` when the allowance is
+> insufficient** — `wallet.rs:430-441` (regular) and `wallet.rs:201-204` (merkle). **A finite
+> approval is therefore erased on first payment.** Code's arbitrary-amount setter is real but
+> cannot hold a ceiling against the top-up.
+>
+> **THE ONE PATH THAT PRODUCES A FINITE APPROVAL IS THE EXTERNAL-SIGNER PATH** — it sets
+> `approve_amount` to exactly the total owed.
+>
+> **The architectural point, and it is the good news of the night:** the seam that keeps keys
+> **outside the process** and the seam that **bounds the approval** are **THE SAME SEAM.** One
+> mechanism, two properties — not two problems to solve. **A finite approval is achievable
+> precisely when the client does NOT hold the signing key.** External-signer is load-bearing
+> on both axes, so the custody half of Stage 2 now has a **named path with a citation under
+> it**, where an hour ago it had none.
+>
+> **Still blocked:** the **gas** blocker (Arbitrum gas is ETH; the agent earns ANT; no
+> sponsorship path). Stage-2 `pay`-verb text stays blocked on that alone.
+>
+> **ERC RECHECK CLOSED 2026-08-08 — this amendment STANDS, no second correction.**
+> **ERC-7710 and ERC-7715 both EXIST** at `github.com/ethereum/ERCs` (`ERCS/erc-7710.md`,
+> `ERCS/erc-7715.md`). The earlier 404 was the repo split, not non-existence — goose checked
+> `ethereum/EIPs` and owned the error. **Naming ERC-7710 as the real primitive is correct.**
+>
+> **Two qualifications that must travel with every citation of it:**
+> 1. **Both are DRAFT, not Final.** Spec text must say so; a Draft ERC can change under us.
+> 2. **Sharpened, replacing this amendment's looser wording:** *"caveats are absent from
+>    ERC-7710's **normative Specification** entirely and exist only in MetaMask's
+>    **non-normative Reference Implementation**."* The earlier phrasing implied caveats were
+>    normative-but-misdescribed; they are **not in the normative text at all.** Anyone
+>    writing spec against "ERC-7710 caveats" is writing against a reference implementation,
+>    not a standard.
 
 ## AUTONOMI CUSTODY — the way through is NOT the framework
 

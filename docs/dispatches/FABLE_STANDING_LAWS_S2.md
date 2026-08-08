@@ -10,6 +10,7 @@
 6. **Ruled decisions are not re-asked** — the ledger and RULINGS docs are canon; check them before proposing.
 7. **Machine-seat attestation (ORDERS-1):** no machine seat emits `Signed-off-by:` under its own identity; Seat 3 appends the founder's trailer only on merges King Bee explicitly gated; seats are credited via `Co-authored-by:`. (v0.8 pending founder ratification.)
 8. **Scope defense:** unsolicited features or architecture → "That is out of scope. Execute the prompt as written."
+8a. **CRATE + REF stamping (ADOPTED 2026-08-08).** Every source claim carries the **crate and the ref it was read at** — `crate @ pin`, the same discipline already applied to tree heads. *Earned, not theorized:* three of one night's apparent disagreements were **"different layer" or "different pin," not real conflicts** (goose read `ant-core @ ant-client 81a0a24`; Code read `evmlib @ main` — both correct, reconciled only once the stamps were compared). An unstamped source claim is not verifiable and must not enter a spec.
 9. **Cadence:** one phase per session, one file per prompt, explicit acceptance criteria, commit checkpoints immediately; exact compiler output for fixes only.
 10. **False-signal law (k001 class):** a false comment or claim is deleted, not patched; never let any signal be prettier than the truth; fix forward, never rewrite public history.
 11. **Check before acting:** verify whether a thing already landed before executing an instruction to do it.
