@@ -105,21 +105,51 @@ choice; a bDiD-level **policy default** supplies it when the caller does not.
    has already been seen. Record a visibility change as a **new** receipt referencing the
    prior one (§6 append-only), never as an edit.
 
-### ⛔ DEFAULT — NOT YET RULED. VALIDATION MUST FAIL UNTIL IT IS.
+### DEFAULT — RULED 2026-08-08: `private`
 
-The founder ruled **which options exist**, not **which one a new bDiD starts in.** That
-word is outstanding.
+**A new bDiD starts `private`.** Founder: *"private by default where it makes sense, as
+public previously described as lower cost; so informed consent can help here too."*
 
-**Implementation requirement, deliberate:** the bDiD-level default is
-`visibility_default: unset` at issuance, and **a receipt whose `visibility` is unset MUST
-fail validation.** No silent default is permitted.
+`visibility_default: private` at bDiD issuance. Going public is **deliberate, informed, and
+cheaper.**
 
-*Why this is a hard failure rather than a fallback:* the default **is** the decision —
-receipts are auto-generated and defaults are rarely changed, so whatever value ships
-becomes the posture of nearly every receipt ever written. And the asymmetry runs one way:
-**a default-private posture can be relaxed later; a default-public posture can never be
-retracted for receipts already written.** A convenient fallback here would quietly make
-the decision that the founder explicitly reserved.
+**Why the default is self-enforcing without a rule.** The discount for `public` is the
+**real cost difference** — public bData chunks vs zbData self-encrypted storage — **not a
+subsidy.** That single property does the work a policy would otherwise have to do: nobody
+is *prevented* from over-sharing, and nobody pays a *privacy premium*. Privacy is the
+free-by-default state because it is the state that costs what it costs; publicity is
+cheaper because it genuinely is cheaper. Implementations **must not** invent a synthetic
+discount — if the cost gap ever narrows, the discount narrows with it. A subsidised
+"public" would be a nudge, and a nudge is not consent.
+
+### Informed consent is the MECHANISM, not a disclaimer
+
+Switching a receipt or a bDiD default to `public` requires a consent surface that shows
+**both consequences together, at the moment of choosing:**
+
+1. **The privacy consequence** — what becomes world-readable, including §3b below.
+2. **The cost consequence** — the actual storage-cost difference.
+
+**A consent flow that shows one without the other is not informed consent** and does not
+satisfy this ruling. Cost shown alone is an inducement; privacy shown alone hides why
+anyone would choose it. Both, together, or the choice is not informed.
+
+## 3b. What `public` actually reveals — the invertibility disclosure
+
+**Carried forward from the privacy survey and now binding on the consent surface.**
+
+For **simple, single-rail operations, a public `total` may be invertible back to the line
+items.** If rates are public and an operation has few line items, disclosing the total can
+disclose the breakdown — so choosing `public` for the aggregate is not reliably a way to
+publish "just the number."
+
+**Therefore the consent surface must state honestly what `public` reveals**, and must not
+imply that a public total conceals the itemisation. The protection is real for complex
+multi-rail operations and **weak for simple single-rail ones.**
+
+*This is a disclosure requirement, not a defect to engineer around.* The honest statement
+is cheap; a user who believes a public total is opaque when it is not has been misled by
+the interface, which is the failure mode informed consent exists to prevent.
 
 ## 4. ⚠ STRUCTURAL FINDING — the total requires a rate, and the rate is unruled
 
@@ -158,7 +188,7 @@ appears in this document.**
 | Whether receipts are per-operation or per-epoch-batched | Cost and privacy tradeoff; unruled |
 | Signature / attestation over the receipt | Depends on the passkey succession question, explicitly still open |
 | On-chain vs off-chain receipt storage | Touches the multi-asset escrow and BNRoSe-3 archival decisions |
-| Privacy posture | **NARROWED 2026-08-08** → [`dispatches/SURFACED_SPEND_RECEIPT_PRIVACY_2026-08-08.md`](./dispatches/SURFACED_SPEND_RECEIPT_PRIVACY_2026-08-08.md). **Settled:** the spender always sees its own accounting (KISS ruling), and **financial privacy comes from RAIL SELECTION, not from hiding receipts** — a user wanting privacy picks a private rail (e.g. Zano); the receipt then faithfully records a spend already private at the rail. Persona-scoping remains the house pattern. **Single open question: VISIBLE TO WHOM** — spending bDiD only / bDiD + parent / public. Awaiting founder word. Schema is unaffected either way: visibility is an access-control property of receipt *storage*, not a field. |
+| ~~Privacy posture~~ | ✅ **CLOSED 2026-08-08** — all three options ship, `private` is the default, informed consent (privacy + cost together) gates any move to `public`, invertibility disclosed. See §3a / §3b. History: → [`dispatches/SURFACED_SPEND_RECEIPT_PRIVACY_2026-08-08.md`](./dispatches/SURFACED_SPEND_RECEIPT_PRIVACY_2026-08-08.md). **Settled:** the spender always sees its own accounting (KISS ruling), and **financial privacy comes from RAIL SELECTION, not from hiding receipts** — a user wanting privacy picks a private rail (e.g. Zano); the receipt then faithfully records a spend already private at the rail. Persona-scoping remains the house pattern. **Single open question: VISIBLE TO WHOM** — spending bDiD only / bDiD + parent / public. Awaiting founder word. Schema is unaffected either way: visibility is an access-control property of receipt *storage*, not a field. |
 
 ## 6. Inherited invariants
 
@@ -180,6 +210,14 @@ appears in this document.**
 - [ ] Round-trip: serialize → deserialize → re-serialize is byte-identical (needed before
       `receipt_id` can be content-addressed at all).
 - [ ] No fiat currency field exists anywhere in the schema.
-- [ ] **A receipt with `visibility` unset FAILS validation** — no silent default (§3a).
+- [ ] **A new bDiD is issued with `visibility_default: private`** (§3a, ruled).
+- [ ] A receipt with `visibility` unset resolves to the bDiD default; if the bDiD has no
+      default set, validation **fails** rather than assuming one.
+- [ ] Any transition to `public` passes through a consent surface showing **privacy AND
+      cost consequences together** — one without the other fails the ruling (§3a).
+- [ ] The consent surface states the **invertibility disclosure** (§3b) — no implication
+      that a public total conceals its line items.
+- [ ] The `public` discount equals the **measured** storage-cost difference; **no synthetic
+      subsidy** (§3a).
 - [ ] `visibility` and the store the receipt is written to **agree**; a mismatch fails.
 - [ ] A visibility change emits a **new** receipt referencing the prior one; it never edits.
