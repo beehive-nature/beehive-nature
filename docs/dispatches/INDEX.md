@@ -75,7 +75,35 @@ written.**
   independently verified via GitHub API (`"private": false`, `"visibility": "public"`),
   so the contract source is already world-readable.
 
-**Honest residual, stated once for the founder's word:** public *source* is not the same as
-a published *worked exploit analysis with magnitudes*, which is what the held docs contain,
-and registration is open. The gap is real but small, and it is a founder call, not a seat
-call. **Push remains HELD pending Seat 0's one word.** No history surgery either way.
+**Honest residual, recorded not hidden:** public *source* is not the same as a published
+*worked exploit analysis with magnitudes*, and goose established registration is **ungated
+in code**. Narrowing fact from Seat 0: the contract is **not accepting registrations, with
+nothing expired until 2027-08-01** — so the vector is not practically reachable today even
+though the code carries no gate. The gap is real but small. **The founder weighed it and
+gave the word.**
+
+## RELEASED — founder word 2026-08-08 ("full steam")
+
+**The hold is LIFTED and the range is PUSHED.** Receipt:
+
+```
+push:        3a1af37..7c858b7   main -> main
+HEAD:        7c858b78628f8c977176e51c717ad259b4b7df5b
+origin/main: 7c858b78628f8c977176e51c717ad259b4b7df5b   (ls-remote verified)
+ahead 0 · behind 0
+```
+
+**Release condition REPLACED (Cowork finding adopted by Seat 0).** The prior condition —
+*"hold lifts when bug 1 lands tests-green"* — was **dead**, not merely unmet: the fee
+verdict removed the fix it assumed, so no future event could ever satisfy it. It is
+replaced by: **released by founder word, 2026-08-08.** No seat should wait on a milestone
+that can never arrive.
+
+**Basis of record:** Code's public-repo argument, independently verified by Cowork via the
+GitHub API (`beehive-nature/b-domain` → `"private": false`). Not the freeze — Fable's
+"registration closed by policy" was withdrawn as unsupported by the code.
+
+**Cadence rule now self-executing** for docs-only ranges with a clean scan; no further word
+needed per push. Bug 1 remains **DO-NOT-WRITE**; the GO_ORDER gate is unaffected; no
+tokenomics constant was in the pushed range (verified: the sole `420e18` match was a code
+*comment* describing the closed attack).
