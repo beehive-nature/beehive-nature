@@ -49,6 +49,8 @@ The global root spans ALL names (depth-40 indexed tree). A resolver holding one 
 
 **R6c — PROOF ENCODING (NORMATIVE).** Inclusion proofs MUST be encoded in **BINARY**, not hex-JSON. §3.5's ~1.7 KB resolution-cost budget is in binary bytes. At 10^10 scale, a proof carries ceil(log2(10^10)) ≈ 34 sibling hashes; at 32 B each = **1,088 B** binary. Adding leaf hash (32 B) + path-direction bitmap (~5 B) = **~1,125 B** — within budget. The same proof as hex-JSON expands to **~2,400 B** (each byte → 2 hex chars + JSON delimiters) — **over budget on encoding alone**. A budget without a pinned encoding is not a budget.
 
+**MEASURED (Code, synthetic 10^3-10^7 tree):** ceil(log2(N)) exact at every tested N, including both sides of 2^20. At 10^10: binary proof = **1,141 B** inside the **1,740 B** budget with **599 B** headroom. Same proof as hex-JSON = **~2,550 B**, over budget on encoding alone. R6c pin is now MEASURED, not asserted.
+
 **R6d — UNIFORM PAGE PADDING (NORMATIVE).** Prefix-page buckets are padded to a uniform length. Raw bucket size is a side channel that leaks population density of a name's neighborhood. HIBP ships Add-Padding (normalizing to 800-1,000 records) because this leakage is known and mitigated in production. A known side channel with a shipped mitigation is not a design choice. k = 10 (ruled by Seat 1, founder-delegated). Page size = 2^k = 1,024 entries. Buckets padded to 1,024 uniformly. Download per cold lookup: 1,024 x 32 B = ~32 KB, constant at any N.
 
 **Why k=10 (re-derivable, not a taste):**
@@ -60,7 +62,9 @@ The global root spans ALL names (depth-40 indexed tree). A resolver holding one 
 
 **LEAKAGE SEVERITY (cite the average, not the worst):** The median candidate set per prefix is ~10, meaning response size alone collapses effective anonymity from ~1,048,576 to ~10,240 — a ~100x reduction. The 24 uniquely-fingerprinted prefixes (2.3%) are the WORST case; ~100x is the AVERAGE case and the one to cite.
 
-**MEASUREMENT FLOOR:** This was measured under near-uniform SHA-256 distribution with occupancy clustered 933-1,133. Real-world skew — popular name patterns, bulk registrations, adjacent-name claims — widens the spread and increases fingerprinting. Nobody should read 2.3% as expected severity.
+**OCCUPANCY THREAT (real mechanism, not distributional):** Hashing destroys input structure — 50k names sharing a literal prefix scatter across all 1,024 buckets, so real-world name patterns do NOT concentrate occupancy. Skew moves the leak from 2.3% to only 2.9%. The real threat is adversarial GRINDING: ~133,000 hash attempts find a favorable bucket (trivial computation), but 122 REAL REGISTRATIONS are needed to make a chosen bucket the unique largest. Grinding is bounded by REGISTRATION COST, not hash uniformity.
+
+**CROSS-THREAD FLAG:** The privacy threat model is now coupled to registration pricing — a cheaper registration is a cheaper occupancy attack. This is a NEW input to the per-bDiD-cap decision (previously weighed only cost-recovery, rationing, sybil, spam). Do not set a registration cost without it.
 
 **C4 — PADDING RECORDS INDISTINGUISHABLE FROM REAL (ruled, Seat 1).** Padding records must have the same byte distribution as real records — no sentinel, no distinguishable filler. Four reasons: (1) a sentinel hides occupancy from a size-observer but hands TRUE OCCUPANCY to the requester, who can count real records; (2) occupancy over many queries is namespace-density mapping — the enumeration channel this mechanism exists to close; (3) the cost is zero since the bytes ship either way; (4) it weakens nothing — validity comes from the SIGNATURE and the MERKLE PROOF, never from page membership.
 
