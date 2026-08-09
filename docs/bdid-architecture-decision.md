@@ -136,6 +136,28 @@ commit(epoch, new_root, prev_root, tree_size, delta_id, forced_watermark)
 
 which **overwrites** the oldest slot in a 144-row ring. Net RAM delta: **0 bytes**.
 
+> **ABI CAVEATS — what `commit()` does and does not guarantee.**
+> *Measured on Jungle4 2026-08-09 (Cowork, epoch 146, tx `f32e7478…`). Recorded here so no
+> reader infers a guarantee the contract does not make.*
+>
+> 1. **`tree_size` is ASSERTED, not verified against `new_root`.** The contract enforces
+>    **monotonicity only** — *"tree_size may never shrink; the tree is append-only"*,
+>    confirmed by a deliberate shrink attempt, which was refused. It does **not** and cannot
+>    check that `new_root` actually commits to `tree_size` leaves. A committer may state any
+>    non-shrinking value. This is consistent with the split — **the chain proves ORDER, the
+>    resolver proves CONTENT** — but `tree_size` *reads* like a verified quantity and is not
+>    one. Do not build a check on it.
+> 2. **`tree_size` continuity does not imply a real ancestor relationship.** Two consecutive
+>    rows can satisfy monotonicity while their roots commit to unrelated trees (as happens
+>    whenever synthetic or test rows precede real ones). Continuity of the counter is
+>    arithmetic, not structural.
+> 3. **The `commits` table is a 144-epoch WINDOW, not an archive.** Wrap silently overwrites
+>    the oldest slot — observed: epoch 146 replaced epoch 2 while epoch 3 remained. Anyone
+>    auditing history must treat the table as a sliding window and source older epochs
+>    elsewhere. Relatedly, a skipped epoch during initial ring **fill** leaves its slot cold
+>    until the first wrap, so **row count does not indicate ring health** — do not build that
+>    check either.
+
 Sequencer hardware: ~2×10¹⁰ tree nodes × 32 B ≈ **640 GB NVMe**, 8 cores, ~$1,500. At the aggressive rate of 10B names claimed over 5 years, that is 38,052 inserts/epoch × 40 = 1.5M sha256/epoch — about two seconds on one core. Deliberately hobbyist-grade so the set is contestable by people, not by capital.
 
 ---
