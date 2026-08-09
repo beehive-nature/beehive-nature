@@ -58,6 +58,8 @@ version = "0.1.0"
 dependencies = [
  "base64",
  "chrono",
+ "curve25519-dalek",
+ "ed25519-dalek",
  "k256",
  "p256",
  "rand 0.8.7",

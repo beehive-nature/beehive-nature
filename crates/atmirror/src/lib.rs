@@ -60,6 +60,7 @@ pub mod mirror;
 pub mod mst;
 pub mod rail;
 pub mod receipt;
+pub mod record_sig;
 pub mod restore;
 pub mod state;
 pub mod varint;
