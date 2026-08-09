@@ -47,6 +47,8 @@ The global root spans ALL names (depth-40 indexed tree). A resolver holding one 
 
 **R6b — ODD-NODE PROMOTION (NORMATIVE).** When a level has an odd number of nodes, the unpaired node is **PROMOTED UNCHANGED** to the next level. **DO NOT DUPLICATE.** Duplicating (the Bitcoin construction) carries **CVE-2012-2459**: two distinct leaf sets produce an identical root, making the tree non-injective. RFC 6962 promotes unchanged and is not vulnerable. The two choices yield **DIFFERENT ROOTS** — this is consensus, not style. (See TV-IP6 for the proof.)
 
+**R6c — PROOF ENCODING (NORMATIVE).** Inclusion proofs MUST be encoded in **BINARY**, not hex-JSON. §3.5's ~1.7 KB resolution-cost budget is in binary bytes. At 10^10 scale, a proof carries ceil(log2(10^10)) ≈ 34 sibling hashes; at 32 B each = **1,088 B** binary. Adding leaf hash (32 B) + path-direction bitmap (~5 B) = **~1,125 B** — within budget. The same proof as hex-JSON expands to **~2,400 B** (each byte → 2 hex chars + JSON delimiters) — **over budget on encoding alone**. A budget without a pinned encoding is not a budget.
+
 ## RULE-APPLICATION ORDER
 0. R6 (inclusion proof) — prove record committed in current epoch root
 1. R1 (signature) → 2. R0 (World A) → 3. R3 (revision gap) → 4. R5 (grace lock, PREVIOUS record) → 5. R2 (term) → 6. R4 (cap)
