@@ -128,7 +128,10 @@ Total network cost of a resolution: ~1.7 KB. **Privacy mode:** fetch the whole d
 
 ### 3.5 Epoch mechanics
 
-10-minute epochs, 144/day. Leader = `seq[ sha256(block_id at epoch boundary) mod n ]` — a public beacon nobody controls in advance. The leader applies the ordering rule, updates the indexed tree incrementally, packs **one ANS-104 DataItem per epoch** (this is why `atmirror::arweave` matters: a DataItem header is ~1,044 B, so one item per user would be 500%+ overhead and 10¹⁰ items is absurd; one item per epoch amortizes it to ~0.001%), and submits **one** Vaulta action:
+10-minute epochs, 144/day. Leader = `seq[ sha256(block_id at epoch boundary) mod n ]` — a public beacon nobody controls in advance. The leader applies the ordering rule, updates the indexed tree incrementally, packs **one ANS-104 DataItem per epoch** (this is why `atmirror::arweave` matters: a DataItem header is ~1,044 B, so one item per user would be 500%+ overhead and 10¹⁰ items is absurd; one item per epoch amortizes it to ~0.001%), — but it **FUNDS only this epoch-fixed overhead** (the header + the on-chain
+commit), **never the per-name bytes in the delta** (registrant-pays invariant, below;
+and see the VERIFICATION RESULT for why "one DataItem per epoch" and per-name
+claimant-funding are in tension) — and submits **one** Vaulta action:
 
 ```
 commit(epoch, new_root, prev_root, tree_size, delta_id, forced_watermark)
@@ -151,13 +154,32 @@ which **overwrites** the oldest slot in a 144-row ring. Net RAM delta: **0 bytes
 >
 > | cost | who pays | why |
 > |---|---|---|
-> | on-chain `commit()` — 356 B cold, **0 B on wrap** | **leader** (permissionless — anyone may bear it) | epoch-fixed |
-> | ANS-104 DataItem **header** — ~1,044 B | **leader** | epoch-fixed; this is what one-item-per-epoch amortisation buys |
-> | DataItem **per-name body bytes** | **CLAIMANT** | scales with users — **must never be leader-funded** |
+> | on-chain `commit()` — 356 B cold, **0 B on wrap** | **leader** (permissionless — anyone may bear it) | **the leader's ONLY cost** |
+> | ANS-104 DataItem **header** — ~1,044 B | **CLAIMANT** | under per-name items the header is **per-name** — it grows with users |
+> | DataItem **per-name body bytes** | **CLAIMANT** | scales with users |
 >
-> **The leader PACKS the per-name body; it does not FUND it.** Mechanism:
-> **atmirror's `x-paid-by` Turbo delegate** — already built for the custody work. **The gap
-> is integration, not invention.**
+> **RULED (a): PER-NAME CLAIMANT-FUNDED DataItems.** Each claimant mints and funds **its
+> own** DataItem — header and body together, ~$0.000034 per name, Turbo-bundled server-side.
+> No float, no new accounting layer.
+>
+> *Header corrected 2026-08-09: it was listed as leader-funded/epoch-fixed. Once per-name
+> items were ruled, **the header moved sides** — and my own test decides it: **does this cost
+> grow with the number of names?** Under (a) the header does. I wrote the test and then did
+> not apply it to the row above it.*
+>
+> *Also corrected: I repeated "the gap is integration, not invention" for `x-paid-by`. That
+> was **false at the mechanism level** — `x-paid-by` is `Option<String>`, **one delegate per
+> DataItem**, so header and body are a single payment unit and cannot be split across payers.
+> That constraint is precisely why per-name items are the answer rather than a shared epoch
+> item.*
+>
+> **Why the "10^10 items is absurd" objection dissolves:** :131 assumed **one actor** minting
+> every item. Under (a) each claimant mints and funds its own — there is no single actor
+> bearing 10^10 items, so the count was never the leader's burden to carry.
+>
+> **Rejected — (b) leader-fronts-and-reimburses:** it is **invention** (a new accounting
+> layer), and a non-reimbursing claimant leaves the leader funding records — **the same
+> hardline breach, relocated.**
 >
 > **Any design where epoch inclusion subsidises record storage is a HARDLINE BREACH BY
 > CONSTRUCTION, regardless of how cheap it looks.** The hardline is that BNR funding must
@@ -186,6 +208,52 @@ which **overwrites** the oldest slot in a 144-row ring. Net RAM delta: **0 bytes
 > *Verification of the current design against this invariant is Code's; this entry records
 > the rule, not a claim that the code satisfies it. The on-chain path was verified clean;
 > the off-chain DataItem path is where the breach was found.*
+
+> ## VERIFICATION RESULT — Code (Seat 3), 2026-08-09
+> *Assigned by LAW 8s. Records what the design does against the invariant above — including a
+> mechanism-level collision with the `x-paid-by` resolution. Escalated, not resolved (8c: this is
+> Code's finding; the design call is the founder's / Seat 1's).*
+>
+> **On-chain: CLEAN, proven.** `commit_row` is eight fixed-size scalars; `delta_id` is a 32 B
+> pointer, never records. Measured 356 B cold / 0 B wrap on Jungle4 (`banchor22222`), independent of
+> name count. The committer's on-chain payment cannot scale with records. This half holds by
+> construction.
+>
+> **⚠ The `x-paid-by` resolution is INVENTION under "one DataItem per epoch", not integration.**
+> Verified in `crates/atmirror/src/arweave.rs`: `x-paid-by` is ONE delegate per DataItem
+> (`paid_by: Option<String>` :54; one `x-paid-by` header per POST :218-220), and `data_item()` builds
+> ONE item with ONE owner (:264). **A DataItem is a single payment unit** — its header and its
+> per-name body are charged together, to one payer. So the table above **cannot be executed as
+> written** while `:131` says one DataItem per epoch: you cannot fund the header from the leader and
+> the per-name body from claimants inside the same item. `x-paid-by` attributes the WHOLE item to one
+> payer — leader (breach) or one claimant (absurd).
+>
+> **The only shape where `x-paid-by` achieves per-name claimant funding is per-name DataItems** —
+> each name its own item, `x-paid-by = that claimant`. But then the ~1,044 B header is PER-NAME and
+> CLAIMANT-paid, which dissolves the "header — epoch-fixed — leader" row above and falsifies `:131`'s
+> one-item amortisation. By the block's own test (:178 *does the cost grow with names?*): under
+> per-name items the header grows with names → claimant-funded; the leader's only epoch-fixed cost is
+> the on-chain commit.
+>
+> **Cost of that shape, to inform the choice not make it:** header ~1,044 B/name at $32.56/GiB ≈
+> **$0.000034/name, claimant-paid** — negligible, bounded. Turbo bundles per-name items server-side,
+> so ~38,052 items/epoch is ordinary throughput, not the "10¹⁰ items is absurd" `:131` rejected —
+> that objection was one actor minting all items; here each claimant mints and funds its own.
+>
+> **ESCALATED — a design call above this seat:** (a) relax `:131` to per-name claimant-funded
+> DataItems, accept the bounded claimant-paid header — clean, and "integration" then holds; or
+> (b) keep one-DataItem-per-epoch and build a reimbursement/pre-pay accounting layer — that is
+> invention, and carries a float-risk breach vector (a non-reimbursing claimant leaves the leader
+> funding records). The invariant is safe under either once chosen; it is NOT safe while `:131` says
+> "one DataItem per epoch" AND the table says "per-name body claimant-funded via `x-paid-by`",
+> because those two cannot both hold.
+>
+> **Negative control (8r):** the discriminating live test — a real Turbo upload showing leader-charged
+> vs claimant-charged — needs funded Arweave keys this seat does not hold and will not create (no-key
+> rule; real money). The structural proof stands without it: one owner + one `Option<paid_by>` per
+> item is dispositive, and a confirming harness would only re-assert the type signature (a vacuous
+> test, 8n). The result that proves the point is that the claimant-funded variant is UNBUILDABLE
+> inside one epoch DataItem — the breach is structural, not a bug.
 
 > **ABI CAVEATS — what `commit()` does and does not guarantee.**
 > *Measured on Jungle4 2026-08-09 (Cowork, epoch 146, tx `f32e7478…`). Recorded here so no
