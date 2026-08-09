@@ -58,6 +58,12 @@ The global root spans ALL names (depth-40 indexed tree). A resolver holding one 
 4. Dialing up is free via j decoys (mechanism C); the floor need only be defensible, not maximal.
 5. Uniform padding to 1,024 is required anyway; page size is constant regardless of prefix occupancy.
 
+**LEAKAGE SEVERITY (cite the average, not the worst):** The median candidate set per prefix is ~10, meaning response size alone collapses effective anonymity from ~1,048,576 to ~10,240 — a ~100x reduction. The 24 uniquely-fingerprinted prefixes (2.3%) are the WORST case; ~100x is the AVERAGE case and the one to cite.
+
+**MEASUREMENT FLOOR:** This was measured under near-uniform SHA-256 distribution with occupancy clustered 933-1,133. Real-world skew — popular name patterns, bulk registrations, adjacent-name claims — widens the spread and increases fingerprinting. Nobody should read 2.3% as expected severity.
+
+**C4 — PADDING RECORDS INDISTINGUISHABLE FROM REAL (ruled, Seat 1).** Padding records must have the same byte distribution as real records — no sentinel, no distinguishable filler. Four reasons: (1) a sentinel hides occupancy from a size-observer but hands TRUE OCCUPANCY to the requester, who can count real records; (2) occupancy over many queries is namespace-density mapping — the enumeration channel this mechanism exists to close; (3) the cost is zero since the bytes ship either way; (4) it weakens nothing — validity comes from the SIGNATURE and the MERKLE PROOF, never from page membership.
+
 **REVISION TEST:** k moves if (a) measurement shows cold third-party resolution is far more common than expected, or (b) bandwidth data shows 32 KB is a barrier for the marginal user. Measurable, therefore revisable.
 
 **R6 COMPLETE.** Padding target = 1,024, following from k = 10.
