@@ -1,22 +1,28 @@
-"""Leaf-content structure tests -- the axis that was NAMED, NOT CLAIMED until now.
+"""Leaf-content structure and FORMAT-CONFORMANCE tests.
 
-The R6 suite uses synthetic leaves. Real leaves are canon(record)||sig, where `name`
+The R6 suite uses synthetic leaves. Real leaves are canon(record)||lp(sig), where `name`
 and `payload` are variable-length and attacker-influenced. This file tests whether the
-LEAF IS ACTUALLY A COMMITMENT.
+LEAF IS ACTUALLY A COMMITMENT, and whether this implementation matches the RULED FORMAT.
 
 LAW 8p: structural classes of a REAL leaf enumerated below and each represented.
 LAW 8r: the vulnerable encoding is kept and MUST collide, or the safe result proves
-        nothing. DO NOT delete canon_delimited to make a failing control pass -- its
-        entire job is to exhibit what canon_prefixed avoids.
+        nothing. DO NOT delete canon_delimited or leaf_raw_suffix to make a failing
+        control pass -- their entire job is to exhibit what the ruled format avoids.
 
-Three boundaries are tested, not one:
-  * the FIELD boundary   -- controls A and B (a field absorbs the separator)
-  * the FORMAT boundary  -- R1a conformance: is the length prefix big-endian, and is
-                            that byte order load-bearing? (consensus, not style)
-  * the canon||sig BOUNDARY -- `sig` is appended UNPREFIXED; is the split recoverable?
+WHY A FORMAT SECTION EXISTS AT ALL (earned 2026-08-09): this suite passed 15/15 while
+the reference shipped little-endian length prefixes against a big-endian ruling. It
+tested injectivity, and injectivity is byte-order-blind. A SUITE THAT TESTS THE PROPERTY
+BUT NOT THE FORMAT WILL NOT NOTICE A CONSENSUS DIVERGENCE.
+
+Four boundaries are tested:
+  * the FIELD boundary    -- controls A and B (a field absorbs the separator)
+  * the FORMAT boundary   -- R1a's three pins: framing, field bytes, prefixed sig
+  * the canon||sig split  -- is the boundary recoverable for ANY signature scheme?
+  * the POST-sig boundary -- is the leaf still injective if anything follows sig?
 """
 import struct, hashlib, re
-from canon import canon_delimited, canon_prefixed, _fields, INT_ENC, LEN_PREFIX
+from canon import (canon_delimited, canon_prefixed, _fields, _lp, leaf,
+                   leaf_raw_suffix, LEN_PREFIX, INT_PACK)
 
 LEAF = b'\x00'
 CHARSET = re.compile(rb'^[a-z0-9-]{1,32}$')
@@ -29,11 +35,9 @@ def rec(name, payload):
 
 def hleaf(b): return hashlib.sha256(LEAF + b).digest()
 
-# built from _fields() so it tracks INT_ENC instead of hardcoding it
+# built from _fields() so it tracks the ruled encoding instead of hardcoding it
 MIDDLE = b"|" + b"|".join(_fields(rec(b"x", b"y"))[1:6]) + b"|"
 
-
-# ---- structural classes of a real leaf (LAW 8p) ----
 CLASSES = [
     ("minimal name, empty payload",      rec(b"a", b"")),
     ("max-length name (32)",             rec(b"a" * 32, b"x")),
@@ -49,7 +53,7 @@ CLASSES = [
 def run():
     fails = 0
 
-    # 1. every structural class round-trips distinctly under the safe encoding
+    # ---------------- INJECTIVITY ----------------
     seen = {}
     for label, r in CLASSES:
         c = canon_prefixed(r)
@@ -58,7 +62,6 @@ def run():
         seen[c] = label
     print(f"  {len(CLASSES)} structural classes, all distinct under canon_prefixed")
 
-    # 2. NEGATIVE CONTROL A -- unvalidated name absorbs the middle (LAW 8r)
     A = rec(b"a", MIDDLE + b"z")
     B = rec(b"a" + MIDDLE, b"z")
     vuln = canon_delimited(A) == canon_delimited(B)
@@ -71,7 +74,6 @@ def run():
     if hleaf(canon_delimited(A)) != hleaf(canon_delimited(B)):
         print("  FAIL control A: leaf hashes differ though canon bytes matched"); fails += 1
 
-    # 3. NEGATIVE CONTROL B -- charset-VALID names, collision via a trailing field
     C = rec(b"alice", b"X|Y")
     D = rec(b"alice", b"X")
     vuln2 = canon_delimited(C, extra=b"memo") == canon_delimited(D, extra=b"Y|memo")
@@ -84,7 +86,6 @@ def run():
     print(f"  control B (valid names + trailing field): delimited collides={vuln2} "
           f"prefixed collides={safe2} names_charset_valid={both_valid}")
 
-    # 4. second-preimage: attacker controlling payload cannot hit a chosen leaf
     target = hleaf(canon_prefixed(rec(b"victim", b"real")))
     hit = any(hleaf(canon_prefixed(rec(b"attacker", bytes([i]) * n))) == target
               for i in range(256) for n in (0, 1, 32))
@@ -92,83 +93,117 @@ def run():
         print("  FAIL second-preimage: attacker payload reached the target leaf"); fails += 1
     print(f"  second-preimage over 768 attacker payloads: target reached={hit}")
 
-    # ---------------------------------------------------------------------
-    # 5. R1a CONFORMANCE -- the length prefix MUST be 4-byte BIG-endian.
-    #    Caught late: the reference shipped little-endian while R1a ruled big.
-    # ---------------------------------------------------------------------
-    if LEN_PREFIX != ">I" or canon_prefixed(rec(b"alice", b"p"))[:4] != b"\x00\x00\x00\x05":
-        print("  FAIL R1a: length prefix is not 4-byte big-endian"); fails += 1
-    print(f"  R1a length prefix big-endian: {canon_prefixed(rec(b'alice', b'p'))[:4].hex()} (len 5)")
+    # ---------------- FORMAT CONFORMANCE (R1a, three pins) ----------------
+    print("\n  -- R1a conformance --")
 
-    # 6. ...and that byte order is LOAD-BEARING, not cosmetic.
-    #    Negative control for my own fix: if LE and BE gave the same leaf, R1a's
-    #    byte-order clause would be a formatting preference. It does not.
+    # PIN 1: framing = 4-byte BIG-endian length prefix
+    if LEN_PREFIX != ">I" or canon_prefixed(rec(b"alice", b"p"))[:4] != b"\x00\x00\x00\x05":
+        print("  FAIL R1a pin 1: length prefix is not 4-byte big-endian"); fails += 1
+    print(f"  pin 1 framing: length prefix = {canon_prefixed(rec(b'alice', b'p'))[:4].hex()} (len 5, big-endian)")
+
+    # ...and that byte order is LOAD-BEARING, not cosmetic (control for my own fix)
     r0 = rec(b"alice", b"p")
     be = b"".join(struct.pack(">I", len(x)) + x for x in _fields(r0))
     le = b"".join(struct.pack("<I", len(x)) + x for x in _fields(r0))
-    order_matters = hleaf(be) != hleaf(le)
-    if not order_matters:
+    if hleaf(be) == hleaf(le):
         print("  FAIL endianness control: BE and LE produced the SAME leaf"); fails += 1
-    print(f"  length-prefix byte order load-bearing: {order_matters} "
-          f"(BE {hleaf(be).hex()[:16]} != LE {hleaf(le).hex()[:16]})")
+    print(f"  pin 1 load-bearing: BE {hleaf(be).hex()[:16]} != LE {hleaf(le).hex()[:16]}")
 
-    # ---------------------------------------------------------------------
-    # 7. R1a PINS THE FRAMING, NOT THE FIELD BYTES.
-    #    Three implementations, ALL conforming to R1a (4-byte big-endian length
-    #    prefix, fixed field order), differing only in how they serialize the
-    #    INTEGER fields -- which R1a never defines. All three leaves differ.
-    #    Same argument as R6a: any choice works mathematically; unpinned means
-    #    implementations cannot interoperate.
-    # ---------------------------------------------------------------------
-    def impl(int_enc):
-        if int_enc == "dec":
+    # PIN 2: field bytes = 8-byte BIG-endian unsigned, every integer field
+    if INT_PACK != ">Q":
+        print("  FAIL R1a pin 2: integer fields are not 8-byte big-endian"); fails += 1
+    rev_off = 4 + 5 + 4 + 32                     # past lp(name="alice") and lp(owner)
+    rev_bytes = canon_prefixed(r0)[rev_off:rev_off + 4 + 8]
+    if rev_bytes != b"\x00\x00\x00\x08" + struct.pack(">Q", REV):
+        print("  FAIL R1a pin 2: revision is not lp(8-byte BE)"); fails += 1
+    print(f"  pin 2 field bytes: revision = {rev_bytes.hex()} (len 8, big-endian unsigned)")
+
+    # ...and the pin is LOAD-BEARING: the two rejected alternatives give other leaves
+    def impl(kind):
+        if kind == "dec":
             f = [b"alice", O, str(REV).encode(), str(SA).encode(),
                  str(EA).encode(), str(PSA).encode(), b"p"]
         else:
-            f = [b"alice", O, struct.pack(int_enc + "I", REV),
-                 struct.pack(int_enc + "Q", SA), struct.pack(int_enc + "Q", EA),
-                 struct.pack(int_enc + "Q", PSA), b"p"]
-        return hleaf(b"".join(struct.pack(">I", len(x)) + x for x in f))  # R1a-conforming
-    variants = {k: impl(k) for k in ("<", ">", "dec")}
-    unpinned = len(set(variants.values())) == 3
-    if not unpinned:
-        print("  FAIL field-bytes control: R1a-conforming variants did not diverge"); fails += 1
-    print("  R1a-conforming impls differing ONLY in integer field bytes:")
-    for k, v in variants.items():
-        print(f"      int_enc={k:>3s}  leaf={v.hex()[:32]}")
-    print(f"  all distinct = {unpinned}  <-- R1a pins FRAMING, not FIELD BYTES "
-          f"(reference uses INT_ENC={INT_ENC!r}, INHERITED not ruled)")
+            i, q = kind + "I", kind + "Q"
+            f = [b"alice", O, struct.pack(i, REV), struct.pack(q, SA),
+                 struct.pack(q, EA), struct.pack(q, PSA), b"p"]
+        return hleaf(b"".join(struct.pack(">I", len(x)) + x for x in f))
+    alts = {"4-byte LE (was inherited)": impl("<"),
+            "4-byte BE": impl(">"),
+            "ASCII decimal": impl("dec")}
+    ruled = hleaf(canon_prefixed(r0))
+    if any(v == ruled for v in alts.values()) or len(set(alts.values())) != 3:
+        print("  FAIL pin 2 control: rejected alternatives did not diverge"); fails += 1
+    print(f"  pin 2 load-bearing: ruled 8-byte BE = {ruled.hex()[:16]}")
+    for k, v in alts.items():
+        print(f"      rejected {k:<26s} = {v.hex()[:16]}")
 
-    # ---------------------------------------------------------------------
-    # 8. THE canon||sig BOUNDARY. leaf = H(0x00 || canon || sig), sig UNPREFIXED.
-    #    8a: with a FIXED-length signature (Ed25519, 64 B) the split is recoverable
-    #        under BOTH encodings -- delimited is safe here BY ACCIDENT of Ed25519.
-    #    8b: with a VARIABLE-length signature (secp256k1/K1 DER, 70-72 B -- already
-    #        used elsewhere in this project) bytes move across the boundary and
-    #        delimited COLLIDES. Prefixed is self-delimiting and does not.
-    # ---------------------------------------------------------------------
-    S64 = bytes(range(64))
+    # ...and EIGHT bytes, not four: the 1000-year test, by construction
+    Y2106 = 4_294_967_296                        # 2^32 s after epoch = 2106-02-07
+    Y3026 = 33_350_000_000                       # ~1000 years out
+    u32_overflows, u64_holds = False, True
+    try:
+        struct.pack(">I", Y2106)
+    except struct.error:
+        u32_overflows = True
+    try:
+        struct.pack(">Q", Y3026)
+    except struct.error:
+        u64_holds = False
+    if not (u32_overflows and u64_holds):
+        print("  FAIL 1000-year control: overflow behaviour not as ruled"); fails += 1
+    print(f"  pin 2 width: u32 overflows at {Y2106} (2106-02-07) = {u32_overflows}; "
+          f"u64 holds year 3026 = {u64_holds}")
+
+    # PIN 3: the sig suffix is length-prefixed
+    S64, DER71 = bytes(range(64)), bytes(range(71))
+    if leaf(r0, S64) != hashlib.sha256(LEAF + canon_prefixed(r0) + _lp(S64)).digest():
+        print("  FAIL R1a pin 3: leaf() does not length-prefix sig"); fails += 1
+    print(f"  pin 3 sig prefixed: leaf = H(0x00 || canon || lp(sig)) = {leaf(r0, S64).hex()[:16]}")
+
+    # ---------------- THE canon||sig SPLIT ----------------
+    print("\n  -- boundary behaviour --")
     fixed_ok = all(
         canon_delimited(rec(b"alice", b"P" * 20)) + S64
         != canon_delimited(rec(b"alice", b"P" * (20 - k))) + bytes(64)
         for k in range(1, 21))
     if not fixed_ok:
         print("  FAIL boundary: fixed-length sig collided"); fails += 1
-    print(f"  canon||sig, FIXED 64 B sig: no collision under either encoding = {fixed_ok}")
+    print(f"  FIXED 64 B sig: no collision under either encoding = {fixed_ok} "
+          f"(delimited is safe here BY ACCIDENT of Ed25519's fixed size)")
 
-    der = bytes(range(71))                       # 71 B, a valid DER length
-    pa, sa_ = b"P" * 20, der                     # |payload|=20 |sig|=71
-    pb, sb_ = b"P" * 20 + der[:1], der[1:]       # |payload|=21 |sig|=70, also valid DER
+    pa, sa_ = b"P" * 20, DER71                   # |payload|=20 |sig|=71
+    pb, sb_ = b"P" * 20 + DER71[:1], DER71[1:]   # |payload|=21 |sig|=70, both valid DER
     dv = canon_delimited(rec(b"alice", pa)) + sa_ == canon_delimited(rec(b"alice", pb)) + sb_
-    pv = canon_prefixed(rec(b"alice", pa)) + sa_ == canon_prefixed(rec(b"alice", pb)) + sb_
+    pv = leaf_raw_suffix(rec(b"alice", pa), sa_) == leaf_raw_suffix(rec(b"alice", pb), sb_)
     if not dv:
         print("  FAIL boundary control: variable-length collision did NOT reproduce"); fails += 1
     if pv:
-        print("  FAIL boundary: collision PRESENT under canon_prefixed"); fails += 1
-    print(f"  canon||sig, VARIABLE-length sig (DER 71/70): delimited collides={dv} "
-          f"prefixed collides={pv}  [charset-valid names, NO schema change]")
+        print("  FAIL boundary: collision PRESENT under prefixed canon"); fails += 1
+    print(f"  VARIABLE-length sig (DER 71/70): delimited collides={dv} "
+          f"prefixed-canon collides={pv}  [charset-valid names, NO schema change]")
 
-    total = len(CLASSES) + 13
+    # ---------------- THE POST-sig BOUNDARY (why pin 3 is worth having) ----------------
+    # HONEST SCOPE: raw-suffix sig is injective TODAY, because canon_prefixed is
+    # self-delimiting and NOTHING FOLLOWS sig. Pin 3 is not fixing a live collision.
+    # It is removing the dependency on "nothing ever follows sig" -- the same silent
+    # assumption that made control B possible. Append one component and raw-suffix
+    # collides; length-prefixed does not.
+    TAIL_A, TAIL_B = b"v1", DER71[70:71] + b"v1"          # e.g. a co-sign or version tag
+    raw_coll = (hashlib.sha256(LEAF + canon_prefixed(rec(b"alice", pa)) + DER71 + TAIL_A).digest()
+                == hashlib.sha256(LEAF + canon_prefixed(rec(b"alice", pa)) + DER71[:70] + TAIL_B).digest())
+    lp_coll = (hashlib.sha256(LEAF + canon_prefixed(rec(b"alice", pa)) + _lp(DER71) + TAIL_A).digest()
+               == hashlib.sha256(LEAF + canon_prefixed(rec(b"alice", pa)) + _lp(DER71[:70]) + TAIL_B).digest())
+    if not raw_coll:
+        print("  FAIL post-sig control: raw-suffix collision did NOT reproduce"); fails += 1
+    if lp_coll:
+        print("  FAIL post-sig: collision PRESENT under lp(sig)"); fails += 1
+    print(f"  ANYTHING APPENDED AFTER sig: raw-suffix collides={raw_coll} "
+          f"lp(sig) collides={lp_coll}")
+    print("     (raw-suffix is injective TODAY -- nothing follows sig. Pin 3 removes the")
+    print("      dependency on that staying true, which is exactly control B's failure mode.)")
+
+    total = len(CLASSES) + 21
     print(f"\nCANON SUITE: {total - fails}/{total} passed")
     return fails
 

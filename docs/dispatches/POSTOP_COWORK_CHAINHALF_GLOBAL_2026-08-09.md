@@ -101,3 +101,11 @@ here in practice.)
 4. **The commits table is a 144-epoch window, not a history** (C3).
 5. **Still untested at scale by anyone:** proof size vs the ~1.7 KB **binary** budget (now
    ruled), and the private-lookup bound at 10^10 (constraint ruled, mechanism open).
+
+**⚠ CORRECTED 2026-08-09 (Cowork; correction accepted by Seat 1) — THIS CAVEAT IS STALE.**
+Code has since measured proof size and it landed as **R6c (NORMATIVE, binary encoding)**.
+Precisely: **MEASURED 10^3–10^7. The 10^10 figure — 1,141 B binary inside a 1,740 B budget
+— is closed-form EXTRAPOLATION, not measurement.** Measurement above 10^7 remains open.
+Prefix-page privacy is separately ruled in **R6d** (k = 10, page 1,024, depth d = ceil(log2 N) - 9).
+"Untested by anyone" was true when written and is now WRONG; do not carry it forward.
+
