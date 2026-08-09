@@ -128,10 +128,12 @@ Total network cost of a resolution: ~1.7 KB. **Privacy mode:** fetch the whole d
 
 ### 3.5 Epoch mechanics
 
-10-minute epochs, 144/day. Leader = `seq[ sha256(block_id at epoch boundary) mod n ]` — a public beacon nobody controls in advance. The leader applies the ordering rule, updates the indexed tree incrementally, packs **one ANS-104 DataItem per epoch** (this is why `atmirror::arweave` matters: a DataItem header is ~1,044 B, so one item per user would be 500%+ overhead and 10¹⁰ items is absurd; one item per epoch amortizes it to ~0.001%), — but it **FUNDS only this epoch-fixed overhead** (the header + the on-chain
-commit), **never the per-name bytes in the delta** (registrant-pays invariant, below;
-and see the VERIFICATION RESULT for why "one DataItem per epoch" and per-name
-claimant-funding are in tension) — and submits **one** Vaulta action:
+10-minute epochs, 144/day. Leader = `seq[ sha256(block_id at epoch boundary) mod n ]` — a public beacon nobody controls in advance. The leader applies the ordering rule, updates the indexed tree incrementally, packs the epoch's registrations as **per-name ANS-104 DataItems, each signed and `x-paid-by`-funded by its own claimant**, Turbo-bundled server-side (the ~1,044 B header is therefore **per-name and claimant-paid** — ≈ $0.000034/name at
+$32.56/GiB, bounded and negligible; Turbo bundles per-name items server-side, so ~38,052
+items/epoch is ordinary throughput, not the one-actor-mints-all case the old "10^10 items is
+absurd" objection assumed). **The leader FUNDS only the on-chain commit** (356 B cold / 0 B on
+wrap) — the epoch's *sole* epoch-fixed cost — and **mints no per-name bytes**. It submits **one**
+Vaulta action:
 
 ```
 commit(epoch, new_root, prev_root, tree_size, delta_id, forced_watermark)
@@ -240,7 +242,9 @@ which **overwrites** the oldest slot in a 144-row ring. Net RAM delta: **0 bytes
 > so ~38,052 items/epoch is ordinary throughput, not the "10¹⁰ items is absurd" `:131` rejected —
 > that objection was one actor minting all items; here each claimant mints and funds its own.
 >
-> **ESCALATED — a design call above this seat:** (a) relax `:131` to per-name claimant-funded
+> **RESOLVED — Seat 1 ruled (a), 2026-08-09; `:131` amended to match, `x-paid-by` wired per claimant,
+> leader's only epoch-fixed cost is the on-chain commit. The escalation as it stood, kept as the
+> record of why (a) was chosen over (b):** (a) relax `:131` to per-name claimant-funded
 > DataItems, accept the bounded claimant-paid header — clean, and "integration" then holds; or
 > (b) keep one-DataItem-per-epoch and build a reimbursement/pre-pay accounting layer — that is
 > invention, and carries a float-risk breach vector (a non-reimbursing claimant leaves the leader
