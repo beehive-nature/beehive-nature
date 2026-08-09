@@ -27,11 +27,23 @@ The global root spans ALL names (depth-40 indexed tree). A resolver holding one 
 
 **R1a — CANONICAL ENCODING (NORMATIVE).** canon() MUST use LENGTH-PREFIXED field encoding: each field as 4-byte big-endian length || field bytes, concatenated in fixed field order. Unconditionally injective.
 
+**INTEGER FIELD FORMAT (normative):** Integer fields (revision, signed_at, expires_at, prev_signed_at) are **8-byte big-endian unsigned**. NOT 4 bytes (a 4-byte unsigned timestamp overflows in 2106, failing the 1000-year test by construction). NOT little-endian (Cowork proved three conforming implementations yield three different leaves when byte-order is unruled — injective each, non-interoperable together). Big-endian matches the length prefix: one convention throughout.
+
+**LENGTH PREFIX IS UNCONDITIONAL (normative):** The 4-byte big-endian length prefix is kept on EVERY field without exception, including fixed-width integers. An integer field = [0x00000008] || [8-byte BE value]. The "tidy" alternative (dropping the prefix for fixed-width fields) creates an exception class that goes stale the first time a field is added or a width changes. 4 bytes per integer buys the removal of an entire divergence class.
+
+**SIG FIELD FORMAT (normative):** The sig suffix is length-prefixed like every other field. This does NOT fix a live collision — canon_prefixed is already self-delimiting and raw-appending sig is injective today (Ed25519 is fixed 64 bytes). What it buys: append ANYTHING after sig — a co-signature, a version tag — and raw-suffix COLLIDES while lp(sig) does not. Safe today, broken by the most ordinary future change, silent when it breaks.
+
+**FORMAT VS PROPERTY (standing lesson, Cowork self-audit):** A suite that tests injectivity but not byte-order passes 15/15 while implementations diverge — injectivity is byte-order-blind. Test the FORMAT, not just the PROPERTY. Cowork's own reference implementation was little-endian against a big-endian ruling it supplied the reasoning for, and its suite never caught it.
+
 **WHY NOT PIPE-JOIN (Cowork proved the collision):** pipe-join is NOT injective when two fields are attacker-influenced and variable-length. A{name="a", payload=MIDDLE+"z"} and B{name="a"+MIDDLE, payload="z"} produce IDENTICAL canon bytes — a signature over one validates the other. Charset validation is NOT the fix (holds only while payload stays last; breaks when a field is appended). Length-prefixing has no validation or ordering dependency.
 
 **CHARSET VALIDATION IS A VALIDATION RULE, NOT AN ENCODING FIX.** Must NEVER be mistaken for the mechanism that makes canon() injective.
 
 **BLAST RADIUS:** Prior runs valid for ordering, inclusion, lifecycle. But NO RUN HAS YET DEMONSTRATED THAT A LEAF COMMITS TO ITS RECORD. Until length-prefixed canon() lands and roots re-anchor, Merkle proof proves inclusion of bytes, not commitment to a record.
+
+**R1b — CANONICAL SIGNATURE SCALAR (NORMATIVE, per 8t).** The resolver MUST reject Ed25519 signatures where the scalar s is non-canonical (s >= L, where L = 2^252 + 27742317777372353535851937790883648493). Cowork proved the current safety is LIBRARY ACCIDENT: s+L verifies under a permissive RFC-8032 verifier (L*B is the identity, so [s+L]B == [s]B — the signature is arithmetically valid), and only libsodium's scalar range check rejects it. Same shape as canon(): a conforming implementation on a permissive library would be malleable and the spec would never have told them. MANDATE: reject non-canonical s; do not rely on the verifier library.
+
+**UNTESTED REMAINDER (honest, no predictions):** small-order/mixed-order points, cofactor edge cases (Ed25519 cofactor 8 enables small-subgroup attacks), batch-verification semantics (batch verifiers may have different malleability properties than single-verifier checks). Named, not claimed.
 
 **R2 — TERM (365-DAY EXPIRY).** `epoch_time <= expires_at` (INCLUSIVE). Else EXPIRED -> R5.
 
