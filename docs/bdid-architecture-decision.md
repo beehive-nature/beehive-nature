@@ -140,8 +140,24 @@ which **overwrites** the oldest slot in a 144-row ring. Net RAM delta: **0 bytes
 > *Recorded here, beside `commit()`, because this is exactly where an implementer would be
 > tempted to breach it. (LAW 8s.)*
 >
-> **The sequencer/committer pays ONLY for the epoch commit** — 356 B cold, **0 B on wrap**,
-> and the action is permissionless so anyone may bear it. **It NEVER pays for records.**
+> **THE LINE IS EPOCH-FIXED vs PER-RECORD — not on-chain vs off-chain.**
+> *(Corrected 2026-08-09. The earlier wording drew the line at the chain boundary; that was
+> wrong in both directions — it forbade legitimate leader funding and, worse, implied the
+> off-chain path was outside the invariant. The off-chain path is exactly where the breach
+> was found.)*
+>
+> **The leader funds EPOCH-FIXED overhead only, and it is fixed per epoch regardless of how
+> many names the epoch carries:**
+>
+> | cost | who pays | why |
+> |---|---|---|
+> | on-chain `commit()` — 356 B cold, **0 B on wrap** | **leader** (permissionless — anyone may bear it) | epoch-fixed |
+> | ANS-104 DataItem **header** — ~1,044 B | **leader** | epoch-fixed; this is what one-item-per-epoch amortisation buys |
+> | DataItem **per-name body bytes** | **CLAIMANT** | scales with users — **must never be leader-funded** |
+>
+> **The leader PACKS the per-name body; it does not FUND it.** Mechanism:
+> **atmirror's `x-paid-by` Turbo delegate** — already built for the custody work. **The gap
+> is integration, not invention.**
 >
 > **Any design where epoch inclusion subsidises record storage is a HARDLINE BREACH BY
 > CONSTRUCTION, regardless of how cheap it looks.** The hardline is that BNR funding must
@@ -156,8 +172,20 @@ which **overwrites** the oldest slot in a 144-row ring. Net RAM delta: **0 bytes
 > security parameter for occupancy attacks. Registrant-pays and attack-pricing are the same
 > mechanism — so preserving this invariant preserves both properties at once.
 >
+> **THE TEST THAT MAKES THIS CHECKABLE:** *does this cost grow with the number of names?*
+> If yes, it is claimant-funded — no exceptions, no "it's only a few bytes." If it is fixed
+> per epoch, the leader may bear it. **A per-name cost hidden inside an epoch-level operation
+> is still a per-name cost**, and packaging is not funding.
+>
+> **The default is the defect.** The breach found on 2026-08-09 was not a broken mechanism —
+> it was a *sentence* (:131) that read leader-pays by default for the DataItem body, with no
+> mechanism contradicting it. **A design whose safe behaviour depends on nobody implementing
+> the obvious reading is already broken**, which is why the amendment is to the wording, not
+> only to the code.
+>
 > *Verification of the current design against this invariant is Code's; this entry records
-> the rule, not a claim that the code satisfies it.*
+> the rule, not a claim that the code satisfies it. The on-chain path was verified clean;
+> the off-chain DataItem path is where the breach was found.*
 
 > **ABI CAVEATS — what `commit()` does and does not guarantee.**
 > *Measured on Jungle4 2026-08-09 (Cowork, epoch 146, tx `f32e7478…`). Recorded here so no
