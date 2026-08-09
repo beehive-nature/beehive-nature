@@ -155,6 +155,43 @@ def run():
     print(f"  pin 2 width: u32 overflows at {Y2106} (2106-02-07) = {u32_overflows}; "
           f"u64 holds year 3026 = {u64_holds}")
 
+    # PIN 2b: NO EXCEPTIONS -- the prefix is on EVERY field, fixed-width integers too.
+    # Structural check, not a spot check: parse the buffer forward as pure
+    # length-prefixed frames and require it to consume exactly 7 fields and no
+    # trailing bytes. That can only pass if the framing is uniform.
+    def parse_forward(buf):
+        out, i = [], 0
+        while i < len(buf):
+            if i + 4 > len(buf):
+                return None                       # ragged: not uniformly framed
+            n = struct.unpack(">I", buf[i:i + 4])[0]
+            i += 4
+            if i + n > len(buf):
+                return None                       # length runs past the end
+            out.append(buf[i:i + n]); i += n
+        return out
+    parsed = parse_forward(canon_prefixed(r0))
+    if parsed is None or len(parsed) != 7 or parsed != _fields(r0):
+        print("  FAIL R1a pin 2b: canon is not uniformly length-prefixed"); fails += 1
+    print(f"  pin 2b no exceptions: forward parse yields {len(parsed) if parsed else 0}/7 "
+          f"fields, 0 trailing bytes, round-trips = {parsed == _fields(r0)}")
+
+    # ...and the "tidy" alternative is exhibited as a DIVERGENCE, so nobody re-derives it.
+    # Exception class: omit the prefix on the four fixed-width integers.
+    f = _fields(r0)
+    tidy = _lp(f[0]) + _lp(f[1]) + f[2] + f[3] + f[4] + f[5] + _lp(f[6])
+    tidy_parsed = parse_forward(tidy)
+    tidy_readable = tidy_parsed is not None and tidy_parsed == f
+    if hleaf(tidy) == hleaf(canon_prefixed(r0)):
+        print("  FAIL pin 2b control: exception class gave the SAME leaf"); fails += 1
+    if tidy_readable:
+        print("  FAIL pin 2b control: exception class was parseable without prior knowledge"); fails += 1
+    print(f"  pin 2b control: exception-class leaf = {hleaf(tidy).hex()[:16]} "
+          f"(!= ruled {hleaf(canon_prefixed(r0)).hex()[:16]}); "
+          f"forward-parseable = {tidy_readable}")
+    print("     (a reader must KNOW which fields are fixed-width -- knowledge that goes")
+    print("      stale the first time a field is added or a width changes. 4 bytes each.)")
+
     # PIN 3: the sig suffix is length-prefixed
     S64, DER71 = bytes(range(64)), bytes(range(71))
     if leaf(r0, S64) != hashlib.sha256(LEAF + canon_prefixed(r0) + _lp(S64)).digest():
@@ -203,7 +240,7 @@ def run():
     print("     (raw-suffix is injective TODAY -- nothing follows sig. Pin 3 removes the")
     print("      dependency on that staying true, which is exactly control B's failure mode.)")
 
-    total = len(CLASSES) + 21
+    total = len(CLASSES) + 24
     print(f"\nCANON SUITE: {total - fails}/{total} passed")
     return fails
 

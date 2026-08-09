@@ -12,6 +12,16 @@ CONFORMS TO R1a (NORMATIVE, SPEC_RESOLVER_VALIDITY_RULES), all three pins:
                     throughout. EIGHT bytes, not four -- a 4-byte unsigned timestamp
                     OVERFLOWS 2106-02-07 and fails the 1000-year test by construction
                     (demonstrated in test_canon.py).
+  * NO EXCEPTIONS -- the length prefix is kept on EVERY field WITHOUT EXCEPTION,
+                    including the fixed-width integers: integer field = _lp(int8(v))
+                    = 00000008 || 8-byte BE. Ruled Seat 1 2026-08-09. The "tidy"
+                    alternative -- omit the prefix where the width is already known --
+                    creates an EXCEPTION CLASS, and an exception class means an
+                    implementer must know which fields are fixed-width. That knowledge
+                    goes stale the first time a field is added or a width changes.
+                    4 bytes per integer buys the removal of an entire divergence class.
+                    DO NOT RE-DERIVE THE TIDY ALTERNATIVE. test_canon.py exhibits it
+                    as a divergence and shows a forward parser cannot read it.
   * sig SUFFIX   -- LENGTH-PREFIXED like every other variable-length component, so the
                     leaf is self-delimiting for ANY signature scheme.
 
