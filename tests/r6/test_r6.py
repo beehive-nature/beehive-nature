@@ -13,6 +13,26 @@ and within each N, one representative per distinct proof length, plus leftmost +
 CAVEAT, kept deliberately (Cowork): this enumeration is LARGER THAN IT WAS, NOT PROVEN
 EXHAUSTIVE. Classes may vary along axes nobody has checked -- tree depth, leaf-content
 structure, proof encoding.
+
+OPEN AXES -- NAMED, NOT CLAIMED (LAW 8s: a caveat that lives only in a dispatch expires).
+Both are acknowledged gaps, not oversights. Do not read a green suite as covering them:
+
+  1. LEAF-CONTENT STRUCTURE. This suite uses synthetic leaves (b"L0", b"L1", ...). It
+     exercises tree construction and proof verification in ISOLATION. Real leaves are
+     signed bDiD records -- canon(record) || sig -- with structure, length variance, and
+     an attacker-influenced component. Adversarial leaf CONTENT is untested here.
+     The lifecycle harness exercises real records but does not vary N.
+
+  2. SCALE BEYOND N = 2^20. Largest N in this suite is 33; the padding/occupancy work
+     measured N = 2^20. Behaviour at 10^10 -- proof length, occupancy variance relative
+     to the page floor, grinding cost with depth scaled to hold page size constant --
+     is UNMEASURED. No prediction is offered: the last prediction made about scale
+     behaviour in this area (that organic skew would worsen the occupancy leak) was
+     measured and found WRONG.
+
+NEGATIVE-CONTROL LAW (8r): the CVE-2012-2459 control below is part of this suite by
+design and MUST FAIL if the attack stops reproducing. Do not "fix" a failing control by
+removing it -- a safe result whose unsafe alternative no longer misbehaves proves nothing.
 """
 from merkle import build, verify, hleaf, hnode
 

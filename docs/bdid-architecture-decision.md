@@ -136,6 +136,29 @@ commit(epoch, new_root, prev_root, tree_size, delta_id, forced_watermark)
 
 which **overwrites** the oldest slot in a 144-row ring. Net RAM delta: **0 bytes**.
 
+> ## ⛔ INVARIANT — REGISTRANT-PAYS FOR RECORD STORAGE (RULED, hardline)
+> *Recorded here, beside `commit()`, because this is exactly where an implementer would be
+> tempted to breach it. (LAW 8s.)*
+>
+> **The sequencer/committer pays ONLY for the epoch commit** — 356 B cold, **0 B on wrap**,
+> and the action is permissionless so anyone may bear it. **It NEVER pays for records.**
+>
+> **Any design where epoch inclusion subsidises record storage is a HARDLINE BREACH BY
+> CONSTRUCTION, regardless of how cheap it looks.** The hardline is that BNR funding must
+> never gate how many users can exist; a committer who pays for records is precisely that
+> gate, wearing a different name. This is not a cost trade-off to be optimised — a path that
+> lets record storage ride on the committer's payment is a **defect**, and the fact that it
+> would be inexpensive at small N is irrelevant, because the failure is structural and
+> appears only at the scale where it cannot be undone.
+>
+> **Corollary, and the reason the fee question closed:** the registrant's own resource
+> payment (Autonomi chunk cost for the signed record; Vaulta RAM/A at Layer-2) **is** the
+> security parameter for occupancy attacks. Registrant-pays and attack-pricing are the same
+> mechanism — so preserving this invariant preserves both properties at once.
+>
+> *Verification of the current design against this invariant is Code's; this entry records
+> the rule, not a claim that the code satisfies it.*
+
 > **ABI CAVEATS — what `commit()` does and does not guarantee.**
 > *Measured on Jungle4 2026-08-09 (Cowork, epoch 146, tx `f32e7478…`). Recorded here so no
 > reader infers a guarantee the contract does not make.*
