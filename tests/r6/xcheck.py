@@ -56,18 +56,34 @@ for label, s in SIGS.items():
     print(f"    code  : {my_leaf.hex()}")
 
 if not canon_match:
-    print("\n=== DIVERGENCE — per-field (cowork | code) ===")
     def frames(b):
+        """Parse length-prefixed frames. Returns (frames, clean) where clean is
+        False if a prefix runs past the buffer or trailing bytes remain — i.e.
+        the FRAMING itself is malformed, not just a field value."""
         off, out = 0, []
-        while off < len(b):
+        while off + 4 <= len(b):
             ln = int.from_bytes(b[off:off + 4], "big"); off += 4
+            if off + ln > len(b):
+                return out, False                    # truncated frame
             out.append(b[off:off + ln]); off += ln
-        return out
-    cf, mf = frames(cw_canon), frames(my_canon)
-    for i, name in enumerate(code.FIELD_ORDER):
-        a = cf[i].hex() if i < len(cf) else "(none)"
-        b = mf[i].hex() if i < len(mf) else "(none)"
-        print(f"  {name:14s} {a} | {b}{'' if a == b else '  <-- DIFFERS'}")
+        return out, (off == len(b))
+    cf, cf_ok = frames(cw_canon)
+    mf, mf_ok = frames(my_canon)
+    EXPECT = len(code.FIELD_ORDER)                   # 7 — the ruled field count
+    # FRAMING CHECK FIRST: a per-field table assumes exactly 7 well-formed frames
+    # on both sides. If framing diverged, the table would misattribute the fault
+    # to a field, so report the framing divergence and stop.
+    if not (cf_ok and mf_ok and len(cf) == EXPECT and len(mf) == EXPECT):
+        print("\n=== FRAMING ITSELF DIVERGED — not a field-value difference ===")
+        print(f"  expected {EXPECT} clean frames; cowork parsed {len(cf)} "
+              f"(clean={cf_ok}), code parsed {len(mf)} (clean={mf_ok}).")
+        print("  A length prefix or the frame structure is malformed. A per-field")
+        print("  table would misattribute this; fix the framing first.")
+    else:
+        print("\n=== DIVERGENCE — per-field (cowork | code) ===")
+        for i, name in enumerate(code.FIELD_ORDER):
+            a = cf[i].hex(); b = mf[i].hex()
+            print(f"  {name:14s} {a} | {b}{'' if a == b else '  <-- DIFFERS'}")
 
 ok = canon_match and all_leaf_match
 print(f"\nVERDICT: {'MATCH — format agreed' if ok else 'DIVERGE — see per-field breakdown; escalate to goose'}")
