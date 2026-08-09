@@ -25,6 +25,14 @@ The global root spans ALL names (depth-40 indexed tree). A resolver holding one 
 
 **R1 — SIGNATURE.** verify(...) passes. Else REJECT.
 
+**R1a — CANONICAL ENCODING (NORMATIVE).** canon() MUST use LENGTH-PREFIXED field encoding: each field as 4-byte big-endian length || field bytes, concatenated in fixed field order. Unconditionally injective.
+
+**WHY NOT PIPE-JOIN (Cowork proved the collision):** pipe-join is NOT injective when two fields are attacker-influenced and variable-length. A{name="a", payload=MIDDLE+"z"} and B{name="a"+MIDDLE, payload="z"} produce IDENTICAL canon bytes — a signature over one validates the other. Charset validation is NOT the fix (holds only while payload stays last; breaks when a field is appended). Length-prefixing has no validation or ordering dependency.
+
+**CHARSET VALIDATION IS A VALIDATION RULE, NOT AN ENCODING FIX.** Must NEVER be mistaken for the mechanism that makes canon() injective.
+
+**BLAST RADIUS:** Prior runs valid for ordering, inclusion, lifecycle. But NO RUN HAS YET DEMONSTRATED THAT A LEAF COMMITS TO ITS RECORD. Until length-prefixed canon() lands and roots re-anchor, Merkle proof proves inclusion of bytes, not commitment to a record.
+
 **R2 — TERM (365-DAY EXPIRY).** `epoch_time <= expires_at` (INCLUSIVE). Else EXPIRED -> R5.
 
 **R3 — REVISION GAP (28-DAY).** For `revision > 1`: `signed_at - prev_signed_at >= 28 * 86400`. Else REJECT.
