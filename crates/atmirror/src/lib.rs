@@ -55,6 +55,7 @@ pub mod car;
 pub mod cbor;
 pub mod cid;
 pub mod commit;
+pub mod epoch_funding;
 pub mod did;
 pub mod mirror;
 pub mod mst;

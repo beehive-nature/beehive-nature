@@ -172,6 +172,14 @@ impl ArweaveRail {
         self
     }
 
+    /// The `x-paid-by` delegate this rail will charge, if any. `None` means this
+    /// signer's OWN credits pay — for a per-name DataItem that is the LEADER paying,
+    /// which is the 8s breach. Exposed so a funding-invariant check (see
+    /// [`crate::epoch_funding`]) can read who pays each item without guessing.
+    pub fn delegate(&self) -> Option<&str> {
+        self.paid_by.as_deref()
+    }
+
     fn from_key(
         key: rsa::RsaPrivateKey,
         ephemeral: bool,
