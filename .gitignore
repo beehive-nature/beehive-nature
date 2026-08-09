@@ -57,3 +57,7 @@ BACKUP_*
 .idea/
 .vscode/
 *.swp
+ 
+# Python bytecode 
+__pycache__/ 
+*.pyc
