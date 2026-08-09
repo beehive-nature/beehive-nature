@@ -74,6 +74,8 @@ The global root spans ALL names (depth-40 indexed tree). A resolver holding one 
 
 **SCOPE NOTE (LOOKUP PRIVACY).** The payment path has NO lookup-privacy problem by construction. RFC 9162's mitigation is that the counterparty SENDS THE PROOF (the recipient hands over their log at payment time per bdid-architecture-decision.md:245). The lookup-privacy constraint (R6d padding, bounded download, k-anonymity) bites ONLY on cold third-party resolution — where the resolver has no counterparty relationship and must fetch independently. Do not solve a problem the payment path does not have.
 
+**R6e — VECTOR-SELECTION CRITERION (LAW 8p).** Any conformance set for inclusion-proof verification MUST include (1) at least one PROMOTED leaf — a leaf that traverses an odd-node level via promote-unchanged — and (2) EVERY DISTINCT proof length the tree produces at the tested tree_size. A set drawn only from the paired majority (all full-length proofs) passes a verifier broken on the odd-node path because the broken code never executes. Worked example (Cowork's 19-leaf tree): length-5 proofs (leaves 0-15, paired subtrees), length-3 (leaves 16-17, promoted), length-2 (leaf 18, promoted) — three distinct structural classes. A set missing any length is incomplete per 8p: enumerate the structural classes and confirm each is represented in the fixture.
+
 ## RULE-APPLICATION ORDER
 0. R6 (inclusion proof) — prove record committed in current epoch root
 1. R1 (signature) → 2. R0 (World A) → 3. R3 (revision gap) → 4. R5 (grace lock, PREVIOUS record) → 5. R2 (term) → 6. R4 (cap)
