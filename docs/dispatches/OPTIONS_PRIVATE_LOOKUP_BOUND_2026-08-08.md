@@ -1,76 +1,59 @@
-# OPTIONS — BOUNDED PRIVATE LOOKUP AT 10^10
+# OPTIONS — BOUNDED PRIVATE LOOKUP AT 10^10 (rev 2)
 **From:** goose (instrument-reading) | **To:** Seat 1 / founder
-**Authority:** Seat 1 ruling (constraint ruled; mechanism not; bring options, do not design)
-**Law:** 8a, 8c, 8m, post-op register
+**Authority:** Seat 1 rulings (mechanism = C; padding normative; scope narrowed by F)
+**Rev 2:** Mechanism ruled (C: client-chosen decoys). Prior art merged (HIBP, Safe Browsing, RFC 9162, CONIKS). Scope narrowed (payment path has no lookup-privacy problem).
 
-## THE CONSTRAINT (ruled)
-Private lookup download MUST stay bounded at 10^10. Fixed depth-12 gives:
-- At 10^6 names: ~8 KB per lookup (244 entries x 32 B) — manageable
-- At 10^10 names: ~77 MB per lookup (2.4M entries x 32 B) — PHYSICAL FAILURE
+## MECHANISM RULED: (C) CLIENT-CHOSEN DECOYS
+The user chooses j (number of decoy queries alongside the real one). At j=1, this reduces to (A) adaptive prefix depth — one real query, no decoys, k-anonymity from the page size. At j>1, the user fetches additional pages, increasing the anonymity set at bandwidth cost.
+Choosing j is choosing privacy and bandwidth IN THE SAME ACT — the informed-consent doctrine and the full-feature shape the method ruling wants.
 
-## THE COUPLING (must accompany every option)
-k-anonymity set and download cost MOVE TOGETHER. A larger anonymity set requires downloading more data.
-:125 currently advertises only the anonymity set. Every option below states BOTH.
+k (the page-size parameter) is WITH THE FOUNDER — a values call, not a derivable one.
 
-## OPTION A: ADAPTIVE PREFIX DEPTH (the obvious candidate)
-Mechanism: depth = ceil(log2(N)) - k, where k is a fixed constant. Page size = 2^k entries (constant regardless of N).
+## PRIOR ART (merged from Code's verified analysis + goose's options)
 
-| k | Page size | Download (binary) | k-anonymity floor |
+### HIBP (Have I Been Pwned)
+- Implements k-anonymity: client sends only a hash prefix; server returns all matching records.
+- In their own words: the server never sees the full hash — only the first 5 characters.
+- Bucket size DRIFTS UP with corpus: as the database grows, each prefix bucket contains more records.
+- HIBP added Add-Padding (normalizing to 800-1,000 records per bucket) because raw bucket size leaks population density.
+- Cite both ways: k-anonymity works (server does not see the full query) BUT bucket size grows with corpus unless padded (R6d addresses this).
+
+### Google Safe Browsing
+- Local list approach: client downloads a compact hashed-prefix list locally.
+- Server contacted only on collision (when a local match is found).
+- Effectively a Bloom-filter variant: compact local structure, server query only on collision.
+- Privacy: server learns nothing unless collision (rare for non-malicious queries).
+
+### RFC 9162 (Certificate Transparency V2)
+- The counterparty SENDS THE PROOF. The log operator provides inclusion proofs to any requester.
+- Applied to our payment path: the recipient hands over their log at payment time (:245).
+- The payer verifies inclusion from the provided proof. NO lookup-privacy problem on the payment path by construction.
+
+### CONIKS / KT Finding
+- CONIKS uses a VRF (Verifiable Random Function) for DIRECTORY privacy — preventing a malicious directory from serving different views to different users.
+- But CONIKS's VRF does NOT solve QUERY privacy — the directory still sees which name a user is querying.
+- KT finding: nobody upstream has solved query privacy for this class of system. Query privacy requires either downloading more than needed (k-anonymity/decoys) or cryptographic machinery (PIR).
+
+## THE OPTIONS (reframed under the ruled mechanism)
+
+### (C) Client-chosen decoys — RULED; CONTAINS (A) AT j=1
+| j | Effective anonymity | Download | Notes |
 |---|---|---|---|
-| 5 | 32 entries | ~1 KB | 32 |
-| 8 | 256 entries | ~8 KB | 256 |
-| 12 | 4,096 entries | ~128 KB | 4,096 |
+| 0 (real query only) | 2^k (page size) | ~page_size x 32B | This IS option (A) adaptive depth |
+| 1 decoy | 2 x 2^k | ~2 x page download | User trades bandwidth for privacy |
+| j decoys | (j+1) x 2^k | ~(j+1) x page download | User chooses their trade-off |
 
-Page size is CONSTANT — does not grow with N. At 10^10, k=8 gives 8 KB (vs 77 MB fixed depth-12).
-k is a values call: how much anonymity is enough? Download and anonymity are coupled (both = 2^k).
+### (D) PIR — EXTREME, NAMES ITS PRICE
+~proof-size download. Perfect (information-theoretic) privacy. Server-side O(N) per query — expensive at 10^10. May conflict with no-intermediary model. NOT a default; documented as the extreme.
 
-## OPTION B: AUTHENTICATED BLOOM FILTER PER PREFIX PAGE
-Mechanism: Each depth-12 prefix page carries a Merkle-committed Bloom filter. User downloads the filter, not the full page.
+### (E) Anonymous transport — EXTREME, NAMES ITS PRICE
+Route queries through anonymous transport (Tor, mixnet). Server sees nothing. But: latency, reliability, and the transport becomes a dependency. NOT a default; documented as the extreme.
 
-| Parameter | Value |
-|---|---|
-| Filter size at 4096 entries, 1% FPR | ~6 KB |
-| k-anonymity | 4,096 (full page scope) |
-| False positive rate | 1% (tunable; conservative on non-membership) |
+## THE COUPLING (unchanged)
+k-anonymity set and download cost MOVE TOGETHER. :125 must state BOTH. At 10^10, download is the binding constraint.
 
-Trade-off: false positives mean a user might think a name is taken when it is not. Adds a committed data structure. Fixed depth-12 is fine (filter is compact regardless of page population).
-
-## OPTION C: PIR (PRIVATE INFORMATION RETRIEVAL)
-Mechanism: Server holds an encrypted index; user submits an encrypted query. Only the answer downloads.
-
-| Parameter | Value |
-|---|---|
-| Download | O(1) per query (~proof size) |
-| k-anonymity | Information-theoretic (perfect) |
-| Server cost | O(N) per query (expensive at 10^10) |
-
-Trade-off: requires server-side computation — may conflict with Autonomi's no-intermediary model. PIR is computationally expensive at scale. Highest cryptographic complexity.
-
-## OPTION D: RANGE QUERY (USER-SELECTED SUB-RANGE)
-Mechanism: User queries a sub-range of the prefix page instead of the full page.
-
-| Range fraction | Download | k-anonymity |
-|---|---|---|
-| Full page (1/1) | ~128 KB (at k=12) | 4,096 |
-| Half page (1/2) | ~64 KB | 2,048 |
-| Quarter page (1/4) | ~32 KB | 1,024 |
-
-Trade-off: user selects privacy/cost trade-off per query. Server learns the sub-range (reduced anonymity).
-
-## SUMMARY
-| Option | Download @ 10^10 | k-anonymity | Complexity | Fits Autonomi? |
-|---|---|---|---|---|
-| A: Adaptive depth (k=8) | ~8 KB | 256 | Low | Yes |
-| A: Adaptive depth (k=12) | ~128 KB | 4,096 | Low | Yes |
-| B: Authenticated Bloom filter | ~6 KB | 4,096 | Medium | Yes (adds committed structure) |
-| C: PIR | ~1.7 KB | Perfect | High | Uncertain (server model) |
-| D: Range query | Variable | Variable | Low | Yes |
-
-## :125 CORRECTION NEEDED
-Whatever option is chosen, :125 must state BOTH the anonymity set AND the download cost.
-Currently it advertises only k-anonymous lookup without the download size.
-At 10^10, the download cost is the binding constraint, not the anonymity set.
+## SCOPE NOTE
+The payment path has NO lookup-privacy problem (counterparty sends the proof per RFC 9162 + :245). The constraint bites ONLY cold third-party resolution.
 
 ## SCOPE FENCE
-Options only. The constraint is ruled; the mechanism is Seat 1 / founder call. Do not design.
-Execute the prompt as written.
+Mechanism ruled (C); k pending founder (values call). D/E documented as extremes. Do not design. Execute the prompt as written.

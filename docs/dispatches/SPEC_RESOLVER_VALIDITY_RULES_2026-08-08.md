@@ -49,6 +49,21 @@ The global root spans ALL names (depth-40 indexed tree). A resolver holding one 
 
 **R6c — PROOF ENCODING (NORMATIVE).** Inclusion proofs MUST be encoded in **BINARY**, not hex-JSON. §3.5's ~1.7 KB resolution-cost budget is in binary bytes. At 10^10 scale, a proof carries ceil(log2(10^10)) ≈ 34 sibling hashes; at 32 B each = **1,088 B** binary. Adding leaf hash (32 B) + path-direction bitmap (~5 B) = **~1,125 B** — within budget. The same proof as hex-JSON expands to **~2,400 B** (each byte → 2 hex chars + JSON delimiters) — **over budget on encoding alone**. A budget without a pinned encoding is not a budget.
 
+**R6d — UNIFORM PAGE PADDING (NORMATIVE).** Prefix-page buckets are padded to a uniform length. Raw bucket size is a side channel that leaks population density of a name's neighborhood. HIBP ships Add-Padding (normalizing to 800-1,000 records) because this leakage is known and mitigated in production. A known side channel with a shipped mitigation is not a design choice. k = 10 (ruled by Seat 1, founder-delegated). Page size = 2^k = 1,024 entries. Buckets padded to 1,024 uniformly. Download per cold lookup: 1,024 x 32 B = ~32 KB, constant at any N.
+
+**Why k=10 (re-derivable, not a taste):**
+1. HIBP's ~800-suffix bucket is the only planetary-scale deployment of this construction; 1,024 exceeds it, same order of magnitude. Prior-art grounded.
+2. Option F removes the payment path — cost lands only on cold third-party resolution (rarer path, can afford higher floor).
+3. ~32 KB is affordable on any connection that can run the app. Inclusion by construction.
+4. Dialing up is free via j decoys (mechanism C); the floor need only be defensible, not maximal.
+5. Uniform padding to 1,024 is required anyway; page size is constant regardless of prefix occupancy.
+
+**REVISION TEST:** k moves if (a) measurement shows cold third-party resolution is far more common than expected, or (b) bandwidth data shows 32 KB is a barrier for the marginal user. Measurable, therefore revisable.
+
+**R6 COMPLETE.** Padding target = 1,024, following from k = 10.
+
+**SCOPE NOTE (LOOKUP PRIVACY).** The payment path has NO lookup-privacy problem by construction. RFC 9162's mitigation is that the counterparty SENDS THE PROOF (the recipient hands over their log at payment time per bdid-architecture-decision.md:245). The lookup-privacy constraint (R6d padding, bounded download, k-anonymity) bites ONLY on cold third-party resolution — where the resolver has no counterparty relationship and must fetch independently. Do not solve a problem the payment path does not have.
+
 ## RULE-APPLICATION ORDER
 0. R6 (inclusion proof) — prove record committed in current epoch root
 1. R1 (signature) → 2. R0 (World A) → 3. R3 (revision gap) → 4. R5 (grace lock, PREVIOUS record) → 5. R2 (term) → 6. R4 (cap)
