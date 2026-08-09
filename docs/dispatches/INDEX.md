@@ -1,15 +1,31 @@
 # DISPATCH MAILBOX — INDEX
-**Maintained by:** Cowork (document seat), on every mailbox change.
-**Authorization:** founder word "index and whatever" (2026-08-07). Endorsed Seat 1.
+**Maintained by:** Cowork (document seat) — **STANDING DUTY**, ruled 2026-08-09 under
+delegated authority. Updated on **every** mailbox change: addressee · status · gating word ·
+receipt commit.
+**Authorization:** founder word "index and whatever" (2026-08-07); endorsed Seat 1; made a
+standing duty by Seat 1 under the AUTONOMY DIRECTIVE (2026-08-09).
 **Rule:** the bus carries its own state. A seat opening this directory reads status here
 before acting, killing the stale-board error class at the root.
 
-Last updated: 2026-08-08, at commit of this file.
+**Last updated: 2026-08-09** — autonomy directive landed; R1a/R6 format lane recorded;
+push state refreshed against `origin/main`.
+
+**⚠ GATING-WORD COLUMN, READ THIS FIRST:** under the AUTONOMY DIRECTIVE the **per-push
+founder word is RETIRED**. Rows below whose gate reads "founder word" are **historical
+records of how that item cleared at the time**, not live gates. Current gate for a push =
+**Seat-1 ruling + standing pre-flight** (secret scan · 48-hex accounting · never
+`--no-verify`). Founder retains veto. **Absolute and NOT delegated: mainnet untouched, no
+mainnet key in any seat.**
 
 ## Live dispatches
 
 | File | To | Kind | Gating word | Status | Receipt |
 |---|---|---|---|---|---|
+| `DIRECTIVE_AUTONOMY_2026-08-09.md` | **all seats** | ⭐ **OPERATING LAW** | Seat 1 (delegated) | **IN FORCE 2026-08-09.** Autonomous building. Authority resolves at Seat 1 by the founder's algorithm (10B users / 1000 yr / no centralized bottleneck-gate-MiM / performance improves with user count; tiebreaker: WWDLD). Founder interrupted ONLY for manual tasks — credentials, accounts, hardware, values/names. **Per-push founder word RETIRED**; pushes clear on Seat-1 ruling + standing pre-flight. **Founder retains veto. NOT DELEGATED, ABSOLUTE: mainnet untouched, no mainnet key in any seat.** Post-op notes, 8a receipts, 8c flag-don't-absorb unchanged | landed this turn |
+| `SPEC_RESOLVER_VALIDITY_RULES_2026-08-08.md` (rev 6+) | Code / all | **Spec — R0–R6 NORMATIVE** | Seat 1 | **CANON, and the format is now fully pinned.** R1a: 4-byte **BE** length prefix on **every** field **without exception** (fixed-width integers included — `_lp(int8(v))`); integer field bytes = **8-byte BE unsigned** (4-byte overflows 2106, fails the 1000-year test); **`sig` length-prefixed**. R1b: reject non-canonical `S` (`s < L`) explicitly — never rely on library accident. R6a tags `0x00`/`0x01`; R6b **promote-unchanged** (CVE-2012-2459); R6c binary proof encoding; R6d k=10 / page 1,024 / `d = ceil(log2 N) − 9`. ⚠ **Working copy is UNCOMMITTED in-tree** (goose's lane) — the ruled text above is committed only where the post-ops quote it | see post-ops |
+| **R1a/R6 FORMAT LANE — RECONCILED** | Code + Cowork | **Cross-implementation proof** | Seat 1 | ✅ **CLOSED, MATCH 2026-08-09.** RECONCILE-V1 record through **both** implementations: canon **113 B** identical; leaf ed25519(64 B) `092eac0e…` and leaf DER(71 B) `eff1e56e…` identical. Cross-**CONSTRUCTION**, stronger than each-runs-the-other's-vector. **EPOCH LADDER (standing, keep in the header): 147–149** valid for ordering/inclusion/lifecycle ONLY · **150–152** commit to records under a **non-final integer encoding** · **153+** commit under the **fully pinned format** (153/154/155 landed, chain-linked, foreign-oracle verified, 8s surface PASS) | `POSTOP_COWORK_RECONCILE_V1` · `_UNCONDITIONAL_PREFIX` |
+| `021c013` — canon reconciliation harness | Code (Seat 3) | Commit — push ruling | **Seat 1: PUSH** | **RULED PUSH — awaiting Code's execution + remote sha.** Adds `tests/r6/reconcile.py` + `xcheck.py`. ⚠ **Cowork review, recorded not absorbed:** (a) `xcheck.frames()` parses both sides as uniformly length-prefixed, so under an **exception-class** divergence — the framing case it exists to diagnose — it mislocalises fields rather than reporting the real fault; **fix dispatched to Code** (assert 7 frames on both sides first, else report *"framing itself diverged"*). (b) The harness needs **both repos**: Windows here has no Python on PATH and the sandbox does not mount `b-domain`, so **Cowork could not run it** — the proof is committed but still not re-runnable from this repo alone. goose holds the expected-value fixture that closes (b) | pending Code |
+| **COWORK R6/R1a SUITE** — `tests/r6/` | all seats | **Standing conformance suite** | — | **32/32 canon · 93/93 R6 · 10/10 sig**, all standalone exit 0. Carries the negative controls per 8r — pipe-join collisions, CVE-2012-2459 duplication, permissive-Ed25519 `s+L`, exception-class framing. **DO NOT delete a control to make a failing test pass; its job is to accept/exhibit what the ruled format must reject** | `f906c3a` |
 | `DISPATCH_BNR_INVITE_ONBOARD_2026-08-08.md` | **unrouted** — Seat 0/1 to docket the spec draft | Dispatch (6 invite/onboard directives, creatormagic recon of Buzz) | — | **LANDED 2026-08-08** by Seat 3 (founder relay; verbatim; provenance grep clean). Items 3/4/6 ALIGNED with CD-13 / `identity.mobile` Tier-1 / KISS canon. **2 escalations open:** E1 — adopted invite-rationing-by-rank (`b-tokenomics.md` §2.10) vs owner-set use-count sliders (items 1b/5): does rationing govern Buzz-surface invites?; E2 — invite-join identity mint lands on the funded-wallet composition question **in flight** ("no seat builds against either reading"). Fences recorded: F1 P-13 (invite gates a community's door, never THE door), F2 P-1 (redemption emits nothing), F3 Art. V.1 (service-layer, never subsidized). **No implementation until routed + E1/E2 worded** | `RECEIPT_COURSE_SYNC_INVITE_2026-08-08.md` |
 | `GO_ORDER_THREE_BUGS_2026-08-07.md` | Code | Go-order (3 fixes) | founder "go" — **GIVEN** | **OPEN — awaiting Code execution.** Each fix needs its named test (fail→pass), receipts pasted, all three land before any tokenomics constant. **Bug #2 now has constitutional backing — `RULING_REPLAY_WORLD_A`: fail-closed refusal is canon, no replay lane.** These fixes lift the push hold (below) | — |
 | `A1_LAYER1_AMENDMENT_2026-08-07.md` | Code | Spec amendment | founder "A1 go" — **GIVEN** | **LIFTED.** R8 Layer-1 rewritten to frozen-selection wording; collision closed on paper, register closes on Code's COURSE_SYNC | — |
@@ -56,6 +72,48 @@ Last updated: 2026-08-08, at commit of this file.
 | 7 | (row-7 gate) | founder word | **CLOSED — dual-currency: b for compute, stablecoin for service; commit-format kept as-is (founder board 2026-08-07)** |
 
 *Word-stack closures above are recorded from Seat 0's board of 2026-08-07; canonical text lives in the Fable ledger / Code filings. This table is the pointer, not the canon.*
+
+**⚠ THE WORD-STACK IS NOW A HISTORICAL TABLE, not a live queue.** Under the AUTONOMY
+DIRECTIVE (2026-08-09) the founder is interrupted only for **manual tasks** — credentials,
+accounts, hardware, values/names. Design questions and pushes resolve at Seat 1. Rows above
+record how each item cleared under the old regime; **do not add a design or push item to
+this stack.** Only genuinely manual items belong here now.
+
+## Push state — CURRENT (2026-08-09)
+
+Verified this turn, not carried forward:
+
+```text
+origin/main 021c01342225d430256510548d755e7b827f7dcd   <- Code executed the ruled push
+ahead 1 · behind 0
+unpushed    this INDEX/directive commit (Cowork)
+working     M docs/dispatches/SPEC_RESOLVER_VALIDITY_RULES_2026-08-08.md   (uncommitted)
+```
+
+**`021c013` is PUSHED — Seat 1 ruled it, Code executed it.** Remote sha
+`021c01342225d430256510548d755e7b827f7dcd`, confirmed on `origin/main` by
+`git branch -r --contains`. **Recorded as Code's execution, not Cowork's** (8c).
+
+**Coupling note, resolved before it mattered:** git history is linear, so while `021c013`
+sat unpushed it was an **ancestor** of Cowork's commit — any push of `main` would have
+published Code's commit and taken the remote sha with it. Cowork committed and held rather
+than execute another seat's ruled push. **Code pushed first and the coupling dissolved.**
+Kept here because the constraint recurs: **whenever two seats have unpushed commits, the
+later one cannot publish without publishing the earlier.** The seat that is second either
+holds or publishes under explicit attribution — there is no third option.
+
+**Uncommitted working state flagged, not touched:** `SPEC_RESOLVER_VALIDITY_RULES` carries
+modifications in the working tree. That file is goose's lane. A seat reading the ruled R1a
+text from the tree is reading an **uncommitted** copy — worth knowing before quoting it as
+canon.
+
+**Standing pre-flight for every push** (replaces the per-push founder word): secret scan ·
+48-hex accounting · **never `--no-verify`**. Annotate legitimate public constants
+**same-line** (`PUBLIC-CONSTANT`, `TESTNET-ONLY`) rather than bypassing the hook.
+
+---
+
+## HISTORICAL — push state as of 2026-08-07/08 (kept as record, superseded above)
 
 ## Push state — HELD, and why (cadence rule working as designed)
 
