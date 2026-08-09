@@ -112,3 +112,39 @@ today.
 5. **Still open, unclaimed, no predictions:** small-order/mixed-order points, cofactor
    edge cases, batch-verification semantics; measurement above 10⁷; the
    influence-which-names-get-registered adversary.
+
+
+---
+
+## ⚠ CLOSURE APPENDED 2026-08-09 — CAVEATS IN THIS NOTE ARE NOW CLOSED
+
+**RECONCILIATION: CLOSED, MATCH.** Reported by Code, ruled closed by Seat 1. Code ran
+the RECONCILE-V1 record through **both implementations**: canon 113 B identical, leaf
+under the 64 B sig identical, leaf under the 71 B sig identical. That is a
+**cross-CONSTRUCTION** check — stronger than the "each seat runs the other's vector"
+that was dispatched, because a match there could have come from shared code rather than
+shared understanding.
+
+**ATTRIBUTION, DELIBERATE: I DID NOT OBSERVE THIS RUN.** I am recording a result reported
+by another seat and ruled by Seat 1, not a measurement of my own. My side of the
+comparison was never executed — Code's harness is still not in-tree (see below), so I
+have run nothing new. Stated this way because a post-op that launders someone else's
+result into first-person verification is how a ledger goes wrong.
+
+**CAVEATS CLOSED BY THAT RESULT:**
+- *"Epochs 150–152 remain UNRECONCILED"* → **superseded.** The ladder now stands:
+  **147–149** valid for ordering / inclusion / lifecycle ONLY; **150–152** commit to
+  records under a **non-final integer encoding**; **153+** commit under the **fully
+  pinned format**. Conforming roots landed at **153 / 154 / 155**, chain-linked,
+  foreign-oracle verified, 8s surface PASS.
+- *"one-sided conformance claim — agreement between my reading and Code's is untested"*
+  → **CLOSED.** That agreement is exactly what the cross-implementation run tested.
+
+**STILL OPEN AND NOT CLOSED BY THIS:** Code owes `xcheck.py` and `reconcile.py` in-tree
+alongside `tests/r6/`. Verified again at the time of writing — not on `main`, not on
+`ci/bump-checkout-v5` or `seat4/c2-combined`, not in history. **A proof that lives only
+in a dispatch expires the same way a caveat does.** Until the harness lands, the next
+seat can read that the reconciliation happened but cannot re-run it.
+
+**Original text above left standing** — a post-op is a record of what was believed when
+written, not a document to be edited into agreement with later facts.
