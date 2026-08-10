@@ -22,12 +22,13 @@
 //!     `is_small_order()` so a mistyped constant fails loudly, with a `validated >= 1`
 //!     guard so the control cannot go vacuous.
 //!   * cofactor-8 / mixed-order — DEFENDED by `verify_strict` (non-cofactored; it
-//!     rejects small-order R and A), which the small-order control exercises directly.
-//!     A standalone "cofactored-verify accepts / strict rejects" DIVERGENCE control is
-//!     EXCLUDED-WHY: the Fiat-Shamir challenge `k = H(R‖A‖m)` binds R, so naive
-//!     constructions (e.g. R+T) do not reproduce the attack — a correct small-subgroup
-//!     forgery ("Taming the many EdDSAs" §5) is research-grade machinery for a defense
-//!     the small-order rejection already covers.
+//!     rejects small-order R and A). SUPERSEDED-WITH-RECEIPT (the honest history stays):
+//!     the earlier exclusion-why — "a divergence control needs a small-subgroup forgery;
+//!     the Fiat-Shamir challenge k=H(R‖A‖m) binds R so naive R+T does not reproduce it" —
+//!     was honest on the information in hand. goose then located the published vectors, so
+//!     the divergence is now a GENUINE control in `tests/speccheck.rs`: ed25519-speccheck
+//!     vectors 0/1/2/11 (small-order A/R) where cofactored `verify` ACCEPTS and
+//!     `verify_record` (strict) REJECTS. 8x: both sides evidenced, not just our rejection.
 //!   * batch verification — EXCLUDED: no batch-verify construction exists to test;
 //!     `verify_record` is single-signature only.
 
