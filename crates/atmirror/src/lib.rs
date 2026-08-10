@@ -63,6 +63,7 @@ pub mod rail;
 pub mod receipt;
 pub mod record_sig;
 pub mod restore;
+pub mod route;
 pub mod state;
 pub mod turbo_approval;
 pub mod varint;
