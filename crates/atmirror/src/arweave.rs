@@ -422,6 +422,59 @@ impl Rail for ArweaveRail {
 
 // ─── ANS-104 encoding helpers ────────────────────────────────────────────
 
+/// Build a signed ANS-104 DataItem with an **Ed25519** signer (signature type 2).
+///
+/// The 3.3x-cheaper header path: an Ed25519 DataItem header is `2 + 64 + 32 = 98`
+/// bytes against RSA-4096's `2 + 512 + 512 = 1026`. This is the cost lever the
+/// sovereign wallet-funding spec turns on (`docs/SPEC_SOVEREIGN_WALLET_FUNDING.md`
+/// OPEN ITEM 2; `storage-substrate-split` §3 item 13). Format constants are
+/// verified against arbundles `SIG_CONFIG[ED25519]`: sigType 2, sigLength 64,
+/// pubLength 32.
+///
+/// Ed25519 signs the 48-byte deep-hash **directly** — no SHA-256 pre-hash, unlike
+/// the RSA-PSS path in [`ArweaveRail::data_item`] — because Ed25519 hashes
+/// internally. `owner` is the 32-byte public key; the id is `base64url(sha256(sig))`.
+/// The caller holds the `SigningKey`; no key material leaves the process (A8).
+pub fn build_ed25519_data_item(
+    signing_key: &ed25519_dalek::SigningKey,
+    data: &[u8],
+    tags: &[(String, String)],
+) -> (String, Vec<u8>) {
+    use ed25519_dalek::Signer;
+
+    let owner = signing_key.verifying_key().to_bytes(); // 32-byte Ed25519 public key
+    let tag_bytes = avro_tags(tags);
+
+    // deepHash(["dataitem", "1", "2", owner, target, anchor, tags, data])
+    // "1" = format version, "2" = signature type (Ed25519, ASCII as arbundles emits).
+    let msg = deep_hash(&DeepHashItem::List(vec![
+        DeepHashItem::Blob(b"dataitem".to_vec()),
+        DeepHashItem::Blob(b"1".to_vec()),
+        DeepHashItem::Blob(b"2".to_vec()),
+        DeepHashItem::Blob(owner.to_vec()),
+        DeepHashItem::Blob(Vec::new()), // no target
+        DeepHashItem::Blob(Vec::new()), // no anchor
+        DeepHashItem::Blob(tag_bytes.clone()),
+        DeepHashItem::Blob(data.to_vec()),
+    ]));
+
+    // Ed25519 signs the 48-byte deep-hash directly (no pre-hash).
+    let sig = signing_key.sign(&msg).to_bytes(); // 64 bytes
+    let id = b64url_nopad(&Sha256::digest(sig));
+
+    let mut item = Vec::with_capacity(2 + 64 + 32 + 2 + 16 + tag_bytes.len() + data.len());
+    item.extend_from_slice(&2u16.to_le_bytes()); // signature type 2 = Ed25519
+    item.extend_from_slice(&sig); //   64
+    item.extend_from_slice(&owner); //  32
+    item.push(0); // target absent
+    item.push(0); // anchor absent
+    item.extend_from_slice(&(tags.len() as u64).to_le_bytes());
+    item.extend_from_slice(&(tag_bytes.len() as u64).to_le_bytes());
+    item.extend_from_slice(&tag_bytes);
+    item.extend_from_slice(data);
+    (id, item)
+}
+
 /// Avro `array<{name: bytes, value: bytes}>` encoding used for tags:
 /// zigzag-varint count, each field as zigzag-varint length + bytes, then a
 /// zero terminator block.
@@ -495,6 +548,55 @@ fn b64url_nopad(data: &[u8]) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// The Ed25519 (sig type 2) DataItem is well-formed AND the signature genuinely
+    /// verifies over the deep-hash — not a strawman 64 bytes. Header layout and the
+    /// 3.3x lever (96-byte sig+owner vs RSA's 1024) are asserted here; conformance
+    /// against a FOREIGN oracle (arbundles parses+validates it) is proven separately
+    /// in `examples/emit_ed25519_dataitem.rs` + the node harness (a page must not be
+    /// its own witness).
+    #[test]
+    fn ed25519_data_item_is_well_formed_and_verifies() {
+        use ed25519_dalek::{Signature, SigningKey, Verifier};
+
+        let sk = SigningKey::from_bytes(&[42u8; 32]);
+        let data = b"bnr sovereign funding lever";
+        let tags = [("Content-Type".to_string(), "text/plain".to_string())];
+        let (id, item) = build_ed25519_data_item(&sk, data, &tags);
+
+        // layout: sigType(2) | sig(64) | owner(32) | target(1) | anchor(1) | ...
+        assert_eq!(&item[0..2], &2u16.to_le_bytes(), "signature type must be 2 (Ed25519)");
+        let sig = &item[2..66];
+        let owner = &item[66..98];
+        assert_eq!(owner, sk.verifying_key().to_bytes(), "owner is the 32-byte pubkey");
+        assert_eq!(item[98], 0, "target absent");
+        assert_eq!(item[99], 0, "anchor absent");
+
+        // id = base64url(sha256(signature))
+        assert_eq!(id, b64url_nopad(&Sha256::digest(sig)));
+
+        // the signature verifies over the SAME deep-hash the encoder signed.
+        let tag_bytes = avro_tags(&tags);
+        let msg = deep_hash(&DeepHashItem::List(vec![
+            DeepHashItem::Blob(b"dataitem".to_vec()),
+            DeepHashItem::Blob(b"1".to_vec()),
+            DeepHashItem::Blob(b"2".to_vec()),
+            DeepHashItem::Blob(sk.verifying_key().to_bytes().to_vec()),
+            DeepHashItem::Blob(Vec::new()),
+            DeepHashItem::Blob(Vec::new()),
+            DeepHashItem::Blob(tag_bytes),
+            DeepHashItem::Blob(data.to_vec()),
+        ]));
+        let sig_arr: [u8; 64] = sig.try_into().unwrap();
+        let signature = Signature::from_bytes(&sig_arr);
+        assert!(
+            sk.verifying_key().verify(&msg, &signature).is_ok(),
+            "Ed25519 signature must verify over the deep-hash"
+        );
+
+        // the 3.3x lever: Ed25519 sig+owner is 96 bytes vs RSA-4096's 1024.
+        assert_eq!(sig.len() + owner.len(), 96);
+    }
 
     #[test]
     fn status_202_is_success_not_a_parse_failure() {
