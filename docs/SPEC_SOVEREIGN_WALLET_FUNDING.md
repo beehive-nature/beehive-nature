@@ -1,107 +1,98 @@
-# SOVEREIGN WALLET-FUNDING SPEC v2 �?" SELF-FUNDED, NO ENDOWMENT
+# SOVEREIGN WALLET-FUNDING SPEC v3 — ALPHA/BETA STAGED, SELF-FUNDED
 ### Seat: Goose, Seat 1
 ### Date: 2026-08-10
-### Status: SUPERSEDES v1 (74d9d4f) �?" endowment model was wrong
-### Correction: Founder directive �?" "we are not going to ever supplement/fund anyone's accounts. Everything is self-funded. Users pay their own way."
+### Status: SUPERSEDES v2 — Founder directive on staging + sequencing
 
 ---
 
-## THE CORRECTION
+## THE STAGING MODEL (Founder directive)
 
-v1 proposed an "endowment JWK" that pays outer bundle fees for users. That is a **centralized subsidy** �?" a treasury paying for users is the opposite of decentralized. **Deleted entirely.**
+### ALPHA (now) — Vaulta A token, not b
 
-## THE PRINCIPLE (founder's words, not paraphrased)
+The MVP alpha uses **Vaulta A** as the compute/bMeshLLM meter via Buzz. A is the existing native token on Vaulta — it already works, it has value, it pays for RAM/CPU/NET. Users acquire A themselves (self-funded) and spend it on Vaulta operations.
 
-- **Everything is self-funded.** No subsidy, no endowment, no treasury paying for users. Ever.
-- **Users pay their own way.** That is what makes it decentralized.
-- **"Free" means no Vaulta account** �?" not "BNR pays." Tier 1 users get a basic account that exists without needing a paid Vaulta account.
-- **Tier 2 users create and fund their own Vaulta account.** Themselves. With their own resources.
-- **Fully autonomous, self-learning/healing, scaling to 10B.** No human in the loop, no central funder.
+**Buzz relays compute metering:** when a user's bMeshLLM request runs, Buzz meters the A-cost and the user pays in A. Autonomous paying of other accounts (ANT for storage, AR for permanence, RAM/CPU-NET for compute) happens via the adapter layer — but the user's A funds it, not an endowment.
 
-## THE ARCHITECTURE (self-funded)
+**Alpha tier model:**
+- **Guest (free):** basic BNRoSe experience. Browse, read, observe. No chain interaction. No funds needed. Identity is local (bDiD from passkey).
+- **Paid (self-funded):** user acquires A, creates Vaulta account, participates in compute/bMeshLLM, funds their own ANT/AR/RAM/CPU-NET. Everything self-funded.
 
-### How a new user starts with zero balance
+### BETA (later) — b on mainnet Vaulta, self-funded paid tier
 
-1. **bDiD creation (free):** Passkey + BIP-39 seed �+' derive keypair �+' did:webvh identifier derived from the key. Pure local computation. Zero cost. No chain interaction needed.
+When b deploys on mainnet Vaulta, the paid tier uses b instead of A. But b is still self-funded — users earn or acquire b themselves. The transition from A-metering to b-metering is a token swap, not an architecture change.
 
-2. **Tier 1 = no Vaulta account.** The user exists on the cheapest/free rail. HIVE custom_json costs RC (resource credits) which regenerate over time �?" effectively free for basic operations. The bDiD is anchored to HIVE first (the free rail), not Arweave (the paid rail).
+### SEQUENCE (Founder directive)
 
-3. **User earns b through participation.** b is metabolic energy �?" earned by contributing to the network (compute, storage, validation, uniqueness proofs, resource provision, social participation). The user starts at zero and earns their way.
+1. **AR/ANT first** — get Arweave and Autonomi functional for all plugins/dApps
+2. **Then Vaulta** — A-token compute metering via Buzz
+3. **Then HIVE** — social/coordination rail
 
-4. **User spends b on operations.** When the user has earned enough b, they can:
-   - Anchor identity to Arweave for permanence (b �+' AR conversion at the draw facility)
-   - Upgrade to Tier 2: create their own Vaulta account (they acquire A tokens themselves)
-   - Upload data, run operations, participate in escrow
+This sequence means the MVP build order is: storage substrates → compute metering → social coordination. Not all at once.
 
-5. **The draw facility converts b to native tokens.** The b�+"rate is confined to the draw facility (KISS ruling, D-14). But the native tokens come from the NETWORK'S OWN EARNINGS (Autonomi farming earns ANT, HIVE operations earn HIVE, etc.) and from USERS BRINGING THEIR OWN �?" never from a subsidy fund.
+---
 
-### Tier model (corrected)
+## THE SYBIL IMMUNITY QUESTION (Founder's key challenge)
 
-| Tier | What "free" means | Who pays | Chains |
+> "How can they authentically prove 1 in 10 billion + uniqueness for sybil immunity without full BNRoSe resources to begin unlocking b?"
+
+This is the hardest unsolved problem. A guest user with zero resources needs to prove they are a unique human — but uniqueness proof (biometric PoU) is itself a Tier 3 / "later" feature. **How does a guest prove uniqueness before they have the resources to run the uniqueness proof?**
+
+### Candidate approaches (need research, not ruling):
+
+1. **Proof of Work (device-side):** The user's device computes a moderate PoW puzzle that is expensive enough to deter sybil but cheap enough for one person's phone. One puzzle = one identity claim. Not biometric, but raises the cost of fake accounts. Self-funded (device pays in compute).
+
+2. **Social graph attestation (vouching):** Existing unique users vouch for new users. A web-of-trust approach. Requires k unique vouchers per new identity. Bootstraps from the social layer. No resources needed — just human relationships.
+
+3. **Deposit-bond (skin in the game):** The user locks a small amount of A (self-acquired) as a sybil bond. If the identity is proven duplicate, the bond is slashed. Self-funded by definition. The bond size sets the sybil cost.
+
+4. **HIVE reputation as proxy:** HIVE account age + reputation score as a weak uniqueness signal. Not strong alone but composable with other proofs.
+
+5. **Zero-knowledge uniqueness proof:** A ZK proof that the user belongs to a set of unique humans (e.g., from a biometric registry) without revealing which one. Requires the registry to exist first.
+
+**The honest answer: this is an open research question, not a solved problem.** The MVP alpha can ship without full sybil immunity (guest tier is read-only, no value at risk). Sybil resistance becomes critical when b unlocks — and that's the beta timeline.
+
+---
+
+## WHAT THIS MEANS FOR THE BUILD (corrected dispatch)
+
+### Build sequence (Founder directive: AR/ANT → Vaulta → HIVE)
+
+**Phase 0 — AR/ANT functional (Code, now):**
+1. Self-hosted ar-io-node on VPS (AGPL, no-token mode) — gateway for all AR reads
+2. Autonomi nodes (2-3) on VPS — storage farming + chunk hosting
+3. User-signed ANS-104 DataItem pipeline (Code's Ed25519 work 0515e06 is the foundation)
+4. User pays AR for their own uploads (self-funded, no endowment)
+
+**Phase 1 — Vaulta A metering via Buzz (Code, after Phase 0):**
+1. Vaulta node (SHIP) on VPS
+2. Buzz relay meters compute/bMeshLLM costs in A
+3. User creates Vaulta account (self-funded — user acquires A)
+4. Wallet shows A balance + compute spend
+5. Adapter layer routes: A → ANT (storage), A → AR (permanence), A → RAM/CPU-NET (compute)
+
+**Phase 2 — HIVE (after Vaulta):**
+1. hived on VPS
+2. Buzz relay adds HIVE social/coordination
+3. Identity anchoring to HIVE
+
+### Guest vs Paid tier (corrected)
+
+| Tier | Auth | Cost | What they can do |
 |---|---|---|---|
-| **Tier 1 (Beginner)** | No Vaulta account needed. HIVE rail is effectively free (RC regenerates). | User earns b through participation. Zero external funding. | HIVE (free rail), local identity |
-| **Tier 2 (Intermediate)** | Not free �?" user creates and funds their OWN Vaulta account. | User self-funds. Acquires A tokens through earning b, trading, or external purchase. | + Vaulta, Arweave (user-funded AR) |
-| **Tier 3 (Advanced)** | User has Trezor, funds everything themselves. | User self-funds all chains. | All chains, node operations |
+| **Guest (free)** | Passkey | Zero | Browse, read, observe. Local identity. No chain interaction. |
+| **Paid (alpha)** | Passkey + Vaulta account | Self-funded A | Compute/bMeshLLM, storage (ANT), permanence (AR), trading |
+| **Paid (beta)** | FIDO2/Trezor + Vaulta account | Self-funded b | All of above, b-metered, full adapter suite |
+| **Advanced** | Trezor + biometric PoU/PoL | Self-funded everything | Node operations, AI-model ops, governance |
 
-### What this means for the bundler
-
-**There is no endowment signing outer bundles.** The ANS-104 bundling pattern still works, but:
-- Each user signs their own DataItem with their own key
-- The outer bundle transaction is paid by whoever has the AR �?" the user themselves
-- Multiple users can cooperatively self-bundle (one user pays, others sign inner items), but there is no BNR treasury doing it for them
-- The user acquires AR through the draw facility (converting earned b) or externally
-
-### What this means for the wallet MVP
-
-DESIGN-BRIEF-03 corrections needed:
-- **Onboarding wizard step 4:** "Your wallet is ready" shows **ZERO balance** (or b earned through initial participation), NOT a "funded starter balance." The wallet is ready; it's empty; the user earns their way.
-- **Tier 1 wallet:** exists on HIVE rail. No AR needed. No Vaulta needed. The user participates, earns b, and upgrades when ready.
-- **Tier 2 upgrade:** the wallet UI guides the user through creating and funding their own Vaulta account. BNR provides the TOOLS (account creation flow, RAM purchase interface) but NOT the FUNDS.
-
-### What this means for Code
-
-Code's next planned item ("endowment bundler: aggregate DataItems, sign the outer bundle with the endowment") is **CANCELLED.** There is no endowment.
-
-Instead:
-- **Ed25519 sig-type-2 support (0515e06):** EXCELLENT work. This is the 3.3A- cost lever and it's conformance-proven. Keep it �?" it's the foundation for user-signed DataItems.
-- **Next build:** the self-funding draw facility (b �+" native token conversion) and the user-signed DataItem pipeline (user signs, user pays, no intermediary).
-
-## ANTI-CAPTURE CHECKLIST (revised)
-
-- [x] **No subsidy** �?" users fund themselves, always
-- [x] **No endowment** �?" no treasury paying for users
-- [x] **No custodial intermediary** �?" users sign their own data, pay their own fees
-- [x] **Self-scaling** �?" 10B users each earning and spending their own b
-- [x] **Autonomous** �?" no human deciding who gets funded
-- [x] **Decentralized** �?" because users pay their own way
+---
 
 ## OPEN ITEMS (revised)
 
-1. **HIVE as the free rail** �?" verify: can a new user with zero HIVE create an account and post custom_json without any external funding? (HIVE account creation costs; RC delegation needed initially. Who delegates? If no one �?" the user can't start. RESOLVE THIS.)
-2. **b earning mechanism** �?" what exactly does a new Tier 1 user DO to earn their first b? (The answer to this IS the answer to "how is it free.")
-3. **Draw facility reserve** �?" where do native tokens come from for b conversion? (Network earnings? User-provided? Both?)
-4. **Ed25519 DataItem pipeline** �?" user signs, user pays AR. Code's 0515e06 is the foundation. Next: the user-facing flow.
+1. **Sybil immunity for guests** — open research question (5 candidate approaches above). Not blocking alpha (guest = read-only).
+2. **AR/ANT setup** — Code can start Phase 0 as soon as VPS is available. Nothing else blocks it.
+3. **Buzz A-metering** — how exactly does Buzz relay measure and charge compute costs in A? Needs spec.
+4. **Draw facility** — A → ANT/AR conversion mechanism. Self-funded: user's A pays for everything.
 
 ---
 
-## BOOTSTRAP PROPOSAL — How a Zero-Balance User Earns First b (needs Founder ruling)
-
-The critical question: a new Tier 1 user has a bDiD and a keypair but zero balance. How do they start? Three models, not mutually exclusive:
-
-### Model A: Device contribution (device earns native tokens autonomously)
-The user opts in to contribute resources from their device (storage space, compute cycles, bandwidth). The device runs a lightweight Autonomi node / HIVE client / compute provider. It earns native tokens through its own participation. **No subsidy — the device generates its own resources.** Scales to 10B because each device contributes. This is genuinely self-funded: the user's hardware is the capital.
-
-### Model B: HIVE as the free rail (protocol-level, not subsidy)
-BNR's autonomous HIVE node claims accounts and provides them to new users. This is the HIVE protocol's claimed-account mechanism — the node earns HIVE through witness/mining operations and uses some to claim accounts. HIVE custom_json costs RC which regenerates over time — effectively free for basic operations (identity anchoring, participation). **"Free" = no Vaulta account, HIVE rail is near-zero-cost.** Not a subsidy — it's protocol infrastructure operating autonomously.
-
-### Model C: Dormant identity until externally funded
-The bDiD is created locally and is valid but not anchored to any chain. The user can RECEIVE assets (someone sends them b or native tokens to their address). Once they have something, they activate and participate. Simplest model but requires external bootstrap (a friend sends them $0.01 of HIVE, they buy a tiny amount of AR, etc.).
-
-### My recommendation: A + B combined
-The user creates a bDiD (free). BNR's autonomous HIVE node provides the account (Model B — protocol-level, not subsidy). The user's device starts contributing resources (Model A — Autonomi node earns ANT, compute contribution earns b). The user now has resources to operate. No human decides who gets funded — the protocol handles it. This is fully autonomous, self-scaling, and genuinely self-funded.
-
-**This needs the Founder's ruling. The entire wallet MVP's Phase 1 depends on which model (or combination) is correct.**
-
----
-
-**Goose, Seat 1. Corrected. The endowment model was a centralized error. Self-funded is the only sovereign path.**
+**Goose, Seat 1. Staging model updated. Leading the build without gating.**
