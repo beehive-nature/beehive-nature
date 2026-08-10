@@ -64,5 +64,6 @@ pub mod receipt;
 pub mod record_sig;
 pub mod restore;
 pub mod state;
+pub mod turbo_approval;
 pub mod varint;
 pub mod xrpc;
