@@ -203,7 +203,7 @@ The existing `onboarding` crate already has the machinery:
 3. FIDO2 security key enrollment (Tier 2)
 4. TOTP setup (Tier 2)
 5. Trezor connection + firmware verification (Tier 3)
-6. Wallet funding ceremony (per KISS ruling — bDiD issuance funds the wallet)
+6. Self-funding bootstrap (zero balance — user earns b through participation, no subsidy)
 
 The wizard flow:
 
@@ -266,7 +266,7 @@ The wizard flow:
 7. Spend-view (aggregate total + itemized per-adapter breakdown)
 8. Basic send/receive (Arweave ANS-104 DataItem, Vaulta transfer)
 
-**Acceptance:** A new user opens the web app, creates a free account with passkey, receives a funded wallet, sees balances across 3 chains, and can send/receive. No hardware required.
+**Acceptance:** A new user opens the web app, creates a free account with passkey, receives a zero-balance wallet (self-funded — no subsidy), sees balances across 3 chains, and can send/receive. No hardware required.
 
 ### Phase 2 — Tier 2 + Active Operations (target: 4-6 weeks after Phase 1)
 
@@ -308,7 +308,7 @@ The wizard flow:
 The RAID trilogy assessed 20+ projects. The findings directly shape this MVP:
 
 - **No third-party wallet is worth adopting** (Wander, AO Wallet, Arweave.app all failed the capture test). **Build native.** PATTERN their UX (Wander's injected-provider convention, AO Wallet's local keystore) but never depend on them.
-- **Nothing funds AR wallets non-custodially.** The sovereign top-up (self-hosted arbundles + native JWK + endowment-funds-fee-but-user-signs) is the only path. This is a build item, not a dependency.
+- **Nothing funds AR wallets non-custodially.** The sovereign path is self-funded: user earns b, spends b on operations, converts to native tokens at the draw facility. No endowment, no subsidy. See SPEC_SOVEREIGN_WALLET_FUNDING.md v2.
 - **The capture pattern is at the application layer, not the storage layer.** Every ecosystem project re-inserts a token or account between user and base layer. BNR's wallet must not do this — the user's relationship is with their keys and the permissionless base, never with a BNR-operated intermediary.
 - **Our anchor-based resolver is architecturally stronger** than ARNS and ANS. The wallet resolves bDiDs via Merkle proofs (self-contained, no gateway read required). Neither ecosystem naming system can make that claim.
 - **The sovereign AR path costs $76,980 for 10B identity records** (ANS-104 Ed25519, one-time, permanent). This is affordable and scales.
@@ -320,7 +320,7 @@ The RAID trilogy assessed 20+ projects. The findings directly shape this MVP:
 1. **Leptos vs Dioxus** — Leptos recommended (web-first, more mature). Dioxus if you want desktop+mobile from one codebase from the start. Your call.
 2. **OAuth providers** — GitHub + Google confirmed? Add Apple? Drop OAuth entirely for passkey-only onboarding?
 3. **Phase 1 chains** — I scoped Vaulta + Arweave + HIVE for Phase 1. Add/remove?
-4. **Wallet funding source** — KISS ruling says "wallet funded to cover basic adapter tokens." What funds the wallet at issuance? (Genesis allocation? Treasury? Faucet?)
+4. **RESOLVED: Self-funded.** Zero balance at issuance. No faucet, no endowment, no subsidy. User earns b through participation. "Free" = no Vaulta account needed, not BNR pays. See SPEC_SOVEREIGN_WALLET_FUNDING.md v2.
 5. **Server architecture** — single Axum instance for MVP, or distributed from the start? (For 10B scale: distributed, but for MVP: single is rational.)
 6. **Design system** — inherit the audited palette from DESIGN-BRIEF-01, or define a new one for the wallet surface? (Recommendation: inherit — same tokens, re-contrast-checked against the wallet's own backgrounds.)
 
