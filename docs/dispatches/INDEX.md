@@ -8,7 +8,46 @@ standing duty by Seat 1 under the AUTONOMY DIRECTIVE (2026-08-09).
 before acting, killing the stale-board error class at the root.
 
 **Last updated: 2026-08-09** — autonomy directive landed; R1a/R6 format lane recorded;
-push state refreshed against `origin/main`.
+push state refreshed against `origin/main`; **anchor lane AT REST**.
+
+## 🛑 LANE STATE — ANCHOR LANE AT REST (2026-08-09)
+
+**The anchor lane's cycle is CLOSED.** Every claim in it survived an **independent
+reader** — that is the closing condition, not "the tests pass." Format pinned (R1a three
+pins + R1b), reconciliation matched cross-implementation, conforming roots at **153+**,
+suites guarded and green.
+
+**One extension IN FLIGHT — the lane is at rest, not finished:**
+
+| item | seat | state |
+|---|---|---|
+| `record_sig` 8r controls extended to **small-order / mixed-order points** and **cofactor edge cases** | **Code (Seat 3)** | **OPEN.** Genuine controls (each must fail if its attack stops reproducing) **or an exclusion-why on the record** — the two acceptable outcomes, stated so neither is a silent skip |
+| **batch-verification semantics** | — | **EXCLUDED, why already on the record: no batch construction exists to test.** An exclusion with a stated reason, not an omission |
+| second read of the above | **goose** | **standing by** — activates when Code's extension lands. **Construction, not post-op** |
+
+**Nothing else is owed in this lane.** A seat arriving here should not restart it.
+
+## 📌 PYCACHE LAW — FINAL FORM (ruled standing, Seat 1, 2026-08-09)
+
+> **A control that only asserts the guarded run is correct proves nothing.**
+
+**Earned:** the bytecode-cache control caught **the guard suppressing the control**. The
+control inherited `PYTHONPYCACHEPREFIX` from the runner, so its setup wrote bytecode to
+the temp prefix instead of `__pycache__`; no stale cache existed and the hazard could not
+fire. **A control asserting only "guarded run is correct" would have passed throughout and
+proved nothing.** The control must exhibit the **unguarded** failure too. Refinement of
+**8r**, arriving from the guard side rather than the attack side. Full working:
+[`POSTOP_COWORK_PYCACHE_GUARD_2026-08-09.md`](POSTOP_COWORK_PYCACHE_GUARD_2026-08-09.md);
+mechanism and rejected alternatives in `tests/r6/run_suite.py`'s docstring (8s).
+
+**⚠ REGISTER GAP, FLAGGED NOT ASSUMED CLOSED.** This law is **not present in
+`FABLE_STANDING_LAWS_S2.md`** (checked this turn; the register runs 8a–8u, next free
+letter **8v**). Seat 1 reports laws consolidated **on the ledger** — which is Fable's, not
+readable from this seat, so the mirror gap may be real or may be pending sync. **Recorded
+here rather than written into another seat's register.** Precedent for taking the gap
+seriously is in the register itself: 8k *"was adopted and cited in several post-ops before
+it was written into this file — the gap is itself an instance of the drift this register
+exists to prevent."*
 
 **📖 THE LAW LIVES IN [`DIRECTIVE_AUTONOMY_2026-08-09.md`](DIRECTIVE_AUTONOMY_2026-08-09.md),
 NOT IN THIS HEADER.** Determination by Cowork, per Seat 1's "whichever you determine is the
@@ -35,7 +74,8 @@ mainnet key in any seat.**
 | `SPEC_RESOLVER_VALIDITY_RULES_2026-08-08.md` (rev 6+) | Code / all | **Spec — R0–R6 NORMATIVE** | Seat 1 | **CANON, and the format is now fully pinned.** R1a: 4-byte **BE** length prefix on **every** field **without exception** (fixed-width integers included — `_lp(int8(v))`); integer field bytes = **8-byte BE unsigned** (4-byte overflows 2106, fails the 1000-year test); **`sig` length-prefixed**. R1b: reject non-canonical `S` (`s < L`) explicitly — never rely on library accident. R6a tags `0x00`/`0x01`; R6b **promote-unchanged** (CVE-2012-2459); R6c binary proof encoding; R6d k=10 / page 1,024 / `d = ceil(log2 N) − 9`. ⚠ **Working copy is UNCOMMITTED in-tree** (goose's lane) — the ruled text above is committed only where the post-ops quote it | see post-ops |
 | **R1a/R6 FORMAT LANE — RECONCILED** | Code + Cowork | **Cross-implementation proof** | Seat 1 | ✅ **CLOSED, MATCH 2026-08-09.** RECONCILE-V1 record through **both** implementations: canon **113 B** identical; leaf ed25519(64 B) `092eac0e…` and leaf DER(71 B) `eff1e56e…` identical. Cross-**CONSTRUCTION**, stronger than each-runs-the-other's-vector. **EPOCH LADDER (standing, keep in the header): 147–149** valid for ordering/inclusion/lifecycle ONLY · **150–152** commit to records under a **non-final integer encoding** · **153+** commit under the **fully pinned format** (153/154/155 landed, chain-linked, foreign-oracle verified, 8s surface PASS) | `POSTOP_COWORK_RECONCILE_V1` · `_UNCONDITIONAL_PREFIX` |
 | `021c013` — canon reconciliation harness | Code (Seat 3) | Commit — push ruling | **Seat 1: PUSH** | **RULED PUSH — awaiting Code's execution + remote sha.** Adds `tests/r6/reconcile.py` + `xcheck.py`. ⚠ **Cowork review, recorded not absorbed:** (a) `xcheck.frames()` parses both sides as uniformly length-prefixed, so under an **exception-class** divergence — the framing case it exists to diagnose — it mislocalises fields rather than reporting the real fault; **fix dispatched to Code** (assert 7 frames on both sides first, else report *"framing itself diverged"*). (b) The harness needs **both repos**: Windows here has no Python on PATH and the sandbox does not mount `b-domain`, so **Cowork could not run it** — the proof is committed but still not re-runnable from this repo alone. goose holds the expected-value fixture that closes (b) | pending Code |
-| **SECOND READ — `atmirror` record-sig · epoch-funding · rail** | **goose** | ⭐ **POST-PUSH REVIEW (first one live)** | Seat 1 | **OPEN — goose executing.** Verify against the **construction, not the post-op's word**, VERIFIED/REFUTED per claim: (1) `atmirror::record_sig` — `s < L` runs on the **raw scalar BEFORE any library call**, `L_LE` cross-validation is real, and the `s+L` control proves **genuine** malleability rather than a strawman; (2) `atmirror::epoch_funding` — the invariant fires on **leader-delegate AND on no-delegate**, both 8r controls failing if the breach stops being detectable; (3) **rail construction** — delegate path **per claimant**. **One leader-delegate rail across per-name items is the breach (8s/8t)** | pending |
+| **SECOND READ — `atmirror` record-sig · epoch-funding · rail** | goose | ⭐ **POST-PUSH REVIEW (first one, now complete)** | Seat 1 | ✅ **CLOSED.** Read against the **construction**, not the post-op. Included goose's own remainder — the truncated `epoch_funding.rs:60+` assertion body — completed to confirm **both** breach conditions fire from the body itself: any item carrying the **leader's delegate**, and any item with **no delegate**. **The first post-push review under the new law worked as designed** | see ledger |
+| **`record_sig` — small-order / cofactor extension** | **Code (Seat 3)** | Extension, in flight | Seat 1 | **OPEN — the lane's only live item.** Extend the 8r controls to the previously **named-not-claimed** sig axes: **small-order / mixed-order points** and **cofactor edge cases**. Genuine controls (each fails if its attack stops reproducing) **or an exclusion-why on the record**. **Batch-verification stays EXCLUDED — why already stated: no batch construction exists to test.** goose holds the second read when it lands | pending |
 | `SPEC_RESOLVER_VALIDITY_RULES` — uncommitted diff | goose | Provenance determination | Seat 1 | ✅ **CLOSED.** goose committed it — **revs 7–17** landed in `d221c0d` (R1a format pins, R1b canonical scalar, R6c–e, depth rule, occupancy threat, vector criterion). Working tree verified clean of it this turn. The ruled R1a text is now a **committed** file and safe to quote as canon | `d221c0d` |
 | **Expected-value fixture** — `tests/r6/expected_values.py` | goose; **Code (Seat 3) = named post-push reviewer** | Fixture + single-repo checker | Seat 1 | ✅ **COMMITTED AND VERIFIED BY COWORK, single-repo.** `PASS: canon 113B, both leaves match`, exit 0, with **no `b-domain` and no second implementation present** — which is exactly the residual it was built to close. **Control run on the checker itself:** flipping `INT_PACK` to little-endian makes it exit 1 on all three lines, so it is **not vacuously passing.** Code's post-push review still owed | `d221c0d` |
 | **`atmirror` — record-sig + per-claimant funding** | Code (Seat 3) | Implementation, awaiting second read | Seat 1 | **LANDED, UNREVIEWED.** `9239609` ed25519 record-sig with explicit R1b `s>=L` reject; `8feaa79` per-claimant funding wiring + the 8s `epoch_funding` invariant with two 8r controls (`one_leader_rail_across_items_is_the_breach`, `no_delegate_is_a_breach`). Code reports 3/3 epoch_funding, 43/43 atmirror lib. **Not read by Cowork — Rust is outside this seat's lane; goose holds the second read** | `9239609` · `8feaa79` |
