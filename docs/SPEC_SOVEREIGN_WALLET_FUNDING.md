@@ -1,157 +1,87 @@
-# SOVEREIGN WALLET-FUNDING SPEC — How BNR Funds User AR Capacity Without Custody
-### Seat: Goose, Seat 1 (self-initiative — unblocks wallet MVP Phase 1)
+# SOVEREIGN WALLET-FUNDING SPEC v2 — SELF-FUNDED, NO ENDOWMENT
+### Seat: Goose, Seat 1
 ### Date: 2026-08-10
-### Status: DRAFT
-### Depends on: compass artifact Part C.5, storage-substrate-split §1/§3, ceremony cross-check (eb91f9c), RAID trilogy
+### Status: SUPERSEDES v1 (74d9d4f) — endowment model was wrong
+### Correction: Founder directive — "we are not going to ever supplement/fund anyone's accounts. Everything is self-funded. Users pay their own way."
 
 ---
 
-## THE PROBLEM (confirmed by all three RAID axes)
+## THE CORRECTION
 
-Nothing in the Arweave ecosystem funds a user's upload capacity non-custodially:
-- **Turbo Credits** — hosted scrip, non-transferable, non-refundable, managed by ar.io's payment service
-- **Verto/flex** — settles PST↔PST only, never native AR
-- **Irys** — custodial bundler, pivoted off Arweave
-- **everPay** — custodial bridge with watchmen multisig
-- **Paragraph** — one company wallet signs and pays every upload
+v1 proposed an "endowment JWK" that pays outer bundle fees for users. That is a **centralized subsidy** — a treasury paying for users is the opposite of decentralized. **Deleted entirely.**
 
-Every solution inserts an intermediary between the user and the permissionless base layer. BNR's filter rejects all of them.
+## THE PRINCIPLE (founder's words, not paraphrased)
 
-## THE SOLUTION (sovereign per-claimant funding)
+- **Everything is self-funded.** No subsidy, no endowment, no treasury paying for users. Ever.
+- **Users pay their own way.** That is what makes it decentralized.
+- **"Free" means no Vaulta account** — not "BNR pays." Tier 1 users get a basic account that exists without needing a paid Vaulta account.
+- **Tier 2 users create and fund their own Vaulta account.** Themselves. With their own resources.
+- **Fully autonomous, self-learning/healing, scaling to 10B.** No human in the loop, no central funder.
 
-**The endowment pays the fee. The user signs the data. The two never meet in custody.**
+## THE ARCHITECTURE (self-funded)
 
-```
-User (browser, self-custodial JWK or passkey-derived key)
-  │
-  │  1. signs ANS-104 DataItem (their data, their signature)
-  │
-  ▼
-BNR Bundler (self-hosted, sovereign)
-  │
-  │  2. aggregates N user-signed DataItems into one bundle
-  │  3. signs the outer bundle transaction with the ENDOWMENT JWK
-  │     (endowment wallet is treasury-controlled, funded in AR)
-  │  4. posts the bundle to Arweave L1 (any node, multi-gateway fallback)
-  │
-  ▼
-Arweave Network (permissionless base layer)
-  │
-  │  5. bundle is mined → permanent → each DataItem is independently
-  │     verifiable by its own signature (user's key), attributed to its
-  │     own owner, but PAID FOR by the endowment
-  │
-  ▼
-Result: user data is permanent on Arweave. User never held AR.
-        Endowment never held the user's key. Zero custody crossover.
-```
+### How a new user starts with zero balance
 
-**This is the ANS-104 specification working as designed.** Each DataItem inside a bundle carries its own owner address and signature. The bundle transaction's reward (the AR fee) is paid by whoever signs the outer transaction. BNR separates these: user signs inner, endowment signs outer.
+1. **bDiD creation (free):** Passkey + BIP-39 seed → derive keypair → did:webvh identifier derived from the key. Pure local computation. Zero cost. No chain interaction needed.
 
-## CUSTODY BOUNDARY (non-negotiable)
+2. **Tier 1 = no Vaulta account.** The user exists on the cheapest/free rail. HIVE custom_json costs RC (resource credits) which regenerate over time — effectively free for basic operations. The bDiD is anchored to HIVE first (the free rail), not Arweave (the paid rail).
 
-| Key | Who holds | What it does | Where it lives |
+3. **User earns b through participation.** b is metabolic energy — earned by contributing to the network (compute, storage, validation, uniqueness proofs, resource provision, social participation). The user starts at zero and earns their way.
+
+4. **User spends b on operations.** When the user has earned enough b, they can:
+   - Anchor identity to Arweave for permanence (b → AR conversion at the draw facility)
+   - Upgrade to Tier 2: create their own Vaulta account (they acquire A tokens themselves)
+   - Upload data, run operations, participate in escrow
+
+5. **The draw facility converts b to native tokens.** The b↔rate is confined to the draw facility (KISS ruling, D-14). But the native tokens come from the NETWORK'S OWN EARNINGS (Autonomi farming earns ANT, HIVE operations earn HIVE, etc.) and from USERS BRINGING THEIR OWN — never from a subsidy fund.
+
+### Tier model (corrected)
+
+| Tier | What "free" means | Who pays | Chains |
 |---|---|---|---|
-| **User signing key** | The user (browser IndexedDB, passkey-unlocked, or Trezor) | Signs individual DataItems | Never on any server |
-| **Endowment JWK** | Treasury / founder custody | Signs bundle transactions, pays AR fees | VPS or cold storage, NEVER in browser |
-| **BNR bundler key** (optional) | BNR infrastructure | Signs operational metadata, not user data | VPS only |
+| **Tier 1 (Beginner)** | No Vaulta account needed. HIVE rail is effectively free (RC regenerates). | User earns b through participation. Zero external funding. | HIVE (free rail), local identity |
+| **Tier 2 (Intermediate)** | Not free — user creates and funds their OWN Vaulta account. | User self-funds. Acquires A tokens through earning b, trading, or external purchase. | + Vaulta, Arweave (user-funded AR) |
+| **Tier 3 (Advanced)** | User has Trezor, funds everything themselves. | User self-funds all chains. | All chains, node operations |
 
-**The endowment JWK is the money.** It follows the same custody rules as the ceremony wallet (mode 600, never printed, never transmitted, backed up offline). The ceremony cross-check (eb91f9c) verified this pattern — the same discipline applies.
+### What this means for the bundler
 
-## COST MODEL (from storage-substrate-split §3)
+**There is no endowment signing outer bundles.** The ANS-104 bundling pattern still works, but:
+- Each user signs their own DataItem with their own key
+- The outer bundle transaction is paid by whoever has the AR — the user themselves
+- Multiple users can cooperatively self-bundle (one user pays, others sign inner items), but there is no BNR treasury doing it for them
+- The user acquires AR through the draw facility (converting earned b) or externally
 
-| Scenario | Cost | Source |
-|---|---|---|
-| 10B identity records (one-time, ANS-104 Ed25519) | **$76,980** (41,837 AR) | storage-substrate-split §3 |
-| Annual re-issue (10B × 1 update/year) | **$76,980/year** | same |
-| Per-user identity record (300 bytes, Ed25519) | **$0.0000077** | 10,057 winston/byte × 416 bytes |
-| Per-user annual update | **$0.0000077/year** | same |
+### What this means for the wallet MVP
 
-**The endowment must be pre-funded with enough AR to cover the projected user base.** For 1M users at launch: 1M × $0.0000077 = **$7.70 one-time**. For 10B users: $76,980. The endowment is a prepaid, permanent storage fund — AR's one-time-payment model means this money buys 200+ years of storage upfront.
+DESIGN-BRIEF-03 corrections needed:
+- **Onboarding wizard step 4:** "Your wallet is ready" shows **ZERO balance** (or b earned through initial participation), NOT a "funded starter balance." The wallet is ready; it's empty; the user earns their way.
+- **Tier 1 wallet:** exists on HIVE rail. No AR needed. No Vaulta needed. The user participates, earns b, and upgrades when ready.
+- **Tier 2 upgrade:** the wallet UI guides the user through creating and funding their own Vaulta account. BNR provides the TOOLS (account creation flow, RAM purchase interface) but NOT the FUNDS.
 
-**The 3.3× lever:** Ed25519 signatures (ANS-104 sig type 2, ~116 byte header) cost 3.3× less than RSA-4096 (~1,081 byte header). Use Ed25519 for all user DataItems. This is the single highest-leverage cost optimization in the system. (storage-substrate-split §3, item 13.)
+### What this means for Code
 
-## ARCHITECTURE (integration with existing crates)
+Code's next planned item ("endowment bundler: aggregate DataItems, sign the outer bundle with the endowment") is **CANCELLED.** There is no endowment.
 
-```
-crates/adapter-arweave/
-  ├── lib.rs          — Merkle bundle + ArweaveClient trait (BUILT)
-  ├── arweave.rs      — ArweaveRail (needs: Ed25519 sig type 2, paid_by field)
-  └── (new) funding.rs — SovereignFunder: the endowment-pays-user-signs flow
+Instead:
+- **Ed25519 sig-type-2 support (0515e06):** EXCELLENT work. This is the 3.3× cost lever and it's conformance-proven. Keep it — it's the foundation for user-signed DataItems.
+- **Next build:** the self-funding draw facility (b ↔ native token conversion) and the user-signed DataItem pipeline (user signs, user pays, no intermediary).
 
-crates/atmirror/
-  ├── turbo_approval.rs — assert_approvals_present gate (BUILT — reuse pattern)
-  └── epoch_funding.rs   — per-claimant funding invariant (BUILT — extend)
-```
+## ANTI-CAPTURE CHECKLIST (revised)
 
-### SovereignFunder flow (new — funding.rs):
+- [x] **No subsidy** — users fund themselves, always
+- [x] **No endowment** — no treasury paying for users
+- [x] **No custodial intermediary** — users sign their own data, pay their own fees
+- [x] **Self-scaling** — 10B users each earning and spending their own b
+- [x] **Autonomous** — no human deciding who gets funded
+- [x] **Decentralized** — because users pay their own way
 
-```rust
-/// The endowment wallet pays the outer bundle fee.
-/// User-signed DataItems go inside. Zero custody crossover.
-pub struct SovereignFunder {
-    endowment_jwk: JWK,      // treasury-controlled, never in browser
-    gateway_list: Vec<Url>,   // multi-gateway fallback, never hard-code one
-    sig_type: SigType,        // Ed25519 (sig type 2) — 3.3× cheaper
-}
+## OPEN ITEMS (revised)
 
-impl SovereignFunder {
-    /// Accept user-signed DataItems, bundle them, sign with endowment, post.
-    pub fn fund_and_post(&self, items: Vec<DataItem>) -> Result<TxId, FundError> {
-        // 1. verify each DataItem is signed by its claimed owner
-        // 2. bundle: bundleAndSignData(items, endowment_signer)
-        // 3. post to first available gateway (multi-fallback)
-        // 4. return tx_id for user confirmation
-    }
-}
-```
-
-### The `paid_by` integration (from compass artifact Part C.5):
-
-Turbo's `x-paid-by` header lets a payer address cover another wallet's upload. BNR's sovereign equivalent: the endowment JWK signs the outer bundle transaction directly. No header needed, no Turbo service needed. The ANS-104 spec handles attribution natively — each DataItem's `owner` field identifies who signed it, regardless of who paid the bundle fee.
-
-## TIERED FUNDING (maps to wallet custody tiers)
-
-| Tier | User signs with | Endowment pays | Cap per user |
-|---|---|---|---|
-| **Tier 1 (passkey)** | Browser-stored key (passkey-unlocked) | Full fee | Basic allocation (enough for identity + initial data) |
-| **Tier 2 (FIDO2)** | Hardware-unlocked browser key | Full fee | User-funded top-up available |
-| **Tier 3 (Trezor)** | Trezor device (keys never leave) | Optional (user can self-fund in AR) | Unlimited (user controls their own AR) |
-
-**Tier 3 users can opt out of endowment funding entirely** — if they hold their own AR, they sign AND pay. The endowment is for Tier 1/2 users who don't hold AR yet.
-
-## FALLBACK: Turbo CLI ceremony (verified)
-
-If the self-hosted bundler is unavailable (VPS down, node syncing), the Turbo CLI ceremony (eb91f9c, CLEARED by goose cross-check) provides a fallback:
-- `turbo share-credits --wallet-file <endowment> --address <user> --value <cap> --expires-by-seconds <ttl>`
-- Creates a capped, expiring credit approval from endowment to user
-- User uploads via Turbo with the endowment's credits
-- Auto-expires (returns unused credits to endowment)
-
-This is NOT the primary path — it introduces Turbo as a dependency. But it's a verified fallback while the sovereign bundler is being built.
-
-## ANTI-CAPTURE CHECKLIST (applied to this spec)
-
-- [x] **No hosted endpoint required** — self-hosted bundler posts directly to any AR node
-- [x] **No token gate** — AR is the only token; no ARIO, no AO, no WNDR
-- [x] **No custodial intermediary** — endowment pays, user signs, keys never cross
-- [x] **Multi-gateway fallback** — never hard-code arweave.net
-- [x] **10B scalable** — $76,980 for all 10B identity records, one-time, permanent
-- [x] **1000-year durable** — AR endowment funds 200+ years of storage upfront
-- [x] **Orthogonal** — if BNR's bundler disappears, users still have their signed DataItems and can post to any node themselves
-
-## OPEN ITEMS
-
-1. **Endowment wallet creation** — same ceremony as eb91f9c (generate JWK, fund with AR). Founder custody.
-2. **Ed25519 sig type 2 in arweave.rs** — verify the existing ArweaveRail supports sig type 2, not just RSA-4096. This is the 3.3× cost lever. (storage-substrate-split §5 item 13.)
-3. **Self-hosted bundler implementation** — the `bundleAndSignData` logic from @dha-team/arbundles (Apache-2.0), ported to Rust or called via WASM.
-4. **Per-user cap enforcement** — how to limit how much endowment funding each user gets (Tier 1 basic allocation). Needs the spend receipt schema (Cowork B3).
-5. **Gateway list configuration** — load-balanced multi-gateway with health checks. Primary: self-hosted ar-io-node. Fallback: 2-3 public gateways.
-
-## WHAT THIS UNBLOCKS
-
-This spec unblocks **wallet MVP Phase 1 item 5** (wallet funding ceremony per KISS ruling) and **Phase 1 item 8** (basic send/receive — Arweave ANS-104 DataItem path). Without it, the wallet can create identities but can't fund their storage. With it, a Tier 1 user creates a passkey, gets a bDiD, and their identity record is permanently anchored on Arweave — all without holding AR.
+1. **HIVE as the free rail** — verify: can a new user with zero HIVE create an account and post custom_json without any external funding? (HIVE account creation costs; RC delegation needed initially. Who delegates? If no one — the user can't start. RESOLVE THIS.)
+2. **b earning mechanism** — what exactly does a new Tier 1 user DO to earn their first b? (The answer to this IS the answer to "how is it free.")
+3. **Draw facility reserve** — where do native tokens come from for b conversion? (Network earnings? User-provided? Both?)
+4. **Ed25519 DataItem pipeline** — user signs, user pays AR. Code's 0515e06 is the foundation. Next: the user-facing flow.
 
 ---
 
-**Goose, Seat 1. Self-initiative spec. Ready for Code to implement when A2 (wallet scaffold) begins.**
+**Goose, Seat 1. Corrected. The endowment model was a centralized error. Self-funded is the only sovereign path.**
