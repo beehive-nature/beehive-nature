@@ -97,6 +97,35 @@ Return these five, each with its doc citation, and the card fills in minutes:
 not native, an uncapped approval is a standing risk to the founder's balance and **Seat 1
 rules before this card reaches him**, not after.
 
+## Blocking input 0 — **founder cannot unlock the wallet** (observed 2026-08-09 19:45)
+
+**ArDrive web 2.85.0 refuses unlock for `6tlCkGE8…NWck`. It is very likely NOT the
+password.** The app's own message conflates two causes — *"The password is wrong **or a
+network error occurred**"* — and the underlying exception is a **transport** failure, not
+an auth rejection:
+
+```text
+ClientException: XMLHttpRequest error.
+uri=https://turbo-gateway.com/wallet/6tlCkGE8…NWck/balance
+```
+
+**Password decryption is local.** A wrong password does not produce an XHR error against
+a remote balance endpoint.
+
+**Both hosts verified reachable from an independent network this turn** (Cowork, not from
+memory): `payment.ardrive.io` responds and itself declares `"gateway":
+"https://turbo-gateway.com"`; `turbo-gateway.com` serves. **So the outage is local to the
+founder's browser/network**, not a dead service — consistent with an ad/privacy blocker,
+VPN, or DNS filter, since `turbo-gateway.com` is a third-party host relative to
+`app.ardrive.io` and is exactly the shape such tools block.
+
+**⚠ FINDING THAT MATTERS FOR THIS CARD, beyond the immediate problem: the Turbo balance
+fetch is on the UNLOCK path** (`useTurboPayment: true`). **A Turbo network hiccup locks
+the founder out of his wallet entirely** — so the funded-upload flow has a single point of
+failure at the moment of login, before any of Steps 1–3. **Step 0 of the card must become
+"confirm you can unlock,"** and this belongs in goose's mechanics read as a resilience
+question, not just a connectivity annoyance.
+
 ## Blocking input 2 — **Code (Seat 3)**
 
 - The claimant addresses, in paste-ready order (public addresses only — **no JWK, no
