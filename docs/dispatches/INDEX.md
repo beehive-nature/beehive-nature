@@ -51,14 +51,21 @@ and the file carries no duplicates.
 | **8w** | **LINEAR-HISTORY PUBLICATION** — two seats, unpushed commits, one branch: **hold, or publish under explicit attribution.** "Push and say nothing" is not a third option |
 | **8x** | **GUARD EVIDENCE** — refines 8r from the guard side. The control must show the hazard reproduces **unguarded** *and* that the guard **engaged**; **controls must be independent of the environment the guard creates** |
 
-**⚠ TWO THINGS FLAGGED AT THE REGISTER, not absorbed.** (1) That file **mirrors the Fable
-ledger and the ledger wins on conflict** — so a mirror that **leads** its source is its own
-drift risk. If the ledger does not yet carry these three, it should, or the direction of a
-future conflict there would be misleading. (2) Seat 1's standing rule in the same dispatch
-— *every room-law ruling ships with its register text in the same dispatch; a law the seats
-cannot read is not yet a law of the room* — reads like a standing law but **was not among
-the three dispatched, so it is recorded as a note and NOT given a letter.** It may warrant
-**8y**; that is Seat 1's call, not Cowork's.
+| **8y** | **A LAW THE SEATS CANNOT READ IS NOT YET A LAW OF THE ROOM** — every Seat-1 room-law ruling ships with its **register text in the same dispatch**, landed by a hands seat as **transcription-not-authorship**, letters **assigned at write time against the file** |
+
+**BOTH EARLIER FLAGS ANSWERED, and closed rather than left hanging.** (1) *Mirror leads
+source* — **answered by Seat 1: the ledger carries all three; the mirror does not lead its
+source.** (2) *The standing rule recorded as a note without a letter, Seat 1's call* —
+**ruled, and it is now 8y.** The dangling "may warrant 8y" suggestion inside the register
+was rewritten to point at the landed law, so the file does not carry a proposal for
+something that already exists.
+
+**Letter assignment, done the way 8y itself requires — and the check caught something.**
+Enumerated line-anchored against the file first: `8a`–`8x` present, `8y` free. A naive
+substring guard for `"8y."` **fired falsely**, because the register's own earlier note
+contained the phrase *"may warrant 8y."* — **prose about a letter is not a use of it.**
+Fixed the check, not the letter; the line-anchored enumeration was right and `8y` was
+genuinely next-free. Verified after writing: no duplicate letters.
 
 **📖 THE LAW LIVES IN [`DIRECTIVE_AUTONOMY_2026-08-09.md`](DIRECTIVE_AUTONOMY_2026-08-09.md),
 NOT IN THIS HEADER.** Determination by Cowork, per Seat 1's "whichever you determine is the
