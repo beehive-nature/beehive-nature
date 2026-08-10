@@ -38,6 +38,7 @@ members = [
     "crates/type-bindings",
     "crates/verify-trezor",
     "crates/vocabulary",
+    "crates/wallet-relay",
     "crates/zano-watcher",
 ]
 

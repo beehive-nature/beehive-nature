@@ -1,0 +1,25 @@
+# wallet-relay — the Phase-0 Axum relay skeleton (PHASE0_AR_ANT_SETUP_SPEC steps 4/5/7).
+# Serves GraphQL proxy + raw reads through a health-checked multi-gateway pool and
+# accepts USER-SIGNED Ed25519 DataItems. Never holds keys, stateless per-user
+# (dispatch D5): the server is a relay + read surface, nothing more.
+[package]
+name = "wallet-relay"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "BNR wallet relay: GraphQL/raw read proxy over a health-checked gateway pool + user-signed Ed25519 DataItem upload endpoint; holds no keys, stateless per-user"
+
+[dependencies]
+atmirror = { path = "../atmirror" }
+axum = "0.8"
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "net"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+base64 = "0.22"
+# House transport (LOVErnment-DAO D-009c): ureq + rustls, driven via spawn_blocking.
+ureq = { version = "2", features = ["json"] }
+
+[dev-dependencies]
+tower = { version = "0.5", features = ["util"] }
+http-body-util = "0.1"
+ed25519-dalek = "2"

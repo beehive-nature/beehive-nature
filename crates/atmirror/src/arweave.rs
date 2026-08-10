@@ -475,6 +475,107 @@ pub fn build_ed25519_data_item(
     (id, item)
 }
 
+/// A parsed, signature-verified Ed25519 (sig type 2) DataItem — the RELAY-side
+/// inverse of [`build_ed25519_data_item`], for the user-signed upload endpoint
+/// (PHASE0_AR_ANT_SETUP_SPEC step 5). Self-funded model: the relay validates and
+/// routes; it never signs and never holds a key.
+#[derive(Debug)]
+pub struct ParsedEd25519Item {
+    /// `base64url(sha256(signature))` — recomputed here, never trusted from the wire.
+    pub id: String,
+    /// The signer's 32-byte Ed25519 public key (the ANS-104 `owner`).
+    pub owner: [u8; 32],
+    /// Total DataItem length in bytes — what Arweave storage actually costs,
+    /// hence what the 256 KiB routing crossover meters.
+    pub item_len: usize,
+    /// Payload length (the `data` segment only).
+    pub data_len: usize,
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum ParseItemError {
+    /// Buffer too short for the claimed structure. Names the segment that ran out.
+    Truncated(&'static str),
+    /// Signature type is not 2 (Ed25519). Phase 0 accepts Ed25519 only; the
+    /// caller sees WHICH type arrived so the refusal is diagnosable.
+    NotEd25519(u16),
+    /// The Ed25519 signature does not verify over the item's deep-hash —
+    /// tampered payload, tampered signature, or a wrong owner key.
+    BadSignature,
+}
+
+/// Parse + VERIFY an incoming ANS-104 Ed25519 DataItem. Unlike the builder this
+/// accepts optional `target`/`anchor` (arbundles-signed items may carry them);
+/// both feed the deep-hash exactly as ANS-104 specifies (empty blob when absent).
+/// Nothing from the wire is trusted: the id is recomputed from the signature and
+/// the signature is verified over the recomputed deep-hash before anything is
+/// returned.
+pub fn parse_ed25519_data_item(bytes: &[u8]) -> Result<ParsedEd25519Item, ParseItemError> {
+    use ed25519_dalek::{Signature, Verifier, VerifyingKey};
+
+    let need = |ok: bool, seg: &'static str| if ok { Ok(()) } else { Err(ParseItemError::Truncated(seg)) };
+
+    need(bytes.len() >= 2, "signature type")?;
+    let sig_type = u16::from_le_bytes([bytes[0], bytes[1]]);
+    if sig_type != 2 {
+        return Err(ParseItemError::NotEd25519(sig_type));
+    }
+    need(bytes.len() >= 2 + 64 + 32 + 2, "header")?;
+    let sig: [u8; 64] = bytes[2..66].try_into().expect("sized slice");
+    let owner: [u8; 32] = bytes[66..98].try_into().expect("sized slice");
+
+    // optional target, then optional anchor: flag byte 0 = absent, 1 = +32 bytes.
+    let mut off = 98usize;
+    let optional = |name: &'static str, off: &mut usize| -> Result<Vec<u8>, ParseItemError> {
+        need(bytes.len() > *off, name)?;
+        match bytes[*off] {
+            0 => {
+                *off += 1;
+                Ok(Vec::new())
+            }
+            1 => {
+                need(bytes.len() >= *off + 1 + 32, name)?;
+                let v = bytes[*off + 1..*off + 33].to_vec();
+                *off += 33;
+                Ok(v)
+            }
+            _ => Err(ParseItemError::Truncated(name)), // invalid presence flag
+        }
+    };
+    let target = optional("target", &mut off)?;
+    let anchor = optional("anchor", &mut off)?;
+
+    need(bytes.len() >= off + 16, "tag lengths")?;
+    let tag_bytes_len =
+        u64::from_le_bytes(bytes[off + 8..off + 16].try_into().expect("sized slice")) as usize;
+    let tags_start = off + 16;
+    need(bytes.len() >= tags_start + tag_bytes_len, "tag bytes")?;
+    let tag_bytes = &bytes[tags_start..tags_start + tag_bytes_len];
+    let data = &bytes[tags_start + tag_bytes_len..];
+
+    let msg = deep_hash(&DeepHashItem::List(vec![
+        DeepHashItem::Blob(b"dataitem".to_vec()),
+        DeepHashItem::Blob(b"1".to_vec()),
+        DeepHashItem::Blob(b"2".to_vec()),
+        DeepHashItem::Blob(owner.to_vec()),
+        DeepHashItem::Blob(target),
+        DeepHashItem::Blob(anchor),
+        DeepHashItem::Blob(tag_bytes.to_vec()),
+        DeepHashItem::Blob(data.to_vec()),
+    ]));
+
+    let vk = VerifyingKey::from_bytes(&owner).map_err(|_| ParseItemError::BadSignature)?;
+    vk.verify(&msg, &Signature::from_bytes(&sig))
+        .map_err(|_| ParseItemError::BadSignature)?;
+
+    Ok(ParsedEd25519Item {
+        id: b64url_nopad(&Sha256::digest(sig)),
+        owner,
+        item_len: bytes.len(),
+        data_len: data.len(),
+    })
+}
+
 /// Avro `array<{name: bytes, value: bytes}>` encoding used for tags:
 /// zigzag-varint count, each field as zigzag-varint length + bytes, then a
 /// zero terminator block.
@@ -596,6 +697,50 @@ mod tests {
 
         // the 3.3x lever: Ed25519 sig+owner is 96 bytes vs RSA-4096's 1024.
         assert_eq!(sig.len() + owner.len(), 96);
+    }
+
+    /// Relay-side inverse: the parser round-trips the builder's output and
+    /// refuses every tamper class LOUDLY — no refusal path is silent.
+    #[test]
+    fn parse_ed25519_round_trips_and_refuses_tampering() {
+        use ed25519_dalek::SigningKey;
+
+        let sk = SigningKey::from_bytes(&[9u8; 32]);
+        let data = b"user-signed payload";
+        let tags = [("Content-Type".to_string(), "text/plain".to_string())];
+        let (id, item) = build_ed25519_data_item(&sk, data, &tags);
+
+        // round-trip: id recomputed (not trusted), owner + lengths agree.
+        let parsed = parse_ed25519_data_item(&item).expect("valid item parses");
+        assert_eq!(parsed.id, id);
+        assert_eq!(parsed.owner, sk.verifying_key().to_bytes());
+        assert_eq!(parsed.item_len, item.len());
+        assert_eq!(parsed.data_len, data.len());
+
+        // tampered payload byte -> BadSignature.
+        let mut t = item.clone();
+        let last = t.len() - 1;
+        t[last] ^= 0x01;
+        assert!(matches!(parse_ed25519_data_item(&t), Err(ParseItemError::BadSignature)));
+
+        // tampered signature byte -> BadSignature.
+        let mut t = item.clone();
+        t[10] ^= 0x01;
+        assert!(matches!(parse_ed25519_data_item(&t), Err(ParseItemError::BadSignature)));
+
+        // RSA sig type (1) -> NotEd25519(1), named not silent.
+        let mut t = item.clone();
+        t[0] = 1;
+        t[1] = 0;
+        assert!(matches!(parse_ed25519_data_item(&t), Err(ParseItemError::NotEd25519(1))));
+
+        // truncation -> Truncated, at any cut point, never a panic.
+        for cut in [0, 1, 65, 97, 99, item.len() - 1] {
+            assert!(
+                matches!(parse_ed25519_data_item(&item[..cut]), Err(_)),
+                "cut at {cut} must refuse, not accept"
+            );
+        }
     }
 
     #[test]
