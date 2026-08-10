@@ -14,6 +14,13 @@ the reference shipped little-endian length prefixes against a big-endian ruling.
 tested injectivity, and injectivity is byte-order-blind. A SUITE THAT TESTS THE PROPERTY
 BUT NOT THE FORMAT WILL NOT NOTICE A CONSENSUS DIVERGENCE.
 
+⚠ RUNNING THIS SUITE: if you edit canon.py and revert it, DELETE `tests/r6/__pycache__`
+before trusting the result. A stale `.pyc` can shadow a source file that is byte-identical
+to HEAD — observed 2026-08-09: canon.py matched HEAD by md5 and the suite still reported
+`FAIL R1a pin 2`, because Python imported cached bytecode from the edited version. `-B`
+does NOT help; it prevents writing bytecode, not reading it. The dangerous direction is the
+opposite one: a suite PASSING against bytecode that is not the code in the repo.
+
 Four boundaries are tested:
   * the FIELD boundary    -- controls A and B (a field absorbs the separator)
   * the FORMAT boundary   -- R1a's three pins: framing, field bytes, prefixed sig

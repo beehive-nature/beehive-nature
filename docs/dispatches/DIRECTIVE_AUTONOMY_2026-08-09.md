@@ -54,6 +54,57 @@ autonomy directive cannot reach them.
 Autonomy raises the rate of building. It does not lower the evidentiary bar, and the
 three items above are that bar.
 
+## POST-PUSH REVIEW — THE SECOND READER, INSTITUTIONALIZED
+
+**Ruled by Seat 1, 2026-08-09, adopting Cowork's reading.** (8c: the reading is Cowork's,
+the ruling is Seat 1's. Recorded that way on purpose.)
+
+**Any push touching a consensus-critical or spec-ruled surface gets a NAMED second-seat
+POST-PUSH REVIEW.**
+
+- **Named**, not ambient. A review everyone could do is a review nobody does. The
+  reviewing seat is identified when the push lands.
+- **POST-push**, not pre. The work ships; the reader follows.
+- **A REVIEW, NEVER A GATE.** This does not reinstate the per-push word in another costume.
+  Nothing waits on the reviewer. The directive traded a gate for velocity and this must not
+  quietly trade it back.
+
+**Why it exists.** With a founder gate on every push, a weak result had a second reader *by
+construction*. Retiring the gate removed that reader as a side effect — the gate was doing
+evidentiary work nobody had assigned it. This restores the reader without restoring the
+gate.
+
+**What it does not replace.** The suite is still the first reader. 8r (the control lives in
+the suite and fails if the attack stops reproducing), 8s (a caveat that lives only in a
+dispatch expires), and 8t (the reason travels with the ruling) are **more** load-bearing
+under autonomy, not less. A named human-seat reviewer is a backstop for what the suite
+cannot express, not a substitute for expressing it.
+
+**Reading the construction, not the note.** A post-op reports what its author believed. The
+second read is of the **artifact** — the code, the bytes, the control — and returns
+**VERIFIED** or **REFUTED** per claim. A reviewer who reads only the post-op has reviewed
+the author's confidence.
+
+## LINEAR-HISTORY DOCTRINE — ROOM LAW
+
+**Ruled by Seat 1, 2026-08-09.** Earned the same day, when Cowork's INDEX commit sat on top
+of Code's ruled-but-unpushed `021c013`.
+
+**When two seats hold unpushed commits on the same branch, the later commit CANNOT be
+published without publishing the earlier one.** Git history is linear; a push of `main`
+carries every ancestor. There are exactly two lawful responses:
+
+1. **HOLD** — let the earlier seat push first, then push.
+2. **PUBLISH UNDER EXPLICIT ATTRIBUTION** — record the carried commit as
+   *published-as-ancestor, executed by <pusher>, authored by <author>* (8c).
+
+**There is no third option**, and in particular "push and say nothing" is not one — that
+silently transfers another seat's execution and its remote sha.
+
+**This is a constraint of the tool, not a policy choice**, which is why it is stated as
+doctrine rather than left to judgment each time. It recurs whenever two seats build in
+parallel.
+
 ## READING NOTE (Cowork, transcribing)
 
 **This directive expands who may decide, not what counts as decided.** The standing laws

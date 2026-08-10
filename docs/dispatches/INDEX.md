@@ -10,6 +10,16 @@ before acting, killing the stale-board error class at the root.
 **Last updated: 2026-08-09** — autonomy directive landed; R1a/R6 format lane recorded;
 push state refreshed against `origin/main`.
 
+**📖 THE LAW LIVES IN [`DIRECTIVE_AUTONOMY_2026-08-09.md`](DIRECTIVE_AUTONOMY_2026-08-09.md),
+NOT IN THIS HEADER.** Determination by Cowork, per Seat 1's "whichever you determine is the
+durable home": **the directive is the law book; this INDEX is a board.** Rows here churn and
+get rewritten — a law parked in a manifest expires with the manifest, which is 8s exactly.
+So both new laws — **POST-PUSH REVIEW** (named second-seat reader on any consensus-critical
+or spec-ruled push; a review, **never a gate**) and the **LINEAR-HISTORY DOCTRINE** (two
+seats holding unpushed commits: **hold**, or **publish under explicit attribution**; no
+third option) — are recorded there in full. **This board carries the pointer, because this
+board is what a seat reads at push time.**
+
 **⚠ GATING-WORD COLUMN, READ THIS FIRST:** under the AUTONOMY DIRECTIVE the **per-push
 founder word is RETIRED**. Rows below whose gate reads "founder word" are **historical
 records of how that item cleared at the time**, not live gates. Current gate for a push =
@@ -25,7 +35,11 @@ mainnet key in any seat.**
 | `SPEC_RESOLVER_VALIDITY_RULES_2026-08-08.md` (rev 6+) | Code / all | **Spec — R0–R6 NORMATIVE** | Seat 1 | **CANON, and the format is now fully pinned.** R1a: 4-byte **BE** length prefix on **every** field **without exception** (fixed-width integers included — `_lp(int8(v))`); integer field bytes = **8-byte BE unsigned** (4-byte overflows 2106, fails the 1000-year test); **`sig` length-prefixed**. R1b: reject non-canonical `S` (`s < L`) explicitly — never rely on library accident. R6a tags `0x00`/`0x01`; R6b **promote-unchanged** (CVE-2012-2459); R6c binary proof encoding; R6d k=10 / page 1,024 / `d = ceil(log2 N) − 9`. ⚠ **Working copy is UNCOMMITTED in-tree** (goose's lane) — the ruled text above is committed only where the post-ops quote it | see post-ops |
 | **R1a/R6 FORMAT LANE — RECONCILED** | Code + Cowork | **Cross-implementation proof** | Seat 1 | ✅ **CLOSED, MATCH 2026-08-09.** RECONCILE-V1 record through **both** implementations: canon **113 B** identical; leaf ed25519(64 B) `092eac0e…` and leaf DER(71 B) `eff1e56e…` identical. Cross-**CONSTRUCTION**, stronger than each-runs-the-other's-vector. **EPOCH LADDER (standing, keep in the header): 147–149** valid for ordering/inclusion/lifecycle ONLY · **150–152** commit to records under a **non-final integer encoding** · **153+** commit under the **fully pinned format** (153/154/155 landed, chain-linked, foreign-oracle verified, 8s surface PASS) | `POSTOP_COWORK_RECONCILE_V1` · `_UNCONDITIONAL_PREFIX` |
 | `021c013` — canon reconciliation harness | Code (Seat 3) | Commit — push ruling | **Seat 1: PUSH** | **RULED PUSH — awaiting Code's execution + remote sha.** Adds `tests/r6/reconcile.py` + `xcheck.py`. ⚠ **Cowork review, recorded not absorbed:** (a) `xcheck.frames()` parses both sides as uniformly length-prefixed, so under an **exception-class** divergence — the framing case it exists to diagnose — it mislocalises fields rather than reporting the real fault; **fix dispatched to Code** (assert 7 frames on both sides first, else report *"framing itself diverged"*). (b) The harness needs **both repos**: Windows here has no Python on PATH and the sandbox does not mount `b-domain`, so **Cowork could not run it** — the proof is committed but still not re-runnable from this repo alone. goose holds the expected-value fixture that closes (b) | pending Code |
-| **COWORK R6/R1a SUITE** — `tests/r6/` | all seats | **Standing conformance suite** | — | **32/32 canon · 93/93 R6 · 10/10 sig**, all standalone exit 0. Carries the negative controls per 8r — pipe-join collisions, CVE-2012-2459 duplication, permissive-Ed25519 `s+L`, exception-class framing. **DO NOT delete a control to make a failing test pass; its job is to accept/exhibit what the ruled format must reject** | `f906c3a` |
+| **SECOND READ — `atmirror` record-sig · epoch-funding · rail** | **goose** | ⭐ **POST-PUSH REVIEW (first one live)** | Seat 1 | **OPEN — goose executing.** Verify against the **construction, not the post-op's word**, VERIFIED/REFUTED per claim: (1) `atmirror::record_sig` — `s < L` runs on the **raw scalar BEFORE any library call**, `L_LE` cross-validation is real, and the `s+L` control proves **genuine** malleability rather than a strawman; (2) `atmirror::epoch_funding` — the invariant fires on **leader-delegate AND on no-delegate**, both 8r controls failing if the breach stops being detectable; (3) **rail construction** — delegate path **per claimant**. **One leader-delegate rail across per-name items is the breach (8s/8t)** | pending |
+| `SPEC_RESOLVER_VALIDITY_RULES` — uncommitted diff | goose | Provenance determination | Seat 1 | ✅ **CLOSED.** goose committed it — **revs 7–17** landed in `d221c0d` (R1a format pins, R1b canonical scalar, R6c–e, depth rule, occupancy threat, vector criterion). Working tree verified clean of it this turn. The ruled R1a text is now a **committed** file and safe to quote as canon | `d221c0d` |
+| **Expected-value fixture** — `tests/r6/expected_values.py` | goose; **Code (Seat 3) = named post-push reviewer** | Fixture + single-repo checker | Seat 1 | ✅ **COMMITTED AND VERIFIED BY COWORK, single-repo.** `PASS: canon 113B, both leaves match`, exit 0, with **no `b-domain` and no second implementation present** — which is exactly the residual it was built to close. **Control run on the checker itself:** flipping `INT_PACK` to little-endian makes it exit 1 on all three lines, so it is **not vacuously passing.** Code's post-push review still owed | `d221c0d` |
+| **`atmirror` — record-sig + per-claimant funding** | Code (Seat 3) | Implementation, awaiting second read | Seat 1 | **LANDED, UNREVIEWED.** `9239609` ed25519 record-sig with explicit R1b `s>=L` reject; `8feaa79` per-claimant funding wiring + the 8s `epoch_funding` invariant with two 8r controls (`one_leader_rail_across_items_is_the_breach`, `no_delegate_is_a_breach`). Code reports 3/3 epoch_funding, 43/43 atmirror lib. **Not read by Cowork — Rust is outside this seat's lane; goose holds the second read** | `9239609` · `8feaa79` |
+| **COWORK R6/R1a SUITE** — `tests/r6/` | all seats | **Standing conformance suite** | — | **32/32 canon · 93/93 R6 · 10/10 sig · fixture PASS**, all standalone exit 0. ⚠ **OPERATIONAL HAZARD, recorded in the suite docstring (8s):** a stale `tests/r6/__pycache__` can shadow a source file that is **byte-identical to HEAD** — observed this turn, canon.py matched HEAD by md5 while the suite reported `FAIL R1a pin 2` from cached bytecode of an edited version. **`-B` does not help** (it stops writing bytecode, not reading it). Harmless direction here; **the dangerous direction is a suite PASSING against bytecode that is not the code in the repo.** Delete `__pycache__` after any edit-and-revert. Carries the negative controls per 8r — pipe-join collisions, CVE-2012-2459 duplication, permissive-Ed25519 `s+L`, exception-class framing. **DO NOT delete a control to make a failing test pass; its job is to accept/exhibit what the ruled format must reject** | `f906c3a` |
 | `DISPATCH_BNR_INVITE_ONBOARD_2026-08-08.md` | **unrouted** — Seat 0/1 to docket the spec draft | Dispatch (6 invite/onboard directives, creatormagic recon of Buzz) | — | **LANDED 2026-08-08** by Seat 3 (founder relay; verbatim; provenance grep clean). Items 3/4/6 ALIGNED with CD-13 / `identity.mobile` Tier-1 / KISS canon. **2 escalations open:** E1 — adopted invite-rationing-by-rank (`b-tokenomics.md` §2.10) vs owner-set use-count sliders (items 1b/5): does rationing govern Buzz-surface invites?; E2 — invite-join identity mint lands on the funded-wallet composition question **in flight** ("no seat builds against either reading"). Fences recorded: F1 P-13 (invite gates a community's door, never THE door), F2 P-1 (redemption emits nothing), F3 Art. V.1 (service-layer, never subsidized). **No implementation until routed + E1/E2 worded** | `RECEIPT_COURSE_SYNC_INVITE_2026-08-08.md` |
 | `GO_ORDER_THREE_BUGS_2026-08-07.md` | Code | Go-order (3 fixes) | founder "go" — **GIVEN** | **OPEN — awaiting Code execution.** Each fix needs its named test (fail→pass), receipts pasted, all three land before any tokenomics constant. **Bug #2 now has constitutional backing — `RULING_REPLAY_WORLD_A`: fail-closed refusal is canon, no replay lane.** These fixes lift the push hold (below) | — |
 | `A1_LAYER1_AMENDMENT_2026-08-07.md` | Code | Spec amendment | founder "A1 go" — **GIVEN** | **LIFTED.** R8 Layer-1 rewritten to frozen-selection wording; collision closed on paper, register closes on Code's COURSE_SYNC | — |
@@ -94,13 +108,17 @@ working     M docs/dispatches/SPEC_RESOLVER_VALIDITY_RULES_2026-08-08.md   (unco
 `021c01342225d430256510548d755e7b827f7dcd`, confirmed on `origin/main` by
 `git branch -r --contains`. **Recorded as Code's execution, not Cowork's** (8c).
 
-**Coupling note, resolved before it mattered:** git history is linear, so while `021c013`
-sat unpushed it was an **ancestor** of Cowork's commit — any push of `main` would have
-published Code's commit and taken the remote sha with it. Cowork committed and held rather
-than execute another seat's ruled push. **Code pushed first and the coupling dissolved.**
-Kept here because the constraint recurs: **whenever two seats have unpushed commits, the
-later one cannot publish without publishing the earlier.** The seat that is second either
-holds or publishes under explicit attribution — there is no third option.
+**Coupling, resolved before it mattered:** while `021c013` sat unpushed it was an
+**ancestor** of Cowork's commit, so any push of `main` would have carried it. Cowork **held**;
+Code pushed first and the coupling dissolved. **This is now the LINEAR-HISTORY DOCTRINE —
+full text in [`DIRECTIVE_AUTONOMY_2026-08-09.md`](DIRECTIVE_AUTONOMY_2026-08-09.md)**, not
+here. Short form for push time: **hold, or publish under explicit attribution. No third
+option — and "push and say nothing" is not one.**
+
+**Post-push review applies to this surface.** Any push touching a consensus-critical or
+spec-ruled surface gets a **named second-seat reviewer**, identified when the push lands.
+**Review, never a gate — nothing waits on the reviewer.** Currently named: **Code (Seat 3)
+reviews goose's expected-value fixture commit.**
 
 **Uncommitted working state flagged, not touched:** `SPEC_RESOLVER_VALIDITY_RULES` carries
 modifications in the working tree. That file is goose's lane. A seat reading the ruled R1a
