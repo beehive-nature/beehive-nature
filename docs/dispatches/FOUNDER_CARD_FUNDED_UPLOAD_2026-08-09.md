@@ -1,157 +1,117 @@
-# FOUNDER CARD — FUNDED UPLOAD TEST
+# FOUNDER ONE-PAGER — BNR WALLET CEREMONY
 **For:** King Bee (Seat 0) · **Prepared by:** Cowork · **Handed up via:** Seat 1
-**Status:** ⛔ **NOT READY TO HAND UP — two inputs outstanding.** See *Fill status* below.
-**Your time:** two clicks and a paste. Everything else is already done.
+**Status:** ⛔ **NOT READY — awaiting goose's verified syntax and Code's script + addresses.**
+**Your part:** run two commands, click one checkout link, paste one line back.
+
+> **The web app is out of the path.** It gates login on a balance fetch to one
+> third-party host and reports that failure as "wrong password." We replace it rather
+> than work around it. **Everything below is CLI — your key never leaves your machine.**
 
 ---
 
-# 🔴 BEFORE ANYTHING — THE ONE RULE
+# 🔴 THE ONE RULE
 
-## **NEVER share your seed phrase, private key, or wallet JWK file.**
-### Not with a seat. Not in chat. Not in a form. Not "just to check something."
+## **NEVER share, paste, upload, or transmit the keyfile.**
+### Not to a seat. Not into chat. Not into a web form. Not "just to check it."
 
-**Nothing in this entire flow needs them.** The seats need three things only, and all
-three are public: **wallet address**, **approval ID**, **transaction receipt**.
+**The file `[KEYFILE NAME — Code]` on your disk IS the wallet.** Whoever holds it holds
+the funds. **No step below asks for it, and no seat will ever ask you for it.**
 
-> ### 🛑 STOP IMMEDIATELY IF
-> - any page asks for a **seat phrase / recovery phrase / private key / JWK upload**
-> - the URL is **not** the one printed in Step 1 of this card
-> - the amount shown is **not** what you typed
->
-> **Stopping costs nothing. There is no step in this flow that is time-sensitive.**
+**Back it up before you fund it:** copy it somewhere offline. If it is lost, the $10 is
+lost with it — recoverable only from your own backup.
 
----
-
-# STEP 1 — TOP UP
-
-> ⬜ **`[TOP-UP URL — awaiting goose's source read]`**
-> ⬜ **`[EXACT BUTTON LABEL — awaiting goose]`**
-> ⬜ **Amount to enter: `[MINIMUM — awaiting goose; card and AR minimums differ]`**
-
-**Pay with card. This is the only money in the whole test.**
+**What the seats receive, all public and all harmless:** your wallet **address**, the
+**approval receipt**, transaction **IDs**.
 
 ---
 
-# STEP 2 — CREATE THE DELEGATED-PAYMENT APPROVAL
+# STEP 1 — GENERATE THE WALLET (your machine, offline key)
 
-> ⬜ **`[EXACT CONSOLE FLOW — awaiting goose's source read]`**
-
-**Approve these addresses — already generated, zero-value, disposable:**
-
-> ⬜ `[CLAIMANT ADDRESS 1 — awaiting Code]`
-> ⬜ `[CLAIMANT ADDRESS 2 — awaiting Code]`
-> ⬜ `[… count set by Code's recommendation]`
-
-**Pre-filled bounds — type these exactly:**
-
-| field | value |
-|---|---|
-| **Cap / spending limit** | ⬜ `[awaiting goose — does the approval support a native cap?]` |
-| **Expiry** | ⬜ `[awaiting goose — native expiry supported?]` |
-
-**Why bounded:** an approval without a cap is an open tap on your balance. If the
-mechanism turns out **not** to support caps natively, **that changes the plan and Seat 1
-decides before you touch it** — it will not silently reach you as an uncapped approval.
-
----
-
-# STEP 3 — PASTE ONE THING BACK
-
-**Copy the approval confirmation and paste it to Seat 1. That is the whole handoff.**
-
-> ⬜ **`[EXACT FIELD NAME — awaiting goose: approval ID? txid? just the approver address?]`**
-
-**Then you are done.** The seats run the upload; the delegate (your approval) pays;
-your key never moves and never leaves your wallet.
-
----
----
-
-# ⚙️ FILL STATUS — NOT PART OF THE CARD
-
-**This card is deliberately unfinished, and the blanks are the point.**
-
-Every ⬜ is a value I would have had to invent. A card that sends the founder to a
-plausible-looking URL to type a payment card number is not a documentation defect, it is
-a **real-world harm** — and inventing the flow from memory is exactly LAW **8u**
-(*verify the mechanism before claiming "integration, not invention"*) and the failure
-this room has caught repeatedly this session. **I did not fill them from memory. I know
-roughly how this works; roughly is not a card.**
-
-Not filling them is also **8o**: the source read is goose's named task, and duplicating
-it burns a second seat on one problem.
-
-## Blocking input 1 — **goose** (Turbo mechanics, at source)
-
-Return these five, each with its doc citation, and the card fills in minutes:
-
-| # | needed | goes to |
-|---|---|---|
-| 1 | Top-up URL + exact button label | Step 1 |
-| 2 | Card minimum **and** AR minimum (they differ) | Step 1 amount |
-| 3 | Exact console flow to create a delegated-payment approval | Step 2 |
-| 4 | **Do approvals carry a native cap and expiry?** If no → **the plan changes; do not hand this card up** | Step 2 bounds |
-| 5 | What the uploader needs — approval ID, or just the approver's address? And does `x-paid-by` charge the **approver's** balance? | Step 3 paste-back |
-
-**Item 4 is the one that can change the plan**, per the dispatch. If caps or expiry are
-not native, an uncapped approval is a standing risk to the founder's balance and **Seat 1
-rules before this card reaches him**, not after.
-
-## Blocking input 0 — **founder cannot unlock the wallet** (observed 2026-08-09 19:45)
-
-**ArDrive web 2.85.0 refuses unlock for `6tlCkGE8…NWck`. It is very likely NOT the
-password.** The app's own message conflates two causes — *"The password is wrong **or a
-network error occurred**"* — and the underlying exception is a **transport** failure, not
-an auth rejection:
-
-```text
-ClientException: XMLHttpRequest error.
-uri=https://turbo-gateway.com/wallet/6tlCkGE8…NWck/balance
+```
+⬜ [COMMAND 1 — awaiting Code, built from goose's verified syntax]
 ```
 
-**Password decryption is local.** A wrong password does not produce an XHR error against
-a remote balance endpoint.
+**Prints:** your new **address**, a **backup instruction**, and a **Stripe checkout link**.
+**Writes:** the keyfile to your disk. **Sends:** nothing.
 
-**Both hosts verified reachable from an independent network this turn** (Cowork, not from
-memory): `payment.ardrive.io` responds and itself declares `"gateway":
-"https://turbo-gateway.com"`; `turbo-gateway.com` serves. **So the outage is local to the
-founder's browser/network**, not a dead service — consistent with an ad/privacy blocker,
-VPN, or DNS filter, since `turbo-gateway.com` is a third-party host relative to
-`app.ardrive.io` and is exactly the shape such tools block.
+# STEP 2 — PAY $10
 
-**✅ RESOLVED 2026-08-09 — founder reimported the seed and the wallet loaded. ⚠ THE CAUSE
-IS UNDETERMINED, and my diagnosis above is NOT confirmed by that fix.** Reimport re-derives
-and re-stores the wallet, so it would clear a **corrupted local keystore** — and a purely
-network cause would have been cleared just as well by the blip passing in the interim.
-**The two are indistinguishable from this outcome.** Recorded as unresolved rather than
-claimed as vindicated: the transport evidence was real, the fix does not select between
-the explanations, and a card built on a wrong root cause fails the next time it matters.
+**Open the checkout link Step 1 printed. Pay by card. Cap: $10 — this is the only money
+in the whole test.**
 
-**⚠ FINDING THAT MATTERS FOR THIS CARD, beyond the immediate problem: the Turbo balance
-fetch is on the UNLOCK path** (`useTurboPayment: true`). **A Turbo network hiccup locks
-the founder out of his wallet entirely** — so the funded-upload flow has a single point of
-failure at the moment of login, before any of Steps 1–3. **Step 0 of the card must become
-"confirm you can unlock,"** and this belongs in goose's mechanics read as a resilience
-question, not just a connectivity annoyance.
+> ⬜ `[Confirm the address shown at checkout matches the address Step 1 printed]`
 
-## Blocking input 2 — **Code (Seat 3)**
+# STEP 3 — CREATE THE CAPPED APPROVALS
 
-- The claimant addresses, in paste-ready order (public addresses only — **no JWK, no
-  key material in this file, ever**).
-- The **count**, with the why: how many delegates genuinely prove **per-claimant**
-  funding with real receipts. **One address cannot** — per-claimant funding and
-  leader-funding are indistinguishable at n = 1, which is the whole invariant under test
-  (`epoch_funding`, 8s/8t).
+```
+⬜ [COMMAND 2 — awaiting Code]
+```
 
-## What is already done and needs nothing
+**Grants the seats' disposable addresses permission to spend — capped and expiring:**
 
-- Safety framing, stop conditions, step order, and the single paste-back — **written and
-  final**; they do not depend on either read.
-- **Boundary held throughout:** founder-only = the card payment and the approval.
-  Seats = public addresses, receipts, zero-value throwaways. **Keys never cross.**
+| bound | value |
+|---|---|
+| Cap | ⬜ `[awaiting goose — native cap flag]` |
+| Expiry | ⬜ `[awaiting goose — native expiry flag]` |
+| Addresses | ⬜ `[awaiting Code — zero-value, disposable]` |
 
-## Handing up
+# STEP 4 — PASTE ONE LINE BACK
 
-**Do not hand this to the founder in its current state.** When both inputs land, I fill
-the ⬜s, re-verify that Step 1's URL matches goose's citation exactly, and hand it to
-Seat 1 the same turn.
+**Command 2 prints a receipt. Paste it to Seat 1. Done** — the seats run the upload, your
+approval pays, and the keyfile never moves.
+
+---
+
+> ### 🛑 STOP IF
+> - anything asks you to **upload, paste, or type the keyfile or a seed phrase**
+> - the checkout amount is **not $10**
+> - the address at checkout ≠ the address Step 1 printed
+>
+> **Nothing here is time-sensitive. Stopping costs nothing.**
+
+---
+---
+
+# ⚙️ NOT PART OF THE ONE-PAGER
+
+## Fill status
+
+**The ⬜s are commands I would have had to invent.** A wrong command in a wallet ceremony
+either fails loudly or **writes a keyfile the founder thinks is backed up and isn't** —
+and inventing CLI syntax from memory is LAW **8u**, plus duplicating goose's named source
+read (**8o**). Structure, safety framing, ordering and the paste-back are **final**.
+
+- **goose owes:** fiat-checkout flow to an address (no wallet login) · create-approval /
+  share-credits syntax with **cap + expiry flags** · confirmation a **native-JWK** account
+  can create approvals (and, for the record, whether Solana-owned can — the dead-end
+  check) · wallet-generation command that **keeps the JWK local**.
+- **Code owes:** both commands as a runnable script, plus the disposable addresses and the
+  count. **The script must run for the founder alone — no seat touches the keyfile.**
+
+## Two things I am flagging rather than assuming
+
+**1. `n = 1` cannot prove per-claimant funding.** At a single claimant address,
+per-claimant and leader-funded are **indistinguishable** — which is the whole invariant
+under test (`epoch_funding`, 8s/8t). The count needs its why either way.
+
+**2. If cap and expiry are not native flags, this one-pager does not ship as written.**
+An uncapped approval against a live card-funded balance is an open tap. **Seat 1 rules
+before it reaches the founder**, not after.
+
+## Delivery — one half is not mine to do
+
+Dispatch says land in the **mailbox + the BNR public drive**. **Mailbox: done** (this
+file, in-tree). **Public drive: I have no upload path** — no funded key, and creating one
+is precisely what this ceremony exists to do. **Chicken-and-egg, stated rather than
+quietly half-delivered:** the drive copy lands after the ceremony funds the wallet, or a
+seat with an existing funded path does it. **Not silently skipped.**
+
+## Boarding fact — logged
+
+`docs/ledger/pirate-haul-rulings-2026q3.md`, with one precision the dispatch's wording
+overstates: the **design defect** (single third-party host on the login path; two causes
+collapsed into one message) is established from the app's own config and error text and
+stands. The **founder's specific incident is UNDETERMINED** — a seed reimport clears a
+corrupted keystore *and* would coincide with a transient fault passing, and both hosts
+tested reachable minutes later. **The replacement ruling does not depend on which it was**,
+so the ledger records the defect as fact and the incident as unresolved.
