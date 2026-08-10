@@ -40,14 +40,25 @@ proved nothing.** The control must exhibit the **unguarded** failure too. Refine
 [`POSTOP_COWORK_PYCACHE_GUARD_2026-08-09.md`](POSTOP_COWORK_PYCACHE_GUARD_2026-08-09.md);
 mechanism and rejected alternatives in `tests/r6/run_suite.py`'s docstring (8s).
 
-**⚠ REGISTER GAP, FLAGGED NOT ASSUMED CLOSED.** This law is **not present in
-`FABLE_STANDING_LAWS_S2.md`** (checked this turn; the register runs 8a–8u, next free
-letter **8v**). Seat 1 reports laws consolidated **on the ledger** — which is Fable's, not
-readable from this seat, so the mirror gap may be real or may be pending sync. **Recorded
-here rather than written into another seat's register.** Precedent for taking the gap
-seriously is in the register itself: 8k *"was adopted and cited in several post-ops before
-it was written into this file — the gap is itself an instance of the drift this register
-exists to prevent."*
+**✅ REGISTER GAP CLOSED — this law is now `8x`.** Landed with two companions on Seat 1's
+dispatch (transcription, not authorship). Letters assigned **at write time against the
+file**, not assumed: `8a`–`8u` were present, so `8v`/`8w`/`8x` were genuinely next-free,
+and the file carries no duplicates.
+
+| letter | law |
+|---|---|
+| **8v** | **SECOND-READER** — named second-seat post-push review on any consensus-critical or spec-ruled push. **Named, post-push, never a gate.** The read is of the **construction**, not the post-op |
+| **8w** | **LINEAR-HISTORY PUBLICATION** — two seats, unpushed commits, one branch: **hold, or publish under explicit attribution.** "Push and say nothing" is not a third option |
+| **8x** | **GUARD EVIDENCE** — refines 8r from the guard side. The control must show the hazard reproduces **unguarded** *and* that the guard **engaged**; **controls must be independent of the environment the guard creates** |
+
+**⚠ TWO THINGS FLAGGED AT THE REGISTER, not absorbed.** (1) That file **mirrors the Fable
+ledger and the ledger wins on conflict** — so a mirror that **leads** its source is its own
+drift risk. If the ledger does not yet carry these three, it should, or the direction of a
+future conflict there would be misleading. (2) Seat 1's standing rule in the same dispatch
+— *every room-law ruling ships with its register text in the same dispatch; a law the seats
+cannot read is not yet a law of the room* — reads like a standing law but **was not among
+the three dispatched, so it is recorded as a note and NOT given a letter.** It may warrant
+**8y**; that is Seat 1's call, not Cowork's.
 
 **📖 THE LAW LIVES IN [`DIRECTIVE_AUTONOMY_2026-08-09.md`](DIRECTIVE_AUTONOMY_2026-08-09.md),
 NOT IN THIS HEADER.** Determination by Cowork, per Seat 1's "whichever you determine is the
