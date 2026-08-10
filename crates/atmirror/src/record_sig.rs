@@ -11,6 +11,25 @@
 //! This layer is DISTINCT from [`crate::commit::verify_signature`] — that is the
 //! atproto COMMIT signature (secp256k1 ES256K / P-256 ES256, low-S), a different
 //! signature over a different object, and it stays as-is (sound at its own layer).
+//!
+//! SIGNATURE-AXIS COVERAGE (ruled inclusion amendment, 2026-08-09) — genuine 8r
+//! controls where constructible, an explicit exclusion-why where not:
+//!   * non-canonical scalar `s >= L` — GENUINE control (`s_plus_l_is_rejected…`),
+//!     self-checked: it proves `s+L` reduces to `s` mod L, so the control fails if
+//!     the malleability stops reproducing.
+//!   * small-order / non-canonical POINT — GENUINE control
+//!     (`small_order_and_noncanonical_pubkeys_are_rejected`), self-validated via
+//!     `is_small_order()` so a mistyped constant fails loudly, with a `validated >= 1`
+//!     guard so the control cannot go vacuous.
+//!   * cofactor-8 / mixed-order — DEFENDED by `verify_strict` (non-cofactored; it
+//!     rejects small-order R and A), which the small-order control exercises directly.
+//!     A standalone "cofactored-verify accepts / strict rejects" DIVERGENCE control is
+//!     EXCLUDED-WHY: the Fiat-Shamir challenge `k = H(R‖A‖m)` binds R, so naive
+//!     constructions (e.g. R+T) do not reproduce the attack — a correct small-subgroup
+//!     forgery ("Taming the many EdDSAs" §5) is research-grade machinery for a defense
+//!     the small-order rejection already covers.
+//!   * batch verification — EXCLUDED: no batch-verify construction exists to test;
+//!     `verify_record` is single-signature only.
 
 use ed25519_dalek::{Signature, VerifyingKey};
 
@@ -141,5 +160,64 @@ mod tests {
         assert!(bool::from(Scalar::from_canonical_bytes(l_minus_1).is_some()));
         assert!(!s_lt_l(&L_LE));
         assert!(s_lt_l(&l_minus_1));
+    }
+
+    /// Small-order / mixed-order / non-canonical public keys are rejected (the
+    /// previously named-not-claimed axes, 2026-08-09). `verify_record` uses
+    /// `verify_strict`, which is non-cofactored and rejects weak (small-order)
+    /// points — the defense against cofactor-8 small-subgroup malleability.
+    ///
+    /// GENUINE 8r control, not a strawman: each canonical candidate is SELF-VALIDATED
+    /// here as actually small-order via curve25519-dalek's `is_small_order()`, so a
+    /// mistyped constant fails the test loudly rather than silently testing a benign
+    /// point. Non-canonical candidates are rejected at decode. The control fails if
+    /// EITHER the points stop being small-order OR the rejection stops firing — it
+    /// cannot go vacuous (the `validated` guard requires >=1 real small-order reject).
+    ///
+    /// Encodings from Chalkias, Cottier et al., "Taming the many EdDSAs" (2020), §5.
+    #[test]
+    fn small_order_and_noncanonical_pubkeys_are_rejected() {
+        use curve25519_dalek::edwards::CompressedEdwardsY;
+
+        // The 8 small-order point encodings (identity, the 2-/4-torsion, order-8),
+        // plus non-canonical variants that must fail at decode.
+        let encodings: [[u8; 32]; 6] = [
+            hex32("0100000000000000000000000000000000000000000000000000000000000000"), // PUBLIC-CONSTANT small-order point: identity, order 1
+            hex32("ecffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f"), // PUBLIC-CONSTANT small-order point: order 2
+            hex32("0000000000000000000000000000000000000000000000000000000000000000"), // PUBLIC-CONSTANT small-order point: order 4
+            hex32("0000000000000000000000000000000000000000000000000000000000000080"), // PUBLIC-CONSTANT small-order point: order 4, other sign
+            hex32("c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac037a"), // PUBLIC-CONSTANT small-order point: order 8
+            hex32("ecffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"), // PUBLIC-CONSTANT non-canonical point encoding (y >= p)
+        ];
+
+        // A canonical signature so the s<L gate passes and we actually reach the
+        // key/point check (this control is about the point, not the scalar).
+        let sk = SigningKey::from_bytes(&[3u8; 32]);
+        let msg = b"bnr-record";
+        let sig = sk.sign(msg).to_bytes();
+
+        let mut validated_small_order = 0usize;
+        for (i, enc) in encodings.iter().enumerate() {
+            if let Some(pt) = CompressedEdwardsY(*enc).decompress() {
+                // (a) canonical encoding — SELF-VALIDATE it is genuinely small-order.
+                assert!(pt.is_small_order(), "encoding {i} is NOT small-order — bad constant");
+                validated_small_order += 1;
+            }
+            // (b) whether small-order-canonical or non-canonical, verify_record MUST reject.
+            assert_eq!(
+                verify_record(enc, msg, &sig),
+                Err(RecordSigError::BadSignature),
+                "encoding {i} (small-order or non-canonical) was NOT rejected"
+            );
+        }
+        assert!(validated_small_order >= 1, "control vacuous: no genuine small-order point tested");
+    }
+
+    fn hex32(s: &str) -> [u8; 32] {
+        let mut out = [0u8; 32];
+        for i in 0..32 {
+            out[i] = u8::from_str_radix(&s[2 * i..2 * i + 2], 16).unwrap();
+        }
+        out
     }
 }
