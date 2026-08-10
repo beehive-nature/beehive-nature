@@ -8,6 +8,10 @@
 
 pub mod events;
 pub mod evidence;
+pub mod spend;
 
 pub use events::*;
 pub use evidence::{Evidence, Hash, Provenance, ViewGrade};
+// `spend` is NOT glob-re-exported: it defines its own `Provenance`, which would collide
+// with `evidence::Provenance`. Import as `shared_types::spend::{SpendReceipt, ...}`.
+pub use spend::{LineItem, Rail, ResourceClass, SpendReceipt, Visibility, SCHEMA_VERSION};
