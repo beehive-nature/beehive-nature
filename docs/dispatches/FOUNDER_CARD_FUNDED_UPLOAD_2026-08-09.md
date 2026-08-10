@@ -119,6 +119,14 @@ founder's browser/network**, not a dead service — consistent with an ad/privac
 VPN, or DNS filter, since `turbo-gateway.com` is a third-party host relative to
 `app.ardrive.io` and is exactly the shape such tools block.
 
+**✅ RESOLVED 2026-08-09 — founder reimported the seed and the wallet loaded. ⚠ THE CAUSE
+IS UNDETERMINED, and my diagnosis above is NOT confirmed by that fix.** Reimport re-derives
+and re-stores the wallet, so it would clear a **corrupted local keystore** — and a purely
+network cause would have been cleared just as well by the blip passing in the interim.
+**The two are indistinguishable from this outcome.** Recorded as unresolved rather than
+claimed as vindicated: the transport evidence was real, the fix does not select between
+the explanations, and a card built on a wrong root cause fails the next time it matters.
+
 **⚠ FINDING THAT MATTERS FOR THIS CARD, beyond the immediate problem: the Turbo balance
 fetch is on the UNLOCK path** (`useTurboPayment: true`). **A Turbo network hiccup locks
 the founder out of his wallet entirely** — so the funded-upload flow has a single point of
