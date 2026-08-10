@@ -75,6 +75,10 @@ pub enum ReceiptError {
     UploaderIsDelegate(String),
     /// The per-claimant funding invariant failed (delegate is the leader, or missing).
     Funding(String),
+    /// A grant carries no proof its approval was actually created (empty
+    /// `approval_id`/`cap_winc`). Names the grant. Spend-time gate for the CLI
+    /// ceremony — see [`ApprovalReceipt::assert_approvals_present`].
+    MissingApproval(String),
 }
 
 impl ApprovalReceipt {
@@ -129,6 +133,26 @@ impl ApprovalReceipt {
         let regs = self.registrations();
         let rails = per_claimant_rails(&regs);
         assert_per_claimant_funding(&rails, &regs, leader_delegate).map_err(ReceiptError::Funding)
+    }
+
+    /// Spend-time gate for the CLI ceremony (defense-in-depth behind the ceremony
+    /// script's own refusal). Before the pipeline uploads against a grant, that
+    /// grant must carry PROOF the delegated approval exists — a non-empty
+    /// `approval_id` AND `cap_winc`. A partially-failed ceremony that emitted a
+    /// grant with the payer stamped on but no approval id must NOT be spent against;
+    /// reject it here rather than upload into a non-existent approval and 402.
+    ///
+    /// Distinct from [`Self::verify_per_claimant`], which is the funding INVARIANT
+    /// (who pays) and deliberately treats these fields as untrusted provenance. This
+    /// is the spend-readiness check; the pipeline calls both before uploading.
+    pub fn assert_approvals_present(&self) -> Result<(), ReceiptError> {
+        for g in &self.grants {
+            let present = |o: &Option<String>| o.as_deref().is_some_and(|s| !s.is_empty());
+            if !present(&g.approval_id) || !present(&g.cap_winc) {
+                return Err(ReceiptError::MissingApproval(g.name.clone()));
+            }
+        }
+        Ok(())
     }
 }
 
@@ -252,5 +276,71 @@ mod tests {
             ApprovalReceipt::from_json(b"{not json"),
             Err(ReceiptError::Parse(_))
         ));
+    }
+
+    /// The CLI ceremony (`bnr-turbo-2-approve.sh`) emits a SUPERSET receipt —
+    /// `uploader`/`grants` plus provenance fields (`payer`, `uploader_approval`,
+    /// `raw_approvals`) straight from the turbo `share-credits` output. This is the
+    /// real shape the founder pastes back; it MUST parse (serde ignores the extra
+    /// fields) and consume cleanly. With one funded founder wallet, every grant's
+    /// delegate is the founder's `payingAddress`, so it is honestly SINGLE-PAYER:
+    /// `verify_per_claimant` passes (the founder is not the leader/uploader) but
+    /// `distinct_delegates() == 1` — delegated-payment proven, NOT per-claimant
+    /// differentiated. That distinction is the point, not a defect.
+    #[test]
+    fn parses_ceremony_superset_receipt_single_payer() {
+        let raw = br#"{
+          "uploader": "wmpqC4DnTEuYbZiyj7PAmKNub80REgQ1rwHj0R9__kA",
+          "payer": "FOUNDERpayingAddr",
+          "grants": [
+            {"name":"test-a.b","claimant":"K3p3rOMnClaimant1",
+             "delegate":"FOUNDERpayingAddr","approval_id":"appr_c1_id",
+             "cap_winc":"1000000000","expires":"2026-08-16T00:00:00Z"},
+            {"name":"test-b.b","claimant":"oSRU71itClaimant2",
+             "delegate":"FOUNDERpayingAddr","approval_id":"appr_c2_id",
+             "cap_winc":"1000000000","expires":"2026-08-16T00:00:00Z"}
+          ],
+          "uploader_approval": {"approval_id":"appr_up_id","cap_winc":"1000000000","expires":"2026-08-16T00:00:00Z"},
+          "raw_approvals": [{"approvalDataItemId":"appr_up_id","payingAddress":"FOUNDERpayingAddr"}]
+        }"#;
+        let r = ApprovalReceipt::from_json(raw).expect("ceremony superset receipt parses");
+        assert_eq!(r.grants.len(), 2);
+        assert_eq!(r.grants[0].approval_id.as_deref(), Some("appr_c1_id"));
+        // the founder pays, and the founder is neither the leader nor the uploader:
+        assert_eq!(r.verify_per_claimant("LEADER-delegate"), Ok(()));
+        // ...but it is one funded payer, so this is delegated-not-per-claimant:
+        assert_eq!(
+            r.distinct_delegates(),
+            1,
+            "single founder wallet: delegated-payment proven, per-claimant is not"
+        );
+        // every grant carries its approval id + cap, so it is spend-ready:
+        assert_eq!(r.assert_approvals_present(), Ok(()));
+    }
+
+    /// The consumer half of the k001 fix: a grant with the delegate stamped on but
+    /// NO approval id (what a partially-failed ceremony used to emit) must be
+    /// rejected at spend time — even though `verify_per_claimant` passes it, because
+    /// the funding invariant deliberately ignores the provenance fields.
+    #[test]
+    fn grant_without_approval_id_is_rejected_at_spend_time() {
+        let mut r = two_distinct(); // grants have delegate set but approval_id: None
+        assert_eq!(
+            r.verify_per_claimant(LEADER_DELEGATE),
+            Ok(()),
+            "funding invariant passes — it does not look at approval_id"
+        );
+        assert_eq!(
+            r.assert_approvals_present(),
+            Err(ReceiptError::MissingApproval("alice.b".into())),
+            "but the spend gate rejects a grant with no approval proof"
+        );
+        // fill one but leave cap empty -> still rejected on cap_winc
+        r.grants[0].approval_id = Some("appr_x".into());
+        r.grants[0].cap_winc = Some(String::new());
+        assert_eq!(
+            r.assert_approvals_present(),
+            Err(ReceiptError::MissingApproval("alice.b".into()))
+        );
     }
 }
