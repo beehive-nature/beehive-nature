@@ -24,7 +24,7 @@ One web-based surface with three custody tiers. The user starts free in a browse
 | **Quick start** | GitHub/Google OAuth → passkey creation → bDiD issued. OAuth is **convenience-only**: it bootstraps identity, then is never required again. The bDiD and passkey persist if the OAuth provider disappears. |
 | **Seed backup** | BIP-39 mnemonic generated client-side during onboarding. User writes it down. This is the recovery path if the passkey device is lost. |
 | **Custody model** | Signing key derived from seed, encrypted at rest in browser (IndexedDB), unlocked by passkey assertion. The passkey authenticates; the derived key signs. **The key lives in the browser, not on a server.** |
-| **Wallet** | Auto-funded per KISS ruling — basic adapter tokens for the rails the bDiD needs. |
+| **Wallet** | Self-funded — zero initial balance. No Vaulta account needed (that is what "free" means). User earns b through participation. No subsidy, ever. |
 | **Capabilities** | Read balances (all chains), basic send/receive, spend-view (aggregate + itemized per adapter) |
 | **Ladder** | L1/L2 |
 | **Rust crate** | `webauthn-rs` for passkey creation/verification; `bip39` + `hdwallet` for seed derivation; existing `onboarding` crate's ceremony/gates/ladder/viewmodel |
@@ -226,7 +226,7 @@ The wizard flow:
 [bDiD issuance] → did:webvh creation → anchor to Arweave (ANS-104 Ed25519)
     │
     ▼
-[wallet funding] → per KISS ruling: basic adapter tokens deposited
+[wallet ready] → zero balance. User earns b through participation. No subsidy.
     │
     ▼
 [gate check] → all gates pass? → [done] → wallet view
@@ -261,7 +261,7 @@ The wizard flow:
 2. WebAuthn passkey creation + assertion flow (Tier 1 auth)
 3. BIP-39 seed generation + backup verification
 4. bDiD creation (did:webvh) + Arweave anchor (ANS-104 Ed25519)
-5. Wallet funding ceremony (per KISS ruling)
+5. Self-funding bootstrap (zero balance, b earning mechanism — no subsidy)
 6. Multi-chain balance display (read-only from RPC — Vaulta, Arweave, HIVE)
 7. Spend-view (aggregate total + itemized per-adapter breakdown)
 8. Basic send/receive (Arweave ANS-104 DataItem, Vaulta transfer)

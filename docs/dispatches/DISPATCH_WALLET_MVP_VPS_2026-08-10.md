@@ -27,10 +27,10 @@ I'm not gating the Founder on these. Each has the framework applied. If you disa
 **Friction:** Starting with 3 chains is manageable. Adding more later is additive (each is an adapter crate that already exists).
 **Decision:** **Phase 1: Vaulta + Arweave + HIVE.** Phase 2 adds Zano, BTS, Injective/Cosmos, exSat. Phase 3 adds BTC/ETH/SOL when the dashboard is mature.
 
-### D4 — Wallet funding: Treasury faucet at bDiD issuance
+### D4 — Wallet funding: SELF-FUNDED (corrected — no faucet, no endowment)
 **10B/1000yr:** A treasury faucet that deposits basic adapter tokens at bDiD creation is sustainable if the treasury is endowment-funded (AR prepaid, perpetual). The KISS ruling already established this as a product feature: "genesis funding IS the bDiD issuance."
 **Friction:** Zero user friction — wallet arrives funded. The friction is on the treasury side (funding source), which is a Founder/treasury decision, not a user-facing one.
-**Decision:** **Treasury faucet.** bDiD issuance triggers a micro-allocation of basic adapter tokens (enough for initial onboarding operations). The faucet draws from the treasury, which is endowment-funded. The exact amounts per chain are a treasury ruling, not a build decision.
+**Decision:** **SELF-FUNDED. Zero balance at issuance. No faucet, no endowment, no subsidy.** The user creates a bDiD and gets a wallet with zero balance. Tier 1 = no Vaulta account needed (that is what free means). The user earns b through participation and spends b on operations. Everything is self-funded — users pay their own way. The b earning mechanism is the critical design question (how does a zero-balance user earn their first b?). See SPEC_SOVEREIGN_WALLET_FUNDING.md v2 for the full model.
 
 ### D5 — Server: Single Axum instance, stateless design
 **10B/1000yr:** Stateless per-user means horizontal scaling is just more instances. The server holds no user state — all state is on-chain or client-side (IndexedDB/WASM). This scales to 10B by adding instances behind a load balancer.
