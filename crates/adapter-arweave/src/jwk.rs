@@ -5,7 +5,7 @@
 
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use base64::Engine;
-use rsa::pkcs8::EncodePublicKey;
+use rsa::traits::PublicKeyParts;
 use rsa::{RsaPrivateKey, RsaPublicKey};
 use sha2::{Digest, Sha256};
 

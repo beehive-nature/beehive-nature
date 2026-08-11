@@ -11,7 +11,7 @@
 //! vector. Round-trip sign+verify proves internal consistency only.
 
 use rsa::pss::{SigningKey, VerifyingKey};
-use rsa::signature::{Keypair, RandomizedSigner, Verifier};
+use rsa::signature::{RandomizedSigner, SignatureEncoding, Verifier};
 use rsa::{RsaPrivateKey, RsaPublicKey};
 use sha2::{Digest, Sha256};
 
@@ -75,7 +75,7 @@ impl DataItem {
     /// Sign this DataItem with an RSA private key (PSS, salt_len=0 per Arweave).
     pub fn sign(&mut self, priv_key: &RsaPrivateKey) {
         let hash = self.signature_hash();
-        let signing_key = SigningKey::<Sha256>::new_with_salt_length(priv_key.clone(), 0);
+        let signing_key = SigningKey::<Sha256>::new_with_salt_len(priv_key.clone(), 0);
         let mut rng = rand::thread_rng();
         let sig = signing_key.sign_with_rng(&mut rng, &hash);
         self.signature = sig.to_bytes().to_vec();
@@ -88,8 +88,8 @@ impl DataItem {
         }
         let hash = self.signature_hash();
         let verifying_key = VerifyingKey::<Sha256>::new(pub_key.clone());
-        let sig = rsa::pss::Signature::from_bytes(&self.signature);
-        match sig {
+        let sig_result: Result<rsa::pss::Signature, _> = self.signature[..].try_into();
+        match sig_result {
             Ok(s) => verifying_key.verify(&hash, &s).is_ok(),
             Err(_) => false,
         }
