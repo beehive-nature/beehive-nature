@@ -40,6 +40,7 @@ members = [
     "crates/vocabulary",
     "crates/wallet-relay",
     "crates/zano-watcher",
+    "crates/bmesh-hwfit",
 ]
 
 [workspace.metadata]
