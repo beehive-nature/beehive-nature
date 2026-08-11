@@ -43,6 +43,7 @@ pub fn app(state: AppState) -> Router {
         .route("/v1/upload", post(upload_item))
         .route("/graphql", post(graphql_proxy))
         .route("/raw/{id}", get(raw_read))
+        .route("/v1/arweave/balance/{address}", get(arweave_balance))
         .with_state(state)
 }
 
@@ -192,6 +193,59 @@ async fn raw_read(State(s): State<AppState>, Path(id): Path<String>) -> Response
             bytes,
         )
             .into_response(),
+        Ok(Err(tried)) => (
+            StatusCode::BAD_GATEWAY,
+            Json(serde_json::json!({ "error": "all gateways failed", "gateways_tried": tried })),
+        )
+            .into_response(),
+        Err(join) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(serde_json::json!({ "error": join.to_string() })),
+        )
+            .into_response(),
+    }
+}
+
+/// GET /v1/arweave/balance/{address} — read-only AR balance through the pool.
+async fn arweave_balance(State(s): State<AppState>, Path(address): Path<String>) -> Response {
+    if address.len() != 43 || !address.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_') {
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(serde_json::json!({ "error": "invalid address" })),
+        )
+            .into_response();
+    }
+    let addr = address.clone();
+    let pool = s.pool.clone();
+    let out = tokio::task::spawn_blocking(move || {
+        let agent = ureq::AgentBuilder::new()
+            .timeout_connect(std::time::Duration::from_secs(15))
+            .redirects(0)
+            .build();
+        try_in_order(&pool, |gw| {
+            let resp = agent
+                .get(&format!("{gw}/wallet/{address}/balance"))
+                .call()
+                .map_err(|e| e.to_string())?;
+            let winston = resp.into_string().map_err(|e| e.to_string())?;
+            Ok((winston, gw.to_string()))
+        })
+    })
+    .await;
+
+    match out {
+        Ok(Ok((winston, gateway))) => {
+            let w: u128 = winston.trim().parse().unwrap_or(0);
+            let ar = w as f64 / 1e12;
+            Json(serde_json::json!({
+                "address": addr,
+                "balance_winston": winston.trim(),
+                "balance_ar": format!("{:.12}", ar),
+                "gateway_used": gateway,
+                "tier": "T-S"
+            }))
+                .into_response()
+        }
         Ok(Err(tried)) => (
             StatusCode::BAD_GATEWAY,
             Json(serde_json::json!({ "error": "all gateways failed", "gateways_tried": tried })),
