@@ -87,7 +87,7 @@ impl DataItem {
             return false;
         }
         let hash = self.signature_hash();
-        let verifying_key = VerifyingKey::<Sha256>::new(pub_key.clone());
+        let verifying_key = VerifyingKey::<Sha256>::new_with_salt_len(pub_key.clone(), 0);
         let sig_result: Result<rsa::pss::Signature, _> = self.signature[..].try_into();
         match sig_result {
             Ok(s) => verifying_key.verify(&hash, &s).is_ok(),
