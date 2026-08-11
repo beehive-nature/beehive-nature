@@ -1,4 +1,17 @@
 # DESIGN BRIEF 03 — BNR WALLET / DASHBOARD / OPERATIONS MVP
+
+> # ⚠ PARTIALLY SUPERSEDED — 2026-08-11
+> **The FRONTEND STACK in this document is SUPERSEDED.** Ruling 1 of
+> [`RULINGS_FRONTEND_SIGNER_XLM_2026-08-11.md`](dispatches/RULINGS_FRONTEND_SIGNER_XLM_2026-08-11.md): **htmx + hx-boost + Alpine.js +
+> WASM are PRIMARY; React only where it measurably wins; Leptos and D1 are SUPERSEDED.**
+> This document still says **Leptos in 10 places** — the body is left standing because it
+> records what was asked for when it was written, but **do not build from its stack
+> guidance.** Everything else here remains in force.
+>
+> **Also from that file — ruling 2:** capped-spend enforcement is **SIGNER-AUTHORITATIVE**
+> (Trezor firmware / JWK signer). The relay pre-check is **advisory only** — *a keyless
+> relay can be replaced, so a cap only it enforces is not a cap.*
+
 **Authority:** Seat 0 directive to Seat 1 (goose holding)
 **Date:** 2026-08-10
 **Status:** DRAFT — awaiting Founder review before dispatch
