@@ -3,9 +3,13 @@ name = "adapter-arweave"
 version = "0.1.0"
 edition.workspace = true
 license.workspace = true
-description = "bNature permanence.anchor adapter: bundle CanonicalEvents and anchor them to an independent substrate (v1 mock-first; real Arweave HTTP + wallet signing gate on credentials)"
+description = "Sovereign Arweave adapter: native-JWK ANS-104 signing, gateway pool, read-back verify, event anchoring"
 
 [dependencies]
 shared-types = { path = "../shared-types" }
 serde_json = "1"
 sha2 = { workspace = true }
+rsa = "0.9"
+base64 = "0.22"
+serde = { version = "1", features = ["derive"] }
+rand = "0.8"
