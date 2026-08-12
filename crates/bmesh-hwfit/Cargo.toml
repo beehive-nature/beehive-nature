@@ -7,3 +7,4 @@ description = "Hardware-fit auto-scoring for bMeshLLM node scheduling (SPEC_DOCT
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }
+sysinfo = "0.30"

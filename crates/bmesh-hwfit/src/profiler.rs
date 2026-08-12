@@ -22,7 +22,7 @@ pub struct NodeProfile {
 }
 
 impl NodeProfile {
-    /// Construct a profile manually. Auto-detection is TODO (D7 phase 2).
+    /// Construct a profile manually.
     pub fn manual(
         gpu_vram_bytes: Option<u64>,
         gpu_name: Option<impl Into<String>>,
@@ -36,6 +36,21 @@ impl NodeProfile {
             cpu_cores,
             ram_bytes,
             arch: arch.to_string(),
+        }
+    }
+
+    /// Auto-detect hardware profile from the running system.
+    /// Uses sysinfo (MIT, L-VERIFIED) for CPU count and total RAM.
+    /// GPU detection: NOT IMPLEMENTED — nvml-wrapper license UNVERIFIED
+    /// (dropped per L-VERIFY law; re-add when license is readable).
+    pub fn auto_detect() -> Self {
+        let sys = sysinfo::System::new_all();
+        Self {
+            gpu_vram_bytes: None,
+            gpu_name: None,
+            cpu_cores: sys.cpus().len() as u32,
+            ram_bytes: sys.total_memory(),
+            arch: std::env::consts::ARCH.to_string(),
         }
     }
 }
