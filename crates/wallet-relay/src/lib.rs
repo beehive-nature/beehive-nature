@@ -267,16 +267,18 @@ async fn arweave_status(State(s): State<AppState>, Path(tx_id): Path<String>) ->
     }
     let tx_id_resp = tx_id.clone();
     let pool = s.pool.clone();
+    let gql = r#"{\"query\":\"query{transactions(ids:[\"__TXID__\"]){edges{node{id block{height timestamp} data{size} tags{name value}}}}}}\"}"#
+        .replace("__TXID__", &tx_id);
     let out = tokio::task::spawn_blocking(move || {
         let agent = ureq::AgentBuilder::new()
             .timeout_connect(std::time::Duration::from_secs(15))
             .redirects(0)
             .build();
         try_in_order(&pool, |gw| {
-            // Try /tx/{id} for native tx metadata (returns 200 + JSON if confirmed)
             let resp = agent
-                .get(&format!("{gw}/tx/{tx_id}"))
-                .call()
+                .post(&format!("{gw}/graphql"))
+                .set("Content-Type", "application/json")
+                .send_string(&gql)
                 .map_err(|e| e.to_string())?;
             let body = resp.into_string().map_err(|e| e.to_string())?;
             Ok((body, gw.to_string()))
@@ -288,9 +290,16 @@ async fn arweave_status(State(s): State<AppState>, Path(tx_id): Path<String>) ->
         Ok(Ok((body, gateway))) => {
             // arweave.net/tx/{id} returns JSON with "block" (null if pending) or 404
             let parsed: serde_json::Value = serde_json::from_str(&body).unwrap_or_default();
-            let found = parsed.get("id").is_some();
-            let data_size = parsed.get("data_size").and_then(|v| v.as_u64()).unwrap_or(0);
-            let confirmed = parsed.get("block").and_then(|b| b.as_str()).is_some_and(|s| !s.is_empty());
+            let edges = parsed.pointer("/data/transactions/edges").and_then(|e| e.as_array());
+            let (found, confirmed, data_size) = match edges {
+                Some(arr) if !arr.is_empty() => {
+                    let node = &arr[0]["node"];
+                    let confirmed = node.get("block").and_then(|b| b.as_object()).is_some();
+                    let size = node.pointer("/data/size").and_then(|s| s.as_u64()).unwrap_or(0);
+                    (true, confirmed, size)
+                }
+                _ => (false, false, 0u64),
+            };
             Json(serde_json::json!({
                 "id": tx_id_resp,
                 "found": found,
