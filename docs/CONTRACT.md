@@ -147,6 +147,32 @@ Response 200:
 
 Pre-upload fee preview so the dashboard shows cost before the user signs.
 
+## 5d. Multi-rail balance endpoints (Pillar 2)
+
+**`GET /v1/stellar/balance/{address}`**
+```json
+{ "address": "...", "balances": [...], "native_xlm": "...", "gateway_used": "https://horizon.stellar.org", "tier": "T-S" }
+```
+Source: `https://horizon.stellar.org/accounts/{address}` (public REST, no key).
+
+**`GET /v1/solana/balance/{address}`**
+```json
+{ "address": "...", "balance_lamports": 0, "balance_sol": "0.000000000", "gateway_used": "https://api.mainnet-beta.solana.com", "tier": "T-H" }
+```
+Source: `https://api.mainnet-beta.solana.com` JSON-RPC `getBalance`.
+
+**`GET /v1/hive/balance/{address}`**
+```json
+{ "address": "...", "hive_power": "0", "rc_mana": "0", "rc_mana_pct": "0.0", "gateway_used": "https://api.hive.blog", "tier": "T-S" }
+```
+Source: `https://api.hive.blog` JSON-RPC `database_api.find_accounts` + `rc_api.find_rc_accounts`.
+
+**`GET /v1/vaulta/balance/{address}`**
+```json
+{ "address": "...", "liquid_balance": "...", "cpu_available": 0, "net_available": 0, "ram_usage_bytes": 0, "ram_quota_bytes": 0, "gateway_used": "https://wax.eosrio.io", "tier": "mixed" }
+```
+Source: `https://wax.eosrio.io/v1/chain/get_account`. Tier: owner/active=T-H target, custom PUB_WA=T-F.
+
 ## Also available
 
 - `POST /graphql` — Arweave GraphQL proxy through the pool (bundled-item lookups)
