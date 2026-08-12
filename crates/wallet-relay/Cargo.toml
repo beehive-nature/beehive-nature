@@ -18,8 +18,8 @@ serde_json = "1"
 base64 = "0.22"
 # House transport (LOVErnment-DAO D-009c): ureq + rustls, driven via spawn_blocking.
 ureq = { version = "2", features = ["json"] }
+ed25519-dalek = "2"
 
 [dev-dependencies]
 tower = { version = "0.5", features = ["util"] }
 http-body-util = "0.1"
-ed25519-dalek = "2"

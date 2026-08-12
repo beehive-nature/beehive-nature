@@ -10,6 +10,7 @@
 //! suite exercises it with closures, never sockets.
 
 pub mod gateway;
+pub mod dashboard;
 pub mod upload;
 
 use std::sync::{Arc, Mutex};
@@ -46,6 +47,8 @@ pub fn app(state: AppState) -> Router {
         .route("/v1/arweave/balance/{address}", get(arweave_balance))
         .route("/v1/arweave/status/{tx_id}", get(arweave_status))
         .route("/v1/arweave/price/{bytes}", get(arweave_price))
+        .route("/", get(dashboard::dashboard))
+        .route("/v1/test-upload", post(dashboard::test_upload_handler))
         .with_state(state)
 }
 

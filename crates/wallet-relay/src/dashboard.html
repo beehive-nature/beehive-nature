@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BNR Dashboard</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; color: #1a1a1a; }
+    h1 { font-size: 1.5rem; margin-bottom: 0.25rem; }
+    .tile { border: 1px solid #e0e0e0; border-radius: 8px; padding: 1rem 1.5rem; margin: 1rem 0; }
+    .tile h2 { font-size: 1.1rem; margin-top: 0; }
+    button { background: #4a9eff; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.95rem; }
+    button:disabled { background: #999; }
+    button:hover:not(:disabled) { background: #3a8eef; }
+    pre { background: #f5f5f5; padding: 0.75rem; border-radius: 4px; font-size: 0.85rem; overflow-x: auto; white-space: pre-wrap; }
+    .green { color: #2e7d32; } .red { color: #c62828; }
+    .badge { display: inline-block; padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.7rem; font-weight: 600; background: #fff3cd; color: #856404; }
+    .note { font-size: 0.8rem; color: #666; }
+    input { padding: 0.3rem; font-size: 0.9rem; }
+    code { background: #f0f0f0; padding: 0.1rem 0.3rem; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <h1>Beehive Nature Reserve</h1>
+  <p class="note">Sovereign relay &mdash; same-origin, no CORS</p>
+
+  <div class="tile">
+    <h2>Relay Health</h2>
+    <div id="health">Loading...</div>
+  </div>
+
+  <div class="tile">
+    <h2>DeStorage Upload <span class="badge">T-S</span></h2>
+    <p class="note">
+      Signs a test Ed25519 DataItem server-side, validates, and forwards to Arweave.
+      <br><strong>MVP:</strong> Turbo free tier (no login, hosted hop).
+      <br><strong>Durable:</strong> self-hosted ar-io-node replaces Turbo.
+    </p>
+    <button id="upload-btn" onclick="doUpload()">Sign and Upload</button>
+    <div id="upload-result" style="margin-top:0.75rem"></div>
+  </div>
+
+  <div class="tile">
+    <h2>Transaction Status</h2>
+    <input id="tx-id" placeholder="Arweave tx id" style="width:360px">
+    <button onclick="checkStatus()">Check Status</button>
+    <div id="status-result" style="margin-top:0.75rem"></div>
+  </div>
+
+  <script>
+  async function loadHealth() {
+    try {
+      const r = await fetch('/healthz');
+      const d = await r.json();
+      let html = '';
+      d.gateways.forEach(g => {
+        html += '<span class="' + (g.degraded ? 'red' : 'green') + '">' + (g.degraded ? 'degraded' : 'ok') + '</span> ' + g.gateway + ' (' + g.consecutive_failures + ' fails)<br>';
+      });
+      html += '<br><span class="note">Forward configured: ' + d.forward_configured + '</span>';
+      document.getElementById('health').innerHTML = html;
+    } catch(e) { document.getElementById('health').innerHTML = '<span class="red">Error: ' + e + '</span>'; }
+  }
+
+  async function doUpload() {
+    const btn = document.getElementById('upload-btn');
+    btn.disabled = true; btn.textContent = 'Uploading...';
+    try {
+      const r = await fetch('/v1/test-upload', { method: 'POST' });
+      const d = await r.json();
+      let html = '<pre>' + JSON.stringify(d, null, 2) + '</pre>';
+      if (d.forwarded && d.id) {
+        html += '<p class="green">Forwarded! TX ID: <code>' + d.id + '</code></p>';
+        html += '<p class="note">Turbo batches asynchronously. Check status in ~1-2 min.</p>';
+        document.getElementById('tx-id').value = d.id;
+      } else if (d.refused) {
+        html += '<p class="red">Refused: ' + d.refused + '</p>';
+      }
+      document.getElementById('upload-result').innerHTML = html;
+    } catch(e) { document.getElementById('upload-result').innerHTML = '<span class="red">Error: ' + e + '</span>'; }
+    btn.disabled = false; btn.textContent = 'Sign and Upload';
+  }
+
+  async function checkStatus() {
+    const id = document.getElementById('tx-id').value.trim();
+    if (!id) return;
+    document.getElementById('status-result').innerHTML = 'Checking...';
+    try {
+      const r = await fetch('/v1/arweave/status/' + id);
+      const d = await r.json();
+      let html = '<pre>' + JSON.stringify(d, null, 2) + '</pre>';
+      if (d.found && d.confirmed) html += '<p class="green">Confirmed on Arweave!</p>';
+      else if (d.found) html += '<p>Pending (accepted, not yet mined).</p>';
+      else html += '<p class="red">Not found.</p>';
+      document.getElementById('status-result').innerHTML = html;
+    } catch(e) { document.getElementById('status-result').innerHTML = '<span class="red">Error: ' + e + '</span>'; }
+  }
+
+  loadHealth();
+  setInterval(loadHealth, 30000);
+  </script>
+</body>
+</html>
