@@ -83,7 +83,28 @@ impl RailAdapter for HiveAdapter {
 
 pub struct VaultaAdapter { base_url: String }
 impl Default for VaultaAdapter { fn default() -> Self { Self { base_url: "https://wax.eosrio.io".into() } } }
-impl VaultaAdapter { pub fn with_url(url: impl Into<String>) -> Self { Self { base_url: url.into() } } }
+impl VaultaAdapter {
+    pub fn with_url(url: impl Into<String>) -> Self { Self { base_url: url.into() } }
+
+    /// Read identity record (permission tree) from a Vaulta account.
+    /// Returns versioned envelopes per SPEC-VAULTA-IDENTITY-1 §3.
+    pub fn read_identity(&self, account: &str) -> Result<serde_json::Value, String> {
+        let agent = ureq::AgentBuilder::new().timeout_connect(std::time::Duration::from_secs(15)).redirects(0).build();
+        let body = serde_json::json!({"account_name": account}).to_string();
+        let resp = agent.post(&format!("{}/v1/chain/get_account", self.base_url)).set("Content-Type","application/json").send_string(&body).map_err(|e| e.to_string())?;
+        let parsed: serde_json::Value = serde_json::from_str(&resp.into_string().map_err(|e| e.to_string())?).unwrap_or_default();
+        let perms = parsed.get("permissions").cloned().unwrap_or(serde_json::Value::Array(vec![]));
+        let envs: Vec<serde_json::Value> = perms.as_array()
+            .map(|a| a.iter().map(|p| serde_json::json!({"v":1,"self_desc":{"type":"vaulta-permission","encoding":"json"},
+                "payload":{"permission_name":p.get("perm_name").and_then(|v| v.as_str()).unwrap_or(""),
+                "parent":p.get("parent").and_then(|v| v.as_str()).unwrap_or(""),
+                "auth":p.get("required_auth").cloned().unwrap_or(serde_json::json!({})),
+                "linked_actions":p.get("linked_actions").cloned().unwrap_or(serde_json::Value::Array(vec![]))},
+                "source":self.base_url})).collect()).unwrap_or_default();
+        Ok(serde_json::json!({"v":1,"self_desc":{"type":"vaulta-identity-record","spec":"SPEC-VAULTA-IDENTITY-1"},
+            "account":account,"permissions":envs,"source":self.base_url}))
+    }
+}
 impl RailAdapter for VaultaAdapter {
     fn rail(&self) -> &str { "vaulta" }
     fn base_url(&self) -> &str { &self.base_url }

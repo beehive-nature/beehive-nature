@@ -12,6 +12,9 @@
 pub mod gateway;
 pub mod adapters;
 pub mod buzz;
+pub mod envelope;
+pub mod tx_prep;
+pub mod vaulta;
 pub mod watch;
 pub mod dashboard;
 pub mod rails;
@@ -57,6 +60,9 @@ pub fn app(state: AppState) -> Router {
         .route("/v1/solana/balance/{address}", get(rails::solana_balance))
         .route("/v1/hive/balance/{address}", get(rails::hive_balance))
         .route("/v1/vaulta/balance/{address}", get(rails::vaulta_balance))
+        .route("/v1/vaulta/identity/{account}", get(vaulta::read_identity))
+        .route("/v1/vaulta/mint-walkthrough", post(vaulta::mint_walkthrough))
+        .route("/v1/vaulta/envelope", post(vaulta::build_envelope))
         .route("/v1/mesh/heartbeat", get(buzz::heartbeat))
         .route("/v1/config/watch-only", get(watch::watch_only_config))
         .with_state(state)

@@ -22,6 +22,23 @@ If `docs/CONTRACT.md` is not visible on your fetch, THIS section is the contract
 | GET | `/v1/arweave/status/{tx_id}` | Upload read-back (GraphQL) |
 | GET | `/v1/arweave/price/{bytes}` | Fee preview |
 
+### Vaulta Identity (bDiD)
+| Method | Route | Purpose |
+|--------|-------|---------|
+| GET | `/v1/vaulta/identity/{account}` | Read permission tree (versioned envelopes per SPEC-VAULTA-IDENTITY-1 §3) |
+| POST | `/v1/vaulta/mint-walkthrough` | Prepare UNSIGNED mint txs (founder signs ALL) |
+| POST | `/v1/vaulta/envelope` | Wrap device-read address in PQ-ready versioned envelope |
+
+Response shape (identity read):
+```json
+{ "v": 1, "self_desc": {"type":"vaulta-identity-record","spec":"SPEC-VAULTA-IDENTITY-1"},
+  "account": "...", "permissions": [{"v":1,"payload":{"permission_name":"active",...}}],
+  "source": "https://wax.eosrio.io" }
+```
+
+Mint walkthrough response: unsigned tx objects with `_signatures_required` and `_note: "UNSIGNED"`.
+The seat NEVER signs. All founder-gated per §5.
+
 ### Pillar 2: Rail Balances
 | Method | Route | Chain | Source |
 |--------|-------|-------|--------|
