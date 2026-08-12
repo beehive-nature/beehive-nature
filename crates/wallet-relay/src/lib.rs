@@ -10,6 +10,7 @@
 //! suite exercises it with closures, never sockets.
 
 pub mod gateway;
+pub mod adapters;
 pub mod buzz;
 pub mod watch;
 pub mod dashboard;
