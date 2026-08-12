@@ -14,6 +14,7 @@ pub mod adapters;
 pub mod buzz;
 pub mod cache;
 pub mod envelope;
+pub mod ladder;
 pub mod tx_prep;
 pub mod vaulta;
 pub mod watch;
@@ -64,6 +65,9 @@ pub fn app(state: AppState) -> Router {
         .route("/v1/vaulta/identity/{account}", get(vaulta::read_identity))
         .route("/v1/vaulta/mint-walkthrough", post(vaulta::mint_walkthrough))
         .route("/v1/vaulta/envelope", post(vaulta::build_envelope))
+        .route("/v1/authenticator/ladder", get(ladder_handler))
+        .route("/v1/trezor/granted/{network}", get(trezor_granted))
+        .route("/v1/bni.id/enroll", post(ladder::enroll_handler))
         .route("/v1/mesh/heartbeat", get(buzz::heartbeat))
         .route("/v1/config/watch-only", get(watch::watch_only_config))
         .with_state(state)
@@ -397,6 +401,30 @@ async fn arweave_balance(State(s): State<AppState>, Path(address): Path<String>)
         )
             .into_response(),
     }
+}
+
+/// GET /v1/authenticator/ladder — four-level ladder metadata for dashboard.
+async fn ladder_handler() -> Response {
+    Json(crate::ladder::ladder_metadata()).into_response()
+}
+
+/// GET /v1/trezor/granted/{network} — is this network granted on stock firmware?
+/// Design's 7b tile polls this to render green vs advanced.
+async fn trezor_granted(Path(network): Path<String>) -> Response {
+    let granted = match network.as_str() {
+        "evm" | "ethereum" | "btc" | "bitcoin" | "zec" | "zcash" => true,
+        "xlm" | "stellar" | "sol" | "solana" | "vaulta" | "eos" | "hive" => false,
+        _ => false,
+    };
+    let next_tier = if granted { "Bee (stock firmware)" } else { "Royal Guard (advanced firmware)" };
+    Json(serde_json::json!({
+        "v": 1,
+        "network": network,
+        "granted": granted,
+        "custody_tier": if granted { "T-H" } else { "advanced" },
+        "next_tier": next_tier,
+        "note": if granted { "Device grants read-address at this tier." } else { "No device grant at this tier. Unlocks at advanced firmware." },
+    })).into_response()
 }
 
 #[cfg(test)]
