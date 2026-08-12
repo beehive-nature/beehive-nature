@@ -7,6 +7,44 @@ Owner: Goose, primary executor. Visual layer: Claude Design (hold until spec rat
 
 ---
 
+## Appendix: Relay Route Table (authoritative — bind against this)
+
+Source of truth for all wallet-relay endpoints. Design binds these route names.
+If `docs/CONTRACT.md` is not visible on your fetch, THIS section is the contract.
+
+### bStore (Arweave DeStorage)
+| Method | Route | Purpose |
+|--------|-------|---------|
+| GET | `/` | Dashboard HTML (same-origin, no CORS) |
+| POST | `/v1/upload` | User-signed Ed25519 DataItem upload |
+| POST | `/v1/test-upload` | Server-side test DataItem (clickable) |
+| GET | `/v1/arweave/balance/{address}` | AR balance (gateway pool) |
+| GET | `/v1/arweave/status/{tx_id}` | Upload read-back (GraphQL) |
+| GET | `/v1/arweave/price/{bytes}` | Fee preview |
+
+### Pillar 2: Rail Balances
+| Method | Route | Chain | Source |
+|--------|-------|-------|--------|
+| GET | `/v1/stellar/balance/{address}` | XLM | horizon.stellar.org |
+| GET | `/v1/solana/balance/{address}` | SOL | api.mainnet-beta.solana.com |
+| GET | `/v1/hive/balance/{address}` | HIVE | api.hive.blog |
+| GET | `/v1/vaulta/balance/{address}` | VAULTA | wax.eosrio.io |
+
+### Pillar 3: Buzz Mesh
+| Method | Route | Purpose |
+|--------|-------|---------|
+| GET | `/v1/mesh/heartbeat` | Node presence (bmesh-hwfit scores) |
+
+### Infrastructure
+| Method | Route | Purpose |
+|--------|-------|---------|
+| GET | `/healthz` | Gateway pool health + forward state |
+| POST | `/graphql` | Arweave GraphQL proxy (gateway pool) |
+| GET | `/raw/{id}` | Raw tx/data-item bytes |
+
+All balance responses include `gateway_used` (which RPC answered) and `tier` (custody tier).
+Base URL: `http://129.153.202.144:8080` (VPS) or `http://localhost:8080` (dev).
+
 ## 0. Standing laws this spec is built under
 
 | Law | Source |
