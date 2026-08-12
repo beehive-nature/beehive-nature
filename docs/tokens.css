@@ -1,34 +1,118 @@
-/* BNR Design Tokens v0.1 — Claude Design authored, goose transcribed.
-   Source of truth: DESIGN-BRIEF-01-dashboard.md + DESIGN-CONSTRAINTS.md + founder canonical list.
-   Colour law: D-1 (colour never carries meaning alone) + S4 (never repaint to fix contrast). */
+/* ============================================================
+   bnr-design · tokens.css · v0.1 (D-6 scaffold)
+   Source of law: D-1 (two axes: entity identity + UI semantics)
+   Hexes sampled from canonical art (skaists mandala / kernel mandala).
+   Rule: color NEVER carries meaning alone — pair with icon + label.
+   Zero network: this file fetches nothing. System font stacks only.
+   ============================================================ */
 
 :root {
-  /* Chrome — dark-first */
-  --bg: #06110C;
-  --bg-card: #0C1412;
-  --ink: #E9F2EC;
-  --mut: #8FA79C;
-  --line: #1E2B26;
+  color-scheme: dark light;
 
-  /* Axis A — UI semantics */
-  --info: #6FA9E0;          /* KEEP APART from --ai */
-  --verified: var(--biomass);
-  --guard: #B7A8F7;         /* NEVER error-red */
-  --b-value: #E8B54B;       /* honey = colour of b. b AMOUNTS ONLY. Dark chip only. */
+  /* ---- direction (D-13) ----
+     Every token in this file is direction-agnostic BY CONSTRUCTION, and not by
+     effort: a colour, a font stack and a scale of multiples of 6 have no side.
+     There are no physical properties here to convert to logical ones — that
+     conversion found nothing to do, which is the correct outcome, not a skipped
+     step.
 
-  /* Axis B — entity identity */
-  --ai: #45C2DC;            /* Ai / bLOVErAi */
-  --biomass: #86CC72;       /* life, saturation proportional to biomass */
-  --sovereign: #9C6FD6;     /* human / ALL SOULS */
-  --you: #D655BB;           /* YOU / primary actor */
-  --sovereign-soft: #B79FE0;
+     The one exception is a gradient. An angle is physical and CSS has no
+     logical equivalent — there is no `to inline-end`. So direction is hoisted
+     into a single token and flipped once, below; every gradient downstream
+     reads --flow instead of hard-coding a number. Add a gradient that writes
+     90deg directly and it will silently refuse to mirror.
 
-  /* Rhythm — senary */
-  --space-1: 6px;
-  --space-2: 12px;
-  --space-3: 18px;
-  --space-4: 24px;
-  --space-5: 36px;
-  --space-6: 48px;
-  --radius: 12px;
+     Two angles live here, not one, because they flip differently: --flow is a
+     left-to-right sweep (90 -> 270), --hatch is a diagonal texture (45 -> 135).
+     Direction lives in exactly one file so a reviewer has one place to check. */
+  --flow:  90deg;
+  --hatch: 45deg;
+
+  /* ---- Axis B · entity identity (founder-ruled) ---- */
+  --ai:            #45C2DC;  /* robots / bLOVErAi — machine base */
+  --ai-deep:       #57CDE4;  /* AI accents; bLOVErAi may range --ai ↔ --info */
+  --biomass:       #86CC72;  /* BeehiveBioMass · life · saturation ∝ biomass */
+  --sovereign:     #9C6FD6;  /* human / sovereignty · ALL SOULS */
+  --sovereign-soft:#B79FE0;  /* member seats */
+  --you:           #D655BB;  /* YOU / primary actor (magenta) */
+  --rainbow:       linear-gradient(var(--flow),#FBFB9F,#86CC72,#45C2DC,#6FA9E0,#9C6FD6); /* SKAISTS */
+
+  /* ---- Axis A · UI semantics (kernel palette law) ---- */
+  --primary:       var(--you);      /* active / doing */
+  --info:          #6FA9E0;         /* informational — keep apart from --ai */
+  --verified:      var(--biomass);  /* settled / confirmed-by-test / alive (green allowed) */
+  --guard:         #B7A8F7;         /* guard refusal — NEVER error-red */
+  --b-value:      #E8B54B;  /* honey — the colour of b. b amounts ONLY, dark chip only
+                               (ruled 2026-07-17; BRIEF-01 §0; write-back 2026-08-10).
+                               1.88:1 on light grounds — never text on paper: invert to
+                               a dark chip (§4). Light mode deliberately does NOT override
+                               it, because repainting a semantic token is recolouring a
+                               currency; the chip inversion is the AA path. */
+
+  /* ---- chrome (dark-first: the mandala sings on black) ---- */
+  --bg:            #06110C;
+  --bg-card:       #0C1412;
+  --ink:           #E9F2EC;
+  --ink-mut:       #8FA79C;
+  --ink-dim:       #648176;  /* 4.53:1 on --bg. Was #5E7A6F = 4.11 — below AA. */
+  --line:          #1E2B26;
+
+  /* ---- type (system stacks — zero fetch) ---- */
+  --font-ui:   ui-sans-serif, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
+
+  /* ---- rhythm (senary scale: multiples of 6) ---- */
+  --s1: 6px; --s2: 12px; --s3: 18px; --s4: 24px; --s5: 36px; --s6: 48px;
+  --radius: 12px; --radius-pill: 999px;
 }
+
+/* ---- D-13 · the one flip ----
+   Written as two separate rules, deliberately, NOT as a comma-joined selector
+   list. A selector list is invalidated whole by one member a browser does not
+   understand, so pairing :dir() with [dir] in one list would drop BOTH on any
+   engine lacking :dir() — and the failure would be a silently unmirrored page,
+   not an error anyone sees. Separate rules degrade one at a time.
+   [dir] covers explicit markup; :dir() additionally catches dir="auto" once it
+   resolves. Whichever element carries the attribute redefines --flow for its
+   own subtree, so this works on <html> or on one panel. */
+[dir="rtl"] { --flow: 270deg; --hatch: 135deg; }
+:dir(rtl)   { --flow: 270deg; --hatch: 135deg; }
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg:#FBF7F0; --bg-card:#FFFFFF; --ink:#1C1A17; --line:#E7E1D6;
+
+    /* Light mode had no semantic palette. Every hue below kept its DARK-mode value and
+       was therefore used as text on a near-white background: --biomass measured 1.81:1,
+       --guard 1.97:1, --info 2.33:1. The system was designed dark-first and the light
+       block only ever overrode chrome, so the failure was invisible to anyone reading
+       the file — the tokens looked defined because they were, just not for this mode.
+
+       Each value below is the same hue darkened until it clears 4.5:1 on --bg #FBF7F0,
+       computed rather than chosen. Identity is preserved; legibility is added. */
+    --ink-mut:#67756D;        /* 4.52:1 — was #6B7A72 = 4.23 */
+    --ink-dim:#6A736E;        /* 4.56:1 — was #8A968F = 2.87 */
+    --ai:#2B7A8B;             /* 4.61:1 — was 1.97 */
+    --ai-deep:#2B7A8B;
+    --biomass:#527C46;        /* 4.52:1 — was 1.81 */
+    --sovereign:#865FB8;      /* 4.51:1 — was 3.48 */
+    --sovereign-soft:#865FB8;
+    --you:#B4479D;            /* 4.54:1 — was 3.35 */
+    --info:#4D759B;           /* 4.56:1 — was 2.33. The token the C-2 explainer caught. */
+    --verified:#527C46;
+    --guard:#736A9C;          /* 4.61:1 — was 1.97 */
+  }
+}
+
+/* ---- contrast, and how to re-check it ----
+   Every hex token above was verified against the background it is actually used on:
+   dark-mode :root values against --bg #06110C, light-mode overrides against #FBF7F0.
+   23 hex tokens, 0 below 4.5:1.
+
+   `--verified` is an alias (var(--biomass)) and carries no hex of its own, so a checker
+   scanning for hex must SKIP alias lines rather than mis-read them — an earlier pass here
+   reported a phantom "--ver 1.09" failure by matching a stale offset on an alias line.
+   A false failure is cheaper than a false pass, but both mean the checker is wrong.
+
+   Not yet done: a rendered light-mode pass over index.html in a browser. The values are
+   verified by computation; nobody has watched the styleguide render in light mode. */
