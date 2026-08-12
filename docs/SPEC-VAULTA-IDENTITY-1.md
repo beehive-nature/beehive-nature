@@ -1,10 +1,56 @@
-# SPEC-VAULTA-IDENTITY-1 v0.1 — Vaulta Identity Record / bDiD Mint
+# SPEC-VAULTA-IDENTITY-1 v0.2 — Vaulta Identity Record / bDiD Mint
 
 Status: **SPEC-FIRST (founder-gated)**. No account creation or key operations in a seat.
 Companion to: SPEC_KEYRING-1 §2.6/§3, SPEC-PAY-ONCE-NOW-1 #1/#2,
 SPEC-ONBOARDING-IDENTITY-1, FABLE 8i/8j/8h.
 
 ---
+
+## 0.1 Layer architecture (v0.2 AMENDMENT — the scaling direction)
+
+Per DISPATCH_CLAUDECODE_BDOMAIN_ADDENDUM_R8 (founder-confirmed ruled shape)
+and bdomain-scaling.md (RAM re-derivation: 2,537 B/user for 11-chain whole-account
+model; registeracc require_auth means registrant must already BE an Antelope account),
+the .b identity has THREE layers:
+
+**Layer-0 — bDiD keypair (scales to 10^10, FREE):**
+Locally generated keypair. Zero Vaulta rows, zero cost. Signed bDiD record
+content-addressed on AR/ANT. The ONLY shape that reaches 10 billion users.
+The mass individual identity = a keypair, NOT an account.
+
+**Layer-1 — frozen resolution kernel:**
+Deterministic, never-changing rule: name -> H(name) -> deterministically
+derived Autonomi address -> append-only owner-attested record.
+
+**Layer-2 — anchor adapters (millions, NOT billions):**
+Vaulta account names, Zano aliases, DNS, ATProto handles, ENS — premium,
+scarce, human-readable attestation sources. INVARIANT: adapter transfer or
+loss can NEVER rebind a Layer-0 keypair. Chains are demoted from registry
+to adapter.
+
+### What the full-account shape (§1) IS and IS NOT
+
+The owner/active/bni.id/bni.deploy permission structure = **HUB / DAO-ROOT /
+FOUNDER tier** — correct for the ROOT identity (the founder's own mint, the
+DAO root account). NOT the per-user template.
+
+Per bdomain-scaling.md: full accounts scale to ~3.2x10^8 rows (Vaulta
+max_ram_size ceiling) = 31.5x SHORT of 10^10. RAM is unbuyable in bulk
+(physical ceiling). registeracc's require_auth + is_account means a registrant
+must already BE an Antelope account. Full accounts do NOT scale to 10 billion.
+
+**The per-user identity = Layer-0 keypair.** Zero rows, zero cost,
+content-addressed. The Vaulta full-account model is the hub/root shape.
+Vaulta naming = Layer-2 premium convenience, NOT the identity itself.
+
+**187-bit pointer ruling STAMP:** UNLOCATED in repo docs as of 2026-08-12.
+Searched all .md files in beehive-nature/docs + Downloads. The "187 bits on
+Vaulta that points to AR" ruling may be from a chat session or external doc.
+FLAG: founder to provide source doc/commit for stamping.
+
+Cited: DISPATCH_CLAUDECODE_BDOMAIN_ADDENDUM_R8 (ruled shape, commit context),
+bdomain-scaling.md (RAM re-derivation, 2,537 B/user), FABLE 8h (key-derivation
+= data migration), 8i (deploy = custom permission), 8j (key sort by bytes).
 
 ## 0. Prior design synthesized
 
