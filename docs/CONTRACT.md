@@ -6,6 +6,12 @@ This file at origin is the binding contract. Changes here before UI binds.
 
 ---
 
+## Naming
+**bStore** = the storage service/tile/product (display name). formerly "DeStorage."
+**bData** = public chunks (data-layer noun, unchanged).
+**zbData** = private encrypted bytes (data-layer noun, unchanged).
+Routes and API paths are NOT renamed — this is a display/product-name change.
+
 ## 1. Base URL + CORS
 
 | Environment | Base URL | CORS |
