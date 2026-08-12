@@ -11,6 +11,7 @@
 
 pub mod gateway;
 pub mod buzz;
+pub mod watch;
 pub mod dashboard;
 pub mod rails;
 pub mod upload;
@@ -56,6 +57,7 @@ pub fn app(state: AppState) -> Router {
         .route("/v1/hive/balance/{address}", get(rails::hive_balance))
         .route("/v1/vaulta/balance/{address}", get(rails::vaulta_balance))
         .route("/v1/mesh/heartbeat", get(buzz::heartbeat))
+        .route("/v1/config/watch-only", get(watch::watch_only_config))
         .with_state(state)
 }
 
