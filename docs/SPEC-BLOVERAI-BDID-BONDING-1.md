@@ -106,6 +106,18 @@ not seat design decisions"):
 
 ---
 
+## 5. Chain-enforced property (source-stamped: authorization_manager.cpp:295-301)
+
+Per AntelopeIO/leap, permission-management actions (updateauth/deleteauth/
+linkauth/unlinkauth/canceldelay) are enforced at the AUTHORIZATION LAYER, not
+linkauth. The authorization manager throws `unlinkable_min_permission_action`
+before the action executes.
+
+**Permission-management can NEVER be delegated to a linked permission.**
+This is a CHAIN-ENFORCED property, not a policy choice. The bni.id agent key
+cannot manage permissions — even if bni.id were linked to those actions. The
+chain itself bounds the agent's grant scope (S2), not merely our spec.
+
 ## 4. Routing
 
 The agent credential enrollment routes to bni.id (same path as Larva/Pupa T-F

@@ -52,6 +52,54 @@ Cited: DISPATCH_CLAUDECODE_BDOMAIN_ADDENDUM_R8 (ruled shape, commit context),
 bdomain-scaling.md (RAM re-derivation, 2,537 B/user), FABLE 8h (key-derivation
 = data migration), 8i (deploy = custom permission), 8j (key sort by bytes).
 
+## 0.2 S7 audit amendments (2026-08-12, intern research audited + source-stamped)
+
+### Antelope key types (STAMPED: AntelopeIO/leap main, public_key.hpp:24)
+
+Antelope keys are K1/R1/WebAuthn ONLY — no PQ key type in the variant:
+`variant<ecc::public_key_shim, r1::public_key_shim, webauthn::public_key>`.
+
+**PQ-readiness lives in the S2 envelope layer, NOT the Vaulta permission tree.**
+Account authority stays K1/R1/WA until Antelope ships a PQ key type.
+Hybrid (K1/R1 + ML-DSA dual-sig at envelope layer) is the bridge.
+Default PQ signature: **ML-DSA-65** (FIPS 204).
+SLH-DSA (FIPS 205) reserved for long-horizon archival anchors (7,856 B min sig).
+
+### Five-action authorization bar (STAMPED: authorization_manager.cpp:295-301)
+
+updateauth/deleteauth/linkauth/unlinkauth/canceldelay are enforced at the
+AUTHORIZATION LAYER (authorization_manager::lookup_minimum_permission), NOT
+at linkauth. apply_eosio_linkauth has NO forbidden list. Phrase: "enforced at
+the authorization layer." Never stronger than standing law allows.
+
+### Envelope improvements (adopted into S2)
+
+1. **Domain-separation string** ("bNRi/identity/v1"-style) so one hash function
+   cannot be replayed across contexts.
+2. **Per-chain self_desc hash** (not global) — Zano=Keccak, Antelope=SHA-256.
+
+### RAM price table (VERIFIED at source 2026-08-12)
+
+Location: `code=eosio, scope=eosio, table=rammarket` (NOT eosio.ram — returns empty).
+Returns Bancor RAM market: supply (RAMCORE), base.balance (RAM bytes),
+quote.balance (WAX tokens). Verified via live RPC.
+
+### Account cost (receipted numbers, not estimates)
+
+Full-account all-in: ~3,450 B account base + 2,537 B registry row = ~5,983 B+
+(Receipted at commit 8840740, bdomain-scaling.md. Not the intern's 2-3 KiB range.)
+
+### Owner permission parent encoding
+
+ROOT owner permission's `parent` field = EMPTY STRING (""), not null.
+Encode as `""` in updateauth transactions.
+
+### Layer-0/Layer-2 split STANDS
+
+Native permission table (intern's item-4) is authority of record for the HUB
+TIER ONLY — native permissions require an ACCOUNT, accounts hit the RAM wall
+(~3.2x10^8 ceiling = 31.5x short of 10^10). v0.2 split stands. Do not collapse.
+
 ## 0. Prior design synthesized
 
 The prior Vaulta identity-hub + bDiD custody design is distributed across:
