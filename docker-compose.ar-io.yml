@@ -1,0 +1,35 @@
+# ar-io-node deployment for BNR sovereign Arweave gateway.
+# Per Arweave raid harvest: no-token/no-stake mode, self-hosted.
+# This turns the proven crypto core (adapter-arweave) into a live round-trip.
+#
+# Deploy: docker compose -f docker-compose.ar-io.yml up -d
+# Then set RELAY_GATEWAYS to include http://127.0.0.1:3000 (the ar-io-node default port)
+#
+# Prerequisites on the VPS:
+#   - Docker + Docker Compose installed
+#   - Port 3000 open (or behind Caddy/Tailscale)
+#   - No AR stake required (gateway mode only)
+
+services:
+  ar-io-node:
+    image: ghcr.io/ar.io/ar-io-node:latest
+    container_name: bnr-ar-io-node
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      # Gateway mode: serve Arweave data without staking AR
+      - NODE_MODE=gateway
+      # Bind loopback only — Caddy proxies to public domain
+      - HOST=127.0.0.1
+      - PORT=3000
+    volumes:
+      - ar-io-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  ar-io-data:

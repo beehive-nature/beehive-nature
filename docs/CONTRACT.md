@@ -113,6 +113,26 @@ Response 502:
 
 Test address: `6tlCkGE8...` (founder ArDrive keyfile — full 43-char address TBD).
 
+## 5b. Upload read-back (seam 2 completion)
+
+**`GET /v1/arweave/status/{tx_id}`**
+
+Response 200:
+```json
+{
+  "id": "string (tx id)",
+  "found": true,
+  "confirmed": false,
+  "data_size": 0,
+  "gateway_used": "string (which gateway answered)"
+}
+```
+
+`confirmed: true` when the tx has a block height (mined). `confirmed: false` when
+the tx exists but is pending. `found: false` when no gateway knows this tx id.
+
+The upload control flow: POST /v1/upload → get tx_id → poll GET /v1/arweave/status/{tx_id} → render confirmed + data_size.
+
 ## Also available
 
 - `POST /graphql` — Arweave GraphQL proxy through the pool (bundled-item lookups)

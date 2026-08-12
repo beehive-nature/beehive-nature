@@ -44,6 +44,7 @@ pub fn app(state: AppState) -> Router {
         .route("/graphql", post(graphql_proxy))
         .route("/raw/{id}", get(raw_read))
         .route("/v1/arweave/balance/{address}", get(arweave_balance))
+        .route("/v1/arweave/status/{tx_id}", get(arweave_status))
         .with_state(state)
 }
 
@@ -193,6 +194,63 @@ async fn raw_read(State(s): State<AppState>, Path(id): Path<String>) -> Response
             bytes,
         )
             .into_response(),
+        Ok(Err(tried)) => (
+            StatusCode::BAD_GATEWAY,
+            Json(serde_json::json!({ "error": "all gateways failed", "gateways_tried": tried })),
+        )
+            .into_response(),
+        Err(join) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(serde_json::json!({ "error": join.to_string() })),
+        )
+            .into_response(),
+    }
+}
+
+/// GET /v1/arweave/status/{tx_id} — read-back verification: is this tx on-chain?
+async fn arweave_status(State(s): State<AppState>, Path(tx_id): Path<String>) -> Response {
+    if !tx_id.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_') || tx_id.len() > 64 {
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(serde_json::json!({ "error": "invalid tx id" })),
+        )
+            .into_response();
+    }
+    let tx_id_resp = tx_id.clone();
+    let pool = s.pool.clone();
+    let out = tokio::task::spawn_blocking(move || {
+        let agent = ureq::AgentBuilder::new()
+            .timeout_connect(std::time::Duration::from_secs(15))
+            .redirects(0)
+            .build();
+        try_in_order(&pool, |gw| {
+            // Try /tx/{id} for native tx metadata (returns 200 + JSON if confirmed)
+            let resp = agent
+                .get(&format!("{gw}/tx/{tx_id}"))
+                .call()
+                .map_err(|e| e.to_string())?;
+            let body = resp.into_string().map_err(|e| e.to_string())?;
+            Ok((body, gw.to_string()))
+        })
+    })
+    .await;
+
+    match out {
+        Ok(Ok((body, gateway))) => {
+            // arweave.net/tx/{id} returns JSON with "block" (null if pending) or 404
+            let parsed: serde_json::Value = serde_json::from_str(&body).unwrap_or_default();
+            let found = parsed.get("id").is_some();
+            let data_size = parsed.get("data_size").and_then(|v| v.as_u64()).unwrap_or(0);
+            let confirmed = parsed.get("block").and_then(|b| b.as_str()).is_some_and(|s| !s.is_empty());
+            Json(serde_json::json!({
+                "id": tx_id_resp,
+                "found": found,
+                "confirmed": confirmed,
+                "data_size": data_size,
+                "gateway_used": gateway,
+            }))
+                .into_response()
+        }
         Ok(Err(tried)) => (
             StatusCode::BAD_GATEWAY,
             Json(serde_json::json!({ "error": "all gateways failed", "gateways_tried": tried })),
