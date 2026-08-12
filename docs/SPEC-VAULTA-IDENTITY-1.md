@@ -1,0 +1,174 @@
+# SPEC-VAULTA-IDENTITY-1 v0.1 — Vaulta Identity Record / bDiD Mint
+
+Status: **SPEC-FIRST (founder-gated)**. No account creation or key operations in a seat.
+Companion to: SPEC_KEYRING-1 §2.6/§3, SPEC-PAY-ONCE-NOW-1 #1/#2,
+SPEC-ONBOARDING-IDENTITY-1, FABLE 8i/8j/8h.
+
+---
+
+## 0. Prior design synthesized
+
+The prior Vaulta identity-hub + bDiD custody design is distributed across:
+- SPEC_KEYRING-1 §2.6: Vaulta = secp256k1, T-H target, custom PUB_WA = T-F
+- SPEC_KEYRING-1 §3: bDiD = verification-method succession (additive, never remove)
+- FABLE 8i: deploy authority = custom permission linkauth'd to setcode/setabi/buyram ONLY
+- FABLE 8j: Antelope sorts authority keys by serialized key bytes, not base58 text
+- FABLE 8h: key-derivation change = data migration (even when struct is byte-identical)
+- Founder ruling 2026-08-12: registry = Vaulta account-set roles, NOT ANT, NOT env var
+
+---
+
+## 1. Account structure (Vaulta account-set roles)
+
+The bDiD lives ON the Vaulta account's permission structure:
+
+| Permission | Authority | Role | Custody tier |
+|---|---|---|---|
+| `owner` | recovery multisig | account recovery, permission reset | T-H |
+| `active` | hardware key(s) | operational transactions | T-H |
+| `bni.id` | linked key(s) | identity record read/write | T-F or T-H |
+| `bni.deploy` | linked key(s) | setcode/setabi/buyram ONLY | T-H |
+
+Per FABLE 8i: deploy authority is NEVER `@active`. It is a custom permission
+linkauth'd to setcode/setabi/buyram only. Threshold-1 with two weight-1 keys
+means EITHER KEY ALONE — unacceptable for non-testnet.
+
+Per FABLE 8j: when setting authority keys, sort by serialized 33-byte compressed
+key bytes, NOT the base58 text string. Antelope rejects mismatches as
+"invalid authority" which misdirects to the authority, not the sort.
+
+---
+
+## 2. PQ-ready versioned envelope (invariant #1 + #2)
+
+Every key, address, and identity claim is wrapped in this envelope from record one:
+
+```json
+{
+  "v": 1,
+  "self_desc": {
+    "key_algo": "secp256k1",
+    "sig_algo": "ecdsa",
+    "hash": "sha2-256",
+    "encoding": "base58"
+  },
+  "pq": {
+    "ready": true,
+    "successor_algo": null,
+    "successor_key_ref": null
+  },
+  "payload": {
+    "type": "address",
+    "value": "...",
+    "source": "trezor-device-read",
+    "custody_tier": "T-H"
+  },
+  "timestamp": 0
+}
+```
+
+- **v** = schema version (additive-only; old records never rewritten)
+- **self_desc** = algorithm-agnostic tags naming the exact algorithm (multicodec-style, never a hardcoded curve/hash assumption)
+- **pq.ready** = this record CAN be superseded by a PQ key without re-minting the identity
+- **pq.successor_algo/key_ref** = filled when a PQ successor is added (additive, not replacing)
+- **payload.source** = provenance (device-read, manual, oauth, etc.)
+
+When a PQ successor is added: a NEW envelope record is created (additive).
+The old record's `pq.successor_key_ref` points to the new one. Both remain valid.
+The identity is NOT re-minted — the Vaulta account stays, the key set grows.
+
+---
+
+## 3. bDiD record schema (on Vaulta)
+
+The bDiD record maps to the Vaulta account's permission tree + a data table:
+
+**Permission tree (updateauth/linkauth):**
+- `owner` keys = [{envelope: T-H recovery key}]
+- `active` keys = [{envelope: T-H hardware key}]
+- `bni.id` keys = [{envelope: T-F passkey}, {envelope: T-H Trezor EVM}]
+- `bni.deploy` linkauth'd to: setcode, setabi, buyram
+
+**Identity data table (on-chain or contract):**
+- Each row = one versioned envelope (address or pubkey or DID method)
+- Primary key = envelope hash (deterministic, never recomputed per FABLE 8h)
+- Additive only — new rows appended, old rows never modified
+
+**Device-read addresses (EVM/BTC/ZEC from Trezor):**
+- Stored as envelope rows with payload.type = "address"
+- payload.source = "trezor-device-read"
+- payload.custody_tier = "T-H"
+- Each network gets its own envelope row
+
+---
+
+## 4. Device-read integration flow
+
+```
+Trezor (local bridge 127.0.0.1:21328)
+  → derives EVM/BTC/ZEC public addresses (granted set only)
+Dashboard
+  → wraps each address in a versioned envelope (§2)
+  → sends envelopes to relay
+Relay (adapter ring)
+  → VaultaAdapter prepares the update transaction (UNSIGNED)
+  → surfaces to founder for signing
+Founder (T-H active key)
+  → reviews + signs the transaction
+  → transaction posts to Vaulta
+Dashboard
+  → reads identity record from Vaulta (via VaultaAdapter)
+  → displays addresses + balances via adapter ring
+```
+
+The relay NEVER holds a private key. The Vaulta update requires the founder's
+active permission key. The seat prepares unsigned transactions only.
+
+---
+
+## 5. Irreversible / founder-gated actions (spec-first)
+
+These actions are SPEC-ONLY from a seat. Execution requires the founder:
+
+| Action | Why gated | Who executes |
+|---|---|---|
+| Create Vaulta account | irreversible on-chain | Founder |
+| Set `owner` permission | root authority | Founder |
+| Set `active` permission | operational authority | Founder |
+| Create `bni.id` permission | identity management | Founder |
+| Create `bni.deploy` permission | code deployment | Founder |
+| Deploy identity contract | code on account | Founder (bni.deploy) |
+| Add PQ successor key | identity succession | Founder |
+| Write device-read addresses | requires active key sign | Founder |
+
+The seat CAN: read the Vaulta identity record (public data), prepare unsigned
+transactions, wrap addresses in envelopes, display the record via dashboard.
+The seat CANNOT: sign, send, create accounts, set permissions.
+
+---
+
+## 6. Acceptance criteria
+
+1. Vaulta account has owner/active/bni.id/bni.deploy permissions per §1.
+2. Every key and address wrapped in versioned envelope per §2.
+3. Envelope includes pq.ready=true and successor fields from record one.
+4. Device-read addresses (EVM/BTC/ZEC) write into the record as envelopes.
+5. Old records never rewritten — additions only (verification-method succession).
+6. Dashboard reads registry from Vaulta (via adapter ring) and displays balances.
+7. No seat holds a Vaulta private key or signs a transaction.
+8. Permission keys sorted by serialized bytes, not base58 (FABLE 8j).
+
+---
+
+## 7. UNVERIFIED register
+
+- Vaulta RPC endpoint for reading permission tree: verify exact API shape via adapter
+- Vaulta account creation cost/process: founder action, not yet scoped
+- Identity data table: contract-based or native multi-sig table — design when implementing
+- PQ key algorithm (ML-DSA / SLH-DSA / hybrid): spec when PQ crypto library is selected
+- Transaction format for permission updates (updateauth/linkauth): verify via Vaulta adapter
+- Envelope hash function for primary key: sha2-256 default, self_desc makes it swappable
+
+---
+
+*Goose, primary executor. Synthesizes: SPEC_KEYRING-1 §2.6/§3, SPEC-PAY-ONCE-NOW-1 #1/#2, SPEC-ONBOARDING-IDENTITY-1, FABLE 8i/8j/8h, founder ruling 2026-08-12 (Vaulta account-set roles, NOT ANT).*
