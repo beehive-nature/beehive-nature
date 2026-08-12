@@ -133,6 +133,20 @@ the tx exists but is pending. `found: false` when no gateway knows this tx id.
 
 The upload control flow: POST /v1/upload → get tx_id → poll GET /v1/arweave/status/{tx_id} → render confirmed + data_size.
 
+## 5c. Upload price (fee preview)
+
+**`GET /v1/arweave/price/{bytes}`**
+
+Response 200:
+```json
+{
+  "winston": "string (integer reward)",
+  "gateway_used": "string"
+}
+```
+
+Pre-upload fee preview so the dashboard shows cost before the user signs.
+
 ## Also available
 
 - `POST /graphql` — Arweave GraphQL proxy through the pool (bundled-item lookups)

@@ -45,6 +45,7 @@ pub fn app(state: AppState) -> Router {
         .route("/raw/{id}", get(raw_read))
         .route("/v1/arweave/balance/{address}", get(arweave_balance))
         .route("/v1/arweave/status/{tx_id}", get(arweave_status))
+        .route("/v1/arweave/price/{bytes}", get(arweave_price))
         .with_state(state)
 }
 
@@ -194,6 +195,54 @@ async fn raw_read(State(s): State<AppState>, Path(id): Path<String>) -> Response
             bytes,
         )
             .into_response(),
+        Ok(Err(tried)) => (
+            StatusCode::BAD_GATEWAY,
+            Json(serde_json::json!({ "error": "all gateways failed", "gateways_tried": tried })),
+        )
+            .into_response(),
+        Err(join) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(serde_json::json!({ "error": join.to_string() })),
+        )
+            .into_response(),
+    }
+}
+
+/// GET /v1/arweave/price/{bytes} — fee preview for upload cost.
+async fn arweave_price(State(s): State<AppState>, Path(bytes): Path<String>) -> Response {
+    let n: u64 = bytes.parse().unwrap_or(0);
+    if n > upload::MAX_ITEM_BYTES as u64 {
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(serde_json::json!({ "error": "exceeds max item bytes" })),
+        )
+            .into_response();
+    }
+    let pool = s.pool.clone();
+    let out = tokio::task::spawn_blocking(move || {
+        let agent = ureq::AgentBuilder::new()
+            .timeout_connect(std::time::Duration::from_secs(15))
+            .redirects(0)
+            .build();
+        try_in_order(&pool, |gw| {
+            let resp = agent
+                .get(&format!("{gw}/price/{n}"))
+                .call()
+                .map_err(|e| e.to_string())?;
+            let winston = resp.into_string().map_err(|e| e.to_string())?;
+            Ok((winston, gw.to_string()))
+        })
+    })
+    .await;
+
+    match out {
+        Ok(Ok((winston, gateway))) => {
+            Json(serde_json::json!({
+                "winston": winston.trim(),
+                "gateway_used": gateway,
+            }))
+                .into_response()
+        }
         Ok(Err(tried)) => (
             StatusCode::BAD_GATEWAY,
             Json(serde_json::json!({ "error": "all gateways failed", "gateways_tried": tried })),
