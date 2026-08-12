@@ -10,6 +10,7 @@
 //! suite exercises it with closures, never sockets.
 
 pub mod gateway;
+pub mod buzz;
 pub mod dashboard;
 pub mod rails;
 pub mod upload;
@@ -54,6 +55,7 @@ pub fn app(state: AppState) -> Router {
         .route("/v1/solana/balance/{address}", get(rails::solana_balance))
         .route("/v1/hive/balance/{address}", get(rails::hive_balance))
         .route("/v1/vaulta/balance/{address}", get(rails::vaulta_balance))
+        .route("/v1/mesh/heartbeat", get(buzz::heartbeat))
         .with_state(state)
 }
 
