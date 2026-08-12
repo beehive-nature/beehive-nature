@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BNR Dashboard</title>
-  <script src="https://connect.trezor.io/9/trezor-connect.js"></script>
   <style>
     body { font-family: system-ui, sans-serif; max-width: 800px; margin: 1rem auto; color: #1a1a1a; }
     h1 { font-size: 1.5rem; margin-bottom: 0; }
@@ -38,73 +37,37 @@
 </head>
 <body>
   <h1>Beehive Nature Reserve</h1>
-  <p class="note">Sovereign relay &mdash; same-origin, no CORS</p>
+  <p class="note">Sovereign relay — local-first, no hosted chokepoints</p>
 
   <div class="grid">
     <div class="tile">
       <h2>Relay Health</h2>
       <div id="health">Loading...</div>
     </div>
-
     <div class="tile">
       <h2>Mesh Presence <span class="badge badge-d7">D7</span></h2>
       <div id="heartbeat">Loading...</div>
     </div>
-
     <div class="tile full">
       <h2>Wallet Balances</h2>
-
       <div class="trezor-bar">
-        <button class="trezor" id="trezor-btn" onclick="connectTrezor()">🔗 Connect Trezor</button>
+        <button class="trezor" id="trezor-btn" onclick="connectTrezor()">Read Trezor (Local)</button>
         <span id="trezor-status" class="note">Not connected — addresses entered manually</span>
       </div>
-
-      <div class="rail-row">
-        <label>EVM</label>
-        <input id="evm-addr" placeholder="Connect Trezor to derive (secp256k1)">
-        <span class="badge" id="evm-badge">—</span>
-      </div>
-      <div class="rail-row">
-        <label>AR</label>
-        <input id="ar-addr" placeholder="Arweave address (43 chars)">
-        <span class="badge badge-ts" id="ar-badge">T-S</span>
-        <button onclick="checkBalance('arweave','ar-addr')">Check</button>
-      </div>
-      <div class="rail-row">
-        <label>XLM</label>
-        <input id="xlm-addr" placeholder="Connect Trezor or enter G...">
-        <span class="badge" id="xlm-badge">—</span>
-        <button onclick="checkBalance('stellar','xlm-addr')">Check</button>
-      </div>
-      <div class="rail-row">
-        <label>SOL</label>
-        <input id="sol-addr" placeholder="Connect Trezor or enter address">
-        <span class="badge" id="sol-badge">—</span>
-        <button onclick="checkBalance('solana','sol-addr')">Check</button>
-      </div>
-      <div class="rail-row">
-        <label>HIVE</label>
-        <input id="hive-addr" placeholder="Connect Trezor or enter account">
-        <span class="badge" id="hive-badge">—</span>
-        <button onclick="checkBalance('hive','hive-addr')">Check</button>
-      </div>
-      <div class="rail-row">
-        <label>VAULTA</label>
-        <input id="vlt-addr" placeholder="Connect Trezor or enter account">
-        <span class="badge" id="vlt-badge">—</span>
-        <button onclick="checkBalance('vaulta','vlt-addr')">Check</button>
-      </div>
-
+      <div class="rail-row"><label>EVM</label><input id="evm-addr" placeholder="Read from Trezor or enter 0x..."><span class="badge" id="evm-badge">—</span></div>
+      <div class="rail-row"><label>AR</label><input id="ar-addr" placeholder="Arweave address (43 chars)"><span class="badge badge-ts" id="ar-badge">T-S</span><button onclick="checkBalance('arweave','ar-addr')">Check</button></div>
+      <div class="rail-row"><label>XLM</label><input id="xlm-addr" placeholder="Read from Trezor or enter G..."><span class="badge" id="xlm-badge">—</span><button onclick="checkBalance('stellar','xlm-addr')">Check</button></div>
+      <div class="rail-row"><label>SOL</label><input id="sol-addr" placeholder="Read from Trezor or enter address"><span class="badge" id="sol-badge">—</span><button onclick="checkBalance('solana','sol-addr')">Check</button></div>
+      <div class="rail-row"><label>HIVE</label><input id="hive-addr" placeholder="Read from Trezor or enter account"><span class="badge" id="hive-badge">—</span><button onclick="checkBalance('hive','hive-addr')">Check</button></div>
+      <div class="rail-row"><label>VAULTA</label><input id="vlt-addr" placeholder="Read from Trezor or enter account"><span class="badge" id="vlt-badge">—</span><button onclick="checkBalance('vaulta','vlt-addr')">Check</button></div>
       <div id="balance-result" style="margin-top:0.5rem"></div>
     </div>
-
     <div class="tile">
       <h2>bStore <span class="badge badge-ts">T-S</span></h2>
       <p class="note">MVP: Turbo free tier (shed-able bootstrap). Durable: self-hosted ar-io-node.</p>
       <button id="upload-btn" onclick="doUpload()">Sign and Upload</button>
       <div id="upload-result" style="margin-top:0.5rem"></div>
     </div>
-
     <div class="tile">
       <h2>Transaction Status</h2>
       <input id="tx-id" placeholder="tx id" style="width:100%;margin-bottom:0.3rem">
@@ -114,144 +77,70 @@
   </div>
 
 <script>
-async function loadHealth() {
-  try { const r=await fetch('/healthz'); const d=await r.json();
-    let h='<table>'; d.gateways.forEach(g=>{h+='<tr><td><span class="'+(g.degraded?'red':'green')+'">'+(g.degraded?'degraded':'ok')+'</span></td><td>'+g.gateway+'</td></tr>';});
-    h+='<tr><td>Forward</td><td>'+(d.forward_configured?'configured':'none')+'</td></tr></table>';
-    document.getElementById('health').innerHTML=h;
-  } catch(e){document.getElementById('health').innerHTML='<span class="red">Error</span>';}
+async function loadHealth(){try{const r=await fetch('/healthz');const d=await r.json();let h='<table>';d.gateways.forEach(g=>{h+='<tr><td><span class="'+(g.degraded?'red':'green')+'">'+(g.degraded?'degraded':'ok')+'</span></td><td>'+g.gateway+'</td></tr>';});h+='<tr><td>Forward</td><td>'+(d.forward_configured?'configured':'none')+'</td></tr></table>';document.getElementById('health').innerHTML=h;}catch(e){document.getElementById('health').innerHTML='<span class="red">Error</span>';}}
+async function loadHeartbeat(){try{const r=await fetch('/v1/mesh/heartbeat');const d=await r.json();let h='<table>';h+='<tr><td>Node</td><td>'+d.node_id+'</td></tr>';h+='<tr><td>Status</td><td><span class="'+(d.status==='ready'?'green':'')+'">'+d.status+'</span></td></tr>';h+='<tr><td>Best Fit</td><td>'+d.model_name+'</td></tr>';h+='<tr><td>Score</td><td>'+d.fit_score.toFixed(2)+'</td></tr>';h+='<tr><td>HW</td><td>'+d.hardware.cpu_cores+'c / '+d.hardware.ram_gb+'GB / GPU: '+d.hardware.gpu+'</td></tr>';h+='<tr><td>b-metered</td><td>'+d.b_metered_tokens_this_epoch+' tok</td></tr></table>';document.getElementById('heartbeat').innerHTML=h;}catch(e){document.getElementById('heartbeat').innerHTML='<span class="red">Error</span>';}}
+async function checkBalance(rail,inputId){const addr=document.getElementById(inputId).value.trim();if(!addr)return;document.getElementById('balance-result').innerHTML='<span class="note">Checking '+rail+'...</span>';try{const r=await fetch('/v1/'+rail+'/balance/'+encodeURIComponent(addr));const d=await r.json();let label=rail.toUpperCase(),val='';if(rail==='arweave')val=d.balance_ar?d.balance_ar+' AR':'—';else if(rail==='stellar')val=d.native_xlm?d.native_xlm+' XLM':'—';else if(rail==='solana')val=d.balance_sol?d.balance_sol+' SOL':'—';else if(rail==='hive')val=d.hive_power+' HP, '+d.rc_mana_pct+'% RC';else if(rail==='vaulta')val=d.liquid_balance+', CPU:'+d.cpu_available;document.getElementById('balance-result').innerHTML='<p><strong>'+label+':</strong> '+val+' <span class="note">via '+(d.gateway_used||'?')+' ['+(d.tier||'?')+']</span></p><pre>'+JSON.stringify(d,null,2)+'</pre>';}catch(e){document.getElementById('balance-result').innerHTML='<span class="red">Error</span>';}}
+async function doUpload(){const btn=document.getElementById('upload-btn');btn.disabled=true;btn.textContent='Uploading...';try{const r=await fetch('/v1/test-upload',{method:'POST'});const d=await r.json();let html='<pre>'+JSON.stringify(d,null,2)+'</pre>';if(d.forwarded&&d.id){html+='<p class="green">TX: <code>'+d.id+'</code></p>';document.getElementById('tx-id').value=d.id;}else if(d.refused){html+='<p class="red">Refused: '+d.refused+'</p>';}document.getElementById('upload-result').innerHTML=html;}catch(e){document.getElementById('upload-result').innerHTML='<span class="red">Error</span>';}btn.disabled=false;btn.textContent='Sign and Upload';}
+async function checkStatus(){const id=document.getElementById('tx-id').value.trim();if(!id)return;document.getElementById('status-result').innerHTML='<span class="note">Checking...</span>';try{const r=await fetch('/v1/arweave/status/'+id);const d=await r.json();let html='';if(d.found&&d.confirmed)html+='<p class="green">Confirmed on Arweave!</p>';else if(d.found)html+='<p>Pending (accepted, not yet mined).</p>';else html+='<p class="red">Not found.</p>';html+='<pre>'+JSON.stringify(d,null,2)+'</pre>';document.getElementById('status-result').innerHTML=html;}catch(e){document.getElementById('status-result').innerHTML='<span class="red">Error</span>';}}
+function setBadge(id,text){const el=document.getElementById(id+'-badge');if(el){el.textContent=text;el.className='badge '+(text==='T-H'?'badge-th':text==='T-S'?'badge-ts':'badge-adv');}}
+
+// === TREZOR LOCAL BRIDGE ===
+// Local-first: reads PUBLIC addresses from trezord bridge on localhost.
+// NO connect.trezor.io CDN. NO web popup. Watch-only — never signs.
+// Bridge is Suite's embedded trezord at 127.0.0.1:21328 (POST /enumerate confirmed).
+const TREZOR_BRIDGE = 'http://127.0.0.1:21328';
+const H = 0x80000000;
+
+async function trezorCall(session, msg) {
+  const r = await fetch(TREZOR_BRIDGE + '/call/' + session, { method: 'POST', body: JSON.stringify(msg) });
+  return r.json();
 }
 
-async function loadHeartbeat() {
-  try { const r=await fetch('/v1/mesh/heartbeat'); const d=await r.json();
-    let h='<table>';
-    h+='<tr><td>Node</td><td>'+d.node_id+'</td></tr>';
-    h+='<tr><td>Status</td><td><span class="'+(d.status==='ready'?'green':'')+'">'+d.status+'</span></td></tr>';
-    h+='<tr><td>Best Fit</td><td>'+d.model_name+'</td></tr>';
-    h+='<tr><td>Score</td><td>'+d.fit_score.toFixed(2)+'</td></tr>';
-    h+='<tr><td>HW</td><td>'+d.hardware.cpu_cores+'c / '+d.hardware.ram_gb+'GB / GPU: '+d.hardware.gpu+'</td></tr>';
-    h+='<tr><td>b-metered</td><td>'+d.b_metered_tokens_this_epoch+' tok</td></tr></table>';
-    document.getElementById('heartbeat').innerHTML=h;
-  } catch(e){document.getElementById('heartbeat').innerHTML='<span class="red">Error</span>';}
-}
-
-async function checkBalance(rail,inputId){
-  const addr=document.getElementById(inputId).value.trim(); if(!addr)return;
-  document.getElementById('balance-result').innerHTML='<span class="note">Checking '+rail+'...</span>';
-  try{const r=await fetch('/v1/'+rail+'/balance/'+encodeURIComponent(addr));const d=await r.json();
-    let label=rail.toUpperCase(),val='';
-    if(rail==='arweave')val=d.balance_ar?d.balance_ar+' AR':'—';
-    else if(rail==='stellar')val=d.native_xlm?d.native_xlm+' XLM':'—';
-    else if(rail==='solana')val=d.balance_sol?d.balance_sol+' SOL':'—';
-    else if(rail==='hive')val=d.hive_power+' HP, '+d.rc_mana_pct+'% RC';
-    else if(rail==='vaulta')val=d.liquid_balance+', CPU:'+d.cpu_available;
-    document.getElementById('balance-result').innerHTML='<p><strong>'+label+':</strong> '+val+' <span class="note">via '+(d.gateway_used||'?')+' ['+(d.tier||'?')+']</span></p><pre>'+JSON.stringify(d,null,2)+'</pre>';
-  }catch(e){document.getElementById('balance-result').innerHTML='<span class="red">Error</span>';}
-}
-
-async function doUpload(){
-  const btn=document.getElementById('upload-btn');btn.disabled=true;btn.textContent='Uploading...';
-  try{const r=await fetch('/v1/test-upload',{method:'POST'});const d=await r.json();
-    let html='<pre>'+JSON.stringify(d,null,2)+'</pre>';
-    if(d.forwarded&&d.id){html+='<p class="green">TX: <code>'+d.id+'</code></p>';document.getElementById('tx-id').value=d.id;}
-    else if(d.refused){html+='<p class="red">Refused: '+d.refused+'</p>';}
-    document.getElementById('upload-result').innerHTML=html;
-  }catch(e){document.getElementById('upload-result').innerHTML='<span class="red">Error</span>';}
-  btn.disabled=false;btn.textContent='Sign and Upload';
-}
-
-async function checkStatus(){
-  const id=document.getElementById('tx-id').value.trim();if(!id)return;
-  document.getElementById('status-result').innerHTML='<span class="note">Checking...</span>';
-  try{const r=await fetch('/v1/arweave/status/'+id);const d=await r.json();
-    let html='';
-    if(d.found&&d.confirmed)html+='<p class="green">Confirmed on Arweave!</p>';
-    else if(d.found)html+='<p>Pending (accepted, not yet mined).</p>';
-    else html+='<p class="red">Not found.</p>';
-    html+='<pre>'+JSON.stringify(d,null,2)+'</pre>';
-    document.getElementById('status-result').innerHTML=html;
-  }catch(e){document.getElementById('status-result').innerHTML='<span class="red">Error</span>';}
-}
-
-function setBadge(id,text){const el=document.getElementById(id+'-badge');if(el){el.textContent=text;
-  el.className='badge '+(text==='T-H'?'badge-th':text==='T-S'?'badge-ts':'badge-adv');}}
-
-// === TREZOR CONNECT ===
-// Stock firmware watch-only: derives PUBLIC addresses only. NEVER a private key. NEVER signing.
-// L-VERIFY: trezord-go=LGPL-3.0, Trezor Connect=NOASSERTION (monorepo, CDN-loaded, not bundled)
 async function connectTrezor() {
   const btn = document.getElementById('trezor-btn');
   const status = document.getElementById('trezor-status');
-  btn.disabled = true; status.textContent = 'Connecting to Trezor...';
-
+  btn.disabled = true; status.textContent = 'Scanning local bridge (127.0.0.1:21328)...';
   try {
-    if (typeof TrezorConnect === 'undefined') {
-      status.innerHTML = '<span class="red">Trezor Connect failed to load (CDN blocked?). Install Trezor Suite for the bridge.</span>';
-      btn.disabled = false; return;
+    const enumResp = await fetch(TREZOR_BRIDGE + '/enumerate', { method: 'POST' });
+    const devices = await enumResp.json();
+    if (!devices || devices.length === 0) {
+      status.innerHTML = '<span class="red">No device visible. Close Trezor Suite to release the device, then retry.</span>';
+      btn.disabled = false; btn.textContent = '↻ Retry'; return;
     }
+    const path = devices[0].path;
+    status.textContent = 'Device at ' + path + '. Acquiring...';
+    const acqResp = await fetch(TREZOR_BRIDGE + '/acquire/' + path + '/null', { method: 'POST' });
+    const session = await acqResp.text();
+    let derived = 0;
 
-    TrezorConnect.manifest({ email: 'noreply@bnature.social', appUrl: window.location.origin });
+    // ETH/EVM (m/44'/60'/0'/0/0)
+    try { const r = await trezorCall(session, { type: 'ethereumgetaddress', address_n: [44+H,60+H,0+H,0,0] });
+      if (r.address) { document.getElementById('evm-addr').value = r.address; setBadge('evm','T-H'); derived++; } } catch(e) {}
 
-    let derived = 0, unsupported = 0;
-    const results = [];
+    // XLM (m/44'/148'/0')
+    try { const r = await trezorCall(session, { type: 'stellargetaddress', address_n: [44+H,148+H,0+H] });
+      if (r.address) { document.getElementById('xlm-addr').value = r.address; setBadge('xlm','T-H'); derived++; } } catch(e) { setBadge('xlm','adv'); }
 
-    // ETH/EVM (native Trezor — secp256k1)
-    try {
-      const r = await TrezorConnect.ethereumGetAddress({ path: "m/44'/60'/0'/0/0" });
-      if (r.success) {
-        document.getElementById('evm-addr').value = r.payload.address;
-        setBadge('evm', 'T-H'); derived++;
-        results.push('EVM: ' + r.payload.address.slice(0,10) + '...');
-      }
-    } catch(e) { setBadge('evm', 'adv'); unsupported++; }
+    // SOL (m/44'/501'/0'/0') — firmware-dependent
+    try { const r = await trezorCall(session, { type: 'solananagetaddress', address_n: [44+H,501+H,0+H,0,0+H] });
+      if (r.address) { document.getElementById('sol-addr').value = r.address; setBadge('sol','T-H'); derived++; } } catch(e) { setBadge('sol','adv'); }
 
-    // XLM (Stellar — native Trezor app)
-    try {
-      const r = await TrezorConnect.stellarGetAddress({ path: "m/44'/148'/0'" });
-      if (r.success) {
-        document.getElementById('xlm-addr').value = r.payload.address;
-        setBadge('xlm', 'T-H'); derived++;
-        results.push('XLM: ' + r.payload.address.slice(0,10) + '...');
-      }
-    } catch(e) { setBadge('xlm', 'adv'); unsupported++; }
+    // EOS/Vaulta (m/44'/194'/0'/0/0)
+    try { const r = await trezorCall(session, { type: 'eosgetpublickey', address_n: [44+H,194+H,0+H,0,0] });
+      if (r.wif) { document.getElementById('vlt-addr').value = r.wif; setBadge('vlt','T-H'); derived++; } } catch(e) { setBadge('vlt','adv'); }
 
-    // SOL (Solana — try, may not exist in all firmware)
-    try {
-      const r = await TrezorConnect.getPublicKey({ path: "m/44'/501'/0'", coin: 'solana' });
-      if (r.success) {
-        // SOL address = ed25519 pubkey, base58 — device returns xpub
-        // For watch-only display, show the derived path exists
-        document.getElementById('sol-addr').value = '(derived — see device)';
-        document.getElementById('sol-addr').disabled = true;
-        setBadge('sol', 'T-H'); derived++;
-        results.push('SOL: derived from device');
-      }
-    } catch(e) { setBadge('sol', 'adv'); unsupported++; }
+    await fetch(TREZOR_BRIDGE + '/release/' + session, { method: 'POST' });
 
-    // EOS/Vaulta (native Trezor EOS app)
-    try {
-      const r = await TrezorConnect.eosGetPublicKey({ path: "m/44'/194'/0'/0/0" });
-      if (r.success) {
-        document.getElementById('vlt-addr').value = r.payload.wif || '(EOS pubkey derived)';
-        setBadge('vlt', 'T-H'); derived++;
-        results.push('VAULTA: EOS pubkey derived');
-      }
-    } catch(e) { setBadge('vlt', 'adv'); unsupported++; }
-
-    // AR — NOT a Trezor primitive (RSA-4096)
-    setBadge('ar', 'T-S');
+    setBadge('ar','T-S');
     document.getElementById('ar-addr').placeholder = 'RSA-4096 JWK (not a Trezor primitive — enter manually)';
-
-    // HIVE — no Trezor app
-    setBadge('hive', 'adv');
+    setBadge('hive','adv');
     document.getElementById('hive-addr').placeholder = 'Unlocks at advanced tier';
     document.getElementById('hive-addr').disabled = true;
 
-    status.innerHTML = '<span class="green">Connected: ' + derived + ' rails from device</span>, ' +
-      unsupported + ' unsupported. AR=T-S (software), HIVE=advanced tier.';
-    btn.textContent = '↻ Reconnect Trezor';
+    status.innerHTML = '<span class="green">Local read: ' + derived + ' rails from device (no popup, no CDN).</span> AR=T-S, HIVE=advanced.';
+    btn.textContent = '↻ Re-read Trezor';
   } catch(e) {
-    status.innerHTML = '<span class="red">Trezor Bridge not found at 127.0.0.1:21325. Install Trezor Suite.</span>';
+    status.innerHTML = '<span class="red">Local bridge not found at 127.0.0.1:21328. Is Trezor Suite running?</span>';
   }
   btn.disabled = false;
 }
