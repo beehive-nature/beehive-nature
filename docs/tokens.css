@@ -1,0 +1,34 @@
+/* BNR Design Tokens v0.1 — Claude Design authored, goose transcribed.
+   Source of truth: DESIGN-BRIEF-01-dashboard.md + DESIGN-CONSTRAINTS.md + founder canonical list.
+   Colour law: D-1 (colour never carries meaning alone) + S4 (never repaint to fix contrast). */
+
+:root {
+  /* Chrome — dark-first */
+  --bg: #06110C;
+  --bg-card: #0C1412;
+  --ink: #E9F2EC;
+  --mut: #8FA79C;
+  --line: #1E2B26;
+
+  /* Axis A — UI semantics */
+  --info: #6FA9E0;          /* KEEP APART from --ai */
+  --verified: var(--biomass);
+  --guard: #B7A8F7;         /* NEVER error-red */
+  --b-value: #E8B54B;       /* honey = colour of b. b AMOUNTS ONLY. Dark chip only. */
+
+  /* Axis B — entity identity */
+  --ai: #45C2DC;            /* Ai / bLOVErAi */
+  --biomass: #86CC72;       /* life, saturation proportional to biomass */
+  --sovereign: #9C6FD6;     /* human / ALL SOULS */
+  --you: #D655BB;           /* YOU / primary actor */
+  --sovereign-soft: #B79FE0;
+
+  /* Rhythm — senary */
+  --space-1: 6px;
+  --space-2: 12px;
+  --space-3: 18px;
+  --space-4: 24px;
+  --space-5: 36px;
+  --space-6: 48px;
+  --radius: 12px;
+}
