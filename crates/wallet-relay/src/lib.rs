@@ -267,8 +267,9 @@ async fn arweave_status(State(s): State<AppState>, Path(tx_id): Path<String>) ->
     }
     let tx_id_resp = tx_id.clone();
     let pool = s.pool.clone();
-    let gql = r#"{\"query\":\"query{transactions(ids:[\"__TXID__\"]){edges{node{id block{height timestamp} data{size} tags{name value}}}}}}\"}"#
-        .replace("__TXID__", &tx_id);
+    let gql = serde_json::json!({
+        "query": format!("query{{transactions(ids:[\"{}\"]){{edges{{node{{id block{{height timestamp}} data{{size}} tags{{name value}}}}}}}}}}", tx_id)
+    }).to_string();
     let out = tokio::task::spawn_blocking(move || {
         let agent = ureq::AgentBuilder::new()
             .timeout_connect(std::time::Duration::from_secs(15))
