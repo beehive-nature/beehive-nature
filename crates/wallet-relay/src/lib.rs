@@ -11,6 +11,7 @@
 
 pub mod gateway;
 pub mod dashboard;
+pub mod rails;
 pub mod upload;
 
 use std::sync::{Arc, Mutex};
@@ -49,6 +50,10 @@ pub fn app(state: AppState) -> Router {
         .route("/v1/arweave/price/{bytes}", get(arweave_price))
         .route("/", get(dashboard::dashboard))
         .route("/v1/test-upload", post(dashboard::test_upload_handler))
+        .route("/v1/stellar/balance/{address}", get(rails::stellar_balance))
+        .route("/v1/solana/balance/{address}", get(rails::solana_balance))
+        .route("/v1/hive/balance/{address}", get(rails::hive_balance))
+        .route("/v1/vaulta/balance/{address}", get(rails::vaulta_balance))
         .with_state(state)
 }
 
