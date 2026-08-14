@@ -1,0 +1,85 @@
+==============================================================================
+SIM-MESHFEST-0 — RUN HEADER (§6 gates run BEFORE any result is printed)
+==============================================================================
+  GATE 1 airtime conserved : PASS  density x2 (unsaturated) ⇒ per-device CAPACITY SHARE 245,700 → 108,450 bps  (ratio 0.441; must be <0.50 — halving PLUS the contention penalty)
+  GATE 2 classes separate  : PASS (3 load classes, never averaged)
+  GATE 3 all params tagged : PASS (7 CITED / 14 ASSUMPTION / 0 unlabelled)
+  ⚠ RELAY ASSUMPTION       : RELAY_FRACTION=20% , ACTIVE=30%
+
+==============================================================================
+DENSITY 0.5 people/m²   (500,000 people ⇒ 1.00 km² site)
+==============================================================================
+
+  T-A pure device mesh   devices/cell=3,927  channels=3  avg_hops=17
+  class          offered     goodput  delivery   oversub   verdict
+  L1_control         2k       0.02k      1.0%      96.4x   COLLAPSE
+  L2_audio          64k       0.02k      0.0%    3085.7x   COLLAPSE
+  L3_video        1500k       0.02k      0.0%   72322.1x   COLLAPSE
+
+  T-B mesh + wired backbone   devices/cell=982  channels=11  avg_hops=1
+  class          offered     goodput  delivery   oversub   verdict
+  L1_control         2k       2.00k    100.0%       0.0x   OK
+  L2_audio          64k      64.00k    100.0%       0.3x   OK
+  L3_video        1500k     223.67k     14.9%       6.7x   DEGRADED
+
+==============================================================================
+DENSITY 1.0 people/m²   (500,000 people ⇒ 0.50 km² site)
+==============================================================================
+
+  T-A pure device mesh   devices/cell=7,854  channels=3  avg_hops=17
+  class          offered     goodput  delivery   oversub   verdict
+  L1_control         2k       0.01k      0.5%     192.9x   COLLAPSE
+  L2_audio          64k       0.01k      0.0%    6171.5x   COLLAPSE
+  L3_video        1500k       0.01k      0.0%  144644.2x   COLLAPSE
+
+  T-B mesh + wired backbone   devices/cell=1,963  channels=11  avg_hops=1
+  class          offered     goodput  delivery   oversub   verdict
+  L1_control         2k       2.00k    100.0%       0.0x   OK
+  L2_audio          64k      47.80k     74.7%       1.3x   DEGRADED
+  L3_video        1500k      47.80k      3.2%      31.4x   COLLAPSE
+
+==============================================================================
+DENSITY 2.0 people/m²   (500,000 people ⇒ 0.25 km² site)
+==============================================================================
+
+  T-A pure device mesh   devices/cell=15,708  channels=3  avg_hops=17
+  class          offered     goodput  delivery   oversub   verdict
+  L1_control         2k       0.01k      0.3%     385.7x   COLLAPSE
+  L2_audio          64k       0.01k      0.0%   12343.0x   COLLAPSE
+  L3_video        1500k       0.01k      0.0%  289288.3x   COLLAPSE
+
+  T-B mesh + wired backbone   devices/cell=3,927  channels=11  avg_hops=1
+  class          offered     goodput  delivery   oversub   verdict
+  L1_control         2k       2.00k    100.0%       0.5x   OK
+  L2_audio          64k       4.37k      6.8%      14.7x   COLLAPSE
+  L3_video        1500k       4.37k      0.3%     343.6x   COLLAPSE
+
+==============================================================================
+FAILURE THRESHOLDS — density (people/m²) at which each class stops being met
+==============================================================================
+  class            T-A pure mesh    T-B + backbone
+  L1_control              0.0775            2.3614
+  L2_audio                0.0123            0.8941
+  L3_video                0.0007            0.1380
+
+==============================================================================
+BLE MESH ENVELOPE CHECK (spec §1.2 B2)
+==============================================================================
+  density 0.5:    3,927 nodes in one flood domain → latency ~1500 ms, reliability ~80%   ⛔ OUTSIDE MEASURED ENVELOPE
+  density 1.0:    7,854 nodes in one flood domain → latency ~1500 ms, reliability ~80%   ⛔ OUTSIDE MEASURED ENVELOPE
+  density 2.0:   15,708 nodes in one flood domain → latency ~1500 ms, reliability ~80%   ⛔ OUTSIDE MEASURED ENVELOPE
+
+  Cross-site path needs ~17 hops; BLE practical hop limit is 6. ⛔ CROSS-SITE BLE MESH IS NOT REACHABLE.
+
+==============================================================================
+DECIMEN OPTICAL — AIRTIME FREED (spec §5)
+==============================================================================
+  density 0.5 T-A: control demand is 96.4x usable airtime — moving it optical removes a load the RF layer COULD NOT CARRY ANYWAY
+  density 0.5 T-B: control uses 0.9% of usable airtime; moving it optical frees exactly that much for audio/video
+  density 1.0 T-A: control demand is 192.9x usable airtime — moving it optical removes a load the RF layer COULD NOT CARRY ANYWAY
+  density 1.0 T-B: control uses 4.2% of usable airtime; moving it optical frees exactly that much for audio/video
+  density 2.0 T-A: control demand is 385.7x usable airtime — moving it optical removes a load the RF layer COULD NOT CARRY ANYWAY
+  density 2.0 T-B: control uses 45.8% of usable airtime; moving it optical frees exactly that much for audio/video
+  Optical link rate 1.02 Mbps, line-of-sight, one-to-one, human-mediated
+  ⇒ config/schedule: YES.  audio/video: NO — not modelled as a media path.
+
