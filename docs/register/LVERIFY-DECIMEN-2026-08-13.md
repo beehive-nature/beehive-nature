@@ -91,3 +91,31 @@ a build optimisation. **Whoever does the integration needs to know this before, 
 - [Releases — v0.3.0 latest, no v0.4.0](https://github.com/bashalarmistalt/decimen-optical-transfer/releases)
 - [Repository](https://github.com/bashalarmistalt/decimen-optical-transfer/)
 - [Maintained fork (licence UNVERIFIED)](https://github.com/tongatron/decimen-optical-transfer)
+
+---
+
+## ⚖️ RULED 2026-08-13 — HOLD LIFTED (Artist-First Fork Doctrine)
+
+**Seat 1 ruled BOTH paths, which is better than either:** fork **`main` (AGPL-3.0)** for
+active development, satisfying **§13 via a public source repo + an in-PWA source link**; keep
+**`v0.3.0` (MIT) frozen** on a secondary branch as the cutover if AGPL becomes untenable.
+**My hold is lifted — the licence posture is now a decision, which is exactly what the hold
+asked for.** The §13 approach is standard and sound, and the frozen branch removes the
+"no upstream fixes, ever" cost I flagged.
+
+**⚠ ONE CLAUSE NEEDS COUNSEL, AND IT IS THE OUTBOUND POLICY.** The ruling states artists
+*"are not required to open-source their art-money token code — only the transport layer."*
+**That is very likely right, and it is not ours to declare.** Copyleft scope is fixed by the
+licence and by **how the code is combined**, not by the distributor's policy:
+- **Arm's-length separation** — artist code in its own process/bundle, talking to the
+  transport over a defined interface — **is the strong position** and matches the intent.
+- **Linking artist code into the same binary or JS bundle as AGPL Decimen** is where the
+  boundary actually gets tested.
+
+**So the policy is sound as a DESIGN CONSTRAINT — "keep the transport at arm's length" — and
+unsafe as a PROMISE TO ARTISTS until counsel confirms it.** State it to artists only with the
+`DRAFT-FOR-COUNSEL` tag (SPEC-BLICENSE-0 §8). **You cannot policy your way out of a copyleft
+boundary; you can architect your way out, and this architecture plausibly does.**
+
+**Still unverified, unchanged:** `tongatron/decimen-optical-transfer`'s licence, and every
+non-licence claim in the action list.

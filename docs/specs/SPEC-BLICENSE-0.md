@@ -39,12 +39,14 @@ it does not, **the artist is told plainly that it is a request.**
 | **ccREL / schema.org** | machine-readable `license` field pointing at the immutable license URI, so crawlers, wallets and AI training filters can read terms without parsing prose | web-standard, no chain dependency |
 | **C2PA** | a **declared manifest**: manifest store → claims → assertions, cryptographically signed; assertions are extensible, so the BNR license reference rides as a custom assertion | spec **v2.3** (2025-12 / doc dated 2026-01-05); v2.4 published |
 
-**⚠ THE DISPATCH CITES AN "EXISTING PROVENANCE RULING" FOR C2PA. I CANNOT FIND IT.** No
-C2PA reference exists anywhere in `docs/`. **This spec therefore incorporates C2PA on the
-dispatch's word, not on a ruling I could read** — flagged rather than silently treated as
-settled, because that is exactly the CD-13/CD-29 identifier problem one level up. **If the
-ruling exists, cite its path and this line comes out; if it does not, C2PA needs ruling
-before §5 is built.**
+**⚠ THE C2PA RULING — HALF-CLOSED 2026-08-13, AND THE HALF THAT MATTERS IS STILL OPEN.**
+The ruling **exists** (voice-loop decision 8, 2026-08-12) and now has a docs-side home:
+[`RULING_C2PA_PROVENANCE_2026-08-12.md`](../dispatches/RULING_C2PA_PROVENANCE_2026-08-12.md),
+registered as **VERIFIED-FACTS A54**. **That closes the DANGLING CITATION.** It does **not**
+close the substantive gap: **the ruling's terms live in the chat ledger and remain unread**,
+so **this spec still incorporates C2PA on report rather than on text I could check against.**
+**§1 is therefore UNVERIFIED-AGAINST-THE-RULING until someone transcribes it.** Do not read
+the new file as a source for what the ruling says — it deliberately contains no clauses.
 
 ## §2 — WHAT IS MODELLED (not copied)
 
@@ -137,9 +139,37 @@ clause becomes unenforceable — **it needs a definition before it appears in §
 - **Spec only. No architecture, no contracts, no UI.**
 - **No royalty percentages, no platform-cut numbers, no fee constants** — those are
   tokenomics and remain behind the standing gate. **No constant appears in this document.**
-- **No jurisdiction selected.** Story's PIL builds on US copyright law and leans on the Berne
-  Convention for international recognition; **whether BNR follows that choice is a founder +
-  counsel decision, not a drafting one.**
+- ~~No jurisdiction selected.~~ **CLOSED 2026-08-13 — see §8.**
+
+## §8 — JURISDICTION (RULED 2026-08-13, closes the §7 gap)
+
+**Governing law: WYOMING. Dispute resolution: BINDING ARBITRATION.**
+**Every artist-facing surface carries a `DRAFT-FOR-COUNSEL` tag until counsel signs off.**
+
+**⚠ WYOMING GOVERNS THE CONTRACT, NOT THE COPYRIGHT — and the distinction is load-bearing.**
+Copyright **ownership, validity and infringement** are matters of **national** law (in the
+US, the Copyright Act; internationally, Berne). **A choice-of-law clause cannot move them.**
+So Wyoming law governs *interpretation and enforcement of the licence agreement*; it does
+**not** determine whether the artist owns the work or whether a use infringes. **Drafting must
+not imply otherwise**, or the licence promises a reach it does not have — the same defect
+class as §0's royalty signal.
+
+**⚠ BINDING ARBITRATION — ONE FLAG FOR COUNSEL AND SEAT 1, THEN I DROP IT.** Arbitration is a
+normal commercial choice and it is ruled. Two things should be seen rather than discovered:
+1. **It removes the artist's access to courts and to class actions.** Under a doctrine whose
+   first sentence is *"the law exists to protect the artist,"* that is worth being a
+   deliberate trade rather than an inherited default.
+2. **Enforceability is not uniform.** Mandatory consumer arbitration faces limits in the EU
+   and in some US state consumer-protection regimes. **For a global artist base, the clause
+   may simply not bind some of them** — which counsel should scope, and which the drafting
+   should not assume away.
+
+**`DRAFT-FOR-COUNSEL` TAG — the rule, so it cannot quietly lapse:** the tag appears on
+**every artist-facing rendering of licence text** — onboarding UI, terms preview, exported
+PDF, the machine-readable `license_text_ref` target. **It is removed only by the counsel
+sign-off that makes it false**, never by a UI cleanup pass. **An untagged draft is
+indistinguishable from a reviewed licence to the artist reading it**, which is the whole
+reason the tag exists.
 
 ## COMPLICATIONS
 
@@ -150,8 +180,9 @@ royalty field without showing where it is honoured, **BNR has made a promise the
 cannot keep.**
 
 **C2 — Three flagged gaps, none of which I closed by guessing:** the C2PA "existing
-provenance ruling" I could not find (§1); **VIB undefined** (§6); jurisdiction unselected
-(§7).
+provenance ruling" (§1) — **now a POINTER record only, terms still unread**
+(`RULING_C2PA_PROVENANCE_2026-08-12.md`, VERIFIED-FACTS A54); **VIB still undefined** (§6);
+**jurisdiction CLOSED** by §8.
 
 **C3 — §4's immutability interacts with the right to be forgotten and with takedown
 obligations.** An immutable on-chain license pointing at permanent storage **cannot be
