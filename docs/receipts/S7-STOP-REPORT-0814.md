@@ -86,3 +86,30 @@ Downloads workspace did, and does.
 
 *Seat 3, 2026-08-14. Tree head at write time: `cee0f17` (origin/main, level). The
 Downloads workspace was read only — nothing in it was modified, compiled, or committed.*
+
+## RESOLUTION — 2026-08-14, same day (fix-forward addendum; nothing above rewritten)
+
+Seat-1 dispatch (from ledger) resolved the escalation:
+
+- **Superseding directive = founder tithe ruling 2026-08-13: 100% ARTIST, FINAL.**
+- `Downloads\bnri-contracts` is a **pre-ruling dead draft** — its 80-DAO/20-FOUNDER
+  split matches no ledger ruling; the "80/18/2" comment described a protocol-fee
+  split, never LP fees.
+- Downloads-sweep correction accepted of record.
+
+**Disposition executed by this seat, as ordered:** both draft contracts moved to
+`Downloads\bnri-contracts\attic\pre-ruling-drafts\` (out of Foundry's `src/` build
+path) with DEPRECATED headers citing the superseding ruling; historical MIT SPDX
+lines left untouched (a fact of the draft, not a signal to prettify); neither file
+deleted. Verified after the move: nothing in `src/`, `test/`, or `script/`
+references either contract (the deploy script imports `Bnri.sol` only), so the
+workspace stays coherent with the drafts dead. One loose end, observed not acted
+on (not ordered): the stale compiled artifact
+`out/BNRiV3PermaLock.sol/BNRiV3PermaLock.json` from the 07-29 build still exists —
+it is generated cache and dies on the next `forge build`/`forge clean`.
+
+**Lane state:** Ground 2 CLEARED by founder word. Ground 1 (spec absence) still
+open at this writing — `docs/specs/SPEC-S7-BNRIV3PERMALOCK.md` announced as
+arriving on origin/main via Cowork; not present as of the fetch stamped below.
+Build proceeds the moment it lands, as dispatched: one file, one contract,
+AGPL-3.0-only SPDX, 0.8.25/shanghai, §3 surface, §5 tests T-1..T-6, testnet only.
