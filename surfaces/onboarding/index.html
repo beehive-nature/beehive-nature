@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BNR · Get started</title>
+<!--
+  BNR ONBOARDING WIZARD — beta-test preview.
+  Self-contained, ZERO network (tokens inlined, system fonts, no fetch) so it runs
+  offline / at festival-mesh scale and opens from file:// on any device.
+
+  Design: docs/tokens.css (embedded verbatim) + DESIGN-BRIEF-01 gauge law.
+  Ladder: the 8e FULL SURFACE — every custody option that passes the
+    10^10 / 1000yr / offline-mesh filter is offered, none elected (founder ruling
+    2026-08-14). Passkey · optical air-gap (free hardware custody, decimen) ·
+    security key · Trezor — climb anytime, identity never changes.
+  Patterns: authentik flows/stages (RAID_AUTHENTIK_IDP_PATTERNS) — one screen per
+    stage, re-entrant remediation, confirm-before-activate recovery, designation.
+  Preview note: auth steps SIMULATE in a sandbox; real WebAuthn/optical/USB when
+    served from wallet-relay. The self-funded model shows a ZERO balance at the end
+    ("earn b through participation") — never a fake starter balance.
+-->
+<style>
+/* ==== docs/tokens.css (embedded verbatim — source of law) ==== */
+:root{color-scheme:dark light;--flow:90deg;--hatch:45deg;
+--ai:#45C2DC;--ai-deep:#57CDE4;--biomass:#86CC72;--sovereign:#9C6FD6;--sovereign-soft:#B79FE0;--you:#D655BB;
+--rainbow:linear-gradient(var(--flow),#FBFB9F,#86CC72,#45C2DC,#6FA9E0,#9C6FD6);
+--primary:var(--you);--info:#6FA9E0;--verified:var(--biomass);--guard:#B7A8F7;--b-value:#E8B54B;
+--bg:#06110C;--bg-card:#0C1412;--ink:#E9F2EC;--ink-mut:#8FA79C;--ink-dim:#648176;--line:#1E2B26;
+--font-ui:ui-sans-serif,system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+--font-mono:ui-monospace,"Cascadia Mono","SF Mono",Menlo,Consolas,monospace;
+--s1:6px;--s2:12px;--s3:18px;--s4:24px;--s5:36px;--s6:48px;--radius:12px;--radius-pill:999px;}
+[dir="rtl"]{--flow:270deg;--hatch:135deg;}:dir(rtl){--flow:270deg;--hatch:135deg;}
+@media (prefers-color-scheme:light){:root{--bg:#FBF7F0;--bg-card:#FFFFFF;--ink:#1C1A17;--line:#E7E1D6;
+--ink-mut:#67756D;--ink-dim:#6A736E;--ai:#2B7A8B;--ai-deep:#2B7A8B;--biomass:#527C46;--sovereign:#865FB8;
+--sovereign-soft:#865FB8;--you:#B4479D;--info:#4D759B;--verified:#527C46;--guard:#736A9C;}}
+
+/* ==== component styles ==== */
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--font-ui);
+  -webkit-font-smoothing:antialiased;line-height:1.5}
+body{min-height:100dvh;display:flex;flex-direction:column;align-items:center;
+  padding:max(var(--s3),env(safe-area-inset-top)) var(--s3) var(--s3)}
+.stage{width:100%;max-width:29rem;flex:1;display:flex;flex-direction:column}
+a{color:var(--info)}
+h1{font-size:1.6rem;line-height:1.2;margin:0 0 var(--s2)}
+h2{font-size:1.25rem;margin:0 0 var(--s1)}
+p{margin:0 0 var(--s3);color:var(--ink-mut)}
+.muted{color:var(--ink-dim);font-size:.85rem}
+.mono{font-family:var(--font-mono)}
+
+/* top rail: brand + network state + language */
+.top{width:100%;max-width:29rem;display:flex;align-items:center;gap:var(--s2);
+  margin-block-end:var(--s5)}
+.mark{width:26px;height:26px;border-radius:8px;background:var(--rainbow);flex:none;
+  box-shadow:0 0 0 1px var(--line)}
+.brand{font-weight:700;letter-spacing:.02em}
+.spacer{flex:1}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:.72rem;font-weight:600;
+  padding:5px 10px;border-radius:var(--radius-pill);border:1px solid var(--line);
+  background:var(--bg-card);color:var(--ink-mut);cursor:pointer;min-height:32px}
+.chip .dot{width:7px;height:7px;border-radius:50%;background:var(--verified)}
+.chip.off .dot{background:var(--guard)}
+select.lang{font:inherit;font-size:.72rem;background:var(--bg-card);color:var(--ink-mut);
+  border:1px solid var(--line);border-radius:var(--radius-pill);padding:5px 8px;min-height:32px}
+
+/* progress dots (designation-aware) */
+.rail{display:flex;align-items:center;gap:8px;margin-block-end:var(--s4);flex-wrap:wrap}
+.badge{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+  padding:3px 8px;border-radius:var(--radius-pill);border:1px solid var(--line);color:var(--ink-mut)}
+.badge.desig{color:var(--sovereign-soft);border-color:color-mix(in srgb,var(--sovereign) 40%,var(--line))}
+.dots{display:flex;gap:6px;margin-inline-start:auto}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--line);transition:background .2s}
+.dots i.on{background:var(--primary)}
+.dots i.done{background:var(--verified)}
+
+/* buttons */
+.btn{appearance:none;font:inherit;font-weight:650;width:100%;min-height:52px;
+  border-radius:var(--radius);border:1px solid transparent;cursor:pointer;
+  padding:0 var(--s3);display:flex;align-items:center;justify-content:center;gap:10px;
+  margin-block-end:var(--s2);transition:transform .06s,filter .15s}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:var(--primary);color:#150512;border:none}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.ghost:hover{border-color:var(--ink-dim)}
+.btn.link{background:none;border:none;color:var(--info);min-height:44px;width:auto;
+  margin:0 auto;text-decoration:underline;text-underline-offset:3px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+
+/* custody cards — the 8e full surface */
+.card{display:flex;gap:var(--s3);align-items:flex-start;text-align:start;
+  background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:var(--s3);margin-block-end:var(--s2);cursor:pointer;width:100%;
+  min-height:52px;transition:border-color .15s}
+.card:hover{border-color:var(--ink-dim)}
+.card:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.card .ic{width:38px;height:38px;border-radius:10px;flex:none;display:grid;place-items:center;
+  font-size:1.15rem;background:color-mix(in srgb,var(--sovereign) 14%,transparent)}
+.card.free .ic{background:color-mix(in srgb,var(--biomass) 16%,transparent)}
+.card .body{flex:1;min-width:0}
+.card .t{font-weight:650;color:var(--ink);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card .d{font-size:.85rem;color:var(--ink-mut);margin-block-start:3px}
+.cost{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:var(--radius-pill);
+  border:1px solid var(--line);color:var(--ink-mut);white-space:nowrap}
+.cost.free{color:var(--verified);border-color:color-mix(in srgb,var(--biomass) 40%,var(--line))}
+.tag{font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+  color:var(--sovereign-soft)}
+
+/* panels / honest states */
+.panel{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:var(--s3);margin-block-end:var(--s3)}
+.words{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s2);
+  font-family:var(--font-mono);margin-block:var(--s2)}
+.words span{background:var(--bg);border:1px solid var(--line);border-radius:8px;
+  padding:10px 8px;font-size:.9rem}
+.words span b{color:var(--ink-dim);font-weight:400;font-size:.7rem;margin-inline-end:6px}
+.wordin{width:100%;font:inherit;font-family:var(--font-mono);background:var(--bg);color:var(--ink);
+  border:1px solid var(--line);border-radius:8px;padding:12px;min-height:48px;margin-block-end:var(--s2)}
+.wordin:focus{outline:2px solid var(--primary);outline-offset:1px;border-color:var(--primary)}
+
+/* the honey b chip — b amounts ONLY, dark chip only (tokens.css law) */
+.bchip{display:inline-flex;align-items:baseline;gap:6px;background:#0A0A0A;
+  border:1px solid color-mix(in srgb,var(--b-value) 30%,var(--line));border-radius:var(--radius);
+  padding:14px 18px}
+.bchip b{color:var(--b-value);font-size:2rem;font-weight:750;font-family:var(--font-mono)}
+.bchip span{color:var(--ink-dim)}
+
+/* gauge states (DESIGN-BRIEF-01 §6) */
+.gauge{display:flex;align-items:center;gap:8px;font-size:.82rem;padding:8px 0}
+.gauge .s{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+  padding:2px 7px;border-radius:6px}
+.g-known .s{color:var(--verified);border:1px solid color-mix(in srgb,var(--biomass) 40%,var(--line))}
+.g-stale .s{color:var(--ink-mut);border:1px dashed var(--ink-dim)}
+.g-absent .s{color:var(--guard);border:1px solid color-mix(in srgb,var(--guard) 45%,var(--line))}
+
+/* optical (decimen) mock */
+.qr{width:190px;height:190px;margin:var(--s2) auto;border-radius:var(--radius);
+  border:1px solid var(--line);background:
+    repeating-conic-gradient(var(--ink) 0 25%, var(--bg) 0 50%);
+  background-size:22px 22px;animation:flick .18s steps(2) infinite;
+  box-shadow:0 0 0 8px var(--bg-card)}
+@keyframes flick{50%{filter:invert(1)}}
+
+/* spinner */
+.spin{width:36px;height:36px;border-radius:50%;border:3px solid var(--line);
+  border-top-color:var(--primary);animation:sp 1s linear infinite;margin:var(--s4) auto}
+@keyframes sp{to{transform:rotate(360deg)}}
+.center{text-align:center}
+.grow{flex:1}
+.foot{width:100%;max-width:29rem;margin-block-start:var(--s4);padding-block-start:var(--s3);
+  border-top:1px solid var(--line);color:var(--ink-dim);font-size:.72rem;text-align:center}
+.hide{display:none!important}
+@media (prefers-reduced-motion:reduce){.qr,.spin{animation:none}}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <span class="mark" aria-hidden="true"></span>
+  <span class="brand">BNR</span>
+  <span class="spacer"></span>
+  <button class="chip" id="net" onclick="APP.toggleNet()" title="Works with or without a network">
+    <span class="dot"></span><span id="net-t">Online</span>
+  </button>
+  <select class="lang" id="lang" onchange="APP.setLang(this.value)" aria-label="Language">
+    <option value="en">EN</option><option value="es">ES</option><option value="pt">PT</option>
+    <option value="fr">FR</option><option value="de">DE</option><option value="ar">العربية ‏</option>
+    <option value="zh">简体</option><option value="hi">हिन्दी</option>
+  </select>
+</div>
+
+<main class="stage" id="stage"><!-- screens injected here --></main>
+
+<div class="foot">
+  UX preview · zero-network by construction · auth steps here are <b>SIMULATED, labeled
+  honestly</b> (house law: PLANNED/REFUSED, never mock) — they bind real when served from
+  <span class="mono">wallet-relay</span>. Seat prepares UNSIGNED only; no key ever enters this page.
+</div>
+
+<script>
+"use strict";
+/* ===========================================================================
+   Ceremony state machine. Each screen is a typed stage; advancing carries a
+   small context object forward — the serialization-boundary shape from
+   RAID_AUTHENTIK §18 (component + payload), so the same machine could drive a
+   TUI, a phone, or an optical/paper packet, not just this DOM renderer.
+   =========================================================================== */
+const APP = {
+  ctx:{ designation:"first-join", online:true, custody:null, remediated:false },
+  hist:[],
+
+  go(screen, keep){ if(keep!==false) this.hist.push(this.current); this.current=screen; render(screen); },
+  back(){ const s=this.hist.pop(); if(s){ this.current=s; render(s); } },
+
+  toggleNet(){ this.ctx.online=!this.ctx.online;
+    const on=this.ctx.online;
+    document.getElementById('net').classList.toggle('off',!on);
+    document.getElementById('net-t').textContent = on?'Online':'Offline · mesh';
+    // re-render custody so the offline-native option is highlighted
+    if(this.current==='custody') render('custody');
+  },
+  setLang(v){ document.documentElement.setAttribute('dir', v==='ar'?'rtl':'ltr'); },
+};
+
+/* --- the 8e full surface: every option that clears the filter, none elected.
+   Names match Design's wallet MVP ladder (LARVA/PUPA/BEE/ROYAL GUARD, T-F/T-H
+   seam) + the optical air-gap rung ruled in 2026-08-14 (free hardware custody,
+   RAID_DECIMEN use-case 1). --- */
+const LADDER = [
+  { id:'passkey', ic:'🔑', free:true, rung:'🐛 LARVA · T-F', title:'This device',
+    cost:'Free', tag:'Passkey',
+    desc:'Face / fingerprint / Windows Hello. Your key lives on this device — nothing to buy, nothing to carry.' },
+  { id:'optical', ic:'📷', free:true, rung:'AIR-GAP · T-H-grade', title:'A spare phone',
+    cost:'Free', tag:'Optical signer',
+    desc:'Pair a second phone as an offline signer — keys travel as light, never over a network. Hardware-grade custody at zero cost. Works with no signal at all.' },
+  { id:'key', ic:'🛡️', free:false, rung:'🛡 PUPA · T-F roaming', title:'A security key',
+    cost:'~$25', tag:'FIDO2 + code',
+    desc:'A tap-to-sign key you carry (YubiKey, SoloKey) plus a backup code. Portable hardware backing.' },
+  { id:'trezor', ic:'🔒', free:false, rung:'🐝 BEE · T-H', title:'A Trezor',
+    cost:'~$79', tag:'Hardware custody',
+    desc:'Keys never leave the device; every signature confirmed on its own screen. Grows into ROYAL GUARD (granted-set firmware) later.' },
+];
+
+/* --- copy per stage; kept declarative so localization is a table swap --- */
+const SCREENS = {
+
+  welcome(){ return `
+    <div class="grow">
+      <span class="badge desig">First join</span>
+      <h1 style="margin-top:var(--s4)">Your keys. Your resources.<br>No one in between.</h1>
+      <p>Start free in this browser. No account, no app, no one holding anything for you.
+         Add stronger custody whenever you like — your identity never changes.</p>
+    </div>
+    <button class="btn primary" onclick="APP.go('custody')">Start free →</button>
+    <button class="btn link" onclick="APP.go('custody')">I have a key, a Trezor, or a spare phone</button>
+  `; },
+
+  custody(){
+    const offline = !APP.ctx.online;
+    const cards = LADDER.map(o=>{
+      const nudge = (o.id==='optical' && offline)
+        ? `<div class="tag" style="margin-top:6px">✓ works right now — no network needed</div>` : '';
+      return `
+      <button class="card ${o.free?'free':''}" onclick="APP.pick('${o.id}')">
+        <span class="ic">${o.ic}</span>
+        <span class="body">
+          <span class="t">${o.title}
+            <span class="cost ${o.free?'free':''}">${o.cost}</span></span>
+          <span class="d">${o.desc}</span>
+          <span class="tag" style="display:block;margin-top:6px">${o.tag} · ${o.rung}</span>
+          ${nudge}
+        </span>
+      </button>`;
+    }).join('');
+    return `
+      ${railHTML(1)}
+      <h2>Choose how you hold your keys</h2>
+      <p>Every option below is fully sovereign — pick what fits today.
+         ${offline?'<b style="color:var(--verified)">Offline right now</b>, so the spare-phone path is your fastest.':'You can climb the ladder later without re-doing anything.'}</p>
+      ${cards}
+      <p class="muted" style="margin-top:var(--s2)">More custody = more sovereignty. You keep the same wallet and the same identity at every rung — this is a climb, not a restart.</p>
+    `;
+  },
+
+  /* passkey ceremony (real WebAuthn attempted, simulated on failure) */
+  passkey(){ return stageWrap(2, `
+    <h2>Create your passkey</h2>
+    <p>Your device makes a key only it can use, unlocked by your face or fingerprint.
+       BNR never sees it.</p>
+    <button class="btn primary" onclick="APP.doPasskey(this)">Use Face / Touch / Hello</button>
+    <button class="btn link" onclick="APP.go('custody')">← Pick a different method</button>
+  `); },
+
+  /* re-entrant remediation — authentik's killer move: you can't pass the gate
+     yet, here is the sub-ceremony that lets you. Offered as a CHOICE. */
+  remediate(kind){
+    const label = kind==='key' ? 'a security key' : 'a Trezor';
+    return stageWrap(2, `
+      <span class="badge" style="color:var(--guard);border-color:color-mix(in srgb,var(--guard) 45%,var(--line))">Nothing plugged in</span>
+      <h2 style="margin-top:var(--s3)">No ${label} detected</h2>
+      <p>That's fine — you don't have to buy anything to be secure right now.
+         Choose how to continue:</p>
+      <button class="btn primary" onclick="APP.remediateTo('optical')">
+        📷 Use a spare phone instead — free hardware custody
+      </button>
+      <button class="btn ghost" onclick="APP.remediateTo('passkey')">
+        🔑 Start with this device's passkey (add ${label} later)
+      </button>
+      <button class="btn link" onclick="APP.go('custody')">← Back to all options</button>
+      <p class="muted" style="margin-top:var(--s3)">You can always add ${label} later — the same wallet just gains a stronger lock.</p>
+    `);
+  },
+
+  /* optical air-gap (decimen) — animated-QR concept */
+  optical(){ return stageWrap(2, `
+    <h2>Pair your spare phone</h2>
+    <p>Open BNR on a second phone (even in airplane mode) and point its camera here.
+       The key crosses as light — never over any network.</p>
+    <div class="qr" role="img" aria-label="Animated pairing pattern"></div>
+    <div class="center muted">Streaming pairing request · point the other camera at this</div>
+    <button class="btn primary" style="margin-top:var(--s3)" onclick="APP.opticalDone()">
+      Other phone confirmed it ✓
+    </button>
+    <button class="btn link" onclick="APP.go('custody')">← Pick a different method</button>
+    <p class="muted" style="margin-top:var(--s3)">Nothing secret is on this screen — only a request to pair. The spare phone signs; its key never leaves it.</p>
+  `); },
+
+  /* generic hardware (key / trezor) success path once "present" */
+  hardware(kind){ const l = kind==='key'?'security key':'Trezor';
+    return stageWrap(2, `
+    <h2>Confirm on your ${l}</h2>
+    <p>Touch your ${l} to prove it's you. The signing key stays on the device.</p>
+    <button class="btn primary" onclick="APP.hardwareDone()">I tapped my ${l}</button>
+    <button class="btn link" onclick="APP.go('custody')">← Pick a different method</button>
+  `); },
+
+  /* recovery — confirm-before-activate (authentik static-code pattern +
+     the written-code FLOOR: the one path a person with a single device has). */
+  recovery(){
+    const words = APP._words = genWords();
+    const grid = words.map((w,i)=>`<span><b>${i+1}</b>${w}</span>`).join('');
+    return stageWrap(3, `
+      <h2>Write down your recovery phrase</h2>
+      <p>These 12 words can rebuild your wallet on any device if you lose this one.
+         Write them on paper — this is the one backup that needs nothing you have to buy.</p>
+      <div class="words">${grid}</div>
+      <button class="btn primary" onclick="APP.go('confirm')">I've written them down</button>
+      <p class="muted">Nothing is saved until you confirm you have them — displaying them is not enough.</p>
+    `);
+  },
+  confirm(){
+    const idx = APP._ask = pick3(APP._words.length);
+    return stageWrap(3, `
+      <h2>Confirm your phrase</h2>
+      <p>Type words <b>${idx.map(i=>i+1).join('</b>, <b>')}</b> to prove you saved them.</p>
+      <input class="wordin" id="w0" placeholder="word ${idx[0]+1}" autocomplete="off" autocapitalize="none">
+      <input class="wordin" id="w1" placeholder="word ${idx[1]+1}" autocomplete="off" autocapitalize="none">
+      <input class="wordin" id="w2" placeholder="word ${idx[2]+1}" autocomplete="off" autocapitalize="none">
+      <div id="cf-err" class="muted" style="color:var(--guard);min-height:1.2em"></div>
+      <button class="btn primary" onclick="APP.checkPhrase()">Confirm</button>
+      <button class="btn link" onclick="APP.back()">← See the phrase again</button>
+    `);
+  },
+
+  /* identity creation — honest progress, no fake speed */
+  creating(){ setTimeout(()=>APP.go('ready',false), 1500); return `
+    <div class="grow center" style="display:flex;flex-direction:column;justify-content:center">
+      <div class="spin"></div>
+      <h2>Creating your identity</h2>
+      <p>Writing your <span class="mono">did:webvh</span> and anchoring it to permanent storage.</p>
+      <div class="panel" style="text-align:start">
+        <div class="gauge g-known"><span class="s">Done</span> Keypair bound to your ${custodyLabel()}</div>
+        <div class="gauge g-known"><span class="s">Done</span> Recovery phrase floor set</div>
+        <div class="gauge g-stale"><span class="s">Working</span> Anchoring identity record…</div>
+      </div>
+    </div>`;
+  },
+
+  /* wallet ready — ZERO balance, self-funded (earn through participation) */
+  ready(){ return `
+    <div class="grow">
+      <span class="badge desig">You're in</span>
+      <h1 style="margin-top:var(--s4)">Your wallet is ready</h1>
+      <p>Held by your ${custodyLabel()}. Nobody else can touch it — including us.</p>
+
+      <div class="center" style="margin-block:var(--s4)">
+        <div class="bchip"><b>0</b><span>b</span></div>
+        <div class="muted" style="margin-top:var(--s2)">Earn <b style="color:var(--b-value)">b</b> through participation — no one funds you, and no one gates you.</div>
+      </div>
+
+      <div class="panel">
+        <div class="gauge g-known"><span class="s">Known</span> Identity anchored · <span class="mono">did:webvh</span></div>
+        <div class="gauge g-known"><span class="s">Known</span> Custody · ${custodyLabel()}</div>
+        <div class="gauge g-absent"><span class="s">Absent</span> Balances — connect a rail to read (none faked)</div>
+      </div>
+
+      <p class="muted">Climb anytime: add a spare phone, a key, or a Trezor. Same wallet, same you — the lock just gets stronger.</p>
+    </div>
+    <button class="btn primary" onclick="alert('→ hands off to the dashboard surface (crates/wallet-relay/src/dashboard.html)')">Enter dashboard →</button>
+    <button class="btn link" onclick="APP.restart()">Start the walkthrough over</button>
+  `; },
+};
+
+/* ---------- behaviors ---------- */
+APP.pick = function(id){
+  this.ctx.custody = id;
+  if(id==='passkey') return this.go('passkey');
+  if(id==='optical') return this.go('optical');
+  if(id==='key' || id==='trezor'){
+    // simulate device-absent to demonstrate re-entrant remediation ~half the time,
+    // OR when offline (a USB key/Trezor flow needs this device; the honest nudge is optical).
+    if(!this.ctx.online || Math.random()<0.6){ this.ctx.remediated=true; return this.go('remediate',true), render('remediate'), this._rk=id; }
+    return this.go('hardware'), render(()=>SCREENS.hardware(id)), this._rk=id;
+  }
+};
+APP.remediateTo = function(to){
+  this.ctx.custody = to; this.ctx.remediated = true;
+  if(to==='optical') return this.go('optical');
+  return this.go('passkey');
+};
+APP.doPasskey = async function(btn){
+  btn.disabled=true; btn.textContent='Waiting for your device…';
+  let ok=false, mode='simulated';
+  try{
+    if(window.PublicKeyCredential && location.protocol!=='file:'){
+      // real attempt; harmless preview options
+      await navigator.credentials.create({ publicKey:{
+        challenge:new Uint8Array(32), rp:{name:'BNR'},
+        user:{id:new Uint8Array(16),name:'you@bnr',displayName:'You'},
+        pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
+        authenticatorSelection:{userVerification:'preferred'}, timeout:60000 }});
+      ok=true; mode='real';
+    }
+  }catch(e){ ok=false; }
+  // In a sandbox / file:// / user-cancel we proceed with a clearly-simulated pass,
+  // because this preview is about the FLOW; production refuses on real failure.
+  this.ctx.authMode = ok?mode:'simulated';
+  this.go('recovery');
+};
+APP.opticalDone = function(){ this.ctx.authMode='optical-air-gap'; this.go('recovery'); };
+APP.hardwareDone = function(){ this.ctx.authMode='hardware'; this.go('recovery'); };
+APP.checkPhrase = function(){
+  const got=[0,1,2].map(i=>document.getElementById('w'+i).value.trim().toLowerCase());
+  const want=this._ask.map(i=>this._words[i]);
+  if(got.every((g,i)=>g===want[i])){ this.go('creating'); }
+  else document.getElementById('cf-err').textContent='Those don’t match your phrase — check the numbers and try again.';
+};
+APP.restart = function(){ this.ctx={designation:'first-join',online:this.ctx.online,custody:null,remediated:false}; this.hist=[]; this.go('welcome',false); };
+
+/* ---------- render helpers ---------- */
+function railHTML(step){ return `
+  <div class="rail">
+    <span class="badge desig">First join</span>
+    <span class="muted">Later: recover · add device · rotate — same you</span>
+    <span class="dots" aria-hidden="true">
+      ${[1,2,3].map(n=>`<i class="${n<step?'done':n===step?'on':''}"></i>`).join('')}
+    </span>
+  </div>`; }
+function stageWrap(step, inner){ return `${railHTML(step)}<div class="grow">${inner}</div>`; }
+function custodyLabel(){
+  const m={passkey:'this device’s passkey',optical:'a paired spare phone (offline signer)',
+    key:'a security key',trezor:'a Trezor'};
+  return m[APP.ctx.custody]||'this device';
+}
+function genWords(){ const bank=['anchor','honey','mesh','sovereign','light','ember','river','cedar',
+  'quartz','meadow','signal','harbor','lantern','thistle','cobalt','aurora','pollen','ridge','fathom','willow'];
+  const out=[]; for(let i=0;i<12;i++) out.push(bank[Math.floor(Math.random()*bank.length)]); return out; }
+function pick3(n){ const s=new Set(); while(s.size<3) s.add(Math.floor(Math.random()*n)); return [...s].sort((a,b)=>a-b); }
+
+function render(screen){
+  const html = typeof screen==='function' ? screen() : SCREENS[screen]();
+  const el=document.getElementById('stage'); el.innerHTML=html; el.scrollTop=0;
+  window.scrollTo(0,0);
+}
+APP.current='welcome';
+render('welcome');
+</script>
+</body>
+</html>
