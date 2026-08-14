@@ -132,7 +132,7 @@ This means: **a browser light client reads chain state from AR/ANT permanent sto
 - All crypto in Rust/WASM. No JS signing code. One codebase, one audit.
 - Never hard-code a gateway. Multi-gateway fallback list.
 - Keys never on the server. Browser IndexedDB for Tier 1 encrypted key storage.
-- The `onboarding` crate (ceremony/gates/ladder/probe/viewmodel/render) already exists — wire the Leptos UI to consume `viewmodel.rs` directly.
+- CORRECTED 2026-08-14 (Seat 3): the `onboarding` crate's ceremony/gates/ladder/probe/viewmodel/render modules DO NOT EXIST (phantom — see DESIGN-BRIEF-03 §5 correction). What exists is `crates/onboarding` (custody/enrolment/age primitives, 913 lines). The wizard engine is a greenfield build; pattern it per RAID_AUTHENTIK_IDP_PATTERNS before wiring Leptos to anything.
 
 ### A3 — Trezor WebUSB integration (Phase 3, spec now)
 

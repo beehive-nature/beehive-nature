@@ -82,7 +82,11 @@ impl RailAdapter for HiveAdapter {
 // === Vaulta ===
 
 pub struct VaultaAdapter { base_url: String }
-impl Default for VaultaAdapter { fn default() -> Self { Self { base_url: "https://wax.eosrio.io".into() } } }
+// Default CORRECTED 2026-08-14: was https://wax.eosrio.io, which is the WAX chain
+// (chain_id 1064487b...), not Vaulta — every default-config read queried the wrong
+// blockchain. eos.greymass.com serves Vaulta mainnet (chain_id aca376f2...,
+// cross-confirmed live against eos.eosphere.io, the repo's second b-domain oracle).
+impl Default for VaultaAdapter { fn default() -> Self { Self { base_url: "https://eos.greymass.com".into() } } }
 impl VaultaAdapter {
     pub fn with_url(url: impl Into<String>) -> Self { Self { base_url: url.into() } }
 

@@ -40,7 +40,7 @@ One web-based surface with three custody tiers. The user starts free in a browse
 | **Wallet** | Self-funded — zero initial balance. No Vaulta account needed (that is what "free" means). User earns b through participation. No subsidy, ever. |
 | **Capabilities** | Read balances (all chains), basic send/receive, spend-view (aggregate + itemized per adapter) |
 | **Ladder** | L1/L2 |
-| **Rust crate** | `webauthn-rs` for passkey creation/verification; `bip39` + `hdwallet` for seed derivation; existing `onboarding` crate's ceremony/gates/ladder/viewmodel |
+| **Rust crate** | `webauthn-rs` for passkey creation/verification; `bip39` + `hdwallet` for seed derivation; `crates/onboarding` (custody/enrolment/age primitives — the wizard engine itself is greenfield, see §5 correction) |
 
 ### Tier 2 — Intermediate (Funded, Hardware-backed)
 
@@ -121,7 +121,7 @@ Tier 3+ (Trezor + biometric)
 ### Why Leptos
 
 - **One language, one audit.** The signing logic is already in Rust (`bsigner`, `adapter-arweave`, per-chain crates). Leptos compiles the same Rust to WASM for the browser. No JS rewrite of crypto-critical code. No second implementation to drift.
-- **The onboarding crate already has `viewmodel.rs` (921 lines) and `render.rs` (425 lines).** These model the wizard state machine. Leptos consumes them directly — the view model drives reactive UI without a translation layer.
+- **The wizard view-model/renderer do not exist yet** (§5 correction, 2026-08-14): the previously cited `viewmodel.rs`/`render.rs` are phantom. The plan stands as DESIGN, not as reuse — build the view model as the serialization-boundary challenge protocol patterned in RAID_AUTHENTIK_IDP_PATTERNS §18, and have Leptos consume that.
 - **SSR + WASM hydration.** Fast initial paint (server-rendered HTML), reactive updates (WASM). Important for 10B-user scale: the server renders, the client hydrates.
 - **Mature enough for production.** Leptos 0.7+ is stable, used in production by several companies.
 
@@ -198,17 +198,25 @@ Gated behind Tier 3 auth (Trezor connected). Browser shows: "Operations require 
 
 ## 5. ONBOARDING WIZARD (the shared entry point)
 
-The existing `onboarding` crate already has the machinery:
+**CORRECTED 2026-08-14 (Seat 3, per RAID_AUTHENTIK_IDP_PATTERNS Cross-Seat Notes,
+founder-directed fix).** The table previously here listed seven modules
+(`ceremony.rs`/`gates.rs`/`ladder.rs`/`probe.rs`/`viewmodel.rs`/`render.rs`/
+`doctor.rs`, "2,687 lines, Built") under `b-onboard/src/`. **None of those files
+exist in this repository** (verified: tree search excluding `target/`, zero hits).
+The wizard machinery below is GREENFIELD — do not open a docket assuming it exists.
+
+What actually exists, `crates/onboarding/src/` (913 lines, 16 tests, zero dependents):
 
 | Component | What it does | Status |
 |---|---|---|
-| `ceremony.rs` (404 lines) | The onboarding ceremony state machine | Built |
-| `gates.rs` (229 lines) | Gate checks (each gate must pass before advancing) | Built |
-| `ladder.rs` (198 lines) | Decentralization ladder level assignment | Built |
-| `probe.rs` (271 lines) | Environment probing (what device/browser/capabilities exist) | Built |
-| `viewmodel.rs` (921 lines) | Wizard view model — the state the UI renders | Built |
-| `render.rs` (425 lines) | Rendering pipeline | Built |
-| `doctor.rs` (207 lines) | Diagnostic/repair tool | Built |
+| `lib.rs` (639 lines) | Custody/persona binding, authenticator kinds (2 variants), enrolment with written-code floor, grade disclosure (compile-enforced), commons ladder Step 0-3 | Built, tested |
+| `age.rs` (274 lines) | Age containment — no birthdate/document representable by construction | Built, tested |
+| Ceremony state machine, gates, probe, view model, renderer | The wizard engine itself | **NOT BUILT — greenfield** (see RAID_AUTHENTIK_IDP_PATTERNS for the patterned design) |
+
+Known divergences to resolve before building (RAID_AUTHENTIK cross-seat notes):
+the crate is written around `did:autonomi` while the ruled root is `did:webvh`,
+and three auth-ladder taxonomies coexist (this brief's 3 tiers, `AuthenticatorKind`'s
+2 variants, wallet-relay's 4 rungs) — canonical ladder is an open founder ruling.
 
 **What needs adding:**
 1. WebAuthn passkey creation flow (Tier 1)
@@ -251,7 +259,7 @@ The wizard flow:
 
 | Asset | Location | Status |
 |---|---|---|
-| Onboarding crate (7 modules, 2,687 lines) | `b-onboard/src/` | Built, tested (21 tests) |
+| Onboarding crate (2 modules, 913 lines, 16 tests) | `crates/onboarding/src/` | Built (custody/enrolment/age primitives); wizard engine NOT built — §5 correction 2026-08-14 |
 | Arweave adapter (Merkle bundle + trait) | `adapter-arweave/src/` | Built (MockArweaveClient, trait ready) |
 | Dashboard crate | `dashboard/` | Exists, empty — ready for implementation |
 | bnr-shell crate | `bnr-shell/` | Exists |
