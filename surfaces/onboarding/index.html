@@ -167,6 +167,7 @@ select.lang{font:inherit;font-size:.72rem;background:var(--bg-card);color:var(--
     <option value="en">EN</option><option value="es">ES</option><option value="pt">PT</option>
     <option value="fr">FR</option><option value="de">DE</option><option value="ar">العربية ‏</option>
     <option value="zh">简体</option><option value="hi">हिन्दी</option>
+    <option value="new">＋ yours</option>
   </select>
 </div>
 
@@ -200,7 +201,16 @@ const APP = {
     // re-render custody so the offline-native option is highlighted
     if(this.current==='custody') render('custody');
   },
-  setLang(v){ document.documentElement.setAttribute('dir', v==='ar'?'rtl':'ltr'); },
+  setLang(v){
+    if(v==='new'){
+      // the tribal-corpus breadcrumb: every language belongs, incl. ones no
+      // corporation would ever localize. Voluntary corpus, AI-guided.
+      const f=document.querySelector('.foot');
+      f.innerHTML='🌍 <b style="color:var(--ink)">Your language belongs here.</b> BNR is building a voluntary language corpus — including tribal and uncommon languages the big platforms skip — so this page can one day greet everyone in their own words. Ask us how to contribute yours.';
+      return;
+    }
+    document.documentElement.setAttribute('dir', v==='ar'?'rtl':'ltr');
+  },
 };
 
 /* --- the 8e full surface: every option that clears the filter, none elected.
@@ -217,9 +227,9 @@ const LADDER = [
   { id:'key', ic:'🛡️', free:false, rung:'🛡 PUPA · T-F roaming', title:'A security key',
     cost:'~$25', tag:'FIDO2 + code',
     desc:'A tap-to-sign key you carry (YubiKey, SoloKey) plus a backup code. Portable hardware backing.' },
-  { id:'trezor', ic:'🔒', free:false, rung:'🐝 BEE · T-H', title:'A Trezor',
-    cost:'~$79', tag:'Hardware custody',
-    desc:'Keys never leave the device; every signature confirmed on its own screen. Grows into ROYAL GUARD (granted-set firmware) later.' },
+  { id:'trezor', ic:'🔒', free:false, rung:'🐝 BEE → 👑 ROYAL GUARD', title:'Any Trezor',
+    cost:'$79–249', tag:'Open hardware',
+    desc:'Every Trezor model works out of the box. Open hardware, open firmware — custody you can audit, which the closed-source world never offers. Flash the free Trezor bSAFE 7 firmware later to unlock every BNR chain.' },
 ];
 
 /* --- copy per stage; kept declarative so localization is a table swap --- */
@@ -308,9 +318,16 @@ const SCREENS = {
 
   /* generic hardware (key / trezor) success path once "present" */
   hardware(kind){ const l = kind==='key'?'security key':'Trezor';
+    const crumbs = kind==='trezor' ? `
+    <div class="panel">
+      <div class="gauge g-known"><span class="s">Now</span> 🐝 BEE — works today with stock firmware: BTC, EVM chains, and everything your model already speaks</div>
+      <div class="gauge g-stale"><span class="s">Next</span> 👑 ROYAL GUARD — flash the free <b>Trezor bSAFE 7</b> firmware from your dashboard: Zano · Vaulta · Arweave · HIVE · BTS · Cosmos · exSat + granted-set protection (the device will only ever sign what you pre-approved)</div>
+      <p class="muted" style="margin:var(--s2) 0 0">Same wallet, same you, at every step — the firmware upgrade is a stronger lock, never a restart. Open hardware + open firmware means every claim above is auditable, not marketing.</p>
+    </div>` : '';
     return stageWrap(2, `
     <h2>Confirm on your ${l}</h2>
     <p>Touch your ${l} to prove it's you. The signing key stays on the device.</p>
+    ${crumbs}
     <button class="btn primary" onclick="APP.hardwareDone()">I tapped my ${l}</button>
     <button class="btn link" onclick="APP.go('custody')">← Pick a different method</button>
   `); },
@@ -325,6 +342,15 @@ const SCREENS = {
       <p>These 12 words can rebuild your wallet on any device if you lose this one.
          Write them on paper — this is the one backup that needs nothing you have to buy.</p>
       <div class="words">${grid}</div>
+      <details class="panel" style="cursor:pointer">
+        <summary style="color:var(--ink-mut);font-size:.88rem">More ways to keep it safe (optional)</summary>
+        <div style="margin-block-start:var(--s2);font-size:.85rem;color:var(--ink-mut)">
+          <p style="margin-block-end:var(--s1)">📄 <b>Paper is enough.</b> Two copies, two places you trust.</p>
+          <p style="margin-block-end:var(--s1)">🔥 Later, if you like: a <b>metal backup plate</b> survives fire and water.</p>
+          <p style="margin-block-end:var(--s1)">🔐 Already use a password manager you trust (like <b>Bitwarden</b>)? An encrypted copy there is a fine extra — it syncs and it's protected by your master password.</p>
+          <p style="margin:0;color:var(--guard)">The one rule: never a screenshot, never a plain cloud note, and never type it into anything that isn't your own wallet.</p>
+        </div>
+      </details>
       <button class="btn primary" onclick="APP.go('confirm')">I've written them down</button>
       <p class="muted">Nothing is saved until you confirm you have them — displaying them is not enough.</p>
     `);
