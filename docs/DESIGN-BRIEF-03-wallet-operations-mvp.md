@@ -121,7 +121,7 @@ Tier 3+ (Trezor + biometric)
 ### Why Leptos
 
 - **One language, one audit.** The signing logic is already in Rust (`bsigner`, `adapter-arweave`, per-chain crates). Leptos compiles the same Rust to WASM for the browser. No JS rewrite of crypto-critical code. No second implementation to drift.
-- **The wizard view-model/renderer do not exist yet** (§5 correction, 2026-08-14): the previously cited `viewmodel.rs`/`render.rs` are phantom. The plan stands as DESIGN, not as reuse — build the view model as the serialization-boundary challenge protocol patterned in RAID_AUTHENTIK_IDP_PATTERNS §18, and have Leptos consume that.
+- **The wizard view-model/renderer do not exist yet** (§5 correction, 2026-08-14): the previously cited `viewmodel.rs`/`render.rs` are phantom. The plan stands as DESIGN, not as reuse — build the view model as the serialization-boundary challenge protocol patterned in RAID_AUTHENTIK_IDP_PATTERNS §18, and have the frontend (stack per the SUPERSEDED banner above — htmx+Alpine+WASM, not Leptos) consume that.
 - **SSR + WASM hydration.** Fast initial paint (server-rendered HTML), reactive updates (WASM). Important for 10B-user scale: the server renders, the client hydrates.
 - **Mature enough for production.** Leptos 0.7+ is stable, used in production by several companies.
 
