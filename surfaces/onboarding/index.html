@@ -302,18 +302,23 @@ const SCREENS = {
     `);
   },
 
-  /* optical air-gap (decimen) — animated-QR concept */
+  /* optical air-gap — pairing request. HONESTY: the pattern below is a VISUAL
+     PLACEHOLDER (house law: never mock as real). The real light stream is a
+     static QR for this one-frame payload; the mobile receiver (receive.html)
+     already runs a REAL camera + decoder. Sender-side QR encoding: PLANNED. */
   optical(){ return stageWrap(2, `
     <h2>Pair your spare phone</h2>
-    <p>Open BNR on a second phone (even in airplane mode) and point its camera here.
-       The key crosses as light — never over any network.</p>
-    <div class="qr" role="img" aria-label="Animated pairing pattern"></div>
-    <div class="center muted">Streaming pairing request · point the other camera at this</div>
+    <p>Open <b class="mono">bnr → receive</b> on a second phone (even in airplane mode)
+       and point its camera here. The pairing request crosses as light — never over any network.</p>
+    <div class="qr" role="img" aria-label="Pairing pattern placeholder"></div>
+    <div class="center muted">⚠ visual placeholder — the real code renders here when the
+      sender-side encoder lands (<b>PLANNED</b>). The phone-side camera receiver is
+      real today: <span class="mono">surfaces/onboarding/receive.html</span></div>
     <button class="btn primary" style="margin-top:var(--s3)" onclick="APP.opticalDone()">
-      Other phone confirmed it ✓
+      Other phone confirmed it ✓ <span class="muted">(simulated)</span>
     </button>
     <button class="btn link" onclick="APP.go('custody')">← Pick a different method</button>
-    <p class="muted" style="margin-top:var(--s3)">Nothing secret is on this screen — only a request to pair. The spare phone signs; its key never leaves it.</p>
+    <p class="muted" style="margin-top:var(--s3)">Nothing secret is ever on this screen — only a pairing request. The spare phone signs; its key never leaves it.</p>
   `); },
 
   /* generic hardware (key / trezor) success path once "present" */
@@ -377,7 +382,9 @@ const SCREENS = {
       <p>Writing your <span class="mono">did:webvh</span> and anchoring it to permanent storage.</p>
       <div class="panel" style="text-align:start">
         <div class="gauge g-known"><span class="s">Done</span> Keypair bound to your ${custodyLabel()}</div>
-        <div class="gauge g-known"><span class="s">Done</span> Recovery phrase floor set</div>
+        ${APP.ctx.custody==='trezor'
+          ? `<div class="gauge g-known"><span class="s">Done</span> Recovery lives on your Trezor — you wrote it at device setup; we never ask for it, ever</div>`
+          : `<div class="gauge g-known"><span class="s">Done</span> Recovery phrase floor set</div>`}
         <div class="gauge g-stale"><span class="s">Working</span> Anchoring identity record…</div>
       </div>
     </div>`;
@@ -445,7 +452,15 @@ APP.doPasskey = async function(btn){
   this.go('recovery');
 };
 APP.opticalDone = function(){ this.ctx.authMode='optical-air-gap'; this.go('recovery'); };
-APP.hardwareDone = function(){ this.ctx.authMode='hardware'; this.go('recovery'); };
+APP.hardwareDone = function(){
+  this.ctx.authMode='hardware';
+  // TREZOR SKIPS THE PHRASE (founder ruling 2026-08-14): the device generated and
+  // showed its seed ON ITS OWN SCREEN at device setup — asking again would be
+  // redundant AND a new harvest surface. The skip is a recorded decision, not a
+  // silent hole: the creating screen shows recovery = "on your Trezor".
+  if(this.ctx.custody==='trezor') return this.go('creating');
+  this.go('recovery');
+};
 APP.checkPhrase = function(){
   const got=[0,1,2].map(i=>document.getElementById('w'+i).value.trim().toLowerCase());
   const want=this._ask.map(i=>this._words[i]);

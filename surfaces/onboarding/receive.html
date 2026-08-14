@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BNR · Receive over light</title>
+<!--
+  BNR OPTICAL RECEIVER — the mobile web client for the air-gap rail (day-1
+  differentiator; UX-OPTICAL-PAIRING-1). REAL, not mocked:
+    - real getUserMedia camera preview,
+    - real QR decode via the browser's native BarcodeDetector where it exists
+      (Android Chrome and kin). Where it does not (iOS Safari), the gauge says
+      ABSENT and the vendored-decoder path is declared PLANNED — never faked.
+  Every capability is probed and reported as a gauge (Known/Absent/Refused).
+  Scope: single static-QR payloads (the <=2.9 KB crossover — pairing requests,
+  resume documents, signed txs). Fountain streams (>3 KB) are the decimen lane.
+  SECURITY: the optical channel is unauthenticated — this page VALIDATES SHAPE
+  and displays; it never acts on a payload. Signature verification by the
+  ceremony that consumes it. Camera needs a secure context (https or localhost).
+-->
+<style>
+:root{color-scheme:dark light;
+--biomass:#86CC72;--sovereign-soft:#B79FE0;--you:#D655BB;--info:#6FA9E0;--guard:#B7A8F7;
+--primary:var(--you);--verified:var(--biomass);
+--bg:#06110C;--bg-card:#0C1412;--ink:#E9F2EC;--ink-mut:#8FA79C;--ink-dim:#648176;--line:#1E2B26;
+--font-ui:ui-sans-serif,system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+--font-mono:ui-monospace,"Cascadia Mono","SF Mono",Menlo,Consolas,monospace;
+--s1:6px;--s2:12px;--s3:18px;--s4:24px;--radius:12px;--radius-pill:999px;}
+@media (prefers-color-scheme:light){:root{--bg:#FBF7F0;--bg-card:#FFFFFF;--ink:#1C1A17;--line:#E7E1D6;
+--ink-mut:#67756D;--ink-dim:#6A736E;--biomass:#527C46;--verified:#527C46;--guard:#736A9C;--info:#4D759B;--you:#B4479D;--sovereign-soft:#865FB8;}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-ui);line-height:1.5;
+  min-height:100dvh;display:flex;flex-direction:column;align-items:center;
+  padding:max(var(--s3),env(safe-area-inset-top)) var(--s3) var(--s3)}
+main{width:100%;max-width:29rem}
+h1{font-size:1.35rem;margin:0 0 var(--s2)}
+p{color:var(--ink-mut);margin:0 0 var(--s3)}
+.mono{font-family:var(--font-mono)}
+.panel{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:var(--s3);margin-block-end:var(--s3)}
+.gauge{display:flex;align-items:flex-start;gap:8px;font-size:.85rem;padding:6px 0;color:var(--ink-mut)}
+.gauge .s{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+  padding:2px 7px;border-radius:6px;flex:none;margin-top:2px}
+.g-known .s{color:var(--verified);border:1px solid var(--line)}
+.g-absent .s{color:var(--guard);border:1px solid var(--line)}
+.g-refused .s{color:var(--guard);border:1px dashed var(--guard)}
+.g-planned .s{color:var(--info);border:1px solid var(--line)}
+.btn{appearance:none;font:inherit;font-weight:650;width:100%;min-height:52px;border-radius:var(--radius);
+  border:1px solid transparent;cursor:pointer;padding:0 var(--s3);margin-block-end:var(--s2)}
+.btn.primary{background:var(--primary);color:#150512}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+video{width:100%;aspect-ratio:1;object-fit:cover;border-radius:var(--radius);
+  border:1px solid var(--line);background:#000;display:block}
+.viewport{position:relative;margin-block-end:var(--s3)}
+.reticle{position:absolute;inset:12%;border:2px solid color-mix(in srgb,var(--you) 70%,transparent);
+  border-radius:var(--s3);pointer-events:none}
+.hide{display:none!important}
+pre{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:var(--s2);font-size:.75rem;overflow-x:auto;color:var(--ink-mut)}
+.foot{margin-block-start:auto;padding-block-start:var(--s3);color:var(--ink-dim);font-size:.72rem;text-align:center}
+</style>
+</head>
+<body>
+<main>
+  <h1>📷 Receive over light</h1>
+  <p>Point this camera at a BNR code on another screen. Nothing travels over any
+     network — the payload arrives as light and stays on this device.</p>
+
+  <div class="panel" id="caps"><!-- capability gauges injected --></div>
+
+  <div class="viewport hide" id="vp">
+    <video id="cam" playsinline muted></video>
+    <div class="reticle"></div>
+  </div>
+
+  <button class="btn primary" id="start">Start camera</button>
+  <button class="btn ghost hide" id="stop">Stop camera</button>
+
+  <div id="result"></div>
+
+  <div class="foot">
+    Air-gap receiver · single-frame payloads (≤2.9 KB) · streams &gt;3 KB are the
+    fountain lane (PLANNED) · this page validates <b>shape</b> and displays — the
+    consuming ceremony verifies <b>signatures</b>. It never acts on a payload alone.
+  </div>
+</main>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const CAPS=[], say=(cls,label,text)=>CAPS.push(`<div class="gauge g-${cls}"><span class="s">${label}</span> ${text}</div>`);
+
+/* ---------- capability probe: report honestly, never fake ---------- */
+const secure = window.isSecureContext;
+const hasCam = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+const hasDet = 'BarcodeDetector' in window;
+
+say(secure?'known':'refused','Origin', secure
+  ? 'Secure context — camera API available'
+  : 'NOT a secure context (file:// or http) — browsers refuse cameras here. Serve over https or localhost; this page will not pretend otherwise.');
+say(hasCam?'known':'absent','Camera', hasCam
+  ? 'getUserMedia present'
+  : 'No camera API in this browser');
+say(hasDet?'known':'absent','Decoder', hasDet
+  ? 'Native QR decoder present (BarcodeDetector)'
+  : 'No native decoder in this browser (typical on iOS). The vendored WASM decoder for this case is <b>PLANNED</b> — until it lands, this build reports honestly rather than spinning.');
+if(!hasDet) say('planned','Next','Vendored decoder (zxing-class, offline) → iOS support');
+say('planned','Reply','The response leg (this phone displays a signed answer back as light) lands with the sender-side encoder');
+$('caps').innerHTML=CAPS.join('');
+
+/* ---------- camera loop ---------- */
+let stream=null, raf=0, detector=null, scanning=false;
+
+$('start').onclick = async ()=>{
+  $('result').innerHTML='';
+  if(!secure || !hasCam){
+    return refuse('Camera unavailable', !secure
+      ? 'This page is not in a secure context, so the browser refuses camera access. Open it over https (or localhost) and try again.'
+      : 'This browser exposes no camera API.');
+  }
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}, audio:false});
+  }catch(e){
+    return refuse('Camera permission refused', 'You (or the browser) declined the camera. Nothing was captured. Grant permission and try again — the feed never leaves this device.');
+  }
+  const v=$('cam'); v.srcObject=stream; await v.play();
+  $('vp').classList.remove('hide'); $('stop').classList.remove('hide'); $('start').classList.add('hide');
+  if(hasDet){
+    detector = new BarcodeDetector({formats:['qr_code']});
+    scanning=true; tick();
+  }else{
+    $('result').innerHTML=`<div class="panel"><div class="gauge g-planned"><span class="s">Planned</span>
+      Camera is live, but this browser has no native decoder — decode lands with the vendored WASM build.
+      The preview above is real; pretending to scan would be a lie, so we don't.</div></div>`;
+  }
+};
+$('stop').onclick = stopCam;
+function stopCam(){
+  scanning=false; cancelAnimationFrame(raf);
+  if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; }
+  $('vp').classList.add('hide'); $('stop').classList.add('hide'); $('start').classList.remove('hide');
+}
+
+async function tick(){
+  if(!scanning) return;
+  try{
+    const codes = await detector.detect($('cam'));
+    if(codes.length){ scanning=false; return handle(codes[0].rawValue); }
+  }catch(e){ /* transient detector errors: keep scanning */ }
+  raf=requestAnimationFrame(tick);
+}
+
+/* ---------- payload handling: validate SHAPE, display, never act ---------- */
+function handle(raw){
+  stopCam();
+  let obj=null;
+  try{ obj=JSON.parse(raw); }catch(e){}
+  if(!obj || typeof obj!=='object'){
+    return refuse('Not a BNR payload', `Scanned a code, but it isn't BNR-shaped (got ${raw.length} chars of ${obj===null?'non-JSON text':'JSON non-object'}). Nothing was accepted.`, raw.slice(0,120));
+  }
+  if(obj.v!==1 || typeof obj.kind!=='string'){
+    return refuse('Unrecognized BNR version/kind', 'The payload parsed but does not carry {v:1, kind:"…"}. Refused by shape — loudly, not silently.', JSON.stringify(obj).slice(0,200));
+  }
+  const KNOWN=['bnr-pair-request','bnr-resume','bnr-enroll-pubkey','bnr-watch-list','bnr-signed-tx'];
+  const known=KNOWN.includes(obj.kind);
+  $('result').innerHTML=`
+    <div class="panel">
+      <div class="gauge g-known"><span class="s">Received</span> <b>${obj.kind}</b> · ${raw.length} bytes as light · zero network</div>
+      <div class="gauge ${known?'g-known':'g-absent'}"><span class="s">${known?'Shape ok':'Unknown kind'}</span>
+        ${known?'Recognized ceremony payload — hand-off to the consuming ceremony would verify its signature next':'Parsed, but not a ceremony this build knows; shown, not acted on'}</div>
+      <div class="gauge g-planned"><span class="s">Planned</span> Signature verification + hand-off happens in the ceremony surface, not here — this receiver never acts on a payload alone</div>
+      <pre>${escapeHtml(JSON.stringify(obj,null,2)).slice(0,1200)}</pre>
+      <button class="btn ghost" onclick="location.reload()">Scan another</button>
+    </div>`;
+}
+function refuse(title, why, raw){
+  $('result').innerHTML=`
+    <div class="panel">
+      <div class="gauge g-refused"><span class="s">Refused</span> <b>${title}</b> — ${why}</div>
+      ${raw?`<pre>${escapeHtml(raw)}</pre>`:''}
+      <button class="btn ghost" onclick="location.reload()">Try again</button>
+    </div>`;
+}
+function escapeHtml(s){ return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+</script>
+</body>
+</html>
