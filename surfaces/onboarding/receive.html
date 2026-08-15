@@ -162,7 +162,8 @@ function handle(raw){
   if(obj.v!==1 || typeof obj.kind!=='string'){
     return refuse('Unrecognized BNR version/kind', 'The payload parsed but does not carry {v:1, kind:"…"}. Refused by shape — loudly, not silently.', JSON.stringify(obj).slice(0,200));
   }
-  const KNOWN=['bnr-pair-request','bnr-resume','bnr-enroll-pubkey','bnr-watch-list','bnr-signed-tx'];
+  const KNOWN=['bnr-pair-request','bnr-resume','bnr-enroll-pubkey','bnr-watch-list','bnr-signed-tx',
+               'bnr-consent-request','bnr-consent-signed'];
   const known=KNOWN.includes(obj.kind);
   $('result').innerHTML=`
     <div class="panel">

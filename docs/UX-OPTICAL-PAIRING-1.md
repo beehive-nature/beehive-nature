@@ -53,6 +53,24 @@ Split by interop, not by taste:
   - Fountain framing (our wire, informed by the decimen protocol via the clean-room
     rules — the RAID's dlog contamination firewall applies from day one).
 
+## 2c · Ruled by founder 2026-08-14: the data layer is BLACK AND WHITE
+
+The b logo plan — black hexagons and white — and the channel engineering agree
+exactly, and so does the design law (b [bSAFE] is the uncolored ground):
+
+- **Data modules: black/white only.** Luminance is the one channel every camera,
+  every print process, every lighting condition, and every accessibility need
+  preserves. Color in the DATA would buy little and cost dependability (white
+  balance, cheap sensors, print drift) — the founder's suspicion is correct.
+- **Color is a halo, never a bit.** The mandala gradient lives in a decorative
+  ring/finder AROUND the black-and-white comb (exactly the shared mandala motif:
+  colored petals around a structured core). Strip every drop of color and the
+  code still decodes — D-1 as channel law.
+- Consequence: **the bComb data field IS the b logo aesthetic.** The brand and
+  the channel are the same object; nothing was traded for looks.
+- Upstream note (verified 2026-08-14): decimen main is still v0.5.2 at 418.5 KB/s
+  sustained; no multithread commit on main yet. Re-verify at tag-pin time.
+
 ## 3 · The ceremony grammar (who displays, who scans)
 
 **Directional law (from the RAID, load-bearing):** the UNTRUSTED/new device DISPLAYS;
@@ -69,6 +87,39 @@ the TRUSTED device SCANS and signs. Public data only on any screen, ever.
 - **Every payload:** signed by a key the receiver already trusts, verified by the
   CONSUMING ceremony (the receiver validates shape only), replay-bound (nonce/journal
   head), short-lived. The optical layer is a hostile courier, always.
+
+## 3b · THE DOORSTEP FUNNEL (founder use case, 2026-08-14 — the GTM shape)
+
+*"I am selling seed door to door; a new member scans a QR to start monthly
+deliveries; once the product arrives they discover the rest of BNR."*
+
+The full chameleon: it FEELS like "scan to subscribe" (every incumbent trained
+this gesture) and IS a sovereign identity bootstrap. Staged:
+
+- **Stage 0 — print.** A stylized static QR on the seed packet / flyer / card.
+  Styling rule: **stylize the FRAME (hex border, center mark), never the
+  modules**; encode at high error correction (ECC H tolerates ~30% obstruction);
+  the code inside stays stock-camera decodable — that is the whole trick.
+- **Stage 1 — one network moment.** Stock camera → URL → the receiver/onboarding
+  PWA loads and caches. No signal at the door? The SELLER's phone serves the
+  page (hotspot/captive), or the packet QR carries the essential consent terms
+  themselves (a one-frame payload needs no fetch at all). The server is a
+  bootstrap crutch here, used for exactly one hop, then gone.
+- **Stage 2 — the optic deploy (the dazzle).** Seller's screen streams the
+  subscription offer as light: `bnr-consent-request` {terms, price in plain
+  words, cadence, seller's bDiD, nonce}. Buyer's phone shows the terms ON THE
+  BUYER'S OWN SCREEN (never trust the seller's display for what you're agreeing
+  to), buyer taps consent → keypair born on-device → displays `bnr-enroll-pubkey`
+  + signed consent back → seller scans (the double-flash). Both hold a signed
+  record; **no network existed at any point**; the anchor posts when either side
+  next sees signal. New member in under a minute on a doorstep.
+- **Stage 3 — discovery.** The delivery arrives with the next QR (order status,
+  member surface) → wallet → the ladder → first Trezor. The seed subscription
+  IS the onboarding; crypto is discovered, not pitched.
+
+Payload kinds added to the receiver's known set: `bnr-consent-request`,
+`bnr-consent-signed`. The consent record is a receipt both parties hold —
+subscription state lives in signed envelopes, not in a company database.
 
 ## 4 · Trezor UX (founder rulings, 2026-08-14 beta)
 
