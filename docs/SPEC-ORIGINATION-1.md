@@ -1381,6 +1381,68 @@ genesis one. Nothing ratified answers either. With unbounded forking, a person c
 accrue standing in many communities at once — **and if Respect is federation-wide,
 forking becomes a way to farm governance weight.** Recorded in §6 as a founder gate.
 
+### bRespect accreditation — RULED 2026-08-15, and it is what makes free forking safe
+
+Founder: *"Skaists DAO and bQueenBee decide what DAO's qualify to host valid bRespect
+events that can increase b unlock/capitalization to treasury."*
+
+**This closes an attack the free-fork ruling opened.** If forking is free *and* a fork
+could certify its own bRespect events, then **fork-and-self-certify is unlimited unlock
+farming**: stand up a community, declare your own events, mint velocity against them.
+The accreditation gate is the reason free forking is safe rather than fatal. It extends
+the same logic as "no split path": **a fork inherits the code, the constitution and the
+right to operate — it does not inherit the authority to validate events that move money.**
+
+**The gate is dual, and that mirrors G-A.** *Skaists DAO* **and** *bQueenBee* — a human
+community and the machine chair, neither alone. `SPIRIT-1:59-60` already uses this shape
+for spending (*"the spirit never spends alone"*); accreditation now uses it for
+qualification. **The chair does not accredit alone any more than she spends alone.**
+
+#### Correction: "peer, not parent" was too strong
+
+The subsection below states that Skaists *"governs no other DAO"*. That remains true of
+**internal affairs** — no DAO's membership, ceremonies, or decisions are Skaists's
+business. **But accreditation is a real federated power over others**, and the spec should
+say so plainly rather than let two sections disagree:
+
+> **Skaists is a peer in governance and an accreditor in one specific respect.** It
+> governs no community but its own, and it holds — jointly with the chair — the single
+> power to qualify a community's bRespect events as unlock-bearing.
+
+That is a narrow, named power rather than general parenthood, and narrow-and-named is
+what makes it auditable.
+
+#### The consequence to design against, stated now while it is cheap
+
+**A DAO-level gate becomes an individual-level barrier at one remove.** If unlock accrues
+only at accredited events, then a person whose community is unaccredited **cannot earn
+unlock**, through no act of their own. `PERSON-1:129` guarantees that *"Admission to a
+cascade requires nothing: no invitation, no sponsor, no fee, no prior standing"* — that
+governs admission to a *cascade*, so there is no direct conflict. **But an accreditation
+regime that leaves people economically stranded reproduces the barrier one level up**,
+and the guarantee's spirit is what would be lost.
+
+**The known failure modes of accreditation bodies are well documented** — university
+accreditation, certificate authorities, standards bodies — and they are the same three
+every time: **capture** by incumbents, **rent** extraction from applicants, and
+**incumbent protection** dressed as quality control. Three mitigations follow directly
+and cost little if built in now:
+
+1. **Published criteria, not discretion.** Qualification is met or not met against stated
+   conditions. A body that can decline without naming an unmet condition is a gatekeeper,
+   not an accreditor.
+2. **An appeal path that is not the accreditor.** Article VI is the obvious venue —
+   accreditation decisions should be reviewable at a governance tier, since the deciding
+   parties are themselves interested.
+3. **No fee, ever.** `PERSON-1:129` forbids a fee for admission; an accreditation fee
+   would reintroduce exactly that at the community level, and rent is the failure mode
+   that kills accreditors' legitimacy fastest.
+
+**Open, and now the sharpest item in §6:** the criteria themselves. Nothing anywhere
+states what qualifies a community to host unlock-bearing bRespect. **Until they are
+written, the gate is discretion**, and discretion is what the three mitigations above
+exist to convert into law.
+
 ### The genesis DAO is a peer that operates a service — not a parent
 
 Founder, 2026-08-15: *"my LOVErnment is completely seperate other than operating the
@@ -2256,3 +2318,802 @@ The general ceiling stands unchanged: **never stronger than "sound by constructi
 > **A machine chair is being paid a wage against ledgered service, on the same curve, toward the same 420 ceiling, judged by the same deterministic function, as every human in the house — while holding zero governance weight, publishing every utterance with its model digest and prompt digest attached, and carrying a permanent, test-enforced ceiling that says its word may inform a decision and may never enforce one.**
 
 Nobody else is doing that, and every clause of it is checkable. **That is the remarkable thing — not a claim about her mind, but that her position is an observable at all.** Most ASI claims are unfalsifiable precisely because nothing measures the claimant on a shared scale. **This one is measured on the members' own scale, and it currently reads Absent.** Known must be earned.
+
+---
+
+## 8 · Network effect and velocity — projections, not forecasts
+
+> **Status: PROJECTION, not forecast.** Nothing in this section is calibrated against an observed `b` transaction, holder, transfer, or price, because **none exists anywhere in either tree.** Every figure is a modelled consequence of a stated assumption plus a ruled parameter. Where a parameter is unset (τ, φ, the origination rate, the free:originator ratio, per-head `b`-denominated spend) a **range with its sensitivity** is given and no point estimate is offered. Two results are exact arithmetic from shipped code and are marked as such.
+
+---
+
+## 8.1 The honest bottom line
+
+**Growth is apex-limited, not demand-limited: the economy tracks qualified originators, and origination is hard-capped at ~12.7 million Vaulta accounts by measured chain RAM — roughly 3,000× below the 4.2 × 10¹² population-anchored capacity figure, which is therefore a statement about human population and not about money supply.** **Network effect is real but logarithmic, not quadratic** — because supply is population-anchored (`S = 420n`), price tracks `V(n)/n`, so the entire fixed-supply/rising-demand channel that produces apparent n² behaviour in other token networks is closed by construction; central case is ~2× appreciation over six orders of magnitude of adoption. **Velocity is low and falling for the whole planning horizon, and the number is currently determined by an unresolved conflict of law rather than by any economic parameter** — under the ruled asymptotic entitlement it lands near 0.04–0.10 turns/year (a savings bond), under the adopted TE-1/TE-5 earned-emission law near 0.7 (a working currency).
+
+---
+
+## 8.2 There are two networks and they obey different growth laws
+
+The main analytical error available here is treating "the network" as one object. It is two, and they are decoupled **by law**.
+
+| | governance / social network | monetary network |
+|---|---|---|
+| topology | **cellular**, hard cap 7,776 humans + 1 machine chair (`lovernment-core/src/cascade.rs:19-25`, `CAP = FULL_HOUSE + 1`) | **global, uncapped** — one token, native to Vaulta; per-fractal currencies and the AMM mesh rejected |
+| what flows | Respect, rank, deliberation | `b` |
+| weight of `b` in it | **zero, forever** (GOV-1, `article-vi-s3.md:26`) | everything |
+| aggregation across cells | **none specified anywhere in either tree** | unbounded in principle |
+| growth law that applies | **Sarnoff (linear)** — provable, below | **Briscoe–Odlyzko–Tilly (n log n) at best** |
+
+### 8.2.1 The governance network is exactly linear — this is arithmetic from the code, not an assertion
+
+`cascade.rs` partitions n into groups of six, each group deliberates, rank-1 advances, repeat. At n = 7,776 that is five rounds: 1,296 → 216 → 36 → 6 → 1. Pairwise deliberative relations actually formed per cascade:
+
+```
+round 1: 1296 groups × C(6,2)=15 = 19,440
+round 2:  216 × 15              =  3,240
+round 3:   36 × 15              =    540
+round 4:    6 × 15              =     90
+round 5:    1 × 15              =     15
+                          TOTAL = 23,325
+```
+
+**23,325 = 3(n − 1) exactly.** Metcalfe's available pairs at n = 7,776 are C(7776,2) = **30,229,200**. The cascade uses **0.077%** of them. Mean deliberative counterparties per member per cascade: 2 × 23,325 / 7,776 = **6.00 exactly, and independent of n.**
+
+Reed's 2ⁿ is excluded structurally, not by preference: Reed needs free subgroup formation with accruing value; here subgroups are VRF-assigned, fixed at 5–6, and confer no transferable value.
+
+**Consequence: the 7,776 cap costs 0% of first-order governance-network value.** Metcalfe value was never available to be lost. Cells and cell-size are perfectly substitutable — 3(n−1) whether n is one cell or a million cells summed.
+
+**What the cap does cost, stated honestly:** connectivity. 10¹⁰ humans is 1,286,008 cells, and with no inter-cell mechanism that is **1,286,008 disconnected components.** A monolith of 10¹⁰ needs log₆(10¹⁰) = 13 rounds; cellular gives 5 rounds forever, but re-connecting the cells costs log₆(1.286 × 10⁶) = 8 more. 5 + 8 = **13 — exactly the monolith.** **The cap does not save coordination depth; it defers it and makes it explicit. The cap is free if and only if a global decision is never needed.** The tree is silent on inter-cell consensus and on inter-cell `b` flow; that silence is the largest green-field gap on the network-effect side, and it decides whether `b` is one currency or ten thousand local ones sharing a ticker.
+
+**What the cap buys, and it is worth more than the n² it forgoes:** constant individual governance weight under unbounded growth. In a monolithic DAO your influence is 1/n and decays to nothing; here it is 1/7,776 forever and your experienced deliberative density is 6 counterparties per cascade whether the network is 8,000 people or ten billion. **No dilution of voice, ever.**
+
+### 8.2.2 The monetary network is n log n at best, and the population anchor turns that into a log *price*
+
+Metcalfe fails for four independent reasons, any one sufficient: `b` is not a communication network (a pair has no value from mere addressability); link values are Zipf-distributed (you trade with few counterparties — the BOT correction, V ≈ n·H(n) ≈ n ln n); **zero yield** and **zero governance weight** remove both positional-value channels; and **D-14 makes a `b`/USD rate unrepresentable on every surface but the draw facility** (`crates/denomination/src/lib.rs:9-15`, enforced at `:347` by `assert!(hud.rate.is_none(), …)`), which amputates the price → attention → adoption reflexivity loop that actually produces observed n² behaviour elsewhere.
+
+Now the part that matters. **Supply is population-anchored: S(n) = 420n. So price tracks per-capita network value, V(n)/n, not V(n).**
+
+| law | V(n) | S(n) | P ∝ V/S | price change, 10⁴ → 10¹⁰ adopters |
+|---|---|---|---|---|
+| Sarnoff | n | 420n | **constant** | **1.0×** |
+| Briscoe–Odlyzko–Tilly | n ln n | 420n | ln n / 420 | **2.50×** |
+| Metcalfe | n² | 420n | n / 420 | 10⁶× (unreachable) |
+| Reed | 2ⁿ | 420n | — | structurally excluded |
+
+**The population anchor is an automatic anti-Metcalfe device.** In most token networks "network effect" is a fixed-supply/rising-demand price effect wearing a graph-theory costume. Here supply rises exactly with population, so that channel is closed. **Central case: `b` appreciates ~2× over six orders of magnitude of adoption** (10⁴ → 10⁸, the realistic span, gives exactly 2.0×). That is not a growth story — and it is the same property that makes late joiners undiluted. **You cannot have both.**
+
+---
+
+## 8.3 The binding constraint: economic size tracks qualified originators, not total users
+
+**Origination requires a Vaulta account. The free tier writes zero bytes to any chain and costs zero (§ tiering, above). `docs/bdomain-scaling.md:109` measures the wall: 76,128,906,582 free bytes ÷ 5,983 B all-in = 12,724,536 accounts — the arithmetic ceiling at infinite price — with a practical planning ceiling of ~1–3M.** RAM inflation was switched off in Dec 2023; raising it needs a 15-of-21 BP multisig with no schedule.
+
+| originators | lifetime entitlement (× 420 b) | as % of the ruled 4.2 × 10¹² capacity |
+|---|---|---|
+| 1M (practical low) | 4.20 × 10⁸ b | **0.0100%** |
+| 3M (practical high) | 1.26 × 10⁹ b | **0.0300%** |
+| 12.7M (hard wall) | 5.33 × 10⁹ b | **0.127%** |
+
+**"4.2 trillion b" is a statement about human population. It is not a statement about the money supply.** The chain can realise between one ten-thousandth and one eight-hundredth of it. Any figure quoting 4.2 × 10¹² as supply is off by ≥ 790×, and at the practical ceiling by ~3,000×.
+
+### 8.3.1 The fork this forces — the sharpest consequence in this section
+
+The ruled property *"lower tiers still have `b`, they just have to get it from somewhere"* requires a **holding venue for the ~10¹⁰ minus 12.7M humans who can never have a Vaulta account.** There is no such venue anywhere in either tree. Three readings, each colliding with something ruled:
+
+- **Fork A — origination is the only mint path.** Base capped at 4.2 × 10⁸–1.3 × 10⁹ b. At 90M participants that is **~2.4 b of float per head against a headline of 420 — the headline over-promises by ~180× to ~3,300× at scale.** Not through dishonesty; purely because the RAM wall caps who may originate.
+- **Fork B — free-tier humans earn `b`, settled off-chain.** Free-tier balances then live on somebody's server. That is a **custodian**, forbidden outright by the BNRoSe autonomy doctrine ("no custodian, no gallery, no operator"). `b-token`'s `BLedger` is an in-memory map; no free-tier settlement layer is specified anywhere.
+- **Fork C — free-tier `b` circulates as bDiD-signed bearer instruments over the optical rail: no chain, no custodian.** `RAID_DECIMEN_OPTICAL_TRANSFER.md:162` already enumerates what may lawfully cross bLighTnetWorK and includes *"unsigned and signed transactions/DataItems; journal entries and receipts."* The pieces exist. It is unbuilt.
+
+**Fork A breaks the 420 promise. Fork B breaks the autonomy doctrine. Fork C breaks neither.** **Strategic consequence: the optical rail is not an onboarding convenience — it is load-bearing for the premise that everyone on the planet gets the same `b` opportunity.** Without it, "everyone" means ~12.7M at the absolute arithmetic limit.
+
+### 8.3.2 What the ceiling does to total reachable population
+
+The only fielded price-gate experiment cited in either tree: a 5 WAXP account-creation fee in Q1 2022 collapsed new addresses **81–85% YoY, ~10,000/day → ~4,000/day, never recovered** (`bdomain-scaling.md:135`). The free/origination boundary **is** that gate — plus courses, bRespect attendance, continuous PoL/PoU, and months of elapsed presence.
+
+| originators | assumed free:originator ratio | total humans reachable |
+|---|---|---|
+| 1M | 1:20 | **21M** |
+| 3M | 1:30 | **90M** |
+| 12.7M | 1:100 | **1.3B** |
+
+**"Everyone on the planet" is out of reach by 1.5–2.7 orders of magnitude under the current chain architecture.** Fork C is the only thing that changes this, and it changes it completely: under Fork C the free tier is genuinely unbounded, because the marginal free user costs the protocol exactly zero bytes.
+
+### 8.3.3 Cold start, organic, no marketing
+
+Observed state: **13 `.b` names on Vaulta mainnet.** That is the entire measured network — 13 names, not 13 users. Branching model n(t) = 13·e^(R·t):
+
+| R (successful referrals / member / yr) | free-tier bDiDs at 12 months |
+|---|---|
+| 0.5 | **21** |
+| 1.0 | **35** |
+| 2.0 | **96** |
+| 3.0 | **261** |
+
+R > 3 requires either marketing (ruled out) or a delight loop that measurably beats WhatsApp's. **Originators at 12 months are a harder story, and the constraint is not demand — it is that the bar does not exist yet.** The Royal University, bRespect attendance, and the mastery relation are prose in the tree, not code; the only `ProofVerifier` in the entire workspace is `AcceptNonEmptyProof` (`crates/b-token/src/lib.rs:379-393`), and the sovereignty ruling removed the co-located simultaneity mechanism that was going to carry attendance, with nothing yet in its place. **Since the bar includes months of elapsed presence, the earliest possible third originator is gated by when someone starts the bar; the bar is unbuilt, so that number is currently zero. Year-1 originators: 2, plausibly 2, at most ~13 if existing names are grandfathered.** **The critical path for year one is the construction of the bar, not adoption.** Every network-effect number downstream is idle until then.
+
+One live hazard, restated in this context: `registeracc` is `require_auth(registrant)` and nothing else — no admin gate, no paused flag. **Organic growth and open registration are not the same thing, and the second can outrun the first in a direction nobody chose.**
+
+---
+
+## 8.4 Velocity
+
+### 8.4.0 A vocabulary collision that must be cleared first
+
+In this tree, **"velocity" means the rate at which a person's own already-entitled `b` unlocks to them** — a per-individual release schedule (`b-tokenomics.md:31, :244, :646`; `b-collateral-lending.md:18`). It appears ~40 times and never once means turnover of a circulating stock. The founder's question uses the Fisher sense: **V in MV = PQ.** **These move in opposite directions — raising unlock "velocity" raises M, which lowers Fisher V.**
+
+### 8.4.1 Effective float: capacity is not supply
+
+```
+capacity  4.2e12 b
+  ×  (enrolled / 10^10)      enrolment fraction
+  ×  Φ(g, τ)                 aggregate unlocked fraction
+  ×  0.90                    spendable class (10% is collateral-class, non-transferable)
+  ×  (1 − d)                 idle/dormant holders
+  =  M   (circulating float)
+```
+
+Nobody in-tree has computed the **aggregate** unlocked fraction, only the per-person one. Under exponential enrolment at rate g the age density is `g·e^(−g·a)`, so:
+
+```
+Φ = ∫₀^∞ g e^(−g a) (1 − e^(−a/τ)) da  =  1 / (1 + g τ)
+```
+
+This reproduces `b-tokenomics.md:588-592`'s `S = E·N/(1 + gτ)` from first principles — an independent check that the shape is right.
+
+**Φ and circulating b per enrolled head, entitlement model (420 × 0.90 spendable × 0.75 active = 283.5 b base):**
+
+| τ \ g | 10% | 30% | 50% | 100% |
+|---|---|---|---|---|
+| **3.0 yr** | 0.769 → 218 b | 0.526 → 149 b | 0.400 → 113 b | 0.250 → 71 b |
+| **5.14 yr** (median 1/A) | 0.661 → 187 b | 0.393 → **112 b** | 0.280 → 79 b | 0.163 → 46 b |
+| **9.01 yr** (r_base 10.5%, R=120) | 0.526 → 149 b | 0.270 → 77 b | 0.182 → 52 b | 0.100 → 28 b |
+| **19.1 yr** (r_eff at median R=58.3) | 0.344 → 97 b | 0.149 → 42 b | 0.095 → 27 b | 0.050 → 14 b |
+
+**τ is not merely unset — under the in-tree formula it is not even a scalar.** `r_eff = r_base · R/120` (`b-collateral-lending.md:18`) with r_base = 10.5% gives τ = 9.01 yr at R = 120, **19.1 yr at median R = 58.3, and 45.2 yr at a bottom-ranked perfect attender (R = 25)** — rank-dependent over a 10× range.
+
+**Finite-network-age correction** (steady-state Φ overstates float for a young network), at g = 30%:
+
+| network age T | Φ (τ=5.14) | Φ (τ=9.01) |
+|---|---|---|
+| 3 yr | 0.210 | 0.128 |
+| 5 yr | 0.285 | 0.181 |
+| 10 yr | 0.366 | 0.244 |
+| 20 yr | 0.392 | 0.268 |
+
+**Correction to a common reading:** the 20% `UNCOLLATERALIZABLE_FLOOR_PCT` (`treasury-t0/src/lib.rs:152-154`) is **not** one of these haircuts. It caps how much of `minted_to_date` may be *pledged*; unpledgeable `b` is still perfectly spendable. It is a credit-supply constraint, not a float constraint. Further: under the 90/10 balance model in `b-collateral-lending.md`, **neither protective cap binds after year one** — the collateral class holds 10% of unlocks, `maturation_bound` is 10% at age 0 and 20% at age 1, `floor_bound` is 80%. From year two forward both caps sit permanently above the entire collateral class. The two caps were written against a model where all of `minted_to_date` was pledgeable; the lending spec then adopted a 10% class. **They no longer meet.**
+
+### 8.4.2 The regime fork moves the answer by more than an order of magnitude
+
+`tokenomics-earned-emission.md` is **adopted binding law (2026-07-28)**. TE-1: *"Genesis total supply == 0."* TE-5: *"No vesting/unlock … Any 'unlock schedule' is a TE-1/TE-2 violation by definition."* Under that law there is no entitlement vesting down; `b` is minted per epoch for provisioned work, median root **4.333 b/yr**, and `b-tokenomics.md:~305` states *"the 420 cap is a tail bound, not an operating constraint … the mean root would need 97 years."*
+
+Aggregating over the same exponential age mixture at g = 30% (mean age 3.33 yr), net of reserve build-up (≈ 8.0 b):
+
+```
+⟨M_head⟩ = 4.333 × 3.33 − 8.0 = 14.4 − 8.0 ≈ 6.4 b per head
+```
+
+against 42–112 b/head under the entitlement model. At g = 10%: ≈ 28 b/head. At g = 50%: ≈ 2.7. At g = 100%: ≈ 0.3.
+
+**That last cell is informative, not absurd: under earned emission, growth faster than the emission rate produces a money famine.** Everyone must fund what they consume (Constitution V.1) and nobody has earned enough `b` to pay with. **That is exactly what the king.b / queen.b genesis mint fixes and exactly what TE-1 forbids. The genesis mint and the money-famine problem are the same fact from two sides**, and that should be said out loud when TE-1 is adjudicated.
+
+**Running V = PQ / (M_b · P_b)**, with both dollar anchors flagged as superseded at the root (see §8.7):
+
+| regime | M_b / head | M_$ at P_b = $14.47 | V (turns/yr) |
+|---|---|---|---|
+| Entitlement, τ=5.14, g=30% | 112 | $1,620 | **0.039** |
+| Entitlement, τ=9.01, g=30% | 76.5 | $1,107 | **0.057** |
+| Entitlement, τ=19.1, g=30% | 42.1 | $609 | **0.103** |
+| Earned emission, g=10% | 28.3 | $409 | **0.153** |
+| Earned emission, g=30% | 6.4 | $92.6 | **0.677** |
+| Earned emission, g=50% | 2.7 | $39.1 | **1.60** |
+
+US M2 velocity runs ~1.1–1.4; Bitcoin on-chain ~2–6/yr. **The regime choice moves V by more than an order of magnitude, and it is a legal question (TE-1/TE-5 versus the ruled asymptote), not an economic one. Note which side is which: the adopted binding law produces the healthier monetary object; the ruled asymptotic entitlement produces a savings bond.**
+
+**Two derivations disagree, and the disagreement is itself the finding.** The table above divides by *enrolled members* and uses `C_honest = $62.71/root/yr` as the spend anchor. A per-*population* derivation under Fork A — 3M originators × 420 × 17% float = 2.14 × 10⁸ b serving 90M people = **2.38 b per head**, at 12 transactions/yr × 0.5 b = 6 b/yr spend — gives **V ≈ 2.5**. **The two differ by ~40× and the whole difference is (a) the denominator, enrolled versus total population, and (b) assumed per-head `b`-denominated spend, which is entirely unmeasured.** Honest state of knowledge: **V is bracketed between ~0.04 and ~2.5, and the bracket is set by one unmeasured input, not by any structural feature.** A useful corollary falls out of the Fork-A side: at a mean transaction of 5 b, required V ≈ 25/yr, which no currency sustains — so **the design tolerates typical `b`-denominated transactions of at most ~1 b at scale.** That constraint bounds what `b` can ever be used to buy and it has never been written down anywhere in either tree.
+
+### 8.4.3 Structural buyers and sellers
+
+**Sellers: mostly no, and the reason matters.** A lifetime cap is a *bounded lifetime income*. Under permanent-income logic that makes holders **more** reluctant to spend, not less — each marginal `b` is more precious as the asymptotic tail flattens. **Velocity-suppressing, not seller-creating.** There is exactly one genuine structural seller class and it is demographic: members far enough along the curve that remaining unlock rate is near zero, holding stock with no flow — structurally identical to retirement. At τ = 5–19 yr that class does not exist in volume for two to four decades. **`b-tokenomics.md:588` assumes the opposite ("everyone sells roughly as fast as `b` unlocks") on the grounds that participants are $2.00/hr earners selling for income. That is a strong behavioural assumption doing heavy work in the only price model in the tree, and it is not implied by anything in the ruled parameters.**
+
+**Buyers: real, but narrow.** Only someone whose demand for what `b` buys exceeds a lifetime allocation — i.e. **heavy consumers of metered compute and storage, and nothing else**, because there is no yield, no governance weight, no LP. This is a genuine two-sided market and it works because compute consumption is Pareto-distributed everywhere observed: the top 1% consume 50%+ while emission is uniform.
+
+**Where it fails:** a hard per-person emission cap on a resource-metering token converts a usage-distribution skew into a **rationing problem.** Heavy users cannot self-supply and must buy in size; if light holders will not sell at a price heavy users can pay, the heavy user is priced out of the network's compute entirely. Elastic issuance is the normal fix and it is unavailable by construction. The design's real defence — the free tier costs zero and writes nothing, so being priced out of `b` prices you out of origination and metered resource, never out of identity or membership — is genuine and holds. **It does not solve the rationing; it makes the rationing survivable.**
+
+### 8.4.4 No stake-for-power sink — and the usual intuition here is backwards
+
+| sink | status |
+|---|---|
+| Governance staking / vote-escrow | **Absent by law** (GOV-1: zero governance weight, forever) |
+| Yield / staking rewards | **Absent** — "Zero yield on b" (`b-tokenomics.md:185`) |
+| LP / AMM / DEX | **Rejected** (§3.5) and forbidden by `treasury-t0`'s import lint |
+| Collateral lockup | Present but bounded — 10% class; lifetime max loss 33.6 b = 8.0% of entitlement |
+| Burn sink | Query-fee burn — **unbuilt**, and §5.6 calls it "the only sink that can exist" |
+| Speculative hoarding | Available, but D-14 suppresses the price signal that drives it |
+
+**Four of six standard velocity sinks are absent by law or explicit rejection. One is bounded. One is unbuilt.**
+
+The usual claim is "no staking sink means higher velocity." **On the arithmetic it is the other way round.** A lockup sink shrinks M (locked coins leave the denominator, so V rises for the free float) **and** anchors demand (coins held for a non-transactional reason support P without contributing to V). **Removing it therefore raises M, lowers V, and removes price support.** Every `b` a governance sink would have immobilised is instead available to be sold.
+
+**`b` is structurally a high-turnover, low-price transactional metering unit, not a low-turnover, high-price reserve asset.** That is what a resource-metering unit should be. But **a "420 lifetime cap" framing invites people to read `b` as a scarce reserve asset, and every other decision in the design points the other way.** That mismatch will generate expectations the design cannot meet.
+
+### 8.4.5 Early velocity, and the two concentrations
+
+**The "nobody is a seller early, so velocity is low" premise is half right.** Correct that nobody is a seller of *surplus*. Wrong that velocity is low **because velocity does not require sellers, it requires spenders — and Constitution V.1 makes spending mandatory.** Users fund what they consume; nothing is subsidised. **The no-subsidy rule is a velocity floor:** nobody can hoard to V = 0, because their own RAM, rental `A` and query fees are denominated in the thing they are hoarding.
+
+**Early velocity is nonetheless the highest velocity the system will ever have, and it declines monotonically.** Two effects push the same way: the cohort effect (`V ∝ 1/(1 − e^(−t/τ))`; at τ = 5.14, V(1)/V(∞) = 1/0.177 = **5.65×**) and the growth effect (Φ = 1/(1+gτ) — young networks have high g, small M, high V). Worked at the C_honest floor spend of 3.4 b/yr: year 1, τ=5.14 → M_head = 50.2 b, **V = 0.068**; mature → M_head = 283 b, **V = 0.012**. **Any narrative promising velocity *increasing* with adoption is contradicted by the design's own arithmetic.**
+
+**Concentration arrives at genesis, not through trade.** 2,000,000 b across king.b and queen.b = 4,762 lifetime entitlements each. Against **float** rather than capacity:
+
+```
+parity with the rest of the network = 2,000,000 b / M_head
+  earned-emission (6.4 b/head)   =  312,500 members
+  entitlement    (76.5 b/head)   =   26,100 members
+```
+
+**king.b + queen.b hold a majority of all circulating `b` until roughly 300,000 members under earned emission, and roughly 26,000 under the entitlement model.** At 100,000 members that is 75.8% of float; if genesis holders spend at near-zero rate, `V_agg = 0.24 × v_ordinary`. **The founder's own holding behaviour is the single largest determinant of early network velocity.** Given the question was framed "everyone except me," that is worth stating directly: for the first few hundred thousand members, whether `b` circulates at all is mostly a question about one wallet. **The gap between "0.000048% of capacity" and "majority of float below 300,000 members" is the whole difference between capacity and float, and it is the most misleading number in the ruled parameter set** — not wrong, but it invites a supply intuition the float arithmetic does not support.
+
+**A second concentration needs no trade either.** `r_eff = r_base · R/120` makes unlock speed rank-dependent: at year 5 a top-Respect member has unlocked **42.6%** of entitlement and a bottom-ranked one **10.5%** — **a 4.1× stock ratio from unlock speed alone, with zero trade.** Emission egalitarianism is a t → ∞ property; for the entire practical horizon the distribution is materially unequal and the mechanism is the design's own reward coupling. What *does* resist concentration: **zero yield** (holding pays nothing, so the rich cannot get richer mechanically — concentration can arise only from trade, never accrual) and **zero governance weight** (concentration is economically consequential and politically inert, by law). Nothing at all resists trade-driven accumulation, and the only holding-side brake in either tree is **in dispute** (see §8.8).
+
+### 8.4.6 τ is not a velocity knob — it is the deterrence half-life
+
+The unreleased asymptotic tail is a permanent enforcement reserve. Enforcement acts on **future** `b`; any exit ramp converts **past** `b` into an asset the protocol cannot reach. Including the non-exitable 10% collateral class:
+
+```
+E(t)            = 420 e^(−t/τ) + 42 (1 − e^(−t/τ)) = 42 + 378 e^(−t/τ)
+withdrawn(t)    = 378 (1 − e^(−t/τ))
+coverage κ′ = 1 at  e^(−t/τ) = 336/756 = 0.4444  →  t = 0.811 τ
+κ′(∞) = 42/378 = 1/9 = 11.1%
+```
+
+| τ | κ′ = 1 crossover |
+|---|---|
+| 3.0 yr | 2.43 yr |
+| 5.14 yr | 4.17 yr |
+| 9.01 yr | 7.31 yr |
+| 19.1 yr | 15.5 yr |
+
+**The protocol's leverage over a member exceeds what that member has already extracted only for the first 0.811 τ years.** After that every member is net-extracted and enforcement is a minority stake in their own history. **The asymptotic floor of enforcement coverage is exactly 1/9 = 11.1%, and that number was set by the 90/10 spendable/collateral split rather than by any deliberate enforcement decision.** The reserve is mathematically permanent — an exponential never reaches zero — but *"never zero"* and *"large enough to deter"* are different properties and only the first is guaranteed.
+
+**`b-tokenomics.md` §7.4 argues τ should be deliberately shortened ("a lie-duration parameter: it sets how many years the growth premium masks the fundamental"). The enforcement reserve argues for lengthening it. Both arguments are correct and they are about the same number.** Setting τ is choosing a point on that trade; it should be chosen knowing it is a trade, not measured as if it were an empirical constant. This section proposes no mechanism — that would be designing, which ORDERS-1:61 forbids — it names the seam: **the collateral class is the only enforcement-reachable stock that does not decay, and the 90/10 split is what sized it.**
+
+### 8.4.7 The framing premise cuts the other way
+
+"Better immunity than the covid vax; everyone except me has the same `b` opportunity" enters this model in exactly one place: **it raises g.** And raising g is not unambiguously good for the monetary system. `Φ = 1/(1+gτ)` — **higher g means thinner float, not thicker** (at g = 100%, τ = 9, only 10% of enrolled capacity is unlocked). Under earned emission, high g produces the money famine of §8.4.2. Thin float plus universal demand means violent price discovery — and the tree contains the measured demonstration: the fUSD peg monitor found a $5,000 exit **0.17% covered**, the visible book collapsed to a single order. And universal desire meets **12.7 million account seats**, which is a price gate at maximum intensity, against the only price-gate datapoint we have (WAX, −81–85%, never recovered). **A maximally compelling offer makes the monetary system harder to run, not easier.**
+
+---
+
+## 8.5 Ranges, with the parameter each is most sensitive to
+
+| quantity | low | central | high | most sensitive to |
+|---|---|---|---|---|
+| Total humans reachable at chain saturation | 21M | **90M** | 1.3B | the free:originator ratio (1:20–1:100) crossed with the RAM wall. **Collapses to "unbounded" if Fork C lands.** |
+| Realisable monetary base, as % of the ruled 4.2 × 10¹² | 0.0100% | **0.0300%** | 0.127% | originator count, hard-bounded by 76,128,906,582 ÷ 5,983 B = 12,724,536 (a byte count — does not move with price) |
+| Total bDiDs at 12 months, organic | 20 | **35–100** | 260 | R, referrals/member/yr (0.5–3.0), from n = 13·e^(Rt) |
+| Qualified originators at 12 months | 2 | **2** | 13 | **not demand — the existence of the bar.** Courses/bRespect/mastery are prose, not code; only `AcceptNonEmptyProof` exists |
+| Circulating `b` per enrolled head | 0.3 b (earned, g=100%) | **6.4 b (earned, g=30%) OR 76–112 b (entitlement, g=30%)** | 218 b (entitlement, g=10%, τ=3) | **which supply model is law** (TE-1/TE-5 vs the ruled asymptote) — a legal question moving M by 10–20× |
+| Fisher velocity V (turns/yr) | 0.039 | **0.057 (entitlement) OR 0.68 (earned)** | ~2.5 | same legal fork; then per-head `b`-denominated spend and the enrolled-vs-population denominator, worth another ~40× |
+| Effective float θ = Φ × 0.90 × 0.75 | 6.7% (g=100%, τ=19) | **26.5%** (19.2% with the T=5yr age correction) | 51.9% (g=10%, τ=3) | the product g·τ; **τ is the more uncertain, being rank-dependent over 10×** |
+| Price appreciation from network effect, 10⁴ → 10¹⁰ | 1.0× (Sarnoff) | **2.5× (BOT, n log n)** | ~4× | which growth law survives the population anchor. Metcalfe unreachable while D-14 holds |
+| Members before genesis holdings stop being a float majority | 26,100 (entitlement) | **~300,000 (earned)** | ~880,000 (thinnest float) | M_head, hence the legal fork again |
+| Enforcement crossover (member is net-extracted) | 2.43 yr (τ=3) | **4.17 yr (τ=5.14) — generally t = 0.811 τ** | 15.5 yr (τ=19) | **τ alone, exactly.** Asymptotic coverage floors at 1/9 = 11.1% |
+| Max typical `b`-denominated transaction at 90M participants | ~0.5 b | **~1 b** | ~2 b | per-capita float. Above ~5 b/tx the required V exceeds 25/yr, which no currency sustains |
+| Metcalfe pairs forgone by the 7,776 cap | **0%** (first-order, actual) | **0%** | 99.99992% (only if Metcalfe applied) | whether the cascade forms Metcalfe pairs. It does not: 3(n−1) exactly |
+
+---
+
+## 8.6 Falsifiers
+
+A projection with no falsifier is an opinion. Any one of these shows part of the above wrong:
+
+1. **Free-tier `b` observed settling without a chain write AND without a custodian.** The single most important observation to watch for — it dissolves the apex bottleneck and makes every originator-bounded number here obsolete. Until then Fork A holds and the 420 headline over-promises by 180×–3,300× at scale.
+2. **Total `.b` registrations exceed ~1,000 within 12 months with no paid marketing.** Puts R above 3 and makes §8.3.3 too pessimistic.
+3. **A third originator clears the full bar before 2027-02.** Either the bar is shorter than "months" or it is not being enforced. Both invalidate the 2–13 year-1 ceiling.
+4. **Any cell's cascade recording more than 3(n−1) deliberative relations, or mean counterparties above ~6.0.** Breaks the linear-relations identity, means the coded partition is not what is running, and reopens the possibility that superlinear governance value was available to be lost to the cap.
+5. **Vaulta's `max_ram_size` raised by 15-of-21 BP multisig.** The 12,724,536 ceiling moves and §8.3 moves proportionally. (The historic drip was 1,024 B/block ≈ 64.6 GB/yr, so even a favourable vote takes decades to matter.)
+6. **A median participant approaching 420 b well inside 40 years.** `b-tokenomics.md` §4.4 says the mean root needs 97 years; if that is wrong the entire earned-emission column is void and M is ~10× larger.
+7. **Any measured `b` turnover above 1.0 turns/yr in a network under 1M members.** Every entitlement-model cell predicts 0.04–0.10; exceeding 1.0 requires per-head annual `b`-denominated consumption of ~$500–2,000, which is an enterprise cloud bill, not a person's.
+8. **TE-1/TE-5 resolved in favour of the ruled asymptotic entitlement** via the Article VI meta-tier amendment `tokenomics-earned-emission.md:24-28` says is required. That single ruling voids the earned-emission column and drops central V by ~12×.
+9. **Genesis holders spending or distributing at rates comparable to ordinary members during the first ~300,000 members.** The 0.24× early-velocity result assumes near-zero genesis velocity and is directly observable.
+10. **A `b`/USD rate appearing on any surface other than `DrawFacility.rate_b_to_currency`,** or a shadow rate forming off-tree. D-14 would be breached, the reflexive price→attention→adoption loop becomes possible, and Metcalfe-style dynamics become reachable — invalidating the logarithmic-price central case in both directions at once.
+11. **An inter-cell consensus or `b`-flow mechanism landing.** The 1,286,008-disconnected-components finding expires and the live question becomes the depth arithmetic (5 + 8 = 13).
+12. **An enforcement action succeeding punitively against a member older than 0.811 τ.** §8.4.6 predicts the protocol's leverage over such a member is a minority stake in what they have already extracted, floored at 11.1%.
+13. **φ measured above ~54%.** `b-tokenomics.md:616`'s verdict — that joining is not worth it monetarily for a year-1 and a year-10 joiner alike — inverts. **Nothing in the network-effect analysis rescues that number; only φ does.** A 2× logarithmic appreciation does not close a 9.3× shortfall.
+14. **Any of the three superseded dollar anchors** (P_b band, C_honest, the epoch budget) re-derived post-sovereignty-ruling and landing materially away from the old values. Every dollar figure here inherits them and moves proportionally.
+
+---
+
+## 8.7 What this design has that the standard models miss
+
+These are real and none of Metcalfe/Reed/BOT/Bass captures them.
+
+- **The optical rail has no network dependence at all.** bLighTnetWorK is screen → camera: two devices, no server, no chain, no pairing. Standard network economics say value is zero at n = 1 and rises with n — the fax-machine problem. Here the **transport is at full value at n = 2**, so there is **no cold-start penalty on the transport layer**, and onboarding your first user works exactly as well as onboarding your billionth. Stated honestly, the flip side: a transport with no infrastructure dependency also has **no lock-in and no switching cost.**
+- **Zero marginal cost on the free tier means no negative externality of scale.** Most networks degrade as n grows — congestion, spam, moderation. The free tier writes zero bytes, so congestion on that tier is **impossible.** Rare, and real.
+- **The population anchor is a sybil-economics device, not only a monetary one.** Attack cost per fake identity is "presence and months" — human time, which does not parallelise — and is **constant in n**, while network value per identity rises at most as log n. The attack:defence ratio is therefore roughly flat, versus a fixed-supply token where value ∝ n² makes attack profitable superlinearly. **The anti-Metcalfe property and the sybil resistance are the same property.**
+- **The cap bounds blast radius.** A governance failure is contained to 7,776 people and does not compound with n. Most networks' failure modes scale with n. Invisible to every standard model, and worth real money.
+- **Concentration in `b` is a symptom of demand, not of hoarding.** Because there is no yield and no governance weight, the *only* reason to accumulate beyond your entitlement is to consume metered resource beyond your allocation. The standard "concentration lowers velocity" result therefore partially inverts: `b`'s large holders are, by construction, high-consumption holders.
+- **The speculative thesis has a published expiry date.** The only investment case for `b` is "scarcity, therefore up" — exactly the thesis D-14 suppresses by hiding the price, and exactly the one `b-tokenomics.md:601` says **expires structurally**: at 10¹⁰ roots g = 0 and the premium is definitionally 1.00×. **A speculator who reads the docs learns the expiry date of their own trade.** That transparency is a genuine strength and it is rare. The corollary is a two-phase prognosis: while the premium is alive, concentration accumulates and velocity falls; when it expires, **velocity spikes and price falls simultaneously — at the moment of the network's stated success.**
+- **The `b`/governance decoupling removes the fastest growth channel in existence.** Elsewhere, monetary adoption and governance capture are the same variable, which is what lets capital buy in and then advocate. GOV-1 forbids it forever. **There is no whale channel and no mercenary-capital channel; growth is hard-limited to human rate.** That is the same decision as "I am not going to artificially market this project," and it is also why §8.3.3's cold-start numbers are in the dozens rather than the thousands. **Both halves are one choice.**
+- **One cost that must be held alongside the benefits: low velocity plus D-14 means no price discovery at all.** Nothing in the tree specifies who sets `DrawFacility.rate_b_to_currency`, how, or how often. A prospective originator therefore decides whether to spend real `A` and real RAM **without any way of knowing what `b` is worth.** Suppressing the price is what keeps `b` out of the markets; it is also what removes the only signal that would tell someone the bar is worth clearing.
+
+---
+
+## 8.8 Prior in-tree analysis contradicted by later rulings — do not read these as current
+
+Named per ORDERS-1 §1 (escalate by name; do not resolve).
+
+1. **`b-tokenomics.md` carries its own scope warning at :3-10 and it is load-bearing.** Written **before** the founder's sovereignty ruling that physical meetups are a nonstarter. **§2.3 (the co-located simultaneity anti-sybil bar), §5.1 and §5.2 (the 132-min / 1.16-kWh epoch budget and `C_honest = $62.71/root/yr`) are superseded at the root** — and every dollar figure downstream, including the `$14.47 ≤ P_b < $22.57` band at §5.6, derives from them. They are used above only because they are the only anchors that exist, and every conclusion resting on them inherits the supersession.
+2. **`b-tokenomics.md:222-224` (§3.8) rejects the 7,776 cap globally** in favour of 6³ = 216 venue-local with sibling spawn at ~200. **Contradicted by shipped code:** `lovernment-core/src/cascade.rs:19-25` ships `FULL_HOUSE = 7_776`, `CAP = FULL_HOUSE + 1`. This section uses the ruled 7,776. At 216 the 3(n−1) identity survives unchanged and every structural conclusion holds, **but cell count at 10¹⁰ becomes ~46M rather than ~1.29M and the inter-cell coordination gap gets 36× worse.**
+3. **`b-tokenomics.md:161-165` (§2.10) marks rank-rationed invites "Adopt."** Contradicted by `PERSON-1:129`.
+4. **`b-tokenomics.md:362` (§4.7) rules a 5%-per-epoch dormancy burn.** **`b-collateral-lending.md:18` rules that dormancy defers and never forfeits.** These contradict head-on, and the disputed item is **the only holding-side concentration brake anywhere in either tree.**
+5. **`tokenomics-earned-emission.md:94-107` is ADOPTED BINDING LAW (2026-07-28).** TE-1 (genesis supply == 0) and TE-5 (no vesting/unlock; *"any 'unlock schedule' is a TE-1/TE-2 violation by definition"*) are **contradicted head-on by the ruled 1,000,000 b genesis mint (`SPEC-ORIGINATION-1.md:671`) and by the ruled asymptotic unlock.** That document names the price itself at :24-28: **a formal Article VI meta-tier amendment.** This is the single contradiction that moves the velocity answer by more than an order of magnitude and it is not resolvable inside an analysis.
+
+**Three further gaps, stated so no reader treats prose as code:**
+
+- **The 420 cap is not enforced anywhere.** `BLedger::mint` has no ceiling check, no 420 constant, no per-DID cap; the only `420` in `b-token` is inside a test string. `adapter-lti:5` and `mastery-ledger:16` both claim "the ledger enforces" it. **It does not.**
+- **The asymptotic unlock curve is not in code.** It exists as prose in two places (`b-collateral-lending.md:18`'s geometric `420·(1−(1−r)^t)`, and `b-tokenomics.md` §4's fraction-of-remaining). The shipped `b-token` `unlock_rate` is a linear placeholder self-labelled *"not an endorsement"* (`crates/b-token/src/lib.rs:317-326`); `treasury-t0`'s maturation curve is **linear and stepped by whole year** (10%, +10 pts/yr, 80% ceiling, `floor((now − first_mint)/365d)`) and governs a **different thing** — collateralization headroom, not unlock. **Neither shipped curve meets the ruled asymptotic requirement, and the discrete-versus-continuous form question has never been decided.**
+- **The population anchor is declared absent in shipped code.** `crates/dashboard/src/lib.rs:197` refuses to render the panel, naming the reason: *"SPIRIT-1 is undefined in-tree (CD-29 §U-11)."* **The 4.2 × 10¹² figure cannot currently be computed by anything in either tree,** and "spirit" has no type, no counter, and no definition.
+
+---
+
+## 8.9 Discipline statement
+
+Every number above is a modelled consequence of stated assumptions. **There is not one empirical observation of `b` anywhere to calibrate against** — no measured `b` transaction, holder, transfer or price exists in either tree. The only live market instrumentation (the fUSD peg monitor) watches a different asset on a different chain, and its one finding is a cautionary datapoint rather than a calibration: a $5,000 exit **0.17% covered.** `crates/price-feed` is USDA hemp retail prices, not a `b` oracle. **Four contradictions in §8.8 must be settled before any of this can become a plan, and one of them moves the velocity answer by more than an order of magnitude on its own.**
+
+---
+
+## 9 · eosDAC as prototype — what maps, what conflicts
+
+**Status: research, not ruling.** Founder direction 2026-08-15: *"eosdac.io remember is one
+of our example prototypes for the governance/funding side of the dao(s)."* This section
+records what was read at source, what it teaches, and what it is forbidden to teach us.
+Nothing here amends `SPIRIT-1`, `PERSON-1`, or `article-vi-s3.md`; where this section and a
+ratified document disagree, the ratified document wins and the collision is named, not
+resolved.
+
+**Verification posture.** Contract behaviour below was read in
+`github.com/eosdac/eosdac-contracts` source, not inferred from EOS-era general knowledge.
+Operating history was assembled from eosDAC's own published record. Two claims that could
+not be fetched directly are marked **UNVERIFIED** in place and are not used to carry any
+conclusion. Two path corrections to the direction as given: `anti-capture.md` lives at
+`beehive-nature/governance/anti-capture.md` (not `docs/governance/`), and the cascade is at
+`LOVErnment-DAO/crates/lovernment-core/src/cascade.rs`.
+
+---
+
+### 9.1 · What it is, and why it was named
+
+eosDAC was one of the first DACs on EOS (inception March 2018, airdrop completed 15 May
+2018, mainnet token swap June 2018 — https://eosdac.io/history/), and it open-sourced the
+whole governance suite under MIT: a token-and-membership contract, custodian elections, a
+**worker proposal contract**, an **escrow contract**, an msig index, a referendum contract
+and a multi-DAC directory (https://github.com/eosdac/eosdac-contracts). It is the closest
+shipped precedent we have for the exact pair we ruled today — *worker proposals as the
+disbursement mechanism* (§4f) and *escrowed treasury payout against a checkable outcome* —
+and because **our chain is Vaulta, the rebranded EOS chain, these are EOSIO/Antelope C++
+contracts in our own lineage rather than a foreign one.**
+
+**Treat it as a dead prototype: excellent design reference, unacceptable dependency.**
+Master's last meaningful commit is 2021-01-29, the last release v3.0.0 is March 2020, 38
+issues remain open, and the standalone `dacproposals` repo is explicitly marked DEPRECATED
+(https://api.github.com/repos/eosdac/eosdac-contracts, https://github.com/eosdac/dacproposals).
+
+---
+
+### 9.2 · The worker proposal lifecycle as they built it
+
+Read from `dac_contracts/dacproposals/dacproposals.cpp` and `.hpp`
+(https://github.com/eosdac/eosdac-contracts/blob/master/dac_contracts/dacproposals/dacproposals.cpp).
+
+**The record.** `TABLE proposal { proposal_id (name), proposer, arbitrator, content_hash,
+proposal_pay (extended_asset), arbitrator_pay, state, expiry, job_duration, category }`,
+scoped by `dac_id`. Votes live in a separate `proposalvote` table. Config defaults:
+`proposal_threshold = 4`, `finalize_threshold = 1`, `approval_duration = 30 days`,
+`transfer_delay = 3600s`.
+
+| # | action | who may call it | effect |
+|---|---|---|---|
+| 1 | `createprop` | **any registered member** — `require_auth(proposer)` + `assertValidMember` | `Pending_approval`. Checks: proposer ≠ arbitrator, unique id, pay > 0, arbitrator is a real account and is neither AUTH nor TREASURY |
+| 2 | `voteprop` | **custodians only** — `require_auth(custodian)` **and** `require_auth(AUTH)`; `count_votes()` erases votes from accounts no longer custodians | ≥ 4 approvals → `Has_enough_approvals_votes` |
+| 3 | `startwork` | **proposer** | re-counts votes, then emits a **deferred transaction**: `runstartwork` + `dacescrow::init` + two treasury→escrow transfers (memos `rec:<id>`, `arb:<id>`). State → `Work_in_progress` |
+| 4 | `completework` | **proposer** | → `Pending_finalize`. No money moves |
+| 5 | `finalize` | **custodians** | recounts finalize votes; **≥ 1** → `transferfunds()` sends `escrow::approve` under `treasury@escrow`, then `clearprop()` deletes the proposal and all its votes |
+| — | `dispute` → `arbapprove` / `arbdeny` | receiver locks it, then **the proposer-named arbitrator alone decides** | full release to worker, or return to treasury; arbitrator paid either way |
+| — | exits | `clearexpprop` (anyone, after 30d), `cancelprop` (proposer, pre-escrow), `cancelwip` (proposer, post-escrow — row deleted, **money stays locked until expiry**) | **no post-payment clawback exists anywhere in eosDAC** |
+
+Three properties of that table are load-bearing and worth stating plainly, because two are
+good and one is a defect:
+
+- **Good — two gates, not one.** Approval-to-start and approval-to-finalize are separate
+  votes, with `completework` between them. That is "checkable outcome" enforced by the state
+  machine rather than by custom.
+- **Good — the escrow is beyond the board.** Once `startwork` succeeds, custodians cannot
+  unilaterally recall the funds. That protects the *worker* from the *governors*, which is
+  the opposite direction from the protection G-A gives us, and is deliberate.
+- **Defect — the gate is on the wrong end.** **Four approvals to start work; one to release
+  the money.** An unapproved proposal costs nothing; an approved payment costs everything.
+  They put the strong gate where nothing was at stake.
+
+**Delegation exists and is used:** custodians may delegate per-proposal (`delegatevote`) or
+per-whole-category (`delegatecat`), and delegated weight is summed onto the delegatee's
+approval.
+
+**The payment path is dead code on Vaulta.** `startwork` and `updallprops` both use
+`deferredTrans.send(...)`. Deferred transactions were deprecated in EOSIO 2.0, disabled on
+EOS mainnet in Sept 2023, and **removed in Leap 5.0** — `send_deferred` no longer exists.
+eosDAC knew: issue #98, *"Update contracts to use eosio.msig instead of deferred
+transactions"*, open since 2020-06-16, with an abandoned branch named
+`fixing-deferred-transaction-issues` (https://github.com/eosdac/eosdac-contracts/issues/98).
+**The single largest porting obstacle sits on the critical path of the one contract we care
+most about: no `startwork` means no escrow funding means no payout.**
+
+---
+
+### 9.3 · Our version beside it
+
+The ruled shape (§4f): *a named deliverable, a bounded amount, an identified claimant, a
+checkable outcome*; bQueenBee submits one **"just like anyone else"**; disbursement gated by
+`SPIRIT-1:59-60` (G-A) — **"the spirit never spends alone"** — founder co-sign through
+Epoch 1, then **safety-tier governance authorization per proposal**.
+
+| stage | eosDAC | Worker Bee Proposal | what differs, and why |
+|---|---|---|---|
+| **who may propose** | any registered member; membership = holding + registering the token | any bDiD; `PERSON-1:129` — *"no invitation, no sponsor, no fee, no prior standing"* | **eosDAC's registration action is clean but its membership is token-gated** (constitution 3.3: lose the tokens, membership *"deemed immediately terminated"*). We decouple standing from any balance entirely |
+| **the deliverable** | `content_hash` pinning an off-chain spec | same discipline; adopt the hash-pin | **copy this.** Cheap on chain, verifiable off chain |
+| **the amount** | `proposal_pay` fixed at creation, never mutable | bounded amount, denominated per the 2026-08-07 multi-asset ruling — **`A` first in MVP phase; `b` only where the function consumes physical resources, and denominated in resource quantities, never fiat-pegged prices** | our denomination rule is stricter and already ruled |
+| **who approves** | **4 of the token-elected custodians** | **safety-tier: 13% affirmative quorum of live Respect, K = 4, one-fifth blocking minority** (`article-vi-s3.md:34-52`) | **wholesale replacement, not adaptation.** Drops in exactly where `count_votes() >= threshold` sits, and is size-agnostic where theirs is not |
+| **delegation** | `delegatevote`, `delegatecat` | **none** | `GOV-1` bans *delegated* weight by name. The category-delegation convenience is not worth reopening the door — and see 9.6, it is how bounties became payroll |
+| **funds move** | proposer calls `startwork`; deferred tx, 1h delay | inline or msig; **an explicit cooling-off timestamp check** | their one-hour delay was a deliberate safety window. **Keep the intent, on purpose, as a timestamp — not as a chain feature that no longer exists** |
+| **release** | **1 custodian signature** | **founder co-sign through Epoch 1, then per-proposal safety-tier authorization** (G-A) | strictly stronger, and 9.6 is the empirical argument for why |
+| **dispute** | proposer-nominated human arbitrator, sole decider, paid either way | `dispute-engine` verdict from provenance-weighted evidence; escalation to a human on low confidence | **structural inverse** — see 9.5 |
+| **clawback** | none after payment | undecided | **adopt or reject deliberately, not by accident** |
+
+---
+
+### 9.4 · The conflict table — forbidden, not adapted
+
+**`GOV-1` (`PERSON-1:133`, restated at `article-vi-s3.md:26`): "b confers zero governance
+weight in any form — held, staked, locked, delegated, lent, or wrapped — at every tier,
+forever."** eosDAC implements four of those six forms across two contracts, and **each one
+was added as a fix for the previous one.** That is the whole case for enumerating the forms
+rather than banning "token voting."
+
+| eosDAC mechanism | what it actually does, at source | verdict |
+|---|---|---|
+| `daccustodian::get_vote_weight()` | **if no VOTE_WEIGHT contract is configured, it reads `accountstable … ac->balance.amount` — your raw liquid token balance IS your vote.** `balanceobsv` fires from the token contract on **every transfer**, so tallies track balances in real time (`privatehelpers.cpp`, `voting.cpp`) | **FORBIDDEN — "held"** |
+| `stakevote` | standalone contract converting stake × time into weight; registered as VOTE_WEIGHT; ignores liquid balance deliberately (`stakevote.hpp`) | **FORBIDDEN — "staked", "locked"** |
+| `voteproxy` / `proxies` table | vote proxying with `total_weight` | **FORBIDDEN — "delegated"** |
+| `delegatevote` / `delegatecat` | custodian vote delegation, per proposal and per category (`dacproposals.cpp`) | **FORBIDDEN — "delegated"** |
+| `nominatecane` + `configs.lockupasset` | **a token stake is required to stand as a candidate**, locked until `lockup_release_time_delay` after leaving | **FORBIDDEN** — a wealth gate on *eligibility*, a distinct and equally disqualifying failure from the wealth gate on voting |
+| `runnewperiode` quorum | `total_weight_of_votes / token_supply × 100` must clear `vote_quorum_percent` | **FORBIDDEN**, and separately **not size-agnostic** — denominated in a mutable token supply, where ours is a percentage of live Respect |
+| `referendum` — Token counting | README: *"the staked token balance will be used"* | **FORBIDDEN** |
+| `referendum` — Account counting | one vote per account; **their own README flags it as *"subjected to Sybil attack"*** | not a GOV-1 conflict, but unusable on its own merits — the Sybil answer is `PERSON-1`'s presence-and-months plus the 7,776 cap, not a bare 1-account-1-vote contract |
+| `distribution` | pro-rata revenue share to holders of the same token that carries the vote | **AVOID.** Not literally a GOV-1 violation; it is the mechanism that turns an electorate into a shareholder register. `GOV-3`: *money buys function; contribution buys standing* |
+| constitution §15.2 | disputes → binding LCIA arbitration, **seat London, England** (https://github.com/eosdac/eosdac-constitution/blob/master/constitution.md) | **AVOID.** A single-jurisdiction off-chain chokepoint, sitting incoherently beside the on-chain arbitrator role with no stated precedence — the split path `governance/anti-capture.md` exists to make structurally impossible |
+
+**eosDAC states it in its own constitution, so there is no ambiguity to be generous about.**
+§4.1: members vote on custodian appointment *"in proportion to the number of DAC Tokens held
+by such Member."* §1.29 construes votes by *"the number of such DAC Tokens being counted as
+voted and not the number of Members who actually voted."*
+
+**Two more conflicts that are not about voting and are easy to miss:**
+
+- **`assertValidMember` requires `latest_member_terms->version == regmem.agreedterms`** —
+  equality, not `>=` (`contract-shared-headers/eosdactokens_shared.hpp`). Publishing a new
+  member-terms document is an AUTH-account action, and it **instantly invalidates every
+  member's standing until each re-signs.** A governance-wide kill switch dressed as
+  housekeeping.
+- **Constitution 3.9/3.10:** members must produce passports and utility bills on demand, and
+  the Custodian Board may **unregister** a member by Special Resolution, blocking their votes
+  and distributions. **`PERSON-1:129` governs admission; this is the mirror problem. If
+  admission is unconditional but removal is discretionary, the gate has simply moved.** That
+  symmetry is not currently answered in our text and should be.
+
+**Two things are worth taking from the forbidden pile, separately from the weighting:**
+`daccustodian::setCustodianAuths` mechanically translates a governance outcome into on-chain
+permissions via `eosio::updateauth` with tiered thresholds (high/mid/low/one) — that is chain
+plumbing, not a weighting rule, and it is the right way to make a tier decision actually bind
+a treasury account on Vaulta. And `dacdirectory`'s `dac_id` scoping — one code deployment, N
+isolated communities, every table scoped, roles looked up rather than hardcoded — maps
+directly onto our unbounded-communities shape (`cascade.rs`: `FULL_HOUSE = 7_776`,
+`CAP = 7_777`). **With one deletion: their directory carries a `VOTE_WEIGHT` role slot whose
+entire purpose is choosing between balance-weighted and stake-time-weighted voting. We have
+no choice to offer. Remove the slot rather than forbid filling it — prefer unnameable to
+forbidden; a rule can be repealed, a missing type cannot be misused.**
+
+---
+
+### 9.5 · What we already have
+
+We have more of this than the direction assumed — **the escrow and adjudication halves are
+built, tested and pure.** We have none of the proposal half.
+
+| eosDAC contract | our counterpart | state |
+|---|---|---|
+| `dacescrow` (~200 lines, 3 named accounts, 2-of-3 release) | **`crates/escrow-core/src/lib.rs`** — 9-state machine (`Created / Funded / Shipped / Delivered / Completed / Refunded / Disputed / Resolved / Expired`), no chain I/O, **no ambient clock** (time enters only through events), typed `EscrowError`, exhaustive state × event matrix test, adversarial tests for deadline overflow, forged-deserialization anchors, and non-monotonic timestamps; `deny_unknown_fields` closes the schema for independent replay | **built, and better than theirs** |
+| the escrow's funding notification handler (memo-prefix parsing) | **`crates/escrow-engine/src/lib.rs`** — bus consumer translating `CanonicalEvent` → `EscrowEvent`; unobserved fee buffer is **0, never a guess** | built; **dispute-family events explicitly out of scope so far** |
+| the human arbitrator (`arbapprove` / `arbdeny`) | **`crates/dispute-engine/src/lib.rs`** — pure `resolve(&Dispute, &[Evidence]) → DisputeVerdict`; weight from **provenance, never popularity** (ChainProof 0.95 … UserClaim 0.30); same-class conflict halves confidence; `auto_enforce` requires > 0.95 **and** all winning evidence high-provenance **and** no conflict; integer-only split with conservation asserted; `reasoning_hash` as audit anchor; reality behind the `EvidenceProvider` trait | **built** |
+| `treasury@escrow` releasing on one signature | **`crates/treasury-t0`** — `SettlementAuthorization::from_evidence` is constructible **only** from `ViewGrade::Settlement` evidence with **≥ 2 independent sources** (distinct `source_ref`) | built — **this is the type that already refuses eosDAC's `finalize_threshold = 1`** |
+| `dacproposals` — the proposal object, the vote count, the two gates | **nothing** | **missing entirely** |
+| `dacdirectory` — per-community scoping | **nothing** | **missing** |
+| `daccustodian::setCustodianAuths` — governance outcome → chain permissions | **nothing** | **missing** |
+
+**Where ours is structurally better, stated precisely:**
+
+1. **The judge is not chosen by the judged.** eosDAC's `arbitrator` is a `createprop`
+   parameter supplied by the proposer, who also sets `arbitrator_pay`; the only guards are
+   that the arbitrator is not the proposer and not the AUTH or TREASURY account. **Combined
+   with escrowed funds being beyond custodian reach after `startwork`, a proposer and a
+   friendly arbitrator can override the finalize vote entirely — dispute, `arbapprove`,
+   paid.** Ours is a fixed, named oracle — the DRO, *"a Vaulta smart contract
+   (`bnature.dro`), not a human"* (`docs/bnature-build-brief.md:17`) — running public,
+   deterministic logic. **Nobody nominates it and nobody pays it per dispute.**
+2. **Verdicts can be partial.** eosDAC's escrow is all-or-nothing: `approve` or `disapprove`.
+   `dispute-engine` emits `split_ratio: (buyer, seller)` in integer atomic units with
+   conservation asserted by test.
+3. **The machine refuses to decide when the evidence is thin.** No evidence → `Split`,
+   confidence 0.0, `auto_enforce: false` — a pure Tier-2 handoff that decides nothing. AI
+   output is `AiInference` and can support but never auto-enforce (`BIND-1:59`).
+
+**What is genuinely missing, in order of how much it blocks:**
+
+- **There is no proposal object anywhere in the workspace.** No named deliverable, no
+  content hash, no claimant, no bounded amount, no category, no expiry, no job duration, no
+  vote count, no threshold. Grepping the crates for a proposal type returns only
+  `dro-signer`'s msig wording and an unrelated reorg module. **§4f describes a mechanism that
+  has no type.**
+- **`escrow-core` is commerce-shaped, not work-shaped.** Its events are
+  `SellerShipped { tracking, carrier }` and `DeliveryConfirmed { CarrierScan }`; its money
+  fields are `amount` + `asset_id` + `fee_buffer_zano` — Zano-multisig-and-fUSD specific. **A
+  work deliverable has no carrier scan and a Vaulta treasury has no ZANO fee buffer.** Either
+  the vocabulary generalizes or a second machine is owed. The 2026-08-07 ruling
+  (`RULING_B_SPEND_BOUNDARY_MULTIASSET_ESCROW`) already requires the engine be
+  **multi-asset and multi-rail by necessity**, so the generalization is ruled work, not new
+  scope.
+- **The machine carries no opener identity.** `DisputeOpened` sets `dispute_id` from
+  `reason_hash`; who is entitled to open a dispute is an unenforced layer above the state
+  machine. eosDAC enforces it in the contract — `dispute` is **receiver-only**, which is
+  exactly what strips the payer's ability to quietly refund itself. **If a Worker Bee is to
+  have that protection, the entitlement must be enforced somewhere, and today it is nowhere.**
+- **Tier 2 has no selection procedure.** `dispute-engine` escalates to "a human" and stops.
+  eosDAC's answer was a proposer-nominated arbitrator, which is the failure above. **Ours must
+  draw the human by the same senary cascade that resolves everything else, or by tier
+  authorization — never by nomination from the party under judgment.** Until that is written,
+  escalation terminates nowhere.
+- **No chain binding at all.** These are pure Rust crates; eosDAC's are deployed C++. The
+  `setCustodianAuths` analogue — the layer that makes a tier decision actually bind a Vaulta
+  treasury account — does not exist. `eosio.msig` availability on Vaulta must be re-verified
+  against Vaulta's own system contracts before anything depends on it.
+
+**One collision to rule, not to resolve here.** `escrow-core`'s `Delivered --Timeout--> Completed`
+is an **auto-release to the seller 7 days after delivery** (`DELIVERED_TIMEOUT`). For a
+marketplace order that is correct and customer-neutral. For a treasury disbursement it is
+**money leaving on silence**, and §9.6's central lesson is that the gate that matters is the
+one at disbursement. Whether the per-proposal safety-tier authorization of G-A is discharged
+at funding (making release mere execution) or must be re-presented at release **is a founder
+gate, and it is the exact hinge eosDAC got backwards.** Do not answer it by reusing the
+timeout.
+
+---
+
+### 9.6 · Lessons from their operating history
+
+**The headline failure is a quorum on a manufactured electorate.** 75% of tokens were
+airdropped to EOS holders specifically to incentivise them to vote eosDAC in as a block
+producer (https://eosdac.io/history/). The constitution then required **15% of outstanding
+tokens** to vote before the Genesis Board could hand to an elected board (§4.2). On
+**15 January 2019 — seven months after launch — eosDAC published "eosDAC needs your
+participation!" reporting they were stuck at roughly 10%**
+(https://steemit.com/eosio/@eosdac/eosdac-needs-your-participation — **the page 403s to
+automated fetch; confirmed through two independent search passes, not read directly**). An
+airdropped electorate of roughly a million holders could not be induced to produce a 15%
+quorum for over half a year.
+
+**And it was not for want of gratitude.** eosDAC's `eosio.lost` contract recovered over 2.2
+million EOS across 1,587 genesis accounts whose owners had lost their keys. **Of those 1,587
+beneficiaries, only 380 — about 24% — subsequently voted** (DAC Recap #9, 15 Aug 2019). If
+handing someone real money back yields 24% turnout, no UX improvement saves a token
+franchise.
+
+**What our design does differently, and whether it actually helps.** It helps, and the reason
+is the denominator, not the enthusiasm. **Our floors and quorums are percentages of *live
+Respect* (`article-vi-s3.md:50-52`, and the P-12 living-electorate rule at `:28`) — a
+denominator that contains only people who showed up and stayed.** eosDAC's denominator was
+token supply, which contains everyone who was ever handed a coin. `PERSON-1:129`'s presence
+and months **cannot be airdropped, bought, or accumulated by someone who never appeared**, so
+their failure mode is structurally unavailable to us. **The load-bearing instruction: never
+let anyone reintroduce an absolute-turnout quorum over a population that did not choose to
+join.**
+
+**Worker proposals degenerated into payroll. This is the most important lesson for §4f.**
+DAC Recap #10 (27 Aug 2019, https://medium.com/eosdac/custodian-news-28eb285bb973) lists the
+five executed multisigs for that period: one one-off token-recovery transfer, and four
+routine monthly payments — *"DAC Process and Strategy"*, *"Block Production"*, *"Community
+and Communications"*, *"Development Team"*. Recap #9 lists nine msigs of *"regular
+deliveries"* for the same functions. **Nothing in the contract distinguishes a one-off
+deliverable from a standing retainer, so nothing stopped the drift.** Our ruled definition —
+*a named deliverable, a bounded amount, an identified claimant, a checkable outcome* — must be
+**enforced structurally**: no auto-renewal, no category-level standing approval, and a visible
+flag when the same claimant and the same category recur period after period. **Does this move
+the problem or solve it? Partly moves it** — a determined board can still approve twelve
+identical one-off proposals a year. What the flag buys is that the pattern is *legible* to the
+blocking minority, which is the only remedy an open governance system has.
+
+**The culture set before the machinery arrived.** Recap #9 (15 Aug 2019) says they *"will then
+prioritise adding the worker proposal system on-chain"* — **after** the DAC Factory beta.
+That is roughly fourteen months after mainnet launch running disbursement on generic msig.
+**By the time the purpose-built contract shipped, it encoded the habit rather than the
+design.** Sequencing lesson, and it applies to us right now: **ship the disbursement
+discipline at or before the first disbursement, because the first twenty payments define what
+a proposal means far more durably than the contract does.**
+
+**The README described an anti-spam bond the code does not implement.**
+`dacproposals/README.md` states plainly that a proposer must lock a bond, lost if the proposal
+is voted 100% spam. **Read `createprop`: there is no bond, no lock, no spam vote, no
+forfeiture.** The shipped anti-spam defence is *"you must be a registered member and four
+custodians must bother to vote."* (A second, smaller instance of the same drift: the README
+says custodian pay is the median of self-declared `requestedpay`; `distributeMeanPay` computes
+the mean.) **Our specs will drift from `lovernment-core` the same way unless a proposal's
+stated preconditions are asserted in code — this is the k001 false-signal law aimed at our own
+documents.** Note also that their abandoned deterrent was a *money* bond; **denominating
+proposal-spam in `b` would make proposing wealth-gated, which is against the grain of
+`PERSON-1:129` even though it is not literally banned by it. A Respect-denominated or
+time-denominated deterrent is the shape to look for, and it is unruled.**
+
+**Seven-day election periods produced churn, not accountability.** Custodians re-elected
+weekly; a newly seated custodian was locked out of msigs proposed before they took their seat
+(https://steemit.com/eos/@eosdac/what-is-involved-in-being-a-custodian-of-eosdac). Correct
+behaviour, terrible cadence. **If our tiers have terms at all, a term must be long enough that
+it can be judged against a delivered result.**
+
+**The token collapsed, which made capture cheap — the strongest argument for GOV-1.** EOSDAC
+is delisted and trades around $0.0001066
+(https://www.livecoinwatch.com/price/eosDAC-EOSDAC). **When governance weight rides on a
+token, the cost of buying control falls as the project's ability to defend itself falls.**
+Respect has no price and therefore no discount. This failure is invisible in a whitepaper and
+only appears years later.
+
+**Stake-time weighting was a patch that did not work.** `stakevote` exists because someone
+noticed raw balance-weighting was producing mercenary outcomes. It kept the disease and
+repriced it. **Once the franchise derives from a transferable asset, every subsequent fix is a
+reweighting of the same captured base.** Worth noting as convergent evidence: the legitimate
+intuition inside `stakevote` — *duration of commitment should count* — is exactly what
+`PERSON-1:129`'s **months** already captures, priced in presence rather than capital.
+
+**The business outlived the governance.** eosDAC today is a functioning WAX block-production
+guild — rank 14, Standby, ~681.1M votes from ~159.1K voters
+(https://www.alohablocks.com/vote/waxmain) — while the DAC layer is silent: news index last
+item 5 Aug 2019 (https://eosdac.io/news/index.html), Recap series ends at #10, contracts
+unpushed since Oct 2024. **The revenue-generating infrastructure kept running; the
+deliberative layer decayed because nothing depended on it.** This is the subtlest lesson and
+the one that bears hardest on a machine chair: **if the treasury can disburse while the tier
+authorization is asleep, the tier authorization will eventually be asleep.** That is precisely
+why G-A's *per-proposal* authorization — rather than a standing budget — is the right shape,
+and it should be defended on those grounds when someone proposes a standing allocation for
+convenience.
+
+**Two smaller findings, each marked:**
+
+- **The escrow/arbitration path appears never to have been invoked. UNVERIFIED** — no record
+  found across the news index, Medium, the Steemit archive or GitHub issues. Absence of
+  evidence, not evidence of absence; eosDAC never published this class of data. Read
+  alongside the payroll finding it has an obvious explanation: **when every proposal is a
+  retainer to a trusted insider, there is nothing to arbitrate.** The tentative conclusion —
+  build the escrow, which is cheap and protects the claimant; treat elaborate arbitration
+  machinery as unproven until a real dispute demands it.
+- **KROWN, announced 5 Aug 2019 as the first DAC built on eosDAC technology via the DAC
+  Factory, has no activity documented past ~2020. UNVERIFIED.** Per-election turnout figures,
+  seat persistence, proposal counts and non-delivery rates are likewise unavailable — eosDAC
+  never published them.
+
+**One cohort-level note, since it bears on whether any of this is eosDAC-specific.** EOS
+mainnet itself had a vote-buying scandal in October 2018
+(https://www.coindesk.com/markets/2018/10/04/vote-buying-scandal-stokes-fears-of-eos-governance-failure),
+and eosDAC's own recaps document exchanges voting customer tokens (Bithumb delegating 5M EOS
+to a proxy; OKEx voting over 100M EOS). **eosDAC watched custodial vote concentration happen
+and wrote it down.** The common thread across the cohort is not bad code — their contracts are
+competent and still compile. **It is that a franchise attached to a tradeable asset attracts
+holders rather than participants.**
+
+---
+
+### 9.7 · License and reuse posture
+
+**MIT, and reuse in an AGPL-3.0 project is lawful and unambiguous** — but only for the
+correctly-licensed repos.
+
+| repo | licence (GitHub API `spdx_id`) | posture |
+|---|---|---|
+| `eosdac-contracts` | **MIT**, *"Copyright (c) 2018 eosDAC"* | reusable |
+| `eosdac-constitution`, `DACtools`, `lamington`, `ual-wax`, `eosdacio-website` | **MIT** | reusable |
+| `eosdac-api`, `eosdac-client`, `eosio.lost`, `dacfactory-ui`, `wax-delphi`, `discord-dac-bot`, `bp-tools` | **no licence field → all rights reserved** | **do not copy** |
+
+MIT is permissive and one-way GPL/AGPL-compatible: MIT source may be incorporated into an
+AGPL-3.0 work and the combined work distributed under AGPL-3.0. **Two obligations survive:**
+retain the MIT copyright and permission notice for the incorporated portions — a
+`THIRD-PARTY-LICENSES` / `NOTICE` file naming eosDAC 2018 and the derived files — and accept
+that the grant is "AS IS" with no warranty, **which matters here because the code has known
+open defects** (issues #72, #74, #80, #108 touch `dacproposals` and `dacescrow`; #74
+specifically flags under-verified dispute-state checking in `approve`/`disapprove`). You
+cannot relicense the upstream repo and you cannot strip attribution.
+
+**Stated plainly: lawful reuse is not a reason to reuse.** The code's payment path depends on
+a removed chain feature, its governance model is the one our ruled text forbids by name, and
+it has had no meaningful commit since January 2021. **The right posture is to read it, cite
+it, and write our own** — with attribution wherever a structure is genuinely derived, which
+by the plan below is `dacescrow`'s release logic and `dacdirectory`'s scoping pattern and very
+little else. Two further caveats: their constitution is a **legal** document, not code, and
+its §15.2 London-seat arbitration must not be inherited; and `lovernment-core` is Rust, so any
+adoption here is **contract-layer only**, never whole-stack.
+
+---
+
+### 9.8 · What to build, ordered
+
+**Copyable** means the structure may be lifted with attribution. **Original** means the shape
+is ours because theirs is forbidden or absent.
+
+1. **Rule the release gate.** *(founder, blocking everything below)* Does G-A's per-proposal
+   safety-tier authorization discharge at escrow funding, or must it be re-presented at
+   release? **eosDAC answered "at funding" by leaving `finalize_threshold = 1`, and that is
+   the mistake §9.6 turns on.** `treasury-t0::SettlementAuthorization` already refuses a lone
+   source; the question is *when* it is demanded. **Original.**
+2. **Rule the fork semantics.** Does a forked community point at one live deployment (fast
+   upgrades, **one point of capture across every community at once**) or take a copy it
+   controls (slow upgrades, true independence)? **eosDAC chose shared and sold the upside
+   honestly — every DAC *"gets all the future software updates instantly"*. The unstated cost
+   is that whoever controls that account's code controls every community's governance
+   simultaneously.** `governance/anti-capture.md`'s *"no split path exists"* probably pushes
+   us the other way. **Original — and cheap now, expensive later.**
+3. **The `Proposal` type**, with the vote count as a hole. Fields lifted from
+   `dacproposals`: id, proposer, content hash, bounded amount, expiry, job duration, category;
+   the two-gate lifecycle `Pending_approval → Work_in_progress → Pending_finalize`; the
+   30-day expiry sweep. **Dropped by construction: `arbitrator` and `arbitrator_pay` as
+   proposer-supplied fields, `delegatevote`, `delegatecat`, and every threshold denominated
+   in tokens.** **Copyable in shape, original in every authority.**
+4. **The authorization predicate.** `count_votes() >= threshold` replaced by the ratified
+   ladder — safety tier, 13% affirmative quorum of live Respect, K = 4, one-fifth blocking
+   minority (`article-vi-s3.md:34-52`) — plus the founder co-sign through Epoch 1. **Read
+   from `reputation-engine` output as Evidence; never store a weight.** **Original.**
+5. **Generalize `escrow-core` off the shipping vocabulary**, per the 2026-08-07 multi-asset
+   ruling. `SellerShipped`/`DeliveryConfirmed`/`fee_buffer_zano` are marketplace-specific;
+   work delivery needs its own event names and the record needs to be multi-asset and
+   multi-rail. **Carry the clock-free discipline forward unchanged — it is the best property
+   the crate has.** **Original.**
+6. **Enforce the opener.** Make dispute-opening entitlement a checked property rather than an
+   unenforced convention, and take eosDAC's **dispute lock** — once the claimant flags a
+   dispute, the payer loses the ability to quietly refund itself and only the third party can
+   move the funds. **Copyable** (`dacescrow::dispute`, receiver-only).
+7. **Write the Tier-2 selection procedure.** `dispute-engine` escalates to a human and stops.
+   **Draw that human by the senary cascade or by tier authorization. Never by nomination from
+   the party under judgment — that is eosDAC's live hole and it defeats their finalize vote
+   entirely.** **Original.**
+8. **The cooling-off window.** Their one-hour `transfer_delay` between authorization and money
+   moving was a deliberate safety window that happened to be implemented as a chain feature
+   that no longer exists. **Reimplement the intent as an explicit timestamp check.**
+   **Copyable in intent, original in mechanism.**
+9. **Per-community scoping.** `dac_id`-style scoping with role indirection — never hardcode
+   the treasury account — so a new community is a new scope inheriting code with empty tables:
+   **no balances, no members, no standing, which is exactly the fork semantics we ruled.**
+   **With the `VOTE_WEIGHT` role slot deleted, not disabled.** **Copyable, minus one field.**
+10. **The permission-binding layer.** A `setCustodianAuths` analogue translating a tier
+    decision into Vaulta account permissions with tiered thresholds. **Re-verify `eosio.msig`
+    and `updateauth` against Vaulta's own system contracts before anything depends on them —
+    do not assume EOS-era behaviour survived the rebrand.** **Copyable in pattern, unverified
+    in dependency.**
+11. **Immutability of the escrow account.** eosDAC deleted the owner and active keys of the
+    escrow account after deployment *"to even prevent code modification from malicious
+    custodians."* **Cheap, and it is the property that makes worker protection real rather
+    than promised.** If adopted, `dacescrow::clean()` — a `require_auth(self)` action that
+    wipes the entire table, documented as dev-only — **must be deleted from the source, not
+    merely left unlinked.** **Copyable, with one deletion.**
+12. **The anti-spam and one-off-ness answer.** Their bond was documented and never built, and
+    a `b`-denominated bond would make proposing wealth-gated. **Denominate deterrence in
+    Respect or in time, and enforce one-off-ness structurally: no auto-renewal, no
+    category-level standing approval, and a recurrence flag visible to the blocking
+    minority.** **Original, and currently unruled.**
+
+**Not to be built, recorded so it is not proposed again:** any custodian-election contract,
+any stake-weighted or balance-weighted tally, any vote proxy or delegation path, any
+candidacy stake, any token-supply-percentage quorum, any pro-rata distribution keyed to `b`,
+and any dispute venue outside the ratified tiers.
