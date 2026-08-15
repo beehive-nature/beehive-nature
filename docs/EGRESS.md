@@ -24,7 +24,7 @@ row below is a data-plane call the user's operation asked for.
 
 | endpoint | purpose | when it fires | override / kill |
 |---|---|---|---|
-| `connect.trezor.io` | Trezor Connect v10 — official device rail (consent popup; Bridge/WebUSB) | **On the user ENTERING the Trezor step** (they clicked the Trezor card — explicit rail choice; preloading there keeps the connect popup inside the click's gesture window, or browsers silently block it) | Never enter the Trezor step, or use the device-less walkthrough (custody stays Declared). bSAFE 7 lane replaces this with native transport in our own dashboard |
+| `connect.trezor.io` | Trezor Connect (hosted `/9/trezor-connect.js`, probe-verified 200 on 2026-08-14; the `/10/` path 404s) — official device rail (consent popup; Bridge/WebUSB) | **On the user ENTERING the Trezor step** (they clicked the Trezor card — explicit rail choice; preloading there keeps the connect popup inside the click's gesture window, or browsers silently block it) | Never enter the Trezor step, or use the device-less walkthrough (custody stays Declared). bSAFE 7 lane replaces this with native transport in our own dashboard |
 
 ## atmirror (mirror pipeline)
 

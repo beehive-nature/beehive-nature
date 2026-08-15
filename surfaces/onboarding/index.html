@@ -436,7 +436,8 @@ const SCREENS = {
     <p class="muted" style="margin:0 0 var(--s2)">Uses Trezor's official Connect rail (their consent
       popup; Bridge via Trezor Suite, or WebUSB). Their script loads when you enter this step —
       you chose the Trezor rail by arriving here. <b>If no popup appears, allow popups for this
-      site</b> — the connect flow opens one.</p>
+      site</b> — the connect flow opens one. On a phone: the Trezor must be plugged into the
+      <b>phone itself</b> (USB-OTG) — a device on your laptop can't answer your phone's browser.</p>
     <button class="btn ghost" onclick="APP.hardwareDone()">Walk through without the device <span class="muted">(custody stays "declared")</span></button>
     ` : `
     <button class="btn primary" onclick="APP.hardwareDone()">I tapped my ${l}</button>
@@ -747,7 +748,10 @@ function preloadTrezorConnect(){
     if(!window.TrezorConnect){
       await new Promise((res,rej)=>{
         const s=document.createElement('script');
-        s.src='https://connect.trezor.io/10/trezor-connect.js';
+        // PROBE-VERIFIED 2026-08-14: /9/trezor-connect.js -> 200 text/javascript.
+        // (/10/trezor-connect.js is a 404 -- the round-8 "no popup anywhere" root
+        // cause: a guessed URL. Verify the URL, not just the API.)
+        s.src='https://connect.trezor.io/9/trezor-connect.js';
         s.onload=res; s.onerror=()=>rej(new Error('connect.trezor.io unreachable'));
         document.head.appendChild(s);
       });
