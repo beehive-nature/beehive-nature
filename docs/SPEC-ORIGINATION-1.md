@@ -3576,3 +3576,369 @@ already routes around the constraint the seat would be bought to fix.**
     primary spec. Secondary sources also disagree on staking emissions (~76M `A`/yr vs
     85,600 `A`/day from a 250M pool ≈ 31M `A`/yr) — **do not quote a staking yield figure
     without reading the deployed contract.**
+
+---
+
+## 11 · Sets of 21 — Antelope as an OS, and whether it dissolves the ceiling
+
+**Status: ANALYSIS, not a ruling.** Written by Seat 3 2026-08-15 from founder direction the
+same day. Chain figures were queried live 2026-08-15 ~13:25–13:40 UTC against
+`eos.greymass.com`, `wax.greymass.com`, `mainnet.telos.net`, `telos.greymass.com`,
+`proton.greymass.com`, `libre.greymass.com`, plus `api.waxsweden.org`, `wax.eosusa.io` and
+`api.wax.alohaeos.com` as independent controls — **foreign oracles, not an endpoint this
+project signs through**, per §5 of the standing instructions. Prices: CoinGecko 2026-08-15,
+`A`/EOS $0.061656, WAX $0.00368387, TLOS $0.02988384; read every USD figure as ±25% on the
+day's cross-aggregator spread. **Nothing here authorises a mainnet act. Every recommendation
+in §11.5 is a founder gate.** §11.1 collides with no ruled text; if it ever did, it escalates
+by name rather than resolving.
+
+---
+
+### 11.0 The founder claim, verbatim, and the verdict in three sentences
+
+> *"EOS basically was cornered out and ignored and attention redirected because it is a
+> compliment to ETH and is the key to scalability because it is an OS where we will be able to
+> deploy SETS OF 21 BP to handle the weight of billions of active users."*
+> — Founder, 2026-08-15
+
+**The premise is technically correct: Antelope is chain-making software, `max_ram_size` is a
+per-chain parameter — verified live on five different chains below, all with different values
+— and "sets of 21" was not a thesis, it was deployed (WAX, Telos, UX Network, Proton/XPR,
+Ultra, WORBLI).** **It does not dissolve the ceiling for this design, because the cost of
+chain #2 is not RAM — it is twenty-one independent, funded, legally distinct counterparties in
+an ecosystem that is currently shedding them — and because `b` is Vaulta-native, so
+origination on chain #2 does not produce the Vaulta account that origination requires; it
+relocates the ceiling into a settlement problem.** **It is also unnecessary, because the
+ceiling binds on originators and not on population, and this document already fixes the free
+tier at zero chain bytes (`:520-521`).**
+
+---
+
+### 11.1 Does the ceiling even bind? — answer first, because it is worth more than the rest
+
+**Two questions get confused here and they have opposite answers.**
+
+**Q: can origination ride the naming layer at net-zero RAM? NO — and the disqualifying
+argument is already in this repo.** The naming layer is free because a name needs only
+*inclusion* proved, and staleness is survivable: `bdid-architecture-decision.md:142` — the
+epoch `commit()` "**overwrites** the oldest slot in a 144-row ring. Net RAM delta: **0
+bytes**." A lien is not a name. A lien is a claim enforceable **against** the originator
+**by a third party**, and it must be **current**. `bdomain-scaling.md:148` already rejects
+commitment for exactly this: *"Merkle inclusion cannot prove deletion: a stolen or corrected
+address keeps proving valid for a full epoch, which for a fund-routing registry is a loss
+class, not an inconvenience."* **A lien is strictly worse than an address under that failure
+mode:** an originator presenting a stale inclusion proof can double-issue collateralized `b`
+against already-encumbered collateral, in every epoch window, indefinitely. Likewise
+`bdid-architecture-decision.md:390` — *"No authoritative store must exist for a free identity
+to work"* — is correctly scoped to **free identity** and does not extend to liens.
+**Origination genuinely requires authoritative, mutable, current on-chain state with an
+auth binding. It cannot be free.**
+
+**Q: does the ~12.7M ceiling therefore constrain this design? NO — and this document already
+says so.** The tier boundary at `:487-492` puts the RAM cost exactly and only on the
+originator: the free tier holds and transacts `b`, **carries no liens** (`:492`), needs **no
+Vaulta account** and writes **zero bytes to any chain** (`:520-521`). `:2384` states the
+consequence outright — origination is *"hard-capped at ~12.7 million Vaulta accounts …
+roughly 3,000× below the 4.2 × 10¹² population-anchored capacity figure, which is therefore a
+statement about human population and not about money supply."*
+
+**So the binding number is the count of originators, not of humans — and every other mechanism
+in this spec is deliberately driving that count down:** hardware purchase (`:491`), courses,
+bRespect attendance, continuous PoL/PoU at every gate (`:457`), months of elapsed presence,
+and the floor bound. `:42` is explicit that the anti-farm strategy is *"we never have to count
+people; we only have to make origination earned."* **A design that wants originators scarce
+cannot simultaneously be blocked by a scarcity cap on originators.** At the ceiling, 12.7M
+originators against 10 billion participants is **1 per 787 people** — more headroom than a
+gate priced in hardware and coursework should ever need to use.
+
+**Therefore: the multi-chain argument is unnecessary for THIS problem.** It may still be right
+for others — jurisdictional isolation, community sovereignty, blast-radius containment — but
+not for this one. **The whole of §11 reduces to one founder question, in §11.5.**
+
+**Measured, because the ceiling is falling from outside and that is the one thing worth
+watching.**
+
+| | value | as of | source |
+|---|---:|---|---|
+| free RAM | 76,096,344,376 B | 2026-08-05 | `docs/RECEIPT_R8_VAULTA_RAM.md` |
+| free RAM | 75,944,702,137 B | 2026-08-15 | live `eosio/global` + `rammarket`, `eos.greymass.com` |
+| `max_ram_size` | 418,945,440,768 B | 2026-08-15 | same |
+| `total_ram_bytes_reserved` | 343,000,738,631 B (81.87 %) | 2026-08-15 | same |
+| spot | 0.00033068 A/byte | 2026-08-15 | `rammarket` quote 25,112,643.6297 EOS |
+
+Arithmetic, shown:
+
+- **Consumption:** 76,096,344,376 − 75,944,702,137 = **151,642,239 B in 10 days ≈ 15.16 MB/day, with zero `.b` registrations.**
+- **Ceiling today:** 75,944,702,137 ÷ 5,983 = **12,693,415 all-in users** (5,983 × 12,693,415 = 75,944,701,945, remainder 192).
+- **Erosion:** re-running the doc's own division, 76,128,906,582 ÷ 5,983 = **12,724,203**, so the ceiling fell **30,788 slots in 10 days ≈ 3,079 originator-slots/day**, none of them ours.
+- **Pool life at that rate:** 75,944,702,137 ÷ 15,164,000 ≈ **5,008 days ≈ 13.7 years** to zero, absent any `.b` write.
+
+**This is `bdomain-scaling.md:133` — "you do not own your cost curve" — measured rather than
+predicted.** It justifies a standing monitor. It does not justify a redesign.
+
+**Two receipts owed, recorded rather than smoothed over.** (a) Two independent reads of the
+free pool minutes apart on 2026-08-15 returned 75,944,702,137 and 75,944,705,132 — a 2,995 B
+spread; the lower, conservative figure is used throughout. (b) `bdomain-scaling.md:109`
+states 12,724,536 where its own stated inputs divide to 12,724,203 — a 333-user discrepancy,
+immaterial to every conclusion in either document, but it should be reconciled or annotated
+rather than propagated.
+
+---
+
+### 11.2 Sets of 21, costed — technical minimum vs credible minimum
+
+**The premise verifies. `max_ram_size` is per-chain, and no two chains agree** (all queried
+`eosio/global` and `eosio/global2`, 2026-08-15):
+
+| chain | `max_ram_size` | free RAM | `new_ram_per_block` | active schedule | node version |
+|---|---:|---:|---:|---:|---|
+| EOS / Vaulta | 418,945,440,768 B | 75.9 GB | **0** | 21 | Spring v1.0.5 |
+| WAX | 314,750,913,536 B | 125.9 GB | **0** | **10** (v929) | v5.0.3wax01 |
+| Telos | 36,445,142,656 B | 20.8 GB | **0** | 21 | v1.2.2 |
+| XPR | 17,179,869,184 B | 5.0 GB | **0** | 21 | v3.1.2 |
+| Libre | 68,719,476,736 B | — | **0** | 21 | v3.2.3-hotfix |
+
+Three things fall out immediately.
+
+**(a) The freeze is ecosystem-wide, not an EOS grievance.** `new_ram_per_block = 0` on **all
+five** live chains. `bdomain-scaling.md:109` reads as though the Dec-2023 `setramrate` were
+EOS-specific; it is not, and the correction strengthens the doc rather than weakening it —
+there is no sibling chain with a growing RAM supply to migrate to.
+
+**(b) The ceiling is genuinely per-chain, and there is one hard proof of it.** WAX reports
+**~15 million accounts** (wax.io / Messari, likely-current) — **more accounts than the entire
+~12.7M arithmetic ceiling of a single Vaulta chain.** Adding chains does add real account
+capacity. That part of the founder's reading is not arguable.
+
+**(c) Adding producers never added RAM, and 21 was never a protocol limit.** In
+`AntelopeIO/spring`, `libraries/chain/include/eosio/chain/config.hpp` (main branch):
+`max_producers = 125` pre-Savanna; `max_proposers = 64*1024` and `max_finalizers = 64*1024`
+post-Savanna. **21 is a system-contract and economic convention, not a ceiling.** So the
+sharding intuition is right in its conclusion and wrong in its mechanism: RAM scales by adding
+**chains** or by `setram`, never by adding producers to an existing chain.
+
+**Technical minimum: one machine.** `nodeos` will produce with a single producer; the bios
+boot sequence starts at `eosio` and hands off. A genesis file, a binary, and an afternoon.
+
+**Credible minimum: twenty-one independent, funded, legally distinct organisations, plus a
+block explorer, wallet support, an exchange listing, and a working resource market — forever.**
+The gap between those two numbers is the entire finding. **21 producers run by one operator
+is a database with extra steps:** the 15-of-21 threshold on `eosio.prods@active` is the only
+thing standing between a chain and its operator, and a set you recruited, funded and can
+replace is a 15-of-21 you hold. You would have built a permissioned ledger, paid for
+twenty-one machines to agree with you, and called it a chain.
+
+**The evidence says the recruitment constraint is what actually binds, and it is tightening:**
+
+- **WAX — the largest Antelope sibling by usage — is running a TEN-producer active schedule, not 21.** Schedule version 929: `eosiodetroit, ivote4waxusa, nation.wax, amsterdamwax, cryptolions1, sentnlagents, waxswedenorg, waxhiveguild, eosphereiobp, bp.alcor` — against **56 registered `is_active=1`** producers. Verified **identically on four independent endpoints** (`wax.greymass.com`, `api.waxsweden.org`, `wax.eosusa.io`, `api.wax.alohaeos.com`), 2026-08-15T13:32Z. **The number is solid; the CAUSE is not established** — see §11.6.
+- **WAX cut paid guild positions 27 → 16, effective 2026-01-01** (announced 2025-12-09, with increased standby compensation).
+- **UX Network — a founding Antelope Coalition member and the team that BUILT Antelope IBC — appears dark.** Every probed public endpoint fails to connect (`api.uxnetwork.io`, `ux.eosusa.io`, `ux.api.eosnation.io`, `ux.eossweden.org`, `uxapi.eosphere.io`, `api-ux.eosarabia.net`); `uxnetwork.io` resolves to 162.255.119.115, a Namecheap parking address; `github.com/uxnetwork` newest push 2023-09-22; **antelope.tools (operated by EOS Costa Rica) no longer lists UX among its monitored mainnets** — EOS, FIO, Libre, Telos, WAX, XPR only.
+- **Precedent, same failure shape, seven years earlier: WORBLI cut BPs 32 → 15 in August 2019** as producers stopped producing; the cited cause was a native token with no value accrual, making BP compensation unpayable.
+- **The core software has gone quiet.** `AntelopeIO/spring`: last stable **v1.2.2, 2025-08-19**; last dev preview v2.0.0-dev1.3, 2025-08-27; **last commit to `main` 2025-11-12 — a LICENSE change to MIT**; a commit query with `since=2025-11-15` returns an empty array. `AntelopeIO/leap` final commit **2024-11-13**: *"Add note to README that Leap is no longer supported."*
+- **But the ecosystem is not dead: Telos activated Savanna on mainnet 2026-07-27** (Project Lightspeed, 1-second finality), six weeks before this writing. Deployments still happen; new chains do not.
+- **No turnkey path exists.** There is no Antelope analogue of Cosmos SDK + Interchain Security or Avalanche subnets — no shared-security layer, no managed launch service, no subnet framework. The only practical launch guide found is a three-part hobbyist Medium series (2024-02-25) framing it as a weekend project; its sample `genesis.json` does not set `max_ram_size` and it never states a producer count. **No new Antelope mainnet was found launched since Libre (2022)** — a negative search result, marked UNVERIFIED.
+
+**The bill, if the sharded plan were built anyway — DERIVED, not sourced, order-of-magnitude
+only:**
+
+- 1B users × 5,983 B = **5.983 TB of state**.
+- ÷ 100 chains = **59.83 GB per chain**, and **Antelope state is a `chainbase` mmap, so every producer holds all of it in physical memory.**
+- 21 producers × ~3 node types each (Telos BP minimum: testnet, producing, full) = **63 node-instances per chain, ~6,300 total**.
+- Server DDR5 ECC RDIMM **$29.56–$39.06/GB, median $35.70/GB** (capitalandcompute.net, 2026-08-14; RAM price index **349** against Nov-2025 = 100, i.e. **+249 %**; TrendForce forecasts server DRAM contract prices +13–18 % QoQ in 3Q26).
+- 59.83 GB × $35.70 ≈ **$2,136 of DRAM per node-instance** → × 6,300 ≈ **$13.5M in DRAM alone** — before servers, bandwidth, staff, tokens, liquidity, bridges or explorers — and requiring **2,100 independent producer entities** to be recruited and kept solvent.
+
+**Set that against §10.0 of this document: ~$3.0M of sustained aligned stake plus $18k–48k/yr
+of infrastructure buys ONE seat on ONE existing chain, and does not pay for itself at any
+rank. And set both against the alternative §10.0 already priced: below ~3M accounts the
+ceiling can simply be bought at spot for $133k–$482k, with no seat, no election, and no new
+governance surface.** **The AI-driven memory shortage lands squarely on the one architecture
+whose scaling story is "every validator holds all state in RAM." Sharding does not remove that
+cost; it multiplies it by the number of chains and hands you the invoice at the worst point in
+the DRAM cycle.**
+
+**Total free RAM across ALL five live Antelope chains combined ≈ 227.6 GB ≈ 38M
+Vaulta-equivalent accounts at 5,983 B. Seizing every free byte on every sibling chain does not
+reach 100 million, let alone a billion.**
+
+---
+
+### 11.3 The settlement question a multi-chain world forces
+
+**`b` is Vaulta-native. That is ruled. Chain #2 is not Vaulta.** A single-chain design never
+has to answer where value settles; a multi-chain one does, on its first day.
+
+**Antelope IBC is PROOF-BASED, not notary-based — and that distinction is the whole security
+argument, so state it precisely.** `ibc.prove`'s ABI (read live from `eos.greymass.com`,
+2026-08-15) exposes exactly the surface of a light client: `schedules` / `schedulev2`
+(producer schedules with `block_signing_authority`), `blockheader` / `sblockheader`,
+`heavyproof` / `lightproof`, `actionproof` / `actreceipt`, and `lastproofs`
+(`block_merkle_root` + `expiry`). **The relayer is permissionless and untrusted: it supplies
+proofs it cannot forge. There is no bonded notary, no committee, no threshold multisig, no
+oracle set.** It was deployed to EOS/Vaulta, WAX, Telos and UX (`ibc.wl.*` wraplock,
+`ibc.wt.*` wraptoken, plus the `antelopexsys` router), with ~2.05 MB RAM quota each, and it
+audited clean. **This is real engineering and it should be credited as such.**
+
+**Three caveats decide the architecture anyway.**
+
+**(a) Trustless means "no NEW trusted party," not "no trust."** A bridged asset inherits the
+source chain's producer set. **A 15-of-21 collusion on chain X forges arbitrary state into
+chain Y.** The security of anything transiting the mesh equals the security of the **weakest**
+producer set it touches. Market caps, CoinGecko 2026-08-15: **Vaulta $102.7M, WAX $17.2M,
+Telos $13.5M.** That ratio is the bound, and it is arithmetic, not preference.
+
+**(b) Liveness is not trustless, and the empirical record is brutal.** Proofs carry an
+`expiry` (observed lifetimes 15 minutes to ~13 hours). No relayer, nothing moves. Measured on
+Vaulta's `ibc.prove/lastproofs`, 2026-08-15:
+
+| source chain | last proven block | proof expiry | live head 2026-08-15 | gap |
+|---|---:|---|---:|---|
+| WAX | 382,150,377 | 2025-07-16 | 450,628,724 | **68.5M blocks ≈ 13 months** |
+| Telos | 371,314,268 | 2024-11-04 | 483,566,537 | **112.3M blocks ≈ 21 months** |
+| UX | 284,168,653 | 2025-01-31 | *unreachable* | — |
+
+Producer-schedule continuity — the one thing a light client may not skip — is broken by **60
+versions** on WAX (proven 869 vs live 929) and **1,540** on Telos (6,248 vs 7,788). **Total
+value secured by the entire bridge: ~$6,405** — 13,616.27 EOS locked (~$840), 52,021.82
+wrapped WAX (~$192), 179,816.84 wrapped TLOS (~$5,374), of which **9,821.4423 EOS sits in
+`ibc.wl.ux` against a chain nothing can reach.** Supporting infrastructure is DNS-dead
+(`antelopeibc.io`, `ibc-docs.uxnetwork.io`, `ibc-server.uxnetwork.io`, `explorer.uxnetwork.io`,
+`eos.ibc.animus.is`, `antelopex.io`); source repos frozen (`CryptoMechanics/wraplock`,
+`/wraptoken`, `/eosio-ibc-bridge-contract` all last committed 2023-02-10; `/ibc-proof-server`
+2024-01-25). **Four funded organisations — the ENF, WAX, Telos and UX — collectively could not
+keep three relayers alive. That is the single most important operational datum in this
+section.**
+
+**(c) Savanna broke it, and this is decisive.** `SAVANNA` and `BLS_PRIMITIVES2` are activated
+on **EOS/Vaulta and Telos**, and **not** on WAX (verified via `get_activated_protocol_features`
+on all three, 2026-08-15). `ibc.prove`'s `last_code_update`: **2023-01-28** on EOS,
+**2023-01-28** on Telos, **2023-04-05** on WAX — roughly **20 months before Savanna activated
+(2024-09-25)**. **The deployed light client predates the consensus algorithm it would now have
+to verify. Any IBC direction whose SOURCE is Vaulta or Telos is unverifiable by the deployed
+verifier: their finality is BLS-aggregate and the contract only knows how to check 2/3+1
+producer signatures over pre-Savanna headers.** `AntelopeIO/savanna-light-proof` exists; last
+commit **2024-07-03**; never integrated. **So the restart cost is not "turn the relayer back
+on." It starts at rewriting and re-auditing the light client for BLS finality.**
+
+**The shape the trust model actually supports, therefore:**
+
+**`b` is issued, collateralized, liened and settled on Vaulta. Full stop. Nowhere else, not
+wrapped, not natively re-issued.** Two independent grounds:
+
+1. **Supply invariant.** Native issuance on N chains binds `b`'s supply invariant to the cheapest-to-corrupt producer set in the mesh. Issuing `b` on a $13M chain redeemable against Vaulta-held collateral hands the invariant to a validator set an attacker can buy for a fraction of the collateral.
+2. **The stronger one, specific to this design.** `b` carries **liens** (`:492`). `b-collateral-lending.md:112` states the design's best property outright: *"There is no state in which the protocol asks what `b` is worth… Undercollateralization is not a protocol event — it is the lender's loss, priced at origination, non-recourse."* **That oracle-free, liquidation-free property survives only while collateral and lien live in the same state machine.** Split them across an asynchronous bridge with a demonstrated 13- and 21-month outage record and you have reintroduced exactly the liveness-dependent liquidation risk this design eliminated. `crates/dashboard`'s floor bound is a **global** invariant; sharded, it becomes N local invariants that breach independently.
+
+**What community chains could lawfully carry, if they ever exist: ACTIVITY, never a bearer
+asset.** bRespect attendance, PoL/PoU, community-local receipts, message traffic — none of it
+needs atomic cross-chain settlement, and all of it can be committed to Vaulta by a root exactly
+as the naming layer already is, at **net RAM delta 0**. That yields the cellular substrate at
+zero settlement risk, because nothing of value crosses a trust boundary.
+
+**One finding that is new to this repo and should be carried: `A` is already a wrapped token
+on its own home chain.** The Vaulta system symbol is still **EOS** — `eosio.token` supply is
+still 2,100,000,000.0000 EOS, and `rammarket`'s quote leg is denominated in EOS, so **RAM,
+PowerUp and producer pay are all still EOS-denominated.** `A` is issued by **`core.vaulta`, a
+PRIVILEGED contract created 2025-03-25 (code updated 2025-05-14), currently escrowing
+962,017,241.5435 EOS — 45.81 % of supply — against a 2,100,000,000.0000 A max supply** (all
+queried 2026-08-15). Two consequences. **(i)** Every RAM costing in this repo should be read as
+EOS-denominated, not `A`-denominated; they are near-identical today ($0.0617 vs $0.0618) but
+they are different tokens and can diverge. **(ii)** The simplest conceivable lock-and-mint —
+**crossing no consensus boundary at all, same chain, same producers** — still required a
+privileged system contract to be safe. **That is the template, and it does not generalise
+across a trust boundary.**
+
+---
+
+### 11.4 The record, fairly — a ledger, both columns
+
+**Accuracy is the respect here. Two of the three components of the founder's historical claim
+verify; the causal one does not, and the true version is stronger than the stated one.**
+
+| **credit — what EOS demonstrably got right** | **debit — what it got wrong** |
+|---|---|
+| **Account abstraction, 4.7–6.9 years early.** Named 12-char accounts, weighted multi-level permissions, native multisig, and key rotation without changing the address — all shipped at mainnet launch, June 2018. Ethereum's equivalents: **ERC-4337 EntryPoint deployed to mainnet 2023-03-01**; **EIP-7702 activated with Pectra 2025-05-07 10:05 UTC**. | **"Millions of TPS" was marketed and never met.** Best retrievable mainnet record is a 2,773-tx block = 5,546 TPS instantaneous (EOS Go); a Jungle testnet run hit ~9,565 TPS. **Both are single-block spikes with no stated year — UNVERIFIED. Do not put a TPS number in this spec.** |
+| **No user-surface gas.** Resources were staked, and from ~2021-04-08 **PowerUp** replaced staking/REX with 24-hour market-priced CPU/NET; dApps, wallets and explorers absorbed user cost. Ethereum's paymaster equivalent arrives with ERC-4337 in 2023. | **"Feeless" relocated the cost, it did not remove it.** It moved into RAM bought on a Bancor curve and CPU/NET rental — **the exact cost that produces the ceiling in `bdomain-scaling.md`.** The free lunch was always paid at account-creation time. |
+| **Finality.** ~3 minutes pre-Savanna against Ethereum's ~12.8 minutes post-Merge; **~1 second after the Savanna hard fork, 2024-09-25** — ahead on both sides of the fork. | **Governance collapsed in public.** 2018-06-22 ECAF ordered 27 accounts frozen *"reasoning to follow"*; producers quietly stopped executing its orders and the body was dismantled; Larimer proposed scrapping the constitution. **The constitution bound only while the top 21 chose to comply.** |
+| **Chain-making genuinely worked.** WAX, Telos, UX Network, Proton/XPR, Ultra and WORBLI all ran the same codebase with their own 21, own RAM market, own namespace. Live and independently producing 2026-08-15: WAX head 450,628,724, Telos 483,566,537, Vaulta 514,981,200. | **Vote buying, with no ratification path.** October 2018 reports of Huobi funded to collude with other producers. The constitution forbade vote buying, was **never ratified**, and had **no on-chain mechanism to ratify it**. A referendum tool reached public beta and never became binding. |
+| **It still ships.** **Telos activated Savanna on mainnet 2026-07-27**, six weeks before this writing. | **RAM became a speculative market in 2018** — and that same Bancor curve is what produces the price wall at row #10,000,000 (2.25×) and #29,000,000 (877×) in `bdomain-scaling.md:119-133`. |
+
+**On "a compliment to ETH": defensible on the merits, but complementarity was asserted and
+never shipped.** There was never a credible trust-minimised EOS↔Ethereum bridge, and the era's
+marketing was "Ethereum killer," not complement. Ethereum's own roadmap subsequently converged
+on the properties EOS had first — smart accounts, paymasters, appchains, 7702. **The claim
+survives as "EOS was right early and did not capitalise on it," which is both true and more
+useful than "EOS was right and was ignored."**
+
+**On "attention redirected": verifiably true, and the actor was Block.one, not Ethereum.**
+$4.1B raised 2017-06-26 → 2018-06-01. The **SEC order of 2019-09-30 cost $24M — 0.58 % of the
+raise — with a waiver attached** (secondary sourcing only; sec.gov returned HTTP 403, and the
+proceeding number 33-10714 is **UNVERIFIED**). The **$1B EOS VC pledge** was, per ENF CEO Yves
+La Rose, never intended to be honoured; ENF announced preparation of a suit in July 2023. In
+**May 2021 Block.one put 164,000 BTC + $100M cash + 20M EOS (~$10B) into Bullish**, which
+**IPO'd on NYSE as BLSH in August 2025, raising $1.1B at $37/share.** Producers voted
+**2021-12-08** to freeze ~67M EOS of remaining B1 vesting; the **Antelope fork and rebrand
+landed 2022-08-17** with a coalition committing $8M/yr; **Leap 3.1 consensus upgrade
+2022-09-21**. **Cite this. It is dated, documented, and requires nobody to believe in a
+conspiracy.**
+
+**On "cornered out": no primary evidence of an external suppression campaign was found at this
+search depth.** Absence of evidence at this depth is not disproof, but **the documented
+internal causes plus the capital diversion are sufficient to explain the outcome and are
+vastly more citable.** **Do not repeat "cornered out" as a sourced fact.** The sharper and
+fully-sourced version is: *the sibling chain that built the inter-chain layer died, the largest
+sibling by usage is running half a producer set, and the capital raised to fund the ecosystem
+was deployed into an exchange that listed on the NYSE.*
+
+**One historical datum that is directly load-bearing for this spec, and cuts toward the free
+tier on any chain: WAX introduced an account-creation fee in Q1 2022, and new-address growth
+fell ~81–85 % — from ~10,000/day to ~4,000/day — and never recovered** (Messari; also recorded
+at `bdomain-scaling.md` §5). **Adding chains does not fix a design where the user meets a
+chain-resource cost at the door. One chain or twenty-one, the fee is the thing that kills
+growth.**
+
+**On the cellular question — chains are not cells, and the arithmetic settles it.**
+Communities cap at **7,776** humans, with an unbounded number of communities and growth by
+forking. One chain at the **1–3M practical** ceiling holds **~150–400 communities**; at the
+**12,693,415** arithmetic ceiling, **1,632** (7,776 × 1,632 = 12,690,432). **The chain boundary
+sits two to three orders of magnitude above the social cell and cannot track it.** Communities
+fork organically at zero marginal cost; a chain must be provisioned, funded and staffed by an
+operator. **Cellular chains are not the natural substrate of the cellular social architecture.
+They are a coarse capacity valve. The social layer already gives you cellular scaling at zero
+producer-recruitment cost.**
+
+---
+
+### 11.5 What this means for strategy — ordered
+
+**NOW**
+
+1. **Answer one question, and it gates everything else: is the origination bar expected to be cleared by more than ~12.7 million humans?** Everything in §11.1 reads as *no* — hardware, courses, attendance, months of presence, and `:42`'s "make origination earned." **If the answer is no, the ceiling is slack, today's finding is not a wall, and nothing structural changes. FOUNDER GATE.**
+2. **Stand up a standing RAM monitor** — free pool, `total_ram_bytes_reserved`, and a recomputed ceiling, weekly, receipted, against a foreign oracle. **The ceiling is falling ~3,079 originator-slots/day driven entirely by third parties.** This is a watch item, not a redesign trigger.
+3. **Record in this spec that the ceiling is per-chain, not per-protocol** — WAX's ~15M accounts prove it — **so a known escape hatch exists.** State in the same breath that it is priced in counterparties, not bytes.
+4. **Correct `bdomain-scaling.md`** on two verified points: `new_ram_per_block = 0` is **ecosystem-wide across all five live chains**, and the `:109` division does not reproduce its own stated result (§11.1).
+
+**DEFER — with a written trigger condition, so it is a decision and not a drift**
+
+5. **The contract-row origination record.** `RECEIPT_R8` Query 3 shows the 2,996–3,446 B is mostly **system** overhead: 2,048 B base plus permission objects, `userres`, `delband`, `voters`. A contract-owned row keyed by bDiD holding pubkey + lien state + nonce, authorized by the **contract** via `recover_key` / `assert_recover_key` rather than `require_auth`, plausibly lands at **~250–400 B all-in** — an **8–12×** reduction, moving the originator ceiling to roughly **200–300 million on one chain**, with no bridge, no relayer, no second producer set. **The ~250–400 B is DERIVED arithmetic, not a measured deployment — it needs a real testnet contract with the actual table layout before it can be costed.** Honest cost: you lose native `require_auth` and the `linkauth` machinery already planned at `bdid-architecture-decision.md:479`, you reimplement authorization inside the contract, and replay protection becomes yours. **Trigger: paid originators projected past ~3M, i.e. the practical rather than arithmetic ceiling. Spring supports WebAuthn keys natively, which fits the existing passkey design.**
+6. **Chain #2 as a capacity valve, last, and only if 5 is exhausted** — and even then it carries **activity, never issuance**.
+
+**DO NOT**
+
+7. **Do not issue, collateralize or lien `b` on any chain but Vaulta.** Not wrapped, not natively re-issued, not now, not later. §11.3 grounds 1 and 2 are independently sufficient.
+8. **Do not plan on Antelope IBC.** It is a genuinely proof-based light client that has been unfed for 13–21 months, secures ~$6.4k, has DNS-dead infrastructure and frozen repos, and **cannot verify Vaulta as a source chain at all post-Savanna.** Restart begins at rewriting and re-auditing the light client for BLS finality.
+9. **Do not treat a chain as the social cell.** 1,632 communities per chain at the ceiling. Off by two to three orders of magnitude.
+10. **Do not put a TPS figure in this spec**, and **do not repeat "EOS was cornered out" as a sourced fact.** The Block.one capital record says more, is dated, and holds up.
+11. **Do not read this section as lifting the `kingbeelovis` freeze**, which remains ruled and unlifted in `bdid-architecture-decision.md`. Nothing here authorises a contract change, a `regproducer`, a token purchase, or a genesis.
+
+---
+
+### 11.6 Open — what this section could not close
+
+1. **FOUNDER, ONE LINE, BLOCKS THE REST: is the origination bar expected to be cleared by more than 12.7 million humans?** If no, §11.5 items 5–6 never trigger.
+2. **WAX's 10-producer schedule: the number is solid (four independent endpoints, schedule v929, 2026-08-15), the CAUSE is not.** Deliberate governance change, vote-threshold artifact, or degradation — undetermined. **Worth a direct question to a WAX guild before this is stated publicly; it is a strong claim.**
+3. **No verified 2026 dollar figure for monthly BP burn.** Hardware minimums and DRAM spot pricing are sourced; no Antelope BP published a reachable audited 2025/26 cost disclosure. **The ~$13.5M DRAM figure in §11.2 is DERIVED — order-of-magnitude only.** EOS Nation, EOSphere and Telos BPs file periodic transparency reports; those would close it.
+4. **UX Network's death is triangulated, not announced** — dead endpoints, parked domain, 2023 GitHub, dropped from antelope.tools — but no shutdown notice or post-mortem was found. **Trap avoided, recorded so nobody falls into it: multiple 2026 outlets report "UX Chain" shutting down 2026-05-15. That is Umee/UX Chain, a Cosmos lending chain, a different entity. Do not cite it for Antelope UX Network.**
+5. **Whether the Vaulta Foundation still funds Antelope core development is unknown.** Spring's nine-month commit silence is verified fact; the funding status behind it is not. `VaultaFoundation/grant-framework` exists; 2026 disbursements unverified.
+6. **No authoritative genesis-time minimum producer count exists in official Antelope docs.** The technical-vs-credible distinction in §11.2 rests on governance arithmetic (2/3+1 = 15 of 21 for consensus and for `max_ram_size`), not on a citable launch spec.
+7. **Savanna raises the protocol finalizer ceiling to 65,536; no deployed system contract was confirmed electing more than 21.** On EOS the Savanna activation vote was explicitly "15 of 21 finalizer keys."
+8. **`crates/chain-eos` remains read-only** — SHIP codec plus stream ingester, no transaction construction, signing or account creation (`docs/VERIFIED-FACTS.md:82`, A47; `SPEC-BNROSE-ONBOARD.md:145`). **Whether the target is one chain or twenty-one, the Vaulta write path is unbuilt work and should be read before any origination path is costed.**
+9. **"No new Antelope mainnet since Libre (2022)" is a negative search result, not a census.** UNVERIFIED.
