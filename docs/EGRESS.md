@@ -20,6 +20,12 @@ row below is a data-plane call the user's operation asked for.
 | Hive adapter | balance + RC read | `api.hive.blog` | `HiveAdapter::with_url` |
 | Vaulta adapter | balance + identity read | `eos.greymass.com` (**corrected 2026-08-14** — was `wax.eosrio.io`, the WAX chain, chain_id `1064487b…` ≠ Vaulta `aca376f2…`) | `VaultaAdapter::with_url` |
 
+## surfaces/onboarding (served pages)
+
+| endpoint | purpose | when it fires | override / kill |
+|---|---|---|---|
+| `connect.trezor.io` | Trezor Connect v10 — official device rail (consent popup; Bridge/WebUSB) | **ONLY on the user clicking "Connect my Trezor — for real"** — the wizard performs zero egress until that click | Don't click, or use the device-less walkthrough (custody stays Declared). bSAFE 7 lane replaces this with native transport in our own dashboard |
+
 ## atmirror (mirror pipeline)
 
 | endpoint | purpose | default host(s) | override / kill |

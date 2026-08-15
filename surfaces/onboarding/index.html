@@ -428,7 +428,16 @@ const SCREENS = {
     <h2>Confirm on your ${l}</h2>
     <p>Touch your ${l} to prove it's you. The signing key stays on the device.</p>
     ${crumbs}
+    ${kind==='trezor' ? `
+    <button class="btn primary" onclick="trezorConnectReal(this)">Connect my Trezor — for real</button>
+    <div id="tz-status" class="muted" style="min-height:1.2em;margin-bottom:var(--s2)"></div>
+    <p class="muted" style="margin:0 0 var(--s2)">Uses Trezor's official Connect rail (their consent
+      popup; Bridge via Trezor Suite, or WebUSB). Loads Trezor's script <b>only when you click</b> —
+      this page stays zero-network until you invoke it. If Suite is open, Bridge carries it.</p>
+    <button class="btn ghost" onclick="APP.hardwareDone()">Walk through without the device <span class="muted">(custody stays "declared")</span></button>
+    ` : `
     <button class="btn primary" onclick="APP.hardwareDone()">I tapped my ${l}</button>
+    `}
     <button class="btn link" onclick="APP.go('custody')">← Pick a different method</button>
   `); },
 
@@ -500,7 +509,7 @@ const SCREENS = {
     <div class="grow">
       <span class="badge desig">You're in</span>
       <h1 style="margin-top:var(--s4)">Your wallet is ready</h1>
-      <p>Held by your ${custodyLabel()}. Nobody else can touch it — including us.</p>
+      <p>Held by ${custodyLabel()}. Nobody else can touch it — including us.</p>
 
       <div class="center" style="margin-block:var(--s4)">
         <div class="bchip"><b>0</b><span>b</span></div>
@@ -515,6 +524,10 @@ const SCREENS = {
           ? (APP.ctx.pairConfirmed
               ? `<div class="gauge g-known"><span class="s">Known</span> Custody · ${custodyLabel()} — CONFIRMED by nonce-bound reply${APP.ctx.pairConfirmed.sigOk?' with a REAL on-device signature':' (reply unsigned/preview — labeled)'} · key ${APP.ctx.pairConfirmed.fp}</div>`
               : `<div class="gauge g-stale"><span class="s">Declared</span> Custody · ${custodyLabel()} — no reply scanned; declared is not confirmed</div>`)
+          : APP.ctx.custody==='trezor'
+          ? (APP.ctx.trezorReal
+              ? `<div class="gauge g-known"><span class="s">Known</span> Custody · ${custodyLabel()} · firmware ${APP.ctx.trezorReal.fw} — REAL device verified over Trezor Connect</div>`
+              : `<div class="gauge g-stale"><span class="s">Declared</span> Custody · your Trezor — walked through WITHOUT the device; nothing verified. Use "Connect my Trezor — for real" to earn Known</div>`)
           : `<div class="gauge g-known"><span class="s">Known</span> Custody · ${custodyLabel()}</div>`}
         <div class="gauge g-absent"><span class="s">Absent</span> Balances — connect a rail to read (none faked)</div>
       </div>
@@ -611,8 +624,9 @@ function railHTML(step){ return `
   </div>`; }
 function stageWrap(step, inner){ return `${railHTML(step)}<div class="grow">${inner}</div>`; }
 function custodyLabel(){
-  const m={passkey:'this device’s passkey',optical:'a paired spare phone (offline signer)',
-    key:'a security key',trezor:'a Trezor'};
+  // phrases must read after "Held by …" — beta round 6 caught "your a Trezor"
+  const m={passkey:'this device’s passkey',optical:'your paired spare phone (offline signer)',
+    key:'your security key',trezor:APP.ctx.trezorReal?`your ${APP.ctx.trezorReal.name}`:'your Trezor'};
   return m[APP.ctx.custody]||'this device';
 }
 /* The one-scan install+pair link (founder direction 2026-08-14, after the first
@@ -658,6 +672,47 @@ function drawPairQr(){
   const off=Math.floor((cv.width-qr.size*scale)/2);
   for(let y=0;y<qr.size;y++)for(let x=0;x<qr.size;x++)
     if(qr.getModule(x,y)) g.fillRect(off+x*scale, off+y*scale, scale, scale);
+}
+
+/* ---- REAL Trezor connection (BEE lane) ----
+   Official Trezor Connect v10 — THEIR script, THEIR consent popup, Bridge (ships
+   with Trezor Suite) or WebUSB. Loaded ON CLICK ONLY: the wizard performs zero
+   network egress until the user explicitly invokes Trezor's own rail
+   (EGRESS.md row: connect.trezor.io, click-gated). The bSAFE 7 lane later
+   replaces this with our own native transport in the dashboard. */
+async function trezorConnectReal(btn){
+  const st=document.getElementById('tz-status');
+  btn.disabled=true; st.textContent='Loading Trezor Connect (their official script)…';
+  try{
+    if(!window.TrezorConnect){
+      await new Promise((res,rej)=>{
+        const s=document.createElement('script');
+        s.src='https://connect.trezor.io/10/trezor-connect.js';
+        s.onload=res; s.onerror=()=>rej(new Error('script unreachable'));
+        document.head.appendChild(s);
+      });
+      await TrezorConnect.init({
+        lazyLoad:true,
+        manifest:{ email:'loviswater44@gmail.com', appUrl:'https://beehive-nature.github.io/beehive-nature/' },
+      });
+    }
+    st.textContent='Look for Trezor’s popup — approve it there, then check the device…';
+    const r=await TrezorConnect.getFeatures();
+    if(!r.success) throw new Error(r.payload?.error||'device did not answer');
+    const p=r.payload||{};
+    const NAMES={T1B1:'Trezor Model One',T2T1:'Trezor Model T',T2B1:'Trezor Safe 3',
+                 T3B1:'Trezor Safe 3',T3T1:'Trezor Safe 5',T3W1:'Trezor Safe 7'};
+    const name=NAMES[p.internal_model]||`Trezor (${p.internal_model||p.model||'unknown model'})`;
+    APP.ctx.trezorReal={ name,
+      fw:[p.major_version,p.minor_version,p.patch_version].filter(x=>x!=null).join('.'),
+      label:p.label||'' };
+    st.style.color='var(--verified)';
+    st.textContent=`✓ ${name}${APP.ctx.trezorReal.label?` “${APP.ctx.trezorReal.label}”`:''} · firmware ${APP.ctx.trezorReal.fw} — REAL device, verified over Trezor Connect`;
+    setTimeout(()=>APP.hardwareDone(), 900);
+  }catch(e){
+    btn.disabled=false;
+    st.textContent=`Refused/failed honestly: ${e.message}. Is the device plugged in and unlocked? (If Suite is mid-update, Bridge may be restarting — try again after.)`;
+  }
 }
 
 /* ---- reply-leg verification (wizard side) ---- */
