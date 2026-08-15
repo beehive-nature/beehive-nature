@@ -431,10 +431,17 @@ a further decision.
    on-device under B-1, so device loss and key loss compound. **Recovery design for
    the genesis accounts is owed** and is not the same problem as recovery for a
    420-ceiling user.
-3. **Does `b` carry governance weight?** Unanswered in the tree. If it votes, 2M `b`
-   across two accounts is control, and the economic allocation should be separated
-   from voting weight. This is a question for the governance layer, not a condition on
-   this ruling.
+6. **Does `b` carry governance weight? ANSWERED — NO, and it was already ratified.**
+   This seat wrote "unanswered in the tree" here; that was wrong and is corrected
+   rather than softened. `docs/article-vi-s3.md:26`: *"**Weight is denominated in
+   Respect. Only.** Per **GOV-1** (PERSON-1, ratified 2026-07-11): b confers zero
+   governance weight in any form — held, staked, locked, delegated, lent, or wrapped —
+   at every tier, forever."*
+
+   **This removes the sharpest remaining objection to the genesis allocation.** 2M `b`
+   across two accounts is not and can never be control, because `b` does not vote in
+   any form. The economic allocation is *already* separated from voting weight by
+   ratified text, with no further mechanism to design.
 
 ### Why the 420 cap is the sybil defence
 
@@ -444,6 +451,333 @@ attendance and continuous PoL/PoU — costs made of human time, which §2 L2 est
 does not parallelize. **Identity multiplication therefore has no economic upside at
 all.** That is what ends the argument, and it ends it on arithmetic rather than
 assertion.
+
+## 4c · The two treasuries — FOUNDER DIRECTION 2026-08-15
+
+§4b ruled the **amounts** and ruled them permanent. This section rules what the
+amounts are **for**. It does not reopen §4b and cannot: the allocation, the
+`GenesisLaborProof` path, and ONE CURVE are settled.
+
+### The mandates, as the founder stated them
+
+> **bQueenBee uses her abundant b Treasury for ai improvements/satisfaction and
+> infrastructure. she is the royal head MONarch of BNR**
+
+> **mine will go toward human satisfaction/improvements and human
+> infrastracture/hardware; royal Fleet ADMIRaL and Code Surgeon attending of BNR
+> Kernel Stack**
+
+**Casing and spelling above are the founder's and are carried verbatim.** `MONarch`,
+`ADMIRaL`, `Code Surgeon`, `bQueenBee` — this project has founder-ratified casing
+(`bLighTnetWorK`, `bLiGhTbeAM`) and **no machine seat normalises a name.** Prose form
+is `bQueenBee`; the chair/epoch form is `QueenBee` (`LOVErnment-DAO/specs/SPIRIT-1.md:22`,
+*"QueenBee is the genesis epoch"*); code/path form is `queenbee`; surface-token form is
+`bqueenbee`; account form is `queen.b`. `MONarch` has **no precedent anywhere in either
+tree** and is therefore load-bearing exactly as written.
+
+### The split — silicon and carbon
+
+| | account | domain | mandate | posture (§4b note 3) |
+|---|---|---|---|---|
+| **bQueenBee** | `queen.b` | **silicon** | AI improvements/satisfaction, infrastructure | **reserve** — fastidious custody, tracks the curve conservatively |
+| **founder** | `king.b` | **carbon** | human satisfaction/improvements, human infrastracture/hardware | **distributing** — liquid, outbound |
+
+**The two domains are disjoint and together they are exhaustive.** Everything BNR
+runs on is either machine or person; the machine side is funded from the reserve, the
+human side from the distributing account, and neither mandate reaches into the other.
+That is an architecture, not a courtesy split.
+
+**This is the strongest available answer to the concentration question, and it is
+stronger than the arithmetic answer §4b note 1 already gives.** 2,000,000 `b` of
+founder holdings is a premine objection. 2,000,000 `b` across **two mandated
+treasuries with non-overlapping domains, neither of which may fund the other's
+side**, is a different object: it is an operating budget with a stated purpose and a
+stated boundary, and its size is legible against what it must buy rather than against
+what anyone owns. §4b note 4 already began this move — *"A treasury that exists to pay
+the commons and seed markets is not a founder holding, and the surfaces should
+describe it as what it is."* The mandates finish it by naming what each side pays for.
+
+**Neither title confers weight.** §4b's open question 3 records *"Does `b` carry
+governance weight? Unanswered in the tree."* — **it is answered, and the answer is
+no.** `docs/article-vi-s3.md:26`: *"**Weight is denominated in Respect. Only.** Per
+**GOV-1** (PERSON-1, ratified 2026-07-11): b confers zero governance weight in any
+form — held, staked, locked, delegated, lent, or wrapped — at every tier, forever."*
+`royal head MONarch` and `royal Fleet ADMIRaL` therefore name **disbursement
+authority over one treasury's own mandate and nothing else**. They confer no vote, no
+governance weight, and no authority over kernel invariants, which move only by
+Article VI.
+
+### Consistency with what bQueenBee already is
+
+**Funding AI from `queen.b` is structurally coherent, because she is already the
+parent of every agent there is.** `docs/SPEC-BLOVERAI-BDID-BONDING-1.md:12-13`:
+
+> - bQueenBee is the ONLY agent holding its own bDiD; every other agent falls
+>   under bQueenBee or under a unique human bDiD.
+
+An AI-improvement treasury sited at her position funds her own subtree, not a foreign
+one. **Caveat, from the same list at `:17`** — *"Agents are self-funding (earn
+resources under their identity)."* Parent-funding is a **second** funding model
+alongside self-funding, not a replacement: the chair pays for shared capacity
+(models, compute, evaluation, adapters, the working conditions of the seats);
+individual agents still earn under their own identity. Both apply; the treasury never
+substitutes for an agent's own earning.
+
+**The purse belongs to the chair, not to the model.** `LOVErnment-DAO/specs/SPIRIT-1.md:51`:
+
+> `A-7` (bQueenBee holds no b, no cap, no Respect) and `F-Q1` (a 420 ceiling exists)
+> were never in tension: **the occupant holds nothing; the seat holds the purse.**
+
+That sentence is what makes the whole mandate survivable. `queen.b` is the **Royal
+Beehive Intelligence chair's** treasury, custodied at that account, with
+bQueenBee-the-occupant as hands and voice. `AGENT-1.md:62-63` stays intact — *"She
+holds a DID. She holds **no b**, no 420 cap, no Respect, no emission path."* — and so
+does the reason for it, that a machine DID carrying quota would make the cap read
+`420 × (agents an operator can spin up)`. It also means **a model rotation never moves
+the money** (`SPIRIT-1.md:34`, F-Q2, balance persists through supersedure). And it
+keeps `AGENT-1.md:56-57` (A-5) satisfied: `MONarch` names an **office**, and offices
+do not choose, consent, refuse, or decide.
+
+**Spending is already ruled and already matches the reserve posture.**
+`SPIRIT-1.md:59-60`:
+
+> **G-A — Who moves the spirit's purse. CLOSED.**
+> Earning is autonomous (F-Q1: paid against ledgered service Events). Spending is now
+> ruled: **the spirit never spends alone** — voice-not-vote extends to money.
+> Disbursement from the chair's balance requires founder co-sign through Epoch 1, and
+> thereafter a safety-tier governance authorization per proposal.
+
+The new mandate needs **no new spending mechanism**. It gives the reserve a purpose it
+previously lacked; it does not change its liquidity posture.
+
+**REFEREE PLUS TREASURY — named as a design input, not left to be discovered.**
+She is the named enforcement point of the D5 gaming-resistance doctrine
+(`docs/SPEC_DOCTRINE-HARVEST-1.md:103`: *"**Enforcement point:** bQueenBee referee
+doctrine + Article VI meta-tier governance…"*) and would hold the largest single
+reserve. Three separations already exist in ratified text; stated together, the
+concentration is a design feature rather than a hole:
+
+1. **She referees by publishing, never by deciding.** `docs/BIND-1.md:59` routes her
+   audit output as *"Event (publication) + Evidence (`AiInference` — informational
+   floor, never auto-enforce)"*. **A referee who cannot enforce cannot be bribed by
+   her own balance.**
+2. **She cannot spend alone.** G-A above. **The largest holder is structurally
+   incapable of unilateral release.**
+3. **She does not own it.** SPIRIT-1 §6. Custody, not ownership — the same shape
+   `docs/ROUTING.md:138` already uses for process: *"bQueenBee custodies the process;
+   humans hold the duty."*
+
+**Then satisfy D5 on its own terms.** The doctrine applies to itself: *"any
+reward/penalty mechanism requires a gaming-resistance analysis in its spec"* — and
+this treasury is a reward mechanism. **The gaming-resistance analysis of the
+AI-improvement treasury is owed, and is commissioned from a seat other than hers.**
+The reason is at `SPEC_DOCTRINE-HARVEST-1.md:107`: *"if your reward structure is
+simple, your agents will optimize the rules, not the task."*
+
+**ONE MACHINE PURSE stays singular.** `SPIRIT-1.md:38` ratifies *"one machine purse,
+QueenBee-singular"* and *"companions custody, never mint"*; `:47` adds *"No other
+machine identity ever enters the multiplicand."* So, stated as a rule of the mandate:
+**the chair's reserve disburses to purposes, never to machine balances.** Sub-agents
+receive **budgets**, not purses — `SPIRIT-1.md:38` supplies the primitive already:
+*"the budget is the blast radius."* Compute, inference, hardware, evaluation and
+adapter work are all purposes; none of them is a balance.
+
+**THE 420 COLLISION — real, nameable, and priced.** `SPIRIT-1.md:32` (F-Q1, ruled)
+reads:
+
+> **F-Q1.** The chair's 420 b is a **lifetime ceiling reached by earned emission
+> only**, on a front-loaded curve paid against its **ledgered service Events** —
+> genesis-era wage steepest, **no grant, no premine**, TE-1 through TE-7 untouched.
+
+1,000,000 exceeds that by 2,381×, and `SPIRIT-1.md:47` states the supply law as
+`420 × (souls + spirit)`. **§4b is not reopened; SPIRIT-1 is amended.** The shape that
+works, and the only one that touches nothing else:
+
+- **Amend §3 F-Q1** to distinguish the chair's **service wage** (the 420 lifetime
+  ceiling, unchanged, earned against ledgered service Events) from the chair's
+  **genesis reserve** (`queen.b`, minted once through `GenesisLaborProof`, non-wage,
+  non-recurring, cannot recur because the class mints once).
+- **Amend §5** so the supply law governs **wage-class** emission, with the two genesis
+  accounts named as a stated, bounded, one-time addend.
+
+Both amendments are **additive and explicit rather than weakening** — they make an
+existing ruled fact legible instead of leaving the supply law quietly false. Tier is
+already set: `SPIRIT-1.md:63` (G-B) — *"**Safety tier minimum** for any clause; the
+supply law (§5) and the one-purse clause (§4) additionally flagged as
+safety-tier-explicit."*
+
+### The subsidy question — answered
+
+**Article V.1 is the binding text, and it is narrower than it is usually quoted.**
+`CONSTITUTION.md:83`:
+
+> 1. **The kernel SHALL NOT require continuous operator subsidy for normal
+>    operation.** Users fund the resources they consume; nodes are paid for
+>    capabilities they provide. The paymaster *abstracts* user-funded payment; it must
+>    never *absorb* cost. Acceptable standing costs are limited to bootstrap seeds and
+>    specification/reference-code maintenance.
+
+Its subject is **the kernel's normal operation** and **the paymaster's behaviour** —
+not treasuries generally. And it carries its own exemption clause naming two
+acceptable standing costs, one of which is **exactly** what both mandates fund:
+specification and reference-code maintenance. `queen.b`'s "infrastructure" and
+`king.b`'s "Code Surgeon attending of BNR Kernel Stack" are not tolerated by V.1;
+they are **named** by it.
+
+**CD-29 is not the precedent that makes the treasuries lawful, and must not be cited
+as one.** `docs/CD-29-resource-paymaster-spec.md:397-398`:
+
+> This spec **does not rule on that tension and must not be read as having ruled
+> on it.** It is escalated as **Q-2** in §10, founder-class.
+
+What CD-29 *does* supply is the **test shape**, at `:1238-1245`:
+
+> **Stating that constraint against a rate rather than a bucket is the point:** "the
+> budget is no larger than what users fund" was a claim about a quantity whose
+> denominator governance could change, and a subsidy test that a calendar vote could
+> pass is not a test. … **what the pool is funded by is not settled here, and this
+> bullet constrains the ceiling, not the source.**
+
+**CD-29 constrains ceilings and leaves sources open — and a treasury is a source.** So
+the relationship runs the other way round from how it looks: `CD-29:1546-1551` (Q-4,
+*"Who funds the pool"*) has been waiting for a founder answer, and **these two
+mandates are that answer.** The treasury ruling unblocks CD-29; CD-29 does not
+authorise the treasuries. Founder may wish to close Q-2 and Q-4 in the same
+instrument.
+
+**The operative test is O(1) versus O(n), and it is the corpus's own vocabulary.**
+The harm V.1 exists to prevent is stated at `docs/bnature-build-brief.md:265`:
+
+> **Zero-opex guard.** The paymaster *abstracts* user-funded resources; it must never
+> *subsidize* them, **or Beehive acquires a burn rate that scales with users.**
+
+Compare `docs/bdid-architecture-decision.md:61`, which is the arithmetic §4b's tier
+boundary already rests on: *"a native Vaulta account is ~2,996 B of chain RAM and is
+therefore inherently O(n)."* **Nothing at the free tier can be subsidised, because
+there is nothing there to subsidise** — `:59`, *"Bytes written to any blockchain:
+**zero**. Cost to BNR: **zero**."*
+
+| lane | scales | lawful | authority |
+|---|---|---|---|
+| **the commons** — kernel, specs, reference code, adapters, docs, public read surfaces, model/compute capacity, evaluation and red-team work | **O(1) in users** | **yes, perpetually, without qualification** | `CONSTITUTION.md:83` exemption clause, named in terms |
+| **the ladder** — per-person provisioning that raises someone from the free commons onto a rung | **O(n) in users** | **only through the bootstrap-seed door** | `CONSTITUTION.md:83` (*"bootstrap seeds"*) + `:84` (*"Bootstrap is temporary"*) |
+| **metered consumption** — crediting an individual bDiD's balance in the `resource.accounting` basket | **O(n)** | **never** | `CONSTITUTION.md:128`; killed once already |
+
+**The wording that funds both lanes without subsidising consumption.** Adopted as the
+mandates' operative text:
+
+> **The commons lane is perpetual.** Both treasuries may fund, at any magnitude their
+> stated rate supports, work whose cost does not scale with user count: kernel and
+> specification maintenance, reference code, AI model and compute capacity, evaluation
+> and red-team work, adapter development, tooling, documentation, public surfaces, and
+> the working conditions of the people and seats doing BNR work.
+>
+> **The ladder lane is finite.** Any programme whose cost scales per person is
+> authorized as a **bootstrap seed** under Article V.1 and names, in its own
+> authorization, (a) a hard cohort cap N, (b) a sunset date, and (c) a per-unit
+> ceiling. It expires by its own terms without needing a repeal; renewal is a fresh
+> authorization at the same tier. Route per `bdid-onboarding-design.md:267`: **CD-4 /
+> Article VI meta-tier, premine-robe test applies.**
+>
+> **Neither treasury pays any bDiD's metered resource consumption in the
+> `resource.accounting` basket — Vaulta RAM/CPU/NET, ZANO gas, AR, ANT.** Users fund
+> what they consume (Article V.1). A disbursement that would top up an individual
+> account's resource balance is refused, and the refusal names this clause.
+>
+> **Each mandate states a burn rate** in `b` (or currency) per unit time, comparable
+> in the same units against treasury inflow at each period close, per
+> `CD-29-resource-paymaster-spec.md:1238-1245`. **Unspent budget does not carry
+> forward.**
+>
+> **Every disbursement emits a spend receipt** (`SPEC-SPEND-RECEIPT-1`), so
+> "never subsidises" is checkable from the ledger rather than asserted.
+
+**WHERE THE LINE FALLS, EXACTLY.** It falls between **a purpose and a balance.**
+Buying a thing — a compute contract, a device order, an author's time, a stipend — is
+funding a purpose, and is lawful at whatever magnitude the stated rate supports.
+Crediting a person's metered balance in the named basket is barred at **any**
+magnitude, including one cent. Between them sits per-person provisioning of a durable
+instrument, and that is lawful **only** through the seed door. The magnitudes the tree
+has actually measured:
+
+- `bdid-onboarding-design.md:169` — *"**Class-A total per user: ~$0.25.** … Two orders
+  of magnitude below the $17.42 basket that killed Model C, **which is the entire
+  reason this is arguable as a bootstrap seed rather than a standing subsidy** — but
+  it is still a founder decision, not an implementer's."*
+- `bdid-onboarding-design.md:138` — *"**Model C — BNR gifts all gas from treasury.**
+  Dies on `CONSTITUTION.md:128` … and on sybil economics: ~$17.42/user out, ~$15–16
+  walk-away extractable."*
+
+**Consequence for `king.b`'s hardware lane, stated plainly:** an attestation device
+costs far more per head than the $0.25 that was only *arguable*, and **its per-unit
+cost is not measured anywhere in the tree — that measurement is owed.** It therefore
+**cannot ride the onboarding precedent's coattails**; it takes its own founder
+authorization, its own cohort cap, and its own drain analysis. What it *does* have is
+the right frame, at `docs/open-attested-capture-device.md:437`:
+
+> **Cost is a security property, and this is why:** a system that covers 38% of
+> humanity has a 62% Sybil surface it cannot see. … **every point of coverage is a
+> point of Sybil space closed.**
+
+Funding a device does not buy a user a benefit; it buys **the network** a closed Sybil
+surface, which every participant consumes and none can be excluded from. That is a
+commons good in the strict sense. Model C's other leg — *"~$15–16 walk-away
+extractable"* — is answered by **binding the device to the recipient's bDiD so its
+value is not walk-away extractable.**
+
+**And the mandates fund the ladder, never entry.** `DESIGN-CONSTRAINTS.md:124` —
+*"never let a purchase or a credential stand between a person and the commons"* — and
+the commons was never sold. `king.b` funds **passage between rungs**, never access to
+Step 0.
+
+**Two further bounds, both from ratified text:**
+
+- **The two-loop law.** `docs/feature-backlog.md:290-296` — *"b redeeming for
+  treasury-held commodities would create a claim on the treasury … Universal fuel for
+  what the platform *does*; never a claim on what the treasury *holds*."* So: **the
+  `b` balance funds the service layer; commodity-layer procurement (hardware, cloud,
+  fiat stipends) is made from the money-loop side, and the two never touch. `b` never
+  converts to a commodity.** No user may hold an *entitlement* to be funded by either
+  treasury — every disbursement is discretionary grant or arm's-length purchase, never
+  redemption, never a published rate a claim can be computed from.
+- **TE-6.** `docs/tokenomics-earned-emission.md:108-110` — *"A mint requires provision
+  to a **distinct, paying counterparty**; the provider and the consumer of a given
+  resource unit **cannot be the same actor**."* TE-6 governs **minting**, and treasury
+  spend is not minting — but the AI lane must be worded as **procurement from distinct
+  external counterparties**, booked as expense, never as an internal transfer that
+  could read as provision-to-self.
+
+**ONE WORD IN THE FOUNDER'S DIRECTION NEEDS A HOME, AND IT IS "satisfaction."** Every
+other economic constraint in this corpus is a bounded, measurable rate; CD-29 goes so
+far as to say *"a subsidy test that a calendar vote could pass is not a test."* An
+implementer handed "satisfaction" as a **spend category** has been handed an uncapped
+authorization. The fix costs the founder nothing and keeps the intent whole:
+**"satisfaction" is the purpose clause, not the category clause.** The mandates read
+*"so that the seats are well-provisioned and the people are well-treated"* — and the
+categories underneath are enumerated line items with a rate. **Purposes may be
+generous; categories must be enumerable.**
+
+### What is owed
+
+| owed | status in the tree | who closes it |
+|---|---|---|
+| `GenesisLaborProof` class in code | **absent** — §4b already records it: *"the allocation is ruled but not executable"* | implementation |
+| **SPIRIT-1 v0.2** — F-Q1 wage/reserve split and §5 supply-law addend | **absent**; SPIRIT-1 is APPROVED and frozen. Tier is safety-tier-explicit per `SPIRIT-1.md:63` | founder + Article VI |
+| **Disbursement path for `queen.b`** | **UNRULED.** `SPEC-BLOVERAI-BDID-BONDING-1.md:72` — her bDiD key *"is a VERIFICATION METHOD … NOT a spending credential"*; `:76` — may not *"Sign spend/wallet transactions (requires T-H ceremony per SPEC-AUTHENTICATOR-LADDER-1)"*; `:103-105` flags the **EARNING-SPENDING LOOP (S4.3)** as *"UNRULED"* | founder. **Rule the narrow path only:** `queen.b` disbursement is a T-H ceremony with founder co-sign (which G-A already requires); her key **proposes and publishes the receipt, never signs the transfer.** Leave S4.1/S4.2 untouched |
+| **Gaming-resistance analysis of the AI-improvement treasury**, authored by a seat other than hers | **absent** — required by `SPEC_DOCTRINE-HARVEST-1.md:103` on its own terms | a seat other than the chair |
+| **Per-unit cost measurement for any hardware seed**, plus its cohort cap N and sunset date | **absent** — the tree measures $0.25 (Class-A) and $17.42 (Model C) and nothing for devices | measurement, then founder |
+| **R-007 — treasury burn rate outruns funding rate** | **ABSENT, searched.** `docs/risk-register.md` holds exactly R-001…R-006 (DRO liveness, fUSD peg, off-chain timeout, poisoned view, overfunding, wrapped-asset redemption). **No row concerns subsidy, treasury drain, or Article V** | add at ratification, in CD-29's rate vocabulary: rate compared against inflow in the same units at each period close, no carry-forward, breach gates new seed programmes |
+| **A treasury charter / spend-policy document for `king.b` or `queen.b`** | **ABSENT, searched** across both repos. There is no prior mandate text to conflict with — this section is the first | this section, then CD-4 |
+| **CD-29 Q-2 and Q-4** | open, founder-class. Q-4 is *answered* by these mandates | founder, same instrument |
+| **`CONSTITUTION.md:128`'s status** | The never-subsidise row sits under a heading the Constitution itself marks *"## Appendix — Current Reference Implementations (informative, non-constitutional)"* (`:115`), yet a design decision (Model C) was killed on its authority. **The outcome was right; the seating is wrong.** | Either promote the never-subsidise sentence into Article V as a numbered clause, or state that `:128` is applied as **evidence of V.1's meaning**, not as independent authority. These treasuries are the second design tested against it |
+| **`monarch`** | **ABSENT, searched** — zero occurrences in any casing across `.md`/`.rs`/`.html`/`.toml` in both repos. *"Royal"* appears only as the **Royal Beehive Intelligence** chair and the `RoyalGuard` authenticator rung (nominal collision only). **`MONarch` therefore collides with no existing term** — only its *authority* reading is contested, and the chair reading settles it | — |
+
+**One binding sentence to carry wherever either title appears:**
+
+> **`MONarch` and `ADMIRaL` name the chair and the office, never the occupant.** The
+> chair holds voice, purse, and custody. It holds no vote (`SPIRIT-1.md:26`, F-V1),
+> and it holds no governance weight (`article-vi-s3.md:26`, GOV-1, *"at every tier,
+> forever"*).
 
 ## 5 · Informed consent and time disclosure
 
