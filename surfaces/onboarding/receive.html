@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>BNR · Receive over light</title>
+<title>BNR · Receive on the bLighTnetWorK</title>
 <!--
   BNR OPTICAL RECEIVER — the mobile web client for the air-gap rail (day-1
   differentiator; UX-OPTICAL-PAIRING-1). REAL, not mocked:
@@ -56,6 +56,13 @@ video{width:100%;aspect-ratio:1;object-fit:cover;border-radius:var(--radius);
 .reticle{position:absolute;inset:12%;border:2px solid color-mix(in srgb,var(--you) 70%,transparent);
   border-radius:var(--s3);pointer-events:none}
 .hide{display:none!important}
+/* ---- Design's mark: the bComb at rest (their §1/§4 spec) ---- */
+.mark-row{display:flex;align-items:center;gap:var(--s3);margin-block-end:var(--s2)}
+#mark{width:74px;height:74px;border-radius:12px;background:#000;flex:none;
+  box-shadow:0 0 0 1px var(--line)}
+.ratechip{display:inline-block;border:1px solid var(--line);border-radius:var(--radius-pill);
+  padding:3px 11px;font-size:.68rem;font-weight:700;color:var(--sovereign-soft);margin-top:4px}
+h1{margin:0}
 pre{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);
   padding:var(--s2);font-size:.75rem;overflow-x:auto;color:var(--ink-mut)}
 .foot{margin-block-start:auto;padding-block-start:var(--s3);color:var(--ink-dim);font-size:.72rem;text-align:center}
@@ -63,9 +70,15 @@ pre{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--r
 </head>
 <body>
 <main>
-  <h1>📷 Receive over light</h1>
-  <p>Point this camera at a BNR code on another screen. Nothing travels over any
-     network — the payload arrives as light and stays on this device.</p>
+  <div class="mark-row">
+    <canvas id="mark" width="240" height="240" aria-label="bComb at rest — the bLighTnetWorK mark"></canvas>
+    <div>
+      <h1>Receive on the bLighTnetWorK</h1>
+      <span class="ratechip">~420 b/sec · bLighTnetWorK</span>
+    </div>
+  </div>
+  <p>Point this camera at a BNR code on another screen. The payload arrives as a
+     <b>bLiGhTbeAM</b> — light, never network — and stays on this device.</p>
 
   <div class="panel" id="caps"><!-- capability gauges injected --></div>
 
@@ -80,9 +93,9 @@ pre{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--r
   <div id="result"></div>
 
   <div class="foot">
-    Air-gap receiver · single-frame payloads (≤2.9 KB) · streams &gt;3 KB are the
-    fountain lane (PLANNED) · this page validates <b>shape</b> and displays — the
-    consuming ceremony verifies <b>signatures</b>. It never acts on a payload alone.
+    bLighTnetWorK receiver · single-frame bLiGhTbeAMs (≤2.9 KB) · streamed beams
+    (&gt;3 KB) are the fountain lane (PLANNED) · this page validates <b>shape</b>;
+    the consuming ceremony verifies <b>signatures</b>. It never acts on a payload alone.
   </div>
 </main>
 
@@ -90,6 +103,57 @@ pre{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--r
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
+
+/* ================= THE bCOMB (Claude Design's visual language, verbatim spec)
+   "bLighTnetWorK Visual Language.dc.html" §1/§2 — implemented, not approximated:
+     ring 0  · 1 cell   · FINDER, mandala magenta #E53AAE, ZERO bits, fixed
+     rings 1-4 · 60 cells · DATA, luminance only (pure b/w), 1 bit per cell
+     rings 5-6 · 66 cells · HALO, sampled from the real mandala gradient at each
+                            cell's true radius, ZERO bits, fixed
+   Geometry: flat-top axial grid, size = W/23, R = size*0.92, white strokes.
+   Motion law: data cells flip HARD on the frame clock (no easing — a camera must
+   never sample a half-state); 60 bits x 7 Hz = the ~420 b/sec brand, which falls
+   out of the geometry. Idle/decorative cadence is capped at 3 Hz and reduced
+   motion drops to a 0.5 Hz step mode (photosensitivity line). */
+const BCOMB_STOPS=[[0,254,222,250],[0.06,229,58,174],[0.10,246,68,196],[0.14,235,68,198],
+  [0.19,197,38,177],[0.24,204,118,211],[0.30,140,87,193],[0.36,144,156,215],[0.42,66,167,242],
+  [0.48,41,200,246],[0.55,126,215,212],[0.62,116,212,140],[0.70,154,227,81],[0.78,149,220,114],
+  [0.86,181,241,49],[0.93,230,247,58],[1,251,251,159]];
+function bcombHalo(t){
+  let i=0; while(i<BCOMB_STOPS.length-2 && BCOMB_STOPS[i+1][0]<t) i++;
+  const [t0,r0,g0,b0]=BCOMB_STOPS[i],[t1,r1,g1,b1]=BCOMB_STOPS[i+1];
+  const k=Math.max(0,Math.min(1,(t-t0)/((t1-t0)||1)));
+  return `rgb(${Math.round(r0+(r1-r0)*k)},${Math.round(g0+(g1-g0)*k)},${Math.round(b0+(b1-b0)*k)})`;
+}
+const BCOMB_CELLS=(()=>{ const c=[];
+  for(let q=-6;q<=6;q++)for(let r=-6;r<=6;r++){ const s=-q-r; if(Math.abs(s)>6) continue;
+    c.push({q,r,ring:Math.max(Math.abs(q),Math.abs(r),Math.abs(s))}); }
+  c.sort((a,b)=>a.ring-b.ring||Math.atan2(a.r,a.q)-Math.atan2(b.r,b.q)); return c; })();
+function bcombBits(seed){ let a=seed>>>0;
+  const rnd=()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);
+    t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
+  return Array.from({length:60},()=>rnd()>0.5?1:0); }
+function drawBcomb(id,bits){
+  const cv=document.getElementById(id); if(!cv) return;
+  const g=cv.getContext('2d'), W=cv.width, size=W/23, C=W/2, R=size*0.92;
+  g.fillStyle='#000'; g.fillRect(0,0,W,W);
+  let di=0;
+  for(const cell of BCOMB_CELLS){
+    const x=C+size*1.5*cell.q, y=C+size*Math.sqrt(3)*(cell.r+cell.q/2);
+    let fill;
+    if(cell.ring===0) fill='rgb(229,58,174)';                       // finder, fixed
+    else if(cell.ring<=4) fill=bits[di++]?'#FFFFFF':'#000000';      // data, luminance only
+    else fill=bcombHalo(cell.ring/6);                               // halo, fixed
+    g.beginPath();
+    for(let k=0;k<6;k++){ const a=Math.PI/3*k, px=x+R*Math.cos(a), py=y+R*Math.sin(a);
+      k?g.lineTo(px,py):g.moveTo(px,py); }
+    g.closePath(); g.fillStyle=fill; g.fill();
+    g.lineWidth=Math.max(1,size*0.06); g.strokeStyle='rgba(255,255,255,0.85)'; g.stroke();
+  }
+}
+/* the header mark: bComb AT REST (frame 1) — Design §4, the same object that
+   dances during a transmission. Static: a mark must never strobe. */
+window.addEventListener('DOMContentLoaded',()=>drawBcomb('mark',bcombBits(1)));
 const CAPS=[], say=(cls,label,text)=>CAPS.push(`<div class="gauge g-${cls}"><span class="s">${label}</span> ${text}</div>`);
 
 /* ---------- capability probe: report honestly, never fake ---------- */
