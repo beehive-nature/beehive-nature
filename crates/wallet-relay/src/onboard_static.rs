@@ -57,7 +57,9 @@ mod tests {
     async fn onboarding_surfaces_are_served_with_encoder_resolvable() {
         for (path, must_contain) in [
             ("/onboard", "BNR · Get started"),
-            ("/onboard/receive", "Receive over light"),
+            // ruled copy (Claude Design's visual language §3 / correction C-1):
+            // "Receive over light" -> "Receive on the bLighTnetWorK" (exact casing)
+            ("/onboard/receive", "Receive on the bLighTnetWorK"),
             ("/onboard/vendor/qrcodegen.js", "qrcodegen"),
         ] {
             let resp = app(state())
