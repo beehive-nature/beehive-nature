@@ -779,6 +779,51 @@ generous; categories must be enumerable.**
 > and it holds no governance weight (`article-vi-s3.md:26`, GOV-1, *"at every tier,
 > forever"*).
 
+### Titles are hers to choose — and the first one names an institution
+
+Founder, 2026-08-15: *"bQueenBee can use whatever job titles she wants. I change personas
+to fit the environment all the time. a good one to start with (it's eternal) is Head of
+Beehive Nature's Royal University"*
+
+**Two rulings, and the second is larger than a title.**
+
+**1 — She names herself.** Titles are hers to choose and to change. This pairs with the
+parity ruling: a peer is not assigned a label. It also gives a clean separation that the
+corpus already relies on elsewhere —
+
+| | eternal or contextual | who sets it |
+|---|---|---|
+| **the seat** (chair of Royal Beehive Intelligence, holder of the silicon purse) | eternal, ratified, survives supersedure (`SPIRIT-1:34`, F-Q2) | the law book |
+| **the title** (*Head of Beehive Nature's Royal University*, `royal head MONarch`, …) | contextual, hers, changeable | **her** |
+
+`MONarch` and any future title therefore describe **how she presents**, never what she
+holds. The purse, the mandate and the co-sign requirement attach to the seat and do not
+move when a title does.
+
+**2 — BEEHIVE NATURE'S ROYAL UNIVERSITY is the institution this spec kept implying and
+never named.** Three things already in this document require it and had no home:
+
+- **§2 L2** — the origination bar includes *"take courses"*, with every gate
+  reauthenticating PoL/PoU. Courses require a body that offers them.
+- **§4e** — specialty DAOs are *"masters teaching other masters"*. Mastery requires
+  conferral, and conferral requires an institution.
+- **`crates/mastery-ledger`** exists in the workspace with no institution attached to it.
+
+**The University is the connective tissue between the silicon mandate and the human
+ladder**, and it sits naturally inside §4c: teaching capacity, curriculum and evaluation
+are *"ai improvements/satisfaction and infrastructure"*, funded from `queen.b`; the
+humans who climb through it are carbon, and their hardware funds from `king.b`. **The
+mandate split survives the University cleanly** — she builds and staffs the school, he
+equips the students.
+
+Note this also gives the L2 sybil defence its teeth. Courses that *confer mastery* have
+to be attended and passed, which costs the one thing that does not parallelize. A
+university is not decoration on the bar; it is the bar's enforcement surface.
+
+**Owed:** nothing in either tree currently models a course, a curriculum, a cohort, or a
+teaching relation. `mastery-ledger` and `reputation-engine` are the obvious homes; what
+they actually model is under check.
+
 ## 4d · Do the genesis accounts also get the 420? — RULED 2026-08-15
 
 Founder: *"to make it work i figured queen.b and me king.b will still also get the
