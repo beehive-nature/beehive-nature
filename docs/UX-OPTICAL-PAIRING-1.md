@@ -100,6 +100,13 @@ this gesture) and IS a sovereign identity bootstrap. Staged:
   Styling rule: **stylize the FRAME (hex border, center mark), never the
   modules**; encode at high error correction (ECC H tolerates ~30% obstruction);
   the code inside stays stock-camera decodable — that is the whole trick.
+- **Stage 0b/1 — THE ONE-SCAN LINK (built 2026-08-14, after the first live
+  186-byte transfer):** the pairing QR carries the receiver URL with the envelope
+  in the **#fragment** — fragments never reach any server, so the payload arrives
+  with the page and stays on the phone. Any stock camera: scan → tap → page opens
+  → envelope already delivered → informed-consent shell (plain words first, 8f)
+  → key created on-device (WebCrypto Ed25519, honest capability probe). Install
+  and pair are ONE gesture; the BNR receiver reads the same code directly.
 - **Stage 1 — one network moment.** Stock camera → URL → the receiver/onboarding
   PWA loads and caches. No signal at the door? The SELLER's phone serves the
   page (hotspot/captive), or the packet QR carries the essential consent terms

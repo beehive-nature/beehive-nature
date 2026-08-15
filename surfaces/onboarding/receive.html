@@ -172,9 +172,33 @@ async function tick(){
   raf=requestAnimationFrame(tick);
 }
 
+/* ---------- one-scan install+pair intake ----------
+   A stock camera opens this page via a link whose FRAGMENT carries the envelope
+   (#p=<base64url>). Fragments never reach any server — the payload arrived with
+   the page and stayed on this phone. Same decode for URL-shaped camera scans. */
+function fragmentEnvelope(s){
+  const m = /#p=([A-Za-z0-9_-]+)/.exec(s||'');
+  if(!m) return null;
+  try{
+    const bin=atob(m[1].replace(/-/g,'+').replace(/_/g,'/'));
+    return new TextDecoder().decode(Uint8Array.from(bin,c=>c.charCodeAt(0)));
+  }catch(e){ return null; }
+}
+window.addEventListener('DOMContentLoaded',()=>{
+  const env=fragmentEnvelope(location.hash);
+  if(env){
+    // strip the fragment so a reload/share of the URL doesn't re-deliver it
+    history.replaceState(null,'',location.pathname+location.search);
+    handle(env, /*viaLink*/true);
+  }
+});
+
 /* ---------- payload handling: validate SHAPE, display, never act ---------- */
-function handle(raw){
+function handle(raw, viaLink){
   stopCam();
+  // camera scanned the one-scan LINK form? unwrap it to the envelope inside
+  const wrapped=fragmentEnvelope(raw);
+  if(wrapped) raw=wrapped;
   let obj=null;
   try{ obj=JSON.parse(raw); }catch(e){}
   if(!obj || typeof obj!=='object'){
@@ -186,14 +210,50 @@ function handle(raw){
   const KNOWN=['bnr-pair-request','bnr-resume','bnr-enroll-pubkey','bnr-watch-list','bnr-signed-tx',
                'bnr-consent-request','bnr-consent-signed'];
   const known=KNOWN.includes(obj.kind);
+  const via = viaLink ? 'delivered with the link (fragment — touched no server)' : 'as light · zero network';
+  const consentCta = (known && obj.kind==='bnr-pair-request')
+    ? `<button class="btn primary" onclick='consentShell(${JSON.stringify(JSON.stringify(obj))})'>Begin pairing — see what you'd be agreeing to</button>` : '';
   $('result').innerHTML=`
     <div class="panel">
-      <div class="gauge g-known"><span class="s">Received</span> <b>${obj.kind}</b> · ${raw.length} bytes as light · zero network</div>
+      <div class="gauge g-known"><span class="s">Received</span> <b>${obj.kind}</b> · ${raw.length} bytes ${via}</div>
       <div class="gauge ${known?'g-known':'g-absent'}"><span class="s">${known?'Shape ok':'Unknown kind'}</span>
         ${known?'Recognized ceremony payload — hand-off to the consuming ceremony would verify its signature next':'Parsed, but not a ceremony this build knows; shown, not acted on'}</div>
       <div class="gauge g-planned"><span class="s">Planned</span> Signature verification + hand-off happens in the ceremony surface, not here — this receiver never acts on a payload alone</div>
+      ${consentCta}
       <pre>${escapeHtml(JSON.stringify(obj,null,2)).slice(0,1200)}</pre>
       <button class="btn ghost" onclick="location.reload()">Scan another</button>
+    </div>`;
+}
+
+/* ---------- the informed-consent shell (pair request → this device signs on) ----
+   Plain words FIRST (8f: the summary must be true alone), then the mechanics.
+   Nothing happens without the explicit tap, and key creation reports its real
+   capability (WebCrypto Ed25519 probe) — never a fake success. */
+function consentShell(rawJson){
+  const req=JSON.parse(rawJson);
+  $('result').innerHTML=`
+    <div class="panel">
+      <h1 style="font-size:1.15rem;margin:0 0 6px">Make this phone an offline signer?</h1>
+      <p style="font-size:.9rem">In plain words:</p>
+      <div class="gauge g-known"><span class="s">Gets</span> This phone creates its OWN key and becomes a portable vault — hardware-grade custody, free</div>
+      <div class="gauge g-known"><span class="s">Never</span> The key never leaves this phone — not over light, not over any network, not to BNR</div>
+      <div class="gauge g-known"><span class="s">Undo</span> You can un-pair later from the wallet; the identity stays yours</div>
+      <p class="mono" style="font-size:.72rem;color:var(--ink-dim)">request nonce ${escapeHtml(String(req.nonce||'—'))} · expires ${escapeHtml(String(req.expiry||'—'))}</p>
+      <button class="btn primary" onclick="consentAccept()">I consent — create this phone's key</button>
+      <button class="btn ghost" onclick="location.reload()">Not now</button>
+    </div>`;
+}
+async function consentAccept(){
+  let made=false, how='';
+  try{
+    const kp=await crypto.subtle.generateKey({name:'Ed25519'},false,['sign','verify']);
+    made=!!kp; how='WebCrypto Ed25519 — key created ON this phone, non-extractable';
+  }catch(e){ made=false; how='This browser does not expose Ed25519 key generation yet'; }
+  $('result').innerHTML=`
+    <div class="panel">
+      <div class="gauge ${made?'g-known':'g-planned'}"><span class="s">${made?'Created':'Planned'}</span> ${how}${made?'':' — the vendored-crypto build covers it; nothing was faked'}</div>
+      <div class="gauge g-planned"><span class="s">Next</span> Reply leg: this phone displays its public key + signed consent back as light (the double-flash) — lands with the reply lane</div>
+      <button class="btn ghost" onclick="location.reload()">Done</button>
     </div>`;
 }
 function refuse(title, why, raw){
