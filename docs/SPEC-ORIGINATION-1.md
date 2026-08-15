@@ -36,11 +36,41 @@ it generates correct answers in cases nobody has anticipated yet."*
 **Today it ran the economics, the governance, the identity layer and the naming layer.** The
 same move, twelve times, mostly without anyone naming it.
 
-### The move
+### ⚠ ADVERSARIAL REVIEW RETURNED 2026-08-15 — the first draft was NOT safe to ratify
 
-> When something must not happen, **remove the mechanism that makes it possible** rather
-> than writing a rule against it. A removed mechanism cannot be lobbied, exempted,
-> misconfigured, or repealed by a later maintainer with a good reason.
+**Three lenses attacked this section. The verdict was *holds-with-amendments*, and the
+amendments are structural.** What follows is the corrected doctrine. The first draft's
+central claim was false, five of its twelve instances were not instances, and it carried
+no falsifier in a document that lists fourteen elsewhere.
+
+#### The central claim was false, and the failure mode is WORSE than a rule's
+
+The draft said a removed mechanism *"cannot be repealed by a later maintainer with a good
+reason."* **This document repeals two removals, five weeks apart, and one of them was
+repealed by this seat today.**
+
+- **§4g repeals A-7** — an absolute prohibition ratified 2026-07-11 — using the lever
+  *"A-7 is over-broad relative to its own stated rationale."*
+- **§10.4 narrows GOV-1's "forever"** by scope, so the project may vote stake-weighted `A`
+  on Vaulta, and concedes the critic's objection *"is correct and cannot be argued away."*
+
+> **A rule is repealed by striking its text, which leaves a diff. A removal is repealed by
+> narrowing its rationale, which leaves the text intact and the meaning changed.** The
+> repeal is invisible. **That is worse than a rule, not better** — and it is the exact
+> lever this seat used today, twice, without noticing it was the doctrine's own defeater.
+
+**Outside precedent confirms removal is not permanence, only friction:** `OP_CAT` was
+disabled in Bitcoin 0.3.10 in 2010; BIP-347 to restore it was filed in 2023 and is still
+not activated. Ethereum removed the ability to intervene — *"code is law"* — and when
+circumstances changed, restored it by splitting the chain at block 1,920,000.
+
+### The move, corrected
+
+> When something must not happen **totally**, and the cost of being wrong falls on an
+> attacker rather than a user, **prefer removing the mechanism to regulating its use.**
+> Removal buys **friction, not permanence**: it survives inattention, not intention.
+> **Where it is chosen, write down what was removed and why** — because a removal leaves
+> nothing in the code to read, and its repeal will leave no diff.
 
 ### Every ruling today is an instance
 
@@ -77,22 +107,72 @@ mechanism could not be removed:**
 - the withdraw-to-stable ramp — **liquidity is the mechanism and it is also the point**;
   it cannot be removed, so it must be bounded
 
+### FIVE OF THE TWELVE WERE NOT REMOVALS — corrected
+
+The table above overclaims. Named individually, because a doctrine credited with work it
+did not do will be trusted where it does not apply:
+
+| claimed instance | what it actually is |
+|---|---|
+| **GOV-1** | **an enumerated prohibition** — *"held, staked, locked, delegated, lent, or wrapped."* **Enumeration is the signature of a rule**; a removal has nothing to enumerate. The real removal is elsewhere and was never named: **Article VI weights read Respect, so no type maps a `b` balance to weight.** The draft credited the prohibition and missed the absence |
+| **free tier writes zero bytes** | **zero because it is UNBUILT, not removed.** There is no holding venue for free-tier `b` anywhere in either tree; §8's Fork B is forbidden and Fork C is unbuilt, and its own falsifier list treats zero-byte settlement as a future *observation* |
+| **the curve never completes** | **a tuned constant, not a removal.** §8.4.6 proves enforcement coverage floors at exactly **1/9 = 11.1%**, set incidentally by the 90/10 split, and leverage is a minority stake after `t = 0.811τ`. *"Never zero"* and *"enough to deter"* are different properties. **τ is a knob — precisely the misconfigurable thing removal is supposed to eliminate.** Both shipped curves are **linear**, not asymptotic |
+| **dormancy pauses both halves** | **a rule with extra steps** — §2d.9 owes three (quiet period, reactivation ceremony, Respect rule). **And it is not free:** `b-tokenomics.md:362` rules a 5%-per-epoch dormancy **burn**, `b-collateral-lending.md:18` rules dormancy defers and never forfeits. That contradiction is *"the only holding-side concentration brake anywhere in either tree"* — **choosing pause over burn deletes it, and §0a booked that as a win** |
+| **the sovereign scope clause** | **uncitable as a ruling.** It exists only as this seat's own *unratified draft* in `AGENT-1.v0.4-PROPOSED.md`. §4g does the opposite — it **amends** A-7 and preserves what `SPIRIT-1:51` calls *"a single, deliberate, constitutional exception"* |
+
+**And the evidence base is largely unexecuted.** §8.8 records, in this same document, that
+the 420 cap *"is not enforced anywhere"*, the unlock curve *"is not in code"*, and the
+population anchor is *"declared absent in shipped code."* **At least four claimed removals
+are prose** — which is limit 3 below, occurring *inside* the list of instances.
+
+**Two survive cleanly and are the model:** exact hash equality instead of similarity search
+(no threshold exists, so no error rate exists), and ENSIP-15's refusal of un-normalizable
+input instead of a confusable blacklist. Both are adversarial-input surfaces where correct
+behaviour is total.
+
+### Where it holds, and where it does not
+
+**HOLDS** — adversarial-input surfaces where the correct behaviour is **total** and the cost
+of a false negative falls on an **attacker**: matchers, parsers, name resolvers, type-level
+invariants. The model in this tree is `crates/b-token/src/lib.rs:450-460` — *"the gate is a
+type parameter fixed at construction; there is no argument to satisfy it with."*
+
+**DOES NOT COVER** — anything with a legitimate edge case; anything whose right parameter is
+not yet measurable; anything that must fund open-ended work; and anything where several
+separately-correct removals compose into a system that cannot serve someone.
+
 ### Where it fails, stated so it does not become a slogan
 
-**Three limits, each real:**
+1. **Some mechanisms are the value.** Liquidity, discretion, deliberation. The test asks
+   *can* it be removed, never *must* it be.
+2. **Physics does not negotiate.** Where the mechanism is a fact about the world, the honest
+   move is to stop claiming, not to keep engineering.
+3. **Removal can hide the decision rather than make it.** Absent-by-oversight and
+   absent-by-design are textually identical. **The difference is whether it was written
+   down** — and the review found this failure occurring inside §0a's own instance list.
+4. **Removal excludes the edge case that a rule would have served.** `PERSON-1` P-13 rules
+   the in-person requirement *"a fraud-resistance **parameter**, not doctrine"*, with an
+   Article VI amendment path — **precisely because the structural version excluded the
+   recluse.** The project has already chosen a rule over a removal, on purpose and on the
+   record.
 
-1. **Some mechanisms are the value.** Liquidity, discretion in judgement, human deliberation.
-   Removing them removes the thing being built. The test asks *can* it be removed, never
-   *must* it be.
-2. **Physics does not negotiate.** Where the mechanism is a fact about the world — exposure
-   hunting, the speed of light — the honest move is to stop claiming, not to keep engineering.
-3. **Removal can hide the decision rather than make it.** A mechanism that is absent because
-   nobody thought of it looks identical to one that is absent by design. **The difference is
-   whether it is written down** — which is why this section exists at all.
+**Survivorship bias, and it is provable:** `crates/b-token/src/lib.rs:379-385` documents
+choosing a rule deliberately — *"Deliberately **not** `#[cfg]`-gated: gating it would break
+three dependent crates."* The twelve instances were all rulings that worked. **A list of
+successes is not evidence about a method.**
 
-**Corollary worth keeping:** this is why the law book pays out. A removed mechanism is
-invisible in the code — there is nothing to read. The reasoning survives only if someone
-wrote down what was removed and why.
+### The falsifier this section owes
+
+**§0a is wrong if:** a removal in this design is repealed by rationale-narrowing without a
+diff (**already observed twice — §4g and §10.4**); or a user with a legitimate need is
+excluded by an absence where a rule would have served them; or a claimed removal turns out
+to be an unbuilt feature. **Three of the three have already occurred.** The doctrine is
+therefore **useful and bounded, not governing** — it may guide a design choice on an
+adversarial surface and **may not be cited to settle a question elsewhere.**
+
+**Corollary that survives intact:** a removed mechanism is invisible in the code. The
+reasoning exists only if someone wrote down what was removed and why — **and after this
+review, also what was *not* removed and only looks like it.**
 
 ## 1 · The split that resolves the sybil argument
 
