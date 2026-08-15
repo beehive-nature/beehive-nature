@@ -235,6 +235,56 @@ and the *unreleased tail* need not share a rule. A defensible shape is **balance
 inheritable, tail extinguished** — heirs receive what was earned, and nobody inherits an
 enforcement reserve that was never theirs to be measured against.
 
+#### ANSWERED 2026-08-15 — and the answer is a third option neither fork offered
+
+Founder: *"bInsurance will distribute to predetermined recipients of crypto. me I'm going
+to be ablt to hopefully keep some art erc20i tokens in a wallet I can reopen when I am
+reincarnated again. same e- akashik record eternal spirit"*
+
+**Two mechanisms, not one, and the second dissolves the sybil problem the fork was built
+around.**
+
+**1 — `bInsurance`: predetermined recipients.** A beneficiary designation, named in
+advance. This is the *balance* half and it is the ordinary case: value passes to people
+chosen by the holder, not to an estate process and not to the void.
+
+**2 — DORMANCY, which is neither extinguished nor inherited.** A wallet that is simply
+**left closed**, holding value, unclaimed, until someone opens it. Both earlier options
+assumed death forces a disposition. **It does not: an account can persist untouched.**
+
+**Why this resolves the enforcement objection rather than dodging it.** §2e.1 argues the
+unreleased tail must never complete because it is the permanent enforcement reserve — and
+§2d.9 then worried that a sybil outliving detection sits permanently beyond merge. That
+worry conflates two things:
+
+> **The reserve's job is to keep the ledger correctable while value is still moving.** A
+> dormant account is not earning, not unlocking, not spending, and not registering at
+> events. **It poses no sybil risk, because a sybil that does nothing gains nothing.**
+
+So the rule that falls out is cleaner than either fork:
+
+| account state | unlock | enforcement window |
+|---|---|---|
+| **active** | accrues on the curve | **open** — merge can reach it |
+| **dormant** | **suspended** | **suspended** — nothing to correct, nothing being gained |
+| **reactivated** | resumes where it stopped | **resumes** with it |
+
+**Dormancy pauses both halves together.** Nothing is extinguished, nothing is inherited,
+and the enforcement reserve is never orphaned — it is waiting alongside the value it
+guards. Whoever opens the wallet resumes exactly the position that was left.
+
+**The founder's own case is the clean test:** a wallet held closed across an indefinite
+gap, reopened by whoever holds the key. Under dormancy that is simply a long pause, and
+the design does not need an opinion about who opens it or when. *(The `erc20i` art tokens
+he names are Ethereum-side and outside `b` entirely; the mechanism above governs the `b`
+half.)*
+
+**Still owed:** a dormancy *trigger*. Suspension cannot key off death, which the chain
+cannot observe — it must key off **inactivity**, which the chain can. That means a defined
+quiet period, a defined reactivation ceremony, and a rule for what a **long-dormant
+account's Respect** does (`b` pauses cleanly; standing may not — it is earned in a
+community that may itself no longer exist). Founder gate, §6.
+
 *(The "420 years" remark is taken as rhetorical. It does flag a real interaction: the
 asymptotic curve's τ is meaningful only relative to lifespan. At τ = 7 and an 80-year
 span the tail isever present; at a 420-year span the curve is practically complete for most
