@@ -42,8 +42,11 @@ Verified by ssh (`-i ~/.ssh/bnr_key ubuntu@129.153.202.144`, aarch64):
 - Host firewall OPEN: iptables INPUT accepts tcp 7880/7881, udp 7882/3478.
 
 **The one gap:** `curl http://129.153.202.144:7880` from the venue itself → `000` (and from this
-box). With host iptables accepting, the block is the **OCI security list / NSG ingress** — the
-same selective pattern that left "BNR relay 8080" as the only publicly punched port. **Cure
+box). With host iptables/nftables accepting, the block is the **OCI security list / NSG ingress**.
+Discriminating datapoint (airtight): from the venue, `curl` to its own public IP on **8080 → 200**
+while **7880 → 000** on the same interface — same host firewall, different cloud-level rule.
+8080 carries the "BNR relay" iptables comment; 7880/7881/7882/3478 were never punched at OCI.
+No `oci` CLI on the venue (checked) → the rule must be added in the Oracle console. **Cure
 (founder, OCI console, ~2 min):** add ingress rules to the instance's security list —
 TCP 7880, TCP 7881, UDP 7882, UDP 3478 (source 0.0.0.0/0). Then:
 - `BROOM_LK_URL=wss://129.153.202.144:7880` works from anywhere and broom-agent's
