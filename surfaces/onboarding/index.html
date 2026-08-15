@@ -358,7 +358,7 @@ const SCREENS = {
   /* re-entrant remediation — authentik's killer move: you can't pass the gate
      yet, here is the sub-ceremony that lets you. Offered as a CHOICE. */
   remediate(kind){
-    const label = kind==='key' ? 'a security key' : 'a Trezor';
+    const label = kind==='key' ? 'security key' : 'Trezor'; // bare noun — sentences below add their own article ("No a Trezor" round-7 catch)
     return stageWrap(2, `
       <span class="badge" style="color:var(--guard);border-color:color-mix(in srgb,var(--guard) 45%,var(--line))">Nothing plugged in</span>
       <h2 style="margin-top:var(--s3)">No ${label} detected</h2>
@@ -368,10 +368,10 @@ const SCREENS = {
         📷 Use a spare phone instead — free hardware custody
       </button>
       <button class="btn ghost" onclick="APP.remediateTo('passkey')">
-        🔑 Start with this device's passkey (add ${label} later)
+        🔑 Start with this device's passkey (add a ${label} later)
       </button>
       <button class="btn link" onclick="APP.go('custody')">← Back to all options</button>
-      <p class="muted" style="margin-top:var(--s3)">You can always add ${label} later — the same wallet just gains a stronger lock.</p>
+      <p class="muted" style="margin-top:var(--s3)">You can always add a ${label} later — the same wallet just gains a stronger lock.</p>
     `);
   },
 
@@ -424,6 +424,7 @@ const SCREENS = {
       <div class="gauge g-stale"><span class="s">Next</span> 👑 ROYAL GUARD — flash the free <b>Trezor bSAFE 7</b> firmware from your dashboard: Zano · Vaulta · Arweave · HIVE · BTS · Cosmos · exSat + granted-set protection (the device will only ever sign what you pre-approved)</div>
       <p class="muted" style="margin:var(--s2) 0 0">Same wallet, same you, at every step — the firmware upgrade is a stronger lock, never a restart. Open hardware + open firmware means every claim above is auditable, not marketing.</p>
     </div>` : '';
+    if(kind==='trezor') setTimeout(preloadTrezorConnect,0); // load their rail on ENTERING the step, so the click's popup survives the gesture window
     return stageWrap(2, `
     <h2>Confirm on your ${l}</h2>
     <p>Touch your ${l} to prove it's you. The signing key stays on the device.</p>
@@ -432,12 +433,14 @@ const SCREENS = {
     <button class="btn primary" onclick="trezorConnectReal(this)">Connect my Trezor — for real</button>
     <div id="tz-status" class="muted" style="min-height:1.2em;margin-bottom:var(--s2)"></div>
     <p class="muted" style="margin:0 0 var(--s2)">Uses Trezor's official Connect rail (their consent
-      popup; Bridge via Trezor Suite, or WebUSB). Loads Trezor's script <b>only when you click</b> —
-      this page stays zero-network until you invoke it. If Suite is open, Bridge carries it.</p>
+      popup; Bridge via Trezor Suite, or WebUSB). Their script loads when you enter this step —
+      you chose the Trezor rail by arriving here. <b>If no popup appears, allow popups for this
+      site</b> — the connect flow opens one.</p>
     <button class="btn ghost" onclick="APP.hardwareDone()">Walk through without the device <span class="muted">(custody stays "declared")</span></button>
     ` : `
     <button class="btn primary" onclick="APP.hardwareDone()">I tapped my ${l}</button>
     `}
+    <button class="btn link" onclick="APP.remediateFrom('${kind}')">Don't have it with you? Free alternatives →</button>
     <button class="btn link" onclick="APP.go('custody')">← Pick a different method</button>
   `); },
 
@@ -524,6 +527,10 @@ const SCREENS = {
           ? (APP.ctx.pairConfirmed
               ? `<div class="gauge g-known"><span class="s">Known</span> Custody · ${custodyLabel()} — CONFIRMED by nonce-bound reply${APP.ctx.pairConfirmed.sigOk?' with a REAL on-device signature':' (reply unsigned/preview — labeled)'} · key ${APP.ctx.pairConfirmed.fp}</div>`
               : `<div class="gauge g-stale"><span class="s">Declared</span> Custody · ${custodyLabel()} — no reply scanned; declared is not confirmed</div>`)
+          : APP.ctx.custody==='passkey'
+          ? (APP.ctx.authMode==='real'
+              ? `<div class="gauge g-known"><span class="s">Known</span> Custody · ${custodyLabel()} — a REAL passkey was created on this origin</div>`
+              : `<div class="gauge g-stale"><span class="s">Declared</span> Custody · ${custodyLabel()} — preview walkthrough; no real passkey was created</div>`)
           : APP.ctx.custody==='trezor'
           ? (APP.ctx.trezorReal
               ? `<div class="gauge g-known"><span class="s">Known</span> Custody · ${custodyLabel()} · firmware ${APP.ctx.trezorReal.fw} — REAL device verified over Trezor Connect</div>`
@@ -545,13 +552,19 @@ APP.pick = function(id){
   if(id==='passkey') return this.go('passkey');
   if(id==='optical') return this.go('optical');
   if(id==='key' || id==='trezor'){
-    // simulate device-absent to demonstrate re-entrant remediation ~half the time,
-    // OR when offline (a USB key/Trezor flow needs this device; the honest nudge is optical).
-    if(!this.ctx.online || Math.random()<0.6){ this.ctx.remediated=true; return this.go('remediate',true), render('remediate'), this._rk=id; }
-    return this.go('hardware'), render(()=>SCREENS.hardware(id)), this._rk=id;
+    // Straight to the device screen — ALWAYS. (Round 7 fix: a leftover demo
+    // coin-flip was detouring 60% of Trezor clicks into remediation. Remediation
+    // is for REAL failure or explicit request, never chance.)
+    this._rk=id; this.hist.push(this.current); this.current='hardware';
+    return render(()=>SCREENS.hardware(id));
   }
 };
 APP.door = function(persona){ this.ctx.persona=persona; this.go('custody'); };
+APP.remediateFrom = function(kind){
+  this._rk=kind; this.ctx.remediated=true;
+  this.hist.push(this.current); this.current='remediate';
+  render(()=>SCREENS.remediate(kind));
+};
 APP.tryRecover = function(){
   const raw=(document.getElementById('rec-words').value||'').trim().toLowerCase();
   const words=raw.split(/\s+/).filter(Boolean);
@@ -590,10 +603,20 @@ APP.doPasskey = async function(btn){
       ok=true; mode='real';
     }
   }catch(e){ ok=false; }
-  // In a sandbox / file:// / user-cancel we proceed with a clearly-simulated pass,
-  // because this preview is about the FLOW; production refuses on real failure.
-  this.ctx.authMode = ok?mode:'simulated';
-  this.go('recovery');
+  if(ok){ this.ctx.authMode='real'; return this.go('recovery'); }
+  // Round-7 fix: a CANCELLED real passkey no longer slides through silently.
+  // Where real WebAuthn exists, a cancel shows the refusal + retry; only the
+  // explicit ghost continues as a labeled preview walkthrough.
+  btn.disabled=false; btn.textContent='Use Face / Touch / Hello';
+  const holder=btn.parentElement;
+  if(!document.getElementById('pk-refuse')){
+    const d=document.createElement('div'); d.id='pk-refuse';
+    d.innerHTML=`<div class="gauge g-absent" style="margin:var(--s2) 0"><span class="s">Refused</span>
+        The passkey was not created (cancelled, or unsupported here). Nothing proceeded silently.</div>
+      <button class="btn ghost" onclick="APP.ctx.authMode='simulated';APP.go('recovery')">
+        Continue as preview walkthrough <span class="muted">(custody will read "declared")</span></button>`;
+    holder.insertBefore(d, btn.nextSibling);
+  }
 };
 APP.opticalDone = function(){ this.ctx.authMode='optical-air-gap'; this.go('recovery'); };
 APP.hardwareDone = function(){
@@ -680,15 +703,19 @@ function drawPairQr(){
    network egress until the user explicitly invokes Trezor's own rail
    (EGRESS.md row: connect.trezor.io, click-gated). The bSAFE 7 lane later
    replaces this with our own native transport in the dashboard. */
-async function trezorConnectReal(btn){
-  const st=document.getElementById('tz-status');
-  btn.disabled=true; st.textContent='Loading Trezor Connect (their official script)…';
-  try{
+let _tcReady=null;
+function preloadTrezorConnect(){
+  // Fired on ENTERING the Trezor step (explicit user intent — they clicked the
+  // card). Preloading here means the CLICK only opens the popup, inside the
+  // browser's user-gesture window — round-7 fix: loading on click ate the
+  // gesture in awaits and Edge/Chrome silently blocked the popup.
+  if(_tcReady) return _tcReady;
+  _tcReady=(async()=>{
     if(!window.TrezorConnect){
       await new Promise((res,rej)=>{
         const s=document.createElement('script');
         s.src='https://connect.trezor.io/10/trezor-connect.js';
-        s.onload=res; s.onerror=()=>rej(new Error('script unreachable'));
+        s.onload=res; s.onerror=()=>rej(new Error('connect.trezor.io unreachable'));
         document.head.appendChild(s);
       });
       await TrezorConnect.init({
@@ -696,8 +723,21 @@ async function trezorConnectReal(btn){
         manifest:{ email:'loviswater44@gmail.com', appUrl:'https://beehive-nature.github.io/beehive-nature/' },
       });
     }
-    st.textContent='Look for Trezor’s popup — approve it there, then check the device…';
-    const r=await TrezorConnect.getFeatures();
+  })();
+  _tcReady.catch(()=>{ _tcReady=null; }); // allow retry after a failed load
+  return _tcReady;
+}
+async function trezorConnectReal(btn){
+  const st=document.getElementById('tz-status');
+  btn.disabled=true;
+  try{
+    st.textContent='Readying Trezor’s rail…';
+    await preloadTrezorConnect();
+    st.textContent='Look for Trezor’s popup (allow popups if nothing appears) — approve, then check the device…';
+    const r=await Promise.race([
+      TrezorConnect.getFeatures(),
+      new Promise((_,rej)=>setTimeout(()=>rej(new Error('timed out after 30s — a popup blocker is the usual cause; allow popups for this site and retry')),30000)),
+    ]);
     if(!r.success) throw new Error(r.payload?.error||'device did not answer');
     const p=r.payload||{};
     const NAMES={T1B1:'Trezor Model One',T2T1:'Trezor Model T',T2B1:'Trezor Safe 3',
