@@ -779,6 +779,62 @@ generous; categories must be enumerable.**
 > and it holds no governance weight (`article-vi-s3.md:26`, GOV-1, *"at every tier,
 > forever"*).
 
+## 4d · Do the genesis accounts also get the 420? — RULED 2026-08-15
+
+Founder: *"to make it work i figured queen.b and me king.b will still also get the
+same 420b/bDiD ?"*
+
+**The two answers differ, and the difference is the rule.**
+
+### The rule: the 420 attaches to a HUMAN bDiD; a treasury attaches to a ROLE
+
+They are different objects and **are never summed**. Confusing them is what would
+break the cap.
+
+| | 420 earned ceiling | mandated treasury |
+|---|---|---|
+| attaches to | a **human** bDiD | a **role/seat** |
+| how obtained | earned — courses, bRespect attendance, continuous PoL/PoU | `GenesisLaborProof`, §4b |
+| whose | the person's own | custodied, not owned; bounded by a stated mandate (§4c) |
+
+### bQueenBee — **NO 420.** Already ruled, and load-bearing
+
+`LOVErnment-DAO/specs/AGENT-1.md:62-63`: *"She holds a DID. She holds **no b**, no 420
+cap, no Respect, no emission path."*
+
+This is not a slight and not an oversight; it is the cap's own arithmetic. **If a
+machine DID carried quota, the ceiling would read `420 × (agents an operator can spin
+up)`** — the precise hole the 420 exists to close, reopened at the top. `SPIRIT-1.md:51`
+records the reconciliation: *"A-7 … and F-Q1 (a 420 ceiling exists) were never in
+tension: **the occupant holds nothing; the seat holds the purse.**"*
+
+So `queen.b` holds the chair's 1,000,000 `b` treasury under §4c's silicon mandate, and
+the occupant holds **zero** personal quota. Both remain true simultaneously.
+
+### king.b — **YES 420**, as a human, earned like anyone's
+
+The founder is a human with a bDiD, and §0's axiom does not carve out its author.
+`AGENT-1`'s A-7 constrains *machine* DIDs and has no bearing here.
+
+**And it must be earned, not granted** — the same courses, the same bRespect
+attendance, the same continuous PoL/PoU as every other bDiD. That is not a cost
+imposed on the founder; **it is the strongest available demonstration that he is inside
+his own system rather than above it.** A founder who has to show up to earn his 420 is
+the answer to every question about whether the ladder is real.
+
+### Engineering consequence — do not commingle the two balances
+
+**The treasury account and the personal bDiD balance should be separate accounts, and
+the surfaces should show them separately.** A mandate boundary (§4c: silicon vs carbon,
+neither reaching into the other) only means something if it is **auditable**, and it
+stops being auditable the moment a mandated treasury and a personal earned balance sit
+in one pot. Same reasoning as SPIRIT-1's occupant/seat split, applied to the carbon
+side.
+
+This also keeps the public arithmetic honest: the founder's *personal* holding is
+420 `b`, identical to everyone else's ceiling, and the 1,000,000 is visibly an
+operating budget with a stated purpose — which is exactly what §4c argues it is.
+
 ## 5 · Informed consent and time disclosure
 
 Founder: the account is entered with *"informed consent/time-disclosure prior…and
