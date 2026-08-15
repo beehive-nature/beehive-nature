@@ -11,6 +11,8 @@
   (founder's black-background mandala = the reference; "the b logo moving and
   transferring data" is the brief in one sentence).
 
+> **⚠ RATE SUPERSEDED 2026-08-14 (Cowork):** the `~420 b/sec` brand above is stale — measured rate is **588 b/sec** (84 bits × 7 Hz) since the frame grew to 84 bits. **Any surface copy Design produces should carry 588, not 420.** Body left as written.
+
 ## Orders
 1. **bComb visual spec** — from the founder's mandala assets: data-comb geometry vs halo
    ring split, both polarities, and the STATIC frame look. tokens.css is law (D-1:
