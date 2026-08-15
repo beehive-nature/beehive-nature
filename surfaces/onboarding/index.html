@@ -431,7 +431,8 @@ const SCREENS = {
     <p>Touch your ${l} to prove it's you. The signing key stays on the device.</p>
     ${crumbs}
     ${kind==='trezor' ? `
-    <button class="btn primary" onclick="trezorConnectReal(this)">Connect my Trezor — for real</button>
+    <button class="btn primary" onclick="trezorNativeReal(this)">Connect via BNR native bridge <span class="muted">(localhost — no third-party page)</span></button>
+    <button class="btn ghost" onclick="trezorConnectReal(this)">Connect via Trezor's own rail (Connect popup)</button>
     <div id="tz-status" class="muted" style="min-height:1.2em;margin-bottom:var(--s2)"></div>
     <p class="muted" style="margin:0 0 var(--s2)">Uses Trezor's official Connect rail (their consent
       popup; Bridge via Trezor Suite, or WebUSB). Their script loads when you enter this step —
@@ -752,6 +753,34 @@ function drawPairQr(){
    network egress until the user explicitly invokes Trezor's own rail
    (EGRESS.md row: connect.trezor.io, click-gated). The bSAFE 7 lane later
    replaces this with our own native transport in the dashboard. */
+/* BNR NATIVE LANE (founder-ruled: never wait on a third party). The relay talks
+   to the LOCAL Trezor Bridge itself — /v1/trezor/native/features — so this works
+   only when the wizard is SERVED BY THE RELAY (same origin). On Pages/file://
+   the fetch fails and says so honestly. */
+async function trezorNativeReal(btn){
+  const st=document.getElementById('tz-status');
+  btn.disabled=true; st.textContent='Asking the BNR relay to handshake with the device…';
+  try{
+    const r=await fetch('/v1/trezor/native/features');
+    const j=await r.json();
+    if(!j.ok) throw new Error(`[${j.stage}] ${j.why}`);
+    const f=j.result;
+    if(f.features_msg && f.firmware){
+      APP.ctx.trezorReal={name:'Trezor (native lane)', fw:f.firmware, label:f.vendor||''};
+      st.style.color='var(--verified)';
+      st.textContent=`✓ REAL device · firmware ${f.firmware} · answered over the BNR native bridge — no third-party page involved`;
+      setTimeout(()=>{ if(APP.current==='hardware'&&APP.ctx.custody==='trezor') APP.hardwareDone(); }, 900);
+    }else{
+      throw new Error(`device answered msg_type ${f.response_msg_type} (not Features) — protocol stage incomplete; honest partial: transport works, framing next`);
+    }
+  }catch(e){
+    btn.disabled=false;
+    st.textContent = (location.protocol==='https:'&&!location.host.includes('localhost'))
+      ? `Native lane needs the relay origin: run wallet-relay and open http://localhost:8080/onboard — this page (${location.host}) cannot reach your localhost bridge. (${e.message})`
+      : `Refused/failed honestly: ${e.message}`;
+  }
+}
+
 let _tcReady=null;
 function preloadTrezorConnect(){
   // Fired on ENTERING the Trezor step (explicit user intent — they clicked the

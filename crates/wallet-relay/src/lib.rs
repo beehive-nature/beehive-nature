@@ -21,6 +21,7 @@ pub mod watch;
 pub mod dashboard;
 pub mod onboard_static;
 pub mod rails;
+pub mod trezor_bridge;
 pub mod upload;
 
 use std::sync::{Arc, Mutex};
@@ -77,6 +78,7 @@ pub fn app(state: AppState) -> Router {
         // Pages-style paths) must not 404 on the relay (audit blocker fix)
         .route("/onboard/receive.html", get(onboard_static::receive))
         .route("/receive.html", get(onboard_static::receive))
+        .route("/v1/trezor/native/features", get(trezor_bridge::native_features))
         // both spellings: a page at /onboard resolves its relative script to
         // /vendor/…, a page at /onboard/ resolves to /onboard/vendor/…
         .route("/vendor/qrcodegen.js", get(onboard_static::qrcodegen_js))
