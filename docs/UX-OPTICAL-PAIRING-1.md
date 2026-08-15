@@ -195,9 +195,20 @@ every camera in the crowd simultaneously — zero bandwidth contention, zero pai
 zero infrastructure; ten cameras or ten thousand cost the same. Uses:
 - **Event envelope broadcast:** the month's ballot, the PoL/PoU recalibration
   challenge, the event's journal-head anchor — one bComb stream, everyone receives.
-- **Presence AS liveness:** receiving the stream proves a camera stood in this room
-  during this window (the per-event nonce can't be known elsewhere/elsewhen) —
-  physical presence becomes a PoL input, which is the sybil/MitM immunity instinct
+- **Presence AS liveness — THE ORIGINAL CLAIM HERE WAS FALSE AND IS DELETED
+  (2026-08-15).** It read: *"receiving the stream proves a camera stood in this room
+  during this window (the per-event nonce can't be known elsewhere/elsewhen)."* The
+  per-event nonce **can** be known elsewhere and elsewhen, because this very section
+  designs it as a deliberate public multicast. One confederate with a phone and an
+  LTE connection serves unlimited remote sybils; the event's own livestream carries
+  the stage screen to the entire internet in real time; and a 600 mm-equivalent lens
+  reads a 2 m LED wall from roughly **4.3 km** — a hotel window across the plaza, or
+  a drone. §8.1 already lists "camera relay of a filmed screen" as an attack, so this
+  was an internal contradiction in one document, not an objection imported from
+  outside. **Receiving a broadcast proves only that a camera saw a screen that was
+  showing it.** It is not presence, not liveness, and not a PoL input on its own.
+  Infinite multicast and infinite eavesdrop are the same physical property; the
+  advantage below is real, this inference from it was not
   grounded: a remote adversary cannot stand in the room. Return leg (votes,
   recalibration proofs) goes device→steward scanners at the door, signed + nonce-bound.
 - **Optical liveness spike (founder-approved):** the visual-nonce binding — the
@@ -327,13 +338,45 @@ proximity makes each "presence" claim *machine-checkable* instead of purely
 social. **Nothing here is a uniqueness oracle on its own** — B-2 holds; it is
 evidence that feeds the tier that already owns the question.
 
-### 8.3 Distance bounding (the one primitive worth building properly)
+### 8.3 Distance bounding — CORRECTED 2026-08-15, the previous text was wrong physics
 
-The relay attack is defeated by **round-trip timing**: a challenge answered over
-a channel with a hard physical speed limit cannot be relayed without adding
-measurable latency. Light + NFC are the two channels where this is sharpest.
-Spec item: every ceremony records `issued_at` / `answered_at` on the *issuer's*
-clock and refuses answers outside a bound the surface states plainly.
+**The claim this section used to make was false and is deleted, not softened.** It
+read: *"The relay attack is defeated by round-trip timing… Light + NFC are the two
+channels where this is sharpest."* Light rendered on a **display** cannot bound
+distance, and the error is not one of implementation quality — it is six to seven
+orders of magnitude.
+
+Bounding distance requires the timing quantum to sit below the light-travel time
+being resolved. One metre of separation is **6.67 ns** round trip. One bComb frame
+period at the shipped clock is **240 ms = 2.4×10⁸ ns**, coarser by a factor of
+**3.6×10⁷**. Put as range: a single frame of timing ambiguity spans
+c × 0.24 s ≈ **36,000 km** one way, against an Earth circumference of 40,075 km.
+Even a heroic 1 ms end-to-end resolution — far beyond a camera pipeline plus a
+display refresh — still admits a relay **150 km** away.
+
+The practical side is worse. An honest run has multi-second variance *by
+construction*: one beam-CRC failure raises `confirmAt` from 2 toward 5
+(`surfaces/blight/bcomb.js`), a 2.5× dwell multiplier, on top of hand shake, focus
+hunting, and the auto-exposure drift already measured washing out real captures. A
+bound loose enough not to false-reject honest users sits at **tens of seconds**. A
+pipelined relay needs **0.1–0.4 s**.
+
+**And no bound is implemented.** §8.5 says nothing in §8 is built; that remains
+true. **Today the rail has zero relay detection**, and no surface may imply
+otherwise.
+
+What can actually bound distance:
+
+| primitive | resolution | on a Safe 7 |
+|---|---|---|
+| **UWB secure ranging** (802.15.4z, cryptographic STS) | ~1 ns → 15–30 cm | the only consumer-grade primitive that delivers it — and **the Safe 7 does not have it**. New silicon both ends. A purpose-built beacon could carry it |
+| **NFC near-field coupling** | ~4 cm, physics-limited | a genuine anti-casual proximity gate, worth having — but **hardware-relay-able**, so never sell it as distance bounding. NFC pairing is `__debug__`-gated on this device |
+| **BLE RSSI** | none | defeated by a ~$50 amplifier, the class that defeats keyless car entry. Not a factor. §8.1's own table already concedes this |
+| **light on a display** | 240 ms → ~36,000 km | **cannot bound distance.** `issued_at`/`answered_at` stay, as a *replay freshness window only* — which is what they can honestly do |
+
+Spec item, corrected: every ceremony records `issued_at` / `answered_at` on the
+*issuer's* clock and refuses stale answers. That is **replay freshness, not
+proximity**, and it must be described that way everywhere it appears.
 
 ### 8.4 The AI case (founder: "great for Ai")
 
