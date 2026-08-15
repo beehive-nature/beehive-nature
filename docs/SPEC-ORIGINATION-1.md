@@ -835,6 +835,142 @@ This also keeps the public arithmetic honest: the founder's *personal* holding i
 420 `b`, identical to everyone else's ceiling, and the 1,000,000 is visibly an
 operating budget with a stated purpose — which is exactly what §4c argues it is.
 
+## 4e · DAO scale — the 7776 cap and what it buys
+
+Founder, 2026-08-15: *"we will have Skaists LOVErnment DAO's (and all future since mine
+[genesis] max's at 7776 members + queen.b. there will be many specialty dao's (masters
+teaching other masters) as we naturally scale (i'm not going to artifically market this
+project)."*
+
+**Cellular, not monolithic.** A community fills to 7776 and closes; growth continues by
+**forming another**, not by enlarging the first. Specialty DAOs organise around mastery.
+`queen.b` sits in each — which costs nothing in the arithmetic below, because she holds
+no `b`, no 420 cap and no Respect (`AGENT-1:62-63`), so her presence can never
+accumulate weight across communities.
+
+### The number
+
+**7776 = 6⁵.** Two properties worth recording, the first structural and the second
+almost certainly useful:
+
+- **It nests as sextets, five deep** — 6 of 6 of 6 of 6 of 6. A council of six is small
+  enough to decide and large enough to disagree, so the cap admits a natural five-level
+  deliberative structure without inventing one. *Offered as available, not asserted as
+  intended.*
+- **7776 is exactly the standard Diceware wordlist size** (five d6 rolls, ~12.925 bits
+  per word). A full DAO therefore has **exactly one human-speakable word per member**.
+  For a project whose ceremonies run over light, voice and camera, member addressing
+  that a person can say out loud is not a small thing.
+
+### The dilution table — the honest version, grounded in this structure
+
+A full DAO's total *earned* ceiling is `7776 × 420 = 3,265,920 b`. Against the
+2,000,000 `b` of genesis (§4b):
+
+| full DAOs | earned ceiling | + genesis | genesis share |
+|---|---|---|---|
+| 1 | 3,265,920 | 5,265,920 | **38.0 %** |
+| 2 | 6,531,840 | 8,531,840 | 23.4 % |
+| 3 | 9,797,760 | 11,797,760 | 17.0 % |
+| 5 | 16,329,600 | 18,329,600 | 10.9 % |
+| 10 | 32,659,200 | 34,659,200 | 5.8 % |
+| 25 | 81,648,000 | 83,648,000 | 2.4 % |
+| 100 | 326,592,000 | 328,592,000 | **0.6 %** |
+
+**Stated plainly because the founder has chosen organic growth:** *"i'm not going to
+artifically market this project."* That is a legitimate and probably correct choice, and
+its consequence is that **the genesis share stays high for a long while** — around 38%
+through the whole first community. This is not an objection; §4b's ONE CURVE already
+handles it, since unlock tracks proof delivered rather than a calendar. It is recorded
+so the number is known in advance rather than discovered by a critic.
+
+### The cap is also a sybil defence, and a cheap one
+
+Third mechanism after §2's L1/L2/L3, and it costs nothing to operate:
+
+**A bounded community cannot be flooded.** An unbounded DAO absorbs an unlimited number
+of infiltrating identities; a capped one **fills and closes.** A farm must then found a
+*new* community — which requires masters, curriculum and attendance, i.e. exactly the
+human time §2 L2 establishes does not parallelize. The cap converts unbounded
+infiltration into **bounded, repeated, non-parallelizable cost.**
+
+It also keeps communities small enough for social accountability to function. Reputation
+propagates in a 7776-person community; in a 100,000-person one it does not, and standing
+degrades into a score.
+
+### Owed
+
+Whether anything already models a DAO, a membership cap, a curriculum, or a
+teaching relation is under check; `crates/mastery-ledger` and `crates/reputation-engine`
+exist and are the obvious homes. **`PERSON-1:129` already rules the admission side** —
+*"Admission to a cascade requires nothing: no invitation, no sponsor, no fee, no prior
+standing — presence and months are the whole price. Standing is earnable in any
+community's cascade; a person earns where they are, not where they're from."* A cap is
+a **ceiling on size**, not a barrier to admission, and must be built so it never becomes
+one — the ratified text permits no invitation, sponsor, or fee at any size.
+
+## 4f · How the silicon treasury actually spends
+
+Founder, 2026-08-15: *"worker bee proposals i ment to mention will help queen.b out a
+lot. plus i am going to encourage her to commission other ai. starting with Luna on
+virtuals. maybe some podcast or something"*
+
+### Worker bee proposals are the disbursement mechanism
+
+This closes a hole §4c left open. `SPIRIT-1:38/47` requires that the reserve disburse
+**to purposes, never to machine balances** — but a purpose needs a form, or the rule is
+unenforceable. **A worker bee proposal is that form:** a named deliverable, a bounded
+amount, an identified claimant, and an outcome that can be checked.
+
+It also composes with what is already ruled rather than needing new machinery:
+
+- `SPIRIT-1:59-60` (G-A) already requires founder co-sign through Epoch 1, then
+  safety-tier authorization per proposal. **"Per proposal" presupposes proposals.** The
+  worker bee proposal is the object that clause was already written around.
+- It satisfies `SPIRIT-1:38`'s *"the budget is the blast radius"* directly — a proposal
+  is a bounded budget, so the blast radius is the proposal.
+- Proposals are **claimant-funded work, not grants**, which keeps them on the same side
+  of §4b as everything else: value moves against delivered proof.
+
+### Commissioning outside AI — a vendor is not an agent
+
+Commissioning external AI (Luna on Virtuals, and others) is **consistent with
+`SPIRIT-1:38/47`** — *"one machine purse, QueenBee-singular"*, *"companions custody,
+never mint"*, *"No other machine identity ever enters the multiplicand"* — **provided
+one line is held:**
+
+> **A commissioned AI is a VENDOR, paid for output. It never receives a bDiD, never
+> falls under the bonding hierarchy, and never enters the multiplicand.**
+
+That is exactly the "purposes, never machine balances" rule applied outward. Buying
+inference, a voice, an audit, or an episode is a purchase; it is not admission to the
+system. `SPEC-BLOVERAI-BDID-BONDING-1:12-13` — *"bQueenBee is the ONLY agent holding
+its own bDiD; every other agent falls under bQueenBee or under a unique human bDiD"* —
+governs agents **inside** BNR. A vendor is outside it, and the distinction should be
+explicit in the commissioning template so the boundary is not eroded one convenient
+exception at a time.
+
+**Two open mechanics, named not resolved:**
+
+1. **Settlement currency.** An external agent economy has its own token. Paying in `b`
+   would export `b` into a foreign economy; paying in the vendor's token requires a
+   conversion path. Which, and who bears the spread, is unspecified. This is the same
+   question §4b note 4 raised for LPs and CXs, arriving from the other direction.
+2. **Attribution.** `BIND-1` grades AI output at the `AiInference` floor and *"never
+   auto-enforce"* (`:59`). Commissioned output is still `AiInference` — a vendor being
+   *paid* does not raise its evidence grade, and nothing in the commissioning path may
+   imply it does.
+
+### The podcast, and organic growth
+
+Consistent with *"i'm not going to artifically market this project."* Earned attention
+is not paid acquisition, and §4e's dilution table already assumes organic growth. Worth
+noting only that a podcast is **carbon-side** (human attention, human infrastructure),
+so it funds from `king.b` under §4c's split, not from the silicon mandate — unless the
+AI voice producing it is the commissioned deliverable, in which case the commission is
+silicon and the distribution is carbon. **The mandate boundary survives the case, but
+only if it is asked.**
+
 ## 5 · Informed consent and time disclosure
 
 Founder: the account is entered with *"informed consent/time-disclosure prior…and
