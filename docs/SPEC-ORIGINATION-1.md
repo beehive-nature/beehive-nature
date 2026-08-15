@@ -3169,3 +3169,410 @@ is ours because theirs is forbidden or absent.
 any stake-weighted or balance-weighted tally, any vote proxy or delegation path, any
 candidacy stake, any token-supply-percentage quorum, any pro-rata distribution keyed to `b`,
 and any dispute venue outside the ratified tiers.
+
+---
+
+## 10 · The Vaulta BP seat — what it costs and what it buys
+
+**Status: ANALYSIS, not a ruling.** Written by Seat 3 2026-08-15 from founder direction the
+same day. Every chain figure below was queried live 2026-08-15 ~13:25–13:38 UTC against
+`https://eos.eosphere.io`, `https://eos.greymass.com` (chain API) and
+`https://eos.hyperion.eosrio.io` (Hyperion history) — **foreign oracles, not an endpoint this
+project signs through**, per §5 of the standing instructions. Nothing here authorises a
+mainnet act, a token purchase, or a `regproducer`. **All of it is a founder gate.**
+`A` price used throughout: **$0.0617** (CoinGecko, 2026-08-15; the two aggregator ids
+returned $0.061656 and $0.061839, and the cross-aggregator spread on the day was
+$0.062–$0.081 — **read every USD figure below as ±25%**).
+
+---
+
+### 10.0 The honest bottom line, in three sentences
+
+**Reachable: yes, and faster than anyone would guess** — `metahubeosbp` went from a
+brand-new account on 2026-04-02 to seat 21 by 2026-08-15, on ~205.6M `A` of vote weight of
+which **99.998% came from four proxies under one controlling authority**, so the seat is won
+by joining a slate, not by out-competing 693 candidates. **Cost: ~$3.0M of *sustained*
+aligned stake to displace rank 21 (48.6M `A` at $0.0617), plus $18k–48k/yr of infrastructure,
+against $21,723/yr of income at the marginal seat — the seat does not pay for itself at any
+rank, and "increase inflow" is the one claim in the founder direction that the measured data
+contradicts outright.** **Cheapest way to get what it buys: no** — the RAM ceiling the seat
+is meant to unlock is already dissolved twice inside this repo
+(`bdid-architecture-decision.md:137`, net RAM delta **0**; `bdomain-scaling.md:160`, a `.b`
+identity is a keypair, not an account), and below ~3M accounts the ceiling can simply be
+bought at spot for **$133k–$482k** with no seat, no election, and no GOV-1 exposure.
+
+---
+
+### 10.1 The load-bearing claim is CONFIRMED — exactly, including the block number
+
+The founder direction asked that the RAM/multisig claim be verified independently. It was,
+three times, against two chain APIs and against the deployed system-contract source. It holds
+and is **stronger** than `docs/bdomain-scaling.md:109` states:
+
+| claim | measured | as of |
+|---|---|---|
+| `global2.new_ram_per_block` | **0** | 2026-08-15 13:26 UTC |
+| `eosio::setramrate` calls **in the entire chain history** | **exactly 1** — block 347,215,548, 2023-12-17T07:42:59.5 UTC, `bytes_per_block: 0`, trx `41bcd187…bb98` | Hyperion, total = 1 |
+| `eosio@active` and `eosio@owner` | threshold 1, single entry `eosio.prods@active` weight 1 | 2026-08-15 13:27 UTC |
+| `eosio.prods@active` | **threshold 15 over 21 producers, weight 1 each** | 2026-08-15 13:27 UTC |
+| source guard on `setram` / `setramrate` | both open `require_auth( get_self() )` — `get_self()` is `eosio` | VaultaFoundation/system-contracts |
+
+**The block number asserted at `bdomain-scaling.md:109` is byte-identical to the one on chain.
+The one time this dial was ever touched, it was turned to zero. It has been frozen 2 years
+8 months and there is no pending producer msig touching RAM.**
+
+**Two things the doc misses and should carry.** (a) `eosio.prods` also has `prod.major`
+(threshold 11) and `prod.minor` (threshold 8), neither wired into `eosio@active` — so the RAM
+bar genuinely stays at 15, but a seat buys standing in **three** tiers. (b) **The real lever
+is `setram`, not `setramrate`** — source guard `check( _gstate.max_ram_size < max_ram_size,
+"ram may only be increased" )`, ceiling 1 PiB, and the delta goes **straight into
+`rammarket.base.balance`**. One action, not a drip.
+
+**The doc's own arithmetic needs re-dating, and the direction is unfavourable.**
+
+```
+418,945,440,768 B  max_ram_size
+-343,000,735,636 B  total_ram_bytes_reserved  (81.87% consumed)
+= 75,944,705,132 B  free            (doc used 76,128,906,582 on 2026-08-04)
+
+75,944,705,132 ÷ 5,983 B all-in = 12,693,415 accounts   (doc: 12,724,536)
+delta over 11 days: -184,201,450 B ≈ 16.75 MB/day, -31,121 accounts
+```
+
+**The ceiling is falling, not rising.** `rammarket.base` still equals exactly
+`max_ram_size − total_ram_bytes_reserved`, so the doc's "no second pool" claim holds.
+`bdomain-scaling.md:109` is sound; **update the number and the date.**
+
+---
+
+### 10.2 What a seat buys — three things, and only one of them matters
+
+#### 10.2.1 INCOME — real, measured, and too small to matter
+
+**Inflation is dead and this is Vaulta-current, not EOS-era.** `core.vaulta` `A`:
+supply = max_supply = **2,100,000,000.0000**, fully issued, zero minting headroom
+(2026-08-15). Same for `eosio.token` EOS; the two run in parallel 1:1. Producer pay comes
+from a pre-funded reserve (`eosio` holds 439,328,813.7778 EOS) plus network fees, not
+issuance.
+
+**A measurement trap that must be recorded so nobody repeats it:** BP pay is disbursed in
+**EOS via `eosio.token`**, then swapped 1:1 to `A` via `core.vaulta`. Filtering only
+`core.vaulta:transfer` returns **vpay = 0.00 over 182 days** — a confident, spectacular wrong
+answer. Both token contracts must be queried. (This is almost certainly why one verification
+pass returned "per-seat income unverified" while two others measured it.)
+
+Measured 30d window 2026-07-16 → 2026-08-15, Hyperion:
+
+| | EOS/day | $/yr @ $0.0617 |
+|---|---|---|
+| whole network (bpay 8,695 + vpay 25,752) | **34,447** | **~$777,000** |
+| top-21 range | 962 – 1,648 | **$21,723 – $37,207** |
+| block pay, uniform across the 21 | ~409 | ~$9,200 |
+| rank 22 `aus1genereos` (best standby) | 469 | **$10,582** |
+| rank 48 `kikifinance1` (last paid seat) | 124.5 | **$2,811** |
+| rank 49+ | **0** | **$0** |
+
+The legacy 25/75 split survives: **bpay 25.2% / vpay 74.8%**. `min_pervote_daily_pay` is
+100 EOS/day and pay below it is **zeroed** — exactly **48** accounts received vpay in 30 days.
+**Standbys receive zero block pay** (every rank-22+ row shows `unpaid_blocks = 0`).
+
+**Verdict: income is a rounding error against the vote-acquisition cost, and net negative
+against infrastructure at every rank below 21.** Do not build any case on it.
+
+#### 10.2.2 THE MULTISIG SEAT — this is the prize, and it is 1/15th of one
+
+What 15-of-21 actually controls, all `require_auth(get_self())`, verified at source:
+`setram` / `setramrate`; system-contract `setcode`/`setabi`; `setpriv`; protocol feature
+`activate`; `setparams` (17 chain parameters); `wasmcfg`; `setinflation`/`setschedule`/
+`execschedule`; `rmvproducer`; **`setalimits` and `setacctram`** — which set an individual
+account's RAM quota **directly, bypassing the Bancor market entirely** (`setalimits` grants
+outright unlimited resources); and **`denynames`**, a name blacklist sitting directly on top
+of account creation, **which no document in this repo mentions and which is obviously
+relevant to a `.b` naming project.**
+
+**Quantifying the prize against the 12.7M ceiling.** A single `setram` doubling:
+
+```
+max_ram_size    418,945,440,768 → 837,890,881,536 B
+free pool        75,944,705,132 → 494,890,145,900 B
+all-in ceiling       12,693,415 →      82,715,551 accounts   (+70.0M)
+RAM spot price                  → ~15% of today's
+```
+
+**That is the only thing worth wanting here, and it is real.** It is also a vote in which
+this project would hold **1 of 21 signatures and need 14 others** — and the ask is that all
+of them agree to hold terabytes in a `chainbase` mmap, raising their own hardware cost and
+their own barrier to entry. **That is precisely the concern that produced the December 2023
+shutoff.** Most of the 21 are exchanges (`binancestake`, `big.one`, `newdex.bp`) and infra
+shops with no stake in `.b` scaling. **A seat converts an impossible ask into a lobbying
+campaign. That is a real conversion and it should not be dismissed — but it is not "a vote on
+this project's own scaling constraint," it is 1/15th of one.**
+
+The msig is an **active** lever, not a dormant one — producer approvals run roughly monthly,
+with a legible chain of real work: Savanna consensus (Sept 2024, matching the only four
+`eosio::activate` calls ever, all at block 396,090,328), IBC (Dec 2024), the rebrand
+(Jan–Feb 2025), the `vaulta` token contract (May 2025, matching the only `setpriv` ever),
+`vltransition` (Jun–Jul 2025), EVM upgrades (Sept 2025), treasury msigs through May 2026.
+**Zero RAM-related proposals pending. Last `eosio` `setcode`: 2025-07-15.**
+
+#### 10.2.3 CREDIBILITY — the honest residual
+
+A seat is public, named, and audited by an adversarial community; it is the cheapest
+available proof that this project operates infrastructure rather than merely writes about it,
+and it puts a seat at the BP calls where the 14 other signatures live. **That is a
+marketing-and-relationships asset with a partial income rebate. It is not an income stream
+and it is not a RAM unlock.** Budget it as such or not at all.
+
+---
+
+### 10.3 What a seat costs
+
+#### 10.3.1 Infrastructure and operations — MY ESTIMATE, flagged as such
+
+Per EOS Nation's `bpconfig` (the reference config real BPs run): **7 nodes minimum** — 2
+block relay, 2 transaction sentry, 2 producer (primary + backup), 1+ API;
+`chain-state-db-size-mb = 131072` (128 GB), minimum 32 GB physical + 96 GB swap, Leap v5.0.0+.
+Production practice is 128 GB RAM per node.
+
+```
+Hetzner AX102-class (128 GB DDR5 + NVMe): €122.30/mo historic → €259/mo post-2026-06-15
+7 × €259 = €1,813/mo ≈ €21,756/yr ≈ $23.5k/yr   (FX ~1.08 $/€ assumed, unverified)
+all-in with bandwidth, monitoring, on-call:  $1,500–4,000/mo = $18k–48k/yr
+```
+
+**$18k–48k/yr is my estimate, not a sourced figure. No Vaulta BP publishes audited opex.**
+The only public number (EOSphere, ~A$140k by June 2018, roughly half infrastructure) is
+**eight years stale** and pre-dates the industry migration off cloud.
+
+**Cloud is disqualifying and the arithmetic is not close.** EOS Nation's own archived proposal
+specced AWS `x1.32xlarge` (128 vCPU, 2 TB RAM) — ~$9,500/mo **per node** on demand, against
+$21.7k–37.2k/yr of total income. Any cloud-hosted BP loses money by an order of magnitude.
+
+**Break-even, stated bluntly:** rank 21 earns $21,723/yr against an $18k floor — it clears
+lean bare metal alone and clears **nothing staffed**. Rank 1 at $37,207/yr does not fund a NOC
+with 24/7 on-call. Every serious BP is cross-subsidised by exchange operations, ENF grants,
+consulting, or token holdings. **Standby is net negative at every rank without exception:**
+best case rank 22 at $10,582/yr against the same $18k floor; ranks 30–48 earn $2,811–$4,155;
+ranks 49+ earn zero while bearing full cost.
+
+#### 10.3.2 The vote-acquisition problem — and why it is not primarily an economic one
+
+Standings, live 2026-08-15 ~13:30 UTC, chain-queried and cross-checked against
+`alohablocks.com/vote` (agreement to 4 significant figures). Raw `total_votes` were converted
+to `A`-voting-today by inverting the Antelope decay function
+`2^(weeks since 2000-01-01 / 52)`, multiplier **1.0989e8** — the derivation reproduced Aloha's
+published figures at ranks 1, 21 and 30 exactly, which **independently verifies the
+52-week-doubling model on live Vaulta**.
+
+| rank | producer | `A` voting today |
+|---|---|---|
+| 21 | `metahubeosbp` | **205.63M** ← the bar |
+| 22 | `aus1genereos` | 157.03M |
+| 30 | `noaharkeosbp` | 56.98M |
+| 50 | Dex223 DAO | 37.3M |
+
+```
+gap to displace rank 21:  205.63M − 157.03M = 48.60M A × $0.0617 ≈ $3.0M
+205.63M A from zero = 33.7% of all activated stake (609.29M A)
+                    = 12.4% of circulating supply (1.661B A)
+                    ≈ $12.7M notional — against a $102.7M total market cap
+```
+
+**Acquiring 12.4% of float would move price violently, so $12.7M is a floor, not a price.**
+693 registered candidates compete for 21 seats. And decay bites: a vote not refreshed loses
+half its **relative** weight per year, so support must be **sustained**, not won once.
+
+**But the on-chain evidence says the seat is not bought — it is joined, and the evidence is
+unusually clean.** Tracing the voters behind rank 21:
+
+```
+proxy1.ecf 69.13e18 + proxy2.ecf 56.50e18 + proxy4.ecf 53.56e18 + proxy3.ecf 46.78e18
+= 2.25975e20 raw   vs  metahubeosbp total 2.25979e20
+→ 99.998% of rank 21's entire vote. Non-proxy support: ~4,000 A.
+```
+
+All four proxies vote an **identical 21-name slate that is byte-for-byte the current
+`eosio.prods` membership**, and all four share one authority: 2-of-2 over
+`{treasurymsig@active, vote.ecf@active}`, where `vote.ecf` is itself 5-of-7. The largest
+**independent** proxy on the chain is ~64M `A` — under a third of the bar. Meanwhile
+`aus1genereos` holds **157.03M `A` of genuinely dispersed support** (Binance proxy,
+`vote.hufi`, `vote.mlt`, `genpool` proxies) and sits at rank 22, **locked out because it is
+not on the slate**, while an account created 2026-04-02 with ~4,000 `A` of independent
+backing sits at 21.
+
+**The structural fact underneath, and it is the whole game:** Antelope BP voting is **30-slot
+approval voting**. A voter's full weight applies to **each** name; adding a 22nd name divides
+nothing and **costs the existing 21 nothing**. Seating a newcomer is **free** for whoever
+controls a large slate. That is why this is a relationship contest and why merit is necessary
+and nowhere near sufficient.
+
+**Precedent that a genuine newcomer can get in fast:** `metahubeosbp` — created and
+`regproducer` 2026-04-02, first `claimrewards` 2026-06-02, seat 21 today. `bp.1dex` — created
+2025-07-17, `regproducer` 2025-10-11, now rank 17 (271.0M `A`) and an `eosio.prods` signer.
+**The barrier is not time, capital, or track record. It is one relationship.**
+
+#### 10.3.3 The obligations, which are not nominal
+
+`regproducer` is a Ricardian contract binding the operator to: a public endpoint serving ≥100
+peers; a validating node that reports invalid blocks; **clock sync within 10 ms of atomic
+standard**; **disclosure of beneficial owners >10% under penalty of perjury**; a maintained
+disclosure website; FIFO transaction handling; no block-content manipulation for profit.
+**Double-signing → automatic fine equal to one year's compensation plus disqualification.**
+Unavailability → disqualification by 2/3+ of producers. There is **no automatic on-chain
+slashing for missed blocks** — you lose pro-rata block pay and take vote damage. Note also
+that Aloha's reliability tracker currently returns "no data found" for Vaulta, so third-party
+uptime accountability is **weaker than it looks**.
+
+---
+
+### 10.4 The GOV-1 tension — named, and stated in the form a critic could not improve
+
+**Do not smooth this.** Vaulta BP election is stake-weighted token voting in the most literal
+possible sense: weight is `staked_tokens × 2^t`, and 205.6M `A` of it is what holds seat 21.
+`docs/article-vi-s3.md:26` (GOV-1, ratified 2026-07-11) says: **"b confers zero governance
+weight in any form — held, staked, locked, delegated, lent, or wrapped — at every tier,
+forever."** Weight is Respect only.
+
+**The defence, stated as strongly as it can honestly be put:**
+
+> GOV-1 governs **the constitution of this polity's electorate**. Voting `A` on Vaulta does
+> not constitute an electorate — it operates infrastructure in a foreign jurisdiction under
+> that jurisdiction's rules, the way a co-operative may hold shares in a utility without
+> adopting shareholder governance internally. `A` is not `b`. A Vaulta ballot is not an
+> Article VI amendment. **We refuse stake-weight for our own governance; we participate in
+> Vaulta's stake-weighted election because RAM — the origination ceiling — is controlled by a
+> 15-of-21 signature in which we would otherwise have no voice.** The project is a *customer*
+> of a stake-weighted system it declines to replicate, not a participant reforming it from
+> within.
+
+**And now the part that makes the defence survive contact.** The critic's best move is not
+"hypocrisy" — it is: *your scaling depends on a mechanism you call illegitimate, and a seat
+obtained by courting large token holders imports a dependency on exactly the actors GOV-1
+exists to make powerless internally.* **That objection is correct and cannot be argued away.
+It can only be removed, and §10.5 is how it is removed.** A defence that ends at "different
+ledger" is a distinction about *whose* ledger, not about whether stake-weighting is being
+used, and a hostile reader will find that in one pass.
+
+**Three prohibitions, currently UNRULED, owed as ratified text before any `regproducer`:**
+
+1. **No `A` acquired, staked, or voted for Vaulta BP purposes ever confers internal
+   governance weight of any kind.** (Follows from GOV-1; must be said explicitly because the
+   asset is not `b` and a future reader will notice the gap.)
+2. **Respect is never convertible into `A`-voting power, and `A`-voting outcomes never feed
+   back as internal governance weight.** Both directions, named separately.
+3. **No slate seat may be accepted on any condition touching internal governance, Respect
+   accrual, or `b`.** The ECF finding shows exactly how fast slate capture happens when
+   weight is purchasable; the mirror risk is being captured *by* a slate.
+
+---
+
+### 10.5 Cheaper paths to the same outcome — and two of them are already ruled in this repo
+
+**Ordered cheapest first. The seat is last, and it is the most expensive path to the least
+binding version of the problem.**
+
+**(a) The naming layer already has net RAM delta ZERO — this is not a mitigation, it is a
+dissolution.** `bdid-architecture-decision.md:137`: `commit(epoch, new_root, prev_root,
+tree_size, delta_id, forced_watermark)` **overwrites** the oldest slot in a **144-row ring** —
+356 B cold, 0 B on wrap. **Net RAM delta: 0 bytes.** Unbounded names, zero marginal chain RAM,
+zero BP seats. Per-name storage is claimant-paid off-chain DataItems (~$0.000034/name), and
+`:245` rules that **a free identity needs no authoritative store anywhere**.
+
+**(b) The design does not need one Vaulta account per originator — the repo already says so.**
+`bdomain-scaling.md:160`: *"the only architecture that reaches a billion is one where a `.b`
+identity is a keypair, not an account"* — the vast majority of users never hold an on-chain
+account; only those who anchor or pay take a row. This is the ENS outcome (~2.8M paid L1 names
+beside 5M+ free off-chain names), **split by unit economics, not by count.** **If origination
+does not require an account per originator, the RAM ceiling does not bind this project at all,
+and the premise that a seat is a vote on this project's own scaling constraint dissolves with
+it.**
+
+**(c) At the scale this project actually plans for, the RAM is simply purchasable.**
+`bdomain-scaling.md:109` sets the practical planning ceiling at **~1–3M users**. At live
+`rammarket` Rb/Rq and $0.0617/`A`:
+
+| all-in users | `A` | USD | free pool consumed |
+|---|---|---|---|
+| 1M | 2,158,380 | **$133,077** | small |
+| 3M | 7,811,128 | **$481,603** | <8% |
+| 10M | 93,705,693 | $5.78M | 78.8% — market-break |
+
+**$133k–$482k, no election, no `regproducer`, no GOV-1 exposure, no 14 other signatures.
+Against ~$3.0M of capital committed to vote weight plus $18k–48k/yr.** The seat only starts to
+matter above ~3M all-in accounts — **past this project's own stated planning horizon.**
+
+**(d) Ask without a seat.** `setacctram` and `setalimits` let the 15-of-21 grant a *specific
+account* RAM outside the Bancor market. That is a smaller, cheaper ask than raising
+`max_ram_size` for everyone, it does not force 21 operators to buy hardware, and it requires
+**no seat to propose** — only a producer willing to carry it. It has never been tried here.
+
+**(e) Relationship work, which is the actual scarce input.** The single most important
+unknown in this whole analysis is **who the 5-of-7 signers on `vote.ecf` are and what their
+mandate is** — no public web footprint was found for ECF, `proxy1-4.ecf`, `vote.ecf` or
+`msig.ecf`. Everything in §10.3.2 is on-chain evidence only. That question is answered by
+attending the Vaulta BP monthly call and asking, not by more searching, and it costs nothing.
+
+---
+
+### 10.6 A staged path, if it is pursued anyway
+
+**Standby-first is the wrong shape and the numbers say so plainly: standby is net negative at
+every rank, earns zero block pay, and buys no msig standing whatsoever.** Paying $18k+/yr to
+sit at rank 30 for $4k/yr buys a logo on a list. If the seat is pursued, it is pursued as a
+funded relationship campaign with an explicit abort gate, not as a gradual climb.
+
+| stage | act | gate to proceed |
+|---|---|---|
+| **0** | **Settle (a)/(b) first.** Rule whether origination requires a Vaulta account per originator. | **If it does not, STOP. The rest of this section is moot and that is the best outcome available.** |
+| **1** | Buy RAM at spot for the real projected count (§10.5c). Re-measure the free pool monthly — it is falling ~16.75 MB/day. | Cost exceeds ~$500k, i.e. >3M all-in accounts projected. |
+| **2** | Ratify the three GOV-1 prohibitions (§10.4) **before** any public BP move. | Text ratified. **This is a hard gate — do not `regproducer` first and rule after.** |
+| **3** | Identify ECF and the ENF-adjacent slate holders; attend the BP call; propose the `setacctram` ask (§10.5d) with no seat. | A producer agrees to carry it, or refuses with a stated reason. |
+| **4** | Stand up 7 nodes and `regproducer` **only** if the node fleet is independently justified (API endpoint, IBC, EVM RPC, own infrastructure needs) — **never on BP income**, which does not cover it. | Fleet earns its keep without BP pay. |
+| **5** | Campaign for slate inclusion, budgeting ~$3.0M of *sustained aligned stake* — which is capital deployed and price-exposed, **not spent**, and that distinction should be made honestly in both directions. | Two named slate controllers indicate willingness. |
+| **6** | **Even seated: 1 of 21, needing 14 others to raise their own operating cost.** Budget the lobbying campaign as the real work; the seat is its entry ticket. | — |
+
+**Do not flatter it and do not dismiss it: the seat is reachable, the RAM lever it points at
+is genuinely the largest single lever on this chain, and the project's own architecture
+already routes around the constraint the seat would be bought to fix.**
+
+---
+
+### 10.7 What is owed, and what is UNVERIFIED
+
+1. **`bdomain-scaling.md:109` re-dated** — free pool 75,944,705,132 B, ceiling 12,693,415, as
+   of 2026-08-15. Conclusion unchanged; direction unfavourable.
+2. **The three GOV-1 prohibitions (§10.4) are unruled.** Founder gate.
+3. **Infrastructure opex ($18k–48k/yr) is MY ESTIMATE.** No BP publishes audited opex. FX
+   1.08 $/€ assumed, unverified.
+4. **ECF is UNVERIFIED.** The entity holding 99.998% of rank 21's vote and voting a slate
+   identical to the seated 21 has no public documentation. On-chain evidence only. **Identical
+   slates are equally consistent with open, published, good-faith coordination — this is
+   strong circumstantial evidence of a coordination structure, not a sourced allegation of
+   misconduct, and must never be written as the latter.**
+5. **No Vaulta-era (2023–2026) journalism on BP vote trading exists.** The 2018
+   CoinDesk/Huobi reporting is EOS-era, provenance never verified, and is **not** cited here
+   as current.
+6. **The July 2018 "15 of 21 BPs raised RAM 64→128 GB" precedent is news-sourced only.**
+   Hyperion returned total = 0 for `eosio::setram`, most likely because the index does not
+   reach 2018. **Not presented as verified.** Settling it needs an archival node.
+7. **Rank-1 discrepancy, flagged not smoothed:** one pass named `ivote4eosusa` rank 1 by votes
+   (359.24M `A`), another named `eosphereiobp` rank 1 by measured payout. Income rank should
+   track vote rank; it did not, and the reconciliation was not completed. **No "rank 1"
+   producer is named in the income table above for that reason.** Ranks 21 and 22
+   (`metahubeosbp`, `aus1genereos`) agree across all passes.
+8. **Legacy `pervote_bucket` (24,757.7544 `A`) and `perblock_bucket` (4,767.2863 `A`) showed
+   zero growth over a 91-second sample** and appear vestigial. The live EOS-denominated pay
+   path was measured empirically but not reconciled against them.
+9. **The ~16.75 MB/day pool burn is a two-point estimate over 11 days.** The naive ~12.4-year
+   drain it implies must not be relied on — consumption is bursty and one large deployment
+   moves it.
+10. **Reserve depletion not modelled.** The 439M EOS at `eosio` funds BP pay, staking rewards,
+    ENF and Labs from one pool; only the BP draw (~12.57M EOS/yr) was measured.
+11. **Two outlier payouts unexplained:** `eoscannonchn` 28,282 `A` and `aus1genereos`
+    17,449 `A` over 182 days, far above steady state — almost certainly backlog claims of
+    long-accrued blocks. Excluded from all rate calculations.
+12. **`docs.eosnetwork.com` timed out and `eosnetwork.com` returned HTTP 429.** The reward-model
+    narrative rests on secondary ENF coverage plus direct chain measurement, **not** on the
+    primary spec. Secondary sources also disagree on staking emissions (~76M `A`/yr vs
+    85,600 `A`/day from a 250M pool ≈ 31M `A`/yr) — **do not quote a staking yield figure
+    without reading the deployed contract.**
