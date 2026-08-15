@@ -232,3 +232,70 @@ and the server disappears. Every surface must degrade down that ladder gracefull
 3. Safe 7 hardware I/O inventory (NFC? camera? — UNVERIFIED) before §4.4 spec.
 4. "Trezor bSAFE 7" naming clearance.
 5. PoU/PoL ↔ recovery binding spec (which ceremonies REQUIRE liveness).
+
+---
+
+## 8 · MULTI-CHANNEL PROXIMITY — light + BLE + NFC + WiFi (founder direction 2026-08-15)
+
+> *"combining BT/NFC/wifi for additional multifactor authentication; this will be
+> great for Ai. you want to solve sybil attack; trust me."*
+
+**Why this is the strong path: none of it is biometric.** No body data, no
+template, no gallery, nothing crosses the BIND-1 seam — so `BIO-1` (B-1…B-5) and
+`PERSON-1` P-3 are untouched, and the sybil work proceeds without a doctrine
+amendment. Proximity is a property of *physics and place*, not of a person's body.
+
+### 8.1 What each channel actually proves (different physics = different attack)
+
+| channel | range | proves | its attack |
+|---|---|---|---|
+| **light (bLiGhTbeAM)** | line-of-sight, m | "I could SEE that screen" — directional, needs an unobstructed path; a remote attacker cannot see the room | camera relay of a filmed screen |
+| **NFC** | ~4 cm | "I TOUCHED it" — the strongest proximity claim available | hardware relay (two radios, one operator) |
+| **BLE** | ~10 m | "I was near, and here is the RSSI trace over time" | amplifier relay; RSSI spoofing |
+| **WiFi (scan only)** | ~50 m | "I saw the same access points you did" — a room-scale fingerprint, no association or internet needed | AP-list replay if stale |
+
+**The fusion rule that defeats all four attacks at once: issue the challenge on
+one channel, require the answer on another.** A relay must now defeat *every*
+channel simultaneously, in real time, in both directions — light AND radio AND
+touch. Each is individually beatable; the conjunction is not, and the cost of
+beating it scales with the attacker's physical presence, which is exactly the
+quantity a sybil attacker cannot mass-produce.
+
+### 8.2 The co-presence graph — the part that actually kills sybils at scale
+
+At a 100k-person event every device sees: the same **beam** (one LED wall,
+infinite multicast), the same **WiFi BSSID set**, and each other's **BLE
+advertisements**. Each device can therefore attest: *"at time T, in this
+radio-and-light environment, I witnessed N other distinct devices."*
+
+That is a **witness graph built from physics** — and it feeds `PERSON-1`'s T3
+cascade (peer attestation) rather than competing with it: the cascade already
+rules that uniqueness rides on presence + months + peers. Multi-channel
+proximity makes each "presence" claim *machine-checkable* instead of purely
+social. **Nothing here is a uniqueness oracle on its own** — B-2 holds; it is
+evidence that feeds the tier that already owns the question.
+
+### 8.3 Distance bounding (the one primitive worth building properly)
+
+The relay attack is defeated by **round-trip timing**: a challenge answered over
+a channel with a hard physical speed limit cannot be relayed without adding
+measurable latency. Light + NFC are the two channels where this is sharpest.
+Spec item: every ceremony records `issued_at` / `answered_at` on the *issuer's*
+clock and refuses answers outside a bound the surface states plainly.
+
+### 8.4 The AI case (founder: "great for Ai")
+
+An agent needs to know a **human device was physically present when this was
+authorized** — without knowing *who*, and without a biometric. Multi-channel
+proximity gives exactly that shape: the agent issues a challenge as light, the
+human's device answers signed over BLE/NFC inside the timing bound, and the
+agent holds a receipt that says *present, live, in this room, at this moment*.
+Identity stays the user's key; presence is the physical claim; neither is a body.
+
+### 8.5 Build order (nothing here is built yet)
+1. **Timing bound** on the existing optical ceremony (cheap; issuer-clock only).
+2. **BLE answer lane** — the Safe 7 BLE work (goose's §5 matrix) is the same radio.
+3. **WiFi-scan fingerprint** — browser cannot scan APs; needs the wearable/native
+   surface. Note as PLANNED, never implied in a web build.
+4. **NFC tap** — Web NFC is Chrome-Android only; honest ABSENT elsewhere.
+5. **Co-presence attestations** — the graph, once 1–4 produce signed artifacts.
