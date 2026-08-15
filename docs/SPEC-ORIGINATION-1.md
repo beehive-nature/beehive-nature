@@ -44,7 +44,69 @@ earned.**
 
 ---
 
-## 2 · Defence in depth — three layers, none of which is "detect the relay"
+## 2 · Defence in depth — ordered by what scales
+
+### 2.0 The navigation doctrine — founder, 2026-08-15
+
+> *"This is why I keep redirect our navagation course to **sybil immunity through
+> scalable math and the longitudinal gamified operant rewarded for following rulles**"*
+
+**Three words carry the whole design and each rules out a family of approaches:**
+
+- **Scalable** — the mechanism must not degrade with population. A 1:N gallery fails
+  because its error grows as `N × f` (§2e). Exact-equality checks do not: a nullifier
+  costs the same at ten billion as at ten.
+- **Longitudinal** — the guarantee is a **limit over time**, never a decision at a
+  moment. This is the convergence argument of §2e: `b` is not liquid before evidence
+  matures, so the ledger can be corrected later.
+- **Operant reward for following rules** — the system **rewards compliance** rather
+  than punishing violation.
+
+**That last choice is not merely motivational. It is mathematically safer, and it is the
+direct answer to `PERSON-1`'s asymmetry.** `PERSON-1:48` rules that *"A false accept
+costs one sybil. A false reject costs a person their identity and their money, with no
+appeal that is not a centralized authority."* A punishment architecture must therefore
+solve a **high-stakes classification** — *is this person a sybil? reject if yes* — where
+false positives are catastrophic and irreversible.
+
+**An operant-reward architecture never rejects anyone.** It observes accumulated
+rule-following and releases value accordingly, so:
+
+| | punishment design | operant-reward design |
+|---|---|---|
+| the question asked | *is this a sybil?* (binary, high stakes) | *how much compliance is observed?* (ranked, low stakes) |
+| cost of a false positive | **a real person loses their identity and money** | a real person's unlock is **slower**, and recoverable |
+| cost of a false negative | a sybil succeeds permanently | a sybil unlocks faster than deserved, **until the merge corrects it** |
+| behaviour under uncertainty | must decide | **may simply wait** |
+
+**Errors degrade gracefully instead of destroying someone.** That is why the founder
+keeps steering back to it, and it is the property no scanner-based design can offer.
+
+### 2.1 The layers, ordered by scalability
+
+**Correction to earlier drafts of this section, which repeatedly called attendance the
+strongest layer.** It is the strongest *locally* and the **least scalable globally**:
+it is venue-bound, it cannot reach ten billion people, and §4e establishes it exists
+only where a DAO chooses to operate bRespect. **The load-bearing layers must be the ones
+that hold everywhere, for everyone, forever.**
+
+| | layer | scales? | status |
+|---|---|---|---|
+| **1** | **Longitudinal convergence** — unlock velocity as the enforcement window, merge, reduced future velocity (§2e) | **yes** — per-account arithmetic, population-independent | merge **owed** |
+| **2** | **Exact-equality math** — §4a nullifiers, the 7776 cap, the 420 ceiling | **yes** — O(1) per check, no gallery, no threshold | nullifiers **owed** |
+| **3** | **Operant reward** — the velocity curve rewarding observed rule-following | **yes** — a payoff function, not a classifier | curve **owed** |
+| **4** | **On-device compound entropy** (L1) — public-key-hash equality, no gallery | **yes** — equality, never similarity | fuzzy extraction **owed** |
+| **5** | **Physical attendance** (L2) — human time, non-parallelizable | **no** — venue-bound, and optional per DAO | bRespect exists |
+
+**Attendance keeps its real virtue and loses its false one.** It remains the only thing
+that defeats a *rented* body (§2e), and it is a powerful local amplifier wherever
+bRespect runs. **It is not the foundation**, because a foundation that reaches only the
+people in the room is not a foundation for ten billion.
+
+The sections below retain their original L1/L2/L3 numbering for continuity with
+citations elsewhere in this document; the ordering above is the one that governs.
+
+### 2.2 The layers in detail — none of which is "detect the relay"
 
 The optical rail cannot bound distance (`UX-OPTICAL-PAIRING-1` §8.3, corrected
 2026-08-15: 240 ms frames against 6.67 ns per metre, a ~36,000 km ambiguity window).
