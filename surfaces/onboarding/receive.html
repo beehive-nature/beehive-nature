@@ -1100,13 +1100,62 @@ var qrcodegen;
     if (crc8([idx, tot - 1].concat(bytes)) !== crc) return null;
     return { index: idx, total: tot, bytes: bytes };
   }
+  /* ---------- beam envelope: length + CRC-32 over the WHOLE message ----------
+     Per-frame CRC-8 is a cheap filter, not a guarantee: 1 in 256 corrupt frames
+     passes it. Confirm-then-store catches RANDOM noise, because random garbage
+     rarely repeats byte-identically — but it does NOT catch a SYSTEMATIC misread.
+     If one cell reads wrong every time (glare sitting on one part of the screen
+     while the phone moves), the same wrong frame is seen twice and gets confirmed.
+     Founder receipt 2026-08-15: a beam assembled with intact ends and garbage in
+     the middle, caught only by the outer nonce check. The codec must never hand
+     up bytes it cannot vouch for.
+       [2 bytes length][payload][4 bytes CRC-32 of the payload]
+     zero-padded to the frame boundary. Explicit length replaces tail-padding
+     stripping, which could not tell a real trailing zero from padding. */
+  var HEADER_BYTES = 2, TRAILER_BYTES = 4, ENVELOPE = HEADER_BYTES + TRAILER_BYTES;
+  var MAX_BEAM_BYTES = 64 * PAYLOAD_BYTES - ENVELOPE;          // 506
+
+  var CRC32_TABLE = (function () {
+    var t = new Int32Array(256), c, i, k;
+    for (i = 0; i < 256; i++) {
+      c = i;
+      for (k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+      t[i] = c;
+    }
+    return t;
+  })();
+  function crc32(bytes) {
+    var c = 0xFFFFFFFF;
+    for (var i = 0; i < bytes.length; i++) c = CRC32_TABLE[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+
   function framesFor(text) {
-    var bytes = new TextEncoder().encode(text), out = [];
-    var total = Math.max(1, Math.ceil(bytes.length / PAYLOAD_BYTES));
-    if (total > 64) throw new Error('payload too long for one bComb beam (max ' + (64 * PAYLOAD_BYTES) + ' bytes)');
-    for (var i = 0; i < total; i++)
-      out.push(packFrame(i, total, bytes.slice(i * PAYLOAD_BYTES, i * PAYLOAD_BYTES + PAYLOAD_BYTES)));
+    var payload = new TextEncoder().encode(text);
+    if (payload.length > MAX_BEAM_BYTES)
+      throw new Error('payload too long for one bComb beam (max ' + MAX_BEAM_BYTES + ' bytes)');
+    var sum = crc32(payload), body = [], i;
+    body.push((payload.length >> 8) & 0xff, payload.length & 0xff);
+    for (i = 0; i < payload.length; i++) body.push(payload[i]);
+    body.push((sum >>> 24) & 0xff, (sum >>> 16) & 0xff, (sum >>> 8) & 0xff, sum & 0xff);
+    var total = Math.max(1, Math.ceil(body.length / PAYLOAD_BYTES)), out = [];
+    for (i = 0; i < total; i++)
+      out.push(packFrame(i, total, body.slice(i * PAYLOAD_BYTES, i * PAYLOAD_BYTES + PAYLOAD_BYTES)));
     return out;
+  }
+
+  /* Verify and unwrap an assembled body. Returns the text, or null if the beam
+     did not survive the trip — never a guess. */
+  function openEnvelope(body) {
+    if (body.length < ENVELOPE) return null;
+    var len = (body[0] << 8) | body[1];
+    if (len > MAX_BEAM_BYTES) return null;
+    if (body.length < HEADER_BYTES + len + TRAILER_BYTES) return null;
+    var payload = body.slice(HEADER_BYTES, HEADER_BYTES + len);
+    var o = HEADER_BYTES + len;
+    var want = ((body[o] << 24) | (body[o + 1] << 16) | (body[o + 2] << 8) | body[o + 3]) >>> 0;
+    if (crc32(payload) !== want) return null;
+    return new TextDecoder().decode(new Uint8Array(payload));
   }
 
   /* ---------- draw ----------
@@ -1338,25 +1387,45 @@ var qrcodegen;
   function Assembler() {
     this.total = 0; this.parts = []; this.got = 0;
     this.seen = {}; this.rejected = 0; this.wrongTotal = 0;
+    this.corrupt = 0;            // completed assemblies that failed the beam CRC
+    this.confirmAt = 2;          // sightings required before a frame is trusted
+    this.lastFailure = null;
   }
+  Assembler.prototype.reset = function () {
+    this.total = 0; this.got = 0; this.parts = []; this.seen = {};
+  };
   Assembler.prototype.push = function (fr) {
     if (!fr) return null;
     if (this.total && this.got > 0 && fr.total !== this.total) {
       this.wrongTotal++; this.rejected++;
       if (this.wrongTotal < 12) return null;                     // noise — keep progress
-      this.total = 0; this.got = 0; this.parts = []; this.seen = {};
+      this.reset();
     }
     this.wrongTotal = 0;
     var key = fr.total + '|' + fr.index + '|' + fr.bytes.join(',');
     this.seen[key] = (this.seen[key] || 0) + 1;
-    if (this.seen[key] < 2) return null;                          // confirm-then-store
+    if (this.seen[key] < this.confirmAt) return null;             // confirm-then-store
     if (this.total !== fr.total) { this.total = fr.total; this.parts = new Array(fr.total); this.got = 0; }
     if (this.parts[fr.index] === undefined) { this.parts[fr.index] = fr.bytes; this.got++; }
     if (this.got < this.total) return null;
-    var all = [];
-    for (var i = 0; i < this.total; i++) all = all.concat(this.parts[i]);
-    while (all.length && all[all.length - 1] === 0) all.pop();
-    return new TextDecoder().decode(new Uint8Array(all));
+
+    var body = [], i;
+    for (i = 0; i < this.total; i++) body = body.concat(this.parts[i]);
+    var text = openEnvelope(body);
+    if (text === null) {
+      /* Every frame passed its own CRC-8 and the beam still did not survive —
+         so at least one frame was a systematic misread that slipped the 1-in-256.
+         Refuse it. Delivering bytes we cannot vouch for is the worst outcome
+         available: worse than a slow beam, worse than no beam. Start over, and
+         demand one more confirming sighting per frame, because this channel has
+         now PROVEN it repeats its mistakes. */
+      this.corrupt++; this.lastFailure = 'beam-checksum';
+      this.confirmAt = Math.min(this.confirmAt + 1, 5);
+      this.reset();
+      return null;
+    }
+    this.lastFailure = null;
+    return text;
   };
 
   /* ---------- self-test: proof without a camera ---------- */
@@ -1380,7 +1449,8 @@ var qrcodegen;
 
   root.bcomb = {
     CELLS: CELLS, DATA_CELLS: DATA_CELLS, COLLAR: COLLAR, DATA_BITS: DATA_BITS,
-    PAYLOAD_BYTES: PAYLOAD_BYTES, haloColor: haloColor,
+    PAYLOAD_BYTES: PAYLOAD_BYTES, MAX_BEAM_BYTES: MAX_BEAM_BYTES,
+    crc32: crc32, openEnvelope: openEnvelope, haloColor: haloColor,
     draw: draw, decode: decode, inspect: inspect,
     packFrame: packFrame, unpackFrame: unpackFrame, framesFor: framesFor,
     findFinder: findFinder, sampleBits: sampleBits, cellStats: cellStats,
@@ -1497,8 +1567,20 @@ function tryComb(){
   const ins=bcomb.inspect(g.getImageData(0,0,640,640));
   if(!ins.ok){ if((combTick++%15)===0) $('guide-body').textContent=ins.hint; return null; }
   const fr=ins.frame;
-  $('guide-title').textContent=`bComb frame ${fr.index+1}/${fr.total} read from the hexagons…`;
+  const wasCorrupt=combAsm.corrupt;
   const done=combAsm.push(fr);
+  if(combAsm.corrupt>wasCorrupt){
+    /* A complete set arrived and the whole-beam CRC-32 rejected it: one frame
+       was misread the SAME way every look, so per-frame CRC-8 and
+       confirm-then-store both waved it through. Say what happened and name the
+       cure, rather than reporting a generic failure the user cannot act on. */
+    $('guide-title').textContent='Beam arrived damaged — thrown away, not handed to you.';
+    $('guide-body').textContent=`Every frame passed its own check but the whole message did not. `+
+      `That means a reflection is parked on one part of the comb and it reads wrong the same way every time. `+
+      `Shift the angle slightly and it will re-collect — now asking for ${combAsm.confirmAt} matching looks per frame.`;
+    return 'more';
+  }
+  $('guide-title').textContent=`bComb frame ${fr.index+1}/${fr.total} read from the hexagons…`;
   return done || 'more';
 }
 async function tick(){ if(!scanning)return;

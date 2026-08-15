@@ -41,6 +41,7 @@ members = [
     "crates/wallet-relay",
     "crates/zano-watcher",
     "crates/bmesh-hwfit",
+    "crates/bcomb",
 ]
 
 [workspace.metadata]

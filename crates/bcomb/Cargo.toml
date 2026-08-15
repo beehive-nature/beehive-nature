@@ -1,0 +1,11 @@
+[package]
+name = "bcomb"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "The bComb optical frame format of the bLighTnetWorK: 127 hexagonal cells, 84 luminance bits per frame, per-frame CRC-8 and whole-beam CRC-32. no_std, no allocator, and no transcendental maths, because it has to compile into hardware-wallet firmware. Conformance is held against surfaces/blight/bcomb.js, which is the oracle."
+
+[dependencies]
+
+[lints.rust]
+missing_docs = "warn"
