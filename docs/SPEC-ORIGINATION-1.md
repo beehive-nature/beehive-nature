@@ -125,7 +125,69 @@ it is not.** Both appear in this spec already:
 | one registration per bDiD **per event** | **yes** | §4a nullifier, exact byte equality | **exact** |
 | ≤ 7776 humans per DAO | **yes** | `cascade.rs` `FULL_HOUSE`/`CAP` | **exact** |
 | ≤ 420 `b` per bDiD | **yes** | earned ceiling, arithmetic | **exact** |
-| **one bDiD per human** | **no — provably not** | §2 L1/L2/L3 + the cap | **priced, not proven** |
+| **one bDiD per human** | **not at creation** | §2 L1/L2/L3 + the cap | **converged, not prevented** — see below |
+
+### The ceiling IS achievable — as a limit, not as a gate (founder correction, 2026-08-15)
+
+Founder: *"IMO limit of 420 b per eternal spirit/temporary human experience can be
+achieved since the unlock/b-collateralization/treasury-withdrawl rules/etc. our attempts
+to game the system will catch it eventially and just merges and lowers the unlock b
+velocity in the future."*
+
+**He is right, and the section above was answering a narrower question than the one
+asked.** Everything before this heading proves that **point-in-time** uniqueness is
+undecidable — that you cannot determine at creation whether two bDiDs are one person.
+That proof stands. **It says nothing about whether 420-per-person is enforceable over a
+lifetime, and that is the claim that matters.**
+
+**The two are different guarantees and only one of them was ever impossible:**
+
+| | what it asks | verdict |
+|---|---|---|
+| **point-in-time uniqueness** | "are these two bDiDs the same person, right now?" | **undecidable** — §2e's arithmetic, and `PERSON-1` §2a/2b |
+| **the 420 ceiling as a limit** | "does this person end up with more than 420?" | **enforceable, and it converges** |
+
+**Why the limit is enforceable: `b` is not liquid before the evidence matures.** Three
+ratified mechanisms already do the work, which is why the founder names them —
+
+1. **Unlock velocity (§4b, ONE CURVE).** `b` is released against proof over time, never
+   granted at once. **The unlock curve is therefore also the enforcement window.**
+2. **Collateralization (`crates/dashboard`).** Holdings sit against a floor bound with
+   active liens — value is encumbered, not free.
+3. **Merge, and reduced future velocity.** On detection, accounts reconcile to one and
+   the merged entity's future unlock is lowered. **Excess is amortized away rather than
+   forgiven**, so an over-issue is temporary rather than permanent.
+
+**The convergence argument, stated plainly.** The system holds `total ≤ 420 per person`
+in the limit provided that (a) detection probability over a lifetime tends to 1, and
+(b) unlock is slow relative to detection latency. Both hold here, and (a) holds for a
+reason that is structural rather than lucky:
+
+> **The very participation that earns `b` is what exposes duplication.**
+> A bDiD cannot earn without being observed — every course, every bRespect event, every
+> gate reauthenticates PoL/PoU (§2 L2). Observations accumulate monotonically over a
+> lifetime. **A sybil that hides earns nothing; a sybil that earns is observed.** The
+> attack requires exactly the behaviour that reveals it.
+
+That is why this is not the 1:N gallery problem wearing different clothes. A gallery
+asks one question once, under a false-match rate that cannot be beaten. **This asks the
+same question continuously, for as long as the identity keeps earning, and needs to
+succeed only once.**
+
+**Precedent, from §4h and arrived at independently a millennium ago:** the Song register
+was **mutable** — spirits were enrolled on demonstrated efficacy, and also **demoted and
+struck**. Legitimacy accrued by record and could be corrected by record. *Merging is the
+register being corrected*, which is the oldest half of the mechanism.
+
+**What this changes in this document.** The line below — *"priced, not proven"* —
+understates it. The correct statement is **converged, not prevented**: the ceiling is
+not enforced at the door, and it does not need to be.
+
+**What would break it, named so it can be built against:** a merge mechanism that does
+not exist yet (**owed** — nothing in the tree implements account reconciliation); an
+unlock curve fast enough that a sybil fully realises 420 before detection (a *parameter*
+choice, and the reason §4b's front-loaded curve needs a stated floor on duration); and
+value that escapes the lien before merge (which is what collateralization is for).
 
 **The honest success measure is therefore not "was a duplicate prevented" but "did the
 marginal identity cost more than it yields."** Today a second bDiD yields 420 `b` and
