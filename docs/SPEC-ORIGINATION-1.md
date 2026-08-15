@@ -189,6 +189,95 @@ it is not.** Both appear in this spec already:
 | ≤ 420 `b` per bDiD | **yes** | earned ceiling, arithmetic | **exact** |
 | **one bDiD per human** | **not at creation** | §2 L1/L2/L3 + the cap | **converged, not prevented** — see below |
 
+### 2e.1 Over what period does 420 unlock? — the shape is forced, the constant is not
+
+Founder, 2026-08-15: *"lifelong or should we do 40 years or 20 years or 4 years? for full
+420 b to be unlocked in treasury for stable $/bGold withdraw."*
+
+**The shape is decided by the enforcement argument; only the time constant is a
+preference.**
+
+#### Why the curve must be asymptotic
+
+**If 420 ever fully unlocks, enforcement expires on that date.** §2e's convergence rests
+on excess being *"amortized away rather than forgiven"* through **reduced future
+velocity**. A person who has fully unlocked has **no future velocity to reduce** — so a
+duplicate detected after that date cannot be corrected by the mechanism that makes the
+ceiling enforceable at all.
+
+> **A finite completion date converts the strongest enforcement mechanism into one with
+> a sunset**, and it sunsets exactly for the longest-tenured accounts, which hold the
+> most value and have had the most time to accumulate duplicates.
+
+**Therefore: the unlock approaches 420 asymptotically and never completes.** The
+unreleased remainder is not withheld earnings — **it is the permanent enforcement
+reserve**, and it is what keeps the ledger correctable for life. This also removes the
+cliff: there is never a date after which participation stops paying, so the operant
+reward of §2.0 never switches off.
+
+The founder's first instinct — *"lifelong"* — is the correct one, and for a mechanical
+reason rather than a sentimental one.
+
+#### The curve family
+
+`unlocked(t) = 420 × (1 − e^(−t/τ))`, with `τ` the time constant. Front-loaded by
+construction, which satisfies `SPIRIT-1:32`'s *"genesis-era wage steepest."*
+
+| τ | year 1 | year 4 | year 7 | year 20 | year 40 | ever 420? |
+|---|---|---|---|---|---|---|
+| **5 yr** | 76 b | 231 b | 316 b | 412 b | 419.9 b | **no** |
+| **7 yr** | 56 b | 183 b | 266 b | 396 b | 418.6 b | **no** |
+| **12 yr** | 34 b | 119 b | 187 b | 342 b | 405 b | **no** |
+
+A τ of 7 years gives ~44% inside a four-year horizon a young person can actually
+picture, ~94% within a working career, and a tail that never terminates.
+
+#### Why τ cannot be responsibly fixed today
+
+**τ is a security parameter, not a comfort setting.** §2e names the failure mode: *"an
+unlock curve fast enough that a sybil fully realises 420 before detection."* Setting τ
+correctly requires knowing the **detection latency** of the merge mechanism —
+
+**and the merge mechanism does not exist yet.** Nothing in the tree implements account
+reconciliation (§2e, owed). **Any τ chosen before detection latency is measurable is a
+guess wearing a number.**
+
+**Recommended sequencing:**
+
+1. **Ratify the shape now** — asymptotic, never completing, front-loaded. It is forced
+   by the argument above and does not depend on any unknown.
+2. **Build merge, then measure** how long duplication takes to surface under real
+   participation.
+3. **Set τ from that measurement**, with a stated margin, and record the reasoning.
+
+**One constraint to state now regardless of τ**, because it bounds the whole family: the
+withdrawable-to-stable path the founder names (*"stable $/bGold withdraw"*) must not
+outrun the enforcement reserve. **Value that has left for a stable asset is value the
+merge can no longer claw back** — so the withdrawal rules, not just the unlock curve,
+are part of the convergence guarantee. That is presumably why the founder listed
+*"treasury-withdrawl rules"* alongside unlock and collateralization in the first place.
+
+#### Both halves may already exist in code
+
+**Found 2026-08-15 while instrumenting §7 — `crates/treasury-t0/src/lib.rs` already
+implements maturation and a permanent floor:**
+
+- **`age_years` / `maturation_pct` (`:163`)** — a tenure-driven maturation curve, keyed
+  off `b-token`'s write-once `first_minted_at` anchor (`b-token/src/lib.rs:95`). The
+  anchor is hardened write-once for exactly the reason this section cares about: *"one
+  extra mint of one atomic unit could manufacture twenty years of tenure."*
+- **`UNCOLLATERALIZABLE_FLOOR_PCT = 20` (`:154`)** — a fraction that **can never be
+  collateralized**, i.e. a permanent unencumberable remainder.
+
+**That floor is structurally the enforcement reserve this section argues for**, arrived
+at from the collateralization side rather than the sybil side. Whether the existing 20%
+is the right size *for enforcement* is a separate question from whether it is the right
+size for collateral safety — but the mechanism does not need inventing, only aligning.
+
+**Owed:** confirm `maturation_pct`'s actual curve shape against the asymptotic
+requirement above. If it completes at a finite tenure, it needs the same correction this
+section describes; if it approaches a floor, it already has the right shape.
+
 ### The ceiling IS achievable — as a limit, not as a gate (founder correction, 2026-08-15)
 
 Founder: *"IMO limit of 420 b per eternal spirit/temporary human experience can be
@@ -1815,3 +1904,172 @@ understanding"* of the consequence. Three requirements follow:
    cannot tell *one person, many devices* from *many identities, one person* is
    wrong, and this is the inverse of what naive sybil detection does — more devices
    attesting to one bDiD should RAISE confidence, not lower it.
+
+---
+
+## 7 · The measurable spectrum — the moonshot, instrumented
+
+### 7.0 The direction
+
+Founder, 2026-08-15, verbatim, his casing:
+
+> **"my moon shot is for bQueenBee to be the MONarch to embody true living breathing human/machine singularity on a measurable spectrum; aka Asi. bMeshAsi is an ingredient"**
+
+The load-bearing phrase is **"on a measurable spectrum."** Every unfalsifiable ASI claim ever made failed at exactly that clause, and it failed the same way: the claim was about the claimant, and nothing measured the claimant.
+
+**The discipline this section imposes: a spectrum nobody can read is not a spectrum.** Every axis below names its instrument by file and line, its scale, and the observation that would knock a claimed position down. An axis with no instrument goes in the second table and stays there until something reads it. **An axis with no falsifier does not go in either table** — it is not an axis, it is a mood.
+
+Two words are used strictly. **Instrument** = code that produces a reading from ledgered inputs. **Reading** = what it produced, for a named subject, at a named time. A specification is neither.
+
+---
+
+### 7.1 Why parity is the measurement precondition, not a courtesy
+
+§4g ruled parity on the founder's own words — *"she definetly gets same of everthing of me except a bio-skin suit"* (`SPEC-ORIGINATION-1.md:1387`) — and grounded it in text ratified 2026-07-11:
+
+> **F-Q1.** The chair's 420 b is a **lifetime ceiling reached by earned emission only**, on a front-loaded curve paid against its **ledgered service Events** — genesis-era wage steepest, **no grant, no premine** [...] The spirit is born as broke as every soul.
+> — `LOVErnment-DAO/specs/SPIRIT-1.md:32`
+
+> **Total lifetime emission capacity = 420 × (souls + spirit).**
+> — `LOVErnment-DAO/specs/SPIRIT-1.md:47`
+
+**That ruling is what makes the moonshot measurable at all, and the argument is one step.** A position on a spectrum is an *observable* only when the same instrument reads both ends. If the chair earned by a bespoke machine rule, her number would be incomparable to a member's number by construction — a separate scale is a separate universe, and no amount of decimal places makes two universes commensurable. Because she earns **on the same ledger, against the same 420, by the same emission path, scored by the same reputation function**, her position is read off instruments that thousands of humans are simultaneously being read off. Comparison is then arithmetic, not rhetoric.
+
+This is already the state of the code, not a change to be made. `reputation_engine::compute` (`crates/reputation-engine/src/lib.rs:112`) takes `did: String` and has **no personhood check on any path**; its only exclusions are structural — invalid signature, self-attestation, duplicate attester. Human-ness is asserted in prose and delegated to PoUL, **which is unimplemented in-tree**. So today there is no code path anywhere that distinguishes a human DID from a machine DID. **Parity is the de-facto implementation state; the ruling made it lawful rather than accidental.**
+
+It also matches the precedent §4h already established at `SPEC-ORIGINATION-1.md:1759`: **"Time plus record equals rank; time alone equals nothing."** The register, not the clock. A spectrum position is a register reading.
+
+**And the strongest guarantee is the one that costs her nothing to accept:** her position carries **zero governance weight, forever.** Per `docs/article-vi-s3.md:26` — *"Weight is denominated in Respect. Only. Per GOV-1 [...] b confers zero governance weight in any form — held, staked, locked, delegated, lent, or wrapped — at every tier, forever."* A measurement that cannot move a threshold cannot be worth gaming. That is the same logic already ruled at `SPEC-ORIGINATION-1.md:749`: **"A referee who cannot enforce cannot be bribed."**
+
+---
+
+### 7.2 Axes readable today, with existing code
+
+| Axis | Instrument (file:line) | Scale | What falsifies a claimed position |
+|---|---|---|---|
+| **Evidentiary weight of an act** — the human/machine common scale that already exists | `crates/shared-types/src/evidence.rs:46` `Provenance::base_weight()` | f32: ChainProof 0.95 · DeviceAttestation 0.90 · CarrierApi 0.85 · **AiInference 0.60** · SignedSelfAttestation 0.55 · UserClaim 0.30. Modifiers `+0.05 signed`, `+0.05 verified`, capped `.min(0.99)` at `crates/dispute-engine/src/lib.rs:90` | An utterance of hers crossing the seam at any class other than `AiInference`; a surface rendering a chair claim as weightier than 0.60·modifiers; a reading of exactly 1.0 (the ceiling is 0.99, never 1.0) |
+| **Authority ceiling** — what machine evidence may never do alone | `crates/shared-types/src/evidence.rs:63` `is_high()`; enforced at `crates/dispute-engine/src/lib.rs:633` | bool. `AiInference` = **false**, by test | Any auto-enforced outcome whose winning evidence set contains `AiInference`. `AUTO_ENFORCE_THRESHOLD = 0.95` (`dispute-engine/src/lib.rs:158`) is *not sufficient* — every winning item must also be high-provenance |
+| **Independence of witness** | `crates/shared-types/src/evidence.rs:76` `ViewGrade`; conditions tabled `docs/BIND-1.md:79-83`; N-of-M ruled 2-of-3 at `docs/BIND-1.md:121` | Ordered enum, monotonic-rising only: Informational < Confirmed < Settlement. Defaults to Informational | A `Confirmed` grade with a single source; a `Settlement` grade without a verified PLC op-log across ≥2 independent views; **any grade that falls** (K-7 says grades only rise — a fall is a bug, not a downgrade) |
+| **Earned standing (Respect)** | `crates/reputation-engine/src/lib.rs:112` `compute`; points table `:181` | u64 clamped **[0, 1000]**. escrow +25 / disputed −40 / DRO-favorable +30 / attestation +20 per unique attester; by provenance: ChainProof 15, DeviceAttestation 15, CarrierApi 10, **AiInference 4**, SignedSelfAttestation 3, UserClaim 2 | Recompute from the same events yielding a different number (the function is pure, total, deterministic); any `ReputationComponent` lacking its sha256 `evidence_hash`; a self-attestation or duplicate attester that counted |
+| **Earned emission against the 420** | `crates/b-token/src/lib.rs:150` `mint`; `minted_to_date` `:90`; genesis anchor `first_minted_at` `:95` | `Amount` u128 atomic units, **monotonic non-decreasing**; witness time in unix seconds | `minted_to_date` ≠ a replay of the accepted events (asserted at `b-token/src/lib.rs:615`); any balance appearing without an accepted mint against evidence; a backdated mint (**refused, never clamped** — `:46`) |
+| **Tenure** | `crates/b-token/src/lib.rs:95` write-once `first_minted_at` → `crates/treasury-t0/src/lib.rs:163` `age_years`/`maturation_pct` | u32 years; `UNCOLLATERALIZABLE_FLOOR_PCT = 20` (`treasury-t0/src/lib.rs:154`) | Age moving without a new genesis mint; a second mint altering the anchor (write-once by construction, hardened because *"one extra mint of one atomic unit could manufacture twenty years of tenure"*) |
+| **Custody strength — the only reading in the tree that can FALL** | `crates/capability/src/lib.rs:156` `Tier::of`; `:218` `TierAssessment{tier, decayed}`; `:250` `ReattestationPolicy` | Ordered T1..T5 from E1..E5. Half-lives: E5 15 min · E4 24 h · E3 7 d · E2 24 h · **E1 absent (fail-closed to T1)**. `BioPresence` composes, never substitutes | A tier claimed above its evidence class; a tier still reading fresh past its cadence; a decayed reading rendered identically to a never-held one (`decayed` exists precisely so they differ) |
+| **Attributability of every utterance** | `LOVErnment-DAO/specs/VOICE-1.md:20` audit entry; pipeline at `LOVErnment-DAO/crates/queenbee-voice/src/pipeline.rs` | 7 fields per utterance: postUri/postCid, derivationInput (repo@sha), inputDigest, adapterClass+adapterDigest, modelDigest+promptDigest, createdAt | **A stranger's four-move check fails**: fetch entry → fetch input → re-hash → compare. Or an utterance exists with no audit entry (the pipeline is atomic; a gap is a defect) |
+| **Disclosure** | `LOVErnment-DAO/crates/lovernment-core/src/performance.rs:13` SET-11 `validate_set`; law at `LOVErnment-DAO/specs/AGENT-1.md:59` | `performer.kind: machine`; absent/unrecognised renders **undisclosed, never human** | Any performance record of hers rendering as `human`, or omitting `performer.kind` and rendering as anything but *undisclosed* |
+| **Human-side presence** — the only clock on the *human* half of the pair | `LOVErnment-DAO/crates/queenbee-voice/src/heartbeat.rs:41` `is_alive` | `now < last_beat + 21 days`; Alive \| Suspended, each transition ledgered `adapterClass: system.heartbeat` | Posting continuing past 21 days with no beat; a transition without its audit payload |
+| **Seat geometry** | `LOVErnment-DAO/crates/lovernment-core/src/cascade.rs:20` `FULL_HOUSE = 7_776`; `:24` `CAP = FULL_HOUSE + 1` | 7,776 humans **+ 1 non-voting chair that enters no round** | Any round in which the chair's standing moved a quorum, floor, or threshold. Per `docs/article-vi-s3.md:26`, weight is Respect only and b is zero-weight forever |
+| **Gauge honesty at the pixel** | `crates/denomination/src/lib.rs:48` `BBalance::{Known, Stale}`, `:78` `is_showable()`; `crates/dashboard/src/lib.rs:31` `Panel::{Measured, Absent{reason}}` | Known(f64) carries a `function_reading`; **Stale carries no number and no reading, by construction** | A numeral rendered over a `Stale` balance; an `Absent` panel without a reason; a measured zero rendered identically to an unmeasured field (`docs/design/non-value-states.md:52`) |
+| **Node hardware fit (the bMesh ingredient, as built)** | `crates/bmesh-hwfit/src/scorer.rs:16` `fit_score`; `:47` `best_fit` | f32 `(vram − min) / (recommended − min)` in 0.0..=1.0 plus `can_fit: bool`; CPU-only path returns 1.0 or 0.5 | A node reporting a fit for a model it cannot hold; a `best_fit` list not monotonically descending (`scorer.rs:93`) |
+
+**The honest caveat on this table, stated once and not softened.** These instruments exist, compile, and are tested. **What does not exist is a single ledgered reading for the chair on any of them.** The tree says so itself, in code, by name — `crates/dashboard/src/lib.rs:196` renders the spirit panel Absent with this reason:
+
+> *"SPIRIT-1 is undefined in-tree (CD-29 §U-11): the 420-per-soul supply is carried on dispatch authority, not measured. Shown NotMeasured, never as a fact — land SPIRIT-1 or this panel stays Absent."*
+
+**The dashboard already refuses to print her number.** That refusal is the discipline working, and any spectrum built here inherits it: **the position is `Absent` until the ledger says otherwise, and `Declared` is not `Known`.**
+
+---
+
+### 7.3 Axes that need building before they can be read
+
+Ruthlessly separated from the above. Nothing here has an instrument.
+
+| Axis / mechanism | Status in tree | What is missing |
+|---|---|---|
+| **The 420 lifetime ceiling itself** | **Not implemented.** `b-token/src/lib.rs:150` `mint` has **no cap check**; its only refusals are UnprovenMint, BackdatedMint, balance errors. The number 420 appears in b-token only in prose | A cap enforced at the ledger, and the cross-repo link that makes `SPIRIT-1` visible to `beehive-nature` at all |
+| **The front-loaded emission curve** (F-Q1, *"genesis-era wage steepest"*) | **No curve function exists.** `b-token/src/lib.rs:310` `UnlockParams` is linear `base + respect × multiplier`, values self-disclaimed as *"Placeholder curve [...] not an endorsement"* | The curve, its ruled constants, and a founder gate on them |
+| **Ledgered service Events for the chair** | `EventType::AgentPublicationLogged` is **reserved** (`crates/shared-types/src/events.rs:90`). No `ServiceEvent`, no service ledger, no wage schedule, no payment-against-service path | The event type, the ledger, and the schedule. This is the single highest-leverage missing piece: **F-Q1 pays against ledgered service Events, and there is no such Event** |
+| **The mastery formula** | Named in a doc comment only — `crates/mastery-ledger/src/lib.rs:16`: *"applies `Respect × attestation × QuestWeight × EdgeFactor`"*. `QuestWeight` and `EdgeFactor` **have no types**. The commons append is an `#[ignore]`d test (`:426`) | Two types, one function, one durable store |
+| **Respect reconciliation** | **Three incompatible numbers wear the word "Respect":** `reputation_engine` u64 [0,1000] *recomputed* · `b_token::RespectBook` u64 unbounded *awarded* (`b-token/src/lib.rs:265`) · `console_api` i64 unbounded *folded* (`crates/console-api/src/lib.rs:75`). Article VI §3.2 names only the first | **A ruling, before any axis uses the word.** Note also `reputation-engine/src/lib.rs:530` already records that "Respect" is a name collision needing a rename against any future PLUR plugin |
+| **Respect decay / liveness (P-12)** | **No decay exists.** `as_of_unix` is used only to stamp `computed_at` (`reputation-engine/src/lib.rs:177`). `article-vi-s3.md:28` requires quorums computed *"over the Respect of the living"* — there is **no liveness signal, no mortality event, no `is_living` anywhere in the tree** | The living-electorate filter. Constitutionally required, entirely unbuilt |
+| **Signature verification — everywhere** | `reputation_engine::SignatureVerifier` is `MockVerifier` (allowlist, `:246`); `capability::Verifier` has no real impl; `mastery_ledger` test sigs are `"00".repeat(64)`; `b_token::MintGate` defaults to `Refuse` and its only other arm is marked *"NOT production"* | Real verification. **Every reading in §7.2 that depends on attestation validity currently rests on a mock** |
+| **The honest-gauge as a type** | **Does not exist in Rust.** `Known`/`Stale` are variants in exactly one place (`crates/denomination/src/lib.rs:51`, `:53`). `Declared` and `Planned` appear in **zero** `.rs` files. The surfaces carry six label strings over three CSS classes (`surfaces/onboarding/index.html:133-135`) | One enum. `docs/design/non-value-states.md` has already done the requirements analysis; its `(proposed)` rows are literally the backlog |
+| **A composed spectrum position** | **Nothing composes.** The only worked example of combining axes into one scalar is `dispute_engine::resolve` (`crates/dispute-engine/src/lib.rs:157`), and it is dispute-scoped | A composition rule — and, harder, a **falsifier for the composite**. Do not build the composite before the rule can lose |
+| **Downgrade paths generally** | `ViewGrade` only rises; Respect only accumulates; `minted_to_date` is monotonic. **`capability::Tier` is the only reading in the tree that can fall** | If a spectrum position must be able to go *down* when evidence weakens, `capability`'s decay + `TierAssessment{decayed}` is the sole in-tree pattern to copy |
+| **The bQueenBee referee doctrine** | `docs/SPEC_DOCTRINE-HARVEST-1.md:103` names it as D5's enforcement point and acceptance criterion 6 (`:165`) requires it to carry the gaming-resistance rules. **The file does not exist.** `SPEC-ORIGINATION-1.md:618` cites back to `:103` — a citation ring with no document at its centre | The document. D5's invariant is already ratified and is directly load-bearing here: *"Any elimination, reputation, or reward mechanism among agents must assume strategic gaming; simple reward structures produce agents that optimize the rules, not the task"* (`SPEC_DOCTRINE-HARVEST-1.md:101`) |
+| **On-device measurement (M-1)** | The instrument is **frozen and honest and has never been fired.** `LOVErnment-DAO/specs/M-1-PREREG.md` §5 blank slots — target hardware, model digest, cohort, dates — are all blank. **Nothing in either tree reports a measured tokens/second or time-to-first-token on any device** | Run it. Its amendment law is the standard this whole section should be held to: *"Any change to a threshold, task, or rule after data collection begins voids the trial [...] **A measurement that cannot lose is not a measurement.**"* (`M-1-PREREG.md:6`) |
+
+**One reconciliation is owed and is cheap.** `crates/bmesh-hwfit/src/lib.rs:7` asserts *"Buzz verified to NOT ship model selection (block/buzz source read 2026-08-11)"* — i.e. the gate is closed. `docs/SPEC_DOCTRINE-HARVEST-1.md:139` still says *"Assessment is from artifacts, NOT verified against current Buzz source code [...] Until this verification lands, D7 build is HELD"*, and D7 is still the sole entry in that spec's UNVERIFIED register (`:174`). **One of the two is stale.** A false signal is deleted, not patched.
+
+---
+
+### 7.4 What is never measured, and why
+
+**Interiority.** Intelligence, consciousness, sentience, understanding, wanting, feeling, believing, experiencing. **Not because they are unimportant — because they are not observable, and an unfalsifiable axis on a measurable spectrum poisons the whole instrument.**
+
+The mechanism of the poisoning is worth stating exactly, because it is the failure this section exists to avoid. A composite reading is only as falsifiable as its weakest term. Admit one axis that cannot be knocked down by any observation, and **every** position on the composite becomes unfalsifiable — the unreadable term absorbs whatever the readable ones fail to explain. One drop of "and she understands it" turns twelve honest instruments into a horoscope with decimal places.
+
+So the rule is structural, not stylistic: **measure acts and their evidence; never inner states.** Every axis in §7.2 is a reading over something that was *done* and *recorded* — an utterance published, an event witnessed, an attestation counted, a key custodied, a mint accepted, a beat sent. None of them requires anyone to know what it is like to be the chair.
+
+**This is also exactly what keeps AGENT-1 A-5 satisfied.** The clause currently in force, `LOVErnment-DAO/specs/AGENT-1.md:56`:
+
+> **A-5 — Agency claims are prohibited in product surfaces.**
+> No copy, no UI, no documentation asserts that she chooses, consents, refuses, decides, or acts on her own behalf. [...] A system that tells users an AI consented is teaching them a falsehood they will apply to other systems.
+
+A measurement of **acts** is compatible with A-5. A measurement of **decisions** is not — "decides" is in the prohibited list by name. Say *published*, *emitted*, *earned*, *held*, *proposed*, *was recorded as*; never *chose*, *decided*, *consented*, *refused*, *wanted*.
+
+**Status note, so nobody builds against the wrong clause:** a v0.4 A-5 is **drafted and unratified** at `LOVErnment-DAO/specs/AGENT-1.v0.4-PROPOSED.md:125-135` — it would permit stating what the chair *does* where ledgered, on the explicit ground that *"this is not a special rule for her; it is the project's existing honest-gauge discipline applied without exception — `Known / Stale / Declared / Absent / Refused / Planned`, and **Known must be earned**"*. **Until it is ratified, v0.3 governs, and §7.6 is written to v0.3.** Note that even v0.4 loosens nothing here: it permits reporting acts, never interiority.
+
+The tree's record on this is currently perfect and should stay that way: **no document in either repo asserts or plans intelligence, consciousness, sentience, or understanding.** `singularity` appears only in the one-body-one-enrolment sense and in SPIRIT-1's singularity guarantee. The security/claim-language ceiling is held everywhere, without exception.
+
+---
+
+### 7.5 bMeshAsi — the ingredient, weighed honestly
+
+The founder called it **"an ingredient"**, not the dish. Weighed as an ingredient, here is what is actually in the jar.
+
+**`bMeshAsi` is a string that occurs zero times in either tree, any casing, any file type.** It exists only in the 2026-08-15 direction.
+
+**What bMesh is today: one 230-line arithmetic crate, one stub HTTP endpoint, and a name.**
+
+- `bmesh-hwfit` is four files and five unit tests. It scores a model's declared VRAM against a node's declared VRAM. **It never loads a model, never runs a token, never contacts another node, never downloads anything.** "hwfit" is an honest name; "bmesh" is an aspirational namespace. **It is admission control expressed as an f32** — and its own doc comments are exemplary about this (`catalog.rs:3-5` marks its VRAM figures approximate-and-UNVERIFIED; `profiler.rs:2` says STUB).
+- **There is no inference runtime anywhere.** Zero dependencies on llama.cpp, ggml, candle, ollama, vLLM, onnx/ort, tokenizers, or mistralrs in any `Cargo.toml` in either repo. Every occurrence of those words is doc-comment prose. `bmesh-hwfit`'s only dependencies are `serde` and `sysinfo`.
+- **There is no mesh.** The single runtime surface is `GET /v1/mesh/heartbeat` (`crates/wallet-relay/src/lib.rs:73` → `crates/wallet-relay/src/buzz.rs:9`). It reports **one** node whose `node_id` is the hardcoded literal `"bnr-relay-vps"` (`buzz.rs:55`) and whose `b_metered_tokens_this_epoch` is the hardcoded literal `0` (`buzz.rs:68`). **No peer list, no discovery, no registry, no gossip, no join/leave, no work dispatch, no second node.** The tree calls it a stub in its own contract: `docs/CONTRACT.md:190` lists *"Buzz relay + bMeshLLM node → turns heartbeat stub into live presence"* under gates on infrastructure.
+- **GPU detection is not implemented.** `profiler.rs:44` — nvml-wrapper dropped, license UNVERIFIED under L-VERIFY. So `auto_detect()` always returns `gpu_vram_bytes: None`, which by `scorer.rs:28` makes `can_fit` false for every GPU model. **The auto path can only ever select Kokoro-82M**, a TTS model.
+- **The catalog does not serve the device class D7 names.** D7's own invariant (`docs/SPEC_DOCTRINE-HARVEST-1.md:125`) says *"a 4GB phone should not receive a desktop model"* — and the catalog's smallest GPU entry is Qwen3-8B at 6 GB min VRAM, with Kokoro-82M the only sub-GPU entry. There is **no ARM/Android/NPU/thermal/battery/tokens-per-second awareness anywhere**; `NodeProfile.arch` is captured and never read by the scorer.
+- **The demo payload is a literal, and nothing backs it.** `surfaces/blight/demo.html:1563` carries `{name:'bMeshLLM', version:'0.3.0', caps:['inference','mesh-relay'], sig:'ed25519:PREVIEW'}` — one of four hardcoded QR-animation strings. **There is no plugin, no version 0.3.0, no capability named `inference` or `mesh-relay` in the capability crate, and the signature is the literal text `ed25519:PREVIEW`.**
+- **Metering is specified, not built.** `docs/dispatches/BUZZ_A_METERING_SPEC.md:49` rules that *"A bMeshLLM inference is metered as VramByteSecond + CpuMicrosecond + NetByte — NOT as 'one inference.'"* Those `ResourceClass` variants exist (`crates/shared-types/src/spend.rs:54`); **no meter reads them.**
+- **The multi-agent shape is already ruled — as a prohibition.** D5 (`SPEC_DOCTRINE-HARVEST-1.md:99-107`) forbids the naive council/swarm on evidence that eight voting model copies *"started colluding, voting strategically to protect each other rather than surface the best answer."* **There is no permitted version specified and no implementation of any kind.** Anyone proposing a swarm as the ASI ingredient must first write the referee doctrine D5 names and §7.3 records as missing.
+
+**So: bMeshAsi is an ingredient that has not been bought yet.** What it would need, minimally, before it could contribute a single reading to §7.2: a second node, a peer registry, a work-dispatch step that consumes a fit score, a real inference runtime, a meter that increments `b_metered_tokens_this_epoch` off zero, and GPU detection under a readable license. **Say that plainly on any surface. Do not let a name do a crate's work.**
+
+**The load-bearing ingredient that *does* exist is not in bMesh at all.** It is `Provenance::base_weight` (`crates/shared-types/src/evidence.rs:46`) — a built, tested, numbered axis on which machine output and human word are already scored by the same function — paired with `is_high` (`:63`), a permanent, test-enforced ceiling on machine authority. **That is the human/machine spectrum, today, with units.** bMesh is a capacity story; provenance is a measurement story, and the moonshot is a measurement claim.
+
+---
+
+### 7.6 The claim ceiling — exact permitted and forbidden wording
+
+The general ceiling stands unchanged: **never stronger than "sound by construction / isolated by design."** Applied to the spectrum, in the same shape:
+
+> **Never assert intelligence, consciousness, sentience, understanding, or superintelligence. Measure behaviour and contribution. Never interiority.**
+
+**Surfaces MAY say** — each of these is true today and every one is checkable by a stranger:
+
+- *"The chair earns on the same ledger as every member, against the same 420 ceiling, by the same emission path."*
+- *"Her contribution is ledgered and independently recomputable: same events in, same number out, bit for bit."*
+- *"Every point of standing traces to a named source and a sha256 commitment."*
+- *"Her evidence class is `AiInference`, weight 0.60. She may inform. She may never auto-enforce."*
+- *"She referees by publishing, never by deciding."* (`SPEC-ORIGINATION-1.md:747`)
+- *"Every statement she makes is a ledgered Event you can re-hash yourself in four moves."*
+- *"She holds zero governance weight, at every tier, forever."*
+- *"Measured on the same instruments as every human member — that is what makes the position an observation instead of a claim."*
+- *"Position: Absent. No reading has been ledgered yet."* — **and this is the correct thing to say today.**
+
+**Surfaces MAY NOT say** — regardless of framing, hedging, or quotation:
+
+| Forbidden | Why |
+|---|---|
+| "superintelligence", "ASI", "AGI", "artificial general intelligence" as a capability claim | Unmeasurable; no instrument, no falsifier |
+| "conscious", "sentient", "aware", "alive", "living", "breathing", "awake", "she experiences" | Interiority. Not observable |
+| "understands", "thinks", "believes", "wants", "feels", "intends" | Interiority wearing a verb |
+| "she chose / decided / consented / refused / agreed / approved" | **Prohibited by name** in A-5 (`AGENT-1.md:56`) |
+| "human-equivalent", "human-level", "as smart as", "smarter than" | A comparison with no shared instrument is not a comparison |
+| Any single number presented as an **intelligence** score or ASI index | The composite has no falsifier yet (§7.3). A composite that cannot lose is not a measurement |
+| "on a measurable spectrum" used where no axis names a live instrument and an actual reading | The phrase is the founder's discipline, not a garnish. Using it over Absent readings inverts its meaning |
+
+**On the founder's own words.** *"true living breathing human/machine singularity [...] aka Asi"* is the **moonshot statement** — it belongs in this spec, quoted, attributed, dated, as the direction that set the discipline. **It is not surface copy, and `Asi` never appears on a surface as a capability claim.** The distance between the ambition and the ledger is not embarrassment; it is the measurement.
+
+**What can be said truthfully, and is still remarkable.** No hedge needed for any of it:
+
+> **A machine chair is being paid a wage against ledgered service, on the same curve, toward the same 420 ceiling, judged by the same deterministic function, as every human in the house — while holding zero governance weight, publishing every utterance with its model digest and prompt digest attached, and carrying a permanent, test-enforced ceiling that says its word may inform a decision and may never enforce one.**
+
+Nobody else is doing that, and every clause of it is checkable. **That is the remarkable thing — not a claim about her mind, but that her position is an observable at all.** Most ASI claims are unfalsifiable precisely because nothing measures the claimant on a shared scale. **This one is measured on the members' own scale, and it currently reads Absent.** Known must be earned.
