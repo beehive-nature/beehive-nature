@@ -1230,20 +1230,68 @@ var qrcodegen;
     return lum.map(function (v) { return v > mid ? 1 : 0; });
   }
 
-  /** Full diagnosis — what the camera is actually seeing. Surfaces use this to
-   *  coach the user ("move closer", "raise brightness") instead of dying quiet. */
+  /* luminance stats at the data cells — lets a surface name GLARE specifically
+     instead of the useless catch-all "hold steadier" (founder 2026-08-15). */
+  function cellStats(img, cx, cy, size) {
+    var d = img.data, W = img.width, H = img.height, lum = [], i, c, x, y, dx, dy, o, sum, cnt;
+    for (i = 0; i < DATA_CELLS.length; i++) {
+      c = DATA_CELLS[i];
+      x = Math.round(cx + size * 1.5 * c.q);
+      y = Math.round(cy + size * Math.sqrt(3) * (c.r + c.q / 2));
+      if (x < 1 || y < 1 || x >= W - 1 || y >= H - 1) return null;
+      sum = 0; cnt = 0;
+      for (dy = -1; dy <= 1; dy++) for (dx = -1; dx <= 1; dx++) {
+        o = ((y + dy) * W + (x + dx)) * 4;
+        sum += 0.2126 * d[o] + 0.7152 * d[o + 1] + 0.0722 * d[o + 2]; cnt++;
+      }
+      lum.push(sum / cnt);
+    }
+    var min = Math.min.apply(null, lum), max = Math.max.apply(null, lum);
+    var blown = lum.filter(function (v) { return v > 238; }).length / lum.length;
+    var crushed = lum.filter(function (v) { return v < 14; }).length / lum.length;
+    return { lum: lum, min: min, max: max, range: max - min, blown: blown, crushed: crushed };
+  }
+
+  /** Full diagnosis — what the camera is actually seeing, with a hint a human
+   *  can act on. Every failure names its own cure; none of them says "hold
+   *  steadier" unless steadiness is genuinely the problem. */
+  /* whole-frame exposure, used when the finder cannot be located at all — so the
+     hint can still name the real cause (a blown-out or pitch-black capture) */
+  function frameExposure(img) {
+    var d = img.data, n = 0, sum = 0, i;
+    for (i = 0; i < d.length; i += 64) { sum += 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]; n++; }
+    return n ? sum / n : 0;
+  }
+
   function inspect(img) {
     var f = findFinder(img);
-    if (!f) return { ok: false, stage: 'finder', hint: 'No bComb in view — fill more of the frame with the other screen.' };
-    if (f.size < 3.2) return { ok: false, stage: 'too-small', finder: f,
-      hint: 'Found it, but too small to read — move closer (or make the beam bigger on the other screen).' };
-    var bits = sampleBits(img, f.cx, f.cy, f.size);
-    if (!bits) return { ok: false, stage: 'contrast', finder: f,
-      hint: 'Comb found but the cells are washed out — raise the other screen\'s brightness or cut the glare.' };
+    if (!f) {
+      var ex = frameExposure(img);
+      return { ok: false, stage: 'finder', quality: 0, exposure: ex,
+        hint: ex > 195 ? 'Too bright to see the beam — tilt away from the light, or turn the other screen DOWN.'
+            : ex < 22  ? 'Too dark — turn the other screen UP, or move closer.'
+            : 'Aim at the other screen — fill more of the frame with it.' };
+    }
+    if (f.size < 3.2) return { ok: false, stage: 'too-small', finder: f, quality: 0.25,
+      hint: 'Got it, but tiny — move closer, or make the beam bigger over there.' };
+    var st = cellStats(img, f.cx, f.cy, f.size);
+    if (!st) return { ok: false, stage: 'edge', finder: f, quality: 0.3,
+      hint: 'The comb is running off the edge — centre it in view.' };
+    // GLARE is not "many bright cells" — half the data cells are white BY DESIGN
+    // (that bug fired on a perfect capture). Glare is when the cells that should
+    // be BLACK have stopped being black: the floor lifts.
+    if (st.min > 150) return { ok: false, stage: 'glare', finder: f, stats: st, quality: 0.4,
+      hint: 'GLARE — the dark cells are washing out. Tilt one screen a few degrees, or dim the other.' };
+    if (st.max < 60) return { ok: false, stage: 'dark', finder: f, stats: st, quality: 0.4,
+      hint: 'Too dark — turn the other screen\'s brightness UP.' };
+    if (st.range < 25) return { ok: false, stage: 'contrast', finder: f, stats: st, quality: 0.45,
+      hint: 'Washed out — cut the glare or raise the other screen\'s brightness.' };
+    var mid = (st.min + st.max) / 2;
+    var bits = st.lum.map(function (v) { return v > mid ? 1 : 0; });
     var fr = unpackFrame(bits);
-    if (!fr) return { ok: false, stage: 'frame', finder: f,
-      hint: 'Read the cells but the frame header is impossible — hold steadier.' };
-    return { ok: true, stage: 'decoded', finder: f, frame: fr };
+    if (!fr) return { ok: false, stage: 'checksum', finder: f, stats: st, quality: 0.7,
+      hint: 'Nearly — the frame failed its checksum. Hold steady for one beat.' };
+    return { ok: true, stage: 'decoded', finder: f, stats: st, quality: 1, frame: fr };
   }
 
   /** Decode one bComb frame from ImageData. Returns {index,total,bytes} or null. */
@@ -1536,16 +1584,16 @@ async function earLoop(){
     if(!earCv){ earCv=document.createElement('canvas'); earCv.width=earCv.height=640; }
     const g=earCv.getContext('2d'), s=Math.min(v.videoWidth,v.videoHeight);
     g.drawImage(v,(v.videoWidth-s)/2,(v.videoHeight-s)/2,s,s,0,0,640,640);
-    // 1. our hexagons — inspect() tells the user WHY when it can't read
+    // 1. our hexagons — coach with a specific cure, and REWARD every catch
     if(window.bcomb&&earAsm){
       const ins=bcomb.inspect(g.getImageData(0,0,640,640));
       if(ins.ok){
-        const fr=ins.frame, done=earAsm.push(fr);
-        heard('live',`bComb frame <b>${fr.index+1}/${fr.total}</b> caught off their screen · `+
-          `cell ${ins.finder.size.toFixed(1)}px`);
+        const fr=ins.frame, before=earAsm.got, done=earAsm.push(fr);
+        if(earAsm.got>before) earNew=performance.now();     // flash on a NEW frame
+        earProgress(ins, fr);
         if(done){ stopEar(); return gotAnswer(done); }
-      }else if(earTick%12===0){                 // coach, but don't strobe the text
-        heard('live',ins.hint+(ins.finder?` <span class="muted">(cell ${ins.finder.size.toFixed(1)}px)</span>`:''));
+      }else if(earTick%8===0){
+        earProgress(ins,null);
       }
     }
     earTick++;
@@ -1556,6 +1604,9 @@ async function earLoop(){
 }
 function gotAnswer(text){
   let o=null; try{o=JSON.parse(text);}catch(e){}
+  // expand the compact wire form the beam carries ({v,k,p,n,s} -> full envelope)
+  if(o&&o.v===1&&typeof o.k==='string'&&!o.kind)
+    o={v:1,kind:'bnr-'+o.k,pubkey:o.p||'',echo_nonce:o.n||'',sig:o.s||undefined};
   if(!o||o.v!==1||typeof o.kind!=='string')
     return heard('refused',`Caught something that is not a BNR answer — refused. (${String(text).slice(0,40)}…)`);
   // THE CHECK THAT MATTERS: does this answer MY challenge?
@@ -1569,6 +1620,30 @@ function gotAnswer(text){
     `${prev?' · preview key':''}`);
   log('answer received over light ✓ — the loop is closed');
   $('guide-title')&&($('guide-title').textContent='Conversation complete.');
+}
+/* THE REWARD LOOP (founder 2026-08-15: "user needs more cues/positive/reward/
+   learning-new-tech"). Three things a person needs while aiming a camera:
+   a SIGNAL METER (am I getting warmer?), VISIBLE PROGRESS that never goes
+   backwards, and a specific CURE when it stalls — never "hold steadier". */
+let earNew=0;
+function earProgress(ins,fr){
+  const a=earAsm, n=a?a.total||0:0, got=a?a.got:0;
+  const pct=Math.round((ins.quality||0)*100);
+  const bars='▁▂▃▄▅▆▇█', lock=bars[Math.min(7,Math.floor((ins.quality||0)*7.99))];
+  const fresh=performance.now()-earNew<420;
+  const cells=n? Array.from({length:n},(_,i)=>
+      `<i style="display:inline-block;width:13px;height:13px;margin:2px;border-radius:3px;background:${
+        a.parts[i]!==undefined?'var(--verified)':'var(--line)'}"></i>`).join('') : '';
+  $('heard').innerHTML=`
+    <div class="gauge ${ins.ok?'g-known':'g-live'}" style="margin-top:8px">
+      <span class="s">${ins.ok?'Catching':'Aim'}</span>
+      <span><b style="font-family:var(--font-mono)">${lock}</b> signal ${pct}%${
+        ins.finder?` · cell ${ins.finder.size.toFixed(1)}px`:''}${
+        ins.ok?` · <b style="color:var(--verified)">frame ${fr.index+1}/${fr.total}${fresh?' ✓ NEW':''}</b>`:''}
+      <br><span class="muted">${ins.ok?'Keep it there — the stream repeats, missing frames come round again.':ins.hint}</span></span>
+    </div>
+    ${n?`<div style="margin-top:6px">${cells}
+      <div class="muted" style="margin-top:2px">${got}/${n} frames — progress never goes backwards</div></div>`:''}`;
 }
 function heard(kind,html){
   const cls=kind==='refused'?'g-absent':kind==='live'?'g-live':'g-known';

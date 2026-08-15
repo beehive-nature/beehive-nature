@@ -1234,20 +1234,68 @@ var qrcodegen;
     return lum.map(function (v) { return v > mid ? 1 : 0; });
   }
 
-  /** Full diagnosis — what the camera is actually seeing. Surfaces use this to
-   *  coach the user ("move closer", "raise brightness") instead of dying quiet. */
+  /* luminance stats at the data cells — lets a surface name GLARE specifically
+     instead of the useless catch-all "hold steadier" (founder 2026-08-15). */
+  function cellStats(img, cx, cy, size) {
+    var d = img.data, W = img.width, H = img.height, lum = [], i, c, x, y, dx, dy, o, sum, cnt;
+    for (i = 0; i < DATA_CELLS.length; i++) {
+      c = DATA_CELLS[i];
+      x = Math.round(cx + size * 1.5 * c.q);
+      y = Math.round(cy + size * Math.sqrt(3) * (c.r + c.q / 2));
+      if (x < 1 || y < 1 || x >= W - 1 || y >= H - 1) return null;
+      sum = 0; cnt = 0;
+      for (dy = -1; dy <= 1; dy++) for (dx = -1; dx <= 1; dx++) {
+        o = ((y + dy) * W + (x + dx)) * 4;
+        sum += 0.2126 * d[o] + 0.7152 * d[o + 1] + 0.0722 * d[o + 2]; cnt++;
+      }
+      lum.push(sum / cnt);
+    }
+    var min = Math.min.apply(null, lum), max = Math.max.apply(null, lum);
+    var blown = lum.filter(function (v) { return v > 238; }).length / lum.length;
+    var crushed = lum.filter(function (v) { return v < 14; }).length / lum.length;
+    return { lum: lum, min: min, max: max, range: max - min, blown: blown, crushed: crushed };
+  }
+
+  /** Full diagnosis — what the camera is actually seeing, with a hint a human
+   *  can act on. Every failure names its own cure; none of them says "hold
+   *  steadier" unless steadiness is genuinely the problem. */
+  /* whole-frame exposure, used when the finder cannot be located at all — so the
+     hint can still name the real cause (a blown-out or pitch-black capture) */
+  function frameExposure(img) {
+    var d = img.data, n = 0, sum = 0, i;
+    for (i = 0; i < d.length; i += 64) { sum += 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]; n++; }
+    return n ? sum / n : 0;
+  }
+
   function inspect(img) {
     var f = findFinder(img);
-    if (!f) return { ok: false, stage: 'finder', hint: 'No bComb in view — fill more of the frame with the other screen.' };
-    if (f.size < 3.2) return { ok: false, stage: 'too-small', finder: f,
-      hint: 'Found it, but too small to read — move closer (or make the beam bigger on the other screen).' };
-    var bits = sampleBits(img, f.cx, f.cy, f.size);
-    if (!bits) return { ok: false, stage: 'contrast', finder: f,
-      hint: 'Comb found but the cells are washed out — raise the other screen\'s brightness or cut the glare.' };
+    if (!f) {
+      var ex = frameExposure(img);
+      return { ok: false, stage: 'finder', quality: 0, exposure: ex,
+        hint: ex > 195 ? 'Too bright to see the beam — tilt away from the light, or turn the other screen DOWN.'
+            : ex < 22  ? 'Too dark — turn the other screen UP, or move closer.'
+            : 'Aim at the other screen — fill more of the frame with it.' };
+    }
+    if (f.size < 3.2) return { ok: false, stage: 'too-small', finder: f, quality: 0.25,
+      hint: 'Got it, but tiny — move closer, or make the beam bigger over there.' };
+    var st = cellStats(img, f.cx, f.cy, f.size);
+    if (!st) return { ok: false, stage: 'edge', finder: f, quality: 0.3,
+      hint: 'The comb is running off the edge — centre it in view.' };
+    // GLARE is not "many bright cells" — half the data cells are white BY DESIGN
+    // (that bug fired on a perfect capture). Glare is when the cells that should
+    // be BLACK have stopped being black: the floor lifts.
+    if (st.min > 150) return { ok: false, stage: 'glare', finder: f, stats: st, quality: 0.4,
+      hint: 'GLARE — the dark cells are washing out. Tilt one screen a few degrees, or dim the other.' };
+    if (st.max < 60) return { ok: false, stage: 'dark', finder: f, stats: st, quality: 0.4,
+      hint: 'Too dark — turn the other screen\'s brightness UP.' };
+    if (st.range < 25) return { ok: false, stage: 'contrast', finder: f, stats: st, quality: 0.45,
+      hint: 'Washed out — cut the glare or raise the other screen\'s brightness.' };
+    var mid = (st.min + st.max) / 2;
+    var bits = st.lum.map(function (v) { return v > mid ? 1 : 0; });
     var fr = unpackFrame(bits);
-    if (!fr) return { ok: false, stage: 'frame', finder: f,
-      hint: 'Read the cells but the frame header is impossible — hold steadier.' };
-    return { ok: true, stage: 'decoded', finder: f, frame: fr };
+    if (!fr) return { ok: false, stage: 'checksum', finder: f, stats: st, quality: 0.7,
+      hint: 'Nearly — the frame failed its checksum. Hold steady for one beat.' };
+    return { ok: true, stage: 'decoded', finder: f, stats: st, quality: 1, frame: fr };
   }
 
   /** Decode one bComb frame from ImageData. Returns {index,total,bytes} or null. */
@@ -1489,7 +1537,15 @@ function beamBack(env){
   $('replybox').classList.add('on');
   $('guide-title').textContent='Answer ready — turn this screen around.';
   $('guide-body').textContent='The other device points its camera here to complete the exchange. Two beams crossing = the conversation.';
-  try{ replyFrames = window.bcomb ? bcomb.framesFor(env) : []; }catch(e){ replyFrames=[]; log('bcomb: '+e.message); }
+  // COMPACT WIRE FORM: the beam carries short keys, the receiver expands them.
+  // A 205-byte JSON reply was 41 frames of grinding; this is ~10. Same meaning,
+  // a tenth of the aiming (founder: 48/48 was too long a grind).
+  const compact=(()=>{ const o=JSON.parse(env);
+    const c={v:1,k:(o.kind||'').replace(/^bnr-/,''),p:o.pubkey||'',n:o.echo_nonce||''};
+    if(o.sig) c.s=o.sig.slice(0,22);            // truncated marker: full sig rides the QR lane
+    return JSON.stringify(c); })();
+  try{ replyFrames = window.bcomb ? bcomb.framesFor(compact) : []; }catch(e){ replyFrames=[]; log('bcomb: '+e.message); }
+  log('reply: '+env.length+'B full / '+compact.length+'B compact -> '+(replyFrames.length||'?')+' frames');
   const cv=$('reply'), g=cv.getContext('2d');
   if(replyFrames.length && !replyQR){
     replySeq=0;
