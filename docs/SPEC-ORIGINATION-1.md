@@ -346,14 +346,56 @@ a further decision.
 2. **ONE CURVE — ruled by founder 2026-08-15 ("bingo"), not an engineering note.**
    The genesis allocation unlocks on **the same reward-velocity curve** every other
    bDiD is subject to (§2 L3) — not a separate founder vesting schedule, *the* curve.
-   Three things follow and all of them are load-bearing:
    - **The system has exactly one emission rule**, rather than one rule plus two
      exceptions. There is no second mechanism to specify, audit, or defend.
-   - **Dilution tracks adoption automatically.** The concentration transient in note 1
-     resolves itself as the network grows, with no intervention and no discretion.
    - **The same mechanism does both jobs**: the curve that deters sybils by lowering
-     reward velocity is the curve that releases genesis. One thing to build, one thing
-     to reason about, one thing that can go wrong.
+     reward velocity is the curve that releases genesis.
+
+   **The rule, stated exactly: UNLOCK TRACKS PROOF DELIVERED.** This is what makes the
+   founder's bootstrap requirement (*"I will need at least a large portion of the 1mm
+   b up front"*) consistent rather than exceptional. Other bDiDs unlock gradually
+   **because their proof accrues gradually** — courses, attendance, PoL/PoU over
+   months. The `GenesisLaborProof` of §4b is proof of work **already delivered**: the
+   kernel, the specs, the inventions, public and version-controlled. Delivered proof
+   unlocks now; future work unlocks later portions. **Same rule, different position on
+   it, because the earning already happened.** Nothing is exempted.
+
+   The bootstrap requirement is also **mechanical rather than preferential**: an LP
+   cannot exist without both assets present simultaneously. A market cannot be seeded
+   with a vesting schedule. Exchange listings have the same shape.
+
+3. **THE TWO GENESIS ACCOUNTS ARE DIFFERENT ROLES, NOT TWO COPIES.** Founder,
+   2026-08-15: *"bQueenBee… masters receiving and being fastidious; i will be loose
+   with b."* That is a functional split and the unlock policy should follow it rather
+   than treating the accounts identically:
+   - **king.b — the distributing account.** Liquid by design, because its purpose is
+     outflow: paying upstream authors, seeding LPs and CXs. Needs the front-loaded
+     unlock.
+   - **queen.b — the reserve account.** Fastidious custody. No operational reason for
+     it to be liquid, so it can track the curve conservatively.
+
+   Two roles under one rule is not two exceptions. It also halves the practical
+   concentration in note 1, since only one of the two accounts is ever circulating.
+
+4. **THE ALLOCATION IS A DISTRIBUTION VEHICLE, NOT ACCUMULATION — and this, not the
+   curve, is the real answer to the internal-consistency objection.** The founder's
+   stated uses are outbound: *"first share a portion with each author of code we use
+   directly/indirectly and second I will be using it to set up LP's and CX's."*
+   Paying the dependency graph — every author whose code this project uses, directly
+   or transitively — is an unusual commitment for an AGPL-3.0 project and it changes
+   what the 1mm **is**. A treasury that exists to pay the commons and seed markets is
+   not a founder holding, and the surfaces should describe it as what it is.
+   **Engineering consequence:** "each author of code we use directly/indirectly" is a
+   computable set — it is the dependency graph. That distribution can be *derived*
+   rather than curated, which makes it auditable and removes discretion.
+
+5. **KEY-LOSS RISK IS OPERATIONAL AND UNADDRESSED.** Founder: *"I will probably
+   lose through technicle error a portion of the 1mm b."* Said plainly, and it should
+   be designed for rather than absorbed: a 1mm allocation held by a sole creator is a
+   single point of failure, and §4a already establishes that helper data stays
+   on-device under B-1, so device loss and key loss compound. **Recovery design for
+   the genesis accounts is owed** and is not the same problem as recovery for a
+   420-ceiling user.
 3. **Does `b` carry governance weight?** Unanswered in the tree. If it votes, 2M `b`
    across two accounts is control, and the economic allocation should be separated
    from voting weight. This is a question for the governance layer, not a condition on
