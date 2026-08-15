@@ -187,7 +187,67 @@ it is not.** Both appear in this spec already:
 | one registration per bDiD **per event** | **yes** | §4a nullifier, exact byte equality | **exact** |
 | ≤ 7776 humans per DAO | **yes** | `cascade.rs` `FULL_HOUSE`/`CAP` | **exact** |
 | ≤ 420 `b` per bDiD | **yes** | earned ceiling, arithmetic | **exact** |
-| **one bDiD per human** | **not at creation** | §2 L1/L2/L3 + the cap | **converged, not prevented** — see below |
+| **one bDiD per human** | **not at creation — see 2e.0** | §2 L1/L2/L3 + the cap | **converged, not prevented** — see below |
+
+### 2e.0 CORRECTION — §2a's arithmetic is a property of SIMILARITY SEARCH, not of this design
+
+Founder, 2026-08-15: *"so you are telling me bQueenBee will not be able to tell all of us
+apart unique; even though we each (mostly) two irisis, faces, veins, HR, finger, voice
+and you are telling me my identical twin exists out there?"*
+
+**No. That is not what §2a establishes, and this seat applied it too broadly.** Three
+separate claims were being run together:
+
+| claim | verdict |
+|---|---|
+| **Are humans biometrically distinguishable in principle?** | **YES** — overwhelmingly, and compound modalities make it not close |
+| **Are identical twins biometrically identical?** | **NO** — see below |
+| Does 1:N **similarity search** fail at `N = 10¹⁰`? | yes — but **this design does not do similarity search** |
+
+**Identical twins are not biometrically identical.** Iris texture and fingerprint
+minutiae arise from **chaotic morphogenesis in utero**, not from the genome —
+monozygotic twins share DNA and have irises as different from each other as from a
+stranger's. Face and voice *are* genuinely weak against twins; iris, fingerprint and
+vein are not. **A compound scheme that includes any stochastic modality separates twins
+trivially**, which is the founder's §4a point arriving exactly where it was aimed.
+
+**And the compound arithmetic is decisive.** With `k` independent modalities each at
+single-modality false-match rate `f₁`, a conjunctive match gives `f ≈ f₁^k`. At
+`f₁ = 10⁻⁶` and `k = 4`, `f ≈ 10⁻²⁴`; against `N = 10¹⁰` that is `10⁻¹⁴` expected false
+hits. **The false-accept side is simply solved.** The real cost moves to the other
+direction — requiring all `k` to match multiplies false *rejections* — and **M-of-N
+answers that too**: at 4 modalities requiring 3, false accepts stay near `4 × 10⁻¹⁸`
+while false rejects fall to roughly `6 r₁²`, a hundredfold better than conjunctive
+matching at `r₁ = 1%`.
+
+**The deeper point, and the one that actually retires §2a here: exact equality is not a
+gallery.** §2a's `N × f` is the arithmetic of **threshold similarity search** — N
+comparisons, each with a tolerance. §4a does **hash equality**: one O(1) set lookup,
+no threshold, no distance, no tolerance, **no N in the expression at all.** Two hashes
+are the same bytes or they are not. `BIO-1` §0 says this in its own words — *"no
+template, no distance, no threshold, and no gallery"* — and it is why B-2 permits the
+construction while forbidding 1:N.
+
+**So the design escapes §2a's arithmetic entirely, by not being the thing §2a describes.**
+
+#### What survives the correction, stated precisely
+
+1. **`PERSON-1` §2b is untouched, and it was always the deeper half.** Perfect
+   distinguishability *"does not prove the body is free, or that the person controls the
+   key."* **Renting** remains the residual attack, and no amount of modality stacking
+   touches it — only §2's L2 duration does.
+2. **The error direction moves, it does not vanish.** With exact-equality derivation the
+   risk is no longer false accepts; it is **fuzzy-extractor instability** — a real person
+   failing to re-derive their own key after injury, ageing, or a bad capture. That lands
+   on the same asymmetry `PERSON-1:48` names, so **M-of-N and per-axis discard (§4a) are
+   not optimisations, they are the mitigation.**
+3. **Enrolment remains an unattested root** (§4). The system can prove a Class-3
+   biometric unlocked a key; it cannot prove whose body enrolled.
+
+**Net effect on this document:** §2e's *"provably not"* verdict on one-bDiD-per-human was
+overstated. **Corrected reading — the obstacle was never human distinctness; it is
+liveness, custody and rental.** Which is why §2e.1's convergence argument and §2's L2
+carry the design, and why the founder's compound-entropy thesis stands as written.
 
 ### 2e.1 Over what period does 420 unlock? — the shape is forced, the constant is not
 
