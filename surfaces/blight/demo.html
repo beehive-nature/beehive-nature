@@ -1678,7 +1678,9 @@ function earProgress(ins,fr){
       <br><span class="muted">${ins.ok?'Keep it there — the stream repeats, missing frames come round again.':ins.hint}</span></span>
     </div>
     ${n?`<div style="margin-top:6px">${cells}
-      <div class="muted" style="margin-top:2px">${got}/${n} frames — progress never goes backwards</div></div>`:''}`;
+      <div class="muted" style="margin-top:2px">${got}/${n} frames — progress never goes backwards${
+        a && a.rejected ? ` · <b>${a.rejected}</b> noise frames rejected (your progress was protected)` : ''
+      }</div></div>`:''}`;
 }
 function heard(kind,html){
   const cls=kind==='refused'?'g-absent':kind==='live'?'g-live':'g-known';
