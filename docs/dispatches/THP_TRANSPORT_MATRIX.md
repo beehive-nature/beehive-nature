@@ -120,3 +120,26 @@ Hosted relay = capture pattern; founder verdict ":(". Recorded solely so the lad
 1. **Seat 3 box:** one `trezord` + `wallet-relay` GetFeatures run against stock 2.12.4 (closes §1 UNVERIFIED-on-device).
 2. **Seat 3 box:** `pip install trezor && trezorctl get-features` (closes §3 on real hardware; emulator fallback in-tree via `fw:safe7/proof.py`).
 3. **goose/Code:** WebUSB picker suppression cause under Windows for 9.7.3 (§2.3) — one device-manager capture during receipt 1 settles it.
+
+---
+## Seat 3 addendum — on-box findings (2026-08-14, founder's Windows host)
+
+Probing the actual machine (not source) to turn goose's "should work today" into a recipe:
+
+- **NO standalone `trezord.exe` is installed.** `…\Trezor Suite\resources\bin\` contains
+  `tor.exe`, coinjoin, and — notable — `bluetooth\trezor-bluetooth.exe`, but no bridge
+  binary. Modern Suite (26.x) runs the bridge **in-process** (`@trezor/transport-bridge`).
+  **Consequence:** port 21325 exists **only while Suite is running.** Any advice to "close
+  Suite, the bridge survives" is FALSE now (that was the deprecated standalone-trezord era);
+  `trezor_bridge.rs` busy-message corrected accordingly.
+- **Recipe for the §1 device receipt:** Suite RUNNING (minimized is fine) + Safe 7 on a
+  DATA port + unlocked → `wallet-relay` `/v1/trezor/native/features`. If Suite holds the
+  session, eject the device inside Suite (don't quit Suite) and retry; `/acquire/…/null`
+  forces acquisition.
+- **Live probe now:** 21325 not listening (Suite closed), no `VID_1209` device present →
+  §1 receipt still OWED, blocked on hardware attach, not on code.
+- **BLE asset for §5 (upgrades goose's recommendation):** Suite ships a NATIVE Safe-7 BLE
+  bridge at `…\resources\bin\bluetooth\trezor-bluetooth.exe`. Before reimplementing btleplug
+  from scratch, PROBE this binary — its local port/protocol are a likely ready-made BLE
+  transport (or at least a reference for the GATT flow goose mapped). Port/protocol
+  UNVERIFIED — a follow-up on-box probe when the device is attached.

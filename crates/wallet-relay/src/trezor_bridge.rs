@@ -150,8 +150,13 @@ pub async fn native_features() -> Response {
             .ok_or(("no-device", "Bridge is running but lists NO device. Plug the Trezor into a DATA port (some cables are charge-only), unlock it, and retry.".to_string()))?
             .to_string();
         // stage 3: acquire (fails if Suite holds the session)
+        // Modern Suite (26.x) runs the bridge IN-PROCESS — it listens on 21325
+        // only WHILE SUITE IS RUNNING (verified on-box 2026-08-14: no standalone
+        // trezord.exe installed). So do NOT tell the user to close Suite — that
+        // kills the bridge. If busy, release the device inside Suite (eject) or
+        // just retry; /acquire with a null prev-session forces acquisition.
         let acq = bridge_post(&format!("/acquire/{path}/null"), "")
-            .map_err(|e| ("busy", format!("Device present but could not be acquired — Trezor Suite likely holds the session. Close Suite's window (Bridge keeps running) and retry. ({e})")))?;
+            .map_err(|e| ("busy", format!("Device present but the session is held — release/eject it inside Trezor Suite (keep Suite RUNNING, its in-process bridge is what this lane uses) and retry. ({e})")))?;
         let session = acq
             .split("\"session\":\"")
             .nth(1)
