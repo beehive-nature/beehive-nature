@@ -143,6 +143,67 @@ which fits L1's shape exactly. Being verified; do not build on it yet.
 
 ---
 
+## 4a · Proving one registration per bDiD per event — decentrally
+
+Founder, 2026-08-15: *"how do we decentrally prove they registered just one bDiD
+for the event session?"*
+
+**Event-scoped nullifiers.** On-device, each bDiD derives
+
+```
+nullifier = H(bDiD_secret, event_id)
+```
+
+and publishes **only** that. The same human with the same bDiD produces the same
+bytes every time, so a second registration is caught by **exact equality on a set** —
+no gallery, no template, no distance, no threshold. That is the comparison shape
+`BIO-1` §0 already permits, arrived at from the opposite direction.
+
+Paired with a zero-knowledge membership proof — prove *"my nullifier derives from a
+secret whose commitment is in the enrolled set"* without revealing which commitment —
+the construction is Semaphore-shaped and well studied.
+
+**What it gives us:**
+
+- **Decentralized.** The nullifier set is public and append-only; anyone verifies by
+  set membership. No operator, no custodian, no registry to trust. This satisfies the
+  BNRoSe autonomy doctrine directly: no custodian, no gallery, no operator.
+- **Private.** Nobody learns *who* registered, only that a nullifier already appeared.
+- **Unlinkable across events.** A different `event_id` yields an unrelated nullifier,
+  so attendance at one event cannot be correlated with another.
+- **Immune to the nonce leak.** `UX-OPTICAL-PAIRING-1` §3c (corrected) establishes
+  that the event nonce leaks — livestream, long lens, confederate. **That costs this
+  construction nothing**, because a nullifier's security rests on the *secret*, not
+  on the nonce. `event_id` needs to be unique, never secret.
+- **Reuses machinery we have.** `crates/adapter-arweave` already implements an
+  RFC 6962 Merkle fold with a time-bound root. An event's nullifier set anchors to a
+  permanent substrate with existing, tested code.
+
+**What it does NOT give us, stated plainly:**
+
+- **It does not prove one HUMAN registered once.** It proves one *bDiD* registered
+  once. A human holding two bDiDs has two secrets, therefore two valid nullifiers,
+  and both pass. Nullifiers **enforce** the §0 axiom at event time; they do not
+  **establish** it. Establishing it is L1's job at enrolment, and that dependency is
+  load-bearing rather than incidental.
+- **It does not prove attendance.** `event_id` is public, so a remote party can
+  compute a valid nullifier without being present. Attendance must come from a
+  physical gate interaction — an NFC tap at ~4 cm on entry is the kit's only genuine
+  proximity primitive (§4), and it is anti-casual rather than relay-proof.
+
+**This closes §6 open question 3.** A duplicate nullifier **is** the observable bypass
+attempt: public, cryptographic, decentralized, and requiring no relay detection
+whatsoever. L3's economic penalty finally has a concrete, non-discretionary trigger.
+
+**OPEN ENGINEERING GAP — fuzzy extraction.** `BIO-1` §0 speaks of a
+"biometric-generated public key" and assumes it is deterministic. **Biometrics are
+not.** The same face does not produce the same bits twice, so a stable key requires a
+**fuzzy extractor / secure sketch** — a well-studied primitive that costs entropy and
+requires helper data stored on-device. Nothing in the law book names it, and nothing
+in the tree implements it. This is an engineering gap in L1, not a policy question,
+and L1 is what the whole nullifier construction rests on. **It should be scoped before
+anyone builds the event ceremony.**
+
 ## 5 · Informed consent and time disclosure
 
 Founder: the account is entered with *"informed consent/time-disclosure prior…and
