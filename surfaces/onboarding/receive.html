@@ -109,6 +109,27 @@ if(!hasDet) say('planned','Next','Vendored decoder (zxing-class, offline) → iO
 say('planned','Reply','The response leg (this phone displays a signed answer back as light) lands with the sender-side encoder');
 $('caps').innerHTML=CAPS.join('');
 
+/* If the camera is IMPOSSIBLE here, say so up front, unmissably — before any tap.
+   (Beta finding 2026-08-14: a downloaded copy opens as file:// and the browser
+   blocks cameras with NO popup — "try again" can never work, so the button must
+   not pretend it might.) */
+if(!secure || !hasCam){
+  $('start').classList.add('hide');
+  $('result').innerHTML=`
+    <div class="panel">
+      <div class="gauge g-refused"><span class="s">Refused</span>
+        <b>The camera cannot work on this copy — and no permission popup will ever appear.</b></div>
+      <p style="margin:var(--s2) 0 0;font-size:.88rem;color:var(--ink-mut)">
+        ${!secure
+          ? 'This page was opened as a downloaded file (or plain http). Browsers block cameras there by design. <b>Open the same page from a served https link (or localhost)</b> and the camera prompt appears — nothing is wrong with your phone or this page.'
+          : 'This browser exposes no camera API at all.'}
+      </p>
+      <p class="muted" style="margin:var(--s2) 0 0">Beta lanes: the BNR relay serves this page at
+        <span class="mono">/onboard/receive</span> (localhost = camera works), and the public
+        https link works from anywhere once enabled.</p>
+    </div>`;
+}
+
 /* ---------- camera loop ---------- */
 let stream=null, raf=0, detector=null, scanning=false;
 

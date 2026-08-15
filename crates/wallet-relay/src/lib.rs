@@ -19,6 +19,7 @@ pub mod tx_prep;
 pub mod vaulta;
 pub mod watch;
 pub mod dashboard;
+pub mod onboard_static;
 pub mod rails;
 pub mod upload;
 
@@ -70,6 +71,12 @@ pub fn app(state: AppState) -> Router {
         .route("/v1/bni.id/enroll", post(ladder::enroll_handler))
         .route("/v1/mesh/heartbeat", get(buzz::heartbeat))
         .route("/v1/config/watch-only", get(watch::watch_only_config))
+        .route("/onboard", get(onboard_static::onboard))
+        .route("/onboard/receive", get(onboard_static::receive))
+        // both spellings: a page at /onboard resolves its relative script to
+        // /vendor/…, a page at /onboard/ resolves to /onboard/vendor/…
+        .route("/vendor/qrcodegen.js", get(onboard_static::qrcodegen_js))
+        .route("/onboard/vendor/qrcodegen.js", get(onboard_static::qrcodegen_js))
         .with_state(state)
 }
 
