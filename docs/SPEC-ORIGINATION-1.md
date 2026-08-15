@@ -88,6 +88,69 @@ others' failure mode, and none of them requires knowing how many humans exist.
 
 ---
 
+### 2e · "How do we 100% ensure one person, one bDiD?" — you cannot, and pursuing it is the attack
+
+Founder, 2026-08-15. The sharpest question in the design, and `PERSON-1` already answers
+it twice. **This is not a limitation being conceded; it is a ruling being applied.**
+
+**First: 100% is unavailable at scale.** `PERSON-1:40-46` — for a gallery of `N` and a
+per-comparison false-match rate `f`, expected false hits ≈ `N × f`. At `N = 10¹⁰`, even
+`f = 10⁻¹²` — *"orders of magnitude better than any modality has demonstrated under
+ideal capture, let alone a phone camera outdoors"* — yields **10⁸ people falsely told
+they already exist.** And the errors trade against each other: *"Lowering `f` raises the
+false non-match rate, and real people then fail their own re-verification and lose their
+quota."* The asymmetry settles it — *"A false accept costs one sybil. A false reject
+costs a person their identity and their money, with no appeal that is not a centralized
+authority."*
+
+**Second, and decisively: it fails even at `f = 0`.** `PERSON-1:56-62` —
+
+> Assume perfect deduplication. It proves *this body has not enrolled before*. It does
+> not prove the body is free, or that the person controls the key. … A sybil attacker at
+> scale does not forge ten thousand bodies. They rent ten thousand. Perfect biometric
+> dedup does not prevent that attack — **it is the procurement spec for it**, and it
+> certifies each unit as fresh.
+
+**So a perfect matcher is not a solution that is out of reach; it is a solution that
+would make the problem worse.** Any design pursuing 100% builds the registry that makes
+bodies worth buying.
+
+### What is enforced at 100%, and what is priced
+
+The discipline is to **enforce exactly where the claim is decidable, and price it where
+it is not.** Both appear in this spec already:
+
+| claim | decidable? | mechanism | guarantee |
+|---|---|---|---|
+| one registration per bDiD **per event** | **yes** | §4a nullifier, exact byte equality | **exact** |
+| ≤ 7776 humans per DAO | **yes** | `cascade.rs` `FULL_HOUSE`/`CAP` | **exact** |
+| ≤ 420 `b` per bDiD | **yes** | earned ceiling, arithmetic | **exact** |
+| **one bDiD per human** | **no — provably not** | §2 L1/L2/L3 + the cap | **priced, not proven** |
+
+**The honest success measure is therefore not "was a duplicate prevented" but "did the
+marginal identity cost more than it yields."** Today a second bDiD yields 420 `b` and
+costs: a funded Vaulta account (§3a), courses, bRespect attendance, continuous PoL/PoU
+at every gate, months of elapsed presence (`PERSON-1:129` — *"presence and months are
+the whole price"*), and a lowered reward-velocity curve if detected (§2 L3). **The
+return is linear in human time and human time does not parallelize.** That is the
+property; there is no stronger one available.
+
+### Why "presence and months" beats any scanner — the anti-rental mechanism
+
+The residual attack from `PERSON-1:2b` is **renting** bodies, and it is worth naming
+what defeats it, because it is not accuracy.
+
+**You can rent a body for an afternoon. You cannot rent a life.** A rented body can be
+walked past a scanner once. It cannot sustain months of attendance, complete courses at
+the Royal University, hold a mastery relation, and reauthenticate continuously at every
+gate — not without the renter becoming, in every operational sense, a participant.
+
+**The bar's *duration* is the anti-rental mechanism, and its duration is the part that
+cannot be bought down.** This is why `PERSON-1` puts uniqueness in the cascade's hands
+and nowhere else, and why §2's L2 is the strongest layer despite being the least
+technological. Every hour the bar spends being a scanner is an hour it is not being a
+life.
+
 ## 3 · The tiers
 
 Founder framing, verbatim: *"free/simple for everyone and edge tech limitless for
