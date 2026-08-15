@@ -1332,6 +1332,55 @@ through the whole first community. This is not an objection; §4b's ONE CURVE al
 handles it, since unlock tracks proof delivered rather than a calendar. It is recorded
 so the number is known in advance rather than discovered by a critic.
 
+### There is no cap on LOVErnments — only on members within one
+
+Founder, 2026-08-15: *"there is no cap to LOVErnments; just how many in mine. people will
+fork skaists"*
+
+**7,776 is a quality floor per community, never a ceiling on the system.** The number of
+LOVErnments is unbounded; only membership *within* one is capped, and for the geometric
+reason above. **Total reach is therefore uncapped**, and the design gets the combination
+most governance systems must choose between:
+
+| | bounded | unbounded |
+|---|---|---|
+| **members per community** | **yes — 7,776** — deliberation stays possible, reputation propagates, infiltration fills and closes | |
+| **number of communities** | | **yes — unbounded**, by forking |
+| **the monetary network** | | **yes — global**, one ledger, 420 per human everywhere |
+
+**Local governance quality with global monetary scale.** The `n²` that creates capture
+risk is confined inside a 7,776-member cell; the `n²` that creates monetary utility runs
+across all of them.
+
+#### Fork means found-new, never split-with-share — and that is load-bearing
+
+*"People will fork skaists"* is the growth mechanism, and it must be read the way
+open-source reads it: **copying the pattern, not dividing an existing community.**
+
+This is not a stylistic preference. `docs/governance/anti-capture.md` makes **"no split
+path exists"** a structural guarantee, and a fork that carried away a share of an
+existing treasury, membership roll, or Respect ledger would be exactly the split that
+guarantee forbids. A fork that starts an empty community running the same rules takes
+nothing from anyone.
+
+**So the rule, stated for whoever builds it:**
+
+> A fork inherits **the code, the constitution, and the right to operate** — and
+> inherits **no balances, no members, and no standing.** Members join a fork the way
+> anyone joins anything: `PERSON-1:129`, *"presence and months are the whole price."*
+
+**This makes disagreement non-destructive**, which is unusual and worth stating plainly.
+In most DAOs a contentious fork divides value and both halves are weakened. Here,
+disagreement founds a new community at zero cost to the old one — **the exit is free and
+it takes nothing with it.** That is a stronger anti-capture property than any voting rule,
+because it removes the prize from capturing a community in the first place.
+
+**Still open, and now more pressing:** whether **Respect is per-community or
+federation-wide**, and whether each LOVErnment runs its own Article VI or shares the
+genesis one. Nothing ratified answers either. With unbounded forking, a person could
+accrue standing in many communities at once — **and if Respect is federation-wide,
+forking becomes a way to farm governance weight.** Recorded in §6 as a founder gate.
+
 ### The genesis DAO is a peer that operates a service — not a parent
 
 Founder, 2026-08-15: *"my LOVErnment is completely seperate other than operating the
