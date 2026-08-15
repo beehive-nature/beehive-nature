@@ -134,6 +134,20 @@ if(!secure || !hasCam){
 /* ---------- camera loop ---------- */
 let stream=null, raf=0, detector=null, scanning=false;
 
+/* CAMERA CONSENT: ONCE PER DEVICE (founder ruling 2026-08-15). Browsers already
+   persist the permission per origin; what nagged was OUR Start button. If this
+   device granted before, start the camera on load so the two dApps just talk. */
+const CAM_GRANTED='bnr.blight.camera.granted';
+window.addEventListener('DOMContentLoaded',async ()=>{
+  if(!(secure&&hasCam)) return;
+  let remembered=localStorage.getItem(CAM_GRANTED)==='1';
+  if(!remembered && navigator.permissions){                 // browser may already know
+    try{ const st=await navigator.permissions.query({name:'camera'});
+         if(st.state==='granted'){ remembered=true; } }catch(e){}
+  }
+  if(remembered) $('start').click();
+});
+
 $('start').onclick = async ()=>{
   $('result').innerHTML='';
   if(!secure || !hasCam){
@@ -144,8 +158,10 @@ $('start').onclick = async ()=>{
   try{
     stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}, audio:false});
   }catch(e){
+    localStorage.removeItem(CAM_GRANTED);
     return refuse('Camera permission refused', 'You (or the browser) declined the camera. Nothing was captured. Grant permission and try again — the feed never leaves this device.');
   }
+  localStorage.setItem(CAM_GRANTED,'1');   // remembered: no second ask on this device
   const v=$('cam'); v.srcObject=stream; await v.play();
   $('vp').classList.remove('hide'); $('stop').classList.remove('hide'); $('start').classList.add('hide');
   if(hasDet){
@@ -168,9 +184,43 @@ async function tick(){
   if(!scanning) return;
   try{
     const codes = await detector.detect($('cam'));
-    if(codes.length){ scanning=false; return handle(codes[0].rawValue); }
+    // handle() returns 'more' while a multi-frame beam is still assembling —
+    // the camera MUST keep running through the stream (join anywhere, any order).
+    if(codes.length && handle(codes[0].rawValue)!=='more'){ scanning=false; return; }
   }catch(e){ /* transient detector errors: keep scanning */ }
   raf=requestAnimationFrame(tick);
+}
+
+/* ---------- bLiGhTbeAM multi-frame assembly ----------
+   A beam streams chunk frames {v:1, k:<kind>, i:<index>, n:<total>, d:<slice>}
+   forever (source passes + repair passes). The receiver may join at ANY moment
+   and collect in ANY order; duplicates are free. When every index is held, the
+   slices concatenate into the ceremony envelope, which is then validated
+   exactly like a single-frame payload. (Founder bug 2026-08-15: the receiver
+   only understood single-frame envelopes and correctly REFUSED beam frames with
+   "unrecognized version/kind" — it was right to refuse what it could not read;
+   this teaches it the frame protocol rather than loosening the refusal.) */
+let BEAM=null;
+function isFrame(o){ return o && o.v===1 && typeof o.k==='string'
+  && Number.isInteger(o.i) && Number.isInteger(o.n) && o.n>0 && typeof o.d==='string'; }
+
+function collectFrame(o){
+  if(!BEAM || BEAM.kind!==o.k || BEAM.n!==o.n){ BEAM={kind:o.k, n:o.n, parts:new Array(o.n), got:0}; }
+  if(BEAM.parts[o.i]===undefined){ BEAM.parts[o.i]=o.d; BEAM.got++; }
+  const cellRow = BEAM.parts.map((p,ix)=>
+    `<i style="display:inline-block;width:13px;height:13px;margin:2px;border-radius:3px;
+       background:${p===undefined?'var(--line)':'var(--verified)'}"></i>`).join('');
+  $('result').innerHTML=`
+    <div class="panel">
+      <div class="gauge g-known"><span class="s">Beam</span> <b>${escapeHtml(BEAM.kind)}</b> —
+        collecting ${BEAM.got}/${BEAM.n} frames · keep the camera on the stream</div>
+      <div style="margin:6px 0">${cellRow}</div>
+      <div class="gauge g-known"><span class="s">Any order</span> Frames arrive however they arrive;
+        the stream repeats, so a missed one comes round again.</div>
+    </div>`;
+  if(BEAM.got<BEAM.n) return 'more';
+  const assembled=BEAM.parts.join(''); BEAM=null;
+  return handle(assembled);      // now validate it as a normal ceremony envelope
 }
 
 /* ---------- one-scan install+pair intake ----------
@@ -196,12 +246,14 @@ window.addEventListener('DOMContentLoaded',()=>{
 
 /* ---------- payload handling: validate SHAPE, display, never act ---------- */
 function handle(raw, viaLink){
-  stopCam();
   // camera scanned the one-scan LINK form? unwrap it to the envelope inside
   const wrapped=fragmentEnvelope(raw);
   if(wrapped) raw=wrapped;
   let obj=null;
   try{ obj=JSON.parse(raw); }catch(e){}
+  // a bLiGhTbeAM chunk frame? collect it and KEEP the camera running
+  if(isFrame(obj)) return collectFrame(obj);
+  stopCam();
   if(!obj || typeof obj!=='object'){
     return refuse('Not a BNR payload', `Scanned a code, but it isn't BNR-shaped (got ${raw.length} chars of ${obj===null?'non-JSON text':'JSON non-object'}). Nothing was accepted.`, raw.slice(0,120));
   }
@@ -209,7 +261,11 @@ function handle(raw, viaLink){
     return refuse('Unrecognized BNR version/kind', 'The payload parsed but does not carry {v:1, kind:"…"}. Refused by shape — loudly, not silently.', JSON.stringify(obj).slice(0,200));
   }
   const KNOWN=['bnr-pair-request','bnr-resume','bnr-enroll-pubkey','bnr-watch-list','bnr-signed-tx',
-               'bnr-consent-request','bnr-consent-signed'];
+               'bnr-consent-request','bnr-consent-signed',
+               // beam-carried payloads (bLiGhTbeAM lane): a plugin install is the
+               // founder's own case — the bDiD onboarding is a user's FIRST beam,
+               // so installs reuse a gesture they already know.
+               'bnr-plugin-install','bnr-bdid-handoff'];
   const known=KNOWN.includes(obj.kind);
   const via = viaLink ? 'delivered with the link (fragment — touched no server)' : 'as light · zero network';
   // AUDIT FIX (blocker): scanned payloads are attacker-controlled — obj.kind is
