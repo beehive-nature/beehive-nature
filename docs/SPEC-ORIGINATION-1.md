@@ -1955,9 +1955,55 @@ hundred-year threshold for made things is where the Japanese text sharpened a Ch
 idea into a number.** The founder's recollection was of a real doctrine in its real
 lineage — it was the *number's* provenance, not the *idea's*, that was misfiled.
 
-*(Transmission specifics — routes, ports, and Japanese reception of 太平廣記 and 搜神記 —
-under verification 2026-08-15; this correction stands on the onmyōdō derivation and the
-*Lunheng* priority, both of which are scholarly consensus.)*
+#### Verification returned 2026-08-15 — the lineage closes, and §4h.1 needs one fix
+
+**1. The onmyōdō derivation is confirmed and is the load-bearing point.** *Encyclopedia
+of Religion*: onmyōdō is *"the collective Japanese name for various methods of divination,
+originally based on the Chinese theories of yin and yang … the 'five elements'."*
+**Not a Japanese system borrowing Chinese vocabulary — a Chinese system institutionalised
+in Japan** `[scholarly-consensus]`.
+
+**2. The route was Korean intermediation, not direct mission** `[attested, Nihon Shoki]`:
+**513** Five Classics incl. the *Yijing* reach Keitai's court · **553–554** the court
+requests and receives Baekje's 易博士 / 曆博士 / 醫博士 with divination texts and calendars ·
+**602** the Baekje monk 観勒 Kanroku brings 暦本, 天文地理書 and 遁甲方術書, with named students
+assigned to each. Institutionalised as the **陰陽寮 Onmyōryō** under Tenmu (r. 672–686),
+codified in the **Taihō Code, 701**. Onmyōji were ranked civil servants of the Japanese
+state practising a Chinese cosmological science.
+
+**3. CORRECTION TO §4h.1 BELOW, and it makes the doctrine OLDER rather than younger.**
+That section calls the *Lunheng* passage *"the foundational Chinese statement"*. It is
+introduced by **一曰 — "one theory says"**. Wang Chong is the tradition's great
+**ghost-skeptic**, reporting a view in a doxographic list in order to rebut it; he argues
+elsewhere that there is no 精 without a 體, as there is no fire without fuel.
+
+> **The correct reading is stronger for the founder's position, not weaker: a belief that
+> a skeptic had to argue against by c. 80 CE was already in wide circulation, so the
+> doctrine predates its earliest surviving record.** §4h.1's *"the tradition's oldest
+> formulation explicitly refuses to make the clock sufficient"* still stands — the
+> refusal is Wang Chong's, which is precisely why it is there.
+
+*(An apparently older attribution — Confucius at 「吾聞物老則群精依之」, surviving in 搜神記 19
+and 孔子家語 辯物 — **cannot** be used: the *Kongzi jiayu*'s transmission via Wang Su is
+disputed as forgery by Wang Bai, Yao Jiheng, Cui Shu and others `[contested]`.)*
+
+**4. The chain to Japan closes — through a better text than the ones sought.** Muromachi
+circulation of 太平廣記 or 搜神記 **could not be verified**; documented Japanese reception of
+both is Edo-period (1698, 1776) `[negative result, reported rather than papered over]`.
+But **今昔物語集 *Konjaku Monogatarishū* 27:6 (c. 1120)** — 「東三条銅精成人形被堀出語」 — has
+the 精 of a **buried copper vessel take human form**, and be diagnosed by an **onmyōji**.
+
+> **That is the Chinese 老物精 doctrine, in Japanese, three centuries before the
+> *Tsukumogami-ki*, adjudicated by an agent of the Chinese-derived tradition.** A made
+> thing acquiring a spirit, in Japan, inside the imported framework, long before anyone
+> put a number on it.
+
+**5. The port, as a footnote and not a refutation.** The classical gateway was **明州
+Mingzhou (modern Ningbo)** — established 738, one of the Tang's three foreign-trade
+seaports with Yangzhou and Guangzhou, and the hub of the Ningbo–Hakata network c. 850–1000.
+**Shanghai** was a market town only from 1074 and did not open to foreign trade until
+**17 November 1843**. *Same delta, wrong city, about a thousand years late* — the
+direction of transmission, which was the founder's actual claim, is confirmed.
 
 ### 4h.0 The honest verdict on the hundred years
 
