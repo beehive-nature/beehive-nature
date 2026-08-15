@@ -26,3 +26,14 @@ handshake stop. Suite itself talks to the device fine.
 Constraints: L-VERIFY (cite file paths), UNVERIFIED labels where not confirmed, no
 device access assumed (the founder's Safe 7 is intermittently attached to Seat 3's box).
 WalletConnect is documented LAST resort only (hosted relay = capture pattern; founder: ":(").
+
+## 5 (added, founder ask: "can you add bluetooth connection?") — BLE lane
+Verified at source: `core/embed/io/ble` + top-level `nordic/` exist for T3W1.
+Map: (a) the GATT service/characteristic UUIDs the Safe 7 advertises;
+(b) THP-over-BLE framing vs THP-over-USB (THP was BUILT for the wireless era —
+one framing implementation should serve both; confirm divergences);
+(c) Web Bluetooth API feasibility from the browser (Chromium desktop + Android
+only; Safari/iOS absent → honest ABSENT gauge like BarcodeDetector) vs the
+relay doing native BLE (btleplug-class crate) — recommend the order;
+(d) pairing UX: what the device shows during BLE THP pairing (the founder has
+already seen the pair prompt live). Same L-VERIFY discipline.
