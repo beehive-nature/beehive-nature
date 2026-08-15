@@ -118,6 +118,41 @@ collateralized by active liens, headroom classified against that floor, and a
 a gate on existing machinery, not new economics.** The kernel already governs *how
 much*; the bar governs *who may at all*.
 
+### 3a · The bare metal — where the tier boundary physically is
+
+Founder, 2026-08-15: *"really the bare silicone metal a new .b earner needs is a
+Vaulta account and a little rental A."*
+
+That is exactly right, and it lands on a boundary `bdid-architecture-decision.md`
+already ruled — which is what makes the free tier's zero-cost promise architectural
+rather than aspirational:
+
+| | free tier | `.b` earner / originator |
+|---|---|---|
+| Vaulta account | **none** | **one** — ~2,996 B of chain RAM |
+| bytes written to any chain | **zero** | the account, claimant-funded |
+| cost | **zero** | a little rental `A` |
+| reach | *"fully functional on key-based chains"* — EVM, Bitcoin, Zano, exSat, XRP, Stellar — *"with no account creation anywhere"* | the above, plus Vaulta-native `b` |
+
+`:61` is unambiguous and is quoted rather than paraphrased: *"a native Vaulta account
+is ~2,996 B of chain RAM and is therefore inherently O(n). Free-tier users get **no
+native Vaulta account**… Any design promising 10 billion people a Vaulta account is
+dead before it starts."* And `:29`: *"Vaulta stores 143 KB regardless of whether there
+are 1 million users or 10 billion."*
+
+**So the Vaulta account IS the tier boundary.** Not a policy line drawn across a
+continuum — a physical one. Below it, identity costs nothing and scales to ten billion
+because it writes nothing. Above it, the earner funds their own ~2,996 B, which is
+Article V.1 (*users fund what they consume*) discharged exactly, and matches the ruling
+that *"each claimant mints and funds its own."* This also settles
+`SPEC-BNROSE-ONBOARD` G7 in favour of the user bringing and funding their own account.
+
+**Pricing discipline, ruled at `:29` and binding on every surface:** *"quote the
+paid-tier RAM deposit from live `rammarket` reserves at claim time, never from a price
+list, because the Bancor curve is hyperbolic."* **No dollar or `A` figure may be
+written into any spec, page, or onboarding copy** — it is quoted live at claim time or
+it is wrong.
+
 ---
 
 ## 4 · The device-strength matrix — VERIFIED 2026-08-15
