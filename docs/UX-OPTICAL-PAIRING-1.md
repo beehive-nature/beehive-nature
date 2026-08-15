@@ -25,7 +25,7 @@ app-bundle sideload. **Never reach for the animated stream when a static code se
 |---|---|
 | Mobile receiver — real camera + native BarcodeDetector decode, honest ABSENT on iOS | **BUILT** (`surfaces/onboarding/receive.html`) |
 | Envelope shapes `{v:1, kind}`: `bnr-pair-request` · `bnr-resume` · `bnr-enroll-pubkey` · `bnr-watch-list` · `bnr-signed-tx` | **BUILT** (shape-validate + display, never act) |
-| Sender-side QR encoder (zero-dep, vendorable) | **PLANNED** — next increment |
+| Sender-side QR encoder | **BUILT** — vendored Nayuki qrcodegen (MIT verbatim in-file, pinned 8329a710, compiled ES2017), jsQR foreign-oracle round-trip PASS; wizard pairing screen renders a live `bnr-pair-request` |
 | iOS decode (vendored zxing-class WASM, offline) | **PLANNED** |
 | Response leg (receiver displays signed answer back) | **PLANNED** (needs encoder) |
 | Fountain lane for >3 KB (self-hosted decimen, frozen tag) | **PLANNED** (RAID conditions apply) |
@@ -120,6 +120,32 @@ this gesture) and IS a sovereign identity bootstrap. Staged:
 Payload kinds added to the receiver's known set: `bnr-consent-request`,
 `bnr-consent-signed`. The consent record is a receipt both parties hold —
 subscription state lives in signed envelopes, not in a company database.
+
+## 3c · THE EVENT CEREMONY (founder use case: bRespect monthlies, PoL/PoU recalibration)
+
+Light's unfair advantage over radio: **one screen is an infinite multicast.** A stage
+screen at a bRespect monthly (or a 1M-person popup) streams the event ceremony to
+every camera in the crowd simultaneously — zero bandwidth contention, zero pairing,
+zero infrastructure; ten cameras or ten thousand cost the same. Uses:
+- **Event envelope broadcast:** the month's ballot, the PoL/PoU recalibration
+  challenge, the event's journal-head anchor — one bComb stream, everyone receives.
+- **Presence AS liveness:** receiving the stream proves a camera stood in this room
+  during this window (the per-event nonce can't be known elsewhere/elsewhen) —
+  physical presence becomes a PoL input, which is the sybil/MitM immunity instinct
+  grounded: a remote adversary cannot stand in the room. Return leg (votes,
+  recalibration proofs) goes device→steward scanners at the door, signed + nonce-bound.
+- **Optical liveness spike (founder-approved):** the visual-nonce binding — the
+  screen's pattern must appear inside the capture the signer signs over — is the
+  same primitive; the event is its natural first deployment.
+
+## 3d · Password managers are funnels (founder direction)
+
+Trezor's password features, Bitwarden, and kin already hold people's most-guarded
+digital habits — each is a doorway: users who already run a manager are pre-educated
+in exactly the custody instincts the ladder needs (secrets, backups, devices). The
+wizard's seed-education names Bitwarden deliberately; the dashboard should meet
+managers where they are (import watch-lists, coexist, never demand migration day 1).
+The funnel is trust-first: BNR sits beside the manager until it earns the vault.
 
 ## 4 · Trezor UX (founder rulings, 2026-08-14 beta)
 

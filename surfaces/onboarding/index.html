@@ -179,6 +179,7 @@ select.lang{font:inherit;font-size:.72rem;background:var(--bg-card);color:var(--
   <span class="mono">wallet-relay</span>. Seat prepares UNSIGNED only; no key ever enters this page.
 </div>
 
+<script src="vendor/qrcodegen.js"></script>
 <script>
 "use strict";
 /* ===========================================================================
@@ -302,20 +303,23 @@ const SCREENS = {
     `);
   },
 
-  /* optical air-gap — pairing request. HONESTY: the pattern below is a VISUAL
-     PLACEHOLDER (house law: never mock as real). The real light stream is a
-     static QR for this one-frame payload; the mobile receiver (receive.html)
-     already runs a REAL camera + decoder. Sender-side QR encoding: PLANNED. */
-  optical(){ return stageWrap(2, `
+  /* optical air-gap — pairing request. The QR is REAL (vendored MIT qrcodegen,
+     jsQR-conformance-verified at vendor time): scan it with receive.html and it
+     validates as a bnr-pair-request. The pubkey inside is a PREVIEW value and
+     says so — in production it is the ceremony's actual enrolment key. */
+  optical(){ setTimeout(drawPairQr, 0); return stageWrap(2, `
     <h2>Pair your spare phone</h2>
     <p>Open <b class="mono">bnr → receive</b> on a second phone (even in airplane mode)
        and point its camera here. The pairing request crosses as light — never over any network.</p>
-    <div class="qr" role="img" aria-label="Pairing pattern placeholder"></div>
-    <div class="center muted">⚠ visual placeholder — the real code renders here when the
-      sender-side encoder lands (<b>PLANNED</b>). The phone-side camera receiver is
-      real today: <span class="mono">surfaces/onboarding/receive.html</span></div>
+    <div class="center">
+      <canvas id="pairqr" width="290" height="290"
+        style="width:230px;height:230px;border-radius:var(--radius);
+               box-shadow:0 0 0 6px #fff, 0 0 0 9px var(--line);image-rendering:pixelated"
+        role="img" aria-label="BNR pairing request QR code"></canvas>
+    </div>
+    <div class="center muted" id="pairqr-note">Live pairing request — scannable with the BNR receiver (or any QR reader; it shows the envelope)</div>
     <button class="btn primary" style="margin-top:var(--s3)" onclick="APP.opticalDone()">
-      Other phone confirmed it ✓ <span class="muted">(simulated)</span>
+      Other phone confirmed it ✓ <span class="muted">(confirm leg: simulated until the reply lane lands)</span>
     </button>
     <button class="btn link" onclick="APP.go('custody')">← Pick a different method</button>
     <p class="muted" style="margin-top:var(--s3)">Nothing secret is ever on this screen — only a pairing request. The spare phone signs; its key never leaves it.</p>
@@ -484,6 +488,31 @@ function custodyLabel(){
     key:'a security key',trezor:'a Trezor'};
   return m[APP.ctx.custody]||'this device';
 }
+/* Render the REAL pairing QR (vendored qrcodegen). If the vendor file is absent
+   (this file copied alone), say so honestly instead of faking a pattern. */
+function drawPairQr(){
+  const cv=document.getElementById('pairqr'); if(!cv) return;
+  if(!(window.qrcodegen&&qrcodegen.QrCode)){
+    document.getElementById('pairqr-note').innerHTML=
+      '⚠ encoder not loaded (vendor/qrcodegen.js missing) — no code rendered; the folder ships together';
+    cv.style.display='none'; return;
+  }
+  const pk=new Uint8Array(32); crypto.getRandomValues(pk);
+  const b64=btoa(String.fromCharCode(...pk)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  const env=JSON.stringify({v:1,kind:'bnr-pair-request',
+    pubkey:'PREVIEW_'+b64, designation:APP.ctx.designation,
+    nonce:Array.from(crypto.getRandomValues(new Uint8Array(8)),x=>x.toString(16).padStart(2,'0')).join(''),
+    expiry:new Date(Date.now()+5*60*1000).toISOString()});
+  const qr=qrcodegen.QrCode.encodeText(env, qrcodegen.QrCode.Ecc.MEDIUM);
+  const quiet=4, scale=Math.floor(cv.width/(qr.size+quiet*2));
+  const g=cv.getContext('2d');
+  g.fillStyle='#fff'; g.fillRect(0,0,cv.width,cv.height);
+  g.fillStyle='#000';
+  const off=Math.floor((cv.width-qr.size*scale)/2);
+  for(let y=0;y<qr.size;y++)for(let x=0;x<qr.size;x++)
+    if(qr.getModule(x,y)) g.fillRect(off+x*scale, off+y*scale, scale, scale);
+}
+
 function genWords(){ const bank=['anchor','honey','mesh','sovereign','light','ember','river','cedar',
   'quartz','meadow','signal','harbor','lantern','thistle','cobalt','aurora','pollen','ridge','fathom','willow'];
   const out=[]; for(let i=0;i<12;i++) out.push(bank[Math.floor(Math.random()*bank.length)]); return out; }
