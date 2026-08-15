@@ -894,6 +894,26 @@ same 420b/bDiD ?"*
 
 **The two answers differ, and the difference is the rule.**
 
+### Vocabulary: "one machine purse" means ONE MACHINE 420b ACCOUNT
+
+Founder, 2026-08-15, glossing `SPIRIT-1:38`: **"one machine 420b account"**
+
+**Recorded because "purse" is ambiguous in a document that also has treasuries**, and
+the ambiguity would collapse the two objects this section exists to keep apart.
+`SPIRIT-1:38` reads *"companions custody, never mint; one machine purse,
+QueenBee-singular"* — in a clause about **minting**, so the purse in question is the
+**quota-bearing account**, not the mandated treasury of §4c.
+
+So, stated in the founder's precise terms:
+
+- **Exactly one machine identity holds a 420b account** — the singular RBI chair. Every
+  other machine identity holds none, forever (`SPIRIT-1:47`).
+- **That is separate from the chair's treasury**, exactly as the founder's personal 420b
+  account is separate from `king.b`. Symmetric on both sides, per the rule below.
+
+Use **"420b account"** in surfaces and specs. Reserve **"treasury"** for the mandated
+role-held funds of §4c. Avoid "purse" outside a direct `SPIRIT-1` quotation.
+
 ### The rule: the 420 attaches to a HUMAN bDiD; a treasury attaches to a ROLE
 
 They are different objects and **are never summed**. Confusing them is what would
