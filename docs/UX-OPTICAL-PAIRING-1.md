@@ -34,7 +34,7 @@ app-bundle sideload. **Never reach for the animated stream when a static code se
 | Envelope shapes `{v:1, kind}`: `bnr-pair-request` · `bnr-resume` · `bnr-enroll-pubkey` · `bnr-watch-list` · `bnr-signed-tx` | **BUILT** (shape-validate + display, never act) |
 | Sender-side QR encoder | **BUILT** — vendored Nayuki qrcodegen (MIT verbatim in-file, pinned 8329a710, compiled ES2017), jsQR foreign-oracle round-trip PASS; wizard pairing screen renders a live `bnr-pair-request` |
 | iOS decode (vendored zxing-class WASM, offline) | **PLANNED** |
-| Response leg (receiver displays signed answer back) | **PLANNED** (needs encoder) |
+| Response leg (the double-flash) | **BUILT** 2026-08-14 — phone: on-device Ed25519 keypair, nonce-echoing reply, REALLY signed where supported (every degradation labeled); wizard: scan/paste + nonce-binding + sig verify + fingerprint; Declared→Known only on a bound reply. Refusal matrix DOM-verified (wrong-nonce/no-echo/no-request/wrong-kind all refuse named) |
 | Fountain lane for >3 KB (self-hosted decimen, frozen tag) | **PLANNED** (RAID conditions apply) |
 
 ## 2b · The bComb frame (founder direction 2026-08-14: "hexagonal and BNR palette, in Rust")

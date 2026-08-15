@@ -151,7 +151,11 @@ select.lang{font:inherit;font-size:.72rem;background:var(--bg-card);color:var(--
 .foot{width:100%;max-width:29rem;margin-block-start:var(--s4);padding-block-start:var(--s3);
   border-top:1px solid var(--line);color:var(--ink-dim);font-size:.72rem;text-align:center}
 .hide{display:none!important}
-@media (prefers-reduced-motion:reduce){.qr,.spin{animation:none}}
+
+/* silk: every screen rises in gently; honest about motion preferences */
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.stage>*{animation:rise .22s ease both}
+@media (prefers-reduced-motion:reduce){.qr,.spin,.stage>*{animation:none}}
 </style>
 </head>
 <body>
