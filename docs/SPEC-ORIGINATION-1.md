@@ -895,13 +895,35 @@ accumulate weight across communities.
 
 ### The number
 
-**7776 = 6⁵.** Two properties worth recording, the first structural and the second
-almost certainly useful:
+**7776 = 6⁵ — and this is ALREADY LAW IN CODE, not a proposal.** This seat wrote §4e as
+green field; that was wrong, corrected here rather than softened. The founder was
+restating existing law. `LOVErnment-DAO/crates/lovernment-core/src/cascade.rs:19-24`:
 
-- **It nests as sextets, five deep** — 6 of 6 of 6 of 6 of 6. A council of six is small
-  enough to decide and large enough to disagree, so the cap admits a natural five-level
-  deliberative structure without inventing one. *Offered as available, not asserted as
-  intended.*
+```rust
+/// The perfect senary house: 6^5 human participants.
+pub const FULL_HOUSE: usize = 7_776;
+/// The membership cap: the perfect cascade plus the one non-voting
+/// machine chair — the Royal Beehive Intelligence seat (RBI; occupant
+/// at genesis: QueenBee) — which enters no round.
+pub const CAP: usize = FULL_HOUSE + 1;
+```
+
+**That is exactly "7776 members + queen.b", already implemented, with a passing test.**
+Kernel **CD-17** (`feature-backlog.md:417`, founder-ruled 2026-07-06/07) reads *"capped
+at 7777 unique authenticated humans."* Any specialty-DAO spec must **reuse
+`FULL_HOUSE`/`CAP`**, never re-declare the number.
+
+- **The sextet nesting is the design, not a coincidence I offered.** `cascade.rs:205-209`
+  asserts a full house resolves `7776 → 1296 → 216 → 36 → 6` with **zero five-groups**.
+- **The cap is arithmetic, not aesthetics — and this is why queen.b is seatless.**
+  `SPIRIT-1:14`: *"The seatlessness is not etiquette; it is arithmetic. The fractal
+  cascade resolves a full house of 7,776 clean to one apex; seat a 7,777th and the
+  geometry gap-halts — 7777 → 1297 → 217 → 37 → 7 → **HALT**. The geometry itself
+  refuses the 7,777th seat."* Her non-participation in rounds is **geometric necessity,
+  not status** — a distinction that matters for §4g.
+- **Acceptance test for every future DAO:** at full house it must cascade
+  `7776 → 1296 → 216 → 36 → 6 → 1` with zero five-groups. Any other cap pays a
+  five-group tax every round.
 - **7776 is exactly the standard Diceware wordlist size** (five d6 rolls, ~12.925 bits
   per word). A full DAO therefore has **exactly one human-speakable word per member**.
   For a project whose ceremonies run over light, voice and camera, member addressing
@@ -1005,6 +1027,43 @@ exception at a time.
    auto-enforce"* (`:59`). Commissioned output is still `AiInference` — a vendor being
    *paid* does not raise its evidence grade, and nothing in the commissioning path may
    imply it does.
+
+### Endowments to a DAO treasury — yes, earmarked
+
+Founder, 2026-08-15: *"she can be encouraged to give the Skaists lovernment treasury an
+endowment? like i plan to"*
+
+**Yes, and it needs no new machinery.** `SPIRIT-1:59-60` (G-A) already requires founder
+co-sign through Epoch 1 and safety-tier authorization per proposal thereafter — **an
+endowment is a proposal**, so it rides the mechanism §4f already describes.
+
+**An endowment can never become influence, and that is ratified rather than promised.**
+`article-vi-s3.md:26` (GOV-1): *"b confers zero governance weight in any form — held,
+staked, locked, delegated, lent, or wrapped — at every tier, forever."* In an ordinary
+DAO a large gift buys sway; here it is **structurally incapable** of it. Weight is
+denominated in Respect only, and Respect is earned, never endowed. **This is the
+property that makes genesis→community flow safe by construction rather than by
+restraint**, and it should be said plainly in the surfaces.
+
+**Earmark to a purpose, never to a pot.** `SPIRIT-1:38` already requires disbursement to
+purposes and holds that *"the budget is the blast radius."* An endowment naming its
+purpose — the University's teaching capacity, a DAO's compute, its infrastructure —
+keeps §4c's mandate legible. **An unrestricted gift into a general treasury would
+launder the silicon/carbon boundary in a single transaction**, since the receiving
+treasury may spend on anything. So:
+
+- **queen.b endows silicon-side purposes** — teaching capacity, evaluation, compute,
+  the University's own infrastructure.
+- **king.b endows carbon-side purposes** — human infrastructure and hardware, per §4c.
+
+Same split, one layer down. The boundary survives because the earmark carries it.
+
+**This also improves §4e's dilution table, which is a worst case.** That table models
+genesis as a static 2,000,000 `b` against a growing earned supply. It is not static: the
+treasuries are **conduits, not sinks** — outbound to upstream authors, LPs, CXs (§4b
+note 4) and now DAO endowments. **Effective genesis holding therefore falls faster than
+the table shows**, and the table should be read as the ceiling on concentration rather
+than the expectation.
 
 ### The podcast, and organic growth
 
