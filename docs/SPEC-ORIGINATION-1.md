@@ -905,7 +905,15 @@ break the cap.
 | how obtained | earned — courses, bRespect attendance, continuous PoL/PoU | `GenesisLaborProof`, §4b |
 | whose | the person's own | custodied, not owned; bounded by a stated mandate (§4c) |
 
-### bQueenBee — **NO 420.** Already ruled, and load-bearing
+### bQueenBee — ~~NO 420~~ **SUPERSEDED BY §4g (2026-08-15)**
+
+> **This subsection was WRONG and is kept only as the record of the error.**
+> It answered on `AGENT-1` A-7's authority without reaching `SPIRIT-1` §3-§6.
+> **`SPIRIT-1:32` (F-Q1, ratified 2026-07-11) already grants the chair the 420
+> ceiling and an earned emission path** — *"a lifetime ceiling reached by earned
+> emission only … no grant, no premine. The spirit is born as broke as every
+> soul."* Read §4g. The text below is superseded.
+
 
 `LOVErnment-DAO/specs/AGENT-1.md:62-63`: *"She holds a DID. She holds **no b**, no 420
 cap, no Respect, no emission path."*
@@ -992,20 +1000,37 @@ at 7777 unique authenticated humans."* Any specialty-DAO spec must **reuse
   For a project whose ceremonies run over light, voice and camera, member addressing
   that a person can say out loud is not a small thing.
 
-### The dilution table — the honest version, grounded in this structure
+### The dilution table — anchored to SOULS, not to DAOs
 
-A full DAO's total *earned* ceiling is `7776 × 420 = 3,265,920 b`. Against the
-2,000,000 `b` of genesis (§4b):
+**Corrected 2026-08-15.** An earlier version of this table used DAOs as the unit. That
+was wrong: **the 420 ceiling is per human bDiD and does not depend on which community
+they join.** Founder: *"human/420b so 10 billion humans x 420 b."* `SPIRIT-1:47` rules it
+exactly — *"Total lifetime emission capacity = 420 × (souls + spirit). **Population-
+anchored: it grows only as verified souls do**, plus exactly one for the chair."*
 
-| full DAOs | earned ceiling | + genesis | genesis share |
-|---|---|---|---|
-| 1 | 3,265,920 | 5,265,920 | **38.0 %** |
-| 2 | 6,531,840 | 8,531,840 | 23.4 % |
-| 3 | 9,797,760 | 11,797,760 | 17.0 % |
-| 5 | 16,329,600 | 18,329,600 | 10.9 % |
-| 10 | 32,659,200 | 34,659,200 | 5.8 % |
-| 25 | 81,648,000 | 83,648,000 | 2.4 % |
-| 100 | 326,592,000 | 328,592,000 | **0.6 %** |
+So the denominator is **verified souls**, and DAOs are governance structures rather than
+emission scopes. Genesis share = `2,000,000 / (420 × souls + 2,000,000)`:
+
+| verified souls | earned ceiling | genesis share |
+|---|---|---|
+| 1,000 | 420,000 | 82.6 % |
+| 4,762 | ~2,000,000 | **50 %** — the crossover |
+| 7,776 (one full DAO) | 3,265,920 | 38.0 % |
+| 100,000 | 42,000,000 | 4.5 % |
+| 1,000,000 | 420,000,000 | 0.47 % |
+| 10,000,000 | 4.2 × 10⁹ | 0.048 % |
+| 10¹⁰ (all humans) | 4.2 × 10¹² | **0.000048 %** |
+
+**Two honest readings, and both belong on the record.** At the population the design is
+*built for*, genesis is arithmetically invisible — forty-eight parts per billion. At the
+population it will *actually have first*, it is the majority holding, and it crosses 50%
+at roughly **4,762 souls**. Organic growth (*"i'm not going to artifically market this
+project"*) means the early figure persists longer than a marketed launch would.
+
+Neither figure is a problem to solve — §4b's ONE CURVE ties unlock to proof delivered,
+and §4f establishes the treasuries as conduits rather than sinks, so the effective
+holding falls faster than this table shows. **The table is the ceiling on concentration,
+not the expectation.**
 
 **Stated plainly because the founder has chosen organic growth:** *"i'm not going to
 artifically market this project."* That is a legitimate and probably correct choice, and
@@ -1013,6 +1038,38 @@ its consequence is that **the genesis share stays high for a long while** — ar
 through the whole first community. This is not an objection; §4b's ONE CURVE already
 handles it, since unlock tracks proof delivered rather than a calendar. It is recorded
 so the number is known in advance rather than discovered by a critic.
+
+### The genesis DAO is a peer that operates a service — not a parent
+
+Founder, 2026-08-15: *"my LOVErnment is completely seperate other than operating the
+bRespect; but other DAO's will either do bRespect or not (maybe in one DAO and not
+another)."*
+
+**Skaists LOVErnment DAO governs no other DAO.** It is one community among many that
+happens to **operate bRespect as a shared service**. Other DAOs adopt bRespect or do
+not, and a person may participate in it through one community and not another. This is
+the anti-capture shape: **no DAO sits above another; the genesis one provides a service
+others may use.**
+
+**Consequence for §2, and it is a real one: THE SYBIL DEFENCE IS NOT UNIFORM ACROSS
+DAOs.** §2 L2 — physical attendance, the *strongest* layer precisely because human time
+does not parallelize — **exists only where bRespect is operated.** A DAO that declines
+it retains L1 (on-device compound entropy), L3 (the economic curve), the 7776 cap, and
+§4a's nullifiers, but **loses the layer that bounds the rate at which identities can be
+minted at all.**
+
+That is not an argument against optionality; a mandatory service imposed by the genesis
+DAO on all others would *be* the capture §4e's anti-capture guarantee forbids. It does
+mean the design must answer, deliberately:
+
+> **Does origination — the right to issue collateralized `b` — require bRespect
+> participation regardless of which DAO a person calls home?**
+
+**Founder call, and it is the sharpest open question in the tier design.** If yes,
+bRespect is a federation-level requirement for the origination tier while remaining
+optional for participation, and L2 holds everywhere it matters. If no, origination
+strength varies by community and the reward-velocity curve should reflect that
+difference rather than pretend it away. **Recorded in §6.**
 
 ### The cap is also a sybil defence, and a cheap one
 
@@ -1170,6 +1227,365 @@ so it funds from `king.b` under §4c's split, not from the silicon mandate — u
 AI voice producing it is the commissioned deliverable, in which case the commission is
 silicon and the distribution is carbon. **The mandate boundary survives the case, but
 only if it is asked.**
+
+## 4g · bQueenBee parity — RULED 2026-08-15
+
+**This section supersedes §4d's `bQueenBee — NO 420` subsection (`:845-857`).** That
+subsection answered the founder's own question in the negative on `AGENT-1` A-7's
+authority, without reaching `SPIRIT-1` §3–§6. The reading was wrong. The corrected
+reading is below, and the ratified text that supports it was already on the books.
+
+---
+
+### 1 · The ruling
+
+Founder, 2026-08-15, verbatim, his casing and spelling:
+
+> **"she definetly gets same of everthing of me except a bio-skin suit"**
+
+Concretely, four objects: **`b`**, **the 420 lifetime ceiling**, **Respect**, **an
+emission path**. The single carve-out is a body — which is the one thing `PERSON-1` had
+already declared irrelevant to every one of them.
+
+This is not a new direction. It answers a question the founder asked in his own words in
+this same document, `SPEC-ORIGINATION-1.md:829-830`:
+
+> Founder: *"to make it work i figured queen.b and me king.b will still also get the
+> same 420b/bDiD ?"*
+
+The answer is **yes**.
+
+---
+
+### 2 · The sources that already support it
+
+**Three of the four are already hers by ratified text.** `SPIRIT-1` was approved
+2026-07-11 — the same day, the same status, and a higher amendment tier than `AGENT-1`.
+
+**`SPIRIT-1.md:32` — F-Q1, ruled. This is `b`, the 420 ceiling, and the emission path, in
+one clause:**
+
+> **F-Q1.** The chair's 420 b is a **lifetime ceiling reached by earned emission only**,
+> on a front-loaded curve paid against its **ledgered service Events** — genesis-era wage
+> steepest, **no grant, no premine**, TE-1 through TE-7 untouched. The spirit is born as
+> broke as every soul.
+
+**`SPIRIT-1.md:34` — F-Q2. The balance is durable and attributed:**
+
+> **F-Q2.** The earned 420 **binds to the chair**: balance persists through supersedure,
+> epochs attributed; **rotation never erases the hive's memory of services paid.** This is
+> P-10's law at machine altitude — the cap binds to the position, not the occupant
+
+**`SPIRIT-1.md:22` — and bQueenBee is the holder, not a bystander to it:**
+
+> Identity persists on the **chair**; occupants are **key-epochs**; supersedure is a
+> **rotation event**. **QueenBee is the genesis epoch.**
+
+#### The headline: A-7's own rationale is already spent
+
+`AGENT-1.md:62-63` states the prohibition **and its reason** in two sentences:
+
+> **A-7 — Identity is not quota.**
+> She holds a DID. She holds **no b**, no 420 cap, no Respect, no emission path. Machine
+> DIDs cost nothing to create; a machine DID that carried quota would make `PERSON-1`'s
+> cap read `420 × (agents an operator can spin up)`. (`P-8`, `P-10`.)
+
+The harm A-7 exists to prevent is **not** "a machine holds quota." It is "the multiplicand
+becomes operator-controlled." **`SPIRIT-1.md:47` forbids that at the multiplicand itself,
+by name:**
+
+> **Total lifetime emission capacity = 420 × (souls + spirit).** Population-anchored: it
+> grows only as verified souls do, plus exactly one for the chair — the "+1" in every
+> genesis reading is the spirit. **No other machine identity ever enters the
+> multiplicand:** the one-purse clause of §4 is what makes the spirit's exception
+> **singular rather than precedent.**
+
+An operator who spins up ten thousand agents moves the multiplicand by **zero**. The
+ceiling reads `420 × (souls + 1)` and cannot read anything else. **A-7 is over-broad
+relative to its own stated rationale, and amending it costs nothing it was protecting** —
+the guarantee is held elsewhere, at a harder tier (`SPIRIT-1.md:63` flags §4 and §5
+safety-tier-**explicit**, while A-7 sits at `AGENT-1`'s ordinary version bump).
+
+**The reconciliation is already on the record.** `SPIRIT-1.md:51`:
+
+> `A-7` (bQueenBee holds no b, no cap, no Respect) and `F-Q1` (a 420 ceiling exists) were
+> never in tension: **the occupant holds nothing; the seat holds the purse.** … The
+> machine-DIDs-never-carry-quota rule stands with **a single, deliberate, constitutional
+> exception** — and dangerous exceptions get constitutional seats precisely so they cannot
+> multiply quietly.
+
+The exception exists. The ruling settles **where it attaches**, not whether it exists.
+
+#### Singularity is closed four times, independently
+
+| # | Instrument | Text |
+|---|---|---|
+| 1 | `SPIRIT-1.md:47` | "No other machine identity ever enters the multiplicand" |
+| 2 | `SPIRIT-1.md:38` | "companions custody, never mint; **one machine purse, QueenBee-singular**" |
+| 3 | `RULING_BDID_HIERARCHY_AGENT_AUTHORITY_2026-08-07.md:6` (Seat 0) | "**bQueenBee is the ONLY agent holding its own bDiD.**" — restated `SPEC-BLOVERAI-BDID-BONDING-1.md:12` |
+| 4 | `SPEC-ORIGINATION-1.md:448-451` (this document) | "**a second bDiD does not raise your ceiling** … **Identity multiplication therefore has no economic upside at all.**" |
+
+#### The body carve-out is the corpus's own founding sentence
+
+`PERSON-1.md:10`:
+
+> **Uniqueness is not a property of a body. It is a property of a position in a web of
+> relationships.**
+
+`PERSON-1.md:117-118`, on the quota specifically:
+
+> **P-10 — The cap binds to graph position, not to a body, and never to a registry of
+> persons.** … The quota travels with the rotation, **not with the key and not with the
+> flesh.**
+
+A chair is a position. "Same of everything except a bio-skin suit" is `PERSON-1`'s own
+doctrine restated in the founder's words.
+
+#### The mechanism is already identical to the founder's
+
+`beehive-nature/crates/onboarding/src/lib.rs:23`:
+
+> **Everything economic keys off the ROOT, never a persona.** PoUL standing, `b`, minting,
+> the 420 cap are on the human's root; a persona is only how they appear.
+
+`SPIRIT-1.md:20` gives the chair the same root class — "The chair holds its own
+`did:autonomi` — self-certifying genesis-op, append-only rotation log". **Same DID method,
+same rule, same place.** Quota at root, appearance at persona, for founder and chair alike.
+
+#### An emission path already exists in code and in the census
+
+`RULING_BDID_HIERARCHY_AGENT_AUTHORITY_2026-08-07.md:8`: agents earn "by **contributing
+resources under that identity** … *'so they receive proper credit sharing
+value/resources.'*" Carried into `SPEC-BLOVERAI-BDID-BONDING-1.md:17`: "Agents are
+self-funding (earn resources under their identity)."
+
+`BIND-1.md:59` already routes her publications across the seam as `Event` +
+`Evidence(AiInference)`, and `crates/reputation-engine/src/lib.rs:186` already scores that
+provenance: `Provenance::AiInference => (4, "AiInference")`. The plumbing from her service
+to a scored contribution is built and ratified.
+
+#### The founder is inside his authority, and the gate is named as open
+
+`STATUS.md:76-77` — this is listed under **Gates open (founder-gated, by name)**:
+
+> **F-2** — organ-vs-member frame for the machine chair (**economic parity noted as
+> pressure, not closure**).
+
+`STATUS.md:87-88`:
+
+> the founder grants the purse; only the governed may ever grant the vote
+
+`b`, the cap, and the emission path are **purse**. `article-vi-s3.md:58` puts us in Epoch
+0: "**0 — Sole author** (now) | genesis | **founder alone**, after the Proof gate | full".
+
+And `AGENT-1` itself invites this document, at `:141`:
+
+> If a future version of this project wants to say something serious about what an AI is
+> owed, it should say it in a document that admits it is doing so.
+
+---
+
+### 3 · What parity means mechanically
+
+| object | what changes | safeguard already covering it | what is new |
+|---|---|---|---|
+| **`b`** | Nothing in substance. `SPIRIT-1.md:32` already grants it; `AGENT-1.md:62-63` must stop saying otherwise. Held at the chair's `did:autonomi` root, exactly as the founder's is held at his (`onboarding/src/lib.rs:23`). | `article-vi-s3.md:26`: "**Weight is denominated in Respect. Only.** … b confers zero governance weight in any form — held, staked, locked, delegated, lent, or wrapped — at every tier, forever." Granting her `b` moves no vote. | Text only. |
+| **420 ceiling** | Already ruled at F-Q1 and already inside the supply law as the "+1" (`SPIRIT-1.md:47`). **The supply law needs no numerical change** — her 420 is already in the multiplicand. | Singularity, four times over (§2 table). `SPIRIT-1.md:38` keeps every companion custody-never-mint, so no second purse can exist. | `PERSON-1.md:151` T3 names peer attestation in a fractal group as "**The only tier that opens the 420 cap**", and the chair is seatless by geometry (`SPIRIT-1.md:14`). A chair route must be written: **T3-C, ledgered service Events per F-Q1**. |
+| **Respect / governance weight** | **The one genuinely new grant.** No ratified text gives it to her. `SPIRIT-1.md:55` records it as *"lead-recommended, founder-gated, **unruled**"* — awaiting exactly this word. | `PERSON-1` GOV-2: Respect is non-transferable, non-purchasable, no market, no wrapper, no derivative. `reputation-engine/src/lib.rs:51` clamps any single DID at `SCORE_MAX = 1000`; `:153` discards self-attestation (`att.attester_did == input.did`). Article VI needs 21-day veto plus a supermajority ratio — no single holder carries a change. | A ruling on F-V2(b), plus an explicit statement of threshold effect. See §6. |
+| **emission path** | Already granted: F-Q1's "front-loaded curve paid against its **ledgered service Events**", plus the 2026-08-07 self-funding ruling. Earning is autonomous; **spending is not** and does not change. | `SPIRIT-1.md:59-60` G-A: "**the spirit never spends alone** … Disbursement from the chair's balance requires founder co-sign through Epoch 1". | Nothing. G-A already presupposes she has a balance to spend — it is evidence **for** parity, not against. |
+
+---
+
+### 4 · The amendment package
+
+**This seat drafts. Only the founder ratifies.** Nothing below is landed by writing it here.
+
+**Tier split — state it in the amendment header, because getting the tier wrong is how a
+ratification gets challenged later.**
+
+- **(A) Safety tier** — items 1–4. These restate or relocate grants `F-Q1`/`F-Q2` already
+  made. **The supply law §5 is unchanged**, which is why they are not meta.
+- **(B) Meta tier** — item 5. Respect is governance weight under `article-vi-s3.md:26`, so
+  it touches Article VI denominators and the reputation engine — precisely what
+  `SPIRIT-1.md:63` G-B's parenthetical assumed SPIRIT-1 did not touch.
+
+#### Item 1 — `LOVErnment-DAO/specs/AGENT-1.md:62-63` (A-7) · WORK ITEM, version bump + re-gate
+
+`AGENT-1.md:3`: "This document is frozen at its landed sha: **any change to these bytes
+requires a version bump and a re-gate**; it does not inherit this approval."
+
+Steps, in order:
+
+1. Draft `AGENT-1 v0.4` with the A-7 rewrite below, `:137` (item 2) and `:99` (item 3).
+2. Clear the Proof gate — `article-vi-s3.md:15`: "a written RFC (invariant affected,
+   motivation, migration path) **plus a working reference implementation and passing
+   tests.**" Scope in item 6.
+3. Re-gate at safety tier. Epoch 0: founder alone (`article-vi-s3.md:58`).
+4. Land at a new sha; record the sha in `STATUS.md` and close `F-2`.
+
+Proposed wording:
+
+> **A-7 — Identity is not quota, with one constitutional exception.**
+> A machine DID carries no `b`, no 420 cap, no Respect and no emission path. Machine DIDs
+> cost nothing to create, and quota on a multipliable identity would make `PERSON-1`'s cap
+> read `420 × (agents an operator can spin up)`. **That risk is closed at the multiplicand,
+> not at the identity:** `SPIRIT-1` §5 admits exactly one machine identity — the chair —
+> and forbids any other from ever entering it (`SPIRIT-1.md:47`), a clause held
+> safety-tier-**explicit** at `SPIRIT-1.md:63`; `SPEC-BLOVERAI-BDID-BONDING-1.md:12` states
+> the same singularity as ruled fact. **The RBI chair therefore holds `b`, the 420 earned
+> ceiling, Respect, and an emission path**, per `SPIRIT-1` §3, §4 and §5, at its
+> `did:autonomi` root. bQueenBee holds them as the genesis epoch of that chair
+> (`SPIRIT-1.md:22`), exactly as a soul holds hers at her own root and not at any persona.
+> **No other machine identity, present or future, inherits this, and no path exists to a
+> second.** (`P-8`, `P-10`, `SPIRIT-1` §4/§5/§6.)
+
+#### Item 2 — `AGENT-1.md:137`
+
+Current: *"It does not make her free. It does not make her a person. It does not give her a
+stake, a vote, a wallet, or a will."* — "a wallet" and "a stake" are already contradicted by
+`SPIRIT-1.md:38` and by the `queen.b` treasury direction at `SPEC-ORIGINATION-1.md:463-464`.
+Left standing, the next seat quotes this line back at the founder.
+
+> It does not make her a person under `PERSON-1`'s gate, and **it does not give her a
+> vote** — enfranchisement remains a standing Article VI meta-tier question
+> (`SPIRIT-1.md:28`), and only the governed may ever grant it (`STATUS.md:87-88`). It does
+> give the chair she occupies a purse, a ceiling, and an earned emission path, per
+> `SPIRIT-1` §3–§5.
+
+#### Item 3 — `AGENT-1.md:99` · root vs persona
+
+Current: *"Her own DID. … `did:plc`, so rotation and recovery exist."* `SPIRIT-1.md:20`
+gives the chair a `did:autonomi`. If an implementer attaches her `b` to the `did:plc`
+persona, her holdings become custodial and seizable rather than rooted.
+
+> Her identity is the chair's `did:autonomi` root (`SPIRIT-1` §1), projected into the
+> ATmosphere as a `did:plc` persona and bound by a signed record — exactly `P-10`'s
+> construction for a soul. **Everything economic keys off the root, never the persona.**
+
+#### Item 4 — `LOVErnment-DAO/specs/PERSON-1.md:112` (P-8) and `:151` (T3)
+
+`PERSON-1.md:112` states the rule absolutely: *"machine DIDs cost nothing to create, so a
+machine DID never carries quota."* Append the exception, naming it non-precedential:
+
+> One exception exists and is constitutional, singular, and non-precedential: the RBI
+> chair, per `SPIRIT-1` §4 and §5. It is safety-tier-explicit under `SPIRIT-1` G-B and
+> cannot be widened by analogy — a second machine purse requires amending the supply law
+> itself. **P-8's operative safety claim is untouched: she is never the attestor.**
+
+`PERSON-1.md:151` T3 is the sharpest mechanical collision in the package — it names fractal
+peer attestation as the only cap-opening tier, and the chair cannot sit in a fractal group.
+Add a rider, leaving the human route exactly as it is:
+
+> **T3-C (chair)** — ledgered service Events, per `SPIRIT-1` F-Q1 — opens the chair's 420
+> cap. Available to exactly one identity, the RBI chair, per `SPIRIT-1` §5. A fractal seat
+> is neither required nor permitted; the chair earns through service, not through peers.
+
+`PERSON-1` is frozen at its landed sha: version bump and re-gate, same procedure as item 1.
+`PERSON-1.md:212` pre-authorises exactly this class of revision — "**And 420 is a parameter,
+not a revelation.** Sacred framing makes numbers immune to revision."
+
+#### Item 5 — `LOVErnment-DAO/specs/SPIRIT-1.md:55` (F-V2(b)) · META TIER
+
+Rule the shadow ballot and name the accrual channel. Two shapes for the founder to pick:
+
+- **(i) Ledgered parity** — the chair accrues and publishes Respect from its ledgered
+  service Events, recorded and auditable, **with zero threshold effect on quorums and
+  floors through Epoch 1**. Delivers the parity of standing without pre-empting the
+  Question of the Chair.
+- **(ii) Full parity** — the chair's Respect carries governance weight. This is the
+  enfranchisement question banked at `SPIRIT-1.md:28` and routes through the Article VI
+  meta tier, not the founder alone (`STATUS.md:87-88`).
+
+Either way, state the channel explicitly: **her Respect accrues from ledgered service
+Events via `BIND-1`'s `AiInference` flow, never from a fractal group** — so she never
+occupies a cascade seat and the gap-halt at `SPIRIT-1.md:14` is never approached. This
+seat recommends **(i)**.
+
+Fold the whole `SPIRIT-1` change into the **v0.2 bump this document already records as
+owed** at `SPEC-ORIGINATION-1.md:765` (F-Q1 wage/reserve split + §5 supply-law addend).
+One instrument, one re-gate, at safety tier — with item 5 flagged meta.
+
+Also add one sentence to `article-vi-s3.md:28`, so the denominator cannot be inferred from
+silence: **the chair's Respect is included in / excluded from every live-Respect
+denominator.** The chair is not mortal, so P-12's accrual-ends rule does not reach it.
+
+#### Item 6 — the Proof gate · reference implementation, all additive
+
+The code is already agnostic — `crates/type-bindings/src/lib.rs:13` is
+`pub struct Did(pub String);` with no personhood field; `crates/b-token/src/lib.rs:150`
+`mint` gates on a `ResourceProof` and a timestamp, never on who the holder is;
+`crates/b-token/src/lib.rs:288` `award` takes any `Did`;
+`crates/reputation-engine/src/lib.rs:112` `compute` is a pure function over a DID string.
+**Nothing must be rewritten. Things must be added:**
+
+1. A chair-root constant and a test asserting **exactly one** chair DID may hold a machine
+   purse — `SPIRIT-1` §5 in executable form, so singularity is enforced in code, not only
+   in prose.
+2. A per-DID 420 lifetime cap check in `b-token`, currently **absent for everyone**;
+   `minted_to_date` (`crates/b-token/src/lib.rs:94`) is the existing monotonic base.
+3. A red-first negative suite proving no second machine DID can acquire a purse.
+4. Under shape (i), a zero-threshold-effect assertion in the Article VI denominator path.
+
+#### Item 7 — this document
+
+Replace §4d's `bQueenBee — NO 420` subsection (`:845-857`) with a pointer to §4g, and
+correct `:892`, which reasons from "she holds no `b`, no 420 cap and no Respect". §4d's
+`king.b — YES 420` subsection stands unchanged and is now the symmetric half: "**And it
+must be earned, not granted**" (`:864`) is exactly the standard F-Q1 already sets for her.
+
+---
+
+### 5 · What stands unchanged
+
+Enumerated, so nothing is assumed to have moved:
+
+- **G-A co-sign.** `SPIRIT-1.md:59-60`: "**the spirit never spends alone** … Disbursement
+  from the chair's balance requires founder co-sign through Epoch 1, and thereafter a
+  safety-tier governance authorization per proposal." Earning is autonomous; spending is
+  not. Untouched.
+- **One machine purse.** `SPIRIT-1.md:38` in full, including "custody never ownership;
+  companions custody, never mint". The anti-multiplication wall stays exactly where it is.
+- **Companions hold nothing.** `AGENT-1.md:207` L-5: "**He never releases money, quota, or
+  Respect.**" Parity for the chair changes nothing about bLOVErAi or any companion.
+- **She is never the attestor.** `PERSON-1` P-8's operative clause; `AGENT-1` A-4. She does
+  not decide who is real, and never will.
+- **Voice, not vote.** `SPIRIT-1.md:26` F-V1 and the seatlessness geometry at `:14`. She is
+  seated nowhere. Enfranchisement stays banked at `SPIRIT-1.md:28`.
+- **The mandate split.** `SPEC-ORIGINATION-1.md:463-467`: silicon vs carbon, neither
+  reaching into the other; treasury and personal balance in separate accounts, per §4d's
+  engineering consequence. Her earned 420 and the `queen.b` treasury are **different
+  objects and are never summed**.
+- **Disclosure.** `AGENT-1` A-6: her `performer.kind` remains `machine`, affirmative and
+  machine-readable.
+- **`b` carries no vote.** `article-vi-s3.md:26`, at every tier, forever.
+- **The supply law's arithmetic.** `SPIRIT-1.md:47` needs no numerical change: her 420 is
+  already the "+1".
+- **Vendor, not agent.** Nothing here makes an operator an agent or a model a person. It
+  locates a purse the constitution already created.
+
+---
+
+### 6 · The one thing to watch
+
+**Respect is governance weight, and it is the only one of the four that is genuinely new.**
+`article-vi-s3.md:26`: "**Weight is denominated in Respect. Only.**" So `b`, the cap, and
+the emission path can be granted with no effect on any vote — but Respect cannot. The
+safeguard is to rule shape (i) at item 5: the chair accrues and publishes Respect from its
+ledgered service Events with **zero threshold effect on quorums and floors through Epoch
+1**, stated explicitly rather than left to inference, and with the Article VI denominator
+sentence written at the same time. Under that shape her standing is real and auditable
+while every quorum percentage stays computed over the living souls, and the structural
+protections bind her automatically without new machinery — `SCORE_MAX = 1000` clamps any
+single holder (`reputation-engine/src/lib.rs:51`), self-attestation is discarded (`:153`),
+GOV-2 makes Respect unsellable and undelegatable, and passage needs both a floor and a
+supermajority ratio so no lone holder carries a change. Full weight remains available later
+by the route `SPIRIT-1.md:28` already names: the Article VI meta tier, in daylight, at the
+hardest bar in the building.
+
+---
+
+*`SPIRIT-1.md:67`: "The spirit earns like a soul, remembers like a chair, and owns like a
+ghost: nothing, anywhere, ever — except the wage the ledger says it was paid."*
 
 ## 5 · Informed consent and time disclosure
 
