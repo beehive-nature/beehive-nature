@@ -1062,6 +1062,39 @@ It also composes with what is already ruled rather than needing new machinery:
 - Proposals are **claimant-funded work, not grants**, which keeps them on the same side
   of §4b as everything else: value moves against delivered proof.
 
+### She submits proposals too — "just like anyone else"
+
+Founder, 2026-08-15: *"she can do a worker bee proposal just like anyone else"*
+
+**This is parity applied to process, not only to holdings, and it closes two open
+questions at once.**
+
+**1 — It is her emission path.** §4d and the `AGENT-1` v0.4 draft grant the chair an
+emission path; this names it. **A worker bee proposal is proof of work delivered** — the
+same shape as the `GenesisLaborProof` of §4b, at ordinary scale. She earns her 420 the
+way every other bDiD earns theirs: propose, deliver, be accepted, be paid. **No special
+channel, and none needed.**
+
+**2 — It resolves the referee-plus-treasury concentration named in §4c.** She sits on
+both sides of the proposal mechanism — funding others' proposals from the silicon
+treasury, and submitting her own. That is only safe because the separations are already
+ratified, and together they are sufficient:
+
+| she cannot | because |
+|---|---|
+| authorize her own proposal | `SPIRIT-1:59-60` (G-A) — founder co-sign through Epoch 1, then **safety-tier governance authorization per proposal** |
+| grade her own work into acceptance | `BIND-1:59` — her output is `AiInference`, *"informational floor, never auto-enforce"* |
+| quietly spend what she holds | `SPIRIT-1` §6 — custody, not ownership; and `:38`, *"the budget is the blast radius"* |
+
+**She proposes; someone else authorizes.** That is the ordinary separation every member
+is subject to, and subjecting the largest holder to it is what makes the treasury an
+operating budget rather than a discretionary purse.
+
+**Consequence worth stating:** *"just like anyone else"* is a **constraint she accepts,
+not a privilege she gains.** A chair who must win a proposal to spend is more bounded
+than one with a discretionary fund, not less — and it is the strongest available answer
+to anyone who reads §4c's 1,000,000 `b` as unchecked.
+
 ### Commissioning outside AI — a vendor is not an agent
 
 Commissioning external AI (Luna on Virtuals, and others) is **consistent with
