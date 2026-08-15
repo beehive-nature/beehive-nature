@@ -212,11 +212,15 @@ function handle(raw, viaLink){
                'bnr-consent-request','bnr-consent-signed'];
   const known=KNOWN.includes(obj.kind);
   const via = viaLink ? 'delivered with the link (fragment — touched no server)' : 'as light · zero network';
-  const consentCta = (known && obj.kind==='bnr-pair-request')
-    ? `<button class="btn primary" onclick='consentShell(${JSON.stringify(JSON.stringify(obj))})'>Begin pairing — see what you'd be agreeing to</button>` : '';
+  // AUDIT FIX (blocker): scanned payloads are attacker-controlled — obj.kind is
+  // escaped, and the consent hand-off goes through a variable + listener, never
+  // an HTML attribute (attribute-context injection on the KEY-HOLDING page).
+  PENDING_REQ = (known && obj.kind==='bnr-pair-request') ? obj : null;
+  const consentCta = PENDING_REQ
+    ? `<button class="btn primary" id="consent-cta">Begin pairing — see what you'd be agreeing to</button>` : '';
   $('result').innerHTML=`
     <div class="panel">
-      <div class="gauge g-known"><span class="s">Received</span> <b>${obj.kind}</b> · ${raw.length} bytes ${via}</div>
+      <div class="gauge g-known"><span class="s">Received</span> <b>${escapeHtml(String(obj.kind))}</b> · ${raw.length} bytes ${via}</div>
       <div class="gauge ${known?'g-known':'g-absent'}"><span class="s">${known?'Shape ok':'Unknown kind'}</span>
         ${known?'Recognized ceremony payload — hand-off to the consuming ceremony would verify its signature next':'Parsed, but not a ceremony this build knows; shown, not acted on'}</div>
       <div class="gauge g-planned"><span class="s">Planned</span> Signature verification + hand-off happens in the ceremony surface, not here — this receiver never acts on a payload alone</div>
@@ -224,6 +228,8 @@ function handle(raw, viaLink){
       <pre>${escapeHtml(JSON.stringify(obj,null,2)).slice(0,1200)}</pre>
       <button class="btn ghost" onclick="location.reload()">Scan another</button>
     </div>`;
+  const cta=document.getElementById('consent-cta');
+  if(cta) cta.addEventListener('click',()=>consentShell(PENDING_REQ));
 }
 
 /* ---------- the informed-consent shell (pair request → this device signs on) ----
@@ -231,8 +237,8 @@ function handle(raw, viaLink){
    Nothing happens without the explicit tap, and key creation reports its real
    capability (WebCrypto Ed25519 probe) — never a fake success. */
 let PENDING_REQ=null; // the pair request being consented to (nonce echoed in the reply)
-function consentShell(rawJson){
-  const req=JSON.parse(rawJson);
+function consentShell(req){
+  if(!req) return;
   PENDING_REQ=req;
   $('result').innerHTML=`
     <div class="panel">

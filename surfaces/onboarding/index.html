@@ -449,7 +449,9 @@ const SCREENS = {
   /* recovery — confirm-before-activate (authentik static-code pattern +
      the written-code FLOOR: the one path a person with a single device has). */
   recovery(){
-    const words = APP._words = genWords();
+    // AUDIT FIX (high): memoize — "See the phrase again" re-renders this screen,
+    // and regenerating would silently invalidate the phrase already written down.
+    const words = APP._words = (APP._words || genWords());
     const grid = words.map((w,i)=>`<span><b>${i+1}</b>${w}</span>`).join('');
     // PREVIEW=true until real BIP-39 derivation lands. Beta round 5 caught the
     // founder backing up prop words as real — a false signal this banner kills.
@@ -501,9 +503,15 @@ const SCREENS = {
       <h2>Creating your identity</h2>
       <p>Writing your <span class="mono">did:webvh</span> and anchoring it to permanent storage.</p>
       <div class="panel" style="text-align:start">
-        <div class="gauge g-known"><span class="s">Done</span> Keypair bound to your ${custodyLabel()}</div>
+        ${PREVIEW
+          ? `<div class="gauge g-stale"><span class="s">Preview</span> Keypair binding — nothing real is derived yet</div>`
+          : `<div class="gauge g-known"><span class="s">Done</span> Keypair bound to ${custodyLabel()}</div>`}
         ${APP.ctx.custody==='trezor'
-          ? `<div class="gauge g-known"><span class="s">Done</span> Recovery lives on your Trezor — you wrote it at device setup; we never ask for it, ever</div>`
+          ? (APP.ctx.trezorReal
+              ? `<div class="gauge g-known"><span class="s">Done</span> Recovery lives on your Trezor — you wrote it at device setup; we never ask for it, ever</div>`
+              : `<div class="gauge g-stale"><span class="s">Declared</span> Recovery would live on your Trezor — but no device was verified this walkthrough</div>`)
+          : PREVIEW
+          ? `<div class="gauge g-stale"><span class="s">Preview</span> Recovery phrase floor — prop words, not yet real</div>`
           : `<div class="gauge g-known"><span class="s">Done</span> Recovery phrase floor set</div>`}
         <div class="gauge g-stale"><span class="s">Working</span> Anchoring identity record…</div>
       </div>
@@ -527,8 +535,10 @@ const SCREENS = {
           ? `<div class="gauge g-stale"><span class="s">Stale</span> Identity anchored · <span class="mono">did:webvh</span> — preview: nothing was written to any chain</div>`
           : `<div class="gauge g-known"><span class="s">Known</span> Identity anchored · <span class="mono">did:webvh</span></div>`}
         ${APP.ctx.custody==='optical'
-          ? (APP.ctx.pairConfirmed
-              ? `<div class="gauge g-known"><span class="s">Known</span> Custody · ${custodyLabel()} — CONFIRMED by nonce-bound reply${APP.ctx.pairConfirmed.sigOk?' with a REAL on-device signature':' (reply unsigned/preview — labeled)'} · key ${APP.ctx.pairConfirmed.fp}</div>`
+          ? (APP.ctx.pairConfirmed && !APP.ctx.pairConfirmed.preview
+              ? `<div class="gauge g-known"><span class="s">Known</span> Custody · ${custodyLabel()} — CONFIRMED by nonce-bound reply${APP.ctx.pairConfirmed.sigOk?' with a REAL on-device signature':' (signature not verifiable in this browser — carried, labeled)'} · key ${APP.ctx.pairConfirmed.fp}</div>`
+              : APP.ctx.pairConfirmed
+              ? `<div class="gauge g-stale"><span class="s">Declared</span> Custody · ${custodyLabel()} — the reply was a PREVIEW (the phone had no real key to offer); nonce matched but nothing real was enrolled</div>`
               : `<div class="gauge g-stale"><span class="s">Declared</span> Custody · ${custodyLabel()} — no reply scanned; declared is not confirmed</div>`)
           : APP.ctx.custody==='passkey'
           ? (APP.ctx.authMode==='real'
@@ -538,7 +548,7 @@ const SCREENS = {
           ? (APP.ctx.trezorReal
               ? `<div class="gauge g-known"><span class="s">Known</span> Custody · ${custodyLabel()} · firmware ${APP.ctx.trezorReal.fw} — REAL device verified over Trezor Connect</div>`
               : `<div class="gauge g-stale"><span class="s">Declared</span> Custody · your Trezor — walked through WITHOUT the device; nothing verified. Use "Connect my Trezor — for real" to earn Known</div>`)
-          : `<div class="gauge g-known"><span class="s">Known</span> Custody · ${custodyLabel()}</div>`}
+          : `<div class="gauge g-stale"><span class="s">Declared</span> Custody · ${custodyLabel()} — self-reported only; nothing verified${APP.ctx.custody==='key'?' (real FIDO2 enrolment lands with the key build)':''}</div>`}
         <div class="gauge g-absent"><span class="s">Absent</span> Balances — connect a rail to read (none faked)</div>
       </div>
 
@@ -668,7 +678,7 @@ APP.checkPhrase = function(){
   if(got.every((g,i)=>g===want[i])){ this.go('creating'); }
   else document.getElementById('cf-err').textContent='Those don’t match your phrase — check the numbers and try again.';
 };
-APP.restart = function(){ this.ctx={designation:'first-join',online:this.ctx.online,custody:null,remediated:false}; this.hist=[]; this.go('welcome',false); };
+APP.restart = function(){ this.ctx={designation:'first-join',online:this.ctx.online,custody:null,remediated:false}; this.hist=[]; this._words=null; this._pairNonce=null; this.go('welcome',false); };
 
 /* ---------- render helpers ---------- */
 function railHTML(step){ return `
@@ -694,9 +704,14 @@ function custodyLabel(){
    the same code directly. */
 const PUBLIC_RECEIVER='https://beehive-nature.github.io/beehive-nature/surfaces/onboarding/receive.html';
 function receiverBase(){
-  // served same-origin? use our own receiver; file:// preview? use the public one
+  // served same-origin? use our own receiver; file:// preview? use the public one.
+  // AUDIT FIX (blocker): the relay serves the wizard at /onboard (no filename),
+  // where filename-replacement built /receive.html — a route that did not exist.
+  // Route-aware now, and the relay also aliases the .html spellings.
   if(location.protocol==='http:'||location.protocol==='https:'){
-    return location.href.replace(/[^/]*$/,'')+'receive.html';
+    const p=location.pathname;
+    if(/\/onboard\/?$/.test(p)) return location.origin+p.replace(/\/$/,'')+'/receive';
+    return location.href.replace(/[#?].*$/,'').replace(/[^/]*$/,'')+'receive.html';
   }
   return PUBLIC_RECEIVER;
 }
@@ -785,7 +800,9 @@ async function trezorConnectReal(btn){
       label:p.label||'' };
     st.style.color='var(--verified)';
     st.textContent=`✓ ${name}${APP.ctx.trezorReal.label?` “${APP.ctx.trezorReal.label}”`:''} · firmware ${APP.ctx.trezorReal.fw} — REAL device, verified over Trezor Connect`;
-    setTimeout(()=>APP.hardwareDone(), 900);
+    // AUDIT FIX (medium): guard the deferred advance — the user may have
+    // navigated away inside the 900ms; a stale timer must never move them.
+    setTimeout(()=>{ if(APP.current==='hardware'&&APP.ctx.custody==='trezor') APP.hardwareDone(); }, 900);
   }catch(e){
     btn.disabled=false;
     st.textContent=`Refused/failed honestly: ${e.message}. Is the device plugged in and unlocked? (If Suite is mid-update, Bridge may be restarting — try again after.)`;

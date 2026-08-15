@@ -73,6 +73,10 @@ pub fn app(state: AppState) -> Router {
         .route("/v1/config/watch-only", get(watch::watch_only_config))
         .route("/onboard", get(onboard_static::onboard))
         .route("/onboard/receive", get(onboard_static::receive))
+        // .html aliases: URLs built by filename-replacement (file:// copies,
+        // Pages-style paths) must not 404 on the relay (audit blocker fix)
+        .route("/onboard/receive.html", get(onboard_static::receive))
+        .route("/receive.html", get(onboard_static::receive))
         // both spellings: a page at /onboard resolves its relative script to
         // /vendor/…, a page at /onboard/ resolves to /onboard/vendor/…
         .route("/vendor/qrcodegen.js", get(onboard_static::qrcodegen_js))
