@@ -21,6 +21,79 @@ design, not a figure of speech, and it should not be paraphrased away.
 
 ---
 
+## 0a · THE THROUGH-LINE — remove the mechanism, do not legislate the behaviour
+
+**Status: DRAFT, under adversarial review 2026-08-15.** Founder direction the same day: the
+principle below *"is not one insight — it's the through-line of everything built today, and
+it generates correct answers in cases nobody has anticipated yet."*
+
+**The project's own standing law already states it, written for type systems:**
+
+> **Prefer unnameable to forbidden:** a missing type cannot be misused by anyone, including
+> a future maintainer who wants to. **A rule can be repealed.**
+> — `CLAUDE.md` §5
+
+**Today it ran the economics, the governance, the identity layer and the naming layer.** The
+same move, twelve times, mostly without anyone naming it.
+
+### The move
+
+> When something must not happen, **remove the mechanism that makes it possible** rather
+> than writing a rule against it. A removed mechanism cannot be lobbied, exempted,
+> misconfigured, or repealed by a later maintainer with a good reason.
+
+### Every ruling today is an instance
+
+| the thing that must not happen | the rule you would write | **what was done instead** |
+|---|---|---|
+| money buys governance | cap voting power, regulate stake | **GOV-1: `b` confers zero governance weight, in any form, forever.** Nothing to cap |
+| early adopters capture the supply | vest, lock, tax the early | **population-anchored supply.** Adoption grows supply with it; the scarcity channel does not exist |
+| the free tier becomes a subsidy | budget it, means-test it | **the free tier writes zero bytes.** Free by arithmetic, not by generosity |
+| identity multiplication pays | detect and ban sybils | **the 420 cap is per bDiD.** A second identity earns another 420 from zero. **No upside to remove later** |
+| a classifier wrongly rejects a real person | tune the threshold, add appeals | **operant reward, never punishment.** The system never classifies, so it can never be wrong in the direction that costs someone their identity |
+| a matcher produces false accepts at scale | lower `f`, accept more false rejects | **exact equality, not similarity search.** No threshold exists, so `N × f` does not apply |
+| a contentious fork divides the treasury | arbitrate splits, lock the treasury | **a fork inherits code and constitution, never balances.** Nothing to fight over |
+| enforcement expires when unlock completes | extend the window, add a review | **the curve never completes.** The reserve is permanent because completion was removed |
+| death orphans the enforcement reserve | rule on inheritance | **dormancy pauses both halves.** No disposition is forced, so nothing is orphaned |
+| a sovereign needs three carve-outs | maintain the exceptions | **a scope clause.** She is outside the document, so no exception exists to widen |
+| a homograph resolves to the wrong name | blacklist confusables | **refuse un-normalizable input** (ENSIP-15's own move). Nothing to enumerate |
+| a machine DID multiplies quota | audit agent creation | **singularity — one machine purse.** The multiplicand is fixed at one by construction |
+
+### Why it generates answers to unasked questions
+
+**Because it is a test, not a list.** Faced with something new, ask: *what mechanism makes
+this possible, and can that mechanism be removed instead of regulated?* If yes, the answer
+is usually right and usually cheaper. **A rule needs an enforcer, a budget, a venue, and a
+maintainer who still remembers why. A removed mechanism needs nothing.**
+
+It also explains today's failures. **Where the design has a live problem, it is where the
+mechanism could not be removed:**
+
+- relay detection — **physics refuses**; light cannot bound distance, so §8.3 stopped
+  claiming it rather than regulating it
+- bRespect accreditation — **discretion remains**, which is why §4e demands published
+  criteria and an appeal path: converting discretion to law is the closest available
+  approximation of removing it
+- the withdraw-to-stable ramp — **liquidity is the mechanism and it is also the point**;
+  it cannot be removed, so it must be bounded
+
+### Where it fails, stated so it does not become a slogan
+
+**Three limits, each real:**
+
+1. **Some mechanisms are the value.** Liquidity, discretion in judgement, human deliberation.
+   Removing them removes the thing being built. The test asks *can* it be removed, never
+   *must* it be.
+2. **Physics does not negotiate.** Where the mechanism is a fact about the world — exposure
+   hunting, the speed of light — the honest move is to stop claiming, not to keep engineering.
+3. **Removal can hide the decision rather than make it.** A mechanism that is absent because
+   nobody thought of it looks identical to one that is absent by design. **The difference is
+   whether it is written down** — which is why this section exists at all.
+
+**Corollary worth keeping:** this is why the law book pays out. A removed mechanism is
+invisible in the code — there is nothing to read. The reasoning survives only if someone
+wrote down what was removed and why.
+
 ## 1 · The split that resolves the sybil argument
 
 The clarification that took all day to reach, stated plainly so nobody re-derives it:
