@@ -188,6 +188,10 @@ select.lang{font:inherit;font-size:.72rem;background:var(--bg-card);color:var(--
    RAID_AUTHENTIK §18 (component + payload), so the same machine could drive a
    TUI, a phone, or an optical/paper packet, not just this DOM renderer.
    =========================================================================== */
+/* Flip to false when real key derivation + anchoring land — every preview
+   banner and downgraded gauge keys off this one constant. */
+const PREVIEW = true;
+
 const APP = {
   ctx:{ designation:"first-join", online:true, custody:null, remediated:false },
   hist:[],
@@ -348,7 +352,17 @@ const SCREENS = {
   recovery(){
     const words = APP._words = genWords();
     const grid = words.map((w,i)=>`<span><b>${i+1}</b>${w}</span>`).join('');
+    // PREVIEW=true until real BIP-39 derivation lands. Beta round 5 caught the
+    // founder backing up prop words as real — a false signal this banner kills.
+    const previewBanner = PREVIEW ? `
+      <div class="panel" style="border-color:color-mix(in srgb,var(--guard) 55%,var(--line))">
+        <div class="gauge g-absent"><span class="s">Preview</span>
+          <b>These 12 words are stage props.</b> They derive no key, control nothing,
+          and cannot restore anything — do NOT keep them as a backup. Real BIP-39
+          derivation replaces them (and this banner) when the key build lands.</div>
+      </div>` : '';
     return stageWrap(3, `
+      ${previewBanner}
       <h2>Write down your recovery phrase</h2>
       <p>These 12 words can rebuild your wallet on any device if you lose this one.
          Write them on paper — this is the one backup that needs nothing you have to buy.</p>
@@ -409,8 +423,12 @@ const SCREENS = {
       </div>
 
       <div class="panel">
-        <div class="gauge g-known"><span class="s">Known</span> Identity anchored · <span class="mono">did:webvh</span></div>
-        <div class="gauge g-known"><span class="s">Known</span> Custody · ${custodyLabel()}</div>
+        ${PREVIEW
+          ? `<div class="gauge g-stale"><span class="s">Stale</span> Identity anchored · <span class="mono">did:webvh</span> — preview: nothing was written to any chain</div>`
+          : `<div class="gauge g-known"><span class="s">Known</span> Identity anchored · <span class="mono">did:webvh</span></div>`}
+        ${APP.ctx.custody==='optical'
+          ? `<div class="gauge g-stale"><span class="s">Declared</span> Custody · ${custodyLabel()} — the phone's consent cannot reach this screen until the reply leg lands; declared is not confirmed</div>`
+          : `<div class="gauge g-known"><span class="s">Known</span> Custody · ${custodyLabel()}</div>`}
         <div class="gauge g-absent"><span class="s">Absent</span> Balances — connect a rail to read (none faked)</div>
       </div>
 
