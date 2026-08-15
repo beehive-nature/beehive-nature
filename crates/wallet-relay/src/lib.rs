@@ -79,6 +79,9 @@ pub fn app(state: AppState) -> Router {
         .route("/onboard/receive.html", get(onboard_static::receive))
         .route("/receive.html", get(onboard_static::receive))
         .route("/v1/trezor/native/features", get(trezor_bridge::native_features))
+        .route("/blight", get(onboard_static::blight_demo))
+        // the demo's relative encoder path when served at /blight
+        .route("/onboarding/vendor/qrcodegen.js", get(onboard_static::qrcodegen_js))
         // both spellings: a page at /onboard resolves its relative script to
         // /vendor/…, a page at /onboard/ resolves to /onboard/vendor/…
         .route("/vendor/qrcodegen.js", get(onboard_static::qrcodegen_js))

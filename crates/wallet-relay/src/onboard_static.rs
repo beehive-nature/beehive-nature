@@ -15,6 +15,7 @@ use axum::response::{IntoResponse, Response};
 const ONBOARD_HTML: &str = include_str!("../../../surfaces/onboarding/index.html");
 const RECEIVE_HTML: &str = include_str!("../../../surfaces/onboarding/receive.html");
 const QRCODEGEN_JS: &str = include_str!("../../../surfaces/onboarding/vendor/qrcodegen.js");
+const BLIGHT_DEMO: &str = include_str!("../../../surfaces/blight/demo.html");
 
 fn page(body: &'static str, content_type: &'static str) -> Response {
     (StatusCode::OK, [("content-type", content_type)], body).into_response()
@@ -33,6 +34,11 @@ pub async fn receive() -> Response {
 /// GET /onboard/vendor/qrcodegen.js — the wizard's relative script resolves here.
 pub async fn qrcodegen_js() -> Response {
     page(QRCODEGEN_JS, "text/javascript; charset=utf-8")
+}
+
+/// GET /blight — the bLiGhTbeAM demo (moving b logo talking to a BNR dApp).
+pub async fn blight_demo() -> Response {
+    page(BLIGHT_DEMO, "text/html; charset=utf-8")
 }
 
 #[cfg(test)]

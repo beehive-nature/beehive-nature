@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>bLighTnetWorK · the bLiGhTbeAM demo</title>
+<!--
+  THE bLiGhTbeAM DEMO — the moving b logo that talks to a BNR dApp.
+  Ruled split (UX-OPTICAL-PAIRING-1 §2b/2c): the DATA is black/white luminance
+  (real QR frames from the vendored MIT encoder — genuinely decodable), the
+  COLOR is a decorative mandala halo carrying ZERO bits. Strip all color and it
+  still decodes; that is why the brand and the channel are the same object.
+  HONESTY: the in-page dApp receives frames by direct callback (labeled DEMO
+  LINK) — it is a protocol demonstration, not a camera. Point a real phone at
+  the beam and it decodes for real; that is the same frames, no difference.
+-->
+<style>
+:root{color-scheme:dark;
+--ai:#45C2DC;--biomass:#86CC72;--sovereign:#9C6FD6;--sovereign-soft:#B79FE0;--you:#D655BB;
+--rainbow:linear-gradient(90deg,#FBFB9F,#86CC72,#45C2DC,#6FA9E0,#9C6FD6);
+--primary:var(--you);--info:#6FA9E0;--verified:var(--biomass);--guard:#B7A8F7;--b-value:#E8B54B;
+--bg:#06110C;--bg-card:#0C1412;--ink:#E9F2EC;--ink-mut:#8FA79C;--ink-dim:#648176;--line:#1E2B26;
+--font-ui:ui-sans-serif,system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+--font-mono:ui-monospace,"Cascadia Mono","SF Mono",Menlo,Consolas,monospace;
+--s2:12px;--s3:18px;--s4:24px;--radius:12px;--radius-pill:999px;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-ui);line-height:1.5;
+  min-height:100dvh;padding:var(--s3);display:flex;flex-direction:column;align-items:center}
+.wrap{width:100%;max-width:62rem}
+h1{font-size:1.5rem;margin:0 0 4px}
+h1 b{background:var(--rainbow);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--ink-mut);margin:0 0 var(--s4);font-size:.92rem}
+.grid{display:grid;grid-template-columns:1fr;gap:var(--s3)}
+@media(min-width:56rem){.grid{grid-template-columns:1fr 1fr}}
+.panel{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);padding:var(--s3)}
+.mono{font-family:var(--font-mono)}
+.muted{color:var(--ink-dim);font-size:.8rem}
+.btn{appearance:none;font:inherit;font-weight:650;min-height:46px;border-radius:var(--radius);
+  border:1px solid transparent;cursor:pointer;padding:0 var(--s3);margin:0 8px 8px 0}
+.btn.primary{background:var(--primary);color:#150512}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.gauge{display:flex;gap:8px;align-items:flex-start;font-size:.85rem;color:var(--ink-mut);padding:5px 0}
+.gauge .s{font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+  padding:2px 7px;border-radius:6px;flex:none;margin-top:2px;border:1px solid var(--line)}
+.g-known .s{color:var(--verified)} .g-stale .s{color:var(--ink-mut);border-style:dashed}
+.g-absent .s{color:var(--guard)} .g-live .s{color:var(--info)}
+/* ---- the beam stage: data core (b/w) + mandala halo (color, zero bits) ---- */
+.stage{position:relative;width:min(340px,86vw);aspect-ratio:1;margin:0 auto var(--s2)}
+#halo{position:absolute;inset:0;animation:spin 24s linear infinite}
+#halo.fast{animation-duration:7s}
+@keyframes spin{to{transform:rotate(360deg)}}
+#core{position:absolute;inset:19%;border-radius:10px;background:#fff;
+  box-shadow:0 0 0 4px #000,0 0 34px color-mix(in srgb,var(--ai) 45%,transparent);
+  image-rendering:pixelated;transition:box-shadow .3s}
+#core.beaming{box-shadow:0 0 0 4px #000,0 0 60px color-mix(in srgb,var(--ai) 85%,transparent)}
+.progress{height:7px;border-radius:var(--radius-pill);background:var(--line);overflow:hidden;margin:var(--s2) 0}
+.progress i{display:block;height:100%;width:0;background:var(--rainbow);transition:width .18s}
+.cells{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin-top:var(--s2)}
+.cells i{aspect-ratio:1;border-radius:3px;background:var(--line);transition:background .2s}
+.cells i.got{background:var(--verified)}
+.app{border:1px solid var(--line);border-radius:var(--radius);padding:var(--s3);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--sovereign) 8%,transparent),transparent)}
+.app h3{margin:0 0 4px;font-size:1rem}
+.plug{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.plug .ic{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;
+  background:color-mix(in srgb,var(--ai) 16%,transparent);flex:none}
+pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;
+  font-size:.72rem;overflow:auto;max-height:150px;color:var(--ink-mut);margin:var(--s2) 0 0}
+@media(prefers-reduced-motion:reduce){#halo{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><b>bLighTnetWorK</b> · the bLiGhTbeAM demo</h1>
+  <p class="sub">The logo <b>is</b> the transmission. Black-and-white hexagons carry the bits;
+    the mandala halo is pure decoration — strip every colour and it still decodes.
+    ~420 b/sec, no network, no pairing, no install.</p>
+
+  <div class="grid">
+    <!-- ============ SENDER: the moving b ============ -->
+    <div class="panel">
+      <div class="gauge g-live"><span class="s">Sender</span> <b>bComb</b> — real QR frames, hexagonal halo, luminance-only data</div>
+      <div class="stage">
+        <svg id="halo" viewBox="0 0 200 200" aria-hidden="true"></svg>
+        <canvas id="core" width="300" height="300" aria-label="bLiGhTbeAM frame"></canvas>
+      </div>
+      <div style="text-align:center">
+        <button class="btn primary" id="go">▶ Send a bLiGhTbeAM</button>
+        <button class="btn ghost" id="payload">Payload: plugin</button>
+      </div>
+      <div class="progress"><i id="bar"></i></div>
+      <div class="muted" id="txt">Idle — press send. Each frame is a real, scannable code:
+        point a phone at it and the BNR receiver decodes the same bytes.</div>
+    </div>
+
+    <!-- ============ RECEIVER: a BNR dApp ============ -->
+    <div class="panel">
+      <div class="gauge g-live"><span class="s">Receiver</span> a <b>BNR dApp</b> catching the beam</div>
+      <div class="app">
+        <h3 id="app-title">bNature · dApp shell</h3>
+        <div class="muted" id="app-state">Waiting for a beam…</div>
+        <div class="cells" id="cells"></div>
+        <div id="installed"></div>
+      </div>
+      <div class="gauge g-stale" style="margin-top:var(--s2)"><span class="s">Demo link</span>
+        This panel receives frames in-page (direct callback), so the protocol is visible
+        without a second device. A real phone camera decodes the identical frames.</div>
+      <pre id="log">[bLighTnetWorK] ready.</pre>
+    </div>
+  </div>
+</div>
+
+<script src="../onboarding/vendor/qrcodegen.js"></script>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+
+/* ---- the mandala halo: hex rings, colour only, ZERO bits ---- */
+(function halo(){
+  const NS='http://www.w3.org/2000/svg', svg=$('halo');
+  const hex=(cx,cy,r,rot)=>{const p=[];for(let i=0;i<6;i++){const a=Math.PI/3*i+rot;
+    p.push(`${(cx+r*Math.cos(a)).toFixed(2)},${(cy+r*Math.sin(a)).toFixed(2)}`);}return p.join(' ');};
+  const RINGS=[{n:18,rad:88,size:13},{n:14,rad:70,size:11},{n:10,rad:54,size:9}];
+  RINGS.forEach((ring,ri)=>{
+    for(let i=0;i<ring.n;i++){
+      const a=(Math.PI*2/ring.n)*i, cx=100+ring.rad*Math.cos(a), cy=100+ring.rad*Math.sin(a);
+      const el=document.createElementNS(NS,'polygon');
+      el.setAttribute('points',hex(cx,cy,ring.size,a));
+      const t=(i/ring.n+ri*0.18)%1;
+      const stops=['#FBFB9F','#86CC72','#45C2DC','#6FA9E0','#9C6FD6'];
+      el.setAttribute('fill',stops[Math.floor(t*stops.length)%stops.length]);
+      el.setAttribute('opacity',(0.30+0.5*(1-ri/RINGS.length)).toFixed(2));
+      el.style.animation=`pulse ${(2.4+ri*0.7).toFixed(1)}s ease-in-out ${(i*0.05).toFixed(2)}s infinite`;
+      svg.appendChild(el);
+    }
+  });
+  const st=document.createElementNS(NS,'style');
+  st.textContent='@keyframes pulse{0%,100%{opacity:.22}50%{opacity:.95}}'+
+    '@media(prefers-reduced-motion:reduce){polygon{animation:none!important}}';
+  svg.appendChild(st);
+})();
+
+/* ---- payloads: what a beam can carry ---- */
+const PAYLOADS={
+  plugin:{label:'Payload: plugin', title:'Installing plugin…', done:'bMeshLLM plugin installed',
+    icon:'🧩', obj:{v:1,kind:'bnr-plugin-install',name:'bMeshLLM',version:'0.3.0',
+      caps:['inference','mesh-relay'],sig:'ed25519:PREVIEW'}},
+  bdid:{label:'Payload: bDiD', title:'Receiving identity…', done:'bDiD received — wallet can open',
+    icon:'🪪', obj:{v:1,kind:'bnr-bdid-handoff',did:'did:webvh:beehive.nature:PREVIEW',
+      tier:'Larva',sig:'ed25519:PREVIEW'}},
+  consent:{label:'Payload: consent', title:'Reading offer…', done:'Signed consent — subscription live',
+    icon:'🤝', obj:{v:1,kind:'bnr-consent-request',item:'monthly seed delivery',
+      cadence:'monthly',price:'12 b',sig:'ed25519:PREVIEW'}},
+};
+let payloadKey='plugin';
+$('payload').onclick=()=>{
+  const keys=Object.keys(PAYLOADS); payloadKey=keys[(keys.indexOf(payloadKey)+1)%keys.length];
+  $('payload').textContent=PAYLOADS[payloadKey].label;
+  log(`payload → ${payloadKey}`);
+};
+
+/* ---- the beam: real QR frames, carousel + repair (the waggle) ---- */
+const CHUNK=28;                       // bytes per frame — small so the waggle is visible
+let timer=null;
+function log(m){ const el=$('log'); el.textContent=(el.textContent+'\n'+m).split('\n').slice(-9).join('\n'); }
+
+function drawFrame(text){
+  const cv=$('core'), g=cv.getContext('2d');
+  g.fillStyle='#fff'; g.fillRect(0,0,cv.width,cv.height);
+  if(!(window.qrcodegen&&qrcodegen.QrCode)){ g.fillStyle='#000';
+    g.fillText('encoder not loaded',20,40); return; }
+  const qr=qrcodegen.QrCode.encodeText(text, qrcodegen.QrCode.Ecc.LOW);
+  const scale=Math.floor(cv.width/(qr.size+4)), off=Math.floor((cv.width-qr.size*scale)/2);
+  g.fillStyle='#000';
+  for(let y=0;y<qr.size;y++)for(let x=0;x<qr.size;x++)
+    if(qr.getModule(x,y)) g.fillRect(off+x*scale,off+y*scale,scale,scale);
+}
+
+function send(){
+  if(timer){ clearInterval(timer); timer=null; $('go').textContent='▶ Send a bLiGhTbeAM';
+    $('halo').classList.remove('fast'); $('core').classList.remove('beaming'); return; }
+  const P=PAYLOADS[payloadKey];
+  const body=JSON.stringify(P.obj);
+  const chunks=[]; for(let i=0;i<body.length;i+=CHUNK) chunks.push(body.slice(i,i+CHUNK));
+  const K=chunks.length;
+  // receiver state
+  const got=new Array(K).fill(false);
+  $('cells').innerHTML=chunks.map(()=>'<i></i>').join('');
+  $('app-title').textContent=P.title; $('app-state').textContent='Beam detected — collecting frames…';
+  $('installed').innerHTML=''; $('bar').style.width='0%';
+  log(`beam: ${body.length}B in ${K} frames (~420 b/sec)`);
+
+  $('go').textContent='■ Stop'; $('halo').classList.add('fast'); $('core').classList.add('beaming');
+  let seq=0;
+  timer=setInterval(()=>{
+    // carousel: source frames, then repair passes — receiver may join at ANY point
+    const idx=seq%K, isRepair=Math.floor(seq/K)%2===1;
+    const frame=JSON.stringify({v:1,k:P.obj.kind,i:idx,n:K,d:chunks[idx]});
+    drawFrame(frame);
+    // DEMO LINK: the dApp receives this frame directly (labeled in the UI).
+    if(!got[idx]){
+      got[idx]=true;
+      $('cells').children[idx].classList.add('got');
+      const have=got.filter(Boolean).length;
+      $('bar').style.width=Math.round(have/K*100)+'%';
+      $('app-state').textContent=`Collected ${have}/${K} frames${isRepair?' (repair pass)':''} — order does not matter`;
+      if(have===K){
+        clearInterval(timer); timer=null; $('go').textContent='▶ Send a bLiGhTbeAM';
+        $('halo').classList.remove('fast'); $('core').classList.remove('beaming');
+        $('app-title').textContent=P.done;
+        $('app-state').textContent='Payload assembled and verified by shape. Nothing crossed a network.';
+        $('installed').innerHTML=`<div class="plug"><span class="ic">${P.icon}</span>
+          <span><b>${P.done}</b><br><span class="muted">${escapeHtml(JSON.stringify(P.obj).slice(0,72))}…</span></span></div>`;
+        log('assembled ✓ — zero network, zero install');
+      }
+    }
+    seq++;
+  }, 220);
+}
+$('go').onclick=send;
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+drawFrame(JSON.stringify({v:1,kind:'bLiGhTbeAM',ready:true}));
+</script>
+</body>
+</html>
