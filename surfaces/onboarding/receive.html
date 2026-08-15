@@ -1307,13 +1307,42 @@ var qrcodegen;
     return unpackFrame(bits);
   }
 
-  /* ---------- assembly across frames (join anywhere, any order) ---------- */
-  function Assembler() { this.total = 0; this.parts = []; this.got = 0; }
+  /* ---------- assembly across frames (join anywhere, any order) ----------
+     PROGRESS IS SACRED (founder 2026-08-15: "I had almost all the boxes filled
+     and then it restarted"). Root cause: CRC-8 false-accepts about 1 read in
+     256, and at ~10 decode attempts/second a garbage frame carrying a bogus
+     `total` used to WIPE the whole assembly. Two defences, both free of extra
+     wire bits:
+       CONFIRM-THEN-STORE — a frame must decode IDENTICALLY twice before it is
+         stored, so a one-off CRC collision never enters the payload;
+       TOTAL LOCK — once a total is established with real progress, frames
+         claiming a different total are counted as noise and DISCARDED, never
+         allowed to reset. A genuinely new beam is adopted only after the old
+         one has been contradicted persistently (12 sightings). */
+  function Assembler() {
+    this.total = 0; this.parts = []; this.got = 0;
+    this.seen = {};          // key -> sightings, for confirm-then-store
+    this.rejected = 0;       // noise frames discarded (surfaced in the UI)
+    this.wrongTotal = 0;     // consecutive frames claiming another total
+  }
   Assembler.prototype.push = function (fr) {
     if (!fr) return null;
+
+    if (this.total && this.got > 0 && fr.total !== this.total) {
+      this.wrongTotal++; this.rejected++;
+      if (this.wrongTotal < 12) return null;                 // noise — keep progress
+      this.total = 0; this.got = 0; this.parts = []; this.seen = {};   // genuinely new beam
+    }
+    this.wrongTotal = 0;
+
+    var key = fr.total + '|' + fr.index + '|' + fr.bytes.join(',');
+    this.seen[key] = (this.seen[key] || 0) + 1;
+    if (this.seen[key] < 2) return null;                     // first sighting: not trusted yet
+
     if (this.total !== fr.total) { this.total = fr.total; this.parts = new Array(fr.total); this.got = 0; }
     if (this.parts[fr.index] === undefined) { this.parts[fr.index] = fr.bytes; this.got++; }
     if (this.got < this.total) return null;
+
     var all = [];
     for (var i = 0; i < this.total; i++) all = all.concat(this.parts[i]);
     while (all.length && all[all.length - 1] === 0) all.pop();      // strip tail padding
@@ -1329,8 +1358,14 @@ var qrcodegen;
     var frames = framesFor(text), asm = new Assembler(), out = null, decoded = 0;
     for (var i = 0; i < frames.length; i++) {
       draw(ctx, W, frames[i]);
-      var fr = decode(ctx.getImageData(0, 0, W, W));
-      if (fr) { decoded++; out = asm.push(fr) || out; }
+      // read each rendered frame TWICE — confirm-then-store requires two
+      // identical decodes, and a real camera (10-30 fps) sees every 4 Hz frame
+      // several times over, so this mirrors the physical case rather than
+      // weakening the guard for the test's convenience.
+      for (var pass = 0; pass < 2; pass++) {
+        var fr = decode(ctx.getImageData(0, 0, W, W));
+        if (fr) { if (pass === 0) decoded++; out = asm.push(fr) || out; }
+      }
     }
     return {
       frames: frames.length, decoded: decoded,
