@@ -247,13 +247,73 @@ const SCREENS = {
       <p>Start free in this browser. No account, no app, no one holding anything for you.
          Add stronger custody whenever you like — your identity never changes.</p>
     </div>
-    <button class="btn primary" onclick="APP.go('custody')">Start free →</button>
-    <button class="btn link" onclick="APP.go('custody')">I have a key, a Trezor, or a spare phone</button>
+    <button class="btn primary" onclick="APP.door('new')">I'm new here — start free →</button>
+    <button class="btn ghost" onclick="APP.door('pro')">I know wallets — skip the tour</button>
+    <button class="btn ghost" onclick="APP.door('hw')">I run hardware — Trezor / security key</button>
+    <button class="btn link" onclick="APP.go('returning')">Already have BNR? Recover · add device · continue</button>
   `; },
+
+  /* Returning designations — one machine, many ceremonies. Each is a REAL
+     screen; where the backing build is pending, the screen says so. */
+  returning(){ return stageWrap(1, `
+    <h2>Welcome back</h2>
+    <p>Same identity, different ceremony — pick what happened:</p>
+    <button class="card" onclick="APP.go('recover')"><span class="ic">📄</span><span class="body">
+      <span class="t">I lost my device — I have my 12 words</span>
+      <span class="d">Rebuild your wallet from the written phrase. Your identity comes back with it.</span></span></button>
+    <button class="card free" onclick="APP.go('addDevice')"><span class="ic">➕</span><span class="body">
+      <span class="t">Add THIS device to my existing wallet</span>
+      <span class="d">This device shows a code; a device you already trust scans and approves it. Nothing secret crosses.</span></span></button>
+    <button class="card" onclick="APP.go('resume')"><span class="ic">▶️</span><span class="body">
+      <span class="t">Continue a ceremony I started elsewhere</span>
+      <span class="d">Scan or paste the resume code from your other screen — it picks up exactly where you stood.</span></span></button>
+    <button class="btn link" onclick="APP.go('welcome')">← Start fresh instead</button>
+  `); },
+
+  recover(){ return stageWrap(1, `
+    <span class="badge desig">Recover</span>
+    <h2 style="margin-top:var(--s3)">Enter your 12 words</h2>
+    <p>Type them in order. They never leave this device.</p>
+    <textarea class="wordin" id="rec-words" rows="3" autocomplete="off" autocapitalize="none"
+      placeholder="word1 word2 word3 …"></textarea>
+    ${PREVIEW?`<div class="gauge g-absent"><span class="s">Preview</span> Recovery derivation is not built yet — this screen validates SHAPE (12 words) and refuses honestly; it cannot restore anything today and says so rather than pretending.</div>`:''}
+    <div id="rec-err" class="muted" style="color:var(--guard);min-height:1.2em"></div>
+    <button class="btn primary" onclick="APP.tryRecover()">Recover my wallet</button>
+    <button class="btn link" onclick="APP.go('returning')">← Back</button>
+  `); },
+
+  addDevice(){ setTimeout(drawPairQr,0); return stageWrap(1, `
+    <span class="badge desig">Add device</span>
+    <h2 style="margin-top:var(--s3)">Approve this device from one you trust</h2>
+    <p>This new device shows the code (it contains only a fresh PUBLIC key). Scan it
+       with your trusted device's BNR wallet, approve, and this device joins —
+       the safe direction: the new device displays, the trusted one signs.</p>
+    <div class="center">
+      <canvas id="pairqr" width="290" height="290"
+        style="width:230px;height:230px;border-radius:var(--radius);box-shadow:0 0 0 6px #fff,0 0 0 9px var(--line);image-rendering:pixelated"></canvas>
+    </div>
+    <div class="center muted" id="pairqr-note">Waiting for a trusted device to scan and approve…</div>
+    ${PREVIEW?`<div class="gauge g-planned" style="margin-top:var(--s2)"><span class="s">Planned</span> The approval return-path lands with the trusted-wallet surface; this screen's request side is real.</div>`:''}
+    <button class="btn link" onclick="APP.go('returning')">← Back</button>
+  `); },
+
+  resume(){ return stageWrap(1, `
+    <span class="badge desig">Resume</span>
+    <h2 style="margin-top:var(--s3)">Continue where you stood</h2>
+    <p>Paste the resume code from your other screen (or scan it with the receiver page).</p>
+    <textarea class="wordin" id="res-paste" rows="3" placeholder="bnr-resume code…"></textarea>
+    <div id="res-err" class="muted" style="color:var(--guard);min-height:1.2em"></div>
+    <button class="btn primary" onclick="APP.tryResume()">Continue ceremony</button>
+    <button class="btn link" onclick="APP.go('returning')">← Back</button>
+  `); },
 
   custody(){
     const offline = !APP.ctx.online;
-    const cards = LADDER.map(o=>{
+    const persona = APP.ctx.persona||'new';
+    // hardware people see their gear first; everyone else sees the free rungs first
+    const order = persona==='hw' ? ['trezor','key','optical','passkey'] : ['passkey','optical','key','trezor'];
+    const ladder = order.map(id=>LADDER.find(o=>o.id===id));
+    const cards = ladder.map(o=>{
       const nudge = (o.id==='optical' && offline)
         ? `<div class="tag" style="margin-top:6px">✓ works right now — no network needed</div>` : '';
       return `
@@ -268,11 +328,15 @@ const SCREENS = {
         </span>
       </button>`;
     }).join('');
+    const intro = persona==='pro'
+      ? 'Self-custody throughout; WebAuthn, air-gapped optical signer, FIDO2, or Trezor. Same bDiD at every rung.'
+      : persona==='hw'
+      ? 'Your hardware works out of the box — and the free optical rung below is the air-gap trick even hardware people haven\'t seen.'
+      : `Every option below is fully sovereign — pick what fits today. ${offline?'<b style="color:var(--verified)">Offline right now</b>, so the spare-phone path is your fastest.':'You can climb the ladder later without re-doing anything.'}`;
     return `
       ${railHTML(1)}
       <h2>Choose how you hold your keys</h2>
-      <p>Every option below is fully sovereign — pick what fits today.
-         ${offline?'<b style="color:var(--verified)">Offline right now</b>, so the spare-phone path is your fastest.':'You can climb the ladder later without re-doing anything.'}</p>
+      <p>${intro}</p>
       ${cards}
       <p class="muted" style="margin-top:var(--s2)">More custody = more sovereignty. You keep the same wallet and the same identity at every rung — this is a climb, not a restart.</p>
     `;
@@ -324,11 +388,28 @@ const SCREENS = {
     <div class="center muted" id="pairqr-note">One scan does everything: <b>any stock camera</b> opens
       the link → the BNR page installs → the pairing payload arrives with it (it rides the
       #fragment, which never touches any server)</div>
-    <button class="btn primary" style="margin-top:var(--s3)" onclick="APP.opticalDone()">
-      Other phone confirmed it ✓ <span class="muted">(confirm leg: simulated until the reply lane lands)</span>
+    <button class="btn primary" style="margin-top:var(--s3)" onclick="APP.go('replyScan')">
+      Their screen shows a reply code → scan it
     </button>
+    <button class="btn ghost" onclick="APP.opticalDone()">Skip for now <span class="muted">(pairing stays "declared", not confirmed)</span></button>
     <button class="btn link" onclick="APP.go('custody')">← Pick a different method</button>
     <p class="muted" style="margin-top:var(--s3)">Nothing secret is ever on this screen — only a pairing request. The spare phone signs; its key never leaves it.</p>
+  `); },
+
+  /* THE REPLY LEG (wizard side) — scan or paste the phone's reply; verify the
+     ECHOED NONCE against the one THIS screen issued (first real anti-replay in
+     the flow), verify the signature where WebCrypto Ed25519 exists, and only
+     then graduate custody Declared -> Known. Honest probes throughout. */
+  replyScan(){ setTimeout(replyCamStart,0); return stageWrap(2, `
+    <h2>Scan the phone's reply</h2>
+    <p>Point this computer's camera at the code on the phone — or paste the reply's
+       text fallback below. The reply must echo <b>this screen's</b> nonce
+       (<span class="mono">${APP._pairNonce||'—'}</span>) or it is refused.</p>
+    <div id="replycam-slot" class="center"></div>
+    <textarea class="wordin" id="reply-paste" rows="3" placeholder='Paste the reply JSON here (the "Reply as text" fallback on the phone)'></textarea>
+    <div id="reply-err" class="muted" style="color:var(--guard);min-height:1.2em"></div>
+    <button class="btn primary" onclick="verifyReply(document.getElementById('reply-paste').value)">Verify pasted reply</button>
+    <button class="btn link" onclick="APP.go('custody')">← Back</button>
   `); },
 
   /* generic hardware (key / trezor) success path once "present" */
@@ -427,7 +508,9 @@ const SCREENS = {
           ? `<div class="gauge g-stale"><span class="s">Stale</span> Identity anchored · <span class="mono">did:webvh</span> — preview: nothing was written to any chain</div>`
           : `<div class="gauge g-known"><span class="s">Known</span> Identity anchored · <span class="mono">did:webvh</span></div>`}
         ${APP.ctx.custody==='optical'
-          ? `<div class="gauge g-stale"><span class="s">Declared</span> Custody · ${custodyLabel()} — the phone's consent cannot reach this screen until the reply leg lands; declared is not confirmed</div>`
+          ? (APP.ctx.pairConfirmed
+              ? `<div class="gauge g-known"><span class="s">Known</span> Custody · ${custodyLabel()} — CONFIRMED by nonce-bound reply${APP.ctx.pairConfirmed.sigOk?' with a REAL on-device signature':' (reply unsigned/preview — labeled)'} · key ${APP.ctx.pairConfirmed.fp}</div>`
+              : `<div class="gauge g-stale"><span class="s">Declared</span> Custody · ${custodyLabel()} — no reply scanned; declared is not confirmed</div>`)
           : `<div class="gauge g-known"><span class="s">Known</span> Custody · ${custodyLabel()}</div>`}
         <div class="gauge g-absent"><span class="s">Absent</span> Balances — connect a rail to read (none faked)</div>
       </div>
@@ -450,6 +533,26 @@ APP.pick = function(id){
     if(!this.ctx.online || Math.random()<0.6){ this.ctx.remediated=true; return this.go('remediate',true), render('remediate'), this._rk=id; }
     return this.go('hardware'), render(()=>SCREENS.hardware(id)), this._rk=id;
   }
+};
+APP.door = function(persona){ this.ctx.persona=persona; this.go('custody'); };
+APP.tryRecover = function(){
+  const raw=(document.getElementById('rec-words').value||'').trim().toLowerCase();
+  const words=raw.split(/\s+/).filter(Boolean);
+  const err=document.getElementById('rec-err');
+  if(words.length!==12) return err.textContent=`That's ${words.length} words — a recovery phrase is exactly 12. Check for missed or doubled words.`;
+  if(PREVIEW) return err.textContent='Shape is valid (12 words) — but recovery derivation is not built yet, so nothing was restored. This refusal is the honest one.';
+  // real path lands with key derivation
+};
+APP.tryResume = function(){
+  const raw=(document.getElementById('res-paste').value||'').trim();
+  const err=document.getElementById('res-err');
+  if(!raw) return err.textContent='Paste the resume code first.';
+  let obj=null; const m=/#p=([A-Za-z0-9_-]+)/.exec(raw);
+  const body=m?(()=>{try{return new TextDecoder().decode(Uint8Array.from(atob(m[1].replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0)));}catch(e){return raw}})():raw;
+  try{ obj=JSON.parse(body); }catch(e){ return err.textContent='Could not parse that as a resume code.'; }
+  if(obj.kind!=='bnr-resume') return err.textContent=`Refused: kind "${obj.kind||'?'}" is not a resume document.`;
+  err.style.color='var(--verified)';
+  err.textContent=`Valid resume shape (step: ${obj.step_id||'?'}, designation: ${obj.designation||'?'}). Signature verification + actual continuation land with the ceremony engine — shape accepted, nothing resumed silently.`;
 };
 APP.remediateTo = function(to){
   this.ctx.custody = to; this.ctx.remediated = true;
@@ -528,6 +631,10 @@ function b64url(bytes){ return btoa(String.fromCharCode(...bytes)).replace(/\+/g
    (this file copied alone), say so honestly instead of faking a pattern. */
 function drawPairQr(){
   const cv=document.getElementById('pairqr'); if(!cv) return;
+  // The nonce belongs to the CEREMONY, not the rendering: issue it before any
+  // display concern, so a missing encoder can never leave the nonce unset (a
+  // vacuous undefined===undefined check downstream — the bug verification caught).
+  APP._pairNonce=Array.from(crypto.getRandomValues(new Uint8Array(8)),x=>x.toString(16).padStart(2,'0')).join('');
   if(!(window.qrcodegen&&qrcodegen.QrCode)){
     document.getElementById('pairqr-note').innerHTML=
       '⚠ encoder not loaded (vendor/qrcodegen.js missing) — no code rendered; the folder ships together';
@@ -536,7 +643,7 @@ function drawPairQr(){
   const pk=new Uint8Array(32); crypto.getRandomValues(pk);
   const env=JSON.stringify({v:1,kind:'bnr-pair-request',
     pubkey:'PREVIEW_'+b64url(pk), designation:APP.ctx.designation,
-    nonce:Array.from(crypto.getRandomValues(new Uint8Array(8)),x=>x.toString(16).padStart(2,'0')).join(''),
+    nonce:APP._pairNonce,
     expiry:new Date(Date.now()+5*60*1000).toISOString()});
   const link=receiverBase()+'#p='+b64url(new TextEncoder().encode(env));
   const qr=qrcodegen.QrCode.encodeText(link, qrcodegen.QrCode.Ecc.MEDIUM);
@@ -547,6 +654,69 @@ function drawPairQr(){
   const off=Math.floor((cv.width-qr.size*scale)/2);
   for(let y=0;y<qr.size;y++)for(let x=0;x<qr.size;x++)
     if(qr.getModule(x,y)) g.fillRect(off+x*scale, off+y*scale, scale, scale);
+}
+
+/* ---- reply-leg verification (wizard side) ---- */
+let replyStream=null;
+async function replyCamStart(){
+  const slot=document.getElementById('replycam-slot'); if(!slot) return;
+  const secure=window.isSecureContext, hasCam=!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia), hasDet='BarcodeDetector' in window;
+  if(!secure||!hasCam||!hasDet){
+    slot.innerHTML=`<div class="panel"><div class="gauge g-absent"><span class="s">No scan here</span>
+      ${!secure?'Not a secure context — camera blocked by the browser.':!hasCam?'No camera API in this browser.':'No native QR decoder in this browser (typical on desktop).'}
+      Use the paste fallback below — same verification, same result.</div></div>`;
+    return;
+  }
+  try{
+    replyStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});
+  }catch(e){ slot.innerHTML='<div class="panel"><div class="gauge g-absent"><span class="s">Refused</span> Camera permission declined — paste fallback below works the same.</div></div>'; return; }
+  slot.innerHTML='<video id="replycam" playsinline muted style="width:220px;border-radius:12px;border:1px solid var(--line)"></video>';
+  const v=document.getElementById('replycam'); v.srcObject=replyStream; await v.play();
+  const det=new BarcodeDetector({formats:['qr_code']});
+  (async function loop(){
+    if(!document.getElementById('replycam')) return replyCamStop();
+    try{ const c=await det.detect(v); if(c.length){ replyCamStop(); return verifyReply(c[0].rawValue); } }catch(e){}
+    requestAnimationFrame(loop);
+  })();
+}
+function replyCamStop(){ if(replyStream){ replyStream.getTracks().forEach(t=>t.stop()); replyStream=null; } }
+
+async function verifyReply(text){
+  const err=m=>{ const e=document.getElementById('reply-err'); if(e) e.textContent=m; };
+  if(!text||!text.trim()) return err('Nothing to verify yet — scan the code or paste the reply text.');
+  let raw=text.trim();
+  const m=/#p=([A-Za-z0-9_-]+)/.exec(raw);
+  if(m){ try{ raw=new TextDecoder().decode(Uint8Array.from(atob(m[1].replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0))); }catch(e){} }
+  let obj=null; try{ obj=JSON.parse(raw); }catch(e){ return err('That is not a reply — could not parse it.'); }
+  if(obj.kind!=='bnr-enroll-pubkey') return err(`Refused: kind "${obj.kind||'?'}" is not a pairing reply.`);
+  // ABSENCE REFUSES — never a vacuous match: no issued nonce, or no echo, is a hard no.
+  if(!APP._pairNonce) return err('Refused: this screen has not issued a pairing request — nothing to verify against.');
+  if(!obj.echo_nonce) return err('Refused: the reply carries no nonce echo — it cannot be bound to this request.');
+  if(String(obj.echo_nonce)!==String(APP._pairNonce)) return err(`Refused: nonce mismatch — this reply answers a DIFFERENT request (got ${String(obj.echo_nonce).slice(0,16)}). Replays and stale codes are rejected exactly like this.`);
+  const preview=String(obj.pubkey||'').startsWith('PREVIEW_');
+  let sigOk=false;
+  if(obj.sig&&!preview){
+    try{
+      const pub=Uint8Array.from(atob(String(obj.pubkey).replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
+      const key=await crypto.subtle.importKey('raw',pub,{name:'Ed25519'},true,['verify']);
+      const body=JSON.stringify({v:obj.v,kind:obj.kind,pubkey:obj.pubkey,echo_nonce:obj.echo_nonce,created:obj.created});
+      const sig=Uint8Array.from(atob(String(obj.sig).replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
+      sigOk=await crypto.subtle.verify({name:'Ed25519'},key,sig,new TextEncoder().encode(body));
+      if(!sigOk) return err('Refused: the signature does NOT verify over the reply — tampered or reconstructed. Nothing accepted.');
+    }catch(e){ sigOk=false; /* verifier unavailable here — carried, labeled below */ }
+  }
+  // fingerprint: SHA-256 where WebCrypto exists (secure contexts); labeled FNV
+  // fallback elsewhere so verification is TOTAL — it refuses or confirms, never crashes.
+  let fp;
+  if(crypto.subtle){
+    const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(obj.pubkey)));
+    fp=Array.from(new Uint8Array(digest)).slice(0,4).map(x=>x.toString(16).padStart(2,'0')).join('');
+  }else{
+    let h=0x811c9dc5; for(const c of String(obj.pubkey)){ h^=c.charCodeAt(0); h=Math.imul(h,0x01000193)>>>0; }
+    fp='fnv-'+h.toString(16).padStart(8,'0');
+  }
+  APP.ctx.pairConfirmed={fp,sigOk,preview};
+  APP.opticalDone();
 }
 
 function genWords(){ const bank=['anchor','honey','mesh','sovereign','light','ember','river','cedar',

@@ -86,6 +86,7 @@ pre{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--r
   </div>
 </main>
 
+<script src="vendor/qrcodegen.js"></script>
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
@@ -229,8 +230,10 @@ function handle(raw, viaLink){
    Plain words FIRST (8f: the summary must be true alone), then the mechanics.
    Nothing happens without the explicit tap, and key creation reports its real
    capability (WebCrypto Ed25519 probe) — never a fake success. */
+let PENDING_REQ=null; // the pair request being consented to (nonce echoed in the reply)
 function consentShell(rawJson){
   const req=JSON.parse(rawJson);
+  PENDING_REQ=req;
   $('result').innerHTML=`
     <div class="panel">
       <h1 style="font-size:1.15rem;margin:0 0 6px">Make this phone an offline signer?</h1>
@@ -243,18 +246,60 @@ function consentShell(rawJson){
       <button class="btn ghost" onclick="location.reload()">Not now</button>
     </div>`;
 }
+const b64u = b => btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+
+/* THE REPLY LEG (phone side). Consent -> real Ed25519 keypair ON this phone
+   (private key non-extractable) -> reply envelope echoing the request nonce ->
+   REAL signature over the envelope body where WebCrypto Ed25519 exists ->
+   displayed back as light for the other screen to scan. Where a capability is
+   missing, the reply says so — a reply that cannot be signed is carried
+   UNSIGNED and labeled, never faked. */
 async function consentAccept(){
-  let made=false, how='';
+  const req=PENDING_REQ||{};
+  let pubB64=null, sigB64=null, how='', keyed=false;
+  let body=null;
   try{
     const kp=await crypto.subtle.generateKey({name:'Ed25519'},false,['sign','verify']);
-    made=!!kp; how='WebCrypto Ed25519 — key created ON this phone, non-extractable';
-  }catch(e){ made=false; how='This browser does not expose Ed25519 key generation yet'; }
+    const raw=await crypto.subtle.exportKey('raw',kp.publicKey); // public: always exportable
+    pubB64=b64u(raw); keyed=true;
+    body=JSON.stringify({v:1,kind:'bnr-enroll-pubkey',pubkey:pubB64,
+      echo_nonce:String(req.nonce||''),created:new Date().toISOString()});
+    try{
+      const sig=await crypto.subtle.sign({name:'Ed25519'},kp.privateKey,new TextEncoder().encode(body));
+      sigB64=b64u(sig);
+      how='Key created ON this phone (non-extractable) and the consent is REALLY signed by it';
+    }catch(e){ how='Key created ON this phone; signing unavailable in this browser — reply carried UNSIGNED, labeled'; }
+  }catch(e){
+    how='This browser does not expose Ed25519 yet — a PREVIEW reply is shown so the flow can be walked; it says so';
+    const fake=new Uint8Array(32); crypto.getRandomValues(fake);
+    pubB64='PREVIEW_'+b64u(fake);
+    body=JSON.stringify({v:1,kind:'bnr-enroll-pubkey',pubkey:pubB64,
+      echo_nonce:String(req.nonce||''),created:new Date().toISOString()});
+  }
+  const envelope=JSON.stringify({...JSON.parse(body), ...(sigB64?{sig:sigB64}:{sig_absent:'unsigned — see note'})});
+
+  const canDraw=!!(window.qrcodegen&&qrcodegen.QrCode);
   $('result').innerHTML=`
     <div class="panel">
-      <div class="gauge ${made?'g-known':'g-planned'}"><span class="s">${made?'Created':'Planned'}</span> ${how}${made?'':' — the vendored-crypto build covers it; nothing was faked'}</div>
-      <div class="gauge g-planned"><span class="s">Next</span> Reply leg: this phone displays its public key + signed consent back as light (the double-flash) — lands with the reply lane</div>
+      <div class="gauge ${keyed?'g-known':'g-planned'}"><span class="s">${keyed?'Created':'Preview'}</span> ${how}</div>
+      <h1 style="font-size:1.1rem;margin:10px 0 4px">Now show this to the other screen</h1>
+      <p style="font-size:.85rem;margin-bottom:8px">The wizard scans it and your pairing turns <b>confirmed</b>. Only your PUBLIC key + consent are in it.</p>
+      <div style="text-align:center">${canDraw
+        ? `<canvas id="replyqr" width="330" height="330" style="width:250px;height:250px;background:#fff;border-radius:12px;image-rendering:pixelated"></canvas>`
+        : `<div class="gauge g-planned"><span class="s">No encoder</span> vendor/qrcodegen.js not reachable from this copy — reply shown as text below</div>`}
+      </div>
+      <details style="margin-top:8px"><summary style="color:var(--ink-mut);font-size:.8rem;cursor:pointer">Reply as text (fallback)</summary>
+        <pre>${escapeHtml(envelope)}</pre></details>
       <button class="btn ghost" onclick="location.reload()">Done</button>
     </div>`;
+  if(canDraw){
+    const qr=qrcodegen.QrCode.encodeText(envelope, qrcodegen.QrCode.Ecc.MEDIUM);
+    const cv=$('replyqr'), g=cv.getContext('2d');
+    const scale=Math.floor(cv.width/(qr.size+8)), off=Math.floor((cv.width-qr.size*scale)/2);
+    g.fillStyle='#fff'; g.fillRect(0,0,cv.width,cv.height); g.fillStyle='#000';
+    for(let y=0;y<qr.size;y++)for(let x=0;x<qr.size;x++)
+      if(qr.getModule(x,y)) g.fillRect(off+x*scale,off+y*scale,scale,scale);
+  }
 }
 function refuse(title, why, raw){
   $('result').innerHTML=`
