@@ -10,6 +10,13 @@ pairing, resume, enrolment, watch-lists, signed transactions — all as light, n
 no install (the receiver is a web page), working at a 1M-person popup with zero
 infrastructure. It is the single most visible "no one else can do this" surface we own.
 
+## 0b · RECEIPTS (founder-verified, 2026-08-14)
+186 bytes of light, laptop→phone over Pages https; then the full one-scan
+install+pair from a **stock Samsung A16 camera app** — no BNR software on the
+phone, envelope delivered by fragment, consent shell reached. The mass-adoption
+device class is the proven baseline, not the aspiration.
+(`RECEIPT_OPTICAL_ONESCAN_FIRSTLIGHT_2026-08-14.md`)
+
 ## 1 · The rule that shapes everything: one frame first
 
 One QR frame carries ~2.9 KB. **Every day-1 ceremony payload fits in one frame**, so
