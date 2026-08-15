@@ -1,37 +1,45 @@
 /*! bcomb.js — the bComb codec (BNR, part of the bLighTnetWorK)
  *
- *  Claude Design's visual language, made READABLE. Until now bComb could be
- *  drawn but not decoded ("no way to verify" — founder, 2026-08-15). This is
- *  the encoder AND the decoder, plus a self-test that proves the round trip
- *  without any camera.
+ *  MONOCHROME v2 (founder ruling 2026-08-15): "remove all color from it and just
+ *  white hexagons flashing light/data. the color is fucking up the receiving
+ *  camera/process." Correct on two counts, one physical and one doctrinal:
  *
- *  GEOMETRY (Design §1, verbatim): flat-top axial hex grid, 6 rings, 127 cells.
- *    ring 0    · 1 cell   · FINDER  — mandala magenta rgb(229,58,174), 0 bits,
- *                                     the orientation/scale anchor
- *    rings 1-4 · 60 cells · DATA    — luminance only: pure white = 1, black = 0
- *    rings 5-6 · 66 cells · HALO    — mandala gradient at true radius, 0 bits
+ *   PHYSICS — a bright saturated halo on a dark page makes a camera's auto
+ *   exposure hunt upward and its auto white balance chase the hue; the founder
+ *   watched a clean capture drift to washed-out white mid-beam. Luminance-only
+ *   is the channel every camera agrees on.
+ *   DOCTRINE — v1 LOCATED the comb by magenta hue, so colour carried meaning:
+ *   a straight D-1 violation hiding inside the decoder. The finder is now
+ *   STRUCTURAL (a lit centre inside a dark collar) and reads on luminance alone.
+ *
+ *  GEOMETRY — flat-top axial hex grid, 6 rings, 127 cells:
+ *    ring 0    ·  1 cell  · FINDER CORE  — always LIT
+ *    ring 1    ·  6 cells · FINDER COLLAR — always DARK (the bullseye)
+ *    rings 2-5 · 84 cells · DATA — 1 luminance bit per cell
+ *    ring 6    · 36 cells · RIM  — always LIT; zero bits. Optionally tinted with
+ *                                  the mandala gradient for brand renders, which
+ *                                  the decoder never looks at.
  *  Cell layout: x = C + size*1.5*q, y = C + size*sqrt(3)*(r + q/2), size = W/23.
  *
- *  FRAME PAYLOAD (ours): the 60 data bits are
- *    [6 bits index][6 bits total][48 bits = 6 bytes of payload]
- *  so one beam carries up to 64 frames x 6 bytes = 384 bytes, and a receiver
- *  can join at any frame and learn the whole shape from the frame it caught.
+ *  FRAME — the 84 data bits are [6 index][6 total-1][64 payload = 8 bytes][8 CRC],
+ *  so one beam carries up to 64 frames x 8 bytes = 512 bytes, and any single
+ *  frame teaches a late joiner the whole shape. (v1 carried 5 bytes/frame; the
+ *  collar cost 6 cells and the freed halo ring gave back 24, so payload grew.)
  *
- *  RATE, honestly: 60 bits/frame x 7 Hz = 420 BITS/sec (~52 bytes/sec). The
- *  "~420" brand is numerically real but it is bits — not decimen's 418.5 KB/s,
- *  which is a different unit on a different (dense QR) frame. Both true; never
- *  conflate them in copy.
+ *  RATE, honestly: 84 bits/frame x 7 Hz = 588 bits/sec (~73 bytes/sec). The
+ *  "~420" brand came from v1's 60 bits x 7 Hz and is now a floor, not a ceiling.
+ *  Never conflate either figure with decimen's 418.5 KB/s on a dense QR frame.
  */
 (function (root) {
   'use strict';
 
-  var RINGS = 6, DATA_BITS = 60;
+  var RINGS = 6, DATA_BITS = 84, PAYLOAD_BYTES = 8;
 
+  /* mandala gradient — DECORATION ONLY. The decoder never reads a hue. */
   var STOPS = [[0,254,222,250],[0.06,229,58,174],[0.10,246,68,196],[0.14,235,68,198],
     [0.19,197,38,177],[0.24,204,118,211],[0.30,140,87,193],[0.36,144,156,215],[0.42,66,167,242],
     [0.48,41,200,246],[0.55,126,215,212],[0.62,116,212,140],[0.70,154,227,81],[0.78,149,220,114],
     [0.86,181,241,49],[0.93,230,247,58],[1,251,251,159]];
-
   function haloColor(t) {
     var i = 0;
     while (i < STOPS.length - 2 && STOPS[i + 1][0] < t) i++;
@@ -42,7 +50,6 @@
                     Math.round(a[3] + (b[3] - a[3]) * k) + ')';
   }
 
-  // canonical cell order — identical on both ends, or nothing decodes
   var CELLS = (function () {
     var c = [];
     for (var q = -RINGS; q <= RINGS; q++)
@@ -51,27 +58,18 @@
         if (Math.abs(s) > RINGS) continue;
         c.push({ q: q, r: r, ring: Math.max(Math.abs(q), Math.abs(r), Math.abs(s)) });
       }
-    c.sort(function (x, y) {
-      return x.ring - y.ring || Math.atan2(x.r, x.q) - Math.atan2(y.r, y.q);
-    });
+    c.sort(function (x, y) { return x.ring - y.ring || Math.atan2(x.r, x.q) - Math.atan2(y.r, y.q); });
     return c;
   })();
-  var DATA_CELLS = CELLS.filter(function (c) { return c.ring >= 1 && c.ring <= 4; });
+  var DATA_CELLS = CELLS.filter(function (c) { return c.ring >= 2 && c.ring <= 5; });
+  var COLLAR     = CELLS.filter(function (c) { return c.ring === 1; });
 
   function cellXY(c, C, size) {
     return { x: C + size * 1.5 * c.q, y: C + size * Math.sqrt(3) * (c.r + c.q / 2) };
   }
 
-  /* ---------- frame packing ----------
-     60 bits = [6 index][6 total-1][40 payload = 5 bytes][8 CRC].
-     The CRC is not optional decoration: a camera misreading ONE cell used to
-     produce a structurally valid frame full of garbage, which the assembler
-     stored and later handed over as mojibake (founder saw exactly that). A
-     frame that cannot be checked is worse than a smaller frame — so payload
-     dropped 6→5 bytes to buy per-frame integrity. Max beam: 64 × 5 = 320 B. */
-  var PAYLOAD_BYTES = 5;
-
-  function crc8(bytes) {                     // CRC-8/ATM (poly 0x07), tiny + adequate
+  /* ---------- frame packing: [6 idx][6 tot-1][64 payload][8 CRC] = 84 ---------- */
+  function crc8(bytes) {
     var c = 0, i, j;
     for (i = 0; i < bytes.length; i++) {
       c ^= bytes[i] & 0xff;
@@ -79,7 +77,6 @@
     }
     return c & 0xff;
   }
-
   function packFrame(index, total, payload) {
     if (total < 1 || total > 64) throw new Error('total must be 1..64');
     var bits = [], i, b, bytes = [];
@@ -89,9 +86,8 @@
     for (i = 5; i >= 0; i--) bits.push(((total - 1) >> i) & 1);
     for (b = 0; b < PAYLOAD_BYTES; b++) for (i = 7; i >= 0; i--) bits.push((bytes[b] >> i) & 1);
     for (i = 7; i >= 0; i--) bits.push((crc >> i) & 1);
-    return bits;                             // exactly 60
+    return bits;                                  // exactly 84
   }
-
   function unpackFrame(bits) {
     if (!bits || bits.length !== DATA_BITS) return null;
     var idx = 0, tot = 0, crc = 0, i, b, bytes = [];
@@ -104,12 +100,10 @@
       bytes.push(v);
     }
     for (i = 0; i < 8; i++) crc = (crc << 1) | bits[12 + PAYLOAD_BYTES * 8 + i];
-    if (idx >= tot) return null;                                   // impossible → refuse
-    if (crc8([idx, tot - 1].concat(bytes)) !== crc) return null;    // misread → refuse
+    if (idx >= tot) return null;
+    if (crc8([idx, tot - 1].concat(bytes)) !== crc) return null;
     return { index: idx, total: tot, bytes: bytes };
   }
-
-  /* split a string into payload-sized frames */
   function framesFor(text) {
     var bytes = new TextEncoder().encode(text), out = [];
     var total = Math.max(1, Math.ceil(bytes.length / PAYLOAD_BYTES));
@@ -119,19 +113,23 @@
     return out;
   }
 
-  /* ---------- draw ---------- */
+  /* ---------- draw ----------
+     opts.brand : tint the rim with the mandala gradient (decoration; the decoder
+                  ignores it). Default OFF — monochrome is the transport default
+                  because a camera's AE/AWB stay still when nothing is saturated.
+     opts.lit   : luminance of a lit cell (default 235, not 255 — a slightly
+                  softened white gives a camera's auto-exposure less to bloom). */
   function draw(ctx, W, bits, opts) {
     opts = opts || {};
     var size = W / 23, C = W / 2, R = size * 0.92, di = 0;
-    ctx.fillStyle = opts.light ? '#FFFFFF' : '#000000';
-    ctx.fillRect(0, 0, W, W);
+    var lit = opts.lit || 235, LIT = 'rgb(' + lit + ',' + lit + ',' + lit + ')';
+    ctx.fillStyle = '#000000'; ctx.fillRect(0, 0, W, W);
     for (var i = 0; i < CELLS.length; i++) {
       var cell = CELLS[i], p = cellXY(cell, C, size), fill;
-      if (cell.ring === 0) fill = 'rgb(229,58,174)';
-      else if (cell.ring <= 4) {
-        var b = bits[di++] ? 1 : 0;
-        fill = opts.light ? (b ? '#000000' : '#FFFFFF') : (b ? '#FFFFFF' : '#000000');
-      } else fill = opts.strip ? '#202020' : haloColor(cell.ring / RINGS);
+      if (cell.ring === 0) fill = LIT;                       // finder core: lit
+      else if (cell.ring === 1) fill = '#000000';            // finder collar: dark
+      else if (cell.ring <= 5) fill = bits[di++] ? LIT : '#000000';
+      else fill = opts.brand ? haloColor(cell.ring / RINGS) : LIT;   // rim
       ctx.beginPath();
       for (var k = 0; k < 6; k++) {
         var a = Math.PI / 3 * k, px = p.x + R * Math.cos(a), py = p.y + R * Math.sin(a);
@@ -139,58 +137,50 @@
       }
       ctx.closePath();
       ctx.fillStyle = fill; ctx.fill();
-      ctx.lineWidth = Math.max(1, size * 0.06);
-      ctx.strokeStyle = opts.light ? 'rgba(6,17,12,0.85)' : 'rgba(255,255,255,0.85)';
+      ctx.lineWidth = Math.max(1, size * 0.05);
+      ctx.strokeStyle = 'rgba(128,128,128,0.55)';            // neutral seam, no hue
       ctx.stroke();
     }
   }
 
-  /* ---------- decode ----------
-     Locate the magenta finder (centroid of magenta-ish pixels), estimate the
-     cell size from the finder blob's radius, then sample each data cell's
-     centre luminance. Upright orientation assumed for v1 — stated, not hidden;
-     rotation invariance needs a second anchor and is the next increment. */
-  /* CHEAP-PHONE / CROSS-DEVICE ROBUSTNESS (founder 2026-08-15: "interoperable
-     with the bulk of raver (broke artists) phones" — and the same weaknesses
-     were why a laptop webcam could not read a phone screen):
-       1. finder size from blob AREA, not max-distance — one stray magenta pixel
-          (a stage light, a lens flare) no longer inflates the estimate;
-       2. ADAPTIVE luminance threshold — a dim phone at 20% brightness and an
-          overexposed one both failed a fixed 128; the split is now derived from
-          the frame's own sampled min/max;
-       3. every pixel scanned (not every 2nd) when the blob is small, so a comb
-          that occupies a small part of the frame still resolves;
-       4. a diagnosis object is always returned, so a surface can TELL the user
-          "move closer / raise screen brightness" instead of failing silently. */
-  /* The finder must be the LARGEST CONNECTED magenta blob — never a global
-     centroid. (Founder 2026-08-15: the laptop ear refused garbage the instant it
-     saw the phone. Cause: the receiver's own primary buttons are #D655BB, which
-     is magenta by any reasonable test, so a global centroid averaged the real
-     finder together with the UI and sampled every cell in the wrong place.
-     Stage lights, pink clothing and lens flare are the same failure at a rave.) */
-  function isMagenta(r, g, b) {
-    return r > 120 && b > 80 && g < r - 60 && g < b - 25 &&      // magenta-ish
-           (r - g) > 70;                                          // and saturated
+  /* ---------- decode: LUMINANCE ONLY ----------
+     Find the bullseye — a lit hexagon blob whose surrounding collar is dark —
+     then sample the data rings. No hue is read anywhere in this path. */
+  function luma(d, o) { return 0.2126 * d[o] + 0.7152 * d[o + 1] + 0.0722 * d[o + 2]; }
+
+  function frameExposure(img) {
+    var d = img.data, n = 0, sum = 0, i;
+    for (i = 0; i < d.length; i += 64) { sum += luma(d, i); n++; }
+    return n ? sum / n : 0;
   }
 
+  /* Locating the comb, assuming NOTHING about connectivity.
+     Cells are drawn at R = 0.92*size, which leaves a deliberate gap, so the rim
+     is 36 SEPARATE blobs at close range and one merged mass once a camera blurs
+     them together. A finder that assumes either regime breaks in the other. So
+     we read the comb as a CLUSTER of lit hexagons and offer both readings as
+     hypotheses, then let the known-value cells (lit core, dark collar, lit rim)
+     vote. Ring 6 is always lit and always outermost, which is what makes either
+     bound independent of the data:
+       cell CENTROIDS span  18.000*size wide, 20.784*size tall
+       merged OUTER edges span 19.84*size wide, 22.379*size tall            */
+  var CEN_W = 18.0, CEN_H = 20.784, RIM_W = 19.84, RIM_H = 22.379;
+
   function findFinder(img) {
-    var d = img.data, W = img.width, H = img.height, N = W * H;
-    var mask = new Uint8Array(N), i, o;
-    for (i = 0; i < N; i++) {
-      o = i * 4;
-      if (isMagenta(d[o], d[o + 1], d[o + 2])) mask[i] = 1;
-    }
-    /* Flood-fill each blob and pick the most HEXAGON-LIKE one — not the biggest.
-       (Biggest was wrong the moment a UI button out-sized the finder cell, which
-       is exactly the founder's phone: a 520x70 magenta button dwarfs a ~13px
-       finder. A flat-top hexagon has bbox 2R x 1.73R -> aspect ~1.155 and fills
-       ~0.75 of that box; a button is aspect ~7 and fills 1.0. Shape tells them
-       apart at any size.) */
-    var seen = new Uint8Array(N), stack = new Int32Array(N), best = null;
+    var d = img.data, W = img.width, H = img.height, N = W * H, i;
+    // adaptive: "lit" is relative to this frame, so exposure drift cannot break it
+    var lo = 255, hi = 0;
+    for (i = 0; i < N; i += 7) { var L = luma(d, i * 4); if (L < lo) lo = L; if (L > hi) hi = L; }
+    if (hi - lo < 25) return null;
+    var cut = lo + (hi - lo) * 0.55;
+
+    var mask = new Uint8Array(N);
+    for (i = 0; i < N; i++) if (luma(d, i * 4) > cut) mask[i] = 1;
+
+    var seen = new Uint8Array(N), stack = new Int32Array(N), blobs = [];
     for (i = 0; i < N; i++) {
       if (!mask[i] || seen[i]) continue;
-      var sp = 0, n = 0, sx = 0, sy = 0,
-          x0 = W, x1 = -1, y0 = H, y1 = -1;
+      var sp = 0, n = 0, sx = 0, sy = 0, x0 = W, x1 = -1, y0 = H, y1 = -1;
       stack[sp++] = i; seen[i] = 1;
       while (sp > 0) {
         var p = stack[--sp], px = p % W, py = (p / W) | 0;
@@ -202,44 +192,100 @@
         if (py > 0     && mask[p - W] && !seen[p - W]) { seen[p - W] = 1; stack[sp++] = p - W; }
         if (py < H - 1 && mask[p + W] && !seen[p + W]) { seen[p + W] = 1; stack[sp++] = p + W; }
       }
-      if (n < 6) continue;
-      var bw = x1 - x0 + 1, bh = y1 - y0 + 1;
-      var aspect = bw / bh, fill = n / (bw * bh);
-      // distance from the hexagon signature (aspect 1.155, fill 0.75)
-      var err = Math.abs(Math.log(aspect / 1.155)) + Math.abs(fill - 0.75) * 2.2;
-      if (err > 1.0) continue;                       // not hexagon-shaped at all
-      if (!best || err < best.err) best = { n: n, cx: sx / n, cy: sy / n, err: err };
+      if (n < 5) continue;
+      blobs.push({ n: n, cx: sx / n, cy: sy / n, x0: x0, x1: x1, y0: y0, y1: y1 });
     }
-    if (!best) return null;
-    var R = Math.sqrt(best.n / 2.598);           // hex area = 2.598*R^2
-    if (R < 1.2) return null;
-    return { cx: best.cx, cy: best.cy, size: R / 0.92, px: best.n, shapeErr: best.err };
-  }
+    if (!blobs.length) return null;
 
-  function sampleBits(img, cx, cy, size) {
-    var d = img.data, W = img.width, H = img.height;
-    var lum = [], i, c, x, y, dx, dy, o, sum, cnt;
-    for (i = 0; i < DATA_CELLS.length; i++) {
-      c = DATA_CELLS[i];
-      x = Math.round(cx + size * 1.5 * c.q);
-      y = Math.round(cy + size * Math.sqrt(3) * (c.r + c.q / 2));
-      if (x < 1 || y < 1 || x >= W - 1 || y >= H - 1) return null;   // off-frame → refuse
-      sum = 0; cnt = 0;
-      for (dy = -1; dy <= 1; dy++) for (dx = -1; dx <= 1; dx++) {
-        o = ((y + dy) * W + (x + dx)) * 4;
-        sum += 0.2126 * d[o] + 0.7152 * d[o + 1] + 0.0722 * d[o + 2]; cnt++;
+    var cands = [];
+
+    /* H1 — separated regime: the lit hexagons are individually visible. Keep the
+       hexagon-shaped ones, size from their MEDIAN area (robust to a stray UI
+       shape), then bound the ones that agree on size. Ring 6 is lit and outermost,
+       so that bound is the rim's however the data bits fall. */
+    var hexes = [];
+    for (i = 0; i < blobs.length; i++) {
+      var b = blobs[i], bw = b.x1 - b.x0 + 1, bh = b.y1 - b.y0 + 1;
+      var aspect = bw / bh, fill = b.n / (bw * bh);
+      if (aspect < 0.72 || aspect > 1.62) continue;
+      if (fill < 0.55 || fill > 0.98) continue;
+      hexes.push(b);
+    }
+    if (hexes.length >= 10) {
+      var areas = hexes.map(function (b) { return b.n; }).sort(function (a, z) { return a - z; });
+      var med = areas[areas.length >> 1];
+      var keep = hexes.filter(function (b) { return b.n >= med * 0.45 && b.n <= med * 2.2; });
+      if (keep.length >= 10) {
+        var mx0 = Infinity, mx1 = -Infinity, my0 = Infinity, my1 = -Infinity;
+        for (i = 0; i < keep.length; i++) {
+          if (keep[i].cx < mx0) mx0 = keep[i].cx; if (keep[i].cx > mx1) mx1 = keep[i].cx;
+          if (keep[i].cy < my0) my0 = keep[i].cy; if (keep[i].cy > my1) my1 = keep[i].cy;
+        }
+        var byCell = Math.sqrt(med / 2.598) / 0.92;
+        var bySpan = ((mx1 - mx0) / CEN_W + (my1 - my0) / CEN_H) / 2;
+        cands.push({ cx: (mx0 + mx1) / 2, cy: (my0 + my1) / 2, size: bySpan, px: keep.length, how: 'cluster' });
+        cands.push({ cx: (mx0 + mx1) / 2, cy: (my0 + my1) / 2, size: byCell, px: keep.length, how: 'cell' });
       }
-      lum.push(sum / cnt);
     }
-    // adaptive split: midpoint of this frame's own range, with a contrast floor
-    var min = Math.min.apply(null, lum), max = Math.max.apply(null, lum);
-    if (max - min < 25) return null;               // washed out → refuse, don't guess
-    var mid = (min + max) / 2;
-    return lum.map(function (v) { return v > mid ? 1 : 0; });
+
+    /* H2 — merged regime: distance or blur has fused the comb into one mass, so
+       the largest blobs are read as the comb's outer bounds. */
+    blobs.sort(function (a, b) { return b.n - a.n; });
+    for (i = 0; i < Math.min(4, blobs.length); i++) {
+      var m = blobs[i], mw = m.x1 - m.x0 + 1, mh = m.y1 - m.y0 + 1;
+      if (mw / mh < 0.70 || mw / mh > 1.14) continue;
+      cands.push({ cx: (m.x0 + m.x1) / 2, cy: (m.y0 + m.y1) / 2,
+                   size: (mw / RIM_W + mh / RIM_H) / 2, px: m.n, how: 'merged' });
+    }
+
+    var best = null;
+    for (i = 0; i < cands.length; i++) {
+      if (cands[i].size < 1.4) continue;
+      var f = refine(img, cands[i]);
+      if (!f || f.lock < 25) continue;                   // core/collar/rim never agreed
+      if (!best || f.lock > best.lock) best = f;
+    }
+    return best;
   }
 
-  /* luminance stats at the data cells — lets a surface name GLARE specifically
-     instead of the useless catch-all "hold steadier" (founder 2026-08-15). */
+  /* Lock centre and scale against the cells whose value is KNOWN — lit core,
+     dark collar, lit rim (43 anchors). A blob centroid is good to a pixel or
+     two and its area-derived radius is biased by the threshold; that error is
+     harmless at ring 1 and fatal by ring 5, which is where the data now
+     reaches. This search buys back the small-comb envelope outright. */
+  var LIT_ANCHORS  = CELLS.filter(function (c) { return c.ring === 0 || c.ring === 6; });
+  function refine(img, f) {
+    var d = img.data, W = img.width, H = img.height;
+    function at(cx, cy, size, c) {
+      var x = Math.round(cx + size * 1.5 * c.q);
+      var y = Math.round(cy + size * Math.sqrt(3) * (c.r + c.q / 2));
+      if (x < 0 || y < 0 || x >= W || y >= H) return -1;
+      return luma(d, (y * W + x) * 4);
+    }
+    function score(cx, cy, size) {
+      var litSum = 0, litN = 0, darkSum = 0, darkN = 0, v, i;
+      for (i = 0; i < LIT_ANCHORS.length; i++) { v = at(cx, cy, size, LIT_ANCHORS[i]); if (v >= 0) { litSum += v; litN++; } }
+      for (i = 0; i < COLLAR.length; i++)      { v = at(cx, cy, size, COLLAR[i]);      if (v >= 0) { darkSum += v; darkN++; } }
+      if (litN < LIT_ANCHORS.length * 0.6 || darkN < 4) return -1e9;
+      return litSum / litN - darkSum / darkN;          // maximise known contrast
+    }
+    var best = { cx: f.cx, cy: f.cy, size: f.size, s: score(f.cx, f.cy, f.size) };
+    var step = Math.max(0.4, f.size * 0.18), scales = [0.95, 0.97, 0.99, 1.0, 1.01, 1.03, 1.05];
+    for (var pass = 0; pass < 4; pass++) {
+      var moved = false, base = { cx: best.cx, cy: best.cy, size: best.size };
+      for (var dx = -2; dx <= 2; dx++) for (var dy = -2; dy <= 2; dy++)
+        for (var k = 0; k < scales.length; k++) {
+          var cx = base.cx + dx * step, cy = base.cy + dy * step, sz = base.size * scales[k];
+          var s = score(cx, cy, sz);
+          if (s > best.s) { best = { cx: cx, cy: cy, size: sz, s: s }; moved = true; }
+        }
+      if (!moved && pass > 0) break;
+      step *= 0.5; scales = [0.985, 0.995, 1.0, 1.005, 1.015];
+    }
+    f.cx = best.cx; f.cy = best.cy; f.size = best.size; f.lock = best.s;
+    return f;
+  }
+
   function cellStats(img, cx, cy, size) {
     var d = img.data, W = img.width, H = img.height, lum = [], i, c, x, y, dx, dy, o, sum, cnt;
     for (i = 0; i < DATA_CELLS.length; i++) {
@@ -249,26 +295,19 @@
       if (x < 1 || y < 1 || x >= W - 1 || y >= H - 1) return null;
       sum = 0; cnt = 0;
       for (dy = -1; dy <= 1; dy++) for (dx = -1; dx <= 1; dx++) {
-        o = ((y + dy) * W + (x + dx)) * 4;
-        sum += 0.2126 * d[o] + 0.7152 * d[o + 1] + 0.0722 * d[o + 2]; cnt++;
+        o = ((y + dy) * W + (x + dx)) * 4; sum += luma(d, o); cnt++;
       }
       lum.push(sum / cnt);
     }
     var min = Math.min.apply(null, lum), max = Math.max.apply(null, lum);
-    var blown = lum.filter(function (v) { return v > 238; }).length / lum.length;
-    var crushed = lum.filter(function (v) { return v < 14; }).length / lum.length;
-    return { lum: lum, min: min, max: max, range: max - min, blown: blown, crushed: crushed };
+    return { lum: lum, min: min, max: max, range: max - min };
   }
 
-  /** Full diagnosis — what the camera is actually seeing, with a hint a human
-   *  can act on. Every failure names its own cure; none of them says "hold
-   *  steadier" unless steadiness is genuinely the problem. */
-  /* whole-frame exposure, used when the finder cannot be located at all — so the
-     hint can still name the real cause (a blown-out or pitch-black capture) */
-  function frameExposure(img) {
-    var d = img.data, n = 0, sum = 0, i;
-    for (i = 0; i < d.length; i += 64) { sum += 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]; n++; }
-    return n ? sum / n : 0;
+  function sampleBits(img, cx, cy, size) {
+    var st = cellStats(img, cx, cy, size);
+    if (!st || st.range < 25) return null;
+    var mid = (st.min + st.max) / 2;
+    return st.lum.map(function (v) { return v > mid ? 1 : 0; });
   }
 
   function inspect(img) {
@@ -276,7 +315,7 @@
     if (!f) {
       var ex = frameExposure(img);
       return { ok: false, stage: 'finder', quality: 0, exposure: ex,
-        hint: ex > 195 ? 'Too bright to see the beam — tilt away from the light, or turn the other screen DOWN.'
+        hint: ex > 195 ? 'Washed out — turn the OTHER screen DOWN (this reads contrast, not brightness), or tilt away from the light.'
             : ex < 22  ? 'Too dark — turn the other screen UP, or move closer.'
             : 'Aim at the other screen — fill more of the frame with it.' };
     }
@@ -285,104 +324,70 @@
     var st = cellStats(img, f.cx, f.cy, f.size);
     if (!st) return { ok: false, stage: 'edge', finder: f, quality: 0.3,
       hint: 'The comb is running off the edge — centre it in view.' };
-    // GLARE is not "many bright cells" — half the data cells are white BY DESIGN
-    // (that bug fired on a perfect capture). Glare is when the cells that should
-    // be BLACK have stopped being black: the floor lifts.
     if (st.min > 150) return { ok: false, stage: 'glare', finder: f, stats: st, quality: 0.4,
-      hint: 'GLARE — the dark cells are washing out. Tilt one screen a few degrees, or dim the other.' };
+      hint: 'GLARE — the dark cells are washing out. Turn the other screen DOWN, or tilt it a few degrees.' };
     if (st.max < 60) return { ok: false, stage: 'dark', finder: f, stats: st, quality: 0.4,
-      hint: 'Too dark — turn the other screen\'s brightness UP.' };
+      hint: 'Too dark — turn the other screen UP.' };
     if (st.range < 25) return { ok: false, stage: 'contrast', finder: f, stats: st, quality: 0.45,
-      hint: 'Washed out — cut the glare or raise the other screen\'s brightness.' };
+      hint: 'Washed out — turn the other screen DOWN and cut any glare.' };
     var mid = (st.min + st.max) / 2;
-    var bits = st.lum.map(function (v) { return v > mid ? 1 : 0; });
-    var fr = unpackFrame(bits);
+    var fr = unpackFrame(st.lum.map(function (v) { return v > mid ? 1 : 0; }));
     if (!fr) return { ok: false, stage: 'checksum', finder: f, stats: st, quality: 0.7,
-      hint: 'Nearly — the frame failed its checksum. Hold steady for one beat.' };
+      hint: 'Nearly — that frame failed its checksum. Hold it there for one beat.' };
     return { ok: true, stage: 'decoded', finder: f, stats: st, quality: 1, frame: fr };
   }
+  function decode(img) { var r = inspect(img); return r.ok ? r.frame : null; }
 
-  /** Decode one bComb frame from ImageData. Returns {index,total,bytes} or null. */
-  function decode(img) {
-    var f = findFinder(img);
-    if (!f) return null;
-    var bits = sampleBits(img, f.cx, f.cy, f.size);
-    if (!bits) return null;
-    return unpackFrame(bits);
-  }
-
-  /* ---------- assembly across frames (join anywhere, any order) ----------
-     PROGRESS IS SACRED (founder 2026-08-15: "I had almost all the boxes filled
-     and then it restarted"). Root cause: CRC-8 false-accepts about 1 read in
-     256, and at ~10 decode attempts/second a garbage frame carrying a bogus
-     `total` used to WIPE the whole assembly. Two defences, both free of extra
-     wire bits:
-       CONFIRM-THEN-STORE — a frame must decode IDENTICALLY twice before it is
-         stored, so a one-off CRC collision never enters the payload;
-       TOTAL LOCK — once a total is established with real progress, frames
-         claiming a different total are counted as noise and DISCARDED, never
-         allowed to reset. A genuinely new beam is adopted only after the old
-         one has been contradicted persistently (12 sightings). */
+  /* ---------- assembly: progress is sacred ---------- */
   function Assembler() {
     this.total = 0; this.parts = []; this.got = 0;
-    this.seen = {};          // key -> sightings, for confirm-then-store
-    this.rejected = 0;       // noise frames discarded (surfaced in the UI)
-    this.wrongTotal = 0;     // consecutive frames claiming another total
+    this.seen = {}; this.rejected = 0; this.wrongTotal = 0;
   }
   Assembler.prototype.push = function (fr) {
     if (!fr) return null;
-
     if (this.total && this.got > 0 && fr.total !== this.total) {
       this.wrongTotal++; this.rejected++;
-      if (this.wrongTotal < 12) return null;                 // noise — keep progress
-      this.total = 0; this.got = 0; this.parts = []; this.seen = {};   // genuinely new beam
+      if (this.wrongTotal < 12) return null;                     // noise — keep progress
+      this.total = 0; this.got = 0; this.parts = []; this.seen = {};
     }
     this.wrongTotal = 0;
-
     var key = fr.total + '|' + fr.index + '|' + fr.bytes.join(',');
     this.seen[key] = (this.seen[key] || 0) + 1;
-    if (this.seen[key] < 2) return null;                     // first sighting: not trusted yet
-
+    if (this.seen[key] < 2) return null;                          // confirm-then-store
     if (this.total !== fr.total) { this.total = fr.total; this.parts = new Array(fr.total); this.got = 0; }
     if (this.parts[fr.index] === undefined) { this.parts[fr.index] = fr.bytes; this.got++; }
     if (this.got < this.total) return null;
-
     var all = [];
     for (var i = 0; i < this.total; i++) all = all.concat(this.parts[i]);
-    while (all.length && all[all.length - 1] === 0) all.pop();      // strip tail padding
+    while (all.length && all[all.length - 1] === 0) all.pop();
     return new TextDecoder().decode(new Uint8Array(all));
   };
 
   /* ---------- self-test: proof without a camera ---------- */
   function selfTest(text) {
-    text = text || 'bLighTnetWorK · bComb self-test · 420 bits/sec';
+    text = text || 'bLighTnetWorK · bComb mono v2 · luminance only';
     var W = 600, cv = document.createElement('canvas');
     cv.width = cv.height = W;
     var ctx = cv.getContext('2d');
     var frames = framesFor(text), asm = new Assembler(), out = null, decoded = 0;
     for (var i = 0; i < frames.length; i++) {
       draw(ctx, W, frames[i]);
-      // read each rendered frame TWICE — confirm-then-store requires two
-      // identical decodes, and a real camera (10-30 fps) sees every 4 Hz frame
-      // several times over, so this mirrors the physical case rather than
-      // weakening the guard for the test's convenience.
-      for (var pass = 0; pass < 2; pass++) {
+      for (var pass = 0; pass < 2; pass++) {          // a camera sees each frame repeatedly
         var fr = decode(ctx.getImageData(0, 0, W, W));
         if (fr) { if (pass === 0) decoded++; out = asm.push(fr) || out; }
       }
     }
-    return {
-      frames: frames.length, decoded: decoded,
-      recovered: out, ok: out === text,
-      bitsPerFrame: DATA_BITS, dataCells: DATA_CELLS.length, cells: CELLS.length
-    };
+    return { frames: frames.length, decoded: decoded, recovered: out, ok: out === text,
+             bitsPerFrame: DATA_BITS, dataCells: DATA_CELLS.length, cells: CELLS.length,
+             payloadBytes: PAYLOAD_BYTES };
   }
 
   root.bcomb = {
-    CELLS: CELLS, DATA_CELLS: DATA_CELLS, DATA_BITS: DATA_BITS,
-    haloColor: haloColor, draw: draw, decode: decode,
+    CELLS: CELLS, DATA_CELLS: DATA_CELLS, COLLAR: COLLAR, DATA_BITS: DATA_BITS,
+    PAYLOAD_BYTES: PAYLOAD_BYTES, haloColor: haloColor,
+    draw: draw, decode: decode, inspect: inspect,
     packFrame: packFrame, unpackFrame: unpackFrame, framesFor: framesFor,
-    findFinder: findFinder, sampleBits: sampleBits, inspect: inspect,
+    findFinder: findFinder, sampleBits: sampleBits, cellStats: cellStats,
     Assembler: Assembler, selfTest: selfTest
   };
 })(typeof window !== 'undefined' ? window : globalThis);

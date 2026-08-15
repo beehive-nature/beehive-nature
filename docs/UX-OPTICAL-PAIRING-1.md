@@ -78,6 +78,58 @@ exactly, and so does the design law (b [bSAFE] is the uncolored ground):
 - Upstream note (verified 2026-08-14): decimen main is still v0.5.2 at 418.5 KB/s
   sustained; no multithread commit on main yet. Re-verify at tag-pin time.
 
+## 2d · Ruled by founder 2026-08-15: NO COLOUR IN THE TRANSPORT, INCLUDING THE FINDER
+
+Founder, watching a real capture drift from clean to unreadable mid-beam:
+*"the receiving laptop camera starts off with great resolution where I can see
+defined color and it works fast and perfect, but doesn't finish and the camera
+view gets washed out white ... the color is fucking up the receiving camera."*
+
+He was right, and §2c above was already the law — *"strip every drop of color and
+the code still decodes"*. **The v1 implementation did not obey it.** `findFinder`
+located the comb by matching magenta pixels, so hue was load-bearing in the
+DECODER even though no bit was stored in it. Stripping colour would have broken
+decoding outright. That is a D-1 violation that lived inside the codec while the
+doc claimed compliance; naming it here rather than quietly fixing it.
+
+**The ruling, now implemented:**
+- **Nothing in the transport carries hue.** Black ground, white hexagons, and a
+  softened white (235, not 255) so a camera's auto-exposure has less to bloom on.
+- **The anchor is STRUCTURAL, not chromatic** — a lit core inside an always-dark
+  collar, with an always-lit rim at ring 6. Geometry a data pattern cannot fake,
+  read on luminance alone.
+- **The mandala is the logo AT REST.** Brand at rest, luminance in flight. The
+  two are deliberately different objects; §2c's "colour is a halo" survives as a
+  *branding* rule, not a frame-format rule.
+- **Decoration may never share a canvas with data.** The v1 sender had its
+  animated colour mandala repainting the beam canvas at 60fps over a 240ms data
+  clock, so the screen showed decoration ~94% of the time and a camera almost
+  never caught a frame. Self-verify passed anyway because it decoded in the
+  instant before the next repaint — a green light measuring the wrong thing.
+  **This, not the palette, is why beams "started perfect and never finished."**
+
+**Frame format changed with the collar** (v2, 127 cells): ring 0 lit core, ring 1
+dark collar, rings 2–5 = **84 data cells**, ring 6 lit rim. Packing is
+`[6 index][6 total-1][64 payload][8 CRC-8]`; **8 bytes/frame**, max 64 frames =
+512 B/beam. Rate is **84 bits × 7 Hz = 588 b/sec** — the old "~420 b/sec" brand
+came from v1's 60 bits and is now a floor. Both surfaces' rate chips were
+corrected; still never to be confused with decimen's 418.5 KB/s.
+
+**Receipts (measured 2026-08-15, node+canvas oracle and live browser):**
+- self-test 6/6 frames; single-bit flips **84/84 refused, 0 accepted**;
+  round trip byte-perfect; progress held through 8 contradictory noise frames.
+- **Hue-independence proof:** swapping the R and B channels of a captured frame
+  (a maximal hue change at near-constant luminance) returns the **byte-identical
+  frame**. D-1 is now provable, not asserted.
+- **Wash tolerance:** a 55% white overlay — the founder's exact symptom — decodes
+  at 100%. A colourful UI in frame no longer produces a false finder.
+- **Live browser, 9s sustained:** 86/86 reads decoded (100%), all 17 frames
+  collected, payload assembled, and **max channel spread 0 across 739,600 pixels**
+  — the beaming canvas is measurably grayscale.
+
+Still owed: the Rust `bcomb` crate. The JS remains the conformance oracle, and a
+second implementation is not evidence for this one.
+
 ## 3 · The ceremony grammar (who displays, who scans)
 
 **Directional law (from the RAID, load-bearing):** the UNTRUSTED/new device DISPLAYS;
