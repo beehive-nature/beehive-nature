@@ -21,6 +21,27 @@ design, not a figure of speech, and it should not be paraphrased away.
 
 ---
 
+## 0.0 · WHERE THE CITED DOCUMENTS LIVE — read this before checking any reference
+
+**Found by Cowork, 2026-08-15, and it is the CD-13 shape again.** This document cites
+`PERSON-1`, `SPIRIT-1`, `AGENT-1`, `BIO-1` and `cascade.rs` **161 times**, and
+**`git ls-files` in this repository returns ZERO matches for any of them.** A seat told to
+"check `PERSON-1:129`" will find nothing here and may reasonably conclude there is no
+anchor. **There is one — it is just in the other repository.**
+
+| document | repository | path |
+|---|---|---|
+| `PERSON-1`, `BIO-1`, `AGENT-1`, `SPIRIT-1`, `VOICE-1`, `M-1-PREREG` | **`LOVErnment-DAO`** | `specs/` |
+| `cascade.rs` (`FULL_HOUSE`, `CAP`) | **`LOVErnment-DAO`** | `crates/lovernment-core/src/` |
+| `bdomain.cpp`, `UNICODE-NAMING-1` | **`b-domain`** | `contract/`, `docs/` |
+| `article-vi-s3`, `BIND-1`, `CONSTITUTION`, `bdid-architecture-decision`, `bdomain-scaling`, `b-tokenomics`, `b-collateral-lending`, `anti-capture` | **`beehive-nature`** (this repo) | `docs/`, `governance/` |
+| `b-token`, `dashboard`, `treasury-t0`, `reputation-engine`, `escrow-*`, `adapter-arweave`, `bcomb` | **`beehive-nature`** (this repo) | `crates/` |
+
+**All three repositories are PUBLIC.** A quoted line in this document is verifiable here
+even when its primary source is not — the quote travelled, the file did not. **Cite this
+document as the in-tree anchor and the originating repo as the primary**, in that order,
+so a reader can always reach both.
+
 ## 0a · THE THROUGH-LINE — remove the mechanism, do not legislate the behaviour
 
 **Status: DRAFT, under adversarial review 2026-08-15.** Founder direction the same day: the
