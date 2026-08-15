@@ -1396,19 +1396,36 @@ async function reply(o){
   }catch(e){ body=JSON.stringify(answerFor(o,'PREVIEW_'+Math.random().toString(36).slice(2,10))); }
   const env=JSON.stringify({...JSON.parse(body), ...(sig?{sig}:{sig_absent:'unsigned in this browser — labeled'})});
   talk('out', answerWords(o), `${env.length} bytes · ${real?(sig?'REALLY signed on this device':'key made here; signing unavailable'):'preview key'}`);
-  if(window.qrcodegen&&qrcodegen.QrCode){
+  beamBack(env);
+}
+
+/* THE RETURN BEAM streams as bComb (our codec) — so the other device reads it
+   with OUR decoder instead of depending on a browser QR decoder that Windows
+   desktop often does not ship. QR stays available as a fallback toggle. */
+let replyTimer=null, replyFrames=[], replySeq=0, replyQR=false;
+function beamBack(env){
+  clearInterval(replyTimer);
+  $('replybox').classList.add('on');
+  $('guide-title').textContent='Answer ready — turn this screen around.';
+  $('guide-body').textContent='The other device points its camera here to complete the exchange. Two beams crossing = the conversation.';
+  try{ replyFrames = window.bcomb ? bcomb.framesFor(env) : []; }catch(e){ replyFrames=[]; log('bcomb: '+e.message); }
+  const cv=$('reply'), g=cv.getContext('2d');
+  if(replyFrames.length && !replyQR){
+    replySeq=0;
+    replyTimer=setInterval(()=>{
+      bcomb.draw(g, cv.width, replyFrames[replySeq%replyFrames.length]);
+      $('reply-note').innerHTML=`<b>Show this to the other device</b> — return beam, bComb frame `+
+        `${(replySeq%replyFrames.length)+1}/${replyFrames.length}. Only a public key and a signed answer are on it.`;
+      replySeq++;
+    }, 250);                                  // 4 Hz — camera-friendly, under the ceremony cap
+  }else if(window.qrcodegen&&qrcodegen.QrCode){
     const qr=qrcodegen.QrCode.encodeText(env,qrcodegen.QrCode.Ecc.LOW);
-    const cv=$('reply'),g=cv.getContext('2d'),s=Math.floor(cv.width/(qr.size+4)),
-      off=Math.floor((cv.width-qr.size*s)/2);
+    const s=Math.floor(cv.width/(qr.size+4)), off=Math.floor((cv.width-qr.size*s)/2);
     g.fillStyle='#fff';g.fillRect(0,0,cv.width,cv.height);g.fillStyle='#000';
     for(let y=0;y<qr.size;y++)for(let x=0;x<qr.size;x++)if(qr.getModule(x,y))g.fillRect(off+x*s,off+y*s,s,s);
-    $('replybox').classList.add('on');
-    $('reply-note').innerHTML='<b>Show this screen to the other device</b> — it is the return beam. '+
-      'Nothing secret is on it: a public key and a signed answer.';
-    $('guide-title').textContent='Answer ready — turn this screen around.';
-    $('guide-body').textContent='The other device scans this to complete the exchange. Two beams crossing = the conversation.';
+    $('reply-note').innerHTML='<b>Show this to the other device</b> — return beam (QR fallback).';
   }else{
-    $('reply-note').textContent='Encoder not loaded — the reply is in the log below rather than drawn.';
+    $('reply-note').textContent='No encoder available — the reply is in the log below rather than drawn.';
     log(env.slice(0,160));
   }
 }

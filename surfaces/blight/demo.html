@@ -124,7 +124,15 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
         <div id="installed"></div>
       </div>
       <div class="progress"><i id="bar"></i></div>
-      <div class="gauge g-stale"><span class="s">Demo link</span>
+      <!-- THE EAR: the laptop listens for the phone's return beam -->
+      <div style="border-top:1px solid var(--line);margin-top:var(--s3);padding-top:var(--s3)">
+        <div class="gauge g-live"><span class="s">Ear</span> listen for the other device's answer</div>
+        <video id="ear" playsinline muted style="width:100%;aspect-ratio:1;object-fit:cover;
+          border-radius:var(--radius);border:1px solid var(--line);background:#000;display:none"></video>
+        <div id="heard"></div>
+        <button class="btn ghost" id="listen" style="width:100%;margin-top:8px">👁 Listen for the reply</button>
+      </div>
+      <div class="gauge g-stale" style="margin-top:var(--s2)"><span class="s">Demo link</span>
         This panel receives frames in-page, so the protocol is visible without a second
         device. A real phone decodes the identical bytes — in <b>QR</b> mode today,
         in <b>bComb</b> once the bcomb decoder ships.</div>
@@ -1417,6 +1425,68 @@ function tick(){
 }
 $('go').onclick=send;
 function esc(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+/* ================= THE EAR — the laptop receives the phone's answer =========
+   Uses OUR bcomb decoder first (works everywhere; Windows desktop browsers
+   frequently ship no BarcodeDetector at all), BarcodeDetector second if present.
+   The authentication moment lives here: the reply must echo the nonce THIS
+   screen issued, or it answers someone else's challenge and is refused. */
+let earStream=null, earRaf=0, earAsm=null, earDet=null, earCv=null;
+$('listen').onclick=async()=>{
+  if(earStream){ stopEar(); return; }
+  try{ earStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false}); }
+  catch(e){ heard('refused',`Camera refused or unavailable: ${e.message}. Nothing was captured.`); return; }
+  const v=$('ear'); v.srcObject=earStream; v.style.display='block'; await v.play();
+  $('listen').textContent='■ Stop listening';
+  earAsm = window.bcomb ? new bcomb.Assembler() : null;
+  if('BarcodeDetector' in window){ try{ earDet=new BarcodeDetector({formats:['qr_code']}); }catch(e){ earDet=null; } }
+  heard('live', `Listening… hold the phone's answer up to this camera.`+
+    (earDet?' (QR + bComb)':' (bComb — this browser has no QR decoder, and our codec does not need one)'));
+  earLoop();
+};
+function stopEar(){ cancelAnimationFrame(earRaf);
+  if(earStream){earStream.getTracks().forEach(t=>t.stop());earStream=null;}
+  $('ear').style.display='none'; $('listen').textContent='👁 Listen for the reply'; }
+async function earLoop(){
+  if(!earStream) return;
+  const v=$('ear');
+  if(v.videoWidth){
+    if(!earCv){ earCv=document.createElement('canvas'); earCv.width=earCv.height=360; }
+    const g=earCv.getContext('2d'), s=Math.min(v.videoWidth,v.videoHeight);
+    g.drawImage(v,(v.videoWidth-s)/2,(v.videoHeight-s)/2,s,s,0,0,360,360);
+    // 1. our hexagons
+    if(window.bcomb&&earAsm){
+      const fr=bcomb.decode(g.getImageData(0,0,360,360));
+      if(fr){ const done=earAsm.push(fr);
+        heard('live',`bComb frame ${fr.index+1}/${fr.total} caught off their screen…`);
+        if(done){ stopEar(); return gotAnswer(done); } }
+    }
+    // 2. their QR, if this browser can
+    if(earDet){ try{ const c=await earDet.detect(v); if(c.length){ stopEar(); return gotAnswer(c[0].rawValue); } }catch(e){} }
+  }
+  earRaf=requestAnimationFrame(earLoop);
+}
+function gotAnswer(text){
+  let o=null; try{o=JSON.parse(text);}catch(e){}
+  if(!o||o.v!==1||typeof o.kind!=='string')
+    return heard('refused',`Caught something that is not a BNR answer — refused. (${String(text).slice(0,40)}…)`);
+  // THE CHECK THAT MATTERS: does this answer MY challenge?
+  const mine=(PAYLOADS[payloadKey].obj.nonce)||'';
+  const echo=String(o.echo_nonce||'');
+  if(mine && echo!==mine)
+    return heard('refused',`Refused: this answers a DIFFERENT challenge (echoed "${echo.slice(0,14)}", mine is "${mine.slice(0,14)}"). Replays and stale beams die here.`);
+  const signed=!!o.sig, prev=String(o.pubkey||'').startsWith('PREVIEW');
+  heard('known',`◀ <b>${esc(o.kind)}</b> — ${mine?'echoes MY nonce ✓':'no challenge to match'} · `+
+    `key ${esc(String(o.pubkey||'?').slice(0,14))}… · ${signed?'carries a signature':'unsigned (labeled)'}`+
+    `${prev?' · preview key':''}`);
+  log('answer received over light ✓ — the loop is closed');
+  $('guide-title')&&($('guide-title').textContent='Conversation complete.');
+}
+function heard(kind,html){
+  const cls=kind==='refused'?'g-absent':kind==='live'?'g-live':'g-known';
+  $('heard').innerHTML=`<div class="gauge ${cls}" style="margin-top:8px"><span class="s">${
+    kind==='refused'?'Refused':kind==='live'?'Ear':'Heard'}</span> ${html}</div>`;
+}
 showBits('bLighTnetWorK · bLiGhTbeAM · ready');
 step(1);
 </script>
