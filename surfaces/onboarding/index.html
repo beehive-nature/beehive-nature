@@ -279,7 +279,8 @@ const SCREENS = {
     <h2 style="margin-top:var(--s3)">Enter your 12 words</h2>
     <p>Type them in order. They never leave this device.</p>
     <textarea class="wordin" id="rec-words" rows="3" autocomplete="off" autocapitalize="none"
-      placeholder="word1 word2 word3 …"></textarea>
+      onpaste="opsecPasteNote('rec-opsec')" placeholder="word1 word2 word3 …"></textarea>
+    <div id="rec-opsec"></div>
     ${PREVIEW?`<div class="gauge g-absent"><span class="s">Preview</span> Recovery derivation is not built yet — this screen validates SHAPE (12 words) and refuses honestly; it cannot restore anything today and says so rather than pretending.</div>`:''}
     <div id="rec-err" class="muted" style="color:var(--guard);min-height:1.2em"></div>
     <button class="btn primary" onclick="APP.tryRecover()">Recover my wallet</button>
@@ -482,9 +483,10 @@ const SCREENS = {
     return stageWrap(3, `
       <h2>Confirm your phrase</h2>
       <p>Type words <b>${idx.map(i=>i+1).join('</b>, <b>')}</b> to prove you saved them.</p>
-      <input class="wordin" id="w0" placeholder="word ${idx[0]+1}" autocomplete="off" autocapitalize="none">
-      <input class="wordin" id="w1" placeholder="word ${idx[1]+1}" autocomplete="off" autocapitalize="none">
-      <input class="wordin" id="w2" placeholder="word ${idx[2]+1}" autocomplete="off" autocapitalize="none">
+      <input class="wordin" id="w0" placeholder="word ${idx[0]+1}" autocomplete="off" autocapitalize="none" onpaste="opsecPasteNote('cf-opsec')">
+      <input class="wordin" id="w1" placeholder="word ${idx[1]+1}" autocomplete="off" autocapitalize="none" onpaste="opsecPasteNote('cf-opsec')">
+      <input class="wordin" id="w2" placeholder="word ${idx[2]+1}" autocomplete="off" autocapitalize="none" onpaste="opsecPasteNote('cf-opsec')">
+      <div id="cf-opsec"></div>
       <div id="cf-err" class="muted" style="color:var(--guard);min-height:1.2em"></div>
       <button class="btn primary" onclick="APP.checkPhrase()">Confirm</button>
       <button class="btn link" onclick="APP.back()">← See the phrase again</button>
@@ -560,6 +562,37 @@ APP.pick = function(id){
   }
 };
 APP.door = function(persona){ this.ctx.persona=persona; this.go('custody'); };
+
+/* OPSEC AT THE TEACHABLE MOMENT (founder round 8: he pasted his phrase from
+   Notepad and the flow said nothing). A paste into any phrase field means the
+   phrase LIVES SOMEWHERE DIGITAL — say so right then, warmly, with the cleanup
+   steps. Never shame, never block: education, not a gate. */
+function opsecPasteNote(slotId){
+  const slot=document.getElementById(slotId);
+  if(!slot||slot.childElementCount) return; // once per screen
+  slot.innerHTML=`
+    <div class="panel" style="border-color:color-mix(in srgb,var(--guard) 45%,var(--line))">
+      <div class="gauge g-absent"><span class="s">A moment</span>
+        <b>You pasted — so these words live in a file or clipboard somewhere.</b>
+        Anything digital and unencrypted (a notepad file, the clipboard, a chat with
+        yourself) can be read by other apps. No harm done — just tidy up after:</div>
+      <p style="font-size:.85rem;margin:var(--s1) 0 var(--s1)">
+        1&nbsp;· delete the file when you're done here&ensp;
+        2&nbsp;· clear your clipboard&ensp;
+        3&nbsp;· keep the phrase on <b>paper</b>, or in an <b>encrypted manager</b> (like Bitwarden) — never plain text</p>
+      <button class="btn ghost" style="min-height:44px" onclick="opsecClearClipboard(this)">Clear my clipboard now</button>
+    </div>`;
+}
+async function opsecClearClipboard(btn){
+  try{
+    if(!navigator.clipboard||!window.isSecureContext) throw new Error('not available here');
+    await navigator.clipboard.writeText('');
+    btn.textContent='✓ Clipboard cleared'; btn.disabled=true;
+  }catch(e){
+    btn.textContent='Couldn’t clear it from here — copy any harmless word to overwrite it';
+    btn.disabled=true;
+  }
+}
 APP.remediateFrom = function(kind){
   this._rk=kind; this.ctx.remediated=true;
   this.hist.push(this.current); this.current='remediate';
