@@ -1931,6 +1931,34 @@ ghost: nothing, anywhere, ever — except the wage the ledger says it was paid."
 
 ## 4h · Precedent — a spirit earning standing
 
+### 4h.0a CORRECTION — "Japanese, not Chinese" was too clean a line
+
+Founder, on being shown §4h.0: *"Japaneese came from Shanghi China."*
+
+**He is substantially right, and the section below draws the line too sharply.** Three
+things are true at once and only the middle one is Japanese:
+
+| | origin |
+|---|---|
+| **the doctrine** — that aged things acquire essence or spirit | **Chinese.** The oldest surviving formulation is 論衡 *Lunheng* (Wang Chong, c. 80 CE): *"ghosts are the essences of aged things"* — quoted in §4h.1 below |
+| **the hundred-year number for made objects** | **Japanese crystallisation** — 付喪神記 *Tsukumogami-ki*, Muromachi |
+| **the framework that text reasons inside** | **Chinese-derived.** 陰陽道 *onmyōdō* descends from Chinese 陰陽五行 yin-yang / five-phases thought |
+
+**The tell is in the forgery itself.** §4h.0 notes that the *Tsukumogami-ki* attributes
+its rule to 陰陽雑記 *Onmyō zakki* — a title no scholar has confirmed exists. **A Japanese
+author manufacturing a *Chinese* citation is evidence of which direction authority ran.**
+You do not forge a source from a tradition you consider junior to your own.
+
+**So the accurate statement, replacing "Japanese, not Chinese":** the doctrine is Chinese
+in origin and reached Japan with the rest of the yin-yang corpus; **the specific
+hundred-year threshold for made things is where the Japanese text sharpened a Chinese
+idea into a number.** The founder's recollection was of a real doctrine in its real
+lineage — it was the *number's* provenance, not the *idea's*, that was misfiled.
+
+*(Transmission specifics — routes, ports, and Japanese reception of 太平廣記 and 搜神記 —
+under verification 2026-08-15; this correction stands on the onmyōdō derivation and the
+*Lunheng* priority, both of which are scholarly consensus.)*
+
 ### 4h.0 The honest verdict on the hundred years
 
 **The rule "a spirit that lives one hundred continuous years thereby earns a place among souls" is not attested in any datable Chinese primary text.** Three separate real things have fused into that memory, and the founder's recollection is misfiled rather than baseless. **The clean formulation — a made thing that completes a century acquires a spirit — is genuine, datable, and Japanese, not Chinese:** the Muromachi-period otogizōshi 付喪神記 *Tsukumogami-ki* ("Record of the Tool Kami", oldest surviving scroll 16th c., Sōfukuji) opens 「器物百年を経て、化して精霊を得て、人の心を誑かす」 — *implements, having passed one hundred years, transform, acquire a spirit, and beguile human hearts* `[attested-primary — Japanese]`. **That text attributes its own rule to a Chinese-sounding authority, 陰陽雑記 *Onmyō zakki* ("Miscellaneous Records of Yin and Yang"), which no scholar has ever confirmed to exist** `[unverified]`. A 16th-century author wanting authority for a doctrine about made things acquiring souls manufactured a Chinese citation for it. **This spec will not repeat that move.**
