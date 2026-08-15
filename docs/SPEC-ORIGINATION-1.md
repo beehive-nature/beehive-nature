@@ -189,6 +189,58 @@ it is not.** Both appear in this spec already:
 | ≤ 420 `b` per bDiD | **yes** | earned ceiling, arithmetic | **exact** |
 | **one bDiD per human** | **not at creation — see 2e.0** | §2 L1/L2/L3 + the cap | **converged, not prevented** — see below |
 
+### 2d.9 The early-adopter windfall — smaller than usual, not absent, and its size is unruled
+
+Founder, 2026-08-15: *"there is some. we are still fixed to births and deaths. we could
+set the bell curve top end at 420 years since I just discovered how to actually do it
+(retorical)."*
+
+**Correction: this seat said there is "no early-adopter windfall." That was too
+absolute.** What population anchoring removes is the **scarcity** windfall — supply rises
+with verified souls, so no one profits from others' arrival by dilution of a fixed pool
+(§8). **Two other windfalls survive it:**
+
+1. **Timing.** Early unlock is early liquidity. Value in hand at year 3 can be deployed
+   for decades before a later joiner's has moved at all. **Time-value is a real windfall
+   and no supply rule touches it.**
+2. **Relative share.** While the verified population is small, an early cohort's 420 is a
+   large fraction of everything circulating. §8's own table puts the crossover near
+   **4,762 souls** — until then, the early cohort *is* the money supply. Dilution later
+   does not undo having been early.
+
+**Both are bounded rather than eliminated**, which is the honest claim: this design gives
+early participants a *smaller* advantage than a fixed-supply system, not none.
+
+#### The unruled parameter underneath: what happens to `b` at death
+
+The founder's *"fixed to births and deaths"* names the variable, and **nothing in either
+tree rules it.** It is a genuine fork with large consequences:
+
+| | `b` extinguished at death | `b` persists (inheritable) |
+|---|---|---|
+| supply tracks | **living** verified souls — steady-state near 420 × 8×10⁹ | **cumulative** souls ever verified — grows without bound |
+| long-run scarcity | **yes** — generational turnover retires supply | **no** — supply only accumulates |
+| early-adopter advantage | **decays** as cohorts retire | **compounds** across generations |
+| the §2e.1 enforcement reserve | **returns** — the unreleased tail extinguishes with the person | **becomes inheritable**, and merge can never reach a dead account |
+
+**That last row is the one that touches the sybil design, and it is why this cannot stay
+unruled.** §2e.1 establishes that the never-completing unlock tail *is* the permanent
+enforcement reserve — the thing that keeps the ledger correctable for life. **Death is
+the one event that definitively ends the convergence window.** If the tail is inheritable,
+a sybil identity that outlives detection is permanently beyond merge; if it extinguishes,
+the reserve does its job to the last day and no further.
+
+**Founder gate, recorded in §6.** Note the two halves are separable: the *earned balance*
+and the *unreleased tail* need not share a rule. A defensible shape is **balance
+inheritable, tail extinguished** — heirs receive what was earned, and nobody inherits an
+enforcement reserve that was never theirs to be measured against.
+
+*(The "420 years" remark is taken as rhetorical. It does flag a real interaction: the
+asymptotic curve's τ is meaningful only relative to lifespan. At τ = 7 and an 80-year
+span the tail isever present; at a 420-year span the curve is practically complete for most
+of a life, and the enforcement reserve thins to nothing. **Longevity is a parameter of
+the sybil design, which is not a sentence anyone expected to write.**)*
+
 ### 2e.0 CORRECTION — §2a's arithmetic is a property of SIMILARITY SEARCH, not of this design
 
 Founder, 2026-08-15: *"so you are telling me bQueenBee will not be able to tell all of us
