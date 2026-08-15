@@ -62,39 +62,60 @@
     return { x: C + size * 1.5 * c.q, y: C + size * Math.sqrt(3) * (c.r + c.q / 2) };
   }
 
-  /* ---------- frame packing ---------- */
-  function packFrame(index, total, sixBytes) {
+  /* ---------- frame packing ----------
+     60 bits = [6 index][6 total-1][40 payload = 5 bytes][8 CRC].
+     The CRC is not optional decoration: a camera misreading ONE cell used to
+     produce a structurally valid frame full of garbage, which the assembler
+     stored and later handed over as mojibake (founder saw exactly that). A
+     frame that cannot be checked is worse than a smaller frame — so payload
+     dropped 6→5 bytes to buy per-frame integrity. Max beam: 64 × 5 = 320 B. */
+  var PAYLOAD_BYTES = 5;
+
+  function crc8(bytes) {                     // CRC-8/ATM (poly 0x07), tiny + adequate
+    var c = 0, i, j;
+    for (i = 0; i < bytes.length; i++) {
+      c ^= bytes[i] & 0xff;
+      for (j = 0; j < 8; j++) c = (c & 0x80) ? ((c << 1) ^ 0x07) & 0xff : (c << 1) & 0xff;
+    }
+    return c & 0xff;
+  }
+
+  function packFrame(index, total, payload) {
     if (total < 1 || total > 64) throw new Error('total must be 1..64');
-    var bits = [], i, b;
+    var bits = [], i, b, bytes = [];
+    for (b = 0; b < PAYLOAD_BYTES; b++) bytes.push(payload[b] === undefined ? 0 : payload[b] & 0xff);
+    var crc = crc8([index, total - 1].concat(bytes));
     for (i = 5; i >= 0; i--) bits.push((index >> i) & 1);
     for (i = 5; i >= 0; i--) bits.push(((total - 1) >> i) & 1);
-    for (b = 0; b < 6; b++) {
-      var byte = sixBytes[b] === undefined ? 0 : sixBytes[b] & 0xff;
-      for (i = 7; i >= 0; i--) bits.push((byte >> i) & 1);
-    }
-    return bits; // exactly 60
+    for (b = 0; b < PAYLOAD_BYTES; b++) for (i = 7; i >= 0; i--) bits.push((bytes[b] >> i) & 1);
+    for (i = 7; i >= 0; i--) bits.push((crc >> i) & 1);
+    return bits;                             // exactly 60
   }
+
   function unpackFrame(bits) {
     if (!bits || bits.length !== DATA_BITS) return null;
-    var idx = 0, tot = 0, i, bytes = [];
+    var idx = 0, tot = 0, crc = 0, i, b, bytes = [];
     for (i = 0; i < 6; i++) idx = (idx << 1) | bits[i];
     for (i = 6; i < 12; i++) tot = (tot << 1) | bits[i];
     tot += 1;
-    for (var b = 0; b < 6; b++) {
+    for (b = 0; b < PAYLOAD_BYTES; b++) {
       var v = 0;
       for (i = 0; i < 8; i++) v = (v << 1) | bits[12 + b * 8 + i];
       bytes.push(v);
     }
-    if (idx >= tot) return null;            // structurally impossible → refuse
+    for (i = 0; i < 8; i++) crc = (crc << 1) | bits[12 + PAYLOAD_BYTES * 8 + i];
+    if (idx >= tot) return null;                                   // impossible → refuse
+    if (crc8([idx, tot - 1].concat(bytes)) !== crc) return null;    // misread → refuse
     return { index: idx, total: tot, bytes: bytes };
   }
 
-  /* split a string into 6-byte frames */
+  /* split a string into payload-sized frames */
   function framesFor(text) {
     var bytes = new TextEncoder().encode(text), out = [];
-    var total = Math.max(1, Math.ceil(bytes.length / 6));
-    if (total > 64) throw new Error('payload too long for one bComb beam (max 384 bytes)');
-    for (var i = 0; i < total; i++) out.push(packFrame(i, total, bytes.slice(i * 6, i * 6 + 6)));
+    var total = Math.max(1, Math.ceil(bytes.length / PAYLOAD_BYTES));
+    if (total > 64) throw new Error('payload too long for one bComb beam (max ' + (64 * PAYLOAD_BYTES) + ' bytes)');
+    for (var i = 0; i < total; i++)
+      out.push(packFrame(i, total, bytes.slice(i * PAYLOAD_BYTES, i * PAYLOAD_BYTES + PAYLOAD_BYTES)));
     return out;
   }
 
@@ -141,24 +162,58 @@
           that occupies a small part of the frame still resolves;
        4. a diagnosis object is always returned, so a surface can TELL the user
           "move closer / raise screen brightness" instead of failing silently. */
-  function isMagenta(r, g, b) { return r > 120 && b > 90 && g < r - 55 && g < b - 15; }
+  /* The finder must be the LARGEST CONNECTED magenta blob — never a global
+     centroid. (Founder 2026-08-15: the laptop ear refused garbage the instant it
+     saw the phone. Cause: the receiver's own primary buttons are #D655BB, which
+     is magenta by any reasonable test, so a global centroid averaged the real
+     finder together with the UI and sampled every cell in the wrong place.
+     Stage lights, pink clothing and lens flare are the same failure at a rave.) */
+  function isMagenta(r, g, b) {
+    return r > 120 && b > 80 && g < r - 60 && g < b - 25 &&      // magenta-ish
+           (r - g) > 70;                                          // and saturated
+  }
 
   function findFinder(img) {
-    var d = img.data, W = img.width, H = img.height;
-    var sx = 0, sy = 0, n = 0, x, y, o;
-    for (y = 0; y < H; y++) {
-      for (x = 0; x < W; x++) {
-        o = (y * W + x) * 4;
-        if (isMagenta(d[o], d[o + 1], d[o + 2])) { sx += x; sy += y; n++; }
-      }
+    var d = img.data, W = img.width, H = img.height, N = W * H;
+    var mask = new Uint8Array(N), i, o;
+    for (i = 0; i < N; i++) {
+      o = i * 4;
+      if (isMagenta(d[o], d[o + 1], d[o + 2])) mask[i] = 1;
     }
-    if (n < 6) return null;                      // nothing magenta enough
-    var cx = sx / n, cy = sy / n;
-    // hex area = 2.598*R^2  →  R = sqrt(n / 2.598). Area is robust to outliers
-    // in a way max-distance never is.
-    var R = Math.sqrt(n / 2.598);
+    /* Flood-fill each blob and pick the most HEXAGON-LIKE one — not the biggest.
+       (Biggest was wrong the moment a UI button out-sized the finder cell, which
+       is exactly the founder's phone: a 520x70 magenta button dwarfs a ~13px
+       finder. A flat-top hexagon has bbox 2R x 1.73R -> aspect ~1.155 and fills
+       ~0.75 of that box; a button is aspect ~7 and fills 1.0. Shape tells them
+       apart at any size.) */
+    var seen = new Uint8Array(N), stack = new Int32Array(N), best = null;
+    for (i = 0; i < N; i++) {
+      if (!mask[i] || seen[i]) continue;
+      var sp = 0, n = 0, sx = 0, sy = 0,
+          x0 = W, x1 = -1, y0 = H, y1 = -1;
+      stack[sp++] = i; seen[i] = 1;
+      while (sp > 0) {
+        var p = stack[--sp], px = p % W, py = (p / W) | 0;
+        n++; sx += px; sy += py;
+        if (px < x0) x0 = px; if (px > x1) x1 = px;
+        if (py < y0) y0 = py; if (py > y1) y1 = py;
+        if (px > 0     && mask[p - 1] && !seen[p - 1]) { seen[p - 1] = 1; stack[sp++] = p - 1; }
+        if (px < W - 1 && mask[p + 1] && !seen[p + 1]) { seen[p + 1] = 1; stack[sp++] = p + 1; }
+        if (py > 0     && mask[p - W] && !seen[p - W]) { seen[p - W] = 1; stack[sp++] = p - W; }
+        if (py < H - 1 && mask[p + W] && !seen[p + W]) { seen[p + W] = 1; stack[sp++] = p + W; }
+      }
+      if (n < 6) continue;
+      var bw = x1 - x0 + 1, bh = y1 - y0 + 1;
+      var aspect = bw / bh, fill = n / (bw * bh);
+      // distance from the hexagon signature (aspect 1.155, fill 0.75)
+      var err = Math.abs(Math.log(aspect / 1.155)) + Math.abs(fill - 0.75) * 2.2;
+      if (err > 1.0) continue;                       // not hexagon-shaped at all
+      if (!best || err < best.err) best = { n: n, cx: sx / n, cy: sy / n, err: err };
+    }
+    if (!best) return null;
+    var R = Math.sqrt(best.n / 2.598);           // hex area = 2.598*R^2
     if (R < 1.2) return null;
-    return { cx: cx, cy: cy, size: R / 0.92, px: n };
+    return { cx: best.cx, cy: best.cy, size: R / 0.92, px: best.n, shapeErr: best.err };
   }
 
   function sampleBits(img, cx, cy, size) {
