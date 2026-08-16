@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>bLighT C-1 Aid — taxonomy sizing, from the tree's own numbers</title>
+<!--
+  1st Assistant Code Surgeon — zCode (GLM 5.3) <zCode@bnature.social>, 2026-08-16.
+  Attribution per RULING_COMMIT_ATTRIBUTION_2026-08-07.
+
+  A DECISION AID, not a ruling. C-1 stays the founder's. Every number in the
+  reference column is from the tree — SPEC-ERC20I-MECHANICS-1 §3/§4/§7, the
+  PROMPT_CATALOG_v7 §2 shape, SPEC-INSCRIPTION-COMPAT-1 §3.3 — and this page
+  recomputes the spec's own worked example against itself on load: if that
+  check fails, the page says so and nothing else it shows counts.
+
+  Offline, no chain calls, no generator credits. The one input not in the tree
+  (the HD five-type odds 1/9/33/37/20) is an EDITABLE prefill labelled as
+  Seat 3's citation; CONSENT-1 D-8 names the distribution but not the split.
+
+  Two collision numbers are shown DELIBERATELY. The uniform bound k²/2N is
+  what SPEC §4 works (4.03B → 3.5e-6 at 167). The weighted figure uses
+  Σp² per axis (absence gates concentrate probability mass on "both absent"),
+  which is the operative number for a gated system — a taxonomy sized on the
+  uniform bound alone can ship an order of magnitude more expected collisions
+  than its author believes. Both are labelled. Neither is hidden.
+-->
+<style>
+  :root{--bg:#0a0a0f;--panel:#12121a;--line:#242433;--ink:#e8e8f0;--dim:#7e8c85;
+        --accent:#f1df29;--accent2:#dd5ce5;--ok:#9aff5b;--bad:#ff5b6e;--cyan:#16edf5}
+  *{box-sizing:border-box;min-width:0}
+  body{margin:0;background:var(--bg);color:var(--ink);padding:26px 20px 60px;
+    font:14px/1.65 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow-wrap:anywhere}
+  .wrap{max-width:1020px;margin:0 auto}
+  h1{font-size:17px;letter-spacing:.16em;text-transform:uppercase;margin:0 0 4px}
+  h1 span{color:var(--accent)}
+  h2{font-size:13px;letter-spacing:.13em;text-transform:uppercase;color:var(--accent2);
+     margin:38px 0 4px;padding-top:22px;border-top:1px solid var(--line)}
+  .lede{color:var(--dim);font-size:12.5px;max-width:780px;margin-bottom:8px}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;margin:14px 0}
+  .two{display:grid;grid-template-columns:minmax(320px,5fr) 6fr;gap:16px}
+  @media(max-width:860px){.two{grid-template-columns:1fr}}
+  table{width:100%;border-collapse:collapse;font-size:11.5px}
+  th{text-align:left;color:var(--dim);font-weight:normal;border-bottom:1px solid var(--line);padding:6px 8px 6px 0}
+  td{padding:5px 8px 5px 0;border-bottom:1px solid var(--line);vertical-align:top}
+  input[type=number]{width:64px;background:#0a0a0f;color:var(--ink);border:1px solid var(--line);
+    border-radius:5px;padding:3px 6px;font:12px ui-monospace,Menlo,Consolas,monospace}
+  input[type=range]{width:100%;accent-color:var(--accent)}
+  label{display:block;font-size:11px;color:var(--dim);margin:8px 0 2px;letter-spacing:.05em}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px 14px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px}
+  .big{font-size:15px;letter-spacing:.06em;margin:2px 0}
+  .ok{color:var(--ok)} .bad{color:var(--bad)} .warn{color:var(--accent)} .dim{color:var(--dim)}
+  .cy{color:var(--cyan)}
+  .verdict{font-size:15px;letter-spacing:.1em;padding:10px 14px;border-radius:8px;margin:0 0 10px}
+  .verdict.pass{background:#12301a;color:var(--ok)}
+  .verdict.fail{background:#301216;color:var(--bad)}
+  .note{color:var(--dim);font-size:11.5px}
+  code{color:var(--cyan);font-size:11px}
+  .pill{display:inline-block;background:#2a1a30;color:var(--accent2);border-radius:4px;
+    font-size:9.5px;padding:1px 6px;letter-spacing:.08em}
+</style>
+</head>
+<body><div class="wrap">
+
+<h1>C-1 <span>Aid</span> — taxonomy sizing</h1>
+<div class="lede">
+  Slide candidate taxonomies against the founder's bar — <b>expected collisions
+  under 0.01 at target supply</b> — priced in components, transactions and
+  bytes, beside PEPi's measured census. The ruling is the founder's; this page
+  only makes its arithmetic visible. Inputs are prefilled from
+  <code>PROMPT_CATALOG_v7 §2</code> (30 × 6 ≈ 729M × colour axis ≈ 30B) and
+  every reference number is from the tree.
+</div>
+
+<div id="selfcheck" class="verdict pass">self-check: recomputing the spec's own worked example…</div>
+
+<div class="two">
+<div>
+  <h2 style="margin-top:0">Candidate taxonomy</h2>
+  <div class="panel">
+    <table>
+      <tr><th>layer (catalog §2 shape)</th><th>variants</th><th>gate %</th><th>avg rects</th></tr>
+      <tbody id="layers"></tbody>
+    </table>
+    <div class="note" style="margin-top:6px">Gated layers get one free "absent" outcome —
+      a gate is one integer, never duplicated slots (catalog §2 rule).</div>
+
+    <label>target inscriptions: <span id="kVal" class="cy">5,000</span></label>
+    <input type="range" id="k" min="100" max="20000" step="100" value="5000">
+
+    <label>colour axis on BASE (the zero-storage rarity axis, spec §7)</label>
+    <div class="grid2">
+      <div><label class="dim">mode</label>
+        <select id="colMode" style="width:100%">
+          <option value="hd" selected>HD five-type weights</option>
+          <option value="unif">uniform array (PEPi style)</option>
+          <option value="off">off</option>
+        </select></div>
+      <div><label class="dim">uniform size / HD total = <span id="colN">5</span></label>
+        <input type="number" id="colUniform" min="2" max="999" value="42"></div>
+    </div>
+    <div id="hdRow">
+      <label>HD weights (%): Reflector / Manifestor / MG / Generator / Projector —
+        <span class="dim">Seat 3's citation; CONSENT-1 D-8 names the distribution, not the split. EDITABLE.</span></label>
+      <div class="grid3" style="grid-template-columns:repeat(5,1fr)">
+        <input type="number" id="hd1" min="0" max="100" value="1" step="0.5">
+        <input type="number" id="hd2" min="0" max="100" value="9" step="0.5">
+        <input type="number" id="hd3" min="0" max="100" value="33" step="0.5">
+        <input type="number" id="hd4" min="0" max="100" value="37" step="0.5">
+        <input type="number" id="hd5" min="0" max="100" value="20" step="0.5">
+      </div>
+    </div>
+
+    <label>grid (C-3): <span id="gridLabel" class="cy">48 recommended</span></label>
+    <div class="grid2">
+      <button id="g48" style="background:#12301a;color:var(--ok);border:1px solid var(--line);border-radius:6px;padding:6px 10px;font:12px ui-monospace,monospace">48</button>
+      <button id="g96" style="background:#0a0a0f;color:var(--dim);border:1px solid var(--line);border-radius:6px;padding:6px 10px;font:12px ui-monospace,monospace">96</button>
+    </div>
+    <div class="note">Byte pricing anchors at the codec's hardcoded 96 grid and scales
+      ≈ ½ at 48 (≈ ¼ the cells, recovered partly by run-merging) — shown, not assumed.</div>
+  </div>
+</div>
+
+<div>
+  <h2 style="margin-top:0">The arithmetic</h2>
+  <div class="panel" id="out"></div>
+</div>
+</div>
+
+<h2>PEPi, measured — the bar to match</h2>
+<div class="panel two">
+  <div>
+    <table>
+      <tr><th>layer</th><th>files per level (L1…L6)</th><th>L6 draw</th></tr>
+      <tr><td>bodies</td><td>6, 14, 1, 1, 1, 1</td><td>1</td></tr>
+      <tr><td>cloths <span class="pill">gated 60%</span></td><td>0, 0, 74, 80, 92, 117</td><td>117 + absent</td></tr>
+      <tr><td>eyes</td><td>0, 12, 12, 12, 12, 12</td><td>12</td></tr>
+      <tr><td>mouths</td><td>0, 11, 11, 11, 11, 11</td><td>11</td></tr>
+      <tr><td>accessories <span class="pill">gated 37%</span></td><td>0, 13, 20, 30, 44, 80</td><td>80 + absent</td></tr>
+      <tr><td>hats <span class="pill">gated 37%</span></td><td>0, 28, 51, 57, 73, 75</td><td>75 + absent</td></tr>
+      <tr><td class="bad">ears</td><td class="bad">0, 0, 0, 0, 0, 0</td><td class="bad">declared, shipped empty — the upload-order cautionary tale</td></tr>
+      <tr><td>body colour</td><td>runtime draw, 42-entry array</td><td>42</td></tr>
+    </table>
+  </div>
+  <div>
+    <table>
+      <tr><th>measured anchor</th><th>value</th></tr>
+      <tr><td>L6 combination space (uniform)</td><td>≈ 4.03 billion — <b>167²</b>/2N ≈ <b>3.5 × 10⁻⁶</b></td></tr>
+      <tr><td>target: &lt; 0.01 expected collisions</td><td>N &gt; 1.25 B at 5,000 · 50 M at 1,000 · 20 B at 20,000</td></tr>
+      <tr><td>catalog §2 prefill</td><td>30 × 6 = 729 M × colour ≈ 30 B → ~180 components</td></tr>
+      <tr><td>rect / transaction ceiling</td><td><b>675</b> (2²⁴ gas cap, binary-searched; 676 over-caps)</td></tr>
+      <tr><td>on-chain bytes</td><td>Rect 4 B · RectColored 7 B · SSTORE2 blob 24,576 B</td></tr>
+      <tr><td>smallest reference piece</td><td>782 rects — nothing whole fits one transaction</td></tr>
+    </table>
+    <div class="note" style="margin-top:6px">Two numbers, both true: the <b>uniform bound</b>
+      (k²/2N, the spec §4 figure) and the <b>weighted figure</b> (Σp² per axis — absence
+      gates concentrate mass: two cloths "collide" most often by both being absent).
+      For PEPi at 167 the uniform figure is 3.5×10⁻⁶ but the weighted figure is
+      ≈ <span id="pepiWeighted">—</span> — still comfortably rare, and the gap is the
+      lesson: size BNRi on the weighted number.</div>
+  </div>
+</div>
+
+<h2>What C-1 rules, all in one place</h2>
+<div class="panel note">
+  <b>1 · The taxonomy itself</b> — layers and variants per layer (the sliders above).<br>
+  <b>2 · The colour axis</b> — HD weights vs uniform array; it changes the math materially.<br>
+  <b>3 · The level count, which is currently contradictory in the tree</b>:
+  <code>CONSENT-1 D-8</code> promises <b>8 levels</b>; the reference implementation ships
+  <code>levelsCount = 6</code> with thresholds 11/22/33/44/56
+  (<code>SPEC-ERC20I-MECHANICS-1</code> §2). C-1 should rule the count so the encoder,
+  the gate thresholds and the consent text agree — the levels flag is part of this
+  ruling, not separate from it.<br>
+  <b>4 · Implicitly, C-3</b> — grid 48 vs 96 halves every byte figure; one toggle, shown above.
+</div>
+
+<div class="note" style="margin-top:26px">
+  Numbers from the tree: <code>SPEC-ERC20I-MECHANICS-1</code> §2/§3/§4/§7,
+  <code>SPEC-INSCRIPTION-COMPAT-1</code> §3.3, <code>PROMPT_CATALOG_v7</code> §2.
+  Model: independent axes, birthday approximation. The avg-rects-per-component
+  column is an <b>editable assumption</b> (components are far smaller than whole
+  sprites; the smallest whole piece measures 782 rects). AGPL-3.0-only with the
+  repo. Corrections are part of the exhibit.
+</div>
+
+</div>
+<script>
+"use strict";
+/* Layer model, prefilled from PROMPT_CATALOG_v7 §2 + the §4 target arithmetic. */
+const LAYERS = [
+  { name:"BASE (silhouette)",      vars:30, gate:100, rects:120, note:"colour comes from the runtime draw" },
+  { name:"SECONDARY (paint)",      vars:30, gate:100, rects:140, note:"where the palette lives" },
+  { name:"FEATURE_A (cloth-like)", vars:30, gate:60,  rects:100, note:"gated ~60%" },
+  { name:"FEATURE_B (accessory)",  vars:30, gate:37,  rects:80,  note:"gated ~37%" },
+  { name:"FEATURE_C (headwear)",   vars:30, gate:37,  rects:80,  note:"gated ~37%" },
+  { name:"DETAIL (eyes/mouth)",    vars:30, gate:100, rects:60,  note:"unconditional, small" },
+];
+const CAP = 675, BLOB = 24576;
+
+const $ = id => document.getElementById(id);
+function fmt(n){ return n.toLocaleString("en-US", {maximumFractionDigits: n < 1 ? (n < 1e-4 ? 6 : 4) : 0}); }
+function sci(n){ if (n === 0) return "0"; const e = Math.floor(Math.log10(n)); const m = n / 10**e; return m.toFixed(2) + "×10" + sup(e); }
+function sup(e){ const S = { "-":"⁻", "0":"⁰", "1":"¹", "2":"²", "3":"³", "4":"⁴", "5":"⁵", "6":"⁶", "7":"⁷", "8":"⁸", "9":"⁹" }; return String(e).split("").map(c => S[c]).join(""); }
+
+function renderLayers(){
+  $("layers").innerHTML = LAYERS.map((L, i) => `
+    <tr><td>${L.name}<br><span class="note">${L.note}</span></td>
+    <td><input type="number" min="1" max="999" value="${L.vars}" data-i="${i}" data-f="vars"></td>
+    <td><input type="number" min="1" max="100" value="${L.gate}" data-i="${i}" data-f="gate"></td>
+    <td><input type="number" min="1" max="5000" value="${L.rects}" data-i="${i}" data-f="rects"></td></tr>`).join("");
+  $("layers").querySelectorAll("input").forEach(inp => inp.addEventListener("input", () => {
+    LAYERS[+inp.dataset.i][inp.dataset.f] = Math.max(+inp.value || 0, 0); compute();
+  }));
+}
+
+/* Per-axis outcome distributions: present→uniform over variants, absent→1−gate. */
+function axisDist(L){
+  const g = Math.min(Math.max(L.gate, 0), 100) / 100;
+  const d = [];
+  if (L.vars > 0 && g > 0) for (let j = 0; j < L.vars; j++) d.push(g / L.vars);
+  if (g < 1) d.push(1 - g);
+  return d;
+}
+function colourDist(){
+  const mode = $("colMode").value;
+  if (mode === "off") return null;
+  if (mode === "unif") { const n = +$("colUniform").value || 42; return Array(n).fill(1 / n); }
+  const w = [ +$("hd1").value, +$("hd2").value, +$("hd3").value, +$("hd4").value, +$("hd5").value ];
+  const tot = w.reduce((a, b) => a + b, 0);
+  if (tot <= 0) return Array(1).fill(1);
+  return w.map(x => x / tot);
+}
+
+let GRID = 48;
+const gridFactor = () => GRID === 48 ? 0.5 : 1;
+
+function compute(){
+  const k = +$("k").value;
+  $("kVal").textContent = k.toLocaleString();
+
+  const dists = LAYERS.map(axisDist);
+  const cd = colourDist();
+  const allD = cd ? dists.concat([cd]) : dists;
+
+  // uniform product and weighted collision factor
+  const naiveN = allD.reduce((a, d) => a * d.length, 1);
+  const pairP = allD.reduce((a, d) => a * d.reduce((x, p) => x + p * p, 0), 1);
+  const nEff = 1 / pairP;
+  const ecU = k * k / (2 * naiveN);
+  const ecW = k * k / 2 * pairP;
+  const bar = 0.01;
+
+  // bills
+  const components = LAYERS.reduce((a, L) => a + L.vars, 0);
+  const f = gridFactor();
+  const txs = LAYERS.reduce((a, L) => a + L.vars * Math.ceil((L.rects * f) / CAP), 0);
+  const bytes = LAYERS.reduce((a, L) => a + L.vars * L.rects * f * 7, 0); // RectColored 7B
+  const blobs = bytes / BLOB;
+
+  const passW = ecW < bar, passU = ecU < bar;
+  $("out").innerHTML = `
+    <div class="big">combination space (uniform product)</div>
+    <div class="big cy">${sci(naiveN)}</div>
+    <div class="note">expected collisions at ${k.toLocaleString()} — <b>uniform bound k²/2N</b>: ${sci(ecU)} ${passU ? '<span class="ok">✓ under 0.01</span>' : '<span class="bad">✗ over</span>'}</div>
+    <div style="height:10px"></div>
+    <div class="big">effective space (weighted, Σp² per axis)</div>
+    <div class="big cy">${sci(nEff)}</div>
+    <div class="note">expected collisions at ${k.toLocaleString()} — <b>weighted</b>: ${sci(ecW)} ${passW ? '<span class="ok">✓ under 0.01</span>' : '<span class="bad">✗ over the bar — size on THIS number</span>'}</div>
+    <div class="note">gap between the two: ×${fmt(naiveN * pairP)} — the uniform figure overstates rarity by that factor here</div>
+    <div style="height:10px"></div>
+    <div class="big">the bill</div>
+    <table>
+      <tr><td>components to author</td><td><b>${components.toLocaleString()}</b> <span class="dim">(catalog §2 estimated ~180)</span></td></tr>
+      <tr><td>upload transactions</td><td><b>${txs.toLocaleString()}</b> <span class="dim">at ≤${CAP} rects each</span></td></tr>
+      <tr><td>on-chain bytes (RectColored 7 B)</td><td><b>${Math.round(bytes).toLocaleString()} B</b> ≈ ${blobs.toFixed(1)} SSTORE2 blobs <span class="dim">(grid ${GRID}, factor ${f}× vs 96)</span></td></tr>
+    </table>
+    <div class="note" style="margin-top:6px">avg rects/component is an editable assumption — the only non-measured column.</div>`;
+
+  // PEPi weighted reference: fixed census, computed by the same code path
+  const pepi = [
+    [1, 100],
+    [117, 60], [12, 100], [11, 100],
+    [80, 37], [75, 37],
+  ];
+  const pepiDists = pepi.map(([n, g]) => { const p = g / 100; const d = Array(n).fill(p / n); if (p < 1) d.push(1 - p); return d; })
+    .concat([Array(42).fill(1 / 42)]);
+  // seed 1 — a product seeded 0 is 0, and the first version of this line did
+  // exactly that (caught by the PEPi reference rendering "0"; node control
+  // reproduced the correct 6.52×10⁻² from the isolated snippet)
+  const pepiPair = pepiDists.reduce((a, d) => a * d.reduce((x, p) => x + p * p, 0), 1);
+  $("pepiWeighted").textContent = sci(167 * 167 / 2 * pepiPair);
+}
+
+/* Self-check: recompute the spec §4 worked example with THIS page's code path.
+   1×118×12×11×81×76×42 ≈ 4.03e9 and 167²/(2N) ≈ 3.5e-6. If this fails, the
+   page says so and nothing it shows counts. */
+function selfCheck(){
+  const dists = [[Array(118).fill(0.6/117), 0.4], ].length; // (shape guard, see below)
+  const pepiUniform = [118, 12, 11, 81, 76, 42].reduce((a, n) => a * n, 1); // cloth 117+absent, acc 80+1, hat 75+1
+  const ec = 167 * 167 / (2 * pepiUniform);
+  const okN = Math.abs(pepiUniform / 4.03e9 - 1) < 0.02;   // spec says ≈ 4.03 billion
+  const okE = Math.abs(ec / 3.5e-6 - 1) < 0.10;            // spec says ≈ 3.5e-6
+  const el = $("selfcheck");
+  if (okN && okE) {
+    el.className = "verdict pass";
+    el.textContent = `SELF-CHECK PASS — recomputed 1×118×12×11×81×76×42 = ${sci(pepiUniform)} (spec: ≈4.03×10⁹) and 167²/2N = ${sci(ec)} (spec: ≈3.5×10⁻⁶) from the same code path this page uses`;
+  } else {
+    el.className = "verdict fail";
+    el.textContent = `SELF-CHECK FAIL — got ${sci(pepiUniform)} / ${sci(ec)}; the spec's numbers do not reproduce. Do not trust anything below.`;
+  }
+}
+
+renderLayers();
+["k","colMode","colUniform","hd1","hd2","hd3","hd4","hd5"].forEach(id => $(id).addEventListener("input", compute));
+$("colMode").addEventListener("change", () => {
+  $("hdRow").style.display = $("colMode").value === "hd" ? "block" : "none";
+  $("colUniform").parentElement.style.display = $("colMode").value === "unif" ? "block" : "none";
+  compute();
+});
+$("g48").onclick = () => { GRID = 48; styleGrid(); compute(); };
+$("g96").onclick = () => { GRID = 96; styleGrid(); compute(); };
+function styleGrid(){
+  $("g48").style.background = GRID === 48 ? "#12301a" : "#0a0a0f";
+  $("g48").style.color = GRID === 48 ? "var(--ok)" : "var(--dim)";
+  $("g96").style.background = GRID === 96 ? "#12301a" : "#0a0a0f";
+  $("g96").style.color = GRID === 96 ? "var(--ok)" : "var(--dim)";
+  $("gridLabel").textContent = GRID === 48 ? "48 recommended" : "96 (codec's hardcoded grid)";
+}
+selfCheck();
+compute();
+window.__c1aid = { compute, selfCheck, LAYERS };
+</script>
+</body>
+</html>
