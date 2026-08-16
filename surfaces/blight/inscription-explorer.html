@@ -122,22 +122,44 @@ const CHAINS = [
       'https://1rpc.io/base',
       'https://base.meowrpc.com',
   ]},
+  { name:'Ethereum', id:1, rpcs:[
+      'https://eth.llamarpc.com',
+      'https://ethereum-rpc.publicnode.com',
+      'https://eth.drpc.org',
+      'https://rpc.ankr.com/eth',
+  ]},
   { name:'exSat', id:7200, rpcs:[] },             // paste an endpoint; none assumed
+  { name:'BNB',   id:56,   rpcs:[                 // chain ready; no VERIFIED ERC-20i yet
+      'https://bsc-dataseed.binance.org',
+      'https://bsc-rpc.publicnode.com',
+  ]},
   { name:'custom',id:0,    rpcs:[] },
 ];
 // Verified addresses (EIP-55). Two of these circulate with broken checksums elsewhere.
+// `chain` indexes CHAINS. THE THREE PEPi DEPLOYMENTS ARE THE DISAMBIGUATION CASE:
+// same symbol, three contracts, two chains, two entirely different interfaces. A gallery
+// that scales to hundreds of thousands of collections must key on (chain, address) and
+// SHOW the version — never on symbol.
 const TOKENS = [
-  { sym:'PEPI',   addr:'0x28a5e71BFc02723eAC17E39c84c5190415C0de9F', dec:9 },
-  { sym:'FUNGI',  addr:'0x7d9CE55D54FF3FEddb611fC63fF63ec01F26D15F', dec:9 },
-  { sym:'FROGGI', addr:'0x88A78C5035BdC8C9A8bb5c029e6cfCDD14B822FE', dec:9 },
-  { sym:'TRUFFI', addr:'0x2496a9AF81A87eD0b17F6edEaf4Ac57671d24f38', dec:9 },
-  { sym:'JELLI',  addr:'0xA1b9d812926a529D8B002E69FCd070c8275eC73c', dec:9 },
+  { sym:'PEPI (base; v2)', chain:0, addr:'0x28a5e71BFc02723eAC17E39c84c5190415C0de9F', dec:9 },
+  { sym:'PEPI (base; v1)', chain:0, addr:'0x19706c142d33376240e418d6385f05691a5fa8e2', dec:9 },
+  { sym:'FUNGI',           chain:0, addr:'0x7d9CE55D54FF3FEddb611fC63fF63ec01F26D15F', dec:9 },
+  { sym:'FROGGI',          chain:0, addr:'0x88A78C5035BdC8C9A8bb5c029e6cfCDD14B822FE', dec:9 },
+  { sym:'TRUFFI',          chain:0, addr:'0x2496a9AF81A87eD0b17F6edEaf4Ac57671d24f38', dec:9 },
+  { sym:'JELLI',           chain:0, addr:'0xA1b9d812926a529D8B002E69FCd070c8275eC73c', dec:9 },
+  // Ethereum: the ITEM MODEL. SeedData is (uint8,uint256,uint256,uint256) — 4 words —
+  // and inscriptions move by globally-unique id via transferItem, not by magic amount.
+  { sym:'PEPi (eth; item model)', chain:1, addr:'0x3103cD1602d5fa8f4b9283F9D5a7fa2290795d51', dec:9,
+    seedWords:4, enumerate:'page' },
 ];
 // getSvg shapes, probed in order. Each builds calldata from (seed, holder).
+// Selectors derived from a keccak validated against seven known-good signatures.
 const SHAPES = [
-  { id:'triple/a435130b', sel:'a435130b', build:(s,h)=>W(s)+W(0n)+W(0n) },
-  { id:'triple/422b9e23', sel:'422b9e23', build:(s,h)=>W(s)+W(0n)+W(0n) },
-  { id:'addr/a62f5b1b',   sel:'a62f5b1b', build:(s,h)=>W(s)+W(0n)+AD(h) },
+  { id:'triple/a435130b', sel:'a435130b', words:3, build:(s,h)=>W(s)+W(0n)+W(0n) },
+  { id:'triple/422b9e23', sel:'422b9e23', words:3, build:(s,h)=>W(s)+W(0n)+W(0n) },
+  { id:'addr/a62f5b1b',   sel:'a62f5b1b', words:3, build:(s,h)=>W(s)+W(0n)+AD(h) },
+  // getSvg((uint8,uint256,uint256,uint256)) — Ethereum item model
+  { id:'quad/058e7a31',   sel:'058e7a31', words:4, build:(s,h)=>W(0n)+W(s)+W(0n)+W(0n) },
 ];
 const $=id=>document.getElementById(id);
 const W=v=>BigInt(v).toString(16).padStart(64,'0');
@@ -188,8 +210,13 @@ async function scanAll(){
   $('art').innerHTML='';
   for(let i=0;i<TOKENS.length;i++){
     const t=TOKENS[i];
+    // Per-chain routing: each token carries its chain, and the endpoint pool swaps with it.
+    // A cross-chain sweep is N chains' worth of calls, never one unified query.
+    const ch = CHAINS[t.chain||0];
+    if(!ch.rpcs.length) continue;
+    pool = ch.rpcs.slice(); poolIdx = 0;
     rows.length=0;
-    row('scanning', (i+1)+' / '+TOKENS.length+' — '+t.sym);
+    row('scanning', (i+1)+' / '+TOKENS.length+' — '+t.sym+'  ['+ch.name+']');
     row('found so far', found.length? found.map(f=>f.sym).join(', ') : '—', found.length?'ok':'');
     flush();
     try{
