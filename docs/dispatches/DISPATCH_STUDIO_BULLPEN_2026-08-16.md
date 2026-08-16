@@ -47,7 +47,7 @@ know what a trait is**, and the Studio must not know which generator produced a 
 
 **Requirements:**
 
-1. **Key from an environment variable. Never a literal, never a prompt, never a log line.**
+1. **Key from a file (`--key-file`), never an environment variable — MCP children get a scrubbed environment and `${VAR}` interpolation does not happen (buzz's own persona-spec example showing `${GITHUB_TOKEN}` is wrong; env-passed keys silently 401). Never a literal, never a prompt, never a log line.** *(Corrected in place 2026-08-16, goose lane, per Seat 3's read of `buzz-persona/src/resolve.rs`; this line originally said "environment variable".)*
 2. **`GET /balance` before any spend, and after.** The founder has ~2,000 generations; a
    runaway loop is real money. Refuse to start a batch that could exceed a declared budget.
 3. **Determine from the OpenAPI schema, and report back**, whether these exist:
@@ -59,6 +59,14 @@ know what a trait is**, and the Studio must not know which generator produced a 
 4. **Zero generations spent to build it.** Mock the transport, test against recorded
    fixtures. The first real call should be a deliberate, founder-present act.
 5. Async, cancellable, with progress. Generation takes seconds to minutes.
+
+**MCP deployment constraints (folded in 2026-08-16 from Seat 3's post-read of `buzz-agent/src/mcp.rs` — this dispatch was written before that file had been read):**
+
+- The adapter is an **MCP server** (stdio child of buzz), not a standalone daemon.
+- `MAX_SCHEMA_BYTES 4096`: oversize tool schemas are **silently replaced with `{}`** — it presents as a model failure, not a config failure. The adapter's tests assert every schema serializes under that budget.
+- **One MCP command per agent**: pointing buzz at this server replaces its own tools. The surface stays at exactly two tools — `generate_image` and `get_balance` — deliberately the whole art lane.
+- `RawContent::Resource` flattens to `[resource elided]`: blob-by-reference is dead. The adapter **writes the PNG itself** and returns a text handle (absolute path + metadata).
+- Balance is **USD credits (float)**, not a generation count (`GET /balance → CreditsResponse { type: "usd", usd }`), and **cost-per-call is not declared anywhere in the OpenAPI** — it can only be *measured* as the before/after balance delta. The spend cap is therefore denominated in USD, and every generate call reports its measured spend.
 
 **Explicitly NOT in scope for this lane:** prompt authorship, trait taxonomy, anything
 touching the gate or the encoder.

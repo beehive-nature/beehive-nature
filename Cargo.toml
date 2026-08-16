@@ -11,6 +11,7 @@ members = [
     "crates/adapter-autonomi",
     "crates/adapter-carrier",
     "crates/adapter-lti",
+    "crates/adapter-pixellab",
     "crates/atmirror",
     "crates/b-token",
     "crates/bsigner",
