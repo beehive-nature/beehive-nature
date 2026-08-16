@@ -45,6 +45,7 @@ members = [
     "crates/zano-watcher",
     "crates/bmesh-hwfit",
     "crates/bcomb",
+    "crates/bmesh-meter",
 ]
 
 [workspace.metadata]

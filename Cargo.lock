@@ -220,6 +220,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "bmesh-meter"
+version = "0.1.0"
+
+[[package]]
 name = "bnr-shell"
 version = "0.1.0"
 dependencies = [

@@ -1,0 +1,8 @@
+[package]
+name = "bmesh-meter"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "Utilization-pricing engine for the bMesh meter — PowerUp-derived price/fee/hysteresis semantics from pinned source (DISPATCH_BMESHASI_SUPPLY_RESEARCH_2026-08-16 §5, lane R-2)"
+
+[dependencies]
