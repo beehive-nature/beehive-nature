@@ -148,6 +148,8 @@
   <tr><td>2015-03-11</td><td>Spells of Genesis <code>FDCARD</code></td><td><span class="cls f">f</span></td><td>BTC 347172 — bare 1-of-3 multisig, <b>still unspent in 2026</b></td></tr>
   <tr><td>2017</td><td>Curio Cards</td><td><span class="cls d">d</span></td><td>~30 hand-rolled ERC-20s, <code>decimals: 0</code> — <b>a fungible token that is one picture</b></td></tr>
   <tr><td>2019-04-05</td><td>Autoglyphs</td><td><span class="cls a">a</span>/<span class="cls c">c</span></td><td>block 7,510,386 — depends whether the artwork is the text or the image</td></tr>
+  <tr><td>2024-03-03</td><td>the 3.99 MB inscription</td><td><span class="cls b">b</span>/<span class="cls c">c</span></td><td>block 832,947 — <b>99.8% of a block's weight budget in one transaction</b>, riding the witness discount</td></tr>
+  <tr><td>2024-04-20</td><td>Runes launch</td><td><span class="cls a">a</span></td><td>block 840,000 — the halving; runestones in <code>OP_RETURN</code> outputs, commodities without a VM</td></tr>
   <tr><td>2024</td><td>ERC-20i (FUNGI)</td><td><span class="cls a">a</span></td><td>seed-derived art on a fungible balance; <code>getSvg</code> returns the SVG itself</td></tr>
 </table></div>
 </div>
@@ -241,6 +243,64 @@
   recorded as testimony, precise defect <b>under verification</b>
   (<code>SPEC-ERC20I-MECHANICS-1</code> §10). The museum shows the question,
   not a settled answer.
+</div>
+</div>
+
+<h2>Exhibit 9 · Bitcoin's answer — a whole-block inscription, and the asymmetry</h2>
+<div class="lede">
+  The museum's lineage starts on Bitcoin (Counterparty, 2014) and its classes were
+  built without Bitcoin's modern era. The founder's inclusivity ruling (2026-08-16)
+  closes that: below, the record inscription transaction — <b>read live from
+  Bitcoin</b> — the two mechanisms from the Ordinal Theory Handbook, and the
+  asymmetry that separates Bitcoin art from Ethereum art more than any mechanism does.
+</div>
+<div class="panel two">
+  <figure>
+    <div class="stage" style="min-height:200px;aspect-ratio:auto;padding:16px;text-align:left">
+      <div style="width:100%" id="btcTx">reading Bitcoin…</div>
+    </div>
+    <figcaption><b>The record inscription, fetched at page load.</b>
+      txid <code>ed76bf35…72a0</code>. The article that sent us here called it
+      "3.97 MB" and dated it April 2026; the chain says
+      <b>3,991,238 bytes, confirmed 2024-03-03</b> — the 2026 "Relic" is new
+      generative art <i>about</i> the old record, one 1/1 derived from the
+      transaction itself. Both facts on the label.</figcaption>
+  </figure>
+  <figure>
+    <div class="stage" style="min-height:200px;aspect-ratio:auto;padding:16px;text-align:left">
+      <div style="width:100%" id="btcBar">—</div>
+    </div>
+    <figcaption><b>One transaction against one block.</b> Bitcoin blocks cap at
+      4,000,000 weight units. This transaction is nearly the entire budget by
+      itself — possible because inscription data rides the <b>witness</b>, which
+      counts ¼ toward weight. The bar is drawn from the live numbers, not quoted.</figcaption>
+  </figure>
+</div>
+<div class="panel">
+<div class="scroll"><table>
+  <tr><th>protocol</th><th>where the data lives</th><th>mechanism (per the Ordinal Theory Handbook)</th></tr>
+  <tr><td><b>Inscriptions</b><br><span class="note">Ordinal sats, unique artifacts</span></td>
+      <td>taproot script-path spend scripts — the <b>witness</b> of a transaction</td>
+      <td>commit/reveal two-phase; envelope <code>OP_FALSE OP_IF … OP_ENDIF</code>;
+          data pushes capped at 520 bytes; the witness discount is what makes a
+          3.99 MB inscription physically fit</td></tr>
+  <tr><td><b>Runes</b><br><span class="note">fungible commodities — the ERC-20i parallel</span></td>
+      <td>transaction <b>outputs</b>: <code>OP_RETURN OP_13</code> + data pushes</td>
+      <td>one runestone per transaction; edict integers (128-bit);
+          <b>cenotaphs</b> — malformed runestones that burn their runes;
+          the Handbook's own example rune is <code>UNCOMMONGOODS</code></td></tr>
+</table></div>
+<div class="note" style="margin-top:8px">
+  Against the museum's six classes: both sit inside existing rows — inscription
+  content is data-on-chain (b/c hybrid: the envelope is an ordinary Bitcoin
+  transaction), runes are commodities like ERC-20i but carried by outputs, not
+  contract state. <b>What Bitcoin adds is not a class — it is the asymmetry:</b>
+  Ethereum art answers a keyless <code>eth_call</code> from any browser; Bitcoin
+  has no browser-direct read at all. This page reads Bitcoin through
+  <b>Esplora</b> — a public third-party indexer API (<code>blockstream.info</code>,
+  CORS-open, keyless) — and says so on the label. Runes launched at the 2024
+  halving: <b>block 840,000, 2024-04-20 00:09 UTC</b> (hash verified via the same
+  API while building this exhibit).
 </div>
 </div>
 
@@ -404,6 +464,42 @@ function drawGlyph(text){
   }
 })();
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ── Exhibit 9 · Bitcoin, read live through Esplora — and saying so ───────────
+// Host ladder, same doctrine as the EVM pool: this museum's home network kills
+// TLS to one Esplora host by SNI while another answers (measured 2026-08-16:
+// mempool.space → connection reset mid-handshake; blockstream.info → 200 with
+// CORS *). A failed fetch is never a value: the panel says so, quotes the
+// build-time measurement, and draws nothing invented.
+(async()=>{
+  const TXID='ed76bf35918948b8b78be0e6397ad4916d926dd3d65679a8b7e67d8699a672a0'; // PUBLIC-CONSTANT: public Bitcoin txid, derivable by anyone
+  const HOSTS=['https://blockstream.info/api','https://mempool.space/api','https://mempool.emzy.de/api'];
+  let tx=null;
+  for(const h of HOSTS){
+    try{ const r=await fetch(h+'/tx/'+TXID); if(r.ok){ tx=await r.json(); break; } }catch(e){}
+  }
+  const el=document.getElementById('btcTx'), bar=document.getElementById('btcBar');
+  if(!tx){
+    el.innerHTML='<span class="note">indexer unreachable — nothing cached to show you.<br>Measured at build (2026-03-03 block 832,947): size 3,991,238 B · weight 3,991,772 / 4,000,000 wu · fee 109,773,730 sats = 1.0977 BTC.</span>';
+    bar.innerHTML='<span class="note">no live numbers — no bar drawn</span>';
+    return;
+  }
+  const btc=(tx.fee/1e8).toFixed(4);
+  el.innerHTML=
+    '<div class="big" style="font-size:14px">size <b class="cy">'+tx.size.toLocaleString()+' B</b></div>'+
+    '<div class="note">weight <b>'+tx.weight.toLocaleString()+'</b> / 4,000,000 wu · '+
+    (100*tx.weight/4e6).toFixed(1)+'% of a block</div>'+
+    '<div class="note">fee <b>'+tx.fee.toLocaleString()+' sats</b> = '+btc+' BTC</div>'+
+    '<div class="note">block '+(tx.status&&tx.status.block_height)+' · '+
+    new Date((tx.status&&tx.status.block_time||0)*1000).toISOString().slice(0,10)+' UTC</div>';
+  // the bar: this transaction's weight against one full block
+  const pct=Math.min(100,100*tx.weight/4e6);
+  bar.innerHTML='<div style="font-size:11px;color:var(--dim);margin-bottom:6px">this transaction</div>'+
+    '<div style="background:#000;border:1px solid var(--line);border-radius:6px;height:26px;position:relative">'+
+    '<div style="width:'+pct+'%;height:100%;background:#f1df29;border-radius:5px 0 0 5px"></div></div>'+
+    '<div style="font-size:11px;color:var(--dim);margin-top:6px">one full block = 4,000,000 wu — '+pct.toFixed(1)+'% is this one transaction</div>';
+})();
+
 </script>
 </body>
 </html>
