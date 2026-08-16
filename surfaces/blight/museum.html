@@ -162,6 +162,88 @@
   about the wall: <b>the barrier was supply, not gas.</b> Both facts belong on the label.
 </div>
 
+<h2>Exhibit 6 · The process wall — 1,408 bytes</h2>
+<div class="lede">
+  Two PEPi deployments share a symbol and a lineage. Their bytecode sizes are
+  read from chain <b>when this page loads</b>, and the difference is computed
+  here, not quoted. What the bytes bought is on the label below the table.
+</div>
+<div class="panel">
+<div class="scroll"><table>
+  <tr><th>contract</th><th>address</th><th>code size</th></tr>
+  <tr><td>PEPI v1 (Base)</td><td><code>0x1970…a8e2</code></td><td id="sz1">reading…</td></tr>
+  <tr><td>PEPI v2 (Base)</td><td><code>0x28a5…de9F</code></td><td id="sz2">reading…</td></tr>
+  <tr><td>FUNGI (Base)</td><td><code>0x7d9C…D15F</code></td><td id="szF">reading…</td></tr>
+  <tr><td>FROGGI (Base)</td><td><code>0x88A7…22FE</code></td><td id="szR">reading…</td></tr>
+  <tr><td><b>v2 − v1</b></td><td></td><td id="szDiff" class="warn">—</td></tr>
+</table></div>
+<div class="note" style="margin-top:8px" id="pw1408note">
+  The v2 deployment is larger by <b id="pw1408">—</b> bytes, and the verified
+  ABIs say precisely what that bought: <b>one</b> new external function,
+  <code>getHolderIndex</code> — a holder-enumeration view (37 functions → 38).
+  v2 adds nothing else to the surface. Measured 2026-08-16 from
+  <code>eth_getCode</code> and Sourcify-v2 verified ABIs; if the table above
+  says "reading…" the chain is unreachable and <b>no number is invented</b>.
+</div>
+</div>
+
+<h2>Exhibit 7 · The process wall — a revert, performed live</h2>
+<div class="lede">
+  ERC-20i derives its seed from the balance, and the draw is
+  <code>seed + nonce − 1</code>. At <code>seed = 0</code> that underflows:
+  Solidity panics <b>0x11</b>. Harmless to a holder — nobody holds zero and
+  renders — but a live trap for any explorer that iterates addresses. This page
+  performs the trap now: it reads the burn-address record from chain, renders
+  it as the control, then replays the <b>same record with only the seed
+  zeroed</b>.
+</div>
+<div class="panel two">
+  <figure>
+    <div class="stage" id="trapCtl"><span class="note">reading chain…</span></div>
+    <figcaption><b>Control — the record as stored.</b> <code>getSvg(seed,
+      second, extra)</code> with the burn address's own words.
+      <span id="trapCtlBytes">—</span>.</figcaption>
+  </figure>
+  <figure>
+    <div class="stage" id="trapBad"><span class="note">reading chain…</span></div>
+    <figcaption><b>The trap — same record, seed forced to 0.</b> The exact
+      revert, unedited: <span id="trapErr" class="bad">—</span><br>
+      Everything else about the call is identical. The panic selector
+      <code>0x4e487b71</code> with code <code>0x11</code> is the arithmetic
+      underflow, arriving through a call any marketplace might make.</figcaption>
+  </figure>
+</div>
+
+<h2>Exhibit 8 · The process wall — a layer that shipped empty</h2>
+<div class="lede">
+  Not every error performs. <code>earsLevelCounts</code> shipped
+  <b>[0,0,0,0,0,0]</b> — a declared layer, empty forever — and no getter on the
+  token exposes it, so this panel is lineage, not live data, and says so.
+</div>
+<div class="panel">
+<div class="scroll"><table>
+  <tr><th>mechanism</th><th>consequence</th></tr>
+  <tr><td><code>counts[lvl]</code> is <b>increment-only</b> and is the selection
+      modulus</td><td>upload files 1, 2, 5 → count = 3 → file 3 is an empty
+      array that renders as <code>""</code> — <b>silently, no revert</b></td></tr>
+  <tr><td>one out-of-order batch</td><td><b>permanently poisons a level.</b>
+      This is how <code>earsLevelCounts</code> shipped all zeros: the ears gate
+      (3%) selects from an empty file list forever</td></tr>
+  <tr><td><code>setFile</code> replaces, never appends</td><td>a second call for
+      the same <code>(lvl,file)</code> wipes the first; there is no append-mode
+      setter on any of the seven reference contracts</td></tr>
+</table></div>
+<div class="note" style="margin-top:8px">
+  Hence the rehearsal gate: <b>upload order is a deploy-day check</b>
+  (<code>evmcheck.py</code> exists; the testnet rehearsal does not, and the
+  exSat testnet lane is frozen). And still open on the wall, founder testimony
+  2026-08-15: <i>"fungi and pepi v1 both had the same over under bug"</i> —
+  recorded as testimony, precise defect <b>under verification</b>
+  (<code>SPEC-ERC20I-MECHANICS-1</code> §10). The museum shows the question,
+  not a settled answer.
+</div>
+</div>
+
 <div class="note" style="margin-top:34px">
   <b>Corrections are part of the exhibit.</b> "Random art maker" is backwards — Autoglyphs
   takes a <i>caller-chosen</i> seed and is fully deterministic and grindable. The randomness
@@ -255,6 +337,73 @@ function drawGlyph(text){
     if(!document.getElementById(id).querySelector('svg'))
       document.getElementById(id).innerHTML='<span class="note">chain unreachable — nothing cached to show you</span>';
 })();
+
+// ── The process wall (B-3) — errors performed live, never retold ────────────
+// Receipts behind these exhibits were measured 2026-08-16: code sizes by
+// eth_getCode (v1 20,173 B, v2 21,581 B, diff exactly 1,408), the function-set
+// diff from Sourcify-v2 verified ABIs (v2 = v1 + getHolderIndex), and the
+// seed=0 trap as control-vs-panic on the burn address's stored record.
+(async()=>{
+  const P1='0x19706c142d33376240e418d6385f05691a5fa8e2',
+        P2='0x28a5e71BFc02723eAC17E39c84c5190415C0de9F',
+        FG='0x7d9CE55D54FF3FEddb611fC63fF63ec01F26D15F',
+        FR='0x88A78C5035BdC8C9A8bb5c029e6cfCDD14B822FE',
+        DEAD='0x000000000000000000000000000000000000dEaD';
+  // raw RPC with the same fallback ladder as call(); never a value on failure
+  const rpc=async(m,p)=>{
+    for(const url of RPC.base){
+      try{
+        const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({jsonrpc:'2.0',id:1,method:m,params:p})});
+        const j=await r.json(); if(!j.error) return j.result;
+      }catch(e){}
+    }
+    return null;
+  };
+  const put=(id,html)=>{const el=document.getElementById(id); if(el) el.innerHTML=html;};
+
+  // Exhibit 6 — code sizes and the 1,408 bytes, computed live
+  const sz=async a=>{const r=await rpc('eth_getCode',[a,'latest']);return r?(r.length-2)/2:null;};
+  const [s1,s2,sf,sr]=await Promise.all([sz(P1),sz(P2),sz(FG),sz(FR)]);
+  if(s1&&s2){
+    put('sz1',s1.toLocaleString()+' B'); put('sz2',s2.toLocaleString()+' B');
+    put('szDiff',(s2-s1).toLocaleString()+' B');
+    put('pw1408',(s2-s1).toLocaleString());
+  } else {
+    put('sz1','<span class="bad">chain unreachable</span>'); put('sz2','<span class="bad">chain unreachable</span>');
+    put('pw1408note','Chain unreachable — the sizes are NOT shown. Measured on 2026-08-16 they were 20,173 and 21,581 bytes (diff 1,408); today\u2019s read failed and no number is invented.');
+  }
+  put('szF',sf?sf.toLocaleString()+' B':'—'); put('szR',sr?sr.toLocaleString()+' B':'—');
+
+  // Exhibit 7 — the seed=0 trap: control render vs panic, one word apart
+  const rec=await call('base',P2,'0x0fd9587e'+AD(DEAD)+W(0));   // getItemData(address,uint256)
+  if(rec){
+    const w=(rec.slice(2).match(/.{64}/g)||[]);
+    if(w.length>=3){
+      const ctl=await call('base',P2,'0xa435130b'+w.slice(0,3).join(''));
+      if(ctl){ const s=decStr(ctl);
+        document.getElementById('trapCtl').innerHTML=s;
+        document.getElementById('trapCtlBytes').textContent=s.length.toLocaleString()+' bytes of SVG, stored seed '+BigInt('0x'+w[0]);
+      } else { document.getElementById('trapCtl').innerHTML='<span class="note">control render failed — nothing faked</span>'; }
+      // same record, seed word forced to zero — expect panic 0x11
+      const zeroW='0'.repeat(64);
+      const jraw=await (async()=>{ for(const url of RPC.base){ try{
+          const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_call',
+              params:[{to:P2,data:'0xa435130b'+zeroW+w[1]+w[2]},'latest']})});
+          const j=await r.json(); if(j.error) return j.error; }catch(e){} } return null; })();
+      const err=jraw&&jraw.message?jraw.message:null;
+      document.getElementById('trapBad').innerHTML=
+        '<pre style="min-height:120px;font-size:clamp(8px,1vw,12px);white-space:pre-wrap;text-align:left">'+
+        (err?esc(err):'no revert came back — the trap did not perform; nothing faked')+'</pre>';
+      document.getElementById('trapErr').textContent=err?err.split('\n')[0]:'(not reproduced)';
+    } else { document.getElementById('trapBad').innerHTML='<span class="note">record shape unexpected — trap not performed</span>'; }
+  } else {
+    document.getElementById('trapCtl').innerHTML='<span class="note">chain unreachable — nothing cached to show you</span>';
+    document.getElementById('trapBad').innerHTML='<span class="note">chain unreachable — trap not performed</span>';
+  }
+})();
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 </script>
 </body>
 </html>
