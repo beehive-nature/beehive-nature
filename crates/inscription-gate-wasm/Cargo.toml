@@ -1,0 +1,15 @@
+[package]
+name = "inscription-gate-wasm"
+version = "0.1.0"
+edition = "2021"
+license = "AGPL-3.0-only"
+description = "C-ABI wasm shim over inscription-gate. The verdict code is the core crate's, unchanged — this only marshals bytes."
+
+# cdylib: the wasm module surfaces/blight/studio-gate.wasm is built from.
+# rlib: so `cargo test` can exercise the ABI natively against the same encoder
+# the browser runs — the byte-identity property the gate exists for.
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+inscription-gate = { path = "../inscription-gate" }

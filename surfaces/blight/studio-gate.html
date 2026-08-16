@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>bLighT Studio Gate — trait pre-flight</title>
+<!--
+  1st Assistant Code Surgeon — zCode (GLM 5.3), 2026-08-16.
+  Attribution per RULING_COMMIT_ATTRIBUTION_2026-08-07; rank per founder ruling
+  of 2026-08-16. Spec: docs/SPEC-INSCRIPTION-COMPAT-1.md §4.
+
+  The verdict is NOT computed here. This page loads the same WASM build of
+  crates/inscription-gate that the LaunchPad's deploy check will run, calls it
+  over a flat C ABI, and renders what it returns. If this page ever disagrees
+  with the LaunchPad, the gate is advisory — so the verdict code lives in the
+  crate and nowhere else, and the fix hints below are UI copy only (kept in
+  lockstep with Finding::fix_hint in crates/inscription-gate/src/lib.rs).
+
+  Offline by construction: one HTML file, one WASM file, no network calls, no
+  generator credits. Nothing leaves the machine the PNG was dropped on.
+-->
+<style>
+  :root{--bg:#0a0a0f;--panel:#12121a;--line:#242433;--ink:#e8e8f0;--dim:#7e8c85;
+        --accent:#f1df29;--accent2:#dd5ce5;--ok:#9aff5b;--bad:#ff5b6e;--cyan:#16edf5}
+  *{box-sizing:border-box;min-width:0}
+  html,body{max-width:100%;overflow-x:hidden}
+  body{margin:0;background:var(--bg);color:var(--ink);padding:26px 20px 60px;
+    font:14px/1.65 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    overflow-wrap:anywhere}
+  .wrap{max-width:980px;margin:0 auto}
+  h1{font-size:17px;letter-spacing:.16em;text-transform:uppercase;margin:0 0 4px}
+  h1 span{color:var(--accent)}
+  h2{font-size:13px;letter-spacing:.13em;text-transform:uppercase;color:var(--accent2);
+     margin:38px 0 4px;padding-top:22px;border-top:1px solid var(--line)}
+  .lede{color:var(--dim);font-size:12.5px;max-width:760px;margin-bottom:8px}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;margin:14px 0}
+  .two{display:grid;grid-template-columns:minmax(280px,5fr) 7fr;gap:16px}
+  @media(max-width:820px){.two{grid-template-columns:1fr}}
+  canvas{image-rendering:pixelated;max-width:100%;background:#000;border-radius:8px;display:block}
+  figcaption{color:var(--dim);font-size:10.5px;margin-top:9px;line-height:1.6}
+  figcaption b{color:var(--ink)}
+  .drop{border:2px dashed var(--line);border-radius:10px;padding:34px 16px;text-align:center;
+    color:var(--dim);cursor:pointer;transition:border-color .15s,color .15s}
+  .drop.ready{border-color:var(--accent);color:var(--accent)}
+  .drop small{display:block;margin-top:4px;font-size:10.5px}
+  label{display:block;font-size:11px;color:var(--dim);margin:10px 0 2px;letter-spacing:.06em}
+  input[type=number],select,textarea{width:100%;background:#0a0a0f;color:var(--ink);
+    border:1px solid var(--line);border-radius:6px;padding:6px 8px;
+    font:12px ui-monospace,Menlo,Consolas,monospace}
+  textarea{resize:vertical;min-height:64px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px}
+  .verdict{font-size:15px;letter-spacing:.1em;padding:10px 14px;border-radius:8px;margin:0 0 10px}
+  .verdict.pass{background:#12301a;color:var(--ok)}
+  .verdict.fail{background:#301216;color:var(--bad)}
+  .verdict.wait{background:#1a1a22;color:var(--dim)}
+  table{width:100%;border-collapse:collapse;font-size:11.5px}
+  th{text-align:left;color:var(--dim);font-weight:normal;border-bottom:1px solid var(--line);padding:6px 8px 6px 0}
+  td{padding:6px 8px 6px 0;border-bottom:1px solid var(--line);vertical-align:top}
+  .tag{color:var(--accent2)}
+  .fix{color:var(--cyan)}
+  .afix{display:inline-block;background:#2a2a12;color:var(--accent);border-radius:4px;
+    font-size:9.5px;padding:1px 6px;letter-spacing:.08em}
+  .uifix .tag{color:#ff9a5b}
+  .stats{color:var(--dim);font-size:11.5px;margin:8px 0}
+  .stats b{color:var(--ink)}
+  .note{color:var(--dim);font-size:11.5px}
+  .bad{color:var(--bad)} .ok{color:var(--ok)} .warn{color:var(--accent)}
+  legend{color:var(--dim);font-size:10.5px;letter-spacing:.08em}
+</style>
+</head>
+<body><div class="wrap">
+
+<h1>bLighT <span>Studio Gate</span></h1>
+<div class="lede">
+  Drop a trait-layer PNG. The verdict comes from <code>crates/inscription-gate</code>
+  compiled to WASM — the same gate the LaunchPad will run at deploy — not from a
+  JavaScript re-implementation. Every finding carries its fix; the chain checks
+  <b>none</b> of this, and ownership is renounced after deploy, so this page is
+  where a mistake is still catchable.
+</div>
+
+<div class="panel">
+  <div id="drop" class="drop">drop a PNG here, or click to choose
+    <small>square image, ideally grid×grid or an integer multiple of it</small>
+  </div>
+  <input id="file" type="file" accept="image/png" hidden>
+</div>
+
+<div class="two">
+<div>
+  <h2 style="margin-top:0">Gate configuration</h2>
+  <div class="panel">
+    <div class="grid2">
+      <div><label for="grid">grid (C-3, frozen at deploy)</label>
+        <input id="grid" type="number" min="4" max="255" value="48"></div>
+      <div><label for="orient">lattice orientation</label>
+        <select id="orient">
+          <option value="0" selected>flat-top (measured: fits ~15% larger cells)</option>
+          <option value="1">pointy-top</option>
+        </select></div>
+      <div><label for="maxrects">max rects / transaction</label>
+        <input id="maxrects" type="number" min="1" value="675"></div>
+      <div><label for="maxhair">max hairline run (cells)</label>
+        <input id="maxhair" type="number" min="1" value="6"></div>
+      <div><label for="minmargin">min edge margin (cells)</label>
+        <input id="minmargin" type="number" min="0" value="2"></div>
+    </div>
+    <label for="palette">locked palette — hex colours, comma or space separated</label>
+    <textarea id="palette" placeholder="empty = palette check disabled (C-1 has not locked the set yet — paste the collection's colours when it has)"></textarea>
+    <div class="note" style="margin-top:8px">675 rects is <b>measured</b> by binary search
+      against the 2^24 gas cap (25,226 gas/rect). Orientation decides which
+      direction a 1-cell run shears into a zigzag — flat-top punishes horizontal
+      runs, pointy-top vertical ones.</div>
+  </div>
+</div>
+
+<div>
+  <h2 style="margin-top:0">Verdict</h2>
+  <div class="panel">
+    <div id="verdict" class="verdict wait">waiting for a layer</div>
+    <div id="stats" class="stats">—</div>
+    <div id="findings" style="display:none"><div class="scroll" style="overflow-x:auto"><table>
+      <tr><th>finding</th><th>detail</th><th>fix</th></tr>
+      <tbody id="fbody"></tbody>
+    </table></div></div>
+  </div>
+</div>
+</div>
+
+<h2>The layer, as the gate sees it</h2>
+<div class="panel two">
+  <figure>
+    <canvas id="preview" width="48" height="48" style="width:100%;aspect-ratio:1/1"></canvas>
+    <figcaption><b>Cell grid.</b> Transparent cells stay dark. Off-palette cells
+      are tinted; hairline runs outlined red; dither windows boxed orange; the
+      required margin ring is hatched — art under the hatch is inside the zone
+      the device clips.</figcaption>
+  </figure>
+  <figure>
+    <canvas id="src" width="48" height="48" style="width:100%;aspect-ratio:1/1"></canvas>
+    <figcaption><b>Source PNG at 1:1-ish.</b> Shown as decoded, before cell
+      mapping, so a bad export (soft edges, wrong size) is visible next to what
+      the gate measured.</figcaption>
+  </figure>
+</div>
+
+<div class="note panel">
+  <b>Decode-side checks live here, not in the WASM</b> — they are properties of
+  the PNG before cells exist: soft alpha (a soft matte destroys hard-edged pixel
+  art per spec §4), non-square exports, and size reduction. They are labelled
+  <span style="color:#ff9a5b">decode</span> in the findings table so nothing
+  pretends to be a gate verdict that isn't one.
+</div>
+
+<div class="note" style="margin-top:26px">
+  Corrections are part of the exhibit. This gate exists because things were
+  measured, not guessed — receipts in <code>docs/SPEC-INSCRIPTION-COMPAT-1.md</code> §4
+  and <code>docs/receipts/panelfit.js</code>. AGPL-3.0-only, with the crate it runs.
+</div>
+
+</div>
+<script>
+"use strict";
+/* ── ABI constants — MUST match crates/inscription-gate-wasm/src/lib.rs ────── */
+const REPORT_HEADER = 14, FINDING_BYTES = 16;
+const TAGS = {
+  1:{name:"grid mismatch", fix:"re-author at the collection's grid", autofix:false,
+     detail:f=>`expected ${f.expected}×${f.expected}, PNG decodes to ${f.found}×${f.found}`},
+  2:{name:"empty", fix:"layer contains no cells", autofix:false, detail:()=>"no filled cells at all"},
+  3:{name:"off-palette", fix:"quantise to the nearest locked colour", autofix:true,
+     detail:f=>`#${f.color.toString(16).padStart(6,'0')} in ${f.cells} cells → nearest locked #${f.nearest.toString(16).padStart(6,'0')}`},
+  4:{name:"out of bounds", fix:"clip or translate into the grid", autofix:true,
+     detail:f=>`cell (${f.col},${f.row}) — the chain stores it, the viewport clips it, no revert`},
+  5:{name:"too many rects", fix:"merge vertically, or simplify — one trait must fit one transaction", autofix:false,
+     detail:f=>`${f.count} rects after RLE against a limit of ${f.limit}`},
+  6:{name:"hairline", fix:"thicken to 2 cells, angle it, or break it into beads", autofix:false,
+     detail:f=>`${f.len}-cell run on the shear axis from (${f.col},${f.row}) — becomes a zigzag on the lattice`},
+  7:{name:"dither", fix:"replace with a solid fill; dithering cannot survive the lattice", autofix:false,
+     detail:f=>`checkerboard window at (${f.col},${f.row}) — scattered into unrelated dots by the lattice`},
+  8:{name:"margin", fix:"inset the artwork; the device clips the outer cells", autofix:false,
+     detail:f=>`${f.sideName} edge has ${f.actual} empty cells, ${f.required} required`},
+};
+const SIDES = ["top","bottom","left","right"], AXES = ["horizontal","vertical"];
+
+/* ── wasm load. A failed load is never a value: the page says so and stops.
+   POINTERS ARE PLAIN NUMBERS, never view objects: any wasm allocation can grow
+   linear memory, which detaches every existing JS view (byteOffset collapses
+   to 0 — silently wrong reads). Views are re-derived from wasm.memory.buffer
+   after every wasm call; arguments that read memory.buffer AFTER an alloc in
+   the same expression evaluate against a detached buffer. ──────────────────── */
+let wasm = null;
+const ptr = { cells: 0, palette: 0, report: 0 };
+const CAP_CELLS = 255 * 255 * 4, CAP_PALETTE = 255 * 4;
+let CAP_REPORT = 4096;
+(async () => {
+  try {
+    // Bytes-then-instantiate, not instantiateStreaming: streaming demands the
+    // application/wasm MIME type, and simple static servers (and some CDNs)
+    // send application/octet-stream — the gate must not depend on server config.
+    const bytes = await (await fetch("./studio-gate.wasm")).arrayBuffer();
+    const m = await WebAssembly.instantiate(bytes, {});
+    if (m.instance.exports.gate_version() !== 2) throw new Error("report format v" + m.instance.exports.gate_version() + " — this page speaks v2");
+    wasm = m.instance.exports;
+    ptr.cells = wasm.alloc(CAP_CELLS);      // alloc FIRST, then touch memory.buffer
+    ptr.palette = wasm.alloc(CAP_PALETTE);
+    ptr.report = wasm.alloc(CAP_REPORT);
+    document.getElementById("verdict").textContent = "gate loaded — waiting for a layer";
+  } catch (e) {
+    document.getElementById("verdict").className = "verdict fail";
+    document.getElementById("verdict").textContent = "gate DID NOT LOAD — nothing is faked";
+    document.getElementById("stats").textContent = String(e);
+  }
+})();
+
+function readCfg() {
+  const pal = (document.getElementById("palette").value.match(/[0-9a-fA-F]{6}/g) || [])
+    .map(h => parseInt(h, 16));
+  const palBytes = new Uint8Array(pal.length * 4);
+  pal.forEach((c, i) => palBytes.set(new Uint8Array(new Uint32Array([c]).buffer), i * 4));
+  return {
+    grid: +document.getElementById("grid").value || 48,
+    maxRects: +document.getElementById("maxrects").value || 675,
+    minMargin: +document.getElementById("minmargin").value,
+    maxHair: +document.getElementById("maxhair").value || 6,
+    orient: +document.getElementById("orient").value,
+    palette: pal, palBytes,
+  };
+}
+
+/* PNG → {dim, rgba}. Dim matters: the gate reports GridMismatch against it. */
+function decodePNG(file) {
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => {
+      const cv = document.createElement("canvas");
+      cv.width = img.naturalWidth; cv.height = img.naturalHeight;
+      const cx = cv.getContext("2d", { willReadFrequently: true });
+      cx.drawImage(img, 0, 0);
+      res({ dim: img.naturalWidth, h: img.naturalHeight, data: cx.getImageData(0, 0, cv.width, cv.height).data, canvas: cv });
+    };
+    img.onerror = () => rej(new Error("not a decodable image"));
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+/* Cells from pixels. k×k blocks majority-vote when the PNG is a multiple of the
+   grid; 1:1 otherwise. Soft alpha is counted here — it is a PNG property, not a
+   gate verdict, and the gate's cells are binary by construction. */
+function mapCells(rgba, dim, grid) {
+  const k = (dim % grid === 0 && dim >= grid) ? dim / grid : 1, g = (dim / k) | 0;
+  const cells = new Uint32Array(g * g);
+  let softAlpha = 0;
+  for (let br = 0; br < g; br++) for (let bc = 0; bc < g; bc++) {
+    const tally = new Map(); let present = 0, total = 0;
+    for (let y = 0; y < k; y++) for (let x = 0; x < k; x++) {
+      const i = ((br * k + y) * dim + bc * k + x) * 4;
+      const a = rgba[i + 3];
+      if (a > 0 && a < 255) softAlpha++;
+      if (a < 128) continue;
+      const c = (rgba[i] << 16) | (rgba[i + 1] << 8) | rgba[i + 2];
+      tally.set(c, (tally.get(c) || 0) + 1); present++; total++;
+    }
+    if (total > 0 && present > total / 2) {
+      let best = 0, bn = 0; for (const [c, n] of tally) if (n > bn) { bn = n; best = c; }
+      cells[br * g + bc] = best;
+    }
+  }
+  return { cells, grid: g, block: k, softAlpha };
+}
+
+/* ── the one real call. Retry-on-overflow is the ABI's contract, not a hope.
+   All wasm-memory access happens through views derived AFTER the wasm calls
+   that may have grown memory; pointers stay plain numbers throughout. ─────── */
+function runGate(cellsU32, foundGrid, cfg) {
+  const cellBytes = new Uint8Array(cellsU32.buffer, 0, foundGrid * foundGrid * 4);
+  const palBytes = cfg.palBytes;
+  new Uint8Array(wasm.memory.buffer, ptr.cells, cellBytes.length).set(cellBytes);
+  if (palBytes.length) new Uint8Array(wasm.memory.buffer, ptr.palette, palBytes.length).set(palBytes);
+  let len = wasm.gate_check(ptr.cells, cellBytes.length, foundGrid, cfg.grid,
+    cfg.maxRects, cfg.minMargin, cfg.maxHair, cfg.orient,
+    ptr.palette, palBytes.length,
+    ptr.report, CAP_REPORT);
+  if (len > CAP_REPORT) {           // grow, alloc again, run again
+    CAP_REPORT = len + 64;
+    ptr.report = wasm.alloc(CAP_REPORT);
+    len = wasm.gate_check(ptr.cells, cellBytes.length, foundGrid, cfg.grid,
+      cfg.maxRects, cfg.minMargin, cfg.maxHair, cfg.orient,
+      ptr.palette, palBytes.length,
+      ptr.report, CAP_REPORT);
+    if (len > CAP_REPORT) throw new Error("report overflowed twice — refusing");
+  }
+  const dv = new DataView(wasm.memory.buffer, ptr.report, len);
+  const pass = dv.getUint8(0) === 1;
+  const cellN = dv.getUint32(2, true), rects = dv.getUint32(6, true), n = dv.getUint32(10, true);
+  const findings = [];
+  for (let i = 0; i < n; i++) {
+    const o = REPORT_HEADER + i * FINDING_BYTES;
+    const tag = dv.getUint8(o), f = { tag };
+    if (tag === 1) { f.expected = dv.getUint8(o+1); f.found = dv.getUint8(o+2); }
+    else if (tag === 3) { f.color = dv.getUint32(o+1, true); f.cells = dv.getUint32(o+5, true); f.nearest = dv.getUint32(o+9, true); }
+    else if (tag === 4) { f.col = dv.getUint8(o+1); f.row = dv.getUint8(o+2); }
+    else if (tag === 5) { f.count = dv.getUint32(o+1, true); f.limit = dv.getUint32(o+5, true); }
+    else if (tag === 6) { f.axis = dv.getUint8(o+1); f.col = dv.getUint8(o+2); f.row = dv.getUint8(o+3); f.len = dv.getUint8(o+4); }
+    else if (tag === 7) { f.col = dv.getUint8(o+1); f.row = dv.getUint8(o+2); f.extent = dv.getUint8(o+3); }
+    else if (tag === 8) { f.side = dv.getUint8(o+1); f.sideName = SIDES[f.side] || "?"; f.actual = dv.getUint8(o+2); f.required = dv.getUint8(o+3); }
+    findings.push(f);
+  }
+  return { pass, cells: cellN, rects, findings };
+}
+
+/* ── preview: the cell grid with finding overlays ──────────────────────────── */
+function drawPreview(cv, cellsU32, g, findings, cfg, src) {
+  cv.width = g; cv.height = g;
+  const cx = cv.getContext("2d");
+  cx.clearRect(0, 0, g, g);
+  const offPal = new Set(findings.filter(f => f.tag === 3).map(f => f.color));
+  for (let r = 0; r < g; r++) for (let c = 0; c < g; c++) {
+    const v = cellsU32[r * g + c];
+    if (!v) continue;
+    cx.fillStyle = "#" + v.toString(16).padStart(6, "0");
+    cx.fillRect(c, r, 1, 1);
+    if (cfg.palette.length && !cfg.palette.includes(v)) { cx.fillStyle = "rgba(221,92,229,.45)"; cx.fillRect(c, r, 1, 1); }
+  }
+  cx.lineWidth = 1 / g * 2;
+  for (const f of findings) {
+    if (f.tag === 6) { // hairline run — along its axis from the start cell
+      cx.strokeStyle = "#ff5b6e"; cx.beginPath();
+      if (f.axis === 0) { cx.rect(f.col + .5, f.row + .5, f.len - 1, 1 - 1); }
+      else { cx.rect(f.col + .5, f.row + .5, 1 - 1, f.len - 1); }
+      cx.stroke();
+    } else if (f.tag === 7) { // dither window
+      cx.strokeStyle = "#ff9a5b"; cx.strokeRect(f.col + .5, f.row + .5, f.extent - 1, f.extent - 1);
+    } else if (f.tag === 4) { // out of bounds — ring the cell if it landed inside after mapping
+      cx.strokeStyle = "#f1df29"; cx.strokeRect(f.col + .5, f.row + .5, 1 - 1, 1 - 1);
+    }
+  }
+  if (src && src.cells > 0) { // margin ring — hatch the zone that must stay empty
+    const m = cfg.minMargin;
+    if (m > 0) {
+      cx.strokeStyle = "rgba(126,140,133,.8)";
+      cx.setLineDash([1, 1]);
+      cx.strokeRect(m + .5, m + .5, g - 2 * m - 1, g - 2 * m - 1);
+      cx.setLineDash([]);
+    }
+  }
+}
+function drawSrc(cv, src) {
+  const w = Math.min(src.dim, 256);
+  cv.width = w; cv.height = w;
+  const cx = cv.getContext("2d");
+  cx.imageSmoothingEnabled = false;
+  cx.drawImage(src.canvas, 0, 0, w, w);   // scaled draw — a raw byte slice of a >256px source renders garbage
+}
+
+/* ── findings table: gate verdicts first, decode-side rows labelled as such ── */
+function render(verdict, decodeFindings, cfg) {
+  const v = document.getElementById("verdict");
+  const uiFails = decodeFindings.filter(f => f.level === "fail");
+  v.className = "verdict " + (verdict.pass && !uiFails.length ? "pass" : "fail");
+  v.textContent = verdict.pass && !uiFails.length
+    ? "PASS — layer is deployable as configured"
+    : "FAIL — " + verdict.findings.length + " gate finding(s)" + (uiFails.length ? ", " + uiFails.length + " decode issue(s)" : "");
+  document.getElementById("stats").innerHTML =
+    `<b>${verdict.cells}</b> filled cells · <b>${verdict.rects}</b> rects after RLE (limit ${cfg.maxRects}) · ` +
+    `grid ${cfg.grid} · ${cfg.palette.length ? cfg.palette.length + " locked colours" : "palette check disabled"}`;
+  const body = document.getElementById("fbody");
+  body.innerHTML = "";
+  const row = (name, detail, fix, autofix, ui) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td class="tag${ui ? "" : ""}">${ui ? '<span style="color:#ff9a5b">decode</span> · ' : ""}${name}${autofix ? ' <span class="afix">auto-fixable</span>' : ""}</td><td>${detail}</td><td class="fix">${fix || "—"}</td>`;
+    body.appendChild(tr);
+  };
+  for (const f of verdict.findings) {
+    const t = TAGS[f.tag]; if (!t) continue;
+    row(t.name, t.detail(f), t.fix, t.autofix, false);
+  }
+  for (const f of decodeFindings) row(f.name, f.detail, f.fix, false, true);
+  document.getElementById("findings").style.display = verdict.findings.length || decodeFindings.length ? "block" : "none";
+}
+
+/* ── the entry point — drop event AND window.__gateHandleFile share this ───── */
+async function handleFile(file) {
+  if (!wasm) { render({ pass: false, findings: [], cells: 0, rects: 0 },
+    [{ level: "fail", name: "gate unavailable", detail: "WASM did not load; nothing is faked", fix: "serve over http(s), or reload" }], readCfg()); return; }
+  const cfg = readCfg();
+  const decode = [];
+  try { var src = await decodePNG(file); } catch (e) {
+    render({ pass: false, findings: [], cells: 0, rects: 0 },
+      [{ level: "fail", name: "undecodable", detail: String(e.message || e), fix: "export as PNG" }], cfg); return;
+  }
+  if (src.dim !== src.h) decode.push({ level: "fail", name: "not square", detail: `${src.dim}×${src.h} — the grid is square`, fix: "re-export square" });
+  if (src.dim > 255) decode.push({ level: "fail", name: "too large", detail: `${src.dim}px — a cell grid tops out at 255`, fix: "re-export at grid resolution (or a multiple)" });
+  if (decode.some(d => d.level === "fail" && (d.name === "not square" || d.name === "too large"))) {
+    render({ pass: false, findings: [], cells: 0, rects: 0 }, decode, cfg); return;
+  }
+  const { cells, grid, block, softAlpha } = mapCells(src.data, src.dim, cfg.grid);
+  if (softAlpha > 0) decode.push({ level: "warn", name: "soft alpha", detail: `${softAlpha} pixels are semi-transparent — a soft matte destroys hard-edged pixel art (spec §4)`, fix: "binary alpha only: fully opaque or fully transparent" });
+  if (block > 1) decode.push({ level: "ok-row", name: "downsampled", detail: `${src.dim}px → ${grid} cells by ${block}×${block} block majority`, fix: "" });
+  const verdict = runGate(cells, grid, cfg);
+  drawPreview(document.getElementById("preview"), cells, grid, verdict.findings, cfg, src);
+  drawSrc(document.getElementById("src"), src);
+  render(verdict, decode, cfg);
+}
+window.__gateHandleFile = handleFile;   // the drop handler below calls exactly this
+
+/* ── ?selftest — the page's own controls (law 8x: exhibit the failure too) ──
+   Synthesizes each case as a real PNG, runs it through the SAME handleFile the
+   drop event calls, and renders the receipt table. The expected strings are
+   the specification; a case that stops failing must turn this table red. */
+if (new URLSearchParams(location.search).has("selftest")) {
+  (async () => {
+    // wait for the wasm or the first case would read as "gate unavailable"
+    for (let i = 0; i < 50 && !wasm; i++) await new Promise(r => setTimeout(r, 100));
+    const makePng = async (size, paint) => {
+      const cv = document.createElement("canvas");
+      cv.width = size; cv.height = size;
+      paint(cv.getContext("2d"), size);
+      const blob = await new Promise(res => cv.toBlob(res, "image/png"));
+      return new File([blob], "case.png", { type: "image/png" });
+    };
+    const px = (cx, x, y, r, g, b, a = 255) => { cx.fillStyle = `rgba(${r},${g},${b},${a / 255})`; cx.fillRect(x, y, 1, 1); };
+    const block = (cx, x0, y0, r, g, b, a) => { for (let y = y0; y < y0 + 4; y++) for (let x = x0; x < x0 + 4; x++) px(cx, x, y, r, g, b, a); };
+    const pal = document.getElementById("palette");
+    const cases = [
+      ["clean pass", "", async () => await makePng(48, cx => block(cx, 8, 8, 255, 0, 0)), ["PASS"]],
+      ["off-palette + auto-fixable", "ff0000, 0000ff", async () => await makePng(48, cx => block(cx, 8, 8, 250, 5, 5)), ["off-palette", "auto-fixable"]],
+      ["hairline (flat-top, horizontal)", "", async () => await makePng(48, cx => { for (let x = 10; x < 20; x++) px(cx, x, 24, 0, 255, 0); }), ["hairline"]],
+      ["dither window", "", async () => await makePng(48, cx => { for (let y = 8; y < 16; y++) for (let x = 8; x < 16; x++) if ((x + y) % 2 === 0) px(cx, x, y, 0, 255, 0); }), ["dither"]],
+      ["margin on top edge", "", async () => await makePng(48, cx => block(cx, 20, 0, 0, 255, 0)), ["margin"]],
+      ["grid mismatch 50px vs 48", "", async () => await makePng(50, cx => block(cx, 8, 8, 0, 255, 0)), ["grid mismatch"]],
+      ["soft alpha (decode-side)", "", async () => await makePng(48, cx => block(cx, 8, 8, 0, 255, 0, 128)), ["soft alpha"]],
+    ];
+    const rows = [];
+    let passN = 0;
+    for (const [name, palette, make, expect] of cases) {
+      pal.value = palette;
+      await handleFile(await make());
+      const verdictNow = document.getElementById("verdict").textContent;
+      const txt = verdictNow + " · " +
+        [...document.querySelectorAll("#fbody tr")].map(tr => tr.textContent.replace(/\s+/g, " ")).join(" | ");
+      const ok = expect.every(e => txt.toLowerCase().includes(e.toLowerCase()));
+      if (ok) passN++;
+      rows.push(`<tr><td>${ok ? "ok" : "FAIL"}</td><td>${name}</td><td class="note">expect: ${expect.join(", ")} — got: ${verdictNow.replace(/<[^>]*>/g, "").slice(0, 120)}</td></tr>`);
+    }
+    pal.value = "";
+    document.getElementById("verdict").className = "verdict " + (passN === cases.length ? "pass" : "fail");
+    document.getElementById("verdict").textContent = `SELF-TEST ${passN}/${cases.length} — ` +
+      (passN === cases.length ? "every case behaved as specified" : "a control stopped failing; do not trust this build");
+    document.getElementById("stats").textContent = "self-test mode — synthesis, real decode, real WASM call, no drop needed";
+    document.getElementById("findings").style.display = "block";
+    document.getElementById("fbody").innerHTML = rows.join("");
+  })();
+}
+
+const dz = document.getElementById("drop"), fi = document.getElementById("file");
+dz.addEventListener("click", () => fi.click());
+fi.addEventListener("change", () => fi.files[0] && handleFile(fi.files[0]));
+["dragenter", "dragover"].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add("ready"); }));
+["dragleave", "drop"].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove("ready"); }));
+dz.addEventListener("drop", e => { const f = e.dataTransfer.files[0]; if (f) handleFile(f); });
+</script>
+</body>
+</html>
