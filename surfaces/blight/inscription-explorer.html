@@ -81,6 +81,20 @@
     </div>
   </div>
 
+  <div class="note" style="max-width:760px;border:1px solid var(--line);border-radius:8px;padding:12px;margin-top:16px">
+    <b style="color:var(--accent2)">Market — deliberately not live yet.</b><br>
+    Trading inscriptions is not a UI problem, it is a settlement problem. On this standard a
+    transfer of a <i>non-exact-seed</i> amount dissolves locked inscriptions back into spores:
+    measured on a real wallet holding five, sending 1 whole token took it to four, and sending
+    the full balance took it to zero. A same-seed collision is worse — it dissolves the piece
+    being sold <i>plus unrelated ones</i>, and does not revert.<br><br>
+    So a market here needs one-inscription-per-address custody, exact-seed settlement, and a
+    recipient collision check — and any address that holds art must never also handle fee
+    balances, or the first fee sweep dissolves what it is holding. That is being built against
+    a verified reference rather than guessed at. <b>Viewing is safe and read-only; trading ships
+    when it is proven, not when it is demoed.</b>
+  </div>
+
   <div class="note" style="max-width:760px">
     <b>Why three ABI shapes.</b> There is no single ERC-20i interface. PEPi answers on
     <code>0xa435130b</code>, the FUNGI/FROGGI/JELLI group on <code>0x422b9e23</code>, and TRUFFI on
