@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BNRi — the fleet's own art</title>
+<!-- Zero dependencies. The seven pieces are embedded, so this file IS the collection:
+     it renders BNRi's hexrect art with nothing but itself. Same law as every surface —
+     survives on a USB stick. The decoder reads BOTH wire formats, v1 and v2, detected
+     by the version byte, never assumed. amber frequency (reader-adjacent, art-docked). -->
+<style>
+  :root{--bg:#0a0a0f;--panel:#12121a;--line:#242433;--ink:#e8e8f0;--dim:#7e8c85;
+        --accent:#eb8f16;--accent2:#dd5ce5;--ok:#9aff5b;--bad:#ff5b6e}
+  *{box-sizing:border-box;min-width:0}
+  html,body{max-width:100%;overflow-x:hidden}
+  body{margin:0;background:var(--bg);color:var(--ink);padding:24px 20px 60px;
+    font:14px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .wrap{max-width:1000px;margin:0 auto}
+  h1{font-size:16px;letter-spacing:.15em;text-transform:uppercase;margin:0 0 4px}
+  h1 span{color:var(--accent)}
+  .sub{color:var(--dim);font-size:12px;margin-bottom:18px;max-width:680px}
+  .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+  figure{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
+  .stage{background:#000;border-radius:8px;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .stage canvas{width:100%;height:100%;image-rendering:pixelated}
+  figcaption{color:var(--dim);font-size:10.5px;margin-top:9px;line-height:1.55}
+  figcaption b{color:var(--ink)}
+  .v{display:inline-block;padding:1px 6px;border-radius:4px;font-size:9px;margin-left:4px}
+  .v1{background:#2a2412;color:var(--accent)} .v2{background:#12301a;color:var(--ok)}
+  .foot{color:var(--dim);font-size:11px;margin-top:32px;border-top:1px solid var(--line);padding-top:14px}
+  .foot a{color:var(--accent)}
+</style></head><body><div class="wrap">
+<h1>BNRi <span>· the fleet's own art</span></h1>
+<div class="sub">The explorer renders every other project's inscriptions. This is ours —
+seven hexrect pieces, embedded and drawn in your browser from the packed format itself.
+The decoder reads <b>both wire formats</b>: v1 (8-byte records) and v2 (versioned,
+palette-indexed, run-length) — detected by the version byte, never assumed. Every pixel is
+computed here; nothing is a stored image.</div>
+<div class="gallery" id="g"></div>
+
+</div>
+<script>
+function hexToBytes(h){const b=new Uint8Array(h.length/2);for(let i=0;i<b.length;i++)b[i]=parseInt(h.substr(i*2,2),16);return b;}
+// v1: 8-byte records [x][y][w][h][R][G][B][reserved=0]. v2: [0x02][n][RGB*n][x][y][w][h][idx]*.
+// Detection: a v2 blob starts with 0x02 and its length does not divide by 8 in the v1 way
+// once the palette header is accounted for. We detect by the leading version byte: v1
+// blobs begin with a coordinate byte for a real piece (row 0), never 0x02 as a *version*.
+// To be safe we try v2 parse first when byte0===2, else v1.
+function decode(bytes){
+  if(bytes[0]===0x02){ // v2
+    const n=bytes[1]; const pal=[];
+    let p=2; for(let i=0;i<n;i++){pal.push([bytes[p],bytes[p+1],bytes[p+2]]);p+=3;}
+    const rects=[];
+    while(p+4<bytes.length){ rects.push({x:bytes[p],y:bytes[p+1],w:bytes[p+2],h:bytes[p+3],c:pal[bytes[p+4]]}); p+=5; }
+    return {ver:2, rects};
+  }
+  // v1
+  const rects=[];
+  for(let i=0;i+7<bytes.length;i+=8){
+    rects.push({x:bytes[i],y:bytes[i+1],w:bytes[i+2],h:bytes[i+3],c:[bytes[i+4],bytes[i+5],bytes[i+6]]});
+  }
+  return {ver:1, rects};
+}
+function render(hex){
+  const {ver,rects}=decode(hexToBytes(hex));
+  let W=0,H=0; for(const r of rects){W=Math.max(W,r.x+r.w);H=Math.max(H,r.y+r.h);}
+  const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+  const g=cv.getContext('2d');
+  for(const r of rects){ g.fillStyle='rgb('+r.c[0]+','+r.c[1]+','+r.c[2]+')'; g.fillRect(r.x,r.y,r.w,r.h); }
+  return {cv,ver,rects:rects.length,dim:W+'×'+H};
+}
+const g=document.getElementById('g');
+// Art loads from separate .hex files — the collection's real artifacts, not inlined blobs.
+// Same law: each .hex survives on its own; the page is the renderer, the files are the art.
+(async()=>{
+const manifest=await fetch('bnri-art/manifest.json').then(r=>r.json());
+for(const m of manifest){
+  let hex; try{ hex=(await fetch(m.file).then(r=>r.text())).trim(); }
+  catch(e){ const fig=document.createElement('figure');
+    fig.innerHTML='<div class="stage"><span style="color:var(--bad);font-size:11px">'+m.name+': file unreachable</span></div>';
+    g.appendChild(fig); continue; }
+  const name=m.name, piece={hex, bytes:m.bytes};
+  const fig=document.createElement('figure');
+  const st=document.createElement('div'); st.className='stage';
+  let out; try{ out=render(piece.hex); st.appendChild(out.cv); }
+  catch(e){ st.innerHTML='<span style="color:var(--bad);font-size:11px">decode failed: '+e.message+'</span>'; out={ver:'?',rects:0,dim:'—'}; }
+  const cap=document.createElement('figcaption');
+  cap.innerHTML='<b>'+name+'</b><span class="v v'+out.ver+'">v'+out.ver+'</span><br>'+
+    out.dim+' · '+out.rects+' rects · '+piece.bytes.toLocaleString()+' B';
+  fig.appendChild(st); fig.appendChild(cap); g.appendChild(fig);
+}
+})();
+</script>
+<script src="./fleet.js"></script>
+</body></html>

@@ -1,0 +1,37 @@
+[
+ {
+  "name": "bqueen bee genesis 96x96",
+  "file": "bnri-art/001_bqueen_bee_genesis_96x96.hex",
+  "bytes": 16216
+ },
+ {
+  "name": "reflector larva",
+  "file": "bnri-art/002_reflector_larva.hex",
+  "bytes": 9496
+ },
+ {
+  "name": "reflector pupa",
+  "file": "bnri-art/003_reflector_pupa.hex",
+  "bytes": 15776
+ },
+ {
+  "name": "Reflector Worker Bee (Level 3) (1)",
+  "file": "bnri-art/004_reflector_worker_bee_level_3_1.hex",
+  "bytes": 14368
+ },
+ {
+  "name": "Reflector Forager Bee (Level 4)",
+  "file": "bnri-art/005_reflector_forager_bee_level_4.hex",
+  "bytes": 20136
+ },
+ {
+  "name": "Reflector Queen's Guard (Level 5)",
+  "file": "bnri-art/006_reflector_queen_s_guard_level_5.hex",
+  "bytes": 16792
+ },
+ {
+  "name": "Manifestor Larva (Level 1)",
+  "file": "bnri-art/007_manifestor_larva_level_1.hex",
+  "bytes": 17344
+ }
+]
