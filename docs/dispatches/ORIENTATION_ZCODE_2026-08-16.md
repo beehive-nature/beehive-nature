@@ -189,6 +189,73 @@ their fixes. Usable today, offline, zero credits. Same code as the LaunchPad's d
 
 ---
 
+## 7a · LANE R-1 · THE bBuzz RELAY ON THE ORACLE BOX (staged, unstarted)
+
+The founder's current priority and the thing that unblocks him today. Scoped here rather
+than scripted, because **Seat 3 has not read buzz's deployment path** and will not specify
+a deploy for software whose build it has not opened. **Read first, then write the script.**
+
+### What is known
+
+| | |
+|---|---|
+| shape | Axum/WebSocket **Nostr relay**, self-hosted |
+| stores | **Postgres 17** (events, monthly RANGE-partitioned; channels; workflows; audit log) + **Redis 7** (pub/sub fan-out, presence, typing) + **S3-compatible media** |
+| box | `ssh oracle` works. 4 CPU, 23Gi RAM, **39G free disk**, no GPU |
+| source | the fork, `skaists/buzz`, synced 2026-08-16 (`ahead 2, behind 0`) |
+| auth | **NIP-42 AUTH** exists (`"No AUTH challenge received from relay"` is in the shipped binary) |
+
+### Four design decisions, each with its reason
+
+1. **A hostname the founder controls — never a `*.buzz.xyz` subdomain.** This is the whole
+   point. His building's wifi silently kills TLS to `buzz.xyz` **by SNI**: TCP connects,
+   the handshake dies, `curl` exits 35, and a VPN "fixes" it. One filter rule takes out
+   every community on that apex simultaneously. A relay on his own hostname has nothing
+   for that rule to match. *(Verified: same Cloudflare IP, `cloudflare.com` and
+   `example.com` SNIs return certs; all three `buzz` SNIs return none.)*
+2. **Media does not live on this disk.** 39G is the binding constraint, not RAM. Point
+   S3-compatible storage at **Autonomi or real S3** from day one. Running MinIO locally
+   fills the box and forces a migration later.
+3. **Postgres partitions events monthly** — plan retention before launch, not after the
+   first partition fills.
+4. **NIP-42 AUTH is the portability knob.** Requiring auth lets a community refuse an
+   `npub`. The founder's stated goal is a **bDiD that carries across all bBuzz
+   communities**, and a Nostr key is portable *by protocol* — the only way to lose that is
+   to gate on a registry. **Set this deliberately; do not inherit a default.**
+
+### Script shape — same as `oracle-setup.sh`, which is the working precedent
+
+One line for the founder, no `&&`, no quoting, no path translation:
+
+```
+wsl -e sh /mnt/c/Users/travi/<name>.sh
+```
+
+- **checks every precondition and refuses loudly** rather than half-installing
+- **nothing irreversible without him seeing it first** — package installs, firewall
+  changes and service enablement are announced before they run
+- **no key material handled** — TLS keys, DB passwords and any relay secret are generated
+  *on the box* or read from a path, never passed through a prompt or a transcript
+- **idempotent** — safe to re-run; existing config is detected and left alone
+
+### Unknowns to settle before writing a line of it
+
+- buzz's actual build and run path for `buzz-relay` (cargo profile, features, binary name)
+- its config format and required environment
+- database migration/bootstrap steps
+- ports needed, and whether Oracle Cloud's **security list** must be opened separately
+  from the OS firewall — on Oracle this is two distinct layers and forgetting the cloud
+  one is the classic failure
+- TLS: `wss://` needs a certificate. Let's Encrypt on the box, or terminate at a proxy
+
+### Verification, when it stands up
+
+The founder's own client must connect from the network that was blocking him — **that is
+the acceptance test**, not a local `curl` on the box. The relay is only fixed if it works
+from the wifi that broke the last one.
+
+---
+
 ## 8 · ISSUING ORDERS
 
 Dispatches land in `beehive-nature/docs/dispatches/`. **It is a multi-seat bus, not a
