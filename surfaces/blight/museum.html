@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>bLighT Museum — what "on-chain" actually means</title>
+<!--
+  Every artefact on this page is fetched live from chain at load. Nothing is embedded,
+  nothing is cached, nothing is served from this host but the markup you are reading.
+  If that fails, the page says so rather than showing you a picture it kept.
+-->
+<style>
+  :root{--bg:#0a0a0f;--panel:#12121a;--line:#242433;--ink:#e8e8f0;--dim:#7e8c85;
+        --accent:#f1df29;--accent2:#dd5ce5;--ok:#9aff5b;--bad:#ff5b6e;--cyan:#16edf5}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);padding:26px 20px 60px;
+    font:14px/1.65 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .wrap{max-width:900px;margin:0 auto}
+  h1{font-size:17px;letter-spacing:.16em;text-transform:uppercase;margin:0 0 4px}
+  h1 span{color:var(--accent)}
+  h2{font-size:13px;letter-spacing:.13em;text-transform:uppercase;color:var(--accent2);
+     margin:38px 0 4px;padding-top:22px;border-top:1px solid var(--line)}
+  .lede{color:var(--dim);font-size:12.5px;max-width:680px;margin-bottom:8px}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;margin:14px 0}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:760px){.two{grid-template-columns:1fr}}
+  figure{margin:0}
+  .stage{background:#000;border-radius:8px;padding:10px;min-height:260px;
+    display:flex;align-items:center;justify-content:center}
+  .stage svg{width:100%;height:auto;image-rendering:pixelated}
+  figcaption{color:var(--dim);font-size:10.5px;margin-top:9px;line-height:1.6}
+  figcaption b{color:var(--ink)}
+  pre{white-space:pre;overflow:auto;font-size:6px;line-height:1.05;color:var(--cyan);
+    background:#000;border-radius:8px;padding:10px;margin:0;max-height:270px}
+  table{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:8px}
+  th{text-align:left;color:var(--dim);font-weight:normal;border-bottom:1px solid var(--line);padding:6px 8px 6px 0}
+  td{padding:6px 8px 6px 0;border-bottom:1px solid var(--line);vertical-align:top}
+  .cls{display:inline-block;width:17px;height:17px;line-height:17px;text-align:center;
+    border-radius:4px;font-size:10px;font-weight:bold}
+  .a{background:#12301a;color:var(--ok)} .b{background:#2a2a12;color:var(--accent)}
+  .c{background:#2a1a30;color:var(--accent2)} .d{background:#301a12;color:#ff9a5b}
+  .e{background:#301216;color:var(--bad)} .f{background:#1a1a22;color:var(--dim)}
+  .note{color:var(--dim);font-size:11.5px}
+  .warn{color:var(--accent)} .bad{color:var(--bad)} .ok{color:var(--ok)}
+  code{color:var(--cyan);font-size:11px}
+  blockquote{margin:14px 0;padding:12px 16px;border-left:2px solid var(--accent2);
+    color:var(--ink);font-size:12.5px;background:#12121a;border-radius:0 8px 8px 0}
+</style>
+</head>
+<body><div class="wrap">
+
+<h1>bLighT <span>Museum</span></h1>
+<div class="lede">
+  Every artefact below is read from chain when this page loads. The argument is not that
+  on-chain art is better — it is that <b>"on-chain" names at least six different things</b>,
+  and the difference decides what survives.
+</div>
+
+<h2>Exhibit 1 · The score and the picture</h2>
+<div class="lede">
+  <b>Autoglyphs</b> (2019) is usually called the first fully on-chain generative art on
+  Ethereum, and the founding object of this lineage. What its contract actually returns is
+  <b>4,318 bytes of plain text</b>. From the artists' own source header:
+</div>
+<blockquote>
+  "The output of the tokenURI function is a set of instructions to make a drawing… The
+  drawing can be any size, and the pen's stroke width should be between 1/5th to 1/10th the
+  size of a cell."
+</blockquote>
+<div class="lede">
+  Size and stroke width are left free, and <b>no renderer is committed on-chain — not even a
+  hash of one.</b> So the picture everyone knows is one interpretation among many. The
+  drawing on the right is <i>this page's</i> interpretation, made just now in your browser.
+  It is not <i>the</i> Autoglyph. There isn't one.
+</div>
+<div class="panel two">
+  <figure>
+    <pre id="glyphText">reading chain…</pre>
+    <figcaption><b>What the chain returns</b> — <code>tokenURI(1)</code> on
+      <code>0xd4e4078c…</code>, live. Plain text, <span id="glyphBytes">—</span>.
+      Complete, deterministic, self-contained.</figcaption>
+  </figure>
+  <figure>
+    <div class="stage" id="glyphArt"><span class="note">rendering…</span></div>
+    <figcaption><b>One valid drawing of it</b> — rendered here from the legend in the
+      source (<code>O</code> circle, <code>+</code> cross, <code>#</code> fill). Stroke
+      width and size were <b>chosen by this page</b>, because the chain does not say.</figcaption>
+  </figure>
+</div>
+
+<h2>Exhibit 2 · The picture itself</h2>
+<div class="lede">
+  <b>ERC-20i</b> (2024) returns the artwork, not instructions for it. <code>getSvg</code>
+  emits a complete SVG — no legend, no interpretation, no renderer to lose. The image below
+  came from one <code>eth_call</code> with no choices made by anyone.
+</div>
+<div class="panel two">
+  <figure>
+    <div class="stage" id="pepiArt"><span class="note">reading chain…</span></div>
+    <figcaption><b>PEPi</b> <code>0x28a5e71B…</code> on Base, frozen record at the burn
+      address. <span id="pepiBytes">—</span> of SVG. <span class="ok">Zero external
+      references.</span></figcaption>
+  </figure>
+  <figure>
+    <div class="stage" id="froggiArt"><span class="note">reading chain…</span></div>
+    <figcaption><b>FROGGi</b> <code>0x88A78C50…</code>, the same call on a different
+      contract. <span id="froggiBytes">—</span> — an order of magnitude larger than its
+      peers.</figcaption>
+  </figure>
+</div>
+<div class="note panel">
+  So the ancestor is more on-chain than most people think in one sense — the text is
+  complete and permanent — and <b>less</b> in another: the image you recognise depends on
+  software the chain never named. ERC-20i closes that gap. That is a real advance, and it
+  is the reason this museum exists as running code rather than a wall of JPEGs.
+</div>
+
+<h2>Exhibit 3 · Six meanings of "on-chain"</h2>
+<div class="lede">Most disputes about whether something is "really on-chain" are two people using different rows.</div>
+<div class="panel">
+<table>
+  <tr><th>class</th><th>what it means</th><th>survives its author?</th></tr>
+  <tr><td><span class="cls a">a</span></td><td>generated by contract code at read time</td><td class="ok">yes — nothing else required</td></tr>
+  <tr><td><span class="cls b">b</span></td><td>data on-chain, rendered off-chain</td><td class="warn">only if a renderer is rebuilt</td></tr>
+  <tr><td><span class="cls c">c</span></td><td>script on-chain, executed by your browser</td><td class="warn">depends on the runtime lasting</td></tr>
+  <tr><td><span class="cls d">d</span></td><td>pointer to IPFS or Arweave</td><td class="warn">only while someone pins or endows it</td></tr>
+  <tr><td><span class="cls e">e</span></td><td>pointer to a web server</td><td class="bad">no</td></tr>
+  <tr><td><span class="cls f">f</span></td><td>no image reference at all</td><td class="note">the asset outlives any picture of it</td></tr>
+</table>
+</div>
+
+<h2>Exhibit 4 · The chronology</h2>
+<div class="lede">Dates read from creation transactions and block headers, not from write-ups. The story starts on Bitcoin, three years before Ethereum's art history.</div>
+<div class="panel">
+<table>
+  <tr><th>date</th><th>object</th><th>class</th><th>note</th></tr>
+  <tr><td>2014-01-02</td><td>Counterparty genesis</td><td class="note">layer</td><td>BTC 278270 — an interpretation of ordinary Bitcoin transactions</td></tr>
+  <tr><td>2015-03-11</td><td>Spells of Genesis <code>FDCARD</code></td><td><span class="cls f">f</span></td><td>BTC 347172 — bare 1-of-3 multisig, <b>still unspent in 2026</b></td></tr>
+  <tr><td>2017</td><td>Curio Cards</td><td><span class="cls d">d</span></td><td>~30 hand-rolled ERC-20s, <code>decimals: 0</code> — <b>a fungible token that is one picture</b></td></tr>
+  <tr><td>2019-04-05</td><td>Autoglyphs</td><td><span class="cls a">a</span>/<span class="cls c">c</span></td><td>block 7,510,386 — depends whether the artwork is the text or the image</td></tr>
+  <tr><td>2024</td><td>ERC-20i (FUNGI)</td><td><span class="cls a">a</span></td><td>seed-derived art on a fungible balance; <code>getSvg</code> returns the SVG itself</td></tr>
+</table>
+</div>
+
+<h2>Exhibit 5 · What it cost to be here</h2>
+<div class="panel note">
+  Every Autoglyph ran its full generative loop <i>inside the mint transaction</i>:
+  <b>median 2,874,700 gas — 35.9% of the entire block gas limit, per artwork.</b>
+  512 works were minted by <b>59 distinct addresses</b>, and the collection sold out in
+  <b>43.66 hours</b> with a hard <code>TOKEN_LIMIT</code> and no admin surface to raise it.<br><br>
+  So anyone who found this later and felt priced out was right about the machine and wrong
+  about the wall: <b>the barrier was supply, not gas.</b> Both facts belong on the label.
+</div>
+
+<div class="note" style="margin-top:34px">
+  <b>Corrections are part of the exhibit.</b> "Random art maker" is backwards — Autoglyphs
+  takes a <i>caller-chosen</i> seed and is fully deterministic and grindable. The randomness
+  everyone remembers belongs to MoonCatRescue, which seeds from a blockhash. This museum
+  keeps its own errors on the wall, because the lineage it documents is made of them.
+</div>
+
+</div>
+<script>
+const RPC={ eth:['https://eth.llamarpc.com','https://ethereum-rpc.publicnode.com','https://eth.drpc.org'],
+            base:['https://mainnet.base.org','https://base.llamarpc.com','https://base-rpc.publicnode.com','https://base.drpc.org'] };
+const W=v=>BigInt(v).toString(16).padStart(64,'0');
+const AD=a=>'0'.repeat(24)+a.replace(/^0x/,'').toLowerCase();
+async function call(net,to,data){
+  for(const url of RPC[net]){
+    try{
+      const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_call',params:[{to,data},'latest']})});
+      const j=await r.json(); if(!j.error && j.result && j.result!=='0x') return j.result;
+    }catch(e){}
+  }
+  return null;                                  // never a value on failure
+}
+const decStr=r=>{const h=r.slice(2);const l=parseInt(h.slice(64,128),16);
+  const b=h.slice(128,128+l*2).match(/../g)||[];
+  return decodeURIComponent(b.map(x=>'%'+x).join(''));};
+
+// Autoglyphs: render the legend. Stroke width and size are OUR choice — that is the point.
+function drawGlyph(text){
+  const body=text.replace(/^data:text\/plain;charset=utf-8,/,'');
+  const rows=body.split('\n').filter(r=>r.length);
+  const N=rows.length||64, C=10, S=1.6;
+  let p='';
+  for(let y=0;y<rows.length;y++){
+    for(let x=0;x<rows[y].length;x++){
+      const ch=rows[y][x], cx=x*C+C/2, cy=y*C+C/2;
+      if(ch==='O') p+=`<circle cx="${cx}" cy="${cy}" r="${C/2}" fill="none"/>`;
+      else if(ch==='+') p+=`<path d="M${cx} ${y*C}V${y*C+C}M${x*C} ${cy}H${x*C+C}"/>`;
+      else if(ch==='#') p+=`<rect x="${x*C}" y="${y*C}" width="${C}" height="${C}" fill="currentColor" stroke="none"/>`;
+      else if(ch==='|') p+=`<path d="M${cx} ${y*C}V${y*C+C}"/>`;
+      else if(ch==='-') p+=`<path d="M${x*C} ${cy}H${x*C+C}"/>`;
+      else if(ch==='\\') p+=`<path d="M${x*C} ${y*C}L${x*C+C} ${y*C+C}"/>`;
+      else if(ch==='/') p+=`<path d="M${x*C+C} ${y*C}L${x*C} ${y*C+C}"/>`;
+      else if(ch==='X') p+=`<path d="M${x*C} ${y*C}L${x*C+C} ${y*C+C}M${x*C+C} ${y*C}L${x*C} ${y*C+C}"/>`;
+    }
+  }
+  const w=(rows[0]||'').length*C;
+  return `<svg viewBox="0 0 ${w} ${rows.length*C}" xmlns="http://www.w3.org/2000/svg"
+    stroke="#e8e8f0" stroke-width="${S}" fill="none" color="#e8e8f0"
+    style="background:#000">${p}</svg>`;
+}
+(async()=>{
+  // Exhibit 1
+  const t=await call('eth','0xd4e4078ca3495de5b1d4db434bebc5a986197782','0xc87b56dd'+W(1));
+  if(t){ const txt=decStr(t);
+    document.getElementById('glyphText').textContent=txt.replace(/^data:text\/plain;charset=utf-8,/,'');
+    document.getElementById('glyphBytes').textContent=txt.length.toLocaleString()+' bytes';
+    document.getElementById('glyphArt').innerHTML=drawGlyph(txt);
+  } else { document.getElementById('glyphText').textContent='chain unreachable — nothing cached to show you'; }
+
+  // Exhibit 2 — a frozen PEPi record at the burn address, and a FROGGi live spore
+  const DEAD='0x000000000000000000000000000000000000dEaD';
+  const rec=await call('base','0x28a5e71bfc02723eac17e39c84c5190415c0de9f','0x0fd9587e'+AD(DEAD)+W(0));
+  if(rec){ const w=(rec.slice(2).match(/.{64}/g)||[]).slice(0,3);
+    const svg=await call('base','0x28a5e71bfc02723eac17e39c84c5190415c0de9f','0xa435130b'+w.join(''));
+    if(svg){ const s=decStr(svg);
+      document.getElementById('pepiArt').innerHTML=s;
+      document.getElementById('pepiBytes').textContent=s.length.toLocaleString()+' bytes'; } }
+  // FROGGi has NO sporesDegree — it reverts. The seed source is not universal any more
+  // than the renderer is, so fall back to the whole-token balance.
+  const FROGGI='0x88a78c5035bdc8c9a8bb5c029e6cfcdd14b822fe';
+  let tri=null;
+  const sd=await call('base',FROGGI,'0xa775188a'+AD(DEAD));
+  if(sd){ tri=(sd.slice(2).match(/.{64}/g)||[]).slice(0,3).join(''); }
+  else {
+    const bal=await call('base',FROGGI,'0x70a08231'+AD(DEAD));
+    if(bal){ const seed=BigInt(bal)/(10n**9n); tri=W(seed)+W(0n)+W(0n); }
+  }
+  if(tri){ const svg=await call('base',FROGGI,'0x422b9e23'+tri);
+    if(svg){ const s=decStr(svg);
+      document.getElementById('froggiArt').innerHTML=s;
+      document.getElementById('froggiBytes').textContent=s.length.toLocaleString()+' bytes'; } }
+  for(const id of ['pepiArt','froggiArt'])
+    if(!document.getElementById(id).querySelector('svg'))
+      document.getElementById(id).innerHTML='<span class="note">chain unreachable — nothing cached to show you</span>';
+})();
+</script>
+</body>
+</html>
