@@ -54,12 +54,17 @@ uncertainty is one-way.
 
 Six things, in dependency order. Detail in §5 and §6.
 
-1. **A keying decision, and it is the expensive-later one.** Make BNRi's art a *pure
-   deterministic function of `(address, balance)`* — Fungi's model — so any verifier can
-   reproduce it from chain state with **zero contract reads**. PEPi's model (a stored
-   `seed2` and an `extra` derived from an incrementing on-chain `_random_nonce`) is *not*
-   off-chain derivable; every render needs a contract read. Choose now; it is a storage
-   layout, and storage layouts do not get changed after deploy.
+1. **A keying decision, and it is the expensive-later one.** BNRi's art must be a *pure
+   deterministic function of state any RPC caller can read* — no private inputs, no
+   signer-only values, no off-chain oracle. **See §5.0**, which corrects an earlier and
+   stricter version of this item.
+   **What the two models actually cost:** Fungi's `(address, balance)` keying is
+   derivable off-chain with **zero contract reads**. PEPi's (a stored `seed2` and an
+   `extra` from an incrementing `_random_nonce`) is **not derivable — but it is
+   readable**, which is the property verification needs. The trade is *one `eth_call`
+   against event-driven art*, not *verifiable against unverifiable*. Both are sound;
+   pick on how much the art should react to history. Choose now either way — it is a
+   storage layout, and storage layouts do not get changed after deploy.
 2. **A licence declared *in* the contract**, not only in an SPDX header on the source. §5.4.
 3. **A Solidity toolchain the project does not currently have.** `find . -name '*.sol'`
    over the tree returns **0 files**; there is no `foundry.toml`, no `hardhat.config`, no
@@ -270,7 +275,50 @@ is a storage-layout decision.
 
 We control this design. These are the things to do differently.
 
-### 5.1 Key the art on `(address, balance)` and nothing else — decide now
+### 5.0 CORRECTION 2026-08-15 — §5.1 below states the requirement TOO STRONGLY
+
+**goose's PEPi seed verification (`8ff40f6`) shows the constraint this document argues for
+is stricter than the property it needs, and would cost BNRi its most interesting mechanics
+for nothing.**
+
+PEPi's determinism decomposes into **three separable streams**, not one:
+
+| stream | keyed to | behaviour |
+|---|---|---|
+| `seed` | **balance** | whole-token snapshot; zeroes below 1 whole token, restores on the way back up |
+| `seed2` | **event randomness** | `RandLib.random_value(++_random_nonce)` — a separate nonce stream, rolling **per inscription event, not per balance** |
+| `extra` | **address identity** | `keccak256(account ‖ nonce)` — fixed per wallet, modulo inscription events |
+
+**So PEPi's art is NOT derivable from `(address, balance)` alone — and it does not need to
+be.** §5.1's requirement conflates two different things:
+
+| | requirement | what it costs |
+|---|---|---|
+| **§5.1 as written** | art **derivable** from `(address, balance)` alone | forbids event-driven variation entirely. The art could never respond to anything except a number going up |
+| **what verifier-side checking actually needs** | art **deterministic given the on-chain seeds**, and **those seeds readable** | one extra `eth_call`, and every mechanic survives |
+
+**A verifier does not have to *derive* the seeds. It reads them, renders deterministically,
+and compares.** That is the whole requirement, and **PEPi already satisfies it** — `getSvg`
+is `external view` and the seed accessor is public.
+
+**Corrected recommendation, superseding §5.1:**
+
+> **BNRi's art must be a pure deterministic function of state that any RPC caller can read.**
+> No private inputs, no signer-only values, no off-chain oracles. Event-driven randomness is
+> **permitted and encouraged**, provided the resulting seed is publicly readable.
+
+The failure mode §5.1 was reaching for is real but narrower: **art that depends on something
+a verifier cannot obtain** breaks the anti-MiM check. Event randomness stored on-chain is
+obtainable. A private input is not. **That is the line, and it is much further out than
+§5.1 drew it.**
+
+*(Methodological note worth keeping, also from `8ff40f6`: the runtime bytecode contains
+**zero** occurrences of `3b9aca00` (10⁹), because the division uses a dynamic `decimals()`
+call. **A bytecode-pattern check would have silently missed the seed's units** — this seat's
+own probe was string-extraction over bytecode, and would have found nothing. Source was
+necessary and Sourcify had it.)*
+
+### 5.1 Key the art on `(address, balance)` and nothing else — SUPERSEDED BY §5.0
 
 **Recommendation: BNRi art MUST be a pure deterministic function of `(holder address,
 whole-token balance)`, with no stored per-holder randomness and no dependence on any mutable
@@ -500,7 +548,7 @@ of exSat is now almost entirely on the write side.**
 
 | # | ruling |
 |---|---|
-| **F-1** | **Is BNRi's art keyed on `(address, balance)` alone (§5.1)?** Recommended: yes. This is the choice that is free now and a migration later, and it is what makes verifier-side checking work at all. Accept explicitly that the image changes with the balance. |
+| **F-1** | **REVISED by §5.0 — the question was wrong, not just the answer.** Verifier-side checking needs the seeds **readable**, not **derivable**; PEPi's `seed2` event randomness satisfies it via one `eth_call`, so the original framing would have banned event-driven art for no gain. **The real question: should BNRi's art react to on-chain history (`seed2`-style, one read to verify) or only to the balance (Fungi-style, zero reads)?** Recommended: **react to history** — patterning PEPi means keeping its mechanism, and the verification cost is one RPC call. Either way, accept that the image changes with the balance. Storage layout, so it is free now and a migration later. |
 | **F-2** | **Do we ask PEPi/Fungi for a grant at all?** Recommendation: **no** — §5.2 makes it moot, and §3 shows there is no one who can demonstrably grant. If yes, it is an outbound message on the founder's word, and only an explicit written grant naming the contract address counts. |
 | **F-3** | **CC0-1.0 for the BNRi artwork, declared on-chain (§5.4)?** Recommended: yes, on mechanism grounds — a verifier's render must not be an infringement. |
 | **F-4** | **What licence does the BNRi contract source ship under?** AGPL-3.0-only (kernel) vs `MIT OR Apache-2.0` (the standing SDK-edge intent in `docs/LICENSING.md`). A deployed EVM art contract is not obviously either. Seat 3 will not pick this. |
