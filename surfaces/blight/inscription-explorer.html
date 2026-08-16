@@ -879,6 +879,28 @@ async function view(){
   flush();
 }
 
+// WALLET STATE IS VISIBLE STATE. Verbal communication is ~4% of human
+// communication — connection must be shown in color AND label, never left
+// as a stale imperative ("Connect wallet" while connected is a lie told by
+// a button). Green = connected, with the address on the button itself so
+// the label carries the fact; neutral when not. Wallet events update it:
+// switching accounts or locking the wallet in-extension is reflected here
+// without a page reload (accountsChanged, chainChanged).
+// SEAM: the onboarding connect flow (Seat 3's lane) should own this state
+// when it lands — this module deliberately exposes setWalletState() on
+// window so the onboarding surface can drive the same button instead of
+// replacing it.
+function setWalletState(addr){
+  const b=$('connect');
+  if(addr){
+    b.textContent='connected · '+addr.slice(0,6)+'…'+addr.slice(-4);
+    b.style.color='var(--ok)'; b.style.borderColor='var(--ok)';
+  }else{
+    b.textContent='Connect wallet';
+    b.style.color=''; b.style.borderColor='';
+  }
+}
+window.setWalletState=setWalletState;
 async function connect(){
   if(!window.ethereum){ rows.length=0; row('wallet','no injected provider found','warn'); return flush(); }
   try{
@@ -886,8 +908,14 @@ async function connect(){
     // The wallet becomes the RPC. Each connected user brings their own endpoint, so the
     // shared public limiter stops being the ceiling on sweeps.
     walletProvider = window.ethereum;
-    if(a&&a[0]){ $('addr').value=a[0]; scanAll(); }
+    if(a&&a[0]){ setWalletState(a[0]); $('addr').value=a[0]; scanAll(); }
+    else setWalletState(null);
   }catch(e){ rows.length=0; row('wallet',String(e.message).slice(0,80),'bad'); flush(); }
+}
+// The wallet can change underneath the page: reflect it, don't poll.
+if(window.ethereum&&window.ethereum.on){
+  window.ethereum.on('accountsChanged',a=>{ if(a&&a.length){ setWalletState(a[0]); walletProvider=window.ethereum; } else { setWalletState(null); walletProvider=null; } });
+  window.ethereum.on('disconnect',()=>{ setWalletState(null); walletProvider=null; });
 }
 
 (function init(){
@@ -911,6 +939,13 @@ async function connect(){
     pool=$('rpc').value.split(',').map(s=>s.trim()).filter(Boolean); poolIdx=0; });
   $('go').onclick=view; $('scan').onclick=scanAll; $('connect').onclick=connect;
   $('addr').addEventListener('keydown',e=>{ if(e.key==='Enter') view(); });
+  // A previously-authorized wallet is shown as connected WITHOUT prompting —
+  // eth_accounts never triggers a popup; eth_requestAccounts does.
+  if(window.ethereum){
+    window.ethereum.request({method:'eth_accounts'}).then(a=>{
+      if(a&&a[0]&&!walletProvider){ walletProvider=window.ethereum; setWalletState(a[0]); }
+    }).catch(()=>{});
+  }
 })();
 </script>
 </body>
