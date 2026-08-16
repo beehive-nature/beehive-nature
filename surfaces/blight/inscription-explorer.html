@@ -670,6 +670,61 @@ function renderInscription(insc){
 }
 function escapeHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
+// ── PROOF-CARRYING READS ─────────────────────────────────────────────────────
+// A named indexer can serve anything; a verified read proves what it serves.
+// Esplora returns {block_height, merkle:[sibling hashes], pos}; the page walks
+// the Bitcoin merkle tree LOCALLY (double-SHA-256, little-endian internals,
+// sibling-left on odd index) and compares the computed root to the block's
+// merkle_root. The block hash is corroborated across every ladder host that
+// answers. Honest label: verified INCLUSION at a corroborated block hash —
+// not full header-chain SPV (that would need the ~80 MB header chain).
+const hexToBytes=h=>new Uint8Array((h.match(/../g)||[]).map(x=>parseInt(x,16)));
+const bytesToHex=b=>[...b].map(x=>x.toString(16).padStart(2,'0')).join('');
+async function sha256d(bytes){
+  const a=new Uint8Array(await crypto.subtle.digest('SHA-256',bytes));
+  return new Uint8Array(await crypto.subtle.digest('SHA-256',a));
+}
+async function verifyMerkle(txid,proof,rootHex){
+  let h=hexToBytes(txid).reverse();          // display hex is byte-reversed internal
+  let idx=proof.pos;
+  for(const sib of proof.merkle){
+    const s=hexToBytes(sib).reverse();
+    const cat=new Uint8Array(64);
+    if(idx%2===1){ cat.set(s); cat.set(h,32); }   // odd: sibling is the left pair
+    else          { cat.set(h); cat.set(s,32); }  // even: sibling is the right pair
+    h=await sha256d(cat);
+    idx=Math.floor(idx/2);
+  }
+  return bytesToHex(h.reverse())===String(rootHex).toLowerCase();
+}
+async function proofRows(txid,st){
+  if(!st||!st.confirmed||!st.block_hash) return;
+  const bh=st.block_height;
+  const proof=await esplora('/tx/'+txid+'/merkle-proof');
+  const block=await esplora('/block/'+st.block_hash);
+  if(!proof||!proof.merkle||!block||!block.merkle_root){
+    row('inclusion proof','UNAVAILABLE from the ladder — inclusion unverified, stated not implied','warn');
+    return;
+  }
+  const ok=await verifyMerkle(txid,proof,block.merkle_root);
+  row('inclusion proof', ok
+    ? 'VERIFIED locally — tx walks to merkle root '+block.merkle_root.slice(0,12)+'… of block '+bh+
+      ' ('+proof.merkle.length+' level(s), double-SHA-256 computed in this page)'
+    : 'FAILED — computed root does not match; do not trust this indexer for this tx',
+    ok?'ok':'bad');
+  let agree=0, answered=0;
+  for(const h of ESPLORA){
+    try{
+      const r=await fetch(h+'/block-height/'+bh);
+      if(r.ok){ answered++; if((await r.text()).trim()===st.block_hash) agree++; }
+    }catch(e){}
+  }
+  row('block hash corroboration', answered
+    ? agree+' / '+answered+' reachable endpoints return block '+bh+' = '+st.block_hash.slice(0,12)+'…'+(agree===answered?'':' — DISAGREEMENT; treat as unverified')
+    : 'no endpoint answered the corroboration probe — block hash uncorroborated',
+    answered&&agree===answered?'ok':'warn');
+}
+
 async function viewBitcoin(){
   rows.length=0; $('raw').textContent='';
   $('art').innerHTML='<span style="color:var(--dim);font-size:12px">reading Bitcoin via Esplora…</span>';
@@ -688,6 +743,7 @@ async function viewBitcoin(){
     row('fee',tx.fee.toLocaleString()+' sats = '+(tx.fee/1e8).toFixed(8)+' BTC');
     const inscs=inscriptionsFromTx(tx);
     row('inscriptions',inscs.length?inscs.length+' in this transaction (canonical id: txid i N)':'none — not an inscription transaction',inscs.length?'ok':'warn');
+    await proofRows(txid,st);   // verified inclusion beats a named indexer
     const rs=runestoneFromTx(tx);
     if(rs) row('runestone', rs.cenotaph?rs.note:
       (rs.edicts.length?rs.edicts.length+' edict(s): '+rs.edicts.map(e=>e.amount.toLocaleString()+' of '+e.id+' → output '+e.output).join('; '):'fields only (etch or mint)'),'ok');
