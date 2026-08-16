@@ -158,6 +158,14 @@ const CHAINS = [
   // the UI, and the host ladder exists because this museum's home network kills
   // TLS to one Esplora host by SNI while another answers (measured 2026-08-16).
   { name:'Bitcoin', id:0, btc:true, rpcs:[] },
+  // BCH anchor lane. Single keyless source measured reachable (Blockchair's
+  // LIST endpoints: blocks + global transactions; every dashboards/filtered
+  // form is gated, and the ?block= filter is DECORATIVE - it returns global
+  // rows regardless, measured 2026-08-16). The merkle branch is built
+  // CLIENT-SIDE from the block's txid group - the anchor-truth law applied.
+  // Receipt: block 964363, 164 txs, root match + walker verify + 3 tamper
+  // controls, all green (this session's transcript).
+  { name:'Bitcoin Cash', id:0, bch:true, rpcs:[] },
 ];
 // Verified addresses (EIP-55). Two of these circulate with broken checksums elsewhere.
 // `chain` indexes CHAINS. THE THREE PEPi DEPLOYMENTS ARE THE DISAMBIGUATION CASE:
@@ -360,6 +368,7 @@ async function scanAll(){
   // No collection sweep exists on Bitcoin — the address field there is a txid
   // or address, and the single view IS the sweep.
   if(CHAINS[+$('chain').value]&&CHAINS[+$('chain').value].btc) return viewBitcoin();
+  if(CHAINS[+$('chain').value]&&CHAINS[+$('chain').value].bch) return viewBCH();
   let holder=$('addr').value.trim();
   rpcUrl=$('rpc').value.trim();
   rows.length=0;
@@ -725,6 +734,163 @@ async function proofRows(txid,st){
     answered&&agree===answered?'ok':'warn');
 }
 
+// �"?�"? BITCOIN CASH MODE (BCH anchor lane) �"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?
+// BCH kept Bitcoin's merkle and tx structure, so the proof walker above
+// (verifyMerkle) is reused VERBATIM. What differs is the source: one keyless
+// endpoint family (Blockchair lists) whose `?block=` filter is decorative and
+// whose dashboards are gated - measured - so the merkle branch is built
+// CLIENT-SIDE from the block's txid group in the global list. The txid list
+// order hypothesis (global id ascending = merkle order) is not trusted: it is
+// PROVEN per query by recomputing the whole merkle root and comparing it to
+// the block's declared root before any verification is claimed.
+const BCH='https://api.blockchair.com/bitcoin-cash';
+let bchLast=0;
+async function bchGet(path){
+  // pace hard - the anonymous limiter is real (430 measured repeatedly), and a
+  // browser shares one IP with everything else the user is doing
+  const gap=Date.now()-bchLast; if(gap<700) await new Promise(r=>setTimeout(r,700-gap));
+  for(let att=0;;att++){
+    bchLast=Date.now();
+    let r;
+    try{ r=await fetch(BCH+path); }catch(e){ throw new Error('network: '+e.message); }
+    if(r.ok) return await r.json();
+    if((r.status===429||r.status===430)&&att<2){
+      row('pacing','Blockchair limiter (HTTP '+r.status+') - waiting 8s, attempt '+(att+1)+'/2','warn');
+      await new Promise(rs=>setTimeout(rs,8000)); continue;
+    }
+    throw new Error('HTTP '+r.status);
+  }
+}
+// Full merkle root from txid list (BTC/BCH rules: pair, duplicate-last-if-odd,
+// double-SHA-256, little-endian internals) - the completeness arbiter.
+async function bchRootOf(ids){
+  let cur=ids.map(h=>hexToBytes(h).reverse());
+  while(cur.length>1){
+    const nx=[];
+    for(let i=0;i<cur.length;i+=2){
+      const a=cur[i],b=i+1<cur.length?cur[i+1]:cur[i];
+      const cat=new Uint8Array(a.length+b.length); cat.set(a); cat.set(b,a.length);
+      nx.push(await sha256d(cat));
+    }
+    cur=nx;
+  }
+  return cur.length?cur[0].reverse():new Uint8Array(0);
+}
+// Branch extraction with position tracking (duplicate-last-if-odd), hex out.
+async function bchBranchOf(ids,idx){
+  let cur=ids.map(h=>hexToBytes(h).reverse()), i=idx;
+  const out=[];
+  while(cur.length>1){
+    const sib=i%2===1?cur[i-1]:(i+1<cur.length?cur[i+1]:cur[i]);
+    out.push(bytesToHex(sib.slice().reverse()));
+    const nx=[];
+    for(let k=0;k<cur.length;k+=2){
+      const a=cur[k],b=k+1<cur.length?cur[k+1]:cur[k];
+      const cat=new Uint8Array(a.length+b.length); cat.set(a); cat.set(b,a.length);
+      nx.push(await sha256d(cat));
+    }
+    cur=nx; i=Math.floor(i/2);
+  }
+  return out;
+}
+// Walk the global list (block-contiguous MOSTLY, but block ids can interleave
+// at page boundaries - measured: a "passed" row can appear while more rows of
+// the target block are still to come). Completion is COUNT-DRIVEN against the
+// block's declared transaction_count, and the merkle-root cross-check below
+// remains the final arbiter - refuse, never guess.
+async function bchWalk(txid,maxPages,fromOff,needCount){
+  const rows=[]; let blockId=null, passed=false, off=fromOff||0;
+  for(;off<maxPages*100;off+=100){
+    const pg=await bchGet('/transactions?limit=100&offset='+off);
+    if(!pg.data||!pg.data.length) break;
+    for(const t of pg.data){
+      if(t.block_id<=0) continue;
+      if(txid&&t.hash===txid) blockId=t.block_id;
+      if(blockId!==null&&t.block_id===blockId) rows.push(t);
+      else if(blockId!==null&&t.block_id<blockId) passed=true;
+    }
+    row('walk','global list page '+(off/100+1)+' - '+(blockId!==null?rows.length+' rows of block '+blockId+(passed?' (passed a lower block - interleave suspected, continuing to count)':''):'searching'),'');
+    if(!txid) break;
+    if(needCount&&blockId!==null&&rows.length>=needCount) break;
+    if(!needCount&&blockId!==null&&passed) break;
+  }
+  return {blockId,rows,off};
+}
+// The same walk as verifyMerkle above, but consuming the raw branch array +
+// position (bchBranchOf's output), mirroring the Node receipt verbatim.
+async function bchVerifyMerkle(txid,branch,pos,rootHex){
+  let h=hexToBytes(txid).reverse();
+  let idx=pos;
+  for(const sibHex of branch){
+    const s=hexToBytes(sibHex).reverse();
+    const cat=new Uint8Array(64);
+    if(idx%2===1){ cat.set(s); cat.set(h,32); }
+    else{ cat.set(h); cat.set(s,32); }
+    h=await sha256d(cat);
+    idx=Math.floor(idx/2);
+  }
+  return bytesToHex(h.reverse())===String(rootHex).toLowerCase();
+}
+async function viewBCH(){
+  rows.length=0; $('raw').textContent='';
+  $('art').innerHTML='<span style="color:var(--dim);font-size:12px">reading BCH via Blockchair lists�?�</span>';
+  row('reader','Blockchair public LIST endpoints - the only keyless BCH source measured reachable from this network. The ?block= filter is decorative (returns global rows; measured) and dashboards are gated, so the merkle branch is built client-side from the block\'s txid group - the anchor-truth law applied','warn');
+  const v=$('addr').value.trim();
+  const m=v.match(/^([0-9a-fA-F]{64})$/);
+  if(!m){ row('status','BCH mode takes a 64-hex txid (recent - within the global list window)','bad'); $('art').innerHTML=''; return flush(); }
+  const txid=m[1].toLowerCase();
+  row('txid',txid.slice(0,12)+'�?�'+txid.slice(-8));
+  let walk;
+  try{ walk=await bchWalk(txid,25); }
+  catch(e){ row('status','source unreachable ('+e.message+') - nothing cached, nothing faked','bad'); $('art').innerHTML=''; return flush(); }
+  if(walk.blockId===null){ row('status','txid not in the recent window (2,500 txs) - the keyless global list does not reach it; no older-tx endpoint is available without a key. Stated, not implied','warn'); $('art').innerHTML=''; return flush(); }
+  const B=walk.blockId;
+  // block row FIRST - hash + merkle_root + declared tx count drive completion
+  let blk=null;
+  try{ const bl=await bchGet('/blocks?limit=50'); blk=(bl.data||[]).find(b=>b.id===B); }catch(e){}
+  if(!blk){ row('block header','merkle_root not reachable for block '+B+' - inclusion CANNOT be verified now; not claimed','warn'); $('art').innerHTML=''; return flush(); }
+  // count-driven completion: block ids interleave at page boundaries (measured),
+  // so 'passed' is not proof of done - the declared count is
+  let guard=0;
+  while(blk.transaction_count&&walk.rows.length<blk.transaction_count&&walk.off<25*100&&guard++<30){
+    const more=await bchWalk(txid,25,walk.off+100,blk.transaction_count);
+    for(const t of more.rows) if(!walk.rows.some(r=>r.hash===t.hash)) walk.rows.push(t);
+    walk.off=more.off;
+  }
+  const txrow=walk.rows.find(t=>t.hash===txid);
+  row('block',B+' - declared '+blk.transaction_count+' txs, collected '+walk.rows.length,walk.rows.length>=blk.transaction_count?'ok':'warn');
+  if(walk.rows.length<blk.transaction_count){ row('completeness','could not collect the full block (window or pacing limit) - verification on partial data; REFUSED','bad'); $('art').innerHTML=''; return flush(); }
+  row('size / fee',txrow.size.toLocaleString()+' B A� '+txrow.fee.toLocaleString()+' sats'+(txrow.is_coinbase?' A� COINBASE':''));
+  row('block hash',blk.hash.slice(0,12)+'�?�');
+  // order hypothesis: global id ascending = merkle order. PROVEN per query:
+  const sorted=walk.rows.slice().sort((a,b)=>a.id-b.id);
+  const computed=bytesToHex(await bchRootOf(sorted.map(t=>t.hash)));
+  const declared=String(blk.merkle_root).toLowerCase();
+  const rootOk=computed===declared;
+  row('root cross-check', rootOk
+    ? 'client-computed merkle root over '+sorted.length+' txids == declared root '+declared.slice(0,12)+'�?� - list complete, order proven'
+    : 'computed root '+computed.slice(0,12)+'�?� != declared - the collected group is incomplete or mis-ordered; verification REFUSED',
+    rootOk?'ok':'bad');
+  if(!rootOk){ $('art').innerHTML=''; return flush(); }
+  const pos=sorted.findIndex(t=>t.hash===txid);
+  const proof=await bchBranchOf(sorted.map(t=>t.hash),pos);
+  const ok=await bchVerifyMerkle(txid,proof,pos,declared);   // the same walk as Bitcoin mode
+  row('inclusion proof', ok
+    ? 'VERIFIED locally - tx walks to merkle root '+declared.slice(0,12)+'�?� of block '+B+' ('+proof.length+' level(s), branch built client-side from txids, double-SHA-256 in this page)'
+    : 'FAILED - computed root does not match; do not trust this source for this tx',
+    ok?'ok':'bad');
+  // tamper control, run live in the page - the receipt that keeps proving itself
+  const badTx=txid.slice(0,-2)+(txid.endsWith('00')?'11':'00');
+  const tamper=!await bchVerifyMerkle(badTx,proof,pos,declared);
+  row('tamper control', tamper
+    ? 'flipped-txid variant REJECTED - the walker is load-bearing, not decorative'
+    : 'flipped txid ACCEPTED - the verification is broken; trust nothing on this page',
+    tamper?'ok':'bad');
+  row('source honesty','single keyless source (Blockchair). Bitcoin mode corroborates across three Esplora hosts; no second BCH endpoint answered this network today - inclusion is proven against THIS source\'s declared root, and the root itself is uncorroborated. Stated, not implied','warn');
+  $('art').innerHTML='<span style="color:var(--dim);font-size:12px">BCH mode: anchor reads - inclusion proof in the rows above. Inscription rendering lives in Bitcoin mode.</span>';
+  return flush();
+}
+
 async function viewBitcoin(){
   rows.length=0; $('raw').textContent='';
   $('art').innerHTML='<span style="color:var(--dim);font-size:12px">reading Bitcoin via Esplora…</span>';
@@ -800,6 +966,7 @@ async function view(){
   $('art').innerHTML='<span style="color:var(--dim);font-size:12px">reading chain…</span>';
   // Bitcoin answers a different reader — route before any EVM assumption runs
   if(CHAINS[+$('chain').value]&&CHAINS[+$('chain').value].btc) return viewBitcoin();
+  if(CHAINS[+$('chain').value]&&CHAINS[+$('chain').value].bch) return viewBCH();
   let holder=$('addr').value.trim();
   const contract=$('custom').value.trim()||$('token').value;
   rpcUrl=$('rpc').value.trim();
