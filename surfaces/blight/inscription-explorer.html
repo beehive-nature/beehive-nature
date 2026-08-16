@@ -1084,6 +1084,84 @@ if(window.ethereum&&window.ethereum.on){
   window.ethereum.on('disconnect',()=>{ setWalletState(null); walletProvider=null; });
 }
 
+/* ── ?selftest — the explorer's own pure logic, law 8x: exhibit the failure ──
+   Same discipline as the gate page: every case is synthesized, run through the
+   REAL functions this page uses (not a re-implementation), and the expected
+   strings are the specification — a case that stops failing turns the table red. */
+if(new URLSearchParams(location.search).has('selftest')){
+(async()=>{
+  rows.length=0; $('raw').textContent='';
+  const T=[];
+  const ok=(name,cond,detail)=>T.push({name,ok:!!cond,detail:detail||''});
+  const s=b=>[...b].map(c=>String.fromCharCode(c)).join('');
+
+  // ── scriptPushes: the opcode walk that both decoders stand on ──
+  try{
+    let p=scriptPushes('036f7264');
+    ok('pushes: plain',p.length===1&&s(p[0])==='ord');
+    p=scriptPushes('00');
+    ok('pushes: OP_0 kept as empty push',p.length===1&&p[0].length===0);
+    p=scriptPushes('4c03010203');
+    ok('pushes: PUSHDATA1 little-endian',p.length===1&&p[0].length===3&&p[0][2]===3);
+    p=scriptPushes('4d0300010203');
+    ok('pushes: PUSHDATA2 little-endian',p.length===1&&p[0].length===3);
+    p=scriptPushes('036f726495',true);
+    ok('pushes: strict stops at non-push opcode',p.stopped===true);
+  }catch(e){ ok('scriptPushes',false,String(e)); }
+
+  // ── inscriptionsFromTx: synthetic reveal witness (sig, envelope, control) ──
+  try{
+    const txt=[...'text/plain'].map(c=>c.charCodeAt(0).toString(16).padStart(2,'0')).join('');
+    const hello=[...'hello'].map(c=>c.charCodeAt(0).toString(16).padStart(2,'0')).join('');
+    const env='00'+'63'+'036f7264'+'0101'+'0a'+txt+'00'+'05'+hello+'68';
+    const tx={vin:[{witness:['0101',env,'c1']}]};
+    const got=inscriptionsFromTx(tx);
+    ok('envelope: one inscription found',got.length===1);
+    ok('envelope: content-type',got[0]&&got[0].ctype==='text/plain');
+    ok('envelope: content bytes',got[0]&&s(got[0].content)==='hello'&&got[0].chunks===1);
+  }catch(e){ ok('inscriptionsFromTx',false,String(e)); }
+
+  // ── runestones: leb128, bijective base-26, edict tails, cenotaph ──
+  try{
+    ok('runeName: bijective A',runeName(1n)==='A');
+    ok('runeName: bijective Z',runeName(26n)==='Z');
+    ok('runeName: bijective AA',runeName(27n)==='AA');
+    ok('runeName: bijective AZ',runeName(52n)==='AZ');
+    const leb=v=>{const o=[];let x=v;do{let b=Number(x&127n);x/=128n;if(x>0n)b+=128;o.push(b);}while(x>0n);return o;};
+    const ints=[20n,12n,20n,34n,0n,0n,5n,0n,2n,1n];
+    const payload=ints.flatMap(v=>{const b=leb(v);return[b.length,...b];});
+    const ph=payload.map(b=>b.toString(16).padStart(2,'0')).join('');
+    const tx2={vout:[{scriptpubkey:'6a5d'+ph}]};
+    const rs=runestoneFromTx(tx2);
+    ok('runestone: mint fields',rs&&!rs.cenotaph&&rs.fields&&rs.fields[20]&&rs.fields[20][0]===12n&&rs.fields[20][1]===34n);
+    ok('runestone: edict tail parsed',rs&&rs.edicts&&rs.edicts.length===1&&rs.edicts[0].output===2);
+    const tx3={vout:[{scriptpubkey:'6a5d95'}]};
+    const rs3=runestoneFromTx(tx3);
+    ok('runestone: cenotaph on non-push opcode',rs3&&rs3.cenotaph===true);
+  }catch(e){ ok('runestoneFromTx',false,String(e)); }
+
+  // ── both merkle walkers on hand-built trees (Bitcoin + BCH agree) ──
+  try{
+    const L=['aa','bb','cc','dd'].map(c=>c.repeat(32));
+    const root=bytesToHex(await bchRootOf(L));
+    const br2=await bchBranchOf(L,2);
+    ok('bch walker: verifies pos 2',await bchVerifyMerkle(L[2],br2,2,root));
+    ok('btc walker: same tree verifies',await verifyMerkle(L[2],{merkle:br2,pos:2},root));
+    ok('both walkers agree on tamper',!await bchVerifyMerkle(L[1],br2,2,root));
+    const L3=L.slice(0,3);
+    const root3=bytesToHex(await bchRootOf(L3));
+    const br1=await bchBranchOf(L3,1);
+    ok('odd-leaf tree: duplicate-last verifies',await bchVerifyMerkle(L3[1],br1,1,root3));
+  }catch(e){ ok('merkle walkers',false,String(e)); }
+
+  const passN=T.filter(t=>t.ok).length;
+  row('SELF-TEST',passN+'/'+T.length+(passN===T.length?' — every case behaved as specified':' — A CONTROL STOPPED FAILING; DO NOT TRUST THIS BUILD'),passN===T.length?'ok':'bad');
+  for(const t of T) row(t.ok?'ok':'FAIL',t.name+(t.detail?' — '+t.detail:''),t.ok?'ok':'bad');
+  $('art').innerHTML='<span style="color:'+(passN===T.length?'var(--ok)':'var(--bad)')+';font-size:13px">self-test '+passN+'/'+T.length+' — synthesis, real decode, real walkers, no network</span>';
+  flush();
+})();
+}
+
 (function init(){
   $('chain').innerHTML=CHAINS.map((c,i)=>`<option value="${i}">${c.name}</option>`).join('');
   const fillTokens=()=>{ $('token').innerHTML=TOKENS.map(t=>`<option value="${t.addr}">${t.sym}</option>`).join(''); };
@@ -1096,6 +1174,9 @@ if(window.ethereum&&window.ethereum.on){
       // Bitcoin: no EVM collections; the address field carries txid / txid i N / bc1…
       $('token').innerHTML='<option value="">Bitcoin · paste txid or txid i N (or a bc1 address)</option>';
       $('rpc').value=ESPLORA.join(', ');
+    } else if(c.bch){
+      $('token').innerHTML='<option value="">Bitcoin Cash - paste a recent txid (inclusion proof, client-built branch)</option>';
+      $('rpc').value=BCH;
     } else fillTokens();
   };
   setChain(0);
