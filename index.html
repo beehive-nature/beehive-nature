@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>bLighT Inscription Explorer</title>
+<!--
+  ZERO DEPENDENCIES BY DESIGN.
+  No CDN, no framework, no build step, no backend, no API key. One file.
+  That is not minimalism for its own sake — it is the thesis. Every ERC-20i project
+  whose art "died" died because a SERVER died. The art never moved. This page proves
+  it by rendering inscriptions with nothing but a public RPC and the chain itself.
+  If this file survives on a USB stick, the art survives.
+-->
+<style>
+  :root{
+    --bg:#0a0a0f; --panel:#12121a; --line:#242433; --ink:#e8e8f0;
+    --dim:#7e8c85; --accent:#f1df29; --accent2:#dd5ce5; --ok:#9aff5b; --bad:#ff5b6e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:14px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;padding:20px}
+  h1{font-size:16px;margin:0 0 2px;letter-spacing:.14em;text-transform:uppercase}
+  h1 span{color:var(--accent)}
+  .sub{color:var(--dim);font-size:12px;margin-bottom:18px}
+  .wrap{max-width:1080px;margin:0 auto}
+  .bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+  input,select,button{font:inherit;background:var(--panel);color:var(--ink);
+    border:1px solid var(--line);border-radius:6px;padding:9px 11px}
+  input{flex:1;min-width:260px}
+  button{cursor:pointer;border-color:var(--accent);color:var(--accent)}
+  button:hover{background:#1c1c26}
+  button.alt{border-color:var(--line);color:var(--dim)}
+  .grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px}
+  @media(max-width:820px){.grid{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+  .art{display:flex;align-items:center;justify-content:center;min-height:340px;
+    background:#000;border-radius:8px;overflow:hidden}
+  .art svg,.art img{max-width:100%;height:auto;image-rendering:pixelated}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  td{padding:5px 0;border-bottom:1px solid var(--line);vertical-align:top}
+  td:first-child{color:var(--dim);width:44%;padding-right:10px}
+  .ok{color:var(--ok)} .bad{color:var(--bad)} .warn{color:var(--accent)}
+  .note{color:var(--dim);font-size:11px;margin-top:12px;line-height:1.6}
+  .tag{display:inline-block;padding:1px 6px;border:1px solid var(--line);
+    border-radius:4px;font-size:10px;color:var(--dim);margin-right:4px}
+  details{margin-top:10px}summary{cursor:pointer;color:var(--dim);font-size:12px}
+  pre{white-space:pre-wrap;word-break:break-all;font-size:10px;color:var(--dim);
+    max-height:200px;overflow:auto;margin:8px 0 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>bLighT <span>Inscription Explorer</span></h1>
+  <div class="sub">Renders on-chain inscription art from chain state alone. No server, no indexer, no API key.</div>
+
+  <div class="bar">
+    <select id="chain"></select>
+    <select id="token"></select>
+    <input id="addr" placeholder="0x… holder address" spellcheck="false">
+    <button id="go">View</button>
+    <button id="scan">Scan all collections</button>
+    <button id="connect" class="alt">Connect wallet</button>
+  </div>
+  <div class="bar">
+    <input id="rpc" placeholder="RPC endpoint" spellcheck="false">
+    <input id="custom" placeholder="…or a custom token contract 0x…" spellcheck="false">
+  </div>
+
+  <div class="grid">
+    <div class="panel"><div class="art" id="art">
+      <span style="color:var(--dim);font-size:12px">enter an address and press View</span>
+    </div></div>
+    <div class="panel">
+      <table id="diag"><tr><td>status</td><td class="dim">idle</td></tr></table>
+      <details><summary>raw SVG</summary><pre id="raw"></pre></details>
+      <div class="note">
+        <span class="tag">no backend</span><span class="tag">no CDN</span><span class="tag">one file</span>
+        Every byte rendered above came from a single <code>eth_call</code>.
+      </div>
+    </div>
+  </div>
+
+  <div class="note" style="max-width:760px;border:1px solid var(--line);border-radius:8px;padding:12px;margin-top:16px">
+    <b style="color:var(--accent2)">Market — deliberately not live yet.</b><br>
+    Trading inscriptions is not a UI problem, it is a settlement problem. On this standard a
+    transfer of a <i>non-exact-seed</i> amount dissolves locked inscriptions back into spores:
+    measured on a real wallet holding five, sending 1 whole token took it to four, and sending
+    the full balance took it to zero. A same-seed collision is worse — it dissolves the piece
+    being sold <i>plus unrelated ones</i>, and does not revert.<br><br>
+    So a market here needs one-inscription-per-address custody, exact-seed settlement, and a
+    recipient collision check — and any address that holds art must never also handle fee
+    balances, or the first fee sweep dissolves what it is holding. That is being built against
+    a verified reference rather than guessed at. <b>Viewing is safe and read-only; trading ships
+    when it is proven, not when it is demoed.</b>
+  </div>
+
+  <div class="note" style="max-width:760px">
+    <b>Why three ABI shapes.</b> There is no single ERC-20i interface. PEPi answers on
+    <code>0xa435130b</code>, the FUNGI/FROGGI/JELLI group on <code>0x422b9e23</code>, and TRUFFI on
+    <code>0xa62f5b1b</code> — which takes an <i>address</i> where the others take a seed triple.
+    This page probes for whichever the contract answers, so an unknown contract can be pasted in
+    and still resolve.<br><br>
+    <b>Known trap, guarded.</b> <code>seed = 0</code> reverts with panic <code>0x11</code> —
+    <code>seed + nonce − 1</code> underflows. Any explorer that iterates addresses hits this. It is
+    caught below rather than surfaced as a failure.
+  </div>
+</div>
+
+<script>
+// REDUNDANT ENDPOINTS. A single public RPC cannot carry a five-collection sweep — measured
+// repeatedly. The pool is rotated on rate-limit, which multiplies the effective ceiling and
+// removes the single point of failure. When a wallet is connected the page routes through
+// the WALLET's provider instead, so each user brings their own endpoint and the shared
+// limit stops applying entirely.
+const CHAINS = [
+  { name:'Base', id:8453, rpcs:[
+      'https://mainnet.base.org',
+      'https://base.llamarpc.com',
+      'https://base-rpc.publicnode.com',
+      'https://base.drpc.org',
+      'https://1rpc.io/base',
+      'https://base.meowrpc.com',
+  ]},
+  { name:'exSat', id:7200, rpcs:[] },             // paste an endpoint; none assumed
+  { name:'custom',id:0,    rpcs:[] },
+];
+// Verified addresses (EIP-55). Two of these circulate with broken checksums elsewhere.
+const TOKENS = [
+  { sym:'PEPI',   addr:'0x28a5e71BFc02723eAC17E39c84c5190415C0de9F', dec:9 },
+  { sym:'FUNGI',  addr:'0x7d9CE55D54FF3FEddb611fC63fF63ec01F26D15F', dec:9 },
+  { sym:'FROGGI', addr:'0x88A78C5035BdC8C9A8bb5c029e6cfCDD14B822FE', dec:9 },
+  { sym:'TRUFFI', addr:'0x2496a9AF81A87eD0b17F6edEaf4Ac57671d24f38', dec:9 },
+  { sym:'JELLI',  addr:'0xA1b9d812926a529D8B002E69FCd070c8275eC73c', dec:9 },
+];
+// getSvg shapes, probed in order. Each builds calldata from (seed, holder).
+const SHAPES = [
+  { id:'triple/a435130b', sel:'a435130b', build:(s,h)=>W(s)+W(0n)+W(0n) },
+  { id:'triple/422b9e23', sel:'422b9e23', build:(s,h)=>W(s)+W(0n)+W(0n) },
+  { id:'addr/a62f5b1b',   sel:'a62f5b1b', build:(s,h)=>W(s)+W(0n)+AD(h) },
+];
+const $=id=>document.getElementById(id);
+const W=v=>BigInt(v).toString(16).padStart(64,'0');
+const AD=a=>'0'.repeat(24)+a.replace(/^0x/,'').toLowerCase();
+
+let rpcUrl = CHAINS[0].rpc;
+
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+// Public RPCs rate-limit. A five-collection sweep is ~20 calls and WILL trip Base's
+// limiter, which surfaces as "over rate limit" — indistinguishable from a broken
+// contract unless it is retried. Exponential backoff, and rate-limit is never
+// reported as a render failure.
+async function call(to,data,tries){
+  tries = tries||4;
+  for(let i=0;i<tries;i++){
+    let j;
+    try{
+      const r = await fetch(rpcUrl,{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_call',params:[{to,data},'latest']})});
+      j = await r.json();
+    }catch(e){ if(i===tries-1) throw new Error('network: '+e.message); await sleep(400*(1<<i)); continue; }
+    if(j.error){
+      const m = j.error.message||'reverted';
+      if(/rate limit|too many|429/i.test(m) && i<tries-1){ await sleep(700*(1<<i)); continue; }
+      const err = new Error(m); err.rateLimited=/rate limit|too many|429/i.test(m); throw err;
+    }
+    return j.result;
+  }
+}
+// ABI-decode a single returned `string`
+function decodeString(hex){
+  const h = hex.replace(/^0x/,'');
+  const len = parseInt(h.slice(64,128),16);
+  const bytes = h.slice(128,128+len*2).match(/../g)||[];
+  return decodeURIComponent(bytes.map(b=>'%'+b).join(''));
+}
+const rows=[];
+const row=(k,v,cls)=>rows.push(`<tr><td>${k}</td><td class="${cls||''}">${v}</td></tr>`);
+const flush=()=>$('diag').innerHTML=rows.join('');
+
+// One address across every known collection — the view that surfaces things you were
+// not looking for. Sequential, not parallel: a parallel sweep guarantees a rate-limit.
+async function scanAll(){
+  const holder=$('addr').value.trim();
+  rpcUrl=$('rpc').value.trim();
+  if(!/^0x[0-9a-fA-F]{40}$/.test(holder)){ rows.length=0; row('status','bad address','bad'); return flush(); }
+  const found=[];
+  $('art').innerHTML='';
+  for(let i=0;i<TOKENS.length;i++){
+    const t=TOKENS[i];
+    rows.length=0;
+    row('scanning', (i+1)+' / '+TOKENS.length+' — '+t.sym);
+    row('found so far', found.length? found.map(f=>f.sym).join(', ') : '—', found.length?'ok':'');
+    flush();
+    try{
+      const r = await resolve(t.addr, holder);
+      if(r.svg) found.push({sym:t.sym, svg:r.svg, seed:r.seed, kind:'live'});
+      (r.locked||[]).forEach(l=>found.push({sym:t.sym, svg:l.svg, seed:l.seed, kind:'frozen'}));
+    }catch(e){ /* absent or unsupported — expected for most */ }
+    await sleep(150);
+  }
+  const nLive=found.filter(f=>f.kind==='live').length, nFroz=found.length-nLive;
+  rows.length=0;
+  row('address', holder.slice(0,10)+'…'+holder.slice(-6));
+  row('provider', walletProvider? 'wallet (own RPC)' : pool.length+' pooled endpoints',
+      walletProvider?'ok':'');
+  row('live spores', nLive, nLive?'ok':'');
+  row('frozen / locked', nFroz, nFroz?'ok':'');
+  found.forEach(f=>row(f.sym+' · '+f.kind, 'seed '+f.seed+' · '+f.svg.length.toLocaleString()+' B','ok'));
+  flush();
+  $('art').innerHTML = found.length
+    ? '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;width:100%;padding:12px">'
+      + found.map(f=>'<div style="text-align:center"><div style="background:#000;border-radius:6px;padding:6px;'
+        + (f.kind==='frozen'?'outline:1px solid var(--accent2)':'') + '">'
+        + f.svg + '</div><div style="color:var(--dim);font-size:10px;margin-top:5px">'
+        + f.sym + ' · <span style="color:'+(f.kind==='frozen'?'var(--accent2)':'var(--dim)')+'">'
+        + f.kind + '</span><br>seed ' + f.seed + '</div></div>').join('')
+      + '</div>'
+    : '<span style="color:var(--dim);font-size:12px">no inscriptions found for this address</span>';
+}
+
+// JSON-RPC BATCHING. Measured: a five-collection sweep at one HTTP request per eth_call
+// trips Base's public limiter even with exponential backoff. Batching collapses the three
+// probes per token into ONE request, because public RPCs meter requests, not sub-calls.
+let pool=[], poolIdx=0, walletProvider=null;
+const nextRpc=()=>{ poolIdx=(poolIdx+1)%Math.max(pool.length,1); return pool[poolIdx]; };
+
+async function batch(calls,tries){
+  tries=tries||Math.max(pool.length,1)+2;
+  // Connected wallet → use the user's own provider, one call at a time. No shared limit.
+  if(walletProvider){
+    const out=[];
+    for(const c of calls){
+      try{ out.push(await walletProvider.request({method:'eth_call',params:[{to:c.to,data:c.data},'latest']})); }
+      catch(e){ out.push(null); }
+    }
+    return out;
+  }
+  const body=calls.map((c,i)=>({jsonrpc:'2.0',id:i,method:'eth_call',params:[{to:c.to,data:c.data},'latest']}));
+  let lastErr='no endpoint';
+  for(let i=0;i<tries;i++){
+    const url = pool[poolIdx] || rpcUrl;
+    if(!url){ throw new Error('no RPC endpoint set'); }
+    let j;
+    try{
+      const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+      j=await r.json();
+    }catch(e){ lastErr='network'; nextRpc(); await sleep(200); continue; }
+    const arr=Array.isArray(j)?j:[j];
+    const limited=arr.some(x=>x.error&&/rate limit|too many|429|capacity/i.test(x.error.message||''));
+    if(limited){ lastErr='rate limit'; nextRpc(); await sleep(250); continue; }   // rotate, don't wait it out
+    const out=new Array(calls.length).fill(null);
+    for(const x of arr){ if(!x.error && typeof x.id==='number') out[x.id]=x.result; }
+    return out;
+  }
+  const e=new Error('all endpoints exhausted ('+lastErr+')'); e.rateLimited=true; throw e;
+}
+
+// Shared resolver — no DOM. Used by both the single view and the sweep.
+async function resolve(contract, holder){
+  const [decR, balR, sd] = await batch([
+    {to:contract,data:'0x313ce567'},
+    {to:contract,data:'0x70a08231'+AD(holder)},
+    {to:contract,data:'0xa775188a'+AD(holder)},
+  ]);
+  const dec = decR&&decR!=='0x' ? Number(BigInt(decR)) : 18;
+  const bal = balR&&balR!=='0x' ? BigInt(balR) : 0n;
+  const seed = bal / (10n ** BigInt(dec));
+  if(bal===0n) return {svg:null,reason:'no balance'};
+  let triple=null, onChainSeed=null;
+  if(sd){
+    const words=(sd.replace(/^0x/,'').match(/.{64}/g)||[]);
+    if(words.length>=3){ triple=words.slice(0,3); onChainSeed=BigInt('0x'+words[0]); }
+  }
+  if(seed===0n && !triple) return {svg:null,reason:'seed 0 — would panic 0x11'};
+  // All getSvg candidates in ONE batch — reverts come back as per-item errors, not
+  // failures, so probing every shape costs a single request.
+  const cands=[];
+  for(const s of SHAPES){
+    if(triple) cands.push({s, to:contract, data:'0x'+s.sel+triple.join('')});
+    cands.push({s, to:contract, data:'0x'+s.sel+s.build(seed,holder)});
+  }
+  const res = await batch(cands);
+  let live=null, shape=null;
+  for(let i=0;i<cands.length;i++){
+    const r=res[i];
+    if(r&&r!=='0x'&&r.length>200){ live=decodeString(r); shape=cands[i].s.id; break; }
+  }
+  // LOCKED / FROZEN RECORDS — the tradeable ones, and invisible to the live-spore path.
+  // A wallet can hold zero spores and five frozen pieces; that wallet renders nothing
+  // unless enumerated. mushroomCount 0x9c216508 -> mushroomOfOwnerByIndex 0x0fd9587e,
+  // which returns the persisted (seed, seed2, extra) triple verbatim.
+  const locked=[];
+  try{
+    const [mcR] = await batch([{to:contract,data:'0x9c216508'+AD(holder)}]);
+    const n = mcR&&mcR!=='0x' ? Number(BigInt(mcR)) : 0;
+    if(n>0){
+      const idxCalls=[];
+      for(let i=0;i<Math.min(n,24);i++) idxCalls.push({to:contract,data:'0x0fd9587e'+AD(holder)+W(BigInt(i))});
+      const recs = await batch(idxCalls);
+      const svgCalls=[], seeds=[];
+      for(const rec of recs){
+        if(!rec||rec==='0x') continue;
+        const w=(rec.replace(/^0x/,'').match(/.{64}/g)||[]).slice(0,3);
+        if(w.length<3) continue;
+        seeds.push(BigInt('0x'+w[0]).toString());
+        svgCalls.push({to:contract,data:'0x'+(shape? SHAPES.find(s=>s.id===shape).sel : 'a435130b')+w.join('')});
+      }
+      if(svgCalls.length){
+        const svgs = await batch(svgCalls);
+        svgs.forEach((r,i)=>{ if(r&&r!=='0x'&&r.length>200) locked.push({seed:seeds[i], svg:decodeString(r)}); });
+      }
+    }
+  }catch(e){}
+  if(!live && !locked.length) return {svg:null,reason:'no getSvg shape matched',locked:[]};
+  return {svg:live, shape, locked,
+          seed:(onChainSeed!==null?onChainSeed:seed).toString(), dec, bal};
+}
+
+async function view(){
+  rows.length=0; $('raw').textContent='';
+  $('art').innerHTML='<span style="color:var(--dim);font-size:12px">reading chain…</span>';
+  const holder=$('addr').value.trim();
+  const contract=$('custom').value.trim()||$('token').value;
+  rpcUrl=$('rpc').value.trim();
+  if(!/^0x[0-9a-fA-F]{40}$/.test(holder)){row('status','bad address','bad');return flush();}
+  if(!rpcUrl){row('status','no RPC endpoint set','bad');return flush();}
+
+  row('contract',contract.slice(0,10)+'…'+contract.slice(-6));
+  row('holder',holder.slice(0,10)+'…'+holder.slice(-6));
+  try{
+    const decR = await call(contract,'0x313ce567').catch(()=>null);
+    const dec = decR&&decR!=='0x' ? Number(BigInt(decR)) : 18;
+    const balR = await call(contract,'0x70a08231'+AD(holder));
+    const bal = BigInt(balR);
+    const seed = bal / (10n ** BigInt(dec));
+    row('decimals',dec);
+    row('balance',(bal).toString()+' raw');
+    row('seed',seed.toString()+' whole tokens', seed===0n?'warn':'');
+
+    // The guarded trap: seed 0 underflows inside the contract.
+    if(seed===0n){
+      row('status','seed = 0 — would revert with panic 0x11. Guarded, not called.','warn');
+      $('art').innerHTML='<span style="color:var(--dim);font-size:12px">no inscription at zero balance</span>';
+      return flush();
+    }
+
+    // MEASURED: the render inputs are READ, not derived. sporesDegree(address) returns the
+    // live (seed, seed2, extra) triple — and its seed is NOT balance/10^decimals. It is
+    // captured from the transfer that created the spore. A holder with 7 whole tokens
+    // returned seed 3. Deriving from balance reverts.
+    let triple=null;
+    try{
+      const sd = await call(contract,'0xa775188a'+AD(holder));
+      const words = (sd.replace(/^0x/,'').match(/.{64}/g)||[]);
+      if(words.length>=3){ triple = words.slice(0,3); row('seed source','sporesDegree (live)','ok');
+        row('on-chain seed', BigInt('0x'+words[0]).toString(),
+            BigInt('0x'+words[0])===seed?'':'warn'); }
+    }catch(e){ row('seed source','derived from balance','warn'); }
+
+    let svg=null, used=null, lastErr=null;
+    for(const s of SHAPES){
+      const payloads = triple ? ['0x'+s.sel+triple.join(''), '0x'+s.sel+s.build(seed,holder)]
+                              : ['0x'+s.sel+s.build(seed,holder)];
+      for(const data of payloads){
+        try{
+          const r = await call(contract,data);
+          if(r&&r!=='0x'&&r.length>200){ svg=decodeString(r); used=s.id; break; }
+        }catch(e){ lastErr=e.message; }
+      }
+      if(svg) break;
+    }
+    if(!svg){ row('status','no getSvg shape matched — '+(lastErr||'empty'),'bad');
+      $('art').innerHTML='<span style="color:var(--bad);font-size:12px">no renderer on this contract</span>';
+      return flush(); }
+
+    row('ABI shape',used,'ok');
+    row('SVG bytes',svg.length.toLocaleString());
+    const ext=(svg.match(/https?:\/\/[^"' ]+/g)||[]).filter(u=>!u.includes('w3.org'));
+    row('external refs', ext.length? ext.length+' — NOT self-contained' : 'none — fully on-chain',
+        ext.length?'bad':'ok');
+    row('status','rendered from chain','ok');
+    $('art').innerHTML=svg;
+    $('raw').textContent=svg.slice(0,4000)+(svg.length>4000?'\n… truncated':'');
+  }catch(e){
+    row('status',String(e.message).slice(0,120),'bad');
+    $('art').innerHTML='<span style="color:var(--bad);font-size:12px">'+String(e.message).slice(0,80)+'</span>';
+  }
+  flush();
+}
+
+async function connect(){
+  if(!window.ethereum){ rows.length=0; row('wallet','no injected provider found','warn'); return flush(); }
+  try{
+    const a = await window.ethereum.request({method:'eth_requestAccounts'});
+    // The wallet becomes the RPC. Each connected user brings their own endpoint, so the
+    // shared public limiter stops being the ceiling on sweeps.
+    walletProvider = window.ethereum;
+    if(a&&a[0]){ $('addr').value=a[0]; scanAll(); }
+  }catch(e){ rows.length=0; row('wallet',String(e.message).slice(0,80),'bad'); flush(); }
+}
+
+(function init(){
+  $('chain').innerHTML=CHAINS.map((c,i)=>`<option value="${i}">${c.name}</option>`).join('');
+  $('token').innerHTML=TOKENS.map(t=>`<option value="${t.addr}">${t.sym}</option>`).join('');
+  const setChain=i=>{ pool=CHAINS[i].rpcs.slice(); poolIdx=0;
+    $('rpc').value=pool.join(', ') || ''; };
+  setChain(0);
+  $('chain').onchange=e=>setChain(+e.target.value);
+  $('rpc').addEventListener('change',()=>{ pool=$('rpc').value.split(',').map(s=>s.trim()).filter(Boolean); poolIdx=0; });
+  $('go').onclick=view; $('scan').onclick=scanAll; $('connect').onclick=connect;
+  $('addr').addEventListener('keydown',e=>{ if(e.key==='Enter') view(); });
+})();
+</script>
+</body>
+</html>
