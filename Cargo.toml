@@ -16,6 +16,7 @@ members = [
     "crates/bsigner",
     "crates/bnr-shell",
     "crates/capability",
+    "crates/inscription-gate",
     "crates/chain-eos",
     "crates/chain-exsat-evm",
     "crates/chain-zano",

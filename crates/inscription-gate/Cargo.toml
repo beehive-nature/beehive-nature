@@ -1,0 +1,14 @@
+[package]
+name = "inscription-gate"
+version = "0.1.0"
+edition = "2021"
+license = "AGPL-3.0-only"
+description = "Mechanical validation gate for inscription trait layers. Same verdict native and in WASM."
+
+# No I/O, no threads, no filesystem — so this compiles unchanged to wasm32-unknown-unknown
+# and produces byte-identical verdicts in the Studio's browser preview and the LaunchPad's
+# deploy check. If the two ever disagree, the gate is advisory rather than binding, which
+# defeats its purpose.
+[dependencies]
+
+[dev-dependencies]
