@@ -8,6 +8,33 @@ my fork."*
 Every claim is cited or marked **UNVERIFIED**. Numbers carry their derivation. Where this
 document and the contracts disagree, the contracts win.
 
+---
+
+## ⚠ CORRECTION 2026-08-16 — THIS DOCUMENT CONFLATES TWO STANDARDS
+
+**Base and Ethereum are two different standards sharing a name.** Line numbers cited
+throughout §3, §5 and §6 below — `Pepi.sol:174-202`, `:255-277`, `:286-293`, `:429-467` —
+are **Ethereum-only**. They do not describe Base.
+
+Measured: the **Base** source is **344 lines**, declares exactly three events
+(`OnMushroomTransfer`, `OnSporesGrow`, `OnSporesShrink`), and
+`grep -c 'OnItemBurn\|transferItem'` returns **0** across all four Base contract files.
+
+| | **Base** | **Ethereum** |
+|---|---|---|
+| identity | **seed value**, unique per owner | **globally-unique item id** |
+| moving one inscription | transfer an amount whose whole-token floor equals the held seed | `transferItem(address,uint256)` |
+| burn reasons | none declared | `TO_SOURCE`, `PARTIAL_ROE`, `INVARIANT`, `SOURCE_SANITIZE` |
+| enumeration | `mushroomOfOwnerByIndex` | `getOwnerItemsPage` (paginated) |
+| `SeedData` | 3 words | 4 words (leading `uint8`) |
+
+**A wallet built to one model will mis-render the other.** Read every section below as
+describing the **Ethereum** deployment unless it says otherwise; the Base behaviour needs
+its own pass against the Base source, which has not been done.
+
+`SPEC-INSCRIPTION-COMPAT-1` is the safe reference in the meantime — it was written from
+measurements of both and does not inherit this defect.
+
 ## 0 · The family
 
 Five canonical tokens on Base. Registry double-sourced from `fungiblesxyz/generator-app`

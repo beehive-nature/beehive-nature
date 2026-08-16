@@ -45,14 +45,27 @@ detection is mandatory, not defensive programming.
 **A fifth shape is expected.** Detection must degrade to "unknown renderer" rather than
 "no art".
 
-### 1.2 Seeds are READ, never derived
+### 1.2 Seeds are READ, never derived — and the seed source is not universal either
 
-`sporesDegree(address)` `0xa775188a` returns the live triple. **Its seed is not
-`balance / 10^decimals`.** Measured: a holder with **7 whole tokens returns on-chain seed 3**
-— the seed is captured from the transfer that created the spore. Deriving from balance and
-passing `seed2 = 0` **reverts**.
+`sporesDegree(address)` `0xa775188a` returns the live triple **where it exists**. Its seed
+is **not** `balance / 10^decimals`: measured, a holder with **7 whole tokens returns
+on-chain seed 3** — the seed is captured from the transfer that created the spore. Deriving
+from balance and passing `seed2 = 0` **reverts**.
 
-Return width varies: **3 words on Base, 4 on Ethereum** (leading `uint8`).
+**Return width varies: 3 words on Base, 4 on Ethereum** (leading `uint8`).
+
+> **CORRECTION 2026-08-16.** An earlier revision presented `sporesDegree` as universal.
+> **It reverts on FROGGi.** The seed source is no more standardised than the renderer is,
+> and a consumer that assumes it renders nothing for that token.
+
+**So resolution is a fallback chain, not a call:**
+
+1. try `sporesDegree(holder)` → if it returns ≥3 words, use them
+2. else derive `seed = balance / 10^decimals` and try the triple `(seed, 0, 0)`
+3. else report **unknown seed source** — never "no art"
+
+Measured on FROGGi: `sporesDegree` reverts, the balance-derived path returns **62,710 B**
+of SVG. Both branches are required.
 
 ### 1.3 Self-containment
 

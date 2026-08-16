@@ -97,12 +97,21 @@
   </div>
 
   <div class="note" style="max-width:760px;border:1px solid var(--line);border-radius:8px;padding:12px">
-    <b style="color:var(--accent2)">A swap button is a delete button.</b><br>
-    Measured: this token's Uniswap pool holds <b>8,292 whole tokens, zero inscriptions and
-    zero spores</b> — it is excluded from inscription accounting entirely. Sending an
-    inscription toward a pool destroys it, under the burn reason <code>TO_SOURCE</code>,
-    <b>5,934 times</b> on the Ethereum deployment alone. Any wallet showing "swap" beside an
-    inscription without saying this will eventually delete someone's art on a routine sell.
+    <b style="color:var(--accent2)">When a swap destroys art, and when it doesn't.</b><br>
+    An earlier version of this page said every swap is a delete. <b>That was overstated and
+    is corrected here.</b> The debit is
+    <code>floor(balance) − floor(balance − amount)</code>, so <b>loose spores absorb the
+    trade first</b>. Measured: a holder with a 107-spore cushion sold 25 whole tokens and
+    lost <b>nothing</b>; sub-whole-token sales destroy nothing at all. But a holder with no
+    cushion sold <b>4% of a position and lost 40% of the art</b> — five inscriptions down to
+    three.<br><br>
+    <b>The rule: destruction happens only when the whole-token delta exceeds your spore
+    cushion.</b> Providing liquidity is different and worse — it always dissolves, because
+    the position manager pays by transferring to the pool. Proven twice, on two contracts.
+    The pool itself holds <b>8,292 whole tokens, zero inscriptions and zero spores</b> — it
+    is excluded from inscription accounting entirely.<br><br>
+    A wallet must therefore compute the actual risk, not shout on every trade. <i>Warning on
+    every swap trains people to dismiss the warning that matters.</i>
   </div>
 
   <div class="note" style="max-width:760px">
