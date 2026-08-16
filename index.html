@@ -88,19 +88,30 @@
     measured on a real wallet holding five, sending 1 whole token took it to four, and sending
     the full balance took it to zero. A same-seed collision is worse — it dissolves the piece
     being sold <i>plus unrelated ones</i>, and does not revert.<br><br>
-    So a market here needs one-inscription-per-address custody, exact-seed settlement, and a
-    recipient collision check — and any address that holds art must never also handle fee
-    balances, or the first fee sweep dissolves what it is holding. That is being built against
-    a verified reference rather than guessed at. <b>Viewing is safe and read-only; trading ships
-    when it is proven, not when it is demoed.</b>
+    The fix is not a safer escrow — it is an <b>id-addressed transfer</b>. The Ethereum
+    deployment moves one inscription by globally-unique id, carrying exactly its backing
+    tokens, so no arithmetic can go wrong. Where that exists, a market can escrow the
+    <i>payment</i> and never touch the art at all, and delivery is provable by an
+    <code>eth_call</code>. <b>Viewing is safe and read-only; trading ships when it is proven,
+    not when it is demoed.</b>
+  </div>
+
+  <div class="note" style="max-width:760px;border:1px solid var(--line);border-radius:8px;padding:12px">
+    <b style="color:var(--accent2)">A swap button is a delete button.</b><br>
+    Measured: this token's Uniswap pool holds <b>8,292 whole tokens, zero inscriptions and
+    zero spores</b> — it is excluded from inscription accounting entirely. Sending an
+    inscription toward a pool destroys it, under the burn reason <code>TO_SOURCE</code>,
+    <b>5,934 times</b> on the Ethereum deployment alone. Any wallet showing "swap" beside an
+    inscription without saying this will eventually delete someone's art on a routine sell.
   </div>
 
   <div class="note" style="max-width:760px">
-    <b>Why three ABI shapes.</b> There is no single ERC-20i interface. PEPi answers on
-    <code>0xa435130b</code>, the FUNGI/FROGGI/JELLI group on <code>0x422b9e23</code>, and TRUFFI on
-    <code>0xa62f5b1b</code> — which takes an <i>address</i> where the others take a seed triple.
-    This page probes for whichever the contract answers, so an unknown contract can be pasted in
-    and still resolve.<br><br>
+    <b>Why four ABI shapes.</b> There is no single ERC-20i interface. PEPi answers on
+    <code>0xa435130b</code>, the FUNGI/FROGGI/JELLI group on <code>0x422b9e23</code>, TRUFFI on
+    <code>0xa62f5b1b</code> — which takes an <i>address</i> where the others take a seed triple —
+    and the Ethereum item model on <code>0x058e7a31</code>, whose seed struct is four words, not
+    three. Two contracts sharing a signature can still have different selectors, so this page
+    probes rather than assumes, and a fifth shape is expected.<br><br>
     <b>Known trap, guarded.</b> <code>seed = 0</code> reverts with panic <code>0x11</code> —
     <code>seed + nonce − 1</code> underflows. Any explorer that iterates addresses hits this. It is
     caught below rather than surfaced as a failure.
@@ -206,7 +217,7 @@ async function scanAll(){
   const holder=$('addr').value.trim();
   rpcUrl=$('rpc').value.trim();
   if(!/^0x[0-9a-fA-F]{40}$/.test(holder)){ rows.length=0; row('status','bad address','bad'); return flush(); }
-  const found=[];
+  const found=[]; const unreadable=[];
   $('art').innerHTML='';
   for(let i=0;i<TOKENS.length;i++){
     const t=TOKENS[i];
@@ -223,7 +234,8 @@ async function scanAll(){
       const r = await resolve(t.addr, holder);
       if(r.svg) found.push({sym:t.sym, svg:r.svg, seed:r.seed, kind:'live'});
       (r.locked||[]).forEach(l=>found.push({sym:t.sym, svg:l.svg, seed:l.seed, kind:'frozen'}));
-    }catch(e){ /* absent or unsupported — expected for most */ }
+      if(r.lockedStatus==='unreadable') unreadable.push(t.sym);
+    }catch(e){ unreadable.push(t.sym); }
     await sleep(150);
   }
   const nLive=found.filter(f=>f.kind==='live').length, nFroz=found.length-nLive;
@@ -233,6 +245,7 @@ async function scanAll(){
       walletProvider?'ok':'');
   row('live spores', nLive, nLive?'ok':'');
   row('frozen / locked', nFroz, nFroz?'ok':'');
+  if(unreadable.length) row('UNREADABLE', unreadable.join(', ')+' — endpoints exhausted; may hold unread art', 'bad');
   found.forEach(f=>row(f.sym+' · '+f.kind, 'seed '+f.seed+' · '+f.svg.length.toLocaleString()+' B','ok'));
   flush();
   $('art').innerHTML = found.length
@@ -317,10 +330,15 @@ async function resolve(contract, holder){
   // A wallet can hold zero spores and five frozen pieces; that wallet renders nothing
   // unless enumerated. mushroomCount 0x9c216508 -> mushroomOfOwnerByIndex 0x0fd9587e,
   // which returns the persisted (seed, seed2, extra) triple verbatim.
-  const locked=[];
+  // HONESTY RULE: a failed fetch must never read as "none". A wallet holding five frozen
+  // pieces and a flaky endpoint would otherwise render as an empty collection — the exact
+  // defect that made an earlier probe report 0 inscriptions in a pool that was simply
+  // unreachable. Failure is reported as UNKNOWN, never as zero.
+  const locked=[]; let lockedStatus='ok';
   try{
     const [mcR] = await batch([{to:contract,data:'0x9c216508'+AD(holder)}]);
-    const n = mcR&&mcR!=='0x' ? Number(BigInt(mcR)) : 0;
+    if(mcR===null||mcR===undefined){ lockedStatus='unreadable'; throw new Error('count unreadable'); }
+    const n = mcR!=='0x' ? Number(BigInt(mcR)) : 0;
     if(n>0){
       const idxCalls=[];
       for(let i=0;i<Math.min(n,24);i++) idxCalls.push({to:contract,data:'0x0fd9587e'+AD(holder)+W(BigInt(i))});
@@ -338,9 +356,13 @@ async function resolve(contract, holder){
         svgs.forEach((r,i)=>{ if(r&&r!=='0x'&&r.length>200) locked.push({seed:seeds[i], svg:decodeString(r)}); });
       }
     }
-  }catch(e){}
-  if(!live && !locked.length) return {svg:null,reason:'no getSvg shape matched',locked:[]};
-  return {svg:live, shape, locked,
+  }catch(e){ if(lockedStatus==='ok') lockedStatus='unreadable'; }
+  if(!live && !locked.length)
+    return {svg:null, locked:[], lockedStatus,
+            reason: lockedStatus==='unreadable'
+              ? 'frozen records UNREADABLE — endpoints exhausted, not necessarily absent'
+              : 'no getSvg shape matched'};
+  return {svg:live, shape, locked, lockedStatus,
           seed:(onChainSeed!==null?onChainSeed:seed).toString(), dec, bal};
 }
 
@@ -350,8 +372,21 @@ async function view(){
   const holder=$('addr').value.trim();
   const contract=$('custom').value.trim()||$('token').value;
   rpcUrl=$('rpc').value.trim();
-  if(!/^0x[0-9a-fA-F]{40}$/.test(holder)){row('status','bad address','bad');return flush();}
-  if(!rpcUrl){row('status','no RPC endpoint set','bad');return flush();}
+  // Name the ACTUAL cause. "bad address" for a chain with no endpoint sends a beginner
+  // hunting the wrong problem — the same class of defect as a rate limit surfacing as a
+  // dead contract.
+  const chSel = CHAINS[+$('chain').value||0];
+  if(!pool.length && !rpcUrl && !walletProvider){
+    row('status','no RPC endpoint configured for '+chSel.name,'bad');
+    row('fix','paste an endpoint above, or pick a chain that has one','');
+    return flush();
+  }
+  if(!/^0x[0-9a-fA-F]{40}$/.test(holder)){
+    row('status', /\.[a-z]{1,4}$/i.test(holder)
+      ? 'looks like a name, not an address — .b resolution is not wired yet'
+      : 'not a 20-byte hex address','bad');
+    return flush();
+  }
 
   row('contract',contract.slice(0,10)+'…'+contract.slice(-6));
   row('holder',holder.slice(0,10)+'…'+holder.slice(-6));
