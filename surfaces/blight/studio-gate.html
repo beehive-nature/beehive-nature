@@ -695,5 +695,6 @@ fi.addEventListener("change", () => fi.files[0] && handleFile(fi.files[0]));
 ["dragleave", "drop"].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove("ready"); }));
 dz.addEventListener("drop", e => { const f = e.dataTransfer.files[0]; if (f) handleFile(f); });
 </script>
+<script src="./fleet.js"></script>
 </body>
 </html>

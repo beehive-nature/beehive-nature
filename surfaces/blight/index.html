@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>bLighT fLeeT — one operation, many frequencies</title>
+<!--
+  1st Assistant Code Surgeon — zCode (GLM 5.3) <zCode@bnature.social>, 2026-08-16.
+  Attribution per RULING_COMMIT_ATTRIBUTION_2026-08-07.
+
+  THE FRONT DOOR. Six surfaces existed with nothing holding the impression
+  that this is all one operation. This page is that impression, and it is
+  built the way the founder specified: the unified thing feels like ONE
+  action (look, connect, go deeper), every surface keeps its own frequency
+  and feel, and "all the nerd stuff" lives in the corner as a link out —
+  never in the way. The funnel arc is the order of the cards: trust is
+  earned first (museum), utility given second (gate, explorer), conversion
+  last (marketplace — docked, honestly, until trading is proven rather
+  than demoed). The paymaster principle is quoted once: one number is all
+  a user should ever have to read.
+-->
+<style>
+  :root{--bg:#0a0a0f;--panel:#12121a;--line:#242433;--ink:#e8e8f0;--dim:#7e8c85;
+        --accent:#f1df29;--accent2:#dd5ce5;--ok:#9aff5b;--bad:#ff5b6e;--cyan:#16edf5}
+  /* each surface keeps its own frequency: its card carries its accent */
+  :root{--f-museum:#dd5ce5;--f-explorer:#16edf5;--f-gate:#9aff5b;--f-aid:#f1df29;
+        --f-reader:#ff9a5b;--f-market:#ff5b6e}
+  *{box-sizing:border-box;min-width:0}
+  body{margin:0;background:var(--bg);color:var(--ink);padding:34px 20px 60px;
+    font:14px/1.65 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow-wrap:anywhere}
+  .wrap{max-width:960px;margin:0 auto}
+  h1{font-size:19px;letter-spacing:.2em;text-transform:uppercase;margin:0 0 6px}
+  h1 span{color:var(--accent)}
+  .lede{color:var(--dim);font-size:12.5px;max-width:720px;margin-bottom:18px}
+  .door{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:18px 0 6px}
+  .door button{background:#12301a;color:var(--ok);border:1px solid var(--line);border-radius:8px;
+    padding:10px 20px;font:13px ui-monospace,monospace;cursor:pointer}
+  .door button:hover{border-color:var(--ok)}
+  .door .hint{color:var(--dim);font-size:11.5px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:14px;margin:20px 0}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;
+    text-decoration:none;color:var(--ink);display:block;position:relative;overflow:hidden}
+  .card:hover{border-color:var(--c)}
+  .card .bar{position:absolute;top:0;left:0;right:0;height:3px;background:var(--c)}
+  .card h2{margin:2px 0 6px;font-size:13.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--c)}
+  .card p{margin:0;color:var(--dim);font-size:11.5px;line-height:1.6}
+  .card .go{margin-top:10px;font-size:11px;color:var(--c)}
+  .phase{font-size:9.5px;letter-spacing:.14em;color:var(--bg);background:var(--c);
+    display:inline-block;border-radius:4px;padding:1px 7px;margin-bottom:10px}
+  .corner{margin-top:26px;padding:14px 16px;border:1px dashed var(--line);border-radius:10px;
+    color:var(--dim);font-size:11.5px}
+  .corner a{color:var(--cyan)}
+  .quote{margin:22px 0;padding:12px 16px;border-left:2px solid var(--accent);border-radius:0 8px 8px 0;
+    background:#12121a;color:var(--ink);font-size:12.5px}
+  .quote b{color:var(--accent)}
+</style>
+</head>
+<body><div class="wrap">
+
+<h1>bLighT <span>fLeeT</span></h1>
+<div class="lede">
+  One operation with many frequencies. Everything below runs from chain state
+  or your own machine — no server of ours, no key, every claim checkable by a
+  stranger. Trust first, tools second, trade last.
+</div>
+
+<div class="door">
+  <button id="connect">connect wallet</button>
+  <span class="hint">one connection carries across the fleet — the button always tells the truth about its state</span>
+</div>
+
+<div class="grid">
+  <a class="card" style="--c:var(--f-museum)" href="./museum.html">
+    <div class="bar"></div>
+    <span class="phase">trust</span>
+    <h2>museum</h2>
+    <p>What "on-chain" actually means — nine exhibits fetched live from Bitcoin, Ethereum and Base, the errors kept on the wall, the 3.99 MB inscription that nearly filled a block.</p>
+    <div class="go">walk the halls →</div>
+  </a>
+  <a class="card" style="--c:var(--f-gate)" href="./studio-gate.html">
+    <div class="bar"></div>
+    <span class="phase">utility</span>
+    <h2>studio gate</h2>
+    <p>Drop a trait PNG, meet the same WASM verdict the LaunchPad will run at deploy — palette, hairline, dither, margin, rect budget, each finding with its fix. Offline, zero credits.</p>
+    <div class="go">check your art →</div>
+  </a>
+  <a class="card" style="--c:var(--f-explorer)" href="./inscription-explorer.html">
+    <div class="bar"></div>
+    <span class="phase">utility</span>
+    <h2>explorer</h2>
+    <p>One field: an address, a .b / .eth name, a Bitcoin txid or inscription id. Art renders from chain, inscription content decodes in your browser, inclusion carries a merkle proof verified locally.</p>
+    <div class="go">read any chain →</div>
+  </a>
+  <a class="card" style="--c:var(--f-aid)" href="./c1-aid.html">
+    <div class="bar"></div>
+    <span class="phase">making</span>
+    <h2>C-1 aid</h2>
+    <p>Taxonomy sizing with live collision arithmetic — the uniform bound and the weighted truth side by side, the component and byte bill under your sliders.</p>
+    <div class="go">run the numbers →</div>
+  </a>
+  <a class="card" style="--c:var(--f-reader)" href="./vaulta-reader.html">
+    <div class="bar"></div>
+    <span class="phase">making</span>
+    <h2>vaulta reader</h2>
+    <p>Any contract's table rows through public keyless APIs — the anchor's read path, three rotating endpoints, ambiguities stated rather than hidden.</p>
+    <div class="go">read the tables →</div>
+  </a>
+  <a class="card" style="--c:var(--f-market)" href="./inscription-explorer.html">
+    <div class="bar"></div>
+    <span class="phase">conversion · docked</span>
+    <h2>marketplace</h2>
+    <p>Trading ships when it's proven, not when it's demoed. Escrow that never touches the art, delivery provable by one call — the door opens on construction we can show, not promise.</p>
+    <div class="go">why it waits →</div>
+  </a>
+</div>
+
+<div class="quote">
+  <b>One number is all you should ever read:</b> <code>1.321 b / 10 g bGoLd</code> —
+  the machine consumes b, you see grams. Every new vessel is a new button, not a
+  new education.
+</div>
+
+<div class="corner">
+  <b>the corner, as promised:</b> the deep water lives at
+  <a href="https://github.com/beehive-nature/beehive-nature">github.com/beehive-nature</a>
+  — specs, receipts, corrections on the wall, every bug we ever caught kept on
+  exhibit. The nerd stuff isn't hidden; it's just not in your way.
+</div>
+
+</div>
+<script src="./fleet.js"></script>
+<script>
+"use strict";
+// The same truth-telling wallet state as the explorer — a front door keeps
+// its promises or nothing behind it matters.
+const $=id=>document.getElementById(id);
+function setWalletState(addr){
+  const b=$('connect');
+  if(addr){ b.textContent='connected \u00B7 '+addr.slice(0,6)+'\u2026'+addr.slice(-4); b.style.color='var(--ok)'; b.style.borderColor='var(--ok)'; }
+  else{ b.textContent='connect wallet'; b.style.color=''; b.style.borderColor=''; }
+}
+$('connect').onclick=async()=>{
+  if(!window.ethereum){ setWalletState(null); return; }
+  try{
+    const a=await window.ethereum.request({method:'eth_requestAccounts'});
+    setWalletState(a&&a[0]||null);
+  }catch(e){ setWalletState(null); }
+};
+if(window.ethereum){
+  window.ethereum.request({method:'eth_accounts'}).then(a=>{ if(a&&a[0]) setWalletState(a[0]); }).catch(()=>{});
+  window.ethereum.on && window.ethereum.on('accountsChanged',a=>setWalletState(a&&a[0]||null));
+}
+</script>
+</body>
+</html>
