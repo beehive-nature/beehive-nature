@@ -83,7 +83,7 @@
   <div id="drop" class="drop">drop a PNG here, or click to choose
     <small>square image, ideally grid×grid or an integer multiple of it</small>
   </div>
-  <input id="file" type="file" accept="image/png" hidden>
+  <input id="file" type="file" accept="image/png,.hex" hidden>
 </div>
 
 <div class="two">
@@ -142,6 +142,32 @@
       mapping, so a bad export (soft edges, wrong size) is visible next to what
       the gate measured.</figcaption>
   </figure>
+</div>
+
+<h2>The blob — the layer as bytes (v2 codec, golden-tested)</h2>
+<div class="panel two">
+  <figure>
+    <canvas id="lattice" width="680" height="584" style="width:100%;aspect-ratio:auto"></canvas>
+    <figcaption><b>Hex lattice render.</b> Exactly the geometry the on-chain SVG
+      walks — flat-top or pointy-top per the gate config. This is what the cells
+      become; the square preview above is what they came from.</figcaption>
+  </figure>
+  <div>
+    <div id="blob-stats" class="stats">drop a layer that passes the gate, or drop a .hex blob to preview it</div>
+    <label style="display:flex;gap:8px;align-items:center;margin-top:10px">
+      <input type="checkbox" id="substrate" style="width:auto">
+      <span>map empty cells to substrate #0A0A0F (BNRi full-frame mode — off = sparse trait layer)</span>
+    </label>
+    <button id="dl" disabled style="margin-top:12px;background:#1a1a12;color:var(--accent);border:1px solid #3a3a1a;
+      border-radius:6px;padding:8px 14px;font:12px ui-monospace,monospace;cursor:pointer;width:100%">
+      download _hexrect_v2.hex</button>
+    <div id="codec-goldens" class="note" style="margin-top:12px">codec goldens: checking…</div>
+    <div class="note" style="margin-top:6px">v2 wire: <code>0x02</code> version, palette count, first-seen RGB
+      triples, 5-byte rects (col,row,w,h,idx) — byte-identical to the Rust encoder
+      (bnri-cosmic) and the Solidity decoder (HexLib, 37/37 forge). Loading a .hex
+      blob previews it; the first byte dispatches v2/v1 exactly like
+      <code>BnriArt.setLayerBlob</code>. A blob preview is NOT a gate verdict.</div>
+  </div>
 </div>
 
 <div class="note panel">
@@ -380,6 +406,7 @@ function render(verdict, decodeFindings, cfg) {
 
 /* ── the entry point — drop event AND window.__gateHandleFile share this ───── */
 async function handleFile(file) {
+  if (/\.hex$/i.test(file.name)) { await handleBlob(file); return; }
   if (!wasm) { render({ pass: false, findings: [], cells: 0, rects: 0 },
     [{ level: "fail", name: "gate unavailable", detail: "WASM did not load; nothing is faked", fix: "serve over http(s), or reload" }], readCfg()); return; }
   const cfg = readCfg();
@@ -400,8 +427,217 @@ async function handleFile(file) {
   drawPreview(document.getElementById("preview"), cells, grid, verdict.findings, cfg, src);
   drawSrc(document.getElementById("src"), src);
   render(verdict, decode, cfg);
+  if (verdict.pass && !decode.some(d => d.level === "fail")) blobPipeline(cells, grid, cfg, file.name);
+  else lockBlob();
 }
 window.__gateHandleFile = handleFile;   // the drop handler below calls exactly this
+
+/* === v2 codec (JS) - the third leg, byte-identical to Rust and Solidity =====
+   Golden constants shared three ways; the codec verifies itself on every page
+   load into #codec-goldens, so a drifted build announces itself immediately. */
+function hexStrOf(u8){ return Array.from(u8).map(b=>b.toString(16).padStart(2,"0")).join(""); }
+function hexDecodeU8(s){
+  const clean = s.replace(/[^0-9a-fA-F]/g, "");
+  const out = new Uint8Array(clean.length >> 1);
+  for (let i = 0; i < out.length; i++) out[i] = parseInt(clean.substr(i*2, 2), 16);
+  return out;
+}
+function canonicalizeCells(cells, grid){
+  const rowsRuns = [];
+  for (let r = 0; r < grid; r++) {
+    const rr = []; let c = 0;
+    while (c < grid) {
+      if (cells[r*grid+c] === 0) { c++; continue; }
+      const color = cells[r*grid+c], start = c;
+      while (c < grid && cells[r*grid+c] === color) c++;
+      rr.push({c:start, w:c-start, col:color});
+    }
+    rowsRuns.push(rr);
+  }
+  const out = []; let open = [];
+  for (let r = 0; r < grid; r++) {
+    const used = new Array(open.length).fill(false), next = [];
+    for (const run of rowsRuns[r]) {
+      let m = false;
+      for (let i = 0; i < open.length; i++)
+        if (!used[i] && open[i].c === run.c && open[i].w === run.w && open[i].col === run.col) {
+          used[i] = true; next.push({...open[i], h: open[i].h + 1}); m = true; break;
+        }
+      if (!m) next.push({c:run.c, w:run.w, col:run.col, row:r, h:1});
+    }
+    for (let i = 0; i < open.length; i++) if (!used[i]) out.push(open[i]);
+    open = next;
+  }
+  for (const o of open) out.push(o);
+  return out.map(o => ({col:o.c, row:o.row, w:o.w, h:o.h, color:o.col}));
+}
+function encodeV2(rects){
+  const palette = [];
+  const idx = rects.map(r => {
+    let i = palette.indexOf(r.color);
+    if (i < 0) { palette.push(r.color); i = palette.length - 1; }
+    return i;
+  });
+  if (palette.length === 0) throw new Error("PaletteCountZero");
+  if (palette.length > 255) throw new Error("PaletteTooLarge");
+  const out = new Uint8Array(2 + 3*palette.length + 5*rects.length);
+  out[0] = 0x02; out[1] = palette.length;
+  palette.forEach((c,i) => { out[2+3*i]=(c>>16)&255; out[3+3*i]=(c>>8)&255; out[4+3*i]=c&255; });
+  rects.forEach((r,i) => {
+    const o = 2 + 3*palette.length + 5*i;
+    out[o]=r.col; out[o+1]=r.row; out[o+2]=r.w; out[o+3]=r.h; out[o+4]=idx[i];
+  });
+  return out;
+}
+function parseV2(b){
+  if (b.length === 0) throw new Error("EmptyBlob");
+  if (b[0] !== 0x02) throw new Error("BadVersion");
+  const n = b[1];
+  if (n === 0) throw new Error("PaletteCountZero");
+  const pe = 2 + 3*n;
+  if (b.length < pe) throw new Error("TruncatedPalette");
+  const pal = [];
+  for (let i = 0; i < n; i++) pal.push((b[2+3*i]<<16)|(b[3+3*i]<<8)|b[4+3*i]);
+  if ((b.length - pe) % 5 !== 0) throw new Error("TrailingBytes");
+  const rects = [];
+  for (let i = 0; i < (b.length - pe)/5; i++) {
+    const o = pe + 5*i, w = b[o+2], h = b[o+3];
+    if (b[o+4] >= n) throw new Error("BadPaletteIndex");
+    if (w === 0 || h === 0) throw new Error("ZeroDimension");
+    rects.push({col:b[o], row:b[o+1], w, h, color: pal[b[o+4]]});
+  }
+  return rects;
+}
+function parseV1(b){
+  if (b.length % 8 !== 0) throw new Error("NotMultipleOf8");
+  const rects = [];
+  for (let i = 0; i < b.length/8; i++) {
+    const o = 8*i;
+    if (b[o+7] !== 0) throw new Error("ReservedByteNonZero");
+    if (b[o+2] === 0 || b[o+3] === 0) throw new Error("ZeroDimension");
+    rects.push({col:b[o], row:b[o+1], w:b[o+2], h:b[o+3], color:(b[o+4]<<16)|(b[o+5]<<8)|b[o+6]});
+  }
+  return rects;
+}
+const dispatchBlob = b => (b.length > 0 && b[0] === 0x02) ? parseV2(b) : parseV1(b);
+
+/* -- hex lattice render: flat-top and pointy-top, same geometry family as
+      HexLib's on-chain SVG. Pointy-top: pitch x = sqrt3*R, odd rows offset;
+      flat-top: pitch x = 1.5R, odd columns offset (the measured orientation). */
+function drawLattice(cv, cells, grid, orient){
+  const R = 8, SQ3 = Math.sqrt(3);
+  let W, H;
+  if (orient === 1) { W = (grid + 0.5)*SQ3*R + R; H = grid*1.5*R + R; }
+  else { W = grid*1.5*R + R; H = (grid + 1)*SQ3*R; }
+  cv.width = Math.ceil(W); cv.height = Math.ceil(H);
+  const cx = cv.getContext("2d");
+  cx.fillStyle = "#0A0A0F"; cx.fillRect(0, 0, cv.width, cv.height);
+  const hex = (x, y) => {
+    cx.beginPath();
+    for (let i = 0; i < 6; i++) {
+      const a = orient === 1 ? Math.PI/3*i - Math.PI/2 : Math.PI/3*i;
+      const px = x + R*Math.cos(a), py = y + R*Math.sin(a);
+      i ? cx.lineTo(px, py) : cx.moveTo(px, py);
+    }
+    cx.closePath();
+  };
+  for (let r = 0; r < grid; r++) for (let c = 0; c < grid; c++) {
+    const v = cells[r*grid+c];
+    if (!v) continue;
+    cx.fillStyle = "#" + v.toString(16).padStart(6, "0");
+    if (orient === 1) hex(SQ3*R*(c + 0.5*(r & 1)) + SQ3*R/2, 1.5*R*r + R);
+    else hex(1.5*R*c + R, SQ3*R*(r + 0.5*(c & 1)) + SQ3*R/2);
+    cx.fill();
+  }
+}
+
+/* -- blob pipeline: cells -> canonicalize (+optional substrate) -> v2 -> stats+dl */
+let lastBlob = null;
+function blobPipeline(cells, grid, cfg, name){
+  const stats = document.getElementById("blob-stats"), dl = document.getElementById("dl");
+  const useSub = document.getElementById("substrate").checked;
+  let work = cells;
+  if (useSub) {
+    work = Uint32Array.from(cells);
+    for (let i = 0; i < work.length; i++) if (work[i] === 0) work[i] = 0x0A0A0F;
+  }
+  try {
+    const rects = canonicalizeCells(work, grid);
+    const blob = encodeV2(rects);
+    lastBlob = { bytes: blob, name: (name || "layer").replace(/\.[^.]*$/, "") + "_hexrect_v2.hex" };
+    drawLattice(document.getElementById("lattice"), work, grid, cfg.orient);
+    const txs = Math.ceil(rects.length / cfg.maxRects);
+    stats.innerHTML = `<b>${rects.length}</b> rects after v-merge (gate RLE budget: ${cfg.maxRects}/tx → ${txs} tx) · ` +
+      `<b>${blob.length}</b> B v2 · ${(100*blob.length/24576).toFixed(1)}% of the 24,576 B blob ceiling · ` +
+      `v1 would be ${rects.length*8} B`;
+    dl.disabled = false;
+  } catch (e) {
+    stats.textContent = "encode failed: " + e.message;
+    dl.disabled = true;
+  }
+}
+function lockBlob(){
+  document.getElementById("blob-stats").textContent = "blob locked — the layer must pass the gate first";
+  document.getElementById("dl").disabled = true;
+}
+document.getElementById("dl").addEventListener("click", () => {
+  if (!lastBlob) return;
+  const url = URL.createObjectURL(new Blob([lastBlob.bytes], { type: "application/octet-stream" }));
+  const a = document.createElement("a");
+  a.href = url; a.download = lastBlob.name; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+});
+document.getElementById("substrate").addEventListener("change", () => { if (lastBlob) location.reload(); });
+
+/* -- .hex blob preview: parse with the same dispatch BnriArt uses. A blob
+      preview is NOT a gate verdict - labelled as such, per house law. */
+async function handleBlob(file){
+  const cfg = readCfg();
+  const stats = document.getElementById("blob-stats");
+  let text;
+  try { text = await file.text(); }
+  catch (e) { stats.textContent = "unreadable file: " + e; return; }
+  // encoding-agnostic: keep only hex digits (handles the legacy UTF-16 blobs too)
+  let bytes;
+  try { bytes = hexDecodeU8(text); } catch (e) { stats.textContent = "not a hex blob"; return; }
+  let rects, version;
+  try { rects = dispatchBlob(bytes); version = bytes[0] === 0x02 ? "v2" : "v1"; }
+  catch (e) {
+    stats.textContent = "blob rejected: " + e.message + " (strict, never clamps)";
+    document.getElementById("dl").disabled = true;
+    return;
+  }
+  const grid = Math.max(...rects.map(r => Math.max(r.col + r.w, r.row + r.h)), 1);
+  const cells = new Uint32Array(96*96 > grid*grid ? 96*96 : grid*grid);
+  const g = Math.sqrt(cells.length) | 0;
+  for (const r of rects) for (let dy = 0; dy < r.h; dy++) for (let dx = 0; dx < r.w; dx++) cells[(r.row+dy)*g + (r.col+dx)] = r.color;
+  drawLattice(document.getElementById("lattice"), cells, g, cfg.orient);
+  const pal = new Set(rects.map(r => r.color));
+  stats.innerHTML = `<b>${version}</b> blob · <b>${rects.length}</b> rects · <b>${bytes.length}</b> B · ` +
+    `${pal.size} colours · rendered at ${g}×${g} · <span style="color:#ff9a5b">preview, not a gate verdict</span>`;
+  document.getElementById("dl").disabled = true;   // previews are not re-exported
+}
+
+/* -- codec goldens, verified on EVERY load: same constants as Rust + Solidity. */
+(function codecSelfCheck(){
+  const el = document.getElementById("codec-goldens");
+  const t = [];
+  try {
+    t.push(hexStrOf(encodeV2([{col:5,row:7,w:3,h:2,color:0x112233}])) === "02011122330507030200");
+    const c16 = new Uint32Array(256);
+    for (let x = 0; x < 2; x++) { c16[x] = 0xFF0000; c16[16+x] = 0xFF0000; }
+    t.push(hexStrOf(encodeV2(canonicalizeCells(c16, 16))) === "0201ff00000000020200");
+    t.push(hexStrOf(encodeV2([{col:0,row:0,w:1,h:1,color:0xAABBCC},{col:1,row:0,w:1,h:1,color:0x001122}])) === "0202aabbcc00112200000101000100010101");
+    t.push(JSON.stringify(parseV1(hexDecodeU8("00000101ff000000"))) === JSON.stringify([{col:0,row:0,w:1,h:1,color:0xFF0000}]));
+    const bt = encodeV2(canonicalizeCells(c16, 16));
+    t.push(hexStrOf(encodeV2(parseV2(bt))) === hexStrOf(bt));
+  } catch (e) { t.push(false); }
+  const ok = t.every(Boolean);
+  el.innerHTML = ok
+    ? `<span class="ok">codec goldens: ${t.length}/${t.length} — byte-identical to Rust + Solidity</span>`
+    : `<span class="bad">CODEC GOLDEN FAILED (${t.filter(Boolean).length}/${t.length}) — do not trust this build</span>`;
+})();
+
 
 /* ── ?selftest — the page's own controls (law 8x: exhibit the failure too) ──
    Synthesizes each case as a real PNG, runs it through the SAME handleFile the
