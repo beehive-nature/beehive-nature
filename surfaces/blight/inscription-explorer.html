@@ -211,7 +211,14 @@ async function call(to,data,tries){
       const r = await fetch(rpcUrl,{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_call',params:[{to,data},'latest']})});
       j = await r.json();
-    }catch(e){ if(i===tries-1) throw new Error('network: '+e.message); await sleep(400*(1<<i)); continue; }
+    }catch(e){
+      // rotate BEFORE retrying (founder receipt 2026-08-16: Enter failed / click worked —
+      // the same endpoint was hammered while healthy ones sat idle) and snap rpcUrl back
+      // to the selected chain's pool if .b name-resolution left it on another chain's
+      // ladder (wrong-chain reads return a polite '0x' — never a value, receipt fd5355e).
+      if(pool.length>1) rpcUrl=nextRpc();
+      if(i===tries-1) throw new Error('network: '+e.message+' (hosts rotated each try)');
+      await sleep(400*(1<<i)); continue; }
     if(j.error){
       const m = j.error.message||'reverted';
       if(/rate limit|too many|429/i.test(m) && i<tries-1){ await sleep(700*(1<<i)); continue; }
