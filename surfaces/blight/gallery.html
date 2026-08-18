@@ -46,6 +46,7 @@ body{background:var(--bg);color:#cfe8d6;font:13px/1.5 'IBM Plex Mono',monospace;
 <div id="plaque"><div class="title">…</div><div class="sub">…</div></div>
 <div id="controls">
   <button id="bPlay" class="on" title="the tour walks itself">▶ tour</button>
+  <button id="bWings" title="collections as exhibits">⊞</button>
   <button id="bAsk" title="visit any wallet's collection">any wallet</button>
 </div>
 <div id="ask"><div><input id="addr" placeholder="0x… or name.base.eth"><button id="go">visit</button></div></div>
@@ -141,6 +142,7 @@ async function loadGarden(addr){
   });
   return found;
 }
+window.__show=show;
 function show(i){
   idx=(i+pieces.length)%pieces.length;
   const f=$('frame');
@@ -168,6 +170,8 @@ async function start(addr,wing){
   }
   $('dots').innerHTML=pieces.map((_,k)=>'<i data-k="'+k+'"></i>').join('');
   [...$('dots').children].forEach(d=>d.onclick=()=>show(+d.dataset.k));
+  window.__garden=pieces;
+  if(window.__wingsRefresh) window.__wingsRefresh();
   show(0);
   if(walking&&timer) clearInterval(timer);
   timer=setInterval(walk,6000);
@@ -191,6 +195,79 @@ document.addEventListener('keydown',e=>{
   if(e.key===' '){ e.preventDefault(); $('bPlay').click(); }
 });
 start('0xfbd201472d5a439f1f0e408eb5dfaf6ea3687876',"the founder's garden · base");
+</script>
+<div id="wings" style="position:fixed;inset:0;background:#050508f5;z-index:60;display:none;overflow-y:auto;padding:70px 4vw 90px"><div id="wingsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;max-width:1100px;margin:0 auto"></div><div id="roomBack" style="display:none;max-width:1100px;margin:0 auto"></div></div><script>
+/* WINGS: every collection its own exhibit; every exhibit opens a room with the
+   full-stack facts (source-verified in the catalog lane). Icon-first, value-first. */
+var FACTS={
+ 'PEPI v2':{sup:'13,370',lad:'11·22·33·44·56 (top 0.42%)',art:'anon 0x1609e546… · lifecycle art, traits in SVG',pool:'Uni v3 PEPI/WETH 1%'},
+ 'PEPI v1':{sup:'13,370',lad:'11·22·33·44·56',art:'same anon creator · the o/u era',pool:'Uni v3'},
+ 'FUNGI':{sup:'210,000,000',lad:'21k·525k·1.05M·1.575M·2.1M (top 1%)',art:'ToddStool · on-chain trait JSON · spore→mushroom',pool:'Uni v3 ~$35k'},
+ '$FROGGI':{sup:'76,740,000',lad:'1k·3k·10k·30k·60k·120k (top 0.16%)',art:'animated egg→body · expressions',pool:'—'},
+ 'JELLI':{sup:'210,000,000',lad:'1k·21k·105k·420k·1.05M (top 0.5%)',art:'underwater scenes · mirrorTime',pool:'—'},
+ 'JEDI':{sup:'210,000,000',lad:'10.5k·105k·1.05M (top 0.5%)',art:'lightsabers · site jedi.army dead',pool:'none — no DEX pair'},
+ 'TRUFFI':{sup:'15,000,000',lad:'? — source pending',art:'art keyed to the HOLDER',pool:'—'},
+ 'MiDi':{sup:'210,000,000',lad:'music: scale·duration·bars',art:'the fallen youngest · lived May–Jun 2024',pool:'none'},
+};
+var _w=function(id){return document.getElementById(id);};
+function openWings(){
+  _w('wings').style.display='block'; _w('wingsGrid').style.display='grid'; _w('roomBack').style.display='none';
+  var g=window.__garden||[], by={};
+  g.forEach(function(p){ (by[p.sym]=by[p.sym]||[]).push(p); });
+  Object.keys(by).forEach(function(k){ by[k].sort(function(x,y){return (y.lvln===null?-1:y.lvln)-(x.lvln===null?-1:x.lvln)||(y.seed||0)-(x.seed||0);}); });
+  var grid=_w('wingsGrid'); grid.innerHTML='';
+  Object.keys(by).forEach(function(sym){
+    var list=by[sym]; var f=list[0]; if(!f) return;
+    var card=document.createElement('div');
+    card.style.cssText='background:#0d0d15;border:1px solid #1a1a2a;border-radius:10px;overflow:hidden;cursor:pointer;transition:transform .15s,border-color .15s';
+    card.onmouseover=function(){card.style.transform='translateY(-3px)';card.style.borderColor='#00E5FF';};
+    card.onmouseout=function(){card.style.transform='';card.style.borderColor='#1a1a2a';};
+    var th=document.createElement('div'); th.style.cssText='background:#000;padding:10px;display:flex;justify-content:center';
+    th.innerHTML=f.svg; var sv=th.querySelector('svg'); if(sv){sv.style.width='120px';sv.style.height='120px';}
+    card.appendChild(th);
+    var lab=document.createElement('div'); lab.style.cssText='padding:10px 12px';
+    var l1=document.createElement('div'); l1.style.cssText='color:#00E5FF;font-size:13px'; l1.textContent=sym;
+    var l2=document.createElement('div'); l2.style.cssText='color:#5a6478;font-size:10.5px;margin-top:3px';
+    l2.textContent=list.length+' piece'+(list.length>1?'s':'')+' · best '+((f.lvln!==null&&f.pipmax)?('L'+f.lvln+'/'+f.pipmax):'?');
+    lab.appendChild(l1); lab.appendChild(l2); card.appendChild(lab);
+    card.onclick=function(){openRoom(sym,list);};
+    grid.appendChild(card);
+  });
+  if(!grid.children.length){ var e=document.createElement('div'); e.style.color='#5a6478';
+    e.textContent='no exhibits yet — visit a wallet first (any wallet button)'; grid.appendChild(e); }
+}
+function openRoom(sym,list){
+  _w('wingsGrid').style.display='none'; _w('roomBack').style.display='block';
+  var F=FACTS[sym]||{}; var rb=_w('roomBack'); rb.innerHTML='';
+  var head=document.createElement('div'); head.style.cssText='overflow:hidden';
+  var t=document.createElement('div'); t.style.cssText='color:#00E5FF;font-size:17px;float:left'; t.textContent=sym;
+  var back=document.createElement('button'); back.textContent='⌂ wings';
+  back.style.cssText='float:right;background:#0d0d15;color:#5a6478;border:1px solid #1a1a2a;border-radius:5px;padding:5px 10px;cursor:pointer;font:11px ui-monospace,monospace';
+  back.onclick=openWings;
+  head.appendChild(t); head.appendChild(back); rb.appendChild(head);
+  var sub=document.createElement('div'); sub.style.cssText='color:#5a6478;font-size:11px;margin:8px 0 14px;line-height:1.8';
+  sub.textContent=['supply '+(F.sup||'?'),'ladder '+(F.lad||'?'),F.art||'','pool '+(F.pool||'?')].filter(Boolean).join(' · ');
+  rb.appendChild(sub);
+  var wall=document.createElement('div');
+  wall.style.cssText='display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px';
+  list.forEach(function(p){
+    var c=document.createElement('div');
+    c.style.cssText='background:#0d0d15;border:1px solid #1a1a2a;border-radius:8px;overflow:hidden;cursor:pointer;text-align:center';
+    var th=document.createElement('div'); th.style.cssText='background:#000;padding:8px'; th.innerHTML=p.svg;
+    var sv=th.querySelector('svg'); if(sv){sv.style.width='100%';sv.style.height='auto';}
+    var l=document.createElement('div'); l.style.cssText='padding:6px;color:#5a6478;font-size:10px';
+    l.textContent='seed '+(p.seed||0).toLocaleString()+((p.lvln!==null&&p.pipmax)?(' · L'+p.lvln):'');
+    c.appendChild(th); c.appendChild(l);
+    c.onclick=function(){ closeWings(); var i=(window.__garden||[]).indexOf(p); if(i>-1&&window.__show) window.__show(i); };
+    wall.appendChild(c);
+  });
+  rb.appendChild(wall);
+}
+function closeWings(){ _w('wings').style.display='none'; }
+document.getElementById('bWings').onclick=function(){ var w=_w('wings');
+  if(w.style.display==='block'){ closeWings(); } else { openWings(); } };
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeWings(); });
+
 </script>
 </body>
 </html>
