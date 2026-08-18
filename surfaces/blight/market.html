@@ -130,6 +130,7 @@ const pipmax=col=>col.lv?col.lv.length-1-col.base:0;
 const pips=(n,max)=>{ let s=''; for(let k=0;k<Math.max(max,1);k++) s+=k<n?'\u25CF':'\u00B7'; return s; };
 let inventory=[];
 const PRICES={'FUNGI':0.00041,'$FROGGI':0.004,'JELLI':0.0009,'PEPI v2':3.2,'PEPI v1':0.55};
+const fromLine='\nfrom: bsy: [your handle] | npub: [your address] (bind: /keys/addresses)';
 const $=id=>document.getElementById(id);
 async function buildInventory(){
   const found=[];
@@ -189,6 +190,15 @@ function preview(i){
   $('room').classList.add('open');
   shareRoom(p,i);
   $('confirm').onclick=function(){ this.textContent='\u23F3 docking… the escrow contract is the last piece'; this.disabled=true; };
+  var im=document.getElementById('inquireMsg');
+  if(im&&!im.onclick){
+    im.onclick=function(){
+      var u=location.origin+location.pathname+'?piece='+encodeURIComponent(p.col.sym+':'+p.seed);
+      var note='INQUIRY - '+p.col.sym+' seed '+p.seed.toLocaleString()+' (level '+(p.lvln??'?')+')'+
+        fromLine+'\nroom: '+u+'\n- from the DeMarketPlace';
+      navigator.clipboard.writeText(note).then(function(){ im.textContent='offer note copied — the DIDs travel with it'; });
+    };
+  };
 }
 function shareRoom(p,i){
   try{

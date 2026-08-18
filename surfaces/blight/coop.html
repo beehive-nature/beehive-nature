@@ -144,7 +144,8 @@ function sheet(s){
   const note='COOP OFFTAKE REQUEST - '+s.n+' (rank #'+s.rank+')\n'+
     'spec '+s.spec+' · unit '+s.unit+' · stable '+s.stable+'\n'+
     'volume: ____ · target fUSD: ____ · destination: ____\n'+
-    'index: '+location.origin+location.pathname+'\n- from the Coop at beehivenature.com';
+    'index: '+location.origin+location.pathname+'\nfrom: bsy: [your handle] | npub: [your address] (bind: /keys/addresses)\n'+
+    '- from the Coop at beehivenature.com';
   $('offtake').onclick=function(){ navigator.clipboard.writeText(note).then(()=>{ this.textContent='\u2709 offtake note copied'; }); };
   $('accord').onclick=function(){ this.textContent='opens the accord card when the escrow docks — the pattern ships in the farmers market'; };
 }

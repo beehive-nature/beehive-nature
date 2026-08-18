@@ -238,7 +238,8 @@ $('aNote').onclick=()=>{
   const u=location.origin+location.pathname;
   const note='bACCORD - '+p.col.sym+' seed '+p.seed.toLocaleString()+' (level '+(p.lvln??'?')+')\\n'+
     'ask '+L.fusd.toLocaleString()+' fUSD, exact '+L.whole.toLocaleString()+'\\n'+
-    'referee bQueenBee. see the stall: '+u+'\\n- from the farmers market at beehivenature.com';
+    'referee bQueenBee. see the stall: '+u+'\\nfrom: bsy: [your handle] | npub: [your address] (bind: /keys/addresses)\n'+
+    '- from the farmers market at beehivenature.com';
   navigator.clipboard.writeText(note).then(()=>{ $('aNote').textContent='\u2709 accord note copied'; });
 };
 $('aSign').onclick=function(){ this.textContent='\u23F3 docking — the audited escrow is the last piece'; this.disabled=true; };
