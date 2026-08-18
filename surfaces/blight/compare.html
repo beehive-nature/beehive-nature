@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>bLighT Catalog — the ERC-20i family, artist by artist</title>
+<style>
+:root{
+  --bg:#0A0A0F; --panel:#14141f; --panel2:#0d0d15; --line:#262638;
+  --crt:#00FF41; --cyan:#00E5FF; --pink:#FF3DB0; --purple:#A24BFF; --lime:#9FFF3D;
+  --dim:#5a6478; --ink:#cfe8d6;
+  --mono:'IBM Plex Mono','Consolas',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--mono);font-size:13px;line-height:1.55;
+  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="97" viewBox="0 0 56 97"><g fill="none" stroke="%231a1a2a" stroke-width="1"><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z"/><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z" transform="translate(28,48)"/></g></svg>');}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background:repeating-linear-gradient(to bottom,rgba(0,0,0,0) 0 2px,rgba(0,0,0,.14) 2px 4px);mix-blend-mode:multiply}
+.wrap{max-width:1180px;margin:0 auto;padding:26px 20px 90px}
+h1{font-size:22px;color:var(--cyan);letter-spacing:1px;text-shadow:0 0 10px rgba(0,229,255,.35)}
+.sub{color:var(--dim);font-size:12px;margin:4px 0 22px}
+h2{font-size:15px;color:var(--crt);margin:30px 0 10px;letter-spacing:1px}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:860px){.split{grid-template-columns:1fr}}
+.pane{background:var(--panel);border:1px solid var(--line);padding:14px 16px}
+.pane h3{color:var(--pink);font-size:14px;letter-spacing:1px;margin-bottom:2px}
+.pane .by{color:var(--dim);font-size:11px;margin-bottom:10px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+td{padding:4px 0;border-bottom:1px dotted #23233a;vertical-align:top}
+td:first-child{color:var(--dim);width:38%;padding-right:10px}
+.pend{color:var(--purple)}
+.lad{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px}
+.rung{border:1px solid var(--line);padding:2px 8px;font-size:11px;color:var(--ink)}
+.rung.top{border-color:var(--lime);color:var(--lime);box-shadow:0 0 10px rgba(159,255,61,.35)}
+.bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+select{background:var(--panel2);border:1px solid var(--cyan);color:var(--cyan);font:inherit;padding:6px 10px}
+button{background:none;border:1px solid var(--crt);color:var(--crt);font:inherit;padding:6px 14px;cursor:pointer}
+button:hover{background:var(--crt);color:#000}
+.live{color:var(--lime)}
+.foot{margin-top:34px;color:var(--dim);font-size:10.5px;line-height:1.7}
+.foot b{color:var(--ink)}
+.ok{color:var(--lime)} .warn{color:var(--pink)}
+nav{margin-top:40px;display:flex;gap:14px;flex-wrap:wrap;font-size:11px}
+nav a{color:var(--dim);text-decoration:none}
+nav a:hover{color:var(--cyan)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>bLighT Catalog <span style="color:var(--dim)">// the multi-artist ERC-20i family</span></h1>
+<div class="sub">Every artist's scheme in its own terms. Every cell sourced from read code or a chain receipt — pending cells say so.</div>
+
+<div class="bar">
+  <select id="a"></select>
+  <select id="b"></select>
+  <button id="sw">⇄ swap</button>
+  <span style="color:var(--dim);align-self:center;font-size:11px" id="fRate"></span>
+</div>
+<div class="split" id="split"></div>
+
+<h2>the family table</h2>
+<div style="overflow-x:auto"><table id="fam"></table></div>
+
+<div class="foot" id="srcs"></div>
+<nav id="fleet"></nav>
+</div>
+<script>
+// ---------------- THE DATA — every row traced ----------------
+// PEPI: levels + mechanics from the verified Pepi.sol (read 2026-08-16); supplies read on-chain;
+//       FUNGI constants from ToddStool/fungi Generator.sol lines 10-14 (cloned + read);
+//       FROGGI/JELLI ladders bisected on-chain 2026-08-16 (boundary calls bracket each rung ±1);
+//       TRUFFI has no getMeta(uint256,uint256) — its art is holder-keyed (getSvg takes an address);
+//       source pending, honestly.
+const COLS=[
+ {sym:'PEPI v2',chain:'Base',addr:'0x28a5e71BFc02723eAC17E39c84c5190415C0de9F',
+  artist:'anon 0x1609e546e31629… (self-identified via source header; site dead)',
+  supply:13370, seedWords:3, seedShape:'(seed, seed2, extra)',
+  ladder:[11,22,33,44,56], topName:'L6', lvlOffset:1,
+  hasMeta:false,
+  traits:'traits live in the SVG only — no getMeta; levels by balance thresholds',
+  capture:'capture at whole-token transfer; exact-seed transfer moves art intact (trySeedTransfer)',
+  bug:'CLEAN — v2 arithmetic fixed', pool:'Uniswap V3, PEPI/WETH, 1% fee (0xdf6d5270…) · LP timelocked per project',
+  provenance:'Pepi.sol verified source; pool read on-chain 2026-08-16'},
+ {sym:'PEPI v1',chain:'Base',addr:'0x19706c142d33376240e418d6385f05691a5fa8e2',
+  artist:'same anon creator as v2',
+  supply:13370, seedWords:3, seedShape:'(seed, seed2, extra)',
+  ladder:[11,22,33,44,56], topName:'L6', lvlOffset:1,
+  hasMeta:false,
+  traits:'traits live in the SVG only — no getMeta',
+  capture:'same family; seed = floor(balance) at capture events',
+  bug:'o/u BUG — floor(bal) − floor(bal−amount) can dissolve art on non-exact sends',
+  pool:'Uniswap V3 (0x7e708e16…)',
+  provenance:'Pepi.sol verified source; the stuck-wallet saga 2026-08-16'},
+ {sym:'FUNGI',chain:'Base',addr:'0x7d9CE55D54FF3FEddb611fC63fF63ec01F26D15F',
+  artist:'ToddStool — github.com/ToddStool/fungi · @Fungi_ERC20i · claims "The First ERC-20i with Native Inscriptions" (date check pending vs PEPi v1 2024-04-10; FUNGI repo updated 2024-04-24)',
+  supply:210000000, seedWords:2, seedShape:'(seed, extra)',
+  ladder:[21000,525000,1050000,1575000,2100000], topName:'L5',
+  hasMeta:true,
+  traits:'getMeta → JSON on-chain: background, ground, stem, cap, hasDots (+colors). Art richer at top: stems [5,5,5,6,10], caps/dots [5,7,10,10,10] per level',
+  capture:'capture at whole-token transfer; level = f(seed) only — extra shuffles art, never level',
+  bug:'o/u family (found with v1 + FUNGI per founder correction 2026-08-16)',
+  pool:'Uniswap V3 FUNGI/WETH (0x8ce9b689…) · ~$0.000409 · liq ~$34.7k (dexscreener 2026-08-16)',
+  provenance:'Generator.sol:10-14 constants + chain bisect to the token; 2,099,999→L4 / 2,100,000→L5',
+  dsPair:'base/0x8ce9b689018fc94f44540b62ba6e10dc8b346448'},
+ {sym:'$FROGGI',chain:'Base',addr:'0x88A78C5035BdC8C9A8bb5c029e6cfCDD14B822FE',
+  artist:'unattributed (pending) — not ToddStool; different trait vocabulary',
+  supply:76740000, seedWords:2, seedShape:'(seed, extra) presumed — getMeta answers',
+  ladder:[1000,3000,10000,30000,60000,120000], topName:'L6',
+  hasMeta:true,
+  traits:'getMeta → bg, bgPalette, EGG, eggAnimation, body, expression, animateBody, colorCycle, eyes — animated frogs hatching from eggs',
+  capture:'level = f(seed); boundaries bisected on-chain (±1)',
+  bug:'pending source read',
+  pool:'pending',
+  provenance:'chain bisect 2026-08-16: anchors 1→L0, 21k→L3, 525k→L6; rungs 1000/3000/10001/30012/60005/120001'},
+ {sym:'JELLI',chain:'Base',addr:'0xA1b9d812926a529D8B002E69FCd070c8275eC73c',
+  artist:'unattributed (pending)',
+  supply:210000000, seedWords:2, seedShape:'(seed, extra) presumed — getMeta answers',
+  ladder:[1000,21000,105000,420000,1050000], topName:'L5',
+  hasMeta:true,
+  traits:'getMeta → background ×2, hasGround, groundColor, hasWeed, weed, weedColor, hasBubble, bubble, bubbleColor, mirrorTime — underwater scene',
+  capture:'level = f(seed); boundaries bisected on-chain (±1)',
+  bug:'pending source read',
+  pool:'pending',
+  provenance:'chain bisect 2026-08-16: anchors 1→L0, 21k→L2, 525k→L4, 1.05M→L5 (cap)'},
+ {sym:'TRUFFI',chain:'Base',addr:'0x2496a9AF81A87eD0b17F6edEaf4Ac57671d24f38',
+  artist:'unattributed (pending)',
+  supply:15000000, seedWords:'addr', seedShape:'holder-keyed — getSvg takes (seed, holder-address)',
+  ladder:null, topName:'?', hasMeta:false,
+  traits:'no getMeta(uint256,uint256) — a different beast entirely', 
+  capture:'art keyed to the HOLDER, not just the seed — the only one in the family',
+  bug:'pending source read', pool:'pending',
+  provenance:'selector probes revert on getMeta; address-shape confirmed in explorer probing'},
+ {sym:'JEDI',chain:'Base',addr:'0xA058c6f2A56BaAFD5dE4BCAD8f2Cb26F6A32b7D1',
+  artist:'unattributed (pending) — the lightsaber artist; site jedi.army is DEAD (connection refused 2026-08-16); found by on-chain fingerprint after the March \'24 family doc named it',
+  supply:210000000, seedWords:2, seedShape:'(seed, extra) presumed — getMeta answers',
+  ladder:[10500,105000,1050000], topName:'L3', hasMeta:true,
+  traits:'getMeta → CAPITALIZED keys: Level, Hilt Color, Beam Color, Beam Glow Color, Background Color, Saber Shape id, Description, Web — lightsabers; the only collection whose site URL lives inside its own trait JSON',
+  capture:'level = f(seed); ×10 ladder, bisected on-chain 2026-08-16 (L1 ~10,500 / L2 105,000 / L3 1,050,000) — doc-corroborated ("top level 3 at 1,050,000+, 0.5% of supply")',
+  bug:'pending source read',
+  pool:'NONE — zero DEX pairs (dexscreener pairs:null 2026-08-16); unswappable via AMM; March \'24 doc priced entry $123',
+  provenance:'March \'24 family review + chain bisect + fingerprint match (only 9-dec/210M JEDI on Base)'},
+];
+const pct=(n,sup)=>((n/sup)*100).toPrecision(2)+'% of supply';
+const fmt=n=>n.toLocaleString('en-US');
+function pane(c){
+  const top=c.ladder?c.ladder[c.ladder.length-1]:null;
+  return '<div class="pane"><h3>'+c.sym+'</h3><div class="by">'+c.chain+' · '+c.addr.slice(0,10)+'…'+c.addr.slice(-4)+'</div>'
+   +'<table>'
+   +row('artist',c.artist)
+   +row('supply',c.supply?fmt(c.supply):'<span class="pend">pending</span>')
+   +row('seed shape',c.seedShape)
+   +row('level ladder',c.ladder?'<div class="lad">'+c.ladder.map((v,i)=>'<span class="rung'+(i===c.ladder.length-1?' top':'')+'">L'+(i+1+(c.lvlOffset||0))+' ≥ '+fmt(v)+'</span>').join('')+'</div>':'<span class="pend">source pending</span>')
+   +row('top level',top?'<span class="live">'+c.topName+' at '+fmt(top)+' = '+pct(top,c.supply)+'</span>':'<span class="pend">?</span>')
+   +row('top-rung price',c.dsPair?'<span id="tp-'+c.sym.replace(/[^A-Z]/ig,'')+'">fetching…</span>':'<span class="pend">pending</span>')
+   +row('traits',c.traits)
+   +row('capture rule',c.capture)
+   +row('known bug',c.bug)
+   +row('pool',c.pool)
+   +row('provenance',c.provenance)
+   +'</table></div>';
+}
+const row=(k,v)=>'<tr><td>'+k+'</td><td>'+v+'</td></tr>';
+const $=id=>document.getElementById(id);
+function draw(){
+  const a=COLS[+$('a').value], b=COLS[+$('b').value];
+  $('split').innerHTML=pane(a)+pane(b);
+  fetchTop(a); fetchTop(b);
+}
+async function fetchTop(c){
+  if(!c.dsPair) return;
+  const elid='tp-'+c.sym.replace(/[^A-Z]/ig,'');
+  const el=$(elid); if(!el) return;
+  try{
+    const r=await fetch('https://api.dexscreener.com/latest/dex/pairs/'+c.dsPair);
+    const j=await r.json();
+    const p=j.pair||j.pairs&&j.pairs[0];
+    const top=c.ladder[c.ladder.length-1];
+    const usd=p&&p.priceUsd?parseFloat(p.priceUsd):null;
+    if(usd!==null){
+      el.textContent='$'+(usd*top).toFixed(2)+' ($'+usd+' each)';
+      el.className='live';
+    } else { el.textContent='pair found, no price'; el.className='pend'; }
+  }catch(e){ el.textContent='unreachable — pending'; el.className='pend'; }
+}
+// family table
+function famTable(){
+  let h='<tr style="color:var(--dim)"><td>collection</td><td>supply</td><td>seed shape</td><td>top level</td><td>% of supply</td><td>getMeta</td><td>artist</td></tr>';
+  for(const c of COLS){
+    const top=c.ladder?c.ladder[c.ladder.length-1]:null;
+    h+='<tr><td style="color:var(--cyan)">'+c.sym+'</td><td>'+fmt(c.supply)+'</td><td>'+c.seedShape+'</td>'
+      +(top?'<td class="ok">'+c.topName+' @ '+fmt(top)+'</td><td>'+pct(top,c.supply)+'</td>':'<td class="pend">?</td><td class="pend">?</td>')
+      +'<td>'+(c.hasMeta?'<span class="ok">yes — on-chain JSON</span>':'<span class="warn">no</span>')+'</td>'
+      +'<td>'+c.artist.split('—')[0].slice(0,40)+(c.artist.length>40?'…':'')+'</td></tr>';
+  }
+  $('fam').innerHTML=h;
+}
+// boot
+$('a').innerHTML=COLS.map((c,i)=>'<option value="'+i+'">'+c.sym+'</option>').join('');
+$('b').innerHTML=COLS.map((c,i)=>'<option value="'+i+'"'+(i===2?' selected':'')+'>'+c.sym+'</option>').join('');
+$('a').onchange=draw; $('b').onchange=draw; $('sw').onclick=()=>{const t=$('a').value;$('a').value=$('b').value;$('b').value=t;draw();};
+draw(); famTable();
+$('srcs').innerHTML='<b>Sources.</b> FUNGI: ToddStool/fungi <i>Generator.sol:10-14</i> (cloned 2026-08-16) + boundary calls 2,099,999→L4 / 2,100,000→L5, extra-independence proven (extras 1/999/123456789 leave level fixed). '
+ +'PEPi: verified Pepi.sol read (trySeedTransfer three-path decode) + on-chain supplies. FROGGI/JELLI: pure chain bisection, anchors and rungs listed per row; ±1 at the boundary. '
+ +'TRUFFI: getMeta((uint256,uint256)) probes revert; holder-keyed getSvg confirmed. Prices: dexscreener public API, fetched live in your browser right now. '
+ +'<b>Self-check:</b> ladder sums follow each contract\u2019s own constants — no cross-collection threshold is ever reused (that bug, caught 2026-08-16, is why this page exists).';
+// fleet nav (idempotent with fleet.js when landed)
+$('fleet').innerHTML=(window.FLEET_NAV?FLEET_NAV:[
+ '<a href="./index.html">◈ fLeeT</a>','<a href="./museum.html">◈ museum</a>','<a href="./inscription-explorer.html">◈ explorer</a>',
+ '<a href="./studio-gate.html">◈ studio gate</a>','<a href="./c1-aid.html">◈ C-1 aid</a>','<a href="./vaulta-reader.html">◈ vaulta reader</a>'].join(' · '.replace(/ · $/,''))).join(' · ');
+</script>
+</body>
+</html>

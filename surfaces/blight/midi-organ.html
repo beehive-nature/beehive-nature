@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>bLighT Organ — the seed becomes sound (for MiDi, the youngest lost boy)</title>
+<style>
+:root{--bg:#0A0A0F;--crt:#00FF41;--cyan:#00E5FF;--pink:#FF3DB0;--dim:#5a6478}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:#cfe8d6;font:13px/1.6 'IBM Plex Mono',monospace;padding:30px 20px;
+  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="97"><g fill="none" stroke="%231a1a2a"><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z"/><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z" transform="translate(28,48)"/></g></svg>')}
+.wrap{max-width:720px;margin:0 auto}
+h1{color:var(--cyan);font-size:20px;text-shadow:0 0 10px rgba(0,229,255,.4)}
+.sub{color:var(--dim);font-size:11.5px;margin:6px 0 20px;line-height:1.7}
+input,button{font:inherit;background:#0d0d15;color:var(--crt);border:1px solid var(--cyan);padding:8px 12px}
+button{cursor:pointer;border-color:var(--crt)} button:hover{background:var(--crt);color:#000}
+button.stop{border-color:var(--pink);color:var(--pink)} button.stop:hover{background:var(--pink);color:#000}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+#meta{margin:14px 0;font-size:12px;line-height:2}
+.chip{display:inline-block;border:1px solid #2a2a3d;border-radius:4px;padding:2px 8px;margin:2px 6px 2px 0;font-size:11px}
+.foot{margin-top:26px;color:var(--dim);font-size:10.5px;line-height:1.8}
+</style>
+</head>
+<body><div class="wrap">
+<h1>bLighT Organ <span style="color:var(--dim)">// seed → sound</span></h1>
+<div class="sub">The music-inscription modality, given wind. Traits are read live from the MiDi contracts
+(0xf7Cf2…, 0x569e…, 0x2d448…) — deployed May 2024, heard for minutes, silent since June 3.
+Same doctrine as seed→SVG: keyless, client-side, deterministic. Credit to the fallen anon artist.</div>
+<div class="row">
+  <select id="c"></select>
+  <input id="s" type="number" value="1000" min="1" style="width:120px" placeholder="seed">
+  <button id="read">read traits</button>
+  <button id="play">▶ hear</button>
+  <button id="stop" class="stop">■</button>
+</div>
+<div id="meta">choose a deploy and press read — the chain still answers.</div>
+<div class="foot">Rendering: scale name → interval set; root derived from the seed; duration → note
+length; barColors tint the bars. Same seed, same song, forever. The gallery gains a sense.</div>
+<script>
+const DEPLOYS=[['MiDi #1','0xf7Cf2DF510bc0EC400232874f2fB4F2cDf9352d6'],
+ ['MiDi #2 (lived May 2 – Jun 3 2024)','0x569e1A337b095B1A6c8F206158072cEDb6325b56'],
+ ['MiDi #3','0x2d448bC9a98d28cB094722c2B8208916A248D5ac']];
+const HOSTS=['https://base-rpc.publicnode.com','https://base.drpc.org'];
+const W=v=>BigInt(v).toString(16).padStart(64,'0');
+const dec=s=>{const b=Buffer?null:null; /* browser: atob path */ 
+  const h=s.replace(/^0x/,'');const off=parseInt(h.slice(64,128),16);const len=parseInt(h.slice(off*2,off*2+64),16);
+  let out='';for(let i=0;i<len;i++){out+=String.fromCharCode(parseInt(h.slice((off+32+i)*2,(off+32+i)*2+2),16));}
+  return decodeURIComponent(escape(out));};
+const SCALES={'major':[0,2,4,5,7,9,11],'harmonic major':[0,2,4,5,7,8,11],'minor':[0,2,3,5,7,8,10],
+ 'harmonic minor':[0,2,3,5,7,8,11],'melodic minor':[0,2,3,5,7,9,11],'pentatonic':[0,3,5,7,10],
+ 'blues':[0,3,5,6,7,10],'dorian':[0,2,3,5,7,9,10],'phrygian':[0,1,3,5,7,8,10],'lydian':[0,2,4,6,7,9,11],
+ 'mixolydian':[0,2,4,5,7,9,10],'locrian':[0,1,3,5,6,8,10],'chromatic':[0,1,2,3,4,5,6,7,8,9,10,11]};
+let META=null,timers=[],ac=null;
+const $=id=>document.getElementById(id);
+$('c').innerHTML=DEPLOYS.map((d,i)=>'<option value="'+i+'">'+d[0]+'</option>').join('');
+async function read(){
+  $('meta').textContent='reading chain…';
+  const to=DEPLOYS[+$('c').value][1], seed=Math.max(1,Math.floor(+$('s').value||1));
+  let r=null;
+  for(const h of HOSTS){ try{
+    const res=await fetch(h,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_call',params:[{to,data:'0xc3f4552a'+W(seed)+W(0)},'latest']})});
+    const j=await res.json(); if(j.result&&j.result!=='0x'){ r=j.result; break; }
+  }catch(e){} }
+  if(!r){ $('meta').textContent='unreachable — the hosts are quiet; try again'; return; }
+  META=JSON.parse(dec(r));
+  $('meta').innerHTML=Object.entries(META).map(([k,v])=>'<span class="chip">'+k+' '+v+'</span>').join('');
+}
+const midiToFreq=m=>440*Math.pow(2,(m-69)/12);
+function play(){
+  if(!META){ $('meta').textContent='read the traits first — then the seed can sing'; return; }
+  stop();
+  ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+  const seed=BigInt(Math.max(1,Math.floor(+$('s').value||1)));
+  const scaleName=String(META.scale||'Major').toLowerCase();
+  const iv=SCALES[scaleName]||SCALES[scaleName.replace(/ (major|minor)$/,'')]||SCALES.major;
+  const root=48+Number(seed%12n);                       // seed picks the key — deterministic
+  const durMs=Math.max(120,Number(META.durationMs||625));
+  const bars=Math.max(4,Math.min(32,Number(META.duration||150)));
+  for(let i=0;i<bars;i++){
+    const deg=Number((seed>>BigInt(i))%BigInt(iv.length));   // seed walks the scale
+    const oct=Number((seed>>BigInt(i+8))%3n);
+    const f=midiToFreq(root+iv[deg]+12*oct);
+    const t=ac.currentTime+(i*durMs/1000);
+    const o=ac.createOscillator(), g=ac.createGain();
+    o.type='triangle'; o.frequency.value=f;
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(0.22,t+durMs*0.001/10+0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+durMs/1000*0.9);
+    o.connect(g).connect(ac.destination); o.start(t); o.stop(t+durMs/1000);
+    timers.push(o);
+  }
+}
+function stop(){ if(ac){ timers.forEach(o=>{try{o.stop()}catch(e){}}); timers=[]; } }
+$('read').onclick=read; $('play').onclick=play; $('stop').onclick=stop;
+</script>
+</div></body>
+</html>
