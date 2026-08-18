@@ -47,7 +47,7 @@ document.getElementById('listen').onclick=function(){
     t.textContent=p.at+' · bsky';
     var c=document.createElement('div');
     var html=[]; String(p.text).split(' — ').forEach(function(part){
-      if(/^https?:///.test(part)) html.push('<a href="'+part+'" target="_blank" rel="noopener noreferrer">'+part.slice(0,58)+'…</a>');
+      if(/^https?:..../.test(part)) html.push('<a href="'+part+'" target="_blank" rel="noopener noreferrer">'+part.slice(0,58)+'…</a>');
       else html.push(part.replace(/[<>]/g,''));
     });
     c.innerHTML=html.join(' — ');
