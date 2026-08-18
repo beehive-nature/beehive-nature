@@ -1,1218 +1,303 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>bLighT Inscription Explorer</title>
-<!--
-  ZERO DEPENDENCIES BY DESIGN.
-  No CDN, no framework, no build step, no backend, no API key. One file.
-  That is not minimalism for its own sake — it is the thesis. Every ERC-20i project
-  whose art "died" died because a SERVER died. The art never moved. This page proves
-  it by rendering inscriptions with nothing but a public RPC and the chain itself.
-  If this file survives on a USB stick, the art survives.
--->
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>the Modern Inscription Art Gallery — explore living collections</title>
 <style>
-  :root{
-    --bg:#0a0a0f; --panel:#12121a; --line:#242433; --ink:#e8e8f0;
-    --dim:#7e8c85; --accent:#f1df29; --accent2:#dd5ce5; --ok:#9aff5b; --bad:#ff5b6e;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);
-    font:14px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;padding:20px}
-  h1{font-size:16px;margin:0 0 2px;letter-spacing:.14em;text-transform:uppercase}
-  h1 span{color:var(--accent)}
-  .sub{color:var(--dim);font-size:12px;margin-bottom:18px}
-  .wrap{max-width:1080px;margin:0 auto}
-  .bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
-  input,select,button{font:inherit;background:var(--panel);color:var(--ink);
-    border:1px solid var(--line);border-radius:6px;padding:9px 11px}
-  input{flex:1;min-width:260px}
-  button{cursor:pointer;border-color:var(--accent);color:var(--accent)}
-  button:hover{background:#1c1c26}
-  button.alt{border-color:var(--line);color:var(--dim)}
-  .grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px}
-  @media(max-width:820px){.grid{grid-template-columns:1fr}}
-  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
-  .art{display:flex;align-items:center;justify-content:center;min-height:340px;
-    background:#000;border-radius:8px;overflow:hidden}
-  .art svg,.art img{max-width:100%;height:auto;image-rendering:pixelated}
-  table{width:100%;border-collapse:collapse;font-size:12px}
-  td{padding:5px 0;border-bottom:1px solid var(--line);vertical-align:top}
-  td:first-child{color:var(--dim);width:44%;padding-right:10px}
-  .ok{color:var(--ok)} .bad{color:var(--bad)} .warn{color:var(--accent)}
-  .note{color:var(--dim);font-size:11px;margin-top:12px;line-height:1.6}
-  .tag{display:inline-block;padding:1px 6px;border:1px solid var(--line);
-    border-radius:4px;font-size:10px;color:var(--dim);margin-right:4px}
-  details{margin-top:10px}summary{cursor:pointer;color:var(--dim);font-size:12px}
-  pre{white-space:pre-wrap;word-break:break-all;font-size:10px;color:var(--dim);
-    max-height:200px;overflow:auto;margin:8px 0 0}
+:root{--bg:#050508;--ink:#cfe8d6;--cyan:#00E5FF;--gold:#FFD700;--dim:#5a6478;--line:#16161f}
+*{margin:0;padding:0;box-sizing:border-box}
+html{background:var(--bg)}
+body{color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;overflow-x:hidden;
+  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="97"><g fill="none" stroke="%23141a17" stroke-width="1"><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z"/><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z" transform="translate(28,48)"/></g></svg>')}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9990;
+  background:repeating-linear-gradient(to bottom,rgba(0,0,0,0) 0 2px,rgba(0,0,0,.12) 2px 4px);mix-blend-mode:multiply}
+/* ---------- the doorway ---------- */
+#door{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:20;transition:opacity .8s ease;padding:20px;text-align:center}
+#door.gone{opacity:0;pointer-events:none}
+#door h1{font-size:clamp(22px,5vw,34px);color:var(--cyan);letter-spacing:.08em;font-weight:400;
+  text-shadow:0 0 18px rgba(0,229,255,.35)}
+#door p{color:var(--dim);font-size:12px;margin:10px 0 26px;letter-spacing:.05em}
+#door form{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+#door input{background:#0b0b12;color:var(--cyan);border:1px solid var(--line);border-radius:10px;
+  padding:12px 18px;font:14px 'IBM Plex Mono',monospace;width:min(400px,80vw);text-align:center;outline:none;transition:border-color .3s}
+#door input:focus{border-color:var(--cyan);box-shadow:0 0 24px rgba(0,229,255,.12)}
+#door button{background:none;color:#9FFF3D;border:1px solid #1d3a26;border-radius:10px;padding:12px 22px;
+  font:14px 'IBM Plex Mono',monospace;cursor:pointer;letter-spacing:.1em}
+#door button:hover{background:#9FFF3D;color:#000}
+#door .seeds{margin-top:34px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+#door .seeds button{border-color:var(--line);color:var(--dim);padding:8px 14px;font-size:11px}
+#door .seeds button:hover{color:var(--cyan);border-color:var(--cyan);background:none}
+#door .msg{margin-top:18px;font-size:11px;color:#e8b84a;min-height:16px}
+/* ---------- the gallery ---------- */
+#stage{padding:86px 4vw 110px;display:none}
+#wing{position:fixed;top:16px;left:0;right:0;text-align:center;font-size:11px;color:var(--dim);
+  letter-spacing:.22em;text-transform:uppercase;z-index:15}
+#top{position:fixed;top:12px;left:14px;right:14px;display:flex;gap:8px;z-index:30;align-items:center}
+#top .grow{flex:1}
+#top button,#top a{background:#0b0b12cc;color:var(--dim);border:1px solid var(--line);border-radius:8px;
+  padding:6px 12px;cursor:pointer;font:12px ui-monospace,monospace;text-decoration:none}
+#top button:hover,#top a:hover{color:var(--cyan);border-color:var(--cyan)}
+#top #conn.ok{color:#9FFF3D;border-color:#1d3a26}
+#wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:16px;max-width:1300px;margin:0 auto}
+.piece{background:#0b0b12;border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer;
+  opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s ease,border-color .25s,box-shadow .25s}
+.piece.in{opacity:1;transform:none}
+.piece:hover{border-color:var(--cyan);box-shadow:0 8px 34px rgba(0,229,255,.12);transform:translateY(-3px)}
+.piece .art{background:#000;padding:10px;min-height:170px;display:flex;align-items:center;justify-content:center}
+.piece .art svg{width:100%;max-height:220px;height:auto}
+.piece .lab{padding:9px 12px}
+.piece .lab .n{color:var(--cyan);font-size:12.5px}
+.piece .lab .m{color:var(--dim);font-size:10.5px;margin-top:2px}
+.piece .lab .m b{color:var(--gold);font-weight:400;letter-spacing:2px}
+.piece.crown{border-color:#3d3410}
+.piece.crown:hover{box-shadow:0 8px 34px rgba(255,215,0,.16);border-color:var(--gold)}
+#empty{color:var(--dim);text-align:center;padding:60px 0;font-size:13px}
+/* ---------- the room (full piece) ---------- */
+#room{position:fixed;inset:0;background:#050508f2;z-index:50;display:none;overflow-y:auto}
+#room.open{display:block}
+#room .inner{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:56px 18px 120px}
+#room .art{background:#000;border-radius:14px;padding:18px;max-width:min(64vh,88vw);box-shadow:0 0 80px rgba(0,229,255,.08)}
+#room .art svg{width:100%;height:auto;display:block}
+#room.gold .art{box-shadow:0 0 90px rgba(255,215,0,.18)}
+#room .plaque{margin-top:26px;text-align:center}
+#room .plaque .t{color:var(--cyan);font-size:16px;letter-spacing:.06em}
+#room .plaque .s{color:var(--dim);font-size:11.5px;margin-top:6px}
+#room .plaque .s b{color:var(--gold);font-weight:400;letter-spacing:3px}
+#room .whisper{margin-top:18px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+#room .whisper button{background:#0b0b12;color:var(--dim);border:1px solid var(--line);border-radius:8px;
+  padding:7px 14px;cursor:pointer;font:12px ui-monospace,monospace}
+#room .whisper button:hover{color:var(--cyan);border-color:var(--cyan)}
+#room #deets{display:none;margin-top:16px;color:var(--dim);font-size:11px;line-height:1.9;text-align:left;
+  background:#0b0b12;border:1px solid var(--line);border-radius:10px;padding:14px 18px;max-width:560px;word-break:break-all}
+#room #deets.open{display:block}
+#room #deets .k{color:#7e8c85}
+#room .close{position:fixed;top:14px;right:16px;background:#0b0b12;color:var(--dim);border:1px solid var(--line);
+  border-radius:8px;padding:6px 14px;cursor:pointer;font:13px ui-monospace,monospace;z-index:60}
+/* ---------- gentle wallet ---------- */
+#curtain{position:fixed;inset:0;background:#050508e6;z-index:70;display:none;align-items:center;justify-content:center;padding:20px}
+#curtain.open{display:flex}
+#curtain .card{max-width:420px;background:#0b0b12;border:1px solid var(--line);border-radius:14px;padding:26px;text-align:center}
+#curtain .card h3{color:var(--cyan);font-weight:400;font-size:15px}
+#curtain .card p{color:var(--dim);font-size:11.5px;margin:12px 0 18px;line-height:1.8}
+#curtain .card button{background:none;color:#9FFF3D;border:1px solid #1d3a26;border-radius:8px;padding:8px 16px;cursor:pointer;font:12px ui-monospace,monospace}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>bLighT <span>Inscription Explorer</span></h1>
-  <div class="sub">Renders on-chain inscription art from chain state alone. No server, no indexer, no API key.</div>
+<div id="wing">the doorway</div>
+<div id="top" style="display:none">
+  <button id="home" title="back to the doorway">⌂</button>
+  <button id="conn" title="your wallet">◌ wallet</button>
+  <span class="grow"></span>
+  <a href="./workbench.html" title="the instruments live here">⚗ workbench</a>
+  <a id="market" href="#" title="the DeMarketPlace docks here">⧉ soon</a>
+</div>
 
-  <div class="bar">
-    <select id="chain"></select>
-    <select id="token"></select>
-    <input id="addr" placeholder="0x… holder address" spellcheck="false">
-    <button id="go">View</button>
-    <button id="scan">Scan all collections</button>
-    <button id="connect" class="alt">Connect wallet</button>
-  </div>
-  <div class="bar">
-    <input id="rpc" placeholder="RPC endpoint" spellcheck="false">
-    <input id="custom" placeholder="…or a custom token contract 0x…" spellcheck="false">
-  </div>
-
-  <div class="grid">
-    <div class="panel"><div class="art" id="art">
-      <span style="color:var(--dim);font-size:12px">enter an address and press View</span>
-    </div></div>
-    <div class="panel">
-      <table id="diag"><tr><td>status</td><td class="dim">idle</td></tr></table>
-      <details><summary>raw SVG</summary><pre id="raw"></pre></details>
-      <div class="note">
-        <span class="tag">no backend</span><span class="tag">no CDN</span><span class="tag">one file</span>
-        Every byte rendered above came from a single <code>eth_call</code>.
-      </div>
-    </div>
-  </div>
-
-  <div class="note" style="max-width:760px;border:1px solid var(--line);border-radius:8px;padding:12px;margin-top:16px">
-    <b style="color:var(--accent2)">Market — deliberately not live yet.</b><br>
-    Trading inscriptions is not a UI problem, it is a settlement problem. On this standard a
-    transfer of a <i>non-exact-seed</i> amount dissolves locked inscriptions back into spores:
-    measured on a real wallet holding five, sending 1 whole token took it to four, and sending
-    the full balance took it to zero. A same-seed collision is worse — it dissolves the piece
-    being sold <i>plus unrelated ones</i>, and does not revert.<br><br>
-    The fix is not a safer escrow — it is an <b>id-addressed transfer</b>. The Ethereum
-    deployment moves one inscription by globally-unique id, carrying exactly its backing
-    tokens, so no arithmetic can go wrong. Where that exists, a market can escrow the
-    <i>payment</i> and never touch the art at all, and delivery is provable by an
-    <code>eth_call</code>. <b>Viewing is safe and read-only; trading ships when it is proven,
-    not when it is demoed.</b>
-  </div>
-
-  <div class="note" style="max-width:760px;border:1px solid var(--line);border-radius:8px;padding:12px">
-    <b style="color:var(--accent2)">When a swap destroys art, and when it doesn't.</b><br>
-    An earlier version of this page said every swap is a delete. <b>That was overstated and
-    is corrected here.</b> The debit is
-    <code>floor(balance) − floor(balance − amount)</code>, so <b>loose spores absorb the
-    trade first</b>. Measured: a holder with a 107-spore cushion sold 25 whole tokens and
-    lost <b>nothing</b>; sub-whole-token sales destroy nothing at all. But a holder with no
-    cushion sold <b>4% of a position and lost 40% of the art</b> — five inscriptions down to
-    three.<br><br>
-    <b>The rule: destruction happens only when the whole-token delta exceeds your spore
-    cushion.</b> Providing liquidity is different and worse — it always dissolves, because
-    the position manager pays by transferring to the pool. Proven twice, on two contracts.
-    The pool itself holds <b>8,292 whole tokens, zero inscriptions and zero spores</b> — it
-    is excluded from inscription accounting entirely.<br><br>
-    A wallet must therefore compute the actual risk, not shout on every trade. <i>Warning on
-    every swap trains people to dismiss the warning that matters.</i>
-  </div>
-
-  <div class="note" style="max-width:760px">
-    <b>Why four ABI shapes.</b> There is no single ERC-20i interface. PEPi answers on
-    <code>0xa435130b</code>, the FUNGI/FROGGI/JELLI group on <code>0x422b9e23</code>, TRUFFI on
-    <code>0xa62f5b1b</code> — which takes an <i>address</i> where the others take a seed triple —
-    and the Ethereum item model on <code>0x058e7a31</code>, whose seed struct is four words, not
-    three. Two contracts sharing a signature can still have different selectors, so this page
-    probes rather than assumes, and a fifth shape is expected.<br><br>
-    <b>Known trap, guarded.</b> <code>seed = 0</code> reverts with panic <code>0x11</code> —
-    <code>seed + nonce − 1</code> underflows. Any explorer that iterates addresses hits this. It is
-    caught below rather than surfaced as a failure.
+<div id="door">
+  <h1>the Modern Inscription Art Gallery</h1>
+  <p>whose art shall we visit?</p>
+  <form id="frm"><input id="addr" placeholder="0x… or name.base.eth" spellcheck="false"><button>enter</button></form>
+  <div class="msg" id="dmsg"></div>
+  <div class="seeds">
+    <button data-a="0xfbd201472d5a439f1f0e408eb5dfaf6ea3687876">the founder's garden</button>
+    <button data-a="0xbcba79164beb12c1b1497c96bbf4346f1bc45dec">the veteran collector</button>
   </div>
 </div>
 
+<div id="stage"><div id="wall"></div></div>
+
+<div id="room"><button class="close">esc ✕</button><div class="inner">
+  <div class="art" id="rart"></div>
+  <div class="plaque" id="rplaque"></div>
+  <div class="whisper">
+    <button id="bDeets">… details</button>
+    <button id="bDl">⬇ keep the art</button>
+  </div>
+  <div id="deets"></div>
+</div></div>
+
+<div id="curtain"><div class="card">
+  <h3 id="ch">your wallet isn't visible here</h3>
+  <p id="cp">this page lives in a ordinary browser tab. to bring your wallet: open this page inside your
+  wallet's own browser, or enable its extension and refresh. the gallery itself needs no wallet —
+  every eye is welcome.</p>
+  <button id="cok">understood</button>
+</div></div>
+
 <script>
-// REDUNDANT ENDPOINTS. A single public RPC cannot carry a five-collection sweep — measured
-// repeatedly. The pool is rotated on rate-limit, which multiplies the effective ceiling and
-// removes the single point of failure. When a wallet is connected the page routes through
-// the WALLET's provider instead, so each user brings their own endpoint and the shared
-// limit stops applying entirely.
-const CHAINS = [
-  { name:'Base', id:8453, rpcs:[
-      'https://mainnet.base.org',
-      'https://base.llamarpc.com',
-      'https://base-rpc.publicnode.com',
-      'https://base.drpc.org',
-      'https://1rpc.io/base',
-      'https://base.meowrpc.com',
-  ]},
-  { name:'Ethereum', id:1, rpcs:[
-      'https://eth.llamarpc.com',
-      'https://ethereum-rpc.publicnode.com',
-      'https://eth.drpc.org',
-  ]},
-  { name:'exSat', id:7200, rpcs:[] },             // paste an endpoint; none assumed
-  { name:'BNB',   id:56,   rpcs:[                 // chain ready; no VERIFIED ERC-20i yet
-      'https://bsc-dataseed.binance.org',
-      'https://bsc-rpc.publicnode.com',
-  ]},
-  { name:'custom',id:0,    rpcs:[] },
-  // Bitcoin answers through Esplora, not eth_call — the asymmetry is stated in
-  // the UI, and the host ladder exists because this museum's home network kills
-  // TLS to one Esplora host by SNI while another answers (measured 2026-08-16).
-  { name:'Bitcoin', id:0, btc:true, rpcs:[] },
-  // BCH anchor lane. Single keyless source measured reachable (Blockchair's
-  // LIST endpoints: blocks + global transactions; every dashboards/filtered
-  // form is gated, and the ?block= filter is DECORATIVE - it returns global
-  // rows regardless, measured 2026-08-16). The merkle branch is built
-  // CLIENT-SIDE from the block's txid group - the anchor-truth law applied.
-  // Receipt: block 964363, 164 txs, root match + walker verify + 3 tamper
-  // controls, all green (this session's transcript).
-  { name:'Bitcoin Cash', id:0, bch:true, rpcs:[] },
-];
-// Verified addresses (EIP-55). Two of these circulate with broken checksums elsewhere.
-// `chain` indexes CHAINS. THE THREE PEPi DEPLOYMENTS ARE THE DISAMBIGUATION CASE:
-// same symbol, three contracts, two chains, two entirely different interfaces. A gallery
-// that scales to hundreds of thousands of collections must key on (chain, address) and
-// SHOW the version — never on symbol.
-const TOKENS = [
-  { sym:'PEPI (base; v2)', chain:0, addr:'0x28a5e71BFc02723eAC17E39c84c5190415C0de9F', dec:9 },
-  { sym:'PEPI (base; v1)', chain:0, addr:'0x19706c142d33376240e418d6385f05691a5fa8e2', dec:9 },
-  { sym:'FUNGI',           chain:0, addr:'0x7d9CE55D54FF3FEddb611fC63fF63ec01F26D15F', dec:9 },
-  { sym:'FROGGI',          chain:0, addr:'0x88A78C5035BdC8C9A8bb5c029e6cfCDD14B822FE', dec:9 },
-  { sym:'TRUFFI',          chain:0, addr:'0x2496a9AF81A87eD0b17F6edEaf4Ac57671d24f38', dec:9 },
-  { sym:'JELLI',           chain:0, addr:'0xA1b9d812926a529D8B002E69FCd070c8275eC73c', dec:9 },
-  // Ethereum: the ITEM MODEL. SeedData is (uint8,uint256,uint256,uint256) — 4 words —
-  // and inscriptions move by globally-unique id via transferItem, not by magic amount.
-  { sym:'PEPi (eth; item model)', chain:1, addr:'0x3103cD1602d5fa8f4b9283F9D5a7fa2290795d51', dec:9,
-    seedWords:4, enumerate:'page' },
-];
-// getSvg shapes, probed in order. Each builds calldata from (seed, holder).
-// Selectors derived from a keccak validated against seven known-good signatures.
-const SHAPES = [
-  { id:'triple/a435130b', sel:'a435130b', words:3, build:(s,h)=>W(s)+W(0n)+W(0n) },
-  { id:'triple/422b9e23', sel:'422b9e23', words:3, build:(s,h)=>W(s)+W(0n)+W(0n) },
-  { id:'addr/a62f5b1b',   sel:'a62f5b1b', words:3, build:(s,h)=>W(s)+W(0n)+AD(h) },
-  // getSvg((uint8,uint256,uint256,uint256)) — Ethereum item model
-  { id:'quad/058e7a31',   sel:'058e7a31', words:4, build:(s,h)=>W(0n)+W(s)+W(0n)+W(0n) },
-];
-const $=id=>document.getElementById(id);
+/* THE EXPLORER, rebuilt as the experience. The math never leaves the basement:
+   batched eth_call, host rotation, defensive decode — the visitor sees only art.
+   The workbench (⚗, top right) keeps every instrument, receipt and education row. */
 const W=v=>BigInt(v).toString(16).padStart(64,'0');
 const AD=a=>'0'.repeat(24)+a.replace(/^0x/,'').toLowerCase();
-
-let rpcUrl = CHAINS[0].rpc;
-
-const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-// Public RPCs rate-limit. A five-collection sweep is ~20 calls and WILL trip Base's
-// limiter, which surfaces as "over rate limit" — indistinguishable from a broken
-// contract unless it is retried. Exponential backoff, and rate-limit is never
-// reported as a render failure.
-async function call(to,data,tries){
-  tries = tries||4;
-  for(let i=0;i<tries;i++){
-    let j;
-    try{
-      const r = await fetch(rpcUrl,{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_call',params:[{to,data},'latest']})});
-      j = await r.json();
-    }catch(e){
-      // rotate BEFORE retrying (founder receipt 2026-08-16: Enter failed / click worked —
-      // the same endpoint was hammered while healthy ones sat idle) and snap rpcUrl back
-      // to the selected chain's pool if .b name-resolution left it on another chain's
-      // ladder (wrong-chain reads return a polite '0x' — never a value, receipt fd5355e).
-      if(pool.length>1) rpcUrl=nextRpc();
-      if(i===tries-1) throw new Error('network: '+e.message+' (hosts rotated each try)');
-      await sleep(400*(1<<i)); continue; }
-    if(j.error){
-      const m = j.error.message||'reverted';
-      if(/rate limit|too many|429/i.test(m) && i<tries-1){ await sleep(700*(1<<i)); continue; }
-      const err = new Error(m); err.rateLimited=/rate limit|too many|429/i.test(m); throw err;
-    }
-    return j.result;
-  }
-}
-// ABI-decode a single returned `string`
+const HOSTS=['https://base-rpc.publicnode.com','https://base.drpc.org','https://base.llamarpc.com'];
+const COLS=[
+ {sym:'PEPI v2',c:'0x28a5e71BFc02723eAC17E39c84c5190415C0de9F',sel:'a435130b',lv:[0,11,22,33,44,56],base:1,names:['Egg Mass','Tadpole','Baby','Teenager','Adult','Mature']},
+ {sym:'PEPI v1',c:'0x19706c142d33376240e418d6385f05691a5fa8e2',sel:'a435130b',lv:[0,11,22,33,44,56],base:1,names:['Egg Mass','Tadpole','Baby','Teenager','Adult','Mature']},
+ {sym:'FUNGI',c:'0x7d9CE55D54FF3FEddb611fC63fF63ec01F26D15F',sel:'422b9e23',lv:[0,21000,525000,1050000,1575000,2100000],base:0},
+ {sym:'$FROGGI',c:'0x88A78C5035BdC8C9A8bb5c029e6cfCDD14B822FE',sel:'422b9e23',lv:[0,1000,3000,10000,30000,60000,120000],base:0},
+ {sym:'JELLI',c:'0xA1b9d812926a529D8B002E69FCd070c8275eC73c',sel:'422b9e23',lv:[0,1000,21000,105000,420000,1050000],base:0},
+ {sym:'JEDI',c:'0xA058c6f2A56BaAFD5dE4BCAD8f2Cb26F6A32b7D1',sel:'422b9e23',lv:[0,10500,105000,1050000],base:0},
+ {sym:'TRUFFI',c:'0x2496a9AF81A87eD0b17F6edEaf4Ac57671d24f38',sel:'a62f5b1b',lv:null,base:0},
+ {sym:'MiDi',c:'0x569e1A337b095B1A6c8F206158072cEDb6325b56',sel:'422b9e23',lv:null,base:0},
+];
 function decodeString(hex){
-  const h = hex.replace(/^0x/,'');
-  const len = parseInt(h.slice(64,128),16);
-  const bytes = h.slice(128,128+len*2).match(/../g)||[];
-  return decodeURIComponent(bytes.map(b=>'%'+b).join(''));
-}
-const rows=[];
-const row=(k,v,cls)=>rows.push(`<tr><td>${k}</td><td class="${cls||''}">${v}</td></tr>`);
-const flush=()=>$('diag').innerHTML=rows.join('');
-
-// ── NAME RESOLUTION (B-2) ────────────────────────────────────────────────────
-// .b (Vaulta), .base.eth (Basenames), .eth (ENS). Three states distinguished —
-// unregistered / LAPSED / current — because "not found" hides the difference between
-// "never existed" and "was somebody's, isn't now". Cached per session. A naming outage
-// degrades to "paste the raw address": resolution failure must never break a render.
-const RC=[1n,0x8082n,0x800000000000808an,0x8000000080008000n,0x808bn,0x80000001n,
-0x8000000080008081n,0x8000000000008009n,0x8an,0x88n,0x80008009n,0x8000000an,0x8000808bn,
-0x800000000000008bn,0x8000000000008089n,0x8000000000008003n,0x8000000000008002n,
-0x8000000000000080n,0x800an,0x800000008000000an,0x8000000080008081n,0x8000000000008080n,
-0x80000001n,0x8000000080008008n];
-const KROT=[[0,36,3,41,18],[1,44,10,45,2],[62,6,43,15,61],[28,55,25,21,56],[27,20,39,8,14]];
-const M64=(1n<<64n)-1n;
-function keccak256(bytes){
-  const rot=(x,n)=>n===0n?x:((x<<n)|(x>>(64n-n)))&M64;
-  let A=Array.from({length:5},()=>[0n,0n,0n,0n,0n]);
-  const rate=136, pad=rate-(bytes.length%rate);
-  const msg=new Uint8Array(bytes.length+pad);
-  msg.set(bytes); msg[bytes.length]=0x01; msg[msg.length-1]|=0x80;
-  for(let off=0;off<msg.length;off+=rate){
-    for(let i=0;i<17;i++){let l=0n;for(let b=7;b>=0;b--)l=(l<<8n)|BigInt(msg[off+i*8+b]);A[i%5][(i/5)|0]^=l;}
-    for(let r=0;r<24;r++){
-      const C=[0,1,2,3,4].map(x=>A[x][0]^A[x][1]^A[x][2]^A[x][3]^A[x][4]);
-      const D=[0,1,2,3,4].map(x=>C[(x+4)%5]^rot(C[(x+1)%5],1n));
-      for(let x=0;x<5;x++)for(let y=0;y<5;y++)A[x][y]^=D[x];
-      const B=[[],[],[],[],[]];
-      for(let x=0;x<5;x++)for(let y=0;y<5;y++)B[y][(2*x+3*y)%5]=rot(A[x][y],BigInt(KROT[x][y]));
-      for(let x=0;x<5;x++)for(let y=0;y<5;y++)A[x][y]=B[x][y]^((~B[(x+1)%5][y]&M64)&B[(x+2)%5][y]);
-      A[0][0]^=RC[r];
-    }
+  const h=hex.replace(/^0x/,'');
+  const off=parseInt(h.slice(0,64),16);
+  if(!(off===0x20)) throw 0;
+  const len=parseInt(h.slice(off*2,off*2+64),16);
+  if(!(len>=0&&len<=16384)) throw 0;
+  let out='';
+  for(let i=0;i<len;i++){
+    const b=parseInt(h.slice((off+32+i)*2,(off+32+i)*2+2),16);
+    if(Number.isNaN(b)) throw 0;
+    out+=String.fromCharCode(b);
   }
-  const out=new Uint8Array(32);let p=0;
-  for(let i=0;i<4;i++){let l=A[i%5][(i/5)|0];for(let b=0;b<8;b++)out[p++]=Number((l>>BigInt(8*b))&0xFFn);}
-  return out;
+  try{ return decodeURIComponent(escape(out)); }catch(e){ return out; }
 }
-function namehash(name){
-  let node=new Uint8Array(32);
-  if(name){const L=name.split('.');
-    for(let i=L.length-1;i>=0;i--){
-      const lh=keccak256(new TextEncoder().encode(L[i]));
-      const cat=new Uint8Array(64);cat.set(node);cat.set(lh,32);
-      node=keccak256(cat);
-    }}
-  return '0x'+[...node].map(b=>b.toString(16).padStart(2,'0')).join('');
-}
-// EOS uint64 -> account-name string: derives a domain's chainaddrs scope from its id.
-// CONTROL: 6830934878284532282 must encode to fva5q53rzb53e (remington.b's live scope).
-function u64ToName(v){
-  const CH='.12345abcdefghijklmnopqrstuvwxyz';
-  v=BigInt(v); let s='';
-  for(let i=0;i<=12;i++){
-    s=CH[Number(v&(i===0?0x0Fn:0x1Fn))]+s;
-    v >>= (i===0?4n:5n);
-  }
-  return s.replace(/\.+$/,'');
-}
-async function resolveDotB(label, wantChainId){
-  // Same rule as the EVM pool: one Vaulta API is a single point of failure, so rotate.
-  const VAPI=['https://eos.greymass.com','https://api.eosn.io','https://eos.api.eosnation.io'];
-  const post=async(body)=>{ let last;
-    for(const h of VAPI){ try{
-      const r=await fetch(h+'/v1/chain/get_table_rows',{method:'POST',
-        headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-      return await r.json();
-    }catch(e){ last=e; } }
-    throw last||new Error('all Vaulta endpoints unreachable'); };
-  const dom=await post({json:true,code:'kingbeelovis',scope:'kingbeelovis',table:'domains',limit:100});
-  const hit=(dom.rows||[]).find(d=>String(d.domain_name).toLowerCase()===label);
-  if(!hit){ row('resolver','.b: "'+label+'.b" unregistered — available','warn'); return null; }
-  if(hit.expires && Date.parse(hit.expires+'Z') < Date.now()){
-    row('resolver','.b: "'+label+'.b" LAPSED (expired '+String(hit.expires).slice(0,10)+') — was owned, is not now','warn');
-    return null;
-  }
-  const ca=await post({json:true,code:'kingbeelovis',scope:u64ToName(hit.id),table:'chainaddrs',limit:100});
-  const rc=(ca.rows||[]).filter(r=>String(r.domain_id)===String(hit.id));
-  const pick=rc.find(r=>r.chain_key==='eip155:'+wantChainId)
-          || rc.find(r=>r.chain_key==='eip155:1')
-          || rc.find(r=>/^eip155:/.test(r.chain_key||''));
-  if(!pick){ row('resolver','.b: registered + current, but no EVM address row in chainaddrs','warn'); return null; }
-  row('resolver','.b via Vaulta · '+pick.chain_key+
-    (pick.chain_key!=='eip155:'+wantChainId?' (no row for the selected chain; using this one)':''),'ok');
-  return pick.address;
-}
-async function resolveEns(name){
-  const isBase=/\.base\.eth$/i.test(name);
-  const REG=isBase?'0xB94704422c2a1E396835A571837Aa5AE53285a95':'0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e';
-  const rpcs=isBase?CHAINS[0].rpcs:CHAINS[1].rpcs;
-  const call=async(to,data)=>{ for(const url of rpcs){ try{
-      const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_call',params:[{to,data},'latest']})});
-      const j=await r.json(); if(!j.error&&j.result) return j.result;
-    }catch(e){} } return null; };
-  const node=namehash(name.toLowerCase());
-  const own=await call(REG,'0x02571be3'+node.slice(2));                 // owner(bytes32)
-  if(!own||/^0x0*$/.test(own)){ row('resolver',(isBase?'Basenames':'ENS')+': "'+name+'" unregistered','warn'); return null; }
-  const rs=await call(REG,'0x0178b8bf'+node.slice(2));                  // resolver(bytes32)
-  if(!rs||/^0x0*$/.test(rs)){ row('resolver','registered, but no resolver set','warn'); return null; }
-  const a=await call('0x'+rs.slice(26),'0x3b3b57de'+node.slice(2));     // addr(bytes32)
-  if(!a||/^0x0*$/.test(a)){ row('resolver','resolver set, but no address record','warn'); return null; }
-  row('resolver',(isBase?'Basenames (Base)':'ENS (Ethereum)')+' · registry → resolver → addr','ok');
-  return '0x'+a.slice(26);
-}
-async function resolveIfName(input){
-  const v=String(input||'').trim();
-  if(/^0x[0-9a-fA-F]{40}$/.test(v)) return v;
-  // Storage is a cache, never a dependency: sessionStorage THROWS in data: URLs,
-  // sandboxed iframes and some private modes. Resolution must survive without it.
-  const store={get:k=>{try{return sessionStorage.getItem(k)}catch(e){return null}},
-               set:(k,x)=>{try{sessionStorage.setItem(k,x)}catch(e){}}};
-  const key='resolve:'+v.toLowerCase();
-  const c=store.get(key);
-  if(c){ row('resolver','cached: '+v+' → '+c.slice(0,10)+'…','ok'); return c; }
-  // The keccak validates itself before any namehash is trusted — a broken hash would
-  // resolve every name to the wrong node and fail as "unregistered", which is a lie.
-  const kv=[...keccak256(new Uint8Array(0))].map(b=>b.toString(16).padStart(2,'0')).join('');
-  if(kv!=='c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470'){ // PUBLIC-CONSTANT: keccak256 of empty input, universal test vector
-    row('resolver','keccak self-check FAILED — refusing to resolve; paste the raw address','bad'); return null;
-  }
-  let out=null;
-  try{
-    if(/\.b$/i.test(v))        out=await resolveDotB(v.toLowerCase().replace(/\.b$/,''),(CHAINS[+$('chain').value||0]||CHAINS[0]).id);
-    else if(/\.eth$/i.test(v)) out=await resolveEns(v);
-    else { row('status','not a 20-byte hex address, and not a .b / .eth name','bad'); return null; }
-  }catch(e){
-    row('resolver','resolution unreachable ('+String(e.message).slice(0,44)+') — paste the raw address','warn');
-    return null;
-  }
-  if(out){ store.set(key,out); row('name', v+' → '+out.slice(0,10)+'…'+out.slice(-6)); }
-  return out;
-}
-
-// One address across every known collection — the view that surfaces things you were
-// not looking for. Sequential, not parallel: a parallel sweep guarantees a rate-limit.
-async function scanAll(){
-  // No collection sweep exists on Bitcoin — the address field there is a txid
-  // or address, and the single view IS the sweep.
-  if(CHAINS[+$('chain').value]&&CHAINS[+$('chain').value].btc) return viewBitcoin();
-  if(CHAINS[+$('chain').value]&&CHAINS[+$('chain').value].bch) return viewBCH();
-  let holder=$('addr').value.trim();
-  rpcUrl=$('rpc').value.trim();
-  rows.length=0;
-  const resolvedScan=await resolveIfName(holder);
-  if(!resolvedScan){
-    $('art').innerHTML='<span style="color:var(--bad);font-size:12px">name resolution failed — press Scan again or paste the raw 0x… address</span>';
-    return flush();
-  }
-  holder=resolvedScan;
-  const found=[]; const unreadable=[];
-  $('art').innerHTML='';
-  for(let i=0;i<TOKENS.length;i++){
-    const t=TOKENS[i];
-    // Per-chain routing: each token carries its chain, and the endpoint pool swaps with it.
-    // A cross-chain sweep is N chains' worth of calls, never one unified query.
-    const ch = CHAINS[t.chain||0];
-    if(!ch.rpcs.length) continue;
-    pool = ch.rpcs.slice(); poolIdx = 0;
-    rows.length=0;
-    row('scanning', (i+1)+' / '+TOKENS.length+' — '+t.sym+'  ['+ch.name+']');
-    row('found so far', found.length? found.map(f=>f.sym).join(', ') : '—', found.length?'ok':'');
-    flush();
+async function rpc(calls){
+  for(let h of HOSTS){
+    const ctl=new AbortController(); const kill=setTimeout(()=>ctl.abort(),8000);
     try{
-      const r = await resolve(t.addr, holder);
-      if(r.svg) found.push({sym:t.sym, svg:r.svg, seed:r.seed, kind:'live'});
-      (r.locked||[]).forEach(l=>found.push({sym:t.sym, svg:l.svg, seed:l.seed, kind:'frozen'}));
-      if(r.lockedStatus==='unreadable') unreadable.push(t.sym);
-    }catch(e){ unreadable.push(t.sym); }
-    await sleep(150);
-  }
-  const nLive=found.filter(f=>f.kind==='live').length, nFroz=found.length-nLive;
-  rows.length=0;
-  row('address', holder.slice(0,10)+'…'+holder.slice(-6));
-  row('provider', walletProvider? 'wallet (own RPC)' : pool.length+' pooled endpoints',
-      walletProvider?'ok':'');
-  row('live spores', nLive, nLive?'ok':'');
-  row('frozen / locked', nFroz, nFroz?'ok':'');
-  if(unreadable.length) row('UNREADABLE', unreadable.join(', ')+' — endpoints exhausted; may hold unread art', 'bad');
-  found.forEach(f=>row(f.sym+' · '+f.kind, 'seed '+f.seed+' · '+f.svg.length.toLocaleString()+' B','ok'));
-  flush();
-  $('art').innerHTML = found.length
-    ? '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;width:100%;padding:12px">'
-      + found.map(f=>'<div style="text-align:center"><div style="background:#000;border-radius:6px;padding:6px;'
-        + (f.kind==='frozen'?'outline:1px solid var(--accent2)':'') + '">'
-        + f.svg + '</div><div style="color:var(--dim);font-size:10px;margin-top:5px">'
-        + f.sym + ' · <span style="color:'+(f.kind==='frozen'?'var(--accent2)':'var(--dim)')+'">'
-        + f.kind + '</span><br>seed ' + f.seed + '</div></div>').join('')
-      + '</div>'
-    : '<span style="color:var(--dim);font-size:12px">no inscriptions found for this address</span>';
-}
-
-// JSON-RPC BATCHING. Measured: a five-collection sweep at one HTTP request per eth_call
-// trips Base's public limiter even with exponential backoff. Batching collapses the three
-// probes per token into ONE request, because public RPCs meter requests, not sub-calls.
-let pool=[], poolIdx=0, walletProvider=null;
-const nextRpc=()=>{ poolIdx=(poolIdx+1)%Math.max(pool.length,1); return pool[poolIdx]; };
-
-async function batch(calls,tries){
-  tries=tries||Math.max(pool.length,1)+2;
-  // Connected wallet → use the user's own provider, one call at a time. No shared limit.
-  if(walletProvider){
-    const out=[];
-    for(const c of calls){
-      try{ out.push(await walletProvider.request({method:'eth_call',params:[{to:c.to,data:c.data},'latest']})); }
-      catch(e){ out.push(null); }
-    }
-    return out;
-  }
-  const body=calls.map((c,i)=>({jsonrpc:'2.0',id:i,method:'eth_call',params:[{to:c.to,data:c.data},'latest']}));
-  let lastErr='no endpoint';
-  for(let i=0;i<tries;i++){
-    const url = pool[poolIdx] || rpcUrl;
-    if(!url){ throw new Error('no RPC endpoint set'); }
-    let j;
-    try{
-      const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-      j=await r.json();
-    }catch(e){ lastErr='network'; nextRpc(); await sleep(200); continue; }
-    const arr=Array.isArray(j)?j:[j];
-    const limited=arr.some(x=>x.error&&/rate limit|too many|429|capacity/i.test(x.error.message||''));
-    if(limited){ lastErr='rate limit'; nextRpc(); await sleep(250); continue; }   // rotate, don't wait it out
-    const out=new Array(calls.length).fill(null);
-    for(const x of arr){ if(!x.error && typeof x.id==='number') out[x.id]=x.result; }
-    return out;
-  }
-  const e=new Error('all endpoints exhausted ('+lastErr+')'); e.rateLimited=true; throw e;
-}
-
-// Shared resolver — no DOM. Used by both the single view and the sweep.
-async function resolve(contract, holder){
-  const [decR, balR, sd] = await batch([
-    {to:contract,data:'0x313ce567'},
-    {to:contract,data:'0x70a08231'+AD(holder)},
-    {to:contract,data:'0xa775188a'+AD(holder)},
-  ]);
-  const dec = decR&&decR!=='0x' ? Number(BigInt(decR)) : 18;
-  const bal = balR&&balR!=='0x' ? BigInt(balR) : 0n;
-  const seed = bal / (10n ** BigInt(dec));
-  if(bal===0n) return {svg:null,reason:'no balance'};
-  let triple=null, onChainSeed=null;
-  if(sd){
-    const words=(sd.replace(/^0x/,'').match(/.{64}/g)||[]);
-    if(words.length>=3){ triple=words.slice(0,3); onChainSeed=BigInt('0x'+words[0]); }
-  }
-  if(seed===0n && !triple) return {svg:null,reason:'seed 0 — would panic 0x11'};
-  // All getSvg candidates in ONE batch — reverts come back as per-item errors, not
-  // failures, so probing every shape costs a single request.
-  const cands=[];
-  for(const s of SHAPES){
-    if(triple) cands.push({s, to:contract, data:'0x'+s.sel+triple.join('')});
-    cands.push({s, to:contract, data:'0x'+s.sel+s.build(seed,holder)});
-  }
-  const res = await batch(cands);
-  let live=null, shape=null;
-  for(let i=0;i<cands.length;i++){
-    const r=res[i];
-    if(r&&r!=='0x'&&r.length>200){ live=decodeString(r); shape=cands[i].s.id; break; }
-  }
-  // LOCKED / FROZEN RECORDS — the tradeable ones, and invisible to the live-spore path.
-  // A wallet can hold zero spores and five frozen pieces; that wallet renders nothing
-  // unless enumerated. mushroomCount 0x9c216508 -> mushroomOfOwnerByIndex 0x0fd9587e,
-  // which returns the persisted (seed, seed2, extra) triple verbatim.
-  // HONESTY RULE: a failed fetch must never read as "none". A wallet holding five frozen
-  // pieces and a flaky endpoint would otherwise render as an empty collection — the exact
-  // defect that made an earlier probe report 0 inscriptions in a pool that was simply
-  // unreachable. Failure is reported as UNKNOWN, never as zero.
-  const locked=[]; let lockedStatus='ok';
-  try{
-    const [mcR] = await batch([{to:contract,data:'0x9c216508'+AD(holder)}]);
-    if(mcR===null||mcR===undefined){ lockedStatus='unreadable'; throw new Error('count unreadable'); }
-    const n = mcR!=='0x' ? Number(BigInt(mcR)) : 0;
-    if(n>0){
-      const idxCalls=[];
-      for(let i=0;i<Math.min(n,24);i++) idxCalls.push({to:contract,data:'0x0fd9587e'+AD(holder)+W(BigInt(i))});
-      const recs = await batch(idxCalls);
-      const svgCalls=[], seeds=[];
-      for(const rec of recs){
-        if(!rec||rec==='0x') continue;
-        const w=(rec.replace(/^0x/,'').match(/.{64}/g)||[]).slice(0,3);
-        if(w.length<3) continue;
-        seeds.push(BigInt('0x'+w[0]).toString());
-        svgCalls.push({to:contract,data:'0x'+(shape? SHAPES.find(s=>s.id===shape).sel : 'a435130b')+w.join('')});
-      }
-      if(svgCalls.length){
-        const svgs = await batch(svgCalls);
-        svgs.forEach((r,i)=>{ if(r&&r!=='0x'&&r.length>200) locked.push({seed:seeds[i], svg:decodeString(r)}); });
-      }
-    }
-  }catch(e){ if(lockedStatus==='ok') lockedStatus='unreadable'; }
-  if(!live && !locked.length)
-    return {svg:null, locked:[], lockedStatus,
-            reason: lockedStatus==='unreadable'
-              ? 'frozen records UNREADABLE — endpoints exhausted, not necessarily absent'
-              : 'no getSvg shape matched'};
-  return {svg:live, shape, locked, lockedStatus,
-          seed:(onChainSeed!==null?onChainSeed:seed).toString(), dec, bal};
-}
-
-// ── BITCOIN MODE ─────────────────────────────────────────────────────────────
-// 1st Assistant Code Surgeon — zCode (GLM 5.3) <zCode@bnature.social>, 2026-08-16.
-//
-// Inscriptions: txid (or txid i N) → Esplora /tx → taproot witness script →
-// opcode walk → "ord" envelope fields → content, decoded IN THE BROWSER. No ord
-// server, no key, no index. Proven on reveal tx a3bebf68…i4: 68,858 B of valid
-// 2048×2048 WebP, byte-exact against ordinals.com's own page.
-//
-// Runes: the runestone decoder follows the specification in the ord repo
-// (docs/src/runes/specification.md): first OP_RETURN OP_13 output, data pushes
-// concatenated, LEB128 u128 stream, tag/value fields with Body-tag-0 edict
-// tail, delta-encoded RuneIds, bijective base-26 names. Address mode shows
-// PER-UTXO ALLOCATION EVIDENCE — edict transfers attribute exactly; mint
-// amounts depend on etch terms and prior-mint history, so a wallet-sum balance
-// is NOT claimed. The label says so.
-//
-// SECURITY: inscription content is UNTRUSTED bytes from a stranger's tx. It is
-// rendered as DATA (blob URLs for images, textContent for text) and never
-// injected as HTML. SVG and text/html inscriptions display as source text.
-const ESPLORA=['https://blockstream.info/api','https://mempool.space/api','https://mempool.emzy.de/api'];
-let esploraIdx=0;
-async function esplora(path){
-  for(let i=0;i<ESPLORA.length;i++){
-    const h=ESPLORA[(esploraIdx+i)%ESPLORA.length];
-    try{ const r=await fetch(h+path); if(r.ok) return await r.json(); }catch(e){}
-  }
-  esploraIdx=(esploraIdx+1)%ESPLORA.length;
-  return null;   // a failed fetch is never a value
-}
-// opcode walk over a script; OP_0 preserved as an empty push (it is both the
-// envelope's OP_FALSE and the content-chunk tag — discarding it desyncs parse).
-// Envelope mode SKIPS structural opcodes (OP_IF/OP_ENDIF bracket the envelope);
-// strict mode (runestones) stops per spec — an opcode ≥ 79 in a payload is a
-// cenotaph, not something to skip past.
-function scriptPushes(script, strict){
-  const out=[]; let i=0; let stopped=false;
-  const b=typeof script==='string' ? new Uint8Array(script.match(/../g).map(x=>parseInt(x,16))) : script;
-  while(i<b.length){
-    const op=b[i]; i++;
-    if(op===0){ out.push(new Uint8Array(0)); continue; }
-    if(op>=1&&op<=75){ out.push(b.slice(i,i+op)); i+=op; continue; }
-    if(op===76){ const n=b[i]; i++; out.push(b.slice(i,i+n)); i+=n; continue; }
-    if(op===77){ const n=b[i+1]*256+b[i]; i+=2; out.push(b.slice(i,i+n)); i+=n; continue; }  // little-endian — a big-endian read turned a 520-byte chunk into 2,050 consumed bytes and desynced the walk past markers
-    if(op===78){ const n=(b[i+3]*16777216+b[i+2]*65536+b[i+1]*256+b[i])>>>0; i+=4; out.push(b.slice(i,i+n)); i+=n; continue; }
-    if(strict){ stopped=true; break; }
-  }
-  out.stopped=stopped;
-  return out;
-}
-const eq=(a,s)=>a.length===s.length&&[...a].every((c,k)=>c===s.charCodeAt(k));
-function inscriptionsFromTx(tx){
-  const found=[];
-  for(const vin of (tx.vin||[])){
-    const wit=vin.witness;
-    if(!wit||wit.length<2) continue;
-    let pushes;
-    try{ pushes=scriptPushes(wit[wit.length-2]); }catch(e){ continue; }
-    // ord markers can share one script: every envelope is one inscription
-    const marks=[];
-    for(let k=0;k<pushes.length;k++) if(eq(pushes[k],'ord')) marks.push(k);
-    for(let m=0;m<marks.length;m++){
-      const start=marks[m]+1, end=m+1<marks.length?marks[m+1]:pushes.length;
-      let ctype=null; const fields=[]; const chunks=[];
-      let k=start;
-      while(k<end){
-        const tag=pushes[k];
-        if(tag.length===0){                       // OP_0: content chunk tag
-          k++;
-          while(k<end&&pushes[k].length>1){ chunks.push(pushes[k]); k++; }
-        } else if(tag.length===1&&k+1<end){
-          const val=pushes[k+1];
-          if(tag[0]===1) ctype=new TextDecoder().decode(val);
-          else fields.push([tag[0],val.length]);
-          k+=2;
-        } else k++;
-      }
-      let len=0; chunks.forEach(c=>len+=c.length);
-      const content=new Uint8Array(len); let o=0;
-      chunks.forEach(c=>{content.set(c,o);o+=c.length;});
-      found.push({n:found.length, ctype, content, fields, chunks:chunks.length});
-    }
-  }
-  return found;
-}
-// — runestone decode, per the ord specification —
-function leb128u128s(bytes){
-  const ints=[]; let cur=0n, shift=0n, count=0, cenotaph=false;
-  for(let i=0;i<bytes.length;i++){
-    const b=bytes[i]; count++;
-    cur|=BigInt(b&0x7f)<<shift; shift+=7n;
-    if((b&0x80)===0){ ints.push(cur); cur=0n; shift=0n; count=0; }
-    else if(count>18||cur>>(128n-7n)>0n){ cenotaph=true; break; }
-  }
-  if(count!==0) cenotaph=true;   // truncated varint
-  return {ints,cenotaph};
-}
-function runeName(n){
-  if(n<=0n) return null;
-  let s=''; let v=n;
-  while(v>0n){ v-=1n; s=String.fromCharCode(65+Number(v%26n))+s; v/=26n; }
-  return s;
-}
-const TAGS={0:'body',1:'divisibility',2:'flags',3:'spacers',4:'rune',5:'symbol',6:'premine',
-  8:'cap',10:'amount',12:'heightStart',14:'heightEnd',16:'offsetStart',18:'offsetEnd',
-  20:'mint',22:'pointer',126:'cenotaph',127:'nop'};
-function runestoneFromTx(tx){
-  for(const vout of (tx.vout||[])){
-    const spk=vout.scriptpubkey||'';
-    if(!(spk.startsWith('6a5d'))) continue;         // OP_RETURN OP_13
-    const bytes=new Uint8Array(spk.match(/../g).map(x=>parseInt(x,16)));
-    const pushes=scriptPushes(bytes.slice(2), true);   // strict: opcode ≥79 in payload → cenotaph
-    if(pushes.stopped) return {cenotaph:true, note:'non-push opcode in payload — a cenotaph; contained runes are burned'};
-    let payload=new Uint8Array(0);
-    for(const p of pushes){
-      if(p.length===0){ payload=concatU8(payload,new Uint8Array([0])); }
-      else payload=concatU8(payload,p);
-    }
-    const {ints,cenotaph}=leb128u128s(payload);
-    if(cenotaph) return {cenotaph:true, note:'malformed runestone — a cenotaph; contained runes are burned'};
-    const fields={}, edicts=[];
-    let i=0;
-    for(;i+1<ints.length;i+=2){
-      const tag=Number(ints[i]);
-      if(tag===0){ i++; break; }                    // Body: following ints are edicts
-      (fields[tag]=fields[tag]||[]).push(ints[i+1]);
-    }
-    let bh=0n, txi=0n;
-    const rest=ints.slice(i);
-    for(let e=0;e+3<rest.length;e+=4){
-      const dh=rest[e], dt=rest[e+1], amt=rest[e+2], out=rest[e+3];
-      bh+=dh; txi=dh>0n?dt:(txi+dt);
-      edicts.push({id:bh+':'+txi, amount:amt, output:Number(out)});
-    }
-    return {fields, edicts, cenotaph:false};
+      const r=await fetch(h,{method:'POST',headers:{'Content-Type':'application/json'},signal:ctl.signal,
+        body:JSON.stringify(calls.map((c,i)=>({jsonrpc:'2.0',id:i,method:'eth_call',params:[{to:c.to,data:c.data},'latest']})))});
+      const j=await r.json(); clearTimeout(kill);
+      if(Array.isArray(j)) return j.map(x=>x.result??null);
+    }catch(e){ clearTimeout(kill); }
   }
   return null;
 }
-function concatU8(a,b){ const o=new Uint8Array(a.length+b.length); o.set(a); o.set(b,a.length); return o; }
-function renderInscription(insc){
-  const ct=(insc.ctype||'').toLowerCase();
-  const url=URL.createObjectURL(new Blob([insc.content],{type:insc.ctype||'application/octet-stream'}));
-  if(/^image\/(png|jpeg|gif|webp|avif|bmp)$/.test(ct))
-    return '<img src="'+url+'" style="max-width:100%;height:auto;image-rendering:pixelated;border-radius:4px;background:#000">';
-  if(ct==='text/plain'||ct==='application/json')
-    return '<pre style="white-space:pre-wrap;font-size:11px;color:var(--dim);text-align:left;max-height:280px;overflow:auto">'+
-      escapeHtml(new TextDecoder().decode(insc.content.slice(0,4000)))+'</pre>';
-  // svg, text/html and unknown types are NEVER injected as markup — source view only
-  return '<div style="color:var(--dim);font-size:11px">'+escapeHtml(ct||'unknown type')+
-    ' — displayed as data, never executed · <a href="'+url+'" download="inscription'+
-    insc.n+'" style="color:var(--cyan)">download</a></div>'+
-    '<pre style="white-space:pre-wrap;font-size:9.5px;color:var(--dim);text-align:left;max-height:180px;overflow:auto">'+
-    escapeHtml(new TextDecoder().decode(insc.content.slice(0,1500)))+'</pre>';
-}
-function escapeHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-
-// ── PROOF-CARRYING READS ─────────────────────────────────────────────────────
-// A named indexer can serve anything; a verified read proves what it serves.
-// Esplora returns {block_height, merkle:[sibling hashes], pos}; the page walks
-// the Bitcoin merkle tree LOCALLY (double-SHA-256, little-endian internals,
-// sibling-left on odd index) and compares the computed root to the block's
-// merkle_root. The block hash is corroborated across every ladder host that
-// answers. Honest label: verified INCLUSION at a corroborated block hash —
-// not full header-chain SPV (that would need the ~80 MB header chain).
-const hexToBytes=h=>new Uint8Array((h.match(/../g)||[]).map(x=>parseInt(x,16)));
-const bytesToHex=b=>[...b].map(x=>x.toString(16).padStart(2,'0')).join('');
-async function sha256d(bytes){
-  const a=new Uint8Array(await crypto.subtle.digest('SHA-256',bytes));
-  return new Uint8Array(await crypto.subtle.digest('SHA-256',a));
-}
-async function verifyMerkle(txid,proof,rootHex){
-  let h=hexToBytes(txid).reverse();          // display hex is byte-reversed internal
-  let idx=proof.pos;
-  for(const sib of proof.merkle){
-    const s=hexToBytes(sib).reverse();
-    const cat=new Uint8Array(64);
-    if(idx%2===1){ cat.set(s); cat.set(h,32); }   // odd: sibling is the left pair
-    else          { cat.set(h); cat.set(s,32); }  // even: sibling is the right pair
-    h=await sha256d(cat);
-    idx=Math.floor(idx/2);
-  }
-  return bytesToHex(h.reverse())===String(rootHex).toLowerCase();
-}
-async function proofRows(txid,st){
-  if(!st||!st.confirmed||!st.block_hash) return;
-  const bh=st.block_height;
-  const proof=await esplora('/tx/'+txid+'/merkle-proof');
-  const block=await esplora('/block/'+st.block_hash);
-  if(!proof||!proof.merkle||!block||!block.merkle_root){
-    row('inclusion proof','UNAVAILABLE from the ladder — inclusion unverified, stated not implied','warn');
-    return;
-  }
-  const ok=await verifyMerkle(txid,proof,block.merkle_root);
-  row('inclusion proof', ok
-    ? 'VERIFIED locally — tx walks to merkle root '+block.merkle_root.slice(0,12)+'… of block '+bh+
-      ' ('+proof.merkle.length+' level(s), double-SHA-256 computed in this page)'
-    : 'FAILED — computed root does not match; do not trust this indexer for this tx',
-    ok?'ok':'bad');
-  let agree=0, answered=0;
-  for(const h of ESPLORA){
-    try{
-      const r=await fetch(h+'/block-height/'+bh);
-      if(r.ok){ answered++; if((await r.text()).trim()===st.block_hash) agree++; }
-    }catch(e){}
-  }
-  row('block hash corroboration', answered
-    ? agree+' / '+answered+' reachable endpoints return block '+bh+' = '+st.block_hash.slice(0,12)+'…'+(agree===answered?'':' — DISAGREEMENT; treat as unverified')
-    : 'no endpoint answered the corroboration probe — block hash uncorroborated',
-    answered&&agree===answered?'ok':'warn');
-}
-
-// �"?�"? BITCOIN CASH MODE (BCH anchor lane) �"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?
-// BCH kept Bitcoin's merkle and tx structure, so the proof walker above
-// (verifyMerkle) is reused VERBATIM. What differs is the source: one keyless
-// endpoint family (Blockchair lists) whose `?block=` filter is decorative and
-// whose dashboards are gated - measured - so the merkle branch is built
-// CLIENT-SIDE from the block's txid group in the global list. The txid list
-// order hypothesis (global id ascending = merkle order) is not trusted: it is
-// PROVEN per query by recomputing the whole merkle root and comparing it to
-// the block's declared root before any verification is claimed.
-const BCH='https://api.blockchair.com/bitcoin-cash';
-let bchLast=0;
-async function bchGet(path){
-  // pace hard - the anonymous limiter is real (430 measured repeatedly), and a
-  // browser shares one IP with everything else the user is doing
-  const gap=Date.now()-bchLast; if(gap<700) await new Promise(r=>setTimeout(r,700-gap));
-  for(let att=0;;att++){
-    bchLast=Date.now();
-    let r;
-    try{ r=await fetch(BCH+path); }catch(e){ throw new Error('network: '+e.message); }
-    if(r.ok) return await r.json();
-    if((r.status===429||r.status===430)&&att<2){
-      row('pacing','Blockchair limiter (HTTP '+r.status+') - waiting 8s, attempt '+(att+1)+'/2','warn');
-      await new Promise(rs=>setTimeout(rs,8000)); continue;
-    }
-    throw new Error('HTTP '+r.status);
-  }
-}
-// Full merkle root from txid list (BTC/BCH rules: pair, duplicate-last-if-odd,
-// double-SHA-256, little-endian internals) - the completeness arbiter.
-async function bchRootOf(ids){
-  let cur=ids.map(h=>hexToBytes(h).reverse());
-  while(cur.length>1){
-    const nx=[];
-    for(let i=0;i<cur.length;i+=2){
-      const a=cur[i],b=i+1<cur.length?cur[i+1]:cur[i];
-      const cat=new Uint8Array(a.length+b.length); cat.set(a); cat.set(b,a.length);
-      nx.push(await sha256d(cat));
-    }
-    cur=nx;
-  }
-  return cur.length?cur[0].reverse():new Uint8Array(0);
-}
-// Branch extraction with position tracking (duplicate-last-if-odd), hex out.
-async function bchBranchOf(ids,idx){
-  let cur=ids.map(h=>hexToBytes(h).reverse()), i=idx;
-  const out=[];
-  while(cur.length>1){
-    const sib=i%2===1?cur[i-1]:(i+1<cur.length?cur[i+1]:cur[i]);
-    out.push(bytesToHex(sib.slice().reverse()));
-    const nx=[];
-    for(let k=0;k<cur.length;k+=2){
-      const a=cur[k],b=k+1<cur.length?cur[k+1]:cur[k];
-      const cat=new Uint8Array(a.length+b.length); cat.set(a); cat.set(b,a.length);
-      nx.push(await sha256d(cat));
-    }
-    cur=nx; i=Math.floor(i/2);
-  }
-  return out;
-}
-// Walk the global list (block-contiguous MOSTLY, but block ids can interleave
-// at page boundaries - measured: a "passed" row can appear while more rows of
-// the target block are still to come). Completion is COUNT-DRIVEN against the
-// block's declared transaction_count, and the merkle-root cross-check below
-// remains the final arbiter - refuse, never guess.
-async function bchWalk(txid,maxPages,fromOff,needCount){
-  const rows=[]; let blockId=null, passed=false, off=fromOff||0;
-  for(;off<maxPages*100;off+=100){
-    const pg=await bchGet('/transactions?limit=100&offset='+off);
-    if(!pg.data||!pg.data.length) break;
-    for(const t of pg.data){
-      if(t.block_id<=0) continue;
-      if(txid&&t.hash===txid) blockId=t.block_id;
-      if(blockId!==null&&t.block_id===blockId) rows.push(t);
-      else if(blockId!==null&&t.block_id<blockId) passed=true;
-    }
-    row('walk','global list page '+(off/100+1)+' - '+(blockId!==null?rows.length+' rows of block '+blockId+(passed?' (passed a lower block - interleave suspected, continuing to count)':''):'searching'),'');
-    if(!txid) break;
-    if(needCount&&blockId!==null&&rows.length>=needCount) break;
-    if(!needCount&&blockId!==null&&passed) break;
-  }
-  return {blockId,rows,off};
-}
-// The same walk as verifyMerkle above, but consuming the raw branch array +
-// position (bchBranchOf's output), mirroring the Node receipt verbatim.
-async function bchVerifyMerkle(txid,branch,pos,rootHex){
-  let h=hexToBytes(txid).reverse();
-  let idx=pos;
-  for(const sibHex of branch){
-    const s=hexToBytes(sibHex).reverse();
-    const cat=new Uint8Array(64);
-    if(idx%2===1){ cat.set(s); cat.set(h,32); }
-    else{ cat.set(h); cat.set(s,32); }
-    h=await sha256d(cat);
-    idx=Math.floor(idx/2);
-  }
-  return bytesToHex(h.reverse())===String(rootHex).toLowerCase();
-}
-async function viewBCH(){
-  rows.length=0; $('raw').textContent='';
-  $('art').innerHTML='<span style="color:var(--dim);font-size:12px">reading BCH via Blockchair lists�?�</span>';
-  row('reader','Blockchair public LIST endpoints - the only keyless BCH source measured reachable from this network. The ?block= filter is decorative (returns global rows; measured) and dashboards are gated, so the merkle branch is built client-side from the block\'s txid group - the anchor-truth law applied','warn');
-  const v=$('addr').value.trim();
-  const m=v.match(/^([0-9a-fA-F]{64})$/);
-  if(!m){ row('status','BCH mode takes a 64-hex txid (recent - within the global list window)','bad'); $('art').innerHTML=''; return flush(); }
-  const txid=m[1].toLowerCase();
-  row('txid',txid.slice(0,12)+'�?�'+txid.slice(-8));
-  let walk;
-  try{ walk=await bchWalk(txid,25); }
-  catch(e){ row('status','source unreachable ('+e.message+') - nothing cached, nothing faked','bad'); $('art').innerHTML=''; return flush(); }
-  if(walk.blockId===null){ row('status','txid not in the recent window (2,500 txs) - the keyless global list does not reach it; no older-tx endpoint is available without a key. Stated, not implied','warn'); $('art').innerHTML=''; return flush(); }
-  const B=walk.blockId;
-  // block row FIRST - hash + merkle_root + declared tx count drive completion
-  let blk=null;
-  try{ const bl=await bchGet('/blocks?limit=50'); blk=(bl.data||[]).find(b=>b.id===B); }catch(e){}
-  if(!blk){ row('block header','merkle_root not reachable for block '+B+' - inclusion CANNOT be verified now; not claimed','warn'); $('art').innerHTML=''; return flush(); }
-  // count-driven completion: block ids interleave at page boundaries (measured),
-  // so 'passed' is not proof of done - the declared count is
-  let guard=0;
-  while(blk.transaction_count&&walk.rows.length<blk.transaction_count&&walk.off<25*100&&guard++<30){
-    const more=await bchWalk(txid,25,walk.off+100,blk.transaction_count);
-    for(const t of more.rows) if(!walk.rows.some(r=>r.hash===t.hash)) walk.rows.push(t);
-    walk.off=more.off;
-  }
-  const txrow=walk.rows.find(t=>t.hash===txid);
-  row('block',B+' - declared '+blk.transaction_count+' txs, collected '+walk.rows.length,walk.rows.length>=blk.transaction_count?'ok':'warn');
-  if(walk.rows.length<blk.transaction_count){ row('completeness','could not collect the full block (window or pacing limit) - verification on partial data; REFUSED','bad'); $('art').innerHTML=''; return flush(); }
-  row('size / fee',txrow.size.toLocaleString()+' B A� '+txrow.fee.toLocaleString()+' sats'+(txrow.is_coinbase?' A� COINBASE':''));
-  row('block hash',blk.hash.slice(0,12)+'�?�');
-  // order hypothesis: global id ascending = merkle order. PROVEN per query:
-  const sorted=walk.rows.slice().sort((a,b)=>a.id-b.id);
-  const computed=bytesToHex(await bchRootOf(sorted.map(t=>t.hash)));
-  const declared=String(blk.merkle_root).toLowerCase();
-  const rootOk=computed===declared;
-  row('root cross-check', rootOk
-    ? 'client-computed merkle root over '+sorted.length+' txids == declared root '+declared.slice(0,12)+'�?� - list complete, order proven'
-    : 'computed root '+computed.slice(0,12)+'�?� != declared - the collected group is incomplete or mis-ordered; verification REFUSED',
-    rootOk?'ok':'bad');
-  if(!rootOk){ $('art').innerHTML=''; return flush(); }
-  const pos=sorted.findIndex(t=>t.hash===txid);
-  const proof=await bchBranchOf(sorted.map(t=>t.hash),pos);
-  const ok=await bchVerifyMerkle(txid,proof,pos,declared);   // the same walk as Bitcoin mode
-  row('inclusion proof', ok
-    ? 'VERIFIED locally - tx walks to merkle root '+declared.slice(0,12)+'�?� of block '+B+' ('+proof.length+' level(s), branch built client-side from txids, double-SHA-256 in this page)'
-    : 'FAILED - computed root does not match; do not trust this source for this tx',
-    ok?'ok':'bad');
-  // tamper control, run live in the page - the receipt that keeps proving itself
-  const badTx=txid.slice(0,-2)+(txid.endsWith('00')?'11':'00');
-  const tamper=!await bchVerifyMerkle(badTx,proof,pos,declared);
-  row('tamper control', tamper
-    ? 'flipped-txid variant REJECTED - the walker is load-bearing, not decorative'
-    : 'flipped txid ACCEPTED - the verification is broken; trust nothing on this page',
-    tamper?'ok':'bad');
-  row('source honesty','single keyless source (Blockchair). Bitcoin mode corroborates across three Esplora hosts; no second BCH endpoint answered this network today - inclusion is proven against THIS source\'s declared root, and the root itself is uncorroborated. Stated, not implied','warn');
-  $('art').innerHTML='<span style="color:var(--dim);font-size:12px">BCH mode: anchor reads - inclusion proof in the rows above. Inscription rendering lives in Bitcoin mode.</span>';
-  return flush();
-}
-
-async function viewBitcoin(){
-  rows.length=0; $('raw').textContent='';
-  $('art').innerHTML='<span style="color:var(--dim);font-size:12px">reading Bitcoin via Esplora…</span>';
-  row('reader','Esplora public API — Bitcoin has no keyless eth_call; an indexer is named, not hidden','warn');
-  const v=$('addr').value.trim();
-  const m=v.match(/^([0-9a-fA-F]{64})(?:i(\d+))?$/);
-  if(m){
-    const txid=m[1].toLowerCase(), want=m[2]!==undefined?+m[2]:null;
-    const tx=await esplora('/tx/'+txid);
-    if(!tx){ row('status','indexer unreachable — inscription not shown, nothing cached','bad');
-      $('art').innerHTML='<span style="color:var(--bad);font-size:12px">unreachable</span>'; return flush(); }
-    const st=tx.status||{};
-    row('txid',txid.slice(0,12)+'…'+txid.slice(-8));
-    row('block',st.block_height??'unconfirmed','ok');
-    row('size / weight',tx.size.toLocaleString()+' B · '+tx.weight.toLocaleString()+' wu ('+(100*tx.weight/4e6).toFixed(1)+'% of a block)');
-    row('fee',tx.fee.toLocaleString()+' sats = '+(tx.fee/1e8).toFixed(8)+' BTC');
-    const inscs=inscriptionsFromTx(tx);
-    row('inscriptions',inscs.length?inscs.length+' in this transaction (canonical id: txid i N)':'none — not an inscription transaction',inscs.length?'ok':'warn');
-    await proofRows(txid,st);   // verified inclusion beats a named indexer
-    const rs=runestoneFromTx(tx);
-    if(rs) row('runestone', rs.cenotaph?rs.note:
-      (rs.edicts.length?rs.edicts.length+' edict(s): '+rs.edicts.map(e=>e.amount.toLocaleString()+' of '+e.id+' → output '+e.output).join('; '):'fields only (etch or mint)'),'ok');
-    const show=want!==null?inscs.filter(x=>x.n===want):inscs;
-    if(want!==null&&!show.length) row('status','no inscription i'+want+' — this tx has '+inscs.length,'bad');
-    show.forEach(x=>{
-      row('i'+x.n,x.ctype+' · '+x.content.length.toLocaleString()+' B · '+x.chunks+' chunk(s)'+
-        (x.fields.length?' · extra fields '+x.fields.map(f=>'0x'+f[0].toString(16)+'('+f[1]+')').join(' '):''),'ok');
-    });
-    $('art').innerHTML=show.length
-      ? '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;width:100%;padding:12px">'+show.map(x=>
-          '<div style="text-align:center"><div style="background:#000;border-radius:6px;padding:8px">'+renderInscription(x)+
-          '</div><div style="color:var(--dim);font-size:10px;margin-top:5px">'+txid.slice(0,8)+'…i'+x.n+'</div></div>').join('')+'</div>'
-      : '<span style="color:var(--dim);font-size:12px">no inscription content to render</span>';
-    if(show[0]) $('raw').textContent='content['+show[0].n+'] '+show[0].ctype+' '+show[0].content.length+' B — first bytes: '+
-      [...show[0].content.slice(0,32)].map(b=>b.toString(16).padStart(2,'0')).join(' ');
-    return flush();
-  }
-  if(/^(bc1|1|3)[a-zA-Z0-9]{25,62}$/.test(v)){
-    const utxos=await esplora('/address/'+v+'/utxo');
-    if(!utxos){ row('status','indexer unreachable — nothing cached to show you','bad');
-      $('art').innerHTML=''; return flush(); }
-    row('address',v);
-    row('utxos',utxos.length+' unspent ('+(utxos.reduce((a,u)=>a+u.value,0)/1e8).toFixed(8)+' BTC)','ok');
-    // per-UTXO allocation evidence. NOT a balance claim: edict transfers attribute
-    // exactly, but mint amounts depend on etch terms and prior-mint history.
-    row('runes','allocation evidence per UTXO — a wallet-sum balance needs transfer history; not claimed here','warn');
-    let evidence=0;
-    for(const u of utxos.slice(0,8)){
-      const t=await esplora('/tx/'+u.txid);
-      if(!t) continue;
-      const rs=runestoneFromTx(t);
-      if(!rs) continue;
-      if(rs.cenotaph){ row(u.txid.slice(0,10)+'…:'+u.vout,'cenotaph','warn'); evidence++; continue; }
-      const f=rs.fields;
-      const lines=[];
-      if(f[20]) lines.push('MINT of rune '+f[20][0]+':'+f[20][1]);
-      if(f[4])  lines.push('ETCH '+((runeName(f[4][0])||'?')+' (#'+f[4][0]+')')+
-        (f[6]?' premine '+f[6][0].toLocaleString():'')+(f[10]?' · '+f[10][0].toLocaleString()+'/mint':''));
-      rs.edicts.filter(e=>e.output===u.vout).forEach(e=>lines.push(e.amount.toLocaleString()+' of rune '+e.id+' → this output'));
-      if(lines.length){ row(u.txid.slice(0,10)+'…:'+u.vout,lines.join(' · '),'ok'); evidence++; }
-    }
-    if(!evidence) row('runes found','none in the first '+Math.min(utxos.length,8)+' UTXOs — absence in a SAMPLE, not proof of none','warn');
-    $('art').innerHTML='<span style="color:var(--dim);font-size:12px">address mode: allocation evidence in the rows above — inscription ids render in full (paste a txid)</span>';
-    return flush();
-  }
-  row('status','Bitcoin mode takes a txid, a txid i N (inscription id), or a bc1 address','bad');
-  $('art').innerHTML='';
-  return flush();
-}
-
-async function view(){
-  rows.length=0; $('raw').textContent='';
-  $('art').innerHTML='<span style="color:var(--dim);font-size:12px">reading chain…</span>';
-  // Bitcoin answers a different reader — route before any EVM assumption runs
-  if(CHAINS[+$('chain').value]&&CHAINS[+$('chain').value].btc) return viewBitcoin();
-  if(CHAINS[+$('chain').value]&&CHAINS[+$('chain').value].bch) return viewBCH();
-  let holder=$('addr').value.trim();
-  const contract=$('custom').value.trim()||$('token').value;
-  rpcUrl=$('rpc').value.trim();
-  // Name the ACTUAL cause. "bad address" for a chain with no endpoint sends a beginner
-  // hunting the wrong problem — the same class of defect as a rate limit surfacing as a
-  // dead contract.
-  const chSel = CHAINS[+$('chain').value||0];
-  if(!pool.length && !rpcUrl && !walletProvider){
-    row('status','no RPC endpoint configured for '+chSel.name,'bad');
-    row('fix','paste an endpoint above, or pick a chain that has one','');
-    return flush();
-  }
-  const resolvedView=await resolveIfName(holder);
-  if(!resolvedView){
-    // Stale art from a previous (connected-wallet) scan must never masquerade as the
-    // answer to a DIFFERENT address the user just typed — founder receipt 2026-08-19:
-    // 'typing another name only searches my connected wallet.' It didn't; resolution
-    // failed and old art stood silent. Now the stage says so.
-    $('art').innerHTML='<span style="color:var(--bad);font-size:12px">that name did not resolve (host mood, not your typing) — paste the raw 0x… address, or press View again</span>';
-    return flush();
-  }
-  holder=resolvedView;
-
-  row('contract',contract.slice(0,10)+'…'+contract.slice(-6));
-  row('holder',holder.slice(0,10)+'…'+holder.slice(-6));
+async function resolveName(v){
+  if(/^0x[0-9a-fA-F]{40}$/.test(v)) return v.toLowerCase();
   try{
-    const decR = await call(contract,'0x313ce567').catch(()=>null);
-    const dec = decR&&decR!=='0x' ? Number(BigInt(decR)) : 18;
-    const balR = await call(contract,'0x70a08231'+AD(holder));
-    const bal = BigInt(balR);
-    const seed = bal / (10n ** BigInt(dec));
-    row('decimals',dec);
-    row('balance',(bal).toString()+' raw');
-    row('seed',seed.toString()+' whole tokens', seed===0n?'warn':'');
-
-    // The guarded trap: seed 0 underflows inside the contract.
-    if(seed===0n){
-      row('status','seed = 0 — would revert with panic 0x11. Guarded, not called.','warn');
-      $('art').innerHTML='<span style="color:var(--dim);font-size:12px">no inscription at zero balance</span>';
-      return flush();
+    const j=await (await fetch('https://api.base.domains/v1/'+encodeURIComponent(v),{headers:{'User-Agent':'gallery/1.0'}})).json();
+    return (j&&j.address)?j.address.toLowerCase():null;
+  }catch(e){ return null; }
+}
+const lvlOf=(s,col)=>{ if(!col.lv) return null; let l=col.base;
+  for(let i=1;i<col.lv.length;i++) if(s>=col.lv[i]) l++;
+  return l-col.base; };
+const pipmax=col=>col.lv?col.lv.length-1-col.base:0;
+const pips=(n,max)=>{ let s=''; for(let k=0;k<Math.max(max,1);k++) s+=k<n?'●':'·'; return s; };
+let garden=[],holderName='';
+const $=id=>document.getElementById(id);
+async function visit(v){
+  const msg=$('dmsg'); msg.textContent='…'; msg.style.color='var(--dim)';
+  const a=await resolveName(String(v||'').trim());
+  if(!a){ msg.style.color='#e8b84a';
+    msg.textContent='that name did not answer — try again, or paste the 0x… address'; return; }
+  msg.textContent='reading the chain…';
+  const found=[];
+  for(const col of COLS){
+    const bal=await rpc([{to:col.c,data:'0x70a08231'+AD(a)}]);
+    if(!bal||!bal[0]||bal[0]==='0x'||BigInt(bal[0])<=0n) continue;
+    const seed=Number(BigInt(bal[0])/1000000000n);
+    const liveCall={to:col.c,data:col.sel+W(seed)+W(0)+(col.sel==='a62f5b1b'?AD(a):W(0))};
+    const cnt=await rpc([{to:col.c,data:'0x9c216508'+AD(a)}]);
+    const n=cnt&&cnt[0]&&cnt[0]!=='0x'?Number(BigInt(cnt[0])):0;
+    const calls=[liveCall];
+    for(let i=0;i<Math.min(n,8);i++) calls.push({to:col.c,data:'0x0fd9587e'+AD(a)+W(BigInt(i))});
+    const res=await rpc(calls);
+    if(res&&res[0]&&res[0].length>200){
+      try{ found.push({svg:decodeString(res[0]),col,seed,lvln:lvlOf(seed,col)}); }catch(e){}
     }
-
-    // MEASURED: the render inputs are READ, not derived. sporesDegree(address) returns the
-    // live (seed, seed2, extra) triple — and its seed is NOT balance/10^decimals. It is
-    // captured from the transfer that created the spore. A holder with 7 whole tokens
-    // returned seed 3. Deriving from balance reverts.
-    let triple=null;
-    try{
-      const sd = await call(contract,'0xa775188a'+AD(holder));
-      const words = (sd.replace(/^0x/,'').match(/.{64}/g)||[]);
-      if(words.length>=3){ triple = words.slice(0,3); row('seed source','sporesDegree (live)','ok');
-        row('on-chain seed', BigInt('0x'+words[0]).toString(),
-            BigInt('0x'+words[0])===seed?'':'warn'); }
-    }catch(e){ row('seed source','derived from balance','warn'); }
-
-    let svg=null, used=null, lastErr=null;
-    for(const s of SHAPES){
-      const payloads = triple ? ['0x'+s.sel+triple.join(''), '0x'+s.sel+s.build(seed,holder)]
-                              : ['0x'+s.sel+s.build(seed,holder)];
-      for(const data of payloads){
-        try{
-          const r = await call(contract,data);
-          if(r&&r!=='0x'&&r.length>200){ svg=decodeString(r); used=s.id; break; }
-        }catch(e){ lastErr=e.message; }
+    for(let i=1;i<res.length;i++){
+      const rec=res[i]; if(!rec||rec==='0x') continue;
+      const w=(rec.replace(/^0x/,'').match(/.{64}/g)||[]).slice(0,3);
+      if(w.length<2) continue;
+      const s=BigInt('0x'+w[0]);
+      const data=col.sel==='a62f5b1b'?col.sel+w[0]+w[1]+AD(a):col.sel+w.join('');
+      const sr=await rpc([{to:col.c,data}]);
+      if(sr&&sr[0]&&sr[0].length>200){
+        try{ found.push({svg:decodeString(sr[0]),col,seed:Number(s),lvln:lvlOf(Number(s),col)}); }catch(e){}
       }
-      if(svg) break;
     }
-    if(!svg){ row('status','no getSvg shape matched — '+(lastErr||'empty'),'bad');
-      $('art').innerHTML='<span style="color:var(--bad);font-size:12px">no renderer on this contract</span>';
-      return flush(); }
-
-    row('ABI shape',used,'ok');
-    row('SVG bytes',svg.length.toLocaleString());
-    const ext=(svg.match(/https?:\/\/[^"' ]+/g)||[]).filter(u=>!u.includes('w3.org'));
-    row('external refs', ext.length? ext.length+' — NOT self-contained' : 'none — fully on-chain',
-        ext.length?'bad':'ok');
-    row('status','rendered from chain','ok');
-    $('art').innerHTML=svg;
-    $('raw').textContent=svg.slice(0,4000)+(svg.length>4000?'\n… truncated':'');
-  }catch(e){
-    row('status',String(e.message).slice(0,120),'bad');
-    $('art').innerHTML='<span style="color:var(--bad);font-size:12px">'+String(e.message).slice(0,80)+'</span>';
   }
-  flush();
+  if(!found.length){ msg.style.color='#e8b84a';
+    msg.textContent='this garden is quiet — no living pieces found for that address'; return; }
+  found.sort((x,y)=>{ const la=x.lvln===null?-1:x.lvln, lb=y.lvln===null?-1:y.lvln;
+    if(lb!==la) return lb-la; return (y.seed||0)-(x.seed||0); });
+  garden=found; holderName=String(v||a).trim();
+  $('door').classList.add('gone');
+  $('top').style.display='flex';
+  $('stage').style.display='block';
+  $('wing').textContent=holderName+' · collection';
+  const wall=$('wall'); wall.innerHTML='';
+  found.forEach((p,i)=>{
+    const el=document.createElement('div');
+    el.className='piece'+(p.lvln!==null&&p.lvln===pipmax(p.col)&&pipmax(p.col)>0?' crown':'');
+    const art=document.createElement('div'); art.className='art'; art.innerHTML=p.svg;
+    const lab=document.createElement('div'); lab.className='lab';
+    const n=document.createElement('div'); n.className='n'; n.textContent=p.col.sym;
+    const m=document.createElement('div'); m.className='m';
+    m.innerHTML=(p.lvln!==null?('<b>'+pips(p.lvln,pipmax(p.col))+'</b> '+(p.col.names?p.col.names[p.lvln]:'level '+p.lvln)):'')+
+      ' <span>· '+String(p.seed||0).toLocaleString()+'</span>';
+    lab.appendChild(n); lab.appendChild(m);
+    el.appendChild(art); el.appendChild(lab);
+    el.onclick=()=>openRoom(i);
+    wall.appendChild(el);
+    setTimeout(()=>el.classList.add('in'),90*i);   // the wall assembles itself, piece by piece
+  });
+  window.scrollTo(0,0);
 }
-
-// WALLET STATE IS VISIBLE STATE. Verbal communication is ~4% of human
-// communication — connection must be shown in color AND label, never left
-// as a stale imperative ("Connect wallet" while connected is a lie told by
-// a button). Green = connected, with the address on the button itself so
-// the label carries the fact; neutral when not. Wallet events update it:
-// switching accounts or locking the wallet in-extension is reflected here
-// without a page reload (accountsChanged, chainChanged).
-// SEAM: the onboarding connect flow (Seat 3's lane) should own this state
-// when it lands — this module deliberately exposes setWalletState() on
-// window so the onboarding surface can drive the same button instead of
-// replacing it.
-function setWalletState(addr){
-  const b=$('connect');
-  if(addr){
-    b.textContent='connected · '+addr.slice(0,6)+'…'+addr.slice(-4);
-    b.style.color='var(--ok)'; b.style.borderColor='var(--ok)';
-  }else{
-    b.textContent='Connect wallet';
-    b.style.color=''; b.style.borderColor='';
-  }
-}
-window.setWalletState=setWalletState;
-async function connect(){
-  if(!window.ethereum){ rows.length=0; row('wallet','no injected provider found','warn'); return flush(); }
-  try{
-    const a = await window.ethereum.request({method:'eth_requestAccounts'});
-    // The wallet becomes the RPC. Each connected user brings their own endpoint, so the
-    // shared public limiter stops being the ceiling on sweeps.
-    walletProvider = window.ethereum;
-    if(a&&a[0]){ setWalletState(a[0]); $('addr').value=a[0]; scanAll(); }
-    else setWalletState(null);
-  }catch(e){ rows.length=0; row('wallet',String(e.message).slice(0,80),'bad'); flush(); }
-}
-// The wallet can change underneath the page: reflect it, don't poll.
-if(window.ethereum&&window.ethereum.on){
-  window.ethereum.on('accountsChanged',a=>{ if(a&&a.length){ setWalletState(a[0]); walletProvider=window.ethereum; } else { setWalletState(null); walletProvider=null; } });
-  window.ethereum.on('disconnect',()=>{ setWalletState(null); walletProvider=null; });
-}
-
-/* ── ?selftest — the explorer's own pure logic, law 8x: exhibit the failure ──
-   Same discipline as the gate page: every case is synthesized, run through the
-   REAL functions this page uses (not a re-implementation), and the expected
-   strings are the specification — a case that stops failing turns the table red. */
-if(new URLSearchParams(location.search).has('selftest')){
-(async()=>{
-  rows.length=0; $('raw').textContent='';
-  const T=[];
-  const ok=(name,cond,detail)=>T.push({name,ok:!!cond,detail:detail||''});
-  const s=b=>[...b].map(c=>String.fromCharCode(c)).join('');
-
-  // ── scriptPushes: the opcode walk that both decoders stand on ──
-  try{
-    let p=scriptPushes('036f7264');
-    ok('pushes: plain',p.length===1&&s(p[0])==='ord');
-    p=scriptPushes('00');
-    ok('pushes: OP_0 kept as empty push',p.length===1&&p[0].length===0);
-    p=scriptPushes('4c03010203');
-    ok('pushes: PUSHDATA1 little-endian',p.length===1&&p[0].length===3&&p[0][2]===3);
-    p=scriptPushes('4d0300010203');
-    ok('pushes: PUSHDATA2 little-endian',p.length===1&&p[0].length===3);
-    p=scriptPushes('036f726495',true);
-    ok('pushes: strict stops at non-push opcode',p.stopped===true);
-  }catch(e){ ok('scriptPushes',false,String(e)); }
-
-  // ── inscriptionsFromTx: synthetic reveal witness (sig, envelope, control) ──
-  try{
-    const txt=[...'text/plain'].map(c=>c.charCodeAt(0).toString(16).padStart(2,'0')).join('');
-    const hello=[...'hello'].map(c=>c.charCodeAt(0).toString(16).padStart(2,'0')).join('');
-    const env='00'+'63'+'036f7264'+'0101'+'0a'+txt+'00'+'05'+hello+'68';
-    const tx={vin:[{witness:['0101',env,'c1']}]};
-    const got=inscriptionsFromTx(tx);
-    ok('envelope: one inscription found',got.length===1);
-    ok('envelope: content-type',got[0]&&got[0].ctype==='text/plain');
-    ok('envelope: content bytes',got[0]&&s(got[0].content)==='hello'&&got[0].chunks===1);
-  }catch(e){ ok('inscriptionsFromTx',false,String(e)); }
-
-  // ── runestones: leb128, bijective base-26, edict tails, cenotaph ──
-  try{
-    ok('runeName: bijective A',runeName(1n)==='A');
-    ok('runeName: bijective Z',runeName(26n)==='Z');
-    ok('runeName: bijective AA',runeName(27n)==='AA');
-    ok('runeName: bijective AZ',runeName(52n)==='AZ');
-    const leb=v=>{const o=[];let x=v;do{let b=Number(x&127n);x/=128n;if(x>0n)b+=128;o.push(b);}while(x>0n);return o;};
-    const ints=[20n,12n,20n,34n,0n,0n,5n,0n,2n,1n];
-    const payload=ints.flatMap(v=>{const b=leb(v);return[b.length,...b];});
-    const ph=payload.map(b=>b.toString(16).padStart(2,'0')).join('');
-    const tx2={vout:[{scriptpubkey:'6a5d'+ph}]};
-    const rs=runestoneFromTx(tx2);
-    ok('runestone: mint fields',rs&&!rs.cenotaph&&rs.fields&&rs.fields[20]&&rs.fields[20][0]===12n&&rs.fields[20][1]===34n);
-    ok('runestone: edict tail parsed',rs&&rs.edicts&&rs.edicts.length===1&&rs.edicts[0].output===2);
-    const tx3={vout:[{scriptpubkey:'6a5d95'}]};
-    const rs3=runestoneFromTx(tx3);
-    ok('runestone: cenotaph on non-push opcode',rs3&&rs3.cenotaph===true);
-  }catch(e){ ok('runestoneFromTx',false,String(e)); }
-
-  // ── both merkle walkers on hand-built trees (Bitcoin + BCH agree) ──
-  try{
-    const L=['aa','bb','cc','dd'].map(c=>c.repeat(32));
-    const root=bytesToHex(await bchRootOf(L));
-    const br2=await bchBranchOf(L,2);
-    ok('bch walker: verifies pos 2',await bchVerifyMerkle(L[2],br2,2,root));
-    ok('btc walker: same tree verifies',await verifyMerkle(L[2],{merkle:br2,pos:2},root));
-    ok('both walkers agree on tamper',!await bchVerifyMerkle(L[1],br2,2,root));
-    const L3=L.slice(0,3);
-    const root3=bytesToHex(await bchRootOf(L3));
-    const br1=await bchBranchOf(L3,1);
-    ok('odd-leaf tree: duplicate-last verifies',await bchVerifyMerkle(L3[1],br1,1,root3));
-  }catch(e){ ok('merkle walkers',false,String(e)); }
-
-  const passN=T.filter(t=>t.ok).length;
-  row('SELF-TEST',passN+'/'+T.length+(passN===T.length?' — every case behaved as specified':' — A CONTROL STOPPED FAILING; DO NOT TRUST THIS BUILD'),passN===T.length?'ok':'bad');
-  for(const t of T) row(t.ok?'ok':'FAIL',t.name+(t.detail?' — '+t.detail:''),t.ok?'ok':'bad');
-  $('art').innerHTML='<span style="color:'+(passN===T.length?'var(--ok)':'var(--bad)')+';font-size:13px">self-test '+passN+'/'+T.length+' — synthesis, real decode, real walkers, no network</span>';
-  flush();
-})();
-}
-
-(function init(){
-  $('chain').innerHTML=CHAINS.map((c,i)=>`<option value="${i}">${c.name}</option>`).join('');
-  const fillTokens=()=>{ $('token').innerHTML=TOKENS.map(t=>`<option value="${t.addr}">${t.sym}</option>`).join(''); };
-  fillTokens();
-  const setChain=i=>{
-    const c=CHAINS[i]||CHAINS[0];
-    pool=c.rpcs.slice(); poolIdx=0;
-    $('rpc').value=pool.join(', ')||'';
-    if(c.btc){
-      // Bitcoin: no EVM collections; the address field carries txid / txid i N / bc1…
-      $('token').innerHTML='<option value="">Bitcoin · paste txid or txid i N (or a bc1 address)</option>';
-      $('rpc').value=ESPLORA.join(', ');
-    } else if(c.bch){
-      $('token').innerHTML='<option value="">Bitcoin Cash - paste a recent txid (inclusion proof, client-built branch)</option>';
-      $('rpc').value=BCH;
-    } else fillTokens();
+function openRoom(i){
+  const p=garden[i]; if(!p) return;
+  $('rart').innerHTML=p.svg;
+  const max=pipmax(p.col);
+  const crown=p.lvln!==null&&p.lvln===max&&max>0;
+  $('room').classList.toggle('gold',crown);
+  $('rplaque').innerHTML='<div class="t">'+p.col.sym+(crown?' · crown':'')+'</div>'+
+    '<div class="s">'+(p.lvln!==null?('<b>'+pips(p.lvln,max)+'</b> '+(p.col.names?p.col.names[p.lvln]:'level '+p.lvln)+' · '):'')+
+    'seed '+String(p.seed||0).toLocaleString()+' · '+(i+1)+' of '+garden.length+'</div>';
+  $('deets').classList.remove('open');
+  $('deets').innerHTML=[
+    ['collection',p.col.sym],['contract',p.col.c],['holder',holderName],
+    ['seed',String(p.seed||0)],['level',p.lvln===null?'unknown (source pending)':p.lvln+' of '+max],
+    ['art bytes',String((p.svg||'').length)],['ladder',p.col.lv?p.col.lv.join(' · '):'—'],
+  ].map(r=>'<span class="k">'+r[0]+'</span>  '+r[1]).join('<br>');
+  $('room').classList.add('open');
+  $('bDl').onclick=()=>{
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([p.svg||''],{type:'image/svg+xml'}));
+    a.download=p.col.sym.replace(/[^\w]+/g,'-').toLowerCase()+'-seed'+p.seed+'.svg'; a.click();
   };
-  setChain(0);
-  $('chain').onchange=e=>setChain(+e.target.value);
-  $('rpc').addEventListener('change',()=>{ const c=CHAINS[+$('chain').value];
-    if(c&&c.btc) return;   // Bitcoin's Esplora ladder is not user-editable here
-    pool=$('rpc').value.split(',').map(s=>s.trim()).filter(Boolean); poolIdx=0; });
-  $('go').onclick=view; $('scan').onclick=scanAll; $('connect').onclick=connect;
-  $('addr').addEventListener('keydown',e=>{ if(e.key==='Enter') view(); });
-  // A previously-authorized wallet is shown as connected WITHOUT prompting —
-  // eth_accounts never triggers a popup; eth_requestAccounts does.
-  if(window.ethereum){
-    window.ethereum.request({method:'eth_accounts'}).then(a=>{
-      if(a&&a[0]&&!walletProvider){ walletProvider=window.ethereum; setWalletState(a[0]); }
-    }).catch(()=>{});
+}
+$('bDeets').onclick=()=>$('deets').classList.toggle('open');
+document.querySelector('#room .close').onclick=()=>$('room').classList.remove('open');
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){ $('room').classList.remove('open'); $('curtain').classList.remove('open'); }
+  if($('room').classList.contains('open')){ /* arrows walk the garden in the room */ }
+});
+/* wallet: gentle always. No provider is a doorway, not an error. */
+let walletAddr=null;
+function setConn(){ const b=$('conn');
+  if(walletAddr){ b.classList.add('ok'); b.textContent='◉ '+walletAddr.slice(0,6)+'…'+walletAddr.slice(-4); }
+  else { b.classList.remove('ok'); b.textContent='◌ wallet'; } }
+if(window.ethereum&&window.ethereum.request){
+  window.ethereum.request({method:'eth_accounts'}).then(a=>{ if(a&&a[0]){ walletAddr=a[0]; setConn(); } }).catch(()=>{});
+}
+$('conn').onclick=async()=>{
+  if(walletAddr) return;
+  if(!window.ethereum){
+    $('ch').textContent="your wallet isn't visible here";
+    $('cp').textContent='to bring it: open this page inside your wallet\u2019s own browser, or enable its extension and refresh. the gallery itself needs no wallet — every eye is welcome, and the art downloads freely.';
+    $('curtain').classList.add('open'); return;
   }
-})();
+  try{
+    const a=await window.ethereum.request({method:'eth_requestAccounts'});
+    if(a&&a[0]){ walletAddr=a[0]; setConn(); }
+  }catch(e){
+    $('ch').textContent='the wallet declined';
+    $('cp').textContent='no problem — viewing needs no wallet. connect whenever an action asks for one.';
+    $('curtain').classList.add('open');
+  }
+};
+$('cok').onclick=()=>$('curtain').classList.remove('open');
+$('home').onclick=()=>{ $('stage').style.display='none'; $('top').style.display='none';
+  $('door').classList.remove('gone'); $('wing').textContent='the doorway'; $('dmsg').textContent=''; };
+$('frm').onsubmit=e=>{ e.preventDefault(); visit($('addr').value); };
+document.querySelectorAll('#door .seeds button').forEach(b=>{ b.onclick=()=>visit(b.dataset.a); });
 </script>
-<script src="./fleet.js"></script>
 <div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:.6rem;z-index:99999;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
 <script src="../tour.js"></script>
 </body>
