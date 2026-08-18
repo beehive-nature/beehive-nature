@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>the Farmers Market — beehivenature.com · the community's private party</title>
+<style>
+:root{--bg:#07090a;--ink:#d8e8cf;--leaf:#7ec850;--gold:#FFD700;--dim:#6b7a6b;--line:#1a241c;--ok:#9FFF3D;--warn:#e8b84a;--fusd:#c9a64a}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding-bottom:70px;
+  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72"><g fill="none" stroke="%23121e14" stroke-width="1.2"><path d="M36 4 L60 18 L60 46 L36 60 L12 46 L12 18 Z"/><path d="M36 4 L60 18 L60 46 L36 60 L12 46 L12 18 Z" transform="translate(30,30)"/></g></svg>')}
+header{padding:44px 20px 8px;text-align:center}
+h1{font-size:clamp(19px,4.5vw,27px);color:var(--leaf);font-weight:400;letter-spacing:.05em;text-shadow:0 0 14px rgba(126,200,80,.25)}
+header p{color:var(--dim);font-size:11.5px;margin-top:8px;letter-spacing:.04em}
+.gate{max-width:680px;margin:18px auto;padding:14px 18px;border:1px dashed var(--line);border-radius:10px;
+  color:var(--dim);font-size:11px;line-height:1.9;text-align:center}
+.gate b{color:var(--gold);font-weight:400}
+nav{position:sticky;top:0;background:#07090aee;backdrop-filter:blur(6px);z-index:40;display:flex;gap:8px;
+  justify-content:center;padding:12px;border-bottom:1px solid var(--line)}
+nav button{background:#0b120d;color:var(--dim);border:1px solid var(--line);border-radius:8px;padding:7px 16px;
+  cursor:pointer;font:12.5px 'IBM Plex Mono',monospace}
+nav button.on{color:var(--gold);border-color:#3d3410}
+#wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(225px,1fr));gap:16px;max-width:1150px;margin:24px auto 40px;padding:0 16px}
+.stall{background:#0b120d;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.stall .art{background:#0d160f;padding:12px;min-height:170px;display:flex;align-items:center;justify-content:center}
+.stall .art svg{width:100%;max-height:200px;height:auto}
+.stall .body{padding:12px 14px}
+.stall .n{color:var(--leaf);font-size:13px}
+.stall .m{color:var(--dim);font-size:10.5px;margin-top:3px}
+.stall .m b{color:var(--gold);font-weight:400;letter-spacing:2px}
+.price{display:flex;justify-content:space-between;align-items:baseline;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+.price .p{color:var(--fusd);font-size:15px}
+.price .u{color:var(--dim);font-size:10px}
+.acts{display:flex;gap:8px;margin-top:10px}
+.acts button{flex:1;background:none;border:1px solid var(--line);border-radius:7px;padding:7px 6px;cursor:pointer;
+  color:var(--dim);font:11px ui-monospace,monospace}
+.acts .deal{border-color:#2c4418;color:var(--ok)}
+.acts .deal:hover{background:var(--ok);color:#000;border-color:var(--ok)}
+.acts button:hover{border-color:var(--leaf);color:var(--leaf)}
+#accord{position:fixed;inset:0;background:#07090af2;z-index:60;display:none;overflow-y:auto}
+#accord.open{display:block}
+#accord .close{position:fixed;top:14px;right:16px;background:#0b120d;color:var(--dim);border:1px solid var(--line);border-radius:8px;padding:6px 14px;cursor:pointer;z-index:70}
+#accord .inner{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 18px 100px}
+.card{background:#0b120d;border:1px solid #2c4418;border-radius:14px;padding:22px 26px;max-width:560px;width:100%}
+.card h3{color:var(--gold);font-weight:400;letter-spacing:.12em;font-size:14px;text-align:center}
+.card .row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px dotted var(--line);font-size:12px}
+.card .row .k{color:var(--dim)}
+.card .row .v{color:var(--ink)}
+.card .who{margin-top:14px;display:flex;justify-content:space-between;color:var(--dim);font-size:10.5px}
+.card .sig{margin-top:16px;text-align:center;color:#3d5a2c;font-size:16px;letter-spacing:.3em}
+.acts2{display:flex;gap:8px;margin-top:18px}
+.acts2 button{flex:1;background:none;border:1px solid #2c4418;color:var(--ok);border-radius:8px;padding:9px;cursor:pointer;font:11.5px ui-monospace,monospace}
+.acts2 button:hover{background:var(--ok);color:#000}
+.acts2 button.ghostb{border-color:var(--line);color:var(--dim)}
+.acts2 button.ghostb:hover{border-color:var(--leaf);color:var(--leaf);background:none}
+.note{color:var(--dim);font-size:10px;margin-top:12px;text-align:center;line-height:1.7}
+#rules{max-width:700px;margin:26px auto 60px;padding:0 18px}
+#rules .r{padding:14px 0;border-bottom:1px solid var(--line);color:var(--dim);font-size:11.5px;line-height:1.8}
+#rules .r b{color:var(--leaf);font-weight:400}
+#about{max-width:700px;margin:26px auto 60px;padding:0 18px;color:var(--dim);font-size:11.5px;line-height:2;text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <h1>🌻 the Farmers Market</h1>
+  <p>beehivenature.com · the community's private party · settles in fUSD · refereed by bQueenBee</p>
+</header>
+<nav>
+  <button id="tStalls" class="on">◉ the stalls</button>
+  <button id="tAccord">🤝 bAccord</button>
+  <button id="tRules">⚖ the house rules</button>
+  <button id="tAbout">⌂ about</button>
+</nav>
+
+<div class="gate">
+  <b>private party</b> — the door opens to the community: holders, farmers, artists, .b neighbors.<br>
+  this is the MVP demo: stalls render live from the founder's garden; bAccords are real artifacts you can send.
+  DAO-gated entry, fUSD settlement and the escrow dock with the contract.
+</div>
+
+<div id="wall"></div>
+
+<div id="accord"><button class="close">esc ✕</button><div class="inner">
+  <div class="card">
+    <h3>— a bACCORD —</h3>
+    <div class="row"><span class="k">the piece</span><span class="v" id="aPiece">—</span></div>
+    <div class="row"><span class="k">seed · level</span><span class="v" id="aSeed">—</span></div>
+    <div class="row"><span class="k">the ask</span><span class="v" id="aAsk">—</span></div>
+    <div class="row"><span class="k">exact amount</span><span class="v" id="aAmt">—</span></div>
+    <div class="row"><span class="k">settles in</span><span class="v" style="color:var(--fusd)">fUSD</span></div>
+    <div class="row"><span class="k">referee</span><span class="v">bQueenBee 🐝</span></div>
+    <div class="who"><span id="aFrom">from: —</span><span id="aTo">to: —</span></div>
+    <div class="sig">⊹ ⊹ ⊹</div>
+    <div class="acts2">
+      <button id="aCard">⬇ keep the accord card</button>
+      <button id="aNote">✉ copy the accord note</button>
+      <button id="aSign" class="ghostb">◯ sign — when escrow docks</button>
+    </div>
+    <div class="note">either side may open a bAccord — buyer or farmer. your live bLOVErAi can draft it with you (the hearth, next build).<br>
+    the card is a real PNG, made in your browser — artsy by construction, no backend.</div>
+  </div>
+</div></div>
+
+<div id="rules" style="display:none">
+  <div class="r"><b>1 · the party is private.</b> the market serves the community — artists, farmers, holders, .b neighbors. the DAO holds the door; the chain checks the ticket.</div>
+  <div class="r"><b>2 · fUSD is the porch currency.</b> the public gallery trades USDC and exSat rails; the farmers market remembers fUSD — community money for the community's stalls.</div>
+  <div class="r"><b>3 · art trades locked, whole, exact.</b> the five o/u laws apply here as everywhere: locked inscriptions only, exact amounts, cushions shown, art never touches a pool.</div>
+  <div class="r"><b>4 · bAccords are the handshake.</b> buyer or farmer opens one; bQueenBee referees; both parties' bLOVErAi's may help draft. the accord card is the social artifact — send it anywhere.</div>
+  <div class="r"><b>5 · the farmer eats first.</b> splits settle to creators the moment the deal lands — the middleman is a smart function, not a tollbooth.</div>
+</div>
+
+<div id="about" style="display:none">
+  <p>this is the MVP demo surface for <b style="color:var(--leaf)">beehivenature.com</b> — the farmers market.<br>
+  stalls render live from chain state (the founder's garden as the opening produce).<br>
+  bAccord cards generate as real PNGs in-browser; accord notes carry deep links to the rooms.<br>
+  docking next: DAO-gated entry, fUSD settlement, the audited escrow, and the bLOVErAi co-creation hearth.<br>
+  the public market lives next door: <a href="./market.html" style="color:var(--cyan)">the DeMarketPlace</a> — USDC + exSat, inquire flow.</p>
+</div>
+
+<script>
+/* THE FARMERS MARKET MVP. Same engine discipline as the fleet: chain state, keyless,
+   defensive decode, self-measured chrome. Stalls = the garden's finest; bAccords =
+   real, artsy, sendable artifacts (canvas PNG + deep-link note). fUSD is the frame. */
+const W=v=>BigInt(v).toString(16).padStart(64,'0');
+const AD=a=>'0'.repeat(24)+a.replace(/^0x/,'').toLowerCase();
+const HOSTS=['https://base-rpc.publicnode.com','https://base.drpc.org'];
+const LOV='0xfbd201472d5a439f1f0e408eb5dfaf6ea3687876';
+const COLS=[
+ {sym:'FUNGI',c:'0x7d9CE55D54FF3FEddb611fC63fF63ec01F26D15F',sel:'422b9e23',lv:[0,21000,525000,1050000,1575000,2100000],base:0,ou:true},
+ {sym:'$FROGGI',c:'0x88A78C5035BdC8C9A8bb5c029e6cfCDD14B822FE',sel:'422b9e23',lv:[0,1000,3000,10000,30000,60000,120000],base:0},
+ {sym:'JELLI',c:'0xA1b9d812926a529D8B002E69FCd070c8275eC73c',sel:'422b9e23',lv:[0,1000,21000,105000,420000,1050000],base:0},
+ {sym:'PEPI v2',c:'0x28a5e71BFc02723eAC17E39c84c5190415C0de9F',sel:'a435130b',lv:[0,11,22,33,44,56],base:1},
+];
+function decodeString(hex){
+  const h=hex.replace(/^0x/,'');
+  const off=parseInt(h.slice(0,64),16); if(!(off===0x20)) throw 0;
+  const len=parseInt(h.slice(off*2,off*2+64),16); if(!(len>=0&&len<=16384)) throw 0;
+  let out='';
+  for(let i=0;i<len;i++){ const b=parseInt(h.slice((off+32+i)*2,(off+32+i)*2+2),16);
+    if(Number.isNaN(b)) throw 0; out+=String.fromCharCode(b); }
+  try{ return decodeURIComponent(escape(out)); }catch(e){ return out; }
+}
+async function rpc(calls){
+  for(const h of HOSTS){
+    const ctl=new AbortController(); const kill=setTimeout(()=>ctl.abort(),8000);
+    try{
+      const r=await fetch(h,{method:'POST',headers:{'Content-Type':'application/json'},signal:ctl.signal,
+        body:JSON.stringify(calls.map((c,i)=>({jsonrpc:'2.0',id:i,method:'eth_call',params:[{to:c.to,data:c.data},'latest']})))});
+      const j=await r.json(); clearTimeout(kill);
+      if(Array.isArray(j)) return j.map(x=>x.result??null);
+    }catch(e){ clearTimeout(kill); }
+  }
+  return null;
+}
+const lvlOf=(s,col)=>{ if(!col.lv) return null; let l=col.base;
+  for(let i=1;i<col.lv.length;i++) if(s>=col.lv[i]) l++;
+  return l-col.base; };
+const pipmax=col=>col.lv?col.lv.length-1-col.base:0;
+const pips=(n,max)=>{ let s=''; for(let k=0;k<Math.max(max,1);k++) s+=k<n?'\u25CF':'\u00B7'; return s; };
+let stalls=[]; let current=null;
+const FUSD={'FUNGI':0.00041,'$FROGGI':0.004,'JELLI':0.0009,'PEPI v2':3.2};
+const $=id=>document.getElementById(id);
+async function buildStalls(){
+  const found=[];
+  for(const col of COLS){
+    const bal=await rpc([{to:col.c,data:'0x70a08231'+AD(LOV)}]);
+    if(!bal||!bal[0]||bal[0]==='0x'||BigInt(bal[0])<=0n) continue;
+    const seed=Number(BigInt(bal[0])/1000000000n);
+    const res=await rpc([{to:col.c,data:col.sel+W(seed)+W(0)+W(0)}]);
+    if(res&&res[0]&&res[0].length>200){
+      try{ found.push({svg:decodeString(res[0]),col,seed,lvln:lvlOf(seed,col)}); }catch(e){}
+    }
+  }
+  found.sort((a,b)=>((b.lvln??-1)-(a.lvln??-1))||((b.seed||0)-(a.seed||0)));
+  stalls=found.slice(0,6);
+}
+function dealOf(p){ const whole=Math.max(1,Math.floor(p.seed*0.4));
+  const unit=FUSD[p.col.sym]||0.001;
+  return {whole,fusd:Math.max(1,Math.round(whole*unit*100)/100)}; }
+function renderWall(){
+  const w=$('wall'); w.innerHTML='';
+  stalls.forEach((p,i)=>{
+    const L=dealOf(p);
+    const s=document.createElement('div'); s.className='stall';
+    const art=document.createElement('div'); art.className='art'; art.innerHTML=p.svg;
+    const body=document.createElement('div'); body.className='body';
+    body.innerHTML='<div class="n">'+p.col.sym+'</div>'+
+      '<div class="m"><b>'+pips(p.lvln??0,pipmax(p.col))+'</b> seed '+p.seed.toLocaleString()+' · lot '+L.whole.toLocaleString()+' exact</div>'+
+      '<div class="price"><span class="p">'+L.fusd.toLocaleString()+' fUSD</span><span class="u">community price</span></div>'+
+      '<div class="acts"><button class="deal" data-i="'+i+'">🤝 open bAccord</button><button data-v="'+i+'">view</button></div>';
+    s.appendChild(art); s.appendChild(body); w.appendChild(s);
+  });
+  w.querySelectorAll('.deal').forEach(b=>b.onclick=()=>openAccord(+b.dataset.i,'farmer'));
+  w.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>viewStall(+b.dataset.v));
+}
+function openAccord(i,opener){
+  const p=stalls[i]; if(!p) return;
+  const L=dealOf(p); current={p,L,opener};
+  $('aPiece').textContent=p.col.sym;
+  $('aSeed').textContent=p.seed.toLocaleString()+' · level '+(p.lvln??'?')+' of '+pipmax(p.col);
+  $('aAsk').textContent=L.fusd.toLocaleString()+' fUSD';
+  $('aAmt').textContent=L.whole.toLocaleString()+' '+p.col.sym+' (exact)';
+  $('aFrom').textContent=opener==='buyer'?'from: you (buyer opens)':'from: the farmer';
+  $('aTo').textContent=opener==='buyer'?'to: the farmer':'to: you (farmer opens)';
+  $('accord').classList.add('open');
+}
+function viewStall(i){
+  const p=stalls[i]; if(!p) return; const L=dealOf(p);
+  openAccord(i,'buyer');
+  $('aAsk').textContent=L.fusd.toLocaleString()+' fUSD · viewing';
+}
+$('aCard').onclick=()=>{
+  const {p,L}=current;
+  const c=document.createElement('canvas'); c.width=760; c.height=420;
+  const x=c.getContext('2d');
+  x.fillStyle='#07090a'; x.fillRect(0,0,760,420);
+  x.strokeStyle='#2c4418'; x.lineWidth=2; x.strokeRect(14,14,732,392);
+  x.strokeStyle='#1a241c'; x.lineWidth=1; x.strokeRect(24,24,712,372);
+  x.fillStyle='#FFD700'; x.font='22px monospace'; x.textAlign='center';
+  x.fillText('\u2014  a  b A C C O R D  \u2014',380,66);
+  x.fillStyle='#7ec850'; x.font='17px monospace';
+  x.fillText(p.col.sym+' \u00B7 seed '+p.seed.toLocaleString()+' \u00B7 level '+(p.lvln??'?')+'/'+pipmax(p.col),380,108);
+  x.fillStyle='#d8e8cf'; x.font='15px monospace';
+  x.fillText('the ask:  '+L.fusd.toLocaleString()+' fUSD',380,150);
+  x.fillText('exact amount:  '+L.whole.toLocaleString()+' '+p.col.sym,380,180);
+  x.fillText('settles in fUSD \u00B7 referees: bQueenBee \uD83D\uDC1D',380,210);
+  x.fillStyle='#6b7a6b'; x.font='12px monospace';
+  x.fillText('locked inscription only \u00B7 art travels whole \u00B7 cushion shown to both',380,254);
+  x.fillStyle='#3d5a2c'; x.font='20px monospace'; x.textAlign='center';
+  x.fillText('\u22B9   \u22B9   \u22B9',380,306);
+  x.fillStyle='#6b7a6b'; x.font='10px monospace';
+  x.fillText('beehivenature.com \u00B7 the farmers market \u00B7 an honest handshake',380,384);
+  const a=document.createElement('a');
+  a.href=c.toDataURL('image/png');
+  a.download='baccord-'+p.col.sym.replace(/[^\w]+/g,'-').toLowerCase()+'-'+p.seed+'.png'; a.click();
+};
+$('aNote').onclick=()=>{
+  const {p,L}=current;
+  const u=location.origin+location.pathname;
+  const note='bACCORD - '+p.col.sym+' seed '+p.seed.toLocaleString()+' (level '+(p.lvln??'?')+')\\n'+
+    'ask '+L.fusd.toLocaleString()+' fUSD, exact '+L.whole.toLocaleString()+'\\n'+
+    'referee bQueenBee. see the stall: '+u+'\\n- from the farmers market at beehivenature.com';
+  navigator.clipboard.writeText(note).then(()=>{ $('aNote').textContent='\u2709 accord note copied'; });
+};
+$('aSign').onclick=function(){ this.textContent='\u23F3 docking — the audited escrow is the last piece'; this.disabled=true; };
+document.querySelector('#accord .close').onclick=()=>$('accord').classList.remove('open');
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') $('accord').classList.remove('open'); });
+const tabs={tStalls:'wall',tAccord:'wall',tRules:'rules',tAbout:'about'};
+$('tAccord').onclick=()=>{ if(stalls.length) openAccord(Math.floor(Math.random()*stalls.length),'buyer'); };
+for(const t of ['tStalls','tRules','tAbout']){ $(t).onclick=()=>{ for(const k of ['tStalls','tRules','tAbout']) $(k).classList.toggle('on',k===t);
+  for(const p of ['wall','rules','about']) $(p).style.display=(tabs[t]===p)?(p==='wall'?'grid':'block'):'none'; }; }
+$('wall').innerHTML='<p style="color:var(--dim);grid-column:1/-1;text-align:center;padding:40px">tending the garden\u2019s stalls…</p>';
+buildStalls().then(()=>{ renderWall();
+  if(!stalls.length) $('wall').innerHTML='<p style="color:var(--dim);grid-column:1/-1;text-align:center;padding:40px">the stalls are resting — back shortly</p>'; });
+</script>
+<div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:.6rem;z-index:99999;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
+<script src="../tour.js?v=5"></script>
+</body>
+</html>

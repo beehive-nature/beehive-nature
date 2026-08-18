@@ -4,7 +4,7 @@
   if(document.getElementById('tourbar')) return;
   var ROOT = location.pathname.indexOf('/beehive-nature/')===0 ? '/beehive-nature/surfaces/' : '/surfaces/';
   var P=[['⌂ hub',''],['fLeeT','blight/'],['museum','blight/museum.html'],['explorer','blight/inscription-explorer.html'],['workbench','blight/workbench.html'],
-    ['catalog','blight/compare.html'],['organ','blight/midi-organ.html'],['music studio','blight/studio-music.html'],['market','blight/market.html'],['bNRi gallery','blight/bnri-gallery.html'],
+    ['catalog','blight/compare.html'],['organ','blight/midi-organ.html'],['music studio','blight/studio-music.html'],['market','blight/market.html'],['farmers','blight/farmers.html'],['bNRi gallery','blight/bnri-gallery.html'],
     ['studio gate','blight/studio-gate.html'],['C-1 aid','blight/c1-aid.html'],['vaulta reader','blight/vaulta-reader.html'],
     ['hardware','hardware/'],['key build','onboarding/'],['recover','recover.html']];
   var bar=document.createElement('nav');
