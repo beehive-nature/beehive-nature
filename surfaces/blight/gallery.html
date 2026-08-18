@@ -16,6 +16,12 @@ body{background:var(--bg);color:#cfe8d6;font:13px/1.5 'IBM Plex Mono',monospace;
 #plaque .title{font-size:15px;color:#00E5FF;letter-spacing:.06em}
 #plaque .sub{font-size:11px;color:var(--dim);margin-top:4px}
 #plaque .sub b{color:#9FFF3D;font-weight:400}
+.pips{letter-spacing:3px;color:#FFD700;font-size:12px}
+.pips .off{color:#262638}
+#hint{position:fixed;bottom:96px;left:0;right:0;text-align:center;font-size:15px;color:#7e8c85;
+  letter-spacing:.4em;transition:opacity 1s ease;z-index:20}
+#wing{position:fixed;top:18px;left:0;right:0;text-align:center;font-size:11px;color:var(--dim);letter-spacing:.2em;text-transform:uppercase}
+.gold #frame svg{filter:drop-shadow(0 0 52px rgba(255,215,0,.28))}
 #wing{position:fixed;top:18px;left:0;right:0;text-align:center;font-size:11px;color:var(--dim);letter-spacing:.2em;text-transform:uppercase}
 #controls{position:fixed;top:14px;right:16px;display:flex;gap:6px;z-index:30}
 #controls button{background:#0d0d15cc;color:var(--dim);border:1px solid var(--edge);border-radius:5px;padding:5px 10px;cursor:pointer;font:11px ui-monospace,monospace}
@@ -34,6 +40,7 @@ body{background:var(--bg);color:#cfe8d6;font:13px/1.5 'IBM Plex Mono',monospace;
 </head>
 <body>
 <div id="wing">the founder's garden · base</div>
+<div id="hint">▶ &nbsp;‹ › &nbsp;🔍 &nbsp;⌂</div>
 <div id="stage"><div id="frame"></div></div>
 <div id="dots"></div>
 <div id="plaque"><div class="title">…</div><div class="sub">…</div></div>
@@ -95,9 +102,8 @@ async function resolveName(v){
   }catch(e){ return null; }
 }
 let pieces=[],idx=0,walking=true,timer=null;
-const lvlName=(s,col)=>{ if(!col.lv) return ''; const L=col.base; let lv=L.base??0;
-  let l=col.base; for(let i=1;i<col.lv.length;i++) if(s>=col.lv[i]) l++;
-  return 'level '+(l-col.base); };
+const lvlNum=(s,col)=>{ if(!col.lv) return null; let l=col.base; for(let i=1;i<col.lv.length;i++) if(s>=col.lv[i]) l++;
+  return l-col.base; };
 async function loadGarden(addr){
   const found=[];
   for(const col of COLS){
@@ -112,7 +118,7 @@ async function loadGarden(addr){
     for(let i=0;i<Math.min(n,8);i++) calls.push({to:col.c,data:'0x0fd9587e'+AD(addr)+W(BigInt(i))});
     const res=await rpc(calls);
     if(res&&res[0]&&res[0]!=='0x'&&res[0].length>200){
-      try{ found.push({svg:decodeString(res[0]),sym:col.sym,seed,lvl:lvlName(seed,col)}); }catch(e){}
+      try{ found.push({svg:decodeString(res[0]),sym:col.sym,seed,lvln:lvlNum(seed,col),pipmax:col.lv?col.lv.length-1-col.base:0}); }catch(e){}
     }
     for(let i=1;i<res.length;i++){
       const rec=res[i];
@@ -122,10 +128,17 @@ async function loadGarden(addr){
       const s=BigInt('0x'+w[0]);
       const svgRes=await rpc([{to:col.c,data:col.sel+w.slice(0,col.sel==='a62f5b1b'?2:3).join('')+(col.sel==='a62f5b1b'?AD(addr):'')}]);
       if(svgRes&&svgRes[0]&&svgRes[0].length>200){
-        try{ found.push({svg:decodeString(svgRes[0]),sym:col.sym,seed:Number(s),lvl:lvlName(Number(s),col)}); }catch(e){}
+        try{ found.push({svg:decodeString(svgRes[0]),sym:col.sym,seed:Number(s),lvln:lvlNum(Number(s),col),pipmax:col.lv?col.lv.length-1-col.base:0}); }catch(e){}
       }
     }
   }
+  // VALUE-FIRST CURATION, the dealer's order: highest level leads the tour, then the
+  // rarer (bigger seed within its ladder). Gold light falls on top-level pieces.
+  found.sort((a,b)=>{
+    const la=a.lvln===null?-1:a.lvln, lb=b.lvln===null?-1:b.lvln;
+    if(lb!==la) return lb-la;
+    return (b.seed||0)-(a.seed||0);
+  });
   return found;
 }
 function show(i){
@@ -135,10 +148,12 @@ function show(i){
   setTimeout(()=>{
     const p=pieces[idx];
     f.innerHTML=p.svg;
-    $('plaque').innerHTML='<div class="title">'+p.sym+' · seed '+p.seed.toLocaleString()+'</div>'+
-      '<div class="sub">'+(p.lvl?p.lvl+' · ':'')+'rendered from chain state · <b>'+String(idx+1).padStart(2,'0')+' / '+pieces.length+'</b></div>';
-    f.classList.remove('fade');
+    $('plaque').innerHTML='<div class="title">'+p.sym+'</div>'+
+      '<div class="sub"><span class="pips">'+(p.lvln===null?'':pips(p.lvln,p.pipmax))+'</span> · <b>'+
+      String(idx+1).padStart(2,'0')+' / '+pieces.length+'</b></div>';
+    document.body.classList.toggle('gold',p.lvln!==null&&p.lvln===p.pipmax&&p.pipmax>0);
     [...$('dots').children].forEach((d,k)=>d.classList.toggle('here',k===idx));
+    f.classList.remove('fade');
   },420);
 }
 function walk(){ if(!walking||!pieces.length) return; show(idx+1); }
@@ -157,7 +172,11 @@ async function start(addr,wing){
   if(walking&&timer) clearInterval(timer);
   timer=setInterval(walk,6000);
 }
+const pips=(n,max)=>{max=Math.max(max,1);let s='';for(let k=0;k<max;k++)s+=k<n?'●':'<span class=\"off\">●</span>';return s;};
 const $=id=>document.getElementById(id);
+const hideHint=()=>{const hh=document.getElementById('hint');if(hh){hh.style.opacity=0;setTimeout(()=>hh.remove(),1100);}};
+document.addEventListener('click',hideHint);
+document.addEventListener('keydown',hideHint);
 $('bPlay').onclick=()=>{ walking=!walking; $('bPlay').textContent=walking?'▶ tour':'❚❚ paused'; $('bPlay').classList.toggle('on',walking); };
 $('bAsk').onclick=()=>{ const a=$('ask'); a.style.display=a.style.display==='flex'?'none':'flex'; $('addr').focus(); };
 $('go').onclick=async()=>{ const v=$('addr').value.trim(); if(!v) return;
