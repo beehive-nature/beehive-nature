@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>the hearth — co-create with the hive's AI</title>
+<style>
+:root{--bg:#0d1410;--ink:#e2efdb;--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--dim:#8a9a8a;--line:#243026}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:36px 16px 90px;
+  background-image:radial-gradient(ellipse at 50% 0%,rgba(255,160,60,.05),transparent 55%)}
+header{text-align:center;margin-bottom:20px}
+h1{font-size:clamp(18px,4vw,26px);color:var(--gold);font-weight:400;letter-spacing:.05em;text-shadow:0 0 14px rgba(255,180,80,.25)}
+header p{color:var(--dim);font-size:11px;margin-top:6px}
+#chat{max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:10px;min-height:50vh}
+.msg{border-radius:12px;padding:12px 16px;font-size:12.5px;line-height:1.8;max-width:88%}
+.msg.user{align-self:flex-end;background:#123024;color:#c9e8cf;border:1px solid #1d4a2e}
+.msg.ai{align-self:flex-start;background:#1a1a2a;color:#d8cff0;border:1px solid #2a2a4d}
+.msg.ai .art{margin-top:10px;background:#000;padding:10px;border-radius:8px;max-width:280px}
+.msg.ai .art svg{width:100%;height:auto}
+.msg.ai .link{margin-top:8px;font-size:10.5px}
+.msg.ai .link a{color:var(--cyan)}
+#ask{max-width:680px;margin:16px auto 0;display:flex;gap:8px}
+#ask input{flex:1;background:#0a100c;color:var(--cyan);border:1px solid var(--line);border-radius:10px;padding:12px 16px;font:13px 'IBM Plex Mono',monospace;outline:none}
+#ask input:focus{border-color:var(--gold)}
+#ask button{background:#3d2a10;color:var(--gold);border:1px solid #5a4020;border-radius:10px;padding:12px 20px;cursor:pointer;font:13px 'IBM Plex Mono',monospace}
+#ask button:hover{background:var(--gold);color:#000}
+#seeds{max-width:680px;margin:12px auto 0;display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+#seeds button{background:none;border:1px solid var(--line);color:var(--dim);border-radius:8px;padding:6px 12px;cursor:pointer;font:11px 'IBM Plex Mono',monospace}
+#seeds button:hover{color:var(--gold);border-color:var(--gold)}
+.note{max-width:680px;margin:16px auto 0;color:#5a6478;font-size:10px;text-align:center;line-height:1.8}
+</style>
+</head>
+<body>
+<header>
+  <h1>🔥 the hearth</h1>
+  <p>co-create with the hive's AI · every answer is an artifact with an address · TASK 10 of 10</p>
+</header>
+<div id="chat"></div>
+<div id="seeds">
+  <button data-q="grow me a mushroom">🍄 grow</button>
+  <button data-q="play me a song in harmonic major">🎵 play</button>
+  <button data-q="show me the crown of the vault">👑 crown</button>
+  <button data-q="help me make a deal on a FUNGI">🤝 deal</button>
+</div>
+<div id="ask"><input id="q" placeholder="ask the hearth…" spellcheck="false"><button id="send">send</button></div>
+<div class="note">the deterministic hearth: today it composes from the fleet's own engines (organ, gallery, vault,
+toll) — every artifact addressable, honest, chain-backed. the living model docks behind this same window.</div>
+<script src="./pointers.js?v=1"></script>
+<script>
+/* THE HEARTH — TASK 10. The prompt window where AI co-creates with humans.
+   v1 is the DETERMINISTIC hearth: it routes plain-language asks to the fleet's
+   real engines and returns real artifacts with addresses. No backend — the
+   seams are laid where the living model will sit: one route() function.
+   Nature's model: the hearth is the warm center; the hive's organs feed it. */
+const W=v=>BigInt(v).toString(16).padStart(64,'0');
+const AD=a=>'0'.repeat(24)+a.replace(/^0x/,'').toLowerCase();
+const HOSTS=['https://base-rpc.publicnode.com','https://base.drpc.org'];
+const COLS={
+ fungi:{sym:'FUNGI',c:'0x7d9ce55d54ff3feddb611fc63ff63ec01f26d15f',sel:'422b9e23',lv:[0,21000,525000,1050000,1575000,2100000]},
+ pepi:{sym:'PEPI v2',c:'0x28a5e71bfc02723eac17e39c84c5190415c0de9f',sel:'a435130b',lv:[0,11,22,33,44,56]},
+};
+function decodeString(hex){
+  const h=hex.replace(/^0x/,'');
+  const off=parseInt(h.slice(0,64),16); if(!(off===0x20)) throw 0;
+  const len=parseInt(h.slice(off*2,off*2+64),16); if(!(len>=0&&len<=16384)) throw 0;
+  let out='';
+  for(let i=0;i<len;i++){ const b=parseInt(h.slice((off+32+i)*2,(off+32+i)*2+2),16);
+    if(Number.isNaN(b)) throw 0; out+=String.fromCharCode(b); }
+  try{ return decodeURIComponent(escape(out)); }catch(e){ return out; }
+}
+async function rpc(calls){
+  for(const h of HOSTS){
+    const ctl=new AbortController(); const kill=setTimeout(()=>ctl.abort(),8000);
+    try{
+      const r=await fetch(h,{method:'POST',headers:{'Content-Type':'application/json'},signal:ctl.signal,
+        body:JSON.stringify(calls.map((c,i)=>({jsonrpc:'2.0',id:i,method:'eth_call',params:[{to:c.to,data:c.data},'latest']})))});
+      const j=await r.json(); clearTimeout(kill);
+      if(Array.isArray(j)) return j.map(x=>x.result??null);
+    }catch(e){ clearTimeout(kill); }
+  }
+  return null;
+}
+const SCALES={'harmonic major':[0,2,4,5,7,8,11],'major':[0,2,4,5,7,9,11],'minor':[0,2,3,5,7,8,10],
+ 'blues':[0,3,5,6,7,10],'pentatonic':[0,3,5,7,10],'dorian':[0,2,3,5,7,9,10]};
+function route(q){
+  q=q.toLowerCase();
+  if(/mushroom|fungi|grow/.test(q)) return {kind:'art',col:COLS.fungi,
+    seed:2100000+Math.floor(Math.random()*100000),say:'grown from the chain — a crown-grade roll, fresh from the generator:'};
+  if(/crown|vault|top level/.test(q)) return {kind:'art',col:COLS.fungi,
+    seed:2140426,say:'the founder\u2019s own crown, read live from their garden:'};
+  if(/pepi|frog|pepe/.test(q)) return {kind:'art',col:COLS.pepi,
+    seed:56,say:'a PEPI at the top rung — 56 of 13,370, the whole ladder in one seed:'};
+  if(/song|play|music|melody|scale/.test(q)){
+    var scale='harmonic major';
+    for(var s in SCALES) if(q.indexOf(s)>-1) scale=s;
+    return {kind:'song',scale:scale,seed:1000+Math.floor(Math.random()*99999),
+      say:'composed for you \u2014 press the link, it plays in the organ:'};
+  }
+  if(/deal|offer|buy|trade|accord/.test(q)) return {kind:'deal',say:'here is your offer note, stamped with your two addresses when bound \u2014 copy it to any channel:'};
+  if(/help|what can/.test(q)) return {kind:'help',say:'i grow art, compose songs, show crowns, and draft deals. every answer is a link you can keep. try: grow me a mushroom \u00B7 play me a blues song \u00B7 show me the crown \u00B7 help me make a deal.'};
+  return {kind:'help',say:'i didn\u2019t catch that \u2014 but i can: grow art \u00B7 play songs \u00B7 show crowns \u00B7 draft deals. every answer carries an address.'};
+}
+async function respond(q){
+  const r=route(q);
+  const m=document.createElement('div'); m.className='msg ai';
+  const say=document.createElement('div'); say.textContent=r.say;
+  m.appendChild(say);
+  if(r.kind==='art'){
+    const res=await rpc([{to:r.col.c,data:r.col.sel+W(r.seed)+W(0)+W(0)}]);
+    if(res&&res[0]&&res[0].length>200){
+      try{
+        const svg=decodeString(res[0]);
+        const art=document.createElement('div'); art.className='art'; art.innerHTML=svg;
+        m.appendChild(art);
+      }catch(e){}
+    }
+    const lvl=(function(){var l=0;for(var i=1;i<r.col.lv.length;i++)if(r.seed>=r.col.lv[i])l++;return l;})();
+    const link=document.createElement('div'); link.className='link';
+    var u=location.origin+location.pathname.replace(/[^/]*$/,'')+'gallery.html';
+    link.innerHTML=r.col.sym+' seed '+r.seed.toLocaleString()+' level '+lvl+' \u00B7 <a href="'+u+'">the gallery</a> \u00B7 '+
+      (window.PTR?PTR.room(r.col.sym,r.seed).slice(0,120)+'\u2026':'');
+    m.appendChild(link);
+  } else if(r.kind==='song'){
+    const link=document.createElement('div'); link.className='link';
+    var ou=location.origin+location.pathname.replace(/[^/]*$/,'')+'midi-organ.html?seed='+r.seed;
+    link.innerHTML='seed '+r.seed+' in '+r.scale+' \u00B7 <a href="'+ou+'">hear it \u2014 the organ</a>';
+    m.appendChild(link);
+    try{
+      const ac=new (window.AudioContext||window.webkitAudioContext)();
+      const iv=SCALES[r.scale]||SCALES['harmonic major'];
+      const root=48+(r.seed%12);
+      for(let i=0;i<8;i++){
+        const deg=(r.seed>>i)%iv.length;
+        const f=440*Math.pow(2,(root+iv[deg]+12*((r.seed>>(i+8))%2)-69)/12);
+        const t=ac.currentTime+i*0.32;
+        const o=ac.createOscillator(), g=ac.createGain();
+        o.type='triangle'; o.frequency.value=f;
+        g.gain.setValueAtTime(0.0001,t);
+        g.gain.exponentialRampToValueAtTime(0.18,t+0.015);
+        g.gain.exponentialRampToValueAtTime(0.0001,t+0.28);
+        o.connect(g).connect(ac.destination); o.start(t); o.stop(t+0.3);
+      }
+    }catch(e){}
+  } else if(r.kind==='deal'){
+    var note=window.PTR?PTR.room('FUNGI',2140426):'';
+    const pre=document.createElement('pre');
+    pre.style.cssText='font-size:10px;white-space:pre-wrap;word-break:break-all;color:#c9e8cf;margin-top:8px';
+    pre.textContent=note+'\nmy offer: ____ USDC \u00B7 exact amount \u00B7 the room travels with it';
+    m.appendChild(pre);
+  }
+  document.getElementById('chat').appendChild(m);
+  window.scrollTo(0,document.body.scrollHeight);
+}
+function ask(){
+  const i=document.getElementById('q');
+  const v=i.value.trim(); if(!v) return;
+  const u=document.createElement('div'); u.className='msg user'; u.textContent=v;
+  document.getElementById('chat').appendChild(u);
+  i.value='';
+  setTimeout(function(){ respond(v); },350);
+}
+document.getElementById('send').onclick=ask;
+document.getElementById('q').addEventListener('keydown',function(e){ if(e.key==='Enter') ask(); });
+document.querySelectorAll('#seeds button').forEach(function(b){ b.onclick=function(){ document.getElementById('q').value=b.dataset.q; ask(); }; });
+</script>
+<div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:.6rem;z-index:99999;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
+<script src="../tour.js?v=5"></script>
+</body>
+</html>
