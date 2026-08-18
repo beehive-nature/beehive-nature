@@ -2,10 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="color-scheme" content="dark">
 <title>the pulse — bX pointers live on the relay</title>
 <style>
-:root{--bg:#0d1410;--ink:#e2efdb;--cyan:#00E5FF;--violet:#c9a0ff;--dim:#8a9a8a;--line:#243026}
+:root{--bg:#0d1410;--ink:#e2efdb;--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--dim:#8a9a8a;--line:#243026}
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:36px 16px 90px}
 header{text-align:center;margin-bottom:18px}
@@ -46,11 +49,13 @@ document.getElementById('listen').onclick=function(){
     var t=document.createElement('div'); t.className='t';
     t.textContent=p.at+' · bsky';
     var c=document.createElement('div');
-    var html=[]; String(p.text).split(' — ').forEach(function(part){
-      if(/^https?:..../.test(part)) html.push('<a href="'+part+'" target="_blank" rel="noopener noreferrer">'+part.slice(0,58)+'…</a>');
-      else html.push(part.replace(/[<>]/g,''));
+    String(p.text).split(' — ').forEach(function(part,pi){
+      if(pi>0) c.appendChild(document.createTextNode(' — '));
+      if(/^https?:..../.test(part)){
+        var a=document.createElement('a'); a.href=part; a.target='_blank'; a.rel='noopener noreferrer';
+        a.textContent=part.slice(0,58)+'…'; c.appendChild(a);
+      } else c.appendChild(document.createTextNode(part));
     });
-    c.innerHTML=html.join(' — ');
     var f=document.createElement('div'); f.className='from';
     f.textContent='@'+p.author;
     d.appendChild(t); d.appendChild(c); d.appendChild(f);
@@ -75,7 +80,7 @@ RELAY.on(function(n){
   feed.insertBefore(d,feed.children[1]||null);
 });
 </script>
-<div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:.6rem;z-index:99999;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
-<script src="../tour.js?v=7"></script>
+<div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(.6rem + 46px);z-index:9997;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
+<script src="../tour.js?v=8"></script>
 </body>
 </html>

@@ -4,6 +4,9 @@
      your keys and prove control. Verify: open DevTools Network tab — nothing loads.
      Engine: bdid-key (FileKey-pattern derivation, Ed25519 per did-autonomi-spec). -->
 <html lang="en"><head><meta charset="utf-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>bDiD — offline recovery</title>
 <style>
@@ -5122,5 +5125,5 @@ $('sign').onclick=()=>{ if(!current)return;
   $('sig').textContent=BDIDKEY.toHex(sig)+(BDIDKEY.verifyRecordSig(sig,new TextEncoder().encode($('msg').value),current.record.publicKey)?'  ✓ self-verified (R1b strict)':'  ✗ verify failed');
 };
 addEventListener('beforeunload',()=>{current&&current.masterPrk.fill(0);current&&current.record.seed.fill(0)});
-</script></main><script src="tour.js?v=5"></script>
+</script></main>
 </body></html>

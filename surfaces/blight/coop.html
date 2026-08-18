@@ -2,9 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="color-scheme" content="dark"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>the Coop — hemp biomass downstream · the criticality index, live</title>
 <style>
-:root{--bg:#0a0a0f;--ink:#e2efdb;--leaf:#7ec850;--gold:#FFD700;--dim:#8a9a8a;--line:#243026;--ok:#9FFF3D;--fusd:#c9a64a}
+:root{--bg:#0a0a0f;--ink:#e2efdb;--leaf:#7ec850;--gold:#FFD700;--cyan:#39c5cf;--dim:#8a9a8a;--line:#243026;--ok:#9FFF3D;--fusd:#c9a64a}
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#0d1410;color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding-bottom:80px;
   background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72"><g fill="none" stroke="%23131c15" stroke-width="1.2"><path d="M36 4 L60 18 L60 46 L36 60 L12 46 L12 18 Z"/><path d="M36 4 L60 18 L60 46 L36 60 L12 46 L12 18 Z" transform="translate(30,30)"/></g></svg>')}
@@ -60,7 +63,7 @@ nav button.on{color:var(--gold);border-color:#3d3410}
 
 <div id="index"></div>
 
-<div id="detail" style="display:none" ><button class="close">esc ✕</button><div class="inner"><div class="sheet" id="sheet"></div></div></div>
+<div id="detail"><button class="close">esc ✕</button><div class="inner"><div class="sheet" id="sheet"></div></div></div>
 
 <div id="tiers" style="display:none">
   <div class="t"><b>CORE 10 — ready today.</b> ranked by market depth × offtake readiness × regulatory clarity × storage stability. the Coop's opening shelf: tap any stream for the sheet, offtake notes, and bAccord drafting.</div>
@@ -153,10 +156,10 @@ document.querySelector('#detail .close').onclick=()=>$('detail').classList.remov
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') $('detail').classList.remove('open'); });
 const tabs={tIndex:'index',tTiers:'tiers',tAbout:'about'};
 for(const t in tabs){ $(t).onclick=()=>{ for(const k in tabs){ $(k).classList.toggle('on',k===t);
-  $(tabs[k]).style.display=k===t?'block':'none'; } }; }
+  $(tabs[k]).style.display=k===t?(tabs[k]==='index'?'grid':'block'):'none'; } }; }
 renderIndex();
 </script>
-<div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:.6rem;z-index:99999;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
-<script src="../tour.js?v=7"></script>
+<div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(.6rem + 46px);z-index:9997;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
+<script src="../tour.js?v=8"></script>
 </body>
 </html>

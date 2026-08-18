@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>bLighT Workbench — the instrument (tech bench)</title>
 <!--
@@ -17,7 +20,8 @@
     --bg:#0a0a0f; --panel:#12121a; --line:#242433; --ink:#e8e8f0;
     --dim:#7e8c85; --accent:#f1df29; --accent2:#dd5ce5; --ok:#9aff5b; --bad:#ff5b6e;
   }
-  *{box-sizing:border-box}
+  *{box-sizing:border-box;min-width:0}
+  html,body{max-width:100%;overflow-x:hidden}
   body{margin:0;background:var(--bg);color:var(--ink);
     font:14px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;padding:20px}
   h1{font-size:16px;margin:0 0 2px;letter-spacing:.14em;text-transform:uppercase}
@@ -743,7 +747,7 @@ async function proofRows(txid,st){
     answered&&agree===answered?'ok':'warn');
 }
 
-// �"?�"? BITCOIN CASH MODE (BCH anchor lane) �"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?
+// ———— BITCOIN CASH MODE (BCH anchor lane) ————
 // BCH kept Bitcoin's merkle and tx structure, so the proof walker above
 // (verifyMerkle) is reused VERBATIM. What differs is the source: one keyless
 // endpoint family (Blockchair lists) whose `?block=` filter is decorative and
@@ -842,13 +846,13 @@ async function bchVerifyMerkle(txid,branch,pos,rootHex){
 }
 async function viewBCH(){
   rows.length=0; $('raw').textContent='';
-  $('art').innerHTML='<span style="color:var(--dim);font-size:12px">reading BCH via Blockchair lists�?�</span>';
+  $('art').innerHTML='<span style="color:var(--dim);font-size:12px">reading BCH via Blockchair lists…</span>';
   row('reader','Blockchair public LIST endpoints - the only keyless BCH source measured reachable from this network. The ?block= filter is decorative (returns global rows; measured) and dashboards are gated, so the merkle branch is built client-side from the block\'s txid group - the anchor-truth law applied','warn');
   const v=$('addr').value.trim();
   const m=v.match(/^([0-9a-fA-F]{64})$/);
   if(!m){ row('status','BCH mode takes a 64-hex txid (recent - within the global list window)','bad'); $('art').innerHTML=''; return flush(); }
   const txid=m[1].toLowerCase();
-  row('txid',txid.slice(0,12)+'�?�'+txid.slice(-8));
+  row('txid',txid.slice(0,12)+'…'+txid.slice(-8));
   let walk;
   try{ walk=await bchWalk(txid,25); }
   catch(e){ row('status','source unreachable ('+e.message+') - nothing cached, nothing faked','bad'); $('art').innerHTML=''; return flush(); }
@@ -869,23 +873,23 @@ async function viewBCH(){
   const txrow=walk.rows.find(t=>t.hash===txid);
   row('block',B+' - declared '+blk.transaction_count+' txs, collected '+walk.rows.length,walk.rows.length>=blk.transaction_count?'ok':'warn');
   if(walk.rows.length<blk.transaction_count){ row('completeness','could not collect the full block (window or pacing limit) - verification on partial data; REFUSED','bad'); $('art').innerHTML=''; return flush(); }
-  row('size / fee',txrow.size.toLocaleString()+' B A� '+txrow.fee.toLocaleString()+' sats'+(txrow.is_coinbase?' A� COINBASE':''));
-  row('block hash',blk.hash.slice(0,12)+'�?�');
+  row('size / fee',txrow.size.toLocaleString()+' B · '+txrow.fee.toLocaleString()+' sats'+(txrow.is_coinbase?' · COINBASE':''));
+  row('block hash',blk.hash.slice(0,12)+'…');
   // order hypothesis: global id ascending = merkle order. PROVEN per query:
   const sorted=walk.rows.slice().sort((a,b)=>a.id-b.id);
   const computed=bytesToHex(await bchRootOf(sorted.map(t=>t.hash)));
   const declared=String(blk.merkle_root).toLowerCase();
   const rootOk=computed===declared;
   row('root cross-check', rootOk
-    ? 'client-computed merkle root over '+sorted.length+' txids == declared root '+declared.slice(0,12)+'�?� - list complete, order proven'
-    : 'computed root '+computed.slice(0,12)+'�?� != declared - the collected group is incomplete or mis-ordered; verification REFUSED',
+    ? 'client-computed merkle root over '+sorted.length+' txids == declared root '+declared.slice(0,12)+'… - list complete, order proven'
+    : 'computed root '+computed.slice(0,12)+'… != declared - the collected group is incomplete or mis-ordered; verification REFUSED',
     rootOk?'ok':'bad');
   if(!rootOk){ $('art').innerHTML=''; return flush(); }
   const pos=sorted.findIndex(t=>t.hash===txid);
   const proof=await bchBranchOf(sorted.map(t=>t.hash),pos);
   const ok=await bchVerifyMerkle(txid,proof,pos,declared);   // the same walk as Bitcoin mode
   row('inclusion proof', ok
-    ? 'VERIFIED locally - tx walks to merkle root '+declared.slice(0,12)+'�?� of block '+B+' ('+proof.length+' level(s), branch built client-side from txids, double-SHA-256 in this page)'
+    ? 'VERIFIED locally - tx walks to merkle root '+declared.slice(0,12)+'… of block '+B+' ('+proof.length+' level(s), branch built client-side from txids, double-SHA-256 in this page)'
     : 'FAILED - computed root does not match; do not trust this source for this tx',
     ok?'ok':'bad');
   // tamper control, run live in the page - the receipt that keeps proving itself
@@ -1213,7 +1217,7 @@ if(new URLSearchParams(location.search).has('selftest')){
 })();
 </script>
 <script src="./fleet.js"></script>
-<div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:.6rem;z-index:99999;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
-<script src="tour.js?v=7"></script>
+<div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(.6rem + 46px);z-index:9997;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
+<script src="../tour.js?v=8"></script>
 </body>
 </html>

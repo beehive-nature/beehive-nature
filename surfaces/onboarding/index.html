@@ -2,6 +2,9 @@
 <html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>BNR · Get started</title>
 <!--
@@ -267,7 +270,7 @@ const SCREENS = {
     <h2>Welcome back</h2>
     <p>Same identity, different ceremony — pick what happened:</p>
     <button class="card" onclick="APP.go('recover')"><span class="ic">📄</span><span class="body">
-      <span class="t">I lost my device — I have my 12 words</span>
+      <span class="t">I lost my device — I have my ${ENGINE?24:12} words</span>
       <span class="d">Rebuild your wallet from the written phrase. Your identity comes back with it.</span></span></button>
     <button class="card free" onclick="APP.go('addDevice')"><span class="ic">➕</span><span class="body">
       <span class="t">Add THIS device to my existing wallet</span>
@@ -280,7 +283,7 @@ const SCREENS = {
 
   recover(){ return stageWrap(1, `
     <span class="badge desig">Recover</span>
-    <h2 style="margin-top:var(--s3)">Enter your 12 words</h2>
+    <h2 style="margin-top:var(--s3)">Enter your ${ENGINE?24:12} words</h2>
     <p>Type them in order. They never leave this device.</p>
     <textarea class="wordin" id="rec-words" rows="3" autocomplete="off" autocapitalize="none"
       onpaste="opsecPasteNote('rec-opsec')" placeholder="word1 word2 word3 …"></textarea>
@@ -470,7 +473,7 @@ const SCREENS = {
     return stageWrap(3, `
       ${previewBanner}
       <h2>Write down your recovery phrase</h2>
-      <p>These 12 words can rebuild your wallet on any device if you lose this one.
+      <p>These ${words.length} words can rebuild your wallet on any device if you lose this one.
          Write them on paper — this is the one backup that needs nothing you have to buy.</p>
       <div class="words">${grid}</div>
       <details class="panel" style="cursor:pointer">
@@ -968,7 +971,7 @@ function render(screen){
 APP.current='welcome';
 render('welcome');
 </script>
-<div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:.6rem;z-index:99999;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
-<script src="tour.js?v=5"></script>
+<div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(.6rem + 46px);z-index:9997;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
+<script src="../tour.js?v=8"></script>
 </body>
 </html>

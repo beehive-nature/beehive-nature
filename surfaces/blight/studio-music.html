@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>bLighT Studio — music creation MVP (interoperable with the ERC-20i family)</title>
 <style>
 :root{--bg:#0A0A0F;--crt:#00FF41;--cyan:#00E5FF;--pink:#FF3DB0;--dim:#5a6478}
@@ -16,7 +19,7 @@ input,select,button{font:inherit;background:#0d0d15;color:var(--crt);border:1px 
 button{cursor:pointer;border-color:var(--crt)} button:hover{background:var(--crt);color:#000}
 button.stop{border-color:var(--pink);color:var(--pink)} button.stop:hover{background:var(--pink);color:#000}
 button.ghost{border-color:#262638;color:var(--dim)} button.ghost:hover{background:#1a1a2a;color:var(--cyan)}
-#grid{display:grid;grid-template-columns:repeat(16,1fr);gap:3px;margin:12px 0}
+#grid{display:grid;grid-template-columns:repeat(18,1fr);gap:3px;margin:12px 0}
 .cell{aspect-ratio:1;border:1px solid #262638;background:#0d0d15;border-radius:3px;cursor:pointer;min-width:0}
 .cell.on{background:var(--crt);box-shadow:0 0 8px rgba(0,255,65,.5)}
 .cell.now{outline:2px solid var(--cyan)}
@@ -191,7 +194,7 @@ if(q.get('score')){ try{
 }catch(e){ $('status').textContent='link score unreadable'; } }
 buildGrid();
 </script>
-</div><div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:.6rem;z-index:99999;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
-<script src="tour.js?v=7"></script>
+</div><div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(.6rem + 46px);z-index:9997;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
+<script src="../tour.js?v=8"></script>
 </body>
 </html>

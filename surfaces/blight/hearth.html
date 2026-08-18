@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="color-scheme" content="dark">
 <title>the hearth — co-create with the hive's AI</title>
 <style>
@@ -13,7 +16,7 @@ header{text-align:center;margin-bottom:20px}
 h1{font-size:clamp(18px,4vw,26px);color:var(--gold);font-weight:400;letter-spacing:.05em;text-shadow:0 0 14px rgba(255,180,80,.25)}
 header p{color:var(--dim);font-size:11px;margin-top:6px}
 #chat{max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:10px;min-height:50vh}
-.msg{border-radius:12px;padding:12px 16px;font-size:12.5px;line-height:1.8;max-width:88%}
+.msg{border-radius:12px;padding:12px 16px;font-size:12.5px;line-height:1.8;max-width:88%;overflow-wrap:anywhere;word-break:break-word}
 .msg.user{align-self:flex-end;background:#123024;color:#c9e8cf;border:1px solid #1d4a2e}
 .msg.ai{align-self:flex-start;background:#1a1a2a;color:#d8cff0;border:1px solid #2a2a4d}
 .msg.ai .art{margin-top:10px;background:#000;padding:10px;border-radius:8px;max-width:280px}
@@ -85,6 +88,7 @@ const SCALES={'harmonic major':[0,2,4,5,7,8,11],'major':[0,2,4,5,7,9,11],'minor'
  'blues':[0,3,5,6,7,10],'pentatonic':[0,3,5,7,10],'dorian':[0,2,3,5,7,9,10]};
 function route(q){
   q=q.toLowerCase();
+  if(/deal|offer|buy|trade|accord/.test(q)) return {kind:'deal',say:'here is your offer note, stamped with your two addresses when bound — copy it to any channel:'};
   if(/mushroom|fungi|grow/.test(q)) return {kind:'art',col:COLS.fungi,
     seed:2100000+Math.floor(Math.random()*100000),say:'grown from the chain — a crown-grade roll, fresh from the generator:'};
   if(/crown|vault|top level/.test(q)) return {kind:'art',col:COLS.fungi,
@@ -97,7 +101,6 @@ function route(q){
     return {kind:'song',scale:scale,seed:1000+Math.floor(Math.random()*99999),
       say:'composed for you \u2014 press the link, it plays in the organ:'};
   }
-  if(/deal|offer|buy|trade|accord/.test(q)) return {kind:'deal',say:'here is your offer note, stamped with your two addresses when bound \u2014 copy it to any channel:'};
   if(/help|what can/.test(q)) return {kind:'help',say:'i grow art, compose songs, show crowns, and draft deals. every answer is a link you can keep. try: grow me a mushroom \u00B7 play me a blues song \u00B7 show me the crown \u00B7 help me make a deal.'};
   return {kind:'help',say:'i didn\u2019t catch that \u2014 but i can: grow art \u00B7 play songs \u00B7 show crowns \u00B7 draft deals. every answer carries an address.'};
 }
@@ -164,7 +167,7 @@ document.getElementById('send').onclick=ask;
 document.getElementById('q').addEventListener('keydown',function(e){ if(e.key==='Enter') ask(); });
 document.querySelectorAll('#seeds button').forEach(function(b){ b.onclick=function(){ document.getElementById('q').value=b.dataset.q; ask(); }; });
 </script>
-<div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:.6rem;z-index:99999;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
-<script src="../tour.js?v=7"></script>
+<div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(.6rem + 46px);z-index:9997;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
+<script src="../tour.js?v=8"></script>
 </body>
 </html>

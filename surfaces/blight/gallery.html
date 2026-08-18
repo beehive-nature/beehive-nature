@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>the Modern Inscription Art Gallery — a walking tour of on-chain art</title>
 <style>
 :root{--bg:#050508;--dim:#5a6478;--edge:#1a1a2a}
@@ -114,14 +117,15 @@ async function loadGarden(addr){
     const seed=Number(BigInt(bal[0])/1000000000n);
     const calls=[{to:col.c,data:col.sel+W(seed)+W(0)+W(0)}];
     if(col.sel==='a62f5b1b') calls[0]={to:col.c,data:col.sel+W(seed)+W(0)+AD(addr)};
-    const [mc]=await (async()=>{ const r=await rpc(['0x9c216508'+AD(addr)].map(d=>({to:col.c,data:d}))); return r; })();
+    const mcRes=await rpc(['0x9c216508'+AD(addr)].map(d=>({to:col.c,data:d})));
+    const mc=mcRes&&mcRes[0];
     const n=mc&&mc!=='0x'?Number(BigInt(mc)):0;
     for(let i=0;i<Math.min(n,8);i++) calls.push({to:col.c,data:'0x0fd9587e'+AD(addr)+W(BigInt(i))});
     const res=await rpc(calls);
     if(res&&res[0]&&res[0]!=='0x'&&res[0].length>200){
       try{ found.push({svg:decodeString(res[0]),sym:col.sym,seed,lvln:lvlNum(seed,col),pipmax:col.lv?col.lv.length-1-col.base:0}); }catch(e){}
     }
-    for(let i=1;i<res.length;i++){
+    for(let i=1;res&&i<res.length;i++){
       const rec=res[i];
       if(!rec||rec==='0x') continue;
       const w=(rec.replace(/^0x/,'').match(/.{64}/g)||[]).slice(0,3);
@@ -162,7 +166,13 @@ function walk(){ if(!walking||!pieces.length) return; show(idx+1); }
 async function start(addr,wing){
   $('plaque').innerHTML='<div class="title" style="color:var(--dim)">walking the gallery…</div><div class="sub">reading the chain</div>';
   $('frame').innerHTML='';
-  pieces=await loadGarden(addr);
+  let got;
+  try{ got=await loadGarden(addr); }
+  catch(e){
+    $('plaque').innerHTML='<div class="title" style="color:#e8b84a">the chain didn&#39;t answer — try again in a moment</div><div class="sub">every read is live; nothing here is faked</div>';
+    return;
+  }
+  pieces=got;
   $('wing').textContent=wing;
   if(!pieces.length){
     $('plaque').innerHTML='<div class="title" style="color:#e8b84a">this garden is quiet — no live inscriptions found</div><div class="sub">try bloverai.base.eth, or any 0x… address</div>';
@@ -269,5 +279,6 @@ document.getElementById('bWings').onclick=function(){ var w=_w('wings');
 document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeWings(); });
 
 </script>
+<script src="../tour.js?v=8"></script>
 </body>
 </html>

@@ -1,10 +1,13 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>BNRi — the fleet's own art</title>
-<!-- Zero dependencies. The seven pieces are embedded, so this file IS the collection:
-     it renders BNRi's hexrect art with nothing but itself. Same law as every surface —
-     survives on a USB stick. The decoder reads BOTH wire formats, v1 and v2, detected
-     by the version byte, never assumed. amber frequency (reader-adjacent, art-docked). -->
+<!-- The renderer is self-contained; the ART is fetched from bnri-art/*.hex beside this
+     file — the collection's real artifacts, not inlined blobs. Copy the directory, not
+     just the file, to carry it on a USB stick. The decoder reads BOTH wire formats,
+     v1 and v2, detected by the version byte, never assumed. amber frequency. -->
 <style>
   :root{--bg:#0a0a0f;--panel:#12121a;--line:#242433;--ink:#e8e8f0;--dim:#7e8c85;
         --accent:#eb8f16;--accent2:#dd5ce5;--ok:#9aff5b;--bad:#ff5b6e}
@@ -70,7 +73,11 @@ const g=document.getElementById('g');
 // Art loads from separate .hex files — the collection's real artifacts, not inlined blobs.
 // Same law: each .hex survives on its own; the page is the renderer, the files are the art.
 (async()=>{
-const manifest=await fetch('bnri-art/manifest.json').then(r=>r.json());
+let manifest;
+try{ manifest=await fetch('bnri-art/manifest.json').then(r=>r.json()); }
+catch(e){ const fig=document.createElement('figure');
+  fig.innerHTML='<div class="stage"><span style="color:var(--bad);font-size:11px">manifest unreachable — the collection could not be listed</span></div>';
+  g.appendChild(fig); return; }
 for(const m of manifest){
   let hex; try{ hex=(await fetch(m.file).then(r=>r.text())).trim(); }
   catch(e){ const fig=document.createElement('figure');
@@ -89,6 +96,6 @@ for(const m of manifest){
 })();
 </script>
 <script src="./fleet.js"></script>
-<div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:.6rem;z-index:99999;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
-<script src="tour.js?v=7"></script>
+<div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(.6rem + 46px);z-index:9997;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
+<script src="../tour.js?v=8"></script>
 </body></html>
