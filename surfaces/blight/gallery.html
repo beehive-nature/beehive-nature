@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>the Modern Inscription Art Gallery — a walking tour of on-chain art</title>
+<style>
+:root{--bg:#050508;--dim:#5a6478;--edge:#1a1a2a}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:#cfe8d6;font:13px/1.5 'IBM Plex Mono',monospace;overflow:hidden}
+#stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:4vh 4vw 12vh}
+#frame{max-width:min(62vh,86vw);max-height:66vh;transition:opacity .6s ease,transform .6s ease}
+#frame.fade{opacity:0;transform:scale(.985)}
+#frame svg{width:100%;height:auto;display:block;filter:drop-shadow(0 0 42px rgba(0,229,255,.14))}
+#plaque{position:fixed;left:0;right:0;bottom:58px;text-align:center;transition:opacity .5s ease;padding:0 16px}
+#plaque .title{font-size:15px;color:#00E5FF;letter-spacing:.06em}
+#plaque .sub{font-size:11px;color:var(--dim);margin-top:4px}
+#plaque .sub b{color:#9FFF3D;font-weight:400}
+#wing{position:fixed;top:18px;left:0;right:0;text-align:center;font-size:11px;color:var(--dim);letter-spacing:.2em;text-transform:uppercase}
+#controls{position:fixed;top:14px;right:16px;display:flex;gap:6px;z-index:30}
+#controls button{background:#0d0d15cc;color:var(--dim);border:1px solid var(--edge);border-radius:5px;padding:5px 10px;cursor:pointer;font:11px ui-monospace,monospace}
+#controls button:hover{color:#00E5FF;border-color:#00E5FF}
+#controls button.on{color:#00FF41;border-color:#1d3a26}
+#ask{position:fixed;bottom:56px;left:16px;right:16px;display:none;justify-content:center;z-index:40}
+#ask div{display:flex;gap:6px;background:#0d0d15ee;border:1px solid var(--edge);border-radius:8px;padding:8px}
+#ask input{background:#050508;color:#00E5FF;border:1px solid var(--edge);border-radius:5px;padding:7px 10px;font:12px ui-monospace,monospace;width:min(340px,60vw)}
+#ask button{background:#0d0d15;color:#00FF41;border:1px solid var(--edge);border-radius:5px;padding:7px 12px;cursor:pointer;font:12px ui-monospace,monospace}
+#dots{position:fixed;bottom:104px;left:0;right:0;display:flex;justify-content:center;gap:5px;flex-wrap:wrap;padding:0 10px}
+#dots i{width:5px;height:5px;border-radius:50%;background:#262638;cursor:pointer}
+#dots i.here{background:#00E5FF;box-shadow:0 0 6px rgba(0,229,255,.7)}
+#market{position:fixed;bottom:56px;right:16px;font-size:10px;color:var(--dim);z-index:30;text-decoration:none;border:1px solid var(--edge);border-radius:99px;padding:4px 10px;background:#0d0d15cc}
+#market:hover{color:#9FFF3D;border-color:#9FFF3D}
+</style>
+</head>
+<body>
+<div id="wing">the founder's garden · base</div>
+<div id="stage"><div id="frame"></div></div>
+<div id="dots"></div>
+<div id="plaque"><div class="title">…</div><div class="sub">…</div></div>
+<div id="controls">
+  <button id="bPlay" class="on" title="the tour walks itself">▶ tour</button>
+  <button id="bAsk" title="visit any wallet's collection">any wallet</button>
+</div>
+<div id="ask"><div><input id="addr" placeholder="0x… or name.base.eth"><button id="go">visit</button></div></div>
+<a id="market" href="#" title="the DeMarketPlace docks here">⧉ market — docking soon</a>
+<script>
+/* The GALLERY: art first, one piece at a time, a walking tour. The tech lives in the
+   explorer (its own surface, its own frequency); here only the piece, its name, its
+   seed, its collection. Default wing: the founder's garden — bloverai.base.eth.
+   All seven+ EVM ERC-20i families, fetched live, keyless, no keys no logins. */
+const W=v=>BigInt(v).toString(16).padStart(64,'0');
+const AD=a=>'0'.repeat(24)+a.replace(/^0x/,'').toLowerCase();
+const HOSTS=['https://base-rpc.publicnode.com','https://base.drpc.org'];
+const COLS=[
+ {sym:'PEPI v2',c:'0x28a5e71BFc02723eAC17E39c84c5190415C0de9F',sel:'a435130b',lv:[0,11,22,33,44,56],base:1},
+ {sym:'PEPI v1',c:'0x19706c142d33376240e418d6385f05691a5fa8e2',sel:'a435130b',lv:[0,11,22,33,44,56],base:1},
+ {sym:'FUNGI',c:'0x7d9CE55D54FF3FEddb611fC63fF63ec01F26D15F',sel:'422b9e23',lv:[0,21000,525000,1050000,1575000,2100000],base:0},
+ {sym:'$FROGGI',c:'0x88A78C5035BdC8C9A8bb5c029e6cfCDD14B822FE',sel:'422b9e23',lv:[0,1000,3000,10000,30000,60000,120000],base:0},
+ {sym:'JELLI',c:'0xA1b9d812926a529D8B002E69FCd070c8275eC73c',sel:'422b9e23',lv:[0,1000,21000,105000,420000,1050000],base:0},
+ {sym:'JEDI',c:'0xA058c6f2A56BaAFD5dE4BCAD8f2Cb26F6A32b7D1',sel:'422b9e23',lv:[0,10500,105000,1050000],base:0},
+ {sym:'TRUFFI',c:'0x2496a9AF81A87eD0b17F6edEaf4Ac57671d24f38',sel:'a62f5b1b',lv:null,base:0},
+ {sym:'MiDi',c:'0x569e1A337b095B1A6c8F206158072cEDb6325b56',sel:'422b9e23',lv:null,base:0},
+];
+function decodeString(hex){
+  const h=hex.replace(/^0x/,'');
+  const off=parseInt(h.slice(0,64),16);
+  if(!(off===0x20)) throw 0;
+  const len=parseInt(h.slice(off*2,off*2+64),16);
+  if(!(len>=0&&len<=16384)) throw 0;
+  let out='';
+  for(let i=0;i<len;i++){
+    const b=parseInt(h.slice((off+32+i)*2,(off+32+i)*2+2),16);
+    if(Number.isNaN(b)) throw 0;
+    out+=String.fromCharCode(b);
+  }
+  return out;
+}
+async function rpc(calls){
+  for(const h of HOSTS){
+    const ctl=new AbortController(); const kill=setTimeout(()=>ctl.abort(),8000);
+    try{
+      const r=await fetch(h,{method:'POST',headers:{'Content-Type':'application/json'},signal:ctl.signal,
+        body:JSON.stringify(calls.map((c,i)=>({jsonrpc:'2.0',id:i,method:'eth_call',params:[{to:c.to,data:c.data},'latest']})))});
+      const j=await r.json(); clearTimeout(kill);
+      if(Array.isArray(j)) return j.map(x=>x.result??null);
+    }catch(e){ clearTimeout(kill); }
+  }
+  return null;
+}
+async function resolveName(v){
+  if(/^0x[0-9a-fA-F]{40}$/.test(v)) return v.toLowerCase();
+  try{
+    const j=await (await fetch('https://api.base.domains/v1/'+encodeURIComponent(v),{headers:{'User-Agent':'gallery/1.0'}})).json();
+    return (j&&j.address)?j.address.toLowerCase():null;
+  }catch(e){ return null; }
+}
+let pieces=[],idx=0,walking=true,timer=null;
+const lvlName=(s,col)=>{ if(!col.lv) return ''; const L=col.base; let lv=L.base??0;
+  let l=col.base; for(let i=1;i<col.lv.length;i++) if(s>=col.lv[i]) l++;
+  return 'level '+(l-col.base); };
+async function loadGarden(addr){
+  const found=[];
+  for(const col of COLS){
+    const bal=await rpc([{to:col.c,data:'0x70a08231'+AD(addr)}]);
+    if(!bal||!bal[0]||bal[0]==='0x'||BigInt(bal[0])<=0n) continue;
+    // live seed = floor(balance); frozen records via holder index (up to 8)
+    const seed=Number(BigInt(bal[0])/1000000000n);
+    const calls=[{to:col.c,data:col.sel+W(seed)+W(0)+W(0)}];
+    if(col.sel==='a62f5b1b') calls[0]={to:col.c,data:col.sel+W(seed)+W(0)+AD(addr)};
+    const [mc]=await (async()=>{ const r=await rpc(['0x9c216508'+AD(addr)].map(d=>({to:col.c,data:d}))); return r; })();
+    const n=mc&&mc!=='0x'?Number(BigInt(mc)):0;
+    for(let i=0;i<Math.min(n,8);i++) calls.push({to:col.c,data:'0x0fd9587e'+AD(addr)+W(BigInt(i))});
+    const res=await rpc(calls);
+    if(res&&res[0]&&res[0]!=='0x'&&res[0].length>200){
+      try{ found.push({svg:decodeString(res[0]),sym:col.sym,seed,lvl:lvlName(seed,col)}); }catch(e){}
+    }
+    for(let i=1;i<res.length;i++){
+      const rec=res[i];
+      if(!rec||rec==='0x') continue;
+      const w=(rec.replace(/^0x/,'').match(/.{64}/g)||[]).slice(0,3);
+      if(w.length<2) continue;
+      const s=BigInt('0x'+w[0]);
+      const svgRes=await rpc([{to:col.c,data:col.sel+w.slice(0,col.sel==='a62f5b1b'?2:3).join('')+(col.sel==='a62f5b1b'?AD(addr):'')}]);
+      if(svgRes&&svgRes[0]&&svgRes[0].length>200){
+        try{ found.push({svg:decodeString(svgRes[0]),sym:col.sym,seed:Number(s),lvl:lvlName(Number(s),col)}); }catch(e){}
+      }
+    }
+  }
+  return found;
+}
+function show(i){
+  idx=(i+pieces.length)%pieces.length;
+  const f=$('frame');
+  f.classList.add('fade');
+  setTimeout(()=>{
+    const p=pieces[idx];
+    f.innerHTML=p.svg;
+    $('plaque').innerHTML='<div class="title">'+p.sym+' · seed '+p.seed.toLocaleString()+'</div>'+
+      '<div class="sub">'+(p.lvl?p.lvl+' · ':'')+'rendered from chain state · <b>'+String(idx+1).padStart(2,'0')+' / '+pieces.length+'</b></div>';
+    f.classList.remove('fade');
+    [...$('dots').children].forEach((d,k)=>d.classList.toggle('here',k===idx));
+  },420);
+}
+function walk(){ if(!walking||!pieces.length) return; show(idx+1); }
+async function start(addr,wing){
+  $('plaque').innerHTML='<div class="title" style="color:var(--dim)">walking the gallery…</div><div class="sub">reading the chain</div>';
+  $('frame').innerHTML='';
+  pieces=await loadGarden(addr);
+  $('wing').textContent=wing;
+  if(!pieces.length){
+    $('plaque').innerHTML='<div class="title" style="color:#e8b84a">this garden is quiet — no live inscriptions found</div><div class="sub">try bloverai.base.eth, or any 0x… address</div>';
+    return;
+  }
+  $('dots').innerHTML=pieces.map((_,k)=>'<i data-k="'+k+'"></i>').join('');
+  [...$('dots').children].forEach(d=>d.onclick=()=>show(+d.dataset.k));
+  show(0);
+  if(walking&&timer) clearInterval(timer);
+  timer=setInterval(walk,6000);
+}
+const $=id=>document.getElementById(id);
+$('bPlay').onclick=()=>{ walking=!walking; $('bPlay').textContent=walking?'▶ tour':'❚❚ paused'; $('bPlay').classList.toggle('on',walking); };
+$('bAsk').onclick=()=>{ const a=$('ask'); a.style.display=a.style.display==='flex'?'none':'flex'; $('addr').focus(); };
+$('go').onclick=async()=>{ const v=$('addr').value.trim(); if(!v) return;
+  const a=await resolveName(v);
+  if(!a){ $('addr').style.borderColor='#e8b84a'; return; }
+  $('addr').style.borderColor='';
+  start(a,(v||a.slice(0,10)+'…')+' · garden'); };
+$('addr').addEventListener('keydown',e=>{ if(e.key==='Enter') $('go').click(); });
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight') show(idx+1);
+  if(e.key==='ArrowLeft') show(idx-1);
+  if(e.key===' '){ e.preventDefault(); $('bPlay').click(); }
+});
+start('0xfbd201472d5a439f1f0e408eb5dfaf6ea3687876',"the founder's garden · base");
+</script>
+</body>
+</html>
