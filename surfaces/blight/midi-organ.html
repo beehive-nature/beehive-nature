@@ -90,15 +90,23 @@ async function read(){
   const to=DEPLOYS[+$('c').value][1], seed=Math.max(1,Math.floor(+$('s').value||1));
   let r=null;
   for(const h of HOSTS){
+    // universal timeout: AbortController + race — AbortSignal.timeout() is missing
+    // on some mobile browsers and the fetch then hangs forever (founder receipt:
+    // 'reading traits' stuck on his device). This works everywhere.
+    const ctl=new AbortController();
+    const kill=setTimeout(()=>ctl.abort(),8000);
     try{
       const res=await fetch(h,{method:'POST',headers:{'Content-Type':'application/json'},
-        signal:AbortSignal.timeout(8000),
+        signal:ctl.signal,
         body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_call',params:[{to,data:'0xc3f4552a'+W(seed)+W(0)},'latest']})});
       const j=await res.json();
+      clearTimeout(kill);
       if(j.result&&j.result!=='0x'){ r=j.result; break; }
       if(j.error) m.textContent='host said: '+String(j.error.message).slice(0,60)+' — trying next…';
-    }catch(e){ m.textContent='host unreachable ('+String(e.name||e.message).slice(0,24)+') — trying next…'; }
+    }catch(e){ clearTimeout(kill); m.textContent='host unreachable ('+String((e&&e.name)||e).slice(0,24)+') — trying next…'; }
   }
+  // watchdog: whatever happened above, never leave 'reading chain…' on screen
+  setTimeout(()=>{ if(m.textContent.indexOf('reading chain')>-1){ m.style.color='#e8b84a'; m.textContent='both hosts went quiet — press read again (this message replaces an older version that could hang forever)'; } },10000);
   if(!r){ m.style.color='#e8b84a'; m.textContent='getMeta unreachable right now — the hosts are moody; press read again.'; return; }
   try{ META=JSON.parse(dec(r)); }
   catch(e){ m.style.color='#ff5b6e'; m.textContent='traits returned but would not parse (seed '+seed+') — tell zCode'; return; }
