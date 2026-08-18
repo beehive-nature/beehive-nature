@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>the pulse — bX pointers live on the relay</title>
+<style>
+:root{--bg:#0d1410;--ink:#e2efdb;--cyan:#00E5FF;--violet:#c9a0ff;--dim:#8a9a8a;--line:#243026}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:36px 16px 90px}
+header{text-align:center;margin-bottom:18px}
+h1{font-size:clamp(17px,4vw,24px);color:var(--violet);font-weight:400;letter-spacing:.05em}
+header p{color:var(--dim);font-size:11px;margin-top:6px}
+#state{text-align:center;color:var(--gold);font-size:10.5px;min-height:18px;margin-bottom:14px}
+#feed{max-width:720px;margin:0 auto}
+.note{background:#111a14;border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:10px;font-size:11px;line-height:1.8}
+.note .t{color:var(--violet);font-size:10px}
+.note a{color:var(--cyan)}
+.note .from{color:var(--dim);font-size:10px;word-break:break-all}
+footer{max-width:720px;margin:20px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
+button{background:#26123a;color:#c9a0ff;border:1px solid var(--line);border-radius:8px;padding:9px 18px;cursor:pointer;font:12px 'IBM Plex Mono',monospace}
+button:hover{background:#c9a0ff;color:#000}
+#bar{text-align:center;margin-bottom:16px}
+</style>
+</head>
+<body>
+<header>
+  <h1>📡 the pulse</h1>
+  <p>bX pointers, live on the nostr relay · TASK 6 v1 — read + broadcast · E2E docks with the engine</p>
+</header>
+<div id="bar"><button id="listen">listen to the relay</button></div>
+<div id="state">idle — press listen; pointers only, never content</div>
+<div id="feed"><div class="note"><span class="t">about</span><br>this reads kind-1 events beginning with [bX — the pointer grammar from pointers.js. anyone broadcasting the grammar appears here, from any client, any relay. the DM payload law made visible.</div></div>
+<footer>relays: damos · nos.lol · nostr.band (rotation v1) · E2E NIP-44 docks with secp256k1 vendoring</footer>
+<script src="./pointers.js?v=1"></script>
+<script src="./relay.js?v=1"></script>
+<script>
+var feed=document.getElementById('feed');
+var state=document.getElementById('state');
+document.getElementById('listen').onclick=function(){
+  this.disabled=true; this.textContent='listening…';
+  RELAY.connect(null,function(s){ state.textContent=s; });
+};
+RELAY.on(function(n){
+  var d=document.createElement('div'); d.className='note';
+  var t=document.createElement('div'); t.className='t';
+  t.textContent=new Date(n.created_at*1000).toISOString().slice(0,19)+' UTC';
+  var c=document.createElement('div');
+  var parts=String(n.content).split(' — ');
+  var html=[];
+  parts.forEach(function(p){
+    if(/^https?:\/\//.test(p)) html.push('<a href="'+p+'" target="_blank" rel="noopener noreferrer">'+p.slice(0,60)+'…</a>');
+    else html.push(p.replace(/[<>]/g,''));
+  });
+  c.innerHTML=html.join(' — ');
+  var f=document.createElement('div'); f.className='from';
+  f.textContent='npub sig '+(n.id||'').slice(0,16)+'…';
+  d.appendChild(t); d.appendChild(c); d.appendChild(f);
+  feed.insertBefore(d,feed.children[1]||null);
+});
+</script>
+<div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:.6rem;z-index:99999;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
+<script src="../tour.js?v=5"></script>
+</body>
+</html>
