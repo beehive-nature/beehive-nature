@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>bLighT Studio — music creation MVP (interoperable with the ERC-20i family)</title>
+<style>
+:root{--bg:#0A0A0F;--crt:#00FF41;--cyan:#00E5FF;--pink:#FF3DB0;--dim:#5a6478}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:#cfe8d6;font:13px/1.6 'IBM Plex Mono',monospace;padding:24px 16px 64px;
+  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="97"><g fill="none" stroke="%231a1a2a"><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z"/><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z" transform="translate(28,48)"/></g></svg>')}
+.wrap{max-width:940px;margin:0 auto}
+h1{color:var(--cyan);font-size:20px;text-shadow:0 0 10px rgba(0,229,255,.4)}
+.sub{color:var(--dim);font-size:11.5px;margin:6px 0 16px;line-height:1.7}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+input,select,button{font:inherit;background:#0d0d15;color:var(--crt);border:1px solid #262638;padding:7px 10px;border-radius:4px}
+button{cursor:pointer;border-color:var(--crt)} button:hover{background:var(--crt);color:#000}
+button.stop{border-color:var(--pink);color:var(--pink)} button.stop:hover{background:var(--pink);color:#000}
+button.ghost{border-color:#262638;color:var(--dim)} button.ghost:hover{background:#1a1a2a;color:var(--cyan)}
+#grid{display:grid;grid-template-columns:repeat(16,1fr);gap:3px;margin:12px 0}
+.cell{aspect-ratio:1;border:1px solid #262638;background:#0d0d15;border-radius:3px;cursor:pointer;min-width:0}
+.cell.on{background:var(--crt);box-shadow:0 0 8px rgba(0,255,65,.5)}
+.cell.now{outline:2px solid var(--cyan)}
+.deg{grid-column:span 2;font-size:9px;color:var(--dim);align-self:center;text-align:left}
+#status{font-size:11.5px;min-height:20px;color:#7e8c85}
+.foot{margin-top:18px;color:var(--dim);font-size:10.5px;line-height:1.7}
+a{color:var(--cyan)}
+</style>
+</head>
+<body><div class="wrap">
+<h1>bLighT Studio <span style="color:var(--dim)">// music creation MVP</span></h1>
+<div class="sub">A 16-step sequencer that speaks the ERC-20i family's language: import any piece's on-chain
+scale, compose, loop live, export the score as an inscription-ready payload. Console tiers (Beginner/
+Experienced/Pro, gated by your holdings) come with the booth — this MVP ships everything open with that noted.</div>
+
+<div class="row">
+  <select id="scale"></select>
+  <select id="root"></select>
+  <label style="color:var(--dim);font-size:11px">BPM <input id="bpm" type="number" value="132" min="60" max="200" style="width:70px"></label>
+  <select id="wave"><option>triangle</option><option>square</option><option>sawtooth</option><option>sine</option></select>
+  <button id="play">▶ play loop</button>
+  <button id="stop" class="stop">■</button>
+  <button id="clear" class="ghost">clear</button>
+  <button id="dice" class="ghost">🎲 randomize</button>
+  <button id="export" class="ghost">⬇ export score (JSON)</button>
+  <button id="link" class="ghost">🔗 copy song-link</button>
+</div>
+<div class="row">
+  <input id="impAddr" placeholder="import: any family contract 0x…" style="flex:1;min-width:240px;color:var(--cyan)">
+  <input id="impSeed" type="number" value="1000" min="1" style="width:110px;color:var(--cyan)" placeholder="seed">
+  <button id="import" class="ghost">⬆ pull its scale from chain</button>
+</div>
+<div id="status">ready — click cells to compose. rows are scale degrees (low → high).</div>
+<div id="grid"></div>
+<div class="foot">Interop: <b>import</b> reads getMeta from any ERC-20i family contract (MiDi, FUNGI, FROGGI, JELLI…) and
+adopts its scale + colors. <b>Export</b> writes the score as the JSON payload the encoder will inscribe:
+{scale, root, bpm, wave, steps[]}. Same score, same song, forever — the seed doctrine, now for your own music.
+<span id="impnote"></span></div>
+<script>
+const SCALES={'major':[0,2,4,5,7,9,11],'harmonic major':[0,2,4,5,7,8,11],'minor':[0,2,3,5,7,8,10],
+ 'harmonic minor':[0,2,3,5,7,8,11],'melodic minor':[0,2,3,5,7,9,11],'pentatonic':[0,3,5,7,10],
+ 'blues':[0,3,5,6,7,10],'dorian':[0,2,3,5,7,9,10],'phrygian':[0,1,3,5,7,8,10],'lydian':[0,2,4,6,7,9,11],
+ 'mixolydian':[0,2,4,5,7,9,10],'locrian':[0,1,3,5,6,8,10],'chromatic':[0,1,2,3,4,5,6,7,8,9,10,11]};
+const NOTES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const KNOWN={'0xf7cf2df510bc0ec400232874f2fb4f2cdf9352d6':'MiDi #1','0x569e1a337b095b1a6c8f206158072cedb6325b56':'MiDi #2',
+ '0x2d448bc9a98d28cb094722c2b8208916a248d5ac':'MiDi #3','0x7d9ce55d54ff3feddb611fc63ff63ec01f26d15f':'FUNGI',
+ '0x88a78c5035bdc8c9a8bb5c029e6cfcdd14b822fe':'FROGGI','0xa1b9d812926a529d8b002e69fcd070c8275ec73c':'JELLI',
+ '0xa058c6f2a56baafd5de4bcad8f2cb26f6a32b7d1':'JEDI'};
+const HOSTS=['https://base-rpc.publicnode.com','https://base.drpc.org'];
+const W=v=>BigInt(v).toString(16).padStart(64,'0');
+function dec(s){
+  const h=s.replace(/^0x/,'');
+  const off=parseInt(h.slice(0,64),16);
+  if(!(off===0x20)) throw new Error('offset '+off);
+  const len=parseInt(h.slice(off*2,off*2+64),16);
+  if(!(len>=0&&len<=8192)) throw new Error('length '+len);
+  let out='';
+  for(let i=0;i<len;i++){
+    const b=parseInt(h.slice((off+32+i)*2,(off+32+i)*2+2),16);
+    if(Number.isNaN(b)) throw new Error('truncated');
+    out+=String.fromCharCode(b);
+  }
+  try{ return decodeURIComponent(escape(out)); }catch(e){ return out; }
+}
+const $=id=>document.getElementById(id);
+const DEGREES=8, STEPS=16;
+let pattern=Array.from({length:DEGREES},()=>Array(STEPS).fill(false));
+let ac=null, timer=null, playing=false, imported={};
+$('scale').innerHTML=Object.keys(SCALES).map(s=>'<option'+(s==='harmonic major'?' selected':'')+'>'+s+'</option>').join('');
+$('root').innerHTML=NOTES.map((n,i)=>'<option value="'+i+'"'+(i===9?' selected':'')+'>'+n+'</option>').join('');
+function buildGrid(){
+  const g=$('grid'); g.innerHTML='';
+  for(let d=DEGREES-1;d>=0;d--){
+    const lab=document.createElement('div'); lab.className='deg'; lab.textContent='deg '+(d+1); g.appendChild(lab);
+    for(let s=0;s<STEPS;s++){
+      const c=document.createElement('div'); c.className='cell'+(pattern[d][s]?' on':'');
+      c.dataset.d=d; c.dataset.s=s;
+      if(imported.colors){ c.style.borderColor=(d%2?imported.colors[0]:imported.colors[1])+'55'; }
+      c.onclick=()=>{ pattern[d][s]=!pattern[d][s]; c.classList.toggle('on',pattern[d][s]); };
+      g.appendChild(c);
+    }
+  }
+}
+const freq=(semi)=>440*Math.pow(2,(semi-69)/12);
+function step(){
+  const iv=SCALES[$('scale').value];
+  const root=48+(+$('root').value);
+  const stepIdx=+(timer?.dataset?.i||0);
+  document.querySelectorAll('.cell.now').forEach(e=>e.classList.remove('now'));
+  for(let d=0;d<DEGREES;d++){
+    const cell=document.querySelector('.cell[data-d="'+d+'"][data-s="'+stepIdx+'"]');
+    if(cell) cell.classList.add('now');
+    if(pattern[d][stepIdx]){
+      const semi=root+iv[d%iv.length]+12*Math.floor(d/iv.length);
+      const o=ac.createOscillator(), g=ac.createGain();
+      o.type=$('wave').value; o.frequency.value=freq(semi);
+      const T=ac.currentTime;
+      g.gain.setValueAtTime(0.0001,T);
+      g.gain.exponentialRampToValueAtTime(0.18,T+0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001,T+60/ +$('bpm').value/4*0.9);
+      o.connect(g).connect(ac.destination); o.start(T); o.stop(T+60/ +$('bpm').value/4);
+    }
+  }
+  timer.dataset.i=(stepIdx+1)%STEPS;
+}
+function play(){
+  if(playing) return;
+  ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+  if(ac.state==='suspended') ac.resume();
+  playing=true;
+  timer=document.createElement('div'); timer.dataset.i=0; document.body.appendChild(timer);
+  const iv=()=>{ if(!playing) return; step(); setTimeout(iv,60000/ +$('bpm').value/4); };
+  iv();
+}
+function stop(){ playing=false; if(timer) timer.remove(); document.querySelectorAll('.cell.now').forEach(e=>e.classList.remove('now')); }
+$('play').onclick=play; $('stop').onclick=stop;
+$('clear').onclick=()=>{ pattern=Array.from({length:DEGREES},()=>Array(STEPS).fill(false)); buildGrid(); };
+$('dice').onclick=()=>{
+  pattern=Array.from({length:DEGREES},()=>Array(STEPS).fill(false));
+  for(let s=0;s<STEPS;s++){ const d=Math.floor(Math.random()*DEGREES); if(Math.random()<0.45) pattern[d][s]=true; }
+  $('scale').selectedIndex=Math.floor(Math.random()*Object.keys(SCALES).length);
+  $('root').value=Math.floor(Math.random()*12);
+  buildGrid(); $('status').textContent='rolled a fresh song — press play';
+};
+function score(){ return {v:1,scale:$('scale').value,root:NOTES[+$('root').value],bpm:+$('bpm').value,
+  wave:$('wave').value,steps:pattern.map(r=>r.map(c=>c?1:0).join('')).join('|'),imported:imported.meta||null}; }
+$('export').onclick=()=>{
+  const b=new Blob([JSON.stringify(score(),null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(b);
+  a.download='blight-score-'+Date.now()+'.json'; a.click();
+  $('status').textContent='score exported — this JSON is the inscription payload';
+};
+$('link').onclick=()=>{
+  const b=btoa(JSON.stringify(score()));
+  const u=location.origin+location.pathname+'?score='+encodeURIComponent(b.slice(0,1800));
+  navigator.clipboard.writeText(u).then(()=>$('status').textContent='song-link copied');
+};
+$('import').onclick=async()=>{
+  const a=$('impAddr').value.trim().toLowerCase(), seed=Math.max(1,Math.floor(+$('impSeed').value||1));
+  const st=$('status');
+  if(!/^0x[0-9a-f]{40}$/.test(a)){ st.textContent='paste a full 0x… contract address'; return; }
+  st.textContent='reading chain…';
+  for(const h of HOSTS){
+    const ctl=new AbortController(); const kill=setTimeout(()=>ctl.abort(),8000);
+    try{
+      const r=await fetch(h,{method:'POST',headers:{'Content-Type':'application/json'},signal:ctl.signal,
+        body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_call',params:[{to:a,data:'0xc3f4552a'+W(seed)+W(0)},'latest']})});
+      const j=await r.json(); clearTimeout(kill);
+      if(j.result&&j.result!=='0x'){
+        const m=JSON.parse(dec(j.result));
+        const sc=String(m.scale||'').toLowerCase();
+        if(SCALES[sc]) $('scale').value=sc;
+        imported={meta:m,colors:[m.barColorTop||'#13451D',m.barColorBottom||'#2e7d32']};
+        KNOWN[a]&&($('impnote').textContent=' imported from '+KNOWN[a]+' ');
+        st.textContent='imported '+(KNOWN[a]||a.slice(0,10)+'…')+' seed '+seed+': scale "'+(m.scale||'?')+'" — grid retinted with its bar colors';
+        buildGrid(); return;
+      }
+      if(j.error) st.textContent='host: '+String(j.error.message).slice(0,50)+' — trying next';
+    }catch(e){ clearTimeout(kill); st.textContent='unreachable — trying next host'; }
+  }
+  st.style.color='#e8b84a'; st.textContent='import failed — that contract may not speak getMeta (TRUFFI and PEPI keep traits in their SVGs)';
+};
+const q=new URLSearchParams(location.search);
+if(q.get('score')){ try{
+  const s=JSON.parse(atob(q.get('score')));
+  if(s.scale&&SCALES[s.scale]) $('scale').value=s.scale;
+  if(s.root) $('root').value=NOTES.indexOf(s.root);
+  if(s.bpm) $('bpm').value=s.bpm;
+  if(s.wave) $('wave').value=s.wave;
+  if(s.steps) s.steps.split('|').forEach((row,d)=>{ if(pattern[d]) pattern[d]=[...row].map(c=>c==='1'); });
+  $('status').textContent='song-link loaded — press play';
+}catch(e){ $('status').textContent='link score unreadable'; } }
+buildGrid();
+</script>
+</div><div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:.6rem;z-index:99999;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
+<script src="../tour.js"></script>
+</body>
+</html>
