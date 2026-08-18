@@ -2171,15 +2171,15 @@ var BDIDKEY = (() => {
   var _2n3 = /* @__PURE__ */ BigInt(2);
   var _5n2 = /* @__PURE__ */ BigInt(5);
   var _8n3 = /* @__PURE__ */ BigInt(8);
-  var ed25519_CURVE_p = /* @__PURE__ */ BigInt("0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffed");
+  var ed25519_CURVE_p = /* @__PURE__ */ BigInt("0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffed"); /* PUBLIC-CONSTANT: RFC 8032 / noble-curves universal curve parameters, public by definition */
   var ed25519_CURVE = /* @__PURE__ */ (() => ({
     p: ed25519_CURVE_p,
-    n: BigInt("0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed"),
+    n: BigInt("0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed"), /* PUBLIC-CONSTANT: RFC 8032 / noble-curves universal curve parameters, public by definition */
     h: _8n3,
-    a: BigInt("0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffec"),
-    d: BigInt("0x52036cee2b6ffe738cc740797779e89800700a4d4141d8ab75eb4dca135978a3"),
-    Gx: BigInt("0x216936d3cd6e53fec0a4e231fdd6dc5c692cc7609525a7b2c9562d608f25d51a"),
-    Gy: BigInt("0x6666666666666666666666666666666666666666666666666666666666666658")
+    a: BigInt("0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffec"), /* PUBLIC-CONSTANT: RFC 8032 / noble-curves universal curve parameters, public by definition */
+    d: BigInt("0x52036cee2b6ffe738cc740797779e89800700a4d4141d8ab75eb4dca135978a3"), /* PUBLIC-CONSTANT: RFC 8032 / noble-curves universal curve parameters, public by definition */
+    Gx: BigInt("0x216936d3cd6e53fec0a4e231fdd6dc5c692cc7609525a7b2c9562d608f25d51a"), /* PUBLIC-CONSTANT: RFC 8032 / noble-curves universal curve parameters, public by definition */
+    Gy: BigInt("0x6666666666666666666666666666666666666666666666666666666666666658") /* PUBLIC-CONSTANT: RFC 8032 / noble-curves universal curve parameters, public by definition */
   }))();
   function ed25519_pow_2_252_3(x) {
     const _10n = BigInt(10), _20n = BigInt(20), _40n = BigInt(40), _80n = BigInt(80);
@@ -2204,7 +2204,7 @@ var BDIDKEY = (() => {
     bytes[31] |= 64;
     return bytes;
   }
-  var ED25519_SQRT_M1 = /* @__PURE__ */ BigInt("19681161376707505956807079304988542015446066515923890162744021073123829784752");
+  var ED25519_SQRT_M1 = /* @__PURE__ */ BigInt("19681161376707505956807079304988542015446066515923890162744021073123829784752"); /* PUBLIC-CONSTANT: RFC 8032 / noble-curves universal curve parameters, public by definition */
   function uvRatio(u, v) {
     const P = ed25519_CURVE_p;
     const v3 = mod(v * v * v, P);
@@ -4908,7 +4908,7 @@ zoo`.split("\n"));
       sign: (msg) => ed25519.sign(msg, seed)
     };
   }
-  var L = 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3edn;
+  var L = 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3edn; /* PUBLIC-CONSTANT: RFC 8032 / noble-curves universal curve parameters, public by definition */
   function verifyRecordSig(sig, msg, publicKey) {
     if (!(sig instanceof Uint8Array) || sig.length !== 64) return false;
     let s = 0n;
