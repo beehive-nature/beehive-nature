@@ -68,6 +68,7 @@ nav button.on{color:var(--gold);border-color:#3d3410}
   <button id="tLaws">⚖ how it settles</button>
 </nav>
 <div id="wall"></div>
+<div id="rev" style="position:fixed;left:10px;bottom:54px;z-index:80;color:#333;font:9px ui-monospace,monospace;pointer-events:none">market rev 3</div>
 <div id="mine" style="display:none">
   <p>listing is an exact-amount act.<br>when settlement docks, this page signs with your wallet.</p>
   <p style="color:var(--warn)">◌ connect wallet — docking soon</p>
@@ -217,6 +218,12 @@ function viewPiece(i){
   $('room').classList.add('open');
 }
 document.querySelector('#room .close').onclick=()=>$('room').classList.remove('open');
+$('room').addEventListener('click',function(e){ if(e.target===this||e.target.classList.contains('inner')) this.classList.remove('open'); });
+var _origOpen=$('room').classList.open;
+setInterval(function(){ var r=$('room');
+  if(r.classList.contains('open')&&(!document.getElementById('rart').innerHTML||document.getElementById('rart').innerHTML.length<60)){
+    r.classList.remove('open'); document.getElementById('wall').insertAdjacentHTML('afterbegin','<p style="color:#e8b84a;grid-column:1/-1;text-align:center">a room opened empty and was closed — tell zCode if this repeats</p>');
+  } },1200);
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') $('room').classList.remove('open'); });
 const tabs={tBrowse:'wall',tMine:'mine',tLaws:'laws'};
 for(const t in tabs){ $(t).onclick=()=>{ for(const k in tabs){
