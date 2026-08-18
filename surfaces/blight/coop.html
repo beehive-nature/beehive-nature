@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>the Coop — hemp biomass downstream · the criticality index, live</title>
+<style>
+:root{--bg:#08090b;--ink:#d8e8cf;--leaf:#7ec850;--gold:#FFD700;--dim:#6b7a6b;--line:#1c261e;--ok:#9FFF3D;--fusd:#c9a64a}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding-bottom:80px;
+  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72"><g fill="none" stroke="%23131c15" stroke-width="1.2"><path d="M36 4 L60 18 L60 46 L36 60 L12 46 L12 18 Z"/><path d="M36 4 L60 18 L60 46 L36 60 L12 46 L12 18 Z" transform="translate(30,30)"/></g></svg>')}
+header{padding:42px 20px 6px;text-align:center}
+h1{font-size:clamp(19px,4.5vw,27px);color:var(--leaf);font-weight:400;letter-spacing:.05em;text-shadow:0 0 14px rgba(126,200,80,.25)}
+header p{color:var(--dim);font-size:11.5px;margin-top:8px;letter-spacing:.03em}
+nav{position:sticky;top:0;background:#08090bee;backdrop-filter:blur(6px);z-index:40;display:flex;gap:8px;
+  justify-content:center;padding:12px;border-bottom:1px solid var(--line)}
+nav button{background:#0b120d;color:var(--dim);border:1px solid var(--line);border-radius:8px;padding:7px 16px;
+  cursor:pointer;font:12.5px 'IBM Plex Mono',monospace}
+nav button.on{color:var(--gold);border-color:#3d3410}
+#index{max-width:1150px;margin:22px auto 40px;padding:0 16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.stream{background:#0b120d;border:1px solid var(--line);border-radius:12px;padding:16px 18px;cursor:pointer;
+  transition:border-color .2s,transform .15s}
+.stream:hover{border-color:var(--leaf);transform:translateY(-2px)}
+.stream .rank{float:right;color:#3d5a2c;font-size:18px}
+.stream.t1 .rank{color:var(--gold)}
+.stream .n{color:var(--leaf);font-size:13.5px;clear:both}
+.stream .m{color:var(--dim);font-size:10.5px;margin-top:5px;line-height:1.7}
+.stream .m b{color:var(--fusd);font-weight:400}
+.dept{color:#c9a0ff;font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;margin-top:8px;display:inline-block;
+  border:1px solid #2a1a3d;border-radius:4px;padding:1px 7px}
+.gated{color:#e8b84a}
+#detail{position:fixed;inset:0;background:#08090af2;z-index:60;display:none;overflow-y:auto}
+#detail.open{display:block}
+#detail .close{position:fixed;top:14px;right:16px;background:#0b120d;color:var(--dim);border:1px solid var(--line);border-radius:8px;padding:6px 14px;cursor:pointer;z-index:70}
+#detail .inner{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 18px 100px}
+.sheet{background:#0b120d;border:1px solid var(--line);border-radius:14px;padding:24px 28px;max-width:620px;width:100%}
+.sheet h3{color:var(--leaf);font-weight:400;font-size:16px}
+.sheet .rk{color:var(--gold);font-size:11px;letter-spacing:.1em;margin-top:2px}
+.sheet .row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px dotted var(--line);font-size:12px}
+.sheet .row .k{color:var(--dim)}
+.acts2{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+.acts2 button{flex:1;background:none;border:1px solid #2c4418;color:var(--ok);border-radius:8px;padding:9px;cursor:pointer;font:11.5px ui-monospace,monospace;min-width:140px}
+.acts2 button:hover{background:var(--ok);color:#000}
+.note{color:var(--dim);font-size:10px;margin-top:12px;text-align:center;line-height:1.7}
+#tiers{max-width:760px;margin:26px auto 60px;padding:0 18px}
+#tiers .t{padding:16px 0;border-bottom:1px solid var(--line);color:var(--dim);font-size:11.5px;line-height:1.9}
+#tiers .t b{color:var(--leaf);font-weight:400}
+#about{max-width:760px;margin:26px auto 60px;padding:0 18px;color:var(--dim);font-size:11.5px;line-height:2;text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <h1>🌾 the Coop</h1>
+  <p>hemp biomass downstream · seeds, hearts, cannabinoids · the criticality index — ranked, live, expandable</p>
+</header>
+<nav>
+  <button id="tIndex" class="on">◉ the index</button>
+  <button id="tTiers">▤ tiers · 25k map</button>
+  <button id="tAbout">⌂ about</button>
+</nav>
+
+<div id="index"></div>
+
+<div id="detail"><button class="close">esc ✕</button><div class="inner"><div class="sheet" id="sheet"></div></div></div>
+
+<div id="tiers" style="display:none">
+  <div class="t"><b>CORE 10 — ready today.</b> ranked by market depth × offtake readiness × regulatory clarity × storage stability. the Coop's opening shelf: tap any stream for the sheet, offtake notes, and bAccord drafting.</div>
+  <div class="t"><b>GROWTH TIER — next 10–50.</b> cannabinoid blends and formulated bases (CBN+CBD sleep blends, minor-cannabinoid isolates, cosmetic bases, hulled and toasted seed lines, rosin and live-resin where legal). the index promotes streams from here as offtakes prove.</div>
+  <div class="t"><b>LONG TAIL — toward 25,000 SKUs.</b> formulated CPG, regional specialties, derivative ingredients, fiber composites grades, hurd product families. the index scales by the same law as the gallery: number first, depth on demand — every SKU addressable when it earns a sheet.</div>
+  <div class="t"><b>THE LAW OF THE INDEX.</b> criticality is earned, not declared: a stream rises when its offtakes, clarity, and stability rise. the ranking recomputes as the Coop's data layer grows — research and custom visualization dock into this spine.</div>
+</div>
+
+<div id="about" style="display:none">
+  <p>the Coop is the hemp farmer's floor of <b style="color:var(--leaf)">beehivenature.com</b> — the b2c dream from the first dispatch, now with a front door.<br>
+  sibling floors: <a href="./farmers.html" style="color:var(--cyan)">the farmers market</a> (fUSD community party) ·
+  <a href="./market.html" style="color:var(--cyan)">the Apiary / public market</a> (USDC + exSat).<br>
+  the bLoomery (art, make-an-offer) lives in the gallery's parlor.<br>
+  settling in fUSD on the community rail; offtake notes today, escrow when the contract docks.</p>
+</div>
+
+<script>
+/* THE COOP — hemp biomass criticality index, MVP: the Core 10 as live cards,
+   per-stream sheets with offtake notes (bAccord pattern), tier map, honest data.
+   No backend; the data is the doctrine's ranked index; viz and research dock later. */
+const CORE=[
+ {rank:1, n:'CBD full-spectrum distillate', dept:'cannabinoid', form:'oil, distillate',
+  spec:'60-70% CBD, full spectrum terps', unit:'kg', note:'the workhorse commodity — deepest buyer pool in the plant',
+  stable:'12-18mo cold', clarity:'hemp-compliant (<0.3% d9)'},
+ {rank:2, n:'CBD isolate', dept:'cannabinoid', form:'crystal, powder',
+  spec:'99%+ CBD', unit:'kg', note:'the gold bar of biomass — storage-stable, exportable',
+  stable:'24mo+', clarity:'hemp-compliant'},
+ {rank:3, n:'CBG distillate', dept:'cannabinoid', form:'oil, distillate',
+  spec:'70-90% CBG', unit:'kg', note:'the premium minor — offtakes live now',
+  stable:'12mo cold', clarity:'hemp-compliant'},
+ {rank:4, n:'hemp hearts (dehulled seed)', dept:'food', form:'hulled seed',
+  spec:'food-grade, >45% oil, >30% protein', unit:'25kg case / pallet', note:'zero regulatory ambiguity — the grocery-verified lane',
+  stable:'12mo frozen / 6mo dry', clarity:'food — fully clear'},
+ {rank:5, n:'cold-press hemp seed oil', dept:'food', form:'oil',
+  spec:'unrefined, n3:n6 ideal', unit:'L / 200L drum', note:'food + cosmetic, established buyers',
+  stable:'12mo dark/cold', clarity:'food — fully clear'},
+ {rank:6, n:'hemp protein powder', dept:'food', form:'powder',
+  spec:'33-50% protein, concentrate or isolate', unit:'20kg bag', note:'fitness CPG — co-packers buy by the ton',
+  stable:'18mo', clarity:'food — fully clear'},
+ {rank:7, n:'CBN / minor-cannabinoid distillates', dept:'cannabinoid', form:'oil, distillate',
+  spec:'60%+ CBN blends', unit:'kg', note:'the sleep economy — boutique but hot',
+  stable:'12mo cold', clarity:'hemp-compliant'},
+ {rank:8, n:'bast fiber (textile/technical)', dept:'fiber', form:'baled fiber',
+  spec:'decorticated, cleaned,specified length', unit:'metric ton', note:'composites + auto buyers; decortication installed',
+  stable:'indefinite dry', clarity:'fully clear'},
+ {rank:9, n:'hurd / shiv (bedding + hempcrete)', dept:'fiber', form:'chipped core',
+  spec:'sized 1/4in-1in', unit:'metric ton / supersack', note:'the volume play — logistics-bound, local-strong',
+  stable:'indefinite dry', clarity:'fully clear'},
+ {rank:10, n:'THCa / legal-limit distillate', dept:'cannabinoid', form:'oil, distillate',
+  spec:'jurisdiction-dependent', unit:'kg', note:'highest $/lb — COMPLIANCE-GATED by jurisdiction',
+  stable:'6-12mo cold', clarity:'GATED — state-by-state', gated:true},
+];
+const $=id=>document.getElementById(id);
+function renderIndex(){
+  const w=$('index'); w.innerHTML='';
+  CORE.forEach(s=>{
+    const el=document.createElement('div');
+    el.className='stream'+(s.rank===1?' t1':'');
+    const m=document.createElement('div'); m.className='m';
+    m.innerHTML=s.note+'<br><b>'+s.unit+'</b> · '+s.spec+' · stable '+s.stable;
+    const r=document.createElement('div'); r.className='rank'; r.textContent='#'+s.rank;
+    const n=document.createElement('div'); n.className='n'; n.textContent=s.n;
+    const d=document.createElement('span'); d.className='dept'+(s.gated?' gated':''); d.textContent=s.dept+(s.gated?' · gated':'');
+    el.appendChild(r); el.appendChild(n); el.appendChild(m); el.appendChild(d);
+    el.onclick=()=>sheet(s);
+    w.appendChild(el);
+  });
+}
+function sheet(s){
+  const sh=$('sheet');
+  const row=(k,v)=>'<div class="row"><span class="k">'+k+'</span><span>'+v+'</span></div>';
+  sh.innerHTML='<h3>'+s.n+'</h3><div class="rk">criticality rank #'+s.rank+' of 10 · '+s.dept+'</div>'+
+    row('form',s.form)+row('spec',s.spec)+row('unit',s.unit)+
+    row('storage stability',s.stable)+row('regulatory clarity',s.clarity)+
+    row('settles in','<span style="color:var(--fusd)">fUSD</span> · community rail')+
+    row('why it ranks here',s.note)+
+    '<div class="acts2"><button id="offtake">\u2709 request offtake — copies the note</button>'+
+    '<button id="accord">🤝 draft a bAccord</button></div>'+
+    '<div class="note">the index is earned not declared — streams rise as offtakes, clarity and stability rise.<br>research + custom visualization dock into this spine as the data layer grows.</div>';
+  $('detail').classList.add('open');
+  const note='COOP OFFTAKE REQUEST - '+s.n+' (rank #'+s.rank+')\n'+
+    'spec '+s.spec+' · unit '+s.unit+' · stable '+s.stable+'\n'+
+    'volume: ____ · target fUSD: ____ · destination: ____\n'+
+    'index: '+location.origin+location.pathname+'\n- from the Coop at beehivenature.com';
+  $('offtake').onclick=function(){ navigator.clipboard.writeText(note).then(()=>{ this.textContent='\u2709 offtake note copied'; }); };
+  $('accord').onclick=function(){ this.textContent='opens the accord card when the escrow docks — the pattern ships in the farmers market'; };
+}
+document.querySelector('#detail .close').onclick=()=>$('detail').classList.remove('open');
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') $('detail').classList.remove('open'); });
+const tabs={tIndex:'index',tTiers:'tiers',tAbout:'about'};
+for(const t in tabs){ $(t).onclick=()=>{ for(const k in tabs){ $(k).classList.toggle('on',k===t);
+  $(tabs[k]).style.display=k===t?'block':'none'; } }; }
+renderIndex();
+</script>
+<div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:.6rem;z-index:99999;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
+<script src="../tour.js?v=5"></script>
+</body>
+</html>
