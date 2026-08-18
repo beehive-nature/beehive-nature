@@ -336,6 +336,32 @@ async function fetchTraits(p){
       var sw=/^#[0-9a-fA-F]{6}$/.test(v)?'<span style="display:inline-block;width:10px;height:10px;border:1px solid #333;background:'+v+';margin-right:5px;vertical-align:-1px"></span>':'';
       return '<span style="display:inline-block;border:1px solid #1a1a2a;border-radius:5px;padding:3px 9px;margin:3px 4px 3px 0;font-size:10.5px">'+sw+kv[0]+' '+v+'</span>';}).join('');
 }
+async function crownExpedition(){
+  var msg=document.getElementById('dmsg'); msg.style.color='var(--dim)'; msg.textContent='expedition: reading the holder leaderboard…';
+  var pool=COLS.filter(function(c){return c.lv&&c.lv.length>1;});
+  var col=pool[Math.floor(Math.random()*pool.length)];
+  var top=col.lv[col.lv.length-1];
+  var holders=[];
+  try{
+    var r=await fetch('https://base.blockscout.com/api/v2/tokens/'+col.c+'/holders?limit=50',{headers:{'User-Agent':'gallery/1.0'}});
+    var j=await r.json();
+    (j.items||[]).forEach(function(it){
+      var bal=it.value?Number(BigInt(it.value))/1e9:0;
+      if(bal>=top) holders.push({a:(it.address&&it.address.hash)||it.address, bal:bal});
+    });
+  }catch(e){}
+  holders=holders.filter(function(x){return /^0x[0-9a-fA-F]{40}$/.test(x.a);});
+  holders.sort(function(x,y){return y.bal-x.bal;});
+  if(!holders.length){ msg.textContent='no crowns found on this leaderboard — press again (another collection)'; return null; }
+  var pick=holders[Math.floor(Math.random()*Math.min(holders.length,12))];
+  msg.textContent='crown found · holder '+pick.a.slice(0,10)+'… · reading its art…';
+  var seed=Math.floor(pick.bal);
+  var res=await rpc([{to:col.c,data:col.sel+W(seed)+W(0)+W(0)}]);
+  if(!res||!res[0]||res[0].length<200){ msg.textContent='art unreadable — press again'; return null; }
+  var svg=null; try{ svg=decodeString(res[0]); }catch(e){}
+  if(!svg){ msg.textContent='art unreadable — press again'; return null; }
+  return {svg:svg,col:col,seed:seed,lvln:lvlOf(seed,col),holder:pick.a};
+}
 function openRoom(i){
   const p=garden[i]; if(!p) return;
   $('rart').innerHTML=p.svg;
@@ -395,28 +421,22 @@ $('home').onclick=()=>{ $('stage').style.display='none'; $('top').style.display=
 $('frm').onsubmit=e=>{ e.preventDefault(); visit($('addr').value); };
 document.querySelectorAll('#door .seeds button[data-a]').forEach(b=>{ b.onclick=()=>visit(b.dataset.a); });
 document.getElementById('vault').onclick=async function(){
-  var msg=document.getElementById('dmsg'); msg.style.color='var(--dim)'; msg.textContent='opening the vault…';
-  var pool=COLS.filter(function(c){return c.lv&&c.lv.length>1;});
-  var col=pool[Math.floor(Math.random()*pool.length)];
-  var top=col.lv[col.lv.length-1];
-  var seed=top+Math.floor(Math.random()*top*1.5)+1;
-  var res=await rpc([{to:col.c,data:col.sel+W(seed)+W(0)+W(0)}]);
-  if(!res||!res[0]||res[0].length<200){ msg.textContent='the vault hesitated — press again'; return; }
-  try{
-    garden=[{svg:decodeString(res[0]),col:col,seed:seed,lvln:lvlOf(seed,col)}];
-    holderName='the vault · '+col.sym;
-    document.getElementById('door').classList.add('gone');
-    document.getElementById('top').style.display='flex';
-    document.getElementById('stage').style.display='block';
-    document.getElementById('wing').textContent='the vault · a crown, at random';
-    var wall=document.getElementById('wall'); wall.innerHTML='';
-    var el=document.createElement('div'); el.className='piece crown in';
-    var art=document.createElement('div'); art.className='art'; art.innerHTML=garden[0].svg;
-    var lab=document.createElement('div'); lab.className='lab';
-    lab.innerHTML='<div class="n">'+col.sym+'</div><div class="m"><b>'+pips(garden[0].lvln,pipmax(col))+'</b> crown · seed '+seed.toLocaleString()+'</div>';
-    el.appendChild(art); el.appendChild(lab); el.onclick=function(){openRoom(0);};
-    wall.appendChild(el); msg.textContent='';
-  }catch(e){ msg.textContent='the vault hesitated — press again'; }
+  var crown=await crownExpedition();
+  if(!crown) return;
+  garden=[{svg:crown.svg,col:crown.col,seed:crown.seed,lvln:crown.lvln}];
+  holderName='crown of '+crown.holder.slice(0,8)+'…';
+  document.getElementById('door').classList.add('gone');
+  document.getElementById('top').style.display='flex';
+  document.getElementById('stage').style.display='block';
+  document.getElementById('wing').textContent='the vault · a crown from the corpus · '+crown.col.sym;
+  var wall=document.getElementById('wall'); wall.innerHTML='';
+  var el=document.createElement('div'); el.className='piece crown in';
+  var art=document.createElement('div'); art.className='art'; art.innerHTML=garden[0].svg;
+  var lab=document.createElement('div'); lab.className='lab';
+  lab.innerHTML='<div class="n">'+crown.col.sym+'</div><div class="m"><b>'+pips(garden[0].lvln,pipmax(crown.col))+'</b> crown · seed '+crown.seed.toLocaleString()+' · from the leaderboard</div>';
+  el.appendChild(art); el.appendChild(lab); el.onclick=function(){openRoom(0);};
+  wall.appendChild(el);
+  document.getElementById('dmsg').textContent='';
 };
 </script>
 <div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:.6rem;z-index:99999;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
