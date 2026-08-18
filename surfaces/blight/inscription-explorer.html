@@ -128,6 +128,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9990;
     <button id="bDl">⬇ keep the art</button>
   </div>
   <div id="traits" style="margin-top:16px;max-width:600px"></div>
+  <div id="dossier" style="margin-top:14px;max-width:600px;display:none;background:#0b0b12;border:1px solid #3d3410;border-radius:10px;padding:14px 18px;font-size:11px;line-height:2;color:#c9b458"></div>
   <div id="deets"></div>
 </div></div>
 
@@ -143,6 +144,8 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9990;
 /* THE EXPLORER, rebuilt as the experience. The math never leaves the basement:
    batched eth_call, host rotation, defensive decode — the visitor sees only art.
    The workbench (⚗, top right) keeps every instrument, receipt and education row. */
+var SUPPLY={'PEPI v2':13370,'PEPI v1':13370,'FUNGI':210000000,'$FROGGI':76740000,'JELLI':210000000,'JEDI':210000000,'TRUFFI':15000000,'MiDi':210000000};
+var ARTIST={'PEPI v2':'anon 0x1609e546… — lifecycle art','PEPI v1':'anon 0x1609e546… — the o/u era','FUNGI':'ToddStool — on-chain trait JSON','$FROGGI':'unattributed — animated egg→body','JELLI':'unattributed — underwater scenes','JEDI':'unattributed — lightsabers','TRUFFI':'unattributed — holder-keyed','MiDi':'the fallen youngest — music on-chain'};
 const W=v=>BigInt(v).toString(16).padStart(64,'0');
 const AD=a=>'0'.repeat(24)+a.replace(/^0x/,'').toLowerCase();
 const HOSTS=['https://base-rpc.publicnode.com','https://base.drpc.org','https://base.llamarpc.com'];
@@ -379,6 +382,22 @@ function openRoom(i){
   ].map(r=>'<span class="k">'+r[0]+'</span>  '+r[1]).join('<br>');
   $('room').classList.add('open');
   fetchTraits(p);
+  var dz=document.getElementById('dossier');
+  var isCrown=p.lvln!==null&&p.lvln===pipmax(p.col)&&pipmax(p.col)>0;
+  if(dz){
+    if(isCrown&&p.col.lv){
+      var sup=SUPPLY[p.col.sym]||0, top=p.col.lv[p.col.lv.length-1];
+      var maxCrowns=Math.floor(sup/top);
+      dz.innerHTML='<div style="color:#FFD700;letter-spacing:.1em;font-size:12px">the crown dossier</div>'+
+        'rarity — a top-level seed needs '+top.toLocaleString()+' of '+sup.toLocaleString()+' supply: <b>at most '+maxCrowns.toLocaleString()+' crowns can ever exist</b>'+
+        (sup?' ('+((top/sup)*100).toFixed(2)+'% of supply each)':'')+'<br>'+
+        'this seed — '+p.seed.toLocaleString()+' · level '+(p.lvln+1-(p.col.base||0))+' of '+pipmax(p.col)+' · ladder '+p.col.lv.slice(1).join(' · ')+'<br>'+
+        'artist — '+(ARTIST[p.col.sym]||'unattributed')+'<br>'+
+        'provenance — captured at a whole-token transfer, timestamped by the chain forever'+
+        (window.__crownHolder?' · expedition: '+window.__crownHolder:'');
+      dz.style.display='block';
+    } else { dz.style.display='none'; }
+  }
   $('bDl').onclick=()=>{
     const a=document.createElement('a');
     a.href=URL.createObjectURL(new Blob([p.svg||''],{type:'image/svg+xml'}));
@@ -434,7 +453,9 @@ document.getElementById('vault').onclick=async function(){
   var art=document.createElement('div'); art.className='art'; art.innerHTML=garden[0].svg;
   var lab=document.createElement('div'); lab.className='lab';
   lab.innerHTML='<div class="n">'+crown.col.sym+'</div><div class="m"><b>'+pips(garden[0].lvln,pipmax(crown.col))+'</b> crown · seed '+crown.seed.toLocaleString()+' · from the leaderboard</div>';
+  window.__crownHolder='crown of '+crown.holder.slice(0,10)+'…';
   el.appendChild(art); el.appendChild(lab); el.onclick=function(){openRoom(0);};
+  setTimeout(function(){openRoom(0);},650);
   wall.appendChild(el);
   document.getElementById('dmsg').textContent='';
 };
