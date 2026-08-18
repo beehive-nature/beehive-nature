@@ -19,4 +19,10 @@
   }).join('');
   document.body.appendChild(bar);
   document.body.style.paddingBottom='46px';
+  // lane discipline: fixed bottom widgets must not sit under the bar or each other.
+  // the ⌂ badge rides just above the bar; the ⧉ market door rides above that.
+  var badge=document.getElementById('bnr-beta-badge');
+  if(badge) badge.style.bottom='52px';
+  var mk=document.getElementById('market');
+  if(mk) mk.style.bottom='92px';
 })();
