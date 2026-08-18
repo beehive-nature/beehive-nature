@@ -379,7 +379,10 @@ async function scanAll(){
   rpcUrl=$('rpc').value.trim();
   rows.length=0;
   const resolvedScan=await resolveIfName(holder);
-  if(!resolvedScan) return flush();
+  if(!resolvedScan){
+    $('art').innerHTML='<span style="color:var(--bad);font-size:12px">name resolution failed — press Scan again or paste the raw 0x… address</span>';
+    return flush();
+  }
   holder=resolvedScan;
   const found=[]; const unreadable=[];
   $('art').innerHTML='';
@@ -986,7 +989,14 @@ async function view(){
     return flush();
   }
   const resolvedView=await resolveIfName(holder);
-  if(!resolvedView) return flush();
+  if(!resolvedView){
+    // Stale art from a previous (connected-wallet) scan must never masquerade as the
+    // answer to a DIFFERENT address the user just typed — founder receipt 2026-08-19:
+    // 'typing another name only searches my connected wallet.' It didn't; resolution
+    // failed and old art stood silent. Now the stage says so.
+    $('art').innerHTML='<span style="color:var(--bad);font-size:12px">that name did not resolve (host mood, not your typing) — paste the raw 0x… address, or press View again</span>';
+    return flush();
+  }
   holder=resolvedView;
 
   row('contract',contract.slice(0,10)+'…'+contract.slice(-6));
