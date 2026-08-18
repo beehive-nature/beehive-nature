@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8"><meta name="color-scheme" content="dark"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>the Coop — hemp biomass downstream · the criticality index, live</title>
 <style>
 :root{--bg:#0a0a0f;--ink:#e2efdb;--leaf:#7ec850;--gold:#FFD700;--dim:#8a9a8a;--line:#243026;--ok:#9FFF3D;--fusd:#c9a64a}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding-bottom:80px;
+body{background:#0d1410;color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding-bottom:80px;
   background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72"><g fill="none" stroke="%23131c15" stroke-width="1.2"><path d="M36 4 L60 18 L60 46 L36 60 L12 46 L12 18 Z"/><path d="M36 4 L60 18 L60 46 L36 60 L12 46 L12 18 Z" transform="translate(30,30)"/></g></svg>')}
 header{padding:42px 20px 6px;text-align:center}
 h1{font-size:clamp(19px,4.5vw,27px);color:var(--leaf);font-weight:400;letter-spacing:.05em;text-shadow:0 0 14px rgba(126,200,80,.25)}
 header p{color:var(--dim);font-size:11.5px;margin-top:8px;letter-spacing:.03em}
-nav{position:sticky;top:0;background:#0a0a0fee;backdrop-filter:blur(6px);z-index:40;display:flex;gap:8px;
+nav{position:sticky;top:0;background:#0a0a0fee;z-index:40;display:flex;gap:8px;
   justify-content:center;padding:12px;border-bottom:1px solid var(--line)}
 nav button{background:#0e1611;color:var(--dim);border:1px solid var(--line);border-radius:8px;padding:7px 16px;
   cursor:pointer;font:12.5px 'IBM Plex Mono',monospace}
@@ -60,7 +60,7 @@ nav button.on{color:var(--gold);border-color:#3d3410}
 
 <div id="index"></div>
 
-<div id="detail"><button class="close">esc ✕</button><div class="inner"><div class="sheet" id="sheet"></div></div></div>
+<div id="detail" style="display:none" ><button class="close">esc ✕</button><div class="inner"><div class="sheet" id="sheet"></div></div></div>
 
 <div id="tiers" style="display:none">
   <div class="t"><b>CORE 10 — ready today.</b> ranked by market depth × offtake readiness × regulatory clarity × storage stability. the Coop's opening shelf: tap any stream for the sheet, offtake notes, and bAccord drafting.</div>

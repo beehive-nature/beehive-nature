@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8"><meta name="color-scheme" content="dark"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>the Farmers Market — beehivenature.com · the community's private party</title>
 <style>
 :root{--bg:#07090a;--ink:#d8e8cf;--leaf:#7ec850;--gold:#FFD700;--dim:#6b7a6b;--line:#1a241c;--ok:#9FFF3D;--warn:#e8b84a;--fusd:#c9a64a}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding-bottom:70px;
+body{background:#0d1410;color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding-bottom:70px;
   background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72"><g fill="none" stroke="%23121e14" stroke-width="1.2"><path d="M36 4 L60 18 L60 46 L36 60 L12 46 L12 18 Z"/><path d="M36 4 L60 18 L60 46 L36 60 L12 46 L12 18 Z" transform="translate(30,30)"/></g></svg>')}
 header{padding:44px 20px 8px;text-align:center}
 h1{font-size:clamp(19px,4.5vw,27px);color:var(--leaf);font-weight:400;letter-spacing:.05em;text-shadow:0 0 14px rgba(126,200,80,.25)}
@@ -14,7 +14,7 @@ header p{color:var(--dim);font-size:11.5px;margin-top:8px;letter-spacing:.04em}
 .gate{max-width:680px;margin:18px auto;padding:14px 18px;border:1px dashed var(--line);border-radius:10px;
   color:var(--dim);font-size:11px;line-height:1.9;text-align:center}
 .gate b{color:var(--gold);font-weight:400}
-nav{position:sticky;top:0;background:#07090aee;backdrop-filter:blur(6px);z-index:40;display:flex;gap:8px;
+nav{position:sticky;top:0;background:#0d1410;z-index:40;display:flex;gap:8px;
   justify-content:center;padding:12px;border-bottom:1px solid var(--line)}
 nav button{background:#0b120d;color:var(--dim);border:1px solid var(--line);border-radius:8px;padding:7px 16px;
   cursor:pointer;font:12.5px 'IBM Plex Mono',monospace}
@@ -79,7 +79,7 @@ nav button.on{color:var(--gold);border-color:#3d3410}
 
 <div id="wall"></div>
 
-<div id="accord"><button class="close">esc ✕</button><div class="inner">
+<div id="accord" style="display:none" ><button class="close">esc ✕</button><div class="inner">
   <div class="card">
     <h3>— a bACCORD —</h3>
     <div class="row"><span class="k">the piece</span><span class="v" id="aPiece">—</span></div>
