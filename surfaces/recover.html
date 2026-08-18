@@ -5122,4 +5122,5 @@ $('sign').onclick=()=>{ if(!current)return;
   $('sig').textContent=BDIDKEY.toHex(sig)+(BDIDKEY.verifyRecordSig(sig,new TextEncoder().encode($('msg').value),current.record.publicKey)?'  ✓ self-verified (R1b strict)':'  ✗ verify failed');
 };
 addEventListener('beforeunload',()=>{current&&current.masterPrk.fill(0);current&&current.record.seed.fill(0)});
-</script></main></body></html>
+</script></main><script src="tour.js"></script>
+</body></html>
