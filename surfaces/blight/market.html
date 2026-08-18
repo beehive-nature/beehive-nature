@@ -147,8 +147,8 @@ async function buildInventory(){
 }
 function listingOf(p){ const whole=Math.max(1,Math.floor(p.seed*0.4));
   const unit=PRICES[p.col.sym]||0.001;
-  const pe=Math.max(0.0004,whole*unit/3200);
-  return {whole,pe}; }
+  const usdc=Math.max(1,Math.round(whole*unit*100)/100);
+  return {whole,usdc}; }
 function renderWall(){
   const w=$('wall'); w.innerHTML='';
   inventory.forEach((p,i)=>{
@@ -163,8 +163,8 @@ function renderWall(){
       : 'clean arithmetic — art moves as-is; fresh roll only on the extra.';
     body.innerHTML='<div class="n">'+p.col.sym+'</div>'+
       '<div class="m"><b>'+pips(p.lvln??0,pipmax(p.col))+'</b> seed '+p.seed.toLocaleString()+' · listing '+L.whole.toLocaleString()+' exact</div>'+
-      '<div class="price"><span class="p">'+L.pe.toFixed(4)+' \u039E</span><span class="u">~$'+(L.pe*3200).toFixed(2)+'</span></div>'+
-      '<div class="acts"><button class="buy" data-i="'+i+'">acquire</button><button data-v="'+i+'">view</button></div>';
+      '<div class="price"><span class="p">'+L.usdc.toLocaleString()+' USDC</span><span class="u">spot · exact-amount</span></div>'+
+      '<div class="acts"><button class="buy" data-i="'+i+'">inquire</button><button data-v="'+i+'">view</button></div>';
     body.appendChild(disc);
     card.appendChild(art); card.appendChild(body); w.appendChild(card);
   });
@@ -183,7 +183,8 @@ function preview(i){
     'seller\u2019s spore cushion after: <span class="'+(safe?'':'risk')+'">'+cushion.toLocaleString()+' '+(safe?'— safe (law 3)':'— DISSOLUTION RISK')+'</span><br>'+
     (p.col.ou?'<span class="risk">law 4: o/u collection — the art re-rolls on delivery; seed + level intact</span><br>':'')+
     'payment routes freely · art walks a straight bridge (law 5)'+
-    '<div class="go"><button id="confirm">\u25C9 confirm — when settlement docks</button></div>'+
+    '<div class="go"><button id=\"inquireMsg\">send inquiry — copies your offer note</button></div>'+
+    '<div class="go"><button id=\"confirm\">\u25C9 confirm — when settlement docks</button></div>'+
     '<div class="note">front-end MVP: this preview is real math on real chain state. the signature waits for the audited escrow.</div>';
   $('room').classList.add('open');
   shareRoom(p,i);
