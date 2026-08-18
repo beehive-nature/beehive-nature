@@ -60,10 +60,21 @@ const DEPLOYS=[['MiDi #1','0xf7Cf2DF510bc0EC400232874f2fB4F2cDf9352d6'],
 const HOSTS=['https://base-rpc.publicnode.com','https://base.drpc.org'];
 const W=v=>BigInt(v).toString(16).padStart(64,'0');
 function dec(s){
+  // Defensive ABI-string decode. The bug that killed Chrome: a misparsed
+  // 'length' word could be ~1e76 and the byte loop then allocated a string
+  // of that size — tab death, browser death. Now: real offset, sane bounds,
+  // hard 8KB cap. Malformed input throws instead of exploding.
   const h=s.replace(/^0x/,'');
-  const len=parseInt(h.slice(128,192),16);           // ABI string: [offset=0x20][length][bytes]
+  const off=parseInt(h.slice(0,64),16);                 // first word IS the offset
+  if(!(off===0x20)) throw new Error('unexpected offset '+off);
+  const len=parseInt(h.slice(off*2,off*2+64),16);       // length word
+  if(!(len>=0&&len<=8192)) throw new Error('implausible length '+len);
   let out='';
-  for(let i=0;i<len;i++) out+=String.fromCharCode(parseInt(h.slice(256+i*2,256+i*2+2),16));
+  for(let i=0;i<len;i++){
+    const byte=parseInt(h.slice((off+32+i)*2,(off+32+i)*2+2),16);
+    if(Number.isNaN(byte)) throw new Error('truncated payload');
+    out+=String.fromCharCode(byte);
+  }
   try{ return decodeURIComponent(escape(out)); }catch(e){ return out; }
 }
 const SCALES={'major':[0,2,4,5,7,9,11],'harmonic major':[0,2,4,5,7,8,11],'minor':[0,2,3,5,7,8,10],
