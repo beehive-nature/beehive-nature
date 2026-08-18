@@ -1,71 +1,104 @@
-<!doctype html>
-<!-- BNR hub — surfaces/index.html · the one page that links the whole public stack.
-     Every card links a live surface AND its source. Zero third-party requests. -->
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BNR · surfaces hub</title>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>beehive nature · the surfaces — one hive, every door</title>
 <style>
-:root{--bg:#0d1117;--panel:#161b22;--line:#30363d;--ink:#e6edf3;--mut:#8b949e;--ok:#3fb950;--warn:#d29922;--teal:#39c5cf;--b:#e6b32e;--vio:#a78bfa;--mag:#e53aae}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;display:flex;justify-content:center;padding:2rem 1rem 4rem}
-main{max-width:900px;width:100%}a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
-h1{font-size:1.5rem;margin:.2rem 0;background:linear-gradient(90deg,var(--teal),var(--vio),var(--mag));-webkit-background-clip:text;background-clip:text;color:transparent}
-.sub{color:var(--mut);font-size:.9rem;margin-bottom:1.2rem}
-.beta{display:inline-block;border:1px dashed var(--warn);color:var(--warn);border-radius:99px;padding:.1rem .8rem;font-size:.75rem;margin-bottom:1rem}
-h2{font-size:.95rem;color:var(--mut);text-transform:uppercase;letter-spacing:.08em;margin:1.6rem 0 .6rem}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:.8rem}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:.9rem 1rem;display:block;color:var(--ink)}
-.card:hover{border-color:var(--teal);text-decoration:none}
-.card .ic{font-size:1.2rem}.card h3{font-size:.95rem;margin:.25rem 0}.card p{color:var(--mut);font-size:.8rem;margin:.15rem 0 0}
-.live{color:var(--ok);font-size:.68rem;border:1px solid var(--ok);border-radius:99px;padding:0 .45rem;vertical-align:middle}
-.doctrine{border-left:3px solid var(--teal);padding-left:1rem;color:var(--mut);font-size:.85rem;margin:1.4rem 0}
-footer{color:var(--mut);font-size:.78rem;margin-top:2rem;border-top:1px solid var(--line);padding-top:1rem;line-height:1.8}
-</style></head><body><main>
-<span class="beta">BETA · everything here is open source · nothing custodies real funds yet · break things and tell the raid</span>
-<h1>🐝 Beehive Nature Reserve — the surfaces</h1>
-<div class="sub">One hub, the whole public stack: identity, light, art, markets, governance, hardware. Every card links a live surface; every page links its source. Same bDiD everywhere — a climb, not a restart.</div>
+:root{--bg:#07090b;--ink:#e2efdb;--cyan:#00E5FF;--gold:#FFD700;--leaf:#7ec850;--dim:#8a9a8a;--line:#243026;--violet:#c9a0ff}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:40px 16px 90px;
+  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72"><g fill="none" stroke="%23131c15" stroke-width="1.2"><path d="M36 4 L60 18 L60 46 L36 60 L12 46 L12 18 Z"/><path d="M36 4 L60 18 L60 46 L36 60 L12 46 L12 18 Z" transform="translate(30,30)"/></g></svg>')}
+header{text-align:center;margin-bottom:30px}
+h1{font-size:clamp(20px,5vw,30px);color:var(--cyan);font-weight:400;letter-spacing:.06em;text-shadow:0 0 16px rgba(0,229,255,.25)}
+header p{color:var(--dim);font-size:11.5px;margin-top:8px}
+.org{max-width:1150px;margin:0 auto 8px;display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.org span{color:var(--gold);border:1px solid #3d3410;border-radius:99px;padding:2px 12px;font-size:10px;letter-spacing:.15em}
+section{max-width:1150px;margin:26px auto}
+section h2{font-size:13px;letter-spacing:.2em;font-weight:400;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+a.card{display:block;background:#0e1611;border:1px solid var(--line);border-radius:12px;padding:14px 16px;text-decoration:none;color:var(--ink);
+  transition:transform .15s,border-color .2s}
+a.card:hover{transform:translateY(-3px);border-color:var(--cyan)}
+a.card .t{font-size:13.5px;color:var(--cyan)}
+a.card .d{font-size:10.5px;color:var(--dim);margin-top:4px;line-height:1.6}
+a.card .tag{display:inline-block;font-size:9px;letter-spacing:.1em;border:1px solid var(--line);border-radius:4px;padding:1px 6px;margin-top:8px;color:var(--gold)}
+a.card.g .t{color:var(--leaf)}
+a.card.v .t{color:var(--violet)}
+footer{max-width:1150px;margin:34px auto 0;color:var(--dim);font-size:10.5px;line-height:2;text-align:center}
+footer a{color:var(--cyan)}
+</style>
+</head>
+<body>
+<header>
+  <h1>🐝 beehive nature · the surfaces</h1>
+  <p>one hive, every door — static, keyless, honest. the anchor is the truth; these pages are its windows.</p>
+  <div class="org"><span>BEEHIVE-NATURE</span><span>BEEHIVE-BIOMASS</span><span>SKAISTS</span></div>
+</header>
 
-<h2>identity — the ceremony</h2>
-<div class="grid">
-<a class="card" href="onboarding/"><span class="ic">🔑</span><h3>bDiD Onboarding <span class="live">live key build</span></h3><p>Passkey (PRF) or phrase → real Ed25519 keys, real 24 words, honest refusals. Phones welcome.</p></a>
-<a class="card" href="recover.html"><span class="ic">📄</span><h3>Offline Recovery Tool</h3><p>24 words → your keys with zero network. Download it; it outlives every service.</p></a>
-<a class="card" href="onboarding/receive.html"><span class="ic">📥</span><h3>Receive on the bLighTnetWorK</h3><p>The receive side of the optical pairing ceremony.</p></a>
-</div>
+<section>
+  <h2>◈ VISIT — the art</h2>
+  <div class="grid">
+    <a class="card" href="blight/gallery.html"><div class="t">🖼 the Gallery</div><div class="d">a walking tour of on-chain art — crowns lead, the veil ghosts behind</div><div class="tag">NEW</div></a>
+    <a class="card" href="blight/inscription-explorer.html"><div class="t">🔍 the Explorer</div><div class="d">whose art shall we visit? any wallet, any name — the doorway</div></a>
+    <a class="card" href="blight/compare.html"><div class="t">⊞ the Catalog</div><div class="d">seven ERC-20i artists compared — ladders, traits, prices of the top rung</div></a>
+    <a class="card" href="blight/museum.html"><div class="t">🏛 the Museum</div><div class="d">what "on-chain" actually means — exhibits with receipts</div></a>
+    <a class="card" href="blight/bnri-gallery.html"><div class="t">🌌 bNRi Gallery</div><div class="d">the fleet renders its own native art</div></a>
+  </div>
+</section>
 
-<h2>light — the optical stack</h2>
-<div class="grid">
-<a class="card" href="blight/demo.html"><span class="ic">💡</span><h3>bLiGhTbeAM demo</h3><p>The bComb hexagonal beam, live — screen-to-camera data on luminance alone.</p></a>
-<a class="card" href="blight/"><span class="ic">🛸</span><h3>bLighT fLeeT</h3><p>One operation, many frequencies — the fleet view.</p></a>
-<a class="card" href="blight/museum.html"><span class="ic">🏛</span><h3>bLighT Museum</h3><p>What "on-chain" actually means, shown not told.</p></a>
-</div>
+<section>
+  <h2>⧉ TRADE — the floors</h2>
+  <div class="grid">
+    <a class="card g" href="blight/market.html"><div class="t">the Apiary — inscription market</div><div class="d">locked inscriptions, USDC + exSat · inquire, make offers, share rooms</div><div class="tag">NEW · MVP</div></a>
+    <a class="card g" href="blight/farmers.html"><div class="t">🌻 the Farmers Market</div><div class="d">the community's private party — fUSD, bAccord cards, bQueenBee refereed</div><div class="tag">NEW · MVP</div></a>
+    <a class="card g" href="blight/coop.html"><div class="t">🌾 the Coop</div><div class="d">hemp biomass downstream — the criticality index, Core 10 live</div><div class="tag">NEW · MVP</div></a>
+    <a class="card g" href="dao-dashboard/"><div class="t">🗳 DAO Dashboard</div><div class="d">apps, rewards, the governance view</div></a>
+  </div>
+</section>
 
-<h2>art & markets — the inscription economy</h2>
-<div class="grid">
-<a class="card" href="blight/inscription-explorer.html"><span class="ic">🔍</span><h3>Inscription Explorer</h3><p>Browse the chain's inscriptions.</p></a>
-<a class="card" href="blight/bnri-gallery.html"><span class="ic">🎨</span><h3>BNRi Gallery</h3><p>The fleet's own art.</p></a>
-<a class="card" href="blight/studio-gate.html"><span class="ic">🚪</span><h3>Studio Gate</h3><p>Trait pre-flight for creators.</p></a>
-<a class="card" href="blight/vaulta-reader.html"><span class="ic">📖</span><h3>Vaulta Reader</h3><p>The b-indexer's read path, keyless.</p></a>
-<a class="card" href="blight/compare.html"><span class="ic">📊</span><h3>The Catalog</h3><p>Every ERC-20i artist side-by-side — levels, traits, live prices.</p></a>
-<a class="card" href="blight/midi-organ.html"><span class="ic">🎹</span><h3>The Organ</h3><p>The lost MIDI music contracts, playable again.</p></a>
-<a class="card" href="blight/c1-aid.html"><span class="ic">🧮</span><h3>C-1 Aid</h3><p>Taxonomy sizing from the tree's own numbers.</p></a>
-</div>
+<section>
+  <h2>🌾 HARVEST — the land</h2>
+  <div class="grid">
+    <a class="card g" href="blight/c1-aid.html"><div class="t">🌱 C-1 Aid</div><div class="d">taxonomy sizing from the tree's own numbers</div></a>
+    <a class="card g" href="hardware/"><div class="t">🔧 Hardware Guide</div><div class="d">the open-hardware review + the manufacturer shelves (Trezor · Foundation)</div></a>
+  </div>
+</section>
 
-<h2>hardware — learn · verify · build</h2>
-<div class="grid">
-<a class="card" href="hardware/"><span class="ic">🐝</span><h3>Open Hardware Guide</h3><p>Every wallet worth owning; open tech only; excluded list with reasons.</p></a>
-<a class="card" href="hardware/security.html"><span class="ic">🛡</span><h3>Security Events</h3><p>Coldcard RNG, TROPIC01, Ledger Recover — read honestly.</p></a>
-<a class="card" href="hardware/build.html"><span class="ic">🔧</span><h3>Become a Producer</h3><p>$50 build party → open silicon; EDC & Tomorrowland as proving ground.</p></a>
-<a class="card" href="hardware/lab.html"><span class="ic">⬡</span><h3>The Lab</h3><p>Science + art reviews under ratified law; the Comb Score.</p></a>
-</div>
+<section>
+  <h2>🎛 MAKE — the studio</h2>
+  <div class="grid">
+    <a class="card v" href="blight/midi-organ.html"><div class="t">🎵 the Organ</div><div class="d">the seed becomes sound — MiDi's scales playable again</div><div class="tag">NEW</div></a>
+    <a class="card v" href="blight/studio-music.html"><div class="t">🎛 the Studio</div><div class="d">16-step sequencer — import any piece's scale, export the score</div><div class="tag">NEW</div></a>
+    <a class="card v" href="blight/studio-gate.html"><div class="t">⚗ the Gate</div><div class="d">drop art, the chain's own checker judges it (WASM)</div></a>
+    <a class="card v" href="blight/workbench.html"><div class="t">🛠 the Workbench</div><div class="d">every instrument — receipts, selftests, BTC/BCH readers, raw calldata</div><div class="tag">MASTER TIER</div></a>
+    <a class="card v" href="blight/demo.html"><div class="t">▷ Demo</div><div class="d">the original walk-through</div></a>
+  </div>
+</section>
 
-<h2>governance</h2>
-<div class="grid">
-<a class="card" href="dao-dashboard/"><span class="ic">🌀</span><h3>skaists DAO dashboard</h3><p>Circles of six, the fold to one carried voice.</p></a>
-</div>
+<section>
+  <h2>🔑 KEYS — the self</h2>
+  <div class="grid">
+    <a class="card" href="onboarding/"><div class="t">🗝 Key Build</div><div class="d">real WebAuthn PRF ceremony · real 24-word root · audited engine</div></a>
+    <a class="card" href="onboarding/receive.html"><div class="t">📥 Receive</div><div class="d">your addresses, plainly</div></a>
+    <a class="card" href="recover.html"><div class="t">🛟 Recovery</div><div class="d">offline, zero network — 24 words home</div></a>
+    <a class="card" href="hardware/build.html"><div class="t">🔩 Hardware Build</div><div class="d">the bSAFE build path</div></a>
+    <a class="card" href="hardware/security.html"><div class="t">🛡 Security</div><div class="d">the doctrine page</div></a>
+    <a class="card" href="hardware/lab.html"><div class="t">🧪 the Lab</div><div class="d">the hardware lab charter</div></a>
+  </div>
+</section>
 
-<div class="doctrine"><b style="color:var(--ink)">Beta testers:</b> start with the onboarding ceremony on your phone, then flash the beam demo at a second device's camera. Screenshot every refusal and every confusing sentence — the words are the product.</div>
+<section>
+  <h2>🛰 READ — the instruments</h2>
+  <div class="grid">
+    <a class="card" href="blight/vaulta-reader.html"><div class="t">📡 Vaulta Reader</div><div class="d">the b-indexer's read path, keyless</div></a>
+    <a class="card" href="https://github.com/beehive-nature/beehive-nature"><div class="t">⌥ Source</div><div class="d">everything, on GitHub</div></a>
+  </div>
+</section>
 
 <footer>
-AGPL-3.0-only · <a href="https://github.com/beehive-nature/beehive-nature" rel="noopener">source tree</a> · this page: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/index.html" rel="noopener">surfaces/index.html</a> · derivation pattern credits <a href="https://github.com/RockwellShah/filekey" rel="noopener">FileKey</a> (GPLv3) · QR by <a href="https://github.com/trezor/QR-Code-generator" rel="noopener">Nayuki</a> (MIT)<br>
-don't trust these pages either — every claim links its source. Verify.
+  22 surfaces · three orgs · one organism — <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/architecture/HOMEOSTASIS-v1.md">HOMEOSTASIS v1</a><br>
+  student below, teacher beside, master behind the ⚗ — every eye welcome
 </footer>
-</main><script src="tour.js?v=5"></script>
-</body></html>
+<script src="tour.js?v=5"></script>
+</body>
+</html>
