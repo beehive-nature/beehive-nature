@@ -51,8 +51,9 @@
         'background:#12301a;color:#9FFF3D;border:1px solid #242433;border-radius:7px;padding:8px 12px;cursor:pointer;font:11px ui-monospace,monospace',
         function(){
           var u=location.origin+location.pathname;
-          var note='OFFER - '+p.col.sym+' seed '+p.seed.toLocaleString()+
-            ' (level '+(p.lvln===null?'?':p.lvln)+')\n'+
+          var ptrLine=window.PTR?PTR.room(p.col.sym,p.seed):null;
+          var note=(ptrLine?ptrLine+'\n':'OFFER - '+p.col.sym+' seed '+p.seed.toLocaleString()+
+            ' (level '+(p.lvln===null?'?':p.lvln)+')\n')+
             'spot approx $'+val.toLocaleString()+' | my offer: ____ USDC | exact amount\n'+
             'room: '+u+'\n- from the Modern Inscription Art Gallery';
           navigator.clipboard.writeText(note).then(function(){
