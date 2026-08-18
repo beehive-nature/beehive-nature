@@ -34,12 +34,28 @@ button:hover{background:#c9a0ff;color:#000}
 <footer>relays: damos · nos.lol · nostr.band (rotation v1) · E2E NIP-44 docks with secp256k1 vendoring</footer>
 <script src="./pointers.js?v=1"></script>
 <script src="./relay.js?v=1"></script>
+<script src="./bsky.js?v=1"></script>
 <script>
 var feed=document.getElementById('feed');
 var state=document.getElementById('state');
 document.getElementById('listen').onclick=function(){
   this.disabled=true; this.textContent='listening…';
   RELAY.connect(null,function(s){ state.textContent=s; });
+  BSKY.searchPointer('[bX',function(p){
+    var d=document.createElement('div'); d.className='note';
+    var t=document.createElement('div'); t.className='t';
+    t.textContent=p.at+' · bsky';
+    var c=document.createElement('div');
+    var html=[]; String(p.text).split(' — ').forEach(function(part){
+      if(/^https?:///.test(part)) html.push('<a href="'+part+'" target="_blank" rel="noopener noreferrer">'+part.slice(0,58)+'…</a>');
+      else html.push(part.replace(/[<>]/g,''));
+    });
+    c.innerHTML=html.join(' — ');
+    var f=document.createElement('div'); f.className='from';
+    f.textContent='@'+p.author;
+    d.appendChild(t); d.appendChild(c); d.appendChild(f);
+    feed.insertBefore(d,feed.children[1]||null);
+  },function(m){ });
 };
 RELAY.on(function(n){
   var d=document.createElement('div'); d.className='note';
