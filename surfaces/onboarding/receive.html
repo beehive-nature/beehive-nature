@@ -1214,6 +1214,16 @@ var qrcodegen;
        merged OUTER edges span 19.84*size wide, 22.379*size tall            */
   var CEN_W = 18.0, CEN_H = 20.784, RIM_W = 19.84, RIM_H = 22.379;
 
+  /* Scratch buffers, reused across calls: allocating mask+seen+stack fresh
+     (≈2.5 MB at 640², every camera frame) was a GC storm on phones. Keyed
+     by pixel count in case frame sizes interleave. */
+  var SCRATCH = {};
+  function scratchFor(N) {
+    var s = SCRATCH[N];
+    if (!s) s = SCRATCH[N] = { mask: new Uint8Array(N), seen: new Uint8Array(N), stack: new Int32Array(N) };
+    else { s.mask.fill(0); s.seen.fill(0); }
+    return s;
+  }
   function findFinder(img) {
     var d = img.data, W = img.width, H = img.height, N = W * H, i;
     // adaptive: "lit" is relative to this frame, so exposure drift cannot break it
@@ -1222,10 +1232,10 @@ var qrcodegen;
     if (hi - lo < 25) return null;
     var cut = lo + (hi - lo) * 0.55;
 
-    var mask = new Uint8Array(N);
+    var sc = scratchFor(N), mask = sc.mask;
     for (i = 0; i < N; i++) if (luma(d, i * 4) > cut) mask[i] = 1;
 
-    var seen = new Uint8Array(N), stack = new Int32Array(N), blobs = [];
+    var seen = sc.seen, stack = sc.stack, blobs = [];
     for (i = 0; i < N; i++) {
       if (!mask[i] || seen[i]) continue;
       var sp = 0, n = 0, sx = 0, sy = 0, x0 = W, x1 = -1, y0 = H, y1 = -1;
@@ -1564,7 +1574,7 @@ function tryComb(){
   if(!window.bcomb || !combAsm) return null;
   const v=$('cam'); if(!v.videoWidth) return null;
   if(!combCanvas){ combCanvas=document.createElement('canvas'); combCanvas.width=640; combCanvas.height=640; }
-  const g=combCanvas.getContext('2d');
+  const g=combCanvas.getContext('2d',{willReadFrequently:true});
   const s=Math.min(v.videoWidth,v.videoHeight);          // centre square crop
   g.drawImage(v,(v.videoWidth-s)/2,(v.videoHeight-s)/2,s,s,0,0,640,640);
   const ins=bcomb.inspect(g.getImageData(0,0,640,640));
@@ -1586,12 +1596,17 @@ function tryComb(){
   $('guide-title').textContent=`bComb frame ${fr.index+1}/${fr.total} read from the hexagons…`;
   return done || 'more';
 }
+let scanFrame=0;
 async function tick(){ if(!scanning)return;
-  try{ const c=await detector.detect($('cam'));
-       if(c.length && handle(c[0].rawValue)!=='more'){ scanning=false; return; } }catch(e){}
-  // no QR this frame? try the hexagons
-  try{ const combed=tryComb();
-       if(combed && combed!=='more' && handle(combed)!=='more'){ scanning=false; return; } }catch(e){}
+  // Full decode work at 60fps against a 4fps transmitter was pure heat on a
+  // phone — every 2nd frame (~30Hz) still samples each beamed frame ~7×.
+  if((scanFrame++&1)===0){
+    try{ const c=await detector.detect($('cam'));
+         if(c.length && handle(c[0].rawValue)!=='more'){ scanning=false; return; } }catch(e){}
+    // no QR this frame? try the hexagons
+    try{ const combed=tryComb();
+         if(combed && combed!=='more' && handle(combed)!=='more'){ scanning=false; return; } }catch(e){}
+  }
   raf=requestAnimationFrame(tick); }
 
 /* ===== the conversation panel ===== */

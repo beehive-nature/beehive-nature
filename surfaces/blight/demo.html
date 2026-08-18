@@ -1213,6 +1213,16 @@ var qrcodegen;
        merged OUTER edges span 19.84*size wide, 22.379*size tall            */
   var CEN_W = 18.0, CEN_H = 20.784, RIM_W = 19.84, RIM_H = 22.379;
 
+  /* Scratch buffers, reused across calls: allocating mask+seen+stack fresh
+     (≈4.4 MB at 860², 4×/s, forever) was a GC storm that froze phones. Keyed
+     by pixel count because the beam (860²) and the ear (640²) interleave. */
+  var SCRATCH = {};
+  function scratchFor(N) {
+    var s = SCRATCH[N];
+    if (!s) s = SCRATCH[N] = { mask: new Uint8Array(N), seen: new Uint8Array(N), stack: new Int32Array(N) };
+    else { s.mask.fill(0); s.seen.fill(0); }
+    return s;
+  }
   function findFinder(img) {
     var d = img.data, W = img.width, H = img.height, N = W * H, i;
     // adaptive: "lit" is relative to this frame, so exposure drift cannot break it
@@ -1221,10 +1231,10 @@ var qrcodegen;
     if (hi - lo < 25) return null;
     var cut = lo + (hi - lo) * 0.55;
 
-    var mask = new Uint8Array(N);
+    var sc = scratchFor(N), mask = sc.mask;
     for (i = 0; i < N; i++) if (luma(d, i * 4) > cut) mask[i] = 1;
 
-    var seen = new Uint8Array(N), stack = new Int32Array(N), blobs = [];
+    var seen = sc.seen, stack = sc.stack, blobs = [];
     for (i = 0; i < N; i++) {
       if (!mask[i] || seen[i]) continue;
       var sp = 0, n = 0, sx = 0, sy = 0, x0 = W, x1 = -1, y0 = H, y1 = -1;
@@ -1493,7 +1503,15 @@ function hexPath(g,cx,cy,r,rot){
   g.closePath();
 }
 
-let spin=0, haloT=0;
+/* One pre-rendered radial glow, stamped per lit cell. shadowBlur on 91 cells
+   at 60fps was CPU-rasterized on phones and froze the tab; a sprite blit is
+   the same aura at a fraction of the cost. */
+const GLOW=(()=>{const c=document.createElement('canvas');c.width=c.height=128;
+  const g=c.getContext('2d'), rg=g.createRadialGradient(64,64,8,64,64,62);
+  rg.addColorStop(0,'rgba(190,240,255,0.75)');rg.addColorStop(0.45,'rgba(160,225,250,0.26)');
+  rg.addColorStop(1,'rgba(160,225,250,0)');
+  g.fillStyle=rg;g.fillRect(0,0,128,128);return c;})();
+let spin=0, haloT=0, beamFrame=0;
 function drawBeam(){
   /* THE DECORATION MUST NEVER PAINT OVER THE DATA. This renderer and tick()
      share one canvas: at 60fps it was overwriting the real bComb frame that
@@ -1506,11 +1524,12 @@ function drawBeam(){
      color is fucking up the receiving camera/process" — he was reading the
      symptom exactly right.) */
   if(timer){ requestAnimationFrame(drawBeam); return; }
-  const cv=$('beam'), g=cv.getContext('2d'), W=cv.width, H=cv.height;
+  if(beamFrame++&1){ requestAnimationFrame(drawBeam); return; }   // 30fps is plenty for a slow spin
+  const cv=$('beam'), g=cv.getContext('2d',{willReadFrequently:true}), W=cv.width, H=cv.height;
   g.clearRect(0,0,W,H); g.save(); g.translate(W/2,H/2);
 
   // --- colour halo: decoration, ZERO bits (spins, breathes) ---
-  haloT+=0.012;
+  haloT+=0.024;
   const stops=['#FBFB9F','#86CC72','#45C2DC','#6FA9E0','#9C6FD6'];
   g.save(); g.rotate(spin*0.35);
   for(let ring=0; ring<3; ring++){
@@ -1532,20 +1551,21 @@ function drawBeam(){
     c.t += ((c.lit?1:0)-c.t)*0.28;         // eased transition per frame
     const r=25 + c.t*4;
     if(c.t>0.04){
-      g.shadowColor='rgba(180,240,255,'+(0.55*c.t)+')';
-      g.shadowBlur=26*c.t;
+      const gs=r*3.4;
+      g.globalAlpha=0.85*c.t;
+      g.drawImage(GLOW,c.x-gs/2,c.y-gs/2,gs,gs);
+      g.globalAlpha=1;
       g.fillStyle=`rgba(255,255,255,${0.10+0.90*c.t})`;
     }else{
-      g.shadowBlur=0; g.fillStyle='rgba(255,255,255,0.045)';
+      g.fillStyle='rgba(255,255,255,0.045)';
     }
     hexPath(g,c.x,c.y,r,Math.PI/6);
     g.fill();
-    g.shadowBlur=0;
     g.lineWidth=2; g.strokeStyle=`rgba(120,200,220,${0.10+0.35*c.t})`;
     g.stroke();
   }
   g.restore(); g.restore();
-  spin+=0.006;
+  spin+=0.012;
   requestAnimationFrame(drawBeam);
 }
 requestAnimationFrame(drawBeam);
@@ -1619,7 +1639,7 @@ function send(){
   // proven by bcomb.selfTest(); the QR lane keeps its own 28-byte chunking.
   try{ COMB = window.bcomb ? bcomb.framesFor(body) : []; }
   catch(e){ COMB=[]; log('bcomb: '+e.message); }
-  K=chunks.length; got=new Array(K).fill(false); seq=0; loops=0;
+  K=chunks.length; got=new Array(K).fill(false); seq=0; loops=0; lastSelfOk='';
   $('cells').innerHTML=chunks.map(()=>'<i></i>').join('');
   $('app-title').textContent=P.title; $('app-state').textContent='Beam detected — collecting frames…';
   $('installed').innerHTML=''; $('bar').style.width='0%';
@@ -1639,20 +1659,27 @@ function stop(){
   $('guide-body').textContent='Press send whenever you want it back.';
   step(1);
 }
+let lastSelfOk='';
 function tick(){
+  if(document.hidden) return;            // a hidden screen transmits nothing — don't burn the phone
   const idx=seq%K, pass=Math.floor(seq/K);
   if(idx===0&&seq>0){ loops++; if(loops===1) step(4); }
   const frame=JSON.stringify({v:1,k:P.obj.kind,i:idx,n:K,d:chunks[idx]});
-  // ---- bComb lane: draw a REAL frame and immediately decode it back off our
-  // own canvas — live proof the hexagons carry data (no camera needed) ----
+  // ---- bComb lane: draw a REAL frame; every 8th frame, decode it back off our
+  // own canvas — live proof the hexagons carry data (no camera needed). The
+  // full-canvas readback + finder is the page's heaviest work; sampling it
+  // keeps the proof honest without freezing phones. ----
   let selfOk='';
   if(COMB.length && window.bcomb){
-    const ci=seq%COMB.length, cv=$('beam'), g=cv.getContext('2d');
+    const ci=seq%COMB.length, cv=$('beam'), g=cv.getContext('2d',{willReadFrequently:true});
     bcomb.draw(g, cv.width, COMB[ci]);
-    const back=bcomb.decode(g.getImageData(0,0,cv.width,cv.height));
-    selfOk = back && back.index===ci
-      ? ` · self-verified ✓ frame ${back.index+1}/${back.total} read back off this screen`
-      : ' · self-verify: could not read back (report this)';
+    if(seq%8===0){
+      const back=bcomb.decode(g.getImageData(0,0,cv.width,cv.height));
+      lastSelfOk = back && back.index===ci
+        ? ` · self-verified ✓ frame ${back.index+1}/${back.total} read back off this screen`
+        : ' · self-verify: could not read back (report this)';
+    }
+    selfOk=lastSelfOk;
   }else{
     showBits(frame);                     // fallback: decorative bits only
   }
@@ -1706,9 +1733,12 @@ function stopEar(){ cancelAnimationFrame(earRaf);
 async function earLoop(){
   if(!earStream) return;
   const v=$('ear');
-  if(v.videoWidth){
+  // Full-frame finder work at 60fps against a 4fps transmitter was pure heat —
+  // every 2nd frame (~30Hz) still samples each beamed frame ~7 times over.
+  const heavy=(earTick&1)===0; earTick++;
+  if(v.videoWidth && heavy){
     if(!earCv){ earCv=document.createElement('canvas'); earCv.width=earCv.height=640; }
-    const g=earCv.getContext('2d'), s=Math.min(v.videoWidth,v.videoHeight);
+    const g=earCv.getContext('2d',{willReadFrequently:true}), s=Math.min(v.videoWidth,v.videoHeight);
     g.drawImage(v,(v.videoWidth-s)/2,(v.videoHeight-s)/2,s,s,0,0,640,640);
     // 1. our hexagons — coach with a specific cure, and REWARD every catch
     if(window.bcomb&&earAsm){
@@ -1718,11 +1748,10 @@ async function earLoop(){
         if(earAsm.got>before) earNew=performance.now();     // flash on a NEW frame
         earProgress(ins, fr);
         if(done){ stopEar(); return gotAnswer(done); }
-      }else if(earTick%8===0){
+      }else if(earTick%16<2){
         earProgress(ins,null);
       }
     }
-    earTick++;
     // 2. their QR, if this browser can
     if(earDet){ try{ const c=await earDet.detect(v); if(c.length){ stopEar(); return gotAnswer(c[0].rawValue); } }catch(e){} }
   }
