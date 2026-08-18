@@ -11,7 +11,7 @@
     ['C-1','blight/c1-aid.html'],['vaulta','blight/vaulta-reader.html'],['museum','blight/museum.html'],
     ['market','blight/market.html'],['farmers','blight/farmers.html'],['coop','blight/coop.html'],
     ['pulse','blight/pulse.html'],['hearth','blight/hearth.html'],
-    ['hw','hardware/'],['keys','onboarding/'],['recover','recover.html']];
+    ['dao','../dao-dashboard/'],['hw','hardware/'],['keys','onboarding/'],['dids','keys/addresses.html'],['recover','recover.html']];
   var bar=document.createElement('nav');
   bar.id='tourbar';
   bar.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:9998;'+
