@@ -62,7 +62,15 @@
         });
       var ct=btn('contact owner — 5 USDC anti-spam',
         'background:#0a1626;color:#69b7ff;border:1px solid #242433;border-radius:7px;padding:8px 12px;cursor:pointer;font:11px ui-monospace,monospace',
-        function(){ ct.textContent='5 USDC held — opens when the rail docks'; });
+        function(){
+        var ev=TOLL.event(null,null,location.href);
+        ct.textContent='5 USDC anti-spam — the escrow event:';
+        var box=document.createElement('div');
+        box.style.cssText='margin-top:10px;max-width:560px';
+        TOLL.render(box,ev);
+        var host=document.getElementById('parlor');
+        if(host) host.appendChild(box);
+      });
       var ai=btn('the artist AI seat',
         'background:#26123a;color:#c9a0ff;border:1px solid #242433;border-radius:7px;padding:8px 12px;cursor:pointer;font:11px ui-monospace,monospace',
         function(){
