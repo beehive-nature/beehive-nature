@@ -18,7 +18,9 @@
       (here?'border:1px solid #1d3a26;border-radius:3px':'')+'">'+p[0]+'</a>';
   }).join('');
   document.body.appendChild(bar);
-  document.body.style.paddingBottom='46px';
+  // the bar wraps on narrow screens and GROWS — measure it, never guess.
+  var pad=function(){ document.body.style.paddingBottom=(bar.offsetHeight+10)+'px'; };
+  pad(); if(window.ResizeObserver) new ResizeObserver(pad).observe(bar); else window.addEventListener('resize',pad);
   // lane discipline: fixed bottom widgets must not sit under the bar or each other.
   // the ⌂ badge rides just above the bar; the ⧉ market door rides above that.
   var badge=document.getElementById('bnr-beta-badge');
