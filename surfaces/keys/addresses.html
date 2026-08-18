@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>your two addresses — did:plc + npub from one bDiD root</title>
+<style>
+:root{--bg:#0d1410;--ink:#e2efdb;--cyan:#00E5FF;--violet:#c9a0ff;--gold:#FFD700;--dim:#8a9a8a;--line:#243026}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:40px 16px 90px}
+header{text-align:center;margin-bottom:24px}
+h1{font-size:clamp(18px,4vw,26px);color:var(--cyan);font-weight:400;letter-spacing:.05em}
+header p{color:var(--dim);font-size:11.5px;margin-top:8px}
+.wrap{max-width:760px;margin:0 auto}
+.card{background:#111a14;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:16px}
+.card h3{font-weight:400;font-size:14px;letter-spacing:.05em}
+.card.plc h3{color:var(--cyan)} .card.npub h3{color:var(--violet)}
+.row{display:flex;justify-content:space-between;gap:14px;padding:8px 0;border-bottom:1px dotted var(--line);font-size:11.5px}
+.row .k{color:var(--dim);flex-shrink:0}
+.row .v{text-align:right;word-break:break-all}
+.mono{font-size:10.5px;color:var(--gold)}
+.note{color:var(--dim);font-size:10.5px;line-height:1.8;margin-top:10px}
+.note b{color:var(--ink);font-weight:400}
+form{display:flex;gap:8px;margin:16px auto 20px;max-width:560px}
+input{flex:1;background:#0a100c;color:var(--cyan);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font:12px 'IBM Plex Mono',monospace}
+button{background:#12301a;color:#9FFF3D;border:1px solid #2c4418;border-radius:8px;padding:10px 18px;cursor:pointer;font:12px 'IBM Plex Mono',monospace}
+button:hover{background:#9FFF3D;color:#000}
+footer{max-width:760px;margin:26px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
+</style>
+</head>
+<body>
+<header>
+  <h1>🗝 your two addresses</h1>
+  <p>one bDiD root · two mailing rails — bsky (did:plc) and nostr (npub) · TASKS 1+2 of the comms ledger</p>
+</header>
+<div class="wrap">
+<form onsubmit="event.preventDefault();derive()">
+  <input id="root" placeholder="paste a root seed / any string to see the derivation shape" spellcheck="false">
+  <button>derive the shape</button>
+</form>
+
+  <div class="card plc">
+    <h3>① the bsky address — did:plc</h3>
+    <div class="row"><span class="k">did method</span><span class="v">did:plc (portable, PDS-hosted, ATProto)</span></div>
+    <div class="row"><span class="k">derivation role</span><span class="v">bDiD root ATTESTS the plc signing key (never is it)</span></div>
+    <div class="row"><span class="k">plc document</span><span class="v mono" id="plcDoc">did:plc:&lt;rotation-0-hash-of-root&gt;</span></div>
+    <div class="row"><span class="k">also_known_as</span><span class="v mono" id="plcAka">at://handle.beehive</span></div>
+    <div class="row"><span class="k">escrow event field</span><span class="v mono">buyer_did / seller_did: did:plc:…</span></div>
+    <div class="note"><b>law:</b> the plc did is a HANDLE, not the root — lose it and the root re-attests a new one. rotation keys held by the bDiD ceremony; the escrow fixtures already speak this field.</div>
+  </div>
+
+  <div class="card npub">
+    <h3>② the nostr address — npub</h3>
+    <div class="row"><span class="k">key scheme</span><span class="v">secp256k1 pair, bech32 (npub/nsec)</span></div>
+    <div class="row"><span class="k">derivation role</span><span class="v">bDiD root derives the pair via registered context</span></div>
+    <div class="row"><span class="k">npub (public)</span><span class="v mono" id="npubV">npub1&lt;bech32-of-derived-pub&gt;</span></div>
+    <div class="row"><span class="k">nsec (secret)</span><span class="v mono">never rendered, never on-chain, client-held only</span></div>
+    <div class="row"><span class="k">NIP-05</span><span class="v mono" id="nip05">name@beehive.nature</span></div>
+    <div class="row"><span class="k">DM payload</span><span class="v mono">pointers only (?room ?order ?piece) — never content</span></div>
+    <div class="note"><b>law:</b> the npub is an ADDRESS of the root, not the root itself; relays carry ciphertext (NIP-44 class), and the derivation context is registered so any client can re-derive from the ceremony. secp256k1 vendoring docks with the engine (bdid-key carries ed25519 today).</div>
+  </div>
+
+  <div class="card">
+    <h3 style="color:var(--gold)">③ the binding attestation (on-chain row)</h3>
+    <div class="row"><span class="k">attestation event</span><span class="v mono">did-bind: {root_fp, plc, npub, ts, sig}</span></div>
+    <div class="row"><span class="k">where</span><span class="v">Vaulta custom_json lane (the event layer already chosen)</span></div>
+    <div class="row"><span class="k">cost</span><span class="v">HP-only, free forever at stake (measured 17/20 ops are custom_json)</span></div>
+    <div class="note"><b>the interweave:</b> one soul, two mailing addresses, both revocable, both re-derivable. bAccords (TASK 4) stamp both fields on every card and event.</div>
+  </div>
+
+  <footer>part of the comms ledger (TASKS 1–10) · static, keyless demo — the derivation display shows SHAPE; real keys dock with the engine · zCode 2026-08-18</footer>
+</div>
+<script>
+/* TASK 1+2 shippable slice: the BINDING SURFACE. Deterministic shape-display from any
+   string (SHA-256, WebCrypto) so the page demonstrates the derivation grammar without
+   pretending to hold keys. Real plc/secp256k1 operations dock with the key-build engine. */
+async function sha256hex(s){
+  const d=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)));
+  return [...d].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+const B32='qpzry9x8gf2tvdw0s3jn54khce6mua7l';
+function bech32polymod(v){const G=[0x3b6a57b2,0x26508e6d,0x1ea119fa,0x3d4233dd,0x2a1462b3];let c=1;
+  for(let d of v){c^=d>>25;for(let i=0;i<5;i++)if((c>>i)&1)c^=G[i];c=(c<<1)^(d&0x1f)^0x1f;}return c^1;}
+function bech32(hrp,hex){
+  const data=[];for(let i=0;i<hex.length;i+=2)data.push(parseInt(hex.slice(i,i+2),16));
+  const conv=data.map(b=>(b>>1)^((b&1)<<4));
+  const values=[...hrp.split('').map(c=>c.charCodeAt(0)&31),0,...conv];
+  const poly=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+  for(let d of values)for(let i=5;i>0;i--)poly[i]=((poly[i]^((poly[0]>>7)^(d>>i)))<<1)|((poly[i-1]>>7)^(d>>i))&1,poly[0]=(poly[0]<<1)^(d&1);
+  let chk=0;const vals=values.concat([0,0,0,0,0,0]);
+  const chars=hrp+'1'+vals.map(v=>B32[v]).join('');
+  return chars;
+}
+async function derive(){
+  const v=document.getElementById('root').value.trim()||'demo-root';
+  const h=await sha256hex('bnr.b/did-plc/'+v);
+  const n=await sha256hex('bnr.b/nostr-npub/'+v);
+  document.getElementById('plcDoc').textContent='did:plc:'+h.slice(0,24);
+  document.getElementById('plcAka').textContent='at://'+(v.replace(/[^a-z0-9.-]/gi,'')||'handle')+'.beehive';
+  document.getElementById('npubV').textContent=bech32('npub',n.slice(0,52));
+  document.getElementById('nip05').textContent=(v.replace(/[^a-z0-9.-]/gi,'')||'name')+'@beehive.nature';
+}
+</script>
+<div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:.6rem;z-index:99999;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
+<script src="../tour.js?v=5"></script>
+</body>
+</html>
