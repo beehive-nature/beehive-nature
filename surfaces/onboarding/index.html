@@ -184,6 +184,7 @@ select.lang{font:inherit;font-size:.72rem;background:var(--bg-card);color:var(--
 </div>
 
 <script src="vendor/qrcodegen.js"></script>
+<script src="bdid-key.js"></script> <!-- vendored key engine: PRF→master_prk→Ed25519, BIP39, fingerprints -->
 <script>
 "use strict";
 /* ===========================================================================
@@ -192,9 +193,12 @@ select.lang{font:inherit;font-size:.72rem;background:var(--bg-card);color:var(--
    RAID_AUTHENTIK §18 (component + payload), so the same machine could drive a
    TUI, a phone, or an optical/paper packet, not just this DOM renderer.
    =========================================================================== */
-/* Flip to false when real key derivation + anchoring land — every preview
-   banner and downgraded gauge keys off this one constant. */
-const PREVIEW = true;
+/* Key derivation is REAL when the vendored engine (bdid-key.js) is present.
+   PREVIEW now means "keys not real" and flips automatically; ANCHORING remains
+   unbuilt either way and keeps its own Working gauge in creating(). */
+const ENGINE = window.BDIDKEY || null;
+const KEYS_REAL = !!ENGINE;
+const PREVIEW = !KEYS_REAL;
 
 const APP = {
   ctx:{ designation:"first-join", online:true, custody:null, remediated:false },
@@ -281,7 +285,7 @@ const SCREENS = {
     <textarea class="wordin" id="rec-words" rows="3" autocomplete="off" autocapitalize="none"
       onpaste="opsecPasteNote('rec-opsec')" placeholder="word1 word2 word3 …"></textarea>
     <div id="rec-opsec"></div>
-    ${PREVIEW?`<div class="gauge g-absent"><span class="s">Preview</span> Recovery derivation is not built yet — this screen validates SHAPE (12 words) and refuses honestly; it cannot restore anything today and says so rather than pretending.</div>`:''}
+    ${PREVIEW?`<div class="gauge g-absent"><span class="s">Preview</span> Recovery derivation is not built yet — this screen validates SHAPE (12 words) and refuses honestly; it cannot restore anything today and says so rather than pretending.</div>`:`<div class="gauge g-known"><span class="s">Real</span> Recovery derivation is live — 24 words (or a bdidrec1… code) rebuild your keys right here, offline.</div>`}
     <div id="rec-err" class="muted" style="color:var(--guard);min-height:1.2em"></div>
     <button class="btn primary" onclick="APP.tryRecover()">Recover my wallet</button>
     <button class="btn link" onclick="APP.go('returning')">← Back</button>
@@ -452,7 +456,7 @@ const SCREENS = {
   recovery(){
     // AUDIT FIX (high): memoize — "See the phrase again" re-renders this screen,
     // and regenerating would silently invalidate the phrase already written down.
-    const words = APP._words = (APP._words || genWords());
+    const words = APP._words = (APP._words || (ENGINE ? (APP.establishRoot(null), APP._words) : genWords()));
     const grid = words.map((w,i)=>`<span><b>${i+1}</b>${w}</span>`).join('');
     // PREVIEW=true until real BIP-39 derivation lands. Beta round 5 caught the
     // founder backing up prop words as real — a false signal this banner kills.
@@ -504,9 +508,9 @@ const SCREENS = {
       <h2>Creating your identity</h2>
       <p>Writing your <span class="mono">did:webvh</span> and anchoring it to permanent storage.</p>
       <div class="panel" style="text-align:start">
-        ${PREVIEW
+        ${PREVIEW || !APP._id
           ? `<div class="gauge g-stale"><span class="s">Preview</span> Keypair binding — nothing real is derived yet</div>`
-          : `<div class="gauge g-known"><span class="s">Done</span> Keypair bound to ${custodyLabel()}</div>`}
+          : `<div class="gauge g-known"><span class="s">Done</span> Ed25519 record key derived (${APP.ctx.rootDoor||'phrase-only'}) · fingerprint <b>${APP._id.fingerprint.words}</b></div>`}
         ${APP.ctx.custody==='trezor'
           ? (APP.ctx.trezorReal
               ? `<div class="gauge g-known"><span class="s">Done</span> Recovery lives on your Trezor — you wrote it at device setup; we never ask for it, ever</div>`
@@ -550,6 +554,9 @@ const SCREENS = {
               ? `<div class="gauge g-known"><span class="s">Known</span> Custody · ${custodyLabel()} · firmware ${APP.ctx.trezorReal.fw} — REAL device verified over Trezor Connect</div>`
               : `<div class="gauge g-stale"><span class="s">Declared</span> Custody · your Trezor — walked through WITHOUT the device; nothing verified. Use "Connect my Trezor — for real" to earn Known</div>`)
           : `<div class="gauge g-stale"><span class="s">Declared</span> Custody · ${custodyLabel()} — self-reported only; nothing verified${APP.ctx.custody==='key'?' (real FIDO2 enrolment lands with the key build)':''}</div>`}
+        ${(!PREVIEW && APP._id)
+          ? `<div class="gauge g-known"><span class="s">Known</span> Identity fingerprint · <b>${APP._id.fingerprint.words}</b> <span class="mono">${APP._id.fingerprint.hex}</span> — compare by eye on any device</div>`
+          : ''}
         <div class="gauge g-absent"><span class="s">Absent</span> Balances — connect a rail to read (none faked)</div>
       </div>
 
@@ -558,6 +565,24 @@ const SCREENS = {
     <button class="btn primary" onclick="alert('→ hands off to the dashboard surface (crates/wallet-relay/src/dashboard.html)')">Enter dashboard →</button>
     <button class="btn link" onclick="APP.restart()">Start the walkthrough over</button>
   `; },
+};
+
+/* ---------- key build (engine-backed) ----------
+   Root policy: with a PRF-capable passkey the root derives from the PRF secret
+   (two doors — passkey and phrase — one root). Without PRF, the root is fresh
+   entropy and the PHRASE is the only root door; the passkey (if any) is an
+   authenticator only. Either way the authenticator is a key, never the identity
+   (crates/onboarding/src/lib.rs). */
+APP.establishRoot = function(prfSecret){
+  if(!ENGINE) return;
+  const prk = prfSecret ? ENGINE.masterPrkFromPrfSecret(prfSecret)
+                        : crypto.getRandomValues(new Uint8Array(32));
+  if(prfSecret) prfSecret.fill(0);
+  if(APP._root) APP._root.fill(0);
+  APP._root = prk;
+  APP._id = ENGINE.deriveIdentity(prk, 'bnr.b');
+  APP._words = APP._id.phrase.split(' ');
+  APP.ctx.rootDoor = prfSecret ? 'passkey+phrase' : 'phrase-only';
 };
 
 /* ---------- behaviors ---------- */
@@ -614,9 +639,19 @@ APP.tryRecover = function(){
   const raw=(document.getElementById('rec-words').value||'').trim().toLowerCase();
   const words=raw.split(/\s+/).filter(Boolean);
   const err=document.getElementById('rec-err');
+  if(ENGINE){
+    try{
+      const id = ENGINE.identityFromRecovery(raw, 'bnr.b');
+      if(APP._root) APP._root.fill(0);
+      APP._root=id.masterPrk; APP._id=id; APP._words=id.phrase.split(' ');
+      APP.ctx.custody = APP.ctx.custody || 'passkey'; APP.ctx.authMode='recovered';
+      err.style.color='var(--verified)';
+      err.textContent=`Restored. Fingerprint: ${id.fingerprint.words} — check it matches what you wrote next to your phrase.`;
+      return setTimeout(()=>APP.go('creating'), 1200);
+    }catch(e){ return err.textContent=e.message; }
+  }
   if(words.length!==12) return err.textContent=`That's ${words.length} words — a recovery phrase is exactly 12. Check for missed or doubled words.`;
-  if(PREVIEW) return err.textContent='Shape is valid (12 words) — but recovery derivation is not built yet, so nothing was restored. This refusal is the honest one.';
-  // real path lands with key derivation
+  return err.textContent='Shape is valid (12 words) — but recovery derivation is not built yet, so nothing was restored. This refusal is the honest one.';
 };
 APP.tryResume = function(){
   const raw=(document.getElementById('res-paste').value||'').trim();
@@ -636,16 +671,34 @@ APP.remediateTo = function(to){
 };
 APP.doPasskey = async function(btn){
   btn.disabled=true; btn.textContent='Waiting for your device…';
-  let ok=false, mode='simulated';
+  let ok=false;
   try{
     if(window.PublicKeyCredential && location.protocol!=='file:'){
-      // real attempt; harmless preview options
-      await navigator.credentials.create({ publicKey:{
-        challenge:new Uint8Array(32), rp:{name:'BNR'},
-        user:{id:new Uint8Array(16),name:'you@bnr',displayName:'You'},
-        pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
-        authenticatorSelection:{userVerification:'preferred'}, timeout:60000 }});
-      ok=true; mode='real';
+      if(ENGINE){
+        // Real ceremony. UV MUST be "required" at create AND get — CTAP2 returns a
+        // DIFFERENT PRF secret for non-UV assertions; "preferred" would let a later
+        // login silently derive a different identity (lockout that looks like data
+        // loss). residentKey "required" → discoverable; nothing stored but the passkey.
+        const enr = await ENGINE.enrollPasskey('you@bnr');
+        if(enr.prfEnabled){
+          // Layer-2 capability answer is yes → PRF assertion → derive the root.
+          const prf = await ENGINE.getPrfSecret();
+          APP.establishRoot(prf);
+        }else{
+          // Honest fallback rung: passkey authenticates, but this authenticator
+          // cannot derive (no PRF). Root = fresh entropy; the PHRASE is the root door.
+          APP.establishRoot(null);
+        }
+        ok=true;
+      }else{
+        // engine absent → labeled preview walkthrough, harmless options
+        await navigator.credentials.create({ publicKey:{
+          challenge:crypto.getRandomValues(new Uint8Array(32)), rp:{name:'BNR'},
+          user:{id:crypto.getRandomValues(new Uint8Array(16)),name:'you@bnr',displayName:'You'},
+          pubKeyCredParams:[{type:'public-key',alg:-8},{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
+          authenticatorSelection:{residentKey:'required',userVerification:'required'}, timeout:60000 }});
+        ok=true;
+      }
     }
   }catch(e){ ok=false; }
   if(ok){ this.ctx.authMode='real'; return this.go('recovery'); }
@@ -663,7 +716,7 @@ APP.doPasskey = async function(btn){
     holder.insertBefore(d, btn.nextSibling);
   }
 };
-APP.opticalDone = function(){ this.ctx.authMode='optical-air-gap'; this.go('recovery'); };
+APP.opticalDone = function(){ this.ctx.authMode='optical-air-gap'; if(ENGINE&&!APP._root) APP.establishRoot(null); this.go('recovery'); };
 APP.hardwareDone = function(){
   this.ctx.authMode='hardware';
   // TREZOR SKIPS THE PHRASE (founder ruling 2026-08-14): the device generated and
@@ -671,6 +724,7 @@ APP.hardwareDone = function(){
   // redundant AND a new harvest surface. The skip is a recorded decision, not a
   // silent hole: the creating screen shows recovery = "on your Trezor".
   if(this.ctx.custody==='trezor') return this.go('creating');
+  if(ENGINE&&!APP._root) APP.establishRoot(null);
   this.go('recovery');
 };
 APP.checkPhrase = function(){
@@ -914,5 +968,6 @@ function render(screen){
 APP.current='welcome';
 render('welcome');
 </script>
+<div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:.6rem;z-index:99999;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
 </body>
 </html>

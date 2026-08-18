@@ -1,0 +1,60 @@
+<!doctype html>
+<!-- BNR surface: BECOME A PRODUCER — page 3 of 3 (guide · security · build)
+     Mission: turn users of sovereign tech into builders of it. The proving ground
+     is the massive festival — a temporary micro-economy dense enough to stress
+     everything — and the graduates are the creators of the next 1000 years. -->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Become a Producer · BNR</title>
+<style>
+:root{--bg:#0d1117;--panel:#161b22;--line:#30363d;--ink:#e6edf3;--mut:#8b949e;--ok:#3fb950;--warn:#d29922;--teal:#39c5cf;--b:#e6b32e;--vio:#a78bfa}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;display:flex;justify-content:center;padding:1.5rem 1rem 4rem}
+main{max-width:860px;width:100%}a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
+nav{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.2rem}
+nav a{border:1px solid var(--line);border-radius:99px;padding:.25rem .9rem;font-size:.85rem;color:var(--mut)}
+nav a.here{color:var(--teal);border-color:var(--teal)}
+h1{font-size:1.35rem;color:var(--teal);margin:.2rem 0}.sub{color:var(--mut);font-size:.9rem;margin-bottom:1.4rem}
+h2{font-size:1.05rem;color:var(--ink);margin:1.6rem 0 .4rem}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:1rem 1.1rem;margin:1rem 0}
+p{color:var(--mut);font-size:.9rem;margin:.5rem 0}
+.step{display:flex;gap:.9rem;margin:.9rem 0}.step .n{color:var(--b);font-weight:700;min-width:1.6rem}
+.step b{color:var(--ink)}.step p{margin:.2rem 0 0}
+.case{border-left:3px solid var(--vio);padding-left:1rem}
+.doctrine{border-left:3px solid var(--teal);padding-left:1rem;color:var(--mut);font-size:.88rem}
+.links{font-size:.85rem}.links a{margin-right:1rem}
+footer{color:var(--mut);font-size:.78rem;margin-top:2rem;border-top:1px solid var(--line);padding-top:1rem}
+</style></head><body><main>
+<nav><a href="../">⌂ hub</a><a href="index.html">🐝 open hardware guide</a><a href="security.html">🛡 security events</a><a class="here" href="build.html">🔧 become a producer</a><a href="lab.html">⬡ the lab</a></nav>
+<h1>Don't just hold the keys — build the locks</h1>
+<div class="sub">Every device on the guide page was designed by a small group of people who decided not to wait for permission. This page is the ladder from <i>user</i> to <i>producer</i>: open hardware, open firmware, open silicon — and a proving ground unlike anywhere else on earth. The creators of the next thousand years start as students with a $50 kit.</div>
+
+<h2>The builder's ladder</h2>
+<div class="panel">
+<div class="step"><span class="n">1</span><div><b>Build one — the build party.</b><p>A SeedSigner or Krux assembles in an afternoon from ~$50 of commodity parts. You leave holding a signer you built with your own hands and can verify to the last line. This is the ceremony that converts belief into capability.</p></div></div>
+<div class="step"><span class="n">2</span><div><b>Read one — firmware literacy.</b><p>Open the source of the device in your pocket. Trace one flow end to end: seed words in → key derived → transaction displayed → signature out. You now know more about your own custody than 99% of holders.</p></div></div>
+<div class="step"><span class="n">3</span><div><b>Change one — your first patch.</b><p>Fork, change a screen, tighten a check, add a language. Flash it. The moment your own build boots is the moment vendors become optional. (This is exactly how bSAFE 7 began: a fork that restored what upstream dropped.)</p></div></div>
+<div class="step"><span class="n">4</span><div><b>Speak light — the optical layer.</b><p>Screens and cameras are radios that can't be jammed silently. Study fountain-coded QR (BC-UR), then the bComb beam — 127 hexagonal cells, no_std, honest CRCs — and make two devices talk with photons alone.</p></div></div>
+<div class="step"><span class="n">5</span><div><b>Wear it — the open wearable gap.</b><p>Watches and rings that sense heartbeat and presence are mostly closed today. That's not a wall, it's an opening: open-firmware wearables that attest liveness to a sovereign identity barely exist. First movers get to define the category.</p></div></div>
+<div class="step"><span class="n">6</span><div><b>Silicon — the thousand-year layer.</b><p>Auditable secure elements (TROPIC01), open microkernels (Xous/KeyOS-class), reference designs anyone can manufacture. The generation that treats chips the way this one treats code will build devices no empire can discontinue.</p></div></div>
+<div class="links" style="margin-top:.8rem">study: <a href="https://github.com/SeedSigner/seedsigner" rel="noopener">seedsigner</a> <a href="https://github.com/selfcustody/krux" rel="noopener">krux</a> <a href="https://github.com/BlockchainCommons/bc-ur" rel="noopener">bc-ur</a> <a href="https://github.com/trezor/trezor-firmware" rel="noopener">trezor-firmware</a> <a href="https://github.com/betrusted-io/xous-core" rel="noopener">xous</a> <a href="https://github.com/tropicsquare" rel="noopener">tropic square</a></div>
+</div>
+
+<h2>The proving ground: the massive festival</h2>
+<p>A giant EDM festival is a city that exists for three days: hundreds of thousands of people, dense radio spectrum, patchy backhaul, real money moving fast, and everyone wearing something on their wrist. It is the hardest honest test environment sovereign tech can ask for — <b style="color:var(--ink)">a temporary micro-economy where the whole loop (identity → payment → access → data) runs at maximum pressure and then resets.</b> What survives a festival scales to a city.</p>
+
+<div class="panel case"><b style="color:var(--ink)">Case study A — EDC Las Vegas.</b>
+<p>On the order of half a million attendances across three nights in a speedway. Today it runs on closed RFID wristbands and centralized cashless systems: one vendor, one database, one point of failure — and the attendee owns none of it. Study questions: map the payment + access flows; where does the system fail when backhaul drops? What would the same loops look like on optical + mesh with self-custodied identity? What does the attendee get back when they own their own data?</p></div>
+
+<div class="panel case"><b style="color:var(--ink)">Case study B — Tomorrowland, Belgium.</b>
+<p>Roughly four hundred thousand people across two weekends, with one of the most sophisticated closed wristband ecosystems in the world (payments, social features, access tiers). The most polished version of the centralized model — which makes it the best benchmark to surpass. Study questions: what UX standard must a sovereign wristband meet to feel this smooth? Which features exist only because the data is centralized — and which get <i>better</i> when it isn't?</p></div>
+
+<div class="panel"><b style="color:var(--ink)">The sandbox study: a socioeconomic wellness experiment.</b>
+<p>Run the sovereign stack at festival scale and the byproduct is a research dataset that exists nowhere else: a complete, consented picture of a temporary economy — spending, movement, mesh connectivity (bMeshAi), and Lane-C wellness telemetry from wearables — in a population of hundreds of thousands, with a natural control (the same festival on the closed stack).</p>
+<p>The data law is inherited, not invented: <b style="color:var(--ink)">per-study opt-in</b> bound to a persona nullifier, never the root identity; raw data sealed to the participant; only aggregates leave; participants are paid from the proceeds in the same economy they generated. Monetizing raw data means monetizing <i>consented, participant-owned</i> data — the study inherits the custody-disclosure law wholesale, and a study that can't recruit under those terms doesn't run.</p></div>
+
+<div class="panel doctrine"><b style="color:var(--ink)">The multi-dApp front end.</b> One surface, many dApps: wallet, access, marketplace, dispute, wellness — each an app holding a child seed, none holding the root, all riding the same mesh (bMeshAi) when the towers choke. The festival build IS the city build at 1:100 scale; cross-pollination is the point. Students who ship a stage-scale deployment have shipped the architecture of the macro economy.</div>
+
+<h2>Where to start this week</h2>
+<p>Get the parts list from the guide page. Host a build party — six people, one afternoon, six signers. Then pick your rung on the ladder above and climb one step. The onboarding surface will enroll your bDiD when you're ready; the same identity follows you from your first $50 build to whatever you ship at festival scale.</p>
+
+<footer><a href="index.html">← the guide</a> · <a href="security.html">← security events</a> · built for students, festival crews, and the stubborn · same bDiD at every rung · <a href="../onboarding/">🔑 onboard ceremony</a> · <a href="../recover.html">📄 recovery tool</a> · <a href="../blight/demo.html">💡 the beam</a> · <a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/hardware/build.html" rel="noopener">view source</a></footer>
+</main></body></html>

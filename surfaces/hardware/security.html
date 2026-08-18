@@ -1,0 +1,70 @@
+<!doctype html>
+<!-- BNR surface: SECURITY EVENTS — page 2 of 3 (guide · security · build)
+     Editorial law: every entry states WHAT KIND of event it is (vulnerability,
+     disclosure, license change, architecture decision), what it means for a holder,
+     and links the primary source. Disclosure is health; silence is the red flag.
+     Entries are hand-curated — this page never auto-ingests a feed. -->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Security Events · BNR</title>
+<style>
+:root{--bg:#0d1117;--panel:#161b22;--line:#30363d;--ink:#e6edf3;--mut:#8b949e;--ok:#3fb950;--warn:#d29922;--bad:#f85149;--teal:#39c5cf}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;display:flex;justify-content:center;padding:1.5rem 1rem 4rem}
+main{max-width:860px;width:100%}a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
+nav{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.2rem}
+nav a{border:1px solid var(--line);border-radius:99px;padding:.25rem .9rem;font-size:.85rem;color:var(--mut)}
+nav a.here{color:var(--teal);border-color:var(--teal)}
+h1{font-size:1.35rem;color:var(--teal);margin:.2rem 0}.sub{color:var(--mut);font-size:.9rem;margin-bottom:1.4rem}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:1rem 1.1rem;margin:1rem 0}
+.kind{display:inline-block;border-radius:99px;padding:.05rem .6rem;font-size:.72rem;border:1px solid var(--line);margin-right:.4rem}
+.k-vuln{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 55%,var(--line))}
+.k-disc{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 55%,var(--line))}
+.k-lic{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 55%,var(--line))}
+.k-arch{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 55%,var(--line))}
+.k-gap{color:var(--mut)}
+.date{color:var(--mut);font-size:.78rem;float:right}
+h2{font-size:1rem;margin:.4rem 0 .2rem}
+p{color:var(--mut);font-size:.88rem;margin:.5rem 0}
+.means{border-left:3px solid var(--teal);padding-left:.8rem;font-size:.85rem;color:var(--ink)}
+.doctrine{border-left:3px solid var(--teal);padding-left:1rem;color:var(--mut);font-size:.88rem}
+footer{color:var(--mut);font-size:.78rem;margin-top:2rem;border-top:1px solid var(--line);padding-top:1rem}
+</style></head><body><main>
+<nav><a href="../">⌂ hub</a><a href="index.html">🐝 open hardware guide</a><a class="here" href="security.html">🛡 security events</a><a href="build.html">🔧 become a producer</a><a href="lab.html">⬡ the lab</a></nav>
+<h1>Security events, read honestly</h1>
+<div class="sub">How to read this page: in open hardware, <b style="color:var(--ok)">a published attack is the system working</b> — researchers probe, vendors disclose, firmware patches, everyone learns. The red flag is never the disclosure; it is the vendor you never hear from. Each entry names what <i>kind</i> of event it was, because "hack" gets used for four different things.</div>
+
+<div class="panel" style="border-color:color-mix(in srgb,var(--bad) 45%,var(--line))"><span class="date">regression Mar 2021 · disclosed Jul 30 2026 · actively exploited</span>
+<span class="kind k-vuln">critical vulnerability</span><span class="kind k-disc">disclosed by Block + independent researchers</span>
+<h2>Coldcard RNG failure — five years of weak seeds</h2>
+<p>A 2021 firmware change silently disabled the hardware RNG path: a build flag was set to zero but the code checked whether the flag <i>existed</i>, not whether it was <i>on</i>, so seed generation fell back to a non-cryptographic software generator. Mk2/Mk3 (v4.x) seeds became near-deterministic given observable device state; Mk4/Q/Mk5 (v5.x+) added only a 32-bit reseed — at most 2³² possible streams, brute-forceable. Everything drawing on that stream was touched: seeds, paper-wallet keys, seed-XOR masks, backup encryption. Funds were being actively drained when Block's engineering team published, five years after the regression landed.</p>
+<div class="means">What it means for you: <b>updating firmware cannot repair a seed that was already generated weak</b> — affected users must move funds to a wallet created on patched firmware (or different hardware) and follow Coinkite's migration guidance. Exposure follows the firmware version at <i>generation time</i>, not the device's age. And the structural lesson this page exists for: entropy cannot be audited after the fact, closed review cultures repel the researchers who would have caught this in year one, and no maker's reputation — anyone's — is a substitute for reproducible verification. Don't trust; verify.</div></div>
+
+<div class="panel"><span class="date">attack Jan 2026 · disclosed Jun 2026</span>
+<span class="kind k-vuln">vulnerability research</span><span class="kind k-disc">vendor disclosed</span>
+<h2>TROPIC01 laser fault-injection (Trezor Safe 7)</h2>
+<p>Ledger's Donjon research lab demonstrated a laser fault-injection attack against the TROPIC01 auditable secure element; Trezor disclosed publicly in June 2026. Physical-access attack class, lab-grade equipment. A separate event from the Coldcard RNG failure above — different vendor, different class: this one needs the device in hand and a laser bench; that one shipped weak seeds to everyone.</p>
+<div class="means">What it means for you: this is why the Safe 7 stacks <b>two heterogeneous secure elements plus a passphrase</b> — no single chip is the last line. Keep a passphrase on high-value seeds; physical-access attacks are exactly what it exists for. And note the deeper lesson: an auditable chip got probed <i>in public</i> and everyone learned. Closed chips get probed too — you just never hear.</div></div>
+
+<div class="panel"><span class="date">standing since 2023</span>
+<span class="kind k-arch">architecture decision</span>
+<h2>Ledger Recover (all Ledger devices)</h2>
+<p>Ledger shipped an opt-in service in which device firmware shards and exports encrypted seed material to third-party custodians. Not a bug and not a breach — a deliberate architecture decision that proved the firmware <i>can</i> move seed material off-device.</p>
+<div class="means">What it means for you: the boundary you rely on is what the firmware <b>can</b> do, not what settings currently say. This is the event that moved Ledger to our excluded list — architecture, not incident.</div></div>
+
+<div class="panel"><span class="date">2021 → present</span>
+<span class="kind k-lic">license change</span>
+<h2>Coldcard leaves open source</h2>
+<p>Coldcard began as GPLv3 — itself incorporating GPLv3 Trezor code, exercising exactly the freedoms FOSS grants. When Foundation exercised those same freedoms in 2020 (porting GPL components into Passport, with attribution, under GPLv3), Coinkite removed the GPL code and moved new Coldcard code to MIT + Commons Clause — whose own FAQ answers "is this open source?" with "No." That license wall then made code exchange in either direction legally impossible. A license event, not a vulnerability — but its consequences for independent review were not abstract, as the entry above shows.</p>
+<div class="means">What it means for you: source-<i>visible</i> lets you read; open <i>source</i> lets the community fork, patch, audit, and outlive the vendor. For thousand-year custody, only the second counts — and a project that walls out its reviewers is quietly walling out the people who find RNG bugs in year one instead of year five.</div></div>
+
+<div class="panel"><span class="date">observed 2026, unresolved</span>
+<span class="kind k-gap kind">vendor gap</span>
+<h2>Safe 7 authenticity root missing upstream</h2>
+<p>Trezor's device-authenticity endpoint for the Safe 7 generation (<span style="color:var(--ink)">t3w1/authenticity.json</span>) returns 404 while prior generations resolve. Any flow that attests device genuineness is blocked on a vendor publication no one else controls.</p>
+<div class="means">What it means for you: verify your device by the seal ritual and signed-firmware check at setup. For the BNR fleet: bSAFE 7 publishes its own signed definitions and authenticity chain rather than waiting — a fork must own its trust root anyway.</div></div>
+
+<div class="panel doctrine">
+<b style="color:var(--ink)">The editorial law of this page.</b> Every future entry must state: the event <b>kind</b> (vulnerability / disclosure / license / architecture / supply-chain / gap), the <b>access required</b> (remote, local, physical, lab), whether the vendor <b>disclosed or was outed</b>, and one concrete <b>"what it means for you."</b> No entry ships without a primary source. Fear sells hardware; this page doesn't. And one law above the others, learned the hard way by the whole industry in 2026: <b style="color:var(--ink)">reputation is not evidence.</b> No founder's confidence, no podcast consensus, no years of recommendations substitute for reproducible builds and independent review — apply the same scrutiny to friends, sponsors, favorites, and us.
+</div>
+
+<footer><a href="index.html">← the guide</a> · sources: <a href="https://engineering.block.xyz/blog/predictable-rng-fallback-and-32-bit-reseed-in-coldcard-firmware" rel="noopener">Block engineering advisory (Jul 2026)</a>, Coinkite migration guidance, Trezor TROPIC01 disclosure (Jun 2026), Ledger Recover documentation, Commons Clause FAQ · <a href="build.html">become a producer →</a> · <a href="../onboarding/">🔑 onboard ceremony</a> · <a href="../recover.html">📄 recovery tool</a> · <a href="../blight/demo.html">💡 the beam</a> · <a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/hardware/security.html" rel="noopener">view source</a></footer>
+</main></body></html>

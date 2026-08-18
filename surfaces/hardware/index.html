@@ -1,0 +1,101 @@
+<!doctype html>
+<!-- BNR surface: OPEN HARDWARE GUIDE — page 1 of 3 (guide · security · build)
+     Doctrine: only open tech is reviewed here. Closed devices appear once, in the
+     excluded list, with their reason named — never a silent skip, never a store link.
+     Always order direct from the manufacturer. Zero third-party requests on this page. -->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Open Hardware Guide · BNR</title>
+<style>
+:root{--bg:#0d1117;--panel:#161b22;--line:#30363d;--ink:#e6edf3;--mut:#8b949e;--ok:#3fb950;--warn:#d29922;--bad:#f85149;--teal:#39c5cf;--b:#e6b32e}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;display:flex;justify-content:center;padding:1.5rem 1rem 4rem}
+main{max-width:860px;width:100%}a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
+nav{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.2rem}
+nav a{border:1px solid var(--line);border-radius:99px;padding:.25rem .9rem;font-size:.85rem;color:var(--mut)}
+nav a.here{color:var(--teal);border-color:var(--teal)}
+h1{font-size:1.35rem;color:var(--teal);margin:.2rem 0}.sub{color:var(--mut);font-size:.9rem;margin-bottom:1.4rem}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:1rem 1.1rem;margin:1rem 0}
+.gauge{display:inline-block;border-radius:99px;padding:.05rem .6rem;font-size:.72rem;margin:.1rem .25rem .1rem 0;border:1px solid var(--line);color:var(--mut)}
+.g-ok{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 55%,var(--line))}
+.g-warn{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 55%,var(--line))}
+.g-bad{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 55%,var(--line))}
+.dev h2{font-size:1.05rem;margin:.1rem 0 .3rem}.dev .price{color:var(--b);float:right;font-size:.95rem}
+.dev p{color:var(--mut);font-size:.88rem;margin:.5rem 0}
+.links{font-size:.85rem;margin-top:.4rem}.links a{margin-right:1rem}
+.rung{color:var(--mut);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em}
+table{width:100%;border-collapse:collapse;font-size:.83rem;margin:.6rem 0}
+td,th{border:1px solid var(--line);padding:.4rem .6rem;text-align:left}th{color:var(--mut);font-weight:600}
+.doctrine{border-left:3px solid var(--teal);padding-left:1rem;color:var(--mut);font-size:.88rem}
+.x{border-color:color-mix(in srgb,var(--bad) 30%,var(--line))}
+footer{color:var(--mut);font-size:.78rem;margin-top:2rem;border-top:1px solid var(--line);padding-top:1rem}
+</style></head><body><main>
+<nav><a href="../">⌂ hub</a><a class="here" href="index.html">🐝 open hardware guide</a><a href="security.html">🛡 security events</a><a href="build.html">🔧 become a producer</a><a href="lab.html">⬡ the lab</a></nav>
+<h1>Own your keys on hardware you can read</h1>
+<div class="sub">Every device below is open enough to audit: firmware you can build, designs you can study, and a maker who sells to you directly. Everything closed is in the excluded list at the bottom — with its reason named, because a silent skip teaches nothing. Same bDiD at every rung; this is a climb, not a restart.</div>
+
+<div class="panel doctrine">
+<b style="color:var(--ink)">Three rules before you spend a dollar.</b><br>
+1 · <b>Order direct from the manufacturer.</b> Never marketplaces, never resellers — supply-chain tampering is the one attack you can decline by habit.<br>
+2 · <b>Your written 24 words are the floor</b> at every rung. The device is a lock; the phrase is the door that survives every device.<br>
+3 · <b>Verify what you receive:</b> check the seal ritual the maker documents, and confirm firmware signatures on first boot. If a step feels skippable, that's the step.
+</div>
+
+<h2 style="color:var(--ink);font-size:1rem">The ladder at a glance</h2>
+<table>
+<tr><th>$</th><th>Rung</th><th>Device</th><th>Air-gap</th></tr>
+<tr><td>$0</td><td>Spare phone, optical</td><td>your own onboarding surface</td><td>screen ⇄ camera</td></tr>
+<tr><td>~$50</td><td>Build-it-yourself</td><td>SeedSigner · Krux</td><td>QR only, stateless</td></tr>
+<tr><td>$59–79</td><td>First open commercial</td><td>Trezor Safe 3</td><td>USB (not air-gapped)</td></tr>
+<tr><td>$79–169</td><td>Open budget / multi-chain</td><td>Jade Plus · Keystone 3 Pro</td><td>QR camera</td></tr>
+<tr><td>$249</td><td>The anchor</td><td>Trezor Safe 7 (bSAFE)</td><td>USB · BLE(Noise) · beam-capable</td></tr>
+<tr><td>$349</td><td>Premium open air-gap</td><td>Passport Prime</td><td>QR camera · microSD</td></tr>
+</table>
+
+<div class="panel dev"><span class="price">$249</span><span class="rung">the anchor · T5</span><h2>Trezor Safe 7</h2>
+<span class="gauge g-ok">firmware open</span><span class="gauge g-ok">schematics public</span><span class="gauge g-ok">auditable SE (TROPIC01)</span><span class="gauge g-ok">FIDO2</span><span class="gauge g-warn">not QR-air-gapped stock</span>
+<p>Three hardware layers — TROPIC01 (the first secure element outside researchers can audit), an EAL6+ SE, and an open MCU — plus a committed post-quantum path. The BNR fork (bSAFE 7) adds what the mission needs, including the optical beam. Trezor has shipped open firmware since the first generation; that track record is the product.</p>
+<div class="links">→ <a href="https://trezor.io" rel="noopener">trezor.io (order direct)</a> <a href="https://github.com/trezor/trezor-firmware" rel="noopener">firmware source</a></div></div>
+
+<div class="panel dev"><span class="price">~$50 in parts</span><span class="rung">the build-party rung</span><h2>SeedSigner</h2>
+<span class="gauge g-ok">fully open</span><span class="gauge g-ok">stateless — no secrets at rest</span><span class="gauge g-ok">commodity parts</span><span class="gauge g-warn">Bitcoin-only</span>
+<p>A signer you assemble yourself from a Pi Zero, camera, and screen. It holds nothing when powered off — the seed enters per session by QR or dice. No customs form flags it, no company can stop making it, and building one teaches more than reading ten reviews. The rung that turns users into producers.</p>
+<div class="links">→ <a href="https://seedsigner.com" rel="noopener">seedsigner.com</a> <a href="https://github.com/SeedSigner/seedsigner" rel="noopener">source</a></div></div>
+
+<div class="panel dev"><span class="price">~$35–65</span><span class="rung">diy, second flavor</span><h2>Krux</h2>
+<span class="gauge g-ok">fully open</span><span class="gauge g-ok">runs on cheap K210 boards</span><span class="gauge g-warn">Bitcoin-only</span>
+<p>Same philosophy as SeedSigner on different silicon — flash open firmware onto an off-the-shelf device with a camera and screen. A second independent implementation of the same idea is health, not redundancy.</p>
+<div class="links">→ <a href="https://selfcustody.github.io/krux/" rel="noopener">krux docs</a> <a href="https://github.com/selfcustody/krux" rel="noopener">source</a></div></div>
+
+<div class="panel dev"><span class="price">$59–79</span><span class="rung">first commercial rung</span><h2>Trezor Safe 3</h2>
+<span class="gauge g-ok">firmware open</span><span class="gauge g-ok">secure element</span><span class="gauge g-ok">FIDO2</span><span class="gauge g-warn">USB only</span>
+<p>The cheapest fully-open-firmware commercial signer — and because it speaks FIDO2, the same $59 object can be your passkey. The natural first step off the spare-phone rung.</p>
+<div class="links">→ <a href="https://trezor.io" rel="noopener">trezor.io (order direct)</a> <a href="https://github.com/trezor/trezor-firmware" rel="noopener">firmware source</a></div></div>
+
+<div class="panel dev"><span class="price">$79–169</span><span class="rung">open budget air-gap</span><h2>Blockstream Jade / Jade Plus</h2>
+<span class="gauge g-ok">fully open, board included</span><span class="gauge g-ok">QR camera air-gap</span><span class="gauge g-warn">no SE — blind-oracle model (disclosed)</span><span class="gauge g-warn">BTC/Liquid only</span>
+<p>Open to the last line, cheap, camera-based QR signing. Its twist: instead of a secure element, the key is sealed to a rate-limited oracle — run Blockstream's or your own. That dependency is honest and disclosed, and self-hosting the oracle fits a sovereign stack unusually well.</p>
+<div class="links">→ <a href="https://blockstream.com/jade/" rel="noopener">blockstream.com/jade (order direct)</a> <a href="https://github.com/Blockstream/Jade" rel="noopener">source</a></div></div>
+
+<div class="panel dev"><span class="price">$119–149</span><span class="rung">multi-chain air-gap</span><h2>Keystone 3 Pro</h2>
+<span class="gauge g-ok">app + SE firmware open</span><span class="gauge g-ok">QR/UR native</span><span class="gauge g-warn">hardware partially open</span><span class="gauge g-warn">no FIDO2</span>
+<p>The pragmatic pick if you arrive holding many chains: broad support, BC-UR animated-QR signing with every major software wallet, and — rare anywhere — the secure-element firmware is published. Know its limits and it serves well.</p>
+<div class="links">→ <a href="https://keyst.one" rel="noopener">keyst.one (order direct)</a> <a href="https://github.com/KeystoneHQ" rel="noopener">source</a></div></div>
+
+<div class="panel dev"><span class="price">$349</span><span class="rung">premium open air-gap</span><h2>Foundation Passport Prime</h2>
+<span class="gauge g-ok">CERN-OHL-S open hardware</span><span class="gauge g-ok">KeyOS: Rust microkernel, apps get child seeds</span><span class="gauge g-ok">QR + microSD</span><span class="gauge g-ok">FIDO2</span>
+<p>The most architecturally interesting open device shipping: a Rust microkernel OS where each sandboxed app receives a hardened child seed and can never touch the root. Open hardware under a real open-hardware license, not just published schematics. Priced for the committed.</p>
+<div class="links">→ <a href="https://foundation.xyz" rel="noopener">foundation.xyz (order direct)</a> <a href="https://github.com/Foundation-Devices" rel="noopener">source</a></div></div>
+
+<div class="panel dev"><span class="price">~$149</span><span class="rung">honorable mentions</span><h2>BitBox02 · OneKey · Cypherock X1</h2>
+<span class="gauge g-ok">open firmware</span>
+<p>BitBox02: clean open firmware, USB-only — solid, adds no modality. OneKey: open multi-chain alternative. Cypherock X1: no seed phrase at all — the key is Shamir-split across NFC cards, a genuinely different recovery geometry worth studying.</p>
+<div class="links">→ <a href="https://bitbox.swiss" rel="noopener">bitbox.swiss</a> <a href="https://github.com/BitBoxSwiss/bitbox02-firmware" rel="noopener">source</a> · <a href="https://onekey.so" rel="noopener">onekey.so</a> <a href="https://github.com/OneKeyHQ" rel="noopener">source</a> · <a href="https://www.cypherock.com" rel="noopener">cypherock.com</a> <a href="https://github.com/Cypherock" rel="noopener">source</a></div></div>
+
+<div class="panel x"><span class="rung" style="color:var(--bad)">excluded — reason named, never a silent skip</span>
+<p><b>Ledger</b> — closed secure element, and the Recover service proved firmware can extract seed material to third-party custodians. Fails the sovereignty test at the architecture level, not the feature level.<br>
+<b>Coldcard</b> — battle-tested hardware, but the firmware license left OSI open source after the Passport fork dispute. Source-visible is not open; excluded on license, respected on engineering.<br>
+<b>NGRAVE, Tangem, and card-style wallets</b> — closed firmware and/or no display to verify what you sign. If you cannot read it and cannot see it, it is not yours.</p></div>
+
+<div class="panel doctrine"><b style="color:var(--ink)">For the largest holdings:</b> no single device — however open — should hold a life-changing balance alone. Use a 2-of-3 multisig across different makers and firmware lineages (e.g. Safe 7 + Passport Prime + SeedSigner). All three speak QR, so the quorum works fully air-gapped, and no single supply chain is a single point of failure.</div>
+
+<footer>Part of the BNR onboarding surface · open tech only · order direct · your phrase is the floor · <a href="security.html">security events →</a> · <a href="../onboarding/">🔑 onboard ceremony</a> · <a href="../recover.html">📄 recovery tool</a> · <a href="../blight/demo.html">💡 the beam</a> · <a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/hardware/index.html" rel="noopener">view source</a></footer>
+</main></body></html>

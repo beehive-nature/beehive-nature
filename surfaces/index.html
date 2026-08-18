@@ -1,0 +1,70 @@
+<!doctype html>
+<!-- BNR hub — surfaces/index.html · the one page that links the whole public stack.
+     Every card links a live surface AND its source. Zero third-party requests. -->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BNR · surfaces hub</title>
+<style>
+:root{--bg:#0d1117;--panel:#161b22;--line:#30363d;--ink:#e6edf3;--mut:#8b949e;--ok:#3fb950;--warn:#d29922;--teal:#39c5cf;--b:#e6b32e;--vio:#a78bfa;--mag:#e53aae}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;display:flex;justify-content:center;padding:2rem 1rem 4rem}
+main{max-width:900px;width:100%}a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
+h1{font-size:1.5rem;margin:.2rem 0;background:linear-gradient(90deg,var(--teal),var(--vio),var(--mag));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--mut);font-size:.9rem;margin-bottom:1.2rem}
+.beta{display:inline-block;border:1px dashed var(--warn);color:var(--warn);border-radius:99px;padding:.1rem .8rem;font-size:.75rem;margin-bottom:1rem}
+h2{font-size:.95rem;color:var(--mut);text-transform:uppercase;letter-spacing:.08em;margin:1.6rem 0 .6rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:.8rem}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:.9rem 1rem;display:block;color:var(--ink)}
+.card:hover{border-color:var(--teal);text-decoration:none}
+.card .ic{font-size:1.2rem}.card h3{font-size:.95rem;margin:.25rem 0}.card p{color:var(--mut);font-size:.8rem;margin:.15rem 0 0}
+.live{color:var(--ok);font-size:.68rem;border:1px solid var(--ok);border-radius:99px;padding:0 .45rem;vertical-align:middle}
+.doctrine{border-left:3px solid var(--teal);padding-left:1rem;color:var(--mut);font-size:.85rem;margin:1.4rem 0}
+footer{color:var(--mut);font-size:.78rem;margin-top:2rem;border-top:1px solid var(--line);padding-top:1rem;line-height:1.8}
+</style></head><body><main>
+<span class="beta">BETA · everything here is open source · nothing custodies real funds yet · break things and tell the raid</span>
+<h1>🐝 Beehive Nature Reserve — the surfaces</h1>
+<div class="sub">One hub, the whole public stack: identity, light, art, markets, governance, hardware. Every card links a live surface; every page links its source. Same bDiD everywhere — a climb, not a restart.</div>
+
+<h2>identity — the ceremony</h2>
+<div class="grid">
+<a class="card" href="onboarding/"><span class="ic">🔑</span><h3>bDiD Onboarding <span class="live">live key build</span></h3><p>Passkey (PRF) or phrase → real Ed25519 keys, real 24 words, honest refusals. Phones welcome.</p></a>
+<a class="card" href="recover.html"><span class="ic">📄</span><h3>Offline Recovery Tool</h3><p>24 words → your keys with zero network. Download it; it outlives every service.</p></a>
+<a class="card" href="onboarding/receive.html"><span class="ic">📥</span><h3>Receive on the bLighTnetWorK</h3><p>The receive side of the optical pairing ceremony.</p></a>
+</div>
+
+<h2>light — the optical stack</h2>
+<div class="grid">
+<a class="card" href="blight/demo.html"><span class="ic">💡</span><h3>bLiGhTbeAM demo</h3><p>The bComb hexagonal beam, live — screen-to-camera data on luminance alone.</p></a>
+<a class="card" href="blight/"><span class="ic">🛸</span><h3>bLighT fLeeT</h3><p>One operation, many frequencies — the fleet view.</p></a>
+<a class="card" href="blight/museum.html"><span class="ic">🏛</span><h3>bLighT Museum</h3><p>What "on-chain" actually means, shown not told.</p></a>
+</div>
+
+<h2>art & markets — the inscription economy</h2>
+<div class="grid">
+<a class="card" href="blight/inscription-explorer.html"><span class="ic">🔍</span><h3>Inscription Explorer</h3><p>Browse the chain's inscriptions.</p></a>
+<a class="card" href="blight/bnri-gallery.html"><span class="ic">🎨</span><h3>BNRi Gallery</h3><p>The fleet's own art.</p></a>
+<a class="card" href="blight/studio-gate.html"><span class="ic">🚪</span><h3>Studio Gate</h3><p>Trait pre-flight for creators.</p></a>
+<a class="card" href="blight/vaulta-reader.html"><span class="ic">📖</span><h3>Vaulta Reader</h3><p>The b-indexer's read path, keyless.</p></a>
+<a class="card" href="blight/compare.html"><span class="ic">📊</span><h3>The Catalog</h3><p>Every ERC-20i artist side-by-side — levels, traits, live prices.</p></a>
+<a class="card" href="blight/midi-organ.html"><span class="ic">🎹</span><h3>The Organ</h3><p>The lost MIDI music contracts, playable again.</p></a>
+<a class="card" href="blight/c1-aid.html"><span class="ic">🧮</span><h3>C-1 Aid</h3><p>Taxonomy sizing from the tree's own numbers.</p></a>
+</div>
+
+<h2>hardware — learn · verify · build</h2>
+<div class="grid">
+<a class="card" href="hardware/"><span class="ic">🐝</span><h3>Open Hardware Guide</h3><p>Every wallet worth owning; open tech only; excluded list with reasons.</p></a>
+<a class="card" href="hardware/security.html"><span class="ic">🛡</span><h3>Security Events</h3><p>Coldcard RNG, TROPIC01, Ledger Recover — read honestly.</p></a>
+<a class="card" href="hardware/build.html"><span class="ic">🔧</span><h3>Become a Producer</h3><p>$50 build party → open silicon; EDC & Tomorrowland as proving ground.</p></a>
+<a class="card" href="hardware/lab.html"><span class="ic">⬡</span><h3>The Lab</h3><p>Science + art reviews under ratified law; the Comb Score.</p></a>
+</div>
+
+<h2>governance</h2>
+<div class="grid">
+<a class="card" href="dao-dashboard/"><span class="ic">🌀</span><h3>skaists DAO dashboard</h3><p>Circles of six, the fold to one carried voice.</p></a>
+</div>
+
+<div class="doctrine"><b style="color:var(--ink)">Beta testers:</b> start with the onboarding ceremony on your phone, then flash the beam demo at a second device's camera. Screenshot every refusal and every confusing sentence — the words are the product.</div>
+
+<footer>
+AGPL-3.0-only · <a href="https://github.com/beehive-nature/beehive-nature" rel="noopener">source tree</a> · this page: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/index.html" rel="noopener">surfaces/index.html</a> · derivation pattern credits <a href="https://github.com/RockwellShah/filekey" rel="noopener">FileKey</a> (GPLv3) · QR by <a href="https://github.com/trezor/QR-Code-generator" rel="noopener">Nayuki</a> (MIT)<br>
+don't trust these pages either — every claim links its source. Verify.
+</footer>
+</main></body></html>

@@ -1,0 +1,89 @@
+<!doctype html>
+<!-- BNR surface: THE LAB — page 4 (guide · security · build · lab)
+     Tom's Hardware for the sovereign age, reviewed under stage lights.
+     Editorial law (BNR-LAB-1): science + art always together · review units
+     disclosed on every review · no paid placement, no affiliates, ever · only
+     open tech gets a comb · negative results publish · scores versioned to firmware. -->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Lab · BNR</title>
+<style>
+:root{--bg:#0d1117;--panel:#161b22;--line:#30363d;--ink:#e6edf3;--mut:#8b949e;--ok:#3fb950;--warn:#d29922;--bad:#f85149;--teal:#39c5cf;--b:#e6b32e;--vio:#a78bfa;--mag:#e53aae}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;display:flex;justify-content:center;padding:1.5rem 1rem 4rem}
+main{max-width:860px;width:100%}a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
+nav{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.2rem}
+nav a{border:1px solid var(--line);border-radius:99px;padding:.25rem .9rem;font-size:.85rem;color:var(--mut)}
+nav a.here{color:var(--mag);border-color:var(--mag)}
+h1{font-size:1.35rem;margin:.2rem 0;background:linear-gradient(90deg,var(--teal),var(--vio),var(--mag));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--mut);font-size:.9rem;margin-bottom:1.4rem}
+h2{font-size:1.05rem;color:var(--ink);margin:1.6rem 0 .4rem}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:1rem 1.1rem;margin:1rem 0}
+p{color:var(--mut);font-size:.9rem;margin:.5rem 0}
+.law{border-left:3px solid var(--mag);padding-left:1rem;color:var(--mut);font-size:.88rem}
+.disc{display:inline-block;border:1px dashed var(--warn);color:var(--warn);border-radius:6px;padding:.1rem .6rem;font-size:.75rem;margin-bottom:.5rem}
+.half{display:flex;gap:1rem;flex-wrap:wrap}.half>div{flex:1;min-width:260px}
+.sci{border-top:2px solid var(--teal);padding-top:.5rem}.art{border-top:2px solid var(--mag);padding-top:.5rem}
+.sci b{color:var(--teal)}.art b{color:var(--mag)}
+.comb{display:flex;align-items:center;gap:1rem;margin:.6rem 0}
+.axes{font-size:.78rem;color:var(--mut);line-height:1.9}
+.axes b{color:var(--ink);display:inline-block;min-width:7.5rem}
+.bar{display:inline-block;width:6.5rem;height:.5rem;border:1px solid var(--line);border-radius:99px;vertical-align:middle;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--vio))}
+.pending{color:var(--warn)}
+.gear td{border:1px solid var(--line);padding:.4rem .6rem;font-size:.83rem}
+table{width:100%;border-collapse:collapse;margin:.6rem 0}
+th{border:1px solid var(--line);padding:.4rem .6rem;text-align:left;color:var(--mut);font-size:.8rem}
+footer{color:var(--mut);font-size:.78rem;margin-top:2rem;border-top:1px solid var(--line);padding-top:1rem}
+</style></head><body><main>
+<nav><a href="../">⌂ hub</a><a href="index.html">🐝 open hardware guide</a><a href="security.html">🛡 security events</a><a href="build.html">🔧 become a producer</a><a class="here" href="lab.html">⬡ the lab</a></nav>
+<h1>The Lab — science and art, under stage lights</h1>
+<div class="sub">Tom's Hardware raised a generation of builders by testing everything and printing the numbers. This is that, for the sovereign age, with a light show. Every device gets two reviews published together: <b style="color:var(--teal)">THE SCIENCE</b> — automated, reproducible benches run by the BNR surgical code team, every number regenerable from an open harness — and <b style="color:var(--mag)">THE ART</b> — one human's lived verdict: does the ceremony feel sovereign, and does it survive a festival night? Science without art is a spec sheet. Art without science is an ad.</div>
+
+<div class="panel law"><b style="color:var(--ink)">The ethics law, printed where everyone can see it.</b><br>
+Review units come from manufacturers and are <b style="color:var(--ink)">disclosed on every review</b> — gifts never buy verdicts; the disclosure proves it. No paid placement, no affiliate links, ever; every link is the same one a stranger would find. Only open tech gets a comb — closed boxes are indexed once, with reasons, on the guide page. Negative results publish, with the data, and vendors get right-of-reply appended verbatim. Scores are versioned to firmware, never evergreen.</div>
+
+<h2>The Comb Score — six cells, no fake total</h2>
+<div class="panel"><p>Six axes, one hexagon, in bComb's own geometry. Five cells are computable; the sixth belongs to a human, and no average hides it: <b style="color:var(--ink)">⬡ Openness · ⬡ Air-gap · ⬡ Custody law · ⬡ Build · ⬡ Art · ⬡ Ecosystem fit</b>. A device can bench perfectly and still die in the Art cell — that verdict is data too.</p></div>
+
+<h2>On the bench now</h2>
+
+<div class="panel"><span class="disc">unit: founder's own, purchased direct · firmware: bSAFE 7 fork</span>
+<h2 style="margin:.2rem 0">Trezor Safe 7 / bSAFE 7</h2>
+<div class="half">
+<div class="sci"><b>THE SCIENCE (harness results to date)</b>
+<p>Noise XX host channel: handshake, transport, tamper-refusal — 4/4 automated tests green. Key build: PRF→Ed25519 derivation deterministic across 26 pinned-vector tests; full WebAuthn ceremony verified against a CTAP2 authenticator with PRF. Pending bench: bComb beam throughput from the device screen (the no_std renderer compiles; capture-rate runs queued), BLE-vs-optical signing latency, battery under continuous beam.</p></div>
+<div class="art"><b>THE ART (founder's cell)</b>
+<p class="pending">Pending write-up — first impressions logged since first-generation Trezor onward; the Safe 7 verdict publishes with the beam demo. The bar: does the countersign ceremony (fingerprint words on device) feel like a ritual or a chore?</p></div>
+</div>
+<div class="comb"><div class="axes">
+<b>⬡ Openness</b><span class="bar"><i style="width:92%"></i></span> auditable SE + open firmware<br>
+<b>⬡ Air-gap</b><span class="bar"><i style="width:55%"></i></span> stock: none · fork: beam-capable<br>
+<b>⬡ Custody law</b><span class="bar"><i style="width:90%"></i></span> phrase floor, no exfil path<br>
+<b>⬡ Build</b><span class="bar"><i style="width:85%"></i></span> three hardware layers<br>
+<b>⬡ Art</b><span class="bar"><i style="width:0%"></i></span> <span class="pending">awaiting the human</span><br>
+<b>⬡ Ecosystem</b><span class="bar"><i style="width:95%"></i></span> the anchor; FIDO2 rung native
+</div></div></div>
+
+<div class="panel"><span class="disc">unit: not yet received — review slot open to Foundation</span>
+<h2 style="margin:.2rem 0">Foundation Passport Prime</h2>
+<p>The maker's own frame is the right one to test: "a hardware wallet protects Bitcoin keys — Passport Prime protects your authority across Bitcoin, identity, 2FA, security keys, encrypted storage, and KeyOS apps." That's an <i>authority platform</i> claim, and it happens to be our own T5 doctrine said in another accent — so the bench will treat it as a claim, not a slogan: KeyOS child-seed isolation probed from a hostile app, FIDO2/PRF conformance, QR/UR capture rates, Shamir NFC-card recovery walked by a first-timer. The Art cell asks the only question that matters at 2am in a crowd: does authority feel like <i>yours</i>?</p></div>
+
+<div class="panel"><span class="disc">units: ~$50 in commodity parts, self-sourced</span>
+<h2 style="margin:.2rem 0">SeedSigner &amp; Krux (build-party bench)</h2>
+<p class="pending">Queued: assembly-time trials with first-time builders (the build page's party doubles as the bench), stateless-boot verification, QR round-trip rates on cheap camera modules. The Art cell here is communal — six builders, six verdicts, printed unedited.</p></div>
+
+<h2>Complementary gear — completes the kit, reviewed by the same law</h2>
+<div class="panel">
+<table class="gear">
+<tr><th>Class</th><th>What & why</th></tr>
+<tr><td><b>Steel</b></td><td>Metal backup plates — the 24-word floor, made fireproof. Bench: stamp legibility after heat/immersion. Open designs preferred (washer-and-stamp beats proprietary puzzles).</td></tr>
+<tr><td><b>Silence</b></td><td>Faraday sleeves & bags — radio silence you can verify. Bench: attenuation measured, not advertised.</td></tr>
+<tr><td><b>Eyes</b></td><td>NIR-capable camera modules & Pi kits — the builder rung's optics, and Lane-A research hardware for the bSAFE device path.</td></tr>
+<tr><td><b>Mesh</b></td><td>LoRa radios & open mesh nodes (Meshtastic-class) — bMeshNetWork's field layer; what carries the stack when festival towers choke.</td></tr>
+<tr><td><b>Touch</b></td><td>NFC/RFID reader-writers — study the closed wristband systems (EDC/Tomorrowland) to surpass them; program the open ones.</td></tr>
+<tr><td><b>Pulse</b></td><td>Open wearable dev kits (PineTime/Bangle.js-class) — Lane-B presence research; the open-ring gap is still an open invitation.</td></tr>
+<tr><td><b>Software shelf</b></td><td>FOSS only: Sparrow, Nunchuk, Electrum-class coordinators, the BNR surfaces & offline recovery tool. Multisig quorums exercised air-gapped end to end.</td></tr>
+</table>
+<p style="font-size:.8rem">Same law as everything above: open designs, direct links, zero affiliates. If a category has no open option worth listing, the row says so — that gap is an assignment for the <a href="build.html">build page</a>.</p></div>
+
+<footer>science by the surgical code team · art by the founder · units disclosed, always · negative results publish · <a href="index.html">← the guide</a> · <a href="../onboarding/">🔑 onboard ceremony</a> · <a href="../recover.html">📄 recovery tool</a> · <a href="../blight/demo.html">💡 the beam</a> · <a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/hardware/lab.html" rel="noopener">view source</a></footer>
+</main></body></html>
