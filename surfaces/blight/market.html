@@ -6,10 +6,9 @@
 <style>
 :root{--bg:#050508;--ink:#cfe8d6;--cyan:#00E5FF;--gold:#FFD700;--dim:#5a6478;--line:#16161f;--ok:#9FFF3D;--warn:#e8b84a}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;
+body{background:#0a0a0f;color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;
   background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="97"><g fill="none" stroke="%23141a17"><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z"/><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z" transform="translate(28,48)"/></g></svg>')}
-body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9990;
-  background:repeating-linear-gradient(to bottom,rgba(0,0,0,0) 0 2px,rgba(0,0,0,.12) 2px 4px);mix-blend-mode:multiply}
+
 header{padding:46px 20px 10px;text-align:center}
 h1{font-size:clamp(20px,4.5vw,28px);color:var(--cyan);font-weight:400;letter-spacing:.06em;text-shadow:0 0 16px rgba(0,229,255,.3)}
 header p{color:var(--dim);font-size:11.5px;margin-top:8px;letter-spacing:.04em}
@@ -20,7 +19,7 @@ nav button{background:#0b0b12;color:var(--dim);border:1px solid var(--line);bord
 nav button.on{color:var(--gold);border-color:#3d3410}
 #wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;max-width:1200px;margin:26px auto 120px;padding:0 16px}
 .card{background:#0b0b12;border:1px solid var(--line);border-radius:12px;overflow:hidden}
-.card .art{background:#000;padding:12px;min-height:180px;display:flex;align-items:center;justify-content:center}
+.card .art{background:#0d0d15;padding:12px;border-bottom:1px solid var(--line);min-height:180px;display:flex;align-items:center;justify-content:center}
 .card .art svg{width:100%;max-height:210px;height:auto}
 .card .body{padding:12px 14px}
 .card .n{color:var(--cyan);font-size:13px}
@@ -186,7 +185,28 @@ function preview(i){
     '<div class="go"><button id="confirm">\u25C9 confirm — when settlement docks</button></div>'+
     '<div class="note">front-end MVP: this preview is real math on real chain state. the signature waits for the audited escrow.</div>';
   $('room').classList.add('open');
+  shareRoom(p,i);
   $('confirm').onclick=function(){ this.textContent='\u23F3 docking… the escrow contract is the last piece'; this.disabled=true; };
+}
+function shareRoom(p,i){
+  try{
+    var b=document.createElement('button'); b.textContent='🔗 share this room';
+    b.style.cssText='margin-top:10px;background:none;border:1px dashed #1d3a26;color:#9FFF3D;border-radius:8px;padding:7px 14px;cursor:pointer;font:11px ui-monospace,monospace;width:100%';
+    b.onclick=function(){
+      var u=location.origin+location.pathname+'?piece='+encodeURIComponent(p.col.sym+':'+p.seed);
+      navigator.clipboard.writeText(u).then(function(){ b.textContent='room-link copied — the dossier travels with it'; });
+    };
+    var pre=document.querySelector('#rpre .go')||document.getElementById('rpre');
+    pre.appendChild(b);
+  }catch(e){}
+}
+var _qm=new URLSearchParams(location.search);
+if(_qm.get('piece')&&_qm.get('piece').indexOf(':')>-1){
+  (function(){ var pp=_qm.get('piece').split(':');
+    var wait=setInterval(function(){
+      for(var k=0;k<inventory.length;k++) if(inventory[k].col.sym===pp[0]&&String(inventory[k].seed)===pp[1]){ clearInterval(wait); preview(k); }
+    },400); setTimeout(function(){clearInterval(wait);},15000);
+  })();
 }
 function viewPiece(i){
   const p=inventory[i]; if(!p) return;
