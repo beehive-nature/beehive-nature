@@ -56,7 +56,7 @@ not an adoption.**
 
 | | question |
 |---|---|
-| **E-1** | first registry-read receipt (two oracles, the read-first pass) |
+| **E-1** | ~~first registry-read receipt~~ **CLOSED 2026-08-20** — `RECEIPT_ERC8004_E1_READ_FIRST_2026-08-20.md`: canonical singletons are 130-B ERC-1967 proxies over chain-identical impls (admin slot empty), minimal (no name, no count surface, URI-optional), **live with real registrations on both chains** (8/8 sampled ids exist, distinct owners; Base #25331 = the literature's Prover Agent, exact match); Validation Registry = honest absence; reputation score-reads owed a bounded follow-up once a feedback-carrying agent is identified |
 | **E-2** | founder key ceremony for any future registration (founder-hands; two-person rule if a second operator exists) |
 | **E-3** | the x402 question, if the payments pairing ever becomes real (rail-4 license table first) |
 
