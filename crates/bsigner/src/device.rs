@@ -110,7 +110,18 @@ impl From<&AvailableDevice> for DeviceSummary {
 /// Returns an empty vector rather than an error when nothing is attached —
 /// "no device present" is a normal state and a perfectly good receipt.
 pub fn enumerate() -> Vec<DeviceSummary> {
-    trezor_client::find_devices(false).iter().map(DeviceSummary::from).collect()
+    find_devices_usb_safe().iter().map(DeviceSummary::from).collect()
+}
+
+/// `trezor_client::find_devices` reaches USB through rusb's `GlobalContext`,
+/// which PANICS — and poisons its `Once`, so every later call panics too —
+/// when `libusb_init` fails (a CI runner or container with no USB stack,
+/// observed on ubuntu-latest: "Can't init Global usb context, error Other").
+/// A signer that cannot open a USB context has no devices: that is a state,
+/// not a failure — the same doctrine `enumeration_is_safe_with_no_device_attached`
+/// asserts. The catch is scoped to this one call and maps only to "none found".
+fn find_devices_usb_safe() -> Vec<trezor_client::AvailableDevice> {
+    std::panic::catch_unwind(|| trezor_client::find_devices(false)).unwrap_or_default()
 }
 
 /// Read the Ethereum address at `path` from the first attached device.
@@ -122,7 +133,7 @@ pub fn enumerate() -> Vec<DeviceSummary> {
 /// Fails cleanly when no device is attached — this crate never falls back to
 /// a software key, because it holds none.
 pub fn ethereum_address(path: &[u32]) -> Result<String, DeviceError> {
-    let mut devices = trezor_client::find_devices(false);
+    let mut devices = find_devices_usb_safe();
     if devices.is_empty() {
         return Err(DeviceError::NoDevice);
     }
