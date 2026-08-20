@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="color-scheme" content="dark">
+<title>bEarth — what it would actually cost the planet</title>
+<style>
+:root{
+ --bg:#0d1410;--panel:#111a14;--well:#0a0f0b;--ink:#e6f2df;--dim:#93a493;--faint:#7a8c7c;
+ --line:#243026;--gold:#FFD700;--violet:#c9a0ff;--cyan:#00E5FF;--warn:#ffb347;
+ /* VERDICT SET — this is review.html's validated stack, reused IN ITS ORIGINAL ORDER
+    and re-checked against this surface. Order is load-bearing: adjacency is a property
+    of stack order, so reordering would discard the validation rather than carry it.
+    Worst adjacent pair in this order is 12.5 ΔE tritan (steelman ⊗ refuted) — which is
+    why every verdict also carries its word in text and is never colour alone. */
+ --v-signed:#3f9c55;--v-steel:#a476ec;--v-refuted:#c07f1c;--v-open:#0092a6;
+ --land:#c07f1c;--n2o:#a476ec;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{overflow-x:hidden}
+body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;padding:26px 13px 80px}
+main{max-width:1000px;margin:0 auto}
+header{text-align:center}
+h1{font-size:clamp(19px,5vw,30px);color:var(--gold);font-weight:400;letter-spacing:.03em}
+.sub{color:var(--dim);font-size:11.5px;margin-top:8px;max-width:730px;margin-inline:auto;line-height:1.8}
+section{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:15px 16px;margin-top:14px}
+h2{font-size:11.5px;color:var(--violet);font-weight:400;letter-spacing:.09em;margin-bottom:9px}
+.law{color:var(--dim);font-size:10.5px;line-height:1.8}
+.law b{color:var(--ink)}
+a{color:var(--cyan)}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+#hero{background:var(--well);border:1px solid var(--line);border-radius:11px;padding:18px 16px;margin-top:14px;text-align:center}
+#hbig{font-size:clamp(32px,10vw,58px);line-height:1.05;color:var(--land)}
+#hbig small{display:block;font-size:13px;color:var(--dim);margin-top:8px;line-height:1.7}
+#hsub{font-size:11px;color:var(--dim);margin-top:12px;max-width:600px;margin-inline:auto;line-height:1.8}
+
+#dials{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:flex-end}
+label{display:block;color:var(--dim);font-size:9.5px;letter-spacing:.05em;margin-bottom:3px}
+input[type=number],select{background:var(--well);color:var(--ink);border:1px solid var(--line);
+ border-radius:6px;padding:6px 8px;font:12px 'IBM Plex Mono',monospace}
+input[type=number]{width:96px}
+input[type=range]{width:100%;accent-color:var(--land)}
+#out{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:9px;margin-top:14px}
+.o{background:var(--well);border:1px solid var(--line);border-left:3px solid var(--land);border-radius:8px;padding:10px 11px}
+.o .v{font-size:20px;line-height:1.25}
+.o .v s{font-size:11px;color:var(--dim);text-decoration:none}
+.o .l{font-size:9.5px;color:var(--dim);margin-top:3px;letter-spacing:.04em}
+.o .w{font-size:9px;color:var(--faint);margin-top:5px;line-height:1.6}
+.o.alarm{border-left-color:var(--warn)} .o.alarm .v{color:var(--warn)}
+
+.cmp{margin-top:12px}
+.cmp .row{display:flex;align-items:center;gap:10px;margin-bottom:7px;font-size:10.5px}
+.cmp .nm{width:170px;flex:0 0 auto;color:var(--dim)}
+.cmp .tr{flex:1;height:14px;background:var(--well);border-radius:3px;overflow:hidden;min-width:80px}
+.cmp .tr i{display:block;height:100%;border-radius:3px}
+.cmp .vv{width:96px;flex:0 0 auto;text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
+
+table{width:100%;border-collapse:collapse;font-size:10.5px;min-width:660px}
+th{color:var(--violet);font-weight:400;font-size:9.5px;letter-spacing:.05em;text-align:left;
+ padding:6px;border-bottom:1px solid var(--line)}
+td{padding:7px 6px;border-bottom:1px solid var(--line);color:var(--dim);vertical-align:top;line-height:1.7}
+td.n{color:var(--ink)}
+.vd{font-size:8.5px;letter-spacing:.06em;border-radius:3px;padding:2px 6px;white-space:nowrap;
+ display:inline-block;border:1px solid;background:var(--well)}
+.vd.signed{color:var(--v-signed);border-color:#2b5a39}
+.vd.steel{color:var(--v-steel);border-color:#5b4780}
+.vd.refuted{color:var(--v-refuted);border-color:#6b4710}
+.vd.open{color:var(--v-open);border-color:#065361}
+.quote{border-left:3px solid var(--line);padding-left:11px;margin-top:8px;color:var(--dim);font-size:10.5px;line-height:1.8}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:11px;margin-top:10px}
+.card{background:var(--well);border:1px solid var(--line);border-radius:9px;padding:12px 13px}
+.card h4{font-size:10px;font-weight:400;letter-spacing:.06em;margin-bottom:7px}
+.card p{font-size:11px;line-height:1.85;color:var(--ink)}
+footer{max-width:1000px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>🜃 bEarth</h1>
+  <div class="sub">If every living human ate <b style="color:var(--ink)">100 g of hemp hearts a
+  day</b>, what would the planet actually have to give up? This page answers that with arithmetic
+  you can redo, and it <b style="color:var(--ink)">refutes three of this project's own favourite
+  claims</b> on the way — because a page that only checks other people's numbers is advocacy
+  wearing a lab coat.</div>
+</header>
+
+<div id="hero">
+  <div id="hbig">—</div>
+  <div id="hsub"></div>
+</div>
+
+<section>
+  <h2>1 · THE DEMAND — every assumption is a dial, because every one of them is contested</h2>
+  <div id="dials">
+    <div><label for="pop">people (billions)</label><input id="pop" type="number" min="0.001" max="12" step="0.1" value="8.2"></div>
+    <div><label for="gday">grams per person per day</label><input id="gday" type="number" min="1" max="500" step="5" value="100"></div>
+    <div><label for="rec">hull → heart recovery %</label><input id="rec" type="number" min="20" max="60" step="1" value="36"></div>
+    <div><label for="yld">seed yield t/ha</label><input id="yld" type="number" min="0.3" max="3" step="0.05" value="1.0"></div>
+    <div><label for="nrate">N applied kg/ha</label><input id="nrate" type="number" min="0" max="300" step="5" value="130"></div>
+    <div><label for="ef">N₂O emission factor</label><select id="ef">
+      <option value="0.0020">measured on hemp — 0.20% (Tedeschi 2020)</option>
+      <option value="0.0016">measured on hemp — 0.16%, urea</option>
+      <option value="0.0100" selected>IPCC Tier 1 default — 1.00%</option>
+    </select></div>
+  </div>
+  <div id="out"></div>
+  <div class="law" style="margin-top:11px"><b>Why recovery and yield are dials and not constants.</b>
+  Hulled-heart recovery is <b>34–38% measured</b>, not the 65% that circulates in trade material —
+  that difference alone moves the land answer by a factor of two, so it is the single most
+  load-bearing number on this page. Hemp grain yields run <b>0.67–1.0 t/ha</b> in Manitoba records.
+  Set them where you can defend them; the page will not choose a flattering value for you.</div>
+</section>
+
+<section>
+  <h2>2 · THE LAND — against real denominators</h2>
+  <div class="cmp" id="cmp"></div>
+  <div class="law" style="margin-top:10px"><b>The denominator is FAO's ~1,581 Mha of arable and
+  permanent cropland</b> — all of it, everywhere, already growing everything humanity eats. This
+  page shows the human arm only. <b>And the FAOSTAT hemp area total is a floor, not a total:</b>
+  China, plausibly the largest producer on earth, has not reported hemp area since 1990. Any
+  statement about how much hemp the world grows today is a lower bound wearing a total's name —
+  the same defect this project names in a lab's four-analyte "total cannabinoids".</div>
+</section>
+
+<section>
+  <h2>3 · THE THREE CLAIMS THIS PROJECT HAD TO GIVE UP</h2>
+  <div class="law">Each was tested by a research pass whose brief was to <i>refute</i> it. Each
+  failed. All three are published here, against interest, because the alternative is finding out
+  from a reviewer.</div>
+
+  <div class="scroll"><table><thead><tr>
+    <th style="width:150px">the claim</th><th style="width:96px">verdict</th><th>what the sources actually say</th>
+  </tr></thead><tbody>
+  <tr>
+    <td class="n">"hemp sequesters CO₂ — double rainforest"</td>
+    <td><span class="vd refuted">REFUTED</span></td>
+    <td>Fails on three independent grounds. <b>(a) The word "rainforest" was never in the source.</b>
+      It traces to a single 2021 <a href="https://www.dezeen.com/2021/06/30/carbon-sequestering-hemp-darshil-shah-interview/">Dezeen
+      interview</a> with Darshil Shah of Cambridge's Centre for Natural Material Innovation, who
+      said hemp is "more effective than <i>trees</i>" — a generic young/temperate forest baseline.
+      Rainforest is the substitution hemp loses worst against.
+      <b>(b) The units are not comparable.</b> Hemp's 8–15 tCO₂/ha is one ~110-day growing season;
+      the 2–6 tCO₂/ha quoted for forest is <i>per year</i>. Like-for-like on gross uptake, tropical
+      rainforest runs ~110 tCO₂/ha/yr — it beats hemp roughly <b>8:1</b>, the opposite direction.
+      <b>(c) Under IPCC methodology the number is zero.</b> The 2006 Guidelines, Vol. 4 Ch. 5, set an
+      annual crop's biomass stock change equal to its harvest loss in the same year — net zero by
+      construction. And the institution that would profit from disagreeing agrees:
+      <b><a href="https://verra.org/methodologies/methodology-for-carbon-sequestration-through-cultivating-hemp/">Verra
+      placed its hemp sequestration methodology on hold in December 2023 for non-permanence</a></b>,
+      still on hold today. If field sequestration were creditable, the largest carbon standard on
+      earth would be crediting it.</td>
+  </tr>
+  <tr>
+    <td class="n">"hemp sequesters nitrogen"</td>
+    <td><span class="vd refuted">REFUTED</span></td>
+    <td><b>Hemp fixes no atmospheric nitrogen and is a heavy feeder.</b> <i>Cannabis sativa</i> is
+      Cannabaceae, not Fabaceae; it forms no rhizobial nodules. Its mycorrhizal associations improve
+      <i>uptake</i> of nitrogen already present and fix none — which is very likely where the belief
+      comes from. Ontario's own guidance: hemp "requires approximately the same fertility as a
+      high-yielding crop of wheat." Total plant uptake is ~200 kg N/ha, against 120 for canola.
+      <b>The myth has a specific and traceable origin: a name collision with sunn hemp</b>
+      (<i>Crotalaria juncea</i>), which genuinely is a nitrogen-fixing legume — extension services
+      publish explainers titled "Sunn Hemp (Not Industrial Hemp)" because the confusion is so
+      common. Expect any agronomist to raise this within a sentence.</td>
+  </tr>
+  <tr>
+    <td class="n">"an obvious downstream product is fertilizer"</td>
+    <td><span class="vd refuted">REFUTED<br>on economics</span></td>
+    <td><b>The two co-products fail in opposite directions.</b> The one genuinely rich in nitrogen —
+      seed press cake at 31.6% crude protein, ~5% N — <b>received AAFCO/FDA-CVM approval as laying-hen
+      feed in August 2024</b> and trades near soybean meal at roughly $280–300/t. Its nutrient value
+      as fertiliser is about $50–90/t. <b>Selling it as fertiliser destroys roughly 70–80% of its
+      value.</b> Meanwhile the co-product available in bulk — hurd — is 45.2% carbon and 0.45%
+      nitrogen, a <b>C:N ratio near 100:1</b> against the ~35:1 threshold where microbial
+      immobilisation begins. Incorporating hurd <b>takes nitrogen out of the soil</b> in the first
+      season. Marketing it as a soil food is the precise inversion of what it does. Biochar from
+      hurd is more N-inert still (C:N 140–400:1): it is a carbon-permanence play, and merging it
+      with a nitrogen story is a category error.</td>
+  </tr>
+  </tbody></table></div>
+</section>
+
+<section>
+  <h2>4 · AND THE THREE THAT SURVIVED — stated at full strength</h2>
+  <div class="law">A refutation pass that returns only refutations has not been run honestly. These
+  came back stronger than expected, and two of them are numbers this project had not been using.</div>
+
+  <div class="scroll"><table><thead><tr>
+    <th style="width:150px">the finding</th><th style="width:96px">verdict</th><th>the evidence, with its limits attached</th>
+  </tr></thead><tbody>
+  <tr>
+    <td class="n">Hemp's measured N₂O is ~5× BELOW the IPCC default</td>
+    <td><span class="vd steel">STRONGEST<br>CARD</span></td>
+    <td><b>This is the best environmental number this project has, and nobody is using it.</b>
+      Tedeschi et al. 2020 (<i>Agriculture</i> 10(6):240) measured chamber fluxes twice daily on
+      field hemp at 80 kg N/ha and found an emission factor of <b>0.20% (ammonium nitrate) and 0.16%
+      (urea)</b> — against the <b>IPCC Tier 1 default of 1.00%</b>. Since nitrous oxide is ~273×
+      CO₂ over 100 years and dominates crop footprints, this is the difference between hemp looking
+      ordinary and hemp looking excellent. It also implies that <b>published hemp life-cycle
+      assessments, which use the Tier 1 default, likely overstate hemp's N₂O by about fivefold.</b>
+      <b>The limits, stated as prominently:</b> this is <i>one</i> site, <i>one</i> season, sandy-loam
+      Mediterranean soil, and the trial carried <b>no zero-nitrogen control</b> — the authors say so.
+      It is a single data point, not a literature. Say "the only published field measurement," never
+      "studies show." Their paper uses GWP 298 (AR4); the dial above restates on 273 (AR6).</td>
+  </tr>
+  <tr>
+    <td class="n">Per tonne of textile fibre, hemp beats cotton on nitrogen</td>
+    <td><span class="vd signed">SIGNED</span></td>
+    <td>~<b>71 kg N per tonne of bast fibre</b> against <b>104–125 for cotton lint</b> — a 30–45%
+      advantage, and a like-for-like comparison of two crops making the same product. This is the
+      cleanest agronomic win available. <b>But be precise about which hemp:</b> per tonne of
+      <i>seed</i>, hemp needs 40–50 kg N against wheat's 20 — roughly <b>double</b>. Per tonne of
+      <i>stalk</i> it is ~20–22, level with wheat. Hemp's nitrogen story is good for fibre, neutral
+      for biomass, and poor for grain — and this page is about grain. State all three or the number
+      is a cherry.</td>
+  </tr>
+  <tr>
+    <td class="n">The carbon that stays put is in the wall, not the field</td>
+    <td><span class="vd steel">THE REAL<br>VERSION</span></td>
+    <td>Where the founder's instinct is genuinely right. Hemp-lime construction can be net-negative
+      over its life cycle, and Shen et al. 2022 found that durable bio-based product routes
+      "ensured a long-term climate benefit" <i>even where no additional soil carbon was gained</i>.
+      Permanence is the thing a rainforest comparison cannot give and a wall can.
+      <b>Two brakes:</b> some hempcrete formulations are net <i>positive</i> — high-density mixes
+      above ~300 kg/m³ using Portland cement — so the material choice decides the sign, not the
+      crop. And hemp <i>food</i> products go the other way: the same 2024 assessment puts hemp oil
+      at +23.4 and hemp flour at +31.8 kg CO₂ per kg after storage accounting. <b>Net-negative is a
+      condition hemp can meet, never a property hemp has.</b></td>
+  </tr>
+  </tbody></table></div>
+</section>
+
+<section>
+  <h2>5 · STILL OPEN — named, not quietly dropped</h2>
+  <div class="scroll"><table><thead><tr>
+    <th style="width:190px">question</th><th style="width:96px">status</th><th>what is missing</th>
+  </tr></thead><tbody>
+  <tr><td class="n">Does hemp reduce nitrate leaching as a catch crop?</td>
+    <td><span class="vd open">NO DATA</span></td>
+    <td><b>No study measuring hemp's effect on nitrate leaching was found</b>, and the mechanism
+      cuts against it: 79% of hemp's nitrogen uptake happens in the first month and 88% by the end
+      of the vegetative period. Catch crops work by holding nitrogen through autumn and winter —
+      a spring-sown crop off the field by late summer is structurally the wrong shape. Under high
+      supply, hemp leachate nitrate ran <i>above</i> the irrigation solution. Do not claim this one.</td></tr>
+  <tr><td class="n">Does hemp build soil organic carbon vs other arable crops?</td>
+    <td><span class="vd open">NOT<br>ESTABLISHED</span></td>
+    <td>No strong controlled evidence in established farmland. The apparent support has two traps:
+      much of it concerns <b>sunn hemp, a different species</b>, and the striking soil-organic-matter
+      gains come from post-mining substrate where the baseline is near-bare. There is also a
+      trade-off — leave the straw and you may gain soil carbon; harvest it for product and you do
+      not. You get one or the other.</td></tr>
+  <tr><td class="n">How much nitrogen does field retting actually return?</td>
+    <td><span class="vd open">MECHANISM<br>ONLY</span></td>
+    <td>The mechanism is documented and is the founder's best one: of ~200 kg N/ha taken up, only
+      <b>40 leaves the field in seed</b> — the other 160 sits in stalk, leaf and root, and retting
+      leaches nutrients back under the swath. Root biomass is measured at 1.7–2.3 t/ha dry.
+      <b>But no study quantifies kg N/ha returned or its fertiliser-replacement value.</b> A real
+      mechanism with no magnitude is a hypothesis, and it is listed here as one.</td></tr>
+  <tr><td class="n">World nitrogen fertiliser consumption, for the ratio in section 1</td>
+    <td><span class="vd open">DENOMINATOR<br>UNSOURCED</span></td>
+    <td>The comparison figure of ~110 Mt N/yr has <b>not been primary-verified from FAOSTAT</b> in
+      this tree. The ratio is shown because it is the most consequential number on the page, and it
+      is badged rather than quietly rounded. A FAOSTAT pull is owed before it is cited anywhere off
+      this surface.</td></tr>
+  </tbody></table></div>
+</section>
+
+<section>
+  <h2>6 · THE OTHER ARMS — animals, structured and honestly empty</h2>
+  <div class="law">The founder asked for dog, cat and cattle arms. The structure is here; the
+  numbers are not, because no verified per-species hemp intake requirement has been established in
+  this tree. <b>An empty column is the correct rendering of an unmeasured thing</b> — the same law
+  the food surface applies to a missing USDA row. These fill when a sourced requirement lands, and
+  not before.</div>
+  <div class="scroll"><table id="animals"><thead><tr>
+    <th>arm</th><th style="text-align:right">population</th><th style="text-align:right">g/day</th>
+    <th style="text-align:right">Mt hearts/yr</th><th style="text-align:right">Mha</th><th>what is missing</th>
+  </tr></thead><tbody></tbody></table></div>
+</section>
+
+<section>
+  <h2>7 · THE TWO HEADLINES</h2>
+  <div class="two">
+    <div class="card" style="border-left:3px solid var(--v-signed)">
+      <h4 style="color:var(--v-signed)">✓ THE SENTENCE AN ENVIRONMENTAL SCIENTIST WOULD SIGN</h4>
+      <p>Hemp is a fast, high-yield biomass crop whose climate value comes not from field
+      sequestration — which, as an annual crop, IPCC inventory methodology accounts as zero net
+      biomass stock change — but from displacing high-emission materials and holding biogenic carbon
+      in durable products, conditional on low nitrogen inputs, a non-Portland binder, low-carbon
+      processing energy, and a product lifetime long enough to matter.</p>
+    </div>
+    <div class="card" style="border-left:3px solid var(--v-refuted)">
+      <h4 style="color:var(--v-refuted)">✗ THE SENTENCE THE TRADE PRESS WRITES</h4>
+      <p>Hemp absorbs twice as much CO₂ as rainforest and sequesters nitrogen, making it the world's
+      most powerful carbon-capturing crop — and its waste stream is a natural fertiliser that closes
+      the nutrient loop.</p>
+      <p style="color:var(--dim);font-size:10px;margin-top:9px">Every clause fails. Rainforest was
+      never in the source; gross seasonal uptake is being compared to net annual accumulation; hemp
+      fixes no nitrogen and exports 40 kg N/ha in seed; and its bulk co-product removes soil nitrogen
+      rather than supplying it.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>8 · SOURCES</h2>
+  <div class="law">
+  <b>Carbon</b> — <a href="https://www.ipcc-nggip.iges.or.jp/public/2006gl/pdf/4_Volume4/V4_05_Ch5_Cropland.pdf">IPCC
+  2006 Guidelines Vol. 4 Ch. 5 (Cropland)</a> ·
+  <a href="https://verra.org/methodologies/methodology-for-carbon-sequestration-through-cultivating-hemp/">Verra
+  M0187, on hold for non-permanence</a> ·
+  <a href="https://www.nature.com/articles/s41586-020-2035-0">Hubau et al. 2020, <i>Nature</i></a> ·
+  <a href="https://www.frontiersin.org/journals/environmental-science/articles/10.3389/fenvs.2024.1342330/full">Frontiers
+  2024, hemp cultivation and seed-based foods LCA</a> ·
+  <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10672900/">hemp board LCA</a>.
+  <b>Nitrogen</b> — <a href="https://mdpi-res.com/d_attachment/agriculture/agriculture-10-00240/article_deploy/agriculture-10-00240.pdf">Tedeschi
+  et al. 2020, <i>Agriculture</i> 10(6):240 — the only published field N₂O measurement on hemp</a> ·
+  <a href="https://www.omafra.gov.on.ca/CropOp/en/indus_misc/fibre/hemp.html">OMAFRA hemp agronomy</a> ·
+  <a href="https://www.hemptrade.ca/content.aspx?page_id=22&amp;club_id=950211&amp;module_id=409582">Canadian
+  Hemp Trade Alliance, nutrient use</a> ·
+  <a href="https://www.nrcs.usda.gov/sites/default/files/2023-04/nrcs142p2_053283.pdf">USDA NRCS
+  Agronomy Tech Note 10 — Sunn Hemp, the species this is confused with</a> ·
+  <a href="https://www.nrcs.usda.gov/sites/default/files/2022-09/SoilTechNote23A.pdf">NRCS Soil Tech
+  Note 23A — the C:N immobilisation threshold</a>.
+  <b>Feed approval</b> — <a href="https://hempfeedcoalition.org/2024/08/13/hemp-seed-meal-achieves-monumental-milestone-through-aafco-and-fda-cvm/">AAFCO/FDA-CVM
+  hemp seed meal for laying hens, August 2024</a>.
+  <br><br><b>Declared failures, not filled from memory:</b> the original Dezeen page returned 403 and
+  the quotation above is reconstructed from surviving mirrors — <b>the exact time-unit wording is
+  unconfirmed</b>, which matters, because the unit mismatch is the whole argument.
+  <i>Nature</i> redirected to authentication; Hubau's figures are abstract-level. Several publisher
+  PDFs returned 403 or paywalls. One source returned two different indoor N₂O values on two fetches
+  and <b>that figure has been excluded entirely</b> rather than averaged.
+  </div>
+</section>
+</main>
+
+<footer>
+  built for the environmental arm · every number here is a dial you can move and an arithmetic you
+  can redo · <a href="bfood.html">the nutrition side</a> · <a href="bigen.html">the evidence deck</a>
+  · <a href="index.html">← the hive</a>
+</footer>
+
+<script src="tour.js?v=8"></script>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+function num(x,d){ if(x===null||!isFinite(x)) return '—';
+  var a=Math.abs(x); if(d===undefined) d = a>=100?0 : a>=10?1 : a>=1?2 : 3;
+  var s=x.toFixed(d); if(s.indexOf('.')>-1) s=s.replace(/0+$/,'').replace(/\.$/,''); return s; }
+function commas(x){ return num(x,0).replace(/\B(?=(\d{3})+(?!\d))/g,','); }
+
+var CROPLAND=1581;      /* Mha arable + permanent crops, FAO */
+var WORLD_N=110;        /* Mt N/yr — BADGED UNSOURCED, see section 5 */
+var GWP_N2O=273;        /* AR6, 100-year */
+
+function calc(){
+  var pop=+$('pop').value*1e9, g=+$('gday').value, rec=+$('rec').value/100,
+      yld=+$('yld').value, nrate=+$('nrate').value, ef=+$('ef').value;
+  var heartsT = pop*g*365/1e6/1000;          /* tonnes -> Mt */
+  var heartsMt = pop*g*365/1e12;
+  var seedMt = heartsMt/rec;
+  var mha = (seedMt*1e6)/(yld*1e6)/1e6*1e6/1e6; /* Mt / (t/ha) -> Mha */
+  mha = seedMt/yld;
+  var pctCrop = 100*mha/CROPLAND;
+  var nMt = mha*1e6*nrate/1e9;               /* Mha * kg/ha -> Mt N */
+  var n2oN = nMt*ef;                          /* Mt N2O-N */
+  var n2o = n2oN*44/28;                       /* Mt N2O */
+  var co2e = n2o*GWP_N2O;                     /* Mt CO2e */
+  return {heartsMt:heartsMt,seedMt:seedMt,mha:mha,pctCrop:pctCrop,nMt:nMt,co2e:co2e,
+    pctWorldN:100*nMt/WORLD_N, ef:ef};
+}
+
+function render(){
+  var c=calc();
+  $('hbig').innerHTML=commas(c.mha)+' <small>million hectares of farmland — '
+    +'<b style="color:var(--warn)">'+num(c.pctCrop,0)+'% of all the cropland on Earth</b>, '
+    +'for the human arm alone</small>';
+  $('hsub').innerHTML='At '+$('gday').value+' g a day for '+$('pop').value+' billion people, at '
+    +$('rec').value+'% heart recovery and '+$('yld').value+' t/ha. '
+    +'<b style="color:var(--ink)">Every one of those four numbers is a dial below</b>, because every '
+    +'one is contested — and the honest version of this page is the one where you can move them '
+    +'against us.';
+
+  var efPct=num(c.ef*100,2)+'%';
+  $('out').innerHTML=[
+   o(commas(c.heartsMt),'Mt','hemp hearts per year','the edible fraction — what people actually eat'),
+   o(commas(c.seedMt),'Mt','whole seed per year','hearts ÷ recovery. Hulling is where half the mass goes.'),
+   o(commas(c.mha),'Mha','farmland','seed ÷ yield',1),
+   o(num(c.pctCrop,0)+'%','','of world cropland','against FAO’s ~1,581 Mha of arable and permanent crops',1),
+   o(commas(c.nMt),'Mt','nitrogen fertiliser per year','at '+$('nrate').value+' kg N/ha applied',1),
+   o(num(c.pctWorldN,0)+'%','','of world N fertiliser use','denominator ~110 Mt N/yr — NOT primary-verified, see §5',1),
+   o(commas(c.co2e),'Mt','CO₂e from direct N₂O','at EF '+efPct+', GWP 273. Change the EF dial and watch this move fivefold.',1)
+  ].join('');
+
+  var rows=[['this demand, at your dials',c.mha,'var(--land)'],
+    ['all world cropland',CROPLAND,'var(--faint)'],
+    ['India — total cropland',168,'var(--faint)'],
+    ['United States — total cropland',158,'var(--faint)'],
+    ['world wheat harvested area',220,'var(--faint)']];
+  var mx=Math.max.apply(null,rows.map(function(r){return r[1]}));
+  $('cmp').innerHTML=rows.map(function(r){
+    return '<div class="row"><div class="nm">'+r[0]+'</div>'
+      +'<div class="tr"><i style="width:'+(100*r[1]/mx)+'%;background:'+r[2]+'"></i></div>'
+      +'<div class="vv">'+commas(r[1])+' Mha</div></div>'; }).join('');
+
+  /* animal arms — structure present, magnitudes honestly absent */
+  var A=[['dogs','~900 M','not established','no sourced per-species hemp intake requirement in this tree'],
+   ['cats','~600 M','not established','obligate carnivore — a plant-protein arm needs a taurine and arachidonic-acid answer first'],
+   ['cattle','~1.5 bn','not established','ruminant. Hemp co-product feed is regulated separately and the US approval so far covers laying hens, not cattle'],
+   ['laying hens','~8 bn','AAFCO/FDA-CVM approved','the ONE arm with a real regulatory basis — hemp seed meal, ≤20% inclusion, ≤20 ppm CBD, ≤2 ppm THC, August 2024']];
+  $('animals').tBodies[0].innerHTML=A.map(function(a){
+    return '<tr><td class="n">'+a[0]+'</td><td style="text-align:right">'+a[1]+'</td>'
+      +'<td style="text-align:right;font-style:italic;color:var(--faint)">'+a[2]+'</td>'
+      +'<td style="text-align:right;font-style:italic;color:var(--faint)">—</td>'
+      +'<td style="text-align:right;font-style:italic;color:var(--faint)">—</td>'
+      +'<td>'+a[3]+'</td></tr>'; }).join('');
+}
+function o(v,u,l,w,alarm){ return '<div class="o'+(alarm?' alarm':'')+'"><div class="v">'+v
+  +(u?' <s>'+u+'</s>':'')+'</div><div class="l">'+l+'</div><div class="w">'+w+'</div></div>'; }
+
+['pop','gday','rec','yld','nrate','ef'].forEach(function(i){
+  $(i).addEventListener('input',render); $(i).addEventListener('change',render); });
+render();
+})();
+</script>
+</body>
+</html>
