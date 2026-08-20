@@ -83,3 +83,50 @@ voice crate), receipts throughout.
 **The art law rides from day one:** a sound inscription is art — ERC-20i-family
 discipline, exSat the home, **never bridged** (to-source dissolution), and MEDIA-1's
 pin discipline on every master. zAgent (GLM 5.3), acting chief, 2026-08-20. 🐝
+
+---
+
+## 5 · BEATPORT-CLASS INTEGRATION — the lawful posture (founder list, 2026-08-20)
+
+The founder's tool list (api-evangelist/beatport docs, the beatport org, beatportdl,
+music-assistant + its discussion, orpheusdl-beatport, beets-beatport4, the kemo gist)
+maps three integration classes, and the house treats them differently BY LAW:
+
+| class | examples | posture |
+|---|---|---|
+| **metadata & catalog patterns** | api-evangelist docs, beets-beatport4 (beets plugin class), music-assistant's connector discussion | **adopt as patterns** — the room's catalog/metadata layer: track IDs, artists, labels, artwork references, the DJ's own library organization |
+| **the DJ's own purchases** | library tools operating on tracks the DJ bought | **supported** — a DJ's purchased library is theirs; the room reads THEIR library metadata, never a shared stream of purchased catalogs |
+| **download/circumvention-shaped** | beatportdl, orpheusdl-beatport, the streaming-proxy's Beatport-API mimicry (§3) | **pattern-study only, never shipped** — ToS-risk class; the hive does not build distribution circumvention, full stop. Streaming from services a DJ does not control into a commercial-mimicked API is counsel-and-founder territory at best |
+
+**The commerce rule:** purchase links, affiliates, anything money — founder hands (DB-4
+lineage). The room's Beatport surface, if built, is **metadata + the DJ's own library +
+"buy it where the artist gets paid" links** — and it names that law on its face.
+
+## 6 · THE LISTENING ROOM — the founder's "another tab outside the buzz"
+
+Founder, verbatim: *"full integration with the buzz room maybe another tab outside of
+the buzz for art viewing and listening and edits?"* — **Yes, and it is an estate
+surface, not a buzz feature** (the pattern: buzz is the room; Pages is the gallery):
+
+**`surfaces/listening.html` — the Listening Room** (build queued behind DB-1's class
+ratification):
+
+- **VIEW:** the sound-inscription gallery — each piece's on-chain art (the generator's
+  visual twin, hex-art lineage) beside its provenance: parent seed, renderer contract,
+  the set it dropped in, the AR-pinned master's sha256.
+- **LISTEN:** two paths, both keyless — (a) **client-side re-render**: the on-chain
+  seed + renderer played in the browser (the organ's synth, generalized — the
+  inscription IS the music, no file needed); (b) the **AR master** via public gateway
+  for the studio recording. The now-playing wall of the buzz room embeds the same
+  players for live sets.
+- **EDITS — the fork law applied to sound:** a listener forks a piece the way BiGen
+  forks a verdict: change the seed, hear the change immediately (client-side), and
+  mint the fork **with provenance to its parent** — a remix lineage that is itself
+  receipted art. Edits never mutate the original (append-mostly, the reorg law's
+  grammar); the fork tree IS the community's collaborative score.
+- **Integration with the room:** the buzz room's live wall links every played track to
+  its Listening-Room page when an inscription exists — the set becomes a walkable
+  gallery the moment it ends; bQueenBee's drop announcements link there too.
+
+**Gate DB-5:** the fork-provenance shape (parent pointer + divergence receipt) rides
+DB-1's class ratification — one ruling opens the room's build.
