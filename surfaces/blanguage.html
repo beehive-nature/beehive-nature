@@ -107,7 +107,12 @@ footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   and its methodology <a href="https://unesdoc.unesco.org/ark:/48223/pf0000183699">Language Vitality and Endangerment, 2003</a>;
   the successor platform is the <a href="https://www.unesco.org/en/articles/unesco-hosts-ad-hoc-expert-meeting-world-atlas-languages">World Atlas of Languages</a>.
   codes link <a href="https://iso639-3.sil.org/">ISO 639-3</a>; a language with no code renders "no code — a finding, not a blank".
-  English is the control specimen: ours, no special treatment.</div>
+  English is the control specimen: ours, no special treatment.
+  <b style="color:var(--gold)">العربية is the first RTL member — direction goes load-bearing</b> (D-13, tokens.css --flow/--hatch);
+  its cells render dir=rtl natively, never as a mirrored afterthought.
+  and the day's unification, recorded where both registers cite it: <b>money is any language that expresses value</b> —
+  a currency docks for a jurisdiction the way a father tongue docks for a speech community, and the pointer principle holds:
+  a currency rendering never owns the value it expresses (gate T-8: the EU/EUR/VAT lane).</div>
   <div class="card">
     <h3>the control specimen — <span class="end">English · eng</span> · consent flags apply identically</h3>
     <div class="cb">
@@ -204,7 +209,16 @@ var DOCK=[
   note:'the bridge\'s first worked specimen — and the resonance already in the law: skaists (the seeded community context, Ballot A G4) is Latvian'},
  {end:'ภาษาไทย',ex:'Thai',code:'tha',dir:'ltr',reg:'reference ladder · rung two',
   src:'<a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/register/FATHER-SET-1.md">FATHER-SET-1</a> · ~21M native / ~60M+ L2 (founder\'s ~90M recorded) · CANDIDATE',
-  note:'representation = T-4\'s first worked case — the Kingdom\'s own authority, recorded as aspiration only; founder-hands diplomacy exclusively'}
+  note:'representation = T-4\'s first worked case — the Kingdom\'s own authority, recorded as aspiration only; founder-hands diplomacy exclusively'},
+ {end:'العربية',ex:'Arabic',code:'ara',dir:'rtl',reg:'father set · FOUNDER-HARDWIRED',
+  src:'<a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/register/FATHER-SET-1.md">FATHER-SET-1</a> · ~380M across the macrolanguage (MSA itself has effectively no native speakers — the aggregate is the dialect continuum) · CANDIDATE',
+  note:'the FIRST RTL member — the direction-token law (D-13, tokens.css --flow/--hatch) goes load-bearing; the register\'s monarch-doctrine question (which sovereign, or none, for a macrolanguage of many states) is a founder act, not a seat\'s'},
+ {end:'français',ex:'French',code:'fra',dir:'ltr',reg:'reference ladder · rung three — the NEUTRAL GENESIS REFERENCE',
+  src:'<a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/register/FATHER-SET-1.md">FATHER-SET-1</a> · ~80M native / ~300M+ francophonie (OIF-claimed) · CANDIDATE',
+  note:'addressed to the Government of France — never an assumed authority; the doctrine: we never assume or believe another language\'s authorities'},
+ {end:'italiano',ex:'Italian',code:'ita',dir:'ltr',reg:'reference ladder',
+  src:'<a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/register/FATHER-SET-1.md">FATHER-SET-1</a> · ~64M native · CANDIDATE',
+  note:'addressed to the Government of Italy — and the European Parliament along the whole way; the EU lane (EUR as the docked language-of-value + VAT) rides gate T-8'}
 ];
 var dk=$('dock');
 dk.innerHTML='<tr><th>language</th><th>ISO 639-3</th><th>dir</th><th>vitality (linked)</th><th class="law">note</th></tr>';
@@ -213,9 +227,10 @@ dk.innerHTML='<tr><th>language</th><th>ISO 639-3</th><th>dir</th><th>vitality (l
  var status=l.reg
   ? '<span style="color:var(--gold)">'+l.reg+'</span><div style="font-size:9px;color:var(--dim)">vitality not asserted — register row, CANDIDATE grade</div>'
   : '<i style="background:'+t.c+'"></i>'+t.n;
- dk.innerHTML+='<tr><td class="cl">'+l.end+'<div style="font-size:9px;color:var(--dim)">'+l.ex+'</div></td>'
+ var rtl=l.dir==='rtl'?' dir="rtl"':'';
+ dk.innerHTML+='<tr><td class="cl"'+rtl+'>'+l.end+'<div style="font-size:9px;color:var(--dim)">'+l.ex+'</div></td>'
   +'<td><a href="https://iso639-3.sil.org/code/'+l.code+'">'+l.code+'</a></td>'
-  +'<td>'+l.dir+'</td>'
+  +'<td'+rtl+'>'+l.dir+'</td>'
   +'<td class="vit">'+status+'<div style="font-size:9px;color:var(--dim)">'+l.src+'</div></td>'
   +'<td style="font-size:9px;color:var(--dim)">'+l.note+'</td></tr>';
  });
@@ -244,16 +259,35 @@ var DRAFT={
      'BETA · viss šeit ir atvērtais kods · nekas vēl neglabā īstus līdzekļus · lauziet un pastāstiet reidam',
      '🛰 LASĪT — instrumenti',
      '🎛 RADĪT — studija',
-     '31 virsma · trīs organizācijas · viens organisms']
+     '31 virsma · trīs organizācijas · viens organisms'],
+ fra:['🐝 beehive nature · les surfaces',
+     'une ruche, toutes les portes — statique, sans clés, honnête. l\'ancre est la vérité ; ces pages en sont les fenêtres.',
+     'BETA · tout ici est open source · rien ne garde encore de vrais fonds · cassez des choses et prévenez le raid',
+     '🛰 LIRE — les instruments',
+     '🎛 CRÉER — le studio',
+     '31 surfaces · trois organisations · un organisme'],
+ ita:['🐝 beehive nature · le superfici',
+     'un alveare, tutte le porte — statico, senza chiavi, onesto. l\'ancora è la verità; queste pagine ne sono le finestre.',
+     'BETA · tutto qui è open source · nulla custodisce ancora fondi reali · rompete le cose e avvisate il raid',
+     '🛰 LEGGERE — gli strumenti',
+     '🎛 CREARE — lo studio',
+     '31 superfici · tre organizzazioni · un organismo'],
+ ara:['🐝 beehive nature · الأسطح',
+     'خِلية واحدة، كلّ الأبواب — ثابت، بلا مفاتيح، صادق. المرساة هي الحقيقة؛ وهذه الصفحات نوافذها.',
+     'BETA · كل شيء هنا مفتوح المصدر · لا شيء يحرس أموالًا حقيقية بعد · اكسروا الأشياء وأخبروا الغارة',
+     '🛰 قراءة — الأدوات',
+     '🎛 صناعة — الاستوديو',
+     '31 سطحًا · ثلاث منظمات · كائن حيّ واحد']
 };
 var st=$('strings');
 st.innerHTML='<tr><th>key</th>'+DOCK.map(function(l){return '<th>'+l.end+'</th>';}).join('')+'</tr>';
-KEYS.forEach(function(s,ki){
+ KEYS.forEach(function(s,ki){
  var r='<tr><td class="cl">'+s.k+'</td>';
  DOCK.forEach(function(l,idx){
   if(idx===0){ r+='<td class="base">'+s.v+'</td>'; return; }
   var d=DRAFT[l.code]&&DRAFT[l.code][ki];
-  if(d){ r+='<td class="base">'+d+'<div style="font-size:8.5px;color:var(--amber)">⚙ machine draft — label stays until a community attests</div></td>'; }
+  var rtl=l.dir==='rtl'?' dir="rtl"':'';
+  if(d){ r+='<td class="base"'+rtl+'>'+d+'<div style="font-size:8.5px;color:var(--amber)">⚙ machine draft — label stays until a community attests</div></td>'; }
   else { r+='<td class="absent">— absent · contribute</td>'; }
  });
  r+='</tr>';
@@ -302,7 +336,8 @@ var SRC=[
  ['Glottolog','complementary language catalogue','<a href="https://glottolog.org/">glottolog.org</a>'],
  ['this hub, verbatim','string-corpus genesis','<a href="https://beehive-nature.github.io/beehive-nature/surfaces/">surfaces/</a>'],
  ['FATHER-SET-1 register','father set (Russian hardwired) · genesis Latvian · rung-two Thai · CANDIDATE counts','<a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/register/FATHER-SET-1.md">docs/register/</a>'],
- ['DISPATCH — bLanguage-translated .b names','the bridge, the exploit map, the pointer principle, gates T-1…T-7','<a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/DISPATCH_BTRANSLATED_B_NAMES_2026-08-20.md">docs/dispatches/</a>']
+ ['DISPATCH — bLanguage-translated .b names','the bridge, the exploit map, the pointer principle, gates T-1…T-7','<a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/DISPATCH_BTRANSLATED_B_NAMES_2026-08-20.md">docs/dispatches/</a>'],
+ ['T-5 ruler options','speaker-count sources compared — licences, receipts, disagreements; the pick is gate T-5\'s','<a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/register/SPEAKER-COUNT-RULER-OPTIONS.md">docs/register/</a>']
 ];
 var tb2=$('srctab');
 tb2.innerHTML='<tr><th>source</th><th>for</th><th>link</th></tr>';
