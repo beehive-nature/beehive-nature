@@ -111,4 +111,50 @@ SHOULD control.
 naming half; the seam between them is §4's pointer principle. Neither seat builds ahead
 of T-1/T-2.
 
+## 7 · ADDENDUM (same day) — the Father-tongue bridge reframes T-1
+
+Founder, verbatim: *"every front facing user surface needs to have a way people can use a
+large N 'Father tongue' to adapt their rare mother tongue; ai should be a perfect layer
+for this. user perfered top 2 languages customization; with expert: cypherpunk level;
+experienced: raver level; bee level so three different design layout teplets calibrated
+for each level that can also synergise with the zbDiD stack. everywhere there is color
+communicating should be an oprotunity to show our scalable language corpus sovereignty
+and hardcoded father languages"*
+
+**This dissolves §2's collision.** The ≥300M gate was never an exclusion — it defines the
+**hardcoded FATHER set**: the pivot languages every surface carries by construction. A
+rare mother tongue enters *through* its speaker's father tongue: the user works in their
+large-N language, **BLAI drafts the mother-tongue rendering** (labeled machine-draft per
+BRIEF-04's honest-absence law — machine text renders as machine), and the community
+attests over time. The corpus stays gateless exactly as ruled; the gate names the bridge
+set, not the guest list. **This is the resurrection doctrine applied to languages** —
+the same shape as the erc20i ruling: include and resurrect all viable, via preapproved
+pivots. T-1 narrows to: confirm the father-set threshold (300M vs 100M) *as the pivot
+set's definition*.
+
+**Three design templates, one preference pair** (routes to SPRINT_DESIGN_UNIFY as D5):
+- **🐝 bee level** — the newcomer template: guided, minimal, generous.
+- **🎛 raver level** — experienced: mid-density, vivid (the retired rave energy's lawful
+  home, per D-F5's own note that it survives in the decoration layer).
+- **⚗ cypherpunk level** — expert: dense, raw, workbench-tier — receipts and calldata
+  forward.
+Every user holds a **top-2 language preference** (typically mother tongue + father
+tongue). Both preferences are presentation-layer and local-first — a template or
+language choice is never identity data; if it ever syncs, it rides a persona binding,
+never the root (the BRIEF-04 seam). "Synergise with the zbDiD stack" is read as: the
+preference travels with the persona, works logged-out, and costs zero chain bytes.
+(Naming note, same pattern as BLAi: **zbDiD is the founder's shorthand for bzDiD** —
+recorded, not a new entity.)
+
+**The unification law hiding in the last sentence:** the pair-check law already rules
+that color never communicates alone — every colored state carries a glyph or label.
+**Every such label is a corpus record.** So the accessibility law and the language
+sovereignty are ONE mechanism: wherever color communicates, its mandatory label renders
+in the user's top-2 languages, machine-drafts labeled, absences honest — the corpus
+becomes visible exactly where the design system already demands text. No new surface
+area; the law we had was the opportunity he named.
+
+**Gate T-6:** ratify the three-template system (bee/raver/cypherpunk) + top-2 preference
+as D5 of the design sprint, persona-bound-never-root.
+
 **Seat 3, 2026-08-20.**
