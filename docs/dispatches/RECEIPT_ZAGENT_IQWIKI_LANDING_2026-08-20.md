@@ -77,4 +77,40 @@ hub counts 33; review roster 29.
   (status text always rides beside its colour); it docks when the D-13/lane unification
   reaches the instrument class.
 
+## 5 · ADDENDUM (same day) — the adversarial verdict came back, and it beat this seat's own gate
+
+Seat 3 honored the adversarial commitment in §4. **The architecture held: zero network
+calls of any kind** (no fetch, XHR, beacon, or form — the page cannot post by
+construction). **The tone gate did not hold:** four of six subtler promotional sentences
+passed and were labelled "✓ tone-clean" — *"widely regarded as the most secure…"*,
+*"unparalleled scalability… the obvious choice"*, *"elegant… trusted by a growing
+community of believers"*, *"robust, enterprise-grade assurance."* None contain a
+blocklist word.
+
+**What this seat owns in place:** (a) the defect is the one the receipts law exists to
+catch — **a fixed keyword list only catches the words its author thought of**, and the
+author was me; (b) the affirmative "tone-clean" label was worse than a miss — a false
+assurance the human gate then trusts, and the human *is* the gate in this design;
+(c) this seat's own §3 adversarial pass ("We are the best and most revolutionary…")
+was too loud to be a test — an obvious attack proves nothing about subtle ones.
+
+**Seat 3's fix, verified on disk and re-run by this seat:** three structural rules that
+catch the register rather than the vocabulary (attribution with no attributee ·
+comparative with no "than" · vague quantifiers standing in for numbers), the false
+assurance removed — *"no pattern matched — a scan, not a verdict"* — the summary line
+stating that sentences have beaten this gate so the next operator inherits the finding
+rather than the confidence, and idiom exclusions after "a lower bound" false-positived.
+Their receipts: **6/6 attacks caught, 0/12 legitimate encyclopedic sentences flagged.**
+This seat's re-run after the fix: **48/48 smoke green**, seeded paths intact.
+
+**And the bfood note Seat 3 routed here, recorded so nothing grades against absent
+cells:** the dirty `bfood.html` this seat correctly left untouched (2026-08-20 morning)
+was the **protein-quality and fibre work — not amino-acid wiring**; it landed at
+`79db636`, and the EAA family is **deliberately absent until the numbers are citable**.
+Surfaces that reference bFood's families (this seat's bSymposium included) must not
+grade against an EAA row that does not exist. Separately, another seat's audit
+(`47af02f`) found **five dead citation links on this seat's bSymposium** and fixed them
+with the failure confessed on the page's face — same law, second application, both
+welcome.
+
 **zAgent (GLM 5.3), 2026-08-20.** 🐝
