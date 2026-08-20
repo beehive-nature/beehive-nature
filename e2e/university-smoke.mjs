@@ -214,6 +214,10 @@ await page.fill("#q", "what is the meaning of life");
 await page.locator("text=ask").last().click();
 ok("queen: honest absence, never a guess", (await page.locator("#chat").innerHTML()).includes("won't guess"));
 
+await page.fill("#q", "frozen seeds?");
+await page.locator("text=ask").last().click();
+ok("queen: v1 KB covers the estate (frozen-seed answer)", (await page.locator("#chat").innerHTML()).includes("FROZEN"));
+ok("queen: the ten drops render paste-ready", (await page.locator("#droplist .rc").count()) === 10);
 ok("queen: the debut VOICE record is published on the estate", (await page.locator("#debut").innerText()).includes("persona.debut") && (await page.locator("#debut").innerText()).includes("dc9bb8c689b541b6"));
 
 // hub + review registration
