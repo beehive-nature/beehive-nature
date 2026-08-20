@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="color-scheme" content="dark">
+<title>BiGen — the evidence library · cannabis &amp; cancer, exhibit 001</title>
+<style>
+:root{--bg:#0d1410;--ink:#e2efdb;--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--dim:#8a9a8a;--line:#243026;--leaf:#7ddf8f;--amber:#ffb347;
+/* tier set = the six-checks-validated categorical set for surface #0d1410
+   (lightness band 0.48–0.67, CVD worst adjacent ΔE 17.1 protan, normal 22.7, contrast ≥3:1
+   — receipt in review.html). Identity never rides color alone: marker + label always.
+   REFUTED and REFUTED-AS-UNIVERSAL share a hue BY DESIGN and differ by marker ✗/⊘. */
+--t-sup:#3f9c55;--t-mix:#c07f1c;--t-unt:#0092a6;--t-ref:#a476ec}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:36px 16px 90px}
+header{text-align:center;margin-bottom:10px}
+h1{font-size:clamp(17px,4vw,24px);color:var(--gold);font-weight:400;letter-spacing:.05em}
+header p{color:var(--dim);font-size:11px;margin-top:6px;max-width:720px;margin-left:auto;margin-right:auto}
+main{max-width:880px;margin:0 auto}
+section{background:#111a14;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:16px}
+section h2{font-size:12px;color:var(--violet);font-weight:400;letter-spacing:.08em;margin-bottom:8px}
+.law{color:var(--dim);font-size:10px;line-height:1.7}
+.banner{border:1px dashed #3d3410;background:#141207;border-radius:8px;padding:9px 12px;font-size:10.5px;color:var(--gold);line-height:1.7;margin-bottom:10px}
+a{color:var(--cyan)}
+.wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:10.5px;margin-top:6px}
+td,th{border-bottom:1px solid var(--line);padding:6px 8px;text-align:start;color:var(--dim);vertical-align:top}
+th{color:var(--violet);font-weight:400;white-space:nowrap}
+td.cl{color:var(--ink)}
+.tier{white-space:nowrap;font-weight:400}
+.tier i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-inline-end:5px;vertical-align:-1px}
+.cite{font-size:9px;color:var(--dim);white-space:nowrap}
+.tgl{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.tgl button{background:#0a0f0b;border:1px solid var(--line);border-radius:7px;color:var(--dim);padding:5px 12px;cursor:pointer;font:10.5px 'IBM Plex Mono',monospace}
+.tgl button[aria-pressed="true"]{color:var(--gold);border-color:#3d3410;background:#141207}
+#state-prose{font-size:12px;line-height:1.8;color:var(--ink)}
+.gm{display:grid;grid-template-columns:auto 1fr 1fr 1fr;gap:4px;margin-top:8px;font-size:10.5px}
+.gm .h{color:var(--violet);font-size:10px;padding:4px 6px}
+.gm .r{color:var(--dim);padding:4px 6px;border-block-end:1px solid var(--line)}
+.gm .cell{padding:4px 6px;border-block-end:1px solid var(--line);border-inline-start:1px solid var(--line);color:var(--ink)}
+.gm .cell.full{color:var(--t-sup)} .gm .cell.early{color:var(--amber)} .gm .cell.empty{color:var(--dim);font-style:italic}
+.card{background:#0a0f0b;border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:10px}
+.card h3{font-size:11.5px;color:var(--ink);font-weight:400;line-height:1.6}
+.card h3 .what{color:var(--dim);font-size:10px}
+.ib{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px;margin-top:8px}
+.ib div{background:#0d1410;border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-size:9.5px;color:var(--dim)}
+.ib b{color:var(--ink);font-weight:400}
+.flag-true{color:var(--amber)} .flag-gap{color:var(--violet)}
+.rcg{background:#0d1410;border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin-top:8px;font-size:10.5px;line-height:1.8}
+.rcg .m{color:var(--ink)} .rcg .n{color:var(--dim)}
+details{margin-top:10px}
+summary{cursor:pointer;color:var(--violet);font-size:10.5px}
+pre{background:#0a0f0b;border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:8px;font-size:9.5px;line-height:1.6;overflow-x:auto;color:var(--dim)}
+footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
+</style>
+</head>
+<body>
+<header>
+  <h1>⌕ BiGen — the evidence library</h1>
+  <p>systematic review in the Cochrane tradition, as a public repo: standing queries instead of
+  stale searches, plots as YAML instead of PDF images, judgments in git history instead of editorial
+  memory. this surface is exhibit 001 — the cannabis &amp; cancer corpus as an
+  <b style="color:var(--gold);font-weight:400">evidence map</b>: mechanistic and early-phase, honestly not poolable.</p>
+</header>
+<main>
+
+<section>
+  <h2>WHY THIS EXISTS — the four things Cochrane cannot retrofit</h2>
+  <div class="wrap"><table>
+    <tr><th></th><th>Cochrane</th><th>BiGen</th></tr>
+    <tr><td class="cl">searches</td><td>run by hand; reviews go stale for years</td><td>standing queries on a schedule — living is mechanical</td></tr>
+    <tr><td class="cl">access</td><td>paywalled across most of the world</td><td>a public git repo — clone is the whole access story</td></tr>
+    <tr><td class="cl">data</td><td>forest plots are images inside PDFs</td><td>plots are YAML — anyone recomputes the number</td></tr>
+    <tr><td class="cl">dissent</td><td>write a letter to the editor</td><td>fork, change the rating, show your work</td></tr>
+  </table></div>
+  <div class="law" style="margin-top:8px">a Cochrane forest plot is an assertion you trust; a BiGen plot is a computation
+  you re-run. architecture: <a href="https://github.com/skaists/LOVErnment-DAO/blob/main/bigen/ARCHITECTURE.md">bigen/ARCHITECTURE.md</a> ·
+  integrity schema: <a href="https://github.com/skaists/LOVErnment-DAO/blob/main/bigen/integrity/SCHEMA.md">bigen/integrity/SCHEMA.md</a> ·
+  design law: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/DESIGN-BRIEF-02-bigen-library.md">DESIGN-BRIEF-02</a>.
+  every record below was verified against PubMed via E-utilities on <span id="vdate">2026-08-19</span> — not against recollection.</div>
+</section>
+
+<section>
+  <h2>STATE OF THE EVIDENCE — one summary, three reading levels (identical numbers, only prose changes)</h2>
+  <div class="tgl" role="group" aria-label="reading level">
+    <button id="lv-p" aria-pressed="true" onclick="setLevel('p')">plain</button>
+    <button id="lv-s" aria-pressed="false" onclick="setLevel('s')">standard</button>
+    <button id="lv-t" aria-pressed="false" onclick="setLevel('t')">technical</button>
+  </div>
+  <div id="state-prose"></div>
+  <div class="law" style="margin-top:6px">reading level is a preference, not a tier — nobody proves anything to get the
+  plain version, and technical is not a reward (DESIGN-CONSTRAINTS §5). all three render from the same constants.</div>
+</section>
+
+<section>
+  <h2>EXHIBIT 001 · EVIDENCE MAP — cannabis &amp; cancer</h2>
+  <div class="banner">this corpus is mechanistic + early-phase: nothing in it is poolable, so no pooled estimate
+  will ever render on this page. a pooled number on an evidence map is a category error — the exact error this
+  object type exists to prevent (BRIEF-02 §2 negative control). where a published pooled analysis exists
+  (Zhang 2015, lung cancer), it is cited as <b>their</b> computation, never rendered as ours.</div>
+  <div class="wrap"><table id="tiers">
+    <tr><th>claim</th><th>verdict</th><th class="cite">sources</th></tr>
+  </table></div>
+  <div class="law" style="margin-top:8px">verdict set: ✓ SUPPORTED · ≈ MIXED · ? UNTESTED · ✗ REFUTED · ⊘ REFUTED-AS-UNIVERSAL.
+  UNTESTED means no study has asked the question — a finding, not a gap in our work and not a negative result.
+  claims arrive graded or they do not arrive (DESIGN-CONSTRAINTS §6).</div>
+</section>
+
+<section>
+  <h2>THE GAP MAP — oncology trials by intent × formulation: the empty cells are the finding</h2>
+  <div class="wrap"><div class="gm" id="gapmap"></div></div>
+  <div class="law" style="margin-top:6px">two of six cells occupied. empty is information: no synthetic-isolate antitumour
+  trial exists, and no CBD-isolate oncology trial of any intent exists. every occupied cell cites its trials below.</div>
+</section>
+
+<section>
+  <h2>THE REGISTER — the search strategy is config that runs, not prose somebody retypes</h2>
+<pre id="queries">loading…</pre>
+  <div class="law" style="margin-top:6px">sweep receipt: all <span id="swept">13</span> PubMed-indexed records in this
+  corpus checked against <span style="white-space:nowrap">"Retracted Publication"[pt]</span> on <span id="vdate2">2026-08-19</span> — 0 flagged.
+  Hussein 2014 is not PubMed-indexed: manual watch, no structured flag exists to fetch. this page is static and keyless;
+  the register re-verifies on schedule in the repo.</div>
+</section>
+
+<section>
+  <h2>STUDY CARDS — the integrity layer, per study, symmetric by law</h2>
+  <div class="law">defaults are <b>unclear / not_assessed</b>, never favourable — an unassessed study displays as
+  unassessed. integrity renders beside the finding and never auto-downgrades it: a fork may weight it, the library
+  does not weight it for you (SCHEMA Law B).</div>
+  <div id="cards"></div>
+</section>
+
+<section>
+  <h2>THE INSTRUMENT — why the integrity layer exists (Lundh 2017, Cochrane methods review)</h2>
+  <div class="wrap"><table>
+    <tr><th>manufacturer-sponsored → …</th><th>RR</th><th>95% CI</th></tr>
+    <tr><td class="cl">favourable efficacy <b>results</b></td><td>1.27</td><td>1.17–1.37</td></tr>
+    <tr><td class="cl">favourable <b>conclusions</b></td><td>1.34</td><td>1.19–1.51</td></tr>
+    <tr><td class="cl"><b>low</b> risk of bias from blinding</td><td>1.25</td><td>1.05–1.50</td></tr>
+    <tr><td class="cl">results–conclusions <b>agreement</b></td><td>0.83</td><td>0.70–0.98</td></tr>
+  </table></div>
+  <div class="law" style="margin-top:8px">read rows 3 and 4 together: sponsored studies score <i>better</i> on standard
+  methodology — the bias is not in the method section, it is in the sentence after the table. that sentence is what
+  <b>results_conclusions_gap</b> measures. <a href="https://doi.org/10.1002/14651858.MR000033.pub3">Lundh et al. 2017, MR000033</a>.</div>
+  <div class="rcg"><span class="m">the instrument pointed at ourselves first:</span> <span class="n">BiGen's own ECS map
+  attributed CBD's stem-cell effect to an "AMPK→SIRT1/autophagy pathway." AMPK appears nowhere in the source's
+  abstract, keywords, or MeSH terms (<a href="https://doi.org/10.21873/invivo.14186">In Vivo 2026;40(1):222–234</a>, PMID 41482390).
+  logged as CORRECTIONS-01 EDIT 1 — a library that only runs its instruments on other people's work has not implemented them.</span></div>
+</section>
+
+<section>
+  <h2>THE MAP AS DATA — clone it, fork the verdicts, show your work</h2>
+  <details><summary>exhibit 001 as YAML (what this page renders; lives in the repo as bigen/evidence-maps/)</summary>
+<pre id="yaml">loading…</pre>
+  </details>
+</section>
+
+<section>
+  <h2>SOURCES — cite or the cell stays silent</h2>
+  <div class="wrap"><table id="srctab"></table></div>
+</section>
+
+</main>
+<footer>
+  an evidence map, not medical advice · preclinical strength is not clinical proof in either direction ·
+  AGPL-3.0-only · <a href="https://github.com/beehive-nature/beehive-nature">source tree</a> ·
+  this page: surfaces/bigen.html · <a href="index.html">← the hive</a><br>
+  don't trust these pages either — every claim links its source. Verify.
+</footer>
+
+<script src="tour.js?v=8"></script>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i);};
+
+/* ===== receipts: everything below was verified live via PubMed E-utilities, 2026-08-19 ===== */
+
+var P=function(id){return '<a href="https://pubmed.ncbi.nlm.nih.gov/'+id+'/">PMID '+id+'</a>';};
+
+var SRC={
+ R01:{c:'Guzmán 2003 · Nat Rev Cancer 3(10)',t:'landmark review — the preclinical case',l:P('14570037')},
+ R02:{c:'Velasco, Sánchez, Guzmán 2012 · Nat Rev Cancer 12(6)',t:'the mechanisms-by-cancer-type review',l:P('22555283')},
+ R03:{c:'Guzmán et al. 2006 · Br J Cancer 95(2)',t:'pilot: intratumoral Δ9-THC, recurrent glioblastoma, n=9',l:P('16804518')},
+ R04:{c:'ASCO/JCO 2017 · 35(15s):2046',t:'phase 2 randomised: nabiximols (1:1 CBD:THC) + temozolomide, recurrent GBM',l:'<a href="https://ascopubs.org/doi/10.1200/JCO.2017.35.15_suppl.2046">JCO abstract</a>'},
+ R05:{c:'Johnson et al. 2010 · J Pain Symptom Manage 39(2)',t:'RCT: THC:CBD extract, intractable cancer pain',l:P('19896326')},
+ R06:{c:'CINV systematic review 2020 · Support Care Cancer',t:'oral cannabinoids for chemotherapy nausea/vomiting prophylaxis',l:P('31916006')},
+ R07:{c:'Strasser et al. 2006 · J Clin Oncol',t:'RCT: cannabis extract vs THC vs placebo, cancer cachexia — null',l:P('16849753')},
+ R08:{c:'Zhang et al. 2015 · Int J Cancer',t:'pooled analysis, ILCC: cannabis smoking & lung cancer (2,159 cases)',l:P('24947688')+' · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4262725/">PMC</a>'},
+ R09:{c:'Doherty et al. 2021 · Br J Cancer',t:'"hype or hope?" — the sober read on glioblastoma evidence',l:P('33623077')},
+ R10:{c:'NASEM 2017 · the Health Effects of Cannabis and Cannabinoids',t:'the congressionally-mandated evidence review',l:'<a href="https://nap.nationalacademies.org/catalog/24625/">NAP 24625</a>'},
+ R11:{c:'Bint Faiz et al. 2024',t:'current review: therapeutic potential in cancer',l:P('39331301')},
+ R12:{c:'Castle et al. 2025',t:'meta-analysis: medical cannabis in cancer populations',l:P('40303989')},
+ R13:{c:'Creangă-Murariu et al. 2026',t:'antitumour activity + interaction with oncology treatments',l:P('42198443')},
+ R14:{c:'Javid et al. 2025',t:'glioma immune modulation review',l:'<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12334796/">PMC12334796</a>'},
+ R15:{c:'Alghamdi et al. 2025',t:'systematic review: synthetic cannabinoids, CB2 agonists',l:P('40483537')},
+ R16:{c:'Feng et al. 2024 · J Transl Med',t:'CBD + THC/CBG synergy, radiosensitisation — bench to bedside',l:'<a href="https://doi.org/10.1186/s12967-024-05477-0">DOI</a>'},
+ R17:{c:'Baumeister et al. 2021',t:'Mendelian randomisation: cannabis-use genetic liability &amp; squamous cell carcinoma',l:'<a href="https://www.sciencedirect.com/science/article/pii/S1556086421021055">eBioMedicine</a>'},
+ R18:{c:'Hussein et al. 2014 · Alexandria J Med',t:'cannabis extract &amp; hepatic TERT mRNA in mice (not PubMed-indexed)',l:'<a href="https://doi.org/10.1016/j.ajme.2014.02.003">DOI</a>'},
+ R19:{c:'Chueaphromsri et al. 2026 · In Vivo 40(1)',t:'CBD &amp; senescence in normal human mesenchymal stem cells',l:P('41482390')}
+};
+var S=function(){var a=[];for(var i=0;i<arguments.length;i++)a.push(SRC[arguments[i]].l);return a.join(' ');};
+
+/* tier colours: validated set; identity = marker + label, color only reinforces */
+var TIER={
+ sup:{m:'✓',n:'SUPPORTED',c:'#3f9c55'},
+ mix:{m:'≈',n:'MIXED',c:'#c07f1c'},
+ unt:{m:'?',n:'UNTESTED',c:'#0092a6'},
+ ref:{m:'✗',n:'REFUTED',c:'#a476ec'},
+ runiv:{m:'⊘',n:'REFUTED-AS-UNIVERSAL',c:'#a476ec'}
+};
+var ROWS=[
+ {cl:'cannabinoids induce apoptosis and slow tumour growth in cancer cell lines and animal models',
+  t:'sup',s:['R01','R02','R15'],note:'three decades of concordant preclinical work'},
+ {cl:'CBD:THC with temozolomide shows a preliminary antitumour signal in recurrent glioblastoma',
+  t:'sup',s:['R03','R04','R09','R16'],note:'phase 1/2 only — the tier is that the signal exists, not that efficacy is proven; no phase 3 exists'},
+ {cl:'cannabinoids are a proven standalone cure for cancer in humans',
+  t:'ref',s:['R09','R11','R13'],note:'no confirmatory trial exists; the claim as stated is ahead of all data in every direction'},
+ {cl:'THC:CBD extract reduces some cancer-related pain that resisted opioids',
+  t:'sup',s:['R05','R10'],note:'RCT-level for a narrow, treatment-resistant population'},
+ {cl:'oral cannabinoids prevent chemotherapy nausea/vomiting where standard antiemetics fail',
+  t:'mix',s:['R06'],note:'positive in older comparator trials; modern reviews position as adjunct, not first-line'},
+ {cl:'cannabinoids improve cancer cachexia or appetite',
+  t:'mix',s:['R07'],note:'the dedicated cancer RCT was null (extract vs THC vs placebo); evidence from other cachexia domains does not transfer'},
+ {cl:'CBD monotherapy treats cancer in humans',
+  t:'unt',s:[],note:'no CBD-isolate oncology RCT in the register — absence of a trial, not a negative result (see gap map)'},
+ {cl:'habitual cannabis smoking raises lung-cancer risk across the board',
+  t:'runiv',s:['R08','R17'],note:'pooled case-control evidence is null at measured exposure; precision is limited for very heavy long-term use, and an MR design flags squamous carcinoma — the universal is refuted, the heavy tail is untested'},
+ {cl:'cannabinoids down-regulate telomerase (TERT mRNA) in cancer models',
+  t:'sup',s:['R18'],note:'mRNA measured, activity not assayed — integrity flag on the activity sentence, card C below'},
+ {cl:'cannabinoids up-regulate telomerase in normal cells',
+  t:'unt',s:['R19'],note:'no study whose primary question is this (CORRECTIONS-01 EDIT 2); the adjacent finding — CBD delayed senescence in normal stem cells — is real and is not this claim'}
+];
+var tb=$('tiers');
+ROWS.forEach(function(r){
+ var tr=document.createElement('tr');
+ var t=TIER[r.t];
+ tr.innerHTML='<td class="cl">'+r.cl+(r.note?'<div style="font-size:9.5px;color:var(--dim);margin-top:3px">'+r.note+'</div>':'')+'</td>'
+  +'<td class="tier"><i style="background:'+t.c+'"></i>'+t.m+' '+t.n+'</td>'
+  +'<td class="cite">'+(r.s.length?S.apply(null,r.s):'<span style="font-style:italic">none — that is the verdict</span>')+'</td>';
+ tb.appendChild(tr);
+});
+
+/* gap map: occupied cites, empty is the finding */
+var GM={cols:['plant combination (THC:CBD)','synthetic isolate (dronabinol / nabilone)','CBD isolate'],
+ rows:[
+  {r:'supportive care — pain, CINV, cachexia',cells:['full|nabiximols in cancer pain '+SRC.R05.l+' · extract in cachexia '+SRC.R07.l,'full|dronabinol/nabilone in CINV '+SRC.R06.l,'empty|no trial']},
+  {r:'antitumour intent — with chemo/radiotherapy',cells:['early|THC intratumoral '+SRC.R03.l+' · nabiximols + temozolomide '+SRC.R04.l,'empty|no trial','empty|no trial']}]};
+var gm=$('gapmap');
+gm.innerHTML='<div class="h"></div>'+GM.cols.map(function(c){return '<div class="h">'+c+'</div>';}).join('');
+GM.rows.forEach(function(row){
+ var h='<div class="r">'+row.r+'</div>';
+ row.cells.forEach(function(c){
+  var p=c.split('|');
+  h+='<div class="cell '+p[0]+'">'+(p[0]==='empty'?'— '+p[1]+' · the finding':(p[0]==='early'?'early-phase · ':'')+p[1])+'</div>';
+ });
+ gm.innerHTML+=h;
+});
+
+/* register: executable search strategy + sweep receipts */
+$('queries').textContent=
+'- id: cannabinoid-cancer-oncology\n'+
+'  pubmed:\n'+
+'    query: "(cannabinoid OR cannabidiol OR dronabinol OR nabilone OR cannabis)\n'+
+'            AND (cancer OR oncology OR tumour OR tumor OR antineoplastic)\n'+
+'            AND (randomized controlled trial[pt] OR meta-analysis[pt] OR systematic review[pt])"\n'+
+'  schedule: weekly\n'+
+'  last_run: 2026-08-19\n'+
+'  new_since_last: 0          # corpus seeded this run\n'+
+'- id: integrity-sweep-cancer\n'+
+'  type: retraction_check     # PubMed "Retracted Publication"[pt] on every uid\n'+
+'  targets: all_included_studies\n'+
+'  schedule: weekly\n'+
+'  last_run: 2026-08-19\n'+
+'  result: 13 swept · 0 flagged · 1 manual-watch (Hussein 2014, not indexed)\n'+
+'  on_change: open_amendment  # a retraction is an AMENDMENTS event, never a silent edit';
+
+/* study cards: one integrity block per study, fields only where verified */
+var CARDS=[
+ {h:'card A — Johnson et al. 2010 · the symmetry specimen',
+  what:'RCT · THC:CBD extract vs placebo · intractable cancer-related pain · a positive result we rely on',
+  rows:[
+   ['funding','<b class="flag-true">manufacturer_funded: true</b> — GW Pharma, seller of the extract under test; full-text funding extraction pending'],
+   ['retraction','<b>none</b> · swept 2026-08-19 (uid 19896326)'],
+   ['registration','<b>unclear</b> — not extracted; report predates trial-registration norms'],
+   ['results–conclusions','<b>aligned</b> — the ≥30% pain-response advantage claimed is the one measured']],
+  note:'this card is the negative control passing: the flag fires on a manufacturer-funded study whose result we cite approvingly. a detector that only fires on results we dislike is declaring allegiance, not measuring bias (SCHEMA Law A).'},
+ {h:'card B — Guzmán et al. 2006 · the pilot that started the clinical question',
+  what:'phase I/II pilot · intratumoral Δ9-THC · recurrent glioblastoma · n=9',
+  rows:[
+   ['funding','<b>manufacturer_funded: false</b> — generic molecule, no seller identified in the record held; full-text funding extraction pending'],
+   ['retraction','<b>none</b> · swept 2026-08-19 (uid 16804518)'],
+   ['registration','<b>unclear</b> — not extracted'],
+   ['results–conclusions','<b>aligned</b> — framed by its authors as a pilot; no efficacy claim beyond the recorded signal']],
+  note:'n=9 with a safety endpoint and a survival hint. it earns SUPPORTED for "a signal exists" and nothing more.'},
+ {h:'card C — Hussein et al. 2014 · the flagged specimen',
+  what:'in vivo · mouse · hepatic TERT mRNA · cannabis extract ~2:1 THC-dominant · unregistered',
+  rows:[
+   ['funding','<b>manufacturer_funded: false</b>'],
+   ['retraction','<b>manual watch</b> — not PubMed-indexed; no structured flag exists to fetch'],
+   ['registration','<b>UNREGISTERED</b> — in vivo study'],
+   ['results–conclusions','<b class="flag-gap">conclusion_overstates</b>']],
+  rcg:'MEASURED: "TERT mRNA 116.13 → 2.29 / 3.08 / 9.60 copies" (pre/concurrent/post-treatment; all three arms statistically indistinguishable from healthy control)<br>'+
+      'CLAIMED: "leads to down regulation of telomerase activity"<br>'+
+      'NOTE: no telomerase activity assay (TRAP) was run — mRNA was measured, activity was inferred<br>'+
+      'INDIRECTNESS: HIGH — ~2:1 THC-dominant is the near-inverse of the CBD-dominant trial corpus',
+  note:'the MEASURED/CLAIMED/NOTE triple quotes both sides so a stranger can check us without special access. the direction is real; the mechanism sentence is the overreach.'}
+];
+CARDS.forEach(function(c){
+ var d=document.createElement('div'); d.className='card';
+ var h='<h3>'+c.h+' <span class="what">· '+c.what+'</span></h3><div class="ib">';
+ c.rows.forEach(function(r){h+='<div>'+r[0]+'<br>'+r[1]+'</div>';});
+ h+='</div>';
+ if(c.rcg)h+='<div class="rcg">'+c.rcg+'</div>';
+ h+='<div class="law" style="margin-top:6px">'+c.note+'</div>';
+ d.innerHTML=h; $('cards').appendChild(d);
+});
+
+/* exhibit as data */
+$('yaml').textContent=
+'# bigen/evidence-maps/cannabis-cancer.yaml — v0, seeded 2026-08-19\n'+
+'# object type: evidence_map (NOT a review — no pooled estimate is defined, ever)\n'+
+'topic: cannabis-and-cancer\n'+
+'poolable: false\n'+
+'tier_table:\n'+
+ROWS.map(function(r){return '  - claim: "'+r.cl.replace(/"/g,"'")+'"\n    tier: '+TIER[r.t].n+'\n'+(r.s.length?'    sources: ['+r.s.join(', ')+']':'    sources: []');}).join('\n')+
+'\n\n'+
+'gap_map:\n'+
+'  columns: [plant-combination, synthetic-isolate, cbd-isolate]\n'+
+'  rows:\n'+
+'    supportive-care:      [occupied, occupied, EMPTY]\n'+
+'    antitumour-intent:    [occupied-early-phase, EMPTY, EMPTY]\n'+
+'  finding: four of six cells empty — no synthetic-isolate antitumour trial,\n'+
+'           no CBD-isolate oncology trial of any intent\n'+
+'\n'+
+'register:\n'+
+'  queries: [cannabinoid-cancer-oncology, integrity-sweep-cancer]\n'+
+'  last_run: 2026-08-19\n'+
+'  retraction_sweep: 13 swept / 0 flagged / 1 manual-watch\n'+
+'\n'+
+'integrity:                  # per bigen/integrity/SCHEMA.md — defaults unclear/not_assessed\n'+
+'  - study: johnson-2010\n'+
+'    manufacturer_funded: true      # GW Pharma — flag on a result we like: Law A control\n'+
+'    results_conclusions_gap: aligned\n'+
+'  - study: guzman-2006\n'+
+'    manufacturer_funded: false\n'+
+'    results_conclusions_gap: aligned\n'+
+'  - study: hussein-2014\n'+
+'    registered: false\n'+
+'    indirectness: high\n'+
+'    results_conclusions_gap: conclusion_overstates   # mRNA measured, activity inferred\n'+
+'# fork this file, change a verdict, show your work — that is the dissent mechanism';
+
+/* sources table */
+var st=$('srctab');
+Object.keys(SRC).forEach(function(k){
+ var r=SRC[k],tr=document.createElement('tr');
+ tr.innerHTML='<td class="cite">'+k+'</td><td class="cl">'+r.c+'</td><td>'+r.t+'</td><td>'+r.l+'</td>';
+ st.appendChild(tr);
+});
+
+/* reading levels — one set of figures, three renderings; numbers cannot diverge */
+var F={n9:'9',gbm:'glioblastoma',nullp:'null',adjunct:'adjunct'};
+var LVL={
+ p:'What the science says, in plain words. Lab studies and animal studies, across three decades, agree that cannabinoids can kill cancer cells and slow tumours in a dish and in mice. In people, the picture is much smaller: tiny early trials in '+F.gbm+' suggest a hint of benefit when cannabinoids are added to chemotherapy, but no large trial has proven it. Cannabis compounds do help some cancer patients with pain when strong painkillers failed. For nausea from chemotherapy they are a backup option, not a first choice. For appetite loss in cancer, the one dedicated trial found no benefit. Claims that cannabis cures cancer are not supported by any human evidence. Claims that smoking cannabis causes lung cancer are also not supported — the best pooled study found no raised risk at the levels people actually smoke, though it could not rule out risk for very heavy long-term smokers. Nobody has tested CBD alone as a cancer treatment. That is the honest state of it: promising in the lab, early and unproven in the clinic, real for some pain.',
+ s:'The preclinical evidence is strong and concordant — three decades of cell and animal work show anti-proliferative, pro-apoptotic and anti-angiogenic effects (Guzmán 2003; Velasco 2012). Clinically, the evidence is early-phase and promising but unconfirmed: a '+F.n9+'-patient pilot of intratumoral THC and a phase 2 randomised trial of nabiximols added to temozolomide both show signals in recurrent '+F.gbm+', and no phase 3 exists. The rigorously supported uses are symptomatic: RCT-level evidence for THC:CBD extract in opioid-resistant cancer pain, guideline positioning as an adjunct for CINV where standard antiemetics fail, and a null dedicated trial in cancer cachexia. On risk, the pooled ILCC analysis found little evidence that habitual cannabis smoking raises lung-cancer risk, though it was underpowered for very heavy long-term use, and a Mendelian-randomisation design flags squamous carcinoma as unresolved. Anyone quoting cannabinoids as a proven cure — or as proven harmless — is ahead of the data in both directions.',
+ t:'Effect direction is consistent across preclinical models (CB1/CB2-mediated ER-stress apoptosis, anti-angiogenesis via VEGF pathways; CB2-selective agonists reproduce it), but translation is untested at confirmatory scale: the clinical corpus is one '+F.n9+'-patient phase I/II intratumoral-THC pilot and one randomised phase 2 of 1:1 CBD:THC oromucosal spray + temozolomide in recurrent '+F.gbm+', both with survival signals, no phase 3. Symptom evidence is RCT-grade for nociceptive-resistant cancer pain (THC:CBD extract vs placebo, Johnson 2010), mixed for CINV prophylaxis (positive in older active-comparator trials; systematic reviews place cannabinoids as adjuncts after 5-HT3/NK1 failure), and null in the dedicated cancer-cachexia randomisation (Strasser 2006). Risk evidence: pooled case-control across six ILCC studies found no material elevation in lung-cancer risk at habitual exposure with wide CIs in the heavy tail; a Mendelian-randomisation analysis reports increased squamous-cell carcinoma risk under genetic-liability instruments — designs disagree, cells remain underpowered. CBD-isolate oncology trials: none exist. Heterogeneity of formulations (extract ratios, isolates) is the principal obstacle to any future pooling — which is why this corpus renders as an evidence map, not a meta-analysis.'
+};
+function setLevel(v){
+ $('state-prose').innerHTML=LVL[v];
+ [['p','lv-p'],['s','lv-s'],['t','lv-t']].forEach(function(x){
+  $(x[1]).setAttribute('aria-pressed', v===x[0]?'true':'false');
+ });
+}
+setLevel('p');
+})();
+</script>
+</body>
+</html>
