@@ -86,7 +86,7 @@ footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
 </section>
 
 <section>
-  <h2>STATE OF THE EVIDENCE — one summary, three reading levels (identical numbers, only prose changes)</h2>
+  <h2>STATE OF THE EVIDENCE · EXHIBIT 001 (cannabis &amp; cancer) — one summary, three reading levels (identical numbers, only prose changes)</h2>
   <div class="tgl" role="group" aria-label="reading level">
     <button id="lv-p" aria-pressed="true" onclick="setLevel('p')">plain</button>
     <button id="lv-s" aria-pressed="false" onclick="setLevel('s')">standard</button>
@@ -116,6 +116,31 @@ footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   <div class="wrap"><div class="gm" id="gapmap"></div></div>
   <div class="law" style="margin-top:6px">three of six cells occupied. empty is information: no synthetic-isolate antitumour
   trial exists, and no CBD-isolate oncology trial of any intent exists. every occupied cell cites its trials below.</div>
+</section>
+
+<section>
+  <h2>EXHIBIT 002 · EVIDENCE MAP — the COA panel undercount: a total wearing a panel's name</h2>
+  <div class="banner">the founder's catch, documented from primary regulation: regulators require 4–16 analytes
+  against <b>~160 cannabinoids identified in the plant</b> — a COA's "Total Cannabinoids" line is a panel floor
+  wearing a total's name. this corpus is regulatory tables + same-sample assays: <b>not poolable — no pooled
+  estimate will ever render here.</b> source of record:
+  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/RECEIPT_CANNABINOID_PANEL_UNDERCOUNT_2026-08-20.md">RECEIPT_CANNABINOID_PANEL_UNDERCOUNT</a> (Seat 3, 37a432f; Canada IHR figure corrected same-day at 72661ef in the sibling receipt).</div>
+  <div class="wrap"><table id="tiers2">
+    <tr><th>claim</th><th>verdict</th><th class="cite">sources</th></tr>
+  </table></div>
+  <div class="law" style="margin-top:8px">the display law this exhibit exists to carry: <b>the surfaces never render
+  "total cannabinoids" without naming the panel</b> — <span style="color:var(--ink)">total (n of ~160 known)</span> —
+  three laws sharing one grammar: <b>unmeasured ≠ zero · saturated fat ≠ one number · total ≠ panel sum.</b></div>
+  <div class="card">
+    <h3>the two honest boundaries — ship with the finding, always</h3>
+    <div class="cb">
+      <div>the gap<br><b>compound COUNT, not MASS</b> — the "10–30% of mass unidentified" figure traces to 403'd trade press; never cited</div>
+      <div>the matrix<br><b>NO figure describes seed</b> — every source is inflorescence, plant, resin, or extract; the seed ceiling is the contamination mechanism, not panel width</div>
+    </div>
+    <div class="law" style="margin-top:6px">and gate <b style="color:var(--gold)">CB-4</b>: does the project commission its own broad-spectrum
+    assay on its own COA — the one measurement nobody else publishes, with the funding flag firing on ourselves
+    (integrity Law A's next generation — the specimen ships first or the detector is decorative).</div>
+  </div>
 </section>
 
 <section>
@@ -243,6 +268,34 @@ ROWS.forEach(function(r){
   +'<td class="tier"><i style="background:'+t.c+'"></i>'+t.m+' '+t.n+'</td>'
   +'<td class="cite">'+(r.s.length?S.apply(null,r.s):'<span style="font-style:italic">none — that is the verdict</span>')+'</td>';
  tb.appendChild(tr);
+});
+
+/* ===== EXHIBIT 002 — the COA panel undercount; source of record: docs/receipts/RECEIPT_CANNABINOID_PANEL_UNDERCOUNT_2026-08-20.md ===== */
+var REC='<a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/RECEIPT_CANNABINOID_PANEL_UNDERCOUNT_2026-08-20.md">receipt §</a>';
+var ROWS2=[
+ {cl:'a lab\'s "total cannabinoids" is its own panel\'s sum, not a total',
+  t:'sup',s:[REC+'1'],note:'regulator floors: Health Canada 4 · Oregon 4 · California 6 · Colorado 8 · AOAC 12 · commercial ceiling 15–16 · USDA hemp compliance one analyte pair — against ~160 identified'},
+ {cl:'unpanelled compounds are present in ordinary and even government-standardised material',
+  t:'sup',s:[REC+'3'],note:'Monti 2022: +19 compounds on the SAME 45 samples (targeted vs untargeted) · Cerrato 2025: 61 annotated incl. full C1–C7 homologue series · Citti 2019: THCP/CBDP in FM2, government-standardised medicinal cannabis'},
+ {cl:'the unpanelled fraction is functionally consequential, not merely present',
+  t:'sup',s:[REC+'3'],note:'Berman 2018: two extracts equally 50% w/w CBD did not produce the same anticonvulsant effect'},
+ {cl:'"10–30% of extract mass is unidentified on a typical COA"',
+  t:'ref',s:[REC+'4a'],note:'traces only to trade press that 403\'d, no primary citation — the gap is proven in compound count, never mass'},
+ {cl:'"there are 113 cannabinoids"',
+  t:'ref',s:[REC+'2'],note:'no primary source exists behind cannabis writing\'s most-quoted number; the Mississippi series runs 70 → 104 → 120 → 125; current: ~160 identified (Gandlevskiy 2025, PMID <a href="https://pubmed.ncbi.nlm.nih.gov/41321142/">41321142</a>) or 125 isolated-and-characterised (Radwan 2021) — detected ≠ characterised'},
+ {cl:'panel width is what limits seed cannabinoid content',
+  t:'unt',s:[REC+'4b'],note:'no source in the corpus describes seed — hull-on, dehulled, or oil; the seed ceiling is the contamination mechanism (no glandular trichomes), not the analyte count'},
+ {cl:'a reference method exists for true total-cannabinoid content',
+  t:'ref',s:[REC+'4c'],note:'Jornet-Martinez 2023: "no reference methods are available"; the one non-targeted assay (Fast Blue B) is a "rough estimation" calibrated against CBD alone; LC-CAD unified calibration is the most promising untried route'}
+];
+var tb2=$('tiers2');
+ROWS2.forEach(function(r){
+ var tr=document.createElement('tr');
+ var t=TIER[r.t];
+ tr.innerHTML='<td class="cl">'+r.cl+(r.note?'<div style="font-size:9.5px;color:var(--dim);margin-top:3px">'+r.note+'</div>':'')+'</td>'
+  +'<td class="tier"><i style="background:'+t.c+'"></i>'+t.m+' '+t.n+'</td>'
+  +'<td class="cite">'+r.s.join(' ')+'</td>';
+ tb2.appendChild(tr);
 });
 
 /* gap map: occupied cites, empty is the finding */
