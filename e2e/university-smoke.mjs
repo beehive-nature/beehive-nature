@@ -177,6 +177,8 @@ await page.goto(`${BASE}/surfaces/blongevity.html`);
 await page.waitForTimeout(500);
 const mir = await page.locator('#mirror').innerHTML();
 ok('mirror: personal tiles compute at 80 kg (5.4x n-3 brick, 1.6x n-6)', mir.includes('5.4') && mir.includes('100') && mir.includes('1.6'));
+const hasTokens = await page.locator('link[href="tokens.css"]').count();
+ok('longevity: consumes the living token sheet', hasTokens === 1);
 await page.fill('#m-wt', '60');
 ok('mirror: recomputes to the reader (60 kg)', (await page.locator('#mirror').innerHTML()).includes('4.1'));
 const mline = await page.locator('#m-line').innerHTML();

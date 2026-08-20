@@ -1,0 +1,53 @@
+/* tokens.css — the living D1 macro sheet, in code.
+   With both Claude seats dark (2026-08-20), the three z seats carry the estate's
+   aesthetic by founder word: "carry our alpha/beta to a beautiful aesthetic and
+   next level/generation UI/UX." This file is the shared foundation every surface
+   may adopt; artboards resume on top of it when Claude Design returns.
+
+   LAWS THIS SHEET ENSHRINES (SPRINT_DESIGN_UNIFY seed brief, binding):
+   - colors never operate singular: the categorical set below is the six-checks
+     VALIDATED set for surface #0d1410 (receipt: review.html header comment;
+     corrections 3a0be7b / 8b64cc2) — REUSE IN ORDER, never reorder, never invent
+     hues outside these ramps; identity never rides color alone (glyph + label).
+   - contrast floor AA on every composited pair, dark and light.
+   - casings are payload; non-value states are first-class. */
+
+:root{
+  /* ── surface ramp (dark first; the estate's home ground) ── */
+  --bg0:#07090b; --bg1:#0d1410; --bg2:#111a14; --bg3:#16211a; --well:#0a0f0b;
+  /* ── ink scale ── */
+  --ink:#e2efdb; --ink-hi:#eef7e9; --dim:#8a9a8a; --faint:#6f7f71;
+  /* ── line + hairline ── */
+  --line:#243026; --line-hi:#37493c;
+  /* ── accent family (UI accents only — never categorical data) ── */
+  --gold:#FFD700; --cyan:#00E5FF; --violet:#c9a0ff; --leaf:#7ddf8f; --amber:#ffb347;
+  /* ── THE VALIDATED CATEGORICAL SET (in order: works · idea · bug · gap) ──
+     lightness band 0.48–0.67 · CVD worst adjacent ΔE 12.5 (tritan, idea⊗bug) ·
+     worst protan pair 17.1 (green⊗orange — never adjacent) · normal 22.7 ·
+     contrast ≥3:1 on #0d1410. do not reorder without re-running the validator. */
+  --cat-works:#3f9c55; --cat-idea:#a476ec; --cat-bug:#c07f1c; --cat-gap:#0092a6;
+  /* semantic aliases onto the validated set (aliases, never new hues) */
+  --ok:var(--cat-works); --open:var(--cat-gap); --flag:var(--cat-bug); --diverge:var(--cat-idea);
+  /* lipid lanes (fat education): n-6 and n-3 map onto validated orange and teal */
+  --n6:var(--cat-bug); --n3:var(--cat-gap);
+  /* ── type scale (IBM Plex Mono lineage; clamp = responsive by construction) ── */
+  --t-display:clamp(19px,4.5vw,27px);
+  --t-h1:clamp(17px,4vw,24px);
+  --t-h2:12px; --t-body:13px; --t-small:11px; --t-law:10px; --t-micro:9.5px;
+  --lh-tight:1.35; --lh-body:1.6; --lh-law:1.75;
+  /* ── spacing scale (4px base) ── */
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:22px; --s6:30px; --s7:44px;
+  /* ── radii ── */
+  --r-sm:5px; --r-md:8px; --r-lg:11px; --r-pill:99px;
+  /* ── motion tokens (honest motion: never a lie while loading) ── */
+  --dur-fast:140ms; --dur:260ms; --dur-slow:520ms; --dur-stage:700ms;
+  --ease:cubic-bezier(.2,.8,.2,1); --ease-out:cubic-bezier(.16,1,.3,1);
+  /* ── elevation: glow, never drop-shadow theatrics ── */
+  --glow-gold:0 0 14px rgba(255,215,0,.12); --glow-ok:0 0 12px rgba(63,156,85,.18);
+  /* ── non-value states are first-class: these are the only sanctioned renderings ──
+     absent · not measured (n/m) · not computable · single-source · floor (≥):
+     dashed rim, no fill, the words themselves. see bigen/bfood for the specimens. */
+}
+@media (prefers-reduced-motion: reduce){
+  :root{--dur-fast:0ms;--dur:0ms;--dur-slow:0ms;--dur-stage:0ms}
+}
