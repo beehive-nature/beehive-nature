@@ -54,6 +54,7 @@ a{color:var(--cyan)}
       <option value="hi">हिन्दी (hi)</option>
       <option value="cmn">中文 · 普通话 (cmn)</option>
       <option value="ru">Русский (ru) · founder-hardwired</option>
+      <option value="ar">العربية (ar) · founder-hardwired</option>
     </select>
   </label>
   <label style="font-size:10px;color:var(--dim);margin-left:12px">mother tongue (any — the corpus is gateless)
@@ -93,6 +94,7 @@ a{color:var(--cyan)}
     <tr><td class="n">English</td><td>en</td><td>~380M</td><td>Latin</td></tr>
     <tr><td class="n">Hindi</td><td>hi</td><td>~345M</td><td>Devanagari</td></tr>
     <tr><td class="n">Russian <span class="badge">FOUNDER-HARDWIRED</span></td><td>ru</td><td>~145–150M</td><td>Cyrillic</td></tr>
+    <tr><td class="n">Arabic <span class="badge">FOUNDER-HARDWIRED</span></td><td>ar</td><td>~380M (macrolanguage)</td><td>Arabic · RTL — the D-13 direction token goes load-bearing</td></tr>
   </tbody></table>
   <div class="law" style="margin-top:8px"><b>the reference ladder:</b> genesis — <b>Latvian</b>
   (latviešu, ~1.5M native; <i>skaists</i>.b, the seeded community context, is Latvian for
@@ -134,13 +136,13 @@ var $=function(i){return document.getElementById(i);};
 /* machine-draft renderings (⚙ unattested) for the demo strings — the corpus replaces
    these the day attested records exist; until then they are honestly labeled drafts. */
 var STR={
-  works:  {en:'works', es:'funciona', hi:'काम करता है', cmn:'有效', ru:'работает'},
-  bug:    {en:'bug', es:'fallo', hi:'त्रुटि', cmn:'缺陷', ru:'ошибка'},
-  gap:    {en:'gap', es:'vacío', hi:'कमी', cmn:'缺口', ru:'пробел'},
-  idea:   {en:'idea', es:'idea', hi:'विचार', cmn:'想法', ru:'идея'},
-  alias:  {en:'alias (your tongue)', es:'alias (tu idioma)', hi:'उपनाम (आपकी भाषा)', cmn:'别名（您的语言）', ru:'псевдоним (ваш язык)'},
-  skel:   {en:'confusable skeleton', es:'esqueleto anti-confusión', hi:'भ्रम-रोधी कंकाल', cmn:'防混淆骨架', ru:'антиомоглифный скелет'},
-  canon:  {en:'canonical leaf + Merkle proof', es:'hoja canónica + prueba Merkle', hi:'विहित पत्ता + मर्कल प्रमाण', cmn:'规范叶节点 + 默克尔证明', ru:'канонический лист + доказательство Меркла'}
+  works:  {en:'works', es:'funciona', hi:'काम करता है', cmn:'有效', ru:'работает', ar:'يعمل'},
+  bug:    {en:'bug', es:'fallo', hi:'त्रुटि', cmn:'缺陷', ru:'ошибка', ar:'خلل'},
+  gap:    {en:'gap', es:'vacío', hi:'कमी', cmn:'缺口', ru:'пробел', ar:'فجوة'},
+  idea:   {en:'idea', es:'idea', hi:'विचार', cmn:'想法', ru:'идея', ar:'فكرة'},
+  alias:  {en:'alias (your tongue)', es:'alias (tu idioma)', hi:'उपनाम (आपकी भाषा)', cmn:'别名（您的语言）', ru:'псевдоним (ваш язык)', ar:'اسم مستعار (بلغتك)'},
+  skel:   {en:'confusable skeleton', es:'esqueleto anti-confusión', hi:'भ्रम-रोधी कंकाल', cmn:'防混淆骨架', ru:'антиомоглифный скелет', ar:'هيكل مضاد للالتباس'},
+  canon:  {en:'canonical leaf + Merkle proof', es:'hoja canónica + prueba Merkle', hi:'विहित पत्ता + मर्कल प्रमाण', cmn:'规范叶节点 + 默克尔证明', ru:'канонический лист + доказательство Меркла', ar:'ورقة أساسية + برهان ميركل'}
 };
 var VER=[{k:'works',c:'#3f9c55'},{k:'idea',c:'#a476ec'},{k:'bug',c:'#c07f1c'},{k:'gap',c:'#0092a6'}];
 var GLY={works:'✅',idea:'💡',bug:'🐛',gap:'🕳'};
