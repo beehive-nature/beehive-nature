@@ -36,7 +36,12 @@ a{color:var(--cyan)}
 #hero{background:var(--well);border:1px solid var(--line);border-radius:11px;padding:18px 16px;margin-top:14px;text-align:center}
 #hbig{font-size:clamp(32px,10vw,58px);line-height:1.05;color:var(--land)}
 #hbig small{display:block;font-size:13px;color:var(--dim);margin-top:8px;line-height:1.7}
-#hsub{font-size:11px;color:var(--dim);margin-top:12px;max-width:600px;margin-inline:auto;line-height:1.8}
+#hsub{font-size:11px;color:var(--dim);margin-top:14px;max-width:600px;margin-inline:auto;line-height:1.8}
+#combs{display:flex;flex-wrap:wrap;gap:26px;justify-content:center;margin-top:18px}
+.cw{max-width:240px}
+.cw svg{display:block;width:100%;height:auto}
+.cw .cap{font-size:9.5px;color:var(--dim);margin-top:8px;line-height:1.7;text-align:center}
+.cw .cap b{color:var(--ink)}
 
 #dials{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:flex-end}
 label{display:block;color:var(--dim);font-size:9.5px;letter-spacing:.05em;margin-bottom:3px}
@@ -91,6 +96,7 @@ footer{max-width:1000px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
 
 <div id="hero">
   <div id="hbig">—</div>
+  <div id="combs"></div>
   <div id="hsub"></div>
 </div>
 
@@ -375,8 +381,50 @@ function calc(){
     pctWorldN:100*nMt/WORLD_N, ef:ef};
 }
 
+/* ---- the hero image: 100 comb cells, each one per cent of a world total ----
+   A unit chart, deliberately: one cell means one per cent everywhere, so the reader
+   counts rather than estimates an area. The fractional cell fills partially from the
+   bottom rather than rounding, because rounding 53.4 to 53 whole cells would be a
+   silent claim of precision the arithmetic does not have. */
+function hexPts(cx,cy,R){ var p=[];
+  for(var i=0;i<6;i++){ var a=(-90+60*i)*Math.PI/180;
+    p.push((cx+R*Math.cos(a)).toFixed(2)+','+(cy+R*Math.sin(a)).toFixed(2)); }
+  return p.join(' '); }
+function hexFillPts(cx,cy,R,frac){
+  var K=Math.sqrt(3)/2, yTop=cy+R-2*R*Math.max(0,Math.min(1,frac));
+  function hw(y){ if(y<=cy-R||y>=cy+R) return 0;
+    if(y<cy-R/2) return K*R*(y-(cy-R))/(R/2);
+    if(y>cy+R/2) return K*R*((cy+R)-y)/(R/2);
+    return K*R; }
+  var ys=[yTop]; [cy-R/2,cy+R/2].forEach(function(b){ if(b>yTop&&b<cy+R) ys.push(b); }); ys.push(cy+R);
+  return ys.map(function(y){return [cx-hw(y),y]})
+    .concat(ys.map(function(y){return [cx+hw(y),y]}).reverse())
+    .map(function(p){return p[0].toFixed(2)+','+p[1].toFixed(2)}).join(' ');
+}
+function comb(pct,colour,title,cap){
+  var R=9,w=Math.sqrt(3)*R,vs=1.5*R,per=10,g='',over=pct>100;
+  var shown=Math.min(pct,100);
+  for(var i=0;i<100;i++){
+    var col=i%per,row=Math.floor(i/per);
+    var cx=3+(w+1.5)*col+w/2+(row%2?(w+1.5)/2:0), cy=3+row*(vs+1.5)+R;
+    var pts=hexPts(cx,cy,R), f=Math.max(0,Math.min(1,shown-i));
+    g+='<polygon points="'+pts+'" fill="#0f1712" stroke="#2b3a30" stroke-width="0.8"/>';
+    if(f>0) g+='<polygon points="'+hexFillPts(cx,cy,R,f)+'" fill="'+colour+'"/>';
+  }
+  var sw=per*(w+1.5)+(w+1.5)/2+6, sh=10*(vs+1.5)+R+6;
+  return '<div class="cw"><svg viewBox="0 0 '+sw+' '+sh+'" role="img" aria-label="'+title
+    +': '+num(pct,0)+' of 100 cells filled">'+g+'</svg>'
+    +'<div class="cap"><b>'+num(pct,0)+' of 100</b> — '+cap
+    +(over?'<br><b style="color:var(--warn)">this exceeds the whole total</b>':'')+'</div></div>';
+}
+
 function render(){
   var c=calc();
+  $('combs').innerHTML=
+    comb(c.pctCrop,'var(--land)','share of world cropland',
+      'every cell is one per cent of <b>all the arable and permanent cropland on Earth</b>. This is what one food, for one species, would occupy.')
+   +comb(c.pctWorldN,'var(--n2o)','share of world nitrogen fertiliser',
+      'every cell is one per cent of <b>world nitrogen fertiliser use</b>. Denominator not yet primary-verified — see §5.');
   $('hbig').innerHTML=commas(c.mha)+' <small>million hectares of farmland — '
     +'<b style="color:var(--warn)">'+num(c.pctCrop,0)+'% of all the cropland on Earth</b>, '
     +'for the human arm alone</small>';
