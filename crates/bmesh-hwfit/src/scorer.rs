@@ -67,14 +67,14 @@ mod tests {
 
     #[test]
     fn ideal_24gb_fits_all_gpu_models() {
-        let n = NodeProfile::manual(Some(24 * GB), "RTX 4090", 16, 64 * GB, "x86_64");
+        let n = NodeProfile::manual(Some(24 * GB), Some("RTX 4090"), 16, 64 * GB, "x86_64");
         let scores = best_fit(&n, &default_catalog());
         assert!(scores.iter().any(|s| s.score == 1.0 && s.reason.contains("Qwen3-30B")));
     }
 
     #[test]
     fn proportional_20gb() {
-        let n = NodeProfile::manual(Some(20 * GB), "RTX 4000 Ada", 12, 32 * GB, "x86_64");
+        let n = NodeProfile::manual(Some(20 * GB), Some("RTX 4000 Ada"), 12, 32 * GB, "x86_64");
         let cat = default_catalog();
         let qwen = cat.iter().find(|m| m.name.contains("Qwen3-30B")).unwrap();
         let s = fit_score(&n, qwen);
@@ -91,7 +91,7 @@ mod tests {
 
     #[test]
     fn sorted_descending() {
-        let n = NodeProfile::manual(Some(24 * GB), "RTX 4090", 16, 64 * GB, "x86_64");
+        let n = NodeProfile::manual(Some(24 * GB), Some("RTX 4090"), 16, 64 * GB, "x86_64");
         let s = best_fit(&n, &default_catalog());
         for i in 1..s.len() { assert!(s[i-1].score >= s[i].score); }
     }
