@@ -5,6 +5,18 @@ sources: [chat]
 aliases: ["candidates", "raid candidates", "pending targets", "candidate docket"]
 ---
 
+## 2026-08-19 SOULCATS/ROSE-OFFER BATCH — 9 targets, all L-VERIFIED per lane receipts (DISPATCH_SOULCATS_HUNT_ROSE_OFFER_2026-08-19)
+
+- [verified] **Souli ($SOULI)** — Base `0xb43eA104c7ec75038Ac8EcA57107Eefc8B039aFF`, deployed 2024-06-07: genuine 2024 ERC-20i art token, market dead (control-passed), whitepaper Wayback-only. **Museum fallen-wing candidate (gate R-4)**; its exact-transfer stabilize rule = family prior art for handing art intact
+- [verified] **CoreCats (CCAT)** — MIT at pinned `fc77a46`/`3ca8920`: NOT soul cats (zero "soul" hits, controls passed), live on Core Blockchain (XCB). TAKE patterns: packed-bytes on-chain data + SVG renderer with 1000/1000 pixel-parity receipts, no-admin-by-construction, EVM reference copy. Museum guest-exhibit candidate (R-4)
+- [verified] **ERC-6551 token-bound accounts** — TAKE the shape for the bRoSe OFFER basket (registry `0x0000…5758`, CertiK audit in-repo; MIT-by-SPDX only, no root LICENSE — note it)
+- [verified] **Peanut V4.4** — GPL-3.0: PATTERN ONLY, reimplement clean-room (offer/claim-by-signature/lapse ceremony)
+- [verified] **Charged Particles** — LICENSE body MIT while the GitHub sidebar says NOASSERTION (the sidebar lied again — L-VERIFY vindicated); production proof of an MIT NFT-basket
+- [verified] **CryptoGift** — MIT but NOT lock-and-redeem (force-push + owner-burn): LEAVE mechanism, TAKE date-gated reveal; the author's ERC-1363 is the clean pay-and-notify rail
+- [verified] **ervikassingh/nft-market** — NO license ever committed (all-rights-reserved): PATTERN only, code must not board
+- [verified] **IOTAplus/NFTMarketplace** — SPDX-only, uncompilable as committed, stats bug: strong PATTERN (escrow-listings + view-enumeration for static pages), rewrite fresh
+- [dropped] **Linkdrop** (unlicensed) · **erc721.org** (unlicensed site — cite EIP-721 CC0 instead) · **shobhitic gist** (vending machine, unchecked transferFrom)
+
 ## Pending verification (gate not satisfied)
 
 - [stated] 2026-07-24 crawl4ai (unclecode/crawl4ai) — PENDING RAW LICENSE READ. Founder challenged the boarding report's "Apache-2.0 with a required attribution clause" as possible custom-license-in-Apache-clothing (the Remotion trap) and ordered verification. RECEIPTS: (1) CHANGELOG.md v0.5.0 = "Modified the license to Apache 2.0 with a REQUIRED attribution clause… All users MUST now clearly attribute" — mandatory as of 0.5.0; (2) CURRENT canonical README (repo at v0.9.2) = "licensed under the Apache License 2.0, attribution is RECOMMENDED via the badges below" — softened required→recommended; (3) the SAME current README paragraph still says "you must include one of the following attribution methods" — unresolved internal contradiction in live text; (4) forks/mirrors + PyPI still propagate the OLD "required" language; (5) a mirror's pyproject.toml declares license={text="MIT"} — a THIRD claim in the wild. FOUNDER RULING (2026-07-24): "That's not Apache-2.0 with a NOTICE file. That's a custom license wearing Apache's jacket. Gate NOT satisfied." UNVERIFIED: the actual LICENSE file BODY could not be fetched (fetch-permission block) — L-VERIFY's own test is unmet. TO PROMOTE: pull raw LICENSE text at a pinned commit, read the attribution clause verbatim. If mandatory attribution is real → custom license, treat as CAUTION permanently. Meanwhile Docling holds the b-indexer web rail (ruled)
