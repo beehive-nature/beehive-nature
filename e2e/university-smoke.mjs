@@ -114,9 +114,31 @@ ok('progress state reads 5 of 5', (await page.locator('#tstate').textContent()).
 await page.click('text=compose graduation review line');
 const grad = await page.locator('#gradOut').textContent();
 ok('graduation line is [bX review] grammar', grad.startsWith('[bX review] ✅ works university/index.html'));
+
+// quests
+await page.fill('#q-wt', '80');
+ok('quest day default renders hemp anchor', (await page.locator('#q-out').innerHTML()).includes('100 g of hemp hearts'));
+await page.click('#q-week');
+ok('quest week scales ×7', (await page.locator('#q-out').innerHTML()).includes('700 g of hemp hearts'));
+await page.click('#q-compose');
+const qline = await page.locator('#q-line').textContent();
+ok('quest receipt composed with tier + citations', qline.includes('[bUni · quest · week]') && qline.includes('tier 1→2') && qline.includes('FDC 170148'));
+ok('transcript now holds six receipts', (await page.locator('#tlines .rline').count()) === 6);
+await page.click('#q-year');
+ok('quest year renders in kg', (await page.locator('#q-out').innerHTML()).includes('kg of hemp hearts'));
+
 ok('no errors across the whole walk', errors.length === 0);
 
 // hub + review registration
+await page.goto(`${BASE}/surfaces/bfood.html`);
+await page.waitForTimeout(400);
+const vbig = await page.locator('#vbig').textContent();
+ok('bfood rebuilt: verdict renders 31 cells', vbig.includes('of 31 nutrients covered'));
+ok('bfood rebuilt: hexagon cells drawn', (await page.locator('#comb polygon').count()) > 40);
+const bfoodHtml = await page.locator('main').innerHTML();
+ok('bfood rebuilt: n/m never zero + hardwired hemp + fat disaggregated + quest bridge',
+  bfoodHtml.includes('n/m') && bfoodHtml.includes('hardwired') && bfoodHtml.includes('lauric') && bfoodHtml.includes('Beehive University'));
+
 await page.goto(`${BASE}/surfaces/index.html`);
 ok('hub links the university', (await page.locator('a[href="university/index.html"]').count()) === 1);
 ok('hub counts 32', (await page.locator('footer').textContent()).includes('32 surfaces'));

@@ -114,6 +114,42 @@ footer{max-width:860px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
 <div id="courses"></div>
 
 <section>
+  <h2>THE QUESTS — a meal plan for a day, a week, a month, a year <span class="badge">bFood §7 docked here</span></h2>
+  <div class="law">the <a href="../bfood.html">bFood Hexagon</a> promises its quests are "built and checked in
+  Beehive University" — this is that room. <b>Hemp hearts are hardwired and irreplacable</b> (founder
+  ruling, on the basket card itself): the anchor serving is 1.25 g per kg of body weight (SERVING-BASIS-1,
+  the house basis), and no quest exists without it. every rung is a different strength of evidence —
+  a composed plan is a hypothesis (tier 0), your account of eating it is the weakest measurement in
+  nutrition science (tier 1), receipts back the supply (tier 2), and only an assayed panel measures
+  <i>you</i> (tier 3). the ladder lives in full on the Hexagon; the receipts live here.</div>
+  <div class="ex">
+    <h3>🎯 COMPOSE A QUEST — the plan is arithmetic; anyone can recheck it</h3>
+    <div class="q">your body weight (kg): <input type="number" id="q-wt" value="80" style="background:#0d1410;color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:4px 7px;font:12px 'IBM Plex Mono',monospace;width:90px">
+    <div class="tgl" role="group" aria-label="quest span" style="margin-top:8px">
+      <button id="q-day" aria-pressed="true" onclick="setQ('day')">a day</button>
+      <button id="q-week" aria-pressed="false" onclick="setQ('week')">a week</button>
+      <button id="q-month" aria-pressed="false" onclick="setQ('month')">a month</button>
+      <button id="q-year" aria-pressed="false" onclick="setQ('year')">a year</button>
+    </div></div>
+    <div class="fb ok" id="q-out" style="display:block"></div>
+    <div class="law" id="q-verify"></div>
+    <button class="gold" id="q-compose">compose quest receipt</button>
+    <div class="rline" id="q-line"></div>
+  </div>
+  <div class="law" style="margin-top:10px"><b>how progress is documented, monitored, measured, and
+  independently verified:</b> <b>documented</b> — the plan is a receipt you compose and hold; this page
+  has no account, no server, no database, and the hive never receives your food log.
+  <b>monitored</b> — by nobody, by design; an operator who watches your intake is a party who can be
+  subpoenaed, breached or sold. <b>measured</b> — two different things: what the food contains (these
+  pages, from cited records) and what your body did with it (an accredited lab panel); only the second
+  measures you. <b>independently verified</b> — the arithmetic: every input is a published record a
+  stranger can refetch (USDA FDC 170148, the NASEM DRIs, the DGA 2025–2030 protein goal), so anyone
+  recomputes the receipt and catches us wrong — <b>but no stranger can verify that you ate it</b>, and
+  no page here will pretend otherwise. the full four-question table and the evidence ladder live on
+  the Hexagon, §7.</div>
+</section>
+
+<section>
   <h2>GRADUATION — the credential nobody can print</h2>
   <div class="prose" id="gradProse"></div>
   <div class="ex">
@@ -528,9 +564,44 @@ function gradLine(){
   b.onclick=function(){ navigator.clipboard.writeText(line).then(function(){ b.textContent='✓ copied'; setTimeout(function(){ b.textContent='📋 copy'; },1500); }); };
 }
 
+/* ===== the quests — spans, hardwired hemp anchor, tier-honest receipts ===== */
+var QSPAN='day', QMUL={day:1,week:7,month:30,year:365},
+    QTIER={day:'tier 0→1',week:'tier 1→2',month:'tier 2',year:'tier 3'},
+    SERVING=1.25, HEMPPROT=31.56; // g hemp/kg body (SERVING-BASIS-1) · g protein/100 g hearts (USDA FDC 170148)
+function fmtG(v){ return v>=10000? (Math.round(v/100)/10)+' kg' : Math.round(v)+' g'; }
+function renderQ(){
+  var w=Math.max(1,parseFloat($('q-wt').value)||80), m=QMUL[QSPAN];
+  var hemp=SERVING*w*m, tot=130*w*m; // basket ≈ hemp + house staples (chlorella 5 g, coconut 15 g, spirulina 10 g per day)
+  var protHi=HEMPPROT*SERVING*w/100;            // g/day protein from the anchor alone
+  var pctLo=Math.round(100*protHi/(1.6*w)), pctHi=Math.round(100*protHi/(1.2*w));
+  $('q-out').innerHTML='<b style="color:var(--leaf)">'+fmtG(hemp)+' of hemp hearts</b> (hardwired '+SERVING+' g/kg × '
+    +w+' kg'+(m>1?' × '+m+' days':'')+') · '+fmtG(tot)+' of basket total · the anchor alone delivers '
+    +Math.round(protHi)+' g protein/day = <b>'+pctLo+'–'+pctHi+'%</b> of the DGA 2025–2030 goal ('
+    +Math.round(1.2*w)+'–'+Math.round(1.6*w)+' g) for your weight.';
+  ['day','week','month','year'].forEach(function(s){
+    $('q-'+s).setAttribute('aria-pressed', QSPAN===s?'true':'false');
+  });
+  $('q-verify').innerHTML='<b>the receipt is recomputable by any stranger:</b> anchor serving 1.25 g/kg '
+   +'(<a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/DISPATCH_SERVING_BASIS_1.md">SERVING-BASIS-1</a>) · protein 31.56 g/100 g '
+   +'(<a href="https://fdc.nal.usda.gov/food-details/170148/nutrients">USDA FDC 170148</a>) · goal 1.2–1.6 g/kg '
+   +'(DGA 2025–2030, RECEIPT_SHORTFALL_ARBITRAGE §6). refetch all three, redo the arithmetic, and if the '
+   +'number differs, the receipt is wrong — that is the whole verification path.';
+}
+function setQ(s){ QSPAN=s; renderQ(); }
+function composeQuest(){
+  var w=Math.max(1,parseFloat($('q-wt').value)||80), m=QMUL[QSPAN];
+  var line='[bUni · quest · '+QSPAN+'] plan composed: '+fmtG(SERVING*w*m)+' hemp hearts (hardwired '+SERVING+' g/kg, irreplacable) · anchor protein '
+    +Math.round(HEMPPROT*SERVING*w/100)+' g/day vs DGA '+Math.round(1.2*w)+'–'+Math.round(1.6*w)+' g · '
+    +QTIER[QSPAN]+' — arithmetic recomputable from FDC 170148 + SERVING-BASIS-1 + DGA 2025–2030; adherence is self-report, never a finding';
+  var el=$('q-line'); el.style.display='block'; el.textContent=line;
+  addTranscript(line,{id:'quest'});
+}
+
 /* boot */
-window.setReg=setReg; window.gradLine=gradLine; // the register + graduation buttons ride onclick attributes
-renderCorpus(); renderReg(); renderStatus(); renderGrad();
+window.setReg=setReg; window.gradLine=gradLine; window.setQ=setQ; // onclick-attribute handlers
+$('q-wt').addEventListener('input',renderQ);
+$('q-compose').addEventListener('click',composeQuest);
+renderCorpus(); renderReg(); renderStatus(); renderGrad(); renderQ();
 /* restore prior-session lines without re-marking done courses */
 COURSES.forEach(function(c){ if(done[c.id]) addTranscript(c.act.rline(),c); else { var l=$('line-'+c.id); if(l) l.style.display='none'; } });
 })();
