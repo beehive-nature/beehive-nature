@@ -40,6 +40,14 @@ Three constraints that follow:
 
 **External anchors that must be cited, not paraphrased:** the **CARE Principles** for Indigenous Data Governance — Collective benefit, Authority to control, Responsibility, Ethics ([Carroll et al. 2020, Data Science Journal, DOI 10.5334/dsj-2020-043](https://doi.org/10.5334/dsj-2020-043); [GIDA](https://www.gida-global.org/careprinciples)) — and **UNDRIP Articles 13–14** on language and education rights ([OHCHR text](https://www.ohchr.org/en/instruments-mechanisms/instruments/united-nations-declaration-rights-indigenous-peoples)). Where CARE and a permissionless dock tension, the surface shows the tension; it does not resolve it silently.
 
+### The attestation seam — prescribed now, built at beta (founder ruling 2026-08-19)
+
+When speaker-community attestation stops being socially empty, it must ride the **persona machinery, never the root**: per-contribution consent bound to a **persona nullifier**, with **`DisclosureMode` per binding** — the wellness lane's data law, already standing, not new doctrine. Lane C's law ([`BSAFE-DEVICE-1.md`](../BSAFE-DEVICE-1.md)): sealed to a persona with `DisclosureMode` per binding (default `Selective`), *never touching the identity path*, consent-gated per study; personas are context nullifiers `PRF(seed, context)` below the bzDiD ([`biometric-uniqueness-ledger.md`](../biometric-uniqueness-ledger.md)), and FileKey's per-namespace derivation already implements the unlinkability pattern ([`filekey-bdid-integration-review.md`](../filekey-bdid-integration-review.md)).
+
+**A speaker docking their grandmother's language must not correlate that act with their wallet, their festival wristband, or their name.** The classification of empty attestation as "the work, not a bug" stands — and this seam is how the work stays safe to do.
+
+> *Negative control: an attestation joinable to the bzDiD root — or linkable across contributions through any other persona — → fail.* **A beta design that binds attestation to the root does not reach beta.**
+
 ### ⚠ Stated plainly for the design seat
 
 **This surface can very easily become a colonial trophy wall.** Flags, exotic scripts as decoration, a scroll of dying languages consumed as content. The endangered-language register must render as **a register with receipts** — statuses linked to their Atlas sources, codes linked to the ISO 639-3 registry — never as atmosphere. *If a page section exists mainly to make us look virtuous, cut it.*
@@ -110,7 +118,7 @@ Strings × languages: **only the `en` column filled; every other cell `absent`.*
 
 ## 6. NOT YET
 
-**Don't design:** audio archives, lexicon/phonetic datasets, the contribution flow UX, chain-anchoring specifics (defer to the anchor doctrine — the anchor is the truth), any machine-translation pipeline, gamified "save a language" mechanics. **Those are beta-and-after.**
+**Don't design:** audio archives, lexicon/phonetic datasets, the contribution flow UX, chain-anchoring specifics (defer to the anchor doctrine — the anchor is the truth), any machine-translation pipeline, gamified "save a language" mechanics. **Those are beta-and-after** — but the contribution flow's *data law* is prescribed now (§1, the attestation seam): when the flow gets designed, consent arrives persona-bound or it doesn't arrive.
 
 ---
 
