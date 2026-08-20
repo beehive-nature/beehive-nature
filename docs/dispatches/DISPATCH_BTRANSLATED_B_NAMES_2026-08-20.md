@@ -157,4 +157,33 @@ area; the law we had was the opportunity he named.
 **Gate T-6:** ratify the three-template system (bee/raver/cypherpunk) + top-2 preference
 as D5 of the design sprint, persona-bound-never-root.
 
+## 8 · ADDENDUM (same day) — "make all of this real living breATHING": the build opens
+
+Founder, verbatim: *"excellent doctor (teacher). make all of this real living breATHING.
+use pages and repos and as our adapters [eternal immutable data networks and vaulta/hive
+{BCH back up anchor with exSAT]"*
+
+**Read as three acts:**
+1. **The alpha builds now** under §4's pointer principle (aliases are pointers, never
+   ownership) and §7's father-tongue bridge — landed same day as
+   `surfaces/btranslated.html` (KEYS wing): the candidate father set rendered with its
+   source honestly graded, a live pointer-principle demonstration against the real
+   registry names, the withdrawal state as a first-class specimen, and the top-2
+   preference (local-first, persona-never-root). Demo content is labeled demo; nothing
+   fakes resolution.
+2. **The adapter register is seeded by founder word** — gate R-5's list, recorded:
+   **Vaulta** (identity anchor) · **Hive** (content-is-chain) · the **eternal immutable
+   data networks** (Arweave, Autonomi — the pay-once stores already in the ring) ·
+   **exSat** (EVM lane) · **BCH as BACKUP ANCHOR**. Landed as
+   `docs/register/PREAPPROVED-ADAPTERS-1.md` with per-adapter in-tree status; additions
+   forever by founder word only.
+3. **Pages + repos are themselves adapters** — the mirror layer the relay already
+   trusts: the tree is the record, Pages serve it, and the design lane's new repo proved
+   the pattern this morning.
+
+**Gate status note:** this addendum treats the founder's order as opening the ALPHA
+build only. T-1's number, T-4's representation shape, and T-5's ruler remain open; the
+alpha ships with candidate data graded as candidate. Nothing on the surface can mint,
+own, or route value — pointer principle by construction.
+
 **Seat 3, 2026-08-20.**
