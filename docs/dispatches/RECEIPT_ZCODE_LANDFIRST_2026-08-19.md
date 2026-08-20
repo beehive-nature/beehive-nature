@@ -26,11 +26,20 @@ landed) applied before the `am`:
   **RATIFIED** BNR-LAB-1 charter — lived only inside the handoff zip.
 - `git apply --check` on the patch fails on all ten badge hunks (every blight page moved
   since 3e108d5). `git am` refuses; force-applying would revert the founder-directed
-  rename and the visual-layer fixes.
+  rename and the visual-layer fixes. The patch itself was honest on its own base —
+  verified in a throwaway worktree (2026-08-19): it applies cleanly onto `3e108d5`.
+  It is main that moved, not the patch that lied.
 
 ## 2 · Receipts — all from the landed tree, 2026-08-19
 
-**Node engine** (`key-build/bdid-key`): `npm ci && node test/test.mjs` →
+*Run provenance (precision pass, same day): every run below is environment-labeled —
+node and e2e legs ran Windows-side (node v24, Git Bash, playwright chromium); the cargo
+leg ran in WSL. The Cowork seat separately reports 26/26 from its Linux sandbox on both
+the pack original and the landed tree (their ledger, 2026-08-19). Two machines, three
+independent engines, one contract.*
+
+**Node engine** (`key-build/bdid-key`, Windows-side node in Git Bash): `npm ci && node
+test/test.mjs` →
 **26 passed, 0 failed**, pinned cross-implementation vector regenerates byte-identically:
 
 ```
@@ -47,7 +56,8 @@ first3      "stem answer claim"
 `noise_xx_handshake_transport_and_tamper_refusal` (thp);
 `full_stack_over_mem_transport` (host).
 
-**E2e** (`e2e/e2e.mjs`, run against the live tree's surface): **6/6** — engine loaded
+**E2e** (`e2e/e2e.mjs`, Windows-side playwright chromium, run against the live tree's
+surface): **6/6** — engine loaded
 (`BZDIDKEY` truthy, `PREVIEW=false`); phrase-only root = 24 valid BIP39 words; restore
 via the DOM rebuilds the same fingerprint; bad checksum refused honestly; full passkey
 ceremony (authMode=real, door=passkey+phrase, 24 words → recovery screen); PRF
