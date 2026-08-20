@@ -68,7 +68,7 @@ The explorer shows **select** ERC-20i tokens — not every token, just the curat
 | Token | Chain | Contract | Status |
 |---|---|---|---|
 | **BNRi** | Vaulta EVM | (TBD — your deployment) | Featured |
-| **PEPI** | Ethereum | `0x3103cd1602d5fa8f4b9283f9d5a7fa2295d51` | Featured (reference) |
+| **PEPI** | Ethereum | `0x3103cd1602d5fa8f4b9283f9d5a7fa2290795d51` | Featured (reference) |
 | **PEPI** | Base | `0x28a5e71bfc02723eac17e39c84c5190415c0de9f` | Featured (reference) |
 | **FUNGI** | Base | (search Basescan) | Listed (historical reference) |
 | Future ERC-20i tokens | Any chain | — | Apply via governance |
@@ -243,7 +243,7 @@ const ERC20I_REGISTRY = {
   ],
   ethereum: [
     {
-      address: "0x3103cd1602d5fa8f4b9283f9d5a7fa2295d51",
+      address: "0x3103cd1602d5fa8f4b9283f9d5a7fa2290795d51",
       symbol: "PEPI",
       name: "Pepe Inscriptions",
       featured: true,

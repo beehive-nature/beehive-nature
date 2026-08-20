@@ -57,9 +57,13 @@ song you've never heard; when you find one you love, copy the song-link — that
 the scale; duration → note length; barColorTop/Bottom paint the bars. This is the calibration bench for the
 encoder to come — every seed here is a candidate inscription.</div>
 <script>
-const DEPLOYS=[['MiDi #1','0xf7Cf2DF510bc0EC400232874f2fB4F2cDf9352d6'],
- ['MiDi #2 (lived May 2 – Jun 3 2024)','0x569e1A337b095B1A6c8F206158072cEDb6325b56'],
- ['MiDi #3','0x2d448bC9a98d28cB094722c2B8208916A248D5ac']];
+/* Census 2026-08-20 correction: "fallen" is the ARTIST's story, not the contracts'.
+   All three answer and render today (two-source verified). #1 is the healthiest —
+   ownership RENOUNCED (art frozen by code) and Sourcify exact_match; #2 and #3 keep a
+   live owner key, so their art is frozen only by the artist's absence. */
+const DEPLOYS=[['MiDi #1 — renounced, still transferring','0xf7Cf2DF510bc0EC400232874f2fB4F2cDf9352d6'],
+ ['MiDi #2 (lived May 2 – Jun 3 2024) — renders, owner key live','0x569e1A337b095B1A6c8F206158072cEDb6325b56'],
+ ['MiDi #3 — renders, owner key live','0x2d448bC9a98d28cB094722c2B8208916A248D5ac']];
 const HOSTS=['https://base-rpc.publicnode.com','https://base.drpc.org'];
 const W=v=>BigInt(v).toString(16).padStart(64,'0');
 function dec(s){

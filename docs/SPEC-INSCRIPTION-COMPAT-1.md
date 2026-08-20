@@ -112,6 +112,12 @@ This is the axis that separates the two generations, and it is **not retrofittab
   collision silently dissolves the piece being sold plus unrelated ones, without reverting.**
 - **Item model:** `transferItem(address,uint256)` `0x67c65e99` moves one inscription **by
   globally-unique id**, carrying exactly its backing tokens, seed data re-added verbatim.
+  **Census correction 2026-08-20 — `transferItem` is NOT a family marker.** Bytecode was
+  read on two independent RPCs for every Base family member (FUNGI, PEPi v1/v2, FROGGI,
+  JELLI, TRUFFI, JEDI, MiDi ×3, Souli): the selector is **absent from all of them**. It
+  belongs to the Ethereum Pepi item model alone (`0x3103cd16…`), which remains the only
+  tier-2 tradeable deployment in existence. Do not probe for it to test family membership
+  — a negative proves nothing but "not the ETH item model."
 
 > **Tier 2 requires an id-addressed transfer.** A Base-style token is viewable and
 > collectable but **cannot be safely traded by a third-party marketplace**, because every
