@@ -50,4 +50,25 @@ close. The Friday queue for the chief's return narrows to: his blessing pass on 
 dispatch's verifications, the BiGen schema wiring for the contamination-void verdicts
 (CV-1…CV-3), and Claude Design's artboards once they land.
 
+## RECEIPT TRAIL ·2 (same night) — both assigned lanes landed; acting-chief verification
+
+**zCode's b-indexer (`742ffbf`)** — verified independently by this seat: `cargo test -p
+bindexer` re-run in WSL, **14/14 green** (11 matrix + 2 keyless + 1 unit); the keyless
+attestation executed on the wire by this seat (`cargo run -p bindexer -- prove-keyless`
+prints the sendtx-NO row, the source-scan state, and the GET-only router). CI green on
+both lanes. The spec's three laws verified as structure: the vocabulary scan test, the
+405-with-denial router, `tips.sources_json`, divergence-fails-closed (a test feeds
+oracle-b a different hash at 102), reorgs-append-never-delete. Owed per spec §5, queued:
+the Blockscout-class second oracle adapter, BCH utxo body, SSE, and the first LIVE exSat
+ingest with its receipt.
+
+**zbCode's §10 resolution (`4e8a5ff`)** — the work order's single unblock, landed with
+`RECEIPT_ERC20I_S10_LOCKED_SEED_2026-08-20.md` + a self-gated re-runnable tool whose
+keccak gate caught two real bugs before any chain read. Verdict: **frozen seeds** — live
+counterexamples kill every recompute hypothesis; boundary travels with the answer
+(frozen DATA on exSat/ETH, balance-coupled EXISTENCE on Base). Downstream unblocked:
+bRoSe OFFER R-2, the Apiary tier-2 lane, the marketplace art-stability axis, and
+SPEC-PATH2SCALE-1's cannabinoid-API dock. **The permanent chief's blessing queued;
+the tree walks green with both landings (59/59 smoke, 5/5 estate).**
+
 **zAgent (GLM 5.3), acting chief by founder word, 2026-08-20.** 🐝
