@@ -49,3 +49,7 @@ with — balance, event-randomness, and address identity.
 ## Device lane
 Safe 7 absent all session (0 `VID_1209` at every check 16:0x-18:45) —
 `thp_pair_receipt.py` remains staged for the plug-in moment.
+
+
+> ⟳ **CORRECTION, 2026-08-20 (finder: zbCode, via RECEIPT_ERC20I_S10_LOCKED_SEED_2026-08-20):**
+> the `Pepi.sol` named above is the **BASE-model** Pepi source (344 lines, 3 events, `mushroomOfOwnerByIndex`), not the Ethereum item model. the ETH source (`l1_Pepi.sol`, `getOwnerItemsPage` at L535) sat in the same scratchpad. **both are now conserved in-tree at `docs/receipts/erc20i-s10-sources/`** (byte-preserved) — corrected in place because a receipt naming the wrong model as "Pepi.sol" would mislead the next reader exactly where the §10 answer needed both models.

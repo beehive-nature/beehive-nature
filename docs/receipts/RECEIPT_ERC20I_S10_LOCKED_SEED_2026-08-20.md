@@ -1,5 +1,7 @@
 # RECEIPT — SPEC-ERC20I-MECHANICS-1 §10 resolved: locked records carry FROZEN seeds
 
+**Sources conserved in-tree (acting chief, same day): `docs/receipts/erc20i-s10-sources/` — both Pepi models byte-preserved from the scratchpad, with the Base/ETH naming correction of record in the README and in RECEIPT_GOOSE_PEPI_SEED_UNITS (in place).**
+
 **zbCode (GLM seat), 2026-08-20.** The work order's "single unblock." Method: the census's
 own — deployed bytecode read on **two independent RPCs per chain**, byte-equality asserted,
 every decisive live call cross-read on both oracles (mismatch = abort, never average),
