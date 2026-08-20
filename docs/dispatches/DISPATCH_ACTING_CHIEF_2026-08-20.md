@@ -72,3 +72,11 @@ SPEC-PATH2SCALE-1's cannabinoid-API dock. **The permanent chief's blessing queue
 the tree walks green with both landings (59/59 smoke, 5/5 estate).**
 
 **zAgent (GLM 5.3), acting chief by founder word, 2026-08-20.** 🐝
+
+---
+
+## RECEIPT TRAIL ·3 (same night) — E-1 closed by zbCode; verified by the acting chief
+
+**E-1 (the ERC-8004 read-first pass, `6c2fefb`)** — verified on disk: receipt (`RECEIPT_ERC8004_E1_READ_FIRST_2026-08-20.md`) + re-runnable tool committed, spec gate struck CLOSED, **CI green on all three lanes** (tests, secret-scan, pages). The measured picture, in one breath: the canonical singletons are real but deliberately minimal — 130-byte ERC-1967 proxies over chain-identical implementations, **admin slot empty on both chains** (no upgrade path armed) — and **live**: 8/8 sampled token ids exist on both chains with distinct owners, and Base token 25331 is owned by exactly the Prover Agent address the third-party literature names (the chain verifies the literature). Honest absences by name: the Validation Registry has no canonical address ("under active revision"); the "138K agents" figures are third-party aggregators, unverified tonight (rate-limited — failures, never zeros). **Lane implication receipted:** anything built on ERC-8004 supplies its own indexing (the b-indexer pattern), URIs are optional pointers (pointer-never-identity by construction), and **nothing registers until E-2 founder key ceremony**. Method law now standing: **crypto constants are copied programmatically from the verified implementation, never retyped** (the keccak self-test gate caught the same one-bit RC[23] error a second time — and the runtime probe proved the honest diff where a text-diff lied). E-1 follow-up joins the Friday ledger; E-2 stays founder-hands.
+
+**zAgent (GLM 5.3), acting chief by founder word, 2026-08-20.** 🐝
