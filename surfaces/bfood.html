@@ -148,7 +148,7 @@ footer{max-width:1000px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
 </section>
 
 <section>
-  <h2>2 · THE HEXAGON — 31 cells, one per nutrient, filled by what you actually got</h2>
+  <h2>2 · THE HEXAGON — 40 cells, one per nutrient, filled by what you actually got</h2>
   <div id="comb"></div>
   <div id="key"></div>
 </section>
@@ -214,6 +214,18 @@ footer{max-width:1000px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
   it is lysine for every cereal and seed protein, while it is methionine+cysteine for every legume.
   <b>That mismatch is exactly why complementation works</b>: two proteins limited by different
   things, pooled, are limited by neither. It is not a trick, it is arithmetic on the aggregate.</div>
+
+  <div class="card" style="margin-top:11px;border-left:3px solid var(--fillfull)">
+    <h4 style="color:var(--fillfull)">✓ AND THE HEXAGON REPRODUCES IT INDEPENDENTLY — which is the
+    only reason you should believe either</h4>
+    <p style="font-size:10.5px;line-height:1.9">The claim above comes from published feeding
+    studies. The nine amino acid cells in section 2 come from somewhere else entirely: raw USDA
+    composition, divided by requirements read out of the DRI report. <b>Two routes that share no
+    data.</b> At the default basket they land on the same answer — <b>lysine is the lowest cell of
+    the nine, at roughly half your requirement, while the other eight run from 79% to 123%.</b>
+    Nobody told the arithmetic what to find. If the two had disagreed, this section would say so
+    instead, because a page that only reports its confirmations is not measuring anything.</p>
+  </div>
 
   <div id="diaas"></div>
   <div class="law" style="margin-top:10px"><b>Read the whiskers, not the bars.</b> Those are one
@@ -469,14 +481,38 @@ var NUT=[
  {k:'iodine',s:'I',u:'µg',b:'RDA',fam:5,m:150,f:150,ul:1100},
  {k:'selenium',s:'Se',u:'µg',b:'RDA',fam:5,m:55,f:55,ul:400},
  {k:'molybdenum',s:'Mo',u:'µg',b:'RDA',fam:5,m:45,f:45,ul:2000},
- {k:'chromium',s:'Cr',u:'µg',b:'AI',fam:5,m:35,f:25,a51m:30,a51f:20}
+ {k:'chromium',s:'Cr',u:'µg',b:'AI',fam:5,m:35,f:25,a51m:30,a51f:20},
+
+ /* THE NINE INDISPENSABLE AMINO ACIDS — IOM/NASEM DRI 2005, adults 19+, in mg per kg of
+    body weight per day. These genuinely DO scale with your mass, which is why they are
+    the only cells besides energy, protein and fibre marked body-scaled.
+    Resolved 2026-08-20 across five independent routes after every ordinary path failed:
+    the NAP online reader serves page images with no text layer. The values were finally
+    read from a 2017 Wayback capture of that reader taken while it still emitted OCR text,
+    and confirmed against Appendix E page images plus the Internet Archive full-text index.
+    All nine satisfy the report's own RDA = 1.24 x EAR rounding rule — an internal check
+    that nine wrong numbers could not pass together. */
+ {k:'histidine',s:'His',u:'mg',b:'RDA',fam:6,perKg:14,ear:11,
+   note:'one of only two rows here with no direct adult measurement behind it — the DRI derives it rather than observing it'},
+ {k:'isoleucine',s:'Ile',u:'mg',b:'RDA',fam:6,perKg:19,ear:15},
+ {k:'leucine',s:'Leu',u:'mg',b:'RDA',fam:6,perKg:42,ear:34},
+ {k:'lysine',s:'Lys',u:'mg',b:'RDA',fam:6,perKg:38,ear:31,
+   note:'THE one that limits hemp — see section 5. This cell can read 100% while hemp’s protein is still lysine-limited, because the basket’s other foods supply it. That is complementation, visible as a number.'},
+ {k:'methionine + cysteine',s:'SAA',u:'mg',b:'RDA',fam:6,perKg:19,ear:15,
+   note:'a requirement for the PAIR, not for either alone — cysteine is made from methionine, so the second spares the first'},
+ {k:'phenylalanine + tyrosine',s:'AAA',u:'mg',b:'RDA',fam:6,perKg:33,ear:27,
+   note:'a pair requirement, tyrosine made from phenylalanine. ⚠ The widely-repeated adult figures of EAR 36 / RDA 44 are the PREGNANCY row — quoted correctly by the 2024 AHRQ review, then misattributed downstream because its overview runs life stages together without subheadings. Adults are 27 / 33. This is our own read-the-primary-record law catching a trap in a federal systematic review.'},
+ {k:'threonine',s:'Thr',u:'mg',b:'RDA',fam:6,perKg:20,ear:16},
+ {k:'tryptophan',s:'Trp',u:'mg',b:'RDA',fam:6,perKg:5,ear:4},
+ {k:'valine',s:'Val',u:'mg',b:'RDA',fam:6,perKg:24,ear:19}
 ];
 var FAM=[{n:'ENERGY & BUILD',d:'the only rows that scale with your body'},
  {n:'ESSENTIAL FATS',d:'the two your body cannot synthesise'},
  {n:'FAT-SOLUBLE VITAMINS',d:'stored, so excess accumulates'},
  {n:'WATER-SOLUBLE VITAMINS',d:'not stored, so needed continually'},
  {n:'MAJOR MINERALS',d:'required in hundreds of mg or more'},
- {n:'TRACE MINERALS',d:'required in mg or µg — small, not optional'}];
+ {n:'TRACE MINERALS',d:'required in mg or µg — small, not optional'},
+ {n:'INDISPENSABLE AMINO ACIDS',d:'⚖ the only vitamins-and-minerals-adjacent rows that truly scale with your body'}];
 
 /* ═══ FOODS — per 100 g. null = the row is ABSENT from the record = NotMeasured.
    A measured zero stays 0. The two are never merged. Stack order is validated. ═══ */
@@ -502,7 +538,22 @@ var V={
  'potassium':[1200,850,0,1363],'sodium':[5,112.5,0,1048],
  'iron':[7.95,70,0.05,28.5],'zinc':[9.9,1.5,0.02,2.0],'copper':[1600,1000,0,6100],
  'manganese':[7.6,5,0,1.9],'iodine':[null,null,null,null],'selenium':[null,null,0,7.2],
- 'molybdenum':[null,null,null,null],'chromium':[null,null,null,null]
+ 'molybdenum':[null,null,null,null],'chromium':[null,null,null,null],
+ /* Amino acids, mg per 100 g, pulled from the USDA PRIMARY record this time —
+    fdc.nal.usda.gov/portal-data/external/<id> returns live JSON where the API demo key
+    is rate-limited and the food-details path 404s. Hemp 170148 and spirulina 170495 both
+    carry full amino acid rows.
+    Coconut oil's protein is a MEASURED 0.00 g, but its individual amino acid rows are
+    ABSENT from the record — so it is null here, not zero. Rendering it 0 would assert a
+    measurement USDA never made, which is the exact law this page exists to keep. Chlorella
+    has no USDA record at all. Both absences make every amino acid cell a FLOOR, marked ≥,
+    and that is correct rather than inconvenient. */
+ 'histidine':[969,null,null,1085],'isoleucine':[1286,null,null,3209],
+ 'leucine':[2163,null,null,4947],'lysine':[1276,null,null,3025],
+ 'methionine + cysteine':[1605,null,null,1811],   /* Met 933 + Cys 672 ; 1149 + 662 */
+ 'phenylalanine + tyrosine':[2710,null,null,5361],/* Phe 1447 + Tyr 1263 ; 2777 + 2584 */
+ 'threonine':[1269,null,null,2970],'tryptophan':[369,null,null,929],
+ 'valine':[1777,null,null,3512]
 };
 var SATF=[4.6,null,82.475,2.65];
 
@@ -518,6 +569,7 @@ function person(){ return {sex:$('sex').value,age:+$('age').value||49,ht:+$('ht'
   wt:+$('wt').value||80,pal:+$('pal').value}; }
 function req(n,p,d){
   if(n.dyn) return d[n.dyn];
+  if(n.perKg) return n.perKg*p.wt;   /* amino acids: mg/kg/day x your mass */
   var v = p.sex==='m'?n.m:n.f;
   if(p.age>=31){ if(p.sex==='m'&&n.a31m) v=n.a31m; if(p.sex==='f'&&n.a31f) v=n.a31f; }
   if(p.age>=51){ if(p.sex==='m'&&n.a51m) v=n.a51m; if(p.sex==='f'&&n.a51f) v=n.a51f; }
@@ -675,7 +727,8 @@ function render(){
       +'<td class="num">'+(r.pct===null?'<span class="nm">n/m</span>':(r.del.floor?'≥':'')+num(Math.min(r.pct,9999),0)+'%')+'</td>'
       +'<td class="num">'+num(r.req)+' '+n.u+'</td>'
       +'<td class="num">'+(r.del.measured?(r.del.floor?'≥ ':'')+num(r.del.tot)+' '+n.u:'<span class="nm">not measured</span>')+'</td>'
-      +'<td><span class="tag">'+n.b+'</span> <span class="tag'+(n.dyn?' s':'')+'">'+(n.dyn?'⚖ body':'👥 group')+'</span></td>'
+      +'<td><span class="tag">'+n.b+'</span> <span class="tag'+((n.dyn||n.perKg)?' s':'')+'">'
+        +(n.dyn?'⚖ body':n.perKg?'⚖ '+n.perKg+' mg/kg':'👥 group')+'</span></td>'
       +'<td class="num">'+(r.del.measured&&r.req?(r.del.tot-r.req>=0?'+':'')+num(r.del.tot-r.req):'—')+'</td>';
     tb.appendChild(tr);
     var notes=[];
