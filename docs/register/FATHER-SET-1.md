@@ -37,7 +37,37 @@ everything here until the T-5 ruler exists. **The resonance is already in the la
 `skaists.b` is the seeded community context in Ballot A's G4 register — *skaists* is
 Latvian. The genesis reference and the genesis community context are the same tongue.
 Routing: the corpus half is zCode-R's lane (BRIEF-04); this register records the naming
-half's fact. **If T-1 lands at 100M instead**, the set grows by
+half's fact.
+
+## THE REFERENCE LADDER, RUNG TWO — Thai (founder-ruled 2026-08-20)
+
+Founder, verbatim: *"Thai will be refrence tribal at around 90 million native speakers
+for next level BlanguageDOCK for approval by his majesty Monarch Rama x (include is full
+sacred name) and cc/addressed to all approviate parties. this will be perfect for the
+the scaling/autonmous velocity chaos on this spectrum road of singularity"*
+
+**Thai (th, ภาษาไทย)** is the next-level reference language — the mid-rung between the
+genesis specimen (Latvian, ~1.5M) and the father set. Speaker count, honestly: the
+founder states ~90M; commonly aggregated figures put **Central Thai at ~21M native**
+with **~60M+ total speakers including L2 across Thailand** (the ~90M reading matches the
+broader Tai family / national population framing). CANDIDATE grade, T-5 ruler pending,
+both figures recorded.
+
+**Representation — gate T-4's first worked case, handled with the care it demands.**
+For the Thai language the founder proposes the approval authority be the Kingdom's own:
+**His Majesty King Maha Vajiralongkorn Phra Vajiraklaochaoyuhua** (Rama X, tenth monarch
+of the Chakri dynasty; reigning title *Phrabat Somdet Phra Vajira Klao Chao Yu Hua*;
+title as bestowed at the Coronation of 4 May 2019 — name verified against the Royal Thai
+Government's Public Relations Department and Royal Thai Embassy publications, never from
+memory).
+
+**Stated plainly so this register can never be misread:** this entry records an
+**aspiration to respectfully seek approval** — it does not claim, imply, or anticipate
+royal endorsement, and no seat approaches the Palace or any Thai institution; any such
+address, and its cc to all appropriate parties, is **founder-hands diplomacy
+exclusively**, drafted only when the founder orders it and reviewed for protocol
+correctness before a single word travels. Until and unless such approval exists, Thai's
+entry stands as CANDIDATE on identical terms to every other language here. **If T-1 lands at 100M instead**, the set grows by
 roughly: Bengali, Portuguese, Russian, Japanese, Yue, Vietnamese, Turkish, Wu, Marathi,
 Telugu, Western Punjabi, Korean (~a dozen more, same aggregation caveat).
 
