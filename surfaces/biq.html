@@ -181,12 +181,35 @@ var SUBJECTS=[
    {t:'The project\u2019s documentation states that no contract is deployed until an open question about ERC-20i seed mechanics — whether a locked record carries a frozen seed or recomputes from the holder — is resolved against deployed bytecode.', c:'DISPATCH_SOULCATS_HUNT_ROSE_OFFER_2026-08-19 §4 · SPEC-ERC20I-MECHANICS-1 §10', u:GH+'docs/dispatches/DISPATCH_SOULCATS_HUNT_ROSE_OFFER_2026-08-19.md'}
   ]}
 ];
+/* TONE RULES.
+   Seat-3 verification pass, 2026-08-20: the original list was a fixed keyword blocklist
+   and six adversarial sentences walked four of them straight through — "widely regarded
+   as the most secure", "unparalleled ... the obvious choice", "trusted by a growing
+   community of believers", "robust, enterprise-grade assurance". Every one read CLEAN.
+   A blocklist only ever catches the words its author happened to think of.
+
+   Two changes. First, three rules below are STRUCTURAL rather than lexical: a comparative
+   with no "than", an attribution with no attributee, and a pile-up of evaluative adjectives
+   are promotional whatever vocabulary they are dressed in. Second, and more important, the
+   scan no longer claims a sentence is clean — see scan()'s caller. A miss that says nothing
+   is recoverable; a miss that says "tone-clean" is a false assurance the human then trusts. */
 var TONE=[
  {name:'first person', re:/\b(we|our|ours|us|i|my|mine)\b/i},
  {name:'second person', re:/\b(you|your|yours)\b/i},
- {name:'superlative / promotional adjective', re:/\b(best|greatest|fastest|most advanced|leading|revolutionary|world-class|ultimate|unmatched|seamless|seamlessly|cutting-edge|state-of-the-art|next-generation|game-changing|powerful|perfect)\b/i},
- {name:'promotional verb', re:/\b(revolutioni[sz]e[sd]?|supercharge[sd]?|unlock[s]?|empower[sd]?|disrupt[sd]?|redefin\w*)\b/i},
- {name:'unfalsifiable phrasing', re:/\b(obviously|clearly|undoubtedly|everyone knows|without question|simply the)\b/i},
+ {name:'superlative / promotional adjective', re:/\b(best|greatest|fastest|finest|safest|strongest|most\s+\w+|leading|revolutionary|world-class|ultimate|unmatched|unparalleled|unrivall?ed|premier|seamless|seamlessly|cutting-edge|state-of-the-art|next-generation|game-changing|powerful|robust|enterprise-grade|military-grade|bank-grade|industry-standard|elegant|beautiful|perfect|flawless)\b/i},
+ {name:'promotional verb', re:/\b(revolutioni[sz]e[sd]?|supercharge[sd]?|unlock[s]?|empower[sd]?|disrupt[sd]?|redefin\w*|deliver(s|ed)?\s+(robust|seamless|unmatched|powerful)|harness\w*|leverag\w*)\b/i},
+ {name:'unfalsifiable phrasing', re:/\b(obviously|clearly|undoubtedly|everyone knows|without question|simply the|obvious choice|no-brainer|of course)\b/i},
+ /* structural — catches the register, not the vocabulary */
+ {name:'attribution with no attributee ("widely regarded" — by whom?)',
+  re:/\b(widely|generally|commonly|universally|often)\s+(regarded|considered|accepted|recognised|recognized|known|held|believed|seen)\b|\bis\s+(considered|regarded|recognised|recognized)\b|\btrusted\s+by\b|\bknown\s+for\b|\bmany\s+(say|believe|agree)\b/i},
+ /* The "than" lookahead alone produced a false positive on "a lower bound of 128 bits",
+    which is a fixed technical idiom rather than a comparative claim. A rule that flags
+    correct prose teaches the writer to tick keep-anyway reflexively, which destroys the
+    gate more thoroughly than a missed sentence would — so the collocations are excluded. */
+ {name:'comparative with no "than" — more/better than WHAT?',
+  re:/\b(more|less|better|worse|higher|lower|faster|slower|greater|stronger|safer|cheaper)\b(?!\s+(bound|bounds|order|level|levels|layer|layers|tier|tiers|case|cases|limit|limits|half|end))(?![^.]*\bthan\b)/i},
+ {name:'vague quantifier standing in for a number',
+  re:/\b(a\s+growing\s+\w+|countless|numerous|a\s+wide\s+(range|variety)|many\s+of\s+the\s+\w+|significant(ly)?|substantial(ly)?|dramatic(ally)?)\b/i},
  {name:'exclamation mark', re:/!/}
 ];
 var cur=SUBJECTS[0];
@@ -210,7 +233,12 @@ function renderSents(){
     if(s.checked&&flags.length){
       fh='<div class="flag" style="display:block">⚑ '+flags.join(' · ')+' — <label style="cursor:pointer"><input type="checkbox" data-keep="'+i+'"'+(s.keep?' checked':'')+'> keep anyway (your call, on the record)</label></div>';
     } else if(s.checked){
-      fh='<div class="okline" style="display:block">✓ tone-clean</div>';
+      /* NEVER "tone-clean". A keyword-and-pattern scan cannot certify neutrality, and
+         saying so invites the human to stop reading — which is the one thing this page
+         must not cause, because the human IS the gate. Report only what was actually
+         done: nothing matched. */
+      fh='<div class="okline" style="display:block">no pattern matched — <span style="opacity:.75">'
+        +'a scan, not a verdict. neutrality is still yours to judge.</span></div>';
     }
     d.innerHTML='<label class="stx"><input type="checkbox" class="pick" data-i="'+i+'"'+(s.checked?' checked':'')+'> '+esc(s.t)+'</label>'
       +'<div class="scit">[source] <a href="'+s.u+'" rel="noopener">'+esc(s.c)+'</a>'+(s.custom?' · contributor-added':'')+'</div>'+fh;
@@ -254,7 +282,13 @@ window.compose=function(){
     +'\n\n(Draft composed with the bIQ Composer — third person, every sentence cited; submitted by a human via the Sophia gate.)';
   $('draft').style.display='block'; $('draft').textContent=draft;
   $('cp').style.display='inline-block';
-  toneHost.innerHTML='<div class="okline" style="display:block">✓ tone check passed — '+sel.length+' sentence(s), '+cites.length+' citation(s), every sentence carrying its source.</div>';
+  toneHost.innerHTML='<div class="okline" style="display:block">'
+    +'draft composed — '+sel.length+' sentence(s), '+cites.length+' citation(s), every sentence carrying its source.'
+    +'<div style="margin-top:6px;opacity:.8;font-weight:400">'
+    +'<b>This is not a certificate of neutrality.</b> The scan matches patterns; it cannot read register, '
+    +'and a competent writer walks past any pattern list without trying. Six adversarial sentences were run '
+    +'at this gate on 2026-08-20 and four passed. <b>Read the draft yourself before you paste it</b> — '
+    +'a human editor at IQ.wiki will, and they decline without explaining.</div></div>';
 };
 window.cpDraft=function(){
   navigator.clipboard.writeText($('draft').textContent).then(function(){
