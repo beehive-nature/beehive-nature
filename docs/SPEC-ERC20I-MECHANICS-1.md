@@ -239,9 +239,23 @@ and shimmer for a few hundred bytes that would cost thousands of cells to store.
 
 ## 10 · Open
 
-- **Locked inscriptions** — whether a locked record carries a frozen seed (making it
-  transferable art) or recomputes from the holder. Decides whether a marketplace can exist.
-  Under verification.
+- **Locked inscriptions — RESOLVED 2026-08-20: the record carries a FROZEN seed.**
+  Measured per the census method (deployed bytecode on two independent RPCs per chain,
+  decisive reads cross-verified on both; receipts:
+  `docs/receipts/RECEIPT_ERC20I_S10_LOCKED_SEED_2026-08-20.md`, tool
+  `docs/receipts/erc20i-s10-locked-seed.mjs`). The collected mushroom (Base) / item (ETH
+  Pepi) stores its full seed data at collection/mint; the enumeration getters are pure
+  stored reads (`mushroomOfOwnerByIndex` strict body: SLOAD only, zero DIV, zero external
+  calls, on PEPI-Base and FUNGI); transfer moves the record verbatim. Live proof: Base
+  wallets hold records whose seeds differ from each other, from the live spore seed, and
+  from the balance floor simultaneously (five mutually distinct values in one FUNGI
+  wallet); on ETH, `getSvg` rendered 1,733 B from a dead address's stored item triple.
+  **Marketplace consequence:** locked records are stable, transferable art — but on Base
+  the record's *existence* stays balance-coupled (mushrooms dissolve FIFO when outflow
+  exceeds spores), so escrow must carry or verify backing; the ETH item model moves
+  backing atomically under the same id (tier 2, COMPAT-1 §2.2). Flags raised, not
+  resolved: JELLI lacks the family enumeration selectors entirely; FUNGI records are
+  2-word (seed, seed2) vs PEPI's 3.
 - **The over/under bug** — founder reports FUNGI and PEPi v1 share it. Precise defect and
   visible effect under verification.
 - **PEPi v1 vs v2** — three contracts share the PEPI symbol; which deployment is which is
