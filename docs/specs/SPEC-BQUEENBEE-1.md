@@ -113,3 +113,31 @@ walls routing protocol talk to the graded lane, the university, the verify path,
 telemetry refusal), every reply badged ⚙, **honest absence by name when unmatched** — "an
 absence from me is an absence, never a zero" — plus the bLOVErAi handoff prompt (composes,
 sends nothing). Hub at 41 surfaces, roster 33, **64/64**.
+
+---
+
+## ADDENDUM ·2 — the rails discovery: her voice engine already exists (2026-08-20 night)
+
+The founder shared the hive's bsky post of record
+(`at://did:plc:77xbxwg7vh3wh5pmzvid65hc/app.bsky.feed.post/3mqicxz6xds2o`, 2026-07-12 —
+the VOICE-1 v0.1 APPROVED announcement), and it resolves three things at once:
+
+1. **QB-1's bsky half is SATISFIED since July:** the rail account exists, founder-held,
+   handle `beehivenature.com`, DID of record `did:plc:77xbxwg7vh3wh5pmzvid65hc`
+   (PUBLIC-CONSTANT). **The nostr half remains owed, founder-hands.**
+2. **The VOICE-1 protocol IS her publishing law** — posts are versioned voice-records
+   (class · lexicon · rate · heartbeat · sha-pinned · commit-linked). Her debut and every
+   receipts-drop ride this grammar, not ad-hoc posting.
+3. **`crates/queenbee-voice` (LOVErnment-DAO, VOICE-1 + dockets D-004…D-008) is her
+   publishing engine, already built:** one public verb `submit_post` and nothing else
+   (no like/repost/follow/reply/delete paths exist to reach); hard UTC-day cap **3/day**;
+   **21-day heartbeat** whose silence itself is ledgered; TreeLanding class = pure
+   commit-derived announcements, signature-verified only, repo allowlist pinned in code
+   (skaists/LOVErnment-DAO + beehive-nature/beehive-nature).
+
+**The complete queen, now mapped:** outbound = the voice crate (VOICE records, capped,
+heartbeat, audited) · inbound = `bqueenbee-live.html` (tonight's v0 chat — receipts-d
+answers, telemetry-free) · identity = the founder-held DID (and, when the founder rules
+E-2, the ERC-8004 pointer). Her receipts-drops calendar (manifesto §"first ten") becomes
+**VOICE class extensions** in that tree — each a spec'd adapter class, never freeform
+posting. The two trees were already building her; tonight they met.
