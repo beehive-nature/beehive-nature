@@ -86,3 +86,35 @@ the museum dead-network law; one word from the founder overrides it.)
 
 *Read-only verification throughout; no endpoint was probed beyond our own tree, no key
 material touched.*
+
+---
+
+## 6 · ADDENDUM, same night — the boundary question answered: the dangling-art doctrine
+
+The seat's reading (§2: ops gated, viewing open) was put to the founder with one
+alternative (everything gated, even viewing). His answer, verbatim:
+
+> *"autonomous redundent chaos adoption velocity we dangle more of the art in front
+> until we hit limits? would that be a waste?"*
+
+**The reading stands, extended into doctrine:**
+
+1. **Viewing stays open — and we dangle MORE, not less.** Maximum anonymous exposure of
+   the collection is the adoption-velocity engine, and on the current rails it costs the
+   hive nothing: static Pages (free, effectively unbounded) + chain reads executed by the
+   **visitor's own browser** against public RPCs (their IP, their rate limits). Dangling
+   art this way is not a waste — it is free distribution. The waste-vector exists only if
+   viewing is ever routed through OUR quota (rail-2), which §2 already forbids.
+2. **The limits we hit are signals, not walls.** When a visitor's public-rail experience
+   degrades (their 429s) or a free tier ends, that is the trigger to cache harder or
+   migrate the function to the sovereign rail (rail 1) — never a trigger to gate the art
+   behind login.
+3. **The wallet session is a door to MORE dangling, never a wall in front of it.**
+   Anonymous sees the collection; a session unlocks deeper scans, personal galleries,
+   own-holdings views, offers and claims. Sessions personalize and attribute; they do not
+   ration the art.
+4. **The posture has its name from the founder's own words: autonomous, redundant,
+   chaos-tolerant, adoption-velocity-first.** Static-first (nothing of ours to hammer),
+   operator-diverse redundant oracles (two-operator law), dead-network honesty when
+   things break, and the gate exists to keep that machine fundable and attributable —
+   serving velocity, never throttling it.
