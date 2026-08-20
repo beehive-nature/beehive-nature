@@ -100,6 +100,59 @@ law 8d: "does the cost of the ten-billionth user land on BNR?").
   individual — *"it doesn't know you"; filling it is "selling, not teaching"*
   (`docs/design/non-value-states.md:105`).
 
+## 2a · ADDENDUM (2026-08-19, same day) — hemp seed heARTs as reference genesis commodity, and the bFood Hexagon
+
+Founder, verbatim: *"yep hemp seed heARTs are going to be the reference genesis commodity
+because of its unique universal nutriant properties (we need every nutritiant, vitamin,
+minerals, protein [essential and nonessential], fat [critical for aging with
+mTOR/TERTgene/Telomeres {Omega 1 = THCA}; required to reverse Artifical Chronic
+inflammatory Disease (ACiD) ]Omega 2 = CBDA}; Essential Omega 3 : Omega 6 (1:3 ratio).
+when we add chorella and spirolina algaes next with liquid coconut oil (MCT's) they will go
+inot the bFood Hexagon Pie graphical chart of how much each food source fills up
+statistically in our 100% MINIMUM (include max/LD50 where indacated) Required Nutritional
+Intake (don't let them fool us on the fat.....lots of fake science to prevent this natural
+scalable approach that will effect a black swan economic event with potential projected
+decrease in ACiD medical/xyz care/service/cost)"*
+
+**Ruling recorded:** hemp seed heARTs (casing his) = the **reference genesis commodity** of
+the nutrition lane — consistent with the tree as it stands: the COA spec's record shape
+("the jewel; the seed is the first entry"), the committed marketplace test vector
+(`category: "hemp-seeds"`), coop.html's #4 grocery-verified lane, and the price feed's
+FVHEMP series. Next foods queued: chlorella, spirulina, liquid coconut oil (MCTs) — each
+enters as a new set of determinations in the same NutrientRecord shape, no new
+architecture.
+
+**The Axis A / Axis B routing, applied to this message** (the twice-ratified k001 wall):
+
+| claim class | examples from the founder's words | where it lives |
+|---|---|---|
+| **Axis A — composition & regulatory facts (in-repo)** | nutrient/vitamin/mineral/protein content per food; omega-3:omega-6 ratio as a measured ratio; RDI/%DV as labeling facts; tolerable upper limits and LD50 where published — each value **cited to its source** (USDA FoodData Central / EFSA / the commissioned COA when it lands), unmeasured never rendered as zero | the COA record shape, `crates/coa`, the bFood surface |
+| **Axis B — effect & mechanism theses (off-repo, GRADE-graded)** | "Omega 1 = THCA" / "Omega 2 = CBDA" as functional designations; mTOR/TERT/telomere aging mechanics; "required to reverse ACiD"; the fat-science-suppression thesis; the black-swan cost-collapse projection | **BIGEN research questions** — a forest plot you re-run, not an assertion; the RELAY_UI precedent stands: effect claims live in the graded drawer, never on the bar |
+
+**ACiD** ("Artificial Chronic inflammatory Disease") is the founder's coinage — recorded
+here as vocabulary; whether it enters VOCABULARY.md is a naming gate (G-6). The 1:3
+omega-3:omega-6 target and "don't let them fool us on the fat" are exactly what BIGEN's
+integrity layer exists for: the graded evidence either holds or it doesn't, **and the
+manufacturer_funded flag fires symmetrically — including on our own commissioned COA** —
+which is what makes the founder's challenge to "fake science" falsifiable instead of
+rhetorical.
+
+**The bFood Hexagon — honest form spec** (queued as sprint phase D3+, SPRINT_DESIGN_UNIFY):
+a bcomb-identity **hex grid, one hexagon per nutrient** — never a radial pie, because pie
+angles distort magnitude and this chart's whole job is magnitude. Each cell: linear fill =
+% of the 100% MINIMUM required intake supplied by the current basket (hemp heARTs +
+chlorella + spirulina + MCT), stacked by food source in the validated color set; a cell
+past its tolerable upper limit flags in reserved status colors with its UL/LD50 citation;
+an unmeasured nutrient renders **NotMeasured, never 0** (`crates/coa`'s law — absence of
+test is not absence of substance); a per-individual figure renders **NotComputable — "it
+doesn't know you"** until the system actually does. Hover carries value + unit + source +
+serving basis. Every value cited or the cell says UNVERIFIED — cite-or-stop applies to
+food exactly as it does to crypto.
+
+**Build gate (G-7):** the surface ships only with a sourced dataset — literature values
+(USDA FDC etc.) clearly labeled as literature, replaced by the commissioned COA lot record
+when it lands. No number without a source ever renders.
+
 ## 3 · The stretch phase — dormancy, rediscovery, and what verification can honestly mean
 
 **The founder's hypothesis is already recorded in spec text** — `SPEC-ORIGINATION-1`
@@ -183,6 +236,8 @@ the study *falsifiable* and the kernel defensible while the study runs. The **10
 | **G-3** | the dormancy trigger (quiet period + reactivation ceremony + dormant-Respect) — already owed at SPEC-ORIGINATION-1:456-459 (the "Still owed" block); the stretch phase raises its priority. SPEC-ORIGINATION-1 itself is DRAFT — its ratification is its own, larger question | §3 |
 | **G-4** | AGENT-1 L-1 ("No DID… Ever") vs the bonding spec's verification-method keypair — one reading needed | §1 |
 | **G-5** | commission the reincarnation-study interpretation plugin as a spec lane (off-kernel, LOVErnment-DAO side, BIGEN-adjacent) | §3 |
+| **G-6** | "ACiD" (Artificial Chronic inflammatory Disease) and "Omega 1/Omega 2" as functional designations — VOCABULARY entries, or founder-doctrine vocabulary that stays quoted? | §2a |
+| **G-7** | the bFood Hexagon dataset lane: literature values (USDA FDC, cited per cell) now, commissioned COA lot record replaces them — confirm | §2a |
 
 Nothing above designs an unruled mechanism. The primitive runs today as
 propose-draft-human-signs on the live market rails; the stretch phase waits on G-2/G-3 with
