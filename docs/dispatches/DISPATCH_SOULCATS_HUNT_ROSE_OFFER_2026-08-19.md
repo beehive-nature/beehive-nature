@@ -135,5 +135,27 @@ time per the standing rule.
 | **R-3** | first chain: exSat (bnri-contracts lane, S-7 discipline, SEPARATE contract per the 2026-08-13 ruling) — confirm |
 | **R-4** | museum: induct **Souli** into the fallen wing (the real archived 2024 ERC-20i), and catalog **CCAT** as a values-aligned guest exhibit (fully on-chain, MIT, no-admin-by-construction) — yes/no each |
 
+## 6 · RULINGS RECEIVED (2026-08-20, founder verbatim)
+
+1. *"voucher is orthoganol with our escrow/markets [token, physical agro, b for
+   bMeshAsi]"* — **the OFFER is its own rail, deliberately NOT entangled with the
+   escrow/markets stack** (token trade, physical agro, b-for-bMeshAsi). Consequence for
+   the build: the offer contract composes BESIDE the marketplace, never inside it; no
+   escrow-wire event types are reused for offers; the "Locked inscriptions only trade"
+   law governs the market lane and the OFFER lane separately. R-1's naming question
+   remains open; the orthogonality is settled.
+2. *"Souli: why do our best to include and resorect all viable erc20i on preapproved
+   adapters/chains"* — **R-4 answered, expansively: RESURRECTION DOCTRINE.** Not just
+   Souli — the museum/collection's mandate is to include and resurrect **every viable
+   ERC-20i**, on **preapproved adapters/chains**. Two execution consequences:
+   (a) a full family census is now a standing lane (enumerate, verify aliveness and
+   mechanics two-source, catalog); (b) "preapproved adapters/chains" makes the adapter
+   list itself a founder-gated register — a new chain/adapter enters by ruling, not by
+   default (**gate R-5**: seed the preapproved list — Ethereum + Base are where the
+   family measurably lives; exSat is ours).
+
+**Seat 3 note, same day:** the census launched as a research workflow on this ruling;
+its induction list lands as an addendum here with per-contract receipts.
+
 **Seat 3, 2026-08-19.** Clones and receipts in the session scratchpad; pinned shas above
 are the authority.
