@@ -1,7 +1,7 @@
 # SPEC-ONBOARDING-IDENTITY-1 v0.1 — Onboarding & Identity Layer
 
 Status: DRAFT for founder ratification. Spec only, no implementation.
-Companion to: SPEC_KEYRING-1 (custody tiers, bDiD binding), SPEC_DOCTRINE-HARVEST-1 D1 (trust boundary).
+Companion to: SPEC_KEYRING-1 (custody tiers, bzDiD binding), SPEC_DOCTRINE-HARVEST-1 D1 (trust boundary).
 
 ---
 
@@ -10,7 +10,7 @@ Companion to: SPEC_KEYRING-1 (custody tiers, bDiD binding), SPEC_DOCTRINE-HARVES
 | Law | Source |
 |---|---|
 | Custody tiers: T-H (hardware seed), T-F (FIDO2/passkey), T-S (software rotatable), T-P (platform/custodial) | SPEC_KEYRING-1 §1 |
-| bDiD = verification-method succession (add keys, never lose old ones; old methods degrade to recovery, not root authority) | SPEC_KEYRING-1 §3 |
+| bzDiD = verification-method succession (add keys, never lose old ones; old methods degrade to recovery, not root authority) | SPEC_KEYRING-1 §3 |
 | Explicit Trust Boundary: agent publishes what it defends AND does NOT defend | SPEC_DOCTRINE-HARVEST-1 D1 |
 | Untrusted-content-as-data quarantine | SPEC_DOCTRINE-HARVEST-1 D2 |
 | OAuth/social-login = hosted chokepoint = the class BNR replaces | standing (zBuZz-class) |
@@ -35,7 +35,7 @@ Companion to: SPEC_KEYRING-1 (custody tiers, bDiD binding), SPEC_DOCTRINE-HARVES
 
 ## 2. Layer 1: Passkey / FIDO2 (sovereign)
 
-This IS the bDiD verification-method layer. Passkey = authority.
+This IS the bzDiD verification-method layer. Passkey = authority.
 
 ### Architecture
 
@@ -57,7 +57,7 @@ The browser uses its built-in WebAuthn API — no client-side library needed. Th
 4. Solo 2 signs the challenge with the per-RP private key.
 5. Relying party verifies the assertion against the stored public key.
 
-### Server-side verification (for bDiD-bound services)
+### Server-side verification (for bzDiD-bound services)
 
 The BNR relay/server verifies WebAuthn assertions using `webauthn-rs`:
 - **L-VERIFY**: webauthn-rs = **MPL-2.0** (Firstyear/webauthn-rs, kanidm/webauthn-rs — GitHub API verified).
@@ -73,7 +73,7 @@ The BNR relay/server verifies WebAuthn assertions using `webauthn-rs`:
 ### What Layer 1 IS
 
 - Hardware-rooted identity verification
-- bDiD verification method (the passkey proves "you are you" to the bDiD)
+- bzDiD verification method (the passkey proves "you are you" to the bzDiD)
 - No third-party token custody (Solo 2 holds the keys, not a cloud service)
 - Multi-platform (works with any WebAuthn-compatible browser/OS)
 
@@ -87,7 +87,7 @@ The BNR relay/server verifies WebAuthn assertions using `webauthn-rs`:
 
 ## 3. Layer 2: OAuth social-login (ramp, never root)
 
-OAuth social-login is a **ramp ONTO the sovereign bDiD**, not the root identity. It is the class BNR replaces.
+OAuth social-login is a **ramp ONTO the sovereign bzDiD**, not the root identity. It is the class BNR replaces.
 
 ### Architecture
 
@@ -99,7 +99,7 @@ OAuth provider authenticates the user
 BNR onboarding receives the OAuth identity
     ↓ prompts: "Upgrade to hardware-rooted identity"
 Solo 2 passkey registration
-    ↓ bDiD binds to the passkey (verification-method succession)
+    ↓ bzDiD binds to the passkey (verification-method succession)
 OAuth token becomes SECONDARY (still works, not root authority)
 ```
 
@@ -127,19 +127,19 @@ The dashboard/onboarding surface shows the user's CURRENT tier and the NEXT avai
 
 ---
 
-## 4. bDiD integration
+## 4. bzDiD integration
 
-Per SPEC_KEYRING-1 §3 (bDiD binding layer):
+Per SPEC_KEYRING-1 §3 (bzDiD binding layer):
 
-1. **Initial binding (T-P)**: User arrives via OAuth. bDiD creates a placeholder identity keyed to the OAuth subject. Tier badge: T-P.
-2. **Passkey binding (T-F)**: User registers Solo 2 passkey. bDiD adds the passkey public key as a verification method. The OAuth method degrades to recovery. Tier badge: T-F.
-3. **Hardware binding (T-H)**: User binds Trezor wallet address. bDiD adds the hardware address as a verification method. Tier badge: T-H.
+1. **Initial binding (T-P)**: User arrives via OAuth. bzDiD creates a placeholder identity keyed to the OAuth subject. Tier badge: T-P.
+2. **Passkey binding (T-F)**: User registers Solo 2 passkey. bzDiD adds the passkey public key as a verification method. The OAuth method degrades to recovery. Tier badge: T-F.
+3. **Hardware binding (T-H)**: User binds Trezor wallet address. bzDiD adds the hardware address as a verification method. Tier badge: T-H.
 
-**Verification-method succession**: each upgrade ADDS a method. Old methods are never deleted (they become recovery paths). The bDiD document records the full succession chain — a user can always see their custody history.
+**Verification-method succession**: each upgrade ADDS a method. Old methods are never deleted (they become recovery paths). The bzDiD document records the full succession chain — a user can always see their custody history.
 
 ### Trust boundary (per SPEC_DOCTRINE-HARVEST-1 D1)
 
-The bDiD publishes what it defends against:
+The bzDiD publishes what it defends against:
 - **Defends**: impersonation without the registered hardware authenticator (T-F/T-H).
 - **Does NOT defend**: loss of ALL authenticators (user must maintain backup Solo 2 + recovery codes). Social-engineering of the OAuth provider (provider can still reset OAuth access — which is why OAuth is never root).
 
@@ -158,20 +158,20 @@ Stage 0: Discovery
 
 Stage 1: Entry (T-P)
   → User signs in with Google/GitHub/Apple (OAuth)
-  → bDiD placeholder created
+  → bzDiD placeholder created
   → Dashboard shows: "Your identity is platform-custodied. Upgrade to passkey."
   → All read-only features available (view balances, explore)
 
 Stage 2: Sovereign (T-F)
   → User clicks "Upgrade to Passkey"
   → Browser prompts → user taps Solo 2
-  → Passkey registered, bDiD upgraded
+  → Passkey registered, bzDiD upgraded
   → Dashboard badge changes: T-P → T-F
   → Write features unlock (upload, sign, transact with approval)
 
 Stage 3: Hardware custody (T-H)
   → User connects Trezor (already implemented in dashboard)
-  → Wallet address bound to bDiD
+  → Wallet address bound to bzDiD
   → Dashboard badge: T-H
   → Full sovereign capability
 
@@ -211,7 +211,7 @@ Every surface decision measured by: "does this maximally improve the user's qual
 For BNR services that need to verify WebAuthn assertions (e.g., the relay authenticating a user's passkey):
 
 - **Library**: `webauthn-rs` (MPL-2.0, L-VERIFIED)
-- **Flow**: browser sends assertion → relay verifies via webauthn-rs → bDiD records the verification
+- **Flow**: browser sends assertion → relay verifies via webauthn-rs → bzDiD records the verification
 - **The relay never holds a private key** — it verifies public-key assertions only
 - **State**: the relay stores credential public keys (not private keys) for verification
 
@@ -232,7 +232,7 @@ For BNR services that need to verify WebAuthn assertions (e.g., the relay authen
 1. Layer 1 (Passkey/FIDO2): a user with a Solo 2 can register passkeys for each ramp relying party. Private keys never leave the device.
 2. Layer 2 (OAuth ramp): a user can sign in with Google/GitHub/Apple/MS and be guided to upgrade to passkey within 5 minutes.
 3. Progressive custody ladder: the dashboard shows the user's current custody tier and next upgrade at every step. Tier badges are accurate, never faked.
-4. bDiD integration: each custody upgrade adds a verification method without removing old ones. The succession chain is recorded.
+4. bzDiD integration: each custody upgrade adds a verification method without removing old ones. The succession chain is recorded.
 5. Server-side verification: the relay can verify WebAuthn assertions using webauthn-rs without holding any private keys.
 6. Ramps: each ramp is independently replaceable. The BNR stack works without any specific ramp.
 7. Solo 2 backup: two Solo 2 devices provide redundant authenticators. Loss of one does not lock the user out.
@@ -247,4 +247,4 @@ For BNR services that need to verify WebAuthn assertions (e.g., the relay authen
 
 ---
 
-*Goose, primary executor. Cites: SPEC_KEYRING-1 (custody tiers, bDiD binding), SPEC_DOCTRINE-HARVEST-1 D1 (trust boundary), FOUR AXES (community inflow funnel), progressive custody ladder (founder ruling), zBuZz-class hosted chokepoint rule (standing).*
+*Goose, primary executor. Cites: SPEC_KEYRING-1 (custody tiers, bzDiD binding), SPEC_DOCTRINE-HARVEST-1 D1 (trust boundary), FOUR AXES (community inflow funnel), progressive custody ladder (founder ruling), zBuZz-class hosted chokepoint rule (standing).*

@@ -1,7 +1,7 @@
 /* relay.js — TASK 6: nostr relay transport, v1.
    PTR messages over public relays via wss. v1 is READ + PLAINTEXT-KIND broadcast
    of pointer events (kind 1 with the [bX ] prefix filter); E2E (NIP-44 + secp256k1
-   vendored from bdid-key) docks as TASK 6b — the law stays: payloads are POINTERS,
+   vendored from bzdid-key) docks as TASK 6b — the law stays: payloads are POINTERS,
    never content, so plaintext-v1 leaks nothing but a URL that renders from chain.
    Zero deps: WebSocket + SubCrypto for ids. */
 var RELAY=(function(){

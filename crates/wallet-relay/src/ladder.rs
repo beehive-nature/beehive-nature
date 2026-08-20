@@ -69,7 +69,7 @@ impl AuthenticatorTier {
 pub struct EnrollmentRequest {
     pub tier: AuthenticatorTier,
     pub pubkey_envelope: serde_json::Value, // PQ-ready versioned envelope (§2)
-    pub account: String,                     // Vaulta account name (the bDiD)
+    pub account: String,                     // Vaulta account name (the bzDiD)
 }
 
 /// The ladder metadata for dashboard display.

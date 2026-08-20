@@ -1,4 +1,4 @@
-# bDiD architecture — the 10-billion-user decision
+# bzDiD architecture — the 10-billion-user decision
 
 <!-- 8 agents: 4 independent candidate architectures, 3 judges on separate
      dimensions, 1 synthesis. Decided 2026-08-04. Mainnet facts queried live. -->
@@ -11,12 +11,12 @@
 
 ## 1. The decision
 
-**Build `bDiD/BEELOG`: a self-certifying root identity (from `self-certifying`) whose human-readable `.b` name is a leaf in a single indexed Merkle log with one root row on Vaulta (from `commit-da`).**
+**Build `bzDiD/BEELOG`: a self-certifying root identity (from `self-certifying`) whose human-readable `.b` name is a leaf in a single indexed Merkle log with one root row on Vaulta (from `commit-da`).**
 
 This is a hybrid, and it is a coherent whole rather than a compromise, because each candidate's fatal flaw is the other's core mechanism:
 
-- **`self-certifying` contributes the identity layer.** `bDiD = hash(genesis_op)` — a rotation-key-committing, hash-of-genesis DID. Uniqueness is collision resistance, not agreement. No issuer, no ordering, no registry, no DA, no chain bytes, no cost. This is the only structure in the field that answers "decentralized, automatic, autonomous" for all 10 billion, because the vast majority of those 10 billion will never claim a scarce name and therefore never need consensus about anything.
-  - **Correction I am making to that candidate: 128 bits is not enough.** A 128-bit identifier has ~2⁶⁴ ≈ 1.8×10¹⁹ birthday-collision work. The candidate computed the *accidental* collision probability (1.5×10⁻¹⁹, correct) and never addressed the *adversarial* one. At Bitcoin-class hashrate (~6×10²⁰ H/s) 2⁶⁴ is a fraction of a second, so an attacker can craft two genesis ops sharing one bDiD — bind one to a name, present the other. `rollup`'s 160-bit truncation (2⁸⁰) is better but still not a margin I will sign. **bDiD is the full 256-bit digest**, base32, 52 chars. The raw DID is machine-facing; humans use the `.b` name or a DNS handle.
+- **`self-certifying` contributes the identity layer.** `bzDiD = hash(genesis_op)` — a rotation-key-committing, hash-of-genesis DID. Uniqueness is collision resistance, not agreement. No issuer, no ordering, no registry, no DA, no chain bytes, no cost. This is the only structure in the field that answers "decentralized, automatic, autonomous" for all 10 billion, because the vast majority of those 10 billion will never claim a scarce name and therefore never need consensus about anything.
+  - **Correction I am making to that candidate: 128 bits is not enough.** A 128-bit identifier has ~2⁶⁴ ≈ 1.8×10¹⁹ birthday-collision work. The candidate computed the *accidental* collision probability (1.5×10⁻¹⁹, correct) and never addressed the *adversarial* one. At Bitcoin-class hashrate (~6×10²⁰ H/s) 2⁶⁴ is a fraction of a second, so an attacker can craft two genesis ops sharing one bzDiD — bind one to a name, present the other. `rollup`'s 160-bit truncation (2⁸⁰) is better but still not a margin I will sign. **bzDiD is the full 256-bit digest**, base32, 52 chars. The raw DID is machine-facing; humans use the `.b` name or a DNS handle.
 
 - **`commit-da` contributes the naming layer.** A depth-40 **indexed** Merkle tree (leaves carry `next_key`, so *non-membership* is provable), key = `sha256("b:v1:" ‖ skeleton(name))`, root committed in one Vaulta row per epoch. This fixes `self-certifying`'s two real defects, both correctly identified by the panel:
   1. **`.b` ownership becomes a Merkle proof, not a replay.** `self-certifying` made name ownership a client-side consensus rule requiring replay of the whole commit stream — which no wallet will do, so in practice every wallet would have believed a resolver. Against an on-chain root, a lying gateway produces arithmetic that fails.
@@ -53,7 +53,7 @@ The three layers are independent by construction: identity survives the log dyin
    genesis_op = dag-cbor { type:"b:genesis", rotationKeys:[r0,r1,r2],
                            signingKey: s, services:[hint…], alsoKnownAs:[],
                            validUntil: <epoch> }
-   bDiD = "did:b:" || base32( sha256(dag-cbor(genesis_op)) )     // 256-bit, 52 chars
+   bzDiD = "did:b:" || base32( sha256(dag-cbor(genesis_op)) )     // 256-bit, 52 chars
    ```
 4. Per-chain keys derive by SLIP-0010/BIP-32 hardened paths. The user can now **receive on every key-based chain** (EVM, Bitcoin, Zano, exSat, XRP, Stellar…) with no account creation anywhere.
 5. Elapsed time: milliseconds. Bytes written to any blockchain: **zero**. Cost to BNR: **zero**. Identity now exists and is verifiable by anyone who is handed the genesis op.
@@ -63,8 +63,8 @@ The three layers are independent by construction: identity survives the log dyin
 ### 3.2 Claiming a `.b` name — commit, then reveal
 
 - `n = skeleton(NFKC(lowercase(input)))` — UTS-46 plus Unicode confusable skeleton. `k = sha256("b:v1:" ‖ n)`.
-- **Commit (epoch E):** broadcast `C = sha256(n ‖ nonce ‖ bDiD)` to any bonded sequencer, *or* call `forcecommit(C)` directly on the contract. Sequencers see 32 bytes of entropy — front-running is impossible, not merely discouraged.
-- **Reveal (epoch E+1 … E+144):** broadcast `(n, nonce, bDiD, display_form, sig)`. Commitments expire after 144 epochs (24 h at 10-min epochs).
+- **Commit (epoch E):** broadcast `C = sha256(n ‖ nonce ‖ bzDiD)` to any bonded sequencer, *or* call `forcecommit(C)` directly on the contract. Sequencers see 32 bytes of entropy — front-running is impossible, not merely discouraged.
+- **Reveal (epoch E+1 … E+144):** broadcast `(n, nonce, bzDiD, display_form, sig)`. Commitments expire after 144 epochs (24 h at 10-min epochs).
 - **Award:** §4.
 - **Insert:** the winning leaf enters the indexed tree at epoch close. Losers' commitments expire and leave no state anywhere.
 
@@ -72,13 +72,13 @@ Leaf, canonical packed binary (reuse `atmirror/src/cbor.rs` + `varint.rs`):
 
 ```
 leaf := display_len u8 | display utf8 (≤32)   ~12 B
-      | bdid       [u8;32]                     32
+      | bzdid       [u8;32]                     32
       | head_cid   [u8;32]   (anchored log head)32
       | seq        u32                           4
       | registered u32 | expires u32             8
       | flags      u8                            1
       | next_key   [u8;32]  (non-membership)    32
-      | sig        [u8;64]  (bDiD signing key)  64
+      | sig        [u8;64]  (bzDiD signing key)  64
                                             ≈ 185 B  → 192 B padded
 ```
 
@@ -108,7 +108,7 @@ Writing an address changes the log head → the user's leaf `head_cid`/`seq` upd
  6. Fetch the DID log from leaf.service_hints (ar:// tag query, autonomi://, https://)
     OR accept it directly from the recipient out of band. Either is fine: it is
     self-certifying.
- 7. Verify sha256(genesis_op) == leaf.bdid ; walk prev/sig to head.
+ 7. Verify sha256(genesis_op) == leaf.bzdid ; walk prev/sig to head.
     Require head.seq >= leaf.seq. A leaf pointing past the log you were handed is
     withholding -> REFUSE.
  8. Slot for the target CAIP-2 chain:
@@ -117,7 +117,7 @@ Writing an address changes the log head → the user's leaf `head_cid`/`seq` upd
       unset/unrevealed -> encrypted handshake to the DID service endpoint;
                           recipient releases one address for one payment.
                           Never guess. Never fall back.
- 9. Display a 2-word checksum from sha256(bdid ‖ caip2 ‖ address) for out-of-band
+ 9. Display a 2-word checksum from sha256(bzdid ‖ caip2 ‖ address) for out-of-band
     confirmation.
 10. ANY failure above -> refuse to send. No cache fallback, ever.
 ```
@@ -320,8 +320,8 @@ The sequencer decides **nothing** about who wins. It decides only *inclusion*, a
 ### 4.3 The trust assumption, stated without decoration
 
 - **Vaulta block producers order the epochs.** A BP cartel colluding with a claimant could censor a competing commit for the epochs needed to lose a race. This is the same trust already carried by every transaction on the chain and by the 13 names that exist today. It is not zero. It is not BNR.
-- **Nobody is trusted for the identity itself.** A bDiD cannot be censored (no issuer), forged (you verify the DID *is* the hash of the op you were handed), or frozen (no registry holds it). This is why the 10-billion population has no ordering problem: the hard part of naming was avoided for them, not solved.
-- **DNS/ICANN is trusted for domain-bound handles.** `alice.example.com ↔ bDiD` via bidirectional `_bdid` TXT / `.well-known` plus `alsoKnownAs` (already implemented — `atmirror/src/did.rs` does live `did:plc`/`did:web` resolution over HTTPS). This is free, unlimited, needs zero on-chain bytes, and lets real users have real human-readable names before any `.b` mechanism exists. **The cost, which no candidate said out loud: a registrar or a court can take your handle.** Your bDiD and your funds are unaffected; your name is not.
+- **Nobody is trusted for the identity itself.** A bzDiD cannot be censored (no issuer), forged (you verify the DID *is* the hash of the op you were handed), or frozen (no registry holds it). This is why the 10-billion population has no ordering problem: the hard part of naming was avoided for them, not solved.
+- **DNS/ICANN is trusted for domain-bound handles.** `alice.example.com ↔ bzDiD` via bidirectional `_bzdid` TXT / `.well-known` plus `alsoKnownAs` (already implemented — `atmirror/src/did.rs` does live `did:plc`/`did:web` resolution over HTTPS). This is free, unlimited, needs zero on-chain bytes, and lets real users have real human-readable names before any `.b` mechanism exists. **The cost, which no candidate said out loud: a registrar or a court can take your handle.** Your bzDiD and your funds are unaffected; your name is not.
 
 ### 4.4 Residual centralization — named, with the removal path
 
@@ -332,7 +332,7 @@ The sequencer decides **nothing** about who wins. It decides only *inclusion*, a
 
 ### 4.5 Squatting — what is not solved
 
-There is **no sybil-resistant free-name mechanism that does not require either a trusted issuer or a real cost.** An OAuth nullifier needs a salt holder (that is BNR → violates Constraint 2) or a public salt (that publicly links a `.b` name to a Google account → violates RELAY_22). I recommend not shipping it. What ships instead: scarce human-readable strings are **paid only** (which also satisfies "no subsidy"), names ≤5 chars are permanently premium, annual expiry with renewal as an ordinary log entry, and the free tier's unlimited names are self-certifying bDiDs and DNS-bound handles — neither of which is scarce, so neither can be squatted.
+There is **no sybil-resistant free-name mechanism that does not require either a trusted issuer or a real cost.** An OAuth nullifier needs a salt holder (that is BNR → violates Constraint 2) or a public salt (that publicly links a `.b` name to a Google account → violates RELAY_22). I recommend not shipping it. What ships instead: scarce human-readable strings are **paid only** (which also satisfies "no subsidy"), names ≤5 chars are permanently premium, annual expiry with renewal as an ordinary log entry, and the free tier's unlimited names are self-certifying bzDiDs and DNS-bound handles — neither of which is scarce, so neither can be squatted.
 
 ---
 
@@ -380,14 +380,14 @@ Arweave figures use Turbo at **$32.56/GiB** (the July–Aug 2026 retail figure t
 
 | Item | Bytes | Cost | Payer |
 |---|---|---|---|
-| **Free tier — bDiD creation** | 0 on chain | **$0.00** | nobody |
+| **Free tier — bzDiD creation** | 0 on chain | **$0.00** | nobody |
 | Free tier — log storage | ~600 B | **$0.00 required** | see below |
 | **Paid name — leaf** | 192 B | $0.0000058 | claimant |
 | **Paid name — public record** (genesis op + DID doc + 64-slot padded disclosure tree) | ~2,650 B | $0.0000804 | claimant |
 | **Paid name — total permanent DA** | ~2,842 B | **$0.0000862** | claimant |
 | **Paid tier — Vaulta account RAM** (~2,996 B, quoted live at claim time) | 2,996 B | **~$0.072 today, and rising** | depositor |
 
-**Free-tier DA is $0 because it is not required.** This is a direct consequence of self-certification and it is the single most important cost property of this design: a recipient can hand the payer their log *at payment time* and the payer verifies it locally (`sha256(genesis_op) == bDiD`). No authoritative store must exist for a free identity to work. Compare the alternative: 10¹⁰ × 600 B = 5,588 GiB ≈ **$181,945** of unfunded ingest that `self-certifying` never named a payer for. Here that spend is optional and per-user.
+**Free-tier DA is $0 because it is not required.** This is a direct consequence of self-certification and it is the single most important cost property of this design: a recipient can hand the payer their log *at payment time* and the payer verifies it locally (`sha256(genesis_op) == bzDiD`). No authoritative store must exist for a free identity to work. Compare the alternative: 10¹⁰ × 600 B = 5,588 GiB ≈ **$181,945** of unfunded ingest that `self-certifying` never named a payer for. Here that spend is optional and per-user.
 
 **DA scaling for publicly-resolvable names** (the only names that *require* DA, because the payer starts with nothing but a string):
 
@@ -437,7 +437,7 @@ The brief said `kingbeelovis`; the local `docs/SCHEMA_resolver_C2_draft.md` said
 - **`kingbeelovis` is declared canonical for legacy.** It runs the newer ABI (CAIP-2 `chainkeys`, matching `bdomain.hpp`'s `std::string chain_key` design) and has 2,593,578 B of spare RAM quota. It is **frozen**: no new registrations, code unchanged, admin unchanged, contract left running exactly as it is.
 - **`remington.gm` is declared non-canonical and frozen.** No rows are touched, nothing is deleted. Because the same human owns both, nobody loses a name — the duplicate is a documentation hazard, not a dispute. It is written into the spec so that no future client resolves against it.
 - **BEELOG deploys to a fresh account** with its own permissions, so the burn schedule in §4.4 does not entangle the legacy admin key.
-- **The 13 names are seeded into BEELOG epoch 0** as pre-committed reserved leaves at genesis. Zero incremental RAM (they are leaves, not rows). Each leaf is `flags = RESERVED` with an empty `bdid` until the holder creates one.
+- **The 13 names are seeded into BEELOG epoch 0** as pre-committed reserved leaves at genesis. Zero incremental RAM (they are leaves, not rows). Each leaf is `flags = RESERVED` with an empty `bzdid` until the holder creates one.
 - **Immediate operational action, independent of architecture: the names expire 2027-07-28 and 2027-08-01.** Renewal is a live obligation on the legacy contract regardless of which design won. Put it on a calendar now.
 
 ### 7.3 What the holders experience
@@ -448,8 +448,8 @@ The brief said `kingbeelovis`; the local `docs/SCHEMA_resolver_C2_draft.md` said
 |---|---|---|
 | Legacy resolution (`get_table_rows` on `kingbeelovis`) | works | **still works, unchanged, indefinitely** |
 | The 13 names in BEELOG | n/a | pre-reserved; nobody else can ever claim them |
-| To activate a name in BEELOG | n/a | create a bDiD (one passkey tap), sign a binding op, reveal in the next epoch |
-| If the holder never creates a bDiD | n/a | the leaf stays `RESERVED` forever; new wallets return "not yet activated" and refuse to send; the legacy contract keeps resolving |
+| To activate a name in BEELOG | n/a | create a bzDiD (one passkey tap), sign a binding op, reveal in the next epoch |
+| If the holder never creates a bzDiD | n/a | the leaf stays `RESERVED` forever; new wallets return "not yet activated" and refuse to send; the legacy contract keeps resolving |
 | Cost to migrate | — | **$0** (BNR seeds the reserved leaves at genesis) |
 
 The only thing a holder gives up by *not* migrating is reachability from new wallets, and that is reversible at any time by claiming the reserved leaf.
@@ -463,8 +463,8 @@ Every phase ends with something a real human uses on mainnet. No phase ends in a
 **Phase 0 — Reconcile the record (days). Extends: `b-domain/docs`, `b-domain/scripts`.**
 Publish which mainnet account is canonical; correct `SCHEMA_resolver_C2_draft.md` §1/§5; renew the 13 names well before 2027-07-28. *Ends when:* the deployed-state document matches the three measured deployments and a renewal is scheduled.
 
-**Phase 1 — bDiD free tier (weeks). Extends: `onboarding`, `atmirror` (`cbor`, `cid`, `car`, `commit`, `did`, `state`).**
-Passkey PRF → rotation keys → 256-bit genesis op → SLIP-0010 per-chain derivation. Handles via DNS/`did:web` bidirectional binding, which `atmirror/src/did.rs` already resolves live. Zero chain code, zero new contract, zero consensus. *Ends when:* a real human creates a bDiD from a Proton passkey, publishes `_bdid.alice.example.com`, and **receives a real payment on a key-based chain**. The hardest new work here is rotation-conflict resolution (two ops at the same `seq` signed by different-priority rotation keys) — `commit.rs` verifies one signature over one commit; it does not arbitrate competing histories. Budget for that honestly.
+**Phase 1 — bzDiD free tier (weeks). Extends: `onboarding`, `atmirror` (`cbor`, `cid`, `car`, `commit`, `did`, `state`).**
+Passkey PRF → rotation keys → 256-bit genesis op → SLIP-0010 per-chain derivation. Handles via DNS/`did:web` bidirectional binding, which `atmirror/src/did.rs` already resolves live. Zero chain code, zero new contract, zero consensus. *Ends when:* a real human creates a bzDiD from a Proton passkey, publishes `_bzdid.alice.example.com`, and **receives a real payment on a key-based chain**. The hardest new work here is rotation-conflict resolution (two ops at the same `seq` signed by different-priority rotation keys) — `commit.rs` verifies one signature over one commit; it does not arbitrate competing histories. Budget for that honestly.
 
 **Phase 2 — Antelope signing (weeks). Extends: `bsigner`, `chain-eos`.**
 `bsigner` is deliberately incapable of signing (`lib.rs:6`; `channel::RefusingSigner`; test `signing_is_refused_through_the_public_api`) and `chain-eos` is decode-only (`skip_signature()`, `abi::decode_action` with no encoder). But `cleos` plus an unlocked wallet **is** the live write path today — it is how all 13 names were claimed, and the README records Trezor-signed EOS actions proven on Safe 7. So this phase *replaces a manual path*, it does not enable one, which de-risks it substantially. *Ends when:* a mainnet transaction is signed from Rust and lands.
@@ -497,6 +497,6 @@ Per-slot `InformedConsent`, encrypted handshake mode, stealth meta-addresses (BI
 
 **6. Arweave/Turbo pricing or the bundler regresses.** $32.56/GiB is a measured retail figure from one vendor at one moment, and ANS-104 bundlers have no slashing for a bundler that takes your fee and drops your DataItem. *Earliest signal:* Turbo quote >2× the Phase 3 baseline, or bundler rejection/omission rate >0.1% in the epoch cross-check that `atmirror::arweave` already performs (it computes the id locally and compares). Mitigations already coded: dual-write to Autonomi, and the fact that a full name log at 10B names is only ~2.6 TB — one commodity drive, so mirroring is not exotic infrastructure.
 
-**7. DA loss makes an epoch's names cryptographically committed but unresolvable.** The root says they exist; nobody can produce the path. Two-phase posting (Arweave confirmation depth ≥20 blocks *before* the root advances) is the primary defence and is cheap. But note the sharp asymmetry that argues for this design: **every free-tier bDiD is completely unaffected by DA loss**, because it needs no store at all. Only public `.b` names are at risk. *Earliest signal:* any epoch where the sequencer's local id cross-check against the bundler disagrees.
+**7. DA loss makes an epoch's names cryptographically committed but unresolvable.** The root says they exist; nobody can produce the path. Two-phase posting (Arweave confirmation depth ≥20 blocks *before* the root advances) is the primary defence and is cheap. But note the sharp asymmetry that argues for this design: **every free-tier bzDiD is completely unaffected by DA loss**, because it needs no store at all. Only public `.b` names are at risk. *Earliest signal:* any epoch where the sequencer's local id cross-check against the bundler disagrees.
 
 **8. Where I am least confident.** The Antelope row-overhead constant (~112 B) is an estimate and the code+ABI size (~80,000 B) is an extrapolation from the measured 42,869 B `bdomain.wasm` — a 2× error puts the footprint at ~$7 instead of $3.56, which changes nothing. The Turbo price is one vendor at one date. The sequencer's 640 GB tree-state figure assumes a naive node-per-entry layout and is an upper bound. **None of these uncertainties can move the decision**, because the decision rests on a ratio of ~2×10⁸, not on a margin of a few percent. The things that *can* move the decision are risks 1, 3, and 4, and all three have signals that arrive before the expensive work does.

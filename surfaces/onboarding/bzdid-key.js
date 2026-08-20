@@ -1,4 +1,4 @@
-var BDIDKEY = (() => {
+var BZDIDKEY = (() => {
   var __defProp = Object.defineProperty;
   var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
   var __getOwnPropNames = Object.getOwnPropertyNames;
@@ -17,10 +17,10 @@ var BDIDKEY = (() => {
   };
   var __toCommonJS = (mod2) => __copyProps(__defProp({}, "__esModule", { value: true }), mod2);
 
-  // src/bdid-key.js
-  var bdid_key_exports = {};
-  __export(bdid_key_exports, {
-    BdidKeyError: () => BdidKeyError,
+  // src/bzdid-key.js
+  var bzdid_key_exports = {};
+  __export(bzdid_key_exports, {
+    BzdidKeyError: () => BzdidKeyError,
     CONTEXT_TAG_LEN: () => CONTEXT_TAG_LEN,
     LABEL_FINGERPRINT: () => LABEL_FINGERPRINT,
     LABEL_MASTER_PRK: () => LABEL_MASTER_PRK,
@@ -4852,7 +4852,11 @@ zoo`.split("\n"));
   }
   var bech32m = /* @__PURE__ */ freeze(() => genBech32("bech32m"));
 
-  // src/bdid-key.js
+  // src/bzdid-key.js
+  // FROZEN v1 BYTE CONSTANTS — the 2026-08-19 bDiD→bzDiD rename deliberately does NOT touch
+  // these strings or the bech32 HRP below: they are KDF domain-separation labels and wire
+  // spellings; changing one byte re-derives every existing key and orphans printed recovery
+  // material. A future v2 ceremony may spell them BZDID-v2. See docs/VOCABULARY.md.
   var LABEL_PRF_INPUT = "BDID-v1/prf-input/identity";
   var LABEL_MASTER_PRK = "BDID-v1/master-prk";
   var LABEL_RECORD_KEY = "BDID-v1/ed25519-record-key";
@@ -4875,28 +4879,28 @@ zoo`.split("\n"));
     return out;
   }
   var toHex = (b) => Array.from(b, (x) => x.toString(16).padStart(2, "0")).join("");
-  var BdidKeyError = class extends Error {
+  var BzdidKeyError = class extends Error {
     constructor(msg, code) {
       super(msg);
-      this.name = "BdidKeyError";
+      this.name = "BzdidKeyError";
       this.code = code;
     }
   };
   var PRF_INPUT_SALT = sha256(ascii(LABEL_PRF_INPUT));
   function masterPrkFromPrfSecret(prfSecret) {
     if (!(prfSecret instanceof Uint8Array) || prfSecret.length !== 32) {
-      throw new BdidKeyError(`prf_secret must be 32 bytes, got ${prfSecret?.length}`, "prf_secret_length");
+      throw new BzdidKeyError(`prf_secret must be 32 bytes, got ${prfSecret?.length}`, "prf_secret_length");
     }
     return extract(sha256, prfSecret, ascii(LABEL_MASTER_PRK));
   }
   function contextTag(context) {
     if (typeof context !== "string" || context.length === 0) {
-      throw new BdidKeyError("context must be a non-empty string", "context_empty");
+      throw new BzdidKeyError("context must be a non-empty string", "context_empty");
     }
     return sha256(ascii(context)).subarray(0, CONTEXT_TAG_LEN);
   }
   function deriveRecordKey(masterPrk, context) {
-    if (masterPrk.length !== 32) throw new BdidKeyError("master_prk must be 32 bytes", "master_prk_length");
+    if (masterPrk.length !== 32) throw new BzdidKeyError("master_prk must be 32 bytes", "master_prk_length");
     const seed = expand(sha256, masterPrk, concat(ascii(LABEL_RECORD_KEY), ascii(context)), 32);
     const publicKey = ed25519.getPublicKey(seed);
     return {
@@ -4921,31 +4925,31 @@ zoo`.split("\n"));
     }
   }
   function personaNullifier(masterPrk, context) {
-    if (masterPrk.length !== 32) throw new BdidKeyError("master_prk must be 32 bytes", "master_prk_length");
+    if (masterPrk.length !== 32) throw new BzdidKeyError("master_prk must be 32 bytes", "master_prk_length");
     return expand(sha256, masterPrk, concat(ascii(LABEL_PERSONA), ascii(context)), 32);
   }
   function encodeRecoveryPhrase(masterPrk) {
-    if (masterPrk.length !== 32) throw new BdidKeyError("master_prk must be 32 bytes", "master_prk_length");
+    if (masterPrk.length !== 32) throw new BzdidKeyError("master_prk must be 32 bytes", "master_prk_length");
     return entropyToMnemonic(masterPrk, wordlist);
   }
   function decodeRecoveryPhrase(mnemonic) {
     const words = mnemonic.trim().toLowerCase().split(/\s+/);
     if (words.length !== WORDS_DECISION) {
-      throw new BdidKeyError(
-        words.length === 12 ? 'this is a 12-word phrase; bDiD recovery phrases are 24 words (256-bit root). If you are holding prototype "stage prop" words, they never derived anything \u2014 see the preview banner.' : `a recovery phrase is exactly ${WORDS_DECISION} words, got ${words.length}`,
+      throw new BzdidKeyError(
+        words.length === 12 ? 'this is a 12-word phrase; bzDiD recovery phrases are 24 words (256-bit root). If you are holding prototype "stage prop" words, they never derived anything \u2014 see the preview banner.' : `a recovery phrase is exactly ${WORDS_DECISION} words, got ${words.length}`,
         "word_count"
       );
     }
     const normalized = words.join(" ");
     if (!validateMnemonic(normalized, wordlist)) {
-      throw new BdidKeyError("invalid phrase: unknown word or checksum failure \u2014 check each word against the printed list", "bip39_invalid");
+      throw new BzdidKeyError("invalid phrase: unknown word or checksum failure \u2014 check each word against the printed list", "bip39_invalid");
     }
     const entropy = mnemonicToEntropy(normalized, wordlist);
-    if (entropy.length !== 32) throw new BdidKeyError("entropy != 32 bytes", "entropy_length");
+    if (entropy.length !== 32) throw new BzdidKeyError("entropy != 32 bytes", "entropy_length");
     return entropy;
   }
   function encodeRecoveryCode(masterPrk) {
-    if (masterPrk.length !== 32) throw new BdidKeyError("master_prk must be 32 bytes", "master_prk_length");
+    if (masterPrk.length !== 32) throw new BzdidKeyError("master_prk must be 32 bytes", "master_prk_length");
     return bech32m.encode(RECOVERY_HRP, bech32m.toWords(concat(Uint8Array.of(REC_VERSION), masterPrk)), 1023);
   }
   function decodeRecoveryCode(code) {
@@ -4953,11 +4957,11 @@ zoo`.split("\n"));
     try {
       payload = bech32m.fromWords(bech32m.decode(code.trim(), 1023).words);
     } catch (e) {
-      throw new BdidKeyError(`not a valid bdidrec code: ${e.message}`, "bech32m_decode");
+      throw new BzdidKeyError(`not a valid bdidrec code: ${e.message}`, "bech32m_decode");
     }
-    if (!code.trim().toLowerCase().startsWith(RECOVERY_HRP + "1")) throw new BdidKeyError("wrong prefix", "wrong_hrp");
-    if (payload.length !== 33) throw new BdidKeyError(`payload length ${payload.length} != 33`, "payload_length");
-    if (payload[0] !== REC_VERSION) throw new BdidKeyError(`unsupported rec version 0x${payload[0].toString(16)}`, "rec_version");
+    if (!code.trim().toLowerCase().startsWith(RECOVERY_HRP + "1")) throw new BzdidKeyError("wrong prefix", "wrong_hrp");
+    if (payload.length !== 33) throw new BzdidKeyError(`payload length ${payload.length} != 33`, "payload_length");
+    if (payload[0] !== REC_VERSION) throw new BzdidKeyError(`unsupported rec version 0x${payload[0].toString(16)}`, "rec_version");
     return payload.slice(1);
   }
   function decodeRecoveryAuto(input) {
@@ -4966,7 +4970,7 @@ zoo`.split("\n"));
     return decodeRecoveryPhrase(t);
   }
   function fingerprint(publicKey) {
-    if (publicKey.length !== 32) throw new BdidKeyError("public key must be 32 bytes", "pk_length");
+    if (publicKey.length !== 32) throw new BzdidKeyError("public key must be 32 bytes", "pk_length");
     const h = sha256(concat(ascii(LABEL_FINGERPRINT), publicKey));
     let acc = 0n;
     for (let i = 0; i < 9; i++) acc = acc << 8n | BigInt(h[i]);
@@ -5016,7 +5020,7 @@ zoo`.split("\n"));
         extensions: { prf: {} }
       }
     });
-    if (!cred) throw new BdidKeyError("passkey creation returned null", "create_null");
+    if (!cred) throw new BzdidKeyError("passkey creation returned null", "create_null");
     const ext = cred.getClientExtensionResults();
     return { credentialId: cred.id, prfEnabled: ext?.prf?.enabled === true };
   }
@@ -5029,11 +5033,11 @@ zoo`.split("\n"));
         extensions: { prf: { eval: { first: bs(PRF_INPUT_SALT) } } }
       }
     });
-    if (!assertion) throw new BdidKeyError("assertion returned null", "assert_null");
+    if (!assertion) throw new BzdidKeyError("assertion returned null", "assert_null");
     const first = assertion.getClientExtensionResults()?.prf?.results?.first;
-    if (!first) throw new BdidKeyError("no PRF output (authenticator lacks PRF, or no passkey enrolled here)", "no_prf_output");
+    if (!first) throw new BzdidKeyError("no PRF output (authenticator lacks PRF, or no passkey enrolled here)", "no_prf_output");
     const out = new Uint8Array(first);
-    if (out.length !== 32) throw new BdidKeyError(`PRF output ${out.length} bytes, expected 32`, "prf_length");
+    if (out.length !== 32) throw new BzdidKeyError(`PRF output ${out.length} bytes, expected 32`, "prf_length");
     return out;
   }
   async function identityFromPasskey(context) {
@@ -5047,7 +5051,7 @@ zoo`.split("\n"));
     const masterPrk = decodeRecoveryAuto(input);
     return { masterPrk, ...deriveIdentity(masterPrk, context) };
   }
-  return __toCommonJS(bdid_key_exports);
+  return __toCommonJS(bzdid_key_exports);
 })();
 /*! Bundled license information:
 

@@ -42,7 +42,7 @@ pub enum UploadRefusal {
 }
 
 /// Validate one raw DataItem body. Uploads through this endpoint are BULK by
-/// class: identity/DID-log records travel the bDiD issuance pipeline, not this
+/// class: identity/DID-log records travel the bzDiD issuance pipeline, not this
 /// generic endpoint, so the class override never applies here.
 pub fn validate_upload(bytes: &[u8]) -> Result<UploadDecision, UploadRefusal> {
     if bytes.len() > MAX_ITEM_BYTES {

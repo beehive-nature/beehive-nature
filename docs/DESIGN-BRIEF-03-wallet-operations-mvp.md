@@ -21,9 +21,9 @@
 
 ## 0. WHAT THIS IS
 
-One web-based surface with three custody tiers. The user starts free in a browser and escalates to hardware custody without ever leaving the product or losing their identity. Every tier shares the same bDiD, the same wallet, the same spend-view — only the signing path changes.
+One web-based surface with three custody tiers. The user starts free in a browser and escalates to hardware custody without ever leaving the product or losing their identity. Every tier shares the same bzDiD, the same wallet, the same spend-view — only the signing path changes.
 
-**The product is the tiering itself.** A user who begins at Tier 1 (passkey, free) can upgrade to Tier 2 (FIDO2) then Tier 3 (Trezor) without re-onboarding. The bDiD persists; the custody wraps around it.
+**The product is the tiering itself.** A user who begins at Tier 1 (passkey, free) can upgrade to Tier 2 (FIDO2) then Tier 3 (Trezor) without re-onboarding. The bzDiD persists; the custody wraps around it.
 
 ---
 
@@ -34,7 +34,7 @@ One web-based surface with three custody tiers. The user starts free in a browse
 | Aspect | Spec |
 |---|---|
 | **Auth** | WebAuthn passkey — platform authenticator (Touch ID, Face ID, Windows Hello) or sync passkey (Apple/Google keychain) |
-| **Quick start** | GitHub/Google OAuth → passkey creation → bDiD issued. OAuth is **convenience-only**: it bootstraps identity, then is never required again. The bDiD and passkey persist if the OAuth provider disappears. |
+| **Quick start** | GitHub/Google OAuth → passkey creation → bzDiD issued. OAuth is **convenience-only**: it bootstraps identity, then is never required again. The bzDiD and passkey persist if the OAuth provider disappears. |
 | **Seed backup** | BIP-39 mnemonic generated client-side during onboarding. User writes it down. This is the recovery path if the passkey device is lost. |
 | **Custody model** | Signing key derived from seed, encrypted at rest in browser (IndexedDB), unlocked by passkey assertion. The passkey authenticates; the derived key signs. **The key lives in the browser, not on a server.** |
 | **Wallet** | Self-funded — zero initial balance. No Vaulta account needed (that is what "free" means). User earns b through participation. No subsidy, ever. |
@@ -80,7 +80,7 @@ Tier 3 (Trezor, full custody + operations)
 Tier 3+ (Trezor + biometric)
 ```
 
-**Escalation preserves the bDiD.** The identity doesn't change; only the verification method upgrades. This is W3C DID Core separation: identifier public, document public, verification method private — and the verification method gets stronger.
+**Escalation preserves the bzDiD.** The identity doesn't change; only the verification method upgrades. This is W3C DID Core separation: identifier public, document public, verification method private — and the verification method gets stronger.
 
 ---
 
@@ -244,7 +244,7 @@ The wizard flow:
 [seed generation] → BIP-39 mnemonic → "write these 12 words down" → verify 3 random words
     │
     ▼
-[bDiD issuance] → did:webvh creation → anchor to Arweave (ANS-104 Ed25519)
+[bzDiD issuance] → did:webvh creation → anchor to Arweave (ANS-104 Ed25519)
     │
     ▼
 [wallet ready] → zero balance. User earns b through participation. No subsidy.
@@ -281,7 +281,7 @@ The wizard flow:
 1. Leptos project scaffold (WASM frontend + Axum relay server)
 2. WebAuthn passkey creation + assertion flow (Tier 1 auth)
 3. BIP-39 seed generation + backup verification
-4. bDiD creation (did:webvh) + Arweave anchor (ANS-104 Ed25519)
+4. bzDiD creation (did:webvh) + Arweave anchor (ANS-104 Ed25519)
 5. Self-funding bootstrap (zero balance, b earning mechanism — no subsidy)
 6. Multi-chain balance display (read-only from RPC — Vaulta, Arweave, HIVE)
 7. Spend-view (aggregate total + itemized per-adapter breakdown)
@@ -318,8 +318,8 @@ The wizard flow:
 3. **One codebase, one audit.** All crypto/signing logic is Rust. WASM for browser, native for desktop, same crates. No JS reimplementation of custody-critical code.
 4. **Honest-empty panels.** Stale, Absent, Refused, Breach — all four non-value states are compile-enforced. A wrong number is worse than no number. (DESIGN-BRIEF-01 §6.)
 5. **Spend-view is resource-denominated.** Line items are chunk counts, mesh-seconds, VRAM-byte-seconds — never fiat. Appreciation would break itemized accounting. (KISS ruling §2/§3.)
-6. **OAuth is convenience, not dependency.** GitHub/Google bootstrap is optional. The bDiD + passkey persist without them.
-7. **Tier escalation preserves identity.** Upgrading custody doesn't re-onboard. The bDiD is constant; only the verification method changes.
+6. **OAuth is convenience, not dependency.** GitHub/Google bootstrap is optional. The bzDiD + passkey persist without them.
+7. **Tier escalation preserves identity.** Upgrading custody doesn't re-onboard. The bzDiD is constant; only the verification method changes.
 8. **10B users, 1000 years.** The server is stateless per-user. All user state lives on-chain or in client-side storage. The server can disappear and users retain their identity, wallet, and data.
 
 ---
@@ -331,7 +331,7 @@ The RAID trilogy assessed 20+ projects. The findings directly shape this MVP:
 - **No third-party wallet is worth adopting** (Wander, AO Wallet, Arweave.app all failed the capture test). **Build native.** PATTERN their UX (Wander's injected-provider convention, AO Wallet's local keystore) but never depend on them.
 - **Nothing funds AR wallets non-custodially.** The sovereign path is self-funded: user earns b, spends b on operations, converts to native tokens at the draw facility. No endowment, no subsidy. See SPEC_SOVEREIGN_WALLET_FUNDING.md v2.
 - **The capture pattern is at the application layer, not the storage layer.** Every ecosystem project re-inserts a token or account between user and base layer. BNR's wallet must not do this — the user's relationship is with their keys and the permissionless base, never with a BNR-operated intermediary.
-- **Our anchor-based resolver is architecturally stronger** than ARNS and ANS. The wallet resolves bDiDs via Merkle proofs (self-contained, no gateway read required). Neither ecosystem naming system can make that claim.
+- **Our anchor-based resolver is architecturally stronger** than ARNS and ANS. The wallet resolves bzDiDs via Merkle proofs (self-contained, no gateway read required). Neither ecosystem naming system can make that claim.
 - **The sovereign AR path costs $76,980 for 10B identity records** (ANS-104 Ed25519, one-time, permanent). This is affordable and scales.
 
 ---

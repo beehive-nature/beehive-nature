@@ -1,4 +1,4 @@
-# SPEC-VAULTA-IDENTITY-1 v0.2 — Vaulta Identity Record / bDiD Mint
+# SPEC-VAULTA-IDENTITY-1 v0.2 — Vaulta Identity Record / bzDiD Mint
 
 Status: **SPEC-FIRST (founder-gated)**. No account creation or key operations in a seat.
 Companion to: SPEC_KEYRING-1 §2.6/§3, SPEC-PAY-ONCE-NOW-1 #1/#2,
@@ -13,8 +13,8 @@ and bdomain-scaling.md (RAM re-derivation: 2,537 B/user for 11-chain whole-accou
 model; registeracc require_auth means registrant must already BE an Antelope account),
 the .b identity has THREE layers:
 
-**Layer-0 — bDiD keypair (scales to 10^10, FREE):**
-Locally generated keypair. Zero Vaulta rows, zero cost. Signed bDiD record
+**Layer-0 — bzDiD keypair (scales to 10^10, FREE):**
+Locally generated keypair. Zero Vaulta rows, zero cost. Signed bzDiD record
 content-addressed on AR/ANT. The ONLY shape that reaches 10 billion users.
 The mass individual identity = a keypair, NOT an account.
 
@@ -102,9 +102,9 @@ TIER ONLY — native permissions require an ACCOUNT, accounts hit the RAM wall
 
 ## 0. Prior design synthesized
 
-The prior Vaulta identity-hub + bDiD custody design is distributed across:
+The prior Vaulta identity-hub + bzDiD custody design is distributed across:
 - SPEC_KEYRING-1 §2.6: Vaulta = secp256k1, T-H target, custom PUB_WA = T-F
-- SPEC_KEYRING-1 §3: bDiD = verification-method succession (additive, never remove)
+- SPEC_KEYRING-1 §3: bzDiD = verification-method succession (additive, never remove)
 - FABLE 8i: deploy authority = custom permission linkauth'd to setcode/setabi/buyram ONLY
 - FABLE 8j: Antelope sorts authority keys by serialized key bytes, not base58 text
 - FABLE 8h: key-derivation change = data migration (even when struct is byte-identical)
@@ -114,7 +114,7 @@ The prior Vaulta identity-hub + bDiD custody design is distributed across:
 
 ## 1. Account structure (Vaulta account-set roles)
 
-The bDiD lives ON the Vaulta account's permission structure:
+The bzDiD lives ON the Vaulta account's permission structure:
 
 | Permission | Authority | Role | Custody tier |
 |---|---|---|---|
@@ -173,9 +173,9 @@ The identity is NOT re-minted — the Vaulta account stays, the key set grows.
 
 ---
 
-## 3. bDiD record schema (on Vaulta)
+## 3. bzDiD record schema (on Vaulta)
 
-The bDiD record maps to the Vaulta account's permission tree + a data table:
+The bzDiD record maps to the Vaulta account's permission tree + a data table:
 
 **Permission tree (updateauth/linkauth):**
 - `owner` keys = [{envelope: T-H recovery key}]

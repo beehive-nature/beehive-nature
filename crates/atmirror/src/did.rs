@@ -9,7 +9,7 @@
 //!
 //! SCOPE (ruled Seat 1 2026-08-09): the `#atproto` signing key here is the
 //! **ATProto identity key** — secp256k1 (ES256K), as ATProto mandates. It is NOT
-//! the **bDiD record-signing key**, which is ed25519 (`did-autonomi-spec` keyAlg)
+//! the **bzDiD record-signing key**, which is ed25519 (`did-autonomi-spec` keyAlg)
 //! and is verified in [`crate::record_sig`] under R1b. Two distinct keys at two
 //! distinct layers; do not conflate them (this note exists because they were).
 

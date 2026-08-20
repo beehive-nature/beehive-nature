@@ -22,7 +22,7 @@ If `docs/CONTRACT.md` is not visible on your fetch, THIS section is the contract
 | GET | `/v1/arweave/status/{tx_id}` | Upload read-back (GraphQL) |
 | GET | `/v1/arweave/price/{bytes}` | Fee preview |
 
-### Vaulta Identity (bDiD)
+### Vaulta Identity (bzDiD)
 | Method | Route | Purpose |
 |--------|-------|---------|
 | GET | `/v1/vaulta/identity/{account}` | Read permission tree (versioned envelopes per SPEC-VAULTA-IDENTITY-1 §3) |
@@ -72,7 +72,7 @@ Base URL: `http://129.153.202.144:8080` (VPS) or `http://localhost:8080` (dev).
 | LOCAL-FIRST — zero hosted chokepoint. The ArDrive hosted-login failure is the founding boarding fact; never hard-code one gateway | Founder directive 2026-08-11 |
 | Self-funded: users acquire resources themselves; the system never absorbs cost | CONSTITUTION Art. V.1; SPEC_SOVEREIGN_WALLET_FUNDING |
 | Receipt rule: measured > estimated; UNVERIFIED marked and stopped | standing |
-| The bDiD root is the SEED, not the device | SPEC_KEYRING-1 §3 |
+| The bzDiD root is the SEED, not the device | SPEC_KEYRING-1 §3 |
 
 ---
 

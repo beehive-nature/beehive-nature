@@ -12,7 +12,7 @@ protocols, and no organ's failure can kill the organism.
 
 | Organ | Repo | Role in the organism |
 |---|---|---|
-| TRADE | beehive-nature | the floors: gallery/market/farmers/coop + the escrow wire + bDiD key-build. the metabolism — value in, value out |
+| TRADE | beehive-nature | the floors: gallery/market/farmers/coop + the escrow wire + bzDiD key-build. the metabolism — value in, value out |
 | ATTEST | attestation-core | the immune system's signature: claims about orders, goods, souls — verifiable, portable |
 | CREATE | bnri-cosmic | the genome: hex-art codecs and corpus — what the organism's art is made of |
 | CREATE | bnr-design | the phenotype: design language, the canon (kandy-CRT, personas, refusal-amber) |

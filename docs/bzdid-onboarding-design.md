@@ -3,9 +3,9 @@
      architecture reviews, 1 synthesis. Fiat figures are 2026-08-04 spot and are
      re-quotable, NOT constants. Re-price before sizing anything. -->
 
-# bDiD onboarding — the buildable design
+# bzDiD onboarding — the buildable design
 
-Companion to [bdid-onboarding-inventory.md](bdid-onboarding-inventory.md), which measures
+Companion to [bzdid-onboarding-inventory.md](bzdid-onboarding-inventory.md), which measures
 what the workspace already does. This one measures what the *chains* require.
 
 **Correction carried in from the BNR firmware tree:** where this document reports that the
@@ -18,7 +18,7 @@ model, no BIP-32 path).
 
 ---
 
-# bDiD Onboarding — One Buildable Design
+# bzDiD Onboarding — One Buildable Design
 
 **Status:** synthesis for build. All three previously-drafted architectures were rejected; this document is the survivor, assembled from what each got right.
 **Price basis:** all fiat figures are 2026-08-04 spot and are re-quotable, not constants. A (Vaulta) spot is **disputed ±25%** across venues ($0.0647 CMC / $0.0727 Coinbase / $0.0803 CryptoRank); A-denominated figures below use $0.065–$0.073.
@@ -26,9 +26,9 @@ model, no BIP-32 path).
 
 ---
 
-## 1. What a bDiD is
+## 1. What a bzDiD is
 
-A bDiD is **not a wallet and does not contain a key**. In the shipped crate it is exactly three things.
+A bzDiD is **not a wallet and does not contain a key**. In the shipped crate it is exactly three things.
 
 **(a) A root identity.** `RootIdentity { did: Did, anchored: bool }` — `crates\onboarding\src\lib.rs:62-67`. `Did` is `type_bindings::Did(pub String)` (`crates\type-bindings\src\lib.rs:13`), a newtype over a string with a `method()` accessor and **no validation** — nothing today checks the string is `did:autonomi:…`.
 
@@ -38,7 +38,7 @@ A bDiD is **not a wallet and does not contain a key**. In the shipped crate it i
 
 Grade is derived, not stored: `reachable_grade` (`lib.rs:314-319`) returns `ViewGrade::Settlement` iff `binding.is_some() && enrolment.root.anchored && SettlementBinding::is_settlement_grade()`, else `Confirmed`. It **never returns `Informational`** — so "has a grade" is not a gate; only `== Settlement` is.
 
-### What a bDiD is NOT today, and what this design must add
+### What a bzDiD is NOT today, and what this design must add
 
 Five concrete gaps, all of which are new code in `crates/onboarding`:
 
@@ -50,7 +50,7 @@ Five concrete gaps, all of which are new code in `crates/onboarding`:
 | Disclosure covers only PDS custody | `lib.rs:149-156, 199-201` | `InformedConsent.discloses_software_key`, `.discloses_recovery_custody`, `.discloses_bridge_custody`, each enforced the same way |
 | No key material, by design and correctly | `Cargo.toml:8-11` — no crypto dep | Unchanged. Keys stay on the device / in the browser, never in the crate |
 
-**The new type, concretely.** A bDiD gains an *address book of public material*, not a wallet:
+**The new type, concretely.** A bzDiD gains an *address book of public material*, not a wallet:
 
 ```rust
 // crates/onboarding/src/rails.rs
@@ -266,7 +266,7 @@ BCH → XLM → SOL → ZEC-t → XRP → ETH L1 → exSat. Each is *derive + qu
 
 **F1 — Article V.1 authorization for the Class-A seed.** `CONSTITUTION.md:83` forbids the operator absorbing cost; `:128` names Vaulta RAM/CPU/NET and ZANO/AR/ANT specifically and says "never subsidizes." Its only door is "bootstrap seeds." **Question:** does the founder authorize ~$0.25/user of Class-A seed (Vaulta RAM + float + 3 HIVE) as a bootstrap seed, with (a) a hard cohort cap N and (b) a sunset date? The cap is the sybil bound and the design does not ship without a number in it. Route per `feature-backlog.md:283-285`: CD-4 / Article VI meta-tier, premine-robe test applies.
 
-**F2 — the pre-spend gate.** Must a bDiD reach `ViewGrade::Settlement` (`lib.rs:314-319`: `binding.is_some() && root.anchored && verified_bidirectional && op_log_views >= 2`) before BNR signs *anything*? Note `reachable_grade` never returns `Informational`, so gating on "has a grade" gates on nothing. Today `Enrolment::complete` requires only a free passkey and a free written code — there is no cost between "stranger" and "BNR signs two transactions for you."
+**F2 — the pre-spend gate.** Must a bzDiD reach `ViewGrade::Settlement` (`lib.rs:314-319`: `binding.is_some() && root.anchored && verified_bidirectional && op_log_views >= 2`) before BNR signs *anything*? Note `reachable_grade` never returns `Informational`, so gating on "has a grade" gates on nothing. Today `Enrolment::complete` requires only a free passkey and a free written code — there is no cost between "stranger" and "BNR signs two transactions for you."
 
 **F3 — Hive recovery-account custody.** BNR becomes every created account's default recovery account: a standing, seizure-capable relationship, changeable only by the user via `change_recovery_account` with a 30-day delay. Does BNR accept this role at all, and is disclosure-plus-surfacing sufficient? This is the same defect class RELAY_22 §5a already legislates for PDS custody (`lib.rs:149-156, 199-201`); the crate enforces disclosure for an identity binding and not for a seizure power over money.
 

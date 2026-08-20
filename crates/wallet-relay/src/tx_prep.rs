@@ -1,4 +1,4 @@
-//! Unsigned TX preparation for the Vaulta bDiD mint (SPEC-VAULTA-IDENTITY-1 §5).
+//! Unsigned TX preparation for the Vaulta bzDiD mint (SPEC-VAULTA-IDENTITY-1 §5).
 //! ALL actions are founder-gated. The seat PREPARES unsigned tx objects; NEVER signs/sends/creates.
 //! Keys MUST be sorted by serialized 33-byte compressed bytes (FABLE 8j).
 

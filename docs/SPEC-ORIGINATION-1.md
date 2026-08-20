@@ -9,7 +9,7 @@ material, or the `kingbeelovis` freeze.
 
 ## 0 · The axiom
 
-> **1 Human = 1 bDiD** — founder, 2026-08-15
+> **1 Human = 1 bzDiD** — founder, 2026-08-15
 
 Everything below is either a consequence of that sentence or a defence of it.
 
@@ -34,7 +34,7 @@ anchor. **There is one — it is just in the other repository.**
 | `PERSON-1`, `BIO-1`, `AGENT-1`, `SPIRIT-1`, `VOICE-1`, `M-1-PREREG` | **`LOVErnment-DAO`** | `specs/` |
 | `cascade.rs` (`FULL_HOUSE`, `CAP`) | **`LOVErnment-DAO`** | `crates/lovernment-core/src/` |
 | `bdomain.cpp`, `UNICODE-NAMING-1` | **`b-domain`** | `contract/`, `docs/` |
-| `article-vi-s3`, `BIND-1`, `CONSTITUTION`, `bdid-architecture-decision`, `bdomain-scaling`, `b-tokenomics`, `b-collateral-lending`, `anti-capture` | **`beehive-nature`** (this repo) | `docs/`, `governance/` |
+| `article-vi-s3`, `BIND-1`, `CONSTITUTION`, `bzdid-architecture-decision`, `bdomain-scaling`, `b-tokenomics`, `b-collateral-lending`, `anti-capture` | **`beehive-nature`** (this repo) | `docs/`, `governance/` |
 | `b-token`, `dashboard`, `treasury-t0`, `reputation-engine`, `escrow-*`, `adapter-arweave`, `bcomb` | **`beehive-nature`** (this repo) | `crates/` |
 
 **All three repositories are PUBLIC.** A quoted line in this document is verifiable here
@@ -100,7 +100,7 @@ circumstances changed, restored it by splitting the chain at block 1,920,000.
 | money buys governance | cap voting power, regulate stake | **GOV-1: `b` confers zero governance weight, in any form, forever.** Nothing to cap |
 | early adopters capture the supply | vest, lock, tax the early | **population-anchored supply.** Adoption grows supply with it; the scarcity channel does not exist |
 | the free tier becomes a subsidy | budget it, means-test it | **the free tier writes zero bytes.** Free by arithmetic, not by generosity |
-| identity multiplication pays | detect and ban sybils | **the 420 cap is per bDiD.** A second identity earns another 420 from zero. **No upside to remove later** |
+| identity multiplication pays | detect and ban sybils | **the 420 cap is per bzDiD.** A second identity earns another 420 from zero. **No upside to remove later** |
 | a classifier wrongly rejects a real person | tune the threshold, add appeals | **operant reward, never punishment.** The system never classifies, so it can never be wrong in the direction that costs someone their identity |
 | a matcher produces false accepts at scale | lower `f`, accept more false rejects | **exact equality, not similarity search.** No threshold exists, so `N × f` does not apply |
 | a contentious fork divides the treasury | arbitrate splits, lock the treasury | **a fork inherits code and constitution, never balances.** Nothing to fight over |
@@ -202,10 +202,10 @@ The clarification that took all day to reach, stated plainly so nobody re-derive
 | | scales with | bounds |
 |---|---|---|
 | **Resources** — VPS count, nodes, relays, computation, hash | capital | **capability**: how much you may originate, how fast, what you can run |
-| **Humanness** | nothing | **identity**: exactly one bDiD, forever |
+| **Humanness** | nothing | **identity**: exactly one bzDiD, forever |
 
 **Resources never buy identity.** A farm running a hundred VPS behind one human is
-**one bDiD with high throughput**, not a hundred identities. This is why the earlier
+**one bzDiD with high throughput**, not a hundred identities. This is why the earlier
 objection — "resources parallelize, so a resource bar is a weak sybil defence" — was
 aimed at the wrong axis. A resource bar was never the identity defence. It is the
 capability ladder. The identity defence is §2.
@@ -311,10 +311,10 @@ and relays are capability signals that parallelize with money; attendance is the
 that bounds count.
 
 **L3 — Economic disincentive (incentive design).**
-Attempting to bypass the single bDiD lowers the **reward velocity curve for future
+Attempting to bypass the single bzDiD lowers the **reward velocity curve for future
 unlock collateralization**. A farm's marginal identity is therefore worth
 progressively less. This layer does not need to *detect* a bypass with certainty to
-work — it only needs the expected return on a second bDiD to fall below its cost.
+work — it only needs the expected return on a second bzDiD to fall below its cost.
 That is a materially weaker requirement than proof, and it is the reason this layer
 survives where physical detection died.
 
@@ -324,7 +324,7 @@ others' failure mode, and none of them requires knowing how many humans exist.
 
 ---
 
-### 2e · "How do we 100% ensure one person, one bDiD?" — you cannot, and pursuing it is the attack
+### 2e · "How do we 100% ensure one person, one bzDiD?" — you cannot, and pursuing it is the attack
 
 Founder, 2026-08-15. The sharpest question in the design, and `PERSON-1` already answers
 it twice. **This is not a limitation being conceded; it is a ruling being applied.**
@@ -358,10 +358,10 @@ it is not.** Both appear in this spec already:
 
 | claim | decidable? | mechanism | guarantee |
 |---|---|---|---|
-| one registration per bDiD **per event** | **yes** | §4a nullifier, exact byte equality | **exact** |
+| one registration per bzDiD **per event** | **yes** | §4a nullifier, exact byte equality | **exact** |
 | ≤ 7776 humans per DAO | **yes** | `cascade.rs` `FULL_HOUSE`/`CAP` | **exact** |
-| ≤ 420 `b` per bDiD | **yes** | earned ceiling, arithmetic | **exact** |
-| **one bDiD per human** | **not at creation — see 2e.0** | §2 L1/L2/L3 + the cap | **converged, not prevented** — see below |
+| ≤ 420 `b` per bzDiD | **yes** | earned ceiling, arithmetic | **exact** |
+| **one bzDiD per human** | **not at creation — see 2e.0** | §2 L1/L2/L3 + the cap | **converged, not prevented** — see below |
 
 ### 2d.9 The early-adopter windfall — smaller than usual, not absent, and its size is unruled
 
@@ -520,7 +520,7 @@ construction while forbidding 1:N.
 3. **Enrolment remains an unattested root** (§4). The system can prove a Class-3
    biometric unlocked a key; it cannot prove whose body enrolled.
 
-**Net effect on this document:** §2e's *"provably not"* verdict on one-bDiD-per-human was
+**Net effect on this document:** §2e's *"provably not"* verdict on one-bzDiD-per-human was
 overstated. **Corrected reading — the obstacle was never human distinctness; it is
 liveness, custody and rental.** Which is why §2e.1's convergence argument and §2's L2
 carry the design, and why the founder's compound-entropy thesis stands as written.
@@ -623,7 +623,7 @@ velocity in the future."*
 
 **He is right, and the section above was answering a narrower question than the one
 asked.** Everything before this heading proves that **point-in-time** uniqueness is
-undecidable — that you cannot determine at creation whether two bDiDs are one person.
+undecidable — that you cannot determine at creation whether two bzDiDs are one person.
 That proof stands. **It says nothing about whether 420-per-person is enforceable over a
 lifetime, and that is the claim that matters.**
 
@@ -631,7 +631,7 @@ lifetime, and that is the claim that matters.**
 
 | | what it asks | verdict |
 |---|---|---|
-| **point-in-time uniqueness** | "are these two bDiDs the same person, right now?" | **undecidable** — §2e's arithmetic, and `PERSON-1` §2a/2b |
+| **point-in-time uniqueness** | "are these two bzDiDs the same person, right now?" | **undecidable** — §2e's arithmetic, and `PERSON-1` §2a/2b |
 | **the 420 ceiling as a limit** | "does this person end up with more than 420?" | **enforceable, and it converges** |
 
 **Why the limit is enforceable: `b` is not liquid before the evidence matures.** Three
@@ -651,7 +651,7 @@ in the limit provided that (a) detection probability over a lifetime tends to 1,
 reason that is structural rather than lucky:
 
 > **The very participation that earns `b` is what exposes duplication.**
-> A bDiD cannot earn without being observed — every course, every bRespect event, every
+> A bzDiD cannot earn without being observed — every course, every bRespect event, every
 > gate reauthenticates PoL/PoU (§2 L2). Observations accumulate monotonically over a
 > lifetime. **A sybil that hides earns nothing; a sybil that earns is observed.** The
 > attack requires exactly the behaviour that reveals it.
@@ -677,7 +677,7 @@ choice, and the reason §4b's front-loaded curve needs a stated floor on duratio
 value that escapes the lien before merge (which is what collateralization is for).
 
 **The honest success measure is therefore not "was a duplicate prevented" but "did the
-marginal identity cost more than it yields."** Today a second bDiD yields 420 `b` and
+marginal identity cost more than it yields."** Today a second bzDiD yields 420 `b` and
 costs: a funded Vaulta account (§3a), courses, bRespect attendance, continuous PoL/PoU
 at every gate, months of elapsed presence (`PERSON-1:129` — *"presence and months are
 the whole price"*), and a lowered reward-velocity curve if detected (§2 L3). **The
@@ -735,7 +735,7 @@ much*; the bar governs *who may at all*.
 Founder, 2026-08-15: *"really the bare silicone metal a new .b earner needs is a
 Vaulta account and a little rental A."*
 
-That is exactly right, and it lands on a boundary `bdid-architecture-decision.md`
+That is exactly right, and it lands on a boundary `bzdid-architecture-decision.md`
 already ruled — which is what makes the free tier's zero-cost promise architectural
 rather than aspirational:
 
@@ -778,7 +778,7 @@ quietly amended.
 |---|---|---|---|
 | **Trezor Safe 7** | **witnessed consent, bound to a per-unit root** | `SignIdentity` on the secp256k1 branch signs `sha256(challenge_hidden) ‖ sha256(challenge_visual)` — **what is displayed is inside the signature**, so WYSIWYS is cryptographic, not a UI convention. `AuthenticateDevice` signs a caller-chosen nonce under **three independent per-device roots** — Infineon OPTIGA (ECDSA), Tropic Square TROPIC01 (ECDSA), and an STM32U5G key that is **ML-DSA-44 post-quantum** — each chaining to Trezor's root CA, and **refuses if the bootloader is unlocked** | it has **no camera**; it can never read |
 | **Samsung A16** | **the body gate, and the only camera** | Android key attestation is CDD-mandatory: the hardware-enforced `AuthorizationList` carries `userAuthType` (504), `authTimeout` (505), `unlockedDeviceReq` (509), so a remote verifier can check **without trusting the app** that the key *cannot sign* without a Class-3 biometric on that handset. This is exactly B-4a's shape — one signature, no scores | **multi-modal fusion** (see correction 3); proving *whose* finger enrolled; StrongBox (**UNVERIFIED**, probably absent — Knox Vault reached A35/A55, nothing names A16) |
-| **Solo 2 ×2** | **possession, and stable derivation** | origin-bound, challenge-bound signature from a key isolated by design, plus **`hmac-secret`: a stable 32 bytes per (credential, salt)**, derivable only by that physical key, **zero server storage, no gallery anywhere** — this is the L1-shaped primitive, and it is confirmed present | **uniqueness or sybil resistance, ever** (correction 1); `signCount` for clone detection; carrying a bDiD reference (largeBlob/credBlob postdate the last signed Solo 2 firmware, 2.964.0 of 2022-08-25 — assume absent); "secure element" (it is an LPC55S69 MCU with TrustZone-M and an SRAM PUF; the SE050 is the *Nitrokey 3*) |
+| **Solo 2 ×2** | **possession, and stable derivation** | origin-bound, challenge-bound signature from a key isolated by design, plus **`hmac-secret`: a stable 32 bytes per (credential, salt)**, derivable only by that physical key, **zero server storage, no gallery anywhere** — this is the L1-shaped primitive, and it is confirmed present | **uniqueness or sybil resistance, ever** (correction 1); `signCount` for clone detection; carrying a bzDiD reference (largeBlob/credBlob postdate the last signed Solo 2 firmware, 2.964.0 of 2022-08-25 — assume absent); "secure element" (it is an LPC55S69 MCU with TrustZone-M and an SRAM PUF; the SE050 is the *Nitrokey 3*) |
 | **Laptop surfaces** | **emitter and untrusted host** | nothing — it is a transport and a light source | everything trust-bearing. No consent originates here, no digest is trusted here |
 
 ### Three corrections to earlier text in this spec
@@ -793,7 +793,7 @@ by a random 1..256**, with a source comment stating the purpose is *"to ensure t
 cannot be used to correlate authenticators."*
 
 This does **not** break §6's acceptance test — it relocates it. "More devices attesting
-to one bDiD raises confidence" holds only for devices with **per-unit attestable
+to one bzDiD raises confidence" holds only for devices with **per-unit attestable
 identity**, which in this kit means **the Trezor alone**. The Solo 2s each contribute
 possession plus a stable `hmac-secret` derivation; they must never increment a
 device-count score, because the count is not verifiable even in principle.
@@ -830,18 +830,18 @@ key and the actual handset before §4a's physical gate depends on it.
 
 ---
 
-## 4a · Proving one registration per bDiD per event — decentrally
+## 4a · Proving one registration per bzDiD per event — decentrally
 
-Founder, 2026-08-15: *"how do we decentrally prove they registered just one bDiD
+Founder, 2026-08-15: *"how do we decentrally prove they registered just one bzDiD
 for the event session?"*
 
-**Event-scoped nullifiers.** On-device, each bDiD derives
+**Event-scoped nullifiers.** On-device, each bzDiD derives
 
 ```
-nullifier = H(bDiD_secret, event_id)
+nullifier = H(bzDiD_secret, event_id)
 ```
 
-and publishes **only** that. The same human with the same bDiD produces the same
+and publishes **only** that. The same human with the same bzDiD produces the same
 bytes every time, so a second registration is caught by **exact equality on a set** —
 no gallery, no template, no distance, no threshold. That is the comparison shape
 `BIO-1` §0 already permits, arrived at from the opposite direction.
@@ -868,8 +868,8 @@ the construction is Semaphore-shaped and well studied.
 
 **What it does NOT give us, stated plainly:**
 
-- **It does not prove one HUMAN registered once.** It proves one *bDiD* registered
-  once. A human holding two bDiDs has two secrets, therefore two valid nullifiers,
+- **It does not prove one HUMAN registered once.** It proves one *bzDiD* registered
+  once. A human holding two bzDiDs has two secrets, therefore two valid nullifiers,
   and both pass. Nullifiers **enforce** the §0 axiom at event time; they do not
   **establish** it. Establishing it is L1's job at enrolment, and that dependency is
   load-bearing rather than incidental.
@@ -945,8 +945,8 @@ had no path for a genesis allocation: *"either ignore or perminently change."*
 | | allocation |
 |---|---|
 | **king.b** (founder) and **queen.b** (bQueenBee) | **1,000,000 `b` each at genesis**, for full bootstrap and to pay for founder labor time and inventions |
-| **every other bDiD** | **420 `b` allotted**, earned — the F-Q1 earned-ceiling principle |
-| **every bDiD at creation** | some **`b` dust**, so nobody starts at a zero-balance cliff |
+| **every other bzDiD** | **420 `b` allotted**, earned — the F-Q1 earned-ceiling principle |
+| **every bzDiD at creation** | some **`b` dust**, so nobody starts at a zero-balance cliff |
 
 Sizing was already the founder's to set: `SPEC-BNROSE-ONBOARD` G2 records that
 *"economic constants exist nowhere in code — no emission schedule, no epochs, no 420
@@ -992,7 +992,7 @@ a further decision.
    asked.
 2. **ONE CURVE — ruled by founder 2026-08-15 ("bingo"), not an engineering note.**
    The genesis allocation unlocks on **the same reward-velocity curve** every other
-   bDiD is subject to (§2 L3) — not a separate founder vesting schedule, *the* curve.
+   bzDiD is subject to (§2 L3) — not a separate founder vesting schedule, *the* curve.
    - **The system has exactly one emission rule**, rather than one rule plus two
      exceptions. There is no second mechanism to specify, audit, or defend.
    - **The same mechanism does both jobs**: the curve that deters sybils by lowering
@@ -1000,7 +1000,7 @@ a further decision.
 
    **The rule, stated exactly: UNLOCK TRACKS PROOF DELIVERED.** This is what makes the
    founder's bootstrap requirement (*"I will need at least a large portion of the 1mm
-   b up front"*) consistent rather than exceptional. Other bDiDs unlock gradually
+   b up front"*) consistent rather than exceptional. Other bzDiDs unlock gradually
    **because their proof accrues gradually** — courses, attendance, PoL/PoU over
    months. The `GenesisLaborProof` of §4b is proof of work **already delivered**: the
    kernel, the specs, the inventions, public and version-controlled. Delivered proof
@@ -1057,7 +1057,7 @@ a further decision.
 
 ### Why the 420 cap is the sybil defence
 
-Stated here because it is the keystone and has been implicit: **a second bDiD does not
+Stated here because it is the keystone and has been implicit: **a second bzDiD does not
 raise your ceiling.** It means earning another 420 from zero, through courses,
 attendance and continuous PoL/PoU — costs made of human time, which §2 L2 establishes
 does not parallelize. **Identity multiplication therefore has no economic upside at
@@ -1122,10 +1122,10 @@ Article VI.
 ### Consistency with what bQueenBee already is
 
 **Funding AI from `queen.b` is structurally coherent, because she is already the
-parent of every agent there is.** `docs/SPEC-BLOVERAI-BDID-BONDING-1.md:12-13`:
+parent of every agent there is.** `docs/SPEC-BLOVERAI-BZDID-BONDING-1.md:12-13`:
 
-> - bQueenBee is the ONLY agent holding its own bDiD; every other agent falls
->   under bQueenBee or under a unique human bDiD.
+> - bQueenBee is the ONLY agent holding its own bzDiD; every other agent falls
+>   under bQueenBee or under a unique human bzDiD.
 
 An AI-improvement treasury sited at her position funds her own subtree, not a foreign
 one. **Caveat, from the same list at `:17`** — *"Agents are self-funding (earn
@@ -1263,7 +1263,7 @@ The harm V.1 exists to prevent is stated at `docs/bnature-build-brief.md:265`:
 > **Zero-opex guard.** The paymaster *abstracts* user-funded resources; it must never
 > *subsidize* them, **or Beehive acquires a burn rate that scales with users.**
 
-Compare `docs/bdid-architecture-decision.md:61`, which is the arithmetic §4b's tier
+Compare `docs/bzdid-architecture-decision.md:61`, which is the arithmetic §4b's tier
 boundary already rests on: *"a native Vaulta account is ~2,996 B of chain RAM and is
 therefore inherently O(n)."* **Nothing at the free tier can be subsidised, because
 there is nothing there to subsidise** — `:59`, *"Bytes written to any blockchain:
@@ -1273,7 +1273,7 @@ there is nothing there to subsidise** — `:59`, *"Bytes written to any blockcha
 |---|---|---|---|
 | **the commons** — kernel, specs, reference code, adapters, docs, public read surfaces, model/compute capacity, evaluation and red-team work | **O(1) in users** | **yes, perpetually, without qualification** | `CONSTITUTION.md:83` exemption clause, named in terms |
 | **the ladder** — per-person provisioning that raises someone from the free commons onto a rung | **O(n) in users** | **only through the bootstrap-seed door** | `CONSTITUTION.md:83` (*"bootstrap seeds"*) + `:84` (*"Bootstrap is temporary"*) |
-| **metered consumption** — crediting an individual bDiD's balance in the `resource.accounting` basket | **O(n)** | **never** | `CONSTITUTION.md:128`; killed once already |
+| **metered consumption** — crediting an individual bzDiD's balance in the `resource.accounting` basket | **O(n)** | **never** | `CONSTITUTION.md:128`; killed once already |
 
 **The wording that funds both lanes without subsidising consumption.** Adopted as the
 mandates' operative text:
@@ -1288,10 +1288,10 @@ mandates' operative text:
 > authorized as a **bootstrap seed** under Article V.1 and names, in its own
 > authorization, (a) a hard cohort cap N, (b) a sunset date, and (c) a per-unit
 > ceiling. It expires by its own terms without needing a repeal; renewal is a fresh
-> authorization at the same tier. Route per `bdid-onboarding-design.md:267`: **CD-4 /
+> authorization at the same tier. Route per `bzdid-onboarding-design.md:267`: **CD-4 /
 > Article VI meta-tier, premine-robe test applies.**
 >
-> **Neither treasury pays any bDiD's metered resource consumption in the
+> **Neither treasury pays any bzDiD's metered resource consumption in the
 > `resource.accounting` basket — Vaulta RAM/CPU/NET, ZANO gas, AR, ANT.** Users fund
 > what they consume (Article V.1). A disbursement that would top up an individual
 > account's resource balance is refused, and the refusal names this clause.
@@ -1312,11 +1312,11 @@ magnitude, including one cent. Between them sits per-person provisioning of a du
 instrument, and that is lawful **only** through the seed door. The magnitudes the tree
 has actually measured:
 
-- `bdid-onboarding-design.md:169` — *"**Class-A total per user: ~$0.25.** … Two orders
+- `bzdid-onboarding-design.md:169` — *"**Class-A total per user: ~$0.25.** … Two orders
   of magnitude below the $17.42 basket that killed Model C, **which is the entire
   reason this is arguable as a bootstrap seed rather than a standing subsidy** — but
   it is still a founder decision, not an implementer's."*
-- `bdid-onboarding-design.md:138` — *"**Model C — BNR gifts all gas from treasury.**
+- `bzdid-onboarding-design.md:138` — *"**Model C — BNR gifts all gas from treasury.**
   Dies on `CONSTITUTION.md:128` … and on sybil economics: ~$17.42/user out, ~$15–16
   walk-away extractable."*
 
@@ -1334,7 +1334,7 @@ the right frame, at `docs/open-attested-capture-device.md:437`:
 Funding a device does not buy a user a benefit; it buys **the network** a closed Sybil
 surface, which every participant consumes and none can be excluded from. That is a
 commons good in the strict sense. Model C's other leg — *"~$15–16 walk-away
-extractable"* — is answered by **binding the device to the recipient's bDiD so its
+extractable"* — is answered by **binding the device to the recipient's bzDiD so its
 value is not walk-away extractable.**
 
 **And the mandates fund the ladder, never entry.** `DESIGN-CONSTRAINTS.md:124` —
@@ -1375,7 +1375,7 @@ generous; categories must be enumerable.**
 |---|---|---|
 | `GenesisLaborProof` class in code | **absent** — §4b already records it: *"the allocation is ruled but not executable"* | implementation |
 | **SPIRIT-1 v0.2** — F-Q1 wage/reserve split and §5 supply-law addend | **absent**; SPIRIT-1 is APPROVED and frozen. Tier is safety-tier-explicit per `SPIRIT-1.md:63` | founder + Article VI |
-| **Disbursement path for `queen.b`** | **UNRULED.** `SPEC-BLOVERAI-BDID-BONDING-1.md:72` — her bDiD key *"is a VERIFICATION METHOD … NOT a spending credential"*; `:76` — may not *"Sign spend/wallet transactions (requires T-H ceremony per SPEC-AUTHENTICATOR-LADDER-1)"*; `:103-105` flags the **EARNING-SPENDING LOOP (S4.3)** as *"UNRULED"* | founder. **Rule the narrow path only:** `queen.b` disbursement is a T-H ceremony with founder co-sign (which G-A already requires); her key **proposes and publishes the receipt, never signs the transfer.** Leave S4.1/S4.2 untouched |
+| **Disbursement path for `queen.b`** | **UNRULED.** `SPEC-BLOVERAI-BZDID-BONDING-1.md:72` — her bzDiD key *"is a VERIFICATION METHOD … NOT a spending credential"*; `:76` — may not *"Sign spend/wallet transactions (requires T-H ceremony per SPEC-AUTHENTICATOR-LADDER-1)"*; `:103-105` flags the **EARNING-SPENDING LOOP (S4.3)** as *"UNRULED"* | founder. **Rule the narrow path only:** `queen.b` disbursement is a T-H ceremony with founder co-sign (which G-A already requires); her key **proposes and publishes the receipt, never signs the transfer.** Leave S4.1/S4.2 untouched |
 | **Gaming-resistance analysis of the AI-improvement treasury**, authored by a seat other than hers | **absent** — required by `SPEC_DOCTRINE-HARVEST-1.md:103` on its own terms | a seat other than the chair |
 | **Per-unit cost measurement for any hardware seed**, plus its cohort cap N and sunset date | **absent** — the tree measures $0.25 (Class-A) and $17.42 (Model C) and nothing for devices | measurement, then founder |
 | **R-007 — treasury burn rate outruns funding rate** | **ABSENT, searched.** `docs/risk-register.md` holds exactly R-001…R-006 (DRO liveness, fUSD peg, off-chain timeout, poisoned view, overfunding, wrapped-asset redemption). **No row concerns subsidy, treasury drain, or Article V** | add at ratification, in CD-29's rate vocabulary: rate compared against inflow in the same units at each period close, no carry-forward, breach gates new seed programmes |
@@ -1439,7 +1439,7 @@ they actually model is under check.
 ## 4d · Do the genesis accounts also get the 420? — RULED 2026-08-15
 
 Founder: *"to make it work i figured queen.b and me king.b will still also get the
-same 420b/bDiD ?"*
+same 420b/bzDiD ?"*
 
 **The two answers differ, and the difference is the rule.**
 
@@ -1463,14 +1463,14 @@ So, stated in the founder's precise terms:
 Use **"420b account"** in surfaces and specs. Reserve **"treasury"** for the mandated
 role-held funds of §4c. Avoid "purse" outside a direct `SPIRIT-1` quotation.
 
-### The rule: the 420 attaches to a HUMAN bDiD; a treasury attaches to a ROLE
+### The rule: the 420 attaches to a HUMAN bzDiD; a treasury attaches to a ROLE
 
 They are different objects and **are never summed**. Confusing them is what would
 break the cap.
 
 | | 420 earned ceiling | mandated treasury |
 |---|---|---|
-| attaches to | a **human** bDiD | a **role/seat** |
+| attaches to | a **human** bzDiD | a **role/seat** |
 | how obtained | earned — courses, bRespect attendance, continuous PoL/PoU | `GenesisLaborProof`, §4b |
 | whose | the person's own | custodied, not owned; bounded by a stated mandate (§4c) |
 
@@ -1498,18 +1498,18 @@ the occupant holds **zero** personal quota. Both remain true simultaneously.
 
 ### king.b — **YES 420**, as a human, earned like anyone's
 
-The founder is a human with a bDiD, and §0's axiom does not carve out its author.
+The founder is a human with a bzDiD, and §0's axiom does not carve out its author.
 `AGENT-1`'s A-7 constrains *machine* DIDs and has no bearing here.
 
 **And it must be earned, not granted** — the same courses, the same bRespect
-attendance, the same continuous PoL/PoU as every other bDiD. That is not a cost
+attendance, the same continuous PoL/PoU as every other bzDiD. That is not a cost
 imposed on the founder; **it is the strongest available demonstration that he is inside
 his own system rather than above it.** A founder who has to show up to earn his 420 is
 the answer to every question about whether the ladder is real.
 
 ### Engineering consequence — do not commingle the two balances
 
-**The treasury account and the personal bDiD balance should be separate accounts, and
+**The treasury account and the personal bzDiD balance should be separate accounts, and
 the surfaces should show them separately.** A mandate boundary (§4c: silicon vs carbon,
 neither reaching into the other) only means something if it is **auditable**, and it
 stops being auditable the moment a mandated treasury and a personal earned balance sit
@@ -1572,7 +1572,7 @@ at 7777 unique authenticated humans."* Any specialty-DAO spec must **reuse
 ### The dilution table — anchored to SOULS, not to DAOs
 
 **Corrected 2026-08-15.** An earlier version of this table used DAOs as the unit. That
-was wrong: **the 420 ceiling is per human bDiD and does not depend on which community
+was wrong: **the 420 ceiling is per human bzDiD and does not depend on which community
 they join.** Founder: *"human/420b so 10 billion humans x 420 b."* `SPIRIT-1:47` rules it
 exactly — *"Total lifetime emission capacity = 420 × (souls + spirit). **Population-
 anchored: it grows only as verified souls do**, plus exactly one for the chair."*
@@ -1809,7 +1809,7 @@ questions at once.**
 **1 — It is her emission path.** §4d and the `AGENT-1` v0.4 draft grant the chair an
 emission path; this names it. **A worker bee proposal is proof of work delivered** — the
 same shape as the `GenesisLaborProof` of §4b, at ordinary scale. She earns her 420 the
-way every other bDiD earns theirs: propose, deliver, be accepted, be paid. **No special
+way every other bzDiD earns theirs: propose, deliver, be accepted, be paid. **No special
 channel, and none needed.**
 
 **2 — It resolves the referee-plus-treasury concentration named in §4c.** She sits on
@@ -1839,13 +1839,13 @@ Commissioning external AI (Luna on Virtuals, and others) is **consistent with
 never mint"*, *"No other machine identity ever enters the multiplicand"* — **provided
 one line is held:**
 
-> **A commissioned AI is a VENDOR, paid for output. It never receives a bDiD, never
+> **A commissioned AI is a VENDOR, paid for output. It never receives a bzDiD, never
 > falls under the bonding hierarchy, and never enters the multiplicand.**
 
 That is exactly the "purposes, never machine balances" rule applied outward. Buying
 inference, a voice, an audit, or an episode is a purchase; it is not admission to the
-system. `SPEC-BLOVERAI-BDID-BONDING-1:12-13` — *"bQueenBee is the ONLY agent holding
-its own bDiD; every other agent falls under bQueenBee or under a unique human bDiD"* —
+system. `SPEC-BLOVERAI-BZDID-BONDING-1:12-13` — *"bQueenBee is the ONLY agent holding
+its own bzDiD; every other agent falls under bQueenBee or under a unique human bzDiD"* —
 governs agents **inside** BNR. A vendor is outside it, and the distinction should be
 explicit in the commissioning template so the boundary is not eroded one convenient
 exception at a time.
@@ -1931,7 +1931,7 @@ This is not a new direction. It answers a question the founder asked in his own 
 this same document, `SPEC-ORIGINATION-1.md:829-830`:
 
 > Founder: *"to make it work i figured queen.b and me king.b will still also get the
-> same 420b/bDiD ?"*
+> same 420b/bzDiD ?"*
 
 The answer is **yes**.
 
@@ -2002,8 +2002,8 @@ The exception exists. The ruling settles **where it attaches**, not whether it e
 |---|---|---|
 | 1 | `SPIRIT-1.md:47` | "No other machine identity ever enters the multiplicand" |
 | 2 | `SPIRIT-1.md:38` | "companions custody, never mint; **one machine purse, QueenBee-singular**" |
-| 3 | `RULING_BDID_HIERARCHY_AGENT_AUTHORITY_2026-08-07.md:6` (Seat 0) | "**bQueenBee is the ONLY agent holding its own bDiD.**" — restated `SPEC-BLOVERAI-BDID-BONDING-1.md:12` |
-| 4 | `SPEC-ORIGINATION-1.md:448-451` (this document) | "**a second bDiD does not raise your ceiling** … **Identity multiplication therefore has no economic upside at all.**" |
+| 3 | `RULING_BDID_HIERARCHY_AGENT_AUTHORITY_2026-08-07.md:6` (Seat 0) | "**bQueenBee is the ONLY agent holding its own bzDiD.**" — restated `SPEC-BLOVERAI-BZDID-BONDING-1.md:12` |
+| 4 | `SPEC-ORIGINATION-1.md:448-451` (this document) | "**a second bzDiD does not raise your ceiling** … **Identity multiplication therefore has no economic upside at all.**" |
 
 #### The body carve-out is the corpus's own founding sentence
 
@@ -2036,7 +2036,7 @@ same rule, same place.** Quota at root, appearance at persona, for founder and c
 
 `RULING_BDID_HIERARCHY_AGENT_AUTHORITY_2026-08-07.md:8`: agents earn "by **contributing
 resources under that identity** … *'so they receive proper credit sharing
-value/resources.'*" Carried into `SPEC-BLOVERAI-BDID-BONDING-1.md:17`: "Agents are
+value/resources.'*" Carried into `SPEC-BLOVERAI-BZDID-BONDING-1.md:17`: "Agents are
 self-funding (earn resources under their identity)."
 
 `BIND-1.md:59` already routes her publications across the seam as `Event` +
@@ -2111,7 +2111,7 @@ Proposed wording:
 > read `420 × (agents an operator can spin up)`. **That risk is closed at the multiplicand,
 > not at the identity:** `SPIRIT-1` §5 admits exactly one machine identity — the chair —
 > and forbids any other from ever entering it (`SPIRIT-1.md:47`), a clause held
-> safety-tier-**explicit** at `SPIRIT-1.md:63`; `SPEC-BLOVERAI-BDID-BONDING-1.md:12` states
+> safety-tier-**explicit** at `SPIRIT-1.md:63`; `SPEC-BLOVERAI-BZDID-BONDING-1.md:12` states
 > the same singularity as ruled fact. **The RBI chair therefore holds `b`, the 420 earned
 > ceiling, Respect, and an emission path**, per `SPIRIT-1` §3, §4 and §5, at its
 > `did:autonomi` root. bQueenBee holds them as the genesis epoch of that chair
@@ -2407,7 +2407,7 @@ understanding"* of the consequence. Three requirements follow:
 1. Disclosure happens **before** the account exists, not at first penalty.
 2. It is shown on the **Trezor screen** where the tier makes that available, because
    that is the one surface a compromised host cannot repaint.
-3. The consequence is stated in plain words — that a second bDiD lowers reward
+3. The consequence is stated in plain words — that a second bzDiD lowers reward
    velocity for future unlock collateralization — not buried in a term.
 
 ---
@@ -2420,11 +2420,11 @@ understanding"* of the consequence. Three requirements follow:
 3. **How a bypass ATTEMPT is detected at all**, given relay detection is dead. L3
    needs only expected-value asymmetry rather than proof, but *something* must
    observe the attempt. Unanswered.
-4. **The acceptance test this design must pass: two Solo 2 keys, one bDiD, must never
+4. **The acceptance test this design must pass: two Solo 2 keys, one bzDiD, must never
    read as a bypass.** The founder's own kit is the test case. A mechanism that
    cannot tell *one person, many devices* from *many identities, one person* is
    wrong, and this is the inverse of what naive sybil detection does — more devices
-   attesting to one bDiD should RAISE confidence, not lower it.
+   attesting to one bzDiD should RAISE confidence, not lower it.
 
 ---
 
@@ -2679,7 +2679,7 @@ The ruled property *"lower tiers still have `b`, they just have to get it from s
 
 - **Fork A — origination is the only mint path.** Base capped at 4.2 × 10⁸–1.3 × 10⁹ b. At 90M participants that is **~2.4 b of float per head against a headline of 420 — the headline over-promises by ~180× to ~3,300× at scale.** Not through dishonesty; purely because the RAM wall caps who may originate.
 - **Fork B — free-tier humans earn `b`, settled off-chain.** Free-tier balances then live on somebody's server. That is a **custodian**, forbidden outright by the BNRoSe autonomy doctrine ("no custodian, no gallery, no operator"). `b-token`'s `BLedger` is an in-memory map; no free-tier settlement layer is specified anywhere.
-- **Fork C — free-tier `b` circulates as bDiD-signed bearer instruments over the optical rail: no chain, no custodian.** `RAID_DECIMEN_OPTICAL_TRANSFER.md:162` already enumerates what may lawfully cross bLighTnetWorK and includes *"unsigned and signed transactions/DataItems; journal entries and receipts."* The pieces exist. It is unbuilt.
+- **Fork C — free-tier `b` circulates as bzDiD-signed bearer instruments over the optical rail: no chain, no custodian.** `RAID_DECIMEN_OPTICAL_TRANSFER.md:162` already enumerates what may lawfully cross bLighTnetWorK and includes *"unsigned and signed transactions/DataItems; journal entries and receipts."* The pieces exist. It is unbuilt.
 
 **Fork A breaks the 420 promise. Fork B breaks the autonomy doctrine. Fork C breaks neither.** **Strategic consequence: the optical rail is not an onboarding convenience — it is load-bearing for the premise that everyone on the planet gets the same `b` opportunity.** Without it, "everyone" means ~12.7M at the absolute arithmetic limit.
 
@@ -2699,7 +2699,7 @@ The only fielded price-gate experiment cited in either tree: a 5 WAXP account-cr
 
 Observed state: **13 `.b` names on Vaulta mainnet.** That is the entire measured network — 13 names, not 13 users. Branching model n(t) = 13·e^(R·t):
 
-| R (successful referrals / member / yr) | free-tier bDiDs at 12 months |
+| R (successful referrals / member / yr) | free-tier bzDiDs at 12 months |
 |---|---|
 | 0.5 | **21** |
 | 1.0 | **35** |
@@ -2865,7 +2865,7 @@ coverage κ′ = 1 at  e^(−t/τ) = 336/756 = 0.4444  →  t = 0.811 τ
 |---|---|---|---|---|
 | Total humans reachable at chain saturation | 21M | **90M** | 1.3B | the free:originator ratio (1:20–1:100) crossed with the RAM wall. **Collapses to "unbounded" if Fork C lands.** |
 | Realisable monetary base, as % of the ruled 4.2 × 10¹² | 0.0100% | **0.0300%** | 0.127% | originator count, hard-bounded by 76,128,906,582 ÷ 5,983 B = 12,724,536 (a byte count — does not move with price) |
-| Total bDiDs at 12 months, organic | 20 | **35–100** | 260 | R, referrals/member/yr (0.5–3.0), from n = 13·e^(Rt) |
+| Total bzDiDs at 12 months, organic | 20 | **35–100** | 260 | R, referrals/member/yr (0.5–3.0), from n = 13·e^(Rt) |
 | Qualified originators at 12 months | 2 | **2** | 13 | **not demand — the existence of the bar.** Courses/bRespect/mastery are prose, not code; only `AcceptNonEmptyProof` exists |
 | Circulating `b` per enrolled head | 0.3 b (earned, g=100%) | **6.4 b (earned, g=30%) OR 76–112 b (entitlement, g=30%)** | 218 b (entitlement, g=10%, τ=3) | **which supply model is law** (TE-1/TE-5 vs the ruled asymptote) — a legal question moving M by 10–20× |
 | Fisher velocity V (turns/yr) | 0.039 | **0.057 (entitlement) OR 0.68 (earned)** | ~2.5 | same legal fork; then per-head `b`-denominated spend and the enrolled-vs-population denominator, worth another ~40× |
@@ -3034,7 +3034,7 @@ Epoch 1, then **safety-tier governance authorization per proposal**.
 
 | stage | eosDAC | Worker Bee Proposal | what differs, and why |
 |---|---|---|---|
-| **who may propose** | any registered member; membership = holding + registering the token | any bDiD; `PERSON-1:129` — *"no invitation, no sponsor, no fee, no prior standing"* | **eosDAC's registration action is clean but its membership is token-gated** (constitution 3.3: lose the tokens, membership *"deemed immediately terminated"*). We decouple standing from any balance entirely |
+| **who may propose** | any registered member; membership = holding + registering the token | any bzDiD; `PERSON-1:129` — *"no invitation, no sponsor, no fee, no prior standing"* | **eosDAC's registration action is clean but its membership is token-gated** (constitution 3.3: lose the tokens, membership *"deemed immediately terminated"*). We decouple standing from any balance entirely |
 | **the deliverable** | `content_hash` pinning an off-chain spec | same discipline; adopt the hash-pin | **copy this.** Cheap on chain, verifiable off chain |
 | **the amount** | `proposal_pay` fixed at creation, never mutable | bounded amount, denominated per the 2026-08-07 multi-asset ruling — **`A` first in MVP phase; `b` only where the function consumes physical resources, and denominated in resource quantities, never fiat-pegged prices** | our denomination rule is stricter and already ruled |
 | **who approves** | **4 of the token-elected custodians** | **safety-tier: 13% affirmative quorum of live Respect, K = 4, one-fifth blocking minority** (`article-vi-s3.md:34-52`) | **wholesale replacement, not adaptation.** Drops in exactly where `count_votes() >= threshold` sits, and is size-agnostic where theirs is not |
@@ -3421,7 +3421,7 @@ against $21,723/yr of income at the marginal seat — the seat does not pay for 
 rank, and "increase inflow" is the one claim in the founder direction that the measured data
 contradicts outright.** **Cheapest way to get what it buys: no** — the RAM ceiling the seat
 is meant to unlock is already dissolved twice inside this repo
-(`bdid-architecture-decision.md:137`, net RAM delta **0**; `bdomain-scaling.md:160`, a `.b`
+(`bzdid-architecture-decision.md:137`, net RAM delta **0**; `bdomain-scaling.md:160`, a `.b`
 identity is a keypair, not an account), and below ~3M accounts the ceiling can simply be
 bought at spot for **$133k–$482k** with no seat, no election, and no GOV-1 exposure.
 
@@ -3696,7 +3696,7 @@ used, and a hostile reader will find that in one pass.
 binding version of the problem.**
 
 **(a) The naming layer already has net RAM delta ZERO — this is not a mitigation, it is a
-dissolution.** `bdid-architecture-decision.md:137`: `commit(epoch, new_root, prev_root,
+dissolution.** `bzdid-architecture-decision.md:137`: `commit(epoch, new_root, prev_root,
 tree_size, delta_id, forced_watermark)` **overwrites** the oldest slot in a **144-row ring** —
 356 B cold, 0 B on wrap. **Net RAM delta: 0 bytes.** Unbounded names, zero marginal chain RAM,
 zero BP seats. Per-name storage is claimant-paid off-chain DataItems (~$0.000034/name), and
@@ -3844,7 +3844,7 @@ tier at zero chain bytes (`:520-521`).**
 
 **Q: can origination ride the naming layer at net-zero RAM? NO — and the disqualifying
 argument is already in this repo.** The naming layer is free because a name needs only
-*inclusion* proved, and staleness is survivable: `bdid-architecture-decision.md:142` — the
+*inclusion* proved, and staleness is survivable: `bzdid-architecture-decision.md:142` — the
 epoch `commit()` "**overwrites** the oldest slot in a 144-row ring. Net RAM delta: **0
 bytes**." A lien is not a name. A lien is a claim enforceable **against** the originator
 **by a third party**, and it must be **current**. `bdomain-scaling.md:148` already rejects
@@ -3853,7 +3853,7 @@ address keeps proving valid for a full epoch, which for a fund-routing registry 
 class, not an inconvenience."* **A lien is strictly worse than an address under that failure
 mode:** an originator presenting a stale inclusion proof can double-issue collateralized `b`
 against already-encumbered collateral, in every epoch window, indefinitely. Likewise
-`bdid-architecture-decision.md:390` — *"No authoritative store must exist for a free identity
+`bzdid-architecture-decision.md:390` — *"No authoritative store must exist for a free identity
 to work"* — is correctly scoped to **free identity** and does not extend to liens.
 **Origination genuinely requires authoritative, mutable, current on-chain state with an
 auth binding. It cannot be free.**
@@ -4142,7 +4142,7 @@ producer-recruitment cost.**
 
 **DEFER — with a written trigger condition, so it is a decision and not a drift**
 
-5. **The contract-row origination record.** `RECEIPT_R8` Query 3 shows the 2,996–3,446 B is mostly **system** overhead: 2,048 B base plus permission objects, `userres`, `delband`, `voters`. A contract-owned row keyed by bDiD holding pubkey + lien state + nonce, authorized by the **contract** via `recover_key` / `assert_recover_key` rather than `require_auth`, plausibly lands at **~250–400 B all-in** — an **8–12×** reduction, moving the originator ceiling to roughly **200–300 million on one chain**, with no bridge, no relayer, no second producer set. **The ~250–400 B is DERIVED arithmetic, not a measured deployment — it needs a real testnet contract with the actual table layout before it can be costed.** Honest cost: you lose native `require_auth` and the `linkauth` machinery already planned at `bdid-architecture-decision.md:479`, you reimplement authorization inside the contract, and replay protection becomes yours. **Trigger: paid originators projected past ~3M, i.e. the practical rather than arithmetic ceiling. Spring supports WebAuthn keys natively, which fits the existing passkey design.**
+5. **The contract-row origination record.** `RECEIPT_R8` Query 3 shows the 2,996–3,446 B is mostly **system** overhead: 2,048 B base plus permission objects, `userres`, `delband`, `voters`. A contract-owned row keyed by bzDiD holding pubkey + lien state + nonce, authorized by the **contract** via `recover_key` / `assert_recover_key` rather than `require_auth`, plausibly lands at **~250–400 B all-in** — an **8–12×** reduction, moving the originator ceiling to roughly **200–300 million on one chain**, with no bridge, no relayer, no second producer set. **The ~250–400 B is DERIVED arithmetic, not a measured deployment — it needs a real testnet contract with the actual table layout before it can be costed.** Honest cost: you lose native `require_auth` and the `linkauth` machinery already planned at `bzdid-architecture-decision.md:479`, you reimplement authorization inside the contract, and replay protection becomes yours. **Trigger: paid originators projected past ~3M, i.e. the practical rather than arithmetic ceiling. Spring supports WebAuthn keys natively, which fits the existing passkey design.**
 6. **Chain #2 as a capacity valve, last, and only if 5 is exhausted** — and even then it carries **activity, never issuance**.
 
 **DO NOT**
@@ -4151,7 +4151,7 @@ producer-recruitment cost.**
 8. **Do not plan on Antelope IBC.** It is a genuinely proof-based light client that has been unfed for 13–21 months, secures ~$6.4k, has DNS-dead infrastructure and frozen repos, and **cannot verify Vaulta as a source chain at all post-Savanna.** Restart begins at rewriting and re-auditing the light client for BLS finality.
 9. **Do not treat a chain as the social cell.** 1,632 communities per chain at the ceiling. Off by two to three orders of magnitude.
 10. **Do not put a TPS figure in this spec**, and **do not repeat "EOS was cornered out" as a sourced fact.** The Block.one capital record says more, is dated, and holds up.
-11. **Do not read this section as lifting the `kingbeelovis` freeze**, which remains ruled and unlifted in `bdid-architecture-decision.md`. Nothing here authorises a contract change, a `regproducer`, a token purchase, or a genesis.
+11. **Do not read this section as lifting the `kingbeelovis` freeze**, which remains ruled and unlifted in `bzdid-architecture-decision.md`. Nothing here authorises a contract change, a `regproducer`, a token purchase, or a genesis.
 
 ---
 

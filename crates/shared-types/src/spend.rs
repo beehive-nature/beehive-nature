@@ -123,6 +123,9 @@ pub struct Provenance {
 pub struct SpendReceipt {
     pub schema_version: String,
     pub receipt_id: String,
+    // FROZEN schema-v1 wire field — the 2026-08-19 bDiD→bzDiD rename does not touch
+    // serialized field names; a rename here breaks every already-emitted receipt.
+    // Renames land only with a schema_version bump. See docs/VOCABULARY.md.
     pub spender_bdid: String,
     pub occurred_at: i64,
     pub operation: String,

@@ -14,7 +14,7 @@ The MVP alpha uses **Vaulta A** as the compute/bMeshLLM meter via Buzz. A is the
 **Buzz relays compute metering:** when a user's bMeshLLM request runs, Buzz meters the A-cost and the user pays in A. Autonomous paying of other accounts (ANT for storage, AR for permanence, RAM/CPU-NET for compute) happens via the adapter layer — but the user's A funds it, not an endowment.
 
 **Alpha tier model:**
-- **Guest (free):** basic BNRoSe experience. Browse, read, observe. No chain interaction. No funds needed. Identity is local (bDiD from passkey).
+- **Guest (free):** basic BNRoSe experience. Browse, read, observe. No chain interaction. No funds needed. Identity is local (bzDiD from passkey).
 - **Paid (self-funded):** user acquires A, creates Vaulta account, participates in compute/bMeshLLM, funds their own ANT/AR/RAM/CPU-NET. Everything self-funded.
 
 ### BETA (later) — b on mainnet Vaulta, self-funded paid tier

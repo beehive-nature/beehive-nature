@@ -19,7 +19,7 @@ Both are acknowledged gaps, not oversights. Do not read a green suite as coverin
 
   1. LEAF-CONTENT STRUCTURE. This suite uses synthetic leaves (b"L0", b"L1", ...). It
      exercises tree construction and proof verification in ISOLATION. Real leaves are
-     signed bDiD records -- canon(record) || sig -- with structure, length variance, and
+     signed bzDiD records -- canon(record) || sig -- with structure, length variance, and
      an attacker-influenced component. Adversarial leaf CONTENT is untested here.
      The lifecycle harness exercises real records but does not vary N.
 

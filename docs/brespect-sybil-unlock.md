@@ -14,17 +14,17 @@
 
 ## 1. The honest answer to the conflict
 
-**No. You cannot have multipersona unlinkability and punish duplicate bDiDs, and the part you must give up is *root-level* unlinkability — but only for users who choose to climb the ladder.** What you keep, fully and untouched, is the thing RELAY_22 §2a actually protects: personas remain plural, free, `Selective` by default, and carry no balance, no mint path, no PoUL signal; nothing in this mechanism reads a `PersonaBinding` or a `PersonaRef`, ever.
+**No. You cannot have multipersona unlinkability and punish duplicate bzDiDs, and the part you must give up is *root-level* unlinkability — but only for users who choose to climb the ladder.** What you keep, fully and untouched, is the thing RELAY_22 §2a actually protects: personas remain plural, free, `Selective` by default, and carry no balance, no mint path, no PoUL signal; nothing in this mechanism reads a `PersonaBinding` or a `PersonaRef`, ever.
 
 Stated precisely, because the framing in the task brief mis-cites §2a and all three designs inherited the error:
 
 > §2a (`C:\Users\travi\beehive-nature\crates\onboarding\src\lib.rs:23-25`) is a **layering rule, not a privacy guarantee.** It says economics lives at the root. It is therefore *satisfied* — not merely tolerated — by a mechanism that correlates roots to roots. §2a has nothing to say about root↔root correlation. That silence is the whole space this design lives in.
 
-The founder's trigger, however, does not survive. **"When a multiple bDiD is attempted" is not hard, it is undecidable.** A bDiD is the 256-bit digest of a genesis op; minting one is a hash; there is no issuer and no registry to consult. Detecting an *attempt* requires linking two self-certifying digests to one human, and there is no observable an attempt emits. All three designs reached this independently. It must be amended in writing, not implemented.
+The founder's trigger, however, does not survive. **"When a multiple bzDiD is attempted" is not hard, it is undecidable.** A bzDiD is the 256-bit digest of a genesis op; minting one is a hash; there is no issuer and no registry to consult. Detecting an *attempt* requires linking two self-certifying digests to one human, and there is no observable an attempt emits. All three designs reached this independently. It must be amended in writing, not implemented.
 
 **Amendment, in the words that should go into the ratification:**
 
-> A multiple bDiD cannot be detected and this system does not attempt to detect one. It does not prevent multiple bDiDs — it makes only one of them economically alive. An unvouched root sits at rung 0 forever: a 42 b lifetime ceiling, a 10% annual cap, no self-borrow. Ten thousand of them are free, instantaneous and undetectable, and they are worth 420,000 b of *proven resource contribution* — which is a labour-market problem, not an identity problem.
+> A multiple bzDiD cannot be detected and this system does not attempt to detect one. It does not prevent multiple bzDiDs — it makes only one of them economically alive. An unvouched root sits at rung 0 forever: a 42 b lifetime ceiling, a 10% annual cap, no self-borrow. Ten thousand of them are free, instantaneous and undetectable, and they are worth 420,000 b of *proven resource contribution* — which is a labour-market problem, not an identity problem.
 
 **The exact trade, with no hedging:**
 
@@ -245,7 +245,7 @@ No price is consulted at enforcement, because the obligation was **fixed in b at
 tranche(root) = minted_to_date_of(root) × 10 / 100      // NEVER `remaining`
 ```
 
-**`minted_to_date`, never `remaining`, and this is the single highest-leverage word in all three documents.** cost-based §2 contradicts itself here — its formula says `remaining`, its change-list says `minted_to_date` — and the `remaining` reading grants a fresh root that has done nothing 10% of a lifetime entitlement it has not touched. Worked: 10,000 free bDiDs × 42 b/yr × $20/b × L=0.5 = **$4.2M against $0.001 of CPU**, a 4-to-6-order-of-magnitude swing from the safe reading. Every existing cap in `treasury-t0` is a fraction of `minted_to_date` (`:208-211`, `:221-225`) precisely because that is the monotonic, derived, *earned* quantity.
+**`minted_to_date`, never `remaining`, and this is the single highest-leverage word in all three documents.** cost-based §2 contradicts itself here — its formula says `remaining`, its change-list says `minted_to_date` — and the `remaining` reading grants a fresh root that has done nothing 10% of a lifetime entitlement it has not touched. Worked: 10,000 free bzDiDs × 42 b/yr × $20/b × L=0.5 = **$4.2M against $0.001 of CPU**, a 4-to-6-order-of-magnitude swing from the safe reading. Every existing cap in `treasury-t0` is a fraction of `minted_to_date` (`:208-211`, `:221-225`) precisely because that is the monotonic, derived, *earned* quantity.
 
 Structural changes required — these are real work, not constants:
 
@@ -267,7 +267,7 @@ Gate: **R2 minimum**, revoked permanently on first conviction. At `age_years = 0
 
 ### 5.1 Trigger
 
-Not "a multiple bDiD is attempted" — that is void (§1). The implementable trigger:
+Not "a multiple bzDiD is attempted" — that is void (§1). The implementable trigger:
 
 > **Equivocation.** A root presents itself for vouching as an un-vouched human when it has already been vouched by an overlapping voucher set — established by a `SettlementAuthorization` constructed over Evidence from **≥2 distinct, Settlement-grade sources**, i.e. two humans, independently, who met the person.
 
@@ -387,7 +387,7 @@ And the cheapest attack against cost-based's *session* layer, which this design'
 
 Plainly, with no hedging.
 
-1. **Unlimited bDiDs.** Free, instantaneous, undetectable, by construction. 10,000 R0 roots is a valid state of the system and always will be.
+1. **Unlimited bzDiDs.** Free, instantaneous, undetectable, by construction. 10,000 R0 roots is a valid state of the system and always will be.
 2. **R0 farming.** 42 b lifetime per root × N, throttled only by needing N genuine `ResourceProof`s. That is a labour cost, not an identity cost. If `ResourceProof` verification is weak, this is the whole attack surface — and today `AcceptNonEmptyProof` is the *only* `impl ProofVerifier` in the workspace. **The verifier is a larger hole than anything in this document.**
 3. **A real human selling or renting their vouched root.** No mechanism distinguishes "this human" from "this human's keys, operated by someone who paid them."
 4. **Coercion.** Vouching under duress produces a valid vouch.

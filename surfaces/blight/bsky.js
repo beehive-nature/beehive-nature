@@ -1,7 +1,7 @@
 /* bsky.js — TASK 7: ATProto transport, v1. READ path first, zero deps:
    the public AppView API (no account needed) searched for the [bX pointer
    grammar — same law, second rail. Post path (write) needs a session and
-   docks with the bDiD did:plc binding (TASK 1 engine wiring); v1 keeps the
+   docks with the bzDiD did:plc binding (TASK 1 engine wiring); v1 keeps the
    house static-clean: fetch-only, CORS-open, no keys in the page. */
 var BSKY=(function(){
   var VIEW='https://public.api.bsky.app/xrpc';

@@ -4,7 +4,7 @@
 
 **This document rules nothing.** It collects what is true in the tree, what is true about
 the two languages named, and where the two disagree. Section 3 contains a *recommendation*
-that collides with ratified text at `docs/bdid-architecture-decision.md:65` and `:100`; per
+that collides with ratified text at `docs/bzdid-architecture-decision.md:65` and `:100`; per
 CLAUDE.md §1 that collision is **escalated by name, not resolved here**. Section 6 lists
 what needs the founder's own word.
 
@@ -284,7 +284,7 @@ Reasoning:
   radical, no ligature, no Roman-numeral character ever enters the namespace — and because
   Latvian is provably NFKC-invariant (§3.2), applying an NFKC *test* costs Latvian nothing.
 - **Folding is what makes display diverge invisibly from the key.** The leaf format at
-  `docs/bdid-architecture-decision.md:74-75` already carries a separate `display` field, so
+  `docs/bzdid-architecture-decision.md:74-75` already carries a separate `display` field, so
   the architecture supports the split. The rule should be: display must also be NFC and must
   normalize to the same key.
 - **It is ENSIP-15's actual posture.** ENS applies NFC and then *validates and rejects*;
@@ -299,7 +299,7 @@ Reasoning:
   away from what every user actually types.
 
 **This collides with ratified text and is therefore escalated, not decided.**
-`docs/bdid-architecture-decision.md:65` reads `n = skeleton(NFKC(lowercase(input)))` — "UTS-46
+`docs/bzdid-architecture-decision.md:65` reads `n = skeleton(NFKC(lowercase(input)))` — "UTS-46
 plus Unicode confusable skeleton" — repeated verbatim in the wallet resolution algorithm at
 `:100`. That line is **NFKC**, and it is **not** what ENS chose. It also conflates two
 different things: **UTS #46 §4 Processing Step 2 applies NFC**, not NFKC. (NFKC_Casefold is
@@ -308,7 +308,7 @@ cites UTS-46 for a folding one level more aggressive than UTS-46 performs. See �
 
 ### 3.7 Two defects in existing artifacts that must clear before UNICODE-NAMING-1 is written
 
-**(a) The worked example at `bdid-architecture-decision.md:310` appears to be false.** The
+**(a) The worked example at `bzdid-architecture-decision.md:310` appears to be false.** The
 doc states: "The tree key is the **confusable skeleton**, so `paypaĺ` and `paypal` are the
 same claim and the second one gets a non-membership failure, not a lookalike name." A
 research pass verified against Unicode's `confusables.txt` that **U+013A (ĺ) is absent from
@@ -362,8 +362,8 @@ Verified in source at `C:\Users\travi\b-domain\contract\bdomain.cpp`:
   collision **permanently blocks the target name**, since the honest registrant's transaction
   can never succeed. Today's failure mode is safe against **mis-resolution**; it is not safe
   against **denial**. Opening to UTF-8 grants far more byte freedom to construct one. The new
-  design moves to sha256 (`bdid:65`) and fixes this — but `kingbeelovis` is declared frozen,
-  "code unchanged" (`bdid:292`), so the FNV contract stays live. **Serving Latvian on the
+  design moves to sha256 (`bzdid:65`) and fixes this — but `kingbeelovis` is declared frozen,
+  "code unchanged" (`bzdid:292`), so the FNV contract stays live. **Serving Latvian on the
   current contract would widen a live vulnerability.** This is an argument for the new
   contract, not against Latvian.
 
@@ -465,7 +465,7 @@ fail on ģ if written naively.
 and **~10 Han characters**. A byte cap is not a neutral rule: it gives an English speaker
 three times the name length it gives the founder's wife. **If names are capped, cap them in
 codepoints (or grapheme clusters), not bytes.** *Cost:* a different validity function and an
-explicit RAM answer, since chain RAM is billed in bytes and `bdid:61` is unforgiving about
+explicit RAM answer, since chain RAM is billed in bytes and `bzdid:61` is unforgiving about
 per-user byte arithmetic. This is a genuine tension between equality and the RAM law — it
 needs a ruling, not a preference.
 
@@ -628,7 +628,7 @@ option.** A voluntary *tribal* corpus needs one, and inventing it is designing �
 this seat (ORDERS-1:61).
 
 **F-3 · Normalization form for `.b`.** §3.6 recommends **NFC + reject-don't-fold**. The tree
-already says `skeleton(NFKC(lowercase(input)))` at `bdid-architecture-decision.md:65` and
+already says `skeleton(NFKC(lowercase(input)))` at `bzdid-architecture-decision.md:65` and
 `:100`, cites UTS-46 for it, and **UTS-46 itself applies NFC**. This is a reconciliation with
 ratified text, not a greenfield choice.
 
@@ -652,7 +652,7 @@ uses one as a permanent tree key (§3.7b).
 
 **F-8 · Name length: bytes or codepoints?** A 32-**byte** cap gives English three times the
 name length it gives Latvian and Han (E-7). Changing it to codepoints has a chain-RAM cost
-that `bdid:61` will not let anyone hand-wave.
+that `bzdid:61` will not let anyone hand-wave.
 
 ### 6.2 Engineering, ordered
 
@@ -663,7 +663,7 @@ that `bdid:61` will not let anyone hand-wave.
    sequences** (U+0304, U+030C, U+0327 over Latvian bases)? Requires reading the
    `@adraffy/ens-normalize` data tables. **UNICODE-NAMING-1.md cannot be written before
    this** (§3.10).
-3. **O-3 — Re-verify or retract `bdid-architecture-decision.md:310`.** The `paypaĺ`/`paypal`
+3. **O-3 — Re-verify or retract `bzdid-architecture-decision.md:310`.** The `paypaĺ`/`paypal`
    example appears false against `confusables.txt` (§3.7a). Receipt required. Do not repeat
    it as a code fact in the interim.
 4. **O-4 — Add non-ASCII fixtures to `crates/language-authority` tests.** One Latvian
@@ -709,8 +709,8 @@ standing while this draft sits unratified**:
 
 | where | what it says | status |
 |---|---|---|
-| `bdid-architecture-decision.md:65`, `:100` | `skeleton(NFKC(lowercase(input)))`, "UTS-46 plus Unicode confusable skeleton" | UTS-46 applies **NFC**, not NFKC; ENS chose **NFC**. Conflation, overstated folding. **F-3.** |
-| `bdid-architecture-decision.md:310` | "`paypaĺ` and `paypal` are the same claim" | **CHALLENGED** — U+013A reported absent from `confusables.txt`; UTS #39 skeleton does not strip diacritics. **O-3.** |
+| `bzdid-architecture-decision.md:65`, `:100` | `skeleton(NFKC(lowercase(input)))`, "UTS-46 plus Unicode confusable skeleton" | UTS-46 applies **NFC**, not NFKC; ENS chose **NFC**. Conflation, overstated folding. **F-3.** |
+| `bzdid-architecture-decision.md:310` | "`paypaĺ` and `paypal` are the same claim" | **CHALLENGED** — U+013A reported absent from `confusables.txt`; UTS #39 skeleton does not strip diacritics. **O-3.** |
 | relayed claim about `bdomain.cpp:43-44` | "`tolower()` on bytes ≥ 0x80 is UB" | **FALSE.** Source uses an explicit `'A'..'Z'` range test (`:41-49`). No UB. The real defect is *no Unicode case folding at all*. |
 | framing that reached this seat | "the NFC/NFKC decision is made by the Latin-script languages, so Latvian drives it" | **Half right.** Latvian drives **NFC vs NFD**. Han drives **NFC vs NFKC** — Latvian is NFKC-invariant. §3.2. |
 | any statement that Han traditional/simplified is a normalization problem | — | It is not. Unihan variant properties, informal and non-normative. §3.11. |
@@ -723,7 +723,7 @@ standing while this draft sits unratified**:
 `crates/vocabulary/src/lib.rs:32,36,39,50-52,76,112,205-237` ·
 `crates/language-authority/src/lib.rs:1,3,9-11,19-25,45-58,80-88,104-124,205-212,249-293,365-368,400-415` ·
 `Cargo.toml:6-43` (38 workspace members) ·
-`docs/bdid-architecture-decision.md:29,61,65,74-75,100,292,310` ·
+`docs/bzdid-architecture-decision.md:29,61,65,74-75,100,292,310` ·
 `docs/ROUTING.md:118-124` · `docs/feature-backlog.md:413` ·
 `surfaces/onboarding/index.html:170-174,213-222` ·
 `docs/dispatches/SPEC_RESOLVER_VALIDITY_RULES_2026-08-08.md:59` ·

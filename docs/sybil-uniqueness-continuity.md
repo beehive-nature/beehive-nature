@@ -8,7 +8,7 @@
 
 # ONE-HUMAN-ONE-420 — the presence ratchet with document accelerators
 
-**Design name:** `bDiD/CONTINUITY-v1`
+**Design name:** `bzDiD/CONTINUITY-v1`
 **Status:** buildable on hardware and libraries shipping today. No new cryptography. No gallery. No committee at rest. No issuer.
 
 ---
@@ -24,9 +24,9 @@ A human body can be in exactly one place at one instant, so BNR makes the 420 b 
 ### 2.1 Layer 0 — root secret, zero firmware change
 
 ```
-sig = wallet.signMessage("BNR-bDiD-continuity-root-v1")   // RFC-6979 deterministic ECDSA
+sig = wallet.signMessage("BNR-bzDiD-continuity-root-v1")   // RFC-6979 deterministic ECDSA
 s   = keccak256(sig) mod r_BabyJubJub                      // Semaphore v4 identity scalar
-R   = Poseidon(s)                                          // the bDiD digest
+R   = Poseidon(s)                                          // the bzDiD digest
 ```
 
 Works on Trezor and Ledger **today**, no new app, no PLUME (5–6.5M constraints stays off the phone). RFC-6979 makes `s` a deterministic function of `(seed, string)`: recoverable forever from 24 words, no backup beyond the phrase.

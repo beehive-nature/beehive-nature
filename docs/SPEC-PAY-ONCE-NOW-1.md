@@ -7,7 +7,7 @@ These are trivial to enforce today and a billion-user migration if deferred.
 
 ## The four invariants
 
-### 1. bDiD minted on Vaulta + post-quantum-ready from record one
+### 1. bzDiD minted on Vaulta + post-quantum-ready from record one
 
 Do not mint identity on a classical-only key that forces a re-mint later.
 Autonomi's own model = "establish a new quantum-safe identity," not migrate.
@@ -97,4 +97,4 @@ not on the relay's env vars. The relay is a read cache + write forwarder.
 
 ---
 
-*Goose, primary executor. Cites: SPEC_KEYRING-1 (custody tiers, bDiD), SPEC_DOCTRINE-HARVEST-1 (additive patterns), adapter-ring proof (ArNS AO↔Solana, maidsafe→WithAutonomi), local-first law (VPS = bootstrap crutch), spend-receipt schema discipline.*
+*Goose, primary executor. Cites: SPEC_KEYRING-1 (custody tiers, bzDiD), SPEC_DOCTRINE-HARVEST-1 (additive patterns), adapter-ring proof (ArNS AO↔Solana, maidsafe→WithAutonomi), local-first law (VPS = bootstrap crutch), spend-receipt schema discipline.*

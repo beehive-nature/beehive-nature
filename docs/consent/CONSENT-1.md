@@ -30,7 +30,7 @@
 **D-12 · Disputes.** [DRAFT] Wyoming law; binding arbitration. Counsel flags of record: a choice-of-law clause governs this contract, not copyright (national law governs ownership/infringement), and mandatory arbitration limits court and class access and does not uniformly bind in the EU and some US states. Final text is counsel's.
 
 ## Part B — Confirmation
-The buyer affirms, per checkbox: "I have read D-1 through D-12, I understand each, and I confirm my purchase on these terms." The signed confirmation (bDiD-bound) is recorded with the purchase. No funds move without it.
+The buyer affirms, per checkbox: "I have read D-1 through D-12, I understand each, and I confirm my purchase on these terms." The signed confirmation (bzDiD-bound) is recorded with the purchase. No funds move without it.
 
 ## Part C — Change control
 This document's published hash is referenced by the presale UI. Any post-publication edit invalidates the hash and halts the presale until re-confirmed. Numbers in D-3/D-4/D-6 must be render-time reads of the deployed constants — never retyped.

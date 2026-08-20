@@ -1,6 +1,6 @@
 //! Per-claimant funding wiring for the epoch pipeline (8s / 8t).
 //!
-//! Ruled 2026-08-09 (`bdid-architecture-decision.md` §3.5): the leader PACKS
+//! Ruled 2026-08-09 (`bzdid-architecture-decision.md` §3.5): the leader PACKS
 //! per-name ANS-104 DataItems but FUNDS none of them — each item's [`ArweaveRail`]
 //! carries ITS CLAIMANT's `x-paid-by` delegate ([`ArweaveRail::paid_by`],
 //! `arweave.rs:170`). The leader funds ONLY the on-chain commit. **ONE rail carrying

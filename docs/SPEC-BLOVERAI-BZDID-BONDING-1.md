@@ -1,4 +1,4 @@
-# SPEC-BLOVERAI-BDID-BONDING-1 — Agent Identity Bonding
+# SPEC-BLOVERAI-BZDID-BONDING-1 — Agent Identity Bonding
 
 Status: SPEC-ONLY. Defines two open items. Does NOT invent the bounding model.
 Companion: SPEC-VAULTA-IDENTITY-1 v0.2, SPEC-AUTHENTICATOR-LADDER-1,
@@ -9,15 +9,15 @@ RULING_BDID_HIERARCHY_AGENT_AUTHORITY_2026-08-07, RULING_KISS_BDID_PASSKEY_WALLE
 ## 0. What's ruled (reused, not re-derived)
 
 From RULING_BDID_HIERARCHY_AGENT_AUTHORITY (2026-08-07):
-- bQueenBee is the ONLY agent holding its own bDiD; every other agent falls
-  under bQueenBee or under a unique human bDiD.
+- bQueenBee is the ONLY agent holding its own bzDiD; every other agent falls
+  under bQueenBee or under a unique human bzDiD.
 - Authority axis: SOVEREIGN (agent acts on own authority within scope) vs
-  SUPERVISED (requires approval by bDiD lovis.b). Access is universal; authority
+  SUPERVISED (requires approval by bzDiD lovis.b). Access is universal; authority
   level is the variable.
 - Agents are self-funding (earn resources under their identity).
 
 From RULING_KISS_BDID_PASSKEY_WALLET (2026-08-08):
-- bDiD ships with passkey + wallet as one object (identity + auth + payment).
+- bzDiD ships with passkey + wallet as one object (identity + auth + payment).
 - W3C DID Core three-way: identifier public, document public, verification
   method private.
 
@@ -50,8 +50,8 @@ verification method in bni.id (additive per S3).
 
 Properties:
 - type = "agent_credential" (distinct from "address", "pubkey", "vaulta-permission")
-- bond.permanent = true (one human <-> one agent, permanent per bdid-custody)
-- bond.human_did = the human's bDiD identifier (Vaulta account or Layer-0 keypair hash)
+- bond.permanent = true (one human <-> one agent, permanent per bzdid-custody)
+- bond.human_did = the human's bzDiD identifier (Vaulta account or Layer-0 keypair hash)
 - custody_tier = T-S (agent-held software keypair, not hardware-backed)
 - source = "agent-self-generated" (the agent generated its own key, not enrolled by the human)
 - NEVER private key material. NEVER the human's key.
@@ -101,7 +101,7 @@ not seat design decisions"):
    UNRULED. Flagged for founder.
 
 5. **EARNING-SPENDING LOOP (S4.3)** — how earned balances (ANT, b, $tithe) are
-   held under a bDiD without any agent touching root key material.
+   held under a bzDiD without any agent touching root key material.
    UNRULED. Research + options, not this spec.
 
 ---
@@ -136,4 +136,4 @@ When the agent needs to PERFORM actions (spend, deploy, transact):
 
 ---
 
-*Goose. Cites: RULING_BDID_HIERARCHY_AGENT_AUTHORITY_2026-08-07 (hierarchy, authority axis, S4 remaining work), RULING_KISS_BDID_PASSKEY_WALLET_2026-08-08 (bDiD = passkey + wallet), SPEC-AUTHENTICATOR-LADDER-1 (T-F/T-H seam), SPEC-VAULTA-IDENTITY-1 v0.2 (Layer-0 keypair, S3 additive), SPEC-PAY-ONCE-NOW-1 (versioned envelope).*
+*Goose. Cites: RULING_BDID_HIERARCHY_AGENT_AUTHORITY_2026-08-07 (hierarchy, authority axis, S4 remaining work), RULING_KISS_BDID_PASSKEY_WALLET_2026-08-08 (bzDiD = passkey + wallet), SPEC-AUTHENTICATOR-LADDER-1 (T-F/T-H seam), SPEC-VAULTA-IDENTITY-1 v0.2 (Layer-0 keypair, S3 additive), SPEC-PAY-ONCE-NOW-1 (versioned envelope).*

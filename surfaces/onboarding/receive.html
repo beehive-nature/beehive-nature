@@ -1642,7 +1642,7 @@ function collect(o){
 
 /* ===== payload handling: validate SHAPE, converse, reply ===== */
 const KNOWN=['bnr-pair-request','bnr-resume','bnr-enroll-pubkey','bnr-watch-list','bnr-signed-tx',
-  'bnr-consent-request','bnr-consent-signed','bnr-plugin-install','bnr-bdid-handoff',
+  'bnr-consent-request','bnr-consent-signed','bnr-plugin-install','bnr-bzdid-handoff',
   'bnr-presence-challenge','bnr-presence-proof'];
 function handle(raw,viaLink){
   const w=fragEnv(raw); if(w) raw=w;
@@ -1665,7 +1665,7 @@ function describe(o){
     case 'bnr-plugin-install': return `A plugin is offered: ${o.name||'?'} ${o.version||''}.`;
     case 'bnr-pair-request': return 'The other device wants to pair with this one.';
     case 'bnr-consent-request': return `An offer: ${o.item||'?'} · ${o.price||'?'} · ${o.cadence||'once'}.`;
-    case 'bnr-bdid-handoff': return 'An identity is being handed to this device.';
+    case 'bnr-bzdid-handoff': return 'An identity is being handed to this device.';
     default: return `Received ${o.kind}.`;
   }
 }

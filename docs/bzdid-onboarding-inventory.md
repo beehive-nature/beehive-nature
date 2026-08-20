@@ -1,7 +1,7 @@
 <!-- Generated 2026-08-04 by a 7-agent read-only inventory of the workspace.
      Every claim carries a file:line. Re-run before trusting it after major changes. -->
 
-# bDiD onboarding — what exists, what does not
+# bzDiD onboarding — what exists, what does not
 
 **Why this document exists.** The founder's instruction was *"what we are not doing is
 version after version of half built software."* The way that happens is starting to build
@@ -13,7 +13,7 @@ substantial; the write side is absent everywhere.
 
 ---
 
-# bDiD Onboarding & Auto-Provisioning — Build-vs-Reuse Ledger
+# bzDiD Onboarding & Auto-Provisioning — Build-vs-Reuse Ledger
 
 Tree: `C:\Users\travi\beehive-nature` (35 crates). All paths absolute-relative to `crates/`.
 
@@ -149,7 +149,7 @@ Nine modules. This is the floor for the stated requirement, not a wish list. Mod
 
 ## 4. The §2a collision
 
-The founder wants a user's addresses attached to their bDiD. RELAY_22 §2a says no type in the persona model carries a balance, a mint path, or a PoUL signal, and everything economic keys off the root. These are **not** in conflict, because the requirement conflates three distinct things that must live in three places.
+The founder wants a user's addresses attached to their bzDiD. RELAY_22 §2a says no type in the persona model carries a balance, a mint path, or a PoUL signal, and everything economic keys off the root. These are **not** in conflict, because the requirement conflates three distinct things that must live in three places.
 
 ### Where each thing lives
 

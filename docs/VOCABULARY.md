@@ -1,6 +1,6 @@
 # VOCABULARY — the project's naming laws, in one place
 
-**Status:** living document · **Owner:** founder rulings; Seat 3 maintains · **Last updated:** 2026-07-20
+**Status:** living document · **Owner:** founder rulings; Seat 3 maintains · **Last updated:** 2026-08-19
 
 Every naming law the project has ratified lives here — the rule, why it exists, how it is enforced
 (if it is), and the ruling that set it. Before this document the laws were scattered across five
@@ -164,6 +164,51 @@ collision can occur. Related and live: Law 2 already keeps PLUR vocabulary out o
 regardless.
 
 **Source.** NC-VII1 doc (RELAY_09 lineage). Recorded alongside `40417e7`.
+
+---
+
+## Law 6 — `bzDiD`, never `bDiD` (rename ruled 2026-08-19)
+
+**Rule.** The identity root is **bzDiD** (code: `bzdid`, SCREAMING: `BZDID`, CamelCase: `Bzdid`),
+never `bDiD`. Founder's stated reason: it is the root to the kernel — the `z` names the Zano lane
+in the root's spelling.
+
+**Four carve-outs, each load-bearing:**
+
+1. **Byte-level v1 constants are FROZEN at the old spelling.** The KDF domain-separation labels
+   (`BDID-v1/prf-input/identity`, `BDID-v1/master-prk`, `BDID-v1/ed25519-record-key`,
+   `BDID-v1/persona-nullifier`, `BDID-v1/fingerprint`), the bech32 recovery HRP `bdidrec`, and
+   the SpendReceipt schema-v1 wire field `spender_bdid`. Changing one byte of a KDF label
+   re-derives every existing key; changing the HRP orphans every printed recovery sheet; changing
+   a wire field breaks every emitted receipt. The labels carry their own version tag — a future
+   **v2 ceremony** may spell them `BZDID-v2`. Guard comments sit at all three sites
+   (`surfaces/onboarding/bzdid-key.js`, `surfaces/recover.html`,
+   `crates/shared-types/src/spend.rs`).
+2. **Dated dispatches, rulings, and receipts keep `bDiD`.** `docs/dispatches/**`,
+   `docs/receipts/**`, and `docs/RECEIPT_*` are the historical record — renaming inside them
+   rewrites quoted founder words and dated evidence. Pre-2026-08-19 documents reading `bDiD`
+   mean `bzDiD`. The dispatch filenames `RULING_BDID_HIERARCHY_AGENT_AUTHORITY_2026-08-07.md`
+   and `RULING_KISS_BDID_PASSKEY_WALLET_2026-08-08.md` keep their names, and living-layer
+   references to those filenames keep the old spelling so the links stay true.
+3. **Renamed files:** `docs/bzdid-architecture-decision.md`, `docs/bzdid-onboarding-design.md`,
+   `docs/bzdid-onboarding-inventory.md`, `docs/SPEC-BLOVERAI-BZDID-BONDING-1.md`,
+   `surfaces/onboarding/bzdid-key.js` (the new filename is itself the cache-buster for the live
+   pages). Historical dispatches referencing the old paths were left verbatim per carve-out 2;
+   the old names resolve to nothing — this law is the redirect.
+4. **`LOVErnment-DAO/specs/BIO-1.md` is APPROVED and frozen at its landed sha** — its one `bDiD`
+   occurrence is NOT renamed here; per its own freeze rule that takes a version bump and a
+   re-gate. Escalated to the founder by name. `AGENT-1.v0.4-PROPOSED.md` (unfrozen) renames.
+
+**Why.** Founder ruling, 2026-08-19, via mobile relay: "i want to change EVERYWHERE bDiD to
+bzDiD since it's the root to the kernel." The carve-outs are the do-no-harm line: a rename that
+orphans a real person's recovery sheet is not a rename, it is a key-loss event.
+
+**Enforcement.** Ruling + guard comments; **no code lint yet.** A `vocabulary` crate scan for
+`bdid`-outside-frozen-sites is checkable and a good candidate (the frozen allowlist above is
+exactly the lint's exemption table), with the usual positive control.
+
+**Source.** Founder directive 2026-08-19 (mobile). Sweep landed the same day: 40 files,
+302 insertions / 301 deletions plus the file renames; residual scan clean.
 
 ---
 

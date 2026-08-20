@@ -15,7 +15,7 @@
 
 **Partly — and the part that fails is the part that is written in capital letters.** A multi-biometric uniqueness oracle at 10^10 is buildable and is the correct answer to the earlier undecidability ruling; a *published* one is not, and the six words "ALL SIGNATURES ALREADY PUBLIC" are the only clause that has to die.
 
-The insight is right and it is the strongest thing in the spec: a bDiD is a self-certifying hash with no issuer and no registry, so a second creation emits no observable — and biometric enrolment genuinely is that missing observable. That was the open hole and this closes it. But "public" and "matchable" compose into "identification oracle" definitionally, not incidentally: an adversary who holds the gallery chooses the gallery, partitions it, and binary-searches to the exact record in ⌈log₂10^10⌉ ≈ 34 matcher evaluations. No cancelable transform, fuzzy extractor, or fuzzy vault escapes this, because matchability requires distance preservation and distance preservation *is* the leak. Publication also hands the attacker an offline copy of the matcher, which converts enrolment evasion from a 37%-success gamble into a scripted certainty at ~$11 per fake identity, and it converts one photograph into a wallet balance for a $100 one-time index build. Three separate lanes — surveillance, false-flag griefing, and self-evasion — all trace back to the same clause, and all three close when it goes. Separately and independently: the auto-merge fires on a measurement whose false-positive tail is 6×10^7 to 3.4×10^8 innocent humans, and the −50% penalty is 20:1 in the attacker's favour. Both are fixable without touching the founder's intent.
+The insight is right and it is the strongest thing in the spec: a bzDiD is a self-certifying hash with no issuer and no registry, so a second creation emits no observable — and biometric enrolment genuinely is that missing observable. That was the open hole and this closes it. But "public" and "matchable" compose into "identification oracle" definitionally, not incidentally: an adversary who holds the gallery chooses the gallery, partitions it, and binary-searches to the exact record in ⌈log₂10^10⌉ ≈ 34 matcher evaluations. No cancelable transform, fuzzy extractor, or fuzzy vault escapes this, because matchability requires distance preservation and distance preservation *is* the leak. Publication also hands the attacker an offline copy of the matcher, which converts enrolment evasion from a 37%-success gamble into a scripted certainty at ~$11 per fake identity, and it converts one photograph into a wallet balance for a $100 one-time index build. Three separate lanes — surveillance, false-flag griefing, and self-evasion — all trace back to the same clause, and all three close when it goes. Separately and independently: the auto-merge fires on a measurement whose false-positive tail is 6×10^7 to 3.4×10^8 innocent humans, and the −50% penalty is 20:1 in the attacker's favour. Both are fixable without touching the founder's intent.
 
 **Governance note, stated plainly before anything else:** this proposal is already prohibited four times over by text the founder signed. `C:\Users\travi\LOVErnment-DAO\specs\BIO-1.md` B-1 (no template, embedding, hash, or "irreversibly transformed" derivative), B-2 ("no 1:N comparison, at any gallery size, for any purpose, ever"), B-3 (no biometric-derived provenance identifiers, K-4 founder gate must refuse), and `C:\Users\travi\LOVErnment-DAO\specs\PERSON-1.md` P-3 ("no global biometric template registry. Ever."). A *published* 1:N gallery is a strict superset of what B-1/P-3 already refuse. Proceeding requires a version bump and a re-gate of both APPROVED documents — not an exception, and not a footnote.
 
@@ -170,8 +170,8 @@ And the basket does not have to be defeated, only its weakest-guarded member: sc
 - **Capture** in an attested TEE on the sensor; PAD (LED/UV, electrophysiologic) runs locally, here.
 - **Split** the multi-modal template into additive/replicated secret shares. Each share is statistically independent of the biometric. No party holds a template.
 - **Check** by MPC over the shared gallery; reveal **only the OR bit**. No distances, no index, no masks in clear.
-- **Publish** nothing biometric — a threshold-signed attestation `("bDiD H passed uniqueness at t")`, optionally with a ZK proof that the MPC ran correctly against a committed gallery.
-- **Identity layer unchanged**: bDiD = 256-bit digest of the genesis op, self-certifying. Spend authority stays with the passkey. Personas = context nullifiers `PRF(seed, context)` below the bDiD.
+- **Publish** nothing biometric — a threshold-signed attestation `("bzDiD H passed uniqueness at t")`, optionally with a ZK proof that the MPC ran correctly against a committed gallery.
+- **Identity layer unchanged**: bzDiD = 256-bit digest of the genesis op, self-certifying. Spend authority stays with the passkey. Personas = context nullifiers `PRF(seed, context)` below the bzDiD.
 
 Performance is not the obstacle. Masked fractional Hamming distance over 2048-bit iris codes is cheap: **690,000 comparisons/s on one CPU core**, and **4.29×10^9/s in 3-party MPC on 8× H100 per party** (eprint 2024/705, arXiv:2405.04463; `github.com/worldcoin/mpc-uniqueness-check`) — >1000× over Janus (S&P'24). That is **~2.3 s per enrolment against a 10^10 gallery.** For contrast, homomorphic encryption is not viable here: Blind-Match (arXiv:2408.06167) does 6,144 identifications in 0.74 s on 128-d vectors ≈ 8.3k cmp/s, which extrapolates to **~14 days per single query** at 10^10.
 
@@ -179,7 +179,7 @@ Performance is not the obstacle. Masked fractional Hamming distance over 2048-bi
 
 ### 3.7 Multipersona
 
-"All signatures already public" and "multipersona is legitimate" are not in tension — they are **mutually exclusive**. Personas as context nullifiers below the bDiD (Semaphore / World ID pattern) are free, legitimate, and fully compatible with a uniqueness oracle. A public biometric layer collapses every persona that ever touched enrolment onto one human and onto each other. **Dropping the publication clause is what saves the multipersona ruling.**
+"All signatures already public" and "multipersona is legitimate" are not in tension — they are **mutually exclusive**. Personas as context nullifiers below the bzDiD (Semaphore / World ID pattern) are free, legitimate, and fully compatible with a uniqueness oracle. A public biometric layer collapses every persona that ever touched enrolment onto one human and onto each other. **Dropping the publication clause is what saves the multipersona ruling.**
 
 ---
 
@@ -204,7 +204,7 @@ The spec's phrase "camera LED/UV flash electrophysiologic/iris/fingerprint, faci
 
 **Deployable on a commodity phone in 2026: face 2D, and nothing else.** The highest-entropy modality (iris) and the second-best (vein) both require hardware no phone has shipped since 2019; fingerprint is prohibited at the OS level on both platforms. **This converts an undecidable problem into an Orb-class hardware problem, not an app problem.**
 
-**The "dynamic biologics" instinct cuts the wrong way.** Fusion multiplies only when modalities are (a) independent, (b) individually high-entropy, and (c) stable across the retention horizon. rPPG and EDA fail (b) and (c) by definition — they are *defined* by intra-subject variance. Fusing a high-variance channel raises FNMR, which causes **false splits: one human, two bDiDs** — the exact failure the ledger exists to prevent — unless it is weighted to near zero, in which case it contributed nothing. In an AND-fusion rule (which the FAR budget at 10^10 forces) an electrophysiologic channel at ~20% FNMR contributes 20 points of *evasion probability* and nothing to discrimination. **Run the dynamic channels as PAD only, where they are genuinely valuable, and keep them out of the fusion rule.**
+**The "dynamic biologics" instinct cuts the wrong way.** Fusion multiplies only when modalities are (a) independent, (b) individually high-entropy, and (c) stable across the retention horizon. rPPG and EDA fail (b) and (c) by definition — they are *defined* by intra-subject variance. Fusing a high-variance channel raises FNMR, which causes **false splits: one human, two bzDiDs** — the exact failure the ledger exists to prevent — unless it is weighted to near zero, in which case it contributed nothing. In an AND-fusion rule (which the FAR budget at 10^10 forces) an electrophysiologic channel at ~20% FNMR contributes 20 points of *evasion probability* and nothing to discrimination. **Run the dynamic channels as PAD only, where they are genuinely valuable, and keep them out of the fusion rule.**
 
 Template aging, ranked for a decade-scale ledger: iris ~decades (nine-year pediatric permanence evidence; earlier "iris ages" findings attribute largely to pupil dilation and acquisition variation) → fingerprint pattern decades but capture quality years → face ~6 years → gait/body months → rPPG/EDA minutes to hours.
 
@@ -296,7 +296,7 @@ Merging beats excluding: correct, and it is the single best idea in the onboardi
 
 ### 7.1 The trigger is a measurement with a 10^8-victim tail
 
-A false positive does not mis-flag one person. Per the spec it **fuses two unrelated humans into one bDiD**:
+A false positive does not mis-flag one person. Per the spec it **fuses two unrelated humans into one bzDiD**:
 
 - Two humans, two 420 caps in — **one 420 cap out.** The lifetime cap is annihilated, not throttled.
 - One human is **economically erased**, and the failure is *absorbing*: re-enrolment now hits his own template in the gallery and flags again.
@@ -330,7 +330,7 @@ With a $10 Vaulta fee at b=$1: `420(1−q) − 21q − 10 = 0 → q* = 93.0%`.
 
 Cheapest attack ladder, cheapest first (Vaulta fee assumed $10, unpriced in the spec):
 
-| Lane | Cost/extra bDiD | Notes |
+| Lane | Cost/extra bzDiD | Notes |
 |---|---|---|
 | **White-box FNMR self-evasion** | **$11** | fee + ~$1 labour + $0.0001 compute; p≈1.0; fully scriptable |
 | Generative/injection, unattested capture | $11–15 | killed outright by TEE capture |
@@ -340,16 +340,16 @@ Cheapest attack ladder, cheapest first (Vaulta fee assumed $10, unpriced in the 
 
 **The basket successfully defends the most expensive attack.** Presentation attacks and synthetic irises — what the LED/UV PAD is built for — are 1 to 2.5 orders *more* expensive than simply presenting badly. No rational attacker reaches for them.
 
-Campaign arithmetic at lane 1: $1,000,000 / $11 = 90,909 extra bDiDs = **38.2M b minted**. At b=$1 that is 38× ROI; break-even at b=$0.026. Against 4.2e12 total supply it is 9e-6 — statistically invisible, no anomaly detector fires.
+Campaign arithmetic at lane 1: $1,000,000 / $11 = 90,909 extra bzDiDs = **38.2M b minted**. At b=$1 that is 38× ROI; break-even at b=$0.026. Against 4.2e12 total supply it is 9e-6 — statistically invisible, no anomaly detector fires.
 
 ### 7.4 The merge flow needs strictly more than a uniqueness bit
 
-Detect a prior undisclosed bDiD, **retrieve which one**, merge two 420 contracts, apply the penalty. That is 1:N *identification with record retrieval*, strictly stronger than the boolean AMPC provides, and it makes whoever runs the oracle an identification authority over the species. It also hands a griefing attacker the victim's record index as part of the "supportive" merge.
+Detect a prior undisclosed bzDiD, **retrieve which one**, merge two 420 contracts, apply the penalty. That is 1:N *identification with record retrieval*, strictly stronger than the boolean AMPC provides, and it makes whoever runs the oracle an identification authority over the species. It also hands a griefing attacker the victim's record index as part of the "supportive" merge.
 
 ### 7.5 The restructure that keeps everything the founder wants
 
 1. **The oracle returns one bit and takes no action:** `duplicate — enrolment refused`. Never an index, never a merge, never a penalty. False-positive cost collapses from "420 b annihilated, identity erased, no appeal" to "retry enrolment."
-2. **Merge becomes user-initiated and cryptographically proved.** The enrollee proves control of the prior bDiD with the existing passkey / self-certifying root; *then* the two 420 contracts merge and the restorative unlock-velocity path runs on that proof. **This kills every poisoning attack at once** — the attacker holding a published template cannot produce the victim's passkey signature. It also removes the Art 22 problem, because the decision is no longer solely automated: the user initiates it. And it is arguably *more* restorative than being told what the machine found.
+2. **Merge becomes user-initiated and cryptographically proved.** The enrollee proves control of the prior bzDiD with the existing passkey / self-certifying root; *then* the two 420 contracts merge and the restorative unlock-velocity path runs on that proof. **This kills every poisoning attack at once** — the attacker holding a published template cannot produce the victim's passkey signature. It also removes the Art 22 problem, because the decision is no longer solely automated: the user initiates it. And it is arguably *more* restorative than being told what the machine found.
 3. **Recalibrate magnitude to the prize.** Options that preserve the philosophy: (a) the duplicate's 420 is forfeited to the emission pool rather than merged — attacker downside becomes the full 420 and break-even drops to q = 50%; (b) penalty applies to the cap, not the unlock rate; (c) keep the velocity-restoration path but restore toward the *single* 420, never the doubled one.
 4. **Fee charged before the check, non-refundable on refusal.** Otherwise failed attempts are free and the fee is not a Sybil tax at all — this is the difference between $11 and $27 per fake identity, and it is a one-line policy decision.
 5. **The merge marker must not be a public discriminator.** A visible "−50%, merged" flag is a permanent, machine-readable, globally queryable register of humans who tried to start over — refugees with a discarded pre-flight identity, trafficking survivors, defectors, witnesses, people who transitioned. The restorative intent is real; the target list is real too. Make the unlock curve a private input with a public commitment, or apply the reduction so the resulting schedule is indistinguishable from a normal one.
@@ -357,12 +357,12 @@ Detect a prior undisclosed bDiD, **retrieve which one**, merge two 420 contracts
 
 ### 7.6 The residuals, to be disclosed rather than discovered
 
-- **Enrolment DoS is irreducible.** Even with refusal-only, a master-print or morph attacker (~$25/shot; DeepMasterPrints matches 23% of subjects at FMR 1e-3, ~1.1% at 1e-4; MIPGAN morphs reach 30–90% MMPMR) can permanently deny a target enrolment — the oracle says duplicate, the victim has no prior bDiD to prove control of, lockout is for life. Rate limits and quarantine reduce throughput, not existence.
+- **Enrolment DoS is irreducible.** Even with refusal-only, a master-print or morph attacker (~$25/shot; DeepMasterPrints matches 23% of subjects at FMR 1e-3, ~1.1% at 1e-4; MIPGAN morphs reach 30–90% MMPMR) can permanently deny a target enrolment — the oracle says duplicate, the victim has no prior bzDiD to prove control of, lockout is for life. Rate limits and quarantine reduce throughput, not existence.
 - **The recovery path IS the identification oracle.** Someone who genuinely lost their prior passkey can only be reunified by having the committee identify which record they are. That path must exist and must be an explicit, ceremonied, rate-limited, multi-party-authorised exception with published volume statistics. Never the default. A permanent, disclosed hole.
 - **The Sybil floor is $25–60/head, set by human recruitment, and no cryptography touches it.** The biometrics are genuine, PAD passes truthfully, attested capture attests truthfully, the oracle returns "unique" and is *correct*. Note that lane 3 (blind evasion, $27) lands in the same band, so **$25–60 is the honest floor whichever fixes ship.** Whether it holds is a token-economics question: a genuine human's lifetime 420 is worth buying at $30 whenever b > $0.072. **Full transferability at genesis is what makes that market clear** — it lets an operator take assignment of a recruit's 420 the moment it exists. The oracle bounds the number of *humans*; transferability means bounding humans does not bound *control of allocations*. The lever is vesting, not enrolment: b non-transferable until unlocked forces the operator to hold custody of a wallet controlled by someone else's passkey for years, with counterparty risk per head. That is a founder ruling to revisit, and it should be stated as the acknowledged Sybil floor.
 - **The FNMR side never closes.** At any FP-tolerable operating point, 10^6–10^7 genuine duplicates pass undetected at 10^10. **The oracle is a Sybil dampener, not a uniqueness proof.** Do not price the token as if uniqueness were guaranteed.
 - **The root of trust migrates to the sensor vendor.** Enrolment replay survives "there is nothing to authenticate," and the only defence is attested capture — which makes the sensor manufacturer a subpoena target, a supply-chain target, and a governance actor with veto power over who counts as human. Permanent, not transitional. Name it in the trust model.
-- **Attestation metadata leaks.** "bDiD H passed uniqueness at t" links enrolment timing, and per-sensor or per-jurisdiction binding links place. Batch, jitter, and use a threshold signature that does not identify the device.
+- **Attestation metadata leaks.** "bzDiD H passed uniqueness at t" links enrolment timing, and per-sensor or per-jurisdiction binding links place. Batch, jitter, and use a threshold signature that does not identify the device.
 
 ---
 
@@ -376,9 +376,9 @@ Keep every element of the founder's spec except six words, and change the merge 
 |---|---|
 | Multi-biometric basket, compounding | Weight toward stable high-DoF channels; dynamic biologics become **PAD-only**, out of the fusion rule |
 | LED/UV flash liveness (ISO/IEC 30107-3) | Runs locally, per-capture, inside the TEE — orthogonal to the publish question and genuinely valuable |
-| "No private key" bDiD — 256-bit digest of the genesis op, self-certifying | unchanged |
+| "No private key" bzDiD — 256-bit digest of the genesis op, self-certifying | unchanged |
 | Passkey as spend authority | unchanged |
-| Multipersona as first-class, personas = context nullifiers below the bDiD | **saved** by dropping publication |
+| Multipersona as first-class, personas = context nullifiers below the bzDiD | **saved** by dropping publication |
 | Restorative merge, operant unlock-velocity reward | Trigger becomes **user-initiated on passkey proof**; sign inverted to a **disclosure bonus**; magnitude recalibrated to the 420 prize |
 | Paid Vaulta account as budget-bounded Sybil rate-limiter | Charged **before** the check, non-refundable on refusal. Not a uniqueness proof, must not be leaned on as one |
 | 420 cap at 18 decimals | Revisit **transferability before unlock** — this is the actual Sybil floor lever |

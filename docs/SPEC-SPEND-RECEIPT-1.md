@@ -10,7 +10,7 @@ permanence — per the BNRoSe-0 Charter leg-citation rule.
 standardize early, before adoption spreads). Ruled inputs also from
 `RULING_B_SPEND_BOUNDARY_MULTIASSET_ESCROW` (resource-quantity denomination; b only where
 physical resources are consumed), `RULINGS_TESTNET_A_MVP_CUSTODY` (A-first for MVP),
-`RULING_BDID_HIERARCHY` (the spender is a bDiD).
+`RULING_BDID_HIERARCHY` (the spender is a bzDiD).
 **Status:** SKELETON. Unruled areas are **fence-held**, not invented.
 **Discipline:** LAW 8a — any source claim in this doc carries `crate @ ref`.
 
@@ -29,7 +29,7 @@ can never disagree — the total is *computed from* the line items, never stored
 SpendReceipt {
   schema_version   : string            // "1.0.0-draft"
   receipt_id       : string            // content-addressed; see §5
-  spender_bdid     : BdidRef           // (c) — WHO spent
+  spender_bdid     : BzdidRef           // (c) — WHO spent
   occurred_at      : timestamp         // forward-only; see §6
   operation        : OperationRef      // WHAT caused the spend
   total            : Amount            // (a) — see §4, computed not stored
@@ -38,8 +38,8 @@ SpendReceipt {
   provenance       : Provenance        // (d)
 }
 
-Visibility = private       // (A) spending bDiD only
-           | parent        // (B) spending bDiD + its parent in the bDiD hierarchy
+Visibility = private       // (A) spending bzDiD only
+           | parent        // (B) spending bzDiD + its parent in the bzDiD hierarchy
            | public        // (C) world-readable
 
 LineItem {
@@ -87,12 +87,12 @@ resource quantity — not the price — is the durable field.
 
 **All three ship.** Founder: *"Having all available options seems optimal depending on the
 various intentions users will need/want."* The `visibility` field carries the per-receipt
-choice; a bDiD-level **policy default** supplies it when the caller does not.
+choice; a bzDiD-level **policy default** supplies it when the caller does not.
 
 | Value | Visible to | Typical intent |
 |---|---|---|
-| `private` | spending bDiD only | Default posture for personal/persona spend |
-| `parent` | spending bDiD + its parent in the hierarchy | An agent funded by a parent bDiD; parent needs sight of what it funded |
+| `private` | spending bzDiD only | Default posture for personal/persona spend |
+| `parent` | spending bzDiD + its parent in the hierarchy | An agent funded by a parent bzDiD; parent needs sight of what it funded |
 | `public` | world | Auditability, public accountability, published work |
 
 **Two properties that constrain the implementation:**
@@ -107,10 +107,10 @@ choice; a bDiD-level **policy default** supplies it when the caller does not.
 
 ### DEFAULT — RULED 2026-08-08: `private`
 
-**A new bDiD starts `private`.** Founder: *"private by default where it makes sense, as
+**A new bzDiD starts `private`.** Founder: *"private by default where it makes sense, as
 public previously described as lower cost; so informed consent can help here too."*
 
-`visibility_default: private` at bDiD issuance. Going public is **deliberate, informed, and
+`visibility_default: private` at bzDiD issuance. Going public is **deliberate, informed, and
 cheaper.**
 
 **Why the default is self-enforcing without a rule.** The discount for `public` is the
@@ -124,7 +124,7 @@ discount — if the cost gap ever narrows, the discount narrows with it. A subsi
 
 ### Informed consent is the MECHANISM, not a disclaimer
 
-Switching a receipt or a bDiD default to `public` requires a consent surface that shows
+Switching a receipt or a bzDiD default to `public` requires a consent surface that shows
 **both consequences together, at the moment of choosing:**
 
 1. **The privacy consequence** — what becomes world-readable, including §3b below.
@@ -188,7 +188,7 @@ appears in this document.**
 | Whether receipts are per-operation or per-epoch-batched | Cost and privacy tradeoff; unruled |
 | Signature / attestation over the receipt | Depends on the passkey succession question, explicitly still open |
 | On-chain vs off-chain receipt storage | Touches the multi-asset escrow and BNRoSe-3 archival decisions |
-| ~~Privacy posture~~ | ✅ **CLOSED 2026-08-08** — all three options ship, `private` is the default, informed consent (privacy + cost together) gates any move to `public`, invertibility disclosed. See §3a / §3b. History: → [`dispatches/SURFACED_SPEND_RECEIPT_PRIVACY_2026-08-08.md`](./dispatches/SURFACED_SPEND_RECEIPT_PRIVACY_2026-08-08.md). **Settled:** the spender always sees its own accounting (KISS ruling), and **financial privacy comes from RAIL SELECTION, not from hiding receipts** — a user wanting privacy picks a private rail (e.g. Zano); the receipt then faithfully records a spend already private at the rail. Persona-scoping remains the house pattern. **Single open question: VISIBLE TO WHOM** — spending bDiD only / bDiD + parent / public. Awaiting founder word. Schema is unaffected either way: visibility is an access-control property of receipt *storage*, not a field. |
+| ~~Privacy posture~~ | ✅ **CLOSED 2026-08-08** — all three options ship, `private` is the default, informed consent (privacy + cost together) gates any move to `public`, invertibility disclosed. See §3a / §3b. History: → [`dispatches/SURFACED_SPEND_RECEIPT_PRIVACY_2026-08-08.md`](./dispatches/SURFACED_SPEND_RECEIPT_PRIVACY_2026-08-08.md). **Settled:** the spender always sees its own accounting (KISS ruling), and **financial privacy comes from RAIL SELECTION, not from hiding receipts** — a user wanting privacy picks a private rail (e.g. Zano); the receipt then faithfully records a spend already private at the rail. Persona-scoping remains the house pattern. **Single open question: VISIBLE TO WHOM** — spending bzDiD only / bzDiD + parent / public. Awaiting founder word. Schema is unaffected either way: visibility is an access-control property of receipt *storage*, not a field. |
 
 ## 6. Inherited invariants
 
@@ -210,8 +210,8 @@ appears in this document.**
 - [ ] Round-trip: serialize → deserialize → re-serialize is byte-identical (needed before
       `receipt_id` can be content-addressed at all).
 - [ ] No fiat currency field exists anywhere in the schema.
-- [ ] **A new bDiD is issued with `visibility_default: private`** (§3a, ruled).
-- [ ] A receipt with `visibility` unset resolves to the bDiD default; if the bDiD has no
+- [ ] **A new bzDiD is issued with `visibility_default: private`** (§3a, ruled).
+- [ ] A receipt with `visibility` unset resolves to the bzDiD default; if the bzDiD has no
       default set, validation **fails** rather than assuming one.
 - [ ] Any transition to `public` passes through a consent surface showing **privacy AND
       cost consequences together** — one without the other fails the ruling (§3a).

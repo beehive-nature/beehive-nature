@@ -173,7 +173,7 @@ this gesture) and IS a sovereign identity bootstrap. Staged:
   bootstrap crutch here, used for exactly one hop, then gone.
 - **Stage 2 — the optic deploy (the dazzle).** Seller's screen streams the
   subscription offer as light: `bnr-consent-request` {terms, price in plain
-  words, cadence, seller's bDiD, nonce}. Buyer's phone shows the terms ON THE
+  words, cadence, seller's bzDiD, nonce}. Buyer's phone shows the terms ON THE
   BUYER'S OWN SCREEN (never trust the seller's display for what you're agreeing
   to), buyer taps consent → keypair born on-device → displays `bnr-enroll-pubkey`
   + signed consent back → seller scans (the double-flash). Both hold a signed

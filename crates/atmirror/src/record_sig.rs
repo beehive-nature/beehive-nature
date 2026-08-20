@@ -1,4 +1,4 @@
-//! Ed25519 record-signature verification for bDiD records.
+//! Ed25519 record-signature verification for bzDiD records.
 //!
 //! `did-autonomi-spec` mandates **ed25519** record signatures (`keyAlg=ed25519`).
 //! **R1b** (`SPEC_RESOLVER_VALIDITY_RULES` §R1b, ruled Seat 1 2026-08-09): the

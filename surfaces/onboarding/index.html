@@ -187,7 +187,7 @@ select.lang{font:inherit;font-size:.72rem;background:var(--bg-card);color:var(--
 </div>
 
 <script src="vendor/qrcodegen.js"></script>
-<script src="bdid-key.js"></script> <!-- vendored key engine: PRF→master_prk→Ed25519, BIP39, fingerprints -->
+<script src="bzdid-key.js"></script> <!-- vendored key engine: PRF→master_prk→Ed25519, BIP39, fingerprints -->
 <script>
 "use strict";
 /* ===========================================================================
@@ -196,10 +196,10 @@ select.lang{font:inherit;font-size:.72rem;background:var(--bg-card);color:var(--
    RAID_AUTHENTIK §18 (component + payload), so the same machine could drive a
    TUI, a phone, or an optical/paper packet, not just this DOM renderer.
    =========================================================================== */
-/* Key derivation is REAL when the vendored engine (bdid-key.js) is present.
+/* Key derivation is REAL when the vendored engine (bzdid-key.js) is present.
    PREVIEW now means "keys not real" and flips automatically; ANCHORING remains
    unbuilt either way and keeps its own Working gauge in creating(). */
-const ENGINE = window.BDIDKEY || null;
+const ENGINE = window.BZDIDKEY || null;
 const KEYS_REAL = !!ENGINE;
 const PREVIEW = !KEYS_REAL;
 
@@ -341,7 +341,7 @@ const SCREENS = {
       </button>`;
     }).join('');
     const intro = persona==='pro'
-      ? 'Self-custody throughout; WebAuthn, air-gapped optical signer, FIDO2, or Trezor. Same bDiD at every rung.'
+      ? 'Self-custody throughout; WebAuthn, air-gapped optical signer, FIDO2, or Trezor. Same bzDiD at every rung.'
       : persona==='hw'
       ? 'Your hardware works out of the box — and the free optical rung below is the air-gap trick even hardware people haven\'t seen.'
       : `Every option below is fully sovereign — pick what fits today. ${offline?'<b style="color:var(--verified)">Offline right now</b>, so the spare-phone path is your fastest.':'You can climb the ladder later without re-doing anything.'}`;

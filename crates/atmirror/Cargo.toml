@@ -27,7 +27,7 @@ p256 = { version = "0.13", features = ["ecdsa"] }
 rsa = "0.9"
 rand = "0.8"
 base64 = "0.22"
-# Ed25519 bDiD RECORD-signature verification (did-autonomi-spec keyAlg=ed25519).
+# Ed25519 bzDiD RECORD-signature verification (did-autonomi-spec keyAlg=ed25519).
 # R1b: reject non-canonical scalar s (s >= L) EXPLICITLY — never library accident.
 # curve25519-dalek is used in tests to cross-validate the L constant + malleability.
 ed25519-dalek = "2"
