@@ -152,6 +152,18 @@ await page.locator('button.gold').click();
 ok('biq: keep-anyway acknowledges and emits', (await page.locator('#draft').textContent()).includes('best and most revolutionary'));
 ok('biq: page states it never posts', (await page.locator('body').textContent()).includes('never posts'));
 
+// bSymposium — the MAHA × bFood discourse
+await page.goto(`${BASE}/surfaces/bsymposium.html`);
+await page.waitForTimeout(300);
+ok('symposium: seven discourse rows render', (await page.locator('#rows tbody tr').count()) === 7);
+const symLinks = await page.locator('#rows a').count();
+ok('symposium: both sides cited (≥14 row citations)', symLinks >= 14);
+const symTxt = await page.locator('main').innerHTML();
+ok('symposium: states legend + scope fence + symbiosis + scale note',
+  symTxt.includes('align') && symTxt.includes('complementary') && symTxt.includes('Scope fence')
+  && symTxt.includes('SYMBIOSIS') && symTxt.includes('THE SCALE NOTE'));
+ok('symposium: fetch honesty declared', symTxt.includes('fetch honesty'));
+
 // hub + review registration
 await page.goto(`${BASE}/surfaces/bfood.html`);
 await page.waitForTimeout(400);
@@ -164,11 +176,11 @@ ok('bfood rebuilt: n/m never zero + hardwired hemp + fat disaggregated + quest b
 
 await page.goto(`${BASE}/surfaces/index.html`);
 ok('hub links the university', (await page.locator('a[href="university/index.html"]').count()) === 1);
-ok('hub counts 33', (await page.locator('footer').textContent()).includes('33 surfaces'));
+ok('hub counts 34', (await page.locator('footer').textContent()).includes('34 surfaces'));
 await page.goto(`${BASE}/surfaces/review.html`);
 const optCount = await page.locator('#surf option').count();
 const hasUni = (await page.locator('#surf option[value="university/index.html"]').count()) === 1;
-ok('review deck lists the university surface', optCount === 29 && hasUni);
+ok('review deck lists the university surface', optCount === 30 && hasUni);
 
 console.log(`\n${pass} passed, ${fail} failed` + (errors.length ? '\nerrors:\n' + errors.join('\n') : ''));
 await browser.close(); server.close();
