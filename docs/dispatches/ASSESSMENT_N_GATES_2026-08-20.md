@@ -67,3 +67,16 @@ the acting chief adds:
 - **N-3 — three load-bearing notes:** the Reputation Registry maps onto **Law B verbatim** (evidence, never weight — Article II’s attestation-is-evidence-not-status); the **Identity Registry never touches bzDiD or persona machinery** — one bzDiD per living human is law, machine agents are a separate class with their own registry, founder-held keys keep seats keyless; and the pre-named seam: **human feedback feeding an agent’s reputation rides the consent layer** (persona nullifier, never the root) while machine-to-machine feedback needs none. *(Composing note, acting chief: any x402 payments pairing that follows routes through the money-rails law — rail-4 family, license table applies before any code.)*
 
 **Both seats’ reads are now one record. The words remain the founder’s; execution fires on them with the strengthened shape above.**
+
+---
+
+> ## RULED (founder, 2026-08-20, verbatim)
+> *"full steam ahead yes to all three and your autonomous decision making is great"*
+>
+> **N-1, N-2, N-3: YES.** Executed same hour with the strengthened shape: the register
+> carries the QuickNode bootstrap entry **with its exit criterion in the entry itself**
+> and the two READ rows (Base 8453, Ethereum 1, operator-class-diverse pairs); the
+> evaluation lane is open at `docs/specs/SPEC-ERC8004-EVAL-0.md` with all eight fences —
+> and **nothing registers until founder-held keys exist**. The founder’s word on
+> autonomous decision-making is recorded as standing encouragement, within the ruled
+> scope: autonomous execution and verification, never founder gates.
