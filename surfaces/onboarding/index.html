@@ -767,11 +767,21 @@ function receiverBase(){
   // where filename-replacement built /receive.html — a route that did not exist.
   // Route-aware now, and the relay also aliases the .html spellings.
   if(location.protocol==='http:'||location.protocol==='https:'){
+    // localhost is only reachable from THIS machine — a QR meant for another
+    // device must never carry it (found live 2026-08-19: laptop-rendered QR,
+    // A16 scan → dead link). Same rule as file://: fall back to the public
+    // receiver; the payload rides the #fragment either way and never touches
+    // a server. A LAN-IP origin stays as-is — other devices can reach it.
+    if(/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) return PUBLIC_RECEIVER;
     const p=location.pathname;
     if(/\/onboard\/?$/.test(p)) return location.origin+p.replace(/\/$/,'')+'/receive';
     return location.href.replace(/[#?].*$/,'').replace(/[^/]*$/,'')+'receive.html';
   }
   return PUBLIC_RECEIVER;
+}
+function receiverIsPublicFallback(){
+  return (location.protocol==='http:'||location.protocol==='https:')
+    && /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
 }
 function b64url(bytes){ return btoa(String.fromCharCode(...bytes)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
 
@@ -794,6 +804,10 @@ function drawPairQr(){
     nonce:APP._pairNonce,
     expiry:new Date(Date.now()+5*60*1000).toISOString()});
   const link=receiverBase()+'#p='+b64url(new TextEncoder().encode(env));
+  if(receiverIsPublicFallback()){
+    const n=document.getElementById('pairqr-note');
+    if(n) n.innerHTML='ℹ serving from localhost — the QR points at the <b>public receiver</b> so your other device can reach it (a localhost link would be dead off this machine)';
+  }
   const qr=qrcodegen.QrCode.encodeText(link, qrcodegen.QrCode.Ecc.MEDIUM);
   const quiet=4, scale=Math.floor(cv.width/(qr.size+quiet*2));
   const g=cv.getContext('2d');

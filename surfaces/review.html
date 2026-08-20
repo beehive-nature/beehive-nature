@@ -30,6 +30,28 @@ th{color:var(--violet);font-weight:400} td.n{color:var(--ink)}
 .note .t{color:var(--violet);font-size:9.5px}
 footer{max-width:720px;margin:22px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
 a{color:var(--cyan)}
+/* THE TALLY — verdict palette validated against this surface (#0d1410), dark mode:
+   lightness band 0.48–0.67 PASS · CVD worst adjacent ΔE 17.1 protan PASS ·
+   normal-vision 22.7 PASS · contrast ≥3:1 PASS (dataviz six-checks validator).
+   Stack order keeps green and orange non-adjacent — that pair is the protan trap. */
+:root{--v-works:#3f9c55;--v-idea:#a476ec;--v-bug:#c07f1c;--v-gap:#0092a6}
+#tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:12px}
+.tile{background:#0a0f0b;border:1px solid var(--line);border-radius:8px;padding:10px 12px;text-align:center}
+.tile .tv{font-size:22px;color:var(--ink);line-height:1.2}
+.tile .tv .tof{font-size:12px;color:var(--dim)}
+.tile .tl{font-size:9.5px;color:var(--dim);letter-spacing:.06em;margin-top:2px}
+#legend{margin:12px 0 6px;font-size:10px;color:var(--dim)}
+#legend .lg{margin-right:14px;white-space:nowrap}
+#legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+#bars{margin-top:4px}
+.brow{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.brow .bn{flex:0 0 200px;font-size:10px;color:var(--ink);text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.brow .bt{flex:1;height:14px}
+.brow .bfill{display:flex;height:100%;align-items:stretch}
+.brow .seg{border-radius:3px;margin-right:2px;min-width:6px;cursor:default}
+.brow .seg:last-child{margin-right:0}
+.brow .bc{flex:0 0 26px;font-size:10px;color:var(--dim)}
+#tip{position:fixed;display:none;background:#0a0f0b;border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-size:10px;color:var(--ink);pointer-events:none;z-index:9}
 </style>
 </head>
 <body>
@@ -116,10 +138,33 @@ a{color:var(--cyan)}
   <h2>5 · THE TALLY — only what was deliberately published</h2>
   <div class="law">reads the live rails (Nostr relay + Bluesky public AppView) for the
   <b>[bX review]</b> and <b>[bX guard]</b> grammar. a reviewer who walked every page and published
-  nothing appears nowhere — that is the design, not a gap.</div>
+  nothing appears nowhere — that is the design, not a gap. verdict colors are a
+  validated set (lightness band, CVD separation, contrast — all computed, never eyeballed;
+  colors never operate singular) and every mark carries its glyph, so color is never the
+  only signal.</div>
   <button id="listen">📡 listen to the rails</button>
   <div class="st" id="tallySt">idle</div>
+
+  <div id="tiles">
+    <div class="tile"><div class="tv" id="t-receipts">0</div><div class="tl">receipts</div></div>
+    <div class="tile"><div class="tv" id="t-cov">0<span class="tof">/27</span></div><div class="tl">surfaces walked</div></div>
+    <div class="tile"><div class="tv" id="t-guards">0</div><div class="tl">guard verdicts</div></div>
+    <div class="tile"><div class="tv" id="t-bugs">0</div><div class="tl">🐛 open bugs</div></div>
+  </div>
+
+  <div id="legend">
+    <span class="lg"><i style="background:var(--v-works)"></i>✅ works</span>
+    <span class="lg"><i style="background:var(--v-idea)"></i>💡 idea</span>
+    <span class="lg"><i style="background:var(--v-bug)"></i>🐛 bug</span>
+    <span class="lg"><i style="background:var(--v-gap)"></i>🕳 gap</span>
+  </div>
+  <div id="bars"></div>
+  <div id="unwalked" class="law" style="display:none"></div>
+  <div id="tip"></div>
+
+  <details style="margin-top:10px"><summary style="color:var(--dim);font-size:10.5px;cursor:pointer">table view (the same data, as text)</summary>
   <table id="cov"><thead><tr><th>surface</th><th>receipts</th><th>latest</th></tr></thead><tbody></tbody></table>
+  </details>
   <div id="feed"></div>
 </section>
 
@@ -224,20 +269,96 @@ a{color:var(--cyan)}
     show('promptOut',p); copyBtn('cpPrompt','promptOut');
   };
 
-  var counts={}, latest={};
+  /* Verdict identity is never color-alone: each verdict carries its glyph in the
+     line grammar itself, the legend, and the tooltip. Stack order (works, idea,
+     bug, gap) is the validated non-adjacent-green/orange order — do not reorder
+     without re-running the six-checks validator. */
+  var VERDICTS=[
+    {key:'works',glyph:'✅',name:'works',css:'var(--v-works)'},
+    {key:'idea', glyph:'💡',name:'idea', css:'var(--v-idea)'},
+    {key:'bug',  glyph:'🐛',name:'bug',  css:'var(--v-bug)'},
+    {key:'gap',  glyph:'🕳',name:'gap',  css:'var(--v-gap)'}
+  ];
+  var counts={}, latest={}, totals={receipts:0,guards:0,bugs:0,dedup:{}};
+  function seen(txt){ if(totals.dedup[txt]) return true; totals.dedup[txt]=1; return false; }
   function ingest(txt,who,at){
-    if(txt.indexOf('[bX review]')!==0 && txt.indexOf('[bX guard]')!==0) return;
+    var isReview=txt.indexOf('[bX review]')===0, isGuard=txt.indexOf('[bX guard]')===0;
+    if(!isReview&&!isGuard) return;
+    if(seen(txt)) return; // the same pointer on two rails is one receipt
+    if(isGuard){ totals.guards++; }
     var hit=SURFACES.find(function(s){ return txt.indexOf(s)>-1; })||'(other)';
-    counts[hit]=(counts[hit]||0)+1; latest[hit]=txt.slice(0,110);
+    if(isReview){
+      totals.receipts++;
+      var c=counts[hit]||(counts[hit]={total:0,works:0,idea:0,bug:0,gap:0});
+      c.total++;
+      var v=VERDICTS.find(function(v){ return txt.indexOf(v.glyph)>-1; });
+      if(v){ c[v.key]++; if(v.key==='bug') totals.bugs++; }
+      latest[hit]=txt.slice(0,110);
+    }
+    render(who,at,txt);
+  }
+  function render(who,at,txt){
+    $('t-receipts').textContent=totals.receipts;
+    $('t-guards').textContent=totals.guards;
+    $('t-bugs').textContent=totals.bugs;
+    var walked=Object.keys(counts);
+    $('t-cov').innerHTML=walked.length+'<span class="tof">/'+SURFACES.length+'</span>';
+    // coverage bars — one thin stacked bar per walked surface, sorted by volume,
+    // 2px surface gaps between segments, direct count label at the row's end
+    var max=1; walked.forEach(function(s){ if(counts[s].total>max) max=counts[s].total; });
+    var bars=$('bars'); bars.innerHTML='';
+    walked.slice().sort(function(a,b){ return counts[b].total-counts[a].total; }).forEach(function(s){
+      var row=document.createElement('div'); row.className='brow';
+      // the % lives on an inner fill INSIDE a full-width track, so length is
+      // proportional to count against the same track for every row (a % on the
+      // flex item itself resolves against the whole row and lies about magnitude)
+      var track='<div class="bt"><div class="bfill" style="width:'+Math.round(100*counts[s].total/max)+'%">';
+      VERDICTS.forEach(function(v){
+        var n=counts[s][v.key]; if(!n) return;
+        track+='<div class="seg" style="flex:'+n+';background:'+v.css+'" data-tip="'+v.glyph+' '+v.name+' × '+n+' — '+s+'"></div>';
+      });
+      track+='</div></div>';
+      row.innerHTML='<div class="bn" title="'+s+'">'+s+'</div>'+track+'<div class="bc">'+counts[s].total+'</div>';
+      bars.appendChild(row);
+    });
+    var un=SURFACES.filter(function(s){ return !counts[s]; });
+    var uw=$('unwalked');
+    if(walked.length&&un.length){ uw.style.display='block';
+      uw.innerHTML='<b>not yet walked ('+un.length+'):</b> '+un.join(' · '); }
+    // table view stays in lockstep (the accessible twin of the bars)
     var tb=$('cov').tBodies[0]; tb.innerHTML='';
-    Object.keys(counts).sort().forEach(function(s){
+    walked.slice().sort().forEach(function(s){
       var tr=document.createElement('tr');
-      tr.innerHTML='<td class="n">'+s+'</td><td>'+counts[s]+'</td><td>'+latest[s].replace(/</g,'&lt;')+'</td>';
+      tr.innerHTML='<td class="n">'+s+'</td><td>'+counts[s].total+'</td><td>'+(latest[s]||'').replace(/</g,'&lt;')+'</td>';
       tb.appendChild(tr);
     });
-    var d=document.createElement('div'); d.className='note';
-    d.innerHTML='<span class="t">'+(who||'?')+' · '+(at||'')+'</span><br>'+txt.replace(/</g,'&lt;');
-    $('feed').prepend(d);
+    if(txt!==undefined){
+      var d=document.createElement('div'); d.className='note';
+      d.innerHTML='<span class="t">'+(who||'?')+' · '+(at||'')+'</span><br>'+txt.replace(/</g,'&lt;');
+      $('feed').prepend(d);
+    }
+  }
+  // hover layer: one shared tooltip; the segment's hit target is the bar's full height
+  document.addEventListener('mousemove',function(e){
+    var t=e.target&&e.target.getAttribute&&e.target.getAttribute('data-tip'), tip=$('tip');
+    if(t){ tip.textContent=t; tip.style.display='block';
+      tip.style.left=Math.min(e.clientX+12,window.innerWidth-190)+'px'; tip.style.top=(e.clientY+14)+'px'; }
+    else tip.style.display='none';
+  });
+  /* #demo — labeled synthetic receipts so an alpha tester sees the dashboard's
+     shape before real receipts exist. Every line says DEMO; the real tally is
+     one reload away. Without the fragment, nothing synthetic ever renders. */
+  if(location.hash==='#demo'){
+    ['[bX review] ✅ works blight/farmers.html — u — from: fp:DEMO — note: DEMO held up',
+     '[bX review] ✅ works blight/farmers.html — u — from: fp:DEMO — note: DEMO accord flowed',
+     '[bX review] 💡 idea blight/farmers.html — u — from: fp:DEMO — note: DEMO sort by crop',
+     '[bX review] 🐛 bug onboarding/receive.html — u — from: fp:DEMO — note: DEMO camera stuck on A16',
+     '[bX review] 🕳 gap recover.html — u — from: fp:DEMO — note: DEMO no print stylesheet',
+     '[bX review] ✅ works recover.html — u — from: fp:DEMO — note: DEMO offline held',
+     '[bX review] ✅ works blight/demo.html — u — from: fp:DEMO — note: DEMO beam decoded',
+     '[bX guard] ✓ verified review:demo00000000 — u — from: fp:DEMO-guard'
+    ].forEach(function(l){ ingest(l,'DEMO','—'); });
+    $('tallySt').textContent='DEMO DATA — synthetic, labeled; open without #demo for the real tally';
   }
   $('listen').onclick=function(){
     $('tallySt').textContent='listening — nostr relay + bluesky appview';
