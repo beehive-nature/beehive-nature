@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>bFood Hexagon — the basket vs the minimum, cited or silent</title>
+<style>
+:root{--bg:#0d1410;--ink:#e2efdb;--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--dim:#8a9a8a;--line:#243026;--leaf:#7ddf8f;--amber:#ffb347;
+/* food-source set = the six-checks-validated categorical set for surface #0d1410
+   (lightness band 0.48–0.67, CVD worst adjacent ΔE 17.1 protan, normal 22.7, contrast ≥3:1
+   — receipt in review.html). Identity never rides color alone: label + swatch always. */
+--f-hemp:#3f9c55;--f-spir:#0092a6;--f-chlo:#a476ec;--f-coco:#c07f1c}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:36px 16px 90px}
+header{text-align:center;margin-bottom:10px}
+h1{font-size:clamp(17px,4vw,24px);color:var(--gold);font-weight:400;letter-spacing:.05em}
+header p{color:var(--dim);font-size:11px;margin-top:6px;max-width:700px;margin-left:auto;margin-right:auto}
+main{max-width:860px;margin:0 auto}
+section{background:#111a14;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:16px}
+section h2{font-size:12px;color:var(--violet);font-weight:400;letter-spacing:.08em;margin-bottom:8px}
+.law{color:var(--dim);font-size:10px;line-height:1.7}
+#basket{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:10px}
+.food{background:#0a0f0b;border:1px solid var(--line);border-radius:8px;padding:10px}
+.food .fn{font-size:11px}
+.food .fs{font-size:9px;color:var(--dim);margin-top:2px}
+.food input{width:64px;background:#0d1410;color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:3px 6px;font:12px 'IBM Plex Mono',monospace;margin-top:6px}
+.food i.sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+#hexwrap{overflow-x:auto}
+#hexes{margin-top:6px}
+.hexcell{cursor:default}
+#nodv{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.chip{background:#0a0f0b;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:10px;color:var(--dim)}
+.chip b{color:var(--ink);font-weight:400}
+#tip{position:fixed;display:none;background:#0a0f0b;border:1px solid var(--line);border-radius:6px;padding:6px 9px;font-size:10px;color:var(--ink);pointer-events:none;z-index:9;max-width:300px;line-height:1.6}
+footer{max-width:860px;margin:22px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
+a{color:var(--cyan)}
+#legend{margin-top:8px;font-size:10px;color:var(--dim)}
+#legend span{margin-right:14px;white-space:nowrap}
+#legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+</style>
+</head>
+<body>
+<header>
+  <h1>⬡ the bFood Hexagon</h1>
+  <p>how far the basket fills the 100% MINIMUM required intake, nutrient by nutrient —
+  every number computed live from cited records. composition only: what is IN the food,
+  never what it does to a body. unmeasured is never zero.</p>
+</header>
+<main>
+
+<section>
+  <h2>THE BASKET — grams per day (edit; everything recomputes)</h2>
+  <div id="basket"></div>
+  <div id="legend"></div>
+  <div class="law" style="margin-top:8px">hemp heARTs is the reference genesis commodity
+  (DISPATCH_BLAI_MACRO_SCHEMA §2a). chlorella has no generic USDA record — its values are a
+  published review's ranges across 13 products, contributed at range midpoints and marked ≈
+  (literature-grade, replaced by the commissioned COA when it lands). spirulina's omega rows
+  are undifferentiated in the USDA record, so they are NOT silently substituted.</div>
+</section>
+
+<section>
+  <h2>THE HEXAGON — % of FDA Daily Value supplied, linear fill (never a pie: angles lie about magnitude)</h2>
+  <div id="hexwrap"><svg id="hexes" width="880" height="0" xmlns="http://www.w3.org/2000/svg"></svg></div>
+  <div class="law">fill rises bottom-up, stacked by food in the validated set · a cell over
+  100% keeps its true number and gains a bright ring · dashed cells: NOT MEASURED in any
+  included record — absence of test is not absence of substance · a cell would flag in
+  amber with its citation only if the basket crossed an APPLICABLE tolerable upper limit
+  (UL form restrictions honored: food magnesium and food niacin do not count toward their
+  supplemental-only ULs; vitamin A's UL covers preformed retinol, not algae carotenoids;
+  folate's covers synthetic folic acid only — all three foods measure 0 folic acid).</div>
+</section>
+
+<section>
+  <h2>NO DAILY VALUE ESTABLISHED — measured facts, stated absolutely</h2>
+  <div id="nodv"></div>
+</section>
+
+<section>
+  <h2>SOURCES — cite or the cell stays silent</h2>
+  <div class="law" id="sources"></div>
+</section>
+
+</main>
+<div id="tip"></div>
+<footer>
+  composition facts only (Axis A) — effect and mechanism theses live off-repo in the graded
+  evidence drawer, per the k001 health-claim wall · spec: DISPATCH_BLAI_MACRO_SCHEMA §2a ·
+  <a href="index.html">← the hive</a>
+</footer>
+
+<script src="tour.js?v=8"></script>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i);};
+
+/* ================= THE DATASET — fetched + receipted 2026-08-19 =================
+   USDA FoodData Central (SR Legacy, verified live via api.nal.usda.gov):
+     hemp 170148 · spirulina 170495 · coconut oil 171412
+   Chlorella: NO generic FDC record (live search receipt) — Bito et al., Nutrients
+   2020;12(9):2524 (PMC7551956), ranges across 13 products; midpoints used, ≈-marked.
+   DVs: FDA Daily Values (adults & children ≥4y). ULs: NIH ODS fact sheets.
+   null = NotMeasured (row absent). Measured zeros stay 0.                        */
+var SRC={
+  hemp:'USDA FDC 170148 (SR Legacy)', spir:'USDA FDC 170495 (SR Legacy)',
+  chlo:'Bito et al. 2020, Nutrients 12(9):2524 — product-range midpoint ≈',
+  coco:'USDA FDC 171412 (SR Legacy)'};
+var FOODS=[
+ {id:'hemp',name:'hemp heARTs',grams:30,css:'var(--f-hemp)',hex:'#3f9c55'},
+ {id:'spir',name:'spirulina (dried)',grams:10,css:'var(--f-spir)',hex:'#0092a6'},
+ {id:'chlo',name:'chlorella ≈ (lit.)',grams:5,css:'var(--f-chlo)',hex:'#a476ec'},
+ {id:'coco',name:'coconut oil (MCT-rich)',grams:15,css:'var(--f-coco)',hex:'#c07f1c'}];
+/* per 100 g. order: [hemp, spir, chlo(midpoint), coco] */
+var N=[
+ {k:'protein',u:'g',dv:50, v:[31.56,57.47,61,0]},
+ {k:'total fat',u:'g',dv:78, v:[48.75,7.72,12.5,99.06]},
+ {k:'sat. fat',u:'g',dv:20, v:[4.6,2.65,null,82.475]},
+ {k:'carbs',u:'g',dv:275, v:[8.67,23.9,23.5,0]},
+ {k:'fiber',u:'g',dv:28, v:[4.0,3.6,11.5,0]},
+ {k:'thiamin B1',u:'mg',dv:1.2, v:[1.275,2.38,2.0,0]},
+ {k:'riboflavin B2',u:'mg',dv:1.3, v:[0.285,3.67,5.5,0]},
+ {k:'niacin B3',u:'mg',dv:16, v:[9.2,12.82,45,0],ulNote:'UL 35 mg covers SUPPLEMENTAL niacin only — food niacin does not count (NIH ODS)'},
+ {k:'B6',u:'mg',dv:1.7, v:[0.6,0.364,1.95,0],ul:100},
+ {k:'folate',u:'µg',dv:400, v:[110,94,1950,0],ulNote:'UL 1000 µg covers synthetic folic acid only — all three foods measure folic acid 0'},
+ {k:'B12',u:'µg',dv:2.4, v:[null,0,253,0],note:'hemp: not measured · spirulina: MEASURED 0 in FDC · chlorella: 6–500 µg product range, midpoint shown ≈'},
+ {k:'vit A',u:'µg RAE',dv:900, v:[1,29,null,0],ulNote:'UL 3000 µg covers PREFORMED retinol only — algae carotenoids do not count'},
+ {k:'vit C',u:'mg',dv:90, v:[0.5,10.1,103.5,0],ul:2000},
+ {k:'vit D',u:'µg',dv:20, v:[null,0,null,0],ul:100,note:'hemp: not measured · spirulina: measured 0 · chlorella one-product D2 value excluded as UNVERIFIED (source flags it)'},
+ {k:'vit E',u:'mg',dv:15, v:[0.8,5.0,24,0.11],ulNote:'UL 1000 mg covers supplemental alpha-tocopherol only'},
+ {k:'vit K',u:'µg',dv:120, v:[null,25.5,1900,0.6]},
+ {k:'calcium',u:'mg',dv:1300, v:[70,120,800,1],ul:2500},
+ {k:'iron',u:'mg',dv:18, v:[7.95,28.5,70,0.05],ul:45},
+ {k:'magnesium',u:'mg',dv:420, v:[700,195,221.5,0],ulNote:'UL 350 mg covers SUPPLEMENTAL magnesium only — food magnesium does not count (NIH ODS)'},
+ {k:'phosphorus',u:'mg',dv:1250, v:[1650,118,null,0],ul:4000,note:'chlorella P extraction UNVERIFIED in source — rendered NotMeasured'},
+ {k:'potassium',u:'mg',dv:4700, v:[1200,1363,850,0]},
+ {k:'sodium',u:'mg',dv:2300, v:[5,1048,112.5,0]},
+ {k:'zinc',u:'mg',dv:11, v:[9.9,2.0,1.5,0.02],ul:40},
+ {k:'copper',u:'mg',dv:0.9, v:[1.6,6.1,1,0],ul:10},
+ {k:'manganese',u:'mg',dv:2.3, v:[7.6,1.9,5,0],ul:11},
+ {k:'selenium',u:'µg',dv:55, v:[null,7.2,null,0],ul:400}];
+/* no-DV facts (FDA table has no row): stated absolutely, never as a % */
+var NODV=[
+ {k:'energy',u:'kcal',v:[553,290,null,892]},
+ {k:'omega-3 ALA 18:3 n-3',u:'g',v:[8.684,null,null,0.019],note:'spirulina FDC carries only undifferentiated 18:3 — not substituted'},
+ {k:'omega-6 LA 18:2 n-6',u:'g',v:[27.358,null,null,1.676]},
+ {k:'MUFA',u:'g',v:[5.4,0.675,null,6.332]},
+ {k:'PUFA',u:'g',v:[38.1,2.08,null,1.702]}];
+
+function grams(){ return FOODS.map(function(f){ return Math.max(0, parseFloat($('g-'+f.id).value)||0); }); }
+function fmt(x){ return x>=100?Math.round(x):(x>=10?x.toFixed(1):x.toFixed(2)).replace(/\.?0+$/,''); }
+
+FOODS.forEach(function(f){
+  var d=document.createElement('div'); d.className='food';
+  d.innerHTML='<div class="fn"><i class="sw" style="background:'+f.css+'"></i>'+f.name+'</div>'
+    +'<div class="fs">'+SRC[f.id]+'</div>'
+    +'<input id="g-'+f.id+'" type="number" min="0" step="1" value="'+f.grams+'"> g/day';
+  $('basket').appendChild(d);
+});
+$('legend').innerHTML=FOODS.map(function(f){return '<span><i style="background:'+f.css+'"></i>'+f.name+'</span>';}).join('');
+
+var HW=138,HH=120,COLS=6,PAD=8; // pointy-top hex cell box
+function hexPath(cx,cy,r){ var p=[]; for(var i=0;i<6;i++){ var a=Math.PI/180*(60*i-90);
+  p.push((cx+r*Math.cos(a)).toFixed(1)+','+(cy+r*Math.sin(a)).toFixed(1)); } return 'M'+p.join(' L')+' Z'; }
+
+function render(){
+  var g=grams(), svg=$('hexes'); svg.innerHTML='';
+  var rows=Math.ceil(N.length/COLS); svg.setAttribute('height', rows*(HH+PAD)+30);
+  var defs=document.createElementNS('http://www.w3.org/2000/svg','defs'); svg.appendChild(defs);
+  N.forEach(function(n,idx){
+    var col=idx%COLS,row=Math.floor(idx/COLS);
+    var cx=col*(HW)+HW/2+((row%2)?HW/2:0), cy=row*(HH+PAD)+HH/2;
+    var r=44;
+    var gEl=document.createElementNS('http://www.w3.org/2000/svg','g'); gEl.setAttribute('class','hexcell');
+    // contributions
+    var parts=[],total=0,notMeasured=[],anyMeasured=false;
+    n.v.forEach(function(val,i){
+      if(val===null){ if(g[i]>0) notMeasured.push(FOODS[i].name); return; }
+      anyMeasured=true;
+      var amt=val*g[i]/100; if(amt<=0) return;
+      var pct=100*amt/n.dv; parts.push({i:i,amt:amt,pct:pct}); total+=pct;
+    });
+    var shown=Math.min(total,100);
+    var clipId='c'+idx;
+    var clip=document.createElementNS('http://www.w3.org/2000/svg','clipPath'); clip.setAttribute('id',clipId);
+    var crect=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    var fillH=88*shown/100;
+    crect.setAttribute('x',cx-46); crect.setAttribute('y',(cy+44-fillH)); crect.setAttribute('width',92); crect.setAttribute('height',fillH);
+    clip.appendChild(crect); defs.appendChild(clip);
+    // stacked fill: proportional bands bottom-up inside the clip
+    var y=cy+44;
+    parts.forEach(function(p){
+      // each band's height = its share of the shown fill; when total exceeds 100%
+      // all parts compress proportionally so the fill is exactly full
+      var h=88*p.pct/Math.max(total,100);
+      var band=document.createElementNS('http://www.w3.org/2000/svg','rect');
+      band.setAttribute('x',cx-46); band.setAttribute('y',y-h); band.setAttribute('width',92); band.setAttribute('height',Math.max(h-1.5,0));
+      band.setAttribute('fill',FOODS[p.i].hex); band.setAttribute('clip-path','url(#'+clipId+')');
+      gEl.appendChild(band); y-=h;
+    });
+    var outline=document.createElementNS('http://www.w3.org/2000/svg','path');
+    outline.setAttribute('d',hexPath(cx,cy,r)); outline.setAttribute('fill','none');
+    var ulBreach=false;
+    if(n.ul){ var absTotal=0; n.v.forEach(function(val,i){ if(val!==null) absTotal+=val*g[i]/100; }); if(absTotal>n.ul) ulBreach=true; }
+    outline.setAttribute('stroke', ulBreach?'#ffb347':(total>=100?'#e2efdb':'#243026'));
+    outline.setAttribute('stroke-width', total>=100?2:1.5);
+    if(!anyMeasured) outline.setAttribute('stroke-dasharray','4 4');
+    gEl.appendChild(outline);
+    var t1=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t1.setAttribute('x',cx); t1.setAttribute('y',cy-4); t1.setAttribute('text-anchor','middle');
+    t1.setAttribute('fill', anyMeasured?'#e2efdb':'#8a9a8a'); t1.setAttribute('font-size','13');
+    t1.setAttribute('font-family',"'IBM Plex Mono',monospace");
+    t1.textContent = anyMeasured ? (fmt(total)+'%'+(n.v[2]!==null&&g[2]>0?'≈':'')) : 'n/m';
+    gEl.appendChild(t1);
+    var t2=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t2.setAttribute('x',cx); t2.setAttribute('y',cy+14); t2.setAttribute('text-anchor','middle');
+    t2.setAttribute('fill','#8a9a8a'); t2.setAttribute('font-size','8.5');
+    t2.setAttribute('font-family',"'IBM Plex Mono',monospace");
+    t2.textContent=n.k;
+    gEl.appendChild(t2);
+    // tooltip
+    var tipLines=[n.k+' — '+(anyMeasured?fmt(total)+'% of DV '+n.dv+' '+n.u:'NOT MEASURED in any included record')];
+    parts.sort(function(a,b){return b.pct-a.pct;}).forEach(function(p){
+      tipLines.push(FOODS[p.i].name+': '+fmt(p.amt)+' '+n.u+' ('+fmt(p.pct)+'%)'+(p.i===2?' ≈midpoint':''));
+    });
+    if(notMeasured.length) tipLines.push('not measured: '+notMeasured.join(', '));
+    if(n.ul) tipLines.push('UL '+n.ul+' '+n.u+'/day (NIH ODS)'+(ulBreach?' — EXCEEDED':''));
+    if(n.ulNote) tipLines.push(n.ulNote);
+    if(n.note) tipLines.push(n.note);
+    gEl.setAttribute('data-tip',tipLines.join('\n'));
+    svg.appendChild(gEl);
+  });
+  // no-DV strip
+  var nd=$('nodv'); nd.innerHTML='';
+  NODV.forEach(function(n){
+    var total=0,any=false,miss=[];
+    n.v.forEach(function(val,i){ if(val===null){ if(g[i]>0) miss.push(FOODS[i].name); return; } any=true; total+=val*g[i]/100; });
+    var c=document.createElement('div'); c.className='chip';
+    c.innerHTML='<b>'+n.k+'</b> · '+(any?fmt(total)+' '+n.u:'n/m')+(miss.length?' <span title="not measured: '+miss.join(', ')+'">±</span>':'');
+    if(n.note) c.title=n.note;
+    nd.appendChild(c);
+  });
+  // the measured omega ratio, computed, no claim attached
+  var ala=8.684*g[0]/100+0.019*g[3]/100, la=27.358*g[0]/100+1.676*g[3]/100;
+  if(ala>0){ var chip=document.createElement('div'); chip.className='chip';
+    chip.innerHTML='<b>omega-3 : omega-6 (measured rows only)</b> · 1 : '+(la/ala).toFixed(2);
+    chip.title='computed from FDC 18:3 n-3 and 18:2 n-6 rows of hemp + coconut oil; spirulina/chlorella rows are undifferentiated or absent and are not substituted';
+    nd.appendChild(chip); }
+  $('sources').innerHTML=
+    'hemp heARTs — <a href="https://fdc.nal.usda.gov/food-details/170148/nutrients">USDA FDC 170148</a> · '
+    +'spirulina — <a href="https://fdc.nal.usda.gov/food-details/170495/nutrients">USDA FDC 170495</a> · '
+    +'coconut oil — <a href="https://fdc.nal.usda.gov/food-details/171412/nutrients">USDA FDC 171412</a> · '
+    +'chlorella — <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7551956/">Bito et al., Nutrients 2020;12(9):2524</a> (product ranges; midpoints, ≈) · '
+    +'Daily Values — <a href="https://www.fda.gov/food/nutrition-facts-label/daily-value-nutrition-and-supplement-facts-labels">FDA (adults & children ≥4y; no DV exists for calories)</a> · '
+    +'Upper limits — <a href="https://ods.od.nih.gov/factsheets/">NIH ODS fact sheets</a>, form restrictions as noted per cell. '
+    +'These are LITERATURE values labeled as such — the commissioned tri-jurisdictional COA lot record replaces them when it lands (gate G-7).';
+}
+FOODS.forEach(function(f){ $('basket').addEventListener('input',render); });
+document.addEventListener('mousemove',function(e){
+  var el=e.target; while(el&&el!==document&&!(el.getAttribute&&el.getAttribute('data-tip'))) el=el.parentNode;
+  var t=(el&&el.getAttribute)?el.getAttribute('data-tip'):null, tip=$('tip');
+  if(t){ tip.textContent=t; tip.style.whiteSpace='pre-line'; tip.style.display='block';
+    tip.style.left=Math.min(e.clientX+12,window.innerWidth-310)+'px'; tip.style.top=(e.clientY+14)+'px'; }
+  else tip.style.display='none';
+});
+render();
+})();
+</script>
+</body>
+</html>
