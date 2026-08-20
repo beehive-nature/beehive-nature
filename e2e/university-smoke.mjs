@@ -175,15 +175,15 @@ ok('symposium: fetch honesty declared', symTxt.includes('fetch honesty'));
 // bLongevity Map — the animated upstream river
 await page.goto(`${BASE}/surfaces/blongevity.html`);
 await page.waitForTimeout(400);
-ok('longevity: river renders six nodes', (await page.locator('#river .node').count()) === 6);
-ok('longevity: DIAAS ladder renders 17 bars', (await page.locator('#diaas .drow').count()) === 17);
-const longHtml = await page.locator('main').innerHTML();
+ok('longevity: fat assembly line renders six stages', (await page.locator('#line .stage').count()) === 6);
+ok('longevity: DIAAS demoted to the attention hook, 17 chips', (await page.locator('#diaas .dchip').count()) === 17);
+const longHtml = await page.locator('body').innerHTML();
 ok('longevity: walls on the face + ACiD defined + upstream since 2016',
-  longHtml.includes('Artificial Chronic Inflammatory Disease') && longHtml.includes('since 2016') && longHtml.includes('graded hypothesis'));
+  longHtml.includes('Artificial Chronic Inflammatory Disease') && longHtml.includes('since 2016') && longHtml.includes('graded hypothesis') && longHtml.includes('builds its own cannabinoids') && longHtml.includes('27.4 g LA') && longHtml.includes('20085953'));
 await page.locator('#revBtn').click();
 ok('longevity: reversal toggles, hypothesis badges appear',
   (await page.locator('body').getAttribute('class')).includes('reversed')
-  && (await page.locator('#river .hyp:visible').count()) === 3);
+  && (await page.locator('#line .hyp:visible').count()) === 2);
 
 // hub + review registration
 await page.goto(`${BASE}/surfaces/bfood.html`);
