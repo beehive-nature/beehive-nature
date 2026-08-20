@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="color-scheme" content="dark">
+<link rel="stylesheet" href="tokens.css">
+<title>BNR × Base — the application appendix, receipted on Base itself</title>
+<style>
+:root{--bg:#0d1410;--ink:#e2efdb;--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--dim:#8a9a8a;--line:#243026;--leaf:#7ddf8f;--amber:#ffb347;
+--ok:#3f9c55;--open:#0092a6}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:36px 16px 90px}
+header{text-align:center;margin-bottom:12px;padding-bottom:14px;position:relative}
+header::after{content:'';position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:min(560px,80%);height:2px;
+ background:linear-gradient(90deg,transparent,var(--gold),var(--cyan),transparent);opacity:.55}
+h1{font-size:clamp(19px,4.5vw,27px);color:var(--gold);font-weight:400;letter-spacing:.04em;text-shadow:0 0 18px rgba(255,215,0,.2)}
+header p{color:var(--dim);font-size:11px;margin-top:8px;max-width:780px;margin-inline:auto;line-height:1.85}
+main{max-width:920px;margin:0 auto}
+section{background:#111a14;border:1px solid var(--line);border-radius:var(--r-lg,11px);padding:15px 16px;margin-top:16px}
+section h2{font-size:12px;color:var(--violet);font-weight:400;letter-spacing:.08em;margin-bottom:8px}
+.law{color:var(--dim);font-size:10px;line-height:1.75}
+.law b{color:var(--ink)}
+a{color:var(--cyan)}
+.badge{display:inline-block;font-size:9px;letter-spacing:.1em;border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--gold)}
+table{width:100%;border-collapse:collapse;margin-top:8px;font-size:10.5px}
+td,th{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;color:var(--dim);vertical-align:top}
+th{color:var(--violet);font-weight:400;font-size:9.5px} td.n{color:var(--ink)}
+.rc{background:#0a0f0b;border:1px solid var(--line);border-radius:var(--r-md,8px);padding:11px 13px;margin-top:9px;transition:border-color var(--dur,260ms)}
+.rc:hover{border-color:var(--line-hi,#37493c)}
+.rc .rt{font-size:12px;color:var(--ink);line-height:1.65}
+.rc .rt b{color:var(--leaf);font-weight:400}
+.rc .rd{font-size:9.5px;color:var(--dim);margin-top:4px;line-height:1.7}
+.mstone{border-left:2px solid var(--open);padding:2px 0 2px 11px;margin-top:8px;font-size:11px;color:var(--ink);line-height:1.7}
+.mstone .mw{color:var(--dim);font-size:9.5px}
+footer{max-width:920px;margin:22px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <h1>🛰 BNR × Base — the application appendix</h1>
+  <p>this page is not a pitch deck. <b style="color:var(--ink)">it is our product doing its job on your chain:</b>
+  every claim below is a receipt — a pasted command, real output, re-runnable by any stranger —
+  and the three strongest of them are <b style="color:var(--gold)">measurements of Base's own contracts,
+  taken on two operator-diverse oracles, before we ever applied.</b></p>
+</header>
+<main>
+
+<section>
+  <h2>1 · THE ONE BREATH</h2>
+  <div class="law" style="font-size:11.5px;color:var(--ink);line-height:1.9">Beehive Nature Reserve builds the
+  <b>receipts-first evidence and agent layer</b> for onchain ecosystems: an open (AGPL) organism of
+  <b>40 live, keyless, static surfaces</b> plus Rust instrumentation whose standing law is
+  <i>every claim carries a receipt · every absence is honest · a failed fetch is never a value</i>.
+  For Batch 004's <b>agents</b> vertical we bring the read-and-trust infrastructure ERC-8004 needs
+  and nobody has shipped — measured first, on Base.</div>
+</section>
+
+<section>
+  <h2>2 · OUR BASE RECEIPTS — measured on your chain, two oracles each, all re-runnable</h2>
+  <div class="rc"><div class="rt"><b>RECEIPT 1 · the ERC-8004 read-first pass</b> — your canonical
+  Trustless Agents registries, token by token</div>
+  <div class="rd">the singletons are real but deliberately minimal (130-B ERC-1967 upgradeable proxies,
+  chain-identical implementations, admin slot empty, no on-chain count surface, URI-optional) —
+  and <b>live</b>: every sampled id exists on both chains with distinct owners; Base token #25331 is
+  owned by exactly the Prover Agent address the ecosystem literature names. <b>the chain verified the
+  literature — that is our product working.</b> honest absences named: the Validation registry has no
+  canonical address yet. → <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/RECEIPT_ERC8004_E1_READ_FIRST_2026-08-20.md">the receipt</a> ·
+  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/erc8004-e1-read-first.mjs">the re-runnable tool</a></div></div>
+  <div class="rc"><div class="rt"><b>RECEIPT 2 · the frozen-seed measurement</b> — Base deployed
+  storage, read at the SLOAD level</div>
+  <div class="rd">the ERC-20i family's open escrow question (locked record: frozen seed or recompute?)
+  answered on Base bytecode + live wallets — one wallet holding five mutually distinct seed values
+  kills every recompute hypothesis; the Base boundary (frozen data, balance-coupled existence) is
+  measured at storage level, which is what any marketplace on the family needs first.
+  → <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/RECEIPT_ERC20I_S10_LOCKED_SEED_2026-08-20.md">the receipt</a> ·
+  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/erc20i-s10-sources/">conserved contract sources</a></div></div>
+  <div class="rc"><div class="rt"><b>RECEIPT 3 · the census</b> — Base's ERC-20i family enumerated,
+  with the controls</div>
+  <div class="rd">Souli (2024, 1,150 holders), PEPI-Base, FUNGI, JELLI — enumerated on two independent
+  oracles with the Blockscout-truncation control (1,000-row silent truncation caught and corrected)
+  and a passing control proving a dead market dead rather than unreachable.
+  → <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/DISPATCH_SOULCATS_HUNT_ROSE_OFFER_2026-08-19.md">the census</a></div></div>
+  <div class="rc"><div class="rt"><b>THE INSTRUMENT</b> — the b-indexer: keyless by construction, Base-ready today</div>
+  <div class="rd">Rust + SQLite read-only indexer, 14/14 tests CI-green, GET-only router with no POST
+  handler in existence, sendtx: NO printed on the wire by an attestation command, the two-oracle law
+  in the schema (every response carries its sources; divergence fails closed). ERC-8004's minimal
+  registries require exactly this: <b>agents on Base will need an indexer — ours is built, tested, and
+  keyless.</b> → <a href="https://github.com/beehive-nature/beehive-nature/tree/main/crates/bindexer">the crate</a></div></div>
+</section>
+
+<section>
+  <h2>3 · THE SYNERGY MAP — your named bets × our live lanes</h2>
+  <table>
+    <tr><th>batch 004 vertical</th><th>our lane, live today</th><th>the 8-week product</th></tr>
+    <tr><td class="n">agents</td><td>E-1 receipts of the canonical registries; the b-indexer; the integrity grammar (scores as evidence, never weight) in production on <a href="bigen.html">BiGen</a></td><td class="n">the Trustless-Agents read layer on Base: discovery, reputation-as-evidence, feedback-as-receipts — keyless, sovereign-rail first</td></tr>
+    <tr><td class="n">trading</td><td>§10 unblocked the escrow question; the OFFER mechanism specified; the Apiary surface live</td><td class="n">a Base-native marketplace pilot with the frozen-seed boundary engineered in from day one</td></tr>
+    <tr><td class="n">payments</td><td>optical scan-to-pay adjacency (bComb); the festival economy spec</td><td class="n">advisable stretch, not the batch thesis</td></tr>
+  </table>
+  <div class="law" style="margin-top:8px"><b>why this is synergy and not flattery:</b> every row is a lane
+  we were already building, on rails that already read your chain — the batch accelerates work with
+  receipts behind it, not work that starts at acceptance.</div>
+</section>
+
+<section>
+  <h2>4 · THE 8-WEEK PLAN — every milestone a receipt</h2>
+  <div class="mstone"><span class="mw">weeks 1–2</span> — the agent read layer live on Base's public rails (sovereign first; the free-tier oracle never default, never sole)<br><span class="mw">weeks 3–4</span> — reputation rendered as evidence with the integrity grammar; feedback as receipts<br><span class="mw">weeks 5–6</span> — one real agent-counterpart integration (we know the registered token ids — we read them)<br><span class="mw">weeks 7–8</span> — the Demo Day artifact: a live registry view whose every number carries its source</div>
+</section>
+
+<section>
+  <h2>5 · WHO BUILDS IT — and how you can check us in ten minutes</h5>
+  <div class="law"><b>the founder</b> (King Bee) — upstream-medicine practitioner since 2016, author of the
+  hemp-economics dataset the agricultural lanes ride on. <b>the organism</b> — a multi-seat AI engineering
+  culture (three GLM coder seats + Claude seats + a design seat) that ships daily with two-way
+  verification: every landing is verified by a second seat against the tree before it counts, and the
+  corrections are published in place, against our own interest, on the wall. <b>the ten-minute check:</b>
+  clone <a href="https://github.com/beehive-nature/beehive-nature">the repo</a>, read
+  <a href="https://github.com/beehive-nature/beehive-nature/tree/main/docs/receipts">docs/receipts</a>,
+  re-run any tool — the tree is the diligence material.</div>
+</section>
+
+</main>
+<footer>
+  prepared in the open on 2026-08-20 · this page carries the same law as every surface:
+  every claim links its receipt · AGPL-3.0-only · <a href="index.html">← the hive</a> ·
+  <a href="https://github.com/beehive-nature/beehive-nature">source</a><br>
+  don't trust this page either — verify. that is the whole application.
+</footer>
+
+<script src="tour.js?v=8"></script>
+</body>
+</html>

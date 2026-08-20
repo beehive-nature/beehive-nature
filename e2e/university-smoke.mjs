@@ -196,6 +196,13 @@ ok('longevity: reversal toggles, hypothesis badges appear',
   (await page.locator('body').getAttribute('class')).includes('reversed')
   && (await page.locator('#line .hyp:visible').count()) === 2);
 
+// BNR x Base — the application appendix
+await page.goto(BASE+"/surfaces/b4b.html");
+await page.waitForTimeout(300);
+const b4b = await page.locator("body").innerText();
+ok("b4b: the four receipts render with links", b4b.includes("RECEIPT 1") && b4b.includes("RECEIPT 2") && b4b.includes("RECEIPT 3") && b4b.includes("b-indexer"));
+ok("b4b: synergy map + 8-week plan + verify line", b4b.includes("SYNERGY MAP") && b4b.includes("8-WEEK PLAN") && b4b.includes("#25331"));
+
 // hub + review registration
 await page.goto(`${BASE}/surfaces/bfood.html`);
 await page.waitForTimeout(400);
@@ -208,11 +215,11 @@ ok('bfood rebuilt: n/m never zero + hardwired hemp + fat disaggregated + quest b
 
 await page.goto(`${BASE}/surfaces/index.html`);
 ok('hub links the university', (await page.locator('a[href="university/index.html"]').count()) === 1);
-ok('hub counts 39', (await page.locator('footer').textContent()).includes('39 surfaces'));
+ok('hub counts 40', (await page.locator('footer').textContent()).includes('40 surfaces'));
 await page.goto(`${BASE}/surfaces/review.html`);
 const optCount = await page.locator('#surf option').count();
 const hasUni = (await page.locator('#surf option[value="university/index.html"]').count()) === 1;
-ok('review deck lists the university surface', optCount === 31 && hasUni);
+ok('review deck lists the university surface', optCount === 32 && hasUni);
 
 console.log(`\n${pass} passed, ${fail} failed` + (errors.length ? '\nerrors:\n' + errors.join('\n') : ''));
 await browser.close(); server.close();
