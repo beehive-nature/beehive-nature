@@ -157,5 +157,69 @@ time per the standing rule.
 **Seat 3 note, same day:** the census launched as a research workflow on this ruling;
 its induction list lands as an addendum here with per-contract receipts.
 
+## 7 · THE CENSUS RETURNS (2026-08-20) — 48 raw → 23 unique → 27 verified entries, all two-source
+
+Full per-contract receipts in the census record (session workflow `wf_0e874b97`); every
+chain fact read on two independent oracles; failed fetches recorded as failures, never
+absences. **The resurrection roster, graded:**
+
+### Prime resurrection candidates (dormant, functional, art renders live today)
+| name | chain · address | the case |
+|---|---|---|
+| **JEDI** | base `0xA058c6f2…` | the tree's "prime candidate" verdict HOLDS and strengthened: **ownership RENOUNCED** (art frozen by code), straight FUNGI fork (Sourcify-verified, still literally named "Fungi"), site NXDOMAIN, zero pools, 154 holders — real art, dead ecosystem, nothing can rug it |
+| **MiDi #1** | base `0xf7Cf2DF5…` | **the census corrects the tree**: "fallen" was artist-lore, not mechanics — quietly the healthiest MiDi (transfers 3 weeks ago, 118 holders), **ownership RENOUNCED**, Sourcify **exact_match** (strongest verification in the whole batch). The music renders from chain today |
+| **JELLI** | base `0xA1b9d812…` | renders live (2,784 B SVG measured), transfers as recent as 2026-08-16, $11k reserve parked at $0 volume |
+| **PEPi v2 (Base)** | base `0x28a5e71B…` | $24.6k reserve intact, $0 volume; **census corrected its own conflation** — this is the Pepe Inscriptions project token, distinct from ETH Pepi; NO code on Ethereum |
+| **Souli** | base `0xb43eA104…` | **the open question ANSWERED: genuine ERC-20i confirmed** in Sourcify-verified source (trySeedTransfer, dynamicInscription, the family shape); renderer answers the family selector live; market dead ~6 months, 1,150 holders exactly as the hunt reported |
+| **MiDi #2 / #3** | base `0x569e1A…` / `0x2d448b…` | functional, music renders; #2 zero transfers ~278 days, #3 deadest (70 holders) |
+
+### The induction caveat the census surfaced — now a museum law candidate
+**Owner-not-renounced = art frozen only by abandonment.** Souli's owner can still mutate
+via `setBodies/setDots/setEffects/setEssences/setEyes`; MiDi #2/#3 share one un-renounced
+owner key (`0x57ef1444…`, presumably the gone anon) who could still swap generators.
+JEDI and MiDi #1 are frozen **by code**. The honest museum displays the difference —
+induction preference to renounced contracts, non-renounced enter WITH the caveat on the
+placard (this is the renunciation ledger's own philosophy, applied to guests).
+
+### Alive family (catalog, not resurrection)
+FUNGI (46,969 holders, $265/24h — thin but breathing, the Base original 2024-03-31) ·
+FROGGI (barely alive, $11/24h; its team built Inscript) · TRUFFI (thin-alive, the
+holder-keyed divergent — last transfer 2 days before census) · **Pepi ETH**
+(`0x3103cD16…`, viable-ALIVE, transfers census-day — **the only tier-2 id-addressed
+tradeable model in existence**, `transferItem 0x67c65e99` confirmed in bytecode).
+
+### Infrastructure finds (adapter + marketDEX prior art)
+- **Inscript** (inscriptions.app) — ALIVE Base-App/Farcaster miniapp, registry hardcoded
+  to exactly the four Base tokens (Fungi/Pepi/Froggi/Jelli) with pool bindings extracted
+  verbatim from its bundles — the live adapter surface for the Base family, and a shape
+  worth studying for our explorer.
+- **PepiMarketplace** (eth `0x7261c646…`) — a **verified, functional, dormant tier-2
+  marketplace** (position-based, transferItem in bytecode; last tx 2026-06-13) — direct
+  prior art for the Apiary's tier-2 lane and the bRoSe OFFER's safety analysis.
+- **EggmassCollector** (eth `0x864031A8…`) — buy-and-burn sink, Uniswap-v4-style params.
+
+### Blacklist (REFUTED, recorded so nobody re-boards them)
+Erc20i Club `0xFaAE9CB6…` (name-squat, plain ERC-20) · **Fungi impersonator**
+`0x81d59c32…` (wears the real name+symbol, zero family selectors) · SUISSMA (a CoinGecko
+category mistag, Virtuals clone) · original Pepe Inscriptions `0x0F4AA8C4…` (fallen AND
+not family-shaped — none of the ten family selectors in bytecode).
+
+### Corrections the census owes the tree
+1. MiDi's uniform "fallen" label is artist-lore; mechanically all three are
+   viable-dormant (fix at next museum/organ copy pass).
+2. `docs/design/EXPLORER_SPEC.md:71` carries a TRUNCATED 37-hex copy of the ETH Pepi
+   address — never source from that file; fix owed.
+3. transferItem is **Pepi-specific, not a family marker** — the Base originals never had
+   it; tier taxonomy language should say "the ETH item model" rather than implying a
+   family-wide selector.
+
+### New gate
+| | question |
+|---|---|
+| **R-6** | the family lives on **Base + Ethereum**, which are not yet in the preapproved-adapters register (R-5 seeded Vaulta/Arweave/Autonomi/Hive/exSat/BCH). The surfaces already read both keyless. Formalize Base + Ethereum as **READ adapters** in PREAPPROVED-ADAPTERS-1? |
+
+R-4/ROSE-4 induction words remain the founder's; this census executes nothing — it hands
+the roster over with receipts.
+
 **Seat 3, 2026-08-19.** Clones and receipts in the session scratchpad; pinned shas above
 are the authority.
