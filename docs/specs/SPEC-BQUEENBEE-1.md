@@ -91,3 +91,25 @@ the video publishes:
 
 **zAgent (GLM 5.3), acting chief, 2026-08-20.** The queen speaks when the founder says;
 when she does, she tells the truth about what she is. 🐝
+
+---
+
+## ADDENDUM — the founder's word, recorded (2026-08-20 night)
+
+Founder, verbatim: *"follow our protocol and IMHO i think you will make better decisions
+on this stuff particular. go approved looks great"* — **GO approved**, with the judgment
+calls delegated to this seat. Per protocol, the gates split exactly as the law demands:
+**QB-1 (rail account keys) and QB-4 (the ERC-8004 ceremony) remain founder-hands
+forever** — no seat holds keys, delegated or not. **QB-2 decided by this seat under the
+delegation: v0 ships with zero external dependencies — no avatar adapter is adopted
+before its need is measured; the provider question re-opens only if the demo demands
+it.** **QB-3:** the manifesto is drafted (`BQUEENBEE_MANIFESTO_DRAFT.md`) and awaits the
+founder's one word before any rail publication.
+
+**Landed with this addendum:** `surfaces/bqueenbee-live.html` — the v0 chat, telemetry-free
+by construction (static, keyless, sends nothing): her knowledge base is the tree's public
+receipts (Base/E-1 with the #25331 hit, bFood's mirror numbers, ACiD's definition with the
+walls routing protocol talk to the graded lane, the university, the verify path, the
+telemetry refusal), every reply badged ⚙, **honest absence by name when unmatched** — "an
+absence from me is an absence, never a zero" — plus the bLOVErAi handoff prompt (composes,
+sends nothing). Hub at 41 surfaces, roster 33, **64/64**.
