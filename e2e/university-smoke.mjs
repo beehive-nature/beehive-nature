@@ -172,11 +172,24 @@ ok('symposium: states legend + scope fence + symbiosis + scale note',
   && symTxt.includes('SYMBIOSIS') && symTxt.includes('THE SCALE NOTE'));
 ok('symposium: fetch honesty declared', symTxt.includes('fetch honesty'));
 
+// bLongevity Map — the animated upstream river
+await page.goto(`${BASE}/surfaces/blongevity.html`);
+await page.waitForTimeout(400);
+ok('longevity: river renders six nodes', (await page.locator('#river .node').count()) === 6);
+ok('longevity: DIAAS ladder renders 17 bars', (await page.locator('#diaas .drow').count()) === 17);
+const longHtml = await page.locator('main').innerHTML();
+ok('longevity: walls on the face + ACiD defined + upstream since 2016',
+  longHtml.includes('Artificial Chronic Inflammatory Disease') && longHtml.includes('since 2016') && longHtml.includes('graded hypothesis'));
+await page.locator('#revBtn').click();
+ok('longevity: reversal toggles, hypothesis badges appear',
+  (await page.locator('body').getAttribute('class')).includes('reversed')
+  && (await page.locator('#river .hyp:visible').count()) === 3);
+
 // hub + review registration
 await page.goto(`${BASE}/surfaces/bfood.html`);
 await page.waitForTimeout(400);
 const vbig = await page.locator('#vbig').textContent();
-ok('bfood rebuilt: verdict renders 31 cells', vbig.includes('of 31 nutrients covered'));
+ok('bfood rebuilt: verdict renders 31 cells', vbig.includes('of 40 nutrients covered'));
 ok('bfood rebuilt: hexagon cells drawn', (await page.locator('#comb polygon').count()) > 40);
 const bfoodHtml = await page.locator('main').innerHTML();
 ok('bfood rebuilt: n/m never zero + hardwired hemp + fat disaggregated + quest bridge',
@@ -184,11 +197,11 @@ ok('bfood rebuilt: n/m never zero + hardwired hemp + fat disaggregated + quest b
 
 await page.goto(`${BASE}/surfaces/index.html`);
 ok('hub links the university', (await page.locator('a[href="university/index.html"]').count()) === 1);
-ok('hub counts 34', (await page.locator('footer').textContent()).includes('34 surfaces'));
+ok('hub counts 39', (await page.locator('footer').textContent()).includes('39 surfaces'));
 await page.goto(`${BASE}/surfaces/review.html`);
 const optCount = await page.locator('#surf option').count();
 const hasUni = (await page.locator('#surf option[value="university/index.html"]').count()) === 1;
-ok('review deck lists the university surface', optCount === 30 && hasUni);
+ok('review deck lists the university surface', optCount === 31 && hasUni);
 
 console.log(`\n${pass} passed, ${fail} failed` + (errors.length ? '\nerrors:\n' + errors.join('\n') : ''));
 await browser.close(); server.close();

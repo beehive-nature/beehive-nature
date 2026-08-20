@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="color-scheme" content="dark">
+<title>the bLongevity Map — upstream medicine, from omega substrate to telomere readout</title>
+<style>
+:root{--bg:#0d1410;--ink:#e2efdb;--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--dim:#8a9a8a;--line:#243026;--leaf:#7ddf8f;--amber:#ffb347;
+--ess:#3f9c55;--cond:#c07f1c;--non:#5a6b5c;--cb:#a476ec;--om:#0092a6}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:36px 16px 90px}
+header{text-align:center;margin-bottom:10px}
+h1{font-size:clamp(17px,4vw,24px);color:var(--gold);font-weight:400;letter-spacing:.05em}
+header p{color:var(--dim);font-size:11px;margin-top:6px;max-width:760px;margin-left:auto;margin-right:auto}
+main{max-width:920px;margin:0 auto}
+section{background:#111a14;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:16px}
+section h2{font-size:12px;color:var(--violet);font-weight:400;letter-spacing:.08em;margin-bottom:8px}
+.law{color:var(--dim);font-size:10px;line-height:1.7}
+.law b{color:var(--ink)}
+a{color:var(--cyan)}
+.badge{display:inline-block;font-size:9px;letter-spacing:.1em;border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--gold)}
+.badge.hyp{color:var(--amber);border-color:#4a3a1a}
+.badge.rec{color:var(--leaf)}
+/* ── the river ── */
+#river{display:grid;grid-template-columns:1fr;gap:0;margin-top:10px}
+.node{background:#0a0f0b;border:1px solid var(--line);border-radius:10px;padding:11px 14px;position:relative}
+.node .nn{font-size:9px;color:var(--dim);letter-spacing:.14em}
+.node .nt{font-size:12.5px;color:var(--ink);margin-top:2px;line-height:1.6}
+.node .nc{font-size:9.5px;color:var(--dim);margin-top:4px;line-height:1.7}
+.node .nc a{font-size:9.5px}
+.arrow{height:26px;display:flex;justify-content:center;align-items:center}
+.arrow svg{width:22px;height:26px;overflow:visible}
+.arrow path{stroke:var(--dim);stroke-width:1.6;fill:none;stroke-dasharray:4 5;animation:flow 1.2s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-9}}
+.node.omega{border-color:#1d4f58}.node.omega .nt b{color:var(--om)}
+.node.cb{border-color:#3d3410}.node.cb .nt b{color:var(--cb)}
+.node.acid{border-color:#4a3a1a;background:#141008}
+.node.acid .nt{color:var(--amber)}
+.node.tert .nt b{color:var(--violet)}
+.node.readout .nt b{color:var(--gold)}
+.node .pulse{position:absolute;top:8px;right:10px;width:9px;height:9px;border-radius:50%;background:var(--ess);animation:pulse 2.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(63,156,85,.5)}50%{box-shadow:0 0 0 7px rgba(63,156,85,0)}}
+body.reversed .arrow path{animation-direction:reverse;stroke:var(--amber)}
+body.reversed .node .hyp{display:inline}
+.hyp{display:none}
+#revBtn{background:#2a230a;color:var(--gold);border:1px solid #4a3a1a;border-radius:8px;padding:8px 16px;cursor:pointer;font:11.5px 'IBM Plex Mono',monospace;margin-top:10px}
+#revBtn:hover{background:var(--gold);color:#000}
+/* ── essential / not ── */
+#classes{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px;margin-top:10px}
+.cgroup{background:#0a0f0b;border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+.cgroup.ess{border-color:#2b4a34;animation:essglow 3s ease-in-out infinite}
+@keyframes essglow{0%,100%{box-shadow:0 0 0 0 rgba(63,156,85,.22)}50%{box-shadow:0 0 14px 2px rgba(63,156,85,.10)}}
+.cgroup.cond{border-color:#4a3a1a}
+.cgroup.non{opacity:.62}
+.cgroup h3{font-size:11px;font-weight:400;color:var(--ink)}
+.cgroup .ch{font-size:9.5px;color:var(--dim);margin-top:2px;margin-bottom:6px}
+.cgroup .rows{font-size:10.5px;color:var(--dim);line-height:1.9}
+.cgroup .rows b{color:var(--ink);font-weight:400}
+.cgroup.ess .rows b{color:var(--ess)}
+/* ── DIAAS ── */
+.drow{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.drow .dn{flex:0 0 92px;font-size:10px;color:var(--ink);text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.drow .dt{flex:1;height:15px;background:#0a0f0b;border:1px solid var(--line);border-radius:3px;position:relative;overflow:hidden}
+.drow .dt i{position:absolute;inset:0;transform-origin:left;background:linear-gradient(90deg,#1d4f58,var(--om));animation:grow 1.1s cubic-bezier(.2,.8,.2,1) forwards;transform:scaleX(0)}
+.drow.hemp .dt i{background:linear-gradient(90deg,#2b4a34,var(--ess))}
+@keyframes grow{to{transform:scaleX(1)}}
+.dref{position:absolute;top:-2px;bottom:-2px;left:66.6%;width:1px;background:var(--amber);z-index:2}
+.drow .dv{flex:0 0 66px;font-size:10px;color:var(--dim)}
+.drow .lim{flex:0 0 74px;font-size:9px;color:var(--amber)}
+@media (prefers-reduced-motion: reduce){
+  .arrow path,.node .pulse,.cgroup.ess,.drow .dt i{animation:none}
+  .drow .dt i{transform:scaleX(1)}
+  body.reversed .arrow path{stroke:var(--amber)}
+}
+footer{max-width:920px;margin:22px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
+</style>
+</head>
+<body>
+<header>
+  <h1>🧬 the bLongevity Map</h1>
+  <p><b style="color:var(--ink)">upstream medicine</b> — the founder's practice since 2016 — rendered as one river:
+  omega fats feed the substrate, CB1/CB2 are the interface, inflammation is the process,
+  <b style="color:var(--amber)">ACiD</b> is the made disease, and the telomere is the long-horizon readout.
+  every arrow below carries its receipt; the reversal claim carries its grade.</p>
+</header>
+<main>
+
+<section>
+  <h2>0 · THE WALLS, ON THE FACE</h2>
+  <div class="law"><b>Three claim classes render here, each badged:</b>
+  <span class="badge rec">✓ receipted</span> pathophysiology and composition facts (cited inline) ·
+  <span class="badge hyp">🧪 graded hypothesis</span> the reversal thesis — the founder's doctrine,
+  pre-registered at the <a href="bigen.html">BiGen</a> lane per the CB-1 pattern, never asserted as found ·
+  <span class="badge">interpretation lane</span> "exponential longevity in all planes" — the founder's
+  metaphysical framing, recorded verbatim and fenced off the science surfaces per the reincarnation-study
+  precedent. dose never renders here (CB-2). ACiD is defined:
+  <b style="color:var(--amber)">Artificial Chronic Inflammatory Disease</b> — <i>made</i>, therefore in
+  principle unmakeable; that is the map's whole orientation. <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/RULING_ACID_DEFINED_2026-08-20.md">the ruling</a>.</div>
+</section>
+
+<section>
+  <h2>1 · THE RIVER — upstream to downstream, animated; run it backwards to see the hypothesis</h2>
+  <div class="law"><b>The green pulse marks essential inputs</b> — the molecules the body cannot make.
+  The arrows flow downstream (causation's direction). The button reverses them: the <b>reversal
+  hypothesis</b> — nutrition unmaking ACiD upstream — rendered as exactly what it is: a labeled graded
+  run, with <span class="badge hyp">🧪</span> badges appearing on every node it crosses.</div>
+  <div id="river">
+    <div class="node omega"><span class="pulse"></span>
+      <div class="nn">UPSTREAM · SUBSTRATE</div>
+      <div class="nt"><b>omega fats — the only two essential fatty acids</b></div>
+      <div class="nc">linoleic acid (n-6) and α-linolenic acid (n-3) cannot be synthesized — DRI AI rows
+      exist for both (<a href="bfood.html">the Hexagon</a>). downstream of them, the endocannabinoids
+      themselves are fatty-acid derivatives — anandamide and 2-AG are <b>arachidonoyl-class</b> substrates
+      (<a href="https://pubmed.ncbi.nlm.nih.gov/41167310/">JBC 2025</a>): <b>the omega lane feeds the
+      receptor lane's own signal molecules.</b> no authoritative n-6:n-3 target exists — a page printing
+      one invents it (Hexagon §2).</div></div>
+    <div class="arrow"><svg viewBox="0 0 22 26"><path d="M11 1 L11 18 M5 12 L11 19 L17 12"/></svg></div>
+    <div class="node cb"><span class="pulse"></span>
+      <div class="nn">INTERFACE · RECEPTORS</div>
+      <div class="nt"><b>CB1 · CB2 — the two-axis interface</b></div>
+      <div class="nc">the functional-naming settlement's axes: <b>CB1 central</b> (Δ9-THC's unique cell —
+      partial agonist, BBB-crossing) · <b>CB2 the peripheral-class receptor</b> (the CB2 half of the
+      agonist pharmacology, <a href="https://pubmed.ncbi.nlm.nih.gov/36397993/">eCAM 2022</a>; receptor
+      expression across tissues including immune cells, <a href="https://pubmed.ncbi.nlm.nih.gov/14570037/">Guzmán 2003</a>).
+      CBD is a <b>negative allosteric modulator</b> of CB1 — CB1-negative without antagonism
+      (<a href="https://pubmed.ncbi.nlm.nih.gov/36153039/">Mol Pharmacol 2022</a>). the severity ladder
+      (10:1 · 5:1 · 3:1) reads on these axes.</div></div>
+    <div class="arrow"><svg viewBox="0 0 22 26"><path d="M11 1 L11 18 M5 12 L11 19 L17 12"/></svg></div>
+    <div class="node"><span class="pulse"></span>
+      <div class="nn">PROCESS</div>
+      <div class="nt"><b>chronic inflammation</b></div>
+      <div class="nc">the process class between the interface and the disease — the tier-3 endpoint the
+      <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/specs/SPEC-POPUP-IRB-1.md">festival
+      telemetry lane</a> measures (CRP-class markers under consent, never surveillance).</div></div>
+    <div class="arrow"><svg viewBox="0 0 22 26"><path d="M11 1 L11 18 M5 12 L11 19 L17 12"/></svg></div>
+    <div class="node acid">
+      <div class="nn">PRESENTATION</div>
+      <div class="nt"><b>ACiD — Artificial Chronic Inflammatory Disease</b></div>
+      <div class="nc">the founder's definition, on the face: the burden is <b>made</b> — artificial inputs
+      (the ultra-processed class, petrochemical adulterants and residues — the exact material class the
+      <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/DISPATCH_CONTAMINATION_VOID_LAW_2026-08-20.md">contamination-void law</a>
+      strikes from the literature). a made disease is unmakeable: remove the artificial, supply the
+      essential. <span class="hyp badge">🧪 the unmaking is the graded hypothesis</span></div></div>
+    <div class="arrow"><svg viewBox="0 0 22 26"><path d="M11 1 L11 18 M5 12 L11 19 L17 12"/></svg></div>
+    <div class="node tert">
+      <div class="nn">MACHINERY</div>
+      <div class="nt"><b>TERT → telomerase → telomere maintenance</b></div>
+      <div class="nc">telomere biology is universal eukaryotic physiology — the telomerase discovery line
+      (<a href="https://pubmed.ncbi.nlm.nih.gov/3907856/">Greider &amp; Blackburn 1985</a>). maintenance
+      machinery read out over years, not meals. <span class="hyp badge">🧪 attrition as ACiD's long-run cost</span></div></div>
+    <div class="arrow"><svg viewBox="0 0 22 26"><path d="M11 1 L11 18 M5 12 L11 19 L17 12"/></svg></div>
+    <div class="node readout">
+      <div class="nn">READOUT · LONG HORIZON</div>
+      <div class="nt"><b>telomere length — an association-class readout</b></div>
+      <div class="nc">measurable, gradable, slow: the qPCR assay's own review says reproducibility is still
+      being standardized (<a href="https://pubmed.ncbi.nlm.nih.gov/30343983/">Lin 2019</a>) — single
+      timepoints are hypothesis-grade. the RCT class exists: a moderately high-protein diet moved telomere
+      length in a randomized trial (<a href="https://pubmed.ncbi.nlm.nih.gov/39861449/">Nutrients 2025</a>).
+      <span class="hyp badge">🧪 nutrition preserving the readout = the thesis, pre-registered</span></div></div>
+  </div>
+  <button id="revBtn">⏪ run the reversal hypothesis — upstream, as practiced since 2016</button>
+  <div class="law" style="margin-top:8px">when reversed, the badges and the amber arrows are the claim's
+  <b>grade</b>, not its truth: each reversed arrow is one pre-registerable question. this is upstream
+  medicine's own honesty — a practice that treats headwaters earns the right to say which streams are
+  proven and which are hypotheses.</div>
+</section>
+
+<section>
+  <h2>2 · ESSENTIAL vs NOT — the marked difference</h2>
+  <div class="law"><b>The receipted line between the classes is the requirement row:</b> essential
+  nutrients have one (RDA/AI — the DRI tables behind the Hexagon); non-essential ones do not, because the
+  body synthesizes them. the glow marks what must arrive from outside; the still grey marks what the body
+  builds itself. conditional essentialness (conditionally required in illness, infancy, aging) is badged
+  rather than silently binned.</div>
+  <div id="classes">
+    <div class="cgroup ess"><h3>ESSENTIAL — cannot be synthesized · DRI row exists</h3>
+      <div class="ch">the glow class: absence = deficiency disease, by definition of the word</div>
+      <div class="rows"><b>9 amino acids</b> — histidine, isoleucine, leucine, lysine, methionine,
+      phenylalanine, threonine, tryptophan, valine (hemp's limit: <b>lysine</b> — §3)<br>
+      <b>2 fatty acids</b> — linoleic (n-6) · α-linolenic (n-3)<br>
+      <b>13 vitamins</b> — A · C · D · E · K · B1 · B2 · B3 · B5 · B6 · B7 · B9 · B12<br>
+      <b>minerals &amp; trace</b> — Ca · P · Mg · Na · Cl · K · S · Fe · Zn · Cu · Mn · I · Se · Mo · Cr</div></div>
+    <div class="cgroup cond"><h3>CONDITIONALLY ESSENTIAL — context-dependent</h3>
+      <div class="ch">badged, never binned: required in illness, growth, or aging</div>
+      <div class="rows">arginine · glutamine · cysteine · tyrosine · taurine · choline (no EAR — "insufficient
+      data," the brake from <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/RECEIPT_SHORTFALL_ARBITRAGE_2026-08-20.md">the shortfall receipt</a>)</div></div>
+    <div class="cgroup non"><h3>NON-ESSENTIAL — no DRI row · body-synthesized</h3>
+      <div class="ch">the still class: not unimportant — unrequired from outside</div>
+      <div class="rows">alanine · aspartate · asparagine · glutamate · serine · glycine · proline ·
+      collagen's own triple helix from these — and every molecule the body builds from the essential
+      ones upstream</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>3 · DIAAS, ANIMATED — the complementation mechanism, from the Hexagon's own numbers</h2>
+  <div class="law">data cited to <a href="bfood.html">bFood §protein-quality</a> (landed from the founder's
+  relay, two independent routes agreeing: feeding-study DIAAS and raw-÷-DRI arithmetic, same answer —
+  lysine lowest at roughly half your requirement). <b>the amber line is 100 — the reference protein.</b>
+  every cereal and seed is lysine-limited; every legume is Met+Cys-limited — that single sentence IS the
+  mechanism of complementation, which is why a seed-and-legume basket beats either alone.</div>
+  <div id="diaas" style="margin-top:10px"></div>
+</section>
+
+<section>
+  <h2>4 · THE EVIDENCE LEDGER — every receipt on this page</h4>
+  <div class="law">
+  omega substrate (arachidonoyl endocannabinoids) — <a href="https://pubmed.ncbi.nlm.nih.gov/41167310/">JBC 2025, PMID 41167310</a> ·
+  CB2 pharmacology — <a href="https://pubmed.ncbi.nlm.nih.gov/36397993/">eCAM 2022, PMID 36397993</a> ·
+  receptor expression — <a href="https://pubmed.ncbi.nlm.nih.gov/14570037/">Guzmán 2003, PMID 14570037</a> ·
+  CBD negative allosteric modulation — <a href="https://pubmed.ncbi.nlm.nih.gov/36153039/">Mol Pharmacol 2022, PMID 36153039</a> ·
+  telomerase discovery — <a href="https://pubmed.ncbi.nlm.nih.gov/3907856/">Greider &amp; Blackburn 1985, PMID 3907856</a> ·
+  assay honesty — <a href="https://pubmed.ncbi.nlm.nih.gov/30343983/">Lin 2019, PMID 30343983</a> ·
+  diet→telomere RCT — <a href="https://pubmed.ncbi.nlm.nih.gov/39861449/">Nutrients 2025, PMID 39861449</a> ·
+  DIAAS + the independent reproduction — <a href="bfood.html">bFood §protein-quality</a> ·
+  ACiD + upstream medicine — <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/RULING_ACID_DEFINED_2026-08-20.md">RULING_ACID_DEFINED_2026-08-20</a>.
+  <br><b>the standing gates:</b> reversal thesis → pre-registration (CB-1 pattern) · contamination applies
+  both ways (the void law) · "all planes" → interpretation lane · <b>dose never renders</b> (CB-2).</div>
+</section>
+
+</main>
+<footer>
+  upstream medicine, practiced since 2016 · ACiD = Artificial Chronic Inflammatory Disease ·
+  essential glows because absence of the essential is the one deficiency nothing downstream can fix ·
+  AGPL-3.0-only · <a href="bfood.html">bFood</a> · <a href="bigen.html">BiGen</a> ·
+  <a href="university/index.html">the university</a> · <a href="index.html">← the hive</a><br>
+  don't trust these pages either — every arrow links its receipt. Verify.
+</footer>
+
+<script src="tour.js?v=8"></script>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i);};
+document.getElementById('revBtn').onclick=function(){
+  document.body.classList.toggle('reversed');
+  this.textContent=document.body.classList.contains('reversed')
+    ? '⏩ return to the receipted downstream flow'
+    : '⏪ run the reversal hypothesis — upstream, as practiced since 2016';
+};
+/* DIAAS — the founder-relayed, in-tree-cited ladder (bFood §protein-quality) */
+var D=[['pork',117,'±10.7','none'],['casein',117,'±4.3','none'],['egg',101,'±58.4','none'],
+['potato',100,'±7.3','none'],['soy',91,'±9','Met+Cys'],['whey',85,'±25.2','histidine'],
+['canola',72,'±9.2','lysine'],['pea',70,'±12.3','Met+Cys'],['lupin',68,'±12.7','Met+Cys'],
+['rapeseed',67,'±10.3','lysine'],['oat',57,'±5.8','lysine'],['fava bean',55,'±5.1','Met+Cys'],
+['hemp',54,'no SD','lysine'],['wheat',48,'±10.6','lysine'],['rice',47,'±2.3','lysine'],
+['corn',36,'±14.9','lysine'],['gelatin',2,'±3','tryptophan']];
+var host=$('diaas'), max=117;
+D.forEach(function(d,i){
+  var row=document.createElement('div');
+  row.className='drow'+(d[0]==='hemp'?' hemp':'');
+  row.innerHTML='<div class="dn">'+d[0]+'</div><div class="dt"><div class="dref"></div>'
+   +'<i style="animation-delay:'+(i*70)+'ms;transform:scaleX(0);width:'+Math.max(100*d[1]/max,1.5)+'%"></i></div>'
+   +'<div class="dv">'+d[1]+' '+d[2]+'</div><div class="lim">'+(d[3]==='none'?'—':d[3]+' ⚑')+'</div>';
+  host.appendChild(row);
+});
+})();
+</script>
+</body>
+</html>
