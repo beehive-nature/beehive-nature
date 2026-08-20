@@ -1,0 +1,27 @@
+[package]
+name = "bsafe-host"
+version = "0.1.0"
+description = "bSAFE 7 host: transport layer (BLE via btleplug, feature-gated) over bsafe-thp"
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+bsafe-thp = { path = "../thp" }
+thiserror = "1"
+
+# BLE transport is feature-gated: it pulls platform Bluetooth stacks (BlueZ/DBus
+# on Linux, CoreBluetooth on macOS/iOS, WinRT on Windows, JNI on Android) which
+# need system libraries a CI container may lack. `cargo check` stays green
+# without it; the spike enables it on a dev machine with a Safe 7 in range.
+[dependencies.btleplug]
+version = "0.11"
+optional = true
+
+[dependencies.tokio]
+version = "1"
+features = ["rt-multi-thread", "macros", "time"]
+optional = true
+
+[features]
+default = []
+ble = ["dep:btleplug", "dep:tokio"]

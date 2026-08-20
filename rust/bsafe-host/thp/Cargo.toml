@@ -1,0 +1,13 @@
+[package]
+name = "bsafe-thp"
+version = "0.1.0"
+description = "Trezor Host Protocol (THP) skeleton for the bSAFE 7 Rust host: frame codec + Noise channel"
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+# sopium's noise-rust (the same family trezor forks): pure-Rust Noise framework
+noise-protocol = "0.2"
+noise-rust-crypto = "0.6"
+crc = "3"
+thiserror = "1"

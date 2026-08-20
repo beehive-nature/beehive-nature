@@ -1,0 +1,7 @@
+[workspace]
+resolver = "2"
+members = ["thp", "host"]
+
+[workspace.package]
+edition = "2021"
+license = "AGPL-3.0-only"

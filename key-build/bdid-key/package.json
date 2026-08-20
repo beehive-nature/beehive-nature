@@ -1,0 +1,19 @@
+{
+  "name": "bdid-key",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@noble/curves": "^2.3.0",
+    "@noble/hashes": "^2.3.0",
+    "@scure/base": "^2.3.0",
+    "@scure/bip39": "^2.3.0",
+    "esbuild": "^0.28.2"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "bnr-e2e",
+  "private": true,
+  "type": "module",
+  "description": "Chromium e2e for the bzDiD onboarding surface — CTAP2 virtual authenticator with PRF",
+  "scripts": {
+    "test": "node e2e.mjs"
+  },
+  "dependencies": {
+    "playwright": "^1.50.0"
+  }
+}

@@ -4,6 +4,9 @@
 **/*.rs.bk
 *.pdb
 
+# Node — key-build engine deps, e2e playwright
+node_modules/
+
 # Secrets — NEVER commit keys, seeds, or real test vectors
 *.seed
 *.key

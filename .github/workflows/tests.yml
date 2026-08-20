@@ -23,3 +23,29 @@ jobs:
         run: cargo test --workspace --locked
       - name: Check formatting
         run: cargo fmt --all --check
+      # bSAFE host lives outside the kernel workspace (own members list + lockfile)
+      - name: bSAFE host workspace (THP codec + Noise XX)
+        run: cargo test --locked --manifest-path rust/bsafe-host/Cargo.toml
+
+  node:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # The 26 include the pinned cross-implementation vector any Rust port
+      # must reproduce byte-identically (prf 0x01×32 → master_prk d54134a6…).
+      - name: Key-build engine unit tests (26, incl. pinned vector)
+        working-directory: key-build/bdid-key
+        run: |
+          npm ci
+          node test/test.mjs
+      # Real Chromium, CTAP2 virtual authenticator WITH PRF; drives the live
+      # surface at surfaces/onboarding (engine adjacency flips PREVIEW off).
+      - name: Onboarding e2e (Chromium + virtual authenticator w/ PRF)
+        working-directory: e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          node e2e.mjs
