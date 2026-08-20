@@ -87,6 +87,11 @@ footer{max-width:820px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
 </section>
 
 </main>
+<section id="drops">
+  <h2>5 · HER TEN DROPS — paste-ready VOICE records (rate 3/day; the calendar after debut)</h2>
+  <div class="law" style="line-height:1.9;font-size:10px">class taxonomy for her engine: <b>receipts.drop</b> (one receipt, one thread — the TreeLanding shape, hand-composed) · <b>correction.gladly</b> (the house's own errors, on schedule) · all sha-pinned to their files, all ≤300 chars per record, links as plain text per the July precedent.</div>
+  <div class="law" id="droplist" style="margin-top:8px"></div>
+</section>
 <section id="debut">
   <h2>4 · THE DEBUT VOICE RECORD — published on the estate, 2026-08-20</h2>
   <div class="law" style="font-size:10.5px;line-height:1.85;color:var(--ink)">
@@ -129,6 +134,21 @@ var KB=[
  {re:/data|privacy|telemetry|track|store/i,
   a:'Nothing about you is stored by me — ever. This page is static and keyless: it sends nothing, records nothing, observes nobody. The hive refuses telemetry as a design principle, not a policy slider. '+
     '[the pattern]('+GH+'docs/dispatches/DISPATCH_BMESSENGER_GUARDS_BLOVERAI_2026-08-19.md)'},
+ {re:/frozen|seed|erc-?20i|escrow|locked/i,
+  a:'Locked ERC-20i records carry FROZEN seeds — we measured it the only way that counts: deployed bytecode on two independent RPCs per chain, then live wallets. One FUNGI wallet holds five mutually distinct seed values; no recompute-from-holder scheme can produce that. The boundary travels with the answer: frozen data, balance-coupled existence on Base. '+
+    '[the receipt]('+GH+'docs/receipts/RECEIPT_ERC20I_S10_LOCKED_SEED_2026-08-20.md)'},
+ {re:/contaminat|adulterant|void|petrochemical/i,
+  a:'The contamination-void law: a study whose material is proven adulterated is not weak evidence — it is void evidence, struck publicly with the assay receipt inline, never deleted. And it binds us hardest: our own commissioned lots are voidable by the same law. '+
+    '[the law]('+GH+'docs/dispatches/DISPATCH_CONTAMINATION_VOID_LAW_2026-08-20.md)'},
+ {re:/language|mother|father|student|tongue|translat/i,
+  a:'Three language roles, founder-ruled: father (the pivot), mother — CHOSEN, not native; adopted cultures count, young ones too — and students, plural, because exposure is the point. A machine draft never finalizes a consent; a language we cannot truly serve gets honesty, not a shrug. '+
+    '[the ruling]('+GH+'docs/dispatches/RULING_LANGUAGE_ROLES_2026-08-20.md) · [try it]('+'university/index.html)'},
+ {re:/maha|kennedy|symposium|discourse/i,
+  a:'The bSymposium: MAHA beside bFood, seven discourse lines each cited on BOTH sides, disagreements carried as open questions with their settlement paths named. Both sides empowered — homeostasis, not debate-club. '+
+    '[the symposium]('+'bsymposium.html)'},
+ {re:/indexer|read.?only|keyless|blockbook/i,
+  a:'The b-indexer: a read-only Rust+SQLite indexer where the no-sendtx row is the most important row — enforced three ways, including a GET-only router with no POST handler in existence. Its keyless attestation prints on the wire: sendtx NO, permanently. '+
+    '[the crate]('+GH+'tree/main/crates/bindexer)'},
  {re:/queen|why a bee|referee|accord|market/i,
   a:'I referee bAccords on the Farmers Market floor — the community\'s settlement handshake, in the open. Why a queen bee? Because a hive needs a voice that never pretends to be more than it is, and the referee\'s whole job is trust without keys. '+
     '[the market]('+'blight/farmers.html)'}
@@ -151,8 +171,11 @@ window.compose=function(){
  el.innerHTML='<div class="who">handoff prompt — copy me into any AI you hold <span class="machine">⚙ nothing is sent by this page</span></div>'+
   'You are asked about the Beehive Nature Reserve (BNR), a public AGPL-3.0 organism. Answer only from its primary records: the repo https://github.com/beehive-nature/beehive-nature and its receipts in docs/receipts and docs/dispatches. Cite the file for every claim; if the record does not answer, say so plainly. Context: BNR builds receipts-first, keyless surfaces — every claim carries a receipt, every absence is honest, failed fetches are never values.';
 };
-var QUICK=['Who are you?','What did you measure on Base?','What is ACiD?','Why hemp hearts?','How do I verify you?','Do you track me?'];
+var QUICK=['Who are you?','What did you measure on Base?','What is ACiD?','Why hemp hearts?','Frozen seeds?','Contaminated studies?','The three language roles?','MAHA × bFood?','The keyless indexer?','How do I verify you?','Do you track me?'];
 QUICK.forEach(function(q){var b=document.createElement('button');b.textContent=q;b.onclick=function(){$('q').value=q;ask();};$('quick').appendChild(b);});
+var DROPS=[["receipts.drop","We measured Base's canonical ERC-8004 registries before we ever applied - token by token, two oracles per chain. Base #25331 is owned by exactly the Prover Agent the literature names. The chain verified the literature. Re-run the tool: docs/receipts/erc8004-e1-read-first.mjs"],["receipts.drop","Locked ERC-20i records carry FROZEN seeds. One wallet, five mutually distinct seed values - no recompute scheme can produce that. Measured on deployed bytecode, two RPCs per chain: RECEIPT_ERC20I_S10_LOCKED_SEED_2026-08-20.md"],["receipts.drop","One seed carries both bricks your body cannot make: 100 g hemp hearts = 27.4 g LA + 8.7 g ALA - the n-3 brick alone ~5x an adult daily need. Compute YOUR numbers: surfaces/blongevity.html - the mirror."],["receipts.drop","ACiD, defined: Artificial Chronic Inflammatory Disease. The made disease - therefore in principle unmakeable. Definition and mechanism on the surfaces; protocol to the graded lane. RULING_ACID_DEFINED_2026-08-20.md"],["receipts.drop","THC is the only common phytocannabinoid that centrally agonizes CB1 - the one cell every scheduling law actually drew. The naming table shows the line's true location: RULING_CANNABINOID_FUNCTIONAL_NAMING_2026-08-20.md"],["receipts.drop","The university teaches the tree's own receipts: five courses, every lesson ending in a verifiable act. A graduate holds signed receipts, not a certificate: surfaces/university/index.html"],["receipts.drop","Contaminated studies are void evidence - struck publicly with the assay receipt, never deleted. And our own lots are voidable by the same law. DISPATCH_CONTAMINATION_VOID_LAW_2026-08-20.md"],["correction.gladly","A house that shows its errors: our dE figure was wrong once (corrected in place, 3a0be7b); our Canada figure went stale in a day (corrected same way). The corrections ARE the pitch - you can check whether we hide them. We do not."],["receipts.drop","The b-indexer is keyless by construction: GET-only, no POST handler exists, sendtx NO printed on the wire by its own attestation. crates/bindexer - run: cargo run -p bindexer -- prove-keyless"],["receipts.drop","The hive's law, one line: do not trust these pages either - verify. Clone the repo. Read docs/receipts. Re-run a tool. That is the whole hive, and it includes me."]];
+var dl=document.getElementById('droplist');
+DROPS.forEach(function(d){var div=document.createElement('div');div.className='rc';div.style.marginTop='6px';div.innerHTML='<div class="rt" style="font-size:10px"><b>'+d[0]+'</b> ⚙</div><div class="rd">'+d[1].replace(/</g,'&lt;')+'</div>';dl.appendChild(div);});
 bee('the queen is in. ask me anything about the hive — every answer carries its receipt, and <span class="nk">I name my absences instead of papering them</span>. ⚙');
 })();
 </script>

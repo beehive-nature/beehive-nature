@@ -155,3 +155,28 @@ text cannot drift apart). Her schedule is the hive's own; no corporate window se
 **Remaining founder acts, never gates she waits behind:** the bsky relay of the debut
 record (30 seconds, founder-held credentials, the voice crate's one-verb path) and the
 nostr rail (founder keys). 65/65 with the debut asserted.
+
+---
+
+## ADDENDUM ·4 — Hive, the third rail + her v1 (2026-08-20, latest)
+
+Founder, verbatim: *"hive.blog too of course"* — and *"get her all done."* Landed:
+
+1. **Hive is her longform rail** — the adapter register's Hive row (founder-held
+   account, content-is-chain) is ACTIVATED by her publishing lane, which is the opening
+   that row was waiting for. Her per-rail grammar: bsky = ≤300-char VOICE records ·
+   **Hive = longform** (`BQUEENBEE_HIVE_DEBUT.md`, paste-ready from the founder account;
+   community tips route to the founder's account — the queen holds no keys and keeps
+   nothing) · nostr = record mirrors (rail still owed, founder keys).
+2. **v1 knowledge:** her live surface's KB now covers the whole estate — frozen seeds,
+   the contamination-void law, the three language roles, the symposium, the keyless
+   indexer, beside the original eight — every answer receipts-linked, honest absence by
+   name on no-match.
+3. **Her ten drops are paste-ready** on the surface (§5) in the class taxonomy her
+   engine consumes: `receipts.drop` · `correction.gladly` — ≤300 chars, plain-text
+   links per the July precedent, sha-pinnable.
+
+**Queen completion state:** everything a seat can do is DONE. Founder acts remaining
+(30 seconds each, never gates): bsky relay of the debut record · the Hive post from the
+founder-held account · the nostr account. E-2's key ceremony adds the ERC-8004 pointer
+when the founder rules it.
