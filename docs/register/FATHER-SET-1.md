@@ -51,6 +51,48 @@ The Thai entry above is the doctrine's first worked case and its standard of car
 **Gate T-4b:** the fallback authority where no monarch exists — academies, ministries, or
 founder designation per language. Until ruled, only Thai and English carry named heads.
 
+### T-4b's first worked answer — France, the neutral genesis reference (founder-ruled 2026-08-20)
+
+Founder, verbatim: *"France is an excellent neutral genesis reference bLanguageDOCK
+Personally I a always thought he was the king of France, but we should never assume or
+believe other language's authorities so addressed to the Government of France then Italy
+and EU paralment along the whole way integrating their language of value when it is fiat
+EURO and the EURO VAT TAX where applicable with any of the eco markets."*
+
+**The principle extracted (now doctrine): we never assume or believe another language's
+authorities.** France has no king — and the point generalizes: representation is
+**self-defined by each polity**; this register only records where the open-dock
+invitation is addressed, exactly as they constitute themselves. For republics, T-4b's
+answer is now shaped: **the constitutional government** — and where a supranational body
+exists, it is addressed *along the whole way*:
+
+| language | rung | addressed to (open dock, T-4c shape) |
+|---|---|---|
+| **French** | reference ladder rung three — the NEUTRAL genesis reference (~80M native; ~300M+ across the francophonie, OIF-claimed — CANDIDATE grade as always) | **the Government of France** — never an assumed authority |
+| **Italian** | reference (~64M native, CANDIDATE) | **the Government of Italy** |
+| — | supranational layer | **the European Parliament**, along the whole way |
+
+**The Euro clause:** integrating *their language of value* — **fiat EUR** — with **EU VAT
+where applicable** in any of the eco markets. Routed as **gate T-8** (below): the EU
+market-integration lane (EUR pricing rails + VAT compliance in farmers/coop/DeMarketPlace
+when serving EU participants) is research + options; real-world deployment and adoption
+is the founder's own expertise lane, so the options land at his desk, not as seat design.
+
+## MONEY = ANY LANGUAGE THAT EXPRESSES VALUE (founder doctrine, 2026-08-20, verbatim)
+
+The day's largest unification, recorded where both registers can cite it: **currencies
+are languages of value.** The language register and the value-adapter register are the
+same *kind* of register — a fiat currency docks for a jurisdiction the way a father
+tongue docks for a speech community: hardcoded where load-bearing (EUR for the EU lane),
+attested, honestly labeled, withdrawable with a receipt. The bFood Hexagon's price rails,
+the farmers market's fUSD, the DeMarketPlace's USDC, and tomorrow's EUR lane are all
+*renderings of value in a local tongue* — and the pointer principle holds here too:
+a currency rendering never owns the value it expresses.
+
+**Gate T-8:** commission the EU lane — EUR as the docked language-of-value + VAT-where-
+applicable compliance mapping for the eco markets — research + options to the founder's
+deployment desk.
+
 ### The approach shape — Royal Guard to Royal Guard, an open dock (founder-proposed 2026-08-20)
 
 Founder, verbatim: *"Royal Guard to Royal Gaurd Dock with open invitation without
