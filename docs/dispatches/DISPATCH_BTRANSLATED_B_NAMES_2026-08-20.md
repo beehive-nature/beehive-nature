@@ -186,4 +186,24 @@ build only. T-1's number, T-4's representation shape, and T-5's ruler remain ope
 alpha ships with candidate data graded as candidate. Nothing on the surface can mint,
 own, or route value — pointer principle by construction.
 
+## 9 · ADDENDUM (same day) — gate T-7: a corpus's own `.b`, asked and assessed
+
+Founder, verbatim: *"father ratified language corpuses get their full control of a
+compatable interopratable *.b domain? what do you think?"*
+
+Seat 3's assessment, delivered same day: **yes to one fully-controlled canonical `.b`
+name per father-ratified corpus** (its house — DID document, corpus endpoints, rendering
+tables, attestation roster — registered through the T-4 bAccord with staked
+representation); **no to wildcard/subtree control**, because a language-controlled
+namespace is zone delegation, which the bzdid architecture decision disqualified with
+the words "Do not re-propose zone delegation" — and it would maximize exactly the
+representation-capture and withdrawal blast radii the pointer principle shrinks. Under
+the recommended shape, the language's `.b` is the attestation SOURCE the one skeleton
+tree points at — never the landlord of anyone else's names — and withdrawal stays a
+receipt-shaped quieting of their own house.
+
+| | question |
+|---|---|
+| **T-7** | ratify: one fully-controlled `.b` name per father-ratified corpus (T-4 bAccord holds it); aliases remain pointers into the one tree; no wildcard subtrees ever |
+
 **Seat 3, 2026-08-20.**
