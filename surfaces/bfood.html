@@ -6,265 +6,651 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="color-scheme" content="dark">
-<title>bFood Hexagon — the basket vs the minimum, cited or silent</title>
+<title>bFood Hexagon — the successor to the food pyramid</title>
 <style>
-:root{--bg:#0d1410;--ink:#e2efdb;--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--dim:#8a9a8a;--line:#243026;--leaf:#7ddf8f;--amber:#ffb347;
-/* food-source set = the six-checks-validated categorical set for surface #0d1410
-   (lightness band 0.48–0.67, CVD worst adjacent ΔE 12.5 tritan — 17.1 is the worst PROTAN pair, corrected by the design seat 2026-08-20; normal 22.7, contrast ≥3:1
-   — receipt in review.html). Identity never rides color alone: label + swatch always. */
---f-hemp:#3f9c55;--f-spir:#0092a6;--f-chlo:#a476ec;--f-coco:#c07f1c}
+:root{
+ --bg:#0d1410;--panel:#111a14;--well:#0a0f0b;--ink:#e6f2df;--dim:#93a493;--faint:#7a8c7c;
+ --line:#243026;--gold:#FFD700;--violet:#c9a0ff;--cyan:#00E5FF;
+ /* COVERAGE IS ENCODED BY FILL HEIGHT, NOT BY COLOUR STEP.
+    A ramp fails here: on a surface this dark its lowest step sits at 1.3:1 against
+    the card, so a cell at 5% would be indistinguishable from a cell that was never
+    measured — the two states this whole page exists to keep apart. Height is also
+    the more accurate perceptual channel. So every measured cell is an outlined
+    vessel that fills from the bottom, one colour throughout; amber means an
+    applicable upper limit is exceeded; and NotMeasured is not a shorter fill but
+    NO fill at all, with a dashed rim and the letters n/m. Three redundant signals,
+    never colour alone. */
+ --cellbg:#16211a;--cellrim:#4d6553;--fill:#63c97c;--fillfull:#a6f2b8;
+ --warn:#ffb347;--over:#ff8f5a;
+ /* FOOD IDENTITY — categorical, fixed order, validated on this surface AND against
+    the ground each label actually lands on. Order is load-bearing: adjacency is a
+    property of stack order. Do not reorder. */
+ --f-hemp:#3f9c55;--f-chlo:#a476ec;--f-coco:#c07f1c;--f-spir:#0092a6;
+}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:36px 16px 90px}
-header{text-align:center;margin-bottom:10px}
-h1{font-size:clamp(17px,4vw,24px);color:var(--gold);font-weight:400;letter-spacing:.05em}
-header p{color:var(--dim);font-size:11px;margin-top:6px;max-width:700px;margin-left:auto;margin-right:auto}
-main{max-width:860px;margin:0 auto}
-section{background:#111a14;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:16px}
-section h2{font-size:12px;color:var(--violet);font-weight:400;letter-spacing:.08em;margin-bottom:8px}
-.law{color:var(--dim);font-size:10px;line-height:1.7}
-#basket{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:10px}
-.food{background:#0a0f0b;border:1px solid var(--line);border-radius:8px;padding:10px}
-.food .fn{font-size:11px}
-.food .fs{font-size:9px;color:var(--dim);margin-top:2px}
-.food input{width:64px;background:#0d1410;color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:3px 6px;font:12px 'IBM Plex Mono',monospace;margin-top:6px}
-.food i.sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:-1px}
-#hexwrap{overflow-x:auto}
-#hexes{margin-top:6px}
-.hexcell{cursor:default}
-#nodv{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-.chip{background:#0a0f0b;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:10px;color:var(--dim)}
-.chip b{color:var(--ink);font-weight:400}
-#tip{position:fixed;display:none;background:#0a0f0b;border:1px solid var(--line);border-radius:6px;padding:6px 9px;font-size:10px;color:var(--ink);pointer-events:none;z-index:9;max-width:300px;line-height:1.6}
-footer{max-width:860px;margin:22px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
+html,body{overflow-x:hidden}
+body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;padding:26px 13px 80px}
+main{max-width:1000px;margin:0 auto}
+header{text-align:center;margin-bottom:6px}
+h1{font-size:clamp(19px,5vw,30px);color:var(--gold);font-weight:400;letter-spacing:.03em}
+.sub{color:var(--dim);font-size:11.5px;margin-top:7px;max-width:720px;margin-inline:auto;line-height:1.75}
+section{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:15px 16px;margin-top:14px}
+h2{font-size:11.5px;color:var(--violet);font-weight:400;letter-spacing:.09em;margin-bottom:9px}
+.law{color:var(--dim);font-size:10.5px;line-height:1.8}
+.law b{color:var(--ink)}
 a{color:var(--cyan)}
-#legend{margin-top:8px;font-size:10px;color:var(--dim)}
-#legend span{margin-right:14px;white-space:nowrap}
-#legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+
+/* ---------- the hero verdict ---------- */
+#verdict{display:flex;flex-wrap:wrap;align-items:center;gap:18px;justify-content:center;
+ background:var(--well);border:1px solid var(--line);border-radius:11px;padding:16px;margin-top:14px}
+#vbig{font-size:clamp(30px,9vw,52px);line-height:1;color:var(--fillfull)}
+#vbig small{font-size:14px;color:var(--dim)}
+#vtxt{font-size:11px;color:var(--dim);max-width:400px;line-height:1.8}
+
+/* ---------- the comb ---------- */
+#comb{display:grid;grid-template-columns:repeat(auto-fit,minmax(212px,1fr));gap:11px;margin-top:11px}
+.fam{background:var(--well);border:1px solid var(--line);border-radius:10px;padding:11px 10px 9px}
+.fam h3{font-size:10px;color:var(--ink);font-weight:400;letter-spacing:.07em}
+.fam .cnt{font-size:9.5px;color:var(--dim);margin-top:2px;margin-bottom:7px}
+.fam svg{display:block;width:100%;height:auto;overflow:visible}
+.hx{stroke-width:1.5;transition:none}
+.hlab{font:8.5px 'IBM Plex Mono',monospace;fill:var(--dim);text-anchor:middle}
+.hval{font:9px 'IBM Plex Mono',monospace;fill:var(--ink);text-anchor:middle}
+#key{margin-top:11px;font-size:10px;color:var(--dim);line-height:2.1}
+#key b{color:var(--ink);font-weight:400}
+.kk{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:5px;vertical-align:-2px;border:1px solid var(--line)}
+
+/* ---------- you ---------- */
+#you{display:flex;flex-wrap:wrap;gap:5px 15px;align-items:flex-end}
+label{display:block;color:var(--dim);font-size:9.5px;letter-spacing:.05em;margin-bottom:3px}
+input,select{background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:6px;
+ padding:6px 8px;font:12px 'IBM Plex Mono',monospace}
+input[type=number]{width:78px}
+#derived{display:grid;grid-template-columns:repeat(auto-fit,minmax(146px,1fr));gap:8px;margin-top:13px}
+.dc{background:var(--well);border:1px solid var(--line);border-left:3px solid var(--fill);border-radius:8px;padding:9px 11px}
+.dc .v{font-size:19px;line-height:1.25}
+.dc .v s{font-size:11px;color:var(--dim);text-decoration:none}
+.dc .l{font-size:9.5px;color:var(--dim);letter-spacing:.05em;margin-top:2px}
+.dc .w{font-size:9px;color:var(--fill);margin-top:4px;line-height:1.5}
+
+/* ---------- basket ---------- */
+#basket{display:grid;grid-template-columns:repeat(auto-fit,minmax(196px,1fr));gap:9px;margin-top:9px}
+.food{background:var(--well);border:1px solid var(--line);border-radius:9px;padding:10px 11px}
+.food .fn{font-size:11.5px}
+.food .fsrc{font-size:9px;color:var(--faint);margin-top:3px;line-height:1.55}
+.food .auto{font-size:9px;color:var(--fill);margin-top:5px;line-height:1.5}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.food input{margin-top:7px}
+
+/* ---------- the ledger ---------- */
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:10.5px;min-width:640px}
+th{color:var(--violet);font-weight:400;font-size:9.5px;letter-spacing:.05em;text-align:left;
+ padding:5px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:5px 6px;border-bottom:1px solid var(--line);color:var(--dim);vertical-align:middle}
+td.n{color:var(--ink);white-space:nowrap}
+td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--ink)}
+.bar{position:relative;height:11px;background:var(--well);border-radius:2px;min-width:120px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:2px 0 0 2px}
+.bar u{position:absolute;top:-2px;bottom:-2px;width:1px;background:var(--faint);text-decoration:none}
+.tag{font-size:8.5px;letter-spacing:.04em;border:1px solid var(--line);border-radius:3px;padding:1px 4px;
+ color:var(--dim);white-space:nowrap;display:inline-block}
+.tag.s{color:var(--fill);border-color:#2b4a34}
+.nm{color:var(--faint);font-style:italic}
+.note td{color:var(--faint);font-size:9.5px;padding-top:0;line-height:1.7}
+
+/* ---------- misc ---------- */
+.arb{background:var(--well);border:1px solid var(--line);border-radius:9px;padding:11px 12px;margin-top:8px}
+.arb .big{font-size:17px;color:var(--ink)}
+.arb .big s{font-size:11px;color:var(--dim);text-decoration:none}
+.arb .sm{font-size:10px;color:var(--dim);margin-top:4px;line-height:1.75}
+.brake{border-left:3px solid var(--warn);padding-left:11px;margin-top:10px}
+footer{max-width:1000px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
 </style>
 </head>
 <body>
-<header>
-  <h1>⬡ the bFood Hexagon</h1>
-  <p>how far the basket fills the 100% MINIMUM required intake, nutrient by nutrient —
-  every number computed live from cited records. composition only: what is IN the food,
-  never what it does to a body. unmeasured is never zero.</p>
-</header>
 <main>
+<header>
+  <h1>⬡ THE bFOOD HEXAGON</h1>
+  <div class="sub">The food pyramid drew <b style="color:var(--ink)">food groups</b> and drew the
+  same picture for every human alive. This draws <b style="color:var(--ink)">the nutrients your
+  body actually requires</b> — one cell per nutrient, computed from your height, weight, age, sex
+  and activity — and fills each cell by how much of it today's food really delivered.
+  <b style="color:var(--ink)">Nothing unmeasured is ever drawn as zero.</b></div>
+</header>
+
+<div id="verdict">
+  <div id="vbig">—</div>
+  <div id="vtxt"></div>
+</div>
 
 <section>
-  <h2>THE BASKET — grams per day (edit; everything recomputes)</h2>
+  <h2>1 · YOUR BODY — the five inputs that genuinely move a requirement</h2>
+  <div id="you">
+    <div><label for="sex">sex</label><select id="sex"><option value="m">male</option><option value="f">female</option></select></div>
+    <div><label for="age">age</label><input id="age" type="number" min="19" max="110" value="49"></div>
+    <div><label for="ht">height cm</label><input id="ht" type="number" min="120" max="230" value="180"></div>
+    <div><label for="wt">weight kg</label><input id="wt" type="number" min="30" max="250" value="80"></div>
+    <div><label for="pal">activity</label><select id="pal">
+      <option value="0">inactive</option><option value="1" selected>low active</option>
+      <option value="2">active</option><option value="3">very active</option></select></div>
+  </div>
+  <div id="derived"></div>
+  <div class="law" style="margin-top:11px"><b>Only these four scale with your body, and this page
+  will not pretend otherwise.</b> Energy uses the NASEM 2023 EER equation, where your height,
+  weight, age and activity <i>are</i> the variables. Protein is an RDA in grams per kilogram, so
+  your mass is the number. Fibre scales through energy at 14 g per 1,000 kcal.
+  <b>Every vitamin and mineral below is a flat constant for your age and sex group</b> — NASEM
+  uses reference weights inside the committee's derivation, never as a coefficient in the published
+  value. Inventing a weight curve for zinc to make this page feel more personal would be the exact
+  fake precision this project exists to refuse, so the cells say <span class="tag">👥 group</span>
+  and mean it.</div>
+</section>
+
+<section>
+  <h2>2 · THE HEXAGON — 31 cells, one per nutrient, filled by what you actually got</h2>
+  <div id="comb"></div>
+  <div id="key"></div>
+</section>
+
+<section>
+  <h2>3 · THE BASKET — three honest weights, never one implied</h2>
   <div id="basket"></div>
-  <div id="legend"></div>
-  <div class="law" style="margin-top:8px">hemp heARTs is the reference genesis commodity
-  (DISPATCH_BLAI_MACRO_SCHEMA §2a). chlorella has no generic USDA record — its values are a
-  published review's ranges across 13 products, contributed at range midpoints and marked ≈
-  (literature-grade, replaced by the commissioned COA when it lands). spirulina's omega rows
-  are undifferentiated in the USDA record, so they are NOT silently substituted.</div>
+  <div class="law" style="margin-top:10px"><b>The house serving is 1.25 g of hemp hearts per kg of
+  body weight</b> — 100 g for an 80 kg adult, founder-set, and labelled a <i>house basis</i> rather
+  than a published standard, because it is one. It moves when your weight moves. The reference
+  intakes beside it do not. <b>Two numbers that share a unit but not a pedigree must never be
+  allowed to touch.</b></div>
 </section>
 
 <section>
-  <h2>THE HEXAGON — % of FDA Daily Value supplied, linear fill (never a pie: angles lie about magnitude)</h2>
-  <div id="hexwrap"><svg id="hexes" width="880" height="0" xmlns="http://www.w3.org/2000/svg"></svg></div>
-  <div class="law">fill rises bottom-up, stacked by food in the validated set · a cell over
-  100% keeps its true number and gains a bright ring · dashed cells: NOT MEASURED in any
-  included record — absence of test is not absence of substance · a cell would flag in
-  amber with its citation only if the basket crossed an APPLICABLE tolerable upper limit
-  (UL form restrictions honored: food magnesium and food niacin do not count toward their
-  supplemental-only ULs; vitamin A's UL covers preformed retinol, not algae carotenoids;
-  folate's covers synthetic folic acid only — all three foods measure 0 folic acid).</div>
+  <h2>4 · THE LEDGER — every nutrient, the exact amount, and where it came from</h2>
+  <div class="law">Sorted by how well the basket covers it. The tick on each bar is 100% of your
+  requirement. <b>≥</b> means a food in your basket has no published row for that nutrient, so the
+  total is a <b>floor, not a total</b> — the same law that forbids a lab's four-analyte panel from
+  calling itself "total cannabinoids".</div>
+  <div class="scroll"><table id="tab"><thead><tr>
+    <th>nutrient</th><th>coverage</th><th style="text-align:right">%</th>
+    <th style="text-align:right">you need</th><th style="text-align:right">basket gives</th>
+    <th>basis</th><th style="text-align:right">gap</th>
+  </tr></thead><tbody></tbody></table></div>
+  <div id="ulnote" class="law" style="margin-top:9px"></div>
 </section>
 
 <section>
-  <h2>NO DAILY VALUE ESTABLISHED — measured facts, stated absolutely</h2>
-  <div id="nodv"></div>
+  <h2>5 · FAT, DISAGGREGATED — "saturated fat" is never one number here</h2>
+  <div class="scroll" id="fat"></div>
+  <div class="law" style="margin-top:9px"><b>That category collapses two things a body routes
+  differently</b> — MCTs (C6–C12) leave the gut by the portal vein straight to the liver, LCTs
+  (C14+) by chylomicron through the lymphatics. USDA publishes fatty acids individually by chain
+  length, so this split is not an interpretation we add; <b>it is a column most labels stop
+  showing.</b> Lauric acid (C12) gets its own row because it is an MCT by chain length yet is
+  absorbed substantially like an LCT — and coconut oil, this basket's own MCT source, is roughly
+  half lauric. Publishing that against our own favourite fat is the point: a page that only
+  disaggregates other people's food is marketing.</div>
 </section>
 
 <section>
-  <h2>SOURCES — cite or the cell stays silent</h2>
-  <div class="law" id="sources"></div>
+  <h2>6 · THE ARBITRAGE — what the measurements say people actually miss</h2>
+  <div id="arb"></div>
+  <div class="brake"><div class="law"><b>THE BRAKE, and it ships with the number every time.</b>
+  "Below the EAR" is a statistic about <i>dietary intake</i>, not a deficiency rate. Measured by
+  serum 25(OH)D, about <b>5%</b> of people are at risk of vitamin D deficiency against <b>96%</b>
+  below the dietary EAR — because the board set that RDA <i>"on the assumption that people receive
+  minimal sun exposure."</i> Vitamin E intake is under-captured because cooking fats go uncounted,
+  and choline has no EAR at all. Publishing 96 / 88 / 74% without this paragraph would be
+  technically accurate and substantively misleading, which is the failure mode this page exists to
+  refuse.</div></div>
+  <div class="law" style="margin-top:9px"><b>And the half that never gets quoted:</b> selenium,
+  niacin, riboflavin, phosphorus, <b>iron (6%)</b>, thiamin, B12 and protein are <i>not</i>
+  population shortfalls. A page that shows only the alarming half is a campaign, not a measurement.</div>
 </section>
 
+<section>
+  <h2>7 · THE QUEST — a plan for a day, a week, a month, a year</h2>
+  <div class="law">Each rung is a real span of time and a <b>different strength of evidence</b>.
+  You cannot claim a year-scale result from a day of remembering what you ate, so the rungs do not
+  let you. Every quest is built and checked in <a href="university/">Beehive University</a>.</div>
+  <div id="quests"></div>
+
+  <h2 style="margin-top:18px">…AND HOW ANY OF IT COULD BE BELIEVED</h2>
+  <div class="law"><b>Four different questions hide inside "how do we know it worked", and they have
+  four different answers.</b> Collapsing them is how wellness claims get made.</div>
+  <div class="scroll"><table style="min-width:600px"><thead><tr>
+    <th>the question</th><th>the honest answer here</th><th>who can check it</th></tr></thead><tbody>
+    <tr><td class="n">documented</td>
+      <td>The plan is a file <b>you</b> compose and hold. This page has no account, no server and no
+        database — it computes in your browser and stores nothing. The hive never receives your food log.</td>
+      <td><b>You, completely.</b> There is no custodian to trust, because there is no custodian.</td></tr>
+    <tr><td class="n">monitored</td>
+      <td>By nobody, by design. An operator who watches your intake is a party who can be subpoenaed,
+        breached or sold. <b>Autonomy means every factor is self-verifying</b> — so monitoring is
+        something you do to your own record, not something done to you.</td>
+      <td>You. This is a deliberate capability we refuse to build, not one we have not built yet.</td></tr>
+    <tr><td class="n">measured</td>
+      <td>Two things get measured and they are <b>not the same thing</b>: what the food contains
+        (this page, from published composition), and what your body did with it (a blood panel).
+        Only the second is a measurement <i>of you</i>.</td>
+      <td>Anyone, for the first. An accredited lab under chain of custody, for the second.</td></tr>
+    <tr><td class="n">independently<br>verified</td>
+      <td><b>This is where most of this page is genuinely strong, and where self-report is genuinely
+        worthless.</b> Every requirement traces to a published NASEM value; every food figure to a
+        USDA record ID you can refetch; the EER equation is printed in full. A stranger can
+        recompute this entire page from primary sources and catch us if we are wrong.
+        <b>What no stranger can verify is that you actually ate it.</b></td>
+      <td>Anyone with a browser, for the arithmetic. <b>Nobody, for adherence</b> — unless you
+        choose to attach evidence, which is what the ladder below is for.</td></tr>
+  </tbody></table></div>
+
+  <div class="law" style="margin-top:12px"><b>THE EVIDENCE LADDER — every claim carries the tier it
+  was earned at, and never a higher one.</b></div>
+  <div class="scroll"><table style="min-width:600px"><thead><tr>
+    <th>tier</th><th>what it evidences</th><th>what it cannot support</th></tr></thead><tbody>
+    <tr><td class="n">0 · composed</td><td>a plan exists and its arithmetic is correct</td>
+      <td>anything at all about a body. A plan is a hypothesis.</td></tr>
+    <tr><td class="n">1 · self-reported</td>
+      <td>your own account of what you ate</td>
+      <td><b>the weakest tier in nutrition science and it is not close.</b> Dietary self-report is
+        systematically under-reported, and the error is not random — it varies with body weight, which
+        biases exactly the comparison a page like this invites. Never present a tier-1 result as a finding.</td></tr>
+    <tr><td class="n">2 · receipt-backed</td>
+      <td>that the food entered your household — purchase records, a scale reading, a lot number
+        on a bag</td>
+      <td>that you ingested it, or when. It closes the honesty gap on <i>supply</i>, not on intake.</td></tr>
+    <tr><td class="n">3 · assayed</td>
+      <td>what is measurably in your blood — serum 25(OH)D, ferritin, B12, a lipid panel, omega-3
+        index. <b>The only tier that measures the body rather than the food.</b></td>
+      <td>attribution. A changed biomarker does not name its cause; that needs a design, a control
+        and a pre-registered question — which is the <a href="bigen.html">BiGen</a> lane, off this page.</td></tr>
+  </tbody></table></div>
+  <div class="law" style="margin-top:10px"><b>The one number on this page that already sits at tier 3
+  for everyone:</b> the vitamin D brake in section 6. Serum measurement says roughly 5% are deficient
+  where dietary intake says 96% fall short. That gap between what people eat and what is in their
+  blood <i>is</i> the reason the ladder exists, and it is why this project will not publish an
+  intake statistic as a health finding.</div>
+</section>
+
+<section>
+  <h2>8 · SOURCES — cite, or the cell stays silent</h2>
+  <div class="law" id="src"></div>
+</section>
 </main>
-<div id="tip"></div>
+
 <footer>
-  composition facts only (Axis A) — effect and mechanism theses live off-repo in the graded
-  evidence drawer, per the k001 health-claim wall · spec: DISPATCH_BLAI_MACRO_SCHEMA §2a ·
-  <a href="index.html">← the hive</a>
+  composition and published reference intakes only — what a nutrient <i>does</i> in a body lives
+  off-repo and graded · <a href="university/">learn to check this page</a> ·
+  <a href="bigen.html">the evidence deck</a> · <a href="index.html">← the hive</a>
 </footer>
 
 <script src="tour.js?v=8"></script>
 <script>
 (function(){
-var $=function(i){return document.getElementById(i);};
+var $=function(i){return document.getElementById(i)};
+function num(x,d){ if(x===null||x===undefined||isNaN(x)) return '—';
+  var a=Math.abs(x); if(d===undefined) d = a>=100?0 : a>=10?1 : a>=1?2 : 3;
+  var s=x.toFixed(d); if(s.indexOf('.')>-1) s=s.replace(/0+$/,'').replace(/\.$/,''); return s; }
 
-/* ================= THE DATASET — fetched + receipted 2026-08-19 =================
-   USDA FoodData Central (SR Legacy, verified live via api.nal.usda.gov):
-     hemp 170148 · spirulina 170495 · coconut oil 171412
-   Chlorella: NO generic FDC record (live search receipt) — Bito et al., Nutrients
-   2020;12(9):2524 (PMC7551956), ranges across 13 products; midpoints used, ≈-marked.
-   DVs: FDA Daily Values (adults & children ≥4y). ULs: NIH ODS fact sheets.
-   null = NotMeasured (row absent). Measured zeros stay 0.                        */
-var SRC={
-  hemp:'USDA FDC 170148 (SR Legacy)', spir:'USDA FDC 170495 (SR Legacy)',
-  chlo:'Bito et al. 2020, Nutrients 12(9):2524 — product-range midpoint ≈',
-  coco:'USDA FDC 171412 (SR Legacy)'};
+/* ═══ REQUIREMENTS — NASEM/IOM Dietary Reference Intakes + FDA, adults 19+.
+   ul is the Tolerable Upper Intake Level; ulScope names the FORM the UL actually
+   covers, because a UL applied to the wrong form manufactures false alarms. ═══ */
+var NUT=[
+ {k:'energy',s:'kcal',u:'kcal',b:'EER',fam:0,dyn:'eer',scaled:'⚖ your height, weight, age and activity ARE the equation'},
+ {k:'protein',s:'prot',u:'g',b:'RDA',fam:0,dyn:'prot',scaled:'⚖ 0.8 g per kg of your body'},
+ {k:'dietary fibre',s:'fibre',u:'g',b:'AI',fam:0,dyn:'fib',scaled:'⚖ 14 g per 1,000 kcal — scales through energy'},
+
+ {k:'linoleic acid n-6',s:'n-6',u:'g',b:'AI',fam:1,m:17,f:12,a51m:14,a51f:11},
+ {k:'α-linolenic acid n-3',s:'n-3',u:'g',b:'AI',fam:1,m:1.6,f:1.1,
+   note:'no authoritative body has set a target n-6:n-3 RATIO — the DRI text states the optimal ratio, if any, has not been defined. A page printing one would be inventing it.'},
+
+ {k:'vitamin A',s:'A',u:'µg RAE',b:'RDA',fam:2,m:900,f:700,ul:3000,ulScope:'preformed retinol only — provitamin A carotenoids do not count toward it'},
+ {k:'vitamin D',s:'D',u:'µg',b:'RDA',fam:2,m:15,f:15,a71:20,ul:100,
+   note:'this RDA assumes MINIMAL SUN EXPOSURE — it is a dietary target, not a total requirement'},
+ {k:'vitamin E',s:'E',u:'mg',b:'RDA',fam:2,m:15,f:15,ul:1000,ulScope:'supplemental α-tocopherol only'},
+ {k:'vitamin K',s:'K',u:'µg',b:'AI',fam:2,m:120,f:90},
+
+ {k:'vitamin C',s:'C',u:'mg',b:'RDA',fam:3,m:90,f:75,ul:2000,
+   note:'smokers add 35 mg — the only adult personalisation in all thirteen vitamins, and it is behavioural, not anthropometric'},
+ {k:'thiamin B1',s:'B1',u:'mg',b:'RDA',fam:3,m:1.2,f:1.1,
+   note:'no UL because absorption saturates — that is an absence of evidence of harm, NOT evidence of safety at any dose'},
+ {k:'riboflavin B2',s:'B2',u:'mg',b:'RDA',fam:3,m:1.3,f:1.1},
+ {k:'niacin B3',s:'B3',u:'mg NE',b:'RDA',fam:3,m:16,f:14,ul:35,ulScope:'supplemental niacin only — niacin from food does not count toward it'},
+ {k:'pantothenic acid B5',s:'B5',u:'mg',b:'AI',fam:3,m:5,f:5},
+ {k:'vitamin B6',s:'B6',u:'mg',b:'RDA',fam:3,m:1.3,f:1.3,a51m:1.7,a51f:1.5,ul:100},
+ {k:'biotin B7',s:'B7',u:'µg',b:'AI',fam:3,m:30,f:30},
+ {k:'folate B9',s:'B9',u:'µg DFE',b:'RDA',fam:3,m:400,f:400,ul:1000,ulScope:'synthetic folic acid only — every food here measures zero of it'},
+ {k:'vitamin B12',s:'B12',u:'µg',b:'RDA',fam:3,m:2.4,f:2.4},
+
+ {k:'calcium',s:'Ca',u:'mg',b:'RDA',fam:4,m:1000,f:1000,a51f:1200,a71:1200,ul:2500},
+ {k:'phosphorus',s:'P',u:'mg',b:'RDA',fam:4,m:700,f:700,ul:4000},
+ {k:'magnesium',s:'Mg',u:'mg',b:'RDA',fam:4,m:400,f:310,a31m:420,a31f:320,ul:350,ulScope:'SUPPLEMENTAL magnesium only — magnesium from food does not count toward it'},
+ {k:'potassium',s:'K⁺',u:'mg',b:'AI',fam:4,m:3400,f:2600},
+ {k:'sodium',s:'Na',u:'mg',b:'AI',fam:4,m:1500,f:1500,cdrr:2300,
+   note:'has no UL; it has a Chronic Disease Risk Reduction intake instead — reduce intake if above 2,300 mg'},
+
+ {k:'iron',s:'Fe',u:'mg',b:'RDA',fam:5,m:8,f:18,a51f:8,ul:45},
+ {k:'zinc',s:'Zn',u:'mg',b:'RDA',fam:5,m:11,f:8,ul:40},
+ {k:'copper',s:'Cu',u:'µg',b:'RDA',fam:5,m:900,f:900,ul:10000},
+ {k:'manganese',s:'Mn',u:'mg',b:'AI',fam:5,m:2.3,f:1.8,ul:11},
+ {k:'iodine',s:'I',u:'µg',b:'RDA',fam:5,m:150,f:150,ul:1100},
+ {k:'selenium',s:'Se',u:'µg',b:'RDA',fam:5,m:55,f:55,ul:400},
+ {k:'molybdenum',s:'Mo',u:'µg',b:'RDA',fam:5,m:45,f:45,ul:2000},
+ {k:'chromium',s:'Cr',u:'µg',b:'AI',fam:5,m:35,f:25,a51m:30,a51f:20}
+];
+var FAM=[{n:'ENERGY & BUILD',d:'the only rows that scale with your body'},
+ {n:'ESSENTIAL FATS',d:'the two your body cannot synthesise'},
+ {n:'FAT-SOLUBLE VITAMINS',d:'stored, so excess accumulates'},
+ {n:'WATER-SOLUBLE VITAMINS',d:'not stored, so needed continually'},
+ {n:'MAJOR MINERALS',d:'required in hundreds of mg or more'},
+ {n:'TRACE MINERALS',d:'required in mg or µg — small, not optional'}];
+
+/* ═══ FOODS — per 100 g. null = the row is ABSENT from the record = NotMeasured.
+   A measured zero stays 0. The two are never merged. Stack order is validated. ═══ */
 var FOODS=[
- {id:'hemp',name:'hemp heARTs',grams:30,css:'var(--f-hemp)',hex:'#3f9c55'},
- {id:'spir',name:'spirulina (dried)',grams:10,css:'var(--f-spir)',hex:'#0092a6'},
- {id:'chlo',name:'chlorella ≈ (lit.)',grams:5,css:'var(--f-chlo)',hex:'#a476ec'},
- {id:'coco',name:'coconut oil (MCT-rich)',grams:15,css:'var(--f-coco)',hex:'#c07f1c'}];
-/* per 100 g. order: [hemp, spir, chlo(midpoint), coco] */
-var N=[
- {k:'protein',u:'g',dv:50, v:[31.56,57.47,61,0]},
- {k:'total fat',u:'g',dv:78, v:[48.75,7.72,12.5,99.06]},
- {k:'sat. fat',u:'g',dv:20, v:[4.6,2.65,null,82.475]},
- {k:'carbs',u:'g',dv:275, v:[8.67,23.9,23.5,0]},
- {k:'fiber',u:'g',dv:28, v:[4.0,3.6,11.5,0]},
- {k:'thiamin B1',u:'mg',dv:1.2, v:[1.275,2.38,2.0,0]},
- {k:'riboflavin B2',u:'mg',dv:1.3, v:[0.285,3.67,5.5,0]},
- {k:'niacin B3',u:'mg',dv:16, v:[9.2,12.82,45,0],ulNote:'UL 35 mg covers SUPPLEMENTAL niacin only — food niacin does not count (NIH ODS)'},
- {k:'B6',u:'mg',dv:1.7, v:[0.6,0.364,1.95,0],ul:100},
- {k:'folate',u:'µg',dv:400, v:[110,94,1950,0],ulNote:'UL 1000 µg covers synthetic folic acid only — all three foods measure folic acid 0'},
- {k:'B12',u:'µg',dv:2.4, v:[null,0,253,0],note:'hemp: not measured · spirulina: MEASURED 0 in FDC · chlorella: 6–500 µg product range, midpoint shown ≈'},
- {k:'vit A',u:'µg RAE',dv:900, v:[1,29,null,0],ulNote:'UL 3000 µg covers PREFORMED retinol only — algae carotenoids do not count'},
- {k:'vit C',u:'mg',dv:90, v:[0.5,10.1,103.5,0],ul:2000},
- {k:'vit D',u:'µg',dv:20, v:[null,0,null,0],ul:100,note:'hemp: not measured · spirulina: measured 0 · chlorella one-product D2 value excluded as UNVERIFIED (source flags it)'},
- {k:'vit E',u:'mg',dv:15, v:[0.8,5.0,24,0.11],ulNote:'UL 1000 mg covers supplemental alpha-tocopherol only'},
- {k:'vit K',u:'µg',dv:120, v:[null,25.5,1900,0.6]},
- {k:'calcium',u:'mg',dv:1300, v:[70,120,800,1],ul:2500},
- {k:'iron',u:'mg',dv:18, v:[7.95,28.5,70,0.05],ul:45},
- {k:'magnesium',u:'mg',dv:420, v:[700,195,221.5,0],ulNote:'UL 350 mg covers SUPPLEMENTAL magnesium only — food magnesium does not count (NIH ODS)'},
- {k:'phosphorus',u:'mg',dv:1250, v:[1650,118,null,0],ul:4000,note:'chlorella P extraction UNVERIFIED in source — rendered NotMeasured'},
- {k:'potassium',u:'mg',dv:4700, v:[1200,1363,850,0]},
- {k:'sodium',u:'mg',dv:2300, v:[5,1048,112.5,0]},
- {k:'zinc',u:'mg',dv:11, v:[9.9,2.0,1.5,0.02],ul:40},
- {k:'copper',u:'mg',dv:0.9, v:[1.6,6.1,1,0],ul:10},
- {k:'manganese',u:'mg',dv:2.3, v:[7.6,1.9,5,0],ul:11},
- {k:'selenium',u:'µg',dv:55, v:[null,7.2,null,0],ul:400}];
-/* no-DV facts (FDA table has no row): stated absolutely, never as a % */
-var NODV=[
- {k:'energy',u:'kcal',v:[553,290,null,892]},
- {k:'omega-3 ALA 18:3 n-3',u:'g',v:[8.684,null,null,0.019],note:'spirulina FDC carries only undifferentiated 18:3 — not substituted'},
- {k:'omega-6 LA 18:2 n-6',u:'g',v:[27.358,null,null,1.676]},
- {k:'MUFA',u:'g',v:[5.4,0.675,null,6.332]},
- {k:'PUFA',u:'g',v:[38.1,2.08,null,1.702]}];
+ {id:'hemp',n:'hemp hearts',hex:'#3f9c55',auto:1,g:100,lock:1,
+  src:'USDA FoodData Central 170148',url:'https://fdc.nal.usda.gov/food-details/170148/nutrients'},
+ {id:'chlo',n:'chlorella',hex:'#a476ec',g:5,
+  src:'Bito 2020, Nutrients 12(9):2524 — product-range midpoints, literature-grade not lot-grade',url:'https://pmc.ncbi.nlm.nih.gov/articles/PMC7551956/'},
+ {id:'coco',n:'coconut oil',hex:'#c07f1c',g:15,
+  src:'USDA FoodData Central 171412',url:'https://fdc.nal.usda.gov/food-details/171412/nutrients'},
+ {id:'spir',n:'spirulina, dried',hex:'#0092a6',g:10,
+  src:'USDA FoodData Central 170495',url:'https://fdc.nal.usda.gov/food-details/170495/nutrients'}
+];
+/* keyed to NUT[].k — order matches FOODS: hemp, chlorella, coconut, spirulina */
+var V={
+ 'energy':[553,null,892,290],'protein':[31.56,61,0,57.47],'dietary fibre':[4.0,11.5,0,3.6],
+ 'linoleic acid n-6':[27.358,null,1.676,null],'α-linolenic acid n-3':[8.684,null,0.019,null],
+ 'vitamin A':[1,null,0,29],'vitamin D':[null,null,0,0],'vitamin E':[0.8,24,0.11,5.0],'vitamin K':[null,1900,0.6,25.5],
+ 'vitamin C':[0.5,103.5,0,10.1],'thiamin B1':[1.275,2.0,0,2.38],'riboflavin B2':[0.285,5.5,0,3.67],
+ 'niacin B3':[9.2,45,0,12.82],'pantothenic acid B5':[null,null,null,3.48],'vitamin B6':[0.6,1.95,0,0.364],
+ 'biotin B7':[null,null,null,null],'folate B9':[110,1950,0,94],'vitamin B12':[null,253,0,0],
+ 'calcium':[70,800,1,120],'phosphorus':[1650,null,0,118],'magnesium':[700,221.5,0,195],
+ 'potassium':[1200,850,0,1363],'sodium':[5,112.5,0,1048],
+ 'iron':[7.95,70,0.05,28.5],'zinc':[9.9,1.5,0.02,2.0],'copper':[1600,1000,0,6100],
+ 'manganese':[7.6,5,0,1.9],'iodine':[null,null,null,null],'selenium':[null,null,0,7.2],
+ 'molybdenum':[null,null,null,null],'chromium':[null,null,null,null]
+};
+var SATF=[4.6,null,82.475,2.65];
 
-function grams(){ return FOODS.map(function(f){ return Math.max(0, parseFloat($('g-'+f.id).value)||0); }); }
-function fmt(x){ return x>=100?Math.round(x):(x>=10?x.toFixed(1):x.toFixed(2)).replace(/\.?0+$/,''); }
+/* EER — NASEM 2023, adults 19+. kcal/day; age y, height cm, weight kg. */
+var EER={m:[[753.07,-10.83,6.50,14.10],[581.47,-10.83,8.30,14.94],[1004.82,-10.83,6.52,15.91],[-517.88,-10.83,15.61,19.11]],
+         f:[[584.90,-7.01,5.72,11.71],[575.77,-7.01,6.60,12.14],[710.25,-7.01,6.54,12.34],[511.83,-7.01,9.07,12.56]]};
 
-FOODS.forEach(function(f){
-  var d=document.createElement('div'); d.className='food';
-  d.innerHTML='<div class="fn"><i class="sw" style="background:'+f.css+'"></i>'+f.name+'</div>'
-    +'<div class="fs">'+SRC[f.id]+'</div>'
-    +'<input id="g-'+f.id+'" type="number" min="0" step="1" value="'+f.grams+'"> g/day';
-  $('basket').appendChild(d);
-});
-$('legend').innerHTML=FOODS.map(function(f){return '<span><i style="background:'+f.css+'"></i>'+f.name+'</span>';}).join('');
+/* NHANES 2017–March 2020 Prepandemic, ages 1+, % below the EAR or AI. */
+var SHORT=[['vitamin D',96,1],['dietary fibre',94,1],['choline',88,0],['vitamin E',74,0],
+ ['potassium',72,1],['magnesium',49,0],['calcium',46,1],['vitamin C',44,0],['vitamin A',42,0]];
 
-var HW=138,HH=120,COLS=6,PAD=8; // pointy-top hex cell box
-function hexPath(cx,cy,r){ var p=[]; for(var i=0;i<6;i++){ var a=Math.PI/180*(60*i-90);
-  p.push((cx+r*Math.cos(a)).toFixed(1)+','+(cy+r*Math.sin(a)).toFixed(1)); } return 'M'+p.join(' L')+' Z'; }
-
-function render(){
-  var g=grams(), svg=$('hexes'); svg.innerHTML='';
-  var rows=Math.ceil(N.length/COLS); svg.setAttribute('height', rows*(HH+PAD)+30);
-  var defs=document.createElementNS('http://www.w3.org/2000/svg','defs'); svg.appendChild(defs);
-  N.forEach(function(n,idx){
-    var col=idx%COLS,row=Math.floor(idx/COLS);
-    var cx=col*(HW)+HW/2+((row%2)?HW/2:0), cy=row*(HH+PAD)+HH/2;
-    var r=44;
-    var gEl=document.createElementNS('http://www.w3.org/2000/svg','g'); gEl.setAttribute('class','hexcell');
-    // contributions
-    var parts=[],total=0,notMeasured=[],anyMeasured=false;
-    n.v.forEach(function(val,i){
-      if(val===null){ if(g[i]>0) notMeasured.push(FOODS[i].name); return; }
-      anyMeasured=true;
-      var amt=val*g[i]/100; if(amt<=0) return;
-      var pct=100*amt/n.dv; parts.push({i:i,amt:amt,pct:pct}); total+=pct;
-    });
-    var shown=Math.min(total,100);
-    var clipId='c'+idx;
-    var clip=document.createElementNS('http://www.w3.org/2000/svg','clipPath'); clip.setAttribute('id',clipId);
-    var crect=document.createElementNS('http://www.w3.org/2000/svg','rect');
-    var fillH=88*shown/100;
-    crect.setAttribute('x',cx-46); crect.setAttribute('y',(cy+44-fillH)); crect.setAttribute('width',92); crect.setAttribute('height',fillH);
-    clip.appendChild(crect); defs.appendChild(clip);
-    // stacked fill: proportional bands bottom-up inside the clip
-    var y=cy+44;
-    parts.forEach(function(p){
-      // each band's height = its share of the shown fill; when total exceeds 100%
-      // all parts compress proportionally so the fill is exactly full
-      var h=88*p.pct/Math.max(total,100);
-      var band=document.createElementNS('http://www.w3.org/2000/svg','rect');
-      band.setAttribute('x',cx-46); band.setAttribute('y',y-h); band.setAttribute('width',92); band.setAttribute('height',Math.max(h-1.5,0));
-      band.setAttribute('fill',FOODS[p.i].hex); band.setAttribute('clip-path','url(#'+clipId+')');
-      gEl.appendChild(band); y-=h;
-    });
-    var outline=document.createElementNS('http://www.w3.org/2000/svg','path');
-    outline.setAttribute('d',hexPath(cx,cy,r)); outline.setAttribute('fill','none');
-    var ulBreach=false;
-    if(n.ul){ var absTotal=0; n.v.forEach(function(val,i){ if(val!==null) absTotal+=val*g[i]/100; }); if(absTotal>n.ul) ulBreach=true; }
-    outline.setAttribute('stroke', ulBreach?'#ffb347':(total>=100?'#e2efdb':'#243026'));
-    outline.setAttribute('stroke-width', total>=100?2:1.5);
-    if(!anyMeasured) outline.setAttribute('stroke-dasharray','4 4');
-    gEl.appendChild(outline);
-    var t1=document.createElementNS('http://www.w3.org/2000/svg','text');
-    t1.setAttribute('x',cx); t1.setAttribute('y',cy-4); t1.setAttribute('text-anchor','middle');
-    t1.setAttribute('fill', anyMeasured?'#e2efdb':'#8a9a8a'); t1.setAttribute('font-size','13');
-    t1.setAttribute('font-family',"'IBM Plex Mono',monospace");
-    t1.textContent = anyMeasured ? (fmt(total)+'%'+(n.v[2]!==null&&g[2]>0?'≈':'')) : 'n/m';
-    gEl.appendChild(t1);
-    var t2=document.createElementNS('http://www.w3.org/2000/svg','text');
-    t2.setAttribute('x',cx); t2.setAttribute('y',cy+14); t2.setAttribute('text-anchor','middle');
-    t2.setAttribute('fill','#8a9a8a'); t2.setAttribute('font-size','8.5');
-    t2.setAttribute('font-family',"'IBM Plex Mono',monospace");
-    t2.textContent=n.k;
-    gEl.appendChild(t2);
-    // tooltip
-    var tipLines=[n.k+' — '+(anyMeasured?fmt(total)+'% of DV '+n.dv+' '+n.u:'NOT MEASURED in any included record')];
-    parts.sort(function(a,b){return b.pct-a.pct;}).forEach(function(p){
-      tipLines.push(FOODS[p.i].name+': '+fmt(p.amt)+' '+n.u+' ('+fmt(p.pct)+'%)'+(p.i===2?' ≈midpoint':''));
-    });
-    if(notMeasured.length) tipLines.push('not measured: '+notMeasured.join(', '));
-    if(n.ul) tipLines.push('UL '+n.ul+' '+n.u+'/day (NIH ODS)'+(ulBreach?' — EXCEEDED':''));
-    if(n.ulNote) tipLines.push(n.ulNote);
-    if(n.note) tipLines.push(n.note);
-    gEl.setAttribute('data-tip',tipLines.join('\n'));
-    svg.appendChild(gEl);
-  });
-  // no-DV strip
-  var nd=$('nodv'); nd.innerHTML='';
-  NODV.forEach(function(n){
-    var total=0,any=false,miss=[];
-    n.v.forEach(function(val,i){ if(val===null){ if(g[i]>0) miss.push(FOODS[i].name); return; } any=true; total+=val*g[i]/100; });
-    var c=document.createElement('div'); c.className='chip';
-    c.innerHTML='<b>'+n.k+'</b> · '+(any?fmt(total)+' '+n.u:'n/m')+(miss.length?' <span title="not measured: '+miss.join(', ')+'">±</span>':'');
-    if(n.note) c.title=n.note;
-    nd.appendChild(c);
-  });
-  // the measured omega ratio, computed, no claim attached
-  var ala=8.684*g[0]/100+0.019*g[3]/100, la=27.358*g[0]/100+1.676*g[3]/100;
-  if(ala>0){ var chip=document.createElement('div'); chip.className='chip';
-    chip.innerHTML='<b>omega-3 : omega-6 (measured rows only)</b> · 1 : '+(la/ala).toFixed(2);
-    chip.title='computed from FDC 18:3 n-3 and 18:2 n-6 rows of hemp + coconut oil; spirulina/chlorella rows are undifferentiated or absent and are not substituted';
-    nd.appendChild(chip); }
-  $('sources').innerHTML=
-    'hemp heARTs — <a href="https://fdc.nal.usda.gov/food-details/170148/nutrients">USDA FDC 170148</a> · '
-    +'spirulina — <a href="https://fdc.nal.usda.gov/food-details/170495/nutrients">USDA FDC 170495</a> · '
-    +'coconut oil — <a href="https://fdc.nal.usda.gov/food-details/171412/nutrients">USDA FDC 171412</a> · '
-    +'chlorella — <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7551956/">Bito et al., Nutrients 2020;12(9):2524</a> (product ranges; midpoints, ≈) · '
-    +'Daily Values — <a href="https://www.fda.gov/food/nutrition-facts-label/daily-value-nutrition-and-supplement-facts-labels">FDA (adults & children ≥4y; no DV exists for calories)</a> · '
-    +'Upper limits — <a href="https://ods.od.nih.gov/factsheets/">NIH ODS fact sheets</a>, form restrictions as noted per cell. '
-    +'These are LITERATURE values labeled as such — the commissioned tri-jurisdictional COA lot record replaces them when it lands (gate G-7).';
+function person(){ return {sex:$('sex').value,age:+$('age').value||49,ht:+$('ht').value||180,
+  wt:+$('wt').value||80,pal:+$('pal').value}; }
+function req(n,p,d){
+  if(n.dyn) return d[n.dyn];
+  var v = p.sex==='m'?n.m:n.f;
+  if(p.age>=31){ if(p.sex==='m'&&n.a31m) v=n.a31m; if(p.sex==='f'&&n.a31f) v=n.a31f; }
+  if(p.age>=51){ if(p.sex==='m'&&n.a51m) v=n.a51m; if(p.sex==='f'&&n.a51f) v=n.a51f; }
+  if(p.age>=71&&n.a71) v=n.a71;
+  return v;
 }
-FOODS.forEach(function(f){ $('basket').addEventListener('input',render); });
-document.addEventListener('mousemove',function(e){
-  var el=e.target; while(el&&el!==document&&!(el.getAttribute&&el.getAttribute('data-tip'))) el=el.parentNode;
-  var t=(el&&el.getAttribute)?el.getAttribute('data-tip'):null, tip=$('tip');
-  if(t){ tip.textContent=t; tip.style.whiteSpace='pre-line'; tip.style.display='block';
-    tip.style.left=Math.min(e.clientX+12,window.innerWidth-310)+'px'; tip.style.top=(e.clientY+14)+'px'; }
-  else tip.style.display='none';
+/* returns {tot, floor, missing[], measured} — floor=true when a food in the basket
+   has NO published row, so the sum is a lower bound rather than a total. */
+function deliver(n,g){
+  var rows=V[n.k]||[], tot=0, measured=false, missing=[];
+  FOODS.forEach(function(f,i){
+    if(!g[f.id]) return;
+    var per=rows[i];
+    if(per===null||per===undefined){ missing.push(f.n); return; }
+    measured=true; tot+=per*g[f.id]/100;
+  });
+  return {tot:tot,floor:missing.length>0,missing:missing,measured:measured};
+}
+function fillOf(pct){ return pct>=100?'var(--fillfull)':'var(--fill)'; }
+function hexPts(cx,cy,R){ var p=[];
+  for(var i=0;i<6;i++){ var a=(-90+60*i)*Math.PI/180;
+    p.push((cx+R*Math.cos(a)).toFixed(2)+','+(cy+R*Math.sin(a)).toFixed(2)); }
+  return p.join(' '); }
+/* The partial fill is computed as its own polygon rather than clipped from a rect.
+   A clip-path renders with hard stair-stepping once the SVG is scaled up — visible on
+   any family card holding only two or three cells — and a jagged edge on a page about
+   measurement precision is its own kind of lie. */
+function hexFillPts(cx,cy,R,frac){
+  var K=Math.sqrt(3)/2, yTop=cy+R-2*R*Math.max(0,Math.min(1,frac));
+  function hw(y){
+    if(y<=cy-R||y>=cy+R) return 0;
+    if(y<cy-R/2) return K*R*(y-(cy-R))/(R/2);
+    if(y>cy+R/2) return K*R*((cy+R)-y)/(R/2);
+    return K*R;
+  }
+  var ys=[yTop];
+  [cy-R/2,cy+R/2].forEach(function(b){ if(b>yTop&&b<cy+R) ys.push(b); });
+  ys.push(cy+R);
+  var left=ys.map(function(y){return [cx-hw(y),y]}),
+      right=ys.map(function(y){return [cx+hw(y),y]}).reverse();
+  return left.concat(right).map(function(p){return p[0].toFixed(2)+','+p[1].toFixed(2)}).join(' ');
+}
+
+var grams={};
+function render(){
+  var p=person(), c=EER[p.sex][p.pal];
+  var d={};
+  d.eer = c[0]+c[1]*p.age+c[2]*p.ht+c[3]*p.wt;
+  d.prot = 0.8*p.wt; d.fib = 14*d.eer/1000;
+  var water = p.sex==='m'?3.7:2.7, bmi = p.wt/Math.pow(p.ht/100,2);
+
+  /* hemp hearts track the body; the rest are fixed house amounts */
+  var hempEl=$('g-hemp');
+  if(hempEl && hempEl.dataset.auto==='on') hempEl.value=Math.round(1.25*p.wt);
+  FOODS.forEach(function(f){ grams[f.id]=+$('g-'+f.id).value||0; });
+
+  $('derived').innerHTML=[
+   dc(num(d.eer,0),'kcal','energy · EER','⚖ height, weight, age and activity are the equation'),
+   dc(num(d.prot,0),'g','protein · RDA','⚖ 0.8 g per kg of you'),
+   dc(num(d.fib,0),'g','fibre · AI','⚖ 14 g per 1,000 kcal'),
+   dc(num(water,1),'L','total water · AI','👥 flat for your sex — it does not scale'),
+   dc(num(bmi,1),'','BMI','⚖ computed, reported without judgement')
+  ].join('');
+
+  /* ---- compute every row once ---- */
+  var rows=NUT.map(function(n){
+    var R=req(n,p,d), del=deliver(n,grams);
+    var pct = (R&&del.measured) ? 100*del.tot/R : null;
+    var overUL = (n.ul && !n.ulScope && del.measured && del.tot>n.ul);
+    return {n:n,req:R,del:del,pct:pct,over:overUL};
+  });
+
+  /* ---- 2 · THE HEXAGON ---- */
+  var combEl=$('comb'); combEl.innerHTML='';
+  var metAll=0, cntAll=0;
+  FAM.forEach(function(F,fi){
+    var mine=rows.filter(function(r){return r.n.fam===fi;});
+    var met=mine.filter(function(r){return r.pct!==null&&r.pct>=100;}).length;
+    var nm =mine.filter(function(r){return r.pct===null;}).length;
+    metAll+=met; cntAll+=mine.length;
+    var per = mine.length<=5 ? mine.length : (mine.length<=8?4:5);
+    var R=21, w=Math.sqrt(3)*R, blockH=2*R+27, rowsN=Math.ceil(mine.length/per);
+    /* Every comb is laid out on the SAME five-column viewBox even when it holds two
+       cells, so a cell is the same physical size in every family. A unit chart whose
+       units differ in size between panels is not a unit chart — a reader would take
+       the bigger cell to count for more. */
+    var sw=5*(w+4)+4, sh=rowsN*blockH+4;
+    var g='';
+    mine.forEach(function(r,i){
+      var col=i%per, row=Math.floor(i/per);
+      var cx=4+(w+4)*col+w/2, cy=4+row*blockH+R;
+      var pts=hexPts(cx,cy,R);
+      var title=r.n.k+' — '+(r.pct===null?'not measured in this basket'
+        :(r.del.floor?'at least ':'')+num(r.pct,0)+'% of your '+r.n.b
+         +(r.over?', above an applicable upper limit':''));
+      if(r.pct===null){
+        /* NO fill. Not a short fill — an absent one. */
+        g+='<polygon class="hx" points="'+pts+'" fill="none" stroke="var(--faint)" stroke-dasharray="3 3">'
+          +'<title>'+title+'</title></polygon>';
+      } else {
+        var frac=Math.min(1,r.pct/100);
+        g+='<polygon class="hx" points="'+pts+'" fill="var(--cellbg)" stroke="var(--cellrim)"'
+            +(r.del.floor?' stroke-dasharray="4 2"':'')+'><title>'+title+'</title></polygon>'
+          +(frac>0?'<polygon points="'+hexFillPts(cx,cy,R,frac)+'" fill="'
+            +(r.over?'var(--over)':fillOf(r.pct))+'" pointer-events="none"/>':'')
+          +'<polygon points="'+pts+'" fill="none" pointer-events="none" stroke="'
+            +(r.over?'var(--warn)':r.pct>=100?'var(--fillfull)':'var(--cellrim)')+'"'
+            +(r.del.floor?' stroke-dasharray="4 2"':'')+' stroke-width="1.5"/>';
+      }
+      g+='<text class="hlab" x="'+cx+'" y="'+(cy+R+11)+'">'+r.n.s+'</text>'
+        +'<text class="hval" x="'+cx+'" y="'+(cy+R+21)+'">'
+          +(r.pct===null?'<tspan fill="var(--faint)">n/m</tspan>'
+            :(r.del.floor?'≥':'')+num(Math.min(r.pct,999),0)+'%')+'</text>';
+    });
+    var card=document.createElement('div'); card.className='fam';
+    card.innerHTML='<h3>'+F.n+'</h3><div class="cnt"><b style="color:var(--fill)">'+met+' of '+mine.length+'</b> covered'
+      +(nm?' · <span class="nm">'+nm+' not measured</span>':'')+' — '+F.d+'</div>'
+      +'<svg viewBox="0 0 '+sw+' '+sh+'" role="img" aria-label="'+F.n+': '+met+' of '+mine.length+' covered">'+g+'</svg>';
+    combEl.appendChild(card);
+  });
+
+  $('key').innerHTML=
+    '<b>Each cell is one nutrient, and it fills from the bottom like a comb cell</b> — '
+   +'the height of the fill is the share of <i>your</i> requirement that today\'s basket met. '
+   +'<i class="kk" style="background:var(--fill)"></i>partly filled &nbsp;'
+   +'<i class="kk" style="background:var(--fillfull)"></i>full — requirement met &nbsp;'
+   +'<i class="kk" style="background:var(--over);border-color:var(--warn)"></i>above an applicable upper limit'
+   +'<br><b>and the three states that must never be confused, each marked three ways:</b> &nbsp;'
+   +'<span class="tag">solid rim, some fill</span> measured &nbsp;'
+   +'<span class="tag" style="border-style:dashed">dashed rim, <b>no</b> fill, reads n/m</span> not measured — never drawn as zero &nbsp;'
+   +'<span class="tag" style="border-style:dashed;color:var(--fill)">dashed rim, fill, reads ≥</span> a floor: some food in your basket has no published row for it'
+   +'<br><b>Every cell also prints its own number in text.</b> Nothing here is reachable only by '
+   +'hovering, because a phone has no hover — and this page is read on one.';
+
+  var pctAll=Math.round(100*metAll/cntAll);
+  $('vbig').innerHTML=metAll+' <small>of '+cntAll+' nutrients covered</small>';
+  $('vbig').style.color = pctAll>=40?'var(--fillfull)':'var(--fill)';
+  $('vtxt').innerHTML='by '+num(FOODS.reduce(function(a,f){return a+grams[f.id]},0),0)
+   +' g of whole food a day, against reference intakes computed for a '+p.wt+' kg, '+p.ht+' cm, '
+   +p.age+'-year-old '+(p.sex==='m'?'man':'woman')+'. '
+   +'<b style="color:var(--ink)">The pyramid could never print this sentence</b> — it drew one picture for everyone.';
+
+  /* ---- 4 · THE LEDGER ---- */
+  var sorted=rows.slice().sort(function(a,b){
+    if(a.pct===null&&b.pct===null) return 0;
+    if(a.pct===null) return 1; if(b.pct===null) return -1; return b.pct-a.pct; });
+  var tb=$('tab').tBodies[0]; tb.innerHTML=''; var ulHits=[];
+  sorted.forEach(function(r){
+    var n=r.n, tr=document.createElement('tr');
+    var barW = r.pct===null?0:Math.min(100,r.pct/1.5);
+    var bar='<div class="bar">'+(r.pct===null?'':'<i style="width:'+barW+'%;background:'
+      +(r.over?'var(--over)':fillOf(r.pct))+'"></i>')+'<u style="left:66.67%"></u></div>';
+    if(r.over) ulHits.push(n.k+' — '+num(r.del.tot)+' '+n.u+' against a UL of '+n.ul);
+    tr.innerHTML='<td class="n">'+n.k+'</td><td>'+bar+'</td>'
+      +'<td class="num">'+(r.pct===null?'<span class="nm">n/m</span>':(r.del.floor?'≥':'')+num(Math.min(r.pct,9999),0)+'%')+'</td>'
+      +'<td class="num">'+num(r.req)+' '+n.u+'</td>'
+      +'<td class="num">'+(r.del.measured?(r.del.floor?'≥ ':'')+num(r.del.tot)+' '+n.u:'<span class="nm">not measured</span>')+'</td>'
+      +'<td><span class="tag">'+n.b+'</span> <span class="tag'+(n.dyn?' s':'')+'">'+(n.dyn?'⚖ body':'👥 group')+'</span></td>'
+      +'<td class="num">'+(r.del.measured&&r.req?(r.del.tot-r.req>=0?'+':'')+num(r.del.tot-r.req):'—')+'</td>';
+    tb.appendChild(tr);
+    var notes=[];
+    if(n.note) notes.push(n.note);
+    if(n.ulScope) notes.push('<b>the UL of '+n.ul+' '+n.u+' covers '+n.ulScope+'</b>');
+    if(n.cdrr) notes.push('CDRR '+n.cdrr+' '+n.u);
+    if(r.del.floor&&r.del.measured) notes.push('floor only — no published row for '+r.del.missing.join(', '));
+    if(r.pct===null&&r.del.missing.length) notes.push('no published row in '+r.del.missing.join(', ')+' — so this is silent, not zero');
+    if(notes.length){ var t2=document.createElement('tr'); t2.className='note';
+      t2.innerHTML='<td colspan="7">↳ '+notes.join(' · ')+'</td>'; tb.appendChild(t2); }
+  });
+  $('ulnote').innerHTML = ulHits.length
+    ? '<b style="color:var(--warn)">⚠ an applicable upper limit is exceeded:</b> '+ulHits.join(' · ')
+    : '<b>No applicable Tolerable Upper Intake Level is exceeded by this basket.</b> ULs whose scope '
+      +'covers only supplemental or preformed sources are deliberately not counted against food — '
+      +'that scoping is exactly why a naive page invents toxicity warnings that the science does not support.';
+
+  /* ---- 5 · FAT ---- */
+  var satTot=0,satAny=false,satMiss=[];
+  FOODS.forEach(function(f,i){ if(!grams[f.id]) return; var s=SATF[i];
+    if(s===null){ satMiss.push(f.n); return; } satAny=true; satTot+=s*grams[f.id]/100; });
+  $('fat').innerHTML='<table style="min-width:520px"><thead><tr><th>fraction</th>'
+   +'<th style="text-align:right">this basket</th><th>why it gets its own row</th></tr></thead><tbody>'
+   +'<tr><td class="n">MCT · C6–C10</td><td class="num"><span class="nm">not measured</span></td>'
+     +'<td>USDA publishes 6:0, 8:0 and 10:0 individually — this is pending the chain-length pull, not absent from the science</td></tr>'
+   +'<tr><td class="n">lauric · C12</td><td class="num"><span class="nm">not measured</span></td>'
+     +'<td>an MCT by chain length, absorbed substantially like an LCT — folding it either way would hide the one genuinely contested case</td></tr>'
+   +'<tr><td class="n">LCT · C14+</td><td class="num"><span class="nm">not measured</span></td>'
+     +'<td>myristic, palmitic, stearic — the class the &lt;10%-of-energy guidance is actually about</td></tr>'
+   +'<tr><td class="n" style="color:var(--warn)">the undifferentiated total</td>'
+     +'<td class="num">'+(satAny?num(satTot)+' g':'—')+(satMiss.length?' <span class="tag">floor</span>':'')+'</td>'
+     +'<td><b>this is the number the law forbids rendering alone</b>, shown here only so you can see what it hides — it stays struck until the three rows above carry values</td></tr>'
+   +'</tbody></table>';
+
+  /* ---- 6 · ARBITRAGE ---- */
+  var a=$('arb'); a.innerHTML='';
+  SHORT.forEach(function(s){ var el=document.createElement('div'); el.className='arb';
+    el.innerHTML='<div class="big">'+s[1]+'% <s>below the requirement — '+s[0]+'</s></div>'
+      +'<div class="sm">'+(s[2]?'named a dietary component of public health concern in the 2020–2025 Guidelines'
+        :'<b style="color:var(--warn)">never named for the general population</b> — a larger measured shortfall than calcium at 46%, which was named')+'</div>';
+    a.appendChild(el); });
+  var x=document.createElement('div'); x.className='arb';
+  x.innerHTML='<div class="big">0 <s>occurrences of "public health concern" in the current Guidelines</s></div>'
+   +'<div class="sm">the 2025–2030 edition, January 2026, contains the phrase nowhere — established by exhaustive text extraction of all ten chapters, not by a search box. Its own Scientific Foundation scores carrying the designation forward as <b>☒ Partial</b>. Stated precisely: <i>absent</i>, not abolished — the documents make no such claim, so neither do we.</div>';
+  a.appendChild(x);
+
+  /* ---- 7 · QUESTS, scaled to this body ---- */
+  var hg=grams.hemp||0, totG=FOODS.reduce(function(a,f){return a+grams[f.id]},0);
+  var Q=[
+   {t:'A DAY',mul:1,unit:'g',tier:'tier 0 → 1',
+    goal:'compose one day that fills more cells than it leaves empty, then eat it and log it',
+    earns:'a plan whose arithmetic anyone can check — and your own account of one day',
+    limit:'proves nothing about a body yet, and the page will not let you say otherwise'},
+   {t:'A WEEK',mul:7,unit:'g',tier:'tier 1 → 2',
+    goal:'seven days that differ from each other, with the receipts kept',
+    earns:'a supply record — what actually entered the house, at what price, from which lot',
+    limit:'variety across a week is where the empty cells close; a repeated single day cannot close them'},
+   {t:'A MONTH',mul:30,unit:'kg',tier:'tier 2',
+    goal:'a full cycle with a baseline blood panel drawn at the start',
+    earns:'the first measurement that is of you rather than of your food',
+    limit:'one panel is a starting point, not a result — a single reading has no direction'},
+   {t:'A YEAR',mul:365,unit:'kg',tier:'tier 3',
+    goal:'four panels, four seasons, one pre-registered question written down before you start',
+    earns:'a series a stranger could examine — and the only tier that can carry an outcome claim',
+    limit:'still yours alone, still uncontrolled. It earns a case, not a conclusion.'}
+  ];
+  $('quests').innerHTML=Q.map(function(q){
+    var h=hg*q.mul, t=totG*q.mul, f=function(v){return q.unit==='kg'?num(v/1000,1)+' kg':num(v,0)+' g'};
+    return '<div class="arb"><div class="big">'+q.t+' <s>'+q.tier+'</s></div>'
+     +'<div class="sm"><b style="color:var(--fill)">'+f(h)+' of hemp hearts</b> · '+f(t)+' of food in total, '
+     +'at your current basket.<br><b>the quest</b> — '+q.goal
+     +'<br><b>what it earns</b> — '+q.earns
+     +'<br><b>what it still cannot say</b> — '+q.limit+'</div></div>';
+  }).join('');
+
+  $('src').innerHTML='<b>requirements</b> — the NASEM/IOM Dietary Reference Intakes as restated by '
+   +'<a href="https://ods.od.nih.gov/factsheets/">NIH Office of Dietary Supplements</a>, and '
+   +'<a href="https://www.ncbi.nlm.nih.gov/books/NBK591021/table/tab_5_16/?report=objectonly">the NASEM 2023 EER equations</a>'
+   +' · <b>composition</b> — '+FOODS.map(function(f){return '<a href="'+f.url+'">'+f.n+': '+f.src+'</a>';}).join(' · ')
+   +' · <b>shortfall</b> — NHANES 2017–March 2020 Prepandemic, ages 1+'
+   +' · <b>Daily Values</b> — FDA 21 CFR 101.9.<br>'
+   +'Every food figure here is a <b>published composition value, labelled as such</b>. A commissioned '
+   +'lot COA replaces this column when it lands, and the two will be shown side by side rather than '
+   +'silently swapped.';
+}
+function dc(v,u,l,w){ return '<div class="dc"><div class="v">'+v+(u?' <s>'+u+'</s>':'')
+  +'</div><div class="l">'+l+'</div><div class="w">'+w+'</div></div>'; }
+
+/* ---- basket UI ---- */
+FOODS.forEach(function(f){
+  var el=document.createElement('div'); el.className='food';
+  el.innerHTML='<div class="fn"><i class="sw" style="background:'+f.hex+'"></i>'+f.n
+   +(f.lock?' <span class="tag" style="color:var(--gold);border-color:#4a4020">⛭ hardwired</span>':'')+'</div>'
+   +'<div class="fsrc">'+f.src+'</div>'
+   +'<label for="g-'+f.id+'" style="margin-top:7px">grams per day</label>'
+   +'<input id="g-'+f.id+'" type="number" min="'+(f.lock?1:0)+'" max="2000" step="1" value="'+f.g+'"'+(f.auto?' data-auto="on"':'')+'>'
+   +(f.auto?'<div class="auto">⚖ tracking 1.25 g/kg — the house serving, moving with your weight. Type to override the amount.</div>':'')
+   +(f.lock?'<div class="fsrc" style="color:var(--gold)">Founder ruling: hemp hearts are the '
+     +'<b>genesis reference commodity and are not substitutable</b> — the quantity is yours to set, '
+     +'the row is not removable. Every price, yield and environmental figure across this project is '
+     +'denominated against it, so a basket without it would silently change the meaning of every '
+     +'other number on the page.</div>':'');
+  $('basket').appendChild(el);
 });
+['sex','age','ht','wt','pal'].forEach(function(i){
+  $(i).addEventListener('input',render); $(i).addEventListener('change',render); });
+FOODS.forEach(function(f){ var el=$('g-'+f.id);
+  el.addEventListener('input',function(){ if(f.auto) el.dataset.auto='off'; render(); });
+  if(f.lock) el.addEventListener('change',function(){
+    if((+el.value||0)<1){ el.value=1; render(); } }); });
 render();
 })();
 </script>
