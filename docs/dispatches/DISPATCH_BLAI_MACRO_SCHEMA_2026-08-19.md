@@ -153,6 +153,33 @@ food exactly as it does to crypto.
 (USDA FDC etc.) clearly labeled as literature, replaced by the commissioned COA lot record
 when it lands. No number without a source ever renders.
 
+## 2b · ADDENDUM (2026-08-19, same day) — one bzDiD per living human; the pets question
+
+Founder, verbatim: *"i forsee this evolving over time but we need to value the 3D material
+temp. human suit so 1 bzDiD per living human (what about pets? I feel we should include)"*
+
+**"1 bzDiD per living human" is the standing shape, stated precisely:** free-tier
+self-certifying identities are unlimited and cost nothing by design — what the law guards
+is not *existence* but *quota and standing*: PoUL's cascade + P-10 bind the 420 allotment
+to one graph position per mortal experience, and P-12's coda values exactly what the
+founder names — the temporary suit ("what survives a mortal frame is what was made in it").
+Uniqueness enforcement lives at the personhood/quota layer, never at the identity layer.
+
+**Pets — the lawful shape needs no new architecture:** a pet is a **free-tier bzDiD bonded
+under its human's root** — the dependent pattern, sibling to the agent bond but for a
+living being: keys custodied by the human (a pet cannot self-custody), records (lineage,
+vet zbData, memorial) under its own DID document, cost $0 per the free tier. **The one
+load-bearing fence: a pet identity never enters the PoUL cascade and never carries
+quota** — without that fence "include pets" is the sybil hole wearing a leash (fifty
+registered dogs must never be fifty allotments). Death: P-12 applies unchanged — the
+protocol never learns; attestations made in life stand as ledgered fact. The founder's
+own doctrine already covers them at the coda altitude: *"all biologic beings are eternal
+divine spirits living a temporary experience."*
+
+**Gate G-8:** ratify the dependent-identity class (pets now; any non-key-holding living
+being by the same shape), with the no-quota fence stated in its spec's first line — and
+its name (naming is the founder's; "bPet" is available, unclaimed in both repos).
+
 ## 3 · The stretch phase — dormancy, rediscovery, and what verification can honestly mean
 
 **The founder's hypothesis is already recorded in spec text** — `SPEC-ORIGINATION-1`
@@ -238,6 +265,7 @@ the study *falsifiable* and the kernel defensible while the study runs. The **10
 | **G-5** | commission the reincarnation-study interpretation plugin as a spec lane (off-kernel, LOVErnment-DAO side, BIGEN-adjacent) | §3 |
 | **G-6** | "ACiD" (Artificial Chronic inflammatory Disease) and "Omega 1/Omega 2" as functional designations — VOCABULARY entries, or founder-doctrine vocabulary that stays quoted? | §2a |
 | **G-7** | the bFood Hexagon dataset lane: literature values (USDA FDC, cited per cell) now, commissioned COA lot record replaces them — confirm | §2a |
+| **G-8** | the dependent-identity class (pets, and any non-key-holding living being): human-custodied free-tier bzDiD under the human's root, **never quota-bearing, never in the PoUL cascade** — ratify the shape and name it | §2b |
 
 Nothing above designs an unruled mechanism. The primitive runs today as
 propose-draft-human-signs on the live market rails; the stretch phase waits on G-2/G-3 with
