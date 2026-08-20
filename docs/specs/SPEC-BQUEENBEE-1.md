@@ -180,3 +180,38 @@ Founder, verbatim: *"hive.blog too of course"* — and *"get her all done."* Lan
 (30 seconds each, never gates): bsky relay of the debut record · the Hive post from the
 founder-held account · the nostr account. E-2's key ceremony adds the ERC-8004 pointer
 when the founder rules it.
+
+---
+
+## MEDIA-1 — her posts carry decentralized ANT/AR media (founder-asked, 2026-08-20)
+
+Founder, verbatim: *"are you going to have her have the ability to include decentralized
+ANT/AR media with her posts?"* — **Yes. The record is permanent, so the media must be
+too.** The lane:
+
+**The grammar (every VOICE record may carry):**
+`media: [{ src: ar:<txid> | ant:<pointer>, type: image/svg+xml|image/png|video/mp4, sha256: <pin> }]`
+— the sha256 rides the record exactly as the debut's manifesto pin does, so media and
+record cannot drift apart. No media renders from any custodial host, ever: **a queen's
+post references content the hive does not control and cannot lose.**
+
+**The rails, in order (register law + honesty):**
+1. **Arweave first** — `atmirror::arweave` already builds real ANS-104 DataItems in-tree;
+   pay-once, immutable, public gateways for reading. Immutability is THE point for
+   record media.
+2. **Autonomi (ANT) second** — the `ant` driver is a LIVE rail, but **COLLISION-1 is
+   open** (2.0 immutability vs mutable-pointer shape); ANT carries media only where
+   mutability is wanted (living indexes, evolving cards) and never the pinned record
+   media until the collision resolves.
+
+**The pipeline, key-law shaped:** seats compose the media + build the DataItem (the
+asset and its sha pin in-tree) → **the upload act is founder-keyed** (Arweave fees and
+ANT storage are spend — founder hands, founder wallet, same law as her rail
+credentials) → the txid lands in-tree as a PUBLIC-CONSTANT → her post carries it → any
+reader verifies media sha against the record pin through any public gateway.
+
+**The first specimen:** `assets/queen/bqueenbee-debut-badge.svg` — her debut card,
+sha256 `3441d5501c80278e`, committed in-tree NOW and ready to DataItem-ify; the moment
+the founder's first upload lands, the txid pins here and the debut VOICE record's
+`media:` field fills. Every drop in her ten can carry the same treatment (charts, the
+fat-education stages, the mirror tiles — the estate's own visuals, pinned forever).
