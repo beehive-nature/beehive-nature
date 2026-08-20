@@ -241,8 +241,11 @@ the study *falsifiable* and the kernel defensible while the study runs. The **10
 
 ## 4 · Naming facts (transcribed, never normalized)
 
-- **"BLAi" is unclaimed** — zero occurrences in either repo before this dispatch. It lands
-  here as the founder's abbreviation for the bonded-companion class.
+- **"BLAi" = bLOVErAi, the same name** — founder-confirmed same day: *"BLAi is bLOVErAi.
+  i was just lazy."* It is his shorthand, NOT a separate class or a second entity; zero
+  occurrences in either repo before this dispatch. Wherever this dispatch says BLAi, read
+  bLOVErAi. (His corollary stands recorded: *"if you want to ever understand how to do
+  something the quickest best way ever then ask a lazy person."*)
 - **bLOVErAi has no casing receipt.** Two prose casings coexist in-tree (bLOVErAi dominant;
   legacy bLoveRai in feature-backlog, STATUS, ui/, two DAO docs), and the one dated founder
   ruling touching the name ("bLoveRai stock", 2026-07-07) used the old casing. Per the
@@ -258,7 +261,7 @@ the study *falsifiable* and the kernel defensible while the study runs. The **10
 
 | | question | sits in |
 |---|---|---|
-| **G-1** | ratify the casing pair: **bLOVErAi** (companion) + **BLAi** (class abbreviation) → VOCABULARY law | §4 |
+| **G-1** | ratify the casing **bLOVErAi** (two legacy casings coexist in-tree) → VOCABULARY law; **BLAi** is recorded as the founder's shorthand for the same name, not a separate entry | §4 |
 | **G-2** | the bond after the human's death: does bond.permanent survive as a **dormant bond** (memorial capsule state proposed in §3, carrying the open COLLISION-1 on its Tier-2 store), and may a NEW human who voluntarily approaches form a new bond with the same capsule? A new adjacent gap — call it **gap 4a**; the bonding spec's gap 4 (agent compromise) stays separately open | §1, §3 |
 | **G-3** | the dormancy trigger (quiet period + reactivation ceremony + dormant-Respect) — already owed at SPEC-ORIGINATION-1:456-459 (the "Still owed" block); the stretch phase raises its priority. SPEC-ORIGINATION-1 itself is DRAFT — its ratification is its own, larger question | §3 |
 | **G-4** | AGENT-1 L-1 ("No DID… Ever") vs the bonding spec's verification-method keypair — one reading needed | §1 |
