@@ -53,9 +53,39 @@ contamination was taken *off* of.
 | authority | ceiling for hemp seed food |
 |---|---|
 | FDA (GRN 765 spec, combined THC+THCA) | **≤4 mg/kg** |
-| Health Canada (IHR) | 10 µg/g |
+| ~~Health Canada (IHR) — 10 µg/g~~ | **REPEALED — see the correction below** |
 | EU Reg 2023/915 | 3.0 mg/kg seed · 7.5 mg/kg oil *(trade-source cross-check; EUR-Lex fetch failed — see §6)* |
 | ANZ Food Standards Code 1.4.4-6 | 5 mg/kg THC · 75 mg/kg CBD |
+
+> ### ⟳ CORRECTION, same day — this receipt's own Canada figure was stale
+> **Published here 2026-08-20 as "Health Canada (IHR) 10 µg/g"; that ceiling was
+> REPEALED effective 2025-03-12** — SOR/2025-43 s.69 struck Industrial Hemp Regulations
+> s.2 in its entirety (the Justice Laws consolidation now renders it as the bare string
+> *"2 [Repealed, SOR/2025-43, s. 69]"*). SOR/2025-44 replaced it by adding items 5 and 6
+> to Cannabis Act Schedule 2, putting derivatives of non-viable hemp seed, fibre and root
+> **outside the Act altogether, with no THC ceiling attached to item 5.** Verified on two
+> independent oracles (laws-lois consolidation + Canada Gazette Part II).
+>
+> **The 10 ppm figure is not dead — it moved.** It survives verbatim in the Natural
+> Health Products lane: an NHP may contain hemp seed, oil or protein only if that
+> ingredient carries ≤10 ppm THC and no isolated or concentrated phytocannabinoid. So the
+> honest answer is **product-class dependent**: hemp seed **food** has no numeric THC
+> ceiling in Canadian law today; hemp seed in an **NHP** still has 10 ppm.
+>
+> **Does this change the receipt's verdict? No — and it is worth saying why.** The
+> founder's 1–2 g/100 g figure was contradicted by *measurement* (FSANZ n=55 hulled,
+> median 0.9 mg/kg total THC) and by *mechanism* (no glandular trichomes on seed). The
+> regulatory table was only ever a sanity check. Three of its four rows stand, and Canada
+> deregulating a ceiling is not evidence that seed carries more — it reflects a regulator
+> concluding the hazard was low. **The correction is published because the figure was
+> wrong, not because the conclusion moved.**
+>
+> **And the finding that outlives this correction:** two live Health Canada guidance
+> pages still carry the dead 10 µg/g figure — one of them *date-modified 2025-03-12, the
+> very day the repeal took effect*. **A government's own guidance can contradict that
+> government's own current law.** Standing rule from this: for any regulatory figure,
+> cite the consolidated statute or the Gazette — never a guidance page. That rule is now
+> load-bearing for BiGen's whole regulatory evidence class.
 
 **At 1% THCA, hemp hearts would be ~2,500× the FDA-reviewed specification** — about
 **300 mg THCA in a 30 g serving**, several dozen recreational doses per bowl. Hearts
