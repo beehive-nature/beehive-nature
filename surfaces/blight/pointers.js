@@ -11,7 +11,7 @@ var PTR=(function(){
     var f=[];
     if(DIDS.bsy) f.push('bsy: '+DIDS.bsy);
     if(DIDS.npub) f.push('npub: '+DIDS.npub);
-    if(!f.length) f.push('bind: '+location.origin+location.pathname.replace(/[^/]*$/,'')+'../keys/addresses.html');
+    if(!f.length) f.push('bind: '+base().replace(/blight\/$/,'')+'keys/addresses.html');
     return f.join(' | ');
   }
   function base(){
@@ -30,6 +30,12 @@ var PTR=(function(){
     song:function(seed,note){ return emit('song','seed '+seed,base()+'midi-organ.html?seed='+seed,note); },
     score:function(scoreB64,note){ return emit('score','a composition',base()+'studio-music.html?score='+encodeURIComponent(scoreB64),note); },
     accord:function(sym,seed,note){ return emit('accord','bAccord '+sym+' seed '+seed,base()+'farmers.html',note); },
+    /* [bX review] — a peer-review receipt (DISPATCH_BMESSENGER_GUARDS_BLOVERAI §2):
+       attestation, never telemetry. path is repo-relative under surfaces/. */
+    review:function(path,verdict,note){ return emit('review',verdict+' '+path,base()+path,note); },
+    /* [bX guard] — a Royal-guard verdict on a review receipt, referenced by the
+       first 12 hex of sha256(receipt line). Guards weight, never gate (§3). */
+    guard:function(refId,verdict,note){ return emit('guard',verdict+' review:'+refId,base().replace(/blight\/$/,'')+'review.html',note); },
     fromLine:fromLine
   };
 })();

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>the Royal Review — receipts, never telemetry</title>
+<style>
+:root{--bg:#0d1410;--ink:#e2efdb;--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--dim:#8a9a8a;--line:#243026;--leaf:#7ddf8f;--amber:#ffb347}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:36px 16px 90px}
+header{text-align:center;margin-bottom:8px}
+h1{font-size:clamp(17px,4vw,24px);color:var(--gold);font-weight:400;letter-spacing:.05em}
+header p{color:var(--dim);font-size:11px;margin-top:6px;max-width:680px;margin-left:auto;margin-right:auto}
+main{max-width:720px;margin:0 auto}
+section{background:#111a14;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:16px}
+section h2{font-size:12px;color:var(--violet);font-weight:400;letter-spacing:.08em;margin-bottom:8px}
+section .law{color:var(--dim);font-size:10px;line-height:1.7;margin-bottom:10px}
+label{display:block;color:var(--dim);font-size:10px;margin:8px 0 3px}
+select,input,textarea{width:100%;background:#0a0f0b;color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:8px 10px;font:12px 'IBM Plex Mono',monospace}
+textarea{min-height:74px;resize:vertical}
+button{background:#26123a;color:#c9a0ff;border:1px solid var(--line);border-radius:8px;padding:9px 16px;cursor:pointer;font:12px 'IBM Plex Mono',monospace;margin:10px 8px 0 0}
+button:hover{background:#c9a0ff;color:#000}
+button.gold{background:#2a230a;color:var(--gold)} button.gold:hover{background:var(--gold);color:#000}
+.out{background:#0a0f0b;border:1px dashed var(--line);border-radius:7px;padding:10px;margin-top:10px;font-size:11px;white-space:pre-wrap;word-break:break-all;display:none}
+.ok{color:var(--leaf)} .bad{color:var(--amber)} .st{font-size:10.5px;color:var(--gold);min-height:16px;margin-top:8px;word-break:break-all}
+table{width:100%;border-collapse:collapse;margin-top:10px;font-size:10.5px}
+td,th{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;color:var(--dim)}
+th{color:var(--violet);font-weight:400} td.n{color:var(--ink)}
+.note{background:#0a0f0b;border:1px solid var(--line);border-radius:8px;padding:9px 11px;margin-top:8px;font-size:10.5px;line-height:1.7}
+.note .t{color:var(--violet);font-size:9.5px}
+footer{max-width:720px;margin:22px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
+a{color:var(--cyan)}
+</style>
+</head>
+<body>
+<header>
+  <h1>👑 the Royal Review</h1>
+  <p>guards reviewing the peer reviewers · a review is a signed receipt you choose to publish —
+  nothing on any page observes you. attestation, never telemetry.</p>
+</header>
+<main>
+
+<section id="bind">
+  <h2>1 · WHO SIGNS — bind by passkey tap only</h2>
+  <div class="law">recovery phrases never enter this page — asking again would be a harvest surface.
+  one passkey tap re-derives your bzDiD record key on this device; only signatures ever leave it.
+  guest mode composes UNSIGNED receipts (still publishable; guards will mark them unverified).</div>
+  <button id="bindBtn">🔑 bind with passkey</button>
+  <button id="guestBtn">👤 stay guest (unsigned)</button>
+  <div class="st" id="bindSt">unbound — receipts compose as UNSIGNED</div>
+</section>
+
+<section id="compose">
+  <h2>2 · REVIEW RECEIPT — one surface, one verdict, ≤140 chars</h2>
+  <label for="surf">surface</label>
+  <select id="surf"></select>
+  <label for="verdict">verdict</label>
+  <select id="verdict">
+    <option value="✅ works">✅ works — walked it, it held</option>
+    <option value="🐛 bug">🐛 bug — something broke (say what in the note)</option>
+    <option value="🕳 gap">🕳 gap — something missing</option>
+    <option value="💡 idea">💡 idea — an improvement</option>
+  </select>
+  <label for="rnote">note (≤140)</label>
+  <input id="rnote" maxlength="140" placeholder="what you saw, in one line">
+  <button id="mkReview" class="gold">compose receipt</button>
+  <button id="cpReview" style="display:none">📋 copy</button>
+  <div class="out" id="reviewOut"></div>
+  <div class="law" style="margin-top:8px">publishing rides any client you already hold — paste it
+  as a Nostr note or a Bluesky post (the feed below reads both), or hand it to the founder
+  directly. the in-page publish path docks with TASK&nbsp;6b (E2E), and pretending it is wired
+  before then would be a lie.</div>
+</section>
+
+<section id="guard">
+  <h2>3 · GUARD VERDICT — verify a receipt, then weigh it</h2>
+  <div class="law">paste a full receipt block (line + pub + sig). the check is arithmetic — an
+  Ed25519 signature either verifies or it does not. guards weight reviews in the tally; they never
+  gate or delete them, and no page decides who is real.</div>
+  <textarea id="gIn" placeholder="[bX review] ✅ works blight/farmers.html — https://… — from: fp:… — note: …&#10;pub: <64 hex>&#10;sig: <128 hex>"></textarea>
+  <button id="gCheck">verify signature</button>
+  <div class="st" id="gSt"></div>
+  <label for="gVerdict">guard verdict</label>
+  <select id="gVerdict">
+    <option value="✓ verified">✓ verified — signature and standing check out</option>
+    <option value="✗ unverified">✗ unverified — no or bad signature</option>
+    <option value="⚖ contested">⚖ contested — receipt disputed on substance</option>
+  </select>
+  <button id="mkGuard" class="gold">compose guard verdict</button>
+  <button id="cpGuard" style="display:none">📋 copy</button>
+  <div class="out" id="guardOut"></div>
+</section>
+
+<section id="ai">
+  <h2>4 · bLOVErAi WINDOW — W-3: your AI, your device</h2>
+  <div class="law">this window builds a review prompt and hands it to whatever AI you already
+  hold — nothing is sent anywhere by this page. the in-browser model (W-1) docks later; no lane
+  ever proxies your words through a hive server.</div>
+  <label for="aiSurf">surface to review</label>
+  <select id="aiSurf"></select>
+  <label for="aiFocus">focus</label>
+  <select id="aiFocus">
+    <option value="correctness — does every claim on the page hold against its receipts">correctness</option>
+    <option value="clarity — would a newcomer at 3am understand each step">clarity</option>
+    <option value="accessibility — contrast, keyboard path, small-screen behavior">accessibility</option>
+    <option value="safety — could any wording nudge a user into harm or disclosure">safety</option>
+  </select>
+  <label for="aiExtra">anything specific (optional)</label>
+  <input id="aiExtra" placeholder="e.g. the camera step confused my mother">
+  <button id="mkPrompt" class="gold">build the prompt</button>
+  <button id="cpPrompt" style="display:none">📋 copy</button>
+  <div class="out" id="promptOut"></div>
+</section>
+
+<section id="tally">
+  <h2>5 · THE TALLY — only what was deliberately published</h2>
+  <div class="law">reads the live rails (Nostr relay + Bluesky public AppView) for the
+  <b>[bX review]</b> and <b>[bX guard]</b> grammar. a reviewer who walked every page and published
+  nothing appears nowhere — that is the design, not a gap.</div>
+  <button id="listen">📡 listen to the rails</button>
+  <div class="st" id="tallySt">idle</div>
+  <table id="cov"><thead><tr><th>surface</th><th>receipts</th><th>latest</th></tr></thead><tbody></tbody></table>
+  <div id="feed"></div>
+</section>
+
+</main>
+<footer>
+  the grammar lives in <a href="blight/pointers.js">pointers.js</a> · doctrine:
+  DISPATCH_BMESSENGER_GUARDS_BLOVERAI_2026-08-19 §2–§4 · P-8 holds: no AI and no page decides
+  who is real — people attest, arithmetic verifies · <a href="index.html">← the hive</a>
+</footer>
+
+<script src="tour.js?v=8"></script>
+<script src="onboarding/bzdid-key.js"></script>
+<script src="blight/pointers.js?v=2"></script>
+<script src="blight/relay.js?v=1"></script>
+<script src="blight/bsky.js?v=1"></script>
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i);};
+  var SURFACES=['index.html','onboarding/index.html','onboarding/receive.html','recover.html',
+    'keys/addresses.html','hardware/index.html','hardware/build.html','hardware/lab.html',
+    'hardware/security.html','blight/demo.html','blight/index.html','blight/museum.html',
+    'blight/gallery.html','blight/inscription-explorer.html','blight/compare.html',
+    'blight/bnri-gallery.html','blight/market.html','blight/farmers.html','blight/coop.html',
+    'blight/hearth.html','blight/pulse.html','blight/midi-organ.html','blight/studio-music.html',
+    'blight/studio-gate.html','blight/vaulta-reader.html','blight/workbench.html','review.html'];
+  SURFACES.forEach(function(s){
+    [ $('surf'), $('aiSurf') ].forEach(function(sel){
+      var o=document.createElement('option'); o.value=s; o.textContent=s; sel.appendChild(o);
+    });
+  });
+
+  var ID=null; // {record:{sign,publicKey}, fingerprint}
+  var ENGINE=(typeof BZDIDKEY!=='undefined')?BZDIDKEY:null;
+  var enc=new TextEncoder();
+  function toHex(u){ return Array.prototype.map.call(u,function(b){return b.toString(16).padStart(2,'0');}).join(''); }
+  function fromHex(h){ h=h.trim(); if(!/^[0-9a-fA-F]*$/.test(h)||h.length%2) return null;
+    var u=new Uint8Array(h.length/2); for(var i=0;i<u.length;i++) u[i]=parseInt(h.substr(2*i,2),16); return u; }
+  async function sha256hex(s){
+    var d=new Uint8Array(await crypto.subtle.digest('SHA-256',enc.encode(s)));
+    return toHex(d);
+  }
+
+  $('bindBtn').onclick=async function(){
+    if(!ENGINE){ $('bindSt').textContent='engine failed to load — guest mode only'; return; }
+    try{
+      ID=await ENGINE.identityFromPasskey('bnr.b');
+      $('bindSt').innerHTML='<span class="ok">bound</span> · fingerprint '+ID.fingerprint.words+' · receipts will be SIGNED';
+    }catch(e){ $('bindSt').innerHTML='<span class="bad">not bound:</span> '+e.message+' — enroll a passkey on the <a href="onboarding/index.html">onboarding</a> page first'; }
+  };
+  $('guestBtn').onclick=function(){ ID=null; $('bindSt').textContent='guest — receipts compose as UNSIGNED'; };
+
+  function show(id,text){ var el=$(id); el.style.display='block'; el.textContent=text; }
+  function copyBtn(btn,out){ $(btn).style.display='inline-block'; $(btn).onclick=function(){
+    navigator.clipboard.writeText($(out).textContent).then(function(){ $(btn).textContent='✓ copied'; setTimeout(function(){$(btn).textContent='📋 copy';},1500); }); }; }
+
+  $('mkReview').onclick=async function(){
+    var line=PTR.review($('surf').value,$('verdict').value,$('rnote').value||'');
+    var block=line;
+    if(ID){
+      var sig=ID.record.sign(enc.encode(line));
+      block=line+'\npub: '+toHex(ID.record.publicKey)+'\nsig: '+toHex(sig);
+    } else { block=line+'\nUNSIGNED — bind a passkey above to sign'; }
+    show('reviewOut',block); copyBtn('cpReview','reviewOut');
+  };
+
+  var lastVerified=null;
+  $('gCheck').onclick=async function(){
+    var raw=$('gIn').value.trim(); lastVerified=null;
+    var m=raw.match(/^([\s\S]*?)\npub:\s*([0-9a-fA-F]{64})\s*\nsig:\s*([0-9a-fA-F]{128})\s*$/);
+    if(!m){ $('gSt').innerHTML='<span class="bad">no pub/sig block found — an unsigned receipt can only ever be ✗ unverified</span>'; return; }
+    var line=m[1].trim(), pub=fromHex(m[2]), sig=fromHex(m[3]);
+    if(!ENGINE){ $('gSt').textContent='engine failed to load'; return; }
+    var ok=ENGINE.verifyRecordSig(sig,enc.encode(line),pub);
+    var ref=(await sha256hex(line)).slice(0,12);
+    if(ok){ lastVerified=ref; $('gSt').innerHTML='<span class="ok">VALID ✓</span> · ref '+ref+' · signed by pub '+m[2].slice(0,16)+'…'; $('gVerdict').value='✓ verified'; }
+    else { $('gSt').innerHTML='<span class="bad">INVALID ✗</span> — signature does not verify against that line and key'; $('gVerdict').value='✗ unverified'; }
+  };
+  $('mkGuard').onclick=async function(){
+    var raw=$('gIn').value.trim();
+    var line=(raw.split('\npub:')[0]||raw).trim();
+    var ref=(await sha256hex(line)).slice(0,12);
+    var gline=PTR.guard(ref,$('gVerdict').value,'');
+    var block=gline;
+    if(ID){ var sig=ID.record.sign(enc.encode(gline));
+      block=gline+'\npub: '+toHex(ID.record.publicKey)+'\nsig: '+toHex(sig); }
+    else { block=gline+'\nUNSIGNED — bind a passkey above to sign'; }
+    show('guardOut',block); copyBtn('cpGuard','guardOut');
+  };
+
+  $('mkPrompt').onclick=function(){
+    var s=$('aiSurf').value;
+    var url='https://beehive-nature.github.io/beehive-nature/surfaces/'+s;
+    var p='You are helping me peer-review one surface of the BNR hive (beehive-nature, a public\n'
+      +'AGPL-3.0 project). Surface under review: '+s+'\nLive URL: '+url+'\n\n'
+      +'Focus: '+$('aiFocus').value+'.\n'
+      +($('aiExtra').value?('Specific concern: '+$('aiExtra').value+'\n'):'')
+      +'\nWalk the page as a first-time visitor. Report: (1) what works, (2) any bug with exact\n'
+      +'steps to reproduce, (3) any gap or missing affordance, (4) one improvement. Be concrete\n'
+      +'and quote the page where relevant. Then compress your single most important finding into\n'
+      +'one line of at most 140 characters so I can publish it as a review receipt in this\n'
+      +'grammar: [bX review] <verdict: ✅ works | 🐛 bug | 🕳 gap | 💡 idea> '+s+' — note: <line>';
+    show('promptOut',p); copyBtn('cpPrompt','promptOut');
+  };
+
+  var counts={}, latest={};
+  function ingest(txt,who,at){
+    if(txt.indexOf('[bX review]')!==0 && txt.indexOf('[bX guard]')!==0) return;
+    var hit=SURFACES.find(function(s){ return txt.indexOf(s)>-1; })||'(other)';
+    counts[hit]=(counts[hit]||0)+1; latest[hit]=txt.slice(0,110);
+    var tb=$('cov').tBodies[0]; tb.innerHTML='';
+    Object.keys(counts).sort().forEach(function(s){
+      var tr=document.createElement('tr');
+      tr.innerHTML='<td class="n">'+s+'</td><td>'+counts[s]+'</td><td>'+latest[s].replace(/</g,'&lt;')+'</td>';
+      tb.appendChild(tr);
+    });
+    var d=document.createElement('div'); d.className='note';
+    d.innerHTML='<span class="t">'+(who||'?')+' · '+(at||'')+'</span><br>'+txt.replace(/</g,'&lt;');
+    $('feed').prepend(d);
+  }
+  $('listen').onclick=function(){
+    $('tallySt').textContent='listening — nostr relay + bluesky appview';
+    try{ RELAY.on(function(ev){ ingest(String(ev.content||''),(ev.pubkey||'').slice(0,12),''); });
+         RELAY.connect(null,function(s){ $('tallySt').textContent=s; }); }catch(e){}
+    try{ BSKY.searchPointer('[bX review',function(p){ ingest(p.text,p.author,p.at); },function(){});
+         BSKY.searchPointer('[bX guard',function(p){ ingest(p.text,p.author,p.at); },function(){}); }catch(e){}
+  };
+})();
+</script>
+</body>
+</html>

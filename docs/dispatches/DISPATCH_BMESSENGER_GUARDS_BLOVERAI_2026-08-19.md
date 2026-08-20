@@ -47,6 +47,35 @@ ChaCha20+HMAC with a conversation key from secp256k1 ECDH; the secp256k1 vendori
 with the key engine per addresses.html. Nothing here invents crypto — cite or stop applies
 to the implementation.
 
+## 1a · ADDENDUM (2026-08-19, same day) — the interoperability anchor map
+
+Founder asks: *"are we leveraging hive/vaulta/xyz for at least an anchor or improvement of
+a interoperable code bases? with bsky nostr buzz for example"*
+
+**Yes — and the design law that makes it cheap is already stated in `pointers.js`: a
+message is a pointer, never content.** Any rail that can carry ~140 characters of text is
+a bMessenger transport; the content renders from chain. One grammar, N rails:
+
+| rail | role | state |
+|---|---|---|
+| **Nostr** | transport (broadcast + DM) | **LIVE v1** — `relay.js` (TASK 6); E2E = TASK 6b |
+| **Bluesky / ATProto** | transport, second rail | **LIVE v1 READ** — `bsky.js` (TASK 7: *"same law, second rail"*, public AppView, zero deps); the write path docks with the bzDiD `did:plc` binding |
+| **Vaulta** | THE ANCHOR — identity root, `.b` names, BEELOG epoch roots; what pointers point AT | LIVE (registry) / ruled (BEELOG) |
+| **Arweave / Autonomi** | durable pay-once content layer | LIVE rails (`atmirror::arweave`, ant driver) |
+| **buzz** | self-hosted relay + Arweave mirror + b-indexer bridge — *"fusing Buzz with the four-network stack; killing the hosted-relay dependency"* | **DRAFTED, not built** (`dockets/DOCKET_BUZZ_SOVEREIGN_RELAY_1.md`) |
+| **Hive** | content-is-chain longform + free-at-point-of-use RC; founder holds the account | **RESEARCHED, parked** in the candidates ledger (markdown→Hive + media→Arweave/Autonomi + receipt→anchor hypothesis; b-indexer firehose ingestion deferred pending SPEC_LEXICON-1) |
+
+**The identity glue is one codebase, already real:** `atmirror/src/did.rs` resolves
+`did:plc` (PLC directory) and `did:web` live, and the bzDiD genesis op's `alsoKnownAs` +
+service hints bind one root to many handles — one identity, whatever the rail. So the
+interop story is not N integrations; it is one pointer grammar plus one DID resolver, and
+each new rail is an adapter, not an architecture.
+
+**What's missing, honestly:** the Hive adapter is unbuilt (research is parked, not lost);
+ATProto write needs the did:plc binding wired; the pulse has no cross-rail dedup yet (the
+same pointer on Nostr and Bluesky renders twice). All three are adapter-sized, none is
+architectural.
+
 ## 2 · Peer-review analytics that preserve privacy: attestation, not telemetry
 
 **The fence first:** this tree severs analytics beacons on principle
