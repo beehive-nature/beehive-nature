@@ -69,7 +69,48 @@ only shows the alarming half is propaganda; ours shows both halves.
 
 **Sodium exceeds the Adequate Intake in >97% of every single age-and-sex group** — there
 is no group where it does not — and 89% exceed the Chronic Disease Risk Reduction level.
-Only **18%** keep saturated fat under 10% of calories.
+Only **18%** keep saturated fat under 10% of calories *(as the DGA reports it — see §5a,
+which governs how we may ever render that figure)*.
+
+### §5a · THE FATTY-ACID DISAGGREGATION LAW (founder-ruled 2026-08-20)
+
+Founder, verbatim: *"never mention 'saturated fat' without MCT Saturated fat (essential
+energy better than table sugar) and saturated fat LCT nonessential may cause ACiD
+exacerbation"*
+
+**Standing display law on every surface: the surface may never render an undifferentiated
+"saturated fat" total.** The category collapses two things that a body handles by
+different routes, and collapsing them is the same error class as a lab summing ten
+cannabinoids and calling it "total", or a panel rendering `NotMeasured` as zero.
+
+**The Axis A ground that makes this enforceable — we already have the data.** USDA FDC
+reports individual fatty acids by chain length, not just the roll-up: `4:0 6:0 8:0 10:0
+12:0 14:0 16:0 18:0`. So the disaggregation is not an interpretation we add; it is a
+column we stopped hiding.
+
+| class | chain length | Axis A facts we may carry |
+|---|---|---|
+| **MCT** | C6–C12 (caproic, caprylic, capric, lauric) | absorbed via the portal vein direct to the liver, bypassing chylomicron packaging; rapidly oxidised; ketogenic — well-documented lipid biochemistry |
+| **LCT** | C14+ (myristic, palmitic, stearic) | absorbed via chylomicrons into the lymphatic system; the class the DGA's <10% target is dominated by |
+
+**The founder's two claims are Axis B and route to BiGen, not to the surface:** that MCT
+is *"essential energy better than table sugar"*, and that LCT *"may cause ACiD
+exacerbation"*. Both are effect claims; both are pre-registration-shaped and testable;
+neither may be asserted on a bFood cell. The surface shows the **grams by chain length**,
+cited — which is the strongest honest version of the founder's point, because the reader
+sees the two classes are different quantities before anyone tells them they behave
+differently.
+
+**A nuance that matters for our own basket, stated because it cuts against a tidy story:**
+coconut oil is roughly half **lauric acid (C12)** — classified MCT by chain length, but
+absorbed substantially like an LCT via chylomicrons rather than the portal route. So the
+house's own MCT source is the boundary case, and the surface must show C12 as its own row
+rather than folding it into either class. Hiding that would be exactly the tidy-story
+failure we refuse in others.
+
+**Gate FA-1:** the BiGen pre-registration for the MCT-vs-LCT effect thesis, alongside the
+cannabinoid protocol (CB-1). **Gate FA-2:** confirm the display law's rendering — three
+rows (MCT C6–C10 · lauric C12 · LCT C14+) rather than two, per the nuance above.
 
 ## 6 · A NEW SHORTFALL CREATED BY DEFINITION, JANUARY 2026 — no data changed
 
