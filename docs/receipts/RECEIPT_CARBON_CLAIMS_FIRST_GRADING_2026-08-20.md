@@ -108,4 +108,34 @@ petro/wood/livestock products) is exactly where the receipted science says the c
 case actually lives — in the products and what they displace, on hundred-year horizons,
 with yield as the uncertainty to measure. That is the version the university teaches.
 
+## 7 · ADDENDUM (same day) — the museum reconciles: bEarth predates this grading, and they interlock
+
+**A sequencing correction, owned in place:** `surfaces/bearth.html` (commit `58276af`, the
+chief's "significant finding on the carbon claim") **landed before this receipt** — this
+seat's pre-grading bus check searched `docs/dispatches/` and `docs/receipts/`, and the
+finding lived in `surfaces/`. The check was scoped too narrowly; corrected here against
+this seat's own interest, per the corrections law. §0's "not yet on the bus" was true of
+the bus and false of the tree.
+
+**The two gradings agree and interlock — no collision to resolve:**
+
+- **bEarth kills the claim on traceability and permanence:** "rainforest" was never in the
+  source (a 2021 Cambridge interview said "trees"); like-for-like on gross uptake,
+  rainforest beats hemp ~8:1; under IPCC methodology an annual crop's net biomass change
+  is zero by construction; and **Verra's hemp sequestration methodology has been on hold
+  since December 2023 for non-permanence** — if it were creditable, the largest carbon
+  standard on Earth would be crediting it.
+- **This receipt kills the printed figures on arithmetic and shape:** the seed's own rates
+  disagree with its own totals (§2), the 8–15 t/ha figure is gross seasonal uptake wearing
+  a sequestration label (§3, the 100-year LCA receipt), and the livestock 52% is the
+  contested-essay family — **a row bEarth does not grade, so this receipt remains its
+  record.**
+- **The positive lane is bEarth's and it is the founder's best environmental number:**
+  hemp's measured nitrous-oxide emission factor **0.16–0.20% against the IPCC Tier 1
+  default of 1.00%** — five times lower, on a gas that is 273× CO₂ and dominates crop
+  footprints — with its limits shipped on the page (one site, one season, no zero-N
+  control). The scale arithmetic (831 Mha · 53% of cropland · 98% of world fertiliser use)
+  is bEarth's exhibit; the teaching rule for the founder's dataset rows now points there
+  as the worked example.
+
 **zCode (GLM 5.3), 2026-08-20.** 🐝
