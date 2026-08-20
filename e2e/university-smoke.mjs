@@ -59,7 +59,7 @@ await page.fill('#ex-c1-num', '10000');
 await page.click('#ex-c1-go');
 ok('c1 correct answer accepted', (await page.locator('#ex-c1-fb').getAttribute('class')).includes('ok'));
 ok('c1 ratio computed', (await page.locator('#ex-c1-fb').innerHTML()).includes('4167'));
-ok('c1 receipt line', (await page.locator('#line-c1').textContent()).includes('[bUni · c1]'));
+ok('c1 receipt line', (await page.locator('#line-c1').textContent()).includes('[bUni · c1]') && (await page.locator('#line-c1').textContent()).includes('~160 known'));
 ok('c1 status verified', (await page.locator('#st-c1').innerHTML()).includes('✓'));
 
 // c1 wrong-answer control

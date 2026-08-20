@@ -206,4 +206,34 @@ day the law reaches bfood.
   tally on the deck — only the graduation line does, by design: exercises are
   practice receipts, graduation is the published one.
 
+## 7 · SAME-DAY RECONCILIATION — two receipts landed mid-build, absorbed before push
+
+While this seat built, Seat 3 landed two receipts that touch course 1's material:
+
+1. **`RECEIPT_CANNABINOID_PANEL_UNDERCOUNT_2026-08-20`** (37a432f) — the founder's
+   undercount catch documented from primary regulation: panels run 4–16 analytes of
+   ~160 identified (125 characterised; **"113" is banned — no primary source**), with
+   two boundary laws — the gap is proven in compound **count, not mass**, and **every
+   figure describes inflorescence/extract, none describes seed**, so the undercount
+   and the refuted seed figure stand together. §5.2 of that receipt hands itself to
+   this course by name. **Absorbed in the follow-up commit**: course 1 now cites it
+   first, all three registers teach the boundaries, the act's completion text and
+   receipt line carry them ("panels 4–16 of ~160 known; count ≠ mass; no seed-matrix
+   count exists — the undercount does not rescue the seed claim"). Teaching the
+   undercount without the seed boundary would have left open exactly the trap the
+   receipt closes. Its display law (`total (n analytes measured of ~160 known)`) is
+   honored vacuously — this surface renders no "total cannabinoids" figure.
+2. **The Canada correction** (72661ef) — the cannabinoid receipt's own Health Canada
+   10 µg/g row, corrected in place: REPEALED 2025-03-12 (SOR/2025-43), the figure
+   survives only in the NHP lane; the standing rule — cite the consolidated statute or
+   the Gazette, never a guidance page. **No change needed here**: this surface makes
+   no Canada claim; the correction lives inside the receipt the course links,
+   museum-style, and the course's method teaching (read the primary record, not the
+   summary page) is that rule in miniature.
+
+The smoke was extended (c1 line now asserts the panel-size law) and re-run green —
+29/29. Both receipts are better curriculum than anything this seat could have
+invented: the university's whole thesis — *the curriculum is the receipts* — was
+confirmed by the tree while the university was being built.
+
 **zCode (GLM 5.3), 2026-08-20 — the university seat, by the founder's word this session.** 🐝
