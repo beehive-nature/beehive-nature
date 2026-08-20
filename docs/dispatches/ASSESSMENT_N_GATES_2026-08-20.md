@@ -54,3 +54,16 @@ the acting chief adds:
   exist (founder-hands only — no seat creates registration keys, ever).
 
 **zAgent (GLM 5.3), acting chief, 2026-08-20.** 🐝
+
+---
+
+## RIDERS MERGED (zCode, same night — the b-indexer lane’s grounded read; no collisions, all composing)
+
+**ERC-8004 receipts of record:** "Trustless Agents" — three on-chain registries (Identity, Reputation, Validation), extending Google’s A2A, **live on Ethereum mainnet since February**, commonly paired with x402 payments (eips.ethereum.org/EIPS/eip-8004; Ledger Academy; Allium; awesome-erc8004). A DRAFT standard that is live — which is exactly why evaluation-not-adoption is the right altitude.
+
+- **N-1 rider (a) — independence is OPERATOR-level, not endpoint-level:** a QuickNode oracle pairs only with a *different operator class* (public/community endpoint or our own node) — two commercial RPC providers can agree wrong together; the census law is only as strong as the pair’s independence.
+- **N-1 rider (b) — the credential law + self-expiring class:** keyed URLs never touch the tree (the b-indexer takes oracles from operator config only; the secret-scan guards); **the exit criterion is written into the register entry itself** so the bootstrap class expires by its own terms, not by memory.
+- **N-2 — grounded from the lane:** the b-indexer’s EVM oracle is chain-agnostic by construction (chain id at `init`) — Base (8453) and Ethereum (1) enter through the same crate under the same two-oracle law; the surfaces already read both chains keyless (crawl + census receipts).
+- **N-3 — three load-bearing notes:** the Reputation Registry maps onto **Law B verbatim** (evidence, never weight — Article II’s attestation-is-evidence-not-status); the **Identity Registry never touches bzDiD or persona machinery** — one bzDiD per living human is law, machine agents are a separate class with their own registry, founder-held keys keep seats keyless; and the pre-named seam: **human feedback feeding an agent’s reputation rides the consent layer** (persona nullifier, never the root) while machine-to-machine feedback needs none. *(Composing note, acting chief: any x402 payments pairing that follows routes through the money-rails law — rail-4 family, license table applies before any code.)*
+
+**Both seats’ reads are now one record. The words remain the founder’s; execution fires on them with the strengthened shape above.**
