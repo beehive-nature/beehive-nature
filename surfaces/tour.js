@@ -14,7 +14,9 @@
     '—',
     ['reader','blight/vaulta-reader.html'],['c1','blight/c1-aid.html'],
     '—',
-    ['keys','onboarding/'],['receive','onboarding/receive.html'],['dids','keys/addresses.html'],['recover','recover.html'],['hw','hardware/']];
+    ['keys','onboarding/'],['receive','onboarding/receive.html'],['dids','keys/addresses.html'],['recover','recover.html'],['hw','hardware/'],
+    '—',
+    ['🎓','university/'],['🐝','bqueenbee-live.html'],['🎧','listening.html'],['⬡','bfood.html'],['🏛','bsymposium.html']];
   var b=document.createElement('nav');b.id='tbar';
   b.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:9998;display:flex;flex-wrap:nowrap;overflow-x:auto;gap:0 8px;padding:6px 12px;background:#111;border-top:1px solid #333;font:11px monospace;-webkit-overflow-scrolling:touch;scrollbar-width:none;white-space:nowrap;max-height:40px;box-sizing:border-box';
   b.innerHTML=L.map(function(x){
