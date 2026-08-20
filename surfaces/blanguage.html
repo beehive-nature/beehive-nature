@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="color-scheme" content="dark">
+<title>the BlanguageDOCK — every language a first-class passenger</title>
+<style>
+:root{--bg:#0d1410;--ink:#e2efdb;--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--dim:#8a9a8a;--line:#243026;--leaf:#7ddf8f;--amber:#ffb347;
+/* vitality set = the six-checks-validated categorical set for surface #0d1410
+   (lightness band 0.48–0.67, CVD worst adjacent ΔE 17.1 protan, normal 22.7, contrast ≥3:1
+   — receipt in review.html). Identity never rides color alone: label + link always. */
+--v-safe:#3f9c55;--v-vul:#0092a6;--v-def:#a476ec;--v-sev:#c07f1c;--v-cri:#c07f1c}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:36px 16px 90px}
+header{text-align:center;margin-bottom:10px}
+h1{font-size:clamp(17px,4vw,24px);color:var(--gold);font-weight:400;letter-spacing:.05em}
+header p{color:var(--dim);font-size:11px;margin-top:6px;max-width:740px;margin-left:auto;margin-right:auto}
+main{max-width:880px;margin:0 auto}
+section{background:#111a14;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:16px}
+section h2{font-size:12px;color:var(--violet);font-weight:400;letter-spacing:.08em;margin-bottom:8px}
+.law{color:var(--dim);font-size:10px;line-height:1.7}
+.banner{border:1px dashed #3d3410;background:#141207;border-radius:8px;padding:9px 12px;font-size:10.5px;color:var(--gold);line-height:1.7;margin-bottom:10px}
+a{color:var(--cyan)}
+.wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:10.5px;margin-top:6px}
+td,th{border-bottom:1px solid var(--line);padding:6px 8px;text-align:start;color:var(--dim);vertical-align:top}
+th{color:var(--violet);font-weight:400;white-space:nowrap}
+td.cl{color:var(--ink)}
+.vit{white-space:nowrap}
+.vit i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-inline-end:5px;vertical-align:-1px}
+.gm td.absent{color:var(--dim);font-style:italic}
+.gm td.base{color:var(--ink)}
+.card{background:#0a0f0b;border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:10px}
+.card h3{font-size:11.5px;color:var(--ink);font-weight:400;line-height:1.6}
+.card .end{color:var(--gold)}
+.cb{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px;margin-top:8px}
+.cb div{background:#0d1410;border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-size:9.5px;color:var(--dim)}
+.cb b{color:var(--ink);font-weight:400}
+pre{background:#0a0f0b;border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:8px;font-size:9.5px;line-height:1.6;overflow-x:auto;color:var(--dim)}
+details{margin-top:10px}
+summary{cursor:pointer;color:var(--violet);font-size:10.5px}
+footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
+</style>
+</head>
+<body>
+<header>
+  <h1>🌐 the BlanguageDOCK</h1>
+  <p>the organism's language corpus, run as a permissionless dock — decentralized, self-healing, and read by
+  every user-visible text surface. tribal, indigenous, rare and endangered languages dock without asking anyone.
+  alpha MVP: the mechanism, the register, and the honest empty cells. steward seat: zCode.</p>
+</header>
+<main>
+
+<section>
+  <h2>WHY A DOCK, NOT A LOCALE LIST</h2>
+  <div class="banner">UNESCO: no less than <b>40% of some 6,700 languages</b> are in danger of disappearing
+  (<a href="https://www.unesco.org/en/articles/towards-world-atlas-languages">unesco.org</a>); the Atlas's last edition
+  counted 538 critically + 502 severely + 632 definitely endangered + 607 vulnerable
+  (<a href="https://en.wikipedia.org/wiki/Atlas_of_the_World%27s_Languages_in_Danger">Atlas record</a>).
+  a locale list adds languages when a market justifies them. a dock lets a language board because it exists.</div>
+  <div class="wrap"><table>
+    <tr><th></th><th>traditional i18n</th><th>BlanguageDOCK</th></tr>
+    <tr><td class="cl">locales</td><td>a product decision</td><td>a language docks itself — no gatekeeper decides worthiness</td></tr>
+    <tr><td class="cl">strings</td><td>en first, the rest are translation tasks</td><td>records with parents: who, when, which sweep passed</td></tr>
+    <tr><td class="cl">absence</td><td>silent fallback to English, unmarked</td><td>absent renders as absent — machine renders as machine, labeled</td></tr>
+    <tr><td class="cl">removal</td><td>an editor deletes a file</td><td>withdrawal with a receipt; history chain-anchored — the dock forgets nothing, it honors withdrawals</td></tr>
+    <tr><td class="cl">improvement</td><td>a release cycle</td><td>standing sweeps + git deliberation; forks are dissent</td></tr>
+  </table></div>
+  <div class="law" style="margin-top:8px">spec: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/DESIGN-BRIEF-04-blanguagedock.md">DESIGN-BRIEF-04</a>
+  — the Claude Design handoff ships at the alpha→beta transition, by founder order.</div>
+</section>
+
+<section>
+  <h2>THE CONSENT LAYER — measurement, never decoration</h2>
+  <div class="law">the sibling of BiGen's integrity layer, with the same symmetry law: consent blocks apply to
+  <b>English, to our own hub strings, to a fluent elder and to a machine draft — identically</b>. the failure mode this
+  layer exists to prevent is appropriation theater: a warm veneer over heritage extraction.
+  anchored in <a href="https://doi.org/10.5334/dsj-2020-043">CARE — Carroll et al. 2020, Data Science Journal</a>
+  (Collective benefit · Authority to control · Responsibility · Ethics,
+  <a href="https://www.gida-global.org/careprinciples">GIDA</a>) and
+  <a href="https://www.ohchr.org/en/instruments-mechanisms/instruments/united-nations-declaration-rights-indigenous-peoples">UNDRIP Articles 13–14</a>.
+  where CARE and permissionless docking tension, this surface shows the tension; it does not resolve it silently.</div>
+  <pre>consent:
+  contributor:         git identity | bzDiD
+  community_attested:  true | false | not_sought   # a speaker/community of the language vouches
+  provenance:          how the text came to be
+  withdrawal:
+    status:            none | withdrawn            # any contributor may withdraw THEIR OWN — permissionless
+    effective:         YYYY-MM-DD                 # no one may remove another's, or the history
+    history:           preserved, chain-anchored   # the dock forgets nothing; it honors withdrawals
+  machine_generated:   true | false                # if true, renders LABELED — never silently</pre>
+  <div class="law">three negative controls: the consent block rendering softer on our own material → fail ·
+  a withdrawn string still rendering → fail · a withdrawal erasing history → also fail ·
+  a machine-drafted string rendering unlabeled → fail. (machine is never silent about being machine —
+  the unmeasured-never-zero law, translated.)</div>
+</section>
+
+<section>
+  <h2>THE DOCK — seed register, every status source-linked</h2>
+  <div class="wrap"><table id="dock"></table></div>
+  <div class="law" style="margin-top:8px">vitality categories cite the
+  <a href="https://en.wikipedia.org/wiki/Atlas_of_the_World%27s_Languages_in_Danger">UNESCO Atlas record</a> (2010, Moseley ed.)
+  and its methodology <a href="https://unesdoc.unesco.org/ark:/48223/pf0000183699">Language Vitality and Endangerment, 2003</a>;
+  the successor platform is the <a href="https://www.unesco.org/en/articles/unesco-hosts-ad-hoc-expert-meeting-world-atlas-languages">World Atlas of Languages</a>.
+  codes link <a href="https://iso639-3.sil.org/">ISO 639-3</a>; a language with no code renders "no code — a finding, not a blank".
+  English is the control specimen: ours, no special treatment.</div>
+  <div class="card">
+    <h3>the control specimen — <span class="end">English · eng</span> · consent flags apply identically</h3>
+    <div class="cb">
+      <div>community_attested<br><b>not_sought</b> — rendered, not hidden</div>
+      <div>machine_generated<br><b>true</b> (baseline authored by the hive, not a community of speakers)</div>
+      <div>withdrawal<br><b>none</b> · provenance: this repo</div>
+      <div>vitality<br><b>safe</b> — and irrelevant to its standing in the dock</div>
+    </div>
+    <div class="law" style="margin-top:6px">if the consent block looks like a formality here, it is wrong everywhere
+    (BRIEF-04 §5 — the same specimen-first lesson as BiGen's manufacturer-funded LiBBY block).</div>
+  </div>
+</section>
+
+<section>
+  <h2>THE STRING CORPUS — the hub's own strings, and the honest empty cells</h2>
+  <div class="banner">the corpus genesis: the dock starts by eating the organism's own UI. baseline en only —
+  <b>no cell is machine-filled, no cell is invented by a non-speaker.</b> the empty cells are the corpus's first
+  finding and its invitation: this is what an untranslated truth looks like.</div>
+  <div class="wrap"><table class="gm" id="strings"></table></div>
+  <div class="law" style="margin-top:8px">a string absent in a language renders absent <b>on every surface</b>, labeled —
+  never a silent fallback to English pretending to be the reader's language. a string record never displays
+  dock-entry furniture (vitality badges): a category error the brief forbids.</div>
+</section>
+
+<section>
+  <h2>THE SWEEPS — self-healing as visible machinery, not a claim</h2>
+  <pre>- id: missing-key-sweep      # every UI key on every surface exists in the corpus, or renders Absent{reason}
+  schedule: weekly
+  last_run: 2026-08-19        # corpus seeded this run — zero violations, by construction
+- id: withdrawal-sweep       # no withdrawn string still renders anywhere
+  schedule: weekly
+  last_run: 2026-08-19
+- id: machine-label-sweep    # no machine text renders unlabeled
+  schedule: weekly
+  last_run: 2026-08-19
+- id: direction-sweep        # dir=rtl renders logical properties (D-13), never a mirrored afterthought
+  schedule: weekly
+  last_run: 2026-08-19
+  on_change: open_amendment  # a violation is an AMENDMENTS event, never a silent fix</pre>
+  <div class="law" style="margin-top:6px">the corpus improves the BiGen way: standing queries, receipts in git history,
+  dissent by fork. a stranger can run the sweeps and check us.</div>
+</section>
+
+<section>
+  <h2>THE DOCK AS DATA — clone it, fork the verdicts, show your work</h2>
+  <details><summary>the seed register as YAML (lives in-repo; this page renders it)</summary>
+<pre id="yaml">loading…</pre>
+  </details>
+</section>
+
+<section>
+  <h2>SOURCES — cite or the cell stays silent</h2>
+  <div class="wrap"><table id="srctab"></table></div>
+</section>
+
+</main>
+<footer>
+  alpha MVP — mechanism + register + honest absence; the string layer reaches every surface at beta ·
+  AGPL-3.0-only · <a href="https://github.com/beehive-nature/beehive-nature">source tree</a> ·
+  this page: surfaces/blanguage.html · <a href="index.html">← the hive</a><br>
+  a traditional locale is a product decision; a docked language is a passenger.
+</footer>
+
+<script src="tour.js?v=8"></script>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i);};
+
+/* seed register — statuses linked, codes linked, nothing invented */
+var VIT={
+ safe:{n:'safe',c:'#3f9c55'}, vul:{n:'vulnerable',c:'#0092a6'},
+ def:{n:'definitely endangered',c:'#a476ec'}, sev:{n:'severely endangered',c:'#c07f1c'},
+ cri:{n:'critically endangered',c:'#c07f1c'}
+};
+var DOCK=[
+ {end:'English',ex:'the control specimen',code:'eng',dir:'ltr',v:'safe',
+  src:'baseline — ours',note:'community_attested: not_sought · machine_generated: true — the flags render on our own material'},
+ {end:'te reo Māori',ex:'Māori',code:'mri',dir:'ltr',v:'def',
+  src:'<a href="https://en.wikipedia.org/wiki/Atlas_of_the_World%27s_Languages_in_Danger">Atlas</a> · kōhanga reo immersion revitalization',note:''},
+ {end:'ʻŌlelo Hawaiʻi',ex:'Hawaiian',code:'haw',dir:'ltr',v:'sev',
+  src:'<a href="https://en.wikipedia.org/wiki/Atlas_of_the_World%27s_Languages_in_Danger">Atlas</a> · Pūnana Leo revitalization',note:''},
+ {end:'Diné bizaad',ex:'Navajo',code:'nav',dir:'ltr',v:'vul',
+  src:'<a href="https://en.wikipedia.org/wiki/Atlas_of_the_World%27s_Languages_in_Danger">Atlas</a> · large speaker base, intergenerational transmission weakening',note:''},
+ {end:'aynu itak',ex:'Ainu',code:'ain',dir:'ltr',v:'cri',
+  src:'<a href="https://endangeredlanguages.com/elp-language/1212">Endangered Languages Project</a> · <a href="https://www.bunka.go.jp/english/policy/japanese_language/policy/">Japan Agency for Cultural Affairs</a>',note:''}
+];
+var dk=$('dock');
+dk.innerHTML='<tr><th>language</th><th>ISO 639-3</th><th>dir</th><th>vitality (linked)</th><th class="law">note</th></tr>';
+DOCK.forEach(function(l){
+ var t=VIT[l.v];
+ dk.innerHTML+='<tr><td class="cl">'+l.end+'<div style="font-size:9px;color:var(--dim)">'+l.ex+'</div></td>'
+  +'<td><a href="https://iso639-3.sil.org/code/'+l.code+'">'+l.code+'</a></td>'
+  +'<td>'+l.dir+'</td>'
+  +'<td class="vit"><i style="background:'+t.c+'"></i>'+t.n+'<div style="font-size:9px;color:var(--dim)">'+l.src+'</div></td>'
+  +'<td style="font-size:9px;color:var(--dim)">'+l.note+'</td></tr>';
+});
+
+/* string corpus genesis — hub strings verbatim, en baseline, every other cell absent */
+var KEYS=[
+ {k:'hub.title',v:'🐝 beehive nature · the surfaces'},
+ {k:'hub.tagline',v:'one hive, every door — static, keyless, honest. the anchor is the truth; these pages are its windows.'},
+ {k:'hub.beta',v:'BETA · everything here is open source · nothing custodies real funds yet · break things and tell the raid'},
+ {k:'wing.read',v:'🛰 READ — the instruments'},
+ {k:'wing.make',v:'🎛 MAKE — the studio'},
+ {k:'footer.count',v:'31 surfaces · three orgs · one organism'}
+];
+var st=$('strings');
+st.innerHTML='<tr><th>key</th>'+DOCK.map(function(l){return '<th>'+l.end+'</th>';}).join('')+'</tr>';
+KEYS.forEach(function(s){
+ var r='<tr><td class="cl">'+s.k+'</td>';
+ DOCK.forEach(function(l,idx){
+  r+= idx===0
+   ? '<td class="base">'+s.v+'</td>'
+   : '<td class="absent">— absent · contribute</td>';
+ });
+ r+='</tr>';
+ st.innerHTML+=r;
+});
+
+/* the dock as data */
+$('yaml').textContent=
+'# blanguageDOCK seed register — v0, 2026-08-19\n'+
+'# object types: dock_entry / string_record / sweep_record — never interchangeable\n'+
+'dock:\n'+
+DOCK.map(function(l){
+ return '  - endonym: "'+l.end+'"\n    iso639_3: '+l.code+'\n    direction: '+l.dir+'\n    vitality: '+VIT[l.v].n+'   # linked in surface; Atlas/ELP sourced\n'+
+ '    consent:\n      community_attested: '+(l.code==='eng'?'not_sought':'not_sought')+'\n      machine_generated: '+(l.code==='eng'?'true  # authored by the hive, labeled':'false')+'\n      withdrawal: { status: none }';
+}).join('\n')+
+'\n\nstrings:                      # corpus genesis — the hub\'s own UI, baseline en\n'+
+KEYS.map(function(s){return '  - key: '+s.k+'\n    en: "'+s.v.replace(/"/g,"'")+'"   # source: surfaces/index.html, verbatim\n    '+DOCK.slice(1).map(function(l){return l.code+': absent';}).join('\n    ');}).join('\n')+
+'\n\n# law: absent renders absent, labeled — never a silent English fallback pretending to be translation\n'+
+'# law: machine renders as machine — never silent about it\n'+
+'# law: withdrawal is honored, history is kept — the dock forgets nothing\n'+
+'# fork this file, contribute a language, show your work';
+
+/* sources */
+var SRC=[
+ ['UNESCO — towards World Atlas of Languages','the 40% / ~6,700 figure','<a href="https://www.unesco.org/en/articles/towards-world-atlas-languages">unesco.org</a>'],
+ ['UNESCO Atlas of the World\'s Languages in Danger','vitality categories; 538/502/632/607 counts','<a href="https://en.wikipedia.org/wiki/Atlas_of_the_World%27s_Languages_in_Danger">Atlas record</a>'],
+ ['UNESCO — Language Vitality and Endangerment (2003)','the nine-factor methodology','<a href="https://unesdoc.unesco.org/ark:/48223/pf0000183699">unesdoc</a>'],
+ ['World Atlas of Languages (successor platform)','the living successor to the 2010 Atlas','<a href="https://www.unesco.org/en/articles/unesco-hosts-ad-hoc-expert-meeting-world-atlas-languages">unesco.org</a>'],
+ ['Endangered Languages Project — Ainu','critically endangered, linked record','<a href="https://endangeredlanguages.com/elp-language/1212">elp-language/1212</a>'],
+ ['Japan Agency for Cultural Affairs','Ainu critically endangered, state listing','<a href="https://www.bunka.go.jp/english/policy/japanese_language/policy/">bunka.go.jp</a>'],
+ ['Carroll et al. 2020 — CARE Principles','Collective benefit · Authority · Responsibility · Ethics','<a href="https://doi.org/10.5334/dsj-2020-043">Data Science Journal</a> · <a href="https://www.gida-global.org/careprinciples">GIDA</a>'],
+ ['UNDRIP Articles 13–14','indigenous language and education rights','<a href="https://www.ohchr.org/en/instruments-mechanisms/instruments/united-nations-declaration-rights-indigenous-peoples">OHCHR</a>'],
+ ['ISO 639-3 registry','language codes, live lookup','<a href="https://iso639-3.sil.org/">iso639-3.sil.org</a>'],
+ ['Glottolog','complementary language catalogue','<a href="https://glottolog.org/">glottolog.org</a>'],
+ ['this hub, verbatim','string-corpus genesis','<a href="https://beehive-nature.github.io/beehive-nature/surfaces/">surfaces/</a>']
+];
+var tb2=$('srctab');
+tb2.innerHTML='<tr><th>source</th><th>for</th><th>link</th></tr>';
+SRC.forEach(function(r){ tb2.innerHTML+='<tr><td class="cl">'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>'; });
+})();
+</script>
+</body>
+</html>
