@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>bFactory — the river's source, programmed by its demand</title>
+<style>
+:root{--bg:#0d1410;--ink:#e2efdb;--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--dim:#8a9a8a;--line:#243026;--leaf:#7ddf8f;--amber:#ffb347;
+/* stage set — validated against THIS surface (#0d1410) and pair-checked against the
+   ground each label actually lands on, not against the well. Order keeps green and
+   orange non-adjacent (the protan trap) and green and teal non-adjacent (the tritan
+   trap the design seat caught on bfood). Identity never rides colour alone. */
+--s-plan:#a476ec;--s-grow:#3f9c55;--s-harvest:#c07f1c;--s-deliver:#0092a6}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:32px 16px 90px}
+header{text-align:center;margin-bottom:8px}
+h1{font-size:clamp(17px,4vw,24px);color:var(--gold);font-weight:400;letter-spacing:.05em}
+header p{color:var(--dim);font-size:11px;margin-top:6px;max-width:700px;margin-left:auto;margin-right:auto}
+main{max-width:860px;margin:0 auto}
+section{background:#111a14;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:14px}
+section h2{font-size:12px;color:var(--violet);font-weight:400;letter-spacing:.08em;margin-bottom:8px}
+.law{color:var(--dim);font-size:10.5px;line-height:1.75}
+.stage{font-size:10.5px;color:var(--dim)}
+#designbar{background:#1a1408;border:1px solid #3d3410;border-radius:10px;padding:10px 14px;color:var(--gold);font-size:10.5px;line-height:1.7;text-align:center;max-width:860px;margin:0 auto 14px}
+#farmerlaw{background:#0f1a12;border:1px solid var(--leaf);border-radius:10px;padding:12px 15px;max-width:860px;margin:0 auto 14px}
+#farmerlaw .t{color:var(--leaf);font-size:11px;letter-spacing:.06em}
+#farmerlaw .b{color:var(--ink);font-size:11px;margin-top:5px;line-height:1.75}
+#loop{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:10px}
+.node{background:#0a0f0b;border:1px solid var(--line);border-radius:9px;padding:11px 12px;border-left-width:3px}
+.node .n{font-size:11px}
+.node .d{font-size:10px;color:var(--dim);margin-top:4px;line-height:1.65}
+.node .st{font-size:9px;color:var(--dim);letter-spacing:.08em;margin-top:6px;display:block}
+table{width:100%;border-collapse:collapse;margin-top:8px;font-size:10.5px}
+td,th{border-bottom:1px solid var(--line);padding:6px;text-align:left;color:var(--dim);vertical-align:top}
+th{color:var(--violet);font-weight:400} td.n{color:var(--ink)}
+.gate{background:#0a0f0b;border:1px dashed var(--amber);border-radius:9px;padding:10px 12px;margin-top:8px}
+.gate .g{color:var(--amber);font-size:10.5px}
+.gate .q{color:var(--dim);font-size:10px;margin-top:4px;line-height:1.7}
+.bar{height:13px;border-radius:3px;display:flex;margin-top:5px;overflow:hidden}
+.bar i{display:block;height:100%;margin-right:2px;border-radius:2px}
+.bar i:last-child{margin-right:0}
+#split{margin-top:8px}
+.splitrow{margin-bottom:10px}
+.splitrow .lbl{font-size:10.5px}
+.splitrow .val{font-size:10px;color:var(--dim);margin-top:3px}
+button{background:#26123a;color:#c9a0ff;border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer;font:11.5px 'IBM Plex Mono',monospace;margin:8px 6px 0 0}
+button:hover{background:#c9a0ff;color:#000}
+button.on{background:#c9a0ff;color:#000}
+footer{max-width:860px;margin:20px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.85}
+a{color:var(--cyan)}
+</style>
+</head>
+<body>
+
+<div id="designbar">
+  ⚙ <b>THIS IS A DESIGN SURFACE — NOTHING IS BUILT.</b> No bFactory exists; no number on this
+  page is telemetry. Everything here is the ratified design made walkable, so alpha testers
+  can read the plan and argue with it. A page that showed a running factory would be
+  fabricating data, which is the one thing this organism refuses.
+</div>
+
+<div id="farmerlaw">
+  <div class="t">🌻 THE FARMER EATS FIRST — ratified law, carried verbatim on page one</div>
+  <div class="b">The Coop is <i>the hemp farmer's floor</i>, and <b>the bootstrap is human
+  farming</b> — the founder's own word. Until gate <b>BF-1</b> is ruled, every bFactory
+  document and surface carries this law where it cannot be missed. Automation that displaced
+  the farmer would break a rule this organism ratified before it built anything.</div>
+</div>
+
+<header>
+  <h1>🏭 the bFactory</h1>
+  <p>an ordinary farm grows a crop and then asks what can be made from it.
+  a bFactory reads the downstream dock and <b>grows to it</b>. one new part — a control
+  loop — on top of rails this organism already built.</p>
+</header>
+<main>
+
+<section>
+  <h2>1 · THE CONTROL LOOP — the only genuinely new part</h2>
+  <div id="loop"></div>
+  <div class="law" style="margin-top:10px"><b>The loop closes.</b> What was delivered is
+  measured, and the measurement re-docks as the next cycle's ground truth. That closure is
+  what separates this from a greenhouse with robots: the plan is a <i>function of demand</i>,
+  and demand is a function of what actually shipped.</div>
+</section>
+
+<section>
+  <h2>2 · "PROGRAM THE PLANT" — what it means precisely, and what it does not</h2>
+  <div class="law">It means <b>select cultivar, control the growth environment, and choose
+  the harvest stage</b> to bias which fractions the plant yields. Bast fibre wants a
+  different plant, planting density and harvest date than seed; flower wants a third. That is
+  agronomy with a closed loop, and it is achievable with ordinary equipment.
+  <b>It is not a claim about genetic engineering</b> — that would be a separate spec with an
+  entirely separate regulatory surface, and this design does not assert it (gate BF-2).</div>
+  <div class="stage" style="margin-top:10px">pick a demand signal and watch the intended
+  fraction split move — <b>illustrative shape only, not measured yields</b>:</div>
+  <div><button data-plan="fibre">fibre-led</button><button data-plan="seed">seed-led</button><button data-plan="dual">dual-purpose</button></div>
+  <div id="split"></div>
+</section>
+
+<section>
+  <h2>3 · WHAT PLUGS IN — already built, not promised</h2>
+  <table><thead><tr><th>layer</th><th>what carries it today</th></tr></thead><tbody>
+    <tr><td class="n">demand signal</td><td>the biomass river's four coordinates (fraction → process → class → product)</td></tr>
+    <tr><td class="n">composition truth</td><td><code>crates/coa</code> — Measurement / Absence; &lt;LOQ is never 0</td></tr>
+    <tr><td class="n">market settlement</td><td><code>crates/normalizer</code> — ProductListed → OrderFunded → OrderShipped, typed end to end</td></tr>
+    <tr><td class="n">the agreement</td><td>bAccords, bQueenBee-refereed (the Farmers Market's own rail)</td></tr>
+    <tr><td class="n">environmental accounting</td><td>the environmental arm — a bFactory's inputs and outputs <i>are</i> its parameters</td></tr>
+    <tr><td class="n">provenance</td><td>the eternal ring (Arweave · Autonomi) anchored on Vaulta, per the adapter register</td></tr>
+  </tbody></table>
+  <div class="law" style="margin-top:8px">Six layers already exist; the bFactory adds one.
+  That ratio is the strongest argument that the sequencing is right — and the reason this
+  design is publishable before a single bolt is turned.</div>
+</section>
+
+<section>
+  <h2>4 · HONESTY REQUIREMENTS — binding on any build</h2>
+  <div class="law">
+  <b>Failure is a first-class state.</b> A crop fails, a robot stops, a sensor lies. A
+  bFactory must report <i>what it did not achieve</i> with the same fidelity as what it did —
+  the NotMeasured law applied to a whole season.<br>
+  <b>"Fully autonomous" describes the operating loop, not an absence of accountability.</b>
+  Every cycle emits receipts onto the same rails the Coop and Farmers Market already use.<br>
+  <b>No hive subsidy.</b> A bFactory funds its own inputs and is paid for its output like any
+  other participant — a factory the hive must underwrite fails the ten-billionth-user test
+  wearing a different costume.</div>
+</section>
+
+<section>
+  <h2>5 · OPEN GATES — shown, because alpha testers deserve the undecided parts too</h2>
+  <div class="gate"><div class="g">⚑ BF-1 · the farmer's standing under automation</div>
+    <div class="q">Does "the farmer eats first" mean (a) farmers hold settlement priority over
+    bFactory output on the same rails, (b) bFactories serve only where human farming does not
+    reach — off-season, controlled environment, land unsuited to field crops, scale beyond
+    available labour — or (c) a ruled combination? <b>No seat may decide this.</b> The
+    engineering argument for (b) stands on its own merits: human farming supplies the
+    <i>measured</i> ground truth any autonomous planner needs before it can be trusted with a
+    season.</div></div>
+  <div class="gate"><div class="g">⚑ BF-2 · what "program the plant" extends to</div>
+    <div class="q">Cultivar, environment and harvest-stage selection (this design's reading),
+    or genetic modification — which is a separate spec, a separate regulatory surface, and a
+    separate ruling.</div></div>
+  <div class="gate"><div class="g">⚑ BF-3 · first physical scope</div>
+    <div class="q">A controlled-environment module, or an instrumented partnership with a
+    human farm that supplies the ground truth BF-1's option (b) argues for.</div></div>
+</section>
+
+</main>
+<footer>
+  design: SPEC-BFACTORIES-1 · source river: SPEC-BIOMASS-RIVER-1 · the farmer-first law:
+  <a href="blight/farmers.html">the Farmers Market</a> · <a href="blight/coop.html">the Coop</a><br>
+  composition and process facts only — what a product does to a body lives off-repo, graded ·
+  <a href="index.html">← the hive</a>
+</footer>
+
+<script src="tour.js?v=8"></script>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i);};
+
+/* The loop's four stages. Colour is never the only channel: each carries a glyph, a
+   name, and a stage label in text — the text twin IS the content, not a hover. */
+var LOOP=[
+ {g:'◈',n:'PLAN',c:'var(--s-plan)',d:'read the dock: which fractions, processes and classes are being asked for, and in what quantity',st:'stage 1 · reads the river'},
+ {g:'❋',n:'GROW',c:'var(--s-grow)',d:'cultivar, density, environment and season chosen to bias the fraction split toward the plan',st:'stage 2 · agronomy'},
+ {g:'⌁',n:'HARVEST',c:'var(--s-harvest)',d:'harvest stage is itself a lever — the same field yields differently cut early or late',st:'stage 3 · timing is a control'},
+ {g:'⇢',n:'DELIVER + MEASURE',c:'var(--s-deliver)',d:'shipped on the existing market rails, then measured — and the measurement re-docks as next cycle’s ground truth',st:'stage 4 · closes the loop'}];
+var lp=$('loop');
+LOOP.forEach(function(s){
+  var d=document.createElement('div'); d.className='node'; d.style.borderLeftColor=s.c;
+  d.innerHTML='<div class="n" style="color:'+s.c+'">'+s.g+' '+s.n+'</div>'
+    +'<div class="d">'+s.d+'</div><span class="st">'+s.st+'</span>';
+  lp.appendChild(d);
+});
+
+/* Illustrative fraction splits — SHAPE ONLY, explicitly not measured yields. The whole
+   point is that the plan moves the split; real numbers arrive with real seasons. */
+var PLANS={
+  fibre:[['bast fibre',46,'var(--s-grow)'],['hurd / shiv',34,'var(--s-harvest)'],['seed',12,'var(--s-deliver)'],['leaf + residue',8,'var(--s-plan)']],
+  seed: [['seed',44,'var(--s-deliver)'],['seed-cake / meal',26,'var(--s-harvest)'],['bast fibre',18,'var(--s-grow)'],['leaf + residue',12,'var(--s-plan)']],
+  dual: [['seed',30,'var(--s-deliver)'],['bast fibre',30,'var(--s-grow)'],['hurd / shiv',26,'var(--s-harvest)'],['leaf + residue',14,'var(--s-plan)']]
+};
+function drawSplit(key){
+  var rows=PLANS[key], el=$('split'); el.innerHTML='';
+  var bar='<div class="bar">';
+  rows.forEach(function(r){ bar+='<i style="width:'+r[1]+'%;background:'+r[2]+'"></i>'; });
+  bar+='</div>';
+  el.innerHTML=bar+rows.map(function(r){
+    return '<div class="splitrow"><div class="lbl"><span style="color:'+r[2]+'">▪</span> '+r[0]
+      +' — <b>'+r[1]+'%</b> of harvested mass</div>'
+      +'<div class="val">illustrative shape · not a measured yield · a real figure arrives only from a real season</div></div>';
+  }).join('');
+  Array.prototype.forEach.call(document.querySelectorAll('[data-plan]'),function(b){
+    b.className = (b.getAttribute('data-plan')===key) ? 'on' : '';
+  });
+}
+Array.prototype.forEach.call(document.querySelectorAll('[data-plan]'),function(b){
+  b.onclick=function(){ drawSplit(b.getAttribute('data-plan')); };
+});
+drawSplit('dual');
+})();
+</script>
+</body>
+</html>
