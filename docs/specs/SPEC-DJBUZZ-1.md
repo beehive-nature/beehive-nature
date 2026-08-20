@@ -130,3 +130,34 @@ ratification):
 
 **Gate DB-5:** the fork-provenance shape (parent pointer + divergence receipt) rides
 DB-1's class ratification — one ruling opens the room's build.
+
+---
+
+## 7 · THE CREATION DOCTRINE — humans + AI making first-class art around the clock (GO executed)
+
+Founder, verbatim: *"lets get the Ui/UX for humans and ai creating 1st class sound and
+visual art around the clock across the world. How do we best work with others, stay true
+to our self art creation process and fully leverage hardware/bMeshAsi for music
+creation, production intwined with erc20i tokens and or nfts"* — **GO approved on all
+DB gates.** The doctrine, four lines, each already a standing law elsewhere in the tree:
+
+1. **Humans and AI co-create, badges honest.** The around-the-clock output is a feature
+   only if every piece says what it is: ⚙ on AI-touched art, exactly as on machine-drafted
+   language. The world's first honest generative label is the moat.
+2. **The self-art process stays sovereign.** The founder's style anchors are the genesis
+   corpus; AI extends, never replaces; forks credit parents (the lineage law, live in
+   the Listening Room).
+3. **Working with others rides the bAccord grammar.** Remix rights, revenue splits,
+   credit — settled in the open, bQueenBee refereeable, the Farmers Market's shape.
+4. **Hardware + bMeshAi carry the production.** Offline-first studio (the bSAFE device
+   lane); performances sync over the mesh when towers choke (bMeshAi); the tokens are
+   the receipts — **ERC-20i inscriptions for the art, never bridged; NFT-class minting
+   only where tier-2 id-addressed transfer exists** (the §10 boundary, measured: frozen
+   data on exSat/ETH; on Base, existence couples to balance — escrow carries backing).
+
+**Landed with the GO:** `surfaces/listening.html` — the Listening Room v0: one seed
+driving sound AND sight through a deterministic demo renderer (the organ generalized);
+**the fork law live** (child = parent with one nibble flipped, divergence receipt
+rendered, parent untouched, lineage stacked); the DB-1 provenance card rendered as UI;
+the doctrine on the page. Hub 42, roster 34, **70/70**. The real renderer-contract
+build and the buzz-room wiring follow the deployment gates.

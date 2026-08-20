@@ -220,6 +220,14 @@ ok("queen: v1 KB covers the estate (frozen-seed answer)", (await page.locator("#
 ok("queen: the ten drops render paste-ready", (await page.locator("#droplist .rc").count()) === 10);
 ok("queen: the debut VOICE record is published on the estate", (await page.locator("#debut").innerText()).includes("persona.debut") && (await page.locator("#debut").innerText()).includes("dc9bb8c689b541b6"));
 
+// the Listening Room — the fork law, live
+await page.goto(BASE+"/surfaces/listening.html");
+await page.waitForTimeout(300);
+ok("listening: the piece renders (seed + viz + lineage sections)", (await page.locator("#seed").count())===1 && (await page.locator("#viz").count())===1 && (await page.locator("#lineage").count())===1);
+await page.locator("#fork").click();
+ok("listening: fork derives child + lineage row + counter", (await page.locator("#forkcount").textContent()).includes("1 fork") && (await page.locator(".forkrow").count())===1 && (await page.locator(".forkrow").innerHTML()).includes("divergence receipt"));
+ok("listening: the DB-1 provenance card + creation doctrine present", (await page.locator("body").innerText()).includes("WHAT A REAL INSCRIPTION CARRIES") && (await page.locator("body").innerText()).includes("bMeshAi"));
+
 // hub + review registration
 await page.goto(`${BASE}/surfaces/bfood.html`);
 await page.waitForTimeout(400);
@@ -232,11 +240,11 @@ ok('bfood rebuilt: n/m never zero + hardwired hemp + fat disaggregated + quest b
 
 await page.goto(`${BASE}/surfaces/index.html`);
 ok('hub links the university', (await page.locator('a[href="university/index.html"]').count()) === 1);
-ok('hub counts 41', (await page.locator('footer').textContent()).includes('41 surfaces'));
+ok('hub counts 42', (await page.locator('footer').textContent()).includes('42 surfaces'));
 await page.goto(`${BASE}/surfaces/review.html`);
 const optCount = await page.locator('#surf option').count();
 const hasUni = (await page.locator('#surf option[value="university/index.html"]').count()) === 1;
-ok('review deck lists the university surface', optCount === 33 && hasUni);
+ok('review deck lists the university surface', optCount === 34 && hasUni);
 
 console.log(`\n${pass} passed, ${fail} failed` + (errors.length ? '\nerrors:\n' + errors.join('\n') : ''));
 await browser.close(); server.close();
