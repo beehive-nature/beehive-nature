@@ -26,6 +26,9 @@ jobs:
       # bSAFE host lives outside the kernel workspace (own members list + lockfile)
       - name: bSAFE host workspace (THP codec + Noise XX)
         run: cargo test --locked --manifest-path rust/bsafe-host/Cargo.toml
+      # SPEC-BINDEXER-0: the keyless attestation is a CI-visible receipt
+      - name: bindexer keyless attestation (SPEC-BINDEXER-0)
+        run: cargo run --locked -p bindexer -- prove-keyless
 
   node:
     runs-on: ubuntu-latest

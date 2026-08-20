@@ -46,6 +46,7 @@ members = [
     "crates/bmesh-hwfit",
     "crates/bcomb",
     "crates/bmesh-meter",
+    "crates/bindexer",
 ]
 
 [workspace.metadata]
