@@ -32,6 +32,14 @@ td.n{color:var(--ink)}
 .st{white-space:nowrap;font-weight:400}
 .st i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-inline-end:5px;vertical-align:-1px}
 .cite{font-size:9px;color:var(--dim)}
+/* link-resolution badges — status is never carried by colour alone; each prints its word */
+.lk{font-size:8.5px;letter-spacing:.03em;border:1px solid;border-radius:3px;padding:0 4px;white-space:nowrap;display:inline-block}
+.lk.ok{color:#63c97c;border-color:#2b5a39}
+.lk.bad{color:#ff8f5a;border-color:#6b3a1e}
+.lk.unk{color:#93a493;border-color:#3a4a3c}
+.fetchnote{margin-top:14px;padding:11px 13px;border:1px solid #6b4710;border-left:3px solid #ffb347;
+ border-radius:8px;font-size:10.5px;line-height:1.85;color:var(--dim)}
+.fetchnote b{color:var(--ink)}
 .quote{background:#0a0f0b;border:1px solid var(--line);border-radius:9px;padding:10px 12px;margin-top:10px;font-size:11px;line-height:1.8}
 .quote .who{color:var(--gold);font-size:9.5px;letter-spacing:.06em}
 .lane{background:#0a0f0b;border:1px solid var(--line);border-radius:10px;padding:11px 13px;margin-top:10px}
@@ -248,11 +256,39 @@ var ROWS=[
   s:'align',
   set:'co-creation 4: receipts-first publishing as shared infrastructure — the discipline that keeps a discourse homeostatic is mechanical, free, and already built.'}
 ];
+/* LINK-RESOLUTION STATUS — Seat 3 verification pass, 2026-08-20.
+   Every external citation URL on this page was requested from this host. Five returned
+   404 and four are paywalled or bot-blocked, so they cannot be confirmed from here.
+   That matters more on this page than on any other in the tree, because one of the rows
+   below documents a federal report shipping citations that did not resolve. A page making
+   that observation while carrying unresolving citations of its own has disqualified
+   itself. So the status of each link is now printed beside it rather than left for a
+   reader to discover. Declared, not zeroed -- the same standard we ask of them.
+   Measured with: curl -sS -o /dev/null -w "%{http_code}" -L --max-time 20 */
+var LINKSTATUS={
+ 'https://www.whitehouse.gov/wp-content/uploads/2025/05/MAHA-Report.pdf':[404,'did not resolve from this host'],
+ 'https://www.whitehouse.gov/presidential-actions/2025/02/establishing-the-presidents-commission-to-make-america-healthy-again/':[404,'did not resolve from this host'],
+ 'https://www.bbc.com/news/articles/cly4z5z8g9zo':[404,'did not resolve from this host'],
+ 'https://www.mcgill.ca/oss/article/critical-thinking-health/unscientific-crusade-against-seed-oils':[404,'did not resolve from this host'],
+ 'https://fortune.com/2025/02/19/rfk-jr-banning-candy-soda-snap/':[404,'did not resolve from this host'],
+ 'https://www.hhs.gov/about/news/2025/09/09/maha-commission-unveils-sweeping-strategy-to-make-our-children-healthy-again.html':[403,'blocked to this host — neither confirmed nor refuted'],
+ 'https://www.axios.com/2025/05/09/fda-color-additives-rfk-jr-dye-ban':[403,'blocked to this host — neither confirmed nor refuted'],
+ 'https://www.nytimes.com/2025/05/29/health/trump-administration-maha-report-citations.html':[403,'paywalled to this host — neither confirmed nor refuted'],
+ 'https://www.nytimes.com/2025/11/11/business/shutdown-deal-food-safety.html':[403,'paywalled to this host — neither confirmed nor refuted'],
+ 'https://www.wsj.com/articles/trump-officials-balk-at-rfk-jr-s-attack-on-pesticides-8a2f7a1b':[401,'paywalled to this host — neither confirmed nor refuted'],
+ 'https://www.baltimoresun.com/2026/06/23/federal-judge-blocks-usdas-snap-restrictions-on-soda-candy-in-five-states':[200,'resolved']
+};
+function linkBadge(u){
+ var s=LINKSTATUS[u]; if(!s) return '';
+ if(s[0]===200) return ' <span class="lk ok" title="'+s[1]+'">✓ resolves</span>';
+ if(s[0]===404) return ' <span class="lk bad" title="'+s[1]+'">✗ '+s[0]+' — does not resolve</span>';
+ return ' <span class="lk unk" title="'+s[1]+'">? '+s[0]+' — unverifiable from here</span>';
+}
 var tb=$('rows').tBodies[0];
 ROWS.forEach(function(r){
  var tr=document.createElement('tr'), t=T[r.s];
  tr.innerHTML='<td class="n">'+r.q+'</td>'
-  +'<td>'+r.maha+'<div class="cite">[<a href="'+r.mu+'" rel="noopener">'+r.mc+'</a>]</div></td>'
+  +'<td>'+r.maha+'<div class="cite">[<a href="'+r.mu+'" rel="noopener">'+r.mc+'</a>]'+linkBadge(r.mu)+'</div></td>'
   +'<td>'+r.bfood+'<div class="cite">[<a href="'+r.bu+'" rel="noopener">'+r.bc+'</a>]</div></td>'
   +'<td class="st"><i style="background:'+t.c+'"></i>'+t.g+' '+t.n+'</td>'
   +'<td>'+r.set+'</td>';
@@ -275,7 +311,20 @@ $('srcs').innerHTML=[
  ['the shortfall receipt','https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/RECEIPT_SHORTFALL_ARBITRAGE_2026-08-20.md'],
  ['the peer-reviewed counter-record (2026) — Am J Health Promot editorial','https://pubmed.ncbi.nlm.nih.gov/41910371/'],
  ['the peer-reviewed counter-record (2026) — J Health Polit Policy Law','https://pubmed.ncbi.nlm.nih.gov/41059522/']
-].map(function(s){ return '<a href="'+s[1]+'" rel="noopener">'+s[0]+'</a>'; }).join(' · ')+'.';
+].map(function(s){ return '<a href="'+s[1]+'" rel="noopener">'+s[0]+'</a>'+linkBadge(s[1]); }).join(' · ')+'.'
+ +'<div class="fetchnote"><b>LINK STATUS, measured from this host on 2026-08-20 and printed '
+ +'rather than left for you to find.</b> Of the external citations above, <b>five did not '
+ +'resolve</b> — including both whitehouse.gov links, the Executive Order and the Assessment '
+ +'PDF itself — and <b>four are paywalled or blocked to this host</b>, so they can be neither '
+ +'confirmed nor refuted from here. Only the Baltimore Sun ruling and the two PubMed records '
+ +'were retrieved.<br><br><b>This is stated first because of what the last row of the table '
+ +'says.</b> A page observing that a federal report carried citations which did not resolve, '
+ +'while carrying unresolving citations of its own, has forfeited the standing to make the '
+ +'observation. A 404 is not proof a source was invented — government URLs move, news sites '
+ +'restructure, and several of these are almost certainly real documents at addresses that '
+ +'have changed. But under this project’s own law an unresolving citation cannot stand '
+ +'unmarked, and it is marked. <b>A verification pass to find addresses that do resolve is '
+ +'running; the claims stay only where it succeeds.</b></div>';
 })();
 </script>
 </body>
