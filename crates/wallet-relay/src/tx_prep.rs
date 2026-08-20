@@ -4,7 +4,13 @@
 
 use serde_json::{json, Value};
 
-pub fn prepare_updateauth(account:&str, permission:&str, parent:&str, threshold:u32, keys:&[(&str,u32)]) -> Value {
+pub fn prepare_updateauth(
+    account: &str,
+    permission: &str,
+    parent: &str,
+    threshold: u32,
+    keys: &[(&str, u32)],
+) -> Value {
     json!({ "actions":[{ "account":"eosio", "name":"updateauth",
         "authorization":[{"actor":account,"permission":"active"}],
         "data":{ "account":account, "permission":permission, "parent":parent,
@@ -15,14 +21,20 @@ pub fn prepare_updateauth(account:&str, permission:&str, parent:&str, threshold:
         "_signatures_required":["active"] })
 }
 
-pub fn prepare_linkauth(account:&str, code:&str, action_type:&str, permission:&str) -> Value {
+pub fn prepare_linkauth(account: &str, code: &str, action_type: &str, permission: &str) -> Value {
     json!({ "actions":[{ "account":"eosio", "name":"linkauth",
         "authorization":[{"actor":account,"permission":"active"}],
         "data":{"account":account,"code":code,"type":action_type,"requirement":permission} }],
         "_note":"UNSIGNED — founder signs.", "_signatures_required":["active"] })
 }
 
-pub fn prepare_newaccount(creator:&str, new_account:&str, owner_keys:&[(&str,u32)], active_keys:&[(&str,u32)], ram_bytes:u64) -> Value {
+pub fn prepare_newaccount(
+    creator: &str,
+    new_account: &str,
+    owner_keys: &[(&str, u32)],
+    active_keys: &[(&str, u32)],
+    ram_bytes: u64,
+) -> Value {
     json!({ "actions":[{
         "account":"eosio","name":"newaccount","authorization":[{"actor":creator,"permission":"active"}],
         "data":{ "creator":creator, "name":new_account,
@@ -34,7 +46,11 @@ pub fn prepare_newaccount(creator:&str, new_account:&str, owner_keys:&[(&str,u32
         "_signatures_required":[format!("{}@active",creator)], "_irreversible":true })
 }
 
-pub fn prepare_mint_walkthrough(creator:&str, new_account:&str, device_addresses:&[Value]) -> Value {
+pub fn prepare_mint_walkthrough(
+    creator: &str,
+    new_account: &str,
+    device_addresses: &[Value],
+) -> Value {
     json!({ "spec":"SPEC-VAULTA-IDENTITY-1", "account":new_account, "all_unsigned":true, "founder_gated":true,
         "steps":[
             {"step":1,"action":"newaccount","note":"Creates the Vaulta account. IRREVERSIBLE. Founder signs."},

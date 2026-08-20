@@ -69,7 +69,7 @@ impl AuthenticatorTier {
 pub struct EnrollmentRequest {
     pub tier: AuthenticatorTier,
     pub pubkey_envelope: serde_json::Value, // PQ-ready versioned envelope (§2)
-    pub account: String,                     // Vaulta account name (the bzDiD)
+    pub account: String,                    // Vaulta account name (the bzDiD)
 }
 
 /// The ladder metadata for dashboard display.
@@ -83,7 +83,14 @@ use axum::Json;
 /// NEVER carries a private key. NEVER signs. Produces an UNSIGNED updateauth tx.
 pub async fn enroll_handler(body: Bytes) -> Response {
     let p: serde_json::Value = match serde_json::from_slice(&body) {
-        Ok(v) => v, Err(e) => return (StatusCode::BAD_REQUEST, Json(serde_json::json!({"error":e.to_string()}))).into_response(),
+        Ok(v) => v,
+        Err(e) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(serde_json::json!({"error":e.to_string()})),
+            )
+                .into_response()
+        }
     };
     let tier_str = p.get("tier").and_then(|v| v.as_str()).unwrap_or("");
     let tier = match tier_str {
@@ -91,37 +98,64 @@ pub async fn enroll_handler(body: Bytes) -> Response {
         "pupa" => AuthenticatorTier::Pupa,
         "bee" => AuthenticatorTier::Bee,
         "royal_guard" => AuthenticatorTier::RoyalGuard,
-        _ => return (StatusCode::BAD_REQUEST, Json(serde_json::json!({"error":"invalid tier"}))).into_response(),
+        _ => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(serde_json::json!({"error":"invalid tier"})),
+            )
+                .into_response()
+        }
     };
     // T-F tiers enroll into bni.id. T-H tiers route to ceremony (not this endpoint).
     if tier.custody_tier() == "T-H" {
-        return (StatusCode::OK, Json(serde_json::json!({
-            "routed_to": "ceremony step 6 (T-H sign)",
-            "note": "T-H tiers do not enroll via bni.id. They sign the ceremony.",
-            "tier": tier_str,
-        }))).into_response();
+        return (
+            StatusCode::OK,
+            Json(serde_json::json!({
+                "routed_to": "ceremony step 6 (T-H sign)",
+                "note": "T-H tiers do not enroll via bni.id. They sign the ceremony.",
+                "tier": tier_str,
+            })),
+        )
+            .into_response();
     }
     let account = p.get("account").and_then(|v| v.as_str()).unwrap_or("");
     if account.is_empty() {
-        return (StatusCode::BAD_REQUEST, Json(serde_json::json!({"error":"account required"}))).into_response();
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(serde_json::json!({"error":"account required"})),
+        )
+            .into_response();
     }
     // Produce an UNSIGNED updateauth tx adding the pubkey to bni.id.
     // The key lives at pubkey_envelope.payload.value (envelope.rs::pubkey_envelope).
     let envelope = p.get("pubkey_envelope").cloned().unwrap_or_default();
-    let pubkey = match envelope.get("payload").and_then(|pl| pl.get("value")).and_then(|v| v.as_str()) {
-        Some(k) if plausible_vaulta_pubkey(k) => k.to_string(),
-        Some(k) => return (StatusCode::BAD_REQUEST, Json(serde_json::json!({
-            "error":"pubkey_envelope.payload.value is not a plausible Vaulta public key",
-            "got": k,
-        }))).into_response(),
-        None => return (StatusCode::BAD_REQUEST, Json(serde_json::json!({
-            "error":"pubkey_envelope.payload.value (string) required",
-        }))).into_response(),
-    };
-    let tx = crate::tx_prep::prepare_updateauth(
-        account, "bni.id", "active", 1,
-        &[(pubkey.as_str(), 1)],
-    );
+    let pubkey =
+        match envelope
+            .get("payload")
+            .and_then(|pl| pl.get("value"))
+            .and_then(|v| v.as_str())
+        {
+            Some(k) if plausible_vaulta_pubkey(k) => k.to_string(),
+            Some(k) => return (
+                StatusCode::BAD_REQUEST,
+                Json(serde_json::json!({
+                    "error":"pubkey_envelope.payload.value is not a plausible Vaulta public key",
+                    "got": k,
+                })),
+            )
+                .into_response(),
+            None => {
+                return (
+                    StatusCode::BAD_REQUEST,
+                    Json(serde_json::json!({
+                        "error":"pubkey_envelope.payload.value (string) required",
+                    })),
+                )
+                    .into_response()
+            }
+        };
+    let tx =
+        crate::tx_prep::prepare_updateauth(account, "bni.id", "active", 1, &[(pubkey.as_str(), 1)]);
     Json(serde_json::json!({
         "v": 1,
         "action": "enroll_into_bni.id",
@@ -130,13 +164,17 @@ pub async fn enroll_handler(body: Bytes) -> Response {
         "envelope": envelope,
         "unsigned_tx": tx,
         "_note": "UNSIGNED. Founder signs. Pubkey enrolled additively (S3). Never a private key.",
-    })).into_response()
+    }))
+    .into_response()
 }
 
 /// Base58 alphabet shared by EOS/Vaulta key encodings (no 0, O, I, l).
 fn is_base58(s: &str) -> bool {
-    !s.is_empty() && s.bytes().all(|b| matches!(b,
-        b'1'..=b'9' | b'A'..=b'H' | b'J'..=b'N' | b'P'..=b'Z' | b'a'..=b'k' | b'm'..=b'z'))
+    !s.is_empty()
+        && s.bytes().all(|b| {
+            matches!(b,
+        b'1'..=b'9' | b'A'..=b'H' | b'J'..=b'N' | b'P'..=b'Z' | b'a'..=b'k' | b'm'..=b'z')
+        })
 }
 
 /// Format plausibility ONLY — no base58check decode, no checksum verification.
@@ -187,7 +225,9 @@ mod tests {
     use http_body_util::BodyExt;
 
     /// Synthetic 53-char legacy-format key — a test vector, not a real account key.
-    fn test_key() -> String { format!("EOS{}", "K1".repeat(25)) }
+    fn test_key() -> String {
+        format!("EOS{}", "K1".repeat(25))
+    }
 
     async fn call(body: serde_json::Value) -> (StatusCode, serde_json::Value) {
         let resp = enroll_handler(Bytes::from(body.to_string())).await;
@@ -202,11 +242,20 @@ mod tests {
         let envelope = crate::envelope::pubkey_envelope(&key, "secp256k1", "test", "T-F");
         let (status, body) = call(serde_json::json!({
             "tier": "larva", "account": "alice", "pubkey_envelope": envelope,
-        })).await;
+        }))
+        .await;
         assert_eq!(status, StatusCode::OK);
         let tx_key = &body["unsigned_tx"]["actions"][0]["data"]["auth"]["keys"][0]["key"];
-        assert_eq!(tx_key, key.as_str(), "tx must carry the envelope's key, not a placeholder");
-        assert_eq!(body["envelope"]["payload"]["value"], key.as_str(), "envelope still echoed");
+        assert_eq!(
+            tx_key,
+            key.as_str(),
+            "tx must carry the envelope's key, not a placeholder"
+        );
+        assert_eq!(
+            body["envelope"]["payload"]["value"],
+            key.as_str(),
+            "envelope still echoed"
+        );
     }
 
     #[tokio::test]
@@ -227,7 +276,8 @@ mod tests {
         let (status, body) = call(serde_json::json!({
             "tier": "larva", "account": "alice",
             "pubkey_envelope": {"v":1, "payload":{"type":"pubkey", "value":"not-a-key!!!"}},
-        })).await;
+        }))
+        .await;
         assert_eq!(status, StatusCode::BAD_REQUEST);
         assert_eq!(body["got"], "not-a-key!!!");
     }
@@ -235,11 +285,23 @@ mod tests {
     #[test]
     fn pubkey_plausibility_bounds() {
         assert!(plausible_vaulta_pubkey(&test_key()));
-        assert!(plausible_vaulta_pubkey(&format!("PUB_K1_{}", "K1".repeat(25))));
-        assert!(plausible_vaulta_pubkey(&format!("PUB_R1_{}", "K1".repeat(25))));
+        assert!(plausible_vaulta_pubkey(&format!(
+            "PUB_K1_{}",
+            "K1".repeat(25)
+        )));
+        assert!(plausible_vaulta_pubkey(&format!(
+            "PUB_R1_{}",
+            "K1".repeat(25)
+        )));
         assert!(!plausible_vaulta_pubkey("EOSshort"), "wrong length");
-        assert!(!plausible_vaulta_pubkey(&format!("EOS{}OK", "K1".repeat(24))), "0/O/I/l are not base58");
+        assert!(
+            !plausible_vaulta_pubkey(&format!("EOS{}OK", "K1".repeat(24))),
+            "0/O/I/l are not base58"
+        );
         assert!(!plausible_vaulta_pubkey("PUB_K1_"), "empty body");
-        assert!(!plausible_vaulta_pubkey("PUB_KEY_FROM_ENVELOPE"), "the old placeholder must never pass");
+        assert!(
+            !plausible_vaulta_pubkey("PUB_KEY_FROM_ENVELOPE"),
+            "the old placeholder must never pass"
+        );
     }
 }

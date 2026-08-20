@@ -183,8 +183,11 @@ pub async fn native_features() -> Response {
 
     match out {
         Ok(Ok(v)) => Json(serde_json::json!({ "ok": true, "result": v })).into_response(),
-        Ok(Err((stage, why))) => Json(serde_json::json!({ "ok": false, "stage": stage, "why": why })).into_response(),
-        Err(e) => Json(serde_json::json!({ "ok": false, "stage": "join", "why": e.to_string() })).into_response(),
+        Ok(Err((stage, why))) => {
+            Json(serde_json::json!({ "ok": false, "stage": stage, "why": why })).into_response()
+        }
+        Err(e) => Json(serde_json::json!({ "ok": false, "stage": "join", "why": e.to_string() }))
+            .into_response(),
     }
 }
 
@@ -204,7 +207,9 @@ mod tests {
         assert_eq!(t, 17);
         assert_eq!(p, vec![0x0a, 0x02, b'h', b'i']);
         assert!(unframe_hex("0011").unwrap_err().contains("too short"));
-        assert!(unframe_hex("00110000000a00").unwrap_err().contains("truncated"));
+        assert!(unframe_hex("00110000000a00")
+            .unwrap_err()
+            .contains("truncated"));
     }
 
     #[test]

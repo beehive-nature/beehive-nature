@@ -46,30 +46,53 @@ pub const SCHEMA_VERSION: &str = "1.0.0-draft";
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Rail {
-    Vaulta, Autonomi, Arweave, Arbitrum, Hive, Zano, Exsat, Mesh, Other,
+    Vaulta,
+    Autonomi,
+    Arweave,
+    Arbitrum,
+    Hive,
+    Zano,
+    Exsat,
+    Mesh,
+    Other,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ResourceClass {
-    MeshSecond, VramByteSecond, RamByte, CpuMicrosecond,
-    NetByte, ChunkCount, StorageByte, ChainFee,
+    MeshSecond,
+    VramByteSecond,
+    RamByte,
+    CpuMicrosecond,
+    NetByte,
+    ChunkCount,
+    StorageByte,
+    ChainFee,
 }
 
 /// Denomination. MVP is `A` (A-first ruling). **Never a fiat currency** — that is the
 /// denomination law expressed in the type system rather than in a comment.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub enum Denom { B, A }
+pub enum Denom {
+    B,
+    A,
+}
 
 /// RULED 2026-08-08. Default `Private`; widening is gated on informed consent that shows
 /// privacy AND cost together. Widening later cannot un-publish what was already written.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub enum Visibility { Private, Parent, Public }
+pub enum Visibility {
+    Private,
+    Parent,
+    Public,
+}
 
 impl Default for Visibility {
-    fn default() -> Self { Visibility::Private }
+    fn default() -> Self {
+        Visibility::Private
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -78,12 +101,19 @@ impl Default for Visibility {
 
 /// `units × 10^-scale` of `denom`. Integer-only: exact, and byte-stable under bincode.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub struct Amount { pub units: u128, pub scale: u8, pub denom: Denom }
+pub struct Amount {
+    pub units: u128,
+    pub scale: u8,
+    pub denom: Denom,
+}
 
 /// Exact rational: `charged = quantity × numer / denom_`. Kept as a ratio so no rounding
 /// is baked in — two implementations cannot disagree about a digit that was never written.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub struct RateRatio { pub numer: u128, pub denom_: u128 }
+pub struct RateRatio {
+    pub numer: u128,
+    pub denom_: u128,
+}
 
 /// How `quantity` became `charged`. `rate_set_ref` is deliberately opaque — the FENCE-HOLD
 /// from spec §4. **No tokenomics constant appears in this file.**
@@ -155,16 +185,24 @@ impl SpendReceipt {
             if li.charged.denom != first.denom || li.charged.scale != first.scale {
                 return Err(TotalError::MixedDenomination);
             }
-            units = units.checked_add(li.charged.units).ok_or(TotalError::Overflow)?;
+            units = units
+                .checked_add(li.charged.units)
+                .ok_or(TotalError::Overflow)?;
         }
-        Ok(Amount { units, scale: first.scale, denom: first.denom })
+        Ok(Amount {
+            units,
+            scale: first.scale,
+            denom: first.denom,
+        })
     }
 
     /// Does every line's `charged` follow from its own `quantity × rate`? This is what
     /// makes the rate auditable rather than decorative.
     pub fn rates_reproduce_charges(&self) -> bool {
         self.line_items.iter().all(|li| {
-            if li.rate.ratio.denom_ == 0 { return false; }
+            if li.rate.ratio.denom_ == 0 {
+                return false;
+            }
             match li.quantity.checked_mul(li.rate.ratio.numer) {
                 Some(n) => n / li.rate.ratio.denom_ == li.charged.units,
                 None => false,
@@ -180,32 +218,75 @@ mod tests {
     use super::*;
 
     fn rate(n: u128, d: u128) -> Rate {
-        Rate { ratio: RateRatio { numer: n, denom_: d },
-               rate_set_ref: "rateset:v0-unruled".into(), observed_at: 1_800_000_000 }
+        Rate {
+            ratio: RateRatio {
+                numer: n,
+                denom_: d,
+            },
+            rate_set_ref: "rateset:v0-unruled".into(),
+            observed_at: 1_800_000_000,
+        }
     }
     fn line(rail: Rail, rc: ResourceClass, qty: u128, charged: u128, r: Rate) -> LineItem {
-        LineItem { adapter: "adapter-test".into(), rail, resource_class: rc,
-                   quantity: qty, quantity_unit: "unit".into(),
-                   charged: Amount { units: charged, scale: 6, denom: Denom::A },
-                   rate: r, rail_receipt: None }
+        LineItem {
+            adapter: "adapter-test".into(),
+            rail,
+            resource_class: rc,
+            quantity: qty,
+            quantity_unit: "unit".into(),
+            charged: Amount {
+                units: charged,
+                scale: 6,
+                denom: Denom::A,
+            },
+            rate: r,
+            rail_receipt: None,
+        }
     }
     fn receipt(items: Vec<LineItem>) -> SpendReceipt {
         SpendReceipt {
-            schema_version: SCHEMA_VERSION.into(), receipt_id: "rcpt:test".into(),
-            spender_bdid: "did:bnr:test".into(), occurred_at: 1_800_000_000,
-            operation: "op:test".into(), epoch: 42, line_items: items,
+            schema_version: SCHEMA_VERSION.into(),
+            receipt_id: "rcpt:test".into(),
+            spender_bdid: "did:bnr:test".into(),
+            occurred_at: 1_800_000_000,
+            operation: "op:test".into(),
+            epoch: 42,
+            line_items: items,
             visibility: Visibility::default(),
-            provenance: Provenance { caused_by: "op:test".into(), anchors: vec![], prior_receipt_id: None },
+            provenance: Provenance {
+                caused_by: "op:test".into(),
+                anchors: vec![],
+                prior_receipt_id: None,
+            },
         }
     }
 
     #[test]
     fn total_is_the_sum_of_line_charges() {
         let r = receipt(vec![
-            line(Rail::Arweave, ResourceClass::ChunkCount, 10, 100, rate(10, 1)),
-            line(Rail::Autonomi, ResourceClass::MeshSecond, 5, 50, rate(10, 1)),
+            line(
+                Rail::Arweave,
+                ResourceClass::ChunkCount,
+                10,
+                100,
+                rate(10, 1),
+            ),
+            line(
+                Rail::Autonomi,
+                ResourceClass::MeshSecond,
+                5,
+                50,
+                rate(10, 1),
+            ),
         ]);
-        assert_eq!(r.total().unwrap(), Amount { units: 150, scale: 6, denom: Denom::A });
+        assert_eq!(
+            r.total().unwrap(),
+            Amount {
+                units: 150,
+                scale: 6,
+                denom: Denom::A
+            }
+        );
     }
 
     #[test]
@@ -214,23 +295,41 @@ mod tests {
         // a number across incommensurable units — the exact failure the spec's §4 exists
         // to prevent. Do NOT "fix" this test by making total() lenient.
         let mut r = receipt(vec![
-            line(Rail::Arweave, ResourceClass::ChunkCount, 10, 100, rate(10, 1)),
+            line(
+                Rail::Arweave,
+                ResourceClass::ChunkCount,
+                10,
+                100,
+                rate(10, 1),
+            ),
             line(Rail::Hive, ResourceClass::ChainFee, 1, 7, rate(7, 1)),
         ]);
         r.line_items[1].charged.denom = Denom::B;
         assert_eq!(r.total(), Err(TotalError::MixedDenomination));
 
         let mut r2 = receipt(vec![
-            line(Rail::Arweave, ResourceClass::ChunkCount, 10, 100, rate(10, 1)),
+            line(
+                Rail::Arweave,
+                ResourceClass::ChunkCount,
+                10,
+                100,
+                rate(10, 1),
+            ),
             line(Rail::Hive, ResourceClass::ChainFee, 1, 7, rate(7, 1)),
         ]);
-        r2.line_items[1].charged.scale = 2;          // same denom, different scale
+        r2.line_items[1].charged.scale = 2; // same denom, different scale
         assert_eq!(r2.total(), Err(TotalError::MixedDenomination));
     }
 
     #[test]
     fn rate_reproduces_the_charge_and_a_wrong_rate_is_detectable() {
-        let good = receipt(vec![line(Rail::Arweave, ResourceClass::ChunkCount, 10, 100, rate(10, 1))]);
+        let good = receipt(vec![line(
+            Rail::Arweave,
+            ResourceClass::ChunkCount,
+            10,
+            100,
+            rate(10, 1),
+        )]);
         assert!(good.rates_reproduce_charges());
 
         // CONTROL: tamper the charge only. If this still passes, the rate is decorative
@@ -243,13 +342,25 @@ mod tests {
     #[test]
     fn exact_rational_rate_avoids_the_rounding_a_float_would_bake_in() {
         // 1/3 per unit × 30 units = 10 exactly. A f64 0.333… would not land on 10.
-        let r = receipt(vec![line(Rail::Mesh, ResourceClass::MeshSecond, 30, 10, rate(1, 3))]);
+        let r = receipt(vec![line(
+            Rail::Mesh,
+            ResourceClass::MeshSecond,
+            30,
+            10,
+            rate(1, 3),
+        )]);
         assert!(r.rates_reproduce_charges());
     }
 
     #[test]
     fn json_round_trips_byte_identically() {
-        let r = receipt(vec![line(Rail::Arweave, ResourceClass::ChunkCount, 10, 100, rate(10, 1))]);
+        let r = receipt(vec![line(
+            Rail::Arweave,
+            ResourceClass::ChunkCount,
+            10,
+            100,
+            rate(10, 1),
+        )]);
         let a = serde_json::to_string(&r).unwrap();
         let back: SpendReceipt = serde_json::from_str(&a).unwrap();
         assert_eq!(r, back);
@@ -260,7 +371,13 @@ mod tests {
     fn quantity_survives_round_trip_exactly_at_the_top_of_u128() {
         // The denomination law is only real if large exact quantities are not lossy.
         let big = u128::MAX;
-        let r = receipt(vec![line(Rail::Autonomi, ResourceClass::StorageByte, big, 0, rate(0, 1))]);
+        let r = receipt(vec![line(
+            Rail::Autonomi,
+            ResourceClass::StorageByte,
+            big,
+            0,
+            rate(0, 1),
+        )]);
         let back: SpendReceipt = serde_json::from_str(&serde_json::to_string(&r).unwrap()).unwrap();
         assert_eq!(back.line_items[0].quantity, big);
     }

@@ -16,7 +16,9 @@ const PNG_1PX_B64: &str =
     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
 
 fn png_1px() -> Vec<u8> {
-    base64::engine::general_purpose::STANDARD.decode(PNG_1PX_B64).unwrap()
+    base64::engine::general_purpose::STANDARD
+        .decode(PNG_1PX_B64)
+        .unwrap()
 }
 
 async fn read_msg<R: tokio::io::AsyncRead + Unpin>(r: &mut BufReader<R>) -> Value {
@@ -66,14 +68,24 @@ async fn handshake<W: tokio::io::AsyncWrite + Unpin, R: tokio::io::AsyncRead + U
     let resp = read_msg(r).await;
     assert_eq!(resp["result"]["serverInfo"]["name"], "adapter-pixellab");
     assert_eq!(resp["result"]["protocolVersion"], "2025-06-18");
-    write_msg(w, &json!({"jsonrpc":"2.0","method":"notifications/initialized"})).await;
+    write_msg(
+        w,
+        &json!({"jsonrpc":"2.0","method":"notifications/initialized"}),
+    )
+    .await;
 }
 
 #[tokio::test]
 async fn initialize_tools_list_and_notification_silence() {
     let dir = tempfile::tempdir().unwrap();
-    let (_mock, mut w, mut r, _h) =
-        spawn_server(vec![], ServerConfig { out_dir: dir.path().into(), max_spend_usd: None }).await;
+    let (_mock, mut w, mut r, _h) = spawn_server(
+        vec![],
+        ServerConfig {
+            out_dir: dir.path().into(),
+            max_spend_usd: None,
+        },
+    )
+    .await;
 
     write_msg(
         &mut w,
@@ -90,8 +102,16 @@ async fn initialize_tools_list_and_notification_silence() {
 
     // A notification must produce no response: the next line we read belongs
     // to id 2, not to the notification.
-    write_msg(&mut w, &json!({"jsonrpc":"2.0","method":"notifications/initialized"})).await;
-    write_msg(&mut w, &json!({"jsonrpc":"2.0","id":2,"method":"tools/list"})).await;
+    write_msg(
+        &mut w,
+        &json!({"jsonrpc":"2.0","method":"notifications/initialized"}),
+    )
+    .await;
+    write_msg(
+        &mut w,
+        &json!({"jsonrpc":"2.0","id":2,"method":"tools/list"}),
+    )
+    .await;
     let resp = read_msg(&mut r).await;
     assert_eq!(resp["id"], 2, "notification must not have been answered");
 
@@ -99,7 +119,11 @@ async fn initialize_tools_list_and_notification_silence() {
     let names: Vec<&str> = tools.iter().map(|t| t["name"].as_str().unwrap()).collect();
     assert!(names.contains(&"generate_image"));
     assert!(names.contains(&"get_balance"));
-    assert_eq!(tools.len(), 2, "surface is exactly the art lane — one MCP command per agent");
+    assert_eq!(
+        tools.len(),
+        2,
+        "surface is exactly the art lane — one MCP command per agent"
+    );
 }
 
 /// buzz's MAX_SCHEMA_BYTES is 4096; oversize schemas are silently replaced
@@ -124,11 +148,14 @@ async fn generate_with_style_anchor_writes_png_and_measures_spend() {
     let anchor = dir.path().join("anchor.png");
     std::fs::write(&anchor, png_1px()).unwrap();
     let out_dir = dir.path().join("out");
-    let cfg = ServerConfig { out_dir: out_dir.clone(), max_spend_usd: Some(10.0) };
+    let cfg = ServerConfig {
+        out_dir: out_dir.clone(),
+        max_spend_usd: Some(10.0),
+    };
     let responses = vec![
-        serde_json::from_str(BALANCE_FIXTURE).unwrap(),      // balance before: 5.0
-        serde_json::from_str(GENERATE_FIXTURE).unwrap(),     // the generation
-        json!({"type":"usd","usd":4.96}),                    // balance after
+        serde_json::from_str(BALANCE_FIXTURE).unwrap(), // balance before: 5.0
+        serde_json::from_str(GENERATE_FIXTURE).unwrap(), // the generation
+        json!({"type":"usd","usd":4.96}),               // balance after
     ];
     let (mock, mut w, mut r, _h) = spawn_server(responses, cfg).await;
     handshake(&mut w, &mut r).await;
@@ -155,11 +182,17 @@ async fn generate_with_style_anchor_writes_png_and_measures_spend() {
     let text = resp["result"]["content"][0]["text"].as_str().unwrap();
     let out: Value = serde_json::from_str(text).unwrap();
 
-    assert_eq!(out["endpoint"], "bitforge", "a style anchor must route to bitforge");
+    assert_eq!(
+        out["endpoint"], "bitforge",
+        "a style anchor must route to bitforge"
+    );
     assert_eq!(out["layer"], "006_Manifestor_Larva");
     let path = std::path::PathBuf::from(out["path"].as_str().unwrap());
     assert!(path.exists(), "PNG must exist at the returned handle");
-    assert!(path.starts_with(&out_dir), "handle must point into the configured out-dir");
+    assert!(
+        path.starts_with(&out_dir),
+        "handle must point into the configured out-dir"
+    );
     let written = std::fs::read(&path).unwrap();
     assert_eq!(written, png_1px());
 
@@ -184,7 +217,10 @@ async fn budget_cap_refuses_second_generation() {
     let dir = tempfile::tempdir().unwrap();
     let anchor = dir.path().join("anchor.png");
     std::fs::write(&anchor, png_1px()).unwrap();
-    let cfg = ServerConfig { out_dir: dir.path().join("out"), max_spend_usd: Some(0.05) };
+    let cfg = ServerConfig {
+        out_dir: dir.path().join("out"),
+        max_spend_usd: Some(0.05),
+    };
     let responses = vec![
         json!({"type":"usd","usd":5.0}),
         serde_json::from_str(GENERATE_FIXTURE).unwrap(),
@@ -228,7 +264,10 @@ async fn budget_cap_refuses_second_generation() {
 #[tokio::test]
 async fn get_balance_reports_usd_and_session() {
     let dir = tempfile::tempdir().unwrap();
-    let cfg = ServerConfig { out_dir: dir.path().into(), max_spend_usd: Some(3.0) };
+    let cfg = ServerConfig {
+        out_dir: dir.path().into(),
+        max_spend_usd: Some(3.0),
+    };
     let (_mock, mut w, mut r, _h) =
         spawn_server(vec![serde_json::from_str(BALANCE_FIXTURE).unwrap()], cfg).await;
     handshake(&mut w, &mut r).await;
@@ -242,7 +281,8 @@ async fn get_balance_reports_usd_and_session() {
     .await;
     let resp = read_msg(&mut r).await;
     assert_eq!(resp["result"]["isError"], false);
-    let out: Value = serde_json::from_str(resp["result"]["content"][0]["text"].as_str().unwrap()).unwrap();
+    let out: Value =
+        serde_json::from_str(resp["result"]["content"][0]["text"].as_str().unwrap()).unwrap();
     assert_eq!(out["usd"], 5.0);
     assert_eq!(out["session"]["cap_usd"], 3.0);
     assert_eq!(out["session"]["spent_usd"], 0.0);
@@ -251,8 +291,14 @@ async fn get_balance_reports_usd_and_session() {
 #[tokio::test]
 async fn unknown_tool_is_a_protocol_error() {
     let dir = tempfile::tempdir().unwrap();
-    let (_mock, mut w, mut r, _h) =
-        spawn_server(vec![], ServerConfig { out_dir: dir.path().into(), max_spend_usd: None }).await;
+    let (_mock, mut w, mut r, _h) = spawn_server(
+        vec![],
+        ServerConfig {
+            out_dir: dir.path().into(),
+            max_spend_usd: None,
+        },
+    )
+    .await;
     handshake(&mut w, &mut r).await;
 
     write_msg(
@@ -270,8 +316,14 @@ async fn unknown_tool_is_a_protocol_error() {
 #[tokio::test]
 async fn invalid_enum_rejects_before_any_request() {
     let dir = tempfile::tempdir().unwrap();
-    let (mock, mut w, mut r, _h) =
-        spawn_server(vec![], ServerConfig { out_dir: dir.path().into(), max_spend_usd: None }).await;
+    let (mock, mut w, mut r, _h) = spawn_server(
+        vec![],
+        ServerConfig {
+            out_dir: dir.path().into(),
+            max_spend_usd: None,
+        },
+    )
+    .await;
     handshake(&mut w, &mut r).await;
 
     write_msg(
@@ -284,8 +336,14 @@ async fn invalid_enum_rejects_before_any_request() {
     let resp = read_msg(&mut r).await;
     assert_eq!(resp["result"]["isError"], true);
     let text = resp["result"]["content"][0]["text"].as_str().unwrap();
-    assert!(text.contains("allowed:"), "error must list allowed values: {text}");
-    assert!(mock.calls_snapshot().is_empty(), "validation must fire before any network");
+    assert!(
+        text.contains("allowed:"),
+        "error must list allowed values: {text}"
+    );
+    assert!(
+        mock.calls_snapshot().is_empty(),
+        "validation must fire before any network"
+    );
 }
 
 #[tokio::test]
@@ -293,8 +351,14 @@ async fn non_png_style_anchor_is_rejected() {
     let dir = tempfile::tempdir().unwrap();
     let junk = dir.path().join("not-a-png.png");
     std::fs::write(&junk, b"definitely not png bytes").unwrap();
-    let (mock, mut w, mut r, _h) =
-        spawn_server(vec![], ServerConfig { out_dir: dir.path().into(), max_spend_usd: None }).await;
+    let (mock, mut w, mut r, _h) = spawn_server(
+        vec![],
+        ServerConfig {
+            out_dir: dir.path().into(),
+            max_spend_usd: None,
+        },
+    )
+    .await;
     handshake(&mut w, &mut r).await;
 
     write_msg(

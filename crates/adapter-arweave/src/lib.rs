@@ -357,22 +357,36 @@ mod r6_conformance {
     /// sees the annotation on the SAME LINE (LAW 8g — a public test vector and a private
     /// key are the same shape to a scanner). **Do not strip the suffix from the vectors.**
     fn h_of(v: &Value) -> [u8; 32] {
-        h32(v.as_str().expect("tagged hash").split_whitespace().next().expect("hex"))
+        h32(v
+            .as_str()
+            .expect("tagged hash")
+            .split_whitespace()
+            .next()
+            .expect("hex"))
     }
     fn leaves_of(v: &Value) -> Vec<[u8; 32]> {
         v["leaves"].as_array().unwrap().iter().map(h_of).collect()
     }
-    fn root_of(v: &Value) -> [u8; 32] { h_of(&v["root"]) }
+    fn root_of(v: &Value) -> [u8; 32] {
+        h_of(&v["root"])
+    }
 
     #[test]
     fn rust_fold_matches_the_shared_vectors_at_every_n() {
         let v: Value = serde_json::from_str(VECTORS).expect("vectors parse");
         let cases = v["cases"].as_array().expect("cases");
-        assert!(cases.len() >= 12, "vector set shrank — regenerate, do not weaken the test");
+        assert!(
+            cases.len() >= 12,
+            "vector set shrank — regenerate, do not weaken the test"
+        );
         for c in cases {
             let n = c["n"].as_u64().unwrap();
             let got = merkle_root(&leaves_of(c)).expect("non-empty");
-            assert_eq!(got, root_of(c), "FOLD DIVERGES from the shared vector at N={n}");
+            assert_eq!(
+                got,
+                root_of(c),
+                "FOLD DIVERGES from the shared vector at N={n}"
+            );
         }
     }
 
@@ -393,14 +407,19 @@ mod r6_conformance {
 
         assert_eq!(root_a, root_of(a), "set_a diverges from the shared vector");
         assert_eq!(root_b, root_of(b), "set_b diverges from the shared vector");
-        assert_ne!(root_a, root_b, "CVE-2012-2459 REPRODUCES: distinct leaf sets share a root");
+        assert_ne!(
+            root_a, root_b,
+            "CVE-2012-2459 REPRODUCES: distinct leaf sets share a root"
+        );
 
         // The sharper assertion: our root for set_a must NOT be the value a duplicating
         // fold would produce. Set inequality alone could hold for the wrong reason.
         let duplicating = h_of(&cve["duplicating_fold_gives_both_sets"]);
         assert_ne!(root_a, duplicating, "the fold is duplicating its odd tail");
-        assert_eq!(root_b, duplicating,
+        assert_eq!(
+            root_b, duplicating,
             "vector self-check: set_b (even, 4 leaves) must equal the duplicating fold of set_a — \
-             if this fails the CONTROL is broken, not the implementation");
+             if this fails the CONTROL is broken, not the implementation"
+        );
     }
 }

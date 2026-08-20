@@ -43,8 +43,8 @@ pub async fn blight_demo() -> Response {
 
 #[cfg(test)]
 mod tests {
-    use crate::{app, AppState};
     use crate::gateway::GatewayPool;
+    use crate::{app, AppState};
     use axum::http::StatusCode;
     use http_body_util::BodyExt;
     use tower::ServiceExt;
@@ -63,7 +63,11 @@ mod tests {
             ("/onboard/vendor/qrcodegen.js", "qrcodegen"),
         ] {
             let resp = app(state())
-                .oneshot(axum::http::Request::get(path).body(axum::body::Body::empty()).unwrap())
+                .oneshot(
+                    axum::http::Request::get(path)
+                        .body(axum::body::Body::empty())
+                        .unwrap(),
+                )
                 .await
                 .unwrap();
             assert_eq!(resp.status(), StatusCode::OK, "{path}");
@@ -73,7 +77,11 @@ mod tests {
         }
         // the wizard references the vendor script by the path the router serves
         let resp = app(state())
-            .oneshot(axum::http::Request::get("/onboard").body(axum::body::Body::empty()).unwrap())
+            .oneshot(
+                axum::http::Request::get("/onboard")
+                    .body(axum::body::Body::empty())
+                    .unwrap(),
+            )
             .await
             .unwrap();
         let body = resp.into_body().collect().await.unwrap().to_bytes();

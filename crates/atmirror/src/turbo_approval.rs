@@ -245,7 +245,10 @@ mod tests {
             uploader: UPLOADER.into(),
             grants: vec![],
         };
-        assert_eq!(r.verify_per_claimant(LEADER_DELEGATE), Err(ReceiptError::Empty));
+        assert_eq!(
+            r.verify_per_claimant(LEADER_DELEGATE),
+            Err(ReceiptError::Empty)
+        );
     }
 
     /// The founder-paste shape parses: optional mechanism fields present on one grant,
@@ -265,7 +268,10 @@ mod tests {
         assert_eq!(r.grants.len(), 2);
         assert_eq!(r.grants[0].approval_id.as_deref(), Some("appr_1"));
         assert_eq!(r.grants[0].cap_winc.as_deref(), Some("1000000000"));
-        assert_eq!(r.grants[1].approval_id, None, "optional fields default when absent");
+        assert_eq!(
+            r.grants[1].approval_id, None,
+            "optional fields default when absent"
+        );
         assert_eq!(r.verify_per_claimant(LEADER_DELEGATE), Ok(()));
         assert_eq!(r.distinct_delegates(), 2);
     }

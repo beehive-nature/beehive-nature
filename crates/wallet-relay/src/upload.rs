@@ -46,7 +46,10 @@ pub enum UploadRefusal {
 /// generic endpoint, so the class override never applies here.
 pub fn validate_upload(bytes: &[u8]) -> Result<UploadDecision, UploadRefusal> {
     if bytes.len() > MAX_ITEM_BYTES {
-        return Err(UploadRefusal::TooLarge { got: bytes.len(), max: MAX_ITEM_BYTES });
+        return Err(UploadRefusal::TooLarge {
+            got: bytes.len(),
+            max: MAX_ITEM_BYTES,
+        });
     }
     let parsed = parse_ed25519_data_item(bytes).map_err(|e| match e {
         ParseItemError::Truncated(seg) => UploadRefusal::Malformed(seg.to_string()),
@@ -105,17 +108,26 @@ mod tests {
         let mut it = item(b"x");
         it[0] = 1;
         it[1] = 0;
-        assert_eq!(validate_upload(&it).unwrap_err(), UploadRefusal::NotEd25519 { got: 1 });
+        assert_eq!(
+            validate_upload(&it).unwrap_err(),
+            UploadRefusal::NotEd25519 { got: 1 }
+        );
 
         // tampered payload
         let mut it = item(b"x");
         let last = it.len() - 1;
         it[last] ^= 1;
-        assert_eq!(validate_upload(&it).unwrap_err(), UploadRefusal::BadSignature);
+        assert_eq!(
+            validate_upload(&it).unwrap_err(),
+            UploadRefusal::BadSignature
+        );
 
         // garbage without a valid sig type: the sig-type check fires FIRST,
         // so the refusal names the type that arrived, not a generic "malformed"
-        assert_eq!(validate_upload(&[0u8; 4]).unwrap_err(), UploadRefusal::NotEd25519 { got: 0 });
+        assert_eq!(
+            validate_upload(&[0u8; 4]).unwrap_err(),
+            UploadRefusal::NotEd25519 { got: 0 }
+        );
 
         // sig type 2 but truncated body -> structural refusal naming the segment
         assert!(matches!(

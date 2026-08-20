@@ -26,9 +26,16 @@ fn main() {
     match resp {
         Ok(r) => {
             let body: serde_json::Value = r.into_json().unwrap_or_default();
-            println!("{}", serde_json::to_string_pretty(&body).unwrap_or_default());
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&body).unwrap_or_default()
+            );
 
-            if body.get("forwarded").and_then(|v| v.as_bool()).unwrap_or(false) {
+            if body
+                .get("forwarded")
+                .and_then(|v| v.as_bool())
+                .unwrap_or(false)
+            {
                 let tx = body
                     .pointer("/accepted/id")
                     .and_then(|v| v.as_str())

@@ -17,12 +17,18 @@ async fn main() {
         Err(_) => GatewayPool::default_pool(),
     };
     let forward_to = std::env::var("RELAY_FORWARD_TO").ok();
-    let port: u16 = std::env::var("RELAY_PORT").ok().and_then(|p| p.parse().ok()).unwrap_or(8080);
+    let port: u16 = std::env::var("RELAY_PORT")
+        .ok()
+        .and_then(|p| p.parse().ok())
+        .unwrap_or(8080);
 
     let listener = tokio::net::TcpListener::bind(("0.0.0.0", port))
         .await
         .expect("bind relay port");
-    eprintln!("wallet-relay listening on :{port} (forward: {})", forward_to.as_deref().unwrap_or("validate-only"));
+    eprintln!(
+        "wallet-relay listening on :{port} (forward: {})",
+        forward_to.as_deref().unwrap_or("validate-only")
+    );
     axum::serve(listener, app(AppState::new(pool, forward_to)))
         .await
         .expect("serve");

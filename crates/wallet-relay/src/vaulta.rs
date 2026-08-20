@@ -20,8 +20,16 @@ pub async fn read_identity(State(_s): State<AppState>, Path(account): Path<Strin
     let out = tokio::task::spawn_blocking(move || adapter.read_identity(&acct)).await;
     match out {
         Ok(Ok(id)) => Json(id).into_response(),
-        Ok(Err(e)) => (StatusCode::BAD_GATEWAY, Json(serde_json::json!({"error":e}))).into_response(),
-        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({"error":e.to_string()}))).into_response(),
+        Ok(Err(e)) => (
+            StatusCode::BAD_GATEWAY,
+            Json(serde_json::json!({"error":e})),
+        )
+            .into_response(),
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(serde_json::json!({"error":e.to_string()})),
+        )
+            .into_response(),
     }
 }
 
@@ -29,13 +37,28 @@ pub async fn read_identity(State(_s): State<AppState>, Path(account): Path<Strin
 /// Body: {"creator":"...","new_account":"...","device_addresses":[...]}
 pub async fn mint_walkthrough(body: Bytes) -> Response {
     let p: Value = match serde_json::from_slice(&body) {
-        Ok(v) => v, Err(e) => return (StatusCode::BAD_REQUEST, Json(serde_json::json!({"error":e.to_string()}))).into_response(),
+        Ok(v) => v,
+        Err(e) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(serde_json::json!({"error":e.to_string()})),
+            )
+                .into_response()
+        }
     };
     let creator = p.get("creator").and_then(|v| v.as_str()).unwrap_or("");
     let new_acct = p.get("new_account").and_then(|v| v.as_str()).unwrap_or("");
-    let addrs = p.get("device_addresses").and_then(|v| v.as_array()).cloned().unwrap_or_default();
+    let addrs = p
+        .get("device_addresses")
+        .and_then(|v| v.as_array())
+        .cloned()
+        .unwrap_or_default();
     if creator.is_empty() || new_acct.is_empty() {
-        return (StatusCode::BAD_REQUEST, Json(serde_json::json!({"error":"creator and new_account required"}))).into_response();
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(serde_json::json!({"error":"creator and new_account required"})),
+        )
+            .into_response();
     }
     Json(tx_prep::prepare_mint_walkthrough(creator, new_acct, &addrs)).into_response()
 }
@@ -43,14 +66,25 @@ pub async fn mint_walkthrough(body: Bytes) -> Response {
 /// POST /v1/vaulta/envelope — wrap a device-read address in PQ-ready envelope.
 pub async fn build_envelope(body: Bytes) -> Response {
     let p: Value = match serde_json::from_slice(&body) {
-        Ok(v) => v, Err(e) => return (StatusCode::BAD_REQUEST, Json(serde_json::json!({"error":e.to_string()}))).into_response(),
+        Ok(v) => v,
+        Err(e) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(serde_json::json!({"error":e.to_string()})),
+            )
+                .into_response()
+        }
     };
     let addr = p.get("address").and_then(|v| v.as_str()).unwrap_or("");
     let net = p.get("network").and_then(|v| v.as_str()).unwrap_or("");
     let src = p.get("source").and_then(|v| v.as_str()).unwrap_or("manual");
     let tier = p.get("tier").and_then(|v| v.as_str()).unwrap_or("T-S");
     if addr.is_empty() || net.is_empty() {
-        return (StatusCode::BAD_REQUEST, Json(serde_json::json!({"error":"address and network required"}))).into_response();
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(serde_json::json!({"error":"address and network required"})),
+        )
+            .into_response();
     }
     Json(envelope::address_envelope(addr, net, src, tier)).into_response()
 }

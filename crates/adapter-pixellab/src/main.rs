@@ -23,13 +23,16 @@ fn parse_args() -> Result<Args, String> {
     };
     let mut it = std::env::args().skip(1);
     while let Some(flag) = it.next() {
-        let val = it.next().ok_or_else(|| format!("flag {flag} needs a value"))?;
+        let val = it
+            .next()
+            .ok_or_else(|| format!("flag {flag} needs a value"))?;
         match flag.as_str() {
             "--key-file" => a.key_file = val,
             "--out-dir" => a.out_dir = val,
             "--max-spend" => {
                 a.max_spend = Some(
-                    val.parse::<f64>().map_err(|_| format!("--max-spend: not a number: {val}"))?,
+                    val.parse::<f64>()
+                        .map_err(|_| format!("--max-spend: not a number: {val}"))?,
                 )
             }
             "--base-url" => a.base_url = val,
@@ -47,14 +50,19 @@ fn parse_args() -> Result<Args, String> {
     // PixelLab's OpenAPI — it can only be measured after the fact. An uncapped default is
     // therefore a runaway with no brake. Refuse to start rather than start unbounded.
     match a.max_spend {
-        None => return Err(
-            "--max-spend <usd> is required.\n\n  \
+        None => {
+            return Err("--max-spend <usd> is required.\n\n  \
              This adapter spends real credits autonomously, and PixelLab does not declare \
              cost-per-call\n  anywhere in its schema — spend is only measurable as a \
              balance delta AFTER the fact.\n  Starting uncapped means there is no brake. \
-             Pick a ceiling you would not mind losing,\n  e.g. --max-spend 2.00".into()),
-        Some(v) if !(v > 0.0) || !v.is_finite() => return Err(
-            format!("--max-spend must be a positive finite number of USD, got {v}")),
+             Pick a ceiling you would not mind losing,\n  e.g. --max-spend 2.00"
+                .into())
+        }
+        Some(v) if !(v > 0.0) || !v.is_finite() => {
+            return Err(format!(
+                "--max-spend must be a positive finite number of USD, got {v}"
+            ))
+        }
         _ => {}
     }
     Ok(a)
@@ -80,13 +88,17 @@ async fn main() {
             exit(2);
         }
     };
-    let transport = Arc::new(adapter_pixellab::pixellab::HttpTransport::new(&args.base_url, key));
+    let transport = Arc::new(adapter_pixellab::pixellab::HttpTransport::new(
+        &args.base_url,
+        key,
+    ));
     let config = Arc::new(adapter_pixellab::ServerConfig {
         out_dir: PathBuf::from(&args.out_dir),
         max_spend_usd: args.max_spend,
     });
     if let Err(e) =
-        adapter_pixellab::run_server(transport, config, tokio::io::stdin(), tokio::io::stdout()).await
+        adapter_pixellab::run_server(transport, config, tokio::io::stdin(), tokio::io::stdout())
+            .await
     {
         eprintln!("adapter-pixellab: {e}");
         exit(1);

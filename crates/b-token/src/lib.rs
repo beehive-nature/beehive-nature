@@ -439,7 +439,11 @@ mod tests {
             })
         );
         assert_eq!(l.first_minted_at_of(&a), Some(AT), "anchor did not move");
-        assert_eq!(l.balance_of(&a), 1, "the backdated mint did not land either");
+        assert_eq!(
+            l.balance_of(&a),
+            1,
+            "the backdated mint did not land either"
+        );
 
         // Forward is fine, and does not disturb the anchor.
         l.mint(&a, 1, &proof("later"), AT + 60).unwrap();
@@ -470,7 +474,11 @@ mod tests {
                          "first_minted_at":{"did:autonomi:a":1700000000}}"#;
         let mut restored: BLedger = serde_json::from_str(legacy).unwrap();
         assert_eq!(restored.balance_of(&a), 10, "balances survive");
-        assert_eq!(restored.gate(), MintGate::Refuse, "and the gate fails closed");
+        assert_eq!(
+            restored.gate(),
+            MintGate::Refuse,
+            "and the gate fails closed"
+        );
         assert_eq!(
             restored.mint(&a, 1, &proof("e"), AT + 1),
             Err(LedgerError::UnprovenMint)

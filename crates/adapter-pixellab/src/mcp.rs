@@ -65,7 +65,10 @@ where
     let mut line = String::new();
     loop {
         line.clear();
-        let n = reader.read_line(&mut line).await.map_err(|e| format!("stdin read: {e}"))?;
+        let n = reader
+            .read_line(&mut line)
+            .await
+            .map_err(|e| format!("stdin read: {e}"))?;
         if n == 0 {
             // Client went away. In-flight work aborts with the runtime.
             return Ok(());
@@ -77,15 +80,26 @@ where
         let msg: Value = match serde_json::from_str(trimmed) {
             Ok(v) => v,
             Err(_) => {
-                write_json(&writer, &json!({
-                    "jsonrpc": "2.0", "id": null,
-                    "error": { "code": -32700, "message": "parse error" }
-                }))
+                write_json(
+                    &writer,
+                    &json!({
+                        "jsonrpc": "2.0", "id": null,
+                        "error": { "code": -32700, "message": "parse error" }
+                    }),
+                )
                 .await;
                 continue;
             }
         };
-        handle(transport.clone(), config.clone(), budget.clone(), writer.clone(), cancels.clone(), msg).await;
+        handle(
+            transport.clone(),
+            config.clone(),
+            budget.clone(),
+            writer.clone(),
+            cancels.clone(),
+            msg,
+        )
+        .await;
     }
 }
 
@@ -123,7 +137,11 @@ async fn handle<T: Transport, W: tokio::io::AsyncWrite + Unpin + Send + 'static>
     msg: Value,
 ) {
     let id = msg.get("id").cloned();
-    let method = msg.get("method").and_then(Value::as_str).unwrap_or("").to_string();
+    let method = msg
+        .get("method")
+        .and_then(Value::as_str)
+        .unwrap_or("")
+        .to_string();
 
     if id.is_none() {
         // Notifications get no response. Cancellation is the one we act on.
@@ -158,7 +176,11 @@ async fn handle<T: Transport, W: tokio::io::AsyncWrite + Unpin + Send + 'static>
             .await;
         }
         "ping" => {
-            write_json(&writer, &json!({ "jsonrpc": "2.0", "id": id, "result": {} })).await;
+            write_json(
+                &writer,
+                &json!({ "jsonrpc": "2.0", "id": id, "result": {} }),
+            )
+            .await;
         }
         "tools/list" => {
             write_json(
@@ -168,7 +190,11 @@ async fn handle<T: Transport, W: tokio::io::AsyncWrite + Unpin + Send + 'static>
             .await;
         }
         "tools/call" => {
-            let name = params.get("name").and_then(Value::as_str).unwrap_or("").to_string();
+            let name = params
+                .get("name")
+                .and_then(Value::as_str)
+                .unwrap_or("")
+                .to_string();
             if name != "generate_image" && name != "get_balance" {
                 write_json(
                     &writer,

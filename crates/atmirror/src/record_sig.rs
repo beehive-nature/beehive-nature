@@ -38,10 +38,8 @@ use ed25519_dalek::{Signature, VerifyingKey};
 /// little-endian, 32 bytes. A signature scalar `s` is canonical iff `s < L`.
 /// Cross-validated against curve25519-dalek's own canonical boundary in tests.
 const L_LE: [u8; 32] = [
-    0xed, 0xd3, 0xf5, 0x5c, 0x1a, 0x63, 0x12, 0x58,
-    0xd6, 0x9c, 0xf7, 0xa2, 0xde, 0xf9, 0xde, 0x14,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10,
+    0xed, 0xd3, 0xf5, 0x5c, 0x1a, 0x63, 0x12, 0x58, 0xd6, 0x9c, 0xf7, 0xa2, 0xde, 0xf9, 0xde, 0x14,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10,
 ];
 
 #[derive(Debug, PartialEq, Eq)]
@@ -86,7 +84,8 @@ pub fn verify_record(pubkey: &[u8; 32], msg: &[u8], sig64: &[u8]) -> Result<(), 
     let mut sig_arr = [0u8; 64];
     sig_arr.copy_from_slice(sig64);
     let sig = Signature::from_bytes(&sig_arr);
-    vk.verify_strict(msg, &sig).map_err(|_| RecordSigError::BadSignature)
+    vk.verify_strict(msg, &sig)
+        .map_err(|_| RecordSigError::BadSignature)
 }
 
 #[cfg(test)]
@@ -147,7 +146,10 @@ mod tests {
         // (3) our verify REJECTS it, explicitly, on the s>=L rule — not on a parse accident.
         let mut mal = sig;
         mal[32..64].copy_from_slice(&s_mal);
-        assert_eq!(verify_record(&vk, msg, &mal), Err(RecordSigError::NonCanonicalS));
+        assert_eq!(
+            verify_record(&vk, msg, &mal),
+            Err(RecordSigError::NonCanonicalS)
+        );
     }
 
     /// Cross-validate the hand-written L_LE against the library's own canonical
@@ -158,7 +160,9 @@ mod tests {
         assert!(bool::from(Scalar::from_canonical_bytes(L_LE).is_none()));
         let mut l_minus_1 = L_LE;
         l_minus_1[0] -= 1;
-        assert!(bool::from(Scalar::from_canonical_bytes(l_minus_1).is_some()));
+        assert!(bool::from(
+            Scalar::from_canonical_bytes(l_minus_1).is_some()
+        ));
         assert!(!s_lt_l(&L_LE));
         assert!(s_lt_l(&l_minus_1));
     }
@@ -201,7 +205,10 @@ mod tests {
         for (i, enc) in encodings.iter().enumerate() {
             if let Some(pt) = CompressedEdwardsY(*enc).decompress() {
                 // (a) canonical encoding — SELF-VALIDATE it is genuinely small-order.
-                assert!(pt.is_small_order(), "encoding {i} is NOT small-order — bad constant");
+                assert!(
+                    pt.is_small_order(),
+                    "encoding {i} is NOT small-order — bad constant"
+                );
                 validated_small_order += 1;
             }
             // (b) whether small-order-canonical or non-canonical, verify_record MUST reject.
@@ -211,7 +218,10 @@ mod tests {
                 "encoding {i} (small-order or non-canonical) was NOT rejected"
             );
         }
-        assert!(validated_small_order >= 1, "control vacuous: no genuine small-order point tested");
+        assert!(
+            validated_small_order >= 1,
+            "control vacuous: no genuine small-order point tested"
+        );
     }
 
     fn hex32(s: &str) -> [u8; 32] {

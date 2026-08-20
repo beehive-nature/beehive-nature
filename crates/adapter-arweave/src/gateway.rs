@@ -103,7 +103,10 @@ mod tests {
     #[test]
     fn empty_pool_errors() {
         let pool = GatewayPool::new();
-        assert_eq!(pool.post_dataitem(&DataItem::new(vec![], vec![])), Err(GatewayError::NoGateway));
+        assert_eq!(
+            pool.post_dataitem(&DataItem::new(vec![], vec![])),
+            Err(GatewayError::NoGateway)
+        );
         assert_eq!(pool.get_data("abc"), Err(GatewayError::NoGateway));
     }
 

@@ -13,13 +13,7 @@ pub async fn heartbeat() -> Response {
     let arch = std::env::consts::ARCH.to_string();
 
     let gpu_name: Option<String> = gpu_vram.map(|_| "detected".into());
-    let profile = bmesh_hwfit::NodeProfile::manual(
-        gpu_vram,
-        gpu_name,
-        cpu_cores,
-        ram_bytes,
-        &arch,
-    );
+    let profile = bmesh_hwfit::NodeProfile::manual(gpu_vram, gpu_name, cpu_cores, ram_bytes, &arch);
 
     let catalog = bmesh_hwfit::default_catalog();
     let scores = bmesh_hwfit::best_fit(&profile, &catalog);
@@ -27,7 +21,12 @@ pub async fn heartbeat() -> Response {
     // Extract best-fit model name from the reason string
     let (best_model, best_score) = match scores.first() {
         Some(s) => {
-            let name = s.reason.split(" — ").next().unwrap_or("unknown").to_string();
+            let name = s
+                .reason
+                .split(" — ")
+                .next()
+                .unwrap_or("unknown")
+                .to_string();
             (name, s.score)
         }
         None => ("none fits".into(), 0.0),

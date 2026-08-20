@@ -13,17 +13,26 @@ pub struct ResponseCache {
 
 impl ResponseCache {
     pub fn new(ttl_secs: u64) -> Self {
-        Self { entries: Mutex::new(HashMap::new()), ttl: Duration::from_secs(ttl_secs) }
+        Self {
+            entries: Mutex::new(HashMap::new()),
+            ttl: Duration::from_secs(ttl_secs),
+        }
     }
     /// Get cached data if fresh.
     pub fn get(&self, key: &str) -> Option<Vec<u8>> {
         let e = self.entries.lock().ok()?;
         let (data, ts) = e.get(key)?;
-        if ts.elapsed() < self.ttl { Some(data.clone()) } else { None }
+        if ts.elapsed() < self.ttl {
+            Some(data.clone())
+        } else {
+            None
+        }
     }
     /// Store data with current timestamp.
     pub fn put(&self, key: &str, data: Vec<u8>) {
-        if let Ok(mut e) = self.entries.lock() { e.insert(key.to_string(), (data, Instant::now())); }
+        if let Ok(mut e) = self.entries.lock() {
+            e.insert(key.to_string(), (data, Instant::now()));
+        }
     }
 }
 

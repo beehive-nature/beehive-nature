@@ -129,7 +129,11 @@ pub fn crc8(bytes: &[u8]) -> u8 {
     for b in bytes {
         c ^= *b;
         for _ in 0..8 {
-            c = if c & 0x80 != 0 { (c << 1) ^ 0x07 } else { c << 1 };
+            c = if c & 0x80 != 0 {
+                (c << 1) ^ 0x07
+            } else {
+                c << 1
+            };
         }
     }
     c
@@ -141,7 +145,11 @@ pub fn crc32(bytes: &[u8]) -> u32 {
     for b in bytes {
         c ^= *b as u32;
         for _ in 0..8 {
-            c = if c & 1 != 0 { 0xEDB8_8320 ^ (c >> 1) } else { c >> 1 };
+            c = if c & 1 != 0 {
+                0xEDB8_8320 ^ (c >> 1)
+            } else {
+                c >> 1
+            };
         }
     }
     !c
@@ -220,7 +228,11 @@ pub fn unpack_frame(bits: &[bool]) -> Result<Frame, Error> {
     if crc8(&crc_input) != crc {
         return Err(Error::FrameChecksum);
     }
-    Ok(Frame { index, total, bytes })
+    Ok(Frame {
+        index,
+        total,
+        bytes,
+    })
 }
 
 /// Total body length for a payload: length prefix, payload, CRC-32 trailer.
@@ -377,8 +389,14 @@ mod tests {
     fn impossible_frames_are_refused() {
         assert_eq!(pack_frame(0, 0, &[]).unwrap_err(), Error::TotalOutOfRange);
         assert_eq!(pack_frame(0, 65, &[]).unwrap_err(), Error::TotalOutOfRange);
-        assert_eq!(pack_frame(4, 4, &[]).unwrap_err(), Error::IndexNotLessThanTotal);
-        assert_eq!(unpack_frame(&[false; 10]).unwrap_err(), Error::WrongBitCount);
+        assert_eq!(
+            pack_frame(4, 4, &[]).unwrap_err(),
+            Error::IndexNotLessThanTotal
+        );
+        assert_eq!(
+            unpack_frame(&[false; 10]).unwrap_err(),
+            Error::WrongBitCount
+        );
     }
 
     /// Assembling a beam and opening it, exactly as a receiver does.
@@ -400,7 +418,7 @@ mod tests {
             &b""[..],
             &b"b"[..],
             &b"bComb"[..],
-            &b"ends with nulls\0\0\0"[..],   // explicit length beats tail-stripping
+            &b"ends with nulls\0\0\0"[..], // explicit length beats tail-stripping
             &[0u8; 64][..],
             &[0xFFu8; MAX_BEAM_BYTES][..],
         ] {
@@ -413,7 +431,10 @@ mod tests {
 
     #[test]
     fn oversized_payload_is_refused_not_truncated() {
-        assert_eq!(frames_needed(MAX_BEAM_BYTES + 1).unwrap_err(), Error::PayloadTooLong);
+        assert_eq!(
+            frames_needed(MAX_BEAM_BYTES + 1).unwrap_err(),
+            Error::PayloadTooLong
+        );
         assert!(frames_needed(MAX_BEAM_BYTES).is_ok());
     }
 
@@ -451,9 +472,15 @@ mod tests {
         assert!(matches!(role(1), Role::Collar));
         assert_eq!(CELLS.iter().filter(|c| c.ring == 1).count(), 6);
         assert_eq!(CELLS.iter().filter(|c| c.ring == 6).count(), 36);
-        assert_eq!(CELLS.iter().filter(|c| c.data_index >= 0).count(), DATA_BITS);
+        assert_eq!(
+            CELLS.iter().filter(|c| c.data_index >= 0).count(),
+            DATA_BITS
+        );
         let bits = [true; DATA_BITS];
         assert!(lit_cell(0, &bits), "core must light");
-        assert!(!lit_cell(1, &bits), "collar must stay dark even with all bits set");
+        assert!(
+            !lit_cell(1, &bits),
+            "collar must stay dark even with all bits set"
+        );
     }
 }

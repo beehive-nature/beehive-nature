@@ -59,9 +59,16 @@ mod fence_tests {
         let chain = EXSAT_MAINNET.verify_chain_id(7200).unwrap();
         let req = AuthenticatedRequest {
             caller: CallerId("test".into()),
-            payload: SignRequest { chain, path: vec![], payload: vec![] },
+            payload: SignRequest {
+                chain,
+                path: vec![],
+                payload: vec![],
+            },
         };
-        assert!(matches!(RefusingSigner.sign(req), Err(ChannelError::SigningRefused)));
+        assert!(matches!(
+            RefusingSigner.sign(req),
+            Err(ChannelError::SigningRefused)
+        ));
     }
 
     #[test]

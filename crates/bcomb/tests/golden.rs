@@ -15,6 +15,7 @@ fn string_to_bits(s: &str) -> Vec<bool> {
 }
 
 /// (index, total, payload, exact 84-bit string the oracle produces)
+#[rustfmt::skip] // one vector per line so each PUBLIC-CONSTANT marker stays on its string (the secret scan requires same-line markers)
 const FRAMES: &[(u8, u8, [u8; 8], &str)] = &[
     (0, 1, [0, 0, 0, 0, 0, 0, 0, 0], "000000000000000000000000000000000000000000000000000000000000000000000000000000000000"), // PUBLIC-CONSTANT (bComb frame bits)
     (3, 12, [1, 2, 3, 4, 5, 6, 7, 8], "000011001011000000010000001000000011000001000000010100000110000001110000100011001100"), // PUBLIC-CONSTANT (bComb frame bits)
@@ -24,6 +25,7 @@ const FRAMES: &[(u8, u8, [u8; 8], &str)] = &[
 ];
 
 /// (text, frame count, exact frame bit strings in order)
+#[rustfmt::skip] // same-line PUBLIC-CONSTANT markers, same reason as FRAMES
 const BEAMS: &[(&str, usize, &[&str])] = &[
     ("bComb", 2, &[
         "000000000001000000000000010101100010010000110110111101101101011000101001110001110011", // PUBLIC-CONSTANT (bComb frame bits)
@@ -91,7 +93,9 @@ fn packs_exactly_what_the_oracle_packs() {
             bits_to_string(&bits),
             *expect,
             "frame index={} total={} payload={:?}",
-            index, total, payload
+            index,
+            total,
+            payload
         );
     }
 }
@@ -110,10 +114,21 @@ fn unpacks_the_oracles_own_bits() {
 fn splits_beams_exactly_as_the_oracle_does() {
     for (text, count, frames) in BEAMS {
         let data = text.as_bytes();
-        assert_eq!(frames_needed(data.len()).expect("count"), *count, "frame count for {:?}", text);
+        assert_eq!(
+            frames_needed(data.len()).expect("count"),
+            *count,
+            "frame count for {:?}",
+            text
+        );
         for (i, expect) in frames.iter().enumerate() {
             let bits = frame_at(data, i).expect("frame");
-            assert_eq!(bits_to_string(&bits), **expect, "beam {:?} frame {}", text, i);
+            assert_eq!(
+                bits_to_string(&bits),
+                **expect,
+                "beam {:?} frame {}",
+                text,
+                i
+            );
         }
     }
 }
@@ -123,7 +138,15 @@ fn lit_cells_match_the_oracles_renderer() {
     let data = "bComb".as_bytes();
     let bits = frame_at(data, 0).expect("frame");
     let lit: Vec<usize> = (0..CELLS.len()).filter(|i| lit_cell(*i, &bits)).collect();
-    let expect: Vec<usize> = vec![0, 18, 32, 34, 36, 37, 41, 44, 49, 50, 52, 53, 55, 56, 57, 58, 60, 61, 63, 64, 66, 68, 69, 73, 75, 78, 79, 80, 84, 85, 86, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126];
-    assert_eq!(lit, expect, "lit cell indices for the first frame of \"bComb\"");
+    let expect: Vec<usize> = vec![
+        0, 18, 32, 34, 36, 37, 41, 44, 49, 50, 52, 53, 55, 56, 57, 58, 60, 61, 63, 64, 66, 68, 69,
+        73, 75, 78, 79, 80, 84, 85, 86, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102,
+        103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120,
+        121, 122, 123, 124, 125, 126,
+    ];
+    assert_eq!(
+        lit, expect,
+        "lit cell indices for the first frame of \"bComb\""
+    );
     assert_eq!(lit.len(), 69);
 }

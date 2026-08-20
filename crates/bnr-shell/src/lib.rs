@@ -148,7 +148,7 @@ pub mod dependency {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use b_token::{ResourceProof};
+    use b_token::ResourceProof;
     use denomination::{CurrencyId, Money};
 
     fn did(s: &str) -> Did {

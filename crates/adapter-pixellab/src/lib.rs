@@ -36,7 +36,8 @@ pub struct ServerConfig {
 /// CRLF, and parsers choke on the carriage returns while the header looks
 /// perfectly valid. Strip them here, on a copy in memory, never in place.
 pub fn load_key(path: &Path) -> Result<String, String> {
-    let raw = std::fs::read_to_string(path).map_err(|e| format!("key file {}: {e}", path.display()))?;
+    let raw =
+        std::fs::read_to_string(path).map_err(|e| format!("key file {}: {e}", path.display()))?;
     let stripped = raw.trim_start_matches('\u{feff}').replace('\r', "");
     let key = stripped.trim();
     if key.is_empty() {

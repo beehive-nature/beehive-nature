@@ -528,8 +528,7 @@ mod tests {
     fn funded(who: &Did, bal: Amount) -> BLedger {
         let mut l = BLedger::with_gate(MintGate::AcceptNonEmptyEvidence);
         let minted = bal.saturating_mul(100).max(100);
-        l.mint(who, minted, &proof(), genesis_for(8))
-            .unwrap();
+        l.mint(who, minted, &proof(), genesis_for(8)).unwrap();
         l.burn(who, minted - bal).unwrap();
         l
     }
@@ -537,13 +536,7 @@ mod tests {
     /// to exercise the caps against a known base and a known (derived) age.
     fn minted_at_age(who: &Did, amt: Amount, age_years: i64) -> BLedger {
         let mut l = BLedger::with_gate(MintGate::AcceptNonEmptyEvidence);
-        l.mint(
-            who,
-            amt,
-            &proof(),
-            genesis_for(age_years),
-        )
-        .unwrap();
+        l.mint(who, amt, &proof(), genesis_for(age_years)).unwrap();
         l
     }
     fn ev(source: &str, grade: ViewGrade) -> Evidence {

@@ -25,7 +25,12 @@ fn main() {
                 d
             ),
             chain_registry::Provenance::Unverified(r) => {
-                println!("  {:<16} {:<18} UNVERIFIED — {}", c.name, c.chain_key.to_string(), r)
+                println!(
+                    "  {:<16} {:<18} UNVERIFIED — {}",
+                    c.name,
+                    c.chain_key.to_string(),
+                    r
+                )
             }
         }
     }
@@ -49,7 +54,10 @@ fn main() {
         println!("  none attached (no hardware, no emulator listening)");
     } else {
         for d in &devices {
-            println!("  {}  [model {} | debug {}]", d.description, d.model, d.debug);
+            println!(
+                "  {}  [model {} | debug {}]",
+                d.description, d.model, d.debug
+            );
         }
     }
 

@@ -206,7 +206,7 @@ impl Dashboard {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use b_token::{ResourceProof};
+    use b_token::ResourceProof;
     use reputation_engine::{compute, ReputationInput};
 
     const NOW: i64 = 2_000_000_000;

@@ -65,7 +65,10 @@ impl std::fmt::Display for ApiError {
 }
 
 pub trait Transport: Send + Sync + 'static {
-    fn request(&self, req: HttpRequest) -> impl std::future::Future<Output = Result<Value, ApiError>> + Send;
+    fn request(
+        &self,
+        req: HttpRequest,
+    ) -> impl std::future::Future<Output = Result<Value, ApiError>> + Send;
 }
 
 /// Real HTTP transport. The key lives in memory and the Authorization header
@@ -97,12 +100,21 @@ impl Transport for HttpTransport {
         if let Some(body) = req.body {
             r = r.json(&body);
         }
-        let resp = r.send().await.map_err(|e| ApiError::Transport(e.to_string()))?;
+        let resp = r
+            .send()
+            .await
+            .map_err(|e| ApiError::Transport(e.to_string()))?;
         let status = resp.status().as_u16();
-        let text = resp.text().await.map_err(|e| ApiError::Transport(e.to_string()))?;
+        let text = resp
+            .text()
+            .await
+            .map_err(|e| ApiError::Transport(e.to_string()))?;
         let val: Value = serde_json::from_str(&text).unwrap_or(json!({ "raw": text }));
         if status >= 400 {
-            return Err(ApiError::Api { status, body: val.to_string() });
+            return Err(ApiError::Api {
+                status,
+                body: val.to_string(),
+            });
         }
         Ok(val)
     }
@@ -215,16 +227,25 @@ fn build_body(r: &GenerateRequest, bitforge: bool) -> Value {
 }
 
 fn parse_generate(v: Value, endpoint: &'static str) -> Result<GenerateResult, ApiError> {
-    let image = v.get("image").ok_or_else(|| ApiError::Parse("response missing image".into()))?;
+    let image = v
+        .get("image")
+        .ok_or_else(|| ApiError::Parse("response missing image".into()))?;
     let b64 = image
         .get("base64")
         .and_then(Value::as_str)
         .ok_or_else(|| ApiError::Parse("response image missing base64".into()))?;
     let usage = v.get("usage").cloned().unwrap_or(Value::Null);
-    Ok(GenerateResult { image_b64: b64.to_string(), usage, endpoint })
+    Ok(GenerateResult {
+        image_b64: b64.to_string(),
+        usage,
+        endpoint,
+    })
 }
 
-pub async fn generate_bitforge<T: Transport>(t: &T, r: &GenerateRequest) -> Result<GenerateResult, ApiError> {
+pub async fn generate_bitforge<T: Transport>(
+    t: &T,
+    r: &GenerateRequest,
+) -> Result<GenerateResult, ApiError> {
     let v = t
         .request(HttpRequest {
             method: "POST",
@@ -235,7 +256,10 @@ pub async fn generate_bitforge<T: Transport>(t: &T, r: &GenerateRequest) -> Resu
     parse_generate(v, "bitforge")
 }
 
-pub async fn generate_pixflux<T: Transport>(t: &T, r: &GenerateRequest) -> Result<GenerateResult, ApiError> {
+pub async fn generate_pixflux<T: Transport>(
+    t: &T,
+    r: &GenerateRequest,
+) -> Result<GenerateResult, ApiError> {
     let v = t
         .request(HttpRequest {
             method: "POST",
@@ -248,7 +272,11 @@ pub async fn generate_pixflux<T: Transport>(t: &T, r: &GenerateRequest) -> Resul
 
 pub async fn get_balance<T: Transport>(t: &T) -> Result<f64, ApiError> {
     let v = t
-        .request(HttpRequest { method: "GET", path: "/balance".into(), body: None })
+        .request(HttpRequest {
+            method: "GET",
+            path: "/balance".into(),
+            body: None,
+        })
         .await?;
     v.get("usd")
         .and_then(Value::as_f64)
@@ -269,6 +297,9 @@ pub fn validate_enum(name: &str, v: &str, allowed: &[&str]) -> Result<(), String
     if allowed.contains(&v) {
         Ok(())
     } else {
-        Err(format!("invalid {name} {v:?}; allowed: {}", allowed.join(", ")))
+        Err(format!(
+            "invalid {name} {v:?}; allowed: {}",
+            allowed.join(", ")
+        ))
     }
 }

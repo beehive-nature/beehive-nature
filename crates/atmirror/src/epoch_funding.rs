@@ -52,10 +52,16 @@ pub fn assert_per_claimant_funding(
     for (rail, reg) in rails.iter().zip(regs) {
         match rail.delegate() {
             None => {
-                return Err(format!("{}: no delegate — the leader's own credits pay (breach)", reg.name))
+                return Err(format!(
+                    "{}: no delegate — the leader's own credits pay (breach)",
+                    reg.name
+                ))
             }
             Some(d) if d == leader_delegate => {
-                return Err(format!("{}: funded by the LEADER delegate — the breach", reg.name))
+                return Err(format!(
+                    "{}: funded by the LEADER delegate — the breach",
+                    reg.name
+                ))
             }
             Some(d) if d != reg.claimant_delegate => {
                 return Err(format!(
@@ -87,7 +93,10 @@ mod tests {
     fn per_claimant_funding_holds() {
         let r = regs();
         let rails = per_claimant_rails(&r);
-        assert_eq!(assert_per_claimant_funding(&rails, &r, "LEADER-delegate"), Ok(()));
+        assert_eq!(
+            assert_per_claimant_funding(&rails, &r, "LEADER-delegate"),
+            Ok(())
+        );
         for (rail, reg) in rails.iter().zip(&r) {
             assert_eq!(rail.delegate(), Some(reg.claimant_delegate.as_str()));
         }

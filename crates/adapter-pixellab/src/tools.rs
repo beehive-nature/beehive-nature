@@ -7,7 +7,7 @@ use serde::Deserialize;
 use serde_json::{json, Value};
 use std::sync::{Arc, Mutex};
 
-use crate::pixellab::{self, Transport, GenerateRequest};
+use crate::pixellab::{self, GenerateRequest, Transport};
 use crate::storage;
 
 /// USD-denominated budget. Per-call cost is not declared in the OpenAPI, so
@@ -21,7 +21,11 @@ pub struct Budget {
 
 impl Budget {
     pub fn new(cap: Option<f64>) -> Self {
-        Self { cap_usd: cap, spent: Mutex::new(0.0), counter: Mutex::new(0) }
+        Self {
+            cap_usd: cap,
+            spent: Mutex::new(0.0),
+            counter: Mutex::new(0),
+        }
     }
 
     fn gate(&self) -> Result<(), String> {
@@ -128,7 +132,8 @@ pub async fn execute<T: Transport>(
 }
 
 async fn balance<T: Transport>(transport: &Arc<T>, budget: &Arc<Budget>) -> Result<Value, String> {
-    let usd = pixellab::get_balance(transport.as_ref()).await
+    let usd = pixellab::get_balance(transport.as_ref())
+        .await
         .map_err(|e| format!("balance fetch failed: {e}"))?;
     Ok(json!({
         "usd": usd,
@@ -165,11 +170,16 @@ async fn generate<T: Transport>(
 
     // Balance before — a failed fetch is never a value: refuse rather than
     // spend blind.
-    let before = pixellab::get_balance(transport.as_ref()).await
+    let before = pixellab::get_balance(transport.as_ref())
+        .await
         .map_err(|e| format!("pre-spend balance check failed, refusing to generate: {e}"))?;
     budget.gate()?;
 
-    let seed_json = if let Some(s) = args.seed { json!(s) } else { Value::Null };
+    let seed_json = if let Some(s) = args.seed {
+        json!(s)
+    } else {
+        Value::Null
+    };
     let req = GenerateRequest {
         description: args.prompt,
         negative_description: args.negative_description,
@@ -243,7 +253,9 @@ fn read_image_arg(p: Option<&str>) -> Result<Option<String>, String> {
         Some(path) => {
             let bytes = std::fs::read(path).map_err(|e| format!("read {path}: {e}"))?;
             storage::assert_png(&bytes).map_err(|e| format!("{path}: {e}"))?;
-            Ok(Some(base64::engine::general_purpose::STANDARD.encode(bytes)))
+            Ok(Some(
+                base64::engine::general_purpose::STANDARD.encode(bytes),
+            ))
         }
     }
 }

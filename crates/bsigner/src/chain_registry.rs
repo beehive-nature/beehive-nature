@@ -62,10 +62,19 @@ pub enum Provenance {
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 pub enum ChainError {
     #[error("chain-id mismatch for {chain}: pinned {pinned}, endpoint reported {observed} — refusing to proceed")]
-    ChainIdMismatch { chain: &'static str, pinned: u64, observed: u64 },
+    ChainIdMismatch {
+        chain: &'static str,
+        pinned: u64,
+        observed: u64,
+    },
 
-    #[error("chain {chain} is UNVERIFIED ({reason}) — cannot be used until a live reading confirms it")]
-    Unverified { chain: &'static str, reason: &'static str },
+    #[error(
+        "chain {chain} is UNVERIFIED ({reason}) — cannot be used until a live reading confirms it"
+    )]
+    Unverified {
+        chain: &'static str,
+        reason: &'static str,
+    },
 }
 
 /// A pinned EVM chain. **Cannot authorise anything on its own.**
@@ -104,7 +113,10 @@ impl EvmChain {
     /// about to be used — not from config, and not from this struct.
     pub fn verify_chain_id(&self, observed: u64) -> Result<VerifiedEvmChain, ChainError> {
         if let Provenance::Unverified(reason) = self.provenance {
-            return Err(ChainError::Unverified { chain: self.name, reason });
+            return Err(ChainError::Unverified {
+                chain: self.name,
+                reason,
+            });
         }
         if observed != self.chain_id {
             return Err(ChainError::ChainIdMismatch {
@@ -113,7 +125,10 @@ impl EvmChain {
                 observed,
             });
         }
-        Ok(VerifiedEvmChain { inner: self.clone(), observed_chain_id: observed })
+        Ok(VerifiedEvmChain {
+            inner: self.clone(),
+            observed_chain_id: observed,
+        })
     }
 }
 
@@ -185,8 +200,14 @@ mod tests {
 
     #[test]
     fn pinned_ids_match_the_live_readings_of_2026_07_30() {
-        assert_eq!(EXSAT_MAINNET.chain_id, 7200, "exSat mainnet: eth_chainId 0x1c20");
-        assert_eq!(ARBITRUM_ONE.chain_id, 42161, "Arbitrum One: eth_chainId 0xa4b1");
+        assert_eq!(
+            EXSAT_MAINNET.chain_id, 7200,
+            "exSat mainnet: eth_chainId 0x1c20"
+        );
+        assert_eq!(
+            ARBITRUM_ONE.chain_id, 42161,
+            "Arbitrum One: eth_chainId 0xa4b1"
+        );
         assert_eq!(
             VAULTA_MAINNET.chain_id_hex,
             "aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906", // PUBLIC-CONSTANT
@@ -196,7 +217,9 @@ mod tests {
 
     #[test]
     fn matching_chain_id_verifies() {
-        let v = EXSAT_MAINNET.verify_chain_id(7200).expect("7200 matches the pin");
+        let v = EXSAT_MAINNET
+            .verify_chain_id(7200)
+            .expect("7200 matches the pin");
         assert_eq!(v.chain_id(), 7200);
         assert_eq!(v.chain().name, "exSat mainnet");
     }
@@ -208,7 +231,11 @@ mod tests {
         let err = EXSAT_MAINNET.verify_chain_id(1).unwrap_err();
         assert_eq!(
             err,
-            ChainError::ChainIdMismatch { chain: "exSat mainnet", pinned: 7200, observed: 1 }
+            ChainError::ChainIdMismatch {
+                chain: "exSat mainnet",
+                pinned: 7200,
+                observed: 1
+            }
         );
     }
 
@@ -223,7 +250,13 @@ mod tests {
         // exSat testnet has no sourced id, so nothing verifies it — not even a
         // value that happens to be correct. It must be sourced first.
         let err = EXSAT_TESTNET.verify_chain_id(839999).unwrap_err();
-        assert!(matches!(err, ChainError::Unverified { chain: "exSat testnet", .. }));
+        assert!(matches!(
+            err,
+            ChainError::Unverified {
+                chain: "exSat testnet",
+                ..
+            }
+        ));
     }
 
     #[test]

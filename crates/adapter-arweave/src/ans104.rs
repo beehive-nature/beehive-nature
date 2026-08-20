@@ -53,7 +53,10 @@ impl DataItem {
 
     /// Add a tag.
     pub fn with_tag(mut self, name: &str, value: &str) -> Self {
-        self.tags.push(Tag { name: name.into(), value: value.into() });
+        self.tags.push(Tag {
+            name: name.into(),
+            value: value.into(),
+        });
         self
     }
 
@@ -192,8 +195,14 @@ mod tests {
     #[test]
     fn serialize_tags_roundtrip() {
         let tags = vec![
-            Tag { name: "App-Name".into(), value: "BNR".into() },
-            Tag { name: "Content-Type".into(), value: "text/plain".into() },
+            Tag {
+                name: "App-Name".into(),
+                value: "BNR".into(),
+            },
+            Tag {
+                name: "Content-Type".into(),
+                value: "text/plain".into(),
+            },
         ];
         let bytes = serialize_tags(&tags);
         assert_eq!(&bytes[..2], &2u16.to_le_bytes(), "tag count = 2");
@@ -221,11 +230,17 @@ mod tests {
         assert!(!item.signature.is_empty(), "signature populated after sign");
 
         // Verify against same key — must pass
-        assert!(item.verify(&pub_key), "signature must verify against the signing key");
+        assert!(
+            item.verify(&pub_key),
+            "signature must verify against the signing key"
+        );
 
         // Verify against a DIFFERENT key — must fail
         let (_, other_pub) = crate::jwk::generate_keypair(2048);
-        assert!(!item.verify(&other_pub), "signature must NOT verify against a different key");
+        assert!(
+            !item.verify(&other_pub),
+            "signature must NOT verify against a different key"
+        );
     }
 
     #[test]
@@ -252,6 +267,9 @@ mod tests {
 
         // Tamper: change data after signing
         item.data = b"tampered".to_vec();
-        assert!(!item.verify(&pub_key), "tampered data must fail verification");
+        assert!(
+            !item.verify(&pub_key),
+            "tampered data must fail verification"
+        );
     }
 }

@@ -376,7 +376,9 @@ impl Rail for ArweaveRail {
             }
         }
         Err(last.unwrap_or_else(|| {
-            RailError::Transport(format!("{MAX_ATTEMPTS} attempts exhausted with no response"))
+            RailError::Transport(format!(
+                "{MAX_ATTEMPTS} attempts exhausted with no response"
+            ))
         }))
     }
 
@@ -513,7 +515,13 @@ pub enum ParseItemError {
 pub fn parse_ed25519_data_item(bytes: &[u8]) -> Result<ParsedEd25519Item, ParseItemError> {
     use ed25519_dalek::{Signature, Verifier, VerifyingKey};
 
-    let need = |ok: bool, seg: &'static str| if ok { Ok(()) } else { Err(ParseItemError::Truncated(seg)) };
+    let need = |ok: bool, seg: &'static str| {
+        if ok {
+            Ok(())
+        } else {
+            Err(ParseItemError::Truncated(seg))
+        }
+    };
 
     need(bytes.len() >= 2, "signature type")?;
     let sig_type = u16::from_le_bytes([bytes[0], bytes[1]]);
@@ -666,10 +674,18 @@ mod tests {
         let (id, item) = build_ed25519_data_item(&sk, data, &tags);
 
         // layout: sigType(2) | sig(64) | owner(32) | target(1) | anchor(1) | ...
-        assert_eq!(&item[0..2], &2u16.to_le_bytes(), "signature type must be 2 (Ed25519)");
+        assert_eq!(
+            &item[0..2],
+            &2u16.to_le_bytes(),
+            "signature type must be 2 (Ed25519)"
+        );
         let sig = &item[2..66];
         let owner = &item[66..98];
-        assert_eq!(owner, sk.verifying_key().to_bytes(), "owner is the 32-byte pubkey");
+        assert_eq!(
+            owner,
+            sk.verifying_key().to_bytes(),
+            "owner is the 32-byte pubkey"
+        );
         assert_eq!(item[98], 0, "target absent");
         assert_eq!(item[99], 0, "anchor absent");
 
@@ -721,18 +737,27 @@ mod tests {
         let mut t = item.clone();
         let last = t.len() - 1;
         t[last] ^= 0x01;
-        assert!(matches!(parse_ed25519_data_item(&t), Err(ParseItemError::BadSignature)));
+        assert!(matches!(
+            parse_ed25519_data_item(&t),
+            Err(ParseItemError::BadSignature)
+        ));
 
         // tampered signature byte -> BadSignature.
         let mut t = item.clone();
         t[10] ^= 0x01;
-        assert!(matches!(parse_ed25519_data_item(&t), Err(ParseItemError::BadSignature)));
+        assert!(matches!(
+            parse_ed25519_data_item(&t),
+            Err(ParseItemError::BadSignature)
+        ));
 
         // RSA sig type (1) -> NotEd25519(1), named not silent.
         let mut t = item.clone();
         t[0] = 1;
         t[1] = 0;
-        assert!(matches!(parse_ed25519_data_item(&t), Err(ParseItemError::NotEd25519(1))));
+        assert!(matches!(
+            parse_ed25519_data_item(&t),
+            Err(ParseItemError::NotEd25519(1))
+        ));
 
         // truncation -> Truncated, at any cut point, never a panic.
         for cut in [0, 1, 65, 97, 99, item.len() - 1] {

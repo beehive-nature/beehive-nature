@@ -69,8 +69,7 @@ const fn harden(i: u32) -> u32 {
 
 /// `m/44'/60'/0'/0/0` — the first Ethereum account. The EVM identity that
 /// already spans Arbitrum (ANT) and the Turbo/ar.io rail is derived here.
-pub const ETH_PATH_ACCOUNT_0: [u32; 5] =
-    [harden(44), harden(60), harden(0), 0, 0];
+pub const ETH_PATH_ACCOUNT_0: [u32; 5] = [harden(44), harden(60), harden(0), 0, 0];
 
 #[derive(Debug, thiserror::Error)]
 pub enum DeviceError {
@@ -110,7 +109,10 @@ impl From<&AvailableDevice> for DeviceSummary {
 /// Returns an empty vector rather than an error when nothing is attached —
 /// "no device present" is a normal state and a perfectly good receipt.
 pub fn enumerate() -> Vec<DeviceSummary> {
-    find_devices_usb_safe().iter().map(DeviceSummary::from).collect()
+    find_devices_usb_safe()
+        .iter()
+        .map(DeviceSummary::from)
+        .collect()
 }
 
 /// `trezor_client::find_devices` reaches USB through rusb's `GlobalContext`,
@@ -139,8 +141,12 @@ pub fn ethereum_address(path: &[u32]) -> Result<String, DeviceError> {
     }
     let device = devices.remove(0);
 
-    let mut client = device.connect().map_err(|e| DeviceError::Transport(e.to_string()))?;
-    client.init_device(None).map_err(|e| DeviceError::Device(e.to_string()))?;
+    let mut client = device
+        .connect()
+        .map_err(|e| DeviceError::Transport(e.to_string()))?;
+    client
+        .init_device(None)
+        .map_err(|e| DeviceError::Device(e.to_string()))?;
 
     client
         .ethereum_get_address(path.to_vec())
@@ -154,7 +160,10 @@ mod tests {
     #[test]
     fn eth_path_is_the_standard_first_account() {
         // m/44'/60'/0'/0/0
-        assert_eq!(ETH_PATH_ACCOUNT_0, [0x8000_002C, 0x8000_003C, 0x8000_0000, 0, 0]);
+        assert_eq!(
+            ETH_PATH_ACCOUNT_0,
+            [0x8000_002C, 0x8000_003C, 0x8000_0000, 0, 0]
+        );
     }
 
     #[test]

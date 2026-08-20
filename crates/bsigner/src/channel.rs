@@ -100,9 +100,9 @@ impl SignerChannel for RefusingSigner {
     fn query(&self, req: AuthenticatedRequest<Query>) -> Result<QueryResponse, ChannelError> {
         match req.payload {
             Query::ListDevices => Ok(QueryResponse::Devices(crate::device::enumerate())),
-            Query::EthereumAddress { path } => {
-                Ok(QueryResponse::Address(crate::device::ethereum_address(&path)?))
-            }
+            Query::EthereumAddress { path } => Ok(QueryResponse::Address(
+                crate::device::ethereum_address(&path)?,
+            )),
         }
     }
 
@@ -121,15 +121,27 @@ mod tests {
         let chain = EXSAT_MAINNET.verify_chain_id(7200).unwrap();
         let req = AuthenticatedRequest {
             caller: CallerId("dashboard".into()),
-            payload: SignRequest { chain, path: vec![], payload: vec![0xde, 0xad] },
+            payload: SignRequest {
+                chain,
+                path: vec![],
+                payload: vec![0xde, 0xad],
+            },
         };
-        assert!(matches!(RefusingSigner.sign(req), Err(ChannelError::SigningRefused)));
+        assert!(matches!(
+            RefusingSigner.sign(req),
+            Err(ChannelError::SigningRefused)
+        ));
     }
 
     #[test]
     fn device_listing_is_served() {
-        let req =
-            AuthenticatedRequest { caller: CallerId("dashboard".into()), payload: Query::ListDevices };
-        assert!(matches!(RefusingSigner.query(req), Ok(QueryResponse::Devices(_))));
+        let req = AuthenticatedRequest {
+            caller: CallerId("dashboard".into()),
+            payload: Query::ListDevices,
+        };
+        assert!(matches!(
+            RefusingSigner.query(req),
+            Ok(QueryResponse::Devices(_))
+        ));
     }
 }

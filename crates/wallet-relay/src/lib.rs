@@ -9,20 +9,20 @@
 //! `spawn_blocking`; the failover loop itself is pure ([`try_in_order`]) so the
 //! suite exercises it with closures, never sockets.
 
-pub mod gateway;
 pub mod adapters;
 pub mod buzz;
 pub mod cache;
-pub mod envelope;
-pub mod ladder;
-pub mod tx_prep;
-pub mod vaulta;
-pub mod watch;
 pub mod dashboard;
+pub mod envelope;
+pub mod gateway;
+pub mod ladder;
 pub mod onboard_static;
 pub mod rails;
 pub mod trezor_bridge;
+pub mod tx_prep;
 pub mod upload;
+pub mod vaulta;
+pub mod watch;
 
 use std::sync::{Arc, Mutex};
 
@@ -45,7 +45,10 @@ pub struct AppState {
 
 impl AppState {
     pub fn new(pool: GatewayPool, forward_to: Option<String>) -> Self {
-        AppState { pool: Arc::new(Mutex::new(pool)), forward_to }
+        AppState {
+            pool: Arc::new(Mutex::new(pool)),
+            forward_to,
+        }
     }
 }
 
@@ -65,7 +68,10 @@ pub fn app(state: AppState) -> Router {
         .route("/v1/hive/balance/{address}", get(rails::hive_balance))
         .route("/v1/vaulta/balance/{address}", get(rails::vaulta_balance))
         .route("/v1/vaulta/identity/{account}", get(vaulta::read_identity))
-        .route("/v1/vaulta/mint-walkthrough", post(vaulta::mint_walkthrough))
+        .route(
+            "/v1/vaulta/mint-walkthrough",
+            post(vaulta::mint_walkthrough),
+        )
         .route("/v1/vaulta/envelope", post(vaulta::build_envelope))
         .route("/v1/authenticator/ladder", get(ladder_handler))
         .route("/v1/trezor/granted/{network}", get(trezor_granted))
@@ -78,14 +84,23 @@ pub fn app(state: AppState) -> Router {
         // Pages-style paths) must not 404 on the relay (audit blocker fix)
         .route("/onboard/receive.html", get(onboard_static::receive))
         .route("/receive.html", get(onboard_static::receive))
-        .route("/v1/trezor/native/features", get(trezor_bridge::native_features))
+        .route(
+            "/v1/trezor/native/features",
+            get(trezor_bridge::native_features),
+        )
         .route("/blight", get(onboard_static::blight_demo))
         // the demo's relative encoder path when served at /blight
-        .route("/onboarding/vendor/qrcodegen.js", get(onboard_static::qrcodegen_js))
+        .route(
+            "/onboarding/vendor/qrcodegen.js",
+            get(onboard_static::qrcodegen_js),
+        )
         // both spellings: a page at /onboard resolves its relative script to
         // /vendor/…, a page at /onboard/ resolves to /onboard/vendor/…
         .route("/vendor/qrcodegen.js", get(onboard_static::qrcodegen_js))
-        .route("/onboard/vendor/qrcodegen.js", get(onboard_static::qrcodegen_js))
+        .route(
+            "/onboard/vendor/qrcodegen.js",
+            get(onboard_static::qrcodegen_js),
+        )
         .with_state(state)
 }
 
@@ -186,7 +201,9 @@ async fn graphql_proxy(State(s): State<AppState>, body: Bytes) -> Response {
     .await;
 
     match out {
-        Ok(Ok(json)) => (StatusCode::OK, [("content-type", "application/json")], json).into_response(),
+        Ok(Ok(json)) => {
+            (StatusCode::OK, [("content-type", "application/json")], json).into_response()
+        }
         Ok(Err(tried)) => (
             StatusCode::BAD_GATEWAY,
             Json(serde_json::json!({ "error": "all gateways failed", "gateways_tried": tried })),
@@ -202,7 +219,11 @@ async fn graphql_proxy(State(s): State<AppState>, body: Bytes) -> Response {
 
 /// GET /raw/{id} — raw tx/data-item bytes through the pool (ar-io `/raw/`).
 async fn raw_read(State(s): State<AppState>, Path(id): Path<String>) -> Response {
-    if !id.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_') || id.len() > 64 {
+    if !id
+        .chars()
+        .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+        || id.len() > 64
+    {
         return (
             StatusCode::BAD_REQUEST,
             Json(serde_json::json!({ "error": "invalid id" })),
@@ -216,7 +237,10 @@ async fn raw_read(State(s): State<AppState>, Path(id): Path<String>) -> Response
             .redirects(0)
             .build();
         try_in_order(&pool, |gw| {
-            let resp = agent.get(&format!("{gw}/raw/{id}")).call().map_err(|e| e.to_string())?;
+            let resp = agent
+                .get(&format!("{gw}/raw/{id}"))
+                .call()
+                .map_err(|e| e.to_string())?;
             let mut buf = Vec::new();
             use std::io::Read;
             resp.into_reader()
@@ -276,13 +300,11 @@ async fn arweave_price(State(s): State<AppState>, Path(bytes): Path<String>) -> 
     .await;
 
     match out {
-        Ok(Ok((winston, gateway))) => {
-            Json(serde_json::json!({
-                "winston": winston.trim(),
-                "gateway_used": gateway,
-            }))
-                .into_response()
-        }
+        Ok(Ok((winston, gateway))) => Json(serde_json::json!({
+            "winston": winston.trim(),
+            "gateway_used": gateway,
+        }))
+        .into_response(),
         Ok(Err(tried)) => (
             StatusCode::BAD_GATEWAY,
             Json(serde_json::json!({ "error": "all gateways failed", "gateways_tried": tried })),
@@ -298,7 +320,11 @@ async fn arweave_price(State(s): State<AppState>, Path(bytes): Path<String>) -> 
 
 /// GET /v1/arweave/status/{tx_id} — read-back verification: is this tx on-chain?
 async fn arweave_status(State(s): State<AppState>, Path(tx_id): Path<String>) -> Response {
-    if !tx_id.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_') || tx_id.len() > 64 {
+    if !tx_id
+        .chars()
+        .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+        || tx_id.len() > 64
+    {
         return (
             StatusCode::BAD_REQUEST,
             Json(serde_json::json!({ "error": "invalid tx id" })),
@@ -307,7 +333,8 @@ async fn arweave_status(State(s): State<AppState>, Path(tx_id): Path<String>) ->
     }
     let tx_id_resp = tx_id.clone();
     // Cache check — if cached, skip network fetch and use cached body
-    let cached_body: Option<String> = crate::cache::cache().get(&tx_id)
+    let cached_body: Option<String> = crate::cache::cache()
+        .get(&tx_id)
         .and_then(|b| String::from_utf8(b).ok());
     let pool = s.pool.clone();
     let gql = serde_json::json!({
@@ -334,12 +361,17 @@ async fn arweave_status(State(s): State<AppState>, Path(tx_id): Path<String>) ->
         Ok(Ok((body, gateway))) => {
             // arweave.net/tx/{id} returns JSON with "block" (null if pending) or 404
             let parsed: serde_json::Value = serde_json::from_str(&body).unwrap_or_default();
-            let edges = parsed.pointer("/data/transactions/edges").and_then(|e| e.as_array());
+            let edges = parsed
+                .pointer("/data/transactions/edges")
+                .and_then(|e| e.as_array());
             let (found, confirmed, data_size) = match edges {
                 Some(arr) if !arr.is_empty() => {
                     let node = &arr[0]["node"];
                     let confirmed = node.get("block").and_then(|b| b.as_object()).is_some();
-                    let size = node.pointer("/data/size").and_then(|s| s.as_u64()).unwrap_or(0);
+                    let size = node
+                        .pointer("/data/size")
+                        .and_then(|s| s.as_u64())
+                        .unwrap_or(0);
                     (true, confirmed, size)
                 }
                 _ => (false, false, 0u64),
@@ -351,7 +383,7 @@ async fn arweave_status(State(s): State<AppState>, Path(tx_id): Path<String>) ->
                 "data_size": data_size,
                 "gateway_used": gateway,
             }))
-                .into_response()
+            .into_response()
         }
         Ok(Err(tried)) => (
             StatusCode::BAD_GATEWAY,
@@ -368,7 +400,11 @@ async fn arweave_status(State(s): State<AppState>, Path(tx_id): Path<String>) ->
 
 /// GET /v1/arweave/balance/{address} — read-only AR balance through the pool.
 async fn arweave_balance(State(s): State<AppState>, Path(address): Path<String>) -> Response {
-    if address.len() != 43 || !address.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_') {
+    if address.len() != 43
+        || !address
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+    {
         return (
             StatusCode::BAD_REQUEST,
             Json(serde_json::json!({ "error": "invalid address" })),
@@ -404,7 +440,7 @@ async fn arweave_balance(State(s): State<AppState>, Path(address): Path<String>)
                 "gateway_used": gateway,
                 "tier": "T-S"
             }))
-                .into_response()
+            .into_response()
         }
         Ok(Err(tried)) => (
             StatusCode::BAD_GATEWAY,
@@ -432,7 +468,11 @@ async fn trezor_granted(Path(network): Path<String>) -> Response {
         "xlm" | "stellar" | "sol" | "solana" | "vaulta" | "eos" | "hive" => false,
         _ => false,
     };
-    let next_tier = if granted { "Bee (stock firmware)" } else { "Royal Guard (advanced firmware)" };
+    let next_tier = if granted {
+        "Bee (stock firmware)"
+    } else {
+        "Royal Guard (advanced firmware)"
+    };
     Json(serde_json::json!({
         "v": 1,
         "network": network,
@@ -466,7 +506,11 @@ mod tests {
 
         // second gateway succeeds after the first fails
         let got = try_in_order(&s.pool, |gw| {
-            if gw == "http://gw-a" { Err("down".into()) } else { Ok(gw.to_string()) }
+            if gw == "http://gw-a" {
+                Err("down".into())
+            } else {
+                Ok(gw.to_string())
+            }
         });
         assert_eq!(got.unwrap(), "http://gw-b");
         let health = s.pool.lock().unwrap().health();
@@ -496,7 +540,10 @@ mod tests {
             serde_json::from_slice(&resp.into_body().collect().await.unwrap().to_bytes()).unwrap();
         assert_eq!(body["accepted"]["id"], id);
         assert_eq!(body["accepted"]["route"], "arweave");
-        assert_eq!(body["forwarded"], false, "no bundler configured — said so, not implied");
+        assert_eq!(
+            body["forwarded"], false,
+            "no bundler configured — said so, not implied"
+        );
     }
 
     #[tokio::test]

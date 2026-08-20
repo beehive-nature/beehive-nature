@@ -21,10 +21,19 @@ pub fn assert_png(bytes: &[u8]) -> Result<(), String> {
 /// adapter attaches no meaning to it — it is opaque metadata that becomes a
 /// readable filename.
 pub fn sanitize_layer(name: Option<&str>) -> String {
-    let base = name.map(str::trim).filter(|s| !s.is_empty()).unwrap_or("sprite");
+    let base = name
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .unwrap_or("sprite");
     let mut s: String = base
         .chars()
-        .map(|c| if c.is_ascii_alphanumeric() || c == '-' || c == '_' { c } else { '_' })
+        .map(|c| {
+            if c.is_ascii_alphanumeric() || c == '-' || c == '_' {
+                c
+            } else {
+                '_'
+            }
+        })
         .collect();
     s.truncate(64);
     if s.is_empty() {

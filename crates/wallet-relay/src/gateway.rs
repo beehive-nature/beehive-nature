@@ -52,7 +52,10 @@ impl GatewayPool {
                 continue;
             }
             seen.push(u.clone());
-            gateways.push(Gateway { url: u, consecutive_failures: 0 });
+            gateways.push(Gateway {
+                url: u,
+                consecutive_failures: 0,
+            });
         }
         match gateways.len() {
             0 => Err(PoolError::Empty),
@@ -118,7 +121,10 @@ mod tests {
 
     #[test]
     fn refuses_pools_that_cannot_fail_over() {
-        assert_eq!(GatewayPool::new(&[] as &[&str]).unwrap_err(), PoolError::Empty);
+        assert_eq!(
+            GatewayPool::new(&[] as &[&str]).unwrap_err(),
+            PoolError::Empty
+        );
         assert_eq!(
             GatewayPool::new(&["https://arweave.net"]).unwrap_err(),
             PoolError::NoFallback,
@@ -133,8 +139,12 @@ mod tests {
 
     #[test]
     fn preference_order_holds_until_failures_degrade() {
-        let mut p = GatewayPool::new(&["http://self:3000", "https://pub1", "https://pub2"]).unwrap();
-        assert_eq!(p.ordered(), ["http://self:3000", "https://pub1", "https://pub2"]);
+        let mut p =
+            GatewayPool::new(&["http://self:3000", "https://pub1", "https://pub2"]).unwrap();
+        assert_eq!(
+            p.ordered(),
+            ["http://self:3000", "https://pub1", "https://pub2"]
+        );
 
         // failures below the threshold do not reorder
         p.mark_failure("http://self:3000");
@@ -143,7 +153,10 @@ mod tests {
 
         // the third consecutive failure degrades to the BACK — tried last, not never
         p.mark_failure("http://self:3000");
-        assert_eq!(p.ordered(), ["https://pub1", "https://pub2", "http://self:3000"]);
+        assert_eq!(
+            p.ordered(),
+            ["https://pub1", "https://pub2", "http://self:3000"]
+        );
 
         // one success heals fully and restores preference order
         p.mark_success("http://self:3000");
