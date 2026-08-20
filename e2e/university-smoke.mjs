@@ -190,7 +190,7 @@ ok('longevity: fat assembly line renders six stages', (await page.locator('#line
 ok('longevity: DIAAS demoted to the attention hook, 17 chips', (await page.locator('#diaas .dchip').count()) === 17);
 const longHtml = await page.locator('body').innerHTML();
 ok('longevity: walls on the face + ACiD defined + upstream since 2016',
-  longHtml.includes('Artificial Chronic Inflammatory Disease') && longHtml.includes('since 2016') && longHtml.includes('graded hypothesis') && longHtml.includes('builds its own cannabinoids') && longHtml.includes('27.4 g LA') && longHtml.includes('20085953'));
+  longHtml.includes('Artificial Chronic Inflammatory Disease') && longHtml.includes('since 2016') && longHtml.includes('graded hypothesis') && longHtml.includes('builds its own cannabinoids') && longHtml.includes('27.4 g LA') && longHtml.includes('20085953') && longHtml.includes('FLAGSHIP') && longHtml.includes('116.13') && longHtml.includes('UNTESTED'));
 await page.locator('#revBtn').click();
 ok('longevity: reversal toggles, hypothesis badges appear',
   (await page.locator('body').getAttribute('class')).includes('reversed')
