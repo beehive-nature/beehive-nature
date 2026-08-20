@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="color-scheme" content="dark">
+<title>bIQ Composer — a paste-ready proposal for the Sophia gate; the page never posts</title>
+<style>
+:root{--bg:#0d1410;--ink:#e2efdb;--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--dim:#8a9a8a;--line:#243026;--leaf:#7ddf8f;--amber:#ffb347;
+--ok:#3f9c55;--warn:#c07f1c;--info:#0092a6}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:36px 16px 90px}
+header{text-align:center;margin-bottom:10px}
+h1{font-size:clamp(17px,4vw,24px);color:var(--gold);font-weight:400;letter-spacing:.05em}
+header p{color:var(--dim);font-size:11px;margin-top:6px;max-width:700px;margin-left:auto;margin-right:auto}
+main{max-width:860px;margin:0 auto}
+section{background:#111a14;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:16px}
+section h2{font-size:12px;color:var(--violet);font-weight:400;letter-spacing:.08em;margin-bottom:8px}
+.law{color:var(--dim);font-size:10px;line-height:1.7}
+.law b{color:var(--ink)}
+a{color:var(--cyan)}
+.badge{display:inline-block;font-size:9px;letter-spacing:.1em;border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--gold)}
+table{width:100%;border-collapse:collapse;margin-top:8px;font-size:10.5px}
+td,th{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;color:var(--dim);vertical-align:top}
+th{color:var(--violet);font-weight:400} td.n{color:var(--ink)}
+select,input,textarea{background:#0a0f0b;color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:7px 10px;font:12px 'IBM Plex Mono',monospace}
+textarea{width:100%;min-height:56px;resize:vertical}
+button{background:#26123a;color:#c9a0ff;border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer;font:11.5px 'IBM Plex Mono',monospace;margin-top:8px;margin-right:7px}
+button:hover{background:#c9a0ff;color:#000}
+button.gold{background:#2a230a;color:var(--gold)} button.gold:hover{background:var(--gold);color:#000}
+.sent{background:#0a0f0b;border:1px solid var(--line);border-radius:9px;padding:10px 12px;margin-top:8px}
+.sent .stx{font-size:12px;line-height:1.7}
+.sent .scit{font-size:9.5px;color:var(--dim);margin-top:5px}
+.sent.on{border-color:#2b4a34}
+.sent .pick{margin-right:8px;vertical-align:-1px}
+.flag{border-left:3px solid var(--warn);padding-left:10px;margin-top:7px;font-size:10.5px;color:var(--amber);line-height:1.7;display:none}
+.okline{border-left:3px solid var(--ok);padding-left:10px;margin-top:7px;font-size:10.5px;color:var(--leaf);display:none}
+.out{background:#0a0f0b;border:1px dashed var(--line);border-radius:8px;padding:11px 13px;margin-top:10px;font-size:11px;white-space:pre-wrap;word-break:break-word;display:none}
+.never{border:1px dashed #3d3410;background:#141207;border-radius:8px;padding:9px 12px;font-size:10.5px;color:var(--gold);line-height:1.7;margin-top:10px}
+footer{max-width:860px;margin:22px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
+</style>
+</head>
+<body>
+<header>
+  <h1>✍ the bIQ Composer</h1>
+  <p>a paste-ready wiki proposal for IQ.wiki's Sophia gate — third person, a citation on
+  every sentence, tone-checked before a human ever opens the chat. <b style="color:var(--gold)">this page
+  composes; a person publishes. it never posts, never holds a key, never automates
+  submission.</b></p>
+</header>
+<main>
+
+<section>
+  <h2>0 · WHY A COMPOSER — the finding that governs this build</h2>
+  <div class="law"><b>IQ.wiki has no write API.</b> The official MCP server exposes five
+  read-only tools; the public API is marketed as upcoming; the only documented intake is a
+  human typing into the <b>Sophia</b> chat (the "Suggest Wiki" button). Sophia is real and
+  <i>is</i> the gate: she gathers the proposal, runs it against the editorial standards,
+  and routes it to the human editorial team — most decisions within days. Outside people
+  do not edit; they suggest. So the machine's job ends at a well-formed, well-cited,
+  neutral-toned draft — <b>the human is the gate no automation replaces</b> (the same
+  boundary the whole project rests on). Order of record:
+  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/ORDER_ZAGENT_IQWIKI_SOPHIA_2026-08-20.md">ORDER_ZAGENT_IQWIKI_SOPHIA_2026-08-20</a>.</div>
+  <div class="law" style="margin-top:8px">⚠ <b>flagged, not resolved:</b> IQ.wiki's own
+  <span class="badge">/about</span> and <span class="badge">/wiki/iqwiki</span> pages still describe the old open-editor
+  model while <span class="badge">/faq</span> and <span class="badge">/guidelines</span> describe the Sophia model — a site
+  mid-migration. which page describes the current write path is a genuine unknown; this
+  composer assumes the stricter reading (human editorial review) and assumes nothing else.</div>
+</section>
+
+<section>
+  <h2>1 · BEFORE COMPOSING — has an entry already landed?</h2>
+  <div class="law">the order's standing rule: check before composing. this seat probed
+  IQ.wiki's search server-side on 2026-08-20 — <b>both probe paths returned HTTP 404</b>
+  (the search is a JavaScript client route; a failed fetch is a failure, never "no entry
+  exists"). so the check is yours, operator: open
+  <a href="https://iq.wiki/" rel="noopener">iq.wiki</a>, search the subject, and only
+  propose what is absent — a correction to an existing entry is a different, smaller
+  submission than a new wiki.</div>
+</section>
+
+<section>
+  <h2>2 · THE SUBJECT — four things, because four clear the scope gate</h2>
+  <div class="law">IQ.wiki's first screen is scope: <i>"subject must be meaningfully
+  connected to crypto."</i> the register below is pre-cleared — <b>a nutrition surface
+  does not clear it and cannot be selected; that is the cheapest rejection, refused here
+  rather than there.</b></div>
+  <div style="margin-top:8px">
+    <select id="subject" style="width:100%"></select>
+    <div class="law" id="scope" style="margin-top:6px"></div>
+  </div>
+</section>
+
+<section>
+  <h2>3 · THE SENTENCES — a sentence without a citation does not enter the draft</h2>
+  <div class="law">every seeded sentence below is composed from the project's own
+  ratified records — which IQ.wiki's citation policy explicitly permits (<i>official docs
+  and primary sources qualify</i>; the most favourable fact in the whole research pass).
+  tick to include; add your own at the bottom — <b>but the citation slot cannot be left
+  empty, and the page enforces it</b>.</div>
+  <div id="sents"></div>
+  <div class="sent" style="border-style:dashed">
+    <div class="stx"><b>add a sentence (third person, one claim):</b></div>
+    <textarea id="c-text" placeholder="e.g. The adapter register is maintained in a public GitHub repository."></textarea>
+    <div style="margin-top:6px"><input id="c-label" placeholder="citation label — e.g. PREAPPROVED-ADAPTERS-1.md" style="width:46%">
+      <input id="c-url" placeholder="citation URL (https://…)" style="width:52%"></div>
+    <button onclick="addCustom()">attach citation &amp; add sentence</button>
+    <div class="flag" id="c-fb"></div>
+  </div>
+</section>
+
+<section>
+  <h2>4 · THE TONE CHECK — third person, no superlatives, no advertisement</h2>
+  <div class="law">the real risk is not authorship (IQ.wiki has no COI rule) — <b>it is
+  tone</b>: promotional tone is their definition of spam, judged by a human editor with no
+  obligation to explain. the checker flags first person, second person, superlatives,
+  promotional verbs, unfalsifiable phrasing and exclamation marks. <b>it shows you the
+  flagged sentence and why; it never silently rewrites.</b> a flagged sentence can still
+  go in — but only by your explicit keep-anyway tick, so the human decision stays visible
+  at the seam it belongs.</div>
+  <button class="gold" onclick="compose()">run tone check &amp; compose the draft</button>
+  <div id="toneOut"></div>
+</section>
+
+<section>
+  <h2>5 · THE DRAFT — sized for a chat window</h2>
+  <div class="out" id="draft"></div>
+  <button id="cp" style="display:none" onclick="cpDraft()">📋 copy the proposal</button>
+  <div class="never">✋ <b>the handoff is human hands.</b> open IQ.wiki, click
+  <i>Suggest Wiki</i>, and paste. this page cannot and will not submit anything itself —
+  no seat transmits to any external institution; that is founder-hands law. one open
+  question rides with you: whether the Sophia chat asks for a connected wallet is
+  unresolved (the seat's probes hit JS shells); if it asks, that fact belongs on the bus —
+  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/ORDER_ZAGENT_IQWIKI_SOPHIA_2026-08-20.md">§4 of the order</a> closes with that ask.</div>
+</section>
+
+</main>
+<footer>
+  order: ORDER_ZAGENT_IQWIKI_SOPHIA_2026-08-20 · BLAi drafts and tone-checks; the human
+  is the gate · the page never posts and never holds a key · AGPL-3.0-only ·
+  <a href="index.html">← the hive</a><br>
+  don't trust these pages either — every sentence above carries its source. Verify.
+</footer>
+
+<script src="tour.js?v=8"></script>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i);};
+var GH='https://github.com/beehive-nature/beehive-nature/blob/main/';
+var SUBJECTS=[
+ {id:'bzdid', name:'bzDiD — the dual-rail decentralized identity scheme',
+  scope:'clears the crypto scope gate on its face: a decentralized identity scheme binding protocol identifiers (did:plc, npub) to a passkey-derived root.',
+  sents:[
+   {t:'bzDiD is a decentralized identity scheme developed by the Beehive Nature Reserve project, an open-source organization that publishes its repositories on GitHub.', c:'BNR source tree', u:GH},
+   {t:'A bzDiD record binds two decentralized identifiers — an AT Protocol did:plc and a Nostr npub — to a single key root derived locally in the holder\u2019s browser through a WebAuthn passkey ceremony.', c:'surfaces/keys/addresses.html', u:GH+'surfaces/keys/addresses.html'},
+   {t:'The reference implementation derives the root via the WebAuthn PRF extension and is verified by a cross-implementation test suite whose pinned vector reproduces identically in JavaScript and Rust engines.', c:'RECEIPT_ZCODE_LANDFIRST_2026-08-19', u:GH+'docs/dispatches/RECEIPT_ZCODE_LANDFIRST_2026-08-19.md'},
+   {t:'The project publishes the implementation under the AGPL-3.0-only license.', c:'LICENSE', u:GH+'LICENSE'}
+  ]},
+ {id:'bdot', name:'the .b registry — on-chain naming with translated aliases',
+  scope:'clears the scope gate: a blockchain naming layer anchored on Vaulta, with alias resolution terminating at canonical names.',
+  sents:[
+   {t:'The .b registry is a blockchain naming layer anchored on the Vaulta network, operated under the registry account kingbeelovis by the Beehive Nature Reserve project.', c:'PREAPPROVED-ADAPTERS-1', u:GH+'docs/register/PREAPPROVED-ADAPTERS-1.md'},
+   {t:'In the registry\u2019s documented design, translated aliases are pointers: resolution always terminates at a canonical name\u2019s leaf and its Merkle proof, an alias holds no keys and no value, and a withdrawn alias stops rendering without affecting resolution.', c:'DISPATCH_BTRANSLATED_B_NAMES_2026-08-20', u:GH+'docs/dispatches/DISPATCH_BTRANSLATED_B_NAMES_2026-08-20.md'},
+   {t:'The design documentation describes language-lane registration as a bAccord with escrow staked against representation fraud, in which withdrawal is honored and history preserved.', c:'DISPATCH_BTRANSLATED_B_NAMES_2026-08-20', u:GH+'docs/dispatches/DISPATCH_BTRANSLATED_B_NAMES_2026-08-20.md'}
+  ]},
+ {id:'adapters', name:'the BNR preapproved adapter register',
+  scope:'clears the scope gate: a cross-chain adapter register spanning Vaulta, Arweave, Autonomi, Hive, exSat and Bitcoin Cash.',
+  sents:[
+   {t:'Beehive Nature Reserve maintains a public register of preapproved adapters in which external blockchains and storage networks enter by recorded founder decision rather than by default.', c:'PREAPPROVED-ADAPTERS-1', u:GH+'docs/register/PREAPPROVED-ADAPTERS-1.md'},
+   {t:'Registered adapters include Vaulta as an identity anchor, Arweave and Autonomi as pay-once immutable storage networks, Hive as a content chain, exSat as an EVM inscription lane, and Bitcoin Cash designated as a backup anchor.', c:'PREAPPROVED-ADAPTERS-1', u:GH+'docs/register/PREAPPROVED-ADAPTERS-1.md'},
+   {t:'The register records each adapter\u2019s implementation status and an exit rule under which an adapter leaves or changes role only by founder decision, recorded with a receipt.', c:'PREAPPROVED-ADAPTERS-1', u:GH+'docs/register/PREAPPROVED-ADAPTERS-1.md'}
+  ]},
+ {id:'bnrose', name:'bNRoSe — the specified ERC-20i offer mechanism',
+  scope:'clears the scope gate: an ERC-20i/ERC-6551 marketplace-gift mechanism on EVM chains. NOTE: specified, not deployed — the draft says so, because a proposal that overstates deployment dies on verification.',
+  sents:[
+   {t:'The bRoSe Offer is a specified but undeployed marketplace mechanism for gifting ERC-20i inscription collections, documented by the Beehive Nature Reserve project in 2026.', c:'DISPATCH_SOULCATS_HUNT_ROSE_OFFER_2026-08-19 §4', u:GH+'docs/dispatches/DISPATCH_SOULCATS_HUNT_ROSE_OFFER_2026-08-19.md'},
+   {t:'In the documented design, a buyer assembles ERC-20i tokens into an ERC-6551 token-bound account owned by an offer NFT, so that transferring the NFT transfers the collection by construction.', c:'DISPATCH_SOULCATS_HUNT_ROSE_OFFER_2026-08-19 §4', u:GH+'docs/dispatches/DISPATCH_SOULCATS_HUNT_ROSE_OFFER_2026-08-19.md'},
+   {t:'The offer ceremony escrows the offer NFT against a claim credential, treats the recipient\u2019s signature as acceptance, and returns unclaimed offers to the sender after a timeout.', c:'DISPATCH_SOULCATS_HUNT_ROSE_OFFER_2026-08-19 §4', u:GH+'docs/dispatches/DISPATCH_SOULCATS_HUNT_ROSE_OFFER_2026-08-19.md'},
+   {t:'The project\u2019s documentation states that no contract is deployed until an open question about ERC-20i seed mechanics — whether a locked record carries a frozen seed or recomputes from the holder — is resolved against deployed bytecode.', c:'DISPATCH_SOULCATS_HUNT_ROSE_OFFER_2026-08-19 §4 · SPEC-ERC20I-MECHANICS-1 §10', u:GH+'docs/dispatches/DISPATCH_SOULCATS_HUNT_ROSE_OFFER_2026-08-19.md'}
+  ]}
+];
+var TONE=[
+ {name:'first person', re:/\b(we|our|ours|us|i|my|mine)\b/i},
+ {name:'second person', re:/\b(you|your|yours)\b/i},
+ {name:'superlative / promotional adjective', re:/\b(best|greatest|fastest|most advanced|leading|revolutionary|world-class|ultimate|unmatched|seamless|seamlessly|cutting-edge|state-of-the-art|next-generation|game-changing|powerful|perfect)\b/i},
+ {name:'promotional verb', re:/\b(revolutioni[sz]e[sd]?|supercharge[sd]?|unlock[s]?|empower[sd]?|disrupt[sd]?|redefin\w*)\b/i},
+ {name:'unfalsifiable phrasing', re:/\b(obviously|clearly|undoubtedly|everyone knows|without question|simply the)\b/i},
+ {name:'exclamation mark', re:/!/}
+];
+var cur=SUBJECTS[0];
+window.addCustom=function(){
+  var t=$('c-text').value.trim(), l=$('c-label').value.trim(), u=$('c-url').value.trim();
+  var fb=$('c-fb'); fb.style.display='block'; fb.style.borderColor='var(--warn)';
+  if(!t||!l||!u){ fb.textContent='✗ refused: a sentence does not enter the draft without all three — the claim, a citation label, and a citation URL. this is the receipt rule expressed as an editor.'; return; }
+  if(!/^https?:\/\//.test(u)){ fb.textContent='✗ refused: the citation must be a URL a reviewer can open. (GitHub links to the project\u2019s public records are the house pattern.)'; return; }
+  cur.sents.push({t:t,c:l,u:u,custom:true});
+  fb.style.borderColor='var(--ok)'; fb.style.color='var(--leaf)';
+  fb.textContent='✓ added with its citation — it now sits in the sentence register below, subject to the same tone check as everything else.';
+  $('c-text').value=''; $('c-label').value=''; $('c-url').value='';
+  renderSents();
+};
+function renderSents(){
+  var host=$('sents'); host.innerHTML='';
+  cur.sents.forEach(function(s,i){
+    var d=document.createElement('div'); d.className='sent'+(s.on?' on':'');
+    var flags=s.checked?scan(s.t):[];
+    var fh='';
+    if(s.checked&&flags.length){
+      fh='<div class="flag" style="display:block">⚑ '+flags.join(' · ')+' — <label style="cursor:pointer"><input type="checkbox" data-keep="'+i+'"'+(s.keep?' checked':'')+'> keep anyway (your call, on the record)</label></div>';
+    } else if(s.checked){
+      fh='<div class="okline" style="display:block">✓ tone-clean</div>';
+    }
+    d.innerHTML='<label class="stx"><input type="checkbox" class="pick" data-i="'+i+'"'+(s.checked?' checked':'')+'> '+esc(s.t)+'</label>'
+      +'<div class="scit">[source] <a href="'+s.u+'" rel="noopener">'+esc(s.c)+'</a>'+(s.custom?' · contributor-added':'')+'</div>'+fh;
+    host.appendChild(d);
+  });
+  Array.prototype.forEach.call(host.getElementsByClassName('pick'),function(cb){
+    cb.addEventListener('change',function(){
+      var i=+this.getAttribute('data-i'); cur.sents[i].checked=this.checked; cur.sents[i].keep=false; renderSents();
+    });
+  });
+  Array.prototype.forEach.call(host.querySelectorAll('[data-keep]'),function(cb){
+    cb.addEventListener('change',function(){
+      cur.sents[+this.getAttribute('data-keep')].keep=this.checked;
+    });
+  });
+}
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+function scan(t){ return TONE.filter(function(r){ return r.re.test(t); }).map(function(r){ return r.name; }); }
+window.compose=function(){
+  var sel=cur.sents.filter(function(s){ return s.checked; });
+  var toneHost=$('toneOut'); toneHost.innerHTML='';
+  var blockers=0;
+  sel.forEach(function(s){
+    var flags=scan(s.t);
+    if(flags.length&&!s.keep) blockers++;
+  });
+  if(!sel.length){ toneHost.innerHTML='<div class="flag" style="display:block">✗ nothing selected — a draft of zero sentences is not a proposal.</div>'; $('draft').style.display='none'; $('cp').style.display='none'; return; }
+  if(blockers){
+    toneHost.innerHTML='<div class="flag" style="display:block">✗ '+blockers+' flagged sentence(s) remain undecided — tick keep-anyway on each (or untick the sentence). the page will not emit a draft over an unacknowledged flag; that friction is the human gate, visible.</div>';
+    $('draft').style.display='none'; $('cp').style.display='none'; return;
+  }
+  var cites=[], body='';
+  sel.forEach(function(s){
+    var idx=cites.findIndex(function(c){ return c.u===s.u&&c.c===s.c; });
+    if(idx<0){ cites.push({c:s.c,u:s.u}); idx=cites.length-1; }
+    body+=(body?' ':'')+'['+(idx+1)+'] '+s.t;
+  });
+  var title=cur.name.split(' — ')[0];
+  var draft='Proposed wiki: '+title+'\n\n'+body+'\n\nCitations:\n'
+    +cites.map(function(c,i){ return '['+(i+1)+'] '+c.c+' — '+c.u; }).join('\n')
+    +'\n\n(Draft composed with the bIQ Composer — third person, every sentence cited; submitted by a human via the Sophia gate.)';
+  $('draft').style.display='block'; $('draft').textContent=draft;
+  $('cp').style.display='inline-block';
+  toneHost.innerHTML='<div class="okline" style="display:block">✓ tone check passed — '+sel.length+' sentence(s), '+cites.length+' citation(s), every sentence carrying its source.</div>';
+};
+window.cpDraft=function(){
+  navigator.clipboard.writeText($('draft').textContent).then(function(){
+    var b=$('cp'); b.textContent='✓ copied — human hands from here'; setTimeout(function(){ b.textContent='📋 copy the proposal'; },2000);
+  });
+};
+(function(){
+  var sel=$('subject');
+  SUBJECTS.forEach(function(s,i){ var o=document.createElement('option'); o.value=s.id; o.textContent=s.name; sel.appendChild(o); });
+  sel.addEventListener('change',function(){
+    cur=SUBJECTS[sel.selectedIndex];
+    $('scope').innerHTML='<b>scope check:</b> '+cur.scope;
+    renderSents(); $('draft').style.display='none'; $('cp').style.display='none'; $('toneOut').innerHTML='';
+  });
+  $('scope').innerHTML='<b>scope check:</b> '+cur.scope;
+  SUBJECTS[0].sents.forEach(function(s){ s.checked=true; }); // start with the whole seeded register visible
+  renderSents();
+})();
+})();
+</script>
+</body>
+</html>

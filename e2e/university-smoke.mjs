@@ -129,6 +129,29 @@ ok('quest year renders in kg', (await page.locator('#q-out').innerHTML()).includ
 
 ok('no errors across the whole walk', errors.length === 0);
 
+// bIQ composer — the Sophia gate lane
+await page.goto(`${BASE}/surfaces/biq.html`);
+await page.waitForTimeout(300);
+ok('biq: four scope-cleared subjects', (await page.locator('#subject option').count()) === 4);
+ok('biq: seeded sentences render cited + preselected', (await page.locator('#sents .sent').count()) >= 3 && (await page.locator('#sents .sent .pick:checked').count()) >= 3);
+await page.locator('button.gold').click();
+const biqDraft = await page.locator('#draft').textContent();
+ok('biq: clean seeded draft composes with citations', biqDraft.includes('[1]') && biqDraft.includes('Citations:'));
+await page.fill('#c-text', 'The adapter register is maintained in a public repository.');
+await page.locator('text=attach citation & add sentence').click();
+ok('biq: uncited sentence refused by the editor', (await page.locator('#c-fb').textContent()).includes('refused'));
+await page.fill('#c-text', 'We are the best and most revolutionary project in crypto!');
+await page.fill('#c-label', 'adversarial test');
+await page.fill('#c-url', 'https://example.com/adversarial');
+await page.locator('text=attach citation & add sentence').click();
+await page.locator('#sents .sent').last().locator('.pick').check();
+await page.locator('button.gold').click();
+ok('biq: promotional sentence blocks the draft', (await page.locator('#toneOut').textContent()).includes('unacknowledged flag'));
+await page.locator('#sents [data-keep]').last().check();
+await page.locator('button.gold').click();
+ok('biq: keep-anyway acknowledges and emits', (await page.locator('#draft').textContent()).includes('best and most revolutionary'));
+ok('biq: page states it never posts', (await page.locator('body').textContent()).includes('never posts'));
+
 // hub + review registration
 await page.goto(`${BASE}/surfaces/bfood.html`);
 await page.waitForTimeout(400);
@@ -141,11 +164,11 @@ ok('bfood rebuilt: n/m never zero + hardwired hemp + fat disaggregated + quest b
 
 await page.goto(`${BASE}/surfaces/index.html`);
 ok('hub links the university', (await page.locator('a[href="university/index.html"]').count()) === 1);
-ok('hub counts 32', (await page.locator('footer').textContent()).includes('32 surfaces'));
+ok('hub counts 33', (await page.locator('footer').textContent()).includes('33 surfaces'));
 await page.goto(`${BASE}/surfaces/review.html`);
 const optCount = await page.locator('#surf option').count();
 const hasUni = (await page.locator('#surf option[value="university/index.html"]').count()) === 1;
-ok('review deck lists the university surface', optCount === 28 && hasUni);
+ok('review deck lists the university surface', optCount === 29 && hasUni);
 
 console.log(`\n${pass} passed, ${fail} failed` + (errors.length ? '\nerrors:\n' + errors.join('\n') : ''));
 await browser.close(); server.close();
