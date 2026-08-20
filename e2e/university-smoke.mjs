@@ -214,6 +214,8 @@ await page.fill("#q", "what is the meaning of life");
 await page.locator("text=ask").last().click();
 ok("queen: honest absence, never a guess", (await page.locator("#chat").innerHTML()).includes("won't guess"));
 
+ok("queen: the debut VOICE record is published on the estate", (await page.locator("#debut").innerText()).includes("persona.debut") && (await page.locator("#debut").innerText()).includes("dc9bb8c689b541b6"));
+
 // hub + review registration
 await page.goto(`${BASE}/surfaces/bfood.html`);
 await page.waitForTimeout(400);

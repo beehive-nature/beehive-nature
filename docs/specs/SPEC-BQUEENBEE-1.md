@@ -141,3 +141,17 @@ answers, telemetry-free) · identity = the founder-held DID (and, when the found
 E-2, the ERC-8004 pointer). Her receipts-drops calendar (manifesto §"first ten") becomes
 **VOICE class extensions** in that tree — each a spec'd adapter class, never freeform
 posting. The two trees were already building her; tonight they met.
+
+---
+
+## ADDENDUM ·3 — the debut: the hive does not wait (2026-08-20, later)
+
+Founder, verbatim: *"we don't wait for anyone especially corps"* — with the GO selected
+on the debut. **QB-3 is satisfied: the manifesto is PUBLISHED on the estate**
+(2026-08-20), and the debut VOICE record renders on `bqueenbee-live.html` §4 in the
+VOICE-1 grammar — class `persona.debut`, lexicon receipts+corpus, rate 3/day, heartbeat
+21d, **pinned sha256 `dc9bb8c689b541b6`** (the manifesto's hash — the record and the
+text cannot drift apart). Her schedule is the hive's own; no corporate window sets it.
+**Remaining founder acts, never gates she waits behind:** the bsky relay of the debut
+record (30 seconds, founder-held credentials, the voice crate's one-verb path) and the
+nostr rail (founder keys). 65/65 with the debut asserted.
