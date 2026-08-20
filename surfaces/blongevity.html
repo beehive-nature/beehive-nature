@@ -72,6 +72,14 @@ body.reversed .stage .hyp{display:inline}
 .cgroup .rows{font-size:10.5px;color:var(--dim);line-height:1.9}
 .cgroup .rows b{color:var(--ink);font-weight:400}
 .cgroup.ess .rows b{color:var(--ess)}
+/* ── the mirror ── */
+.mtile{background:#0a0f0b;border:1px solid var(--line);border-radius:10px;padding:11px 13px;position:relative;overflow:hidden}
+.mtile::after{content:'';position:absolute;inset:auto 0 0 0;height:2px;background:linear-gradient(90deg,var(--n6),var(--n3));opacity:.7}
+.mtile .mv{font-size:clamp(22px,5vw,30px);line-height:1.15;color:var(--ink)}
+.mtile .mv small{font-size:12px;color:var(--dim)}
+.mtile .ml{font-size:9.5px;color:var(--dim);margin-top:3px;line-height:1.65}
+.mtile .ml b{color:var(--gold);font-weight:400}
+.mtile.n3t .mv{color:var(--n3)} .mtile.n6t .mv{color:var(--n6)}
 /* ── DIAAS, demoted to the attention hook ── */
 #diaas{display:flex;flex-wrap:wrap;gap:5px 10px;margin-top:8px}
 .dchip{font-size:9.5px;color:var(--dim);border:1px solid var(--line);border-radius:5px;padding:2px 7px}
@@ -187,6 +195,26 @@ footer{max-width:920px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
 </section>
 
 <section>
+  <h2>1½ · THE MIRROR — your line in the numbers</h2>
+  <div class="law"><b>education becomes self-recognition when the numbers are yours.</b>
+  enter your weight — every figure below recomputes to your body, from the same receipted
+  records the Hexagon uses (USDA FDC 170148 for composition, NASEM DRIs for requirements,
+  the founder's hardwired 1.25 g/kg house serving). no account, no server, this browser only.
+  <b style="color:var(--gold)">the permanent benefit is structural:</b> essential means every day,
+  for life — no body outgrows its bricks. the long-horizon part is the hypothesis you can
+  <a href="bfood.html#quests">join as a quest</a>, graded honestly.</div>
+  <div style="margin-top:8px">
+    <label style="font-size:10px;color:var(--dim)">your weight (kg)
+      <input id="m-wt" type="number" min="30" max="250" value="80" style="background:#0a0f0b;color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:5px 9px;font:12px 'IBM Plex Mono',monospace;width:84px"></label>
+    <label style="font-size:10px;color:var(--dim);margin-left:12px">sex (sets your AI denominators)
+      <select id="m-sex" style="background:#0a0f0b;color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:5px 9px;font:12px 'IBM Plex Mono',monospace">
+        <option value="m">male</option><option value="f">female</option></select></label>
+  </div>
+  <div id="mirror" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:9px;margin-top:10px"></div>
+  <div class="law" id="m-line" style="margin-top:9px"></div>
+</section>
+
+<section>
   <h2>2 · ESSENTIAL vs NOT — the marked difference</h2>
   <div class="law"><b>the receipted line is the requirement row:</b> essential nutrients have one
   (RDA/AI); non-essential do not, because the body synthesizes them. the glow marks what must arrive
@@ -245,6 +273,28 @@ footer{max-width:920px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
 <script src="tour.js?v=8"></script>
 <script>
 (function(){
+/* ── the mirror: the reader's own line, from the same receipted records as the Hexagon ──
+   FDC 170148 per 100 g: LA 27.358 · ALA 8.684 · protein 31.56 · AI (NASEM): ALA 1.6 m / 1.1 f,
+   LA 17 m / 12 f · DGA 2025-2030 protein 1.2–1.6 g/kg · house serving 1.25 g/kg (SERVING-BASIS-1) */
+var LA100=27.358, ALA100=8.684, P100=31.56;
+function mirror(){
+  var w=Math.max(1,parseFloat(document.getElementById('m-wt').value)||80);
+  var m=document.getElementById('m-sex').value==='m';
+  var serve=1.25*w, la=LA100*serve/100, ala=ALA100*serve/100, prot=P100*serve/100;
+  var aiAla=m?1.6:1.1, aiLa=m?17:12;
+  var xAla=(ala/aiAla), xLa=(la/aiLa);
+  var pl=Math.round(100*prot/(1.6*w)), ph=Math.round(100*prot/(1.2*w));
+  function f2(x){return Math.round(x*10)/10;}
+  document.getElementById('mirror').innerHTML=
+   '<div class="mtile"><div class="mv">'+Math.round(serve)+'<small> g</small></div><div class="ml">your house serving of hemp hearts — <b>1.25 g/kg × your weight</b>, founder-set</div></div>'
+  +'<div class="mtile n3t"><div class="mv">'+f2(xAla)+'×<small>/day</small></div><div class="ml">your <b>n-3 brick (ALA)</b> from one serving — '+f2(ala)+' g against your daily requirement of '+aiAla+' g</div></div>'
+  +'<div class="mtile n6t"><div class="mv">'+f2(xLa)+'×<small>/day</small></div><div class="ml">your <b>n-6 brick (LA)</b> — '+f2(la)+' g against your daily requirement of '+aiLa+' g</div></div>'
+  +'<div class="mtile"><div class="mv">'+pl+'–'+ph+'<small>%</small></div><div class="ml">of your <b>DGA protein goal</b> riding along free in the same serving</div></div>';
+  document.getElementById('m-line').innerHTML='<b style="color:var(--gold)">read your line:</b> at '+w+' kg, one serving of one seed carries both bricks your body cannot make — the n-3 brick alone at '+f2(xAla)+'× your daily need — plus '+Math.round(prot)+' g protein. <b>the bricks are the permanent benefit: essential means every day, for life.</b> what they build downstream (stage 3 onward) is the receipted chemistry; what it could change over years is the graded hypothesis — <a href="bfood.html#quests">the quest is how you join it</a>.';
+}
+document.getElementById('m-wt').addEventListener('input',mirror);
+document.getElementById('m-sex').addEventListener('change',mirror);
+mirror();
 document.getElementById('revBtn').onclick=function(){
   document.body.classList.toggle('reversed');
   this.textContent=document.body.classList.contains('reversed')

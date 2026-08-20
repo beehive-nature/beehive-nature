@@ -172,9 +172,18 @@ ok('symposium: states legend + scope fence + symbiosis + scale note',
   && symTxt.includes('SYMBIOSIS') && symTxt.includes('THE SCALE NOTE'));
 ok('symposium: fetch honesty declared', symTxt.includes('fetch honesty'));
 
-// bLongevity Map — the animated upstream river
+// bLongevity Map — the mirror first: the reader sees themselves in the numbers
 await page.goto(`${BASE}/surfaces/blongevity.html`);
-await page.waitForTimeout(400);
+await page.waitForTimeout(500);
+const mir = await page.locator('#mirror').innerHTML();
+ok('mirror: personal tiles compute at 80 kg (5.4x n-3 brick, 1.6x n-6)', mir.includes('5.4') && mir.includes('100') && mir.includes('1.6'));
+await page.fill('#m-wt', '60');
+ok('mirror: recomputes to the reader (60 kg)', (await page.locator('#mirror').innerHTML()).includes('4.1'));
+const mline = await page.locator('#m-line').innerHTML();
+ok('mirror: the permanent line + the quest join present', mline.includes('every day, for life') && mline.includes('quest'));
+
+// bLongevity Map — the animated upstream river
+await page.waitForTimeout(200);
 ok('longevity: fat assembly line renders six stages', (await page.locator('#line .stage').count()) === 6);
 ok('longevity: DIAAS demoted to the attention hook, 17 chips', (await page.locator('#diaas .dchip').count()) === 17);
 const longHtml = await page.locator('body').innerHTML();
