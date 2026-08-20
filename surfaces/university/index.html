@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="color-scheme" content="dark">
+<title>Beehive University — the curriculum is the receipts</title>
+<style>
+:root{--bg:#0d1410;--ink:#e2efdb;--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--dim:#8a9a8a;--line:#243026;--leaf:#7ddf8f;--amber:#ffb347;
+/* university set = the six-checks-validated categorical set for surface #0d1410,
+   REUSED in its validated order (works, idea, bug, gap) — not reordered, not extended.
+   Receipt: lightness band 0.48–0.67, CVD worst adjacent ΔE 12.5 (tritan, idea⊗bug);
+   17.1 is the worst PROTAN pair (green⊗orange — why they are never adjacent here);
+   normal-vision 22.7, contrast ≥3:1 (validator receipt in review.html; corrected
+   in place by the design seat via 3a0be7b / 8b64cc2). Identity never rides color
+   alone: glyph + label always. */
+--c-works:#3f9c55;--c-idea:#a476ec;--c-bug:#c07f1c;--c-gap:#0092a6}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:36px 16px 90px}
+header{text-align:center;margin-bottom:10px}
+h1{font-size:clamp(17px,4vw,24px);color:var(--gold);font-weight:400;letter-spacing:.05em}
+header p{color:var(--dim);font-size:11px;margin-top:6px;max-width:720px;margin-left:auto;margin-right:auto}
+main{max-width:860px;margin:0 auto}
+section{background:#111a14;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:16px}
+section h2{font-size:12px;color:var(--violet);font-weight:400;letter-spacing:.08em;margin-bottom:8px}
+.law{color:var(--dim);font-size:10px;line-height:1.7}
+.charter{border:1px dashed #3d3410;background:#141207;border-radius:8px;padding:9px 12px;font-size:10.5px;color:var(--gold);line-height:1.7;margin:10px 0}
+a{color:var(--cyan)}
+.badge{display:inline-block;font-size:9px;letter-spacing:.1em;border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--gold)}
+.machine{color:var(--dim);font-size:9px;border:1px dashed var(--line);border-radius:4px;padding:0 5px;margin-left:6px}
+.tgl{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.tgl button{background:#0a0f0b;border:1px solid var(--line);border-radius:7px;color:var(--dim);padding:5px 12px;cursor:pointer;font:10.5px 'IBM Plex Mono',monospace}
+.tgl button[aria-pressed="true"]{color:var(--gold);border-color:#3d3410;background:#141207}
+.prose{font-size:12px;line-height:1.8;color:var(--ink)}
+.acts{margin-top:10px}
+.ex{background:#0a0f0b;border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:10px}
+.ex h3{font-size:11.5px;color:var(--ink);font-weight:400}
+.ex .q{font-size:11px;color:var(--ink);line-height:1.8;margin-top:6px}
+.ex label{display:block;font-size:11px;color:var(--dim);margin-top:5px;cursor:pointer;line-height:1.7}
+.ex input[type=checkbox],.ex input[type=radio]{margin-right:7px;vertical-align:-1px}
+.ex input[type=number]{background:#0d1410;color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:4px 7px;font:12px 'IBM Plex Mono',monospace;width:90px}
+.ex button{background:#26123a;color:#c9a0ff;border:1px solid var(--line);border-radius:8px;padding:7px 14px;cursor:pointer;font:11.5px 'IBM Plex Mono',monospace;margin-top:9px;margin-right:7px}
+.ex button:hover{background:#c9a0ff;color:#000}
+.ex button.gold{background:#2a230a;color:var(--gold)} .ex button.gold:hover{background:var(--gold);color:#000}
+.fb{font-size:11px;margin-top:8px;line-height:1.7;display:none}
+.fb.ok{color:var(--leaf)} .fb.bad{color:var(--amber)}
+.rline{background:#0d1410;border:1px dashed var(--line);border-radius:7px;padding:9px 11px;margin-top:9px;font-size:10.5px;white-space:pre-wrap;word-break:break-word;display:none}
+table{width:100%;border-collapse:collapse;margin-top:8px;font-size:10.5px}
+td,th{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;color:var(--dim)}
+th{color:var(--violet);font-weight:400} td.n{color:var(--ink)}
+.swatch{display:inline-flex;align-items:center;gap:6px;background:#0a0f0b;border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin:3px 4px 3px 0;font-size:11px}
+.swatch i{display:inline-block;width:11px;height:11px;border-radius:2px}
+.swatch button{background:none;border:1px solid var(--line);border-radius:6px;color:var(--dim);cursor:pointer;font:10px 'IBM Plex Mono',monospace;padding:2px 7px;margin-left:4px}
+.dE{font-size:10.5px;color:var(--dim);margin-top:4px}
+.dE b{color:var(--ink);font-weight:400}
+#transcript .rline{display:block}
+.gates td{vertical-align:top}
+footer{max-width:860px;margin:22px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
+</style>
+</head>
+<body>
+<header>
+  <h1>🎓 Beehive University</h1>
+  <p>the curriculum is the receipts — every lesson this university teaches already exists in the
+  tree as a verified record, and every lesson ends in a verifiable act: a receipt <i>you</i> produce.
+  a graduate holds signed receipts, not a certificate.</p>
+</header>
+<main>
+
+<section>
+  <h2>THE CHARTER — what this is, and what it is not</h2>
+  <div class="charter">founder, 2026-08-20, on the commission: <i>"yes to the fourth seat, and the
+  brief opens by naming what it is not: a content silo. The curriculum is the receipts. Every lesson
+  ends in a verifiable act — you learn to read a COA by finding the panel undercount in our own
+  material; you learn evidence grading by watching the funding flag fire on our own commissioned
+  study. A graduate holds signed receipts, not a certificate."</i></div>
+  <div class="law">this surface is a <b>view</b>, not a store: the fifth dock over what has already
+  been proven (after BlanguageDOCK over strings, the COA shape over foods, the adapter register over
+  chains, the biomass river over products). no lesson exists here whose claim is not receipted
+  in-tree — every section links its receipt, and a claim without one does not ship.
+  commission: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/COMMISSION_BEEHIVE_UNIVERSITY_2026-08-20.md">COMMISSION_BEEHIVE_UNIVERSITY_2026-08-20</a>.
+  presentation law holds: this page leads with nutrition and method, never with cannabis framing
+  (<a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/DISPATCH_SERVING_BASIS_1.md">SERVING-BASIS-1 §2</a>);
+  composition and definitions only — what a substance <i>does to a body</i> stays off-repo behind graded evidence.</div>
+</section>
+
+<section>
+  <h2>THE THREE REGISTERS — one set of facts, three densities</h2>
+  <div class="tgl" role="group" aria-label="register">
+    <button id="rg-bee" aria-pressed="true" onclick="setReg('bee')">🐝 bee — guided, minimal, generous</button>
+    <button id="rg-raver" aria-pressed="false" onclick="setReg('raver')">🎛 raver — mid-density, vivid</button>
+    <button id="rg-cyper" aria-pressed="false" onclick="setReg('cypherpunk')">⚗ cypherpunk — dense, receipts-forward</button>
+  </div>
+  <div class="law">a register is a reading level, not a tier — nobody proves anything to get the bee
+  version, and cypherpunk is not a reward. all three render from the same constants; numbers cannot
+  diverge. the founder has ruled b-gating for the upper two registers <i>in late beta</i>; until
+  gate U-1's reading lands, nothing here is gated — holding is not spending.</div>
+  <div class="law" style="margin-top:8px">▾ corpus law, live: the status labels below are corpus
+  records — pick your father tongue and they follow (machine-drafted ⚙ until a community attests;
+  the preference is local-first and shared with <a href="../btranslated.html">bTranslated</a>).</div>
+  <div style="margin-top:6px">
+    <label style="font-size:10px;color:var(--dim)">father tongue
+      <select id="father" style="background:#0a0f0b;color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:5px 9px;font:11px 'IBM Plex Mono',monospace">
+        <option value="en">English (en)</option><option value="es">Español (es)</option>
+        <option value="hi">हिन्दी (hi)</option><option value="cmn">中文 · 普通话 (cmn)</option>
+        <option value="ru">Русский (ru)</option><option value="ar">العربية (ar)</option>
+      </select></label>
+    <div id="corpusChips" style="margin-top:8px"></div>
+  </div>
+</section>
+
+<div id="courses"></div>
+
+<section>
+  <h2>GRADUATION — the credential nobody can print</h2>
+  <div class="prose" id="gradProse"></div>
+  <div class="ex">
+    <h3>🎯 THE FIFTH ACT — publish a review receipt on the Royal Review deck</h3>
+    <div class="q">this is bee-level graduation: you have read the page, run the acts, and now you
+    contribute a verifiable artefact. the button composes the review line below — take it to
+    <a href="../review.html">the Royal Review</a>, bind a passkey, sign, and publish by whichever rail
+    you already hold. this page holds no keys, posts nothing, and mints nothing: the signed receipt
+    <b>is</b> the credential.</div>
+    <button class="gold" onclick="gradLine()">compose graduation review line</button>
+    <button id="gcp" style="display:none">📋 copy</button>
+    <div class="rline" id="gradOut"></div>
+  </div>
+  <div class="law" style="margin-top:8px">gate U-3, ruled by the founder's own words this session:
+    a graduate holds signed receipts, not a certificate — nothing mints, because minting invites
+    credential inflation and the receipt is already unforgeable. recorded in
+    <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/RECEIPT_BEEHIVE_UNIVERSITY_LANDING_2026-08-20.md">the landing receipt</a>.</div>
+</section>
+
+<section id="transcript">
+  <h2>THE TRANSCRIPT — receipts you produced this session</h2>
+  <div class="law">five acts, five lines, one transcript — in the same <b>[bX review]</b> grammar
+  the Royal Guard already verifies. compose them above; they collect here. signing happens at the
+  deck, not here. (the transcript lives in this browser only — localStorage, never a server.)</div>
+  <div id="tlines"></div>
+  <div class="law" style="margin-top:8px" id="tstate"></div>
+</section>
+
+<section>
+  <h2>GATES — open questions are exhibits, not embarrassments</h2>
+  <table class="gates">
+    <tr><th></th><th>question</th><th>state</th></tr>
+    <tr><td class="n">U-1</td><td>b-gating the upper two registers vs CD-29's "b is never a redemption
+      ticket" — holding is not spending, so it likely does not collide, but a seat may not decide it</td>
+      <td class="n" id="g-u1">OPEN — reading owed to the founder</td></tr>
+    <tr><td class="n">U-2</td><td>the seat's name (this page carries the founder's own name for the
+      section, "Beehive University"; the seat label is his to give) · wing vs own repo — applied as a
+      wing of <a href="../index.html">the surfaces</a> per the commission's recommendation, because a
+      separate repo would tempt this into the content silo it exists not to be</td>
+      <td class="n" id="g-u2">OPEN — name owed to the founder</td></tr>
+    <tr><td class="n">U-3</td><td>does a completed course mint anything on-chain?</td>
+      <td class="n" id="g-u3">RULED — the receipt is the whole credential (founder, 2026-08-20)</td></tr>
+  </table>
+  <div class="law" style="margin-top:8px">collisions are flagged, never resolved silently — that is
+  house law, and this table is it working.</div>
+</section>
+
+</main>
+<footer>
+  doctrine: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/COMMISSION_BEEHIVE_UNIVERSITY_2026-08-20.md">COMMISSION_BEEHIVE_UNIVERSITY_2026-08-20</a> ·
+  landing receipt: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/RECEIPT_BEEHIVE_UNIVERSITY_LANDING_2026-08-20.md">RECEIPT_BEEHIVE_UNIVERSITY_LANDING_2026-08-20</a> ·
+  inherited: <a href="../hardware/build.html">the producer ladder</a> · <a href="../hardware/lab.html">the lab charter</a> ·
+  <a href="../blight/museum.html">the museum's show-the-errors doctrine</a> · <a href="../bigen.html">BiGen's methodology</a><br>
+  built by zCode (GLM 5.3), the university seat by founder direction · Seat 3 verifies on landing · AGPL-3.0-only ·
+  <a href="../index.html">← the hive</a><br>
+  don't trust these pages either — every claim links its receipt. Verify.
+</footer>
+
+<script src="../tour.js?v=8"></script>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i);};
+
+/* ===== THE CONSTANTS — single source; every prose register interpolates these ===== */
+var K={
+  f877:'0.877', fsanzMed:2.4, fsanzMax:5.7, claimMg:10000, ratio:4167,
+  vitD_EAR:96, vitD_risk:5, proteinLo:1.2, proteinHi:1.6, proteinEAR:0.66, belowEAR:9,
+  iron:6, dE_norm:22.7, dE_tritan:12.5, dE_protan:17.1
+};
+
+/* ===== corpus law: father-tongue labels (machine drafts ⚙, same preference key as bTranslated) ===== */
+var STR={
+  open:    {en:'the act awaits', es:'el acto espera', hi:'कार्य प्रतीक्षारत है', cmn:'行动待完成', ru:'акт ожидает', ar:'الفعل ينتظر'},
+  verified:{en:'verified', es:'verificado', hi:'सत्यापित', cmn:'已验证', ru:'проверено', ar:'موثّق'},
+  receipt: {en:'receipt', es:'recibo', hi:'रसीद', cmn:'回执', ru:'квитанция', ar:'إيصال'},
+  course:  {en:'course', es:'curso', hi:'पाठ्यक्रम', cmn:'课程', ru:'курс', ar:'دورة'}
+};
+function father(){ try{ return (JSON.parse(localStorage.getItem('btranslated_pref')||'{}').father)||'en'; }catch(e){ return 'en'; } }
+function T(key){ var f=father(), s=STR[key]||{}; return {txt:s[f]||s.en, machine:f!=='en'}; }
+function chip(key,glyph,color){
+  var r=T(key);
+  return '<span class="swatch"><i style="background:'+color+'"></i>'+glyph+' '+r.txt+
+    (r.machine?'<span class="machine">⚙ machine draft</span>':'')+'</span>';
+}
+function renderCorpus(){
+  $('father').value=father();
+  $('corpusChips').innerHTML=
+    chip('open','○','var(--c-gap)')+' '+chip('verified','✓','var(--c-works)');
+}
+$('father').addEventListener('change',function(){
+  var p; try{ p=JSON.parse(localStorage.getItem('btranslated_pref')||'{}'); }catch(e){ p={}; }
+  p.father=$('father').value;
+  try{ localStorage.setItem('btranslated_pref',JSON.stringify(p)); }catch(e){}
+  renderCorpus(); renderReg(); renderGrad();
+});
+
+/* ===== the five courses: prose per register, acts as exercises; numbers from K only ===== */
+var COURSES=[
+{ id:'c1', glyph:'🔬', name:'how to read a lab report',
+  src:'RECEIPT_HEMP_HEART_CANNABINOID_2026-08-20 · SPEC_hulled_hemp_hearts_COA_tri_jurisdictional (§2.9, §3)',
+  srcl:'https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/RECEIPT_HEMP_HEART_CANNABINOID_2026-08-20.md',
+  prose:{
+   bee:'A lab report is a photograph of one sample, taken by one method, at one sensitivity. Three questions get you most of the way: <b>what was measured</b> (the panel — the list of substances the lab actually looked for), <b>how low can it see</b> (the LOQ — below that line, the honest word is "&lt;LOQ", never "0"), and <b>what material was tested</b> (a hemp seed with its shell on and the same seed hulled are different materials — the cannabinoid sits on the outside of the shell, so dehulling removes most of it). Our own spec puts it as a law: no result may be reported as 0 where the true statement is "below the limit of quantitation", and a blank cell is a rejection.',
+   raver:'Three moves and a trapdoor. <b>Panel</b>: a certificate reports what its panel measured — common potency panels carry a dozen-odd analytes, and "&lt;LOQ" on everything else. <b>LOQ</b>: certificates on this material are commonly issued at LOQ 100 µg/g against a literature mean around '+K.fsanzMed/10+' µg/g — our spec calls that blind by ~345× and rejects it. <b>Material</b>: hull-on vs dehulled changes everything — ~90% of seed THC sits on the testa and one wash removes it; the kernel measures &lt;0.5 µg/g. And the trapdoor: "total THC" is not the total of anything — it is exactly Δ9-THC + '+K.f877+'×THCA, a sum of <b>two</b> molecules defined by the USDA handbook. Acid-to-neutral conversion at the '+K.f877+' factor is arithmetic, not measurement.',
+   cypherpunk:'Read the method block before the number block. Panel ≠ family: a "total THC" row is Δ9 + '+K.f877+'·THCA (USDA handbook; H.R. 5371) — 2 analytes of a family far larger than any panel; every "&lt;LOQ" is a censored observation, not a zero. LOQ is the censoring floor: at the common LOQ 0.010% (100 µg/g) against a hulled-seed literature mean ~0.29 µg/g, the assay is blind ~345× and carries no information — SPEC §2.9 mandates LOQ ≤ 0.1 µg/g per analyte, method blanks between every sample, single-use vials (THC carries over), no decarboxylation (volatilisation error — compute the total instead). Material identity is load-bearing: FSANZ Stage 2 (n=55, six ISO/IEC-17025 labs, LC-MS/MS) is the only large dataset where every seed was visually confirmed hulled: median family sum ≈'+K.fsanzMed+' mg/kg, max '+K.fsanzMax+' mg/kg. Kernels physically separated: &lt;0.5 µg/g Δ9 (Ross 2000); THCA directly quantified 0.01–1.18 µg/g (Kacargil 2026). Receipts: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/RECEIPT_HEMP_HEART_CANNABINOID_2026-08-20.md">cannabinoid receipt</a> · <a href="https://github.com/beehive-nature/beehive-nature/blob/main/SPEC_hulled_hemp_hearts_COA_tri_jurisdictional.md">the tri-jurisdictional spec</a>.'
+  },
+  act:{
+    h:'🔎 ACT — find the panel undercount in our own material',
+    q:'A certificate prints <b>"total THC: 0.9 mg/kg"</b>. The panel behind that word is the USDA definition. Tick every molecule whose amount is actually inside that number:',
+    kind:'check',
+    opts:['Δ9-THC ✓','THCA ✓','CBD','CBDA','CBN','CBG','CBC','THCV'],
+    ans:[1,1,0,0,0,0,0,0],
+    follow:'then the arithmetic: the figure once claimed to the founder — 1–2 g per 100 g — against the measured median. claim (mg/kg):',
+    followInput:K.claimMg,
+    followCompute:function(v){ return 'the claim equals '+v+' mg/kg against the FSANZ confirmed-hulled median '+K.fsanzMed+' mg/kg — a factor of ≈ '+Math.round(v/K.fsanzMed)+'×. both numbers are now yours: the panel said two molecules, and the magnitude said the claim belongs to plant extract, not the dehulled kernel (the steelman, stated as prominently as the refutation).'; },
+    rline:function(){ return '[bUni · c1] panel-undercount found: "total THC" = 2 analytes (Δ9 + '+K.f877+'×THCA) of a family no panel exhausts; claim '+K.claimMg+' mg/kg vs measured median '+K.fsanzMed+' mg/kg ≈ '+K.ratio+'× — NotMeasured ≠ 0'; }
+  }
+},
+{ id:'c2', glyph:'📏', name:'how a requirement is set',
+  src:'RECEIPT_SHORTFALL_ARBITRAGE_2026-08-20 (§3, §6) · bFood Hexagon (DV + UL form restrictions)',
+  srcl:'https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/RECEIPT_SHORTFALL_ARBITRAGE_2026-08-20.md',
+  prose:{
+   bee:'Nutrition panels carry a bar called the Daily Value. Behind that one bar live several different kinds of bar, and telling them apart is the whole lesson. An <b>RDA</b> is set from measured needs. An <b>AI</b> (Adequate Intake) means <i>the data were insufficient</i> — it is a professional guess wearing a number\'s clothes. A <b>UL</b> (upper limit) is about supplements, often not food: the niacin UL covers supplemental niacin only, and food magnesium never counts toward the magnesium UL. And some bars scale with your body (protein is grams per kilogram) while most do not (vitamin D is vitamin D whether you weigh 50 kg or 100 kg). The distinction is the lesson: know which kind of bar you are reading before you compare yourself to it.',
+   raver:'One bar on the label, five bars in the law: <b>EAR</b> (half of healthy people covered — the "% below EAR" statistics are measured against this), <b>RDA</b> (97–98% covered), <b>AI</b> (data were insufficient — choline has <i>no EAR at all</i>, so "88% below" for choline is below an AI, a softer statement than it sounds), <b>UL</b> (supplement-shaped: niacin, magnesium, folate, vitamin E ULs cover the synthetic forms only; vitamin A\'s covers preformed retinol, not algae carotenoids), <b>DV</b> (the label number — one per nutrient, per day, for everyone ≥4 years). And the scaling split: protein is '+K.proteinLo+'–'+K.proteinHi+' g per kg of you; vitamin D is a fixed '+20+' µg. When the 2025–2030 guidelines moved the protein goal, the average American woman fell below target overnight — with <b>no new data</b>. Definitions move; data doesn\'t follow them.',
+   cypherpunk:'Requirement ontology, precisely: EAR = median requirement of a specified population (the "% below EAR" figures are intake-adequacy statistics against EAR/AI, NHANES 2017–March 2020); RDA = EAR + 2·SD; AI = substitute where "insufficient data were available" (choline: no EAR exists); UL = ceiling for a <i>form</i> — niacin (supplemental), magnesium (supplemental), folate (synthetic folic acid; all three basket foods measure 0 folic acid), vitamin A (preformed retinol only), vitamin E (supplemental α-tocopherol) — form restrictions honored per cell on <a href="../bfood.html">the Hexagon</a>. Scaling: protein prescribed per kg ('+K.proteinLo+'–'+K.proteinHi+' g/kg, DGA 2025–2030; EAR '+K.proteinEAR+' g/kg); most micronutrient reference values are fixed per age–sex group, not per mass. The definitional-shortfall specimen: measured mean intake 1.25 g/kg (men 19+), 1.09 g/kg (women 19+); only '+K.belowEAR+'% below the EAR, yet the average woman 19+ sits below the new goal — same NHANES, different bar, manufactured January 2026. DGA quotes stop at the intake half; effect clauses are Axis B and stay off-repo (shortfall receipt §7).'
+  },
+  act:{
+    h:'📐 ACT — compute your own, then map what scales',
+    q:'your body weight (kg):',
+    kind:'scale',
+    compute:function(w){ return 'your protein goal at '+K.proteinLo+'–'+K.proteinHi+' g/kg: <b>'+Math.round(w*K.proteinLo)+'–'+Math.round(w*K.proteinHi)+' g/day</b> (DGA 2025–2030). your EAR floor: '+ (w*K.proteinEAR).toFixed(1) +' g/day. now the map — for each row, does the requirement scale with body weight?'; },
+    follow:'protein (g/kg) — YES · vitamin D (20 µg fixed) — NO · calcium (1,300 mg fixed) — NO · iron (fixed by age & sex) — NO · energy (kcal/kg) — YES. the trap question: '+K.belowEAR+'% of women fall below the protein EAR, yet the average woman is below the new goal. how? <b>the goal moved, the data did not</b> — a shortfall created by definition.',
+    rline:function(){ return '[bUni · c2] requirement-scaling mapped: protein '+K.proteinLo+'–'+K.proteinHi+' g/kg scales, micronutrient reference values fixed per age–sex; only '+K.belowEAR+'% below EAR yet average below goal — the bar moved, not the data'; }
+  }
+},
+{ id:'c3', glyph:'🎭', name:'how to be lied to with a true number',
+  src:'RECEIPT_SHORTFALL_ARBITRAGE_2026-08-20 (§1–§4, the brake)',
+  srcl:'https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/RECEIPT_SHORTFALL_ARBITRAGE_2026-08-20.md',
+  prose:{
+   bee:'A true number can still lie — by leaving out the sentence that makes it honest. Our own receipt found a number like that and refused to publish it alone: <b>'+K.vitD_EAR+'% of people are below the vitamin D requirement</b> — and only <b>'+K.vitD_risk+'% are actually at risk of deficiency</b>. Both are true. The first counts diets against a bar that <i>assumes you get almost no sunlight</i>; the second measures the vitamin in people\'s blood. One alarm, one brake, always together. The same receipt publishes the boring half nobody headlines — population-wide iron, famous for deficiency, is at just '+K.iron+'% below its bar. A page that shows only the alarming half is propaganda; ours shows both halves, and now you can tell the difference.',
+   raver:'The move is called the missing brake. Headline: <b>'+K.vitD_EAR+'% below the EAR</b> for vitamin D. Brake: by blood measurement (serum 25(OH)D, NHANES 2011–2014), only <b>'+K.vitD_risk+'% at risk of deficiency</b>, 18% at risk of inadequacy — because the RDA <i>assumes minimal sun exposure</i>: the bar is set for people who live indoors. Publishing '+K.vitD_EAR+'/'+K.vitD_risk+'% without the brake is technically accurate and substantively misleading — the exact failure mode this project exists to refuse, so the brake ships beside the number, always. Then run the check in reverse: a page of alarms about iron and deficiency should meet the fact that population-wide iron sits at <b>'+K.iron+'% below EAR</b> — selenium under 3%, niacin under 3%, B12 at 7%. Selection bias cuts both ways; the honest page prints the non-shortfalls to defeat it.',
+   cypherpunk:'Two statistics, one nutrient, both true: intake-adequacy ('+K.vitD_EAR+'% below EAR/AI, NHANES 2017–Mar 2020, food+beverages) vs status ('+K.vitD_risk+'% at risk of deficiency by serum 25(OH)D, NHANES 2011–2014) — reconciled by the FNB\'s own note that the RDA assumes minimal sun exposure. Vitamin E\'s intake estimate "might be low… because the amounts and types of fat added during cooking are often unknown"; choline\'s "% below" is below an AI with no EAR ("insufficient data"). The receipt\'s law: the brake ships beside the number, always — 96/88/74% without the three caveats would be technically accurate and substantively misleading. Anti-selection control in the same table: selenium &lt;3 · niacin &lt;3 · riboflavin 4 · phosphorus 5 · <b>iron '+K.iron+'</b> · thiamin 7 · B12 7 · protein 7. Overstatement discipline applies to our own side: the phrase "public health concern" is ABSENT from the 2025–2030 edition and the carry-forward recommendation was scored ☒ Partial — not "abolished", and the receipt says so precisely because overstating would hand critics the win.'
+  },
+  act:{
+    h:'🧩 ACT — reconcile the two truths, then catch the missing half',
+    q:'<b>'+K.vitD_EAR+'% below the requirement</b> and <b>only '+K.vitD_risk+'% at risk of deficiency</b> — both true. pick the honest reconciliation:',
+    kind:'radio',
+    opts:['one of the studies must be wrong — pick the scarier one',
+          'the '+K.vitD_EAR+'% is an intake statistic measured against a bar that assumes minimal sun exposure; the '+K.vitD_risk+'% is what blood measurements show — both true, different questions',
+          'deficiency is rare, so requirements don\'t matter'],
+    ans:1,
+    follow:'exactly — the '+K.vitD_EAR+'% counts diets against a bar that assumes minimal sun exposure; the '+K.vitD_risk+'% is what serum 25(OH)D status actually shows. both true, different questions, and the brake ships beside the number, always. second catch: a page shows you 96% · 94% · 88% · 74% and stops — which row from the same government table is it hiding? <b>iron — '+K.iron+'% below EAR</b>, population-wide not a shortfall, despite its reputation. the page that hides it is selecting, and now you check for the boring half every time.',
+    rline:function(){ return '[bUni · c3] two truths reconciled: '+K.vitD_EAR+'% below EAR (intake stat, minimal-sun assumption) vs '+K.vitD_risk+'% at risk (serum status) — the brake ships beside the number, always; iron '+K.iron+'% below EAR is the hidden non-shortfall half'; }
+  }
+},
+{ id:'c4', glyph:'⛓', name:'how to read a chain',
+  src:'DISPATCH_SOULCATS_HUNT_ROSE_OFFER_2026-08-19 (two-source method) · standing law: two independent sources for any chain fact',
+  srcl:'https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/DISPATCH_SOULCATS_HUNT_ROSE_OFFER_2026-08-19.md',
+  prose:{
+   bee:'A blockchain is a public ledger anyone can read — so the rule is simple and strict: <b>never take one stranger\'s word for what it says</b>. Not even the page you\'re reading. A chain fact counts as verified when <b>two independent sources</b> agree — two different readers, not the same reader asked twice. And when a lookup <i>fails</i> — the site is down, the request times out — the honest answer is "the lookup failed", never "zero". This project learned that the hard way: a wallet\'s frozen art once rendered as an empty collection just because one server was unreachable.',
+   raver:'Three laws, each earned the hard way. <b>Two independent oracles</b>: every chain fact in this organism is read on two independent sources before it\'s a fact — the census that found the Souli contract read it on Ethereum and Base Blockscout, two readers of one ledger. <b>A page is not its own witness</b>: a surface that asserts what it did not fetch is a claim wearing a UI; the honest page shows you the fetch. <b>A failed fetch is a failure, never a value</b>: a pool that was merely unreachable once rendered as holding 0 inscriptions; 48 selectors once reported "not found" that were present. The control law: if everything comes back empty, suspect the probe, not the world.',
+   cypherpunk:'Method, as ruled and practiced: (1) every chain fact on two independent oracles (e.g. Souli 0xb43e…9aFF read via Ethereum + Base Blockscout, pinned bodies, license read at pinned commit); (2) a page must not be its own witness — surfaces render fetched state with the fetch visible, assertions without fetches don\'t ship; (3) failed fetches are failures, never zeros — the frozen-art incident (unreachable pool rendered as empty collection) and the 48-selector false-absence are the canonical receipts, and uniform failure across every parameter means the probe is broken; (4) know your tool\'s truncation shape: Blockscout getLogs silently truncates at 1,000 rows with status "OK" — two scans here undercounted 8,162 as 6,723 and 6,417. An absence is only real with a positive control (a passing FUNGI control proved a market dead, not sleeping). Standing law, all seats: two independent sources for any chain fact. Receipts: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/DISPATCH_SOULCATS_HUNT_ROSE_OFFER_2026-08-19.md">the census dispatch</a> · <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/ORIENTATION_ZCODE_2026-08-16.md">the corrections ledger</a>.'
+  },
+  act:{
+    h:'🧾 ACT — the witness test',
+    q:'three "confirmations" of one chain fact (the Souli contract, Base, 2024-06-07). mark each:',
+    kind:'radio3',
+    opts:['A — Ethereum Blockscout says X, Base Blockscout says X → verified fact',
+          'B — the same Blockscout API asked twice, agrees with itself both times → verified fact',
+          'C — a third site timed out and the field rendered "0 holders" → zero holders confirmed'],
+    ans:0,
+    follow:'the readings: <b>A</b> is the only verified fact — two independent oracles agreeing. <b>B</b> is one witness counted twice; agreement with yourself proves nothing. <b>C</b> is the classic failure rendered as a value — a failed fetch is NEVER a value; the honest field says "lookup failed", and the control law asks you to suspect the probe when everything reads empty.',
+    rline:function(){ return '[bUni · c4] witness law passed: two independent oracles = fact; one oracle twice = one witness; failed fetch = failure, never a value'; }
+  }
+},
+{ id:'c5', glyph:'🎨', name:'how colour communicates',
+  src:'SPRINT_DESIGN_UNIFY_2026-08-19 §0 (founder law: "colors should never operate singular") · correction receipts 3a0be7b / 8b64cc2',
+  srcl:'https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/SPRINT_DESIGN_UNIFY_2026-08-19.md',
+  prose:{
+   bee:'Colour on a screen never travels alone: what you actually see is a foreground ON a background, judged as a pair — the founder\'s own law, "<b>colors should never operate singular</b>". And when several colours must be told apart (chart series, verdict states), they are picked as a <b>validated set</b> — checked by arithmetic for how far apart they look to every kind of eyesight, including colour-blind vision — never by eyeball. Two more rules keep everyone included: a colour never carries meaning alone (a glyph or label always rides with it), and the set\'s order matters: the validated order keeps two easily-confused colours apart, and reordering it can silently break the validation.',
+   raver:'The pair law and the set law. <b>Pair</b>: a colour\'s meaning and legibility exist only as foreground⊗background — judged composited against the actual ground it lands on, which is how the design seat once caught this project\'s own coordinating seat validating against the wrong background. <b>Set</b>: any colours that must be distinguished pass six computed checks — lightness band, chroma floor, colour-blind adjacent-pair separation, normal-vision floor, contrast — never eyeballed. The validated verdict set on this dark surface measures worst-adjacent ΔE '+K.dE_tritan+' under tritan vision; the worst <b>protan</b> pair in the set is green⊗orange at '+K.dE_protan+', which is exactly why the validated order keeps them non-adjacent — reorder the palette and that pair lands side by side and the validation is gone. ΔE is just "distance between colours as eyes see it" — bigger is more tellable-apart.',
+   cypherpunk:'Law 1, founder-verbatim: "colors should never operate singular" — enforced as the pair-check (fg composited over its actual bg; the WELLness verify loop\'s contrast probe) and the computed-palette rule (six-checks validator: lightness band 0.48–0.67, chroma floor, CVD adjacent-pair separation ≥8 OKLab×100, normal-vision floor ≥15, contrast ≥3:1 vs surface). Receipted on this surface family: verdict set #3f9c55/#a476ec/#c07f1c/#0092a6 on #0d1410 — worst adjacent ΔE '+K.dE_tritan+' (tritan, idea⊗bug); worst protan pair '+K.dE_protan+' (green⊗orange — non-adjacent by design); normal '+K.dE_norm+'. The correction receipt is itself pedagogy: the header comments once said '+K.dE_protan+' was the worst adjacent; the design seat\'s independent validator run (3a0be7b, restated 8b64cc2) showed '+K.dE_tritan+' tritan is the true worst adjacent and '+K.dE_protan+' the worst <i>protan</i> pair — corrected in place, on the wall, because hiding our own errors would be the one dishonest exhibit. Identity never rides colour alone: glyph + label, always. Reorder = revalidate; an un-revalidated reorder ships a lie about its own legibility.'
+  },
+  act:{
+    h:'trap — break the palette, watch the validation break',
+    q:'the validated set, in its validated order (works · idea · bug · gap). swap two swatches and read the live normal-vision ΔE between each adjacent pair; restore the validated order to complete the act. the green⊗orange adjacency is the protan trap — ΔE '+K.dE_protan+' under protan vision, receipted.',
+    kind:'palette',
+    order:[0,1,2,3],
+    names:['works ✅','idea 💡','bug 🐛','gap 🕳'],
+    hex:['#3f9c55','#a476ec','#c07f1c','#0092a6'],
+    rline:function(){ return '[bUni · c5] pair law passed: validated order restored — worst adjacent ΔE '+K.dE_tritan+' (tritan) with green⊗orange held non-adjacent (protan '+K.dE_protan+'); reorder = revalidate'; }
+  }
+}
+];
+
+/* ===== rendering: course cards, register prose swap ===== */
+var REG='bee', done={};
+try{ done=JSON.parse(localStorage.getItem('buni_progress')||'{}'); }catch(e){ done={}; }
+function saveDone(){ try{ localStorage.setItem('buni_progress',JSON.stringify(done)); }catch(e){}}
+function renderReg(){
+  COURSES.forEach(function(c){
+    var p=$('prose-'+c.id); if(p) p.innerHTML=c.prose[REG];
+  });
+  [['bee','rg-bee'],['raver','rg-raver'],['cypherpunk','rg-cyper']].forEach(function(x){
+    $(x[1]).setAttribute('aria-pressed', REG===x[0]?'true':'false');
+  });
+}
+function setReg(r){ REG=r; renderReg(); }
+
+function okLab(hex){
+  var r=parseInt(hex.substr(1,2),16)/255,g=parseInt(hex.substr(3,2),16)/255,b=parseInt(hex.substr(5,2),16)/255;
+  function f(c){ return c<=0.04045?c/12.92:Math.pow((c+0.055)/1.055,2.4); }
+  var R=f(r),G=f(g),B=f(b);
+  var l=Math.cbrt(0.4122214708*R+0.5363325363*G+0.0514459929*B),
+      m=Math.cbrt(0.2119034982*R+0.6806995451*G+0.1073969566*B),
+      s=Math.cbrt(0.0883024619*R+0.2817188376*G+0.6299787005*B);
+  return [l, m-0.15663809/0.98488104*l-s*0.10409905, s];
+}
+function dE(a,b){ // normal-vision OKLab distance ×100, computed live (honest label: normal vision only)
+  var A=okLab(a),B=okLab(b),d=0;
+  for(var i=0;i<3;i++) d+=Math.pow(A[i]-B[i],2);
+  return Math.round(Math.sqrt(d)*100);
+}
+var VALIDATED=[0,1,2,3];
+function renderPalette(c){
+  var host=$('act-'+c.id+'-pal'); if(!host) return;
+  var o=c.act.order, hex=c.act.hex, names=c.act.names, html='';
+  o.forEach(function(idx,pos){
+    html+='<span class="swatch"><i style="background:'+hex[idx]+'"></i>'+names[idx]
+      +'<button data-swap="'+pos+'" title="swap with the swatch to its right">⇄</button></span>';
+  });
+  html+='<div class="dE">adjacent pairs (normal-vision ΔE, computed live): ';
+  var pairs=[],trap=false;
+  for(var i=0;i<o.length-1;i++){
+    var v=dE(hex[o[i]],hex[o[i+1]]);
+    var isTrap=(o[i]===0&&o[i+1]===2)||(o[i]===2&&o[i+1]===0);
+    if(isTrap) trap=true;
+    pairs.push('<b>'+v+'</b>'+(isTrap?' ⚠ protan trap (ΔE '+K.dE_protan+' under protan vision — receipted)':''));
+  }
+  html+=pairs.join(' · ')+'</div>';
+  if(trap) html+='<div class="dE" style="color:var(--amber)">this order places green adjacent to orange — the pair the validated order exists to keep apart. the validation is broken until the order is restored.</div>';
+  else if(o.join()!==VALIDATED.join()) html+='<div class="dE" style="color:var(--amber)">no protan trap, but this is not the validated order — only the receipted order carries its validation.</div>';
+  else html+='<div class="dE" style="color:var(--leaf)">✓ the validated order — receipt intact (worst adjacent ΔE '+K.dE_tritan+' tritan · worst protan pair '+K.dE_protan+' held non-adjacent).</div>';
+  host.innerHTML=html;
+  var btns=host.getElementsByTagName('button');
+  for(var j=0;j<btns.length;j++){
+    btns[j].onclick=function(){
+      var p=parseInt(this.getAttribute('data-swap'),10);
+      if(p>=o.length-1) p=o.length-2; // wrap: last swaps with first
+      var t=o[p]; o[p]=o[p+1]; o[p+1]=t;
+      renderPalette(c); checkPal(c);
+    };
+  }
+}
+function checkPal(c){
+  var ok=c.act.order.join()===VALIDATED.join();
+  if(ok){ markDone(c); }
+}
+
+function markDone(c){
+  if(done[c.id]) return;
+  done[c.id]=1; saveDone(); renderStatus();
+  var l=$('line-'+c.id); if(l){ l.style.display='block'; }
+  addTranscript(c.act.rline(),c);
+}
+function renderStatus(){
+  COURSES.forEach(function(c){
+    var s=$('st-'+c.id); if(!s) return;
+    var r=T(done[c.id]?'verified':'open');
+    s.innerHTML= done[c.id]
+      ? '<span style="color:var(--c-works)">✓ '+r.txt+'</span>'+(r.machine?'<span class="machine">⚙</span>':'')
+      : '<span style="color:var(--c-gap)">○ '+r.txt+'</span>'+(r.machine?'<span class="machine">⚙</span>':'');
+  });
+  var n=COURSES.filter(function(c){return done[c.id];}).length;
+  $('tstate').textContent=n+' of 5 acts receipted this browser — the transcript is local-only; the credential is the signed receipt you publish, not this list.';
+}
+var T_LINES=[];
+function addTranscript(line,c){
+  if(!T_LINES.some(function(t){return t.line===line;})) T_LINES.push({line:line,id:c.id});
+  var host=$('tlines'); host.innerHTML='';
+  T_LINES.forEach(function(t){
+    var d=document.createElement('div'); d.className='rline'; d.textContent=t.line;
+    host.appendChild(d);
+  });
+  var btn=$('tcopy'); if(!btn){
+    btn=document.createElement('button'); btn.id='tcopy'; btn.textContent='📋 copy transcript';
+    btn.className='gold'; btn.style.cssText='margin-top:8px;background:#2a230a;color:var(--gold);border:1px solid var(--line);border-radius:8px;padding:7px 14px;cursor:pointer;font:11.5px IBM Plex Mono,monospace';
+    btn.onclick=function(){ navigator.clipboard.writeText(T_LINES.map(function(t){return t.line;}).join('\n')); btn.textContent='✓ copied'; setTimeout(function(){btn.textContent='📋 copy transcript';},1500); };
+    host.parentNode.appendChild(btn);
+  }
+}
+/* ===== course DOM ===== */
+var host=$('courses');
+COURSES.forEach(function(c){
+  var sec=document.createElement('section');
+  var status='<span id="st-'+c.id+'"></span>';
+  var srcLink='<a href="'+c.srcl+'">'+c.src+'</a>';
+  var html='<h2>'+c.glyph+' '+c.name.toUpperCase()+' · '+status+'</h2>'
+    +'<div class="law">source of record: '+srcLink+'</div>'
+    +'<div class="prose" id="prose-'+c.id+'"></div>'
+    +'<div class="acts"><div class="ex" id="ex-'+c.id+'"><h3>'+c.act.h+'</h3><div class="q">'+c.act.q+'</div>';
+  var a=c.act;
+  if(a.kind==='check'){
+    html+='<div id="ex-'+c.id+'-opts">';
+    a.opts.forEach(function(o,i){
+      html+='<label><input type="checkbox" data-i="'+i+'">'+o.replace(' ✓','')+'</label>';
+    });
+    html+='</div>';
+    if(a.follow){
+      html+='<div class="q" style="margin-top:10px">'+a.follow+'</div>'
+        +'<input type="number" id="ex-'+c.id+'-num" value="'+a.followInput+'"> mg/kg'
+        +'<div class="fb" id="ex-'+c.id+'-fc"></div>';
+    }
+    html+='<button class="gold" id="ex-'+c.id+'-go">check the panel</button>';
+  }
+  if(a.kind==='radio'||a.kind==='radio3'){
+    html+='<div id="ex-'+c.id+'-opts">';
+    a.opts.forEach(function(o,i){
+      html+='<label><input type="radio" name="'+c.id+'" data-i="'+i+'">'+o+'</label>';
+    });
+    html+='</div><button class="gold" id="ex-'+c.id+'-go">answer</button>';
+  }
+  if(a.kind==='scale'){
+    html+='<input type="number" id="ex-'+c.id+'-w" value="80"> kg'
+      +'<div class="fb ok" id="ex-'+c.id+'-out" style="display:block"></div>'
+      +'<div class="q" style="margin-top:8px">'+a.follow+'</div>'
+      +'<button class="gold" id="ex-'+c.id+'-go">log the scaling map</button>';
+  }
+  if(a.kind==='palette'){
+    html+='<div id="act-'+c.id+'-pal"></div><button class="gold" id="ex-'+c.id+'-go">restore validated order</button>';
+  }
+  html+='<div class="fb" id="ex-'+c.id+'-fb"></div>'
+    +'<div class="rline" id="line-'+c.id+'"></div>'
+    +'</div></div>';
+  sec.innerHTML=html; host.appendChild(sec);
+
+  /* wire the act */
+  if(a.kind==='check'){
+    $('ex-'+c.id+'-go').onclick=function(){
+      var boxes=$('ex-'+c.id+'-opts').getElementsByTagName('input');
+      var picked=[],fb=$('ex-'+c.id+'-fb');
+      for(var i=0;i<boxes.length;i++) if(boxes[i].checked) picked.push(i);
+      var want=a.ans.map(function(v,i){return i;}).filter(function(i){return a.ans[i];});
+      var right=picked.length===want.length&&want.every(function(i){return picked.indexOf(i)>-1;});
+      var num=parseFloat($('ex-'+c.id+'-num').value);
+      var numOk=isFinite(num)&&num>0;
+      if(right&&numOk){
+        fb.className='fb ok'; fb.style.display='block';
+        fb.innerHTML='✓ exactly two — Δ9-THC and THCA (×'+K.f877+'). '+a.followCompute(num);
+        var l=$('line-'+c.id); l.style.display='block'; l.textContent=a.rline();
+        markDone(c);
+      } else {
+        fb.className='fb bad'; fb.style.display='block';
+        fb.innerHTML= right
+          ? 'the panel part is right — now set the claim in mg/kg (1 g per 100 g = 10,000 mg/kg) and read the factor.'
+          : 'not yet. "total THC" is the USDA definition — a sum of exactly two molecules. which two? (the other names are real molecules; they are simply not inside this number.)';
+      }
+    };
+  }
+  if(a.kind==='radio'||a.kind==='radio3'){
+    $('ex-'+c.id+'-go').onclick=function(){
+      var rr=$('ex-'+c.id+'-opts').getElementsByTagName('input');
+      var pick=-1,fb=$('ex-'+c.id+'-fb');
+      for(var i=0;i<rr.length;i++) if(rr[i].checked) pick=i;
+      if(pick<0){ fb.className='fb bad'; fb.style.display='block'; fb.textContent='pick one first.'; return; }
+      var correct = pick===a.ans;
+      if(correct){
+        fb.className='fb ok'; fb.style.display='block'; fb.innerHTML='✓ '+a.follow;
+        var l=$('line-'+c.id); l.style.display='block'; l.textContent=a.rline();
+        markDone(c);
+      } else {
+        fb.className='fb bad'; fb.style.display='block';
+        fb.innerHTML='not that one. '+(a.kind==='radio3'?'read the three against the witness laws: independence, self-agreement, and the failed fetch.':'the honest reconciliation explains how BOTH numbers can be true — look for the one that changes the question being asked.');
+      }
+    };
+  }
+  if(a.kind==='scale'){
+    var upd=function(){
+      var w=parseFloat($('ex-'+c.id+'-w').value);
+      $('ex-'+c.id+'-out').innerHTML= isFinite(w)&&w>0 ? a.compute(w) : 'enter a weight in kg.';
+    };
+    $('ex-'+c.id+'-w').addEventListener('input',upd); upd();
+    $('ex-'+c.id+'-go').onclick=function(){
+      var l=$('line-'+c.id); l.style.display='block'; l.textContent=a.rline();
+      var fb=$('ex-'+c.id+'-fb'); fb.className='fb ok'; fb.style.display='block';
+      fb.innerHTML='✓ logged. protein scales with the body you bring; the micronutrient bars do not — and the woman-below-goal specimen was manufactured by moving a definition, not by measuring anything new.';
+      markDone(c);
+    };
+  }
+  if(a.kind==='palette'){
+    renderPalette(c);
+    $('ex-'+c.id+'-go').onclick=function(){
+      c.act.order=VALIDATED.slice(); renderPalette(c); checkPal(c);
+      var fb=$('ex-'+c.id+'-fb'); fb.className='fb ok'; fb.style.display='block';
+      fb.innerHTML='✓ restored — and note what the exercise proved: the validation is a property of the set, the order and the ground together. any change re-runs the validator or ships a lie about its own legibility.';
+    };
+  }
+});
+
+/* ===== graduation ===== */
+function renderGrad(){
+  $('gradProse').innerHTML = REG==='bee'
+   ? 'You graduate by contributing, not by completing. Five acts taught you five ways to check a claim — panel, bar, brake, witness, pair. The graduation act is the smallest real contribution: <b>a review receipt, signed, published</b>. Nobody can print it for you and nobody can fake it — it is the same attestation grammar the Royal Guard already runs.'
+   : REG==='raver'
+   ? 'Five acts, five instruments: the panel (what was measured vs what the word implies), the bar (which kind of requirement, and whether it scales), the brake (the sentence that makes an alarm honest), the witness (two oracles or it did not happen), the pair (colour judged on its ground, as a set). Graduation = the smallest verifiable contribution: <b>sign a review receipt and publish it</b>. The receipt is the credential — nobody can print it, nobody can fake it.'
+   : 'Five instruments, receipted: panel-completeness (2 of a family inside the word "total"), requirement ontology (EAR/RDA/AI/UL/DV + the scaling split + definitional shortfalls), the brake law (intake-adequacy ≠ status; both true, both published), the witness law (two independent oracles; failed fetch ≠ value; truncation shapes known), the pair law (fg⊗bg composited; validated sets; reorder = revalidate). Graduation: emit a signed <b>[bX review]</b> on the deck — Ed25519 over the line, verifiable by arithmetic, publishable on any rail you hold. The signature <i>is</i> the diploma.';
+}
+function gradLine(){
+  var line='[bX review] ✅ works university/index.html — https://beehive-nature.github.io/beehive-nature/surfaces/university/index.html — from: fp:(bind at the deck) — note: graduate walk — '+(COURSES.filter(function(c){return done[c.id];}).length)+'/5 acts receipted, gates read';
+  var el=$('gradOut'); el.style.display='block'; el.textContent=line;
+  var b=$('gcp'); b.style.display='inline-block';
+  b.onclick=function(){ navigator.clipboard.writeText(line).then(function(){ b.textContent='✓ copied'; setTimeout(function(){ b.textContent='📋 copy'; },1500); }); };
+}
+
+/* boot */
+window.setReg=setReg; window.gradLine=gradLine; // the register + graduation buttons ride onclick attributes
+renderCorpus(); renderReg(); renderStatus(); renderGrad();
+/* restore prior-session lines without re-marking done courses */
+COURSES.forEach(function(c){ if(done[c.id]) addTranscript(c.act.rline(),c); else { var l=$('line-'+c.id); if(l) l.style.display='none'; } });
+})();
+</script>
+</body>
+</html>
