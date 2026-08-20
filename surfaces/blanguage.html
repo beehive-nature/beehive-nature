@@ -123,9 +123,12 @@ footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
 
 <section>
   <h2>THE STRING CORPUS — the hub's own strings, and the honest empty cells</h2>
-  <div class="banner">the corpus genesis: the dock starts by eating the organism's own UI. baseline en only —
-  <b>no cell is machine-filled, no cell is invented by a non-speaker.</b> the empty cells are the corpus's first
-  finding and its invitation: this is what an untranslated truth looks like.</div>
+  <div class="banner">the corpus genesis: the dock starts by eating the organism's own UI. three lawful states per cell:
+  <b>community-attested</b> (none yet), <b>⚙ machine-draft labeled</b> (the father-tongue bridge, ruled 2026-08-20 —
+  BLAI drafts through the pivot and the label never comes off until a community attests), or <b>absent</b> (never silently
+  filled, never a silent English fallback pretending to be translation). the father column renders Русский; the genesis
+  mother tongue latviešu enters through its pivots — the bridge's first live span, per
+  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/register/FATHER-SET-1.md">FATHER-SET-1</a>.</div>
   <div class="wrap"><table class="gm" id="strings"></table></div>
   <div class="law" style="margin-top:8px">a string absent in a language renders absent <b>on every surface</b>, labeled —
   never a silent fallback to English pretending to be the reader's language. a string record never displays
@@ -192,18 +195,30 @@ var DOCK=[
  {end:'Diné bizaad',ex:'Navajo',code:'nav',dir:'ltr',v:'vul',
   src:'<a href="https://en.wikipedia.org/wiki/Atlas_of_the_World%27s_Languages_in_Danger">Atlas</a> · large speaker base, intergenerational transmission weakening',note:''},
  {end:'aynu itak',ex:'Ainu',code:'ain',dir:'ltr',v:'cri',
-  src:'<a href="https://endangeredlanguages.com/elp-language/1212">Endangered Languages Project</a> · <a href="https://www.bunka.go.jp/english/policy/japanese_language/policy/">Japan Agency for Cultural Affairs</a>',note:''}
+  src:'<a href="https://endangeredlanguages.com/elp-language/1212">Endangered Languages Project</a> · <a href="https://www.bunka.go.jp/english/policy/japanese_language/policy/">Japan Agency for Cultural Affairs</a>',note:''},
+ {end:'Русский',ex:'Russian',code:'rus',dir:'ltr',reg:'father set · FOUNDER-HARDWIRED',
+  src:'<a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/register/FATHER-SET-1.md">FATHER-SET-1</a> · ~145–150M native · CANDIDATE (T-5 ruler pending)',
+  note:'entered by founder word below the 300M line — the register\'s second entry mechanism: threshold OR founder word'},
+ {end:'latviešu valoda',ex:'Latvian',code:'lav',dir:'ltr',reg:'genesis reference mother tongue',
+  src:'<a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/register/FATHER-SET-1.md">FATHER-SET-1</a> · ~1.5M native · CANDIDATE',
+  note:'the bridge\'s first worked specimen — and the resonance already in the law: skaists (the seeded community context, Ballot A G4) is Latvian'},
+ {end:'ภาษาไทย',ex:'Thai',code:'tha',dir:'ltr',reg:'reference ladder · rung two',
+  src:'<a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/register/FATHER-SET-1.md">FATHER-SET-1</a> · ~21M native / ~60M+ L2 (founder\'s ~90M recorded) · CANDIDATE',
+  note:'representation = T-4\'s first worked case — the Kingdom\'s own authority, recorded as aspiration only; founder-hands diplomacy exclusively'}
 ];
 var dk=$('dock');
 dk.innerHTML='<tr><th>language</th><th>ISO 639-3</th><th>dir</th><th>vitality (linked)</th><th class="law">note</th></tr>';
-DOCK.forEach(function(l){
+ DOCK.forEach(function(l){
  var t=VIT[l.v];
+ var status=l.reg
+  ? '<span style="color:var(--gold)">'+l.reg+'</span><div style="font-size:9px;color:var(--dim)">vitality not asserted — register row, CANDIDATE grade</div>'
+  : '<i style="background:'+t.c+'"></i>'+t.n;
  dk.innerHTML+='<tr><td class="cl">'+l.end+'<div style="font-size:9px;color:var(--dim)">'+l.ex+'</div></td>'
   +'<td><a href="https://iso639-3.sil.org/code/'+l.code+'">'+l.code+'</a></td>'
   +'<td>'+l.dir+'</td>'
-  +'<td class="vit"><i style="background:'+t.c+'"></i>'+t.n+'<div style="font-size:9px;color:var(--dim)">'+l.src+'</div></td>'
+  +'<td class="vit">'+status+'<div style="font-size:9px;color:var(--dim)">'+l.src+'</div></td>'
   +'<td style="font-size:9px;color:var(--dim)">'+l.note+'</td></tr>';
-});
+ });
 
 /* string corpus genesis — hub strings verbatim, en baseline, every other cell absent */
 var KEYS=[
@@ -214,32 +229,62 @@ var KEYS=[
  {k:'wing.make',v:'🎛 MAKE — the studio'},
  {k:'footer.count',v:'31 surfaces · three orgs · one organism'}
 ];
+/* the father-tongue bridge's first live span (FATHER-SET-1, ruled 2026-08-20):
+   father-set Russian drafted direct; genesis Latvian drafted through its pivots.
+   every draft wears its label — the label stays until a community attests. */
+var DRAFT={
+ ru:['🐝 beehive nature · поверхности',
+     'один улей, все двери — статично, без ключей, честно. якорь — это истина; эти страницы — его окна.',
+     'BETA · всё здесь — открытый код · ничто пока не хранит реальные средства · ломайте и рассказывайте рейду',
+     '🛰 ЧТЕНИЕ — инструменты',
+     '🎛 ТВОРЕНИЕ — студия',
+     '31 поверхность · три организации · один организм'],
+ lv:['🐝 beehive nature · virsmas',
+     'viens strops, visas durvis — statisks, bez atslēgām, godīgs. enkurs ir patiesība; šīs lapas ir tā logi.',
+     'BETA · viss šeit ir atvērtais kods · nekas vēl neglabā īstus līdzekļus · lauziet un pastāstiet reidam',
+     '🛰 LASĪT — instrumenti',
+     '🎛 RADĪT — studija',
+     '31 virsma · trīs organizācijas · viens organisms']
+};
 var st=$('strings');
 st.innerHTML='<tr><th>key</th>'+DOCK.map(function(l){return '<th>'+l.end+'</th>';}).join('')+'</tr>';
-KEYS.forEach(function(s){
+KEYS.forEach(function(s,ki){
  var r='<tr><td class="cl">'+s.k+'</td>';
  DOCK.forEach(function(l,idx){
-  r+= idx===0
-   ? '<td class="base">'+s.v+'</td>'
-   : '<td class="absent">— absent · contribute</td>';
+  if(idx===0){ r+='<td class="base">'+s.v+'</td>'; return; }
+  var d=DRAFT[l.code]&&DRAFT[l.code][ki];
+  if(d){ r+='<td class="base">'+d+'<div style="font-size:8.5px;color:var(--amber)">⚙ machine draft — label stays until a community attests</div></td>'; }
+  else { r+='<td class="absent">— absent · contribute</td>'; }
  });
  r+='</tr>';
  st.innerHTML+=r;
-});
+ });
 
 /* the dock as data */
 $('yaml').textContent=
-'# blanguageDOCK seed register — v0, 2026-08-19\n'+
+'# blanguageDOCK seed register — v1, 2026-08-20 (father-tongue bridge follows FATHER-SET-1)\n'+
 '# object types: dock_entry / string_record / sweep_record — never interchangeable\n'+
 'dock:\n'+
 DOCK.map(function(l){
- return '  - endonym: "'+l.end+'"\n    iso639_3: '+l.code+'\n    direction: '+l.dir+'\n    vitality: '+VIT[l.v].n+'   # linked in surface; Atlas/ELP sourced\n'+
- '    consent:\n      community_attested: '+(l.code==='eng'?'not_sought':'not_sought')+'\n      machine_generated: '+(l.code==='eng'?'true  # authored by the hive, labeled':'false')+'\n      withdrawal: { status: none }';
+ var head='  - endonym: "'+l.end+'"\n    iso639_3: '+l.code+'\n    direction: '+l.dir+'\n';
+ var body=l.reg
+  ? '    register: '+l.reg+'   # counts CANDIDATE — T-5 ruler pending\n'
+  : '    vitality: '+VIT[l.v].n+'   # linked in surface; Atlas/ELP sourced\n';
+ return head+body+
+ '    consent:\n      community_attested: not_sought\n      machine_generated: '+(l.code==='eng'?'true  # authored by the hive, labeled':'false')+'\n      withdrawal: { status: none }';
 }).join('\n')+
 '\n\nstrings:                      # corpus genesis — the hub\'s own UI, baseline en\n'+
-KEYS.map(function(s){return '  - key: '+s.k+'\n    en: "'+s.v.replace(/"/g,"'")+'"   # source: surfaces/index.html, verbatim\n    '+DOCK.slice(1).map(function(l){return l.code+': absent';}).join('\n    ');}).join('\n')+
+KEYS.map(function(s,ki){
+ var lines='  - key: '+s.k+'\n    en: "'+s.v.replace(/"/g,"'")+'"   # source: surfaces/index.html, verbatim';
+ DOCK.slice(1).forEach(function(l){
+  var d=DRAFT[l.code]&&DRAFT[l.code][ki];
+  if(d) lines+='\n    '+l.code+': "'+d.replace(/"/g,"'")+'"   # ⚙ machine draft — label stays until a community attests';
+  else lines+='\n    '+l.code+': absent';
+ });
+ return lines;
+}).join('\n')+
 '\n\n# law: absent renders absent, labeled — never a silent English fallback pretending to be translation\n'+
-'# law: machine renders as machine — never silent about it\n'+
+'# law: machine renders as machine — the draft label never comes off until a community attests\n'+
 '# law: withdrawal is honored, history is kept — the dock forgets nothing\n'+
 '# fork this file, contribute a language, show your work';
 
@@ -255,7 +300,9 @@ var SRC=[
  ['UNDRIP Articles 13–14','indigenous language and education rights','<a href="https://www.ohchr.org/en/instruments-mechanisms/instruments/united-nations-declaration-rights-indigenous-peoples">OHCHR</a>'],
  ['ISO 639-3 registry','language codes, live lookup','<a href="https://iso639-3.sil.org/">iso639-3.sil.org</a>'],
  ['Glottolog','complementary language catalogue','<a href="https://glottolog.org/">glottolog.org</a>'],
- ['this hub, verbatim','string-corpus genesis','<a href="https://beehive-nature.github.io/beehive-nature/surfaces/">surfaces/</a>']
+ ['this hub, verbatim','string-corpus genesis','<a href="https://beehive-nature.github.io/beehive-nature/surfaces/">surfaces/</a>'],
+ ['FATHER-SET-1 register','father set (Russian hardwired) · genesis Latvian · rung-two Thai · CANDIDATE counts','<a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/register/FATHER-SET-1.md">docs/register/</a>'],
+ ['DISPATCH — bLanguage-translated .b names','the bridge, the exploit map, the pointer principle, gates T-1…T-7','<a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/DISPATCH_BTRANSLATED_B_NAMES_2026-08-20.md">docs/dispatches/</a>']
 ];
 var tb2=$('srctab');
 tb2.innerHTML='<tr><th>source</th><th>for</th><th>link</th></tr>';

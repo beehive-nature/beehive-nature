@@ -122,4 +122,16 @@ Strings × languages: **only the `en` column filled; every other cell `absent`.*
 
 ---
 
+## ADDENDUM 2026-08-20 — the father-tongue bridge (ruled in dispatch + register)
+
+The corpus's sibling product — translated `.b` resolution — named the bridge and its register ([DISPATCH_BTRANSLATED_B_NAMES](../dispatches/DISPATCH_BTRANSLATED_B_NAMES_2026-08-20.md) · [FATHER-SET-1](../register/FATHER-SET-1.md)): every front-facing surface carries a hardcoded **father set** of large-N pivot languages, through which any rare mother tongue enters with BLAI drafting **labeled** renderings that communities attest over time. Law updates binding this brief:
+
+- **The corpus stays gateless; the father set names the bridge, not the guests.** Second entry mechanism ruled 2026-08-20: **threshold OR founder word** — Russian hardwired at ~145–150M native (below the 300M line) by founder word alone.
+- **Machine-draft is lawful and always labeled.** The alpha's "no cell machine-filled" stance is superseded by the bridge: every string cell carries one of three states — *community-attested / ⚙ machine-draft / absent* — and the draft label never comes off until a community attests. Absence still never renders as silent English-fallback.
+- **Latvian (`lav`) is the genesis reference mother tongue** (~1.5M native, CANDIDATE) — the resonance already in the law: *skaists*, the seeded community context, is Latvian. **Thai (`tha`)** is reference rung two; its representation case (the Kingdom's own authority, aspiration-only, founder-hands diplomacy exclusively) is T-4's first worked specimen and is handled in the register with the care lèse-majesté context demands.
+- **Aliases are pointers, never ownership** (gate T-2): a father-ratified corpus may hold **one canonical `.b` of its own — a sovereign house, never a fiefdom** (gate T-7's shape). Withdrawal lapses the house's rendering with a receipt; it never orphans anyone else's names.
+- **Counts are CANDIDATE until T-5's Tier-R ruler exists** — cited-or-silent applies to speaker counts exactly as to every other number.
+
+---
+
 *Seven thousand ways of saying "welcome," forty percent of them fading — a dock where any of them boards without asking permission, and none leaves without a receipt.*
