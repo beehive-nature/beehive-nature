@@ -97,16 +97,23 @@ footer{max-width:860px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   version, and cypherpunk is not a reward. all three render from the same constants; numbers cannot
   diverge. the founder has ruled b-gating for the upper two registers <i>in late beta</i>; until
   gate U-1's reading lands, nothing here is gated — holding is not spending.</div>
-  <div class="law" style="margin-top:8px">▾ corpus law, live: the status labels below are corpus
-  records — pick your father tongue and they follow (machine-drafted ⚙ until a community attests;
-  the preference is local-first and shared with <a href="../btranslated.html">bTranslated</a>).</div>
+  <div class="law" style="margin-top:8px">▾ corpus law, live — the **three roles** (founder-ruled
+  2026-08-20): father language (the pivot), mother language (**chosen** — adopted cultures count,
+  young ones too), student language(s) (in active study — exposure is the point). the status labels
+  below are corpus records: they render in every role you set, machine-drafted ⚙ until a community
+  attests; a language with no docked rendering says so by name. local-first, shared with
+  <a href="../btranslated.html">bTranslated</a>.</div>
   <div style="margin-top:6px">
-    <label style="font-size:10px;color:var(--dim)">father tongue
+    <label style="font-size:10px;color:var(--dim)">father language
       <select id="father" style="background:#0a0f0b;color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:5px 9px;font:11px 'IBM Plex Mono',monospace">
         <option value="en">English (en)</option><option value="es">Español (es)</option>
         <option value="hi">हिन्दी (hi)</option><option value="cmn">中文 · 普通话 (cmn)</option>
         <option value="ru">Русский (ru)</option><option value="ar">العربية (ar)</option>
       </select></label>
+    <label style="font-size:10px;color:var(--dim);margin-left:12px">mother language — chosen, not native
+      <input id="mother" placeholder="e.g. latviešu — any language, the corpus is gateless" size="26" style="background:#0a0f0b;color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:5px 9px;font:11px 'IBM Plex Mono',monospace"></label>
+    <label style="font-size:10px;color:var(--dim);margin-left:12px">student language(s) — comma-separated
+      <input id="students" placeholder="e.g. ru, th" size="14" style="background:#0a0f0b;color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:5px 9px;font:11px 'IBM Plex Mono',monospace"></label>
     <div id="corpusChips" style="margin-top:8px"></div>
   </div>
 </section>
@@ -229,22 +236,52 @@ var STR={
 };
 function father(){ try{ return (JSON.parse(localStorage.getItem('btranslated_pref')||'{}').father)||'en'; }catch(e){ return 'en'; } }
 function T(key){ var f=father(), s=STR[key]||{}; return {txt:s[f]||s.en, machine:f!=='en'}; }
-function chip(key,glyph,color){
-  var r=T(key);
-  return '<span class="swatch"><i style="background:'+color+'"></i>'+glyph+' '+r.txt+
-    (r.machine?'<span class="machine">⚙ machine draft</span>':'')+'</span>';
+/* the three roles (RULING_LANGUAGE_ROLES_2026-08-20): father pivot · mother CHOSEN · students plural.
+   A role language with no docked rendering is honest absence, never a silent father-only fallback. */
+var LANG={en:'English',es:'Español',hi:'हिन्दी',cmn:'中文',ru:'Русский',ar:'العربية'};
+function codeOf(s){ s=(s||'').trim().toLowerCase();
+  var n2c={'english':'en','en':'en','es':'es','espanol':'es','español':'es','हिन्दी':'hi','hindi':'hi',
+           '中文':'cmn','chinese':'cmn','mandarin':'cmn','cmn':'cmn','русский':'ru','russian':'ru','ru':'ru',
+           'العربية':'ar','arabic':'ar','ar':'ar'};
+  return n2c[s]||null;
 }
+function pref3(){ var p; try{ p=JSON.parse(localStorage.getItem('btranslated_pref')||'{}'); }catch(e){ p={}; }
+  return {father:p.father||'en',mother:typeof p.mother==='string'?p.mother:'',students:Array.isArray(p.students)?p.students:[]}; }
+function roles3(){ var p=pref3(), r=[{role:'father',code:p.father,raw:p.father}];
+  if(p.mother) r.push({role:'mother',code:codeOf(p.mother),raw:p.mother.trim()});
+  p.students.forEach(function(s){ s=(s||'').trim(); if(s) r.push({role:'student',code:codeOf(s),raw:s}); });
+  return r; }
 function renderCorpus(){
-  $('father').value=father();
-  $('corpusChips').innerHTML=
-    chip('open','○','var(--c-gap)')+' '+chip('verified','✓','var(--c-works)');
+  var p=pref3();
+  $('father').value=p.father; $('mother').value=p.mother; $('students').value=p.students.join(', ');
+  var html='';
+  roles3().forEach(function(R){
+    html+='<div style="margin-top:6px"><span class="badge">'+R.role+(R.role==='student'?' · '+R.raw:'')+'</span> ';
+    ['open','verified'].forEach(function(k){
+      var s=STR[k]||{}, col=k==='open'?'var(--c-gap)':'var(--c-works)', gly=k==='open'?'○':'✓';
+      if(R.code&&s[R.code]){
+        html+='<span class="swatch"><i style="background:'+col+'"></i>'+gly+' '+s[R.code]
+          +(R.code!=='en'?'<span class="machine">⚙ machine draft</span>':'')+'</span> ';
+      } else {
+        var disp=R.code?LANG[R.code]:R.raw;
+        html+='<span class="swatch" style="border-style:dashed"><i style="background:'+col+'"></i>'+gly+' '+s.en
+          +' — no '+k+' rendering docked for '+disp+' yet <span class="machine">gateless corpus — dock it</span></span> ';
+      }
+    });
+    html+='</div>';
+  });
+  $('corpusChips').innerHTML=html;
 }
-$('father').addEventListener('change',function(){
-  var p; try{ p=JSON.parse(localStorage.getItem('btranslated_pref')||'{}'); }catch(e){ p={}; }
-  p.father=$('father').value;
+function save3(){
+  var p=pref3();
+  p.father=$('father').value; p.mother=$('mother').value.trim();
+  p.students=$('students').value.split(',').map(function(s){return s.trim();}).filter(function(s){return s;});
   try{ localStorage.setItem('btranslated_pref',JSON.stringify(p)); }catch(e){}
   renderCorpus(); renderReg(); renderGrad();
-});
+}
+$('father').addEventListener('change',save3);
+$('mother').addEventListener('input',save3);
+$('students').addEventListener('input',save3);
 
 /* ===== the five courses: prose per register, acts as exercises; numbers from K only ===== */
 var COURSES=[

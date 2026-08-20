@@ -51,6 +51,14 @@ const chips = await page.locator('#corpusChips').innerHTML();
 ok('corpus labels follow father tongue (ru)', chips.includes('акт ожидает') && chips.includes('⚙ machine draft'));
 await page.selectOption('#father', 'en');
 ok('corpus back to en, no machine badge', !(await page.locator('#corpusChips').innerHTML()).includes('machine draft'));
+// the three roles (RULING_LANGUAGE_ROLES_2026-08-20)
+await page.fill('#mother', 'latviešu');
+await page.fill('#students', 'ru, th');
+const chips3 = await page.locator('#corpusChips').innerHTML();
+ok('three roles render with badges', chips3.includes('father') && chips3.includes('mother') && chips3.includes('student · ru') && chips3.includes('student · th'));
+ok('russian student rendering docked + machine-badged', chips3.includes('проверено') && chips3.includes('machine draft'));
+ok('latvian mother + thai student honest absence, by name', chips3.includes('latviešu') && chips3.includes('th') && chips3.includes('no ') && chips3.includes('gateless corpus — dock it'));
+await page.fill('#mother', ''); await page.fill('#students', '');
 
 // c1: undercount
 await page.locator('#ex-c1-opts input[data-i="0"]').check();

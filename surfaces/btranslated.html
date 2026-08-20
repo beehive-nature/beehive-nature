@@ -60,8 +60,11 @@ a{color:var(--cyan)}
       <option value="ar">العربية (ar) · founder-hardwired</option>
     </select>
   </label>
-  <label style="font-size:10px;color:var(--dim);margin-left:12px">mother tongue (any — the corpus is gateless)
+  <label style="font-size:10px;color:var(--dim);margin-left:12px">mother language — chosen, not native (any — the corpus is gateless)
     <input id="mother" placeholder="e.g. latviešu — the genesis reference" size="24">
+  </label>
+  <label style="font-size:10px;color:var(--dim);margin-left:12px">student language(s) — comma-separated
+    <input id="students" placeholder="e.g. ru, th" size="12">
   </label>
   <div class="law" id="prefState" style="margin-top:8px">no preference stored yet</div>
 </section>
@@ -153,13 +156,14 @@ var STR={
 var VER=[{k:'works',c:'#3f9c55'},{k:'idea',c:'#a476ec'},{k:'bug',c:'#c07f1c'},{k:'gap',c:'#0092a6'}];
 var GLY={works:'✅',idea:'💡',bug:'🐛',gap:'🕳'};
 function pref(){ try{ return JSON.parse(localStorage.getItem('btranslated_pref')||'{}'); }catch(e){ return {}; } }
-function save(){ var p={father:$('father').value, mother:$('mother').value||''};
+function save(){ var p={father:$('father').value, mother:$('mother').value||'',
+  students:($('students').value||'').split(',').map(function(s){return s.trim();}).filter(function(s){return s;})};
   try{ localStorage.setItem('btranslated_pref', JSON.stringify(p)); }catch(e){}
   render(); }
 function t(key){ var f=$('father').value; var s=STR[key]||{}; return {txt:s[f]||s.en, machine:f!=='en'}; }
 function render(){
   var p=pref();
-  $('prefState').textContent = 'stored locally: father='+($('father').value)+($('mother').value?(' · mother='+$('mother').value+' (gateless — docks via the corpus, never gated)'):'')+' — this browser only';
+  $('prefState').textContent = 'stored locally: father='+($('father').value)+($('mother').value?(' · mother='+$('mother').value+' (chosen, gateless)'):'')+(($('students').value||'').trim()?(' · studying: '+$('students').value):'')+' — this browser only';
   // pointer flow
   var a=t('alias'), s=t('skel'), c=t('canon');
   $('flow').innerHTML =
@@ -180,8 +184,10 @@ function render(){
 var p=pref();
 if(p.father) $('father').value=p.father;
 if(p.mother) $('mother').value=p.mother;
+if(Array.isArray(p.students)&&p.students.length) $('students').value=p.students.join(', ');
 $('father').addEventListener('change',save);
 $('mother').addEventListener('change',save);
+$('students').addEventListener('change',save);
 render();
 })();
 </script>
