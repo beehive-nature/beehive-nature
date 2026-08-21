@@ -175,3 +175,29 @@ verified pass against it corrects this receipt in place:
    > grant. **And the protocol cuts both ways:** `Erc20.sol` and `Airdrop.sol` carry no
    > declaration, so under the same in-band rule **nothing was declared and nothing is
    > taken** — they remain patterns-only. Silence honored as strictly as speech.
+
+---
+
+## ⚖ THE bMETER BEACHES HERE — founder-called, 2026-08-21
+
+**Founder, verbatim:** *"this IMO is where we beach the b meter?"* — read as: this
+receipt class is where the metering lane lands ashore. **Agreed, and here is why it is
+the right beach:** the fleet receipts already carry the raw truth nobody else in the
+market meters — actual compute spent per verified finding — and the house's symmetric
+law says the meter proves itself **on ourselves first**, exactly as the COA spec
+pre-filled `manufacturer_funded: true` on our own assay.
+
+**This receipt's own meter block, measured not estimated:**
+
+| pass | agents | subagent tokens | tool calls | wall time |
+|---|---|---|---|---|
+| the raid workflow (census · 3 dives · attribution · adversarial flip · synthesis) | 7 | **578,217** | 149 | 31.4 min |
+| the ERC-20i/Autonomi follow-up pass (same estate, next day) | 6 | 617,972 | 200 | 38.8 min |
+
+**The standing law this lands:** every fleet-produced receipt henceforth carries its
+meter block — tokens, agents, tool calls, wall time — so a reader can weigh a finding
+against what it cost to establish, and so the bMeshAsi metering lane (`BUZZ_A_METERING`)
+has a native corpus of real workloads before it ever meters a stranger. **The meter's
+first customer is the hive itself.** Nobody meters verified-research-per-token today;
+these receipts make the unit legible. *(If the founder meant a different "b meter,"
+one line redirects this — the block stands either way as measurement.)*
