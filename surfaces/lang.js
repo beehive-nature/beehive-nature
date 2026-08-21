@@ -98,7 +98,18 @@
   function load(cb){
     if(corpus) return cb();
     fetch(R+'lang-corpus.json?v=2').then(function(r){return r.json()})
-      .then(function(j){ corpus=j; cb(); })
+      .then(function(j){ corpus=j;
+        /* the withdrawal law reaches the renderer: a withdrawn tongue stops rendering
+           estate-wide (history kept in the corpus file); its picker entry says so. */
+        try{ var wd=(j._meta&&j._meta.withdrawn)||{};
+          var sel=document.getElementById("blangsel");
+          Object.keys(wd).forEach(function(code){
+            if(sel){ var o=sel.querySelector('option[value="'+code+'"]');
+              if(o){ o.disabled=true; o.textContent+=" 🕊"; } }
+            if(corpus.strings) Object.keys(corpus.strings).forEach(function(k){ delete corpus.strings[k][code]; });
+          });
+        }catch(e){}
+        cb(); })
       .catch(function(){ corpus={strings:{}}; cb(); }); /* fetch failure = full English fallback, counter shows 0/N */
   }
   var _setPref=setPref;

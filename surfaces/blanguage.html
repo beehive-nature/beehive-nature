@@ -173,6 +173,78 @@ footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   <div class="wrap"><table id="srctab"></table></div>
 </section>
 
+
+<section id="workshop">
+  <h2>THE WORKSHOP — dock your tongue: create · merge · migrate · remove</h2>
+  <div class="banner">the four verbs, live against the estate's real corpus (<code>lang-corpus.json</code> —
+  the file the 🌐 picker on every page reads). <b>this page composes; a person publishes.</b> your export is a
+  ready-to-carry fragment for a repo PR or a signed [bX lang] pointer — the page never posts, never holds a key,
+  and a machine draft never finalizes a consent.</div>
+
+  <div class="card">
+    <h3>the corpus, right now</h3>
+    <div class="law" id="ws-state">reading the live corpus…</div>
+    <div class="wrap"><table id="ws-langs"></table></div>
+    <div class="law" style="margin-top:8px"><b>where the corpus itself lives, by the estate's own routing law:</b>
+    <span id="ws-route">…</span> — small public immutable rides <b>Arweave</b>; if the docking works and the corpus
+    outgrows the price break, the same law that routes every other payload graduates it to <b>Autonomi</b>. The
+    anchors field in the corpus meta is append-only and waits for exactly that ceremony
+    (<a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/specs/SPEC-AUTONOMI-TREZOR-1.md" rel="noopener">the founder signs, the seat prepares</a>).</div>
+  </div>
+
+  <div class="card">
+    <h3>pick your verb</h3>
+    <div class="cb" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr))">
+      <div style="cursor:pointer" data-verb="create"><b>➕ create</b><br>dock a tongue the corpus lacks</div>
+      <div style="cursor:pointer" data-verb="merge"><b>🔀 merge</b><br>improve lines in a docked tongue</div>
+      <div style="cursor:pointer" data-verb="migrate"><b>🚚 migrate</b><br>carry lines to a truer code — history kept</div>
+      <div style="cursor:pointer" data-verb="remove"><b>🕊 remove</b><br>withdraw — honored, never erased</div>
+    </div>
+
+    <div id="ws-editor" style="display:none;margin-top:10px">
+      <div class="law"><b id="ws-verbtitle"></b></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+        <span id="ws-fromwrap" style="display:none">
+          <label class="law">from&nbsp;</label><select id="ws-from"></select>
+        </span>
+        <span><label class="law">language code&nbsp;</label>
+          <input id="ws-code" placeholder="e.g. mi, chr, x-yourtongue" style="width:150px;background:#0a0f0b;color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:5px 8px;font:11px 'IBM Plex Mono',monospace"></span>
+        <span><label class="law">native name&nbsp;</label>
+          <input id="ws-name" placeholder="how it names itself" style="width:170px;background:#0a0f0b;color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:5px 8px;font:11px 'IBM Plex Mono',monospace"></span>
+      </div>
+      <div class="law" style="margin-top:6px">no ISO code for your tongue? that is not a wall: use an
+      <code>x-</code> tag — the dock accepts what the registries have not yet named. rtl? add
+      <label><input type="checkbox" id="ws-rtl"> right-to-left</label></div>
+
+      <div id="ws-strings" class="wrap" style="margin-top:8px"></div>
+
+      <div id="ws-removebox" style="display:none;margin-top:8px">
+        <div class="banner">⚠ <b>the removal law, before you compose one.</b> withdrawal is honored and
+        history is kept — the record below ADDS a withdrawal entry; nothing is ever erased. and a tongue that
+        belongs to a people can only be withdrawn by that people: <b>your own contributions are yours to withdraw
+        permissionless; a community tongue needs the community's own consent ceremony</b> (the CONSENT-1 grammar;
+        the bACCORD escrow gate for exactly this exploit is open as <b>LD-1</b> and a lone stranger's removal
+        request parks there rather than executing).</div>
+        <label class="law"><input type="checkbox" id="ws-own"> I withdraw only my own contribution(s)</label><br>
+        <label class="law"><input type="checkbox" id="ws-comm"> I act with my community's documented consent (attach its record in the PR)</label><br>
+        <label class="law">reason (kept in history):&nbsp;</label>
+        <input id="ws-reason" style="width:min(420px,90%);background:#0a0f0b;color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:5px 8px;font:11px 'IBM Plex Mono',monospace">
+      </div>
+
+      <div style="margin-top:10px">
+        <button id="ws-compose" style="background:#26123a;color:var(--violet);border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer;font:11.5px 'IBM Plex Mono',monospace">compose the fragment</button>
+        <button id="ws-copy" style="display:none;background:#2a230a;color:var(--gold);border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer;font:11.5px 'IBM Plex Mono',monospace">📋 copy</button>
+      </div>
+      <pre id="ws-out" style="display:none"></pre>
+      <div class="law" id="ws-carry" style="display:none"><b>how it lands (pick either rail):</b> open a PR against
+      <a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/lang-corpus.json" rel="noopener">surfaces/lang-corpus.json</a>
+      with this fragment, or publish it as a signed <code>[bX lang]</code> pointer on your own rail and link it in
+      an issue. either way a human carries it, the sweeps verify it, and your name (or your chosen silence) rides
+      the attestation block.</div>
+    </div>
+  </div>
+</section>
+
 </main>
 <footer>
   alpha MVP — mechanism + register + honest absence; the string layer reaches every surface at beta ·
@@ -346,5 +418,98 @@ tb2.innerHTML='<tr><th>source</th><th>for</th><th>link</th></tr>';
 SRC.forEach(function(r){ tb2.innerHTML+='<tr><td class="cl">'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>'; });
 })();
 </script>
+
+<script>
+(function(){
+var R2=location.pathname.indexOf('/beehive-nature/')===0?'/beehive-nature/surfaces/':'/surfaces/';
+var C=null, verb=null;
+var KEYS=[]; // filled from corpus
+function $(id){return document.getElementById(id);}
+function esc(x){return String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+fetch(R2+'lang-corpus.json?v=2').then(function(r){return r.json();}).then(function(j){
+  C=j; KEYS=Object.keys(j.strings);
+  var bytes=JSON.stringify(j).length;
+  var langs=j._meta.langs.slice();
+  $('ws-state').innerHTML='<b>'+KEYS.length+'</b> strings × <b>'+langs.length+'</b> docked tongues (+ English baseline) · '
+    +'every rendering currently <b>machine-drafted ⚙</b> — the attested map is empty and waiting for humans · '
+    +'withdrawn: '+Object.keys(j._meta.withdrawn||{}).length;
+  $('ws-route').innerHTML='<b>'+(bytes/1024).toFixed(1)+' kB today</b> — small-public territory (AR); the price break is measured at anchor time, never assumed';
+  var t=$('ws-langs'); t.innerHTML='<tr><th>code</th><th>coverage</th><th>status</th></tr>';
+  langs.forEach(function(code){
+    var n=0; KEYS.forEach(function(k){ if(C.strings[k][code]) n++; });
+    var wd=C._meta.withdrawn&&C._meta.withdrawn[code];
+    t.innerHTML+='<tr><td class="cl">'+esc(code)+'</td><td>'+n+'/'+KEYS.length+'</td><td>'
+      +(wd?'🕊 withdrawn — history kept':'⚙ machine-draft, attestation open')+'</td></tr>';
+  });
+  var f=$('ws-from'); f.innerHTML=langs.map(function(c){return '<option>'+esc(c)+'</option>';}).join('');
+  f.style.cssText='background:#0a0f0b;color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:5px 8px;font:11px "IBM Plex Mono",monospace';
+}).catch(function(){ $('ws-state').textContent='the corpus could not be fetched — a failed fetch is a failure, never an empty corpus. try again.'; });
+
+document.querySelectorAll('#workshop [data-verb]').forEach(function(el){
+  el.addEventListener('click',function(){ verb=el.getAttribute('data-verb'); openEditor(); });
+});
+function openEditor(){
+  if(!C) return;
+  $('ws-editor').style.display='block';
+  $('ws-out').style.display='none'; $('ws-copy').style.display='none'; $('ws-carry').style.display='none';
+  $('ws-fromwrap').style.display=(verb==='merge'||verb==='migrate')?'inline':'none';
+  $('ws-removebox').style.display=(verb==='remove')?'block':'none';
+  $('ws-strings').style.display=(verb==='remove')?'none':'block';
+  $('ws-verbtitle').textContent={
+    create:'➕ CREATE — your tongue, line by line, beside the English it answers',
+    merge:'🔀 MERGE — improve a docked tongue; only the lines you change travel',
+    migrate:'🚚 MIGRATE — carry every line to a truer code; the old code’s history stays',
+    remove:'🕊 REMOVE — compose a withdrawal record; nothing is erased'
+  }[verb];
+  if(verb!=='remove') renderStrings(verb==='merge'?$('ws-from').value:null);
+  if(verb==='merge') $('ws-from').onchange=function(){ renderStrings($('ws-from').value); $('ws-code').value=$('ws-from').value; };
+  if(verb==='migrate') $('ws-strings').style.display='none';
+}
+function renderStrings(prefill){
+  var h='<table><tr><th>key</th><th>English</th><th>your rendering</th></tr>';
+  KEYS.forEach(function(k){
+    var en=C.strings[k].en, cur=prefill?(C.strings[k][prefill]||''):'';
+    h+='<tr><td class="cl">'+esc(k)+'</td><td>'+esc(en)+'</td>'
+      +'<td><textarea data-k="'+esc(k)+'" style="width:100%;min-height:34px;background:#0a0f0b;color:var(--ink);border:1px solid var(--line);border-radius:5px;font:10px \'IBM Plex Mono\',monospace;padding:4px">'+esc(cur)+'</textarea></td></tr>';
+  });
+  $('ws-strings').innerHTML=h+'</table>';
+}
+$('ws-compose').addEventListener('click',function(){
+  var code=($('ws-code').value||'').trim(), name=($('ws-name').value||'').trim();
+  var out;
+  if(verb==='remove'){
+    if(!code){ alert('the code to withdraw'); return; }
+    if(!$('ws-own').checked && !$('ws-comm').checked){ alert('the removal law: affirm whose withdrawal this is — your own, or your community\'s with its consent record'); return; }
+    out={ verb:'remove', code:code,
+      withdrawal:{ date:new Date().toISOString().slice(0,10), reason:$('ws-reason').value||'(none given)',
+        authority:$('ws-comm').checked?'community-consent (record attached in PR — parks at gate LD-1 for verification)':'own-contribution (permissionless)',
+        law:'withdrawal honored, history kept — this record ADDS; nothing is erased' } };
+  }else if(verb==='migrate'){
+    if(!code){ alert('the destination code'); return; }
+    var from=$('ws-from').value, carried={};
+    KEYS.forEach(function(k){ if(C.strings[k][from]) carried[k]=C.strings[k][from]; });
+    out={ verb:'migrate', from:from, to:code, name:name||undefined, strings:carried,
+      history:'the '+from+' entries remain in corpus history; renderers follow '+code+' forward' };
+  }else{
+    if(!code){ alert('a language code — an x- tag is welcome if no registry has named your tongue'); return; }
+    var strings={}, n=0;
+    document.querySelectorAll('#ws-strings textarea').forEach(function(t){
+      var v=t.value.trim(); if(v){ strings[t.getAttribute('data-k')]=v; n++; }
+    });
+    if(!n){ alert('at least one line — partial docking is lawful, absence stays honest'); return; }
+    out={ verb:verb, code:code, name:name||undefined, rtl:$('ws-rtl').checked||undefined, strings:strings,
+      coverage:n+'/'+KEYS.length+' — the missing lines render Absent, never machine-faked',
+      attestation:{ status:'human', by:'(your name, or your chosen silence)', date:new Date().toISOString().slice(0,10),
+        law:'a machine draft never finalizes a consent; this fragment is a HUMAN rendering unless you say otherwise' } };
+  }
+  $('ws-out').textContent=JSON.stringify(out,null,1);
+  $('ws-out').style.display='block'; $('ws-copy').style.display='inline-block'; $('ws-carry').style.display='block';
+});
+$('ws-copy').addEventListener('click',function(){
+  navigator.clipboard.writeText($('ws-out').textContent).then(function(){ $('ws-copy').textContent='✓ copied'; });
+});
+})();
+</script>
+
 </body>
 </html>
