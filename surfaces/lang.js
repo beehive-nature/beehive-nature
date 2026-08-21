@@ -28,6 +28,7 @@
     ['gd','Gàidhlig'],
     ['lv','Latviešu'],
     ['zh','中文'],
+    ['ko','한국어'],
     ['th','ไทย'],
     ['hi','हिन्दी'],
     ['bn','বাংলা'],
@@ -67,9 +68,13 @@
       if(note){
         if(code==='en'){ note.textContent=''; note.title=''; }
         else{
-          note.textContent = total===0 ? '⚙ 0 docked here yet' : '⚙ '+hit+'/'+total;
-          note.title='machine-drafted ⚙ — human attestation upgrades it; '+
-            (total-hit)+' line(s) on this page fall back to English and say so here';
+          var att=corpus&&corpus._meta&&corpus._meta.attested&&corpus._meta.attested[code];
+          if(att){ note.textContent='✓ '+hit+'/'+total;
+            note.title='HUMAN-ATTESTED '+(att.by||'(name withheld)')+' · '+(att.date||'')+
+              ' — a person who lives in this tongue signed these lines'; }
+          else{ note.textContent = total===0 ? '⚙ 0 docked here yet' : '⚙ '+hit+'/'+total;
+            note.title='machine-drafted ⚙ — human attestation upgrades it; '+
+              (total-hit)+' line(s) on this page fall back to English and say so here'; }
         }
       }
     }
@@ -97,7 +102,7 @@
   }
   function load(cb){
     if(corpus) return cb();
-    fetch(R+'lang-corpus.json?v=3').then(function(r){return r.json()})
+    fetch(R+'lang-corpus.json?v=4').then(function(r){return r.json()})
       .then(function(j){ corpus=j;
         /* the withdrawal law reaches the renderer: a withdrawn tongue stops rendering
            estate-wide (history kept in the corpus file); its picker entry says so. */
