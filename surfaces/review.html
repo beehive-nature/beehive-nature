@@ -66,7 +66,7 @@ a{color:var(--cyan)}
 <main>
 
 <section id="bind">
-  <h2>1 · WHO SIGNS — bind by passkey tap only</h2>
+  <h2>1 · <span data-i18n="h.165">WHO SIGNS — bind by passkey tap only</span></h2>
   <div class="law">recovery phrases never enter this page — asking again would be a harvest surface.
   one passkey tap re-derives your bzDiD record key on this device; only signatures ever leave it.
   guest mode composes UNSIGNED receipts (still publishable; guards will mark them unverified).</div>
@@ -76,7 +76,7 @@ a{color:var(--cyan)}
 </section>
 
 <section id="compose">
-  <h2>2 · REVIEW RECEIPT — one surface, one verdict, ≤140 chars</h2>
+  <h2>2 · <span data-i18n="h.166">REVIEW RECEIPT — one surface, one verdict, ≤140 chars</span></h2>
   <label for="surf">surface</label>
   <select id="surf"></select>
   <label for="verdict">verdict</label>
@@ -98,7 +98,7 @@ a{color:var(--cyan)}
 </section>
 
 <section id="guard">
-  <h2>3 · GUARD VERDICT — verify a receipt, then weigh it</h2>
+  <h2>3 · <span data-i18n="h.167">GUARD VERDICT — verify a receipt, then weigh it</span></h2>
   <div class="law">paste a full receipt block (line + pub + sig). the check is arithmetic — an
   Ed25519 signature either verifies or it does not. guards weight reviews in the tally; they never
   gate or delete them, and no page decides who is real.</div>
@@ -117,7 +117,7 @@ a{color:var(--cyan)}
 </section>
 
 <section id="ai">
-  <h2>4 · bLOVErAi WINDOW — W-3: your AI, your device</h2>
+  <h2>4 · <span data-i18n="h.168">bLOVErAi WINDOW — W-3: your AI, your device</span></h2>
   <div class="law">this window builds a review prompt and hands it to whatever AI you already
   hold — nothing is sent anywhere by this page. the in-browser model (W-1) docks later; no lane
   ever proxies your words through a hive server.</div>
@@ -138,7 +138,7 @@ a{color:var(--cyan)}
 </section>
 
 <section id="tally">
-  <h2>5 · THE TALLY — only what was deliberately published</h2>
+  <h2>5 · <span data-i18n="h.169">THE TALLY — only what was deliberately published</span></h2>
   <div class="law">reads the live rails (Nostr relay + Bluesky public AppView) for the
   <b>[bX review]</b> and <b>[bX guard]</b> grammar. a reviewer who walked every page and published
   nothing appears nowhere — that is the design, not a gap. verdict colors are a

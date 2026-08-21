@@ -73,7 +73,7 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 </header>
 
 <section>
-  <h2>THE SHAPE — root below, everything else above</h2>
+  <h2><span data-i18n="h.170">THE SHAPE — root below, everything else above</span></h2>
   <div id="flow">
     <div class="tier root"><div class="t">🐝 <span data-i18n="stack.t1">bzDiD — the identity root</span></div>
       <div class="d">self-authenticating identity (Self-Auth + DiD), built to survive the loss of
@@ -109,7 +109,7 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 </section>
 
 <section>
-  <h2>WHERE AUTONOMI IS IN THIS ESTATE, RIGHT NOW — the direct answer</h2>
+  <h2><span data-i18n="h.171">WHERE AUTONOMI IS IN THIS ESTATE, RIGHT NOW — the direct answer</span></h2>
   <div class="law">
   <b>1 · The founder's own vault runs on it today</b> — personal data storage through the
   Autonomi App, with a hardware-wallet payment lane spec'd so that <b>no key ever leaves the
@@ -131,7 +131,7 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 </section>
 
 <section>
-  <h2>WHICH DOOR RUNS ON WHAT — measured 2026-08-21, not self-reported</h2>
+  <h2><span data-i18n="h.172">WHICH DOOR RUNS ON WHAT — measured 2026-08-21, not self-reported</span></h2>
   <div class="law">Each row is from an endpoint-and-content sweep of the page's actual code on
   the date shown — a surface earns a chip by carrying the rail, not by claiming it.
   <b>No chips at all is its own achievement:</b> the science surfaces (bFood, bEarth, the
@@ -164,7 +164,60 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 </section>
 
 <section>
-  <h2>IF YOU CAME WITH ONE QUESTION — five doors</h2>
+  <h2>ENGINEER FAQ — what breaks when X goes down, answered from the architecture</h2>
+  <div class="law">Every answer below is a property of the design, checkable in the source — not a
+  promise. Where the honest answer is "that hurts today," it says so, with the mitigation's state.</div>
+  <div class="scroll"><table style="min-width:600px">
+    <tr><th style="width:210px">failure</th><th>what actually happens</th></tr>
+    <tr><td class="n">GitHub Pages goes down</td>
+      <td>The pages are <b>static files with no build step</b> — any host serves them unchanged, and
+      every clone of the public repo IS a complete copy of the estate. Your browser keeps working on
+      whatever it already loaded (chain reads are client-side). <b>Honest debt:</b> Pages is the
+      bootstrap crutch, named on this page; the mirror lane + AR/ANT anchors (gate AT-2) are the
+      exit, and until they land, discovery — not function — is what an outage costs.</td></tr>
+    <tr><td class="n">the GitHub <i>org</i> is deleted</td>
+      <td>Git is the medium: every clone carries full history, and the mirror manifest publishes
+      sha256es of the evidence corpus, so any copy can prove it is the real one. The corpus, specs
+      and receipts are AGPL — legally re-hostable by anyone the moment we cannot.</td></tr>
+    <tr><td class="n">a VPS / relay disappears</td>
+      <td>By doctrine any server you find behind a feature is a <b>temporary bootstrap</b> and holds
+      nothing unique: state lives in the repo, on chains, or in your browser's own storage. The
+      bSky/Nostr relays are the last planned migration — once anchored to chains/ANT/AR, redeploying
+      relays is autonomous. Until then a relay outage mutes the social echo, never the record.</td></tr>
+    <tr><td class="n">an RPC endpoint dies (Base/ETH/Arbitrum/Vaulta)</td>
+      <td>Every chain-reading surface carries <b>multi-host failover</b> (two EVM hosts per chain;
+      three Vaulta hosts), and when all hosts fail the surface renders <b>a failure, never a zero</b>
+      — the uniform law you can grep for. Any reader can also repoint one constant at their own
+      node: the pages are keyless <code>eth_call</code>s, nothing more.</td></tr>
+    <tr><td class="n">Autonomi has an outage — or dies entirely</td>
+      <td>The layering is the answer: <b>the bzDiD root sits BELOW every adapter and survives the
+      loss of any of them — including ANT — by design.</b> Storage re-routes by the same price-break
+      law that chose it (Arweave beside it, the repo beneath both). What an Autonomi loss would cost
+      is the private-vault convenience and one leg of permanence — never identity, never the record.</td></tr>
+    <tr><td class="n">Arweave stops accepting writes</td>
+      <td>Same answer mirrored: AR and ANT are <b>two independent permanence legs plus the repo</b>;
+      the manifest's hashes make any surviving copy verifiable. One-leg loss degrades redundancy,
+      not truth.</td></tr>
+    <tr><td class="n">your nodes go down (the farm)</td>
+      <td>Nodes are yours, on your machine — the network re-replicates chunks around absence, and
+      your <b>DataMaps keep working from any client</b>: retrieval needs the network, not your
+      nodes. Earnings pause; nothing is lost but uptime.</td></tr>
+    <tr><td class="n">the language corpus fails to fetch</td>
+      <td>Every page falls back to English <b>and says so</b> — the picker's counter reads the
+      truth (<code>⚙ 0/N</code>) instead of silently anglicizing. A withdrawn tongue stops rendering
+      estate-wide while its history stays in the file.</td></tr>
+    <tr><td class="n">localStorage is cleared / you switch devices</td>
+      <td>You lose only <b>preferences</b> (register, tongue, tri-role languages) — by design there
+      are no accounts to lose. Nothing here identifies you; nothing here can strand you.</td></tr>
+    <tr><td class="n">this page lies to you</td>
+      <td>The standing answer: <b>don't trust these pages either.</b> Every claim links its source;
+      the git history is the audit log; the university teaches the checking. The design goal is not
+      "trust us" — it is <b>maximum verifiability at zero credential cost.</b></td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2><span data-i18n="h.173">IF YOU CAME WITH ONE QUESTION — five doors</span></h2>
   <a class="door" href="keys/addresses.html"><div class="dt">"show me the Autonomi-era identity idea"</div>
     <div class="dd">Self-Auth + DiD, implemented: an identity that needs no server's permission and survives the loss of any adapter under it</div></a>
   <a class="door" href="blight/gallery.html"><div class="dt">"show me something beautiful in 10 seconds"</div>

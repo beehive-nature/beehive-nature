@@ -43,7 +43,7 @@ footer{max-width:760px;margin:26px auto 0;color:var(--dim);font-size:10px;text-a
 </form>
 
   <div class="card plc">
-    <h3>① the bsky address — did:plc</h3>
+    <h3>① <span data-i18n="h.145">the bsky address — did:plc</span></h3>
     <div class="row"><span class="k">did method</span><span class="v">did:plc (portable, PDS-hosted, ATProto)</span></div>
     <div class="row"><span class="k">derivation role</span><span class="v">bzDiD root ATTESTS the plc signing key (never is it)</span></div>
     <div class="row"><span class="k">plc document</span><span class="v mono" id="plcDoc">did:plc:&lt;rotation-0-hash-of-root&gt;</span></div>
@@ -53,7 +53,7 @@ footer{max-width:760px;margin:26px auto 0;color:var(--dim);font-size:10px;text-a
   </div>
 
   <div class="card npub">
-    <h3>② the nostr address — npub</h3>
+    <h3>② <span data-i18n="h.146">the nostr address — npub</span></h3>
     <div class="row"><span class="k">key scheme</span><span class="v">secp256k1 pair, bech32 (npub/nsec)</span></div>
     <div class="row"><span class="k">derivation role</span><span class="v">bzDiD root derives the pair via registered context</span></div>
     <div class="row"><span class="k">npub (public)</span><span class="v mono" id="npubV">npub1&lt;bech32-of-derived-pub&gt;</span></div>
@@ -64,7 +64,7 @@ footer{max-width:760px;margin:26px auto 0;color:var(--dim);font-size:10px;text-a
   </div>
 
   <div class="card">
-    <h3 style="color:var(--gold)">③ the binding attestation (on-chain row)</h3>
+    <h3 style="color:var(--gold)">③ <span data-i18n="h.147">the binding attestation (on-chain row)</span></h3>
     <div class="row"><span class="k">attestation event</span><span class="v mono">did-bind: {root_fp, plc, npub, ts, sig}</span></div>
     <div class="row"><span class="k">where</span><span class="v">Vaulta custom_json lane (the event layer already chosen)</span></div>
     <div class="row"><span class="k">cost</span><span class="v">HP-only, free forever at stake (measured 17/20 ops are custom_json)</span></div>

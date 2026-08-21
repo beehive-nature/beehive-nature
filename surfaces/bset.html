@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="color-scheme" content="dark">
+<title>🎧 the set I build to — what's in the headphones while all of this gets made</title>
+<style>
+:root{--bg:#07090b;--panel:#0e1611;--well:#0a0f0b;--ink:#e2efdb;--dim:#8a9a8a;--faint:#5f6f61;
+ --line:#243026;--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--leaf:#7ddf8f;--amber:#ffb347}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{overflow-x:hidden}
+body{background:var(--bg);color:var(--ink);font:13px/1.65 'IBM Plex Mono',monospace;padding:30px 14px 90px}
+main{max-width:900px;margin:0 auto}
+header{text-align:center;margin-bottom:8px}
+h1{font-size:clamp(19px,5vw,28px);color:var(--gold);font-weight:400}
+.sub{color:var(--dim);font-size:11.5px;margin-top:8px;max-width:680px;margin-inline:auto;line-height:1.8}
+section{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:15px 16px;margin-top:14px}
+h2{font-size:11.5px;color:var(--violet);font-weight:400;letter-spacing:.09em;margin-bottom:9px}
+.law{color:var(--dim);font-size:10.5px;line-height:1.85}
+.law b{color:var(--ink)}
+a{color:var(--cyan)}
+.track{display:flex;gap:12px;align-items:center;background:var(--well);border:1px solid var(--line);
+ border-radius:10px;padding:10px 12px;margin-top:8px;outline:none}
+.track:focus-visible{border-color:var(--cyan);box-shadow:0 0 0 2px rgba(0,229,255,.25)}
+.track svg{flex:0 0 auto;width:52px;height:46px}
+.track .ti{flex:1;min-width:0}
+.track .tt{font-size:12.5px;color:var(--ink);line-height:1.5;word-break:break-word}
+.track .ta{font-size:10.5px;color:var(--dim)}
+.track .tl{font-size:9.5px;margin-top:3px}
+.track .tl a{margin-right:10px}
+.badge{display:inline-block;font-size:8.5px;letter-spacing:.05em;border:1px solid var(--line);
+ border-radius:3px;padding:0 5px;color:var(--faint)}
+.ru{color:var(--violet)}
+.design{border:1px dashed #3d3410;background:#141207;border-radius:9px;padding:11px 13px;
+ font-size:10.5px;color:var(--gold);line-height:1.8;margin-top:10px}
+textarea{width:100%;min-height:90px;background:var(--well);color:var(--ink);border:1px solid var(--line);
+ border-radius:7px;padding:9px;font:11px 'IBM Plex Mono',monospace;resize:vertical}
+button{background:#26123a;color:var(--violet);border:1px solid var(--line);border-radius:8px;
+ padding:8px 14px;cursor:pointer;font:11.5px 'IBM Plex Mono',monospace;min-height:40px;margin-top:8px;margin-right:6px}
+button:hover{background:var(--violet);color:#000}
+pre{background:var(--well);border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:8px;
+ font-size:9.5px;line-height:1.6;overflow-x:auto;color:var(--dim);white-space:pre-wrap;word-break:break-word}
+footer{max-width:900px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
+@media (prefers-reduced-motion: no-preference){
+ .track svg polygon{transition:opacity .6s ease}
+ .track:hover svg polygon,.track:focus-visible svg polygon{opacity:.75}
+}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>🎧 the set I build to</h1>
+  <div class="sub" data-reg="bee">What's in the founder's headphones while all of this gets made —
+  EDM for the festival heart, Russian tracks for the second tongue of the hive. Every track links
+  out to <b style="color:var(--ink)">where the artist gets paid</b>, opens in a new tab so your
+  session stays put, and wears a little comb-sigil grown from its own name.</div>
+  <div class="sub" data-reg="raver">the build soundtrack — EDM × русская музыка — each track wearing
+  a deterministic comb-sigil from its own title-seed: the exact grammar that renders our on-chain
+  art, pointed at the music that powers the making of it. artist-paid links only, new-tab law, no
+  players embedded without consent.</div>
+  <div class="sub" data-reg="cypherpunk">A dataset + renderer, not an embed farm: tracks are records
+  in <code>bset.json</code> (artist · title · lang · artist-paid URL), sigils are FNV-1a-seeded
+  7-cell combs rendered client-side — the ERC-20i seed→art grammar applied to a playlist. No
+  third-party iframes, no tracking pixels, no autoplay; external links measured and new-tabbed at
+  click by the estate's link law. Keyboard: ↑/↓ move, Enter opens.</div>
+</header>
+
+<section>
+  <h2>THE SET — <span id="setcount">…</span></h2>
+  <div id="tracks" role="list"></div>
+  <div class="design" id="emptynote" style="display:none">🎧 <b>The chair is set; the set is the
+  founder's to drop.</b> This page refuses to fake a personal playlist — a made-up "his set" would
+  be a false signal wearing headphones. The founder pastes his list below (or commits
+  <code>bset.json</code>), and every track appears here with its sigil the moment it lands. That is
+  the whole ceremony: <b>no seat invents the founder's taste.</b></div>
+</section>
+
+<section>
+  <h2>DROP THE SET — the one-paste composer</h2>
+  <div class="law">One track per line: <code>Artist — Title — url</code> (url optional; ru-language
+  tracks get auto-detected by Cyrillic, or force with <code>[ru]</code>). The composer renders a
+  live preview above and emits the <code>bset.json</code> fragment for the commit — <b>this page
+  composes; a person publishes.</b></div>
+  <textarea id="paste" placeholder="Boris Brejcha — Purple Noise — https://…
+Нейромонах Феофан — Притоптать [ru] — https://…"></textarea>
+  <div>
+    <button id="preview">preview above</button>
+    <button id="emit">emit bset.json</button>
+    <button id="share">📋 share as text</button>
+  </div>
+  <pre id="out" style="display:none"></pre>
+</section>
+
+<section>
+  <h2>THE DETAILS USUALLY CUT — shipped first here, on purpose</h2>
+  <div class="law">The founder's order, verbatim: <i>"buildout those details that are valuable for
+  end users but left to the end of funded development and get missed or a gross compromise."</i>
+  So this page ships them on day one, as a demonstration that the stack affords them:<br>
+  <b>· keyboard-first</b> — ↑/↓ walks the set, Enter opens the artist link; every row focusable.<br>
+  <b>· reduced-motion respected</b> — the sigil hover-glow only animates for readers whose OS
+  hasn't asked for stillness.<br>
+  <b>· no hover-only anything</b> — every fact is printed text (the A16 law).<br>
+  <b>· share-as-text</b> — the set exports as plain text, because a playlist you can't hand to a
+  friend in a chat message is a playlist half-owned.<br>
+  <b>· artist-paid links only, named on the face</b> — the DJBUZZ law: metadata + the DJ's own
+  library + buy-where-the-artist-gets-paid; no embed farms, no circumvention, no autoplay.<br>
+  <b>· works after load</b> — static page, local data; the music links need the world, the page
+  doesn't.<br>
+  <b>· speaks 18 tongues</b> — the 🌐 picker below carries this page like every other.</div>
+</section>
+</main>
+<footer>
+  the buzz studios' listening lane: <a href="listening.html">the Listening Room (on-chain sound)</a>
+  · <a href="blight/midi-organ.html">the Organ</a> · <a href="index.html" data-i18n="law.hive">← the hive</a>
+</footer>
+<script src="tour.js?v=12"></script>
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id)};
+/* the founder's set docks by commit; the page never fakes it */
+var SET=[];
+try{ /* inline dataset — replaced by the founder's drop */ SET=[]; }catch(e){}
+
+/* FNV-1a — the seed grammar */
+function fnv(s){ var h=0x811c9dc5; for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=(h*0x01000193)>>>0; } return h; }
+var PAL=['#3f9c55','#a476ec','#c07f1c','#0092a6','#7ddf8f','#00E5FF','#FFD700'];
+function sigil(name){
+  var h=fnv(name), cells='';
+  for(var i=0;i<7;i++){
+    var on=(h>>(i*3))&7, c=PAL[(h>>(i*4))%PAL.length];
+    var col=i%4, row=(i/4)|0, R=10;
+    var cx=8+col*17+(row?8:0), cy=10+row*15;
+    var pts=[];
+    for(var k=0;k<6;k++){ var a=(Math.PI/180)*(60*k-90);
+      pts.push((cx+R*Math.cos(a)).toFixed(1)+','+(cy+R*Math.sin(a)).toFixed(1)); }
+    cells+='<polygon points="'+pts.join(' ')+'" fill="'+(on>2?c:'none')+'" stroke="'+c+'" stroke-width="1" opacity="'+(0.35+((h>>(i*2))&3)*0.2)+'"/>';
+  }
+  return '<svg viewBox="0 0 70 46" aria-hidden="true">'+cells+'</svg>';
+}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+function render(list){
+  var host=$('tracks'); host.innerHTML='';
+  $('setcount').textContent=list.length? list.length+' tracks · sigils grown from their own names'
+    : 'awaiting the founder’s drop';
+  $('emptynote').style.display=list.length?'none':'block';
+  list.forEach(function(t,i){
+    var d=document.createElement('div'); d.className='track'; d.tabIndex=0; d.setAttribute('role','listitem');
+    d.innerHTML=sigil(t.artist+' — '+t.title)
+      +'<div class="ti"><div class="tt'+(t.lang==='ru'?' ru':'')+'">'+esc(t.title)+'</div>'
+      +'<div class="ta">'+esc(t.artist)+(t.lang==='ru'?' <span class="badge">ru · русская</span>':' <span class="badge">edm</span>')+'</div>'
+      +'<div class="tl">'+(t.url?'<a href="'+esc(t.url)+'" rel="noopener">artist-paid link ↗</a>':'<span class="badge">link owed — named, not faked</span>')+'</div></div>';
+    d.addEventListener('keydown',function(e){
+      if(e.key==='Enter'&&t.url) window.open(t.url,'_blank','noopener');
+      if(e.key==='ArrowDown'&&d.nextElementSibling) d.nextElementSibling.focus();
+      if(e.key==='ArrowUp'&&d.previousElementSibling) d.previousElementSibling.focus();
+    });
+    host.appendChild(d);
+  });
+}
+function parse(){
+  return $('paste').value.split('\n').map(function(l){return l.trim();}).filter(Boolean).map(function(l){
+    var ru=/\[ru\]/i.test(l)||/[Ѐ-ӿ]/.test(l); l=l.replace(/\[ru\]/ig,'').trim();
+    var parts=l.split(/\s+—\s+|\s+-\s+/);
+    var url=(parts[parts.length-1]||'').match(/^https?:\/\//)?parts.pop():null;
+    return { artist:(parts[0]||'').trim(), title:(parts.slice(1).join(' — ')||'').trim()||'(untitled)',
+      lang:ru?'ru':'en', url:url };
+  }).filter(function(t){return t.artist;});
+}
+$('preview').onclick=function(){ render(parse()); };
+$('emit').onclick=function(){
+  var j={ note:'the founder’s set — bset.json; the page renders this verbatim, sigils derived client-side',
+    dropped:new Date().toISOString().slice(0,10), tracks:parse() };
+  $('out').textContent=JSON.stringify(j,null,1); $('out').style.display='block';
+};
+$('share').onclick=function(){
+  var list=parse().length?parse():SET;
+  var txt='🎧 the set I build to — '+location.href+'\n'+list.map(function(t){
+    return '· '+t.artist+' — '+t.title+(t.url?' · '+t.url:'');}).join('\n');
+  navigator.clipboard.writeText(txt).then(function(){ $('share').textContent='✓ copied as text'; });
+};
+render(SET);
+})();
+</script>
+</body>
+</html>

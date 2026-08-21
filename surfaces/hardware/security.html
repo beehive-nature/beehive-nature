@@ -37,31 +37,31 @@ footer{color:var(--mut);font-size:.78rem;margin-top:2rem;border-top:1px solid va
 
 <div class="panel" style="border-color:color-mix(in srgb,var(--bad) 45%,var(--line))"><span class="date">regression Mar 2021 · disclosed Jul 30 2026 · actively exploited</span>
 <span class="kind k-vuln">critical vulnerability</span><span class="kind k-disc">disclosed by Block + independent researchers</span>
-<h2>Coldcard RNG failure — five years of weak seeds</h2>
+<h2><span data-i18n="h.140">Coldcard RNG failure — five years of weak seeds</span></h2>
 <p>A 2021 firmware change silently disabled the hardware RNG path: a build flag was set to zero but the code checked whether the flag <i>existed</i>, not whether it was <i>on</i>, so seed generation fell back to a non-cryptographic software generator. Mk2/Mk3 (v4.x) seeds became near-deterministic given observable device state; Mk4/Q/Mk5 (v5.x+) added only a 32-bit reseed — at most 2³² possible streams, brute-forceable. Everything drawing on that stream was touched: seeds, paper-wallet keys, seed-XOR masks, backup encryption. Funds were being actively drained when Block's engineering team published, five years after the regression landed.</p>
 <div class="means">What it means for you: <b>updating firmware cannot repair a seed that was already generated weak</b> — affected users must move funds to a wallet created on patched firmware (or different hardware) and follow Coinkite's migration guidance. Exposure follows the firmware version at <i>generation time</i>, not the device's age. And the structural lesson this page exists for: entropy cannot be audited after the fact, closed review cultures repel the researchers who would have caught this in year one, and no maker's reputation — anyone's — is a substitute for reproducible verification. Don't trust; verify.</div></div>
 
 <div class="panel"><span class="date">attack Jan 2026 · disclosed Jun 2026</span>
 <span class="kind k-vuln">vulnerability research</span><span class="kind k-disc">vendor disclosed</span>
-<h2>TROPIC01 laser fault-injection (Trezor Safe 7)</h2>
+<h2><span data-i18n="h.141">TROPIC01 laser fault-injection (Trezor Safe 7)</span></h2>
 <p>Ledger's Donjon research lab demonstrated a laser fault-injection attack against the TROPIC01 auditable secure element; Trezor disclosed publicly in June 2026. Physical-access attack class, lab-grade equipment. A separate event from the Coldcard RNG failure above — different vendor, different class: this one needs the device in hand and a laser bench; that one shipped weak seeds to everyone.</p>
 <div class="means">What it means for you: this is why the Safe 7 stacks <b>two heterogeneous secure elements plus a passphrase</b> — no single chip is the last line. Keep a passphrase on high-value seeds; physical-access attacks are exactly what it exists for. And note the deeper lesson: an auditable chip got probed <i>in public</i> and everyone learned. Closed chips get probed too — you just never hear.</div></div>
 
 <div class="panel"><span class="date">standing since 2023</span>
 <span class="kind k-arch">architecture decision</span>
-<h2>Ledger Recover (all Ledger devices)</h2>
+<h2><span data-i18n="h.142">Ledger Recover (all Ledger devices)</span></h2>
 <p>Ledger shipped an opt-in service in which device firmware shards and exports encrypted seed material to third-party custodians. Not a bug and not a breach — a deliberate architecture decision that proved the firmware <i>can</i> move seed material off-device.</p>
 <div class="means">What it means for you: the boundary you rely on is what the firmware <b>can</b> do, not what settings currently say. This is the event that moved Ledger to our excluded list — architecture, not incident.</div></div>
 
 <div class="panel"><span class="date">2021 → present</span>
 <span class="kind k-lic">license change</span>
-<h2>Coldcard leaves open source</h2>
+<h2><span data-i18n="h.143">Coldcard leaves open source</span></h2>
 <p>Coldcard began as GPLv3 — itself incorporating GPLv3 Trezor code, exercising exactly the freedoms FOSS grants. When Foundation exercised those same freedoms in 2020 (porting GPL components into Passport, with attribution, under GPLv3), Coinkite removed the GPL code and moved new Coldcard code to MIT + Commons Clause — whose own FAQ answers "is this open source?" with "No." That license wall then made code exchange in either direction legally impossible. A license event, not a vulnerability — but its consequences for independent review were not abstract, as the entry above shows.</p>
 <div class="means">What it means for you: source-<i>visible</i> lets you read; open <i>source</i> lets the community fork, patch, audit, and outlive the vendor. For thousand-year custody, only the second counts — and a project that walls out its reviewers is quietly walling out the people who find RNG bugs in year one instead of year five.</div></div>
 
 <div class="panel"><span class="date">observed 2026, unresolved</span>
 <span class="kind k-gap kind">vendor gap</span>
-<h2>Safe 7 authenticity root missing upstream</h2>
+<h2><span data-i18n="h.144">Safe 7 authenticity root missing upstream</span></h2>
 <p>Trezor's device-authenticity endpoint for the Safe 7 generation (<span style="color:var(--ink)">t3w1/authenticity.json</span>) returns 404 while prior generations resolve. Any flow that attests device genuineness is blocked on a vendor publication no one else controls.</p>
 <div class="means">What it means for you: verify your device by the seal ritual and signed-firmware check at setup. For the BNR fleet: bSAFE 7 publishes its own signed definitions and authenticity chain rather than waiting — a fork must own its trust root anyway.</div></div>
 
