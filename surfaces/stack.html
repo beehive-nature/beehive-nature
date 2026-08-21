@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="color-scheme" content="dark">
+<title>the Engine Room — what actually runs under BNRoSe</title>
+<style>
+:root{--bg:#07090b;--panel:#0e1611;--well:#0a0f0b;--ink:#e2efdb;--dim:#8a9a8a;--faint:#5f6f61;
+ --line:#243026;--cyan:#00E5FF;--gold:#FFD700;--leaf:#7ddf8f;--violet:#c9a0ff;
+ /* rail identity chips — glyph + word always, never colour alone */
+ --r-ant:#e0484f;--r-ar:#8a9aff;--r-vaulta:#7ddf8f;--r-hive:#e31337;--r-evm:#00E5FF;
+ --r-btc:#f7931a;--r-social:#c9a0ff}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{overflow-x:hidden}
+body{background:var(--bg);color:var(--ink);font:13px/1.65 'IBM Plex Mono',monospace;padding:30px 14px 90px}
+main{max-width:960px;margin:0 auto}
+header{text-align:center;margin-bottom:8px}
+h1{font-size:clamp(19px,5vw,28px);color:var(--cyan);font-weight:400;letter-spacing:.05em;
+ text-shadow:0 0 16px rgba(0,229,255,.25)}
+.sub{color:var(--dim);font-size:11.5px;margin-top:8px;max-width:700px;margin-inline:auto;line-height:1.8}
+section{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:15px 16px;margin-top:14px}
+h2{font-size:11.5px;color:var(--violet);font-weight:400;letter-spacing:.09em;margin-bottom:9px}
+.law{color:var(--dim);font-size:10.5px;line-height:1.85}
+.law b{color:var(--ink)}
+a{color:var(--cyan)}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:10.5px;min-width:560px}
+th{color:var(--violet);font-weight:400;font-size:9.5px;letter-spacing:.05em;text-align:left;padding:6px;border-bottom:1px solid var(--line)}
+td{padding:6px;border-bottom:1px solid var(--line);color:var(--dim);vertical-align:top;line-height:1.7}
+td.n{color:var(--ink)}
+.chip{display:inline-block;font-size:9px;letter-spacing:.04em;border:1px solid;border-radius:4px;
+ padding:1px 6px;margin:1px 2px 1px 0;white-space:nowrap;background:var(--well)}
+.c-ant{color:var(--r-ant);border-color:#5a2326}.c-ar{color:var(--r-ar);border-color:#3a4270}
+.c-vaulta{color:var(--r-vaulta);border-color:#2b4a34}.c-hive{color:var(--r-hive);border-color:#5a1c26}
+.c-evm{color:var(--r-evm);border-color:#0a4a56}.c-btc{color:var(--r-btc);border-color:#5f3c14}
+.c-social{color:var(--r-social);border-color:#4a3a63}.c-zero{color:var(--faint);border-color:var(--line)}
+/* the flow diagram — pure HTML, stacks on phones */
+#flow{display:flex;flex-direction:column;gap:0;align-items:center;margin-top:10px}
+.tier{width:100%;max-width:760px;background:var(--well);border:1px solid var(--line);border-radius:10px;
+ padding:10px 13px;text-align:center}
+.tier .t{font-size:12px;color:var(--ink)}
+.tier .d{font-size:10px;color:var(--dim);margin-top:3px;line-height:1.7}
+.tier.root{border-color:#4a3f10;background:linear-gradient(160deg,#141207 0%,var(--well) 60%)}
+.tier.root .t{color:var(--gold)}
+.down{color:var(--faint);font-size:13px;line-height:1.6;padding:1px 0}
+.railrow{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:7px}
+.door{display:block;background:var(--well);border:1px solid var(--line);border-radius:9px;
+ padding:10px 12px;margin-top:8px;text-decoration:none;color:var(--ink)}
+.door:hover{border-color:var(--cyan)}
+.door .dt{font-size:12px;color:var(--cyan)}
+.door .dd{font-size:10px;color:var(--dim);margin-top:2px;line-height:1.6}
+footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>⚙ the Engine Room</h1>
+  <div class="sub" data-reg="bee">A visitor asked the best possible question: <i>"there's a lot
+  going on — which part shows me Autonomi?"</i> This page is the answer. One picture of what
+  actually runs under every door on the hub, in plain words, with the honest parts included.</div>
+  <div class="sub" data-reg="raver">The whole estate, one engine diagram: the identity root, the
+  rust kernel, the rails that carry data and value, and which door runs on what — measured, not
+  claimed. Born from a stranger's question: <i>"which part should I look at to see an
+  interesting use of Autonomi?"</i></div>
+  <div class="sub" data-reg="cypherpunk">Architecture disclosure: bzDiD root → rust coordination
+  kernel → adapter layer (storage, chains, relays) → dApps. Storage routing is a price-break
+  function; per-surface rail usage below is <b>measured by endpoint grep, dated</b>, not
+  self-reported. Bootstrap dependencies and unmigrated relays are named as debts, not hidden.</div>
+</header>
+
+<section>
+  <h2>THE SHAPE — root below, everything else above</h2>
+  <div id="flow">
+    <div class="tier root"><div class="t">🐝 bzDiD — the identity root</div>
+      <div class="d">self-authenticating identity (Self-Auth + DiD), built to survive the loss of
+      <i>any</i> layer above it — including any single storage network. The root is yours;
+      everything else is replaceable. <a href="keys/addresses.html">see it live</a></div></div>
+    <div class="down">▼</div>
+    <div class="tier"><div class="t">the coordination kernel — rust</div>
+      <div class="d">a public workspace of ~36 crates. Adapters plug into it; none of them is
+      load-bearing for identity. <a href="https://github.com/beehive-nature/beehive-nature" rel="noopener">source</a></div></div>
+    <div class="down">▼</div>
+    <div class="tier"><div class="t">the adapter rails — storage, value, relays</div>
+      <div class="d"><b>Storage routes by a price-break law:</b>
+      <span class="chip c-ar">◈ Arweave</span> carries small public immutable data (≈100 kB and
+      under); <span class="chip c-ant">⬢ Autonomi</span> takes over where its per-byte price
+      wins — large public files and <b>private immutable data</b> (self-encrypted, paid in ANT,
+      downloads free forever). <b>Value and state:</b> <span class="chip c-vaulta">▣ Vaulta</span>
+      (RAM/CPU/NET resource model — the .b registry lives here) ·
+      <span class="chip c-evm">⟠ Base + Ethereum</span> (the on-chain art the gallery reads
+      keylessly) · <span class="chip c-btc">₿ Bitcoin</span> (read via Esplora in the museum).
+      <b>Voice:</b> <span class="chip c-hive">◆ Hive</span> longform ·
+      <span class="chip c-social">☄ bSky + Nostr</span> relays.</div></div>
+    <div class="down">▼</div>
+    <div class="tier"><div class="t">the dApps — every card on the hub</div>
+      <div class="d">static, keyless pages. No logins, no custody, nothing to breach — each one a
+      read-and-compose window over the rails below it. <a href="index.html">back to the hub</a></div></div>
+  </div>
+  <div class="law" style="margin-top:11px"><b>The honest parts, stated before anyone asks:</b>
+  GitHub Pages currently serves these pages — a <b>temporary bootstrap crutch</b>, and any small
+  server you might find behind a feature is the same. The mirror lane already hashes and stages
+  the evidence corpus for permanent storage, and the <b>bSky/Nostr relays are the last planned
+  migration</b> — once anchored to the chains and ANT/AR, redeploying relays and nodes becomes
+  autonomous. A page that hid its scaffolding would be advertising; this one is a receipt.</div>
+</section>
+
+<section>
+  <h2>WHERE AUTONOMI IS IN THIS ESTATE, RIGHT NOW — the direct answer</h2>
+  <div class="law">
+  <b>1 · The founder's own vault runs on it today</b> — personal data storage through the
+  Autonomi App, with a hardware-wallet payment lane spec'd so that <b>no key ever leaves the
+  Trezor</b>: the network's own external-signer flow prepares and finalizes while the device
+  signs (<a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/specs/SPEC-AUTONOMI-TREZOR-1.md" rel="noopener">SPEC-AUTONOMI-TREZOR-1</a>).<br>
+  <b>2 · The evidence commons is staged for it</b> — 20 government primary documents (the
+  citations our science surfaces stand on) harvested, sha256-hashed into an
+  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/mirror/MANIFEST.json" rel="noopener">append-only public manifest</a>,
+  awaiting the one Trezor signature that puts them beyond any administration's delete key.<br>
+  <b>3 · The private-data doctrine matches the network's</b> — Autonomi's DataMap-held private
+  immutable data is the storage-layer twin of this estate's law that raw personal data is
+  sealed to its owner, never to an operator.<br>
+  <b>4 · This sprint's receipts land the estate write-path</b> — read-path receipt first (zero
+  keys, zero cost), local devnet end-to-end second, then one founder-signed public upload.
+  Each lands as a receipt in the open repo, dated, reproducible.
+  <span data-reg="cypherpunk"><br><b>5 · And the boundary, stated:</b> nothing in this estate's
+  pages holds an Autonomi key or posts autonomously — the external-signer ceremony is the only
+  write, and a human hand is the gate. That is a design law, not a limitation.</span></div>
+</section>
+
+<section>
+  <h2>WHICH DOOR RUNS ON WHAT — measured 2026-08-21, not self-reported</h2>
+  <div class="law">Each row is from an endpoint-and-content sweep of the page's actual code on
+  the date shown — a surface earns a chip by carrying the rail, not by claiming it.
+  <b>No chips at all is its own achievement:</b> the science surfaces (bFood, bEarth, the
+  symposium, the university) are <span class="chip c-zero">∅ zero-rail</span> — pure static
+  computation over cited records, recomputable by any stranger with no network at all.</div>
+  <div class="scroll"><table>
+    <tr><th>door</th><th>rails under it</th><th>what the rails do there</th></tr>
+    <tr><td class="n"><a href="blight/gallery.html">gallery</a> · <a href="blight/inscription-explorer.html">explorer</a> · <a href="blight/market.html">market</a> · <a href="blight/midi-organ.html">organ</a> · <a href="blight/studio-music.html">studio</a></td>
+      <td><span class="chip c-evm">⟠ base</span><span class="chip c-evm">⟠ eth</span></td>
+      <td>keyless <code>eth_call</code> reads of fully on-chain ERC-20i art — nine families, two chains, no indexer between you and the contract</td></tr>
+    <tr><td class="n"><a href="blight/museum.html">museum</a> · <a href="blight/workbench.html">workbench</a></td>
+      <td><span class="chip c-evm">⟠ base·eth</span><span class="chip c-btc">₿ btc</span><span class="chip c-vaulta">▣ vaulta</span><span class="chip c-ar">◈ ar</span></td>
+      <td>the cross-chain reading room — what "on-chain" actually means, receipted per class</td></tr>
+    <tr><td class="n"><a href="blight/vaulta-reader.html">reader</a> · <a href="blight/compare.html">catalog</a> · <a href="keys/addresses.html">dids</a> · <a href="onboarding/">keys</a></td>
+      <td><span class="chip c-vaulta">▣ vaulta</span><span class="chip c-social">☄ bsky·nostr</span></td>
+      <td>the .b registry, Self-Auth + DiD identity, and the onboarding walk</td></tr>
+    <tr><td class="n"><a href="bqueenbee-live.html">bQueenBee</a> · <a href="blight/pulse.html">pulse</a> · <a href="review.html">review</a></td>
+      <td><span class="chip c-social">☄ bsky·nostr</span><span class="chip c-hive">◆ hive</span></td>
+      <td>the hive's public voice and the Royal Guard's review rails — relays are the last planned migration to chain/ANT/AR anchors</td></tr>
+    <tr><td class="n"><a href="biq.html">bIQ</a> · <a href="btranslated.html">bTranslated</a> · <a href="bfactory.html">bFactory</a> · <a href="recover.html">recover</a></td>
+      <td><span class="chip c-ant">⬢ ant</span><span class="chip c-ar">◈ ar</span><span class="chip c-vaulta">▣ vaulta</span></td>
+      <td>the composer surfaces that document and route the storage rails (recover is deliberately zero-network at run time)</td></tr>
+    <tr><td class="n"><a href="bfood.html">bFood</a> · <a href="bearth.html">bEarth</a> · <a href="bsymposium.html">symposium</a> · <a href="university/">university</a> · <a href="listening.html">listening</a></td>
+      <td><span class="chip c-zero">∅ zero-rail</span></td>
+      <td>pure computation over cited records — nothing to trust but the arithmetic, which is the point</td></tr>
+    <tr><td class="n"><a href="b4b.html">b4b</a> · <a href="blight/farmers.html">farmers</a> · <a href="blight/hearth.html">hearth</a></td>
+      <td><span class="chip c-evm">⟠ base</span></td>
+      <td>the Base-lane alpha (the Coinbase-submission candidate) and the community floors</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2>IF YOU CAME WITH ONE QUESTION — five doors</h2>
+  <a class="door" href="keys/addresses.html"><div class="dt">"show me the Autonomi-era identity idea"</div>
+    <div class="dd">Self-Auth + DiD, implemented: an identity that needs no server's permission and survives the loss of any adapter under it</div></a>
+  <a class="door" href="blight/gallery.html"><div class="dt">"show me something beautiful in 10 seconds"</div>
+    <div class="dd">a walking tour of fully on-chain art, read live from two chains, keylessly</div></a>
+  <a class="door" href="bfood.html"><div class="dt">"show me something useful to me personally"</div>
+    <div class="dd">every nutrient your body needs, computed for your body, every number cited</div></a>
+  <a class="door" href="b4b.html"><div class="dt">"I'm into AI × crypto"</div>
+    <div class="dd">the b4b alpha — the Base-lane application</div></a>
+  <a class="door" href="university/"><div class="dt">"teach me to check any of this"</div>
+    <div class="dd">five courses where every lesson ends in a verifiable act on real receipts</div></a>
+</section>
+</main>
+<footer>
+  every claim on this page is either linked to its record or marked as a debt ·
+  <a href="index.html">← the hub</a>
+</footer>
+<script src="tour.js?v=10"></script>
+</body>
+</html>
