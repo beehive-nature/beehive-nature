@@ -103,6 +103,43 @@ code{color:var(--ink)}
 </section>
 
 <section>
+  <h2>⚡ OUR WALLET, YOUR TREZOR — the signing wing · founder-ruled, no MetaMask</h2>
+  <div class="law"><b>The ruling, executed:</b> this estate's own cockpit talks to the Trezor
+  through <b>Trezor Connect — the device maker's own official bridge</b> — with no third-party
+  wallet in between. The page composes the transaction, <b>the device displays and signs</b>,
+  the page receives only the signed bytes and broadcasts them. No key ever exists outside the
+  hardware; this code handles signatures, never secrets.</div>
+  <div class="law" style="margin-top:8px">⚠ <b>The one disclosed dependency of its kind in the
+  estate:</b> pressing the button below loads Trezor's official Connect script from
+  <code>connect.trezor.io</code> — <b>on your gesture only, never at page load</b>. A signing
+  surface that hid its bridge would be a wallet asking for blind trust; this one names it before
+  you press anything.</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+    <button id="tzconnect">🔌 connect the Trezor (loads Trezor's bridge)</button>
+    <select id="tznet" style="background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:8px;font:12px 'IBM Plex Mono',monospace">
+      <option value="421614">Arbitrum Sepolia — the AT-1 bench (no real funds)</option>
+      <option value="42161">Arbitrum One — mainnet (AT-2, founder-gated)</option>
+    </select>
+  </div>
+  <div class="grid2">
+    <div class="stat"><div class="val nm" id="tzaddr">—</div><div class="lbl">device address · m/44'/60'/0'/0/0</div><div class="src">shown by Connect after on-device confirmation; display only</div></div>
+    <div class="stat"><div class="val nm" id="tzstate">not connected</div><div class="lbl">wing state</div><div class="src" id="tzsrc">the bridge loads only on your press</div></div>
+  </div>
+  <div class="law" style="margin-top:10px"><b>THE AT-1 BENCH — one signature, zero value, full
+  proof of the seam:</b> signs a 0-value self-transaction on Arbitrum Sepolia — the device
+  screen shows exactly what our page composed (that comparison IS the bench), and the signed
+  bytes broadcast to the public RPC. When it clears, the same cockpit signs the daemon's real
+  <code>approve</code> + payment calldata (paste the prepare output below), and AT-2 waits only
+  on the founder's word.</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+    <button id="tzbench">⚖ AT-1: sign the 0-value bench tx</button>
+  </div>
+  <textarea id="tzprep" placeholder='AT-2 lane (gated): paste the antd prepare output (JSON with to/value/data) — the page decodes it into a human-readable summary BEFORE the device is touched, per the spec&#39;s harness law' style="width:100%;min-height:64px;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:9px;font:10.5px 'IBM Plex Mono',monospace;margin-top:8px;resize:vertical"></textarea>
+  <div style="margin-top:6px"><button id="tzdecode">decode the prepare output (no signing)</button></div>
+  <pre id="tzout" style="display:none;background:var(--well);border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:8px;font-size:9.5px;line-height:1.6;overflow-x:auto;color:var(--dim);white-space:pre-wrap;word-break:break-word"></pre>
+</section>
+
+<section>
   <h2>👑 <span data-i18n="h.007">THE SKAISTS SIDE — LOVErnment DAO · Vaulta</span></h2>
   <div class="law">The DAO's ground truth lives on Vaulta: accounts, RAM/CPU/NET, and the
   <code>.b</code> registry at <code>kingbeelovis</code>. Read any account below — the default is
@@ -192,6 +229,84 @@ $('evmgo').onclick=function(){ readEvm($('evmaddr').value.trim()); };
 $('evmvault').onclick=function(){ $('evmaddr').value=VAULT; readEvm(VAULT); };
 $('evmaddr').addEventListener('keydown',function(e){ if(e.key==='Enter') $('evmgo').click(); });
 initToken();
+
+/* ---- THE SIGNING WING — our wallet, the founder's Trezor, no MetaMask (founder-ruled).
+   Trezor Connect (the maker's own bridge) loads ON GESTURE ONLY. The page composes,
+   the DEVICE displays and signs, the page broadcasts signed bytes. Keys never exist here. ---- */
+var NETS={
+ '421614':{name:'Arbitrum Sepolia',hosts:['https://sepolia-rollup.arbitrum.io/rpc','https://arbitrum-sepolia-rpc.publicnode.com']},
+ '42161':{name:'Arbitrum One',hosts:EHOSTS}
+};
+var TZ={ready:false,addr:null};
+function tzs(msg,src){ $('tzstate').textContent=msg; $('tzstate').classList.remove('nm'); if(src)$('tzsrc').textContent=src; }
+async function loadConnect(){
+  if(window.TrezorConnect) return true;
+  tzs('loading Trezor’s bridge…','connect.trezor.io — the disclosed dependency, on your gesture');
+  await new Promise(function(ok,bad){
+    var s=document.createElement('script');
+    s.src='https://connect.trezor.io/9/trezor-connect.js';
+    s.onload=ok; s.onerror=bad; document.head.appendChild(s);
+  });
+  await window.TrezorConnect.init({
+    lazyLoad:true,
+    manifest:{email:'loviswater44@gmail.com',appUrl:'https://beehive-nature.github.io/beehive-nature/surfaces/bantfarm.html'}
+  });
+  return true;
+}
+$('tzconnect').onclick=async function(){
+  try{
+    await loadConnect();
+    tzs('bridge up — confirm on the device','the address shows on the Trezor screen first; approve there');
+    var r=await window.TrezorConnect.ethereumGetAddress({path:"m/44'/60'/0'/0/0",showOnTrezor:true});
+    if(r.success){ TZ.ready=true; TZ.addr=r.payload.address;
+      $('tzaddr').textContent=TZ.addr; $('tzaddr').classList.remove('nm');
+      tzs('connected ✓','device confirmed; nothing signed yet');
+    } else tzs('device said no — '+(r.payload&&r.payload.error||'declined'),'a refusal is a normal outcome, recorded honestly');
+  }catch(e){ tzs('bridge failed to load — declared, not hidden', String(e&&e.message||e).slice(0,60)); }
+};
+$('tzbench').onclick=async function(){
+  if(!TZ.ready){ tzs('connect the device first','the bench signs nothing without it'); return; }
+  var chainId=+$('tznet').value, net=NETS[$('tznet').value];
+  if(chainId===42161){ tzs('mainnet is AT-2 — founder-gated','the bench runs on Sepolia; mainnet waits for the word'); return; }
+  try{
+    async function rpc(m,p){ for(var i=0;i<net.hosts.length;i++){ try{
+      var r=await fetch(net.hosts[i],{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({jsonrpc:'2.0',id:1,method:m,params:p})});
+      var j=await r.json(); if(j.result!==undefined) return j.result; if(j.error) throw new Error(j.error.message);
+    }catch(e){ if(i===net.hosts.length-1) throw e; } } }
+    var nonce=await rpc('eth_getTransactionCount',[TZ.addr,'pending']);
+    var gasPrice=await rpc('eth_gasPrice',[]);
+    var tx={ to:TZ.addr, value:'0x0', data:'0x', chainId:chainId, nonce:nonce,
+      gasLimit:'0x186a0', gasPrice:gasPrice };
+    tzs('composed — now VERIFY ON THE DEVICE SCREEN','to='+TZ.addr.slice(0,10)+'… value=0 — the screen must match this line');
+    var r=await window.TrezorConnect.ethereumSignTransaction({path:"m/44'/60'/0'/0/0",transaction:tx});
+    if(!r.success){ tzs('declined on device — the gate worked',(r.payload&&r.payload.error||'').slice(0,50)); return; }
+    var raw='0x'+(r.payload.serializedTx||'').replace(/^0x/,'');
+    var hash=await rpc('eth_sendRawTransaction',[raw]);
+    $('tzout').style.display='block';
+    $('tzout').textContent='AT-1 BENCH RECEIPT\nnetwork: '+net.name+' (chainId '+chainId+')\nfrom/to (self): '+TZ.addr
+      +'\nvalue: 0\ntx: '+hash+'\nexplorer: https://sepolia.arbiscan.io/tx/'+hash
+      +'\n\nthe seam is proven: composed by our page, signed inside the device, broadcast keylessly.';
+    tzs('AT-1 CLEARED ✓','signed on-device, broadcast; receipt below');
+  }catch(e){ tzs('bench failed — declared', String(e&&e.message||e).slice(0,70)); }
+};
+$('tzdecode').onclick=function(){
+  var t=$('tzprep').value.trim(); if(!t){ return; }
+  try{
+    var p=JSON.parse(t), lines=['PREPARE OUTPUT, DECODED — read this BEFORE the device is touched'];
+    var txs=Array.isArray(p)?p:(p.transactions||p.txs||[p]);
+    txs.forEach(function(x,i){
+      var data=(x.data||'0x'), sel=data.slice(0,10);
+      var kind= sel==='0x095ea7b3'?'ERC-20 approve (spender+amount follow)':
+                sel==='0xa9059cbb'?'ERC-20 transfer':
+                sel==='0x'?'plain value transfer':'contract call '+sel;
+      lines.push((i+1)+'. to: '+(x.to||'?')+'\n   kind: '+kind+'\n   value: '+(x.value||'0x0')
+        +'\n   data bytes: '+((data.length-2)/2));
+    });
+    lines.push('\nHARNESS LAW: the device screen must match these lines. If it does not, decline on the device — a refusal is the system working.');
+    $('tzout').textContent=lines.join('\n'); $('tzout').style.display='block';
+  }catch(e){ $('tzout').textContent='could not parse — paste the daemon’s JSON as-is'; $('tzout').style.display='block'; }
+};
 
 /* ---- SKAISTS / Vaulta — the estate's proven three-host failover ---- */
 var VAPI=['https://eos.greymass.com','https://api.eosn.io','https://eos.api.eosnation.io'];

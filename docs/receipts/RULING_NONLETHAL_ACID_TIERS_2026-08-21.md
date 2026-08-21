@@ -24,8 +24,15 @@ tiers to expected ACiD severity:
 | 5:1 | 4 mg/kg | moderate ACiD |
 | 3:1 | ≈6.7 mg/kg | severe ACiD |
 
-The direction is internally consistent — as the margin narrows, severity rises. **The
-reading is this seat's; the words are the founder's.** If the ratios meant something
+The direction is internally consistent — as the margin narrows, severity rises.
+
+> **⚖ CONFIRMED by the founder, 2026-08-21, verbatim:** *"perfect question and
+> respectfully you have correct."* The divisor reading stands as ruled:
+> **2 / 4 / 6.7 mg/kg → mild / moderate / severe ACiD**, scaled from the hardcoded
+> 20 mg/kg human baseline. No longer a seat's reading — the founder's law.
+
+**The
+reading was this seat's; the words and the confirmation are the founder's.** If the ratios meant something
 else (multiples rather than divisors, or a species-scaling factor), one line corrects
 this table and nothing downstream has consumed it yet.
 

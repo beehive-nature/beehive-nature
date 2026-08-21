@@ -64,10 +64,26 @@ wallet, and that habit is worth more protecting than any single upload.
 
 ## 2 · THE TREZOR MECHANICS — what works and what does not
 
+> **⟳ AMENDED 2026-08-21 — founder's ruling, verbatim:** *"i don't want to use
+> metamask or trezor [suite] first. i want our wallet and trezor integration."*
+> **MetaMask is struck from the path.** The lane is now **our own signing wing** (on
+> the bANTfarm) talking to the device through **Trezor Connect — Trezor's own official
+> web bridge**, no third-party wallet between our page and the hardware. The flow:
+> our page composes the unsigned transaction from the daemon's prepare output →
+> Trezor Connect passes it to the device → **the device displays and signs; the page
+> receives only a signed raw transaction** → our page broadcasts via public RPC.
+> No key material ever exists outside the device; our code handles signatures, never
+> secrets — the law holds by construction, now with our UI as the whole cockpit.
+> **Disclosed dependency, the only one of its kind in the estate:** the signing wing
+> loads Trezor's official Connect script (connect.trezor.io) — on user gesture only,
+> never at page load — and says so on its face. A signing surface that hid its bridge
+> would be a wallet asking for blind trust; this one names it.
+> The MetaMask pairing remains below as the *documented-but-rejected* alternative.
+
 - **Trezor Suite alone is NOT sufficient.** Suite sends and receives; it does not
-  expose arbitrary contract calls and takes no custom RPC. The working, documented
-  path is **Trezor paired with MetaMask** (Trezor's own guide), MetaMask pointed at
-  Arbitrum One, every transaction confirmed on-device.
+  expose arbitrary contract calls and takes no custom RPC. ~~The working, documented
+  path is **Trezor paired with MetaMask**~~ — rejected by the founder's ruling above;
+  retained here only as the fallback of record if Connect ever fails us.
 - **Blind-signing is the residual risk, named rather than hidden.** The device will
   likely render `payForMerkleTree2` calldata as an opaque blob. Our law protects the
   key; it does not protect against signing a malformed transaction. Mitigation is
