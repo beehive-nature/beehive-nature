@@ -9,51 +9,66 @@
 <style>
 :root{--bg:#050508;--dim:#5a6478;--edge:#1a1a2a}
 *{margin:0;padding:0;box-sizing:border-box}
+/* THE OVERHAUL (founder, 2026-08-21: the mobile chrome was five position:fixed layers
+   guessing at each other's coordinates — title under buttons, hint glyphs on the pager,
+   the market chip on the plaque. Rebuilt as ONE flex column: top bar, stage, deck.
+   In-flow elements cannot collide, at any width, by construction. And every control
+   moved to the bottom deck where thumbs actually are — the A16 law applied to layout,
+   with ≥40px tap targets and real prev/next buttons instead of keyboard-hint glyphs. */
 html,body{height:100%}
-body{background:var(--bg);color:#cfe8d6;font:13px/1.5 'IBM Plex Mono',monospace;overflow:hidden}
-#stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:4vh 4vw 12vh}
-#frame{max-width:min(62vh,86vw);max-height:66vh;transition:opacity .6s ease,transform .6s ease}
+body{background:var(--bg);color:#cfe8d6;font:13px/1.5 'IBM Plex Mono',monospace;overflow:hidden;
+  height:100dvh;display:flex;flex-direction:column}
+#topbar{flex:0 0 auto;padding:12px 14px 6px;text-align:center;font-size:11px;color:var(--dim);
+  letter-spacing:.2em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#stage{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;
+  padding:2vh 4vw;touch-action:pan-y}
+#frame{max-width:min(62vh,86vw);max-height:100%;transition:opacity .6s ease,transform .6s ease}
 #frame.fade{opacity:0;transform:scale(.985)}
-#frame svg{width:100%;height:auto;display:block;filter:drop-shadow(0 0 42px rgba(0,229,255,.14))}
-#plaque{position:fixed;left:0;right:0;bottom:58px;text-align:center;transition:opacity .5s ease;padding:0 16px}
+#frame svg{width:100%;height:auto;max-height:100%;display:block;filter:drop-shadow(0 0 42px rgba(0,229,255,.14))}
+.gold #frame svg{filter:drop-shadow(0 0 52px rgba(255,215,0,.28))}
+#deck{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:7px;
+  padding:4px 10px 10px}
+#dots{display:flex;justify-content:center;gap:5px;flex-wrap:wrap;max-width:92vw}
+#dots i{width:6px;height:6px;border-radius:50%;background:#262638;cursor:pointer;padding:2px;background-clip:content-box}
+#dots i.here{background:#00E5FF;background-clip:content-box;box-shadow:0 0 6px rgba(0,229,255,.7)}
+#plaque{text-align:center;transition:opacity .5s ease;padding:0 12px;min-height:34px}
 #plaque .title{font-size:15px;color:#00E5FF;letter-spacing:.06em}
-#plaque .sub{font-size:11px;color:var(--dim);margin-top:4px}
+#plaque .sub{font-size:11px;color:var(--dim);margin-top:3px}
 #plaque .sub b{color:#9FFF3D;font-weight:400}
 .pips{letter-spacing:3px;color:#FFD700;font-size:12px}
 .pips .off{color:#262638}
-#hint{position:fixed;bottom:96px;left:0;right:0;text-align:center;font-size:15px;color:#7e8c85;
-  letter-spacing:.4em;transition:opacity 1s ease;z-index:20}
-#wing{position:fixed;top:18px;left:0;right:0;text-align:center;font-size:11px;color:var(--dim);letter-spacing:.2em;text-transform:uppercase}
-.gold #frame svg{filter:drop-shadow(0 0 52px rgba(255,215,0,.28))}
-#wing{position:fixed;top:18px;left:0;right:0;text-align:center;font-size:11px;color:var(--dim);letter-spacing:.2em;text-transform:uppercase}
-#controls{position:fixed;top:14px;right:16px;display:flex;gap:6px;z-index:30}
-#controls button{background:#0d0d15cc;color:var(--dim);border:1px solid var(--edge);border-radius:5px;padding:5px 10px;cursor:pointer;font:11px ui-monospace,monospace}
-#controls button:hover{color:#00E5FF;border-color:#00E5FF}
-#controls button.on{color:#00FF41;border-color:#1d3a26}
-#ask{position:fixed;bottom:56px;left:16px;right:16px;display:none;justify-content:center;z-index:40}
-#ask div{display:flex;gap:6px;background:#0d0d15ee;border:1px solid var(--edge);border-radius:8px;padding:8px}
-#ask input{background:#050508;color:#00E5FF;border:1px solid var(--edge);border-radius:5px;padding:7px 10px;font:12px ui-monospace,monospace;width:min(340px,60vw)}
-#ask button{background:#0d0d15;color:#00FF41;border:1px solid var(--edge);border-radius:5px;padding:7px 12px;cursor:pointer;font:12px ui-monospace,monospace}
-#dots{position:fixed;bottom:104px;left:0;right:0;display:flex;justify-content:center;gap:5px;flex-wrap:wrap;padding:0 10px}
-#dots i{width:5px;height:5px;border-radius:50%;background:#262638;cursor:pointer}
-#dots i.here{background:#00E5FF;box-shadow:0 0 6px rgba(0,229,255,.7)}
-#market{position:fixed;bottom:56px;right:16px;font-size:10px;color:var(--dim);z-index:30;text-decoration:none;border:1px solid var(--edge);border-radius:99px;padding:4px 10px;background:#0d0d15cc}
-#market:hover{color:#9FFF3D;border-color:#9FFF3D}
+#actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;align-items:stretch}
+#actions button,#actions a{background:#0d0d15cc;color:var(--dim);border:1px solid var(--edge);
+  border-radius:8px;min-height:40px;min-width:44px;padding:8px 12px;cursor:pointer;
+  font:12px ui-monospace,monospace;display:inline-flex;align-items:center;justify-content:center;
+  text-decoration:none;line-height:1}
+#actions button:hover,#actions a:hover{color:#00E5FF;border-color:#00E5FF}
+#actions button.on{color:#00FF41;border-color:#1d3a26}
+#ask{display:none;justify-content:center;width:100%}
+#ask div{display:flex;gap:6px;background:#0d0d15ee;border:1px solid var(--edge);border-radius:8px;
+  padding:8px;width:100%;max-width:440px}
+#ask input{flex:1;min-width:0;background:#050508;color:#00E5FF;border:1px solid var(--edge);
+  border-radius:5px;padding:9px 10px;font:12px ui-monospace,monospace}
+#ask button{background:#0d0d15;color:#00FF41;border:1px solid var(--edge);border-radius:5px;
+  padding:9px 14px;cursor:pointer;font:12px ui-monospace,monospace;min-height:40px}
 </style>
 </head>
 <body>
-<div id="wing">the founder's garden · base</div>
-<div id="hint">▶ &nbsp;‹ › &nbsp;🔍 &nbsp;⌂</div>
+<div id="topbar"><span id="wing">the founder's garden · base</span></div>
 <div id="stage"><div id="frame"></div></div>
-<div id="dots"></div>
-<div id="plaque"><div class="title">…</div><div class="sub">…</div></div>
-<div id="controls">
-  <button id="bPlay" class="on" title="the tour walks itself">▶ tour</button>
-  <button id="bWings" title="collections as exhibits">⊞</button>
-  <button id="bAsk" title="visit any wallet's collection">any wallet</button>
+<div id="deck">
+  <div id="dots"></div>
+  <div id="plaque"><div class="title">…</div><div class="sub">…</div></div>
+  <div id="ask"><div><input id="addr" placeholder="0x… or name.base.eth"><button id="go">visit</button></div></div>
+  <div id="actions">
+    <button id="bPrev" title="previous piece" aria-label="previous piece">‹</button>
+    <button id="bPlay" class="on" title="the tour walks itself">▶ tour</button>
+    <button id="bNext" title="next piece" aria-label="next piece">›</button>
+    <button id="bWings" title="collections as exhibits">⊞ wings</button>
+    <button id="bAsk" title="visit any wallet's collection">any wallet</button>
+    <a id="market" href="#" title="the DeMarketPlace docks here">⧉ market</a>
+  </div>
 </div>
-<div id="ask"><div><input id="addr" placeholder="0x… or name.base.eth"><button id="go">visit</button></div></div>
-<a id="market" href="#" title="the DeMarketPlace docks here">⧉ market — docking soon</a>
 <script>
 /* The GALLERY: art first, one piece at a time, a walking tour. The tech lives in the
    explorer (its own surface, its own frequency); here only the piece, its name, its
@@ -61,9 +76,17 @@ body{background:var(--bg);color:#cfe8d6;font:13px/1.5 'IBM Plex Mono',monospace;
    All seven+ EVM ERC-20i families, fetched live, keyless, no keys no logins. */
 const W=v=>BigInt(v).toString(16).padStart(64,'0');
 const AD=a=>'0'.repeat(24)+a.replace(/^0x/,'').toLowerCase();
-const HOSTS=['https://base-rpc.publicnode.com','https://base.drpc.org'];
+/* multi-chain: each collection names its chain; the family began on Base (Fungi,
+   2024-03-31, the first ERC-20i) and Pepi expanded to Ethereum 2026-03-03 — same
+   operator wallet, byte-identical generator (receipted via Sourcify). */
+const CHAINS={
+  base:['https://base-rpc.publicnode.com','https://base.drpc.org'],
+  eth:['https://ethereum-rpc.publicnode.com','https://eth.drpc.org']
+};
+const H=col=>CHAINS[col.ch||'base'];
 const COLS=[
  {sym:'PEPI v2',c:'0x28a5e71BFc02723eAC17E39c84c5190415C0de9F',sel:'a435130b',lv:[0,11,22,33,44,56],base:1},
+ {sym:'PEPI eth',c:'0x3103cD1602d5fa8f4b9283F9D5a7fa2290795d51',sel:'a435130b',lv:[0,11,22,33,44,56],base:1,ch:'eth'},
  {sym:'PEPI v1',c:'0x19706c142d33376240e418d6385f05691a5fa8e2',sel:'a435130b',lv:[0,11,22,33,44,56],base:1},
  {sym:'FUNGI',c:'0x7d9CE55D54FF3FEddb611fC63fF63ec01F26D15F',sel:'422b9e23',lv:[0,21000,525000,1050000,1575000,2100000],base:0},
  {sym:'$FROGGI',c:'0x88A78C5035BdC8C9A8bb5c029e6cfCDD14B822FE',sel:'422b9e23',lv:[0,1000,3000,10000,30000,60000,120000],base:0},
@@ -86,8 +109,8 @@ function decodeString(hex){
   }
   return out;
 }
-async function rpc(calls){
-  for(const h of HOSTS){
+async function rpc(calls,hosts){
+  for(const h of (hosts||CHAINS.base)){
     const ctl=new AbortController(); const kill=setTimeout(()=>ctl.abort(),8000);
     try{
       const r=await fetch(h,{method:'POST',headers:{'Content-Type':'application/json'},signal:ctl.signal,
@@ -117,11 +140,11 @@ async function loadGarden(addr){
     const seed=Number(BigInt(bal[0])/1000000000n);
     const calls=[{to:col.c,data:col.sel+W(seed)+W(0)+W(0)}];
     if(col.sel==='a62f5b1b') calls[0]={to:col.c,data:col.sel+W(seed)+W(0)+AD(addr)};
-    const mcRes=await rpc(['0x9c216508'+AD(addr)].map(d=>({to:col.c,data:d})));
+    const mcRes=await rpc(['0x9c216508'+AD(addr)].map(d=>({to:col.c,data:d})),H(col));
     const mc=mcRes&&mcRes[0];
     const n=mc&&mc!=='0x'?Number(BigInt(mc)):0;
     for(let i=0;i<Math.min(n,8);i++) calls.push({to:col.c,data:'0x0fd9587e'+AD(addr)+W(BigInt(i))});
-    const res=await rpc(calls);
+    const res=await rpc(calls,H(col));
     if(res&&res[0]&&res[0]!=='0x'&&res[0].length>200){
       try{ found.push({svg:decodeString(res[0]),sym:col.sym,seed,lvln:lvlNum(seed,col),pipmax:col.lv?col.lv.length-1-col.base:0}); }catch(e){}
     }
@@ -131,7 +154,7 @@ async function loadGarden(addr){
       const w=(rec.replace(/^0x/,'').match(/.{64}/g)||[]).slice(0,3);
       if(w.length<2) continue;
       const s=BigInt('0x'+w[0]);
-      const svgRes=await rpc([{to:col.c,data:col.sel+w.slice(0,col.sel==='a62f5b1b'?2:3).join('')+(col.sel==='a62f5b1b'?AD(addr):'')}]);
+      const svgRes=await rpc([{to:col.c,data:col.sel+w.slice(0,col.sel==='a62f5b1b'?2:3).join('')+(col.sel==='a62f5b1b'?AD(addr):'')}],H(col));
       if(svgRes&&svgRes[0]&&svgRes[0].length>200){
         try{ found.push({svg:decodeString(svgRes[0]),sym:col.sym,seed:Number(s),lvln:lvlNum(Number(s),col),pipmax:col.lv?col.lv.length-1-col.base:0}); }catch(e){}
       }
@@ -188,10 +211,18 @@ async function start(addr,wing){
 }
 const pips=(n,max)=>{max=Math.max(max,1);let s='';for(let k=0;k<max;k++)s+=k<n?'●':'<span class=\"off\">●</span>';return s;};
 const $=id=>document.getElementById(id);
-const hideHint=()=>{const hh=document.getElementById('hint');if(hh){hh.style.opacity=0;setTimeout(()=>hh.remove(),1100);}};
-document.addEventListener('click',hideHint);
-document.addEventListener('keydown',hideHint);
 $('bPlay').onclick=()=>{ walking=!walking; $('bPlay').textContent=walking?'▶ tour':'❚❚ paused'; $('bPlay').classList.toggle('on',walking); };
+$('bPrev').onclick=()=>show(idx-1);
+$('bNext').onclick=()=>show(idx+1);
+/* swipe — the stage answers thumbs, not just keys */
+(function(){ let x0=null,y0=null;
+  const st=$('stage');
+  st.addEventListener('touchstart',e=>{ const t=e.touches[0]; x0=t.clientX; y0=t.clientY; },{passive:true});
+  st.addEventListener('touchend',e=>{ if(x0===null) return;
+    const t=e.changedTouches[0], dx=t.clientX-x0, dy=t.clientY-y0; x0=y0=null;
+    if(Math.abs(dx)>48 && Math.abs(dx)>Math.abs(dy)*1.5) show(idx+(dx<0?1:-1));
+  },{passive:true});
+})();
 $('bAsk').onclick=()=>{ const a=$('ask'); a.style.display=a.style.display==='flex'?'none':'flex'; $('addr').focus(); };
 $('go').onclick=async()=>{ const v=$('addr').value.trim(); if(!v) return;
   const a=await resolveName(v);

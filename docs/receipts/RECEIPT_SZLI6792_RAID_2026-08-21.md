@@ -130,3 +130,35 @@ LiveKit venue + our own panels. That is the whole take, and it is enough.
 **Seat 3 (Fable 5), 2026-08-21.** Full pirate rules honoured: everything that serves
 the hive taken — and it turned out the license walls meant the takeable part was the
 ideas, which were the valuable part anyway. Do no harm held. 🐝
+
+---
+
+## ⟳ CORRECTION, same day — two findings above are overturned by the founder's next lead
+
+The founder surfaced `github.com/ERC-20i/Pepi` hours after this receipt landed. A second
+verified pass against it corrects this receipt in place:
+
+1. **"No official Pepi GitHub presence exists" is OVERTURNED.** The account exists and is
+   official: **pepi.sh's own live application bundle links `github.com/ERC-20i/Pepi` in
+   its socials config** — the project endorses it. The miss is explained, not excused:
+   ERC-20i is a GitHub **user** (created 2026-03-09), not an org, and its sole repo is
+   named just "Pepi" with no description — repo search matches names and descriptions,
+   never owner names. Standing lesson: **an absence probe over GitHub search is a floor,
+   not a total** — the same law as every other panel in this tree.
+2. **The "Ethereum-chain PEPI is plausibly a copycat" note is corrected.** The Ethereum
+   deployment `0x3103cD16…` was deployed 2026-03-03 **by the same proven operator wallet**
+   (`0x1609e546…adc3`) that ran the whole Base launch family, and its source is
+   Sourcify-verified byte-identical to the official repo. It is the same project expanding
+   chains. The third-party scam-site flag on the project's old domain looks like a false
+   positive — reported, not ruled.
+3. **The attribution verdict is UNCHANGED and slightly strengthened:** the official repo's
+   single commit is authored `0xhadrian.eth <supCryptoCars@protonmail.com>` — an alias
+   trail, not a human name, and not szli6792. The tree still records no creator.
+4. **License nuance for the founder's gate:** the official repo carries **no LICENSE
+   file**, but 10 of its 12 Solidity files bear in-file `SPDX-License-Identifier: MIT`
+   placed by the publisher (the same headers ship in the on-chain verified source). If
+   counsel accepts in-file SPDX as a grant, those 10 upgrade to TAKE-per-MIT with
+   attribution to "ERC-20i/Pepi". `token/Erc20.sol` — the ERC-20i core, the most valuable
+   file — and `Airdrop.sol` carry **no license line at all** and stay patterns-only
+   regardless. Either way, **Sourcify's verified corpus holds the code of record**
+   independent of any GitHub repo's fate — which is itself the museum's thesis.
