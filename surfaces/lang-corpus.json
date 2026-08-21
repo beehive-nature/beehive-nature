@@ -3,7 +3,6 @@
   "law": "the corpus law applies: every rendering below is MACHINE-DRAFTED (⚙) until a human attestation upgrades it; a missing line falls back to English visibly, never silently; a machine draft never finalizes a consent",
   "drafted": "2026-08-21 by Seat 3 (Fable 5), all ⚙ · h.* heading set fleet-drafted 2026-08-21 (17 agents, one per tongue), all ⚙ · h.* heading set fleet-drafted 2026-08-21 (17 agents, one per tongue), all ⚙ · QA-gate fixes applied same day (18 defects across 12 tongues; h.002 Base-token and the decimal-comma byte-count fixed fleet-wide)",
   "attested": {},
-  "readings_flagged": "Scottish→gd (Gàidhlig), Indian→hi (Hindi), Iranian→fa (Farsi) — founder corrects any with one line · Flemish→nl-be (Vlaams — Belgium: Dutch/French/German are the official three; Vlaams is Flanders, the Tomorrowland jurisdiction)",
   "langs": [
    "ru",
    "cs",
@@ -29,7 +28,8 @@
    "fa"
   ],
   "withdrawn": {},
-  "anchors": []
+  "anchors": [],
+  "readings_ratified": "FOUNDER-RATIFIED 2026-08-21: Scottish→gd (Gàidhlig), Indian→hi (Hindi), Iranian→fa (Farsi), Flemish→nl-be (Vlaams). His words, the standing law for every attestation: 'make all appropriate to the culture/language/value/history/future.'"
  },
  "strings": {
   "beta": {

@@ -162,3 +162,16 @@ verified pass against it corrects this receipt in place:
    file — and `Airdrop.sol` carry **no license line at all** and stay patterns-only
    regardless. Either way, **Sourcify's verified corpus holds the code of record**
    independent of any GitHub repo's fate — which is itself the museum's thesis.
+
+   > **⚖ PL-1 RULED, 2026-08-21 — founder's word, verbatim:** *"he's a cypherpunk so
+   > follow that culture protocol for those types of questions."*
+   > **The reading, executed:** in cypherpunk culture the authoritative declaration
+   > channel is the code itself — an author who ships `SPDX-License-Identifier: MIT`
+   > in the file header, and ships that identical header inside the **on-chain verified
+   > source**, has spoken their license intent in-band, in the medium the culture
+   > treats as canonical. Paperwork-absent is not intent-absent. **The 10 SPDX-MIT
+   > files are TAKE-per-MIT**, attribution "ERC-20i/Pepi (Pepe Inscriptions), MIT per
+   > in-file SPDX", with Sourcify's verified copy cited as the durable source of the
+   > grant. **And the protocol cuts both ways:** `Erc20.sol` and `Airdrop.sol` carry no
+   > declaration, so under the same in-band rule **nothing was declared and nothing is
+   > taken** — they remain patterns-only. Silence honored as strictly as speech.
