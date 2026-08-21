@@ -97,7 +97,7 @@
   }
   function load(cb){
     if(corpus) return cb();
-    fetch(R+'lang-corpus.json?v=2').then(function(r){return r.json()})
+    fetch(R+'lang-corpus.json?v=3').then(function(r){return r.json()})
       .then(function(j){ corpus=j;
         /* the withdrawal law reaches the renderer: a withdrawn tongue stops rendering
            estate-wide (history kept in the corpus file); its picker entry says so. */
