@@ -87,13 +87,15 @@ footer{max-width:900px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
 
 <section>
   <h2>THE TWO PROTOCOLS, ONE SENTENCE EACH</h2>
-  <div class="quote"><span class="who">MAHA — the state protocol</span><br>Established by
-  Executive Order 14212 (Feb 13, 2025), the President's Commission chaired by Secretary
-  Kennedy names four drivers of childhood chronic disease — poor diet, environmental
-  chemicals, inactivity and stress, overmedicalization — and has moved on dyes, SNAP
+  <div class="quote"><span class="who">MAHA — the state protocol</span><br>Executive Order 14212
+  (signed Feb 13 2025, published 90 FR 9833) establishes the <b>President's Make America Healthy
+  Again Commission</b>, chaired by the Secretary of HHS. Its Assessment names four potential
+  drivers of childhood chronic disease — poor diet first, then environmental chemicals,
+  inactivity and stress, overmedicalization — and the Commission has moved on dyes, SNAP
   restrictions, pesticide scrutiny, and a September 2025 national strategy.
-  <span class="cite">[<a href="https://www.whitehouse.gov/presidential-actions/2025/02/establishing-the-presidents-commission-to-make-america-healthy-again/">EO 14212</a> ·
-  <a href="https://www.hhs.gov/about/news/2025/09/09/maha-commission-unveils-sweeping-strategy-to-make-our-children-healthy-again.html">HHS strategy release, Sep 9 2025</a>]</span></div>
+  <span class="cite">[<a href="https://www.govinfo.gov/content/pkg/FR-2025-02-19/html/2025-02871.htm">EO 14212 — Federal Register, the durable copy</a> ·
+  <a href="https://www.whitehouse.gov/presidential-actions/2025/02/establishing-the-presidents-make-america-healthy-again-commission/">whitehouse.gov</a> ·
+  <a href="https://www.fns.usda.gov/newsroom/usda-0213.25">the Strategy — USDA release 0213.25, Sep 9 2025</a>]</span></div>
   <div class="quote"><span class="who">bFood — the measurement protocol</span><br>An open
   (AGPL) nutrition-instrument stack: a per-body reference-intake engine (the EER equations,
   DRI tables), a lot-level COA specification with an LOQ floor law, three display laws
@@ -193,27 +195,27 @@ var T={
 };
 var ROWS=[
  {q:'is diet a first-order input to chronic disease?',
-  maha:'the MAHA Assessment names poor diet first among four drivers of childhood chronic disease.',
-  mc:'MAHA Assessment, May 22 2025',
-  mu:'https://www.whitehouse.gov/wp-content/uploads/2025/05/MAHA-Report.pdf',
+  maha:'the Commission’s "Make Our Children Healthy Again: Assessment" (May 22 2025) names poor diet first among its four potential drivers of childhood chronic disease.',
+  mc:'the Assessment (PDF, p.5), May 22 2025',
+  mu:'https://www.whitehouse.gov/wp-content/uploads/2025/05/WH-The-MAHA-Report-Assessment.pdf',
   bfood:'yes — and we measure it: 96% below the vitamin D EAR beside 5% at risk of deficiency, the brake always attached, and the non-shortfall half (iron 6%) published to defeat selection bias.',
   bc:'RECEIPT_SHORTFALL_ARBITRAGE_2026-08-20',
   bu:'https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/RECEIPT_SHORTFALL_ARBITRAGE_2026-08-20.md',
   s:'align',
   set:'a shared measurement standard: category claims (theirs) + per-nutrient, per-body floors (ours) — line 2.'},
  {q:'what is actually being regulated — categories or measurements?',
-  maha:'ultra-processed food is the named villain; the September strategy proposes food regulation, and the November 2025 shutdown bill simultaneously limited UPF rulemaking — the category is contested inside the government itself.',
-  mc:'HHS strategy Sep 9 2025 · NYT Nov 11 2025',
-  mu:'https://www.nytimes.com/2025/11/11/business/shutdown-deal-food-safety.html',
+  maha:'ultra-processed food is the named category: the September 9 2025 Strategy commits to defining UPFs, closing the GRAS loophole and reforming dietary guidelines. as of August 2026 no federal rule defining UPFs has been proposed or finalized — the July 2025 FDA/USDA Request for Information remains the operative step, and FDA’s 2026 deliverables list the definition as ongoing work. <i>a prior version of this row claimed the November 2025 shutdown law limited UPF rulemaking; the enacted statute contains zero occurrences of "ultra" — the claim was false and is deleted, not softened.</i>',
+  mc:'USDA release 0213.25, Sep 9 2025 · FDA HFP 2026 deliverables',
+  mu:'https://www.fns.usda.gov/newsroom/usda-0213.25',
   bfood:'we take no position on the category and measure everything in it: composition facts per nutrient per body, n/m never zero, floors labelled ≥. a category is a hypothesis; a measurement is a fact — the panel-undercount law applies to diets too.',
   bc:'bfood.html · RECEIPT_CANNABINOID_PANEL_UNDERCOUNT',
   bu:'https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/RECEIPT_CANNABINOID_PANEL_UNDERCOUNT_2026-08-20.md',
   s:'comp',
   set:'complementarity by construction: policy sets the category boundaries, our engine verifies any product against any boundary — openly, per lot.'},
  {q:'how transparent should a food label be?',
-  maha:'acted, not proposed: Red 3 banned Jan 2025; petroleum-based dyes phase-out targeted for 2026, with three new color additives approved toward it.',
-  mc:'FDA/Axios May 9 2025',
-  mu:'https://www.axios.com/2025/05/09/fda-color-additives-rfk-jr-dye-ban',
+  maha:'one binding act and one voluntary programme, and the difference is the story: FDA revoked Red 3’s listing for food and ingested drugs on Jan 15 2025 under the Delaney Clause — compliance deadlines Jan 2027 (food) and Jan 2028 (drugs), so it is lawful on shelves today. the six-dye phase-out is <b>voluntary</b>: FDA asked industry rather than issuing a rule (a Federal Register search returns zero rulemakings for any of the six), and FDA’s own pledge tracker now targets <b>end of 2027</b>, not 2026. six natural-source colour listings finalized since May 2025, four currently in effect.',
+  mc:'FDA Red 3 page · 90 FR 4628 · the FDA pledge tracker',
+  mu:'https://www.fda.gov/industry/color-additives/fdc-red-no-3',
   bfood:'three display laws already in production: NotMeasured ≠ 0 · never an undifferentiated "saturated fat" (MCT / lauric / LCT rows) · never a "total" without its panel size. every number printed as text — no hover.',
   bc:'bfood.html §5 · the display laws',
   bu:'https://beehive-nature.github.io/beehive-nature/surfaces/bfood.html',
@@ -229,54 +231,57 @@ var ROWS=[
   s:'align',
   set:'co-creation 1: the lot-COA spec as a voluntary transparency standard — the mandate is theirs, the instrument is ours.'},
  {q:'seed oils?',
-  maha:'the Secretary: "seed oils are one of the most unhealthy ingredients that we have in foods"; beef tallow promoted as the alternative. the scientific counter-record is substantial and specific.',
-  mc:'STAT 2025 · McGill Schwarcz 2025 · Time 2025',
-  mu:'https://www.mcgill.ca/oss/article/critical-thinking-health/unscientific-crusade-against-seed-oils',
+  maha:'on Aug 24 2024 — six months before the Senate confirmed him 52–48 as HHS Secretary — Robert F. Kennedy Jr. said on Fox &amp; Friends Weekend that seed oils are "one of the … most unhealthy ingredients that we have in foods"; beef tallow has been promoted as the alternative. the scientific counter-record is substantial and specific — and the 2025–2030 Dietary Guidelines are <b>not</b> evidence of a tallow-over-seed-oils federal policy, so this page does not cite them as one.',
+  mc:'McGill OSS (Schwarcz) · PMC reviews',
+  mu:'https://www.mcgill.ca/oss/article/medical-critical-thinking-health-and-nutrition/unscientific-crusade-against-seed-oils',
   bfood:'the disaggregation law without an effect claim: fatty acids displayed by chain length (C6–C10 · lauric C12 · C14+), lauric kept as its own row because it is the boundary case — the reader sees the classes are different quantities before anyone tells them they behave differently. effect claims in either direction are Axis B: off-repo, graded.',
   bc:'RECEIPT_SHORTFALL_ARBITRAGE §5a (founder-ruled display law)',
   bu:'https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/RECEIPT_SHORTFALL_ARBITRAGE_2026-08-20.md',
   s:'open',
   set:'a graded, pre-registered evidence review — the BiGen method — settles effect claims; the chain-length label serves both camps regardless of outcome. disclosure without assertion is the homeostatic move.'},
  {q:'feeding programs — restriction or measurement?',
-  maha:'SNAP restrictions on candy/soda ("we shouldn\u2019t be subsidizing people to eat poison" — Feb 2025); 23 state waivers followed; in June 2026 a federal court vacated five, finding the Act authorizes only "experimental projects".',
-  mc:'Fortune Feb 19 2025 · Baltimore Sun Jun 23 2026',
-  mu:'https://www.baltimoresun.com/2026/06/23/federal-judge-blocks-usdas-snap-restrictions-on-soda-candy-in-five-states',
+  maha:'USDA approved SNAP food-restriction waivers for 23 states — the first, Nebraska, signed May 19 2025 and called by USDA itself "the first-ever waiver to amend the statutory definition of food". on June 22 2026, in <i>Aragon v. Rollins</i> (D.D.C.), the court vacated five approvals: the provision USDA invoked authorizes pilots on <i>administrative efficiency</i>, not participant health, and four states lacked the 30-day Federal Register notice USDA’s own regulation requires. the court added that its analysis "should not be taken as a comment on whether the pilot projects are a good idea or not". <i>a prior version of this row put quote marks around a holding the court never announced; corrected against the opinion itself.</i>',
+  mc:'Aragon v. Rollins, No. 1:26-cv-00861 (D.D.C. Jun 22 2026) — the opinion (PDF)',
+  mu:'https://www.govinfo.gov/content/pkg/USCOURTS-dcd-1_26-cv-00861/pdf/USCOURTS-dcd-1_26-cv-00861-0.pdf',
   bfood:'the evidence ladder was built for exactly this: composed (tier 0) → self-reported → receipt-backed → assayed (tier 3). experiments with honest tiers are the lawful and scientific shape both the court and the science ask for.',
   bc:'bfood.html §7 · the quest ladder',
   bu:'https://beehive-nature.github.io/beehive-nature/surfaces/bfood.html',
   s:'open',
   set:'co-creation 5: SNAP experiments run with the tier ladder — the court named the grammar; we built it.'},
  {q:'can either of us be trusted to cite our own work?',
-  maha:'the May Assessment shipped citations to studies that did not exist; the White House called it formatting; the citations were later replaced. every agentic publisher\u2019s failure mode, at federal scale.',
-  mc:'NYT May 29 2025 · BBC May 29 2025 · NOTUS (updated)',
-  mu:'https://www.nytimes.com/2025/05/29/health/trump-administration-maha-report-citations.html',
+  maha:'on May 29 2025, NOTUS reported that seven of the Assessment’s 500+ cited sources did not appear to have ever been published, alongside dozens of citations with broken links, wrong authors, and conclusions the cited papers did not support. within hours the White House replaced all seven; by May 30, at least 18 original citations had been edited or swapped, some replacements introducing new errors, with no correction notice. the press secretary called them "formatting issues"; an HHS spokesperson said the substance "remains the same". the PDF the government serves today carries a production timestamp of the evening of May 29 — hours after the NOTUS story — which corroborates the replacement without proving what changed; the before/after is NOTUS’s receipt, not the bytes’.',
+  mc:'NOTUS, May 29 2025 · PBS NewsHour · the served PDF’s own XMP metadata',
+  mu:'https://www.notus.org/health-science/make-america-healthy-again-report-citation-errors',
   bfood:'the receipts law exists because we hit the same wall ourselves — a ΔE figure we published was wrong once, corrected in place on the wall; a Canada figure went stale within a day, corrected the same way. no ✅ without a receipt; failed fetches declared; corrections visible. mechanical, not moral.',
   bc:'our own corrections: 3a0be7b / 8b64cc2 · the Canada correction 72661ef',
   bu:'https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/SPRINT_DESIGN_UNIFY_2026-08-19.md',
   s:'align',
   set:'co-creation 4: receipts-first publishing as shared infrastructure — the discipline that keeps a discourse homeostatic is mechanical, free, and already built.'}
 ];
-/* LINK-RESOLUTION STATUS — Seat 3 verification pass, 2026-08-20.
-   Every external citation URL on this page was requested from this host. Five returned
-   404 and four are paywalled or bot-blocked, so they cannot be confirmed from here.
-   That matters more on this page than on any other in the tree, because one of the rows
-   below documents a federal report shipping citations that did not resolve. A page making
-   that observation while carrying unresolving citations of its own has disqualified
-   itself. So the status of each link is now printed beside it rather than left for a
-   reader to discover. Declared, not zeroed -- the same standard we ask of them.
-   Measured with: curl -sS -o /dev/null -w "%{http_code}" -L --max-time 20 */
+/* LINK-RESOLUTION STATUS — re-measured by Seat 3 on 2026-08-21 after the claim-level
+   verification pass completed. Every URL below was requested from this host with:
+   curl -sS -o /dev/null -w "%{http_code}" -L --max-time 25
+   The five dead links this page confessed to on 2026-08-20 are gone — every replacement
+   resolves. The one remaining non-200 is a paywall, kept and marked rather than dropped,
+   because the claim it supports is stated as unverifiable from here. */
 var LINKSTATUS={
- 'https://www.whitehouse.gov/wp-content/uploads/2025/05/MAHA-Report.pdf':[404,'did not resolve from this host'],
- 'https://www.whitehouse.gov/presidential-actions/2025/02/establishing-the-presidents-commission-to-make-america-healthy-again/':[404,'did not resolve from this host'],
- 'https://www.bbc.com/news/articles/cly4z5z8g9zo':[404,'did not resolve from this host'],
- 'https://www.mcgill.ca/oss/article/critical-thinking-health/unscientific-crusade-against-seed-oils':[404,'did not resolve from this host'],
- 'https://fortune.com/2025/02/19/rfk-jr-banning-candy-soda-snap/':[404,'did not resolve from this host'],
- 'https://www.hhs.gov/about/news/2025/09/09/maha-commission-unveils-sweeping-strategy-to-make-our-children-healthy-again.html':[403,'blocked to this host — neither confirmed nor refuted'],
- 'https://www.axios.com/2025/05/09/fda-color-additives-rfk-jr-dye-ban':[403,'blocked to this host — neither confirmed nor refuted'],
- 'https://www.nytimes.com/2025/05/29/health/trump-administration-maha-report-citations.html':[403,'paywalled to this host — neither confirmed nor refuted'],
- 'https://www.nytimes.com/2025/11/11/business/shutdown-deal-food-safety.html':[403,'paywalled to this host — neither confirmed nor refuted'],
- 'https://www.wsj.com/articles/trump-officials-balk-at-rfk-jr-s-attack-on-pesticides-8a2f7a1b':[401,'paywalled to this host — neither confirmed nor refuted'],
- 'https://www.baltimoresun.com/2026/06/23/federal-judge-blocks-usdas-snap-restrictions-on-soda-candy-in-five-states':[200,'resolved']
+ 'https://www.whitehouse.gov/wp-content/uploads/2025/05/WH-The-MAHA-Report-Assessment.pdf':[200,'resolved 2026-08-21'],
+ 'https://www.whitehouse.gov/presidential-actions/2025/02/establishing-the-presidents-make-america-healthy-again-commission/':[200,'resolved 2026-08-21'],
+ 'https://www.govinfo.gov/content/pkg/FR-2025-02-19/html/2025-02871.htm':[200,'resolved 2026-08-21'],
+ 'https://www.fns.usda.gov/newsroom/usda-0213.25':[200,'resolved 2026-08-21'],
+ 'https://ptfcehs.niehs.nih.gov/featured-activities/make-our-children-healthy-again-strategy':[200,'resolved 2026-08-21'],
+ 'https://www.fda.gov/industry/color-additives/fdc-red-no-3':[200,'resolved 2026-08-21'],
+ 'https://www.govinfo.gov/content/pkg/FR-2025-01-16/html/2025-00830.htm':[200,'resolved 2026-08-21'],
+ 'https://www.fda.gov/news-events/press-announcements/hhs-fda-phase-out-petroleum-based-synthetic-dyes-nations-food-supply':[200,'resolved 2026-08-21'],
+ 'https://www.fda.gov/food/color-additives-information-consumers/tracking-food-industry-pledges-remove-petroleum-based-food-dyes':[200,'resolved 2026-08-21'],
+ 'https://www.fda.gov/about-fda/human-foods-program/human-foods-program-2026-priority-deliverables':[200,'resolved 2026-08-21'],
+ 'https://www.govinfo.gov/content/pkg/USCOURTS-dcd-1_26-cv-00861/pdf/USCOURTS-dcd-1_26-cv-00861-0.pdf':[200,'resolved 2026-08-21'],
+ 'https://www.baltimoresun.com/2026/06/23/federal-judge-blocks-usdas-snap-restrictions-on-soda-candy-in-five-states':[200,'resolved'],
+ 'https://www.notus.org/health-science/make-america-healthy-again-report-citation-errors':[200,'resolved 2026-08-21'],
+ 'https://www.notus.org/health-science/maha-report-update-citations':[200,'resolved 2026-08-21'],
+ 'https://www.pbs.org/newshour/politics/watch-maha-report-with-non-existent-sources-had-formatting-issues-white-house-says':[200,'resolved 2026-08-21'],
+ 'https://www.mcgill.ca/oss/article/medical-critical-thinking-health-and-nutrition/unscientific-crusade-against-seed-oils':[200,'resolved 2026-08-21'],
+ 'https://www.wsj.com/articles/trump-officials-balk-at-rfk-jr-s-attack-on-pesticides-8a2f7a1b':[401,'paywalled to this host — neither confirmed nor refuted']
 };
 function linkBadge(u){
  var s=LINKSTATUS[u]; if(!s) return '';
@@ -295,36 +300,44 @@ ROWS.forEach(function(r){
  tb.appendChild(tr);
 });
 $('srcs').innerHTML=[
- ['EO 14212 — the Commission','https://www.whitehouse.gov/presidential-actions/2025/02/establishing-the-presidents-commission-to-make-america-healthy-again/'],
- ['MAHA Assessment (PDF), May 22 2025','https://www.whitehouse.gov/wp-content/uploads/2025/05/MAHA-Report.pdf'],
- ['Make Our Children Healthy Again Strategy, Sep 9 2025','https://www.hhs.gov/about/news/2025/09/09/maha-commission-unveils-sweeping-strategy-to-make-our-children-healthy-again.html'],
- ['FDA dye actions (Axios, May 9 2025)','https://www.axios.com/2025/05/09/fda-color-additives-rfk-jr-dye-ban'],
+ ['EO 14212 — Federal Register, 90 FR 9833 (the durable copy)','https://www.govinfo.gov/content/pkg/FR-2025-02-19/html/2025-02871.htm'],
+ ['EO 14212 — whitehouse.gov','https://www.whitehouse.gov/presidential-actions/2025/02/establishing-the-presidents-make-america-healthy-again-commission/'],
+ ['the Assessment (PDF), May 22 2025','https://www.whitehouse.gov/wp-content/uploads/2025/05/WH-The-MAHA-Report-Assessment.pdf'],
+ ['the Strategy — USDA release 0213.25, Sep 9 2025','https://www.fns.usda.gov/newsroom/usda-0213.25'],
+ ['the Strategy — NIH/NIEHS mirror','https://ptfcehs.niehs.nih.gov/featured-activities/make-our-children-healthy-again-strategy'],
+ ['Red 3 revocation — FDA','https://www.fda.gov/industry/color-additives/fdc-red-no-3'],
+ ['Red 3 revocation — 90 FR 4628','https://www.govinfo.gov/content/pkg/FR-2025-01-16/html/2025-00830.htm'],
+ ['the dye phase-out announcement, Apr 22 2025 — FDA','https://www.fda.gov/news-events/press-announcements/hhs-fda-phase-out-petroleum-based-synthetic-dyes-nations-food-supply'],
+ ['the FDA pledge tracker (voluntary; targets end-2027)','https://www.fda.gov/food/color-additives-information-consumers/tracking-food-industry-pledges-remove-petroleum-based-food-dyes'],
+ ['FDA Human Foods Program 2026 deliverables','https://www.fda.gov/about-fda/human-foods-program/human-foods-program-2026-priority-deliverables'],
+ ['citation errors — NOTUS, May 29 2025','https://www.notus.org/health-science/make-america-healthy-again-report-citation-errors'],
+ ['citation replacements — NOTUS follow-up','https://www.notus.org/health-science/maha-report-update-citations'],
+ ['“formatting issues” — PBS NewsHour','https://www.pbs.org/newshour/politics/watch-maha-report-with-non-existent-sources-had-formatting-issues-white-house-says'],
+ ['Aragon v. Rollins — the opinion itself (govinfo PDF)','https://www.govinfo.gov/content/pkg/USCOURTS-dcd-1_26-cv-00861/pdf/USCOURTS-dcd-1_26-cv-00861-0.pdf'],
+ ['SNAP ruling coverage (Baltimore Sun, Jun 23 2026)','https://www.baltimoresun.com/2026/06/23/federal-judge-blocks-usdas-snap-restrictions-on-soda-candy-in-five-states'],
  ['Pesticide friction (WSJ, May 14 2025)','https://www.wsj.com/articles/trump-officials-balk-at-rfk-jr-s-attack-on-pesticides-8a2f7a1b'],
- ['Citation errors (NYT, May 29 2025)','https://www.nytimes.com/2025/05/29/health/trump-administration-maha-report-citations.html'],
- ['Citation errors (BBC, May 29 2025)','https://www.bbc.com/news/articles/cly4z5z8g9zo'],
- ['Seed-oil counter-record (McGill OSS, 2025)','https://www.mcgill.ca/oss/article/critical-thinking-health/unscientific-crusade-against-seed-oils'],
- ['SNAP quotes (Fortune, Feb 19 2025)','https://fortune.com/2025/02/19/rfk-jr-banning-candy-soda-snap/'],
- ['SNAP ruling (Baltimore Sun, Jun 23 2026)','https://www.baltimoresun.com/2026/06/23/federal-judge-blocks-usdas-snap-restrictions-on-soda-candy-in-five-states'],
- ['Shutdown bill vs UPF rulemaking (NYT, Nov 11 2025)','https://www.nytimes.com/2025/11/11/business/shutdown-deal-food-safety.html'],
+ ['Seed-oil counter-record (McGill OSS, Schwarcz)','https://www.mcgill.ca/oss/article/medical-critical-thinking-health-and-nutrition/unscientific-crusade-against-seed-oils'],
  ['bFood protocol','https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/bfood.html'],
  ['the COA specification','https://github.com/beehive-nature/beehive-nature/blob/main/SPEC_hulled_hemp_hearts_COA_tri_jurisdictional.md'],
  ['the shortfall receipt','https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/RECEIPT_SHORTFALL_ARBITRAGE_2026-08-20.md'],
  ['the peer-reviewed counter-record (2026) — Am J Health Promot editorial','https://pubmed.ncbi.nlm.nih.gov/41910371/'],
  ['the peer-reviewed counter-record (2026) — J Health Polit Policy Law','https://pubmed.ncbi.nlm.nih.gov/41059522/']
 ].map(function(s){ return '<a href="'+s[1]+'" rel="noopener">'+s[0]+'</a>'+linkBadge(s[1]); }).join(' · ')+'.'
- +'<div class="fetchnote"><b>LINK STATUS, measured from this host on 2026-08-20 and printed '
- +'rather than left for you to find.</b> Of the external citations above, <b>five did not '
- +'resolve</b> — including both whitehouse.gov links, the Executive Order and the Assessment '
- +'PDF itself — and <b>four are paywalled or blocked to this host</b>, so they can be neither '
- +'confirmed nor refuted from here. Only the Baltimore Sun ruling and the two PubMed records '
- +'were retrieved.<br><br><b>This is stated first because of what the last row of the table '
- +'says.</b> A page observing that a federal report carried citations which did not resolve, '
- +'while carrying unresolving citations of its own, has forfeited the standing to make the '
- +'observation. A 404 is not proof a source was invented — government URLs move, news sites '
- +'restructure, and several of these are almost certainly real documents at addresses that '
- +'have changed. But under this project’s own law an unresolving citation cannot stand '
- +'unmarked, and it is marked. <b>A verification pass to find addresses that do resolve is '
- +'running; the claims stay only where it succeeds.</b></div>';
+ +'<div class="fetchnote"><b>LINK STATUS — re-measured from this host on 2026-08-21, after the '
+ +'verification pass completed.</b> On 2026-08-20 this page carried five citations that did not '
+ +'resolve — including both whitehouse.gov links — and said so on its face rather than wait to '
+ +'be caught. The pass has returned. Every claim was independently re-verified against primary '
+ +'sources — the Federal Register, govinfo, FDA, USDA, and the court\u2019s own opinion — and every '
+ +'citation above now resolves from this host except one WSJ paywall, which stays marked.'
+ +'<br><br><b>Three rows changed in the process, and each says so in its own text:</b> the '
+ +'shutdown-bill claim was <b>false</b> (the enacted statute contains zero occurrences of '
+ +'\u201cultra\u201d) and is deleted, not softened; the SNAP row had put quotation marks around a holding '
+ +'the court never announced, and is corrected against the opinion itself; the dye row now '
+ +'separates the one binding act — Red 3, with its 2027/2028 compliance dates — from the '
+ +'voluntary six-dye pledge programme (zero rulemakings; FDA\u2019s own tracker targets end-2027, '
+ +'not 2026). <b>And the vindicating detail:</b> the two dead whitehouse.gov links were never '
+ +'invented sources — both documents exist at different addresses, which is exactly why this '
+ +'page refused to treat a 404 as proof of fabrication.</div>';
 })();
 </script>
 </body>
