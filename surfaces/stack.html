@@ -58,7 +58,7 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 <body>
 <main>
 <header>
-  <h1>⚙ the Engine Room</h1>
+  <h1>⚙ <span data-i18n="stack.h1">the Engine Room</span></h1>
   <div class="sub" data-reg="bee">A visitor asked the best possible question: <i>"there's a lot
   going on — which part shows me Autonomi?"</i> This page is the answer. One picture of what
   actually runs under every door on the hub, in plain words, with the honest parts included.</div>
@@ -75,16 +75,16 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 <section>
   <h2>THE SHAPE — root below, everything else above</h2>
   <div id="flow">
-    <div class="tier root"><div class="t">🐝 bzDiD — the identity root</div>
+    <div class="tier root"><div class="t">🐝 <span data-i18n="stack.t1">bzDiD — the identity root</span></div>
       <div class="d">self-authenticating identity (Self-Auth + DiD), built to survive the loss of
       <i>any</i> layer above it — including any single storage network. The root is yours;
       everything else is replaceable. <a href="keys/addresses.html">see it live</a></div></div>
     <div class="down">▼</div>
-    <div class="tier"><div class="t">the coordination kernel — rust</div>
+    <div class="tier"><div class="t"><span data-i18n="stack.t2">the coordination kernel — rust</span></div>
       <div class="d">a public workspace of ~36 crates. Adapters plug into it; none of them is
       load-bearing for identity. <a href="https://github.com/beehive-nature/beehive-nature" rel="noopener">source</a></div></div>
     <div class="down">▼</div>
-    <div class="tier"><div class="t">the adapter rails — storage, value, relays</div>
+    <div class="tier"><div class="t"><span data-i18n="stack.t3">the adapter rails — storage, value, relays</span></div>
       <div class="d"><b>Storage routes by a price-break law:</b>
       <span class="chip c-ar">◈ Arweave</span> carries small public immutable data (≈100 kB and
       under); <span class="chip c-ant">⬢ Autonomi</span> takes over where its per-byte price
@@ -96,7 +96,7 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
       <b>Voice:</b> <span class="chip c-hive">◆ Hive</span> longform ·
       <span class="chip c-social">☄ bSky + Nostr</span> relays.</div></div>
     <div class="down">▼</div>
-    <div class="tier"><div class="t">the dApps — every card on the hub</div>
+    <div class="tier"><div class="t"><span data-i18n="stack.t4">the dApps — every card on the hub</span></div>
       <div class="d">static, keyless pages. No logins, no custody, nothing to breach — each one a
       read-and-compose window over the rails below it. <a href="index.html">back to the hub</a></div></div>
   </div>
@@ -181,6 +181,6 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   every claim on this page is either linked to its record or marked as a debt ·
   <a href="index.html">← the hub</a>
 </footer>
-<script src="tour.js?v=10"></script>
+<script src="tour.js?v=11"></script>
 </body>
 </html>
