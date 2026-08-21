@@ -93,5 +93,14 @@ for (const src of REGISTER) {
   }
 }
 
-writeFileSync(MANIFEST, JSON.stringify(manifest, null, 1));
+/* One entry per line, each carrying its own PUBLIC-CONSTANT marker: the repo is public
+   and its pre-commit secret scan (rightly) challenges any 48+-char hex without one on
+   the same line. A sha256 of a public government document is the definitional public
+   constant, and saying so beside every hash keeps the scanner's law and the manifest's
+   greppability at once. */
+const body = manifest.entries.map(e =>
+  " " + JSON.stringify({ note: "PUBLIC-CONSTANT sha256 of a public document", ...e })
+).join(",\n");
+writeFileSync(MANIFEST,
+  `{\n "spec": ${JSON.stringify(manifest.spec)},\n "entries": [\n${body}\n ]\n}\n`);
 console.log(`\ndone: ${ok} new, ${unchanged} unchanged, ${fail} failed · manifest entries: ${manifest.entries.length}`);
