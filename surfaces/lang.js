@@ -67,7 +67,7 @@
       if(note){
         if(code==='en'){ note.textContent=''; note.title=''; }
         else{
-          note.textContent='⚙ '+hit+'/'+total;
+          note.textContent = total===0 ? '⚙ 0 docked here yet' : '⚙ '+hit+'/'+total;
           note.title='machine-drafted ⚙ — human attestation upgrades it; '+
             (total-hit)+' line(s) on this page fall back to English and say so here';
         }

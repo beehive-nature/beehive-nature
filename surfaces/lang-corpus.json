@@ -671,6 +671,26 @@
    "bn": "বাজার",
    "fa": "بازار",
    "nl-be": "markt"
+  },
+  "law.hive": {
+   "en": "← the hive",
+   "ru": "← улей",
+   "cs": "← úl",
+   "gd": "← an sgeap",
+   "es": "← la colmena",
+   "nl": "← de korf",
+   "nl-be": "← de korf",
+   "de": "← der Bienenstock",
+   "fr": "← la ruche",
+   "zh": "← 蜂巢",
+   "th": "← รังผึ้ง",
+   "lv": "← strops",
+   "uk": "← вулик",
+   "ar": "← الخلية",
+   "he": "← הכוורת",
+   "hi": "← छत्ता",
+   "bn": "← মৌচাক",
+   "fa": "← کندو"
   }
  }
 }

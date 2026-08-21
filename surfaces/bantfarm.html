@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="color-scheme" content="dark">
+<title>the bANTfarm — nodes, and the two treasuries, read keylessly</title>
+<style>
+:root{--bg:#07090b;--panel:#0e1611;--well:#0a0f0b;--ink:#e2efdb;--dim:#8a9a8a;--faint:#5f6f61;
+ --line:#243026;--cyan:#00E5FF;--gold:#FFD700;--leaf:#7ddf8f;--violet:#c9a0ff;--amber:#ffb347;
+ --ant:#e0484f;--vaulta:#7ddf8f}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{overflow-x:hidden}
+body{background:var(--bg);color:var(--ink);font:13px/1.65 'IBM Plex Mono',monospace;padding:30px 14px 90px}
+main{max-width:960px;margin:0 auto}
+header{text-align:center;margin-bottom:8px}
+h1{font-size:clamp(19px,5vw,28px);color:var(--gold);font-weight:400;letter-spacing:.04em}
+.sub{color:var(--dim);font-size:11.5px;margin-top:8px;max-width:700px;margin-inline:auto;line-height:1.8}
+section{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:15px 16px;margin-top:14px}
+h2{font-size:11.5px;color:var(--violet);font-weight:400;letter-spacing:.09em;margin-bottom:9px}
+.law{color:var(--dim);font-size:10.5px;line-height:1.85}
+.law b{color:var(--ink)}
+a{color:var(--cyan)}
+input{background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;
+ padding:8px 10px;font:12px 'IBM Plex Mono',monospace}
+button{background:#26123a;color:var(--violet);border:1px solid var(--line);border-radius:8px;
+ padding:8px 14px;cursor:pointer;font:11.5px 'IBM Plex Mono',monospace;min-height:40px}
+button:hover{background:var(--violet);color:#000}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:9px;margin-top:11px}
+.stat{background:var(--well);border:1px solid var(--line);border-radius:9px;padding:10px 12px;border-left:3px solid var(--ant)}
+.stat.v{border-left-color:var(--vaulta)}
+.stat .val{font-size:19px;line-height:1.3;word-break:break-all}
+.stat .val s{font-size:11px;color:var(--dim);text-decoration:none}
+.stat .lbl{font-size:9.5px;color:var(--dim);margin-top:3px;letter-spacing:.04em}
+.stat .src{font-size:9px;color:var(--faint);margin-top:5px;line-height:1.6}
+.bar{position:relative;height:12px;background:var(--well);border:1px solid var(--line);border-radius:3px;overflow:hidden;margin-top:5px}
+.bar i{display:block;height:100%;background:var(--vaulta)}
+.bar span{position:absolute;inset:0;font-size:9px;color:var(--ink);text-align:center;line-height:12px}
+.nm{color:var(--faint);font-style:italic}
+.design{border:1px dashed #3d3410;background:#141207;border-radius:9px;padding:11px 13px;
+ font-size:10.5px;color:var(--gold);line-height:1.8;margin-top:10px}
+.err{color:var(--amber)}
+footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
+code{color:var(--ink)}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>🐜 the bANTfarm</h1>
+  <div class="sub" data-reg="bee">Two living treasuries, one honest window. On one side, the
+  <b style="color:var(--ant)">ant colony</b> — the Autonomi storage network our data lives on, and
+  the wallet that feeds it. On the other, <b style="color:var(--vaulta)">SKAISTS · LOVErnment
+  DAO</b> on Vaulta, where the .b names live. This page only <i>reads</i> — it never holds a key,
+  and it can't spend a thing. Type any public address and look.</div>
+  <div class="sub" data-reg="raver">the node farm and the two treasuries — ANT on Arbitrum One
+  beside the DAO on Vaulta — read keylessly, live, with every number's source printed under it.
+  the farm feeds the archive; the DAO steers the names; this window watches both.</div>
+  <div class="sub" data-reg="cypherpunk">Read-only dual-treasury instrument: ERC-20
+  <code>balanceOf</code>/<code>decimals</code>/<code>totalSupply</code> + <code>eth_getBalance</code>
+  via public Arbitrum RPC (failover), and Vaulta <code>get_account</code>/<code>get_currency_balance</code>
+  via the estate's proven three-host failover. Zero keys, zero write paths, zero custody — the ANT
+  token address is displayed with its re-derive-before-paying caveat because a DISPLAY address must
+  never be promoted to a PAYMENT address by copy-paste habit. Node operations dock locally (antd),
+  never through a hosted page.</div>
+</header>
+
+<section>
+  <h2>🐜 THE ANT SIDE — the wallet that feeds the archive · Arbitrum One</h2>
+  <div class="law">Uploads to Autonomi are paid in <b>ANT</b> with ETH gas, on Arbitrum One.
+  Enter any <b>public</b> address to read its standing — yours, the project's, anyone's. The
+  token contract is verified live at load (decimals and supply read from the chain, never
+  assumed). <b>⚠ display lane only:</b> before any <i>payment</i>, addresses are re-derived from
+  the installed client per
+  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/specs/SPEC-AUTONOMI-TREZOR-1.md" rel="noopener">SPEC-AUTONOMI-TREZOR-1</a> —
+  a habit this page refuses to weaken.</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+    <input id="evmaddr" placeholder="0x… (public address, read-only)" style="flex:1;min-width:240px">
+    <button id="evmgo">read</button>
+    <button id="evmvault" title="the network's own payment vault — a public infrastructure address, as a live demo">demo: the payment vault</button>
+  </div>
+  <div class="grid2" id="evmout">
+    <div class="stat"><div class="val nm" id="antbal">—</div><div class="lbl">ANT balance</div><div class="src" id="antsrc">enter an address</div></div>
+    <div class="stat"><div class="val nm" id="ethbal">—</div><div class="lbl">ETH (gas) balance</div><div class="src">eth_getBalance · Arbitrum One</div></div>
+    <div class="stat"><div class="val nm" id="antsupply">—</div><div class="lbl">ANT total supply — read live</div><div class="src" id="supplysrc">totalSupply() at load</div></div>
+    <div class="stat"><div class="val nm" id="antdec">—</div><div class="lbl">token decimals — read live</div><div class="src">decimals() at load; the page assumes nothing</div></div>
+  </div>
+
+  <h2 style="margin-top:16px">⛏ NODE OPERATIONS — where the farm actually runs</h2>
+  <div class="law"><b>Your nodes run on your machine</b> (the Autonomi App or <code>antnode</code>),
+  earn ANT for storing the network's chunks, and answer to <b>you</b> — and a page served from the
+  web <b>cannot and should not reach into your machine</b>: the browser's own wall between a hosted
+  page and localhost is a feature this farm respects rather than tunnels around.</div>
+  <div class="design">⚠ DESIGN · the local dock — what lands here as the sprint's T1/T2 receipts
+  close: opened <b>locally</b> (the estate's own dev server beside your daemon), this panel reads
+  your <code>antd</code>'s local API — node count, stored chunks, earnings in attos — with nothing
+  leaving your machine. Until those receipts land this panel stays honestly empty rather than
+  mocked. Run the App meanwhile: <a href="https://github.com/WithAutonomi/ant-ui/releases" rel="noopener">ant-ui
+  releases</a> (v0.9.7+ carries the batch-payment fixes) · node lane:
+  <a href="https://github.com/WithAutonomi/ant-node/releases" rel="noopener">ant-node</a>.</div>
+</section>
+
+<section>
+  <h2>👑 THE SKAISTS SIDE — LOVErnment DAO · Vaulta</h2>
+  <div class="law">The DAO's ground truth lives on Vaulta: accounts, RAM/CPU/NET, and the
+  <code>.b</code> registry at <code>kingbeelovis</code>. Read any account below — the default is
+  the registry's own home. Resources render as bars <i>and</i> numbers, never colour alone.</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+    <input id="vacct" value="kingbeelovis" style="flex:1;min-width:180px;max-width:260px">
+    <button id="vgo">read</button>
+  </div>
+  <div class="grid2">
+    <div class="stat v"><div class="val nm" id="vbal">—</div><div class="lbl">liquid balance</div><div class="src" id="vbalsrc">get_currency_balance</div></div>
+    <div class="stat v"><div class="val nm" id="vram">—</div><div class="lbl">RAM</div><div class="bar"><i id="vrambar" style="width:0%"></i><span id="vramtxt"></span></div><div class="src">used / quota</div></div>
+    <div class="stat v"><div class="val nm" id="vcpu">—</div><div class="lbl">CPU</div><div class="bar"><i id="vcpubar" style="width:0%"></i><span id="vcputxt"></span></div><div class="src">used / max, µs</div></div>
+    <div class="stat v"><div class="val nm" id="vnet">—</div><div class="lbl">NET</div><div class="bar"><i id="vnetbar" style="width:0%"></i><span id="vnettxt"></span></div><div class="src">used / max, bytes</div></div>
+  </div>
+  <div class="law" style="margin-top:10px"><b>the DAO's doors:</b>
+  <a href="dao-dashboard/">the governance dashboard</a> ·
+  <a href="blight/vaulta-reader.html">the .b registry reader</a> ·
+  <a href="https://skaists.github.io/sovereignty-explorer/" rel="noopener">SKAISTS sovereignty explorer</a> ·
+  <a href="https://github.com/skaists/LOVErnment-DAO" rel="noopener">the DAO's public tree</a> —
+  governance follows the worker-proposal + escrow rail; token-weighted custodian voting is refused
+  by GOV-1, and this page inherits that refusal by reading rather than voting.</div>
+</section>
+
+<section>
+  <h2>THE FARM'S LAW — why one window, two chains</h2>
+  <div class="law"><b>The farm feeds the archive; the DAO steers the names.</b> ANT pays for the
+  bytes our receipts and mirrors live on; Vaulta carries the identity registry those receipts
+  cite. One treasury without the other is half an organism — so the window shows both, reads
+  both keylessly, and holds neither. Every number above prints its method beneath it; a failed
+  fetch renders as a failure, never as zero.</div>
+</section>
+</main>
+<footer>
+  reads only · no keys, no custody, no write paths · <a href="stack.html">the engine room</a> ·
+  <a href="index.html" data-i18n="law.hive">← the hive</a>
+</footer>
+<script src="tour.js?v=12"></script>
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id)};
+/* ---- ANT / Arbitrum One ---- */
+var EHOSTS=['https://arb1.arbitrum.io/rpc','https://arbitrum-one-rpc.publicnode.com'];
+/* PUBLIC-CONSTANT: the ANT ERC-20 token address on Arbitrum One, DISPLAY LANE ONLY (payments re-derive per spec) */
+var ANT='0xa78d8321B20c4Ef90eCd72f2588AA985A4BDb684';
+/* PUBLIC-CONSTANT: the Autonomi data-payments vault on Arbitrum One, used here only as a public demo address */
+var VAULT='0xB1b5219f8Aaa18037A2506626Dd0406a46f70BcC';
+var DEC=null;
+function pad(a){return '0'.repeat(24)+a.replace(/^0x/,'').toLowerCase();}
+async function erpc(method,params){
+  for(var i=0;i<EHOSTS.length;i++){
+    try{
+      var r=await fetch(EHOSTS[i],{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({jsonrpc:'2.0',id:1,method:method,params:params})});
+      var j=await r.json();
+      if(j&&j.result!==undefined) return j.result;
+    }catch(e){}
+  }
+  return null;
+}
+function fmt(bi,dec,digits){
+  var s=bi.toString().padStart(dec+1,'0');
+  var whole=s.slice(0,-dec)||'0', frac=s.slice(-dec).slice(0,digits);
+  return whole.replace(/\B(?=(\d{3})+(?!\d))/g,',')+(digits?'.'+frac:'');
+}
+async function initToken(){
+  var d=await erpc('eth_call',[{to:ANT,data:'0x313ce567'},'latest']);
+  var s=await erpc('eth_call',[{to:ANT,data:'0x18160ddd'},'latest']);
+  if(d){ DEC=parseInt(d,16); $('antdec').textContent=DEC; $('antdec').classList.remove('nm'); }
+  else $('antdec').innerHTML='<span class="err">fetch failed — declared, not zeroed</span>';
+  if(s&&DEC!==null){ $('antsupply').innerHTML=fmt(BigInt(s),DEC,0)+' <s>ANT</s>'; $('antsupply').classList.remove('nm');
+    $('supplysrc').textContent='totalSupply() · live · '+ANT.slice(0,10)+'…'; }
+  else $('antsupply').innerHTML='<span class="err">fetch failed</span>';
+}
+async function readEvm(addr){
+  if(!/^0x[0-9a-fA-F]{40}$/.test(addr)){ $('antsrc').textContent='that is not an EVM address'; return; }
+  $('antbal').textContent='reading…'; $('ethbal').textContent='reading…';
+  var bal=await erpc('eth_call',[{to:ANT,data:'0x70a08231'+pad(addr)},'latest']);
+  var eth=await erpc('eth_getBalance',[addr,'latest']);
+  if(bal!==null&&DEC!==null){ $('antbal').innerHTML=fmt(BigInt(bal),DEC,4)+' <s>ANT</s>'; $('antbal').classList.remove('nm');
+    $('antsrc').textContent='balanceOf('+addr.slice(0,8)+'…) · live'; }
+  else $('antbal').innerHTML='<span class="err">fetch failed — a failure, never zero</span>';
+  if(eth!==null){ $('ethbal').innerHTML=fmt(BigInt(eth),18,5)+' <s>ETH</s>'; $('ethbal').classList.remove('nm'); }
+  else $('ethbal').innerHTML='<span class="err">fetch failed</span>';
+}
+$('evmgo').onclick=function(){ readEvm($('evmaddr').value.trim()); };
+$('evmvault').onclick=function(){ $('evmaddr').value=VAULT; readEvm(VAULT); };
+$('evmaddr').addEventListener('keydown',function(e){ if(e.key==='Enter') $('evmgo').click(); });
+initToken();
+
+/* ---- SKAISTS / Vaulta — the estate's proven three-host failover ---- */
+var VAPI=['https://eos.greymass.com','https://api.eosn.io','https://eos.api.eosnation.io'];
+async function vpost(path,body){
+  for(var i=0;i<VAPI.length;i++){
+    try{
+      var r=await fetch(VAPI[i]+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+      if(r.ok) return await r.json();
+    }catch(e){}
+  }
+  return null;
+}
+function kb(n){ return n>1048576?(n/1048576).toFixed(2)+' MB':(n/1024).toFixed(1)+' kB'; }
+function setBar(bar,txt,used,max,label){
+  var pct=max>0?Math.min(100,100*used/max):0;
+  $(bar).style.width=pct.toFixed(1)+'%';
+  $(txt).textContent=label;
+}
+async function readVaulta(acct){
+  $('vbal').textContent='reading…';
+  var a=await vpost('/v1/chain/get_account',{account_name:acct});
+  if(!a||!a.ram_quota){ $('vbal').innerHTML='<span class="err">fetch failed or no such account — declared, not zeroed</span>'; return; }
+  $('vram').textContent=kb(a.ram_usage)+' / '+kb(a.ram_quota); $('vram').classList.remove('nm');
+  setBar('vrambar','vramtxt',a.ram_usage,a.ram_quota,(100*a.ram_usage/a.ram_quota).toFixed(1)+'%');
+  var cu=a.cpu_limit||{}, nu=a.net_limit||{};
+  $('vcpu').textContent=(cu.used||0)+' / '+(cu.max||0); $('vcpu').classList.remove('nm');
+  setBar('vcpubar','vcputxt',cu.used||0,cu.max||1,cu.max?((100*(cu.used||0)/cu.max).toFixed(1)+'%'):'—');
+  $('vnet').textContent=(nu.used||0)+' / '+(nu.max||0); $('vnet').classList.remove('nm');
+  setBar('vnetbar','vnettxt',nu.used||0,nu.max||1,nu.max?((100*(nu.used||0)/nu.max).toFixed(1)+'%'):'—');
+  /* liquid balance: the chain's core token first, legacy symbol second — what returns, renders; what doesn't, stays honest */
+  var b1=await vpost('/v1/chain/get_currency_balance',{code:'core.vaulta',account:acct,symbol:'A'});
+  var b2=(b1&&b1.length)?null:await vpost('/v1/chain/get_currency_balance',{code:'eosio.token',account:acct});
+  var bal=(b1&&b1.length)?b1[0]:((b2&&b2.length)?b2[0]:null);
+  if(bal){ $('vbal').textContent=bal; $('vbal').classList.remove('nm');
+    $('vbalsrc').textContent='get_currency_balance · '+((b1&&b1.length)?'core.vaulta':'eosio.token (legacy)'); }
+  else { $('vbal').innerHTML='<span class="nm">no liquid balance row — absent, not zero</span>'; }
+}
+$('vgo').onclick=function(){ readVaulta($('vacct').value.trim()); };
+$('vacct').addEventListener('keydown',function(e){ if(e.key==='Enter') $('vgo').click(); });
+readVaulta('kingbeelovis');
+})();
+</script>
+</body>
+</html>
