@@ -26,4 +26,27 @@
   }).join('');
   document.body.appendChild(b);
   document.body.style.paddingBottom='48px';
+
+  /* THE EXTERNAL-LINK LAW (founder, 2026-08-21): every hyperlink that leaves the dApp
+     opens in a NEW tab, so the reader's BNRoSe session stays handy and fully functional.
+     Enforced at click time by delegation — covering links rendered after load (several
+     surfaces build their citation lists from JS) — with rel=noopener so the opened page
+     gets no handle back into the dApp. In-estate links keep the same tab: the tour IS
+     the session. */
+  document.addEventListener('click',function(e){
+    var a=e.target && e.target.closest ? e.target.closest('a[href]') : null;
+    if(!a) return;
+    var u; try{ u=new URL(a.getAttribute('href'), location.href); }catch(err){ return; }
+    if((u.protocol==='http:'||u.protocol==='https:') && u.host!==location.host){
+      a.target='_blank';
+      a.rel=((a.rel||'')+' noopener').trim();
+    }
+  },true);
+
+  /* the technical-register toggle (🐝/🎛/⚗) rides every page — see register.js */
+  if(!document.getElementById('bregctl')){
+    var s=document.createElement('script');
+    s.src=R+'register.js?v=1';
+    document.body.appendChild(s);
+  }
 })();
