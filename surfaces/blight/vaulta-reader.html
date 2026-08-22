@@ -133,19 +133,33 @@ async function read(code,scope,table,limit){
   $('status').textContent='reading '+code+' / '+scope+' / '+table+' …';
   $('status').className='note';
   $('out').style.display='none';
-  const r=await vpost({json:true,code,scope,table,limit:Math.max(1,Math.min(100,limit|0||10))});
-  if(r.__error){
-    $('status').innerHTML='<span class="bad">all Vaulta endpoints failed — '+esc(r.__error)+'</span> — nothing cached, nothing invented';
-    return;
-  }
-  const rows=r.rows||[];
+  /* paginates while more=true — up to 10 pages. FIXED 2026-08-22: the old single-shot
+     read truncated the .b registry silently — at 13 names, king.b sat on page 2 of a
+     limit-10 read and the preset never showed it (founder report, same night; king's
+     id 17265842021665813494 sorts 11th). The instrument now follows next_key and says
+     exactly what it fetched — corrections are part of the exhibit. */
+  const per=Math.max(1,Math.min(100,limit|0||10)), MAXPAGES=10;
+  let rows=[], more=false, pages=0, capped=false, nextk='';
+  do{
+    const body={json:true,code,scope,table,limit:per};
+    if(nextk) body.lower_bound=nextk;
+    const r=await vpost(body);
+    if(r.__error){
+      $('status').innerHTML='<span class="bad">all Vaulta endpoints failed — '+esc(r.__error)+'</span> — nothing cached, nothing invented';
+      return;
+    }
+    rows=rows.concat(r.rows||[]);
+    more=!!r.more; nextk=r.next_key||''; pages++;
+    if(more&&pages>=MAXPAGES){ capped=true; break; }
+  }while(more);
   const cols=rows.length? Object.keys(rows[0]) : [];
   $('tbody').innerHTML = rows.length
     ? '<tr>'+cols.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr>'
       + rows.map(row=>'<tr>'+cols.map(c=>'<td title="'+esc(JSON.stringify(row[c]))+'">'+esc(row[c] instanceof Object?JSON.stringify(row[c]):row[c])+'</td>').join('')+'</tr>').join('')
     : '<tr><td class="warn">0 rows — the read SUCCEEDED. An empty table and a nonexistent table are indistinguishable in this API; absence is ambiguous, never proof.</td></tr>';
-  $('meta').innerHTML = rows.length+' row(s) returned'
-    +(r.more?' · <span class="warn">more=true — rows exist beyond this limit; raise it</span>':' · more=false')
+  $('meta').innerHTML = rows.length+' row(s) fetched in '+pages+' page(s) of '+per
+    +(capped?' · <span class="warn">page cap ('+MAXPAGES+') reached — rows still remain beyond; raise the limit</span>'
+      :(more?' · more=true':' · more=false — the whole table is on screen'))
     +' · read via public Vaulta API (ladder of 3, keyless)';
   $('raw').textContent=JSON.stringify(rows,null,1).slice(0,6000);
   $('out').style.display='block';
