@@ -64,6 +64,14 @@ hyperreal.org via Wayback):
 - **The kernel this estate keeps**: the man who added Respect co-created the
   Apache web server, and the archive preserving PLUR's primary record is his.
   The fourth pillar and the open web share a hand.
+- **The island annex** (founder-ordered 2026-08-22): Eivissa's Punic coins
+  paired the island's name ʾYBŠM with the image of **Bes — the Egyptian god of
+  music and dance** ("island of Bes" is the favored scholarly reading, held
+  honestly as "commonly interpreted"); and Alfredo Fiorito — Argentine exile
+  of the 1976 coup, *"I leave my country for political reasons"* — built the
+  roofless Amnesia floor whose 1987 UK visitors founded the clubs Wing III
+  chronicles. An island that stamped the dance god on its money, on an estate
+  whose every door begins with a b.
 - The floor PLUR inherited was **Black, brown, and queer first** (the Loft
   1970 → Paradise Garage → the Warehouse → Detroit); the UK wrote the genre
   into criminal statute (*"a succession of repetitive beats"*, CJPOA 1994

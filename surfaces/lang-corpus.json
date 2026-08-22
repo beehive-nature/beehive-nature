@@ -1,7 +1,7 @@
 {
  "_meta": {
   "law": "the corpus law applies: every rendering below is MACHINE-DRAFTED (⚙) until a human attestation upgrades it; a missing line falls back to English visibly, never silently; a machine draft never finalizes a consent",
-  "drafted": "2026-08-21 by Seat 3 (Fable 5), all ⚙ · h.* heading set fleet-drafted 2026-08-21 (17 agents, one per tongue), all ⚙ · QA-gate fixes applied same day (18 defects across 12 tongues; h.002 Base-token and the decimal-comma byte-count fixed fleet-wide) · ko fleet-drafted 2026-08-21 (single agent, founder-ordered addition), ⚙ · ur ja da nb sv fi tr hu fleet-drafted 2026-08-21 (8 agents + adversarial QA, 198 keys each), all ⚙ · QA-gate fixes applied same day (24 defects across 8 tongues: decimal-comma 31,6 fleet-wide, museum-wing fløj/flygel, musical-score sense, ja English-leakage set, binding-attestation sense tr/hu) · beta2 back-filled for the 18 pre-existing tongues 2026-08-21 (Seat 3 direct draft, each from its tongue's own corpus vocabulary), all ⚙ · bant.panel + bant.wing added 2026-08-21 (bANTfarm instrument build, Seat 3 direct draft × 26), all ⚙ · plur.* museum set (9 keys) fleet-drafted 2026-08-21 (13 agents × 2 tongues + adversarial QA; 12 defects applied incl. the register-vs-records-database class in tr/hu/fa/es/gd and the told-as-lore genre framing in fi/nl/nl-be/da/nb), all ⚙",
+  "drafted": "2026-08-21 by Seat 3 (Fable 5), all ⚙ · h.* heading set fleet-drafted 2026-08-21 (17 agents, one per tongue), all ⚙ · QA-gate fixes applied same day (18 defects across 12 tongues; h.002 Base-token and the decimal-comma byte-count fixed fleet-wide) · ko fleet-drafted 2026-08-21 (single agent, founder-ordered addition), ⚙ · ur ja da nb sv fi tr hu fleet-drafted 2026-08-21 (8 agents + adversarial QA, 198 keys each), all ⚙ · QA-gate fixes applied same day (24 defects across 8 tongues: decimal-comma 31,6 fleet-wide, museum-wing fløj/flygel, musical-score sense, ja English-leakage set, binding-attestation sense tr/hu) · beta2 back-filled for the 18 pre-existing tongues 2026-08-21 (Seat 3 direct draft, each from its tongue's own corpus vocabulary), all ⚙ · bant.panel + bant.wing added 2026-08-21 (bANTfarm instrument build, Seat 3 direct draft × 26), all ⚙ · plur.* museum set (9 keys) fleet-drafted 2026-08-21 (13 agents × 2 tongues + adversarial QA; 12 defects applied incl. the register-vs-records-database class in tr/hu/fa/es/gd and the told-as-lore genre framing in fi/nl/nl-be/da/nb), all ⚙ · plur.wib (Eivissa annex) added 2026-08-22, Seat 3 direct draft × 26 mirroring each tongue's wing vocabulary, all ⚙",
   "attested": {},
   "langs": [
    "ru",
@@ -6103,6 +6103,35 @@
    "fi": "PERIMÄTIETO — kerrottu perimätietona",
    "tr": "RİVAYET — rivayeten aktarılır",
    "hu": "LEGENDA — legendaként mesélve"
+  },
+  "plur.wib": {
+   "en": "ANNEX · THE ISLAND — Eivissa, stamped with the god of the dance",
+   "ru": "АННЕКС · ОСТРОВ — Эйвисса, отчеканившая бога танца",
+   "uk": "АНЕКС · ОСТРІВ — Ейвісса, що викарбувала бога танцю",
+   "cs": "PŘÍSTAVBA · OSTROV — Eivissa s bohem tance na mincích",
+   "de": "ANNEX · DIE INSEL — Eivissa, geprägt mit dem Gott des Tanzes",
+   "gd": "LEAS-SGIATH · AN T-EILEAN — Eivissa, le dia an dannsa air a cuid bhuinn",
+   "fr": "ANNEXE · L'ÎLE — Eivissa, frappée du dieu de la danse",
+   "es": "ANEXO · LA ISLA — Eivissa, acuñada con el dios de la danza",
+   "lv": "PIEBŪVE · SALA — Eivisa, kalta ar dejas dievu",
+   "nl": "ANNEX · HET EILAND — Eivissa, gemunt met de god van de dans",
+   "nl-be": "ANNEX · HET EILAND — Eivissa, gemunt met de god van de dans",
+   "zh": "附厅 · 海岛——伊维萨，硬币上铸着舞蹈之神",
+   "ja": "別館・島——エイヴィッサ、貨幣に踊りの神を刻んだ島",
+   "ko": "별관 · 섬 — 에이비사, 동전에 춤의 신을 새긴 섬",
+   "th": "ส่วนต่อขยาย · เกาะ — เอวิสซา เกาะที่ตีตราเทพแห่งการเต้นรำบนเหรียญ",
+   "ar": "الملحق · الجزيرة — إيفيسا، المطبوعة بإله الرقص على نقودها",
+   "he": "האגף הנספח · האי — אייביסה, שטבעה את אל המחול על מטבעותיה",
+   "hi": "अनुभाग · द्वीप — एइविसा, जिसके सिक्कों पर नृत्य के देवता अंकित हैं",
+   "bn": "সংযোজন · দ্বীপ — এইভিসা, যার মুদ্রায় নৃত্যের দেবতা খোদাই",
+   "fa": "تالار الحاقی · جزیره — ایویسا، که خدای رقص را بر سکه‌هایش زده است",
+   "ur": "ضمیمہ · جزیرہ — ایوِسا، جس کے سکوں پر رقص کے دیوتا کی مہر ہے",
+   "da": "ANNEKS · ØEN — Eivissa, præget med dansens gud",
+   "nb": "ANNEKS · ØYA — Eivissa, preget med dansens gud",
+   "sv": "ANNEX · ÖN — Eivissa, präglad med dansens gud",
+   "fi": "LISÄSIIPI · SAARI — Eivissa, jonka kolikoihin lyötiin tanssin jumala",
+   "tr": "EK KANAT · ADA — dans tanrısı sikkelerine basılmış Eivissa",
+   "hu": "MELLÉKSZÁRNY · A SZIGET — Eivissa, érméin a tánc istenével"
   }
  }
 }
