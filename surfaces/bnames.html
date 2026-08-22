@@ -179,17 +179,29 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
   You sign it; this page never does.</div>
   <div class="acts" id="workshop">
     <div class="act" data-action="registeracc" data-fields="registrant|domain_name|target" data-desc="reserve a name, pointing it at target. Fee 0.0000 today; you carry the RAM (resellable). Term 365 days.">
-      <span class="an">registeracc</span>(registrant, domain_name, target) — tap to compose</div>
+      <span class="an">registeracc</span>(registrant, domain_name, target) —
+      reserve a name, pointing it at <b>target</b>. Fee <b>0.0000</b> today; you carry
+      the RAM (live cost above), one-time, <b>resellable</b>. Term 365 days.
+      <span style="color:var(--cyan);font-size:9px">▸ tap to compose</span></div>
     <div class="act" data-action="renew" data-fields="owner|domain_name|days" data-defaults="|​|365" data-desc="extend the term. All current names expire 2027-08-01.">
-      <span class="an">renew</span>(owner, domain_name, days) — tap to compose</div>
+      <span class="an">renew</span>(owner, domain_name, days) — extend the term.
+      All current names expire <b>2027-08-01</b>.
+      <span style="color:var(--cyan);font-size:9px">▸ tap to compose</span></div>
     <div class="act" data-action="transfer" data-fields="from|domain_name|to" data-desc="hand a name over, whole and on-chain. The trade lane's settlement primitive.">
-      <span class="an">transfer</span>(from, domain_name, to) — tap to compose</div>
+      <span class="an">transfer</span>(from, domain_name, to) — hand a name over,
+      whole and on-chain. The trade lane's settlement primitive.
+      <span style="color:var(--cyan);font-size:9px">▸ tap to compose</span></div>
     <div class="act" data-action="setaccount" data-fields="owner|domain_name|target" data-desc="re-point a name to a new account without moving ownership.">
-      <span class="an">setaccount</span>(owner, domain_name, target) — tap to compose</div>
+      <span class="an">setaccount</span>(owner, domain_name, target) — re-point a
+      name to a new account without moving ownership.
+      <span style="color:var(--cyan);font-size:9px">▸ tap to compose</span></div>
     <div class="act" data-action="setchain" data-fields="owner|domain_name|chain_key|address|addr_type|memo_tag" data-desc="resolve a name to an address on any registered chain.">
-      <span class="an">setchain</span>(owner, domain_name, chain_key, address, addr_type, memo_tag) — tap to compose</div>
+      <span class="an">setchain</span>(owner, domain_name, chain_key, address,
+      addr_type, memo_tag) — a name resolving to an address on <b>any chain</b>.
+      <span style="color:var(--cyan);font-size:9px">▸ tap to compose</span></div>
     <div class="act" data-action="release" data-fields="owner|domain_name" data-desc="let a name go. cleanup is admin-side.">
-      <span class="an">release</span>(owner, domain_name) — tap to compose</div>
+      <span class="an">release</span>(owner, domain_name) — let a name go.
+      <span style="color:var(--cyan);font-size:9px">▸ tap to compose</span></div>
   </div>
   <div id="composer-zone" style="display:none;margin-top:12px;background:var(--well);border:1px solid var(--gold);border-radius:11px;padding:14px 16px">
     <div style="font-size:11px;color:var(--gold);margin-bottom:8px" id="cz-title"></div>
