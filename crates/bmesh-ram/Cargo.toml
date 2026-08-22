@@ -1,0 +1,7 @@
+[package]
+name = "bmesh-ram"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# none — pure std, per the R-2 precedent: a pricing model must be buildable anywhere
