@@ -110,20 +110,7 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
   today's actions are the live Tier-1 shape, not the 10B/1k-year destination.</p>
 </header>
 
-<section style="border-color:var(--gold)">
-  <h2>🗝 CONNECT YOUR WALLET — BNR bzDiD · your soul, remembered, function unlocked</h2>
-  <div class="law">The connect tier, first-party and keyless: your .b name or account is
-  your soul-pointer (the bzDiD shape — one soul, its rails). Stored only in YOUR browser
-  (the estate's local-first law); nothing is sent, ever. Connecting adapts this desk to
-  you: the composer pre-fills, your names shine in the constellation, expiry warnings
-  are yours. Spend-class signing rides the wallet-gate lane (MX-5) — our stack when armed.</div>
-  <div class="row" style="margin-top:8px">
-    <input id="soul-in" placeholder="your account or .b name — e.g. king" spellcheck="false">
-    <button id="soul-go">connect</button>
-    <button id="soul-out" style="display:none">disconnect</button>
-    <span id="soul-chip" class="badge" style="align-self:center;font-size:10px">not connected</span>
-  </div>
-</section>
+
 <section>
   <h2>🌌 THE REGISTRY, ALIVE — every name on chain, drawn live</h2>
   <div class="law">The constellation below is not a picture of the registry — it <b>is</b> the
@@ -135,18 +122,54 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
   </div>
 </section>
 
-<section>
-  <h2>🔎 CHECK ANY NAME — live, keyless, in your browser</h2>
-  <div class="row" id="checkerrow">
-    <input id="q" placeholder="type a name — e.g. k" value="k" spellcheck="false">
-    <button id="go">check</button>
+<section style="border-color:var(--gold)">
+  <h2>🔑 SECURE YOUR .b NAME — search, consent, sign</h2>
+  <div class="law">Three steps. One name per soul.</div>
+  <div class="row" style="margin-top:10px">
+    <input id="q" placeholder="type your name — e.g. k" value="k" spellcheck="false" style="flex:1;font-size:16px;padding:12px 14px">
+    <button id="go" style="font-size:14px;padding:12px 20px">search</button>
   </div>
   <div class="verdict" id="vwrap"><div class="vtext" style="color:var(--dim)">—</div></div>
-  <div class="readout">
+
+  <div id="consent-card" style="display:none;margin-top:12px;background:var(--well);border:1px solid var(--leaf);border-radius:11px;padding:16px 18px">
+    <div style="font-size:11px;color:var(--gold);margin-bottom:10px">⚖️ INFORMED CONSENT — one .b name per bzDiD per unique human</div>
+    <div class="law" style="font-size:11px;line-height:1.9">
+      <b>I understand and agree:</b><br>
+      · I am a unique human being, and this is my one .b name on this registry<br>
+      · One name per bzDiD — I will not register multiple names under multiple accounts<br>
+      · <b style="color:var(--leaf)">People who follow this rule will be rewarded</b> — early, honest participants earn standing in the LOVErnment<br>
+      · The name is mine for 365 days (renewable), resellable, transferable<br>
+      · Cost: fee <b>0.0000</b> + ~<b>0.84 core</b> RAM (one-time, resellable via sellram)<br>
+      · Getting a Vaulta account to secure a .b name is itself a step into sovereignty
+    </div>
+    <div class="row" style="margin-top:12px">
+      <label style="display:flex;align-items:center;gap:8px;color:var(--ink);font-size:12px;cursor:pointer">
+        <input type="checkbox" id="consent-check" style="width:18px;height:18px;accent-color:var(--gold)">
+        I agree — one name, one soul
+      </label>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button id="sign-btn" disabled style="opacity:.4;font-size:13px;padding:12px 22px;background:#1a3a1a;color:var(--leaf);border:1px solid var(--leaf)">
+        ✓ sign to secure <span id="sign-name"></span>.b
+      </button>
+    </div>
+    <div id="sign-out" style="display:none;margin-top:10px"></div>
+  </div>
+
+  <div class="readout" style="margin-top:12px">
     <div class="rd"><div class="k">NAMES ON REGISTRY (live)</div><div class="v" id="count">—</div></div>
-    <div class="rd"><div class="k">REGISTRATION FEE (live config)</div><div class="v" id="fee">—</div></div>
+    <div class="rd"><div class="k">FEE</div><div class="v" id="fee">—</div></div>
+    <div class="rd"><div class="k">RAM COST (live)</div><div class="v" id="ram">—</div></div>
     <div class="rd"><div class="k">TERM</div><div class="v" id="days">—</div></div>
-    <div class="rd"><div class="k">RAM COST PER NAME (live market)</div><div class="v" id="ram">—</div></div>
+  </div>
+
+  <div id="soul-strip" style="display:none;margin-top:10px">
+    <div class="row">
+      <input id="soul-in" placeholder="your account or .b name" spellcheck="false" style="flex:1">
+      <button id="soul-go">connect</button>
+      <button id="soul-out" style="display:none">disconnect</button>
+      <span id="soul-chip" class="badge" style="align-self:center;font-size:10px">not connected</span>
+    </div>
   </div>
 </section>
 
@@ -388,6 +411,51 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
 
   /* ── the animated verdict stamp ── */
   function check(n){
+    n=strip(n);
+    var scan=document.createElement('div'); scan.className='scanline';
+    $('checkerrow')&&$('checkerrow').appendChild(scan);
+    setTimeout(function(){ scan.remove(); },750);
+    var wrap=$('vwrap'); wrap.innerHTML='';
+    var row=live.byName[n];
+    var st=document.createElement('div'); var tx=document.createElement('div');
+    st.className='stamp '+(row?'no':'ok'); tx.className='vtext '+(row?'no':'ok');
+    st.textContent=row?'✕':'✓';
+    if(!n){ wrap.innerHTML='<div class="vtext" style="color:var(--dim)">—</div>'; return; }
+    tx.innerHTML = row
+      ? '<b>'+n+'.b is TAKEN</b> — owner '+row.owner+' · expires '+row.expires.slice(0,10)
+      : '<b>'+n+'.b is AVAILABLE</b> — fee '+(live.fee||'?')+' · RAM ~'+(live.ramCost?live.ramCost.toFixed(4):'?')+' core (resellable) · term '+(live.days||365)+' days';
+    wrap.appendChild(st); wrap.appendChild(tx);
+    // show/hide consent card
+    var cc=$('consent-card');
+    if (!row && n) {
+      cc.style.display='block';
+      $('sign-name').textContent=n;
+      $('consent-check').checked=false;
+      $('sign-btn').disabled=true; $('sign-btn').style.opacity='.4';
+    } else { cc.style.display='none'; }
+  }
+  // consent → enable sign
+  document.addEventListener('change',function(e){
+    if(e.target&&e.target.id==='consent-check'){
+      var btn=$('sign-btn');
+      btn.disabled=!e.target.checked;
+      btn.style.opacity=e.target.checked?'1':'.4';
+    }
+  });
+  // sign → compose the action
+  document.addEventListener('click',function(e){
+    if(e.target&&e.target.id==='sign-btn'&&!e.target.disabled){
+      var n=strip($('q').value);
+      var registrant=SOUL||'kingbeelovis';
+      var out=$('sign-out'); out.style.display='block';
+      out.innerHTML='<pre style="border-color:var(--leaf)">action kingbeelovis::registeracc' + String.fromCharCode(10) +
+        JSON.stringify({registrant:registrant,domain_name:n,target:registrant},null,1) + String.fromCharCode(10,10) +
+        '# paste into cleos/Anchor, or the bNRoSe wallet-gate (MX-5) when armed' + String.fromCharCode(10) +
+        '# reward: early honest participants earn LOVErnment standing' + String.fromCharCode(10) +
+        '# the rails badge (bottom bar) confirms you are on the real origin</pre>';
+    }
+  });
+  function _old_check(n){
     n=strip(n);
     var scan=document.createElement('div'); scan.className='scanline';
     $('checkerrow').style.position='relative'; $('checkerrow').appendChild(scan);
