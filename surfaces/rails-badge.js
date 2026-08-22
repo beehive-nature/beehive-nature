@@ -59,16 +59,57 @@
       return;
     }
     /* the soul's public 0x rail fingerprint — derived identifier, never a key */
-    var fp = await sha256hex('bnr.b/evm/' + soul);
+    var fp = await sha256hex('bnr.b/evm/' + soul + '@' + location.origin);
     var ox = '0x' + fp.slice(0, 6) + '…' + fp.slice(-4);
     dot.style.background = '#7ddf8f';
     dot.style.cssText += ';box-shadow:0 0 8px rgba(125,223,143,.8);animation:rbPulse 2.6s ease-in-out infinite';
     var st = document.createElement('style');
     st.textContent = '@keyframes rbPulse{0%,100%{box-shadow:0 0 4px rgba(125,223,143,.5)}50%{box-shadow:0 0 11px rgba(125,223,143,.95)}}';
     document.head.appendChild(st);
-    txt.innerHTML = '<b style="color:#7ddf8f">' + soul + '.b</b> · <span title="derived public rail fingerprint — sha256(bnr.b/evm/' + soul + '), bzDiD pointer family; an identifier, never a key" style="color:#e2efdb;cursor:help">' + ox + '</span> · rails <b style="color:#7ddf8f">LIVE</b>';
-    txt.title = 'bDiD + crypto rails connected · keyless · active';
-  }
+    /* TOFU — the https-lock law: origin-bound fingerprint, pinned on first verified
+       visit; a spoofed origin CANNOT reproduce your pinned 0x. Tap to inspect. */
+    var pin = null; try { pin = JSON.parse(localStorage.getItem('bnr_rails_pin') || 'null'); } catch (e) {}
+    var myPin = pin && pin[soul + '@' + location.origin];
+    var state, col;
+    if (!myPin) {
+      state = '🔒 pinned'; col = '#7ddf8f';
+      try { var np = pin || {}; np[soul + '@' + location.origin] = fp.slice(0, 12);
+        localStorage.setItem('bnr_rails_pin', JSON.stringify(np)); } catch (e) {}
+    } else if (myPin === fp.slice(0, 12)) {
+      state = '🔒 verified origin'; col = '#7ddf8f';
+    } else {
+      state = '⚠ fingerprint CHANGED — possible spoof'; col = '#ffb347';
+      dot.style.background = '#ffb347';
+    }
+    txt.innerHTML = '<b style="color:#7ddf8f">' + soul + '.b</b> · <span title="origin-bound public fingerprint — sha256(bnr.b/evm/' + soul + '@' + location.origin + '), pinned on first verified visit (TOFU); an identifier, never a key; a spoofed origin shows a different 0x" style="color:#e2efdb;cursor:help">' + ox + '</span> · rails <b style="color:#7ddf8f">LIVE</b> · <span title="' + state + '" style="color:' + col + ';cursor:pointer" id="rb-trust">' + state + '</span>';
+    txt.title = 'bDiD + crypto rails connected · keyless · origin-pinned';
+    var tp = document.getElementById('rb-trust');
+    if (tp) tp.onclick = function (ev) {
+      ev.preventDefault(); ev.stopPropagation();
+      var L = [
+        'RAILS TRUST - the https-lock law, ours:',
+        '',
+        'soul: ' + soul,
+        'origin: ' + location.origin,
+        'fingerprint: 0x' + fp.slice(0, 12) + '  (sha256 of bnr.b/evm/' + soul + '@' + location.origin + ')',
+        'state: ' + state,
+        '',
+        'WHY IT RESISTS SPOOFING: the fingerprint binds your soul to THIS origin.',
+        'A phisher on another domain derives a DIFFERENT 0x than the one you',
+        'pinned here - like the lock, it proves the origin you trusted.',
+        '',
+        'VERIFY YOURSELF (any browser console):',
+        "  crypto.subtle.digest('SHA-256', new TextEncoder()",
+        "    .encode('bnr.b/evm/SOUL@' + location.origin))",
+        '    .then(b => console.log("0x" + [...new Uint8Array(b)]',
+        "      .map(x => x.toString(16).padStart(2,'0')).join('').slice(0,12)))",
+        "  (replace SOUL with your name — the 0x must match this badge)",
+        '',
+        'Honest limits: TOFU defends origin-swap spoofing; it is not a key',
+        'signature - spend-class signing rides the wallet-gate (MX-5).'
+      ].join('\n');
+      alert(L);
+    };  }
   /* defer: the heartbeat lands past the load window so a rare DNS miss never reads as a page defect */
   setTimeout(pill, 1300);
 })();
