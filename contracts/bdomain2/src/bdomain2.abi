@@ -1,0 +1,515 @@
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "version": "eosio::abi/1.2",
+    "types": [],
+    "structs": [
+        {
+            "name": "addchainkey",
+            "base": "",
+            "fields": [
+                {
+                    "name": "admin",
+                    "type": "name"
+                },
+                {
+                    "name": "chain_key",
+                    "type": "string"
+                },
+                {
+                    "name": "label",
+                    "type": "string"
+                },
+                {
+                    "name": "requires_memo",
+                    "type": "bool"
+                }
+            ]
+        },
+        {
+            "name": "chainaddr_row",
+            "base": "",
+            "fields": [
+                {
+                    "name": "chain_ord",
+                    "type": "uint16"
+                },
+                {
+                    "name": "address",
+                    "type": "string"
+                },
+                {
+                    "name": "addr_type",
+                    "type": "string"
+                },
+                {
+                    "name": "memo_tag",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "chainkey_row",
+            "base": "",
+            "fields": [
+                {
+                    "name": "ord",
+                    "type": "uint16"
+                },
+                {
+                    "name": "chain_key",
+                    "type": "string"
+                },
+                {
+                    "name": "label",
+                    "type": "string"
+                },
+                {
+                    "name": "requires_memo",
+                    "type": "bool"
+                }
+            ]
+        },
+        {
+            "name": "cleanup",
+            "base": "",
+            "fields": [
+                {
+                    "name": "domain_name",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "config_row",
+            "base": "",
+            "fields": [
+                {
+                    "name": "admin",
+                    "type": "name"
+                },
+                {
+                    "name": "registration_fee",
+                    "type": "asset"
+                },
+                {
+                    "name": "registration_days",
+                    "type": "uint32"
+                },
+                {
+                    "name": "max_domains",
+                    "type": "uint64"
+                },
+                {
+                    "name": "domains_count",
+                    "type": "uint64"
+                },
+                {
+                    "name": "initialized",
+                    "type": "bool"
+                }
+            ]
+        },
+        {
+            "name": "delchain",
+            "base": "",
+            "fields": [
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "domain_name",
+                    "type": "string"
+                },
+                {
+                    "name": "chain_ord",
+                    "type": "uint16"
+                }
+            ]
+        },
+        {
+            "name": "domain_row",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "domain_name",
+                    "type": "string"
+                },
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "account",
+                    "type": "name"
+                },
+                {
+                    "name": "resolver_id",
+                    "type": "uint16"
+                },
+                {
+                    "name": "registered",
+                    "type": "time_point_sec"
+                },
+                {
+                    "name": "expires",
+                    "type": "time_point_sec"
+                }
+            ]
+        },
+        {
+            "name": "init",
+            "base": "",
+            "fields": [
+                {
+                    "name": "admin",
+                    "type": "name"
+                },
+                {
+                    "name": "reg_fee",
+                    "type": "asset"
+                },
+                {
+                    "name": "reg_days",
+                    "type": "uint32"
+                },
+                {
+                    "name": "max_domains",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "prepaid_row",
+            "base": "",
+            "fields": [
+                {
+                    "name": "payer",
+                    "type": "name"
+                },
+                {
+                    "name": "domain_name",
+                    "type": "string"
+                },
+                {
+                    "name": "amount",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "registeracc",
+            "base": "",
+            "fields": [
+                {
+                    "name": "registrant",
+                    "type": "name"
+                },
+                {
+                    "name": "domain_name",
+                    "type": "string"
+                },
+                {
+                    "name": "target",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "release",
+            "base": "",
+            "fields": [
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "domain_name",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "renew",
+            "base": "",
+            "fields": [
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "domain_name",
+                    "type": "string"
+                },
+                {
+                    "name": "days",
+                    "type": "uint16"
+                }
+            ]
+        },
+        {
+            "name": "resolver_row",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint32"
+                },
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "gateway_url",
+                    "type": "string"
+                },
+                {
+                    "name": "signer_pub",
+                    "type": "string"
+                },
+                {
+                    "name": "ttl_seconds",
+                    "type": "uint32"
+                }
+            ]
+        },
+        {
+            "name": "rmchainkey",
+            "base": "",
+            "fields": [
+                {
+                    "name": "admin",
+                    "type": "name"
+                },
+                {
+                    "name": "chain_key",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "seedmemo",
+            "base": "",
+            "fields": [
+                {
+                    "name": "admin",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "setaccount",
+            "base": "",
+            "fields": [
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "domain_name",
+                    "type": "string"
+                },
+                {
+                    "name": "target",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "setchain",
+            "base": "",
+            "fields": [
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "domain_name",
+                    "type": "string"
+                },
+                {
+                    "name": "chain_ord",
+                    "type": "uint16"
+                },
+                {
+                    "name": "address",
+                    "type": "string"
+                },
+                {
+                    "name": "addr_type",
+                    "type": "string"
+                },
+                {
+                    "name": "memo_tag",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "setresolver",
+            "base": "",
+            "fields": [
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "domain_name",
+                    "type": "string"
+                },
+                {
+                    "name": "resolver_id",
+                    "type": "uint32"
+                },
+                {
+                    "name": "gateway_url",
+                    "type": "string"
+                },
+                {
+                    "name": "signer_pub",
+                    "type": "string"
+                },
+                {
+                    "name": "ttl_seconds",
+                    "type": "uint32"
+                }
+            ]
+        },
+        {
+            "name": "transfer",
+            "base": "",
+            "fields": [
+                {
+                    "name": "from",
+                    "type": "name"
+                },
+                {
+                    "name": "domain_name",
+                    "type": "string"
+                },
+                {
+                    "name": "to",
+                    "type": "name"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "name": "addchainkey",
+            "type": "addchainkey",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "cleanup",
+            "type": "cleanup",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "delchain",
+            "type": "delchain",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "init",
+            "type": "init",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "registeracc",
+            "type": "registeracc",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "release",
+            "type": "release",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "renew",
+            "type": "renew",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "rmchainkey",
+            "type": "rmchainkey",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "seedmemo",
+            "type": "seedmemo",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setaccount",
+            "type": "setaccount",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setchain",
+            "type": "setchain",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setresolver",
+            "type": "setresolver",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "transfer",
+            "type": "transfer",
+            "ricardian_contract": ""
+        }
+    ],
+    "tables": [
+        {
+            "name": "chainaddrs",
+            "type": "chainaddr_row",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "chainkeys",
+            "type": "chainkey_row",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "config",
+            "type": "config_row",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "domains",
+            "type": "domain_row",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "prepaids",
+            "type": "prepaid_row",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "resolvers",
+            "type": "resolver_row",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        }
+    ],
+    "ricardian_clauses": [],
+    "variants": [],
+    "action_results": []
+}
