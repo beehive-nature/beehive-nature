@@ -64,3 +64,5 @@ BACKUP_*
 # Python bytecode 
 __pycache__/ 
 *.pyc
+# third-party source snapshots: preserved for sponsor-mirroring, never republished
+archive-staging/
