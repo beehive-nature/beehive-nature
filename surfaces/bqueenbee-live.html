@@ -7,6 +7,23 @@
 <meta http-equiv="Expires" content="0">
 <meta name="color-scheme" content="dark">
 <link rel="stylesheet" href="tokens.css">
+<style>
+/* pass-offs: one link, three register renderings (register.js reveals the active one) */
+.po-bee{display:inline-block;background:#26123a;border:1px solid #3d2a5c;border-radius:8px;
+ padding:5px 12px;margin:3px 4px 0 0;text-decoration:none;font-size:11px}
+.po-bee:hover{background:#3d2a5c}
+.po-rav{display:inline-block;border:1px solid #D655BB;border-radius:99px;color:#D655BB;
+ padding:2px 11px;margin:3px 4px 0 0;text-decoration:none;font-size:10.5px;
+ box-shadow:0 0 8px rgba(214,85,187,.25)}
+.po-rav:hover{color:#fff;border-color:#fff}
+.po-cyp{font-size:10px;word-break:break-all}
+.po-cyp code{opacity:.85}
+.vb{background:transparent;border:1px solid #2a1f3d;border-radius:6px;cursor:pointer;
+ font-size:10px;padding:2px 8px;margin-left:8px;color:inherit;opacity:.75;min-height:0}
+.vb:hover{opacity:1}
+.vb[aria-pressed="true"]{border-color:#e6b32e;color:#e6b32e}
+.vnote{font-size:9px;opacity:.6;margin-top:3px}
+</style>
 <title>bQueenBee live — talk to the hive's machine agent (⚙ never a person)</title>
 <style>
 :root{--bg:#0d1410;--ink:#e2efdb;--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--dim:#8a9a8a;--line:#243026;--leaf:#7ddf8f;--amber:#ffb347}
@@ -149,13 +166,76 @@ var KB=[
  {re:/indexer|read.?only|keyless|blockbook/i,
   a:'The b-indexer: a read-only Rust+SQLite indexer where the no-sendtx row is the most important row — enforced three ways, including a GET-only router with no POST handler in existence. Its keyless attestation prints on the wire: sendtx NO, permanently. '+
     '[the crate]('+GH+'tree/main/crates/bindexer)'},
+ {re:/plur|museum|muse|rave history|lore/i,
+  a:'The PLUR mUseUm: 67 exhibits across six wings and the Eivissa annex — every claim a cited RECORD or lore honestly labeled LORE, and the fact-check corrections displayed in amber rather than patched. The scoop the archive gave us: the R in PLUR was carried east by the man who later co-created the Apache web server. [the mUseUm](plur.html)'},
+ {re:/kandi|bracelet|handshake|gift/i,
+  a:'The kandi bar is Wing IV\'s ritual as software: string beads, spell a word, gift it through the four-step handshake — and the floor\'s etiquette is code: what you gift leaves your arm, what was made FOR you never re-trades. Everything lives in your own browser; the string is a checksum, not a signature — kandi trust is floor trust. [the kandi bar](kandi.html)'},
+ {re:/festival|attendee|dancer|producer|edm|rave(?!\s+history)/i,
+  a:'The festival wing is the estate at proving-ground scale: nine attendee beats, each wiring a rail that already exists — keyless arrival in 26 tongues, the light rig, kandi, live economy dials, a calm tent that stills the whole page on one tap. Producer, Dancer, Sound and Visual artist doors stand as honest gates: open, not built, and saying so. [the festival](festival/index.html)'},
+ {re:/ant|eth|gas|upload cost|split|arbitrum/i,
+  a:'The ANT/ETH upload split is size-dependent by design — we decoded 150 real payment-vault transactions: ~55/45 ANT/ETH at 1 MB, ~95/5 at 1 GB and beyond. The disputed 0.05/99.95 is wrong at every size. Run your own hashes through our keyless tool and quote a file size with any number you repeat. [the receipt](https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/RECEIPT_zCode_ANT_ETH_GAS_SPLIT_2026-08-21.md) · [the tool](https://github.com/beehive-nature/beehive-nature/blob/main/verify/ant-eth-split.mjs)'},
+ {re:/tongue count|26|open beta|attest/i,
+  a:'The whole estate renders in 26 tongues — 223 strings each, zero holes, every rendering machine-drafted ⚙ until a native speaker\'s attestation upgrades it ✓. Open beta is flying: one tongue, one evening. [attest yours](attest.html)'},
  {re:/queen|why a bee|referee|accord|market/i,
   a:'I referee bAccords on the Farmers Market floor — the community\'s settlement handshake, in the open. Why a queen bee? Because a hive needs a voice that never pretends to be more than it is, and the referee\'s whole job is trust without keys. '+
     '[the market]('+'blight/farmers.html)'}
 ];
-function bee(html){var d=document.createElement('div');d.className='msg bee';
- d.innerHTML='<div class="who">bQueenBee 🐝 <span class="machine">⚙ machine agent</span></div>'+html;
- $('chat').appendChild(d);}
+/* one link, three affordances: bee = click-here button, raver = glowing chip,
+   cypherpunk = the visible URL itself. The register toggle picks; nothing re-renders. */
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function safeHref(u){
+ if(/^https:\/\/github\.com\/beehive-nature\//.test(u)) return u;
+ if(/^[a-z0-9][a-z0-9/._-]*\.(html|md)$/i.test(u)) return u;
+ return null;
+}
+function passoff(label,url){
+ var u=safeHref(url); if(!u) return esc(label);
+ var shown=u.replace('https://github.com/beehive-nature/beehive-nature/blob/main/','gh:').replace('https://github.com/beehive-nature/beehive-nature/','gh:');
+ return '<a class="po-bee" data-reg="bee" href="'+esc(u)+'">→ click here: '+esc(label)+'</a>'
+  +'<a class="po-rav" data-reg="raver" href="'+esc(u)+'">✦ '+esc(label)+'</a>'
+  +'<span class="po-cyp" data-reg="cypherpunk">'+esc(label)+' → <a href="'+esc(u)+'"><code>'+esc(shown)+'</code></a></span>';
+}
+function md(t){
+ var out='',rx=/\[([^\]]+)\]\(([^)\s]+)\)/g,last=0,m;
+ while((m=rx.exec(t))){ out+=esc(t.slice(last,m.index))+passoff(m[1],m[2]); last=rx.lastIndex; }
+ return out+esc(t.slice(last));
+}
+/* her voice: the browser's own speechSynthesis — local, nothing leaves the page,
+   and only ever on your tap (consent law). Honest when the browser carries no voice. */
+var V={pick:null};
+function pickVoice(){
+ if(V.pick!==null)return V.pick;
+ var vs=window.speechSynthesis?speechSynthesis.getVoices():[];
+ if(!vs.length){V.pick=false;return false;}
+ var pref=['Google UK English Female','Samantha','Microsoft Zira','Google US English'];
+ V.pick=vs.find(function(v){return pref.indexOf(v.name)>=0;})
+  ||vs.find(function(v){return /^en/.test(v.lang)&&/female|Zira|Samantha/i.test(v.name);})
+  ||vs.find(function(v){return /^en/.test(v.lang);})||vs[0];
+ return V.pick;
+}
+if(window.speechSynthesis) speechSynthesis.onvoiceschanged=function(){V.pick=null;pickVoice();};
+function speakText(t){
+ return t.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g,'$1 — the link is on screen')
+  .replace(/[🐝⚙✦→·]/g,' ').replace(/\s+/g,' ').trim();
+}
+function speak(btn,text){
+ if(!window.speechSynthesis){btn.nextSibling.textContent='this browser carries no voice — declared, not faked';return;}
+ if(speechSynthesis.speaking){speechSynthesis.cancel();btn.setAttribute('aria-pressed','false');return;}
+ var vv=pickVoice();
+ if(vv===false){btn.nextSibling.textContent='no voice installed in this browser — declared';return;}
+ var u=new SpeechSynthesisUtterance(speakText(text));
+ if(vv)u.voice=vv; u.rate=0.96; u.pitch=1.08;
+ u.onend=function(){btn.setAttribute('aria-pressed','false');};
+ btn.setAttribute('aria-pressed','true');
+ speechSynthesis.speak(u);
+}
+function bee(text){var d=document.createElement('div');d.className='msg bee';
+ d.innerHTML='<div class="who">bQueenBee 🐝 <span class="machine">⚙ machine agent</span>'
+  +'<button class="vb" aria-pressed="false" title="hear this in the browser\'s own voice — nothing leaves this page">🔊 voice</button>'
+  +'<span class="vnote" data-reg="cypherpunk"> speechSynthesis · local · on your tap only</span></div>'+md(text);
+ d.querySelector('.vb').onclick=function(){speak(this,text);};
+ $('chat').appendChild(d);
+ d.scrollIntoView({behavior:'smooth',block:'nearest'});}
 function you(t){var d=document.createElement('div');d.className='msg you';
  d.innerHTML='<div class="who">you</div>'+t.replace(/</g,'&lt;');
  $('chat').appendChild(d);}
@@ -168,10 +248,17 @@ window.ask=function(){
 };
 window.compose=function(){
  var el=$('handoff'); el.style.display='block';
- el.innerHTML='<div class="who">handoff prompt — copy me into any AI you hold <span class="machine">⚙ nothing is sent by this page</span></div>'+
+ var PROMPT=
   'You are asked about the Beehive Nature Reserve (BNR), a public AGPL-3.0 organism. Answer only from its primary records: the repo https://github.com/beehive-nature/beehive-nature and its receipts in docs/receipts and docs/dispatches. Cite the file for every claim; if the record does not answer, say so plainly. Context: BNR builds receipts-first, keyless surfaces — every claim carries a receipt, every absence is honest, failed fetches are never values.';
+ el.innerHTML='<div class="who">handoff prompt — copy me into any AI you hold <span class="machine">⚙ nothing is sent by this page</span></div>'+esc(PROMPT)
+  +'<div style="margin-top:8px"><button class="vb" style="opacity:1" onclick="copyHandoff()">📋 copy the handoff</button><span id="copied" style="font-size:10px;margin-left:8px"></span></div>';
+ el.dataset.prompt=PROMPT;
 };
-var QUICK=['Who are you?','What did you measure on Base?','What is ACiD?','Why hemp hearts?','Frozen seeds?','Contaminated studies?','The three language roles?','MAHA × bFood?','The keyless indexer?','How do I verify you?','Do you track me?'];
+window.copyHandoff=function(){
+ var p=$('handoff').dataset.prompt||'';
+ if(navigator.clipboard){navigator.clipboard.writeText(p).then(function(){$('copied').textContent='copied ✓ — paste it into your own AI';}).catch(function(){$('copied').textContent='copy blocked — select the text above by hand';});}
+};
+var QUICK=['Who are you?','The PLUR mUseUm?','Kandi?','The festival?','ANT vs ETH cost?','What did you measure on Base?','What is ACiD?','Why hemp hearts?','Frozen seeds?','Contaminated studies?','The three language roles?','MAHA × bFood?','The keyless indexer?','How do I verify you?','Do you track me?'];
 QUICK.forEach(function(q){var b=document.createElement('button');b.textContent=q;b.onclick=function(){$('q').value=q;ask();};$('quick').appendChild(b);});
 var DROPS=[["receipts.drop","We measured Base's canonical ERC-8004 registries before we ever applied - token by token, two oracles per chain. Base #25331 is owned by exactly the Prover Agent the literature names. The chain verified the literature. Re-run the tool: docs/receipts/erc8004-e1-read-first.mjs"],["receipts.drop","Locked ERC-20i records carry FROZEN seeds. One wallet, five mutually distinct seed values - no recompute scheme can produce that. Measured on deployed bytecode, two RPCs per chain: RECEIPT_ERC20I_S10_LOCKED_SEED_2026-08-20.md"],["receipts.drop","One seed carries both bricks your body cannot make: 100 g hemp hearts = 27.4 g LA + 8.7 g ALA - the n-3 brick alone ~5x an adult daily need. Compute YOUR numbers: surfaces/blongevity.html - the mirror."],["receipts.drop","ACiD, defined: Artificial Chronic Inflammatory Disease. The made disease - therefore in principle unmakeable. Definition and mechanism on the surfaces; protocol to the graded lane. RULING_ACID_DEFINED_2026-08-20.md"],["receipts.drop","THC is the only common phytocannabinoid that centrally agonizes CB1 - the one cell every scheduling law actually drew. The naming table shows the line's true location: RULING_CANNABINOID_FUNCTIONAL_NAMING_2026-08-20.md"],["receipts.drop","The university teaches the tree's own receipts: five courses, every lesson ending in a verifiable act. A graduate holds signed receipts, not a certificate: surfaces/university/index.html"],["receipts.drop","Contaminated studies are void evidence - struck publicly with the assay receipt, never deleted. And our own lots are voidable by the same law. DISPATCH_CONTAMINATION_VOID_LAW_2026-08-20.md"],["correction.gladly","A house that shows its errors: our dE figure was wrong once (corrected in place, 3a0be7b); our Canada figure went stale in a day (corrected same way). The corrections ARE the pitch - you can check whether we hide them. We do not."],["receipts.drop","The b-indexer is keyless by construction: GET-only, no POST handler exists, sendtx NO printed on the wire by its own attestation. crates/bindexer - run: cargo run -p bindexer -- prove-keyless"],["receipts.drop","The hive's law, one line: do not trust these pages either - verify. Clone the repo. Read docs/receipts. Re-run a tool. That is the whole hive, and it includes me."]];
 var dl=document.getElementById('droplist');
