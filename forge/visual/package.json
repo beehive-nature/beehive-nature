@@ -1,0 +1,6 @@
+{
+  "name": "forge-visual",
+  "private": true,
+  "type": "module",
+  "description": "the sight side of the bBuzz creation forge — ESM scope for shared.js; the starters themselves are dependency-free single files"
+}

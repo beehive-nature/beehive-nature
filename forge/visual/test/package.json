@@ -1,0 +1,9 @@
+{
+  "name": "forge-visual-tests",
+  "private": true,
+  "type": "module",
+  "description": "dev-only test deps for the forge multiplayer layer; the starters themselves stay zero-dependency (BF-2 ruling). yjs is MIT — ruled at Gate BS-1.",
+  "devDependencies": {
+    "yjs": "^13.6.0"
+  }
+}
