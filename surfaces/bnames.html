@@ -135,6 +135,38 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 </section>
 
 <section>
+  <h2>🌍 THE 10-BILLION-USER · 1,000-YEAR DESIGN — ruled after testing every option</h2>
+  <div class="law">We tested every architecture against the chain's real arithmetic
+  (76 GB of buyable RAM, frozen supply, a 12.7M all-in ceiling) and <b>only one way
+  scales</b> — the full analysis is
+  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/bdomain-scaling.md">docs/bdomain-scaling.md</a>
+  (nine agents, two independent derivations reconciling to the registry's own bytes):</div>
+  <div class="acts">
+    <div class="act"><span class="an">TIER 1 — the on-chain anchor (paid, scarce)</span>
+      the <code>domains</code> row stays: ownership, expiry, transfer, release — all under
+      <code>require_auth</code>. After the ruled trims the anchor is <b>~155 B/user</b>
+      (drop the byowner index, ordinal chain keys). Premium tier, millions of anchors,
+      first-come allocation enforced by the chain itself.</div>
+    <div class="act"><span class="an">TIER 2 — off-chain resolution (free, unbounded)</span>
+      addresses move behind a <code>resolvers</code> table (gateway + owner-set signer
+      pubkey + TTL); responses carry timestamp + nonce + signature the client verifies
+      against the on-chain key. <b>Marginal on-chain cost per record: 0 bytes.</b>
+      Freshness native — deletion is instant, correction is mid-epoch. Where ENS landed too.</div>
+    <div class="act"><span class="an">REJECTED — one line each</span>
+      buy-RAM-and-hope: the bytes <b>do not exist</b> past ~12.7M users, at any price ·
+      Merkle + Arweave/IPFS: cannot prove <i>deletion</i> — a stolen address stays valid
+      all epoch, a loss class for a fund-routing registry · fully off-chain: forfeits
+      <code>require_auth</code>, which is the whole contract.</div>
+    <div class="act"><span class="an">THE LAW OF THE MIGRATION WINDOW</span>
+      evolving the live contract to the ruled shape costs <b>under a dollar at 13 rows</b>,
+      a project at 13,000, impossible at 13 million. The <code>setchain</code>-per-address
+      actions on this desk are <b>today's live shape</b>; the ruled design replaces that
+      half with Tier-2 resolvers while the 13 anchors sail through unchanged. Ten billion
+      users = ten billion <b>keypairs, not accounts</b> — only anchors take rows.</div>
+  </div>
+</section>
+
+<section>
   <h2>🎁 WHY THIS IS CHRISTMAS FOR DEVS</h2>
   <div class="law" data-reg="bee">One name, every chain, no subscription server in sight —
   and every number on this page is live from the chain, right now, with its source printed.
@@ -145,7 +177,9 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   <div class="law" data-reg="cypherpunk">all reads public-RPC failover (eosn → eosnation →
   greymass); compose-only page (zero write paths, attestation law); action shapes from the
   live ABI pinned 2026-08-22; two-track law rides (A prototype = mainnet reads like these;
-  b build = Jungle per MX-7); name cost cross-validated crate↔page tonight (0.8421).</div>
+  b build = Jungle per MX-7); name cost cross-validated crate↔page tonight (0.8421);
+  the ruled scaling path is the 10B/1k-year hybrid above — today's actions are the live
+  Tier-1 shape, not the destination.</div>
 </section>
 
 </main>
