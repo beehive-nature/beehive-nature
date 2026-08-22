@@ -54,3 +54,22 @@ The paying hand is ANY contributor, not only the founder. Therefore:
 8. **Credit rides the roster**: a verified sponsor may dock a `receipts` line for the
    mirror they funded — permanence as a public act. The runbook (item 5) becomes
    the SPONSOR runbook: same one-line commands, anyone's wallet, still never a seat's.
+
+
+## ADDENDUM 2 — the PRESTIGE law (founder word, 2026-08-22, verbatim):
+*"sources are great but we node to flash our stack and show respect to sites still
+preserving history but we need to show how are ecosystem autonomously archieves
+everything human bees learn/publish … this falls under prestige where you preserve
+the essense of the time place and post"*
+
+Ruled into the lane:
+9. **THE ARCHIVISTS section** is live on plur.html (Seat 3, this hour) — respect first.
+10. **Auto-archive becomes a standing law**: every NEW external source any estate surface
+    or receipt cites enters the bData manifest at cite-time (snapshot → hash → lane →
+    pending-sponsor). Build it into the pipeline as a sweep any seat can run
+    (`verify/bdata-sweep.mjs`: diff cited-URLs vs manifest, append the missing). The
+    essence preserved is the POST AS IT STOOD — byte-faithful, dated, hash-pinned; the
+    time and the place ride the manifest fields.
+11. **Snapshot etiquette**: one fetch, honest user-agent naming the archive, and the
+    original archivists stay LINKED FIRST on every card — the mirror is continuation,
+    never replacement.
