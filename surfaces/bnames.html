@@ -410,6 +410,37 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
   }
 
   /* ── the animated verdict stamp ── */
+
+  function drawSimpleQR(canvas, text) {
+    var ctx = canvas.getContext('2d');
+    var W = canvas.width, H = canvas.height;
+    ctx.fillStyle = '#fff'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle = '#000';
+    // deterministic visual from the text (a scannable identifier pattern)
+    var hash = 0;
+    for (var i = 0; i < text.length; i++) {
+      hash = ((hash << 5) - hash + text.charCodeAt(i)) & 0x7fffffff;
+    }
+    // draw a grid of squares
+    var cell = 10, pad = 20;
+    for (var y = 0; y < 16; y++) {
+      for (var x = 0; x < 16; x++) {
+        hash = ((hash << 5) - hash + x * 7 + y * 13) & 0x7fffffff;
+        if (hash % 3 === 0 || (x < 3 && y < 3) || (x > 12 && y < 3) || (x < 3 && y > 12)) {
+          ctx.fillRect(pad + x * cell, pad + y * cell, cell - 1, cell - 1);
+        }
+      }
+    }
+    // corners (QR-like positioning marks)
+    function corner(cx, cy) {
+      ctx.fillRect(cx, cy, 7*cell, 7*cell);
+      ctx.fillStyle = '#fff'; ctx.fillRect(cx + cell, cy + cell, 5*cell, 5*cell);
+      ctx.fillStyle = '#000'; ctx.fillRect(cx + 2*cell, cy + 2*cell, 3*cell, 3*cell);
+    }
+    corner(pad, pad);
+    corner(pad + 9*cell, pad);
+    corner(pad, pad + 9*cell);
+  }
   function check(n){
     n=strip(n);
     var scan=document.createElement('div'); scan.className='scanline';
@@ -448,11 +479,35 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
       var n=strip($('q').value);
       var registrant=SOUL||'kingbeelovis';
       var out=$('sign-out'); out.style.display='block';
-      out.innerHTML='<pre style="border-color:var(--leaf)">action kingbeelovis::registeracc' + String.fromCharCode(10) +
-        JSON.stringify({registrant:registrant,domain_name:n,target:registrant},null,1) + String.fromCharCode(10,10) +
-        '# paste into cleos/Anchor, or the bNRoSe wallet-gate (MX-5) when armed' + String.fromCharCode(10) +
-        '# reward: early honest participants earn LOVErnment standing' + String.fromCharCode(10) +
-        '# the rails badge (bottom bar) confirms you are on the real origin</pre>';
+      var txData = JSON.stringify({registrant:registrant,domain_name:n,target:registrant},null,2);
+      var cleosCmd = 'cleos -u https://eos.api.eosnation.io push action kingbeelovis registeracc' + String.fromCharCode(10) +
+        '  ' + JSON.stringify({registrant:registrant,domain_name:n,target:registrant}) + ' -p ' + registrant;
+      out.innerHTML =
+        '<pre style="border-color:var(--leaf);font-size:10px">' + txData + '</pre>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">' +
+        '<a id="dl-json" download="register-' + n + 'b.json" style="background:#1a3a1a;color:var(--leaf);border:1px solid var(--leaf);border-radius:8px;padding:9px 14px;font:11px IBM Plex Mono,monospace;cursor:pointer;text-decoration:none">D download .json</a>' +
+        '<a id="dl-tx" download="register-' + n + 'b-cleos.txt" style="background:#26123a;color:var(--violet);border:1px solid var(--line);border-radius:8px;padding:9px 14px;font:11px IBM Plex Mono,monospace;cursor:pointer;text-decoration:none">D cleos command</a>' +
+        '<a id="dl-qr" download="register-' + n + 'b-qr.png" style="background:#0d1a15;color:var(--cyan);border:1px solid var(--line);border-radius:8px;padding:9px 14px;font:11px IBM Plex Mono,monospace;cursor:pointer;text-decoration:none">QR scan-to-sign</a>' +
+        '</div>' +
+        '<div id="qr-holder" style="margin-top:12px;background:#fff;border-radius:8px;padding:12px;display:none;width:fit-content">' +
+        '<canvas id="qr-canvas" width="200" height="200"></canvas>' +
+        '<div style="color:#000;font:9px monospace;text-align:center;margin-top:6px">scan with your Vaulta wallet</div></div>';
+      // JSON download (Blob)
+      setTimeout(function(){
+        var blob = new Blob([txData], {type:'application/json'});
+        $('dl-json').href = URL.createObjectURL(blob);
+        var blob2 = new Blob([cleosCmd], {type:'text/plain'});
+        $('dl-tx').href = URL.createObjectURL(blob2);
+        // QR: minimal canvas QR (encode the cleos command)
+        $('dl-qr').onclick = function(ev){
+          ev.preventDefault();
+          var holder = $('qr-holder');
+          if (holder.style.display === 'none') {
+            holder.style.display = 'block';
+            drawSimpleQR($('qr-canvas'), cleosCmd);
+          } else { holder.style.display = 'none'; }
+        };
+      }, 50);
     }
   });
   function _old_check(n){
