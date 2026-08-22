@@ -484,8 +484,11 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
         '  ' + JSON.stringify({registrant:registrant,domain_name:n,target:registrant}) + ' -p ' + registrant;
       out.innerHTML =
         '<pre style="border-color:var(--leaf);font-size:10px">' + txData + '</pre>' +
-        '<a id="dl-json" download="register-' + n + 'b.json" style="display:inline-block;margin-top:10px;background:#1a3a1a;color:var(--leaf);border:1px solid var(--leaf);border-radius:8px;padding:10px 18px;font:12px IBM Plex Mono,monospace;cursor:pointer;text-decoration:none">D download the signed Tx (.json)</a>' +
-        '<div style="font-size:9px;color:var(--dim);margin-top:6px">the manual import into your wallet IS the bot protection — a human hand, every time</div>';
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">' +
+        '<a id="dl-json" download="register-' + n + 'b.json" style="background:#1a3a1a;color:var(--leaf);border:1px solid var(--leaf);border-radius:8px;padding:10px 18px;font:12px IBM Plex Mono,monospace;cursor:pointer;text-decoration:none">D download .json</a>' +
+        '<a href="https://unicove.com/en/vaulta/contract/kingbeelovis/registeracc?registrant=' + registrant + '&domain_name=' + n + '&target=' + registrant + '" target="_blank" rel="noopener" style="background:#0d1a15;color:var(--cyan);border:1px solid var(--cyan);border-radius:8px;padding:10px 18px;font:12px IBM Plex Mono,monospace;cursor:pointer;text-decoration:none">OPEN IN UNICOVE</a>' +
+        '</div>' +
+        '<div style="font-size:9px;color:var(--dim);margin-top:6px">download for Anchor/cleos · Unicove opens the action pre-filled with your wallet connected · the manual step IS the bot protection</div>';
       // JSON download (Blob)
       setTimeout(function(){
         var blob = new Blob([txData], {type:'application/json'});
