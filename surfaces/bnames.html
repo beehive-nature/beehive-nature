@@ -438,12 +438,12 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
         fields.forEach(function(f){ vals[f]=$('cz-'+f).value.trim(); });
         var missing=fields.filter(function(f){return !vals[f]});
         if(missing.length){ $('cz-out').textContent='fill: '+missing.join(', '); return; }
-        $('cz-out').innerHTML='<b>action kingbeelovis::'+czAction+'</b>
+        $('cz-out').innerHTML='<b>action kingbeelovis::'+czAction+'</b>'+
 '+
           JSON.stringify(vals,null,1)+
-          '
-
-# signing: your wallet (the MX-5 gate arms first-party soon) — this page composes, never signs';
+'+
+'+
+          '# signing: your wallet (the MX-5 gate arms first-party soon) — this page composes, never signs';
       };
     });
   });
