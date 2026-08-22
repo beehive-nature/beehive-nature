@@ -49,7 +49,8 @@
   document.head.appendChild(css);
 
   var orb = document.createElement('button');
-  orb.id = 'adOrb'; orb.title = 'the agents — bQueenBee · heARTh · bAigents · bLOVErAi'; orb.textContent = '🐝';
+  orb.id = 'adOrb'; orb.title = '⚙ the machine — Alt+/ summon · Alt+1..4 switch AIs · double-click to hide';
+orb.textContent = '⚙';
   var win = document.createElement('div');
   win.id = 'adWin';
   win.innerHTML =
@@ -106,7 +107,7 @@
     inp.value = '';
     if (v === '/help') { convo = []; render();
       var body = win.querySelector('#adBody');
-      body.insertAdjacentHTML('afterbegin', '<div class="adPanel"><b>the dock speaks:</b> I carry four agents. 🐝 answers with receipts (speak any tongue). 🔥 co-creates artifacts. 🤖 tells the mesh truth (meter yes, mesh not yet). 💌 composes handoffs. Agentic actions grow per surface — the wallet floor composes registeracc already.</div>');
+      body.insertAdjacentHTML('afterbegin', '<div class="adPanel"><b>the dock speaks:</b> I carry four agents. 🐝 answers with receipts (speak any tongue). 🔥 co-creates artifacts. 🤖 tells the mesh truth (meter yes, mesh not yet). 💌 composes handoffs. Agentic actions grow per surface — the wallet floor composes registeracc already. KEYS: Alt+/ summon · Alt+1..4 switch AI · double-click ⚙ hide · Alt+H re-summon · Esc close.</div>');
       return; }
     convo.push(v);
     if (cur === 'bloverai' || cur === 'baigents') render();
@@ -115,4 +116,35 @@
   }
   win.querySelector('#adSend').onclick = send;
   win.querySelector('#adPrompt').addEventListener('keydown', function (e) { if (e.key === 'Enter') send(); });
+
+  /* ── the machine's laws of motion: summon, hide, switch — with ease ──
+     Alt+/ (or Alt+M) toggles the window · Esc closes · double-click the ⚙ hides the
+     dock entirely (a whisper-⚙ edge remains) · Alt+1..4 switches AIs instantly ·
+     Alt+H re-summons from hidden. Reduced-motion users get the same keys, no motion. */
+  var hidden = false;
+  orb.addEventListener('dblclick', function () {
+    hidden = true; orb.style.opacity = '.35'; orb.style.transform = 'scale(.6)';
+    win.classList.remove('on');
+    orb.title = '⚙ hidden — Alt+H to summon the machine';
+  });
+  function unhide() { hidden = false; orb.style.opacity = ''; orb.style.transform = '';
+    orb.title = '⚙ the machine — Alt+/ summon · Alt+1..4 switch AIs · double-click to hide'; }
+  function switchAgent(i) {
+    var chips = agentsEl.querySelectorAll('.adAg');
+    if (chips[i]) chips[i].click();
+    if (!win.classList.contains('on')) win.classList.add('on');
+  }
+  document.addEventListener('keydown', function (e) {
+    if (!e.altKey) return;
+    if (e.key === '/' || e.key.toLowerCase() === 'm') { e.preventDefault();
+      if (hidden) { unhide(); win.classList.add('on'); win.querySelector('#adPrompt').focus(); }
+      else { win.classList.toggle('on'); if (win.classList.contains('on')) win.querySelector('#adPrompt').focus(); } }
+    else if (e.key.toLowerCase() === 'h') { e.preventDefault(); unhide(); win.classList.add('on'); }
+    else if (['1','2','3','4'].indexOf(e.key) >= 0) { e.preventDefault(); if (hidden) unhide(); switchAgent(+e.key - 1); }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && win.classList.contains('on')) win.classList.remove('on');
+  });
+  /* the whisper hint rides the /help panel */
+  var origRender = render;
 })();

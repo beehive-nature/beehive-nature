@@ -474,6 +474,22 @@ function buildTongues(){
     if(cands.length)kw=cands[0];}
    if(!kw){for(var tp in topics){var c=topics[tp].split('|').filter(function(k){return /[^\x00-\x7F]/.test(k)});
      if(c.length){kw=c[0];break;}}}
+   /* FINISHED 2026-08-22: no tongue left behind — when kbl carries no attributing
+      keyword, the sample rides the tongue's OWN answer corpus (first native word);
+      accent-free Latin tongues (nl, nl-be) ride their distinctive ASCII keyword —
+      the chip sets her ear+voice; deep answers pivot to English per the pivot law */
+   if(!kw&&j.answers&&j.answers[lang]){
+     var ans=j.answers[lang];
+     var order2=['hemp','base','frozen','kandi'];
+     for(var ai=0;ai<order2.length&&!kw;ai++){
+       var wrds=(ans[order2[ai]]||'').split(/\s+/);
+       for(var wi=0;wi<wrds.length;wi++){var w=wrds[wi].replace(/[^\p{L}\p{N}]/gu,'');
+         if(w.length>=4&&/[^\x00-\x7F]/.test(w)){kw=w;break;}}
+     }
+   }
+   if(!kw){
+     for(var tp2 in topics){var ks=topics[tp2].split('|').filter(function(k){return k.length>=6});
+       if(ks.length){kw=ks[0];break;}}}
    if(!kw)return;
    var b=document.createElement('button');
    b.className='vb';b.style.opacity='1';b.title=lang+' — tap: sets her ear + a sample ask';
