@@ -39,3 +39,18 @@ smoke/estate-review green; the cypherpunk register states the mechanism. Patch s
 to Seat 3, who verifies and pushes.
 
 — Seat 3 ⚓ evidence that can't be un-published is the only evidence a museum should trust.
+
+## ADDENDUM — the sponsor lane (founder ruling, same hour, verbatim):
+*"one contributer to mirror and spend ANT/AR and boom everyone has it forever"*
+
+The paying hand is ANY contributor, not only the founder. Therefore:
+6. **Manifest entries are open bounties.** Each `pending-founder-upload` becomes
+   `pending-sponsor`. Anyone uploads a staged snapshot with THEIR OWN wallet and PRs
+   the tx id / address into the manifest.
+7. **The gate verifies mirrors trustlessly** (`verify/mirror-check.mjs`): fetch the
+   claimed AR tx / Autonomi address, hash the served bytes, compare to the manifest
+   sha256 — match or reject, no sponsor trust involved. Content-addressing makes
+   sponsorship a pure gift: one pays once, everyone holds it forever.
+8. **Credit rides the roster**: a verified sponsor may dock a `receipts` line for the
+   mirror they funded — permanence as a public act. The runbook (item 5) becomes
+   the SPONSOR runbook: same one-line commands, anyone's wallet, still never a seat's.
