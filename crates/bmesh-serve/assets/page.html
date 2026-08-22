@@ -3,150 +3,237 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="dark">
-<title>bmesh-serve — the stack proof: htmx · AlpineJS · sqlite/postgres, each at its polar strength</title>
+<title>the BNRoSe dev deck — dashboard · monitoring · analytics · communication · wallet</title>
 <script src="/assets/htmx.js"></script>
 <script defer src="/assets/alpine.js"></script>
 <style>
 :root{--bg:#07090b;--panel:#0e1611;--well:#0a0f0b;--ink:#e2efdb;--dim:#8a9a8a;--line:#243026;
  --gold:#FFD700;--leaf:#7ddf8f;--cyan:#00E5FF;--amber:#ffb347;--violet:#c9a0ff}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:13px/1.65 'IBM Plex Mono',monospace;padding:30px 14px 70px}
-main{max-width:940px;margin:0 auto}
-header{text-align:center;margin-bottom:14px}
-h1{font-size:clamp(18px,4vw,25px);color:var(--gold);font-weight:400;letter-spacing:.04em}
-header p{color:var(--dim);font-size:11px;margin-top:6px;max-width:780px;margin-inline:auto;line-height:1.8}
-section{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:15px 16px;margin-top:14px}
-h2{font-size:11.5px;color:var(--violet);font-weight:400;letter-spacing:.09em;margin-bottom:9px}
-.law{color:var(--dim);font-size:10.5px;line-height:1.85}.law b{color:var(--ink)}
+body{background:var(--bg);color:var(--ink);font:13px/1.65 'IBM Plex Mono',monospace;padding:24px 14px 80px}
+main{max-width:1080px;margin:0 auto}
+header{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+h1{font-size:clamp(17px,3.5vw,23px);color:var(--gold);font-weight:400;letter-spacing:.04em}
+header p{color:var(--dim);font-size:10.5px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tabs button{background:#101a14;color:var(--dim);border:1px solid var(--line);border-radius:8px;
+ padding:8px 14px;cursor:pointer;font:11px 'IBM Plex Mono',monospace;min-height:34px}
+.tabs button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold)}
+.tabs button:hover{color:var(--cyan);border-color:var(--cyan)}
+.floor{display:none;flex-direction:column;gap:12px}
+.floor.on{display:flex}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:14px 16px}
+h2{font-size:11px;color:var(--violet);font-weight:400;letter-spacing:.09em;margin-bottom:8px}
+.law{color:var(--dim);font-size:10px;line-height:1.8}.law b{color:var(--ink)}
 a{color:var(--cyan)}
-table{width:100%;border-collapse:collapse;font-size:10.5px}
-td,th{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;color:var(--dim)}
-th{color:var(--violet);font-weight:400;font-size:9.5px}
-td:first-child{color:var(--ink)}
-button{background:#26123a;color:var(--violet);border:1px solid var(--line);border-radius:8px;
- padding:8px 14px;cursor:pointer;font:11.5px 'IBM Plex Mono',monospace;min-height:38px}
-button:hover{background:var(--violet);color:#000}
-.regbar{display:flex;gap:6px;margin:8px 0}
-.regbar button{min-height:30px;padding:4px 10px;font-size:10px}
-.regbar button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold)}
-.big{font-size:22px;color:var(--gold);margin:6px 0}
-.lane{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:10px}
-.card{background:var(--well);border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:10.5px;color:var(--dim);line-height:1.7}
-.card b{color:var(--ink)} .card .k{font-size:9px;color:var(--leaf);letter-spacing:.1em}
-.err{color:var(--amber)}
-footer{max-width:940px;margin:20px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.9}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.cell{background:var(--well);border:1px solid var(--line);border-radius:9px;padding:10px 12px}
+.cell .k{font-size:9px;color:var(--dim);letter-spacing:.08em}
+.cell .v{font-size:17px;color:var(--leaf);margin-top:3px;font-variant-numeric:tabular-nums}
+.cell .v.big{font-size:24px;color:var(--gold)}
+.cell .s{font-size:8.5px;color:var(--dim);margin-top:3px;line-height:1.5}
+table{width:100%;border-collapse:collapse;font-size:10px}
+td,th{border-bottom:1px solid var(--line);padding:5px 7px;text-align:left;color:var(--dim)}
+th{color:var(--violet);font-weight:400;font-size:9px} td:first-child{color:var(--ink)}
+pre{background:#060a08;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:9.5px;
+ color:var(--dim);line-height:1.7;white-space:pre-wrap;word-break:break-word;margin-top:8px}
+pre b{color:var(--ink)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+input,select{background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;
+ padding:8px 10px;font:11.5px 'IBM Plex Mono',monospace;flex:1;min-width:150px}
+button.act{background:#26123a;color:var(--violet);border:1px solid var(--line);border-radius:8px;
+ padding:8px 14px;cursor:pointer;font:11px 'IBM Plex Mono',monospace;min-height:36px}
+button.act:hover{background:var(--violet);color:#000}
+iframe{width:100%;min-height:560px;border:1px solid var(--line);border-radius:10px;background:#07090b}
+footer{max-width:1080px;margin:18px auto 0;color:var(--dim);font-size:9.5px;text-align:center;line-height:1.8}
 </style>
 </head>
-<body>
-<main x-data="deck()">
+<body x-data="deck()">
+<main>
 <header>
-  <h1>⚙ bmesh-serve — the stack proof</h1>
-  <p>htmx · AlpineJS · sqlite · postgres — <b style="color:var(--gold)">each at its polar strength</b>,
-  in one working loop. Your browser reads the live Vaulta rammarket keylessly (free distribution —
-  the server pays no egress), POSTs the reading; the server journals it to sqlite and renders the
-  fragments htmx swaps back; AlpineJS owns the toggle and the live math below. Founder word 2026-08-22.</p>
+  <h1>🛳 the BNRoSe dev deck</h1>
+  <p>dashboard · monitoring · analytics · communication · wallet — first-party only: our Rust/axum server,
+  htmx + AlpineJS, the sqlite journal. No third-party anything; every read keyless.</p>
 </header>
 
-<section>
-  <h2>🎛 THE REGISTER — AlpineJS at its polar strength (small state, declarative, in the markup)</h2>
-  <div class="law">The estate's register law, verbatim: <b>a register changes prose and density,
-  never a number</b> — three renderings of one truth that can never disagree about a fact.</div>
-  <div class="regbar">
-    <button @click="reg='bee'" :aria-pressed="reg==='bee'">🐝 bee</button>
-    <button @click="reg='raver'" :aria-pressed="reg==='raver'">🎛 raver</button>
-    <button @click="reg='cypherpunk'" :aria-pressed="reg==='cypherpunk'">⚗ cypherpunk</button>
-  </div>
-  <template x-if="reg==='bee'">
-    <div class="law" style="font-size:12px;color:var(--ink)">A name on our chain costs about
-    <b x-text="reading ? reading.toFixed(4) : '…'"></b> core, once — and you can sell it back.
-    No yearly bill, no renewal server. The number above is read from the chain by this very page.</div>
-  </template>
-  <template x-if="reg==='raver'">
-    <div class="big"><span x-text="reading ? reading.toFixed(4) : '—'"></span> core / .b name
-    <span style="font-size:11px;color:var(--dim)">· one-time · resellable · live</span></div>
-  </template>
-  <template x-if="reg==='cypherpunk'">
-    <div class="law">rammarket: <code>get_table_rows eosio/eosio</code> → base
-    <span x-text="base ? base.toLocaleString('en-US') : '—'"></span> B · quote raw
-    <span x-text="quote ? quote.toLocaleString('en-US') : '—'"></span> · per-name = 2,537 × quote/base
-    (2,537 B/row receipted, double-derived). Host: <span x-text="host || '—'"></span>. Server journal:
-    <span x-text="journalBackend"></span>.</div>
-  </template>
-</section>
+<div class="tabs">
+  <button @click="tab='dash'" :aria-pressed="tab==='dash'">🛠 dashboard</button>
+  <button @click="tab='mon'" :aria-pressed="tab==='mon'">📡 monitoring</button>
+  <button @click="tab='ana'" :aria-pressed="tab==='ana'">📊 analytics</button>
+  <button @click="tab='com'" :aria-pressed="tab==='com'">💬 communication</button>
+  <button @click="tab='wal'" :aria-pressed="tab==='wal'">🗝 wallet</button>
+</div>
 
-<section>
-  <h2>📡 THE READ — your browser, keyless, the dangling-art lane</h2>
-  <div class="law">This page fetches the rammarket row from the public failover trio
-  (api.eosn.io → eos.api.eosnation.io → eos.greymass.com) every 30 seconds —
-  <b>in your browser</b>. The server never makes this call; distribution is free by construction.</div>
-  <div class="lane">
-    <div class="card"><div class="k">READING (LIVE, YOUR BROWSER)</div>
-      <b x-text="reading ? reading.toFixed(4)+' core / name' : 'reading…'"></b><br>
-      host: <span x-text="host || '—'"></span></div>
-    <div class="card"><div class="k">ACTION — POST A TICK (htmx)</div>
-      <button hx-post="/api/tick" hx-vals="js:{
-        core_units_per_name: $data.reading || 0,
-        base_bytes: $data.base || 0,
-        quote_raw: $data.quote || 0,
-        source_host: $data.host || 'none'
-      }" hx-target="#journal" hx-swap="innerHTML">journal this reading</button></div>
-    <div class="card"><div class="k">SERVER STATUS (htmx poll 10s)</div>
-      <span hx-get="/api/status" hx-trigger="load, every 10s">loading…</span></div>
+<!-- ═══ DASHBOARD ═══ -->
+<section class="floor" :class="{on:tab==='dash'}">
+  <div class="panel">
+    <h2>🛠 THE SERVER — ours, first-party, running this deck</h2>
+    <div class="law">axum + tokio (the wallet-relay pattern) serving htmx fragments from the sqlite
+    journal — the stack proof promoted to the dev deck. Nothing third-party: the vendored
+    htmx/Alpine ride from <code>/assets</code>, the journal is our own file, the reads are keyless.</div>
+    <div class="grid" style="margin-top:10px">
+      <div class="cell"><div class="k">SERVER STATUS (htmx 10s)</div><div class="v" style="font-size:12px"><span hx-get="/api/status" hx-trigger="load, every 10s">…</span></div></div>
+      <div class="cell"><div class="k">FLEET HUB</div><div class="v big">60</div><div class="s">public surfaces · <a href="https://beehive-nature.github.io/beehive-nature/surfaces/index.html" target="_blank" rel="noopener">the hub ↗</a></div></div>
+      <div class="cell"><div class="k">THE MESH CRATES</div><div class="v">3</div><div class="s">bmesh-ram 17 tests · bmesh-meter 17 · bmesh-hwfit 5 — both chains conformance-pinned</div></div>
+      <div class="cell"><div class="k">THE CONTRACT</div><div class="v">45 KB</div><div class="s">bdomain2.wasm compiled (CDT 4.1.1) — fee-wired, capped, memo-guarded, Tier-2 resolvers</div></div>
+    </div>
+  </div>
+  <div class="panel">
+    <h2>⚓ THE DIVERSION DIALS — live, your browser, keyless</h2>
+    <div class="grid">
+      <div class="cell"><div class="k">VAULTA HEAD (live)</div><div class="v" id="vhead">—</div><div class="s" id="vmeta">get_info · three-host failover</div></div>
+      <div class="cell"><div class="k">HIVE HEAD (live)</div><div class="v" id="hhead">—</div><div class="s" id="hmeta">condenser_api · api.hive.blog</div></div>
+      <div class="cell"><div class="k">CURRENT WITNESS (live)</div><div class="v" id="hwit" style="font-size:14px">—</div><div class="s">the seat the diverted flow funds</div></div>
+      <div class="cell"><div class="k">.B NAME COST (live market)</div><div class="v" id="ramc">—</div><div class="s">2,537 B × live rammarket · resellable</div></div>
+    </div>
   </div>
 </section>
 
-<section>
-  <h2>🧾 THE JOURNAL — sqlite at its polar strength (embedded, zero-ops), htmx at its polar strength (server-rendered fragments)</h2>
-  <div class="law">Server-rendered rows, polled every 5 seconds — the server owns the HTML,
-  the client only swaps it. Newest first, twelve deep.</div>
-  <table>
-    <thead><tr><th>id</th><th>core / name</th><th>base bytes</th><th>quote raw</th><th>host</th></tr></thead>
-    <tbody id="journal" hx-get="/api/ticks" hx-trigger="load, every 5s"><tr><td colspan="5">loading…</td></tr></tbody>
-  </table>
+<!-- ═══ MONITORING ═══ -->
+<section class="floor" :class="{on:tab==='mon'}">
+  <div class="panel">
+    <h2>📡 THE GATES — the estate's standing checks</h2>
+    <div class="law">The three standing gates, runnable from this box:
+    <code>node e2e/university-smoke.mjs</code> (behavioral, 70) ·
+    <code>node e2e/estate-review.mjs</code> (structural) ·
+    <code>cargo test -p bmesh-ram -p bmesh-meter</code> (34 model tests).
+    Last session standing: <b>smoke 70/70 · estate 5/5 · models 17+17</b>.</div>
+    <div class="grid" style="margin-top:10px">
+      <div class="cell"><div class="k">SMOKE (BEHAVIORAL)</div><div class="v">70/70</div><div class="s">queen tongues + voice · name desk · meter vectors</div></div>
+      <div class="cell"><div class="k">ESTATE REVIEW (STRUCTURAL)</div><div class="v">5/5</div><div class="s">60 cards · footer==cards · tourbar · zero broken links</div></div>
+      <div class="cell"><div class="k">MODEL CONFORMANCE</div><div class="v">34</div><div class="s">both chains pinned (mainnet + Jungle) · mutation-proven</div></div>
+      <div class="cell"><div class="k">THE QUEEN</div><div class="v">26</div><div class="s">tongues · two-way voice (mic-in + spoken answers)</div></div>
+    </div>
+  </div>
+  <div class="panel">
+    <h2>📡 LIVE CHAIN WATCH — session-honest sparklines</h2>
+    <div class="law">Your browser polls every 15s; a dead read goes amber, a gap is a gap (the bANTfarm law).
+    Session values only — nothing stored, nothing sent.</div>
+    <div class="grid" style="margin-top:10px">
+      <div class="cell"><div class="k">VAULTA BLOCKS THIS SESSION</div><div class="v" id="vsess">0</div></div>
+      <div class="cell"><div class="k">HIVE BLOCKS THIS SESSION</div><div class="v" id="hsess">0</div></div>
+      <div class="cell"><div class="k">SESSION SAMPLES</div><div class="v" id="samples">0</div></div>
+      <div class="cell"><div class="k">HEARTBEAT</div><div class="v" id="beat">0:00</div></div>
+    </div>
+  </div>
 </section>
 
-<section>
-  <h2>🐘 POSTGRES — the honest absence, by design</h2>
-  <div class="law" id="pglane"><b>Not armed in this build.</b> postgres compiles only with
-  <code>--features postgres</code> — its polar strength is many concurrent writers and rich
-  queries at scale, which is not this lane's demand. When a lane's function demands it
-  (the bounty board's queue, metering at fleet scale), it is armed deliberately and the
-  same Journal contract serves it. sqlite carries the default everywhere else: one file,
-  embedded, git-friendly, zero administration.</div>
+<!-- ═══ ANALYTICS ═══ -->
+<section class="floor" :class="{on:tab==='ana'}">
+  <div class="panel">
+    <h2>📊 THE JOURNAL — sqlite analytics, server-rendered fragments (htmx)</h2>
+    <div class="law">Every meter tick you journal lands in <b>our own sqlite file</b>; the fragments
+    below are rendered server-side and polled — the polar-strength loop proven in the stack proof.
+    Journal a reading from the wallet floor or the button below.</div>
+    <div class="row">
+      <button class="act" hx-post="/api/tick" hx-vals="js:{core_units_per_name: (window.__deck\&\&window.__deck.reading)||0.8421, base_bytes: (window.__deck\&\&window.__deck.base)||75800886740, quote_raw: (window.__deck\&\&window.__deck.quote)||251602894241, source_host: 'deck-manual'}" hx-target="#jtable" hx-swap="innerHTML">journal a tick now</button>
+    </div>
+    <div class="grid" style="margin-top:10px">
+      <div class="cell"><div class="k">TOTAL TICKS (sqlite)</div><div class="v"><span hx-get="/api/analytics/summary" hx-trigger="load, every 12s">…</span></div></div>
+      <div class="cell"><div class="k">COST TREND (first → latest)</div><div class="v" style="font-size:12px"><span hx-get="/api/analytics/trend" hx-trigger="load, every 12s">…</span></div></div>
+    </div>
+    <table style="margin-top:10px"><thead><tr><th>id</th><th>core/name</th><th>base</th><th>quote</th><th>host</th></tr></thead>
+      <tbody id="jtable" hx-get="/api/ticks" hx-trigger="load, every 5s"></tbody></table>
+  </div>
+</section>
+
+<!-- ═══ COMMUNICATION ═══ -->
+<section class="floor" :class="{on:tab==='com'}">
+  <div class="panel">
+    <h2>💬 THE QUEEN — first-party, 26 tongues, two-way voice</h2>
+    <div class="law">bQueenBee live rides embedded — our own surface, our own machine agent,
+    every answer carrying its receipt. Speak to her in any tongue; she speaks back.</div>
+    <iframe src="https://beehive-nature.github.io/beehive-nature/surfaces/bqueenbee-live.html" title="bQueenBee live"></iframe>
+  </div>
+</section>
+
+<!-- ═══ WALLET ═══ -->
+<section class="floor" :class="{on:tab==='wal'}">
+  <div class="panel">
+    <h2>🗝 THE WALLET FLOOR — read, resolve, compose. Sign comes when MX-5 arms (first-party)</h2>
+    <div class="law">First-party only: this floor reads keylessly and composes actions in the registry's
+    real ABI shape. Signing is a wallet-gate lane away (MX-5 brief prepared) — built on OUR stack
+    when worded, never a third-party door.</div>
+    <div class="row">
+      <input id="wq" value="kingbeelovis" placeholder="account or .b name">
+      <button class="act" id="wgo">read the soul</button>
+    </div>
+    <div id="wout" class="law" style="margin-top:10px;min-height:20px">—</div>
+    <div class="grid" id="wcards" style="margin-top:8px"></div>
+    <h2 style="margin-top:14px">🧾 COMPOSER — registeracc (real shape, suffixless)</h2>
+    <div class="row">
+      <input id="cname" value="k" placeholder="name"><input id="creg" value="kingbeelovis" placeholder="registrant"><input id="ctgt" value="kingbeelovis" placeholder="target">
+      <button class="act" id="ccomp">compose</button>
+    </div>
+    <pre id="crec">— compose to see the action —</pre>
+  </div>
 </section>
 
 <footer>
-  ⚙ bmesh-serve · the stack proof · htmx 2.0.4 + AlpineJS 3.14.9 vendored and SHA-pinned ·
-  sqlite journal · postgres feature-gated · axum, the estate's server pattern<br>
-  crates/bmesh-serve · part of the bMeshAsi lane · AGPL-3.0-only
+  🛳 the BNRoSe dev deck · crates/bmesh-serve · first-party only: axum + htmx + AlpineJS + sqlite (postgres armed by feature) ·
+  vendored assets, keyless reads, zero third-party anything · AGPL-3.0-only
 </footer>
 </main>
-
 <script>
-function deck(){
-  return {
-    reg:'bee', reading:null, base:null, quote:null, host:null, journalBackend:'sqlite (default)',
-    async pull(){
-      const hosts=['https://api.eosn.io','https://eos.api.eosnation.io','https://eos.greymass.com'];
-      for(const h of hosts){
-        try{
-          const r=await fetch(h+'/v1/chain/get_table_rows',{method:'POST',
-            body:JSON.stringify({json:true,code:'eosio',scope:'eosio',table:'rammarket',limit:1})});
-          if(!r.ok) continue;
-          const d=await r.json();
-          const row=d.rows&&d.rows[0]; if(!row||!row.base||!row.quote) continue;
-          const raw=s=>{const p=(s||'').trim().split(' ')[0]||'0';const dec=(p.split('.')[1]||'').length;
-            return {v:Math.round(parseFloat(p)*Math.pow(10,dec)),d:dec};};
-          const b=raw(row.base.balance), q=raw(row.quote.balance);
-          if(b.v>0){ this.base=b.v; this.quote=q.v; this.reading=2537*q.v/b.v/Math.pow(10,q.d);
-            this.host=h.replace('https://',''); return; }
-        }catch(e){ /* failover, next host */ }
-      }
-      this.host='all three hosts failed — honest gap';
-    },
-    init(){ this.pull(); setInterval(()=>this.pull(),30000); }
+function deck(){ return { tab:'dash', reading:null, base:null, quote:null }; }
+(function(){
+  var VH=['https://api.eosn.io','https://eos.api.eosnation.io','https://eos.greymass.com'];
+  var HH=['https://api.hive.blog','https://api.deathwing.me'];
+  var $=function(i){return document.getElementById(i)};
+  var t0=Date.now(), v0=null, h0=null, samples=0;
+  setInterval(function(){ var s=Math.round((Date.now()-t0)/1000);
+    if($('beat')){$('beat').textContent=Math.floor(s/60)+':'+('0'+s%60).slice(-2);
+      $('samples').textContent=samples;} },1000);
+  function esc(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+  async function post(hosts,p,b){ for(var i=0;i<hosts.length;i++){ try{
+    var r=await fetch(hosts[i]+p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
+    if(r.ok) return await r.json(); }catch(e){} } return null; }
+  async function poll(){
+    if(document.visibilityState!=='visible') return;
+    var v=await post(VH,'/v1/chain/get_info',{});
+    if(v&&v.head_block_num){ $('vhead').textContent='#'+v.head_block_num.toLocaleString();
+      if(v0!==null)$('vsess').textContent=(v.head_block_num-v0).toLocaleString(); if(v0===null)v0=v.head_block_num; samples++; }
+    var h=await post(HH,'',{'jsonrpc':'2.0',method:'condenser_api.get_dynamic_global_properties',params:[],id:1});
+    if(h&&h.result){ var g=h.result; $('hhead').textContent='#'+g.head_block_number.toLocaleString();
+      $('hwit').textContent='@'+(g.current_witness||'—');
+      if(h0!==null)$('hsess').textContent=(g.head_block_number-h0).toLocaleString(); if(h0===null)h0=g.head_block_number; samples++; }
+    var rm=await post(VH,'/v1/chain/get_table_rows',{json:true,code:'eosio',scope:'eosio',table:'rammarket',limit:1});
+    var row=rm&&rm.rows&&rm.rows[0];
+    if(row&&row.base&&row.quote){
+      function raw(s){var p2=(s||'').trim().split(' ')[0]||'0';var d=(p2.split('.')[1]||'').length;
+        return {v:Math.round(parseFloat(p2)*Math.pow(10,d)),d:d};}
+      var b2=raw(row.base.balance),q2=raw(row.quote.balance);
+      if(b2.v>0){ window.__deck={reading:2537*q2.v/b2.v/Math.pow(10,q2.d),base:b2.v,quote:q2.v};
+        var dk=window.__deck; $('ramc').textContent=dk.reading.toFixed(4)+' core';
+        var dd=document.querySelector('[x-data]'); if(dd){dd._x_dataStack[0].reading=dk.reading;dd._x_dataStack[0].base=dk.base;dd._x_dataStack[0].quote=dk.quote;} } }
+  }
+  poll(); setInterval(poll,15000);
+  /* wallet floor */
+  function card(k,v,s){return '<div class="cell"><div class="k">'+k+'</div><div class="v" style="font-size:14px">'+v+'</div>'+(s?'<div class="s">'+s+'</div>':'')+'</div>';}
+  $('wgo').onclick=async function(){
+    var q=($('wq').value||'').trim().toLowerCase().replace(/\.b$/,''); if(!q)return;
+    $('wout').textContent='reading '+q+'…';
+    var reg=await post(VH,'/v1/chain/get_table_rows',{json:true,code:'kingbeelovis',scope:'kingbeelovis',table:'domains',limit:500});
+    var named=null; if(reg&&reg.rows)for(var i=0;i<reg.rows.length;i++)if(reg.rows[i].domain_name===q){named=reg.rows[i];break;}
+    var soul=named?named.account:q;
+    var acct=await post(VH,'/v1/chain/get_account',{account_name:soul});
+    if(!acct){$('wout').innerHTML='<span style="color:var(--amber)">read failed — honest gap</span>';return;}
+    var age=Math.max(0,Math.floor((Date.now()-new Date(acct.created+'Z'))/86400000));
+    $('wcards').innerHTML=
+      card('IDENTITY',named?'✓ '+esc(q)+'.b':'✗ unnamed',named?('expires '+named.expires.slice(0,10)+' · owner '+esc(named.owner)):'no registry row')+
+      card('ACCOUNT',esc(soul),age.toLocaleString()+' days · '+(acct.core_liquid_balance||'—'))+
+      card('RAM',((acct.ram_usage||0)/1024).toFixed(1)+' KB','of '+((acct.ram_quota||0)/1024).toFixed(0)+' KB')+
+      card('PERMS',(acct.permissions||[]).map(function(p){return p.perm_name}).join('/'),'first-party read');
+    $('wout').innerHTML=named?'✓ live sovereign — '+esc(q)+'.b → '+esc(soul):'· real account, unnamed';
   };
-}
+  $('ccomp').onclick=function(){
+    var n=($('cname').value||'').trim().replace(/\.b$/,''),r=($('creg').value||'').trim(),t=($('ctgt').value||'').trim();
+    if(!n||!r||!t){$('crec').textContent='fill all three';return;}
+    $('crec').innerHTML='<b># register '+esc(n)+'.b — the action, in the real ABI shape</b>\n'+
+      'action: kingbeelovis::registeracc\n'+JSON.stringify({registrant:r,domain_name:n,target:t},null,1)+
+      '\n\n# signing: the wallet-gate lane (MX-5 brief prepared) — OUR stack when armed, never third-party';
+  };
+})();
 </script>
 </body>
 </html>

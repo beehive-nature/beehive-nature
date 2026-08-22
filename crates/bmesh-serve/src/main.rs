@@ -48,6 +48,8 @@ async fn main() {
         .route("/api/ticks", get(ticks_fragment))
         .route("/api/tick", post(post_tick))
         .route("/api/status", get(status_fragment))
+        .route("/api/analytics/summary", get(analytics_summary))
+        .route("/api/analytics/trend", get(analytics_trend))
         .with_state(state);
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:8788").await.unwrap();
@@ -129,6 +131,31 @@ async fn status_fragment(State(st): State<SharedState>) -> Html<String> {
         } else {
             "honest absence — armed by --features postgres; its polar strength (many concurrent writers) is not this lane's demand"
         }
+    ))
+}
+
+/// sqlite analytics — the journal's own history, server-rendered (htmx fragment)
+async fn analytics_summary(State(st): State<SharedState>) -> Html<String> {
+    let n = st.journal.count();
+    Html(format!("{n} ticks"))
+}
+
+async fn analytics_trend(State(st): State<SharedState>) -> Html<String> {
+    let mut all = st.journal.recent(10_000);
+    all.reverse(); // oldest first
+    if all.is_empty() {
+        return Html("no ticks yet".to_string());
+    }
+    let first = all.first().unwrap();
+    let last = all.last().unwrap();
+    let delta = last.core_units_per_name - first.core_units_per_name;
+    Html(format!(
+        "{:.4} → {:.4} ({}{:.4} over {} ticks)",
+        first.core_units_per_name,
+        last.core_units_per_name,
+        if delta >= 0.0 { "+" } else { "" },
+        delta,
+        all.len()
     ))
 }
 
