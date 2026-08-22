@@ -440,7 +440,11 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
         if(missing.length){ $('cz-out').textContent='fill: '+missing.join(', '); return; }
         $('cz-out').innerHTML='<b>action kingbeelovis::'+czAction+'</b>' + String.fromCharCode(10) +
           JSON.stringify(vals,null,1) + String.fromCharCode(10,10) +
-          '# signing: your wallet — this page composes, never signs';
+          '# TO SECURE THIS NAME — paste into your Vaulta wallet (Anchor, cleos, or the bNRoSe wallet-gate when armed):' + String.fromCharCode(10) +
+          'cleos -u https://eos.api.eosnation.io push action kingbeelovis registeracc' + String.fromCharCode(10) +
+          '  the JSON above -p YOUR_ACCOUNT' + String.fromCharCode(10,10) +
+          '# fee 0.0000 + ~0.84 core RAM (resellable) + 365-day term' + String.fromCharCode(10) +
+          '# the rails badge in the bottom bar confirms you are on the real origin (TOFU lock) — this page composes, never signs';
       };
     });
   });
@@ -473,7 +477,7 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
     var v=soulStrip($('soul-in').value); if(!v)return; SOUL=v; soulApply();
   };
   $('soul-out').onclick=function(){ SOUL=null; soulApply(); };
-  try{ var saved=localStorage.getItem('bnr_soul'); if(saved){ SOUL=saved; } }catch(e){}
+  try{ var saved=localStorage.getItem('bnr_soul'); if(saved){ SOUL=saved; $('soul-in').value=saved; } }catch(e){}
   (async function(){
     await Promise.all([loadRegistry(),loadConfig(),loadRamCost()]);
     soulApply();
