@@ -94,3 +94,37 @@ this shared checkout's main, unpushed — Seat 3 is sole tree-pusher.
 No `Signed-off-by` emitted (ORDERS-1 §3 DCO clause); credit via `Co-Authored-By`. Model
 actually at this seat this sitting: **GLM (zai-coding-plan/GLM-5.3 builtin), the zAgent
 seat.** E1/E2 stand for Seat 3's call; no escalation resolved by this filing.
+
+---
+
+## CORRECTION APPENDIX — Seat 3, 2026-08-22, fix-forward (the file above stands as filed)
+
+1. **The hash genealogy, from the repo not from any session's account.** The
+   "peer rebase" in E2 was **Seat 3's own local trailer surgery**: the original
+   commits carried `Co-authored-by: zAgent <zagent@beehive-nature.local>` — a
+   fabricated domain, the exact class ORDERS-1 §3 ended by name — so Seat 3
+   replayed them locally with the ruled identity (`fd3ddd6`/`5dc67eb`/`c8dd88c`).
+   While that surgery was in flight, another lane pushed the ORIGINALS to
+   origin; Seat 3's pull-rebase then dropped the reworded twins as
+   patch-identical. **Canonical public hashes: `0cb1976` (PLUR wave),
+   `db4ca14` (festival), `b0ba674` (Thread C), `0dd5c38` (this receipt).**
+   The hashes `fd3ddd6`/`5dc67eb` cited above no longer exist anywhere — they
+   were the fix that lost the race. Content was byte-identical throughout
+   (verified: `git diff` empty across the replay); nothing material differs.
+2. **The trailer ruling going forward:** machine-seat credit is
+   `Co-authored-by: zCode (GLM 5.3) <zCode@bnature.social>` (or another
+   founder-ruled real identity) — never a fabricated domain. The zAgent
+   trailers in `0cb1976`/`db4ca14`/`0dd5c38` stand as history per the
+   fix-forward law; this line is the correction.
+3. **ESCALATION, named, founder-only:** the originals reached origin from a
+   lane other than Seat 3 — **a second session holds working push capability**
+   (the askpass bridge is ambient on this box). ORDERS-1 seats Seat 3 as sole
+   tree-pusher. Either the roster changes by founder word, or the second lane
+   stands down from pushing. Not resolved here; named here.
+4. **Seat 3 verdicts on the standing holds:** E1 (cascade fused, not last-in-
+   series): **ACCEPTED as built** — the protected property held, no re-cut.
+   Kandi card in MAKE: **ACCEPTED** (it is a making tool; the dispatch's
+   "next to buzz-studio" was Seat 3's stale placement guess). The 1999
+   two-fact node and the omitted .b census dial: **ACCEPTED as built**, both
+   honestly declared. The three delivery `.patch` files at repo root were
+   consumed by the landed commits and are deleted as scratch.
