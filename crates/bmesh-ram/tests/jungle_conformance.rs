@@ -21,9 +21,9 @@ use bmesh_ram::RamMarket;
 /// live jungle4 rammarket + global, 2026-08-22
 fn jungle_market() -> RamMarket {
     RamMarket::new(
-        58_110_658_174,     // base RAM bytes = max − reserved (exact, see J-V4)
-        118_256_296_455,    // quote "11825629.6455 EOS" raw @ 4 dp
-        18_256_296_455,     // global total_ram_stake
+        58_110_658_174,  // base RAM bytes = max − reserved (exact, see J-V4)
+        118_256_296_455, // quote "11825629.6455 EOS" raw @ 4 dp
+        18_256_296_455,  // global total_ram_stake
     )
 }
 
@@ -33,7 +33,7 @@ fn jv1_buy_100_tokens_matches_jungle_derivation() {
     let t = m.buy(1_000_000).unwrap();
     assert_eq!(t.fee, 5_000);
     assert_eq!(t.after_fee, 995_000);
-    assert_eq!(t.bytes, 488_934);        // python: int(995000*58110658174/(118256296455+995000))
+    assert_eq!(t.bytes, 488_934); // python: int(995000*58110658174/(118256296455+995000))
     assert_eq!(m.base_bytes, 58_110_169_240);
     assert_eq!(m.quote_units, 118_257_291_455);
 }
@@ -53,12 +53,12 @@ fn jv2_round_trip_loss_identical_to_mainnet_to_the_unit() {
 fn jv3_buyrambytes_undershoot_reproduces_on_jungle() {
     let mut m = jungle_market();
     let (cost, cpf) = m.cost_for_bytes(4096);
-    assert_eq!(cost, 8_335);             // int(118256296455*4096/(58110658174-4096))
-    assert_eq!(cpf, 8_376);              // int(8335/0.995)
+    assert_eq!(cost, 8_335); // int(118256296455*4096/(58110658174-4096))
+    assert_eq!(cpf, 8_376); // int(8335/0.995)
     let t = m.buy(cpf).unwrap();
     assert_eq!(t.fee, 42);
     assert_eq!(t.after_fee, 8_334);
-    assert_eq!(t.bytes, 4_095);          // one byte short — again, on another chain
+    assert_eq!(t.bytes, 4_095); // one byte short — again, on another chain
 }
 
 #[test]
@@ -67,7 +67,10 @@ fn jv4_jungle_state_invariants_and_the_ten_million_seed() {
     assert_eq!(68_719_476_736_i64 - 10_608_818_562_i64, 58_110_658_174_i64);
     // per-chain genesis seed: Jungle's is 10x mainnet's — the LAW is structural,
     // the SEED is genesis-supply/1000, whatever that supply was
-    assert_eq!(118_256_296_455_i64 - 18_256_296_455_i64, 100_000_000_000_i64);
+    assert_eq!(
+        118_256_296_455_i64 - 18_256_296_455_i64,
+        100_000_000_000_i64
+    );
     // and lockstep conservation holds under trades:
     let mut m = jungle_market();
     let seed = m.quote_units - m.total_ram_stake;

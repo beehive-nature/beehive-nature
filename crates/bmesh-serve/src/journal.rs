@@ -56,7 +56,9 @@ impl SqliteJournal {
                 at TEXT NOT NULL DEFAULT (datetime('now'))
             );",
         )?;
-        Ok(Self { conn: std::sync::Mutex::new(conn) })
+        Ok(Self {
+            conn: std::sync::Mutex::new(conn),
+        })
     }
 
     /// In-memory journal — tests and throwaway runs.
@@ -72,7 +74,9 @@ impl SqliteJournal {
                 at TEXT NOT NULL DEFAULT (datetime('now'))
             );",
         )?;
-        Ok(Self { conn: std::sync::Mutex::new(conn) })
+        Ok(Self {
+            conn: std::sync::Mutex::new(conn),
+        })
     }
 }
 
@@ -82,7 +86,12 @@ impl Journal for SqliteJournal {
         c.execute(
             "INSERT INTO ticks (core_units_per_name, base_bytes, quote_raw, source_host)
              VALUES (?1, ?2, ?3, ?4)",
-            rusqlite::params![t.core_units_per_name, t.base_bytes, t.quote_raw, t.source_host],
+            rusqlite::params![
+                t.core_units_per_name,
+                t.base_bytes,
+                t.quote_raw,
+                t.source_host
+            ],
         )
         .expect("insert tick");
         c.last_insert_rowid()
@@ -91,8 +100,10 @@ impl Journal for SqliteJournal {
     fn recent(&self, n: usize) -> Vec<Tick> {
         let c = self.conn.lock().unwrap();
         let mut stmt = c
-            .prepare("SELECT id, core_units_per_name, base_bytes, quote_raw, source_host
-                      FROM ticks ORDER BY id DESC LIMIT ?1")
+            .prepare(
+                "SELECT id, core_units_per_name, base_bytes, quote_raw, source_host
+                      FROM ticks ORDER BY id DESC LIMIT ?1",
+            )
             .expect("prepare recent");
         let rows = stmt
             .query_map([n as i64], |r| {
@@ -110,7 +121,8 @@ impl Journal for SqliteJournal {
 
     fn count(&self) -> i64 {
         let c = self.conn.lock().unwrap();
-        c.query_row("SELECT COUNT(*) FROM ticks", [], |r| r.get(0)).unwrap_or(0)
+        c.query_row("SELECT COUNT(*) FROM ticks", [], |r| r.get(0))
+            .unwrap_or(0)
     }
 
     fn backend_name(&self) -> &'static str {
@@ -154,7 +166,9 @@ pub mod pg {
                     &[],
                 )
                 .await?;
-            Ok(Self { client: Arc::new(tokio::sync::Mutex::new(client)) })
+            Ok(Self {
+                client: Arc::new(tokio::sync::Mutex::new(client)),
+            })
         }
     }
 
@@ -213,8 +227,13 @@ pub mod pg {
             let client = self.client.clone();
             tokio::task::block_in_place(|| {
                 tokio::runtime::Handle::current().block_on(async move {
-                    client.lock().await.query_one("SELECT COUNT(*) FROM ticks", &[]).await
-                        .map(|r| r.get::<_, i64>(0)).unwrap_or(0)
+                    client
+                        .lock()
+                        .await
+                        .query_one("SELECT COUNT(*) FROM ticks", &[])
+                        .await
+                        .map(|r| r.get::<_, i64>(0))
+                        .unwrap_or(0)
                 })
             })
         }

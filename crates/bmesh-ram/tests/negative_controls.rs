@@ -37,7 +37,7 @@ fn control_2_inverse_conversion_truncates() {
 fn control_3_buy_converts_the_fee_net_amount_against_the_live_state() {
     let mut m = live_market();
     let t = m.buy(1_000_000).unwrap();
-    assert_eq!(t.bytes, 299_764);                 // the independently derived live vector
-    assert_eq!(m.quote_units, 251_603_889_241);   // quote grew by 995_000 — the FEE-NET amount
+    assert_eq!(t.bytes, 299_764); // the independently derived live vector
+    assert_eq!(m.quote_units, 251_603_889_241); // quote grew by 995_000 — the FEE-NET amount
     assert_eq!(m.base_bytes, 75_800_586_976);
 }

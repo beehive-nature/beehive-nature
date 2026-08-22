@@ -39,7 +39,10 @@ pub type SharedState = Arc<AppState>;
 #[tokio::main]
 async fn main() {
     let journal = SqliteJournal::open("bmesh-serve.db").expect("open sqlite journal");
-    let state: SharedState = Arc::new(AppState { journal, started: Instant::now() });
+    let state: SharedState = Arc::new(AppState {
+        journal,
+        started: Instant::now(),
+    });
 
     let app = Router::new()
         .route("/", get(page))
@@ -52,7 +55,9 @@ async fn main() {
         .route("/api/analytics/trend", get(analytics_trend))
         .with_state(state);
 
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:8788").await.unwrap();
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:8788")
+        .await
+        .unwrap();
     println!("bmesh-serve listening on http://127.0.0.1:8788 (sqlite journal: bmesh-serve.db)");
     axum::serve(listener, app).await.unwrap();
 }
@@ -66,7 +71,11 @@ async fn htmx_js() -> Response {
 }
 
 async fn alpine_js() -> Response {
-    ([(header::CONTENT_TYPE, "application/javascript")], ALPINE_JS).into_response()
+    (
+        [(header::CONTENT_TYPE, "application/javascript")],
+        ALPINE_JS,
+    )
+        .into_response()
 }
 
 /// thousands-grouped rendering for i64 (rust format strings carry no grouping flag)

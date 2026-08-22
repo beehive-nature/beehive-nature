@@ -15,7 +15,7 @@ pub struct Trade {
     pub bytes: i64,
 }
 
-pub const MIN_BYTES: i64 = 1;      // db:85  check( bytes_out > 0, "must reserve a positive amount" )
+pub const MIN_BYTES: i64 = 1; // db:85  check( bytes_out > 0, "must reserve a positive amount" )
 pub const MIN_CORE_UNITS: i64 = 2; // db:128 check( tokens_out.amount > 1, "…selling ram is too low" )
 
 /// es:81-94 `get_bancor_output` — int64 promoted to double, quotient in double,
@@ -26,7 +26,11 @@ pub fn bancor_output(inp_reserve: i64, out_reserve: i64, inp: i64) -> i64 {
     let ob = out_reserve as f64;
     let input = inp as f64;
     let out = ((input * ob) / (ib + input)) as i64; // C++ int64_t(double) truncates
-    if out < 0 { 0 } else { out }                   // es:91 guard
+    if out < 0 {
+        0
+    } else {
+        out
+    } // es:91 guard
 }
 
 /// es:96-108 `get_bancor_input` — the inverse, same double-truncation discipline.
@@ -37,7 +41,11 @@ pub fn bancor_input(out_reserve: i64, inp_reserve: i64, out: i64) -> i64 {
     let ib = inp_reserve as f64;
     let output = out as f64;
     let inp = ((ib * output) / (ob - output)) as i64;
-    if inp < 0 { 0 } else { inp }                   // es:105 guard
+    if inp < 0 {
+        0
+    } else {
+        inp
+    } // es:105 guard
 }
 
 /// db:60,140 `(x + 199) / 200` — 0.5%, rounded UP, in integer arithmetic.
@@ -70,7 +78,11 @@ pub struct RamMarket {
 
 impl RamMarket {
     pub fn new(base_bytes: i64, quote_units: i64, total_ram_stake: i64) -> Self {
-        Self { base_bytes, quote_units, total_ram_stake }
+        Self {
+            base_bytes,
+            quote_units,
+            total_ram_stake,
+        }
     }
 
     /// The live chain's state satisfies `base == max_ram_size − reserved` exactly;
@@ -82,18 +94,23 @@ impl RamMarket {
     /// `quote += from`, `base -= out`); `total_ram_stake += after_fee` (db:88).
     pub fn buy(&mut self, quant_units: i64) -> Result<Trade, RamError> {
         if quant_units <= 0 {
-            return Err(RamError::NonPositivePayment);          // db:57
+            return Err(RamError::NonPositivePayment); // db:57
         }
-        let fee = fee_ceil(quant_units);                        // db:59-60
-        let after_fee = quant_units - fee;                      // db:64-65
+        let fee = fee_ceil(quant_units); // db:59-60
+        let after_fee = quant_units - fee; // db:64-65
         let bytes_out = bancor_output(self.quote_units, self.base_bytes, after_fee); // es:72
         if bytes_out < MIN_BYTES {
-            return Err(RamError::BuyBelowMinimum);              // db:85
+            return Err(RamError::BuyBelowMinimum); // db:85
         }
-        self.quote_units += after_fee;                          // es:73 quote.balance += from
-        self.base_bytes -= bytes_out;                           // es:74 base.balance  -= out
-        self.total_ram_stake += after_fee;                      // db:88
-        Ok(Trade { amount_in: quant_units, fee, after_fee, bytes: bytes_out })
+        self.quote_units += after_fee; // es:73 quote.balance += from
+        self.base_bytes -= bytes_out; // es:74 base.balance  -= out
+        self.total_ram_stake += after_fee; // db:88
+        Ok(Trade {
+            amount_in: quant_units,
+            fee,
+            after_fee,
+            bytes: bytes_out,
+        })
     }
 
     /// `sellram` (db:115-146): base→quote conversion (es:67-70), the `> 1` guard,
@@ -104,13 +121,18 @@ impl RamMarket {
     pub fn sell(&mut self, bytes: i64) -> Result<Trade, RamError> {
         let tokens_out = bancor_output(self.base_bytes, self.quote_units, bytes); // es:68
         if tokens_out < MIN_CORE_UNITS {
-            return Err(RamError::SellBelowMinimum);             // db:128 (chain reverts)
+            return Err(RamError::SellBelowMinimum); // db:128 (chain reverts)
         }
-        self.base_bytes += bytes;                               // es:69
-        self.quote_units -= tokens_out;                         // es:70
-        let fee = fee_ceil(tokens_out);                         // db:140
+        self.base_bytes += bytes; // es:69
+        self.quote_units -= tokens_out; // es:70
+        let fee = fee_ceil(tokens_out); // db:140
         self.total_ram_stake -= tokens_out;
-        Ok(Trade { amount_in: tokens_out - fee, fee, after_fee: tokens_out, bytes })
+        Ok(Trade {
+            amount_in: tokens_out - fee,
+            fee,
+            after_fee: tokens_out,
+            bytes,
+        })
     }
 
     /// `buyrambytes` (db:25-31): inverse-conversion cost, then the `/0.995`
@@ -119,7 +141,7 @@ impl RamMarket {
     /// tests can pin the measured one-byte undershoot.
     pub fn cost_for_bytes(&self, bytes: i64) -> (i64, i64) {
         let cost = bancor_input(self.base_bytes, self.quote_units, bytes); // db:28 call-site order
-        let cost_plus_fee = (cost as f64 / 0.995f64) as i64;    // db:30 int64 <- double trunc
+        let cost_plus_fee = (cost as f64 / 0.995f64) as i64; // db:30 int64 <- double trunc
         (cost, cost_plus_fee)
     }
 

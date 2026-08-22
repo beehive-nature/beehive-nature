@@ -15,19 +15,19 @@ use bmesh_ram::RamMarket;
 /// live rammarket row, 2026-08-22
 fn live_market() -> RamMarket {
     RamMarket::new(
-        75_800_886_740,     // base  RAM bytes      = max_ram_size − total_ram_bytes_reserved (exact)
-        251_602_894_241,    // quote "25160289.4241" core-token raw units @ 4 dp
-        241_602_894_241,    // global total_ram_stake (raw units)
+        75_800_886_740, // base  RAM bytes      = max_ram_size − total_ram_bytes_reserved (exact)
+        251_602_894_241, // quote "25160289.4241" core-token raw units @ 4 dp
+        241_602_894_241, // global total_ram_stake (raw units)
     )
 }
 
 #[test]
 fn v1_buy_100_tokens_matches_live_derivation() {
     let mut m = live_market();
-    let t = m.buy(1_000_000).unwrap();           // 100.0000 core
-    assert_eq!(t.fee, 5_000);                    // (1_000_000 + 199)/200
+    let t = m.buy(1_000_000).unwrap(); // 100.0000 core
+    assert_eq!(t.fee, 5_000); // (1_000_000 + 199)/200
     assert_eq!(t.after_fee, 995_000);
-    assert_eq!(t.bytes, 299_764);                // python: int(995000*75800886740 / (251602894241+995000))
+    assert_eq!(t.bytes, 299_764); // python: int(995000*75800886740 / (251602894241+995000))
     assert_eq!(m.base_bytes, 75_800_586_976);
     assert_eq!(m.quote_units, 251_603_889_241);
     assert_eq!(m.total_ram_stake, 241_603_889_241);
@@ -38,7 +38,7 @@ fn v1b_fee_ceils_not_floors() {
     // discriminator: at 1,000,001 the ceil and floor diverge (5,001 vs 5,000)
     let mut m = live_market();
     let t = m.buy(1_000_001).unwrap();
-    assert_eq!(t.fee, 5_001);                    // (1_000_001 + 199)/200 = 5,001 exactly
+    assert_eq!(t.fee, 5_001); // (1_000_001 + 199)/200 = 5,001 exactly
 }
 
 #[test]
@@ -46,10 +46,10 @@ fn v2_sell_round_trip_and_loss_accounting() {
     let mut m = live_market();
     let b = m.buy(1_000_000).unwrap();
     let s = m.sell(b.bytes).unwrap();
-    assert_eq!(s.after_fee, 994_998);            // gross tokens_out
-    assert_eq!(s.fee, 4_975);                    // (994_998 + 199)/200
-    assert_eq!(s.amount_in, 990_023);            // net proceeds
-    // loss = fee_buy + fee_sell + exactly 2 truncation units (measured)
+    assert_eq!(s.after_fee, 994_998); // gross tokens_out
+    assert_eq!(s.fee, 4_975); // (994_998 + 199)/200
+    assert_eq!(s.amount_in, 990_023); // net proceeds
+                                      // loss = fee_buy + fee_sell + exactly 2 truncation units (measured)
     assert_eq!(1_000_000 - s.amount_in, 9_977);
 }
 
@@ -60,21 +60,27 @@ fn v3_buyrambytes_double_fee_undershoots_one_byte() {
     // the deployed "exact bytes" action delivers ONE BYTE LESS than requested.
     let mut m = live_market();
     let (cost, cost_plus_fee) = m.cost_for_bytes(4096);
-    assert_eq!(cost, 13_595);                    // int(251602894241*4096 / (75800886740-4096)) = 13657.28→trunc… see receipt
-    assert_eq!(cost_plus_fee, 13_663);           // int(13595/0.995) = int(13663.316…) trunc
+    assert_eq!(cost, 13_595); // int(251602894241*4096 / (75800886740-4096)) = 13657.28→trunc… see receipt
+    assert_eq!(cost_plus_fee, 13_663); // int(13595/0.995) = int(13663.316…) trunc
     let t = m.buy(cost_plus_fee).unwrap();
-    assert_eq!(t.fee, 69);                       // (13663+199)/200 = 69
+    assert_eq!(t.fee, 69); // (13663+199)/200 = 69
     assert_eq!(t.after_fee, 13_594);
-    assert_eq!(t.bytes, 4_095);                  // < 4096: the measured undershoot
+    assert_eq!(t.bytes, 4_095); // < 4096: the measured undershoot
 }
 
 #[test]
 fn v4_live_state_invariants() {
     // relay base is EXACTLY the unallocated supply (research §2c cross-check, reproduced)
-    assert_eq!(418_945_440_768_i64 - 343_144_554_028_i64, 75_800_886_740_i64);
+    assert_eq!(
+        418_945_440_768_i64 - 343_144_554_028_i64,
+        75_800_886_740_i64
+    );
     // the never-deposited genesis seed: quote − stake == supply/1000 at init
     // (sys:583) — 10,000,000,000 raw = 1,000,000.0000 core, conserved exactly
-    assert_eq!(251_602_894_241_i64 - 241_602_894_241_i64, 10_000_000_000_i64);
+    assert_eq!(
+        251_602_894_241_i64 - 241_602_894_241_i64,
+        10_000_000_000_i64
+    );
     // and the lockstep pairing conserves it through trades:
     let mut m = live_market();
     let seed_before = m.quote_units - m.total_ram_stake;
@@ -87,7 +93,7 @@ fn v4_live_state_invariants() {
 #[test]
 fn v5_guards_reject_like_the_chain() {
     let mut m = live_market();
-    assert!(m.buy(0).is_err());                          // db:57 positive amount
+    assert!(m.buy(0).is_err()); // db:57 positive amount
     assert!(m.buy(-5).is_err());
     // a buy so small the relay rounds to zero bytes — db:85 rejects
     assert!(m.buy(1).is_err());
@@ -100,9 +106,12 @@ fn v5_guards_reject_like_the_chain() {
     assert_eq!(s.amount_in, 2);
     // the >1 guard bites on a relay where a byte rounds to ≤1 unit (e.g. ratio 1:1)
     let mut full = RamMarket::new(100_000_000_000, 100_000_000_000, 0);
-    assert!(full.sell(1).is_err());                      // db:128
-    // and an Err sell leaves state untouched — the chain's revert, mirrored
+    assert!(full.sell(1).is_err()); // db:128
+                                    // and an Err sell leaves state untouched — the chain's revert, mirrored
     let before = (full.base_bytes, full.quote_units, full.total_ram_stake);
     assert!(full.sell(1).is_err());
-    assert_eq!((full.base_bytes, full.quote_units, full.total_ram_stake), before);
+    assert_eq!(
+        (full.base_bytes, full.quote_units, full.total_ram_stake),
+        before
+    );
 }

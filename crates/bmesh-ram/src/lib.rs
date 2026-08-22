@@ -48,4 +48,6 @@
 
 pub mod market;
 
-pub use market::{bancor_input, bancor_output, RamMarket, RamError, Trade, MIN_BYTES, MIN_CORE_UNITS};
+pub use market::{
+    bancor_input, bancor_output, RamError, RamMarket, Trade, MIN_BYTES, MIN_CORE_UNITS,
+};
