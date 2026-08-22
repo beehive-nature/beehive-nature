@@ -484,29 +484,12 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
         '  ' + JSON.stringify({registrant:registrant,domain_name:n,target:registrant}) + ' -p ' + registrant;
       out.innerHTML =
         '<pre style="border-color:var(--leaf);font-size:10px">' + txData + '</pre>' +
-        '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">' +
-        '<a id="dl-json" download="register-' + n + 'b.json" style="background:#1a3a1a;color:var(--leaf);border:1px solid var(--leaf);border-radius:8px;padding:9px 14px;font:11px IBM Plex Mono,monospace;cursor:pointer;text-decoration:none">D download .json</a>' +
-        '<a id="dl-tx" download="register-' + n + 'b-cleos.txt" style="background:#26123a;color:var(--violet);border:1px solid var(--line);border-radius:8px;padding:9px 14px;font:11px IBM Plex Mono,monospace;cursor:pointer;text-decoration:none">D cleos command</a>' +
-        '<a id="dl-qr" download="register-' + n + 'b-qr.png" style="background:#0d1a15;color:var(--cyan);border:1px solid var(--line);border-radius:8px;padding:9px 14px;font:11px IBM Plex Mono,monospace;cursor:pointer;text-decoration:none">QR scan-to-sign</a>' +
-        '</div>' +
-        '<div id="qr-holder" style="margin-top:12px;background:#fff;border-radius:8px;padding:12px;display:none;width:fit-content">' +
-        '<canvas id="qr-canvas" width="200" height="200"></canvas>' +
-        '<div style="color:#000;font:9px monospace;text-align:center;margin-top:6px">scan with your Vaulta wallet</div></div>';
+        '<a id="dl-json" download="register-' + n + 'b.json" style="display:inline-block;margin-top:10px;background:#1a3a1a;color:var(--leaf);border:1px solid var(--leaf);border-radius:8px;padding:10px 18px;font:12px IBM Plex Mono,monospace;cursor:pointer;text-decoration:none">D download the signed Tx (.json)</a>' +
+        '<div style="font-size:9px;color:var(--dim);margin-top:6px">the manual import into your wallet IS the bot protection — a human hand, every time</div>';
       // JSON download (Blob)
       setTimeout(function(){
         var blob = new Blob([txData], {type:'application/json'});
         $('dl-json').href = URL.createObjectURL(blob);
-        var blob2 = new Blob([cleosCmd], {type:'text/plain'});
-        $('dl-tx').href = URL.createObjectURL(blob2);
-        // QR: minimal canvas QR (encode the cleos command)
-        $('dl-qr').onclick = function(ev){
-          ev.preventDefault();
-          var holder = $('qr-holder');
-          if (holder.style.display === 'none') {
-            holder.style.display = 'block';
-            drawSimpleQR($('qr-canvas'), cleosCmd);
-          } else { holder.style.display = 'none'; }
-        };
       }, 50);
     }
   });
