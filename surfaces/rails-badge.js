@@ -54,8 +54,10 @@
     if (!alive) { dot.style.background = '#ffb347'; txt.textContent = 'rails: honest gap'; return; }
     if (!soul) {
       dot.style.background = '#7ddf8f'; dot.title = 'rails live';
-      txt.innerHTML = 'rails <b style="color:#7ddf8f">LIVE</b> · <a href="' +
-        (location.pathname.indexOf('/beehive-nature/') === 0 ? '/beehive-nature/' : '/') + 'surfaces/bnames.html" style="color:#00E5FF;text-decoration:none">connect your soul</a>';
+      var B = (location.pathname.indexOf('/beehive-nature/') === 0 ? '/beehive-nature/' : '/');
+      txt.innerHTML = 'rails <b style="color:#7ddf8f">LIVE</b> · <a href="' + B +
+        'surfaces/bnames.html" style="color:#00E5FF;text-decoration:none">connect</a> · <a href="' + B +
+        'surfaces/onboarding/" style="color:#7ddf8f;text-decoration:none">create bzDiD</a>';
       return;
     }
     /* the soul's public 0x rail fingerprint — derived identifier, never a key */
