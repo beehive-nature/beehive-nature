@@ -50,7 +50,9 @@
 
   var orb = document.createElement('button');
   orb.id = 'adOrb'; orb.title = '⚙ the machine — Alt+/ summon · Alt+1..4 switch AIs · double-click to hide';
-orb.textContent = '⚙';
+/* inline SVG gear: the glyph sits off-center in mobile fonts (founder FYI,
+     2026-08-22); a drawn gear centers true on every font and every screen */
+  orb.innerHTML = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" style="display:block"><path d="M12 8.6A3.4 3.4 0 1 0 12 15.4 3.4 3.4 0 0 0 12 8.6z" stroke="#FFD700" stroke-width="1.7"/><path d="M12 2.4l1.3 2.6 2.9-.6.5 2.9 2.7 1.1-1.3 2.6 1.3 2.6-2.7 1.1-.5 2.9-2.9-.6L12 21.6l-1.3-2.6-2.9.6-.5-2.9-2.7-1.1 1.3-2.6-1.3-2.6 2.7-1.1.5-2.9 2.9.6z" stroke="#FFD700" stroke-width="1.2" fill="rgba(255,215,0,.06)"/></svg>';
   var win = document.createElement('div');
   win.id = 'adWin';
   win.innerHTML =

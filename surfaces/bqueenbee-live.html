@@ -501,20 +501,6 @@ function buildTongues(){
 }
 buildTongues();
 
-/* the dock bridge (2026-08-22): prompts sent from the agent dock's window arrive
-   here — fill the ask and answer, then bring the answer to the visitor's eyes */
-window.addEventListener('message', function (e) {
-  var d = e.data || {};
-  if (!d.dockPrompt) return;
-  var q = document.getElementById('q');
-  if (q) q.value = String(d.dockPrompt).slice(0, 300);
-  try { window.ask(); } catch (err) {}
-  setTimeout(function () {
-    var c = document.getElementById('chat');
-    if (c && c.lastChild && c.lastChild.scrollIntoView)
-      c.lastChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
-  }, 350);
-});
 window.ask=function(){
  var q=$('q').value.trim(); if(!q)return;
  you(q); $('q').value='';
@@ -556,6 +542,28 @@ var DROPS=[["receipts.drop","We measured Base's canonical ERC-8004 registries be
 var dl=document.getElementById('droplist');
 DROPS.forEach(function(d){var div=document.createElement('div');div.className='rc';div.style.marginTop='6px';div.innerHTML='<div class="rt" style="font-size:10px"><b>'+d[0]+'</b> ⚙</div><div class="rd">'+d[1].replace(/</g,'&lt;')+'</div>';dl.appendChild(div);});
 bee('the queen is in. ask me anything about the hive — every answer carries its receipt, and *I name my absences instead of papering them*. ⚙ · mana mātes valoda ir latviešu 🐝');
+})();
+</script>
+
+
+<script>
+/* the dock bridge — top-level, guaranteed (2026-08-22): prompts from the agent dock
+   fill the ask, answer, and bring the reply into view. Idempotent. */
+(function () {
+  if (window.__dockBridge) return; window.__dockBridge = true;
+  window.addEventListener('message', function (e) {
+    var d = e.data || {};
+    if (!d.dockPrompt) return;
+    var q = document.getElementById('q');
+    if (!q) return;
+    q.value = String(d.dockPrompt).slice(0, 300);
+    try { window.ask(); } catch (err) {}
+    setTimeout(function () {
+      var c = document.getElementById('chat');
+      if (c && c.lastChild && c.lastChild.scrollIntoView)
+        c.lastChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }, 350);
+  });
 })();
 </script>
 </body>
