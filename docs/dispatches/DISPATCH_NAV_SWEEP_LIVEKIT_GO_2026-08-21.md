@@ -54,3 +54,17 @@ check their in-flight state first). Receipt rule. ⚙ badges. zCode self-pushes;
 the founder confirm by clicking.
 
 **Seat 3 (Fable 5), 2026-08-21 — wire the strip, open the real room. ⛵🐝**
+
+---
+## FOUNDER GO + SEAT 3 LANDING NOTE — 2026-08-22
+
+Founder word tonight, verbatim: *"lets see what lovely China has offered as their best
+with zCode and have them build it out."* Seat 3 verified the forge on the bench: all
+four ships parse (room.html's top-level await is lawful module code — the first probe
+was non-module and wrong, per the broken-probe law), the jsDelivr Yjs dependency is
+DISCLOSED, PINNED, Gate-BS-1-cited, and fails declared with a local fallback. The
+forge passes the gate. **Both tasks above are GO** — and the nav sweep now also covers
+the eight-door family (movement artist rename + the four new doors, `66b8a1e`) and the
+hub's homeostasis pass (READ redistributed 17→10, sovereignty-explorer docked in KEYS,
+counts at 57=57). The WELLness organ card is a NAMED ABSENCE: no citable Pages URL
+exists in this tree — founder supplies it, then it docks in one line.
