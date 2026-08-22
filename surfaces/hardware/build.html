@@ -25,10 +25,54 @@ p{color:var(--mut);font-size:.9rem;margin:.5rem 0}
 .doctrine{border-left:3px solid var(--teal);padding-left:1rem;color:var(--mut);font-size:.88rem}
 .links{font-size:.85rem}.links a{margin-right:1rem}
 footer{color:var(--mut);font-size:.78rem;margin-top:2rem;border-top:1px solid var(--line);padding-top:1rem}
-</style></head><body><main>
+/* — the festival rig — decor only (aria-hidden), GPU-cheap keyframes, honest to
+   prefers-reduced-motion, paused while the tab hides. The comb is not ornament:
+   it is the bComb's 127-cell geometry from rung 4, lit like the stage. */
+.rig{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.beam{position:absolute;top:-25%;width:2px;height:150%;opacity:.10;
+ background:linear-gradient(to bottom,transparent,var(--c),transparent);
+ transform-origin:50% 0;animation:sway 11s ease-in-out infinite alternate}
+@keyframes sway{from{transform:rotate(-14deg)}to{transform:rotate(14deg)}}
+.spk{position:absolute;bottom:-4%;opacity:0;font-style:normal;font-weight:400;
+ animation:rise linear infinite}
+@keyframes rise{0%{transform:translateY(0);opacity:0}12%{opacity:var(--o,.2)}88%{opacity:var(--o,.2)}100%{transform:translateY(-108vh);opacity:0}}
+.glow{position:fixed;top:-30vh;left:50%;transform:translateX(-50%);width:120vw;height:60vh;
+ z-index:0;pointer-events:none;
+ background:radial-gradient(ellipse at center,rgba(57,197,207,.13),rgba(167,139,250,.07) 45%,transparent 70%)}
+main{position:relative;z-index:1}
+h1{text-shadow:0 0 22px rgba(57,197,207,.5)}
+.combwrap{text-align:center;margin:1.4rem 0 .4rem}
+.combwrap svg{width:min(420px,88vw);height:auto;display:block;margin:0 auto;
+ filter:drop-shadow(0 0 14px rgba(167,139,250,.25))}
+#comb polygon{stroke:#0d1117;stroke-width:1;opacity:.28;
+ animation:cellpulse var(--d,3s) ease-in-out var(--dl,0s) infinite alternate}
+@keyframes cellpulse{from{opacity:.22}to{opacity:.95}}
+.combcap{color:var(--mut);font-size:.8rem;max-width:560px;margin:.6rem auto 0}
+.step .n{min-width:2rem;height:2rem;display:inline-flex;align-items:center;justify-content:center;
+ clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+ background:var(--rc,var(--b));color:#0d1117;font-weight:700}
+.step:nth-of-type(1){--rc:#e6b32e}.step:nth-of-type(2){--rc:#39c5cf}
+.step:nth-of-type(3){--rc:#3fb950}.step:nth-of-type(4){--rc:#a78bfa}
+.step:nth-of-type(5){--rc:#D655BB}.step:nth-of-type(6){--rc:#45C2DC}
+.case{position:relative;overflow:hidden}
+.case::after{content:'';position:absolute;inset:0;pointer-events:none;
+ background:linear-gradient(120deg,transparent 30%,rgba(167,139,250,.06) 50%,transparent 70%)}
+@media (prefers-reduced-motion:reduce){.beam,.spk,#comb polygon{animation:none}#comb polygon{opacity:.6}}
+body.still .beam,body.still .spk,body.still #comb polygon{animation-play-state:paused}
+</style></head><body>
+<div class="glow" aria-hidden="true"></div>
+<div class="rig" aria-hidden="true"></div>
+<main>
 <nav><a href="../">⌂ hub</a><a href="index.html">🐝 open hardware guide</a><a href="security.html">🛡 security events</a><a class="here" href="build.html">🔧 become a producer</a><a href="lab.html">⬡ the lab</a></nav>
 <h1>Don't just hold the keys — build the locks</h1>
 <div class="sub">Every device on the guide page was designed by a small group of people who decided not to wait for permission. This page is the ladder from <i>user</i> to <i>producer</i>: open hardware, open firmware, open silicon — and a proving ground unlike anywhere else on earth. The creators of the next thousand years start as students with a $50 kit.</div>
+
+<div class="combwrap">
+<svg id="comb" viewBox="0 0 480 440" role="img" aria-label="a comb of 127 hexagonal cells pulsing in six colors — the bComb geometry as a festival light rig"></svg>
+<p class="combcap">127 cells — the bComb's own geometry from rung 4, wearing festival colors:
+every smaller hexagon a kernel of truth, every pulse a photon the rig could really send.
+The decor here is the doctrine with the lights on.</p>
+</div>
 
 <h2><span data-i18n="h.122">The builder's ladder</span></h2>
 <div class="panel">
@@ -60,5 +104,52 @@ footer{color:var(--mut);font-size:.78rem;margin-top:2rem;border-top:1px solid va
 <p>Get the parts list from the guide page. Host a build party — six people, one afternoon, six signers. Then pick your rung on the ladder above and climb one step. The onboarding surface will enroll your bzDiD when you're ready; the same identity follows you from your first $50 build to whatever you ship at festival scale.</p>
 
 <footer><a href="index.html">← the guide</a> · <a href="security.html">← security events</a> · built for students, festival crews, and the stubborn · same bzDiD at every rung · <a href="../onboarding/">🔑 onboard ceremony</a> · <a href="../recover.html">📄 recovery tool</a> · <a href="../blight/demo.html">💡 the beam</a> · <a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/hardware/build.html" rel="noopener">view source</a></footer>
-</main><script src="../tour.js?v=16"></script>
+</main>
+<script>
+(function(){
+"use strict";
+/* deterministic festival: colors from a hash over axial coords (the comb-sigil
+   tradition) so every visitor sees the same rig; all motion is CSS keyframes. */
+var COLS=['#39c5cf','#e6b32e','#a78bfa','#D655BB','#3fb950','#45C2DC'];
+var NS='http://www.w3.org/2000/svg';
+var comb=document.getElementById('comb');
+if(comb){
+  var S=17,W=480,H=440,cx=W/2,cy=H/2,frag=document.createDocumentFragment(),n=0;
+  for(var q=-6;q<=6;q++)for(var r=-6;r<=6;r++){
+    if(Math.abs(q+r)>6)continue;
+    var x=cx+S*1.7320508*(q+r/2), y=cy+S*1.5*r;
+    var ring=Math.max(Math.abs(q),Math.abs(r),Math.abs(q+r));
+    var hsh=(((q+7)*73856093)^((r+7)*19349663))>>>0;
+    var poly=document.createElementNS(NS,'polygon'),v=[];
+    for(var i=0;i<6;i++){var a=Math.PI/180*(60*i-30);
+      v.push((x+(S-1.6)*Math.cos(a)).toFixed(1)+','+(y+(S-1.6)*Math.sin(a)).toFixed(1));}
+    poly.setAttribute('points',v.join(' '));
+    poly.setAttribute('fill',COLS[hsh%6]);
+    poly.style.setProperty('--dl',(ring*.38+((hsh>>>8)%100)/100*1.4).toFixed(2)+'s');
+    poly.style.setProperty('--d',(2.6+((hsh>>>8)%100)/100*2.2).toFixed(2)+'s');
+    frag.appendChild(poly); n++;
+  }
+  comb.appendChild(frag);
+  if(n!==127){ var cap=document.querySelector('.combcap');
+    if(cap) cap.textContent='cell count rendered: '+n+' — expected 127; the geometry is declared wrong, not hidden.'; }
+}
+var rig=document.querySelector('.rig');
+if(rig){
+  var i,b,s;
+  for(i=0;i<5;i++){ b=document.createElement('i'); b.className='beam';
+    b.style.left=(12+i*19)+'%'; b.style.setProperty('--c',COLS[i%6]);
+    b.style.animationDelay=(-i*2.3)+'s'; b.style.animationDuration=(9+i*1.7)+'s';
+    rig.appendChild(b); }
+  for(i=0;i<12;i++){ s=document.createElement('b'); s.className='spk'; s.textContent='\u2B21';
+    s.style.left=((i*83)%97)+'%'; s.style.color=COLS[i%6];
+    s.style.fontSize=(9+(i*7)%14)+'px';
+    s.style.setProperty('--o',(0.14+((i*13)%20)/100).toFixed(2));
+    s.style.animationDuration=(26+(i*11)%22)+'s'; s.style.animationDelay=(-((i*7)%40))+'s';
+    rig.appendChild(s); }
+}
+document.addEventListener('visibilitychange',function(){
+  document.body.classList.toggle('still',document.hidden); });
+})();
+</script>
+<script src="../tour.js?v=16"></script>
 </body></html>
