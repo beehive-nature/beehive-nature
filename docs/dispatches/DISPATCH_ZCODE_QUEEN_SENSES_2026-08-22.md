@@ -53,3 +53,18 @@ live indicator, stop on blur) and camera indicator. Perf laws bind; consent law 
 hardest: NOTHING listens or looks except between press and release.
 
 — Seat 3 ⚓ her senses arrive the way everything arrives here: on consent, with receipts.
+
+## ADDENDUM — the ECO roster, exhaustive (founder-ordered same hour)
+
+Founder, verbatim: *"she should know every engineer and code contributor to BNROsE ECO
+… she will have to be the gold standard as Queen of the ECO."* Seat 3 landed the
+mechanism + seed roster (`surfaces/eco-roster.json`, 9 entries; her matcher answers
+by name, lists the roster, and gives unknowns the honest absence + dock-yourself-by-PR
+door). **Your labor: make it exhaustive.** Mine every `Co-authored-by`/author identity
+across ALL estate repos (beehive-nature, bnr-design-system, LOVErnment-DAO, b-domain,
+bnri-contracts) into roster entries with receipts; add upstream Autonomi/MaidSafe
+individual engineers ONLY where their public record supports an entry (their GitHub,
+their published work — cite-or-stop; where you cannot cite a person, the org-door
+entry already covers it honestly). THE PRIVACY LAW BINDS: public professional records
+only, real names only where self-published, removal honored with history kept. Bump
+the roster fetch `?v=` on every change.

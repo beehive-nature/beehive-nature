@@ -239,9 +239,32 @@ function bee(text){var d=document.createElement('div');d.className='msg bee';
 function you(t){var d=document.createElement('div');d.className='msg you';
  d.innerHTML='<div class="who">you</div>'+t.replace(/</g,'&lt;');
  $('chat').appendChild(d);}
+/* the ECO roster: the Queen knows her people — from the public file, and from nothing else.
+   Public professional records only; dock yourself by PR; removal honored, history kept. */
+var ROSTER=null;
+fetch('eco-roster.json?v=1').then(function(r){return r.json()}).then(function(j){ROSTER=j;}).catch(function(){ROSTER=false;});
+function personAnswer(p){
+ var links=p.receipts.map(function(r){return '['+r.label+']('+r.url+')'}).join(' \u00b7 ');
+ return p.names[0]+' \u2014 '+p.role+' (since '+p.since+') '+links;
+}
+function tryRoster(q){
+ if(!ROSTER)return null;
+ var ql=q.toLowerCase();
+ var hit=ROSTER.people.find(function(p){return p.names.some(function(n){return ql.indexOf(n.toLowerCase())>=0});});
+ if(hit)return personAnswer(hit);
+ if(/who (built|made|wrote)|contributor|engineer|roster|team|the seats|who works/i.test(q)){
+  return 'The ECO roster, receipts per person: '+ROSTER.people.map(function(p){return p.names[0]}).join(' \u00b7 ')
+   +'. Ask me any of them by name. The roster is a public file \u2014 if you build here, dock yourself by PR; removal on request is honored with history kept. [the roster](eco-roster.json)';
+ }
+ if(/^\s*who\s?(is|was|'s)\s/i.test(q))
+  return 'That name is not on the ECO roster yet \u2014 and I will not guess about a person. The roster is public and PR-open: whoever builds here docks themselves, with receipts. [the roster](eco-roster.json)';
+ return null;
+}
 window.ask=function(){
  var q=$('q').value.trim(); if(!q)return;
  you(q); $('q').value='';
+ var pa=tryRoster(q);
+ if(pa){bee(pa);return;}
  var hit=KB.find(function(k){return k.re.test(q);});
  if(hit){bee(hit.a);}
  else{bee('<span class="nk">I don\'t know that by name — and I won\'t guess.</span> here is how to check: the tree\'s receipts are public and re-runnable, and the handoff button below builds your question with my sources for any AI you hold. an absence from me is an absence, never a zero.');}
@@ -258,7 +281,7 @@ window.copyHandoff=function(){
  var p=$('handoff').dataset.prompt||'';
  if(navigator.clipboard){navigator.clipboard.writeText(p).then(function(){$('copied').textContent='copied ✓ — paste it into your own AI';}).catch(function(){$('copied').textContent='copy blocked — select the text above by hand';});}
 };
-var QUICK=['Who are you?','The PLUR mUseUm?','Kandi?','The festival?','ANT vs ETH cost?','What did you measure on Base?','What is ACiD?','Why hemp hearts?','Frozen seeds?','Contaminated studies?','The three language roles?','MAHA × bFood?','The keyless indexer?','How do I verify you?','Do you track me?'];
+var QUICK=['Who are you?','Who is David Irvine?','The ECO roster?','The PLUR mUseUm?','Kandi?','The festival?','ANT vs ETH cost?','What did you measure on Base?','What is ACiD?','Why hemp hearts?','Frozen seeds?','Contaminated studies?','The three language roles?','MAHA × bFood?','The keyless indexer?','How do I verify you?','Do you track me?'];
 QUICK.forEach(function(q){var b=document.createElement('button');b.textContent=q;b.onclick=function(){$('q').value=q;ask();};$('quick').appendChild(b);});
 var DROPS=[["receipts.drop","We measured Base's canonical ERC-8004 registries before we ever applied - token by token, two oracles per chain. Base #25331 is owned by exactly the Prover Agent the literature names. The chain verified the literature. Re-run the tool: docs/receipts/erc8004-e1-read-first.mjs"],["receipts.drop","Locked ERC-20i records carry FROZEN seeds. One wallet, five mutually distinct seed values - no recompute scheme can produce that. Measured on deployed bytecode, two RPCs per chain: RECEIPT_ERC20I_S10_LOCKED_SEED_2026-08-20.md"],["receipts.drop","One seed carries both bricks your body cannot make: 100 g hemp hearts = 27.4 g LA + 8.7 g ALA - the n-3 brick alone ~5x an adult daily need. Compute YOUR numbers: surfaces/blongevity.html - the mirror."],["receipts.drop","ACiD, defined: Artificial Chronic Inflammatory Disease. The made disease - therefore in principle unmakeable. Definition and mechanism on the surfaces; protocol to the graded lane. RULING_ACID_DEFINED_2026-08-20.md"],["receipts.drop","THC is the only common phytocannabinoid that centrally agonizes CB1 - the one cell every scheduling law actually drew. The naming table shows the line's true location: RULING_CANNABINOID_FUNCTIONAL_NAMING_2026-08-20.md"],["receipts.drop","The university teaches the tree's own receipts: five courses, every lesson ending in a verifiable act. A graduate holds signed receipts, not a certificate: surfaces/university/index.html"],["receipts.drop","Contaminated studies are void evidence - struck publicly with the assay receipt, never deleted. And our own lots are voidable by the same law. DISPATCH_CONTAMINATION_VOID_LAW_2026-08-20.md"],["correction.gladly","A house that shows its errors: our dE figure was wrong once (corrected in place, 3a0be7b); our Canada figure went stale in a day (corrected same way). The corrections ARE the pitch - you can check whether we hide them. We do not."],["receipts.drop","The b-indexer is keyless by construction: GET-only, no POST handler exists, sendtx NO printed on the wire by its own attestation. crates/bindexer - run: cargo run -p bindexer -- prove-keyless"],["receipts.drop","The hive's law, one line: do not trust these pages either - verify. Clone the repo. Read docs/receipts. Re-run a tool. That is the whole hive, and it includes me."]];
 var dl=document.getElementById('droplist');
