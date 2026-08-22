@@ -37,7 +37,7 @@
     '  font:10px \'IBM Plex Mono\',monospace;padding:4px 11px;transition:all .18s} .adAg:hover{color:#00E5FF;border-color:#00E5FF}',
     '.adAg[aria-pressed="true"]{color:#FFD700;border-color:#FFD700;box-shadow:0 0 10px rgba(255,215,0,.22)}',
     '#adBody{flex:1;overflow:auto;min-height:120px}',
-    '#adBody iframe{width:100%;height:340px;border:none;background:#07090b}',
+    '#adBody iframe{width:100%;height:460px;border:none;background:#07090b}',
     '.adPanel{padding:12px 14px;font:11px/1.75 \'IBM Plex Mono\',monospace;color:#8a9a8a}',
     '.adPanel b{color:#e2efdb} .adPanel a{color:#00E5FF;text-decoration:none}',
     '#adFoot{display:flex;gap:7px;padding:9px 12px;border-top:1px solid #243026}',
@@ -70,7 +70,19 @@ orb.textContent = '⚙';
     { id: 'bloverai', chip: '💌 bLOVErAi', kind: 'compose',
       note: 'the handoff window — your question composed with our sources, for any AI you already hold. Nothing is sent by this dock.' }
   ];
-  var cur = 'queen', convo = [];
+  var cur = 'queen', convo = [], installEvt = null;
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); installEvt = e; });
+  function metaAnswer(v) {
+    if (!/app|install|homescreen|home screen|home-screen/i.test(v)) return null;
+    var btn = installEvt
+      ? '<button id="adInst" style="background:#26123a;color:#c9a0ff;border:1px solid #243026;border-radius:8px;font:11px IBM Plex Mono,monospace;padding:9px 16px;cursor:pointer;margin-top:8px">📲 install the BNRoSe app now</button>'
+      : '';
+    return '<div class="adPanel"><b>the machine answers (it lives in the app):</b><br>' +
+      'This fleet IS an installable app — first-party, no store.<br><br>' +
+      '<b>Android/Chrome:</b> menu ⋮ → <i>Add to Home screen</i> / <i>Install app</i><br>' +
+      '<b>iOS/Safari:</b> Share ⬆️ → <i>Add to Home Screen</i><br><br>' +
+      'The ⚙ lands on your home screen with the Queen, 26 tongues, the name desk, and your soul connected.' + btn + '</div>';
+  }
 
   var agentsEl = win.querySelector('#adAgents');
   AGENTS.forEach(function (a) {
@@ -131,6 +143,15 @@ orb.textContent = '⚙';
       var body = win.querySelector('#adBody');
       body.insertAdjacentHTML('afterbegin', '<div class="adPanel"><b>the dock speaks:</b> I carry four agents. 🐝 answers with receipts (speak any tongue). 🔥 co-creates artifacts. 🤖 tells the mesh truth (meter yes, mesh not yet). 💌 composes handoffs. Agentic actions grow per surface — the wallet floor composes registeracc already. KEYS: Alt+/ summon · Alt+1..4 switch AI · double-click ⚙ hide · Alt+H re-summon · Esc close.</div>');
       return; }
+    var meta = metaAnswer(v);
+    if (meta) {
+      var bodym = win.querySelector('#adBody');
+      if (cur === 'queen' || cur === 'hearth') { bodym.innerHTML = meta + bodym.innerHTML; }
+      else bodym.innerHTML = meta;
+      var ib = win.querySelector('#adInst');
+      if (ib) ib.onclick = function () { if (installEvt) { installEvt.prompt(); installEvt = null; } };
+      return;
+    }
     convo.push(v);
     if (cur === 'bloverai' || cur === 'baigents') render();
     else { var body = win.querySelector('#adBody'); var f = body.querySelector('iframe');
