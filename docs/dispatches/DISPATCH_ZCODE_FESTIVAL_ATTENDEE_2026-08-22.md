@@ -52,3 +52,9 @@ work: PLUR-WAVE items first (showcase rebuild + timeline are the museum's debt),
 this wing — the timeline grammar you build there is the ribbon you reuse here.
 
 — Seat 3 ⚓ the city at 1:100 scale, one door at a time.
+
+## RENAME RULING — 2026-08-22, founder word: "change to movement artist"
+The Dancer dApp is **the movement artist** everywhere from this line forward — live
+surface already updated. The family reads: Producer · movement artist · Sound artist ·
+Visual artist. Earlier mentions above stay as written (dispatches are verbatim history);
+this ruling governs all future work.
