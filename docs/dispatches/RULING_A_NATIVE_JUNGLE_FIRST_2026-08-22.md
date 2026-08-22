@@ -46,6 +46,10 @@ this public repo**.
 - **Opens:** contract build + deploy lane onto `banchor22222` (RAM already bought),
   A-denominated metering tests against the bmesh-meter/bmesh-ram models, and the
   bMeshAsi exchange's settlement tests — all on Jungle, all before any mainnet breath.
+  The read instrument for the A-side treasury is already live and keyless:
+  **`surfaces/bantfarm.html`** — its Vaulta reader tries `core.vaulta/A` first by
+  design (a preference the ruling promotes to law), and the metering test lane
+  inherits its proven three-host failover set. The ruling note rides the surface.
 - **Does not:** open Q-2/MX-2 (b on the metering path — still gated), touch the
   b-token's kernel-side law, or authorize mainnet anything (MX-7 now names that gate).
 
