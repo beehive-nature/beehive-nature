@@ -90,3 +90,13 @@ seat, and the register.js law header at its next functional change (the pointer
 lands there without a cache-cascade until then). One set of constants stands:
 registers restyle prose and density, **never numbers** — PLUR changes the voice,
 not the facts.
+
+## RATIFIED CREED LINE — 2026-08-22, founder's word: "ratified law and lore"
+
+> **"10Ve the first ingredient"** — the wOlf, dropped watching bset.html, docked
+> verbatim-cased at `0ed6b7a`, ratified the same hour.
+
+As LAW: it names the load order — love before mechanism, in every build and every
+register (the PLUR clause's own root). As LORE: it enters the estate's telling as
+the founder's line, cased exactly as spoken, joining "I build for the poor starving
+artist" on the hub footer. Casings are the payload; never normalize it.
