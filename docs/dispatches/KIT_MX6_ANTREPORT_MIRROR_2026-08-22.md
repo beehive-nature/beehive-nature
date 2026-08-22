@@ -34,3 +34,25 @@ failover mirror, honestly labeled, with a visible freshness stamp.
 No scraping of non-public endpoints, no reconstruction of his data pipeline (his
 16-section telemetry stays his), no rate quoted (MX-4), no key from anyone (MX-5 stays
 gated — the mirror needs no wallet session; only step 6 does, when it exists).
+
+## ADDENDUM (same night): the PERMANENT tier — indelible + antd on Autonomi
+
+The mirror's honest weakness is the box: community iron can die, and a stale mirror
+says so loudly but still dies. WithAutonomi's **indelible**
+(github.com/WithAutonomi/indelible · indelibletool.com — enterprise storage gateway
+for Autonomi: Go + Vue single binary, REST API, admin dashboard, SQLite default /
+Postgres for production) closes that: snapshot pages are **written to Autonomi once,
+one-time ANT payment, no renewals, no egress fees, self-encrypted and chunked across
+thousands of nodes** — the failover mirror becomes *indelible*, outliving any box,
+free-to-read distribution forever (the dangling-art doctrine's final form).
+
+- **Stack note, receipt-worthy:** indelible chose the estate's exact polar-strength
+  shape (SQLite default / Postgres by function, self-hosted, single process) —
+  independent convergence on the founder's ruled pattern, by Autonomi's own org.
+- **Kit path (when MX-6 arms):** run antd + indelible on the community box → REST-push
+  the page snapshots → serve reads from Autonomi or the local cache → the mirror's
+  freshness stamp governs which tier answers (live box first, permanent tier on fail).
+- **Economics:** one-time ANT per snapshot batch — the ANT-side treasury's exact lane
+  (the bANTfarm reads it live); receipts ride the exchange's storage class, iron first.
+- **Honesty:** permanence/quantum-resistance claims are the vendor's own descriptions,
+  not independently audited — quoted as claims, receipted as such.
