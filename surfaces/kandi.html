@@ -1,0 +1,296 @@
+<!doctype html>
+<!-- BNR surface: the kandi bar — the mUseUm's Wing IV ritual, live. Make kandi, name it,
+     gift it through the four-step handshake. The etiquette is code: what you gift leaves
+     your arm; kandi made FOR you never re-trades; nothing is stored anywhere but this
+     browser; the string is a checksum, not a signature — kandi trust is floor trust. -->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>the kandi bar — make it, name it, gift it</title>
+<style>
+:root{--bg:#0a0612;--panel:#120b1d;--well:#0d0816;--line:#2a1f3d;--ink:#ece5f7;--dim:#9d92b3;--faint:#6b6180;
+ --p:#39c5cf;--l:#D655BB;--u:#e6b32e;--r:#a78bfa;--ok:#7ddf8f;--amber:#ffb347;--cyan:#45C2DC;--o:#ff8c5a;--s:#f4e04d}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{overflow-x:hidden}
+body{background:var(--bg);color:var(--ink);font:13.5px/1.7 'IBM Plex Mono',ui-monospace,monospace;padding:28px 14px 90px}
+main{max-width:860px;margin:0 auto}
+a{color:var(--cyan)}
+header{text-align:center;margin-bottom:8px}
+h1{font-size:clamp(20px,5.2vw,28px);font-weight:400;letter-spacing:.05em;text-shadow:0 0 22px rgba(214,85,187,.45)}
+.sub{color:var(--dim);font-size:11.5px;margin:10px auto 0;max-width:640px;line-height:1.85}
+section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 17px;margin-top:16px}
+h2{font-size:12px;font-weight:400;letter-spacing:.08em;margin-bottom:8px;color:var(--l)}
+h2.arms{color:var(--u)}
+.law{color:var(--dim);font-size:10.5px;line-height:1.85;margin-bottom:8px}
+.law b{color:var(--ink)}
+.pal{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.pal button{width:34px;height:34px;border-radius:50%;border:2px solid var(--line);cursor:pointer;padding:0}
+.pal button:hover{border-color:var(--ink)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+input,textarea{background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;
+ padding:8px 10px;font:12px 'IBM Plex Mono',monospace}
+button.act{background:#26123a;color:var(--r);border:1px solid var(--line);border-radius:8px;
+ padding:8px 14px;cursor:pointer;font:11.5px 'IBM Plex Mono',monospace;min-height:40px}
+button.act:hover{background:var(--r);color:#0a0612}
+.brace{text-align:center;margin:10px 0 2px;min-height:40px}
+.brace svg{max-width:min(360px,86vw);height:auto}
+.karm{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:10px}
+.kc{background:var(--well);border:1px solid var(--line);border-radius:9px;padding:9px 10px;text-align:center}
+.kc .who{font-size:9.5px;color:var(--dim);margin-top:4px;line-height:1.6}
+.kc .who b{color:var(--ink)}
+.kc .tag{display:inline-block;font-size:8.5px;letter-spacing:.06em;border-radius:5px;padding:1px 7px;margin-top:5px}
+.kc .tag.keep{color:var(--amber);border:1px dashed #5c4318}
+.kc .tag.trade{color:var(--ok);border:1px solid #1d4a2a}
+.kc button{margin-top:6px}
+.hand{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-top:9px}
+.hs{background:var(--well);border:1px solid var(--line);border-radius:9px;padding:8px;text-align:center;opacity:.35;transition:opacity .4s,border-color .4s}
+.hs.on{opacity:1;border-color:var(--l)}
+.hs svg{width:56px;height:56px}
+.hs .t{font-size:9px;letter-spacing:.08em;margin-top:3px}
+.hs:nth-child(1) .t{color:var(--p)}.hs:nth-child(2) .t{color:var(--l)}
+.hs:nth-child(3) .t{color:var(--u)}.hs:nth-child(4) .t{color:var(--r)}
+.gv{display:none;margin-top:10px}
+.gv.open{display:block}
+.err{color:var(--amber);font-size:10.5px;margin-top:6px;min-height:16px}
+.given{color:var(--faint);font-size:10px;line-height:1.8;margin-top:10px}
+footer{max-width:860px;margin:24px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
+code{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){.hs{transition:none}}
+</style></head><body>
+<main>
+<header>
+  <h1>🍬 the kandi bar</h1>
+  <div class="sub"><span data-i18n="kandi.bar">the kandi bar — make it, name it, gift it through interlocked hands</span></div>
+  <div class="sub" data-reg="bee">This is the mUseUm's ritual wing, alive. String beads, spell a
+  word, and gift the bracelet to anyone — the gift travels as a little text string they paste
+  here. Everything lives only in your own browser; nothing is sent anywhere, ever. Your first
+  kandi is already waiting on your left arm.</div>
+  <div class="sub" data-reg="raver">make it. name it. do the handshake. peace, love, unity —
+  and on respect, the kandi crosses. right arm trades, left arm keeps, and what somebody made
+  FOR you never re-trades — that's not a setting, that's the floor's law, and here the floor's
+  law is code.</div>
+  <div class="sub" data-reg="cypherpunk">Format: <code>KND1|maker|for|ts36|beads|fnv</code> —
+  beads as [0-9] color indices and [A-Z] letter beads; FNV-1a/32 over the payload, base36.
+  <b>A checksum, not a signature</b> — kandi trust is floor trust, stated plainly. State:
+  <code>localStorage</code> only, zero network, zero custody; names are validated to a strict
+  charset and rendered as text, never markup. Digital kandi copies — the culture's answer is the
+  retirement rule, so gifting removes the piece from your arm and keeps a memory line, the same
+  shape as the corpus's withdrawal law.</div>
+</header>
+
+<section>
+  <h2>⚗ THE COMPOSER — string it</h2>
+  <div class="law"><b>Beads:</b> tap colors, or type a word — letters become letter-beads.
+  <b>Then name it:</b> who you are (optional), and who it's for (only if it's made <i>for</i>
+  someone — that flag is forever).</div>
+  <div class="pal" id="pal" aria-label="bead colors"></div>
+  <div class="row">
+    <input id="word" placeholder="word beads (A–Z)" maxlength="12" style="flex:1;min-width:140px">
+    <button class="act" id="addword">add word</button>
+    <button class="act" id="undo">⌫ last bead</button>
+    <button class="act" id="clear">clear</button>
+  </div>
+  <div class="brace" id="preview" aria-label="bracelet preview"></div>
+  <div class="row">
+    <input id="maker" placeholder="made by (optional)" maxlength="24" style="flex:1;min-width:140px">
+    <input id="madefor" placeholder="made FOR (optional — makes it a keepsake)" maxlength="24" style="flex:1;min-width:180px">
+    <button class="act" id="stringit">✚ string it onto my right arm</button>
+  </div>
+  <div class="err" id="cerr"></div>
+</section>
+
+<section>
+  <h2 class="arms">🫱🫲 <span data-i18n="kandi.arms">THE TWO ARMS — right arm trades, left arm keeps</span></h2>
+  <div class="law"><b>The etiquette, enforced as written in the mUseUm:</b> tradeables ride the
+  right arm; keepsakes and gifts received ride the left and <b>never re-trade</b>; never ask for
+  a specific piece; and <b>what you gift leaves your arm</b> — a memory line stays, history kept.</div>
+  <div style="font-size:10.5px;color:var(--ok);letter-spacing:.06em;margin-top:6px">RIGHT ARM — tradeable</div>
+  <div class="karm" id="right"></div>
+  <div style="font-size:10.5px;color:var(--amber);letter-spacing:.06em;margin-top:12px">LEFT ARM — keepsakes</div>
+  <div class="karm" id="left"></div>
+  <div class="given" id="givenlog"></div>
+</section>
+
+<section id="ceremony" style="display:none">
+  <h2>✋ THE HANDSHAKE — the gift crosses on step four</h2>
+  <div class="hand" id="steps">
+    <div class="hs"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M24 44 L24 22 M32 44 L32 14 M24 30 Q28 26 32 30" stroke="var(--p)" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M40 44 L40 22 M48 44 L48 14 M40 30 Q44 26 48 30" stroke="var(--p)" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".5"/></svg><div class="t">1 · PEACE</div></div>
+    <div class="hs"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 46 C18 36 14 24 22 18 C28 14 32 20 32 24" stroke="var(--l)" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M32 46 C46 36 50 24 42 18 C36 14 32 20 32 24" stroke="var(--l)" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".5"/></svg><div class="t">2 · LOVE</div></div>
+    <div class="hs"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="14" y="26" width="22" height="12" rx="6" stroke="var(--u)" stroke-width="3.5" fill="none"/><rect x="28" y="26" width="22" height="12" rx="6" stroke="var(--u)" stroke-width="3.5" fill="none" opacity=".5"/></svg><div class="t">3 · UNITY</div></div>
+    <div class="hs"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="16" y="27" width="32" height="10" rx="5" stroke="var(--r)" stroke-width="3" fill="none"/><circle cx="22" cy="45" r="3" fill="var(--p)"/><circle cx="30" cy="47" r="3" fill="var(--l)"/><circle cx="38" cy="47" r="3" fill="var(--u)"/><circle cx="46" cy="45" r="3" fill="var(--r)"/></svg><div class="t">4 · RESPECT</div></div>
+  </div>
+  <div class="gv" id="giftout">
+    <div class="law"><b>The kandi crosses.</b> Hand this string over — any channel is the floor.
+    It has left your arm.</div>
+    <textarea id="giftstr" readonly style="width:100%;min-height:56px;resize:vertical"></textarea>
+    <div class="row"><button class="act" id="copygift">copy the kandi</button><button class="act" id="donegift">close</button></div>
+  </div>
+</section>
+
+<section>
+  <h2>🤲 RECEIVE — through interlocked hands</h2>
+  <div class="law">Paste a kandi string somebody handed you. It lands on your <b>left arm</b> —
+  received kandi keeps, never re-trades.</div>
+  <div class="row">
+    <textarea id="rcv" placeholder="KND1|…" style="flex:1;min-width:220px;min-height:44px;resize:vertical"></textarea>
+    <button class="act" id="rcvgo">receive</button>
+  </div>
+  <div class="err" id="rerr"></div>
+</section>
+</main>
+<footer>
+  🍬 nothing here is sent anywhere · localStorage only · a checksum, not a signature ·
+  <a href="plur.html">🪩 the mUseUm (Wing IV is this page's law)</a> ·
+  <a href="hardware/build.html">🔧 the festival</a> ·
+  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/kandi.html" rel="noopener">view source</a> ·
+  <a href="index.html" data-i18n="law.hive">← the hive</a>
+</footer>
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id)};
+var COLS=['#39c5cf','#D655BB','#e6b32e','#a78bfa','#7ddf8f','#45C2DC','#ff8c5a','#ece5f7','#5b4a86','#f4e04d'];
+var NAMERE=/^[A-Za-z0-9 .·'’-]{0,24}$/;
+var BEADRE=/^[0-9A-Z]{1,40}$/;
+
+/* ---- state: this browser only, honest shape ---- */
+function load(){ try{ var s=JSON.parse(localStorage.getItem('bkandi')||'null');
+  if(s&&s.v===1&&Array.isArray(s.right)&&Array.isArray(s.left)&&Array.isArray(s.given)) return s;
+ }catch(e){} return null; }
+function save(){ try{ localStorage.setItem('bkandi',JSON.stringify(S)); }catch(e){} }
+var S=load();
+if(!S){ /* first visit: the mUseUm gifts every guest their first kandi */
+  S={v:1,right:[],left:[{maker:'the PLUR mUseUm',madefor:'you',beads:'0P1L2U3R',ts:Date.now(),rcv:true}],given:[]};
+  save();
+}
+
+/* ---- codec: KND1|maker|for|ts36|beads|fnv — checksum, not signature ---- */
+function fnv(str){ var h=0x811c9dc5;
+  for(var i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=(h+((h<<1)+(h<<4)+(h<<7)+(h<<8)+(h<<24)))>>>0; }
+  return h.toString(36); }
+function clean(s){ s=String(s||'').replace(/\|/g,'').trim();
+  return NAMERE.test(s)?s:null; }
+function encode(k){
+  var payload='KND1|'+(k.maker||'')+'|'+(k.madefor||'')+'|'+k.ts.toString(36)+'|'+k.beads;
+  return payload+'|'+fnv(payload); }
+function decode(str){
+  var p=String(str||'').trim().split('|');
+  if(p.length!==6||p[0]!=='KND1') return {err:'not a KND1 kandi string'};
+  var maker=clean(p[1]), madefor=clean(p[2]);
+  if(maker===null||madefor===null) return {err:'a name carries characters this bar refuses'};
+  if(!BEADRE.test(p[4])) return {err:'the bead string is not [0-9A-Z] (1–40 beads)'};
+  var ts=parseInt(p[3],36);
+  if(!isFinite(ts)||ts<=0) return {err:'the timestamp does not parse'};
+  var payload=p.slice(0,5).join('|');
+  if(fnv(payload)!==p[5]) return {err:'checksum mismatch — the string was altered or mistyped'};
+  return {maker:maker,madefor:madefor,beads:p[4],ts:ts};
+}
+
+/* ---- bracelet SVG: beads on a ring, letters on white beads ---- */
+function braceSVG(beads,scale){
+  var n=beads.length; if(!n) return '';
+  var R=Math.max(34,n*7), C=R+16, r=Math.min(13,Math.max(8,120/Math.sqrt(n)+3));
+  var out='<svg viewBox="0 0 '+(C*2)+' '+(C*2)+'" style="width:'+(scale||'100%')+'" role="img" aria-label="a kandi bracelet of '+n+' beads">';
+  out+='<circle cx="'+C+'" cy="'+C+'" r="'+R+'" fill="none" stroke="#2a1f3d" stroke-width="2"/>';
+  for(var i=0;i<n;i++){
+    var a=(i/n)*2*Math.PI-Math.PI/2, x=C+R*Math.cos(a), y=C+R*Math.sin(a), ch=beads[i];
+    if(/[0-9]/.test(ch)){ out+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+r+'" fill="'+COLS[+ch]+'" stroke="#0a0612" stroke-width="1.5"/>'; }
+    else{ out+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+r+'" fill="#ece5f7" stroke="#0a0612" stroke-width="1.5"/>'
+      +'<text x="'+x.toFixed(1)+'" y="'+(y+3.5).toFixed(1)+'" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="'+(r+1)+'" fill="#0a0612">'+ch+'</text>'; }
+  }
+  return out+'</svg>';
+}
+
+/* ---- composer ---- */
+var draft=[];
+COLS.forEach(function(c,i){ var b=document.createElement('button');
+  b.style.background=c; b.title='bead '+i; b.setAttribute('aria-label','color bead '+i);
+  b.addEventListener('click',function(){ if(draft.length<40){ draft.push(String(i)); paint(); } });
+  $('pal').appendChild(b); });
+function paint(){ $('preview').innerHTML=draft.length?braceSVG(draft.join(''),'min(300px,80vw)')
+  :'<span style="color:var(--faint);font-size:10.5px;font-style:italic">an empty string — tap beads or add a word</span>'; }
+$('addword').onclick=function(){
+  var w=$('word').value.toUpperCase().replace(/[^A-Z]/g,'').slice(0,12);
+  if(!w){ $('cerr').textContent='letters A–Z only'; return; }
+  if(draft.length+w.length>40){ $('cerr').textContent='a bracelet caps at 40 beads — honest wrists'; return; }
+  draft=draft.concat(w.split('')); $('word').value=''; $('cerr').textContent=''; paint(); };
+$('word').addEventListener('keydown',function(e){ if(e.key==='Enter') $('addword').click(); });
+$('undo').onclick=function(){ draft.pop(); paint(); };
+$('clear').onclick=function(){ draft=[]; paint(); };
+$('stringit').onclick=function(){
+  if(!draft.length){ $('cerr').textContent='no beads yet'; return; }
+  var maker=clean($('maker').value), madefor=clean($('madefor').value);
+  if(maker===null||madefor===null){ $('cerr').textContent='names: letters, digits, spaces, .·’- — max 24'; return; }
+  var k={maker:maker,madefor:madefor,beads:draft.join(''),ts:Date.now()};
+  if(madefor){ S.left.push(Object.assign({rcv:false},k)); } else { S.right.push(k); }
+  save(); draft=[]; $('maker').value=''; $('madefor').value=''; $('cerr').textContent=''; paint(); arms();
+};
+
+/* ---- the arms ---- */
+function card(k,side,idx){
+  var d=document.createElement('div'); d.className='kc';
+  d.innerHTML=braceSVG(k.beads,'110px');
+  var who=document.createElement('div'); who.className='who';
+  var mk=document.createElement('b'); mk.textContent=k.maker||'a stranger at the bar';
+  who.appendChild(document.createTextNode('by ')); who.appendChild(mk);
+  if(k.madefor){ var f=document.createElement('div'); f.textContent='made for '+k.madefor; who.appendChild(f); }
+  d.appendChild(who);
+  var tag=document.createElement('span');
+  tag.className='tag '+(side==='right'?'trade':'keep');
+  tag.textContent=side==='right'?'tradeable':'keepsake — never re-trades';
+  d.appendChild(tag);
+  if(side==='right'){
+    var g=document.createElement('button'); g.className='act'; g.textContent='✦ gift it';
+    g.addEventListener('click',function(){ gift(idx); });
+    d.appendChild(g);
+  }
+  return d;
+}
+function arms(){
+  $('right').innerHTML=''; $('left').innerHTML='';
+  if(!S.right.length) $('right').innerHTML='<div style="color:var(--faint);font-size:10px;font-style:italic;padding:6px">nothing strung yet — the composer is open</div>';
+  S.right.forEach(function(k,i){ $('right').appendChild(card(k,'right',i)); });
+  S.left.forEach(function(k,i){ $('left').appendChild(card(k,'left',i)); });
+  $('givenlog').textContent=S.given.length
+    ? 'given away, remembered: '+S.given.map(function(g){return (g.beads.length)+' beads → '+(g.to||'the floor')}).join(' · ')
+    : '';
+}
+
+/* ---- the gift ceremony ---- */
+var giving=null;
+function gift(idx){
+  giving=idx; $('ceremony').style.display='block'; $('giftout').classList.remove('open');
+  var steps=$('steps').children, k=S.right[idx];
+  for(var i=0;i<4;i++) steps[i].classList.remove('on');
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var delay=reduce?0:650;
+  function on(i){ steps[i].classList.add('on');
+    if(i<3) setTimeout(function(){on(i+1)},delay);
+    else setTimeout(function(){
+      $('giftstr').value=encode(k); $('giftout').classList.add('open');
+      /* the retirement rule: what you gift leaves your arm; memory kept */
+      S.given.push({beads:k.beads,to:k.madefor||'',ts:Date.now()});
+      S.right.splice(idx,1); save(); arms();
+      $('ceremony').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'});
+    },delay);
+  }
+  on(0);
+  $('ceremony').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'});
+}
+$('copygift').onclick=function(){ $('giftstr').select();
+  try{ document.execCommand('copy'); }catch(e){}
+  if(navigator.clipboard) navigator.clipboard.writeText($('giftstr').value).catch(function(){}); };
+$('donegift').onclick=function(){ $('ceremony').style.display='none'; giving=null; };
+
+/* ---- receive ---- */
+$('rcvgo').onclick=function(){
+  var r=decode($('rcv').value);
+  if(r.err){ $('rerr').textContent='refused — '+r.err; return; }
+  S.left.push({maker:r.maker,madefor:r.madefor,beads:r.beads,ts:r.ts,rcv:true});
+  save(); $('rcv').value=''; $('rerr').textContent=''; arms();
+};
+
+paint(); arms();
+})();
+</script>
+<script src="tour.js?v=18"></script>
+</body></html>
