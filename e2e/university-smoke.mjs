@@ -240,11 +240,11 @@ ok('bfood rebuilt: n/m never zero + hardwired hemp + fat disaggregated + quest b
 
 await page.goto(`${BASE}/surfaces/index.html`);
 ok('hub links the university', (await page.locator('a[href="university/index.html"]').count()) === 1);
-ok('hub counts 57', (await page.locator('footer').textContent()).includes('57 surfaces'));
+ok('hub counts 58', (await page.locator('footer').textContent()).includes('58 surfaces'));
 await page.goto(`${BASE}/surfaces/review.html`);
 const optCount = await page.locator('#surf option').count();
 const hasUni = (await page.locator('#surf option[value="university/index.html"]').count()) === 1;
-ok('review deck lists the university surface', optCount === 54 && hasUni);
+ok('review deck lists the university surface', optCount === 55 && hasUni);
 
 console.log(`\n${pass} passed, ${fail} failed` + (errors.length ? '\nerrors:\n' + errors.join('\n') : ''));
 await browser.close(); server.close();

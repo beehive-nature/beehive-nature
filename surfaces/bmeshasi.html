@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
+<meta name="color-scheme" content="dark">
+<link rel="stylesheet" href="tokens.css">
+<title>bMeshAsi — the community iron exchange · metered · iron paid first</title>
+<style>
+:root{--bg:#0d1410;--ink:#e2efdb;--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--dim:#8a9a8a;--line:#243026;--leaf:#7ddf8f;--amber:#ffb347;--open:#0092a6}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:36px 16px 90px}
+header{text-align:center;margin-bottom:12px;padding-bottom:14px;position:relative}
+header::after{content:'';position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:min(560px,80%);height:2px;
+ background:linear-gradient(90deg,transparent,var(--gold),var(--cyan),transparent);opacity:.55}
+h1{font-size:clamp(19px,4.5vw,27px);color:var(--gold);font-weight:400;letter-spacing:.04em;text-shadow:0 0 18px rgba(255,215,0,.2)}
+header p{color:var(--dim);font-size:11px;margin-top:8px;max-width:800px;margin-inline:auto;line-height:1.85}
+main{max-width:940px;margin:0 auto}
+section{background:#111a14;border:1px solid var(--line);border-radius:var(--r-lg,11px);padding:15px 16px;margin-top:16px}
+section h2{font-size:12px;color:var(--violet);font-weight:400;letter-spacing:.08em;margin-bottom:8px}
+.law{color:var(--dim);font-size:10px;line-height:1.75}.law b{color:var(--ink)}
+a{color:var(--cyan)}
+.ceiling{border:1px solid var(--amber);border-radius:8px;padding:8px 12px;margin-top:10px;font-size:10px;color:var(--amber);line-height:1.7}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+@media(max-width:720px){.cols{grid-template-columns:1fr}}
+.col{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:10.5px;line-height:1.75;color:var(--dim)}
+.col h3{font-size:10px;font-weight:400;letter-spacing:.08em;margin-bottom:6px}
+.col.yes h3{color:var(--leaf)} .col.no h3{color:var(--amber)}
+.col b{color:var(--ink)}
+.wf{display:flex;gap:6px;align-items:stretch;margin-top:10px;flex-wrap:wrap}
+.wf .step{flex:1;min-width:150px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:10px;line-height:1.6;color:var(--dim)}
+.wf .step b{display:block;font-size:11px;color:var(--ink)}
+.wf .step.first{border-color:var(--gold)} .wf .step.first b{color:var(--gold)}
+.wf .arrow{align-self:center;color:var(--dim);font-size:14px}
+.ctl{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:10px}
+.ctl label{display:block;font-size:9.5px;color:var(--dim);letter-spacing:.05em;margin-bottom:3px}
+.ctl input[type=range]{width:100%;accent-color:var(--gold)}
+.ctl .val{color:var(--leaf);font-size:10px}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:12px}
+.rd{background:#0a0f0b;border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.rd .k{font-size:9px;color:var(--dim);letter-spacing:.08em}
+.rd .v{font-size:17px;color:var(--leaf);margin-top:2px}
+.rd .s{font-size:9px;color:var(--dim);margin-top:3px;line-height:1.5}
+.rd.hero .v{color:var(--gold);font-size:22px}
+.badge{display:inline-block;font-size:9px;letter-spacing:.1em;border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--gold)}
+.badge.leaf{color:var(--leaf)} .badge.amber{color:var(--amber)}
+table{width:100%;border-collapse:collapse;margin-top:8px;font-size:10.5px}
+td,th{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;color:var(--dim);vertical-align:top}
+th{color:var(--violet);font-weight:400;font-size:9.5px} td.n{color:var(--ink)}
+.rc{background:#0a0f0b;border:1px solid var(--line);border-radius:var(--r-md,8px);padding:11px 13px;margin-top:9px}
+.rc .rt{font-size:12px;color:var(--ink);line-height:1.65}.rc .rt b{color:var(--leaf);font-weight:400}
+.rc .rd2{font-size:9.5px;color:var(--dim);margin-top:4px;line-height:1.7}
+.gate{border-left:2px solid var(--amber);padding:2px 0 2px 11px;margin-top:8px;font-size:11px;color:var(--ink);line-height:1.7}
+.gate .gw{color:var(--dim);font-size:9.5px}
+footer{max-width:940px;margin:22px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <h1>⚓ bMeshAsi — the community iron exchange</h1>
+  <p>save the builders their cloud bill · meter the usage on our landed curve ·
+  <b style="color:var(--gold)">the iron is reimbursed first</b> — VPS, hardware, bandwidth —
+  before anything else is paid. self-funded by law: settlement deducts from the spender's
+  own balance, never an endowment, never a subsidy, never a treasury.
+  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/SPEC-BMESHASI-EXCHANGE-1.md">the spec</a> ·
+  founder word 2026-08-22.</p>
+</header>
+<main>
+
+<section>
+  <h2>1 · THE WEIGH-IN — what a name may not do</h2>
+  <div class="cols">
+    <div class="col yes">
+      <h3>EXISTS TODAY · every row a receipt</h3>
+      <b>the meter</b> — <a href="https://github.com/beehive-nature/beehive-nature/tree/main/crates/bmesh-meter">crates/bmesh-meter</a>:
+      a pure utilization-pricing engine, 17 tests, mutation-proven, zero dependencies
+      (<a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/RECEIPT_ZCODE_R2_BMESH_METER_2026-08-16.md">R-2 receipt</a>).<br>
+      <b>admission scoring</b> — bmesh-hwfit scores a model's declared VRAM against a node's
+      declared VRAM. five tests. it never loads a model.<br>
+      <b>one heartbeat</b> — a stub endpoint reporting one node and zero metered tokens.<br>
+      <b>the laws</b> — A-first metering + self-funded constraint
+      (<a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/DISPATCH_COWORK_B1_BUZZ_A_METERING.md">B1</a>),
+      the wallet-gate law <i>366ea1f</i>, the dangling-art doctrine <i>3bf7b8a</i>.<br>
+      <b>the iron</b> — community boxes already pledged, headroom included.
+    </div>
+    <div class="col no">
+      <h3>DOES NOT EXIST YET · said plainly</h3>
+      <b>no mesh</b> — no peers, no registry, no discovery, no work dispatch.<br>
+      <b>no inference runtime</b> — zero model dependencies anywhere.<br>
+      <b>no GPU detection</b> — the profiler path is a stub by license law.<br>
+      <b>no live settlement</b> — the waterfall below is a LAW OF ORDER, not a running
+      payment. nothing on this page moves value today.<br><br>
+      <b style="color:var(--amber)">"Say that plainly on any surface. Do not let a name do a crate's work."</b><br>
+      — <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/SPEC-ORIGINATION-1.md">SPEC-ORIGINATION-1 §7.5</a>,
+      the claim ceiling that binds this page.
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>2 · THE EXCHANGE — who does what, and the waterfall</h2>
+  <div class="law"><b>providers</b> pledge iron to the board (a statement on a static page —
+  no keys, no credentials; onboarding a real customer is a founder gate, MX-6).
+  <b>consumers</b> book resource classes: <b>mirror-hosting</b> (static public pages —
+  exhibit 1 below), <b>vRAM</b> (memory-hours, admission-scored), <b>CPU-node</b>,
+  <b>bandwidth/egress</b> (class open · rates gated MX-4, never quoted).
+  consuming and spending sit behind the wallet session per the wallet-gate law;
+  <b>viewing this exchange is and stays open</b> — limits are signals, not walls.</div>
+  <div class="wf">
+    <div class="step first"><b>① IRON FIRST</b>VPS · hardware · bandwidth — the providers'
+    actual costs. paid before anything else. the ORDER is the law on this surface.</div>
+    <div class="arrow">→</div>
+    <div class="step"><b>② the rest</b>everything after the iron is whole — per founder
+    word. the RATIOS are economics and sit behind gate MX-1; none is implied.</div>
+    <div class="arrow">→</div>
+    <div class="step"><b>③ the receipt</b>every meter tick and every reimbursement is a
+    published receipt — the same standing law as every other surface in this organism.</div>
+  </div>
+  <div class="ceiling">settlement is NOT LIVE. this page states the order of payment and
+  the math of the meter; it does not claim the mesh, the market, or the reimbursement
+  is running. sound by construction — nothing stronger.</div>
+</section>
+
+<section>
+  <h2>3 · THE METER — clickable, semantics faithful to the landed crate</h2>
+  <div class="law">the fee curve is the landed <b>bmesh-meter</b> semantics:
+  <b>p(u) = min + (max−min)·u^(e−1)</b>, flat-below-watermark priced at the
+  <b>adjusted</b> utilization (the ratchet output), the price integral above it,
+  one ceil at the end. the numbers below are <b>REFERENCE PARAMETERS</b> from the
+  pinned public source — the conformance vectors of the R-2 receipt, not our curve:
+  <b style="color:var(--amber)">our live values are gate MX-1</b> (economics are a founder
+  word, ORDERS-1:61). the math is ours and tested; the parameters are placeholders you can turn.</div>
+  <div class="ctl">
+    <div><label>exponent e <span class="val" id="ve">2.0</span></label><input type="range" id="e" min="1" max="5" step="0.1" value="2"></div>
+    <div><label>min price <span class="val" id="vmin">2500</span></label><input type="range" id="minp" min="0" max="50000" step="100" value="2500"></div>
+    <div><label>max price <span class="val" id="vmax">75000</span></label><input type="range" id="maxp" min="100" max="150000" step="100" value="75000"></div>
+    <div><label>watermark w <span class="val" id="vw">0.30</span></label><input type="range" id="w" min="0" max="1" step="0.01" value="0.30"></div>
+    <div><label>interval start u₀ <span class="val" id="vu0">0.10</span></label><input type="range" id="u0" min="0" max="1" step="0.01" value="0.10"></div>
+    <div><label>interval end u₁ <span class="val" id="vu1">0.60</span></label><input type="range" id="u1" min="0" max="1" step="0.01" value="0.60"></div>
+    <div><label>adjusted utilization uₐ (ratchet out) <span class="val" id="vua">0.20</span></label><input type="range" id="ua" min="0" max="1" step="0.01" value="0.20"></div>
+  </div>
+  <div class="readout">
+    <div class="rd hero"><div class="k">FEE OVER [u₀, u₁] · meter units</div><div class="v" id="fee">—</div>
+      <div class="s" id="guard">one ceil at the end, exactly as the crate</div></div>
+    <div class="rd"><div class="k">FLAT PORTION (below w)</div><div class="v" id="flat">—</div>
+      <div class="s">(min(u₁,w) − u₀) · p(uₐ) — priced at the ratchet's adjusted utilization</div></div>
+    <div class="rd"><div class="k">INTEGRAL PORTION (above w)</div><div class="v" id="intg">—</div>
+      <div class="s">∫ p(u) du over [max(u₀,w), u₁]</div></div>
+    <div class="rd"><div class="k">p(uₐ) — the flat price</div><div class="v" id="pua">—</div>
+      <div class="s">at e = 1 the source prices flat at max — encoded as the source does, not as intuition expects</div></div>
+  </div>
+  <div class="law" style="margin-top:10px">waterfall reminder: whatever this meter reads,
+  the <b>iron is reimbursed first</b> — the order above; the split is a founder word.
+  at reference parameters, the whole-market rental [0,1] reads <b>38,750</b> — the exact
+  conformance vector the crate's tests pin (case 1 of the R-2 receipt). set
+  u₀=0, u₁=1, w=0 and see it.</div>
+</section>
+
+<section>
+  <h2>4 · THE SUPPLY BOARD — honest statuses, no vaporware rows</h2>
+  <table>
+    <thead><tr><th>resource</th><th>class</th><th>holder</th><th>status</th></tr></thead>
+    <tbody>
+      <tr><td class="n">Oracle always-free 4-core · 24 GB · headroom beyond its community node</td><td>CPU-node · mirror-hosting</td><td>founder (pledged)</td>
+        <td><span class="badge leaf">PLEDGED</span> the dock offer — relayed founder-hands to ant.report 2026-08-22
+        (<a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/ledger/pirate-haul-candidates.md">ledger addendum 2</a>)</td></tr>
+      <tr><td class="n">ant.report failover mirror / vantage point</td><td>mirror-hosting</td><td>the estate → the author</td>
+        <td><span class="badge">OFFERED</span> zero burden: public pages only, no repo access, no obligation — awaiting the author's word (MX-6)</td></tr>
+      <tr><td class="n">bAigents shared resources · vRAM</td><td>vRAM</td><td>community (future)</td>
+        <td><span class="badge amber">GATED</span> needs the mesh itself — peers, registry, dispatch (§1: does not exist yet)</td></tr>
+      <tr><td class="n">bBuzz communities · compute meter lane</td><td>CPU-node</td><td>the relay</td>
+        <td><span class="badge">A-FIRST LAW</span> B1 stands; the b-path is gate MX-2</td></tr>
+      <tr><td class="n">community bandwidth / egress</td><td>bandwidth</td><td>whoever pledges</td>
+        <td><span class="badge amber">CLASS OPEN · RATES GATED</span> egress pricing UNVERIFIED at every provider — never quoted (MX-4)</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>5 · FOUNDER GATES — open, named, no seat may resolve them</h2>
+  <div class="gate"><b>MX-1</b> — curve parameter VALUES per resource class.<div class="gw">economics; ORDERS-1:61. the mechanism ships parameterized; this page runs reference vectors.</div></div>
+  <div class="gate"><b>MX-2</b> — Q-2: b entering the commodity-metering path.<div class="gw">stays gated; A-first stands (B1).</div></div>
+  <div class="gate"><b>MX-3</b> — voucher identity: bTiMe, workerbee, or a sibling?<div class="gw">one founder word opens it; until then no voucher primitive exists anywhere in this organism.</div></div>
+  <div class="gate"><b>MX-4</b> — egress/bandwidth rates.<div class="gw">UNVERIFIED across every provider; must be pinned before any rate is quoted to anyone.</div></div>
+  <div class="gate"><b>MX-5</b> — the wallet-gate merge point for exchange spend.<div class="gw">the ruled-open WHERE question (366ea1f).</div></div>
+  <div class="gate"><b>MX-6</b> — external-customer onboarding.<div class="gw">accepting any real customer (ant.report first) is founder-hands only.</div></div>
+</section>
+
+<section>
+  <h2>6 · WHY THE ARMADA WINS — receipts, not adjectives</h2>
+  <div class="rc"><div class="rt">📡 <b>independent rigs converge.</b> our 150-tx on-chain decode and
+    ant.report's full-genesis walk matched within ~one point at every size (55/45 → 95/5 by the
+    MiB→GiB ladder). two independent measurements, one number.</div>
+    <div class="rd2"><a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/RECEIPT_zCode_ANT_ETH_GAS_SPLIT_2026-08-21.md">the receipt</a> ·
+    re-runnable keyless: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/verify/ant-eth-split.mjs">verify/ant-eth-split.mjs</a></div></div>
+  <div class="rc"><div class="rt">🧾 <b>the real cost, measured in every direction.</b> we publish what
+    storage actually costs before we ask anyone to trust a number — including the honest
+    debate where our own first cut was wrong in both directions at once.</div>
+    <div class="rd2"><a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/RECEIPT_STORAGE_TCO_2026-08-22.md">RECEIPT_STORAGE_TCO_2026-08-22</a> ·
+    supply research: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/DISPATCH_BMESHASI_SUPPLY_RESEARCH_2026-08-16.md">DISPATCH_BMESHASI_SUPPLY_RESEARCH</a></div></div>
+  <div class="rc"><div class="rt">⚓ <b>the pitch to every builder paying a cloud bill.</b> the cloud
+    rents you a stranger's machine and bills you at month-end; the armada's iron is iron
+    someone already loves, the meter is a tested curve, and the waterfall pays the IRON
+    first — with a receipt for every tick. that is the whole leap: not cheaper promises,
+    measurable honesty.</div>
+    <div class="rd2">spec: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/SPEC-BMESHASI-EXCHANGE-1.md">SPEC-BMESHASI-EXCHANGE-1</a> ·
+    meter: <a href="https://github.com/beehive-nature/beehive-nature/tree/main/crates/bmesh-meter">crates/bmesh-meter</a></div></div>
+</section>
+
+</main>
+<footer>
+  ⚓ bMeshAsi · the community iron exchange · metered on the landed curve · iron paid first — by order, not yet by wire<br>
+  static · keyless · zero server state · AGPL-3.0-only · <a href="index.html">the hub</a> ·
+  this page: surfaces/bmeshasi.html · the claim ceiling of SPEC-ORIGINATION-1 §7.5 binds every word above
+</footer>
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id)};
+  function priceAt(u,minP,maxP,e){ if(e===1) return maxP; return minP+(maxP-minP)*Math.pow(u,e-1); }
+  function compute(){
+    var e=+$('e').value, minP=+$('minp').value, maxP=+$('maxp').value, w=+$('w').value,
+        u0=+$('u0').value, u1=+$('u1').value, ua=+$('ua').value;
+    $('ve').textContent=e.toFixed(1); $('vmin').textContent=minP; $('vmax').textContent=maxP;
+    $('vw').textContent=w.toFixed(2); $('vu0').textContent=u0.toFixed(2);
+    $('vu1').textContent=u1.toFixed(2); $('vua').textContent=ua.toFixed(2);
+    var g=$('guard');
+    if(e<1){ g.textContent='guard: exponent e ≥ 1 is enforced (the crate rejects below-one)'; g.style.color='var(--amber)'; return; }
+    if(e===1&&minP!==maxP){ g.textContent='guard: at e = 1 the source forces min = max (ExponentOneRequiresEqualPrices)'; g.style.color='var(--amber)'; return; }
+    if(u1<u0){ g.textContent='interval inverted — u₁ must be ≥ u₀'; g.style.color='var(--amber)'; return; }
+    g.style.color=''; g.textContent='one ceil at the end, exactly as the crate';
+    var pua=priceAt(ua,minP,maxP,e);
+    var below=Math.max(0, Math.min(u1,w)-u0)*pua;                 // flat stretch below the watermark, priced at adjusted utilization
+    var hi=Math.max(u0,w), above=0;
+    if(u1>hi){ above=minP*(u1-hi)+(maxP-minP)*(Math.pow(u1,e)-Math.pow(hi,e))/e; } // integral of p(u) above the watermark
+    var fee=Math.ceil(below+above);
+    $('fee').textContent=fee.toLocaleString('en-US');
+    $('flat').textContent=Math.round(below).toLocaleString('en-US');
+    $('intg').textContent=Math.round(above).toLocaleString('en-US');
+    $('pua').textContent=Math.round(pua).toLocaleString('en-US');
+  }
+  ['e','minp','maxp','w','u0','u1','ua'].forEach(function(id){ $(id).addEventListener('input',compute); });
+  compute();
+})();
+</script>
+<script src="tour.js?v=20"></script>
+</body>
+</html>
