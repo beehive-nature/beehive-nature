@@ -1,0 +1,8 @@
+[workspace]
+resolver = "2"
+members = ["crates/buzz-gain"]
+
+# The bBuzz creation forge (SPEC-BUZZFORGE-1). One phase per session (cadence law):
+# lap 1 (BF-1) = this workspace + the first CLAP-only Effect template, buzz-gain.
+# Later laps queue: visual starters (platform Canvas/SVG — BF-2 ruled), Yjs multiplayer,
+# the harness guidance/learning lane, and the VST3 opt-in behind its GPLv3 notice (PF-1).

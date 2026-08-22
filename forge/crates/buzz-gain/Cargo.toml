@@ -1,0 +1,18 @@
+[package]
+name = "buzz-gain"
+version = "0.1.0"
+edition = "2021"
+license = "AGPL-3.0-only"
+description = "bBuzz forge first template: gain + tape saturation with the SPEC-BUZZFORGE-1 §5 safety wrapper (hard limiter + crash guard). CLAP-only per PF-1. ⚙ AI-authored DSP — review before sharing."
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+# Pinned to the SPEC-BUZZFORGE-1 §3a license pin: ISC, commit f36931f (2026-05-10),
+# LICENSE sha256 9a6b01e206b7c24a562280bee8eb719ff803042b5e42f977e95c942e2215369a (PUBLIC-CONSTANT: license content pin).
+# License note (verified in the BF-1 build): nih_plug compiles vst3-sys (GPLv3)
+# unconditionally, even for CLAP-only exports — no VST3 binary is produced by this
+# crate, and GPLv3 code may merge into our AGPL-3.0-only work (one-way compatible).
+# PF-1's VST3 notice duty attaches when/if a VST3 export ships.
+nih_plug = { git = "https://github.com/robbert-vdh/nih-plug.git", rev = "f36931f7af4646065488a9845d8f8c2f95252c23" }
