@@ -11,77 +11,123 @@
 :root{--bg:#07090b;--panel:#0e1611;--well:#0a0f0b;--ink:#e2efdb;--dim:#8a9a8a;--faint:#5f6f61;
  --line:#243026;--cyan:#00E5FF;--gold:#FFD700;--leaf:#7ddf8f;--violet:#c9a0ff;--amber:#ffb347}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:13px/1.65 'IBM Plex Mono',monospace;padding:30px 14px 90px}
-main{max-width:980px;margin:0 auto}
+body{background:var(--bg);color:var(--ink);font:13px/1.65 'IBM Plex Mono',monospace;padding:30px 14px 90px;overflow-x:hidden}
+main{max-width:1020px;margin:0 auto;position:relative}
+/* ── the drifting comb background ── */
+#sky{position:fixed;inset:0;z-index:-1;opacity:.16;pointer-events:none}
 header{text-align:center;margin-bottom:12px;padding-bottom:13px;position:relative}
-header::after{content:'';position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:min(560px,80%);height:2px;
- background:linear-gradient(90deg,transparent,var(--gold),var(--cyan),transparent);opacity:.55}
-h1{font-size:clamp(19px,4.5vw,27px);color:var(--gold);font-weight:400;letter-spacing:.04em}
+header::after{content:'';position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:min(600px,84%);height:2px;
+ background:linear-gradient(90deg,transparent,var(--gold),var(--cyan),transparent);opacity:.6}
+h1{font-size:clamp(19px,4.5vw,27px);color:var(--gold);font-weight:400;letter-spacing:.04em;text-shadow:0 0 24px rgba(255,215,0,.35)}
 header p{color:var(--dim);font-size:11px;margin-top:8px;max-width:820px;margin-inline:auto;line-height:1.85}
 section{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:15px 16px;margin-top:14px}
 h2{font-size:11.5px;color:var(--violet);font-weight:400;letter-spacing:.09em;margin-bottom:9px}
 .law{color:var(--dim);font-size:10.5px;line-height:1.85}.law b{color:var(--ink)}
 a{color:var(--cyan)}
+/* ── the constellation ── */
+#constwrap{position:relative;margin-top:8px}
+#const{width:100%;height:auto;display:block}
+#constwrap .tip{position:absolute;pointer-events:none;background:#060a08;border:1px solid var(--line);border-radius:8px;
+ padding:7px 10px;font-size:9.5px;color:var(--dim);line-height:1.6;opacity:0;transition:opacity 180ms;z-index:5;max-width:220px}
+.hexdrift{animation:hexdrift 7s ease-in-out infinite}
+@keyframes hexdrift{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.crownfloat{animation:crownfloat 5s ease-in-out infinite}
+@keyframes crownfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.ringpulse{animation:ringpulse 2.2s ease-out infinite;transform-origin:center;transform-box:fill-box}
+@keyframes ringpulse{0%{opacity:.9;transform:scale(.7)}70%{opacity:0;transform:scale(1.5)}100%{opacity:0}}
+.sparkdot{animation:sparkdot 1.6s ease-in-out infinite}
+@keyframes sparkdot{0%,100%{opacity:.25}50%{opacity:1}}
+/* ── jewels ── */
 .jewels{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:10px}
-.jewel{background:var(--well);border:1px solid var(--line);border-radius:11px;padding:13px 14px}
-.jewel .jn{font-size:19px;color:var(--gold)}
-.jewel .st{font-size:10px;letter-spacing:.08em;margin-top:4px}
-.jewel.avail{border-color:var(--leaf)} .jewel.avail .st{color:var(--leaf)}
-.jewel.held{border-color:var(--amber)} .jewel.held .st{color:var(--amber)}
+.jewel{background:var(--well);border:1px solid var(--line);border-radius:11px;padding:13px 14px;position:relative;overflow:hidden}
+.jewel::before{content:'';position:absolute;inset:0;border-radius:11px;pointer-events:none}
+.jewel .jn{font-size:19px;color:var(--gold);display:flex;align-items:center;gap:8px}
+.jewel .jn svg{filter:drop-shadow(0 0 6px rgba(255,215,0,.5))}
+.jewel.avail{border-color:var(--leaf)} .jewel.avail::before{box-shadow:inset 0 0 26px rgba(125,223,143,.09);animation:breathe 3.2s ease-in-out infinite}
+.jewel.held{border-color:var(--amber)} .jewel.held::before{box-shadow:inset 0 0 26px rgba(255,179,71,.10);animation:breathe 4.4s ease-in-out infinite}
+@keyframes breathe{0%,100%{opacity:.5}50%{opacity:1}}
+.jewel .st{font-size:10px;letter-spacing:.12em;margin-top:4px}
+.jewel.avail .st{color:var(--leaf)} .jewel.held .st{color:var(--amber)}
 .jewel .meta{font-size:9.5px;color:var(--dim);margin-top:6px;line-height:1.6}
-.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+/* ── checker + stamp ── */
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;position:relative}
 input{background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;
- padding:9px 11px;font:12px 'IBM Plex Mono',monospace;flex:1;min-width:170px}
+ padding:9px 11px;font:12px 'IBM Plex Mono',monospace;flex:1;min-width:170px;transition:border-color 240ms, box-shadow 240ms}
+input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 14px rgba(255,215,0,.18)}
 button{background:#26123a;color:var(--violet);border:1px solid var(--line);border-radius:8px;
- padding:9px 14px;cursor:pointer;font:11.5px 'IBM Plex Mono',monospace;min-height:38px}
-button:hover{background:var(--violet);color:#000}
-.verdict{margin-top:10px;font-size:12px;min-height:20px}
-.verdict.ok{color:var(--leaf)} .verdict.no{color:var(--amber)}
+ padding:9px 14px;cursor:pointer;font:11.5px 'IBM Plex Mono',monospace;min-height:38px;transition:transform 160ms, background 160ms}
+button:hover{background:var(--violet);color:#000;transform:translateY(-1px)}
+button:active{transform:translateY(1px)}
+.verdict{margin-top:12px;min-height:54px;display:flex;align-items:center;gap:12px}
+.stamp{width:44px;height:44px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:22px;
+ animation:stampin .45s cubic-bezier(.2,1.6,.4,1) both}
+.stamp.ok{border:2px solid var(--leaf);color:var(--leaf);box-shadow:0 0 18px rgba(125,223,143,.35)}
+.stamp.no{border:2px solid var(--amber);color:var(--amber);box-shadow:0 0 18px rgba(255,179,71,.35)}
+@keyframes stampin{0%{transform:scale(0) rotate(-30deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
+.vtext{font-size:12.5px;line-height:1.7;animation:slidein .4s ease-out both}
+.vtext.ok{color:var(--leaf)} .vtext.no{color:var(--amber)}
+@keyframes slidein{0%{transform:translateX(14px);opacity:0}100%{transform:translateX(0);opacity:1}}
+.scanline{position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);
+ animation:scan .7s ease-in-out;pointer-events:none}
+@keyframes scan{0%{top:0;opacity:1}100%{top:100%;opacity:0}}
+/* ── animated stats ── */
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:12px}
+.rd{background:var(--well);border:1px solid var(--line);border-radius:8px;padding:10px 12px;position:relative;overflow:hidden}
+.rd .k{font-size:9px;color:var(--dim);letter-spacing:.08em}
+.rd .v{font-size:17px;color:var(--leaf);margin-top:2px;font-variant-numeric:tabular-nums}
+.rd .flash{animation:rdflash 1s ease-out}
+@keyframes rdflash{0%{background:rgba(125,223,143,.22)}100%{background:transparent}}
 pre{background:#060a08;border:1px solid var(--line);border-radius:8px;padding:11px 13px;font-size:9.5px;
  color:var(--dim);line-height:1.7;white-space:pre-wrap;word-break:break-word;margin-top:10px}
 pre b{color:var(--ink)}
-.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:10px}
-.rd{background:var(--well);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
-.rd .k{font-size:9px;color:var(--dim);letter-spacing:.08em}
-.rd .v{font-size:16px;color:var(--leaf);margin-top:2px}
 .acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;margin-top:10px}
-.act{background:var(--well);border:1px solid var(--line);border-radius:9px;padding:11px 13px;font-size:10.5px;color:var(--dim);line-height:1.75}
+.act{background:var(--well);border:1px solid var(--line);border-radius:9px;padding:11px 13px;font-size:10.5px;color:var(--dim);line-height:1.75;
+ transition:border-color 240ms, transform 240ms}
+.act:hover{border-color:var(--violet);transform:translateY(-2px)}
 .act b{color:var(--ink)} .act .an{color:var(--cyan);font-size:11px}
-footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
+footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
+<canvas id="sky"></canvas>
 <main>
 <header>
   <h1>👑 the .b name desk</h1>
   <p data-reg="bee">Names on our chain, for humans and the things they love. Type any name and
-  this page checks — live, right now — whether it's free. Reserving costs <b>zero fee</b> today;
-  you only pay the chain's memory it sits in (about the price of a coffee fraction, and it's
-  <b style="color:var(--gold)">yours to sell back</b>). This desk never holds keys — it writes
+  watch the desk check it — live, right now, from the chain itself. Reserving costs
+  <b>zero fee</b> today; you only pay the chain's memory it sits in, and it's
+  <b style="color:var(--gold)">yours to sell back</b>. This desk never holds keys — it writes
   nothing; it composes what <b>you</b> sign.</p>
-  <p data-reg="raver">the .b desk — reserve · transfer · trade · resolve: live availability
-  straight off the registry at kingbeelovis, paste-ready actions with the REAL ABI shape,
-  one-year terms, renew/repoint/multi-chain resolve lanes, all keyless reads in your browser.</p>
+  <p data-reg="raver">the .b desk — reserve · transfer · trade · resolve: a living constellation
+  of the registry, animated availability, paste-ready actions with the REAL ABI shape, one-year
+  terms, renew/repoint/multi-chain resolve lanes — all keyless reads in your browser.</p>
   <p data-reg="cypherpunk">Registry <code>kingbeelovis</code> on Vaulta (aca376f2…): tables
-  <code>domains</code> (id/domain_name/owner/account/registered/expires), <code>config</code>
-  (admin/registration_fee/registration_days), <code>chainaddrs</code> (per-chain resolution).
-  Actions (live ABI, 2026-08-22): <code>registeracc(registrant,domain_name,target)</code> ·
-  <code>transfer(from,domain_name,to)</code> · <code>renew(owner,domain_name,days)</code> ·
-  <code>release</code> · <code>setaccount</code> · <code>setchain(owner,domain_name,chain_key,address,addr_type,memo_tag)</code>.
-  Names are stored SUFFIXLESS (king.b → "king"). Zero writes from this page — compose-only.</p>
+  <code>domains</code> / <code>config</code> / <code>chainaddrs</code>. Actions (live ABI,
+  2026-08-22): <code>registeracc(registrant,domain_name,target)</code> ·
+  <code>transfer</code> · <code>renew</code> · <code>release</code> · <code>setaccount</code> ·
+  <code>setchain</code>. Names stored SUFFIXLESS. Zero writes from this page — compose-only;
+  today's actions are the live Tier-1 shape, not the 10B/1k-year destination.</p>
 </header>
 
 <section>
+  <h2>🌌 THE REGISTRY, ALIVE — every name on chain, drawn live</h2>
+  <div class="law">The constellation below is not a picture of the registry — it <b>is</b> the
+  registry, read live from the chain as this page opened and drawn as it answered. The crowned
+  node is <b>king.b</b>; the pulsing ghosts are the open crown jewels. Touch any node.</div>
+  <div id="constwrap">
+    <svg id="const" viewBox="0 0 960 300" role="img" aria-label="live .b registry constellation"></svg>
+    <div class="tip" id="ctip"></div>
+  </div>
+</section>
+
+<section>
   <h2>🔎 CHECK ANY NAME — live, keyless, in your browser</h2>
-  <div class="law">The suffix is added for display and stripped for the chain — on-chain,
-  <code>king.b</code> is stored as <code>king</code>. The whole registry (all 13 names as of
-  tonight) is read live from the public failover trio; nothing is stored, nothing is sent.</div>
-  <div class="row">
+  <div class="row" id="checkerrow">
     <input id="q" placeholder="type a name — e.g. k" value="k" spellcheck="false">
     <button id="go">check</button>
   </div>
-  <div class="verdict" id="verdict">—</div>
+  <div class="verdict" id="vwrap"><div class="vtext" style="color:var(--dim)">—</div></div>
   <div class="readout">
     <div class="rd"><div class="k">NAMES ON REGISTRY (live)</div><div class="v" id="count">—</div></div>
     <div class="rd"><div class="k">REGISTRATION FEE (live config)</div><div class="v" id="fee">—</div></div>
@@ -91,19 +137,18 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 </section>
 
 <section>
-  <h2>👑 THE CROWN JEWELS — king · k · q, checked live on load</h2>
+  <h2>👑 THE CROWN JEWELS — king · k · q, breathing live</h2>
   <div class="jewels">
-    <div class="jewel" id="j-king"><div class="jn">king.b</div><div class="st">checking…</div><div class="meta"></div></div>
-    <div class="jewel" id="j-k"><div class="jn">k.b</div><div class="st">checking…</div><div class="meta"></div></div>
-    <div class="jewel" id="j-q"><div class="jn">q.b</div><div class="st">checking…</div><div class="meta"></div></div>
+    <div class="jewel" id="j-king"><div class="jn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 8l4 4 5-7 5 7 4-4-2 12H5L3 8z" fill="#FFD700"/></svg>king.b</div><div class="st">checking…</div><div class="meta"></div></div>
+    <div class="jewel" id="j-k"><div class="jn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#7ddf8f" stroke-width="2"/><circle cx="12" cy="12" r="3.5" fill="#7ddf8f"/></svg>k.b</div><div class="st">checking…</div><div class="meta"></div></div>
+    <div class="jewel" id="j-q"><div class="jn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#7ddf8f" stroke-width="2"/><circle cx="12" cy="12" r="3.5" fill="#7ddf8f"/></svg>q.b</div><div class="st">checking…</div><div class="meta"></div></div>
   </div>
 </section>
 
 <section>
   <h2>🧾 THE COMPOSER — paste-ready, REAL action shape, you sign it (never this page)</h2>
   <div class="law">Fields from the registry's live ABI — not invented, not approximated.
-  The desk composes; <b>signing is founder hands or the wallet-gate lane</b> (MX-5). Replace
-  <code>target</code> with the account the name should resolve to (often the registrant itself).</div>
+  The desk composes; <b>signing is founder hands or the wallet-gate lane</b> (MX-5).</div>
   <div class="row">
     <input id="cname" placeholder="name (suffix stripped)" value="k" spellcheck="false">
     <input id="creg" placeholder="registrant" value="kingbeelovis" spellcheck="false">
@@ -117,84 +162,68 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   <h2>🛠 THE FULL WORKSHOP — every lane the registry really has (live ABI, 2026-08-22)</h2>
   <div class="acts">
     <div class="act"><span class="an">registeracc</span>(registrant, domain_name, target) —
-      reserve a name, pointing it at <code>target</code>. Fee <b>0.0000</b> today (live config);
-      you carry the RAM (~live cost above), one-time and <b>resellable</b>. Term 365 days.</div>
+      reserve a name, pointing it at <code>target</code>. Fee <b>0.0000</b> today; you carry
+      the RAM (~live cost above), one-time, <b>resellable</b>. Term 365 days.</div>
     <div class="act"><span class="an">renew</span>(owner, domain_name, days) — extend the term.
-      All 13 current names expire <b>2027-08-01</b> (live read).</div>
+      All current names expire <b>2027-08-01</b> (live read).</div>
     <div class="act"><span class="an">transfer</span>(from, domain_name, to) — hand a name over,
       whole and on-chain. The trade lane's settlement primitive: offer → escrow → transfer.</div>
     <div class="act"><span class="an">setaccount</span>(owner, domain_name, target) — re-point a
       name to a new account without moving ownership.</div>
     <div class="act"><span class="an">setchain</span>(owner, domain_name, chain_key, address,
-      addr_type, memo_tag) — <b>the bleeding edge:</b> one .b name resolving to an address on
-      ANY registered chain — chain_key list rides the <code>chainkeys</code> table (addchainkey
-      is admin). Names become universal handles.</div>
+      addr_type, memo_tag) — today's live shape: a name resolving to an address on any
+      registered chain (the ruled 10B design evolves this into Tier-2 signed resolvers).</div>
     <div class="act"><span class="an">release</span>(owner, domain_name) — let a name go.
-      The RAM row persists per the registry's design; cleanup is admin-side.</div>
+      cleanup is admin-side; reclamation at scale is a design-doc lane.</div>
   </div>
 </section>
 
 <section>
   <h2>🌍 THE 10-BILLION-USER · 1,000-YEAR DESIGN — ruled after testing every option</h2>
-  <div class="law">We tested every architecture against the chain's real arithmetic
-  (76 GB of buyable RAM, frozen supply, a 12.7M all-in ceiling) and <b>only one way
-  scales</b> — the full analysis is
-  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/bdomain-scaling.md">docs/bdomain-scaling.md</a>
-  (nine agents, two independent derivations reconciling to the registry's own bytes):</div>
+  <div class="law">We tested every architecture against the chain's real arithmetic and
+  <b>only one way scales</b> —
+  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/bdomain-scaling.md">the full analysis</a>:</div>
   <div class="acts">
-    <div class="act"><span class="an">TIER 1 — the on-chain anchor (paid, scarce)</span>
-      the <code>domains</code> row stays: ownership, expiry, transfer, release — all under
-      <code>require_auth</code>. After the ruled trims the anchor is <b>~155 B/user</b>
-      (drop the byowner index, ordinal chain keys). Premium tier, millions of anchors,
-      first-come allocation enforced by the chain itself.</div>
+    <div class="act"><span class="an">TIER 1 — on-chain anchor (paid, scarce)</span>
+      the domains row stays under <code>require_auth</code>; after the ruled trims the anchor is
+      <b>~155 B/user</b>. Premium tier, millions of anchors, first-come by the chain itself.</div>
     <div class="act"><span class="an">TIER 2 — off-chain resolution (free, unbounded)</span>
-      addresses move behind a <code>resolvers</code> table (gateway + owner-set signer
-      pubkey + TTL); responses carry timestamp + nonce + signature the client verifies
-      against the on-chain key. <b>Marginal on-chain cost per record: 0 bytes.</b>
-      Freshness native — deletion is instant, correction is mid-epoch. Where ENS landed too.</div>
+      addresses behind owner-signed responses a client verifies against the on-chain key —
+      <b>0 marginal bytes per record</b>, deletion instant. Where ENS landed too.</div>
     <div class="act"><span class="an">REJECTED — one line each</span>
-      buy-RAM-and-hope: the bytes <b>do not exist</b> past ~12.7M users, at any price ·
-      Merkle + Arweave/IPFS: cannot prove <i>deletion</i> — a stolen address stays valid
-      all epoch, a loss class for a fund-routing registry · fully off-chain: forfeits
-      <code>require_auth</code>, which is the whole contract.</div>
-    <div class="act"><span class="an">THE LAW OF THE MIGRATION WINDOW</span>
-      evolving the live contract to the ruled shape costs <b>under a dollar at 13 rows</b>,
-      a project at 13,000, impossible at 13 million. The <code>setchain</code>-per-address
-      actions on this desk are <b>today's live shape</b>; the ruled design replaces that
-      half with Tier-2 resolvers while the 13 anchors sail through unchanged. Ten billion
-      users = ten billion <b>keypairs, not accounts</b> — only anchors take rows.</div>
+      buy-RAM: the bytes <b>do not exist</b> past ~12.7M users · Merkle: cannot prove
+      <i>deletion</i> · fully off-chain: forfeits <code>require_auth</code>.</div>
+    <div class="act"><span class="an">THE MIGRATION WINDOW</span>
+      evolving the live contract costs <b>under a dollar at 13 rows</b>, impossible at 13 million.
+      Ten billion users = ten billion <b>keypairs, not accounts</b> — only anchors take rows.</div>
   </div>
 </section>
 
 <section>
   <h2>🎁 WHY THIS IS CHRISTMAS FOR DEVS</h2>
-  <div class="law" data-reg="bee">One name, every chain, no subscription server in sight —
-  and every number on this page is live from the chain, right now, with its source printed.
-  Free to check, nearly free to hold, yours to sell back.</div>
-  <div class="law" data-reg="raver">names that resolve everywhere (setchain), trade on-chain
-  (transfer + escrow), cost coffee-money once (RAM, resellable), and the whole UX runs
-  keyless in your browser — the desk composes, you sign, the chain remembers.</div>
-  <div class="law" data-reg="cypherpunk">all reads public-RPC failover (eosn → eosnation →
-  greymass); compose-only page (zero write paths, attestation law); action shapes from the
-  live ABI pinned 2026-08-22; two-track law rides (A prototype = mainnet reads like these;
-  b build = Jungle per MX-7); name cost cross-validated crate↔page tonight (0.8421);
-  the ruled scaling path is the 10B/1k-year hybrid above — today's actions are the live
-  Tier-1 shape, not the destination.</div>
+  <div class="law" data-reg="bee">One name, every chain, no subscription server in sight — and
+  every number on this page is live from the chain with its source printed. Free to check,
+  nearly free to hold, yours to sell back.</div>
+  <div class="law" data-reg="raver">a living constellation, animated availability, names that
+  resolve everywhere, trade on-chain, cost coffee-money once — the desk composes, you sign,
+  the chain remembers.</div>
+  <div class="law" data-reg="cypherpunk">public-RPC failover; compose-only (zero write paths);
+  live ABI pinned 2026-08-22; two-track law rides (A = mainnet reads, b = Jungle per MX-7);
+  name cost cross-validated crate↔page (0.8421).</div>
 </section>
 
 </main>
 <footer>
   👑 the .b name desk · registry kingbeelovis on Vaulta · live ABI shapes 2026-08-22 · compose-only, zero custody<br>
   static · keyless · AGPL-3.0-only · <a href="index.html">the hub</a> · this page: surfaces/bnames.html ·
-  RAM cost model: crates/bmesh-ram · the registry rows themselves are the receipt
+  the registry rows themselves are the receipt
 </footer>
 <script src="tour.js?v=20"></script>
 <script>
 (function(){
   var $=function(id){return document.getElementById(id)};
   var HOSTS=['https://api.eosn.io','https://eos.api.eosnation.io','https://eos.greymass.com'];
-  var live={names:null,byName:{},fee:null,days:null,ramCost:null};
-  function firstHost(){ return location.protocol==='file:' ? HOSTS[1] : HOSTS[0]; } /* eosnation proven from file://; eosn first on http */
+  var live={rows:[],byName:{},fee:null,days:null,ramCost:null};
   async function post(path,body){
     var order = location.protocol==='file:' ? [HOSTS[1],HOSTS[2]] : HOSTS;
     for(var i=0;i<order.length;i++){
@@ -204,23 +233,105 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     return null;
   }
   function strip(n){ return (n||'').trim().toLowerCase().replace(/\.b$/,''); }
+  function flash(id,txt){ var el=$(id); el.textContent=txt; el.classList.remove('flash');
+    void el.offsetWidth; el.classList.add('flash'); }
+
+  /* ── the drifting comb sky ── */
+  (function(){
+    var c=$('sky'),x=c.getContext('2d'),hexes=[],W,H;
+    function size(){W=c.width=innerWidth;H=c.height=innerHeight;} size(); addEventListener('resize',size);
+    for(var i=0;i<26;i++) hexes.push({x:Math.random(),y:Math.random(),r:14+Math.random()*30,
+      s:.2+Math.random()*.5,p:Math.random()*6.28});
+    (function draw(t){
+      x.clearRect(0,0,W,H); x.strokeStyle='#2c3f33'; x.lineWidth=1;
+      hexes.forEach(function(h){
+        var hx=h.x*W+Math.sin(t/4000+h.p)*14, hy=h.y*H+Math.cos(t/5000+h.p)*10;
+        x.globalAlpha=.25+.2*Math.sin(t/1500+h.p); x.beginPath();
+        for(var k=0;k<6;k++){var a=Math.PI/3*k;t?0:0;
+          var px=hx+h.r*Math.cos(a),py=hy+h.r*Math.sin(a);k?x.lineTo(px,py):x.moveTo(px,py);}
+        x.closePath();x.stroke();
+      });
+      requestAnimationFrame(draw);
+    })(0);
+  })();
+
+  /* ── the live constellation ── */
+  function hexPath(cx,cy,r){var p='';for(var k=0;k<6;k++){var a=Math.PI/3*k+Math.PI/6;
+    p+=(k?'L':'M')+(cx+r*Math.cos(a)).toFixed(1)+' '+(cy+r*Math.sin(a)).toFixed(1);}return p+'Z';}
+  function drawConst(){
+    var svg=$('const'), rows=live.rows, n=rows.length, NS='http://www.w3.org/2000/svg';
+    svg.innerHTML='';
+    if(!rows.length){ svg.innerHTML='<text x="480" y="150" text-anchor="middle" fill="#8a9a8a" font-size="12">read failed — honest gap</text>'; return; }
+    var cx=480, cy=150;
+    function node(nx,ny,name,opts){
+      opts=opts||{}; var g=document.createElementNS(NS,'g');
+      g.setAttribute('class',opts.ghost?'':'hexdrift'); g.style.cursor='pointer';
+      var r=opts.big?30:(opts.ghost?20:19);
+      if(opts.big) g.setAttribute('class','crownfloat');
+      var h=document.createElementNS(NS,'path');
+      h.setAttribute('d',hexPath(nx,ny,r));
+      h.setAttribute('fill',opts.ghost?'rgba(10,15,11,.85)':'#0e1611');
+      h.setAttribute('stroke',opts.big?'#FFD700':(opts.ghost?'#7ddf8f':'#3d5344'));
+      h.setAttribute('stroke-width',opts.big?2.4:(opts.ghost?1.6:1.2));
+      if(opts.big) h.setAttribute('filter','drop-shadow(0 0 8px rgba(255,215,0,.5))');
+      g.appendChild(h);
+      if(opts.ghost){ var ring=document.createElementNS(NS,'circle');
+        ring.setAttribute('cx',nx);ring.setAttribute('cy',ny);ring.setAttribute('r',r);
+        ring.setAttribute('fill','none');ring.setAttribute('stroke','#7ddf8f');
+        ring.setAttribute('stroke-width','1.2');ring.setAttribute('class','ringpulse');
+        g.appendChild(ring); }
+      var t=document.createElementNS(NS,'text');
+      t.setAttribute('x',nx);t.setAttribute('y',ny+3.5);t.setAttribute('text-anchor','middle');
+      t.setAttribute('fill',opts.big?'#FFD700':(opts.ghost?'#7ddf8f':'#8a9a8a'));
+      t.setAttribute('font-size',opts.big?11:8.5);t.setAttribute('font-family','IBM Plex Mono');
+      t.textContent=name; g.appendChild(t);
+      if(opts.big){ var cr=document.createElementNS(NS,'path');
+        cr.setAttribute('d','M'+(nx-9)+' '+(ny-r-11)+'l5 4 4-6 4 6 5-4-2 8h-14z');
+        cr.setAttribute('fill','#FFD700'); g.appendChild(cr); }
+      var dot=document.createElementNS(NS,'circle');
+      dot.setAttribute('cx',nx+r*.85);dot.setAttribute('cy',ny-r*.85);dot.setAttribute('r','1.8');
+      dot.setAttribute('fill',opts.big?'#FFD700':(opts.ghost?'#7ddf8f':'#5f6f61'));
+      dot.setAttribute('class','sparkdot'); g.appendChild(dot);
+      g.addEventListener('pointerenter',function(e){
+        var tip=$('ctip'), w=$('constwrap').getBoundingClientRect();
+        tip.innerHTML='<b style="color:var(--gold)">'+opts.tip.name+'.b</b><br>'+opts.tip.body;
+        tip.style.left=Math.min(e.clientX-w.left+10,w.width-230)+'px'; tip.style.top=(e.clientY-w.top-10)+'px'; tip.style.opacity=1;
+      });
+      g.addEventListener('pointerleave',function(){ $('ctip').style.opacity=0; });
+      g.addEventListener('click',function(){ $('q').value=opts.tip.name; check(opts.tip.name); });
+      svg.appendChild(g);
+    }
+    var kingRow=null; rows.forEach(function(r){ if(r.domain_name==='king') kingRow=r; });
+    if(kingRow) node(cx,cy,'king',{big:true,tip:{name:'king',
+      body:'HELD · owner '+kingRow.owner+'<br>resolves → '+kingRow.account+'<br>expires '+kingRow.expires.slice(0,10)}});
+    var others=rows.filter(function(r){return r.domain_name!=='king';});
+    others.forEach(function(r,i){
+      var a=2*Math.PI*i/others.length + .4, rad=64+((i%2)*36)+Math.min(70,others.length*4);
+      node(cx+rad*Math.cos(a)*1.5, cy+rad*Math.sin(a)*.82, r.domain_name, {tip:{name:r.domain_name,
+        body:'HELD · owner '+r.owner+'<br>expires '+r.expires.slice(0,10)}});
+    });
+    node(cx-170,cy+95,'k',{ghost:true,tip:{name:'k',body:'AVAILABLE — the open jewel<br>fee 0.0000 · RAM ~'+(live.ramCost?live.ramCost.toFixed(4):'?')+' one-time'}});
+    node(cx+170,cy+95,'q',{ghost:true,tip:{name:'q',body:'AVAILABLE — the open jewel<br>fee 0.0000 · RAM ~'+(live.ramCost?live.ramCost.toFixed(4):'?')+' one-time'}});
+  }
+
+  /* ── data loads ── */
   async function loadRegistry(){
     var rows=[],more=true,nextk='';
     while(more){
       var b={json:true,code:'kingbeelovis',scope:'kingbeelovis',table:'domains',limit:500};
       if(nextk)b.lower_bound=nextk;
       var d=await post('/v1/chain/get_table_rows',b);
-      if(!d){ $('count').textContent='read failed — honest gap'; return; }
+      if(!d){ $('count').textContent='read failed'; return; }
       rows=rows.concat(d.rows||[]); more=d.more; nextk=d.next_key;
     }
-    live.names=rows.length; live.byName={};
+    live.rows=rows; live.byName={};
     rows.forEach(function(r){ live.byName[r.domain_name]=r; });
-    $('count').textContent=rows.length;
+    flash('count',rows.length);
   }
   async function loadConfig(){
     var d=await post('/v1/chain/get_table_rows',{json:true,code:'kingbeelovis',scope:'kingbeelovis',table:'config',limit:1});
     if(d&&d.rows&&d.rows[0]){ live.fee=d.rows[0].registration_fee; live.days=d.rows[0].registration_days;
-      $('fee').textContent=live.fee; $('days').textContent=live.days+' days'; }
+      flash('fee',live.fee); flash('days',live.days+' days'); }
   }
   async function loadRamCost(){
     var d=await post('/v1/chain/get_table_rows',{json:true,code:'eosio',scope:'eosio',table:'rammarket',limit:1});
@@ -230,26 +341,33 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
         return {v:Math.round(parseFloat(p)*Math.pow(10,dec)),d:dec};}
       var b=raw(row.base.balance),q=raw(row.quote.balance);
       if(b.v>0){ live.ramCost=2537*q.v/b.v/Math.pow(10,q.d);
-        $('ram').textContent=live.ramCost.toFixed(4)+' core · resellable'; }
+        flash('ram',live.ramCost.toFixed(4)+' core · resellable'); }
     }
   }
+
+  /* ── the animated verdict stamp ── */
   function check(n){
     n=strip(n);
-    var v=$('verdict'); v.className='verdict';
-    if(!n){ v.textContent='—'; return; }
+    var scan=document.createElement('div'); scan.className='scanline';
+    $('checkerrow').style.position='relative'; $('checkerrow').appendChild(scan);
+    setTimeout(function(){ scan.remove(); },750);
+    var wrap=$('vwrap'); wrap.innerHTML='';
     var row=live.byName[n];
-    if(row){ v.classList.add('no');
-      v.textContent='✗ '+n+'.b is TAKEN — owner '+row.owner+' · resolves to '+row.account+' · expires '+row.expires.slice(0,10);
-    } else { v.classList.add('ok');
-      v.textContent='✓ '+n+'.b is AVAILABLE — fee '+(live.fee||'?')+' · RAM ~'+(live.ramCost?live.ramCost.toFixed(4):'?')+' core one-time (resellable) · term '+(live.days||365)+' days';
-    }
+    var st=document.createElement('div'); var tx=document.createElement('div');
+    st.className='stamp '+(row?'no':'ok'); tx.className='vtext '+(row?'no':'ok');
+    st.textContent=row?'✕':'✓';
+    if(!n){ wrap.innerHTML='<div class="vtext" style="color:var(--dim)">—</div>'; return; }
+    tx.innerHTML = row
+      ? '<b>'+n+'.b is TAKEN</b> — owner '+row.owner+' · resolves to '+row.account+' · expires '+row.expires.slice(0,10)
+      : '<b>'+n+'.b is AVAILABLE</b> — fee '+(live.fee||'?')+' · RAM ~'+(live.ramCost?live.ramCost.toFixed(4):'?')+' core one-time (resellable) · term '+(live.days||365)+' days';
+    wrap.appendChild(st); wrap.appendChild(tx);
   }
   function jewel(id,n){
     var el=$(id), row=live.byName[n];
     var st=el.querySelector('.st'), meta=el.querySelector('.meta');
-    if(row){ el.className='jewel held'; st.textContent='HELD';
+    if(row){ el.className='jewel held'; st.textContent='● HELD';
       meta.textContent='owner '+row.owner+' · expires '+row.expires.slice(0,10); }
-    else { el.className='jewel avail'; st.textContent='AVAILABLE';
+    else { el.className='jewel avail'; st.textContent='◉ AVAILABLE';
       meta.textContent='fee '+(live.fee||'?')+' · RAM ~'+(live.ramCost?live.ramCost.toFixed(4):'?')+' core · '+(live.days||365)+'-day term'; }
   }
   $('go').onclick=function(){ check($('q').value); };
@@ -264,12 +382,12 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
       '# live state at compose-time: '+(taken?'TAKEN by '+live.byName[n].owner+' (this call will fail — check first)':'AVAILABLE')+
       ' · fee '+(live.fee||'?')+' · RAM ~'+(live.ramCost?live.ramCost.toFixed(4):'?')+' core one-time, resellable\n'+
       '# term '+(live.days||365)+' days — extend later: renew(owner, domain_name, days)\n'+
-      '# after it lands: setchain(owner, '+(n)+', chain_key, address, addr_type, memo_tag) makes it resolve on ANY chain\n'+
-      '# transfer lane: transfer(from, '+(n)+', to) — whole, on-chain, escrow-ready';
+      '# the ruled 10B design evolves resolution into Tier-2 signed resolvers — migration window is NOW at '+live.rows.length+' rows';
   };
   (async function(){
     await Promise.all([loadRegistry(),loadConfig(),loadRamCost()]);
-    ['king','k','q'].forEach(function(n,i){ jewel('j-'+n,n); });
+    drawConst();
+    ['king','k','q'].forEach(function(n){ jewel('j-'+n,n); });
     check($('q').value);
   })();
 })();
