@@ -101,6 +101,28 @@ orb.textContent = '⚙';
   render();
 
   orb.onclick = function () { win.classList.toggle('on'); if (win.classList.contains('on')) win.querySelector('#adPrompt').focus(); };
+
+  /* ── mobile laws (no Alt keys down here): tap summons; LONG-PRESS the ⚙ hides the
+     machine to its whisper; tap the whisper to summon again; the agent chips are
+     touch-native quick-switch. The anchor-app (PWA) carries all of it standalone. ── */
+  var lpTimer = null, lpFired = false;
+  orb.addEventListener('touchstart', function (e) {
+    lpFired = false;
+    lpTimer = setTimeout(function () {
+      lpFired = true; hidden = true;
+      orb.style.opacity = '.35'; orb.style.transform = 'scale(.6)';
+      win.classList.remove('on');
+      orb.title = '⚙ hidden — tap the whisper to summon';
+      if (navigator.vibrate) { try { navigator.vibrate(18); } catch (err) {} }
+    }, 520);
+  }, { passive: true });
+  ['touchend', 'touchmove', 'touchcancel'].forEach(function (ev) {
+    orb.addEventListener(ev, function () { clearTimeout(lpTimer); }, { passive: true });
+  });
+  orb.addEventListener('click', function () {
+    if (lpFired) { lpFired = false; return; } /* the long-press already acted */
+    if (hidden) { unhide(); }
+  });
   win.querySelector('.x').onclick = function () { win.classList.remove('on'); };
   function send() {
     var inp = win.querySelector('#adPrompt'); var v = (inp.value || '').trim(); if (!v) return;

@@ -1,0 +1,14 @@
+{
+  "name": "BNRoSe — the beehive nature fleet",
+  "short_name": "BNRoSe",
+  "description": "the armada: the Queen in 26 tongues, the .b name desk, the iron exchange, the live rails — first-party, keyless, receipted",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#07090b",
+  "theme_color": "#07090b",
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
