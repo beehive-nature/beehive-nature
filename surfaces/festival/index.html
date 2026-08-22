@@ -1,0 +1,466 @@
+<!doctype html>
+<!-- BNR surface: the festival — the attendee experience. The eco's first dApp face,
+     per DISPATCH_ZCODE_FESTIVAL_ATTENDEE_2026-08-22: it inherits the mUseUm's grammar
+     (comb, kandi beads, four PLUR colors, RECORD/LORE honesty) and turns the animation
+     up — within the law: CSS keyframes only, nothing faster than 3 Hz, full dignified
+     static under prefers-reduced-motion, pause on document.hidden, no rAF loops.
+     Every beat wires a rail that already exists — nothing mocked, everything a door. -->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>the festival — the attendee experience</title>
+<style>
+:root{--bg:#0a0612;--panel:#120b1d;--well:#0d0816;--line:#2a1f3d;--ink:#ece5f7;--dim:#9d92b3;--faint:#6b6180;
+ --p:#39c5cf;--l:#D655BB;--u:#e6b32e;--r:#a78bfa;--ok:#7ddf8f;--amber:#ffb347;--cyan:#45C2DC}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{overflow-x:hidden}
+body{background:var(--bg);color:var(--ink);font:13.5px/1.7 'IBM Plex Mono',ui-monospace,monospace;padding:28px 14px 96px}
+main{max-width:920px;margin:0 auto;position:relative;z-index:1}
+a{color:var(--cyan)}
+header{text-align:center;margin-bottom:4px}
+h1{font-size:clamp(21px,5.5vw,30px);font-weight:400;letter-spacing:.05em;text-shadow:0 0 24px rgba(69,194,220,.45)}
+h1 .p{color:var(--p)}h1 .l2{color:var(--l)}h1 .u2{color:var(--u)}h1 .r2{color:var(--r)}
+.sub{color:var(--dim);font-size:11.5px;margin:10px auto 0;max-width:700px;line-height:1.85}
+section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 17px;margin-top:16px;position:relative}
+section.beat::before{content:attr(data-beat);position:absolute;top:-8px;left:14px;background:var(--bg);padding:0 8px;
+ font-size:8.5px;letter-spacing:.18em;color:var(--c,var(--cyan))}
+h2{font-size:12px;font-weight:400;letter-spacing:.08em;margin-bottom:6px;color:var(--c,var(--cyan))}
+h2 .tag{font-size:8px;letter-spacing:.1em;border:1px solid var(--line);border-radius:5px;padding:1px 6px;vertical-align:middle;margin-left:8px;color:var(--ok)}
+h2 .tag.door{color:var(--amber)}
+.law{color:var(--dim);font-size:10.5px;line-height:1.85;margin-bottom:8px}
+.law b{color:var(--ink)}
+.door{display:block;background:var(--well);border:1px solid var(--line);border-radius:9px;padding:12px 14px;margin-top:9px;
+ text-decoration:none;color:var(--ink);transition:border-color .25s}
+.door:hover{border-color:var(--c,var(--cyan))}
+.door .t{font-size:12px;color:var(--c,var(--cyan))}
+.door .d{font-size:10.5px;color:var(--dim);margin-top:3px;line-height:1.7}
+.door .d b{color:var(--ink)}
+.rib{display:flex;gap:2px;overflow-x:auto;margin-top:14px;padding:10px 2px 2px;position:relative;scrollbar-width:thin}
+.rib::before{content:'';position:absolute;left:0;right:0;top:27px;height:2px;background:var(--line)}
+.rib .cell{flex:0 0 auto;background:none;border:0;color:var(--ink);cursor:pointer;font:inherit;text-align:center;padding:0 6px;position:relative;z-index:1}
+.rib .cell svg{width:30px;height:33px;display:block;margin:0 auto}
+.rib .cell polygon{fill:var(--c);opacity:.85;transition:opacity .3s}
+.rib .cell:hover polygon,.rib .cell:focus-visible polygon{opacity:1}
+.rib .cell:focus-visible{outline:1px dashed var(--cyan);outline-offset:2px;border-radius:6px}
+.rib .cell i{display:block;font-style:normal;font-size:9px;letter-spacing:.06em;margin-top:2px}
+.rigwrap{position:relative;background:var(--well);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:8px}
+.rigwrap svg{display:block;width:100%;height:auto}
+.rig{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.beam{position:absolute;top:-25%;width:2px;height:150%;opacity:.10;
+ background:linear-gradient(to bottom,transparent,var(--c),transparent);
+ transform-origin:50% 0;animation:sway var(--du,12s) ease-in-out var(--dl,0s) infinite alternate}
+@keyframes sway{from{transform:rotate(-12deg)}to{transform:rotate(12deg)}}
+.spk{position:absolute;bottom:-4%;opacity:var(--o,.2);animation:rise var(--du,30s) linear var(--dl,0s) infinite}
+@keyframes rise{from{transform:translateY(0)}to{transform:translateY(-108vh)}}
+#comb2 polygon{stroke:#0a0612;stroke-width:1;opacity:.3;animation:cp var(--d,3s) ease-in-out var(--dl,0s) infinite alternate}
+@keyframes cp{from{opacity:.22}to{opacity:.95}}
+.dials{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:10px}
+.dial{background:var(--well);border:1px solid var(--line);border-radius:9px;padding:10px;text-align:center}
+.dial .arc{display:block;margin:0 auto}
+.dial .val{font-size:15px;margin-top:4px}
+.dial .lbl{font-size:9.5px;color:var(--dim);letter-spacing:.06em;margin-top:2px}
+.dial .src{font-size:8.5px;color:var(--faint);margin-top:4px;line-height:1.5}
+.dial .needle{transform-origin:50px 44px;transition:transform .8s ease-out}
+button.act{background:#26123a;color:var(--r);border:1px solid var(--line);border-radius:8px;
+ padding:8px 14px;cursor:pointer;font:11.5px 'IBM Plex Mono',monospace;min-height:40px}
+button.act:hover{background:var(--r);color:#0a0612}
+button.act.calmb{background:#0d2517;color:var(--ok)}
+button.act.calmb:hover{background:var(--ok);color:#0a0612}
+.raw{font-size:9px;color:var(--faint);margin-top:8px;line-height:1.6;word-break:break-all}
+.fam{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:10px}
+.gate{background:var(--well);border:1px dashed var(--line);border-radius:9px;padding:10px 12px}
+.gate .t{font-size:11px;color:var(--dim)}
+.gate .t b{color:var(--ink)}
+.gate .d{font-size:9.5px;color:var(--faint);margin-top:4px;line-height:1.7}
+.gate .gl{display:inline-block;font-size:8px;letter-spacing:.1em;color:var(--amber);border:1px dashed #5c4318;border-radius:5px;padding:1px 7px;margin-top:6px}
+.pass{background:var(--well);border:1px solid var(--line);border-radius:9px;padding:10px 12px;margin-top:9px;text-align:center}
+.pass input{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:7px 10px;font:12px 'IBM Plex Mono',monospace;width:min(280px,80%)}
+.pass .out{margin-top:8px;min-height:30px}
+footer{max-width:920px;margin:24px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2;position:relative;z-index:1}
+code{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){
+ .beam,.spk{animation:none}
+ #comb2 polygon{animation:none;opacity:.6}
+ .rib .cell polygon,.dial .needle{transition:none}
+}
+body.still .beam,body.still .spk,body.still #comb2 polygon{animation-play-state:paused}
+</style></head><body>
+<main>
+<header>
+  <h1>🎪 the <span class="p">f</span><span class="l2">e</span><span class="u2">s</span><span class="r2">t</span><span class="p">i</span><span class="l2">v</span><span class="u2">a</span><span class="r2">l</span></h1>
+  <div class="sub"><span data-i18n="f.sub">the festival, attendee edition — one day on the floor, every rail it runs on, live</span></div>
+  <div class="sub" data-reg="bee">Welcome in — this is your day at the festival, and your day
+  costs nothing and asks nothing: no ticket, no account, no wallet. Every part of the floor
+  below is a real, working piece of the hive it tours. If a door is not built yet, it says so
+  on its face.</div>
+  <div class="sub" data-reg="raver">your day at the festival, wire to wire: arrive keyless,
+  walk the ribbon, dance under the comb rig, speak light, trade kandi, watch the chain's own
+  dials move, rest in the calm tent, leave a receipt. every beat is a real rail already
+  running — nothing here is a mock-up, and the doors not built yet wear their gates honestly.
+  this is your floor.</div>
+  <div class="sub" data-reg="cypherpunk">Method: a static, keyless dApp face — zero server
+  state, zero credentials, zero telemetry. Each beat wires an existing rail and names it:
+  the corpus (26 tongues, machine-drafted ⚙ until a human attests), the register layer, the
+  optical pairing demo, the kandi codec, public-RPC economy reads (failover, honest failure
+  rendered as failure), and the WCAG-2.3.1-bound animation law. Unbuilt lanes are declared
+  gates, never faked liveness.</div>
+</header>
+
+<nav class="rib" aria-label="the day's ribbon — click what calls to you">
+  <button class="cell" data-go="s-arrive" style="--c:#39c5cf"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>ARRIVE</i></button>
+  <button class="cell" data-go="s-floor" style="--c:#D655BB"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>THE FLOOR</i></button>
+  <button class="cell" data-go="s-speak" style="--c:#e6b32e"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>SPEAK LIGHT</i></button>
+  <button class="cell" data-go="s-kandi" style="--c:#a78bfa"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>KANDI</i></button>
+  <button class="cell" data-go="s-econ" style="--c:#45C2DC"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>THE BOARD</i></button>
+  <button class="cell" data-go="s-set" style="--c:#7ddf8f"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>THE SET</i></button>
+  <button class="cell" data-go="s-calm" style="--c:#39c5cf"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>CALM TENT</i></button>
+  <button class="cell" data-go="s-receipt" style="--c:#D655BB"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>RECEIPT</i></button>
+  <button class="cell" data-go="s-family" style="--c:#e6b32e"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>THE FAMILY</i></button>
+</nav>
+
+<section class="beat" id="s-arrive" data-beat="BEAT 1 · LIVE" style="--c:#39c5cf">
+  <h2><span data-i18n="f.arrive">ARRIVE — no ticket, no account; your tongue and your register</span><span class="tag">LIVE</span></h2>
+  <div class="law" data-reg="bee">There is no ticket booth because looking is always free
+  here. Your tongue rides the 🌐 picker in the bar below — twenty-six of them, and any line
+  not yet in yours falls back to English <b>visibly</b>, never silently. The 🐝/🎛/⚗ switch
+  beside it sets how deep this page talks: gentle, vivid, or dense.</div>
+  <div class="law" data-reg="raver">walk in free. pick your tongue — twenty-six docked, and
+  the counter beside the picker tells you straight how much of this floor speaks it yet. flip
+  the 🐝/🎛/⚗ switch for the register that fits you; the words change, the floor doesn't.</div>
+  <div class="law" data-reg="cypherpunk">State model at arrival: none. Tongue choice and
+  register live in <code>localStorage</code> on your device only; no account exists to make.
+  Corpus law applies — every rendering is machine-drafted ⚙ until a human attestation
+  upgrades it, and coverage is displayed, not implied.</div>
+  <div class="pass">
+    <div class="law" style="margin:0;text-align:center"><b>your day pass</b> — a strand strung
+    from your name, here and gone: nothing is stored, nothing is sent</div>
+    <input id="passname" placeholder="type any name" maxlength="24" aria-label="your day-pass name">
+    <div class="out" id="passout" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="beat" id="s-floor" data-beat="BEAT 2 · LIVE" style="--c:#D655BB">
+  <h2><span data-i18n="f.floor">THE FLOOR — the 127-comb rig, live</span><span class="tag">LIVE</span></h2>
+  <div class="law" data-reg="bee">The light above your head is the estate's own hexagon —
+  the 127-cell comb, the shape the founder ruled highest-impact, rendered fresh in your
+  browser with beams and drifting sparks. The same rig, at festival scale, is a real build:
+  the proving ground link below is its bill of materials.</div>
+  <div class="law" data-reg="raver">look up: 127 cells of the comb breathing in the four PLUR
+  colors — deterministic, so every visitor tonight sees the same rig — beams sweeping slow,
+  sparks rising. when you've had enough light, the calm tent is a beat away and its button
+  means it.</div>
+  <div class="law" data-reg="cypherpunk">Render: deterministic 127-cell axial geometry
+  (hash-seeded colors), CSS keyframes only — cell cycles 2.6–4.8 s, beam sweeps 9–16 s,
+  spark rises 26–48 s; nothing flashes faster than 3 Hz (WCAG 2.3.1, stated and measured);
+  <code>prefers-reduced-motion</code> collapses to a full static experience; all motion
+  pauses on <code>document.hidden</code>; zero rAF. The physical rig spec lives at
+  <a href="../hardware/build.html">the festival proving ground</a>.</div>
+  <div class="rigwrap" aria-hidden="true">
+    <div class="rig" id="rig"></div>
+    <svg id="comb2" viewBox="0 0 480 440" role="img" aria-label="the 127-cell comb light rig"></svg>
+  </div>
+</section>
+
+<section class="beat" id="s-speak" data-beat="BEAT 3 · DOOR" style="--c:#e6b32e">
+  <h2><span data-i18n="f.speak">SPEAK LIGHT — pair by photons</span><span class="tag door">DOOR</span></h2>
+  <div class="law" data-reg="bee">Screens can talk to cameras using nothing but brightness —
+  that is the estate's optical lane. Two devices that have never met can be introduced by
+  one blinking at the other. The demo is one click away.</div>
+  <div class="law" data-reg="raver">no cables, no codes, no accounts — the screen itself
+  speaks, the camera listens, and two strangers are paired. it's the bLighTbeAM, the
+  estate's oldest trick, live behind this door.</div>
+  <div class="law" data-reg="cypherpunk">bLighTbeAM: screen-to-camera data transfer on
+  luminance alone — the bComb hexagonal beam. The demo surface carries its own honesty
+  notes and method; this beat is the door, the lane is real and keyless.</div>
+  <a class="door" href="../blight/demo.html" style="--c:#e6b32e">
+    <div class="t">💡 the bLighTbeAM demo</div>
+    <div class="d">the pairing ceremony, live — <b>blight/demo.html</b>, the estate's genesis surface</div></a>
+</section>
+
+<section class="beat" id="s-kandi" data-beat="BEAT 4 · LIVE" style="--c:#a78bfa">
+  <h2><span data-i18n="f.kandi">kandi — make one, gift one</span><span class="tag">LIVE</span></h2>
+  <div class="law" data-reg="bee">The mUseUm's ritual wing, alive: string beads, spell a
+  word, and gift the bracelet through the four-step handshake. The gift travels as a little
+  text string; the etiquette — right arm trades, left arm keeps, made-for-you never
+  re-trades — is enforced in code.</div>
+  <div class="law" data-reg="raver">this is the real thing: compose your kandi, do the
+  handshake — peace, love, unity, and on respect the kandi crosses. what you gift leaves
+  your arm; that's not a setting, that's the floor's law, and here it's code.</div>
+  <div class="law" data-reg="cypherpunk">Codec: <code>KND1|maker|for|ts36|beads|fnv</code> —
+  FNV-1a/32 checksum, not a signature; kandi trust is floor trust. State:
+  <code>localStorage</code> only, zero network, names validated to a strict charset and
+  rendered as text. The museum's Wing IV is this page's law.</div>
+  <a class="door" href="../kandi.html" style="--c:#a78bfa">
+    <div class="t">🍬 the kandi bar</div>
+    <div class="d">make it, name it, gift it through interlocked hands — <b>kandi.html</b>,
+    live; your first kandi is already waiting on your left arm</div></a>
+</section>
+
+<section class="beat" id="s-econ" data-beat="BEAT 5 · LIVE" style="--c:#45C2DC">
+  <h2><span data-i18n="f.econ">THE ECONOMY BOARD — live dials, keyless reads</span><span class="tag">LIVE</span></h2>
+  <div class="law" data-reg="bee">The festival has a meter panel, and it reads the chains
+  themselves — gas price, the latest block, the work in it — straight from public endpoints
+  that cost nothing to ask. If the reads can't reach your browser, the dials say so; they
+  never pretend.</div>
+  <div class="law" data-reg="raver">the board's live: real gas, real blocks, real work,
+  read keyless off Arbitrum One every twenty seconds while you watch — the festival's pulse
+  on the wall. a dark dial is a declared failure, never a zero.</div>
+  <div class="law" data-reg="cypherpunk">Methods, per dial: <code>eth_gasPrice</code> (log
+  dial 0.005–5 gwei) · <code>eth_blockNumber</code> · <code>eth_getBlockByNumber</code> →
+  gasUsed (dial 0–30 Mgas). Two public hosts with failover; refresh 20 s, paused while the
+  tab is hidden; RPC failure renders amber and names itself — a gap is data. The full
+  cockpit lives at <a href="../bantfarm.html">the bANTfarm</a>.</div>
+  <div class="dials">
+    <div class="dial"><svg class="arc" viewBox="0 0 100 52" aria-hidden="true"><path d="M8 48 A42 42 0 0 1 92 48" fill="none" stroke="#2a1f3d" stroke-width="7" stroke-linecap="round"/><g class="needle" id="ngas"><line x1="50" y1="44" x2="50" y2="12" stroke="#45C2DC" stroke-width="2.5" stroke-linecap="round"/></g></svg><div class="val" id="dgasv">—</div><div class="lbl">L2 gas price</div><div class="src">eth_gasPrice · Arbitrum One · public RPC</div></div>
+    <div class="dial"><svg class="arc" viewBox="0 0 100 52" aria-hidden="true"><path d="M8 48 A42 42 0 0 1 92 48" fill="none" stroke="#2a1f3d" stroke-width="7" stroke-linecap="round"/><g class="needle" id="nblk"><line x1="50" y1="44" x2="50" y2="12" stroke="#7ddf8f" stroke-width="2.5" stroke-linecap="round"/></g></svg><div class="val" id="dblkv">—</div><div class="lbl">latest block</div><div class="src">eth_blockNumber · needle: last 100k blocks</div></div>
+    <div class="dial"><svg class="arc" viewBox="0 0 100 52" aria-hidden="true"><path d="M8 48 A42 42 0 0 1 92 48" fill="none" stroke="#2a1f3d" stroke-width="7" stroke-linecap="round"/><g class="needle" id="nused"><line x1="50" y1="44" x2="50" y2="12" stroke="#e6b32e" stroke-width="2.5" stroke-linecap="round"/></g></svg><div class="val" id="dusedv">—</div><div class="lbl">gas used, latest block</div><div class="src">eth_getBlockByNumber · dial 0–30 Mgas</div></div>
+  </div>
+  <div style="margin-top:8px"><button class="act" id="eread">read the board again</button></div>
+  <div class="raw" id="eraw">raw lane — last responses land here as they arrive</div>
+</section>
+
+<section class="beat" id="s-set" data-beat="BEAT 6 · DOOR" style="--c:#7ddf8f">
+  <h2><span data-i18n="f.set">THE SET — the music</span><span class="tag door">DOOR</span></h2>
+  <div class="law" data-reg="bee">A floor needs a soundtrack. The founder's own build set
+  plays behind one door, and on-chain sound — forkable, provenance-carrying — lives behind
+  the other.</div>
+  <div class="law" data-reg="raver">two doors, one wall of sound: the set the founder builds
+  to, and the listening room where the music itself lives on-chain — fork it live, the
+  original never mutates.</div>
+  <div class="law" data-reg="cypherpunk">Rail: static surfaces over receipted records —
+  artist-paid links only on the set; DB-1 inscription shape rendered as UI, fork law
+  enforced by construction, in the listening room.</div>
+  <a class="door" href="../bset.html" style="--c:#7ddf8f">
+    <div class="t">🎧 the set I build to</div>
+    <div class="d">the founder's build soundtrack — EDM × русская музыка, <b>bset.html</b></div></a>
+  <a class="door" href="../listening.html" style="--c:#7ddf8f">
+    <div class="t">🎵 the Listening Room</div>
+    <div class="d">on-chain sound, forkable art — <b>listening.html</b>, the fork law live</div></a>
+</section>
+
+<section class="beat" id="s-calm" data-beat="BEAT 7 · LIVE" style="--c:#39c5cf">
+  <h2><span data-i18n="f.calm">THE CALM TENT — sensory-safe by design</span><span class="tag">LIVE</span></h2>
+  <div class="law" data-reg="bee">Every festival needs a quiet tent, and this one is real:
+  the button below dims the whole rig to stillness — beams, sparks, comb — and the page
+  obeys the same law unprompted if your device asks for less motion.</div>
+  <div class="law" data-reg="raver">the tent is a feature, not a fallback. one press and the
+  floor goes still — every light on this page, quiet in one breath. press again when you're
+  ready; the rig will be right where you left it, same as it is for everybody.</div>
+  <div class="law" data-reg="cypherpunk">The flash laws, enforced and stated: nothing on any
+  estate page flashes faster than 3 Hz (WCAG 2.3.1); <code>prefers-reduced-motion</code>
+  yields a full, dignified static experience; all animation pauses on
+  <code>document.hidden</code>. The toggle persists locally — your calm, your device, your
+  call. Wing V of the mUseUm holds the doctrine.</div>
+  <div style="margin-top:8px"><button class="act calmb" id="calm">dim the rig</button></div>
+</section>
+
+<section class="beat" id="s-receipt" data-beat="BEAT 8 · DOOR" style="--c:#D655BB">
+  <h2><span data-i18n="f.receipt">LEAVE A RECEIPT — your review, your tongue</span><span class="tag door">DOOR</span></h2>
+  <div class="law" data-reg="bee">When you leave, you can leave a note the hive can verify —
+  a signed review of any surface, in the grammar the estate reads. And if one of the
+  twenty-six tongues is yours, one evening of attesting turns its machine drafts into a
+  signed record with your name on it.</div>
+  <div class="law" data-reg="raver">the exit is a door too: drop a [bX review] receipt on
+  your way out — signed, yours, verifiable by anyone. and if your tongue is on the board,
+  the attestation campaign is open: one evening, your name in the permanent record.</div>
+  <div class="law" data-reg="cypherpunk">Rail: Ed25519-signed review receipts composed
+  client-side and published by any client you already hold — attestation, never telemetry;
+  the corpus attestation campaign upgrades ⚙ renderings by human signature.</div>
+  <a class="door" href="../review.html" style="--c:#D655BB">
+    <div class="t">👑 the Royal Review</div>
+    <div class="d">one surface, one verdict, ≤140 chars, signed — <b>review.html</b></div></a>
+  <a class="door" href="../attest.html" style="--c:#D655BB">
+    <div class="t">✍🌐 eighteen evenings</div>
+    <div class="d">the attestation campaign — your tongue, your signature — <b>attest.html</b></div></a>
+</section>
+
+<section class="beat" id="s-family" data-beat="BEAT 9 · GATES" style="--c:#e6b32e">
+  <h2><span data-i18n="f.family">THE FAMILY — the doors not built yet</span><span class="tag door">GATES</span></h2>
+  <div class="law" data-reg="bee">This attendee day is the first face of a family the
+  founder has named: the Producer, the Dancer, the Sound artist, the Visual artist. None of
+  those dApps is built yet — and per this estate's law, unbuilt looks unbuilt. What will
+  land behind each door is written on it.</div>
+  <div class="law" data-reg="raver">the family's coming — producer, dancer, sound, visual —
+  and every one of those doors says plainly it's a gate, not a room. no fake liveness, no
+  coming-soon theater: what lands behind each one is printed right on the card.</div>
+  <div class="law" data-reg="cypherpunk">Multi-dApp doctrine (build.html): each family dApp
+  ships as its own surface holding a child seed, never the root, riding the same mesh. The
+  founder rules naming; these cards carry his plain words and nothing invented.</div>
+  <div class="fam">
+    <div class="gate"><div class="t">🎛 <b>the Festival Producer</b></div>
+      <div class="d">what lands: the antd dock + the treasuries — the producer's own cockpit
+      over node operations, funds, and the build ladder.</div>
+      <span class="gl" data-i18n="f.gate">gate open — not built yet</span></div>
+    <div class="gate"><div class="t">💃 <b>the Dancer</b></div>
+      <div class="d">what lands: the wellness lane — Lane-C opt-in per the sandbox-study
+      law; the attendee's own body-data on the attendee's own terms.</div>
+      <span class="gl" data-i18n="f.gate">gate open — not built yet</span></div>
+    <div class="gate"><div class="t">🎚 <b>the Sound artist</b></div>
+      <div class="d">what lands: the bset/studio lane — the sequencer, the organ, the score
+      export, grown into a performer's instrument.</div>
+      <span class="gl" data-i18n="f.gate">gate open — not built yet</span></div>
+    <div class="gate"><div class="t">🎨 <b>the Visual artist</b></div>
+      <div class="d">what lands: the buzz-studio/bLighT lane — co-created combs and photon
+      beams as a visualist's rig, inscription-grade exports.</div>
+      <span class="gl" data-i18n="f.gate">gate open — not built yet</span></div>
+  </div>
+</section>
+
+<section>
+  <div class="law" style="margin:0"><b>Honesty ledger, one line:</b> LIVE — the tongue and
+  register layer, the comb rig, the day pass, the economy dials, the calm tent, the kandi
+  bar behind its door. DOORS — speak light, the set, the review and attestation exits. GATES
+  — the four family dApps, founder-gated builds, stated as such. The museum that taught this
+  page its grammar: <a href="../plur.html">🪩 the PLUR mUseUm</a>. 🎪 festival attendee ·
+  composed 2026-08-22 per DISPATCH_ZCODE_FESTIVAL_ATTENDEE — the eco's first dApp face.</div>
+</section>
+</main>
+<footer>
+  🎪 one day, every rail, nothing mocked · static + keyless · the animation law: ≤3 Hz,
+  reduced-motion honored, pause-on-hidden ·
+  <a href="../plur.html">🪩 the mUseUm</a> ·
+  <a href="../kandi.html">🍬 kandi</a> ·
+  <a href="../hardware/build.html">🔧 the proving ground</a> ·
+  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/festival/index.html" rel="noopener">view source</a> ·
+  <a href="../index.html" data-i18n="law.hive">← the hive</a>
+</footer>
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id)};
+var COLS=['#39c5cf','#D655BB','#e6b32e','#a78bfa','#7ddf8f','#45C2DC'];
+var NS='http://www.w3.org/2000/svg';
+
+/* the 127-comb rig — deterministic, CSS keyframes only, ≤3 Hz law */
+var comb=$('comb2');
+if(comb){
+  var S=17,W=480,H=440,cx=W/2,cy=H/2,frag=document.createDocumentFragment(),n=0;
+  for(var q=-6;q<=6;q++)for(var r=-6;r<=6;r++){
+    if(Math.abs(q+r)>6)continue;
+    var x=cx+S*1.7320508*(q+r/2), y=cy+S*1.5*r;
+    var ring=Math.max(Math.abs(q),Math.abs(r),Math.abs(q+r));
+    var hsh=(((q+7)*73856093)^((r+7)*19349663))>>>0;
+    var poly=document.createElementNS(NS,'polygon'),v=[];
+    for(var i=0;i<6;i++){var a=Math.PI/180*(60*i-30);
+      v.push((x+(S-1.6)*Math.cos(a)).toFixed(1)+','+(y+(S-1.6)*Math.sin(a)).toFixed(1));}
+    poly.setAttribute('points',v.join(' '));
+    poly.setAttribute('fill',COLS[hsh%6]);
+    poly.style.setProperty('--dl',(ring*.38+((hsh>>>8)%100)/100*1.4).toFixed(2)+'s');
+    poly.style.setProperty('--d',(2.6+((hsh>>>8)%100)/100*2.2).toFixed(2)+'s');
+    frag.appendChild(poly); n++;
+  }
+  comb.appendChild(frag);
+  if(n!==127) comb.setAttribute('aria-label','cell count rendered: '+n+' — expected 127; the geometry is declared wrong, not hidden');
+}
+/* beams + sparks over the rig — pre-rendered glow, no shadowBlur-per-frame */
+var rig=$('rig');
+if(rig){
+  for(var b=0;b<5;b++){ var bm=document.createElement('i'); bm.className='beam';
+    bm.style.left=(12+b*19)+'%'; bm.style.setProperty('--c',COLS[b%6]);
+    bm.style.setProperty('--dl',(-b*2.3)+'s'); bm.style.setProperty('--du',(9+b*1.7)+'s');
+    rig.appendChild(bm); }
+  for(var s=0;s<12;s++){ var sp=document.createElement('i'); sp.className='spk';
+    sp.textContent='\u2B21';
+    sp.style.left=((s*83)%97)+'%'; sp.style.color=COLS[s%6];
+    sp.style.fontSize=(9+(s*7)%14)+'px';
+    sp.style.setProperty('--o',(0.14+((s*13)%20)/100).toFixed(2));
+    sp.style.setProperty('--du',(26+(s*11)%22)+'s'); sp.style.setProperty('--dl',(-((s*7)%40))+'s');
+    rig.appendChild(sp); }
+}
+
+/* the ribbon — click what calls to you */
+document.querySelectorAll('.rib .cell').forEach(function(b){
+  b.addEventListener('click',function(){
+    var t=document.getElementById(b.getAttribute('data-go'));
+    if(!t) return;
+    var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    t.setAttribute('tabindex','-1');
+    t.focus({preventScroll:true});
+    t.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});
+  });
+});
+
+/* the day pass — a strand from your name, stored nowhere */
+var PCOLS=['#39c5cf','#D655BB','#e6b32e','#a78bfa','#7ddf8f','#45C2DC','#ff8c5a','#ece5f7','#5b4a86','#f4e04d'];
+function strand(name){
+  var h=2166136261; name=String(name||'').trim()||'anonymous tonight';
+  for(var i=0;i<name.length;i++){ h^=name.charCodeAt(i); h=(h+((h<<1)+(h<<4)+(h<<7)+(h<<8)+(h<<24)))>>>0; }
+  var out='';
+  for(var j=0;j<7;j++){ var c=PCOLS[(h>>>(j*3))%10];
+    out+='<circle cx="'+(14+j*16)+'" cy="14" r="6" fill="'+c+'" stroke="#0a0612" stroke-width="1.5"/>'; }
+  return '<svg viewBox="0 0 132 28" width="132" height="28" role="img" aria-label="your day-pass strand, seven beads">'+out+'</svg>';
+}
+function pass(){ $('passout').innerHTML=strand($('passname').value); }
+$('passname').addEventListener('input',pass);
+pass();
+
+/* the economy board — keyless public-RPC reads, honest failure */
+var EHOSTS=['https://arb1.arbitrum.io/rpc','https://arbitrum-one-rpc.publicnode.com'];
+var ehost=0;
+function erpc(method,params){
+  var tryN=0;
+  function attempt(){
+    var host=EHOSTS[(ehost+tryN)%EHOSTS.length];
+    return fetch(host,{method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({jsonrpc:'2.0',id:1,method:method,params:params})})
+    .then(function(r){return r.json()})
+    .then(function(j){
+      if(j&&j.result!==undefined){ ehost=(ehost+tryN)%EHOSTS.length; return j.result; }
+      throw new Error(j&&j.error?JSON.stringify(j.error):'no result');
+    })
+    .catch(function(e){
+      tryN++;
+      if(tryN>=EHOSTS.length) throw e;
+      return attempt();
+    });
+  }
+  return attempt();
+}
+function needle(id,frac){ var g=$(id); if(g) g.style.transform='rotate('+(-90+Math.max(0,Math.min(1,frac))*180).toFixed(1)+'deg)'; }
+function econ(){
+  erpc('eth_gasPrice',[]).then(function(gp){
+    return erpc('eth_blockNumber',[]).then(function(bn){
+      return erpc('eth_getBlockByNumber',[bn,false]).then(function(blk){
+        var gwei=parseInt(gp,16)/1e9, blkN=parseInt(bn,16), used=parseInt(blk.gasUsed,16)/1e6;
+        $('dgasv').textContent=gwei.toFixed(4)+' gwei';
+        $('dblkv').textContent=blkN.toLocaleString('en-US');
+        $('dusedv').textContent=used.toFixed(2)+' Mgas';
+        needle('ngas',(Math.log10(Math.max(gwei,0.005))-Math.log10(0.005))/(Math.log10(5)-Math.log10(0.005)));
+        needle('nblk',(blkN%100000)/100000);
+        needle('nused',used/30);
+        $('eraw').textContent='raw lane · eth_gasPrice '+gp+' · eth_blockNumber '+bn+' · gasUsed '+blk.gasUsed+' · host '+EHOSTS[ehost];
+      });
+    });
+  }).catch(function(e){
+    $('dgasv').textContent='—'; $('dblkv').textContent='—'; $('dusedv').textContent='—';
+    $('eraw').textContent='raw lane — RPC unreachable from this browser: '+String(e&&e.message||e)+' — declared failure, never zero';
+    ['ngas','nblk','nused'].forEach(function(id){needle(id,0)});
+  });
+}
+$('eread').onclick=econ;
+var etimer=null;
+function startE(){ if(etimer===null){ etimer=setInterval(econ,20000); } }
+function stopE(){ if(etimer!==null){ clearInterval(etimer); etimer=null; } }
+document.addEventListener('visibilitychange',function(){
+  if(document.hidden){ document.body.classList.add('still'); stopE(); }
+  else{
+    var calm=true;
+    try{ calm=localStorage.getItem('fcalm')==='1'; }catch(e){}
+    document.body.classList.toggle('still',calm);
+    startE(); econ();
+  }
+});
+econ(); startE();
+
+/* the calm tent — dim the rig; your calm, your device, your call */
+var calmBtn=$('calm');
+function setCalm(on){
+  document.body.classList.toggle('still',on);
+  calmBtn.textContent=on?'light the rig up':'dim the rig';
+  try{ localStorage.setItem('fcalm',on?'1':'0'); }catch(e){}
+}
+try{ if(localStorage.getItem('fcalm')==='1') setCalm(true); }catch(e){}
+calmBtn.onclick=function(){ setCalm(!document.body.classList.contains('still')); };
+})();
+</script>
+<script src="../tour.js?v=19"></script>
+</body></html>
