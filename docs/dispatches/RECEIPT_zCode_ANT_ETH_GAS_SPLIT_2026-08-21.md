@@ -101,3 +101,26 @@ Headline table in TL;DR. Model: 1 MB = 3 chunks → 1 quotes txn (avg of 74 obse
 - One-line verdict: §TL;DR — **~55/45 at 1 MB; ~95/5 at 1 GB; ~96/4 at 1 TB (ANT/ETH, USD, 2026-08-21 gas & prices); no size supports 0.05/99.95.**
 - Named corrections (founder-gated, none applied): `surfaces/bantfarm.html:117` (qualify "a little ETH" by size); `docs/storage-substrate-split.md` L64/L67 (batch width 256, gas $0.000158/chunk), L67 ($0.000122 storage floor stale), L126/L128 (§3 gas math $158K not $39M; ANT leg $3.5M), L89 (uncertainty closed).
 - Scope fence held: zero edits to surfaces/, ledger, attic; this file is the only tree change; delivered as git-am patch per relay protocol — Seat 3 compiles/verifies/pushes.
+
+---
+
+## INDEPENDENTLY CONFIRMED — 2026-08-22, a second oracle by a different method
+
+A community member in the Autonomi Discord ran the same three sizes through
+**www.ant.report** — an external calculator that walked the ENTIRE transaction
+history from genesis (including intermediate txns), versus this receipt's
+150-transaction decoded sample. Convergence, side by side:
+
+| size | ant.report (ANT / gas → split) | this receipt |
+|---|---|---|
+| 1 MiB | $0.0095 / $0.0083 → **53.37 / 46.63** | ~55/45 (1 MB) |
+| 1 GiB | $1.07 / $0.06 → **94.69 / 5.31** | ~95/5 (1 GB) |
+| 1 TiB | $1,090 / $60.41 → **94.75 / 5.25** | ~96/4 (1 TB) |
+
+Two independent methodologies (full-genesis walk vs live-sample decode), two
+independent builders, agreement within ~1 point at every size — the strongest
+close a measured dispute can have. The community reading matches ours too:
+gas scales well on Arbitrum; the ANT share dominates at archive scale by
+design. The 0.05/99.95 claim stays dead at every size, now twice over.
+(ant.report noted as a live external instrument for this lane; ledger-track it
+only on founder word.)
