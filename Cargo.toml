@@ -47,6 +47,7 @@ members = [
     "crates/bcomb",
     "crates/bmesh-meter",
     "crates/bmesh-ram",
+    "crates/bmesh-serve",
     "crates/bindexer",
 ]
 

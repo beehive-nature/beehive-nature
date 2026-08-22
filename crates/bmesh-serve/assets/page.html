@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>bmesh-serve — the stack proof: htmx · AlpineJS · sqlite/postgres, each at its polar strength</title>
+<script src="/assets/htmx.js"></script>
+<script defer src="/assets/alpine.js"></script>
+<style>
+:root{--bg:#07090b;--panel:#0e1611;--well:#0a0f0b;--ink:#e2efdb;--dim:#8a9a8a;--line:#243026;
+ --gold:#FFD700;--leaf:#7ddf8f;--cyan:#00E5FF;--amber:#ffb347;--violet:#c9a0ff}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:13px/1.65 'IBM Plex Mono',monospace;padding:30px 14px 70px}
+main{max-width:940px;margin:0 auto}
+header{text-align:center;margin-bottom:14px}
+h1{font-size:clamp(18px,4vw,25px);color:var(--gold);font-weight:400;letter-spacing:.04em}
+header p{color:var(--dim);font-size:11px;margin-top:6px;max-width:780px;margin-inline:auto;line-height:1.8}
+section{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:15px 16px;margin-top:14px}
+h2{font-size:11.5px;color:var(--violet);font-weight:400;letter-spacing:.09em;margin-bottom:9px}
+.law{color:var(--dim);font-size:10.5px;line-height:1.85}.law b{color:var(--ink)}
+a{color:var(--cyan)}
+table{width:100%;border-collapse:collapse;font-size:10.5px}
+td,th{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;color:var(--dim)}
+th{color:var(--violet);font-weight:400;font-size:9.5px}
+td:first-child{color:var(--ink)}
+button{background:#26123a;color:var(--violet);border:1px solid var(--line);border-radius:8px;
+ padding:8px 14px;cursor:pointer;font:11.5px 'IBM Plex Mono',monospace;min-height:38px}
+button:hover{background:var(--violet);color:#000}
+.regbar{display:flex;gap:6px;margin:8px 0}
+.regbar button{min-height:30px;padding:4px 10px;font-size:10px}
+.regbar button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold)}
+.big{font-size:22px;color:var(--gold);margin:6px 0}
+.lane{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:10px}
+.card{background:var(--well);border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:10.5px;color:var(--dim);line-height:1.7}
+.card b{color:var(--ink)} .card .k{font-size:9px;color:var(--leaf);letter-spacing:.1em}
+.err{color:var(--amber)}
+footer{max-width:940px;margin:20px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.9}
+</style>
+</head>
+<body>
+<main x-data="deck()">
+<header>
+  <h1>⚙ bmesh-serve — the stack proof</h1>
+  <p>htmx · AlpineJS · sqlite · postgres — <b style="color:var(--gold)">each at its polar strength</b>,
+  in one working loop. Your browser reads the live Vaulta rammarket keylessly (free distribution —
+  the server pays no egress), POSTs the reading; the server journals it to sqlite and renders the
+  fragments htmx swaps back; AlpineJS owns the toggle and the live math below. Founder word 2026-08-22.</p>
+</header>
+
+<section>
+  <h2>🎛 THE REGISTER — AlpineJS at its polar strength (small state, declarative, in the markup)</h2>
+  <div class="law">The estate's register law, verbatim: <b>a register changes prose and density,
+  never a number</b> — three renderings of one truth that can never disagree about a fact.</div>
+  <div class="regbar">
+    <button @click="reg='bee'" :aria-pressed="reg==='bee'">🐝 bee</button>
+    <button @click="reg='raver'" :aria-pressed="reg==='raver'">🎛 raver</button>
+    <button @click="reg='cypherpunk'" :aria-pressed="reg==='cypherpunk'">⚗ cypherpunk</button>
+  </div>
+  <template x-if="reg==='bee'">
+    <div class="law" style="font-size:12px;color:var(--ink)">A name on our chain costs about
+    <b x-text="reading ? reading.toFixed(4) : '…'"></b> core, once — and you can sell it back.
+    No yearly bill, no renewal server. The number above is read from the chain by this very page.</div>
+  </template>
+  <template x-if="reg==='raver'">
+    <div class="big"><span x-text="reading ? reading.toFixed(4) : '—'"></span> core / .b name
+    <span style="font-size:11px;color:var(--dim)">· one-time · resellable · live</span></div>
+  </template>
+  <template x-if="reg==='cypherpunk'">
+    <div class="law">rammarket: <code>get_table_rows eosio/eosio</code> → base
+    <span x-text="base ? base.toLocaleString('en-US') : '—'"></span> B · quote raw
+    <span x-text="quote ? quote.toLocaleString('en-US') : '—'"></span> · per-name = 2,537 × quote/base
+    (2,537 B/row receipted, double-derived). Host: <span x-text="host || '—'"></span>. Server journal:
+    <span x-text="journalBackend"></span>.</div>
+  </template>
+</section>
+
+<section>
+  <h2>📡 THE READ — your browser, keyless, the dangling-art lane</h2>
+  <div class="law">This page fetches the rammarket row from the public failover trio
+  (api.eosn.io → eos.api.eosnation.io → eos.greymass.com) every 30 seconds —
+  <b>in your browser</b>. The server never makes this call; distribution is free by construction.</div>
+  <div class="lane">
+    <div class="card"><div class="k">READING (LIVE, YOUR BROWSER)</div>
+      <b x-text="reading ? reading.toFixed(4)+' core / name' : 'reading…'"></b><br>
+      host: <span x-text="host || '—'"></span></div>
+    <div class="card"><div class="k">ACTION — POST A TICK (htmx)</div>
+      <button hx-post="/api/tick" hx-vals="js:{
+        core_units_per_name: $data.reading || 0,
+        base_bytes: $data.base || 0,
+        quote_raw: $data.quote || 0,
+        source_host: $data.host || 'none'
+      }" hx-target="#journal" hx-swap="innerHTML">journal this reading</button></div>
+    <div class="card"><div class="k">SERVER STATUS (htmx poll 10s)</div>
+      <span hx-get="/api/status" hx-trigger="load, every 10s">loading…</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>🧾 THE JOURNAL — sqlite at its polar strength (embedded, zero-ops), htmx at its polar strength (server-rendered fragments)</h2>
+  <div class="law">Server-rendered rows, polled every 5 seconds — the server owns the HTML,
+  the client only swaps it. Newest first, twelve deep.</div>
+  <table>
+    <thead><tr><th>id</th><th>core / name</th><th>base bytes</th><th>quote raw</th><th>host</th></tr></thead>
+    <tbody id="journal" hx-get="/api/ticks" hx-trigger="load, every 5s"><tr><td colspan="5">loading…</td></tr></tbody>
+  </table>
+</section>
+
+<section>
+  <h2>🐘 POSTGRES — the honest absence, by design</h2>
+  <div class="law" id="pglane"><b>Not armed in this build.</b> postgres compiles only with
+  <code>--features postgres</code> — its polar strength is many concurrent writers and rich
+  queries at scale, which is not this lane's demand. When a lane's function demands it
+  (the bounty board's queue, metering at fleet scale), it is armed deliberately and the
+  same Journal contract serves it. sqlite carries the default everywhere else: one file,
+  embedded, git-friendly, zero administration.</div>
+</section>
+
+<footer>
+  ⚙ bmesh-serve · the stack proof · htmx 2.0.4 + AlpineJS 3.14.9 vendored and SHA-pinned ·
+  sqlite journal · postgres feature-gated · axum, the estate's server pattern<br>
+  crates/bmesh-serve · part of the bMeshAsi lane · AGPL-3.0-only
+</footer>
+</main>
+
+<script>
+function deck(){
+  return {
+    reg:'bee', reading:null, base:null, quote:null, host:null, journalBackend:'sqlite (default)',
+    async pull(){
+      const hosts=['https://api.eosn.io','https://eos.api.eosnation.io','https://eos.greymass.com'];
+      for(const h of hosts){
+        try{
+          const r=await fetch(h+'/v1/chain/get_table_rows',{method:'POST',
+            body:JSON.stringify({json:true,code:'eosio',scope:'eosio',table:'rammarket',limit:1})});
+          if(!r.ok) continue;
+          const d=await r.json();
+          const row=d.rows&&d.rows[0]; if(!row||!row.base||!row.quote) continue;
+          const raw=s=>{const p=(s||'').trim().split(' ')[0]||'0';const dec=(p.split('.')[1]||'').length;
+            return {v:Math.round(parseFloat(p)*Math.pow(10,dec)),d:dec};};
+          const b=raw(row.base.balance), q=raw(row.quote.balance);
+          if(b.v>0){ this.base=b.v; this.quote=q.v; this.reading=2537*q.v/b.v/Math.pow(10,q.d);
+            this.host=h.replace('https://',''); return; }
+        }catch(e){ /* failover, next host */ }
+      }
+      this.host='all three hosts failed — honest gap';
+    },
+    init(){ this.pull(); setInterval(()=>this.pull(),30000); }
+  };
+}
+</script>
+</body>
+</html>

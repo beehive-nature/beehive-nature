@@ -1,0 +1,23 @@
+[package]
+name = "bmesh-serve"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = "0.8"
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "net"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+rusqlite = { version = "0.32", features = ["bundled"] }
+# postgres lane: deliberate scale choice, armed only by --features postgres.
+# Its polar strength (many concurrent writers, rich queries) is NOT this demo
+# lane's demand; sqlite carries the default (embedded, zero-ops) — the honest
+# absence on the page says so.
+tokio-postgres = { version = "0.7", optional = true }
+
+[features]
+postgres = ["dep:tokio-postgres"]
+
+[dev-dependencies]
+tower = { version = "0.5", features = ["util"] }
+http-body-util = "0.1"
