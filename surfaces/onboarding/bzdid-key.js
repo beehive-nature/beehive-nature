@@ -23,6 +23,7 @@ var BZDIDKEY = (() => {
     BzdidKeyError: () => BzdidKeyError,
     CONTEXT_TAG_LEN: () => CONTEXT_TAG_LEN,
     LABEL_FINGERPRINT: () => LABEL_FINGERPRINT,
+    LABEL_K1_KEY: () => LABEL_K1_KEY,
     LABEL_MASTER_PRK: () => LABEL_MASTER_PRK,
     LABEL_PERSONA: () => LABEL_PERSONA,
     LABEL_PRF_INPUT: () => LABEL_PRF_INPUT,
@@ -36,6 +37,7 @@ var BZDIDKEY = (() => {
     decodeRecoveryCode: () => decodeRecoveryCode,
     decodeRecoveryPhrase: () => decodeRecoveryPhrase,
     deriveIdentity: () => deriveIdentity,
+    deriveK1Key: () => deriveK1Key,
     deriveRecordKey: () => deriveRecordKey,
     encodeRecoveryCode: () => encodeRecoveryCode,
     encodeRecoveryPhrase: () => encodeRecoveryPhrase,
@@ -4860,6 +4862,7 @@ zoo`.split("\n"));
   var LABEL_PRF_INPUT = "BDID-v1/prf-input/identity";
   var LABEL_MASTER_PRK = "BDID-v1/master-prk";
   var LABEL_RECORD_KEY = "BDID-v1/ed25519-record-key";
+  var LABEL_K1_KEY = "BDID-v1/secp256k1-record-key";
   var LABEL_PERSONA = "BDID-v1/persona-nullifier";
   var LABEL_FINGERPRINT = "BDID-v1/fingerprint";
   var RECOVERY_HRP = "bdidrec";
@@ -4911,6 +4914,30 @@ zoo`.split("\n"));
       publicKey,
       sign: (msg) => ed25519.sign(msg, seed)
     };
+  }
+  var K1_N = 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141n; /* PUBLIC-CONSTANT: secp256k1 group order (SEC 2 standard parameter, public by definition) */
+  function deriveK1Key(masterPrk, context) {
+    if (masterPrk.length !== 32) throw new BzdidKeyError("master_prk must be 32 bytes", "master_prk_length");
+    if (typeof context !== "string" || context.length === 0) {
+      throw new BzdidKeyError("context must be a non-empty string", "context_empty");
+    }
+    let counter = 0;
+    for (; ; ) {
+      const info = counter === 0 ? concat(ascii(LABEL_K1_KEY), ascii(context)) : concat(ascii(LABEL_K1_KEY), ascii(context), Uint8Array.of(counter));
+      const seed = expand(sha256, masterPrk, info, 32);
+      let s = 0n;
+      for (let i = 0; i < 32; i++) s = s << 8n | BigInt(seed[i]);
+      if (s !== 0n && s < K1_N) {
+        return {
+          context,
+          /** 32-byte secp256k1 scalar (the private key). Scrub with .fill(0) when done. */
+          seed,
+          curve: "secp256k1"
+        };
+      }
+      seed.fill(0);
+      counter++;
+    }
   }
   var L = 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3edn; /* PUBLIC-CONSTANT: RFC 8032 / noble-curves universal curve parameters, public by definition */
   function verifyRecordSig(sig, msg, publicKey) {

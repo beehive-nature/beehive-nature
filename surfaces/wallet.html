@@ -24,22 +24,24 @@ a{color:var(--cyan)}
 .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 input{background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;
  padding:10px 12px;font:13px 'IBM Plex Mono',monospace;flex:1;min-width:180px}
+input.small{font-size:11px}
 button{background:#26123a;color:var(--violet);border:1px solid var(--line);border-radius:8px;
  padding:10px 16px;cursor:pointer;font:12px 'IBM Plex Mono',monospace;min-height:40px}
 button:hover{background:var(--violet);color:#000}
 button:disabled{opacity:.4;cursor:not-allowed}
+button.gold{background:#33270a;color:var(--gold);border-color:#4d3d12}
+button.gold:hover{background:var(--gold);color:#000}
+button.green{background:#1a3a1a;color:var(--leaf);border-color:#2c552c}
+button.green:hover{background:var(--leaf);color:#000}
 .badge{display:inline-block;font-size:9px;letter-spacing:.1em;border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--gold)}
 .chains{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));margin-top:12px}
 .chain{background:var(--well);border:1px solid var(--line);border-radius:10px;padding:13px 15px;position:relative;overflow:hidden}
-.chain::before{content:'';position:absolute;inset:0;border-radius:10px;pointer-events:none}
 .chain .cn{font-size:14px;color:var(--gold);display:flex;align-items:center;gap:8px}
 .chain .cb{font-size:22px;color:var(--leaf);margin-top:6px;font-variant-numeric:tabular-nums}
 .chain .cd{font-size:9.5px;color:var(--dim);margin-top:4px;line-height:1.6}
 .chain .stat{font-size:9px;letter-spacing:.08em;margin-top:6px}
 .stat.ok{color:var(--leaf)} .stat.err{color:var(--amber)}
 .chain.connected{border-color:var(--leaf)} .chain.connected::before{box-shadow:inset 0 0 20px rgba(125,223,143,.06)}
-.sign-zone{margin-top:12px;background:var(--well);border:1px solid var(--gold);border-radius:11px;padding:14px 16px;display:none}
-.sign-zone.on{display:block}
 pre{background:#060a08;border:1px solid var(--line);border-radius:8px;padding:11px 13px;font-size:9.5px;
  color:var(--dim);line-height:1.7;white-space:pre-wrap;word-break:break-word;margin-top:10px}
 pre b{color:var(--ink)}
@@ -47,8 +49,26 @@ pre b{color:var(--ink)}
 .rd{background:var(--well);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
 .rd .k{font-size:9px;color:var(--dim);letter-spacing:.08em}
 .rd .v{font-size:16px;color:var(--leaf);margin-top:2px;font-variant-numeric:tabular-nums}
+/* ── the keychain ring ── */
+.ring-wrap{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.ring-wrap svg{flex:0 0 auto}
+@keyframes ringspin{to{stroke-dashoffset:-120}}
 @keyframes breathe{0%,100%{opacity:.5}50%{opacity:1}}
-.breathing{animation:breathe 3s ease-in-out infinite}
+@keyframes pulseout{0%{r:9;opacity:.9}100%{r:26;opacity:0}}
+@keyframes dashflow{to{stroke-dashoffset:-40}}
+.ring-orbit{animation:ringspin 14s linear infinite}
+.node-breathe{animation:breathe 3s ease-in-out infinite}
+.bridge-arc{stroke-dasharray:5 5;animation:dashflow 3s linear infinite}
+.stamp{display:inline-block;font-size:10px;letter-spacing:.14em;padding:3px 10px;border-radius:5px;
+ border:1px solid var(--amber);color:var(--amber);transform:rotate(-2deg)}
+.stamp.ok{border-color:var(--leaf);color:var(--leaf)}
+.keycard{flex:1;min-width:230px;background:var(--well);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.keycard .kt{font-size:10px;letter-spacing:.1em;color:var(--violet)}
+.keycard .kp{font-size:10.5px;color:var(--ink);margin-top:4px;word-break:break-all}
+.keycard .kd{font-size:9.5px;color:var(--dim);margin-top:3px}
+@media (prefers-reduced-motion: reduce){
+ .ring-orbit,.node-breathe,.sig-pulse,.bridge-arc,.breathing{animation:none !important}
+}
 footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
 </style>
 </head>
@@ -62,8 +82,8 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   <p data-reg="raver">the multi-chain wallet — bzDiD soul connects, keyless reads show every
   balance, derived keys sign. First-party, adapter-native, zero custody.</p>
   <p data-reg="cypherpunk">bzDiD masterPRK → per-chain derived keys (secp256k1 for Vaulta,
-  ed25519 for bzDiD rails) → client-side signing via vendored noble curves + eosjs serializer
-  → broadcast via public RPC. Keys never leave the browser. TOFU lock on every origin.</p>
+  ed25519 for bzDiD rails) → client-side eosjs serialization + noble signature →
+  broadcast via public RPC. Keys live in tab memory only, zero storage, zero custody.</p>
 </header>
 
 <section style="border-color:var(--gold)">
@@ -75,6 +95,79 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     <button id="wgo" style="font-size:14px;padding:12px 20px">connect</button>
   </div>
   <div class="law" id="wstat" style="margin-top:8px;min-height:20px">— not connected —</div>
+</section>
+
+<section id="kc-sec">
+  <h2>🗝 THE KEYCHAIN — your bzDiD holds every key</h2>
+  <div class="law">Touch your passkey once per visit — the WebAuthn PRF ceremony re-derives your
+  <b>masterPRK</b> in this tab's memory (never stored, never sent). From it we derive:
+  the <b>ed25519 soul record key</b> (context <b>bnr.b</b>, same as onboarding) and the
+  <b>Vaulta K1 signing key</b> (context <b>vaulta:yourname</b>, secp256k1). No passkey here, or it
+  lacks PRF? Use your 24-word recovery phrase below — same soul, same keys.</div>
+  <div class="ring-wrap">
+    <svg width="230" height="230" viewBox="0 0 230 230" aria-label="keychain ring">
+      <circle cx="115" cy="115" r="86" fill="none" stroke="#243026" stroke-width="1"/>
+      <circle class="ring-orbit" cx="115" cy="115" r="86" fill="none" stroke="#FFD700" stroke-width="1.4"
+        stroke-dasharray="3 9" opacity=".5"/>
+      <circle cx="115" cy="115" r="58" fill="none" stroke="#1a241d" stroke-width="1"/>
+      <!-- master key at center -->
+      <g>
+        <circle class="node-breathe" cx="115" cy="115" r="13" fill="none" stroke="#FFD700" stroke-width="1.2"/>
+        <circle cx="115" cy="115" r="6" fill="#FFD700" opacity=".85"/>
+        <text x="115" y="143" text-anchor="middle" font-size="8.5" fill="#8a9a8a" font-family="IBM Plex Mono">masterPRK</text>
+      </g>
+      <!-- ed25519 soul node -->
+      <g>
+        <circle cx="115" cy="29" r="8" fill="#0e1611" stroke="#c9a0ff" stroke-width="1.4"/>
+        <circle cx="115" cy="29" r="3" fill="#c9a0ff"/>
+        <text x="115" y="14" text-anchor="middle" font-size="8" fill="#8a9a8a" font-family="IBM Plex Mono">soul · ed25519</text>
+      </g>
+      <!-- K1 vaulta node -->
+      <g>
+        <circle id="k1node" class="node-breathe" cx="201" cy="115" r="8" fill="#0e1611" stroke="#5f6f61" stroke-width="1.4"/>
+        <circle id="k1core" cx="201" cy="115" r="3" fill="#5f6f61"/>
+        <text x="201" y="100" text-anchor="middle" font-size="8" fill="#8a9a8a" font-family="IBM Plex Mono">vaulta · K1</text>
+      </g>
+      <!-- future chains node -->
+      <g opacity=".45">
+        <circle cx="115" cy="201" r="8" fill="#0e1611" stroke="#00E5FF" stroke-width="1.4" stroke-dasharray="2 3"/>
+        <text x="115" y="222" text-anchor="middle" font-size="8" fill="#8a9a8a" font-family="IBM Plex Mono">eth · next</text>
+      </g>
+      <!-- bridge arc + anchor (turned on when bridged) -->
+      <path id="bridgearc" class="bridge-arc" d="M 201 115 Q 235 178 178 196" fill="none"
+        stroke="#5f6f61" stroke-width="1.2" opacity="0"/>
+      <g id="anchornode" opacity="0">
+        <text x="168" y="207" font-size="13" fill="#FFD700">⚓</text>
+        <text x="178" y="222" font-size="8" fill="#8a9a8a" font-family="IBM Plex Mono">chain authority</text>
+      </g>
+      <circle id="sigpulse" class="sig-pulse" cx="201" cy="115" r="9" fill="none" stroke="#7ddf8f" stroke-width="2" opacity="0"/>
+    </svg>
+    <div style="flex:1;min-width:250px">
+      <div class="row" style="margin-top:0">
+        <button id="kc-pass" class="gold">🗝 connect keychain (passkey)</button>
+      </div>
+      <div class="row">
+        <input id="kc-rec" class="small" type="password" placeholder="…or paste your 24-word recovery phrase / bdidrec code" spellcheck="false" autocomplete="off">
+        <button id="kc-recgo">recover</button>
+      </div>
+      <div class="law" id="kc-stat" style="margin-top:6px;min-height:20px">— keychain not connected —</div>
+      <div id="kc-cards" style="display:none;gap:10px;flex-wrap:wrap;margin-top:8px">
+        <div class="keycard" style="flex:1 1 100%">
+          <div class="kt">SOUL FINGERPRINT (ed25519 record · bnr.b)</div>
+          <div class="kp" id="kc-soul-fp">—</div>
+          <div class="kd" id="kc-soul-pub">—</div>
+        </div>
+        <div class="keycard" style="flex:1 1 100%;border-color:#2c552c">
+          <div class="kt">VAULTA K1 SIGNING KEY (vaulta:<span id="kc-soul-name">…</span>)</div>
+          <div class="kp" id="kc-k1-pub" style="color:var(--leaf)">—</div>
+          <div class="kd">chain authority: <span id="kc-bridge-verdict" class="stamp">checking…</span></div>
+        </div>
+      </div>
+      <div class="row" id="kc-outrow" style="display:none">
+        <button id="kc-out" style="font-size:10px;padding:6px 12px;min-height:32px">disconnect + scrub keys from memory</button>
+      </div>
+    </div>
+  </div>
 </section>
 
 <section>
@@ -109,22 +202,36 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   </div>
 </section>
 
+<section id="bridge-sec" style="display:none;border-color:var(--gold)">
+  <h2>🌉 THE BRIDGE — one time, then never manual again</h2>
+  <div class="law">Your bzDiD-derived K1 key is not on your account yet. Paste your existing
+  <b>active</b> private key <b>once</b> — we build an updateauth that <b>adds</b> the derived key
+  alongside every key already on your account (nothing removed, threshold unchanged), sign with
+  your old key, broadcast, then this field disappears from your life. The old key stays in tab
+  memory only and is scrubbed the moment the transaction is sent.</div>
+  <div class="row">
+    <input id="br-wif" class="small" type="password" placeholder="existing ACTIVE private key (5K… / L… / K… / PVT_K1_…)" autocomplete="off" spellcheck="false" style="flex:2">
+    <button id="br-go" class="gold">BRIDGE MY bzDiD</button>
+  </div>
+  <div class="law" id="br-stat" style="margin-top:6px;min-height:20px">— waiting for your existing key —</div>
+  <pre id="br-out" style="display:none"></pre>
+</section>
+
 <section>
-  <h2>✍ SIGN — your key, your transaction, never stored</h2>
-  <div class="law">Paste your private key once — it stays in memory for this tab only,
-  never stored, never sent. Sign and broadcast from the browser.</div>
+  <h2>✍ SIGN — your bzDiD signs, zero paste</h2>
+  <div class="law" id="sign-law">Connect your keychain above and bridge it once — after that
+  every transaction signs with your derived key. <b>Nothing manual, ever.</b></div>
   <div class="row">
-    <input id="tx-key" type="password" placeholder="paste your private key (WIF format: 5K... or 5J...)" style="font-size:11px;flex:2" autocomplete="off">
+    <input id="tx-contract" placeholder="contract" value="kingbeelovis" spellcheck="false">
+    <input id="tx-action" placeholder="action" value="registeracc" spellcheck="false">
   </div>
   <div class="row">
-    <input id="tx-contract" placeholder="contract (e.g. kingbeelovis)" value="kingbeelovis" spellcheck="false">
-    <input id="tx-action" placeholder="action (e.g. registeracc)" value="registeracc" spellcheck="false">
+    <input id="tx-data" class="small" placeholder='JSON args' value='{"registrant":"kingbeelovis","domain_name":"k","target":"kingbeelovis"}' style="flex:2" spellcheck="false">
   </div>
   <div class="row">
-    <input id="tx-data" placeholder='JSON args' value='{"registrant":"kingbeelovis","domain_name":"k","target":"kingbeelovis"}' style="flex:2;font-size:11px" spellcheck="false">
-  </div>
-  <div class="row">
-    <button id="tx-go" style="background:#1a3a1a;color:var(--leaf);border-color:var(--leaf)">SIGN + BROADCAST</button>
+    <button id="tx-k" class="green" style="font-size:11px">⏱ preset: reserve k.b</button>
+    <button id="tx-q" class="green" style="font-size:11px">⏱ preset: reserve q.b</button>
+    <button id="tx-go" class="green" style="flex:1">SIGN + BROADCAST with bzDiD key</button>
   </div>
   <pre id="tx-out" style="display:none"></pre>
 </section>
@@ -134,55 +241,336 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   <div class="readout">
     <div class="rd"><div class="k">SOUL</div><div class="v" id="sum-soul" style="font-size:13px">—</div></div>
     <div class="rd"><div class="k">CHAINS CONNECTED</div><div class="v" id="sum-chains">0</div></div>
-    <div class="rd"><div class="k">0x FINGERPRINT</div><div class="v" id="sum-fp" style="font-size:11px">—</div></div>
-    <div class="rd"><div class="k">STATUS</div><div class="v" id="sum-stat" style="font-size:12px;color:var(--amber)">signing: integration in progress</div></div>
+    <div class="rd"><div class="k">KEYCHAIN</div><div class="v" id="sum-kc" style="font-size:12px;color:var(--amber)">not connected</div></div>
+    <div class="rd"><div class="k">VAULTA AUTHORITY</div><div class="v" id="sum-bridge" style="font-size:12px;color:var(--amber)">—</div></div>
   </div>
 </section>
 
 </main>
 <footer>
-  🗝 the BNR wallet · bzDiD is the wallet · first-party only · vendored noble + eosjs · zero custody<br>
-  static · keyless reads · AGPL-3.0-only · <a href="index.html">the hub</a> · this page: surfaces/wallet.html
+  🗝 the BNR wallet · bzDiD is the wallet · first-party only · vendored eosjs + noble (IIFE build receipt in vendor/BUILD-NOTES.md) · zero custody<br>
+  static · keys live in tab memory only · AGPL-3.0-only · <a href="index.html">the hub</a> · this page: surfaces/wallet.html
 </footer>
 <script src="agent-dock.js?v=4"></script>
 <script src="tour.js?v=22"></script>
+<script src="onboarding/bzdid-key.js"></script>
+<script src="onboarding/vendor/bnr-sign.js?v=1"></script>
 <script>
 (function(){
   var $=function(i){return document.getElementById(i)};
-  var VH=['https://api.eosn.io','https://eos.api.eosnation.io','https://eos.greymass.com'];
+  var VH=['https://eos.api.eosnation.io','https://eos.greymass.com','https://api.eosn.io'];
   var HH='https://api.hive.blog';
-  var AH='https://arb1.arbitrum.io/rpc';
-  var ANT='0xAacF78d5a0a284b2F7eFb1149d7C9eA01A26b0e6'; // ANT token on Arbitrum PUBLIC-CONSTANT
+  var LIVE_HOST=null;
   var SOUL=null;
+  var MPRK=null;          // Uint8Array(32) masterPRK — tab memory only
+  var K1=null;            // {wif, eosPub, pubK1} — tab memory only
+  var BRIDGED=null;       // true/false/unknown
+  var BN=null;            // BnrSign bundle
 
+  // nothing freezes silently: surface any stray handler error in the page
+  window.addEventListener('error',function(ev){
+    var el=$('tx-out'); if(el){el.style.display='block';el.textContent='page error: '+(ev.message||'')}
+  });
+  window.addEventListener('unhandledrejection',function(ev){
+    var el=$('tx-out'); if(el){el.style.display='block';el.textContent='unhandled: '+((ev.reason&&ev.reason.message)||String(ev.reason))}
+  });
+
+  function fetchT(url,opts,ms){
+    var ctl=new AbortController();
+    var t=setTimeout(function(){ctl.abort()},ms||9000);
+    return fetch(url,Object.assign({},opts,{signal:ctl.signal})).finally(function(){clearTimeout(t)});
+  }
   async function post(hosts,path,body){
     var hs=Array.isArray(hosts)?hosts:[hosts];
     for(var i=0;i<hs.length;i++){
       try{
-        var r=await fetch(hs[i]+path,{method:'POST',
+        var r=await fetchT(hs[i]+path,{method:'POST',
           headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
         if(r.ok)return await r.json();
       }catch(e){}
     }
     return null;
   }
+  // nodes answer broadcasts with HTTP 500 + a JSON reason — read it, don't discard it
+  async function postAny(hosts,path,body){
+    var hs=Array.isArray(hosts)?hosts:[hosts];
+    for(var i=0;i<hs.length;i++){
+      try{
+        var r=await fetchT(hs[i]+path,{method:'POST',
+          headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+        var d=await r.json();
+        if(d&&(d.transaction_id||!r.ok))return d;
+      }catch(e){}
+    }
+    return null;
+  }
 
+  /* ── keychain helpers ─────────────────────────────────────── */
+  function wif37(seed){
+    var p=new Uint8Array(33); p[0]=0x80; p.set(seed,1);
+    var chk=BN.sha256(BN.sha256(p)).slice(0,4);
+    return BN.Numeric.binaryToBase58(new Uint8Array([...p,...chk]));
+  }
+  // accepts 51-char (37B) and 52-char compressed (38B) WIFs + PVT_K1_; returns eosjs-legal form
+  function parseWifAny(s){
+    s=(s||'').trim();
+    if(/^PVT_K1_[0-9A-Za-z]+$/.test(s))return s;
+    var raw=BN.Numeric.base58ToBinary(0,s);
+    var seed=null;
+    if(raw.length===37&&raw[0]===0x80)seed=raw.slice(1,33);
+    else if(raw.length===38&&raw[0]===0x80&&raw[33]===0x01)seed=raw.slice(1,33);
+    else throw new Error('not a WIF (decoded '+raw.length+' bytes) — paste the private key your wallet exported');
+    var body=raw.slice(0,raw.length-4),chk=raw.slice(raw.length-4);
+    var calc=BN.sha256(BN.sha256(body)).slice(0,4);
+    for(var i=0;i<4;i++)if(chk[i]!==calc[i])throw new Error('WIF checksum failed — typo in the key?');
+    return wif37(seed);
+  }
+  function deriveK1(){
+    if(!MPRK||!SOUL)return;
+    var rec=BZDIDKEY.deriveK1Key(MPRK,'vaulta:'+SOUL);
+    var w=wif37(rec.seed);
+    rec.seed.fill(0);
+    var pk=BN.PrivateKey.fromString(w);
+    K1={wif:w, eosPub:pk.getPublicKey().toLegacyString(), pubK1:pk.getPublicKey().toString()};
+  }
+  function scrubAll(){
+    if(MPRK){MPRK.fill(0);MPRK=null}
+    K1=null;BRIDGED=null;
+  }
+
+  async function pickHost(){
+    for(var i=0;i<VH.length;i++){
+      try{var r=await fetchT(VH[i]+'/v1/chain/get_info',{method:'POST'},6000);if(r.ok){LIVE_HOST=VH[i];return LIVE_HOST}}catch(e){}
+    }
+    return null;
+  }
+  function rpc(){
+    return new BN.JsonRpc(LIVE_HOST,{fetch:fetch});
+  }
+  function api(provider){
+    return new BN.Api({rpc:rpc(),signatureProvider:provider,textEncoder:new TextEncoder(),textDecoder:new TextDecoder()});
+  }
+
+  /* canonical key compare: both to PUB_* canonical strings */
+  function canon(k){try{return BN.PublicKey.fromString(k).toString()}catch(e){return k}}
+
+  async function checkBridge(){
+    if(!K1||!SOUL){BRIDGED=null;return}
+    $('kc-bridge-verdict').textContent='checking…';$('kc-bridge-verdict').className='stamp';
+    var acc=await post(VH,'/v1/chain/get_account',{account_name:SOUL});
+    if(!acc){setBridgeState(false,'account unreadable');return}
+    var act=(acc.permissions||[]).filter(function(p){return p.perm_name==='active'})[0];
+    if(!act){setBridgeState(false,'no active perm');return}
+    var keys=(act.required_auth&&act.required_auth.keys)||[];
+    BRIDGED=keys.some(function(k){return canon(k.key)===K1.pubK1});
+    setBridgeState(BRIDGED,BRIDGED?'BRIDGED — bzDiD signs for '+SOUL:'NOT YET on chain — bridge below');
+  }
+  function setBridgeState(ok,label){
+    var v=$('kc-bridge-verdict');
+    v.textContent=label; v.className='stamp'+(ok?' ok':'');
+    $('bridge-sec').style.display=(MPRK&&K1&&!ok)?'block':'none';
+    var n=$('k1node'),c=$('k1core'),arc=$('bridgearc'),an=$('anchornode');
+    if(ok){n.setAttribute('stroke','#7ddf8f');c.setAttribute('fill','#7ddf8f');
+      arc.setAttribute('stroke','#FFD700');arc.setAttribute('opacity','.8');
+      an.setAttribute('opacity','1')}
+    else{n.setAttribute('stroke','#5f6f61');c.setAttribute('fill','#5f6f61');
+      arc.setAttribute('opacity','0');an.setAttribute('opacity','0')}
+    $('sum-bridge').textContent=ok?'bridged ✓':(MPRK?'needs bridge':'—');
+    $('sum-bridge').style.color=ok?'var(--leaf)':'var(--amber)';
+  }
+
+  /* ── keychain connect ceremony ────────────────────────────── */
+  function keychainOn(id){
+    MPRK=id.masterPrk.slice();
+    id.masterPrk.fill&&id.masterPrk.fill(0);
+    deriveK1();
+    $('kc-soul-fp').textContent=(id.fingerprint&&id.fingerprint.words)||'—';
+    $('kc-soul-pub').textContent='ed25519: '+Array.from(id.record.publicKey).slice(0,8).map(function(b){return b.toString(16).padStart(2,'0')}).join('')+'…';
+    $('kc-soul-name').textContent=SOUL||'…';
+    $('kc-k1-pub').textContent=K1?K1.eosPub:'—';
+    $('kc-cards').style.display='flex';
+    $('kc-outrow').style.display='flex';
+    $('kc-stat').innerHTML='✓ keychain live — <b style="color:var(--leaf)">keys in tab memory only</b>, never stored';
+    $('sum-kc').textContent='connected ✓';$('sum-kc').style.color='var(--leaf)';
+    checkBridge();
+  }
+  $('kc-pass').onclick=async function(){
+    if(!BZDIDKEY){$('kc-stat').textContent='engine missing';return}
+    try{
+      var sup=await BZDIDKEY.prfBrowserSupport();
+      if(sup===false){$('kc-stat').textContent='this browser lacks PRF — use the recovery lane below';return}
+      $('kc-stat').textContent='touch your passkey…';
+      var id=await BZDIDKEY.identityFromPasskey('bnr.b');
+      keychainOn(id);
+    }catch(e){
+      $('kc-stat').textContent='passkey lane: '+e.message+' — if your passkey predates PRF, use recovery below';
+    }
+  };
+  $('kc-recgo').onclick=function(){
+    var raw=$('kc-rec').value;
+    if(!raw.trim()){$('kc-stat').textContent='paste your phrase or bdidrec code first';return}
+    try{
+      var id=BZDIDKEY.identityFromRecovery(raw,'bnr.b');
+      $('kc-rec').value='';
+      keychainOn(id);
+    }catch(e){$('kc-stat').textContent=e.message}
+  };
+
+  $('kc-out').onclick=function(){
+    scrubAll();
+    $('kc-cards').style.display='none';$('kc-outrow').style.display='none';
+    $('bridge-sec').style.display='none';
+    $('kc-stat').textContent='— keychain scrubbed from memory —';
+    $('sum-kc').textContent='not connected';$('sum-kc').style.color='var(--amber)';
+    $('sum-bridge').textContent='—';$('sum-bridge').style.color='var(--amber)';
+  };
+
+  /* ── THE BRIDGE: one-time updateauth ──────────────────────── */
+  $('br-go').onclick=async function(){
+    var out=$('br-out'),stat=$('br-stat');
+    out.style.display='block';
+    if(!K1||!SOUL){stat.textContent='connect your keychain first';return}
+    if(!LIVE_HOST){await pickHost(); if(!LIVE_HOST){stat.textContent='no RPC host reachable';return}}
+    try{
+    var wif;
+    try{wif=parseWifAny($('br-wif').value)}
+    catch(e){stat.textContent=e.message;return}
+    stat.textContent='1/5 reading live account authority…';
+    var acc=await post(VH,'/v1/chain/get_account',{account_name:SOUL});
+    if(!acc){stat.textContent='account read failed';return}
+    var act=acc.permissions.filter(function(p){return p.perm_name==='active'})[0];
+    if(!act||!act.required_auth){stat.textContent='account has no readable active permission';return}
+    var ra=act.required_auth;
+    var existing=ra.keys.map(function(k){return {key:k.key,weight:k.weight}});
+    var already=existing.some(function(k){return canon(k.key)===K1.pubK1});
+    if(already){setBridgeState(true,'already bridged');stat.textContent='already bridged — nothing to do';$('br-wif').value='';return}
+    var newKeys=existing.concat([{key:K1.eosPub,weight:1}]).sort(function(a,b){
+      var keyBytes=function(s){try{var p=BN.PublicKey.fromString(s);return (p.key&&p.key.data)||new Uint8Array(0)}catch(e){return new Uint8Array(0)}};
+      var da=keyBytes(a.key),db=keyBytes(b.key);
+      for(var i=0;i<Math.min(da.length,db.length);i++)if(da[i]!==db[i])return da[i]-db[i];
+      return da.length-db.length;
+    });
+    var args={account:SOUL,permission:'active',parent:act.parent||'owner',
+      auth:{threshold:ra.threshold,keys:newKeys,accounts:ra.accounts||[],waits:ra.waits||[]}};
+    var actz=[{actor:SOUL,permission:'active'}];
+    var prov=new BN.JsSignatureProvider([wif]);
+    $('br-wif').value=''; // scrub the paste immediately — provider holds it in memory for this tx only
+    var A=api(prov);
+    stat.textContent='2/5 serializing updateauth (eosio ABI, client-side)…';
+      var abi=await rpc().get_abi('eosio');
+      var types=BN.Serialize.getTypesFromAbi(BN.Serialize.createInitialTypes(),abi.abi);
+      var amap=new Map(); for(const a of abi.abi.actions)amap.set(a.name,BN.Serialize.getType(types,a.type));
+      var sa=BN.Serialize.serializeAction({types:types,actions:amap},'eosio','updateauth',actz,args,new TextEncoder(),new TextDecoder());
+      stat.textContent='3/5 signing with your existing key…';
+      var info=await rpc().get_info();
+      var ref=await rpc().get_block(info.head_block_num-3);
+      var txJson={expiration:new Date(Date.now()+120000).toISOString().slice(0,19),
+        ref_block_num:(info.head_block_num-3)&0xffff,ref_block_prefix:ref.ref_block_prefix,
+        max_net_usage_words:0,max_cpu_usage_ms:0,delay_sec:0,context_free_actions:[],
+        actions:[{account:'eosio',name:'updateauth',authorization:actz,data:sa.data}],
+        transaction_extensions:[]};
+      var packed=await A.serializeTransaction(txJson);
+      var req=[BN.PrivateKey.fromString(wif).getPublicKey().toString()];
+      var sgn=await prov.sign({chainId:info.chain_id,requiredKeys:req,serializedTransaction:packed,abis:[]});
+      stat.textContent='4/5 broadcasting…';
+      var hex=Array.from(packed).map(function(b){return b.toString(16).padStart(2,'0')}).join('');
+      var res=await postAny(VH,'/v1/chain/send_transaction',
+        {signatures:sgn.signatures,compression:0,packed_context_free_data:'',packed_trx:hex});
+      if(res&&res.transaction_id){
+        stat.innerHTML='<b style="color:var(--leaf)">5/5 BRIDGED</b> — tx '+res.transaction_id.slice(0,16)+'…';
+        out.innerHTML='<b>transaction_id:</b> '+res.transaction_id+String.fromCharCode(10)+
+          '<b>added key:</b> '+K1.eosPub+String.fromCharCode(10)+
+          '<b>threshold/keys:</b> '+newKeys.length+' keys @ threshold '+ra.threshold+' (nothing removed)';
+        checkBridge();
+      } else {
+        var msg=JSON.stringify(res&&res.error||res||{}).slice(0,400);
+        if(/provided keys|declares authority|unsatisfied/i.test(msg)){
+          msg='the pasted key is NOT on '+SOUL+'@active — paste the ACTIVE key ('+
+            existing.map(function(k){return k.key.slice(0,12)+'…'}).join(', ')+') — raw: '+msg;
+        }
+        stat.textContent='node refused:'; out.textContent=msg;
+      }
+    }catch(e){
+      stat.textContent='bridge failed: '+(e&&e.message||String(e));
+      out.textContent=(e&&e.message||String(e))+String.fromCharCode(10)+'(full lane receipts in onboarding/vendor/BUILD-NOTES.md)';
+    }
+  };
+
+  /* ── SIGN lane: bzDiD key signs, zero paste ───────────────── */
+  function preset(name){
+    $('tx-contract').value=SOUL||'kingbeelovis';
+    $('tx-action').value='registeracc';
+    $('tx-data').value=JSON.stringify({registrant:SOUL||'kingbeelovis',domain_name:name,target:SOUL||'kingbeelovis'});
+  }
+  $('tx-k').onclick=function(){preset('k')};
+  $('tx-q').onclick=function(){preset('q')};
+  $('tx-go').onclick=async function(){
+    var out=$('tx-out'); out.style.display='block';
+    var pulse=$('sigpulse');
+    pulse.style.animation='none'; void pulse.getBoundingClientRect();
+    pulse.style.animation='pulseout 1.2s ease-out 2';
+    if(!K1||!SOUL){out.textContent='connect your keychain first (the gold button above)';return}
+    if(!BRIDGED){out.textContent='your bzDiD key is not on '+SOUL+'@active yet — run THE BRIDGE above first';return}
+    var contract=$('tx-contract').value.trim(), action=$('tx-action').value.trim();
+    var data; try{data=JSON.parse($('tx-data').value)}catch(e){out.textContent='invalid JSON: '+e.message;return}
+    if(!contract||!action){out.textContent='contract + action required';return}
+    if(!LIVE_HOST){await pickHost(); if(!LIVE_HOST){out.textContent='no RPC host reachable';return}}
+    var actor=data.registrant||data.owner||data.from||data.account||SOUL;
+    var actz=[{actor:actor,permission:'active'}];
+    var prov=new BN.JsSignatureProvider([K1.wif]);
+    var A=api(prov);
+    try{
+      out.textContent='1/4 serializing '+contract+':'+action+' from live ABI…';
+      var abi=await rpc().get_abi(contract);
+      if(!abi||!abi.abi)throw new Error('no ABI on '+contract+' — check the contract name');
+      var types=BN.Serialize.getTypesFromAbi(BN.Serialize.createInitialTypes(),abi.abi);
+      var amap=new Map(); for(const a of abi.abi.actions)amap.set(a.name,BN.Serialize.getType(types,a.type));
+      if(!amap.get(action))throw new Error('action '+action+' not in '+contract+' ABI (has: '+Array.from(amap.keys()).slice(0,10).join(', ')+')');
+      var sa=BN.Serialize.serializeAction({types:types,actions:amap},contract,action,actz,data,new TextEncoder(),new TextDecoder());
+      out.textContent='2/4 building tx + signing with your bzDiD key…';
+      var info=await rpc().get_info();
+      var ref=await rpc().get_block(info.head_block_num-3);
+      var txJson={expiration:new Date(Date.now()+120000).toISOString().slice(0,19),
+        ref_block_num:(info.head_block_num-3)&0xffff,ref_block_prefix:ref.ref_block_prefix,
+        max_net_usage_words:0,max_cpu_usage_ms:0,delay_sec:0,context_free_actions:[],
+        actions:[{account:contract,name:action,authorization:actz,data:sa.data}],
+        transaction_extensions:[]};
+      var packed=await A.serializeTransaction(txJson);
+      var sgn=await prov.sign({chainId:info.chain_id,requiredKeys:[K1.pubK1],serializedTransaction:packed,abis:[]});
+      out.textContent='3/4 broadcasting…';
+      var hex=Array.from(packed).map(function(b){return b.toString(16).padStart(2,'0')}).join('');
+      var res=await postAny(VH,'/v1/chain/send_transaction',
+        {signatures:sgn.signatures,compression:0,packed_context_free_data:'',packed_trx:hex});
+      if(res&&res.transaction_id){
+        out.innerHTML='<b style="color:var(--leaf)">✓ SIGNED + BROADCAST by your bzDiD key</b>'+String.fromCharCode(10)+
+          '<b>transaction_id:</b> '+res.transaction_id+String.fromCharCode(10)+
+          '<b>signed by:</b> '+K1.eosPub+String.fromCharCode(10)+
+          '<b>packed_trx:</b> '+hex.slice(0,128)+'…';
+      } else {
+        var msg=JSON.stringify(res&&res.error||res||{}).slice(0,400);
+        out.innerHTML='<b style="color:var(--amber)">node refused:</b> '+msg;
+      }
+    }catch(e){
+      out.innerHTML='<b style="color:var(--amber)">sign error:</b> '+e.message;
+    }
+  };
+
+  /* ── balances (keyless, unchanged lane) ───────────────────── */
   async function readVaulta(acct){
     var d=await post(VH,'/v1/chain/get_account',{account_name:acct});
     if(!d){ $('v-stat').textContent='read failed'; $('v-stat').className='stat err'; return; }
-    $('v-bal').textContent=d.core_liquid_balance||'0.0000 A';
+    $('v-bal').textContent=d.core_liquid_balance||'0.0000';
     $('v-info').textContent='RAM '+(d.ram_usage/1024).toFixed(1)+'/'+(d.ram_quota/1024).toFixed(0)+' KB · '+
       'CPU '+((d.cpu_limit&&d.cpu_limit.used)||0)+'μs · perms '+(d.permissions||[]).map(function(p){return p.perm_name}).join('/');
     $('v-stat').textContent='✓ live'; $('v-stat').className='stat ok';
     $('ch-vaulta').classList.add('connected');
-    // ANT token balance via get_currency_balance
     var ant=await post(VH,'/v1/chain/get_currency_balance',{code:'arbitrum',symbol:'ANT',account:acct});
     if(ant&&ant.length) $('ant-bal').textContent=ant[0];
   }
 
   async function readHive(acct){
     try{
-      var r=await fetch(HH,{method:'POST',headers:{'Content-Type':'application/json'},
+      var r=await fetchT(HH,{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({jsonrpc:'2.0',method:'condenser_api.get_accounts',params:[[acct]],id:1})});
       var d=await r.json();
       if(d.result&&d.result[0]){
@@ -201,116 +589,33 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     $('wstat').innerHTML='✓ connected as <b style="color:var(--leaf)">'+SOUL+'</b> — reading balances…';
     await Promise.all([readVaulta(SOUL), readHive(SOUL)]);
     $('wstat').innerHTML='✓ connected as <b style="color:var(--leaf)">'+SOUL+'</b> · balances live';
-    // 0x fingerprint
-    try{
-      var fp=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('bnr.b/evm/'+SOUL+'@'+location.origin));
-      var hex=[...new Uint8Array(fp)].map(function(b){return b.toString(16).padStart(2,'0')}).join('');
-      $('sum-fp').textContent='0x'+hex.slice(0,8)+'…'+hex.slice(-4);
-    }catch(e){}
     $('sum-soul').textContent=SOUL+'.b';
     $('sum-chains').textContent=document.querySelectorAll('.chain.connected').length;
+    if(K1)checkBridge();
   }
 
   $('wgo').onclick=function(){
     var v=($('wq').value||'').trim().toLowerCase().replace(/\.b$/,'');
     if(!v){ $('wstat').textContent='type your name first'; return; }
     SOUL=v;
-    try{localStorage.setItem('bnr_soul',SOUL);}catch(e){}
+    try{localStorage.setItem('bnr_soul',SOUL)}catch(e){}
+    if(K1)deriveK1();
     readAll();
   };
   $('wq').addEventListener('keydown',function(e){if(e.key==='Enter')$('wgo').click()});
+  $('kc-rec').addEventListener('keydown',function(e){if(e.key==='Enter')$('kc-recgo').click()});
+  $('br-wif').addEventListener('keydown',function(e){if(e.key==='Enter')$('br-go').click()});
 
+  window.addEventListener('beforeunload',scrubAll);
 
-  /* ── THE SIGNING LANE: key import (memory only) → TaPoS → build → sign → broadcast ── */
-  $('tx-go').onclick = async function(){
-    var out = $('tx-out'); out.style.display = 'block';
-    var key = $('tx-key').value.trim();
-    var contract = $('tx-contract').value.trim();
-    var action = $('tx-action').value.trim();
-    var dataStr = $('tx-data').value.trim();
-    if (!key || !contract || !action || !dataStr) { out.textContent = 'fill all fields'; return; }
-    var data;
-    try { data = JSON.parse(dataStr); } catch(e) { out.textContent = 'invalid JSON: ' + e.message; return; }
-
-    // Step 1: TaPoS from get_info
-    out.textContent = '1/4 getting chain info…';
-    var info = await post(VH, '/v1/chain/get_info', {});
-    if (!info) { out.textContent = 'chain info failed'; return; }
-    var refBlockNum = info.head_block_num & 0xFFFF;
-    var refBlockPrefix = info.head_block_id ? parseInt(info.head_block_id.slice(16, 24).match(/../g).reverse().join(''), 16) : 0;
-
-    // Step 2: Build the transaction
-    out.textContent = '2/4 building transaction…';
-    var expiration = new Date(Date.now() + 60000).toISOString().slice(0, 19);
-    var tx = {
-      expiration: expiration,
-      ref_block_num: refBlockNum,
-      ref_block_prefix: refBlockPrefix,
-      max_net_usage_words: 0,
-      max_cpu_usage_ms: 0,
-      delay_sec: 0,
-      context_free_actions: [],
-      actions: [{
-        account: contract,
-        name: action,
-        authorization: [{ actor: data.registrant || data.owner || data.from || 'kingbeelovis', permission: 'active' }],
-        data: data
-      }],
-      transaction_extensions: []
-    };
-
-    // Step 3: Sign — we use the get_info + push_transaction approach
-    // The public RPCs accept the JSON transaction directly via /v1/chain/send_transaction
-    // with signatures computed from the serialized digest
-    out.textContent = '3/4 computing digest + signing…';
-
-    // For now, use the /v1/chain/abi_json_to_bin approach via a different endpoint
-    // Actually, most public RPCs support /v1/chain/push_transaction with packed_trx
-    // But we need the serialized transaction + signature
-
-    // The simplest approach that works: use the /v1/chain/send_transaction endpoint
-    // which accepts the full transaction + signatures
-    // For signing, we need the private key in the right format
-
-    // Try loading the vendored secp256k1
-    try {
-      var secp = await import('./onboarding/vendor/secp256k1.mjs');
-      var sha256 = await import('./onboarding/vendor/sha256.mjs');
-
-      // WIF decode (base58check → 32-byte private key)
-      var raw = atob(key.replace(/^5[HJK]/, ''));
-      if (raw.length < 32) { out.textContent = 'key too short after decode'; return; }
-      var privKey = new Uint8Array(32);
-      for (var i = 0; i < 32; i++) privKey[i] = raw.charCodeAt(i);
-
-      // Compute the chain-aware digest
-      var chainId = info.chain_id;
-      var txJson = JSON.stringify(tx);
-      var digestInput = chainId + txJson + '0000000000000000000000000000000000000000000000000000000000000000'; // PUBLIC-CONSTANT (zero hash for tx digest)
-      var digest = sha256.sha256(digestInput);
-      var sig = secp.secp256k1.sign(digest, privKey);
-
-      // Step 4: Broadcast
-      out.textContent = '4/4 broadcasting…';
-      var signedTx = {
-        transaction: tx,
-        signatures: [sig],
-        context_free_data: []
-      };
-      var result = await post(VH, '/v1/chain/send_transaction', signedTx);
-      if (result && result.transaction_id) {
-        out.innerHTML = '<b style="color:var(--leaf)">SUCCESS</b> — tx: ' + result.transaction_id.slice(0, 16) + '…';
-      } else {
-        out.innerHTML = '<b style="color:var(--amber)">broadcast result:</b> ' + JSON.stringify(result).slice(0, 200);
-      }
-    } catch(e) {
-      out.innerHTML = '<b style="color:var(--amber)">signing error:</b> ' + e.message + String.fromCharCode(10) +
-        'NOTE: this is a first-pass implementation — the serialization format may need' + String.fromCharCode(10) +
-        'the full eosjs adapter for compatibility with all Vaulta nodes.';
-    }
-  };
-
-  // auto-connect from localStorage
+  // boot: bundle check + auto-connect balances from localStorage
+  BN=window.BnrSign||null;
+  if(!BN){
+    var s=document.createElement('div');s.className='law';
+    s.style.color='var(--amber)';
+    s.textContent='⚠ signing bundle (vendor/bnr-sign.js) failed to load — balances still work, signing disabled';
+    $('kc-sec').prepend(s);
+  } else { pickHost(); }
   try{
     var saved=localStorage.getItem('bnr_soul');
     if(saved){ SOUL=saved; $('wq').value=saved; readAll(); }
