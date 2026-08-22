@@ -41,6 +41,20 @@ button:hover{background:var(--violet);color:#000}
 .nm{color:var(--faint);font-style:italic}
 .design{border:1px dashed #3d3410;background:#141207;border-radius:9px;padding:11px 13px;
  font-size:10.5px;color:var(--gold);line-height:1.8;margin-top:10px}
+.dials{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px;margin-top:11px}
+.dial{background:var(--well);border:1px solid var(--line);border-radius:9px;padding:10px 8px;text-align:center}
+.dial svg{width:100%;max-width:150px;display:block;margin:0 auto}
+.dial .val{font-size:16px;margin-top:2px;min-height:22px}
+.dial .val s{font-size:10px;color:var(--dim);text-decoration:none}
+.dial .big{font-size:25px;color:var(--gold);line-height:2}
+.dial .lbl{font-size:9.5px;color:var(--dim);letter-spacing:.04em;margin-top:2px}
+.dial .src{font-size:8.5px;color:var(--faint);margin-top:4px;line-height:1.5}
+.nodial{display:flex;flex-direction:column;justify-content:center}
+.sparks{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:9px;margin-top:9px}
+.spark{background:var(--well);border:1px solid var(--line);border-radius:9px;padding:8px 10px}
+.spark .lbl{font-size:9.5px;color:var(--dim);letter-spacing:.04em;margin-bottom:4px}
+.skmm{display:flex;justify-content:space-between;font-size:8.5px;color:var(--faint)}
+.cypre{background:var(--well);border:1px solid var(--line);border-radius:8px;padding:9px;margin-top:9px;font-size:9px;line-height:1.6;color:var(--dim);white-space:pre-wrap;word-break:break-word}
 .err{color:var(--amber)}
 footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
 code{color:var(--ink)}
@@ -68,8 +82,48 @@ code{color:var(--ink)}
 </header>
 
 <section>
+  <h2>📟 <span data-i18n="bant.panel">THE INSTRUMENT PANEL — live dials, session-honest, keyless</span></h2>
+  <div class="law" data-reg="bee">Six living instruments, read straight off the two chains with
+  no key and no account. A glowing needle means the number just arrived; amber says a read
+  failed — the dials never invent, and a gap in a line is a gap that really happened. Their
+  history lives only in this tab, from the moment you opened it, and is never stored or sent.</div>
+  <div class="law" data-reg="raver">the cockpit strip — L2 gas, gas-per-block, block rate,
+  Vaulta finality, the .b census — needles ride public RPC every 15 seconds, one glow per lane,
+  session sparklines growing underneath. nothing stored, nothing sent, nothing faked: a dead
+  read goes amber and the line simply breaks.</div>
+  <div class="law" data-reg="cypherpunk">Methods, per needle: <code>eth_gasPrice</code> (log dial
+  0.005–5 gwei) · <code>eth_getBlockByNumber</code> → gasUsed per block · block rate over a rolling
+  8-sample window · <code>get_info</code> → head − LIB · <code>get_table_rows</code>
+  kingbeelovis/domains. Failover per lane (2 Arbitrum hosts, 3 Vaulta hosts); a failed read
+  renders amber and breaks the sparkline — a gap is data. Raw responses land in the lane below.
+  15 s cadence, paused while the tab is hidden; buffers cap at 160 samples in RAM only.</div>
+  <div class="dials">
+    <div class="dial"><div id="dgas"></div><div class="val nm" id="dgasv">—</div><div class="lbl">L2 gas price</div><div class="src" id="dgass">eth_gasPrice · Arbitrum One</div></div>
+    <div class="dial"><div id="dfull"></div><div class="val nm" id="dfullv">—</div><div class="lbl">gas used, latest block</div><div class="src" id="dfulls">eth_getBlockByNumber · dial 0–30 Mgas</div></div>
+    <div class="dial"><div id="dbpm"></div><div class="val nm" id="dbpmv">—</div><div class="lbl">L2 block rate</div><div class="src" id="dbpms">measured this session, never quoted</div></div>
+    <div class="dial"><div id="dlib"></div><div class="val nm" id="dlibv">—</div><div class="lbl">Vaulta finality lag</div><div class="src" id="dlibs">head − LIB · get_info · Savanna</div></div>
+    <div class="dial nodial"><div class="big nm" id="dnamesv">—</div><div class="lbl">.b names on the registry</div><div class="src" id="dnamess">get_table_rows · kingbeelovis / domains</div></div>
+    <div class="dial nodial"><div class="big nm" id="dsesv">—</div><div class="lbl">session samples</div><div class="src" id="dsess">this tab only — nothing stored, nothing sent</div></div>
+  </div>
+  <div class="sparks">
+    <div class="spark" style="color:var(--cyan)"><div class="lbl">gas price — this session</div><div id="skgas"><span class="nm">two samples make a line — measuring…</span></div></div>
+    <div class="spark" style="color:var(--gold)"><div class="lbl">gas per block — this session</div><div id="skfull"><span class="nm">two samples make a line — measuring…</span></div></div>
+  </div>
+  <pre class="cypre" data-reg="cypherpunk" id="dialraw">raw lane — last responses land here as they arrive</pre>
+</section>
+
+<section>
   <h2>🐜 <span data-i18n="h.005">THE ANT SIDE — the wallet that feeds the archive · Arbitrum One</span></h2>
-  <div class="law">Uploads to Autonomi are paid in <b>ANT</b> with ETH gas, on Arbitrum One.
+  <div class="law" data-reg="bee">Storing things on Autonomi costs <b>ANT</b>, plus a little ETH
+  for gas, on Arbitrum One. Type any <b>public</b> address — yours, the project's, anyone's —
+  and read its standing. Nothing here can spend; looking is free and safe. ⚠ And before any
+  <i>real</i> payment, the address is always re-derived on your own machine — this page shows,
+  it never pays.</div>
+  <div class="law" data-reg="raver">ANT feeds the archive — the Arbitrum One lane. punch in any
+  public address and watch its standing light up live off the chain, decimals and supply read
+  fresh at load, never assumed. ⚠ display lane only: payments re-derive from the installed
+  client, every single time.</div>
+  <div class="law" data-reg="cypherpunk">Uploads to Autonomi are paid in <b>ANT</b> with ETH gas, on Arbitrum One.
   Enter any <b>public</b> address to read its standing — yours, the project's, anyone's. The
   token contract is verified live at load (decimals and supply read from the chain, never
   assumed). <b>⚠ display lane only:</b> before any <i>payment</i>, addresses are re-derived from
@@ -89,7 +143,17 @@ code{color:var(--ink)}
   </div>
 
   <h2 style="margin-top:16px">⛏ <span data-i18n="h.006">NODE OPERATIONS — where the farm actually runs</span></h2>
-  <div class="law"><b>Your nodes run on your machine</b> (the Autonomi App or <code>antnode</code>),
+  <div class="law" data-reg="bee">Your nodes run on <b>your own machine</b> and earn ANT for
+  storing the network's chunks. A web page cannot reach into your computer — that wall is a
+  feature, and this farm respects it. The panel below stays honestly empty until the local
+  dock lands.</div>
+  <div class="law" data-reg="cypherpunk"><code>antd</code>'s API is a localhost-only surface, and
+  the browser's wall between a hosted page and 127.0.0.1 is <b>load-bearing</b>: a hosted page
+  gets zero paths to your daemon, by design and by law. The dock opens only beside the daemon —
+  the estate's own dev server on your machine — reading node count, stored chunks, and earnings
+  in attos, with nothing egressing. Until its T1/T2 receipts land, the panel is honestly empty,
+  never mocked.</div>
+  <div class="law" data-reg="raver"><b>Your nodes run on your machine</b> (the Autonomi App or <code>antnode</code>),
   earn ANT for storing the network's chunks, and answer to <b>you</b> — and a page served from the
   web <b>cannot and should not reach into your machine</b>: the browser's own wall between a hosted
   page and localhost is a feature this farm respects rather than tunnels around.</div>
@@ -103,18 +167,30 @@ code{color:var(--ink)}
 </section>
 
 <section>
-  <h2>⚡ OUR WALLET, YOUR TREZOR — the signing wing · founder-ruled, no MetaMask</h2>
-  <div class="law"><b>The ruling, executed:</b> this estate's own cockpit talks to the Trezor
+  <h2>⚡ <span data-i18n="bant.wing">OUR WALLET, YOUR TREZOR — the signing wing · founder-ruled, no MetaMask</span></h2>
+  <div class="law" data-reg="bee">This estate talks to your Trezor through the device maker's own
+  official bridge — no third-party wallet in between, by the founder's ruling. The page writes
+  the transaction, <b>the device's screen shows it and signs it</b>, and no key ever leaves the
+  hardware. ⚠ Two things to know before pressing: the button loads Trezor's bridge from
+  <code>connect.trezor.io</code> — on your press only, never by itself — and <b>one Trezor
+  serves one app at a time</b>: close Trezor Suite and the Autonomi App first, or the device
+  will refuse.</div>
+  <div class="law" data-reg="raver"><b>founder-ruled: our cockpit, your device, no MetaMask.</b>
+  the page composes, the Trezor screen is the truth, the page only broadcasts signed bytes.
+  the bridge (<code>connect.trezor.io</code>) loads on your gesture and is named before you
+  press — and release the device first: Suite or the Autonomi App holding it is the #1 bench
+  failure, paid for on the founder's own desk.</div>
+  <div class="law" data-reg="cypherpunk"><b>The ruling, executed:</b> this estate's own cockpit talks to the Trezor
   through <b>Trezor Connect — the device maker's own official bridge</b> — with no third-party
   wallet in between. The page composes the transaction, <b>the device displays and signs</b>,
   the page receives only the signed bytes and broadcasts them. No key ever exists outside the
   hardware; this code handles signatures, never secrets.</div>
-  <div class="law" style="margin-top:8px">⚠ <b>The one disclosed dependency of its kind in the
+  <div class="law" data-reg="cypherpunk" style="margin-top:8px">⚠ <b>The one disclosed dependency of its kind in the
   estate:</b> pressing the button below loads Trezor's official Connect script from
   <code>connect.trezor.io</code> — <b>on your gesture only, never at page load</b>. A signing
   surface that hid its bridge would be a wallet asking for blind trust; this one names it before
   you press anything.</div>
-  <div class="law" style="margin-top:8px">🔓 <b>Release the device first:</b> one Trezor, one app
+  <div class="law" data-reg="cypherpunk" style="margin-top:8px">🔓 <b>Release the device first:</b> one Trezor, one app
   at a time — if <b>Trezor Suite</b> or the <b>Autonomi App</b> is open, the bridge will report
   <i>"used by another application"</i> and the takeover often fails. Close them, then connect.
   (The founder's first bench run paid for this sentence.)</div>
@@ -145,7 +221,16 @@ code{color:var(--ink)}
 
 <section>
   <h2>👑 <span data-i18n="h.007">THE SKAISTS SIDE — LOVErnment DAO · Vaulta</span></h2>
-  <div class="law">The DAO's ground truth lives on Vaulta: accounts, RAM/CPU/NET, and the
+  <div class="law" data-reg="bee">The DAO's home chain is Vaulta. Read any account below — the
+  default is the <code>.b</code> registry's own home — and its balance and resources render as
+  bars <i>and</i> numbers, never colour alone. Reading is free; this page cannot vote or spend.</div>
+  <div class="law" data-reg="cypherpunk"><code>get_account</code> → RAM/CPU/NET quotas and usage;
+  <code>get_currency_balance</code> tried against <code>core.vaulta/A</code> first,
+  <code>eosio.token</code> legacy second — what returns, renders; what doesn't stays an honest
+  absence. Three-host failover, the estate's proven lane. The <code>.b</code> registry lives at
+  <code>kingbeelovis</code>; governance rides the worker-proposal + escrow rail and GOV-1 refuses
+  token-weighted custodian voting — a reader inherits that refusal by having no write path at all.</div>
+  <div class="law" data-reg="raver">The DAO's ground truth lives on Vaulta: accounts, RAM/CPU/NET, and the
   <code>.b</code> registry at <code>kingbeelovis</code>. Read any account below — the default is
   the registry's own home. Resources render as bars <i>and</i> numbers, never colour alone.</div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
@@ -169,7 +254,16 @@ code{color:var(--ink)}
 
 <section>
   <h2><span data-i18n="h.008">THE FARM'S LAW — why one window, two chains</span></h2>
-  <div class="law"><b>The farm feeds the archive; the DAO steers the names.</b> ANT pays for the
+  <div class="law" data-reg="bee">The ant colony pays for the bytes our records live on; the DAO
+  on Vaulta keeps the names those records answer to. One without the other is half an organism —
+  so this window watches both, holds neither, and every number tells you where it came from.
+  When a read fails, it says so; it never quietly shows a zero.</div>
+  <div class="law" data-reg="cypherpunk"><b>Invariants:</b> one window, two chains, zero write
+  paths. ANT (Arbitrum One) funds storage; Vaulta carries the registry the receipts cite. Every
+  figure prints its method beneath it; RPC failure renders as declared failure, never as 0; the
+  session's instrument history exists only in tab RAM. The page can be audited from view-source
+  alone — no build step, no bundler, one disclosed on-gesture dependency in the signing wing.</div>
+  <div class="law" data-reg="raver"><b>The farm feeds the archive; the DAO steers the names.</b> ANT pays for the
   bytes our receipts and mirrors live on; Vaulta carries the identity registry those receipts
   cite. One treasury without the other is half an organism — so the window shows both, reads
   both keylessly, and holds neither. Every number above prints its method beneath it; a failed
@@ -180,7 +274,7 @@ code{color:var(--ink)}
   reads only · no keys, no custody, no write paths · <a href="stack.html">the engine room</a> ·
   <a href="index.html" data-i18n="law.hive">← the hive</a>
 </footer>
-<script src="tour.js?v=15"></script>
+<script src="tour.js?v=16"></script>
 <script>
 (function(){
 "use strict";
@@ -386,6 +480,106 @@ async function readVaulta(acct){
 $('vgo').onclick=function(){ readVaulta($('vacct').value.trim()); };
 $('vacct').addEventListener('keydown',function(e){ if(e.key==='Enter') $('vgo').click(); });
 readVaulta('kingbeelovis');
+
+/* ---- THE INSTRUMENT PANEL — every needle prints its method; failure is declared, never zeroed;
+   history is session-only tab RAM (capped), paused while hidden. One set of constants: the
+   registers restyle prose, never these numbers. ---- */
+function arcPath(f){
+  var a0=135*Math.PI/180, a1=(135+270*f)*Math.PI/180;
+  return 'M'+(50+38*Math.cos(a0)).toFixed(2)+' '+(50+38*Math.sin(a0)).toFixed(2)
+    +' A 38 38 0 '+(270*f>180?1:0)+' 1 '
+    +(50+38*Math.cos(a1)).toFixed(2)+' '+(50+38*Math.sin(a1)).toFixed(2);
+}
+function mkDial(id,accent){
+  $(id).innerHTML='<svg viewBox="0 0 100 82" role="img" aria-label="dial">'
+   +'<path d="'+arcPath(1)+'" fill="none" stroke="var(--line)" stroke-width="6" stroke-linecap="round"/>'
+   +'<path id="'+id+'-arc" d="" fill="none" stroke="'+accent+'" stroke-width="6" stroke-linecap="round" style="filter:drop-shadow(0 0 5px '+accent+')"/>'
+   +'<g id="'+id+'-ndl" style="transform-origin:50px 50px;transition:transform .9s cubic-bezier(.4,0,.2,1)">'
+   +'<line x1="50" y1="50" x2="50" y2="16" stroke="var(--ink)" stroke-width="2"/></g>'
+   +'<circle cx="50" cy="50" r="3.5" fill="var(--ink)"/></svg>';
+}
+function setDial(id,f,valHtml,srcText){
+  var arc=$(id+'-arc'), ndl=$(id+'-ndl'), v=$(id+'v');
+  if(f===null){ arc.setAttribute('d',''); ndl.style.display='none';
+    v.innerHTML='<span class="err">fetch failed — declared</span>'; }
+  else{ f=Math.max(0,Math.min(1,f)); ndl.style.display='';
+    arc.setAttribute('d',arcPath(Math.max(f,0.004)));
+    ndl.style.transform='rotate('+(270*f-135)+'deg)';
+    v.innerHTML=valHtml; v.classList.remove('nm'); }
+  if(srcText!==undefined) $(id+'s').textContent=srcText;
+}
+function spark(id,buf,fmtv){
+  var el=$(id), vals=buf.filter(function(x){return x!==null});
+  if(vals.length<2) return;
+  var min=Math.min.apply(null,vals), max=Math.max.apply(null,vals), span=(max-min)||1;
+  var W=300,H=44,segs=[],cur=[];
+  buf.forEach(function(v,i){
+    if(v===null){ if(cur.length>1)segs.push(cur); cur=[]; return; }
+    cur.push((buf.length>1?i*(W/(buf.length-1)):0).toFixed(1)+','+(H-4-(v-min)/span*(H-10)).toFixed(1));
+  });
+  if(cur.length>1)segs.push(cur);
+  el.innerHTML='<svg viewBox="0 0 300 44" preserveAspectRatio="none" style="width:100%;height:44px;display:block">'
+    +segs.map(function(s){return '<polyline points="'+s.join(' ')+'" fill="none" stroke="currentColor" stroke-width="1.5" vector-effect="non-scaling-stroke"/>';}).join('')
+    +'</svg><div class="skmm"><span>min '+fmtv(min)+'</span><span>max '+fmtv(max)+'</span></div>';
+}
+var SES={gas:[],full:[],blocks:[],raw:{},t0:new Date()};
+function push(a,v){ a.push(v); if(a.length>160)a.shift(); }
+function rawLane(){
+  var o=SES.raw, keys=Object.keys(o), lines=[];
+  for(var i=0;i<keys.length;i++) lines.push(keys[i]+' -> '+o[keys[i]]);
+  var el=$('dialraw'); if(el) el.textContent=lines.join(String.fromCharCode(10))||'raw lane — waiting for the first tick';
+}
+async function tickL2(){
+  var gp=await erpc('eth_gasPrice',[]);
+  if(gp!==null){
+    var g=parseInt(gp,16)/1e9; push(SES.gas,g); SES.raw['eth_gasPrice']=gp;
+    setDial('dgas',(Math.log10(g)-Math.log10(0.005))/(Math.log10(5)-Math.log10(0.005)),
+      g.toPrecision(3)+' <s>gwei</s>','eth_gasPrice · live · log dial 0.005–5 gwei');
+  } else { push(SES.gas,null); SES.raw['eth_gasPrice']='FAILED (both hosts)'; setDial('dgas',null); }
+  var b=await erpc('eth_getBlockByNumber',['latest',false]);
+  if(b&&b.gasUsed&&b.gasLimit&&b.number){
+    var used=parseInt(b.gasUsed,16), n=parseInt(b.number,16), mg=used/1e6;
+    push(SES.full,mg); SES.raw['eth_getBlockByNumber.latest']='#'+n+' gasUsed='+used;
+    setDial('dfull',mg/30,(mg>=1?mg.toFixed(1):mg.toFixed(3))+' <s>Mgas</s>','gas used by block '+n.toLocaleString('en-US')+' · dial 0–30 Mgas');
+    push(SES.blocks,{n:n,t:Date.now()});
+    if(SES.blocks.length>=2){
+      var w=SES.blocks.slice(-8), dn=w[w.length-1].n-w[0].n, dt=(w[w.length-1].t-w[0].t)/60000;
+      if(dt>0) setDial('dbpm',(dn/dt)/400,Math.round(dn/dt)+' <s>blk/min</s>',
+        'measured this session · '+w.length+'-sample window · dial 0–400');
+    } else $('dbpms').textContent='two samples make a rate — measuring…';
+  } else { push(SES.full,null); SES.raw['eth_getBlockByNumber.latest']='FAILED (both hosts)'; setDial('dfull',null); }
+  spark('skgas',SES.gas,function(v){return v.toPrecision(2)+' gwei'});
+  spark('skfull',SES.full,function(v){return (v>=1?v.toFixed(1):v.toFixed(3))+' Mgas'});
+  $('dsesv').textContent=SES.gas.length; $('dsesv').classList.remove('nm');
+  $('dsess').textContent='since '+SES.t0.toTimeString().slice(0,5)+' · this tab only — nothing stored, nothing sent';
+  rawLane();
+}
+async function tickVaulta(){
+  var i=await vpost('/v1/chain/get_info',{});
+  if(i&&i.head_block_num&&i.last_irreversible_block_num){
+    var lag=i.head_block_num-i.last_irreversible_block_num;
+    SES.raw['get_info']='head='+i.head_block_num+' lib='+i.last_irreversible_block_num;
+    setDial('dlib',lag/30,lag+' <s>blocks</s>','head − LIB · Savanna finality · dial 0–30');
+  } else { SES.raw['get_info']='FAILED (all three hosts)'; setDial('dlib',null); }
+  rawLane();
+}
+async function tickNames(){
+  var r=await vpost('/v1/chain/get_table_rows',{json:true,code:'kingbeelovis',scope:'kingbeelovis',table:'domains',limit:200});
+  if(r&&r.rows){
+    $('dnamesv').textContent=r.rows.length+(r.more?'+':''); $('dnamesv').classList.remove('nm');
+    $('dnamess').textContent='get_table_rows · kingbeelovis / domains · live count, the namespace is open';
+    SES.raw['get_table_rows.domains']=r.rows.length+' rows'+(r.more?' (more)':'');
+  } else { $('dnamesv').innerHTML='<span class="err" style="font-size:12px">fetch failed — declared</span>'; SES.raw['get_table_rows.domains']='FAILED'; }
+  rawLane();
+}
+mkDial('dgas','var(--cyan)'); mkDial('dfull','var(--gold)');
+mkDial('dbpm','var(--leaf)'); mkDial('dlib','var(--violet)');
+function ticks(){ if(document.hidden) return; tickL2(); tickVaulta(); }
+ticks(); tickNames();
+setInterval(ticks,15000);
+/* a tab opened in the background gets its needles the moment it is looked at */
+document.addEventListener('visibilitychange',function(){ if(!document.hidden) ticks(); });
+setInterval(function(){ if(!document.hidden) tickNames(); },300000);
 })();
 </script>
 </body>
