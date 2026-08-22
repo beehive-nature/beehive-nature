@@ -32,10 +32,10 @@ Receipt rule: no ✅ without the pasted command and real unedited output — see
 ## Queue (cadence law: one phase per session)
 
 1. ~~first vertical slice~~ — done 2026-08-21
-2. visual starters (platform Canvas/SVG — BF-2 ruled)
-3. multiplayer: plugin source as a Yjs doc on the huddle's data channel
-4. harness guidance/learning lane (in-band explain, practice loops)
-5. VST3 opt-in behind its GPLv3 notice (PF-1)
+2. ~~visual starters (platform Canvas/SVG — BF-2 ruled)~~ — done 2026-08-21 (forge/visual/, 26/26 tests)
+3. multiplayer — CRDT slice done 2026-08-21 (forge/visual/shared.js, 7/7; huddle wiring = own lap, see MULTIPLAYER-SEAM.md)
+4. ~~harness guidance/learning lane~~ — designed 2026-08-21 (forge/GUIDANCE-LANE.md; lifts into the harness prompt at the studio lap)
+5. ~~VST3 opt-in behind its GPLv3 notice (PF-1)~~ — done 2026-08-21 (feature vst3 + NOTICE-VST3.md, dual-build receipted)
 
 ⚙ Everything AI-authored in this lane carries the gear badge; a human/⚙ review
 precedes any share.

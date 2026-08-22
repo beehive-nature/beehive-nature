@@ -5,6 +5,12 @@ edition = "2021"
 license = "AGPL-3.0-only"
 description = "bBuzz forge first template: gain + tape saturation with the SPEC-BUZZFORGE-1 §5 safety wrapper (hard limiter + crash guard). CLAP-only per PF-1. ⚙ AI-authored DSP — review before sharing."
 
+[features]
+# PF-1: VST3 export is OPT-IN. Enabling it compiles the VST3 entry point, and any
+# VST3 binary you distribute carries GPLv3 obligations via vst3-sys — read
+# NOTICE-VST3.md before enabling. CLAP remains the default, unencumbered path.
+vst3 = []
+
 [lib]
 crate-type = ["cdylib"]
 

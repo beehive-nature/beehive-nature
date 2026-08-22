@@ -62,6 +62,10 @@ BF-1: SHA-pin all three…~~ **CLOSED by LEAD, 2026-08-21:** all three pinned (�
 re-verified byte-level at the clones; the visual-render L-VERIFY is closed by the BF-2
 ruling (platform Canvas/SVG = zero third-party render dep). Standing clause: any future
 shader/Rust-WASM dep gets raw-read + pinned before boarding.
+**PF-1 executed 2026-08-21:** the VST3 opt-in is implemented as cargo feature `vst3`
+(`crates/buzz-gain`, NOTICE-VST3.md beside it) — dual-build receipted: the default
+artifact emits `clap_entry` only; `--features vst3` adds `GetPluginFactory`. The notice
+travels with the crate.
 
 ### 3a · PINS (zCode, 2026-08-21 — sha256 of the license files at the pinned commits) <!-- PUBLIC-CONSTANT: content pins of public repo license files -->
 

@@ -186,3 +186,17 @@ impl ClapPlugin for BuzzGain {
 }
 
 nih_export_clap!(BuzzGain);
+
+// PF-1: the VST3 export is opt-in behind the `vst3` cargo feature. Building with it
+// means you intend to distribute a VST3 binary — read NOTICE-VST3.md first: vst3-sys
+// is GPLv3, so the binary carries source-on-request duties. CLAP-only builds
+// (the default) never emit this entry point.
+#[cfg(feature = "vst3")]
+impl Vst3Plugin for BuzzGain {
+    const VST3_CLASS_ID: [u8; 16] = *b"BuzzGainForge-01";
+    const VST3_SUBCATEGORIES: &'static [Vst3SubCategory] =
+        &[Vst3SubCategory::Fx, Vst3SubCategory::Tools];
+}
+
+#[cfg(feature = "vst3")]
+nih_export_vst3!(BuzzGain);
