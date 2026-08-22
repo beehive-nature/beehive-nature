@@ -107,7 +107,10 @@ adding them is a follow-up lap when that wave lands.
 - **MX-6** external-customer onboarding (ant.report acceptance) — founder-hands only.
 - **MX-7** mainnet deployment of any BNR smart contract — **RULED (2026-08-22): only
   after the contract is fully built and fully tested on the Jungle testnet** (test bed
-  `banchor22222`, RAM already bought; see [[RULING_A_NATIVE_JUNGLE_FIRST_2026-08-22]]).
+  `banchor22222`, RAM already bought; see [[RULING_A_NATIVE_JUNGLE_FIRST_2026-08-22]],
+  incl. its §3.5 amendment: **two tracks — A prototype faces Vaulta MAINNET (reads,
+  meters, settlement; no contracts); the b build is FORGED ON JUNGLE**, mainnet only
+  after the full pass, founder word).
 
 ## 7 · Non-goals (hard)
 

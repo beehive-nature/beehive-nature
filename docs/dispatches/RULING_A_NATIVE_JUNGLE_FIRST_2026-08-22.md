@@ -41,6 +41,23 @@ Standing laws carried forward unchanged: the faucet human-proof for this identit
 **count 1 and must not go higher**; keys are testnet-only throwaways and **never enter
 this public repo**.
 
+## 3.5 · AMENDMENT (founder word, same night): the two tracks
+
+> **"A again will be our prototype for Vaulta mainnet and use Vaulta's jungletestnet
+> for b build"**
+
+Sharpened into two explicit tracks:
+
+- **TRACK A — the A prototype, Vaulta MAINNET-facing.** A is the mainnet token; the
+  A-denominated lane (keyless reads, the meters, the exchange's settlement rail) faces
+  mainnet by design — it already does, keylessly and read-only (the bANTfarm, the DAO
+  dashboard, tonight's live dials). No contract deploys ride this track.
+- **TRACK B — the b build, JUNGLE TESTNET.** The b-token contract work builds and
+  tests on Jungle (`banchor22222`, RAM bought, A funded); MX-7 unchanged and absolute:
+  b reaches mainnet only after the full Jungle pass, on founder word.
+
+The two tracks never blur: **A flows on mainnet, b is forged on Jungle.**
+
 ## 4 · What this opens / what it does not
 
 - **Opens:** contract build + deploy lane onto `banchor22222` (RAM already bought),
