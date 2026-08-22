@@ -49,10 +49,10 @@
     s.src=R+'register.js?v=1';
     document.body.appendChild(s);
   }
-  /* the language toggle (18 tongues, corpus-law honest) rides every page — see lang.js */
+  /* the language toggle (every corpus-docked tongue, corpus-law honest) rides every page — see lang.js */
   if(!document.getElementById('blangctl')){
     var s2=document.createElement('script');
-    s2.src=R+'lang.js?v=5';
+    s2.src=R+'lang.js?v=6';
     document.body.appendChild(s2);
   }
 })();

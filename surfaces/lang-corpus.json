@@ -1,7 +1,7 @@
 {
  "_meta": {
   "law": "the corpus law applies: every rendering below is MACHINE-DRAFTED (⚙) until a human attestation upgrades it; a missing line falls back to English visibly, never silently; a machine draft never finalizes a consent",
-  "drafted": "2026-08-21 by Seat 3 (Fable 5), all ⚙ · h.* heading set fleet-drafted 2026-08-21 (17 agents, one per tongue), all ⚙ · h.* heading set fleet-drafted 2026-08-21 (17 agents, one per tongue), all ⚙ · QA-gate fixes applied same day (18 defects across 12 tongues; h.002 Base-token and the decimal-comma byte-count fixed fleet-wide) · ko fleet-drafted 2026-08-21 (single agent, founder-ordered addition), ⚙",
+  "drafted": "2026-08-21 by Seat 3 (Fable 5), all ⚙ · h.* heading set fleet-drafted 2026-08-21 (17 agents, one per tongue), all ⚙ · QA-gate fixes applied same day (18 defects across 12 tongues; h.002 Base-token and the decimal-comma byte-count fixed fleet-wide) · ko fleet-drafted 2026-08-21 (single agent, founder-ordered addition), ⚙ · ur ja da nb sv fi tr hu fleet-drafted 2026-08-21 (8 agents + adversarial QA, 198 keys each), all ⚙ · QA-gate fixes applied same day (24 defects across 8 tongues: decimal-comma 31,6 fleet-wide, museum-wing fløj/flygel, musical-score sense, ja English-leakage set, binding-attestation sense tr/hu) · beta2 back-filled for the 18 pre-existing tongues 2026-08-21 (Seat 3 direct draft, each from its tongue's own corpus vocabulary), all ⚙",
   "attested": {},
   "langs": [
    "ru",
@@ -21,12 +21,21 @@
    "bn",
    "fa",
    "nl-be",
-   "ko"
+   "ko",
+   "ur",
+   "ja",
+   "da",
+   "nb",
+   "sv",
+   "fi",
+   "tr",
+   "hu"
   ],
   "rtl": [
    "ar",
    "he",
-   "fa"
+   "fa",
+   "ur"
   ],
   "withdrawn": {},
   "anchors": [],
@@ -53,7 +62,15 @@
    "bn": "বেটা · এখানে সবকিছু ওপেন সোর্স · এখনো কিছুই আসল অর্থ রাখে না · ভেঙে দেখুন এবং দলকে জানান",
    "fa": "بتا · همه‌چیز اینجا متن‌باز است · هنوز هیچ‌چیز پول واقعی نگه نمی‌دارد · بشکنید و به تیم بگویید",
    "nl-be": "BETA · alles hier is open source · niets beheert al echt geld · maak gerust iets kapot en laat het de raid weten",
-   "ko": "베타 · 여기 있는 모든 것은 오픈 소스 · 아직 실제 자금을 수탁하는 것은 없음 · 마음껏 부수고 레이드에 알려주세요"
+   "ko": "베타 · 여기 있는 모든 것은 오픈 소스 · 아직 실제 자금을 수탁하는 것은 없음 · 마음껏 부수고 레이드에 알려주세요",
+   "ur": "BETA · یہاں سب کچھ اوپن سورس ہے · ابھی کوئی چیز حقیقی رقوم کی تحویل نہیں رکھتی · چیزیں توڑیں اور ریڈ کو بتائیں",
+   "ja": "BETA · ここにあるすべてはオープンソース · 実資金を預かるものはまだ何もない · 壊して、レイドに知らせて",
+   "da": "BETA · alt her er open source · intet forvalter rigtige midler endnu · ødelæg ting og fortæl det til raidet",
+   "nb": "BETA · alt her er åpen kildekode · ingenting forvalter ekte midler ennå · knus ting og si fra til raidet",
+   "sv": "BETA · allt här är öppen källkod · inget förvaltar riktiga medel ännu · ha sönder saker och berätta för raiden",
+   "fi": "BETA · kaikki täällä on avointa lähdekoodia · mikään ei vielä säilytä oikeita varoja · riko asioita ja kerro parvelle",
+   "tr": "BETA · buradaki her şey açık kaynak · henüz hiçbir şey gerçek fonları emanet almıyor · bir şeyler kırın ve akına haber verin",
+   "hu": "BETA · itt minden nyílt forráskódú · semmi sem őriz még valódi pénzt · törj el dolgokat és szólj a rajnak"
   },
   "nh.h": {
    "en": "NEW HERE? — pick by what you came for",
@@ -74,7 +91,15 @@
    "bn": "এখানে নতুন? — যে জন্য এসেছেন সেই অনুযায়ী বেছে নিন",
    "fa": "تازه‌وارد؟ — بر اساس آنچه به‌دنبالش آمده‌اید انتخاب کنید",
    "nl-be": "NIEUW HIER? — kies volgens waarvoor ge gekomen zijt",
-   "ko": "처음이신가요? — 찾아온 목적대로 고르세요"
+   "ko": "처음이신가요? — 찾아온 목적대로 고르세요",
+   "ur": "نئے آئے ہیں؟ — جس کام کے لیے آئے، اسی سے چنیں",
+   "ja": "はじめて？ — 来た目的で選ぼう",
+   "da": "NY HER? — vælg efter det, du kom for",
+   "nb": "NY HER? — velg etter det du kom for",
+   "sv": "NY HÄR? — välj efter vad du kom för",
+   "fi": "UUSI TÄÄLLÄ? — valitse sen mukaan, mitä tulit hakemaan",
+   "tr": "YENİ MİSİNİZ? — ne için geldiğinize göre seçin",
+   "hu": "ÚJ VAGY ITT? — válassz aszerint, amiért jöttél"
   },
   "nh1.t": {
    "en": "\"what runs under all this?\"",
@@ -95,7 +120,15 @@
    "bn": "\"এই সবকিছুর নিচে কী চলছে?\"",
    "fa": "«زیر همهٔ این‌ها چه چیزی کار می‌کند؟»",
    "nl-be": "\"wat draait er onder dit alles?\"",
-   "ko": "\"이 모든 것 아래에는 무엇이 돌아가는가?\""
+   "ko": "\"이 모든 것 아래에는 무엇이 돌아가는가?\"",
+   "ur": "\"اس سب کے نیچے کیا چلتا ہے؟\"",
+   "ja": "「この下では何が動いている？」",
+   "da": "\"hvad kører under alt det her?\"",
+   "nb": "«hva kjører under alt dette?»",
+   "sv": "\"vad driver allt det här?\"",
+   "fi": "\"mikä pyörii tämän kaiken alla?\"",
+   "tr": "\"tüm bunların altında ne çalışıyor?\"",
+   "hu": "\"mi fut mindez alatt?\""
   },
   "nh1.d": {
    "en": "the Engine Room — the identity root, the rust kernel, and which rail carries each door, measured not claimed",
@@ -116,7 +149,15 @@
    "bn": "ইঞ্জিন-কক্ষ — পরিচয়ের মূল, rust কার্নেল, আর কোন রেল কোন দরজা বহন করে; মাপা, দাবি নয়",
    "fa": "موتورخانه — ریشهٔ هویت، هستهٔ rust، و اینکه هر در را کدام ریل می‌برد؛ اندازه‌گیری‌شده، نه ادعایی",
    "nl-be": "de Machinekamer — de identiteitswortel, de rust-kernel, en welke rail elke deur draagt; gemeten, niet beweerd",
-   "ko": "엔진룸 — 정체성 뿌리, rust 커널, 그리고 각 문을 싣는 레일까지, 주장이 아니라 측정된"
+   "ko": "엔진룸 — 정체성 뿌리, rust 커널, 그리고 각 문을 싣는 레일까지, 주장이 아니라 측정된",
+   "ur": "انجن روم — شناخت کی جڑ، rust کرنل، اور کون سی ریل کس دروازے کو اٹھاتی ہے، دعویٰ نہیں پیمائش",
+   "ja": "機関室 — アイデンティティの根、rust カーネル、そして各扉を運ぶレール。主張ではなく計測で",
+   "da": "Maskinrummet — identitetsroden, rust-kernen, og hvilken skinne der bærer hver dør, målt, ikke påstået",
+   "nb": "Maskinrommet — identitetsroten, rust-kjernen, og hvilken skinne som bærer hver dør, målt, ikke påstått",
+   "sv": "Maskinrummet — identitetsroten, rust-kärnan, och vilken räls som bär varje dörr, mätt inte påstått",
+   "fi": "Konehuone — identiteettijuuri, rust-ydin ja se, mikä kisko kantaa minkäkin oven — mitattuna, ei väitettynä",
+   "tr": "Makine Dairesi — kimlik kökü, rust çekirdeği ve her kapıyı hangi rayın taşıdığı; iddia değil, ölçüm",
+   "hu": "a Gépterem — az identitásgyökér, a rust kernel, és hogy melyik ajtót melyik sín viszi, mérve, nem állítva"
   },
   "nh2.t": {
    "en": "\"show me something beautiful\"",
@@ -137,7 +178,15 @@
    "bn": "\"আমাকে সুন্দর কিছু দেখাও\"",
    "fa": "«چیزی زیبا نشانم بده»",
    "nl-be": "\"toon mij iets moois\"",
-   "ko": "\"아름다운 것을 보여줘\""
+   "ko": "\"아름다운 것을 보여줘\"",
+   "ur": "\"مجھے کچھ خوبصورت دکھاؤ\"",
+   "ja": "「美しいものを見せて」",
+   "da": "\"vis mig noget smukt\"",
+   "nb": "«vis meg noe vakkert»",
+   "sv": "\"visa mig något vackert\"",
+   "fi": "\"näytä minulle jotain kaunista\"",
+   "tr": "\"bana güzel bir şey göster\"",
+   "hu": "\"mutass valami szépet\""
   },
   "nh2.d": {
    "en": "a walking tour of fully on-chain art, read live from two chains, keylessly — ten seconds to the first piece",
@@ -158,7 +207,15 @@
    "bn": "সম্পূর্ণ অন-চেইন শিল্পের ভ্রমণ, দুটি চেইন থেকে সরাসরি পড়া, চাবিহীন — প্রথম শিল্পকর্মে দশ সেকেন্ড",
    "fa": "گردشی در هنر تماماً روی زنجیره، خوانده‌شده زنده از دو زنجیره، بدون کلید — ده ثانیه تا نخستین اثر",
    "nl-be": "een wandeling door volledig on-chain kunst, live gelezen van twee chains, zonder sleutels — tien seconden tot het eerste werk",
-   "ko": "완전 온체인 예술의 도보 투어, 두 체인에서 키 없이 실시간으로 읽어 옴 — 첫 작품까지 10초"
+   "ko": "완전 온체인 예술의 도보 투어, 두 체인에서 키 없이 실시간으로 읽어 옴 — 첫 작품까지 10초",
+   "ur": "مکمل آن چین آرٹ کی سیر، دو چینز سے براہِ راست پڑھی گئی، بغیر کسی کلید کے — پہلے فن پارے تک دس سیکنڈ",
+   "ja": "完全オンチェーン・アートの散歩道。二つのチェーンから鍵なしでライブ読み取り — 最初の一枚まで十秒",
+   "da": "en vandretur gennem fuldt on-chain kunst, læst live fra to kæder, nøglefrit — ti sekunder til det første værk",
+   "nb": "en vandring gjennom helt kjedebasert kunst, lest direkte fra to kjeder, nøkkelløst — ti sekunder til første verk",
+   "sv": "en vandring genom helt on-chain-konst, läst live från två kedjor, nyckellöst — tio sekunder till första verket",
+   "fi": "kävelykierros täysin ketjussa olevaa taidetta, luettuna elävänä kahdesta ketjusta, avaimitta — kymmenen sekuntia ensimmäiseen teokseen",
+   "tr": "tamamen zincir üstü sanatta bir yürüyüş turu, iki zincirden canlı, anahtarsız okunur — ilk esere on saniye",
+   "hu": "sétáló túra teljesen láncon élő művészet közt, két láncról élőben olvasva, kulcs nélkül — tíz másodperc az első műig"
   },
   "nh3.t": {
    "en": "\"something useful to me\"",
@@ -179,7 +236,15 @@
    "bn": "\"আমার কাজে লাগে এমন কিছু\"",
    "fa": "«چیزی که به کارم بیاید»",
    "nl-be": "\"iets nuttigs voor mij\"",
-   "ko": "\"나에게 쓸모 있는 것\""
+   "ko": "\"나에게 쓸모 있는 것\"",
+   "ur": "\"میرے کام کی کوئی چیز\"",
+   "ja": "「自分の役に立つものを」",
+   "da": "\"noget nyttigt for mig\"",
+   "nb": "«noe nyttig for meg»",
+   "sv": "\"något användbart för mig\"",
+   "fi": "\"jotain minulle hyödyllistä\"",
+   "tr": "\"bana yararlı bir şey\"",
+   "hu": "\"valami, ami nekem hasznos\""
   },
   "nh3.d": {
    "en": "every nutrient your body needs, computed for your height and weight, every number cited",
@@ -200,7 +265,15 @@
    "bn": "আপনার শরীরের প্রয়োজনীয় প্রতিটি পুষ্টি, আপনার উচ্চতা-ওজন অনুযায়ী হিসাব করা, প্রতিটি সংখ্যার উৎস দেওয়া",
    "fa": "هر مادهٔ مغذی که بدن‌تان نیاز دارد، براساس قد و وزن شما محاسبه‌شده، هر عدد با منبع",
    "nl-be": "elke voedingsstof die uw lichaam nodig heeft, berekend voor uw lengte en gewicht, elk getal met bron",
-   "ko": "당신의 몸에 필요한 모든 영양소를 키와 몸무게에 맞춰 계산, 모든 숫자에 출처 표기"
+   "ko": "당신의 몸에 필요한 모든 영양소를 키와 몸무게에 맞춰 계산, 모든 숫자에 출처 표기",
+   "ur": "ہر غذائی جز جس کی آپ کے جسم کو ضرورت ہے، آپ کے قد اور وزن کے حساب سے شمار کردہ، ہر عدد باحوالہ",
+   "ja": "身体が必要とするすべての栄養素を、身長と体重に合わせて計算。すべての数値に出典つき",
+   "da": "hvert næringsstof din krop behøver, beregnet for din højde og vægt, hvert tal med kilde",
+   "nb": "hvert næringsstoff kroppen din trenger, beregnet for din høyde og vekt, hvert tall med kilde",
+   "sv": "varje näringsämne din kropp behöver, beräknat för din längd och vikt, varje siffra med källa",
+   "fi": "jokainen ravintoaine, jota kehosi tarvitsee, laskettuna pituudellesi ja painollesi, jokainen luku lähteineen",
+   "tr": "bedeninizin ihtiyaç duyduğu her besin, boyunuza ve kilonuza göre hesaplanmış, her sayı kaynaklı",
+   "hu": "minden tápanyag, amire a testednek szüksége van, magasságodra és súlyodra számítva, minden szám hivatkozva"
   },
   "nh4.t": {
    "en": "\"I'm into AI × crypto\"",
@@ -221,7 +294,15 @@
    "bn": "\"আমি AI × ক্রিপ্টোতে আগ্রহী\"",
    "fa": "«اهل هوش مصنوعی × کریپتو هستم»",
    "nl-be": "\"ik zit in AI × crypto\"",
-   "ko": "\"AI × 크립토에 관심 있어\""
+   "ko": "\"AI × 크립토에 관심 있어\"",
+   "ur": "\"مجھے AI × کرپٹو کا شوق ہے\"",
+   "ja": "「AI × クリプトが好き」",
+   "da": "\"jeg er til AI × krypto\"",
+   "nb": "«jeg er interessert i AI × krypto»",
+   "sv": "\"jag gillar AI × krypto\"",
+   "fi": "\"minua kiinnostaa AI × krypto\"",
+   "tr": "\"AI × kripto ilgi alanım\"",
+   "hu": "\"az AI × kripto érdekel\""
   },
   "nh4.d": {
    "en": "the b4b alpha — the Base-lane application",
@@ -242,7 +323,15 @@
    "bn": "b4b আলফা — Base লেনের অ্যাপ্লিকেশন",
    "fa": "آلفای b4b — اپلیکیشن مسیر Base",
    "nl-be": "de b4b-alpha — de applicatie op de Base-lijn",
-   "ko": "b4b 알파 — Base 레인 애플리케이션"
+   "ko": "b4b 알파 — Base 레인 애플리케이션",
+   "ur": "b4b الفا — Base لین کی ایپلی کیشن",
+   "ja": "b4b アルファ — Base レーンのアプリケーション",
+   "da": "b4b-alfaen — applikationen på Base-sporet",
+   "nb": "b4b-alfaen — applikasjonen på Base-skinnen",
+   "sv": "b4b-alfan — applikationen i Base-spåret",
+   "fi": "b4b-alfa — Base-kaistan sovellus",
+   "tr": "b4b alfası — Base hattı uygulaması",
+   "hu": "a b4b alfa — a Base-sávos alkalmazás"
   },
   "nh5.t": {
    "en": "\"teach me to check any of this\"",
@@ -263,7 +352,15 @@
    "bn": "\"আমাকে এসব যাচাই করা শেখাও\"",
    "fa": "«یادم بده هرکدام از این‌ها را راستی‌آزمایی کنم»",
    "nl-be": "\"leer mij dit alles controleren\"",
-   "ko": "\"이걸 검증하는 법을 가르쳐줘\""
+   "ko": "\"이걸 검증하는 법을 가르쳐줘\"",
+   "ur": "\"مجھے یہ سب جانچنا سکھاؤ\"",
+   "ja": "「検証のしかたを教えて」",
+   "da": "\"lær mig at efterprøve alt det her\"",
+   "nb": "«lær meg å etterprøve alt dette»",
+   "sv": "\"lär mig kontrollera vad som helst av det här\"",
+   "fi": "\"opeta minut tarkistamaan mitä tahansa tästä\"",
+   "tr": "\"bunların herhangi birini denetlemeyi öğret\"",
+   "hu": "\"taníts meg bármit ellenőrizni ebből\""
   },
   "nh5.d": {
    "en": "five courses; every lesson ends in a verifiable act on real receipts",
@@ -284,7 +381,15 @@
    "bn": "পাঁচটি কোর্স; প্রতিটি পাঠ শেষ হয় আসল রসিদের উপর যাচাইযোগ্য কাজ দিয়ে",
    "fa": "پنج دوره؛ هر درس با کنشی راستی‌آزمودنی روی رسیدهای واقعی پایان می‌یابد",
    "nl-be": "vijf cursussen; elke les eindigt in een verifieerbare handeling op echte bewijzen",
-   "ko": "다섯 개의 코스; 모든 수업은 실제 영수증 위에서 검증 가능한 행위로 끝납니다"
+   "ko": "다섯 개의 코스; 모든 수업은 실제 영수증 위에서 검증 가능한 행위로 끝납니다",
+   "ur": "پانچ کورس؛ ہر سبق کا اختتام حقیقی رسیدوں پر ایک قابلِ تصدیق عمل پر ہوتا ہے",
+   "ja": "五つのコース。各レッスンは本物のレシートに対する検証可能な行為で終わる",
+   "da": "fem kurser; hver lektion ender i en verificerbar handling på rigtige kvitteringer",
+   "nb": "fem kurs; hver leksjon ender i en verifiserbar handling på ekte kvitteringer",
+   "sv": "fem kurser; varje lektion slutar i en verifierbar handling på riktiga kvitton",
+   "fi": "viisi kurssia; jokainen oppitunti päättyy todennettavaan tekoon oikeilla kuiteilla",
+   "tr": "beş kurs; her ders gerçek makbuzlar üzerinde doğrulanabilir bir eylemle biter",
+   "hu": "öt kurzus; minden lecke ellenőrizhető tettel zárul valódi bizonylatokon"
   },
   "nh.reg": {
    "en": "and the 🐝/🎛/⚗ switch in the bar below adjusts every page's depth — gentle, vivid, or dense — your choice travels with you.",
@@ -305,7 +410,15 @@
    "bn": "আর নিচের বারে 🐝/🎛/⚗ সুইচ প্রতিটি পাতার গভীরতা বদলায় — কোমল, প্রাণবন্ত বা ঘন — আপনার পছন্দ আপনার সাথে চলে।",
    "fa": "و کلید 🐝/🎛/⚗ در نوار پایین ژرفای هر صفحه را تنظیم می‌کند — ملایم، زنده یا فشرده — انتخاب‌تان با شما سفر می‌کند.",
    "nl-be": "en de 🐝/🎛/⚗-schakelaar in de balk hieronder past de diepte van elke pagina aan — zacht, levendig of dicht — uw keuze reist met u mee.",
-   "ko": "아래 바의 🐝/🎛/⚗ 스위치는 모든 페이지의 깊이를 조절합니다 — 부드럽게, 생생하게, 조밀하게 — 당신의 선택은 어디든 함께 갑니다."
+   "ko": "아래 바의 🐝/🎛/⚗ 스위치는 모든 페이지의 깊이를 조절합니다 — 부드럽게, 생생하게, 조밀하게 — 당신의 선택은 어디든 함께 갑니다.",
+   "ur": "اور نیچے کی پٹی میں 🐝/🎛/⚗ سوئچ ہر صفحے کی گہرائی بدلتا ہے — نرم، شوخ، یا گاڑھا — آپ کا انتخاب آپ کے ساتھ سفر کرتا ہے۔",
+   "ja": "下のバーの 🐝/🎛/⚗ スイッチが全ページの深さを調整する — やさしく、鮮やかに、濃密に — 選択はあなたと共に旅をする。",
+   "da": "og 🐝/🎛/⚗-kontakten i bjælken nedenfor justerer hver sides dybde — blid, levende eller tæt — dit valg rejser med dig.",
+   "nb": "og 🐝/🎛/⚗-bryteren i linjen nedenfor justerer dybden på hver side — mild, levende eller tett — valget ditt reiser med deg.",
+   "sv": "och 🐝/🎛/⚗-reglaget i listen nedan justerar varje sidas djup — mild, livfull eller tät — ditt val följer med dig.",
+   "fi": "ja alapalkin 🐝/🎛/⚗-kytkin säätää jokaisen sivun syvyyttä — lempeä, elävä tai tiheä — valintasi kulkee mukanasi.",
+   "tr": "ve aşağıdaki çubuktaki 🐝/🎛/⚗ anahtarı her sayfanın derinliğini ayarlar — yumuşak, canlı ya da yoğun — seçiminiz sizinle yolculuk eder.",
+   "hu": "és a lenti sáv 🐝/🎛/⚗ kapcsolója minden oldal mélységét állítja — szelíd, élénk vagy sűrű — a választásod veled utazik."
   },
   "sec.light": {
    "en": "LIGHT — the optical stack",
@@ -326,7 +439,15 @@
    "bn": "আলো — অপটিক্যাল স্ট্যাক",
    "fa": "نور — پشتهٔ نوری",
    "nl-be": "LICHT — de optische stack",
-   "ko": "빛 — 광학 스택"
+   "ko": "빛 — 광학 스택",
+   "ur": "روشنی — آپٹیکل اسٹیک",
+   "ja": "光 — 光学スタック",
+   "da": "LYS — den optiske stak",
+   "nb": "LYS — den optiske stabelen",
+   "sv": "LJUS — den optiska stacken",
+   "fi": "VALO — optinen pino",
+   "tr": "IŞIK — optik yığın",
+   "hu": "FÉNY — az optikai verem"
   },
   "sec.visit": {
    "en": "VISIT — the art",
@@ -347,7 +468,15 @@
    "bn": "পরিদর্শন — শিল্প",
    "fa": "بازدید — هنر",
    "nl-be": "BEZOEK — de kunst",
-   "ko": "방문 — 예술"
+   "ko": "방문 — 예술",
+   "ur": "دورہ — فن",
+   "ja": "訪問 — アート",
+   "da": "BESØG — kunsten",
+   "nb": "BESØK — kunsten",
+   "sv": "BESÖK — konsten",
+   "fi": "VIERAILE — taide",
+   "tr": "ZİYARET — sanat",
+   "hu": "LÁTOGATÁS — a művészet"
   },
   "sec.trade": {
    "en": "TRADE — the floors",
@@ -368,7 +497,15 @@
    "bn": "বাণিজ্য — বাজারতল",
    "fa": "دادوستد — تالارها",
    "nl-be": "HANDEL — de vloeren",
-   "ko": "거래 — 플로어"
+   "ko": "거래 — 플로어",
+   "ur": "تجارت — منڈیاں",
+   "ja": "交易 — 取引フロア",
+   "da": "HANDEL — gulvene",
+   "nb": "HANDEL — gulvene",
+   "sv": "HANDEL — golven",
+   "fi": "KÄY KAUPPAA — kaupankäyntikerrokset",
+   "tr": "TİCARET — katlar",
+   "hu": "KERESKEDÉS — a parkettek"
   },
   "sec.harvest": {
    "en": "HARVEST — the land",
@@ -389,7 +526,15 @@
    "bn": "ফসল — জমি",
    "fa": "برداشت — زمین",
    "nl-be": "OOGST — het land",
-   "ko": "수확 — 땅"
+   "ko": "수확 — 땅",
+   "ur": "فصل — زمین",
+   "ja": "収穫 — 大地",
+   "da": "HØST — landet",
+   "nb": "HØST — landet",
+   "sv": "SKÖRD — marken",
+   "fi": "SADONKORJUU — maa",
+   "tr": "HASAT — toprak",
+   "hu": "ARATÁS — a föld"
   },
   "sec.make": {
    "en": "MAKE — the studio",
@@ -410,7 +555,15 @@
    "bn": "গড়ো — স্টুডিও",
    "fa": "بساز — استودیو",
    "nl-be": "MAAK — de studio",
-   "ko": "제작 — 스튜디오"
+   "ko": "제작 — 스튜디오",
+   "ur": "بنائیں — اسٹوڈیو",
+   "ja": "制作 — スタジオ",
+   "da": "SKAB — studiet",
+   "nb": "SKAP — atelieret",
+   "sv": "SKAPA — ateljén",
+   "fi": "TEE — studio",
+   "tr": "YAP — stüdyo",
+   "hu": "ALKOTÁS — a műterem"
   },
   "sec.keys": {
    "en": "KEYS — the self",
@@ -431,7 +584,15 @@
    "bn": "চাবি — আত্ম",
    "fa": "کلیدها — خویشتن",
    "nl-be": "SLEUTELS — het zelf",
-   "ko": "열쇠 — 자기 자신"
+   "ko": "열쇠 — 자기 자신",
+   "ur": "کلیدیں — اپنی ذات",
+   "ja": "鍵 — 自己",
+   "da": "NØGLER — selvet",
+   "nb": "NØKLER — selvet",
+   "sv": "NYCKLAR — jaget",
+   "fi": "AVAIMET — oma itse",
+   "tr": "ANAHTARLAR — benlik",
+   "hu": "KULCSOK — az én"
   },
   "sec.read": {
    "en": "READ — the instruments",
@@ -452,7 +613,15 @@
    "bn": "পড়ো — যন্ত্রসমূহ",
    "fa": "بخوان — ابزارها",
    "nl-be": "LEES — de instrumenten",
-   "ko": "읽기 — 계기"
+   "ko": "읽기 — 계기",
+   "ur": "پڑھیں — آلات",
+   "ja": "読む — 計器",
+   "da": "LÆS — instrumenterne",
+   "nb": "LES — instrumentene",
+   "sv": "LÄS — instrumenten",
+   "fi": "LUE — instrumentit",
+   "tr": "OKU — aletler",
+   "hu": "OLVASÁS — a műszerek"
   },
   "foot.verify": {
    "en": "don't trust these pages either — every claim links its source. Verify.",
@@ -473,7 +642,15 @@
    "bn": "এই পাতাগুলোকেও বিশ্বাস করবেন না — প্রতিটি দাবি তার উৎসে যুক্ত। যাচাই করুন।",
    "fa": "به این صفحه‌ها هم اعتماد نکنید — هر ادعا به منبعش پیوند دارد. راستی‌آزمایی کنید.",
    "nl-be": "vertrouw ook deze pagina’s niet — elke bewering linkt naar haar bron. Verifieer.",
-   "ko": "이 페이지들도 믿지 마세요 — 모든 주장은 출처로 연결됩니다. 검증하세요."
+   "ko": "이 페이지들도 믿지 마세요 — 모든 주장은 출처로 연결됩니다. 검증하세요.",
+   "ur": "ان صفحات پر بھی بھروسا نہ کریں — ہر دعویٰ اپنا ماخذ جوڑتا ہے۔ تصدیق کریں۔",
+   "ja": "このページも信じるな — すべての主張は出典にリンクしている。検証を。",
+   "da": "stol heller ikke på disse sider — hvert udsagn linker sin kilde. Verificér.",
+   "nb": "ikke stol på disse sidene heller — hver påstand lenker til sin kilde. Verifiser.",
+   "sv": "lita inte på dessa sidor heller — varje påstående länkar sin källa. Verifiera.",
+   "fi": "älä luota näihinkään sivuihin — jokainen väite linkittää lähteensä. Todenna.",
+   "tr": "bu sayfalara da güvenmeyin — her iddia kaynağına bağlanır. Doğrulayın.",
+   "hu": "ezekben az oldalakban se bízz — minden állítás linkeli a forrását. Ellenőrizd."
   },
   "stack.h1": {
    "en": "the Engine Room",
@@ -494,7 +671,15 @@
    "bn": "ইঞ্জিন-কক্ষ",
    "fa": "موتورخانه",
    "nl-be": "de Machinekamer",
-   "ko": "엔진룸"
+   "ko": "엔진룸",
+   "ur": "انجن روم",
+   "ja": "機関室",
+   "da": "Maskinrummet",
+   "nb": "Maskinrommet",
+   "sv": "Maskinrummet",
+   "fi": "Konehuone",
+   "tr": "Makine Dairesi",
+   "hu": "a Gépterem"
   },
   "stack.t1": {
    "en": "bzDiD — the identity root",
@@ -515,7 +700,15 @@
    "bn": "bzDiD — পরিচয়ের মূল",
    "fa": "bzDiD — ریشهٔ هویت",
    "nl-be": "bzDiD — de identiteitswortel",
-   "ko": "bzDiD — 정체성 뿌리"
+   "ko": "bzDiD — 정체성 뿌리",
+   "ur": "bzDiD — شناخت کی جڑ",
+   "ja": "bzDiD — アイデンティティの根",
+   "da": "bzDiD — identitetsroden",
+   "nb": "bzDiD — identitetsroten",
+   "sv": "bzDiD — identitetsroten",
+   "fi": "bzDiD — identiteettijuuri",
+   "tr": "bzDiD — kimlik kökü",
+   "hu": "bzDiD — az identitásgyökér"
   },
   "stack.t2": {
    "en": "the coordination kernel — rust",
@@ -536,7 +729,15 @@
    "bn": "সমন্বয় কার্নেল — rust",
    "fa": "هستهٔ هماهنگی — rust",
    "nl-be": "de coördinatiekernel — rust",
-   "ko": "조정 커널 — rust"
+   "ko": "조정 커널 — rust",
+   "ur": "رابطہ کاری کرنل — rust",
+   "ja": "調整カーネル — rust",
+   "da": "koordinationskernen — rust",
+   "nb": "koordineringskjernen — rust",
+   "sv": "koordinationskärnan — rust",
+   "fi": "koordinaatioydin — rust",
+   "tr": "koordinasyon çekirdeği — rust",
+   "hu": "a koordinációs kernel — rust"
   },
   "stack.t3": {
    "en": "the adapter rails — storage, value, relays",
@@ -557,7 +758,15 @@
    "bn": "অ্যাডাপ্টার রেল — সংরক্ষণ, মূল্য, রিলে",
    "fa": "ریل‌های آداپتور — ذخیره‌سازی، ارزش، رله‌ها",
    "nl-be": "de adapterrails — opslag, waarde, relays",
-   "ko": "어댑터 레일 — 저장, 가치, 릴레이"
+   "ko": "어댑터 레일 — 저장, 가치, 릴레이",
+   "ur": "اڈاپٹر ریلیں — ذخیرہ، قدر، ریلے",
+   "ja": "アダプターレール — ストレージ・価値・リレー",
+   "da": "adapterskinnerne — lagring, værdi, relæer",
+   "nb": "adapterskinnene — lagring, verdi, reléer",
+   "sv": "adapterrälsarna — lagring, värde, reläer",
+   "fi": "sovitinkiskot — tallennus, arvo, releet",
+   "tr": "adaptör rayları — depolama, değer, röleler",
+   "hu": "az adaptersínek — tárolás, érték, relék"
   },
   "stack.t4": {
    "en": "the dApps — every card on the hub",
@@ -578,7 +787,15 @@
    "bn": "dApp — হাবের প্রতিটি কার্ড",
    "fa": "dAppها — هر کارت روی هاب",
    "nl-be": "de dApps — elke kaart op de hub",
-   "ko": "dApp들 — 허브의 모든 카드"
+   "ko": "dApp들 — 허브의 모든 카드",
+   "ur": "dApps — ہب کا ہر کارڈ",
+   "ja": "dApp 群 — ハブのすべてのカード",
+   "da": "dApp'erne — hvert kort på hubben",
+   "nb": "dApp-ene — hvert kort på navet",
+   "sv": "dApparna — varje kort på navet",
+   "fi": "dApp-sovellukset — keskuksen jokainen kortti",
+   "tr": "dApp'ler — merkezdeki her kart",
+   "hu": "a dAppok — a hub minden kártyája"
   },
   "lang.note": {
    "en": "machine-drafted ⚙ — human attestation upgrades it; a missing line falls back to English and says so",
@@ -599,7 +816,15 @@
    "bn": "যন্ত্র-খসড়া ⚙ — মানব সত্যায়ন একে উন্নীত করে; অনুপস্থিত লাইন ইংরেজিতে ফিরে যায় এবং তা জানায়",
    "fa": "پیش‌نویس ماشینی ⚙ — گواهی انسانی آن را ارتقا می‌دهد؛ سطرِ غایب به انگلیسی بازمی‌گردد و همین را می‌گوید",
    "nl-be": "machine-ontwerp ⚙ — menselijke attestatie waardeert het op; een ontbrekende regel valt terug op Engels en zegt dat",
-   "ko": "기계 초안 ⚙ — 사람의 증명이 등급을 올립니다; 빠진 줄은 영어로 대체되며 그 사실을 밝힙니다"
+   "ko": "기계 초안 ⚙ — 사람의 증명이 등급을 올립니다; 빠진 줄은 영어로 대체되며 그 사실을 밝힙니다",
+   "ur": "مشین کا مسودہ ⚙ — انسانی تصدیق اسے بہتر درجہ دیتی ہے؛ لاپتا سطر انگریزی پر لوٹ جاتی ہے اور یہ بتا دیتی ہے",
+   "ja": "機械による下訳 ⚙ — 人の認証で格上げされる。欠けた行は英語に戻り、そう明示する",
+   "da": "maskinudkast ⚙ — menneskelig attestering opgraderer det; en manglende linje falder tilbage til engelsk og siger det",
+   "nb": "maskinutkast ⚙ — menneskelig attestasjon oppgraderer det; en manglende linje faller tilbake til engelsk og sier det selv",
+   "sv": "maskinutkast ⚙ — mänsklig attestering uppgraderar det; en saknad rad faller tillbaka till engelska och säger det",
+   "fi": "koneen luonnostelema ⚙ — ihmisen todistus korottaa sen; puuttuva rivi putoaa englantiin ja sanoo sen",
+   "tr": "makine taslağı ⚙ — insan tasdiki onu yükseltir; eksik bir satır İngilizceye döner ve bunu söyler",
+   "hu": "géppel vázolt ⚙ — emberi tanúsítás emeli feljebb; a hiányzó sor angolra vált vissza, és ezt jelzi is"
   },
   "act.tour": {
    "en": "tour",
@@ -620,7 +845,15 @@
    "bn": "সফর",
    "fa": "گشت",
    "nl-be": "tour",
-   "ko": "투어"
+   "ko": "투어",
+   "ur": "سیر",
+   "ja": "ツアー",
+   "da": "rundtur",
+   "nb": "omvisning",
+   "sv": "rundtur",
+   "fi": "kierros",
+   "tr": "tur",
+   "hu": "túra"
   },
   "act.paused": {
    "en": "paused",
@@ -641,7 +874,15 @@
    "bn": "বিরতি",
    "fa": "مکث",
    "nl-be": "gepauzeerd",
-   "ko": "일시정지"
+   "ko": "일시정지",
+   "ur": "رُکا ہوا",
+   "ja": "一時停止",
+   "da": "på pause",
+   "nb": "pauset",
+   "sv": "pausad",
+   "fi": "tauolla",
+   "tr": "duraklatıldı",
+   "hu": "szünetel"
   },
   "act.wings": {
    "en": "wings",
@@ -662,7 +903,15 @@
    "bn": "ডানা",
    "fa": "بال‌ها",
    "nl-be": "vleugels",
-   "ko": "날개"
+   "ko": "날개",
+   "ur": "ونگز",
+   "ja": "ウィング",
+   "da": "fløje",
+   "nb": "fløyer",
+   "sv": "flyglar",
+   "fi": "siivet",
+   "tr": "kanatlar",
+   "hu": "szárnyak"
   },
   "act.wallet": {
    "en": "any wallet",
@@ -683,7 +932,15 @@
    "bn": "যেকোনো ওয়ালেট",
    "fa": "هر کیف‌پولی",
    "nl-be": "eender welke wallet",
-   "ko": "아무 지갑"
+   "ko": "아무 지갑",
+   "ur": "کوئی بھی والٹ",
+   "ja": "どのウォレットでも",
+   "da": "enhver wallet",
+   "nb": "enhver lommebok",
+   "sv": "valfri plånbok",
+   "fi": "mikä tahansa lompakko",
+   "tr": "herhangi bir cüzdan",
+   "hu": "bármely tárca"
   },
   "act.market": {
    "en": "market",
@@ -704,7 +961,15 @@
    "bn": "বাজার",
    "fa": "بازار",
    "nl-be": "markt",
-   "ko": "마켓"
+   "ko": "마켓",
+   "ur": "منڈی",
+   "ja": "マーケット",
+   "da": "marked",
+   "nb": "marked",
+   "sv": "marknad",
+   "fi": "markkina",
+   "tr": "pazar",
+   "hu": "piac"
   },
   "law.hive": {
    "en": "← the hive",
@@ -725,7 +990,15 @@
    "hi": "← छत्ता",
    "bn": "← মৌচাক",
    "fa": "← کندو",
-   "ko": "← 벌집"
+   "ko": "← 벌집",
+   "ur": "← چھتہ",
+   "ja": "← 巣へ",
+   "da": "← kuben",
+   "nb": "← kuben",
+   "sv": "← kupan",
+   "fi": "← pesä",
+   "tr": "← kovan",
+   "hu": "← a kaptár"
   },
   "h.001": {
    "en": "THE ONE BREATH",
@@ -746,7 +1019,15 @@
    "hi": "एक ही साँस",
    "bn": "এক নিঃশ্বাস",
    "fa": "یک نَفَس",
-   "ko": "한 호흡"
+   "ko": "한 호흡",
+   "ur": "ایک سانس",
+   "ja": "ひとつの呼吸",
+   "da": "DET ENE ÅNDEDRAG",
+   "nb": "DET ENE ÅNDEDRAGET",
+   "sv": "DET ENDA ANDETAGET",
+   "fi": "YKSI HENKÄYS",
+   "tr": "TEK NEFES",
+   "hu": "AZ EGY LÉLEGZET"
   },
   "h.002": {
    "en": "OUR BASE RECEIPTS — measured on your chain, two oracles each, all re-runnable",
@@ -767,7 +1048,15 @@
    "hi": "हमारी Base रसीदें — आपकी चेन पर मापी गईं, हरेक के दो ओरेकल, सभी दोबारा चलाने योग्य",
    "bn": "আমাদের Base প্রমাণপত্র — আপনার চেইনে পরিমাপকৃত, প্রতিটিতে দুই ওরাকল, সবই পুনরায় চালানো যায়",
    "fa": "رسیدهای ما روی Base — سنجیده بر زنجیرهٔ شما، هر یک با دو پیشگو، همگی قابل اجرای دوباره",
-   "ko": "우리의 Base 영수증 — 당신의 체인에서 측정, 각각 오라클 둘, 전부 재실행 가능"
+   "ko": "우리의 Base 영수증 — 당신의 체인에서 측정, 각각 오라클 둘, 전부 재실행 가능",
+   "ur": "ہماری Base رسیدیں — آپ کی چین پر ناپی گئیں، ہر ایک کے دو اوریکل، سب دوبارہ چلائی جا سکتی ہیں",
+   "ja": "私たちの Base レシート — あなたのチェーンで計測、各項目に二つのオラクル、すべて再実行可能",
+   "da": "VORES BASE-KVITTERINGER — målt på din kæde, to orakler hver, alle kan genkøres",
+   "nb": "VÅRE Base-KVITTERINGER — målt på din kjede, to orakler hver, alt kan kjøres om igjen",
+   "sv": "VÅRA BASE-KVITTON — mätta på din kedja, två orakel vardera, alla kan köras om",
+   "fi": "BASE-KUITTIMME — mitattu sinun ketjullasi, kaksi oraakkelia kullakin, kaikki uudelleenajettavissa",
+   "tr": "BASE MAKBUZLARIMIZ — zincirinizde ölçüldü, her biri iki kâhinle, hepsi yeniden çalıştırılabilir",
+   "hu": "A Base-BIZONYLATAINK — a te láncodon mérve, egyenként két orákulummal, mind újrafuttatható"
   },
   "h.003": {
    "en": "THE SYNERGY MAP — your named bets × our live lanes",
@@ -788,7 +1077,15 @@
    "hi": "तालमेल का नक़्शा — आपके नामित दाँव × हमारी सक्रिय लेनें",
    "bn": "সমন্বয়ের মানচিত্র — আপনার নামাঙ্কিত বাজি × আমাদের সচল লেন",
    "fa": "نقشهٔ هم‌افزایی — شرط‌های نام‌بردهٔ شما × مسیرهای زندهٔ ما",
-   "ko": "시너지 지도 — 당신이 지목한 베팅 × 우리의 가동 중인 레인"
+   "ko": "시너지 지도 — 당신이 지목한 베팅 × 우리의 가동 중인 레인",
+   "ur": "ہم آہنگی کا نقشہ — آپ کے نامزد داؤ × ہماری زندہ لینیں",
+   "ja": "シナジーマップ — あなたが名指しした賭け × 私たちの稼働レーン",
+   "da": "SYNERGIKORTET — dine navngivne indsatser × vores live spor",
+   "nb": "SYNERGIKARTET — dine navngitte veddemål × våre levende baner",
+   "sv": "SYNERGIKARTAN — dina namngivna satsningar × våra live-spår",
+   "fi": "SYNERGIAKARTTA — sinun nimetyt vetosi × meidän elävät kaistamme",
+   "tr": "SİNERJİ HARİTASI — adlı bahisleriniz × canlı hatlarımız",
+   "hu": "A SZINERGIA-TÉRKÉP — a te megnevezett tétjeid × a mi élő sávjaink"
   },
   "h.004": {
    "en": "THE 8-WEEK PLAN — every milestone a receipt",
@@ -809,7 +1106,15 @@
    "hi": "8-सप्ताह की योजना — हर पड़ाव एक रसीद",
    "bn": "8-সপ্তাহের পরিকল্পনা — প্রতিটি মাইলফলক একেকটি প্রমাণপত্র",
    "fa": "برنامهٔ 8 هفته‌ای — هر نقطهٔ عطف یک رسید",
-   "ko": "8주 계획 — 모든 마일스톤이 곧 영수증"
+   "ko": "8주 계획 — 모든 마일스톤이 곧 영수증",
+   "ur": "8 ہفتوں کا منصوبہ — ہر سنگِ میل ایک رسید",
+   "ja": "8週間計画 — すべてのマイルストーンがレシート",
+   "da": "8-UGERS-PLANEN — hver milepæl en kvittering",
+   "nb": "8-UKERSPLANEN — hver milepæl en kvittering",
+   "sv": "8-VECKORSPLANEN — varje milstolpe ett kvitto",
+   "fi": "8 VIIKON SUUNNITELMA — jokainen virstanpylväs on kuitti",
+   "tr": "8 HAFTALIK PLAN — her kilometre taşı bir makbuz",
+   "hu": "A 8 HETES TERV — minden mérföldkő egy bizonylat"
   },
   "h.005": {
    "en": "THE ANT SIDE — the wallet that feeds the archive · Arbitrum One",
@@ -830,7 +1135,15 @@
    "hi": "ANT पक्ष — वह वॉलेट जो अभिलेखागार को पोषता है · Arbitrum One",
    "bn": "ANT-এর দিক — যে ওয়ালেট আর্কাইভকে খাওয়ায় · Arbitrum One",
    "fa": "سوی ANT — کیف پولی که آرشیو را می‌خورانَد · Arbitrum One",
-   "ko": "ANT 쪽 — 아카이브를 먹여 살리는 지갑 · Arbitrum One"
+   "ko": "ANT 쪽 — 아카이브를 먹여 살리는 지갑 · Arbitrum One",
+   "ur": "ANT کا پہلو — وہ والٹ جو آرکائیو کو پالتا ہے · Arbitrum One",
+   "ja": "ANT の側 — アーカイブを養うウォレット · Arbitrum One",
+   "da": "ANT-SIDEN — den wallet der føder arkivet · Arbitrum One",
+   "nb": "ANT-SIDEN — lommeboken som mater arkivet · Arbitrum One",
+   "sv": "ANT-SIDAN — plånboken som föder arkivet · Arbitrum One",
+   "fi": "ANT-PUOLI — lompakko, joka ruokkii arkistoa · Arbitrum One",
+   "tr": "ANT TARAFI — arşivi besleyen cüzdan · Arbitrum One",
+   "hu": "AZ ANT-OLDAL — a tárca, amely az archívumot táplálja · Arbitrum One"
   },
   "h.006": {
    "en": "NODE OPERATIONS — where the farm actually runs",
@@ -851,7 +1164,15 @@
    "hi": "नोड संचालन — जहाँ फ़ार्म वास्तव में चलता है",
    "bn": "নোড পরিচালনা — খামারটি আসলে যেখানে চলে",
    "fa": "عملیات گره — جایی که مزرعه واقعاً می‌چرخد",
-   "ko": "노드 운영 — 농장이 실제로 돌아가는 곳"
+   "ko": "노드 운영 — 농장이 실제로 돌아가는 곳",
+   "ur": "نوڈ آپریشنز — فارم اصل میں جہاں چلتا ہے",
+   "ja": "ノード運用 — ファームが実際に動く場所",
+   "da": "NODEDRIFT — hvor farmen faktisk kører",
+   "nb": "NODEDRIFT — der gården faktisk kjører",
+   "sv": "NODDRIFT — där gården faktiskt kör",
+   "fi": "SOLMUOPERAATIOT — missä farmi todella pyörii",
+   "tr": "DÜĞÜM OPERASYONLARI — çiftliğin gerçekte çalıştığı yer",
+   "hu": "CSOMÓPONT-ÜZEMELTETÉS — ahol a farm valójában fut"
   },
   "h.007": {
    "en": "THE SKAISTS SIDE — LOVErnment DAO · Vaulta",
@@ -872,7 +1193,15 @@
    "hi": "SKAISTS पक्ष — LOVErnment DAO · Vaulta",
    "bn": "SKAISTS-এর দিক — LOVErnment DAO · Vaulta",
    "fa": "سوی SKAISTS — LOVErnment DAO · Vaulta",
-   "ko": "SKAISTS 쪽 — LOVErnment DAO · Vaulta"
+   "ko": "SKAISTS 쪽 — LOVErnment DAO · Vaulta",
+   "ur": "SKAISTS کا پہلو — LOVErnment DAO · Vaulta",
+   "ja": "SKAISTS の側 — LOVErnment DAO · Vaulta",
+   "da": "SKAISTS-SIDEN — LOVErnment DAO · Vaulta",
+   "nb": "SKAISTS-SIDEN — LOVErnment DAO · Vaulta",
+   "sv": "SKAISTS-SIDAN — LOVErnment DAO · Vaulta",
+   "fi": "SKAISTS-PUOLI — LOVErnment DAO · Vaulta",
+   "tr": "SKAISTS TARAFI — LOVErnment DAO · Vaulta",
+   "hu": "A SKAISTS-OLDAL — LOVErnment DAO · Vaulta"
   },
   "h.008": {
    "en": "THE FARM'S LAW — why one window, two chains",
@@ -893,7 +1222,15 @@
    "hi": "फ़ार्म का विधान — एक खिड़की, दो चेनें क्यों",
    "bn": "খামারের বিধান — কেন এক জানালা, দুই চেইন",
    "fa": "قانون مزرعه — چرا یک پنجره، دو زنجیره",
-   "ko": "농장의 법 — 왜 하나의 창, 두 개의 체인인가"
+   "ko": "농장의 법 — 왜 하나의 창, 두 개의 체인인가",
+   "ur": "فارم کا قانون — ایک کھڑکی، دو چینز کیوں",
+   "ja": "ファームの法 — なぜ一つの窓に二つのチェーンか",
+   "da": "FARMENS LOV — hvorfor ét vindue, to kæder",
+   "nb": "GÅRDENS LOV — hvorfor ett vindu, to kjeder",
+   "sv": "GÅRDENS LAG — varför ett fönster, två kedjor",
+   "fi": "FARMIN LAKI — miksi yksi ikkuna, kaksi ketjua",
+   "tr": "ÇİFTLİĞİN YASASI — neden tek pencere, iki zincir",
+   "hu": "A FARM TÖRVÉNYE — miért egy ablak, két lánc"
   },
   "h.009": {
    "en": "THE DEMAND — every assumption is a dial, because every one of them is contested",
@@ -914,7 +1251,15 @@
    "hi": "माँग — हर मान्यता एक डायल है, क्योंकि हर एक विवादित है",
    "bn": "চাহিদা — প্রতিটি অনুমান একেকটি ডায়াল, কারণ প্রতিটিই বিতর্কিত",
    "fa": "تقاضا — هر فرض یک پیچِ تنظیم است، چون تک‌تک‌شان محل مناقشه‌اند",
-   "ko": "수요 — 모든 가정은 다이얼입니다, 하나하나가 다 논쟁 중이기에"
+   "ko": "수요 — 모든 가정은 다이얼입니다, 하나하나가 다 논쟁 중이기에",
+   "ur": "مطالبہ — ہر مفروضہ ایک ڈائل ہے، کیونکہ ہر ایک متنازع ہے",
+   "ja": "需要 — すべての前提はダイヤルである。どれもが争われているから",
+   "da": "KRAVET — hver antagelse er en drejeknap, fordi hver eneste af dem er omstridt",
+   "nb": "KRAVET — hver antakelse er en dreieknapp, fordi hver eneste av dem er omstridt",
+   "sv": "KRAVET — varje antagande är ett vred, för vart och ett är omstritt",
+   "fi": "VAATIMUS — jokainen oletus on säädin, koska jokainen niistä on kiistanalainen",
+   "tr": "TALEP — her varsayım bir düğme, çünkü her biri tartışmalı",
+   "hu": "A KERESLET — minden feltevés egy tekerő, mert mindegyik vitatott"
   },
   "h.010": {
    "en": "THE LAND — against real denominators",
@@ -935,7 +1280,15 @@
    "hi": "भूमि — वास्तविक हरों के सापेक्ष",
    "bn": "ভূমি — প্রকৃত হরের বিপরীতে",
    "fa": "زمین — در برابر مخرج‌های واقعی",
-   "ko": "땅 — 실제 분모에 견주어"
+   "ko": "땅 — 실제 분모에 견주어",
+   "ur": "زمین — حقیقی مخرجوں کے مقابل",
+   "ja": "大地 — 実在の分母に照らして",
+   "da": "LANDET — mod rigtige nævnere",
+   "nb": "LANDET — mot ekte nevnere",
+   "sv": "MARKEN — mot verkliga nämnare",
+   "fi": "MAA — todellisia nimittäjiä vasten",
+   "tr": "TOPRAK — gerçek paydalara karşı",
+   "hu": "A FÖLD — valódi nevezőkkel szemben"
   },
   "h.011": {
    "en": "THE THREE CLAIMS THIS PROJECT HAD TO GIVE UP",
@@ -956,7 +1309,15 @@
    "hi": "तीन दावे जो इस परियोजना को छोड़ने पड़े",
    "bn": "যে তিনটি দাবি এই প্রকল্পকে ছেড়ে দিতে হয়েছে",
    "fa": "سه ادعایی که این پروژه ناچار شد کنار بگذارد",
-   "ko": "이 프로젝트가 포기해야 했던 세 가지 주장"
+   "ko": "이 프로젝트가 포기해야 했던 세 가지 주장",
+   "ur": "وہ تین دعوے جو اس منصوبے کو چھوڑنے پڑے",
+   "ja": "このプロジェクトが手放さざるを得なかった三つの主張",
+   "da": "DE TRE PÅSTANDE, DETTE PROJEKT MÅTTE OPGIVE",
+   "nb": "DE TRE PÅSTANDENE DETTE PROSJEKTET MÅTTE GI SLIPP PÅ",
+   "sv": "DE TRE ANSPRÅK PROJEKTET FICK GE UPP",
+   "fi": "KOLME VÄITETTÄ, JOISTA TÄMÄN HANKKEEN OLI LUOVUTTAVA",
+   "tr": "BU PROJENİN VAZGEÇMEK ZORUNDA KALDIĞI ÜÇ İDDİA",
+   "hu": "A HÁROM ÁLLÍTÁS, AMELYET E PROJEKTNEK FEL KELLETT ADNIA"
   },
   "h.012": {
    "en": "AND THE THREE THAT SURVIVED — stated at full strength",
@@ -977,7 +1338,15 @@
    "hi": "और तीन जो बचे रहे — पूरी शक्ति से कहे गए",
    "bn": "আর যে তিনটি টিকে গেছে — পূর্ণ শক্তিতে বিবৃত",
    "fa": "و آن سه که ماندند — با تمام قوّت بیان‌شده",
-   "ko": "그리고 살아남은 세 가지 — 온전한 강도로 서술"
+   "ko": "그리고 살아남은 세 가지 — 온전한 강도로 서술",
+   "ur": "اور وہ تین جو بچ گئے — پوری قوت سے بیان کردہ",
+   "ja": "そして生き残った三つ — 全力の言明で",
+   "da": "OG DE TRE DER OVERLEVEDE — sagt i fuld styrke",
+   "nb": "OG DE TRE SOM OVERLEVDE — uttalt i full styrke",
+   "sv": "OCH DE TRE SOM ÖVERLEVDE — uttalade med full styrka",
+   "fi": "JA KOLME, JOTKA SELVISIVÄT — täydellä voimalla lausuttuina",
+   "tr": "VE HAYATTA KALAN ÜÇÜ — tam güçle söylenmiş",
+   "hu": "ÉS A HÁROM, AMELY TÚLÉLT — teljes erővel kimondva"
   },
   "h.013": {
    "en": "STILL OPEN — named, not quietly dropped",
@@ -998,7 +1367,15 @@
    "hi": "अब भी खुले — नाम लेकर, चुपचाप नहीं छोड़े गए",
    "bn": "এখনও খোলা — নাম ধরে বলা, চুপিচুপি বাদ নয়",
    "fa": "هنوز باز — نام‌برده، نه بی‌صدا کنارگذاشته",
-   "ko": "아직 열려 있음 — 조용히 버리지 않고 이름을 붙임"
+   "ko": "아직 열려 있음 — 조용히 버리지 않고 이름을 붙임",
+   "ur": "ابھی کھلے — نام لے کر، چپکے سے نہیں گرائے گئے",
+   "ja": "未解決 — 名指しされ、黙って落とされてはいない",
+   "da": "STADIG ÅBENT — navngivet, ikke stille droppet",
+   "nb": "FORTSATT ÅPENT — navngitt, ikke stille droppet",
+   "sv": "ÄNNU ÖPPET — namngivet, inte tyst struket",
+   "fi": "YHÄ AUKI — nimettynä, ei hiljaa pudotettuna",
+   "tr": "HÂLÂ AÇIK — adıyla anılmış, sessizce düşürülmemiş",
+   "hu": "MÉG NYITVA — néven nevezve, nem csendben elejtve"
   },
   "h.014": {
    "en": "THE OTHER ARMS — animals, structured and honestly empty",
@@ -1019,7 +1396,15 @@
    "hi": "अन्य भुजाएँ — पशु, संरचित और ईमानदारी से रिक्त",
    "bn": "অন্য শাখাগুলি — প্রাণী, সুগঠিত এবং সৎভাবে শূন্য",
    "fa": "بازوهای دیگر — جانوران، ساخت‌یافته و صادقانه خالی",
-   "ko": "다른 팔들 — 동물, 구조는 갖췄고 정직하게 비어 있음"
+   "ko": "다른 팔들 — 동물, 구조는 갖췄고 정직하게 비어 있음",
+   "ur": "دوسرے بازو — جانور، منظم اور ایمانداری سے خالی",
+   "ja": "もう一つの腕 — 動物たち。構造はあり、正直に空のまま",
+   "da": "DE ANDRE ARME — dyr, struktureret og ærligt tomt",
+   "nb": "DE ANDRE ARMENE — dyr, strukturert og ærlig tomt",
+   "sv": "DE ANDRA ARMARNA — djur, strukturerat och ärligt tomt",
+   "fi": "MUUT HAARAT — eläimet, jäsenneltyinä ja rehellisen tyhjinä",
+   "tr": "DİĞER KOLLAR — hayvanlar, yapılandırılmış ve dürüstçe boş",
+   "hu": "A TÖBBI ÁG — állatok, strukturáltan és őszintén üresen"
   },
   "h.015": {
    "en": "THE TWO HEADLINES",
@@ -1040,7 +1425,15 @@
    "hi": "दो सुर्ख़ियाँ",
    "bn": "দুটি শিরোনাম",
    "fa": "دو تیتر اصلی",
-   "ko": "두 개의 헤드라인"
+   "ko": "두 개의 헤드라인",
+   "ur": "دو سرخیاں",
+   "ja": "二つの見出し",
+   "da": "DE TO OVERSKRIFTER",
+   "nb": "DE TO OVERSKRIFTENE",
+   "sv": "DE TVÅ RUBRIKERNA",
+   "fi": "KAKSI OTSIKKOA",
+   "tr": "İKİ MANŞET",
+   "hu": "A KÉT FŐCÍM"
   },
   "h.016": {
    "en": "SOURCES",
@@ -1061,7 +1454,15 @@
    "hi": "स्रोत",
    "bn": "উৎসসমূহ",
    "fa": "منابع",
-   "ko": "출처"
+   "ko": "출처",
+   "ur": "ماخذات",
+   "ja": "出典",
+   "da": "KILDER",
+   "nb": "KILDER",
+   "sv": "KÄLLOR",
+   "fi": "LÄHTEET",
+   "tr": "KAYNAKLAR",
+   "hu": "FORRÁSOK"
   },
   "h.017": {
    "en": "THE CONTROL LOOP — the only genuinely new part",
@@ -1082,7 +1483,15 @@
    "hi": "नियंत्रण पाश — इकलौता सचमुच नया हिस्सा",
    "bn": "নিয়ন্ত্রণ চক্র — একমাত্র সত্যিকারের নতুন অংশ",
    "fa": "حلقهٔ کنترل — تنها بخشِ به‌راستی نو",
-   "ko": "제어 루프 — 진정으로 새로운 유일한 부분"
+   "ko": "제어 루프 — 진정으로 새로운 유일한 부분",
+   "ur": "کنٹرول لوپ — واحد واقعی نیا حصہ",
+   "ja": "制御ループ — 唯一、真に新しい部分",
+   "da": "KONTROLSLØJFEN — den eneste ægte nye del",
+   "nb": "KONTROLLSLØYFEN — den eneste genuint nye delen",
+   "sv": "STYRSLINGAN — den enda genuint nya delen",
+   "fi": "OHJAUSSILMUKKA — ainoa aidosti uusi osa",
+   "tr": "KONTROL DÖNGÜSÜ — gerçekten yeni olan tek parça",
+   "hu": "A SZABÁLYOZÓ HUROK — az egyetlen valóban új rész"
   },
   "h.018": {
    "en": "\"PROGRAM THE PLANT\" — what it means precisely, and what it does not",
@@ -1103,7 +1512,15 @@
    "hi": "\"पौधे को प्रोग्राम करो\" — इसका ठीक-ठीक अर्थ क्या है, और क्या नहीं",
    "bn": "\"গাছকে প্রোগ্রাম করো\" — এর সঠিক অর্থ কী, আর কী নয়",
    "fa": "«برنامه‌ریزیِ گیاه» — دقیقاً به چه معناست، و به چه معنا نیست",
-   "ko": "\"식물을 프로그래밍하라\" — 정확히 무엇을 뜻하고, 무엇을 뜻하지 않는가"
+   "ko": "\"식물을 프로그래밍하라\" — 정확히 무엇을 뜻하고, 무엇을 뜻하지 않는가",
+   "ur": "\"پودے کو پروگرام کرو\" — اس کا ٹھیک ٹھیک مطلب، اور جو مطلب نہیں",
+   "ja": "「植物をプログラムする」— その正確な意味と、意味しないこと",
+   "da": "\"PROGRAMMÉR PLANTEN\" — hvad det præcist betyder, og hvad det ikke gør",
+   "nb": "«PROGRAMMER PLANTEN» — hva det betyr presist, og hva det ikke gjør",
+   "sv": "\"PROGRAMMERA VÄXTEN\" — vad det betyder exakt, och vad det inte betyder",
+   "fi": "\"OHJELMOI KASVI\" — mitä se tarkoittaa täsmälleen, ja mitä se ei tarkoita",
+   "tr": "\"BİTKİYİ PROGRAMLA\" — tam olarak ne demek, ne demek değil",
+   "hu": "\"PROGRAMOZD A NÖVÉNYT\" — mit jelent pontosan, és mit nem"
   },
   "h.019": {
    "en": "WHAT PLUGS IN — already built, not promised",
@@ -1124,7 +1541,15 @@
    "hi": "क्या जुड़ता है — पहले से निर्मित, वादा नहीं",
    "bn": "যা যুক্ত হয় — ইতিমধ্যে নির্মিত, প্রতিশ্রুত নয়",
    "fa": "آنچه وصل می‌شود — از پیش ساخته، نه وعده‌داده",
-   "ko": "무엇이 꽂히는가 — 약속이 아니라 이미 지어진 것"
+   "ko": "무엇이 꽂히는가 — 약속이 아니라 이미 지어진 것",
+   "ur": "کیا جڑتا ہے — بن چکا، وعدہ نہیں",
+   "ja": "接続できるもの — 約束ではなく、すでに構築済み",
+   "da": "HVAD DER KOBLES PÅ — allerede bygget, ikke lovet",
+   "nb": "HVA SOM KOBLES INN — allerede bygget, ikke lovet",
+   "sv": "VAD SOM KOPPLAS IN — redan byggt, inte utlovat",
+   "fi": "MIKÄ KYTKEYTYY — jo rakennettu, ei luvattu",
+   "tr": "NE TAKILIYOR — çoktan inşa edilmiş, vaat edilmemiş",
+   "hu": "MI CSATLAKOZIK — már megépült, nem ígéret"
   },
   "h.020": {
    "en": "HONESTY REQUIREMENTS — binding on any build",
@@ -1145,7 +1570,15 @@
    "hi": "ईमानदारी की शर्तें — हर निर्माण पर बाध्यकारी",
    "bn": "সততার শর্ত — যেকোনো নির্মাণে বাধ্যতামূলক",
    "fa": "الزامات صداقت — لازم‌الاجرا برای هر ساختی",
-   "ko": "정직성 요건 — 어떤 빌드에도 구속력 있음"
+   "ko": "정직성 요건 — 어떤 빌드에도 구속력 있음",
+   "ur": "ایمانداری کی شرائط — ہر تعمیر پر لازم",
+   "ja": "正直さの要件 — どのビルドにも拘束力を持つ",
+   "da": "ÆRLIGHEDSKRAV — bindende for ethvert build",
+   "nb": "ÆRLIGHETSKRAV — bindende for enhver bygging",
+   "sv": "ÄRLIGHETSKRAV — bindande för varje bygge",
+   "fi": "REHELLISYYSVAATIMUKSET — sitovat jokaista rakennelmaa",
+   "tr": "DÜRÜSTLÜK GEREKLERİ — her yapım için bağlayıcı",
+   "hu": "ŐSZINTESÉGI KÖVETELMÉNYEK — minden buildre kötelező"
   },
   "h.021": {
    "en": "OPEN GATES — shown, because alpha testers deserve the undecided parts too",
@@ -1166,7 +1599,15 @@
    "hi": "खुले द्वार — दिखाए गए, क्योंकि अल्फ़ा परीक्षक अनिर्णीत हिस्सों के भी हक़दार हैं",
    "bn": "খোলা ফটক — দেখানো হলো, কারণ আলফা পরীক্ষকরাও অনির্ধারিত অংশগুলির হকদার",
    "fa": "دروازه‌های باز — نمایان، چون آزمونگران آلفا سزاوار بخش‌های هنوز تصمیم‌نگرفته هم هستند",
-   "ko": "열린 게이트 — 알파 테스터는 미결 부분도 볼 자격이 있기에 공개"
+   "ko": "열린 게이트 — 알파 테스터는 미결 부분도 볼 자격이 있기에 공개",
+   "ur": "کھلے گیٹ — دکھائے گئے، کیونکہ الفا آزمانے والے غیر طے شدہ حصوں کے بھی حق دار ہیں",
+   "ja": "開いたゲート — 未決の部分もアルファテスターに見せるべきだから",
+   "da": "ÅBNE PORTE — vist, fordi alfatestere også fortjener de uafgjorte dele",
+   "nb": "ÅPNE PORTER — vist, fordi alfatestere fortjener de uavgjorte delene også",
+   "sv": "ÖPPNA GRINDAR — visade, för alfatestare förtjänar även de oavgjorda delarna",
+   "fi": "AVOIMET PORTIT — näytettyinä, koska alfatestaajat ansaitsevat myös ratkaisemattomat osat",
+   "tr": "AÇIK GEÇİTLER — gösteriliyor, çünkü alfa testçileri karara bağlanmamış kısımları da hak eder",
+   "hu": "NYITOTT KAPUK — megmutatva, mert az alfatesztelőknek az eldöntetlen részek is járnak"
   },
   "h.022": {
    "en": "YOUR BODY — the five inputs that genuinely move a requirement",
@@ -1187,7 +1628,15 @@
    "hi": "आपका शरीर — पाँच इनपुट जो किसी आवश्यकता को सचमुच बदलते हैं",
    "bn": "আপনার শরীর — যে পাঁচটি ইনপুট সত্যিই একটি চাহিদা বদলায়",
    "fa": "بدن شما — پنج ورودی‌ای که به‌راستی یک نیاز را جابه‌جا می‌کنند",
-   "ko": "당신의 몸 — 필요량을 실제로 움직이는 다섯 가지 입력"
+   "ko": "당신의 몸 — 필요량을 실제로 움직이는 다섯 가지 입력",
+   "ur": "آپ کا جسم — وہ پانچ اندراج جو واقعی کسی ضرورت کو ہلاتے ہیں",
+   "ja": "あなたの身体 — 必要量を実際に動かす五つの入力",
+   "da": "DIN KROP — de fem input der reelt flytter et behov",
+   "nb": "KROPPEN DIN — de fem inndataene som genuint flytter et behov",
+   "sv": "DIN KROPP — de fem indata som verkligen flyttar ett behov",
+   "fi": "KEHOSI — viisi syötettä, jotka aidosti liikuttavat tarvetta",
+   "tr": "BEDENİNİZ — bir gereksinimi gerçekten oynatan beş girdi",
+   "hu": "A TESTED — az öt bemenet, amely valóban elmozdít egy szükségletet"
   },
   "h.023": {
    "en": "THE HEXAGON — 40 cells, one per nutrient, filled by what you actually got",
@@ -1208,7 +1657,15 @@
    "hi": "षट्कोण — 40 कोष्ठ, हर पोषक तत्व का एक, उसी से भरे जो आपको वास्तव में मिला",
    "bn": "ষড়ভুজ — 40টি কোষ, প্রতি পুষ্টি-উপাদানে একটি, আপনি আসলে যা পেয়েছেন তাতে পূর্ণ",
    "fa": "شش‌ضلعی — 40 خانه، یکی برای هر مغذی، پرشده با آنچه واقعاً دریافت کردید",
-   "ko": "육각형 — 40개의 칸, 영양소당 하나, 실제 섭취한 만큼 채워짐"
+   "ko": "육각형 — 40개의 칸, 영양소당 하나, 실제 섭취한 만큼 채워짐",
+   "ur": "مسدس — 40 خانے، فی غذائی جز ایک، جو آپ کو واقعی ملا اس سے بھرے",
+   "ja": "六角形 — 40のセル、栄養素ごとに一つ、実際に摂ったもので満たされる",
+   "da": "HEXAGONEN — 40 celler, én pr. næringsstof, fyldt af hvad du faktisk fik",
+   "nb": "HEKSAGONET — 40 celler, én per næringsstoff, fylt av det du faktisk fikk",
+   "sv": "HEXAGONEN — 40 celler, en per näringsämne, fyllda av vad du faktiskt fick",
+   "fi": "KUUSIKULMIO — 40 solua, yksi per ravintoaine, täytettynä sillä mitä todella sait",
+   "tr": "ALTIGEN — 40 hücre, besin başına bir, gerçekten aldıklarınızla dolar",
+   "hu": "A HATSZÖG — 40 cella, tápanyagonként egy, azzal töltve, amit valóban megkaptál"
   },
   "h.024": {
    "en": "THE BASKET — three honest weights, never one implied",
@@ -1229,7 +1686,15 @@
    "hi": "टोकरी — तीन ईमानदार भार, कभी एक अनुमानित नहीं",
    "bn": "ঝুড়ি — তিনটি সৎ ওজন, কখনও একটিমাত্র ইঙ্গিত নয়",
    "fa": "سبد — سه وزنِ صادقانه، هرگز یکِ ضمنی",
-   "ko": "바구니 — 세 개의 정직한 무게, 암시된 하나는 결코 없음"
+   "ko": "바구니 — 세 개의 정직한 무게, 암시된 하나는 결코 없음",
+   "ur": "ٹوکری — تین ایماندار وزن، کبھی ایک مضمر نہیں",
+   "ja": "バスケット — 三つの正直な重さ。暗黙の一つには決してしない",
+   "da": "KURVEN — tre ærlige vægte, aldrig én underforstået",
+   "nb": "KURVEN — tre ærlige vekter, aldri én underforstått",
+   "sv": "KORGEN — tre ärliga vikter, aldrig en underförstådd",
+   "fi": "KORI — kolme rehellistä painoa, ei koskaan yksi vihjattu",
+   "tr": "SEPET — üç dürüst ağırlık, asla ima edilen tek bir tane değil",
+   "hu": "A KOSÁR — három őszinte súly, sosem egy odaértett"
   },
   "h.025": {
    "en": "THE LEDGER — every nutrient, the exact amount, and where it came from",
@@ -1250,7 +1715,15 @@
    "hi": "बहीखाता — हर पोषक तत्व, सटीक मात्रा, और वह कहाँ से आया",
    "bn": "খতিয়ান — প্রতিটি পুষ্টি-উপাদান, সঠিক পরিমাণ, আর তার উৎস",
    "fa": "دفتر کل — هر مغذی، مقدار دقیق، و اینکه از کجا آمد",
-   "ko": "장부 — 모든 영양소, 정확한 양, 그리고 그 출처"
+   "ko": "장부 — 모든 영양소, 정확한 양, 그리고 그 출처",
+   "ur": "کھاتہ — ہر غذائی جز، عین مقدار، اور جہاں سے آیا",
+   "ja": "台帳 — すべての栄養素、正確な量、そして出どころ",
+   "da": "HOVEDBOGEN — hvert næringsstof, den præcise mængde, og hvor den kom fra",
+   "nb": "HOVEDBOKEN — hvert næringsstoff, den nøyaktige mengden, og hvor den kom fra",
+   "sv": "LIGGAREN — varje näringsämne, den exakta mängden, och varifrån den kom",
+   "fi": "TILIKIRJA — jokainen ravintoaine, tarkka määrä ja mistä se tuli",
+   "tr": "DEFTER — her besin, tam miktar ve nereden geldiği",
+   "hu": "A FŐKÖNYV — minden tápanyag, a pontos mennyiség, és hogy honnan jött"
   },
   "h.026": {
    "en": "PROTEIN QUALITY — why 31.6 grams of protein is not 31.6 grams of protein",
@@ -1271,7 +1744,15 @@
    "hi": "प्रोटीन की गुणवत्ता — 31.6 ग्राम प्रोटीन 31.6 ग्राम प्रोटीन क्यों नहीं है",
    "bn": "প্রোটিনের মান — কেন 31.6 গ্রাম প্রোটিন মানেই 31.6 গ্রাম প্রোটিন নয়",
    "fa": "کیفیت پروتئین — چرا 31.6 گرم پروتئین، 31.6 گرم پروتئین نیست",
-   "ko": "단백질 품질 — 왜 단백질 31.6그램이 단백질 31.6그램이 아닌가"
+   "ko": "단백질 품질 — 왜 단백질 31.6그램이 단백질 31.6그램이 아닌가",
+   "ur": "پروٹین کا معیار — کیوں 31.6 گرام پروٹین 31.6 گرام پروٹین نہیں",
+   "ja": "タンパク質の質 — なぜ 31.6 g のタンパク質は 31.6 g のタンパク質ではないのか",
+   "da": "PROTEINKVALITET — hvorfor 31,6 gram protein ikke er 31,6 gram protein",
+   "nb": "PROTEINKVALITET — hvorfor 31,6 gram protein ikke er 31,6 gram protein",
+   "sv": "PROTEINKVALITET — varför 31,6 gram protein inte är 31,6 gram protein",
+   "fi": "PROTEIININ LAATU — miksi 31,6 grammaa proteiinia ei ole 31,6 grammaa proteiinia",
+   "tr": "PROTEİN KALİTESİ — neden 31,6 gram protein, 31,6 gram protein değildir",
+   "hu": "FEHÉRJEMINŐSÉG — miért nem 31,6 gramm fehérje a 31,6 gramm fehérje"
   },
   "h.027": {
    "en": "FIBRE — the outcome evidence, carrying the certainty its own authors assigned",
@@ -1292,7 +1773,15 @@
    "hi": "फ़ाइबर — परिणाम-साक्ष्य, उतनी ही निश्चितता के साथ जितनी उसके अपने लेखकों ने दी",
    "bn": "আঁশ — ফলাফলের প্রমাণ, তার নিজের লেখকদের নির্ধারিত নিশ্চয়তা সমেত",
    "fa": "فیبر — شواهد پیامدی، با همان قطعیتی که نویسندگانش برایش قائل شدند",
-   "ko": "식이섬유 — 결과 증거, 원저자들이 매긴 확실성 그대로"
+   "ko": "식이섬유 — 결과 증거, 원저자들이 매긴 확실성 그대로",
+   "ur": "فائبر — نتائج کے شواہد، اسی یقین کے ساتھ جو خود ان کے مصنفین نے دیا",
+   "ja": "食物繊維 — アウトカムの証拠。著者自身が付した確実性をそのまま携えて",
+   "da": "FIBER — udfaldsevidensen, med den sikkerhed dens egne forfattere tildelte",
+   "nb": "FIBER — utfallsbeviset, med den sikkerheten forfatterne selv tildelte",
+   "sv": "FIBER — utfallsevidensen, buren med den säkerhet dess egna författare tilldelade",
+   "fi": "KUITU — lopputulosnäyttö, kantaen sen varmuuden, jonka sen omat tekijät sille antoivat",
+   "tr": "LİF — sonuç kanıtı, kendi yazarlarının biçtiği kesinlikle birlikte",
+   "hu": "ROST — a kimeneti bizonyíték, azzal a bizonyossággal, amelyet saját szerzői adtak neki"
   },
   "h.028": {
    "en": "FAT, DISAGGREGATED — \"saturated fat\" is never one number here",
@@ -1313,7 +1802,15 @@
    "hi": "वसा, खोलकर — \"संतृप्त वसा\" यहाँ कभी एक अकेली संख्या नहीं",
    "bn": "চর্বি, বিশ্লেষিত — \"স্যাচুরেটেড ফ্যাট\" এখানে কখনও একটিমাত্র সংখ্যা নয়",
    "fa": "چربی، تفکیک‌شده — «چربی اشباع» اینجا هرگز یک عدد نیست",
-   "ko": "지방, 낱낱이 — 여기서 \"포화지방\"은 결코 하나의 숫자가 아닙니다"
+   "ko": "지방, 낱낱이 — 여기서 \"포화지방\"은 결코 하나의 숫자가 아닙니다",
+   "ur": "چکنائی، جدا جدا — یہاں \"سیر شدہ چکنائی\" کبھی ایک عدد نہیں",
+   "ja": "脂質を分解する — ここでは「飽和脂肪」は決して一つの数字ではない",
+   "da": "FEDT, OPDELT — \"mættet fedt\" er aldrig ét tal her",
+   "nb": "FETT, OPPDELT — «mettet fett» er aldri ett tall her",
+   "sv": "FETT, UPPDELAT — \"mättat fett\" är aldrig en enda siffra här",
+   "fi": "RASVA, ERITELTYNÄ — \"tyydyttynyt rasva\" ei ole täällä koskaan yksi luku",
+   "tr": "YAĞ, AYRIŞTIRILMIŞ — burada \"doymuş yağ\" asla tek bir sayı değil",
+   "hu": "ZSÍR, SZÉTBONTVA — a \"telített zsír\" itt sosem egyetlen szám"
   },
   "h.029": {
    "en": "THE ARBITRAGE — what the measurements say people actually miss",
@@ -1334,7 +1831,15 @@
    "hi": "आर्बिट्राज — माप के अनुसार लोग वास्तव में क्या चूकते हैं",
    "bn": "আরবিট্রাজ — পরিমাপগুলি বলছে মানুষ আসলে কী বাদ দেয়",
    "fa": "آربیتراژ — آنچه اندازه‌گیری‌ها می‌گویند مردم واقعاً کم دارند",
-   "ko": "아비트라지 — 측정이 말해주는, 사람들이 실제로 놓치는 것"
+   "ko": "아비트라지 — 측정이 말해주는, 사람들이 실제로 놓치는 것",
+   "ur": "آربٹراژ — پیمائشیں بتاتی ہیں کہ لوگ اصل میں کیا چھوڑ جاتے ہیں",
+   "ja": "アービトラージ — 計測が語る、人々が実際に不足しているもの",
+   "da": "ARBITRAGEN — hvad målingerne siger, folk faktisk mangler",
+   "nb": "ARBITRASJEN — hva målingene sier at folk faktisk mangler",
+   "sv": "ARBITRAGET — vad mätningarna säger att folk faktiskt missar",
+   "fi": "ARBITRAASI — mitä mittausten mukaan ihmisiltä todella jää puuttumaan",
+   "tr": "ARBİTRAJ — ölçümlere göre insanların gerçekten kaçırdığı",
+   "hu": "AZ ARBITRÁZS — amiből a mérések szerint az embereknek valóban hiányuk van"
   },
   "h.030": {
    "en": "THE QUEST — a plan for a day, a week, a month, a year",
@@ -1355,7 +1860,15 @@
    "hi": "अभियान — एक दिन, एक सप्ताह, एक महीने, एक वर्ष की योजना",
    "bn": "অভিযাত্রা — এক দিন, এক সপ্তাহ, এক মাস, এক বছরের পরিকল্পনা",
    "fa": "مأموریت — برنامه‌ای برای یک روز، یک هفته، یک ماه، یک سال",
-   "ko": "퀘스트 — 하루, 일주일, 한 달, 일 년의 계획"
+   "ko": "퀘스트 — 하루, 일주일, 한 달, 일 년의 계획",
+   "ur": "مہم — ایک دن، ایک ہفتے، ایک مہینے، ایک سال کا منصوبہ",
+   "ja": "クエスト — 一日・一週間・一か月・一年の計画",
+   "da": "QUESTEN — en plan for en dag, en uge, en måned, et år",
+   "nb": "OPPDRAGET — en plan for en dag, en uke, en måned, et år",
+   "sv": "UPPDRAGET — en plan för en dag, en vecka, en månad, ett år",
+   "fi": "TEHTÄVÄ — suunnitelma päiväksi, viikoksi, kuukaudeksi, vuodeksi",
+   "tr": "GÖREV — bir gün, bir hafta, bir ay, bir yıl için plan",
+   "hu": "A KÜLDETÉS — terv egy napra, egy hétre, egy hónapra, egy évre"
   },
   "h.031": {
    "en": "AND HOW ANY OF IT COULD BE BELIEVED",
@@ -1376,7 +1889,15 @@
    "hi": "और इस सब पर भरोसा कैसे किया जा सकता है",
    "bn": "আর এর কোনোটাই কীভাবে বিশ্বাসযোগ্য হতে পারে",
    "fa": "و اینکه چگونه می‌توان هیچ‌یک از اینها را باور کرد",
-   "ko": "그리고 이 중 무엇이든 어떻게 믿을 수 있는가"
+   "ko": "그리고 이 중 무엇이든 어떻게 믿을 수 있는가",
+   "ur": "اور اس میں سے کسی پر یقین کیسے آ سکتا ہے",
+   "ja": "そして、そのどれをどう信じうるのか",
+   "da": "OG HVORDAN NOGET AF DET OVERHOVEDET KAN TROS",
+   "nb": "OG HVORDAN NOE AV DETTE I DET HELE TATT KAN TROS",
+   "sv": "OCH HUR NÅGOT AV DET ALLS KAN TROS",
+   "fi": "JA MITEN MITÄÄN SIITÄ VOISI USKOA",
+   "tr": "VE BUNLARIN HERHANGİ BİRİNE NASIL İNANILABİLİR",
+   "hu": "ÉS HOGYAN LEHETNE BÁRMIT IS ELHINNI EBBŐL"
   },
   "h.032": {
    "en": "SOURCES — cite, or the cell stays silent",
@@ -1397,7 +1918,15 @@
    "hi": "स्रोत — हवाला दो, वरना कोष्ठ मौन रहता है",
    "bn": "উৎসসমূহ — উদ্ধৃতি দিন, নইলে কোষটি নীরব থাকে",
    "fa": "منابع — استناد کن، وگرنه خانه خاموش می‌ماند",
-   "ko": "출처 — 인용하거나, 칸은 침묵합니다"
+   "ko": "출처 — 인용하거나, 칸은 침묵합니다",
+   "ur": "ماخذات — حوالہ دیں، ورنہ خانہ خاموش رہتا ہے",
+   "ja": "出典 — 引用なくば、セルは沈黙のまま",
+   "da": "KILDER — citér, eller cellen forbliver tavs",
+   "nb": "KILDER — siter, ellers forblir cellen taus",
+   "sv": "KÄLLOR — citera, annars förblir cellen tyst",
+   "fi": "LÄHTEET — viittaa, tai solu pysyy hiljaa",
+   "tr": "KAYNAKLAR — kaynak göster, yoksa hücre sessiz kalır",
+   "hu": "FORRÁSOK — hivatkozz, vagy a cella néma marad"
   },
   "h.033": {
    "en": "WHY THIS EXISTS — the four things Cochrane cannot retrofit",
@@ -1418,7 +1947,15 @@
    "hi": "यह क्यों है — चार चीज़ें जो Cochrane बाद में नहीं जोड़ सकता",
    "bn": "এটি কেন আছে — যে চারটি জিনিস Cochrane পরে জুড়ে দিতে পারে না",
    "fa": "چرا این وجود دارد — چهار چیزی که Cochrane نمی‌تواند بعداً جا بیندازد",
-   "ko": "왜 존재하는가 — Cochrane이 소급 적용할 수 없는 네 가지"
+   "ko": "왜 존재하는가 — Cochrane이 소급 적용할 수 없는 네 가지",
+   "ur": "یہ کیوں موجود ہے — وہ چار چیزیں جو Cochrane پیچھے سے نہیں جوڑ سکتا",
+   "ja": "なぜ存在するか — Cochrane が後付けできない四つのこと",
+   "da": "HVORFOR DETTE FINDES — de fire ting, Cochrane ikke kan eftermontere",
+   "nb": "HVORFOR DETTE FINNES — de fire tingene Cochrane ikke kan ettermontere",
+   "sv": "VARFÖR DETTA FINNS — de fyra saker Cochrane inte kan eftermontera",
+   "fi": "MIKSI TÄMÄ ON OLEMASSA — neljä asiaa, joita Cochrane ei voi jälkiasentaa",
+   "tr": "BU NEDEN VAR — Cochrane'in sonradan ekleyemeyeceği dört şey",
+   "hu": "MIÉRT LÉTEZIK EZ — a négy dolog, amit a Cochrane utólag nem pótolhat"
   },
   "h.034": {
    "en": "STATE OF THE EVIDENCE · EXHIBIT 001 (cannabis & cancer) — one summary, three reading levels (identical numbers, only prose changes)",
@@ -1439,7 +1976,15 @@
    "hi": "साक्ष्य की स्थिति · प्रदर्श 001 (कैनबिस और कैंसर) — एक सारांश, पढ़ने के तीन स्तर (संख्याएँ समान, केवल गद्य बदलता है)",
    "bn": "প্রমাণের অবস্থা · প্রদর্শনী 001 (গাঁজা ও ক্যান্সার) — এক সারসংক্ষেপ, তিন পাঠস্তর (সংখ্যা অভিন্ন, শুধু গদ্য বদলায়)",
    "fa": "وضعیت شواهد · نمایهٔ 001 (شاهدانه و سرطان) — یک چکیده، سه سطح خواندن (اعداد یکسان، فقط نثر عوض می‌شود)",
-   "ko": "증거의 현주소 · 전시 001 (대마와 암) — 하나의 요약, 세 가지 읽기 수준 (숫자는 동일, 산문만 달라짐)"
+   "ko": "증거의 현주소 · 전시 001 (대마와 암) — 하나의 요약, 세 가지 읽기 수준 (숫자는 동일, 산문만 달라짐)",
+   "ur": "شواہد کی حالت · نمائش 001 (بھنگ اور سرطان) — ایک خلاصہ، پڑھنے کی تین سطحیں (اعداد ایک جیسے، صرف عبارت بدلتی ہے)",
+   "ja": "証拠の現状 · 展示 001（大麻とがん）— 一つの要約、三つの読解レベル（数値は同一、変わるのは文章だけ）",
+   "da": "EVIDENSENS TILSTAND · UDSTILLING 001 (cannabis & kræft) — ét resumé, tre læseniveauer (identiske tal, kun prosaen ændres)",
+   "nb": "BEVISENES TILSTAND · UTSTILLING 001 (cannabis og kreft) — ett sammendrag, tre lesenivåer (identiske tall, bare prosaen endres)",
+   "sv": "EVIDENSLÄGET · EXPONAT 001 (cannabis & cancer) — en sammanfattning, tre läsnivåer (identiska siffror, endast prosan ändras)",
+   "fi": "NÄYTÖN TILA · TODISTE 001 (kannabis & syöpä) — yksi tiivistelmä, kolme lukutasoa (samat luvut, vain proosa muuttuu)",
+   "tr": "KANITIN DURUMU · SERGİ 001 (kenevir & kanser) — tek özet, üç okuma düzeyi (sayılar aynı, yalnız düzyazı değişir)",
+   "hu": "A BIZONYÍTÉKOK ÁLLÁSA · 001. TÁRLÓ (kannabisz és rák) — egy összefoglaló, három olvasási szint (azonos számok, csak a próza változik)"
   },
   "h.035": {
    "en": "EXHIBIT 001 · EVIDENCE MAP — cannabis & cancer",
@@ -1460,7 +2005,15 @@
    "hi": "प्रदर्श 001 · साक्ष्य-मानचित्र — कैनबिस और कैंसर",
    "bn": "প্রদর্শনী 001 · প্রমাণ-মানচিত্র — গাঁজা ও ক্যান্সার",
    "fa": "نمایهٔ 001 · نقشهٔ شواهد — شاهدانه و سرطان",
-   "ko": "전시 001 · 증거 지도 — 대마와 암"
+   "ko": "전시 001 · 증거 지도 — 대마와 암",
+   "ur": "نمائش 001 · شواہد کا نقشہ — بھنگ اور سرطان",
+   "ja": "展示 001 · 証拠マップ — 大麻とがん",
+   "da": "UDSTILLING 001 · EVIDENSKORT — cannabis & kræft",
+   "nb": "UTSTILLING 001 · BEVISKART — cannabis og kreft",
+   "sv": "EXPONAT 001 · EVIDENSKARTA — cannabis & cancer",
+   "fi": "TODISTE 001 · NÄYTTÖKARTTA — kannabis & syöpä",
+   "tr": "SERGİ 001 · KANIT HARİTASI — kenevir & kanser",
+   "hu": "001. TÁRLÓ · BIZONYÍTÉKTÉRKÉP — kannabisz és rák"
   },
   "h.036": {
    "en": "THE GAP MAP — oncology trials by intent × formulation: the empty cells are the finding",
@@ -1481,7 +2034,15 @@
    "hi": "रिक्तता-मानचित्र — उद्देश्य × सूत्रीकरण के अनुसार ऑन्कोलॉजी परीक्षण: ख़ाली कोष्ठ ही निष्कर्ष हैं",
    "bn": "ফাঁকের মানচিত্র — উদ্দেশ্য × ফর্মুলেশন অনুযায়ী অনকোলজি ট্রায়াল: শূন্য কোষগুলিই প্রাপ্তি",
    "fa": "نقشهٔ شکاف — کارآزمایی‌های سرطان‌شناسی بر پایهٔ نیت × فرمولاسیون: خانه‌های خالی خودِ یافته‌اند",
-   "ko": "공백 지도 — 목적 × 제형별 종양학 임상시험: 빈 칸이 곧 발견입니다"
+   "ko": "공백 지도 — 목적 × 제형별 종양학 임상시험: 빈 칸이 곧 발견입니다",
+   "ur": "خلا کا نقشہ — نیت × ترکیب کے لحاظ سے آنکولوجی ٹرائل: خالی خانے ہی دریافت ہیں",
+   "ja": "ギャップマップ — 腫瘍学試験を目的 × 製剤で並べる：空のセルこそが所見",
+   "da": "HULLERNES KORT — onkologiforsøg efter hensigt × formulering: de tomme celler er fundet",
+   "nb": "HULLKARTET — onkologistudier etter hensikt × formulering: de tomme cellene er funnet",
+   "sv": "GAPKARTAN — onkologiprövningar efter avsikt × beredning: de tomma cellerna är fyndet",
+   "fi": "AUKKOKARTTA — onkologian kokeet tarkoitus × formulaatio: tyhjät solut ovat löydös",
+   "tr": "BOŞLUK HARİTASI — niyet × formülasyona göre onkoloji denemeleri: boş hücreler bulgunun ta kendisi",
+   "hu": "A HIÁNYTÉRKÉP — onkológiai vizsgálatok szándék × formuláció szerint: az üres cellák maguk a lelet"
   },
   "h.037": {
    "en": "EXHIBIT 002 · EVIDENCE MAP — the COA panel undercount: a total wearing a panel's name",
@@ -1502,7 +2063,15 @@
    "hi": "प्रदर्श 002 · साक्ष्य-मानचित्र — COA पैनल की कम-गिनती: पैनल का नाम ओढ़े हुए एक योग",
    "bn": "প্রদর্শনী 002 · প্রমাণ-মানচিত্র — COA প্যানেলের কম-গণনা: প্যানেলের নাম পরা একটি মোট",
    "fa": "نمایهٔ 002 · نقشهٔ شواهد — کم‌شماریِ پنل COA: جمعی که نام یک پنل را بر خود دارد",
-   "ko": "전시 002 · 증거 지도 — COA 패널 과소집계: 패널의 이름을 두른 합계"
+   "ko": "전시 002 · 증거 지도 — COA 패널 과소집계: 패널의 이름을 두른 합계",
+   "ur": "نمائش 002 · شواہد کا نقشہ — COA پینل کی کم گنتی: ایک میزان جس نے پینل کا نام اوڑھ رکھا ہے",
+   "ja": "展示 002 · 証拠マップ — COA パネルの過少計上：パネルの名を着た合計値",
+   "da": "UDSTILLING 002 · EVIDENSKORT — COA-panelets undertælling: en total iført et panels navn",
+   "nb": "UTSTILLING 002 · BEVISKART — COA-panelets undertelling: en total som bærer et panels navn",
+   "sv": "EXPONAT 002 · EVIDENSKARTA — COA-panelens underräkning: en totalsumma som bär en panels namn",
+   "fi": "TODISTE 002 · NÄYTTÖKARTTA — COA-paneelin alilaskenta: kokonaissumma paneelin nimissä",
+   "tr": "SERGİ 002 · KANIT HARİTASI — COA panel eksik sayımı: panel adı taşıyan bir toplam",
+   "hu": "002. TÁRLÓ · BIZONYÍTÉKTÉRKÉP — a COA-panel alulszámlálása: egy összeg, amely egy panel nevét viseli"
   },
   "h.038": {
    "en": "the two honest boundaries — ship with the finding, always",
@@ -1523,7 +2092,15 @@
    "hi": "दो ईमानदार सीमाएँ — निष्कर्ष के साथ ही जारी करो, हमेशा",
    "bn": "দুটি সৎ সীমানা — প্রাপ্তির সঙ্গেই প্রকাশ, সর্বদা",
    "fa": "دو مرزِ صادقانه — همیشه همراهِ یافته منتشر کن",
-   "ko": "두 개의 정직한 경계 — 언제나 발견과 함께 배포"
+   "ko": "두 개의 정직한 경계 — 언제나 발견과 함께 배포",
+   "ur": "دو ایماندار حدیں — دریافت سمیت ہی جاری کریں، ہمیشہ",
+   "ja": "二つの正直な境界 — 所見とともに出荷する、常に",
+   "da": "de to ærlige grænser — udgiv med fundet, altid",
+   "nb": "de to ærlige grensene — leveres med funnet, alltid",
+   "sv": "de två ärliga gränserna — leverera med fyndet, alltid",
+   "fi": "kaksi rehellistä rajaa — toimita löydös mukana, aina",
+   "tr": "iki dürüst sınır — her zaman bulguyla birlikte gönder",
+   "hu": "a két őszinte határ — a lelettel együtt szállítsd, mindig"
   },
   "h.039": {
    "en": "THE REGISTER — the search strategy is config that runs, not prose somebody retypes",
@@ -1544,7 +2121,15 @@
    "hi": "पंजी — खोज-रणनीति चलने वाला कॉन्फ़िग है, गद्य नहीं जिसे कोई दोबारा टाइप करे",
    "bn": "নিবন্ধন-খাতা — অনুসন্ধান-কৌশল হলো চলমান কনফিগ, কারও পুনরায় টাইপ করা গদ্য নয়",
    "fa": "دفتر ثبت — راهبرد جست‌وجو پیکربندی‌ای است که اجرا می‌شود، نه نثری که کسی دوباره تایپ کند",
-   "ko": "레지스터 — 검색 전략은 실행되는 설정이지, 누군가 다시 타이핑하는 산문이 아닙니다"
+   "ko": "레지스터 — 검색 전략은 실행되는 설정이지, 누군가 다시 타이핑하는 산문이 아닙니다",
+   "ur": "رجسٹر — تلاش کی حکمتِ عملی ایسی کنفیگریشن ہے جو چلتی ہے، ایسی عبارت نہیں جسے کوئی دوبارہ ٹائپ کرے",
+   "ja": "レジスター — 検索戦略は実行される設定であり、誰かが打ち直す文章ではない",
+   "da": "REGISTRET — søgestrategien er konfiguration der kører, ikke prosa nogen gentaster",
+   "nb": "REGISTERET — søkestrategien er konfigurasjon som kjører, ikke prosa noen taster inn på nytt",
+   "sv": "REGISTRET — sökstrategin är konfiguration som körs, inte prosa någon skriver om för hand",
+   "fi": "REKISTERI — hakustrategia on ajettavaa konfiguraatiota, ei proosaa, jonka joku näppäilee uudelleen",
+   "tr": "SİCİL — arama stratejisi çalışan bir yapılandırmadır, birinin yeniden yazdığı düzyazı değil",
+   "hu": "A REGISZTER — a keresési stratégia futó konfiguráció, nem próza, amit valaki újragépel"
   },
   "h.040": {
    "en": "STUDY CARDS — the integrity layer, per study, symmetric by law",
@@ -1565,7 +2150,15 @@
    "hi": "अध्ययन-कार्ड — सत्यनिष्ठा की परत, प्रति अध्ययन, विधान से सममित",
    "bn": "গবেষণা-কার্ড — সততার স্তর, প্রতি গবেষণায়, বিধান অনুযায়ী প্রতিসম",
    "fa": "کارت‌های مطالعه — لایهٔ درستی، برای هر مطالعه، به‌حکم قانون متقارن",
-   "ko": "연구 카드 — 무결성 계층, 연구마다, 법에 따라 대칭"
+   "ko": "연구 카드 — 무결성 계층, 연구마다, 법에 따라 대칭",
+   "ur": "مطالعہ کارڈ — دیانت کی تہہ، فی مطالعہ، قانون کے تحت متقارن",
+   "ja": "スタディカード — 研究ごとの整合性レイヤー、法により対称",
+   "da": "STUDIEKORT — integritetslaget, pr. studie, symmetrisk ved lov",
+   "nb": "STUDIEKORT — integritetslaget, per studie, symmetrisk etter loven",
+   "sv": "STUDIEKORT — integritetslagret, per studie, symmetriskt enligt lagen",
+   "fi": "TUTKIMUSKORTIT — eheyskerros, tutkimuskohtainen, lain mukaan symmetrinen",
+   "tr": "ÇALIŞMA KARTLARI — bütünlük katmanı, çalışma başına, yasa gereği simetrik",
+   "hu": "TANULMÁNYKÁRTYÁK — az integritásréteg tanulmányonként, törvény szerint szimmetrikusan"
   },
   "h.041": {
    "en": "THE INSTRUMENT — why the integrity layer exists (Lundh 2017, Cochrane methods review)",
@@ -1586,7 +2179,15 @@
    "hi": "उपकरण — सत्यनिष्ठा की परत क्यों है (Lundh 2017, Cochrane विधि-समीक्षा)",
    "bn": "যন্ত্রটি — সততার স্তর কেন আছে (Lundh 2017, Cochrane পদ্ধতি পর্যালোচনা)",
    "fa": "ابزار سنجش — چرا لایهٔ درستی وجود دارد (Lundh 2017، مرور روش‌های Cochrane)",
-   "ko": "계기 — 무결성 계층이 존재하는 이유 (Lundh 2017, Cochrane 방법론 리뷰)"
+   "ko": "계기 — 무결성 계층이 존재하는 이유 (Lundh 2017, Cochrane 방법론 리뷰)",
+   "ur": "آلہ — دیانت کی تہہ کیوں ہے (Lundh 2017، Cochrane طریقہ کار کا جائزہ)",
+   "ja": "計器 — 整合性レイヤーが存在する理由（Lundh 2017、Cochrane 方法論レビュー）",
+   "da": "INSTRUMENTET — hvorfor integritetslaget findes (Lundh 2017, Cochrane-metodegennemgang)",
+   "nb": "INSTRUMENTET — hvorfor integritetslaget finnes (Lundh 2017, Cochrane-metodegjennomgang)",
+   "sv": "INSTRUMENTET — varför integritetslagret finns (Lundh 2017, Cochrane-metodöversikt)",
+   "fi": "INSTRUMENTTI — miksi eheyskerros on olemassa (Lundh 2017, Cochrane-menetelmäkatsaus)",
+   "tr": "ALET — bütünlük katmanı neden var (Lundh 2017, Cochrane yöntem incelemesi)",
+   "hu": "A MŰSZER — miért létezik az integritásréteg (Lundh 2017, Cochrane módszertani áttekintés)"
   },
   "h.042": {
    "en": "THE MAP AS DATA — clone it, fork the verdicts, show your work",
@@ -1607,7 +2208,15 @@
    "hi": "मानचित्र, डेटा के रूप में — इसे क्लोन करो, निर्णयों को फ़ोर्क करो, अपना काम दिखाओ",
    "bn": "মানচিত্র যখন ডেটা — ক্লোন করুন, রায়গুলি ফর্ক করুন, নিজের কাজ দেখান",
    "fa": "نقشه به‌مثابهٔ داده — کلونش کن، حکم‌ها را فورک کن، کارَت را نشان بده",
-   "ko": "데이터로서의 지도 — 복제하고, 판정을 포크하고, 과정을 보여주세요"
+   "ko": "데이터로서의 지도 — 복제하고, 판정을 포크하고, 과정을 보여주세요",
+   "ur": "نقشہ بطور ڈیٹا — اسے کلون کریں، فیصلے فورک کریں، اپنا کام دکھائیں",
+   "ja": "データとしてのマップ — クローンし、評決をフォークし、過程を示せ",
+   "da": "KORTET SOM DATA — klon det, forgren verdikterne, vis dit arbejde",
+   "nb": "KARTET SOM DATA — klon det, forgren dommene, vis arbeidet ditt",
+   "sv": "KARTAN SOM DATA — klona den, forka domsluten, visa ditt arbete",
+   "fi": "KARTTA DATANA — kloonaa se, haarauta tuomiot, näytä työsi",
+   "tr": "VERİ OLARAK HARİTA — klonla, hükümleri çatalla, işini göster",
+   "hu": "A TÉRKÉP MINT ADAT — klónozd, forkold az ítéleteket, mutasd meg a munkád"
   },
   "h.043": {
    "en": "SOURCES — cite or the cell stays silent",
@@ -1628,7 +2237,15 @@
    "hi": "स्रोत — हवाला दो, वरना कोष्ठ मौन रहता है",
    "bn": "উৎসসমূহ — উদ্ধৃতি দিন, নইলে কোষটি নীরব থাকে",
    "fa": "منابع — استناد کن وگرنه خانه خاموش می‌ماند",
-   "ko": "출처 — 인용하거나 칸은 침묵합니다"
+   "ko": "출처 — 인용하거나 칸은 침묵합니다",
+   "ur": "ماخذات — حوالہ دیں ورنہ خانہ خاموش رہتا ہے",
+   "ja": "出典 — 引用なくば、セルは沈黙のまま",
+   "da": "KILDER — citér, eller cellen forbliver tavs",
+   "nb": "KILDER — siter, ellers forblir cellen taus",
+   "sv": "KÄLLOR — citera, annars förblir cellen tyst",
+   "fi": "LÄHTEET — viittaa tai solu pysyy hiljaa",
+   "tr": "KAYNAKLAR — kaynak göster, yoksa hücre sessiz kalır",
+   "hu": "FORRÁSOK — hivatkozz, vagy a cella néma marad"
   },
   "h.044": {
    "en": "WHY A COMPOSER — the finding that governs this build",
@@ -1649,7 +2266,15 @@
    "hi": "संयोजक क्यों — वह निष्कर्ष जो इस निर्माण को शासित करता है",
    "bn": "কেন একজন রচয়িতা — যে প্রাপ্তি এই নির্মাণকে শাসন করে",
    "fa": "چرا یک آهنگساز — یافته‌ای که این ساخت را راهبری می‌کند",
-   "ko": "왜 컴포저인가 — 이 빌드를 지배하는 발견"
+   "ko": "왜 컴포저인가 — 이 빌드를 지배하는 발견",
+   "ur": "کمپوزر کیوں — وہ دریافت جو اس تعمیر پر حکم چلاتی ہے",
+   "ja": "なぜコンポーザーか — このビルドを律する所見",
+   "da": "HVORFOR EN KOMPONIST — det fund der styrer dette build",
+   "nb": "HVORFOR EN KOMPONIST — funnet som styrer denne byggingen",
+   "sv": "VARFÖR EN KOMPOSITÖR — fyndet som styr detta bygge",
+   "fi": "MIKSI LAATIJA — löydös, joka hallitsee tätä rakennelmaa",
+   "tr": "NEDEN BİR BESTECİ — bu yapımı yöneten bulgu",
+   "hu": "MIÉRT EGY KOMPONÁLÓ — a lelet, amely e buildet kormányozza"
   },
   "h.045": {
    "en": "BEFORE COMPOSING — has an entry already landed?",
@@ -1670,7 +2295,15 @@
    "hi": "रचने से पहले — क्या कोई प्रविष्टि पहले ही दर्ज हो चुकी है?",
    "bn": "রচনার আগে — কোনো ভুক্তি কি ইতিমধ্যে পৌঁছে গেছে?",
    "fa": "پیش از تصنیف — آیا مدخلی از قبل نشسته است؟",
-   "ko": "작성하기 전에 — 이미 등재된 항목이 있는가?"
+   "ko": "작성하기 전에 — 이미 등재된 항목이 있는가?",
+   "ur": "لکھنے سے پہلے — کیا کوئی اندراج پہلے ہی اتر چکا؟",
+   "ja": "作成の前に — エントリはすでに着地していないか？",
+   "da": "FØR KOMPOSITION — er en post allerede landet?",
+   "nb": "FØR KOMPONERING — har en oppføring allerede landet?",
+   "sv": "INNAN KOMPONERANDET — har en post redan landat?",
+   "fi": "ENNEN LAATIMISTA — onko merkintä jo laskeutunut?",
+   "tr": "BESTELEMEDEN ÖNCE — bir madde çoktan yerleşti mi?",
+   "hu": "KOMPONÁLÁS ELŐTT — landolt-e már szócikk?"
   },
   "h.046": {
    "en": "THE SUBJECT — four things, because four clear the scope gate",
@@ -1691,7 +2324,15 @@
    "hi": "विषय — चार चीज़ें, क्योंकि चार ही दायरे का द्वार पार करती हैं",
    "bn": "বিষয় — চারটি জিনিস, কারণ চারটিই পরিধির ফটক পেরোয়",
    "fa": "موضوع — چهار چیز، چون چهار از دروازهٔ دامنه می‌گذرند",
-   "ko": "주제 — 네 가지, 넷이 범위 게이트를 통과하기 때문"
+   "ko": "주제 — 네 가지, 넷이 범위 게이트를 통과하기 때문",
+   "ur": "موضوع — چار چیزیں، کیونکہ چار دائرہ کار کے گیٹ سے گزرتی ہیں",
+   "ja": "主題 — 四つ。四つならスコープゲートを通るから",
+   "da": "EMNET — fire ting, fordi fire passerer omfangsporten",
+   "nb": "EMNET — fire ting, fordi fire passerer omfangsporten",
+   "sv": "ÄMNET — fyra saker, för fyra klarar omfångsgrinden",
+   "fi": "AIHE — neljä asiaa, koska neljä läpäisee laajuusportin",
+   "tr": "KONU — dört şey, çünkü kapsam geçidini dördü geçiyor",
+   "hu": "A TÉMA — négy dolog, mert ez a négy jut át a hatókör-kapun"
   },
   "h.047": {
    "en": "THE SENTENCES — a sentence without a citation does not enter the draft",
@@ -1712,7 +2353,15 @@
    "hi": "वाक्य — बिना हवाले का वाक्य मसौदे में नहीं आता",
    "bn": "বাক্যগুলি — উদ্ধৃতিহীন কোনো বাক্য খসড়ায় ঢোকে না",
    "fa": "جمله‌ها — جمله‌ای بی‌استناد وارد پیش‌نویس نمی‌شود",
-   "ko": "문장들 — 인용 없는 문장은 초안에 들어가지 못합니다"
+   "ko": "문장들 — 인용 없는 문장은 초안에 들어가지 못합니다",
+   "ur": "جملے — بغیر حوالے کا جملہ مسودے میں داخل نہیں ہوتا",
+   "ja": "文 — 引用のない文はドラフトに入らない",
+   "da": "SÆTNINGERNE — en sætning uden citation kommer ikke ind i udkastet",
+   "nb": "SETNINGENE — en setning uten sitering kommer ikke inn i utkastet",
+   "sv": "MENINGARNA — en mening utan citering kommer inte in i utkastet",
+   "fi": "LAUSEET — lause ilman viitettä ei pääse luonnokseen",
+   "tr": "CÜMLELER — atıfsız bir cümle taslağa giremez",
+   "hu": "A MONDATOK — hivatkozás nélküli mondat nem kerül a vázlatba"
   },
   "h.048": {
    "en": "THE TONE CHECK — third person, no superlatives, no advertisement",
@@ -1733,7 +2382,15 @@
    "hi": "स्वर-जाँच — अन्य पुरुष, कोई अतिशयोक्ति नहीं, कोई विज्ञापन नहीं",
    "bn": "সুর যাচাই — তৃতীয় পুরুষ, কোনো অতিশয়োক্তি নয়, কোনো বিজ্ঞাপন নয়",
    "fa": "بازبینی لحن — سوم‌شخص، بدون صفتِ عالی، بدون تبلیغ",
-   "ko": "어조 점검 — 3인칭, 최상급 금지, 광고 금지"
+   "ko": "어조 점검 — 3인칭, 최상급 금지, 광고 금지",
+   "ur": "لہجے کی جانچ — غائب صیغہ، نہ مبالغہ، نہ اشتہار",
+   "ja": "トーンチェック — 三人称、最上級なし、宣伝なし",
+   "da": "TONETJEKKET — tredje person, ingen superlativer, ingen reklame",
+   "nb": "TONESJEKKEN — tredje person, ingen superlativer, ingen reklame",
+   "sv": "TONKONTROLLEN — tredje person, inga superlativ, ingen reklam",
+   "fi": "SÄVYTARKISTUS — kolmas persoona, ei superlatiiveja, ei mainontaa",
+   "tr": "TON DENETİMİ — üçüncü şahıs, üstünlük sıfatı yok, reklam yok",
+   "hu": "A HANGNEM-ELLENŐRZÉS — harmadik személy, se felsőfok, se reklám"
   },
   "h.049": {
    "en": "THE DRAFT — sized for a chat window",
@@ -1754,7 +2411,15 @@
    "hi": "मसौदा — चैट-खिड़की के नाप का",
    "bn": "খসড়া — চ্যাট-জানালার মাপে",
    "fa": "پیش‌نویس — به‌اندازهٔ یک پنجرهٔ گفت‌وگو",
-   "ko": "초안 — 채팅 창에 맞는 크기"
+   "ko": "초안 — 채팅 창에 맞는 크기",
+   "ur": "مسودہ — چیٹ کھڑکی کے ناپ کا",
+   "ja": "ドラフト — チャット窓に収まる大きさ",
+   "da": "UDKASTET — dimensioneret til et chatvindue",
+   "nb": "UTKASTET — dimensjonert for et chatvindu",
+   "sv": "UTKASTET — dimensionerat för ett chattfönster",
+   "fi": "LUONNOS — mitoitettu chat-ikkunaan",
+   "tr": "TASLAK — bir sohbet penceresine göre boyutlanmış",
+   "hu": "A VÁZLAT — csevegőablakra méretezve"
   },
   "h.050": {
    "en": "WHY A DOCK, NOT A LOCALE LIST",
@@ -1775,7 +2440,15 @@
    "hi": "डॉक क्यों, लोकेल-सूची क्यों नहीं",
    "bn": "কেন একটি ডক, লোকেল-তালিকা নয়",
    "fa": "چرا یک اسکله، نه فهرستی از زبان‌ها",
-   "ko": "왜 로케일 목록이 아니라 도킹인가"
+   "ko": "왜 로케일 목록이 아니라 도킹인가",
+   "ur": "گودی کیوں، لوکیل کی فہرست کیوں نہیں",
+   "ja": "なぜロケール一覧ではなくドックか",
+   "da": "HVORFOR EN DOK, IKKE EN LOCALE-LISTE",
+   "nb": "HVORFOR EN DOKK, IKKE EN LOCALE-LISTE",
+   "sv": "VARFÖR EN DOCKA, INTE EN SPRÅKLISTA",
+   "fi": "MIKSI TELAKKA, EI LOKAALILISTA",
+   "tr": "NEDEN BİR RIHTIM, YEREL AYAR LİSTESİ DEĞİL",
+   "hu": "MIÉRT DOKK, ÉS NEM LOCALE-LISTA"
   },
   "h.051": {
    "en": "THE CONSENT LAYER — measurement, never decoration",
@@ -1796,7 +2469,15 @@
    "hi": "सहमति की परत — माप, कभी सजावट नहीं",
    "bn": "সম্মতির স্তর — পরিমাপ, কখনও সাজসজ্জা নয়",
    "fa": "لایهٔ رضایت — سنجش، هرگز تزیین",
-   "ko": "동의 계층 — 측정일 뿐, 결코 장식이 아님"
+   "ko": "동의 계층 — 측정일 뿐, 결코 장식이 아님",
+   "ur": "رضامندی کی تہہ — پیمائش، کبھی سجاوٹ نہیں",
+   "ja": "同意レイヤー — 計測であって、装飾では決してない",
+   "da": "SAMTYKKELAGET — måling, aldrig dekoration",
+   "nb": "SAMTYKKELAGET — måling, aldri dekorasjon",
+   "sv": "SAMTYCKESLAGRET — mätning, aldrig dekoration",
+   "fi": "SUOSTUMUSKERROS — mittausta, ei koskaan koristetta",
+   "tr": "RIZA KATMANI — ölçüm, asla süsleme değil",
+   "hu": "A BELEEGYEZÉSI RÉTEG — mérés, sosem dekoráció"
   },
   "h.052": {
    "en": "THE DOCK — seed register, every status source-linked",
@@ -1817,7 +2498,15 @@
    "hi": "डॉक — बीज-पंजी, हर स्थिति स्रोत से जुड़ी",
    "bn": "ডক — বীজ নিবন্ধন-খাতা, প্রতিটি অবস্থা উৎসে যুক্ত",
    "fa": "اسکله — دفترِ بذرها، هر وضعیت با پیوند به منبع",
-   "ko": "도킹 — 시드 레지스터, 모든 상태에 출처 링크"
+   "ko": "도킹 — 시드 레지스터, 모든 상태에 출처 링크",
+   "ur": "گودی — بیج رجسٹر، ہر حیثیت ماخذ سے جُڑی",
+   "ja": "ドック — シードレジスター、すべてのステータスに出典リンク",
+   "da": "DOKKEN — frøregister, hver status kildelinket",
+   "nb": "DOKKEN — frøregister, hver status kildelenket",
+   "sv": "DOCKAN — fröregister, varje status källänkad",
+   "fi": "TELAKKA — siemenrekisteri, jokainen tila lähdelinkitetty",
+   "tr": "RIHTIM — tohum sicili, her durum kaynağa bağlı",
+   "hu": "A DOKK — magregiszter, minden státusz forráshoz linkelve"
   },
   "h.053": {
    "en": "THE STRING CORPUS — the hub's own strings, and the honest empty cells",
@@ -1838,7 +2527,15 @@
    "hi": "स्ट्रिंग-संग्रह — हब की अपनी स्ट्रिंगें, और ईमानदार ख़ाली कोष्ठ",
    "bn": "স্ট্রিং-ভাণ্ডার — হাবের নিজস্ব স্ট্রিং, আর সৎ শূন্য কোষগুলি",
    "fa": "پیکرهٔ رشته‌ها — رشته‌های خودِ هاب، و خانه‌های خالیِ صادقانه",
-   "ko": "문자열 코퍼스 — 허브 자신의 문자열, 그리고 정직한 빈 칸들"
+   "ko": "문자열 코퍼스 — 허브 자신의 문자열, 그리고 정직한 빈 칸들",
+   "ur": "سٹرنگ کارپس — خود ہب کی سٹرنگز، اور ایماندار خالی خانے",
+   "ja": "文字列コーパス — ハブ自身の文字列と、正直な空セル",
+   "da": "STRENGKORPUSSET — hubbens egne strenge, og de ærligt tomme celler",
+   "nb": "STRENGKORPUSET — navets egne strenger, og de ærlige tomme cellene",
+   "sv": "STRÄNGKORPUSEN — navets egna strängar, och de ärligt tomma cellerna",
+   "fi": "MERKKIJONOKORPUS — keskuksen omat merkkijonot ja rehellisen tyhjät solut",
+   "tr": "DİZE KORPUSU — merkezin kendi dizeleri ve dürüstçe boş hücreler",
+   "hu": "A SZTRINGKORPUSZ — a hub saját sztringjei, és az őszintén üres cellák"
   },
   "h.054": {
    "en": "THE SWEEPS — self-healing as visible machinery, not a claim",
@@ -1859,7 +2556,15 @@
    "hi": "सफ़ाई-चक्र — आत्म-मरम्मत दिखती मशीनरी के रूप में, दावे के रूप में नहीं",
    "bn": "ঝাড়ু-অভিযান — স্ব-নিরাময় দৃশ্যমান যন্ত্র হিসেবে, দাবি হিসেবে নয়",
    "fa": "رُفت‌وروب‌ها — خودترمیمی همچون ماشین‌آلاتِ نمایان، نه یک ادعا",
-   "ko": "스위프 — 주장이 아니라 눈에 보이는 기계 장치로서의 자가 치유"
+   "ko": "스위프 — 주장이 아니라 눈에 보이는 기계 장치로서의 자가 치유",
+   "ur": "جھاڑو پھیرے — خود شفا بطور دکھتی مشینری، دعویٰ نہیں",
+   "ja": "スイープ — 自己修復を見える機構として、主張としてではなく",
+   "da": "FEJNINGERNE — selvhelbredelse som synligt maskineri, ikke en påstand",
+   "nb": "FEIINGENE — selvreparasjon som synlig maskineri, ikke en påstand",
+   "sv": "SVEPEN — självläkning som synligt maskineri, inte ett påstående",
+   "fi": "LAKAISUT — itsekorjaus näkyvänä koneistona, ei väitteenä",
+   "tr": "TARAMALAR — görünür makine olarak öz-onarım, iddia değil",
+   "hu": "A SÖPRÉSEK — az öngyógyítás mint látható gépezet, nem állítás"
   },
   "h.055": {
    "en": "THE DOCK AS DATA — clone it, fork the verdicts, show your work",
@@ -1880,7 +2585,15 @@
    "hi": "डॉक, डेटा के रूप में — इसे क्लोन करो, निर्णयों को फ़ोर्क करो, अपना काम दिखाओ",
    "bn": "ডক যখন ডেটা — ক্লোন করুন, রায়গুলি ফর্ক করুন, নিজের কাজ দেখান",
    "fa": "اسکله به‌مثابهٔ داده — کلونش کن، حکم‌ها را فورک کن، کارَت را نشان بده",
-   "ko": "데이터로서의 도킹 — 복제하고, 판정을 포크하고, 과정을 보여주세요"
+   "ko": "데이터로서의 도킹 — 복제하고, 판정을 포크하고, 과정을 보여주세요",
+   "ur": "گودی بطور ڈیٹا — اسے کلون کریں، فیصلے فورک کریں، اپنا کام دکھائیں",
+   "ja": "データとしてのドック — クローンし、評決をフォークし、過程を示せ",
+   "da": "DOKKEN SOM DATA — klon den, forgren verdikterne, vis dit arbejde",
+   "nb": "DOKKEN SOM DATA — klon den, forgren dommene, vis arbeidet ditt",
+   "sv": "DOCKAN SOM DATA — klona den, forka domsluten, visa ditt arbete",
+   "fi": "TELAKKA DATANA — kloonaa se, haarauta tuomiot, näytä työsi",
+   "tr": "VERİ OLARAK RIHTIM — klonla, hükümleri çatalla, işini göster",
+   "hu": "A DOKK MINT ADAT — klónozd, forkold az ítéleteket, mutasd meg a munkád"
   },
   "h.056": {
    "en": "THE WORKSHOP — dock your tongue: create · merge · migrate · remove",
@@ -1901,7 +2614,15 @@
    "hi": "कार्यशाला — अपनी भाषा डॉक करो: रचो · मिलाओ · स्थानांतरित करो · हटाओ",
    "bn": "কর্মশালা — আপনার ভাষাকে ডকে ভেড়ান: তৈরি · একীভূত · স্থানান্তর · অপসারণ",
    "fa": "کارگاه — زبانت را پهلو بده: ساختن · ادغام · کوچ · حذف",
-   "ko": "워크숍 — 당신의 언어를 도킹하세요: 생성 · 병합 · 이전 · 제거"
+   "ko": "워크숍 — 당신의 언어를 도킹하세요: 생성 · 병합 · 이전 · 제거",
+   "ur": "ورکشاپ — اپنی زبان گودی میں باندھیں: بنائیں · ملائیں · منتقل کریں · ہٹائیں",
+   "ja": "工房 — あなたの言語をドックする：作成 · 統合 · 移行 · 削除",
+   "da": "VÆRKSTEDET — dok dit tungemål: opret · flet · migrér · fjern",
+   "nb": "VERKSTEDET — dokk tungemålet ditt: opprett · slå sammen · migrer · fjern",
+   "sv": "VERKSTADEN — docka ditt tungomål: skapa · slå samman · migrera · ta bort",
+   "fi": "TYÖPAJA — telakoi kielesi: luo · yhdistä · siirrä · poista",
+   "tr": "ATÖLYE — dilini rıhtıma bağla: oluştur · birleştir · taşı · kaldır",
+   "hu": "A MŰHELY — dokkold a nyelved: létrehozás · összevonás · átköltöztetés · eltávolítás"
   },
   "h.057": {
    "en": "the corpus, right now",
@@ -1922,7 +2643,15 @@
    "hi": "संग्रह, अभी इस क्षण",
    "bn": "ভাণ্ডার, এই মুহূর্তে",
    "fa": "پیکره، همین حالا",
-   "ko": "코퍼스, 바로 지금"
+   "ko": "코퍼스, 바로 지금",
+   "ur": "کارپس، اس وقت",
+   "ja": "コーパスの現在",
+   "da": "korpusset, lige nu",
+   "nb": "korpuset, akkurat nå",
+   "sv": "korpusen, just nu",
+   "fi": "korpus, juuri nyt",
+   "tr": "korpus, şu anda",
+   "hu": "a korpusz, most éppen"
   },
   "h.058": {
    "en": "pick your verb",
@@ -1943,7 +2672,15 @@
    "hi": "अपनी क्रिया चुनो",
    "bn": "আপনার ক্রিয়া বেছে নিন",
    "fa": "فعلت را انتخاب کن",
-   "ko": "동사를 고르세요"
+   "ko": "동사를 고르세요",
+   "ur": "اپنا فعل چنیں",
+   "ja": "動詞を選ぶ",
+   "da": "vælg dit verbum",
+   "nb": "velg verbet ditt",
+   "sv": "välj ditt verb",
+   "fi": "valitse verbisi",
+   "tr": "fiilini seç",
+   "hu": "válaszd ki az igéd"
   },
   "h.059": {
    "en": "Candidate taxonomy",
@@ -1964,7 +2701,15 @@
    "hi": "उम्मीदवार वर्गीकरण",
    "bn": "প্রার্থী শ্রেণিবিন্যাস",
    "fa": "رده‌بندی نامزدها",
-   "ko": "후보 분류 체계"
+   "ko": "후보 분류 체계",
+   "ur": "امیدوار درجہ بندی",
+   "ja": "候補の分類",
+   "da": "Kandidattaksonomi",
+   "nb": "Kandidattaksonomi",
+   "sv": "Kandidattaxonomi",
+   "fi": "Ehdokastaksonomia",
+   "tr": "Aday taksonomisi",
+   "hu": "Jelölt-taxonómia"
   },
   "h.060": {
    "en": "The arithmetic",
@@ -1985,7 +2730,15 @@
    "hi": "अंकगणित",
    "bn": "পাটিগণিত",
    "fa": "حساب و کتاب",
-   "ko": "셈법"
+   "ko": "셈법",
+   "ur": "حساب",
+   "ja": "算術",
+   "da": "Aritmetikken",
+   "nb": "Aritmetikken",
+   "sv": "Aritmetiken",
+   "fi": "Aritmetiikka",
+   "tr": "Aritmetik",
+   "hu": "A számtan"
   },
   "h.061": {
    "en": "PEPi, measured — the bar to match",
@@ -2006,7 +2759,15 @@
    "hi": "PEPi, मापा हुआ — बराबरी की कसौटी",
    "bn": "PEPi, পরিমাপকৃত — যে মান ছুঁতে হবে",
    "fa": "PEPi، سنجیده — معیاری که باید به آن رسید",
-   "ko": "PEPi, 측정됨 — 맞춰야 할 기준"
+   "ko": "PEPi, 측정됨 — 맞춰야 할 기준",
+   "ur": "PEPi، ناپا ہوا — وہ معیار جس تک پہنچنا ہے",
+   "ja": "PEPi、計測済み — 合わせるべきバー",
+   "da": "PEPi, målt — overliggeren der skal nås",
+   "nb": "PEPi, målt — lista som skal nås",
+   "sv": "PEPi, mätt — ribban att nå",
+   "fi": "PEPi, mitattuna — rima, johon yltää",
+   "tr": "PEPi, ölçüldü — yakalanacak çıta",
+   "hu": "PEPi, megmérve — a léc, amit el kell érni"
   },
   "h.062": {
    "en": "What C-1 rules, all in one place",
@@ -2027,7 +2788,15 @@
    "hi": "C-1 जो-जो तय करता है, सब एक जगह",
    "bn": "C-1 যা বিধান দেয়, সব এক জায়গায়",
    "fa": "آنچه C-1 حکم می‌کند، همه یک‌جا",
-   "ko": "C-1이 정하는 것, 한자리에 모두"
+   "ko": "C-1이 정하는 것, 한자리에 모두",
+   "ur": "C-1 جو کچھ طے کرتا ہے، سب ایک جگہ",
+   "ja": "C-1 が定めることを、一か所に",
+   "da": "Hvad C-1 fastslår, samlet ét sted",
+   "nb": "Hva C-1 fastsetter, alt på ett sted",
+   "sv": "Vad C-1 stadgar, allt på ett ställe",
+   "fi": "Mitä C-1 säätää, kaikki yhdessä paikassa",
+   "tr": "C-1'in hükmettiği her şey, tek yerde",
+   "hu": "Amit a C-1 elrendel, mind egy helyen"
   },
   "h.063": {
    "en": "the family table",
@@ -2048,7 +2817,15 @@
    "bn": "পরিবার-সারণি",
    "fa": "جدول خانواده",
    "nl": "de familietabel",
-   "ko": "패밀리 표"
+   "ko": "패밀리 표",
+   "ur": "خاندانی جدول",
+   "ja": "ファミリー表",
+   "da": "familietabellen",
+   "nb": "familietabellen",
+   "sv": "familjetabellen",
+   "fi": "perhetaulukko",
+   "tr": "aile tablosu",
+   "hu": "a családi tábla"
   },
   "h.065": {
    "en": "bNature · dApp shell",
@@ -2069,7 +2846,15 @@
    "hi": "bNature · dApp खोल",
    "bn": "bNature · dApp শেল",
    "fa": "bNature · پوستهٔ dApp",
-   "ko": "bNature · dApp 셸"
+   "ko": "bNature · dApp 셸",
+   "ur": "bNature · dApp خول",
+   "ja": "bNature · dApp シェル",
+   "da": "bNature · dApp-skal",
+   "nb": "bNature · dApp-skall",
+   "sv": "bNature · dApp-skal",
+   "fi": "bNature · dApp-kuori",
+   "tr": "bNature · dApp kabuğu",
+   "hu": "bNature · dApp-héj"
   },
   "h.066": {
    "en": "a bACCORD —",
@@ -2090,7 +2875,15 @@
    "hi": "एक bACCORD —",
    "bn": "একটি bACCORD —",
    "fa": "یک bACCORD —",
-   "ko": "bACCORD 하나 —"
+   "ko": "bACCORD 하나 —",
+   "ur": "ایک bACCORD —",
+   "ja": "ひとつの bACCORD —",
+   "da": "en bACCORD —",
+   "nb": "en bACCORD —",
+   "sv": "en bACCORD —",
+   "fi": "bACCORD —",
+   "tr": "bir bACCORD —",
+   "hu": "egy bACCORD —"
   },
   "h.067": {
    "en": "museum",
@@ -2111,7 +2904,15 @@
    "hi": "संग्रहालय",
    "bn": "জাদুঘর",
    "fa": "موزه",
-   "ko": "미술관"
+   "ko": "미술관",
+   "ur": "عجائب گھر",
+   "ja": "美術館",
+   "da": "museum",
+   "nb": "museum",
+   "sv": "museum",
+   "fi": "museo",
+   "tr": "müze",
+   "hu": "múzeum"
   },
   "h.068": {
    "en": "studio gate",
@@ -2132,7 +2933,15 @@
    "hi": "स्टूडियो द्वार",
    "bn": "স্টুডিও ফটক",
    "fa": "دروازهٔ استودیو",
-   "ko": "스튜디오 게이트"
+   "ko": "스튜디오 게이트",
+   "ur": "اسٹوڈیو گیٹ",
+   "ja": "スタジオゲート",
+   "da": "studieport",
+   "nb": "atelierport",
+   "sv": "ateljégrind",
+   "fi": "studioportti",
+   "tr": "stüdyo geçidi",
+   "hu": "műteremkapu"
   },
   "h.069": {
    "en": "explorer",
@@ -2153,7 +2962,15 @@
    "hi": "अन्वेषक",
    "bn": "এক্সপ্লোরার",
    "fa": "کاوشگر",
-   "ko": "익스플로러"
+   "ko": "익스플로러",
+   "ur": "ایکسپلورر",
+   "ja": "エクスプローラー",
+   "da": "udforsker",
+   "nb": "utforsker",
+   "sv": "utforskare",
+   "fi": "selain",
+   "tr": "gezgin",
+   "hu": "felfedező"
   },
   "h.070": {
    "en": "C-1 aid",
@@ -2174,7 +2991,15 @@
    "hi": "C-1 सहायता",
    "bn": "C-1 সহায়িকা",
    "fa": "یاریِ C-1",
-   "ko": "C-1 보조"
+   "ko": "C-1 보조",
+   "ur": "C-1 معاون",
+   "ja": "C-1 の手引き",
+   "da": "C-1-hjælp",
+   "nb": "C-1-hjelp",
+   "sv": "C-1-hjälp",
+   "fi": "C-1-apu",
+   "tr": "C-1 yardımı",
+   "hu": "C-1 segéd"
   },
   "h.071": {
    "en": "vaulta reader",
@@ -2195,7 +3020,15 @@
    "hi": "vaulta पाठक",
    "bn": "vaulta পাঠক",
    "fa": "خوانشگرِ vaulta",
-   "ko": "vaulta 리더"
+   "ko": "vaulta 리더",
+   "ur": "vaulta ریڈر",
+   "ja": "vaulta リーダー",
+   "da": "vaulta-læser",
+   "nb": "vaulta-leser",
+   "sv": "vaulta-läsare",
+   "fi": "vaulta-lukija",
+   "tr": "vaulta okuyucusu",
+   "hu": "vaulta-olvasó"
   },
   "h.072": {
    "en": "marketplace",
@@ -2216,7 +3049,15 @@
    "hi": "बाज़ार",
    "bn": "বাজার",
    "fa": "بازارچه",
-   "ko": "마켓플레이스"
+   "ko": "마켓플레이스",
+   "ur": "بازار",
+   "ja": "マーケットプレイス",
+   "da": "markedsplads",
+   "nb": "markedsplass",
+   "sv": "marknadsplats",
+   "fi": "kauppapaikka",
+   "tr": "pazar yeri",
+   "hu": "piactér"
   },
   "h.073": {
    "en": "your wallet isn't visible here",
@@ -2237,7 +3078,15 @@
    "hi": "आपका वॉलेट यहाँ दिखाई नहीं देता",
    "bn": "আপনার ওয়ালেট এখানে দৃশ্যমান নয়",
    "fa": "کیف پول شما اینجا دیده نمی‌شود",
-   "ko": "여기서는 당신의 지갑이 보이지 않습니다"
+   "ko": "여기서는 당신의 지갑이 보이지 않습니다",
+   "ur": "آپ کا والٹ یہاں دکھائی نہیں دیتا",
+   "ja": "あなたのウォレットはここには見えない",
+   "da": "din wallet er ikke synlig her",
+   "nb": "lommeboken din er ikke synlig her",
+   "sv": "din plånbok syns inte här",
+   "fi": "lompakkosi ei näy täällä",
+   "tr": "cüzdanınız burada görünmez",
+   "hu": "a tárcád itt nem látható"
   },
   "h.074": {
    "en": "Exhibit 1 · The score and the picture",
@@ -2258,7 +3107,15 @@
    "hi": "प्रदर्श 1 · स्कोर और चित्र",
    "bn": "প্রদর্শনী 1 · স্কোর ও ছবি",
    "fa": "نمایهٔ 1 · امتیاز و تصویر",
-   "ko": "전시 1 · 악보와 그림"
+   "ko": "전시 1 · 악보와 그림",
+   "ur": "نمائش 1 · موسیقی کا مسودہ (اسکور) اور تصویر",
+   "ja": "展示 1 · 楽譜と絵",
+   "da": "Udstilling 1 · Partituret og billedet",
+   "nb": "Utstilling 1 · Partituret og bildet",
+   "sv": "Exponat 1 · Partituret och bilden",
+   "fi": "Todiste 1 · Partituuri ja kuva",
+   "tr": "Sergi 1 · Partisyon ve resim",
+   "hu": "1. tárló · A kotta és a kép"
   },
   "h.075": {
    "en": "Exhibit 2 · The picture itself",
@@ -2279,7 +3136,15 @@
    "hi": "प्रदर्श 2 · स्वयं चित्र",
    "bn": "প্রদর্শনী 2 · স্বয়ং ছবিটি",
    "fa": "نمایهٔ 2 · خودِ تصویر",
-   "ko": "전시 2 · 그림 그 자체"
+   "ko": "전시 2 · 그림 그 자체",
+   "ur": "نمائش 2 · خود تصویر",
+   "ja": "展示 2 · 絵そのもの",
+   "da": "Udstilling 2 · Selve billedet",
+   "nb": "Utstilling 2 · Selve bildet",
+   "sv": "Exponat 2 · Bilden själv",
+   "fi": "Todiste 2 · Kuva itse",
+   "tr": "Sergi 2 · Resmin kendisi",
+   "hu": "2. tárló · Maga a kép"
   },
   "h.076": {
    "en": "Exhibit 3 · Six meanings of \"on-chain\"",
@@ -2300,7 +3165,15 @@
    "hi": "प्रदर्श 3 · \"ऑन-चेन\" के छह अर्थ",
    "bn": "প্রদর্শনী 3 · \"অন-চেইন\"-এর ছয়টি অর্থ",
    "fa": "نمایهٔ 3 · شش معنای «روی‌زنجیره»",
-   "ko": "전시 3 · \"온체인\"의 여섯 가지 의미"
+   "ko": "전시 3 · \"온체인\"의 여섯 가지 의미",
+   "ur": "نمائش 3 · \"آن چین\" کے چھ معنی",
+   "ja": "展示 3 · 「オンチェーン」の六つの意味",
+   "da": "Udstilling 3 · Seks betydninger af \"on-chain\"",
+   "nb": "Utstilling 3 · Seks betydninger av «på kjeden»",
+   "sv": "Exponat 3 · Sex betydelser av \"on-chain\"",
+   "fi": "Todiste 3 · Kuusi merkitystä sanalle \"ketjussa\"",
+   "tr": "Sergi 3 · \"Zincir üstü\"nün altı anlamı",
+   "hu": "3. tárló · Az \"on-chain\" hat jelentése"
   },
   "h.077": {
    "en": "Exhibit 4 · The chronology",
@@ -2321,7 +3194,15 @@
    "hi": "प्रदर्श 4 · कालक्रम",
    "bn": "প্রদর্শনী 4 · কালপঞ্জি",
    "fa": "نمایهٔ 4 · گاه‌شمار",
-   "ko": "전시 4 · 연대기"
+   "ko": "전시 4 · 연대기",
+   "ur": "نمائش 4 · زمانی ترتیب",
+   "ja": "展示 4 · 年表",
+   "da": "Udstilling 4 · Kronologien",
+   "nb": "Utstilling 4 · Kronologien",
+   "sv": "Exponat 4 · Kronologin",
+   "fi": "Todiste 4 · Kronologia",
+   "tr": "Sergi 4 · Kronoloji",
+   "hu": "4. tárló · A kronológia"
   },
   "h.078": {
    "en": "Exhibit 5 · What it cost to be here",
@@ -2342,7 +3223,15 @@
    "hi": "प्रदर्श 5 · यहाँ होने की क़ीमत",
    "bn": "প্রদর্শনী 5 · এখানে থাকতে কী খরচ হয়েছে",
    "fa": "نمایهٔ 5 · بهای اینجا بودن",
-   "ko": "전시 5 · 여기 있기 위해 치른 값"
+   "ko": "전시 5 · 여기 있기 위해 치른 값",
+   "ur": "نمائش 5 · یہاں ہونے کی قیمت",
+   "ja": "展示 5 · ここに在るために要した費用",
+   "da": "Udstilling 5 · Hvad det kostede at være her",
+   "nb": "Utstilling 5 · Hva det kostet å være her",
+   "sv": "Exponat 5 · Vad det kostade att vara här",
+   "fi": "Todiste 5 · Mitä täällä oleminen maksoi",
+   "tr": "Sergi 5 · Burada olmanın bedeli",
+   "hu": "5. tárló · Mibe került itt lenni"
   },
   "h.079": {
    "en": "Exhibit 6 · The process wall — 1,408 bytes",
@@ -2363,7 +3252,15 @@
    "hi": "प्रदर्श 6 · प्रक्रिया-दीवार — 1,408 बाइट",
    "bn": "প্রদর্শনী 6 · প্রক্রিয়ার দেয়াল — 1,408 বাইট",
    "fa": "نمایهٔ 6 · دیوار فرایند — 1,408 بایت",
-   "ko": "전시 6 · 과정의 벽 — 1 408바이트"
+   "ko": "전시 6 · 과정의 벽 — 1 408바이트",
+   "ur": "نمائش 6 · عمل کی دیوار — 1,408 بائٹس",
+   "ja": "展示 6 · プロセスの壁 — 1,408 バイト",
+   "da": "Udstilling 6 · Procesmuren — 1 408 bytes",
+   "nb": "Utstilling 6 · Prosessveggen — 1 408 byte",
+   "sv": "Exponat 6 · Processväggen — 1 408 byte",
+   "fi": "Todiste 6 · Prosessimuuri — 1 408 tavua",
+   "tr": "Sergi 6 · Süreç duvarı — 1 408 bayt",
+   "hu": "6. tárló · A folyamatfal — 1 408 bájt"
   },
   "h.080": {
    "en": "Exhibit 7 · The process wall — a revert, performed live",
@@ -2384,7 +3281,15 @@
    "hi": "प्रदर्श 7 · प्रक्रिया-दीवार — एक रिवर्ट, प्रत्यक्ष प्रदर्शित",
    "bn": "প্রদর্শনী 7 · প্রক্রিয়ার দেয়াল — একটি রিভার্ট, সরাসরি সম্পাদিত",
    "fa": "نمایهٔ 7 · دیوار فرایند — یک بازگردانی، زنده اجراشده",
-   "ko": "전시 7 · 과정의 벽 — 리버트, 라이브로 시연"
+   "ko": "전시 7 · 과정의 벽 — 리버트, 라이브로 시연",
+   "ur": "نمائش 7 · عمل کی دیوار — ایک ریورٹ، براہِ راست پیش کیا گیا",
+   "ja": "展示 7 · プロセスの壁 — ライブで実演されたリバート",
+   "da": "Udstilling 7 · Procesmuren — en revert, udført live",
+   "nb": "Utstilling 7 · Prosessveggen — en revert, utført direkte",
+   "sv": "Exponat 7 · Processväggen — en revert, utförd live",
+   "fi": "Todiste 7 · Prosessimuuri — peruutus, esitettynä livenä",
+   "tr": "Sergi 7 · Süreç duvarı — canlı sergilenen bir geri alma",
+   "hu": "7. tárló · A folyamatfal — egy revert, élőben előadva"
   },
   "h.081": {
    "en": "Exhibit 8 · The process wall — a layer that shipped empty",
@@ -2405,7 +3310,15 @@
    "hi": "प्रदर्श 8 · प्रक्रिया-दीवार — एक परत जो ख़ाली ही जारी हुई",
    "bn": "প্রদর্শনী 8 · প্রক্রিয়ার দেয়াল — একটি স্তর যা শূন্য অবস্থায় প্রকাশিত",
    "fa": "نمایهٔ 8 · دیوار فرایند — لایه‌ای که خالی منتشر شد",
-   "ko": "전시 8 · 과정의 벽 — 비어 있는 채 배포된 레이어"
+   "ko": "전시 8 · 과정의 벽 — 비어 있는 채 배포된 레이어",
+   "ur": "نمائش 8 · عمل کی دیوار — ایک تہہ جو خالی روانہ ہوئی",
+   "ja": "展示 8 · プロセスの壁 — 空のまま出荷されたレイヤー",
+   "da": "Udstilling 8 · Procesmuren — et lag der blev udgivet tomt",
+   "nb": "Utstilling 8 · Prosessveggen — et lag som ble levert tomt",
+   "sv": "Exponat 8 · Processväggen — ett lager som levererades tomt",
+   "fi": "Todiste 8 · Prosessimuuri — kerros, joka toimitettiin tyhjänä",
+   "tr": "Sergi 8 · Süreç duvarı — boş yayımlanan bir katman",
+   "hu": "8. tárló · A folyamatfal — egy réteg, amely üresen érkezett"
   },
   "h.082": {
    "en": "Exhibit 9 · Bitcoin's answer — a whole-block inscription, and the asymmetry",
@@ -2426,7 +3339,15 @@
    "hi": "प्रदर्श 9 · Bitcoin का उत्तर — पूरे-ब्लॉक का अभिलेख, और विषमता",
    "bn": "প্রদর্শনী 9 · Bitcoin-এর উত্তর — পূর্ণ-ব্লক ইনস্ক্রিপশন, আর অসমতা",
    "fa": "نمایهٔ 9 · پاسخ بیت‌کوین — حکاکیِ یک بلوکِ کامل، و عدم‌تقارن",
-   "ko": "전시 9 · 비트코인의 답 — 블록 전체 인스크립션, 그리고 비대칭"
+   "ko": "전시 9 · 비트코인의 답 — 블록 전체 인스크립션, 그리고 비대칭",
+   "ur": "نمائش 9 · Bitcoin کا جواب — پورے بلاک کا کندہ نقش، اور عدم توازن",
+   "ja": "展示 9 · Bitcoin の答え — ブロック丸ごとのインスクリプションと、その非対称",
+   "da": "Udstilling 9 · Bitcoins svar — en helbloks-inskription, og asymmetrien",
+   "nb": "Utstilling 9 · Bitcoins svar — en helblokk-innskripsjon, og asymmetrien",
+   "sv": "Exponat 9 · Bitcoins svar — en helblocksinskription, och asymmetrin",
+   "fi": "Todiste 9 · Bitcoinin vastaus — kokonaisen lohkon inskriptio, ja epäsymmetria",
+   "tr": "Sergi 9 · Bitcoin'in cevabı — tam blokluk bir yazıt ve asimetri",
+   "hu": "9. tárló · A Bitcoin válasza — egy egészblokkos inskripció, és az aszimmetria"
   },
   "h.083": {
    "en": "SOURCES & DOORS — the ERC-20i wing, receipted",
@@ -2447,7 +3368,15 @@
    "hi": "स्रोत और द्वार — ERC-20i विंग, रसीद-सहित",
    "bn": "উৎস ও দরজা — ERC-20i শাখা, প্রমাণপত্রসহ",
    "fa": "منابع و درها — بالِ ERC-20i، با رسید",
-   "ko": "출처와 문 — ERC-20i 날개, 영수증 첨부"
+   "ko": "출처와 문 — ERC-20i 날개, 영수증 첨부",
+   "ur": "ماخذات اور دروازے — ERC-20i ونگ، رسیدوں سمیت",
+   "ja": "出典と扉 — ERC-20i ウィング、レシートつき",
+   "da": "KILDER & DØRE — ERC-20i-fløjen, med kvitteringer",
+   "nb": "KILDER & DØRER — ERC-20i-fløyen, med kvitteringer",
+   "sv": "KÄLLOR & DÖRRAR — ERC-20i-flygeln, kvitterad",
+   "fi": "LÄHTEET & OVET — ERC-20i-siipi, kuitattuna",
+   "tr": "KAYNAKLAR & KAPILAR — ERC-20i kanadı, makbuzlu",
+   "hu": "FORRÁSOK ÉS AJTÓK — az ERC-20i szárny, bizonylatolva"
   },
   "h.084": {
    "en": "Gate configuration",
@@ -2468,7 +3397,15 @@
    "hi": "द्वार विन्यास",
    "bn": "ফটক কনফিগারেশন",
    "fa": "پیکربندی دروازه",
-   "ko": "게이트 구성"
+   "ko": "게이트 구성",
+   "ur": "گیٹ کنفیگریشن",
+   "ja": "ゲート構成",
+   "da": "Portkonfiguration",
+   "nb": "Portkonfigurasjon",
+   "sv": "Grindkonfiguration",
+   "fi": "Portin konfiguraatio",
+   "tr": "Geçit yapılandırması",
+   "hu": "Kapukonfiguráció"
   },
   "h.085": {
    "en": "Verdict",
@@ -2489,7 +3426,15 @@
    "hi": "निर्णय",
    "bn": "রায়",
    "fa": "حکم",
-   "ko": "판정"
+   "ko": "판정",
+   "ur": "فیصلہ",
+   "ja": "評決",
+   "da": "Verdikt",
+   "nb": "Dom",
+   "sv": "Domslut",
+   "fi": "Tuomio",
+   "tr": "Hüküm",
+   "hu": "Ítélet"
   },
   "h.086": {
    "en": "The layer, as the gate sees it",
@@ -2510,7 +3455,15 @@
    "hi": "परत, जैसी द्वार उसे देखता है",
    "bn": "স্তরটি, ফটক যেমন দেখে",
    "fa": "لایه، آن‌گونه که دروازه می‌بیند",
-   "ko": "게이트가 보는 그대로의 레이어"
+   "ko": "게이트가 보는 그대로의 레이어",
+   "ur": "تہہ، جیسے گیٹ اسے دیکھتا ہے",
+   "ja": "ゲートから見たレイヤー",
+   "da": "Laget, som porten ser det",
+   "nb": "Laget, slik porten ser det",
+   "sv": "Lagret, som grinden ser det",
+   "fi": "Kerros, sellaisena kuin portti sen näkee",
+   "tr": "Katman, geçidin gördüğü haliyle",
+   "hu": "A réteg, ahogyan a kapu látja"
   },
   "h.087": {
    "en": "The blob — the layer as bytes (v2 codec, golden-tested)",
@@ -2531,7 +3484,15 @@
    "hi": "ब्लॉब — परत बाइट-रूप में (v2 कोडेक, गोल्डन-परीक्षित)",
    "bn": "ব্লব — বাইট হিসেবে স্তরটি (v2 কোডেক, গোল্ডেন-পরীক্ষিত)",
    "fa": "بلاب — لایه به‌صورت بایت‌ها (کدک v2، با آزمون طلایی)",
-   "ko": "블롭 — 바이트로 본 레이어 (v2 코덱, 골든 테스트 통과)"
+   "ko": "블롭 — 바이트로 본 레이어 (v2 코덱, 골든 테스트 통과)",
+   "ur": "بلاب — تہہ بطور بائٹس (v2 کوڈیک، گولڈن ٹیسٹ شدہ)",
+   "ja": "ブロブ — バイト列としてのレイヤー（v2 コーデック、ゴールデンテスト済み）",
+   "da": "Blobben — laget som bytes (v2-codec, golden-testet)",
+   "nb": "Blobben — laget som byte (v2-kodek, golden-testet)",
+   "sv": "Blobben — lagret som byte (v2-codec, golden-testad)",
+   "fi": "Blobi — kerros tavuina (v2-koodekki, golden-testattu)",
+   "tr": "Blob — bayt olarak katman (v2 kodek, golden testli)",
+   "hu": "A blob — a réteg bájtokként (v2 kodek, golden-tesztelt)"
   },
   "h.088": {
    "en": "THE WALLS, ON THE FACE",
@@ -2552,7 +3513,15 @@
    "hi": "दीवारें, मुख पर अंकित",
    "bn": "দেয়ালগুলি, মুখের উপরেই",
    "fa": "دیوارها، بر پیشانی",
-   "ko": "벽들, 정면에 그대로"
+   "ko": "벽들, 정면에 그대로",
+   "ur": "دیواریں، چہرے پر",
+   "ja": "壁は、正面に掲げて",
+   "da": "MURENE, PÅ FACADEN",
+   "nb": "VEGGENE, PÅ SELVE FLATEN",
+   "sv": "VÄGGARNA, PÅ FRAMSIDAN",
+   "fi": "MUURIT, KASVOILLA",
+   "tr": "DUVARLAR, YÜZÜN ÜZERİNDE",
+   "hu": "A FALAK, AZ ELŐLAPON"
   },
   "h.089": {
    "en": "THE FAT ASSEMBLY LINE — upstream medicine, stage by stage, animated",
@@ -2573,7 +3542,15 @@
    "hi": "वसा की असेंबली-लाइन — अपस्ट्रीम चिकित्सा, चरण-दर-चरण, सजीव चित्रित",
    "bn": "চর্বির সংযোজন-লাইন — উজানের চিকিৎসা, ধাপে ধাপে, সচল চিত্রে",
    "fa": "خط مونتاژ چربی — داروی بالادستی، مرحله‌به‌مرحله، پویانمایی‌شده",
-   "ko": "지방 조립 라인 — 상류의 의학, 단계별로, 애니메이션으로"
+   "ko": "지방 조립 라인 — 상류의 의학, 단계별로, 애니메이션으로",
+   "ur": "چکنائی کی اسمبلی لائن — اوپر کی دھارا کی دوا، مرحلہ بہ مرحلہ، متحرک",
+   "ja": "脂質の組立ライン — 上流の医学を、段階ごとに、アニメーションで",
+   "da": "FEDTSAMLEBÅNDET — opstrøms medicin, trin for trin, animeret",
+   "nb": "FETTSAMLEBÅNDET — oppstrøms medisin, trinn for trinn, animert",
+   "sv": "FETTETS LÖPANDE BAND — uppströmsmedicin, steg för steg, animerad",
+   "fi": "RASVAN KOKOONPANOLINJA — ylävirran lääketiede, vaihe vaiheelta, animoituna",
+   "tr": "YAĞ MONTAJ HATTI — yukarı akış tıbbı, aşama aşama, canlandırmalı",
+   "hu": "A ZSÍR-FUTÓSZALAG — orvoslás a forrás felől, szakaszról szakaszra, animálva"
   },
   "h.090": {
    "en": "½ · THE MIRROR — your line in the numbers",
@@ -2594,7 +3571,15 @@
    "hi": "½ · दर्पण — संख्याओं में आपकी रेखा",
    "bn": "½ · আয়না — সংখ্যার ভেতর আপনার রেখা",
    "fa": "½ · آینه — خطِ تو در میان اعداد",
-   "ko": "½ · 거울 — 숫자 속 당신의 선"
+   "ko": "½ · 거울 — 숫자 속 당신의 선",
+   "ur": "½ · آئینہ — اعداد میں آپ کی اپنی لکیر",
+   "ja": "½ · 鏡 — 数字の中のあなたの線",
+   "da": "½ · SPEJLET — din linje i tallene",
+   "nb": "½ · SPEILET — din linje i tallene",
+   "sv": "½ · SPEGELN — din rad i siffrorna",
+   "fi": "½ · PEILI — sinun rivisi luvuissa",
+   "tr": "½ · AYNA — sayılardaki kendi çizginiz",
+   "hu": "½ · A TÜKÖR — a te sorod a számokban"
   },
   "h.091": {
    "en": "ESSENTIAL vs NOT — the marked difference",
@@ -2615,7 +3600,15 @@
    "hi": "अनिवार्य बनाम अन्य — चिह्नित अंतर",
    "bn": "অত্যাবশ্যক বনাম নয় — চিহ্নিত পার্থক্য",
    "fa": "ضروری در برابر غیرضروری — تفاوتِ نشان‌گذاری‌شده",
-   "ko": "필수 대 비필수 — 표시된 차이"
+   "ko": "필수 대 비필수 — 표시된 차이",
+   "ur": "لازمی بمقابلہ غیر لازمی — نمایاں فرق",
+   "ja": "必須か否か — 印された違い",
+   "da": "ESSENTIEL vs IKKE — den markerede forskel",
+   "nb": "ESSENSIELT vs IKKE — den markerte forskjellen",
+   "sv": "ESSENTIELL vs INTE — den markerade skillnaden",
+   "fi": "VÄLTTÄMÄTÖN vs EI — merkitty ero",
+   "tr": "ESANSİYEL vs DEĞİL — işaretli fark",
+   "hu": "ESSZENCIÁLIS vs NEM — a megjelölt különbség"
   },
   "h.092": {
    "en": "ESSENTIAL — cannot be synthesized · DRI row exists",
@@ -2636,7 +3629,15 @@
    "hi": "अनिवार्य — शरीर में नहीं बन सकता · DRI पंक्ति मौजूद",
    "bn": "অত্যাবশ্যক — সংশ্লেষণ সম্ভব নয় · DRI সারি আছে",
    "fa": "ضروری — سنتزشدنی نیست · ردیف DRI دارد",
-   "ko": "필수 — 체내 합성 불가 · DRI 행 존재"
+   "ko": "필수 — 체내 합성 불가 · DRI 행 존재",
+   "ur": "لازمی — جسم نہیں بنا سکتا · DRI قطار موجود",
+   "ja": "必須 — 体内で合成できない · DRI 行が存在する",
+   "da": "ESSENTIEL — kan ikke syntetiseres · DRI-række findes",
+   "nb": "ESSENSIELT — kan ikke syntetiseres · DRI-rad finnes",
+   "sv": "ESSENTIELL — kan inte syntetiseras · DRI-rad finns",
+   "fi": "VÄLTTÄMÄTÖN — ei voida syntetisoida · DRI-rivi on olemassa",
+   "tr": "ESANSİYEL — sentezlenemez · DRI satırı var",
+   "hu": "ESSZENCIÁLIS — nem szintetizálható · van DRI-sor"
   },
   "h.093": {
    "en": "NON-ESSENTIAL — no DRI row · body-synthesized",
@@ -2657,7 +3658,15 @@
    "hi": "ग़ैर-अनिवार्य — कोई DRI पंक्ति नहीं · शरीर में संश्लेषित",
    "bn": "অনাবশ্যক — DRI সারি নেই · শরীরে সংশ্লেষিত",
    "fa": "غیرضروری — بدون ردیف DRI · ساختهٔ خودِ بدن",
-   "ko": "비필수 — DRI 행 없음 · 체내 합성"
+   "ko": "비필수 — DRI 행 없음 · 체내 합성",
+   "ur": "غیر لازمی — DRI قطار نہیں · جسم خود بناتا ہے",
+   "ja": "非必須 — DRI 行なし · 体内で合成される",
+   "da": "IKKE-ESSENTIEL — ingen DRI-række · kropssyntetiseret",
+   "nb": "IKKE-ESSENSIELT — ingen DRI-rad · kroppssyntetisert",
+   "sv": "ICKE-ESSENTIELL — ingen DRI-rad · kroppen syntetiserar själv",
+   "fi": "EI-VÄLTTÄMÄTÖN — ei DRI-riviä · kehon syntetisoima",
+   "tr": "ESANSİYEL OLMAYAN — DRI satırı yok · vücutça sentezlenir",
+   "hu": "NEM ESSZENCIÁLIS — nincs DRI-sor · a test szintetizálja"
   },
   "h.094": {
    "en": "THE ATTENTION HOOK — protein, since the industry insists",
@@ -2678,7 +3687,15 @@
    "hi": "ध्यान खींचने वाला काँटा — प्रोटीन, क्योंकि उद्योग ज़िद करता है",
    "bn": "মনোযোগের টোপ — প্রোটিন, যেহেতু শিল্পমহল নাছোড়",
    "fa": "قلابِ توجه — پروتئین، چون صنعت اصرار دارد",
-   "ko": "시선을 끄는 미끼 — 단백질, 업계가 고집하니까"
+   "ko": "시선을 끄는 미끼 — 단백질, 업계가 고집하니까",
+   "ur": "توجہ کا کانٹا — پروٹین، چونکہ صنعت اصرار کرتی ہے",
+   "ja": "注意のフック — タンパク質。業界がそう言い張るので",
+   "da": "OPMÆRKSOMHEDSKROGEN — protein, siden industrien insisterer",
+   "nb": "OPPMERKSOMHETSKROKEN — protein, siden industrien insisterer",
+   "sv": "UPPMÄRKSAMHETSKROKEN — protein, eftersom industrin insisterar",
+   "fi": "HUOMIOKOUKKU — proteiini, koska teollisuus vaatii",
+   "tr": "DİKKAT KANCASI — protein, madem sektör ısrar ediyor",
+   "hu": "A FIGYELEMHOROG — fehérje, ha már az ipar ragaszkodik hozzá"
   },
   "h.095": {
    "en": "THE EVIDENCE LEDGER — every receipt on this page",
@@ -2699,7 +3716,15 @@
    "hi": "साक्ष्य-बहीखाता — इस पृष्ठ की हर रसीद",
    "bn": "প্রমাণের খতিয়ান — এই পাতার প্রতিটি প্রমাণপত্র",
    "fa": "دفتر شواهد — همهٔ رسیدهای این صفحه",
-   "ko": "증거 장부 — 이 페이지의 모든 영수증"
+   "ko": "증거 장부 — 이 페이지의 모든 영수증",
+   "ur": "شواہد کا کھاتہ — اس صفحے کی ہر رسید",
+   "ja": "証拠台帳 — このページのすべてのレシート",
+   "da": "EVIDENSHOVEDBOGEN — hver kvittering på denne side",
+   "nb": "BEVISHOVEDBOKEN — hver kvittering på denne siden",
+   "sv": "EVIDENSLIGGAREN — varje kvitto på denna sida",
+   "fi": "NÄYTÖN TILIKIRJA — jokainen kuitti tällä sivulla",
+   "tr": "KANIT DEFTERİ — bu sayfadaki her makbuz",
+   "hu": "A BIZONYÍTÉK-FŐKÖNYV — az oldal minden bizonylata"
   },
   "h.096": {
    "en": "WHO I AM (said first, in every room)",
@@ -2720,7 +3745,15 @@
    "hi": "मैं कौन हूँ (हर कक्ष में, सबसे पहले कहा गया)",
    "bn": "আমি কে (প্রতিটি ঘরে, সবার আগে বলা)",
    "fa": "من که هستم (نخست گفته می‌شود، در هر اتاق)",
-   "ko": "나는 누구인가 (모든 방에서 가장 먼저 말함)"
+   "ko": "나는 누구인가 (모든 방에서 가장 먼저 말함)",
+   "ur": "میں کون ہوں (ہر کمرے میں، سب سے پہلے کہا گیا)",
+   "ja": "私は誰か（どの部屋でも、まず最初に言う）",
+   "da": "HVEM JEG ER (sagt først, i hvert rum)",
+   "nb": "HVEM JEG ER (sagt først, i hvert rom)",
+   "sv": "VEM JAG ÄR (sagt först, i varje rum)",
+   "fi": "KUKA OLEN (sanottu ensin, joka huoneessa)",
+   "tr": "KİMİM (önce söylenir, her odada)",
+   "hu": "KI VAGYOK (elsőként kimondva, minden szobában)"
   },
   "h.097": {
    "en": "ASK ME (answers from the receipts — or an honest absence, by name)",
@@ -2741,7 +3774,15 @@
    "hi": "मुझसे पूछो (उत्तर रसीदों से — या नाम लेकर एक ईमानदार अनुपस्थिति)",
    "bn": "আমাকে জিজ্ঞেস করুন (উত্তর প্রমাণপত্র থেকে — নয়তো নাম ধরে সৎ অনুপস্থিতি)",
    "fa": "از من بپرس (پاسخ‌ها از دلِ رسیدها — یا غیابی صادقانه، با ذکر نام)",
-   "ko": "물어보세요 (영수증에서 나온 답 — 아니면 이름을 밝힌 정직한 부재)"
+   "ko": "물어보세요 (영수증에서 나온 답 — 아니면 이름을 밝힌 정직한 부재)",
+   "ur": "مجھ سے پوچھیں (جواب رسیدوں سے — یا نام لے کر ایک ایماندار غیر موجودگی)",
+   "ja": "私に聞いて（答えはレシートから — なければ、名指しの正直な不在）",
+   "da": "SPØRG MIG (svar fra kvitteringerne — eller et ærligt fravær, ved navn)",
+   "nb": "SPØR MEG (svar fra kvitteringene — eller et ærlig fravær, nevnt ved navn)",
+   "sv": "FRÅGA MIG (svar ur kvittona — eller en ärlig frånvaro, vid namn)",
+   "fi": "KYSY MINULTA (vastaukset kuiteista — tai rehellinen puute, nimeltä mainiten)",
+   "tr": "BANA SOR (cevaplar makbuzlardan — ya da adıyla, dürüst bir yokluk)",
+   "hu": "KÉRDEZZ (válaszok a bizonylatokból — vagy őszinte hiány, néven nevezve)"
   },
   "h.098": {
    "en": "MY WALLS, SAID ALOUD",
@@ -2762,7 +3803,15 @@
    "hi": "मेरी दीवारें, खुलकर कही गईं",
    "bn": "আমার দেয়াল, উচ্চস্বরে বলা",
    "fa": "دیوارهای من، به آوازِ بلند",
-   "ko": "나의 벽, 소리 내어 말함"
+   "ko": "나의 벽, 소리 내어 말함",
+   "ur": "میری دیواریں، بلند آواز میں",
+   "ja": "私の壁を、声に出して",
+   "da": "MINE MURE, SAGT HØJT",
+   "nb": "MINE VEGGER, SAGT HØYT",
+   "sv": "MINA VÄGGAR, SAGDA HÖGT",
+   "fi": "MUURINI, ÄÄNEEN SANOTTUINA",
+   "tr": "DUVARLARIM, YÜKSEK SESLE",
+   "hu": "A FALAIM, HANGOSAN KIMONDVA"
   },
   "h.099": {
    "en": "HER TEN DROPS — paste-ready VOICE records (rate 3/day; the calendar after debut)",
@@ -2783,7 +3832,15 @@
    "hi": "उसकी दस बूँदें — चिपकाने-योग्य VOICE अभिलेख (दर 3/दिन; पदार्पण के बाद कैलेंडर)",
    "bn": "তাঁর দশ ফোঁটা — পেস্ট-প্রস্তুত VOICE রেকর্ড (হার 3/দিন; অভিষেকের পরে বর্ষপঞ্জি)",
    "fa": "ده قطرهٔ او — رکوردهای VOICE آمادهٔ چسباندن (نرخ 3 در روز؛ تقویم پس از رونمایی)",
-   "ko": "그녀의 열 개의 드롭 — 붙여넣기만 하면 되는 VOICE 레코드 (속도 3/일; 캘린더는 데뷔 후)"
+   "ko": "그녀의 열 개의 드롭 — 붙여넣기만 하면 되는 VOICE 레코드 (속도 3/일; 캘린더는 데뷔 후)",
+   "ur": "اس کے دس قطرے — چسپاں کرنے کو تیار VOICE ریکارڈ (شرح 3/دن؛ ڈیبیو کے بعد کیلنڈر)",
+   "ja": "彼女の十滴 — 貼り付け可能な VOICE レコード（レートは1日3件、カレンダーはデビュー後）",
+   "da": "HENDES TI DRÅBER — indsætningsklare VOICE-poster (takt 3/dag; kalenderen efter debuten)",
+   "nb": "HENNES TI DRÅPER — VOICE-poster klare til å limes inn (takt 3/dag; kalenderen etter debuten)",
+   "sv": "HENNES TIO DROPPAR — klistringsklara VOICE-poster (takt 3/dag; kalendern efter debuten)",
+   "fi": "HÄNEN KYMMENEN PISARAANSA — liittämisvalmiit VOICE-tietueet (tahti 3/päivä; kalenteri debyytin jälkeen)",
+   "tr": "ONUN ON DAMLASI — yapıştırmaya hazır VOICE kayıtları (hız 3/gün; takvim çıkıştan sonra)",
+   "hu": "AZ Ő TÍZ CSEPPJE — beillesztésre kész VOICE-rekordok (ütem 3/nap; a naptár a debütálás után)"
   },
   "h.100": {
    "en": "THE DEBUT VOICE RECORD — published on the estate, 2026-08-20",
@@ -2804,7 +3861,15 @@
    "hi": "पदार्पण VOICE अभिलेख — एस्टेट पर प्रकाशित, 2026-08-20",
    "bn": "অভিষেক VOICE রেকর্ড — এস্টেটে প্রকাশিত, 2026-08-20",
    "fa": "رکورد VOICE رونمایی — منتشرشده بر این قلمرو، 2026-08-20",
-   "ko": "데뷔 VOICE 레코드 — 에스테이트에 게시, 2026-08-20"
+   "ko": "데뷔 VOICE 레코드 — 에스테이트에 게시, 2026-08-20",
+   "ur": "ڈیبیو VOICE ریکارڈ — اسٹیٹ پر شائع، 2026-08-20",
+   "ja": "デビュー VOICE レコード — 2026-08-20、エステートに公開",
+   "da": "DEBUT-VOICE-POSTEN — publiceret på godset, 2026-08-20",
+   "nb": "DEBUTENS VOICE-POST — publisert på eiendommen, 2026-08-20",
+   "sv": "DEBUTENS VOICE-POST — publicerad på egendomen, 2026-08-20",
+   "fi": "DEBYYTIN VOICE-TIETUE — julkaistu tiluksella 2026-08-20",
+   "tr": "ÇIKIŞ VOICE KAYDI — mülkte yayımlandı, 2026-08-20",
+   "hu": "A DEBÜTÁLÓ VOICE-REKORD — a birtokon közzétéve, 2026-08-20"
   },
   "h.101": {
    "en": "THE CHARTER — how this discourse runs",
@@ -2825,7 +3890,15 @@
    "hi": "सनद — यह संवाद कैसे चलता है",
    "bn": "সনদ — এই আলাপ কীভাবে চলে",
    "fa": "منشور — این گفتمان چگونه اداره می‌شود",
-   "ko": "헌장 — 이 담론이 진행되는 방식"
+   "ko": "헌장 — 이 담론이 진행되는 방식",
+   "ur": "منشور — یہ مکالمہ کیسے چلتا ہے",
+   "ja": "憲章 — この対話の運びかた",
+   "da": "CHARTERET — hvordan denne diskurs kører",
+   "nb": "CHARTERET — hvordan denne diskursen drives",
+   "sv": "STADGAN — hur denna diskurs drivs",
+   "fi": "PERUSKIRJA — miten tämä diskurssi kulkee",
+   "tr": "TÜZÜK — bu söylem nasıl işler",
+   "hu": "A CHARTA — hogyan zajlik ez a diskurzus"
   },
   "h.102": {
    "en": "THE TWO PROTOCOLS, ONE SENTENCE EACH",
@@ -2846,7 +3919,15 @@
    "hi": "दो प्रोटोकॉल, हरेक एक वाक्य में",
    "bn": "দুই প্রোটোকল, প্রতিটির এক বাক্য",
    "fa": "دو پروتکل، هر یک در یک جمله",
-   "ko": "두 개의 프로토콜, 각각 한 문장씩"
+   "ko": "두 개의 프로토콜, 각각 한 문장씩",
+   "ur": "دونوں پروٹوکول، ہر ایک کا ایک جملہ",
+   "ja": "二つのプロトコル、各一文で",
+   "da": "DE TO PROTOKOLLER, ÉN SÆTNING HVER",
+   "nb": "DE TO PROTOKOLLENE, ÉN SETNING HVER",
+   "sv": "DE TVÅ PROTOKOLLEN, EN MENING VARDERA",
+   "fi": "KAKSI PROTOKOLLAA, YKSI LAUSE KUMMASTAKIN",
+   "tr": "İKİ PROTOKOL, HER BİRİ TEK CÜMLE",
+   "hu": "A KÉT PROTOKOLL, EGY-EGY MONDATBAN"
   },
   "h.103": {
    "en": "THE DISCOURSE — seven lines, each receipted on both sides",
@@ -2867,7 +3948,15 @@
    "hi": "संवाद — सात पंक्तियाँ, हरेक दोनों ओर से रसीद-सहित",
    "bn": "আলাপ — সাতটি পঙ্‌ক্তি, প্রতিটি দুই পক্ষেই প্রমাণপত্রসহ",
    "fa": "گفتمان — هفت سطر، هر یک از هر دو سو با رسید",
-   "ko": "담론 — 일곱 줄, 각 줄마다 양쪽에 영수증"
+   "ko": "담론 — 일곱 줄, 각 줄마다 양쪽에 영수증",
+   "ur": "مکالمہ — سات سطریں، ہر ایک دونوں طرف سے رسید یافتہ",
+   "ja": "対話 — 七つの行、それぞれ両側にレシートつき",
+   "da": "DISKURSEN — syv linjer, hver med kvittering på begge sider",
+   "nb": "DISKURSEN — sju linjer, hver med kvittering på begge sider",
+   "sv": "DISKURSEN — sju rader, var och en kvitterad på båda sidor",
+   "fi": "DISKURSSI — seitsemän riviä, jokainen kuitattu molemmin puolin",
+   "tr": "SÖYLEM — yedi satır, her biri iki tarafta da makbuzlu",
+   "hu": "A DISKURZUS — hét sor, mindegyik mindkét oldalon bizonylatolt"
   },
   "h.104": {
    "en": "THE SYMBIOSIS LANES — what each side brings, and the co-creations waiting",
@@ -2888,7 +3977,15 @@
    "hi": "सहजीवन-लेनें — हर पक्ष क्या लाता है, और प्रतीक्षारत सह-रचनाएँ",
    "bn": "সহজীবনের লেন — প্রতি পক্ষ কী আনে, আর অপেক্ষমাণ যৌথ-সৃষ্টিগুলি",
    "fa": "مسیرهای هم‌زیستی — هر سو چه می‌آورد، و هم‌آفرینی‌های در انتظار",
-   "ko": "공생 레인 — 각자가 가져오는 것, 그리고 기다리는 공동 창작"
+   "ko": "공생 레인 — 각자가 가져오는 것, 그리고 기다리는 공동 창작",
+   "ur": "ہم زیستی کی لینیں — ہر فریق کیا لاتا ہے، اور منتظر مشترکہ تخلیقات",
+   "ja": "共生レーン — 双方が持ち寄るものと、待っている共創",
+   "da": "SYMBIOSESPORENE — hvad hver side bringer, og de sam-skabelser der venter",
+   "nb": "SYMBIOSEBANENE — hva hver side bringer, og samskapningene som venter",
+   "sv": "SYMBIOSSPÅREN — vad varje sida bidrar med, och samskapelserna som väntar",
+   "fi": "SYMBIOOSIKAISTAT — mitä kumpikin puoli tuo, ja odottavat yhteisluomukset",
+   "tr": "SİMBİYOZ HATLARI — her tarafın getirdiği ve bekleyen ortak yaratımlar",
+   "hu": "A SZIMBIÓZIS-SÁVOK — mit hoz ki-ki, és a várakozó közös alkotások"
   },
   "h.105": {
    "en": "what MAHA uniquely holds",
@@ -2909,7 +4006,15 @@
    "hi": "जो केवल MAHA के पास है",
    "bn": "MAHA-র একক অধিকারে যা আছে",
    "fa": "آنچه تنها MAHA دارد",
-   "ko": "MAHA만이 가진 것"
+   "ko": "MAHA만이 가진 것",
+   "ur": "جو صرف MAHA کے پاس ہے",
+   "ja": "MAHA だけが持つもの",
+   "da": "hvad kun MAHA rummer",
+   "nb": "det bare MAHA holder",
+   "sv": "vad MAHA ensamt bär",
+   "fi": "mitä MAHA yksin pitää hallussaan",
+   "tr": "MAHA'nın benzersiz elinde tuttuğu",
+   "hu": "amit egyedül a MAHA birtokol"
   },
   "h.106": {
    "en": "what bFood uniquely holds",
@@ -2930,7 +4035,15 @@
    "hi": "जो केवल bFood के पास है",
    "bn": "bFood-এর একক অধিকারে যা আছে",
    "fa": "آنچه تنها bFood دارد",
-   "ko": "bFood만이 가진 것"
+   "ko": "bFood만이 가진 것",
+   "ur": "جو صرف bFood کے پاس ہے",
+   "ja": "bFood だけが持つもの",
+   "da": "hvad kun bFood rummer",
+   "nb": "det bare bFood holder",
+   "sv": "vad bFood ensamt bär",
+   "fi": "mitä bFood yksin pitää hallussaan",
+   "tr": "bFood'un benzersiz elinde tuttuğu",
+   "hu": "amit egyedül a bFood birtokol"
   },
   "h.107": {
    "en": "five co-creations, ready to start",
@@ -2951,7 +4064,15 @@
    "hi": "पाँच सह-रचनाएँ, शुरू होने को तैयार",
    "bn": "পাঁচটি যৌথ-সৃষ্টি, শুরুর জন্য প্রস্তুত",
    "fa": "پنج هم‌آفرینی، آمادهٔ آغاز",
-   "ko": "시작만 남은 다섯 개의 공동 창작"
+   "ko": "시작만 남은 다섯 개의 공동 창작",
+   "ur": "پانچ مشترکہ تخلیقات، شروع کرنے کو تیار",
+   "ja": "始められる五つの共創",
+   "da": "fem sam-skabelser, klar til start",
+   "nb": "fem samskapninger, klare til start",
+   "sv": "fem samskapelser, redo att börja",
+   "fi": "viisi yhteisluomusta, valmiina alkamaan",
+   "tr": "başlamaya hazır beş ortak yaratım",
+   "hu": "öt közös alkotás, indulásra készen"
   },
   "h.108": {
    "en": "THE SCALE NOTE — this grammar extends",
@@ -2972,7 +4093,15 @@
    "hi": "पैमाने पर टिप्पणी — यह व्याकरण आगे बढ़ता है",
    "bn": "মাপের টীকা — এই ব্যাকরণ প্রসারিত হয়",
    "fa": "یادداشت مقیاس — این دستورِ زبان گسترش می‌یابد",
-   "ko": "규모에 관한 메모 — 이 문법은 확장됩니다"
+   "ko": "규모에 관한 메모 — 이 문법은 확장됩니다",
+   "ur": "پیمانے کا نوٹ — یہ گرامر پھیلتی ہے",
+   "ja": "スケールの注記 — この文法は拡張する",
+   "da": "SKALANOTEN — denne grammatik rækker videre",
+   "nb": "SKALANOTATET — denne grammatikken strekker seg videre",
+   "sv": "SKALNOTEN — denna grammatik sträcker sig vidare",
+   "fi": "SKAALAHUOMAUTUS — tämä kielioppi laajenee",
+   "tr": "ÖLÇEK NOTU — bu gramer genişler",
+   "hu": "A LÉPTÉKJEGYZET — ez a nyelvtan kiterjeszthető"
   },
   "h.109": {
    "en": "THE RECORD — every receipt on this page",
@@ -2993,7 +4122,15 @@
    "hi": "अभिलेख — इस पृष्ठ की हर रसीद",
    "bn": "নথি — এই পাতার প্রতিটি প্রমাণপত্র",
    "fa": "پرونده — همهٔ رسیدهای این صفحه",
-   "ko": "기록 — 이 페이지의 모든 영수증"
+   "ko": "기록 — 이 페이지의 모든 영수증",
+   "ur": "ریکارڈ — اس صفحے کی ہر رسید",
+   "ja": "記録 — このページのすべてのレシート",
+   "da": "OPTEGNELSEN — hver kvittering på denne side",
+   "nb": "OPPTEGNELSEN — hver kvittering på denne siden",
+   "sv": "FÖRTECKNINGEN — varje kvitto på denna sida",
+   "fi": "PÖYTÄKIRJA — jokainen kuitti tällä sivulla",
+   "tr": "KAYIT — bu sayfadaki her makbuz",
+   "hu": "A JEGYZŐKÖNYV — az oldal minden bizonylata"
   },
   "h.110": {
    "en": "YOUR TOP-2 — mother tongue + father tongue (local-first, never identity data)",
@@ -3014,7 +4151,15 @@
    "hi": "आपकी शीर्ष-2 — मातृभाषा + पितृभाषा (पहले स्थानीय, पहचान-डेटा कभी नहीं)",
    "bn": "আপনার সেরা-2 — মাতৃভাষা + পিতৃভাষা (লোকাল-ফার্স্ট, কখনও পরিচয়-ডেটা নয়)",
    "fa": "دو زبانِ برترِ تو — زبان مادری + زبان پدری (محلی-نخست، هرگز دادهٔ هویتی نه)",
-   "ko": "당신의 TOP-2 — 어머니의 언어 + 아버지의 언어 (로컬 우선, 결코 신원 데이터 아님)"
+   "ko": "당신의 TOP-2 — 어머니의 언어 + 아버지의 언어 (로컬 우선, 결코 신원 데이터 아님)",
+   "ur": "آپ کی اولین 2 — مادری زبان + پدری زبان (مقامی-اول، کبھی شناختی ڈیٹا نہیں)",
+   "ja": "あなたのトップ2 — 母の言語 + 父の言語（ローカルファースト、アイデンティティデータには決してしない）",
+   "da": "DINE TOP-2 — modersmål + fadersmål (lokalt-først, aldrig identitetsdata)",
+   "nb": "DINE TOPP-2 — morsmål + farsmål (lokalt først, aldri identitetsdata)",
+   "sv": "DINA TVÅ FRÄMSTA — modersmål + fadersmål (lokalt först, aldrig identitetsdata)",
+   "fi": "SINUN TOP-2 — äidinkieli + isänkieli (paikallinen ensin, ei koskaan identiteettidataa)",
+   "tr": "İLK 2'NİZ — ana dil + baba dili (yerel-öncelikli, asla kimlik verisi değil)",
+   "hu": "A TE TOP-2-D — anyanyelv + apanyelv (helyben-első, sosem identitásadat)"
   },
   "h.111": {
    "en": "WITHDRAWAL — a first-class state, receipt-shaped",
@@ -3035,7 +4180,15 @@
    "hi": "वापसी — एक प्रथम-श्रेणी अवस्था, रसीद के आकार की",
    "bn": "প্রত্যাহার — প্রথম শ্রেণির একটি অবস্থা, প্রমাণপত্রের আকারে",
    "fa": "کناره‌گیری — وضعیتی درجه‌یک، به شکلِ رسید",
-   "ko": "철회 — 일급 상태, 영수증의 형태"
+   "ko": "철회 — 일급 상태, 영수증의 형태",
+   "ur": "دستبرداری — پہلے درجے کی حالت، رسید کی شکل میں",
+   "ja": "撤回 — レシートの形をした第一級の状態",
+   "da": "TILBAGETRÆKNING — en førsteklasses tilstand, kvitteringsformet",
+   "nb": "TILBAKETREKKING — en fullverdig tilstand, kvitteringsformet",
+   "sv": "UTTRÄDE — ett fullvärdigt tillstånd, format som ett kvitto",
+   "fi": "VETÄYTYMINEN — täysiarvoinen tila, kuitin muotoinen",
+   "tr": "ÇEKİLME — birinci sınıf bir durum, makbuz biçiminde",
+   "hu": "VISSZAVONÁS — elsőosztályú állapot, bizonylat-formájú"
   },
   "h.112": {
    "en": "THE UNIFICATION LAW, LIVE — every color's mandatory label is a corpus record",
@@ -3056,7 +4209,15 @@
    "hi": "एकीकरण-विधान, सजीव — हर रंग का अनिवार्य लेबल एक संग्रह-अभिलेख है",
    "bn": "একীকরণ বিধান, সরাসরি — প্রতিটি রঙের বাধ্যতামূলক লেবেল একটি ভাণ্ডার-নথি",
    "fa": "قانون یکپارچگی، زنده — برچسبِ الزامیِ هر رنگ یک رکوردِ پیکره است",
-   "ko": "통일의 법, 실시간 — 모든 색의 필수 라벨은 하나의 코퍼스 레코드"
+   "ko": "통일의 법, 실시간 — 모든 색의 필수 라벨은 하나의 코퍼스 레코드",
+   "ur": "یکجائی کا قانون، زندہ — ہر رنگ کا لازمی لیبل ایک کارپس ریکارڈ ہے",
+   "ja": "統一の法、稼働中 — すべての色の必須ラベルはコーパスの記録",
+   "da": "FORENINGSLOVEN, LIVE — hver farves obligatoriske etiket er en korpuspost",
+   "nb": "FORENINGSLOVEN, DIREKTE — hver farges obligatoriske etikett er en korpuspost",
+   "sv": "FÖRENINGSLAGEN, LIVE — varje färgs obligatoriska etikett är en korpuspost",
+   "fi": "YHDISTÄMISLAKI, ELÄVÄNÄ — jokaisen värin pakollinen etiketti on korpustietue",
+   "tr": "BİRLEŞTİRME YASASI, CANLI — her rengin zorunlu etiketi bir korpus kaydıdır",
+   "hu": "AZ EGYESÍTÉSI TÖRVÉNY, ÉLŐBEN — minden szín kötelező címkéje korpuszrekord"
   },
   "h.114": {
    "en": "Respect standings",
@@ -3077,7 +4238,15 @@
    "hi": "सम्मान-स्थितियाँ",
    "bn": "সম্মানের অবস্থান",
    "fa": "جایگاه‌های احترام",
-   "ko": "존중 순위"
+   "ko": "존중 순위",
+   "ur": "احترام کے درجات",
+   "ja": "リスペクト順位",
+   "da": "Respektstillinger",
+   "nb": "Respektstillinger",
+   "sv": "Respektställningar",
+   "fi": "Kunnioituksen asemat",
+   "tr": "Saygı sıralaması",
+   "hu": "Tisztelet-állások"
   },
   "h.115": {
    "en": "Commissioning",
@@ -3098,7 +4267,15 @@
    "hi": "कार्यादेश",
    "bn": "কমিশনিং",
    "fa": "به‌کارگماری",
-   "ko": "커미셔닝"
+   "ko": "커미셔닝",
+   "ur": "کمیشننگ",
+   "ja": "コミッション",
+   "da": "Bestilling af værker",
+   "nb": "Kommisjonering",
+   "sv": "Beställning",
+   "fi": "Toimeksiannot",
+   "tr": "Görevlendirme",
+   "hu": "Megbízás"
   },
   "h.116": {
    "en": "Emission headroom",
@@ -3119,7 +4296,15 @@
    "hi": "उत्सर्जन की गुंजाइश",
    "bn": "নিঃসরণের অবশিষ্ট সীমা",
    "fa": "حاشیهٔ انتشار",
-   "ko": "발행 여유"
+   "ko": "발행 여유",
+   "ur": "اخراج کی گنجائش",
+   "ja": "発行余力",
+   "da": "Emissionsråderum",
+   "nb": "Emisjonstakhøyde",
+   "sv": "Emissionsutrymme",
+   "fi": "Emission liikkumavara",
+   "tr": "Emisyon payı",
+   "hu": "Kibocsátási mozgástér"
   },
   "h.117": {
    "en": "Commons price feed — hemp hearts",
@@ -3140,7 +4325,15 @@
    "hi": "कॉमन्स मूल्य-फ़ीड — हेम्प हार्ट्स",
    "bn": "কমন্স মূল্য-ফিড — শণবীজের শাঁস",
    "fa": "خوراک قیمتِ همگانی — مغز دانهٔ شاهدانه",
-   "ko": "커먼즈 가격 피드 — 헴프 하트"
+   "ko": "커먼즈 가격 피드 — 헴프 하트",
+   "ur": "کامنز قیمت فیڈ — بھنگ کے مغز",
+   "ja": "コモンズ価格フィード — ヘンプハーツ",
+   "da": "Fælledens prisfeed — hampehjerter",
+   "nb": "Allmenningens prisfeed — hampehjerter",
+   "sv": "Allmänningens prisflöde — hampahjärtan",
+   "fi": "Yhteismaan hintasyöte — hampunsydämet",
+   "tr": "Müşterekler fiyat akışı — kenevir tohumu içi",
+   "hu": "A közjavak ár-adatsora — hántolt kendermag"
   },
   "h.118": {
    "en": "Network",
@@ -3161,7 +4354,15 @@
    "hi": "नेटवर्क",
    "bn": "নেটওয়ার্ক",
    "fa": "شبکه",
-   "ko": "네트워크"
+   "ko": "네트워크",
+   "ur": "نیٹ ورک",
+   "ja": "ネットワーク",
+   "da": "Netværk",
+   "nb": "Nettverk",
+   "sv": "Nätverk",
+   "fi": "Verkko",
+   "tr": "Ağ",
+   "hu": "Hálózat"
   },
   "h.119": {
    "en": "Circles",
@@ -3182,7 +4383,15 @@
    "hi": "मंडलियाँ",
    "bn": "বৃত্তসমূহ",
    "fa": "حلقه‌ها",
-   "ko": "서클"
+   "ko": "서클",
+   "ur": "حلقے",
+   "ja": "サークル",
+   "da": "Cirkler",
+   "nb": "Sirkler",
+   "sv": "Cirklar",
+   "fi": "Piirit",
+   "tr": "Çemberler",
+   "hu": "Körök"
   },
   "h.120": {
    "en": "Spirit",
@@ -3203,7 +4412,15 @@
    "hi": "भावना",
    "bn": "চেতনা",
    "fa": "روح",
-   "ko": "정신"
+   "ko": "정신",
+   "ur": "روح",
+   "ja": "スピリット",
+   "da": "Ånd",
+   "nb": "Ånd",
+   "sv": "Anda",
+   "fi": "Henki",
+   "tr": "Ruh",
+   "hu": "Szellem"
   },
   "h.122": {
    "en": "The builder's ladder",
@@ -3224,7 +4441,15 @@
    "hi": "निर्माता की सीढ़ी",
    "bn": "নির্মাতার মই",
    "fa": "نردبان سازنده",
-   "ko": "빌더의 사다리"
+   "ko": "빌더의 사다리",
+   "ur": "معمار کی سیڑھی",
+   "ja": "ビルダーの梯子",
+   "da": "Byggerens stige",
+   "nb": "Byggerens stige",
+   "sv": "Byggarens stege",
+   "fi": "Rakentajan tikkaat",
+   "tr": "Yapıcının merdiveni",
+   "hu": "Az építő létrája"
   },
   "h.123": {
    "en": "The proving ground: the massive festival",
@@ -3245,7 +4470,15 @@
    "hi": "परीक्षण-भूमि: विराट उत्सव",
    "bn": "পরীক্ষার ময়দান: বিশাল উৎসব",
    "fa": "میدان آزمون: جشنوارهٔ عظیم",
-   "ko": "증명의 장: 거대한 축제"
+   "ko": "증명의 장: 거대한 축제",
+   "ur": "آزمائش گاہ: عظیم میلہ",
+   "ja": "実証の場：巨大フェスティバル",
+   "da": "Prøvepladsen: den massive festival",
+   "nb": "Prøvegrunnen: den massive festivalen",
+   "sv": "Provningsmarken: den massiva festivalen",
+   "fi": "Koetuskenttä: massiivinen festivaali",
+   "tr": "Sınama alanı: devasa festival",
+   "hu": "A próbapálya: a hatalmas fesztivál"
   },
   "h.124": {
    "en": "Where to start this week",
@@ -3266,7 +4499,15 @@
    "hi": "इस सप्ताह कहाँ से शुरू करें",
    "bn": "এই সপ্তাহে কোথা থেকে শুরু",
    "fa": "همین هفته از کجا آغاز کنیم",
-   "ko": "이번 주에 시작할 곳"
+   "ko": "이번 주에 시작할 곳",
+   "ur": "اس ہفتے کہاں سے شروع کریں",
+   "ja": "今週の始めどころ",
+   "da": "Hvor du starter i denne uge",
+   "nb": "Hvor du starter denne uken",
+   "sv": "Var du börjar den här veckan",
+   "fi": "Mistä aloittaa tällä viikolla",
+   "tr": "Bu hafta nereden başlamalı",
+   "hu": "Hol kezdd ezen a héten"
   },
   "h.125": {
    "en": "The ladder at a glance",
@@ -3287,7 +4528,15 @@
    "hi": "सीढ़ी एक नज़र में",
    "bn": "এক নজরে মই",
    "fa": "نردبان در یک نگاه",
-   "ko": "한눈에 보는 사다리"
+   "ko": "한눈에 보는 사다리",
+   "ur": "سیڑھی ایک نظر میں",
+   "ja": "梯子を一望する",
+   "da": "Stigen i ét blik",
+   "nb": "Stigen i ett blikk",
+   "sv": "Stegen i överblick",
+   "fi": "Tikkaat yhdellä silmäyksellä",
+   "tr": "Merdiven bir bakışta",
+   "hu": "A létra egy pillantásra"
   },
   "h.126": {
    "en": "Trezor Safe 7",
@@ -3308,7 +4557,15 @@
    "hi": "Trezor Safe 7",
    "bn": "Trezor Safe 7",
    "fa": "Trezor Safe 7",
-   "ko": "Trezor Safe 7"
+   "ko": "Trezor Safe 7",
+   "ur": "Trezor Safe 7",
+   "ja": "Trezor Safe 7",
+   "da": "Trezor Safe 7",
+   "nb": "Trezor Safe 7",
+   "sv": "Trezor Safe 7",
+   "fi": "Trezor Safe 7",
+   "tr": "Trezor Safe 7",
+   "hu": "Trezor Safe 7"
   },
   "h.127": {
    "en": "SeedSigner",
@@ -3329,7 +4586,15 @@
    "hi": "SeedSigner",
    "bn": "SeedSigner",
    "fa": "SeedSigner",
-   "ko": "SeedSigner"
+   "ko": "SeedSigner",
+   "ur": "SeedSigner",
+   "ja": "SeedSigner",
+   "da": "SeedSigner",
+   "nb": "SeedSigner",
+   "sv": "SeedSigner",
+   "fi": "SeedSigner",
+   "tr": "SeedSigner",
+   "hu": "SeedSigner"
   },
   "h.128": {
    "en": "Krux",
@@ -3350,7 +4615,15 @@
    "hi": "Krux",
    "bn": "Krux",
    "fa": "Krux",
-   "ko": "Krux"
+   "ko": "Krux",
+   "ur": "Krux",
+   "ja": "Krux",
+   "da": "Krux",
+   "nb": "Krux",
+   "sv": "Krux",
+   "fi": "Krux",
+   "tr": "Krux",
+   "hu": "Krux"
   },
   "h.129": {
    "en": "Trezor Safe 3",
@@ -3371,7 +4644,15 @@
    "hi": "Trezor Safe 3",
    "bn": "Trezor Safe 3",
    "fa": "Trezor Safe 3",
-   "ko": "Trezor Safe 3"
+   "ko": "Trezor Safe 3",
+   "ur": "Trezor Safe 3",
+   "ja": "Trezor Safe 3",
+   "da": "Trezor Safe 3",
+   "nb": "Trezor Safe 3",
+   "sv": "Trezor Safe 3",
+   "fi": "Trezor Safe 3",
+   "tr": "Trezor Safe 3",
+   "hu": "Trezor Safe 3"
   },
   "h.130": {
    "en": "Blockstream Jade / Jade Plus",
@@ -3392,7 +4673,15 @@
    "hi": "Blockstream Jade / Jade Plus",
    "bn": "Blockstream Jade / Jade Plus",
    "fa": "Blockstream Jade / Jade Plus",
-   "ko": "Blockstream Jade / Jade Plus"
+   "ko": "Blockstream Jade / Jade Plus",
+   "ur": "Blockstream Jade / Jade Plus",
+   "ja": "Blockstream Jade / Jade Plus",
+   "da": "Blockstream Jade / Jade Plus",
+   "nb": "Blockstream Jade / Jade Plus",
+   "sv": "Blockstream Jade / Jade Plus",
+   "fi": "Blockstream Jade / Jade Plus",
+   "tr": "Blockstream Jade / Jade Plus",
+   "hu": "Blockstream Jade / Jade Plus"
   },
   "h.131": {
    "en": "Keystone 3 Pro",
@@ -3413,7 +4702,15 @@
    "hi": "Keystone 3 Pro",
    "bn": "Keystone 3 Pro",
    "fa": "Keystone 3 Pro",
-   "ko": "Keystone 3 Pro"
+   "ko": "Keystone 3 Pro",
+   "ur": "Keystone 3 Pro",
+   "ja": "Keystone 3 Pro",
+   "da": "Keystone 3 Pro",
+   "nb": "Keystone 3 Pro",
+   "sv": "Keystone 3 Pro",
+   "fi": "Keystone 3 Pro",
+   "tr": "Keystone 3 Pro",
+   "hu": "Keystone 3 Pro"
   },
   "h.132": {
    "en": "Foundation Passport Prime",
@@ -3434,7 +4731,15 @@
    "hi": "Foundation Passport Prime",
    "bn": "Foundation Passport Prime",
    "fa": "Foundation Passport Prime",
-   "ko": "Foundation Passport Prime"
+   "ko": "Foundation Passport Prime",
+   "ur": "Foundation Passport Prime",
+   "ja": "Foundation Passport Prime",
+   "da": "Foundation Passport Prime",
+   "nb": "Foundation Passport Prime",
+   "sv": "Foundation Passport Prime",
+   "fi": "Foundation Passport Prime",
+   "tr": "Foundation Passport Prime",
+   "hu": "Foundation Passport Prime"
   },
   "h.133": {
    "en": "BitBox02 · OneKey · Cypherock X1",
@@ -3455,7 +4760,15 @@
    "hi": "BitBox02 · OneKey · Cypherock X1",
    "bn": "BitBox02 · OneKey · Cypherock X1",
    "fa": "BitBox02 · OneKey · Cypherock X1",
-   "ko": "BitBox02 · OneKey · Cypherock X1"
+   "ko": "BitBox02 · OneKey · Cypherock X1",
+   "ur": "BitBox02 · OneKey · Cypherock X1",
+   "ja": "BitBox02 · OneKey · Cypherock X1",
+   "da": "BitBox02 · OneKey · Cypherock X1",
+   "nb": "BitBox02 · OneKey · Cypherock X1",
+   "sv": "BitBox02 · OneKey · Cypherock X1",
+   "fi": "BitBox02 · OneKey · Cypherock X1",
+   "tr": "BitBox02 · OneKey · Cypherock X1",
+   "hu": "BitBox02 · OneKey · Cypherock X1"
   },
   "h.134": {
    "en": "the manufacturer shelves",
@@ -3476,7 +4789,15 @@
    "hi": "निर्माता की अलमारियाँ",
    "bn": "নির্মাতাদের তাক",
    "fa": "قفسه‌های سازندگان",
-   "ko": "제조사 선반"
+   "ko": "제조사 선반",
+   "ur": "صنعت کاروں کے شیلف",
+   "ja": "メーカーの棚",
+   "da": "producenthylderne",
+   "nb": "produsenthyllene",
+   "sv": "tillverkarhyllorna",
+   "fi": "valmistajahyllyt",
+   "tr": "üretici rafları",
+   "hu": "a gyártói polcok"
   },
   "h.135": {
    "en": "The Comb Score — six cells, no fake total",
@@ -3497,7 +4818,15 @@
    "hi": "छत्ता-स्कोर — छह कोष्ठ, कोई नक़ली योग नहीं",
    "bn": "মৌচাক-স্কোর — ছয়টি কোষ, কোনো ভুয়া মোট নয়",
    "fa": "امتیازِ شانِ عسل — شش خانه، بی‌جمعِ ساختگی",
-   "ko": "콤 스코어 — 여섯 칸, 가짜 총점은 없음"
+   "ko": "콤 스코어 — 여섯 칸, 가짜 총점은 없음",
+   "ur": "کومب اسکور — چھ خانے، کوئی جعلی میزان نہیں",
+   "ja": "コムスコア — 六つのセル、偽りの合計なし",
+   "da": "Bikage-scoren — seks celler, ingen falsk total",
+   "nb": "Bikake-scoren — seks celler, ingen falsk totalsum",
+   "sv": "Vaxkakepoängen — sex celler, ingen falsk totalsumma",
+   "fi": "Kennopisteet — kuusi solua, ei valesummaa",
+   "tr": "Petek Skoru — altı hücre, sahte toplam yok",
+   "hu": "A lép-pontszám — hat cella, nincs hamis végösszeg"
   },
   "h.136": {
    "en": "On the bench now",
@@ -3518,7 +4847,15 @@
    "hi": "अभी बेंच पर",
    "bn": "এখন বেঞ্চে",
    "fa": "اکنون روی میز کار",
-   "ko": "지금 작업대 위에"
+   "ko": "지금 작업대 위에",
+   "ur": "اب بینچ پر",
+   "ja": "いまベンチの上に",
+   "da": "På bænken nu",
+   "nb": "På benken nå",
+   "sv": "På bänken nu",
+   "fi": "Penkillä nyt",
+   "tr": "Şu an tezgâhta",
+   "hu": "Most a munkapadon"
   },
   "h.137": {
    "en": "Trezor Safe 7 / bSAFE 7",
@@ -3539,7 +4876,15 @@
    "hi": "Trezor Safe 7 / bSAFE 7",
    "bn": "Trezor Safe 7 / bSAFE 7",
    "fa": "Trezor Safe 7 / bSAFE 7",
-   "ko": "Trezor Safe 7 / bSAFE 7"
+   "ko": "Trezor Safe 7 / bSAFE 7",
+   "ur": "Trezor Safe 7 / bSAFE 7",
+   "ja": "Trezor Safe 7 / bSAFE 7",
+   "da": "Trezor Safe 7 / bSAFE 7",
+   "nb": "Trezor Safe 7 / bSAFE 7",
+   "sv": "Trezor Safe 7 / bSAFE 7",
+   "fi": "Trezor Safe 7 / bSAFE 7",
+   "tr": "Trezor Safe 7 / bSAFE 7",
+   "hu": "Trezor Safe 7 / bSAFE 7"
   },
   "h.138": {
    "en": "SeedSigner & Krux (build-party bench)",
@@ -3560,7 +4905,15 @@
    "hi": "SeedSigner और Krux (बिल्ड-पार्टी बेंच)",
    "bn": "SeedSigner ও Krux (নির্মাণ-আসরের বেঞ্চ)",
    "fa": "SeedSigner و Krux (میزِ مهمانیِ ساخت)",
-   "ko": "SeedSigner & Krux (조립 파티 작업대)"
+   "ko": "SeedSigner & Krux (조립 파티 작업대)",
+   "ur": "SeedSigner اور Krux (بلڈ پارٹی بینچ)",
+   "ja": "SeedSigner & Krux（ビルドパーティのベンチ）",
+   "da": "SeedSigner & Krux (byggefest-bænken)",
+   "nb": "SeedSigner & Krux (byggefest-benken)",
+   "sv": "SeedSigner & Krux (byggfestens bänk)",
+   "fi": "SeedSigner & Krux (rakennustalkoiden penkki)",
+   "tr": "SeedSigner & Krux (montaj partisi tezgâhı)",
+   "hu": "SeedSigner & Krux (építőparti-munkapad)"
   },
   "h.139": {
    "en": "Complementary gear — completes the kit, reviewed by the same law",
@@ -3581,7 +4934,15 @@
    "hi": "पूरक उपकरण — किट पूरी करते हैं, उसी विधान से समीक्षित",
    "bn": "সহায়ক সরঞ্জাম — কিট সম্পূর্ণ করে, একই বিধানে পর্যালোচিত",
    "fa": "تجهیزات مکمل — کیت را کامل می‌کند، بازبینی‌شده با همان قانون",
-   "ko": "보완 장비 — 키트를 완성하며, 같은 법으로 심사"
+   "ko": "보완 장비 — 키트를 완성하며, 같은 법으로 심사",
+   "ur": "تکمیلی سامان — کٹ مکمل کرتا ہے، اسی قانون سے جانچا گیا",
+   "ja": "補完ギア — キットを完成させ、同じ法で審査される",
+   "da": "Supplerende grej — fuldender sættet, gennemgået efter samme lov",
+   "nb": "Utfyllende utstyr — fullfører settet, vurdert etter samme lov",
+   "sv": "Kompletterande utrustning — fullbordar kitet, granskad enligt samma lag",
+   "fi": "Täydentävät varusteet — täydentävät setin, saman lain katselmoimat",
+   "tr": "Tamamlayıcı donanım — kiti tamamlar, aynı yasayla incelenir",
+   "hu": "Kiegészítő felszerelés — teljessé teszi a készletet, ugyanazon törvény szerint szemlézve"
   },
   "h.140": {
    "en": "Coldcard RNG failure — five years of weak seeds",
@@ -3602,7 +4963,15 @@
    "hi": "Coldcard RNG विफलता — पाँच वर्षों के कमज़ोर बीज",
    "bn": "Coldcard RNG ব্যর্থতা — পাঁচ বছরের দুর্বল সিড",
    "fa": "خطای RNG در Coldcard — پنج سال بذرهای ضعیف",
-   "ko": "Coldcard RNG 결함 — 5년간의 취약한 시드"
+   "ko": "Coldcard RNG 결함 — 5년간의 취약한 시드",
+   "ur": "Coldcard RNG کی ناکامی — پانچ سال کمزور بیج",
+   "ja": "Coldcard の RNG 障害 — 五年分の弱いシード",
+   "da": "Coldcard-RNG-svigt — fem år med svage seeds",
+   "nb": "Coldcard-RNG-svikt — fem år med svake frø",
+   "sv": "Coldcard-RNG-haveriet — fem år av svaga frön",
+   "fi": "Coldcard-RNG-vika — viisi vuotta heikkoja siemeniä",
+   "tr": "Coldcard RNG arızası — beş yıllık zayıf tohumlar",
+   "hu": "Coldcard RNG-hiba — öt évnyi gyenge seed"
   },
   "h.141": {
    "en": "TROPIC01 laser fault-injection (Trezor Safe 7)",
@@ -3623,7 +4992,15 @@
    "hi": "TROPIC01 लेज़र दोष-अंतःक्षेपण (Trezor Safe 7)",
    "bn": "TROPIC01 লেজার ফল্ট-ইনজেকশন (Trezor Safe 7)",
    "fa": "تزریق خطای لیزری TROPIC01 (Trezor Safe 7)",
-   "ko": "TROPIC01 레이저 오류 주입 (Trezor Safe 7)"
+   "ko": "TROPIC01 레이저 오류 주입 (Trezor Safe 7)",
+   "ur": "TROPIC01 لیزر فالٹ انجیکشن (Trezor Safe 7)",
+   "ja": "TROPIC01 レーザー・フォールト注入（Trezor Safe 7）",
+   "da": "TROPIC01 laser-fejlinjektion (Trezor Safe 7)",
+   "nb": "TROPIC01 laser-feilinjeksjon (Trezor Safe 7)",
+   "sv": "TROPIC01-laserfelinjektion (Trezor Safe 7)",
+   "fi": "TROPIC01-laservikainjektio (Trezor Safe 7)",
+   "tr": "TROPIC01 lazerli hata enjeksiyonu (Trezor Safe 7)",
+   "hu": "TROPIC01 lézeres hibainjektálás (Trezor Safe 7)"
   },
   "h.142": {
    "en": "Ledger Recover (all Ledger devices)",
@@ -3644,7 +5021,15 @@
    "hi": "Ledger Recover (सभी Ledger उपकरण)",
    "bn": "Ledger Recover (সব Ledger ডিভাইস)",
    "fa": "Ledger Recover (همهٔ دستگاه‌های Ledger)",
-   "ko": "Ledger Recover (모든 Ledger 기기)"
+   "ko": "Ledger Recover (모든 Ledger 기기)",
+   "ur": "Ledger Recover (تمام Ledger آلات)",
+   "ja": "Ledger Recover（全 Ledger デバイス）",
+   "da": "Ledger Recover (alle Ledger-enheder)",
+   "nb": "Ledger Recover (alle Ledger-enheter)",
+   "sv": "Ledger Recover (alla Ledger-enheter)",
+   "fi": "Ledger Recover (kaikki Ledger-laitteet)",
+   "tr": "Ledger Recover (tüm Ledger cihazları)",
+   "hu": "Ledger Recover (minden Ledger-eszköz)"
   },
   "h.143": {
    "en": "Coldcard leaves open source",
@@ -3665,7 +5050,15 @@
    "hi": "Coldcard ने ओपन सोर्स छोड़ा",
    "bn": "Coldcard ওপেন সোর্স ছেড়ে যাচ্ছে",
    "fa": "Coldcard از متن‌باز خارج می‌شود",
-   "ko": "Coldcard, 오픈 소스를 떠나다"
+   "ko": "Coldcard, 오픈 소스를 떠나다",
+   "ur": "Coldcard اوپن سورس چھوڑ گیا",
+   "ja": "Coldcard、オープンソースを去る",
+   "da": "Coldcard forlader open source",
+   "nb": "Coldcard forlater åpen kildekode",
+   "sv": "Coldcard lämnar öppen källkod",
+   "fi": "Coldcard jättää avoimen lähdekoodin",
+   "tr": "Coldcard açık kaynağı terk ediyor",
+   "hu": "A Coldcard elhagyja a nyílt forráskódot"
   },
   "h.144": {
    "en": "Safe 7 authenticity root missing upstream",
@@ -3686,7 +5079,15 @@
    "hi": "Safe 7 प्रामाणिकता-मूल अपस्ट्रीम में अनुपस्थित",
    "bn": "Safe 7 প্রামাণিকতার মূল উজানে অনুপস্থিত",
    "fa": "ریشهٔ اصالت Safe 7 در بالادست غایب است",
-   "ko": "Safe 7 정품 인증 루트, 업스트림에 부재"
+   "ko": "Safe 7 정품 인증 루트, 업스트림에 부재",
+   "ur": "Safe 7 کی اصالت کی جڑ اوپر کے ماخذ سے غائب",
+   "ja": "Safe 7 の真正性ルート、上流に不在",
+   "da": "Safe 7-ægthedsrod mangler opstrøms",
+   "nb": "Safe 7-autentisitetsroten mangler oppstrøms",
+   "sv": "Safe 7-äkthetsroten saknas uppströms",
+   "fi": "Safe 7:n aitousjuuri puuttuu ylävirrasta",
+   "tr": "Safe 7 orijinallik kökü yukarı akışta eksik",
+   "hu": "A Safe 7 eredetiség-gyökere hiányzik az upstreamből"
   },
   "h.145": {
    "en": "the bsky address — did:plc",
@@ -3707,7 +5108,15 @@
    "hi": "bsky पता — did:plc",
    "bn": "bsky ঠিকানা — did:plc",
    "fa": "نشانی bsky — did:plc",
-   "ko": "bsky 주소 — did:plc"
+   "ko": "bsky 주소 — did:plc",
+   "ur": "bsky پتا — did:plc",
+   "ja": "bsky アドレス — did:plc",
+   "da": "bsky-adressen — did:plc",
+   "nb": "bsky-adressen — did:plc",
+   "sv": "bsky-adressen — did:plc",
+   "fi": "bsky-osoite — did:plc",
+   "tr": "bsky adresi — did:plc",
+   "hu": "a bsky-cím — did:plc"
   },
   "h.146": {
    "en": "the nostr address — npub",
@@ -3728,7 +5137,15 @@
    "hi": "nostr पता — npub",
    "bn": "nostr ঠিকানা — npub",
    "fa": "نشانی nostr — npub",
-   "ko": "nostr 주소 — npub"
+   "ko": "nostr 주소 — npub",
+   "ur": "nostr پتا — npub",
+   "ja": "nostr アドレス — npub",
+   "da": "nostr-adressen — npub",
+   "nb": "nostr-adressen — npub",
+   "sv": "nostr-adressen — npub",
+   "fi": "nostr-osoite — npub",
+   "tr": "nostr adresi — npub",
+   "hu": "a nostr-cím — npub"
   },
   "h.147": {
    "en": "the binding attestation (on-chain row)",
@@ -3749,7 +5166,15 @@
    "hi": "बाध्यकारी अभिप्रमाणन (ऑन-चेन पंक्ति)",
    "bn": "বন্ধনের প্রত্যয়ন (অন-চেইন সারি)",
    "fa": "گواهیِ پیوند (ردیفِ روی‌زنجیره)",
-   "ko": "바인딩 증명 (온체인 행)"
+   "ko": "바인딩 증명 (온체인 행)",
+   "ur": "بندھن کی تصدیق (آن چین قطار)",
+   "ja": "バインド認証（オンチェーンの行）",
+   "da": "bindingsattesteringen (on-chain-række)",
+   "nb": "bindingsattestasjonen (rad på kjeden)",
+   "sv": "bindningsattesteringen (on-chain-rad)",
+   "fi": "sidontatodistus (ketjussa oleva rivi)",
+   "tr": "bağlama tasdiki (zincir üstü satır)",
+   "hu": "az összekötési tanúsítás (láncon lévő sor)"
   },
   "h.148": {
    "en": "THE PIECE — seed → sound + sight, one renderer",
@@ -3770,7 +5195,15 @@
    "hi": "कृति — बीज → ध्वनि + दृश्य, एक ही रेंडरर",
    "bn": "শিল্পকর্ম — সিড → শব্দ + দৃশ্য, এক রেন্ডারার",
    "fa": "قطعه — بذر ← صدا + تصویر، یک رندرکنندهٔ واحد",
-   "ko": "작품 — 시드 → 소리 + 시각, 렌더러 하나"
+   "ko": "작품 — 시드 → 소리 + 시각, 렌더러 하나",
+   "ur": "فن پارہ — بیج ← آواز + منظر، ایک ہی رینڈرر",
+   "ja": "作品 — シード → 音と視覚、レンダラーは一つ",
+   "da": "VÆRKET — seed → lyd + syn, én renderer",
+   "nb": "VERKET — frø → lyd + syn, én renderer",
+   "sv": "VERKET — frö → ljud + syn, en renderare",
+   "fi": "TEOS — siemen → ääni + näky, yksi renderöijä",
+   "tr": "ESER — tohum → ses + görüntü, tek işleyici",
+   "hu": "A MŰ — seed → hang + látvány, egy renderelő"
   },
   "h.149": {
    "en": "THE FORK LAW, LIVE — edits with provenance, the original never mutates",
@@ -3791,7 +5224,15 @@
    "hi": "फ़ोर्क-विधान, सजीव — उद्गम-सहित संपादन, मूल कभी नहीं बदलता",
    "bn": "ফর্ক বিধান, সরাসরি — উৎস-পরিচয়সহ সম্পাদনা, মূলটি কখনও বদলায় না",
    "fa": "قانون فورک، زنده — ویرایش‌ها با تبارنامه، اصل هرگز دگرگون نمی‌شود",
-   "ko": "포크의 법, 실시간 — 출처를 지닌 편집, 원본은 결코 변형되지 않음"
+   "ko": "포크의 법, 실시간 — 출처를 지닌 편집, 원본은 결코 변형되지 않음",
+   "ur": "فورک کا قانون، زندہ — نسب نامے سمیت ترامیم، اصل کبھی نہیں بدلتا",
+   "ja": "フォークの法、稼働中 — 来歴つきの編集、原本は決して変異しない",
+   "da": "FORK-LOVEN, LIVE — redigeringer med proveniens, originalen muterer aldrig",
+   "nb": "FORGRENINGSLOVEN, DIREKTE — redigeringer med proveniens, originalen muterer aldri",
+   "sv": "FORKLAGEN, LIVE — redigeringar med proveniens, originalet muterar aldrig",
+   "fi": "HAARAUTUSLAKI, ELÄVÄNÄ — muokkaukset alkuperätiedoin, alkuperäinen ei koskaan muutu",
+   "tr": "ÇATAL YASASI, CANLI — menşeli düzenlemeler, orijinal asla değişmez",
+   "hu": "A FORK-TÖRVÉNY, ÉLŐBEN — szerkesztések eredettel, az eredeti sosem változik"
   },
   "h.150": {
    "en": "WHAT A REAL INSCRIPTION CARRIES (the provenance card, DB-1's ruled shape)",
@@ -3812,7 +5253,15 @@
    "hi": "एक वास्तविक अभिलेख क्या वहन करता है (उद्गम-कार्ड, DB-1 का निर्धारित आकार)",
    "bn": "একটি প্রকৃত ইনস্ক্রিপশন যা বহন করে (উৎস-পরিচয় কার্ড, DB-1-এর বিধিবদ্ধ আকার)",
    "fa": "آنچه یک حکاکیِ واقعی با خود دارد (کارت تبارنامه، شکلِ حکم‌شدهٔ DB-1)",
-   "ko": "진짜 인스크립션이 담는 것 (출처 카드, DB-1이 판결로 정한 형태)"
+   "ko": "진짜 인스크립션이 담는 것 (출처 카드, DB-1이 판결로 정한 형태)",
+   "ur": "ایک حقیقی کندہ نقش کیا اٹھائے ہوتا ہے (نسب نامہ کارڈ، DB-1 کی طے شدہ شکل)",
+   "ja": "本物のインスクリプションが携えるもの（来歴カード、DB-1 の裁定された形）",
+   "da": "HVAD EN ÆGTE INSKRIPTION BÆRER (proveniens-kortet, DB-1's fastslåede form)",
+   "nb": "HVA EN EKTE INNSKRIPSJON BÆRER (proveniens-kortet, DB-1s fastsatte form)",
+   "sv": "VAD EN RIKTIG INSKRIPTION BÄR (provenienskortet, DB-1:s stadgade form)",
+   "fi": "MITÄ AITO INSKRIPTIO KANTAA (alkuperäkortti, DB-1:n säätämä muoto)",
+   "tr": "GERÇEK BİR YAZITIN TAŞIDIKLARI (menşe kartı, DB-1'in hükme bağlanmış biçimi)",
+   "hu": "MIT HORDOZ EGY VALÓDI INSKRIPCIÓ (az eredetkártya, a DB-1 elrendelt alakja)"
   },
   "h.151": {
    "en": "WHO CREATES HERE — humans + AI, around the clock, with the walls",
@@ -3833,7 +5282,15 @@
    "hi": "यहाँ कौन रचता है — मनुष्य + AI, चौबीसों घंटे, दीवारों के साथ",
    "bn": "এখানে কারা সৃষ্টি করে — মানুষ + AI, চব্বিশ ঘণ্টা, দেয়ালসমেত",
    "fa": "چه کسانی اینجا می‌آفرینند — انسان‌ها + هوش مصنوعی، شبانه‌روز، همراه با دیوارها",
-   "ko": "여기서는 누가 창작하는가 — 인간 + AI, 24시간 내내, 벽과 함께"
+   "ko": "여기서는 누가 창작하는가 — 인간 + AI, 24시간 내내, 벽과 함께",
+   "ur": "یہاں کون تخلیق کرتا ہے — انسان + AI، چوبیس گھنٹے، دیواروں سمیت",
+   "ja": "ここで創るのは誰か — 人間 + AI、昼夜を問わず、壁とともに",
+   "da": "HVEM SKABER HER — mennesker + AI, døgnet rundt, med murene",
+   "nb": "HVEM SOM SKAPER HER — mennesker + AI, døgnet rundt, med veggene",
+   "sv": "VEM SOM SKAPAR HÄR — människor + AI, dygnet runt, med väggarna",
+   "fi": "KUKA TÄÄLLÄ LUO — ihmiset + tekoäly, kellon ympäri, muurien kanssa",
+   "tr": "BURADA KİM YARATIYOR — insanlar + yapay zekâ, günün her saati, duvarlarla birlikte",
+   "hu": "KI ALKOT ITT — emberek + AI, éjjel-nappal, a falakkal"
   },
   "h.165": {
    "en": "WHO SIGNS — bind by passkey tap only",
@@ -3854,7 +5311,15 @@
    "hi": "कौन हस्ताक्षर करता है — केवल पासकी स्पर्श से बंधन",
    "bn": "কে স্বাক্ষর করে — শুধু পাসকি স্পর্শেই বন্ধন",
    "fa": "چه کسی امضا می‌کند — پیوند تنها با ضربهٔ passkey",
-   "ko": "누가 서명하는가 — 오직 패스키 탭으로만 바인딩"
+   "ko": "누가 서명하는가 — 오직 패스키 탭으로만 바인딩",
+   "ur": "کون دستخط کرتا ہے — بندھن صرف پاس کی کی تھپکی سے",
+   "ja": "署名するのは誰か — バインドはパスキーのタップのみ",
+   "da": "HVEM SIGNERER — bind kun med et passkey-tryk",
+   "nb": "HVEM SOM SIGNERER — bind kun med et passkey-trykk",
+   "sv": "VEM SOM SIGNERAR — bind endast med ett passkey-tryck",
+   "fi": "KUKA ALLEKIRJOITTAA — sidonta vain passkey-napautuksella",
+   "tr": "KİM İMZALIYOR — bağlama yalnızca geçiş anahtarı dokunuşuyla",
+   "hu": "KI ÍR ALÁ — kötés csak passkey-érintéssel"
   },
   "h.166": {
    "en": "REVIEW RECEIPT — one surface, one verdict, ≤140 chars",
@@ -3875,7 +5340,15 @@
    "hi": "समीक्षा-रसीद — एक सतह, एक निर्णय, ≤140 अक्षर",
    "bn": "পর্যালোচনা প্রমাণপত্র — এক পৃষ্ঠতল, এক রায়, ≤140 অক্ষর",
    "fa": "رسید بازبینی — یک سطح، یک حکم، ≤140 نویسه",
-   "ko": "리뷰 영수증 — 하나의 서피스, 하나의 판정, ≤140자"
+   "ko": "리뷰 영수증 — 하나의 서피스, 하나의 판정, ≤140자",
+   "ur": "جائزہ رسید — ایک سطح، ایک فیصلہ، ≤140 حروف",
+   "ja": "レビューレシート — 一つのサーフェス、一つの評決、≤140字",
+   "da": "GENNEMGANGSKVITTERING — én flade, ét verdikt, ≤140 tegn",
+   "nb": "GJENNOMGANGSKVITTERING — én flate, én dom, ≤140 tegn",
+   "sv": "GRANSKNINGSKVITTO — en yta, ett domslut, ≤140 tecken",
+   "fi": "KATSELMUSKUITTI — yksi pinta, yksi tuomio, ≤140 merkkiä",
+   "tr": "İNCELEME MAKBUZU — tek yüzey, tek hüküm, ≤140 karakter",
+   "hu": "SZEMLE-BIZONYLAT — egy felület, egy ítélet, ≤140 karakter"
   },
   "h.167": {
    "en": "GUARD VERDICT — verify a receipt, then weigh it",
@@ -3896,7 +5369,15 @@
    "hi": "प्रहरी-निर्णय — रसीद सत्यापित करो, फिर तौलो",
    "bn": "প্রহরীর রায় — প্রমাণপত্র যাচাই করুন, তারপর ওজন দিন",
    "fa": "حکم نگهبان — رسیدی را وارسی کن، سپس بسنج",
-   "ko": "가드 판정 — 영수증을 검증한 뒤 무게를 단다"
+   "ko": "가드 판정 — 영수증을 검증한 뒤 무게를 단다",
+   "ur": "محافظ کا فیصلہ — رسید کی تصدیق کریں، پھر اسے تولیں",
+   "ja": "ガード評決 — レシートを検証し、それから重みづける",
+   "da": "VOGTER-VERDIKT — verificér en kvittering, og vej den derefter",
+   "nb": "VAKTDOM — verifiser en kvittering, og vei den så",
+   "sv": "VAKTENS DOMSLUT — verifiera ett kvitto, väg det sedan",
+   "fi": "VARTIJAN TUOMIO — todenna kuitti, sitten punnitse se",
+   "tr": "MUHAFIZ HÜKMÜ — bir makbuzu doğrula, sonra tart",
+   "hu": "ŐR-ÍTÉLET — ellenőrizz egy bizonylatot, aztán mérlegeld"
   },
   "h.168": {
    "en": "bLOVErAi WINDOW — W-3: your AI, your device",
@@ -3917,7 +5398,15 @@
    "hi": "bLOVErAi खिड़की — W-3: आपका AI, आपका उपकरण",
    "bn": "bLOVErAi জানালা — W-3: আপনার AI, আপনার ডিভাইস",
    "fa": "پنجرهٔ bLOVErAi — W-3: هوش مصنوعیِ تو، دستگاهِ تو",
-   "ko": "bLOVErAi 창 — W-3: 당신의 AI, 당신의 기기"
+   "ko": "bLOVErAi 창 — W-3: 당신의 AI, 당신의 기기",
+   "ur": "bLOVErAi کھڑکی — W-3: آپ کا AI، آپ کا آلہ",
+   "ja": "bLOVErAi ウィンドウ — W-3：あなたの AI、あなたのデバイス",
+   "da": "bLOVErAi-VINDUET — W-3: din AI, din enhed",
+   "nb": "bLOVErAi-VINDU — W-3: din AI, din enhet",
+   "sv": "bLOVErAi-FÖNSTRET — W-3: din AI, din enhet",
+   "fi": "bLOVErAi-IKKUNA — W-3: sinun tekoälysi, sinun laitteesi",
+   "tr": "bLOVErAi PENCERESİ — W-3: kendi yapay zekân, kendi cihazın",
+   "hu": "bLOVErAi-ABLAK — W-3: a te AI-od, a te eszközöd"
   },
   "h.169": {
    "en": "THE TALLY — only what was deliberately published",
@@ -3938,7 +5427,15 @@
    "hi": "गिनती — केवल वही जो जान-बूझकर प्रकाशित हुआ",
    "bn": "গণনা — শুধু যা সজ্ঞানে প্রকাশিত",
    "fa": "شمارش — تنها آنچه آگاهانه منتشر شد",
-   "ko": "집계 — 의도적으로 게시된 것만"
+   "ko": "집계 — 의도적으로 게시된 것만",
+   "ur": "میزان — صرف وہ جو جان بوجھ کر شائع ہوا",
+   "ja": "集計 — 意図して公開されたものだけ",
+   "da": "OPTÆLLINGEN — kun det, der bevidst blev publiceret",
+   "nb": "OPPTELLINGEN — bare det som ble bevisst publisert",
+   "sv": "SAMMANRÄKNINGEN — endast det som avsiktligt publicerades",
+   "fi": "LASKENTA — vain se, mikä julkaistiin tarkoituksella",
+   "tr": "SAYIM — yalnızca kasten yayımlananlar",
+   "hu": "A SZÁMVETÉS — csak ami szándékosan lett közzétéve"
   },
   "h.170": {
    "en": "THE SHAPE — root below, everything else above",
@@ -3959,7 +5456,15 @@
    "hi": "आकार — जड़ नीचे, बाक़ी सब ऊपर",
    "bn": "আকার — মূল নিচে, বাকি সব উপরে",
    "fa": "شکل — ریشه در پایین، باقی همه در بالا",
-   "ko": "형태 — 아래에는 뿌리, 그 위에 나머지 전부"
+   "ko": "형태 — 아래에는 뿌리, 그 위에 나머지 전부",
+   "ur": "شکل — جڑ نیچے، باقی سب اوپر",
+   "ja": "かたち — 根は下に、それ以外はすべて上に",
+   "da": "FORMEN — roden nedenunder, alt andet ovenover",
+   "nb": "FORMEN — roten nederst, alt annet over",
+   "sv": "FORMEN — roten under, allt annat ovanpå",
+   "fi": "MUOTO — juuri alla, kaikki muu yllä",
+   "tr": "BİÇİM — kök altta, geri kalan her şey üstte",
+   "hu": "AZ ALAK — a gyökér alul, minden más fölötte"
   },
   "h.171": {
    "en": "WHERE AUTONOMI IS IN THIS ESTATE, RIGHT NOW — the direct answer",
@@ -3980,7 +5485,15 @@
    "hi": "इस एस्टेट में Autonomi अभी कहाँ है — सीधा उत्तर",
    "bn": "এই এস্টেটে Autonomi এখন ঠিক কোথায় — সরাসরি উত্তর",
    "fa": "Autonomi اکنون کجای این قلمرو است — پاسخِ سرراست",
-   "ko": "이 에스테이트에서 Autonomi는 지금 어디에 있는가 — 직접적인 답"
+   "ko": "이 에스테이트에서 Autonomi는 지금 어디에 있는가 — 직접적인 답",
+   "ur": "اس اسٹیٹ میں Autonomi اس وقت کہاں ہے — سیدھا جواب",
+   "ja": "Autonomi はこのエステートのどこにいるか、いま — 率直な答え",
+   "da": "HVOR AUTONOMI ER PÅ DETTE GODS, LIGE NU — det direkte svar",
+   "nb": "HVOR AUTONOMI ER I DENNE EIENDOMMEN, AKKURAT NÅ — det direkte svaret",
+   "sv": "VAR AUTONOMI ÄR I DENNA EGENDOM, JUST NU — det direkta svaret",
+   "fi": "MISSÄ AUTONOMI ON TÄLLÄ TILUKSELLA, JUURI NYT — suora vastaus",
+   "tr": "AUTONOMI BU MÜLKTE ŞU AN NEREDE — doğrudan cevap",
+   "hu": "HOL VAN MOST AZ Autonomi EZEN A BIRTOKON — a közvetlen válasz"
   },
   "h.172": {
    "en": "WHICH DOOR RUNS ON WHAT — measured 2026-08-21, not self-reported",
@@ -4001,7 +5514,15 @@
    "hi": "कौन-सा द्वार किस पर चलता है — 2026-08-21 को मापा गया, स्व-घोषित नहीं",
    "bn": "কোন দরজা কীসে চলে — 2026-08-21-এ পরিমাপকৃত, স্ব-ঘোষিত নয়",
    "fa": "هر در بر چه می‌چرخد — سنجیدهٔ 2026-08-21، نه خوداظهاری",
-   "ko": "어느 문이 무엇으로 돌아가는가 — 2026-08-21 측정, 자체 보고가 아님"
+   "ko": "어느 문이 무엇으로 돌아가는가 — 2026-08-21 측정, 자체 보고가 아님",
+   "ur": "کون سا دروازہ کس پر چلتا ہے — 2026-08-21 کو ناپا گیا، خود بیان کردہ نہیں",
+   "ja": "どの扉が何で動くか — 2026-08-21 計測、自己申告ではない",
+   "da": "HVILKEN DØR KØRER PÅ HVAD — målt 2026-08-21, ikke selvrapporteret",
+   "nb": "HVILKEN DØR KJØRER PÅ HVA — målt 2026-08-21, ikke selvrapportert",
+   "sv": "VILKEN DÖRR SOM KÖR PÅ VAD — mätt 2026-08-21, inte självrapporterat",
+   "fi": "MIKÄ OVI KULKEE MILLÄKIN — mitattu 2026-08-21, ei itseraportoitu",
+   "tr": "HANGİ KAPI NEYLE ÇALIŞIYOR — 2026-08-21'de ölçüldü, öz-beyan değil",
+   "hu": "MELYIK AJTÓ MIN FUT — mérve 2026-08-21, nem önbevallás"
   },
   "h.173": {
    "en": "IF YOU CAME WITH ONE QUESTION — five doors",
@@ -4022,7 +5543,15 @@
    "hi": "यदि आप एक प्रश्न लेकर आए हैं — पाँच द्वार",
    "bn": "যদি একটিমাত্র প্রশ্ন নিয়ে এসে থাকেন — পাঁচটি দরজা",
    "fa": "اگر با یک پرسش آمده‌ای — پنج در",
-   "ko": "하나의 질문을 들고 왔다면 — 다섯 개의 문"
+   "ko": "하나의 질문을 들고 왔다면 — 다섯 개의 문",
+   "ur": "اگر آپ ایک سوال لے کر آئے — پانچ دروازے",
+   "ja": "一つの問いを携えて来たなら — 五つの扉",
+   "da": "HVIS DU KOM MED ÉT SPØRGSMÅL — fem døre",
+   "nb": "KOM DU MED ETT SPØRSMÅL — fem dører",
+   "sv": "OM DU KOM MED EN ENDA FRÅGA — fem dörrar",
+   "fi": "JOS TULIT YHDEN KYSYMYKSEN KANSSA — viisi ovea",
+   "tr": "TEK SORUYLA GELDİYSENİZ — beş kapı",
+   "hu": "HA EGY KÉRDÉSSEL JÖTTÉL — öt ajtó"
   },
   "h.174": {
    "en": "THE CHARTER — what this is, and what it is not",
@@ -4043,7 +5572,15 @@
    "hi": "सनद — यह क्या है, और क्या नहीं",
    "bn": "সনদ — এটি কী, আর কী নয়",
    "fa": "منشور — این چیست، و چه نیست",
-   "ko": "헌장 — 이것은 무엇이고, 무엇이 아닌가"
+   "ko": "헌장 — 이것은 무엇이고, 무엇이 아닌가",
+   "ur": "منشور — یہ کیا ہے، اور کیا نہیں",
+   "ja": "憲章 — これが何であり、何でないか",
+   "da": "CHARTERET — hvad dette er, og hvad det ikke er",
+   "nb": "CHARTERET — hva dette er, og hva det ikke er",
+   "sv": "STADGAN — vad detta är, och vad det inte är",
+   "fi": "PERUSKIRJA — mitä tämä on, ja mitä se ei ole",
+   "tr": "TÜZÜK — bu nedir ve ne değildir",
+   "hu": "A CHARTA — mi ez, és mi nem"
   },
   "h.175": {
    "en": "THE THREE REGISTERS — one set of facts, three densities",
@@ -4064,7 +5601,15 @@
    "hi": "तीन रजिस्टर — एक ही तथ्य-समुच्चय, तीन घनत्व",
    "bn": "তিনটি ভাষারীতি — এক সেট তথ্য, তিন ঘনত্ব",
    "fa": "سه سیاق — یک مجموعه واقعیت، سه چگالی",
-   "ko": "세 개의 레지스터 — 하나의 사실 집합, 세 가지 밀도"
+   "ko": "세 개의 레지스터 — 하나의 사실 집합, 세 가지 밀도",
+   "ur": "تین رجسٹر — حقائق کا ایک مجموعہ، تین کثافتیں",
+   "ja": "三つのレジスター — 一組の事実、三つの濃度",
+   "da": "DE TRE REGISTRE — ét sæt fakta, tre tætheder",
+   "nb": "DE TRE REGISTRENE — ett sett fakta, tre tettheter",
+   "sv": "DE TRE REGISTREN — en uppsättning fakta, tre tätheter",
+   "fi": "KOLME REKISTERIÄ — yksi faktajoukko, kolme tiheyttä",
+   "tr": "ÜÇ ANLATIM DÜZEYİ — tek olgu kümesi, üç yoğunluk",
+   "hu": "A HÁROM REGISZTER — egyetlen tényhalmaz, három sűrűség"
   },
   "h.176": {
    "en": "COMPOSE A QUEST — the plan is arithmetic; anyone can recheck it",
@@ -4085,7 +5630,15 @@
    "hi": "एक अभियान रचो — योजना अंकगणित है; कोई भी दोबारा जाँच सकता है",
    "bn": "একটি অভিযাত্রা রচনা করুন — পরিকল্পনাটি পাটিগণিত; যে-কেউ আবার যাচাই করতে পারে",
    "fa": "یک مأموریت بساز — برنامه حساب است؛ هر کس می‌تواند دوباره بسنجد",
-   "ko": "퀘스트 작성 — 계획은 산술입니다; 누구나 검산할 수 있습니다"
+   "ko": "퀘스트 작성 — 계획은 산술입니다; 누구나 검산할 수 있습니다",
+   "ur": "مہم ترتیب دیں — منصوبہ حساب ہے؛ کوئی بھی دوبارہ جانچ سکتا ہے",
+   "ja": "クエストを組む — 計画は算術。誰でも検算できる",
+   "da": "KOMPONÉR EN QUEST — planen er aritmetik; enhver kan efterregne den",
+   "nb": "KOMPONER ET OPPDRAG — planen er aritmetikk; hvem som helst kan regne den etter",
+   "sv": "KOMPONERA ETT UPPDRAG — planen är aritmetik; vem som helst kan räkna om den",
+   "fi": "KOKOA TEHTÄVÄ — suunnitelma on aritmetiikkaa; kuka tahansa voi laskea sen uudelleen",
+   "tr": "BİR GÖREV KUR — plan aritmetiktir; herkes yeniden denetleyebilir",
+   "hu": "ÁLLÍTS ÖSSZE KÜLDETÉST — a terv számtan; bárki újraellenőrizheti"
   },
   "h.177": {
    "en": "GRADUATION — the credential nobody can print",
@@ -4106,7 +5659,15 @@
    "hi": "स्नातक — वह प्रमाणपत्र जो कोई छाप नहीं सकता",
    "bn": "স্নাতক — যে সনদ কেউ ছাপতে পারে না",
    "fa": "فارغ‌التحصیلی — مدرکی که هیچ‌کس نمی‌تواند چاپش کند",
-   "ko": "졸업 — 아무도 인쇄할 수 없는 자격 증명"
+   "ko": "졸업 — 아무도 인쇄할 수 없는 자격 증명",
+   "ur": "فراغت — وہ سند جو کوئی چھاپ نہیں سکتا",
+   "ja": "卒業 — 誰にも印刷できない資格",
+   "da": "DIMISSION — beviset ingen kan printe",
+   "nb": "GRADUERING — vitnemålet ingen kan trykke",
+   "sv": "EXAMEN — meriten ingen kan trycka upp",
+   "fi": "VALMISTUMINEN — todistus, jota kukaan ei voi painaa",
+   "tr": "MEZUNİYET — kimsenin yazdıramayacağı belge",
+   "hu": "DIPLOMAOSZTÓ — az oklevél, amit senki sem nyomtathat ki"
   },
   "h.178": {
    "en": "THE FIFTH ACT — publish a review receipt on the Royal Review deck",
@@ -4127,7 +5688,15 @@
    "hi": "पाँचवाँ अंक — Royal Review डेक पर समीक्षा-रसीद प्रकाशित करो",
    "bn": "পঞ্চম অঙ্ক — Royal Review ডেকে একটি পর্যালোচনা প্রমাণপত্র প্রকাশ করুন",
    "fa": "پردهٔ پنجم — رسیدِ بازبینی را روی عرشهٔ Royal Review منتشر کن",
-   "ko": "다섯 번째 막 — Royal Review 덱에 리뷰 영수증을 게시"
+   "ko": "다섯 번째 막 — Royal Review 덱에 리뷰 영수증을 게시",
+   "ur": "پانچواں عمل — Royal Review ڈیک پر جائزہ رسید شائع کریں",
+   "ja": "第五の行為 — Royal Review デッキにレビューレシートを公開する",
+   "da": "DEN FEMTE HANDLING — publicér en gennemgangskvittering på Royal Review-dækket",
+   "nb": "DEN FEMTE HANDLINGEN — publiser en gjennomgangskvittering på Royal Review-dekket",
+   "sv": "DEN FEMTE AKTEN — publicera ett granskningskvitto på Royal Review-däcket",
+   "fi": "VIIDES TEKO — julkaise katselmuskuitti Royal Review -kannella",
+   "tr": "BEŞİNCİ EYLEM — Royal Review güvertesinde bir inceleme makbuzu yayımla",
+   "hu": "AZ ÖTÖDIK TETT — tegyél közzé szemle-bizonylatot a Royal Review fedélzeten"
   },
   "h.179": {
    "en": "THE TRANSCRIPT — receipts you produced this session",
@@ -4148,7 +5717,15 @@
    "hi": "प्रतिलेख — इस सत्र में आपकी बनाई रसीदें",
    "bn": "প্রতিলিপি — এই অধিবেশনে আপনার তৈরি প্রমাণপত্রগুলি",
    "fa": "رونوشت — رسیدهایی که در این نشست ساختی",
-   "ko": "성적표 — 이번 세션에서 당신이 만든 영수증들"
+   "ko": "성적표 — 이번 세션에서 당신이 만든 영수증들",
+   "ur": "روداد — اس نشست میں آپ کی بنائی رسیدیں",
+   "ja": "トランスクリプト — このセッションであなたが作ったレシート",
+   "da": "UDSKRIFTEN — kvitteringer du frembragte i denne session",
+   "nb": "UTSKRIFTEN — kvitteringer du produserte i denne økten",
+   "sv": "UTSKRIFTEN — kvitton du producerade under denna session",
+   "fi": "TRANSKRIPTI — kuitit, jotka tuotit tässä istunnossa",
+   "tr": "DÖKÜM — bu oturumda ürettiğiniz makbuzlar",
+   "hu": "A LECKEKÖNYV — a bizonylatok, amelyeket ebben a munkamenetben készítettél"
   },
   "h.180": {
    "en": "GATES — open questions are exhibits, not embarrassments",
@@ -4169,7 +5746,44 @@
    "hi": "द्वार — खुले प्रश्न प्रदर्श हैं, शर्मिंदगी नहीं",
    "bn": "ফটকসমূহ — খোলা প্রশ্ন প্রদর্শনী, লজ্জা নয়",
    "fa": "دروازه‌ها — پرسش‌های باز نمایه‌اند، نه مایهٔ شرمساری",
-   "ko": "게이트 — 미결 질문은 창피가 아니라 전시물입니다"
+   "ko": "게이트 — 미결 질문은 창피가 아니라 전시물입니다",
+   "ur": "گیٹس — کھلے سوال نمائشیں ہیں، شرمندگیاں نہیں",
+   "ja": "ゲート — 未決の問いは展示物であって、恥ではない",
+   "da": "PORTE — åbne spørgsmål er udstillinger, ikke pinligheder",
+   "nb": "PORTER — åpne spørsmål er utstillinger, ikke pinligheter",
+   "sv": "GRINDARNA — öppna frågor är exponat, inte pinsamheter",
+   "fi": "PORTIT — avoimet kysymykset ovat näyttelyesineitä, eivät häpeän aiheita",
+   "tr": "GEÇİTLER — açık sorular sergidir, utanç değil",
+   "hu": "KAPUK — a nyitott kérdések kiállított darabok, nem szégyenfoltok"
+  },
+  "beta2": {
+   "en": "OPEN BETA REVIEW — the whole Beehive Nature Reserve is invited: break things, review things, attest your tongue, and publish your [bX review] receipt on the Royal Review deck",
+   "ur": "اوپن بیٹا جائزہ — پوری Beehive Nature Reserve مدعو ہے: چیزیں توڑیں، جائزہ لیں، اپنی زبان کی تصدیق کریں، اور اپنی [bX review] رسید Royal Review ڈیک پر شائع کریں",
+   "ja": "オープンベータレビュー — Beehive Nature Reserve 全体を招待する：壊し、レビューし、あなたの言語を認証し、[bX review] レシートを Royal Review デッキに公開しよう",
+   "da": "ÅBEN BETA-GENNEMGANG — hele Beehive Nature Reserve er inviteret: ødelæg ting, gennemgå ting, attestér dit tungemål, og publicér din [bX review]-kvittering på Royal Review-dækket",
+   "nb": "ÅPEN BETA-GJENNOMGANG — hele Beehive Nature Reserve er invitert: knus ting, gjennomgå ting, attester ditt tungemål, og publiser din [bX review]-kvittering på Royal Review-dekket",
+   "sv": "ÖPPEN BETAGRANSKNING — hela Beehive Nature Reserve är inbjuden: ha sönder saker, granska saker, attestera ditt tungomål och publicera ditt [bX review]-kvitto på Royal Review-däcket",
+   "fi": "AVOIN BETAKATSELMUS — koko Beehive Nature Reserve on kutsuttu: rikkokaa asioita, katselmoikaa, todistakaa kielenne ja julkaiskaa [bX review] -kuittinne Royal Review -kannella",
+   "tr": "AÇIK BETA İNCELEMESİ — tüm Beehive Nature Reserve davetli: bir şeyler kırın, inceleyin, dilinizi tasdik edin ve [bX review] makbuzunuzu Royal Review güvertesinde yayımlayın",
+   "hu": "NYÍLT BETA-SZEMLE — az egész Beehive Nature Reserve meghívott: törj el dolgokat, szemlézz, tanúsítsd a nyelved, és tedd közzé [bX review] bizonylatodat a Royal Review fedélzeten",
+   "ru": "ОТКРЫТЫЙ БЕТА-ОБЗОР — приглашён весь Beehive Nature Reserve: ломайте, рецензируйте, засвидетельствуйте свой язык и публикуйте свою квитанцию [bX review] на деке Royal Review",
+   "cs": "OTEVŘENÁ BETA-RECENZE — zvána je celá Beehive Nature Reserve: rozbíjejte, recenzujte, doložte svůj jazyk a zveřejněte svou účtenku [bX review] na palubě Royal Review",
+   "gd": "LÈIRMHEAS BETA FOSGAILTE — tha fàilte air Beehive Nature Reserve gu lèir: brist rudan, dèan lèirmheas, teistich do chànan, agus foillsich do chuidhteas [bX review] air deic an Lèirmheis Rìoghail",
+   "es": "REVISIÓN BETA ABIERTA — toda la Beehive Nature Reserve está invitada: rompe cosas, reseña cosas, atestigua tu lengua y publica tu recibo [bX review] en el tablero Royal Review",
+   "nl": "OPEN BÈTA-REVIEW — de hele Beehive Nature Reserve is uitgenodigd: maak dingen kapot, beoordeel dingen, attesteer je taal en publiceer je [bX review]-kwitantie op het Royal Review-dek",
+   "nl-be": "OPEN BÈTA-REVIEW — heel de Beehive Nature Reserve is uitgenodigd: maak gerust iets kapot, beoordeel wat je wil, attesteer je taal en publiceer je [bX review]-bewijsstuk op het Royal Review-dek",
+   "de": "OFFENE BETA-REZENSION — das ganze Beehive Nature Reserve ist eingeladen: macht Dinge kaputt, rezensiert, bezeugt eure Sprache und veröffentlicht euren [bX review]-Beleg auf dem Royal-Review-Deck",
+   "fr": "REVUE BÊTA OUVERTE — toute la Beehive Nature Reserve est invitée : cassez des choses, passez-les en revue, attestez votre langue et publiez votre reçu [bX review] sur le pont Royal Review",
+   "zh": "公开测试版评审 — 诚邀整个 Beehive Nature Reserve：尽管试出问题、进行评审、为你的语言作证，并在皇家评审台发布你的 [bX review] 回执",
+   "th": "เปิดรีวิวรุ่นเบต้า — ขอเชิญชาว Beehive Nature Reserve ทั้งหมด: ลองพังดู รีวิวสิ่งต่าง ๆ รับรองภาษาของคุณ และเผยแพร่ใบเสร็จ [bX review] ของคุณบนเด็ค Royal Review",
+   "lv": "ATVĒRTĀ BETA RECENZIJA — aicināta visa Beehive Nature Reserve: lauziet, recenzējiet, apliecinājiet savu valodu un publicējiet savu [bX review] kvīti uz Royal Review klāja",
+   "uk": "ВІДКРИТИЙ БЕТА-ОГЛЯД — запрошено весь Beehive Nature Reserve: ламайте, оглядайте, засвідчіть свою мову й опублікуйте свою квитанцію [bX review] на палубі Royal Review",
+   "ar": "مراجعة تجريبية مفتوحة — الدعوة موجّهة إلى Beehive Nature Reserve بأكملها: جرّب أن تكسر، راجِع، اشهد للغتك، وانشر إيصال [bX review] على منصّة Royal Review",
+   "he": "סקירת בטא פתוחה — כל Beehive Nature Reserve מוזמנת: תשברו דברים, סקרו דברים, העידו על לשונכם ופרסמו את קבלת ה-[bX review] שלכם על לוח ה-Royal Review",
+   "hi": "खुली बीटा समीक्षा — पूरा Beehive Nature Reserve आमंत्रित है: तोड़कर देखें, समीक्षा करें, अपनी भाषा की गवाही दें, और अपनी [bX review] रसीद Royal Review डेक पर प्रकाशित करें",
+   "bn": "খোলা বেটা পর্যালোচনা — সমগ্র Beehive Nature Reserve আমন্ত্রিত: ভেঙে দেখুন, পর্যালোচনা করুন, আপনার ভাষার সাক্ষ্য দিন, এবং আপনার [bX review] প্রমাণপত্র Royal Review ডেকে প্রকাশ করুন",
+   "fa": "بازبینی بتای باز — همهٔ Beehive Nature Reserve دعوت‌اند: بشکنید، بازبینی کنید، زبان خود را گواهی دهید و رسید [bX review] خود را روی عرشهٔ Royal Review منتشر کنید",
+   "ko": "공개 베타 리뷰 — Beehive Nature Reserve 전체를 초대합니다: 마음껏 부수고, 리뷰하고, 여러분의 언어를 증명하고, [bX review] 영수증을 Royal Review 덱에 게시하세요"
   }
  }
 }

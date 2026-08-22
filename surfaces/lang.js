@@ -1,4 +1,4 @@
-/* lang.js — the estate-wide language toggle. 18 tongues, one corpus, honest absence.
+/* lang.js — the estate-wide language toggle. every corpus-docked tongue, one corpus, honest absence.
    Loaded by tour.js on every surface, same pattern as register.js: the choice persists
    (localStorage 'blang'), travels between pages, and syncs across open tabs.
 
@@ -29,6 +29,14 @@
     ['lv','Latviešu'],
     ['zh','中文'],
     ['ko','한국어'],
+    ['ja','日本語'],
+    ['ur','اردو'],
+    ['tr','Türkçe'],
+    ['hu','magyar'],
+    ['da','dansk'],
+    ['nb','norsk'],
+    ['sv','svenska'],
+    ['fi','suomi'],
     ['th','ไทย'],
     ['hi','हिन्दी'],
     ['bn','বাংলা'],
@@ -36,7 +44,7 @@
     ['he','עברית'],
     ['fa','فارسی']
   ];
-  var RTL={'ar':1,'he':1,'fa':1};
+  var RTL={'ar':1,'he':1,'fa':1,'ur':1};
   var corpus=null;
 
   function pref(){ try{ var v=localStorage.getItem('blang');
@@ -102,7 +110,7 @@
   }
   function load(cb){
     if(corpus) return cb();
-    fetch(R+'lang-corpus.json?v=4').then(function(r){return r.json()})
+    fetch(R+'lang-corpus.json?v=5').then(function(r){return r.json()})
       .then(function(j){ corpus=j;
         /* the withdrawal law reaches the renderer: a withdrawn tongue stops rendering
            estate-wide (history kept in the corpus file); its picker entry says so. */
