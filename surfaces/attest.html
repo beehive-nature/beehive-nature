@@ -121,7 +121,7 @@ Start here (no account, no install): https://beehive-nature.github.io/beehive-na
   the corpus: <a href="blanguage.html">the BlanguageDOCK</a> · the machinery:
   <a href="stack.html">the engine room</a> · <a href="index.html" data-i18n="law.hive">← the hive</a>
 </footer>
-<script src="tour.js?v=18"></script>
+<script src="tour.js?v=19"></script>
 <script>
 (function(){
 "use strict";
@@ -142,7 +142,7 @@ var WHY={cs:'Trezor’s home — the hardware lane signs here',gd:'Autonomi’s 
    Seat's one offered adjustment, per his "unless you see a better path": Arabic slots
    ninth rather than into the pack — founder-hardwired AND the estate's RTL proof. */
 var PRI=['ru','lv','uk','gd','cs','zh','ko','th','ar','nl-be'];
-fetch(R+'lang-corpus.json?v=8').then(function(r){return r.json()}).then(function(j){
+fetch(R+'lang-corpus.json?v=9').then(function(r){return r.json()}).then(function(j){
   var KEYS=Object.keys(j.strings), att=j._meta.attested||{};
   var langs=j._meta.langs.slice().sort(function(a,b){
     var pa=PRI.indexOf(a),pb=PRI.indexOf(b);
@@ -163,7 +163,7 @@ fetch(R+'lang-corpus.json?v=8').then(function(r){return r.json()}).then(function
   });
 }).catch(function(){ $('tally').innerHTML='—<s>the corpus could not be fetched; a failure, never a zero</s>'; });
 (function(){ /* the call's tongue list renders from the live corpus — additions never stale it */
-  fetch(R+'lang-corpus.json?v=8').then(function(r){return r.json()}).then(function(j){
+  fetch(R+'lang-corpus.json?v=9').then(function(r){return r.json()}).then(function(j){
     var names={ru:'русский',lv:'latviešu',uk:'українська',gd:'Gàidhlig',cs:'čeština',zh:'中文',ko:'한국어',th:'ไทย',ar:'العربية','nl-be':'Vlaams',es:'español',nl:'Nederlands',de:'Deutsch',fr:'français',he:'עברית',hi:'हिन्दी',bn:'বাংলা',fa:'فارسی',ja:'日本語',ur:'اردو',tr:'Türkçe',hu:'magyar',da:'dansk',nb:'norsk',sv:'svenska',fi:'suomi'};
     var list=j._meta.langs.map(function(c){return names[c]||c}).join(' · ');
     var t=$('call').textContent;

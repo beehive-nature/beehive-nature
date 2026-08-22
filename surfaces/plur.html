@@ -3,7 +3,9 @@
      and that will be our next mUseUm"). Every exhibit below is either a cited RECORD
      or lore honestly labeled LORE; where the adversarial verify pass corrected a
      popular telling, the correction is DISPLAYED, not hidden. Research: 6-wing fleet
-     + verify (wf_b7e9b43f-ff5, 12 agents, 900k tokens), 2026-08-21. -->
+     + verify (wf_b7e9b43f-ff5, 12 agents, 900k tokens), 2026-08-21. Island showcase
+     rebuilt 2026-08-22 per DISPATCH_ZCODE_PLUR_WAVE — composed from the verified
+     payloads in docs/dispatches/payloads/, never re-researched. -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="dark">
 <title>the PLUR mUseUm — peace · love · unity · respect, receipted</title>
@@ -53,6 +55,16 @@ h2{font-size:12px;font-weight:400;letter-spacing:.08em;margin-bottom:4px}
 .hs .t{font-size:9.5px;letter-spacing:.08em;margin-top:3px}
 .hs:nth-child(1) .t{color:var(--p)}.hs:nth-child(2) .t{color:var(--l)}
 .hs:nth-child(3) .t{color:var(--u)}.hs:nth-child(4) .t{color:var(--r)}
+.rib{display:flex;gap:2px;overflow-x:auto;margin-top:14px;padding:10px 2px 2px;position:relative;scrollbar-width:thin}
+.rib::before{content:'';position:absolute;left:0;right:0;top:27px;height:2px;background:var(--line)}
+.rib .cell{flex:0 0 auto;background:none;border:0;color:var(--ink);cursor:pointer;font:inherit;text-align:center;padding:0 5px;position:relative;z-index:1}
+.rib .cell svg{width:32px;height:35px;display:block;margin:0 auto}
+.rib .cell polygon{fill:var(--c);opacity:.85;transition:opacity .3s}
+.rib .cell:hover polygon,.rib .cell:focus-visible polygon{opacity:1}
+.rib .cell:focus-visible{outline:1px dashed var(--cyan);outline-offset:2px;border-radius:6px}
+.rib .cell i{display:block;font-style:normal;font-size:9.5px;letter-spacing:.05em;margin-top:2px}
+.rib .cell em{display:block;font-style:normal;font-size:8px;color:var(--dim);max-width:80px;margin:0 auto;line-height:1.45}
+.wg{display:block;margin:0 auto 8px;width:54px;height:44px;opacity:.95}
 footer{max-width:900px;margin:24px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2;position:relative;z-index:1}
 code{color:var(--ink)}
 .rig{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
@@ -60,7 +72,7 @@ code{color:var(--ink)}
  background:linear-gradient(to bottom,transparent,var(--c),transparent);
  transform-origin:50% 0;animation:sway 12s ease-in-out infinite alternate}
 @keyframes sway{from{transform:rotate(-12deg)}to{transform:rotate(12deg)}}
-@media (prefers-reduced-motion:reduce){.beam,#comb polygon{animation:none}#comb polygon{opacity:.6}}
+@media (prefers-reduced-motion:reduce){.beam,#comb polygon{animation:none}#comb polygon{opacity:.6}.rib .cell polygon{transition:none}}
 body.still .beam,body.still #comb polygon{animation-play-state:paused}
 </style></head><body>
 <div class="rig" aria-hidden="true"></div>
@@ -86,12 +98,33 @@ body.still .beam,body.still #comb polygon{animation-play-state:paused}
   <div class="combwrap" aria-hidden="true"><svg id="comb" viewBox="0 0 340 310"></svg></div>
 </header>
 
+<nav class="rib" aria-label="the era ribbon — twenty-six centuries, click what calls to you">
+  <button class="cell" data-go="e-bes" style="--c:#39c5cf"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>654 BC</i><em>Bes</em></button>
+  <button class="cell" data-go="e-loft" style="--c:#D655BB"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>1970</i><em>the Loft</em></button>
+  <button class="cell" data-go="e-pacha" style="--c:#e6b32e"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>1973</i><em>Pacha</em></button>
+  <button class="cell" data-go="e-amn" style="--c:#a78bfa"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>1976</i><em>Amnesia</em></button>
+  <button class="cell" data-go="e-cdm" style="--c:#45C2DC"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>1980</i><em>Café del Mar</em></button>
+  <button class="cell" data-go="e-tierno" style="--c:#7ddf8f"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>1984</i><em>"que se coloque"</em></button>
+  <button class="cell" data-go="e-trip" style="--c:#39c5cf"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>1987</i><em>the trip</em></button>
+  <button class="cell" data-go="e-ssol" style="--c:#D655BB"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>1988</i><em>Second Summer</em></button>
+  <button class="cell" data-go="e-plu" style="--c:#e6b32e"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>1990</i><em>PLU train car</em></button>
+  <button class="cell" data-go="e-plur" style="--c:#a78bfa"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>1993</i><em>PLUR</em></button>
+  <button class="cell" data-go="e-cja" style="--c:#45C2DC"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>1994</i><em>repetitive beats</em></button>
+  <button class="cell" data-go="e-ds" style="--c:#7ddf8f"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>1998</i><em>DanceSafe</em></button>
+  <button class="cell" data-go="e-unesco" style="--c:#39c5cf"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>1999</i><em>UNESCO · Circoloco</em></button>
+  <button class="cell" data-go="e-space" style="--c:#D655BB"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>2016</i><em>Space closes</em></button>
+  <button class="cell" data-go="e-tm" style="--c:#e6b32e"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>2023</i><em>the trademark</em></button>
+  <button class="cell" data-go="e-alfredo" style="--c:#a78bfa"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>2024</i><em>Alfredo</em></button>
+  <button class="cell" data-go="e-law" style="--c:#45C2DC"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>2026</i><em>this estate</em></button>
+</nav>
+
 <section class="w1">
   <h2>Ⅰ · <span data-i18n="plur.w1">WING I · THE WORD — where PLUR was born</span></h2>
+  <svg class="wg" viewBox="0 0 64 48" aria-hidden="true"><rect x="8" y="14" width="36" height="20" rx="3" stroke="var(--p)" stroke-width="2.5" fill="none"/><rect x="44" y="8" width="12" height="26" rx="2" stroke="var(--p)" stroke-width="2.5" fill="none" opacity=".5"/><circle cx="18" cy="38" r="4" stroke="var(--p)" stroke-width="2.5" fill="none"/><circle cx="38" cy="38" r="4" stroke="var(--p)" stroke-width="2.5" fill="none"/><text x="26" y="27.5" text-anchor="middle" font-size="8" fill="var(--p)" font-family="IBM Plex Mono,monospace" letter-spacing="1">PLU</text></svg>
   <div class="wl"><b>The legend says one DJ shouted it into being. The archive says it took a
   train car, two coasts, a booklet, a mailing list, and a threat.</b> Both are in this wing —
   labeled.</div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <div class="ex" id="e-plu"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
   <b>July 4, 1990 — the three words appear.</b> Adam X — Frankie Bones' brother — paints
   <b>"Peace Love Unity"</b> on a train car. The earliest reported physical appearance of the slogan
   in the scene; the artifact itself does not survive. Bones himself calls 1990–1993 the
@@ -103,7 +136,7 @@ body.still .beam,body.still #comb polygon{animation-play-state:paused}
   US rave movement ran about nineteen months and <b>ended before the famous mic moment</b> — a
   chronology that quietly undercuts every telling that places the fight "at a Storm Rave."
   <div class="src">Vice (2015), dates as reported — <a href="https://www.vice.com/en/article/how-frankie-bones-storm-rave-birthed-the-plur-movement/" rel="noopener">vice.com</a></div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <div class="ex" id="e-plur"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
   <b>The R rode in from San Francisco.</b> Around May 1993, Brian Behlendorf carries Geoff White's
   booklet <i>Cybertribe Rising</i> — with its essay on the "4 Pillars of the House Community,"
   one pillar being <b>respect</b> — to the East Coast. At a renegade party in the RFK Stadium
@@ -160,9 +193,10 @@ body.still .beam,body.still #comb polygon{animation-play-state:paused}
 
 <section class="w2">
   <h2>Ⅱ · <span data-i18n="plur.w2">WING II · THE INHERITANCE — the floor was Black, brown, and queer first</span></h2>
+  <svg class="wg" viewBox="0 0 64 48" aria-hidden="true"><circle cx="32" cy="24" r="18" stroke="var(--l)" stroke-width="2.5" fill="none"/><circle cx="32" cy="24" r="12" stroke="var(--l)" stroke-width="1.2" fill="none" opacity=".5"/><circle cx="32" cy="24" r="3.2" fill="var(--l)"/></svg>
   <div class="wl"><b>PLUR did not invent the sanctuary floor. It inherited one</b> — built decades
   earlier by people the outside world would not have. This wing is the deed of inheritance.</div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <div class="ex" id="e-loft"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
   <b>Valentine's Day 1970 — "Love Saves the Day."</b> David Mancuso's first Loft party, 647
   Broadway, NYC: invitation-only, nothing sold, running past legal hours. The invitation's initials
   wink at LSD while announcing an ethic of universal love.
@@ -219,10 +253,274 @@ body.still .beam,body.still #comb polygon{animation-play-state:paused}
 </section>
 
 <section class="wib">
-  <h2>⚓ <span data-i18n="plur.wib">ANNEX · THE ISLAND — Eivissa, stamped with the god of the dance</span></h2>
-  <div class="wl"><b>Before the island loaded the Second Summer of Love, it spent twenty-six
-  centuries practicing.</b> Its money wore a dancing god; its caves held a goddess; its exiles
-  built the floor. The next wing imports what this one grew.</div>
+  <h2>⚓ <span data-i18n="plur.wib">THE ISLAND · EIVISSA — for much of the world, rave was born here</span></h2>
+  <svg class="wg" viewBox="0 0 64 48" aria-hidden="true"><circle cx="32" cy="24" r="19" stroke="var(--cyan)" stroke-width="2.5" fill="none"/><circle cx="32" cy="24" r="15" stroke="var(--cyan)" stroke-width="1" fill="none" opacity=".45"/><path d="M25 33 v-7 M39 33 v-7 M25 26 q7 -9 14 0 M25 26 l-6 -6 M39 26 l6 -6 M25 33 l-4 5 M39 33 l4 5" stroke="var(--cyan)" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <div class="wl"><b>For much of the world, rave was born here.</b> Not the music — Chicago's
+  Warehouse and Detroit's Belleville Three made that, and Wing II holds their deed. The
+  <i>wave</i> was born here: a permissive window the transition opened, an uncovered dancefloor
+  under the trees, a mayor who blessed the party from the stage, and four London DJs who went
+  home and lit 1988. Around that showcase, the island's own twenty-six centuries — a dancing
+  god on the money, a goddess in the cave, a philosopher on the beach. The showcase first;
+  the deep history after, as it always was.</div>
+  <div class="ex" id="e-birth"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>THE BIRTHPLACE — the claim, on the record.</b> The genre at the root of UK acid house is
+  literally named for these islands — <b>Balearic beat</b>, for the Balearics — and its
+  canonical author is Amnesia's resident DJ <b>Alfredo</b>, whom the dance press titles the
+  "Father of the Balearic beat." In summer 1987 four London DJs heard him at Amnesia and went
+  home to open Shoom, Spectrum and The Trip; 1988 became the Second Summer of Love. That is
+  why the dance press treats Ibiza as the spiritual home of rave for much of the world — an
+  export chain with the island at its source, held honestly below in its record and lore
+  halves.
+  <div class="q">"Balearic beat was named for its popularity among European nightclub and beach
+  rave patrons on the Balearic island of Ibiza, a popular tourist destination."</div>
+  <div class="src">Wikipedia, "Balearic beat" (quote verbatim) · DJ Mag obituary, "DJ Alfredo,
+  Ibiza legend and 'Father of the Balearic beat'" · the 1987 cards below carry the chain in
+  full</div></div>
+  <div class="ex" id="e-tierno"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>THE SPANISH DOOR — the crown quote, verified to the night.</b> Madrid, 28–29 January 1984:
+  the Fiesta del Estudiante y la Radio — "24 Horas de Música y Radio," organized by RNE Radio
+  3's <i>Tiempo de Universidad</i> — fills the Palacio de los Deportes. Mayor <b>Enrique
+  Tierno Galván</b>, from the stage, to the rockeros:
+  <div class="q">"Rockeros: el que no esté colocado, que se coloque y al loro"</div>
+  <i>Colocado</i>: slang for high. <i>Al loro</i>: Madrid slang for keep your eyes open. An
+  elected mayor blessing the party from an official stage, to applause — nine years after
+  Franco (dead 20 November 1975, ending nearly four decades of dictatorship, into a peaceful
+  transition to democracy). The single best exhibit of official tolerance this wing holds.
+  Ten years later the British Parliament answered the same music by defining its beat in
+  statute to ban it — Wing III holds that door's other side.
+  <div class="src">El País, 29 January 1984 (contemporaneous report; quote verbatim including
+  the opening "Rockeros:") · Archivo RTVE footage, "el concierto del Estudiante y la Radio de
+  1984" · Franco dates per Britannica</div>
+  <div class="vn">verify pass: several retellings misplace the line at the San Isidro fiestas or
+  a spring festival — the contemporaneous El País report and the RTVE archive fix it at the
+  January 1984 student-radio festival. The "III Gran" edition number and the Santo Tomás de
+  Aquino framing appear in neither source and are dropped.</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>The door's legal hinge — decriminalization was a pre-existing condition, not a reform.</b>
+  Spain never criminalized drug possession for personal use: a 1974 Supreme Court doctrine
+  held possession criminal only when intended for third-party consumption —
+  <div class="q">"In 1974, the Spanish Supreme Court clarified that possession would only be
+  criminal if intended for third-party consumption, exempting personal use from
+  prosecution—a ruling maintained to this day."</div>
+  The 1983 penal reform narrowed punishable conduct further and wrote the distinction between
+  seriously harmful substances and cannabis into statute-era practice. The window closed in
+  1992: the Ley Corcuera (LO 1/1992) made <i>public</i> consumption a grave administrative
+  infraction — fined, never a crime — while private use stayed outside the criminal law
+  entirely, BOE art. 25.1 verbatim:
+  <div class="q">"el consumo en lugares, vías, establecimientos o transportes públicos, así
+  como la tenencia ilícita, aunque no estuviera destinada al tráfico, de drogas tóxicas,
+  estupefacientes o sustancias psicotrópicas"</div>
+  The permissive window c. 1975–1992 is exactly when the island's open-air scene formed.
+  <div class="src">TalkingDrugs, "Spain's Decriminalisation: Decades of Quiet Innovation"
+  (Valldaura, Ojeda, Rosell &amp; Roig, 2025 — quote verbatim) · BOE-A-1992-4252, art. 25.1
+  (verbatim) · 1983 reform per OJP/NCJRS abstract + TNI Spain country report</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>The material fact: the floor had no roof.</b> Through the 1980s the flagship clubs ran
+  open-air and all-night with no equivalent of UK licensing hours — DJ Alfredo began his
+  Amnesia residency in 1983 on an uncovered dancefloor under the trees, sets running to
+  sunrise, while Ku drew crowds in the thousands around its open-air pool:
+  <div class="q">"He was given his first Amnesia gig in 1983 and played under the trees that
+  still stand, on the open-air dancefloor that is now covered."</div>
+  This is what visiting Britons had no legal way to reproduce at home — the climate made the
+  architecture. And the 1990s closed both windows at once: national law in 1992, and stricter
+  noise and licensing regulation that roofed the open-air floors — Amnesia complying with a
+  retractable roof over the Terrace.
+  <div class="q">"The nineties brought stricter noise and licensing regulations to Ibiza.
+  Amnesia acquiesced to municipal regulations with a new retractable roof over the
+  Terrace."</div>
+  <div class="src">DJ Mag, "Celebrating 50 years of Amnesia" (both quotes verbatim); Amnesia's
+  own history page · the finca and its resident have their own cards directly below</div></div>
+  <div class="ex" id="e-mol"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>THE MOLECULE — history only: dates, people, laws, one botanical family tree. No chemistry,
+  no process, no dosage; that ceiling is this card's law.</b> The paper trail begins as a
+  clerical line: MDMA first appears in Merck's records in 1912, lab-journal name
+  "Methylsafrylamin," an unnamed intermediate in German patent No. 274 350 (filed 24 December
+  1912) on a route to a <i>styptic</i> — a clotting agent. It was never the product. The
+  famous origin — "Merck made it in 1912 as an appetite suppressant" — is a myth the company's
+  own archive demolished: no appetite-suppressant program existed 1900–1960, and the substance
+  was not pharmacologically tested at all until 1927, work then halted for economic reasons
+  (the rumor's likely root: a confusion with MDA, which Smith Kline French did test in the
+  1950s).
+  <div class="q">"Merck applied for this patent to protect an alternative chemical method for
+  synthesizing the styptic hydrastinine, not appetite suppressants."</div>
+  Alexander Shulgin did not invent it — he reintroduced it: re-synthesized and self-tested
+  September 1976, passed to psychotherapist Leo Zeff in 1977, and in 1978 published with David
+  E. Nichols the first report of its human psychopharmacology — the paper trail behind his
+  erroneous "father of MDMA" title. Then the quiet therapeutic era: an estimated few dozen
+  therapists (1978–85), Zeff introducing it to about four thousand people and training more
+  than 150 therapists, Greer and Tolbert treating over eighty patients 1980–85 — their
+  published reports became classics of the era's clinical literature.
+  <div class="src">Bernschneider-Reif, Öxler &amp; Freudenmann, Pharmazie 61 (2006) — the Merck
+  archive study (quote verbatim) · Freudenmann et al., Addiction 101 (2006) · Passie, Drug
+  Science, Policy and Law 4 (2018) · Benzenhöfer &amp; Passie, Addiction 105 (2010)</div>
+  <div class="vn">verify pass: the therapy-era line ships corrected — Greer &amp; Tolbert's
+  reports are "classics in the field" (the source's own words), not "the era's main clinical
+  account"; and the few-dozen estimate covers 1978–1985.</div></div>
+  <div class="ex"><span class="kb lor" data-i18n="plur.lore">LORE — told as lore</span><br>
+  <b>The molecule's street lore — the name, the open bar, the island leg.</b> "Ecstasy" dates
+  to circa 1981, chosen by a Los Angeles distribution network purely as marketing — the
+  anonymous distributor, quoted in Bruce Eisner's <i>Ecstasy: The MDMA Story</i> (1989):
+  <div class="q">"it would sell better than calling it 'Empathy'"</div>
+  Dallas, the Starck Club (opened May 1984): while it was still legal, ecstasy was sold openly
+  across the bar — by bartenders and via the cigarette girl — a trade the club's oral history
+  attributes to individual employees, not management. And how it reached Ibiza in the
+  mid-1980s: the standard histories point to the Bhagwan Rajneesh sannyasin network, which
+  Matthew Collin's <i>Altered State</i> documents building distribution channels beyond the
+  US — but the specific island-arrival story remains anecdotal; David Hillier, checking it,
+  found no smoking gun. Three tellings, tellers named; that is what lore is.
+  <div class="src">Eisner (1989) via hedweb.com · Red Bull Music Academy Daily, "Nightclubbing:
+  Starck Club" (2016 — named tellers) · Collin, <i>Altered State</i> (1997) tested in Vice
+  (2018)</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>The scheduling, the family tree, the other documented life.</b> Texas: Michael Clegg's
+  "Texas Group" mass-distributed the tablet in Dallas before the ban — the DEA's own figure,
+  as reported: "distributing upwards of 500,000 pills a month in Dallas at the time." The
+  answer was the DEA's first-ever use of its emergency scheduling power — Federal Register 31
+  May 1985, effective 1 July 1985:
+  <div class="q">"EFFECTIVE DATE: On July 1, 1985, MDMA will be subject to Schedule I
+  control."</div>
+  The botanical ancestry, stated as encyclopedic fact and nothing more: <b>safrole</b> — the
+  principal component of sassafras oil, from the sassafras tree (<i>Sassafras albidum</i>) —
+  is the classic historically documented precursor family associated with MDMA, and is
+  internationally controlled as a listed precursor:
+  <div class="q">"Safrole is listed as a Table I precursor under the United Nations Convention
+  Against Illicit Traffic in Narcotic Drugs and Psychotropic Substances."</div>
+  The founder's "sassafras tree bark oil" is exactly this family tree — named as ancestry,
+  never conflating the tree with the synthetic. And the molecule's other documented life
+  continues: MAPS's phase-3 trials met their primary endpoints (MAPP1, <i>Nature Medicine</i>
+  2021; MAPP2, 2023), but on 4 June 2024 an FDA advisory committee voted against approval and
+  on 9 August 2024 the FDA issued Lykos Therapeutics a Complete Response Letter requiring
+  another phase-3 trial — published by the FDA itself 4 September 2025. Unapproved as of 2026;
+  the research arc goes on.
+  <div class="src">RBMA Daily / Texas Monthly (DEA figure quote verbatim) · Federal Register 50
+  FR 23118 (quote verbatim, public domain) · Wikipedia "Safrole" (UN 1988 Table I, quote
+  verbatim) · Lykos press release + MAPS statement on the CRL</div></div>
+  <div class="ex" id="e-canna"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>CANNABIS &amp; THE KINGDOM — the legal ground.</b> Personal consumption is not
+  criminalized in Spain and carries an administrative penalty only in public; beneath it sits
+  the Supreme Court's <b>consumo compartido</b> doctrine — closed-group, non-commercial
+  consumption is not inherently criminal — the legal seed of the cannabis club model. The
+  honest counterweight, in force 1 July 2015: the Ley Mordaza (LO 4/2015) makes public
+  consumption or possession a <i>serious administrative infraction</i> under art. 36.16, fined
+  €601–30,000 — no criminal record, a real penalty, heavily used. Private use remains outside
+  both criminal and administrative sanction.
+  <div class="q">"Drug consumption and possession for personal use are not criminalized in
+  Spain and carry an administrative penalty only when performed in a public place"</div>
+  <div class="src">ICEERS, Spain legal information (quote verbatim) · BOE, LO 4/2015 arts.
+  36.16 + 39.1 (fine band verified in the consolidated text)</div>
+  <div class="vn">verify pass: a popular framing attributes the doctrine to the 1978
+  Constitution's privacy protections — the cited source says no such thing, and the
+  attribution is dropped here. The source itself flags the doctrine as "recently revised": the
+  2015 Supreme Court ceiling, two cards down.</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>The clubs — legalisation without commercialisation.</b> The Basque origin: Kalamudia's
+  1997 public protest plantation, repeated without prosecution, dissolved around 2001–02 into
+  local associations cultivating for their own members. <b>Pannagh</b>: founded in Bilbao 22
+  February 2003, registered 20 June 2003; its president Martín Barriuso arrested with two
+  members while harvesting for the club in 2005 — and the favorable Basque court outcome in
+  2006 (confiscated cannabis returned) is credited with precipitating the nationwide
+  expansion. The model as its international students codify it:
+  <div class="q">"Cannabis social clubs (CSCs) are private, non-profit organisations in which
+  cannabis is collectively grown and distributed to registered members."</div>
+  The first CSC dates to 2001; roughly 400 clubs exist; Uruguay later wrote CSCs into statute;
+  "the growth of the CSC model in Spain demonstrates that cannabis legalisation does not have
+  to mean commercialisation." The boom's numbers: Catalonia went from about 40 clubs in 2011
+  to more than 500 with over 165,000 members by 2014 (a club-federation president's count —
+  an advocate's figures, flagged as such) — the press dubbing Barcelona "the Amsterdam of
+  southern Europe." The arc bends back: the Constitutional Court annulled Navarra's
+  foral regulation (STC 144/2017) and Catalonia's Law 13/2017 in full (STC 100/2018, 19
+  September 2018) — narcotics regulation is exclusive state competence:
+  <div class="q">"marijuana's regulation must be in the hands of the State, which has sole
+  responsibility for establishing the criminal penalties for narcotics"</div>
+  And the Supreme Court's 2015 <b>Ebers</b> line drew the criminal ceiling: organized
+  cultivation and distribution by a club of 290 members constitutes trafficking — large
+  open-membership clubs over the line, the small closed-circle doctrine intact beneath it.
+  <div class="src">Pannagh's own history + ENCOD (dates confirmed) · Transform Drug Policy
+  Foundation briefing (quotes verbatim) · Reason (2016 — boom figures) · Ara English (STC
+  quotes) · Poder Judicial news release (Ebers, STS 484/2015)</div>
+  <div class="vn">verify pass: the Barcelona enforcement line ships corrected — over 50 clubs
+  closed under Mayor Trias's threatened 150-meter zoning plan (which would have shut about
+  80%), reversed by Mayor Colau before it took effect; the widely repeated "a third of the
+  city's 145 clubs ordered closed" is not in the cited source. Malta is likewise dropped —
+  the briefing names only Uruguay.</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>Hemp — the kingdom's strategic fiber.</b> From 1665 to 1808 the Spanish crown ran a
+  sustained military supply system for <i>cáñamo</i>: hemp made the fleet's match-cord,
+  rigging and sails, and royal policy tried to extend its harvest to the American possessions
+  to escape dependence on Russian hemp bought in the Baltic:
+  <div class="q">"con él se producía cuerda mecha, y jarcia y velas para el aparejo de los
+  veleros"</div>
+  <b>Callosa de Segura</b> (Alicante) is the living monument — self-styled <i>capital del
+  cáñamo</i>, Spain's leading maker of hemp rope, nets and espadrille soles until synthetic
+  fibers displaced the craft in the 1960s; its Museo del Cáñamo (founded 1986, an official
+  Museographic Collection since 24 March 1994) exhibits the whole cycle from seed to spun
+  thread. (The popular telling dates the town's hemp working to c. 1300 and calls medieval
+  Callosa the largest producer — trade lore, carried as tradition, not documented.) Modern
+  lawful hemp: under the EU framework only certified-seed varieties below 0.3% THC qualify,
+  and the EU's fibre-hemp area grew from 20,540 ha (2015) to 33,020 ha (2022) — France,
+  Germany and the Netherlands lead; Spain cultivates inside the framework, a legal fact, not a
+  leadership claim. This estate keeps its own hemp line on the board:
+  <a href="dao-dashboard/">the hemp-hearts commons price feed</a> on the DAO dashboard.
+  <div class="src">Díaz-Ordóñez, <i>Espacio Tiempo y Forma</i> IV/32 (2019) — crown supply
+  system (quote verbatim, ES) · Ayuntamiento de Callosa de Segura + es.wikipedia (museum
+  dates) · European Commission DG AGRI hemp page (quotes verbatim)</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>The island inside the model.</b> Ibiza's scene runs on the same national theory — and it
+  is municipally documented, not just promoted: the city council has issued opening licenses
+  to 17 cannabis associations since 2018, and in March 2024 voted to regulate new openings
+  through a municipal ordinance, suspending licenses for new associations meanwhile:
+  <div class="q">"el Consistorio ha dado licencia de apertura a 17 de estos establecimientos
+  desde 2018"</div>
+  November 2023: members of the island's Domus Club protested outside the Ibiza courts over a
+  police raid they said was carried out without a judicial order. The argument the kingdom has
+  had for thirty years, the island has out loud too.
+  <div class="src">Periódico de Ibiza (26 March 2024 — quote verbatim) · Cañamo magazine (Domus
+  Club raid coverage)</div></div>
+  <div class="ex" id="e-amn"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>Amnesia: a farmhouse renamed by a philosopher.</b> A centuries-old finca near Sant Rafel —
+  five generations of the Planells family — sold in 1970, then leased in May 1976 by Madrid
+  philosopher <b>Antonio Escohotado</b> (later the author of <i>Historia general de las drogas</i>),
+  who wanted a name that meant going out to forget your problems. It opened for dancing in 1976:
+  <div class="q">"non-stop dancing around the small central water pool"</div>
+  — and through the 1980s the floor had <b>no roof</b>. The open sky is the physical precondition
+  of the Balearic sunrise set.
+  <div class="src">DJ Mag, "Celebrating 50 years of Amnesia" anniversary feature</div></div>
+  <div class="ex" id="e-alfredo"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>Alfredo — the exile who built the floor.</b> Alfredo Fiorito: born Rosario, Argentina, 1953;
+  a journalist. He left in 1976, after the coup — his own words:
+  <div class="q">"I leave my country for political reasons."</div>
+  — invoking the Proceso and the 30,000 disappeared. He reached Ibiza that September; candlemaker,
+  delivery driver, bartender, then the decks. First Amnesia gig 1983; resident from 1984; the
+  all-genres sunrise style — house beside disco, reggae, flamenco, Pink Floyd — that the UK would
+  later bottle as "Balearic": <i>"I blurred the division between black and white music."</i> His
+  own memory of the floor: <i>"There were Italians, french, four or three English, Spanish, South
+  Americans, Germans"</i> — and his record box built to serve all of them at once. He died on the
+  island December 24, 2024, aged 71. Amnesia's farewell: <i>"Your music and vision shaped the
+  sound of Balearic beat."</i>
+  <div class="src">Test Pressing, "DJ Alfredo — R.I.P. In His Own Words"; RA / DJ Mag / Mixmag obituaries (death date verified across all three)</div>
+  <div class="vn">verify note: the widely quoted "straight, gay, bi-sexual, young, old…" crowd
+  description traces to Space Ibiza's promotional bio, not to verified Alfredo speech — his
+  verbatim floor description above is the one on the record. The mixed-floor ethos itself is the
+  veteran's own telling: memoir, honored as such.</div></div>
+  <div class="ex" id="e-trip"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>The 1987 pipeline — record half.</b> In summer 1987, around Paul Oakenfold's 24th birthday,
+  Oakenfold, Danny Rampling, Nicky Holloway and Johnny Walker heard Alfredo at Amnesia — a trip
+  entwined, in their own accounts, with first ecstasy. The trip is documented:
+  <i>"it's certainly true to say that the trip happened."</i> Home again: Rampling launches
+  <b>Shoom</b> (late 1987 — Wing III picks up this thread), Oakenfold opens <b>Spectrum</b>
+  (April 1988, after his smaller Future night), Holloway launches <b>The Trip</b> (May 1988).
+  Walker founded no club — he played Oakenfold's nights; the legend usually forgets that.
+  <div class="src">Ears To The House investigative verification; RA and DJ Mag Alfredo obituaries corroborate the four names</div></div>
+  <div class="ex"><span class="kb lor" data-i18n="plur.lore">LORE — told as lore</span><br>
+  <b>The 1987 pipeline — lore half.</b> "Four DJs brought house music to Britain" is the
+  participant-told founding myth, polished across decades of their own retellings. House was
+  already in the UK — Jazzy M's pirate show from 1986, house at the Haçienda's Nude night from
+  1986 — and UK–Ibiza traffic predates the trip (Trevor Fung had DJed the island since 1982).
+  The pipeline is real; the origin-point framing is canon, not chronicle. Alfredo's own wry
+  postscript, on the record:
+  <div class="q">"When I first went to play in London I discovered that everyone was playing my
+  records."</div>
+  <div class="src">Oakenfold/Rampling/Holloway oral histories; the challenge documented by Ears To The House; Alfredo per Test Pressing</div></div>
   <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
   <b>The oldest floor: Sa Caleta, late 8th century BC.</b> A Phoenician settlement on the south
   coast — stone buildings, communal ovens, metalworking — abandoned around 600 BC in a planned,
@@ -233,7 +531,7 @@ body.still .beam,body.still #comb polygon{animation-play-state:paused}
   <div class="vn">verify pass: 654 BC is a modern computation — Diodorus gives only "160 years
   after Carthage"; the 814 BC anchor is Timaeus's date, supplied in the Loeb editor's footnote.
   Archaeology at Sa Caleta predates the literary date by roughly two generations.</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <div class="ex" id="e-bes"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
   <b>The centerpiece: the name itself.</b> Ibiza/Eivissa descends from the Phoenician-Punic
   <b>ʾYBŠM</b> (Iboshim) via Greek Ebousos and Latin Ebusus — and the favored scholarly reading
   (J. M. Solà-Solé) is <b>"island of Bes."</b> Bes: the Egyptian dwarf god of <b>music, dance,
@@ -264,7 +562,7 @@ body.still .beam,body.still #comb polygon{animation-play-state:paused}
   mythology projecting the island's <i>genuine, excavated</i> Tanit cult onto the rock offshore.
   Three tellings, all real as tellings; the receipts live in the cave and the necropolis.
   <div class="src">Island tradition per Diario de Ibiza and travel literature; geology per Emily Kaufman, "The History Buff's Guide to Ibiza"</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <div class="ex" id="e-unesco"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
   <b>UNESCO, 1999: "Ibiza, Biodiversity and Culture."</b> A mixed cultural-natural listing: Dalt
   Vila's Renaissance fortifications, Sa Caleta, Puig des Molins — and
   <div class="q">"the best-conserved marine meadows of Posidonia Oceanica (Neptune Grass) in the
@@ -280,7 +578,7 @@ body.still .beam,body.still #comb polygon{animation-play-state:paused}
   hotel being built at the port will change the island's character. The first documented case of
   the island's oldest ritual: arriving, and worrying about who arrives next.
   <div class="src">Vicente Valero, <i>Experiencia y pobreza: Walter Benjamin en Ibiza</i> (2001/2017); <i>Cartas de la época de Ibiza</i> (2008)</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <div class="ex" id="e-pacha"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
   <b>The hippie loading dock — and 1973, the hinge year.</b> American draft resisters avoiding
   Vietnam and European dropouts escaping post-war conformity settled in communes in the island's
   rural reaches. In 1973 the bohemia acquired institutions: the Hotel Club Punta Arabí invited the
@@ -290,52 +588,7 @@ body.still .beam,body.still #comb polygon{animation-play-state:paused}
   Bar Anita in Sant Carles is remembered as the settlers' hub — the village's only telephone, the
   de facto post office — a telling preserved by everyone and archived by no one.
   <div class="src">Diario de Ibiza; Illes Balears tourism board (market, 1973, verified); Wikipedia: The Pacha Group (verified); Bar Anita per local heritage tellings — that last card is lore-grade and labeled in-line</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>Amnesia: a farmhouse renamed by a philosopher.</b> A centuries-old finca near Sant Rafel —
-  five generations of the Planells family — sold in 1970, then leased in May 1976 by Madrid
-  philosopher <b>Antonio Escohotado</b> (later the author of <i>Historia general de las drogas</i>),
-  who wanted a name that meant going out to forget your problems. It opened for dancing in 1976:
-  <div class="q">"non-stop dancing around the small central water pool"</div>
-  — and through the 1980s the floor had <b>no roof</b>. The open sky is the physical precondition
-  of the Balearic sunrise set.
-  <div class="src">DJ Mag, "Celebrating 50 years of Amnesia" anniversary feature</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>Alfredo — the exile who built the floor.</b> Alfredo Fiorito: born Rosario, Argentina, 1953;
-  a journalist. He left in 1976, after the coup — his own words:
-  <div class="q">"I leave my country for political reasons."</div>
-  — invoking the Proceso and the 30,000 disappeared. He reached Ibiza that September; candlemaker,
-  delivery driver, bartender, then the decks. First Amnesia gig 1983; resident from 1984; the
-  all-genres sunrise style — house beside disco, reggae, flamenco, Pink Floyd — that the UK would
-  later bottle as "Balearic": <i>"I blurred the division between black and white music."</i> His
-  own memory of the floor: <i>"There were Italians, french, four or three English, Spanish, South
-  Americans, Germans"</i> — and his record box built to serve all of them at once. He died on the
-  island December 24, 2024, aged 71. Amnesia's farewell: <i>"Your music and vision shaped the
-  sound of Balearic beat."</i>
-  <div class="src">Test Pressing, "DJ Alfredo — R.I.P. In His Own Words"; RA / DJ Mag / Mixmag obituaries (death date verified across all three)</div>
-  <div class="vn">verify note: the widely quoted "straight, gay, bi-sexual, young, old…" crowd
-  description traces to Space Ibiza's promotional bio, not to verified Alfredo speech — his
-  verbatim floor description above is the one on the record. The mixed-floor ethos itself is the
-  veteran's own telling: memoir, honored as such.</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>The 1987 pipeline — record half.</b> In summer 1987, around Paul Oakenfold's 24th birthday,
-  Oakenfold, Danny Rampling, Nicky Holloway and Johnny Walker heard Alfredo at Amnesia — a trip
-  entwined, in their own accounts, with first ecstasy. The trip is documented:
-  <i>"it's certainly true to say that the trip happened."</i> Home again: Rampling launches
-  <b>Shoom</b> (late 1987 — Wing III picks up this thread), Oakenfold opens <b>Spectrum</b>
-  (April 1988, after his smaller Future night), Holloway launches <b>The Trip</b> (May 1988).
-  Walker founded no club — he played Oakenfold's nights; the legend usually forgets that.
-  <div class="src">Ears To The House investigative verification; RA and DJ Mag Alfredo obituaries corroborate the four names</div></div>
-  <div class="ex"><span class="kb lor" data-i18n="plur.lore">LORE — told as lore</span><br>
-  <b>The 1987 pipeline — lore half.</b> "Four DJs brought house music to Britain" is the
-  participant-told founding myth, polished across decades of their own retellings. House was
-  already in the UK — Jazzy M's pirate show from 1986, house at the Haçienda's Nude night from
-  1986 — and UK–Ibiza traffic predates the trip (Trevor Fung had DJed the island since 1982).
-  The pipeline is real; the origin-point framing is canon, not chronicle. Alfredo's own wry
-  postscript, on the record:
-  <div class="q">"When I first went to play in London I discovered that everyone was playing my
-  records."</div>
-  <div class="src">Oakenfold/Rampling/Holloway oral histories; the challenge documented by Ears To The House; Alfredo per Test Pressing</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <div class="ex" id="e-cdm"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
   <b>The sunset counter-gift: chillout.</b> Café del Mar opens June 20, 1980 in Sant Antoni — a
   bar aimed at the sunset, interior by Lluís Güell. <b>José Padilla</b>, resident from 1991 after
   years of selling the venue his sunset mixtapes, launches the Café del Mar compilations in 1994
@@ -348,7 +601,7 @@ body.still .beam,body.still #comb polygon{animation-play-state:paused}
   <div class="vn">verify pass: "first record to package the sound" softened — the sources call it
   a landmark of an already-live scene, and no source states primacy. The tribute quote is from
   Café del Mar's own posted farewell, not the news piece that carried it.</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <div class="ex" id="e-space"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
   <b>The superclub arc, with its receipts.</b> Ku opens 1979 in San Rafael; renamed
   <b>Privilege</b> in 1995; the 2003 Guinness World Records lists it the world's largest nightclub
   — 6,500 m², capacity 10,000; closed after 2019; the site reopened as UNVRS in 2025.
@@ -374,9 +627,10 @@ body.still .beam,body.still #comb polygon{animation-play-state:paused}
 
 <section class="w3">
   <h2>Ⅲ · <span data-i18n="plur.w3">WING III · THE STATE vs THE DANCE — the law that named the music</span></h2>
+  <svg class="wg" viewBox="0 0 64 48" aria-hidden="true"><rect x="16" y="10" width="32" height="28" rx="3" stroke="var(--u)" stroke-width="2.5" fill="none"/><path d="M16 10 q-7 4 0 9 M48 10 q7 4 0 9" stroke="var(--u)" stroke-width="2" fill="none" opacity=".6"/><line x1="24" y1="19" x2="40" y2="19" stroke="var(--u)" stroke-width="1.6"/><line x1="24" y1="24" x2="40" y2="24" stroke="var(--u)" stroke-width="1.6"/><line x1="24" y1="29" x2="34" y2="29" stroke="var(--u)" stroke-width="1.6"/></svg>
   <div class="wl"><b>In 1994 the United Kingdom wrote a genre of music into criminal statute.</b>
   This wing holds the exact words — and what the culture did next.</div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <div class="ex" id="e-cja"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
   <b>The centerpiece. Criminal Justice and Public Order Act 1994, section 63(1)(b), enacted
   text, verbatim:</b>
   <div class="q">"music" includes sounds wholly or predominantly characterised by the emission of
@@ -391,7 +645,7 @@ body.still .beam,body.still #comb polygon{animation-play-state:paused}
   <div class="src">legislation.gov.uk, enacted vs current text</div>
   <div class="vn">verify pass correction: the cut to 20 applies to England &amp; Wales; the Scottish
   version of s.63 retains the 100-person threshold.</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <div class="ex" id="e-ssol"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
   <b>What they were afraid of started in a gym.</b> Shoom — Danny Rampling's weekly all-nighter in
   a Southwark Street fitness centre, late 1987, straight off the Ibiza/Amnesia trip — ignites UK
   acid house; 1988–89 becomes the <b>Second Summer of Love</b>, smiley-face emblem and all. By 1989
@@ -431,6 +685,7 @@ body.still .beam,body.still #comb polygon{animation-play-state:paused}
 
 <section class="w4">
   <h2>Ⅳ · <span data-i18n="plur.w4">WING IV · THE RITUAL — kandi, the handshake, respect in practice</span></h2>
+  <svg class="wg" viewBox="0 0 64 48" aria-hidden="true"><circle cx="32" cy="24" r="14" stroke="var(--r)" stroke-width="2.5" fill="none"/><circle cx="32" cy="10" r="3.4" fill="var(--p)"/><circle cx="44.5" cy="17.5" r="3.4" fill="var(--l)"/><circle cx="44.5" cy="30.5" r="3.4" fill="var(--u)"/><circle cx="32" cy="38" r="3.4" fill="var(--r)"/></svg>
   <div class="wl"><b>A creed you can shake hands with.</b> Four gestures, a bracelet, free water,
   and the strange history of governments deciding whether care is contraband.</div>
   <div class="hand" aria-label="the four steps of the PLUR handshake">
@@ -445,6 +700,8 @@ body.still .beam,body.still #comb polygon{animation-play-state:paused}
   <div class="q">"trade your kandi through your interlocked hands, one at a time"</div>
   Etiquette rides with it: tradeables on the right arm, keepsakes on the left; never ask for a
   specific piece; never re-trade kandi made <i>for you</i>.
+  <div style="margin-top:6px">The ritual, live: <a href="kandi.html">🍬 the kandi bar</a> —
+  compose one, do the four-step handshake, gift it; the etiquette above enforced in code.</div>
   <div class="src"><a href="https://iheartraves.com/blogs/post/how-to-trade-kandi-at-a-rave" rel="noopener">iHeartRaves, "How to Trade Kandi at a Rave"</a> — the ritual as codified in-scene</div>
   <div class="vn">verify pass: the popular "bracelet slid over still-clasped hands" phrasing is not
   what the source says — the trade goes <i>through</i> the interlocked hands. Corrected on display.</div></div>
@@ -455,7 +712,7 @@ body.still .beam,body.still #comb polygon{animation-play-state:paused}
   informants). Kandi itself is traced in community tellings to 1990s "candy ravers" and the
   friendship-bracelet exchange. The gestures postdate the 1993 motto by about a decade.
   <div class="src">USC Digital Folklore Archives, "PLUR Handshake and the Exchanging of Kandi"; scene guides (Freedom Rave Wear, iHeartRaves)</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <div class="ex" id="e-ds"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
   <b>Respect-in-practice was raver-built — and it predates the famous names.</b> Toronto's
   <b>TRIP!</b> (est. 1995): <i>"born … out of a need for appropriate drug and sex information
   within the Toronto rave scene."</i> Then <b>DanceSafe</b>, founded 1998 by Emanuel Sferios in the
@@ -495,6 +752,7 @@ body.still .beam,body.still #comb polygon{animation-play-state:paused}
 
 <section class="w5">
   <h2>Ⅴ · <span data-i18n="plur.w5">WING V · THE SENSORY FLOOR — the dance floor as a neurodivergent sanctuary</span></h2>
+  <svg class="wg" viewBox="0 0 64 48" aria-hidden="true"><path d="M8 40 L32 8 L56 40 Z" stroke="var(--p)" stroke-width="2.5" fill="none" stroke-linejoin="round"/><path d="M23 40 L32 25 L41 40" stroke="var(--p)" stroke-width="1.6" fill="none" opacity=".55"/></svg>
   <div class="wl"><b>The founder of this estate calls his own register "hippy autistic PLUR."</b>
   This wing is why that phrase is coherent — the floor as regulation, belonging, and design law.</div>
   <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
@@ -548,6 +806,7 @@ body.still .beam,body.still #comb polygon{animation-play-state:paused}
 
 <section class="w6">
   <h2>Ⅵ · <span data-i18n="plur.w6">WING VI · THE LIVING LAW — PLUR now, and the register it rules here</span></h2>
+  <svg class="wg" viewBox="0 0 64 48" aria-hidden="true"><path d="M32 7 v28 M20 36 h24" stroke="var(--l)" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M14 13 h36" stroke="var(--l)" stroke-width="2" stroke-linecap="round"/><path d="M14 13 l-6.5 13 h13 Z M50 13 l-6.5 13 h13 Z" stroke="var(--l)" stroke-width="1.8" fill="none" stroke-linejoin="round" opacity=".85"/></svg>
   <div class="wl"><b>Thirty-plus years on, the four words are still working — and still being
   fought over.</b> The last wing is the present tense.</div>
   <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
@@ -560,7 +819,7 @@ body.still .beam,body.still #comb polygon{animation-play-state:paused}
   <div class="vn">verify pass: the source uses "headliners" (lowercase, in quotes) for attendees —
   it does not establish capitalized "Headliners" as official branding. Displayed as the ethos it
   documents, not the trademark it doesn't.</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <div class="ex" id="e-tm"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
   <b>The live tension: can four words be property?</b> February 10, 2023 — Insomniac Holdings, LLC
   files US trademark application <b>serial 97790066</b> for the word "PLUR," covering clothing.
   The community's recorded reaction: <i>"That's not very PLUR of them."</i> Frankie Bones — whom
@@ -595,7 +854,7 @@ body.still .beam,body.still #comb polygon{animation-play-state:paused}
   one global tribal village; thirty-year veterans keep re-telling it because the telling <i>is</i>
   the transmission. A museum that pinned it to one version would kill the thing it preserves.
   <div class="src">Frankie Bones, Tumblr ("PLUR", "The Raver's Manifesto"); Vice (2015)</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <div class="ex" id="e-law"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
   <b>And here, PLUR is written law.</b> On this estate the founder — thirty years on the floor —
   ruled the 🎛 raver register's constitution in his own words: <i>"antiracist, voluntarist, hippy
   autistic PLUR vibe."</i> Every raver-register line estate-wide answers to it; machine drafts wear
@@ -612,7 +871,10 @@ body.still .beam,body.still #comb polygon{animation-play-state:paused}
   lore labeled lore with its tellers named — the estate's corpus law applied to cultural memory.
   A museum that labels its lore lies to no one. <span style="color:var(--faint)">Curated 2026-08-21 ·
   the day's research fleet: 12 agents, 225 source fetches · Eivissa annex added 2026-08-22
-  (founder-ordered): 6 agents, 97 source fetches, same gate.</span></div>
+  (founder-ordered): 6 agents, 97 source fetches, same gate · the island showcase rebuilt
+  2026-08-22 (founder-ordered): Spanish door + molecule + cannabis &amp; hemp lanes, 24 claims
+  with 9 adversarial verdicts, composed from the two paid payloads — nobody re-paid for the
+  digging.</span></div>
 </section>
 </main>
 <footer>
@@ -653,6 +915,17 @@ document.querySelectorAll('.beads').forEach(function(b,wi){
   for(var i=0;i<14;i++){ var d=document.createElement('i');
     d.style.background=COLS[(wi*5+i*3)%6]; b.appendChild(d); }
 });
+/* the era ribbon — a map, not a corridor: click what calls to you */
+document.querySelectorAll('.rib .cell').forEach(function(b){
+  b.addEventListener('click',function(){
+    var t=document.getElementById(b.getAttribute('data-go'));
+    if(!t) return;
+    var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    t.setAttribute('tabindex','-1');
+    t.focus({preventScroll:true});
+    t.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});
+  });
+});
 /* two soft beams behind everything */
 var rig=document.querySelector('.rig');
 if(rig){ for(var i=0;i<3;i++){ var bm=document.createElement('i'); bm.className='beam';
@@ -663,5 +936,5 @@ document.addEventListener('visibilitychange',function(){
   document.body.classList.toggle('still',document.hidden); });
 })();
 </script>
-<script src="tour.js?v=18"></script>
+<script src="tour.js?v=19"></script>
 </body></html>

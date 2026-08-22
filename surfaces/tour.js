@@ -16,7 +16,7 @@
     '—',
     ['keys','onboarding/'],['receive','onboarding/receive.html'],['dids','keys/addresses.html'],['recover','recover.html'],['hw','hardware/'],
     '—',
-    ['🎓','university/'],['🐝','bqueenbee-live.html'],['🎧','listening.html'],['⬡','bfood.html'],['🏛','bsymposium.html'],['⚙','stack.html'],['🐜','bantfarm.html'],['♫','bset.html'],['🪩','plur.html'],['🎨','buzz-studio.html']];
+    ['🎓','university/'],['🐝','bqueenbee-live.html'],['🎧','listening.html'],['⬡','bfood.html'],['🏛','bsymposium.html'],['⚙','stack.html'],['🐜','bantfarm.html'],['♫','bset.html'],['🪩','plur.html'],['🎪','festival/'],['🎨','buzz-studio.html']];
   var b=document.createElement('nav');b.id='tbar';
   b.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:9998;display:flex;flex-wrap:nowrap;overflow-x:auto;gap:0 8px;padding:6px 12px;background:#111;border-top:1px solid #333;font:11px monospace;-webkit-overflow-scrolling:touch;scrollbar-width:none;white-space:nowrap;max-height:40px;box-sizing:border-box';
   b.innerHTML=L.map(function(x){
@@ -52,7 +52,7 @@
   /* the language toggle (every corpus-docked tongue, corpus-law honest) rides every page — see lang.js */
   if(!document.getElementById('blangctl')){
     var s2=document.createElement('script');
-    s2.src=R+'lang.js?v=9';
+    s2.src=R+'lang.js?v=10';
     document.body.appendChild(s2);
   }
 })();
