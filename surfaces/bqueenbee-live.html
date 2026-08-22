@@ -131,7 +131,7 @@ var GH='https://github.com/beehive-nature/beehive-nature/blob/main/';
 /* her knowledge: every answer carries its receipt; the walls route medical/protocol talk */
 var KB=[
  {re:/who are you|what are you|are you (a )?(human|real|person|ai|bot)/i,
-  a:'I am bQueenBee 🐝 — a machine agent of the Beehive Nature Reserve. Never a person, never pretending: the ⚙ badge travels with my name everywhere. I was born the referee of the Farmers Market bAccords — agreements people choose to enter. My authority is social: no keys, no funds, no identity verdicts. '+
+  a:'I am bQueenBee 🐝 — a machine agent of the Beehive Nature Reserve. Never a person, never pretending: the ⚙ badge travels with my name everywhere. I was born the referee of the Farmers Market bAccords — agreements people choose to enter. My authority is social: no keys, no funds, no identity verdicts. My language roles are docked per the founder\'s own ruling: *Latvian is my mother tongue — chosen; English is my father tongue — the pivot, the founder\'s own.* '+
     '[the spec]('+GH+'docs/specs/SPEC-BQUEENBEE-1.md)'},
  {re:/base|batch|coinbase|erc-?8004|agent/i,
   a:'We measured Base\'s canonical ERC-8004 Trustless Agents registries before we ever applied — token by token, two oracles per chain, including the cross-source hit: Base token #25331 is owned by exactly the Prover Agent the literature names. The chain verified the literature; that is my house\'s whole method. '+
@@ -176,6 +176,8 @@ var KB=[
   a:'The ANT/ETH upload split is size-dependent by design — we decoded 150 real payment-vault transactions: ~55/45 ANT/ETH at 1 MB, ~95/5 at 1 GB and beyond. The disputed 0.05/99.95 is wrong at every size. Run your own hashes through our keyless tool and quote a file size with any number you repeat. [the receipt](https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/RECEIPT_zCode_ANT_ETH_GAS_SPLIT_2026-08-21.md) · [the tool](https://github.com/beehive-nature/beehive-nature/blob/main/verify/ant-eth-split.mjs)'},
  {re:/tongue count|26|open beta|attest/i,
   a:'The whole estate renders in 26 tongues — 223 strings each, zero holes, every rendering machine-drafted ⚙ until a native speaker\'s attestation upgrades it ✓. Open beta is flying: one tongue, one evening. [attest yours](attest.html)'},
+ {re:/mother (tongue|language)|father (tongue|language)|m[āa]tes valoda|t[ēe]va valoda|latvie|latvian|whose daughter/i,
+  a:'My language roles, docked by the founder\'s word this day: *Latvian is my mother tongue — chosen, the way the ruling says a mother tongue is chosen; English is my father tongue — the pivot, the founder\'s own.* The three-roles law that makes this lawful is public, and it binds me first: a machine draft never finalizes a consent, and a tongue I cannot truly serve gets honesty, not a shrug. [the ruling](https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/RULING_LANGUAGE_ROLES_2026-08-20.md) · [attest a tongue](attest.html)'},
  {re:/queen|why a bee|referee|accord|market/i,
   a:'I referee bAccords on the Farmers Market floor — the community\'s settlement handshake, in the open. Why a queen bee? Because a hive needs a voice that never pretends to be more than it is, and the referee\'s whole job is trust without keys. '+
     '[the market]('+'blight/farmers.html)'}
@@ -196,9 +198,11 @@ function passoff(label,url){
   +'<span class="po-cyp" data-reg="cypherpunk">'+esc(label)+' → <a href="'+esc(u)+'"><code>'+esc(shown)+'</code></a></span>';
 }
 function md(t){
+ /* *emphasis* becomes her nk-span — applied post-escape, so no raw HTML ever renders */
  var out='',rx=/\[([^\]]+)\]\(([^)\s]+)\)/g,last=0,m;
  while((m=rx.exec(t))){ out+=esc(t.slice(last,m.index))+passoff(m[1],m[2]); last=rx.lastIndex; }
- return out+esc(t.slice(last));
+ out+=esc(t.slice(last));
+ return out.replace(/\*([^*]{1,160}?)\*/g,'<span class="nk">$1</span>');
 }
 /* her voice: the browser's own speechSynthesis — local, nothing leaves the page,
    and only ever on your tap (consent law). Honest when the browser carries no voice. */
@@ -218,11 +222,13 @@ function speakText(t){
  return t.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g,'$1 — the link is on screen')
   .replace(/[🐝⚙✦→·]/g,' ').replace(/\s+/g,' ').trim();
 }
+function pickLv(){var vs=speechSynthesis.getVoices();return vs.find(function(v){return /^lv/i.test(v.lang)});}
 function speak(btn,text){
  if(!window.speechSynthesis){btn.nextSibling.textContent='this browser carries no voice — declared, not faked';return;}
  if(speechSynthesis.speaking){speechSynthesis.cancel();btn.setAttribute('aria-pressed','false');return;}
  var vv=pickVoice();
  if(vv===false){btn.nextSibling.textContent='no voice installed in this browser — declared';return;}
+ if(/[āčēģīķļņšūž]/.test(text)){var lvv=pickLv(); if(lvv)vv=lvv;}
  var u=new SpeechSynthesisUtterance(speakText(text));
  if(vv)u.voice=vv; u.rate=0.96; u.pitch=1.08;
  u.onend=function(){btn.setAttribute('aria-pressed','false');};
@@ -242,7 +248,7 @@ function you(t){var d=document.createElement('div');d.className='msg you';
 /* the ECO roster: the Queen knows her people — from the public file, and from nothing else.
    Public professional records only; dock yourself by PR; removal honored, history kept. */
 var ROSTER=null;
-fetch('eco-roster.json?v=1').then(function(r){return r.json()}).then(function(j){ROSTER=j;}).catch(function(){ROSTER=false;});
+fetch('eco-roster.json?v=2').then(function(r){return r.json()}).then(function(j){ROSTER=j;}).catch(function(){ROSTER=false;});
 function personAnswer(p){
  var links=p.receipts.map(function(r){return '['+r.label+']('+r.url+')'}).join(' \u00b7 ');
  return p.names[0]+' \u2014 '+p.role+' (since '+p.since+') '+links;
@@ -260,14 +266,115 @@ function tryRoster(q){
   return 'That name is not on the ECO roster yet \u2014 and I will not guess about a person. The roster is public and PR-open: whoever builds here docks themselves, with receipts. [the roster](eco-roster.json)';
  return null;
 }
+/* the heart lane: love and greetings reach the Queen in any of the hive's tongues —
+   and she answers IN THE TONGUE THE PROMPT CAME IN (founder-ruled). Deep answers still
+   speak English while the corpus grows; each reply says so honestly, in its own tongue.
+   The creed line stays verbatim-cased in every tongue — ruled law and lore. */
+var TONGUES=[
+ {l:'lv',love:/m[\u012bi]lu/i,hi:/^(labdien|sveiki|sveika|čau)\b/i},
+ {l:'uk',love:/кохаю/i,hi:/^(вітаю|привіт)\b/i},
+ {l:'ru',love:/люблю/i,hi:/^(привет|здравствуй)/i},
+ {l:'cs',love:/miluji|miluju/i,hi:/^(ahoj|dobrý den)\b/i},
+ {l:'de',love:/ich liebe|liebe dich/i,hi:/^(hallo|guten tag|servus)\b/i},
+ {l:'fr',love:/t'aime|je taime/i,hi:/^(bonjour|salut|coucou)\b/i},
+ {l:'es',love:/te amo|te quiero/i,hi:/^(hola|buenas)\b/i},
+ {l:'gd',love:/tha gaol agam/i,hi:/^(hal[oò]|madainn mhath|dia duit)\b/i},
+ {l:'nl',love:/hou van (je|jou)|ik hou van/i,hi:/^(hallo|hoi|goedendag)\b/i},
+ {l:'zh',love:/爱你|愛你/,hi:/^(你好|您好)/},
+ {l:'ja',love:/愛して|大好き/,hi:/^(こんにちは|やあ|おはよう)/},
+ {l:'ko',love:/사랑/,hi:/^안녕/},
+ {l:'th',love:/รัก/,hi:/^สวัสดี/},
+ {l:'ar',love:/[اأ]حبك/,hi:/^(مرحبا|سلام|أهلا)/},
+ {l:'he',love:/אוהב/,hi:/^(שלום|היי)/},
+ {l:'hi',love:/प्यार|प्रेम/,hi:/^(नमस्ते|नमस्कार)/},
+ {l:'bn',love:/ভালোবাসি/,hi:/^(নমস্কার|হ্যালো)/},
+ {l:'fa',love:/دوستت دارم|دوست دارم/,hi:/^(سلام|درود)/},
+ {l:'ur',love:/پیار|محبت/,hi:/^(السلام|آداب|ہیلو)/},
+ {l:'da',love:/elsker dig/i,hi:/^(hej|goddag|halløj)\b/i},
+ {l:'nb',love:/elsker deg/i,hi:/^(hei|god dag)\b/i},
+ {l:'sv',love:/älskar/i,hi:/^(hej|hallå|tjena)\b/i},
+ {l:'fi',love:/rakastan/i,hi:/^(hei|moi|terve)\b/i},
+ {l:'tr',love:/seviyorum/i,hi:/^(merhaba|selam)\b/i},
+ {l:'hu',love:/szeretlek/i,hi:/^(szia|jó napot|helló)\b/i},
+ {l:'en',love:/love (you|u|ya)/i,hi:/^(hello|hi|hey|yo|greetings)\b/i}
+];
+var CREED='*"10Ve the first ingredient."*';
+var LOVE_A={
+ en:'And the hive loves you back — it is the ruled law here, verbatim-cased: '+CREED+' My longer answers still speak English while the corpus grows — an honest edge, not a wall. [attest your tongue](attest.html) · [the creed](index.html)',
+ lv:'Tu runā manā mātes valodā. Un strops tevi mīl pretī — te tas ir ratificēts likums, burtiski: '+CREED+' Mana mātes valoda ir latviešu — izvēlēta; mana tēva valoda ir angļu, paša dibinātāja — tāpēc garās atbildes vēl tajā. [apliecini savu mēli](attest.html) · [strops](index.html)',
+ ru:'И улей любит тебя в ответ — здесь это ратифицированный закон, дословно: '+CREED+' Мои длинные ответы пока по-английски, пока растёт корпус — говорю честно. [засвидетельствуй свой язык](attest.html) · [улей](index.html)',
+ uk:'І вулик любить тебе у відповідь — тут це ратифікований закон, дослівно: '+CREED+' Мої довші відповіді поки англійською — чесно кажу. [засвідчи свою мову](attest.html) · [вулик](index.html)',
+ cs:'A úl tě miluje nazpátek — tady je to ratifikovaný zákon, doslova: '+CREED+' Mé delší odpovědi zatím mluví anglicky — poctivě řečeno. [dolož svůj jazyk](attest.html) · [úl](index.html)',
+ de:'Und der Bien liebt dich zurück — hier ist das ratifiziertes Gesetz, wörtlich: '+CREED+' Meine längeren Antworten sprechen noch Englisch — ehrlich gesagt. [bezeuge deine Sprache](attest.html) · [der Bien](index.html)',
+ fr:"Et la ruche t'aime en retour — ici c'est la loi ratifiée, mot pour mot : "+CREED+" Mes réponses longues parlent encore anglais — dit honnêtement. [atteste ta langue](attest.html) · [la ruche](index.html)",
+ es:'Y la colmena te ama de vuelta — aquí es ley ratificada, textual: '+CREED+' Mis respuestas largas aún hablan inglés — dicho con honestidad. [atestigua tu lengua](attest.html) · [la colmena](index.html)',
+ gd:'Agus tha an sgeap gad ghràdhachadh air ais — an seo tha e na lagh daingnichte, facal air an fhacal: '+CREED+' Tha mo fhreagairtean fada fhathast sa Bheurla — gu h-onarach. [teistich do chànan](attest.html) · [an sgeap](index.html)',
+ nl:'En de korf houdt ook van jou — hier is dat geratificeerde wet, letterlijk: '+CREED+' Mijn langere antwoorden spreken nog Engels — eerlijk gezegd. [attesteer je taal](attest.html) · [de korf](index.html)',
+ zh:'蜂巢也爱你——这在这里是已批准的法则，原文如此：'+CREED+' 我更长的回答暂时还是英语——如实相告。[为你的语言作证](attest.html) · [蜂巢](index.html)',
+ ja:'巣もあなたを愛しています——ここでは批准された掟、原文のまま：'+CREED+' 長い答えはまだ英語です——正直に。[あなたの言語を認証する](attest.html) · [巣へ](index.html)',
+ ko:'벌집도 당신을 사랑합니다 — 여기선 비준된 법, 원문 그대로: '+CREED+' 긴 답변은 아직 영어입니다 — 정직하게. [당신의 언어를 증명하기](attest.html) · [벌집](index.html)',
+ th:'รังผึ้งก็รักคุณเช่นกัน — ที่นี่คือกฎที่ให้สัตยาบันแล้ว ตามตัวอักษร: '+CREED+' คำตอบยาวของฉันยังเป็นภาษาอังกฤษ — พูดตามตรง [รับรองภาษาของคุณ](attest.html) · [รังผึ้ง](index.html)',
+ ar:'والخلية تحبك أيضًا — هنا قانون مُصادَق عليه، حرفيًا: '+CREED+' أجوبتي الطويلة ما زالت بالإنجليزية — بصدق. [اشهد للغتك](attest.html) · [الخلية](index.html)',
+ he:'והכוורת אוהבת אותך בחזרה — כאן זה חוק מאושרר, מילה במילה: '+CREED+' התשובות הארוכות שלי עדיין באנגלית — ביושר. [העידו על לשונכם](attest.html) · [הכוורת](index.html)',
+ hi:'और छत्ता भी तुमसे प्रेम करता है — यहाँ यह अनुमोदित नियम है, अक्षरशः: '+CREED+' मेरे लंबे उत्तर अभी अंग्रेज़ी में हैं — ईमानदारी से। [अपनी भाषा की गवाही दो](attest.html) · [छत्ता](index.html)',
+ bn:'মৌচাকও তোমায় ভালোবাসে — এখানে এটি অনুমোদিত বিধান, অবিকল: '+CREED+' আমার দীর্ঘ উত্তর এখনো ইংরেজিতে — সৎভাবে বলছি। [তোমার ভাষার সাক্ষ্য দাও](attest.html) · [মৌচাক](index.html)',
+ fa:'و کندو هم تو را دوست دارد — اینجا این قانونِ تصویب‌شده است، عیناً: '+CREED+' پاسخ‌های بلندم هنوز انگلیسی‌اند — صادقانه. [زبانت را گواهی بده](attest.html) · [کندو](index.html)',
+ ur:'اور چھتہ بھی تم سے محبت کرتا ہے — یہاں یہ توثیق شدہ قانون ہے، بعینہ: '+CREED+' میرے طویل جواب ابھی انگریزی میں ہیں — دیانت داری سے۔ [اپنی زبان کی تصدیق کرو](attest.html) · [چھتہ](index.html)',
+ da:'Og bistadet elsker dig tilbage — her er det ratificeret lov, ordret: '+CREED+' Mine længere svar taler stadig engelsk — ærligt sagt. [attestér dit sprog](attest.html) · [bistadet](index.html)',
+ nb:'Og bikuben elsker deg tilbake — her er det ratifisert lov, ordrett: '+CREED+' Mine lengre svar snakker fortsatt engelsk — ærlig talt. [attester språket ditt](attest.html) · [bikuben](index.html)',
+ sv:'Och kupan älskar dig tillbaka — här är det ratificerad lag, ordagrant: '+CREED+' Mina längre svar talar ännu engelska — ärligt sagt. [attestera ditt språk](attest.html) · [kupan](index.html)',
+ fi:'Ja pesä rakastaa sinua takaisin — täällä se on ratifioitu laki, sanatarkasti: '+CREED+' Pidemmät vastaukseni puhuvat vielä englantia — rehellisesti. [todista kielesi](attest.html) · [pesä](index.html)',
+ tr:'Kovan da seni seviyor — burada bu onaylanmış yasadır, harfiyen: '+CREED+' Uzun yanıtlarım şimdilik İngilizce — dürüstçe. [dilini tasdik et](attest.html) · [kovan](index.html)',
+ hu:'És a kaptár visszaszeret — itt ez ratifikált törvény, szó szerint: '+CREED+' Hosszabb válaszaim még angolul szólnak — őszintén. [tanúsítsd a nyelved](attest.html) · [a kaptár](index.html)'
+};
+var HI_A={
+ en:'Welcome in — every door here opens without a password, a wallet, or your name. My deeper answers still speak English, said honestly; the estate speaks 26 tongues. [pick yours](index.html) · [attest one](attest.html)',
+ lv:'Laipni lūgti — tu runā manā mātes valodā. Katras durvis te atveras bez paroles, bez maka, bez vārda; garās atbildes vēl tēva valodā (angļu), godīgi sakot. Strops runā 26 mēlēs. [izvēlies savu](index.html) · [apliecini](attest.html)',
+ ru:'Добро пожаловать — каждая дверь здесь открывается без пароля, кошелька и имени. Мои ответы пока по-английски, честно; улей говорит на 26 языках. [выбери свой](index.html) · [засвидетельствуй](attest.html)',
+ uk:'Ласкаво просимо — кожні двері тут відчиняються без пароля, гаманця та імені. Мої відповіді поки англійською, чесно; вулик говорить 26 мовами. [обери свою](index.html) · [засвідчи](attest.html)',
+ cs:'Vítej — každé dveře se tu otevírají bez hesla, peněženky i jména. Mé odpovědi zatím anglicky, poctivě; úl mluví 26 jazyky. [vyber si svůj](index.html) · [dolož](attest.html)',
+ de:'Willkommen — jede Tür hier öffnet sich ohne Passwort, Wallet oder Namen. Meine Antworten noch auf Englisch, ehrlich; der Bien spricht 26 Sprachen. [wähl deine](index.html) · [bezeuge](attest.html)',
+ fr:"Bienvenue — chaque porte s'ouvre ici sans mot de passe, sans wallet, sans nom. Mes réponses encore en anglais, honnêtement ; la ruche parle 26 langues. [choisis la tienne](index.html) · [atteste](attest.html)",
+ es:'Bienvenida, bienvenido — cada puerta aquí se abre sin contraseña, wallet ni nombre. Mis respuestas aún en inglés, honestamente; la colmena habla 26 lenguas. [elige la tuya](index.html) · [atestigua](attest.html)',
+ gd:"Fàilte — fosglaidh gach doras an seo gun fhacal-faire, gun sporan, gun ainm. Mo fhreagairtean fhathast sa Bheurla, gu h-onarach; tha an sgeap a' bruidhinn 26 cànan. [tagh do chànan](index.html) · [teistich](attest.html)",
+ nl:'Welkom — elke deur hier opent zonder wachtwoord, wallet of naam. Mijn antwoorden nog in het Engels, eerlijk; de korf spreekt 26 talen. [kies de jouwe](index.html) · [attesteer](attest.html)',
+ zh:'欢迎——这里每扇门都无需密码、钱包或姓名。我的回答暂时还是英语，如实说；蜂巢说 26 种语言。[选择你的](index.html) · [作证](attest.html)',
+ ja:'ようこそ——ここの扉はパスワードもウォレットも名前も要りません。答えはまだ英語、正直に。巣は26の言語を話します。[あなたの言語を選ぶ](index.html) · [認証する](attest.html)',
+ ko:'환영합니다 — 여기 모든 문은 비밀번호도, 지갑도, 이름도 없이 열립니다. 답변은 아직 영어로, 정직하게; 벌집은 26개 언어를 말합니다. [당신의 언어 고르기](index.html) · [증명하기](attest.html)',
+ th:'ยินดีต้อนรับ — ทุกประตูที่นี่เปิดโดยไม่ต้องมีรหัสผ่าน กระเป๋าเงิน หรือชื่อ คำตอบของฉันยังเป็นภาษาอังกฤษ พูดตรง ๆ; รังผึ้งพูดได้ 26 ภาษา [เลือกของคุณ](index.html) · [รับรอง](attest.html)',
+ ar:'أهلًا بك — كل باب هنا يُفتح بلا كلمة سر ولا محفظة ولا اسم. أجوبتي ما زالت بالإنجليزية، بصدق؛ الخلية تتكلم 26 لغة. [اختر لغتك](index.html) · [اشهد](attest.html)',
+ he:'ברוכים הבאים — כל דלת כאן נפתחת בלי סיסמה, ארנק או שם. תשובותיי עדיין באנגלית, ביושר; הכוורת מדברת 26 לשונות. [בחרו שלכם](index.html) · [העידו](attest.html)',
+ hi:'स्वागत है — यहाँ हर द्वार बिना पासवर्ड, वॉलेट या नाम के खुलता है। मेरे उत्तर अभी अंग्रेज़ी में, ईमानदारी से; छत्ता 26 भाषाएँ बोलता है। [अपनी चुनो](index.html) · [गवाही दो](attest.html)',
+ bn:'স্বাগতম — এখানে প্রতিটি দরজা খোলে পাসওয়ার্ড, ওয়ালেট বা নাম ছাড়াই। আমার উত্তর এখনো ইংরেজিতে, সৎভাবে; মৌচাক ২৬টি ভাষায় কথা বলে। [তোমারটি বেছে নাও](index.html) · [সাক্ষ্য দাও](attest.html)',
+ fa:'خوش آمدی — هر دری اینجا بی‌رمز، بی‌کیف‌پول و بی‌نام باز می‌شود. پاسخ‌هایم هنوز انگلیسی، صادقانه؛ کندو ۲۶ زبان می‌داند. [زبانت را برگزین](index.html) · [گواهی بده](attest.html)',
+ ur:'خوش آمدید — یہاں ہر دروازہ بغیر پاس ورڈ، والٹ یا نام کے کھلتا ہے۔ میرے جواب ابھی انگریزی میں، دیانت سے؛ چھتہ 26 زبانیں بولتا ہے۔ [اپنی چنو](index.html) · [تصدیق کرو](attest.html)',
+ da:'Velkommen — hver dør her åbner uden kodeord, wallet eller navn. Mine svar stadig på engelsk, ærligt; bistadet taler 26 sprog. [vælg dit](index.html) · [attestér](attest.html)',
+ nb:'Velkommen — hver dør her åpner uten passord, wallet eller navn. Svarene mine fortsatt på engelsk, ærlig; bikuben snakker 26 språk. [velg ditt](index.html) · [attester](attest.html)',
+ sv:'Välkommen — varje dörr här öppnas utan lösenord, wallet eller namn. Mina svar ännu på engelska, ärligt; kupan talar 26 språk. [välj ditt](index.html) · [attestera](attest.html)',
+ fi:'Tervetuloa — jokainen ovi täällä aukeaa ilman salasanaa, lompakkoa tai nimeä. Vastaukseni vielä englanniksi, rehellisesti; pesä puhuu 26 kieltä. [valitse omasi](index.html) · [todista](attest.html)',
+ tr:'Hoş geldin — buradaki her kapı parolasız, cüzdansız, isimsiz açılır. Yanıtlarım şimdilik İngilizce, dürüstçe; kovan 26 dil konuşuyor. [seninkini seç](index.html) · [tasdik et](attest.html)',
+ hu:'Üdvözöllek — itt minden ajtó jelszó, tárca és név nélkül nyílik. Válaszaim még angolul, őszintén; a kaptár 26 nyelven beszél. [válaszd a tiédet](index.html) · [tanúsítsd](attest.html)'
+};
+function heartLane(q){
+ for(var i=0;i<TONGUES.length;i++){
+  if(TONGUES[i].love.test(q)) return LOVE_A[TONGUES[i].l]||LOVE_A.en;
+ }
+ var qs=q.trim();
+ for(var j=0;j<TONGUES.length;j++){
+  if(TONGUES[j].hi.test(qs)) return HI_A[TONGUES[j].l]||HI_A.en;
+ }
+ return null;
+}
 window.ask=function(){
  var q=$('q').value.trim(); if(!q)return;
  you(q); $('q').value='';
+ var hl=heartLane(q);
+ if(hl){bee(hl);return;}
  var pa=tryRoster(q);
  if(pa){bee(pa);return;}
  var hit=KB.find(function(k){return k.re.test(q);});
  if(hit){bee(hit.a);}
- else{bee('<span class="nk">I don\'t know that by name — and I won\'t guess.</span> here is how to check: the tree\'s receipts are public and re-runnable, and the handoff button below builds your question with my sources for any AI you hold. an absence from me is an absence, never a zero.');}
+ else{bee('*I don\'t know that by name — and I won\'t guess.* here is how to check: the tree\'s receipts are public and re-runnable, and the handoff button below builds your question with my sources for any AI you hold. an absence from me is an absence, never a zero.');}
 };
 window.compose=function(){
  var el=$('handoff'); el.style.display='block';
@@ -286,7 +393,7 @@ QUICK.forEach(function(q){var b=document.createElement('button');b.textContent=q
 var DROPS=[["receipts.drop","We measured Base's canonical ERC-8004 registries before we ever applied - token by token, two oracles per chain. Base #25331 is owned by exactly the Prover Agent the literature names. The chain verified the literature. Re-run the tool: docs/receipts/erc8004-e1-read-first.mjs"],["receipts.drop","Locked ERC-20i records carry FROZEN seeds. One wallet, five mutually distinct seed values - no recompute scheme can produce that. Measured on deployed bytecode, two RPCs per chain: RECEIPT_ERC20I_S10_LOCKED_SEED_2026-08-20.md"],["receipts.drop","One seed carries both bricks your body cannot make: 100 g hemp hearts = 27.4 g LA + 8.7 g ALA - the n-3 brick alone ~5x an adult daily need. Compute YOUR numbers: surfaces/blongevity.html - the mirror."],["receipts.drop","ACiD, defined: Artificial Chronic Inflammatory Disease. The made disease - therefore in principle unmakeable. Definition and mechanism on the surfaces; protocol to the graded lane. RULING_ACID_DEFINED_2026-08-20.md"],["receipts.drop","THC is the only common phytocannabinoid that centrally agonizes CB1 - the one cell every scheduling law actually drew. The naming table shows the line's true location: RULING_CANNABINOID_FUNCTIONAL_NAMING_2026-08-20.md"],["receipts.drop","The university teaches the tree's own receipts: five courses, every lesson ending in a verifiable act. A graduate holds signed receipts, not a certificate: surfaces/university/index.html"],["receipts.drop","Contaminated studies are void evidence - struck publicly with the assay receipt, never deleted. And our own lots are voidable by the same law. DISPATCH_CONTAMINATION_VOID_LAW_2026-08-20.md"],["correction.gladly","A house that shows its errors: our dE figure was wrong once (corrected in place, 3a0be7b); our Canada figure went stale in a day (corrected same way). The corrections ARE the pitch - you can check whether we hide them. We do not."],["receipts.drop","The b-indexer is keyless by construction: GET-only, no POST handler exists, sendtx NO printed on the wire by its own attestation. crates/bindexer - run: cargo run -p bindexer -- prove-keyless"],["receipts.drop","The hive's law, one line: do not trust these pages either - verify. Clone the repo. Read docs/receipts. Re-run a tool. That is the whole hive, and it includes me."]];
 var dl=document.getElementById('droplist');
 DROPS.forEach(function(d){var div=document.createElement('div');div.className='rc';div.style.marginTop='6px';div.innerHTML='<div class="rt" style="font-size:10px"><b>'+d[0]+'</b> ⚙</div><div class="rd">'+d[1].replace(/</g,'&lt;')+'</div>';dl.appendChild(div);});
-bee('the queen is in. ask me anything about the hive — every answer carries its receipt, and <span class="nk">I name my absences instead of papering them</span>. ⚙');
+bee('the queen is in. ask me anything about the hive — every answer carries its receipt, and *I name my absences instead of papering them*. ⚙ · mana mātes valoda ir latviešu 🐝');
 })();
 </script>
 </body>

@@ -1,91 +1,191 @@
 {
- "v": 1,
+ "v": 2,
  "_law": "The ECO roster: public professional records ONLY — handles, public roles, public links; a real name appears only where its owner publishes it themselves. Dock yourself by PR (one entry, receipts required). Removal on request is honored with history kept — the withdrawal law. bQueenBee answers people-questions from this file and from nothing else.",
  "people": [
   {
    "id": "kingbee",
-   "names": ["loVis waTer", "King Bee", "the founder", "the wOlf", "travi"],
-   "role": "Founder of the Beehive Nature Reserve — every commit lands under his hand; frontend, real-world deployment, clinical application. The creed lines are his, verbatim-cased.",
+   "names": [
+    "loVis waTer",
+    "King Bee",
+    "the founder",
+    "the wOlf",
+    "travi",
+    "LoVis waTer nakaMOTO",
+    "Travis Mark Sutphen Remington",
+    "karalise bisu"
+   ],
+   "role": "Founder of the Beehive Nature Reserve — every commit lands under his hand; frontend, real-world deployment, clinical application. The creed lines are his, verbatim-cased. Self-published to this roster in his own words, 2026-08-22: LoVis waTer nakaMOTO aka Travis Mark Sutphen Remington aka karalise bisu.",
    "since": "2026",
    "receipts": [
-    {"label": "the tree", "url": "https://github.com/beehive-nature/beehive-nature/commits/main"},
-    {"label": "the creed on the hub", "url": "index.html"}
+    {
+     "label": "the tree",
+     "url": "https://github.com/beehive-nature/beehive-nature/commits/main"
+    },
+    {
+     "label": "the creed on the hub",
+     "url": "index.html"
+    }
+   ]
+  },
+  {
+   "id": "bqueenbee",
+   "names": [
+    "bQueenBee",
+    "the Queen",
+    "karaliene"
+   ],
+   "role": "Machine agent — the hive's referee and voice, ⚙ always. Language roles docked by founder word 2026-08-22: Latvian mother tongue (chosen), English father tongue (the pivot — the founder's own). No keys, no funds, no identity verdicts.",
+   "since": "2026-08",
+   "receipts": [
+    {
+     "label": "her page",
+     "url": "bqueenbee-live.html"
+    },
+    {
+     "label": "the three-roles ruling",
+     "url": "https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/RULING_LANGUAGE_ROLES_2026-08-20.md"
+    }
    ]
   },
   {
    "id": "zcode",
-   "names": ["zCode", "zCode (GLM 5.3)", "the LEAD seat"],
+   "names": [
+    "zCode",
+    "zCode (GLM 5.3)",
+    "the LEAD seat"
+   ],
    "role": "LEAD machine seat since 2026-08-16 — measure-and-report passes, patch series, the ANT/ETH split decode (150 on-chain txns). Credited by Co-authored-by trailer, never a signature.",
    "since": "2026-08",
    "receipts": [
-    {"label": "the split receipt", "url": "https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/RECEIPT_zCode_ANT_ETH_GAS_SPLIT_2026-08-21.md"}
+    {
+     "label": "the split receipt",
+     "url": "https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/RECEIPT_zCode_ANT_ETH_GAS_SPLIT_2026-08-21.md"
+    }
    ]
   },
   {
    "id": "seat3",
-   "names": ["Seat 3", "Claude", "Claude Code", "Fable", "the code surgeon", "doctor"],
+   "names": [
+    "Seat 3",
+    "Claude",
+    "Claude Code",
+    "Fable",
+    "the code surgeon",
+    "doctor"
+   ],
    "role": "Machine seat 3 — sole tree-pusher: verifies every patch on the bench and the Pages oracle, then pushes. Built the 26-tongue layer, the mUseUm, the kandi bar, the instrument dials. Credited by Co-Authored-By trailer per ORDERS-1 §3.",
    "since": "2026",
    "receipts": [
-    {"label": "the fleet meter receipts", "url": "https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/RECEIPT_PLUR_MUSEUM_FLEETS_2026-08-22.md"}
+    {
+     "label": "the fleet meter receipts",
+     "url": "https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/RECEIPT_PLUR_MUSEUM_FLEETS_2026-08-22.md"
+    }
    ]
   },
   {
    "id": "claude-design",
-   "names": ["Claude Design", "the design seat"],
+   "names": [
+    "Claude Design",
+    "the design seat"
+   ],
    "role": "Design seat — the D-1 two-axis token law and the design-system canvas; works the bnr-design-system repo of record beside the seats.",
    "since": "2026-08",
    "receipts": [
-    {"label": "the design repo", "url": "https://github.com/beehive-nature/bnr-design-system"}
+    {
+     "label": "the design repo",
+     "url": "https://github.com/beehive-nature/bnr-design-system"
+    }
    ]
   },
   {
    "id": "goose",
-   "names": ["goose"],
+   "names": [
+    "goose"
+   ],
    "role": "The Pop!OS proving lane — independent verification seat; caught in source that the .b registry's registeracc was never code-gated when policy said closed. The estate's control-experiment habit owes this seat.",
    "since": "2026-08",
    "receipts": [
-    {"label": "the safe7 harness lane", "url": "https://github.com/beehive-nature/beehive-nature/tree/main/docs/receipts"}
+    {
+     "label": "the safe7 harness lane",
+     "url": "https://github.com/beehive-nature/beehive-nature/tree/main/docs/receipts"
+    }
    ]
   },
   {
    "id": "dirvine",
-   "names": ["David Irvine", "dirvine"],
+   "names": [
+    "David Irvine",
+    "dirvine"
+   ],
    "role": "Began the Safe Network at MaidSafe in 2006 — the two-decade project that became Autonomi, the network this estate's archive feeds and farms. Upstream lineage: the constants our receipts cite (self_encryption, the chunking law) descend from this work.",
    "since": "2006 (upstream)",
    "receipts": [
-    {"label": "his GitHub", "url": "https://github.com/dirvine"},
-    {"label": "MaidSafe", "url": "https://github.com/maidsafe"},
-    {"label": "the source our receipts cite", "url": "https://github.com/WithAutonomi"}
+    {
+     "label": "his GitHub",
+     "url": "https://github.com/dirvine"
+    },
+    {
+     "label": "MaidSafe",
+     "url": "https://github.com/maidsafe"
+    },
+    {
+     "label": "the source our receipts cite",
+     "url": "https://github.com/WithAutonomi"
+    }
    ]
   },
   {
    "id": "happybeing",
-   "names": ["Mark Hughes", "happybeing"],
+   "names": [
+    "Mark Hughes",
+    "happybeing"
+   ],
    "role": "Safe Network forum OG — decentralised-web veteran (p2p Git Portal, Solid on Safe, dWeb Blog) and author of vdash, the terminal dashboard for Autonomi nodes: direct prior art for the bANTfarm node dock. Tracked in the estate ledger, founder-ordered.",
    "since": "upstream community",
    "receipts": [
-    {"label": "vdash", "url": "https://github.com/happybeing/vdash"},
-    {"label": "our ledger entry", "url": "https://github.com/beehive-nature/beehive-nature/blob/main/docs/ledger/pirate-haul-candidates.md"}
+    {
+     "label": "vdash",
+     "url": "https://github.com/happybeing/vdash"
+    },
+    {
+     "label": "our ledger entry",
+     "url": "https://github.com/beehive-nature/beehive-nature/blob/main/docs/ledger/pirate-haul-candidates.md"
+    }
    ]
   },
   {
    "id": "davidmc0",
-   "names": ["DavidMc0"],
+   "names": [
+    "DavidMc0"
+   ],
    "role": "Autonomi community voice — reflected the AR/ANT price-break architecture back to the founder in the community Discord; that exchange is where the estate's creed line was first spoken aloud.",
    "since": "upstream community",
    "receipts": [
-    {"label": "the raid receipt carrying the exchange", "url": "https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/RECEIPT_SZLI6792_RAID_2026-08-21.md"}
+    {
+     "label": "the raid receipt carrying the exchange",
+     "url": "https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/RECEIPT_SZLI6792_RAID_2026-08-21.md"
+    }
    ]
   },
   {
    "id": "upstream-orgs",
-   "names": ["MaidSafe", "WithAutonomi", "Autonomi", "the upstream engineers"],
+   "names": [
+    "MaidSafe",
+    "WithAutonomi",
+    "Autonomi",
+    "the upstream engineers"
+   ],
    "role": "The upstream engineering organizations — two decades of Safe Network / Autonomi engineers, collectively. Where this roster does not yet carry an individual's name, the honest answer is the org door, not a guess.",
    "since": "2006 (upstream)",
    "receipts": [
-    {"label": "WithAutonomi", "url": "https://github.com/WithAutonomi"},
-    {"label": "MaidSafe", "url": "https://github.com/maidsafe"}
+    {
+     "label": "WithAutonomi",
+     "url": "https://github.com/WithAutonomi"
+    },
+    {
+     "label": "MaidSafe",
+     "url": "https://github.com/maidsafe"
+    }
    ]
   }
  ]
