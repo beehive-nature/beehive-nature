@@ -173,22 +173,30 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
 </section>
 
 <section>
-  <h2>🛠 THE FULL WORKSHOP — every lane the registry really has (live ABI, 2026-08-22)</h2>
-  <div class="acts">
-    <div class="act"><span class="an">registeracc</span>(registrant, domain_name, target) —
-      reserve a name, pointing it at <code>target</code>. Fee <b>0.0000</b> today; you carry
-      the RAM (~live cost above), one-time, <b>resellable</b>. Term 365 days.</div>
-    <div class="act"><span class="an">renew</span>(owner, domain_name, days) — extend the term.
-      All current names expire <b>2027-08-01</b> (live read).</div>
-    <div class="act"><span class="an">transfer</span>(from, domain_name, to) — hand a name over,
-      whole and on-chain. The trade lane's settlement primitive: offer → escrow → transfer.</div>
-    <div class="act"><span class="an">setaccount</span>(owner, domain_name, target) — re-point a
-      name to a new account without moving ownership.</div>
-    <div class="act"><span class="an">setchain</span>(owner, domain_name, chain_key, address,
-      addr_type, memo_tag) — today's live shape: a name resolving to an address on any
-      registered chain (the ruled 10B design evolves this into Tier-2 signed resolvers).</div>
-    <div class="act"><span class="an">release</span>(owner, domain_name) — let a name go.
-      cleanup is admin-side; reclamation at scale is a design-doc lane.</div>
+  <h2>🛠 THE FULL WORKSHOP — tap any action to compose it (live ABI, 2026-08-22)</h2>
+  <div class="law">Every card is now an instrument — tap to expand, fill the fields
+  (pre-filled from your connected soul where possible), compose the paste-ready action.
+  You sign it; this page never does.</div>
+  <div class="acts" id="workshop">
+    <div class="act" data-action="registeracc" data-fields="registrant|domain_name|target" data-desc="reserve a name, pointing it at target. Fee 0.0000 today; you carry the RAM (resellable). Term 365 days.">
+      <span class="an">registeracc</span>(registrant, domain_name, target) — tap to compose</div>
+    <div class="act" data-action="renew" data-fields="owner|domain_name|days" data-defaults="|​|365" data-desc="extend the term. All current names expire 2027-08-01.">
+      <span class="an">renew</span>(owner, domain_name, days) — tap to compose</div>
+    <div class="act" data-action="transfer" data-fields="from|domain_name|to" data-desc="hand a name over, whole and on-chain. The trade lane's settlement primitive.">
+      <span class="an">transfer</span>(from, domain_name, to) — tap to compose</div>
+    <div class="act" data-action="setaccount" data-fields="owner|domain_name|target" data-desc="re-point a name to a new account without moving ownership.">
+      <span class="an">setaccount</span>(owner, domain_name, target) — tap to compose</div>
+    <div class="act" data-action="setchain" data-fields="owner|domain_name|chain_key|address|addr_type|memo_tag" data-desc="resolve a name to an address on any registered chain.">
+      <span class="an">setchain</span>(owner, domain_name, chain_key, address, addr_type, memo_tag) — tap to compose</div>
+    <div class="act" data-action="release" data-fields="owner|domain_name" data-desc="let a name go. cleanup is admin-side.">
+      <span class="an">release</span>(owner, domain_name) — tap to compose</div>
+  </div>
+  <div id="composer-zone" style="display:none;margin-top:12px;background:var(--well);border:1px solid var(--gold);border-radius:11px;padding:14px 16px">
+    <div style="font-size:11px;color:var(--gold);margin-bottom:8px" id="cz-title"></div>
+    <div style="color:var(--dim);font-size:10px;margin-bottom:10px" id="cz-desc"></div>
+    <div id="cz-fields" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+    <button class="act" style="margin-top:10px;background:#26123a;color:var(--violet);border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer;font:11px 'IBM Plex Mono',monospace" id="cz-compose">compose the action</button>
+    <pre id="cz-out" style="margin-top:8px"></pre>
   </div>
 </section>
 
@@ -393,6 +401,41 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
   }
   $('go').onclick=function(){ check($('q').value); };
   $('q').addEventListener('keydown',function(e){ if(e.key==='Enter') check($('q').value); });
+
+  /* ── THE WORKSHOP: tap any action card to compose it ── */
+  var czOpen=false, czAction=null;
+  document.querySelectorAll('#workshop .act').forEach(function(card){
+    card.addEventListener('click',function(){
+      var zone=$('composer-zone');
+      czAction=card.dataset.action;
+      $('cz-title').textContent='▸ '+czAction+' — fill the fields, compose the action';
+      $('cz-desc').textContent=card.dataset.desc;
+      var fields=card.dataset.fields.split('|');
+      var fw=$('cz-fields'); fw.innerHTML='';
+      fields.forEach(function(f){
+        var inp=document.createElement('input');
+        inp.placeholder=f; inp.id='cz-'+f; inp.style.cssText='flex:1;min-width:100px;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:7px 9px;font:11px IBM Plex Mono,monospace';
+        if(f==='owner'||f==='registrant'||f==='from'){ inp.value=SOUL||'kingbeelovis'; }
+        if(f==='days'){ inp.value='365'; }
+        fw.appendChild(inp);
+      });
+      zone.style.display='block'; czOpen=true;
+      zone.scrollIntoView({behavior:'smooth',block:'nearest'});
+      $('cz-compose').onclick=function(){
+        var vals={};
+        fields.forEach(function(f){ vals[f]=$('cz-'+f).value.trim(); });
+        var missing=fields.filter(function(f){return !vals[f]});
+        if(missing.length){ $('cz-out').textContent='fill: '+missing.join(', '); return; }
+        $('cz-out').innerHTML='<b>action kingbeelovis::'+czAction+'</b>
+'+
+          JSON.stringify(vals,null,1)+
+          '
+
+# signing: your wallet (the MX-5 gate arms first-party soon) — this page composes, never signs';
+      };
+    });
+  });
+
   $('compose').onclick=function(){
     var n=strip($('cname').value), reg=($('creg').value||'').trim(), tgt=($('ctgt').value||'').trim();
     if(!n||!reg||!tgt){ $('recipe').textContent='— fill name, registrant, and target —'; return; }
