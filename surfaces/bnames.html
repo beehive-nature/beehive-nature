@@ -479,7 +479,7 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
       var n=strip($('q').value);
       var registrant=SOUL||'kingbeelovis';
       var out=$('sign-out'); out.style.display='block';
-      var txData = JSON.stringify({registrant:registrant,domain_name:n,target:registrant},null,2);
+      var txData = JSON.stringify({actions:[{account:"kingbeelovis",name:"registeracc",authorization:[{actor:registrant,permission:"active"}],data:{registrant:registrant,domain_name:n,target:registrant}}]},null,2);
       var cleosCmd = 'cleos -u https://eos.api.eosnation.io push action kingbeelovis registeracc' + String.fromCharCode(10) +
         '  ' + JSON.stringify({registrant:registrant,domain_name:n,target:registrant}) + ' -p ' + registrant;
       out.innerHTML =
