@@ -155,7 +155,7 @@ footer{max-width:940px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   the <b>iron is reimbursed first</b> — the order above; the split is a founder word.
   at reference parameters, the whole-market rental [0,1] reads <b>38,750</b> — the exact
   conformance vector the crate's tests pin (case 1 of the R-2 receipt). set
-  u₀=0, u₁=1, w=0 and see it.</div>
+  u₀=0, u₁=1, w=0 and see it. <span class="badge amber" id="mx1state">REFERENCE VECTORS — MX-1 OPEN (the founder word arms this meter in one line)</span></div>
 </section>
 
 <section>
@@ -216,13 +216,44 @@ footer{max-width:940px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
 </section>
 
 <section>
-  <h2>6 · FOUNDER GATES — open, named, no seat may resolve them</h2>
-  <div class="gate"><b>MX-1</b> — curve parameter VALUES per resource class.<div class="gw">economics; ORDERS-1:61. the mechanism ships parameterized; this page runs reference vectors.</div></div>
-  <div class="gate"><b>MX-2</b> — Q-2: b entering the commodity-metering path.<div class="gw">stays gated; A-first stands (B1).</div></div>
-  <div class="gate"><b>MX-3</b> — voucher identity: bTiMe, workerbee, or a sibling?<div class="gw">one founder word opens it; until then no voucher primitive exists anywhere in this organism.</div></div>
-  <div class="gate"><b>MX-4</b> — egress/bandwidth rates.<div class="gw">UNVERIFIED across every provider; must be pinned before any rate is quoted to anyone.</div></div>
-  <div class="gate"><b>MX-5</b> — the wallet-gate merge point for exchange spend.<div class="gw">the ruled-open WHERE question (366ea1f).</div></div>
-  <div class="gate"><b>MX-6</b> — external-customer onboarding.<div class="gw">accepting any real customer (ant.report first) is founder-hands only.</div></div>
+  <h2>6 · FOUNDER GATES — open, named, and now each with its PREPARED state</h2>
+  <div class="law">A gate is founder-held by law — but "awaiting a word" is not "awaiting
+  work." Everything a seat could prepare <b>is prepared</b>; each row below names what the
+  word arms. One word per gate. Nothing here resolves a gate.</div>
+  <div class="gate"><b>MX-1</b> — curve parameter VALUES per resource class.
+    <div class="gw">economics; ORDERS-1:61 — never a seat's to choose.
+    <b style="color:var(--leaf)">PREPARED:</b> the meter above carries a one-line
+    <code>FOUNDER_VALUES</code> drop-in — the word becomes the live curve in a single edit,
+    chip flips, sliders sync. No code waits to be written.</div></div>
+  <div class="gate"><b>MX-2</b> — Q-2: b entering the commodity-metering path.
+    <div class="gw">stays gated; A-first stands (B1) — and the two-track ruling named the
+    rails: A flows mainnet, b forges Jungle. The fence IS the state; nothing to prepare.</div></div>
+  <div class="gate"><b>MX-3</b> — voucher identity: bTiMe, workerbee, or a sibling?
+    <div class="gw">no voucher primitive exists anywhere in this organism — fence notes in
+    the crates, zero code identifiers. The word opens design, not repair.</div></div>
+  <div class="gate"><b>MX-4</b> — egress/bandwidth rates.
+    <div class="gw">must be pinned before any rate is quoted — still none quoted.
+    <b style="color:var(--leaf)">PREPARED:</b> the obscuration itself is now pinned with
+    evidence (every sampled provider omits/walls/JS-strips egress; the one independent
+    aggregator identified) and the pinning path is named — invoice → aggregator-depth →
+    measurement.
+    <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/RECEIPT_EGRESS_PIN_MX4_2026-08-22.md">the receipt</a>.</div></div>
+  <div class="gate"><b>MX-5</b> — the wallet-gate merge point for exchange spend.
+    <div class="gw">the ruled-open WHERE question (366ea1f).
+    <b style="color:var(--leaf)">PREPARED:</b> four candidates with trade-offs and one
+    recommendation (standalone gate service; relay as first caller) — the word is now a
+    30-second decision.
+    <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/BRIEF_MX5_WALLET_GATE_WHERE_2026-08-22.md">the brief</a>.</div></div>
+  <div class="gate"><b>MX-6</b> — external-customer onboarding.
+    <div class="gw">founder-hands only — and the hands are now a five-minute job.
+    <b style="color:var(--leaf)">PREPARED:</b> the zero-burden ant.report mirror runbook —
+    every step, every constraint honored (his site stays truth, the mirror says so on its
+    face, no analytics, no keys, one message to Shu).
+    <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/KIT_MX6_ANTREPORT_MIRROR_2026-08-22.md">the kit</a>.</div></div>
+  <div class="gate"><b>MX-7</b> — mainnet deployment of any BNR smart contract.
+    <div class="gw">RULED (2026-08-22): Jungle-first, always — b forges on the test chain
+    until the full pass + founder word; the pricing brain already holds both chains'
+    conformance. See the two-track ruling.</div></div>
 </section>
 
 <section>
@@ -255,6 +286,14 @@ footer{max-width:940px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
 <script>
 (function(){
   var $=function(id){return document.getElementById(id)};
+  /* ┌──────────────────────────────────────────────────────────────────────┐
+     │ MX-1 DROP-IN — the founder word lands HERE, one edit, nothing else. │
+     │ Shape: { min: 2500, max: 75000, e: 2.0, watermark: 0.30 }          │
+     │ (values are the founder's economics, ORDERS-1:61 — never a seat's). │
+     │ Non-null ⇒ sliders sync, the chip flips to LIVE, the calculator     │
+     │ carries the founder's curve. Reference vectors ride while null.     │
+     └──────────────────────────────────────────────────────────────────────┘ */
+  var FOUNDER_VALUES = null; /* MX-1 OPEN — reference vectors below */
   function priceAt(u,minP,maxP,e){ if(e===1) return maxP; return minP+(maxP-minP)*Math.pow(u,e-1); }
   function compute(){
     var e=+$('e').value, minP=+$('minp').value, maxP=+$('maxp').value, w=+$('w').value,
@@ -278,6 +317,12 @@ footer{max-width:940px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
     $('pua').textContent=Math.round(pua).toLocaleString('en-US');
   }
   ['e','minp','maxp','w','u0','u1','ua'].forEach(function(id){ $(id).addEventListener('input',compute); });
+  if(FOUNDER_VALUES){
+    $('e').value=FOUNDER_VALUES.e; $('minp').value=FOUNDER_VALUES.min;
+    $('maxp').value=FOUNDER_VALUES.max; $('w').value=FOUNDER_VALUES.watermark;
+    var chip=$('mx1state'); if(chip){ chip.textContent='⚖️ FOUNDER-WORD PARAMETERS LIVE (MX-1 armed)';
+      chip.style.color='var(--gold)'; chip.style.borderColor='var(--gold)'; }
+  }
   compute();
 
   /* ⚡ THE DIVERSION — live dials, session-honest, visitor's browser only.
