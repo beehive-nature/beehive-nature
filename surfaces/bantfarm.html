@@ -114,6 +114,10 @@ code{color:var(--ink)}
   <code>connect.trezor.io</code> — <b>on your gesture only, never at page load</b>. A signing
   surface that hid its bridge would be a wallet asking for blind trust; this one names it before
   you press anything.</div>
+  <div class="law" style="margin-top:8px">🔓 <b>Release the device first:</b> one Trezor, one app
+  at a time — if <b>Trezor Suite</b> or the <b>Autonomi App</b> is open, the bridge will report
+  <i>"used by another application"</i> and the takeover often fails. Close them, then connect.
+  (The founder's first bench run paid for this sentence.)</div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
     <button id="tzconnect">🔌 connect the Trezor (loads Trezor's bridge)</button>
     <select id="tznet" style="background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:8px;font:12px 'IBM Plex Mono',monospace">
@@ -237,10 +241,29 @@ var NETS={
  '421614':{name:'Arbitrum Sepolia',hosts:['https://sepolia-rollup.arbitrum.io/rpc','https://arbitrum-sepolia-rpc.publicnode.com']},
  '42161':{name:'Arbitrum One',hosts:EHOSTS}
 };
-var TZ={ready:false,addr:null};
+var TZ={ready:false,addr:null,inited:false};
 function tzs(msg,src){ $('tzstate').textContent=msg; $('tzstate').classList.remove('nm'); if(src)$('tzsrc').textContent=src; }
+/* the founder's first bench run taught this taxonomy — each known failure gets its remedy,
+   printed at full length (a truncated error cost us the diagnosis once; never again) */
+function remedy(err){
+  var e=String(err&&err.message||err||'');
+  if(/used by another|Inactive device/i.test(e))
+    return 'the device is HELD BY ANOTHER APP — close Trezor Suite (and the Autonomi App), then press connect again';
+  if(/Initialize failed/i.test(e))
+    return 'the bridge could not take the device — close Trezor Suite / the Autonomi App, unplug-replug the Trezor, press again';
+  if(/[Pp]opup closed|window closed/i.test(e))
+    return 'the Trezor window was closed before finishing — press again and complete it';
+  if(/[Pp]ermissions? not granted|Cancelled|cancelled/i.test(e))
+    return 'declined in the Trezor window — a refusal is a normal outcome';
+  return e.slice(0,160);
+}
 async function loadConnect(){
-  if(window.TrezorConnect) return true;
+  if(window.TrezorConnect&&TZ.inited) return true;
+  if(window.TrezorConnect&&!TZ.inited){ /* script loaded earlier but init failed — retry init only */
+    await window.TrezorConnect.init({lazyLoad:true,
+      manifest:{email:'loviswater44@gmail.com',appUrl:'https://beehive-nature.github.io/beehive-nature/surfaces/bantfarm.html'}});
+    TZ.inited=true; return true;
+  }
   tzs('loading Trezor’s bridge…','connect.trezor.io — the disclosed dependency, on your gesture');
   await new Promise(function(ok,bad){
     var s=document.createElement('script');
@@ -251,6 +274,7 @@ async function loadConnect(){
     lazyLoad:true,
     manifest:{email:'loviswater44@gmail.com',appUrl:'https://beehive-nature.github.io/beehive-nature/surfaces/bantfarm.html'}
   });
+  TZ.inited=true;
   return true;
 }
 $('tzconnect').onclick=async function(){
@@ -258,21 +282,32 @@ $('tzconnect').onclick=async function(){
     await loadConnect();
     tzs('bridge up — confirm on the device','the address shows on the Trezor screen first; approve there');
     var r=await window.TrezorConnect.ethereumGetAddress({path:"m/44'/60'/0'/0/0",showOnTrezor:true});
-    if(r.success){ TZ.ready=true; TZ.addr=r.payload.address;
+    var addr=r&&r.success&&r.payload&&r.payload.address;
+    if(typeof addr==='string'&&/^0x[0-9a-fA-F]{40}$/.test(addr)){
+      TZ.ready=true; TZ.addr=addr;
       $('tzaddr').textContent=TZ.addr; $('tzaddr').classList.remove('nm');
       tzs('connected ✓','device confirmed; nothing signed yet');
-    } else tzs('device said no — '+(r.payload&&r.payload.error||'declined'),'a refusal is a normal outcome, recorded honestly');
-  }catch(e){ tzs('bridge failed to load — declared, not hidden', String(e&&e.message||e).slice(0,60)); }
+    } else if(r&&r.success){
+      /* the founder's bench hit exactly this class: success-shaped reply, unusable address —
+         which then fed a non-string into the RPC (the Go unmarshal error). Refused here now. */
+      TZ.ready=false;
+      tzs('bridge replied without a usable address — REFUSED, nothing will be signed',
+        'payload was: '+JSON.stringify(r.payload).slice(0,140));
+    } else tzs('device said no — '+remedy(r&&r.payload&&r.payload.error),'a refusal is a normal outcome, recorded honestly');
+  }catch(e){ tzs('bridge failed — '+remedy(e),'declared, not hidden'); }
 };
 $('tzbench').onclick=async function(){
   if(!TZ.ready){ tzs('connect the device first','the bench signs nothing without it'); return; }
   var chainId=+$('tznet').value, net=NETS[$('tznet').value];
   if(chainId===42161){ tzs('mainnet is AT-2 — founder-gated','the bench runs on Sepolia; mainnet waits for the word'); return; }
+  if(!/^0x[0-9a-fA-F]{40}$/.test(String(TZ.addr))){
+    tzs('the stored address is not a clean 0x string — reconnect first','the RPC never receives a non-string; that lesson is paid for'); return; }
   try{
     async function rpc(m,p){ for(var i=0;i<net.hosts.length;i++){ try{
       var r=await fetch(net.hosts[i],{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({jsonrpc:'2.0',id:1,method:m,params:p})});
-      var j=await r.json(); if(j.result!==undefined) return j.result; if(j.error) throw new Error(j.error.message);
+      var j=await r.json(); if(j.result!==undefined) return j.result;
+      if(j.error) throw new Error(m+' @ '+net.hosts[i].split('//')[1]+': '+j.error.message);
     }catch(e){ if(i===net.hosts.length-1) throw e; } } }
     var nonce=await rpc('eth_getTransactionCount',[TZ.addr,'pending']);
     var gasPrice=await rpc('eth_gasPrice',[]);
@@ -280,15 +315,19 @@ $('tzbench').onclick=async function(){
       gasLimit:'0x186a0', gasPrice:gasPrice };
     tzs('composed — now VERIFY ON THE DEVICE SCREEN','to='+TZ.addr.slice(0,10)+'… value=0 — the screen must match this line');
     var r=await window.TrezorConnect.ethereumSignTransaction({path:"m/44'/60'/0'/0/0",transaction:tx});
-    if(!r.success){ tzs('declined on device — the gate worked',(r.payload&&r.payload.error||'').slice(0,50)); return; }
-    var raw='0x'+(r.payload.serializedTx||'').replace(/^0x/,'');
+    if(!r.success){ tzs('declined on device — the gate worked',remedy(r.payload&&r.payload.error)); return; }
+    var ser=r.payload&&r.payload.serializedTx;
+    if(typeof ser!=='string'||!/^(0x)?[0-9a-fA-F]{20,}$/.test(ser)){
+      tzs('device SIGNED but the bridge returned no serialized tx — nothing sent, declared',
+        'payload keys: '+Object.keys(r.payload||{}).join(',')+' — a v/r/s-only reply needs the RLP fallback; report this line'); return; }
+    var raw='0x'+ser.replace(/^0x/,'');
     var hash=await rpc('eth_sendRawTransaction',[raw]);
     $('tzout').style.display='block';
     $('tzout').textContent='AT-1 BENCH RECEIPT\nnetwork: '+net.name+' (chainId '+chainId+')\nfrom/to (self): '+TZ.addr
       +'\nvalue: 0\ntx: '+hash+'\nexplorer: https://sepolia.arbiscan.io/tx/'+hash
       +'\n\nthe seam is proven: composed by our page, signed inside the device, broadcast keylessly.';
     tzs('AT-1 CLEARED ✓','signed on-device, broadcast; receipt below');
-  }catch(e){ tzs('bench failed — declared', String(e&&e.message||e).slice(0,70)); }
+  }catch(e){ tzs('bench failed — declared', String(e&&e.message||e).slice(0,200)); }
 };
 $('tzdecode').onclick=function(){
   var t=$('tzprep').value.trim(); if(!t){ return; }
