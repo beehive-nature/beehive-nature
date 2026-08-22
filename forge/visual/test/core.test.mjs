@@ -14,6 +14,7 @@ const starters = [
   '../../../surfaces/forge/hexfield.html',
   '../../../surfaces/forge/orbit.html',
   '../../../surfaces/forge/room.html',
+  '../../../surfaces/forge/huddle.html',
 ].map(p => join(here, p));
 let failed = 0;
 const ok = (name, cond) => {
