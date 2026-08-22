@@ -1,0 +1,511 @@
+<!doctype html>
+<!-- BNR surface: the PLUR mUseUm — founder-ordered 2026-08-21 ("add in the PLUR Lore
+     and that will be our next mUseUm"). Every exhibit below is either a cited RECORD
+     or lore honestly labeled LORE; where the adversarial verify pass corrected a
+     popular telling, the correction is DISPLAYED, not hidden. Research: 6-wing fleet
+     + verify (wf_b7e9b43f-ff5, 12 agents, 900k tokens), 2026-08-21. -->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>the PLUR mUseUm — peace · love · unity · respect, receipted</title>
+<style>
+:root{--bg:#0a0612;--panel:#120b1d;--well:#0d0816;--line:#2a1f3d;--ink:#ece5f7;--dim:#9d92b3;--faint:#6b6180;
+ --p:#39c5cf;--l:#D655BB;--u:#e6b32e;--r:#a78bfa;--ok:#7ddf8f;--amber:#ffb347;--cyan:#45C2DC}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{overflow-x:hidden}
+body{background:var(--bg);color:var(--ink);font:13.5px/1.7 'IBM Plex Mono',ui-monospace,monospace;padding:28px 14px 90px}
+main{max-width:900px;margin:0 auto;position:relative;z-index:1}
+a{color:var(--cyan)}
+header{text-align:center;margin-bottom:6px}
+h1{font-size:clamp(21px,5.5vw,30px);font-weight:400;letter-spacing:.05em;
+ text-shadow:0 0 24px rgba(167,139,250,.5)}
+h1 .P{color:var(--p)}h1 .L{color:var(--l)}h1 .U{color:var(--u)}h1 .R{color:var(--r)}
+.four{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:10px;font-size:12px;letter-spacing:.12em}
+.four span{padding:2px 10px;border:1px solid var(--line);border-radius:99px}
+.four .fp{color:var(--p)}.four .fl{color:var(--l)}.four .fu{color:var(--u)}.four .fr{color:var(--r)}
+.sub{color:var(--dim);font-size:11.5px;margin:12px auto 0;max-width:680px;line-height:1.85}
+.combwrap{text-align:center;margin:16px 0 4px}
+.combwrap svg{width:min(300px,74vw);height:auto;filter:drop-shadow(0 0 12px rgba(167,139,250,.28))}
+#comb polygon{stroke:#0a0612;stroke-width:1;opacity:.3;animation:cp var(--d,3s) ease-in-out var(--dl,0s) infinite alternate}
+@keyframes cp{from{opacity:.22}to{opacity:.95}}
+section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 17px;margin-top:16px}
+h2{font-size:12px;font-weight:400;letter-spacing:.08em;margin-bottom:4px}
+.w1 h2{color:var(--p)}.w2 h2{color:var(--l)}.w3 h2{color:var(--u)}.w4 h2{color:var(--r)}.w5 h2{color:var(--p)}.w6 h2{color:var(--l)}
+.wl{color:var(--dim);font-size:10.5px;line-height:1.85;margin-bottom:8px}
+.wl b{color:var(--ink)}
+.beads{display:flex;gap:7px;justify-content:center;margin:14px 0 0}
+.beads i{width:9px;height:9px;border-radius:50%;display:block;opacity:.85}
+.ex{background:var(--well);border:1px solid var(--line);border-radius:9px;padding:10px 12px;margin-top:9px;font-size:11px;line-height:1.75;color:var(--dim)}
+.ex b{color:var(--ink)}
+.w1 .ex{border-left:3px solid var(--p)}.w2 .ex{border-left:3px solid var(--l)}
+.w3 .ex{border-left:3px solid var(--u)}.w4 .ex{border-left:3px solid var(--r)}
+.w5 .ex{border-left:3px solid var(--p)}.w6 .ex{border-left:3px solid var(--l)}
+.kb{display:inline-block;font-size:8.5px;letter-spacing:.08em;border-radius:5px;padding:1px 7px;margin-bottom:5px;vertical-align:middle}
+.kb.rec{background:#12331f;color:var(--ok);border:1px solid #1d4a2a}
+.kb.lor{background:transparent;color:var(--amber);border:1px dashed #5c4318}
+.q{border-left:2px solid var(--faint);padding:2px 0 2px 10px;margin:6px 0;color:var(--ink);font-style:italic}
+.src{font-size:9px;color:var(--faint);margin-top:5px;line-height:1.6}
+.vn{font-size:9px;color:var(--amber);margin-top:4px;line-height:1.6}
+.vn::before{content:'⚖ '}
+.hand{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:9px}
+.hs{background:var(--well);border:1px solid var(--line);border-radius:9px;padding:8px;text-align:center}
+.hs svg{width:64px;height:64px}
+.hs .t{font-size:9.5px;letter-spacing:.08em;margin-top:3px}
+.hs:nth-child(1) .t{color:var(--p)}.hs:nth-child(2) .t{color:var(--l)}
+.hs:nth-child(3) .t{color:var(--u)}.hs:nth-child(4) .t{color:var(--r)}
+footer{max-width:900px;margin:24px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2;position:relative;z-index:1}
+code{color:var(--ink)}
+.rig{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.beam{position:absolute;top:-25%;width:2px;height:150%;opacity:.08;
+ background:linear-gradient(to bottom,transparent,var(--c),transparent);
+ transform-origin:50% 0;animation:sway 12s ease-in-out infinite alternate}
+@keyframes sway{from{transform:rotate(-12deg)}to{transform:rotate(12deg)}}
+@media (prefers-reduced-motion:reduce){.beam,#comb polygon{animation:none}#comb polygon{opacity:.6}}
+body.still .beam,body.still #comb polygon{animation-play-state:paused}
+</style></head><body>
+<div class="rig" aria-hidden="true"></div>
+<main>
+<header>
+  <h1>🪩 the <span class="P">P</span><span class="L">L</span><span class="U">U</span><span class="R">R</span> mUseUm</h1>
+  <div class="four" aria-hidden="true"><span class="fp">PEACE</span><span class="fl">LOVE</span><span class="fu">UNITY</span><span class="fr">RESPECT</span></div>
+  <div class="sub"><span data-i18n="plur.sub">a museum of the four words — every exhibit is either a cited RECORD or lore honestly labeled LORE</span></div>
+  <div class="sub" data-reg="bee">Welcome in. This is the story of four words that keep half a million
+  strangers safe in a field for three days. Some of it is documented — those exhibits carry a green
+  RECORD badge and a source you can click. Some of it lives the way culture actually lives, told
+  and retold — those wear an amber LORE badge, and telling you which is which is how this museum
+  respects you.</div>
+  <div class="sub" data-reg="raver">thirty years of floor wisdom, receipted. the word, the roots,
+  the law they wrote against our beats, the handshake, the sensory floor, the living creed — six
+  wings, every kernel labeled record or lore, nothing prettier than the truth. this is your house.</div>
+  <div class="sub" data-reg="cypherpunk">Method: a six-wing research fleet with an adversarial
+  verify pass (every load-bearing claim re-fetched at its source; corrections are displayed in
+  amber ⚖ lines, not silently patched). Primary archives where they exist — legislation.gov.uk
+  enacted text, hyperreal.org via Wayback, municipal landmark records, court records as reported.
+  A claim without a source does not enter; a telling with variants enters as LORE with its
+  tellers named. The corpus law of this estate applied to cultural memory.</div>
+  <div class="combwrap" aria-hidden="true"><svg id="comb" viewBox="0 0 340 310"></svg></div>
+</header>
+
+<section class="w1">
+  <h2>Ⅰ · <span data-i18n="plur.w1">WING I · THE WORD — where PLUR was born</span></h2>
+  <div class="wl"><b>The legend says one DJ shouted it into being. The archive says it took a
+  train car, two coasts, a booklet, a mailing list, and a threat.</b> Both are in this wing —
+  labeled.</div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>July 4, 1990 — the three words appear.</b> Adam X — Frankie Bones' brother — paints
+  <b>"Peace Love Unity"</b> on a train car. The earliest reported physical appearance of the slogan
+  in the scene; the artifact itself does not survive. Bones himself calls 1990–1993 the
+  <i>"Peace Love Unity Movement"</i> era — P.L.U.M., no R yet.
+  <div class="src">Vice, "How Frankie Bones' Storm Rave Birthed the PLUR Movement" (Dan Wender, 2015) —
+  <a href="https://www.vice.com/en/article/how-frankie-bones-storm-rave-birthed-the-plur-movement/" rel="noopener">vice.com</a></div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>Storm Rave, Brooklyn: May 11, 1991 → December 12, 1992.</b> The party series that seeded the
+  US rave movement ran about nineteen months and <b>ended before the famous mic moment</b> — a
+  chronology that quietly undercuts every telling that places the fight "at a Storm Rave."
+  <div class="src">Vice (2015), dates as reported — <a href="https://www.vice.com/en/article/how-frankie-bones-storm-rave-birthed-the-plur-movement/" rel="noopener">vice.com</a></div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>The R rode in from San Francisco.</b> Around May 1993, Brian Behlendorf carries Geoff White's
+  booklet <i>Cybertribe Rising</i> — with its essay on the "4 Pillars of the House Community,"
+  one pillar being <b>respect</b> — to the East Coast. At a renegade party in the RFK Stadium
+  parking lot, Washington DC, early June 1993, when Laura LaGassa says "peace/love/unity," he adds:
+  <div class="q">"and don't forget Respect"</div>
+  <div class="src">Laura LaGassa's eyewitness email to NE-Raves, Nov 18 1996, archived on hyperreal.org —
+  <a href="https://web.archive.org/web/20260630024924/http://hyperreal.org/raves/spirit/plur/Origin_of_PLUR.html" rel="noopener">Wayback copy</a>
+  (the live hyperreal path now 404s; the archive is the citable copy)</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>The essay went to a mailing list — not Usenet.</b> LaGassa writes up the four pillars and posts
+  to the <b>NE-Raves mailing list</b> (a University of Maryland listserv), early June 1993 — no
+  acronym attached. The endlessly repeated "Respect was added on alt.rave" is not what the primary
+  account says.
+  <div class="src">The essay survives: <a href="https://web.archive.org/web/20260115233924/http://hyperreal.org/raves/spirit/plur/PLUR.html" rel="noopener">hyperreal.org via Wayback</a></div>
+  <div class="vn">verify pass: this card corrects this museum's own research brief, which had
+  repeated the alt.rave version. The gate caught its own side first.</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>The acronym: a signature.</b> Days later, ne-raver <b>Rishad Quazi</b> signs an email to the
+  list "PLUR." Per LaGassa: <i>"I'm about 99% sure it was Rishad. And if it wasn't Rishad, then it
+  probably was Dan [Freelove]"</i> — even the primary account carries its honest 1%.
+  <div class="q">"It caught on like wildfire"</div>
+  <div class="src">LaGassa email, 1996, hyperreal.org via Wayback (link above)</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>The mic moment, eyewitness version.</b> Late June 1993, a New York party thrown by the old
+  Storm Rave crew during the New Music Seminar. A scuffle between rival gang members. Bones jumps
+  on the turntables:
+  <div class="q">"…show some peace, love and unity right now I'm going to break your faces"</div>
+  <b>No "respect" in the shouted line</b> — and the acronym was already circulating on the list
+  before the shout. The legend runs the causality backwards.
+  <div class="src">LaGassa (she spun at this party), 1996 email, hyperreal.org via Wayback</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>Bones' own telling differs — and that is part of the record.</b> His 2015 essay
+  <i>"Peace Love Unity Revisited"</i> places the break-your-faces night in <b>the Bronx</b>, frames
+  Respect as "the fourth pillar" born of that night's disrespect, and says his June 1993 record
+  already carried "respect" on the label. That pressing, if verified against a physical copy, would
+  be an independently datable artifact — <b>this museum has not verified it</b>, and says so.
+  <div class="src">Frankie Bones, Tumblr, "PEACE LOVE UNITY REVISITED" —
+  <a href="https://www.tumblr.com/frankiebones/128339624913/peace-love-unity-revisited-the-origin-of-plur" rel="noopener">tumblr.com/frankiebones</a> · a record OF his telling, not confirmation of its contents</div></div>
+  <div class="ex"><span class="kb lor" data-i18n="plur.lore">LORE — told as lore</span><br>
+  <b>The canonical legend, earliest archived telling.</b> October 9, 1995: "stevie t," editor of
+  Peace Love Rave Magazine, tells NE-Raves the old-skool story — Bones giving a visionary speech at
+  a Storm Rave, the whole warehouse waving hands in unity, the speech retold until it became PLUR.
+  Beautiful, load-bearing, and told here as what it is: the tribe's own founding myth, already
+  polished by 1995.
+  <div class="src">stevie t via NE-Raves, archived on hyperreal.org's PLUR Origins page (Wayback link above)</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>The kernel this estate keeps:</b> the man who appended the R — Brian Behlendorf — went on to
+  co-create the <b>Apache web server</b>, and hyperreal.org, the archive that preserves PLUR's
+  primary record, is his project. The fourth pillar of the rave and the open web share a hand.
+  Respect, it turns out, ships as infrastructure.
+  <div class="src"><a href="https://en.wikipedia.org/wiki/Brian_Behlendorf" rel="noopener">Wikipedia: Brian Behlendorf</a> (Apache co-founder; creator of hyperreal.org and the sfraves list)</div></div>
+  <div class="beads" aria-hidden="true"></div>
+</section>
+
+<section class="w2">
+  <h2>Ⅱ · <span data-i18n="plur.w2">WING II · THE INHERITANCE — the floor was Black, brown, and queer first</span></h2>
+  <div class="wl"><b>PLUR did not invent the sanctuary floor. It inherited one</b> — built decades
+  earlier by people the outside world would not have. This wing is the deed of inheritance.</div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>Valentine's Day 1970 — "Love Saves the Day."</b> David Mancuso's first Loft party, 647
+  Broadway, NYC: invitation-only, nothing sold, running past legal hours. The invitation's initials
+  wink at LSD while announcing an ethic of universal love.
+  <div class="q">"Once you walked into the Loft you were cut off from the outside world. You got
+  into a timeless, mindless state."</div>
+  <div class="src">Mancuso, quoted in Tim Lawrence, <i>Love Saves the Day</i> (Duke Univ. Press, 2003) —
+  <a href="https://www.timlawrence.info/articles2/2013/7/16/love-saves-the-day-david-mancuso-and-the-loft" rel="noopener">timlawrence.info</a></div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>Privacy was the legal architecture of the sanctuary.</b> Because nothing was sold, the Loft sat
+  outside licensing law — a design consciously drawing on the <b>Harlem rent-party tradition of the
+  1920s</b>. Mancuso described his own mixed crowd as "gay, straight, white, Spanish" — his words.
+  Larry Levan, Frankie Knuckles, and Nicky Siano were shaped on this floor.
+  <div class="src">Lawrence (2003); the crowd description is Mancuso's own interview phrasing</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>Paradise Garage, 84 King Street: Jan 28, 1978 → Sep 26, 1987.</b> Members-only, no alcohol,
+  Larry Levan resident — and per the NYC LGBT Historic Sites Project, it
+  <i>"did not discriminate among its membership based on race, class, or sexual identity."</i>
+  Its model was the Loft's, carried forward — the institutional bridge from 1970 to everything
+  rave inherited.
+  <div class="src"><a href="https://www.nyclgbtsites.org/site/paradise-garage/" rel="noopener">NYC LGBT Historic Sites Project</a>;
+  lineage per Brewster &amp; Broughton, <i>Last Night a DJ Saved My Life</i> (1999)</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>The Warehouse, 206 S. Jefferson St, Chicago — 1977, Frankie Knuckles resident to 1982.</b>
+  A private membership club, Saturday midnight to Sunday noon. Knuckles, 1995, on who the floor
+  sheltered:
+  <div class="q">"predominantly black, predominantly gay… Very soulful and very spiritual."
+  … "For most of the people that went there, it was church for them."</div>
+  <div class="src">Frankie Knuckles 1995 interview, republished by Red Bull Music Academy Daily (2018);
+  building facts per the City of Chicago Landmarks designation report</div>
+  <div class="vn">verify note: the more famous variant — "church for people who have fallen from
+  grace" — is quoted everywhere, but its original interview could not be traced. The verifiable
+  quote is displayed; the famous one is named as unverified.</div></div>
+  <div class="ex"><span class="kb lor" data-i18n="plur.lore">LORE — told as lore</span><br>
+  <b>How "house" got its name — two tellings, side by side.</b> The bin-label telling: Importes
+  Etc. on Printer's Row labeled records "As Heard at The Warehouse," shortened to "House" (told by
+  Chip E. and store veterans; variants exist). And Knuckles' own telling, on the record in 1995: a
+  South Side tavern sign reading <b>"WE PLAY HOUSE MUSIC"</b> — <i>"It's the same stuff that you
+  play at The Warehouse."</i> The museum displays both; the culture never picked one.
+  <div class="src">Importes Etc. oral history; Knuckles 1995 interview (RBMA Daily, 2018)</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>June 2023: the City of Chicago designates 206 S. Jefferson a Chicago Landmark as the
+  birthplace of house music.</b> Official municipal recognition that a Black gay membership club is
+  the origin point of the genre — dedication block party, October 5, 2024.
+  <div class="src">City of Chicago, Dept. of Planning &amp; Development landmark designation (2023)</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>Detroit: the Belleville Three.</b> Juan Atkins, Derrick May, Kevin Saunderson — high-school
+  friends — create techno; the 1988 UK compilation <i>Techno! The New Dance Sound of Detroit</i>
+  fixes the name in public. May, 1988:
+  <div class="q">"The music is just like Detroit, a complete mistake. It's like George Clinton and
+  Kraftwerk are stuck in an elevator with only a sequencer to keep them company."</div>
+  <div class="src">Stuart Cosgrove, "Seventh City Techno," The Face, May 1988; compilation per Discogs.
+  (Sources split on whether the quote first ran in The Face or the liner notes — both are 1988 print.)</div></div>
+  <div class="beads" aria-hidden="true"></div>
+</section>
+
+<section class="w3">
+  <h2>Ⅲ · <span data-i18n="plur.w3">WING III · THE STATE vs THE DANCE — the law that named the music</span></h2>
+  <div class="wl"><b>In 1994 the United Kingdom wrote a genre of music into criminal statute.</b>
+  This wing holds the exact words — and what the culture did next.</div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>The centerpiece. Criminal Justice and Public Order Act 1994, section 63(1)(b), enacted
+  text, verbatim:</b>
+  <div class="q">"music" includes sounds wholly or predominantly characterised by the emission of
+  a succession of repetitive beats</div>
+  Royal Assent November 3, 1994. The only place in UK statute law where a genre of music is
+  effectively defined — written to empower police to shut down raves.
+  <div class="src"><a href="https://www.legislation.gov.uk/ukpga/1994/33/section/63/enacted" rel="noopener">legislation.gov.uk — s.63, enacted</a> · verified verbatim against the statute by this museum's fact-check pass</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>The threshold tightened later.</b> As enacted, s.63 reached open-air gatherings of <b>100+
+  people</b> where amplified music plays at night, "likely to cause serious distress to the
+  inhabitants of the locality." The Anti-social Behaviour Act 2003 cut the number to <b>20</b>.
+  <div class="src">legislation.gov.uk, enacted vs current text</div>
+  <div class="vn">verify pass correction: the cut to 20 applies to England &amp; Wales; the Scottish
+  version of s.63 retains the 100-person threshold.</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>What they were afraid of started in a gym.</b> Shoom — Danny Rampling's weekly all-nighter in
+  a Southwark Street fitness centre, late 1987, straight off the Ibiza/Amnesia trip — ignites UK
+  acid house; 1988–89 becomes the <b>Second Summer of Love</b>, smiley-face emblem and all. By 1989
+  the scene is throwing "orbital" raves around the M25 — Sunrise, Energy, Biology — with meeting
+  points released through BT's Voicebank answerphones, tens of thousands strong.
+  <div class="src">Mixmag Summer of Love retrospectives; Red Bull "The road to rave" (M25); Wikipedia: Shoom / Second Summer of Love / Acid house party</div></div>
+  <div class="ex"><span class="kb lor" data-i18n="plur.lore">LORE — told as lore</span><br>
+  <b>Whose smiley?</b> The best-known telling puts the acid-house smiley on Danny Rampling's Shoom
+  flyers from early 1988; another credits the Bomb the Bass "Beat Dis" sleeve (February 1988). Both
+  artifacts are real and dated; who was <i>first</i> genuinely varies by teller.
+  <div class="src">Scene oral history, retold in Matthew Collin's <i>Altered State</i> and elsewhere</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>Castlemorton Common, May 22–29, 1992.</b> The UK's largest illegal rave — estimates 20,000 to
+  40,000 — after police diverted traveller convoys from the Avon Free Festival. The media storm
+  around it is consistently cited as the direct inspiration for the 1994 Act's rave provisions.
+  Thirteen members of Spiral Tribe were tried for it at Worcester Crown Court in one of the longest,
+  most expensive cases in British legal history — around £4 million. <b>All were acquitted.</b>
+  <div class="src">DJ Mag, "The history of Spiral Tribe"; Wikipedia: Castlemorton Common Festival (attendance varies by source)</div></div>
+  <div class="ex"><span class="kb lor" data-i18n="plur.lore">LORE — told as lore</span><br>
+  <b>The travellers' telling: the police made the festival.</b> Operation Nomad shunted the convoys
+  over the county line, West Mercia stood back, and the first-night TV bulletins were the best
+  advertisement a free party ever had. The diversion and the coverage are documented; "they let it
+  happen" is a framing told differently by ravers, residents, and both police forces.
+  <div class="src">Free-party oral tradition, retold in DJ Mag, Vice, and BBC retrospectives</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>The culture answered in three registers.</b> On the street: the Advance Party alliance and
+  three London "Kill the Bill" demonstrations in 1994, ending in Hyde Park on October 9. On wax:
+  Autechre's <i>Anti EP</i> (Warp, Sept 1994), whose sealed sticker warned two tracks contained
+  repetitive beats — while the third was engineered so that
+  <div class="q">"Flutter has been programmed in such a way that no bars contain identical beats"</div>
+  — protest written in the drum programming itself. And on the road: Spiral Tribe and the sound
+  systems took their rigs to Europe, seeding the <b>teknival</b> movement. The law passed; the
+  dance routed around it.
+  <div class="src">GOV.UK FOI release on the 1994 CJB protests; Anti EP sticker text per Discogs/Warp documentation; DJ Mag Spiral Tribe history</div></div>
+  <div class="beads" aria-hidden="true"></div>
+</section>
+
+<section class="w4">
+  <h2>Ⅳ · <span data-i18n="plur.w4">WING IV · THE RITUAL — kandi, the handshake, respect in practice</span></h2>
+  <div class="wl"><b>A creed you can shake hands with.</b> Four gestures, a bracelet, free water,
+  and the strange history of governments deciding whether care is contraband.</div>
+  <div class="hand" aria-label="the four steps of the PLUR handshake">
+    <div class="hs"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M24 44 L24 22 M32 44 L32 14 M24 30 Q28 26 32 30" stroke="var(--p)" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M40 44 L40 22 M48 44 L48 14 M40 30 Q44 26 48 30" stroke="var(--p)" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".5"/></svg><div class="t">1 · PEACE</div></div>
+    <div class="hs"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 46 C18 36 14 24 22 18 C28 14 32 20 32 24" stroke="var(--l)" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M32 46 C46 36 50 24 42 18 C36 14 32 20 32 24" stroke="var(--l)" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".5"/></svg><div class="t">2 · LOVE</div></div>
+    <div class="hs"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="14" y="26" width="22" height="12" rx="6" stroke="var(--u)" stroke-width="3.5" fill="none"/><rect x="28" y="26" width="22" height="12" rx="6" stroke="var(--u)" stroke-width="3.5" fill="none" opacity=".5"/></svg><div class="t">3 · UNITY</div></div>
+    <div class="hs"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="16" y="27" width="32" height="10" rx="5" stroke="var(--r)" stroke-width="3" fill="none"/><circle cx="22" cy="45" r="3" fill="var(--p)"/><circle cx="30" cy="47" r="3" fill="var(--l)"/><circle cx="38" cy="47" r="3" fill="var(--u)"/><circle cx="46" cy="45" r="3" fill="var(--r)"/></svg><div class="t">4 · RESPECT</div></div>
+  </div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>The handshake, as practiced:</b> peace signs touch fingertip-to-fingertip; two half-hearts
+  join; hands clasp, fingers interlocked; then —
+  <div class="q">"trade your kandi through your interlocked hands, one at a time"</div>
+  Etiquette rides with it: tradeables on the right arm, keepsakes on the left; never ask for a
+  specific piece; never re-trade kandi made <i>for you</i>.
+  <div class="src"><a href="https://iheartraves.com/blogs/post/how-to-trade-kandi-at-a-rave" rel="noopener">iHeartRaves, "How to Trade Kandi at a Rave"</a> — the ritual as codified in-scene</div>
+  <div class="vn">verify pass: the popular "bracelet slid over still-clasped hands" phrasing is not
+  what the source says — the trade goes <i>through</i> the interlocked hands. Corrected on display.</div></div>
+  <div class="ex"><span class="kb lor" data-i18n="plur.lore">LORE — told as lore</span><br>
+  <b>Where the handshake and kandi come from — honestly, nobody has the receipt.</b> No dated
+  primary source fixes the four-step exchange's origin; every credible telling makes it a 2000s
+  codification, learned person-to-person (the USC Digital Folklore Archives collects it from raver
+  informants). Kandi itself is traced in community tellings to 1990s "candy ravers" and the
+  friendship-bracelet exchange. The gestures postdate the 1993 motto by about a decade.
+  <div class="src">USC Digital Folklore Archives, "PLUR Handshake and the Exchanging of Kandi"; scene guides (Freedom Rave Wear, iHeartRaves)</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>Respect-in-practice was raver-built — and it predates the famous names.</b> Toronto's
+  <b>TRIP!</b> (est. 1995): <i>"born … out of a need for appropriate drug and sex information
+  within the Toronto rave scene."</i> Then <b>DanceSafe</b>, founded 1998 by Emanuel Sferios in the
+  SF Bay Area — public drug-checking and volunteer booths stocked with
+  <div class="q">"free condoms, earplugs, water, fact-based drug information, and consent
+  education materials"</div>
+  <div class="src"><a href="https://dancesafe.org/about-us/" rel="noopener">dancesafe.org</a>; <a href="https://www.tripproject.ca/" rel="noopener">tripproject.ca</a> · both founding facts verified</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>PLURR — the fifth letter.</b> A circulating variant adds a second R: <b>Responsibility</b> —
+  to self and community, foregrounding harm reduction. The variant's existence in print is record;
+  every single-origin story for it is lore, credited only to unnamed veteran ravers.
+  <div class="src">Wikipedia "PLUR" (documents the variant); scene guides</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>2001, New Orleans: care prosecuted as contraband.</b> Federal prosecutors used the "crack
+  house" statute against the State Palace Theatre rave promoters — citing <b>bottled water, an
+  air-conditioned chill room, glow sticks, pacifiers and massage tables</b> as evidence of
+  facilitating drug use. The ACLU later got the glowstick/pacifier ban lifted on First Amendment
+  grounds. The exact items this wing calls respect-in-practice were, for a while, evidence.
+  <div class="src">Alternet, "Chemical Warfare: The RAVE Act" (2002); ACLU statements of the period</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>The UK wrote the opposite answer.</b> Home Office "Safer Clubbing" guidance (2002):
+  <div class="q">"It is therefore imperative that there is free and unrestricted, but monitored,
+  access to cold drinking water at all times."</div>
+  By 2010/2014 free potable water on request was a <b>mandatory statutory condition</b> on all
+  alcohol-licensed premises: <i>"The responsible person must ensure that free potable water is
+  provided on request…"</i> The rave-era water fight, ended by statute — in the ravers' favor.
+  <div class="src">Safer Clubbing (Home Office/LDPF, 2002), para 2.20 verified verbatim; Licensing Act 2003 Mandatory Conditions Order 2014, legislation.gov.uk</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>Consent, formalized.</b> The Association of Independent Festivals' "Safer Spaces" charter
+  (2017, relaunched 2022, with Rape Crisis England &amp; Wales, Good Night Out, Safe Gigs for Women,
+  Girls Against, UN Women) defines consent as agreement <i>"by choice … freedom and capacity to
+  make that choice,"</i> revocable at any time, and teaches bystander intervention. Respect,
+  operationalized — the fourth word grew teeth.
+  <div class="src">Association of Independent Festivals, Safer Spaces at Festivals charter</div></div>
+  <div class="beads" aria-hidden="true"></div>
+</section>
+
+<section class="w5">
+  <h2>Ⅴ · <span data-i18n="plur.w5">WING V · THE SENSORY FLOOR — the dance floor as a neurodivergent sanctuary</span></h2>
+  <div class="wl"><b>The founder of this estate calls his own register "hippy autistic PLUR."</b>
+  This wing is why that phrase is coherent — the floor as regulation, belonging, and design law.</div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>Stimming is regulation — per autistic adults themselves.</b> Kapp et al. 2019 (32 autistic
+  adults, via interviews and focus groups):
+  <div class="q">"Autistic adults highlighted the importance of stimming as an adaptive mechanism
+  that helps them to soothe or communicate intense emotions or thoughts"</div>
+  The study's own title carries the point: <i>"People should be allowed to do what they like."</i>
+  <div class="src">Kapp, Steward, Crane, Elliott, Elphick, Pellicano &amp; Russell (2019), <i>Autism</i> — quote verbatim from the abstract</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>The floor, first person.</b> DJ Mag's 2023 accessibility feature documents autistic ravers and
+  researchers: Daryl Okene on the dance floor —
+  <div class="q">"latching onto pieces of freedom in public spaces, where I can usually feel quite
+  socially anxious"</div>
+  — and artist Gus: <i>"To dance without inhibition — as though no one is watching."</i> Dr Cathy
+  Manning's design rule: ask autistic people what would help; that is how changes actually benefit
+  them. Named venues exist: Spectrum at Dalston Superstore, collectives e-numbers and MAD.
+  <div class="src">DJ Mag, "How can we make clubs more accessible to autistic ravers?" (Rihana Osman, Sept 2023)</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>The scene runs neurodivergent-rich.</b> DJ Mag reports an Association For Electronic Music
+  survey: <b>58%</b> of respondents working in electronic music demonstrated a neurodivergent
+  condition (38% clinically diagnosed), against a general-population estimate of 15–20%.
+  <div class="src">DJ Mag, "Why are there so many neurodivergent people in electronic music?" (Harold Heath, Sept 2023) — figures as reported; the survey's raw report was not independently fetched</div></div>
+  <div class="ex"><span class="kb lor" data-i18n="plur.lore">LORE — told as lore</span><br>
+  <b>"A rave is one big stim" — and its honest dissent.</b> The telling (Wrong Planet forum, 2013,
+  user metalab):
+  <div class="q">"It's like an entire social construct designed to revolve around and support
+  extreme hyper sensitivity."</div>
+  The same thread holds the variants that keep this card honest: other autistic users describe
+  raves as overwhelming, and one warns of seizure risk from the lights. The floor is sanctuary
+  <i>for some</i> — the culture's job is making that a choice, not a gamble.
+  <div class="src">wrongplanet.net, "Raves, stimming paradise?" (2013) — named tellers, dissent preserved</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>Sanctuary is being built into the infrastructure.</b> Glastonbury's Sensory Calm Spaces
+  (Bristol charity Diverse UK): first tent 2022, four across the site by 2024 — adjustable
+  lighting, weighted blankets, ear defenders, autism-trained staff. <i>"It gives us somewhere to
+  stop for a minute."</i> In the US, KultureCity (founded 2014) certifies venues Sensory Inclusive,
+  and Live Nation began certifying its venues with them.
+  <div class="src">ITV News West Country (June 2024); ABILITY Magazine on KultureCity × Live Nation</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>The flash laws — where rave lighting meets written design law.</b> WCAG 2.3.1, normative
+  verbatim: <i>"Web pages do not contain anything that flashes more than three times in any one
+  second period…"</i> The UK HSE's club guidance caps strobes at 4 flashes/second (as relayed by
+  the Epilepsy Society); Epilepsy Action places the danger band at 10–25 flashes/second; UK
+  broadcast rules hold the three-flash line. <b>This estate obeys the same law: nothing on these
+  pages flashes faster than 3 Hz</b> — this museum's own comb cycles at 5.2 seconds, and every
+  animation stops for <code>prefers-reduced-motion</code>.
+  <div class="src">W3C WCAG SC 2.3.1 (verbatim); Epilepsy Society / Epilepsy Action guidance (Epilepsy Society page verified via indexed text — direct fetch returns 403, declared honestly); Ofcom/ASA flashing-image rules</div></div>
+  <div class="beads" aria-hidden="true"></div>
+</section>
+
+<section class="w6">
+  <h2>Ⅵ · <span data-i18n="plur.w6">WING VI · THE LIVING LAW — PLUR now, and the register it rules here</span></h2>
+  <div class="wl"><b>Thirty-plus years on, the four words are still working — and still being
+  fought over.</b> The last wing is the present tense.</div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>The attendees are the headliners.</b> Pasquale Rotella's stated ethos, from his underground
+  days to EDC's half-million attendances: the true headliners at a rave are the crowd, not the
+  booked artists — and EDC prints its lineups <b>alphabetically, in equal-sized type</b>, to make
+  the point typographic. Insomniac sets up free kandi-making tables; Rotella collects kandi
+  himself.
+  <div class="src">LA Weekly, "EDC 30" + "Inside the World of the Kandi Kids"</div>
+  <div class="vn">verify pass: the source uses "headliners" (lowercase, in quotes) for attendees —
+  it does not establish capitalized "Headliners" as official branding. Displayed as the ethos it
+  documents, not the trademark it doesn't.</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>The live tension: can four words be property?</b> February 10, 2023 — Insomniac Holdings, LLC
+  files US trademark application <b>serial 97790066</b> for the word "PLUR," covering clothing.
+  The community's recorded reaction: <i>"That's not very PLUR of them."</i> Frankie Bones — whom
+  the coverage credits with <b>popularizing</b> PLUR, not coining it — publicly supported the
+  filing. A Change.org petition, "PLUR is NOT for Sale" (June 15, 2025, Malorie Richards), asks
+  the USPTO to reject it:
+  <div class="q">"PLUR — Peace, Love, Unity, Respect — is not a brand. It's a way of life. …
+  You don't protect it — you restrict it."</div>
+  This museum takes no side; it files the dispute itself as the exhibit. A word born from a
+  mailing-list signature now has lawyers. The floor will decide what it always decides: what
+  people actually say to each other with their hands.
+  <div class="src">USPTO serial 97790066 (filing verified); Stereogum (Apr 2023); Extra Chill (June 2025);
+  <a href="https://www.change.org/p/plur-is-not-for-sale" rel="noopener">change.org petition</a> (verified)</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>The Belgian covenant.</b> Tomorrowland's motto, verbatim and official: <i>"Live Today, Love
+  Tomorrow, Unite Forever"</i> — its attendees the "People of Tomorrow," and its middle clause
+  institutionalized as <b>Love Tomorrow</b>, a standing impact platform with five pillars
+  (Responsibility, Nature, Innovation, Health, Respect) and measurable 2030 targets. An ethos
+  slogan with a budget.
+  <div class="src">Tomorrowland official channels; lovetomorrow.com</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>PLUR crosses oceans.</b> Japan: Osaka raver "Party Fish Yuri" founds PLURNET and explains the
+  four words on national TV after meeting kandi at Ultra Miami 2013. Brazil: <i>"Paz, Amor, União
+  e Respeito"</i> circulates in the scene's own press. South Africa: lifestyle media teaches the
+  kandi code — with this museum's honest note that this documents PLUR's <i>reach</i> into African
+  media, not yet a documented local kandi scene. Still taught at commercial events: Relentless
+  Beats' 2024 "Raver's Code." The four words never needed a passport.
+  <div class="src">iHeartRaves Raver Spotlight (2015); AfterMag Brazil (2022); Briefly.co.za (2025); Relentless Beats (2024)</div></div>
+  <div class="ex"><span class="kb lor" data-i18n="plur.lore">LORE — told as lore</span><br>
+  <b>The founding utterance stays alive precisely because it is lore.</b> Its own originator tells
+  it with shifting dates, boroughs, and wording; the Raver's Manifesto frames the whole culture as
+  one global tribal village; thirty-year veterans keep re-telling it because the telling <i>is</i>
+  the transmission. A museum that pinned it to one version would kill the thing it preserves.
+  <div class="src">Frankie Bones, Tumblr ("PLUR", "The Raver's Manifesto"); Vice (2015)</div></div>
+  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
+  <b>And here, PLUR is written law.</b> On this estate the founder — thirty years on the floor —
+  ruled the 🎛 raver register's constitution in his own words: <i>"antiracist, voluntarist, hippy
+  autistic PLUR vibe."</i> Every raver-register line estate-wide answers to it; machine drafts wear
+  ⚙ until his word upgrades them; and the honesty laws this museum runs on — literal language, no
+  signal prettier than the truth, sensory-safe by measurement — are the autistic clause, kept.
+  The toggle at the bottom of this very page is the exhibit, live.
+  <div class="src"><a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/RAVER-REGISTER-LAW.md" rel="noopener">RAVER-REGISTER-LAW.md</a> — ruled 2026-08-21, in force</div></div>
+  <div class="beads" aria-hidden="true"></div>
+</section>
+
+<section>
+  <div class="wl" style="margin:0"><b>Museum method, in one line:</b> six research wings, every
+  load-bearing record adversarially re-fetched at its source, corrections shown in amber ⚖ lines,
+  lore labeled lore with its tellers named — the estate's corpus law applied to cultural memory.
+  A museum that labels its lore lies to no one. <span style="color:var(--faint)">Curated 2026-08-21 ·
+  the day's research fleet: 12 agents, 225 source fetches.</span></div>
+</section>
+</main>
+<footer>
+  🪩 <span class="P" style="color:var(--p)">P</span><span style="color:var(--l)">L</span><span style="color:var(--u)">U</span><span style="color:var(--r)">R</span> ·
+  reads only, cites always · <a href="hardware/build.html">🔧 the festival proving ground</a> ·
+  <a href="bset.html">♫ for the wOlf</a> ·
+  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/plur.html" rel="noopener">view source</a> ·
+  <a href="index.html" data-i18n="law.hive">← the hive</a>
+</footer>
+<script>
+(function(){
+"use strict";
+/* the comb hero — same deterministic 127-cell geometry the founder ruled highest-impact,
+   in the museum's four PLUR colors + two estate accents; CSS keyframes only, ≤3 Hz law */
+var COLS=['#39c5cf','#D655BB','#e6b32e','#a78bfa','#7ddf8f','#45C2DC'];
+var NS='http://www.w3.org/2000/svg';
+var comb=document.getElementById('comb');
+if(comb){
+  var S=12,cx=170,cy=155,frag=document.createDocumentFragment(),n=0;
+  for(var q=-6;q<=6;q++)for(var r=-6;r<=6;r++){
+    if(Math.abs(q+r)>6)continue;
+    var x=cx+S*1.7320508*(q+r/2), y=cy+S*1.5*r;
+    var ring=Math.max(Math.abs(q),Math.abs(r),Math.abs(q+r));
+    var hsh=(((q+7)*73856093)^((r+7)*19349663))>>>0;
+    var poly=document.createElementNS(NS,'polygon'),v=[];
+    for(var i=0;i<6;i++){var a=Math.PI/180*(60*i-30);
+      v.push((x+(S-1.2)*Math.cos(a)).toFixed(1)+','+(y+(S-1.2)*Math.sin(a)).toFixed(1));}
+    poly.setAttribute('points',v.join(' '));
+    poly.setAttribute('fill',COLS[hsh%6]);
+    poly.style.setProperty('--dl',(ring*.4+((hsh>>>8)%100)/100*1.5).toFixed(2)+'s');
+    poly.style.setProperty('--d',(2.6+((hsh>>>8)%100)/100*2.2).toFixed(2)+'s');
+    frag.appendChild(poly); n++;
+  }
+  comb.appendChild(frag);
+}
+/* kandi bead dividers — one strand per wing, deterministic colors */
+document.querySelectorAll('.beads').forEach(function(b,wi){
+  for(var i=0;i<14;i++){ var d=document.createElement('i');
+    d.style.background=COLS[(wi*5+i*3)%6]; b.appendChild(d); }
+});
+/* two soft beams behind everything */
+var rig=document.querySelector('.rig');
+if(rig){ for(var i=0;i<3;i++){ var bm=document.createElement('i'); bm.className='beam';
+  bm.style.left=(20+i*30)+'%'; bm.style.setProperty('--c',COLS[(i*2)%6]);
+  bm.style.animationDelay=(-i*3.7)+'s'; bm.style.animationDuration=(11+i*2.3)+'s';
+  rig.appendChild(bm); } }
+document.addEventListener('visibilitychange',function(){
+  document.body.classList.toggle('still',document.hidden); });
+})();
+</script>
+<script src="tour.js?v=17"></script>
+</body></html>

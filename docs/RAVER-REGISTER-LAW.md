@@ -43,6 +43,38 @@ what you'd actually shout to say *this is safe*, *this is free*, *everyone's
 in*, *watch the rig*, *mind each other* — and the seats retrofit every raver
 block estate-wide in that vocabulary instead of guessing at it.
 
+## The PLUR Lore (founder-ordered addition, 2026-08-21 — "that will be our next mUseUm")
+
+The lore has a museum: **`surfaces/plur.html` — the PLUR mUseUm**, six wings,
+every exhibit either a cited RECORD or lore honestly labeled LORE, load-bearing
+claims adversarially re-fetched at source before display. The shortest true
+telling, per the primary archive (Laura LaGassa's 1996 NE-Raves email,
+hyperreal.org via Wayback):
+
+- **1990** — Adam X paints *Peace Love Unity* on a train car, July 4; Bones
+  calls 1990–93 the P.L.U.M. era. No R yet.
+- **1993** — the R rides in from San Francisco in Geoff White's *Cybertribe
+  Rising* booklet, carried east by **Brian Behlendorf**, who appends *"and
+  don't forget Respect"* at an RFK-lot renegade in DC; LaGassa posts the four
+  pillars to the **NE-Raves mailing list** (not alt.rave — the popular telling
+  is wrong); **Rishad Quazi** signs an email "PLUR." *"It caught on like
+  wildfire."* The famous Bones mic moment — *"…show some peace, love and unity
+  right now I'm going to break your faces"* — happens **after** the acronym
+  already circulated, and without the R.
+- **The kernel this estate keeps**: the man who added Respect co-created the
+  Apache web server, and the archive preserving PLUR's primary record is his.
+  The fourth pillar and the open web share a hand.
+- The floor PLUR inherited was **Black, brown, and queer first** (the Loft
+  1970 → Paradise Garage → the Warehouse → Detroit); the UK wrote the genre
+  into criminal statute (*"a succession of repetitive beats"*, CJPOA 1994
+  s.63(1)(b)) and the culture routed around it; the ritual (kandi, the
+  four-step handshake, free water, DanceSafe) is respect made operational;
+  and the sensory floor is the autistic clause lived, not argued.
+
+The legend itself — one DJ shouting a creed into being — stays displayed **as
+lore**, because the telling is the transmission. A register drafting raver prose
+should know both: the receipt and the myth, and never dress one as the other.
+
 ## Binding on
 
 Every `data-reg="raver"` block estate-wide, every future raver draft by any
