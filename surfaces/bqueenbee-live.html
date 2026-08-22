@@ -84,7 +84,12 @@ footer{max-width:820px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   <div class="qrow" id="quick"></div>
   <div id="ask">
     <input id="q" placeholder="ask the queen anything about the hive…" aria-label="ask bQueenBee">
+    <button id="micb" onclick="micTap()" title="speak to her — the browser's own speech recognition, nothing leaves this page">🎙️</button>
     <button onclick="ask()">ask</button>
+    <button id="autov" class="vb" aria-pressed="false" onclick="VOICE.auto=!VOICE.auto;this.setAttribute('aria-pressed',VOICE.auto)" title="she speaks her answers aloud when on — using the mic turns this on for the conversation">🔊 auto</button>
+  </div>
+  <div id="tongues" class="law" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;align-items:center">
+    <span style="opacity:.8">her tongues — tap one to speak it to her, answer spoken back:</span>
   </div>
   <div class="law" style="margin-top:10px"><b>when I don't know, I say so by name</b> — and hand you the
   verification path instead of guessing. for deeper questions, the
@@ -172,7 +177,7 @@ var KB=[
   a:'The kandi bar is Wing IV\'s ritual as software: string beads, spell a word, gift it through the four-step handshake — and the floor\'s etiquette is code: what you gift leaves your arm, what was made FOR you never re-trades. Everything lives in your own browser; the string is a checksum, not a signature — kandi trust is floor trust. [the kandi bar](kandi.html)'},
  {re:/festival|attendee|dancer|producer|edm|rave(?!\s+history)/i,
   a:'The festival wing is the estate at proving-ground scale: nine attendee beats, each wiring a rail that already exists — keyless arrival in 26 tongues, the light rig, kandi, live economy dials, a calm tent that stills the whole page on one tap. Producer, Dancer, Sound and Visual artist doors stand as honest gates: open, not built, and saying so. [the festival](festival/index.html)'},
- {re:/ant|eth|gas|upload cost|split|arbitrum|gwei/i,
+  {re:/\bant\b|\beth\b|\bgas\b|upload cost|split|arbitrum|gwei/i,
   a:'The ANT/ETH upload split is size-dependent by design — we decoded 150 real payment-vault transactions: ~55/45 ANT/ETH at 1 MB, ~95/5 at 1 GB and beyond. The disputed 0.05/99.95 is wrong at every size. Independently confirmed 2026-08-22 by ant.report\'s full-genesis walk — two methods, one truth, within a point at every size. Run your own hashes through our keyless tool and quote a file size with any number you repeat. [the receipt](https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/RECEIPT_zCode_ANT_ETH_GAS_SPLIT_2026-08-21.md) · [the tool](https://github.com/beehive-nature/beehive-nature/blob/main/verify/ant-eth-split.mjs)'},
  {re:/tongue count|26|open beta|attest/i,
   a:'The whole estate renders in 26 tongues — 223 strings each, zero holes, every rendering machine-drafted ⚙ until a native speaker\'s attestation upgrades it ✓. Open beta is flying: one tongue, one evening. [attest yours](attest.html)'},
@@ -369,6 +374,36 @@ function heartLane(q){
    2026-08-22 (13 agents + collision scrub). Any tongue's keywords route to the topic;
    ENGLISH IS THE PIVOT — the father tongue doing what the three-roles ruling says it does.
    Deep answers still speak it, honestly. */
+/* answers-in-your-tongue: on any topic hit carrying non-ASCII letters, the fetched
+   answer file serves the asker's own tongue (attributed by per-lang keywords or script),
+   falling back to the father tongue honestly. Lazy: English costs zero fetches. */
+var A18N=null,A18P=null;
+function ensureA18N(){ if(A18P)return A18P;
+  A18P=fetch('qkb-i18n.json?v=1').then(function(r){return r.json()}).then(function(j){A18N=j;return j;}).catch(function(){A18N=false;return false;});
+  return A18P; }
+function attrLang(q){
+ /* scripts attribute first (unambiguous); Latin tongues only via diacritic-bearing
+    keywords — a pure-ASCII word like kandi attributes NOTHING (it belongs to everyone) */
+ if(/[぀-ヿ]/.test(q))return 'ja';
+ if(/[가-힯]/.test(q))return 'ko';
+ if(/[一-鿿]/.test(q))return 'zh';
+ if(/[฀-๿]/.test(q))return 'th';
+ if(/[֐-׿]/.test(q))return 'he';
+ if(/[ऀ-ॿ]/.test(q))return 'hi';
+ if(/[ঀ-৿]/.test(q))return 'bn';
+ if(/[іїєґ]/.test(q))return 'uk';
+ if(/[Ѐ-ӿ]/.test(q))return 'ru';
+ if(/[ٹڈڑںھے]/.test(q))return 'ur';
+ if(/[پچژگ]/.test(q))return 'fa';
+ if(/[؀-ۿ]/.test(q))return 'ar';
+ if(!A18N)return null;
+ for(var lang in A18N.kbl){ var t=A18N.kbl[lang];
+  for(var topic in t){ var kws=t[topic].split('|').filter(function(k){return /[^\x00-\x7F]/.test(k)});
+   if(kws.length){ try{ if(new RegExp(kws.join('|'),'iu').test(q)) return lang; }catch(e){} } } }
+ return null;
+}
+var TOPICQ={base:'base agent registry',hemp:'hemp nutrition',acid:'acid cannabinoid',university:'university courses',verify:'verify receipts',privacy:'data privacy',frozen:'frozen seed',contamination:'contaminated studies',langroles:'language roles',symposium:'maha symposium',indexer:'keyless indexer',referee:'queen referee accord',museum:'plur museum',kandi:'kandi handshake',festival:'festival attendee',cost:'ant eth gas upload cost',tongues:'open beta 26'};
+function topicOfHit(hit){ for(var t in TOPICQ){ if(hit.re.test(TOPICQ[t])) return t; } return null; }
 var KBX=[
  ['base agent registry',/agent|agente|agenten|agentenregister|agentregist|agentregister|agenttirekister|ajan|autonome|aģent|base|basechain|basekjede|basekæde|clàrlann|coinbase|kedjeagent|ketjuagent|onchain|register|registr|tillidsløs|tillitsløs|trustless|àidseant|ügynök|агент|ончейн|реестр|реєстр|מרשם|סוכן|סוכנים|آنچین|ايجنت|ایجنت|ایجنٹ|رجسٹری|رجیستری|وكلاء|وكيل|ออนเชน|เบสเชน|エージェント登録|トラストレス|ベースチェーン|代理注册|去信任|智能体|链上代理|레지스트리|베이스체인|온체인/i],
  ['hemp nutrition',/beathachadh|beslenme|bílkovin|chanvre|cáñamo|eiweiß|eiwit|ernährung|fedtsyre|fehérje|fettsyre|fettsäur|gıda|hampa|hampahjärt|hampehjerter|hamppu|hampun|hennephart|hennepzaad|kaņep|kender|nutri|nutrition|näring|olbaltum|omega|oméga|proteiin|protein|proteine|proteína|proteīn|protéine|pròtain|táplálkozás|výživ|белк|білк|конопл|омега|протеин|протеїн|אומגה|חלבון|קנבוס|תזונה|امگا|اوميغا|اومیگا|بروتين|تغذية|تغذیه|شاهدانه|شاہدانہ|غذائیت|پروتئین|پروٹین|โภชนาการ|โอเมกา|オメガ|タンパク質|ヘンプシード|火麻仁|营养|蛋白质|麻の実|麻籽|단백질|영양|오메가|헴프씨드/i],
@@ -389,6 +424,66 @@ var KBX=[
  ['contributors roster',/bidragsgiv|bidragsyter|bidragyder|bijdrager|colaborador|construy|contributeur|csapat|einnseanair|ekip|entwickler|equipo|fejlesztő|gebouwd|geliştirici|ingenier|ingenieur|ingeniør|ingenjör|ingénieur|insinöör|inženier|inženýr|izstrādā|kadro|kehittäj|komand|medewerker|mitwirkende|mérnök|mühendis|névsor|ontwikkelaar|přispěvatel|sgioba|team|tekij|tiimi|tvůrc|udvikler|utvecklar|utvikler|uzbūvē|vývojář|équipe|инженер|команд|разработчик|розробник|создател|інженер|מהנדס|מפתחים|צוות|תורמים|انجینئر|روسٹر|سازندگان|فريق|مساهم|مشارکت|مطورين|معاونین|مهندس|エンジニア|チーム|团队|工程师|貢献者|贡献者|개발자|기여자|엔지니어|팀원/i],
  ['attest 26 languages',/apliecin|atestig|attest|beta|betaversion|betaverze|béta|bêta|chànanach|daudzvalod|flerspråk|hitelesít|idiomas|kielivalik|lisan|lokalisier|lokalizac|meertalig|mehrsprachig|monikieli|multilingue|nyelvek|taalaanbod|taalkeuze|tasdik|tungemål|tungomål|vícejazyčn|багатомовн|локализаци|локализован|локалізаці|локалізован|многоязычн|мультиязычн|ביתא|לשונות|שפות|بولیاں|بيتا|تجريبية|لغات|لهجه|لہجہ|چندزبانه|کثیراللسانی|گویش|หลายภาษา|オープンベータ|公测|多言語|言語認証|语种|语言认证|다국어|언어지원|오픈베타/i]
 ];
+/* ── the two-way voice lane (finish-lane, 2026-08-22): mic-in rides the browser's own
+   SpeechRecognition; answers speak back in the asker's attributed tongue when a voice
+   exists (honest absence otherwise). Nothing leaves the page: recognition and synthesis
+   are both local browser APIs — the consent law holds (mic tap = consent to converse;
+   the auto-voice toggle is always visible and always yours). ── */
+var VOICE={auto:false,lang:(navigator.language||'en').split(',')[0]};
+var SPEECHLANG={'nl-be':'nl-BE','nb':'nb-NO','zh':'zh-CN'};
+function voiceFor(lang){
+ var vs=window.speechSynthesis?speechSynthesis.getVoices():[];
+ if(!vs.length)return false;
+ var want=(SPEECHLANG[lang]||lang).toLowerCase();
+ var v=vs.find(function(x){return x.lang.toLowerCase().indexOf(want)===0;})
+  ||vs.find(function(x){return x.lang.toLowerCase().indexOf(lang)!==-1;});
+ return v||pickVoice();
+}
+function speakLang(text,lang){
+ if(!window.speechSynthesis||!VOICE.auto)return;
+ var vv=voiceFor(lang);
+ if(vv===false)return;
+ var u=new SpeechSynthesisUtterance(speakText(text));
+ u.voice=vv;u.rate=0.96;u.pitch=1.08;
+ speechSynthesis.cancel();speechSynthesis.speak(u);
+}
+var SR=null,SRon=false;
+function micTap(){
+ var R=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!R){var n=document.createElement('div');n.className='msg bee';
+  n.innerHTML='<div class="who">bQueenBee 🐝 <span class="machine">⚙ machine agent</span></div>this browser carries no speech recognition — declared, not faked. typing still reaches me in every tongue.';
+  $('chat').appendChild(n);return;}
+ if(SRon){SR.stop();return;}
+ SR=new R();SR.lang=SPEECHLANG[VOICE.lang]||VOICE.lang;SR.interimResults=false;
+ SR.onresult=function(e){var t=e.results[0][0].transcript;$('q').value=t;ask();};
+ SR.onend=function(){SRon=false;$('micb').textContent='🎙️';$('micb').setAttribute('aria-pressed','false');};
+ SR.onerror=SR.onend;
+ if(!VOICE.auto){VOICE.auto=true;$('autov').setAttribute('aria-pressed','true');}
+ try{SR.start();SRon=true;$('micb').textContent='🔴';$('micb').setAttribute('aria-pressed','true');}catch(e){}
+}
+function buildTongues(){
+ var host=$('tongues');
+ ensureA18N().then(function(j){
+  if(!j||!j.kbl){host.innerHTML+='<span style="color:#8a9a8a">the tongue corpus is absent here — declared</span>';return;}
+  Object.keys(j.kbl).forEach(function(lang){
+   var kw=null;
+   var topics=j.kbl[lang];
+   var order=['hemp','base','frozen','kandi'];
+   for(var oi=0;oi<order.length&&!kw;oi++){var t=topics[order[oi]];if(!t)continue;
+    var cands=t.split('|').filter(function(k){return /[^\x00-\x7F]/.test(k)});
+    if(cands.length)kw=cands[0];}
+   if(!kw){for(var tp in topics){var c=topics[tp].split('|').filter(function(k){return /[^\x00-\x7F]/.test(k)});
+     if(c.length){kw=c[0];break;}}}
+   if(!kw)return;
+   var b=document.createElement('button');
+   b.className='vb';b.style.opacity='1';b.title=lang+' — tap: sets her ear + a sample ask';
+   b.textContent=lang+' · '+kw;
+   b.onclick=function(){VOICE.lang=lang;$('q').value=kw;ask();};
+   host.appendChild(b);
+  });
+ });
+}
+buildTongues();
 window.ask=function(){
  var q=$('q').value.trim(); if(!q)return;
  you(q); $('q').value='';
@@ -397,8 +492,19 @@ window.ask=function(){
  var pa=tryRoster(q);
  if(pa){bee(pa);return;}
  var hit=KB.find(function(k){return k.re.test(q);});
- if(!hit){ for(var kx=0;kx<KBX.length;kx++){ if(KBX[kx][1].test(q)){ hit=KB.find(function(k){return k.re.test(KBX[kx][0]);}); break; } } }
- if(hit){bee(hit.a);}
+ var xTopic=null;
+ if(!hit){ for(var kx=0;kx<KBX.length;kx++){ if(KBX[kx][1].test(q)){ hit=KB.find(function(k){return k.re.test(KBX[kx][0]);}); xTopic=KBX[kx][0]; break; } } }
+ if(hit){
+   if(/[^\x00-\x7F]/.test(q)){
+     var topic=null; for(var tq in TOPICQ){ if(TOPICQ[tq]===xTopic||hit.re.test(TOPICQ[tq])){ topic=tq; break; } }
+     var enA=hit.a;
+     ensureA18N().then(function(j){
+       var lang=attrLang(q);
+       var tr=j&&lang&&j.answers[lang]&&topic&&j.answers[lang][topic];
+       bee(tr||enA); if(tr)speakLang(tr,lang); else if(VOICE.auto)speakLang(enA,'en');
+     });
+   } else { bee(hit.a); speakLang(hit.a,'en'); }
+ }
  else{bee('*I don\'t know that by name — and I won\'t guess.* here is how to check: the tree\'s receipts are public and re-runnable, and the handoff button below builds your question with my sources for any AI you hold. an absence from me is an absence, never a zero.');}
 };
 window.compose=function(){
