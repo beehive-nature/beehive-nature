@@ -68,7 +68,8 @@ impl Default for BuzzGainParams {
             .with_string_to_value(formatters::s2v_f32_gain_to_db()),
             saturation: FloatParam::new("Saturation", 0.25, FloatRange::Linear { min: 0.0, max: 1.0 })
                 .with_smoother(SmoothingStyle::Linear(20.0))
-                .with_value_to_string(formatters::v2s_f32_percentage(0)),
+                .with_value_to_string(formatters::v2s_f32_percentage(0))
+                .with_string_to_value(formatters::s2v_f32_percentage()),
             trim: FloatParam::new(
                 "Trim",
                 util::db_to_gain(0.0),
