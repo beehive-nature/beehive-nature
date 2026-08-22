@@ -55,4 +55,12 @@
     s2.src=R+'lang.js?v=10';
     document.body.appendChild(s2);
   }
+
+  /* the rails badge — every surface's reassurance line: soul 0x fingerprint +
+     LIVE rails (founder word, 2026-08-22). Rides the tbar like the registers. */
+  if(!document.getElementById('railsbadge')){
+    var s3=document.createElement('script');
+    s3.src=R+'rails-badge.js?v=2';
+    document.body.appendChild(s3);
+  }
 })();
