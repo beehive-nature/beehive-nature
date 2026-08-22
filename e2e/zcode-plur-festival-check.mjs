@@ -80,8 +80,9 @@ ok('festival: 9 beats render', (await page.locator('section.beat').count()) === 
 ok('festival: ribbon cells reach their beats', (await page.$$eval('.rib .cell', els =>
   els.every(e => document.getElementById(e.getAttribute('data-go')) !== null))));
 ok('festival: 127-cell comb rendered', (await page.locator('#comb2 polygon').count()) === 127);
-ok('festival: 4 family gates, honestly labeled', (await page.locator('.gate .gl').count()) === 4
-  && (await page.locator('.fam').innerText()).includes('not built yet'));
+ok('festival: eight family doors — seven gates + the kandi kid room open', (await page.locator('.gate').count()) === 8
+  && (await page.locator('[data-i18n="f.gate"]').count()) === 7
+  && (await page.locator('.fam').innerText()).includes('already open'));
 await page.click('#calm');
 ok('festival: calm button stills the rig', (await page.evaluate(() => document.body.classList.contains('still'))));
 await page.click('#calm');
