@@ -64,7 +64,10 @@ not a claim that settlement is live.
 - **Settlement** is A-first (B1 law): metering deducts from the spender's own balance —
   never an endowment, never a subsidy, never a treasury. Consuming/spending sits behind
   the wallet session per WALLET-GATE LAW; **viewing the exchange is and stays open**
-  per DANGLING-ART.
+  per DANGLING-ART. **PROTOTYPE DENOMINATION RULED (2026-08-22,
+  [[RULING_A_NATIVE_JUNGLE_FIRST_2026-08-22]]): Vaulta's native A token carries every
+  metered unit of the prototype — Q-2/MX-2 unchanged and closed; deployment is
+  JUNGLE-FIRST (gate MX-7).**
 
 ## 4 · The waterfall law (the founder's core order)
 
@@ -102,6 +105,9 @@ adding them is a follow-up lap when that wave lands.
 - **MX-4** egress/bandwidth rates — UNVERIFIED at every provider; never quoted to anyone.
 - **MX-5** the wallet-gate merge point for exchange spend (the ruled-open WHERE question, 366ea1f).
 - **MX-6** external-customer onboarding (ant.report acceptance) — founder-hands only.
+- **MX-7** mainnet deployment of any BNR smart contract — **RULED (2026-08-22): only
+  after the contract is fully built and fully tested on the Jungle testnet** (test bed
+  `banchor22222`, RAM already bought; see [[RULING_A_NATIVE_JUNGLE_FIRST_2026-08-22]]).
 
 ## 7 · Non-goals (hard)
 
