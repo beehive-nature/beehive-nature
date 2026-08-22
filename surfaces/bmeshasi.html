@@ -179,7 +179,44 @@ footer{max-width:940px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
 </section>
 
 <section>
-  <h2>5 · FOUNDER GATES — open, named, no seat may resolve them</h2>
+  <h2>⚡ 5 · THE DIVERSION — his bill dies on our rail; the money becomes chain muscle</h2>
+  <div class="law">The neighbor's oracle pays <b>~$2,543/mo to AWS</b> to keep its panels
+  breathing (his numbers, self-published, credited in our ledger). Our rail needs none of it:
+  static Pages serve for free, <b>every read happens in the visitor's own browser</b>
+  (distribution at zero hive cost — the dangling-art law), and anything stateful docks on
+  community iron (the offer on this board). The same monthly flow, <b>diverted</b>, becomes
+  chain muscle instead of a cloud bill — and per the waterfall, the iron is reimbursed
+  first. This exhibit shows the <b>FLOW, never a price</b>: our rates sit behind gates
+  MX-1/MX-4 until the founder words them. The dials below are live proof the destination
+  chains are real and beating — read from your browser, right now.</div>
+  <div class="wf" id="divertflow">
+    <div class="step first"><b>💸 the bill today</b>~$2,543/mo to a cloud, every month, so
+    strangers can read static panels — plus $2.5k/mo of the builder's life.</div>
+    <div class="arrow">→</div>
+    <div class="step"><b>🪦 the bill on our rail</b>ZERO. static Pages · visitor-own-browser
+    reads · community iron for state (failover mirror — the standing offer).</div>
+    <div class="arrow">→</div>
+    <div class="step first"><b>⛓ the diversion</b>the same flow, re-aimed: <b>vRAM pool</b>
+    for the mesh (admission-scored) · <b>high-speed storage</b> class · <b>DPoS block
+    production</b> readiness on Vaulta · <b>witness operations</b> on Hive.</div>
+  </div>
+  <div class="readout" style="margin-top:12px">
+    <div class="rd"><div class="k">⚓ VAULTA PULSE · head block (live)</div><div class="v" id="vhead">—</div>
+      <div class="s" id="vmeta">get_info · three-host failover · the estate's proven lane</div></div>
+    <div class="rd"><div class="k">🐝 HIVE PULSE · head block (live)</div><div class="v" id="hhead">—</div>
+      <div class="s" id="hmeta">condenser_api · api.hive.blog → api.deathwing.me</div></div>
+    <div class="rd"><div class="k">👑 CURRENT WITNESS (live)</div><div class="v" id="hwit" style="font-size:14px">—</div>
+      <div class="s">the seat the diverted flow would fund our own node to hold</div></div>
+    <div class="rd"><div class="k">🫀 THIS PAGE'S HEARTBEAT</div><div class="v" id="beat">0:00</div>
+      <div class="s" id="beatmeta">session clock · reads <span id="rds">0</span> · last <span id="last">—</span> ·
+      nothing stored, nothing sent — alive in YOUR browser only</div></div>
+  </div>
+  <div class="law" style="margin-top:8px">Honest-fail law, inherited from the bANTfarm: a dead read
+  renders amber and says so — a gap is a gap that really happened; the dials never invent.</div>
+</section>
+
+<section>
+  <h2>6 · FOUNDER GATES — open, named, no seat may resolve them</h2>
   <div class="gate"><b>MX-1</b> — curve parameter VALUES per resource class.<div class="gw">economics; ORDERS-1:61. the mechanism ships parameterized; this page runs reference vectors.</div></div>
   <div class="gate"><b>MX-2</b> — Q-2: b entering the commodity-metering path.<div class="gw">stays gated; A-first stands (B1).</div></div>
   <div class="gate"><b>MX-3</b> — voucher identity: bTiMe, workerbee, or a sibling?<div class="gw">one founder word opens it; until then no voucher primitive exists anywhere in this organism.</div></div>
@@ -189,7 +226,7 @@ footer{max-width:940px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
 </section>
 
 <section>
-  <h2>6 · WHY THE ARMADA WINS — receipts, not adjectives</h2>
+  <h2>7 · WHY THE ARMADA WINS — receipts, not adjectives</h2>
   <div class="rc"><div class="rt">📡 <b>independent rigs converge.</b> our 150-tx on-chain decode and
     ant.report's full-genesis walk matched within ~one point at every size (55/45 → 95/5 by the
     MiB→GiB ladder). two independent measurements, one number.</div>
@@ -242,6 +279,47 @@ footer{max-width:940px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   }
   ['e','minp','maxp','w','u0','u1','ua'].forEach(function(id){ $(id).addEventListener('input',compute); });
   compute();
+
+  /* ⚡ THE DIVERSION — live dials, session-honest, visitor's browser only.
+     Laws inherited from the bANTfarm's cockpit: failover per lane, a dead read
+     goes amber and the line simply breaks — nothing stored, nothing sent,
+     paused while the tab is hidden. */
+  var VH=['https://api.eosn.io','https://eos.api.eosnation.io','https://eos.greymass.com'];
+  var HH=['https://api.hive.blog','https://api.deathwing.me'];
+  var t0=Date.now(), reads=0, lastAt=null;
+  function ago(){ return lastAt? Math.round((Date.now()-lastAt)/1000)+'s ago' : '—'; }
+  function amber(id,on){ var el=$(id); if(el) el.style.color=on?'var(--amber)':''; }
+  function beat(){ var s=Math.round((Date.now()-t0)/1000);
+    $('beat').textContent=Math.floor(s/60)+':'+('0'+(s%60)).slice(-2);
+    $('rds').textContent=reads; $('last').textContent=ago(); }
+  setInterval(beat,1000);
+  function poll(){
+    if(document.visibilityState!=='visible') return;
+    var vi=0;
+    (function vNext(){
+      if(vi>=VH.length){ amber('vhead',true); $('vhead').textContent='read failed — honest gap'; return; }
+      fetch(VH[vi]+'/v1/chain/get_info',{method:'POST',body:'{}'})
+        .then(function(r){ if(!r.ok) throw 0; return r.json(); })
+        .then(function(d){ amber('vhead',false); $('vhead').textContent='#'+d.head_block_num.toLocaleString('en-US');
+          $('vmeta').textContent='get_info · '+(VH[vi].replace('https://',''))+' · live in your browser'; reads++; lastAt=Date.now(); })
+        .catch(function(){ vi++; vNext(); });
+    })();
+    var hi=0;
+    (function hNext(){
+      if(hi>=HH.length){ amber('hhead',true); $('hhead').textContent='read failed — honest gap'; return; }
+      fetch(HH[hi],{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({jsonrpc:'2.0',method:'condenser_api.get_dynamic_global_properties',params:[],id:1})})
+        .then(function(r){ if(!r.ok) throw 0; return r.json(); })
+        .then(function(d){ var g=d.result||{}; amber('hhead',false); amber('hwit',false);
+          $('hhead').textContent='#'+(g.head_block_number||0).toLocaleString('en-US');
+          $('hwit').textContent='@'+(g.current_witness||'—');
+          $('hmeta').textContent='condenser_api · '+(HH[hi].replace('https://',''))+' · live in your browser';
+          reads++; lastAt=Date.now(); })
+        .catch(function(){ hi++; hNext(); });
+    })();
+  }
+  document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible') poll(); });
+  poll(); setInterval(poll,15000);
 })();
 </script>
 <script src="tour.js?v=20"></script>
