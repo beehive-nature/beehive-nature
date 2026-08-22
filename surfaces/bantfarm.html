@@ -103,6 +103,7 @@ code{color:var(--ink)}
     <div class="dial"><div id="dbpm"></div><div class="val nm" id="dbpmv">—</div><div class="lbl">L2 block rate</div><div class="src" id="dbpms">measured this session, never quoted</div></div>
     <div class="dial"><div id="dlib"></div><div class="val nm" id="dlibv">—</div><div class="lbl">Vaulta finality lag</div><div class="src" id="dlibs">head − LIB · get_info · Savanna</div></div>
     <div class="dial nodial"><div class="big nm" id="dnamesv">—</div><div class="lbl">.b names on the registry</div><div class="src" id="dnamess">get_table_rows · kingbeelovis / domains</div></div>
+    <div class="dial nodial"><div class="big nm" id="dncost">—</div><div class="lbl">.b name cost · one-time, live</div><div class="src" id="dncosts">rammarket live · 2,537 B/row receipted · resellable (sellram), no renewals</div></div>
     <div class="dial nodial"><div class="big nm" id="dsesv">—</div><div class="lbl">session samples</div><div class="src" id="dsess">this tab only — nothing stored, nothing sent</div></div>
   </div>
   <div class="sparks">
@@ -240,6 +241,15 @@ code{color:var(--ink)}
   law of the economy, not a preference — and no BNR smart contract reaches mainnet until fully built and
   tested on the Jungle testnet (gate MX-7). This window stays read-only, keyless, exactly as built —
   <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/RULING_A_NATIVE_JUNGLE_FIRST_2026-08-22.md" rel="noopener">the ruling</a>.</div>
+  <div class="design" style="margin-top:8px">💰 <b>THE OPEX DESTROYER — b-indexers + b domain.</b> The indexer lane on this page
+  costs <b>$0/mo</b>: every dial reads public RPCs keylessly from <i>your</i> browser — the visitor is the
+  indexer, the method printed under every needle (14/14 re-run receipt). The domain lane costs
+  <b>one-time RAM, priced live on the panel above</b> (2,537 B per .b row, double-derived and reconciled
+  to the registry's own ram_usage) — perpetual, <b>resellable via sellram</b>, no renewal rails, no
+  registrar servers, no indexer cluster: the chain is the database. The server-way's cost is not
+  hypothetical — a community monitor self-publishes <b>$2,543/mo</b> of AWS to keep its panels alive
+  (credited in our ledger). Same visibility, two economics: theirs bills monthly forever; ours paid
+  once, resellable, and the reading is free forever.</div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
     <input id="vacct" value="kingbeelovis" style="flex:1;min-width:180px;max-width:260px">
     <button id="vgo">read</button>
@@ -579,9 +589,30 @@ async function tickNames(){
   } else { $('dnamesv').innerHTML='<span class="err" style="font-size:12px">fetch failed — declared</span>'; SES.raw['get_table_rows.domains']='FAILED'; }
   rawLane();
 }
+/* 💰 the opex destroyer dial: one .b name's one-time RAM cost, priced by the LIVE
+   rammarket relay (the market modeled in crates/bmesh-ram). Row per name = 2,537 B,
+   double-derived and reconciled to kingbeelovis ram_usage exactly (bdomain-scaling).
+   Parsing derives decimals from the row itself — never assumes precision. */
+async function tickNameCost(){
+  var r=await vpost('/v1/chain/get_table_rows',{json:true,code:'eosio',scope:'eosio',table:'rammarket',limit:1});
+  var row=r&&r.rows&&r.rows[0];
+  if(row&&row.base&&row.quote){
+    function raw(s){ var p=(s||'').trim().split(' ')[0]||'0'; var d=(p.split('.')[1]||'').length;
+      return { v: Math.round(parseFloat(p)*Math.pow(10,d)), d:d }; }
+    var b=raw(row.base.balance), q=raw(row.quote.balance);
+    if(b.v>0&&q.v>0){
+      var costRaw=2537*q.v/b.v, txt=(costRaw/Math.pow(10,q.d)).toFixed(4);
+      $('dncost').textContent=txt; $('dncost').classList.remove('nm');
+      $('dncosts').textContent='rammarket live · '+(row.quote.balance.split(' ')[1]||'core')+' '+(txt)+
+        ' one-time for 2,537 B · resellable (sellram) · perpetual, no renewals, no registrar servers';
+      SES.raw['rammarket']='base '+b.v+' · quote '+q.v+' · name='+(txt);
+    }
+  } else { $('dncost').innerHTML='<span class="err" style="font-size:12px">fetch failed — declared</span>'; SES.raw['rammarket']='FAILED'; }
+  rawLane();
+}
 mkDial('dgas','var(--cyan)'); mkDial('dfull','var(--gold)');
 mkDial('dbpm','var(--leaf)'); mkDial('dlib','var(--violet)');
-function ticks(){ if(document.hidden) return; tickL2(); tickVaulta(); }
+function ticks(){ if(document.hidden) return; tickL2(); tickVaulta(); tickNameCost(); }
 ticks(); tickNames();
 setInterval(ticks,15000);
 /* a tab opened in the background gets its needles the moment it is looked at */
