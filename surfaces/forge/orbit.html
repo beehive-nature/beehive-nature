@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>orbit — the bBuzz forge (fleet)</title>
+<style>
+:root{--bg:#0A0A0F;--crt:#00FF41;--cyan:#00E5FF;--pink:#FF3DB0;--dim:#5a6478}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:#cfe8d6;font:13px/1.6 'IBM Plex Mono',monospace;padding:26px 18px 60px}
+.wrap{max-width:860px;margin:0 auto}
+h1{color:var(--cyan);font-size:20px;text-shadow:0 0 10px rgba(0,229,255,.4)}
+h1 .gear{color:var(--pink);font-size:14px;vertical-align:middle}
+.sub{color:var(--dim);font-size:11.5px;margin:6px 0 18px;line-height:1.7}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+input,button{font:inherit;background:#0d0d15;color:var(--crt);border:1px solid #262638;padding:7px 11px;border-radius:4px}
+input[type=text]{width:220px;color:var(--cyan)}
+input[type=range]{width:130px;accent-color:var(--cyan);padding:0}
+button{cursor:pointer;border-color:var(--crt)} button:hover{background:var(--crt);color:#000}
+button.ghost{border-color:#262638;color:var(--dim)} button.ghost:hover{background:#1a1a2a;color:var(--cyan)}
+label.ctl{display:flex;flex-direction:column;gap:2px;font-size:10.5px;color:var(--dim)}
+label.ctl span{color:#9fb2c4}
+svg{background:#000;border:1px solid #1a1a2a;border-radius:6px;display:block;width:100%;margin-bottom:12px}
+.hint{color:var(--dim);font-size:11px;margin:10px 0;line-height:1.7}
+.hint b{color:#cfe8d6}
+.foot{margin-top:18px;color:var(--dim);font-size:10.5px;line-height:1.8}
+#meta{font-size:11.5px;color:#9fb2c4;margin-bottom:10px;min-height:18px}
+</style>
+</head>
+<body><div class="wrap">
+<h1>orbit <span class="gear">⚙</span> <span style="color:var(--dim)">// the seed becomes sight</span></h1>
+<div class="sub">A bBuzz forge visual starter in the SVG dialect. The seed chooses the rose: how many
+petals, how they twist, what they wear. Same seed, same orbit, forever. ⚙ template scaffolded by an
+AI seat — the art you forge from it is yours. Fleet copy of <b>forge/visual/starters/</b> (the repo test harness pins both copies in sync). Launch-pad, not rail: the file is the instrument.</div>
+
+<div class="row">
+  <input id="seed" type="text" value="2000" title="the seed — any text; every seed is a different orbit">
+  <button id="roll" class="ghost" title="let the machine pick">🎲 roll a seed</button>
+  <button id="link" class="ghost" title="copy a link that opens this exact orbit">🔗 copy seed-link</button>
+</div>
+<div class="row">
+  <label class="ctl"><span>petal count k</span><input id="pK" type="range" min="2" max="9" step="1" value="5"></label>
+  <label class="ctl"><span>rings</span><input id="pRings" type="range" min="1" max="7" step="1" value="4"></label>
+  <label class="ctl"><span>twist</span><input id="pTwist" type="range" min="-90" max="90" step="5" value="30"></label>
+  <label class="ctl"><span>hue base</span><input id="pHue" type="range" min="0" max="360" step="1" value="300"></label>
+</div>
+
+<svg id="stage" viewBox="0 0 820 440" xmlns="http://www.w3.org/2000/svg"></svg>
+<div id="meta"></div>
+
+<div class="hint"><b>Tinker:</b> the seed is the composition — change one character and the rose
+re-derives: petals, twist, palette, all of it. <b>Fork:</b> copy the link of a seed you love — the
+parent stays untouched, the child is yours to inscribe. Going deeper: open this file. The <b>CORE</b>
+block is the composition; below it sits only a brush that draws paths. The rose is
+r = R·cos(kθ) sampled at 144 points — try feeding <code>Math.sin(3θ)</code> into the radius, or
+letting <code>k</code> drift per ring, and watch what the family does. Keep it or revert it. That loop is the forge.</div>
+
+<div class="foot">Rendering: FNV-1a → mulberry32 → per-ring rose curves r = R·cos(kθ) (k from the seed's
+pick, half-integer k gives the odd petals), 144 samples each, twist rotates rings against each other,
+hsla fills at low alpha so petals layer instead of occlude. Pure core, thin brush — seed+renderer is
+inscription-shaped (SPEC-BUZZFORGE-1 §2, DB-1). Zero dependencies: platform SVG only.</div>
+
+<script>
+// ---- CORE START ----
+// (seed → orbit data. PURE: no DOM, no globals, deterministic.
+//  This is the composition. Everything the art IS, derives here.)
+function hashSeed(str){
+  // FNV-1a 32-bit — same seed string, same number, on every machine, forever.
+  let h=0x811c9dc5;
+  str=String(str);
+  for(let i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=Math.imul(h,0x01000193)>>>0; }
+  return h>>>0;
+}
+function mulberry32(a){
+  // Tiny deterministic PRNG. a = hashSeed(seed). Same a, same stream, forever.
+  return function(){
+    a|=0; a=(a+0x6D2B79F5)|0;
+    let t=Math.imul(a^(a>>>15),1|a);
+    t=(t+Math.imul(t^(t>>>7),61|t))^t;
+    return ((t^(t>>>14))>>>0)/4294967296;
+  };
+}
+function buildArt(seedStr, params){
+  // seed + params → plain JSON-able orbit data: rose curves as sampled points. No DOM touches.
+  const p = Object.assign({k:5, rings:4, twist:30, hueBase:300}, params);
+  const rng = mulberry32(hashSeed(seedStr));
+  const pick = (lo,hi)=>lo+rng()*(hi-lo);
+  const CX=410, CY=220, RMAX=196;
+  const kSeed = pick(0,1) < 0.5 ? 0.5 : 0;   // half the seeds get the half-integer petal shift — flip this!
+  const orbit = { viewBox:'0 0 820 440', bg:'#000', curves:[] };
+  const rings = Math.max(1, Math.min(7, Math.floor(p.rings)));
+  for(let i=0;i<rings;i++){
+    const k = Math.max(2, Math.min(9, p.k)) + kSeed + i*pick(-0.34,0.34);  // per-ring petal drift
+    const R = Rmax(i);
+    const twist = (p.twist*Math.PI/180)*i;
+    const hue = (p.hueBase + i*pick(8,40)) % 360;
+    const pts = [];
+    const N = 144;
+    for(let s=0;s<=N;s++){
+      const th = (s/N)*2*Math.PI;
+      const r = R*Math.cos(k*th);
+      pts.push([ (CX + r*Math.cos(th+twist)).toFixed(2), (CY + r*Math.sin(th+twist)).toFixed(2) ]);
+    }
+    orbit.curves.push({
+      d: 'M'+pts.map(pt=>pt[0]+' '+pt[1]).join(' L ')+' Z',
+      fill: 'hsla('+hue.toFixed(1)+','+pick(55,90).toFixed(0)+'%,'+pick(30,58).toFixed(0)+'%,'+pick(0.10,0.32).toFixed(2)+')',
+      stroke: 'hsla('+((hue+180)%360).toFixed(1)+',95%,64%,'+pick(0.35,0.85).toFixed(2)+')',
+      width: pick(0.7,2.2).toFixed(2)
+    });
+  }
+  function Rmax(i){ return RMAX*(1 - i*(0.72/Math.max(1,rings))); }
+  orbit.meta = { petals: (Math.max(2,Math.min(9,p.k))+kSeed), rings, seed: String(seedStr) };
+  return orbit;
+}
+// ---- CORE END ----
+
+// ---- BRUSH: the renderer. Dumb on purpose — it only draws what the CORE derived.
+const $ = id => document.getElementById(id);
+const SVGNS = 'http://www.w3.org/2000/svg';
+function render(){
+  const params = { k:+$('pK').value, rings:+$('pRings').value, twist:+$('pTwist').value, hueBase:+$('pHue').value };
+  const art = buildArt($('seed').value, params);
+  const st = $('stage'); st.innerHTML='';
+  for(const c of art.curves){
+    const path = document.createElementNS(SVGNS,'path');
+    path.setAttribute('d', c.d);
+    path.setAttribute('fill', c.fill);
+    path.setAttribute('stroke', c.stroke);
+    path.setAttribute('stroke-width', c.width);
+    st.appendChild(path);
+  }
+  $('meta').textContent = art.meta.petals+'-petal rose · '+art.meta.rings+' rings · seed "'+art.meta.seed+'" — same seed, same orbit, forever';
+  return art;
+}
+const q = new URLSearchParams(location.search);
+if(q.get('seed')) $('seed').value=q.get('seed');
+for(const [k,id] of [['k','pK'],['rings','pRings'],['twist','pTwist'],['hueBase','pHue']])
+  if(q.get(k)!==null) $(id).value=q.get(k);
+['pK','pRings','pTwist','pHue'].forEach(id=>$(id).addEventListener('input',render));
+$('roll').onclick=()=>{ $('seed').value=String(1+Math.floor(Math.random()*999999999)); render(); };
+$('link').onclick=()=>{
+  const u=new URL(location); u.search='';
+  u.searchParams.set('seed',$('seed').value);
+  for(const [k,id] of [['k','pK'],['rings','pRings'],['twist','pTwist'],['hueBase','pHue']])
+    u.searchParams.set(k,$(id).value);
+  navigator.clipboard.writeText(u.toString()).then(()=>$('meta').textContent='seed-link copied — that string is the record');
+};
+render();
+</script>
+</div><div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(.6rem + 46px);z-index:9997;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a> <a href="./" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">🐜 forge</a></div>
+<script src="../tour.js?v=19"></script>
+</body>
+</html>

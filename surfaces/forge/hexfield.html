@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>hexfield — the bBuzz forge (fleet)</title>
+<style>
+:root{--bg:#0A0A0F;--crt:#00FF41;--cyan:#00E5FF;--pink:#FF3DB0;--dim:#5a6478}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:#cfe8d6;font:13px/1.6 'IBM Plex Mono',monospace;padding:26px 18px 60px}
+.wrap{max-width:860px;margin:0 auto}
+h1{color:var(--cyan);font-size:20px;text-shadow:0 0 10px rgba(0,229,255,.4)}
+h1 .gear{color:var(--pink);font-size:14px;vertical-align:middle}
+.sub{color:var(--dim);font-size:11.5px;margin:6px 0 18px;line-height:1.7}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+input,button{font:inherit;background:#0d0d15;color:var(--crt);border:1px solid #262638;padding:7px 11px;border-radius:4px}
+input[type=text]{width:220px;color:var(--cyan)}
+input[type=range]{width:130px;accent-color:var(--cyan);padding:0}
+button{cursor:pointer;border-color:var(--crt)} button:hover{background:var(--crt);color:#000}
+button.ghost{border-color:#262638;color:var(--dim)} button.ghost:hover{background:#1a1a2a;color:var(--cyan)}
+label.ctl{display:flex;flex-direction:column;gap:2px;font-size:10.5px;color:var(--dim)}
+label.ctl span{color:#9fb2c4}
+canvas{background:#000;border:1px solid #1a1a2a;border-radius:6px;display:block;width:100%;margin-bottom:12px}
+.hint{color:var(--dim);font-size:11px;margin:10px 0;line-height:1.7}
+.hint b{color:#cfe8d6}
+.foot{margin-top:18px;color:var(--dim);font-size:10.5px;line-height:1.8}
+#meta{font-size:11.5px;color:#9fb2c4;margin-bottom:10px;min-height:18px}
+</style>
+</head>
+<body><div class="wrap">
+<h1>hexfield <span class="gear">⚙</span> <span style="color:var(--dim)">// the seed becomes sight</span></h1>
+<div class="sub">A bBuzz forge visual starter — the organ's synesthetic twin, generalized. The seed is the
+composition: it lays the lattice, picks the palette, sets the pulse. Same seed, same field, forever.
+⚙ template scaffolded by an AI seat — the art you forge from it is yours. Fleet copy of <b>forge/visual/starters/</b> (the repo test harness pins both copies in sync). Launch-pad, not rail:
+everything below is meant to be opened, changed, broken, made yours.</div>
+
+<div class="row">
+  <input id="seed" type="text" value="1000" title="the seed — any text; every seed is a different field">
+  <button id="roll" class="ghost" title="let the machine pick">🎲 roll a seed</button>
+  <button id="link" class="ghost" title="copy a link that opens this exact field">🔗 copy seed-link</button>
+</div>
+<div class="row">
+  <label class="ctl"><span>density</span><input id="pDensity" type="range" min="6" max="18" step="1" value="11"></label>
+  <label class="ctl"><span>hue base</span><input id="pHue" type="range" min="0" max="360" step="1" value="168"></label>
+  <label class="ctl"><span>hue drift</span><input id="pDrift" type="range" min="0" max="180" step="1" value="72"></label>
+  <label class="ctl"><span>symmetry</span><input id="pSym" type="range" min="0" max="1" step="1" value="1"></label>
+</div>
+
+<canvas id="stage" width="820" height="440"></canvas>
+<div id="meta"></div>
+
+<div class="hint"><b>Tinker:</b> the seed is the composition — change one character and the whole field
+re-derives: lattice, palette, pulse. <b>Fork:</b> finding a seed you love and copying its link *is* the
+fork — the parent stays untouched, the child is yours to inscribe. And when you're ready to go deeper:
+open this file's source. The <b>CORE</b> block is the composition (seed → field data, pure and
+deterministic); the block below it is just the brush. Try changing how <code>pick()</code> chooses a
+fill, or what <code>pulse</code> does to the radius — see it, keep it or revert it. That loop is the forge.</div>
+
+<div class="foot">Rendering: FNV-1a hash of the seed string → mulberry32 stream → axial hex lattice
+(pointy-top, x = 1.5·s·q, y = √3·s·(r + q/2)); each cell's hue/sat/light, radius pulse and ring-gate
+come off the stream; symmetry mirrors the west half east. Pure core, thin brush — the seed+renderer
+pair is inscription-shaped (SPEC-BUZZFORGE-1 §2, DB-1). Zero dependencies: platform Canvas 2D only.</div>
+
+<script>
+// ---- CORE START ----
+// (seed → field data. PURE: no DOM, no globals, deterministic.
+//  This is the composition. Everything the art IS, derives here.)
+function hashSeed(str){
+  // FNV-1a 32-bit — same seed string, same number, on every machine, forever.
+  let h=0x811c9dc5;
+  str=String(str);
+  for(let i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=Math.imul(h,0x01000193)>>>0; }
+  return h>>>0;
+}
+function mulberry32(a){
+  // Tiny deterministic PRNG. a = hashSeed(seed). Same a, same stream, forever.
+  return function(){
+    a|=0; a=(a+0x6D2B79F5)|0;
+    let t=Math.imul(a^(a>>>15),1|a);
+    t=(t+Math.imul(t^(t>>>7),61|t))^t;
+    return ((t^(t>>>14))>>>0)/4294967296;
+  };
+}
+function buildArt(seedStr, params){
+  // seed + params → plain JSON-able field data. No DOM touches. The renderer is just a brush.
+  const p = Object.assign({density:11, hueBase:168, hueDrift:72, symmetry:1}, params);
+  const rng = mulberry32(hashSeed(seedStr));
+  const pick = (lo,hi)=>lo+rng()*(hi-lo);
+  const size = 34;                        // hex radius in px (try 20 for dense lace, 60 for monument)
+  const cols = Math.max(4, Math.min(24, Math.floor(p.density)));
+  const rows = Math.ceil(430/(Math.sqrt(3)*size));
+  const paletteGate = pick(0,1);          // one roll decides the palette family — flip it below!
+  const field = { bg:'#000', size, hexes:[] };
+  const half = Math.ceil(cols/2);
+  for(let q=0;q<half;q++){
+    for(let r=-1;r<rows+1;r++){
+      const x = size*1.5*q;
+      const y = size*Math.sqrt(3)*(r+q/2);
+      if (y < -size || y > 440+size) continue;
+      const hue = (p.hueBase + (rng()-0.5)*2*p.hueDrift + 360) % 360;
+      const sat = pick(38,92);
+      const lig = pick(14,64);
+      const ring = rng() < 0.24;          // ~1 in 4 cells gets the stroke ring
+      const hex = {
+        q, r, x, y,
+        rot: Math.floor(rng()*6),         // flat orientations: 0..5
+        fill: 'hsla('+hue.toFixed(1)+','+sat.toFixed(0)+'%,'+lig.toFixed(0)+'%,'+pick(0.25,0.95).toFixed(2)+')',
+        stroke: ring ? 'hsla('+((hue+p.hueDrift)%360).toFixed(1)+',90%,62%,0.8)' : null,
+        pulse: pick(0.55,1.0),            // radius factor — the cell's breath
+        gate: rng() < 0.88                // a few cells stay dark: the field's rests
+      };
+      field.hexes.push(hex);
+      if (p.symmetry && q>0){
+        field.hexes.push(Object.assign({}, hex, { x: 820 - x, mirror:true }));
+      }
+    }
+  }
+  field.meta = { cells: field.hexes.length, palette: paletteGate < 0.5 ? 'cool family' : 'warm family',
+                 seed: String(seedStr) };
+  return field;
+}
+// ---- CORE END ----
+
+// ---- BRUSH: the renderer. Dumb on purpose — it only draws what the CORE derived.
+const $ = id => document.getElementById(id);
+const cv = $('stage'), ctx = cv.getContext('2d');
+function hexPath(cx, cy, s, rotSteps){
+  ctx.beginPath();
+  for(let i=0;i<6;i++){
+    const a = Math.PI/180*(60*i - 30 + rotSteps*15);   // try: + Date.now()/4000 to make it slowly turn
+    const x = cx + s*Math.cos(a), y = cy + s*Math.sin(a);
+    i ? ctx.lineTo(x,y) : ctx.moveTo(x,y);
+  }
+  ctx.closePath();
+}
+function render(){
+  const params = { density:+$('pDensity').value, hueBase:+$('pHue').value,
+                   hueDrift:+$('pDrift').value, symmetry:+$('pSym').value };
+  const art = buildArt($('seed').value, params);
+  ctx.fillStyle = art.bg; ctx.fillRect(0,0,cv.width,cv.height);
+  for(const h of art.hexes){
+    if(!h.gate) continue;
+    const s = art.size*0.86*h.pulse;
+    hexPath(h.x, h.y, s, h.rot);
+    ctx.fillStyle = h.fill; ctx.fill();
+    if(h.stroke){ ctx.strokeStyle = h.stroke; ctx.lineWidth = 1.4; ctx.stroke(); }
+  }
+  $('meta').textContent = art.meta.cells+' cells · '+art.meta.palette+' · seed "'+art.meta.seed+'" — same seed, same field, forever';
+  return art;
+}
+const q = new URLSearchParams(location.search);
+if(q.get('seed')) $('seed').value=q.get('seed');
+for(const [k,id] of [['density','pDensity'],['hueBase','pHue'],['hueDrift','pDrift'],['symmetry','pSym']])
+  if(q.get(k)!==null) $(id).value=q.get(k);
+['pDensity','pHue','pDrift','pSym'].forEach(id=>$(id).addEventListener('input',render));
+$('roll').onclick=()=>{ $('seed').value=String(1+Math.floor(Math.random()*999999999)); render(); };
+$('link').onclick=()=>{
+  const u=new URL(location); u.search='';
+  u.searchParams.set('seed',$('seed').value);
+  for(const [k,id] of [['density','pDensity'],['hueBase','pHue'],['hueDrift','pDrift'],['symmetry','pSym']])
+    u.searchParams.set(k,$(id).value);
+  navigator.clipboard.writeText(u.toString()).then(()=>$('meta').textContent='seed-link copied — that string is the record');
+};
+render();
+</script>
+</div><div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(.6rem + 46px);z-index:9997;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a> <a href="./" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">🐜 forge</a></div>
+<script src="../tour.js?v=19"></script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>the bBuzz forge — sound + sight, artist-first (fleet)</title>
+<style>
+:root{--bg:#0A0A0F;--crt:#00FF41;--cyan:#00E5FF;--pink:#FF3DB0;--dim:#5a6478;--gold:#e3b341}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:#cfe8d6;font:13px/1.6 'IBM Plex Mono',monospace;padding:26px 18px 60px;
+  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="97"><g fill="none" stroke="%231a1a2a"><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z"/><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z" transform="translate(28,48)"/></g></svg>')}
+.wrap{max-width:880px;margin:0 auto}
+h1{color:var(--cyan);font-size:22px;text-shadow:0 0 10px rgba(0,229,255,.4)}
+h1 .gear{color:var(--pink);font-size:15px;vertical-align:middle}
+h2{color:var(--gold);font-size:15px;margin:26px 0 8px}
+.sub{color:var(--dim);font-size:11.5px;margin:6px 0 18px;line-height:1.7}
+p{margin:8px 0;line-height:1.8}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px;margin:14px 0}
+a.card{display:block;background:#0d0d15;border:1px solid #262638;border-radius:8px;padding:14px;text-decoration:none;color:#cfe8d6}
+a.card:hover{border-color:var(--cyan);background:#101020}
+a.card .t{color:var(--cyan);font-weight:700;margin-bottom:4px}
+a.card .d{color:#9fb2c4;font-size:11.5px;line-height:1.6}
+a.card .tag{display:inline-block;margin-top:8px;font-size:10px;color:var(--gold);border:1px solid #3d3326;border-radius:4px;padding:1px 6px}
+ul{margin:8px 0 8px 20px;line-height:1.9}
+li b{color:#cfe8d6}
+.law{border-left:3px solid var(--gold);padding:8px 14px;background:#0d0d15;border-radius:0 6px 6px 0;margin:12px 0;font-size:12.5px}
+.small{font-size:11px;color:var(--dim);line-height:1.7}
+a{color:var(--cyan)}
+.foot{margin-top:24px;color:var(--dim);font-size:10.5px;line-height:1.8}
+</style>
+</head>
+<body><div class="wrap">
+<h1>🐜 the bBuzz forge <span class="gear">⚙</span></h1>
+<div class="sub">the creation wing of the bBuzz studio — sound <i>and</i> sight, artist-first.
+Describe what you want, the harness builds it, you see and hear it, then you fork it and make it yours.
+⚙ everything the AI seat touches wears the gear badge; everything you forge from it is yours.</div>
+
+<h2>what it is</h2>
+<p>A forge for artists who want instruments, not presets. One loop drives both media:
+<b>describe → build → preview → iterate → fork</b>. The sound side compiles real audio plugins
+(CLAP, built on nih-plug); the sight side grows generative pieces from a seed. Nothing here is
+locked: every template opens to its full source, and the whole estate is a public Rust-and-web
+workspace you can read end to end.</p>
+
+<h2>the teaching promise</h2>
+<ul>
+<li><b>No build without an explain block</b> — the harness says what it chose and why, what each
+knob does, and suggests one small thing to try. A teacher, not a vending machine.</li>
+<li><b>Practice loops</b> — one change at a time, narrated: "you raised density — the lace
+tightened." A bad change is a finding, not an error.</li>
+<li><b>Guidance that ends by pointing at the source</b> — the lane succeeds when you outgrow it.</li>
+</ul>
+
+<div class="law"><b>the fork law:</b> every piece can be forked with one gesture — roll the seed,
+copy the link — and the parent stays untouched, forever. The community's fork-tree <i>is</i> the gallery.</div>
+
+<h2>go play — the sight side (live on this fleet)</h2>
+<div class="cards">
+<a class="card" href="hexfield.html"><div class="t">⬡ hexfield</div><div class="d">a seeded hex lattice on Canvas — roll seeds, steer palette and symmetry, copy fork-links. The Tinker note on the page teaches the first edit.</div><div class="tag">CANVAS · SEED = SCORE</div></a>
+<a class="card" href="orbit.html"><div class="t">✳ orbit</div><div class="d">seeded rose curves in SVG — petals, twist, layered light. Same law: same seed, same orbit, forever.</div><div class="tag">SVG · SEED = SCORE</div></a>
+<a class="card" href="room.html"><div class="t">👥 the two-tab room</div><div class="d">multiplayer you can feel, zero servers: open two tabs, turn a knob in one, watch the field move in both. The CRDT seam the LiveKit huddle will plug into.</div><div class="tag">NEW · BROADCASTCHANNEL + YJS</div></a>
+</div>
+
+<h2>the sound side</h2>
+<p><b>BuzzGain ⚙</b> — the forge's first audio template: drive → tape saturation → trim → a
+hard-wired safety wrapper (soft-knee limiter, NaN/∞ silence, crash guard). Built as a real CLAP
+plugin on our own box, host-validated (29/44, identical to the reference implementation), with
+VST3 as a deliberate GPLv3-gated opt-in. The human ear-test in a DAW is the one receipt still
+owed — that one's on a human with headphones.</p>
+<p class="small">Source and receipts:
+<a href="https://github.com/beehive-nature/beehive-nature/tree/main/forge" rel="noopener">forge/</a> ·
+<a href="https://github.com/beehive-nature/beehive-nature/blob/main/forge/README.md" rel="noopener">forge README</a> ·
+<a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/RECEIPT_zCode_BF1_BUILD_2026-08-21.md" rel="noopener">BF-1 build receipt</a> ·
+<a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/RECEIPT_zCode_BF1_INTEGRATION_2026-08-21.md" rel="noopener">integration receipt</a> ·
+<a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/specs/SPEC-BUZZFORGE-1.md" rel="noopener">SPEC-BUZZFORGE-1</a></p>
+
+<h2>steer it — where your word lands</h2>
+<p class="small">The forge runs on ruled rails and founder word. To read the law or leave a ruling:
+<a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/specs/SPEC-BUZZFORGE-1.md" rel="noopener">the spec</a> ·
+<a href="https://github.com/beehive-nature/beehive-nature/blob/main/forge/GUIDANCE-LANE.md" rel="noopener">the guidance lane</a> ·
+<a href="https://github.com/beehive-nature/beehive-nature/blob/main/forge/visual/MULTIPLAYER-SEAM.md" rel="noopener">the multiplayer seam</a> ·
+<a href="https://github.com/beehive-nature/beehive-nature/tree/main/docs/dispatches" rel="noopener">the dispatches</a> ·
+or just play a piece and tell the hive what you felt — the <a href="../">hub</a> lists every room.</p>
+
+<div class="foot">The forge: SPEC-BUZZFORGE-1 (ratified 2026-08-21) · PF-1 CLAP-default, VST3 opt-in behind its
+GPLv3 notice · BF-2 platform Canvas/SVG, zero third-party render deps · multiplayer via Yjs (MIT) over any
+bytes-medium · ⚙ on every AI-touched output, human/⚙ review before any share · built for the poor starving artist.</div>
+
+<div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(.6rem + 46px);z-index:9997;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
+<script src="../tour.js?v=19"></script>
+</div></body>
+</html>

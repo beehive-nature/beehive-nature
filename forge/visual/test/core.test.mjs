@@ -6,7 +6,15 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const starters = ['hexfield.html', 'orbit-svg.html'];
+// Fleet copies (surfaces/forge/) are pinned in sync with the forge starters —
+// drift between them fails this suite (UI-first fleet law).
+const starters = [
+  '../../../forge/visual/starters/hexfield.html',
+  '../../../forge/visual/starters/orbit-svg.html',
+  '../../../surfaces/forge/hexfield.html',
+  '../../../surfaces/forge/orbit.html',
+  '../../../surfaces/forge/room.html',
+].map(p => join(here, p));
 let failed = 0;
 const ok = (name, cond) => {
   console.log((cond ? 'PASS ' : 'FAIL ') + name);
@@ -14,7 +22,7 @@ const ok = (name, cond) => {
 };
 
 for (const file of starters) {
-  const html = readFileSync(join(here, '..', 'starters', file), 'utf8');
+  const html = readFileSync(file, 'utf8');
   const m = html.match(/\/\/ ---- CORE START ----([\s\S]*?)\/\/ ---- CORE END ----/);
   ok(`${file}: CORE block present`, !!m);
   if (!m) continue;
@@ -54,7 +62,7 @@ for (const file of starters) {
 
   // 6. Param sensitivity: the launch-pad knobs actually steer.
   const vary = (key, value) => JSON.stringify(api.buildArt('hive-77', Object.assign({}, params, { [key]: value }))) !== a1;
-  const knobs = file === 'hexfield.html' ? ['density', 'hueBase', 'hueDrift'] : ['k', 'rings', 'twist'];
+  const knobs = file.includes('orbit') ? ['k', 'rings', 'twist'] : ['density', 'hueBase', 'hueDrift'];
   ok(`${file}: params steer the art (${knobs.join(', ')})`, knobs.every(k => vary(k, params[k] + 3)));
 
   // 7. Inscription shape: the art data is plain JSON (what a seed+renderer inscription carries).
@@ -63,10 +71,14 @@ for (const file of starters) {
   ok(`${file}: art data is JSON-round-trippable (inscription-shaped)`, round);
 
   // 8. The whole inline script (brush included) compiles — caught here, not in a broken browser tab.
-  const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(s => s[1]);
+  //    Module scripts get wrapped in an async body so top-level await compiles.
+  const scripts = [...html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/g)]
+    .filter(m => !/src=/.test(m[1]))
+    .map(m => ({ module: /type=["']module["']/.test(m[1]), src: m[2] }));
   let compiles = scripts.length > 0;
-  for (const src of scripts) {
-    try { new Function(src); } catch (e) { compiles = false; console.log('  compile error: ' + e.message); }
+  for (const s of scripts) {
+    try { new Function(s.module ? 'return (async()=>{\n' + s.src + '\n})' : s.src); }
+    catch (e) { compiles = false; console.log('  compile error: ' + e.message); }
   }
   ok(`${file}: full script (CORE + brush) compiles`, compiles);
 }
