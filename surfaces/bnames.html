@@ -110,6 +110,20 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
   today's actions are the live Tier-1 shape, not the 10B/1k-year destination.</p>
 </header>
 
+<section style="border-color:var(--gold)">
+  <h2>🗝 CONNECT YOUR WALLET — BNR bzDiD · your soul, remembered, function unlocked</h2>
+  <div class="law">The connect tier, first-party and keyless: your .b name or account is
+  your soul-pointer (the bzDiD shape — one soul, its rails). Stored only in YOUR browser
+  (the estate's local-first law); nothing is sent, ever. Connecting adapts this desk to
+  you: the composer pre-fills, your names shine in the constellation, expiry warnings
+  are yours. Spend-class signing rides the wallet-gate lane (MX-5) — our stack when armed.</div>
+  <div class="row" style="margin-top:8px">
+    <input id="soul-in" placeholder="your account or .b name — e.g. king" spellcheck="false">
+    <button id="soul-go">connect</button>
+    <button id="soul-out" style="display:none">disconnect</button>
+    <span id="soul-chip" class="badge" style="align-self:center;font-size:10px">not connected</span>
+  </div>
+</section>
 <section>
   <h2>🌌 THE REGISTRY, ALIVE — every name on chain, drawn live</h2>
   <div class="law">The constellation below is not a picture of the registry — it <b>is</b> the
@@ -275,6 +289,11 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
       h.setAttribute('stroke',opts.big?'#FFD700':(opts.ghost?'#7ddf8f':'#3d5344'));
       h.setAttribute('stroke-width',opts.big?2.4:(opts.ghost?1.6:1.2));
       if(opts.big) h.setAttribute('filter','drop-shadow(0 0 8px rgba(255,215,0,.5))');
+      if(opts.mine){ var mine=document.createElementNS(NS,'circle');
+        mine.setAttribute('cx',nx);mine.setAttribute('cy',ny);mine.setAttribute('r',r+4);
+        mine.setAttribute('fill','none');mine.setAttribute('stroke','#7ddf8f');
+        mine.setAttribute('stroke-width','1.6');mine.setAttribute('stroke-dasharray','4 3');
+        mine.setAttribute('class','ringpulse'); g.appendChild(mine); }
       g.appendChild(h);
       if(opts.ghost){ var ring=document.createElementNS(NS,'circle');
         ring.setAttribute('cx',nx);ring.setAttribute('cy',ny);ring.setAttribute('r',r);
@@ -303,13 +322,14 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
       svg.appendChild(g);
     }
     var kingRow=null; rows.forEach(function(r){ if(r.domain_name==='king') kingRow=r; });
-    if(kingRow) node(cx,cy,'king',{big:true,tip:{name:'king',
-      body:'HELD · owner '+kingRow.owner+'<br>resolves → '+kingRow.account+'<br>expires '+kingRow.expires.slice(0,10)}});
+    var soulOwned=function(row){ return SOUL && row && (row.owner===SOUL||row.domain_name===SOUL||row.account===SOUL); };
+    if(kingRow) node(cx,cy,'king',{big:true,mine:soulOwned(kingRow),tip:{name:'king',
+      body:'HELD · owner '+kingRow.owner+'<br>resolves → '+kingRow.account+'<br>expires '+kingRow.expires.slice(0,10)+(soulOwned(kingRow)?'<br><b style=color:var(--leaf)>YOURS</b>':'')}});
     var others=rows.filter(function(r){return r.domain_name!=='king';});
     others.forEach(function(r,i){
       var a=2*Math.PI*i/others.length + .4, rad=64+((i%2)*36)+Math.min(70,others.length*4);
-      node(cx+rad*Math.cos(a)*1.5, cy+rad*Math.sin(a)*.82, r.domain_name, {tip:{name:r.domain_name,
-        body:'HELD · owner '+r.owner+'<br>expires '+r.expires.slice(0,10)}});
+      node(cx+rad*Math.cos(a)*1.5, cy+rad*Math.sin(a)*.82, r.domain_name, {mine:soulOwned(r),tip:{name:r.domain_name,
+        body:'HELD · owner '+r.owner+'<br>expires '+r.expires.slice(0,10)+(soulOwned(r)?'<br><b style=color:var(--leaf)>YOURS</b>':'')}});
     });
     node(cx-170,cy+95,'k',{ghost:true,tip:{name:'k',body:'AVAILABLE — the open jewel<br>fee 0.0000 · RAM ~'+(live.ramCost?live.ramCost.toFixed(4):'?')+' one-time'}});
     node(cx+170,cy+95,'q',{ghost:true,tip:{name:'q',body:'AVAILABLE — the open jewel<br>fee 0.0000 · RAM ~'+(live.ramCost?live.ramCost.toFixed(4):'?')+' one-time'}});
@@ -385,8 +405,26 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
       '# term '+(live.days||365)+' days — extend later: renew(owner, domain_name, days)\n'+
       '# the ruled 10B design evolves resolution into Tier-2 signed resolvers — migration window is NOW at '+live.rows.length+' rows';
   };
+  /* ── the connect tier: soul remembered (localStorage, local-first; nothing sent) ── */
+  var SOUL=null;
+  function soulStrip(n){ return (n||'').trim().toLowerCase().replace(/\.b$/,''); }
+  function soulApply(){
+    var chip=$('soul-chip'), out=$('soul-out');
+    if(SOUL){ chip.textContent='connected · '+SOUL+'.b'; chip.style.color='var(--leaf)';
+      out.style.display=''; $('creg').value=SOUL; $('ctgt').value=SOUL;
+      try{localStorage.setItem('bnr_soul',SOUL);}catch(e){}
+    } else { chip.textContent='not connected'; chip.style.color=''; out.style.display='none';
+      try{localStorage.removeItem('bnr_soul');}catch(e){} }
+    drawConst(); if(live.rows.length){ ['king','k','q'].forEach(function(n){ jewel('j-'+n,n); }); }
+  }
+  $('soul-go').onclick=function(){
+    var v=soulStrip($('soul-in').value); if(!v)return; SOUL=v; soulApply();
+  };
+  $('soul-out').onclick=function(){ SOUL=null; soulApply(); };
+  try{ var saved=localStorage.getItem('bnr_soul'); if(saved){ SOUL=saved; } }catch(e){}
   (async function(){
     await Promise.all([loadRegistry(),loadConfig(),loadRamCost()]);
+    soulApply();
     drawConst();
     ['king','k','q'].forEach(function(n){ jewel('j-'+n,n); });
     check($('q').value);
