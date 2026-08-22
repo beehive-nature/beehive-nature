@@ -6,12 +6,13 @@ self-contained IIFE that exposes `window.BnrSign`:
 ```
 { Api, JsonRpc, Numeric, Serialize, RpcError,
   PrivateKey, PublicKey, Signature, JsSignatureProvider,
-  sha256, secp }
+  sha256, keccak_256, secp }
 ```
 
 - `eosjs 22.1.0` (MIT) — Api / JsonRpc / serializer / key conversions / JsSignatureProvider
-- `@noble/hashes 1.8.0` (MIT) — sha256
-- `@noble/secp256k1 2.3.0` (MIT) — K1 pubkey math (derive → 33-byte compressed)
+- `@noble/hashes 1.8.0` (MIT) — sha256 + keccak_256 (EVM address derivation;
+  keccak lives under the `@noble/hashes/sha3` subpath, NOT `…/keccak`)
+- `@noble/secp256k1 2.3.0` (MIT) — K1 pubkey math (derive → 33-byte compressed / 65-byte uncompressed)
 - `buffer` (feross, MIT) — Browser Buffer polyfill; eosjs dist code references the
   `Buffer` global and crashes with "Buffer is not defined" in every real browser
   without it. The entry installs it only when `globalThis.Buffer` is undefined.
