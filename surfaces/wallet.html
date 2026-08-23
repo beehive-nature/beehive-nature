@@ -156,7 +156,14 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     <div style="flex:1;min-width:250px">
       <div class="row" style="margin-top:0">
         <button id="kc-pass" class="gold">🗝 connect keychain (passkey)</button>
+        <button id="kc-create" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">＋ create your bzDiD passkey here</button>
       </div>
+      <div class="law" style="margin-top:4px">The passkey must live in a <b>PRF-capable authenticator</b>:
+      platform ones (Windows Hello, iCloud Keychain, Google Password Manager) work; most third-party
+      managers (Bitwarden, 1Password &amp; friends) don't yet — if yours lacks PRF the ceremony says so
+      honestly. Cross-device (the phone-camera QR) works when the phone's provider has PRF.
+      <b>Already hold a bzDiD elsewhere? Don't create a second — import it with your recovery phrase
+      instead (a new passkey = a new soul).</b></div>
       <div class="row">
         <input id="kc-rec" class="small" type="password" placeholder="…or paste your 24-word recovery phrase / bdidrec code" spellcheck="false" autocomplete="off">
         <button id="kc-recgo">recover</button>
@@ -698,7 +705,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
       var id=await BZDIDKEY.identityFromPasskey('bnr.b');
       keychainOn(id);
     }catch(e){
-      $('kc-stat').textContent='passkey lane: '+e.message+' — if your passkey predates PRF, use recovery below';
+      $('kc-stat').textContent=passkeyFallbackMsg(e);
     }
   };
   /* AUTO-CONNECT (founder law: connect bzDiD should be automatic): the WebAuthn
@@ -713,11 +720,42 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     window.removeEventListener('keydown',autoConnect);
     $('kc-stat').textContent='auto-connecting your bzDiD — touch your passkey…';
     BZDIDKEY.identityFromPasskey('bnr.b').then(keychainOn).catch(function(e){
-      if(!MPRK)$('kc-stat').textContent='auto-connect: '+e.message+' — use the gold button or recovery below';
+      if(!MPRK)$('kc-stat').textContent='auto-connect: '+passkeyFallbackMsg(e);
     });
   }
   window.addEventListener('pointerdown',autoConnect);
   window.addEventListener('keydown',autoConnect);
+
+  /* CREATE lane: no bzDiD passkey on this device? make one HERE — enrollment + PRF eval in
+     one visit. If the authenticator lacks PRF we say so and never pretend. */
+  function passkeyFallbackMsg(e){
+    var m=(e&&e.message)||String(e||'');
+    if(/NotAllowed|No available|not.*found|pending|aborted|InvalidState|The operation either timed out/i.test(m)||
+       /no credentials|credential|excluded/i.test(m)){
+      return 'no bzDiD passkey found on this device — ＋ create one (cyan button) or import your soul with the recovery phrase';
+    }
+    if(/no_prf|prf/i.test(m)){
+      return 'that passkey lacks PRF (Bitwarden-class managers don\'t carry it yet) — use a platform passkey (Windows Hello / iCloud / Google) or the recovery phrase';
+    }
+    return 'passkey lane: '+m+' — ＋ create one here, or use recovery below';
+  }
+  $('kc-create').onclick=async function(){
+    if(!BZDIDKEY){$('kc-stat').textContent='engine missing';return}
+    try{
+      $('kc-stat').textContent='creating your bzDiD passkey — confirm with Hello / touch / device…';
+      var en=await BZDIDKEY.enrollPasskey(SOUL||'you');
+      if(en.prfEnabled===false){
+        $('kc-stat').textContent='✗ created, but that authenticator lacks PRF — the bzDiD cannot derive from it. Use a platform passkey (delete this one) or the recovery lane.';
+        return;
+      }
+      $('kc-stat').textContent='passkey created — touching it once to derive your soul…';
+      var id=await BZDIDKEY.identityFromPasskey('bnr.b');
+      keychainOn(id);
+      $('kc-stat').innerHTML='✓ <b style="color:var(--leaf)">bzDiD born on this device</b> — write down your recovery phrase from onboarding NOW; it is the only portable copy of this soul.';
+    }catch(e){
+      $('kc-stat').textContent='create: '+(passkeyFallbackMsg(e).replace('passkey lane: ',''));
+    }
+  };
   $('kc-recgo').onclick=function(){
     var raw=$('kc-rec').value;
     if(!raw.trim()){$('kc-stat').textContent='paste your phrase or bdidrec code first';return}
