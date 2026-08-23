@@ -63,3 +63,20 @@ public parameters, not secrets.
    same flow is a valid broadcast.
 5. `abi_json_to_bin` is GONE on modern public nodes (410/404) — client-side
    serialization is not optional; this bundle IS the lane.
+
+## v5 (2026-08-23) — schnorr added for the QR bridge + the QR vendor
+- `bnr-sign.js?v=5`: `import { schnorr } from '@noble/curves/secp256k1.js'`
+  (@noble/curves 2.3.0, MIT) appended to `entry.js` and exposed as
+  `BnrSign.schnorr` — BIP-340 signing/verification for the QR bridge's
+  ephemeral nostr transport. All v4 exports unchanged (re-verified).
+  NOTE: `import * as ns` would grab the MODULE namespace — schnorr is a named
+  export inside it (`ns.schnorr.sign`), destructure in the entry.
+  Hex law: the single minified body line carries all curve constants — the
+  same-line PUBLIC-CONSTANT marker is APPENDED to that line post-build
+  (`/*PUBLIC-CONSTANT: …*/` at end of line 10).
+- `bnr-qr.js?v=1` (NEW): `qrcode-generator 2.0.4` (MIT) + `jsQR 1.4.0`
+  (Apache-2.0) behind `globalThis.BNRQR = { make(text)->matrix,
+  scan(rgba,w,h)->string|null }` — build via `qr-build.mjs` (same esbuild
+  recipe). Round-trip proven: make() → rasterize ×8 with 2-module quiet zone
+  → scan() returns the exact URL. jsQR wants RGBA Uint8ClampedArray.
+- pins: `npm install eosjs@22.1.0 @noble/hashes@1.8.0 @noble/secp256k1@2.3.0 @noble/curves@2.3.0 qrcode-generator@2.0.4 jsqr@1.4.0 esbuild`

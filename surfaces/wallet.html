@@ -74,8 +74,10 @@ pre b{color:var(--ink)}
 .chip .cv{font-size:10px;color:var(--ink);margin-top:3px;word-break:break-all}
 .chip .cx{font-size:9px;color:var(--faint);margin-top:3px}
 @media (prefers-reduced-motion: reduce){
- .ring-orbit,.node-breathe,.sig-pulse,.bridge-arc,.breathing{animation:none !important}
+ .ring-orbit,.node-breathe,.sig-pulse,.bridge-arc,.breathing,.qr-pulse{animation:none !important}
 }
+.qr-pulse{animation:qr-pulse-k 2.4s ease-in-out infinite}
+@keyframes qr-pulse-k{0%,100%{opacity:.85}50%{opacity:.25}}
 footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
 </style>
 </head>
@@ -157,6 +159,15 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
       <div class="row" style="margin-top:0">
         <button id="kc-pass" class="gold">🗝 connect keychain (passkey)</button>
         <button id="kc-create" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">＋ create your bzDiD passkey here</button>
+        <button id="kc-qr" class="gold" style="background:#231a0e;color:var(--amber);border-color:#4a3a1d">📷 QR bridge (phone ⇄ desk)</button>
+      </div>
+      <div id="qr-sec" style="display:none;margin-top:10px;border:1px solid #4a3a1d;border-radius:10px;padding:12px;background:#140f06">
+        <div class="row" style="justify-content:space-between;align-items:center;margin-top:0">
+          <b style="color:var(--amber)" id="qr-title">📷 QR BRIDGE</b>
+          <button id="qr-x" style="font-size:11px">✕ close</button>
+        </div>
+        <div id="qr-body" style="margin-top:8px"></div>
+        <div class="law" id="qr-law" style="margin-top:6px"></div>
       </div>
       <div class="law" style="margin-top:4px">The passkey must live in a <b>PRF-capable authenticator</b>:
       platform ones (Windows Hello, the Chrome profile, Google Password Manager, iCloud Keychain) work;
@@ -336,8 +347,9 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 <script src="agent-dock.js?v=4"></script>
 <script src="tour.js?v=22"></script>
 <script src="onboarding/bzdid-key.js"></script>
-<script src="onboarding/vendor/bnr-sign.js?v=4"></script>
+<script src="onboarding/vendor/bnr-sign.js?v=5"></script>
 <script src="onboarding/vendor/bnr-keys.js?v=1"></script>
+<script src="onboarding/vendor/bnr-qr.js?v=1"></script>
 <script>
 (function(){
   var $=function(i){return document.getElementById(i)};
@@ -744,6 +756,8 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     $('sum-kc').textContent='connected ✓';$('sum-kc').style.color='var(--leaf)';
     seedContexts(); renderForge();
     checkBridge();
+    if(QR_PENDING){ var rq=QR_PENDING; QR_PENDING=null;
+      $('qr-sec').style.display='block'; qrGrantUI(rq); }
   }
   $('kc-pass').onclick=async function(){
     if(!BZDIDKEY){$('kc-stat').textContent='engine missing';return}
@@ -761,16 +775,25 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
      ceremony needs a user gesture, so the FIRST tap/keypress anywhere arms the
      keychain by itself — one attempt per visit, honest fallback to the buttons. */
   var autoTried=false;
+  var CEREMONY=false;     // a WebAuthn ceremony is open — browsers allow only one at a time
   function autoConnect(ev){
-    if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#kc-rec,#kc-recgo,#br-wif,#br-go'))return; // hands off the recovery/bridge inputs
+    // Hands off every control that runs its own ceremony. This handler fires on
+    // pointerdown, which precedes click — so without #kc-create in this list, pressing
+    // "create your bzDiD passkey" starts a credentials.get() hunt for an existing
+    // passkey first, and the browser then refuses the credentials.create() that the
+    // click handler tries, as a second pending request. That is why "create" only ever
+    // looked for one. Same reasoning for the explicit disconnect, the recovery and
+    // bridge inputs.
+    if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#kc-rec,#kc-recgo,#kc-create,#kc-out,#br-wif,#br-go'))return;
     if(autoTried||MPRK||!BZDIDKEY||!SOUL)return;
     autoTried=true;
     window.removeEventListener('pointerdown',autoConnect);
     window.removeEventListener('keydown',autoConnect);
     $('kc-stat').textContent='auto-connecting your bzDiD — touch your passkey…';
+    CEREMONY=true;
     (CRED_ID?identityFromTargeted(CRED_ID):BZDIDKEY.identityFromPasskey('bnr.b')).then(keychainOn).catch(function(e){
       if(!MPRK)$('kc-stat').textContent='auto-connect: '+passkeyFallbackMsg(e);
-    });
+    }).finally(function(){CEREMONY=false});
   }
   window.addEventListener('pointerdown',autoConnect);
   window.addEventListener('keydown',autoConnect);
@@ -791,6 +814,11 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   }
   $('kc-create').onclick=async function(){
     if(!BZDIDKEY){$('kc-stat').textContent='engine missing';return}
+    if(CEREMONY){
+      $('kc-stat').textContent='a passkey prompt is already open — finish or dismiss it, then press create again';
+      return;
+    }
+    CEREMONY=true;
     try{
       $('kc-stat').textContent='creating your bzDiD passkey — confirm with Hello / touch / device…';
       var en=await BZDIDKEY.enrollPasskey(SOUL||'you');
@@ -813,9 +841,247 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
       keychainOn(id);
       $('kc-stat').innerHTML='✓ <b style="color:var(--leaf)">bzDiD born on this device</b> — connect now re-touches this exact passkey automatically. Write down your recovery phrase from onboarding NOW; it is the only portable copy of this soul.';
     }catch(e){
-      $('kc-stat').textContent='create: '+(passkeyFallbackMsg(e).replace('passkey lane: ',''));
-    }
+      // In the CREATE lane a pending/abort error does NOT mean "no passkey found" —
+      // saying that here is what made this button look like it only ever searched.
+      var m=(e&&e.message)||String(e||'');
+      if(/pending|abort/i.test(m)){
+        $('kc-stat').textContent='create: another passkey prompt was still open, so the browser refused this one — try again now';
+      } else if(/InvalidState/i.test(m)){
+        $('kc-stat').textContent='create: this device already holds a bzDiD passkey for this site — use connect instead of create';
+      } else {
+        $('kc-stat').textContent='create: '+(passkeyFallbackMsg(e).replace('passkey lane: ',''));
+      }
+    }finally{ CEREMONY=false }
   };
+
+  /* ── QR BRIDGE — phone ⇄ desk login, first-party ─────────────
+     The desktop shows a QR; the phone (this same page, keychain already live)
+     scans it and grants the desktop a session. No third-party service holds
+     anything readable: the masterPrk travels as AES-256-GCM ciphertext over
+     public nostr relays, keyed by a throwaway ECDH agreement between the two
+     tabs (ephemeral keys live in tab memory only). Relays carry ephemeral
+     events (kind 20107) they don't store, signed by a throwaway BIP-340 key;
+     the QR itself carries only the page URL + a random session id + the
+     desktop's PUBLIC ephemeral. Pre-check digits (derived from the QR data,
+     computable by both sides before any secret moves) let the human catch a
+     swapped QR; AEAM failure silently discards garbage/replays. */
+  var QR_RELAYS=['wss://relay.damus.io','wss://nos.lol','wss://relay.snort.social'];
+  var QRB=null;   // live bridge state — keys scrubbed on end
+  var QR_PENDING=null;  // a desktop's request opened via #qr= — offered once the keychain is live
+  function bytesToB64u(u){
+    var s='',i;
+    for(i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));
+    return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  }
+  function qrDigits(pub33,sid){
+    var m=BN.sha256(concatB(pub33,sid));
+    return String(((m[0]<<8|m[1])%10000+10000)%10000).padStart(4,'0');
+  }
+  function toHex(u){ return BZDIDKEY.toHex(u) }
+  function concatB(){var n=0,i,a;for(i=0;i<arguments.length;i++)n+=arguments[i].length;
+    var o=new Uint8Array(n),p=0;for(i=0;i<arguments.length;i++){a=arguments[i];o.set(a,p);p+=a.length}return o}
+  async function bridgeKey(priv,theirPub33,sid){
+    var shared=BN.secp.getSharedSecret(priv,theirPub33);      // 33B compressed point
+    var ikm=BN.sha256(shared);                                 // uniform 32B
+    var ik=await crypto.subtle.importKey('raw',ikm,'HKDF',false,['deriveKey']);
+    return crypto.subtle.deriveKey({name:'HKDF',hash:'SHA-256',salt:sid,info:new TextEncoder().encode('bnr-qr-bridge-v1')},
+      ik,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+  }
+  function nostrEvent(sk,content,sid){
+    var pub=BN.schnorr.getPublicKey(sk);                       // 32B x-only — nostr form
+    var ev={pubkey:toHex(pub),created_at:Math.floor(Date.now()/1000),kind:20107,tags:[['sid',toHex(sid)]],content:content};
+    var ser='[0,"'+ev.pubkey+'",'+ev.created_at+','+ev.kind+','+JSON.stringify(ev.tags)+','+JSON.stringify(ev.content)+']';
+    ev.id=toHex(BN.sha256(new TextEncoder().encode(ser)));
+    ev.sig=toHex(BN.schnorr.sign(hexBytes(ev.id),sk));
+    return ev;
+  }
+  function hexBytes(h){var u=new Uint8Array(h.length/2);for(var i=0;i<u.length;i++)u[i]=parseInt(h.substr(i*2,2),16);return u}
+  function hexToB64u(h){
+    var u=new Uint8Array(h.length/2);
+    for(var i=0;i<u.length;i++)u[i]=parseInt(h.substr(i*2,2),16);
+    return bytesToB64u(u);
+  }
+  function qrEnd(msg){
+    if(QRB){
+      if(QRB.sk)QRB.sk.fill(0);
+      if(QRB.sock){try{QRB.sock.forEach(function(w){try{w.close()}catch(e){}})}catch(e){}}
+      if(QRB.camStream){try{QRB.camStream.getTracks().forEach(function(t){t.stop()})}catch(e){}}
+      if(QRB.raf)cancelAnimationFrame(QRB.raf);
+    }
+    QRB=null;
+    if(msg)$('qr-law').textContent=msg;
+  }
+  function qrClose(){ qrEnd(); $('qr-sec').style.display='none'; $('kc-stat').textContent='— QR bridge closed —'; }
+  $('qr-x').onclick=qrClose;
+
+  function qrSvg(text){
+    var q=BNRQR.make(text), n=q.getModuleCount(), d='', r, c;
+    for(r=0;r<n;r++)for(c=0;c<n;c++)if(q.isDark(r,c))d+='M'+c+','+r+'h1v1h-1z';
+    return '<svg id="qr-svg" viewBox="-3 -3 '+(n+6)+' '+(n+6)+'" style="width:232px;height:232px;background:#f4e9d0;border-radius:8px;shape-rendering:crispEdges">'+
+      '<path d="'+d+'" fill="#1a1206"/><rect class="qr-pulse" x="-2.2" y="-2.2" width="'+(n+4.4)+'" height="1" fill="#FFD700" opacity=".85"/></svg>';
+  }
+
+  /* desktop side — ask a phone to log me in */
+  $('kc-qr').onclick=async function(){
+    if(!BN||!BNRQR||!BZDIDKEY){$('kc-stat').textContent='QR bridge needs the vendor bundle (bnr-qr.js)';return}
+    if(typeof WebSocket==='undefined'){$('kc-stat').textContent='this browser lacks WebSockets — QR bridge unavailable';return}
+    qrEnd();
+    $('qr-sec').style.display='block';
+    if(MPRK){ return qrGrantUI(null); }   // keychain live => this device is the GRANTING side
+    var sid=crypto.getRandomValues(new Uint8Array(16));
+    var sk=BN.secp.utils.randomPrivateKey();
+    var pub=BN.secp.getPublicKey(sk);     // 33B compressed
+    var url=location.origin+location.pathname+'#qr='+bytesToB64u(concatB(sid,pub));
+    var dig=qrDigits(pub,sid);
+    QRB={mode:'ask',sid:sid,sk:sk,pub:pub,sock:[],nopen:0};
+    $('qr-title').textContent='📷 QR BRIDGE — waiting for your phone';
+    $('qr-body').innerHTML='<div class="row" style="align-items:flex-start;gap:14px;flex-wrap:wrap">'+
+      qrSvg(url)+
+      '<div style="flex:1;min-width:170px">'+
+        '<div style="font-size:11px;color:var(--dim)">scan with your phone camera — the wallet opens there already asking to grant</div>'+
+        '<div style="font-size:30px;letter-spacing:12px;color:var(--amber);margin:10px 0;font-family:IBM Plex Mono,monospace">'+dig+'</div>'+
+        '<div style="font-size:11px;color:var(--dim)">the phone will show these same four digits before it sends anything — mismatch means a swapped QR, walk away</div>'+
+        '<div id="qr-relaystat" style="margin-top:8px;font-size:11px;color:var(--dim)">relays: connecting…</div>'+
+        '<div id="qr-count" style="font-size:11px;color:var(--dim)">expires in 120s</div>'+
+      '</div></div>';
+    $('qr-law').textContent='your soul travels to THIS tab only, as AES-256-GCM ciphertext over public nostr relays (ephemeral kind they never store, throwaway keys both ends); tab memory only, scrubbed on close like every lane here';
+    var sidHex=toHex(sid), got=0;
+    QRB.sock=QR_RELAYS.map(function(rs){
+      var w; try{ w=new WebSocket(rs) }catch(e){ return null }
+      var opened=false;
+      w.onopen=function(){ opened=true;
+        w.send(JSON.stringify(['REQ','bnrqr'+sidHex,{kinds:[20107],'#sid':[sidHex]}]));
+        var up=$('qr-relaystat'); if(up)up.textContent='relays: '+ (++QRB.nopen||1)+' listening';
+      };
+      w.onmessage=async function(m){
+        if(got)return;
+        var t; try{t=JSON.parse(m.data)}catch(e){return}
+        if(!t||t[0]!=='EVENT'||!t[2]||t[1]!==('bnrqr'+sidHex))return;
+        try{
+          var ev=t[2];
+          var o=JSON.parse(ev.content);
+          var epk=b64uToBytes(o.epk), iv=b64uToBytes(o.iv), ct=b64uToBytes(o.ct);
+          if(epk.length!==33)return;
+          var key=await bridgeKey(QRB.sk,epk,QRB.sid);
+          var pt=new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv:iv},key,ct));
+          if(pt.length!==32)throw new Error('bad prk len');
+          got=1;
+          var id2=BZDIDKEY.deriveIdentity(pt,'bnr.b'); id2.masterPrk=pt;
+          qrEnd();
+          keychainOn(id2);
+          $('qr-sec').style.display='none';
+          $('kc-stat').innerHTML='✓ <b style="color:var(--leaf)">logged in via phone</b> — soul in tab memory, handshake keys scrubbed';
+        }catch(e){ /* garbage or replay — AEAD discarded it */ }
+      };
+      return w;
+    });
+    QRB.nopen=0;
+    var t0=Date.now();
+    (function tick(){
+      if(!QRB||QRB.mode!=='ask')return;
+      var left=120-Math.floor((Date.now()-t0)/1000);
+      var cd=$('qr-count');
+      if(cd)cd.textContent='expires in '+left+'s';
+      if(left<=0){qrEnd('expired — press the QR bridge button for a fresh code');return}
+      QRB.raf=requestAnimationFrame(tick);
+    })();
+  };
+
+  /* phone side — grant a desktop session (from #qr= hash or camera) */
+  function qrGrantUI(req){
+    $('qr-title').textContent='📷 QR BRIDGE — grant a desktop';
+    if(!req){
+      $('qr-body').innerHTML='<div style="font-size:11px;color:var(--dim);margin-bottom:8px">point the camera at the QR on the desktop wallet</div>'+
+        '<video id="qr-cam" playsinline style="width:100%;max-width:280px;border-radius:8px;background:#000"></video>'+
+        '<div id="qr-camstat" style="font-size:11px;color:var(--dim);margin-top:6px">starting camera…</div>';
+      qrStartCam();
+    } else {
+      qrConfirmSheet(req);
+    }
+    $('qr-law').textContent='only scan QRs on a desktop you are driving — you are sending your soul\'s master key, encrypted to that tab alone';
+  }
+  async function qrStartCam(){
+    try{
+      var stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+      if(!QRB)QRB={mode:'grant'};
+      QRB.camStream=stream;
+      var v=$('qr-cam'); v.srcObject=stream; await v.play();
+      var cnv=document.createElement('canvas'), ctx=cnv.getContext('2d');
+      (function loop(){
+        if(!QRB||QRB.mode!=='grant'||!$('qr-cam'))return;
+        if(v.videoWidth){
+          cnv.width=v.videoWidth; cnv.height=v.videoHeight;
+          ctx.drawImage(v,0,0);
+          var d=ctx.getImageData(0,0,cnv.width,cnv.height);
+          var s=BNRQR.scan(d.data,cnv.width,cnv.height);
+          if(s&&s.indexOf('#qr=')>0){
+            var req=qrParseHash(s.substr(s.indexOf('#qr=')+4));
+            if(req){ try{stream.getTracks().forEach(function(t){t.stop()})}catch(e){}
+              QRB.camStream=null; return qrConfirmSheet(req); }
+          }
+        }
+        QRB.raf=requestAnimationFrame(loop);
+      })();
+    }catch(e){
+      var st=$('qr-camstat');
+      if(st)st.textContent='camera unavailable ('+(e&&e.name||'error')+') — open this page on the phone via the QR link itself, or use recovery';
+    }
+  }
+  function qrParseHash(b64){
+    try{
+      var u=b64uToBytes(b64);
+      if(u.length!==16+33)return null;
+      return {sid:u.slice(0,16),pub:u.slice(16)};
+    }catch(e){return null}
+  }
+  function qrConfirmSheet(req){
+    QRB={mode:'confirm',req:req};
+    var dig=qrDigits(req.pub,req.sid);
+    $('qr-body').innerHTML='<div style="font-size:12px">a desktop at <b>'+location.host+'</b> asks to sign in</div>'+
+      '<div style="font-size:30px;letter-spacing:12px;color:var(--amber);margin:10px 0;font-family:IBM Plex Mono,monospace">'+dig+'</div>'+
+      '<div style="font-size:11px;color:var(--dim)">these digits must match the desktop\'s — mismatch means a swapped QR, cancel</div>'+
+      '<div class="row" style="margin-top:12px"><button id="qr-allow" class="gold">allow this desktop</button>'+
+      '<button id="qr-deny">cancel</button></div>';
+    $('qr-deny').onclick=qrClose;
+    $('qr-allow').onclick=async function(){
+      if(!MPRK){$('kc-stat').textContent='keychain not live — connect first, the request is gone after close';return}
+      var sk=BN.secp.utils.randomPrivateKey();               // throwaway nostr key
+      var esk=BN.secp.utils.randomPrivateKey();              // throwaway ECDH key
+      var epk=BN.secp.getPublicKey(esk);
+      var iv=crypto.getRandomValues(new Uint8Array(12));
+      var key=await bridgeKey(esk,QRB.req.pub,QRB.req.sid);
+      var ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv:iv},key,MPRK.slice()));
+      var ev=nostrEvent(sk,JSON.stringify({v:1,epk:bytesToB64u(epk),iv:bytesToB64u(iv),ct:bytesToB64u(ct)}),QRB.req.sid);
+      sk.fill&&sk.fill(0); esk.fill&&esk.fill(0);   // event carries the sig now — scrub both throwaways
+      var sent=0;
+      $('qr-body').innerHTML='<div style="font-size:12px">sending the encrypted grant…</div><div id="qr-relaystat" style="font-size:11px;color:var(--dim);margin-top:6px">relays: 0 ok</div>';
+      QR_RELAYS.forEach(function(rs){
+        var w; try{w=new WebSocket(rs)}catch(e){return}
+        w.onopen=function(){ w.send(JSON.stringify(['EVENT',ev])); sent++;
+          var st=$('qr-relaystat'); if(st)st.textContent='relays: '+sent+' ok'; };
+        w.onclose=function(){try{w.close()}catch(e){}};
+      });
+      $('qr-law').textContent='sent — ciphertext only, one-time session id, relays drop ephemeral events by design. The desktop signs in the moment it decrypts.';
+      setTimeout(function(){ if(QRB&&QRB.mode==='confirm') qrEnd('grant sent — this phone can close the bridge now'); },4000);
+    };
+  }
+  /* boot detect: opened via the desktop's QR (#qr=…)? stash the request; once the
+     keychain is live the confirm sheet offers itself. */
+  (function(){
+    if(location.hash.indexOf('#qr=')!==0)return;
+    var req=qrParseHash(location.hash.slice(4));
+    if(!req)return;
+    QR_PENDING=req;
+    $('qr-sec').style.display='block';
+    if(MPRK)qrGrantUI(req);
+    else{
+      $('qr-title').textContent='📷 QR BRIDGE — a desktop is waiting';
+      $('qr-body').innerHTML='<div style="font-size:12px">a desktop asked to sign in via this phone. Connect your bzDiD here first (passkey above or recovery below) — the request stays ready.</div>';
+      $('qr-law').textContent='the desktop\'s code expires in ~2 minutes; you can rescan after';
+    }
+  })();
+
+
   $('kc-recgo').onclick=function(){
     var raw=$('kc-rec').value;
     if(!raw.trim()){$('kc-stat').textContent='paste your phrase or bdidrec code first';return}
