@@ -7,7 +7,7 @@
 //! OUT protocol is safe under exactly that contract.
 #![allow(static_mut_refs)]
 
-use crate::{PackedAction, TEST_K1_SEED_HEX, TEST_EOS_PUB, TEST_WIF37};
+use crate::{PackedAction, TEST_EOS_PUB, TEST_K1_SEED_HEX, TEST_WIF37};
 
 static mut OUT: [u8; 512] = [0; 512];
 
@@ -141,7 +141,14 @@ pub unsafe extern "C" fn bnr_pack_tx(
         }
         let rd64 = |o: usize| -> u64 {
             u64::from_le_bytes([
-                b[o], b[o + 1], b[o + 2], b[o + 3], b[o + 4], b[o + 5], b[o + 6], b[o + 7],
+                b[o],
+                b[o + 1],
+                b[o + 2],
+                b[o + 3],
+                b[o + 4],
+                b[o + 5],
+                b[o + 6],
+                b[o + 7],
             ])
         };
         let account = rd64(p);
@@ -162,12 +169,8 @@ pub unsafe extern "C" fn bnr_pack_tx(
         });
         p += dlen;
     }
-    let packed = crate::pack_transaction(
-        expiration,
-        ref_block_num as u16,
-        ref_block_prefix,
-        &actions,
-    );
+    let packed =
+        crate::pack_transaction(expiration, ref_block_num as u16, ref_block_prefix, &actions);
     let n = packed.len();
     if n > 512 {
         return 0;
@@ -185,7 +188,8 @@ pub unsafe extern "C" fn bnr_self_test() -> u32 {
         .collect::<Vec<u8>>();
     let mut s = [0u8; 32];
     s.copy_from_slice(&seed);
-    let ok = crate::wif37(&s) == TEST_WIF37 && crate::eos_pub_string(&s).as_deref() == Ok(TEST_EOS_PUB);
+    let ok =
+        crate::wif37(&s) == TEST_WIF37 && crate::eos_pub_string(&s).as_deref() == Ok(TEST_EOS_PUB);
     if ok {
         1
     } else {

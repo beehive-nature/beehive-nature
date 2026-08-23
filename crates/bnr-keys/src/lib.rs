@@ -10,7 +10,7 @@
 //! Every byte law here is proven byte-identical against the vendored eosjs/noble lane;
 //! the pinned vectors in the tests are receipts from that cross-derivation.
 
-use k256::ecdsa::{RecoveryId, SigningKey, signature::hazmat::PrehashSigner};
+use k256::ecdsa::{signature::hazmat::PrehashSigner, RecoveryId, SigningKey};
 use k256::elliptic_curve::sec1::ToEncodedPoint;
 use sha2::{Digest, Sha256};
 
@@ -28,7 +28,8 @@ pub const TEST_EVM_SEED_HEX: &str =
 pub const TEST_EVM_ADDR: &str = "0xb0cd907e16b5aba5cbfab494acf787a7650a5879"; // TESTNET-ONLY throwaway compat vector
 pub const TEST_SIG_VECTOR: &str = "SIG_K1_Juj3MPczGu8FZgVxPzDKNTzFppyDwwDexturPZphWWRJzKpwjiknXnbSFcrrz4NUtaMCMqVM47VNA7ZDizm7SimHtSsb7Q"; // TESTNET-ONLY throwaway compat vector
 pub const TEST_SIG_PAYLOAD_HEX: &str = "1f0397d85083cb077c25ed25e07a509e1e8fa8083158d0c359f7ec360ce005e47421e4eab4bc7f9c93146a9ade9dbec76bb44bc6b90a134f52666ac89a72b354fb"; // TESTNET-ONLY throwaway compat vector (the same eosjs signature, raw 65B)
-pub const TEST_DIGEST_HEX: &str = "4b49c0337ede0ec92744d32942c09a2639c3a64a0f9aac12f4f8722a09b8f0fa"; // TESTNET-ONLY throwaway compat vector (sha256 of 'the rust core vector')
+pub const TEST_DIGEST_HEX: &str =
+    "4b49c0337ede0ec92744d32942c09a2639c3a64a0f9aac12f4f8722a09b8f0fa"; // TESTNET-ONLY throwaway compat vector (sha256 of 'the rust core vector')
 
 const B58: &[u8; 58] = b"123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
@@ -164,10 +165,14 @@ pub fn sig_k1_string(payload65: &[u8; 65]) -> String {
 /// The interop law: elliptic (eosjs) and k256 (us) derive different deterministic nonces, so
 /// signatures differ BYTES but must agree on VALIDITY — this is the cross-check.
 pub fn verify_digest65(seed: &[u8; 32], digest: &[u8; 32], payload65: &[u8]) -> bool {
-    use k256::ecdsa::{Signature, VerifyingKey, signature::hazmat::PrehashVerifier};
-    let Ok(sk) = SigningKey::from_slice(seed) else { return false };
+    use k256::ecdsa::{signature::hazmat::PrehashVerifier, Signature, VerifyingKey};
+    let Ok(sk) = SigningKey::from_slice(seed) else {
+        return false;
+    };
     let vk = VerifyingKey::from(&sk);
-    let Ok(sig) = Signature::from_slice(&payload65[1..65]) else { return false };
+    let Ok(sig) = Signature::from_slice(&payload65[1..65]) else {
+        return false;
+    };
     vk.verify_prehash(digest, &sig).is_ok()
 }
 
@@ -188,7 +193,9 @@ pub fn account_name_u64(name: &str) -> Result<u64, &'static str> {
             _ => return Err("name chars: a-z and 1-5 only"),
         };
         if i < 12 {
-            n |= v.checked_shl(64 - 5 * (i as u32 + 1)).ok_or("shift overflow")?;
+            n |= v
+                .checked_shl(64 - 5 * (i as u32 + 1))
+                .ok_or("shift overflow")?;
         } else if v > 15 {
             return Err("13th char can only be a-j or 1-5");
         } else {
