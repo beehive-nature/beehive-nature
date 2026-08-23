@@ -486,18 +486,31 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     var chk=BN.sha256(BN.sha256(p)).slice(0,4);
     return BN.Numeric.binaryToBase58(new Uint8Array([...p,...chk]));
   }
-  // accepts 51-char (37B) and 52-char compressed (38B) WIFs + PVT_K1_; returns eosjs-legal form
+  // accepts 51-char (37B) and 52-char compressed (38B) WIFs + PVT_K1_ + 64-hex seeds;
+  // eats real-world pastes (wrapped lines, stray spaces) before eosjs ever sees them
   function parseWifAny(s){
-    s=(s||'').trim();
-    if(/^PVT_K1_[0-9A-Za-z]+$/.test(s))return s;
-    var raw=BN.Numeric.base58ToBinary(0,s);
+    s=(s||'').replace(/\s+/g,'');   // notes/managers wrap keys — whitespace is never key material
+    if(!s)throw new Error('paste your existing ACTIVE private key first (5K… / L… / K… / PVT_K1_… / 64-hex)');
+    if(/^[0-9a-fA-F]{64}$/.test(s)){ // hex export = the raw seed
+      var hu=new Uint8Array(32);
+      for(var hi=0;hi<32;hi++)hu[hi]=parseInt(s.substr(hi*2,2),16);
+      if(hu[0]===0)throw new Error('that hex key starts with a zero byte — invalid private key');
+      return wif37(hu);
+    }
+    if(/^PVT_K1_[1-9A-HJ-NP-Za-km-z]+$/.test(s))return s;
+    if(/[^1-9A-HJ-NP-Za-km-z]/.test(s))
+      throw new Error('that paste carries characters a private key never has (spaces/line-wraps should be auto-stripped — this is punctuation, 0/O/I/l, or wrong-field content) — copy the whole key again from its source');
+    if(s.length<50)throw new Error('too short ('+s.length+' chars) — a WIF is 51-52; the copy likely lost characters');
+    var raw;
+    try{ raw=BN.Numeric.base58ToBinary(0,s); }
+    catch(e){ throw new Error('not a WIF — expected 51 chars starting 5K/5J, or 52 starting L/K, or PVT_K1_… (eosjs said: '+e.message+')'); }
     var seed=null;
     if(raw.length===37&&raw[0]===0x80)seed=raw.slice(1,33);
     else if(raw.length===38&&raw[0]===0x80&&raw[33]===0x01)seed=raw.slice(1,33);
-    else throw new Error('not a WIF (decoded '+raw.length+' bytes) — paste the private key your wallet exported');
+    else throw new Error('not a WIF (decoded '+raw.length+' bytes) — paste the private key your wallet exported, not a public key or phrase (phrases belong in the recovery lane above)');
     var body=raw.slice(0,raw.length-4),chk=raw.slice(raw.length-4);
     var calc=BN.sha256(BN.sha256(body)).slice(0,4);
-    for(var i=0;i<4;i++)if(chk[i]!==calc[i])throw new Error('WIF checksum failed — typo in the key?');
+    for(var i2=0;i2<4;i2++)if(chk[i2]!==calc[i2])throw new Error('WIF checksum failed — typo in the key?');
     return wif37(seed);
   }
   function deriveK1(){
@@ -1717,7 +1730,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     }
     return new Uint8Array(item(x));   // the outer call carries the LIST header too
   }
-  window.BNRPAY={rlp:rlp,evmSendRaw:evmSendRaw};  // first-party pay-lane API: RLP encoder + EVM tx builder (receipt-tested against the EIP-155 vector; keys stay in the tab frame)
+  window.BNRPAY={rlp:rlp,evmSendRaw:evmSendRaw,parseWif:parseWifAny};  // first-party pay-lane API: RLP encoder + EVM tx builder (receipt-tested against the EIP-155 vector; keys stay in the tab frame)
   function evmAddrOf(){ // address + fresh seed pair — seed stays in the local frame only
     var rec=BZDIDKEY.deriveK1Key(MPRK,'evm:'+SOUL);
     return {seed:rec.seed,addr:CORE.evmAddr(rec.seed)};
