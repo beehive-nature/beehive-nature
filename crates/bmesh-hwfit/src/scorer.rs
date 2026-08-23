@@ -121,7 +121,11 @@ mod tests {
     #[test]
     fn ideal_24gb_fits_all_gpu_models() {
         let n = NodeProfile::manual(Some(24 * GB), Some("RTX 4090"), 16, 64 * GB, "x86_64");
-        let scores = best_fit(&n, &default_catalog());
+        let cat = default_catalog();
+        let scores = best_fit(&n, &cat);
+        // The name says ALL: assert the count, not just one member. Without
+        // this line, dropping every partial fit from best_fit stayed green.
+        assert_eq!(scores.len(), cat.len());
         assert!(scores
             .iter()
             .any(|s| s.score == 1.0 && s.reason.contains("Qwen3-30B")));
@@ -135,13 +139,37 @@ mod tests {
         let s = fit_score(&n, qwen);
         assert!(s.can_fit);
         assert!((s.score - 0.5).abs() < 0.01); // (20-18)/(22-18)=0.5
+
+        // 20 GB is the MIDPOINT of [18,22] and therefore a fixed point of
+        // score -> 1 - score: on its own it cannot tell the formula from its
+        // inverse. 19 GB is asymmetric and can.
+        let n19 = NodeProfile::manual(Some(19 * GB), Some("RTX 4000 Ada"), 12, 32 * GB, "x86_64");
+        let s19 = fit_score(&n19, qwen);
+        assert!((s19.score - 0.25).abs() < 0.01); // (19-18)/(22-18)=0.25
+
+        // best_fit must KEEP a partial fit, not only perfect ones. Nothing
+        // else exercised that: at 24 GB every model scores exactly 1.0, so a
+        // filter that drops partial fits is invisible there.
+        let listed = best_fit(&n, &cat);
+        assert!(listed
+            .iter()
+            .any(|f| f.reason.contains("Qwen3-30B") && f.score < 1.0));
     }
 
     #[test]
     fn cpu_only_fits_anywhere() {
         let n = NodeProfile::manual(None, None as Option<&str>, 4, 8 * GB, "aarch64");
         let scores = best_fit(&n, &default_catalog());
-        assert!(scores.iter().any(|s| s.reason.contains("Kokoro")));
+        // Asserting only that SOME reason mentions Kokoro left the RAM check
+        // and the score entirely untested: inverting the comparison and
+        // pinning the score both stayed green. Assert the values.
+        let kokoro = scores
+            .iter()
+            .find(|s| s.reason.contains("Kokoro"))
+            .expect("a CPU-only model must fit a GPU-less node");
+        assert!(kokoro.can_fit);
+        assert_eq!(kokoro.score, 1.0); // 8 GB RAM >= Kokoro 1 GB recommended
+        assert!(kokoro.reason.contains("sufficient"));
     }
 
     #[test]
