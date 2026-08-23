@@ -162,6 +162,9 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
       platform ones (Windows Hello, iCloud Keychain, Google Password Manager) work; most third-party
       managers (Bitwarden, 1Password &amp; friends) don't yet — if yours lacks PRF the ceremony says so
       honestly. Cross-device (the phone-camera QR) works when the phone's provider has PRF.
+      <b>Passkeys are origin-bound:</b> one made at another site (an Anchor/wallet passkey for your
+      account, say) can never connect here — it signs at its own site only. Your account's existing
+      key still bridges you in: paste it once below.
       <b>Already hold a bzDiD elsewhere? Don't create a second — import it with your recovery phrase
       instead (a new passkey = a new soul).</b></div>
       <div class="row">
