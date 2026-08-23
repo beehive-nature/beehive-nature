@@ -1408,6 +1408,42 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   };
 
   /* ── THE BRIDGE: one-time updateauth ──────────────────────── */
+  /* ── the account directory: paste a key, the wallet finds the account ──
+     Founder law: "what fucking vaulta address is it? automate this." The pasted
+     key KNOWS which account it runs — derive its pubkey and sweep every account
+     this wallet knows (remembered from every successful read/bridge; seeded
+     with the founder pair). No typing, no pairing, paste → found. */
+  function acctDir(){ try{var d=JSON.parse(localStorage.getItem('bnr_acct_dir')||'[]');if(!Array.isArray(d))d=[]}catch(e){d=[]}
+    ['kingbeelovis','king'].forEach(function(n){ if(d.indexOf(n)<0)d.push(n) });   // founder pair seed
+    if(SOUL&&d.indexOf(SOUL)<0)d.push(SOUL);
+    try{ localStorage.setItem('bnr_acct_dir',JSON.stringify(d)) }catch(e){}        // persist the merged set
+    return d; }
+  function acctDirAdd(n){ if(!n)return; try{ var d=acctDir(); if(d.indexOf(n)<0){d.push(n);localStorage.setItem('bnr_acct_dir',JSON.stringify(d))} }catch(e){} }
+  async function findAccountsForPub(pub){
+    var found=[];
+    var names=acctDir();
+    var res=await Promise.all(names.map(async function(n){
+      try{
+        var a=await post(VH,'/v1/chain/get_account',{account_name:n});
+        if(!a||!a.permissions)return;
+        (a.permissions||[]).forEach(function(p){
+          (((p.required_auth||{}).keys)||[]).forEach(function(k){
+            if(canon(k.key)===canon(pub))found.push({account:n,permission:p.perm_name});
+          });
+        });
+      }catch(e){}
+    }));
+    return found;
+  }
+  async function setSoul(name){
+    SOUL=name;
+    try{localStorage.setItem('bnr_soul',SOUL)}catch(e){}
+    $('wq').value=SOUL;
+    if(K1&&MPRK)deriveK1();
+    readAll();
+    acctDirAdd(name);
+  }
+
   $('br-go').onclick=async function(){
     var out=$('br-out'),stat=$('br-stat');
     out.style.display='block';
@@ -1417,6 +1453,25 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     var wif;
     try{wif=parseWifAny($('br-wif').value)}
     catch(e){stat.textContent=e.message;return}
+    // AUTOMATION: derive the pasted key's pubkey and let IT name the account —
+    // the human never pairs keys with account names again.
+    var pastedPub=null;
+    try{ pastedPub=BN.PrivateKey.fromString(wif).getPublicKey().toLegacyString(); }catch(e){}
+    stat.textContent='1/5 this key is '+((pastedPub||'?').slice(0,15))+'… — finding the account it runs…';
+    var owns=pastedPub?await findAccountsForPub(pastedPub):[];
+    var ownsActive=owns.filter(function(o){return o.permission==='active'});
+    var SWITCHED_FROM=null;
+    if(ownsActive.length===1&&ownsActive[0].account!==SOUL){
+      var target=ownsActive[0].account;
+      SWITCHED_FROM=SOUL;
+      stat.innerHTML='this key runs <b>'+target+'@active</b> — you typed '+SOUL+'. Switching the wallet to '+target+' and bridging THAT.';
+      await setSoul(target);
+    } else if(ownsActive.length>1){
+      stat.innerHTML='this key runs several accounts: '+ownsActive.map(function(o){return '<b>'+o.account+'</b>'}).join(', ')+
+        ' — press BRIDGE again after picking the account in the name field above (the wallet is on '+SOUL+' now).';
+      $('br-wif').value='';
+      return;
+    }
     stat.textContent='1/5 reading live account authority…';
     var acc=await post(VH,'/v1/chain/get_account',{account_name:SOUL});
     if(!acc){stat.textContent='account read failed';return}
@@ -1489,7 +1544,8 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
       var res=await postAny(VH,'/v1/chain/send_transaction',
         {signatures:sgn.signatures,compression:0,packed_context_free_data:'',packed_trx:hex});
       if(res&&res.transaction_id){
-        stat.innerHTML='<b style="color:var(--leaf)">5/5 BRIDGED</b> — tx '+res.transaction_id.slice(0,16)+'…';
+        stat.innerHTML='<b style="color:var(--leaf)">5/5 BRIDGED</b> — '+SOUL+' — tx '+res.transaction_id.slice(0,16)+'…'+
+          (SWITCHED_FROM?' <i>(wallet switched from '+SWITCHED_FROM+' — the key named the account itself)</i>':'');
         out.innerHTML='<b>transaction_id:</b> '+res.transaction_id+String.fromCharCode(10)+
           '<b>added keys:</b> '+K1.eosPub+(waAdd.length?' + '+waAdd[0].key.slice(0,24)+'… (passkey)':'')+String.fromCharCode(10)+
           '<b>threshold:</b> '+ra.threshold+' of '+newKeys.length+' keys — derived key AND passkey can both sign (nothing removed)';
@@ -1918,6 +1974,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     if(!v){ $('wstat').textContent='type your name first'; return; }
     SOUL=v;
     try{localStorage.setItem('bnr_soul',SOUL)}catch(e){}
+    acctDirAdd(SOUL);          // every account the wallet touches joins the sweep
     if(K1)deriveK1();
     readAll();
   };
