@@ -32,19 +32,13 @@ use std::path::Path;
 pub enum Verdict {
     /// Check ran; the machine is fit for this dimension. `note` records
     /// the measured value(s).
-    Pass {
-        note: String,
-    },
+    Pass { note: String },
     /// Check ran; the machine is NOT fit. `reason` names the fix in
     /// human-readable words.
-    Fail {
-        reason: String,
-    },
+    Fail { reason: String },
     /// Check could not run or its result is unclassified on this host.
     /// `why` states what was missing.
-    Unknown {
-        why: String,
-    },
+    Unknown { why: String },
 }
 
 impl fmt::Display for Verdict {
@@ -153,9 +147,7 @@ pub fn page_size_verdict(page_size: i64) -> Verdict {
             note: "page size 16384 bytes (16 KiB)".to_string(),
         },
         n if n <= 0 => Verdict::Unknown {
-            why: format!(
-                "sysconf(_SC_PAGESIZE) returned {n} — page size unavailable on this host"
-            ),
+            why: format!("sysconf(_SC_PAGESIZE) returned {n} — page size unavailable on this host"),
         },
         n => Verdict::Unknown {
             why: format!(
@@ -298,11 +290,7 @@ fn dev_minor(dev: u64) -> u64 {
 #[cfg(target_os = "linux")]
 fn block_device_of(dir: &Path) -> Option<String> {
     let dev = std::fs::metadata(dir).ok()?.dev();
-    let link = Path::new("/sys/dev/block").join(format!(
-        "{}:{}",
-        dev_major(dev),
-        dev_minor(dev)
-    ));
+    let link = Path::new("/sys/dev/block").join(format!("{}:{}", dev_major(dev), dev_minor(dev)));
     let real = std::fs::canonicalize(link).ok()?;
     for ancestor in real.ancestors() {
         if let Some(name) = ancestor.file_name().and_then(std::ffi::OsStr::to_str) {
@@ -484,8 +472,7 @@ CONFIG_X86_5LEVEL=y
 
     #[test]
     fn read_ahead_garbage_value_is_unknown() {
-        let Verdict::Unknown { why } =
-            read_ahead_verdict("sda", Some("auto\n"), Some("0\n"))
+        let Verdict::Unknown { why } = read_ahead_verdict("sda", Some("auto\n"), Some("0\n"))
         else {
             panic!("non-integer read_ahead_kb must be Unknown");
         };
