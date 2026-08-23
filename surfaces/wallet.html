@@ -226,6 +226,150 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   </div>
 </section>
 
+<section id="vault-sec" style="border-color:var(--cyan)">
+  <h2>🔐 THE VAULT — one keypass, every secret</h2>
+  <div class="law">The keys you already hold — <b>seed phrases</b> from any wallet
+  (12 · 15 · 18 · 21 · 24 words) and <b>Vaulta ACTIVE private keys</b>
+  (5K… · L… · K… · PVT_K1_…) — sealed under a single <b>keypass</b> so you never handle
+  them raw again. Sealed with <b>PBKDF2-SHA-256 ×600 000 → AES-256-GCM</b>, header
+  authenticated, salt and IV fresh on every write. Only the ciphertext is stored; it is safe
+  to back up anywhere. Every phrase is <b>checksum-verified before it goes in</b> — a mistyped
+  word is caught now, not on the day you need it.
+  <br><b style="color:var(--amber)">Stated honestly:</b> this is <b>hot storage</b>. It ends the
+  plaintext juggling; it does not turn a browser key into a cold one, and it cannot protect you
+  from a page that has been tampered with. For balances you would not accept losing, the answer
+  is still a signing device.</div>
+
+  <!-- ── state A: no vault on this browser ─────────────────────────────── -->
+  <div id="vlt-new" style="display:none">
+    <div class="law" style="margin-top:12px;color:var(--ink)"><b>① Choose your keypass.</b>
+    This is the only thing standing between anyone with this browser and every secret inside.
+    Generate one — eight words from the BIP-39 list is 88 bits of real entropy, which no one
+    is brute-forcing. Write it on paper. <b style="color:var(--amber)">There is no reset:</b>
+    lose the keypass and the vault is unrecoverable by design.</div>
+    <div class="row">
+      <button id="vlt-gen" class="gold">⚄ generate a keypass</button>
+      <select id="vlt-genlen" style="background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
+        <option value="6">6 words · 66 bits</option>
+        <option value="8" selected>8 words · 88 bits</option>
+        <option value="10">10 words · 110 bits</option>
+        <option value="12">12 words · 132 bits</option>
+      </select>
+    </div>
+    <pre id="vlt-genout" style="display:none"></pre>
+    <div class="row">
+      <input id="vlt-newpass" type="password" placeholder="keypass" autocomplete="new-password" spellcheck="false">
+      <input id="vlt-newpass2" type="password" placeholder="keypass again" autocomplete="new-password" spellcheck="false">
+    </div>
+    <div class="law" id="vlt-strength" style="margin-top:4px;min-height:18px">— </div>
+    <div class="row">
+      <button id="vlt-create" class="green" style="flex:1">🔐 CREATE THE VAULT</button>
+      <button id="vlt-importbtn" style="font-size:11px">import a vault file</button>
+    </div>
+  </div>
+
+  <!-- ── state B: vault exists, locked ─────────────────────────────────── -->
+  <div id="vlt-locked" style="display:none">
+    <div class="row" style="margin-top:12px">
+      <input id="vlt-pass" type="password" placeholder="your keypass" autocomplete="current-password" spellcheck="false" style="flex:2">
+      <button id="vlt-unlock" class="gold">UNLOCK</button>
+    </div>
+    <div class="row">
+      <button id="vlt-pkunlock" class="green" style="flex:1">👆 unlock with this device’s passkey</button>
+    </div>
+    <div class="law" id="vlt-pknote" style="margin-top:4px;font-size:10px"></div>
+    <div class="row">
+      <button id="vlt-importbtn2" style="font-size:10px;padding:6px 12px;min-height:32px">import a vault file</button>
+      <button id="vlt-destroy" style="font-size:10px;padding:6px 12px;min-height:32px;color:var(--amber)">destroy this vault</button>
+    </div>
+  </div>
+
+  <!-- ── state C: unlocked ─────────────────────────────────────────────── -->
+  <div id="vlt-open" style="display:none">
+    <div class="row" style="margin-top:12px;align-items:center">
+      <span class="stamp ok" id="vlt-openstamp">UNLOCKED</span>
+      <span class="law" id="vlt-idle" style="flex:1;min-width:180px">auto-locks after 5 minutes idle</span>
+      <button id="vlt-lock" style="font-size:10px;padding:6px 12px;min-height:32px">🔒 lock now</button>
+    </div>
+
+    <div class="law" style="margin-top:14px;color:var(--ink)"><b>② Put a secret in.</b>
+    Paste it and the type is detected for you — the phrase is checksum-verified, the key is
+    checksum-verified and curve-checked, before anything is sealed.</div>
+    <div class="row">
+      <select id="vlt-type" style="background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
+        <option value="auto" selected>detect type</option>
+        <option value="seed">seed phrase</option>
+        <option value="vaulta">Vaulta active key</option>
+        <option value="note">plain note</option>
+      </select>
+      <input id="vlt-label" placeholder="label — e.g. ledger main · kingbeelovis active" spellcheck="false" style="flex:2">
+    </div>
+    <div class="row">
+      <textarea id="vlt-secret" rows="2" placeholder="paste the seed phrase or the ACTIVE private key" spellcheck="false" autocomplete="off"
+        style="background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:13px 'IBM Plex Mono',monospace;flex:1;min-width:180px;resize:vertical;width:100%"></textarea>
+    </div>
+    <div class="row">
+      <input id="vlt-chain" class="small" placeholder="chain (optional) — BTC · ETH · Vaulta · Zano" spellcheck="false">
+      <input id="vlt-bip39pass" class="small" type="password" placeholder="25th-word passphrase (optional, seeds only)" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="law" id="vlt-check" style="margin-top:4px;min-height:18px">— nothing entered —</div>
+    <div class="row">
+      <button id="vlt-add" class="green" style="flex:1">＋ SEAL IT IN</button>
+      <button id="vlt-clear" style="font-size:11px">clear</button>
+    </div>
+
+    <div class="law" style="margin-top:16px;color:var(--ink)"><b>③ What is inside.</b>
+    Secrets stay hidden until you ask for one. <span id="vlt-count">0 entries</span></div>
+    <div id="vlt-list" class="chips"></div>
+    <pre id="vlt-revealed" style="display:none"></pre>
+
+    <div class="law" style="margin-top:18px;color:var(--ink)"><b>④ Your devices.</b>
+    Every one of these opens this vault on its own, and none of them can read the others.
+    Add each device you own — that is what makes losing one a non-event, and it is how your
+    <b>bzDiD survives a lost laptop</b>. Revoking one leaves every other device working.</div>
+    <div class="law" style="font-size:10px;color:var(--faint);margin-top:4px">
+    Evidence class follows <b>T3 §6b</b> — a credential is ranked by where its private key
+    actually lives, not by brand. <b>E3</b> = device-bound in a hardware keystore (Windows
+    Hello, Apple/Google platform passkey on its own hardware, Bitwarden device-bound mobile).
+    <b>E2</b> = synced or software-held (iCloud Keychain / Google Password Manager / Bitwarden
+    vault / a keypass in any manager) — only as strong as that vault account’s own auth.
+    This page requests no attestation statement, so slots sit at the <b>E2 floor</b> unless you
+    tell it the authenticator is device-bound.</div>
+    <div id="vlt-devices" class="chips"></div>
+    <div class="row">
+      <button id="vlt-addpk" class="green" style="font-size:11px">👆 add this device (passkey)</button>
+      <button id="vlt-addkp" style="font-size:11px">＋ add a keypass (password manager)</button>
+    </div>
+    <div class="row">
+      <label class="law" style="display:flex;align-items:center;gap:7px;cursor:pointer;flex:1 1 100%;font-size:10px">
+        <input type="checkbox" id="vlt-devicebound" style="flex:0;min-width:14px;height:14px">
+        this authenticator is <b>device-bound</b> (Windows Hello / platform passkey on this
+        hardware / Bitwarden device-bound mobile) — claim E3 instead of the E2 floor
+      </label>
+    </div>
+    <div class="row">
+      <button id="vlt-panic" style="font-size:10px;padding:6px 12px;min-height:32px;color:var(--amber)">⚠ panic — revoke every device except this one</button>
+    </div>
+
+    <div class="law" style="margin-top:18px;color:var(--ink)"><b>⑤ Your bzDiD.</b>
+    Seal your soul’s recovery phrase in here and it stops living on one device’s passkey.
+    Any device in the list above can then restore the same bzDiD — same soul, same keys,
+    same .b name. <b>The DID persists; keys rotate under it.</b></div>
+    <div class="row">
+      <button id="vlt-sealbzdid" class="gold" style="flex:1">🐝 seal my bzDiD recovery phrase</button>
+    </div>
+
+    <div class="row" style="margin-top:14px">
+      <button id="vlt-export" style="font-size:10px;padding:6px 12px;min-height:32px">⬇ export sealed vault</button>
+      <button id="vlt-rekey" style="font-size:10px;padding:6px 12px;min-height:32px">change keypass</button>
+      <button id="vlt-destroy2" style="font-size:10px;padding:6px 12px;min-height:32px;color:var(--amber)">destroy this vault</button>
+    </div>
+  </div>
+
+  <div class="law" id="vlt-stat" style="margin-top:10px;min-height:20px">— </div>
+  <input type="file" id="vlt-file" accept=".json,.bnrvault,application/json" style="display:none">
+</section>
+
 <section id="forge-sec">
   <h2>♾ THE KEY FORGE — near infinite keys, one soul</h2>
   <div class="law">Every context derives its own key from your masterPRK: <b>vaulta:names</b> for
@@ -319,7 +463,6 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   <div class="law" id="ac-stat" style="margin-top:6px;min-height:20px">— creator liquid: reading… —</div>
   <pre id="ac-out" style="display:none"></pre>
 </section>
-
 <section id="pay-sec" style="border-color:#3a5a2c">
   <h2>💸 PAY — send · receive · swap</h2>
   <div class="row" style="margin-top:8px">
@@ -383,6 +526,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 
   <div class="law" id="pay-stat" style="margin-top:6px;min-height:20px">— choose a lane above —</div>
 </section>
+
 <section>
   <h2>✍ SIGN — your bzDiD signs, zero paste</h2>
   <div class="law" id="sign-law">Connect your keychain above and bridge it once — after that
@@ -421,7 +565,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 </main>
 <footer>
   🗝 the BNR wallet · bzDiD is the wallet · <span id="core-badge">core: checking…</span> · action translation: vendored eosjs (ABI serializer)<br>
-  static · keys live in tab memory only · Rust core: crates/bnr-keys · AGPL-3.0-only · <a href="index.html">the hub</a> · this page: surfaces/wallet.html
+  static · derived keys live in tab memory only · vault secrets sealed with PBKDF2+AES-GCM · Rust core: crates/bnr-keys · AGPL-3.0-only · <a href="index.html">the hub</a> · this page: surfaces/wallet.html
 </footer>
 <script src="agent-dock.js?v=4"></script>
 <script src="tour.js?v=22"></script>
@@ -429,6 +573,8 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 <script src="onboarding/vendor/bnr-sign.js?v=6"></script>
 <script src="onboarding/vendor/bnr-keys.js?v=1"></script>
 <script src="onboarding/vendor/bnr-qr.js?v=1"></script>
+<script src="onboarding/vendor/bip39-wordlist.js"></script>
+<script src="vault.js?v=1"></script>
 <script>
 (function(){
   var $=function(i){return document.getElementById(i)};
@@ -928,8 +1074,8 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     // passkey first, and the browser then refuses the credentials.create() that the
     // click handler tries, as a second pending request. That is why "create" only ever
     // looked for one. Same reasoning for the explicit disconnect, the recovery and
-    // bridge inputs.
-    if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#kc-rec,#kc-recgo,#kc-create,#kc-out,#br-wif,#br-go'))return;
+    // bridge inputs, and everything inside the vault.
+    if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#kc-rec,#kc-recgo,#kc-create,#kc-out,#br-wif,#br-go,#vault-sec'))return;
     if(autoTried||MPRK||!BZDIDKEY||!SOUL)return;
     autoTried=true;
     window.removeEventListener('pointerdown',autoConnect);
@@ -1385,7 +1531,6 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     }
   })();
 
-
   $('kc-recgo').onclick=function(){
     var raw=$('kc-rec').value;
     if(!raw.trim()){$('kc-stat').textContent='paste your phrase or bdidrec code first';return}
@@ -1815,7 +1960,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     }
     return new Uint8Array(item(x));   // the outer call carries the LIST header too
   }
-  window.BNRPAY={rlp:rlp,evmSendRaw:evmSendRaw,parseWif:parseWifAny};  // first-party pay-lane API: RLP encoder + EVM tx builder (receipt-tested against the EIP-155 vector; keys stay in the tab frame)
+  window.BNRPAY={rlp:rlp,evmSendRaw:evmSendRaw,parseWif:parseWifAny};  // first-party pay-lane API: RLP encoder, EVM tx builder, WIF normalizer (receipt-tested; keys stay in the tab frame)
   function evmAddrOf(){ // address + fresh seed pair — seed stays in the local frame only
     var rec=BZDIDKEY.deriveK1Key(MPRK,'evm:'+SOUL);
     return {seed:rec.seed,addr:CORE.evmAddr(rec.seed)};
@@ -2010,6 +2155,538 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     else loadContexts();
   }catch(e){ loadContexts() }
   if(loadWaCred())$('tx-wa-row').style.display='flex';
+})();
+</script>
+<script>
+/* ── THE VAULT — UI wiring. Engine lives in vault.js; this file only moves
+      strings between the DOM and it, and never logs or transmits a secret. ── */
+(function(){
+  var $=function(i){return document.getElementById(i)};
+  var V=window.BNRVAULT;
+  var IDLE_MS=5*60*1000;
+  var idleTimer=null, tick=null, lastTouch=0;
+
+  if(!V){ $('vlt-stat').textContent='vault engine failed to load (vault.js)'; return }
+  if(!(window.crypto&&window.crypto.subtle)){
+    $('vlt-stat').innerHTML='<b style="color:var(--amber)">WebCrypto unavailable</b> — the vault needs '+
+      'a secure context. Open this page over https:// or from file://, not plain http://.';
+    return;
+  }
+
+  function say(msg,color){ var e=$('vlt-stat'); e.innerHTML=msg; e.style.color=color||'var(--dim)' }
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c] }) }
+
+  /* ── which of the three states are we in ─────────────────────────────── */
+  function paint(){
+    var open=V.isUnlocked(), have=V.exists();
+    $('vlt-new').style.display   = (!have&&!open)?'block':'none';
+    $('vlt-locked').style.display= ( have&&!open)?'block':'none';
+    $('vlt-open').style.display  = open?'block':'none';
+    if(open){ renderList(); armIdle() }
+    else {
+      // Locking must erase the inventory, not just hide it. Hiding the panel leaves
+      // every entry label sitting in the DOM after an auto-lock, which is exactly the
+      // list an attacker at an unattended screen would want.
+      disarmIdle();
+      $('vlt-revealed').style.display='none'; $('vlt-revealed').innerHTML='';
+      $('vlt-list').innerHTML=''; $('vlt-count').textContent='0 entries';
+      $('vlt-secret').value=''; $('vlt-bip39pass').value='';
+    }
+    if(window.__vaultDevices) window.__vaultDevices();
+  }
+
+  /* ── idle auto-lock ──────────────────────────────────────────────────── */
+  function armIdle(){
+    lastTouch=Date.now();
+    if(!tick) tick=setInterval(function(){
+      var left=IDLE_MS-(Date.now()-lastTouch);
+      if(left<=0){ doLock('auto-locked after 5 minutes idle'); return }
+      var s=Math.ceil(left/1000);
+      $('vlt-idle').textContent='auto-locks in '+Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+    },1000);
+  }
+  function disarmIdle(){ if(tick){clearInterval(tick);tick=null} }
+  function touch(){ lastTouch=Date.now() }
+  $('vault-sec').addEventListener('input',touch);
+  $('vault-sec').addEventListener('click',touch);
+  // Leaving the page locks it — do not leave a vault open behind a switched tab.
+  window.addEventListener('pagehide',function(){ if(V.isUnlocked()) V.lock() });
+
+  function doLock(why){
+    V.lock(); $('vlt-pass').value=''; clearForm(); paint();
+    say(why||'— locked —','var(--dim)');
+  }
+
+  /* ── keypass generation + strength ───────────────────────────────────── */
+  $('vlt-gen').onclick=function(){
+    var n=parseInt($('vlt-genlen').value,10)||8;
+    var g=V.generateKeypass(n);
+    $('vlt-genout').style.display='block';
+    $('vlt-genout').innerHTML='<b style="color:var(--gold);font-size:13px">'+esc(g.phrase)+'</b>\n\n'+
+      g.words+' words · '+g.bits+' bits of entropy · drawn from the BIP-39 list with getRandomValues\n'+
+      'WRITE THIS ON PAPER NOW. It has been filled into both fields below, but it is not stored\n'+
+      'anywhere else and there is no way to recover it once this page is closed.';
+    $('vlt-newpass').value=g.phrase; $('vlt-newpass2').value=g.phrase;
+    showStrength();
+  };
+  function showStrength(){
+    var v=$('vlt-newpass').value, s=V.keypassStrength(v);
+    var col=s.bits<50?'var(--amber)':s.bits<70?'var(--gold)':'var(--leaf)';
+    $('vlt-strength').innerHTML=v?('strength: <b style="color:'+col+'">'+s.label+'</b> · ~'+s.bits+' bits'):'— ';
+  }
+  $('vlt-newpass').oninput=showStrength;
+
+  $('vlt-create').onclick=async function(){
+    var a=$('vlt-newpass').value,b=$('vlt-newpass2').value;
+    if(!a){ say('choose a keypass first','var(--amber)'); return }
+    if(a!==b){ say('the two keypass fields do not match','var(--amber)'); return }
+    try{
+      var r=await V.create(a);
+      $('vlt-newpass').value='';$('vlt-newpass2').value='';$('vlt-genout').style.display='none';
+      paint();
+      say('✓ <b style="color:var(--leaf)">vault created and unlocked</b> — '+r.strength.bits+
+          ' bits of keypass. Export a copy once you have put something in it.','var(--dim)');
+    }catch(e){ say(esc(e.message),'var(--amber)') }
+  };
+
+  $('vlt-unlock').onclick=async function(){
+    var p=$('vlt-pass').value;
+    if(!p){ say('enter your keypass','var(--amber)'); return }
+    say('deriving key — 600 000 PBKDF2 rounds, this is meant to be slow…');
+    // Yield a frame so the message paints before the KDF blocks.
+    await new Promise(function(r){setTimeout(r,20)});
+    try{
+      var r=await V.unlock(p);
+      $('vlt-pass').value=''; paint();
+      say('✓ <b style="color:var(--leaf)">unlocked</b> — '+r.entries+' entr'+(r.entries===1?'y':'ies'),'var(--dim)');
+    }catch(e){ say(esc(e.message),'var(--amber)') }
+  };
+  $('vlt-pass').addEventListener('keydown',function(e){ if(e.key==='Enter')$('vlt-unlock').click() });
+  $('vlt-lock').onclick=function(){ doLock('— locked —') };
+
+  /* ── live validation of whatever is being pasted ─────────────────────── */
+  var checkSeq=0;
+  async function check(){
+    var raw=$('vlt-secret').value, mine=++checkSeq;
+    var el=$('vlt-check');
+    if(!raw.trim()){ el.textContent='— nothing entered —'; el.style.color='var(--dim)'; return null }
+    var type=$('vlt-type').value, res;
+    if(type==='note'){ el.textContent='plain note — stored as typed, not validated'; el.style.color='var(--dim)'; return {type:'note'} }
+    if(type==='auto')      res=await V.detect(raw);
+    else if(type==='seed') res=Object.assign({kind:'seed'},await V.validateMnemonic(raw));
+    else                   res=Object.assign({kind:'vaulta'},await V.validateVaultaKey(raw));
+    if(mine!==checkSeq) return null;                 // a newer keystroke already won
+    if(!res.kind){ el.textContent=res.error; el.style.color='var(--amber)'; return null }
+    if(!res.ok){
+      el.innerHTML='<b style="color:var(--amber)">✗ '+esc(res.error)+'</b>';
+      return {type:res.kind,invalid:true};
+    }
+    if(res.kind==='seed'){
+      el.innerHTML='<b style="color:var(--leaf)">✓ valid BIP-39</b> · '+res.count+' words · '+
+        res.entropyBits+' bits of entropy · checksum verified';
+    } else {
+      el.innerHTML='<b style="color:var(--leaf)">✓ valid Vaulta active key</b> · '+esc(res.format)+
+        ' · checksum '+esc(res.checksum)+(res.note?' <span style="color:var(--faint)">('+esc(res.note)+')</span>':'');
+    }
+    return {type:res.kind};
+  }
+  $('vlt-secret').oninput=check;
+  $('vlt-type').onchange=check;
+
+  function clearForm(){
+    $('vlt-secret').value='';$('vlt-label').value='';$('vlt-chain').value='';
+    $('vlt-bip39pass').value='';$('vlt-type').value='auto';
+    var c=$('vlt-check'); if(c){c.textContent='— nothing entered —';c.style.color='var(--dim)'}
+  }
+  $('vlt-clear').onclick=clearForm;
+
+  $('vlt-add').onclick=async function(){
+    var res=await check();
+    if(!res){ say('nothing to seal — paste a secret first','var(--amber)'); return }
+    var type=res.type;
+    if(res.invalid){
+      if(!confirm('That secret does not validate:\n\n'+$('vlt-check').textContent+
+                  '\n\nSeal it in anyway? Some wallets ship non-standard phrases, but this is '+
+                  'usually a typo — and a typo sealed in is a secret you cannot use later.')) return;
+    }
+    try{
+      await V.addEntry({
+        type:type, label:$('vlt-label').value, secret:$('vlt-secret').value,
+        chain:$('vlt-chain').value, passphrase:$('vlt-bip39pass').value,
+        force:!!res.invalid
+      });
+      clearForm(); renderList();
+      say('✓ sealed in and re-encrypted','var(--leaf)');
+    }catch(e){ say(esc(e.message),'var(--amber)') }
+  };
+
+  /* ── the list ────────────────────────────────────────────────────────── */
+  function renderList(){
+    var items;
+    try{ items=V.list() }catch(e){ return }
+    $('vlt-count').textContent=items.length+' entr'+(items.length===1?'y':'ies');
+    if(!items.length){
+      $('vlt-list').innerHTML='<div class="law" style="color:var(--faint)">— empty —</div>';
+      return;
+    }
+    var icon={seed:'🌱',vaulta:'⚡',note:'📝'};
+    $('vlt-list').innerHTML=items.map(function(e){
+      var meta=e.type==='seed'
+        ? (e.meta.words?e.meta.words+' words':'?')+(e.meta.valid?' · checksum ok':' · <span style="color:var(--amber)">unverified</span>')+(e.hasPassphrase?' · +passphrase':'')
+        : e.type==='vaulta' ? esc(e.meta.format||'')+' · checksum '+esc(e.meta.checksum||'')
+        : 'note';
+      return '<div class="chip" data-id="'+e.id+'" style="cursor:default">'+
+        '<div class="cc">'+(icon[e.type]||'')+' '+esc(e.label)+(e.chain?' <span style="color:var(--faint)">· '+esc(e.chain)+'</span>':'')+'</div>'+
+        '<div class="cx">'+meta+'</div>'+
+        '<div class="row" style="margin-top:7px;gap:6px">'+
+          '<button data-act="reveal" data-id="'+e.id+'" style="font-size:9px;padding:5px 9px;min-height:26px">reveal</button>'+
+          (e.type==='vaulta'?'<button data-act="bridge" data-id="'+e.id+'" class="gold" style="font-size:9px;padding:5px 9px;min-height:26px">→ bridge</button>':'')+
+          '<button data-act="del" data-id="'+e.id+'" style="font-size:9px;padding:5px 9px;min-height:26px;color:var(--amber)">delete</button>'+
+        '</div></div>';
+    }).join('');
+  }
+
+  $('vlt-list').onclick=async function(ev){
+    var b=ev.target.closest('button[data-act]'); if(!b) return;
+    var id=b.getAttribute('data-id'), act=b.getAttribute('data-act');
+    touch();
+    if(act==='del'){
+      var it=V.list().filter(function(x){return x.id===id})[0];
+      if(!confirm('Delete "'+(it?it.label:id)+'" from the vault?\n\nIf this is the only copy of '+
+                  'that secret, it is gone for good.')) return;
+      try{ await V.removeEntry(id); renderList(); say('deleted and re-encrypted','var(--dim)') }
+      catch(e){ say(esc(e.message),'var(--amber)') }
+      return;
+    }
+    var r;
+    try{ r=V.reveal(id) }catch(e){ say(esc(e.message),'var(--amber)'); return }
+    if(act==='bridge'){
+      var w=$('br-wif');
+      if(!w){ say('the bridge lane is not on this page','var(--amber)'); return }
+      w.value=r.secret;
+      var sec=$('bridge-sec');
+      if(sec&&sec.style.display==='none'){
+        say('key placed in the bridge field — connect your keychain above to use it','var(--gold)');
+      } else {
+        say('key placed in the bridge field below — it is scrubbed the moment you broadcast','var(--gold)');
+      }
+      if(sec&&sec.scrollIntoView) sec.scrollIntoView({behavior:'smooth',block:'center'});
+      return;
+    }
+    // reveal
+    var out=$('vlt-revealed');
+    out.style.display='block';
+    out.innerHTML='<b>'+esc(r.label)+'</b>\n\n<span style="color:var(--ink);font-size:12px">'+
+      esc(r.secret)+'</span>'+
+      (r.passphrase?'\n\n<b>25th-word passphrase:</b> <span style="color:var(--ink)">'+esc(r.passphrase)+'</span>':'')+
+      '\n\n<span style="color:var(--faint)">on screen until you hide it — nothing was copied automatically</span>';
+    var bar=document.createElement('div');
+    bar.className='row'; bar.style.marginTop='8px';
+    var cp=document.createElement('button');
+    cp.textContent='copy to clipboard'; cp.style.cssText='font-size:9px;padding:5px 9px;min-height:26px';
+    cp.onclick=function(){
+      navigator.clipboard.writeText(r.secret).then(function(){
+        say('copied — your clipboard now holds a private key. Paste it where you need it, then copy something else.','var(--gold)');
+      },function(){ say('clipboard refused — select the text above and copy it manually','var(--amber)') });
+    };
+    var hd=document.createElement('button');
+    hd.textContent='hide'; hd.style.cssText='font-size:9px;padding:5px 9px;min-height:26px';
+    hd.onclick=function(){ out.style.display='none'; out.innerHTML='' };
+    bar.appendChild(cp); bar.appendChild(hd); out.appendChild(bar);
+    if(out.scrollIntoView) out.scrollIntoView({behavior:'smooth',block:'nearest'});
+  };
+
+  /* ── portability ─────────────────────────────────────────────────────── */
+  $('vlt-export').onclick=function(){
+    try{
+      var json=V.exportEnvelope();
+      var blob=new Blob([json],{type:'application/json'});
+      var url=URL.createObjectURL(blob);
+      var a=document.createElement('a');
+      var stamp=new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+      a.href=url; a.download='bnr-vault-'+stamp+'.json';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){URL.revokeObjectURL(url)},1000);
+      say('exported — that file is ciphertext, useless without your keypass. Keep a copy off this machine.','var(--leaf)');
+    }catch(e){ say(esc(e.message),'var(--amber)') }
+  };
+
+  function askImport(){ $('vlt-file').click() }
+  $('vlt-importbtn').onclick=askImport;
+  $('vlt-importbtn2').onclick=askImport;
+  $('vlt-file').onchange=function(){
+    var f=this.files&&this.files[0]; if(!f) return;
+    var fr=new FileReader();
+    fr.onload=async function(){
+      var pass=prompt('Keypass for this vault file:');
+      if(pass===null) return;
+      say('deriving key…');
+      await new Promise(function(r){setTimeout(r,20)});
+      try{
+        var r=await V.importEnvelope(String(fr.result),pass);
+        paint();
+        say('✓ imported and unlocked — '+r.entries+' entries. This replaced any vault previously '+
+            'held in this browser.','var(--leaf)');
+      }catch(e){ say(esc(e.message),'var(--amber)') }
+    };
+    fr.readAsText(f);
+    this.value='';
+  };
+
+  $('vlt-rekey').onclick=async function(){
+    var oldp=prompt('Current keypass:'); if(oldp===null) return;
+    var g=V.generateKeypass(8);
+    var newp=prompt('New keypass:\n\n(suggestion — '+g.bits+' bits, write it down first)\n\n'+g.phrase, g.phrase);
+    if(newp===null||!newp) return;
+    say('re-keying — two KDF passes, this takes a moment…');
+    await new Promise(function(r){setTimeout(r,20)});
+    try{
+      await V.changeKeypass(oldp,newp);
+      paint();
+      say('✓ re-keyed with a fresh salt. The old keypass no longer opens this vault — and any '+
+          'exported file you already made still opens with the OLD one.','var(--leaf)');
+    }catch(e){ say(esc(e.message),'var(--amber)') }
+  };
+
+  function destroy(){
+    if(!confirm('Destroy the vault held in this browser?\n\nEverything sealed inside is erased. '+
+                'If you have not exported a copy, every secret in it is gone permanently.')) return;
+    if(!confirm('Last check — this cannot be undone.\n\nDestroy it?')) return;
+    V.destroy(); paint();
+    say('vault destroyed on this browser','var(--amber)');
+  }
+  $('vlt-destroy').onclick=destroy;
+  $('vlt-destroy2').onclick=destroy;
+
+  window.__vaultRepaint=paint;
+  paint();
+  if(V.exists()) say('a sealed vault is held in this browser — unlock it to see inside','var(--dim)');
+  else say('no vault on this browser yet — create one, or import a vault file','var(--dim)');
+})();
+</script>
+<script>
+/* ── THE VAULT — devices. Slots per T3 §6b; panic path per T3 §Failure. ── */
+(function(){
+  var $=function(i){return document.getElementById(i)};
+  var V=window.BNRVAULT;
+  if(!V||!$("vlt-devices"))return;
+
+  function say(m,c){ var e=$("vlt-stat"); if(e){e.innerHTML=m; e.style.color=c||"var(--dim)"} }
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c] }) }
+  function repaint(){ if(window.__vaultRepaint) window.__vaultRepaint(); else renderSlots() }
+
+  /* A first guess at what to call this device, so the list reads like a shelf of
+     real objects rather than "passkey 1, passkey 2". The user can edit it. */
+  function deviceGuess(){
+    var u=navigator.userAgent||"";
+    if(/iPhone/i.test(u))            return "iPhone";
+    if(/iPad/i.test(u))              return "iPad";
+    if(/Android/i.test(u))           return "Android phone";
+    if(/Mac OS X|Macintosh/i.test(u))return "Mac";
+    if(/CrOS/i.test(u))              return "Chromebook";
+    if(/Linux/i.test(u))             return "Linux machine";
+    if(/Windows/i.test(u))           return "Windows laptop";
+    return "this device";
+  }
+
+  /* PRF is what the whole passkey lane rests on, and support is genuinely uneven.
+     Say so plainly instead of letting people fail into a dead end. */
+  async function prfNote(){
+    var el=$("vlt-pknote"); if(!el)return;
+    var u=navigator.userAgent||"", hint="";
+    if(/Linux/i.test(u)&&!/Android/i.test(u)){
+      hint="Linux has no platform authenticator \u2014 use a hardware security key (YubiKey-class, "+
+           "which carries PRF), or unlock with a keypass from your password manager.";
+    } else if(/Mac OS X|Macintosh|iPhone|iPad/i.test(u)){
+      hint="Apple carries PRF from iOS 18 / macOS 15 (Safari 18) \u2014 older versions will need a keypass.";
+    } else if(/Windows/i.test(u)){
+      hint="Windows Hello carries PRF on Windows 11 in Chrome/Edge.";
+    } else if(/Android/i.test(u)){
+      hint="Google Password Manager passkeys carry PRF in recent Chrome.";
+    }
+    try{
+      if(window.BZDIDKEY&&BZDIDKEY.prfBrowserSupport){
+        var sup=await BZDIDKEY.prfBrowserSupport();
+        if(sup===false) hint="this browser does not expose PRF \u2014 unlock with a keypass instead. "+hint;
+      }
+    }catch(e){}
+    el.innerHTML=hint?("<span style=\"color:var(--faint)\">"+hint+"</span>"):"";
+  }
+
+  /* Bitwarden-class vault passkeys do not carry PRF; the page already says so in the
+     keychain lane. Route that failure to the keypass door rather than a shrug. */
+  function prfFail(e){
+    var m=(e&&e.message)||String(e||"");
+    if(/no_prf|prf/i.test(m)){
+      return "that authenticator has no PRF \u2014 vault-synced managers (Bitwarden-class) do not "+
+             "carry it yet. Use a platform passkey (Windows Hello / iCloud / Google), a hardware "+
+             "key, or add a keypass slot instead.";
+    }
+    if(/NotAllowed|abort|timed out/i.test(m)) return "the passkey prompt was dismissed or timed out \u2014 try again";
+    if(/pending/i.test(m)) return "another passkey prompt is still open \u2014 finish or dismiss it first";
+    return m;
+  }
+
+  async function prfSecret(){
+    if(!(window.BZDIDKEY&&BZDIDKEY.getPrfSecret)) throw new Error("the bzDiD engine is not loaded");
+    return await BZDIDKEY.getPrfSecret();
+  }
+
+  /* A device you have never used here has no passkey to find, and credentials.get()
+     reports that as an indistinguishable "dismissed or timed out". Enrolling one is
+     exactly what adding a new device means, so offer it rather than dead-ending. */
+  function looksLikeNoCredential(e){
+    var m=(e&&e.message)||String(e||"");
+    if(/no_prf/i.test(m)) return false;              // PRF-less authenticator: different problem
+    return /NotAllowed|no credential|not .*found|abort|timed out|assert_null/i.test(m);
+  }
+  async function prfSecretOrEnroll(){
+    try{ return await prfSecret() }
+    catch(e){
+      if(!looksLikeNoCredential(e)) throw e;
+      if(!(window.BZDIDKEY&&BZDIDKEY.enrollPasskey)) throw e;
+      if(!confirm("No passkey for this site was found on this device.\n\nCreate one now? "+
+                  "This is what adding a new device means \u2014 the new passkey becomes another "+
+                  "way into your vault, and your other devices keep working.")) throw e;
+      say("creating a passkey on this device \u2014 confirm with Hello / touch / device\u2026");
+      var en=await BZDIDKEY.enrollPasskey("bnr wallet");
+      if(en&&en.prfEnabled===false){
+        throw new Error("no_prf: created, but that authenticator carries no PRF \u2014 delete it and "+
+                        "use a platform passkey, or add a keypass slot instead");
+      }
+      say("passkey created \u2014 touch it once more to derive its slot key\u2026");
+      return await prfSecret();
+    }
+  }
+
+  /* ── unlock with this device ─────────────────────────────────────────── */
+  $("vlt-pkunlock").onclick=async function(){
+    if(!V.exists()){ say("no vault on this browser yet","var(--amber)"); return }
+    say("touch your passkey\u2026");
+    var sec;
+    // No enrol-on-unlock: a freshly minted passkey matches no slot, so it would
+    // fail a second time and read as the vault being broken. Say what to do instead.
+    try{ sec=await prfSecret() }
+    catch(e){
+      say(looksLikeNoCredential(e)
+        ? "no passkey for this site on this device yet \u2014 unlock with a keypass below, then "+
+          "press <b>add this device</b> to give this one its own passkey"
+        : esc(prfFail(e)),"var(--amber)");
+      return;
+    }
+    try{
+      var r=await V.unlockWithPasskey(sec,function(i,n,l){
+        say("trying device slot "+i+" of "+n+" ("+esc(l)+")\u2026");
+      });
+      sec.fill(0); repaint();
+      say("\u2713 <b style=\"color:var(--leaf)\">unlocked with "+esc(r.slot)+"</b> \u2014 "+r.entries+" entries","var(--dim)");
+    }catch(e){ sec.fill(0); say(esc(e.message),"var(--amber)") }
+  };
+
+  /* ── add this device ─────────────────────────────────────────────────── */
+  $("vlt-addpk").onclick=async function(){
+    if(!V.isUnlocked()){ say("unlock the vault first","var(--amber)"); return }
+    var label=prompt("Name this device \u2014 you will see it in the list and revoke it by this name:", deviceGuess());
+    if(label===null) return;
+    say("touch the passkey you want to add\u2026");
+    var sec;
+    try{ sec=await prfSecretOrEnroll() }catch(e){ say(esc(prfFail(e)),"var(--amber)"); return }
+    var bound=!!($("vlt-devicebound")&&$("vlt-devicebound").checked);
+    try{
+      var r=await V.addPasskeySlot(sec,label,{deviceBound:bound});
+      sec.fill(0); renderSlots();
+      say("\u2713 <b style=\"color:var(--leaf)\">"+esc(r.label)+" can now open this vault</b> \u2014 "+
+          "recorded as "+(bound?"E3 (device-bound)":"E2 (synced/software \u2014 the honest floor)"),"var(--dim)");
+    }catch(e){ sec.fill(0); say(esc(e.message),"var(--amber)") }
+  };
+
+  $("vlt-addkp").onclick=async function(){
+    if(!V.isUnlocked()){ say("unlock the vault first","var(--amber)"); return }
+    var label=prompt("Name this keypass \u2014 e.g. \"mobile \u2014 Bitwarden\", \"laptop \u2014 Google\":", deviceGuess()+" \u2014 password manager");
+    if(label===null) return;
+    var g=V.generateKeypass(8);
+    var kp=prompt("Keypass for \""+label+"\".\n\nA generated one is filled in \u2014 save it into that "+
+                  "password manager now ("+g.bits+" bits):", g.phrase);
+    if(kp===null||!kp) return;
+    try{
+      var r=await V.addKeypassSlot(kp,label);
+      renderSlots();
+      say("\u2713 <b style=\"color:var(--leaf)\">"+esc(r.label)+" can now open this vault</b> \u2014 "+
+          r.strength.bits+" bits, recorded as E2 (a manager-held secret is software-held)","var(--dim)");
+    }catch(e){ say(esc(e.message),"var(--amber)") }
+  };
+
+  /* ── the list ────────────────────────────────────────────────────────── */
+  function renderSlots(){
+    var el=$("vlt-devices"); if(!el)return;
+    var slots=[];
+    try{ slots=V.listSlots() }catch(e){ slots=[] }
+    if(!slots.length){ el.innerHTML=""; return }
+    el.innerHTML=slots.map(function(s){
+      var icon=s.type==="passkey"?"👆":"🔑";
+      var ev=s.evidence==="E3"
+        ? "<span style=\"color:var(--leaf)\">E3 device-bound</span>"
+        : "<span style=\"color:var(--gold)\">E2 synced/software</span>";
+      return "<div class=\"chip\" style=\"cursor:default\">"+
+        "<div class=\"cc\">"+icon+" "+esc(s.label)+(s.current?" <span style=\"color:var(--leaf)\">\u2190 you are here</span>":"")+"</div>"+
+        "<div class=\"cx\">"+ev+" \u00b7 "+esc(s.kdf||"")+"</div>"+
+        (s.current?"":"<div class=\"row\" style=\"margin-top:7px;gap:6px\">"+
+          "<button data-revoke=\""+s.id+"\" style=\"font-size:9px;padding:5px 9px;min-height:26px;color:var(--amber)\">revoke</button>"+
+        "</div>")+
+      "</div>";
+    }).join("");
+  }
+  window.__vaultDevices=renderSlots;
+
+  $("vlt-devices").onclick=async function(ev){
+    var b=ev.target.closest("button[data-revoke]"); if(!b)return;
+    var id=b.getAttribute("data-revoke");
+    var slot=V.listSlots().filter(function(x){return x.id===id})[0];
+    if(!confirm("Revoke \""+(slot?slot.label:id)+"\"?\n\nThat device can no longer open this vault. "+
+                "Every other device keeps working.")) return;
+    try{ await V.removeSlot(id); renderSlots(); say("revoked \u2014 "+esc(slot?slot.label:id)+" can no longer open this vault","var(--dim)") }
+    catch(e){ say(esc(e.message),"var(--amber)") }
+  };
+
+  $("vlt-panic").onclick=async function(){
+    if(!V.isUnlocked()){ say("unlock the vault first","var(--amber)"); return }
+    var n=V.listSlots().length-1;
+    if(n<1){ say("this is already the only way in","var(--amber)"); return }
+    if(!confirm("PANIC \u2014 revoke all "+n+" other device(s)?\n\nOnly the device you are holding "+
+                "right now will still open this vault. Use this when something is lost or stolen.")) return;
+    try{ var r=await V.revokeAllExcept(); renderSlots();
+         say("\u2713 revoked "+r.revoked+" device(s) \u2014 this device is now the only way in. "+
+             "Add your other devices back when you are safe.","var(--leaf)") }
+    catch(e){ say(esc(e.message),"var(--amber)") }
+  };
+
+  /* ── seal the bzDiD ──────────────────────────────────────────────────── */
+  $("vlt-sealbzdid").onclick=async function(){
+    if(!V.isUnlocked()){ say("unlock the vault first","var(--amber)"); return }
+    if(!(window.BZDIDKEY&&BZDIDKEY.identityFromPasskey)){ say("the bzDiD engine is not loaded","var(--amber)"); return }
+    say("touch your bzDiD passkey \u2014 deriving the soul so its phrase can be sealed\u2026");
+    var id;
+    try{ id=await BZDIDKEY.identityFromPasskey("bnr.b") }
+    catch(e){ say(esc(prfFail(e)),"var(--amber)"); return }
+    try{
+      if(!id||!id.phrase) throw new Error("that identity carried no recovery phrase");
+      var fp=(id.fingerprint&&id.fingerprint.words)||"";
+      await V.addEntry({type:"bzdid", label:"my bzDiD soul"+(fp?" \u00b7 "+fp:""),
+        secret:id.phrase, chain:"bzDiD", fingerprint:fp});
+      if(id.masterPrk&&id.masterPrk.fill) id.masterPrk.fill(0);
+      repaint();
+      say("\u2713 <b style=\"color:var(--leaf)\">bzDiD sealed</b>"+(fp?" \u2014 "+esc(fp):"")+
+          ". Any device in your list can now restore this same soul.","var(--dim)");
+    }catch(e){
+      if(id&&id.masterPrk&&id.masterPrk.fill) id.masterPrk.fill(0);
+      say(esc(e.message),"var(--amber)");
+    }
+  };
+
+  renderSlots();
+  prfNote();
 })();
 </script>
 </body>
