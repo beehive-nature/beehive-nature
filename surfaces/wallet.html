@@ -159,9 +159,17 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
         <button id="kc-create" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">＋ create your bzDiD passkey here</button>
       </div>
       <div class="law" style="margin-top:4px">The passkey must live in a <b>PRF-capable authenticator</b>:
-      platform ones (Windows Hello, iCloud Keychain, Google Password Manager) work; most third-party
-      managers (Bitwarden, 1Password &amp; friends) don't yet — if yours lacks PRF the ceremony says so
-      honestly. Cross-device (the phone-camera QR) works when the phone's provider has PRF.
+      platform ones (Windows Hello, the Chrome profile, Google Password Manager, iCloud Keychain) work;
+      most third-party managers (Bitwarden, 1Password &amp; friends) don't yet. <b>Create never takes a
+      manager's word for it:</b> after the "confirmed" the wallet immediately re-touches the exact
+      passkey just made and demands a real PRF secret from it — if it can't, you're told plainly and
+      that dead passkey should be deleted (Chrome: ⋮ → Passwords and autofill → Passkeys). A software
+      passkey confirming instantly is fine; PRF is proven by the touch, not the speed. Hardware keys
+      must be FIDO2.1-class with a PIN set and room for a resident credential — older U2F keys won't
+      be offered. Cross-device (the phone-camera QR) works only when the <b>phone's</b> provider has
+      PRF — on the phone set the default passkey provider to Google/iCloud, or simply open this wallet
+      on the phone itself. After a successful create, this wallet re-touches that same passkey
+      automatically — no "which passkey?" picker ever again.
       <b>Passkeys are origin-bound:</b> one made at another site (an Anchor/wallet passkey for your
       account, say) can never connect here — it signs at its own site only. Your account's existing
       key still bridges you in: paste it once below.
@@ -683,6 +691,44 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     $('sum-bridge').style.color=ok?'var(--leaf)':'var(--amber)';
   }
 
+  /* ── targeted PRF ceremony (the fix for the picker trap) ────
+     A discoverable credentials.get() — what identityFromPasskey() runs — opens
+     the OS "which passkey?" picker. Right after a create, or with third-party
+     providers intercepting, that picker errors out ("problem signing in") and
+     funnels into a QR cross-device hunt the phone can't finish. So the wallet
+     remembers the bzDiD passkey's credential ID (a public identifier, never a
+     key) and addresses it directly with allowCredentials: the browser re-touches
+     THAT one passkey, no picker, no ambiguity. Same PRF salt, same HKDF → the
+     identical soul identityFromPasskey would derive. */
+  function b64uToBytes(s){
+    var b=atob(s.replace(/-/g,'+').replace(/_/g,'/'));
+    var u=new Uint8Array(b.length);
+    for(var i=0;i<b.length;i++)u[i]=b.charCodeAt(i);
+    return u;
+  }
+  var CRED_ID=null; try{CRED_ID=localStorage.getItem('bnr_cred')||null}catch(e){}
+  function saveCred(id){ CRED_ID=id||null; try{ id?localStorage.setItem('bnr_cred',id):localStorage.removeItem('bnr_cred') }catch(e){} }
+  function identityFromTargeted(credId){
+    return navigator.credentials.get({publicKey:{
+      challenge: crypto.getRandomValues(new Uint8Array(32)),
+      timeout: 6e4,
+      userVerification: 'required',
+      allowCredentials: [{type:'public-key', id: b64uToBytes(credId)}],
+      extensions: { prf: { eval: { first: BZDIDKEY.PRF_INPUT_SALT } } }
+    }}).then(function(ass){
+      var ex=ass&&ass.getClientExtensionResults&&ass.getClientExtensionResults();
+      var first=ex&&ex.prf&&ex.prf.results&&ex.prf.results.first;
+      if(!first)throw new Error('no_prf_output: that passkey exists but lacks PRF (Bitwarden-class managers don\'t carry it) — delete it where it was saved, then create again with a platform provider');
+      var out=new Uint8Array(first);
+      if(out.length!==32)throw new Error('PRF output '+out.length+' bytes, expected 32');
+      var mprk=BZDIDKEY.masterPrkFromPrfSecret(out);
+      out.fill(0);
+      var id2=BZDIDKEY.deriveIdentity(mprk,'bnr.b');
+      id2.masterPrk=mprk;
+      return id2;
+    });
+  }
+
   /* ── keychain connect ceremony ────────────────────────────── */
   function keychainOn(id){
     MPRK=id.masterPrk.slice();
@@ -704,8 +750,8 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     try{
       var sup=await BZDIDKEY.prfBrowserSupport();
       if(sup===false){$('kc-stat').textContent='this browser lacks PRF — use the recovery lane below';return}
-      $('kc-stat').textContent='touch your passkey…';
-      var id=await BZDIDKEY.identityFromPasskey('bnr.b');
+      $('kc-stat').textContent=CRED_ID?'touching your bzDiD passkey (the exact one this wallet made)…':'touch your passkey…';
+      var id=await (CRED_ID?identityFromTargeted(CRED_ID):BZDIDKEY.identityFromPasskey('bnr.b'));
       keychainOn(id);
     }catch(e){
       $('kc-stat').textContent=passkeyFallbackMsg(e);
@@ -722,7 +768,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     window.removeEventListener('pointerdown',autoConnect);
     window.removeEventListener('keydown',autoConnect);
     $('kc-stat').textContent='auto-connecting your bzDiD — touch your passkey…';
-    BZDIDKEY.identityFromPasskey('bnr.b').then(keychainOn).catch(function(e){
+    (CRED_ID?identityFromTargeted(CRED_ID):BZDIDKEY.identityFromPasskey('bnr.b')).then(keychainOn).catch(function(e){
       if(!MPRK)$('kc-stat').textContent='auto-connect: '+passkeyFallbackMsg(e);
     });
   }
@@ -733,12 +779,13 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
      one visit. If the authenticator lacks PRF we say so and never pretend. */
   function passkeyFallbackMsg(e){
     var m=(e&&e.message)||String(e||'');
-    if(/NotAllowed|No available|not.*found|pending|aborted|InvalidState|The operation either timed out/i.test(m)||
-       /no credentials|credential|excluded/i.test(m)){
-      return 'no bzDiD passkey found on this device — ＋ create one (cyan button) or import your soul with the recovery phrase';
+    if(/no_prf|no PRF|prf/i.test(m)){
+      return 'that passkey lacks PRF (Bitwarden-class managers don\'t carry it) — delete it where it was saved, create one here with a platform provider (Windows Hello / Chrome profile / Google / iCloud), or import your soul with the recovery phrase';
     }
-    if(/no_prf|prf/i.test(m)){
-      return 'that passkey lacks PRF (Bitwarden-class managers don\'t carry it yet) — use a platform passkey (Windows Hello / iCloud / Google) or the recovery phrase';
+    if(/NotAllowed|No available|not.*found|pending|aborted|InvalidState|timed out|credential|excluded|problem signing/i.test(m)){
+      // covers: user cancelled the picker, the QR cross-device dead end (the
+      // phone's provider had nothing to give), and "no passkey here at all".
+      return 'no usable bzDiD passkey came through — if the browser offered a QR for your phone, know that path only works when the phone\'s provider carries PRF (Bitwarden there intercepts; set the phone\'s default passkey provider to Google/iCloud, or just open the wallet ON the phone and create it there). Here: ＋ create one (cyan button) or import your soul with the recovery phrase';
     }
     return 'passkey lane: '+m+' — ＋ create one here, or use recovery below';
   }
@@ -747,14 +794,24 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     try{
       $('kc-stat').textContent='creating your bzDiD passkey — confirm with Hello / touch / device…';
       var en=await BZDIDKEY.enrollPasskey(SOUL||'you');
-      if(en.prfEnabled===false){
-        $('kc-stat').textContent='✗ created, but that authenticator lacks PRF — the bzDiD cannot derive from it. Use a platform passkey (delete this one) or the recovery lane.';
+      // The picker trap: a create that "confirms" instantly (a software passkey
+      // saved into the browser profile / a manager) still ends with a REAL PRF
+      // test below — we never trust the enrollment's own prfEnabled report, we
+      // re-touch the exact credential just made and make it produce the secret.
+      $('kc-stat').textContent='passkey created — touching THAT passkey once to prove PRF and derive your soul…';
+      var id;
+      try{
+        id=await identityFromTargeted(en.credentialId);
+      }catch(e2){
+        var m2=(e2&&e2.message)||String(e2||'');
+        $('kc-stat').innerHTML='✗ <b style="color:var(--amber)">created but unusable</b> — '+(/no_prf/i.test(m2)
+          ?'that provider\'s passkeys lack PRF (Bitwarden-class managers). Delete the dead passkey where it was saved, then create again choosing a <b>platform</b> provider (Windows Hello / Chrome profile / Google / iCloud), or use recovery below.'
+          :m2+' — delete the dead passkey where it was saved, then try again or use recovery below.');
         return;
       }
-      $('kc-stat').textContent='passkey created — touching it once to derive your soul…';
-      var id=await BZDIDKEY.identityFromPasskey('bnr.b');
+      saveCred(en.credentialId);
       keychainOn(id);
-      $('kc-stat').innerHTML='✓ <b style="color:var(--leaf)">bzDiD born on this device</b> — write down your recovery phrase from onboarding NOW; it is the only portable copy of this soul.';
+      $('kc-stat').innerHTML='✓ <b style="color:var(--leaf)">bzDiD born on this device</b> — connect now re-touches this exact passkey automatically. Write down your recovery phrase from onboarding NOW; it is the only portable copy of this soul.';
     }catch(e){
       $('kc-stat').textContent='create: '+(passkeyFallbackMsg(e).replace('passkey lane: ',''));
     }
