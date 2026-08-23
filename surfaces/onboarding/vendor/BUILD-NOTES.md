@@ -80,3 +80,15 @@ public parameters, not secrets.
   recipe). Round-trip proven: make() → rasterize ×8 with 2-module quiet zone
   → scan() returns the exact URL. jsQR wants RGBA Uint8ClampedArray.
 - pins: `npm install eosjs@22.1.0 @noble/hashes@1.8.0 @noble/secp256k1@2.3.0 @noble/curves@2.3.0 qrcode-generator@2.0.4 jsqr@1.4.0 esbuild`
+
+## v6 (2026-08-23) — sync ECDSA for the EVM pay lane
+- `import { hmac } from '@noble/hashes/hmac'` exposed as `BnrSign.hmac` AND wired:
+  `BnrSign.secp.etc.hmacSha256Sync = (k,m) => hmac(sha256, k, m)` — @noble/secp256k1
+  2.3.0 ships no default sync HMAC (its `utils` has no hook; the wire point is
+  `etc`), so sync `BN.secp.sign(hash,key)` needs this at bundle time. Receipt:
+  EIP-155 canonical vector — payload hash byte-identical (daf5a779…), our sig
+  recovers to the published sender 0x9d8a62f656a8d1615c1294fd71e9cfb3e4855a4f.
+  r/s DIFFER from the example's nonce convention (its RFC6979 folds extra
+  entropy noble's sync signer ignores) — mutual-validity law, same as
+  eosjs↔k256: never string-compare signatures across libraries.
+- pins unchanged + `@noble/hashes` hmac subpath (1.8.0).

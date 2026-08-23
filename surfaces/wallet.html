@@ -320,6 +320,69 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   <pre id="ac-out" style="display:none"></pre>
 </section>
 
+<section id="pay-sec" style="border-color:#3a5a2c">
+  <h2>💸 PAY — send · receive · swap</h2>
+  <div class="row" style="margin-top:8px">
+    <button id="pay-rx" class="gold">📥 receive</button>
+    <button id="pay-tx" class="gold">📤 send</button>
+    <button id="pay-sw" class="gold">🔁 swap</button>
+  </div>
+  <div class="law" id="pay-law">receive needs nothing (addresses below are yours to hand out) ·
+  send signs with your bzDiD keys exactly like every lane here · swap rides the chain's own market</div>
+
+  <div id="rx-panel" style="display:none;margin-top:10px">
+    <div style="display:flex;gap:14px;flex-wrap:wrap" id="rx-cards"></div>
+    <div class="law" style="margin-top:6px">each address derives from your soul — a fresh EVM address can be
+    forged in the key forge above (evm:<b>name</b> contexts); the Vaulta name receives A directly,
+    memo optional. QRs are drawn locally — nothing leaves this page.</div>
+  </div>
+
+  <div id="tx-panel" style="display:none;margin-top:10px">
+    <div class="row" style="margin-top:0">
+      <button id="tx-tab-v" class="gold" style="flex:1">Vaulta · A</button>
+      <button id="tx-tab-e" class="gold" style="flex:1">Arbitrum · ETH / ANT</button>
+    </div>
+    <div id="tx-v" style="display:none;margin-top:8px">
+      <div class="row">
+        <input id="sv-to" placeholder="to — Vaulta account (a-z 1-5)" spellcheck="false" style="font-family:'IBM Plex Mono',monospace;flex:2">
+        <input id="sv-amt" class="small" type="number" step="0.0001" min="0" placeholder="0.0000" style="max-width:130px;flex:0 1 130px" title="amount in A">
+        <input id="sv-memo" class="small" placeholder="memo (optional)" style="flex:2">
+        <button id="sv-go" class="gold">📤 send A</button>
+      </div>
+      <div class="law" id="sv-stat" style="margin-top:4px;min-height:18px">liquid: — </div>
+    </div>
+    <div id="tx-e" style="display:none;margin-top:8px">
+      <div class="row">
+        <select id="se-asset" style="max-width:110px;flex:0 1 110px" title="asset">
+          <option value="eth">ETH</option>
+          <option value="ant">ANT</option>
+        </select>
+        <input id="se-to" placeholder="to — 0x… address" spellcheck="false" style="font-family:'IBM Plex Mono',monospace;flex:2">
+        <input id="se-amt" class="small" type="number" step="0.0001" min="0" placeholder="0.0000" style="max-width:130px;flex:0 1 130px" title="amount">
+        <button id="se-go" class="gold">📤 send</button>
+      </div>
+      <div class="law" id="se-stat" style="margin-top:4px;min-height:18px">derived address: — · gas: reading…</div>
+    </div>
+    <div class="law" style="margin-top:6px">the EVM lane sends from your <b>derived</b> 0x address — fund it via
+    📥 receive first (it is not your Vaulta account wrapped; it's a bzDiD-forged keypair). ETH moves native;
+    ANT rides its Arbitrum contract. Gas is estimated live before you confirm the broadcast.</div>
+  </div>
+
+  <div id="sw-panel" style="display:none;margin-top:10px">
+    <div class="row" style="margin-top:0">
+      <button id="sw-dir" class="gold" style="flex:0 1 220px">direction: buy RAM with A</button>
+      <input id="sw-amt" class="small" type="number" value="8192" min="1" step="1024" style="max-width:150px;flex:0 1 150px">
+      <div class="law" style="flex:2;min-width:200px" id="sw-quote">quote: reading rammarket…</div>
+      <button id="sw-go" class="gold">🔁 swap</button>
+    </div>
+    <div class="law" id="sw-stat" style="margin-top:4px;min-height:18px">—</div>
+    <div class="law" style="margin-top:6px">the chain's own market (Bancor-shaped RAM curve — the bmesh-ram
+    receipts measured it): buy RAM for your account with liquid A, sell RAM you own back for A.
+    Token-for-token DEX swaps land on this lane next — same law, no third-party router in your face.</div>
+  </div>
+
+  <div class="law" id="pay-stat" style="margin-top:6px;min-height:20px">— choose a lane above —</div>
+</section>
 <section>
   <h2>✍ SIGN — your bzDiD signs, zero paste</h2>
   <div class="law" id="sign-law">Connect your keychain above and bridge it once — after that
@@ -363,7 +426,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 <script src="agent-dock.js?v=4"></script>
 <script src="tour.js?v=22"></script>
 <script src="onboarding/bzdid-key.js"></script>
-<script src="onboarding/vendor/bnr-sign.js?v=5"></script>
+<script src="onboarding/vendor/bnr-sign.js?v=6"></script>
 <script src="onboarding/vendor/bnr-keys.js?v=1"></script>
 <script src="onboarding/vendor/bnr-qr.js?v=1"></script>
 <script>
@@ -1526,6 +1589,247 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     }catch(e){
       out.innerHTML='<b style="color:var(--amber)">sign error:</b> '+e.message;
     }
+  };
+
+  /* ── PAY: receive · send · swap ───────────────────────────── */
+  function payStat(m){ $('pay-stat').innerHTML=m }
+  function copyText(t,btn){
+    var done=function(){ var old=btn.textContent; btn.textContent='✓ copied'; setTimeout(function(){btn.textContent=old},1200) };
+    if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(done,done);
+    else done();
+  }
+  /* RECEIVE — every address of this soul, QRs drawn locally */
+  function rxRender(){
+    var cards=[];
+    if(SOUL){
+      cards.push({t:'Vaulta · A',v:SOUL,note:'send A to this account name — memo optional'});
+    }
+    var evmAddr=null;
+    if(MPRK&&CORE){
+      var es=BZDIDKEY.deriveK1Key(MPRK,'evm:'+SOUL).seed;
+      evmAddr=CORE.evmAddr(es); es.fill(0);
+    }
+    if(evmAddr)cards.push({t:'Arbitrum · ETH + ANT',v:evmAddr,note:'the derived bzDiD keypair — fund before sending'});
+    if(MPRK){
+      var nr=BZDIDKEY.deriveK1Key(MPRK,'nostr:'+SOUL);
+      cards.push({t:'nostr · npub',v:npubFromSeed(nr.seed),note:'the comms lane'});
+      nr.seed.fill(0);
+    }
+    if(!cards.length){ $('rx-cards').innerHTML='<div class="law">connect your keychain first — the addresses derive from your soul.</div>'; return }
+    $('rx-cards').innerHTML=cards.map(function(c,i){
+      return '<div style="flex:1 1 220px;max-width:280px;border:1px solid #2c4a3a;border-radius:10px;padding:10px;background:#081810">'+
+        '<div style="font-size:10px;color:var(--faint)">'+c.t+'</div>'+
+        qrSvg(c.v)+
+        '<div style="font-size:11px;font-family:IBM Plex Mono,monospace;word-break:break-all;color:var(--leaf);margin-top:6px">'+c.v+'</div>'+
+        '<div style="font-size:9px;color:var(--dim);margin:4px 0">'+c.note+'</div>'+
+        '<button class="rxc" data-i="'+i+'" style="font-size:10px;padding:4px 10px">copy</button></div>';
+    }).join('');
+    Array.prototype.forEach.call(document.querySelectorAll('.rxc'),function(b){
+      b.onclick=function(){ copyText(cards[+b.getAttribute('data-i')].v,b) };
+    });
+  }
+  $('pay-rx').onclick=function(){ $('tx-panel').style.display='none';$('sw-panel').style.display='none';
+    $('rx-panel').style.display='block'; rxRender(); payStat('📥 receive — QRs drawn locally, nothing leaves this page'); };
+  $('pay-tx').onclick=function(){ $('rx-panel').style.display='none';$('sw-panel').style.display='none';
+    $('tx-panel').style.display='block'; txTab(localStorage.getItem('bnr_tx_tab')||'v'); };
+  $('pay-sw').onclick=function(){ $('rx-panel').style.display='none';$('tx-panel').style.display='none';
+    $('sw-panel').style.display='block'; swQuote(); };
+  function txTab(which){
+    localStorage.setItem('bnr_tx_tab',which);
+    $('tx-v').style.display=which==='v'?'block':'none';
+    $('tx-e').style.display=which==='e'?'block':'none';
+    if(which==='v')svRefresh(); else seRefresh();
+  }
+  $('tx-tab-v').onclick=function(){txTab('v')};
+  $('tx-tab-e').onclick=function(){txTab('e')};
+
+  /* SEND · Vaulta A — the proven bridge/SIGN lane with eosio::transfer */
+  function svRefresh(){
+    var liq=(LAST_ACC&&LAST_ACC.core_liquid_balance)||null;
+    $('sv-stat').innerHTML='liquid: <b>'+(liq!==null?liq:'— read BALANCES above')+'</b>'+
+      (BRIDGED?' · bridge ✓ (K1 signs)':' · <b style="color:var(--amber)">not bridged — the bridge below adds your bzDiD key first</b>');
+  }
+  function validAcct(s){ return /^[a-z1-5]{1,12}$/.test(s||'')&&/[a-z]/.test(s||'') }
+  $('sv-go').onclick=async function(){
+    var to=$('sv-to').value.trim(), amt=parseFloat($('sv-amt').value), memo=$('sv-memo').value;
+    if(!SOUL){payStat('connect your soul first');return}
+    if(!validAcct(to)){$('sv-stat').textContent='recipient must be a Vaulta account: 1-12 chars a-z 1-5';return}
+    if(!(amt>0)){$('sv-stat').textContent='amount must be > 0';return}
+    if(!K1||!BRIDGED){$('sv-stat').textContent='your bzDiD key is not on '+SOUL+'@active yet — run THE BRIDGE below first';return}
+    var q=amt.toFixed(4)+' A';
+    $('sv-stat').textContent='1/4 serializing transfer…';
+    try{
+      var abi=await rpc().get_abi('eosio.token');   // the A token lives on eosio.token, not eosio (the node taught us)
+      var types=BN.Serialize.getTypesFromAbi(BN.Serialize.createInitialTypes(),abi.abi);
+      var amap=new Map(); for(const a of abi.abi.actions)amap.set(a.name,BN.Serialize.getType(types,a.type));
+      var actz=[{actor:SOUL,permission:'active'}];
+      var sa=BN.Serialize.serializeAction({types:types,actions:amap},'eosio.token','transfer',actz,
+        {from:SOUL,to:to,quantity:q,memo:memo||''},new TextEncoder(),new TextDecoder());
+      $('sv-stat').textContent='2/4 signing with your bzDiD key…';
+      var info=await rpc().get_info();
+      var ref=await rpc().get_block(info.head_block_num-3);
+      var built=await buildSigned(info,ref,[{account:'eosio',name:'transfer',authorization:actz,data:sa.data}],null);
+      $('sv-stat').textContent='3/4 broadcasting '+q+' → '+to+'…';
+      var res=await postAny(VH,'/v1/chain/send_transaction',
+        {signatures:built.signatures,compression:0,packed_context_free_data:'',packed_trx:built.packedHex});
+      if(res&&res.transaction_id){
+        $('sv-stat').innerHTML='<b style="color:var(--leaf)">✓ sent '+q+' → '+to+'</b> · tx '+res.transaction_id.slice(0,16)+'…';
+        payStat('📤 Vaulta transfer broadcast — tx '+res.transaction_id);
+        readVaulta(SOUL);
+      } else {
+        var msg=JSON.stringify(res&&res.error||res||{}).slice(0,300);
+        $('sv-stat').innerHTML='<b style="color:var(--amber)">node refused:</b> '+msg;
+      }
+    }catch(e){ $('sv-stat').textContent='send error: '+e.message }
+    $('sv-to').value='';$('sv-amt').value='';
+  };
+
+  /* SEND · EVM — first-party EIP-155 signer: RLP + keccak + noble secp, zero new vendors */
+  function rlp(x){
+    var out=[];
+    function enc(b){
+      if(typeof b==='string')b=new TextEncoder().encode(b);
+      if(b.length===1&&b[0]<0x80)return [b[0]];
+      var l=b.length,lp=[];
+      if(l<56)lp=[0x80+l];
+      else{ var n=Math.ceil(Math.log(l)/Math.log(256))||1, t=l;
+        for(var i=n-1;i>=0;i--){lp.unshift(t%256);t=Math.floor(t/256)}
+        lp=[0xb7+n].concat(lp); }
+      return lp.concat(Array.from(b));
+    }
+    function item(x){
+      if(Array.isArray(x)){
+        var inner=[];x.forEach(function(y){inner=inner.concat(item(y))});
+        var l=inner.length;
+        if(l<56)return [0xc0+l].concat(inner);
+        var n=Math.floor(Math.log2(l)/8)+1,t2=l,lb=[];
+        for(var j2=n-1;j2>=0;j2--){lb[j2]=t2&0xff;t2=Math.floor(t2/256)}
+        return [0xf7+n].concat(lb).concat(inner);
+      }
+      if(typeof x==='bigint'){
+        if(x===0n)return [0x80];
+        var bytes=[];var t=x;
+        while(t>0n){bytes.unshift(Number(t&0xffn));t>>=8n}
+        return enc(new Uint8Array(bytes));
+      }
+      if(typeof x==='number')return item(BigInt(x));
+      return enc(x);
+    }
+    return new Uint8Array(item(x));   // the outer call carries the LIST header too
+  }
+  window.BNRPAY={rlp:rlp,evmSendRaw:evmSendRaw};  // first-party pay-lane API: RLP encoder + EVM tx builder (receipt-tested against the EIP-155 vector; keys stay in the tab frame)
+  function evmAddrOf(){ // address + fresh seed pair — seed stays in the local frame only
+    var rec=BZDIDKEY.deriveK1Key(MPRK,'evm:'+SOUL);
+    return {seed:rec.seed,addr:CORE.evmAddr(rec.seed)};
+  }
+  async function seRefresh(){
+    if(!MPRK||!CORE||!SOUL){$('se-stat').textContent='connect your keychain first';return}
+    var p=evmAddrOf(); var addr=p.addr; p.seed.fill(0);
+    var wei=await evmCall('eth_getBalance',[addr,'latest']);
+    var nonce=await evmCall('eth_getTransactionCount',[addr,'pending']);
+    var gp=await evmCall('eth_gasPrice',[]);
+    if(wei!==null&&gp!==null){
+      $('se-stat').innerHTML='derived: <b>'+addr.slice(0,12)+'…'+addr.slice(-6)+'</b> · '+
+        (parseInt(wei,16)/1e18).toFixed(6)+' ETH · nonce '+(nonce?parseInt(nonce,16):'0')+' · gas '+(parseInt(gp,16)/1e9).toFixed(3)+' gwei';
+    } else $('se-stat').textContent='arbitrum read failed — retry in a moment';
+  }
+  async function evmSendRaw(to,asset,amtEth){
+    var CH=42161n; // Arbitrum One — PUBLIC-CONSTANT
+    var p=evmAddrOf(); var from=p.addr;
+    var value=0n, data=new Uint8Array(0);
+    var toB=hexB(to.replace(/^0x/,''));   // rlp takes BYTES — a '0x…' string would be TEXT-encoded
+    if(asset==='ant'){
+      toB=hexB(ANT.replace(/^0x/,''));
+      var units=BigInt(Math.round(amtEth*1e18));
+      data=hexB('a9059cbb'+'0'.repeat(24)+to.replace(/^0x/,'')+units.toString(16).padStart(64,'0'));
+    } else {
+      value=BigInt(Math.round(amtEth*1e18));
+    }
+    var nonce=parseInt(await evmCall('eth_getTransactionCount',[from,'pending']),16)||0;
+    var gasPrice=BigInt(await evmCall('eth_gasPrice',[])||'0x0');
+    var gas=21000n;
+    if(asset==='ant'){
+      var est=await evmCall('eth_estimateGas',[{from:from,to:to,value:'0x0',data:'0x'+hexS(data)}]);
+      if(est)gas=BigInt(parseInt(est,16));
+    }
+    var pay=rlp([nonce,gasPrice,gas,toB,value,data,CH,0n,0n]);
+    var hash=BN.keccak_256(pay);
+    var sig=BN.secp.sign(hash,p.seed);
+    var v=35n+2n*CH+BigInt(sig.recovery||0);
+    var rb=new Uint8Array(32); new Uint8Array(sig.r.toString(16).padStart(64,'0').match(/../g).map(function(h){return parseInt(h,16)})).forEach(function(b,i){rb[i]=b});
+    var sb=new Uint8Array(32); new Uint8Array(sig.s.toString(16).padStart(64,'0').match(/../g).map(function(h){return parseInt(h,16)})).forEach(function(b,i){sb[i]=b});
+    var raw=rlp([nonce,gasPrice,gas,toB,value,data,v,rb,sb]);
+    p.seed.fill(0);
+    return {rawHex:'0x'+hexS(raw),from:from,gas:gas,gasPrice:gasPrice};
+  }
+  $('se-go').onclick=async function(){
+    var to=$('se-to').value.trim(), asset=$('se-asset').value, amt=parseFloat($('se-amt').value);
+    if(!MPRK||!CORE){payStat('connect your keychain first');return}
+    if(!/^0x[0-9a-fA-F]{40}$/.test(to)){$('se-stat').textContent='recipient must be a 0x… 20-byte address';return}
+    if(!(amt>0)){$('se-stat').textContent='amount must be > 0';return}
+    $('se-stat').textContent='building + signing locally (EIP-155, first-party)…';
+    try{
+      var t=await evmSendRaw(to,asset,amt);
+      var fee=Number(t.gas*t.gasPrice)/1e18;
+      $('se-stat').textContent='broadcasting… fee ≈ '+fee.toFixed(6)+' ETH';
+      var txid=await evmCall('eth_sendRawTransaction',[t.rawHex]);
+      if(txid&&/^0x[0-9a-f]{64}$/i.test(txid)){
+        await seRefresh();   // refresh first, so the receipt line stays on top
+        $('se-stat').innerHTML='<b style="color:var(--leaf)">✓ broadcast</b> · tx '+txid.slice(0,20)+'… (from '+t.from.slice(0,10)+'…)';
+        payStat('📤 Arbitrum '+asset.toUpperCase()+' sent — tx '+txid);
+      } else {
+        $('se-stat').innerHTML='<b style="color:var(--amber)">rpc refused:</b> '+String(txid&&txid.message||txid).slice(0,200);
+      }
+    }catch(e){ $('se-stat').textContent='send error: '+e.message }
+    $('se-to').value='';$('se-amt').value='';
+  };
+
+  /* SWAP · A ↔ RAM — eosio buyrambytes / sellram, live rammarket quote */
+  var SW_BUY=true;
+  async function swQuote(){
+    var p=await ramPrice();
+    if(p===null){$('sw-quote').textContent='quote: rammarket unreadable';return}
+    var n=parseInt($('sw-amt').value,10)||0;
+    if(SW_BUY)$('sw-quote').innerHTML='≈ <b>'+(p*n).toFixed(4)+' A</b> for '+n.toLocaleString()+' B of RAM (draws liquid)';
+    else $('sw-quote').innerHTML='≈ <b>'+((1/p)*n).toFixed(4)+' A</b> back for selling '+n.toLocaleString()+' B (chain sells at market)';
+    var ramQ=(LAST_ACC&&LAST_ACC.ram_quota)||0, ramU=(LAST_ACC&&LAST_ACC.ram_usage)||0;
+    $('sw-stat').innerHTML=SW_BUY?'RAM now: '+(ramU/1024).toFixed(1)+' KB used / '+(ramQ/1024).toFixed(1)+' KB owned — buy adds to the owned column'
+      :'sellable now: ≈'+((ramQ-ramU)/1024).toFixed(1)+' KB (owned − used)';
+  }
+  $('sw-dir').onclick=function(){ SW_BUY=!SW_BUY;
+    $('sw-dir').textContent=SW_BUY?'direction: buy RAM with A':'direction: sell RAM for A';
+    $('sw-amt').min=SW_BUY?1:1024; $('sw-amt').step=SW_BUY?1024:1024;
+    swQuote(); };
+  $('sw-amt').addEventListener('input',function(){ if($('sw-panel').style.display!=='none')swQuote() });
+  $('sw-go').onclick=async function(){
+    if(!SOUL||!K1||!BRIDGED){$('sw-stat').textContent='needs your bridged bzDiD key — run THE BRIDGE below first';return}
+    var n=parseInt($('sw-amt').value,10)||0;
+    if(!(n>0)){$('sw-stat').textContent='enter bytes of RAM';return}
+    var args=SW_BUY?{payer:SOUL,receiver:SOUL,bytes:n}:{account:SOUL,bytes:n};
+    var act=SW_BUY?'buyrambytes':'sellram';
+    $('sw-stat').textContent='1/3 serializing eosio::'+act+'…';
+    try{
+      var abi=await rpc().get_abi('eosio');
+      var types=BN.Serialize.getTypesFromAbi(BN.Serialize.createInitialTypes(),abi.abi);
+      var amap=new Map(); for(const a of abi.abi.actions)amap.set(a.name,BN.Serialize.getType(types,a.type));
+      var actz=[{actor:SOUL,permission:'active'}];
+      var sa=BN.Serialize.serializeAction({types:types,actions:amap},'eosio',act,actz,args,new TextEncoder(),new TextDecoder());
+      $('sw-stat').textContent='2/3 signing…';
+      var info=await rpc().get_info();
+      var ref=await rpc().get_block(info.head_block_num-3);
+      var built=await buildSigned(info,ref,[{account:'eosio',name:act,authorization:actz,data:sa.data}],null);
+      $('sw-stat').textContent='3/3 broadcasting…';
+      var res=await postAny(VH,'/v1/chain/send_transaction',
+        {signatures:built.signatures,compression:0,packed_context_free_data:'',packed_trx:built.packedHex});
+      if(res&&res.transaction_id){
+        $('sw-stat').innerHTML='<b style="color:var(--leaf)">✓ swapped</b> · tx '+res.transaction_id.slice(0,16)+'…';
+        payStat('🔁 '+(SW_BUY?'bought ':'sold ')+n.toLocaleString()+' B RAM — tx '+res.transaction_id);
+        readVaulta(SOUL);
+      } else {
+        var msg=JSON.stringify(res&&res.error||res||{}).slice(0,300);
+        $('sw-stat').innerHTML='<b style="color:var(--amber)">node refused:</b> '+msg;
+      }
+    }catch(e){ $('sw-stat').textContent='swap error: '+e.message }
   };
 
   /* ── balances (keyless, unchanged lane) ───────────────────── */
