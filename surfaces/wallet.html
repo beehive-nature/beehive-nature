@@ -950,12 +950,28 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     if(/no_prf|no PRF|prf/i.test(m)){
       return 'that passkey lacks PRF (Bitwarden-class managers don\'t carry it) — delete it where it was saved, create one here with a platform provider (Windows Hello / Chrome profile / Google / iCloud), or import your soul with the recovery phrase';
     }
+    if(/invalid domain|NotAllowedError.*domain|not allowed for this origin/i.test(m)||BAD_ORIGIN){
+      return 'passkeys CANNOT exist on this origin ('+location.hostname+' — WebAuthn needs a real domain, never an IP). You are on a local build server. The wallet lives at beehive-nature.github.io — open the public link in the banner above and every passkey lane works there.';
+    }
     if(/NotAllowed|No available|not.*found|pending|aborted|InvalidState|timed out|credential|excluded|problem signing/i.test(m)){
       // covers: user cancelled the picker, the QR cross-device dead end (the
       // phone's provider had nothing to give), and "no passkey here at all".
       return 'no usable bzDiD passkey came through — if the browser offered a QR for your phone, know that path only works when the phone\'s provider carries PRF (Bitwarden there intercepts; set the phone\'s default passkey provider to Google/iCloud, or just open the wallet ON the phone and create it there). Here: ＋ create one (cyan button) or import your soul with the recovery phrase';
     }
     return 'passkey lane: '+m+' — ＋ create one here, or use recovery below';
+  }
+  /* ORIGIN GUARD: a wallet opened on an IP (a local build server) can never run
+     a passkey lane — WebAuthn requires a registrable domain. Say it up front,
+     with the door out, instead of letting the ceremonies fail one by one. */
+  var BAD_ORIGIN=/^\d+\.\d+\.\d+\.\d+$/.test(location.hostname);
+  if(BAD_ORIGIN){
+    var b=document.createElement('div');
+    b.style.cssText='position:sticky;top:0;z-index:50;background:#4a3a1d;color:#FFD700;border:2px solid #FFD700;border-radius:10px;padding:12px 14px;margin:10px 0;font-size:13px;line-height:1.6';
+    b.innerHTML='<b>⚠ THIS IS A LOCAL BUILD SERVER ('+location.hostname+') — passkeys cannot work here.</b><br>'+
+      'WebAuthn requires a real domain, and an IP address is never one: every passkey ceremony on this origin will fail with "invalid domain".<br>'+
+      '<b>The wallet\'s real home:</b> <a href="https://beehive-nature.github.io/beehive-nature/surfaces/wallet.html" style="color:#FFD700;text-decoration:underline">beehive-nature.github.io/beehive-nature/surfaces/wallet.html</a> — open that link, bookmark it, and every lane (passkeys, bridge, QR, devices, pay) works smooth.';
+    var main=document.querySelector('main');
+    if(main)main.insertBefore(b,main.firstChild);
   }
   $('kc-create').onclick=function(){
     if(!BZDIDKEY){$('kc-stat').textContent='engine missing';return}
