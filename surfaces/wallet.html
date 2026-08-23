@@ -1424,7 +1424,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
         }
       }catch(e){
         stat.textContent='passkey enrollment skipped ('+e.message+') — bridging with the derived key only';
-        await sleep(1200);
+        await new Promise(function(r){setTimeout(r,1200)});   // let the message be read before the lane continues
       }
     }
     var newKeys=existing.concat([{key:K1.eosPub,weight:1}],waAdd).sort(function(a,b){
