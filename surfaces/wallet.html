@@ -160,6 +160,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
         <button id="kc-pass" class="gold">🗝 connect keychain (passkey)</button>
         <button id="kc-create" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">＋ create your bzDiD passkey here</button>
         <button id="kc-qr" class="gold" style="background:#231a0e;color:var(--amber);border-color:#4a3a1d">📷 QR bridge (phone ⇄ desk)</button>
+        <button id="kc-hw" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">🔑 create on a hardware key</button>
       </div>
       <div id="qr-sec" style="display:none;margin-top:10px;border:1px solid #4a3a1d;border-radius:10px;padding:12px;background:#140f06">
         <div class="row" style="justify-content:space-between;align-items:center;margin-top:0">
@@ -169,6 +170,18 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
         <div id="qr-body" style="margin-top:8px"></div>
         <div class="law" id="qr-law" style="margin-top:6px"></div>
       </div>
+      <div id="dm-sec" style="display:none;margin-top:10px;border:1px solid #1d4655;border-radius:10px;padding:12px;background:#081820">
+        <div class="row" style="justify-content:space-between;align-items:center;margin-top:0">
+          <b style="color:var(--cyan)">🛡 DEVICE MANAGER</b>
+          <button id="dm-x" style="font-size:11px">✕ close</button>
+        </div>
+        <div class="law" style="margin-top:4px">every device that permanently holds this soul, as a seal under its own
+        passkey — the registry is a soul-signed nostr event (kind 30078) any device can read, extend, revoke.
+        Revoke de-syncs a device (its cached seal keeps working offline — honest limit; a full kill is the recovery-rotate
+        lane). Sessions via the QR bridge never enter this list.</div>
+        <div id="dm-body" style="margin-top:8px"></div>
+        <div class="law" id="dm-stat" style="margin-top:6px">— registry not loaded —</div>
+      </div>
       <div class="law" style="margin-top:4px">The passkey must live in a <b>PRF-capable authenticator</b>:
       platform ones (Windows Hello, the Chrome profile, Google Password Manager, iCloud Keychain) work;
       most third-party managers (Bitwarden, 1Password &amp; friends) don't yet. <b>Create never takes a
@@ -177,7 +190,9 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
       that dead passkey should be deleted (Chrome: ⋮ → Passwords and autofill → Passkeys). A software
       passkey confirming instantly is fine; PRF is proven by the touch, not the speed. Hardware keys
       must be FIDO2.1-class with a PIN set and room for a resident credential — older U2F keys won't
-      be offered. Cross-device (the phone-camera QR) works only when the <b>phone's</b> provider has
+      be offered. If Windows said "unrecognized" when you inserted your key, use the dedicated
+      <b>🔑 create on a hardware key</b> button — it routes through the browser's native USB lane
+      (no Windows passkey picker at all), which is the fix for exactly that error. Cross-device (the phone-camera QR) works only when the <b>phone's</b> provider has
       PRF — on the phone set the default passkey provider to Google/iCloud, or simply open this wallet
       on the phone itself. After a successful create, this wallet re-touches that same passkey
       automatically — no "which passkey?" picker ever again.
@@ -205,6 +220,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
       </div>
       <div class="row" id="kc-outrow" style="display:none">
         <button id="kc-out" style="font-size:10px;padding:6px 12px;min-height:32px">disconnect + scrub keys from memory</button>
+        <button id="dm-open" style="font-size:10px;padding:6px 12px;min-height:32px">🛡 devices</button>
       </div>
     </div>
   </div>
@@ -720,7 +736,9 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   }
   var CRED_ID=null; try{CRED_ID=localStorage.getItem('bnr_cred')||null}catch(e){}
   function saveCred(id){ CRED_ID=id||null; try{ id?localStorage.setItem('bnr_cred',id):localStorage.removeItem('bnr_cred') }catch(e){} }
-  function identityFromTargeted(credId){
+  /* raw PRF secret from ONE exact credential — the primitive both the founding
+     path (identityFromTargeted) and the device-seal path (wrapKeyFromPrf) ride on */
+  function prfEvalTargeted(credId){
     return navigator.credentials.get({publicKey:{
       challenge: crypto.getRandomValues(new Uint8Array(32)),
       timeout: 6e4,
@@ -733,12 +751,63 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
       if(!first)throw new Error('no_prf_output: that passkey exists but lacks PRF (Bitwarden-class managers don\'t carry it) — delete it where it was saved, then create again with a platform provider');
       var out=new Uint8Array(first);
       if(out.length!==32)throw new Error('PRF output '+out.length+' bytes, expected 32');
+      return out;
+    });
+  }
+  function identityFromTargeted(credId){
+    return prfEvalTargeted(credId).then(function(out){
       var mprk=BZDIDKEY.masterPrkFromPrfSecret(out);
       out.fill(0);
       var id2=BZDIDKEY.deriveIdentity(mprk,'bnr.b');
       id2.masterPrk=mprk;
       return id2;
     });
+  }
+
+  /* ── device seals — this browser holds the soul under its own passkey ──
+     Founder law: "revoke and add these devices at will." A device's passkey
+     PRF no longer IS the soul (except for the founding device); it WRAPS it:
+     Ki = HKDF(sha256(PRF), info bnr-device-wrap-v1) → AES-256-GCM over the
+     masterPrk. The sealed blob is ciphertext only (key law); the device list
+     syncs through a soul-signed nostr registry event (kind 30078) any
+     soul-holder can read, extend, and revoke from. */
+  function loadSeal(){ try{return JSON.parse(localStorage.getItem('bnr_seal')||'null')}catch(e){return null} }
+  function saveSeal(s){ try{ s?localStorage.setItem('bnr_seal',JSON.stringify(s)):localStorage.removeItem('bnr_seal') }catch(e){} }
+  async function wrapKeyFromPrf(prfSecret){
+    var ikm=BN.sha256(prfSecret);
+    var ik=await crypto.subtle.importKey('raw',ikm,'HKDF',false,['deriveKey']);
+    return crypto.subtle.deriveKey({name:'HKDF',hash:'SHA-256',salt:new TextEncoder().encode('bnr-device-wrap-salt-v1'),info:new TextEncoder().encode('bnr-device-wrap-v1')},
+      ik,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+  }
+  async function sealSoul(prfSecret,masterPrk){
+    var ki=await wrapKeyFromPrf(prfSecret);
+    var iv=crypto.getRandomValues(new Uint8Array(12));
+    var ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv:iv},ki,masterPrk.slice()));
+    return {v:1,iv:bytesToB64u(iv),ct:bytesToB64u(ct),at:new Date().toISOString()};
+  }
+  async function unsealSoul(seal,prfSecret){
+    var ki=await wrapKeyFromPrf(prfSecret);
+    var pt=new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv:b64uToBytes(seal.iv)},ki,b64uToBytes(seal.ct)));
+    if(pt.length!==32)throw new Error('seal opened to '+pt.length+'B, expected 32');
+    return pt;
+  }
+  /* connect order: a sealed device opens the soul through its wrap; the founding
+     device (whose PRF IS the soul) falls through to the direct path */
+  function connectSoul(){
+    var seal=loadSeal();
+    if(seal&&seal.credId){
+      return prfEvalTargeted(seal.credId).then(async function(prf){
+        var mprk=await unsealSoul(seal,prf);
+        prf.fill(0);
+        var id2=BZDIDKEY.deriveIdentity(mprk,'bnr.b');
+        id2.masterPrk=mprk;
+        return id2;
+      }).catch(function(e){
+        if(/no_prf/i.test(e&&e.message||''))throw e;   // real refusal — don't mask it
+        return (CRED_ID?identityFromTargeted(CRED_ID):BZDIDKEY.identityFromPasskey('bnr.b'));
+      });
+    }
+    return (CRED_ID?identityFromTargeted(CRED_ID):BZDIDKEY.identityFromPasskey('bnr.b'));
   }
 
   /* ── keychain connect ceremony ────────────────────────────── */
@@ -765,7 +834,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
       var sup=await BZDIDKEY.prfBrowserSupport();
       if(sup===false){$('kc-stat').textContent='this browser lacks PRF — use the recovery lane below';return}
       $('kc-stat').textContent=CRED_ID?'touching your bzDiD passkey (the exact one this wallet made)…':'touch your passkey…';
-      var id=await (CRED_ID?identityFromTargeted(CRED_ID):BZDIDKEY.identityFromPasskey('bnr.b'));
+      var id=await connectSoul();
       keychainOn(id);
     }catch(e){
       $('kc-stat').textContent=passkeyFallbackMsg(e);
@@ -791,7 +860,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     window.removeEventListener('keydown',autoConnect);
     $('kc-stat').textContent='auto-connecting your bzDiD — touch your passkey…';
     CEREMONY=true;
-    (CRED_ID?identityFromTargeted(CRED_ID):BZDIDKEY.identityFromPasskey('bnr.b')).then(keychainOn).catch(function(e){
+    connectSoul().then(keychainOn).catch(function(e){
       if(!MPRK)$('kc-stat').textContent='auto-connect: '+passkeyFallbackMsg(e);
     }).finally(function(){CEREMONY=false});
   }
@@ -812,47 +881,190 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     }
     return 'passkey lane: '+m+' — ＋ create one here, or use recovery below';
   }
-  $('kc-create').onclick=async function(){
+  $('kc-create').onclick=function(){
     if(!BZDIDKEY){$('kc-stat').textContent='engine missing';return}
-    if(CEREMONY){
-      $('kc-stat').textContent='a passkey prompt is already open — finish or dismiss it, then press create again';
-      return;
-    }
+    // The picker trap: a create that "confirms" instantly (a software passkey
+    // saved into the browser profile / a manager) still ends with a REAL PRF
+    // test inside runCreate — we never trust the enrollment's own prfEnabled
+    // report; the re-touch of the exact credential just made is the proof.
+    runCreate(function(){ return BZDIDKEY.enrollPasskey(SOUL||'you') },
+      'creating your bzDiD passkey — confirm with Hello / touch / device…');
+  };
+
+  /* ── HARDWARE-KEY lane ────────────────────────────────────────
+     "unrecognized" in Windows' passkey picker is the PICKER failing to route,
+     not your key. Requesting a cross-platform authenticator hands the ceremony
+     to the browser's native USB/CTAP stack instead — no platform picker, no QR
+     detour. The key must still prove PRF at the touch (same law as everything
+     here); a U2F-only or pre-PRF firmware key is refused honestly. */
+  async function enrollHardware(){
+    var cred=await navigator.credentials.create({publicKey:{
+      rp:{name:'BNR wallet'},
+      user:{id:crypto.getRandomValues(new Uint8Array(16)),name:SOUL||'you',displayName:SOUL||'you'},
+      challenge:crypto.getRandomValues(new Uint8Array(32)),
+      pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
+      authenticatorSelection:{residentKey:'required',userVerification:'required',authenticatorAttachment:'cross-platform'},
+      timeout:9e4,
+      extensions:{prf:{}}
+    }});
+    if(!cred)throw new Error('hardware create returned null');
+    return {credentialId:cred.id};
+  }
+  async function runCreate(enrollFn,label){
+    if(CEREMONY){$('kc-stat').textContent='a passkey prompt is already open — finish or dismiss it, then try again';return}
     CEREMONY=true;
     try{
-      $('kc-stat').textContent='creating your bzDiD passkey — confirm with Hello / touch / device…';
-      var en=await BZDIDKEY.enrollPasskey(SOUL||'you');
-      // The picker trap: a create that "confirms" instantly (a software passkey
-      // saved into the browser profile / a manager) still ends with a REAL PRF
-      // test below — we never trust the enrollment's own prfEnabled report, we
-      // re-touch the exact credential just made and make it produce the secret.
+      $('kc-stat').textContent=label;
+      var en=await enrollFn();
       $('kc-stat').textContent='passkey created — touching THAT passkey once to prove PRF and derive your soul…';
       var id;
-      try{
-        id=await identityFromTargeted(en.credentialId);
-      }catch(e2){
+      try{ id=await identityFromTargeted(en.credentialId); }
+      catch(e2){
         var m2=(e2&&e2.message)||String(e2||'');
         $('kc-stat').innerHTML='✗ <b style="color:var(--amber)">created but unusable</b> — '+(/no_prf/i.test(m2)
-          ?'that provider\'s passkeys lack PRF (Bitwarden-class managers). Delete the dead passkey where it was saved, then create again choosing a <b>platform</b> provider (Windows Hello / Chrome profile / Google / iCloud), or use recovery below.'
-          :m2+' — delete the dead passkey where it was saved, then try again or use recovery below.');
+          ?'that key lacks PRF (U2F-only or pre-FIDO2.1 firmware). Delete it, or keep it for the Vaulta tx passkey lane below — but it cannot hold a bzDiD.'
+          :m2);
         return;
       }
       saveCred(en.credentialId);
       keychainOn(id);
       $('kc-stat').innerHTML='✓ <b style="color:var(--leaf)">bzDiD born on this device</b> — connect now re-touches this exact passkey automatically. Write down your recovery phrase from onboarding NOW; it is the only portable copy of this soul.';
     }catch(e){
-      // In the CREATE lane a pending/abort error does NOT mean "no passkey found" —
-      // saying that here is what made this button look like it only ever searched.
       var m=(e&&e.message)||String(e||'');
-      if(/pending|abort/i.test(m)){
-        $('kc-stat').textContent='create: another passkey prompt was still open, so the browser refused this one — try again now';
-      } else if(/InvalidState/i.test(m)){
-        $('kc-stat').textContent='create: this device already holds a bzDiD passkey for this site — use connect instead of create';
-      } else {
-        $('kc-stat').textContent='create: '+(passkeyFallbackMsg(e).replace('passkey lane: ',''));
-      }
+      if(/pending|abort/i.test(m))$('kc-stat').textContent='create: another passkey prompt was still open — try again now';
+      else if(/InvalidState/i.test(m))$('kc-stat').textContent='create: this device already holds one — use connect instead';
+      else $('kc-stat').textContent='create: '+(passkeyFallbackMsg(e).replace('passkey lane: ',''));
     }finally{ CEREMONY=false }
+  }
+  $('kc-hw').onclick=function(){
+    if(!BZDIDKEY){$('kc-stat').textContent='engine missing';return}
+    runCreate(enrollHardware,'creating on the hardware key — insert it, enter its PIN, tap when it blinks…');
   };
+
+  /* ── DEVICE MANAGER — add and revoke permanent soul-holders ── */
+  function soulNostr(){
+    var seed=BZDIDKEY.deriveK1Key(MPRK,'nostr:bnr-devices').seed.slice();
+    var pub=BN.schnorr.getPublicKey(seed);
+    return {sk:seed,pub:pub,pubHex:toHex(pub)};
+  }
+  function dmLocal(){ return loadSeal()||null }
+  function dmRender(devices,reg){
+    var me=dmLocal();
+    var rows=(devices||[]).map(function(d){
+      var here=me&&me.credId===d.credId;
+      return '<div class="row" style="justify-content:space-between;align-items:center;border-top:1px solid #123;padding:6px 0">'+
+        '<div style="flex:1;min-width:120px"><b style="color:'+(here?'var(--leaf)':'var(--ink)')+'">'+(d.name||'device')+(here?' · this browser':'')+'</b>'+
+        '<div style="font-size:9px;color:var(--faint)">'+d.fp+' · added '+(d.at||'?')+'</div></div>'+
+        '<button class="dm-rv" data-c="'+d.credId+'" style="font-size:10px;color:#e08;border-color:#412">revoke</button></div>';
+    }).join('');
+    if(!rows)rows='<div class="law">no permanent devices registered yet</div>';
+    $('dm-body').innerHTML=
+      '<div style="font-size:10px;color:var(--faint)">registry: '+ (reg?('<span style="color:var(--leaf)">'+reg.n+' device(s) · last sync '+new Date(reg.at*1000).toLocaleTimeString()+'</span>'):'not found on relays (new soul, or never published)')+'</div>'+
+      rows+
+      '<div class="row" style="margin-top:10px">'+
+        '<button id="dm-add" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">＋ make THIS device permanent</button>'+
+        '<button id="dm-addhw" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">＋ on a hardware key</button>'+
+      '</div>'+
+      '<div class="law" style="margin-top:4px">add = a passkey on THIS browser wraps the soul (platform, or a FIDO key via its native USB lane). The soul must be live here first — connect, QR-bridge from another device, or recovery.</div>';
+    Array.prototype.forEach.call(document.querySelectorAll('.dm-rv'),function(b){
+      b.onclick=function(){ dmRevoke(b.getAttribute('data-c')); };
+    });
+    var add=$('dm-add'); if(add)add.onclick=function(){dmAdd(function(){return BZDIDKEY.enrollPasskey(SOUL||'this-device')})};
+    var addhw=$('dm-addhw'); if(addhw)addhw.onclick=function(){dmAdd(enrollHardware)};
+  }
+  function dmWs(cb){
+    var socks=[],got=false,timer;
+    QR_RELAYS.forEach(function(rs){
+      var w; try{w=new WebSocket(rs)}catch(e){return}
+      w.onopen=function(){
+        var sk=soulNostr();
+        w.send(JSON.stringify(['REQ','bnrdm'+sk.pubHex.slice(0,8),{authors:[sk.pubHex],kinds:[30078],'#d':['bnr-devices-v1'],limit:1}]));
+      };
+      w.onmessage=function(m){
+        if(got)return;
+        var t; try{t=JSON.parse(m.data)}catch(e){return}
+        if(!t||t[0]!=='EVENT'||!t[2])return;
+        var ev=t[2];
+        try{
+          if(!BN.schnorr.verify(hexBytes(ev.sig),hexBytes(ev.id),hexBytes(ev.pubkey)))return;
+          var o=JSON.parse(ev.content);
+          if(!o.devices)return;
+          got=true; clearTimeout(timer);
+          socks.forEach(function(x){try{x.close()}catch(e){}});
+          cb(o.devices,{n:o.devices.length,at:ev.created_at});
+        }catch(e){}
+      };
+      socks.push(w);
+    });
+    timer=setTimeout(function(){ if(!got){ socks.forEach(function(x){try{x.close()}catch(e){}}); cb(null,null); } },6000);
+  }
+  function dmOpen(){
+    if(!MPRK){$('kc-stat').textContent='connect the keychain first — the manager is soul-held';return}
+    $('dm-sec').style.display='block';
+    $('dm-stat').textContent='loading registry from relays…';
+    dmWs(function(devices,reg){
+      DM_REG=devices||[];
+      dmRender(DM_REG,reg);
+      $('dm-stat').textContent=reg?'registry loaded':'no registry on the relays yet — this soul\'s device list starts here';
+    });
+  }
+  var DM_REG=[];
+  $('dm-open').onclick=dmOpen;
+  $('dm-x').onclick=function(){ $('dm-sec').style.display='none'; };
+  function dmPublish(devices){
+    var sn=soulNostr();
+    var ev=nostrEvent(sn.sk,JSON.stringify({v:1,devices:devices}),[['d','bnr-devices-v1'],['alt','BNR bzDiD device registry']],30078);
+    var sent=0;
+    QR_RELAYS.forEach(function(rs){
+      var w; try{w=new WebSocket(rs)}catch(e){return}
+      w.onopen=function(){ w.send(JSON.stringify(['EVENT',ev])); sent++;
+        $('dm-stat').textContent='registry published to '+sent+' relay(s)'; };
+    });
+    return ev;
+  }
+  async function dmAdd(enrollFn){
+    if(!MPRK){$('dm-stat').textContent='soul not live here';return}
+    var me=dmLocal();
+    if(me){ $('dm-stat').textContent='this browser already holds a permanent seal (made '+me.at+')'; return; }
+    if(CEREMONY){$('dm-stat').textContent='a passkey prompt is already open';return}
+    CEREMONY=true;
+    try{
+      $('dm-stat').textContent='step 1 — create the device passkey…';
+      var en=await enrollFn();
+      $('dm-stat').textContent='step 2 — proving PRF on the new passkey…';
+      var prf=await prfEvalTargeted(en.credentialId);
+      $('dm-stat').textContent='step 3 — sealing the soul under it…';
+      var seal=await sealSoul(prf,MPRK);
+      prf.fill(0);
+      seal.credId=en.credentialId;
+      seal.name=(navigator.userAgent||'').match(/Windows|Mac|Linux|Android|iPhone|iPad/)||['device'];
+      seal.name=seal.name[0]+' · '+(SOUL||'bzDiD');
+      var id2=BZDIDKEY.deriveIdentity(MPRK.slice(),'bnr.b');
+      seal.fp=id2.fingerprint.words;
+      saveCred(en.credentialId);
+      saveSeal(seal);
+      var devs=(DM_REG&&DM_REG.length?DM_REG.slice():[]);
+      devs=devs.filter(function(d){return d.credId!==seal.credId});
+      devs.push({credId:seal.credId,name:seal.name,fp:seal.fp,at:seal.at});
+      DM_REG=devs;
+      dmPublish(devs);
+      dmRender(devs,{n:devs.length,at:Math.floor(Date.now()/1000)});
+      $('dm-stat').textContent='✓ this device now holds the soul permanently — connect lands here without QR or recovery';
+    }catch(e){
+      $('dm-stat').textContent='add failed: '+((e&&e.message)||e)+' — nothing was stored';
+    }finally{ CEREMONY=false }
+  }
+  function dmRevoke(credId){
+    if(!MPRK)return;
+    var devs=(DM_REG||[]).filter(function(d){return d.credId!==credId});
+    dmPublish(devs);
+    DM_REG=devs;
+    var me=dmLocal();
+    var selfGone=me&&me.credId===credId;
+    if(selfGone){ saveSeal(null); }
+    dmRender(devs,{n:devs.length,at:Math.floor(Date.now()/1000)});
+    $('dm-stat').textContent='revoked'+(selfGone?' (this browser\'s seal deleted too — connect falls back to passkey/recovery)':' — the device keeps any cached copy offline; full kill is the recovery-rotate lane');
+  }
 
   /* ── QR BRIDGE — phone ⇄ desk login, first-party ─────────────
      The desktop shows a QR; the phone (this same page, keychain already live)
@@ -887,9 +1099,9 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     return crypto.subtle.deriveKey({name:'HKDF',hash:'SHA-256',salt:sid,info:new TextEncoder().encode('bnr-qr-bridge-v1')},
       ik,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
   }
-  function nostrEvent(sk,content,sid){
+  function nostrEvent(sk,content,tags,kind){
     var pub=BN.schnorr.getPublicKey(sk);                       // 32B x-only — nostr form
-    var ev={pubkey:toHex(pub),created_at:Math.floor(Date.now()/1000),kind:20107,tags:[['sid',toHex(sid)]],content:content};
+    var ev={pubkey:toHex(pub),created_at:Math.floor(Date.now()/1000),kind:kind||20107,tags:tags||[],content:content};
     var ser='[0,"'+ev.pubkey+'",'+ev.created_at+','+ev.kind+','+JSON.stringify(ev.tags)+','+JSON.stringify(ev.content)+']';
     ev.id=toHex(BN.sha256(new TextEncoder().encode(ser)));
     ev.sig=toHex(BN.schnorr.sign(hexBytes(ev.id),sk));
@@ -1051,7 +1263,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
       var iv=crypto.getRandomValues(new Uint8Array(12));
       var key=await bridgeKey(esk,QRB.req.pub,QRB.req.sid);
       var ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv:iv},key,MPRK.slice()));
-      var ev=nostrEvent(sk,JSON.stringify({v:1,epk:bytesToB64u(epk),iv:bytesToB64u(iv),ct:bytesToB64u(ct)}),QRB.req.sid);
+      var ev=nostrEvent(sk,JSON.stringify({v:1,epk:bytesToB64u(epk),iv:bytesToB64u(iv),ct:bytesToB64u(ct)}),[['sid',toHex(QRB.req.sid)]]);
       sk.fill&&sk.fill(0); esk.fill&&esk.fill(0);   // event carries the sig now — scrub both throwaways
       var sent=0;
       $('qr-body').innerHTML='<div style="font-size:12px">sending the encrypted grant…</div><div id="qr-relaystat" style="font-size:11px;color:var(--dim);margin-top:6px">relays: 0 ok</div>';
