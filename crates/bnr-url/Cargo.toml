@@ -1,0 +1,14 @@
+[package]
+name = "bnr-url"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "The bnr:// URL scheme — parse, normalize, validate (ORDER cC, SPRINT-2026-08-23-N)"
+
+# NO DEPENDENCIES, deliberately. Two reasons, both load-bearing:
+#   1. ORDER cC requires a two-gate audit for any dependency added. std needs none.
+#   2. A general URL crate would be WRONG here even if it were free. `url`/`idna`
+#      implement RFC 3986 + UTS-46, which ACCEPT names the .b registry refuses
+#      (see the label law in src/lib.rs). This parser must refuse what the
+#      registry refuses, not what the web refuses.
+[dependencies]

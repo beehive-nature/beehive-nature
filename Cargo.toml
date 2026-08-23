@@ -50,6 +50,7 @@ members = [
     "crates/bnr-keys",
     "crates/bmesh-serve",
     "crates/bindexer",
+    "crates/bnr-url",
     "crates/bnr-archive",
 ]
 
