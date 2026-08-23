@@ -107,11 +107,14 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 
 <section id="kc-sec">
   <h2>🗝 THE KEYCHAIN — your bzDiD holds every key</h2>
-  <div class="law">Touch your passkey once per visit — the WebAuthn PRF ceremony re-derives your
-  <b>masterPRK</b> in this tab's memory (never stored, never sent). From it we derive:
-  the <b>ed25519 soul record key</b> (context <b>bnr.b</b>, same as onboarding) and the
-  <b>Vaulta K1 signing key</b> (context <b>vaulta:yourname</b>, secp256k1). No passkey here, or it
-  lacks PRF? Use your 24-word recovery phrase below — same soul, same keys.</div>
+  <div class="law"><b>Automatic:</b> your first tap or keypress anywhere on this page connects the
+  keychain by itself (the WebAuthn ceremony needs one touch of yours — browsers' law, not ours).
+  The PRF ceremony re-derives your <b>masterPRK</b> in this tab's memory (never stored, never
+  sent). From it we derive: the <b>ed25519 soul record key</b> (context <b>bnr.b</b>, same as
+  onboarding), the <b>Vaulta K1 signing key</b> (context <b>vaulta:yourname</b>), your <b>0x/EVM</b>
+  and <b>nostr npub</b> rails (<a href="keys/addresses.html">your two addresses</a>) — and as many
+  more as you forge below. No passkey here, or it lacks PRF? Use your 24-word recovery phrase —
+  same soul, same keys.</div>
   <div class="ring-wrap">
     <svg width="230" height="230" viewBox="0 0 230 230" aria-label="keychain ring">
       <circle cx="115" cy="115" r="86" fill="none" stroke="#243026" stroke-width="1"/>
@@ -193,6 +196,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     <button id="forge-go" class="gold">⚒ FORGE KEY</button>
     <button id="forge-evm" style="font-size:11px">+ evm:<span id="forge-soulname">soul</span></button>
     <button id="forge-vaulta" style="font-size:11px">+ vaulta:<span id="fs2">soul</span></button>
+    <button id="forge-nostr" style="font-size:11px">+ nostr:<span id="fs3">soul</span></button>
   </div>
   <div class="law" id="forge-stat" style="margin-top:6px;min-height:20px">— the forge is unlimited; contexts are names, keys derive on demand —</div>
 </section>
@@ -232,10 +236,17 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 <section id="bridge-sec" style="display:none;border-color:var(--gold)">
   <h2>🌉 THE BRIDGE — one time, then never manual again</h2>
   <div class="law">Your bzDiD-derived K1 key is not on your account yet. Paste your existing
-  <b>active</b> private key <b>once</b> — we build an updateauth that <b>adds</b> the derived key
-  alongside every key already on your account (nothing removed, threshold unchanged), sign with
-  your old key, broadcast, then this field disappears from your life. The old key stays in tab
-  memory only and is scrubbed the moment the transaction is sent.</div>
+  <b>active</b> private key <b>once</b> — we build an updateauth that <b>adds</b> your bzDiD keys
+  alongside every key already on your account (nothing removed, threshold 1: <b>the derived key
+  AND the account passkey can both sign</b>), sign with your old key, broadcast, and this field
+  disappears from your life. The old key stays in tab memory only and is scrubbed the moment the
+  transaction is sent.</div>
+  <div class="row">
+    <label class="law" style="display:flex;align-items:center;gap:7px;cursor:pointer;flex:1 1 100%">
+      <input type="checkbox" id="br-wa" checked style="flex:0;min-width:14px;height:14px">
+      also enroll an account passkey on this origin (PUB_WA at threshold 1 — touch/passkey can sign too)
+    </label>
+  </div>
   <div class="row">
     <input id="br-wif" class="small" type="password" placeholder="existing ACTIVE private key (5K… / L… / K… / PVT_K1_…)" autocomplete="off" spellcheck="false" style="flex:2">
     <button id="br-go" class="gold">BRIDGE MY bzDiD</button>
@@ -248,9 +259,10 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   <h2>🏭 THE ACCOUNT FORGE — Vaulta accounts born from your bzDiD</h2>
   <div class="law">Your <b>bridged</b> account signs <b>newaccount</b>; the new account's owner and
   active keys derive from your bzDiD (contexts <b>vaulta:&#8203;name/owner</b> and
-  <b>vaulta:&#8203;name/active</b>) — no key is exported, written down, or imported, ever. Chain
-  economics stay honest: the <b>creator pays RAM</b> (live price below) and the account wakes when
-  it holds resources. Near infinite: every account born this way signs with your keychain.</div>
+  <b>vaulta:&#8203;name/active</b>) — no key is exported, written down, or imported, ever.
+  Vaulta economics, stated honestly: <b>broadcasting draws on staked CPU/NET, not liquid</b>
+  (a 0.0000 liquid balance does not block transactions); the <b>RAM purchase draws from liquid</b>
+  (live price below). Near infinite: every account born this way signs with your keychain.</div>
   <div class="row">
     <input id="ac-name" placeholder="new account name — exactly 12 chars: a-z 1-5, starts with a letter" spellcheck="false" style="font-family:'IBM Plex Mono',monospace">
     <button id="ac-go" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">🏭 FORGE ACCOUNT</button>
@@ -279,6 +291,12 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     <button id="tx-q" class="green" style="font-size:11px">⏱ preset: reserve q.b</button>
     <button id="tx-go" class="green" style="flex:1">SIGN + BROADCAST with bzDiD key</button>
   </div>
+  <div class="row" id="tx-wa-row" style="display:none">
+    <label class="law" style="display:flex;align-items:center;gap:7px;cursor:pointer">
+      <input type="checkbox" id="tx-wa" style="flex:0;min-width:14px;height:14px">
+      ✋ sign with the account passkey instead (PUB_WA at threshold 1 — either signer works)
+    </label>
+  </div>
   <pre id="tx-out" style="display:none"></pre>
 </section>
 
@@ -294,13 +312,14 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 
 </main>
 <footer>
-  🗝 the BNR wallet · bzDiD is the wallet · first-party only · vendored eosjs + noble (IIFE build receipt in vendor/BUILD-NOTES.md) · zero custody<br>
-  static · keys live in tab memory only · AGPL-3.0-only · <a href="index.html">the hub</a> · this page: surfaces/wallet.html
+  🗝 the BNR wallet · bzDiD is the wallet · <span id="core-badge">core: checking…</span> · action translation: vendored eosjs (ABI serializer)<br>
+  static · keys live in tab memory only · Rust core: crates/bnr-keys · AGPL-3.0-only · <a href="index.html">the hub</a> · this page: surfaces/wallet.html
 </footer>
 <script src="agent-dock.js?v=4"></script>
 <script src="tour.js?v=22"></script>
 <script src="onboarding/bzdid-key.js"></script>
-<script src="onboarding/vendor/bnr-sign.js?v=2"></script>
+<script src="onboarding/vendor/bnr-sign.js?v=4"></script>
+<script src="onboarding/vendor/bnr-keys.js?v=1"></script>
 <script>
 (function(){
   var $=function(i){return document.getElementById(i)};
@@ -309,9 +328,10 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   var LIVE_HOST=null;
   var SOUL=null;
   var MPRK=null;          // Uint8Array(32) masterPRK — tab memory only
-  var K1=null;            // {wif, eosPub, pubK1} — tab memory only
+  var K1=null;            // {seed, wif, eosPub, pubK1} — tab memory only
   var BRIDGED=null;       // true/false/unknown
-  var BN=null;            // BnrSign bundle
+  var BN=null;            // BnrSign bundle (vendored eosjs lane)
+  var CORE=null;          // first-party Rust core (bnr-keys.wasm) — armed only if its self-test passed
 
   // nothing freezes silently: surface any stray handler error in the page
   window.addEventListener('error',function(ev){
@@ -374,15 +394,86 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   function deriveK1(){
     if(!MPRK||!SOUL)return;
     var rec=BZDIDKEY.deriveK1Key(MPRK,'vaulta:'+SOUL);
-    var w=wif37(rec.seed);
-    rec.seed.fill(0);
-    var pk=BN.PrivateKey.fromString(w);
-    K1={wif:w, eosPub:pk.getPublicKey().toLegacyString(), pubK1:pk.getPublicKey().toString()};
+    var seed=rec.seed.slice();
+    var w,eos,pub1;
+    if(CORE){
+      w=CORE.wif37(seed); eos=CORE.eosPub(seed); pub1=CORE.pubK1(seed);
+    } else {
+      w=wif37(seed);
+      var pk=BN.PrivateKey.fromString(w);
+      eos=pk.getPublicKey().toLegacyString(); pub1=pk.getPublicKey().toString();
+    }
+    K1={seed:seed,wif:w,eosPub:eos,pubK1:pub1};
   }
   function scrubAll(){
     if(MPRK){MPRK.fill(0);MPRK=null}
+    if(K1&&K1.seed){K1.seed.fill(0)}
     K1=null;BRIDGED=null;
   }
+
+  /* ── account passkey lane: enroll an our-origin WebAuthn key, build its PUB_WA ──
+     Founder law: "a passkey/hardware WebAuthn key at threshold 1 — both can sign." */
+  function b64r(bytes){                    // EOSIO base64r = standard base64, no padding
+    var s='',i;
+    for(i=0;i<bytes.length;i+=0x8000)s+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));
+    return btoa(s).replace(/=+$/,'');
+  }
+  function b64url(bytes){
+    var s=b64r(bytes);
+    return s.replace(/\+/g,'-').replace(/\//g,'_');
+  }
+  // minimal CBOR walk for the attestation's authData byte-string (fmt text / attStmt map / authData bytes)
+  function authDataFromAttestation(att){
+    var i=0;
+    if(att[i]>>5!==3)return null; i++;                       // map(3)
+    var entries=att[i-1]&0x1f; if(entries<1||entries>23){     // indefinite/long maps: not our case
+      if(entries===31){/* indefinite — walk until break */entries=99}
+    }
+    var authData=null,n=0;
+    while(i<att.length&&n<entries){
+      var t=att[i];
+      if((t>>5)===3){                                        // text key
+        var len=t&0x1f; var key=String.fromCharCode.apply(null,att.subarray(i+1,i+1+len)); i+=1+len;
+        var vt=att[i];
+        if(key==='authData'){
+          if(vt===0x58){var l8=att[i+1];authData=att.subarray(i+2,i+2+l8);break}
+          if(vt===0x59){var l16=(att[i+1]<<8)|att[i+2];authData=att.subarray(i+3,i+3+l16);break}
+          if(vt===0x5a){var l32=((att[i+1]<<24)|(att[i+2]<<16)|(att[i+3]<<8)|att[i+4])>>>0;authData=att.subarray(i+5,i+5+l32);break}
+        } else if((vt>>5)===5||(vt>>5)===0&&key==='attStmt'){ // skip maps/values we don't need
+          // skipping arbitrary CBOR is messy; our attestation shape is well-known,
+          // and if it deviates the caller reports honestly
+          return null;
+        }
+      }
+      n++;
+    }
+    return authData;
+  }
+  // enroll a NEW passkey on THIS origin; returns {pub:PUB_WA_…, credIdHex, credIdB64} or throws honestly
+  async function enrollAccountPasskey(){
+    var cred=await navigator.credentials.create({publicKey:{
+      rp:{name:'BNR wallet',id:location.hostname},
+      user:{id:crypto.getRandomValues(new Uint8Array(16)),name:SOUL,displayName:SOUL+' (account passkey)'},
+      challenge:crypto.getRandomValues(new Uint8Array(32)),
+      pubKeyCredParams:[{type:'public-key',alg:-7}],
+      authenticatorSelection:{residentKey:'preferred',userVerification:'required'},
+      timeout:60000
+    }});
+    if(!cred)throw new Error('passkey enrollment returned nothing');
+    var att=new Uint8Array(cred.getResponse().attestationObject);
+    var authData=authDataFromAttestation(att);
+    if(!authData||authData.length<56)throw new Error('could not read the passkey attestation (unexpected format)');
+    var rpIdHash=authData.slice(0,32),flags=authData[32];
+    var credIdLen=(authData[53]<<8)|authData[54];
+    var credId=authData.slice(55,55+credIdLen);
+    if(credId.length!==credIdLen)throw new Error('credential id truncated');
+    var pub='PUB_WA_'+b64r(new Uint8Array([flags,...rpIdHash,...credId]));
+    // validate the construction round-trips through eosjs before it goes anywhere near the chain
+    var canonPub=BN.PublicKey.fromString(pub).toString();
+    return {pub:pub,canon:canonPub,credIdHex:hexS(credId),credIdB64:b64url(credId)};
+  }
+  function loadWaCred(){try{return JSON.parse(localStorage.getItem('bnr_wa')||'null')}catch(e){return null}}
+  function saveWaCred(c){try{localStorage.setItem('bnr_wa',JSON.stringify(c))}catch(e){}}
 
   /* ── THE KEY FORGE: near infinite contexts, keys derive on demand ── */
   var CONTEXTS=[];   // context NAMES only (never keys) — persisted so the list survives visits
@@ -395,13 +486,30 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   function ensureCtx(c){ if(CONTEXTS.indexOf(c)<0){CONTEXTS.push(c);saveContexts()} }
   function seedContexts(){
     if(!SOUL)return;
-    ensureCtx('vaulta:'+SOUL); ensureCtx('evm:'+SOUL);
-    $('forge-soulname').textContent=SOUL; $('fs2').textContent=SOUL;
+    ensureCtx('vaulta:'+SOUL); ensureCtx('evm:'+SOUL); ensureCtx('nostr:'+SOUL);
+    $('forge-soulname').textContent=SOUL; $('fs2').textContent=SOUL; $('fs3').textContent=SOUL;
   }
   // derive the public material for a context (never persists; keys live only with MPRK)
+  function npubFromSeed(seed){ // NIP-19: bech32('npub', x-only pubkey of the secp256k1 pair)
+    // checksums ride the vendored reference (sipa bech32, spec-vector-verified) — hand-rolling this was tried and lost
+    var pub=BN.secp.getPublicKey(seed,true); // 33B compressed — x-only = [1..33]
+    return BN.bech32.encode('npub',BN.bech32.toWords(pub.slice(1,33)));
+  }
   function deriveFor(ctx){
     if(!MPRK)return null;
     var rec=BZDIDKEY.deriveK1Key(MPRK,ctx);
+    if(/^nostr:/.test(ctx)){
+      var np=npubFromSeed(rec.seed);
+      rec.seed.fill(0);
+      return {kind:'nostr npub', value:np};
+    }
+    if(CORE){
+      var out;
+      if(/^evm:/.test(ctx))out={kind:'EVM 0x', value:CORE.evmAddr(rec.seed)};
+      else out={kind:/^vaulta:/.test(ctx)?'Vaulta K1':'K1', value:CORE.eosPub(rec.seed), pubK1:CORE.pubK1(rec.seed)};
+      rec.seed.fill(0);
+      return out;
+    }
     if(/^evm:/.test(ctx)){
       var pub=BN.secp.getPublicKey(rec.seed,false);           // 65B uncompressed
       var h=BN.keccak_256(pub.slice(1,65));                    // keccak(X‖Y)
@@ -449,6 +557,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   };
   $('forge-evm').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('evm:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ evm key for <b>'+SOUL+'</b> — 0x address derived from your masterPRK'; };
   $('forge-vaulta').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('vaulta:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ vaulta key for <b>'+SOUL+'</b>'; };
+  $('forge-nostr').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('nostr:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ npub for <b>'+SOUL+'</b> — the real NIP-19 address of your derived secp256k1 pair (the comms lane: <a href="keys/addresses.html">your two addresses</a>)'; };
 
   /* ── EVM reads: the derived address IS the wallet on Arbitrum ── */
   async function evmCall(method,params){
@@ -496,6 +605,44 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   }
   function api(provider){
     return new BN.Api({rpc:rpc(),signatureProvider:provider,textEncoder:new TextEncoder(),textDecoder:new TextDecoder()});
+  }
+  function hexB(h){h=h.replace(/^0x/,'');var o=new Uint8Array(h.length>>1);for(var i=0;i<o.length;i++)o[i]=parseInt(h.substr(i*2,2),16);return o}
+  function hexS(b){var s='';for(var i=0;i<b.length;i++)s+=b[i].toString(16).padStart(2,'0');return s}
+  /* core-first signed-tx builder: the Rust core packs the envelope (byte-identical to eosjs,
+     proven) and signs; the account passkey (PUB_WA) rides the eosjs WebAuthn provider;
+     falls back to the vendored eosjs key provider on any failure */
+  async function buildSigned(info,refBlock,actionList,wa){
+    var expSec=Math.floor(Date.now()/1000)+120;
+    var refNum=(info.head_block_num-3)&0xffff;
+    if(!wa&&CORE&&K1&&K1.seed){
+      try{
+        var packed=CORE.packTx(expSec,refNum,refBlock.ref_block_prefix,actionList.map(function(a){
+          return {account:a.account,action:a.name,actor:a.authorization[0].actor,permission:a.authorization[0].permission,dataHex:a.data};
+        }));
+        if(packed){
+          var digest=CORE.chainDigest(hexB(info.chain_id),packed);
+          var sig65=CORE.sign(K1.seed,digest);
+          if(digest&&sig65)return {packedHex:hexS(packed),signatures:[CORE.sigK1(sig65)],by:'rust'};
+        }
+      }catch(e){}
+    }
+    var prov,reqKeys,by;
+    if(wa&&wa.pub&&wa.credIdHex){
+      prov=new BN.WebAuthnSignatureProvider();
+      prov.keys[wa.pub]=wa.credIdHex;
+      reqKeys=[wa.pub]; by='eosjs+passkey';
+    } else {
+      prov=new BN.JsSignatureProvider([K1.wif]);
+      reqKeys=[K1.pubK1]; by='eosjs';
+    }
+    var A=api(prov);
+    var txJson={expiration:new Date(expSec*1000).toISOString().slice(0,19),
+      ref_block_num:refNum,ref_block_prefix:refBlock.ref_block_prefix,
+      max_net_usage_words:0,max_cpu_usage_ms:0,delay_sec:0,context_free_actions:[],
+      actions:actionList,transaction_extensions:[]};
+    var serialized=await A.serializeTransaction(txJson);
+    var sgn=await prov.sign({chainId:info.chain_id,requiredKeys:reqKeys,serializedTransaction:serialized,abis:[]});
+    return {packedHex:hexS(serialized),signatures:sgn.signatures,by:by};
   }
 
   /* canonical key compare: both to PUB_* canonical strings */
@@ -554,6 +701,23 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
       $('kc-stat').textContent='passkey lane: '+e.message+' — if your passkey predates PRF, use recovery below';
     }
   };
+  /* AUTO-CONNECT (founder law: connect bzDiD should be automatic): the WebAuthn
+     ceremony needs a user gesture, so the FIRST tap/keypress anywhere arms the
+     keychain by itself — one attempt per visit, honest fallback to the buttons. */
+  var autoTried=false;
+  function autoConnect(ev){
+    if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#kc-rec,#kc-recgo,#br-wif,#br-go'))return; // hands off the recovery/bridge inputs
+    if(autoTried||MPRK||!BZDIDKEY||!SOUL)return;
+    autoTried=true;
+    window.removeEventListener('pointerdown',autoConnect);
+    window.removeEventListener('keydown',autoConnect);
+    $('kc-stat').textContent='auto-connecting your bzDiD — touch your passkey…';
+    BZDIDKEY.identityFromPasskey('bnr.b').then(keychainOn).catch(function(e){
+      if(!MPRK)$('kc-stat').textContent='auto-connect: '+e.message+' — use the gold button or recovery below';
+    });
+  }
+  window.addEventListener('pointerdown',autoConnect);
+  window.addEventListener('keydown',autoConnect);
   $('kc-recgo').onclick=function(){
     var raw=$('kc-rec').value;
     if(!raw.trim()){$('kc-stat').textContent='paste your phrase or bdidrec code first';return}
@@ -594,7 +758,24 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     var existing=ra.keys.map(function(k){return {key:k.key,weight:k.weight}});
     var already=existing.some(function(k){return canon(k.key)===K1.pubK1});
     if(already){setBridgeState(true,'already bridged');stat.textContent='already bridged — nothing to do';$('br-wif').value='';return}
-    var newKeys=existing.concat([{key:K1.eosPub,weight:1}]).sort(function(a,b){
+    // dual-signer law: derived K1 + our-origin account passkey, both at threshold 1
+    var waAdd=[];
+    if($('br-wa').checked){
+      stat.textContent='1b/5 enrolling your account passkey (touch it)…';
+      try{
+        var wa=await enrollAccountPasskey();
+        if(existing.some(function(k){return canon(k.key)===wa.canon})){
+          saveWaCred({pub:wa.pub,canon:wa.canon,credIdHex:wa.credIdHex});
+        } else {
+          waAdd=[{key:wa.pub,weight:1}];
+          saveWaCred({pub:wa.pub,canon:wa.canon,credIdHex:wa.credIdHex});
+        }
+      }catch(e){
+        stat.textContent='passkey enrollment skipped ('+e.message+') — bridging with the derived key only';
+        await sleep(1200);
+      }
+    }
+    var newKeys=existing.concat([{key:K1.eosPub,weight:1}],waAdd).sort(function(a,b){
       var keyBytes=function(s){try{var p=BN.PublicKey.fromString(s);return (p.key&&p.key.data)||new Uint8Array(0)}catch(e){return new Uint8Array(0)}};
       var da=keyBytes(a.key),db=keyBytes(b.key);
       for(var i=0;i<Math.min(da.length,db.length);i++)if(da[i]!==db[i])return da[i]-db[i];
@@ -629,9 +810,10 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
       if(res&&res.transaction_id){
         stat.innerHTML='<b style="color:var(--leaf)">5/5 BRIDGED</b> — tx '+res.transaction_id.slice(0,16)+'…';
         out.innerHTML='<b>transaction_id:</b> '+res.transaction_id+String.fromCharCode(10)+
-          '<b>added key:</b> '+K1.eosPub+String.fromCharCode(10)+
-          '<b>threshold/keys:</b> '+newKeys.length+' keys @ threshold '+ra.threshold+' (nothing removed)';
+          '<b>added keys:</b> '+K1.eosPub+(waAdd.length?' + '+waAdd[0].key.slice(0,24)+'… (passkey)':'')+String.fromCharCode(10)+
+          '<b>threshold:</b> '+ra.threshold+' of '+newKeys.length+' keys — derived key AND passkey can both sign (nothing removed)';
         checkBridge();
+        if(loadWaCred())$('tx-wa-row').style.display='flex';
       } else {
         var msg=JSON.stringify(res&&res.error||res||{}).slice(0,400);
         if(/provided keys|declares authority|unsatisfied/i.test(msg)){
@@ -658,9 +840,13 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   async function refreshAcctPanel(){
     var p=await ramPrice();
     var bytes=parseInt($('ac-ram').value,10)||8192;
-    $('ac-cost').textContent=p!==null?('RAM cost: ≈'+(p*bytes).toFixed(4)+' A for '+bytes+' B (live rammarket)'):'RAM cost: rammarket unreadable';
+    $('ac-cost').textContent=p!==null?('RAM: ≈'+(p*bytes).toFixed(4)+' A for '+bytes+' B (live rammarket — draws from liquid)'):'RAM cost: rammarket unreadable';
+    var cpuAvail=(LAST_ACC&&LAST_ACC.cpu_limit&&LAST_ACC.cpu_limit.available)||0;
+    var netAvail=(LAST_ACC&&LAST_ACC.net_limit&&LAST_ACC.net_limit.available)||0;
     var liquid=(LAST_ACC&&LAST_ACC.core_liquid_balance)||'—';
-    $('ac-stat').textContent='creator '+SOUL+' liquid: '+liquid+(parseFloat(liquid)>0?' — the creator pays, the account is born funded with RAM':' — creator needs liquid A to pay RAM');
+    $('ac-stat').innerHTML='broadcast is covered by <b>staked</b> CPU/NET (live: '+cpuAvail+'μs · '+
+      (netAvail/1024).toFixed(0)+'KB available — a 0.0000 liquid balance does NOT block broadcasts) · '+
+      'liquid '+liquid+' covers the RAM purchase';
   }
   $('ac-ram').addEventListener('input',function(){ if(VH&&SOUL)refreshAcctPanel() });
   $('ac-go').onclick=async function(){
@@ -686,23 +872,15 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
       var amap=new Map(); for(const a of abi.abi.actions)amap.set(a.name,BN.Serialize.getType(types,a.type));
       var s1=BN.Serialize.serializeAction({types:types,actions:amap},'eosio','newaccount',actz,args1,new TextEncoder(),new TextDecoder());
       var s2=BN.Serialize.serializeAction({types:types,actions:amap},'eosio','buyrambytes',actz,args2,new TextEncoder(),new TextDecoder());
-      stat.textContent='3/5 signing with your bridged bzDiD key…';
-      var prov=new BN.JsSignatureProvider([K1.wif]);
-      var A=api(prov);
+      stat.textContent='3/5 signing with your bridged bzDiD key ('+(CORE?'first-party Rust core':'vendored lane')+')…';
       var info=await rpc().get_info();
       var ref=await rpc().get_block(info.head_block_num-3);
-      var txJson={expiration:new Date(Date.now()+120000).toISOString().slice(0,19),
-        ref_block_num:(info.head_block_num-3)&0xffff,ref_block_prefix:ref.ref_block_prefix,
-        max_net_usage_words:0,max_cpu_usage_ms:0,delay_sec:0,context_free_actions:[],
-        actions:[{account:'eosio',name:'newaccount',authorization:actz,data:s1.data},
-                 {account:'eosio',name:'buyrambytes',authorization:actz,data:s2.data}],
-        transaction_extensions:[]};
-      var packed=await A.serializeTransaction(txJson);
-      var sgn=await prov.sign({chainId:info.chain_id,requiredKeys:[K1.pubK1],serializedTransaction:packed,abis:[]});
+      var built=await buildSigned(info,ref,[
+        {account:'eosio',name:'newaccount',authorization:actz,data:s1.data},
+        {account:'eosio',name:'buyrambytes',authorization:actz,data:s2.data}]);
       stat.textContent='4/5 broadcasting…';
-      var hex=Array.from(packed).map(function(b){return b.toString(16).padStart(2,'0')}).join('');
       var res=await postAny(VH,'/v1/chain/send_transaction',
-        {signatures:sgn.signatures,compression:0,packed_context_free_data:'',packed_trx:hex});
+        {signatures:built.signatures,compression:0,packed_context_free_data:'',packed_trx:built.packedHex});
       if(res&&res.transaction_id){
         ensureCtx('vaulta:'+name+'/owner');ensureCtx('vaulta:'+name+'/active');ensureCtx('vaulta:'+name);
         renderForge();
@@ -711,7 +889,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
           '<b>account:</b> '+name+String.fromCharCode(10)+
           '<b>owner key:</b> '+kd.value+String.fromCharCode(10)+
           '<b>active key:</b> '+ka.value+String.fromCharCode(10)+
-          '<b>RAM:</b> '+bytes+' B paid by '+SOUL+' — contexts added to your forge';
+          '<b>RAM:</b> '+bytes+' B paid by '+SOUL+' · core: '+built.by;
       } else {
         var msg=JSON.stringify(res&&res.error||res||{}).slice(0,400);
         stat.textContent='node refused:'; out.textContent=msg;
@@ -736,15 +914,15 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     pulse.style.animation='none'; void pulse.getBoundingClientRect();
     pulse.style.animation='pulseout 1.2s ease-out 2';
     if(!K1||!SOUL){out.textContent='connect your keychain first (the gold button above)';return}
-    if(!BRIDGED){out.textContent='your bzDiD key is not on '+SOUL+'@active yet — run THE BRIDGE above first';return}
+    var waCred=loadWaCred();
+    var useWa=$('tx-wa').checked&&waCred;
+    if(!BRIDGED&&!useWa){out.textContent='your bzDiD key is not on '+SOUL+'@active yet — run THE BRIDGE above first';return}
     var contract=$('tx-contract').value.trim(), action=$('tx-action').value.trim();
     var data; try{data=JSON.parse($('tx-data').value)}catch(e){out.textContent='invalid JSON: '+e.message;return}
     if(!contract||!action){out.textContent='contract + action required';return}
     if(!LIVE_HOST){await pickHost(); if(!LIVE_HOST){out.textContent='no RPC host reachable';return}}
     var actor=data.registrant||data.owner||data.from||data.account||SOUL;
     var actz=[{actor:actor,permission:'active'}];
-    var prov=new BN.JsSignatureProvider([K1.wif]);
-    var A=api(prov);
     try{
       out.textContent='1/4 serializing '+contract+':'+action+' from live ABI…';
       var abi=await rpc().get_abi(contract);
@@ -753,25 +931,18 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
       var amap=new Map(); for(const a of abi.abi.actions)amap.set(a.name,BN.Serialize.getType(types,a.type));
       if(!amap.get(action))throw new Error('action '+action+' not in '+contract+' ABI (has: '+Array.from(amap.keys()).slice(0,10).join(', ')+')');
       var sa=BN.Serialize.serializeAction({types:types,actions:amap},contract,action,actz,data,new TextEncoder(),new TextDecoder());
-      out.textContent='2/4 building tx + signing with your bzDiD key…';
+      out.textContent='2/4 building tx + signing ('+(useWa?'account passkey — touch it':(CORE?'first-party Rust core':'vendored lane'))+')…';
       var info=await rpc().get_info();
       var ref=await rpc().get_block(info.head_block_num-3);
-      var txJson={expiration:new Date(Date.now()+120000).toISOString().slice(0,19),
-        ref_block_num:(info.head_block_num-3)&0xffff,ref_block_prefix:ref.ref_block_prefix,
-        max_net_usage_words:0,max_cpu_usage_ms:0,delay_sec:0,context_free_actions:[],
-        actions:[{account:contract,name:action,authorization:actz,data:sa.data}],
-        transaction_extensions:[]};
-      var packed=await A.serializeTransaction(txJson);
-      var sgn=await prov.sign({chainId:info.chain_id,requiredKeys:[K1.pubK1],serializedTransaction:packed,abis:[]});
+      var built=await buildSigned(info,ref,[{account:contract,name:action,authorization:actz,data:sa.data}],useWa?waCred:null);
       out.textContent='3/4 broadcasting…';
-      var hex=Array.from(packed).map(function(b){return b.toString(16).padStart(2,'0')}).join('');
       var res=await postAny(VH,'/v1/chain/send_transaction',
-        {signatures:sgn.signatures,compression:0,packed_context_free_data:'',packed_trx:hex});
+        {signatures:built.signatures,compression:0,packed_context_free_data:'',packed_trx:built.packedHex});
       if(res&&res.transaction_id){
         out.innerHTML='<b style="color:var(--leaf)">✓ SIGNED + BROADCAST by your bzDiD key</b>'+String.fromCharCode(10)+
           '<b>transaction_id:</b> '+res.transaction_id+String.fromCharCode(10)+
-          '<b>signed by:</b> '+K1.eosPub+String.fromCharCode(10)+
-          '<b>packed_trx:</b> '+hex.slice(0,128)+'…';
+          '<b>signed by:</b> '+K1.eosPub+' · core: '+built.by+String.fromCharCode(10)+
+          '<b>packed_trx:</b> '+built.packedHex.slice(0,128)+'…';
       } else {
         var msg=JSON.stringify(res&&res.error||res||{}).slice(0,400);
         out.innerHTML='<b style="color:var(--amber)">node refused:</b> '+msg;
@@ -834,7 +1005,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 
   window.addEventListener('beforeunload',scrubAll);
 
-  // boot: bundle check + auto-connect balances from localStorage
+  // boot: bundle check + Rust core arming + auto-connect balances from localStorage
   BN=window.BnrSign||null;
   if(!BN){
     var s=document.createElement('div');s.className='law';
@@ -842,11 +1013,24 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     s.textContent='⚠ signing bundle (vendor/bnr-sign.js) failed to load — balances still work, signing disabled';
     $('kc-sec').prepend(s);
   } else { pickHost(); }
+  if(window.BNRKEYS){
+    window.BNRKEYS.then(function(c){
+      CORE=c;
+      var b=$('core-badge');
+      if(c){
+        b.innerHTML='<span style="color:var(--leaf)">⚙ first-party Rust core armed</span> (bnr-keys.wasm — self-test passed)';
+        if(MPRK){deriveK1();renderForge();checkBridge()}
+      } else {
+        b.innerHTML='<span style="color:var(--dim)">core: vendored eosjs lane (Rust core unavailable here)</span>';
+      }
+    });
+  }
   try{
     var saved=localStorage.getItem('bnr_soul');
-    if(saved){ SOUL=saved; $('wq').value=saved; loadContexts(); $('forge-soulname').textContent=SOUL; renderForge(); readAll(); }
+    if(saved){ SOUL=saved; $('wq').value=saved; loadContexts(); $('forge-soulname').textContent=SOUL; $('fs2').textContent=SOUL; $('fs3').textContent=SOUL; renderForge(); readAll(); }
     else loadContexts();
   }catch(e){ loadContexts() }
+  if(loadWaCred())$('tx-wa-row').style.display='flex';
 })();
 </script>
 </body>

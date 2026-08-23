@@ -1,0 +1,19 @@
+[package]
+name = "bnr-keys"
+version = "0.1.0"
+edition = "2021"
+license = "AGPL-3.0-only"
+description = "The BNR wallet's first-party key + signature core (Rust→WASM). Owns the keys, the digest, the signature, and the transaction envelope; owns nothing dynamic (ABI action translation stays with the vendored eosjs translator)."
+
+[dependencies]
+k256 = { version = "0.13", default-features = false, features = ["ecdsa", "alloc", "arithmetic"] }
+sha2 = { version = "0.10", default-features = false }
+sha3 = { version = "0.10", default-features = false }
+ripemd = { version = "0.1", default-features = false }
+
+[lib]
+crate-type = ["lib", "cdylib"]
+
+[profile.release]
+opt-level = "z"
+lto = true
