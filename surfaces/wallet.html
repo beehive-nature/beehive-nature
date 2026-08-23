@@ -527,6 +527,130 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   <div class="law" id="pay-stat" style="margin-top:6px;min-height:20px">— choose a lane above —</div>
 </section>
 
+<!-- ══ FUND — Meld hosted checkout (zero-backend · public key only) ══ -->
+<section id="fund-sec" style="border-color:#4a3a1d" data-meld-public-key="">
+  <style>
+    #fund-sec .fund-coin{width:26px;height:26px;border-radius:50%;flex:0 0 auto;position:relative;
+     background:radial-gradient(circle at 35% 30%,#ffeaa6,var(--gold) 62%,#6e5300);
+     border:1px solid #4d3d12;animation:fund-glow 2.6s ease-in-out infinite}
+    #fund-sec .fund-coin::after{content:'$';position:absolute;inset:0;display:grid;place-items:center;
+     font-size:13px;color:#3a2c00}
+    @keyframes fund-glow{0%,100%{box-shadow:0 0 5px rgba(255,215,0,.18)}50%{box-shadow:0 0 16px rgba(255,215,0,.5)}}
+    #fund-sec .fund-launch{display:inline-block;background:#33270a;color:var(--gold);border:1px solid #4d3d12;
+     border-radius:8px;padding:10px 18px;cursor:pointer;font:12px 'IBM Plex Mono',monospace;min-height:40px;
+     text-decoration:none;line-height:1.65}
+    #fund-sec .fund-launch:hover{background:var(--gold);color:#000}
+    #fund-sec .fund-launch[aria-disabled="true"]{opacity:.4;cursor:not-allowed}
+    #fund-sec .fund-launch[aria-disabled="true"]:hover{background:#33270a;color:var(--gold)}
+    #fund-sec .fund-note{border:1px solid var(--amber);color:var(--amber);border-radius:8px;
+     padding:9px 12px;font-size:10.5px;line-height:1.8;margin-top:10px}
+    #fund-sec .fund-nojs{border:1px dashed var(--amber);color:var(--amber);border-radius:8px;
+     padding:10px 12px;font-size:11px;margin-top:10px;line-height:1.8}
+    @media (prefers-reduced-motion: reduce){#fund-sec .fund-coin{animation:none}}
+  </style>
+  <h2>💳 FUND — buy USDC, land it on an address you hold</h2>
+  <div class="law">The one lane this wallet cannot forge itself: licensed fiat. The buy runs on
+  <b>Meld's hosted checkout</b> — it opens in its own tab; this page only builds the link.
+  <b>Zero-backend:</b> no BNR server sits in this lane and nothing is fetched from one — your
+  address rides in the checkout URL (the fiat rail's law) and Meld sees what any checkout sees;
+  this wallet signs nothing and stores nothing. The key in the config below is <b>PUBLIC</b>
+  (a publishable Checkout key) — a secret key never touches a page, by Meld's law and ours.</div>
+  <noscript><div class="fund-nojs">💳 funding needs JavaScript — this panel builds the checkout
+  link in your browser, so with scripting off it stays right here, asleep. Everything else on
+  this page renders fine.</div></noscript>
+  <div id="fund-js" hidden>
+    <div class="row" style="align-items:center;flex-wrap:wrap">
+      <span class="fund-coin" aria-hidden="true"></span>
+      <select id="fund-asset" title="destination asset" style="max-width:230px;flex:0 1 230px;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
+        <option value="USDC_BASE">USDC · Base</option>
+        <option value="USDC_ETHEREUM">USDC · Ethereum</option>
+      </select>
+      <input id="fund-addr" class="small" placeholder="destination 0x address — optional, locks the buy to it" spellcheck="false" autocomplete="off" style="flex:2;min-width:240px">
+      <a id="fund-go" class="fund-launch" href="#" aria-disabled="true" target="_blank" rel="noopener noreferrer">💳 buy USDC — opens Meld</a>
+    </div>
+    <div class="law" id="fund-stat" style="margin-top:6px;min-height:20px">…</div>
+  </div>
+  <script>
+    /* ── FUND PANEL CONFIG ────────────────────────────────────────────────
+       The ONE place the Meld PUBLIC Checkout (widget) key is set. Either
+       put it in the data-meld-public-key attribute on the fund-sec section
+       element above, or set window.BNR_MELD_PUBLIC_KEY in an earlier
+       script. Empty ⇒
+       this panel shows "funding not configured" and the launch control stays
+       disabled — visible, never silent, never a throw. PUBLIC key only: a
+       secret/BASIC key must never appear here or anywhere client-side. */
+    const BNR_MELD_PUBLIC_KEY = String(
+      window.BNR_MELD_PUBLIC_KEY ||
+      document.getElementById('fund-sec')?.dataset?.meldPublicKey ||
+      ''
+    ).trim();
+    (function () {
+      'use strict';
+      try {
+        var MELD_CHECKOUT = 'https://meldcrypto.com/';
+        var $ = function (id) { return document.getElementById(id); };
+        var box = $('fund-js'), pick = $('fund-asset'), addr = $('fund-addr'),
+            go = $('fund-go'), stat = $('fund-stat');
+        if (!box || !pick || !addr || !go || !stat) return; // panel markup absent — nothing to wire
+        var keyOk = BNR_MELD_PUBLIC_KEY.length > 0;
+
+        function addrOk(v) { return /^0x[0-9a-fA-F]{40}$/.test(v); }
+        function buildUrl() {
+          var u = new URL(MELD_CHECKOUT);
+          u.searchParams.set('publicKey', BNR_MELD_PUBLIC_KEY);
+          u.searchParams.set('transactionType', 'BUY');
+          u.searchParams.set('theme', 'darkMode');
+          /* locked parameters carry the actual value — never "=true" (Meld's field-locking law) */
+          u.searchParams.set('destinationCurrencyCodeLocked', pick.value);
+          var a = addr.value.trim();
+          if (a && addrOk(a)) u.searchParams.set('walletAddressLocked', a);
+          return u;
+        }
+        function paint() {
+          if (!keyOk) {
+            go.setAttribute('aria-disabled', 'true');
+            go.setAttribute('href', '#');
+            stat.innerHTML = '<b style="color:var(--amber)">\u26a0 funding not configured</b> — the public ' +
+              'Meld Checkout key is not set on this deployment (BNR_MELD_PUBLIC_KEY / data-meld-public-key). ' +
+              'The launch button stays asleep until it is; nothing else on this page is affected.';
+            return;
+          }
+          var a = addr.value.trim();
+          if (a && !addrOk(a)) {
+            go.setAttribute('aria-disabled', 'false');
+            go.setAttribute('href', buildUrl().href);
+            stat.innerHTML = '<b style="color:var(--amber)">that does not look like an 0x/EVM address</b> — ' +
+              'USDC on Base and Ethereum takes 0x followed by 40 hex. It is left out of the link until it parses.';
+            return;
+          }
+          go.setAttribute('href', buildUrl().href);
+          go.setAttribute('aria-disabled', 'false');
+          stat.textContent = a
+            ? 'destination locked: ' + pick.value + ' \u2192 ' + a.slice(0, 8) + '\u2026' + a.slice(-6) +
+              '. Opens Meld\u2019s hosted checkout in a new tab; this wallet signs and sees nothing.'
+            : 'destination asset locked: ' + pick.value + ' — no address typed, the checkout will ask for one.' +
+              ' Opens Meld\u2019s hosted checkout in a new tab; this wallet signs and sees nothing.';
+        }
+        go.addEventListener('click', function (e) {
+          var href = go.getAttribute('href');
+          if (!keyOk || !href || href === '#') e.preventDefault(); // asleep stays asleep
+        });
+        pick.addEventListener('change', paint);
+        addr.addEventListener('input', paint);
+        box.hidden = false; // scripting is on — reveal the panel body
+        paint();
+      } catch (err) {
+        /* never throw, never fail silently: surface it in the panel itself */
+        var statEl = document.getElementById('fund-stat');
+        var jsEl = document.getElementById('fund-js');
+        if (jsEl) jsEl.hidden = false;
+        if (statEl) statEl.textContent = 'funding panel failed to start: ' +
+          (err && err.message ? err.message : err);
+      }
+    })();
+  </script>
+</section>
+
 <section>
   <h2>✍ SIGN — your bzDiD signs, zero paste</h2>
   <div class="law" id="sign-law">Connect your keychain above and bridge it once — after that
