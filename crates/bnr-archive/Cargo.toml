@@ -1,0 +1,13 @@
+[package]
+name = "bnr-archive"
+version = "0.1.0"
+edition = "2021"
+license = "AGPL-3.0-only"
+description = "Deterministic cold-archive batcher: packs a record directory into size-bounded batches with per-batch and per-member SHA-256 digests plus a verifiable manifest. Artifacts only — no network, upload is another seat's job."
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+sha2 = "0.10"
+
+[dev-dependencies]
+serde_json = "1"
