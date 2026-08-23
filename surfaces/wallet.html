@@ -1424,6 +1424,19 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     if(!act||!act.required_auth){stat.textContent='account has no readable active permission';return}
     var ra=act.required_auth;
     var existing=ra.keys.map(function(k){return {key:k.key,weight:k.weight}});
+    // LOCAL authority pre-check: derive the pasted key's pubkey and demand it be on
+    // THIS account's active set before anything is built or broadcast — a wrong-key
+    // paste (e.g. another account's key) answers instantly, named, no node round-trip.
+    var pastedPub=null;
+    try{ pastedPub=BN.PrivateKey.fromString(wif).getPublicKey().toLegacyString(); }catch(e){}
+    if(!pastedPub||!existing.some(function(k){return canon(k.key)===canon(pastedPub)})){
+      stat.innerHTML='✗ <b>this key ('+((pastedPub||'?').slice(0,14))+'…) is NOT on '+SOUL+
+        '@active</b> — that account is controlled by '+existing.map(function(k){return k.key.slice(0,12)+'…'}).join(', ')+
+        '. Paste the ACTIVE private key of <b>'+SOUL+'</b>, or fix the account name above (it currently targets '+
+        '<b>'+SOUL+'</b> — typing a .b name strips the .b and targets the raw account).';
+      $('br-wif').value='';
+      return;
+    }
     var already=existing.some(function(k){return canon(k.key)===K1.pubK1});
     if(already){setBridgeState(true,'already bridged');stat.textContent='already bridged — nothing to do';$('br-wif').value='';return}
     // dual-signer law: derived K1 + our-origin account passkey, both at threshold 1
