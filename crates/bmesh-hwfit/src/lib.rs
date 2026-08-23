@@ -9,9 +9,11 @@
 //! hold" = manual choice, not scored). This crate is a genuinely new build.
 
 pub mod catalog;
+pub mod probe;
 pub mod profiler;
 pub mod scorer;
 
 pub use catalog::{default_catalog, ModelEntry, Quantization};
+pub use probe::{PreflightReport, Verdict};
 pub use profiler::NodeProfile;
 pub use scorer::{best_fit, fit_score, FitScore};

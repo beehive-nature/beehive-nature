@@ -257,6 +257,8 @@ dependencies = [
 name = "bmesh-hwfit"
 version = "0.1.0"
 dependencies = [
+ "flate2",
+ "libc",
  "serde",
  "sysinfo",
 ]

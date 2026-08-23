@@ -83,7 +83,7 @@ pub fn default_catalog() -> Vec<ModelEntry> {
             quantization: Quantization::Fp16,
             parameter_count_b: 0.082,
             min_vram_bytes: 0,
-            recommended_vram_bytes: 1 * GB,
+            recommended_vram_bytes: GB,
             context_window: 512,
         },
     ]

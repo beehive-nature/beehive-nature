@@ -8,3 +8,10 @@ description = "Hardware-fit auto-scoring for bMeshLLM node scheduling (SPEC_DOCT
 [dependencies]
 serde = { version = "1", features = ["derive"] }
 sysinfo = "0.30"
+
+# probe.rs preflight (ORDER zA SPRINT-2026-08-23-N): gzip for /proc/config.gz,
+# sysconf for _SC_PAGESIZE. Linux-only, and both crates are already in the
+# workspace lockfile via sibling crates — no new packages enter the tree.
+[target.'cfg(target_os = "linux")'.dependencies]
+libc = "0.2"
+flate2 = "1"
