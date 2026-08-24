@@ -104,7 +104,7 @@ footer a{color:var(--dim)}
 
 <div class="hero">
   <div class="pstat hero"><div class="n proven">35</div><div class="l">seconds from nothing to a proof on your machine</div></div>
-  <div class="pstat hero"><div class="n gate">1</div><div class="l">test that refuses to pass, and names its own blocker</div></div>
+  <div class="pstat hero"><div class="n gate">3</div><div class="l">held tests, each naming its own blocker</div></div>
   <div class="pstat hero"><div class="n unbuilt">2</div><div class="l">lanes unstarted before any user's money</div></div>
 </div>
 
@@ -120,19 +120,20 @@ footer a{color:var(--dim)}
 <pre><code>git clone https://github.com/beehive-nature/beehive-nature.git
 cd beehive-nature
 cargo test -p chain-zano</code></pre>
-  <span class="receipt"><b>35 seconds</b>, median of three cold runs — empty cargo cache, nothing warm — ending in <b>9 passed, 0 failed, 1 ignored</b>. Range across the three: 28s, 35s, 39s. <b>This number moved.</b> It read 14s earlier the same day; the repository grew, and rather than leave the friendlier figure standing, it was re-measured and replaced. That is the whole habit this page is trying to show you.</span>
+  <span class="receipt"><b>35 seconds</b>, median of three cold runs — empty cargo cache, nothing warm — ending in <b>9 passed, 0 failed, 1 ignored</b> for this crate. Range across the three: 28s, 35s, 39s. <b>This number moved, and the first explanation for it was wrong too.</b> It read 14s earlier the same day, and the obvious story was that the repository had grown. It had not, for this build: <code>crates/chain-zano</code> hashes identical at both points (tree <code>6a56c1ba</code>) and compiles the same 20 dependencies, so the code being timed never changed. The 14s was one un-repeated run. Three runs and a median replaced it. <b>Stamped:</b> measured 2026-08-24 against chain-zano tree <code>6a56c1ba</code>, and <code>e2e/dock-claims.mjs</code> fails the build if that tree moves without a fresh measurement.</span>
   <p class="dim" style="margin-top:9px">Before you commit anything: <code>git config core.hooksPath .githooks</code> — one command per clone, and it turns on the secret scan that CI re-runs on every push.</p>
 </section>
 
 <section>
   <h2 class="gate">not proven — and the code says so out loud</h2>
-  <p class="dim">The one ignored test isn't hidden or skipped quietly. <code>slip0010.rs</code>'s <code>composes_with_keys_module</code> is held shut until someone supplies a verified end-to-end <code>(seed&nbsp;→&nbsp;view_public)</code> vector — and no tool currently produces one, because that derivation is Trezor/Beehive-specific. A green test on a fabricated vector would be worse than a held one.</p>
+  <p class="dim"><b>Three tests are held shut across the workspace, and every one states why in its own <code>#[ignore]</code> reason</b> — none is skipped quietly:</p>
+  <p class="dim"><code>chain-zano/slip0010.rs</code> waits on a verified end-to-end <code>(seed&nbsp;→&nbsp;view_public)</code> vector, and no tool currently produces one because that derivation is Trezor/Beehive-specific. <code>adapter-lti</code> waits on a real LTI 1.3 AGS capture. <code>mastery-ledger</code> waits on the L2 commons ledger. A green test on a fabricated vector would be worse than a held one, so they stay held.</p>
   <p class="dim">The wire contract sits at proto v0.3 — and the file itself reads <b>AUTHORITATIVE DRAFT</b>, not "frozen". This page quotes the artifact rather than the README, because the artifact is the receipt.</p>
 </section>
 
 <section>
   <h2 class="unbuilt">unbuilt — named, never omitted</h2>
-  <span class="gap"><b>Firmware and legal review are unstarted.</b> They are the entire distance between this repository and anything an end user's money touches. Nothing here is ready for that, and no amount of green tests changes it.</span>
+  <span class="gap"><b>Firmware and legal review are unstarted.</b> Not this pages framing — the ledgers: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/STATUS.md">STATUS.md</a> names both as "the unstarted work between here and anything a user touches", and the README repeats it. They are the entire distance between this repository and anything an end users money touches. No amount of green tests shortens it.</span>
   <span class="gap"><b>The self-service contributor wizard does not exist.</b> A form that builds your roster entry and opens the pull request for you was designed and never written. You contribute the ordinary way: open an issue, or open a PR. There is no queue you are waiting in.</span>
   <span class="gap"><b>One public repo has no licence file.</b> <a href="https://github.com/beehive-nature/b-domain">b-domain</a> carries <code>SPDX-License-Identifier: MIT</code> inside its contract sources, but GitHub reports no licence for the repository, which defaults to all rights reserved. If you mean to contribute there, ask first — the terms are not yet stated where they need to be.</span>
 </section>
