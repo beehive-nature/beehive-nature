@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BN ACiD — Artificial Chronic Inflammatory Disease Cascade</title>
+<script src="../vendor/chart.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a14;color:#eee;font-family:Arial,sans-serif}
+.hdr{background:linear-gradient(135deg,#1a0a0a,#0a0a2e);padding:14px 30px;border-bottom:1px solid #333;text-align:center}
+.hdr h1{font-size:22px;background:linear-gradient(90deg,#E74C3C,#E67E22,#27AE60);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:3px}
+.hdr p{color:#555;font-size:11px}
+.wrap{max-width:1100px;margin:0 auto;padding:14px}
+.panel{background:#111122;border-radius:12px;padding:16px;margin-bottom:12px;border:1px solid #1a1a3e}
+.panel h2{font-size:13px;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+.red{color:#E74C3C}.orange{color:#E67E22}.green{color:#27AE60}.neu{color:#00CED1}.purple{color:#8E44AD}.gold{color:#FFD700}
+.hero{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px}
+.hero-card{background:#111122;border-radius:14px;padding:20px;text-align:center;border:1px solid #1a1a3e}
+.hero-card .mega{font-size:32px;font-weight:bold;line-height:1}
+.hero-card .sub{font-size:10px;color:#888;margin-top:6px;text-transform:uppercase}
+.cascade{display:flex;flex-direction:column;gap:6px;padding:10px}
+.cascade-step{display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;background:#080820}
+.cascade-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;flex-shrink:0}
+.cascade-content{flex:1}
+.cascade-content b{font-size:12px;display:block}
+.cascade-content small{font-size:10px;color:#888}
+.cascade-arrow{text-align:center;color:#444;font-size:16px;padding:2px 0}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.chart-box{height:240px;margin:8px 0}
+.disease-row{display:flex;align-items:center;gap:10px;padding:6px;background:#080820;border-radius:6px;margin-bottom:4px}
+.disease-name{width:140px;font-size:11px;font-weight:bold}
+.disease-bar{flex:1;height:20px;background:#0a0a14;border-radius:4px;overflow:hidden}
+.disease-fill{height:100%;display:flex;align-items:center;padding-left:6px;font-size:9px;font-weight:bold;color:#fff;border-radius:4px}
+.disease-stat{width:80px;text-align:right;font-size:11px}
+.compare-row{padding:10px;border-radius:8px;margin-bottom:6px;font-size:11px;line-height:1.6}
+.compare-down{background:#1a0a0a;border-left:3px solid #E74C3C}
+.compare-up{background:#0a1a0a;border-left:3px solid #27AE60}
+.compare-row b{display:block;margin-bottom:3px}
+.artificial-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:10px 0}
+.artificial-card{background:#080820;border-radius:8px;padding:10px;text-align:center}
+.artificial-card .icon{font-size:20px;margin-bottom:4px}
+.artificial-card .name{font-size:10px;font-weight:bold;color:#E74C3C}
+.artificial-card .desc{font-size:9px;color:#666;margin-top:2px}
+.science-box{background:#080820;border-radius:8px;padding:12px;margin:8px 0;font-size:11px;line-height:1.7;color:#aaa}
+.science-box b{color:#00CED1}
+.science-box .highlight{color:#27AE60;font-weight:bold}
+.disclaimer{font-size:9px;color:#444;text-align:center;padding:10px;line-height:1.5}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0}
+.stat-mini{background:#080820;border-radius:6px;padding:8px;text-align:center}
+.stat-mini .v{font-size:16px;font-weight:bold}.stat-mini .l{font-size:8px;color:#666;text-transform:uppercase}
+</style>
+</head>
+<body>
+<div class="hdr">
+<h1>ACiD — Artificial Chronic Inflammatory Disease</h1>
+<p>The TERT-ECS-Telomere Disease Cascade | Upstream Medicine | bnature.social/BiGen v1.0</p>
+</div>
+<div class="wrap">
+
+<!-- HERO -->
+<div class="hero">
+<div class="hero-card">
+<div class="mega red">90%+</div>
+<div class="sub">of Chronic Disease is Downstream of ACiD</div>
+</div>
+<div class="hero-card">
+<div class="mega orange">TERT</div>
+<div class="sub">Gene Dysfunction = Root Cause</div>
+</div>
+<div class="hero-card">
+<div class="mega green">$317T</div>
+<div class="sub">Reversible with Upstream Medicine</div>
+</div>
+</div>
+
+<!-- THE CASCADE -->
+<div class="panel">
+<h2 class="red">The Disease Cascade — How ACiD Creates 90%+ of Chronic Disease</h2>
+<div class="cascade">
+<div class="cascade-step">
+<div class="cascade-num" style="background:#E74C3C;color:#fff">1</div>
+<div class="cascade-content"><b>ARTIFICIAL CAUSES</b><small>Petrochemical pharmaceuticals, pesticides/herbicides, artificial food additives, fluoride, chlorine, gain-of-function agents, DNA/RNA interventions, environmental toxins, suppression of plant medicine</small></div>
+</div>
+<div class="cascade-arrow">&#9660;</div>
+<div class="cascade-step">
+<div class="cascade-num" style="background:#E67E22;color:#fff">2</div>
+<div class="cascade-content"><b>OXIDATIVE STRESS + CHRONIC INFLAMMATION</b><small>Artificial causes create persistent oxidative damage and inflammatory cascades at the cellular level</small></div>
+</div>
+<div class="cascade-arrow">&#9660;</div>
+<div class="cascade-step">
+<div class="cascade-num" style="background:#8E44AD;color:#fff">3</div>
+<div class="cascade-content"><b>TERT GENE DYSFUNCTION</b><small>Telomerase Reverse Transcriptase (TERT) is suppressed. The enzyme that maintains telomere length is disabled by chronic oxidative stress and ECS deficiency</small></div>
+</div>
+<div class="cascade-arrow">&#9660;</div>
+<div class="cascade-step">
+<div class="cascade-num" style="background:#9B59B6;color:#fff">4</div>
+<div class="cascade-content"><b>ECS DYSFUNCTION</b><small>Endocannabinoid System loses homeostatic capacity. CB1/CB2 receptors downregulate. Anandamide and 2-AG levels drop. The body's master regulatory system fails</small></div>
+</div>
+<div class="cascade-arrow">&#9660;</div>
+<div class="cascade-step">
+<div class="cascade-num" style="background:#E74C3C;color:#fff">5</div>
+<div class="cascade-content"><b>ARTIFICIAL TELOMERE SHORTENING</b><small>Without TERT/telomerase, telomeres shorten 2-5x faster than natural aging. Cells reach senescence prematurely. Senescent cells secrete inflammatory cytokines (SASP) creating a FEEDBACK LOOP</small></div>
+</div>
+<div class="cascade-arrow">&#9660;</div>
+<div class="cascade-step">
+<div class="cascade-num" style="background:#E74C3C;color:#fff">6</div>
+<div class="cascade-content"><b>CELLULAR SENESCENCE CASCADE</b><small>SASP (Senescence-Associated Secretory Phenotype) spreads inflammation to neighboring cells. Immune system overwhelmed. Tissue degradation accelerates</small></div>
+</div>
+<div class="cascade-arrow">&#9660;</div>
+<div class="cascade-step" style="border:1px solid #E74C3C55">
+<div class="cascade-num" style="background:#E74C3C;color:#fff">7</div>
+<div class="cascade-content"><b>90%+ OF CHRONIC DISEASE MANIFESTS</b><small>Cancer, heart disease, diabetes, obesity, Alzheimer's, autoimmune disorders, depression, chronic pain, COPD, kidney disease — all downstream of the same upstream cascade</small></div>
+</div>
+</div>
+</div>
+
+<!-- ARTIFICIAL CAUSES DETAIL -->
+<div class="panel">
+<h2 class="red">The Artificial Causes of ACiD</h2>
+<div class="artificial-grid">
+<div class="artificial-card"><div class="icon">&#128138;</div><div class="name">Petro-Pharma</div><div class="desc">Synthetic drugs suppress ECS function, cause oxidative stress, create dependency cycles. $1.4T/yr US pharma spending</div></div>
+<div class="artificial-card"><div class="icon">&#129728;</div><div class="name">Pesticides</div><div class="desc">Glyphosate, organophosphates, neonicotinoids disrupt cellular metabolism and microbiome</div></div>
+<div class="artificial-card"><div class="icon">&#127858;</div><div class="name">Food Additives</div><div class="desc">Artificial colors, preservatives, emulsifiers, seed oils drive systemic inflammation</div></div>
+<div class="artificial-card"><div class="icon">&#128167;</div><div class="name">Fluoride</div><div class="desc">Endocrine disruptor. Calcifies pineal gland. Interferes with enzymatic processes</div></div>
+<div class="artificial-card"><div class="icon">&#9888;</div><div class="name">Chlorine</div><div class="desc">Water disinfectant byproducts (THMs) are carcinogenic and inflammatory</div></div>
+<div class="artificial-card"><div class="icon">&#129728;</div><div class="name">Biological Agents</div><div class="desc">Gain-of-function research, DNA/RNA interventions. May directly damage telomeres</div></div>
+<div class="artificial-card"><div class="icon">&#128064;</div><div class="name">Microplastics</div><div class="desc">Endocrine disruption, cellular damage, inflammatory trigger. Found in human blood</div></div>
+<div class="artificial-card"><div class="icon">&#9889;</div><div class="name">Heavy Metals</div><div class="desc">Mercury, lead, aluminum, cadmium. Directly damage DNA and telomeres</div></div>
+<div class="artificial-card"><div class="icon">&#128683;</div><div class="name">Plant Suppression</div><div class="desc">Cannabis/hemp prohibition = ECS nutrient deficiency epidemic. The remedy is criminalized</div></div>
+</div>
+</div>
+
+<!-- DISEASE STATISTICS -->
+<div class="panel">
+<h2 class="orange">Diseases Downstream of ACiD — US Statistics</h2>
+<div class="disease-row"><div class="disease-name">Heart Disease</div><div class="disease-bar"><div class="disease-fill" style="background:#E74C3C;width:85%">30.3M adults</div></div><div class="disease-stat red">$363B/yr</div></div>
+<div class="disease-row"><div class="disease-name">Cancer</div><div class="disease-bar"><div class="disease-fill" style="background:#E74C3C;width:62%">1.9M new/yr</div></div><div class="disease-stat red">$200B/yr</div></div>
+<div class="disease-row"><div class="disease-name">Diabetes (T2)</div><div class="disease-bar"><div class="disease-fill" style="background:#E67E22;width:75%">37.3M adults</div></div><div class="disease-stat orange">$327B/yr</div></div>
+<div class="disease-row"><div class="disease-name">Obesity</div><div class="disease-bar"><div class="disease-fill" style="background:#E67E22;width:100%">100M+ adults</div></div><div class="disease-stat orange">$173B/yr</div></div>
+<div class="disease-row"><div class="disease-name">Alzheimer's</div><div class="disease-bar"><div class="disease-fill" style="background:#8E44AD;width:28%">6.5M adults</div></div><div class="disease-stat purple">$355B/yr</div></div>
+<div class="disease-row"><div class="disease-name">Autoimmune</div><div class="disease-bar"><div class="disease-fill" style="background:#8E44AD;width:40%">24M adults</div></div><div class="disease-stat purple">$100B/yr</div></div>
+<div class="disease-row"><div class="disease-name">Depression/Anxiety</div><div class="disease-bar"><div class="disease-fill" style="background:#3498DB;width:55%">40M adults</div></div><div class="disease-stat neu">$210B/yr</div></div>
+<div class="disease-row"><div class="disease-name">Chronic Pain</div><div class="disease-bar"><div class="disease-fill" style="background:#3498DB;width:65%">50M adults</div></div><div class="disease-stat neu">$300B/yr</div></div>
+<div class="disease-row"><div class="disease-name">COPD</div><div class="disease-bar"><div class="disease-fill" style="background:#666;width:22%">16M adults</div></div><div class="disease-stat" style="color:#888">$50B/yr</div></div>
+<div class="disease-row"><div class="disease-name">Kidney Disease</div><div class="disease-bar"><div class="disease-fill" style="background:#666;width:48%">37M adults</div></div><div class="disease-stat" style="color:#888">$87B/yr</div></div>
+<div class="disease-row" style="border-top:1px solid #333;margin-top:6px;padding-top:8px"><div class="disease-name" style="font-weight:bold">TOTAL</div><div class="disease-bar"></div><div class="disease-stat red" style="font-size:14px;font-weight:bold">$14.11T/yr</div></div>
+</div>
+
+<!-- TELOMERE SCIENCE -->
+<div class="panel">
+<h2 class="neu">Telomere Science — TERT, ECS & The Aging Clock</h2>
+<div class="science-box">
+<b>What are telomeres?</b> Protective DNA-protein caps at chromosome ends. Each cell division shortens them by ~50-100 base pairs. When critically short, cells enter senescence or apoptosis.<br><br>
+<b>TERT Gene (Telomerase Reverse Transcriptase):</b> Codes for telomerase, the enzyme that LENGTHENS telomeres. When TERT functions properly, telomeres are maintained. When TERT is suppressed (by oxidative stress, inflammation, ECS dysfunction), telomeres shorten artificially fast.<br><br>
+<b>The ECS-Telomere Connection:</b> The Endocannabinoid System regulates inflammation, oxidative stress, and cellular homeostasis. <span class="highlight">ECS dysfunction directly accelerates telomere shortening.</span> Restoring ECS function (via cannabinoid nutrition/RDI) may protect TERT expression and slow or reverse telomere attrition.<br><br>
+<b>The SASP Feedback Loop:</b> Senescent cells (from short telomeres) secrete pro-inflammatory cytokines (SASP). This inflammation causes MORE telomere shortening in neighboring cells. <span class="highlight">This is why chronic disease compounds and accelerates.</span> Breaking this loop requires upstream intervention.<br><br>
+<b>Cannabinoid Protection:</b> CBD and other cannabinoids have demonstrated: anti-inflammatory action (reduces SASP), antioxidant properties (protects telomeres from oxidative damage), potential telomerase upregulation via CB2 receptor activation, and neuroprotective effects. <span class="highlight">This is the scientific basis for cannabinoid RDI as upstream medicine.</span>
+</div>
+<div class="stat-grid">
+<div class="stat-mini"><div class="v neu">~50-100bp</div><div class="l">Telomere loss/yr (normal)</div></div>
+<div class="stat-mini"><div class="v red">2-5x</div><div class="l">Accelerated with ACiD</div></div>
+<div class="stat-mini"><div class="v purple">12,000bp</div><div class="l">Critical senescence threshold</div></div>
+<div class="stat-mini"><div class="v green">0.877</div><div class="l">THCA→THC decarb ratio</div></div>
+</div>
+</div>
+
+<!-- DISEASE PREVALENCE CHART -->
+<div class="panel">
+<h2 class="purple">Disease Prevalence (Millions Affected, US)</h2>
+<div class="chart-box"><canvas id="diseaseChart"></canvas></div>
+</div>
+
+<!-- UPSTREAM VS DOWNSTREAM -->
+<div class="panel">
+<h2 class="gold">Upstream Medicine vs Downstream Pharma</h2>
+<div class="two-col">
+<div>
+<div class="compare-row compare-down">
+<b>&#10060; DOWNSTREAM PHARMA MODEL</b>
+Treat each disease AFTER it manifests:<br>
+- Cancer &rarr; Chemotherapy/radiation ($100K-$1M+)<br>
+- Diabetes &rarr; Insulin/GLP-1 ($1K-$15K/yr)<br>
+- Obesity &rarr; Weight loss surgery/drugs ($15K-$25K)<br>
+- Alzheimer's &rarr; Ineffective drugs ($5K+/yr)<br>
+- Depression &rarr; SSRIs/side effects ($2K+/yr)<br>
+- Chronic pain &rarr; Opioids (deadly cycle)<br>
+<b>Cost: $14.11T/yr. Does not address root cause.</b><br>
+<b>Outcome: Disease management, not healing.</b>
+</div>
+</div>
+<div>
+<div class="compare-row compare-up">
+<b>&#9989; UPSTREAM MEDICINE (BN FLEET)</b>
+Restore ECS + protect telomeres BEFORE disease manifests:<br>
+- Cannabinoid nutrition (RDI) &rarr; restore ECS homeostasis<br>
+- Remove artificial causes (toxins, bad diet, pharma)<br>
+- TERT activation via anti-inflammatory nutrition<br>
+- Break SASP feedback loop at cellular level<br>
+- Body's innate healing capacity handles the rest<br>
+<b>Cost: Minimal (plant-based nutrition).</b><br>
+<b>Outcome: 90% disease reduction = $317T savings.</b><br>
+<b>This is the cannabinoid RDI thesis made actionable.</b>
+</div>
+</div>
+</div>
+</div>
+
+<!-- SOLUTION -->
+<div class="panel">
+<h2 class="green">The Upstream Solution — ECS Restoration Protocol</h2>
+<div class="science-box">
+<b>Step 1: REMOVE artificial causes</b> — Eliminate or reduce exposure to petrochemicals, pesticides, processed foods, fluoride, unnecessary pharmaceuticals.<br><br>
+<b>Step 2: RESTORE ECS function</b> — Daily cannabinoid nutrition (RDI). Travis's protocol: 1,500mg CBD + 600mg THC in MCT oil daily. This is NUTRITION, not medication. The ECS needs cannabinoids like the body needs vitamin C.<br><br>
+<b>Step 3: PROTECT telomeres</b> — Antioxidant-rich diet, reduced oxidative stress, anti-inflammatory lifestyle. Cannabinoids directly reduce the oxidative damage that shortens telomeres.<br><br>
+<b>Step 4: ACTIVATE healing</b> — The body's innate regenerative capacity is UNLOCKED when the ECS is functioning. Stem cell mobilization, neurogenesis, immune rebalancing — all regulated by the ECS.<br><br>
+<b>Step 5: MEASURE & PROVE</b> — BiGen evidence framework tracks outcomes. Flower Lab, Edible Tracker, Intake Tracker all feed session data. Meta-analysis validates the cannabinoid RDI thesis. The $317T savings hypothesis becomes evidence-based medicine.
+</div>
+<div class="stat-grid">
+<div class="stat-mini"><div class="v green">1,500mg</div><div class="l">CBD/day (RDI baseline)</div></div>
+<div class="stat-mini"><div class="v purple">600mg</div><div class="l">THC/day (RDI baseline)</div></div>
+<div class="stat-mini"><div class="v neu">5ml</div><div class="l">MCT carrier/day</div></div>
+<div class="stat-mini"><div class="v gold">12 mo</div><div class="l">Target to heal 133M</div></div>
+</div>
+</div>
+
+<div class="disclaimer">
+ACiD (Artificial Chronic Inflammatory Disease) is a theoretical framework proposed by Travis Remington, FMF HM3, MPAS PA, based on 20+ years of clinical observation. The TERT-ECS-telomere cascade hypothesis synthesizes peer-reviewed telomere biology, endocannabinoid system research, and oxidative stress/inflammation science. Individual claims range from [A] (well-established telomere biology) to [D] (practitioner-level clinical observation). The BN Fleet BiGen framework is designed to systematically validate each claim through consented data collection and meta-analysis. This is research, not medical advice. Consult qualified practitioners for individual health decisions.
+</div>
+
+</div>
+<script>
+new Chart(document.getElementById('diseaseChart'),{type:'bar',
+data:{labels:['Obesity','Chronic Pain','Heart Disease','Diabetes','Depression','Kidney Disease','Autoimmune','Alzheimer\'s','Cancer','COPD'],
+datasets:[{label:'Millions Affected (US)',data:[100,50,30.3,37.3,40,37,24,6.5,18,16],
+backgroundColor:['#E67E22','#3498DB','#E74C3C','#E67E22','#3498DB','#666','#8E44AD','#8E44AD','#E74C3C','#666'],
+borderColor:'#1a1a3e',borderWidth:1}]},
+options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+scales:{x:{title:{display:true,text:'Millions of Americans',color:'#888'},ticks:{color:'#888'},grid:{color:'#1a1a33'}},
+y:{ticks:{color:'#aaa',font:{size:10}},grid:{display:false}}},
+plugins:{legend:{display:false}}}});
+</script>
+</body>
+</html>

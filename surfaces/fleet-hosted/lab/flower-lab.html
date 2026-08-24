@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BN Flower Lab — THCA Blending Calculator</title>
+<script src="../vendor/chart.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#eee;font-family:Inter,system-ui,sans-serif}
+.hdr{background:#16213e;padding:14px 30px;border-bottom:1px solid #333;display:flex;justify-content:space-between;align-items:center}
+.hdr h1{color:#8E44AD;font-size:20px}.hdr .sub{color:#666;font-size:11px}
+.wrap{display:grid;grid-template-columns:300px 1fr 320px;gap:14px;padding:14px;max-width:1400px;margin:0 auto}
+.col h2{color:#8E44AD;font-size:12px;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
+.sc{background:#16213e;border-radius:10px;padding:9px;margin-bottom:5px;border-left:3px solid var(--c)}
+.sn{font-weight:bold;font-size:11px;display:flex;align-items:center;gap:5px;justify-content:space-between}
+.badge{font-size:8px;padding:2px 6px;border-radius:4px;font-weight:bold;text-transform:uppercase}
+.sat{background:#27AE60;color:#fff}.ind{background:#8E44AD;color:#fff}.hyb{background:#E67E22;color:#fff}
+.thca{font-size:10px;color:#f0a500;font-weight:bold}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.meta{color:#777;font-size:9px;margin:1px 0}
+.terps{font-size:8px;color:#aaa;margin:1px 0}
+.ir{display:flex;align-items:center;gap:5px;margin-top:3px}
+.ir input{width:50px;background:#0d1117;border:1px solid #333;color:#8E44AD;text-align:center;padding:2px;border-radius:4px;font-size:12px}
+.pb{flex:1;height:4px;background:#0d1117;border-radius:2px;overflow:hidden}
+.pf{height:100%;border-radius:2px;transition:width .3s}
+.pt{font-size:9px;color:#777;width:28px;text-align:right}
+.cs{background:#16213e;border-radius:10px;padding:14px;margin-bottom:10px}
+.cc{position:relative;height:280px}
+.eff-row{display:flex;align-items:center;gap:8px;margin:4px 0}
+.eff-lbl{width:70px;font-size:10px;color:#bbb}
+.eff-bar{flex:1;height:14px;background:#0d1117;border-radius:7px;overflow:hidden}
+.eff-fill{height:100%;border-radius:7px;transition:width .4s;display:flex;align-items:center;justify-content:flex-end;padding-right:5px;font-size:9px;color:#fff;font-weight:bold}
+.tod{text-align:center;padding:6px;border-radius:6px;font-weight:bold;font-size:11px;margin-top:8px}
+.rn{width:100%;background:#0d1117;border:1px solid #333;color:#eee;padding:5px;border-radius:4px;margin-bottom:6px}
+.pbtn{display:block;width:100%;background:#0d1117;border:1px solid #333;color:#eee;padding:6px;border-radius:6px;margin-bottom:4px;cursor:pointer;text-align:left;font-size:11px;transition:.2s}
+.pbtn:hover{background:#1a2332;border-color:#8E44AD}
+.cl{display:flex;justify-content:space-between;padding:2px 0;font-size:10px;border-bottom:1px solid #1a2332}
+select,input[type=text],input[type=number],textarea{width:100%;background:#0d1117;border:1px solid #333;color:#eee;padding:5px;border-radius:4px;font-size:11px;margin-bottom:4px}
+.session{background:#0d1117;border-radius:8px;padding:10px;margin-top:8px}
+.session h3{color:#8E44AD;font-size:11px;margin-bottom:6px}
+.sliders{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.sl{display:flex;align-items:center;gap:4px;font-size:9px}
+.sl input{width:60px;margin:0}
+.sl span{width:55px;color:#aaa}
+.checkbox-row{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0}
+.checkbox-row label{font-size:9px;display:flex;align-items:center;gap:3px}
+.submit-btn{width:100%;background:#8E44AD;border:none;color:#fff;padding:8px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:bold;margin-top:6px}
+.submit-btn:hover{background:#7d3c98}
+.output{background:#0d1117;border:1px solid #333;border-radius:6px;padding:8px;margin-top:6px;font-size:9px;white-space:pre-wrap;max-height:150px;overflow:auto;display:none}
+.sv{color:#27AE60;font-weight:bold}
+</style>
+</head>
+<body>
+<div class="hdr"><h1>🌿 BN Flower Lab</h1><div class="sub">bnature.social — THCA Blending + Research Tracker v2.0</div></div>
+<div class="wrap">
+<!-- LEFT -->
+<div class="col"><h2>Strains</h2><div id="strainList"></div></div>
+<!-- CENTER -->
+<div class="col">
+<h2>Effects Profile</h2>
+<div class="cs"><div class="cc"><canvas id="chart"></canvas></div></div>
+<div class="cs" id="effBars"></div>
+<div class="cs" id="todBadge"></div>
+</div>
+<!-- RIGHT -->
+<div class="col">
+<h2>Recipe</h2>
+<input class="rn" id="rname" value="Morning Energy" placeholder="Name your blend...">
+<h2>Batch Size</h2>
+<select id="bs" onchange="scaleBatch(this.value)">
+<option value="0">Custom</option><option value="3.5">3.5g (Eighth)</option>
+<option value="7">7g (Quarter)</option><option value="14">14g (Half)</option>
+<option value="28">28g (Oz)</option><option value="112">112g (QP)</option>
+</select>
+<h2>Preset Blends</h2>
+<button class="pbtn" onclick="applyPreset('morning')">☀️ Morning Energy — Sativa Blast</button>
+<button class="pbtn" onclick="applyPreset('creative')">🎨 Creative Flow — Focused</button>
+<button class="pbtn" onclick="applyPreset('balance')">⚖️ Afternoon Balance</button>
+<button class="pbtn" onclick="applyPreset('evening')">🌆 Evening Wind Down</button>
+<button class="pbtn" onclick="applyPreset('rest')">🌙 Deep Rest — Indica Heavy</button>
+<h2 style="margin-top:10px">Cost Analysis</h2>
+<div id="costList"></div>
+<div class="cl sv"><span>Total</span><span id="tc">$0.00</span></div>
+<div class="cl"><span>Per Joint (~0.5g):</span><span id="cpj">$0.00</span></div>
+<div class="cl"><span>THCA %:</span><span id="thca">0%</span></div>
+
+<h2 style="margin-top:10px">Session Log — bDatabase Research</h2>
+<div class="session">
+<h3>Log Your Experience</h3>
+<input type="number" id="doseG" value="0.5" step="0.1" min="0.1" placeholder="Dose consumed (g)">
+<select id="method"><option>Joint</option><option>Pipe</option><option>Vaporizer</option><option>Bong</option></select>
+<input type="text" id="activity" placeholder="What were you doing?">
+<h3 style="color:#666;font-size:10px;margin:6px 0 3px">Rate Effects (0-10):</h3>
+<div class="sliders" id="rateSliders"></div>
+<h3 style="color:#666;font-size:10px;margin:6px 0 3px">Side Effects:</h3>
+<div class="checkbox-row">
+<label><input type="checkbox" value="DryMouth">Dry Mouth</label>
+<label><input type="checkbox" value="DryEyes">Dry Eyes</label>
+<label><input type="checkbox" value="Anxiety">Anxiety</label>
+<label><input type="checkbox" value="Paranoia">Paranoia</label>
+<label><input type="checkbox" value="Munchies">Munchies</label>
+<label><input type="checkbox" value="None">None</label>
+</div>
+<textarea id="notes" rows="2" placeholder="Notes..."></textarea>
+<button class="submit-btn" onclick="submitSession()">📋 Submit to bDatabase</button>
+<div class="output" id="output"></div>
+</div>
+</div>
+</div>
+<script>
+const S=[
+{id:'pineapple',n:'Pineapple Breeze',thca:30.7,oz:50,c:'#F4D03F',type:'SATIVA-DOM',tc:'sat',g:1.5,terps:'Limonene, Myrcene, Caryophyllene',e:{energy:9,creat:7,focus:7,euphoria:6,relax:3,body:3}},
+{id:'cadillac',n:'Cadillac Rainbow',thca:30.1,oz:50,c:'#8E44AD',type:'INDICA-DOM',tc:'ind',g:0,terps:'Caryophyllene, Limonene, Myrcene',e:{energy:5,creat:6,focus:6,euphoria:7,relax:6,body:6}},
+{id:'purple',n:'Purple Haze',thca:25.0,oz:45,c:'#9B59B6',type:'SATIVA',tc:'sat',g:1.0,terps:'Pinene, Myrcene, Caryophyllene',e:{energy:10,creat:9,focus:8,euphoria:7,relax:2,body:2}},
+{id:'papaya',n:'Golden Papaya',thca:24.0,oz:45,c:'#E67E22',type:'SATIVA',tc:'sat',g:1.0,terps:'Myrcene, Limonene, Pinene',e:{energy:8,creat:8,focus:6,euphoria:7,relax:3,body:3}},
+{id:'wifi',n:'White Fire Zkittlez',thca:26.0,oz:48,c:'#E74C3C',type:'HYBRID',tc:'hyb',g:0,terps:'Caryophyllene, Limonene, Humulene',e:{energy:6,creat:7,focus:6,euphoria:8,relax:5,body:5}},
+{id:'icc',n:'Ice Cream Cake',thca:25.0,oz:48,c:'#3498DB',type:'INDICA',tc:'ind',g:0,terps:'Linalool, Myrcene, Caryophyllene',e:{energy:2,creat:4,focus:3,euphoria:7,relax:9,body:9}}
+];
+const P={
+morning:{pineapple:1.5,cadillac:0,purple:1.0,papaya:1.0,wifi:0,icc:0},
+creative:{pineapple:1.0,cadillac:0,purple:0.5,papaya:1.0,wifi:1.0,icc:0},
+balance:{pineapple:0.5,cadillac:1.5,purple:0,papaya:0,wifi:1.0,icc:0.5},
+evening:{pineapple:0,cadillac:1.0,purple:0,papaya:0,wifi:1.0,icc:1.5},
+rest:{pineapple:0,cadillac:1.0,purple:0,papaya:0,wifi:0,icc:2.5}
+};
+const EFF_NAMES={energy:'Energy',creat:'Creativity',focus:'Focus',euphoria:'Euphoria',relax:'Relaxation',body:'Body'};
+const EFF_COLORS={energy:'#27AE60',creat:'#E67E22',focus:'#3498DB',euphoria:'#8E44AD',relax:'#9B59B6',body:'#2C3E50'};
+let chart;
+function build(){
+document.getElementById('strainList').innerHTML=S.map(s=>`<div class="sc" style="--c:${s.c}">
+<div class="sn"><span><span class="dot" style="background:${s.c}"></span>${s.n}</span><span class="badge ${s.tc}">${s.type}</span></div>
+<div class="meta"><span class="thca">${s.thca}% THCA</span> · $${s.oz}/oz</div>
+<div class="terps">${s.terps}</div>
+<div class="ir"><input type="number" id="${s.id}_i" value="${s.g}" min="0" step="0.1" onchange="upd('${s.id}',this.value)">
+<div class="pb"><div class="pf" id="${s.id}_p" style="background:${s.c};width:0%"></div></div>
+<span class="pt" id="${s.id}_t">0%</span></div>
+</div>`).join('');
+document.getElementById('rateSliders').innerHTML=Object.keys(EFF_NAMES).map(k=>`<div class="sl"><span>${EFF_NAMES[k]}</span><input type="range" id="rate_${k}" min="0" max="10" value="5"></div>`).join('');
+}
+function upd(id,v){const s=S.find(x=>x.id===id);if(s)s.g=parseFloat(v)||0;update()}
+function update(){
+const t=S.reduce((a,s)=>a+s.g,0);
+S.forEach(s=>{const p=t>0?s.g/t*100:0;const b=document.getElementById(s.id+'_p');const x=document.getElementById(s.id+'_t');if(b)b.style.width=p+'%';if(x)x.textContent=p.toFixed(0)+'%'});
+const dims=Object.keys(EFF_NAMES);
+const data=dims.map(dm=>{let sm=0;S.forEach(s=>sm+=s.e[dm]*s.g);return t>0?(sm/t):0});
+if(chart){chart.data.datasets[0].data=data;chart.update()}
+// Effect bars
+document.getElementById('effBars').innerHTML='<h2 style="margin-bottom:6px">Calculated Effects</h2>'+dims.map(dm=>{let sm=0;S.forEach(s=>sm+=s.e[dm]*s.g);const val=t>0?sm/t:0;const pct=val*10;return `<div class="eff-row"><span class="eff-lbl">${EFF_NAMES[dm]}</span><div class="eff-bar"><div class="eff-fill" style="background:${EFF_COLORS[dm]};width:${pct}%">${val.toFixed(1)}</div></div></div>`}).join('');
+// Time of day
+const avgEnergy=data[0],avgRelax=data[4];
+let tod,todColor;
+if(avgEnergy>=6){tod='☀️ MORNING / DAYTIME';todColor='#27AE60'}
+else if(avgRelax>=6){tod='🌙 EVENING / NIGHT';todColor='#8E44AD'}
+else{tod='⚖️ AFTERNOON';todColor='#E67E22'}
+document.getElementById('todBadge').innerHTML=`<div class="tod" style="background:${todColor}33;color:${todColor};border:1px solid ${todColor}">${tod}</div>`;
+// Costs
+let cl='',tc=0,weightedThca=0;
+S.forEach(s=>{if(s.g>0){const cost=s.g*(s.oz/28);tc+=cost;weightedThca+=s.thca*s.g;cl+=`<div class="cl"><span>${s.n} (${s.g.toFixed(1)}g)</span><span>$${cost.toFixed(2)}</span></div>`}});
+document.getElementById('costList').innerHTML=cl;
+document.getElementById('tc').textContent='$'+tc.toFixed(2);
+const joints=Math.round(t/0.5);
+document.getElementById('cpj').textContent='$'+(joints>0?tc/joints:0).toFixed(2);
+document.getElementById('thca').textContent=(t>0?(weightedThca/t).toFixed(1):0)+'%';
+}
+function applyPreset(n){const p=P[n];if(!p)return;S.forEach(s=>{s.g=p[s.id]||0;const i=document.getElementById(s.id+'_i');if(i)i.value=s.g});document.getElementById('bs').value='0';update()}
+function scaleBatch(tg){const t=parseFloat(tg);if(!t||t<=0)return;const total=S.reduce((a,s)=>a+s.g,0);if(total<=0)return;S.forEach(s=>{s.g=Math.round(s.g*(t/total)*10)/10;const i=document.getElementById(s.id+'_i');if(i)i.value=s.g});update()}
+function submitSession(){
+const t=S.reduce((a,s)=>a+s.g,0);
+const data={blend:document.getElementById('rname').value,timestamp:new Date().toISOString(),composition:{},totalGrams:t,thcaPercent:document.getElementById('thca').textContent,doseG:parseFloat(document.getElementById('doseG').value),method:document.getElementById('method').value,activity:document.getElementById('activity').value,effects:{},sideEffects:[],notes:document.getElementById('notes').value};
+S.forEach(s=>{if(s.g>0)data.composition[s.n]=s.g});
+Object.keys(EFF_NAMES).forEach(k=>{data.effects[k]=parseInt(document.getElementById('rate_'+k).value)});
+document.querySelectorAll('.checkbox-row input:checked').forEach(c=>data.sideEffects.push(c.value));
+const json=JSON.stringify(data,null,2);
+const out=document.getElementById('output');
+out.style.display='block';out.textContent='✅ DATA LOGGED FOR BIGEN META-ANALYSIS\n\n'+json;
+// Save to localStorage
+let sessions=JSON.parse(localStorage.getItem('bnSessions')||'[]');sessions.push(data);localStorage.setItem('bnSessions',JSON.stringify(sessions));
+}
+document.addEventListener('DOMContentLoaded',function(){
+build();
+chart=new Chart(document.getElementById('chart'),{type:'radar',data:{labels:['Energy','Creativity','Focus','Euphoria','Relaxation','Body'],datasets:[{label:'Blend Effects',data:[0,0,0,0,0,0],borderColor:'#8E44AD',backgroundColor:'rgba(142,68,173,0.15)',borderWidth:2,pointBackgroundColor:'#8E44AD',pointRadius:4}]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{beginAtZero:true,max:10,ticks:{color:'#555',backdropColor:'transparent'},grid:{color:'#2a2a3e'},angleLines:{color:'#2a2a3e'},pointLabels:{color:'#bbb',font:{size:11}}}},plugins:{legend:{display:false}}}});
+update();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BN Blend Lab</title>
+<script src="../vendor/chart.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#eee;font-family:Arial,sans-serif}
+.header{background:#16213e;padding:14px 30px;border-bottom:1px solid #333}
+.header h1{color:#f0a500;font-size:20px}
+.header p{color:#666;font-size:11px}
+.container{display:grid;grid-template-columns:300px 1fr 300px;gap:16px;padding:16px;max-width:1400px;margin:0 auto}
+.section-title{color:#f0a500;font-size:12px;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
+.card{background:#16213e;border-radius:10px;padding:10px;margin-bottom:6px;border-left:3px solid #ccc}
+.card input[type=number]{width:55px;background:#0d1117;border:1px solid #444;color:#f0a500;text-align:center;padding:4px;border-radius:5px;font-size:14px}
+.pct-bar{display:inline-block;width:120px;height:6px;background:#0d1117;border-radius:3px;vertical-align:middle;margin:0 6px;overflow:hidden}
+.pct-fill{height:100%;border-radius:3px;transition:width 0.3s}
+.pct-text{font-size:11px;color:#888;display:inline-block;width:35px}
+.panel{background:#16213e;border-radius:10px;padding:16px;margin-bottom:12px}
+.chart-box{position:relative;height:320px}
+.stats{display:flex;justify-content:space-around;margin-top:12px}
+.stat{text-align:center}
+.stat .val{font-size:22px;color:#f0a500;font-weight:bold}
+.stat .lbl{font-size:10px;color:#666;text-transform:uppercase}
+.btn{display:block;width:100%;background:#0d1117;border:1px solid #444;color:#eee;padding:9px;border-radius:7px;margin-bottom:5px;cursor:pointer;text-align:left;font-size:12px}
+.btn:hover{background:#222;border-color:#f0a500}
+.cost-line{display:flex;justify-content:space-between;padding:3px 0;font-size:11px;border-bottom:1px solid #222}
+.cost-total{color:#27AE60;font-weight:bold;font-size:14px}
+.compare{background:#0d1117;border-radius:7px;padding:8px;margin-top:8px}
+select,input[type=text]{width:100%;background:#0d1117;border:1px solid #444;color:#eee;padding:6px;border-radius:5px;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="header">
+<h1>Blend Lab</h1>
+<p>bnature.social - Tobacco Blending Calculator v3.0</p>
+</div>
+<div class="container">
+
+<!-- LEFT: STRAINS -->
+<div>
+<div class="section-title">Strains</div>
+
+<div class="card" style="border-color:#F4D03F">
+<b>Virginia Bright</b><br>
+<small style="color:#888">Flue-cured, USA - $21.99/lb</small><br>
+<input type="number" id="g_virginia" value="50" min="0" step="1" oninput="doUpdate()">
+<div class="pct-bar"><div class="pct-fill" id="p_virginia" style="background:#F4D03F;width:0%"></div></div>
+<span class="pct-text" id="t_virginia">0%</span>
+</div>
+
+<div class="card" style="border-color:#8B4513">
+<b>Kentucky Burley</b><br>
+<small style="color:#888">Air-cured, USA - $22.99/lb</small><br>
+<input type="number" id="g_burley" value="35" min="0" step="1" oninput="doUpdate()">
+<div class="pct-bar"><div class="pct-fill" id="p_burley" style="background:#8B4513;width:0%"></div></div>
+<span class="pct-text" id="t_burley">0%</span>
+</div>
+
+<div class="card" style="border-color:#E67E22">
+<b>Turkish Izmir</b><br>
+<small style="color:#888">Sun-cured, Turkey - $21.99/lb</small><br>
+<input type="number" id="g_turkish" value="10" min="0" step="1" oninput="doUpdate()">
+<div class="pct-bar"><div class="pct-fill" id="p_turkish" style="background:#E67E22;width:0%"></div></div>
+<span class="pct-text" id="t_turkish">0%</span>
+</div>
+
+<div class="card" style="border-color:#8E44AD">
+<b>St. James Perique</b><br>
+<small style="color:#888">Fermented, LA - $47.98/lb</small><br>
+<input type="number" id="g_perique" value="5" min="0" step="1" oninput="doUpdate()">
+<div class="pct-bar"><div class="pct-fill" id="p_perique" style="background:#8E44AD;width:0%"></div></div>
+<span class="pct-text" id="t_perique">0%</span>
+</div>
+
+<div class="card" style="border-color:#E74C3C">
+<b>KY Fire Cured</b><br>
+<small style="color:#888">Fire-cured, USA - $22.99/lb</small><br>
+<input type="number" id="g_firecured" value="0" min="0" step="1" oninput="doUpdate()">
+<div class="pct-bar"><div class="pct-fill" id="p_firecured" style="background:#E74C3C;width:0%"></div></div>
+<span class="pct-text" id="t_firecured">0%</span>
+</div>
+
+<div class="card" style="border-color:#2C3E50">
+<b>Dark Air Cured</b><br>
+<small style="color:#888">Air-cured, USA - $20.99/lb</small><br>
+<input type="number" id="g_darkair" value="0" min="0" step="1" oninput="doUpdate()">
+<div class="pct-bar"><div class="pct-fill" id="p_darkair" style="background:#2C3E50;width:0%"></div></div>
+<span class="pct-text" id="t_darkair">0%</span>
+</div>
+
+</div>
+
+<!-- CENTER: CHART + STATS -->
+<div>
+<div class="section-title">Flavor Profile</div>
+<div class="panel">
+<div class="chart-box"><canvas id="radar"></canvas></div>
+<div class="stats">
+<div class="stat"><div class="val" id="show_total">100g</div><div class="lbl">Batch</div></div>
+<div class="stat"><div class="val" id="show_cigs">111</div><div class="lbl">Cigarettes</div></div>
+<div class="stat"><div class="val" id="show_pack">$0.00</div><div class="lbl">Per Pack</div></div>
+</div>
+</div>
+</div>
+
+<!-- RIGHT: CONTROLS -->
+<div>
+<div class="section-title">Recipe Name</div>
+<input type="text" id="recipe_name" value="AS Blue">
+
+<div class="section-title">Batch Size</div>
+<select id="batch_size" onchange="doScale()">
+<option value="0">Custom</option>
+<option value="50">Scale to 50g</option>
+<option value="100" selected>Scale to 100g</option>
+<option value="200">Scale to 200g</option>
+<option value="500">Scale to 500g</option>
+</select>
+
+<div class="section-title">Preset Recipes</div>
+<button class="btn" onclick="doPreset('yellow')">AS Yellow - Mellow</button>
+<button class="btn" onclick="doPreset('blue')">AS Blue - Original</button>
+<button class="btn" onclick="doPreset('black')">AS Black - Perique</button>
+<button class="btn" onclick="doPreset('reserve')">Black Reserve - Smoky</button>
+<button class="btn" onclick="doPreset('midnight')">Midnight - Ultra Premium</button>
+
+<div class="section-title" style="margin-top:12px">Cost Analysis</div>
+<div id="cost_lines"></div>
+<div class="cost-line cost-total"><span>Total</span><span id="cost_total">$0.00</span></div>
+<div class="compare">
+<div class="cost-line"><span>American Spirit:</span><span>$12.00/pack</span></div>
+<div class="cost-line"><span>Your Blend:</span><span id="cost_yours">$0.00/pack</span></div>
+<div class="cost-line" style="color:#27AE60;font-weight:bold"><span>You Save:</span><span id="cost_savings">0%</span></div>
+</div>
+</div>
+
+</div>
+
+<script>
+// Strain data
+var DATA = {
+virginia:  {price:21.99, sweet:9, body:4, spice:2, str:4, smoke:1, aroma:6, color:'#F4D03F'},
+burley:    {price:22.99, sweet:3, body:8, spice:2, str:5, smoke:1, aroma:5, color:'#8B4513'},
+turkish:   {price:21.99, sweet:4, body:3, spice:9, str:3, smoke:1, aroma:9, color:'#E67E22'},
+perique:   {price:47.98, sweet:2, body:7, spice:8, str:8, smoke:3, aroma:8, color:'#8E44AD'},
+firecured: {price:22.99, sweet:2, body:6, spice:4, str:7, smoke:9, aroma:7, color:'#E74C3C'},
+darkair:   {price:20.99, sweet:1, body:8, spice:3, str:9, smoke:2, aroma:4, color:'#2C3E50'}
+};
+
+var IDS = ['virginia','burley','turkish','perique','firecured','darkair'];
+
+var PRESETS = {
+yellow:   {virginia:60, burley:35, turkish:5, perique:0, firecured:0, darkair:0, name:'AS Yellow'},
+blue:     {virginia:50, burley:35, turkish:10, perique:5, firecured:0, darkair:0, name:'AS Blue'},
+black:    {virginia:35, burley:40, turkish:10, perique:15, firecured:0, darkair:0, name:'AS Black'},
+reserve:  {virginia:30, burley:30, turkish:10, perique:15, firecured:10, darkair:5, name:'Black Reserve'},
+midnight: {virginia:25, burley:30, turkish:8, perique:15, firecured:15, darkair:7, name:'Midnight'}
+};
+
+var myChart = null;
+
+function getGram(id) {
+  var el = document.getElementById('g_' + id);
+  if (!el) return 0;
+  return parseFloat(el.value) || 0;
+}
+
+function setGram(id, val) {
+  var el = document.getElementById('g_' + id);
+  if (el) el.value = val;
+}
+
+function doUpdate() {
+  // Get all grams
+  var total = 0;
+  var grams = {};
+  for (var i = 0; i < IDS.length; i++) {
+    grams[IDS[i]] = getGram(IDS[i]);
+    total += grams[IDS[i]];
+  }
+
+  // Update percentage bars
+  for (var i = 0; i < IDS.length; i++) {
+    var pct = total > 0 ? (grams[IDS[i]] / total * 100) : 0;
+    var fill = document.getElementById('p_' + IDS[i]);
+    var text = document.getElementById('t_' + IDS[i]);
+    if (fill) fill.style.width = pct + '%';
+    if (text) text.textContent = Math.round(pct) + '%';
+  }
+
+  // Calculate weighted flavor profile
+  var dims = ['sweet', 'body', 'spice', 'str', 'smoke', 'aroma'];
+  var profile = [];
+  for (var d = 0; d < dims.length; d++) {
+    var sum = 0;
+    for (var i = 0; i < IDS.length; i++) {
+      sum += DATA[IDS[i]][dims[d]] * grams[IDS[i]];
+    }
+    profile.push(total > 0 ? (sum / total) : 0);
+  }
+
+  // Update chart
+  if (myChart) {
+    myChart.data.datasets[0].data = profile;
+    myChart.update();
+  }
+
+  // Stats
+  document.getElementById('show_total').textContent = Math.round(total) + 'g';
+  var cigs = Math.round(total / 0.9);
+  document.getElementById('show_cigs').textContent = cigs;
+
+  // Costs
+  var costHtml = '';
+  var totalCost = 0;
+  for (var i = 0; i < IDS.length; i++) {
+    if (grams[IDS[i]] > 0) {
+      var cost = grams[IDS[i]] * (DATA[IDS[i]].price / 454);
+      totalCost += cost;
+      costHtml += '<div class="cost-line"><span>' + IDS[i] + ' (' + grams[IDS[i]] + 'g)</span><span>$' + cost.toFixed(2) + '</span></div>';
+    }
+  }
+  document.getElementById('cost_lines').innerHTML = costHtml;
+  document.getElementById('cost_total').textContent = '$' + totalCost.toFixed(2);
+
+  var costPerCig = cigs > 0 ? totalCost / cigs : 0;
+  var costPerPack = costPerCig * 20;
+  document.getElementById('show_pack').textContent = '$' + costPerPack.toFixed(2);
+  document.getElementById('cost_yours').textContent = '$' + costPerPack.toFixed(2) + '/pack';
+  var savings = costPerPack > 0 ? Math.round((12 - costPerPack) / 12 * 100) : 0;
+  document.getElementById('cost_savings').textContent = savings + '%';
+}
+
+function doPreset(name) {
+  var p = PRESETS[name];
+  if (!p) return;
+  for (var i = 0; i < IDS.length; i++) {
+    setGram(IDS[i], p[IDS[i]]);
+  }
+  document.getElementById('recipe_name').value = p.name;
+  doUpdate();
+}
+
+function doScale() {
+  var target = parseFloat(document.getElementById('batch_size').value);
+  if (!target || target <= 0) {
+    doUpdate();
+    return;
+  }
+  var total = 0;
+  for (var i = 0; i < IDS.length; i++) total += getGram(IDS[i]);
+  if (total <= 0) {
+    doUpdate();
+    return;
+  }
+  for (var i = 0; i < IDS.length; i++) {
+    var scaled = Math.round(getGram(IDS[i]) * (target / total) * 10) / 10;
+    setGram(IDS[i], scaled);
+  }
+  doUpdate();
+}
+
+// Initialize on page load
+window.onload = function() {
+  var ctx = document.getElementById('radar').getContext('2d');
+  myChart = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: ['Sweetness', 'Body', 'Spice', 'Strength', 'Smokiness', 'Aroma'],
+      datasets: [{
+        label: 'Flavor Profile',
+        data: [0, 0, 0, 0, 0, 0],
+        borderColor: '#f0a500',
+        backgroundColor: 'rgba(240,165,0,0.15)',
+        borderWidth: 2,
+        pointBackgroundColor: '#f0a500',
+        pointRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        r: {
+          beginAtZero: true,
+          max: 10,
+          ticks: { color: '#555', backdropColor: 'transparent', stepSize: 2 },
+          grid: { color: '#333' },
+          angleLines: { color: '#333' },
+          pointLabels: { color: '#ccc', font: { size: 12 } }
+        }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+  doUpdate();
+};
+</script>
+</body>
+</html>

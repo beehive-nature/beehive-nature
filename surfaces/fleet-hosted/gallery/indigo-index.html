@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BN Indigo Index v2.0 — Disease Economics + Creativity + GDP</title>
+<script src="../vendor/chart.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a14;color:#eee;font-family:Arial,sans-serif}
+.hdr{background:linear-gradient(135deg,#0a0a2e,#0a1a3e);padding:14px 30px;border-bottom:1px solid #333;text-align:center}
+.hdr h1{font-size:22px;background:linear-gradient(90deg,#4B0082,#00CED1,#FFD700);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:3px}
+.hdr p{color:#555;font-size:11px}
+.wrap{max-width:1200px;margin:0 auto;padding:14px}
+.panel{background:#111122;border-radius:12px;padding:16px;margin-bottom:12px;border:1px solid #1a1a3e}
+.panel h2{font-size:13px;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+.hero-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px}
+.hero-card{background:#111122;border-radius:14px;padding:20px;text-align:center;border:1px solid #1a1a3e}
+.hero-card .mega{font-size:36px;font-weight:bold;line-height:1}
+.hero-card .sub{font-size:10px;color:#888;margin-top:6px;text-transform:uppercase}
+.red{color:#E74C3C}.green{color:#27AE60}.gold{color:#FFD700}.ind{color:#4B0082}.neu{color:#00CED1}.purple{color:#8E44AD}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.chart-box{height:280px;margin:8px 0}
+.breakdown-row{display:flex;align-items:center;gap:10px;padding:8px;background:#080820;border-radius:8px;margin-bottom:5px}
+.breakdown-bar{flex:1;height:24px;background:#0a0a14;border-radius:4px;overflow:hidden}
+.breakdown-fill{height:100%;display:flex;align-items:center;padding-left:8px;font-size:10px;font-weight:bold;color:#fff;border-radius:4px;transition:width .5s}
+.breakdown-label{width:160px;font-size:11px}
+.breakdown-val{width:80px;text-align:right;font-size:12px;font-weight:bold}
+.slider-container{background:#080820;border-radius:10px;padding:14px;margin:10px 0}
+.slider-container label{font-size:11px;color:#888;display:block;margin-bottom:4px}
+.slider-container input[type=range]{width:100%;margin:6px 0}
+.slider-big{text-align:center;font-size:28px;font-weight:bold;margin:6px 0}
+.sim-results{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
+.sim-stat{background:#080820;border-radius:8px;padding:10px;text-align:center}
+.sim-stat .v{font-size:18px;font-weight:bold}.sim-stat .l{font-size:8px;color:#666;text-transform:uppercase}
+.nutrisec-box{background:linear-gradient(135deg,#0a1a2e,#0a2e1a);border:1px solid #27AE6044;border-radius:12px;padding:16px;margin:12px 0}
+.nutrisec-box h3{color:#27AE60;font-size:14px;margin-bottom:8px}
+.nutrisec-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:10px 0}
+.chain-flow{display:flex;align-items:center;justify-content:center;gap:4px;flex-wrap:wrap;padding:14px;background:#080820;border-radius:10px;margin:10px 0}
+.chain-node{padding:6px 10px;border-radius:6px;font-size:10px;font-weight:bold;text-align:center}
+.chain-arrow{color:#444;font-size:14px}
+table{width:100%;font-size:10px;border-collapse:collapse}
+th{text-align:left;padding:5px;color:#666;border-bottom:1px solid #333;text-transform:uppercase;font-size:9px}
+td{padding:5px;border-bottom:1px solid #1a1a3e}
+.badge{font-size:8px;padding:1px 4px;border-radius:3px;font-weight:bold}
+.b-legal{background:#27AE60;color:#fff}.b-med{background:#E67E22;color:#fff}.b-illegal{background:#E74C3C;color:#fff}
+.disclaimer{font-size:9px;color:#444;text-align:center;padding:10px;line-height:1.5}
+select{width:100%;background:#080820;border:1px solid #333;color:#eee;padding:6px;border-radius:5px;font-size:11px;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="hdr">
+<h1>BN Indigo Index v2.0</h1>
+<p>Chronic Disease Economics x Cannabinoid Solution x Creativity x GDP | Operation NutriSec | bnature.social</p>
+</div>
+<div class="wrap">
+
+<!-- HERO STATS -->
+<div class="hero-stats">
+<div class="hero-card">
+<div class="mega red">$14.11T</div>
+<div class="sub">Annual Chronic Disease Cost</div>
+<div style="font-size:10px;color:#555;margin-top:4px">52% of US GDP ($26.95T)</div>
+</div>
+<div class="hero-card">
+<div class="mega green">90%</div>
+<div class="sub">Reduction with Nutrient Therapy</div>
+<div style="font-size:10px;color:#555;margin-top:4px">ECS restoration via cannabinoid RDI</div>
+</div>
+<div class="hero-card">
+<div class="mega gold">$317T</div>
+<div class="sub">25-Year Savings Opportunity</div>
+<div style="font-size:10px;color:#555;margin-top:4px">From $352.77T baseline to $35.28T</div>
+</div>
+</div>
+
+<!-- THE ECONOMIC VALUE CHAIN -->
+<div class="panel">
+<h2 class="gold">The Economic Value Chain</h2>
+<div class="chain-flow">
+<div class="chain-node" style="background:#E74C3C33;color:#E74C3C;border:1px solid #E74C3C55">ECS<br>Dysfunction</div>
+<span class="chain-arrow">&rarr;</span>
+<div class="chain-node" style="background:#E74C3C22;color:#E74C3C;border:1px solid #E74C3C44">Chronic<br>Disease</div>
+<span class="chain-arrow">&rarr;</span>
+<div class="chain-node" style="background:#E67E2233;color:#E67E22;border:1px solid #E67E2255">$14.11T/yr<br>Burden</div>
+<span class="chain-arrow">&rarr;</span>
+<div class="chain-node" style="background:#27AE6033;color:#27AE60;border:1px solid #27AE6055">Cannabinoid<br>Nutrition (RDI)</div>
+<span class="chain-arrow">&rarr;</span>
+<div class="chain-node" style="background:#00CED133;color:#00CED1;border:1px solid #00CED155">ECS<br>Restoration</div>
+<span class="chain-arrow">&rarr;</span>
+<div class="chain-node" style="background:#4B008233;color:#9B59B6;border:1px solid #4B008255">90% Disease<br>Reduction</div>
+<span class="chain-arrow">&rarr;</span>
+<div class="chain-node" style="background:#FFD70033;color:#FFD700;border:1px solid #FFD70055">$317T<br>Savings</div>
+<span class="chain-arrow">&rarr;</span>
+<div class="chain-node" style="background:#27AE6022;color:#27AE60;border:1px solid #27AE6044">Economic<br>Renaissance</div>
+</div>
+</div>
+
+<!-- GDP BREAKDOWN -->
+<div class="panel">
+<h2 class="red">$14.11T Annual Cost Breakdown by GDP Component</h2>
+<div class="breakdown-row"><div class="breakdown-label">Consumption</div><div class="breakdown-bar"><div class="breakdown-fill" style="background:#E74C3C;width:63%">$8.85T</div></div><div class="breakdown-val red">$8.85T</div></div>
+<div style="font-size:9px;color:#555;padding:2px 0 6px 170px">Healthcare $5.19T + Indirect/quality-of-life $3.67T</div>
+<div class="breakdown-row"><div class="breakdown-label">Investment</div><div class="breakdown-bar"><div class="breakdown-fill" style="background:#E67E22;width:19%">$2.75T</div></div><div class="breakdown-val gold">$2.75T</div></div>
+<div style="font-size:9px;color:#555;padding:2px 0 6px 170px">Healthcare infrastructure $2.29T + Supporting industries $0.46T</div>
+<div class="breakdown-row"><div class="breakdown-label">Government</div><div class="breakdown-bar"><div class="breakdown-fill" style="background:#8E44AD;width:15%">$2.16T</div></div><div class="breakdown-val purple">$2.16T</div></div>
+<div style="font-size:9px;color:#555;padding:2px 0 6px 170px">Medicaid $0.82T + State programs $0.41T + NIH/welfare/judicial $0.93T</div>
+<div class="breakdown-row"><div class="breakdown-label">Additional</div><div class="breakdown-bar"><div class="breakdown-fill" style="background:#666;width:3%">$0.35T</div></div><div class="breakdown-val" style="color:#888">$0.35T</div></div>
+<div style="font-size:9px;color:#555;padding:2px 0 6px 170px">Banking losses $0.05T + Auxiliary services $0.30T</div>
+<div class="breakdown-row" style="border-top:1px solid #333;margin-top:6px;padding-top:8px"><div class="breakdown-label" style="font-weight:bold">TOTAL</div><div class="breakdown-bar"></div><div class="breakdown-val red" style="font-size:16px">$14.11T</div></div>
+</div>
+
+<div class="two-col">
+<!-- 25 YEAR PROJECTION -->
+<div class="panel">
+<h2 class="gold">25-Year Projection: Baseline vs Nutrient Solution</h2>
+<div class="chart-box"><canvas id="projChart"></canvas></div>
+</div>
+
+<!-- GDP COMPONENTS DONUT -->
+<div class="panel">
+<h2 class="ind">GDP Component Distribution</h2>
+<div class="chart-box"><canvas id="donutChart"></canvas></div>
+</div>
+</div>
+
+<!-- DISEASE REDUCTION SIMULATOR -->
+<div class="panel">
+<h2 class="green">Disease Reduction Simulator</h2>
+<div class="slider-container">
+<label>If we reduce chronic disease through cannabinoid/nutrient therapy by:</label>
+<div class="slider-big green" id="sim_reduction">90%</div>
+<input type="range" id="reductionSlider" min="0" max="95" value="90" step="5" oninput="doReduction()">
+</div>
+<div class="sim-results">
+<div class="sim-stat"><div class="v green" id="sim_annual">$1.41T</div><div class="l">Remaining Annual Cost</div></div>
+<div class="sim-stat"><div class="v green" id="sim_save_yr">$12.70T</div><div class="l">Annual Savings</div></div>
+<div class="sim-stat"><div class="v gold" id="sim_25yr">$317.49T</div><div class="l">25-Year Savings</div></div>
+<div class="sim-stat"><div class="v neu" id="sim_25_inf">$413.75T</div><div class="l">25-Yr Savings (2% inflation)</div></div>
+<div class="sim-stat"><div class="v neu" id="sim_gdp_boost">+47%</div><div class="l">GDP Freed for Innovation</div></div>
+<div class="sim-stat"><div class="v green" id="sim_healed">120M</div><div class="l">Americans Healed</div></div>
+</div>
+</div>
+
+<!-- OPERATION NUTRISEC -->
+<div class="panel">
+<div class="nutrisec-box">
+<h3>&#9875; Operation NutriSec — Naval Construction Force (SeaBee Fleet)</h3>
+<p style="font-size:11px;color:#bbb;line-height:1.6">
+Proposed to: <b style="color:#FFD700">POTUS Commission, DOGE & Congressional Committee</b><br>
+Author: <b style="color:#00CED1">Travis Mark Sutphen Remington, FMF HM3, MPAS PA, DEA# MR1320871</b>
+</p>
+<div class="nutrisec-stats">
+<div class="sim-stat"><div class="v red" style="font-size:22px">133M</div><div class="l">Americans Needing Healing</div></div>
+<div class="sim-stat"><div class="v green" style="font-size:22px">12 mo</div><div class="l">Target Time to Heal</div></div>
+<div class="sim-stat"><div class="v neu" style="font-size:22px">90%</div><div class="l">Disease Reduction Goal</div></div>
+</div>
+<p style="font-size:11px;color:#888;line-height:1.6;margin-top:8px">
+The SeaBees (Naval Construction Force) build AI-driven, robotic, automated, decentralized, autonomous critical nutrient distribution networks. Military precision applied to healing 133 million Americans with chronic inflammatory disease within 12 months. The <b style="color:#27AE60">Beehive Nature SeaBee Fleet</b> is the military implementation of the BN Fleet bio-factory vision.
+</p>
+<div style="margin-top:8px;padding:8px;background:#080820;border-radius:6px;font-size:10px;color:#666">
+<b style="color:#27AE60">Connection to BN Fleet:</b> The bio-factories (aquifer nutrients, renewable energy, seed-to-product autonomous systems) ARE the SeaBee Fleet infrastructure. beehivebiomass.com is the civilian marketplace. The SeaBees build and secure the physical network. The ICI prices the commodities. The LOVERnment DAO governs distribution. One vision, military and civilian implementations.
+</div>
+</div>
+</div>
+
+<!-- COUNTRY DATA (EXISTING) -->
+<div class="two-col">
+<div class="panel">
+<h2 class="neu">Cannabis Access vs GDP Per Capita</h2>
+<div class="chart-box" style="height:220px"><canvas id="scatterChart"></canvas></div>
+</div>
+<div class="panel">
+<h2 class="ind">Indigo Index Rankings</h2>
+<div class="chart-box" style="height:220px"><canvas id="barChart"></canvas></div>
+</div>
+</div>
+
+<div class="panel">
+<h2 class="gold">Country Data</h2>
+<table>
+<tr><th>Country</th><th>Access</th><th>Indigo</th><th>GDP/cap</th><th>Innovation</th></tr>
+<tbody id="countryRows"></tbody>
+</table>
+</div>
+
+<div class="disclaimer">
+Data sources: CDC chronic disease statistics, US GDP components (BEA 2023), Travis Remington's Operation NutriSec economic analysis. Chronic disease cost methodology includes direct healthcare, indirect productivity loss, investment in disease infrastructure, and government program costs. 90% reduction is a hypothesis based on ECS optimization through cannabinoid nutrition (RDI). The BN Fleet BiGen framework tracks actual outcomes to validate or invalidate these projections. This is not medical or financial advice.
+</div>
+
+</div>
+
+<script>
+var COUNTRIES=[
+{name:'Canada',access:8,gdp:53000,innov:55,creative:5.2,hemp:8.5,legal:'legal'},
+{name:'Uruguay',access:9,gdp:17000,innov:34,creative:3.8,hemp:5.0,legal:'legal'},
+{name:'USA (legal states)',access:6,gdp:70000,innov:61,creative:4.8,hemp:7.0,legal:'legal'},
+{name:'Germany',access:5,gdp:48000,innov:56,creative:3.5,hemp:6.5,legal:'med'},
+{name:'Netherlands',access:6,gdp:58000,innov:54,creative:5.0,hemp:6.0,legal:'med'},
+{name:'Malta',access:8,gdp:33000,innov:45,creative:4.0,hemp:4.0,legal:'legal'},
+{name:'Thailand',access:7,gdp:7000,innov:34,creative:2.8,hemp:5.5,legal:'legal'},
+{name:'Portugal',access:5,gdp:24000,innov:42,creative:3.2,hemp:4.5,legal:'med'},
+{name:'Israel',access:5,gdp:44000,innov:56,creative:5.8,hemp:6.0,legal:'med'},
+{name:'UK',access:3,gdp:45000,innov:52,creative:5.5,hemp:3.5,legal:'med'},
+{name:'Australia',access:4,gdp:60000,innov:50,creative:4.5,hemp:5.5,legal:'med'},
+{name:'France',access:2,gdp:42000,innov:51,creative:4.2,hemp:3.0,legal:'illegal'},
+{name:'China',access:1,gdp:12000,innov:55,creative:2.5,hemp:4.0,legal:'illegal'},
+{name:'Japan',access:1,gdp:40000,innov:55,creative:3.0,hemp:2.0,legal:'illegal'},
+{name:'Singapore',access:1,gdp:72000,innov:57,creative:3.5,hemp:1.0,legal:'illegal'},
+{name:'India',access:2,gdp:2500,innov:36,creative:2.5,hemp:5.0,legal:'illegal'}
+];
+function indigo(c){return Math.round(c.access*3+c.innov*0.3+c.creative*2.5+c.hemp*0.15);}
+
+// PROJECTION CHART
+var years=[];for(var y=2025;y<=2050;y++)years.push("'"+String(y).slice(2));
+var baseline=[];var reduced=[];var baseVal=14.11;var redVal=1.41;
+for(var i=0;i<years.length;i++){
+baseline.push(Math.round(baseVal*Math.pow(1.02,i)*100)/100);
+reduced.push(Math.round(redVal*Math.pow(1.02,i)*100)/100);}
+new Chart(document.getElementById('projChart'),{type:'line',
+data:{labels:years,datasets:[
+{label:'Baseline (No Action)',data:baseline,borderColor:'#E74C3C',backgroundColor:'rgba(231,76,60,0.1)',borderWidth:2,fill:true},
+{label:'With 90% Nutrient Reduction',data:reduced,borderColor:'#27AE60',backgroundColor:'rgba(39,174,96,0.1)',borderWidth:2,fill:true}
+]},
+options:{responsive:true,maintainAspectRatio:false,
+scales:{y:{title:{display:true,text:'Trillion USD',color:'#888'},ticks:{color:'#888'},grid:{color:'#1a1a33'}},
+x:{ticks:{color:'#888',maxTicksLimit:8,font:{size:9}},grid:{color:'#1a1a33'}}},
+plugins:{legend:{labels:{color:'#aaa',font:{size:9}}}}}});
+
+// DONUT CHART
+new Chart(document.getElementById('donutChart'),{type:'doughnut',
+data:{labels:['Consumption ($8.85T)','Investment ($2.75T)','Government ($2.16T)','Additional ($0.35T)'],
+datasets:[{data:[8.85,2.75,2.16,0.35],backgroundColor:['#E74C3C','#E67E22','#8E44AD','#666'],borderColor:'#0a0a14',borderWidth:2}]},
+options:{responsive:true,maintainAspectRatio:false,
+plugins:{legend:{position:'right',labels:{color:'#aaa',font:{size:10}}}}}});
+
+// SCATTER CHART
+var sd=COUNTRIES.map(function(c){return{x:c.access,y:c.gdp,name:c.name};});
+new Chart(document.getElementById('scatterChart'),{type:'scatter',
+data:{datasets:[{data:sd,backgroundColor:COUNTRIES.map(function(c){return c.legal==='legal'?'#27AE60':c.legal==='med'?'#E67E22':'#E74C3C';}),pointRadius:5}]},
+options:{responsive:true,maintainAspectRatio:false,
+scales:{x:{title:{display:true,text:'Cannabis Access',color:'#888'},min:0,max:10,ticks:{color:'#888'},grid:{color:'#1a1a33'}},
+y:{title:{display:true,text:'GDP/cap',color:'#888'},ticks:{color:'#888',callback:function(v){return '$'+v/1000+'k';}},grid:{color:'#1a1a33'}}},
+plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.raw.name;}}}}}});
+
+// BAR CHART
+var sorted=COUNTRIES.slice().sort(function(a,b){return indigo(b)-indigo(a);});
+new Chart(document.getElementById('barChart'),{type:'bar',
+data:{labels:sorted.map(function(c){return c.name;}),
+datasets:[{data:sorted.map(function(c){return indigo(c);}),
+backgroundColor:sorted.map(function(c){return c.legal==='legal'?'#4B0082':'#4B008266';}),borderColor:'#4B0082',borderWidth:1}]},
+options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+scales:{x:{ticks:{color:'#888'},grid:{color:'#1a1a33'}},y:{ticks:{color:'#888',font:{size:8}},grid:{display:false}}},
+plugins:{legend:{display:false}}}});
+
+// COUNTRY TABLE
+var rh='';
+for(var i=0;i<sorted.length;i++){var c=sorted[i];var b=c.legal==='legal'?'b-legal':c.legal==='med'?'b-med':'b-illegal';
+var bl=c.legal==='legal'?'REC':c.legal==='med'?'MED':'PROH';
+rh+='<tr><td>'+c.name+' <span class="badge '+b+'">'+bl+'</span></td><td style="text-align:center">'+c.access+'/10</td><td style="text-align:center;color:#4B0082;font-weight:bold">'+indigo(c)+'</td><td>$'+(c.gdp/1000).toFixed(0)+'k</td><td>'+c.innov+'</td></tr>';}
+document.getElementById('countryRows').innerHTML=rh;
+
+// DISEASE REDUCTION SIMULATOR
+function doReduction(){
+var r=parseInt(document.getElementById('reductionSlider').value);
+document.getElementById('sim_reduction').textContent=r+'%';
+var remaining=14.11*(1-r/100);
+var annualSave=14.11-remaining;
+var save25=annualSave*25;
+var save25Inf=0;for(var i=0;i<25;i++)save25Inf+=annualSave*Math.pow(1.02,i);
+var gdpBoost=Math.round(annualSave/26.95*100);
+var healed=Math.round(133*r/100);
+document.getElementById('sim_annual').textContent='$'+remaining.toFixed(2)+'T';
+document.getElementById('sim_save_yr').textContent='$'+annualSave.toFixed(2)+'T';
+document.getElementById('sim_25yr').textContent='$'+save25.toFixed(1)+'T';
+document.getElementById('sim_25_inf').textContent='$'+save25Inf.toFixed(1)+'T';
+document.getElementById('sim_gdp_boost').textContent='+'+gdpBoost+'%';
+document.getElementById('sim_healed').textContent=healed+'M';
+}
+doReduction();
+</script>
+</body>
+</html>
