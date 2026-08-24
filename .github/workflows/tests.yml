@@ -23,6 +23,9 @@ jobs:
         run: cargo test --workspace --locked
       - name: Check formatting
         run: cargo fmt --all --check
+      # the && short-circuit: a gate that cannot print its own failure (cc2, 2026-08-24)
+      - name: Shell chain lint
+        run: sh scripts/lint-shell-chains.sh
       # bSAFE host lives outside the kernel workspace (own members list + lockfile)
       - name: bSAFE host workspace (THP codec + Noise XX)
         run: cargo test --locked --manifest-path rust/bsafe-host/Cargo.toml
