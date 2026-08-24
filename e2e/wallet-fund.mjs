@@ -157,9 +157,17 @@ try {
       (await page.locator('#fund-stat').innerText()).includes('0x' + MOCK));
     u = assertUrl(await goHref(page), 'sb.meldcrypto.com', 'USDC_BASE');
     ok('URL locks the resolved hex (not the name)', u.searchParams.get('walletAddressLocked') === '0x' + MOCK);
-    await page.fill('#fund-addr', 'x'); // any edit resets the confirmation
+    await page.fill('#fund-addr', 'x');        // any edit…
+    await page.fill('#fund-addr', 'bloverai.base.eth'); // …then back to the SAME name:
+    // if the reset (resolved=null on input) were broken, re-typing the same
+    // name would silently RE-ARM the stale lock — this asserts the specific
+    // outcome (no lock until a fresh resolve), not mere absence after drift.
     u = assertUrl(await goHref(page), 'sb.meldcrypto.com', 'USDC_BASE');
-    ok('editing the field resets the resolved lock', !u.searchParams.has('walletAddressLocked'));
+    ok('editing the field resets the resolved lock (same name re-typed, lock absent until re-resolve)',
+      !u.searchParams.has('walletAddressLocked'));
+    const btnText = await page.locator('#fund-go').innerText();
+    ok('button label restored after edit (no stale "resolved" state)',
+      !btnText.includes('resolved') && btnText.includes('buy USDC'));
     await ctx.close();
   }
   console.log('E2 · unresolvable name (honest failure, no blame):');
