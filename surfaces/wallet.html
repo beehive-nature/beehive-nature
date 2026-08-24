@@ -89,6 +89,17 @@ pre b{color:var(--ink)}
 @media (prefers-reduced-motion: reduce){
  .ring-orbit,.node-breathe,.sig-pulse,.bridge-arc,.breathing,.qr-pulse{animation:none !important}
 }
+/* ── the fold, on a phone ── the form-kill is judged AT THE FOLD: a hero
+   balance below the crease is a hero nobody saw. Mobile only — the
+   balance (with its hero number) and the keychain ring render above
+   CONNECT, so the first three seconds say "here is what this is" before
+   they say "fill this in". Negative order lifts just these two; every
+   other section keeps source order. Desktop unchanged. */
+@media (max-width:700px){
+ main{display:flex;flex-direction:column}
+ section:has(> #chains){order:-2}
+ #kc-sec{order:-1}
+}
 .qr-pulse{animation:qr-pulse-k 2.4s ease-in-out infinite}
 @keyframes qr-pulse-k{0%,100%{opacity:.85}50%{opacity:.25}}
 footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}

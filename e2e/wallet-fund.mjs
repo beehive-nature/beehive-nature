@@ -278,6 +278,30 @@ try {
     ok('headline stops use the page tokens (gold→leaf→cyan)',
       /255, 215, 0/.test(grad.img) && /125, 223, 143/.test(grad.img) &&
       /0, 229, 255/.test(grad.img), grad.img.slice(0, 80));
+    // the fold, on a phone: hero balance + ring ABOVE connect (form-kill law)
+    const fold = await page.evaluate(() => {
+      const top = el => Math.round(el.getBoundingClientRect().top + window.scrollY);
+      const bal = document.getElementById('chains').closest('section');
+      const kc = document.getElementById('kc-sec');
+      const connect = document.getElementById('wq').closest('section');
+      return { bal: top(bal), kc: top(kc), connect: top(connect), fold: window.innerHeight,
+               heroInFold: bal.getBoundingClientRect().top + bal.getBoundingClientRect().height * 0.5 <= window.innerHeight };
+    });
+    ok('fold order: BALANCES before CONNECT on a phone', fold.bal < fold.connect, JSON.stringify(fold));
+    ok('fold order: the ring before CONNECT on a phone', fold.kc < fold.connect, JSON.stringify(fold));
+    ok('hero balance VISIBLE IN THE FOLD (not below the crease)', fold.heroInFold);
+    // desktop order must be untouched
+    const desk = await browser.newContext({ viewport: { width: 1280, height: 720 } });
+    const dpage = await desk.newPage();
+    await dpage.goto('http://127.0.0.1:8891' + URL_, { waitUntil: 'domcontentloaded' });
+    await dpage.waitForTimeout(400);
+    const dOrder = await dpage.evaluate(() => {
+      const top = el => Math.round(el.getBoundingClientRect().top + window.scrollY);
+      return { bal: top(document.getElementById('chains').closest('section')),
+               connect: top(document.getElementById('wq').closest('section')) };
+    });
+    ok('desktop order unchanged (CONNECT stays above BALANCES)', dOrder.connect < dOrder.bal, JSON.stringify(dOrder));
+    await desk.close();
     await ctx.close();
   }
 } finally {
