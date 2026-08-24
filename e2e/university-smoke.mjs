@@ -6,14 +6,23 @@ import { chromium } from 'playwright';
 
 const ROOT = process.cwd().replace(/e2e$/, '');
 
-// Counts the estate's surfaces on disk: every .html under surfaces/, EXCLUDING
-// surfaces/fleet/ — preserved founder art, deliberately unlinked and never counted
-// as ours (when its nine files landed, the footer did not move). This is the
-// definition the footer claim is checked against.
+// Counts the estate's surfaces on disk. EXCLUDED, and why:
+//   surfaces/fleet/                     preserved founder art
+//   surfaces/fleet-hosted/gallery|lab   generated copies of that same art — they
+//                                       differ from the originals by one src
+//                                       attribute, or not at all, and authorship
+//                                       does not transfer through a src swap.
+// COUNTED: surfaces/fleet-hosted/index.html — that page is our own work.
+// Change this rule DELIBERATELY: two assertions depend on it (the hub footer and
+// the review deck), so they are ONE check reported twice, not two agreeing checks.
+const NOT_OURS = (dir, name) =>
+  name === 'fleet' ||
+  (dir.endsWith('fleet-hosted') && (name === 'gallery' || name === 'lab'));
+
 async function countSurfacesOnDisk(dir = join(ROOT, 'surfaces')) {
   let n = 0;
   for (const e of await readdir(dir, { withFileTypes: true })) {
-    if (e.isDirectory() && e.name === 'fleet') continue;
+    if (e.isDirectory() && NOT_OURS(dir, e.name)) continue;
     const p = join(dir, e.name);
     if (e.isDirectory()) n += await countSurfacesOnDisk(p);
     else if (extname(e.name) === '.html') n++;

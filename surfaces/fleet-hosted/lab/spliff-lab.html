@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BN Spliff Lab v2.0</title>
+<script src="../vendor/chart.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#eee;font-family:Arial,sans-serif}
+.hdr{background:#16213e;padding:14px 30px;border-bottom:1px solid #333}
+.hdr h1{font-size:20px;background:linear-gradient(90deg,#f0a500,#8E44AD);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hdr p{color:#666;font-size:11px}
+.wrap{display:grid;grid-template-columns:280px 1fr 290px;gap:12px;padding:12px;max-width:1400px;margin:0 auto}
+.stitle{font-size:11px;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px}
+.stitle.t{color:#f0a500}.stitle.c{color:#8E44AD}.stitle.g{color:#27AE60}
+.card{background:#16213e;border-radius:8px;padding:7px;margin-bottom:4px;border-left:3px solid #ccc}
+.card b{font-size:11px}
+.card small{color:#777;font-size:9px}
+.card input[type=number]{width:45px;background:#0d1117;border:1px solid #444;color:#f0a500;text-align:center;padding:2px;border-radius:4px;font-size:12px}
+.card input.can{color:#8E44AD}
+.pbar{display:inline-block;width:90px;height:4px;background:#0d1117;border-radius:2px;vertical-align:middle;margin:0 4px;overflow:hidden}
+.pfill{height:100%;border-radius:2px;transition:width .3s}
+.ptxt{font-size:9px;color:#666;width:28px;display:inline-block}
+.panel{background:#16213e;border-radius:10px;padding:14px;margin-bottom:10px}
+.cbox{position:relative;height:260px}
+.science{background:#0d1117;border-radius:8px;padding:10px;margin:8px 0;font-size:11px}
+.science .calc{color:#aaa;margin:3px 0}
+.science .result{color:#8E44AD;font-weight:bold;font-size:14px;margin-top:5px}
+.science .note{color:#555;font-size:9px;margin-top:4px}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px}
+.sbox{background:#0d1117;border-radius:6px;padding:8px;text-align:center}
+.sbox .v{font-size:18px;font-weight:bold}.sbox .l{font-size:8px;color:#666;text-transform:uppercase}
+.btn{display:block;width:100%;background:#0d1117;border:1px solid #444;color:#eee;padding:7px;border-radius:6px;margin-bottom:4px;cursor:pointer;text-align:left;font-size:11px}
+.btn:hover{background:#222;border-color:#8E44AD}
+select,input[type=text]{width:100%;background:#0d1117;border:1px solid #444;color:#eee;padding:6px;border-radius:5px;font-size:11px;margin-bottom:6px}
+.cl{display:flex;justify-content:space-between;padding:2px 0;font-size:10px;border-bottom:1px solid #222}
+.intention-box{background:#16213e;border-radius:10px;padding:12px;margin-bottom:10px;border:1px solid #8E44AD44}
+.intention-box select{border-color:#8E44AD44}
+.thc-target{text-align:center;padding:6px;background:#0d1117;border-radius:6px;margin-top:6px}
+.thc-target .v{font-size:20px;color:#8E44AD;font-weight:bold}
+.thc-target .l{font-size:9px;color:#666;text-transform:uppercase}
+</style>
+</head>
+<body>
+<div class="hdr"><h1>BN Spliff Lab</h1><p>bnature.social - Science-Based Tobacco + Cannabis Blender v2.0</p></div>
+<div class="wrap">
+
+<!-- LEFT -->
+<div>
+<div class="intention-box">
+<div class="stitle c">Select Intention</div>
+<select id="intention" onchange="doIntention()">
+<option value="microdose">Microdose - Cannabinoid Nutrition (~5mg)</option>
+<option value="light" selected>Light Functional - Clear-Headed (~10mg)</option>
+<option value="moderate">Moderate - Social & Creative (~20mg)</option>
+<option value="strong">Strong - Evening Use (~40mg)</option>
+<option value="verystrong">Very Strong - Nighttime (~60mg)</option>
+<option value="extrastrong">Extra Strong - Heavy Dose (~80mg)</option>
+<option value="maximum">Maximum - Veteran Dose (~100mg+)</option>
+</select>
+<div class="thc-target"><div class="v" id="show_target">10mg</div><div class="l">Target Absorbed THC per Spliff</div></div>
+</div>
+
+<div class="stitle t">Tobacco Strains</div>
+<div class="card" style="border-color:#F4D03F"><b>Virginia Bright</b> <small>$21.99/lb</small><br><input type="number" id="g_virginia" value="25" min="0" step="1" oninput="doUpdate()"><div class="pbar"><div class="pfill" id="p_virginia" style="background:#F4D03F;width:0%"></div></div><span class="ptxt" id="t_virginia">0%</span></div>
+<div class="card" style="border-color:#8B4513"><b>KY Burley</b> <small>$22.99/lb</small><br><input type="number" id="g_burley" value="20" min="0" step="1" oninput="doUpdate()"><div class="pbar"><div class="pfill" id="p_burley" style="background:#8B4513;width:0%"></div></div><span class="ptxt" id="t_burley">0%</span></div>
+<div class="card" style="border-color:#E67E22"><b>Turkish Izmir</b> <small>$21.99/lb</small><br><input type="number" id="g_turkish" value="5" min="0" step="1" oninput="doUpdate()"><div class="pbar"><div class="pfill" id="p_turkish" style="background:#E67E22;width:0%"></div></div><span class="ptxt" id="t_turkish">0%</span></div>
+<div class="card" style="border-color:#8E44AD"><b>St James Perique</b> <small>$47.98/lb</small><br><input type="number" id="g_perique" value="0" min="0" step="1" oninput="doUpdate()"><div class="pbar"><div class="pfill" id="p_perique" style="background:#8E44AD;width:0%"></div></div><span class="ptxt" id="t_perique">0%</span></div>
+<div class="card" style="border-color:#E74C3C"><b>KY Fire Cured</b> <small>$22.99/lb</small><br><input type="number" id="g_firecured" value="0" min="0" step="1" oninput="doUpdate()"><div class="pbar"><div class="pfill" id="p_firecured" style="background:#E74C3C;width:0%"></div></div><span class="ptxt" id="t_firecured">0%</span></div>
+<div class="card" style="border-color:#2C3E50"><b>Dark Air Cured</b> <small>$20.99/lb</small><br><input type="number" id="g_darkair" value="0" min="0" step="1" oninput="doUpdate()"><div class="pbar"><div class="pfill" id="p_darkair" style="background:#2C3E50;width:0%"></div></div><span class="ptxt" id="t_darkair">0%</span></div>
+
+<div class="stitle c" style="margin-top:10px">Cannabis Strains</div>
+<div class="card" style="border-color:#F4D03F"><b>Pineapple Breeze</b> <small style="color:#f0a500">30.7% THCA</small><br><input type="number" class="can" id="g_pineapple" value="3" min="0" step="0.1" oninput="doUpdate()"><div class="pbar"><div class="pfill" id="p_pineapple" style="background:#F4D03F;width:0%"></div></div><span class="ptxt" id="t_pineapple">0%</span></div>
+<div class="card" style="border-color:#8E44AD"><b>Cadillac Rainbow</b> <small style="color:#f0a500">30.1% THCA</small><br><input type="number" class="can" id="g_cadillac" value="0" min="0" step="0.1" oninput="doUpdate()"><div class="pbar"><div class="pfill" id="p_cadillac" style="background:#8E44AD;width:0%"></div></div><span class="ptxt" id="t_cadillac">0%</span></div>
+<div class="card" style="border-color:#9B59B6"><b>Purple Haze</b> <small style="color:#f0a500">25.0% THCA</small><br><input type="number" class="can" id="g_purple" value="0" min="0" step="0.1" oninput="doUpdate()"><div class="pbar"><div class="pfill" id="p_purple" style="background:#9B59B6;width:0%"></div></div><span class="ptxt" id="t_purple">0%</span></div>
+<div class="card" style="border-color:#E67E22"><b>Golden Papaya</b> <small style="color:#f0a500">24.0% THCA</small><br><input type="number" class="can" id="g_papaya" value="0" min="0" step="0.1" oninput="doUpdate()"><div class="pbar"><div class="pfill" id="p_papaya" style="background:#E67E22;width:0%"></div></div><span class="ptxt" id="t_papaya">0%</span></div>
+<div class="card" style="border-color:#E74C3C"><b>White Fire Zkittlez</b> <small style="color:#f0a500">26.0% THCA</small><br><input type="number" class="can" id="g_wifi" value="0" min="0" step="0.1" oninput="doUpdate()"><div class="pbar"><div class="pfill" id="p_wifi" style="background:#E74C3C;width:0%"></div></div><span class="ptxt" id="t_wifi">0%</span></div>
+<div class="card" style="border-color:#3498DB"><b>Ice Cream Cake</b> <small style="color:#f0a500">25.0% THCA</small><br><input type="number" class="can" id="g_icc" value="0" min="0" step="0.1" oninput="doUpdate()"><div class="pbar"><div class="pfill" id="p_icc" style="background:#3498DB;width:0%"></div></div><span class="ptxt" id="t_icc">0%</span></div>
+</div>
+
+<!-- CENTER -->
+<div>
+<div class="stitle g">Dual Profile (gold=tobacco, purple=cannabis)</div>
+<div class="panel"><div class="cbox"><canvas id="chart"></canvas></div></div>
+
+<div class="panel">
+<div class="stitle c">THC Science — Dose Calculation</div>
+<div class="science" id="sciencePanel">
+<div class="calc">Calculating...</div>
+</div>
+<div class="stats">
+<div class="sbox"><div class="v" id="show_total" style="color:#27AE60">0g</div><div class="l">Total Batch</div></div>
+<div class="sbox"><div class="v" id="show_spliffs" style="color:#f0a500">0</div><div class="l">Spliffs</div></div>
+<div class="sbox"><div class="v" id="show_ratio" style="color:#8E44AD">0:0</div><div class="l">T:C Ratio</div></div>
+</div>
+</div>
+</div>
+
+<!-- RIGHT -->
+<div>
+<div class="stitle g">Recipe Name</div>
+<input type="text" id="rname" value="Light Functional Spliff">
+
+<div class="stitle g">Batch Size (Spliffs to Make)</div>
+<select id="batchcount" onchange="doBatch()">
+<option value="20">20 spliffs</option>
+<option value="50" selected>50 spliffs</option>
+<option value="100">100 spliffs</option>
+<option value="200">200 spliffs</option>
+</select>
+
+<div class="stitle g">Preset Spliff Recipes</div>
+<button class="btn" onclick="doPreset('morning')">Morning Buzz - Light Functional + Sativa</button>
+<button class="btn" onclick="doPreset('creative')">Creative Flow - Moderate + Focus Strain</button>
+<button class="btn" onclick="doPreset('afternoon')">Afternoon Special - Moderate + Complex</button>
+<button class="btn" onclick="doPreset('evening')">Evening Relaxer - Strong + Indica</button>
+<button class="btn" onclick="doPreset('midnight')">Midnight - Very Strong + Heavy Indica</button>
+
+<div class="stitle g" style="margin-top:10px">Cost Analysis</div>
+<div id="costLines"></div>
+<div class="cl" style="color:#27AE60;font-weight:bold"><span>Total</span><span id="totalCost">$0.00</span></div>
+<div class="cl"><span>Per Spliff:</span><span id="perSpliff">$0.00</span></div>
+</div>
+
+</div>
+<script>
+var DECARB=0.877;
+var BIOAVAIL=0.30;
+var TOB={virginia:{p:21.99,g:25,e:{d1:9,d2:4,d3:2,d4:4,d5:1,d6:6}},burley:{p:22.99,g:20,e:{d1:3,d2:8,d3:2,d4:5,d5:1,d6:5}},turkish:{p:21.99,g:5,e:{d1:4,d2:3,d3:9,d4:3,d5:1,d6:9}},perique:{p:47.98,g:0,e:{d1:2,d2:7,d3:8,d4:8,d5:3,d6:8}},firecured:{p:22.99,g:0,e:{d1:2,d2:6,d3:4,d4:7,d5:9,d6:7}},darkair:{p:20.99,g:0,e:{d1:1,d2:8,d3:3,d4:9,d5:2,d6:4}}};
+var CAN={pineapple:{p:50,t:30.7,g:3,e:{d1:9,d2:3,d3:7,d4:6,d5:7,d6:3}},cadillac:{p:50,t:30.1,g:0,e:{d1:5,d2:6,d3:6,d4:7,d5:6,d6:6}},purple:{p:45,t:25.0,g:0,e:{d1:10,d2:2,d3:9,d4:7,d5:8,d6:2}},papaya:{p:45,t:24.0,g:0,e:{d1:8,d2:3,d3:8,d4:7,d5:6,d6:3}},wifi:{p:48,t:26.0,g:0,e:{d1:6,d2:5,d3:7,d4:8,d5:6,d6:5}},icc:{p:48,t:25.0,g:0,e:{d1:2,d2:9,d3:4,d4:7,d5:3,d6:9}}};
+var TIDS=['virginia','burley','turkish','perique','firecured','darkair'];
+var CIDS=['pineapple','cadillac','purple','papaya','wifi','icc'];
+var INTENT={microdose:{mg:5,name:'Microdose'},light:{mg:10,name:'Light Functional'},moderate:{mg:20,name:'Moderate'},strong:{mg:40,name:'Strong'},verystrong:{mg:60,name:'Very Strong'},extrastrong:{mg:80,name:'Extra Strong'},maximum:{mg:100,name:'Maximum'}};
+var PRESETS={morning:{t:{virginia:25,burley:20,turkish:5},c:{pineapple:1.5},int:'light',name:'Morning Buzz'},creative:{t:{virginia:15,burley:20,turkish:5},c:{purple:3},int:'moderate',name:'Creative Flow'},afternoon:{t:{virginia:10,burley:10,turkish:5,firecured:10},c:{cadillac:3},int:'moderate',name:'Afternoon Special'},evening:{t:{virginia:15,burley:15,turkish:5,perique:10},c:{icc:3},int:'strong',name:'Evening Relaxer'},midnight:{t:{virginia:10,burley:15,turkish:5,perique:10,darkair:5},c:{icc:5},int:'verystrong',name:'Midnight'}};
+var chart=null;
+
+function gg(id){var e=document.getElementById('g_'+id);return e?parseFloat(e.value)||0:0;}
+function sg(id,v){var e=document.getElementById('g_'+id);if(e)e.value=v;}
+
+function doUpdate(){
+var totalT=0,totalC=0;
+for(var i=0;i<TIDS.length;i++)totalT+=gg(TIDS[i]);
+for(var i=0;i<CIDS.length;i++)totalC+=gg(CIDS[i]);
+var total=totalT+totalC;
+
+for(var i=0;i<TIDS.length;i++){var pct=total>0?gg(TIDS[i])/total*100:0;var f=document.getElementById('p_'+TIDS[i]);var t=document.getElementById('t_'+TIDS[i]);if(f)f.style.width=pct+'%';if(t)t.textContent=Math.round(pct)+'%';}
+for(var i=0;i<CIDS.length;i++){var pct=total>0?gg(CIDS[i])/total*100:0;var f=document.getElementById('p_'+CIDS[i]);var t=document.getElementById('t_'+CIDS[i]);if(f)f.style.width=pct+'%';if(t)t.textContent=Math.round(pct)+'%';}
+
+var tData=[];for(var d=1;d<=6;d++){var s=0;for(var i=0;i<TIDS.length;i++)s+=TOB[TIDS[i]].e['d'+d]*gg(TIDS[i]);tData.push(totalT>0?s/totalT:0);}
+var cData=[];for(var d=1;d<=6;d++){var s=0;for(var i=0;i<CIDS.length;i++)s+=CAN[CIDS[i]].e['d'+d]*gg(CIDS[i]);cData.push(totalC>0?s/totalC:0);}
+if(chart){chart.data.datasets[0].data=tData;chart.data.datasets[1].data=cData;chart.update();}
+
+var spliffs=Math.round(total/0.9);
+document.getElementById('show_total').textContent=Math.round(total)+'g';
+document.getElementById('show_spliffs').textContent=spliffs;
+document.getElementById('show_ratio').textContent=Math.round(totalT>0?totalT/(totalT+totalC)*100:0)+':'+Math.round(totalC>0?totalC/(totalT+totalC)*100:0);
+
+// SCIENCE
+var weightedThca=0;
+for(var i=0;i<CIDS.length;i++)weightedThca+=CAN[CIDS[i]].t*gg(CIDS[i]);
+var avgThca=totalC>0?weightedThca/totalC:0;
+var totalThcaMg=totalC*avgThca/100*1000;
+var thcAfterDecarb=totalThcaMg*DECARB;
+var absorbedTotal=thcAfterDecarb*BIOAVAIL;
+var perSpliff=spliffs>0?absorbedTotal/spliffs:0;
+var perSpliffThca=spliffs>0?totalThcaMg/spliffs:0;
+var perSpliffThc=spliffs>0?thcAfterDecarb/spliffs:0;
+var perSpliffAbsorbed=spliffs>0?absorbedTotal/spliffs:0;
+
+var sciHTML='<div class="calc">Cannabis: '+totalC.toFixed(1)+'g at '+avgThca.toFixed(1)+'% THCA</div>';
+sciHTML+='<div class="calc">THCA per spliff: '+Math.round(perSpliffThca)+'mg</div>';
+sciHTML+='<div class="calc">After decarb (x0.877): <strong>'+Math.round(perSpliffThc)+'mg THC</strong></div>';
+sciHTML+='<div class="calc">Smoking bioavailability (~30%):</div>';
+sciHTML+='<div class="result">'+Math.round(perSpliffAbsorbed)+'mg absorbed THC per spliff</div>';
+sciHTML+='<div class="note">Based on combustion at ~800C converting THCA to THC, with ~25-37% bioavailability via inhalation (30% used as average). Actual varies by smoking technique, lung capacity, and hold time.</div>';
+var intent=document.getElementById('intention').value;
+var target=INTENT[intent].mg;
+var match=Math.abs(perSpliffAbsorbed-target)<target*0.3;
+sciHTML+='<div class="note" style="color:'+(match?'#27AE60':'#E67E22')+';font-weight:bold">Target: '+target+'mg ('+INTENT[intent].name+') — Currently '+(match?'ON TARGET':'ADJUST NEEDED')+'</div>';
+document.getElementById('sciencePanel').innerHTML=sciHTML;
+
+// Costs
+var cost=0,cl='';
+for(var i=0;i<TIDS.length;i++)if(gg(TIDS[i])>0){var c=gg(TIDS[i])*(TOB[TIDS[i]].p/454);cost+=c;cl+='<div class="cl"><span>T:'+TIDS[i]+' ('+gg(TIDS[i])+'g)</span><span>$'+c.toFixed(2)+'</span></div>';}
+for(var i=0;i<CIDS.length;i++)if(gg(CIDS[i])>0){var c=gg(CIDS[i])*(CAN[CIDS[i]].p/28);cost+=c;cl+='<div class="cl"><span>C:'+CIDS[i]+' ('+gg(CIDS[i])+'g)</span><span>$'+c.toFixed(2)+'</span></div>';}
+document.getElementById('costLines').innerHTML=cl;
+document.getElementById('totalCost').textContent='$'+cost.toFixed(2);
+document.getElementById('perSpliff').textContent='$'+(spliffs>0?cost/spliffs:0).toFixed(2);
+}
+
+function doIntention(){
+var intent=document.getElementById('intention').value;
+var target=INTENT[intent].mg;
+document.getElementById('show_target').textContent=target+'mg';
+document.getElementById('rname').value=INTENT[intent].name+' Spliff';
+// Calculate cannabis needed for target per spliff
+// Assume 0.9g per spliff, current tobacco total stays
+var totalT=0;for(var i=0;i<TIDS.length;i++)totalT+=gg(TIDS[i]);
+// Current cannabis THCA weighted avg
+var wThca=0,totalC=0;
+for(var i=0;i<CIDS.length;i++){wThca+=CAN[CIDS[i]].t*gg(CIDS[i]);totalC+=gg(CIDS[i]);}
+var avgThca=totalC>0?wThca/totalC:30; // default to 30% if no cannabis
+// cannabis per spliff = target / ((avgThca/100)*1000*DECARB*BIOAVAIL)
+var canPerSpliff=target/((avgThca/100)*1000*DECARB*BIOAVAIL);
+// Scale to batch count
+var batch=parseInt(document.getElementById('batchcount').value)||50;
+var totalCanNeeded=Math.round(canPerSpliff*batch*10)/10;
+// Distribute cannabis proportionally (or all to first active strain)
+var hasCan=false;
+for(var i=0;i<CIDS.length;i++){if(gg(CIDS[i])>0)hasCan=true;}
+if(!hasCan){sg('pineapple',totalCanNeeded);}
+else{
+// Scale existing cannabis ratios
+var ratio=totalC>0?totalCanNeeded/totalC:1;
+for(var i=0;i<CIDS.length;i++){if(gg(CIDS[i])>0)sg(CIDS[i],Math.round(gg(CIDS[i])*ratio*10)/10);}
+}
+doUpdate();
+}
+
+function doPreset(n){
+var p=PRESETS[n];if(!p)return;
+for(var i=0;i<TIDS.length;i++)sg(TIDS[i],p.t[TIDS[i]]||0);
+for(var i=0;i<CIDS.length;i++)sg(CIDS[i],p.c[CIDS[i]]||0);
+document.getElementById('intention').value=p.int;
+document.getElementById('show_target').textContent=INTENT[p.int].mg+'mg';
+document.getElementById('rname').value=p.name;
+doUpdate();
+}
+
+function doBatch(){
+doUpdate();
+}
+
+window.onload=function(){
+chart=new Chart(document.getElementById('chart'),{type:'radar',
+data:{labels:['Bright','Body','Complexity','Intensity','Clarity','Depth'],
+datasets:[
+{label:'Tobacco',data:[0,0,0,0,0,0],borderColor:'#f0a500',backgroundColor:'rgba(240,165,0,0.1)',borderWidth:2,pointBackgroundColor:'#f0a500',pointRadius:3},
+{label:'Cannabis',data:[0,0,0,0,0,0],borderColor:'#8E44AD',backgroundColor:'rgba(142,68,173,0.1)',borderWidth:2,pointBackgroundColor:'#8E44AD',pointRadius:3}
+]},
+options:{responsive:true,maintainAspectRatio:false,
+scales:{r:{beginAtZero:true,max:10,ticks:{color:'#555',backdropColor:'transparent',stepSize:2},grid:{color:'#2a2a3e'},angleLines:{color:'#2a2a3e'},pointLabels:{color:'#bbb',font:{size:10}}}},
+plugins:{legend:{labels:{color:'#bbb',font:{size:10}}}}}});
+doUpdate();
+};
+</script>
+</body>
+</html>

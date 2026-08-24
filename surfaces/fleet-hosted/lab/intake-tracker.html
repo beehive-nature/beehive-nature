@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BN Daily Intake Tracker</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#eee;font-family:Inter,system-ui,sans-serif}
+.hdr{background:#16213e;padding:14px 30px;border-bottom:1px solid #333;display:flex;justify-content:space-between;align-items:center}
+.hdr h1{color:#8E44AD;font-size:20px}
+.hdr .sub{color:#666;font-size:11px}
+.wrap{max-width:900px;margin:0 auto;padding:16px}
+.card{background:#16213e;border-radius:12px;padding:16px;margin-bottom:14px}
+.card h2{color:#8E44AD;font-size:13px;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+.card h2.gold{color:#f0a500}
+label{font-size:11px;color:#888;display:block;margin-bottom:3px}
+input,select,textarea{width:100%;background:#0d1117;border:1px solid #333;color:#eee;padding:7px;border-radius:6px;font-size:12px;margin-bottom:8px}
+.row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.btn{width:100%;background:#8E44AD;border:none;color:#fff;padding:10px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:bold}
+.btn:hover{background:#7d3c98}
+.rdi-bar{height:30px;background:#0d1117;border-radius:15px;overflow:hidden;position:relative;margin:10px 0}
+.rdi-fill{height:100%;background:linear-gradient(90deg,#27AE60,#f0a500,#E74C3C);transition:width .5s;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:bold}
+.rdi-target{position:absolute;right:0;top:0;bottom:0;width:2px;background:#fff;z-index:2}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+.stat-box{background:#0d1117;border-radius:8px;padding:10px;text-align:center}
+.stat-box .v{font-size:20px;font-weight:bold}
+.stat-box .l{font-size:9px;color:#666;text-transform:uppercase}
+.timeline{display:flex;gap:4px;margin:10px 0}
+.time-block{flex:1;height:40px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold}
+.time-morn{background:#27AE6033;color:#27AE60;border:1px solid #27AE6044}
+.time-aft{background:#E67E2233;color:#E67E22;border:1px solid #E67E2244}
+.time-eve{background:#8E44AD33;color:#8E44AD;border:1px solid #8E44AD44}
+.log-entry{background:#0d1117;border-radius:8px;padding:8px;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center;font-size:11px}
+.log-entry .del{color:#E74C3C;cursor:pointer;font-size:14px}
+.method-tag{font-size:8px;padding:2px 6px;border-radius:4px;text-transform:uppercase;font-weight:bold}
+.m-flower{background:#27AE60;color:#fff}.m-vape{background:#E67E22;color:#fff}
+.m-dist{background:#8E44AD;color:#fff}.m-spliff{background:#f0a500;color:#000}.m-edible{background:#3498DB;color:#fff}
+.empty{color:#555;text-align:center;padding:20px;font-size:12px}
+</style>
+</head>
+<body>
+<div class="hdr"><h1>BN Daily Intake Tracker</h1><div class="sub">bnature.social - Cannabinoid Consumption vs RDI v1.0</div></div>
+<div class="wrap">
+<div class="card">
+<h2>Log Consumption</h2>
+<div class="row">
+<div><label>Method</label><select id="method" onchange="onMethodChange()">
+<option value="flower">Flower</option><option value="vape">Vape Cart</option>
+<option value="distillate">Distillate</option><option value="spliff">Spliff</option>
+<option value="edible">Edible</option></select></div>
+<div><label id="amtLabel">Grams</label><input type="number" id="amount" value="0.5" step="0.1" min="0.1"></div>
+<div><label>THCA/THC %</label><input type="number" id="potency" value="30" step="0.1"></div>
+</div>
+<div class="row">
+<div><label>Strain/Product</label><input type="text" id="strain" placeholder="e.g. Pineapple Breeze"></div>
+<div><label>Time</label><input type="time" id="time" value="12:00"></div>
+<div><label>Hits (vape only)</label><input type="number" id="hits" value="1" min="1"></div>
+</div>
+<button class="btn" onclick="logEntry()">+ Add to Daily Log</button>
+</div>
+
+<div class="card">
+<h2>Today's Intake vs RDI</h2>
+<div class="stats-row">
+<div class="stat-box"><div class="v" id="totalMg" style="color:#8E44AD">0</div><div class="l">Total mg</div></div>
+<div class="stat-box"><div class="v" id="entries" style="color:#27AE60">0</div><div class="l">Entries</div></div>
+<div class="stat-box"><div class="v" id="rdiPct" style="color:#f0a500">0%</div><div class="l">of RDI</div></div>
+<div class="stat-box"><div class="v" id="avgMg" style="color:#3498DB">0</div><div class="l">Avg/entry</div></div>
+</div>
+<label>Daily RDI Target (mg cannabinoid): <span id="rdiDisplay">100</span>mg</label>
+<input type="range" id="rdiSlider" min="10" max="500" value="100" step="5" oninput="setRDI(this.value)" style="margin-bottom:10px">
+<div class="rdi-bar"><div class="rdi-fill" id="rdiBar" style="width:0%">0mg / 100mg</div></div>
+<div class="timeline">
+<div class="time-block time-morn" id="tlMorn">Morning 0mg</div>
+<div class="time-block time-aft" id="tlAft">Afternoon 0mg</div>
+<div class="time-block time-eve" id="tlEve">Evening 0mg</div>
+</div>
+</div>
+
+<div class="card">
+<h2 class="gold">Today's Log</h2>
+<div id="logList"><div class="empty">No entries yet. Log your first consumption above.</div></div>
+<button class="btn" style="background:#27AE60;margin-top:8px" onclick="exportData()">Export to bDatabase</button>
+<div id="exportOut" style="display:none;background:#0d1117;border-radius:8px;padding:10px;margin-top:8px;font-size:10px;white-space:pre-wrap;max-height:200px;overflow:auto"></div>
+</div>
+</div>
+<script>
+var rdi=100;
+var entries=[];
+var todayKey=new Date().toISOString().slice(0,10);
+
+function load(){var d=localStorage.getItem('bnIntake_'+todayKey);if(d)entries=JSON.parse(d);var r=localStorage.getItem('bnRDI');if(r)rdi=parseInt(r);document.getElementById('rdiSlider').value=rdi;document.getElementById('rdiDisplay').textContent=rdi;render();}
+function save(){localStorage.setItem('bnIntake_'+todayKey,JSON.stringify(entries));}
+
+function onMethodChange(){var m=document.getElementById('method').value;var al=document.getElementById('amtLabel');var amt=document.getElementById('amount');var pot=document.getElementById('potency');var hits=document.getElementById('hits');
+if(m==='vape'){al.textContent='Est. mg per hit';amt.value=5;pot.value=90;pot.parentElement.style.opacity=0.5;}
+else if(m==='edible'){al.textContent='mg THC';amt.value=10;pot.value=100;pot.parentElement.style.opacity=0.5;}
+else if(m==='distillate'){al.textContent='Grams';amt.value=0.1;pot.value=98;pot.parentElement.style.opacity=1;}
+else{al.textContent='Grams';amt.value=0.5;pot.value=30;pot.parentElement.style.opacity=1;}}
+
+function calcMg(entry){
+if(entry.method==='vape')return entry.amount*entry.hits;
+if(entry.method==='edible')return entry.amount;
+return entry.amount*entry.potency/100*1000*0.877;
+}
+
+function logEntry(){
+var m=document.getElementById('method').value;
+var entry={method:m,amount:parseFloat(document.getElementById('amount').value)||0,
+potency:parseFloat(document.getElementById('potency').value)||0,
+strain:document.getElementById('strain').value,
+time:document.getElementById('time').value,
+hits:parseInt(document.getElementById('hits').value)||1,
+mg:0,timestamp:new Date().toISOString()};
+entry.mg=Math.round(calcMg(entry));
+entries.push(entry);
+save();render();
+document.getElementById('strain').value='';
+}
+
+function delEntry(i){entries.splice(i,1);save();render();}
+
+function render(){
+var total=0,morn=0,aft=0,eve=0;
+for(var i=0;i<entries.length;i++){
+total+=entries[i].mg;
+var h=parseInt(entries[i].time.split(':')[0]);
+if(h<12)morn+=entries[i].mg;else if(h<17)aft+=entries[i].mg;else eve+=entries[i].mg;
+}
+document.getElementById('totalMg').textContent=Math.round(total);
+document.getElementById('entries').textContent=entries.length;
+document.getElementById('avgMg').textContent=entries.length>0?Math.round(total/entries.length):0;
+var pct=rdi>0?Math.round(total/rdi*100):0;
+document.getElementById('rdiPct').textContent=pct+'%';
+var bar=document.getElementById('rdiBar');
+bar.style.width=Math.min(pct,100)+'%';
+bar.textContent=Math.round(total)+'mg / '+rdi+'mg';
+document.getElementById('tlMorn').textContent='Morning '+morn+'mg';
+document.getElementById('tlAft').textContent='Afternoon '+aft+'mg';
+document.getElementById('tlEve').textContent='Evening '+eve+'mg';
+
+var html='';
+if(entries.length===0){html='<div class="empty">No entries yet.</div>';}
+else{
+for(var i=entries.length-1;i>=0;i--){
+var e=entries[i];var cn='m-'+e.method;
+html+='<div class="log-entry"><div><span class="method-tag '+cn+'">'+e.method+'</span> '+e.strain+' - '+e.amount+(e.method==='vape'?'mg x'+e.hits+' hits':e.method==='edible'?'mg':'g')+' @ '+e.potency+'% = <strong>'+e.mg+'mg</strong> ('+e.time+')</div><span class="del" onclick="delEntry('+i+')">x</span></div>';
+}}
+document.getElementById('logList').innerHTML=html;
+}
+
+function setRDI(v){rdi=parseInt(v);document.getElementById('rdiDisplay').textContent=rdi;localStorage.setItem('bnRDI',rdi);render();}
+
+function exportData(){
+var data={date:todayKey,rdi:rdi,totalMg:0,entries:[]};
+for(var i=0;i<entries.length;i++){data.totalMg+=entries[i].mg;data.entries.push(entries[i]);}
+var json=JSON.stringify(data,null,2);
+var out=document.getElementById('exportOut');
+out.style.display='block';out.textContent='bDATABASE EXPORT - BiGen Meta-Analysis\n\n'+json;
+}
+
+load();
+</script>
+</body>
+</html>

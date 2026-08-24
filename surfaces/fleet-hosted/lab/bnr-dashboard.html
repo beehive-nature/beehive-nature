@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BNR Dashboard — Collective Command Center</title>
+<script src="../vendor/chart.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#eee;font-family:Inter,system-ui,sans-serif}
+.hdr{background:linear-gradient(135deg,#16213e,#0d1117);padding:16px 30px;border-bottom:1px solid #333;display:flex;justify-content:space-between;align-items:center}
+.hdr h1{font-size:22px;background:linear-gradient(90deg,#f0a500,#8E44AD,#27AE60);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hdr .sub{color:#555;font-size:11px}
+.tabs{display:flex;gap:0;background:#16213e;border-bottom:1px solid #333}
+.tab{padding:12px 24px;cursor:pointer;font-size:13px;color:#666;border-bottom:2px solid transparent;transition:.2s}
+.tab.active{color:#f0a500;border-bottom-color:#f0a500}
+.tab:hover{color:#bbb}
+.wrap{max-width:1200px;margin:0 auto;padding:16px}
+.card{background:#16213e;border-radius:12px;padding:16px;margin-bottom:14px}
+.card h2{font-size:13px;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+.card h2.purple{color:#8E44AD}.card h2.gold{color:#f0a500}.card h2.green{color:#27AE60}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.stat{background:#0d1117;border-radius:10px;padding:14px;text-align:center}
+.stat .v{font-size:28px;font-weight:bold}.stat .l{font-size:9px;color:#666;text-transform:uppercase;margin-top:2px}
+.entry-row{display:flex;justify-content:space-between;align-items:center;padding:8px;background:#0d1117;border-radius:8px;margin-bottom:5px}
+.entry-row .num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold}
+.entry-info{flex:1;margin-left:10px}
+.entry-info .title{font-size:12px;font-weight:bold}.entry-info .desc{font-size:10px;color:#666}
+.badge-evidence{font-size:8px;padding:2px 6px;border-radius:4px;font-weight:bold}
+.ev-a{background:#27AE60;color:#fff}.ev-b{background:#3498DB;color:#fff}.ev-c{background:#E67E22;color:#fff}.ev-d{background:#666;color:#fff}
+.flow-diagram{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;padding:16px;background:#0d1117;border-radius:12px}
+.flow-node{padding:10px 16px;border-radius:8px;font-size:11px;font-weight:bold;text-align:center;min-width:100px}
+.flow-arrow{color:#555;font-size:16px}
+.edu-module{background:#0d1117;border-radius:8px;padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.edu-status{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px}
+.status-locked{background:#333;color:#666}.status-active{background:#E67E22;color:#fff}.status-complete{background:#27AE60;color:#fff}
+.edu-info{flex:1}.edu-info .name{font-size:12px;font-weight:bold}.edu-info .desc{font-size:10px;color:#666}
+.progress-bar{height:6px;background:#0d1117;border-radius:3px;overflow:hidden;margin-top:4px}
+.progress-fill{height:100%;background:#27AE60;border-radius:3px}
+.empty-state{text-align:center;padding:30px;color:#555;font-size:12px}
+.section{display:none}.section.active{display:block}
+</style>
+</head>
+<body>
+<div class="hdr"><div><h1>BNR Dashboard</h1><div class="sub">bnature.social - Collective Command Center v1.0</div></div></div>
+<div class="tabs">
+<div class="tab active" onclick="showTab('data')">bData</div>
+<div class="tab" onclick="showTab('library')">bLibrary</div>
+<div class="tab" onclick="showTab('education')">Education</div>
+</div>
+<div class="wrap">
+
+<!-- bDATA SECTION -->
+<div class="section active" id="sec-data">
+<div class="stats-grid">
+<div class="stat"><div class="v" id="totalSessions" style="color:#8E44AD">0</div><div class="l">Sessions Logged</div></div>
+<div class="stat"><div class="v" id="totalMg" style="color:#f0a500">0</div><div class="l">Total mg Tracked</div></div>
+<div class="stat"><div class="v" id="totalBlends" style="color:#27AE60">0</div><div class="l">Blends Created</div></div>
+<div class="stat"><div class="v" id="avgRDI" style="color:#3498DB">0%</div><div class="l">Avg RDI Met</div></div>
+</div>
+<div class="card"><h2 class="purple">Data Flow — How Information Moves Through BN Fleet</h2>
+<div class="flow-diagram">
+<div class="flow-node" style="background:#27AE6033;color:#27AE60;border:1px solid #27AE60">Flower Lab<br>Sessions</div>
+<span class="flow-arrow">></span>
+<div class="flow-node" style="background:#8E44AD33;color:#8E44AD;border:1px solid #8E44AD">bData<br>Aggregation</div>
+<span class="flow-arrow">></span>
+<div class="flow-node" style="background:#3498DB33;color:#3498DB;border:1px solid #3498DB">BiGen<br>Meta-Analysis</div>
+<span class="flow-arrow">></span>
+<div class="flow-node" style="background:#f0a50033;color:#f0a500;border:1px solid #f0a500">bLibrary<br>Research</div>
+<span class="flow-arrow">></span>
+<div class="flow-node" style="background:#E67E2233;color:#E67E22;border:1px solid #E67E22">Education<br>Courses</div>
+<span class="flow-arrow">></span>
+<div class="flow-node" style="background:#27AE6033;color:#27AE60;border:1px solid #27AE60">Canvas LM<br>Unlock</div>
+<span class="flow-arrow">></span>
+<div class="flow-node" style="background:#E74C3C33;color:#E74C3C;border:1px solid #E74C3C">Marketplace<br>Access</div>
+</div>
+</div>
+<div class="card"><h2 class="purple">Recent bData Dumps</h2><div id="dataList"><div class="empty-state">No data yet. Use Flower Lab and Intake Tracker to generate sessions.<br>Data will appear here automatically.</div></div></div>
+<div class="card"><h2 class="purple">Consumption Method Breakdown</h2><div style="height:200px"><canvas id="methodChart"></canvas></div></div>
+</div>
+
+<!-- bLIBRARY SECTION -->
+<div class="section" id="sec-library">
+<div class="card"><h2 class="gold">iq.wiki Knowledge Base — 16 Entries</h2><div id="wikiList"></div></div>
+<div class="card"><h2 class="gold">BiGen Evidence Framework</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">
+<div class="stat"><div class="v ev-a" style="font-size:14px">A</div><div class="l">Peer-Reviewed</div></div>
+<div class="stat"><div class="v ev-b" style="font-size:14px">B</div><div class="l">Industry Data</div></div>
+<div class="stat"><div class="v ev-c" style="font-size:14px">C</div><div class="l">Regulatory</div></div>
+<div class="stat"><div class="v ev-d" style="font-size:14px">D</div><div class="l">Practitioner</div></div>
+</div></div>
+</div>
+
+<!-- EDUCATION SECTION -->
+<div class="section" id="sec-education">
+<div class="card"><h2 class="green">Canvas LM Comprehension Modules</h2>
+<div id="moduleList"></div></div>
+<div class="card"><h2 class="green">Learning Path — Unlock Velocity</h2>
+<div style="background:#0d1117;border-radius:8px;padding:14px;font-size:11px;color:#aaa">
+<p style="margin-bottom:8px"><strong style="color:#27AE60">Level 1 (Basic):</strong> Hemp fundamentals, cannabinoid science basics, safe consumption practices</p>
+<p style="margin-bottom:8px"><strong style="color:#E67E22">Level 2 (Intermediate):</strong> Strain blending, terpene science, ECS + RDI framework, processing methods</p>
+<p style="margin-bottom:8px"><strong style="color:#8E44AD">Level 3 (Advanced):</strong> Extraction chemistry, bio-factory systems, commodity markets, DAO governance</p>
+<p><strong style="color:#E74C3C">Unlocks:</strong> Each level verified by Canvas LM = faster marketplace access, lower fees, advanced features</p>
+</div></div>
+</div>
+
+</div>
+<script>
+function showTab(name){
+var tabs=document.querySelectorAll('.tab');var secs=document.querySelectorAll('.section');
+for(var i=0;i<tabs.length;i++)tabs[i].classList.remove('active');
+for(var i=0;i<secs.length;i++)secs[i].classList.remove('active');
+event.target.classList.add('active');
+document.getElementById('sec-'+name).classList.add('active');
+}
+
+var WIKI=[
+{n:'00',t:'Master Index',d:'Taxonomy tree, cross-references, citation standards',ev:'D',ec:'ev-d'},
+{n:'01',t:'Hemp Biomass Fundamentals',d:'Plant anatomy, BN Fleet grading system, harvesting',ev:'B',ec:'ev-b'},
+{n:'02',t:'Cannabinoid Product Streams',d:'Extraction methods, CBD/CBG/CBN cascade, QA testing',ev:'A',ec:'ev-a'},
+{n:'03',t:'Bast Fiber Product Streams',d:'Textiles, biocomposites, insulation',ev:'B',ec:'ev-b'},
+{n:'04',t:'Hurd & Shiv Product Streams',d:'Hempcrete, animal bedding, absorbents',ev:'B',ec:'ev-b'},
+{n:'05',t:'Seed & Nutrition Streams',d:'Hearts, protein, oil, omega ratios',ev:'A',ec:'ev-a'},
+{n:'06',t:'Cellulose & Bio-Materials',d:'Bioplastics, paper, nanocellulose',ev:'B',ec:'ev-b'},
+{n:'07',t:'Terpenes & Essential Oils',d:'8 key terpenes, entourage effect',ev:'A',ec:'ev-a'},
+{n:'08',t:'Energy & Biochar Streams',d:'Biofuel, biochar, biomass pellets',ev:'B',ec:'ev-b'},
+{n:'09',t:'Wellness & Cosmetics',d:'Topicals, skincare, tinctures, Canvas LM gate',ev:'B',ec:'ev-b'},
+{n:'10',t:'Taxonomy Data Model',d:'PostgreSQL DDL, JSON-LD, API spec',ev:'D',ec:'ev-d'},
+{n:'11',t:'Commodity Index Spec',d:'ICI methodology, bQueenBee/DAO settlement',ev:'D',ec:'ev-d'},
+{n:'12',t:'HempSweet / Xylitol',d:'Xylitol from hurd xylose, nickel/bacteria/virus',ev:'A',ec:'ev-a'},
+{n:'13',t:'Graphene & Carbon',d:'Supercapacitors from hemp carbon nanosheets',ev:'A',ec:'ev-a'},
+{n:'14',t:'Hemp Lumber',d:'Flooring, structural lumber, engineered wood',ev:'B',ec:'ev-b'},
+{n:'15',t:'Hemp Bitumen',d:'Bio-asphalt, completes zero-waste cascade',ev:'B',ec:'ev-b'}
+];
+
+var MODULES=[
+{level:1,name:'Hemp 101: The Plant That Builds Worlds',desc:'History, botany, legality, why hemp is unique',status:'complete',progress:100},
+{level:1,name:'Cannabinoids as Nutrients: The ECS + RDI',desc:'Endocannabinoid system, Recommended Daily Intake thesis',status:'complete',progress:100},
+{level:1,name:'Safe Consumption: Methods & Dosage',desc:'Flower, vape, edible, tincture methods and dosing',status:'active',progress:40},
+{level:2,name:'Strain Blending Science',desc:'Terpene synergy, effect prediction, ratio engineering',status:'locked',progress:0},
+{level:2,name:'Terpene Deep Dive',desc:'8 primary terpenes, therapeutic properties, entourage',status:'locked',progress:0},
+{level:2,name:'Processing: From Seed to Product',desc:'Extraction, decortication, hydrolysis, carbonization',status:'locked',progress:0},
+{level:3,name:'Bio-Factory Systems',desc:'Autonomous production, aquifer nutrients, cascade economics',status:'locked',progress:0},
+{level:3,name:'Commodity Markets & The ICI',desc:'Index methodology, DEX trading, DAO governance',status:'locked',progress:0},
+{level:3,name:'Building the BN Fleet',desc:'Decentralized infrastructure, LOVERnment, bQueenBee',status:'locked',progress:0}
+];
+
+function loadLibrary(){
+var html='';
+for(var i=0;i<WIKI.length;i++){var w=WIKI[i];
+html+='<div class="entry-row"><div class="num" style="background:#'+w.ec.replace('ev-','')+'">'+w.n+'</div>';
+html+='<div class="entry-info"><div class="title">'+w.t+'</div><div class="desc">'+w.d+'</div></div>';
+html+='<span class="badge-evidence '+w.ec+'">['+w.ev+']</span></div>';}
+document.getElementById('wikiList').innerHTML=html;
+}
+
+function loadModules(){
+var html='';
+for(var i=0;i<MODULES.length;i++){var m=MODULES[i];var sc,sl;
+if(m.status==='complete'){sc='status-complete';sl='&#10003;';}
+else if(m.status==='active'){sc='status-active';sl='L'+m.level;}
+else{sc='status-locked';sl='&#128274;';}
+html+='<div class="edu-module"><div class="edu-status '+sc+'">'+sl+'</div>';
+html+='<div class="edu-info"><div class="name">'+m.name+'</div><div class="desc">'+m.desc+'</div>';
+html+='<div class="progress-bar"><div class="progress-fill" style="width:'+m.progress+'%"></div></div></div></div>';}
+document.getElementById('moduleList').innerHTML=html;
+}
+
+function loadData(){
+var sessions=JSON.parse(localStorage.getItem('bnSessions')||'[]');
+var totalMg=0;var methodCounts={flower:0,vape:0,distillate:0,spliff:0,edible:0};
+
+for(var i=0;i<sessions.length;i++){
+if(sessions[i].doseG&&sessions[i].thcaPercent){
+var pct=parseFloat(sessions[i].thcaPercent)||0;
+totalMg+=sessions[i].doseG*pct/100*1000*0.877;
+}}
+
+var today=new Date().toISOString().slice(0,10);
+var intake=JSON.parse(localStorage.getItem('bnIntake_'+today)||'[]');
+for(var i=0;i<intake.length;i++){
+totalMg+=intake[i].mg||0;
+if(methodCounts[intake[i].method]!==undefined)methodCounts[intake[i].method]++;
+}
+
+document.getElementById('totalSessions').textContent=sessions.length+intake.length;
+document.getElementById('totalMg').textContent=Math.round(totalMg);
+document.getElementById('totalBlends').textContent=sessions.length;
+var rdi=parseInt(localStorage.getItem('bnRDI')||'100');
+document.getElementById('avgRDI').textContent=rdi>0?Math.round(totalMg/rdi*100)+'%':'0%';
+
+if(sessions.length===0&&intake.length===0){
+document.getElementById('dataList').innerHTML='<div class="empty-state">No data yet. Use Flower Lab and Intake Tracker to generate sessions.<br>Data appears here automatically via localStorage.</div>';
+}else{
+var html='';
+for(var i=Math.max(0,sessions.length-5);i<sessions.length;i++){
+var s=sessions[i];html+='<div class="entry-row"><div class="entry-info"><div class="title">Flower Lab: '+(s.blend||'Unnamed')+'</div><div class="desc">'+s.timestamp+' - '+s.thcaPercent+' THCA - '+(s.doseG||0)+'g</div></div></div>';}
+for(var i=Math.max(0,intake.length-5);i<intake.length;i++){
+var e=intake[i];html+='<div class="entry-row"><div class="entry-info"><div class="title">Intake: '+e.method+' - '+e.strain+'</div><div class="desc">'+e.time+' - '+e.mg+'mg</div></div></div>';}
+document.getElementById('dataList').innerHTML=html;
+}
+
+var ctx=document.getElementById('methodChart');
+if(ctx){new Chart(ctx,{type:'doughnut',data:{labels:['Flower','Vape','Distillate','Spliff','Edible'],datasets:[{data:[methodCounts.flower,methodCounts.vape,methodCounts.distillate,methodCounts.spliff,methodCounts.edible],backgroundColor:['#27AE60','#E67E22','#8E44AD','#f0a500','#3498DB']}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#bbb',font:{size:10}}}}}});}
+}
+
+document.addEventListener('DOMContentLoaded',function(){loadLibrary();loadModules();loadData();});
+</script>
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<!-- ORDER cc2-FLEET item 2 — the index that presents the founder's fleet.
+     Single file. No script tag, no framework, no bundle, ZERO off-origin
+     requests. Nothing here reinterprets his art: no thumbnails, no generated
+     previews, no sampling of his palette. The nine surfaces are linked, not
+     depicted. Every number on this page is measured — creation times are the
+     mtimes of the untouched originals at bn-fleet/, preserved byte-identical. -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="Nine surfaces, one hand, one night — the founder's fleet, preserved byte-identical and hosted same-origin.">
+<title>the fleet — nine surfaces, one night</title>
+<style>
+/* ── SEMANTIC COLOUR · meanings picked FIRST, one hue = one meaning, page-wide.
+   Inherited verbatim from the estate's contract (devroom). No hue is invented
+   here and none is reused for looks.
+     harm/defect/gap ……… #ffb347  amber   (what is absent, what would bite)
+     solution/fix/verdict… #7ddf8f  leaf    (the working thing, the verified pass)
+     value/thesis/finder … #FFD700  gold    (the work itself, and its stakes)
+     system/rail/navigation #00E5FF cyan    (structure — links, the data bus)
+     science/verify/gate … #c9a0ff  violet  (the verification layer, added after)
+
+   THE H1 GRADIENT ENCODES THE THESIS, and the order of the stops is the
+   argument: gold → cyan → violet is the WORK first, the STRUCTURE second,
+   the PROCESS last. These nine were made before any of the scaffolding that
+   now surrounds them. The colour says it before the text does. */
+:root{
+  --void:#0d1410; --panel:#111a14; --inset:#0a0f0b;
+  --line:#243026; --line-hi:#37493c;
+  --ink:#e2efdb; --ink-hi:#eef7e9; --dim:#8a9a8a;
+  --sem-harm:#ffb347; --sem-solution:#7ddf8f; --sem-value:#FFD700;
+  --sem-system:#00E5FF; --sem-science:#c9a0ff;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:var(--void); color:var(--ink);
+  font:13px/1.65 'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  padding:34px 16px 80px;
+}
+main{max-width:900px;margin:0 auto}
+a{color:var(--sem-system);text-decoration:none}
+a:hover,a:focus{color:var(--sem-value)}
+a:focus-visible{outline:2px solid var(--sem-value);outline-offset:3px}
+
+header{text-align:center;margin-bottom:26px}
+h1{
+  font-size:clamp(19px,5.2vw,34px); line-height:1.2; font-weight:600;
+  letter-spacing:.01em;
+  background:linear-gradient(90deg,var(--sem-value),var(--sem-system),var(--sem-science));
+  -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent; color:transparent;
+}
+header .sub{color:var(--dim);font-size:11px;margin-top:9px;line-height:1.75}
+
+/* ── HERO — the thesis in three seconds, no paragraph required ── */
+.hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:22px}
+.pstat.hero{background:var(--inset);border:1px solid var(--line);border-radius:13px;padding:19px 14px;text-align:center}
+.pstat.hero .n{font-size:38px;font-weight:700;line-height:1;letter-spacing:-.02em}
+.pstat.hero .l{font-size:10px;color:var(--dim);margin-top:7px;text-transform:uppercase;letter-spacing:.09em;line-height:1.6}
+.n.value{color:var(--sem-value)} .n.system{color:var(--sem-system)} .n.solution{color:var(--sem-solution)}
+
+section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 17px;margin-top:15px}
+section h2{font-size:12px;font-weight:400;letter-spacing:.09em;text-transform:uppercase;margin-bottom:4px}
+section .note{color:var(--dim);font-size:10.5px;line-height:1.8;margin-bottom:11px}
+h2.gallery{color:var(--sem-value)} h2.lab{color:var(--sem-system)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:9px}
+.art{
+  display:block;background:var(--inset);border:1px solid var(--line);
+  border-radius:9px;padding:12px 13px;transition:border-color .16s ease;
+}
+.art:hover,.art:focus-visible{border-color:var(--line-hi)}
+.art .n{font-size:12.5px;color:var(--ink-hi)}
+.art .d{font-size:10px;color:var(--dim);margin-top:5px;line-height:1.7}
+.art .t{font-size:9.5px;color:var(--sem-science);margin-top:6px;letter-spacing:.06em}
+
+.rail{background:var(--inset);border-left:3px solid var(--sem-system);border-radius:0 8px 8px 0;padding:11px 14px;margin-top:12px;font-size:10.5px;color:var(--dim);line-height:1.8}
+.rail b{color:var(--ink-hi)}
+.proof{background:var(--inset);border-left:3px solid var(--sem-solution);border-radius:0 8px 8px 0;padding:11px 14px;margin-top:12px;font-size:10.5px;color:var(--dim);line-height:1.8}
+.proof b{color:var(--sem-solution)}
+.absent{background:var(--inset);border-left:3px solid var(--sem-harm);border-radius:0 8px 8px 0;padding:11px 14px;margin-top:12px;font-size:10.5px;color:var(--dim);line-height:1.8}
+.absent b{color:var(--sem-harm)}
+code{color:var(--ink-hi);font-size:.95em}
+
+footer{max-width:900px;margin:26px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.9}
+
+@media(max-width:560px){
+  body{padding:22px 12px 60px}
+  .pstat.hero .n{font-size:31px}
+  .grid{grid-template-columns:1fr}
+  section{padding:13px 13px}
+}
+@media(prefers-reduced-motion:reduce){.card{transition:none}}
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <h1>nine surfaces, one night, one hand</h1>
+  <p class="sub">Made 2026&#8209;08&#8209;03 between 03:25 and 04:47 — before there was a review lane, a design gate, or a process to satisfy. Preserved here byte&#8209;identical and hosted on one origin. Nothing on this page reinterprets them; the links go to the real files.</p>
+</header>
+
+<div class="hero">
+  <div class="pstat hero">
+    <div class="n value">82</div>
+    <div class="l">minutes, first file to last</div>
+  </div>
+  <div class="pstat hero">
+    <div class="n system">9</div>
+    <div class="l">surfaces · one hand</div>
+  </div>
+  <div class="pstat hero">
+    <div class="n solution">0</div>
+    <div class="l">off-origin requests</div>
+  </div>
+</div>
+
+<section>
+  <h2 class="lab">the lab · six instruments</h2>
+  <p class="note">Built first — 03:25 to 04:16. Every one of these measures something, and they were finished before a single page that argues.</p>
+  <div class="grid">
+    <a class="art" href="lab/flower-lab.html"><span class="n">flower-lab</span><span class="d">Blend composition and session logging — writes <code>bnSessions</code>.</span><span class="t">03:25</span></a>
+    <a class="art" href="lab/intake-tracker.html"><span class="n">intake-tracker</span><span class="d">Daily intake against RDI — writes <code>bnIntake_*</code>, <code>bnRDI</code>.</span><span class="t">03:47</span></a>
+    <a class="art" href="lab/bnr-dashboard.html"><span class="n">bnr-dashboard</span><span class="d">Reads what the other instruments write. The one that only consumes.</span><span class="t">03:48</span></a>
+    <a class="art" href="lab/blend-lab.html"><span class="n">blend-lab</span><span class="d">Blend ratios and their modelled outcome.</span><span class="t">03:50</span></a>
+    <a class="art" href="lab/edible-tracker.html"><span class="n">edible-tracker</span><span class="d">Edible dosing and onset — writes <code>bnEdibleSessions</code>.</span><span class="t">04:15</span></a>
+    <a class="art" href="lab/spliff-lab.html"><span class="n">spliff-lab</span><span class="d">Roll composition against measured effect.</span><span class="t">04:16</span></a>
+  </div>
+  <div class="rail"><b>These six share one origin on purpose.</b> The dashboard reads <code>bnSessions</code>, <code>bnIntake_*</code> and <code>bnRDI</code> straight out of the browser store the others write to. Split them across origins and the bus is severed — with <b>no error at all</b>; the dashboard simply renders zeros, which looks exactly like "no data yet". That failure is asserted in <code>e2e/fleet-bus.mjs</code>, in both directions.</div>
+</section>
+
+<section>
+  <h2 class="gallery">the gallery · three arguments</h2>
+  <p class="note">Built last — 04:23 to 04:47, after every instrument was finished. These do not measure; they argue.</p>
+  <div class="grid">
+    <a class="art" href="gallery/resonance.html"><span class="n">resonance</span><span class="d">The frequency argument.</span><span class="t">04:23</span></a>
+    <a class="art" href="gallery/indigo-index.html"><span class="n">indigo-index</span><span class="d">The index, as a claim rather than a list.</span><span class="t">04:36</span></a>
+    <a class="art" href="gallery/acid-cascade.html"><span class="n">acid-cascade</span><span class="d">ACiD — the chronic inflammatory disease cascade, argued in one page.</span><span class="t">04:47</span></a>
+  </div>
+</section>
+
+<section>
+  <h2 class="gallery">provenance</h2>
+  <div class="proof"><b>Preserved, not edited.</b> All 26 files in the original set hash byte-identical to their sources — sha256 compared against the untouched originals, 26 of 26, zero mismatches. The nine hosted copies here differ from those originals by exactly <b>one line each</b>, and only in the seven that loaded a script from a CDN: that <code>src</code> now points at a vendored <code>chart.js</code> served from this origin. The vendored bytes hash <code>48444a82…f54a</code>, matching what the CDN served when it was captured.</div>
+  <div class="absent"><b>What is not here.</b> No thumbnails, no previews, no generated impressions of these nine. This page links to them and counts them; it does not depict them. The originals under <code>surfaces/fleet/</code> keep their CDN URL forever and are never edited — this hosted set is a generated derivative, and regenerating it is the only way it changes.</div>
+</section>
+
+<footer>
+  <p><a href="../">⌂ the surfaces</a> · <a href="../fleet/PRESERVATION-NOTE.md">preservation note</a> · <a href="../fleet/VALUE-LOOP-MAP.md">value-loop map</a></p>
+  <p>This page runs no JavaScript and makes no off-origin request. Times are the originals' filesystem timestamps, 2026-08-03.</p>
+</footer>
+
+</main>
+</body>
+</html>
