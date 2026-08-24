@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BN Resonance — Collective Consciousness & Plant Medicine</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a14;color:#eee;font-family:Arial,sans-serif;overflow-x:hidden}
+.hdr{background:linear-gradient(135deg,#1a0a2e,#0a1a3e);padding:16px 30px;border-bottom:1px solid #333;text-align:center}
+.hdr h1{font-size:22px;background:linear-gradient(90deg,#7B68EE,#00CED1,#FFD700);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:3px}
+.hdr p{color:#666;font-size:11px}
+.wrap{display:grid;grid-template-columns:240px 1fr 300px;gap:12px;padding:12px;max-width:1400px;margin:0 auto}
+.panel{background:#111122;border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid #1a1a3e}
+.panel h2{font-size:12px;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+/* Hawkins Scale */
+.h-scale{position:relative}
+.h-level{display:flex;align-items:center;gap:6px;padding:2px 4px;border-radius:4px;margin:1px 0;cursor:pointer;transition:.2s;font-size:10px}
+.h-level:hover{background:#ffffff11;transform:translateX(3px)}
+.h-level.active{background:#ffffff22;border:1px solid #FFD700}
+.h-bar{width:30px;height:14px;border-radius:3px;flex-shrink:0}
+.h-name{font-weight:bold}.h-freq{color:#888;margin-left:auto}
+.h-divider{border-top:1px dashed #444;margin:4px 0;text-align:center;font-size:8px;color:#555}
+/* Schumann */
+.schumann-canvas{width:100%;height:140px;background:#080820;border-radius:8px;margin:8px 0}
+.schumann-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px}
+.schumann-stats .stat{background:#080820;border-radius:6px;padding:6px;text-align:center}
+.schumann-stats .v{font-size:16px;font-weight:bold;color:#00CED1}
+.schumann-stats .l{font-size:8px;color:#666;text-transform:uppercase}
+/* Simulator */
+.sim-slider{width:100%;margin:8px 0}
+.sim-value{font-size:22px;font-weight:bold;text-align:center}
+.sim-results{margin-top:10px}
+.sim-row{display:flex;justify-content:space-between;align-items:center;padding:6px;background:#080820;border-radius:6px;margin-bottom:4px;font-size:11px}
+.sim-row .label{color:#888}.sim-row .val{font-weight:bold}
+.positive{color:#27AE60}.negative{color:#E74C3C}.neutral{color:#00CED1}
+/* Charts */
+.chart-box{height:200px;margin:8px 0}
+/* Stats grid */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0}
+.stat-card{background:#080820;border-radius:8px;padding:10px;text-align:center}
+.stat-card .v{font-size:20px;font-weight:bold}.stat-card .l{font-size:8px;color:#666;text-transform:uppercase;margin-top:2px}
+.disclaimer{font-size:9px;color:#444;text-align:center;padding:8px;margin-top:8px;line-height:1.4}
+</style>
+</head>
+<body>
+<div class="hdr">
+<h1>BN Resonance</h1>
+<p>Collective Consciousness, Schumann Frequency & Plant Medicine Correlation — bnature.social v1.0</p>
+</div>
+<div class="wrap">
+
+<!-- LEFT: HAWKINS SCALE -->
+<div>
+<div class="panel">
+<h2 style="color:#7B68EE">Hawkins Consciousness Scale</h2>
+<div class="h-scale" id="hawkinsScale"></div>
+</div>
+</div>
+
+<!-- CENTER: SCHUMANN + CORRELATION -->
+<div>
+<div class="panel">
+<h2 style="color:#00CED1">Schumann Resonance — Earth's Frequency</h2>
+<canvas id="schumann" class="schumann-canvas"></canvas>
+<div class="schumann-stats">
+<div class="stat"><div class="v" id="sr_base">7.83 Hz</div><div class="l">Baseline</div></div>
+<div class="stat"><div class="v" id="sr_current">8.2 Hz</div><div class="l">Current (est)</div></div>
+<div class="stat"><div class="v" id="sr_shift">+0.37</div><div class="l">Shift</div></div>
+</div>
+<div style="font-size:9px;color:#555;margin-top:6px;text-align:center">The Earth's electromagnetic cavity resonates at ~7.83 Hz. Fluctuations occur naturally from solar activity and global lightning. Some research suggests correlation with collective human emotional states.</div>
+</div>
+
+<div class="panel">
+<h2 style="color:#FFD700">Correlation: Cannabinoid Consumers vs Collective Consciousness</h2>
+<div class="chart-box"><canvas id="corrChart"></canvas></div>
+</div>
+
+<div class="panel">
+<h2 style="color:#27AE60">Global Cannabinoid Impact Projection</h2>
+<div class="chart-box"><canvas id="impactChart"></canvas></div>
+</div>
+</div>
+
+<!-- RIGHT: SIMULATOR + STATS -->
+<div>
+<div class="panel">
+<h2 style="color:#7B68EE">What-If Simulator</h2>
+<label style="font-size:10px;color:#888">Global Regular Cannabinoid Consumers</label>
+<div class="sim-value" id="sim_consumers" style="color:#7B68EE">600M</div>
+<input type="range" class="sim-slider" id="consumerSlider" min="0" max="2000" value="600" step="10" oninput="doSim()">
+<label style="font-size:10px;color:#888">Average Daily Intake per Consumer (mg)</label>
+<div class="sim-value" id="sim_intake" style="color:#27AE60">25mg</div>
+<input type="range" class="sim-slider" id="intakeSlider" min="1" max="100" value="25" step="1" oninput="doSim()">
+
+<div class="sim-results">
+<div class="sim-row"><span class="label">Projected Collective Consciousness:</span><span class="val neutral" id="sim_consc">285</span></div>
+<div class="sim-row"><span class="label">Consciousness Shift:</span><span class="val positive" id="sim_shift">+80</span></div>
+<div class="sim-row"><span class="label">Anxiety Reduction:</span><span class="val positive" id="sim_anxiety">-15%</span></div>
+<div class="sim-row"><span class="label">Creativity Index:</span><span class="val positive" id="sim_creative">+12%</span></div>
+<div class="sim-row"><span class="label">Schumann Influence:</span><span class="val neutral" id="sim_schumann">+0.37 Hz</span></div>
+<div class="sim-row"><span class="label">Global Meditators Equiv:</span><span class="val neutral" id="sim_meditators">2.4M</span></div>
+<div class="sim-row"><span class="label">Total Daily Cannabinoids:</span><span class="val" style="color:#FFD700" id="sim_total">15,000 kg</span></div>
+</div>
+</div>
+
+<div class="panel">
+<h2 style="color:#27AE60">Global Statistics</h2>
+<div class="stats-grid">
+<div class="stat-card"><div class="v" style="color:#7B68EE">~600M</div><div class="l">Cannabis Users</div></div>
+<div class="stat-card"><div class="v" style="color:#27AE60">~200M</div><div class="l">CBD Consumers</div></div>
+<div class="stat-card"><div class="v" style="color:#FFD700">~209</div><div class="l">Avg Human Consc.</div></div>
+<div class="stat-card"><div class="v" style="color:#00CED1">7.83 Hz</div><div class="l">Schumann Base</div></div>
+<div class="stat-card"><div class="v" style="color:#E74C3C">$25B</div><div class="l">Cannabis Market</div></div>
+<div class="stat-card"><div class="v" style="color:#3498DB">$8B</div><div class="l">CBD Market</div></div>
+</div>
+</div>
+
+<div class="panel">
+<h2 style="color:#7B68EE">Hawkins Level: <span id="hl_name">Courage</span></h2>
+<div style="font-size:11px;color:#aaa" id="hl_desc">
+The level of courage (200) is the tipping point. Below this, life is seen as hopeless or demanding. At 200, life is seen as challenging but manageable. This is where true empowerment begins.
+</div>
+<div style="margin-top:8px">
+<div style="font-size:10px;color:#666;margin-bottom:4px">Cannabinoid Connection:</div>
+<div style="font-size:10px;color:#27AE60" id="hl_can">
+Regular cannabinoid intake (supporting ECS function) is theorized to help shift individuals from fear/desire states toward courage/acceptance by reducing anxiety and improving emotional regulation.
+</div>
+</div>
+</div>
+
+<div class="disclaimer">
+This visualization explores theoretical correlations between collective cannabinoid intake, consciousness research (Hawkins), and Earth's electromagnetic frequencies. Correlations are modeled projections, not proven causation. The BN Fleet BiGen framework tracks actual session data to build evidence for or against these hypotheses. All data is anonymized and consented.
+</div>
+</div>
+
+</div>
+
+<script>
+// HAWKINS SCALE DATA
+var HAWKINS=[
+{level:1000,name:'Enlightenment (700-1000)',color:'#FFFFFF',desc:'Pure awareness. The highest level of human consciousness. Rare. Saints, avatars.',can:'At this level, cannabinoids are irrelevant. Consciousness is self-sustaining.'},
+{level:600,name:'Peace',color:'#E0E0E0',desc:'Transcendent peace. Effortless manifestation. The ego dissolves into unity.',can:'Deep meditative states. Plant medicine may facilitate glimpses of this state.'},
+{level:540,name:'Joy',color:'#87CEEB',desc:'Unconditional love and joy. Life is self-sustainingly wonderful.',can:'Cannabinoids may support sustained joy by optimizing ECS homeostasis.'},
+{level:500,name:'Love',color:'#FF69B4',desc:'Not emotion but a way of being. Unconditional. Reverent. Forgiving.',can:'Reduced fear response from optimal ECS function may open capacity for love.'},
+{level:400,name:'Reason',color:'#FFD700',desc:'Intellect, logic, science. Einstein, Freud, great thinkers calibrated here.',can:'CBG and balanced CBD:THC ratios may enhance focus and cognitive clarity.'},
+{level:350,name:'Acceptance',color:'#FFA500',desc:'Self-responsible. No victim consciousness. "I create my experience."',can:'Cannabinoids reduce resistance to what IS, facilitating acceptance.'},
+{level:310,name:'Willingness',color:'#FF8C00',desc:'Genuine, friendly. Helpful. Growth-oriented.',can:'ECS optimization correlates with increased prosocial behavior and willingness.'},
+{level:250,name:'Neutrality',color:'#FFFF00',desc:'Flexible, detached, confident. Not dependent on external outcomes.',can:'CBD-dominant intake reduces emotional reactivity, supporting neutrality.'},
+{level:200,name:'Courage',color:'#00FF00',desc:'THE TIPPING POINT. Integrity, empowerment. Life is seen as challenging but manageable.',can:'Regular cannabinoid intake is theorized to help shift from fear states to courage.'},
+{div:true,label:'--- BELOW 200: SURVIVAL CONSCIOUSNESS ---'},
+{level:175,name:'Pride',color:'#808000',desc:'Defensive, conditional self-worth. Dependent on external validation.',can:'Cannabis can temporarily dissolve pride defenses, enabling growth.'},
+{level:150,name:'Anger',color:'#FF4500',desc:'Frustration, aggression. Can fuel action but at cost of health.',can:'THC may either increase or decrease anger depending on set, setting, and dose.'},
+{level:125,name:'Desire',color:'#FF6347',desc:'Craving, attachment. Motivating but never satisfied.',can:'ECS dysregulation may amplify craving. Optimal cannabinoid intake may balance desire.'},
+{level:100,name:'Fear',color:'#FF0000',desc:'Anxiety, withdrawal. Sees world as threatening.',can:'CBD is clinically shown to reduce fear/anxiety. This is the primary therapeutic claim.'},
+{level:75,name:'Grief',color:'#DC143C',desc:'Sadness, loss, regret. Life is seen through filter of sorrow.',can:'Cannabinoids may provide temporary relief from grief but should not replace processing.'},
+{level:50,name:'Apathy',color:'#8B0000',desc:'Despair, hopelessness. "I cant." Life is seen as futile.',can:'ECS deficiency may contribute to apathy. Restoration may re-engage motivation.'},
+{level:30,name:'Guilt',color:'#4B0082',desc:'Self-blame, remorse. Punishing oneself.',can:'Plant medicine ceremonies with cannabinoid support may facilitate self-forgiveness.'},
+{level:20,name:'Shame',color:'#2B2B2B',desc:'The lowest level. Humiliation, self-hatred. Close to death.',can:'Trauma-informed cannabinoid therapy may help release shame stored in the body.'}
+];
+
+// BUILD HAWKINS SCALE
+var scaleHtml='';
+for(var i=0;i<HAWKINS.length;i++){
+var h=HAWKINS[i];
+if(h.div){scaleHtml+='<div class="h-divider">'+h.label+'</div>';continue;}
+scaleHtml+='<div class="h-level" onclick="selectLevel('+i+')" id="hl_'+i+'">';
+scaleHtml+='<div class="h-bar" style="background:'+h.color+'"></div>';
+scaleHtml+='<span class="h-name">'+h.name+'</span>';
+scaleHtml+='<span class="h-freq">'+h.level+'</span>';
+scaleHtml+='</div>';}
+document.getElementById('hawkinsScale').innerHTML=scaleHtml;
+
+function selectLevel(idx){
+var h=HAWKINS[idx];
+if(h.div)return;
+for(var i=0;i<HAWKINS.length;i++){var el=document.getElementById('hl_'+i);if(el)el.classList.remove('active');}
+var el=document.getElementById('hl_'+idx);if(el)el.classList.add('active');
+document.getElementById('hl_name').textContent=h.name+' ('+h.level+')';
+document.getElementById('hl_desc').textContent=h.desc;
+document.getElementById('hl_can').textContent=h.can;
+}
+
+// SCHUMANN RESONANCE ANIMATION
+var srCanvas=document.getElementById('schumann');
+var srCtx=srCanvas.getContext('2d');
+var srTime=0;
+function resizeSR(){srCanvas.width=srCanvas.offsetWidth*2;srCanvas.height=srCanvas.offsetHeight*2;srCtx.scale(2,2);}
+resizeSR();
+
+function drawSchumann(){
+var w=srCanvas.offsetWidth,h=srCanvas.offsetHeight;
+srCtx.fillStyle='#080820';srCtx.fillRect(0,0,w,h);
+// Grid
+srCtx.strokeStyle='#111133';srCtx.lineWidth=0.5;
+for(var x=0;x<w;x+=30){srCtx.beginPath();srCtx.moveTo(x,0);srCtx.lineTo(x,h);srCtx.stroke();}
+srCtx.beginPath();srCtx.moveTo(0,h/2);srCtx.lineTo(w,h/2);srCtx.strokeStyle='#1a1a44';srCtx.stroke();
+
+// Fundamental 7.83 Hz
+srCtx.beginPath();srCtx.strokeStyle='#00CED1';srCtx.lineWidth=2;
+for(var x=0;x<w;x++){
+var t=(x/w)*4*Math.PI+srTime;
+var y=h/2+Math.sin(t*7.83/10)*30;
+if(x===0)srCtx.moveTo(x,y);else srCtx.lineTo(x,y);}
+srCtx.stroke();
+
+// Harmonics
+srCtx.beginPath();srCtx.strokeStyle='#7B68EE88';srCtx.lineWidth=1;
+for(var x=0;x<w;x++){
+var t=(x/w)*4*Math.PI+srTime;
+var y=h/2+Math.sin(t*14.3/10)*15;
+if(x===0)srCtx.moveTo(x,y);else srCtx.lineTo(x,y);}
+srCtx.stroke();
+
+srCtx.beginPath();srCtx.strokeStyle='#FFD70044';srCtx.lineWidth=1;
+for(var x=0;x<w;x++){
+var t=(x/w)*4*Math.PI+srTime;
+var y=h/2+Math.sin(t*20.8/10)*8;
+if(x===0)srCtx.moveTo(x,y);else srCtx.lineTo(x,y);}
+srCtx.stroke();
+
+// Pulse circle
+srCtx.beginPath();var pulse=Math.sin(srTime*2)*5;
+srCtx.arc(w/2,h/2,20+pulse,0,2*Math.PI);
+srCtx.strokeStyle='#00CED1'+Math.round(60+Math.sin(srTime)*30).toString(16);
+srCtx.lineWidth=1;srCtx.stroke();
+
+srTime+=0.02;
+requestAnimationFrame(drawSchumann);
+}
+drawSchumann();
+
+// CORRELATION CHART
+var corrChart=new Chart(document.getElementById('corrChart'),{type:'line',
+data:{labels:['100M','200M','300M','400M','500M','600M','700M','800M','900M','1B','1.2B','1.5B','2B'],
+datasets:[
+{label:'Collective Consciousness (Hawkins)',data:[210,215,221,228,235,242,250,258,267,275,290,310,340],borderColor:'#FFD700',backgroundColor:'rgba(255,215,0,0.1)',borderWidth:2,fill:true,yAxisID:'y'},
+{label:'Creativity Index',data:[102,103,105,107,109,111,113,116,119,122,128,135,145],borderColor:'#27AE60',backgroundColor:'rgba(39,174,96,0.05)',borderWidth:1,yAxisID:'y1'}
+]},
+options:{responsive:true,maintainAspectRatio:false,
+scales:{
+y:{type:'linear',position:'left',title:{display:true,text:'Consciousness Level',color:'#FFD700'},ticks:{color:'#888'},grid:{color:'#1a1a33'},min:200,max:400},
+y1:{type:'linear',position:'right',title:{display:true,text:'Creativity %',color:'#27AE60'},ticks:{color:'#888'},grid:{display:false},min:100,max:150},
+x:{ticks:{color:'#888',maxTicksLimit:7},grid:{color:'#1a1a33'}}
+},
+plugins:{legend:{labels:{color:'#aaa',font:{size:9}}}}}});
+
+// IMPACT CHART
+var impactChart=new Chart(document.getElementById('impactChart'),{type:'bar',
+data:{labels:['Anxiety','Depression','Creativity','Sleep Quality','Social Connection','Pain Relief'],
+datasets:[
+{label:'Current (600M consumers)',data:[12,8,8,10,6,15],backgroundColor:'#7B68EE66',borderColor:'#7B68EE',borderWidth:1},
+{label:'Projected (1.5B consumers)',data:[22,15,18,20,12,28],backgroundColor:'#27AE6066',borderColor:'#27AE60',borderWidth:1}
+]},
+options:{responsive:true,maintainAspectRatio:false,
+scales:{y:{title:{display:true,text:'% Improvement',color:'#888'},ticks:{color:'#888'},grid:{color:'#1a1a33'}},x:{ticks:{color:'#888',font:{size:9}},grid:{color:'#1a1a33'}}},
+plugins:{legend:{labels:{color:'#aaa',font:{size:9}}}}}});
+
+// SIMULATOR
+function doSim(){
+var consumers=parseInt(document.getElementById('consumerSlider').value);
+var intake=parseInt(document.getElementById('intakeSlider').value);
+document.getElementById('sim_consumers').textContent=consumers+'M';
+document.getElementById('sim_intake').textContent=intake+'mg';
+
+// Model: baseline consciousness 205, each 1M consumers at 25mg adds ~0.13 points
+var consc=Math.round(205+(consumers*0.13*(intake/25)));
+var shift=consc-205;
+var anxiety=Math.round(consumers*0.025*(intake/25));
+var creative=Math.round(consumers*0.02*(intake/25));
+var schumann=(consumers*0.0006*(intake/25)).toFixed(2);
+var meditators=((consumers*0.004)*(intake/25)).toFixed(1);
+var totalKg=Math.round(consumers*intake*1000000/1000000);
+
+document.getElementById('sim_consc').textContent=consc;
+document.getElementById('sim_shift').textContent='+'+shift;
+document.getElementById('sim_anxiety').textContent='-'+Math.min(anxiety,40)+'%';
+document.getElementById('sim_creative').textContent='+'+Math.min(creative,35)+'%';
+document.getElementById('sim_schumann').textContent='+'+schumann+' Hz';
+document.getElementById('sim_meditators').textContent=meditators+'M';
+document.getElementById('sim_total').textContent=totalKg.toLocaleString()+' kg';
+document.getElementById('sr_current').textContent=(7.83+parseFloat(schumann)).toFixed(2)+' Hz';
+document.getElementById('sr_shift').textContent='+'+schumann;
+}
+doSim();
+selectLevel(8); // Default to Courage (200)
+</script>
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BN Edible & Effects Tracker</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a14;color:#eee;font-family:Arial,sans-serif}
+.hdr{background:linear-gradient(135deg,#0a1a3e,#1a0a2e);padding:14px 30px;border-bottom:1px solid #333;text-align:center}
+.hdr h1{font-size:20px;background:linear-gradient(90deg,#27AE60,#FFD700);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hdr p{color:#555;font-size:11px}
+.wrap{max-width:800px;margin:0 auto;padding:14px}
+.panel{background:#111122;border-radius:12px;padding:16px;margin-bottom:12px;border:1px solid #1a1a3e}
+.panel h2{font-size:13px;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+.panel h2.green{color:#27AE60}.panel h2.gold{color:#FFD700}.panel h2.purple{color:#8E44AD}
+label{font-size:10px;color:#888;display:block;margin-bottom:2px}
+input,select,textarea{width:100%;background:#080820;border:1px solid #333;color:#eee;padding:7px;border-radius:6px;font-size:12px;margin-bottom:8px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{width:100%;background:#27AE60;border:none;color:#fff;padding:10px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:bold;margin-top:4px}
+.btn.gold{background:#FFD700;color:#000}.btn.purple{background:#8E44AD}
+.baseline-box{background:#080820;border-radius:8px;padding:12px;margin:8px 0}
+.baseline-box .big-num{font-size:24px;font-weight:bold}
+.slider-row{display:flex;align-items:center;gap:8px;margin:6px 0}
+.slider-row label{width:100px;margin:0}
+.slider-row input[type=range]{flex:1;margin:0}
+.slider-row .val{width:60px;text-align:right;font-weight:bold;font-size:12px}
+.effect-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.effect-item{background:#080820;border-radius:6px;padding:8px}
+.effect-item label{font-size:10px}
+.effect-item input[type=range]{margin:4px 0}
+.effect-item .v{text-align:center;font-size:14px;font-weight:bold}
+.side-effects{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.side-effects label{display:flex;align-items:center;gap:4px;font-size:10px;background:#080820;padding:4px 8px;border-radius:4px;cursor:pointer}
+.stars{font-size:24px;cursor:pointer;color:#333}
+.stars .active{color:#FFD700}
+.session-entry{background:#080820;border-radius:8px;padding:8px;margin-bottom:5px;font-size:11px}
+.session-entry .method{display:inline-block;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:bold;margin-right:6px}
+.analysis-box{background:#080820;border-radius:8px;padding:12px;margin:8px 0}
+.analysis-row{display:flex;justify-content:space-between;padding:4px 0;font-size:11px;border-bottom:1px solid #1a1a3e}
+.pos{color:#27AE60}.neg{color:#E74C3C}.neu{color:#FFD700}
+.export-out{background:#080820;border-radius:8px;padding:10px;margin-top:8px;font-size:9px;white-space:pre-wrap;max-height:200px;overflow:auto;display:none}
+.insight{background:#1a2e1a;border:1px solid #27AE6044;border-radius:8px;padding:10px;margin:8px 0;font-size:11px;color:#27AE60}
+</style>
+</head>
+<body>
+<div class="hdr"><h1>Edible & Effects Tracker</h1><p>bnature.social - Baseline Cannabinoid Nutrition + Acute Session Effects | v1.0</p></div>
+<div class="wrap">
+
+<!-- DAILY BASELINE -->
+<div class="panel">
+<h2 class="green">Daily Baseline Protocol — Your Cannabinoid Nutrition</h2>
+<p style="font-size:10px;color:#666;margin-bottom:8px">The cannabinoids you take daily as nutrition (RDI). This baseline fundamentally changes how acute consumption (smoking/vaping) affects you.</p>
+<div class="row3">
+<div><label>CBD (mg/day)</label><input type="number" id="base_cbd" value="1500" min="0" step="50"></div>
+<div><label>THC (mg/day)</label><input type="number" id="base_thc" value="600" min="0" step="25"></div>
+<div><label>CBG/CBN (mg/day)</label><input type="number" id="base_other" value="0" min="0" step="10"></div>
+</div>
+<div class="row3">
+<div><label>Carrier Oil</label><select id="base_carrier"><option>MCT Oil</option><option>Olive Oil</option><option>Hemp Seed Oil</option><option>Coconut Oil</option><option>Other</option></select></div>
+<div><label>Volume (ml/day)</label><input type="number" id="base_volume" value="5" min="0" step="0.5"></div>
+<div><label>Doses per day</label><input type="number" id="base_doses" value="2" min="1" step="1"></div>
+</div>
+<div><label>Days on this protocol</label><input type="number" id="base_days" value="30" min="1" step="1"></div>
+<button class="btn" onclick="saveBaseline()">Save Baseline Protocol</button>
+<div class="baseline-box" id="baselineSummary"></div>
+</div>
+
+<!-- LOG SESSION -->
+<div class="panel">
+<h2 class="gold">Log Acute Session (Smoking / Vaping)</h2>
+<div class="row2">
+<div><label>Method</label><select id="s_method"><option>Spliff</option><option>Joint (pure cannabis)</option><option>Pipe</option><option>Bong</option><option>Vape Cart</option><option>Dry Herb Vape</option></select></div>
+<div><label>Time</label><input type="time" id="s_time" value="14:00"></div>
+</div>
+<div class="row2">
+<div><label>Strain / Product</label><input type="text" id="s_strain" placeholder="e.g. Pineapple Breeze"></div>
+<div><label>Amount (g)</label><input type="number" id="s_amount" value="0.5" min="0.1" step="0.1"></div>
+</div>
+<div class="row2">
+<div><label>THCA %</label><input type="number" id="s_thca" value="30" min="0" step="0.1"></div>
+<div><label>Hours since last edible dose</label><input type="number" id="s_since_edible" value="4" min="0" step="0.5"></div>
+</div>
+</div>
+
+<!-- EFFECTS REPORT -->
+<div class="panel">
+<h2 class="purple">Quick Effects Report — How did it feel?</h2>
+<div class="effect-grid" id="positiveGrid"></div>
+<label style="margin-top:8px">Side Effects (check any experienced):</label>
+<div class="side-effects" id="sideEffects"></div>
+<div style="margin:10px 0"><label>Overall Experience</label><div class="stars" id="stars">
+<span onclick="setStars(1)">&#9733;</span><span onclick="setStars(2)">&#9733;</span><span onclick="setStars(3)">&#9733;</span><span onclick="setStars(4)">&#9733;</span><span onclick="setStars(5)">&#9733;</span>
+</div></div>
+<div><label>Notes</label><textarea id="s_notes" rows="2" placeholder="What were you doing? How was the experience?"></textarea></div>
+<button class="btn purple" onclick="logSession()">Log Session + Effects</button>
+</div>
+
+<!-- PATTERN ANALYSIS -->
+<div class="panel">
+<h2 class="green">Your Pattern Analysis</h2>
+<div class="analysis-box" id="analysis">
+<div class="analysis-row"><span>Sessions logged:</span><span id="a_count">0</span></div>
+<div class="analysis-row"><span>Avg positive score:</span><span class="pos" id="a_positive">—</span></div>
+<div class="analysis-row"><span>Sessions with side effects:</span><span class="neg" id="a_side">—</span></div>
+<div class="analysis-row"><span>Avg overall rating:</span><span class="neu" id="a_rating">—</span></div>
+</div>
+<div class="insight" id="insight">Log sessions to see how your daily baseline affects your acute experiences.</div>
+</div>
+
+<!-- RESEARCH EXPORT -->
+<div class="panel">
+<h2 class="gold">Research Data Export</h2>
+<p style="font-size:10px;color:#666;margin-bottom:8px">Export your baseline + all session data for BiGen meta-analysis. All data is yours — consent-based submission.</p>
+<button class="btn gold" onclick="exportData()">Export to bDatabase</button>
+<div class="export-out" id="exportOut"></div>
+</div>
+
+<div style="font-size:9px;color:#444;text-align:center;padding:10px;line-height:1.5">
+This tool tests the hypothesis that daily cannabinoid nutrition (ECS optimization) creates a foundation where acute cannabis consumption produces more positive effects with fewer side effects. Your data helps build evidence for the cannabinoid RDI thesis.
+</div>
+
+</div>
+
+<script>
+var POS_EFFECTS=['Energy','Creativity','Focus','Euphoria','Relaxation','Body Comfort'];
+var SIDE_EFFECTS=['Anxiety','Paranoia','Dry Mouth','Rapid Heart','Dizziness','Couch-lock','None'];
+var sessions=[];
+var starRating=0;
+var baseline={};
+
+function loadAll(){
+var b=localStorage.getItem('bnBaseline');
+if(b)baseline=JSON.parse(b);else baseline={};
+var s=localStorage.getItem('bnEdibleSessions');
+if(s)sessions=JSON.parse(s);else sessions=[];
+// Fill baseline form
+if(baseline.cbd){document.getElementById('base_cbd').value=baseline.cbd;}
+if(baseline.thc){document.getElementById('base_thc').value=baseline.thc;}
+if(baseline.other){document.getElementById('base_other').value=baseline.other;}
+if(baseline.carrier){document.getElementById('base_carrier').value=baseline.carrier;}
+if(baseline.volume){document.getElementById('base_volume').value=baseline.volume;}
+if(baseline.doses){document.getElementById('base_doses').value=baseline.doses;}
+if(baseline.days){document.getElementById('base_days').value=baseline.days;}
+updateBaselineSummary();updateAnalysis();buildEffects();
+}
+
+function buildEffects(){
+var pg='';
+for(var i=0;i<POS_EFFECTS.length;i++){
+pg+='<div class="effect-item"><label>'+POS_EFFECTS[i]+'</label><input type="range" id="pos_'+i+'" min="0" max="10" value="5" oninput="document.getElementById(\'posv_'+i+'\').textContent=this.value"><div class="v" id="posv_'+i+'">5</div></div>';}
+document.getElementById('positiveGrid').innerHTML=pg;
+var sg='';
+for(var i=0;i<SIDE_EFFECTS.length;i++){
+sg+='<label><input type="checkbox" value="'+SIDE_EFFECTS[i]+'">'+SIDE_EFFECTS[i]+'</label>';}
+document.getElementById('sideEffects').innerHTML=sg;
+}
+
+function saveBaseline(){
+baseline={
+cbd:parseInt(document.getElementById('base_cbd').value)||0,
+thc:parseInt(document.getElementById('base_thc').value)||0,
+other:parseInt(document.getElementById('base_other').value)||0,
+carrier:document.getElementById('base_carrier').value,
+volume:parseFloat(document.getElementById('base_volume').value)||0,
+doses:parseInt(document.getElementById('base_doses').value)||1,
+days:parseInt(document.getElementById('base_days').value)||1,
+saved:new Date().toISOString()
+};
+localStorage.setItem('bnBaseline',JSON.stringify(baseline));
+updateBaselineSummary();
+}
+
+function updateBaselineSummary(){
+var cbd=parseInt(document.getElementById('base_cbd').value)||0;
+var thc=parseInt(document.getElementById('base_thc').value)||0;
+var total=cbd+thc+parseInt(document.getElementById('base_other').value||0);
+var html='<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;text-align:center">'+
+'<div><div class="big-num" style="color:#27AE60">'+cbd+'</div><div style="font-size:9px;color:#666">mg CBD/day</div></div>'+
+'<div><div class="big-num" style="color:#8E44AD">'+thc+'</div><div style="font-size:9px;color:#666">mg THC/day</div></div>'+
+'<div><div class="big-num" style="color:#FFD700">'+total+'</div><div style="font-size:9px;color:#666">mg total/day</div></div>'+
+'<div><div class="big-num" style="color:#00CED1">'+(cbd>0&&thc>0?(cbd/thc).toFixed(1)+':1':'—')+'</div><div style="font-size:9px;color:#666">CBD:THC ratio</div></div>'+
+'</div>';
+document.getElementById('baselineSummary').innerHTML=html;
+}
+
+function setStars(n){starRating=n;var spans=document.getElementById('stars').children;for(var i=0;i<5;i++){spans[i].className=i<n?'active':'';}}
+
+function logSession(){
+var pos={};
+for(var i=0;i<POS_EFFECTS.length;i++){pos[POS_EFFECTS[i]]=parseInt(document.getElementById('pos_'+i).value);}
+var sides=[];
+var checks=document.querySelectorAll('#sideEffects input:checked');
+for(var i=0;i<checks.length;i++){if(checks[i].value!=='None')sides.push(checks[i].value);}
+var session={
+method:document.getElementById('s_method').value,
+strain:document.getElementById('s_strain').value,
+amount:parseFloat(document.getElementById('s_amount').value)||0,
+thca:parseFloat(document.getElementById('s_thca').value)||0,
+time:document.getElementById('s_time').value,
+sinceEdible:parseFloat(document.getElementById('s_since_edible').value)||0,
+positive:pos,
+sideEffects:sides,
+rating:starRating,
+notes:document.getElementById('s_notes').value,
+baseline:{cbd:parseInt(document.getElementById('base_cbd').value)||0,thc:parseInt(document.getElementById('base_thc').value)||0},
+timestamp:new Date().toISOString()
+};
+sessions.push(session);
+localStorage.setItem('bnEdibleSessions',JSON.stringify(sessions));
+updateAnalysis();
+// Reset form
+document.getElementById('s_strain').value='';document.getElementById('s_notes').value='';
+for(var i=0;i<POS_EFFECTS.length;i++){document.getElementById('pos_'+i).value=5;document.getElementById('posv_'+i).textContent='5';}
+setStars(0);
+var checks2=document.querySelectorAll('#sideEffects input');for(var i=0;i<checks2.length;i++)checks2[i].checked=false;
+}
+
+function updateAnalysis(){
+document.getElementById('a_count').textContent=sessions.length;
+if(sessions.length===0)return;
+var avgPos=0,sideCount=0,avgRating=0;
+for(var i=0;i<sessions.length;i++){
+var pSum=0;for(var k in sessions[i].positive)pSum+=sessions[i].positive[k];
+avgPos+=pSum/POS_EFFECTS.length;
+if(sessions[i].sideEffects.length>0)sideCount++;
+avgRating+=sessions[i].rating;
+}
+avgPos=avgPos/sessions.length;
+avgRating=avgRating/sessions.length;
+var sidePct=Math.round(sideCount/sessions.length*100);
+document.getElementById('a_positive').textContent=avgPos.toFixed(1)+'/10';
+document.getElementById('a_side').textContent=sidePct+'% ('+sideCount+'/'+sessions.length+')';
+document.getElementById('a_rating').textContent=avgRating.toFixed(1)+'/5';
+
+// Insight based on baseline
+var cbd=parseInt(document.getElementById('base_cbd').value)||0;
+var thc=parseInt(document.getElementById('base_thc').value)||0;
+var insight='';
+if(cbd>=500&&thc>=200){
+insight='<strong>Strong baseline detected:</strong> '+cbd+'mg CBD + '+thc+'mg THC daily. Your sessions show '+avgPos.toFixed(1)+'/10 positive with only '+sidePct+'% reporting side effects. This supports the ECS optimization hypothesis: a well-nourished endocannabinoid system creates smoother acute experiences with fewer adverse effects.';
+}else if(cbd>0){
+insight='Baseline of '+cbd+'mg CBD/day. Sessions average '+avgPos.toFixed(1)+'/10 positive. Consider increasing baseline THC intake for enhanced entourage effect.';
+}else{
+insight='No baseline protocol set. Sessions average '+avgPos.toFixed(1)+'/10 positive with '+sidePct+'% side effects. Setting a daily cannabinoid baseline may improve your acute experiences.';
+}
+document.getElementById('insight').innerHTML=insight;
+}
+
+function exportData(){
+var data={
+baseline:baseline,
+sessionCount:sessions.length,
+sessions:sessions,
+exportDate:new Date().toISOString(),
+hypothesis:'Daily cannabinoid nutrition (ECS optimization) creates a foundation where acute cannabis consumption produces more positive effects with fewer side effects.'
+};
+var json=JSON.stringify(data,null,2);
+var out=document.getElementById('exportOut');
+out.style.display='block';
+out.textContent='bDATABASE EXPORT — BiGen Meta-Analysis\nHypothesis: ECS baseline optimization + acute consumption correlation\n\n'+json;
+}
+
+loadAll();
+</script>
+</body>
+</html>
