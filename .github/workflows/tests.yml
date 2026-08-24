@@ -61,9 +61,17 @@ jobs:
       # lives in surfaces/forge/orbit-v2.html (not frozen).
       - name: Forge freeze — orbit.html committed-blob sha256
         run: node e2e/forge-freeze.mjs
-      # §7 ENFORCEMENT — this step is the enforcement point; the local
-      # pre-commit hook is advisory only and must never be called "enforced"
-      # on its own. Every commit in the pushed range (origin/main..HEAD) must
-      # be authored by the founder; seats are credited via Co-authored-by.
+      # §7 DETECTION (not enforcement — actions run after the commits reach
+      # origin, so a violation is already public when this step goes red;
+      # prevention needs branch protection + PR-only merges, founder's call).
+      # The local pre-commit hook is advisory only. THE RANGE IS THE PUSH
+      # EVENT'S before..sha — origin/main already points at the pushed sha at
+      # checkout time, so origin/main..HEAD is empty BY CONSTRUCTION on push
+      # events and would be a no-op dressed as green (founder-caught). New
+      # branch (before = all zeros) checks HEAD; anything that cannot be
+      # computed FAILS — the check fails closed.
       - name: §7 identity — author is the founder on the pushed range
+        env:
+          S7_BEFORE: ${{ github.event.before }}
+          S7_SHA: ${{ github.sha }}
         run: sh scripts/identity-check.sh
