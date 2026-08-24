@@ -15,7 +15,13 @@ main{max-width:980px;margin:0 auto}
 header{text-align:center;margin-bottom:14px;padding-bottom:14px;position:relative}
 header::after{content:'';position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:min(560px,84%);height:2px;
  background:linear-gradient(90deg,transparent,var(--gold),var(--cyan),transparent);opacity:.55}
-h1{font-size:clamp(19px,4.5vw,27px);color:var(--gold);font-weight:400;letter-spacing:.04em}
+h1{font-size:clamp(19px,4.5vw,27px);font-weight:400;letter-spacing:.04em;color:var(--gold)}
+/* the headline carries the argument, in the page's own token language:
+   gold = the one soul (value), leaf = every chain alive (live),
+   cyan = the rails that carry it (system) — the stops encode the claim
+   "one soul, every chain"; they are not decoration */
+h1 .h1-arg{background:linear-gradient(94deg,var(--gold) 0%,var(--gold) 30%,var(--leaf) 64%,var(--cyan) 100%);
+ -webkit-background-clip:text;background-clip:text;color:var(--gold);-webkit-text-fill-color:transparent}
 header p{color:var(--dim);font-size:11px;margin-top:8px;max-width:780px;margin-inline:auto;line-height:1.85}
 section{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:15px 16px;margin-top:14px}
 h2{font-size:11.5px;color:var(--violet);font-weight:400;letter-spacing:.09em;margin-bottom:9px}
@@ -42,6 +48,13 @@ button.green:hover{background:var(--leaf);color:#000}
 .chain .stat{font-size:9px;letter-spacing:.08em;margin-top:6px}
 .stat.ok{color:var(--leaf)} .stat.err{color:var(--amber)}
 .chain.connected{border-color:var(--leaf)} .chain.connected::before{box-shadow:inset 0 0 20px rgba(125,223,143,.06)}
+/* ── the hero number ── the home-chain balance is the page's thesis figure:
+   10px uppercase caption, number 32px+ mobile-first (9.5vw on a phone),
+   full-row on wide grids. CSS-only promotion of the live #v-bal read. */
+#ch-vaulta{grid-column:1/-1}
+#ch-vaulta .cn{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+#ch-vaulta .cn .badge{font-size:9px;margin-left:3px}
+#ch-vaulta .cb{font-size:clamp(34px,9.5vw,46px);line-height:1.15;color:var(--gold)}
 pre{background:#060a08;border:1px solid var(--line);border-radius:8px;padding:11px 13px;font-size:9.5px;
  color:var(--dim);line-height:1.7;white-space:pre-wrap;word-break:break-word;margin-top:10px}
 pre b{color:var(--ink)}
@@ -76,6 +89,17 @@ pre b{color:var(--ink)}
 @media (prefers-reduced-motion: reduce){
  .ring-orbit,.node-breathe,.sig-pulse,.bridge-arc,.breathing,.qr-pulse{animation:none !important}
 }
+/* ── the fold, on a phone ── the form-kill is judged AT THE FOLD: a hero
+   balance below the crease is a hero nobody saw. Mobile only — the
+   balance (with its hero number) and the keychain ring render above
+   CONNECT, so the first three seconds say "here is what this is" before
+   they say "fill this in". Negative order lifts just these two; every
+   other section keeps source order. Desktop unchanged. */
+@media (max-width:700px){
+ main{display:flex;flex-direction:column}
+ section:has(> #chains){order:-2}
+ #kc-sec{order:-1}
+}
 .qr-pulse{animation:qr-pulse-k 2.4s ease-in-out infinite}
 @keyframes qr-pulse-k{0%,100%{opacity:.85}50%{opacity:.25}}
 footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
@@ -84,7 +108,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 <body>
 <main>
 <header>
-  <h1>🗝 the BNR wallet</h1>
+  <h1><span aria-hidden="true">🗝</span> <span class="h1-arg">the BNR wallet</span></h1>
   <p data-reg="bee">One identity, every chain. Your bzDiD is your wallet — connect it once
   and see your balances across all your chains, sign transactions, and hold your keys.
   Nothing leaves your browser.</p>
@@ -527,7 +551,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   <div class="law" id="pay-stat" style="margin-top:6px;min-height:20px">— choose a lane above —</div>
 </section>
 
-<!-- ══ FUND — Meld hosted checkout (zero-backend · public key only) ══ -->
+<!-- ══ FUND — Meld hosted checkout (no server of ours · public key only) ══ -->
 <section id="fund-sec" style="border-color:#4a3a1d" data-meld-public-key="" data-meld-env="sandbox">
   <style>
     #fund-sec .fund-coin{width:26px;height:26px;border-radius:50%;flex:0 0 auto;position:relative;
@@ -551,14 +575,16 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   <h2>💳 FUND — buy USDC, land it on an address you hold</h2>
   <div class="law">The one lane this wallet cannot forge itself: licensed fiat. The buy runs on
   <b>Meld's hosted checkout</b> — it opens in its own tab; this page only builds the link.
-  <b>Zero-backend:</b> no BNR server sits in this lane and nothing is fetched from one — your
-  address rides in the checkout URL (the fiat rail's law) and Meld sees what any checkout sees;
-  this wallet signs nothing and stores nothing. The key in the config below is <b>PUBLIC</b>
+  <b>No server of ours:</b> no BNR endpoint sits in this lane; this wallet signs nothing and
+  stores nothing. Your address rides in the checkout URL (the fiat rail's law) and Meld sees
+  what any checkout sees. The key in the config below is <b>PUBLIC</b>
   (a publishable Checkout key) — a secret key never touches a page, by Meld's law and ours.
   <b>Names welcome:</b> type a <b>.eth name</b> (Basename or ENS-style) and the button resolves
-  it to its raw 0x address on <b>Base's own resolver</b> before anything launches — a public
-  RPC read from your browser, no server of ours — and shows you the hex to confirm first,
-  because the checkout needs raw addresses.</div>
+  it to its raw 0x address on <b>Base's own resolver</b> before anything launches — a keyless
+  read from your browser to <b>public Base RPCs picked at random per lookup</b>, so no single
+  operator profiles who funds what. Honest limit: whichever provider you land on <b>can see
+  the lookup</b> — your IP plus the name you asked about. <b>Pasting a raw 0x address skips
+  resolution entirely</b> — if you'd rather not be seen asking, that is a real choice.</div>
   <noscript><div class="fund-nojs">💳 funding needs JavaScript — this panel builds the checkout
   link in your browser, so with scripting off it stays right here, asleep. Everything else on
   this page renders fine.</div></noscript>
@@ -622,7 +648,17 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
            visitor's browser. No server of ours sits in this path; the read
            fires only when the user asks to resolve a name. */
         var BASE_L2_RESOLVER = '0xC6d566A56A1aFf6508b41f6c90ff131615583BCD'; // PUBLIC-CONSTANT (Base L2Resolver, chain 8453)
-        var BASE_RPC_HOSTS = ['https://mainnet.base.org', 'https://base.publicnode.com'];
+        /* FOUR public endpoints, all verified CORS-open and answering this exact
+           eth_call. The FIRST choice per lookup is UNIFORMLY RANDOM (failover then
+           walks the rest in random order). Founder privacy ruling 2026-08-24: a
+           fixed primary would let one operator learn "this IP is about to fund
+           this basename" — IP plus intent — so no endpoint is privileged. */
+        var BASE_RPC_HOSTS = [
+          'https://mainnet.base.org',
+          'https://base.publicnode.com',
+          'https://1rpc.io/base',
+          'https://base.drpc.org'
+        ];
         function hex(b) { return '0x' + Array.prototype.map.call(b, function (x) { return x.toString(16).padStart(2, '0'); }).join(''); }
         function namehash(name) {
           var k = window.BnrSign && window.BnrSign.keccak_256;
@@ -642,12 +678,17 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
           var data = hex(new Uint8Array(Array.prototype.concat(
             Array.prototype.slice.call(k(new TextEncoder().encode('addr(bytes32)'))).slice(0, 4),
             Array.prototype.slice.call(node))));
+          var order = BASE_RPC_HOSTS.slice();
+          for (var j = order.length - 1; j > 0; j--) { // Fisher–Yates: random first choice, random failover walk
+            var r = Math.floor(Math.random() * (j + 1));
+            var t = order[j]; order[j] = order[r]; order[r] = t;
+          }
           var i = 0;
           function tryHost() {
-            if (i >= BASE_RPC_HOSTS.length) return Promise.resolve(null);
+            if (i >= order.length) return Promise.resolve(null);
             var ctl = new AbortController();
             var t = setTimeout(function () { ctl.abort(); }, 9000);
-            return fetch(BASE_RPC_HOSTS[i++], {
+            return fetch(order[i++], {
               method: 'POST', headers: { 'Content-Type': 'application/json' },
               signal: ctl.signal,
               body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_call',
@@ -706,7 +747,9 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
               ? resolved.name + ' \u2192 ' + resolved.addr + ' (resolved on Base, shown to you before launch — ' +
                 'this buy locks to that hex). Tap the button to open the checkout. [' + BNR_MELD_ENV + ']'
               : a + ' is a name — the checkout needs raw hex, so the button resolves it first via Base\u2019s own ' +
-                'resolver (public RPC, in your browser, no server of ours). Nothing launches until you see the 0x.';
+                'resolver: a keyless read from your browser, no server of ours, but the public RPC you land on ' +
+                'CAN see the lookup (your IP + this name) — paste a raw 0x address instead if you\u2019d rather ' +
+                'skip that entirely. Nothing launches until you see the 0x.';
             return;
           }
           stat.textContent = a
@@ -723,9 +766,17 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
           if (isName(a) && !(resolved && resolved.name === a)) {
             e.preventDefault();            // never launch on an unresolved name
             if (resolving) return;
+            if (!(window.BnrSign && window.BnrSign.keccak_256)) {
+              // the crypto bundle is still loading — NOT a resolution failure;
+              // never blame the name or the RPC for a page that isn't ready
+              note = '<b style="color:var(--amber)">the page\u2019s crypto bundle hasn\u2019t finished ' +
+                'loading yet</b> \u2014 one more tap in a moment and the name resolves. Nothing was sent.';
+              paint();
+              return;
+            }
             resolving = true;
             go.textContent = 'resolving ' + a.split('.')[0] + '\u2026';
-            note = 'resolving ' + a + ' on Base\u2026';
+            note = 'resolving ' + a + ' on Base \u2014 random public RPC; its operator sees this lookup\u2026';
             paint();
             resolveName(a).then(function (hexAddr) {
               resolving = false;
