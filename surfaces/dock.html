@@ -110,7 +110,7 @@ footer a{color:var(--dim,#8a9a8a)}
 <p>Beehive Nature is a <strong>coordination kernel written in Rust</strong> — a small core that knows almost nothing on purpose: identity, settlement, escrow, disputes, reputation, and one canonical event log. Everything specific plugs in around it, so chains enter as adapters and applications as dApps, and swapping the settlement chain underneath does not change the heart. Its first target is private commerce between two strangers who trust neither each other nor a middleman: the payment waits in a Zano escrow that only a Trezor can co-sign to release, disputes are settled on evidence, and standing is earned by acting well rather than bought.</p>
 
 <div class="note warn">
-  <p><strong>Status, without rounding up.</strong> This is a kernel under construction, <em>not</em> a running marketplace. The cryptographic design is source-confirmed, the wire contract is frozen at proto v0.3, and host-side Zano derivation is proven against stock Zano — you can reproduce that yourself in one command, below. <strong>Firmware and legal review are the unstarted work</strong> between here and anything an end user touches.</p>
+  <p><strong>Status, without rounding up.</strong> This is a kernel under construction, <em>not</em> a running marketplace. The cryptographic design is source-confirmed, the wire contract is at proto v0.3 (marked <em>AUTHORITATIVE DRAFT</em> in the file itself, not frozen), and host-side Zano derivation is proven against stock Zano — you can reproduce that yourself in one command, below. <strong>Firmware and legal review are the unstarted work</strong> between here and anything an end user touches.</p>
   <p style="margin-bottom:0">The ledger that never rounds up is <a href="https://github.com/beehive-nature/beehive-nature/blob/main/STATUS.md">STATUS.md</a>. Read it before you believe anything else, including this page.</p>
 </div>
 
@@ -139,7 +139,7 @@ footer a{color:var(--dim,#8a9a8a)}
 <pre><code>git clone https://github.com/beehive-nature/beehive-nature.git
 cd beehive-nature
 cargo test -p chain-zano</code></pre>
-<span class="receipt">Measured on a cold clone with an <em>empty</em> cargo cache: clone <b>2 seconds</b>, then <b>14 seconds</b> to download, compile and run — <b>9 passed, 0 failed, 1 ignored</b>. The ignored test names its own blocker: it needs a <code>(spend_secret&nbsp;→&nbsp;public_key)</code> vector, and a real spend secret is deliberately never committed to this repo.</span>
+<span class="receipt">Measured on a cold clone with an <em>empty</em> cargo cache: clone <b>2 seconds</b>, then <b>14 seconds</b> to download, compile and run — <b>9 passed, 0 failed, 1 ignored</b>. The ignored test names its own blocker in one line: <code>slip0010.rs</code>'s <code>composes_with_keys_module</code> waits on a verified end-to-end <code>(seed&nbsp;→&nbsp;view_public)</code> vector, and no tool currently produces one — that derivation is Trezor/Beehive-specific.</span>
 
 <h3>Before you commit anything</h3>
 <pre><code>git config core.hooksPath .githooks</code></pre>
@@ -147,7 +147,7 @@ cargo test -p chain-zano</code></pre>
 
 <h3>With no toolchain at all</h3>
 <p>The surfaces are static HTML and are live now: <a href="https://beehive-nature.github.io/beehive-nature/surfaces/">beehive-nature.github.io/beehive-nature/surfaces/</a>. Nothing to install, nothing to sign into.</p>
-<span class="receipt">If you want the sharpest single example, open <a href="https://beehive-nature.github.io/beehive-nature/surfaces/recover.html">recover.html</a> and watch your browser's network tab: it rebuilds keys from a recovery phrase and makes <b>zero network requests</b> doing it. That is the house style — a page you can save to disk and still trust in ten years.</span>
+<span class="receipt">The sharpest single example is <a href="https://beehive-nature.github.io/beehive-nature/surfaces/recover.html">recover.html</a>: it rebuilds keys from a recovery phrase <b>in the page itself</b> — no server takes part in the derivation, and the derivation code makes no outbound call. Said plainly rather than oversold: the page still loads the estate's shared <code>tour.js</code>, so the network tab is <em>not</em> empty today, and the page cannot honestly claim zero-network until that load is gone. On a page you hand a recovery phrase to, an external script is a real exfiltration path — so that property is worth restoring, and it is an open item rather than a solved one.</span>
 
 <h2 id="ask">Where to ask a question</h2>
 <ul>
