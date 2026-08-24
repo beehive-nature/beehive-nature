@@ -554,7 +554,11 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   <b>Zero-backend:</b> no BNR server sits in this lane and nothing is fetched from one — your
   address rides in the checkout URL (the fiat rail's law) and Meld sees what any checkout sees;
   this wallet signs nothing and stores nothing. The key in the config below is <b>PUBLIC</b>
-  (a publishable Checkout key) — a secret key never touches a page, by Meld's law and ours.</div>
+  (a publishable Checkout key) — a secret key never touches a page, by Meld's law and ours.
+  <b>Names welcome:</b> type a <b>.eth name</b> (Basename or ENS-style) and the button resolves
+  it to its raw 0x address on <b>Base's own resolver</b> before anything launches — a public
+  RPC read from your browser, no server of ours — and shows you the hex to confirm first,
+  because the checkout needs raw addresses.</div>
   <noscript><div class="fund-nojs">💳 funding needs JavaScript — this panel builds the checkout
   link in your browser, so with scripting off it stays right here, asleep. Everything else on
   this page renders fine.</div></noscript>
@@ -565,7 +569,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
         <option value="USDC_BASE">USDC · Base</option>
         <option value="USDC_ETHEREUM">USDC · Ethereum</option>
       </select>
-      <input id="fund-addr" class="small" placeholder="destination 0x address — optional, locks the buy to it" spellcheck="false" autocomplete="off" style="flex:2;min-width:240px">
+      <input id="fund-addr" class="small" placeholder="destination 0x address or .eth name — optional, locks the buy to it" spellcheck="false" autocomplete="off" style="flex:2;min-width:240px">
       <a id="fund-go" class="fund-launch" href="#" aria-disabled="true" target="_blank" rel="noopener noreferrer">💳 buy USDC — opens Meld</a>
     </div>
     <div class="law" id="fund-stat" style="margin-top:6px;min-height:20px">…</div>
@@ -606,16 +610,75 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
         if (!box || !pick || !addr || !go || !stat) return; // panel markup absent — nothing to wire
         var keyOk = BNR_MELD_PUBLIC_KEY.length > 0;
 
-        function addrOk(v) { return /^0x[0-9a-fA-F]{40}$/.test(v); }
+        /* address forms the field accepts: raw 0x/EVM hex, or a name form
+           (.eth — covers Basenames like name.base.eth). Names are never
+           called invalid: they resolve to hex before launch (below). */
+        function isName(v) { return /^[a-z0-9-]+(\.[a-z0-9-]+)*\.eth$/i.test(v); }
+        function addrOk(v) { return /^0x[0-9a-fA-F]{40}$/.test(v) || isName(v); }
+
+        /* ── name → hex resolution, fully client-side ──────────────────────
+           Base's own L2 resolver (contract from base/basenames README —
+           PUBLIC-CONSTANT), read via eth_call on PUBLIC Base RPCs from the
+           visitor's browser. No server of ours sits in this path; the read
+           fires only when the user asks to resolve a name. */
+        var BASE_L2_RESOLVER = '0xC6d566A56A1aFf6508b41f6c90ff131615583BCD'; // PUBLIC-CONSTANT (Base L2Resolver, chain 8453)
+        var BASE_RPC_HOSTS = ['https://mainnet.base.org', 'https://base.publicnode.com'];
+        function hex(b) { return '0x' + Array.prototype.map.call(b, function (x) { return x.toString(16).padStart(2, '0'); }).join(''); }
+        function namehash(name) {
+          var k = window.BnrSign && window.BnrSign.keccak_256;
+          if (!k) return null;
+          var enc = new TextEncoder();
+          return name.split('.').reverse().reduce(function (node, label) {
+            var lh = new Uint8Array(k(enc.encode(label)));
+            var buf = new Uint8Array(64); buf.set(node); buf.set(lh, 32);
+            return new Uint8Array(k(buf));
+          }, new Uint8Array(32));
+        }
+        function resolveName(name) {
+          var k = window.BnrSign && window.BnrSign.keccak_256;
+          if (!k) return Promise.resolve(null);
+          var node = namehash(name);
+          if (!node) return Promise.resolve(null);
+          var data = hex(new Uint8Array(Array.prototype.concat(
+            Array.prototype.slice.call(k(new TextEncoder().encode('addr(bytes32)'))).slice(0, 4),
+            Array.prototype.slice.call(node))));
+          var i = 0;
+          function tryHost() {
+            if (i >= BASE_RPC_HOSTS.length) return Promise.resolve(null);
+            var ctl = new AbortController();
+            var t = setTimeout(function () { ctl.abort(); }, 9000);
+            return fetch(BASE_RPC_HOSTS[i++], {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              signal: ctl.signal,
+              body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_call',
+                params: [{ to: BASE_L2_RESOLVER, data: data }, 'latest'] })
+            }).then(function (r) { return r.json(); }).then(function (j) {
+              clearTimeout(t);
+              var res = j && j.result || '';
+              var a = /^0x[0-9a-fA-F]{64}$/.test(res) ? '0x' + res.slice(-40).toLowerCase() : null;
+              return (a && /^0x0{40}$/.test(a)) ? null : a; // zero address = no record
+            }).catch(function () { clearTimeout(t); return tryHost(); });
+          }
+          return tryHost();
+        }
+
+        var resolved = null;   // {name, addr} once the user has SEEN the resolved hex
+        var resolving = false;
+        var note = '';         // honest failure text, cleared on any input edit
+        var GO_LABEL = go.textContent;
+
         function buildUrl() {
           var u = new URL(MELD_HOSTS[BNR_MELD_ENV]);
           u.searchParams.set('publicKey', BNR_MELD_PUBLIC_KEY);
           u.searchParams.set('transactionType', 'BUY');
           u.searchParams.set('theme', 'darkMode');
-          /* locked parameters carry the actual value — never "=true" (Meld's field-locking law) */
+          /* locked parameters carry the actual value — never "=true" (Meld's field-locking law).
+             No provider/payment-method param is ever set: the widget routes its own quotes. */
           u.searchParams.set('destinationCurrencyCodeLocked', pick.value);
           var a = addr.value.trim();
-          if (a && addrOk(a)) u.searchParams.set('walletAddressLocked', a);
+          if (a && /^0x[0-9a-fA-F]{40}$/.test(a)) u.searchParams.set('walletAddressLocked', a);
+          else if (a && isName(a) && resolved && resolved.name === a)
+            u.searchParams.set('walletAddressLocked', resolved.addr); // the SEEN, confirmed hex
           return u;
         }
         function paint() {
@@ -630,28 +693,61 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
             return;
           }
           var a = addr.value.trim();
-          if (a && !addrOk(a)) {
-            go.setAttribute('aria-disabled', 'false');
-            go.setAttribute('href', buildUrl().href);
-            stat.innerHTML = '<b style="color:var(--amber)">that does not look like an 0x/EVM address</b> — ' +
-              'USDC on Base and Ethereum takes 0x followed by 40 hex. It is left out of the link until it parses.';
-            return;
-          }
           go.setAttribute('href', buildUrl().href);
           go.setAttribute('aria-disabled', 'false');
+          if (note) { stat.innerHTML = note; return; }
+          if (a && !addrOk(a)) {
+            stat.innerHTML = '<b style="color:var(--amber)">that does not read as an address</b> — ' +
+              'an 0x… hex address, or a name form like name.base.eth. It is left out of the link until it parses.';
+            return;
+          }
+          if (a && isName(a)) {
+            stat.textContent = (resolved && resolved.name === a)
+              ? resolved.name + ' \u2192 ' + resolved.addr + ' (resolved on Base, shown to you before launch — ' +
+                'this buy locks to that hex). Tap the button to open the checkout. [' + BNR_MELD_ENV + ']'
+              : a + ' is a name — the checkout needs raw hex, so the button resolves it first via Base\u2019s own ' +
+                'resolver (public RPC, in your browser, no server of ours). Nothing launches until you see the 0x.';
+            return;
+          }
           stat.textContent = a
-            ? 'destination locked: ' + pick.value + ' \u2192 ' + a.slice(0, 8) + '\u2026' + a.slice(-6) +
-              ' [' + BNR_MELD_ENV + ']. Opens Meld\u2019s hosted checkout in a new tab; this wallet signs and sees nothing.'
+            ? 'destination locked: ' + pick.value + ' \u2192 ' + a + ' [' + BNR_MELD_ENV +
+              ']. Opens Meld\u2019s hosted checkout in a new tab; this wallet signs and sees nothing.'
             : 'destination asset locked: ' + pick.value + ' [' + BNR_MELD_ENV +
               '] — no address typed, the checkout will ask for one.' +
               ' Opens Meld\u2019s hosted checkout in a new tab; this wallet signs and sees nothing.';
         }
         go.addEventListener('click', function (e) {
           var href = go.getAttribute('href');
-          if (!keyOk || !href || href === '#') e.preventDefault(); // asleep stays asleep
+          if (!keyOk || !href || href === '#') { e.preventDefault(); return; } // asleep stays asleep
+          var a = addr.value.trim();
+          if (isName(a) && !(resolved && resolved.name === a)) {
+            e.preventDefault();            // never launch on an unresolved name
+            if (resolving) return;
+            resolving = true;
+            go.textContent = 'resolving ' + a.split('.')[0] + '\u2026';
+            note = 'resolving ' + a + ' on Base\u2026';
+            paint();
+            resolveName(a).then(function (hexAddr) {
+              resolving = false;
+              go.textContent = GO_LABEL;
+              if (hexAddr) {
+                resolved = { name: a, addr: hexAddr };
+                go.textContent = '\u2713 resolved \u2014 buy USDC';
+                note = '';
+              } else {
+                note = '<b style="color:var(--amber)">' + a + ' could not be resolved right now.</b> ' +
+                  'Either the name has no address record on Base\u2019s resolver (mainnet-ENS-only names ' +
+                  'don\u2019t live there) or the public RPC is unreachable. Nothing was sent. Your raw 0x ' +
+                  'address is in \ud83d\udce5 receive above \u2014 paste that and the buy proceeds without resolution.';
+              }
+              paint();
+            });
+          }
         });
         pick.addEventListener('change', paint);
-        addr.addEventListener('input', paint);
+        addr.addEventListener('input', function () {
+          resolved = null; note = ''; go.textContent = GO_LABEL; paint();
+        });
         box.hidden = false; // scripting is on — reveal the panel body
         paint();
       } catch (err) {

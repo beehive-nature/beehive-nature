@@ -56,6 +56,14 @@ const assertUrl = (href, host, asset) => {
   ok(`  theme=darkMode`, u.searchParams.get('theme') === 'darkMode');
   ok(`  destinationCurrencyCodeLocked=${asset}`, u.searchParams.get('destinationCurrencyCodeLocked') === asset);
   ok(`  no "=true" param anywhere`, ![...u.searchParams.keys()].some(k => /^(true|1)$/.test(u.searchParams.get(k))));
+  // Finding B — quote routing: NO provider pinning, ever. The exact param key
+  // set is asserted, so any future serviceProviders/paymentMethodType/provider
+  // param fails here loudly (the widget must route its own quotes).
+  const keys = new Set(u.searchParams.keys());
+  const allowed = new Set(['publicKey', 'transactionType', 'theme', 'destinationCurrencyCodeLocked']);
+  if (keys.has('walletAddressLocked')) allowed.add('walletAddressLocked');
+  ok('  no provider pinning (exact param key set)', keys.size === allowed.size &&
+    [...keys].every(k => allowed.has(k)), [...keys].join(','));
   return u;
 };
 
@@ -109,10 +117,70 @@ try {
     await page.fill('#fund-addr', ADDR);
     u = assertUrl(await goHref(page), 'sb.meldcrypto.com', 'USDC_ETHEREUM');
     ok('walletAddressLocked carries the address', u.searchParams.get('walletAddressLocked') === ADDR);
-    await page.fill('#fund-addr', '0x123'); // invalid — must be omitted, never silently wrong
+    await page.fill('#fund-addr', '0x123'); // garbage — must be omitted, never silently wrong
     u = assertUrl(await goHref(page), 'sb.meldcrypto.com', 'USDC_ETHEREUM');
     ok('invalid address left out of URL', !u.searchParams.has('walletAddressLocked'));
-    ok('invalid address gets a visible note', (await page.locator('#fund-stat').innerText()).includes('0x/EVM address'));
+    ok('invalid address gets a visible note', (await page.locator('#fund-stat').innerText()).includes('does not read as an address'));
+    await ctx.close();
+  }
+
+  /* ── E · name-form (.eth) input: resolve-then-confirm, honest failure ── */
+  console.log('E · Basename input (Base RPC mocked, deterministic):');
+  const MOCK = 'fbd201472d5a439f1f0e408eb5dfaf6ea3687876'; // live-resolved hex of the probe below
+  {
+    let rpcHits = 0;
+    const ctx = await armedContext(browser);
+    await ctx.route('**mainnet.base.org*', async route => {
+      rpcHits++;
+      await route.fulfill({ contentType: 'application/json',
+        body: JSON.stringify({ jsonrpc: '2.0', id: 1,
+          result: '0x' + '0'.repeat(24) + MOCK }) });
+    });
+    await ctx.route('**base.publicnode.com*', async route => {
+      rpcHits++;
+      await route.fulfill({ contentType: 'application/json',
+        body: JSON.stringify({ jsonrpc: '2.0', id: 1,
+          result: '0x' + '0'.repeat(24) + MOCK }) });
+    });
+    const page = await ctx.newPage();
+    await page.goto('http://127.0.0.1:8891' + URL_, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(600);
+    await page.fill('#fund-addr', 'bloverai.base.eth');
+    await page.waitForTimeout(250);
+    ok('name never called invalid', !(await page.locator('#fund-stat').innerText()).includes('does not read'));
+    ok('no RPC read until the user asks (zero-backend)', rpcHits === 0, `hits=${rpcHits}`);
+    let u = assertUrl(await goHref(page), 'sb.meldcrypto.com', 'USDC_BASE');
+    ok('unresolved name kept out of URL', !u.searchParams.has('walletAddressLocked'));
+    await page.locator('#fund-go').click(); // first tap = resolve + show, never launch
+    await page.waitForFunction(() => document.getElementById('fund-stat').textContent.includes('0xfbd2'), null, { timeout: 5000 });
+    ok('resolved hex SHOWN to the user before launch',
+      (await page.locator('#fund-stat').innerText()).includes('0x' + MOCK));
+    u = assertUrl(await goHref(page), 'sb.meldcrypto.com', 'USDC_BASE');
+    ok('URL locks the resolved hex (not the name)', u.searchParams.get('walletAddressLocked') === '0x' + MOCK);
+    await page.fill('#fund-addr', 'x'); // any edit resets the confirmation
+    u = assertUrl(await goHref(page), 'sb.meldcrypto.com', 'USDC_BASE');
+    ok('editing the field resets the resolved lock', !u.searchParams.has('walletAddressLocked'));
+    await ctx.close();
+  }
+  console.log('E2 · unresolvable name (honest failure, no blame):');
+  {
+    const ctx = await armedContext(browser);
+    await ctx.route('**mainnet.base.org*', async route => {
+      await route.fulfill({ contentType: 'application/json',
+        body: JSON.stringify({ jsonrpc: '2.0', id: 1, result: '0x' + '00'.repeat(32) }) }); // zero = no record
+    });
+    const page = await ctx.newPage();
+    await page.goto('http://127.0.0.1:8891' + URL_, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(600);
+    await page.fill('#fund-addr', 'not-a-base-name.eth');
+    await page.locator('#fund-go').click();
+    await page.waitForFunction(() => document.getElementById('fund-stat').textContent.includes('could not be resolved'), null, { timeout: 5000 });
+    const msg = await page.locator('#fund-stat').innerText();
+    ok('failure says the NAME could not be resolved (not "invalid")',
+      msg.includes('could not be resolved') && !msg.includes('does not read'));
+    ok('failure points to the raw-address fallback', msg.includes('receive'));
+    const u = new URL(await goHref(page));
+    ok('nothing launched on failure', !u.searchParams.has('walletAddressLocked'));
     await ctx.close();
   }
 
