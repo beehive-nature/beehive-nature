@@ -8,51 +8,76 @@
 <meta name="color-scheme" content="dark">
 <title>the Autonomi builders dev room — the pre-wiki stage</title>
 <style>
-:root{--bg:#0d1410;--ink:#e2efdb;--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--dim:#8a9a8a;--line:#243026;--leaf:#7ddf8f;--amber:#ffb347}
+/* ── SEMANTIC COLOUR · meanings picked FIRST, one hue = one meaning, page-wide ──
+   harm/defect/gap ……… #ffb347  amber   (what's missing, what bites)
+   solution/fix/verdict… #7ddf8f  leaf    (the pass, the fix, the working thing)
+   value/thesis/finder … #FFD700  gold    (the articles, the people, the stakes)
+   system/rail/navigation #00E5FF cyan    (links, pipeline cells, structure)
+   science/verify/gate … #c9a0ff  violet  (the verification layer, the Sophia gate)
+   Never reused for looks. The h1 gradient encodes the page thesis:
+   findings(gold) → articles(cyan) → the gate(violet). */
+:root{--bg:#070c08;--ink:#e2efdb;--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--dim:#8a9a8a;--line:#243026;--leaf:#7ddf8f;--amber:#ffb347;
+--sem-harm:#ffb347;--sem-solution:#7ddf8f;--sem-value:#FFD700;--sem-system:#00E5FF;--sem-science:#c9a0ff}
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:36px 16px 90px}
 header{text-align:center;margin-bottom:10px}
-h1{font-size:clamp(17px,4vw,24px);color:var(--cyan);font-weight:400;letter-spacing:.05em}
+/* DEPTH LADDER step 1 = body void · step 2 = section panel · step 3 = inset wells (.art/.pstat/pre/#pipe) */
+h1{font-size:clamp(18px,4.2vw,26px);font-weight:400;letter-spacing:.05em;
+  background:linear-gradient(90deg,var(--sem-value) 0%,var(--sem-system) 55%,var(--sem-science) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
 header p{color:var(--dim);font-size:11px;margin-top:6px;max-width:740px;margin-left:auto;margin-right:auto}
 main{max-width:900px;margin:0 auto}
-section{background:#111a14;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:16px}
-section h2{font-size:12px;color:var(--violet);font-weight:400;letter-spacing:.08em;margin-bottom:8px}
+section{background:#111a14;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-top:16px}
+section h2{font-size:12px;color:var(--sem-science);font-weight:400;letter-spacing:.08em;margin-bottom:8px}
 .law{color:var(--dim);font-size:10px;line-height:1.7}
 .law b{color:var(--ink)}
-a{color:var(--cyan)}
-.badge{display:inline-block;font-size:9px;letter-spacing:.1em;border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--gold)}
-.badge.leaf{color:var(--leaf);border-color:#2b4a34}
-.badge.amber{color:var(--amber);border-color:#5a4310}
-#pipe{width:100%;height:190px;display:block;background:#0a0f0b;border:1px solid var(--line);border-radius:8px}
+a{color:var(--sem-system)}
+.badge{display:inline-block;font-size:9px;letter-spacing:.1em;border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--dim)}
+.badge.leaf{color:var(--sem-solution);border-color:#2b4a34}
+.badge.amber{color:var(--sem-harm);border-color:#5a4310}
+#pipe{width:100%;height:190px;display:block;background:#0a0f0b;border:1px solid var(--line);border-radius:10px}
 .pstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:10px}
-.pstat{background:#0a0f0b;border:1px solid var(--line);border-radius:8px;padding:8px 10px;text-align:center}
-.pstat .n{font-size:20px;color:var(--cyan)}
+.pstat{background:#0a0f0b;border:1px solid var(--line);border-radius:10px;padding:10px 12px;text-align:center}
+.pstat .n{font-size:20px;color:var(--sem-system)}
 .pstat .l{font-size:9px;color:var(--dim);letter-spacing:.08em;margin-top:2px}
-.art{background:#0a0f0b;border:1px solid var(--line);border-radius:9px;padding:12px 14px;margin-top:12px}
-.art h3{font-size:13px;color:var(--gold);font-weight:400;line-height:1.5}
+/* HERO NUMBER — the room's thesis in three seconds: nothing has left */
+.pstat.hero{border-color:#2b4a34;background:linear-gradient(180deg,#0d1a10 0%,#0a0f0b 100%)}
+.pstat.hero .n{font-size:38px;color:var(--sem-solution);line-height:1.1}
+.pstat.hero .l{font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--sem-harm)}
+.art{background:#0a0f0b;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-top:12px}
+.art h3{font-size:13px;color:var(--sem-value);font-weight:400;line-height:1.5}
 .art .sym{color:var(--ink);font-size:12px;margin-top:6px;line-height:1.6}
 .art .meta{font-size:9.5px;color:var(--dim);margin-top:6px;line-height:1.8}
 .art .chips{margin-top:8px}
-.art .chips span{display:inline-block;font-size:9px;border:1px solid var(--line);border-radius:4px;padding:1px 6px;margin:2px 4px 0 0;color:var(--amber)}
+.art .chips span{display:inline-block;font-size:9px;border:1px solid #5a4310;border-radius:4px;padding:1px 6px;margin:2px 4px 0 0;color:var(--sem-harm)}
 details{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
-summary{cursor:pointer;font-size:10.5px;color:var(--cyan);letter-spacing:.05em;user-select:none}
-summary:hover{color:var(--gold)}
+summary{cursor:pointer;font-size:10.5px;color:var(--sem-system);letter-spacing:.05em;user-select:none}
+summary:hover{color:var(--sem-value)}
 .art-body{font-size:11px;color:var(--dim);line-height:1.75;margin-top:10px}
 .art-body h4{font-size:11.5px;color:var(--ink);font-weight:400;margin:14px 0 4px}
-.art-body pre{background:#070b08;border:1px solid var(--line);border-radius:6px;padding:8px 10px;margin:6px 0;overflow-x:auto;font-size:10.5px;line-height:1.6}
-.art-body code{color:var(--leaf)}
+.art-body pre{background:#070b08;border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:6px 0;overflow-x:auto;font-size:10.5px;line-height:1.6}
+.art-body code{color:var(--sem-solution)}
 .art-body ul{margin:4px 0 4px 18px}
 .art-body li{margin:2px 0}
-.finder{display:grid;grid-template-columns:110px 1fr;gap:10px;background:#0a0f0b;border:1px solid var(--line);border-radius:9px;padding:10px 12px;margin-top:8px}
-.finder .who{color:var(--gold);font-size:11px;word-break:break-all}
+.finder{display:grid;grid-template-columns:110px 1fr;gap:10px;background:#0a0f0b;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:8px}
+.finder .who{color:var(--sem-value);font-size:11px;word-break:break-all}
 .finder .what{color:var(--dim);font-size:10.5px;line-height:1.7}
 .finder .what b{color:var(--ink)}
+.tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
 table{width:100%;border-collapse:collapse;margin-top:8px;font-size:10.5px}
 td,th{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;color:var(--dim);vertical-align:top}
-th{color:var(--violet);font-weight:400} td.n{color:var(--ink)}
-.never{border:1px dashed #3d3410;background:#141207;border-radius:8px;padding:9px 12px;font-size:10.5px;color:var(--gold);line-height:1.7;margin-top:10px}
+th{color:var(--sem-science);font-weight:400} td.n{color:var(--ink)}
+.never{border:1px dashed #5a4310;background:#141207;border-radius:10px;padding:11px 14px;font-size:10.5px;color:var(--sem-value);line-height:1.7;margin-top:10px}
 footer{max-width:900px;margin:22px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
-@media(max-width:560px){.finder{grid-template-columns:1fr;gap:2px}}
+/* MOBILE — the one place we beat the fleet: hold up on a phone */
+@media(max-width:560px){
+  body{padding:22px 10px 90px}
+  section{padding:13px 12px;border-radius:10px}
+  .pstats{grid-template-columns:repeat(2,1fr)}
+  .finder{grid-template-columns:1fr;gap:2px}
+  .art-body pre{font-size:10px}
+  #pipe{height:150px}
+}
 @media(prefers-reduced-motion:reduce){#pipe{animation:none}}
 </style>
 </head>
@@ -70,10 +95,10 @@ footer{max-width:900px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   <h2>0 · THE PIPELINE — where everything stands</h2>
   <canvas id="pipe" width="860" height="190" aria-label="animated pipeline: findings flow as honeycomb cells through drafted, cited, and the Sophia gate"></canvas>
   <div class="pstats">
+    <div class="pstat hero"><div class="n" id="s-sub">0</div><div class="l">submitted — nothing leaves the room</div></div>
     <div class="pstat"><div class="n" id="s-find">4</div><div class="l">FINDINGS · credited</div></div>
     <div class="pstat"><div class="n" id="s-draft">3</div><div class="l">ARTICLES · drafted</div></div>
     <div class="pstat"><div class="n" id="s-cite">0</div><div class="l">CITATIONS · iq.wiki-grade</div></div>
-    <div class="pstat"><div class="n" id="s-sub">0</div><div class="l">SUBMITTED · anywhere</div></div>
   </div>
   <div class="law" style="margin-top:8px">the counts are hand-synced with the articles below — this page never
   queries a network, and the numbers say <b>0 submitted</b> because nothing has been: the Sophia gate is
@@ -280,14 +305,14 @@ W@tch findings by <b>aautonomicc</b>); this article is the write-up of their fin
 
 <section>
   <h2>3 · THE SOPHIA GATE — what iq.wiki requires, and the fork we're standing at</h2>
-  <table>
+  <div class="tablewrap"><table>
     <tr><th>requirement (their words)</th><th>our state</th></tr>
     <tr><td class="n">"Subject must be meaningfully connected to crypto"</td><td>as-written, our articles are generic Linux diagnostics — <b style="color:var(--amber)">out of scope</b>. the honest bridge: these are the failure modes of running <i>node software</i> on ARM64 Linux. a reframe, founder's word.</td></tr>
     <tr><td class="n">"Every claim needs a citation" — official docs, primary sources, reputable publications</td><td>the big lift: ~3–5 pasted-text citations per article (kernel docs, man pages, upstream chunking docs). community credit stays as attribution — it is <b>not</b> their evidence register.</td></tr>
     <tr><td class="n">submission = a human pastes into the Sophia chat</td><td>Sophia "gathers the proposal, runs it against the editorial standards, and routes it to the editorial team"; decisions within days; accepted wikis signed on-chain on Polygon. our estate's composer for this lane: <a href="biq.html">the bIQ Composer</a> — third person, citation on every sentence, tone-checked; <b>the page never posts.</b></td></tr>
     <tr><td class="n">tone: "educational value over hype or opinion"</td><td>already compliant — and article ②'s VA_BITS fence (procedure, never cause) exceeds their neutrality bar.</td></tr>
     <tr><td class="n">no plagiarism, accurate, current</td><td>kernel-behaviour claims must be pinned to a kernel-docs version and re-checked at submission time.</td></tr>
-  </table>
+  </table></div>
   <div class="never">⚖ <b>the fork, named:</b> (a) submit the three as node-operator-framed articles —
   scope-eligible, needs the reframe + citation pass; or (b) keep them here on the estate where no
   scope rule applies, and reference them from iq.wiki articles that <i>do</i> meet scope. full brief with
