@@ -13,17 +13,89 @@
 // D4 HERO NUMBER       one figure at ≥32px with a ≤11px UPPERCASE caption beside it
 // D5 DENSITY WITH AIR  body type ≤14px AND panel radius ≥10px AND panel padding ≥12px
 // M  MOBILE            viewport meta + a ≤600px media query + no horizontal overflow at 375px
-// I1 INSTANT · zero cross-origin requests at load — single file, no bundle; we
-//    finish before their splash screen. same-origin estate riders (tour.js and
-//    its register/lang/rails-badge companions) are allowed.
+// I1 INSTANT · ALL subresources counted — same-origin is NEVER a free pass
+//    (tour.js is same-origin and injects three more scripts; that's how a
+//    seed page once claimed nothing loads while loading four things).
+//    Cross-origin = FAIL. Same-origin = itemized against the estate rider
+//    allowlist; anything outside it = FAIL. The count and KB print either way.
 // I2 INSTANT · first contentful paint < 1000ms, the number PRINTED in the
 //    output — the standing order says measure it, not claim it.
+//    THE METHOD (pinned 2026-08-24, `--measure`): localhost http · cold
+//    context per run · real Chromium · FCP read after the paint entry is
+//    queryable · request count and KB alongside · five runs, table printed.
+//    file:// numbers are NOT comparable and go on record only as divergence.
 // F  FORM KILL — human-judged, printed as the gate's last word: if a stranger's
 //    first impression is "fill this in" rather than "here is what this is,"
 //    the surface fails no matter how green every check above is.
 import { chromium } from 'playwright';
 import { readFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { resolve, dirname, join } from 'node:path';
+import { createServer } from 'node:http';
+import { fileURLToPath } from 'node:url';
+
+/* the estate's sanctioned riders — the tbar session and its companions plus
+   static assets every surface may reference. ANYTHING else that loads at
+   page-open, same-origin or not, is a dependency the surface must argue for
+   in the open — the gate will not wave it through. */
+const RIDER_ALLOWLIST = [
+  /\/tour\.js/, /\/register\.js/, /\/lang\.js/, /\/rails-badge\.js/,
+  /\/agent-dock\.js/,
+  /\/manifest\.webmanifest/, /\/bn-logo\.(jpg|png)/, /\/icon-180\.png/,
+  /\.(json|css)(\?|$)/
+];
+
+const MEASURE = process.argv.includes('--measure');
+const RUNS = 5;
+
+async function serveRoot() {
+  const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+  const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml' };
+  const { readFile: rd } = await import('node:fs/promises');
+  const srv = createServer(async (req, res) => {
+    try {
+      const rel = decodeURIComponent(req.url.split('?')[0]).replace(/^\//, '');
+      const p = join(ROOT, rel);
+      const body = await rd(p);
+      res.writeHead(200, { 'content-type': MIME[(p.match(/\.[a-z0-9]+$/) || [])[0]] || 'application/octet-stream', 'cache-control': 'no-store' });
+      res.end(body);
+    } catch { res.writeHead(404); res.end('nf'); }
+  });
+  await new Promise(r => srv.listen(0, '127.0.0.1', r));
+  return { srv, base: `http://127.0.0.1:${srv.address().port}` };
+}
+
+if (MEASURE) {
+  const files = process.argv.slice(2).filter(a => !a.startsWith('--'));
+  const { srv, base } = await serveRoot();
+  const browser = await chromium.launch();
+  for (const rel of files) {
+    const url = base + '/' + rel.replace(/\\/g, '/').replace(/^\.\.\//, '');
+    console.log(`\n### THE METHOD · ${rel} · localhost http · cold context · real Chromium · ${RUNS} runs`);
+    const rows = [];
+    for (let i = 0; i < RUNS; i++) {
+      const ctx = await browser.newContext(); // COLD — nothing warm, nothing cached
+      const pg = await ctx.newPage();
+      const reqs = [];
+      const sizes = [];
+      pg.on('request', r => { if (r.resourceType() !== 'document') reqs.push(r.url().split('/').pop()); });
+      pg.on('response', async r => { try { sizes.push((await r.body()).length); } catch {} });
+      await pg.goto(url, { waitUntil: 'commit' });
+      // FCP read only after the paint entry is queryable — poll until it exists
+      const fcp = await pg.waitForFunction(() =>
+        performance.getEntriesByType('paint').some(e => e.name === 'first-contentful-paint'),
+        null, { timeout: 10000 }).then(() =>
+        pg.evaluate(() => Math.round(performance.getEntriesByType('paint').find(e => e.name === 'first-contentful-paint').startTime))).catch(() => null);
+      rows.push({ run: i + 1, fcp, n: reqs.length, riders: reqs.join(','), kb: (sizes.reduce((a, b) => a + b, 0) / 1024).toFixed(1) });
+      await ctx.close();
+    }
+    rows.forEach(r => console.log(`  run ${r.run} · FCP ${r.fcp === null ? 'unmeasured' : r.fcp + 'ms'} · ${r.n} requests · ${r.kb} KB · riders: ${r.riders || 'none'}`));
+    const fcps = rows.map(r => r.fcp).filter(v => v !== null).sort((a, b) => a - b);
+    if (fcps.length) console.log(`  median FCP ${fcps[Math.floor(fcps.length / 2)]}ms · requests ${rows[0].n} · ${rows[0].kb} KB — THE number for the report`);
+  }
+  await browser.close(); srv.close();
+  process.exit(0);
+}
+
 
 const targets = process.argv.slice(2).length ? process.argv.slice(2) : ['surfaces/devroom.html'];
 const browser = await chromium.launch();
@@ -109,18 +181,31 @@ for (const rel of targets) {
   ok('M headline shrinks on phone', parseFloat(m.h1) < h1Big, `phone=${m.h1} desktop=${h1Big}px`);
   await mob.close();
 
-  // I1/I2 — INSTANT: nothing cross-origin, first paint measured and printed
-  const crossOrigin = [];
-  page.on('request', r => { try { if (new URL(r.url()).host !== new URL(page.url()).host) crossOrigin.push(r.url()); } catch {} });
+  // I1/I2 — INSTANT: ALL subresources counted; same-origin is never a free pass
+  const subs = [], sizes = [];
+  page.on('request', r => { if (r.resourceType() !== 'document') subs.push(r.url()); });
+  page.on('response', async r => { try { sizes.push((await r.body()).length); } catch {} });
   await page.reload({ waitUntil: 'load' });
   await page.waitForTimeout(300);
-  ok('I1 zero cross-origin requests at load', crossOrigin.length === 0, crossOrigin.slice(0, 3).join(' | '));
+  let pageHost = ''; try { pageHost = new URL(page.url()).host; } catch {}
+  const cross = [], riders = [], unknown = [];
+  for (const u of subs) {
+    let host = ''; try { host = new URL(u).host; } catch {}
+    if (host && pageHost && host !== pageHost) cross.push(u);
+    else if (RIDER_ALLOWLIST.some(re => re.test(u))) riders.push(u.split('/').pop());
+    else unknown.push(u);
+  }
+  const kb = (sizes.reduce((a, b) => a + b, 0) / 1024).toFixed(1);
+  ok('I1 all subresources counted · zero cross-origin, zero outside the rider allowlist',
+    cross.length === 0 && unknown.length === 0,
+    `cross-origin: ${cross.slice(0, 3).join(' | ') || 'none'} · outside-allowlist: ${unknown.slice(0, 3).join(' | ') || 'none'}`);
+  console.log(`  INSTANT · ${subs.length} subresource request(s) · ${kb} KB · riders: ${riders.join(', ') || 'none'} — same-origin riders are COUNTED, never waved through`);
   const fcp = await page.evaluate(() => {
     const p = performance.getEntriesByType('paint').find(e => e.name === 'first-contentful-paint');
     return p ? Math.round(p.startTime) : null;
   });
   ok('I2 first contentful paint < 1000ms', fcp !== null && fcp < 1000, `FCP=${fcp === null ? 'unmeasured' : fcp + 'ms'} (report the number, never just the pass)`);
-  console.log(`  INSTANT · first contentful paint = ${fcp === null ? 'unmeasured' : fcp + 'ms'} — the number belongs in the report`);
+  console.log(`  INSTANT · first contentful paint = ${fcp === null ? 'unmeasured' : fcp + 'ms'} — file:// number; THE METHOD number is --measure's localhost http table`);
   console.log('  F  FORM KILL — human-judged, not scored: first impression must be "here is what this is," never "fill this in."');
   await page.close();
 }

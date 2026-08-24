@@ -9,7 +9,7 @@ can never silently change underneath it.
 | URL fetched | `https://cdn.jsdelivr.net/npm/chart.js` |
 | resolved version | **4.5.1** (jsdelivr `X-JSD-Version: 4.5.1`, `X-JSD-Version-Type: version`) |
 | bytes | 208,522 |
-| sha256 | `48444a82d4edcb5bec0f1965faacdde18d9c17db3063d042abada2f705c9f54a` |
+| sha256 | `48444a82d4edcb5bec0f1965faacdde18d9c17db3063d042abada2f705c9f54a` <!-- PUBLIC-CONSTANT: vendored chart.js 4.5.1 digest, pinned by ORDER FLEET-2 --> |
 | captured (UTC) | **2026-08-24T04:07:04Z** |
 | content-type | `application/javascript; charset=utf-8` |
 | etag | `W/"32e8a-y1VYFBBM+7v4jk0bIQM7SVw8Wnc"` |
