@@ -270,7 +270,17 @@ ok('hub links the university', (await page.locator('a[href="university/index.htm
 await page.goto(`${BASE}/surfaces/review.html`);
 const optCount = await page.locator('#surf option').count();
 const hasUni = (await page.locator('#surf option[value="university/index.html"]').count()) === 1;
-ok('review deck lists the university surface', optCount === 58 && hasUni);
+{
+  // The deck's coverage is CHECKED AGAINST THE TREE, never against a literal.
+  // It asserted `optCount === 58` — a number copied from review.html's own
+  // SURFACES array, so it certified the array's length against itself and could
+  // not see the array being INCOMPLETE. It was: devroom.html, dock.html and
+  // forge/huddle.html were missing while the suite reported green.
+  const onDisk = await countSurfacesOnDisk();
+  ok(`review deck covers every surface (${onDisk}) and lists the university`,
+     optCount === onDisk && hasUni,
+     `deck lists ${optCount}, tree holds ${onDisk}, hasUni=${hasUni}`);
+}
 
 console.log(`\n${pass} passed, ${fail} failed` + (errors.length ? '\nerrors:\n' + errors.join('\n') : ''));
 await browser.close(); server.close();
