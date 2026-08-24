@@ -1,9 +1,11 @@
 #!/bin/sh
 # identity-check.sh — §7 identity check on the PUSHED range.
 #
-# THIS SCRIPT IS THE ENFORCEMENT POINT: CI runs it on every push. The local
-# pre-commit hook is ADVISORY ONLY and must never be called "enforced" on its
-# own — a seat that skips core.hooksPath sees no local check at all.
+# STATUS: DETECTED, NOT ENFORCED. Actions on push run AFTER the commits reach
+# origin — a violation is already public when this step goes red. Prevention
+# needs branch protection + PR-only merges; that is the founder's call. The
+# local pre-commit hook is ADVISORY ONLY and must never be called "enforced"
+# on its own — a seat that skips core.hooksPath sees no local check at all.
 #
 # §7 shape: the AUTHOR of every commit is the founder (env-only: seats export
 # GIT_AUTHOR_NAME/EMAIL as the founder). A seat self-identifies by exporting
