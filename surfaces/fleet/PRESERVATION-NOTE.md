@@ -15,5 +15,13 @@ flagged the discrepancy in its report and commit body. This note exists so the
 record is correct without rewriting merged history: `482412f` stands as merged
 (by `28c1444`, gate-seat pass); only its subject line was imprecise.
 
-Recorded 2026-08-24, founder-ordered follow-up. This file is the only
-post-merge addition to this directory; the art above is untouched.
+Recorded 2026-08-24, founder-ordered follow-up. The art above is untouched — all
+nine surfaces re-verified byte-identical to their originals at each gate.
+
+**Superseded on the count by `PRESERVATION-COUNT.md`,** landed alongside it in the
+same directory, which carries the fuller arithmetic (the 25-vs-26 correction and
+zA's independent recount). This file's earlier claim to be "the only post-merge
+addition to this directory" is no longer true and is withdrawn rather than left
+standing: the directory also holds `PRESERVATION-COUNT.md`, `lab/README.md`,
+`gallery/README.md`, and `vendor/` (the chart.js byte-record). Two notes on one
+subject is one too many — read COUNT for the number, this file for the history.
