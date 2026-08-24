@@ -305,40 +305,69 @@ mod tests {
     }
 
     #[test]
-    fn determinism_same_tree_twice_is_byte_identical() {
-        let root = fixture_dir("determinism");
-        // Created deliberately out of sorted order: packing must not ride
-        // filesystem order.
-        write_record(
-            &root,
-            "zeta/2026-08-23T01.rec",
-            b"zz created first, sorts last",
-        );
-        write_record(&root, "alpha.txt", b"created second, sorts first");
-        write_record(&root, "nested/deep/omega.rec", &[7u8; 40]);
-        write_record(&root, "m.mid", b"m");
-
-        let run1 = build_batches(&root, 48).unwrap();
-        let run2 = build_batches(&root, 48).unwrap();
-
-        assert_eq!(run1.batches.len(), run2.batches.len());
-        for (b1, b2) in run1.batches.iter().zip(&run2.batches) {
-            assert_eq!(b1.seq, b2.seq);
-            assert_eq!(b1.packed, b2.packed, "packed bytes must be byte-identical");
-            assert_eq!(b1.sha256, b2.sha256);
+    fn determinism_is_independent_of_directory_and_creation_order() {
+        // The same logical tree, built in TWO different directories with
+        // opposite creation orders. Names are mixed-case on purpose: NTFS
+        // readdir collates case-insensitively (alpha < Beta < m < Zulu)
+        // while our sort is byte order (Beta < Zulu < alpha < m), so the
+        // pinned expected order below has teeth on BOTH filesystems —
+        // deleting the sort fails it on ext4 (hash order) and on NTFS
+        // (collation order) alike.
+        let records: &[(&str, &[u8])] = &[
+            ("alpha.rec", b"twelve byte"),
+            ("Beta/notes.rec", b"twelve byte"),
+            ("Zulu/first.rec", &[9u8; 20]),
+            ("m.mid", b"m"),
+        ];
+        let root_a = fixture_dir("determinism-a");
+        for (rel, bytes) in records {
+            write_record(&root_a, rel, bytes);
         }
-        assert_eq!(run1.manifest, run2.manifest);
+        let root_b = fixture_dir("determinism-b");
+        for (rel, bytes) in records.iter().rev() {
+            write_record(&root_b, rel, bytes);
+        }
+
+        let run_a = build_batches(&root_a, 30).unwrap();
+        let run_b = build_batches(&root_b, 30).unwrap();
+
+        // Byte-sorted member order is pinned, not just consistent: this is
+        // the assertion that breaks if the sort is ever deleted.
+        let names: Vec<Vec<&str>> = run_a
+            .batches
+            .iter()
+            .map(|b| b.members.iter().map(|m| m.name.as_str()).collect())
+            .collect();
         assert_eq!(
-            serde_json::to_string(&run1.manifest).unwrap(),
-            serde_json::to_string(&run2.manifest).unwrap(),
-            "serialized manifests must be identical"
+            names,
+            vec![
+                vec!["Beta/notes.rec"],
+                vec!["Zulu/first.rec"],
+                vec!["alpha.rec", "m.mid"],
+            ],
+            "member order must be byte-sorted, not readdir order"
         );
 
-        // Sorted-name order proof: the first member of the first batch is
-        // the alphabetically-first name, not the first-created file.
-        assert_eq!(run1.batches[0].members[0].name, "alpha.txt");
+        // Identical runs across the two trees — batches, digests, packed
+        // bytes, and manifest, struct and serialized.
+        assert_eq!(
+            run_a, run_b,
+            "identical logical trees must produce identical runs"
+        );
+        assert_eq!(
+            serde_json::to_string(&run_a.manifest).unwrap(),
+            serde_json::to_string(&run_b.manifest).unwrap(),
+            "serialized manifests must be identical across trees"
+        );
+        for (ba, bb) in run_a.batches.iter().zip(&run_b.batches) {
+            assert_eq!(
+                ba.packed, bb.packed,
+                "packed bytes must be byte-identical across trees"
+            );
+        }
 
-        fs::remove_dir_all(&root).unwrap();
+        fs::remove_dir_all(&root_a).unwrap();
+        fs::remove_dir_all(&root_b).unwrap();
     }
 
     #[test]
