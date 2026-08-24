@@ -1,10 +1,25 @@
 // ad-hoc smoke for surfaces/university/index.html — not part of the committed suite
 import { createServer } from 'node:http';
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import { extname, join } from 'node:path';
 import { chromium } from 'playwright';
 
 const ROOT = process.cwd().replace(/e2e$/, '');
+
+// Counts the estate's surfaces on disk: every .html under surfaces/, EXCLUDING
+// surfaces/fleet/ — preserved founder art, deliberately unlinked and never counted
+// as ours (when its nine files landed, the footer did not move). This is the
+// definition the footer claim is checked against.
+async function countSurfacesOnDisk(dir = join(ROOT, 'surfaces')) {
+  let n = 0;
+  for (const e of await readdir(dir, { withFileTypes: true })) {
+    if (e.isDirectory() && e.name === 'fleet') continue;
+    const p = join(dir, e.name);
+    if (e.isDirectory()) n += await countSurfacesOnDisk(p);
+    else if (extname(e.name) === '.html') n++;
+  }
+  return n;
+}
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json' };
 const server = createServer(async (req, res) => {
   try {
@@ -240,11 +255,32 @@ ok('bfood rebuilt: n/m never zero + hardwired hemp + fat disaggregated + quest b
 
 await page.goto(`${BASE}/surfaces/index.html`);
 ok('hub links the university', (await page.locator('a[href="university/index.html"]').count()) === 1);
-ok('hub counts 62', (await page.locator('footer').textContent()).includes('62 surfaces'));
+{
+  // The footer's surface count is CHECKED AGAINST THE TREE, never against a
+  // literal. A test that asserts "62" against the string "62" certifies its own
+  // claim and passes while the number drifts — which it did, twice.
+  const onDisk = await countSurfacesOnDisk();
+  const footerTxt = await page.locator('footer').textContent();
+  const m = footerTxt.match(/(\d+)\s+surfaces/);
+  const claimed = m ? Number(m[1]) : null;
+  ok(`footer surface count matches the tree (${onDisk})`,
+     claimed === onDisk,
+     `footer says ${claimed}, tree holds ${onDisk}`);
+}
 await page.goto(`${BASE}/surfaces/review.html`);
 const optCount = await page.locator('#surf option').count();
 const hasUni = (await page.locator('#surf option[value="university/index.html"]').count()) === 1;
-ok('review deck lists the university surface', optCount === 58 && hasUni);
+{
+  // The deck's coverage is CHECKED AGAINST THE TREE, never against a literal.
+  // It asserted `optCount === 58` — a number copied from review.html's own
+  // SURFACES array, so it certified the array's length against itself and could
+  // not see the array being INCOMPLETE. It was: devroom.html, dock.html and
+  // forge/huddle.html were missing while the suite reported green.
+  const onDisk = await countSurfacesOnDisk();
+  ok(`review deck covers every surface (${onDisk}) and lists the university`,
+     optCount === onDisk && hasUni,
+     `deck lists ${optCount}, tree holds ${onDisk}, hasUni=${hasUni}`);
+}
 
 console.log(`\n${pass} passed, ${fail} failed` + (errors.length ? '\nerrors:\n' + errors.join('\n') : ''));
 await browser.close(); server.close();
