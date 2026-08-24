@@ -254,6 +254,32 @@ try {
     ok('panel body hidden', await page.locator('#fund-js').isHidden());
     await ctx.close();
   }
+  /* ── F · design acceptance (mobile viewport first, per standing order) ── */
+  console.log('F · design acceptance (390px phone):');
+  {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const page = await ctx.newPage();
+    await page.goto('http://127.0.0.1:8891' + URL_, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(600);
+    const heroSize = await page.evaluate(() => parseFloat(getComputedStyle(document.getElementById('v-bal')).fontSize));
+    const capSize = await page.evaluate(() => parseFloat(getComputedStyle(document.querySelector('#ch-vaulta .cn')).fontSize));
+    const capTransform = await page.evaluate(() => getComputedStyle(document.querySelector('#ch-vaulta .cn')).textTransform);
+    ok('hero number ≥ 32px ON A PHONE', heroSize >= 32, heroSize + 'px');
+    ok('hero caption ≤ 11px uppercase', capSize <= 11 && capTransform === 'uppercase', capSize + 'px ' + capTransform);
+    const grad = await page.evaluate(() => {
+      const el = document.querySelector('h1 .h1-arg');
+      const cs = getComputedStyle(el);
+      return { clip: cs.webkitBackgroundClip || cs.backgroundClip,
+               fill: cs.webkitTextFillColor, img: cs.backgroundImage };
+    });
+    ok('headline gradient-CLIPPED (argument, not colour)', grad.clip === 'text' &&
+      (grad.fill === 'rgba(0, 0, 0, 0)' || grad.fill === 'transparent') &&
+      /linear-gradient/.test(grad.img), JSON.stringify(grad).slice(0, 90));
+    ok('headline stops use the page tokens (gold→leaf→cyan)',
+      /255, 215, 0/.test(grad.img) && /125, 223, 143/.test(grad.img) &&
+      /0, 229, 255/.test(grad.img), grad.img.slice(0, 80));
+    await ctx.close();
+  }
 } finally {
   await browser.close();
   server.close();
