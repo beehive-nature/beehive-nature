@@ -470,16 +470,19 @@ mod tests {
 
     /// Pinned golden digests for tests/fixtures/golden at threshold 24 —
     /// these break if the packing format or batching rule ever changes.
+    /// Fixture names are mixed-case on purpose (Notes/Deep before alpha in
+    /// byte order, after it in NTFS collation): deleting the sort fails
+    /// this golden on NTFS as well as ext4 (ORDER zB-4).
     #[rustfmt::skip]
     const GOLDEN_BATCH_SHAS: [&str; 3] = [
-        "789bc24e636e37366c22ce70d5c7791c2d64aeea5bbad7fe2a0e08cecde81b87", // PUBLIC-CONSTANT: golden batch 1 sha256, not a secret
-        "555cab5aea09d8c75f57b1045e01a349f8795f1afb8109034002d7750be24b01", // PUBLIC-CONSTANT: golden batch 2 sha256, not a secret
-        "ffdd8f8b699c37b7ffb1c5493e64b2120158358f8a5588ef4a87d26fe8996fce", // PUBLIC-CONSTANT: golden batch 3 sha256, not a secret
+        "8ffa7475d8057654ec9dbdf65e30704d1f751abbcefac05e68bd985554cca06a", // PUBLIC-CONSTANT: golden batch 1 sha256, not a secret
+        "9f4f5ef6ae1155d2d85fbf55a53c3b6edce805a45423410c13c88f5b8c90ad0b", // PUBLIC-CONSTANT: golden batch 2 sha256, not a secret
+        "ccbb41e26d7f770bac333b8f7dd02a0632a7f06489b62116be9e0ecd3422ac9d", // PUBLIC-CONSTANT: golden batch 3 sha256, not a secret
     ];
 
     /// The checked-in golden tree (tests/fixtures/golden) with pinned batch
     /// digests and pinned member order. These assertions are the ones that
-    /// BREAK if the packing format or the batching rule changes.
+    /// BREAK if the packing format or the batching rule ever changes.
     #[test]
     fn golden_vector_pins_format_and_batching() {
         let root = Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -488,7 +491,9 @@ mod tests {
             .join("golden");
         let run = build_batches(&root, 24).unwrap();
 
-        // Pinned member order across the three expected batches.
+        // Pinned member order across the three expected batches. Note the
+        // mixed-case byte order: Notes/* before the lowercase names, and
+        // Notes/Deep before Notes/beta — the reverse of NTFS collation.
         let names: Vec<Vec<&str>> = run
             .batches
             .iter()
@@ -497,9 +502,9 @@ mod tests {
         assert_eq!(
             names,
             vec![
-                vec!["alpha.rec", "gamma.rec"],
-                vec!["notes/beta.rec"],
-                vec!["notes/deep/delta.rec"],
+                vec!["Notes/Deep/delta.rec"],
+                vec!["Notes/beta.rec", "alpha.rec"],
+                vec!["gamma.rec"],
             ]
         );
 
