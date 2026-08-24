@@ -33,7 +33,10 @@ jobs:
   node:
     runs-on: ubuntu-latest
     steps:
+      # Full history: the §7 pushed-range check needs origin/main..HEAD
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -52,3 +55,15 @@ jobs:
           npm ci
           npx playwright install --with-deps chromium
           node e2e.mjs
+      # FORGE FREEZE (founder ruling, dispatched 2026-08-24): orbit.html is
+      # frozen art — CI fails on ANY edit to its committed blob. The hash is
+      # taken from the committed blob, never the worktree copy. Tinkering
+      # lives in surfaces/forge/orbit-v2.html (not frozen).
+      - name: Forge freeze — orbit.html committed-blob sha256
+        run: node e2e/forge-freeze.mjs
+      # §7 ENFORCEMENT — this step is the enforcement point; the local
+      # pre-commit hook is advisory only and must never be called "enforced"
+      # on its own. Every commit in the pushed range (origin/main..HEAD) must
+      # be authored by the founder; seats are credited via Co-authored-by.
+      - name: §7 identity — author is the founder on the pushed range
+        run: sh scripts/identity-check.sh
