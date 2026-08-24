@@ -29,6 +29,16 @@
 #      genuinely contains zero commits passes (loudly).
 #
 # Local runs may override: S7_RANGE="a..b" sh scripts/identity-check.sh
+#
+# STAGED MODE (the local pre-commit/commit-msg entry point): S7_STAGED=1 checks
+# the commit IN PROGRESS instead of a range — author/committer come from
+# `git var` (exactly the idents the upcoming commit will use), and the trailer
+# clause is checked against the message file (S7_MSG_FILE, provided by the
+# commit-msg hook; pre-commit runs before a message exists, so it validates
+# identity and defers the trailer half). Same §7 shape, same fail-closed law,
+# one implementation for CI and hooks so they cannot drift. STATUS UNCHANGED:
+# this is DETECTION BEFORE PUBLICATION — hooks are --no-verify-able, CI re-scans
+# on push. Never call this layer prevention.
 set -u
 
 FOUNDER_NAME="loVis waTer"
@@ -36,6 +46,37 @@ FOUNDER_EMAIL="loviswater44@gmail.com"
 
 say() { echo "§7: $*"; }
 die() { echo "§7 FAIL — $*"; echo "§7 FAIL — this check fails closed when it cannot determine an answer."; exit 1; }
+
+if [ -n "${S7_STAGED:-}" ]; then
+  say "staged mode — checking the commit in progress (detection before handoff; --no-verify-able, never prevention)"
+
+  ident=$(git var GIT_AUTHOR_IDENT 2>/dev/null) || die "git var GIT_AUTHOR_IDENT unreadable"
+  an=$(printf '%s\n' "$ident" | sed -n 's/^\(.*\) <\([^>]*\)>.*$/\1/p')
+  ae=$(printf '%s\n' "$ident" | sed -n 's/^\(.*\) <\([^>]*\)>.*$/\2/p')
+  cident=$(git var GIT_COMMITTER_IDENT 2>/dev/null) || die "git var GIT_COMMITTER_IDENT unreadable"
+  cn=$(printf '%s\n' "$cident" | sed -n 's/^\(.*\) <\([^>]*\)>.*$/\1/p')
+  ce=$(printf '%s\n' "$cident" | sed -n 's/^\(.*\) <\([^>]*\)>.*$/\2/p')
+
+  [ "$an" = "$FOUNDER_NAME" ] && [ "$ae" = "$FOUNDER_EMAIL" ] \
+    || die "author of the upcoming commit is '$an <$ae>', not the founder — export GIT_AUTHOR_NAME/GIT_AUTHOR_EMAIL as the founder (seats are committers + trailers, never authors)"
+
+  if [ "$cn" != "$FOUNDER_NAME" ] || [ "$ce" != "$FOUNDER_EMAIL" ]; then
+    if [ -n "${S7_MSG_FILE:-}" ] && [ -f "${S7_MSG_FILE:-}" ]; then
+      # git's OWN trailer parser — the same semantics %(trailers:key=…) uses in
+      # the range check below. A Co-authored-by line that sits in the body is
+      # invisible to it, which is exactly the three-time mistake this catches.
+      trailers=$(git interpret-trailers --parse < "$S7_MSG_FILE" 2>/dev/null | grep -c '^Co-authored-by:' || true)
+      [ "$trailers" -ge 1 ] \
+        || die "seat-typed commit (committer '$cn <$ce>') with no PARSED Co-authored-by trailer — a trailer buried in the body does not count; it must be the final block of the message"
+      say "ok — founder-authored · seat-committed by '$cn' · Co-authored-by trailer parsed: $trailers"
+    else
+      say "ok — founder-authored · seat-committed by '$cn' · trailer check deferred to the commit-msg hook (no message yet at pre-commit time)"
+    fi
+  else
+    say "ok — founder-typed (author == committer) · trailer clause does not apply"
+  fi
+  exit 0
+fi
 
 resolve_commit() {
   git rev-parse -q --verify "$1^{commit}" 2>/dev/null

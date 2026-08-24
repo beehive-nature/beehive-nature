@@ -1,0 +1,6 @@
+#!/bin/sh
+# Commit-msg: the §7 trailer half — git's own trailer parser decides whether
+# Co-authored-by is a TRAILER (final block) or body text; body text does not
+# credit a seat. Detection before handoff; --no-verify-able, never prevention;
+# CI re-scans the pushed range after the fact.
+S7_STAGED=1 S7_MSG_FILE="$1" exec sh scripts/identity-check.sh
