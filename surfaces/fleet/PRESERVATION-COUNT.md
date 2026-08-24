@@ -26,5 +26,11 @@ This note is the correction of record, pointing at `482412f`.
 Byte-exactness receipt: every file's sha256 verified against
 `git show` of the COMMITTED BLOB (not the worktree copy) before and after
 commit — the `surfaces/fleet/** -text` gitattributes pin was required because
-all 25 files are CRLF against the repo-wide `eol=lf` law. Hashes in the FLEET-1
+all 26 files are CRLF against the repo-wide `eol=lf` law. Hashes in the FLEET-1
 seat report of 2026-08-23.
+
+History (folded from PRESERVATION-NOTE.md, 2026-08-24, so one subject has one
+note): `482412f` stands as merged — by `28c1444`, gate-seat pass, hashes
+re-verified at the merge; all nine surfaces were re-verified byte-identical to
+their originals at each gate since. This directory also holds `lab/README.md`,
+`gallery/README.md`, and `vendor/` (the chart.js 4.5.1 byte-record, b640450).
