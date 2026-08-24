@@ -13,6 +13,14 @@
 // D4 HERO NUMBER       one figure at ≥32px with a ≤11px UPPERCASE caption beside it
 // D5 DENSITY WITH AIR  body type ≤14px AND panel radius ≥10px AND panel padding ≥12px
 // M  MOBILE            viewport meta + a ≤600px media query + no horizontal overflow at 375px
+// I1 INSTANT · zero cross-origin requests at load — single file, no bundle; we
+//    finish before their splash screen. same-origin estate riders (tour.js and
+//    its register/lang/rails-badge companions) are allowed.
+// I2 INSTANT · first contentful paint < 1000ms, the number PRINTED in the
+//    output — the standing order says measure it, not claim it.
+// F  FORM KILL — human-judged, printed as the gate's last word: if a stranger's
+//    first impression is "fill this in" rather than "here is what this is,"
+//    the surface fails no matter how green every check above is.
 import { chromium } from 'playwright';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
@@ -100,6 +108,20 @@ for (const rel of targets) {
   ok('M no horizontal overflow at 375px', m.over <= 1, `overflow=${m.over}px`);
   ok('M headline shrinks on phone', parseFloat(m.h1) < h1Big, `phone=${m.h1} desktop=${h1Big}px`);
   await mob.close();
+
+  // I1/I2 — INSTANT: nothing cross-origin, first paint measured and printed
+  const crossOrigin = [];
+  page.on('request', r => { try { if (new URL(r.url()).host !== new URL(page.url()).host) crossOrigin.push(r.url()); } catch {} });
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForTimeout(300);
+  ok('I1 zero cross-origin requests at load', crossOrigin.length === 0, crossOrigin.slice(0, 3).join(' | '));
+  const fcp = await page.evaluate(() => {
+    const p = performance.getEntriesByType('paint').find(e => e.name === 'first-contentful-paint');
+    return p ? Math.round(p.startTime) : null;
+  });
+  ok('I2 first contentful paint < 1000ms', fcp !== null && fcp < 1000, `FCP=${fcp === null ? 'unmeasured' : fcp + 'ms'} (report the number, never just the pass)`);
+  console.log(`  INSTANT · first contentful paint = ${fcp === null ? 'unmeasured' : fcp + 'ms'} — the number belongs in the report`);
+  console.log('  F  FORM KILL — human-judged, not scored: first impression must be "here is what this is," never "fill this in."');
   await page.close();
 }
 
