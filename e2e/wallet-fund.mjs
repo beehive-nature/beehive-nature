@@ -81,6 +81,14 @@ try {
     ok('asset options USDC_BASE + USDC_ETHEREUM',
       JSON.stringify(await page.locator('#fund-asset option').evaluateAll(os => os.map(o => o.value))) ===
       '["USDC_BASE","USDC_ETHEREUM"]');
+    // the launch law: ALWAYS a top-level new tab, never an iframe — the widget
+    // hands off to a third-party hosted checkout on ANOTHER origin (sandbox:
+    // global-stg.transak.com); cross-origin handoff inside a top-level tab is
+    // plain navigation, inside our iframe it would break. Lock it in.
+    ok('launch opens a new tab (target=_blank)', (await go.getAttribute('target')) === '_blank');
+    const rel = (await go.getAttribute('rel')) || '';
+    ok('launch carries rel=noopener noreferrer', rel.includes('noopener') && rel.includes('noreferrer'));
+    ok('panel embeds no iframe', (await page.locator('#fund-sec iframe').count()) === 0);
     const errs = consoleLines.filter(l => l.startsWith('[console.error]') || l.startsWith('[pageerror]'));
     ok('console free of errors', errs.length === 0, errs.join(' | '));
     await ctx.close();
