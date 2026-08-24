@@ -439,9 +439,63 @@ mod tests {
         fs::remove_dir_all(&root).unwrap();
     }
 
+    /// Pinned golden digests for tests/fixtures/golden at threshold 24 —
+    /// these break if the packing format or batching rule ever changes.
+    #[rustfmt::skip]
+    const GOLDEN_BATCH_SHAS: [&str; 3] = [
+        "789bc24e636e37366c22ce70d5c7791c2d64aeea5bbad7fe2a0e08cecde81b87", // PUBLIC-CONSTANT: golden batch 1 sha256, not a secret
+        "555cab5aea09d8c75f57b1045e01a349f8795f1afb8109034002d7750be24b01", // PUBLIC-CONSTANT: golden batch 2 sha256, not a secret
+        "ffdd8f8b699c37b7ffb1c5493e64b2120158358f8a5588ef4a87d26fe8996fce", // PUBLIC-CONSTANT: golden batch 3 sha256, not a secret
+    ];
+
+    /// The checked-in golden tree (tests/fixtures/golden) with pinned batch
+    /// digests and pinned member order. These assertions are the ones that
+    /// BREAK if the packing format or the batching rule changes.
     #[test]
-    fn missing_root_is_an_error() {
+    fn golden_vector_pins_format_and_batching() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests")
+            .join("fixtures")
+            .join("golden");
+        let run = build_batches(&root, 24).unwrap();
+
+        // Pinned member order across the three expected batches.
+        let names: Vec<Vec<&str>> = run
+            .batches
+            .iter()
+            .map(|b| b.members.iter().map(|m| m.name.as_str()).collect())
+            .collect();
+        assert_eq!(
+            names,
+            vec![
+                vec!["alpha.rec", "gamma.rec"],
+                vec!["notes/beta.rec"],
+                vec!["notes/deep/delta.rec"],
+            ]
+        );
+
+        // Pinned batch digests — the golden vectors themselves.
+        for (batch, golden) in run.batches.iter().zip(GOLDEN_BATCH_SHAS) {
+            assert_eq!(
+                batch.sha256, golden,
+                "golden digest drifted for seq {}",
+                batch.seq
+            );
+        }
+
+        // The manifest mirrors the pinned batches.
+        assert_eq!(run.manifest.format_version, FORMAT_VERSION);
+        assert_eq!(run.manifest.batches.len(), 3);
+    }
+
+    #[test]
+    fn missing_root_is_a_not_found_error() {
         let missing = std::env::temp_dir().join("bnr-archive-no-such-root");
-        assert!(build_batches(&missing, 1024).is_err());
+        let err = build_batches(&missing, 1024).unwrap_err();
+        assert_eq!(
+            err.kind(),
+            std::io::ErrorKind::NotFound,
+            "unexpected error: {err}"
+        );
     }
 }
