@@ -528,7 +528,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 </section>
 
 <!-- ══ FUND — Meld hosted checkout (zero-backend · public key only) ══ -->
-<section id="fund-sec" style="border-color:#4a3a1d" data-meld-public-key="">
+<section id="fund-sec" style="border-color:#4a3a1d" data-meld-public-key="" data-meld-env="sandbox">
   <style>
     #fund-sec .fund-coin{width:26px;height:26px;border-radius:50%;flex:0 0 auto;position:relative;
      background:radial-gradient(circle at 35% 30%,#ffeaa6,var(--gold) 62%,#6e5300);
@@ -584,10 +584,22 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
       document.getElementById('fund-sec')?.dataset?.meldPublicKey ||
       ''
     ).trim();
+    /* environment, from data-meld-env on the section element:
+       "sandbox" (DEFAULT — sb.meldcrypto.com, Meld's test rails, test money)
+       or "production" (meldcrypto.com, real money — an EXPLICIT opt-in typed
+       into the markup; sandbox keys must never be pasted into production and
+       production keys never open the sandbox). Anything but the exact string
+       "production" reads as sandbox. */
+    const BNR_MELD_ENV =
+      document.getElementById('fund-sec')?.dataset?.meldEnv === 'production'
+        ? 'production' : 'sandbox';
     (function () {
       'use strict';
       try {
-        var MELD_CHECKOUT = 'https://meldcrypto.com/';
+        var MELD_HOSTS = {
+          sandbox: 'https://sb.meldcrypto.com/',
+          production: 'https://meldcrypto.com/'
+        };
         var $ = function (id) { return document.getElementById(id); };
         var box = $('fund-js'), pick = $('fund-asset'), addr = $('fund-addr'),
             go = $('fund-go'), stat = $('fund-stat');
@@ -596,7 +608,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 
         function addrOk(v) { return /^0x[0-9a-fA-F]{40}$/.test(v); }
         function buildUrl() {
-          var u = new URL(MELD_CHECKOUT);
+          var u = new URL(MELD_HOSTS[BNR_MELD_ENV]);
           u.searchParams.set('publicKey', BNR_MELD_PUBLIC_KEY);
           u.searchParams.set('transactionType', 'BUY');
           u.searchParams.set('theme', 'darkMode');
@@ -612,7 +624,9 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
             go.setAttribute('href', '#');
             stat.innerHTML = '<b style="color:var(--amber)">\u26a0 funding not configured</b> — the public ' +
               'Meld Checkout key is not set on this deployment (BNR_MELD_PUBLIC_KEY / data-meld-public-key). ' +
-              'The launch button stays asleep until it is; nothing else on this page is affected.';
+              'The launch button stays asleep until it is; nothing else on this page is affected. ' +
+              'Environment selected: <b>' + BNR_MELD_ENV + '</b>' +
+              (BNR_MELD_ENV === 'production' ? ' — real money' : ' — sb.meldcrypto.com, test rails') + '.';
             return;
           }
           var a = addr.value.trim();
@@ -627,8 +641,9 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
           go.setAttribute('aria-disabled', 'false');
           stat.textContent = a
             ? 'destination locked: ' + pick.value + ' \u2192 ' + a.slice(0, 8) + '\u2026' + a.slice(-6) +
-              '. Opens Meld\u2019s hosted checkout in a new tab; this wallet signs and sees nothing.'
-            : 'destination asset locked: ' + pick.value + ' — no address typed, the checkout will ask for one.' +
+              ' [' + BNR_MELD_ENV + ']. Opens Meld\u2019s hosted checkout in a new tab; this wallet signs and sees nothing.'
+            : 'destination asset locked: ' + pick.value + ' [' + BNR_MELD_ENV +
+              '] — no address typed, the checkout will ask for one.' +
               ' Opens Meld\u2019s hosted checkout in a new tab; this wallet signs and sees nothing.';
         }
         go.addEventListener('click', function (e) {
