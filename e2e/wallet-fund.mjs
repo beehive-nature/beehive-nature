@@ -48,6 +48,32 @@ const armedContext = async (browser, { env } = {}) => {
   return ctx;
 };
 const goHref = page => page.locator('#fund-go').getAttribute('href');
+/* mock EVERY endpoint the panel may randomly pick — as ONE RegExp. (A glob
+   like '**host*' silently fails on root URLs: single '*' does not match '/',
+   so 'https://host/' leaked to the LIVE network and made tests flaky/hollow.)
+   Host set mirrors wallet.html's BASE_RPC_HOSTS. */
+const BASE_HOST_RE = /^https:\/\/(mainnet\.base\.org|base\.publicnode\.com|1rpc\.io|base\.drpc\.org)(\/|$)/;
+const mockBaseRpc = (ctx, result32, tally) => {
+  const cors = {
+    'access-control-allow-origin': '*',
+    'access-control-allow-methods': 'POST, OPTIONS',
+    'access-control-allow-headers': 'content-type'
+  };
+  ctx.route(BASE_HOST_RE, async route => {
+    const host = new URL(route.request().url()).host;
+    // a JSON POST from an http test origin triggers a CORS preflight — the
+    // mock must answer it like the real endpoints do (they all send ACAO *)
+    if (route.request().method() === 'OPTIONS')
+      return route.fulfill({ status: 204, headers: cors });
+    if (tally) tally[host] = (tally[host] || 0) + 1;
+    await route.fulfill({ contentType: 'application/json', headers: cors,
+      body: JSON.stringify({ jsonrpc: '2.0', id: 1, result: result32 }) });
+  });
+};
+// the page resolves names with the vendored keccak, which loads AFTER the
+// panel script — wait for it explicitly or name-flow tests race the bundle
+const waitBnrSign = page => page.waitForFunction(
+  () => !!(window.BnrSign && window.BnrSign.keccak_256), null, { timeout: 8000 });
 const assertUrl = (href, host, asset) => {
   const u = new URL(href);
   ok(`  host ${host}`, u.origin === `https://${host}`, u.origin);
@@ -128,27 +154,17 @@ try {
   console.log('E · Basename input (Base RPC mocked, deterministic):');
   const MOCK = 'fbd201472d5a439f1f0e408eb5dfaf6ea3687876'; // live-resolved hex of the probe below
   {
-    let rpcHits = 0;
+    const tally = {};
     const ctx = await armedContext(browser);
-    await ctx.route('**mainnet.base.org*', async route => {
-      rpcHits++;
-      await route.fulfill({ contentType: 'application/json',
-        body: JSON.stringify({ jsonrpc: '2.0', id: 1,
-          result: '0x' + '0'.repeat(24) + MOCK }) });
-    });
-    await ctx.route('**base.publicnode.com*', async route => {
-      rpcHits++;
-      await route.fulfill({ contentType: 'application/json',
-        body: JSON.stringify({ jsonrpc: '2.0', id: 1,
-          result: '0x' + '0'.repeat(24) + MOCK }) });
-    });
+    mockBaseRpc(ctx, '0x' + '0'.repeat(24) + MOCK, tally);
     const page = await ctx.newPage();
     await page.goto('http://127.0.0.1:8891' + URL_, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(600);
+    await waitBnrSign(page);
     await page.fill('#fund-addr', 'bloverai.base.eth');
     await page.waitForTimeout(250);
     ok('name never called invalid', !(await page.locator('#fund-stat').innerText()).includes('does not read'));
-    ok('no RPC read until the user asks (zero-backend)', rpcHits === 0, `hits=${rpcHits}`);
+    ok('no RPC read until the user asks (read fires on user action only)', Object.keys(tally).length === 0, JSON.stringify(tally));
     let u = assertUrl(await goHref(page), 'sb.meldcrypto.com', 'USDC_BASE');
     ok('unresolved name kept out of URL', !u.searchParams.has('walletAddressLocked'));
     await page.locator('#fund-go').click(); // first tap = resolve + show, never launch
@@ -173,13 +189,11 @@ try {
   console.log('E2 · unresolvable name (honest failure, no blame):');
   {
     const ctx = await armedContext(browser);
-    await ctx.route('**mainnet.base.org*', async route => {
-      await route.fulfill({ contentType: 'application/json',
-        body: JSON.stringify({ jsonrpc: '2.0', id: 1, result: '0x' + '00'.repeat(32) }) }); // zero = no record
-    });
+    mockBaseRpc(ctx, '0x' + '00'.repeat(32)); // zero = no record
     const page = await ctx.newPage();
     await page.goto('http://127.0.0.1:8891' + URL_, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(600);
+    await waitBnrSign(page);
     await page.fill('#fund-addr', 'not-a-base-name.eth');
     await page.locator('#fund-go').click();
     await page.waitForFunction(() => document.getElementById('fund-stat').textContent.includes('could not be resolved'), null, { timeout: 5000 });
@@ -189,6 +203,31 @@ try {
     ok('failure points to the raw-address fallback', msg.includes('receive'));
     const u = new URL(await goHref(page));
     ok('nothing launched on failure', !u.searchParams.has('walletAddressLocked'));
+    await ctx.close();
+  }
+  console.log('E3 · RPC rotation (privacy ruling — no privileged endpoint):');
+  {
+    const tally = {};
+    const ctx = await armedContext(browser);
+    mockBaseRpc(ctx, '0x' + '0'.repeat(24) + MOCK, tally);
+    const page = await ctx.newPage();
+    await page.goto('http://127.0.0.1:8891' + URL_, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(600);
+    await waitBnrSign(page);
+    for (let k = 0; k < 10; k++) {
+      await page.fill('#fund-addr', 'rot' + k + '.eth');
+      await page.locator('#fund-go').click();
+      await page.waitForFunction(
+        () => document.getElementById('fund-stat').textContent.includes('resolved on Base'),
+        null, { timeout: 5000 });
+    }
+    const hosts = Object.keys(tally);
+    const total = hosts.reduce((s, h) => s + tally[h], 0);
+    ok('ten lookups, one request each (no retry storms)', total === 10, JSON.stringify(tally));
+    // a fixed primary = every hit on one host = FAIL. (P[uniform-4, 10 draws, all
+    // one host] ≈ 4·(1/4)^10 ≈ 0.0004% — if this ever flakes, re-run once.)
+    ok('first choice is RANDOM — more than one endpoint used across 10 lookups',
+      hosts.length >= 2, JSON.stringify(tally));
     await ctx.close();
   }
 
