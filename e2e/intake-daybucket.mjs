@@ -138,6 +138,63 @@ async function freshPage(timeIso, initScript) {
   await ctx.close();
 }
 
+// The 04:00 day-start ruling: the behavioural day runs 04:00->04:00
+// local, so 02:00 and 05:00 on the same calendar day are DIFFERENT
+// behavioural days — 02:00 belongs to the previous one. And `time` is
+// soft: a blank or sloppy user-entered time must not be able to break
+// the key (the machine timestamp is the spine).
+{
+  const a = await freshPage('2026-08-24T02:00:00-06:00');
+  await a.page.goto(`${base}/lab/intake-tracker.html`, { waitUntil: 'load' });
+  await a.page.evaluate(() => logEntry());
+  const keyA = await a.page.evaluate(() =>
+    Object.keys(localStorage).filter(k => k.startsWith('bnIntake_'))[0]);
+  await a.ctx.close();
+
+  const b = await freshPage('2026-08-24T05:00:00-06:00');
+  await b.page.goto(`${base}/lab/intake-tracker.html`, { waitUntil: 'load' });
+  await b.page.evaluate(() => logEntry());
+  const keyB = await b.page.evaluate(() =>
+    Object.keys(localStorage).filter(k => k.startsWith('bnIntake_'))[0]);
+  await b.ctx.close();
+
+  ok('02:00 and 05:00 local land in DIFFERENT buckets',
+    keyA !== keyB, `${keyA} vs ${keyB}`);
+  ok('02:00 belongs to the PREVIOUS behavioural day', keyA === 'bnIntake_2026-08-23', keyA);
+  ok('05:00 belongs to the current behavioural day', keyB === 'bnIntake_2026-08-24', keyB);
+
+  // Soft `time`: blank and sloppy values save into the correct bucket and
+  // break nothing.
+  const c = await freshPage('2026-08-24T05:00:00-06:00');
+  await c.page.goto(`${base}/lab/intake-tracker.html`, { waitUntil: 'load' });
+  await c.page.evaluate(() => { document.getElementById('time').value = ''; logEntry(); });
+  await c.page.evaluate(() => { document.getElementById('time').value = 'sloppy'; logEntry(); });
+  const sloppy = await c.page.evaluate(() => {
+    try {
+      const list = JSON.parse(localStorage.getItem('bnIntake_2026-08-24') || 'null');
+      return { n: list ? list.length : -1, times: list ? list.map(e => e.time) : [] };
+    } catch (e) { return { n: 'threw', times: [] }; }
+  });
+  ok('blank time still keys into the right bucket, nothing crashes',
+    sloppy.n === 2, JSON.stringify(sloppy));
+  // The input is type=time so the browser normalizes UI input — the truly
+  // sloppy path is legacy/imported data. Inject it at the storage layer and
+  // reload: the render must survive and the key must not move.
+  await c.page.evaluate(() => {
+    const list = JSON.parse(localStorage.getItem('bnIntake_2026-08-24'));
+    list.push({ method: 'edible', amount: 10, potency: 100, strain: 'legacy', time: 'sloppy', hits: 1, mg: 10, timestamp: new Date().toISOString() });
+    localStorage.setItem('bnIntake_2026-08-24', JSON.stringify(list));
+  });
+  await c.page.reload({ waitUntil: 'load' });
+  const afterSloppy = await c.page.evaluate(() => ({
+    n: JSON.parse(localStorage.getItem('bnIntake_2026-08-24')).length,
+    rendered: document.getElementById('entries').textContent
+  }));
+  ok('a storage-injected sloppy time renders without breaking key or page',
+    afterSloppy.n === 3 && afterSloppy.rendered === '3', JSON.stringify(afterSloppy));
+  await c.ctx.close();
+}
+
 await browser.close();
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

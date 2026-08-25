@@ -88,7 +88,14 @@ input,select,textarea{width:100%;background:#0d1117;border:1px solid #333;color:
 <script>
 var rdi=100;
 var entries=[];
-function localDayKey(t){var d=t?new Date(t):new Date();var m=d.getMonth()+1,g=d.getDate();return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(g<10?'0':'')+g;}
+// DAY BUCKET: the timestamp is the spine (machine-set, always present).
+// `time` is a soft attribute - ordering/analysis only, it never keys the
+// bucket, and a blank or sloppy value cannot break the key. The
+// behavioural day runs DAY_START -> DAY_START local: default 04:00, so a
+// 02:00 entry belongs to the previous day. Override per-browser by setting
+// localStorage bnDayStart before opening the page.
+var DAY_START=parseFloat(localStorage.getItem('bnDayStart'))||4;
+function localDayKey(t){var d=t?new Date(t):new Date();d=new Date(d.getTime()-DAY_START*3600000);var m=d.getMonth()+1,g=d.getDate();return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(g<10?'0':'')+g;}
 var todayKey=localDayKey();
 
 function load(){todayKey=localDayKey();var d=localStorage.getItem('bnIntake_'+todayKey);if(d)entries=JSON.parse(d);var r=localStorage.getItem('bnRDI');if(r)rdi=parseInt(r);document.getElementById('rdiSlider').value=rdi;document.getElementById('rdiDisplay').textContent=rdi;render();}
@@ -126,7 +133,7 @@ function render(){
 var total=0,morn=0,aft=0,eve=0;
 for(var i=0;i<entries.length;i++){
 total+=entries[i].mg;
-var h=parseInt(entries[i].time.split(':')[0]);
+var h=parseInt((entries[i].time||'').split(':')[0])||0;
 if(h<12)morn+=entries[i].mg;else if(h<17)aft+=entries[i].mg;else eve+=entries[i].mg;
 }
 document.getElementById('totalMg').textContent=Math.round(total);
