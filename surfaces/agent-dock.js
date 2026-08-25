@@ -22,7 +22,7 @@
   css.textContent = [
     '@keyframes adPulse{0%,100%{box-shadow:0 0 10px rgba(255,215,0,.28)}50%{box-shadow:0 0 26px rgba(255,215,0,.62)}}',
     '@keyframes adIn{0%{opacity:0;transform:translateY(18px) scale(.97)}100%{opacity:1;transform:none}}',
-    '#adOrb{position:fixed;left:18px;bottom:18px;z-index:9990;width:52px;height:52px;border-radius:50%;',
+    '#adOrb{position:fixed;left:18px;bottom:66px;z-index:9999;width:52px;height:52px;border-radius:50%;',
     '  background:radial-gradient(circle at 35% 30%,#3a2e08,#1a1405);border:1.5px solid #FFD700;color:#FFD700;',
     '  font-size:22px;cursor:pointer;display:grid;place-items:center;' + (reduce ? '' : 'animation:adPulse 3.4s ease-in-out infinite;'),
     '  transition:transform .2s} #adOrb:hover{transform:scale(1.09)}',
@@ -53,7 +53,7 @@
   /* the founder's mobile screenshots caught the complex SVG paths rendering mangled.
      Fix: a simple, universally-safe centered gear — circle + spokes, no path data.
      display:grid + place-items:center on the button guarantees true centering. */
-  orb.style.cssText = 'position:fixed;left:18px;bottom:18px;z-index:9990;width:52px;height:52px;' +
+  orb.style.cssText = 'position:fixed;left:18px;bottom:66px;z-index:9999;width:52px;height:52px;' +
     'border-radius:50%;background:radial-gradient(circle at 35% 30%,#3a2e08,#1a1405);' +
     'border:1.5px solid #FFD700;cursor:pointer;display:grid;place-items:center;' +
     'font-size:26px;line-height:1;padding:0;color:#FFD700;text-align:center;' +
@@ -66,7 +66,38 @@
     '<div id="adAgents"></div>' +
     '<div id="adBody"></div>' +
     '<div id="adFoot"><input id="adPrompt" placeholder="ask the agents — or type /help"><button id="adSend">send</button></div>';
-  document.body.appendChild(orb); document.body.appendChild(win);
+  document.body.appendChild(orb);
+  /* Seat the orb off the MEASURED #tbar height.
+     FAIL-SAFE LAW: tour.js injects the bar separately, so on the common
+     first-paint path there is NO #tbar yet. Writing a computed value then would
+     overwrite the 66px fail-safe with a MORE clipped 10px — worse than the
+     original 18px. So: no bar, or a bar not yet laid out (height 0), means we
+     write NOTHING and the fail-safe stands. */
+  (function(){
+    function fit(){
+      var o = document.getElementById('adOrb') || orb; if(!o) return;
+      var bar = document.getElementById('tbar'); if(!bar) return;
+      var h = Math.ceil(bar.getBoundingClientRect().height);
+      if(!h) return;                       // bar present but unlaid — keep fail-safe
+      o.style.bottom = (h + 10) + 'px';    // 10px above the REAL bar
+      document.body.style.paddingBottom = (h + 6) + 'px';
+    }
+    fit();
+    addEventListener('resize', fit);
+    /* ResizeObserver refines a bar that already exists; MutationObserver catches
+       the bar ARRIVING. The MO must NOT be nested inside a ResizeObserver check —
+       a browser without RO would then get no bar-arrival handling at all. */
+    var bar = document.getElementById('tbar');
+    if (bar && window.ResizeObserver) { new ResizeObserver(fit).observe(bar); }
+    if (!bar) {
+      var mo = new MutationObserver(function(){
+        var b = document.getElementById('tbar');
+        if (b) { mo.disconnect(); fit();
+                 if (window.ResizeObserver) { new ResizeObserver(fit).observe(b); } }
+      });
+      mo.observe(document.documentElement, {childList:true, subtree:true});
+    }
+  })(); document.body.appendChild(win);
 
   var AGENTS = [
     { id: 'queen', chip: '🐝 bQueenBee', kind: 'iframe', src: R + 'bqueenbee-live.html',

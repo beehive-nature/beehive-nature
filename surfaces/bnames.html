@@ -98,7 +98,8 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
   watch the desk check it — live, right now, from the chain itself. Reserving costs
   <b>zero fee</b> today; you only pay the chain's memory it sits in, and it's
   <b style="color:var(--gold)">yours to sell back</b>. This desk never holds keys — it writes
-  nothing; it composes what <b>you</b> sign.</p>
+  nothing; it composes what <b>you</b> sign.
+        <span style="display:block;margin-top:8px;color:var(--dim,#8a9a8a)">What the desk cannot vouch for is the registry behind it: every <b>.b</b> name answers to the keys behind <code>kingbeelovis</code> — today <b>three independent single-key paths</b> to full control (either <code>active</code> key, or the <code>owner</code> key that outranks it). Any one alone can replace the contract (<code>setcode</code>). <b style="color:var(--amber,#ffb347)">Hardening and reproducible source are not yet published</b> — until they are, a <b>.b</b> name is <b>operator-trusted, not trustless</b>.</span></p>
   <p data-reg="raver">the .b desk — reserve · transfer · trade · resolve: a living constellation
   of the registry, animated availability, paste-ready actions with the REAL ABI shape, one-year
   terms, renew/repoint/multi-chain resolve lanes — all keyless reads in your browser.</p>
@@ -132,6 +133,16 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
   <div class="verdict" id="vwrap"><div class="vtext" style="color:var(--dim)">—</div></div>
 
   <div id="consent-card" style="display:none;margin-top:12px;background:var(--well);border:1px solid var(--leaf);border-radius:11px;padding:16px 18px">
+      <div id="cust" style="border:1px solid var(--amber,#ffb347);border-radius:9px;padding:11px 12px;margin-bottom:12px;background:#171009">
+        <p style="color:var(--amber,#ffb347);font-weight:700;margin:0 0 6px">Hardening and reproducible source are not yet published.</p>
+        <p style="color:var(--dim,#8a9a8a);margin:0;font-size:12px">Until they are, this name is <b>operator-trusted, not trustless</b>: three single-key paths control <code>kingbeelovis</code> (either <code>active</code> key, or the <code>owner</code> key that outranks it).</p>
+      </div>
+      <label id="ack-row" for="ack" style="display:flex;gap:9px;align-items:flex-start;margin:0 0 10px;font-size:13px;cursor:pointer">
+        <input type="checkbox" id="ack" style="width:20px;height:20px;flex:0 0 20px;margin:0;accent-color:var(--amber,#ffb347)">
+        <span>I understand — right now, one person's keys could take this name back.</span>
+      </label>
+      <p id="nf-refusal" style="display:none;color:var(--amber,#ffb347);font-size:12px;margin:0 0 10px;border-left:2px solid var(--amber,#ffb347);padding-left:10px">Registration is open to the founder's own accounts until that ships. This account isn't one of them yet, so the desk won't compose it.</p>
+      <p id="gate-why" style="display:none;color:var(--dim,#8a9a8a);font-size:12px;margin:0 0 10px"></p>
     <div style="font-size:11px;color:var(--gold);margin-bottom:10px">⚖️ INFORMED CONSENT — one .b name per bzDiD per unique human</div>
     <div class="law" style="font-size:11px;line-height:1.9">
       <b>I understand and agree:</b><br>
@@ -292,6 +303,80 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
     return null;
   }
   function strip(n){ return (n||'').trim().toLowerCase().replace(/\.b$/,''); }
+
+  /* --- .b unicove link factory (fixes /actions/ + encoding) --- */
+  var UNICOVE='https://unicove.com/en/vaulta';
+  function unicoveAction(action,params){ return UNICOVE+'/contract/kingbeelovis/actions/'+action+'?'+new URLSearchParams(params).toString(); }
+
+  /* --- .b custody gate: DERIVED from independent reproduction, never typed ---
+     DOUBLY INERT BY DESIGN and that is correct: verifyAtt() returns false and
+     VERIFIERS is empty, so deriveHardened() cannot return true until BOTH are
+     built. Until then non-founder registrations are refused. This is NOT
+     "custody solved". */
+  var FOUNDER=new Set(['kingbeelovis']);      // founder-controlled accounts
+  var RECEIPT_URL='reproducible-build.json';  // union of independent attestations
+  var RPC=null;                               // TODO: the desk's mainnet RPC base. NULL, not a
+                                              // placeholder string — a '<...>' value throws a
+                                              // caught fetch error on EVERY page load.
+  var QUORUM=2;                               // min INDEPENDENT parties that must match
+  var VERIFIERS={};                           // TODO: each key a DIFFERENT independently-discoverable
+                                              // party; NEVER the deploy/owner keys. Publish "K of N"
+                                              // beside QUORUM once real builders are recruited.
+  var HARDENED=false;                         // FAIL-SAFE: locked until PROVEN open
+  async function onchainCodeHash(a){
+    if(!RPC) return null;                     // not configured — stay locked, make no request
+    var r=await fetch(RPC+'/v1/chain/get_code_hash',{method:'POST',body:JSON.stringify({account_name:a})});
+    return ((await r.json()).code_hash||'').toLowerCase()||null; }
+  async function verifyAtt(att,pubkey){ /* TODO: real signature check; false-safe until built */ return false; }
+  async function deriveHardened(){ try{
+      if(!RPC) return false;
+      var live=await onchainCodeHash('kingbeelovis'); if(!live) return false;
+      var rec=await (await fetch(RECEIPT_URL,{cache:'no-store'})).json();
+      var atts=(rec&&Array.isArray(rec.attestations))?rec.attestations:[]; var m=new Set();
+      for(var i=0;i<atts.length;i++){ var a=atts[i]; if(!a||!a.party||!a.builtHash) continue;
+        if(a.builtHash.toLowerCase()!==live) continue; if(!VERIFIERS[a.party]) continue;
+        if(!(await verifyAtt(a,VERIFIERS[a.party]))) continue; m.add(a.party); }
+      return m.size>=QUORUM; }catch(_){ return false; } }
+
+  /* FAIL-SAFE: an absent SOUL must NEVER resolve to the founder. A first-time
+     visitor has SOUL=null (set below, and only restored from localStorage if
+     present), so `SOUL||'kingbeelovis'` would hand every visitor founder rights
+     with the refusal hidden. Require a real SOUL. */
+  function registrantAllowed(r){ return HARDENED || (!!r && FOUNDER.has(r)); }
+
+  /* SINGLE OWNER of #sign-btn's disabled state. Nothing else may write it.
+     Cowork's note said refreshGate "runs last so it's authoritative" — it does
+     not: the pre-existing consent handler is a DOCUMENT-level delegated
+     listener, so it fires on the BUBBLE phase, after these element-level ones,
+     and its unconditional `btn.disabled=!checked` overwrote this decision
+     entirely. Ordering is not ownership. */
+  function refreshGate(){
+    var btn=document.getElementById('sign-btn'); if(!btn) return;
+    var ack=document.getElementById('ack');
+    var cc=document.getElementById('consent-check');
+    var reg=(typeof SOUL!=='undefined'&&SOUL)?SOUL:null;
+    var allowed=registrantAllowed(reg);
+    var refusal=document.getElementById('nf-refusal');
+    if(refusal) refusal.style.display=allowed?'none':'block';
+    var okConsent=cc?cc.checked:true, okAck=ack?ack.checked:true;
+    var ok=okConsent&&okAck&&allowed;
+    btn.disabled=!ok; btn.style.opacity=ok?'1':'.4';
+    /* A dead button with three causes and one explanation is a trap: name the
+       unmet condition rather than leaving the user to guess which. */
+    var why=document.getElementById('gate-why');
+    if(why){
+      var msg='';
+      if(!allowed)          msg='Blocked: registration is limited to the founder\'s own accounts until hardening ships.';
+      else if(!okConsent)   msg='Tick “one name, one soul” to continue.';
+      else if(!okAck)       msg='Tick the custody acknowledgment above to continue.';
+      why.textContent=msg; why.style.display=msg?'block':'none';
+    }
+  }
+  document.addEventListener('change',function(e){
+    if(e.target&&(e.target.id==='ack'||e.target.id==='consent-check')) refreshGate();
+  });
+  refreshGate();                                   // LOCKED first (safe default)
+  deriveHardened().then(function(v){ HARDENED=v; refreshGate(); });
   function flash(id,txt){ var el=$(id); el.textContent=txt; el.classList.remove('flash');
     void el.offsetWidth; el.classList.add('flash'); }
 
@@ -468,17 +553,18 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
   }
   // consent → enable sign
   document.addEventListener('change',function(e){
-    if(e.target&&e.target.id==='consent-check'){
-      var btn=$('sign-btn');
-      btn.disabled=!e.target.checked;
-      btn.style.opacity=e.target.checked?'1':'.4';
-    }
+    /* refreshGate() is the SINGLE owner of #sign-btn.disabled — see its
+       definition. This handler used to write the flag directly and, being
+       document-level, ran on the bubble phase AFTER refreshGate and undid it. */
+    if(e.target&&e.target.id==='consent-check'){ refreshGate(); }
   });
   // sign → compose the action
   document.addEventListener('click',function(e){
     if(e.target&&e.target.id==='sign-btn'&&!e.target.disabled){
+      var _a=document.getElementById('ack'); if(!_a||!_a.checked) return; // custody acknowledgment
       var n=strip($('q').value);
       var registrant=SOUL||'kingbeelovis';
+      if(!registrantAllowed(SOUL||null)) return; // non-founder refused until deriveHardened() is true
       var out=$('sign-out'); out.style.display='block';
       var txData = JSON.stringify({actions:[{account:"kingbeelovis",name:"registeracc",authorization:[{actor:registrant,permission:"active"}],data:{registrant:registrant,domain_name:n,target:registrant}}]},null,2);
       var cleosCmd = 'cleos -u https://eos.api.eosnation.io push action kingbeelovis registeracc' + String.fromCharCode(10) +
@@ -487,7 +573,7 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
         '<pre style="border-color:var(--leaf);font-size:10px">' + txData + '</pre>' +
         '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">' +
         '<a id="dl-json" download="register-' + n + 'b.json" style="background:#1a3a1a;color:var(--leaf);border:1px solid var(--leaf);border-radius:8px;padding:10px 18px;font:12px IBM Plex Mono,monospace;cursor:pointer;text-decoration:none">D download .json</a>' +
-        '<a href="https://unicove.com/en/vaulta/contract/kingbeelovis/registeracc?registrant=' + registrant + '&domain_name=' + n + '&target=' + registrant + '" target="_blank" rel="noopener" style="background:#0d1a15;color:var(--cyan);border:1px solid var(--cyan);border-radius:8px;padding:10px 18px;font:12px IBM Plex Mono,monospace;cursor:pointer;text-decoration:none">OPEN IN UNICOVE</a>' +
+        '<a href="' + unicoveAction('registeracc', {registrant: registrant, domain_name: n, target: registrant}) + '" target="_blank" rel="noopener" style="background:#0d1a15;color:var(--cyan);border:1px solid var(--cyan);border-radius:8px;padding:10px 18px;font:12px IBM Plex Mono,monospace;cursor:pointer;text-decoration:none">OPEN IN UNICOVE</a>' +
         '</div>' +
         '<div style="font-size:9px;color:var(--dim);margin-top:6px">download for Anchor/cleos · Unicove opens the action pre-filled with your wallet connected · the manual step IS the bot protection</div>';
       // JSON download (Blob)
