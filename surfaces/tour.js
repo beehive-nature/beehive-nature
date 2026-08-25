@@ -18,13 +18,72 @@
     '—',
     ['🎓','university/'],['🐝','bqueenbee-live.html'],['🎧','listening.html'],['⬡','bfood.html'],['🏛','bsymposium.html'],['⚙','stack.html'],['🐜','bantfarm.html'],['♫','bset.html'],['🪩','plur.html'],['🎪','festival/'],['🎨','buzz-studio.html'],['⚒','forge/']];
   var b=document.createElement('nav');b.id='tbar';
-  b.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:9998;display:flex;flex-wrap:nowrap;overflow-x:auto;gap:0 4px;padding:7px 12px;background:#111;border-top:1px solid #333;font:11px monospace;-webkit-overflow-scrolling:touch;scrollbar-width:none;white-space:nowrap;max-height:46px;box-sizing:border-box;-webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 34px),transparent 100%);mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 34px),transparent 100%)';
+  /* THE BAR HAS TWO SHAPES (founder order, 2026-08-25).
+     A 39-link horizontal strip was 2,272px wide: SIX links reachable at 390px,
+     83% of the nav off-screen, and still 46% hidden at 1280px. Every link
+     resolved — none of them could be FOUND. Reachable and findable are not the
+     same property, and nothing we had asserted told them apart.
+     COLLAPSED = the strip, unchanged, for the wide case where it fits.
+     EXPANDED  = the same DOM wrapped into a grid, so all 39 are on screen at
+     once, grouped on the '—' dividers that were already there. Same markup, same
+     links, same active state — CSS decides the shape, so there is one nav to
+     maintain and not two. */
+  b.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:9998;display:flex;flex-wrap:nowrap;overflow-x:auto;gap:0 4px;padding:7px 12px;background:#0b0d0c;border-top:1px solid #1c211e;font:500 12px/1 ui-sans-serif,system-ui,sans-serif;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 34px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 34px),transparent)';
   b.innerHTML=L.map(function(x){
-    if(x==='—')return '<span style="align-self:stretch;width:1px;background:#333;margin:0 4px;flex-shrink:0"></span>';
+    if(x==='—')return '<span class="tsep" style="align-self:stretch;width:1px;background:#333;margin:0 4px;flex-shrink:0"></span>';
     var h=(R+x[1])===location.pathname.replace(/index.html$/,'');
     return '<a href="'+R+x[1]+'" style="color:'+(h?'#6f6':'#888')+';background:'+(h?'#16241d':'transparent')+';box-shadow:'+(h?'inset 0 0 0 1px #2b4a3b':'none')+';border-radius:6px;text-decoration:none;padding:6px 9px;min-height:32px;display:inline-flex;align-items:center;flex-shrink:0">'+x[0]+'</a>';
   }).join('');
   document.body.appendChild(b);
+
+  /* the toggle: only earns its place when the strip actually overflows */
+  var tg=document.createElement('button');tg.id='tbarMore';tg.type='button';
+  tg.setAttribute('aria-controls','tbar');tg.setAttribute('aria-expanded','false');
+  tg.setAttribute('aria-label','Show all navigation');
+  tg.style.cssText='position:fixed;right:6px;z-index:9999;min-width:34px;min-height:32px;border:1px solid #2b4a3b;border-radius:6px;background:#0f1512;color:#8fbf9f;font:600 13px/1 ui-sans-serif,system-ui,sans-serif;cursor:pointer;display:none;align-items:center;justify-content:center';
+  document.body.appendChild(tg);
+
+  /* MOBILE-FIRST: if the strip cannot fit, the grid is the DEFAULT, not a tap away.
+     All 39 land on screen at 390px; the toggle then COLLAPSES to the strip. */
+  var open=null;
+  function seatToggle(){ tg.style.bottom=Math.max(7,Math.round((b.getBoundingClientRect().height-32)/2))+'px'; }
+  function overflowing(){ return b.scrollWidth>b.clientWidth+2; }
+  function apply(){
+    if(open){
+      b.style.flexWrap='wrap'; b.style.overflowX='hidden'; b.style.overflowY='auto';
+      b.style.maxHeight='78vh'; b.style.rowGap='6px'; b.style.paddingRight='46px';
+      b.style.webkitMaskImage='none'; b.style.maskImage='none';
+      /* dividers become full-width rules, so each group starts its own row */
+      [].forEach.call(b.querySelectorAll('.tsep'),function(s){
+        s.style.width='100%';s.style.height='1px';s.style.alignSelf='auto';s.style.margin='2px 0';});
+      tg.textContent='×'; tg.style.background='#0f1512'; tg.style.color='#8fbf9f'; tg.setAttribute('aria-expanded','true'); tg.setAttribute('aria-label','Hide navigation');
+    }else{
+      b.style.flexWrap='nowrap'; b.style.overflowX='auto'; b.style.overflowY='hidden';
+      b.style.maxHeight=''; b.style.rowGap=''; b.style.paddingRight='';
+      b.style.webkitMaskImage='linear-gradient(90deg,#000 calc(100% - 34px),transparent)';
+      b.style.maskImage='linear-gradient(90deg,#000 calc(100% - 34px),transparent)';
+      [].forEach.call(b.querySelectorAll('.tsep'),function(s){
+        s.style.width='1px';s.style.height='';s.style.alignSelf='stretch';s.style.margin='0 4px';});
+      tg.textContent='☰'; tg.style.background='#16241d'; tg.style.color='#6f6'; tg.setAttribute('aria-expanded','false'); tg.setAttribute('aria-label','Show all navigation');
+    }
+    seatToggle();
+  }
+  function sync(){ tg.style.display = (open||overflowing()) ? 'inline-flex' : 'none'; seatToggle(); }
+  tg.addEventListener('click',function(){ open=!open; apply(); sync(); });
+  addEventListener('resize',function(){ if(!open) sync(); else seatToggle(); });
+  /* DRAWER, not a permanent grid. Open-by-default measured 379px at 390px — 47%
+     of the viewport, fixed, forever. That trades "cannot find a link" for "cannot
+     see the page", which is not a better nav. Closed is the compact strip; ONE tap
+     opens every link at once. The toggle is always visible while the strip
+     overflows, so the drawer is discoverable rather than hidden. */
+  /* MEASURED, not chosen: default-open renders a 379px grid (47% of a 390x800
+     viewport) that INTERCEPTS POINTER EVENTS over the page beneath it. The suite
+     goes from 74 passed / 0 failed to 14 pointer-interception errors and a crash;
+     a reader hits the same wall, silently. So the grid is one tap away, not the
+     resting state — all 39 on screen at 390px with no scroll the moment it opens. */
+  open = false;
+  apply(); sync();
+
   document.body.style.paddingBottom='52px'; /* initial only; agent-dock fit() refines to the measured bar */
 
   /* THE EXTERNAL-LINK LAW (founder, 2026-08-21): every hyperlink that leaves the dApp
