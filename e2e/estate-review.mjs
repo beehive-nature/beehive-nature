@@ -21,9 +21,19 @@ const server = createServer(async (req, res) => {
        rooted at repo root). Serving the tree at root alone made those 404 on every
        page — a harness artifact, not a site bug. Stripped here so the crawl matches
        production instead of punishing it. */
+    const orig = rel;
     rel = rel.replace(/^surfaces\//, '');
     const p = join(SURF, rel);
-    const body = await readFile((extname(p) ? p : join(p, 'index.html')));
+    /* Repo-root fallback: on Pages the site root IS the repo root, so surfaces
+       may import assets that live beside surfaces/, not inside it —
+       forge/room.html's '../../forge/visual/shared.js' resolves to
+       /forge/visual/shared.js and is 200 on production. Serving only surfaces/
+       made that a 404 here and failed the crawl intermittently (the dynamic
+       import raced the 150ms settle window) — a harness artifact, same class
+       as the /surfaces/ alias above. */
+    let body;
+    try { body = await readFile((extname(p) ? p : join(p, 'index.html'))); }
+    catch { const q = join(ROOT, orig); body = await readFile((extname(q) ? q : join(q, 'index.html'))); }
     res.writeHead(200, { 'content-type': MIME[extname(p)] || 'application/octet-stream', 'cache-control': 'no-store' });
     res.end(body);
   } catch { res.writeHead(404); res.end('nf'); }
