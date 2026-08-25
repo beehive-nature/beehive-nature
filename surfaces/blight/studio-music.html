@@ -7,57 +7,94 @@
 <meta http-equiv="Expires" content="0">
 <title>bLighT Studio — music creation MVP (interoperable with the ERC-20i family)</title>
 <style>
-:root{--bg:#0A0A0F;--crt:#00FF41;--cyan:#00E5FF;--pink:#FF3DB0;--dim:#5a6478}
+/* depth ladder: void #08090d → panel #0e1016 → inset #151a26 (structural, never decorative) */
+:root{--void:#08090d;--panel:#0e1016;--inset:#151a26;--crt:#00FF41;--cyan:#00E5FF;--green:#00FF41;--gold:#FFD60A;--pink:#FF3DB0;--dim:#5a6478;--line:#1e2230}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:#cfe8d6;font:13px/1.6 'IBM Plex Mono',monospace;padding:24px 16px 64px;
-  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="97"><g fill="none" stroke="%231a1a2a"><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z"/><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z" transform="translate(28,48)"/></g></svg>')}
+body{background:var(--void);color:#cfe8d6;font:13px/1.6 'IBM Plex Mono',monospace;padding:22px 14px 84px;
+  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="97"><g fill="none" stroke="%23151a26"><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z"/><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z" transform="translate(28,48)"/></g></svg>')}
 .wrap{max-width:940px;margin:0 auto}
-h1{color:var(--cyan);font-size:20px;text-shadow:0 0 10px rgba(0,229,255,.4)}
-.sub{color:var(--dim);font-size:11.5px;margin:6px 0 16px;line-height:1.7}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
-input,select,button{font:inherit;background:#0d0d15;color:var(--crt);border:1px solid #262638;padding:7px 10px;border-radius:4px}
-button{cursor:pointer;border-color:var(--crt)} button:hover{background:var(--crt);color:#000}
+/* the headline carries the argument: system cyan flows into living-sound green */
+h1{font-size:clamp(19px,5vw,26px);font-weight:600;letter-spacing:.02em;line-height:1.25;
+  background:linear-gradient(95deg,var(--cyan) 0%,#22e9a3 55%,var(--green) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--dim);font-size:11.5px;margin:8px 0 14px;line-height:1.75}
+/* hero number: the whole song, live-counted in bytes */
+.hero{display:flex;gap:18px;align-items:flex-end;background:var(--panel);border:1px solid var(--line);
+  border-radius:14px;padding:16px 20px;margin-bottom:14px;flex-wrap:wrap}
+.hero .num{font-size:44px;font-weight:700;color:var(--gold);line-height:1;letter-spacing:-.02em}
+.hero .cap{font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--dim);margin-top:6px;line-height:1.7}
+.hero .cellnum{margin-left:auto;text-align:right}
+.hero .cellnum .num{font-size:26px;color:var(--cyan)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:14px}
+.panel h2{font-size:10px;text-transform:uppercase;letter-spacing:.16em;color:var(--dim);font-weight:400;margin-bottom:10px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+input,select,button{font:inherit;background:var(--inset);color:var(--crt);border:1px solid #262638;padding:8px 11px;border-radius:8px}
+button{cursor:pointer;border-color:#2f5a3a} button:hover{background:var(--crt);color:#000}
 button.stop{border-color:var(--pink);color:var(--pink)} button.stop:hover{background:var(--pink);color:#000}
-button.ghost{border-color:#262638;color:var(--dim)} button.ghost:hover{background:#1a1a2a;color:var(--cyan)}
-#grid{display:grid;grid-template-columns:repeat(18,1fr);gap:3px;margin:12px 0}
-.cell{aspect-ratio:1;border:1px solid #262638;background:#0d0d15;border-radius:3px;cursor:pointer;min-width:0}
+button.ghost{border-color:#262638;color:var(--dim)} button.ghost:hover{background:var(--inset);color:var(--cyan)}
+#grid{display:grid;grid-template-columns:repeat(18,1fr);gap:3px;overflow-x:auto;padding-bottom:4px}
+.cell{aspect-ratio:1;border:1px solid #262638;background:var(--inset);border-radius:3px;cursor:pointer;min-width:15px}
 .cell.on{background:var(--crt);box-shadow:0 0 8px rgba(0,255,65,.5)}
 .cell.now{outline:2px solid var(--cyan)}
 .deg{grid-column:span 2;font-size:9px;color:var(--dim);align-self:center;text-align:left}
 #status{font-size:11.5px;min-height:20px;color:#7e8c85}
-.foot{margin-top:18px;color:var(--dim);font-size:10.5px;line-height:1.7}
+.fam{display:flex;flex-wrap:wrap;gap:6px}
+.fam span{background:var(--inset);border:1px solid #262638;border-radius:999px;padding:3px 10px;font-size:10.5px;color:var(--dim)}
+.fam span b{color:var(--cyan);font-weight:400}
+.foot{margin-top:16px;color:var(--dim);font-size:10.5px;line-height:1.8}
+.foot b{color:#cfe8d6;font-weight:400}
 a{color:var(--cyan)}
 </style>
 </head>
 <body><div class="wrap">
-<h1>bLighT Studio <span style="color:var(--dim)">// music creation MVP</span></h1>
-<div class="sub">A 16-step sequencer that speaks the ERC-20i family's language: import any piece's on-chain
-scale, compose, loop live, export the score as an inscription-ready payload. Console tiers (Beginner/
-Experienced/Pro, gated by your holdings) come with the booth — this MVP ships everything open with that noted.</div>
+<h1>the song is a seed</h1>
+<div class="sub">bLighT Studio — a 16-step sequencer that speaks the ERC-20i family's language: import any piece's
+on-chain scale, compose, loop live, export the score as an inscription-ready payload. Same score, same song,
+forever — the seed doctrine, now for your own music.</div>
 
-<div class="row">
-  <select id="scale"></select>
-  <select id="root"></select>
-  <label style="color:var(--dim);font-size:11px">BPM <input id="bpm" type="number" value="132" min="60" max="200" style="width:70px"></label>
-  <select id="wave"><option>triangle</option><option>square</option><option>sawtooth</option><option>sine</option></select>
-  <button id="play">▶ play loop</button>
-  <button id="stop" class="stop">■</button>
-  <button id="clear" class="ghost">clear</button>
-  <button id="dice" class="ghost">🎲 randomize</button>
-  <button id="export" class="ghost">⬇ export score (JSON)</button>
-  <button id="link" class="ghost">🔗 copy song-link</button>
+<div class="hero">
+  <div><div class="num" id="heroBytes">— B</div><div class="cap">the whole song<br>inscription-ready</div></div>
+  <div class="cellnum"><div class="num" id="heroCells">0/128</div><div class="cap">cells lit<br>8 degrees × 16 steps</div></div>
+  <div class="cellnum"><div class="num" style="font-size:26px;color:var(--green)" id="heroBpm">132</div><div class="cap">bpm<br>live</div></div>
 </div>
-<div class="row">
-  <input id="impAddr" placeholder="import: any family contract 0x…" style="flex:1;min-width:240px;color:var(--cyan)">
-  <input id="impSeed" type="number" value="1000" min="1" style="width:110px;color:var(--cyan)" placeholder="seed">
-  <button id="import" class="ghost">⬆ pull its scale from chain</button>
+
+<div class="panel">
+  <h2>console</h2>
+  <div class="row">
+    <select id="scale"></select>
+    <select id="root"></select>
+    <label style="color:var(--dim);font-size:11px">BPM <input id="bpm" type="number" value="132" min="60" max="200" style="width:70px"></label>
+    <select id="wave"><option>triangle</option><option>square</option><option>sawtooth</option><option>sine</option></select>
+    <button id="play">▶ play loop</button>
+    <button id="stop" class="stop">■</button>
+    <button id="clear" class="ghost">clear</button>
+    <button id="dice" class="ghost">🎲 randomize</button>
+    <button id="export" class="ghost">⬇ export score (JSON)</button>
+    <button id="link" class="ghost">🔗 copy song-link</button>
+  </div>
+  <div class="row">
+    <input id="impAddr" placeholder="import: any family contract 0x…" style="flex:1;min-width:240px;color:var(--cyan)">
+    <input id="impSeed" type="number" value="1000" min="1" style="width:110px;color:var(--cyan)" placeholder="seed">
+    <button id="import" class="ghost">⬆ pull its scale from chain</button>
+  </div>
+  <div id="status">ready — click cells to compose. rows are scale degrees (low → high).</div>
 </div>
-<div id="status">ready — click cells to compose. rows are scale degrees (low → high).</div>
-<div id="grid"></div>
-<div class="foot">Interop: <b>import</b> reads getMeta from any ERC-20i family contract (MiDi, FUNGI, FROGGI, JELLI…) and
-adopts its scale + colors. <b>Export</b> writes the score as the JSON payload the encoder will inscribe:
-{scale, root, bpm, wave, steps[]}. Same score, same song, forever — the seed doctrine, now for your own music.
-<span id="impnote"></span></div>
+
+<div class="panel">
+  <h2>the score — 8 degrees × 16 steps</h2>
+  <div id="grid"></div>
+</div>
+
+<div class="panel">
+  <h2>the family this studio speaks</h2>
+  <div class="fam" id="famRail"></div>
+</div>
+
+<div class="foot"><b>Interop:</b> <b>import</b> reads getMeta from any ERC-20i family contract (MiDi, FUNGI, FROGGI, JELLI…)
+and adopts its scale + colors. <b>Export</b> writes the score as the JSON payload the encoder will inscribe:
+{scale, root, bpm, wave, steps[]}. Console tiers (Beginner/Experienced/Pro, gated by holdings) come with the
+booth — this MVP ships everything open with that noted. <span id="impnote"></span></div>
+
 <script>
 const SCALES={'major':[0,2,4,5,7,9,11],'harmonic major':[0,2,4,5,7,8,11],'minor':[0,2,3,5,7,8,10],
  'harmonic minor':[0,2,3,5,7,8,11],'melodic minor':[0,2,3,5,7,9,11],'pentatonic':[0,3,5,7,10],
@@ -90,6 +127,7 @@ let pattern=Array.from({length:DEGREES},()=>Array(STEPS).fill(false));
 let ac=null, timer=null, playing=false, imported={};
 $('scale').innerHTML=Object.keys(SCALES).map(s=>'<option'+(s==='harmonic major'?' selected':'')+'>'+s+'</option>').join('');
 $('root').innerHTML=NOTES.map((n,i)=>'<option value="'+i+'"'+(i===9?' selected':'')+'>'+n+'</option>').join('');
+$('famRail').innerHTML=Object.values(KNOWN).map(n=>'<span><b>◆</b> '+n+'</span>').join('');
 function buildGrid(){
   const g=$('grid'); g.innerHTML='';
   for(let d=DEGREES-1;d>=0;d--){
@@ -98,10 +136,20 @@ function buildGrid(){
       const c=document.createElement('div'); c.className='cell'+(pattern[d][s]?' on':'');
       c.dataset.d=d; c.dataset.s=s;
       if(imported.colors){ c.style.borderColor=(d%2?imported.colors[0]:imported.colors[1])+'55'; }
-      c.onclick=()=>{ pattern[d][s]=!pattern[d][s]; c.classList.toggle('on',pattern[d][s]); };
+      c.onclick=()=>{ pattern[d][s]=!pattern[d][s]; c.classList.toggle('on',pattern[d][s]); updateHero(); };
       g.appendChild(c);
     }
   }
+  updateHero();
+}
+function score(){ return {v:1,scale:$('scale').value,root:NOTES[+$('root').value],bpm:+$('bpm').value,
+  wave:$('wave').value,steps:pattern.map(r=>r.map(c=>c?1:0).join('')).join('|'),imported:imported.meta||null}; }
+function updateHero(){
+  const lit=pattern.reduce((a,r)=>a+r.filter(Boolean).length,0);
+  const bytes=JSON.stringify(score()).length;
+  $('heroBytes').textContent=bytes+' B';
+  $('heroCells').textContent=lit+'/128';
+  $('heroBpm').textContent=$('bpm').value;
 }
 const freq=(semi)=>440*Math.pow(2,(semi-69)/12);
 function step(){
@@ -144,8 +192,6 @@ $('dice').onclick=()=>{
   $('root').value=Math.floor(Math.random()*12);
   buildGrid(); $('status').textContent='rolled a fresh song — press play';
 };
-function score(){ return {v:1,scale:$('scale').value,root:NOTES[+$('root').value],bpm:+$('bpm').value,
-  wave:$('wave').value,steps:pattern.map(r=>r.map(c=>c?1:0).join('')).join('|'),imported:imported.meta||null}; }
 $('export').onclick=()=>{
   const b=new Blob([JSON.stringify(score(),null,2)],{type:'application/json'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(b);
@@ -182,6 +228,7 @@ $('import').onclick=async()=>{
   }
   st.style.color='#e8b84a'; st.textContent='import failed — that contract may not speak getMeta (TRUFFI and PEPI keep traits in their SVGs)';
 };
+$('bpm').addEventListener('input',updateHero);
 const q=new URLSearchParams(location.search);
 if(q.get('score')){ try{
   const s=JSON.parse(atob(q.get('score')));

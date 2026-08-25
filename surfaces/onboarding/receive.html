@@ -45,6 +45,12 @@ h1 b{background:var(--rainbow);-webkit-background-clip:text;background-clip:text
 .ratechip{display:inline-block;border:1px solid var(--line);border-radius:var(--radius-pill);
   padding:3px 11px;font-size:.68rem;font-weight:700;color:var(--sovereign-soft);margin-top:4px}
 .sub{color:var(--ink-mut);margin:0 0 var(--s4);font-size:.9rem}
+.hero{display:flex;gap:22px;align-items:flex-end;background:var(--bg-card);border:1px solid var(--line);
+  border-radius:var(--radius);padding:14px 20px;margin-bottom:var(--s4);flex-wrap:wrap}
+.hero .num{font-size:38px;font-weight:700;color:var(--b-value);line-height:1;letter-spacing:-.02em;font-family:var(--font-mono)}
+.hero .cap{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-dim);margin-top:6px;line-height:1.7}
+.hero .side{margin-left:auto;text-align:right}
+.hero .side .num{font-size:24px;color:var(--info)}
 .grid{display:grid;grid-template-columns:1fr;gap:var(--s3)}
 @media(min-width:56rem){.grid{grid-template-columns:1fr 1fr}}
 .panel{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);padding:var(--s3)}
@@ -105,6 +111,13 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
   <p class="sub">Point this camera at a BNR code on another screen. The payload arrives as a
     <b>bLiGhTbeAM</b> — light, never network — and stays on this device. This device
     <b>answers back</b>: its screen becomes the return beam.</p>
+
+  <!-- hero number: the page's argument in one figure — the beam is light, not network -->
+  <div class="hero">
+    <div><div class="num">0 B</div><div class="cap">over the network<br>the beam is light</div></div>
+    <div class="side"><div class="num">~588</div><div class="cap">bits per second<br>through the camera</div></div>
+    <div class="side"><div class="num">2</div><div class="cap">ways<br>this screen also answers</div></div>
+  </div>
 
   <div class="guide">
     <b id="guide-title">Camera first.</b>

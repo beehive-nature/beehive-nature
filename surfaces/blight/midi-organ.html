@@ -7,55 +7,79 @@
 <meta http-equiv="Expires" content="0">
 <title>bLighT Organ — the seed becomes sound (for MiDi, the youngest lost boy)</title>
 <style>
-:root{--bg:#0A0A0F;--crt:#00FF41;--cyan:#00E5FF;--pink:#FF3DB0;--dim:#5a6478}
+/* depth ladder: void #08090d → panel #0e1016 → inset #151a26 */
+:root{--void:#08090d;--panel:#0e1016;--inset:#151a26;--crt:#00FF41;--cyan:#00E5FF;--gold:#FFD60A;--green:#00FF41;--pink:#FF3DB0;--dim:#5a6478;--line:#1e2230}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:#cfe8d6;font:13px/1.6 'IBM Plex Mono',monospace;padding:26px 18px 60px;
-  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="97"><g fill="none" stroke="%231a1a2a"><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z"/><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z" transform="translate(28,48)"/></g></svg>')}
+body{background:var(--void);color:#cfe8d6;font:13px/1.6 'IBM Plex Mono',monospace;padding:22px 14px 84px;
+  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="97"><g fill="none" stroke="%23151a26"><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z"/><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z" transform="translate(28,48)"/></g></svg>')}
 .wrap{max-width:760px;margin:0 auto}
-h1{color:var(--cyan);font-size:20px;text-shadow:0 0 10px rgba(0,229,255,.4)}
-.sub{color:var(--dim);font-size:11.5px;margin:6px 0 18px;line-height:1.7}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
-input,select,button{font:inherit;background:#0d0d15;color:var(--crt);border:1px solid #262638;padding:8px 12px;border-radius:4px}
+/* the headline carries the argument: the gold record of a fallen artist flows into living green sound */
+h1{font-size:clamp(19px,5vw,26px);font-weight:600;letter-spacing:.02em;line-height:1.25;
+  background:linear-gradient(95deg,var(--gold) 0%,#b8e95e 55%,var(--green) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--dim);font-size:11.5px;margin:8px 0 14px;line-height:1.75}
+/* hero number: days the contracts have sat silent — and still answer. live-computed. */
+.hero{display:flex;gap:18px;align-items:flex-end;background:var(--panel);border:1px solid var(--line);
+  border-radius:14px;padding:16px 20px;margin-bottom:14px;flex-wrap:wrap}
+.hero .num{font-size:44px;font-weight:700;color:var(--gold);line-height:1;letter-spacing:-.02em}
+.hero .cap{font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--dim);margin-top:6px;line-height:1.7}
+.hero .side{margin-left:auto;text-align:right}
+.hero .side .num{font-size:26px;color:var(--green)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:14px}
+.panel h2{font-size:10px;text-transform:uppercase;letter-spacing:.16em;color:var(--dim);font-weight:400;margin-bottom:10px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:0}
+input,select,button{font:inherit;background:var(--inset);color:var(--crt);border:1px solid #262638;padding:8px 12px;border-radius:8px}
 input[type=number]{width:130px;color:var(--cyan)}
-button{cursor:pointer;border-color:var(--crt)} button:hover{background:var(--crt);color:#000}
+button{cursor:pointer;border-color:#2f5a3a} button:hover{background:var(--crt);color:#000}
 button.stop{border-color:var(--pink);color:var(--pink)} button.stop:hover{background:var(--pink);color:#000}
-button.ghost{border-color:#262638;color:var(--dim)} button.ghost:hover{background:#1a1a2a;color:var(--cyan)}
-#stage{background:#000;border:1px solid #1a1a2a;border-radius:6px;height:150px;display:flex;align-items:flex-end;
-  gap:3px;padding:10px;margin-bottom:12px;overflow:hidden}
+button.ghost{border-color:#262638;color:var(--dim)} button.ghost:hover{background:var(--inset);color:var(--cyan)}
+#stage{background:#000;border:1px solid #262638;border-radius:10px;height:150px;display:flex;align-items:flex-end;
+  gap:3px;padding:10px;margin-top:12px;overflow:hidden}
 .bar{flex:1;min-width:6px;border-radius:2px 2px 0 0;transition:height .12s ease;height:8%}
-#meta{font-size:11.5px;line-height:2;margin-bottom:10px;min-height:24px}
-.chip{display:inline-block;border:1px solid #2a2a3d;border-radius:4px;padding:2px 8px;margin:2px 6px 2px 0;font-size:11px}
-.hint{color:var(--dim);font-size:11px;margin:10px 0;line-height:1.7}
-.hint b{color:#cfe8d6}
-.foot{margin-top:20px;color:var(--dim);font-size:10.5px;line-height:1.8}
+#meta{font-size:11.5px;line-height:2;margin-top:10px;min-height:24px}
+.chip{display:inline-block;background:var(--inset);border:1px solid #2a2a3d;border-radius:999px;padding:2px 10px;margin:2px 6px 2px 0;font-size:11px}
+.foot{margin-top:16px;color:var(--dim);font-size:10.5px;line-height:1.8}
+.foot b{color:#cfe8d6;font-weight:400}
 </style>
 </head>
 <body><div class="wrap">
-<h1>bLighT Organ <span style="color:var(--dim)">// the seed becomes sound</span></h1>
-<div class="sub">The music-inscription modality, given wind. Traits are read live from the MiDi contracts —
-deployed May 2024, heard for minutes, silent since June 3. The seed is the score: it picks the key,
+<h1>the chain still answers</h1>
+<div class="sub">bLighT Organ — the music-inscription modality, given wind. Traits are read live from the MiDi
+contracts — deployed May 2024, heard for minutes, silent since June 3. The seed is the score: it picks the key,
 walks the scale, sets the tempo. Same seed, same song, forever. Credit to the fallen anon artist.</div>
 
-<div class="row">
-  <select id="c"></select>
-  <input id="s" type="number" value="1000" min="1" title="the seed — every number is a different song">
-  <button id="read">read its traits</button>
-  <button id="play">▶ hear it</button>
-  <button id="stop" class="stop">■</button>
-  <button id="roll" class="ghost" title="let the machine pick a song">🎲 roll a seed</button>
-  <button id="link" class="ghost" title="copy a link that opens this exact song">🔗 copy song-link</button>
+<div class="hero">
+  <div><div class="num" id="heroDays">—</div><div class="cap">days silent<br>still answering</div></div>
+  <div class="side"><div class="num" id="heroSeeds">∞</div><div class="cap">seeds · each one<br>a different song</div></div>
 </div>
 
-<div id="stage"></div>
-<div id="meta">pick a deploy and press <b>read</b> — the chain still answers her, two years silent.</div>
+<div class="panel">
+  <h2>the bench</h2>
+  <div class="row">
+    <select id="c"></select>
+    <input id="s" type="number" value="1000" min="1" title="the seed — every number is a different song">
+    <button id="read">read its traits</button>
+    <button id="play">▶ hear it</button>
+    <button id="stop" class="stop">■</button>
+    <button id="roll" class="ghost" title="let the machine pick a song">🎲 roll a seed</button>
+    <button id="link" class="ghost" title="copy a link that opens this exact song">🔗 copy song-link</button>
+  </div>
+  <div id="stage"></div>
+  <div id="meta">pick a deploy and press <b>read</b> — the chain still answers her, two years silent.</div>
+</div>
 
-<div class="hint"><b>Tinker:</b> the number is the composition. Change one digit and the song changes —
-the key, the melody walk, the bar colors, all of it derives from that one number. Roll the dice for a
-song you've never heard; when you find one you love, copy the song-link — that number <i>is</i> the record.</div>
+<div class="panel">
+  <h2>why this page exists</h2>
+  <div style="font-size:11.5px;color:#9fb3a5;line-height:1.9">
+  The number is the composition. Change one digit and the song changes — the key, the melody walk, the bar
+  colors, all of it derives from that one number. Roll the dice for a song you've never heard; when you find
+  one you love, copy the song-link — that number <i>is</i> the record. Every seed here is a candidate
+  inscription; this bench is the calibration floor for the encoder to come.</div>
+</div>
 
-<div class="foot">Rendering: scale name → interval set (13 scales mapped); seed % 12 picks the key; seed bits walk
-the scale; duration → note length; barColorTop/Bottom paint the bars. This is the calibration bench for the
-encoder to come — every seed here is a candidate inscription.</div>
+<div class="foot"><b>Rendering:</b> scale name → interval set (13 scales mapped); seed % 12 picks the key; seed bits walk
+the scale; duration → note length; barColorTop/Bottom paint the bars. Census 2026-08-20: all three deploys
+answer and render today (two-source verified) — #1 is the healthiest, ownership RENOUNCED, art frozen by code.</div>
 <script>
 /* Census 2026-08-20 correction: "fallen" is the ARTIST's story, not the contracts'.
    All three answer and render today (two-source verified). #1 is the healthiest —
@@ -91,6 +115,8 @@ const SCALES={'major':[0,2,4,5,7,9,11],'harmonic major':[0,2,4,5,7,8,11],'minor'
 let META=null,voices=[],ac=null;
 const $=id=>document.getElementById(id);
 $('c').innerHTML=DEPLOYS.map((d,i)=>'<option value="'+i+'">'+d[0]+'</option>').join('');
+// hero: days since the last heard note (2024-06-03), live
+$('heroDays').textContent=Math.floor((Date.now()-new Date('2024-06-03T00:00:00Z').getTime())/86400000);
 const q=new URLSearchParams(location.search);
 if(q.get('seed')) $('s').value=q.get('seed');
 if(q.get('d')) $('c').value=q.get('d');
