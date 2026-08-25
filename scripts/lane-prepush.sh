@@ -58,6 +58,17 @@ echo
 #    is the structural prevention of Case B; and this script never runs a
 #    two-dot diff. secret-scan.sh TREE mode is directionless and immune —
 #    this law binds the DELTA scan.
+#    SIGN INVERSION (cc2 addendum): the reversed two-dot diff inverts signs —
+#    peer ADDITIONS appear as your deletions, peer DELETIONS appear as your
+#    ADDITIONS. The delta scan reads ^+ lines, so a secret surfacing through
+#    a two-dot diff is one a peer had ALREADY REMOVED: the finding is wrong
+#    about the owner AND the tense, and unfalsifiable against current state
+#    (you grep the tree, find nothing, cannot tell false alarm from
+#    concealment) — and may cost a peer a rotation they already performed.
+#    ESCALATION RULE: a secret-scan hit you cannot locate in the working
+#    tree → CHECK YOUR DOT COUNT BEFORE YOU ESCALATE. Live receipt on this
+#    box: the reversed diff showed "+ ad-hoc smoke… not part of the
+#    committed suite" — a line main had replaced; grep of every tree: 0.
 MB=$(git merge-base "main" "$LANE" 2>/dev/null)
 MT=$(git rev-parse main 2>/dev/null)
 if [ "$MB" = "$MT" ]; then
