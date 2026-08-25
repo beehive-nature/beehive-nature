@@ -39,7 +39,17 @@ for (const l of lines) {
 }
 if (cur) steps.push(cur);
 
+// THE STATIC JOB DECLARES NO needs: (zA completion ruling, 2026-08-24): its
+// immunity to a sibling suite red is one line from being lost the first time
+// someone orders it after the node job. Asserted here so that line cannot
+// land invisibly. Fails closed if the static job cannot be found.
 let bad = 0, checked = 0;
+{
+  const m = text.match(/^  static:\n([\s\S]*?)(?=^  [a-z]+:|\Z)/m);
+  if (!m) { console.log('FAIL static job not found — could-not-compute fails closed'); bad++; }
+  else if (/^\s*needs:/.test(m[1])) { console.log('FAIL static job declares needs: — its immunity to sibling reds is one ordering away from being lost'); bad++; }
+  else console.log('PASS static job declares no needs: — structurally immune to sibling reds');
+}
 for (const s of steps) {
   const hasRun = s.lines.some(l => /^\s*run:/.test(l));
   if (!hasRun) continue;                    // uses:-only step, not a suite

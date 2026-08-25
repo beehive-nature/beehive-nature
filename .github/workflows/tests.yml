@@ -72,6 +72,32 @@ jobs:
       - name: CI shape — every suite step carries if:always()
         if: always()
         run: node scripts/lint-ci-shape.mjs
+      # FORGE FREEZE (founder ruling, dispatched 2026-08-24): orbit.html is
+      # frozen art — CI fails on ANY edit to its committed blob. The hash is
+      # taken from the committed blob, never the worktree copy. Tinkering
+      # lives in surfaces/forge/orbit-v2.html (not frozen). LIVES IN STATIC
+      # BY RULING: node + git only, no browser deps — a suite red in the
+      # node job can never reach this step here.
+      - name: Forge freeze — orbit.html committed-blob sha256
+        if: always()
+        run: node e2e/forge-freeze.mjs
+      # §7 DETECTION (not enforcement — actions run after the commits reach
+      # origin, so a violation is already public when this step goes red;
+      # prevention needs branch protection + PR-only merges, founder's call).
+      # The local pre-commit hook is advisory only. THE RANGE IS THE PUSH
+      # EVENT'S before..sha — origin/main already points at the pushed sha at
+      # checkout time, so origin/main..HEAD is empty BY CONSTRUCTION on push
+      # events and would be a no-op dressed as green (founder-caught). New
+      # branch (before = all zeros) checks HEAD; anything that cannot be
+      # computed FAILS — the check fails closed. LIVES IN STATIC BY RULING;
+      # the full-history checkout this job already carries (for dock-claims'
+      # tree pin) is exactly what the range check needs.
+      - name: §7 identity — author is the founder on the pushed range
+        if: always()
+        env:
+          S7_BEFORE: ${{ github.event.before }}
+          S7_SHA: ${{ github.sha }}
+        run: sh scripts/identity-check.sh
 
   node:
     runs-on: ubuntu-latest
@@ -133,25 +159,8 @@ jobs:
         working-directory: e2e
         if: always()
         run: node fleet-bus.mjs
-      # FORGE FREEZE (founder ruling, dispatched 2026-08-24): orbit.html is
-      # frozen art — CI fails on ANY edit to its committed blob. The hash is
-      # taken from the committed blob, never the worktree copy. Tinkering
-      # lives in surfaces/forge/orbit-v2.html (not frozen).
-      - name: Forge freeze — orbit.html committed-blob sha256
-        if: always()
-        run: node e2e/forge-freeze.mjs
-      # §7 DETECTION (not enforcement — actions run after the commits reach
-      # origin, so a violation is already public when this step goes red;
-      # prevention needs branch protection + PR-only merges, founder's call).
-      # The local pre-commit hook is advisory only. THE RANGE IS THE PUSH
-      # EVENT'S before..sha — origin/main already points at the pushed sha at
-      # checkout time, so origin/main..HEAD is empty BY CONSTRUCTION on push
-      # events and would be a no-op dressed as green (founder-caught). New
-      # branch (before = all zeros) checks HEAD; anything that cannot be
-      # computed FAILS — the check fails closed.
-      - name: §7 identity — author is the founder on the pushed range
-        if: always()
-        env:
-          S7_BEFORE: ${{ github.event.before }}
-          S7_SHA: ${{ github.sha }}
-        run: sh scripts/identity-check.sh
+      # THE JOB MOVE (zA completion ruling, 2026-08-24): the two DETECTION
+      # steps moved INTO STATIC, out of this suite job — structural immunity.
+      # Annotation (if:always()) is something the next person must remember;
+      # a job a suite red cannot reach is something they cannot forget.
+      # Their new home: the static job, below, with the same comments.
