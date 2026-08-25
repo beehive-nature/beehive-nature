@@ -43,9 +43,12 @@ button:hover{background:var(--crt);color:#000}
 .foot{margin-top:34px;color:var(--dim);font-size:10.5px;line-height:1.7}
 .foot b{color:var(--ink)}
 .ok{color:var(--lime)} .warn{color:var(--pink)}
-nav{margin-top:40px;display:flex;gap:14px;flex-wrap:wrap;font-size:11px}
-nav a{color:var(--dim);text-decoration:none}
-nav a:hover{color:var(--cyan)}
+/* every nav rule below is scoped :not(#tbar): tour.js injects <nav id="tbar">
+   into every surface, and a bare-element nav rule restyles that injected bar —
+   on this page it buried the content under a viewport-sized nav. */
+nav:not(#tbar){margin-top:40px;display:flex;gap:14px;flex-wrap:wrap;font-size:11px}
+nav:not(#tbar) a{color:var(--dim);text-decoration:none}
+nav:not(#tbar) a:hover{color:var(--cyan)}
 </style>
 </head>
 <body>

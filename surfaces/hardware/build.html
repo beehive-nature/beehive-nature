@@ -12,9 +12,12 @@
 :root{--bg:#0d1117;--panel:#161b22;--line:#30363d;--ink:#e6edf3;--mut:#8b949e;--ok:#3fb950;--warn:#d29922;--teal:#39c5cf;--b:#e6b32e;--vio:#a78bfa}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;display:flex;justify-content:center;padding:1.5rem 1rem 4rem}
 main{max-width:860px;width:100%}a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
-nav{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.2rem}
-nav a{border:1px solid var(--line);border-radius:99px;padding:.25rem .9rem;font-size:.85rem;color:var(--mut)}
-nav a.here{color:var(--teal);border-color:var(--teal)}
+/* every nav rule below is scoped :not(#tbar): tour.js injects <nav id="tbar">
+   into every surface, and a bare-element nav rule restyles that injected bar —
+   on this page it buried the content under a viewport-sized nav. */
+nav:not(#tbar){display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.2rem}
+nav:not(#tbar) a{border:1px solid var(--line);border-radius:99px;padding:.25rem .9rem;font-size:.85rem;color:var(--mut)}
+nav:not(#tbar) a.here{color:var(--teal);border-color:var(--teal)}
 h1{font-size:1.35rem;color:var(--teal);margin:.2rem 0}.sub{color:var(--mut);font-size:.9rem;margin-bottom:1.4rem}
 h2{font-size:1.05rem;color:var(--ink);margin:1.6rem 0 .4rem}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:1rem 1.1rem;margin:1rem 0}
