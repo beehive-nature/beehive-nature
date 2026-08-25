@@ -33,6 +33,18 @@
 #           added lines of zB's work, three-dot 0 files. A seat with no work at
 #           all can file a security finding about someone else's code.
 #
+# SIGN INVERSION, and why a wrong-dot finding is UNFALSIFIABLE:
+# a reversed two-dot diff also inverts the signs — peer ADDITIONS appear as
+# deletions, peer DELETIONS appear as additions. This scan reads ^+ lines, so a
+# secret surfaced that way is one a peer had ALREADY REMOVED. The finding is
+# wrong about the OWNER and about the TENSE. You then grep the tree, do not find
+# it, and cannot tell "false alarm" from "someone hid it" — and you may have
+# cost a peer a rotation they already performed.
+#   RULE: a scan hit you cannot locate in the working tree means CHECK YOUR DOT
+#   COUNT BEFORE YOU ESCALATE. The locate() helper below does this for you and
+#   says so in the output, so the rule fires when you are looking at a hit
+#   rather than sitting in a header nobody re-reads.
+#
 # SCOPE: secret-scan.sh in TREE mode has no direction and is immune. This
 # applies to the DELTA scan below only.
 #
@@ -89,6 +101,20 @@ echo "  direction: $BASE_REF..HEAD (base -> lane). Never lane -> base."
 # the word "secret"). Excluded from the ADDED-lines checks BY NAME — check 1
 # still scans it as part of the whole tree, so coverage is not lost.
 SELF=scripts/push-preflight.sh
+# Is this token actually IN the working tree? A hit that is not tells you the
+# scan direction is wrong far more often than it tells you a secret is hiding.
+locate() {
+  if git grep -qF -- "$1" -- . 2>/dev/null; then
+    echo "       present in the working tree — treat as a REAL hit."
+  else
+    echo "       NOT PRESENT in the working tree."
+    echo "       >> CHECK YOUR DOT COUNT BEFORE ESCALATING. A two-dot diff inverts"
+    echo "          signs: this may be a PEER'S line that was ALREADY REMOVED,"
+    echo "          surfaced as an addition in a delta that is not yours. Escalating"
+    echo "          it can cost someone a rotation they have already done."
+  fi
+}
+
 ADDED=$(git diff "$BASE_REF"...HEAD -- . ":(exclude)$SELF" | grep '^+' | grep -v '^+++')
 rc=0
 
@@ -105,7 +131,13 @@ fi
 echo "2) private-key material on added lines"
 printf '%s\n' "$ADDED" | grep -nE 'PVT_K1_|xprv|BEGIN .*PRIVATE KE[Y]|\b5[HJK][1-9A-HJ-NP-Za-km-z]{48}\b' >/tmp/pf_2
 n=$(grep -c . /tmp/pf_2 || true)
-if [ "$n" -eq 0 ]; then echo "   ok — 0 matches"; else echo "   BLOCKED — $n match(es):"; head -5 /tmp/pf_2 | sed 's/^/     /'; rc=1; fi
+if [ "$n" -eq 0 ]; then echo "   ok — 0 matches"; else
+  echo "   BLOCKED — $n match(es):"; head -5 /tmp/pf_2 | sed 's/^/     /'
+  printf '%s
+' "$ADDED" | grep -oE 'PVT_K1_[A-Za-z0-9]+|xprv[A-Za-z0-9]+' | sort -u | while read -r t; do
+    printf '     token %s…
+' "$(printf '%s' "$t" | cut -c1-24)"; locate "$t"; done
+  rc=1; fi
 
 echo "3) 64-hex strings on added lines (each must be accounted for)"
 printf '%s\n' "$ADDED" | grep -oE '[0-9a-fA-F]{64}' | sort -u >/tmp/pf_3
