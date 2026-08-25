@@ -45,7 +45,14 @@ body{background:var(--void);color:var(--ink);min-height:100vh;padding:0 0 92px;
 .wrap{max-width:var(--max);margin:0 auto;padding:0 18px}
 a{text-decoration:none}
 
-header{padding:34px 0 6px;text-align:center}
+/* the transmission — the bLiGhTbeAM's own law, quoted from blight/demo.html:
+   "the logo IS the transmission; every lit hexagon is one bit of the live
+   frame." The masthead carries a hex lattice that lights in the estate
+   palette as a slow sweep. Inline canvas: zero requests, throttled to ~12fps,
+   and prefers-reduced-motion gets a single static frame. */
+#beam{position:absolute;top:0;left:0;width:100%;height:330px;pointer-events:none;z-index:0;
+  -webkit-mask-image:linear-gradient(#000 45%,transparent);mask-image:linear-gradient(#000 45%,transparent)}
+header{position:relative;z-index:1;padding:34px 0 6px;text-align:center}
 .mark{font-size:30px;line-height:1;margin-bottom:10px;filter:drop-shadow(0 0 16px rgba(255,182,39,.35))}
 h1{font-size:clamp(26px,6vw,46px);font-weight:700;letter-spacing:-.025em;line-height:1.05;display:inline-block;
   background:linear-gradient(96deg,var(--leaf) 4%,var(--sky) 38%,var(--iris) 66%,var(--honey) 96%);
@@ -132,6 +139,7 @@ section.skaists .shead h2{color:var(--ink)}
 </style>
 </head>
 <body>
+<canvas id="beam" aria-hidden="true"></canvas>
 <div class="wrap">
 <header>
   <div class="mark">🐝</div>
@@ -183,7 +191,7 @@ section.skaists .shead h2{color:var(--ink)}
 </section>
 <section class="biomass" id="biomass">
   <div class="shead"><span class="dot"></span><h2>beehivebiomass.com</h2><em>the plant economy</em><span class="n">17</span></div>
-  <p class="pro note">“beehivebiomass.com is the civilian marketplace” — the founder's own words, written inside his build night. Seven of the nine surfaces he made in 82 minutes on 2026-08-03 (03:25–04:47) live here: the six lab benches and the ACiD cascade — all ACiD material belongs to this domain and bnature.social by founder ruling. What you open are hosted twins of his archive, nine of them carrying behaviour fixes beyond the vendored chart library; the originals under surfaces/fleet/ stay byte-for-byte, and e2e/university-smoke.mjs recomputes that number against the tree on every run rather than trusting this sentence. The remaining two, Indigo Index and Resonance, carry “bnature.social” in their own headers and hang there.</p>
+  <p class="pro note">“beehivebiomass.com is the civilian marketplace” — the founder's own words, written inside his build night. Seven of the nine surfaces he made in 82 minutes on 2026-08-03 (03:25–04:47) live here: the six lab benches and the ACiD cascade — all ACiD material belongs to this domain and bnature.social by founder ruling. What you open are hosted twins of his archive, nine of them carrying behaviour fixes beyond the vendored chart library; the originals under surfaces/fleet/ stay byte-for-byte, and e2e/university-smoke.mjs recomputes that number against the tree on every run rather than trusting this sentence. The remaining two, Indigo Index and Resonance, hang on skaists.social by founder ruling.</p>
   <div class="grid">
     <a class="t" href="fleet-hosted/index.html"><i>⚑</i><b>the fleet</b><s>nine surfaces, one night</s></a>
     <a class="t" href="fleet-hosted/lab/bnr-dashboard.html"><i>📊</i><b>BNR Dashboard</b><s>collective command center</s></a>
@@ -233,8 +241,8 @@ section.skaists .shead h2{color:var(--ink)}
   </div>
 </section>
 <section class="social" id="social">
-  <div class="shead"><span class="dot"></span><h2>bnature.social</h2><em>the social layer</em><span class="n">9</span></div>
-  <p class="pro note">The social layer, ATProto-shaped. Tongues dock as first-class passengers, your name stays in your own language and aliases are pointers, never ownership. The symposium is receipted discourse; the studios and the hearth are rooms where you co-create with the hive and with each other — no server anywhere. Indigo Index and Resonance dock here because their own headers say so: each is signed “bnature.social” in the founder's hand.</p>
+  <div class="shead"><span class="dot"></span><h2>bnature.social</h2><em>the social layer · bsky-style app in waiting</em><span class="n">7</span></div>
+  <p class="pro note">The social layer, ATProto-shaped. Tongues dock as first-class passengers, your name stays in your own language and aliases are pointers, never ownership. The symposium is receipted discourse; the studios and the hearth are rooms where you co-create with the hive and with each other — no server anywhere. Ruled 2026-08-25: this domain ships as a bsky-style ATProto app with these surfaces docked into it — the hive already holds a domain handle and a did:plc, so the rails exist.</p>
   <div class="grid">
     <a class="t" href="devroom.html"><i>🛠</i><b>the builders dev room</b><s>the pre-wiki stage</s></a>
     <a class="t" href="bsymposium.html"><i>🏛</i><b>the bSymposium</b><s>receipted discourse</s></a>
@@ -243,17 +251,17 @@ section.skaists .shead h2{color:var(--ink)}
     <a class="t" href="btranslated.html"><i>🔤</i><b>bTranslated</b><s>your name, your tongue</s></a>
     <a class="t" href="buzz-studio.html"><i>🎨</i><b>the bUZZ Studio</b><s>co-create, no server anywhere</s></a>
     <a class="t" href="blight/hearth.html"><i>🔥</i><b>the hearth</b><s>co-create with the hive's AI</s></a>
-    <a class="t" href="fleet-hosted/gallery/indigo-index.html"><i>🟦</i><b>BN Indigo Index</b><s>disease economics × GDP</s></a>
-    <a class="t" href="fleet-hosted/gallery/resonance.html"><i>🎚</i><b>BN Resonance</b><s>consciousness + plant medicine</s></a>
   </div>
 </section>
 <section class="skaists" id="skaists">
-  <div class="shead"><span class="dot"></span><h2>skaists.social</h2><em>governance &amp; the guard</em><span class="n">5</span></div>
-  <p class="pro note">The governance domain — owned and active. One deck for the DAO, the treasuries and the watch. A review is a signed receipt you choose to publish, never telemetry; the guards review the peer reviewers.</p>
+  <div class="shead"><span class="dot"></span><h2>skaists.social</h2><em>governance &amp; the guard · bsky-style app in waiting</em><span class="n">7</span></div>
+  <p class="pro note">The governance domain — owned and active. One deck for the DAO, the treasuries and the watch. A review is a signed receipt you choose to publish, never telemetry; the guards review the peer reviewers. Indigo Index and Resonance hang here by founder ruling — disease economics and collective resonance are civic instruments, read by the same eyes that read the treasuries. Ruled 2026-08-25: like bnature.social, this domain ships as a bsky-style app with its surfaces docked in.</p>
   <div class="grid">
     <a class="t" href="dao-dashboard/index.html"><i>🏛</i><b>BNR DAO dashboard</b><s>skaists.social, live</s></a>
     <a class="t" href="royalguard.html"><i>💂</i><b>the ROYAL GUARD</b><s>DAO · treasuries · wallet</s></a>
     <a class="t" href="review.html"><i>👑</i><b>the Royal Review</b><s>receipts, never telemetry</s></a>
+    <a class="t" href="fleet-hosted/gallery/indigo-index.html"><i>🟦</i><b>BN Indigo Index</b><s>disease economics × GDP</s></a>
+    <a class="t" href="fleet-hosted/gallery/resonance.html"><i>🎚</i><b>BN Resonance</b><s>consciousness + plant medicine</s></a>
     <a class="t x" href="https://skaists.github.io/sovereignty-explorer/" target="_blank" rel="noopener"><i>🧭</i><b>sovereignty explorer</b><s>counts what the old economy leaves</s></a>
     <a class="t x" href="https://skaists.github.io/beehive-WELLness/" target="_blank" rel="noopener"><i>🌳</i><b>beehive-WELLness</b><s>the nutrition-literacy tree</s></a>
   </div>
@@ -279,6 +287,39 @@ section.skaists .shead h2{color:var(--ink)}
     t.textContent=on?"simple view":"expert view";t.setAttribute("aria-pressed",on?"true":"false");}
   t.addEventListener("click",function(){on=!on;localStorage.setItem("bnExpert",on?"1":"0");paint();});
   paint();
+})();
+(function(){ // the transmission (see the CSS note above #beam)
+  var c=document.getElementById("beam"); if(!c||!c.getContext) return;
+  var x=c.getContext("2d"), DPR=Math.min(window.devicePixelRatio||1,2);
+  var R=13, SQ3=Math.sqrt(3), PAL=["255,182,39","110,231,160","56,189,248","196,160,255"];
+  var W,H,hexes;
+  function build(){
+    W=c.clientWidth; H=c.clientHeight; c.width=W*DPR; c.height=H*DPR;
+    x.setTransform(DPR,0,0,DPR,0,0); hexes=[];
+    var dx=R*1.5, dy=R*SQ3/2;
+    for(var col=0;col*dx<W+R;col++) for(var row=0;row*2*dy<H+R;row++)
+      { var base=Math.random()<0.05?0.04+Math.random()*0.08:0;
+        hexes.push({x:col*dx,y:row*2*dy+(col%2?dy:0),a:base,b:base,p:PAL[(col*7+row*3)%4]}); }
+  }
+  function hex(cx,cy,r){ x.beginPath();
+    for(var i=0;i<6;i++){var an=Math.PI/3*i; x[i?"lineTo":"moveTo"](cx+r*Math.cos(an),cy+r*Math.sin(an));}
+    x.closePath(); }
+  function draw(){ x.clearRect(0,0,W,H); x.strokeStyle="rgba(47,74,60,.15)";
+    for(var i=0;i<hexes.length;i++){ var h=hexes[i]; hex(h.x,h.y,R-1.5); x.stroke();
+      if(h.a>0.008){ x.fillStyle="rgba("+h.p+","+h.a.toFixed(3)+")"; x.fill(); h.a=Math.max(h.b,h.a*0.945); } } }
+  build();
+  if(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches){
+    for(var i=0;i<hexes.length;i+=13) hexes[i].a=0.14; draw(); return;
+  }
+  var wave=0,last=0;
+  function tick(t){
+    if(t-last>80){ last=t; wave=(wave+7)%(W+260); var wx=wave-130;
+      for(var k=0;k<hexes.length;k++){ var h=hexes[k];
+        if(Math.abs(h.x-wx)<52&&Math.random()<0.055) h.a=0.10+Math.random()*0.20; }
+      draw(); }
+    requestAnimationFrame(tick); }
+  requestAnimationFrame(tick);
+  addEventListener("resize",build);
 })();
 </script>
 <script src="agent-dock.js?v=4"></script>
