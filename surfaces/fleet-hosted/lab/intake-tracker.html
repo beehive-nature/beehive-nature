@@ -165,7 +165,7 @@ var data={v:1,date:todayKey,dayStart:DAY_START,timeZone:Intl.DateTimeFormat().re
 for(var i=0;i<entries.length;i++){data.totalMg+=entries[i].mg;data.entries.push(entries[i]);}
 var json=JSON.stringify(data,null,2);
 var out=document.getElementById('exportOut');
-out.style.display='block';out.textContent='bDATABASE EXPORT - BiGen Meta-Analysis\n\n'+json;
+out.style.display='block';out.textContent='bDATABASE EXPORT - BiGen Meta-Analysis\nschema v1 - v: envelope version (absent = pre-version legacy). date: behavioural day key. dayStart: day-boundary hour, local (the day runs dayStart->dayStart). timeZone: IANA zone of the exporting browser. rdi, totalMg: milligrams. entries[]: each machine timestamp is the spine; user-entered time is soft, ordering only.\n\n'+json;
 }
 
 function migrateUtcDayKeys(){

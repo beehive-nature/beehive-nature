@@ -213,10 +213,14 @@ async function freshPage(timeIso, initScript) {
   ok('bnDayStart=8 override shifts the bucket', key === 'bnIntake_2026-08-23', key);
 
   await page.evaluate(() => exportData());
-  const env = await page.evaluate(() => {
-    const t = document.getElementById('exportOut').textContent;
-    return JSON.parse(t.slice(t.indexOf('{')));
-  });
+  const raw = await page.evaluate(() => document.getElementById('exportOut').textContent);
+  const env = JSON.parse(raw.slice(raw.indexOf('{')));
+  // The schema must travel WITH the data: a reader of a published dataset
+  // sees only this text, so the field meanings and the absent-v rule live
+  // in the header block, before the JSON.
+  ok('export carries its schema beside the data (absent-v rule included)',
+    raw.startsWith('bDATABASE EXPORT - BiGen Meta-Analysis\nschema v1 - v: envelope version (absent = pre-version legacy).')
+    && raw.indexOf('absent = pre-version legacy') < raw.indexOf('{'));
   ok('export is versioned', env.v === 1, `v=${env.v}`);
   ok('export records the effective dayStart', env.dayStart === 8, `dayStart=${env.dayStart}`);
   ok('export records the IANA timezone', env.timeZone === 'America/Denver', `timeZone=${env.timeZone}`);
