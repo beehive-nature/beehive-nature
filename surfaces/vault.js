@@ -290,10 +290,54 @@ window.BNRVAULT = (function () {
     };
   }
 
+  /* ── arweave JWK shape check (structural, before sealing) ────────────────
+     Parses the JSON, demands the RSA private parts, decodes the modulus, and
+     derives the PUBLIC address (sha256 of the modulus, base64url) for meta.
+     Self-contained b64url decode — no dependency on the shared unb64.       */
+  var B64U_V = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+  function unb64uV(s) {
+    s = String(s || '').replace(/=+$/, '');
+    var out = [], buf = 0, bits = 0;
+    for (var i = 0; i < s.length; i++) {
+      var v = B64U_V.indexOf(s[i]);
+      if (v < 0) return null;
+      buf = (buf << 6) | v; bits += 6;
+      if (bits >= 8) { bits -= 8; out.push((buf >> bits) & 255); }
+    }
+    return out.length ? new Uint8Array(out) : new Uint8Array(0);
+  }
+  function b64uV(bytes) {
+    var s = '', B = B64U_V;
+    for (var i = 0; i < bytes.length; i += 3) {
+      var a = bytes[i], b = i + 1 < bytes.length ? bytes[i + 1] : null, c = i + 2 < bytes.length ? bytes[i + 2] : null;
+      s += B[a >> 2];
+      s += B[((a & 3) << 4) | (b === null ? 0 : b >> 4)];
+      if (b !== null) s += B[((b & 15) << 2) | (c === null ? 0 : c >> 6)];
+      if (c !== null) s += B[c & 63];
+    }
+    return s;
+  }
+  async function validateArweaveJwk(input) {
+    var j;
+    try { j = JSON.parse(String(input || '').trim()); }
+    catch (e) { return { ok: false, error: 'not JSON — an arweave key is the wallet\'s JWK file contents' }; }
+    if (!j || j.kty !== 'RSA') return { ok: false, error: 'kty is not RSA' };
+    if (!j.n || !j.e || !j.d) return { ok: false, error: 'missing n / e / d — this looks like a public half' };
+    var mod = unb64uV(j.n);
+    if (!mod || mod.length < 256) return { ok: false, error: 'modulus does not decode to an RSA-2048+-sized key' };
+    var digest = await crypto.subtle.digest('SHA-256', mod);
+    return { ok: true, address: b64uV(new Uint8Array(digest)), size: mod.length * 8 };
+  }
+
   /* Route any pasted secret to the right validator. */
   async function detect(input) {
     var s = String(input || '').trim();
     if (!s) return { kind: null, error: 'nothing entered' };
+    if (/^\s*\{/.test(s) && /"kty"\s*:\s*"RSA"/.test(s)) {
+      var w = await validateArweaveJwk(s);
+      if (w.ok) return Object.assign({ kind: 'arweave' }, w);
+      return { kind: null, error: 'reads like an arweave JWK but fails its shape check: ' + w.error };
+    }
     if (/^PVT_/.test(s) || (/^[1-9A-HJ-NP-Za-km-z]{50,53}$/.test(s) && !/\s/.test(s))) {
       var v = await validateVaultaKey(s);
       return Object.assign({ kind: 'vaulta' }, v);
@@ -734,6 +778,15 @@ window.BNRVAULT = (function () {
       meta = { words: secret.split(/s+/).length, fingerprint: String(e.fingerprint || '') };
     } else if (type === 'note') {
       meta = {};
+    } else if (type === 'arweave') {
+      // An Arweave JWK (JSON): structurally validated BEFORE sealing — kty RSA,
+      // modulus + private exponent present and decodable. The PUBLIC address is
+      // derived and stored in meta so the wallet's read lanes never need to
+      // unseal for balance lookups. The secret never leaves the vault sealed.
+      var a = await validateArweaveJwk(secret);
+      if (!a.ok && !e.force) throw new Error(a.error);
+      secret = secret.trim();
+      meta = { address: a.address || null };
     } else {
       throw new Error('unknown entry type: ' + type);
     }
@@ -809,6 +862,7 @@ window.BNRVAULT = (function () {
     addEntry: addEntry, removeEntry: removeEntry,
     exportEnvelope: exportEnvelope, importEnvelope: importEnvelope,
     validateMnemonic: validateMnemonic, validateVaultaKey: validateVaultaKey,
+    validateArweaveJwk: validateArweaveJwk,
     mnemonicToSeed: mnemonicToSeed, normalizePhrase: normalizePhrase, detect: detect,
     generateKeypass: generateKeypass, keypassStrength: keypassStrength,
     VALID_WORD_COUNTS: VALID_WORD_COUNTS, KDF_ITERS: KDF_ITERS, LS_KEY: LS_KEY, FORMAT: FORMAT

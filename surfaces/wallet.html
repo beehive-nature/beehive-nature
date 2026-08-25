@@ -324,6 +324,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
         <option value="auto" selected>detect type</option>
         <option value="seed">seed phrase</option>
         <option value="vaulta">Vaulta active key</option>
+        <option value="arweave">Arweave JWK</option>
         <option value="note">plain note</option>
       </select>
       <input id="vlt-label" placeholder="label — e.g. ledger main · kingbeelovis active" spellcheck="false" style="flex:2">
@@ -442,6 +443,12 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
       <div class="cb" id="ant-bal">—</div>
       <div class="cd" id="ant-info">ANT on Arbitrum — of your derived 0x address</div>
       <div class="stat" id="ant-stat">connect keychain to derive</div>
+    </div>
+    <div class="chain" id="ch-arweave">
+      <div class="cn">🕸 Arweave <span class="badge">AR</span></div>
+      <div class="cb" id="ar-bal">—</div>
+      <div class="cd" id="ar-info">of the vault-held JWK — the address is public metadata, reads stay keyless</div>
+      <div class="stat" id="ar-stat">vault holds no arweave key</div>
     </div>
   </div>
 </section>
@@ -813,6 +820,158 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   </script>
 </section>
 
+<!-- ══ ARWEAVE — publish & anchor (first-party signer · vault custody) ══ -->
+<section id="arw-sec" style="border-color:#4a3a1d">
+  <h2>📡 ARWEAVE — publish &amp; anchor, no middleman</h2>
+  <div class="law">Another adapter on the wallet shell — balance, receive address, send, and
+  one new capability: <b>PUBLISH</b>. The transaction is built and signed <b>in this page</b>
+  with WebCrypto (format-2 data tx, RSA-PSS-SHA256, proven byte-equivalent to arweave-js),
+  posted to <b>public gateways picked at random per call</b> — no single operator learns who
+  anchors what. <b>No bundler, no Turbo, no third-party UI</b> (founder ruling): we dropped
+  the free tier to keep the rail first-party. The JWK lives in <b>the vault</b> — sealed
+  under your keypass, structurally verified before sealing, revealed only into the signing
+  call. Reads are keyless; the gateway sees what any Arweave read sees.</div>
+  <noscript><div class="fund-nojs">📡 publishing needs JavaScript — the tx is built and signed in
+  your browser; with scripting off this panel stays asleep.</div></noscript>
+  <div id="arw-js" hidden>
+    <div class="row" style="align-items:center;flex-wrap:wrap">
+      <span class="fund-coin" aria-hidden="true" style="background:radial-gradient(circle at 35% 30%,#c8f4ff,var(--cyan) 62%,#003a44);border-color:#1d4655"></span>
+      <select id="arw-what" title="what to publish" style="max-width:330px;flex:0 1 330px;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
+        <option value="orbit-anchor">the orbit-manifest anchor · forge/orbit-manifests.md (1,926 B)</option>
+      </select>
+      <button id="arw-go" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">📡 publish to Arweave</button>
+    </div>
+    <div class="law" id="arw-stat" style="margin-top:6px;min-height:20px">…</div>
+  </div>
+  <script>
+    (function () {
+      'use strict';
+      try {
+        var $ = function (id) { return document.getElementById(id); };
+        var box = $('arw-js'), go = $('arw-go'), stat = $('arw-stat');
+        if (!box || !go || !stat) return;
+        /* the committed-blob law, runtime side: the payload is fetched from the
+           deployment and its sha256 is checked against the PINNED hash before
+           anything is signed — a drifted file can never be anchored by mistake. */
+        var ORBIT = {
+          path: 'forge/orbit-manifests.md',
+          sha256: '865f86caf55fab14be36746b4b5465025b04fae478072b09e13fcdbca3b7c406', // PUBLIC-CONSTANT: committed-blob sha256 (zA's pin)
+          tags: [
+            ['Content-Type', 'text/markdown'],
+            ['App-Name', 'Beehive-Nature'],
+            ['Type', 'orbit-manifest-anchor'],
+            ['Manifest-SHA256', '865f86caf55fab14be36746b4b5465025b04fae478072b09e13fcdbca3b7c406'], // PUBLIC-CONSTANT
+            ['Renderer-SHA256', '6e54b80deff87861e4ad0134799cbd8a28492ed9e851b26bdfd597f4258a6b29'], // PUBLIC-CONSTANT
+            ['Renderer-Commit', 'c3e49979a7429b49ab623e3347b8c94e36791780'], // PUBLIC-CONSTANT
+            ['Rail', '2']
+          ]
+        };
+        function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+        function arEntry() {
+          if (!window.BNRVAULT || !BNRVAULT.isUnlocked()) return null;
+          return BNRVAULT.list().filter(function (e) { return e.type === 'arweave'; })[0] || null;
+        }
+        async function hexSha(bytes) {
+          var h = await crypto.subtle.digest('SHA-256', bytes);
+          return Array.prototype.map.call(new Uint8Array(h), function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+        }
+        function paint(msg, color) {
+          stat.innerHTML = msg ? (color ? '<b style="color:' + color + '">' + msg + '</b>' : esc(msg)) : '';
+        }
+        async function refresh() {
+          var A = window.BNRAR;
+          if (!A) { paint('the arweave adapter did not load', 'var(--amber)'); return; }
+          var e = arEntry();
+          var balEl = document.getElementById('ar-bal'), statEl = document.getElementById('ar-stat');
+          if (!e) {
+            if (balEl) balEl.textContent = '—';
+            if (statEl) statEl.textContent = 'vault holds no arweave key';
+            paint('no arweave key in the vault — seal your JWK in THE VAULT above (paste it; the type is detected), then this panel wakes');
+            return;
+          }
+          var addr = e.meta && e.meta.address;
+          if (statEl) statEl.textContent = 'reading ' + (addr || '…');
+          paint('reading ' + addr + '…');
+          try {
+            var bal = await A.balance(addr);
+            var fee = await A.fee(1926);
+            var spot = null;
+            try { spot = await A.spotPrice(); } catch (e2) { /* optional — a dead price source never kills the panel */ }
+            var winston = parseInt(bal, 10) || 0, need = parseInt(fee, 10) || 0;
+            if (balEl) balEl.textContent = (winston / 1e12) + ' AR';
+            if (statEl) statEl.className = 'stat ' + (winston >= need ? 'ok' : 'err'),
+                        statEl.textContent = winston >= need ? 'live · anchor fee covered' : 'live · short ' + ((need - winston) / 1e12) + ' AR for the anchor';
+            paint('address ' + addr + ' · balance ' + (winston / 1e12) + ' AR · anchor fee ' +
+              (need / 1e12) + ' AR (gateway-quoted)' + (spot ? ' · 1 AR ≈ $' + parseFloat(spot).toFixed(2) : '') +
+              (winston < need ? ' — ⚠ short by ' + ((need - winston) / 1e12) + ' AR: fund the address, the tx is ready' : ' — funded, ready'));
+            go.disabled = winston < need;
+          } catch (err) {
+            paint('gateway read failed: ' + (err && err.message ? err.message : err), 'var(--amber)');
+          }
+        }
+        go.addEventListener('click', async function () {
+          var A = window.BNRAR, V = window.BNRVAULT;
+          if (!A || !V) return;
+          var e = arEntry();
+          if (!e) { paint('seal an arweave JWK in the vault first', 'var(--amber)'); return; }
+          go.disabled = true;
+          paint('fetching the committed manifest…');
+          try {
+            var res = await fetch(ORBIT.path);
+            if (!res.ok) throw new Error('could not fetch ' + ORBIT.path + ' (' + res.status + ')');
+            var bytes = new Uint8Array(await res.arrayBuffer());
+            var sha = await hexSha(bytes);
+            if (sha !== ORBIT.sha256) {
+              paint('REFUSED — the deployed file\'s sha256 is ' + sha.slice(0, 16) + '… but the pinned anchor hash is ' +
+                ORBIT.sha256.slice(0, 16) + '… . A drifted file is never anchored; nothing was sent.', 'var(--amber)');
+              return;
+            }
+            paint('payload verified (' + bytes.length + ' B, sha256 pinned) — unlocking the JWK from the vault and signing…');
+            var jwk = JSON.parse(V.reveal(e.id).secret);
+            var r = await A.publish(bytes, ORBIT.tags.map(function (t) { return { name: t[0], value: t[1]}; }), jwk);
+            if (r.ok) {
+              paint('⚓ ANCHORED — tx ' + r.txid);
+              var a = document.createElement('a');
+              a.href = 'https://arweave.net/' + r.txid;
+              a.target = '_blank'; a.rel = 'noopener noreferrer';
+              a.textContent = 'live on arweave: ' + r.txid;
+              a.style.color = 'var(--cyan)';
+              stat.appendChild(document.createElement('br'));
+              stat.appendChild(a);
+            } else if (r.text.indexOf('verification') >= 0 || r.text.indexOf('fund') >= 0) {
+              var bal = await A.balance(await A.addressOf(jwk));
+              var fee = await A.fee(bytes.length);
+              var need = parseInt(fee, 10) || 0, have = parseInt(bal, 10) || 0;
+              paint('the gateway rejected the tx — for an UNFUNDED key this is the expected verdict ' +
+                '(arweave-js gets the identical answer): everything is proven except the money. ' +
+                'This address holds ' + (have / 1e12) + ' AR and the anchor needs ' + (need / 1e12) +
+                ' AR — short by ' + ((need - have) / 1e12) + ' AR. Fund it and tap again.', 'var(--amber)');
+            } else {
+              paint('gateway said ' + r.status + ': ' + String(r.text).slice(0, 120), 'var(--amber)');
+            }
+          } catch (err) {
+            paint('publish failed: ' + (err && err.message ? err.message : err), 'var(--amber)');
+          } finally {
+            go.disabled = false; // state re-syncs on the 45s interval / vault hooks — never overwrite a verdict
+          }
+        });
+        box.hidden = false;
+        paint('…');
+        setInterval(function () { if (!go.disabled) refresh(); }, 45000);
+        setTimeout(refresh, 600);
+        var vsec = document.getElementById('vault-sec');
+        if (vsec) vsec.addEventListener('click', function () { setTimeout(refresh, 400); }); // unlock/seal wakes the panel
+        document.addEventListener('vault-unlocked', refresh, true);
+      } catch (err) {
+        var s = document.getElementById('arw-stat');
+        var b = document.getElementById('arw-js');
+        if (b) b.hidden = false;
+        if (s) s.textContent = 'arweave panel failed to start: ' + (err && err.message ? err.message : err);
+      }
+    })();
+  </script>
+</section>
+
 <section>
   <h2>✍ SIGN — your bzDiD signs, zero paste</h2>
   <div class="law" id="sign-law">Connect your keychain above and bridge it once — after that
@@ -860,7 +1019,8 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 <script src="onboarding/vendor/bnr-keys.js?v=1"></script>
 <script src="onboarding/vendor/bnr-qr.js?v=1"></script>
 <script src="onboarding/vendor/bip39-wordlist.js"></script>
-<script src="vault.js?v=1"></script>
+<script src="vault.js?v=2"></script>
+<script src="arweave.js?v=1"></script>
 <script>
 (function(){
   var $=function(i){return document.getElementById(i)};
@@ -2561,6 +2721,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     if(type==='note'){ el.textContent='plain note — stored as typed, not validated'; el.style.color='var(--dim)'; return {type:'note'} }
     if(type==='auto')      res=await V.detect(raw);
     else if(type==='seed') res=Object.assign({kind:'seed'},await V.validateMnemonic(raw));
+    else if(type==='arweave') res=Object.assign({kind:'arweave'},await V.validateArweaveJwk(raw));
     else                   res=Object.assign({kind:'vaulta'},await V.validateVaultaKey(raw));
     if(mine!==checkSeq) return null;                 // a newer keystroke already won
     if(!res.kind){ el.textContent=res.error; el.style.color='var(--amber)'; return null }
@@ -2571,6 +2732,9 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     if(res.kind==='seed'){
       el.innerHTML='<b style="color:var(--leaf)">✓ valid BIP-39</b> · '+res.count+' words · '+
         res.entropyBits+' bits of entropy · checksum verified';
+    } else if(res.kind==='arweave'){
+      el.innerHTML='<b style="color:var(--leaf)">✓ valid Arweave JWK</b> · RSA-'+res.size+' · address '+
+        esc(res.address)+' (derived, public)';
     } else {
       el.innerHTML='<b style="color:var(--leaf)">✓ valid Vaulta active key</b> · '+esc(res.format)+
         ' · checksum '+esc(res.checksum)+(res.note?' <span style="color:var(--faint)">('+esc(res.note)+')</span>':'');
@@ -2616,11 +2780,12 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
       $('vlt-list').innerHTML='<div class="law" style="color:var(--faint)">— empty —</div>';
       return;
     }
-    var icon={seed:'🌱',vaulta:'⚡',note:'📝'};
+    var icon={seed:'🌱',vaulta:'⚡',note:'📝',arweave:'🕸'};
     $('vlt-list').innerHTML=items.map(function(e){
       var meta=e.type==='seed'
         ? (e.meta.words?e.meta.words+' words':'?')+(e.meta.valid?' · checksum ok':' · <span style="color:var(--amber)">unverified</span>')+(e.hasPassphrase?' · +passphrase':'')
         : e.type==='vaulta' ? esc(e.meta.format||'')+' · checksum '+esc(e.meta.checksum||'')
+        : e.type==='arweave' ? 'JWK · '+(e.meta.address?esc(e.meta.address):'address?')
         : 'note';
       return '<div class="chip" data-id="'+e.id+'" style="cursor:default">'+
         '<div class="cc">'+(icon[e.type]||'')+' '+esc(e.label)+(e.chain?' <span style="color:var(--faint)">· '+esc(e.chain)+'</span>':'')+'</div>'+
