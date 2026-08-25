@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<!-- the forge catalog — the founder's orbit pieces.
+     THE WHOLE ARTWORK IS ONE RENDERER HASH + N PARAMETER TUPLES.
+     Everything below is generated from the PIECES array. Adding a piece is
+     adding a tuple — no markup, no asset, no thumbnail, nothing else. If you
+     find yourself editing anything but that array to add a work, stop: the
+     catalog has stopped being what it claims to be.
+     The renderer is FROZEN (e2e/forge-freeze.mjs pins its committed-blob
+     sha256 and CI fails on any edit). This page never touches it — it opens it. -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="The founder's orbit pieces — one frozen renderer, one tuple each, rendered live.">
+<title>the forge catalog — one renderer, N tuples</title>
+<style>
+/* ── SEMANTIC COLOUR · meanings picked FIRST, one hue = one meaning, page-wide.
+   Estate contract, inherited verbatim. No hue invented, none reused for looks.
+     harm/gap/absent …… #ffb347  amber   (what is missing or not yet done)
+     solution/verified … #7ddf8f  leaf    (the pin holding, the check passing)
+     value/the work …… #FFD700  gold    (the pieces themselves)
+     system/structure … #00E5FF  cyan    (the renderer, links, rails)
+     science/provenance #c9a0ff  violet  (the hash, the proof of sameness)
+
+   THE H1 GRADIENT IS THE ARGUMENT, left to right:
+     violet -> cyan -> gold  =  THE PINNED HASH -> THE ONE RENDERER -> THE MANY PIECES
+   That is the whole thesis: permanence at one layer is what buys variation at
+   the next. Freeze the renderer and a tuple becomes a work. */
+:root{
+  --void:#0d1410; --panel:#111a14; --inset:#0a0f0b;
+  --line:#243026; --line-hi:#37493c;
+  --ink:#e2efdb; --ink-hi:#eef7e9; --dim:#8a9a8a;
+  --sem-harm:#ffb347; --sem-solution:#7ddf8f; --sem-value:#FFD700;
+  --sem-system:#00E5FF; --sem-science:#c9a0ff;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--void);color:var(--ink);
+  font:13px/1.65 'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  padding:32px 16px 78px}
+main{max-width:980px;margin:0 auto}
+a{color:var(--sem-system);text-decoration:none;border-bottom:1px solid transparent}
+a:hover,a:focus{color:var(--sem-value);border-bottom-color:var(--sem-value)}
+a:focus-visible{outline:2px solid var(--sem-value);outline-offset:3px}
+
+header{text-align:center;margin-bottom:22px}
+h1{font-size:clamp(19px,5.2vw,34px);line-height:1.2;font-weight:600;
+  background:linear-gradient(90deg,var(--sem-science),var(--sem-system),var(--sem-value));
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;color:transparent}
+header .lede{color:var(--dim);font-size:11.5px;margin-top:9px;line-height:1.8;max-width:660px;margin-left:auto;margin-right:auto}
+
+.hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:20px}
+.pstat.hero{background:var(--inset);border:1px solid var(--line);border-radius:13px;padding:18px 13px;text-align:center}
+.pstat.hero .n{font-size:38px;font-weight:700;line-height:1;letter-spacing:-.02em}
+.pstat.hero .l{font-size:10px;color:var(--dim);margin-top:7px;text-transform:uppercase;letter-spacing:.09em;line-height:1.6}
+.n.science{color:var(--sem-science)} .n.system{color:var(--sem-system)} .n.value{color:var(--sem-value)}
+
+section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px 17px;margin-top:14px}
+section h2{font-size:11.5px;font-weight:400;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;color:var(--sem-value)}
+h2.system{color:var(--sem-system)} h2.science{color:var(--sem-science)}
+
+.art{background:var(--inset);border:1px solid var(--line);border-radius:10px;padding:12px 13px;margin-top:10px}
+.art .t{font-size:13px;color:var(--ink-hi);margin-bottom:2px}
+.art .sub{font-size:10px;color:var(--dim);letter-spacing:.06em;text-transform:uppercase}
+.frame{width:100%;height:520px;border:1px solid var(--line);border-radius:9px;margin-top:10px;background:var(--void);display:block}
+.tuple{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
+.tuple span{background:var(--void);border:1px solid var(--line-hi);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--ink-hi)}
+.tuple span b{color:var(--dim);font-weight:400}
+.seedlink{display:block;margin-top:8px;font-size:10.5px;color:var(--dim);word-break:break-all;line-height:1.7}
+.seedlink a{color:var(--sem-system)}
+
+.proof{background:var(--inset);border-left:3px solid var(--sem-solution);border-radius:0 8px 8px 0;padding:11px 13px;margin-top:10px;font-size:10.5px;color:var(--dim);line-height:1.85}
+.proof b{color:var(--sem-solution)}
+.gap{background:var(--inset);border-left:3px solid var(--sem-harm);border-radius:0 8px 8px 0;padding:11px 13px;margin-top:10px;font-size:10.5px;color:var(--dim);line-height:1.85}
+.gap b{color:var(--sem-harm)}
+code{color:var(--ink-hi);font-size:.95em}
+footer{max-width:980px;margin:24px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.9}
+footer a{color:var(--dim)}
+@media(max-width:560px){
+  body{padding:22px 12px 56px}
+  .pstat.hero .n{font-size:31px}
+  .frame{height:400px}
+  section{padding:13px 13px}
+}
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <h1>one renderer, one tuple each</h1>
+  <p class="lede">Every piece below is the <b>same frozen program</b> given different numbers. Nothing here is a picture of the art — each frame is the real renderer, running now, from the file whose hash CI refuses to let change.</p>
+</header>
+
+<div class="hero">
+  <div class="pstat hero"><div class="n science">1</div><div class="l">renderer, hash-pinned</div></div>
+  <div class="pstat hero"><div class="n value" id="n-pieces">—</div><div class="l">pieces in this catalog</div></div>
+  <div class="pstat hero"><div class="n system">5</div><div class="l">numbers that make the difference</div></div>
+</div>
+
+<section>
+  <h2 class="value">the pieces</h2>
+  <div id="pieces"></div>
+  <noscript>
+    <div class="gap"><b>This catalog builds itself from a list of tuples, so it needs JavaScript to render.</b>
+    Nothing is lost: open <a href="orbit.html">the renderer</a> directly, and take the parameters from
+    <a href="orbit-manifests.md">orbit-manifests.md</a> — that file is the record, this page is only its display.</div>
+  </noscript>
+</section>
+
+<section>
+  <h2 class="science">provenance</h2>
+  <div class="proof"><b>The renderer is frozen and the freeze is enforced.</b> <code>surfaces/forge/orbit.html</code>, 8,644 bytes, committed-blob
+    <code>sha256 6e54b80d…8a6b29</code> <!-- PUBLIC-CONSTANT: frozen orbit.html renderer committed-blob sha256 -->,
+    pinned from commit <code>c3e4997</code>. <code>e2e/forge-freeze.mjs</code> hashes the <b>committed blob</b> — never a worktree copy — and CI fails on any edit. Tinkering forks to <code>orbit-v2.html</code>.</div>
+  <div class="proof"><b>Same tuple, same picture, forever.</b> That is what the pin buys: a seed-link is a complete record of a work, because the program it runs cannot drift. Reproduce any piece by opening its link — you are running the identical bytes.</div>
+  <div class="gap"><b>Not yet mirrored off this estate.</b> The Arweave copy of the renderer and manifest is the ceremony's ready state, not a completed mirror — it waits on a funded JWK, which does not exist on the dev box. Until then the freeze is enforced by CI and by this repository, and nowhere else.</div>
+</section>
+
+<footer>
+  <p><a href="index.html">⌂ the forge</a> · <a href="orbit.html">the renderer</a> · <a href="orbit-manifests.md">manifests</a> · <a href="../">the surfaces</a></p>
+  <p>Adding a piece is adding a tuple to one array in this file. If it ever takes more than that, the catalog has stopped being what it says it is.</p>
+</footer>
+
+</main>
+<script>
+/* ── THE ONLY THING YOU EDIT TO ADD A PIECE ──────────────────────────
+   One tuple per work. Title is optional and decorative; the parameters
+   ARE the piece. Order here is the order on the page. */
+const PIECES = [
+  { title: 'Manifest A', seed: 2000, k: 8, rings: 7, twist: -10, hueBase: 283 },
+  { title: 'Manifest B', seed: 2000, k: 8, rings: 7, twist:  80, hueBase: 250 },
+];
+
+/* Everything below is generated. The renderer reads all five values from the
+   query string (orbit.html:134-137) and builds this exact link itself when you
+   press its "seed-link" button — so the URL below is the renderer's own record
+   format, not a convention invented here. */
+const RENDERER = 'orbit.html';
+const KEYS = ['seed', 'k', 'rings', 'twist', 'hueBase'];
+
+const link = p => RENDERER + '?' + KEYS.map(k => k + '=' + encodeURIComponent(p[k])).join('&');
+
+const host = document.getElementById('pieces');
+PIECES.forEach((p, i) => {
+  const href = link(p);
+  const abs = new URL(href, location.href).toString();
+  const el = document.createElement('div');
+  el.className = 'art';
+  const head = document.createElement('div');
+  head.innerHTML = '<div class="t"></div><div class="sub"></div>';
+  head.querySelector('.t').textContent = p.title || ('piece ' + (i + 1));
+  head.querySelector('.sub').textContent = 'live render · frozen renderer';
+  el.appendChild(head);
+
+  const f = document.createElement('iframe');
+  f.className = 'frame';
+  f.src = href;
+  f.loading = 'lazy';
+  f.title = (p.title || ('piece ' + (i + 1))) + ' — live render from the frozen orbit renderer';
+  el.appendChild(f);
+
+  const t = document.createElement('div');
+  t.className = 'tuple';
+  KEYS.forEach(k => {
+    const s = document.createElement('span');
+    s.innerHTML = '<b></b>';
+    s.querySelector('b').textContent = k + ' ';
+    s.appendChild(document.createTextNode(String(p[k])));
+    t.appendChild(s);
+  });
+  el.appendChild(t);
+
+  const sl = document.createElement('div');
+  sl.className = 'seedlink';
+  const a = document.createElement('a');
+  a.href = href; a.textContent = abs;
+  sl.appendChild(document.createTextNode('seed-link · '));
+  sl.appendChild(a);
+  el.appendChild(sl);
+
+  host.appendChild(el);
+});
+
+/* DERIVED, never typed — the count is the array's length. A hand-maintained
+   count is a claim that rots the first time someone adds a tuple. */
+document.getElementById('n-pieces').textContent = String(PIECES.length);
+</script>
+</body>
+</html>
