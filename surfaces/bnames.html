@@ -322,6 +322,10 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
   var VERIFIERS={};                           // TODO: each key a DIFFERENT independently-discoverable
                                               // party; NEVER the deploy/owner keys. Publish "K of N"
                                               // beside QUORUM once real builders are recruited.
+  /* DERIVED, never typed — a hand-maintained count is a claim that rots.
+     Computed at load; VERIFIERS is a static literal. If it ever becomes
+     dynamic this must move inside deriveHardened(). */
+  var N_VERIFIERS=Object.keys(VERIFIERS).length;
   var HARDENED=false;                         // FAIL-SAFE: locked until PROVEN open
   async function onchainCodeHash(a){
     if(!RPC) return null;                     // not configured — stay locked, make no request
@@ -330,6 +334,10 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
   async function verifyAtt(att,pubkey){ /* TODO: real signature check; false-safe until built */ return false; }
   async function deriveHardened(){ try{
       if(!RPC) return false;
+      /* Quorum cannot be met by fewer verifiers than it demands. Returns
+         before any network call, and makes the inertness explicit rather
+         than incidental: today N_VERIFIERS is 0 and QUORUM is 2. */
+      if(QUORUM>N_VERIFIERS) return false;
       var live=await onchainCodeHash('kingbeelovis'); if(!live) return false;
       var rec=await (await fetch(RECEIPT_URL,{cache:'no-store'})).json();
       var atts=(rec&&Array.isArray(rec.attestations))?rec.attestations:[]; var m=new Set();
@@ -563,8 +571,12 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
     if(e.target&&e.target.id==='sign-btn'&&!e.target.disabled){
       var _a=document.getElementById('ack'); if(!_a||!_a.checked) return; // custody acknowledgment
       var n=strip($('q').value);
-      var registrant=SOUL||'kingbeelovis';
-      if(!registrantAllowed(SOUL||null)) return; // non-founder refused until deriveHardened() is true
+      /* Guard BEFORE binding. registrantAllowed refuses a null/absent SOUL,
+         so past this line SOUL is guaranteed real and no default is needed.
+         The `||'kingbeelovis'` form is the defect itself — it made the
+         founder the fallback identity — so it does not survive here. */
+      if(!registrantAllowed(SOUL)) return;
+      var registrant=SOUL;
       var out=$('sign-out'); out.style.display='block';
       var txData = JSON.stringify({actions:[{account:"kingbeelovis",name:"registeracc",authorization:[{actor:registrant,permission:"active"}],data:{registrant:registrant,domain_name:n,target:registrant}}]},null,2);
       var cleosCmd = 'cleos -u https://eos.api.eosnation.io push action kingbeelovis registeracc' + String.fromCharCode(10) +
@@ -623,7 +635,10 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
       fields.forEach(function(f){
         var inp=document.createElement('input');
         inp.placeholder=f; inp.id='cz-'+f; inp.style.cssText='flex:1;min-width:100px;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:7px 9px;font:11px IBM Plex Mono,monospace';
-        if(f==='owner'||f==='registrant'||f==='from'){ inp.value=SOUL||'kingbeelovis'; }
+        /* Blank when not connected. Pre-filling the founder's account for an
+           anonymous visitor is the same defect one layer down: it presents
+           his identity as the default. */
+        if(f==='owner'||f==='registrant'||f==='from'){ inp.value=SOUL||''; }
         if(f==='days'){ inp.value='365'; }
         fw.appendChild(inp);
       });
@@ -668,6 +683,12 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
     } else { chip.textContent='not connected'; chip.style.color=''; out.style.display='none';
       try{localStorage.removeItem('bnr_soul');}catch(e){} }
     drawConst(); if(live.rows.length){ ['king','k','q'].forEach(function(n){ jewel('j-'+n,n); }); }
+    /* SOUL just changed — connect, disconnect, or the deferred restore from
+       localStorage in the async init below, which all funnel through here.
+       Without this the gate holds its first-paint verdict: safe (it fails
+       closed) but the founder could not register after connecting in the
+       same session. */
+    if(typeof refreshGate==='function') refreshGate();
   }
   $('soul-go').onclick=function(){
     var v=soulStrip($('soul-in').value); if(!v)return; SOUL=v; soulApply();

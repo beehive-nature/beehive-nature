@@ -32,6 +32,13 @@ const srv = createServer(async (req,res) => {
 await new Promise(r => srv.listen(0,'127.0.0.1',r));
 const base = `http://127.0.0.1:${srv.address().port}`;
 
+/* The page runs its own async init — loadRegistry/loadConfig/loadRamCost, then
+   check(), which RESETS #consent-check and disables the button. A test that
+   ticks boxes before that lands is racing the page and will fail against
+   correct code. Settle first. (Cost me one false "the gate does not
+   re-evaluate" finding.) */
+const settle = async (page) => { await page.waitForTimeout(1200); };
+
 let pass=0, fail=0;
 const ok=(n,c,note='')=>{ console.log(`  ${c?'PASS':'FAIL'} ${n}${note?' — '+note:''}`); c?pass++:fail++; };
 
@@ -43,6 +50,7 @@ const browser = await chromium.launch();
   const page = await ctx.newPage();
   await page.route('**/tour.js*', r => r.abort());        // no bar is ever injected
   await page.goto(`${base}/bnames.html`, { waitUntil:'load' });
+  await settle(page);
   await page.waitForTimeout(400);
   const r = await page.evaluate(() => {
     const o = document.getElementById('adOrb');
@@ -63,6 +71,7 @@ const browser = await chromium.launch();
   const page = await ctx.newPage();
   await page.route('**/tour.js*', r => r.abort());
   await page.goto(`${base}/bnames.html`, { waitUntil:'load' });
+  await settle(page);
   await page.waitForTimeout(200);
   await page.evaluate(() => {
     const b = document.createElement('div');
@@ -86,6 +95,7 @@ const browser = await chromium.launch();
   const ctx = await browser.newContext();
   const page = await ctx.newPage();
   await page.goto(`${base}/bnames.html`, { waitUntil:'load' });
+  await settle(page);
   const soul = await page.evaluate(() => localStorage.getItem('bnr_soul'));
   ok('F2 a fresh visitor really has no stored SOUL', soul === null, String(soul));
   await ctx.close();
@@ -96,6 +106,7 @@ const browser = await chromium.launch();
   const ctx = await browser.newContext();
   const page = await ctx.newPage();
   await page.goto(`${base}/bnames.html`, { waitUntil:'load' });
+  await settle(page);
   await page.evaluate(() => { document.getElementById('consent-card').style.display = 'block'; });
 
   const tick = (id, v) => page.evaluate(([i,val]) => {
@@ -136,6 +147,7 @@ const browser = await chromium.launch();
   const page = await ctx.newPage();
   await page.addInitScript(() => { try{ localStorage.setItem('bnr_soul','kingbeelovis'); }catch(e){} });
   await page.goto(`${base}/bnames.html`, { waitUntil:'load' });
+  await settle(page);
   await page.evaluate(() => { document.getElementById('consent-card').style.display='block'; });
   for (const id of ['consent-check','ack']) {
     await page.evaluate((i) => { const el=document.getElementById(i); el.checked=true;
@@ -151,6 +163,47 @@ const browser = await chromium.launch();
   await ctx.close();
 }
 
+// ── F4 · SOUL set MID-SESSION must re-open the gate ───────────────
+// The gate fails CLOSED without this, which is safe but wrong: the founder
+// could tick both boxes, connect his soul, and still be refused until he
+// re-ticked something. soulApply() is the single choke point — connect,
+// disconnect, and the deferred localStorage restore all funnel through it.
+{
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  await page.goto(`${base}/bnames.html`, { waitUntil:'load' });
+  await settle(page);
+  await page.evaluate(() => { document.getElementById('consent-card').style.display='block'; });
+  for (const id of ['consent-check','ack']) {
+    await page.evaluate((i) => { const el=document.getElementById(i); el.checked=true;
+      el.dispatchEvent(new Event('change',{bubbles:true})); }, id);
+  }
+  let d = await page.evaluate(() => document.getElementById('sign-btn').disabled);
+  ok('F4 both boxes ticked, no soul yet -> still refused', d === true, `disabled=${d}`);
+
+  // connect a founder soul through the REAL control, mid-session
+  // the control lives in a collapsed section; drive the real handler directly
+  await page.evaluate(() => { document.getElementById('soul-in').value='kingbeelovis';
+                              document.getElementById('soul-go').click(); });
+  await page.waitForTimeout(300);
+  const r = await page.evaluate(() => ({
+    disabled: document.getElementById('sign-btn').disabled,
+    why: (document.getElementById('gate-why')||{}).textContent || '',
+    refusal: getComputedStyle(document.getElementById('nf-refusal')).display,
+  }));
+  ok('F4 connecting a founder soul MID-SESSION re-opens the gate, no re-tick',
+     r.disabled === false, `disabled=${r.disabled}`);
+  ok('F4 refusal notice clears on connect', r.refusal === 'none', r.refusal);
+  ok('F4 reason line clears', r.why === '', JSON.stringify(r.why));
+
+  // and disconnecting must close it again
+  await page.evaluate(() => document.getElementById('soul-out').click());
+  await page.waitForTimeout(200);
+  d = await page.evaluate(() => document.getElementById('sign-btn').disabled);
+  ok('F4 disconnecting closes the gate again', d === true, `disabled=${d}`);
+  await ctx.close();
+}
+
 // ── no console errors anywhere (the RPC placeholder used to throw) ──
 {
   const ctx = await browser.newContext();
@@ -158,6 +211,7 @@ const browser = await chromium.launch();
   const errs = [];
   page.on('pageerror', e => errs.push(e.message));
   await page.goto(`${base}/bnames.html`, { waitUntil:'load' });
+  await settle(page);
   await page.waitForTimeout(600);
   ok('no page errors on load (RPC is null, so no fetch is attempted)',
      errs.length === 0, errs.slice(0,2).join(' | ') || 'none');
