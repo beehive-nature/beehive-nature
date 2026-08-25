@@ -20,17 +20,22 @@ jobs:
       - name: Build workspace
         run: cargo build --workspace --locked
       - name: Test workspace
+        if: always()
         run: cargo test --workspace --locked
       - name: Check formatting
+        if: always()
         run: cargo fmt --all --check
       # the && short-circuit: a gate that cannot print its own failure (cc2, 2026-08-24)
       - name: Shell chain lint
+        if: always()
         run: sh scripts/lint-shell-chains.sh
       # bSAFE host lives outside the kernel workspace (own members list + lockfile)
       - name: bSAFE host workspace (THP codec + Noise XX)
+        if: always()
         run: cargo test --locked --manifest-path rust/bsafe-host/Cargo.toml
       # SPEC-BINDEXER-0: the keyless attestation is a CI-visible receipt
       - name: bindexer keyless attestation (SPEC-BINDEXER-0)
+        if: always()
         run: cargo run --locked -p bindexer -- prove-keyless
 
   static:
@@ -50,7 +55,49 @@ jobs:
       # (chain-zano tree hash, #[ignore] census, STATUS.md sentence) and
       # compares them against what the page prints. Static: node + git only.
       - name: Dock claims — hero numbers re-derived from source
+        if: always()
         run: node e2e/dock-claims.mjs
+      # §7 hook selftest: a gate's success state is SILENCE — a passing hook
+      # and a broken hook look identical. The four cases (seat-author blocked,
+      # trailer-in-body blocked, correct shape lands, founder-typed lands) run
+      # through the REAL hooks in a throwaway repo every push, so a reintroduced
+      # fail-open goes red the same hour. Hook, CI and selftest share ONE
+      # implementation — identity-check.sh — never agreeing by convention.
+      - name: §7 hook selftest — four cases, every push
+        if: always()
+        run: sh scripts/identity-check.sh --selftest
+      # THE WORKFLOW ASSERTS ITS OWN SHAPE (zA ruling, 2026-08-24): every
+      # suite step carries if:always() or this step fails the run — the
+      # next step someone adds cannot reintroduce silent skipping.
+      - name: CI shape — every suite step carries if:always()
+        if: always()
+        run: node scripts/lint-ci-shape.mjs
+      # FORGE FREEZE (founder ruling, dispatched 2026-08-24): orbit.html is
+      # frozen art — CI fails on ANY edit to its committed blob. The hash is
+      # taken from the committed blob, never the worktree copy. Tinkering
+      # lives in surfaces/forge/orbit-v2.html (not frozen). LIVES IN STATIC
+      # BY RULING: node + git only, no browser deps — a suite red in the
+      # node job can never reach this step here.
+      - name: Forge freeze — orbit.html committed-blob sha256
+        if: always()
+        run: node e2e/forge-freeze.mjs
+      # §7 DETECTION (not enforcement — actions run after the commits reach
+      # origin, so a violation is already public when this step goes red;
+      # prevention needs branch protection + PR-only merges, founder's call).
+      # The local pre-commit hook is advisory only. THE RANGE IS THE PUSH
+      # EVENT'S before..sha — origin/main already points at the pushed sha at
+      # checkout time, so origin/main..HEAD is empty BY CONSTRUCTION on push
+      # events and would be a no-op dressed as green (founder-caught). New
+      # branch (before = all zeros) checks HEAD; anything that cannot be
+      # computed FAILS — the check fails closed. LIVES IN STATIC BY RULING;
+      # the full-history checkout this job already carries (for dock-claims'
+      # tree pin) is exactly what the range check needs.
+      - name: §7 identity — author is the founder on the pushed range
+        if: always()
+        env:
+          S7_BEFORE: ${{ github.event.before }}
+          S7_SHA: ${{ github.sha }}
+        run: sh scripts/identity-check.sh
 
   node:
     runs-on: ubuntu-latest
@@ -65,6 +112,7 @@ jobs:
       # The 26 include the pinned cross-implementation vector any Rust port
       # must reproduce byte-identically (prf 0x01×32 → master_prk d54134a6…).
       - name: Key-build engine unit tests (26, incl. pinned vector)
+        if: always()
         working-directory: key-build/bdid-key
         run: |
           npm ci
@@ -77,16 +125,26 @@ jobs:
       # playwright the repo pins; `playwright install chromium` then
       # fetches that version's browser build. Both numbers print below —
       # the pin is the receipt, not a claim.
-      - name: Onboarding e2e (Chromium + virtual authenticator w/ PRF)
+      # SHARED SETUP, deliberately split out (zA class fix): install once,
+      # then every suite step carries if:always(). When SETUP fails, the
+      # always() suites still FIRE and fail noisily on the missing
+      # dependency — visible and attributable, never skipped. The only
+      # exempt step in the workflow; lint-ci-shape.mjs knows its name.
+      - name: shared setup — install (exempt from always())
         working-directory: e2e
         run: |
           npm ci
           npx playwright --version
           npx playwright install --dry-run chromium
           npx playwright install --with-deps chromium
-          node e2e.mjs
+      - name: Onboarding e2e (Chromium + virtual authenticator w/ PRF)
+        if: always()
+        working-directory: e2e
+        run: node e2e.mjs
       - name: University smoke (browser suite — see Chromium note above)
         working-directory: e2e
+        if: always()   # a sibling suite's red must not SKIP this one — every
+                       # suite fires every run, or a red stops being attributable
         run: node university-smoke.mjs
       # fleet-pixels: every chart-bearing hosted surface must DRAW (pixels
       # read back from the canvas, not merely load). fleet-bus: the
@@ -95,27 +153,14 @@ jobs:
       # repo-relative; the originals under surfaces/fleet/ are never touched.
       - name: Fleet pixels — the art draws, not just loads
         working-directory: e2e
+        if: always()
         run: node fleet-pixels.mjs
       - name: Fleet bus — the localStorage bus, both directions
         working-directory: e2e
+        if: always()
         run: node fleet-bus.mjs
-      # FORGE FREEZE (founder ruling, dispatched 2026-08-24): orbit.html is
-      # frozen art — CI fails on ANY edit to its committed blob. The hash is
-      # taken from the committed blob, never the worktree copy. Tinkering
-      # lives in surfaces/forge/orbit-v2.html (not frozen).
-      - name: Forge freeze — orbit.html committed-blob sha256
-        run: node e2e/forge-freeze.mjs
-      # §7 DETECTION (not enforcement — actions run after the commits reach
-      # origin, so a violation is already public when this step goes red;
-      # prevention needs branch protection + PR-only merges, founder's call).
-      # The local pre-commit hook is advisory only. THE RANGE IS THE PUSH
-      # EVENT'S before..sha — origin/main already points at the pushed sha at
-      # checkout time, so origin/main..HEAD is empty BY CONSTRUCTION on push
-      # events and would be a no-op dressed as green (founder-caught). New
-      # branch (before = all zeros) checks HEAD; anything that cannot be
-      # computed FAILS — the check fails closed.
-      - name: §7 identity — author is the founder on the pushed range
-        env:
-          S7_BEFORE: ${{ github.event.before }}
-          S7_SHA: ${{ github.sha }}
-        run: sh scripts/identity-check.sh
+      # THE JOB MOVE (zA completion ruling, 2026-08-24): the two DETECTION
+      # steps moved INTO STATIC, out of this suite job — structural immunity.
+      # Annotation (if:always()) is something the next person must remember;
+      # a job a suite red cannot reach is something they cannot forget.
+      # Their new home: the static job, below, with the same comments.
