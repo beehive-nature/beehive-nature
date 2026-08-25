@@ -38,8 +38,14 @@
    +'body[data-reg="cypherpunk"] [data-reg="cypherpunk"]{display:revert}'
    +'#bregctl{display:inline-flex;gap:4px;align-items:center;margin-left:10px;padding-left:10px;flex-shrink:0;'
    +'border-left:1px solid #243026;vertical-align:middle}'
+   /* margin/min-height/height/box-sizing pinned: any page's bare button{} rule
+      (attest/bset carry min-height:40px;margin-top:8px) reaches these buttons for
+      every property this rule leaves open, and the tbar stretches to the tallest
+      rider — 63px, caught by estate-review's paint gate. Same law as the bar's
+      own links: the tour bar is nobody's element selector. */
    +'#bregctl button{background:transparent;border:1px solid #243026;border-radius:6px;'
-   +'color:#8a9a8a;font:10px "IBM Plex Mono",monospace;padding:2px 7px;cursor:pointer;line-height:1.5}'
+   +'color:#8a9a8a;font:10px "IBM Plex Mono",monospace;padding:2px 7px;cursor:pointer;line-height:1.5;'
+   +'margin:0;min-height:0;height:auto;box-sizing:border-box}'
    +'#bregctl button[aria-pressed="true"]{border-color:#FFD700;color:#FFD700}'
    +'#bregctl button:hover{border-color:#00E5FF;color:#00E5FF}'
    +'@media (max-width:520px){#bregctl button span.w{display:none}}'; /* phone: glyphs keep their pressed word via title */

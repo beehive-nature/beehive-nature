@@ -45,7 +45,8 @@ let pass = 0, fail = 0;
 const ok = (name, cond, note = '') => { if (cond) { pass++; console.log(`PASS ${name}`); } else { fail++; console.log(`FAIL ${name}${note ? ' — ' + note : ''}`); } };
 
 const browser = await chromium.launch();
-const page = await browser.newPage();
+// Viewport pinned, not defaulted: the tbar height bound below is anchored to 1280px.
+const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
 const errs = [];
 const netNotes = [];
 page.on('pageerror', e => errs.push('pageerror: ' + e.message));
@@ -72,6 +73,7 @@ const cards = hubLinks.length;
 console.log(`hub: ${cards} cards, ${hubLinks.length} local hrefs`);
 
 // 2 · crawl every hub-discovered local page
+const TBAR_MAX = 60; // px, collapsed strip at 1280px — see the paint check below
 const seen = new Set([...hubLinks, 'index.html']);
 const findings = [];
 for (const href of seen) {
@@ -92,12 +94,32 @@ for (const href of seen) {
     const abs = rootAbs ? target : dir + target;
     if (!existsSync(join(SURF, abs))) findings.push(`BROKEN LINK: ${clean} -> ${h}`);
   }
-  // tour.js presence (the tbar), except pages that opted out
-  const hasTour = await page.evaluate(() => !!document.getElementById('tbar'));
-  if (!hasTour && !clean.startsWith('onboarding')) findings.push(`NO TOURBAR: ${clean}`);
+  // tour.js presence AND paint height (the tbar), except pages that opted out
+  /* Two founder-reported breaks loaded with zero errors and still shipped an
+     unusable bar: page CSS styling bare `nav` restyled the injected strip into
+     a viewport-sized sheet, and riders without flex-shrink:0 stretched it to
+     126px on blight pages. Both invisible to load/error/presence checks — only
+     the RENDERED height tells a healthy bar from a broken one. The collapsed
+     strip is ~47px at 1280px (32px links + 14px padding + 1px border); the
+     bound leaves slack for fonts/scrollbars without readmitting either bug.
+     The riders (register.js / lang.js / rails-badge.js) land async INSIDE the
+     bar after the 150ms settle, so poll until the bar is fully dressed (or the
+     deadline) before measuring — a bare-bar reading would miss exactly the
+     rider bug. On deadline, measure whatever painted rather than skip. */
+  const tbarH = await page.evaluate(async () => {
+    for (let i = 0; i < 30; i++) {
+      if (['tbar', 'bregctl', 'blangctl', 'railsbadge'].every(id => document.getElementById(id))) break;
+      await new Promise(r => setTimeout(r, 50));
+    }
+    const el = document.getElementById('tbar');
+    return el ? el.getBoundingClientRect().height : null;
+  });
+  if (tbarH === null) { if (!clean.startsWith('onboarding')) findings.push(`NO TOURBAR: ${clean}`); }
+  else if (tbarH > TBAR_MAX) findings.push(`TBAR HEIGHT: ${clean}: ${Math.round(tbarH)}px > ${TBAR_MAX}px`);
 }
 ok('every hub-listed surface exists and loads', !findings.some(f => f.startsWith('MISSING') || f.startsWith('LOAD FAIL') || f.startsWith('ERRORS')));
 ok('no broken intra-estate links', !findings.some(f => f.startsWith('BROKEN')));
+ok(`tour bar rides every surface at strip height (≤${TBAR_MAX}px @1280)`, !findings.some(f => f.startsWith('NO TOURBAR') || f.startsWith('TBAR HEIGHT')));
 console.log(findings.length ? 'FINDINGS:\n' + findings.join('\n') : 'FINDINGS: none');
 if (netNotes.length) console.log('NET NOTES (external endpoints, not page defects):\n' + [...new Set(netNotes)].join('\n'));
 
