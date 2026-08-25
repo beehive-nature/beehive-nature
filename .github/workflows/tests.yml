@@ -51,6 +51,14 @@ jobs:
       # compares them against what the page prints. Static: node + git only.
       - name: Dock claims — hero numbers re-derived from source
         run: node e2e/dock-claims.mjs
+      # §7 hook selftest: a gate's success state is SILENCE — a passing hook
+      # and a broken hook look identical. The four cases (seat-author blocked,
+      # trailer-in-body blocked, correct shape lands, founder-typed lands) run
+      # through the REAL hooks in a throwaway repo every push, so a reintroduced
+      # fail-open goes red the same hour. Hook, CI and selftest share ONE
+      # implementation — identity-check.sh — never agreeing by convention.
+      - name: §7 hook selftest — four cases, every push
+        run: sh scripts/identity-check.sh --selftest
 
   node:
     runs-on: ubuntu-latest

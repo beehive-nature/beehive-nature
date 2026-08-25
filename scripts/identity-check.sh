@@ -111,20 +111,27 @@ if [ "${1:-}" = "--selftest" ]; then
   }
 
   echo "§7 selftest — four cases through the REAL hooks (throwaway repo, deleted after):"
+  # every case pins its FULL ident env — the rig is hermetic against whatever
+  # the caller exported (a caller's GIT_COMMITTER_* leaked into T4 once and
+  # the gate CORRECTLY blocked what the rig mislabeled founder-typed)
   blocked "T1 seat-as-author is blocked" \
     env GIT_AUTHOR_NAME=bZiq GIT_AUTHOR_EMAIL=seat@x GIT_COMMITTER_NAME=bZiq GIT_COMMITTER_EMAIL=seat@x \
     git commit -q -m "t1 seat as author"
   printf 't2 subject\n\nCo-authored-by: zCode <z@x>\n\na trailing paragraph pushes the line out of the trailer block\n' > "$T/msg"
   blocked "T2 trailer-in-body is blocked" \
-    env GIT_COMMITTER_NAME=bZiq GIT_COMMITTER_EMAIL=seat@x git commit -q -F "$T/msg"
+    env GIT_AUTHOR_NAME="$FOUNDER_NAME" GIT_AUTHOR_EMAIL="$FOUNDER_EMAIL" \
+        GIT_COMMITTER_NAME=bZiq GIT_COMMITTER_EMAIL=seat@x git commit -q -F "$T/msg"
   printf 't3 subject\n\nCo-authored-by: zCode <z@x>\n' > "$T/msg3"
   created "T3 correct shape lands" bZiq yes \
-    env GIT_COMMITTER_NAME=bZiq GIT_COMMITTER_EMAIL=seat@x git commit -q -F "$T/msg3"
+    env GIT_AUTHOR_NAME="$FOUNDER_NAME" GIT_AUTHOR_EMAIL="$FOUNDER_EMAIL" \
+        GIT_COMMITTER_NAME=bZiq GIT_COMMITTER_EMAIL=seat@x git commit -q -F "$T/msg3"
   echo y >> f.txt && git add f.txt   # T4 needs something staged — an empty commit
                                      # dies on "nothing to commit" before any hook
                                      # runs, and the rig would read git's refusal
                                      # as the gate's verdict
   created "T4 founder-typed lands" "$FOUNDER_NAME" no \
+    env GIT_AUTHOR_NAME="$FOUNDER_NAME" GIT_AUTHOR_EMAIL="$FOUNDER_EMAIL" \
+        GIT_COMMITTER_NAME="$FOUNDER_NAME" GIT_COMMITTER_EMAIL="$FOUNDER_EMAIL" \
     git commit -q -m "t4 founder typed"
   if [ "$st" -ne 0 ]; then echo "§7 selftest FAIL — a working gate and a dead one are not distinguishable by silence; these cases are the difference"; fi
   exit "$st"
