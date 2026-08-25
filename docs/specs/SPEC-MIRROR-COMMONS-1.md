@@ -65,5 +65,18 @@ class stated.
   the new one appended — the manifest is an append-only history of what the record said
   when. A government PDF silently changing is precisely the event this lane exists to
   catch, and the MAHA Assessment has already demonstrated it once.
+- **The public-upload disclosure (T5, 2026-08-25).** A `--public` Autonomi upload stores
+  its root data map as a **plaintext chunk** on the network — any node operator can
+  trawl chunks for valid maps and read the whole file (the reason Watch-It dropped
+  public XOR addresses as an entry type in alpha.40; `docs/ARCHITECTURE.md` carries the
+  mechanism). A private upload writes the same encrypted chunks and keeps the map local,
+  where the chunks are unlinkable noise. **"We uploaded it to Autonomi" is therefore not
+  a privacy claim and this spec never lets it sound like one:** every `--public` act
+  names itself as a deliberate publication rather than a default. For this lane that is
+  the honest description — mirror-class payloads are public-domain government works and
+  publication is the intent, recorded as such at signing time. Witness-class payloads
+  never ride a `--public` upload (they never leave hash + pointers), and anything with a
+  person in it has its own ceremony and is not mirrored here at all. Read-path receipts
+  from public files (antget's address is a public file by design) are unaffected.
 
 🐝

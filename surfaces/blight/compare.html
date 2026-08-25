@@ -145,9 +145,39 @@ const COLS=[
   bug:'pending source read',
   pool:'NONE — zero DEX pairs (dexscreener pairs:null 2026-08-16); unswappable via AMM; March \'24 doc priced entry $123',
   provenance:'March \'24 family review + chain bisect + fingerprint match (only 9-dec/210M JEDI on Base)'},
+ // ---- 2026-08-25 sync: three collections the museum carried and the catalog did not.
+ // Cells below carry only what a source says; the interface facts are the selector
+ // census (docs/receipts/RECEIPT_SELECTOR_CENSUS_2026-08.md), read on two RPCs each.
+ {sym:'PEPI eth',chain:'Ethereum',addr:'0x3103cD1602d5fa8f4b9283F9D5a7fa2290795d51',
+  artist:'same anon operator as the Base PEPI pair — same wallet, byte-identical generator source (museum, proven against Sourcify corpus 2026-08-21)',
+  supply:null, seedWords:4, seedShape:'item model — getSvg((uint8,uint256,uint256,uint256))',
+  ladder:null, topName:'?', hasMeta:null,
+  traits:'unmeasured this pass — the census measured the interface, not the art',
+  capture:'id-addressed: transferItem(address,uint256) moves one inscription by globally-unique id, carrying its backing tokens (§2.2, 2026-08-20; selector measured on-chain 2026-08-25)',
+  bug:'unmeasured — Sourcify verified source linked from the museum, not yet read',
+  pool:'pending',
+  provenance:'museum SOURCES wing (etherscan + sourcify links) · census 2026-08-25: itemCount + getOwnerItemsPage + transferItem + getSvg/item present, two RPCs byte-identical'},
+ {sym:'NTNT',chain:'Base',addr:'0xceb9d2886b29ab2b6d429442540e819f578db92a',
+  artist:'unattributed (pending) — Neutants',
+  supply:null, seedWords:'?', seedShape:'UNKNOWN — none of the four known getSvg shapes (census 2026-08-25)',
+  ladder:null, topName:'?', hasMeta:null,
+  traits:'the family\'s measured unknown: 60 dispatcher immediates, most unresolved — read verified source before building anything on it',
+  capture:'unmeasured',
+  bug:'pending source read',
+  pool:'pending',
+  provenance:'museum SOURCES wing (basescan link, inducted with this sync) · census 2026-08-25: no enumeration pair, no known getSvg shape'},
+ {sym:'MiDi',chain:'Base',addr:'0x569e1A337b095B1A6c8F206158072cEDb6325b56',
+  artist:'unattributed (pending) — one operator ran three MiDi deployments; this is #2 (2026-08-19 census: #1 ownership-renounced and healthiest, #3 the deadest at 70 holders)',
+  supply:210000000, seedWords:2, seedShape:'(seed, extra) presumed — getSvg is FUNGI-shape',
+  ladder:null, topName:'?', hasMeta:null,
+  traits:'MUSIC, not pixels — pieces render as MIDI (the bMiDi studio lane lives on this family); trait surface unmeasured',
+  capture:'unmeasured this pass',
+  bug:'pending source read',
+  pool:'pending',
+  provenance:'museum SOURCES wing (basescan link) · supply read on Base Blockscout 2026-08-25 (210M × 10^9 wei) · census 2026-08-25: FUNGI-shape getSvg, no enumeration pair'},
 ];
 const pct=(n,sup)=>((n/sup)*100).toPrecision(2)+'% of supply';
-const fmt=n=>n.toLocaleString('en-US');
+const fmt=n=>n==null?'pending':n.toLocaleString('en-US');
 function pane(c){
   const top=c.ladder?c.ladder[c.ladder.length-1]:null;
   return '<div class="pane"><h3>'+c.sym+'</h3><div class="by">'+c.chain+' · '+c.addr.slice(0,10)+'…'+c.addr.slice(-4)+'</div>'
@@ -195,7 +225,7 @@ function famTable(){
     const top=c.ladder?c.ladder[c.ladder.length-1]:null;
     h+='<tr><td style="color:var(--cyan)">'+c.sym+'</td><td>'+fmt(c.supply)+'</td><td>'+c.seedShape+'</td>'
       +(top?'<td class="ok">'+c.topName+' @ '+fmt(top)+'</td><td>'+pct(top,c.supply)+'</td>':'<td class="pend">?</td><td class="pend">?</td>')
-      +'<td>'+(c.hasMeta?'<span class="ok">yes — on-chain JSON</span>':'<span class="warn">no</span>')+'</td>'
+      +'<td>'+(c.hasMeta?'<span class="ok">yes — on-chain JSON</span>':c.hasMeta===null?'<span class="pend">unmeasured</span>':'<span class="warn">no</span>')+'</td>'
       +'<td>'+c.artist.split('—')[0].slice(0,40)+(c.artist.length>40?'…':'')+'</td></tr>';
   }
   $('fam').innerHTML=h;
@@ -207,7 +237,9 @@ $('a').onchange=draw; $('b').onchange=draw; $('sw').onclick=()=>{const t=$('a').
 draw(); famTable();
 $('srcs').innerHTML='<b>Sources.</b> FUNGI: ToddStool/fungi <i>Generator.sol:10-14</i> (cloned 2026-08-16) + boundary calls 2,099,999→L4 / 2,100,000→L5, extra-independence proven (extras 1/999/123456789 leave level fixed). '
  +'PEPi: verified Pepi.sol read (trySeedTransfer three-path decode) + on-chain supplies. FROGGI/JELLI: pure chain bisection, anchors and rungs listed per row; ±1 at the boundary. '
- +'TRUFFI: getMeta((uint256,uint256)) probes revert; holder-keyed getSvg confirmed. Prices: dexscreener public API, fetched live in your browser right now. '
+ +'TRUFFI: getMeta((uint256,uint256)) probes revert; holder-keyed getSvg confirmed. '
+ +'PEPI eth · NTNT · MiDi: added 2026-08-25 from the museum\'s SOURCES wing — interface cells from the selector census (<i>docs/receipts/RECEIPT_SELECTOR_CENSUS_2026-08.md</i>, bytecode read on two RPCs per deployment, agreement required). '
+ +'Prices: dexscreener public API, fetched live in your browser right now. '
  +'<b>Self-check:</b> ladder sums follow each contract\u2019s own constants — no cross-collection threshold is ever reused (that bug, caught 2026-08-16, is why this page exists).';
 // fleet nav (idempotent with fleet.js when landed)
 $('fleet').innerHTML=(window.FLEET_NAV||[

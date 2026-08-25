@@ -66,6 +66,14 @@ jobs:
       - name: §7 hook selftest — four cases, every push
         if: always()
         run: sh scripts/identity-check.sh --selftest
+      # SPRINT CLOSING RECEIPT (founder order, 2026-08-25): the four-suite gap
+      # was work that landed and gated nothing, and a report cannot tell a sprint
+      # that shipped from one that stalled. This re-derives every sprint claim
+      # from the repo on EVERY push, not at close — a closing gate that first
+      # runs at close is a claim about a sprint nobody watched.
+      - name: Sprint closing receipt — claims re-derived, not reported
+        if: always()
+        run: node scripts/sprint-close.mjs docs/dispatches/S26-0825.sprint.json
       # THE WORKFLOW ASSERTS ITS OWN SHAPE (zA ruling, 2026-08-24): every
       # suite step carries if:always() or this step fails the run — the
       # next step someone adds cannot reintroduce silent skipping.

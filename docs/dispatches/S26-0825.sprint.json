@@ -1,0 +1,207 @@
+{
+  "sprint": "S26-0825 \u2014 carry, fold, and close on a receipt",
+  "since": "",
+  "_note": [
+    "Claims this sprint will be judged on, and HOW each is re-derived. Written at",
+    "open, not at close \u2014 a claim invented at close is a report wearing a receipt's",
+    "clothes. `since` takes the sprint-open commit sha once it exists.",
+    "",
+    "derive: file | receipt | contains | ciStep | commitSince | gate | manual",
+    "must: true means the sprint does not close without it.",
+    "",
+    "NEEDLE RULE, learned on this file's first run: a `contains` needle must not span",
+    "a line wrap. X4 originally used 'strictly FUNGI' and reported MISSING against a",
+    "spec that says exactly that \u2014 because the source hard-wraps between the two",
+    "words. Pick needles short enough to survive an 88-column re-wrap, or the check",
+    "reports a false negative and someone re-does finished work."
+  ],
+  "claims": [
+    {
+      "id": "C1",
+      "lane": "closing",
+      "title": "Closing receipt runs in CI on push",
+      "derive": "ciStep",
+      "workflow": ".github/workflows/tests.yml",
+      "testPath": "scripts/sprint-close.mjs",
+      "invocation": "scripts/sprint-close.mjs",
+      "must": true
+    },
+    {
+      "id": "E1a",
+      "lane": "erc20i estate",
+      "title": "Catalog carries PEPI eth",
+      "derive": "contains",
+      "path": "surfaces/blight/compare.html",
+      "needle": "0x3103cD16",
+      "must": true
+    },
+    {
+      "id": "E1b",
+      "lane": "erc20i estate",
+      "title": "Catalog carries NTNT",
+      "derive": "contains",
+      "path": "surfaces/blight/compare.html",
+      "needle": "NTNT",
+      "must": true
+    },
+    {
+      "id": "E1c",
+      "lane": "erc20i estate",
+      "title": "Catalog carries MiDi",
+      "derive": "contains",
+      "path": "surfaces/blight/compare.html",
+      "needle": "0x569e1A33",
+      "must": true
+    },
+    {
+      "id": "E2",
+      "lane": "erc20i estate",
+      "title": "Wing cards carry their SOURCES links",
+      "derive": "manual",
+      "note": "no mechanical check yet \u2014 write one or accept LANDED"
+    },
+    {
+      "id": "E3",
+      "lane": "erc20i estate",
+      "title": "PL-1 \u2014 in-file SPDX-MIT as a grant?",
+      "derive": "gate",
+      "note": "founder; ERC-20i/Pepi repo"
+    },
+    {
+      "id": "X1",
+      "lane": "census",
+      "title": "selector_census.py present with offline controls",
+      "derive": "file",
+      "path": "docs/receipts/selector_census.py",
+      "must": true
+    },
+    {
+      "id": "X2",
+      "lane": "census",
+      "title": "All 13 deployment addresses filled",
+      "derive": "manual",
+      "note": "9/13 at open; FILLED 13/13 on 2026-08-25 \u2014 every row carries a source line in docs/receipts/deployments.json (note updated from its at-open text so the receipt stops printing 'outstanding'; derive stays manual, and the census tool itself refuses any null)"
+    },
+    {
+      "id": "X3",
+      "lane": "census",
+      "title": "\u00a72.1 census run and receipted",
+      "derive": "receipt",
+      "path": "docs/receipts/RECEIPT_SELECTOR_CENSUS_2026-08.md",
+      "must": true
+    },
+    {
+      "id": "X4",
+      "lane": "census",
+      "title": "\u00a72.1 row relabelled from Base to FUNGI",
+      "derive": "contains",
+      "path": "docs/SPEC-INSCRIPTION-COMPAT-1.md",
+      "needle": "CORRECTION 2026-08-25 \u2014 this row said",
+      "must": true
+    },
+    {
+      "id": "A1",
+      "lane": "audit",
+      "title": "SourceHat receipt filed",
+      "derive": "receipt",
+      "path": "docs/receipts/RECEIPT_SOURCEHAT_FUNGI_AUDIT_2026-08-25.md",
+      "must": true
+    },
+    {
+      "id": "A2",
+      "lane": "audit",
+      "title": "Museum FUNGI row carries the audit with both caveats",
+      "derive": "contains",
+      "path": "surfaces/blight/museum.html",
+      "needle": "sourcehat.com/audits/Fungi",
+      "must": true
+    },
+    {
+      "id": "A3",
+      "lane": "audit",
+      "title": "\u00a72.2 carries the corroboration and the unfixed-on-chain fact",
+      "derive": "contains",
+      "path": "docs/SPEC-INSCRIPTION-COMPAT-1.md",
+      "needle": "CORROBORATION 2026-08-25",
+      "must": true
+    },
+    {
+      "id": "T1",
+      "lane": "autonomi",
+      "title": "read-path receipt (ant CLI + antget, hashes)",
+      "derive": "receipt",
+      "path": "docs/receipts/RECEIPT_ANT_READPATH_2026-08.md"
+    },
+    {
+      "id": "T2",
+      "lane": "autonomi",
+      "title": "local-devnet write E2E, both directions receipted",
+      "derive": "receipt",
+      "path": "docs/receipts/RECEIPT_ANT_DEVNET_E2E_2026-08.md"
+    },
+    {
+      "id": "T3",
+      "lane": "autonomi",
+      "title": "AT-2 production probe \u2014 external-signer ceremony",
+      "derive": "gate",
+      "note": "founder signs; keys stay in hardware"
+    },
+    {
+      "id": "T4",
+      "lane": "autonomi",
+      "title": "mirror phase 3 \u2014 cost comparison receipted",
+      "derive": "gate",
+      "note": "blocked on T3"
+    },
+    {
+      "id": "T5",
+      "lane": "autonomi",
+      "title": "SPEC-MIRROR-COMMONS-1 states public-upload disclosure",
+      "derive": "contains",
+      "path": "docs/specs/SPEC-MIRROR-COMMONS-1.md",
+      "needle": "plaintext chunk",
+      "must": true
+    },
+    {
+      "id": "D1",
+      "lane": "design law",
+      "title": "No truncation at the point of confirmation",
+      "derive": "contains",
+      "path": "docs/design/UI-LAW.md",
+      "needle": "point of confirmation",
+      "must": true
+    },
+    {
+      "id": "D2",
+      "lane": "design law",
+      "title": "Swap affordance may not be shared between empty and holder states",
+      "derive": "contains",
+      "path": "docs/design/UI-LAW.md",
+      "needle": "delete button wearing a trade label",
+      "must": true
+    },
+    {
+      "id": "M1",
+      "lane": "launchpad",
+      "title": "Tier-3 metadata surface is specified and frozen",
+      "derive": "contains",
+      "path": "docs/SPEC-INSCRIPTION-COMPAT-1.md",
+      "needle": "3.6 The metadata surface",
+      "must": true
+    },
+    {
+      "id": "G1",
+      "lane": "gates",
+      "title": "C-2 \u2014 settlement primitive, now three doors",
+      "derive": "gate",
+      "note": "chain-gated: v4 needs EIP-1153, exSat is Shanghai"
+    },
+    {
+      "id": "G2",
+      "lane": "gates",
+      "title": "C-1 trait taxonomy \u00b7 C-3 pixelsCount",
+      "derive": "gate",
+      "note": "founder"
+    }
+  ]
+}

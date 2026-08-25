@@ -36,6 +36,10 @@ docs/design/*
 # surfaces + Fable's pointers reference, and implementation reads from it. The
 # rest of docs/design/ stays a deferred holding pen.
 !docs/design/non-value-states.md
+# ...and UI-LAW.md, the estate-wide confirmation laws (S26-0825 D1/D2): the
+# sprint-closing receipt re-derives its needles in CI, so the file rides the
+# repo like any other law. Everything else in docs/design/ stays a pen.
+!docs/design/UI-LAW.md
 
 # Relay / working drafts marked DO_NOT_COMMIT in the filename. The marker was
 # the ONLY thing protecting these, and a filename is not an access control:
