@@ -195,6 +195,36 @@ async function freshPage(timeIso, initScript) {
   await c.ctx.close();
 }
 
+// The bnDayStart override: an unasserted config path is an unrun check.
+// Offset 8 with the clock pinned at 05:00 local -> 05:00 minus 8h is
+// 21:00 the PREVIOUS day, so the entry must land in 2026-08-23 (the
+// default 4 would give 2026-08-24 — this only passes if the override
+// actually reached the day-key code). And the export envelope must carry
+// the bucket definition with the data: dayStart + IANA timezone, or two
+// exporters under different offsets produce non-comparable day totals.
+{
+  const { ctx, page } = await freshPage('2026-08-24T05:00:00-06:00', () => {
+    localStorage.setItem('bnDayStart', '8');
+  });
+  await page.goto(`${base}/lab/intake-tracker.html`, { waitUntil: 'load' });
+  await page.evaluate(() => logEntry());
+  const key = await page.evaluate(() =>
+    Object.keys(localStorage).filter(k => k.startsWith('bnIntake_'))[0]);
+  ok('bnDayStart=8 override shifts the bucket', key === 'bnIntake_2026-08-23', key);
+
+  await page.evaluate(() => exportData());
+  const env = await page.evaluate(() => {
+    const t = document.getElementById('exportOut').textContent;
+    return JSON.parse(t.slice(t.indexOf('{')));
+  });
+  ok('export records the effective dayStart', env.dayStart === 8, `dayStart=${env.dayStart}`);
+  ok('export records the IANA timezone', env.timeZone === 'America/Denver', `timeZone=${env.timeZone}`);
+  ok('export envelope still carries date/rdi/totalMg',
+    env.date === '2026-08-23' && typeof env.rdi === 'number' && typeof env.totalMg === 'number',
+    `date=${env.date} rdi=${env.rdi} totalMg=${env.totalMg}`);
+  await ctx.close();
+}
+
 await browser.close();
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
