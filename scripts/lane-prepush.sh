@@ -80,6 +80,9 @@ fi
 echo
 
 echo "1/4 secret-scan, tree mode (secrets + the 48-hex PUBLIC-CONSTANT law)"
+echo "  · if a hit cannot be located in the working tree, check your dot count BEFORE"
+echo "    escalating — a reversed diff surfaces secrets a peer already REMOVED"
+echo "    (wrong owner, wrong tense)."
 sh scripts/secret-scan.sh tree || { echo "PREPUSH FAIL — secret-scan"; exit 1; }
 echo "2/4 §7 identity on main..$LANE (its printed count must equal the asserted $N)"
 S7_RANGE="main..$LANE" sh scripts/identity-check.sh || { echo "PREPUSH FAIL — §7"; exit 1; }
