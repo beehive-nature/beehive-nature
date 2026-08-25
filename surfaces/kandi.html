@@ -40,6 +40,7 @@ button.act:hover{background:var(--r);color:#0a0612}
 .kc .tag{display:inline-block;font-size:8.5px;letter-spacing:.06em;border-radius:5px;padding:1px 7px;margin-top:5px}
 .kc .tag.keep{color:var(--amber);border:1px dashed #5c4318}
 .kc .tag.trade{color:var(--ok);border:1px solid #1d4a2a}
+.kc .tag.ded{color:var(--amber);border:1px solid #5c4318}
 .kc button{margin-top:6px}
 .hand{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-top:9px}
 .hs{background:var(--well);border:1px solid var(--line);border-radius:9px;padding:8px;text-align:center;opacity:.35;transition:opacity .4s,border-color .4s}
@@ -81,7 +82,8 @@ code{color:var(--ink)}
   <h2>⚗ THE COMPOSER — string it</h2>
   <div class="law"><b>Beads:</b> tap colors, or type a word — letters become letter-beads.
   <b>Then name it:</b> who you are (optional), and who it's for (only if it's made <i>for</i>
-  someone — that flag is forever).</div>
+  someone — the dedication rides with it forever). Either way it strings onto your <b>right
+  arm</b>, because it is yours until you gift it; the made-FOR law binds the copy they receive.</div>
   <div class="pal" id="pal" aria-label="bead colors"></div>
   <div class="row">
     <input id="word" placeholder="word beads (A–Z)" maxlength="12" style="flex:1;min-width:140px">
@@ -92,7 +94,7 @@ code{color:var(--ink)}
   <div class="brace" id="preview" aria-label="bracelet preview"></div>
   <div class="row">
     <input id="maker" placeholder="made by (optional)" maxlength="24" style="flex:1;min-width:140px">
-    <input id="madefor" placeholder="made FOR (optional — makes it a keepsake)" maxlength="24" style="flex:1;min-width:180px">
+    <input id="madefor" placeholder="made FOR (optional — rides with the gift)" maxlength="24" style="flex:1;min-width:180px">
     <button class="act" id="stringit">✚ string it onto my right arm</button>
   </div>
   <div class="err" id="cerr"></div>
@@ -103,7 +105,8 @@ code{color:var(--ink)}
   <div class="law"><b>The etiquette, enforced as written in the mUseUm:</b> tradeables ride the
   right arm; keepsakes and gifts received ride the left and <b>never re-trade</b>; never ask for
   a specific piece; and <b>what you gift leaves your arm</b> — a memory line stays, history kept.</div>
-  <div style="font-size:10.5px;color:var(--ok);letter-spacing:.06em;margin-top:6px">RIGHT ARM — tradeable</div>
+  <div id="rescuenote" style="display:none;font-size:10.5px;color:var(--amber);border:1px dashed #5c4318;padding:7px 9px;margin-top:10px;line-height:1.6"></div>
+  <div style="font-size:10.5px;color:var(--ok);letter-spacing:.06em;margin-top:6px">RIGHT ARM — tradeable, and gifts waiting to go</div>
   <div class="karm" id="right"></div>
   <div style="font-size:10.5px;color:var(--amber);letter-spacing:.06em;margin-top:12px">LEFT ARM — keepsakes</div>
   <div class="karm" id="left"></div>
@@ -157,7 +160,23 @@ function load(){ try{ var s=JSON.parse(localStorage.getItem('bkandi')||'null');
   if(s&&s.v===1&&Array.isArray(s.right)&&Array.isArray(s.left)&&Array.isArray(s.given)) return s;
  }catch(e){} return null; }
 function save(){ try{ localStorage.setItem('bkandi',JSON.stringify(S)); }catch(e){} }
-var S=load();
+/* rescue pieces stranded by the made-FOR bug: left arm + rcv:false means you
+   composed it here and it was never received, so it belongs on your right
+   arm. rcv:true is left alone — that kandi really was given to you. */
+function rescueStranded(st){
+  if(!st||!Array.isArray(st.left)||!Array.isArray(st.right)) return st;
+  var keep=[], moved=0;
+  st.left.forEach(function(k){
+    if(k && k.rcv===false){ delete k.rcv; st.right.push(k); moved++; }
+    else keep.push(k);
+  });
+  if(moved) st.left=keep;
+  _rescued=moved;
+  return st;
+}
+var _rescued=0;
+var S=rescueStranded(load());
+if(S&&_rescued) save();
 if(!S){ /* first visit: the mUseUm gifts every guest their first kandi */
   S={v:1,right:[],left:[{maker:'the PLUR mUseUm',madefor:'you',beads:'0P1L2U3R',ts:Date.now(),rcv:true}],given:[]};
   save();
@@ -221,7 +240,11 @@ $('stringit').onclick=function(){
   var maker=clean($('maker').value), madefor=clean($('madefor').value);
   if(maker===null||madefor===null){ $('cerr').textContent='names: letters, digits, spaces, .·’- — max 24'; return; }
   var k={maker:maker,madefor:madefor,beads:draft.join(''),ts:Date.now()};
-  if(madefor){ S.left.push(Object.assign({rcv:false},k)); } else { S.right.push(k); }
+  /* Always your right arm — a piece you made is yours until you gift it,
+     dedication and all. The made-FOR law binds the RECEIVED copy: the gift
+     lands on their left arm with rcv:true and never re-trades. Sending it
+     left here stranded it where no gift button exists. */
+  S.right.push(k);
   save(); draft=[]; $('maker').value=''; $('madefor').value=''; $('cerr').textContent=''; paint(); arms();
 };
 
@@ -235,8 +258,10 @@ function card(k,side,idx){
   if(k.madefor){ var f=document.createElement('div'); f.textContent='made for '+k.madefor; who.appendChild(f); }
   d.appendChild(who);
   var tag=document.createElement('span');
-  tag.className='tag '+(side==='right'?'trade':'keep');
-  tag.textContent=side==='right'?'tradeable':'keepsake — never re-trades';
+  var dedicated = side==='right' && k.madefor;
+  tag.className='tag '+(side!=='right' ? 'keep' : (dedicated ? 'ded' : 'trade'));
+  tag.textContent = side!=='right' ? 'keepsake — never re-trades'
+    : (dedicated ? 'for '+k.madefor+' — gift it, do not trade it' : 'tradeable');
   d.appendChild(tag);
   if(side==='right'){
     var g=document.createElement('button'); g.className='act'; g.textContent='✦ gift it';
@@ -246,6 +271,12 @@ function card(k,side,idx){
   return d;
 }
 function arms(){
+  if(_rescued){
+    var n=$('rescuenote');
+    if(n){ n.textContent='↻ '+_rescued+' kandi you made for someone were stuck on your left arm '
+      + '(a bug fixed 2026-08-25) — they are on your right arm now, ready to gift.';
+      n.style.display='block'; }
+  }
   $('right').innerHTML=''; $('left').innerHTML='';
   if(!S.right.length) $('right').innerHTML='<div style="color:var(--faint);font-size:10px;font-style:italic;padding:6px">nothing strung yet — the composer is open</div>';
   S.right.forEach(function(k,i){ $('right').appendChild(card(k,'right',i)); });
