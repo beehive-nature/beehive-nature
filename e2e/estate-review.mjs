@@ -53,8 +53,9 @@ page.on('console', m => { if (m.type() === 'error') {
 await page.goto(`${BASE}/index.html`);
 await page.waitForTimeout(300);
 ok('hub loads clean', errs.length === 0, errs.join(' | '));
-const hubLinks = await page.$$eval('a.card', as => as.map(a => a.getAttribute('href')).filter(h => h && !/^https?:/.test(h) && !h.startsWith('#')));
-const cards = await page.locator('a.card').count();
+// The hub is a DIRECTORY of a.t tiles (formerly card anchors). Every tile is crawled.
+const hubLinks = await page.$$eval('a.t', as => as.map(a => a.getAttribute('href')).filter(h => h && !/^https?:/.test(h) && !h.startsWith('#')));
+const cards = await page.locator('a.t').count();
 console.log(`hub: ${cards} cards, ${hubLinks.length} local hrefs`);
 
 // 2 · crawl every hub-discovered local page
@@ -91,7 +92,21 @@ if (netNotes.length) console.log('NET NOTES (external endpoints, not page defect
 const hubTxt = await (await page.goto(`${BASE}/index.html`), page.locator('footer').textContent());
 await page.goto(`${BASE}/review.html`); await page.waitForTimeout(200);
 const roster = await page.locator('#surf option').count();
-ok('hub footer count matches card count', hubTxt.includes(`${cards} surfaces`), `footer=${hubTxt.match(/\d+ surfaces/)?.[0]} cards=${cards}`);
+{
+  // The directory shows MORE doors than the footer counts, on purpose:
+  // nine tiles open fleet-hosted/gallery|lab twins of the founder's archive
+  // (authorship: NOT OURS — see university-smoke NOT_OURS), the hub itself is
+  // not a tile, and forge/orbit-v2.html is a working file deliberately not
+  // presented (REACHABILITY_EXEMPT carries the reason). So the invariant is
+  // arithmetic, not equality: footerN = ownTiles + hubItself + notPresented.
+  const twinTiles = hubLinks.filter(h => /^fleet-hosted\/(gallery|lab)\//.test(h)).length;
+  const NOT_PRESENTED = 1; // forge/orbit-v2.html
+  const footerN = Number(hubTxt.match(/(\d+)\s+surfaces/)?.[1]);
+  const ownTiles = new Set(hubLinks.filter(h => h.endsWith('.html') || h.endsWith('/')).map(h => h.endsWith('/') ? h + 'index.html' : h)).size - twinTiles;
+  ok('hub footer count reconciles with the tiles (footer = own tiles + hub itself + not-presented)',
+     footerN === ownTiles + 1 + NOT_PRESENTED,
+     `footer=${footerN} ownTiles=${ownTiles} twins=${twinTiles} (+1 hub, +${NOT_PRESENTED} orbit-v2)`);
+}
 ok('review roster is a sane superset of hub cards', roster >= cards - 8, `roster=${roster} cards=${cards}`);
 
 console.log(`\n${pass} passed, ${fail} failed`);

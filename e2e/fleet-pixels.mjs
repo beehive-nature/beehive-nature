@@ -26,6 +26,11 @@ import { chromium } from 'playwright';
 // Resolve from THIS FILE, never a private absolute path (see fleet-bus.mjs).
 const ROOT = process.env.FLEET_HOSTED
   || join(dirname(fileURLToPath(import.meta.url)), '..', 'surfaces', 'fleet-hosted');
+// The twins carry the estate riders as ../../tour.js etc.; serving only
+// fleet-hosted/ turns every rider into a 404 and fails "no page errors" for a
+// path problem the DEPLOYED site does not have. Serve the parent so relative
+// rider paths resolve exactly as they do on Pages.
+const SERVE = dirname(dirname(ROOT));
 const MIN_PAINTED = 500;      // a real plot paints thousands; a stray border does not
 const MIN_COLOURS = 4;        // axis + grid + at least one series
 const EXPECT_MIN_TARGETS = 7; // an existence floor: a broken scan must FAIL, never pass empty
@@ -34,7 +39,7 @@ const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/cs
 const srv = createServer(async (req, res) => {
   try {
     const p = decodeURIComponent(req.url.split('?')[0]);
-    const body = await readFile(join(ROOT, p));
+    const body = await readFile(join(SERVE, p));
     res.writeHead(200, { 'content-type': TYPES[extname(p)] || 'application/octet-stream' });
     res.end(body);
   } catch { res.writeHead(404); res.end('nf'); }
@@ -76,7 +81,7 @@ for (const t of targets) {
   const errs = [];
   page.on('pageerror', e => errs.push(e.message));
   page.on('requestfailed', r => errs.push('requestfailed ' + r.url()));
-  await page.goto(`${base}/${t}`, { waitUntil: 'load' });
+  await page.goto(`${base}/surfaces/fleet-hosted/${t}`, { waitUntil: 'load' });
 
   // wait until EVERY canvas on the page has at least one opaque pixel
   await page.waitForFunction(() => {

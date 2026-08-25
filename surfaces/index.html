@@ -5,253 +5,261 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
 <meta name="color-scheme" content="dark">
-<title>beehive nature · the surfaces — one hive, every door</title>
+<title>beehive nature · the surfaces — five domains, one organism</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#080A09">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="bn-logo.jpg">
 <style>
-/* ── BEEHIVE NATURE · THE SURFACES ─────────────────────────────────────────
-   A hive, not a terminal. Honey against deep ground, comb geometry, editorial
-   type. Every surface gets a card; every card sits in the section it belongs to.
+/* ── BEEHIVE NATURE · FIVE DOMAINS, ONE DIRECTORY ──────────────────────────
+   Each section is one of the founder's five web properties; a group of tiles
+   graduates to its own site by lifting out whole. Not a magazine — a
+   directory: every surface is a visible tile, and the prose that used to fill
+   the cards lives behind [expert view].
 
-   DEPTH LADDER, three structural steps:
-     --void   the ground everything rests on
-     --panel  a card lifted off it
-     --inset  a well sunk into a panel (stats, tags, the rail)
-   SEMANTIC COLOUR, one meaning per hue, never reused for looks:
-     honey  VALUE — his, earned, scarce
-     leaf   PROVEN — alive, verifiable now
-     sky    SYSTEM — rails, machinery, how to check
-     iris   ART — made things
-     dim    META — labels only, never content
-   ──────────────────────────────────────────────────────────────────────── */
+   DEPTH LADDER    --void ground · --panel domain slab · --raise tile · --inset well
+   SEMANTIC COLOUR the meanings were picked FIRST, then a hue was fitted to
+                   each, and each domain wears the meaning it embodies:
+                     value=honey    the crown brand — beehivenature.com
+                     solution=leaf  what grows — beehivebiomass.com
+                     science=iris   made & studied things — plur.earth
+                     system=sky     the network of people — bnature.social
+                     harm=ember     declared for the estate palette and NOT
+                                    USED here: nothing on this page is a harm.
+                   skaists.social wears plain ink: governance is black-and-white.
+   ─────────────────────────────────────────────────────────────────────── */
 :root{
-  --void:#080A09; --panel:#111614; --inset:#0C110F; --raise:#161D19;
-  --ink:#ECF3EA; --dim:#8B9A90; --line:#1E2A23; --line-hot:#2F4A3C;
-  --honey:#FFB627; --leaf:#6EE7A0; --sky:#38BDF8; --iris:#C4A0FF;
-  --r:16px; --pad:18px; --max:1180px;
+  --void:#080A09; --panel:#101512; --inset:#0C110F; --raise:#181F1B; --lift:#222D27;
+  --ink:#EDF3EA; --dim:#8B9A90; --line:#1E2A23; --hot:#2F4A3C;
+  --honey:#FFB627; --leaf:#6EE7A0; --sky:#38BDF8; --iris:#C4A0FF; --ember:#FF7A6B;
+  --sem-value:var(--honey); --sem-solution:var(--leaf); --sem-system:var(--sky);
+  --sem-science:var(--iris); --sem-harm:var(--ember);
+  --max:1240px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{
-  background:var(--void);color:var(--ink);
-  font:14px/1.65 ui-sans-serif,-apple-system,"Segoe UI",system-ui,sans-serif;
-  min-height:100vh;padding:0 0 96px;-webkit-text-size-adjust:100%;
-  background-image:
-    radial-gradient(1200px 520px at 50% -10%, rgba(255,182,39,.07), transparent 70%),
-    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="64"><path d="M28 0l28 16v32L28 64 0 48V16z" fill="none" stroke="%23121a15" stroke-width="1"/></svg>');
-}
-.wrap{max-width:var(--max);margin:0 auto;padding:0 20px}
-.beta{margin:10px auto 0;text-align:center;border:1px solid #35301A;background:var(--inset);
-  border-radius:10px;padding:7px 14px;font-size:11px;letter-spacing:.06em;color:var(--honey)}
-.beta+.beta{margin-top:8px}
-header{padding:44px 0 8px;text-align:center}
-.mark{font-size:34px;line-height:1;margin-bottom:14px;filter:drop-shadow(0 0 18px rgba(255,182,39,.35))}
-h1{font-size:clamp(30px,7vw,58px);font-weight:700;letter-spacing:-.02em;line-height:1.06;
+body{background:var(--void);color:var(--ink);min-height:100vh;padding:0 0 92px;
+  font:14px/1.6 ui-sans-serif,-apple-system,"Segoe UI",system-ui,sans-serif;-webkit-text-size-adjust:100%;
+  background-image:radial-gradient(1100px 460px at 50% -8%,rgba(255,182,39,.06),transparent 70%);}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 18px}
+a{text-decoration:none}
+
+header{padding:34px 0 6px;text-align:center}
+.mark{font-size:30px;line-height:1;margin-bottom:10px;filter:drop-shadow(0 0 16px rgba(255,182,39,.35))}
+h1{font-size:clamp(26px,6vw,46px);font-weight:700;letter-spacing:-.025em;line-height:1.05;display:inline-block;
   background:linear-gradient(96deg,var(--leaf) 4%,var(--sky) 38%,var(--iris) 66%,var(--honey) 96%);
-  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:var(--leaf)}
-.lede{color:var(--dim);font-size:14.5px;margin:14px auto 0;max-width:60ch;line-height:1.7}
-.orgs{margin:18px auto 0;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-.orgs span{color:var(--honey);border:1px solid #35301A;background:var(--inset);border-radius:99px;
-  padding:4px 14px;font-size:10.5px;letter-spacing:.16em}
-.stats{margin:26px auto 0;background:var(--inset);border:1px solid var(--line);border-radius:var(--r);
-  padding:20px var(--pad);display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:18px 12px}
-.stats div{text-align:center}
-.stats b{display:block;font-size:38px;line-height:1;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
-.stats small{display:block;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-top:8px}
-.stats .p{color:var(--leaf)}.stats .s{color:var(--sky)}.stats .v{color:var(--honey)}.stats .a{color:var(--iris)}
-.rail{position:sticky;top:0;z-index:60;margin:30px auto 0;background:rgba(8,10,9,.92);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+.lede{color:var(--dim);font-size:13.5px;margin:10px auto 0;max-width:52ch}
+
+.pstat{margin:20px auto 0;background:var(--inset);border:1px solid var(--line);border-radius:14px;
+  padding:15px 16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:14px 10px}
+.pstat div{text-align:center}
+.pstat b{display:block;font-size:32px;line-height:1;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.pstat small{display:block;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-top:6px}
+.pstat .p{color:var(--leaf)}.pstat .s{color:var(--sky)}.pstat .v{color:var(--honey)}.pstat .a{color:var(--iris)}
+
+/* jump rail — five domains, always in reach */
+.rail{position:sticky;top:0;z-index:60;margin:20px auto 0;background:rgba(8,10,9,.94);
   backdrop-filter:blur(10px);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.rail nav{max-width:var(--max);margin:0 auto;padding:9px 20px;display:flex;gap:7px;
-  overflow-x:auto;scrollbar-width:none}
+.rail nav{max-width:var(--max);margin:0 auto;padding:8px 18px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
 .rail nav::-webkit-scrollbar{display:none}
-.rail a{flex:0 0 auto;color:var(--dim);text-decoration:none;font-size:11.5px;letter-spacing:.1em;
-  text-transform:uppercase;padding:8px 13px;min-height:36px;display:inline-flex;align-items:center;
-  border:1px solid transparent;border-radius:9px;transition:.18s}
-.rail a:hover,.rail a:focus-visible{color:var(--ink);background:var(--raise);border-color:var(--line-hot);outline:none}
-section{padding:38px 0 0;scroll-margin-top:64px}
-.shead{display:flex;align-items:baseline;gap:12px;margin-bottom:16px;padding-bottom:10px;
-  border-bottom:1px solid var(--line)}
-.shead h2{font-size:15px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
-.shead em{font-style:normal;color:var(--dim);font-size:12px;letter-spacing:.04em;text-transform:none}
-.shead .n{margin-left:auto;font-size:10px;letter-spacing:.12em;color:var(--dim);
-  background:var(--inset);border:1px solid var(--line);border-radius:99px;padding:3px 10px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:14px}
-a.card{position:relative;display:block;background:var(--panel);border:1px solid var(--line);
-  border-radius:var(--r);padding:17px 18px 17px 20px;text-decoration:none;color:var(--ink);overflow:hidden;
-  transition:transform .16s ease,border-color .2s ease,box-shadow .2s ease,background .2s ease}
-a.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--sky);opacity:.55;transition:.2s}
-a.card:hover,a.card:focus-visible{transform:translateY(-4px);border-color:var(--line-hot);
-  background:var(--raise);box-shadow:0 14px 34px rgba(0,0,0,.5);outline:none}
-a.card:hover::before{opacity:1;width:4px}
-a.card .t{font-size:15px;font-weight:600;line-height:1.32;color:var(--sky);letter-spacing:-.01em}
-a.card .d{font-size:12.5px;color:var(--dim);margin-top:7px;line-height:1.62}
-a.card .tag{display:inline-block;font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;
-  border:1px solid var(--line);border-radius:6px;padding:3px 9px;margin-top:12px;color:var(--dim);background:var(--inset)}
-a.card.g .t{color:var(--leaf)} a.card.g::before{background:var(--leaf)}
-a.card.v .t{color:var(--iris)} a.card.v::before{background:var(--iris)}
-a.card.l{border-color:#3A3218;background:linear-gradient(158deg,#171204 0%,var(--panel) 62%)}
-a.card.l .t{color:var(--honey)} a.card.l::before{background:var(--honey)}
-a.card.l:hover{border-color:var(--honey);box-shadow:0 14px 34px rgba(255,182,39,.13)}
-footer{max-width:var(--max);margin:52px auto 0;padding:24px 20px 0;border-top:1px solid var(--line);
-  color:var(--dim);font-size:11.5px;line-height:1.9;text-align:center}
+.rail a{flex:0 0 auto;color:var(--dim);font-size:11px;letter-spacing:.06em;
+  padding:8px 12px;min-height:36px;display:inline-flex;align-items:center;gap:6px;
+  border:1px solid transparent;border-radius:9px;transition:.16s;font-family:ui-monospace,Consolas,monospace}
+.rail a:hover,.rail a:focus-visible{color:var(--ink);background:var(--raise);border-color:var(--hot);outline:none}
+
+/* the domain slab */
+section{margin-top:16px;padding:18px 18px 20px;scroll-margin-top:64px;
+  background:var(--panel);border:1px solid var(--line);border-radius:16px}
+.shead{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;padding-bottom:9px;border-bottom:1px solid var(--line)}
+.shead .dot{width:9px;height:9px;border-radius:50%;align-self:center;flex:0 0 auto}
+.shead h2{font-size:15px;font-weight:600;letter-spacing:.02em;font-family:ui-monospace,Consolas,monospace}
+.shead em{font-style:normal;color:var(--dim);font-size:11.5px}
+.shead .n{margin-left:auto;font-size:9.5px;letter-spacing:.12em;color:var(--dim);
+  background:var(--inset);border:1px solid var(--line);border-radius:99px;padding:2px 9px}
+
+/* the tile: small, scannable, everything above water */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:9px}
+a.t{display:flex;flex-direction:column;gap:3px;background:var(--raise);border:1px solid var(--line);
+  border-radius:12px;padding:12px 12px 11px;color:var(--ink);min-height:82px;
+  transition:transform .14s ease,border-color .18s ease,background .18s ease}
+a.t:hover,a.t:focus-visible{transform:translateY(-3px);border-color:var(--hot);background:var(--lift);outline:none}
+a.t i{font-style:normal;font-size:17px;line-height:1.1}
+a.t b{font-size:12.5px;font-weight:600;line-height:1.25;letter-spacing:-.005em}
+a.t s{text-decoration:none;font-size:10px;color:var(--dim);line-height:1.4}
+
+body.expert .note{display:block;max-width:78ch;margin:0 0 13px;font-size:12.5px;color:var(--dim);line-height:1.7;border-left:2px solid var(--hot);padding-left:12px}
+.pro{display:none}
+
+.tog{position:fixed;right:14px;bottom:78px;z-index:70;background:var(--inset);color:var(--dim);
+  border:1px solid var(--hot);border-radius:99px;padding:9px 15px;font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;cursor:pointer;min-height:38px}
+.tog:hover{color:var(--ink);background:var(--raise)}
+
+footer{max-width:var(--max);margin:44px auto 0;padding:20px 18px 0;border-top:1px solid var(--line);
+  color:var(--dim);font-size:11px;line-height:1.9;text-align:center}
 footer a{color:var(--sky)}
-@media (max-width:640px){
-  .wrap{padding:0 14px}
-  header{padding:30px 0 4px}
-  .lede{font-size:13.5px}
-  .stats{grid-template-columns:repeat(2,1fr);gap:16px 10px;padding:16px 14px}
-  .stats b{font-size:34px}
-  .grid{grid-template-columns:1fr;gap:11px}
-  section{padding:30px 0 0}
-  a.card:hover{transform:none}
-  .rail nav{padding:8px 14px}
+
+@media (max-width:600px){
+  .wrap{padding:0 12px}
+  header{padding:24px 0 2px}
+  .pstat{grid-template-columns:repeat(2,1fr);padding:14px 12px}
+  .pstat b{font-size:29px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(46%,1fr));gap:8px}
+  a.t{min-height:76px;padding:11px 10px}
+  section{padding:14px 12px 16px}
+  a.t:hover{transform:none}
 }
-@media (prefers-reduced-motion:reduce){a.card,.rail a{transition:none}a.card:hover{transform:none}}
+@media (prefers-reduced-motion:reduce){a.t,.rail a{transition:none}a.t:hover{transform:none}}
+section.nature a.t b{color:var(--sem-value)}
+section.nature .dot{background:var(--sem-value)}
+section.nature .shead h2{color:var(--sem-value)}
+section.biomass a.t b{color:var(--sem-solution)}
+section.biomass .dot{background:var(--sem-solution)}
+section.biomass .shead h2{color:var(--sem-solution)}
+section.plur a.t b{color:var(--sem-science)}
+section.plur .dot{background:var(--sem-science)}
+section.plur .shead h2{color:var(--sem-science)}
+section.social a.t b{color:var(--sem-system)}
+section.social .dot{background:var(--sem-system)}
+section.social .shead h2{color:var(--sem-system)}
+section.skaists a.t b{color:var(--ink)}
+section.skaists .dot{background:var(--ink)}
+section.skaists .shead h2{color:var(--ink)}
 </style>
 </head>
 <body>
 <div class="wrap">
-<div class="beta" style="border-color:#1E4A2C;color:var(--leaf)"><span data-i18n="beta2">OPEN BETA REVIEW — the whole Beehive Nature Reserve is invited: break things, review things, attest your tongue, and publish your [bX review] receipt on the Royal Review deck</span></div>
-<div class="beta"><span data-i18n="beta">BETA · everything here is open source · nothing custodies real funds yet · break things and tell the raid</span></div>
-
 <header>
   <div class="mark">🐝</div>
   <h1>beehive nature</h1>
-  <p class="lede">Every door below opens something real — art, music, food, learning. Nothing here asks for a password, a wallet, or your name. Look around; nothing can go wrong by looking.</p>
-  <div class="orgs"><span>BEEHIVE-NATURE</span><span>BEEHIVE-BIOMASS</span><span>SKAISTS</span></div>
-  <!-- HERO NUMBERS, every one measured: 63 is the counted surface total the smoke
-       suite asserts against the tree; 11 is the live chainkeys row count on the .b
-       registry at kingbeelovis; 9 and 82 are the founder fleet and the minutes it
-       took him on 2026-08-03, 03:25 to 04:47. -->
-  <div class="stats">
-    <div><b class="p">63</b><small>surfaces live</small></div>
-    <div><b class="s">11</b><small>chains keyed</small></div>
-    <div><b class="v">9</b><small>his fleet</small></div>
-    <div><b class="a">82</b><small>minutes to build it</small></div>
+  <p class="lede">Five domains, one organism. Every door opens something real; nothing asks for a password, a wallet, or your name.</p>
+  <!-- measured, not typed: 63 surfaces is the count the smoke suite asserts
+       against the tree; 5 domains and 3 orgs are the founder's owned web
+       properties and GitHub organisations (beehive-nature, beehive-biomass,
+       skaists); 11 chains is the live chainkeys row count on kingbeelovis. -->
+  <div class="pstat hero">
+    <div><b data-hero-number class="p">63</b><small data-hero-caption>surfaces</small></div>
+    <div><b data-hero-number class="v">5</b><small data-hero-caption>domains</small></div>
+    <div><b data-hero-number class="a">3</b><small data-hero-caption>orgs</small></div>
+    <div><b data-hero-number class="s">11</b><small data-hero-caption>chains</small></div>
   </div>
 </header>
 </div>
 
 <div class="rail"><nav id="srail"></nav></div>
 
-<div class="wrap" id="sections">
-<section id="new-here">
-  <div class="shead"><h2>🧭 NEW HERE?</h2><em>start where your question is</em><span class="n">7</span></div>
+<div class="wrap">
+<section class="nature" id="nature">
+  <div class="shead"><span class="dot"></span><h2>beehivenature.com</h2><em>the organism · start here</em><span class="n">21</span></div>
+  <p class="pro note">The organism's front door and the whole identity journey in one place: get started, receive, your two addresses, offline recovery — beside the wallet, the .b name desk, and the open hardware that will hold the keys. The Dock grades itself: every claim carries a receipt or is marked UNVERIFIED and stops there. Nothing on this domain asks for a password, a wallet login, or your name.</p>
   <div class="grid">
-    <a class="card" href="fleet-hosted/"><div class="t">🔬 "what did he build before the process?"</div><div class="d">the founder's fleet — nine surfaces made in one night, 03:25 to 04:47 on 2026-08-03, before there was a review lane or a design gate to satisfy. Six lab instruments that <b>measure</b>, three gallery pieces that <b>argue</b>. Archived byte-identical; served with the CDN line dropped and the site's own nav wired in — all nine of them carrying behaviour fixes the archive deliberately does not, so they are part of the estate rather than islands beside it.</div><div class="tag">THE FLEET · NINE SURFACES, ONE NIGHT</div></a>
-    <a class="card" href="stack.html"><div class="t">⚙ <span data-i18n="nh1.t">"what runs under all this?"</span></div><div class="d"><span data-i18n="nh1.d">the Engine Room — the identity root, the rust kernel, and which rail carries each door, measured not claimed</span> (Autonomi · Arweave · Vaulta · Hive · Base · ETH · BTC)</div><div class="tag">START HERE</div></a>
-    <a class="card" href="dock.html"><div class="t">⚓ "what's actually proven here?"</div><div class="d">the Dock — the front door, and it argues instead of welcoming: what is <b>proven</b> and how to check it yourself, what is <b>not proven</b> with the code saying so out loud, and what is <b>unbuilt</b> — named rather than omitted. The three public repos, and what contributing looks like.</div><div class="tag">CONTRIBUTORS · THE FRONT DOOR</div></a>
-    <a class="card" href="blight/gallery.html"><div class="t">🖼 <span data-i18n="nh2.t">"show me something beautiful"</span></div><div class="d"><span data-i18n="nh2.d">a walking tour of fully on-chain art, read live from two chains, keylessly — ten seconds to the first piece</span></div></a>
-    <a class="card g" href="bfood.html"><div class="t">⬡ <span data-i18n="nh3.t">"something useful to me"</span></div><div class="d"><span data-i18n="nh3.d">every nutrient your body needs, computed for your height and weight, every number cited</span></div></a>
-    <a class="card v" href="b4b.html"><div class="t">🤖 <span data-i18n="nh4.t">"I'm into AI × crypto"</span></div><div class="d"><span data-i18n="nh4.d">the b4b alpha — the Base-lane application</span></div></a>
-    <a class="card" href="university/"><div class="t">🎓 <span data-i18n="nh5.t">"teach me to check any of this"</span></div><div class="d"><span data-i18n="nh5.d">five courses; every lesson ends in a verifiable act on real receipts</span></div></a>
+    <a class="t" href="dock.html"><i>⚓</i><b>the Dock</b><s>proven, and unbuilt</s></a>
+    <a class="t" href="stack.html"><i>⚙</i><b>the Engine Room</b><s>what runs under BNRoSe</s></a>
+    <a class="t" href="university/index.html"><i>🎓</i><b>Beehive University</b><s>the curriculum is receipts</s></a>
+    <a class="t" href="wallet.html"><i>👛</i><b>the BNR wallet</b><s>one soul, every chain</s></a>
+    <a class="t" href="onboarding/index.html"><i>🚪</i><b>Your keys, your resources</b><s>no one in between</s></a>
+    <a class="t" href="onboarding/receive.html"><i>📥</i><b>Receive</b><s>on the bLighTnetWorK</s></a>
+    <a class="t" href="keys/addresses.html"><i>🗝</i><b>your two addresses</b><s>did:plc + npub, one root</s></a>
+    <a class="t" href="recover.html"><i>🛟</i><b>bzDiD offline recovery</b><s>24 words, no service alive</s></a>
+    <a class="t" href="bnames.html"><i>🏷</i><b>the .b name desk</b><s>reserve · trade · resolve</s></a>
+    <a class="t" href="hardware/index.html"><i>🔌</i><b>Open Hardware Guide</b><s>hardware you can read</s></a>
+    <a class="t" href="hardware/build.html"><i>🏗</i><b>Become a Producer</b><s>build the locks</s></a>
+    <a class="t" href="hardware/lab.html"><i>🧪</i><b>The Lab</b><s>science and art</s></a>
+    <a class="t" href="hardware/security.html"><i>🛡</i><b>Security Events</b><s>read honestly</s></a>
+    <a class="t" href="bqueenbee-live.html"><i>🐝</i><b>bQueenBee live</b><s>machine agent, never a person</s></a>
+    <a class="t" href="bantfarm.html"><i>🐜</i><b>the bANTfarm</b><s>two treasuries, keyless</s></a>
+    <a class="t" href="bmeshasi.html"><i>🕸</i><b>bMeshAsi</b><s>the community iron exchange</s></a>
+    <a class="t" href="biq.html"><i>🧠</i><b>the bIQ Composer</b><s>cite or stop</s></a>
+    <a class="t" href="b4b.html"><i>🤖</i><b>BNR × Base</b><s>receipted on-chain</s></a>
+    <a class="t" href="blight/demo.html"><i>📡</i><b>the bLiGhTbeAM</b><s>the logo is the transmission</s></a>
+    <a class="t" href="blight/pulse.html"><i>💓</i><b>the pulse</b><s>bX pointers, live relay</s></a>
+    <a class="t" href="blight/vaulta-reader.html"><i>📖</i><b>Vaulta Reader</b><s>the read path, keyless</s></a>
   </div>
 </section>
-<section id="light">
-  <div class="shead"><h2>💡 LIGHT</h2><em>the optical stack</em><span class="n">4</span></div>
+<section class="biomass" id="biomass">
+  <div class="shead"><span class="dot"></span><h2>beehivebiomass.com</h2><em>the plant economy</em><span class="n">14</span></div>
+  <p class="pro note">“beehivebiomass.com is the civilian marketplace” — the founder's own words, written inside his build night. Six of the nine surfaces he made in 82 minutes on 2026-08-03 (03:25–04:47) are the lab benches here. What you open are hosted twins of that archive, nine of them carrying behaviour fixes beyond the vendored chart library; the originals under surfaces/fleet/ stay byte-for-byte, and e2e/university-smoke.mjs recomputes that number against the tree on every run rather than trusting this sentence. The other three of the nine are gallery pieces and hang on plur.earth, where art belongs.</p>
   <div class="grid">
-    <a class="card l" href="blight/demo.html"><div class="t">⬡ bLiGhTbeAM demo</div><div class="d">the bComb hexagonal beam, live — screen-to-camera data on luminance alone</div><div class="tag">GENESIS</div></a>
-    <a class="card l" href="blight/index.html"><div class="t">🛸 bLighT fLeeT</div><div class="d">one operation, many frequencies — the fleet view</div></a>
-    <a class="card l" href="blight/museum.html"><div class="t">🏛 bLighT Museum</div><div class="d">what "on-chain" actually means — exhibits with receipts</div></a>
-    <a class="card l" href="onboarding/receive.html"><div class="t">📥 Receive on the bLighTnetWorK</div><div class="d">the receive side of the optical pairing ceremony</div></a>
+    <a class="t" href="fleet-hosted/index.html"><i>⚑</i><b>the fleet</b><s>nine surfaces, one night</s></a>
+    <a class="t" href="fleet-hosted/lab/bnr-dashboard.html"><i>📊</i><b>BNR Dashboard</b><s>collective command center</s></a>
+    <a class="t" href="fleet-hosted/lab/flower-lab.html"><i>🌸</i><b>BN Flower Lab</b><s>THCA blending + research</s></a>
+    <a class="t" href="fleet-hosted/lab/spliff-lab.html"><i>🌿</i><b>BN Spliff Lab</b><s>science-based blender</s></a>
+    <a class="t" href="fleet-hosted/lab/blend-lab.html"><i>⚗</i><b>Blend Lab</b><s>tobacco blending calculator</s></a>
+    <a class="t" href="fleet-hosted/lab/intake-tracker.html"><i>📈</i><b>Daily Intake Tracker</b><s>consumption vs RDI</s></a>
+    <a class="t" href="fleet-hosted/lab/edible-tracker.html"><i>🍯</i><b>Edible &amp; Effects</b><s>nutrition + session effects</s></a>
+    <a class="t" href="bfood.html"><i>⬡</i><b>the bFood Hexagon</b><s>the pyramid's successor</s></a>
+    <a class="t" href="blongevity.html"><i>🫀</i><b>the fat education</b><s>your body builds cannabinoids</s></a>
+    <a class="t" href="bigen.html"><i>🧬</i><b>BiGen evidence library</b><s>cannabis &amp; cancer, exhibit 001</s></a>
+    <a class="t" href="bearth.html"><i>🌍</i><b>bEarth</b><s>what it costs the planet</s></a>
+    <a class="t" href="bfactory.html"><i>🏭</i><b>the bFactory</b><s>the river's source</s></a>
+    <a class="t" href="blight/coop.html"><i>🌾</i><b>the Coop</b><s>hemp biomass downstream</s></a>
+    <a class="t" href="blight/farmers.html"><i>🧺</i><b>the Farmers Market</b><s>the community's private party</s></a>
   </div>
 </section>
-<section id="visit">
-  <div class="shead"><h2>◈ VISIT</h2><em>the art</em><span class="n">9</span></div>
+<section class="plur" id="plur">
+  <div class="shead"><span class="dot"></span><h2>plur.earth</h2><em>the art planet</em><span class="n">25</span></div>
+  <p class="pro note">Peace · love · unity · respect — the art planet. Inscription art lives on-chain, so the artwork is the record: no server can take it down, no gallery can decline to hang it. Seeds become sound (the Organ, the Studio) and sight (orbit, hexfield); orbit.html is byte-pinned by e2e/forge-freeze.mjs so a piece made against it renders the same way in five years. Three of the founder's one-night pieces hang here as the gallery wing.</p>
   <div class="grid">
-    <a class="card" href="plur.html"><div class="t">🪩 the PLUR mUseUm</div><div class="d">peace · love · unity · respect — six wings + the island showcase, every exhibit a cited RECORD or lore labeled LORE, a clickable era-ribbon across twenty-six centuries</div><div class="tag">NEW</div></a>
-    <a class="card" href="festival/"><div class="t">🎪 the festival — attendee</div><div class="d">the eco's first dApp face — one day on the floor, every rail it runs on: the 127-comb rig, photon pairing, kandi, live keyless economy dials, the calm tent; the family doors (producer · dancer · sound · visual) stated honestly as gates</div><div class="tag">NEW · THE ATTENDEE dAPP</div></a>
-    <a class="card" href="forge/"><div class="t">🐜 the bBuzz forge</div><div class="d">the creation wing — sound + sight, artist-first: seeded pieces you fork with a link, a two-tab multiplayer room you can feel, the CLAP plugin lane receipted — and a teacher, not a vending machine</div><div class="tag">NEW · UI-FIRST FLEET</div></a>
-    <a class="card" href="blight/gallery.html"><div class="t">🖼 the Gallery</div><div class="d">a walking tour of on-chain art — crowns lead, the veil ghosts behind</div><div class="tag">NEW</div></a>
-    <a class="card" href="blight/inscription-explorer.html"><div class="t">🔍 the Explorer</div><div class="d">whose art shall we visit? any wallet, any name — the doorway</div></a>
-    <a class="card" href="blight/compare.html"><div class="t">⊞ the Catalog</div><div class="d">seven ERC-20i artists compared — ladders, traits, prices of the top rung</div></a>
-    <a class="card" href="blight/bnri-gallery.html"><div class="t">🌌 bNRi Gallery</div><div class="d">the fleet renders its own native art</div></a>
-    <a class="card v" href="bset.html"><div class="t">🎧 the set I build to</div><div class="d">the founder’s build soundtrack — EDM × русская музыка, every track wearing a comb-sigil grown from its own name; artist-paid links only</div><div class="tag">NEW · THE EMPTY CHAIR AWAITS THE DROP</div></a>
-    <a class="card" href="listening.html"><div class="t">🎧 the Listening Room</div><div class="d">on-chain sound, forkable art — one seed drives the sound and the sight; fork it live with provenance, the original never mutates; the DB-1 inscription shape rendered as UI</div><div class="tag">NEW · THE FORK LAW, LIVE</div></a>
+    <a class="t" href="plur.html"><i>🪩</i><b>the PLUR mUseUm</b><s>peace love unity respect</s></a>
+    <a class="t" href="festival/index.html"><i>🎪</i><b>the festival</b><s>the attendee experience</s></a>
+    <a class="t" href="kandi.html"><i>🔗</i><b>the kandi bar</b><s>make it, name it, gift it</s></a>
+    <a class="t" href="bset.html"><i>🎧</i><b>the set I build to</b><s>what's in the headphones</s></a>
+    <a class="t" href="listening.html"><i>🎵</i><b>the Listening Room</b><s>on-chain sound, forkable</s></a>
+    <a class="t" href="blight/gallery.html"><i>🖼</i><b>Inscription Art Gallery</b><s>a walking tour</s></a>
+    <a class="t" href="blight/museum.html"><i>🏛</i><b>bLighT Museum</b><s>what on-chain means</s></a>
+    <a class="t" href="blight/bnri-gallery.html"><i>🔷</i><b>BNRi</b><s>the fleet's own art</s></a>
+    <a class="t" href="blight/inscription-explorer.html"><i>🔎</i><b>living collections</b><s>explore the inscriptions</s></a>
+    <a class="t" href="blight/compare.html"><i>📐</i><b>bLighT Catalog</b><s>artist by artist</s></a>
+    <a class="t" href="blight/market.html"><i>🏪</i><b>the DeMarketPlace</b><s>inscriptions, honestly traded</s></a>
+    <a class="t" href="fleet-hosted/gallery/acid-cascade.html"><i>🌀</i><b>BN ACiD</b><s>the disease cascade, painted</s></a>
+    <a class="t" href="fleet-hosted/gallery/indigo-index.html"><i>🟦</i><b>BN Indigo Index</b><s>disease economics × GDP</s></a>
+    <a class="t" href="fleet-hosted/gallery/resonance.html"><i>🎚</i><b>BN Resonance</b><s>consciousness + plant medicine</s></a>
+    <a class="t" href="forge/index.html"><i>⚒</i><b>the bBuzz forge</b><s>sound + sight, artist-first</s></a>
+    <a class="t" href="forge/orbit.html"><i>🪐</i><b>orbit</b><s>the seed becomes sight</s></a>
+    <a class="t" href="forge/hexfield.html"><i>⬡</i><b>hexfield</b><s>the seed becomes field</s></a>
+    <a class="t" href="forge/room.html"><i>🚪</i><b>the two-tab room</b><s>multiplayer you can feel</s></a>
+    <a class="t" href="forge/huddle.html"><i>👥</i><b>the huddle</b><s>the forge, across machines</s></a>
+    <a class="t" href="blight/index.html"><i>💡</i><b>bLighT fLeeT</b><s>one operation, many frequencies</s></a>
+    <a class="t" href="blight/studio-music.html"><i>🎛</i><b>bLighT Studio</b><s>music creation MVP</s></a>
+    <a class="t" href="blight/studio-gate.html"><i>🚦</i><b>Studio Gate</b><s>trait pre-flight</s></a>
+    <a class="t" href="blight/midi-organ.html"><i>🎹</i><b>bLighT Organ</b><s>the seed becomes sound</s></a>
+    <a class="t" href="blight/workbench.html"><i>🔧</i><b>bLighT Workbench</b><s>the instrument</s></a>
+    <a class="t" href="blight/c1-aid.html"><i>🧮</i><b>C-1 Aid</b><s>taxonomy sizing</s></a>
   </div>
 </section>
-<section id="trade">
-  <div class="shead"><h2>⧉ TRADE</h2><em>the floors</em><span class="n">10</span></div>
+<section class="social" id="social">
+  <div class="shead"><span class="dot"></span><h2>bnature.social</h2><em>the social layer</em><span class="n">7</span></div>
+  <p class="pro note">The social layer, ATProto-shaped. Tongues dock as first-class passengers, your name stays in your own language and aliases are pointers, never ownership. The symposium is receipted discourse; the studios and the hearth are rooms where you co-create with the hive and with each other — no server anywhere.</p>
   <div class="grid">
-    <a class="card g" href="blight/market.html"><div class="t">the Apiary — inscription market</div><div class="d">locked inscriptions, USDC + exSat · inquire, make offers, share rooms</div><div class="tag">NEW · MVP</div></a>
-    <a class="card g" href="blight/farmers.html"><div class="t">🌻 the Farmers Market</div><div class="d">the community's private party — fUSD, bAccord cards, bQueenBee refereed</div><div class="tag">NEW · MVP</div></a>
-    <a class="card g" href="blight/coop.html"><div class="t">🌾 the Coop</div><div class="d">hemp biomass downstream — the criticality index, Core 10 live</div><div class="tag">NEW · MVP</div></a>
-    <a class="card g" href="dao-dashboard/"><div class="t">🗳 DAO Dashboard</div><div class="d">apps, rewards, the governance view</div></a>
-    <a class="card g" href="wallet.html"><div class="t">🗝 the BNR wallet</div><div class="d">one soul, every chain — connect your bzDiD, see balances across Vaulta and Hive live, sign transactions from your derived key; the multi-adapter wallet, first-party only, zero custody</div><div class="tag">NEW · BZDID IS THE WALLET</div></a>
-    <a class="card g" href="https://skaists.github.io/sovereignty-explorer/"><div class="t">🧭 SKAISTS sovereignty explorer</div><div class="d">the SENSE-outward organ, now a dApp — the LIVE RAIL floor reads any account or .b name off the chain keylessly (a name IS its resolution), the whole registry as tappable chips, the first-party composer; alive with drifting lights and the sovereignty dial — on its own public deck</div><div class="tag">NEW · LIVE RAIL dApp</div></a>
-    <a class="card" href="bantfarm.html"><div class="t">🐜 the bANTfarm</div><div class="d">the node farm and the two treasuries — ANT on Arbitrum beside the LOVErnment DAO on Vaulta, read keylessly, every number with its method printed under it</div><div class="tag">NEW · TWO CHAINS, ZERO KEYS</div></a>
-    <a class="card" href="bmeshasi.html"><div class="t">⚓ bMeshAsi — the iron exchange</div><div class="d">the community iron exchange — builders' cloud bills moved onto pledged boxes, usage metered on the landed utilization curve (clickable on the page), the IRON reimbursed first by waterfall law; honest to a fault: the meter exists and is tested, the mesh does not yet</div><div class="tag">NEW · METERED · IRON FIRST</div></a>
-    <a class="card" href="royalguard.html"><div class="t">🛡 the ROYAL GUARD</div><div class="d">one deck, three doors — the LOVErnment DAO · the two treasuries · the wallet's read side — married for an Apple-flat learning curve; the three registers (bee · raver · cypherpunk) shown live on one real number, the stack strip for builders, and the external vantage honoring ant.report</div><div class="tag">NEW · ONE DECK · ZERO CUSTODY</div></a>
-    <a class="card" href="bnames.html"><div class="t">👑 the .b name desk</div><div class="d">a living constellation of the registry — every name on chain drawn live around the crowned king.b, pulsing ghost-slots where the open jewels wait; animated availability, paste-ready actions in the REAL ABI shape, and the ruled 10-billion-user hybrid design; compose-only, you sign, never the page</div><div class="tag">NEW · ANIMATED · CHRISTMAS FOR DEVS</div></a>
+    <a class="t" href="devroom.html"><i>🛠</i><b>the builders dev room</b><s>the pre-wiki stage</s></a>
+    <a class="t" href="bsymposium.html"><i>🏛</i><b>the bSymposium</b><s>receipted discourse</s></a>
+    <a class="t" href="attest.html"><i>✍</i><b>one tongue, one evening</b><s>the attestation campaign</s></a>
+    <a class="t" href="blanguage.html"><i>🌐</i><b>the BlanguageDOCK</b><s>every language first-class</s></a>
+    <a class="t" href="btranslated.html"><i>🔤</i><b>bTranslated</b><s>your name, your tongue</s></a>
+    <a class="t" href="buzz-studio.html"><i>🎨</i><b>the bUZZ Studio</b><s>co-create, no server anywhere</s></a>
+    <a class="t" href="blight/hearth.html"><i>🔥</i><b>the hearth</b><s>co-create with the hive's AI</s></a>
   </div>
 </section>
-<section id="harvest">
-  <div class="shead"><h2>🌾 HARVEST</h2><em>the land</em><span class="n">6</span></div>
+<section class="skaists" id="skaists">
+  <div class="shead"><span class="dot"></span><h2>skaists.social</h2><em>governance &amp; the guard</em><span class="n">3</span></div>
+  <p class="pro note">The governance domain — owned and active. One deck for the DAO, the treasuries and the watch. A review is a signed receipt you choose to publish, never telemetry; the guards review the peer reviewers.</p>
   <div class="grid">
-    <a class="card g" href="bfactory.html"><div class="t">🏭 the bFactory</div><div class="d">the river's source, programmed by its demand — the control loop, the farmer-first law, and its open gates</div><div class="tag">NEW · DESIGN</div></a>
-    <a class="card g" href="bfood.html"><div class="t">⬡ the bFood Hexagon</div><div class="d">the food pyramid's successor — 31 nutrient cells computed for your body, every number cited, unmeasured never drawn as zero</div><div class="tag">NEW</div></a>
-    <a class="card g" href="bearth.html"><div class="t">🜃 bEarth</div><div class="d">what feeding every human 100 g a day would actually cost the planet — and the three of our own claims that did not survive checking</div><div class="tag">NEW</div></a>
-    <a class="card g" href="blight/c1-aid.html"><div class="t">🌱 C-1 Aid</div><div class="d">taxonomy sizing from the tree's own numbers</div></a>
-    <a class="card g" href="hardware/"><div class="t">🔧 Hardware Guide</div><div class="d">the open-hardware review + the manufacturer shelves (Trezor · Foundation)</div></a>
-    <a class="card" href="blongevity.html"><div class="t">🧬 the bLongevity Map</div><div class="d">the fat education: your body builds its own cannabinoids out of essential fat - the two bricks (LA/ALA), the workshop, the two dialects (anandamide/2-AG and the omega-3 endocannabinoids), CB1/CB2, ACiD defined, TERT/telomeres with the JAMA 2010 long arrow; protein demoted to the attention hook</div><div class="tag">NEW · ANIMATED · UPSTREAM</div></a>
-  </div>
-</section>
-<section id="make">
-  <div class="shead"><h2>🎛 MAKE</h2><em>the studio</em><span class="n">11</span></div>
-  <div class="grid">
-    <a class="card v" href="blight/midi-organ.html"><div class="t">🎵 the Organ</div><div class="d">the seed becomes sound — MiDi's scales playable again</div><div class="tag">NEW</div></a>
-    <a class="card v" href="blight/studio-music.html"><div class="t">🎛 the Studio</div><div class="d">16-step sequencer — import any piece's scale, export the score</div><div class="tag">NEW</div></a>
-    <a class="card v" href="blight/studio-gate.html"><div class="t">⚗ the Gate</div><div class="d">drop art, the chain's own checker judges it (WASM)</div></a>
-    <a class="card v" href="blight/workbench.html"><div class="t">🛠 the Workbench</div><div class="d">every instrument — receipts, selftests, BTC/BCH readers, raw calldata</div><div class="tag">MASTER TIER</div></a>
-    <a class="card v" href="blight/pulse.html"><div class="t">📡 the Pulse</div><div class="d">bX pointers live on the relay — nostr + bsky, one wall</div><div class="tag">NEW</div></a>
-    <a class="card v" href="blight/hearth.html"><div class="t">🔥 the Hearth</div><div class="d">co-create with the hive AI — every answer an artifact</div><div class="tag">NEW</div></a>
-    <a class="card v" href="kandi.html"><div class="t">🍬 the kandi bar</div><div class="d">the mUseUm's Wing IV ritual as software — compose a bracelet, do the four-step handshake, gift it through interlocked hands; the floor's etiquette enforced in code, nothing sent anywhere</div><div class="tag">NEW · THE RITUAL, LIVE</div></a>
-    <a class="card v" href="buzz-studio.html"><div class="t">🐝🎨 the bUZZ Studio</div><div class="d">co-create a comb in real time — CRDT-merged, peered tab-to-tab instantly and human-to-human by a serverless pairing ceremony; exports inscription-grade SVG with provenance</div><div class="tag">NEW · BS-1 GENESIS · NO SERVER ANYWHERE</div></a>
-    <a class="card" href="devroom.html"><div class="t">🛠 the Autonomi builders dev room</div><div class="d">the pre-wiki stage — community diagnostic findings become articles for the stranger who hits the same wall: the crawling mmap'd store, the impossible OOM on ARM64, the one-byte dedup cascade; every finder credited by name, the Sophia gate's requirements stated honestly, nothing submitted anywhere</div><div class="tag">NEW · PRE-WIKI · 3 DRAFTS</div></a>
-    <a class="card" href="biq.html"><div class="t">✍ the bIQ Composer</div><div class="d">a paste-ready proposal for IQ.wiki's Sophia gate — third person, a citation on every sentence; a human carries it, the page never posts</div><div class="tag">NEW · COMPOSER, NEVER PUBLISHER</div></a>
-    <a class="card" href="blanguage.html"><div class="t">🌐 the BlanguageDOCK</div><div class="d">the language corpus every surface will read — tribal/indigenous/rare/endangered languages dock permissionless; consent layer, honest absence, no cell machine-faked</div><div class="tag">NEW · ALPHA</div></a>
-  </div>
-</section>
-<section id="keys">
-  <div class="shead"><h2>🔑 KEYS</h2><em>the self</em><span class="n">7</span></div>
-  <div class="grid">
-    <a class="card" href="onboarding/"><div class="t">🗝 Key Build</div><div class="d">real WebAuthn PRF ceremony · real 24-word root · audited engine</div></a>
-    <a class="card" href="keys/addresses.html"><div class="t">🏷 Two Addresses</div><div class="d">your bzDiD root binds did:plc + npub — one soul, two rails</div><div class="tag">NEW</div></a>
-    <a class="card" href="btranslated.html"><div class="t">🌐 bTranslated</div><div class="d">your name in your tongue — aliases are pointers, never ownership; the father-tongue bridge live</div><div class="tag">NEW · ALPHA</div></a>
-    <a class="card" href="recover.html"><div class="t">🛟 Recovery</div><div class="d">offline, zero network — 24 words home</div></a>
-    <a class="card" href="hardware/build.html"><div class="t">🔩 Hardware Build</div><div class="d">the bSAFE build path</div></a>
-    <a class="card" href="hardware/security.html"><div class="t">🛡 Security</div><div class="d">the doctrine page</div></a>
-    <a class="card" href="hardware/lab.html"><div class="t">🧪 the Lab</div><div class="d">the hardware lab charter</div></a>
-  </div>
-</section>
-<section id="read">
-  <div class="shead"><h2>🛰 READ</h2><em>the instruments</em><span class="n">10</span></div>
-  <div class="grid">
-    <a class="card" href="blight/vaulta-reader.html"><div class="t">📡 Vaulta Reader</div><div class="d">the b-indexer's read path, keyless</div></a>
-    <a class="card" href="bigen.html"><div class="t">⌕ BiGen — the evidence library</div><div class="d">two exhibits: cannabis &amp; cancer, and the COA panel undercount (a total wearing a panel's name) — tier tables, gap maps, integrity layer; every record cited, unassessed never clean</div><div class="tag">EXHIBITS 001+002</div></a>
-    <a class="card" href="review.html"><div class="t">👑 the Royal Review</div><div class="d">signed review receipts + guard verdicts — attestation, never telemetry</div><div class="tag">NEW</div></a>
-    <a class="card" href="university/index.html"><div class="t">🎓 Beehive University</div><div class="d">the curriculum is the receipts — five courses over proven records, every lesson ending in a verifiable act; a graduate holds signed receipts, not a certificate</div><div class="tag">NEW · THE FIFTH DOCK</div></a>
-    <a class="card" href="bsymposium.html"><div class="t">🏛 the bSymposium</div><div class="d">MAHA × bFood — a receipted, iterative discourse, both sides empowered: seven lines, each cited on both sides, symbiosis lanes named; the grammar scales to universities, gov-health, agro</div><div class="tag">NEW · BOTH SIDES RECEIPTED</div></a>
-    <a class="card" href="b4b.html"><div class="t">🛰 BNR × Base</div><div class="d">the application appendix — our Base receipts live: the ERC-8004 read-first pass, the frozen-seed measurement, the census, the b-indexer; the synergy map and the 8-week plan, every milestone a receipt</div><div class="tag">BATCH 004 · EVIDENCE</div></a>
-    <a class="card" href="bqueenbee-live.html"><div class="t">🐝 bQueenBee · live</div><div class="d">talk to the hive's machine agent — every answer carries its receipt, absences named by name, telemetry-free by construction; ⚙ never a person, and she says so first in every room</div><div class="tag">NEW · FIRST MACHINE AGENT</div></a>
-    <a class="card" href="attest.html"><div class="t">✍🌐 one tongue, one evening</div><div class="d">the attestation campaign — 18 humans, one per tongue, one evening each, turn every machine ⚙ to a signed ✓; your name in the permanent record</div><div class="tag">NEW · MAKE HISTORY</div></a>
-    <a class="card" href="stack.html"><div class="t">⚙ the Engine Room</div><div class="d">what runs under every door — the bzDiD root, the rust kernel, and each surface’s rails (Autonomi · Arweave · Vaulta · Hive · Base · ETH · BTC), measured by sweep, honest about the bootstrap</div><div class="tag">NEW · THE ANSWER TO “WHAT IS THIS?”</div></a>
-    <a class="card" href="https://github.com/beehive-nature/beehive-nature"><div class="t">⌥ Source</div><div class="d">everything, on GitHub</div></a>
+    <a class="t" href="dao-dashboard/index.html"><i>🏛</i><b>BNR DAO dashboard</b><s>skaists.social, live</s></a>
+    <a class="t" href="royalguard.html"><i>💂</i><b>the ROYAL GUARD</b><s>DAO · treasuries · wallet</s></a>
+    <a class="t" href="review.html"><i>👑</i><b>the Royal Review</b><s>receipts, never telemetry</s></a>
   </div>
 </section>
 </div>
 
+<button class="tog" id="xtog" type="button" aria-pressed="false">expert view</button>
+
 <footer>
-  63 surfaces · three orgs · one organism · <b style="color:var(--honey)">built for the poor starving artist</b> · <b style="color:var(--leaf)">“10Ve the first ingredient”</b> — <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/architecture/HOMEOSTASIS-v1.md">HOMEOSTASIS v1</a><br>
-  and the 🐝/⚗/🎛 switch in the bar below adjusts every page depth — gentle, vivid, or dense — your choice travels with you.
+  63 surfaces · three orgs · one organism · <b style="color:var(--honey)">built for the poor starving artist</b> · <b style="color:var(--leaf)">“10Ve the first ingredient”</b> — <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/architecture/HOMEOSTASIS-v1.md">HOMEOSTASIS v1</a>
 </footer>
 
 <script>
-/* the section rail builds itself from the sections that exist, so it can never
-   drift from the page the way a hand-kept menu does */
 (function(){
   var rail=document.getElementById("srail");
   [].forEach.call(document.querySelectorAll("section[id]"),function(s){
@@ -259,6 +267,11 @@ footer a{color:var(--sky)}
     var a=document.createElement("a"); a.href="#"+s.id; a.textContent=h.textContent.trim();
     rail.appendChild(a);
   });
+  var t=document.getElementById("xtog"), on=localStorage.getItem("bnExpert")==="1";
+  function paint(){document.body.classList.toggle("expert",on);
+    t.textContent=on?"simple view":"expert view";t.setAttribute("aria-pressed",on?"true":"false");}
+  t.addEventListener("click",function(){on=!on;localStorage.setItem("bnExpert",on?"1":"0");paint();});
+  paint();
 })();
 </script>
 <script src="agent-dock.js?v=4"></script>
