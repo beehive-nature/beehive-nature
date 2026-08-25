@@ -176,9 +176,7 @@ var pct=parseFloat(sessions[i].thcaPercent)||0;
 totalMg+=sessions[i].doseG*pct/100*1000*0.877;
 }}
 
-// Behavioural day = 04:00->04:00 local (bnDayStart override), matching
-// intake-tracker's DAY_START.
-var _d=new Date(new Date().getTime()-(parseFloat(localStorage.getItem('bnDayStart'))||4)*3600000),_m=_d.getMonth()+1,_g=_d.getDate();var today=_d.getFullYear()+'-'+(_m<10?'0':'')+_m+'-'+(_g<10?'0':'')+_g;
+var today=new Date().toISOString().slice(0,10);
 var intake=JSON.parse(localStorage.getItem('bnIntake_'+today)||'[]');
 for(var i=0;i<intake.length;i++){
 totalMg+=intake[i].mg||0;

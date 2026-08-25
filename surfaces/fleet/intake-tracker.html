@@ -88,17 +88,9 @@ input,select,textarea{width:100%;background:#0d1117;border:1px solid #333;color:
 <script>
 var rdi=100;
 var entries=[];
-// DAY BUCKET: the timestamp is the spine (machine-set, always present).
-// `time` is a soft attribute - ordering/analysis only, it never keys the
-// bucket, and a blank or sloppy value cannot break the key. The
-// behavioural day runs DAY_START -> DAY_START local: default 04:00, so a
-// 02:00 entry belongs to the previous day. Override per-browser by setting
-// localStorage bnDayStart before opening the page.
-var DAY_START=parseFloat(localStorage.getItem('bnDayStart'))||4;
-function localDayKey(t){var d=t?new Date(t):new Date();d=new Date(d.getTime()-DAY_START*3600000);var m=d.getMonth()+1,g=d.getDate();return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(g<10?'0':'')+g;}
-var todayKey=localDayKey();
+var todayKey=new Date().toISOString().slice(0,10);
 
-function load(){todayKey=localDayKey();var d=localStorage.getItem('bnIntake_'+todayKey);if(d)entries=JSON.parse(d);var r=localStorage.getItem('bnRDI');if(r)rdi=parseInt(r);document.getElementById('rdiSlider').value=rdi;document.getElementById('rdiDisplay').textContent=rdi;render();}
+function load(){var d=localStorage.getItem('bnIntake_'+todayKey);if(d)entries=JSON.parse(d);var r=localStorage.getItem('bnRDI');if(r)rdi=parseInt(r);document.getElementById('rdiSlider').value=rdi;document.getElementById('rdiDisplay').textContent=rdi;render();}
 function save(){localStorage.setItem('bnIntake_'+todayKey,JSON.stringify(entries));}
 
 function onMethodChange(){var m=document.getElementById('method').value;var al=document.getElementById('amtLabel');var amt=document.getElementById('amount');var pot=document.getElementById('potency');var hits=document.getElementById('hits');
@@ -133,7 +125,7 @@ function render(){
 var total=0,morn=0,aft=0,eve=0;
 for(var i=0;i<entries.length;i++){
 total+=entries[i].mg;
-var h=parseInt((entries[i].time||'').split(':')[0])||0;
+var h=parseInt(entries[i].time.split(':')[0]);
 if(h<12)morn+=entries[i].mg;else if(h<17)aft+=entries[i].mg;else eve+=entries[i].mg;
 }
 document.getElementById('totalMg').textContent=Math.round(total);
@@ -161,33 +153,13 @@ document.getElementById('logList').innerHTML=html;
 function setRDI(v){rdi=parseInt(v);document.getElementById('rdiDisplay').textContent=rdi;localStorage.setItem('bnRDI',rdi);render();}
 
 function exportData(){
-var data={v:1,date:todayKey,dayStart:DAY_START,timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone,rdi:rdi,totalMg:0,entries:[]}; // the bucket definition travels with the data or day totals cannot be pooled
+var data={date:todayKey,rdi:rdi,totalMg:0,entries:[]};
 for(var i=0;i<entries.length;i++){data.totalMg+=entries[i].mg;data.entries.push(entries[i]);}
 var json=JSON.stringify(data,null,2);
 var out=document.getElementById('exportOut');
-out.style.display='block';out.textContent='bDATABASE EXPORT - BiGen Meta-Analysis\nschema v1 - v: envelope version (absent = pre-version legacy). date: behavioural day key. dayStart: day-boundary hour, local (the day runs dayStart->dayStart). timeZone: IANA zone of the exporting browser. rdi, totalMg: milligrams. entries[]: each machine timestamp is the spine; user-entered time is soft, ordering only.\n\n'+json;
+out.style.display='block';out.textContent='bDATABASE EXPORT - BiGen Meta-Analysis\n\n'+json;
 }
 
-function migrateUtcDayKeys(){
-var legacy=[],rebucket={},changed=false;
-for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('bnIntake_')===0)legacy.push(k);}
-for(var i=0;i<legacy.length;i++){
-var day=legacy[i].slice(9),list;
-try{list=JSON.parse(localStorage.getItem(legacy[i])||'[]');}catch(e){continue;}
-if(!Array.isArray(list))continue;
-for(var j=0;j<list.length;j++){
-var e=list[j];
-var lk=(e&&e.timestamp)?localDayKey(e.timestamp):day;
-if(lk!==day)changed=true;
-(rebucket[lk]=rebucket[lk]||[]).push(e);
-}}
-if(changed){
-for(var i=0;i<legacy.length;i++)localStorage.removeItem(legacy[i]);
-for(var lk in rebucket)localStorage.setItem('bnIntake_'+lk,JSON.stringify(rebucket[lk].sort(function(a,b){
-var ta=a.timestamp?new Date(a.timestamp).getTime():0,tb=b.timestamp?new Date(b.timestamp).getTime():0;return ta-tb;})));
-}}
-
-migrateUtcDayKeys();
 load();
 </script>
 </body>

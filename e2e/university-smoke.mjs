@@ -8,10 +8,17 @@ const ROOT = process.cwd().replace(/e2e$/, '');
 
 // Counts the estate's surfaces on disk. EXCLUDED, and why:
 //   surfaces/fleet/                     preserved founder art
-//   surfaces/fleet-hosted/gallery|lab   generated copies of that same art — they
-//                                       differ from the originals by one src
-//                                       attribute, or not at all, and authorship
-//                                       does not transfer through a src swap.
+//   surfaces/fleet-hosted/gallery|lab   generated copies of that same art. Seven
+//                                       differ from the original only by the src
+//                                       that drops the CDN. intake-tracker and
+//                                       bnr-dashboard ALSO carry behaviour fixes,
+//                                       because functional change to fleet content
+//                                       lands in the DERIVATIVE and never in the
+//                                       archive — that is what fleet-hosted/ is
+//                                       for. They stay uncounted because they are
+//                                       still his pages, generated from his art;
+//                                       fixing a bug in a copy does not transfer
+//                                       authorship of the surface.
 // COUNTED: surfaces/fleet-hosted/index.html — that page is our own work.
 // Change this rule DELIBERATELY: two assertions depend on it (the hub footer and
 // the review deck), so they are ONE check reported twice, not two agreeing checks.
