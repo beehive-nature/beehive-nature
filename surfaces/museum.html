@@ -64,7 +64,7 @@ h2.system{color:var(--sem-system)} h2.science{color:var(--sem-science)}
 .art{background:var(--inset);border:1px solid var(--line);border-radius:10px;padding:12px 13px;margin-top:10px}
 .art .t{font-size:13px;color:var(--ink-hi);margin-bottom:2px}
 .art .sub{font-size:10px;color:var(--dim);letter-spacing:.06em;text-transform:uppercase}
-.frame{width:100%;height:520px;border:1px solid var(--line);border-radius:9px;margin-top:10px;background:var(--void);display:block}
+.frame{width:100%;aspect-ratio:820/440;height:auto;border:1px solid var(--line);border-radius:9px;margin-top:10px;background:#000;display:block}
 .tuple{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
 .tuple span{background:var(--void);border:1px solid var(--line-hi);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--ink-hi)}
 .tuple span b{color:var(--dim);font-weight:400}
@@ -80,8 +80,9 @@ footer{max-width:980px;margin:24px auto 0;color:var(--dim);font-size:10px;text-a
 footer a{color:var(--dim)}
 @media(max-width:560px){
   body{padding:22px 12px 56px}
-  .pstat.hero .n{font-size:31px}
-  .frame{height:400px}
+  .hero{grid-template-columns:1fr}   /* 2+1 orphan at 390px otherwise */
+  .pstat.hero{padding:15px 13px}
+  .pstat.hero .n{font-size:34px}
   section{padding:13px 13px}
 }
 </style>
@@ -91,7 +92,7 @@ footer a{color:var(--dim)}
 
 <header>
   <h1>one renderer, one tuple each</h1>
-  <p class="lede">Every piece below is the <b>same frozen program</b> given different numbers. Nothing here is a picture of the art — each frame is the real renderer, running now, from the file whose hash CI refuses to let change.</p>
+  <p class="lede">Every piece below is the <b>same frozen program</b> given different numbers. Nothing here is a picture of the art — each frame is the real renderer, running now, from the file whose hash CI refuses to let change. Its controls are hidden here so you see the work and not the workshop — open any seed-link and the workshop is right there.</p>
 </header>
 
 <div class="hero">
@@ -105,8 +106,8 @@ footer a{color:var(--dim)}
   <div id="pieces"></div>
   <noscript>
     <div class="gap"><b>This catalog builds itself from a list of tuples, so it needs JavaScript to render.</b>
-    Nothing is lost: open <a href="orbit.html">the renderer</a> directly, and take the parameters from
-    <a href="orbit-manifests.md">orbit-manifests.md</a> — that file is the record, this page is only its display.</div>
+    Nothing is lost: open <a href="forge/orbit.html">the renderer</a> directly, and take the parameters from
+    <a href="forge/orbit-manifests.md">orbit-manifests.md</a> — that file is the record, this page is only its display.</div>
   </noscript>
 </section>
 
@@ -120,7 +121,7 @@ footer a{color:var(--dim)}
 </section>
 
 <footer>
-  <p><a href="index.html">⌂ the forge</a> · <a href="orbit.html">the renderer</a> · <a href="orbit-manifests.md">manifests</a> · <a href="../">the surfaces</a></p>
+  <p><a href="./">⌂ the surfaces</a> · <a href="forge/index.html">the forge</a> · <a href="forge/orbit.html">the renderer</a> · <a href="forge/orbit-manifests.md">manifests</a></p>
   <p>Adding a piece is adding a tuple to one array in this file. If it ever takes more than that, the catalog has stopped being what it says it is.</p>
 </footer>
 
@@ -138,10 +139,45 @@ const PIECES = [
    query string (orbit.html:134-137) and builds this exact link itself when you
    press its "seed-link" button — so the URL below is the renderer's own record
    format, not a convention invented here. */
-const RENDERER = 'orbit.html';
+const RENDERER = 'forge/orbit.html';
 const KEYS = ['seed', 'k', 'rings', 'twist', 'hueBase'];
 
 const link = p => RENDERER + '?' + KEYS.map(k => k + '=' + encodeURIComponent(p[k])).join('&');
+
+/* DISPLAY MODE — the museum hides the workshop; it does not change the work.
+   orbit.html is frozen (e2e/forge-freeze.mjs hashes its committed blob), so it
+   has no "embed" flag and must never grow one to serve this page. It does not
+   need to: the frame is same-origin, so it can be DRESSED from out here. One
+   stylesheet goes into the running document and everything except #stage — the
+   art itself — stops being displayed. The bytes that draw are byte-identical to
+   the ones a seed-link opens; only this frame's view of them is narrowed.
+
+   CSS, not imperative hiding, on purpose: the estate nav and the beta badge are
+   injected AFTER load, and a declarative rule matches nodes that do not exist
+   yet. Hiding by hand would leave whatever arrives late still on screen — which
+   is exactly the nav bar that appeared inside both frames before this landed. */
+const DISPLAY_CSS = [
+  'html,body{margin:0;padding:0;background:#000;overflow:hidden}',
+  'body>*:not(.wrap){display:none!important}',
+  '.wrap{max-width:none!important;margin:0!important;padding:0!important}',
+  '.wrap>*:not(#stage){display:none!important}',
+  '#stage{margin:0!important;border:0!important;border-radius:0!important;width:100%!important;height:100vh!important;background:#000}',
+].join('');
+
+function dress(f) {
+  try {
+    const d = f.contentDocument;
+    if (!d || !d.head || d.getElementById('museum-display')) return;
+    const s = d.createElement('style');
+    s.id = 'museum-display';
+    s.textContent = DISPLAY_CSS;
+    d.head.appendChild(s);
+  } catch {
+    /* Blocked or cross-origin: the frame falls back to the full workshop —
+       visibly wrong rather than silently blank, and forge-catalog.mjs asserts
+       the chrome IS hidden, so this cannot rot unnoticed. */
+  }
+}
 
 const host = document.getElementById('pieces');
 PIECES.forEach((p, i) => {
@@ -157,9 +193,11 @@ PIECES.forEach((p, i) => {
 
   const f = document.createElement('iframe');
   f.className = 'frame';
-  f.src = href;
   f.loading = 'lazy';
+  f.setAttribute('scrolling', 'no');
   f.title = (p.title || ('piece ' + (i + 1))) + ' — live render from the frozen orbit renderer';
+  f.addEventListener('load', () => dress(f));   // listener BEFORE src: the event cannot be missed
+  f.src = href;
   el.appendChild(f);
 
   const t = document.createElement('div');
