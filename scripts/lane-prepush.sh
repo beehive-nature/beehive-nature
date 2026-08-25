@@ -41,13 +41,23 @@ echo "subject asserted · $N commit(s) · direction main..$LANE (composed by thi
 printf '  %s\n' $DELTA
 echo
 
-# ── THE DOT LAW (zB mechanism, founder amendment 2026-08-24) ────────────────
-# TWO dots for commit LISTS (git log):    main..lane   — the subject above.
-# THREE dots for DIFFS and scans:         main...lane  — from the merge-base.
-# A two-dot DIFF compares TIPS: once main advances, main's new content renders
-# as deletions in "your" delta — zC's phantom (a peer's hex runs and scan hits
-# filed as lane findings). Structural here: this script never runs a lane
-# diff, but any diff-based check added later MUST read the state below.
+# ── THE DOT LAW (zB mechanism, founder amendment 2026-08-24; footgun stated
+#    per command — the dot count that means "only mine" is INVERTED between
+#    log and diff):
+#      git log  main..lane     TWO dots   — commits that are yours        ✓ subject
+#      git diff main..lane     TWO dots   — diff of TIPS; peer work rides in
+#                                           REVERSED as your deletions     ✗
+#      git diff main...lane    THREE dots — merge-base to lane, only yours ✓ scan
+#    Cowork's controlled reproduction: (A) a two-dot diff surfaced a PEER'S
+#    token as a deletion inside a non-empty "delta"; (B) with an EMPTY
+#    subject the two-dot diff STILL emitted the peer's secret — a seat with
+#    no work can file a security finding about someone else's code. Live
+#    Case-B receipt on this box: empty subject (0 commits), two-dot emitted
+#    78 files / 10,731 deletions of main-side work; three-dot emitted
+#    nothing. The EMPTY branch of this script exits BEFORE any scan, which
+#    is the structural prevention of Case B; and this script never runs a
+#    two-dot diff. secret-scan.sh TREE mode is directionless and immune —
+#    this law binds the DELTA scan.
 MB=$(git merge-base "main" "$LANE" 2>/dev/null)
 MT=$(git rev-parse main 2>/dev/null)
 if [ "$MB" = "$MT" ]; then
