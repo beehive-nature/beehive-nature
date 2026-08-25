@@ -161,7 +161,7 @@ document.getElementById('logList').innerHTML=html;
 function setRDI(v){rdi=parseInt(v);document.getElementById('rdiDisplay').textContent=rdi;localStorage.setItem('bnRDI',rdi);render();}
 
 function exportData(){
-var data={date:todayKey,dayStart:DAY_START,timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone,rdi:rdi,totalMg:0,entries:[]}; // the bucket definition travels with the data or day totals cannot be pooled
+var data={v:1,date:todayKey,dayStart:DAY_START,timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone,rdi:rdi,totalMg:0,entries:[]}; // the bucket definition travels with the data or day totals cannot be pooled
 for(var i=0;i<entries.length;i++){data.totalMg+=entries[i].mg;data.entries.push(entries[i]);}
 var json=JSON.stringify(data,null,2);
 var out=document.getElementById('exportOut');

@@ -217,6 +217,7 @@ async function freshPage(timeIso, initScript) {
     const t = document.getElementById('exportOut').textContent;
     return JSON.parse(t.slice(t.indexOf('{')));
   });
+  ok('export is versioned', env.v === 1, `v=${env.v}`);
   ok('export records the effective dayStart', env.dayStart === 8, `dayStart=${env.dayStart}`);
   ok('export records the IANA timezone', env.timeZone === 'America/Denver', `timeZone=${env.timeZone}`);
   ok('export envelope still carries date/rdi/totalMg',
