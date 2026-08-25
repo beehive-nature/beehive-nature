@@ -69,7 +69,10 @@ const hubLinks = await page.$$eval('a.t', as => as.map(a => a.getAttribute('href
 // Local doors only: ↗ property tiles (cross-org Pages sites) live on their
 // own origins and are not surfaces of THIS tree, so they never enter the
 // roster or footer arithmetic. hubLinks already filters to local hrefs.
-const cards = hubLinks.length;
+// DISTINCT doors, not anchors: the hub repeats six doors in its START HERE
+// row, which are shortcuts into the domain sections below, not extra
+// surfaces. Counting anchors made the roster look short by exactly that six.
+const cards = new Set(hubLinks).size;
 console.log(`hub: ${cards} cards, ${hubLinks.length} local hrefs`);
 
 // 2 · crawl every hub-discovered local page
