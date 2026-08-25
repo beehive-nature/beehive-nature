@@ -47,6 +47,96 @@ FOUNDER_EMAIL="loviswater44@gmail.com"
 say() { echo "§7: $*"; }
 die() { echo "§7 FAIL — $*"; echo "§7 FAIL — this check fails closed when it cannot determine an answer."; exit 1; }
 
+# ---- SELFTEST ------------------------------------------------------------
+# A gate's success state is SILENCE — a passing hook and a broken hook look
+# identical on a normal day. This enforcement layer failed OPEN twice tonight
+# (2026-08-24) in two independent builds: an unreachable §7 line, and helpers
+# defined after their callers (command-not-found exiting 0). The selftest runs
+# the four cases that can tell a working gate from a dead one, continuously in
+# CI, so the next edit that reintroduces a fail-open goes red the same hour:
+#
+#   T1 seat-as-author      → BLOCKED: exit ≠ 0, "§7 FAIL" in the output, zero commits
+#   T2 trailer-in-body     → BLOCKED by commit-msg (a body line is not a trailer)
+#   T3 correct shape       → CREATED: A=founder C=seat, trailer PARSED ≥ 1
+#   T4 founder-typed       → CREATED: A == C, trailer clause not applicable
+#
+# STANDING LAW (founder, on accepting the hooks): two enforcers of one rule
+# share the implementation, never agree by convention — hook and CI both run
+# THIS file and git's own `interpret-trailers --parse`. This selftest is the
+# third sharer: it exercises the same code both enforcers run.
+#
+# Mutation-receipt protocol learned the hard way: COMMIT the gate before
+# breaking it — a `git checkout --` restore against uncommitted work restores
+# the PRE-selftest gate and erases the test along with the defect.
+if [ "${1:-}" = "--selftest" ]; then
+  unset S7_STAGED S7_MSG_FILE S7_RANGE S7_BEFORE S7_SHA
+  T=$(mktemp -d 2>/dev/null) || { echo "selftest FAIL — mktemp"; exit 1; }
+  trap 'rm -rf "$T"' EXIT INT TERM
+  SELF=$(cd "$(dirname "$0")" && pwd)/$(basename "$0")
+
+  git init -q "$T/repo" && cd "$T/repo" || { echo "selftest FAIL — git init"; exit 1; }
+  git config user.name "$FOUNDER_NAME"
+  git config user.email "$FOUNDER_EMAIL"
+  mkdir -p .githooks scripts
+  cp "$SELF" scripts/identity-check.sh
+  printf '#!/bin/sh\nS7_STAGED=1 sh scripts/identity-check.sh\n' > .githooks/pre-commit
+  printf '#!/bin/sh\nS7_STAGED=1 S7_MSG_FILE="$1" exec sh scripts/identity-check.sh\n' > .githooks/commit-msg
+  chmod +x .githooks/pre-commit .githooks/commit-msg
+  git config core.hooksPath .githooks
+  echo x > f.txt && git add f.txt
+
+  st=0
+  blocked() { # $1 desc — the commit under $@ must FAIL with a §7 FAIL and leave no commit
+    desc=$1; shift
+    out=$("$@" 2>&1); rc=$?
+    n=$(git rev-list --count HEAD 2>/dev/null || echo 0)
+    if [ "$rc" -ne 0 ] && [ "$n" = "0" ] && printf '%s' "$out" | grep -q '§7 FAIL'; then
+      echo "  PASS $desc — blocked, §7 FAIL printed, no commit created"
+    else
+      echo "  FAIL $desc — rc=$rc commits=$n out: $out"; st=1
+    fi
+  }
+  created() { # $1 desc — the commit must succeed; $2 expected committer; $3 needs-trailer
+    desc=$1; want_c=$2; want_trailer=$3; shift 3
+    out=$("$@" 2>&1); rc=$?
+    n=$(git rev-list --count HEAD 2>/dev/null || echo 0)
+    a=$(git log -1 --format='%an' 2>/dev/null); c=$(git log -1 --format='%cn' 2>/dev/null)
+    tr=$(git log -1 --format='%(trailers:key=Co-authored-by)' 2>/dev/null | grep -c 'Co-authored-by' || true)
+    if [ "$rc" = "0" ] && [ "$n" -ge 1 ] && [ "$a" = "$FOUNDER_NAME" ] && [ "$c" = "$want_c" ] \
+       && { [ "$want_trailer" = "no" ] || [ "$tr" -ge 1 ]; }; then
+      echo "  PASS $desc — created A=$a C=$c trailer=$tr"
+    else
+      echo "  FAIL $desc — rc=$rc commits=$n A=$a C=$c trailer=$tr out: $out"; st=1
+    fi
+  }
+
+  echo "§7 selftest — four cases through the REAL hooks (throwaway repo, deleted after):"
+  # every case pins its FULL ident env — the rig is hermetic against whatever
+  # the caller exported (a caller's GIT_COMMITTER_* leaked into T4 once and
+  # the gate CORRECTLY blocked what the rig mislabeled founder-typed)
+  blocked "T1 seat-as-author is blocked" \
+    env GIT_AUTHOR_NAME=bZiq GIT_AUTHOR_EMAIL=seat@x GIT_COMMITTER_NAME=bZiq GIT_COMMITTER_EMAIL=seat@x \
+    git commit -q -m "t1 seat as author"
+  printf 't2 subject\n\nCo-authored-by: zCode <z@x>\n\na trailing paragraph pushes the line out of the trailer block\n' > "$T/msg"
+  blocked "T2 trailer-in-body is blocked" \
+    env GIT_AUTHOR_NAME="$FOUNDER_NAME" GIT_AUTHOR_EMAIL="$FOUNDER_EMAIL" \
+        GIT_COMMITTER_NAME=bZiq GIT_COMMITTER_EMAIL=seat@x git commit -q -F "$T/msg"
+  printf 't3 subject\n\nCo-authored-by: zCode <z@x>\n' > "$T/msg3"
+  created "T3 correct shape lands" bZiq yes \
+    env GIT_AUTHOR_NAME="$FOUNDER_NAME" GIT_AUTHOR_EMAIL="$FOUNDER_EMAIL" \
+        GIT_COMMITTER_NAME=bZiq GIT_COMMITTER_EMAIL=seat@x git commit -q -F "$T/msg3"
+  echo y >> f.txt && git add f.txt   # T4 needs something staged — an empty commit
+                                     # dies on "nothing to commit" before any hook
+                                     # runs, and the rig would read git's refusal
+                                     # as the gate's verdict
+  created "T4 founder-typed lands" "$FOUNDER_NAME" no \
+    env GIT_AUTHOR_NAME="$FOUNDER_NAME" GIT_AUTHOR_EMAIL="$FOUNDER_EMAIL" \
+        GIT_COMMITTER_NAME="$FOUNDER_NAME" GIT_COMMITTER_EMAIL="$FOUNDER_EMAIL" \
+    git commit -q -m "t4 founder typed"
+  if [ "$st" -ne 0 ]; then echo "§7 selftest FAIL — a working gate and a dead one are not distinguishable by silence; these cases are the difference"; fi
+  exit "$st"
+fi
+
 if [ -n "${S7_STAGED:-}" ]; then
   say "staged mode — checking the commit in progress (detection before handoff; --no-verify-able, never prevention)"
 
