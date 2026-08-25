@@ -41,6 +41,23 @@ echo "subject asserted · $N commit(s) · direction main..$LANE (composed by thi
 printf '  %s\n' $DELTA
 echo
 
+# ── THE DOT LAW (zB mechanism, founder amendment 2026-08-24) ────────────────
+# TWO dots for commit LISTS (git log):    main..lane   — the subject above.
+# THREE dots for DIFFS and scans:         main...lane  — from the merge-base.
+# A two-dot DIFF compares TIPS: once main advances, main's new content renders
+# as deletions in "your" delta — zC's phantom (a peer's hex runs and scan hits
+# filed as lane findings). Structural here: this script never runs a lane
+# diff, but any diff-based check added later MUST read the state below.
+MB=$(git merge-base "main" "$LANE" 2>/dev/null)
+MT=$(git rev-parse main 2>/dev/null)
+if [ "$MB" = "$MT" ]; then
+  echo "dot state · main is AT the merge-base — two-dot and three-dot diffs coincide; nothing armed."
+else
+  echo "dot state · main HAS MOVED past the merge-base — the two-dot trap is ARMED:"
+  echo "  any diff over this lane MUST be three-dot (main...$LANE); two-dot would render main's new content as your deletions."
+fi
+echo
+
 echo "1/4 secret-scan, tree mode (secrets + the 48-hex PUBLIC-CONSTANT law)"
 sh scripts/secret-scan.sh tree || { echo "PREPUSH FAIL — secret-scan"; exit 1; }
 echo "2/4 §7 identity on main..$LANE (its printed count must equal the asserted $N)"
