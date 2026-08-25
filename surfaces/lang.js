@@ -90,18 +90,28 @@
   }
   function mount(){
     var host=document.getElementById('tbar');
+    /* margin/min-height/height/box-sizing pinned on all three elements below:
+       an inline style only wins the properties it SETS — any page's bare
+       select{}/span{} rule reaches these controls through every property left
+       open, and the tbar stretches to the tallest rider. Same class as the
+       bare button{} rules (attest/bset, 63px bar) pinned in register.js; no
+       page exercises the select/span hole today — closed before one does.
+       The tour bar is nobody's element selector. */
     var wrap=document.createElement('span'); wrap.id='blangctl';
-    wrap.style.cssText='display:inline-flex;gap:5px;align-items:center;margin-left:10px;flex-shrink:0;'
-      +'padding-left:10px;border-left:1px solid #243026;vertical-align:middle';
+    wrap.style.cssText='display:inline-flex;gap:5px;align-items:center;margin:0 0 0 10px;flex-shrink:0;'
+      +'padding-left:10px;border-left:1px solid #243026;vertical-align:middle;'
+      +'min-height:0;height:auto;box-sizing:border-box';
     var sel=document.createElement('select'); sel.id='blangsel';
     sel.setAttribute('aria-label','language');
     sel.style.cssText='background:#0d1410;color:#8a9a8a;border:1px solid #243026;'
-      +'border-radius:6px;font:10px "IBM Plex Mono",monospace;padding:2px 4px;max-width:110px';
+      +'border-radius:6px;font:10px "IBM Plex Mono",monospace;padding:2px 4px;max-width:110px;'
+      +'margin:0;min-height:0;height:auto;box-sizing:border-box';
     sel.innerHTML='<option value="" disabled>🌐</option>'+LANGS.map(function(L){
       return '<option value="'+L[0]+'">'+L[1]+'</option>'; }).join('');
     sel.addEventListener('change',function(){ setPref(sel.value); });
     var note=document.createElement('span'); note.id='blangnote';
-    note.style.cssText='font:9px "IBM Plex Mono",monospace;color:#FFD700;white-space:nowrap';
+    note.style.cssText='font:9px "IBM Plex Mono",monospace;color:#FFD700;white-space:nowrap;'
+      +'margin:0;min-height:0;height:auto;box-sizing:border-box';
     wrap.appendChild(sel); wrap.appendChild(note);
     if(host) host.appendChild(wrap); else document.body.appendChild(wrap);
     var c=pref();
