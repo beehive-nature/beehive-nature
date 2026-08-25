@@ -120,6 +120,24 @@ async function freshPage(timeIso, initScript) {
   await ctx.close();
 }
 
+// Timestamp-less fallback: an entry with no timestamp has no clock of its
+// own to re-bucket from, so it stays under its existing key — asserted,
+// not assumed (ORDER: an unasserted fallback is an unrun check).
+{
+  const { ctx, page } = await freshPage('2026-08-24T19:00:00-06:00', () => {
+    localStorage.setItem('bnIntake_2026-08-20',
+      JSON.stringify([{ method: 'edible', amount: 10, potency: 100, strain: 'no-ts', time: '12:00', hits: 1, mg: 10 }]));
+  });
+  await page.goto(`${base}/lab/intake-tracker.html`, { waitUntil: 'load' });
+  const kept = await page.evaluate(() => {
+    try { return JSON.parse(localStorage.getItem('bnIntake_2026-08-20') || 'null'); }
+    catch (e) { return 'threw'; }
+  });
+  ok('timestamp-less entry keeps its existing key, nothing crashes',
+    Array.isArray(kept) && kept.length === 1 && kept[0].strain === 'no-ts');
+  await ctx.close();
+}
+
 await browser.close();
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
