@@ -8,27 +8,54 @@
 <meta name="color-scheme" content="dark">
 <title>your two addresses — did:plc + npub from one bzDiD root</title>
 <style>
-:root{--bg:#0d1410;--ink:#e2efdb;--cyan:#00E5FF;--violet:#c9a0ff;--gold:#FFD700;--dim:#8a9a8a;--line:#243026}
+/* ── SEMANTIC COLOUR · meanings picked FIRST (the estate contract):
+   harm amber · solution leaf · value gold · system cyan · science violet.
+   H1 GRADIENT = THE ARGUMENT: one ROOT (gold, the single soul) splits into
+   TWO RAILS — the bsky rail (cyan, did:plc) and the nostr rail (violet,
+   npub) — and the binding receipt binds them back (gold returns as the
+   attestation). One soul, two revocable addresses; the gradient walks it. */
+:root{--void:#0d1410;--panel:#111a14;--inset:#0a0f0b;--ink:#e2efdb;--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--dim:#8a9a8a;--line:#243026;
+--sem-harm:#ffb347;--sem-solution:#7ddf8f;--sem-value:#FFD700;--sem-system:#00E5FF;--sem-science:#c9a0ff}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:40px 16px 90px}
-header{text-align:center;margin-bottom:24px}
-h1{font-size:clamp(18px,4vw,26px);color:var(--cyan);font-weight:400;letter-spacing:.05em}
-header p{color:var(--dim);font-size:11.5px;margin-top:8px}
-.wrap{max-width:760px;margin:0 auto}
-.card{background:#111a14;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:16px}
+/* DEPTH LADDER: body void → cards → input/mono insets */
+body{background:var(--void);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:36px 16px 90px}
+header{text-align:center;margin-bottom:18px}
+h1{font-size:clamp(19px,5vw,32px);font-weight:400;letter-spacing:.05em;line-height:1.2;
+  background:linear-gradient(90deg,var(--sem-value),var(--sem-system),var(--sem-science),var(--sem-value));
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+header p{color:var(--dim);font-size:11.5px;margin-top:7px;line-height:1.75}
+/* HERO — the thesis figure: ONE root, two rails hanging from it */
+.hero{max-width:760px;margin:0 auto 16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.pstat{background:var(--inset);border:1px solid var(--line);border-radius:10px;padding:10px 12px;text-align:center}
+.pstat.hero{border-color:#2b4a34;background:linear-gradient(180deg,#0d1a10 0%,var(--inset) 100%);background-color:var(--inset)}
+.pstat .n{font-size:38px;line-height:1.1;color:var(--sem-solution)}
+.pstat .l{font-size:10px;color:var(--sem-harm);text-transform:uppercase;letter-spacing:.14em;margin-top:3px}
+.pstat .n.sys{color:var(--sem-system)} .pstat .n.sci{color:var(--sem-science)}
+section.wrap{max-width:760px;margin:0 auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+.card{background:var(--inset);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:16px}
 .card h3{font-weight:400;font-size:14px;letter-spacing:.05em}
-.card.plc h3{color:var(--cyan)} .card.npub h3{color:var(--violet)}
+.card.plc h3{color:var(--sem-system)} .card.npub h3{color:var(--sem-science)}
 .row{display:flex;justify-content:space-between;gap:14px;padding:8px 0;border-bottom:1px dotted var(--line);font-size:11.5px}
 .row .k{color:var(--dim);flex-shrink:0}
 .row .v{text-align:right;word-break:break-all}
-.mono{font-size:10.5px;color:var(--gold)}
+.mono{font-size:10.5px;color:var(--sem-value)}
 .note{color:var(--dim);font-size:10.5px;line-height:1.8;margin-top:10px}
 .note b{color:var(--ink);font-weight:400}
 form{display:flex;gap:8px;margin:16px auto 20px;max-width:560px}
-input{flex:1;background:#0a100c;color:var(--cyan);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font:12px 'IBM Plex Mono',monospace}
-button{background:#12301a;color:#9FFF3D;border:1px solid #2c4418;border-radius:8px;padding:10px 18px;cursor:pointer;font:12px 'IBM Plex Mono',monospace}
+input{flex:1;background:var(--inset);color:var(--sem-system);border:1px solid var(--line);border-radius:10px;padding:11px 14px;font:12px 'IBM Plex Mono',monospace;outline:none}
+input:focus{border-color:var(--sem-value)}
+button{background:#12301a;color:#9FFF3D;border:1px solid #2c4418;border-radius:10px;padding:11px 18px;cursor:pointer;font:12px 'IBM Plex Mono',monospace}
 button:hover{background:#9FFF3D;color:#000}
 footer{max-width:760px;margin:26px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
+@media(max-width:560px){
+  body{padding:22px 10px 90px}
+  .hero{grid-template-columns:1fr 1fr}
+  .pstat:first-child{grid-column:1/-1}
+  .row{flex-direction:column;gap:2px}
+  .row .v{text-align:left}
+  form{flex-direction:column}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
@@ -36,7 +63,12 @@ footer{max-width:760px;margin:26px auto 0;color:var(--dim);font-size:10px;text-a
   <h1>🗝 your two addresses</h1>
   <p>one bzDiD root · two mailing rails — bsky (did:plc) and nostr (npub) · TASKS 1+2 of the comms ledger</p>
 </header>
-<div class="wrap">
+<div class="hero">
+  <div class="pstat hero"><div class="n">1</div><div class="l">root — every address below hangs from it</div></div>
+  <div class="pstat"><div class="n sys">2</div><div class="l">rails — did:plc · npub, both revocable</div></div>
+  <div class="pstat"><div class="n sci">0</div><div class="l">secrets rendered — nsec never drawn, never sent</div></div>
+</div>
+<section class="wrap">
 <form onsubmit="event.preventDefault();derive()">
   <input id="root" placeholder="paste a root seed / any string to see the derivation shape" spellcheck="false">
   <button>derive the shape</button>

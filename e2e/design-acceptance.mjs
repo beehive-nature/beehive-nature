@@ -40,6 +40,7 @@ import { fileURLToPath } from 'node:url';
 const RIDER_ALLOWLIST = [
   /\/tour\.js/, /\/register\.js/, /\/lang\.js/, /\/rails-badge\.js/,
   /\/agent-dock\.js/,
+  /\/(pointers|relay|bsky)\.js/,  // the pulse/hearth engines — same-origin estate riders, the lang.js class
   /\/manifest\.webmanifest/, /\/bn-logo\.(jpg|png)/, /\/icon-180\.png/,
   /\.(json|css)(\?|$)/
 ];
