@@ -55,7 +55,10 @@ await page.waitForTimeout(300);
 ok('hub loads clean', errs.length === 0, errs.join(' | '));
 // The hub is a DIRECTORY of a.t tiles (formerly card anchors). Every tile is crawled.
 const hubLinks = await page.$$eval('a.t', as => as.map(a => a.getAttribute('href')).filter(h => h && !/^https?:/.test(h) && !h.startsWith('#')));
-const cards = await page.locator('a.t').count();
+// Local doors only: ↗ property tiles (cross-org Pages sites) live on their
+// own origins and are not surfaces of THIS tree, so they never enter the
+// roster or footer arithmetic. hubLinks already filters to local hrefs.
+const cards = hubLinks.length;
 console.log(`hub: ${cards} cards, ${hubLinks.length} local hrefs`);
 
 // 2 · crawl every hub-discovered local page
