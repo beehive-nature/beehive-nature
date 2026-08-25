@@ -24,21 +24,45 @@
   The beam LOOPS until stopped so a human has time to pick up a phone and aim.
 -->
 <style>
+/* ── SEMANTIC COLOUR · meanings picked FIRST, one hue = one meaning, page-wide.
+   The bLiGhTbeAM's own register palette, mapped onto the estate's five seats
+   of meaning (the transport itself stays luminance-only — ruled 2026-08-15 —
+   so hue never carries data; it only carries meaning):
+     harm/gap ……………… #ffb347  amber   (reserved: a declared decode failure)
+     solution/verified  var(--biomass) #86CC72  (cells received, receipt proven)
+     value/the payload  var(--b-value) #E8B54B  (the work the beam carries)
+     system/rails ……… var(--info) #6FA9E0     (the lanes, the modes, guidance)
+     science/register  var(--sovereign) #9C6FD6 (the sovereign app side, verify)
+
+   THE H1 GRADIENT IS THE ARGUMENT: the rainbow is the network's own — every
+   register in one beam — and "the logo IS the transmission" is the page's
+   thesis: what you look at and what carries the bits are the same object. */
 :root{color-scheme:dark;
 --ai:#45C2DC;--biomass:#86CC72;--sovereign:#9C6FD6;--you:#D655BB;
 --rainbow:linear-gradient(90deg,#FBFB9F,#86CC72,#45C2DC,#6FA9E0,#9C6FD6);
 --primary:var(--you);--info:#6FA9E0;--verified:var(--biomass);--guard:#B7A8F7;--b-value:#E8B54B;
 --bg:#06110C;--bg-card:#0C1412;--ink:#E9F2EC;--ink-mut:#8FA79C;--ink-dim:#648176;--line:#1E2B26;
+--sem-harm:#ffb347;--sem-solution:var(--biomass);--sem-value:var(--b-value);
+--sem-system:var(--info);--sem-science:var(--sovereign);
 --font-ui:ui-sans-serif,system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
 --font-mono:ui-monospace,"Cascadia Mono","SF Mono",Menlo,Consolas,monospace;
 --s2:12px;--s3:18px;--s4:24px;--radius:12px;--radius-pill:999px;}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-ui);line-height:1.5;
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:13.5px;line-height:1.5;
   min-height:100dvh;padding:var(--s3);display:flex;flex-direction:column;align-items:center}
 .wrap{width:100%;max-width:62rem}
-h1{font-size:1.5rem;margin:0 0 4px}
-h1 b{background:var(--rainbow);-webkit-background-clip:text;background-clip:text;color:transparent}
-.sub{color:var(--ink-mut);margin:0 0 var(--s4);font-size:.92rem}
+h1{font-size:clamp(20px,4.6vw,30px);margin:0 0 4px;font-weight:650;
+  background:var(--rainbow);-webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;color:transparent}
+h1 b{font-weight:650}
+.sub{color:var(--ink-mut);margin:0 0 var(--s3);font-size:.92rem}
+.heroband{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 var(--s3)}
+.pstat.hero{background:#0A1410;border:1px solid var(--line);border-radius:13px;padding:19px 13px;text-align:center}
+.pstat .n{display:block;font-size:38px;font-weight:700;line-height:1;letter-spacing:-.025em}
+.pstat .n small{font-size:13px;font-weight:600;color:var(--ink-mut)}
+.pstat .l{display:block;font-size:10px;color:var(--ink-dim);margin-top:8px;text-transform:uppercase;letter-spacing:.085em;line-height:1.65}
+.n.bits{color:var(--sem-value)} .n.zero{color:var(--sem-solution)} .n.modes{color:var(--sem-system)}
 .grid{display:grid;grid-template-columns:1fr;gap:var(--s3)}
 @media(min-width:56rem){.grid{grid-template-columns:1.05fr .95fr}}
 .panel{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);padding:var(--s3)}
@@ -86,6 +110,15 @@ h1 b{background:var(--rainbow);-webkit-background-clip:text;background-clip:text
   background:color-mix(in srgb,var(--ai) 16%,transparent);flex:none}
 pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;
   font-size:.72rem;overflow:auto;max-height:120px;color:var(--ink-mut);margin:var(--s2) 0 0}
+@media(max-width:560px){
+  body{padding:12px}
+  .pstat .n{font-size:31px}
+  .heroband{padding:12px}
+  .btn{min-height:42px;padding:0 var(--s2)}
+}
+@media(prefers-reduced-motion:reduce){
+  .cells i,.progress i{transition:none}
+}
 </style>
 </head>
 <body>
@@ -93,6 +126,12 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
   <h1><b>bLighTnetWorK</b> · the bLiGhTbeAM</h1>
   <p class="sub">The logo <b>is</b> the transmission. Every lit hexagon is one bit of the live frame;
     the lit rim carries none. ~588 b/sec · no network · no pairing · no install.</p>
+
+  <section class="heroband" aria-label="the beam in numbers">
+    <div class="pstat hero"><span class="n bits">84</span><span class="l">bits per frame · 84 of 127 cells carry the payload</span></div>
+    <div class="pstat hero"><span class="n zero">0</span><span class="l">network · pairing · install — all three, zero</span></div>
+    <div class="pstat hero"><span class="n modes">2</span><span class="l">render modes · bComb + QR, the same bytes</span></div>
+  </section>
 
   <div class="grid">
     <!-- ============ SENDER ============ -->

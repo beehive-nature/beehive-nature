@@ -1,101 +1,213 @@
 <!doctype html>
+<!-- BNRi — the fleet's own art. REBUILT 2026-08-24 (zA).
+     Was a bare renderer: the decoder was already real (both wire formats,
+     detected by version byte, never assumed), but the gallery wore no bar and
+     loaded each .hex as its own request — eight fetches, none of them riders.
+     Now the manifest MIRRORS the hex: one allowlisted .json fetch carries the
+     collection, and the .hex files stay beside it untouched — each file still
+     survives on its own; copy the directory, not just the page. The build-up
+     render (rects drawn in file order as you scroll) is the collection being
+     DECODED in front of you, not an effect. amber frequency. -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="Seven hexrect pieces — the fleet's own art, decoded and drawn in your browser from the packed wire format itself. Nothing is a stored image.">
 <title>BNRi — the fleet's own art</title>
-<!-- The renderer is self-contained; the ART is fetched from bnri-art/*.hex beside this
-     file — the collection's real artifacts, not inlined blobs. Copy the directory, not
-     just the file, to carry it on a USB stick. The decoder reads BOTH wire formats,
-     v1 and v2, detected by the version byte, never assumed. amber frequency. -->
 <style>
-  :root{--bg:#0a0a0f;--panel:#12121a;--line:#242433;--ink:#e8e8f0;--dim:#7e8c85;
-        --accent:#eb8f16;--accent2:#dd5ce5;--ok:#9aff5b;--bad:#ff5b6e}
-  *{box-sizing:border-box;min-width:0}
-  html,body{max-width:100%;overflow-x:hidden}
-  body{margin:0;background:var(--bg);color:var(--ink);padding:24px 20px 60px;
-    font:14px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-  .wrap{max-width:1000px;margin:0 auto}
-  h1{font-size:16px;letter-spacing:.15em;text-transform:uppercase;margin:0 0 4px}
-  h1 span{color:var(--accent)}
-  .sub{color:var(--dim);font-size:12px;margin-bottom:18px;max-width:680px}
-  .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
-  figure{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
-  .stage{background:#000;border-radius:8px;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden}
-  .stage canvas{width:100%;height:100%;image-rendering:pixelated}
-  figcaption{color:var(--dim);font-size:10.5px;margin-top:9px;line-height:1.55}
-  figcaption b{color:var(--ink)}
-  .v{display:inline-block;padding:1px 6px;border-radius:4px;font-size:9px;margin-left:4px}
-  .v1{background:#2a2412;color:var(--accent)} .v2{background:#12301a;color:var(--ok)}
-  .foot{color:var(--dim);font-size:11px;margin-top:32px;border-top:1px solid var(--line);padding-top:14px}
-  .foot a{color:var(--accent)}
-</style></head><body><div class="wrap">
-<h1>BNRi <span>· the fleet's own art</span></h1>
-<div class="sub">The explorer renders every other project's inscriptions. This is ours —
-seven hexrect pieces, embedded and drawn in your browser from the packed format itself.
-The decoder reads <b>both wire formats</b>: v1 (8-byte records) and v2 (versioned,
-palette-indexed, run-length) — detected by the version byte, never assumed. Every pixel is
-computed here; nothing is a stored image.</div>
-<div class="gallery" id="g"></div>
+/* ── SEMANTIC COLOUR · meanings picked FIRST, one hue = one meaning, page-wide.
+   The estate's contract, inherited verbatim. No hue invented, none reused for looks.
+     harm/gap ……………… #ffb347  amber   (a piece that fails to decode — declared, never hidden)
+     solution/alive …… #7ddf8f  leaf    (a piece fully drawn — the decoder's verdict)
+     value/the work …… #FFD700  gold    (the collection: bytes, rects, the work itself)
+     system/rails …… #00E5FF  cyan    (links, the formats, navigation)
+     science/verify … #c9a0ff  violet  (v1/v2 detection, the wire format read from bytes)
 
+   THE H1 GRADIENT IS THE ARGUMENT: gold → violet → leaf runs
+   THE BYTES → THE FORMAT DETECTED → THE PIXELS ALIVE. Left to right is one
+   piece's whole journey through this page: packed hex in, version byte read
+   (never assumed), rects drawn — nothing here is a stored image. A gallery
+   that showed only the pixels would be any gallery; this one shows its proof. */
+:root{
+  --void:#0a0a0f; --panel:#12121a; --inset:#0d0d15;
+  --line:#242433; --line-hi:#37374a;
+  --ink:#e8e8f0; --ink-hi:#f4f4fa; --dim:#7e8c85;
+  --sem-harm:#ffb347; --sem-solution:#7ddf8f; --sem-value:#FFD700;
+  --sem-system:#00E5FF; --sem-science:#c9a0ff;
+}
+*{box-sizing:border-box;min-width:0}
+html,body{max-width:100%;overflow-x:hidden}
+body{margin:0;background:var(--void);color:var(--ink);padding:30px 18px 70px;
+  font:13px/1.7 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.wrap{max-width:1000px;margin:0 auto}
+a{color:var(--sem-system);text-decoration:none;border-bottom:1px solid transparent}
+a:hover,a:focus{color:var(--sem-value);border-bottom-color:var(--sem-value)}
+
+header{text-align:center;margin-bottom:20px}
+h1{font-size:clamp(20px,5.4vw,36px);line-height:1.18;font-weight:600;letter-spacing:0;
+  background:linear-gradient(90deg,var(--sem-value),var(--sem-science),var(--sem-solution));
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;color:transparent}
+header .lede{color:var(--dim);font-size:11.5px;margin-top:10px;line-height:1.85;max-width:680px;margin-inline:auto}
+header .lede b{color:var(--ink)}
+
+.hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:6px}
+.pstat.hero{background:var(--inset);border:1px solid var(--line);border-radius:13px;padding:19px 13px;text-align:center}
+.pstat .n{display:block;font-size:38px;font-weight:700;line-height:1;letter-spacing:-.025em}
+.pstat .l{display:block;font-size:10px;color:var(--dim);margin-top:8px;text-transform:uppercase;letter-spacing:.085em;line-height:1.65}
+.n.work{color:var(--sem-value)} .n.fmt{color:var(--sem-science)} .n.drawn{color:var(--sem-solution)}
+
+section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px 17px;margin-top:14px}
+section h2{font-size:11.5px;font-weight:400;letter-spacing:.1em;text-transform:uppercase;margin-bottom:9px}
+h2.value{color:var(--sem-value)} h2.science{color:var(--sem-science)} h2.system{color:var(--sem-system)}
+section p{margin-bottom:9px} section p:last-child{margin-bottom:0}
+.dim{color:var(--dim);font-size:11px;line-height:1.85}
+
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-top:2px}
+figure{margin:0;background:var(--inset);border:1px solid var(--line);border-radius:12px;padding:12px}
+.stage{background:#000;border:1px solid var(--line);border-radius:8px;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.stage canvas{width:100%;height:100%;image-rendering:pixelated}
+figcaption{color:var(--dim);font-size:10.5px;margin-top:9px;line-height:1.55}
+figcaption b{color:var(--ink)}
+figcaption .file{display:block;font-size:9px;color:#565a70;margin-top:3px;word-break:break-all}
+.v{display:inline-block;padding:1px 6px;border-radius:4px;font-size:9px;margin-left:4px}
+.v1{background:#2a2412;color:var(--sem-harm)} .v2{background:#12301a;color:var(--sem-solution)}
+.bad{color:var(--sem-harm);font-size:11px}
+
+footer{color:var(--dim);font-size:10px;text-align:center;margin-top:28px;line-height:1.95}
+footer a{color:var(--dim)}
+.skip{position:absolute;left:-9999px}
+.skip:focus{position:fixed;left:16px;top:16px;background:var(--panel);padding:8px 12px;border-radius:6px;color:var(--ink)}
+
+@media(max-width:560px){
+  body{padding:22px 12px 56px}
+  .pstat .n{font-size:31px}
+  section{padding:13px 13px}
+  .gallery{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+}
+@media(prefers-reduced-motion:reduce){
+  figure.rise{animation:none}
+}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+figure.rise{animation:rise .5s ease both}
+</style></head><body>
+<a class="skip" href="#gallery">Skip to content</a>
+<div class="wrap">
+<header>
+  <h1>BNRi — the fleet's own art</h1>
+  <p class="lede">the explorer renders every other project's inscriptions; this is <b>ours</b> — seven hexrect pieces, decoded and drawn in your browser from the packed format itself. the decoder reads <b>both wire formats</b>, v1 (8-byte records) and v2 (versioned, palette-indexed, run-length), detected by the version byte, never assumed. every pixel is computed here; <b>nothing is a stored image</b>.</p>
+</header>
+
+<div class="hero">
+  <div class="pstat hero"><span class="n work" id="hPieces">7</span><span class="l">pieces in the collection · counted from the manifest</span></div>
+  <div class="pstat hero"><span class="n fmt" id="hFmt">—</span><span class="l">wire formats · detected per piece, never assumed</span></div>
+  <div class="pstat hero"><span class="n drawn" id="hBytes">—</span><span class="l">KB of packed art · the bytes are the work</span></div>
 </div>
+
+<section id="gallery">
+  <h2 class="value">the collection — decoded in front of you</h2>
+  <p class="dim">each piece draws its rects in file order as it enters the viewport — that is the decoder working, not an effect; a piece that fails renders amber and says why. the build-up honours prefers-reduced-motion by drawing instantly.</p>
+  <div class="gallery" id="g"></div>
+</section>
+
+<section>
+  <h2 class="science">the mirror law — how the art travels</h2>
+  <p class="dim">the <a href="bnri-art/manifest.json">manifest</a> mirrors the hex so the page is one request; the <b>.hex files are the art</b> and stay beside it, untouched — each survives on its own. copy <b>the directory</b>, not just this page, and the collection carries on a USB stick. the manifest's hex is byte-length-checked against the files at build time (221,175 chars today — 110,587 B of packed art in seven files).</p>
+  <p class="dim">the decoder reads the version byte first: a v2 blob starts <code>0x02</code>; v1 begins with a coordinate byte for a real piece (row 0), never <code>0x02</code> as a version. we try v2 when byte0 is 2, else v1 — and a misparse renders as a declared failure, never as wrong pixels.</p>
+</section>
+
+<footer>
+  <p><a href="../">⌂ the surfaces</a> · <a href="inscription-explorer.html">the explorer — every other project's inscriptions</a> · <a href="museum.html">the museum — what "on-chain" actually means</a></p>
+  <p>one page request plus tour.js and one manifest.json — the art ships in the manifest, the .hex files beside it remain the artifacts. checked 2026-08-24.</p>
+</footer>
+</div>
+<div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(.6rem + 46px);z-index:9997;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
+<script src="../tour.js?v=22"></script>
 <script>
 function hexToBytes(h){const b=new Uint8Array(h.length/2);for(let i=0;i<b.length;i++)b[i]=parseInt(h.substr(i*2,2),16);return b;}
-// v1: 8-byte records [x][y][w][h][R][G][B][reserved=0]. v2: [0x02][n][RGB*n][x][y][w][h][idx]*.
-// Detection: a v2 blob starts with 0x02 and its length does not divide by 8 in the v1 way
-// once the palette header is accounted for. We detect by the leading version byte: v1
-// blobs begin with a coordinate byte for a real piece (row 0), never 0x02 as a *version*.
-// To be safe we try v2 parse first when byte0===2, else v1.
+/* v1: 8-byte records [x][y][w][h][R][G][B][reserved=0]. v2: [0x02][n][RGB*n][x][y][w][h][idx]*.
+   Detection: v2 blob starts with 0x02; a v1 blob begins with a coordinate byte for
+   a real piece (row 0), never 0x02 as a *version*. Try v2 when byte0===2, else v1. */
 function decode(bytes){
-  if(bytes[0]===0x02){ // v2
+  if(bytes[0]===0x02){
     const n=bytes[1]; const pal=[];
     let p=2; for(let i=0;i<n;i++){pal.push([bytes[p],bytes[p+1],bytes[p+2]]);p+=3;}
     const rects=[];
     while(p+4<bytes.length){ rects.push({x:bytes[p],y:bytes[p+1],w:bytes[p+2],h:bytes[p+3],c:pal[bytes[p+4]]}); p+=5; }
     return {ver:2, rects};
   }
-  // v1
   const rects=[];
   for(let i=0;i+7<bytes.length;i+=8){
     rects.push({x:bytes[i],y:bytes[i+1],w:bytes[i+2],h:bytes[i+3],c:[bytes[i+4],bytes[i+5],bytes[i+6]]});
   }
   return {ver:1, rects};
 }
-function render(hex){
+function parse(hex){
   const {ver,rects}=decode(hexToBytes(hex));
   let W=0,H=0; for(const r of rects){W=Math.max(W,r.x+r.w);H=Math.max(H,r.y+r.h);}
-  const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
-  const g=cv.getContext('2d');
-  for(const r of rects){ g.fillStyle='rgb('+r.c[0]+','+r.c[1]+','+r.c[2]+')'; g.fillRect(r.x,r.y,r.w,r.h); }
-  return {cv,ver,rects:rects.length,dim:W+'×'+H};
+  return {ver,rects,dim:W+'×'+H};
 }
 const g=document.getElementById('g');
-// Art loads from separate .hex files — the collection's real artifacts, not inlined blobs.
-// Same law: each .hex survives on its own; the page is the renderer, the files are the art.
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 (async()=>{
 let manifest;
 try{ manifest=await fetch('bnri-art/manifest.json').then(r=>r.json()); }
-catch(e){ const fig=document.createElement('figure');
-  fig.innerHTML='<div class="stage"><span style="color:var(--bad);font-size:11px">manifest unreachable — the collection could not be listed</span></div>';
+catch(e){ const fig=document.createElement('figure'); fig.className='rise';
+  fig.innerHTML='<div class="stage"><span class="bad">manifest unreachable — the collection could not be listed</span></div>';
   g.appendChild(fig); return; }
+/* the hero numbers are COMPUTED from what actually decoded, never typed in */
+let totalB=0, drawn=0, fmts=new Set();
+manifest.forEach(m=>totalB+=m.bytes);
+document.getElementById('hBytes').textContent=(totalB/1024).toFixed(0);
 for(const m of manifest){
-  let hex; try{ hex=(await fetch(m.file).then(r=>r.text())).trim(); }
-  catch(e){ const fig=document.createElement('figure');
-    fig.innerHTML='<div class="stage"><span style="color:var(--bad);font-size:11px">'+m.name+': file unreachable</span></div>';
-    g.appendChild(fig); continue; }
-  const name=m.name, piece={hex, bytes:m.bytes};
-  const fig=document.createElement('figure');
+  const fig=document.createElement('figure'); fig.className='rise';
   const st=document.createElement('div'); st.className='stage';
-  let out; try{ out=render(piece.hex); st.appendChild(out.cv); }
-  catch(e){ st.innerHTML='<span style="color:var(--bad);font-size:11px">decode failed: '+e.message+'</span>'; out={ver:'?',rects:0,dim:'—'}; }
   const cap=document.createElement('figcaption');
-  cap.innerHTML='<b>'+name+'</b><span class="v v'+out.ver+'">v'+out.ver+'</span><br>'+
-    out.dim+' · '+out.rects+' rects · '+piece.bytes.toLocaleString()+' B';
+  let out;
+  try{ out=parse(m.hex); fmts.add('v'+out.ver); drawn++; }
+  catch(e){ st.innerHTML='<span class="bad">decode failed: '+e.message+'</span>'; out={ver:'?',rects:0,dim:'—'}; }
+  const cv=document.createElement('canvas');
+  const ctx=cv.getContext('2d');
   fig.appendChild(st); fig.appendChild(cap); g.appendChild(fig);
+  function paint(upto){
+    let W=0,H=0; for(const r of out.rects){W=Math.max(W,r.x+r.w);H=Math.max(H,r.y+r.h);}
+    if(!W||!H){ st.innerHTML='<span class="bad">no rects — declared, not faked</span>'; return; }
+    cv.width=W; cv.height=H;
+    ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
+    out.rects.slice(0,upto).forEach(r=>{
+      ctx.fillStyle='rgb('+r.c[0]+','+r.c[1]+','+r.c[2]+')';
+      ctx.fillRect(r.x,r.y,r.w,r.h);
+    });
+    if(upto>=out.rects.length) st.appendChild(cv);
+  }
+  if(out.rects.length){
+    if(reduce){ paint(out.rects.length); }
+    else{
+      /* the build-up: rects drawn in file order on entry — the decode, visible */
+      let i=0;
+      const io=new IntersectionObserver(es=>{
+        if(!es.some(e=>e.isIntersecting)) return;
+        io.disconnect(); fig.classList.add('rise');
+        const step=()=>{ i=Math.min(out.rects.length,i+Math.max(12,Math.ceil(out.rects.length/28)));
+          paint(i); if(i<out.rects.length) requestAnimationFrame(step); else done(); };
+        const done=()=>{ cap.innerHTML='<b>'+m.name+'</b><span class="v v'+out.ver+'">v'+out.ver+'</span><br>'
+          +out.dim+' · '+out.rects.length+' rects · '+m.bytes.toLocaleString()+' B'
+          +'<span class="file">'+m.file.split('/').pop()+'</span>';
+          document.getElementById('hFmt').textContent=fmts.size; };
+        cap.innerHTML='<b>'+m.name+'</b> · decoding…';
+        st.appendChild(cv); requestAnimationFrame(step);
+      },{threshold:.25});
+      io.observe(fig);
+    }
+  }
+  if(reduce||!out.rects.length){
+    cap.innerHTML='<b>'+m.name+'</b><span class="v v'+out.ver+'">v'+out.ver+'</span><br>'
+      +out.dim+' · '+out.rects.length+' rects · '+m.bytes.toLocaleString()+' B'
+      +'<span class="file">'+m.file.split('/').pop()+'</span>';
+    document.getElementById('hFmt').textContent=fmts.size;
+  }
 }
 })();
 </script>
-<script src="./fleet.js"></script>
-<div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(.6rem + 46px);z-index:9997;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
-<script src="../tour.js?v=22"></script>
 </body></html>
