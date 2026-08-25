@@ -10,8 +10,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>bzDiD — offline recovery</title>
 <style>
+/* ── SEMANTIC COLOUR · meanings picked FIRST, one hue = one meaning, page-wide
+   (the estate contract): gold = your words · cyan = derivation · leaf = offline-proven; amber harm, violet science */
+:root{--sem-harm:#ffb347;--sem-solution:#7ddf8f;--sem-value:#FFD700;--sem-system:#00E5FF;--sem-science:#c9a0ff}
+
 :root{--bg:#0d1117;--panel:#161b22;--line:#30363d;--ink:#e6edf3;--mut:#8b949e;--ok:#3fb950;--warn:#d29922;--bad:#f85149;--teal:#39c5cf}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;padding:2rem 1rem;display:flex;justify-content:center}
+*{box-sizing:border-box}body{font-size:13px;margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;padding:2rem 1rem;display:flex;justify-content:center}
 main{max-width:680px;width:100%}h1{font-size:1.25rem;color:var(--teal)}h1 small{color:var(--mut);font-weight:400;display:block;font-size:.8rem}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:1rem;margin:1rem 0}
 textarea,input{width:100%;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:.6rem;font:inherit}
@@ -22,8 +26,35 @@ textarea{min-height:5.5rem}button{background:var(--teal);color:#04262a;border:0;
 .badge{display:inline-block;border:1px solid var(--line);border-radius:99px;padding:.1rem .6rem;font-size:.75rem;color:var(--mut);margin-right:.4rem}
 .badge.ok{color:var(--ok);border-color:var(--ok)}
 #offline-proof{color:var(--warn)}
+
+/* ── BUILD (bZiq, fleet bar): the ceremony made visible. Semantics on this
+   page: gold = your words (the value only you hold), cyan = derivation
+   (system), leaf = offline-proven (solution). H1 GRADIENT = THE ARGUMENT:
+   your WORDS (gold) become your KEYS (cyan) with NOTHING alive (leaf). */
+h1{font-size:clamp(20px,5.2vw,34px);font-weight:400;line-height:1.2;
+  background:linear-gradient(90deg,#FFD700,#00E5FF,#7ddf8f);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+h1 small{display:block;-webkit-text-fill-color:initial;background:none;color:#5a6478;font-size:11px;margin-top:7px;letter-spacing:0}
+.hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;max-width:680px;margin:16px auto}
+.pstat{background:#0a0f0b;border:1px solid var(--line);border-radius:10px;padding:10px 12px;text-align:center}
+.pstat.hero{border-color:#1d3a26;background:linear-gradient(180deg,#0d1a10 0%,#0a0f0b 100%);background-color:#0a0f0b}
+.pstat .n{font-size:38px;line-height:1.1;color:#7ddf8f}
+.pstat .l{font-size:10px;color:#5a6478;text-transform:uppercase;letter-spacing:.14em;margin-top:3px}
+.pstat .n.sys{color:#00E5FF}
+#slots{display:grid;grid-template-columns:repeat(8,1fr);gap:5px;max-width:680px;margin:14px auto}
+#slots .slot{aspect-ratio:1;border:1px solid var(--line);border-radius:6px;background:#070b08;display:flex;align-items:center;justify-content:center;font-size:9px;color:#2e3a2e}
+#slots .slot.on{border-color:#7ddf8f;color:#7ddf8f;background:#0d1a10}
+@media(max-width:560px){#slots{grid-template-columns:repeat(6,1fr)}}
+body{font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace}
 </style></head><body><main>
 <h1>bzDiD offline recovery<small>your 24 words → your keys, with no service alive. This page makes zero network requests.</small></h1>
+
+<section style="display:block;background:#111a14;border:1px solid #243026;border-radius:14px;padding:16px;max-width:720px;margin:0 auto"><div class="hero">
+  <div class="pstat hero"><div class="n" id="netn">…</div><div class="l">network requests — measured live, not promised</div></div>
+  <div class="pstat"><div class="n sys">24</div><div class="l">words — the only key material</div></div>
+  <div class="pstat"><div class="n" id="wordn">0</div><div class="l">words recognized — watch the grid light</div></div>
+</div>
+<div id="slots" aria-label="the 24-word grid, lighting as words arrive"></div></section>
 <div class="panel">
   <div class="k">Recovery phrase (24 words) or bdidrec1… code</div>
   <textarea id="in" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="word1 word2 … word24   —or—   bdidrec1…"></textarea>
@@ -5130,4 +5161,23 @@ $('sign').onclick=()=>{ if(!current)return;
 };
 addEventListener('beforeunload',()=>{current&&current.masterPrk.fill(0);current&&current.record.seed.fill(0)});
 </script></main>
+
+<script>
+/* BUILD: the ceremony, measured not promised — the network figure counts the
+   page's OWN resource entries (this page loads nothing external; the seed-entry
+   law keeps it that way), and the slot grid lights as real words arrive. */
+(function(){
+  var count=function(){ return performance.getEntriesByType('resource').filter(function(r){return r.initiatorType!=='navigation'}).length; };
+  var netn=document.getElementById('netn'); if(netn){ netn.textContent=String(count()); setTimeout(function(){netn.textContent=String(count());},1200); }
+  var slots=[]; var grid=document.getElementById('slots');
+  for(var i=0;i<24;i++){ var d=document.createElement('div'); d.className='slot'; d.textContent=String(i+1); grid.appendChild(d); slots.push(d); }
+  var wordn=document.getElementById('wordn'); var inp=document.getElementById('in');
+  if(inp){ inp.addEventListener('input',function(){
+    var ws=inp.value.trim().toLowerCase().split(/s+/).filter(function(w){return /^[a-z]+$/.test(w)});
+    var n=Math.min(ws.length,24);
+    for(var i=0;i<24;i++){ slots[i].className='slot'+(i<n?' on':''); slots[i].textContent=String(i+1); }
+    wordn.textContent=String(n);
+  }); }
+})();
+</script>
 </body></html>

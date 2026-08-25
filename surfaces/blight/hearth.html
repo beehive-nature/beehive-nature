@@ -57,6 +57,14 @@ header p{color:var(--dim);font-size:11px;margin-top:7px;line-height:1.75}
   .msg{max-width:96%}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* THE WALL — the thesis made visible: every answer is an artifact, so the
+   room's face is the artifacts, growing. */
+#wall{max-width:680px;margin:0 auto 14px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;min-height:120px}
+#wall .pin{background:#000;border:1px solid var(--line);border-radius:10px;padding:8px;width:118px;position:relative}
+#wall .pin svg{width:100%;height:auto}
+#wall .pin .cap{color:var(--dim);font-size:8.5px;text-align:center;margin-top:5px;text-transform:uppercase;letter-spacing:.08em;word-break:break-all}
+#wall .empty{color:var(--dim);font-size:10px;margin:auto;line-height:1.8;text-align:center;padding:20px}
 </style>
 </head>
 <body>
@@ -66,10 +74,10 @@ header p{color:var(--dim);font-size:11px;margin-top:7px;line-height:1.75}
 </header>
 <div class="hero">
   <div class="pstat hero"><div class="n">0</div><div class="l">keys held — the art grows on-chain, read live</div></div>
-  <div class="pstat"><div class="n sys">2</div><div class="l">on-chain generators — fungi · pepi</div></div>
+  <div class="pstat"><div class="n sys" id="wallcount">0</div><div class="l">artifacts on the wall — grows as you create</div></div>
   <div class="pstat"><div class="n sci">4</div><div class="l">artifact kinds — art · song · crown · deal</div></div>
 </div>
-<section id="chat"></section>
+<section id="wall"><div class="empty">the wall pins every artifact this room births — the crown arrives first, read live from the chain</div></section><section id="chat"></section>
 <div id="seeds">
   <button data-q="grow me a mushroom">🍄 grow</button>
   <button data-q="play me a song in harmonic major">🎵 play</button>
@@ -146,6 +154,12 @@ async function respond(q){
         const svg=decodeString(res[0]);
         const art=document.createElement('div'); art.className='art'; art.innerHTML=svg;
         m.appendChild(art);
+        try{ var pin=document.createElement('div'); pin.className='pin';
+          pin.innerHTML=svg+'<div class="cap">'+r.col.sym+' '+r.seed.toLocaleString()+'</div>';
+          var wallEl=document.getElementById('wall'); var empty=wallEl&&wallEl.querySelector('.empty'); if(empty) empty.remove();
+          wallEl.insertBefore(pin,wallEl.firstChild);
+          var wc=document.getElementById('wallcount'); if(wc) wc.textContent=String(wallEl.children.length);
+        }catch(e){}
       }catch(e){}
     }
     const lvl=(function(){var l=0;for(var i=1;i<r.col.lv.length;i++)if(r.seed>=r.col.lv[i])l++;return l;})();
@@ -199,5 +213,40 @@ document.querySelectorAll('#seeds button').forEach(function(b){ b.onclick=functi
 </script>
 <div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(.6rem + 46px);z-index:9997;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
 <script src="../tour.js?v=22"></script>
+
+<script>
+/* BUILD: the crown greets you on the wall — live read, pinned first. */
+(function(){
+  var W=function(v){return BigInt(v).toString(16).padStart(64,'0')};
+  (async function(){
+    var wall=document.getElementById('wall');
+    /* INSTANT LAW: nothing cross-origin at page-open. The wall at rest is a
+       LOCAL comb — the chain read happens when a human asks for it. */
+    var local=document.createElement('div'); local.className='pin';
+    local.innerHTML='<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="#7ddf8f" stroke-width="1.1"><path d="M50 4 L82 22 L82 58 L50 76 L18 58 L18 22 Z"/><path d="M50 40 L82 58 L50 76 L18 58 Z" stroke="#FFD700"/><path d="M50 4 L82 22 L50 40 L18 22 Z" stroke="#00E5FF"/><circle cx="50" cy="58" r="7" stroke="#c9a0ff"/><circle cx="50" cy="58" r="2.5" fill="#FFD700" stroke="none"/></g></svg><div class="cap">the hearth · local sigil, zero requests</div>';
+    var empty=wall.querySelector('.empty'); if(empty) empty.remove();
+    wall.insertBefore(local,wall.firstChild);
+    var wc0=document.getElementById('wallcount'); if(wc0) wc0.textContent=String(wall.children.length);
+    var btn=document.createElement('button'); btn.textContent='read the crown from the chain';
+    btn.style.cssText='margin:6px auto;display:block;background:none;border:1px solid #243026;color:#8a9a8a;border-radius:8px;padding:6px 12px;cursor:pointer;font:10px IBM Plex Mono,monospace';
+    btn.onclick=async function(){ btn.remove(); await crownRead(); };
+    wall.appendChild(btn);
+    async function crownRead(){
+    try{
+      var r=await fetch('https://base-rpc.publicnode.com',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_call',params:[{to:'0x7d9ce55d54ff3feddb611fc63ff63ec01f26d15f',data:'422b9e23'+W(2140426)+W(0)+W(0)},'latest']})});
+      var j=await r.json(); if(!(j&&j.result&&j.result.length>200)) return;
+      var h=j.result.replace(/^0x/,''); var off=parseInt(h.slice(0,64),16); var len=parseInt(h.slice(off*2,off*2+64),16); var out='';
+      for(var i=0;i<len;i++){ out+=String.fromCharCode(parseInt(h.slice((off+32+i)*2,(off+32+i)*2+2),16)); }
+      var d=document.createElement('div'); d.className='pin';
+      d.innerHTML=out+'<div class="cap">the crown · pinned first</div>';
+      var wall=document.getElementById('wall'); var empty=wall.querySelector('.empty'); if(empty) empty.remove();
+      wall.insertBefore(d,wall.firstChild);
+      var wc=document.getElementById('wallcount'); if(wc) wc.textContent=String(wall.children.length);
+    }catch(e){}
+    }
+  })();
+})();
+</script>
 </body>
 </html>

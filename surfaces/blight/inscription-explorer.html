@@ -7,6 +7,10 @@
 <meta http-equiv="Expires" content="0">
 <title>the Modern Inscription Art Gallery — explore living collections</title>
 <style>
+/* ── SEMANTIC COLOUR · meanings picked FIRST, one hue = one meaning, page-wide
+   (the estate contract): cyan = the doorway/system · gold = the art · violet = chain-verified · leaf = live */
+:root{--sem-harm:#ffb347;--sem-solution:#7ddf8f;--sem-value:#FFD700;--sem-system:#00E5FF;--sem-science:#c9a0ff}
+
 :root{--bg:#050508;--ink:#cfe8d6;--cyan:#00E5FF;--gold:#FFD700;--dim:#5a6478;--line:#16161f}
 *{margin:0;padding:0;box-sizing:border-box}
 html{background:#050508;background-color:var(--bg)}
@@ -31,6 +35,8 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9990;
 #door{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
   z-index:20;transition:opacity .8s ease;padding:20px;text-align:center}
 #door.gone{opacity:0;pointer-events:none}
+section#door.doorpanel{background:#0b0b12;border:1px solid var(--line);border-radius:16px;padding:24px;margin:0 auto;max-width:640px}
+@media(max-width:560px){.hero{grid-template-columns:1fr 1fr}.pstat:first-child{grid-column:1/-1}section#door.doorpanel{padding:14px}}
 #door h1{font-size:clamp(22px,5vw,34px);color:var(--cyan);letter-spacing:.08em;font-weight:400;
   text-shadow:0 0 18px rgba(0,229,255,.35)}
 #door p{color:var(--dim);font-size:12px;margin:10px 0 26px;letter-spacing:.05em}
@@ -97,6 +103,23 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9990;
 #curtain .card h3{color:var(--cyan);font-weight:400;font-size:15px}
 #curtain .card p{color:var(--dim);font-size:11.5px;margin:12px 0 18px;line-height:1.8}
 #curtain .card button{background:none;color:#9FFF3D;border:1px solid #1d3a26;border-radius:8px;padding:8px 16px;cursor:pointer;font:12px ui-monospace,monospace}
+
+/* ── BUILD (bZiq, fleet bar): the at-rest argument layer. Semantics on THIS
+   page's palette: cyan = the doorway/system, gold = the art/value, violet =
+   chain-verified, leaf = working/live. H1 GRADIENT = THE ARGUMENT: ANY
+   address (cyan) → the art it holds (gold) → verified on-chain (violet). */
+#door h1{font-size:clamp(20px,5.4vw,34px);font-weight:400;line-height:1.2;
+  background:linear-gradient(90deg,#00E5FF,#FFD700,#c9a0ff);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+.hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;max-width:560px;margin:14px auto 4px}
+.pstat{background:#07070c;border:1px solid var(--line);border-radius:10px;padding:10px 12px;text-align:center}
+.pstat.hero{border-color:#1d3a26;background:linear-gradient(180deg,#0d1a10 0%,#07070c 100%);background-color:#07070c}
+.pstat .n{font-size:38px;line-height:1.1;color:#7ddf8f}
+.pstat .l{font-size:10px;color:#5a6478;text-transform:uppercase;letter-spacing:.14em;margin-top:3px}
+.pstat .n.sys{color:#00E5FF}.pstat .n.sci{color:#c9a0ff}
+#doorart{max-width:230px;margin:12px auto 0;background:#000;border:1px solid var(--line);border-radius:12px;padding:12px}
+#doorart svg{width:100%;height:auto}
+#doorart .cap{text-align:center;color:#5a6478;font-size:9.5px;margin-top:8px;text-transform:uppercase;letter-spacing:.12em}
 </style>
 </head>
 <body>
@@ -110,11 +133,19 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9990;
   <a id="market" href="#" title="the DeMarketPlace docks here">⧉ soon</a>
 </div>
 
-<div id="door">
+<section id="door" class="doorpanel">
   <h1>the Modern Inscription Art Gallery</h1>
   <p>whose art shall we visit?</p>
   <form id="frm"><input id="addr" placeholder="0x… or name.base.eth" spellcheck="false"><button>enter</button></form>
-  <div class="msg" id="dmsg"></div>
+  
+<div class="hero">
+  <div class="pstat hero"><div class="n">0</div><div class="l">keys — a read-only doorway</div></div>
+  <div class="pstat"><div class="n sys">2</div><div class="l">live generators — fungi · pepi</div></div>
+  <div class="pstat"><div class="n sci">1</div><div class="l">crown at the door, rendered live</div></div>
+</div>
+<div id="doorart" aria-label="the crown, rendered live from the chain"><div class="cap">rendering from the chain…</div></div>
+</section>
+<div class="msg" id="dmsg"></div>
   <div class="seeds">
     <button data-a="0xfbd201472d5a439f1f0e408eb5dfaf6ea3687876">the founder's garden</button>
     <button id="vault">a crown from the vault</button>
@@ -492,5 +523,37 @@ document.getElementById('vault').onclick=async function(){
 <script src="./toll.js?v=1"></script>
 <script src="./parlor.js?v=1"></script>
 <script src="../tour.js?v=22"></script>
+
+<script>
+/* BUILD: the crown greets you at the door — a live eth_call, the same
+   keyless rail the gallery uses. At rest the doorway holds real art. */
+(function(){
+  var W=function(v){return BigInt(v).toString(16).padStart(64,'0')};
+  var HOSTS=['https://base-rpc.publicnode.com','https://base.drpc.org'];
+  var FUNGI='0x7d9ce55d54ff3feddb611fc63ff63ec01f26d15f', SEL='422b9e23';
+  function decodeString(hex){var h=hex.replace(/^0x/,'');var off=parseInt(h.slice(0,64),16);
+    var len=parseInt(h.slice(off*2,off*2+64),16);var out='';
+    for(var i=0;i<len;i++){var b=parseInt(h.slice((off+32+i)*2,(off+32+i)*2+2),16);if(isNaN(b))throw 0;out+=String.fromCharCode(b);}
+    try{return decodeURIComponent(escape(out))}catch(e){return out}}
+  /* INSTANT LAW: at rest a LOCAL comb; the chain read fires on the button. */
+  document.getElementById('doorart').innerHTML='<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="#7ddf8f" stroke-width="1.1"><path d="M50 4 L82 22 L82 58 L50 76 L18 58 L18 22 Z"/><path d="M50 40 L82 58 L50 76 L18 58 Z" stroke="#FFD700"/><path d="M50 4 L82 22 L50 40 L18 22 Z" stroke="#00E5FF"/><circle cx="50" cy="58" r="7" stroke="#c9a0ff"/><circle cx="50" cy="58" r="2.5" fill="#FFD700" stroke="none"/></g></svg><div class="cap">local sigil · zero requests — <b id="readcrown" style="color:#00E5FF;cursor:pointer">read the crown from the chain</b></div>';
+  document.getElementById('readcrown').onclick=(async function(){
+    for(var i=0;i<HOSTS.length;i++){
+      try{
+        var r=await fetch(HOSTS[i],{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_call',params:[{to:FUNGI,data:SEL+W(2140426)+W(0)+W(0)},'latest']})});
+        var j=await r.json();
+        if(j&&j.result&&j.result.length>200){
+          var d=document.getElementById('doorart');
+          d.innerHTML=decodeString(j.result)+'<div class="cap">the crown · seed 2,140,426 · live read</div>';
+          return;
+        }
+      }catch(e){}
+    }
+    var d=document.getElementById('doorart');
+    d.innerHTML='<div class="cap">the chain is quiet from here — the door still opens</div>';
+  });
+})();
+</script>
 </body>
 </html>
