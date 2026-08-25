@@ -1,4 +1,4 @@
-// ad-hoc smoke for surfaces/university/index.html — not part of the committed suite
+// smoke for surfaces/university/index.html — part of the committed CI suite since 2026-08-24 (gate-seat wiring; ad-hoc before)
 import { createServer } from 'node:http';
 import { readFile, readdir } from 'node:fs/promises';
 import { extname, join, dirname, normalize } from 'node:path';

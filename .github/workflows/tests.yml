@@ -33,6 +33,25 @@ jobs:
       - name: bindexer keyless attestation (SPEC-BINDEXER-0)
         run: cargo run --locked -p bindexer -- prove-keyless
 
+  static:
+    # ORDER (gate seat, 2026-08-24): the four-suite gap — fleet-pixels,
+    # fleet-bus, dock-claims and university-smoke were built and
+    # mutation-proven but ran on NO push; every assertion this sprint
+    # gated nothing. This job carries the suites that need no browser.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # dock-claims pins a git TREE hash; HEAD must resolve
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # dock-claims re-derives the Dock's three hero numbers from source
+      # (chain-zano tree hash, #[ignore] census, STATUS.md sentence) and
+      # compares them against what the page prints. Static: node + git only.
+      - name: Dock claims — hero numbers re-derived from source
+        run: node e2e/dock-claims.mjs
+
   node:
     runs-on: ubuntu-latest
     steps:
@@ -50,14 +69,36 @@ jobs:
         run: |
           npm ci
           node test/test.mjs
-      # Real Chromium, CTAP2 virtual authenticator WITH PRF; drives the live
-      # surface at surfaces/onboarding (engine adjacency flips PREVIEW off).
+      # ORDER note: university-smoke was classified "static" in the gate
+      # order; measured fact — it launches Chromium (playwright import),
+      # so it lives in THIS job after the browser install. Classification
+      # corrected in wiring, not assumed.
+      # Chromium is PINNED by the lockfile: npm ci installs the exact
+      # playwright the repo pins; `playwright install chromium` then
+      # fetches that version's browser build. Both numbers print below —
+      # the pin is the receipt, not a claim.
       - name: Onboarding e2e (Chromium + virtual authenticator w/ PRF)
         working-directory: e2e
         run: |
           npm ci
+          npx playwright --version
+          npx playwright install --dry-run chromium
           npx playwright install --with-deps chromium
           node e2e.mjs
+      - name: University smoke (browser suite — see Chromium note above)
+        working-directory: e2e
+        run: node university-smoke.mjs
+      # fleet-pixels: every chart-bearing hosted surface must DRAW (pixels
+      # read back from the canvas, not merely load). fleet-bus: the
+      # localStorage data bus asserted both directions (same origin reads;
+      # cross origin severs silently). Both run against surfaces/fleet-hosted,
+      # repo-relative; the originals under surfaces/fleet/ are never touched.
+      - name: Fleet pixels — the art draws, not just loads
+        working-directory: e2e
+        run: node fleet-pixels.mjs
+      - name: Fleet bus — the localStorage bus, both directions
+        working-directory: e2e
+        run: node fleet-bus.mjs
       # FORGE FREEZE (founder ruling, dispatched 2026-08-24): orbit.html is
       # frozen art — CI fails on ANY edit to its committed blob. The hash is
       # taken from the committed blob, never the worktree copy. Tinkering
