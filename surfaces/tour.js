@@ -16,7 +16,12 @@
     '—',
     ['keys','onboarding/'],['receive','onboarding/receive.html'],['dids','keys/addresses.html'],['recover','recover.html'],['hw','hardware/'],
     '—',
-    ['🎓','university/'],['🐝','bqueenbee-live.html'],['🎧','listening.html'],['⬡','bfood.html'],['🏛','bsymposium.html'],['⚙','stack.html'],['🐜','bantfarm.html'],['♫','bset.html'],['🪩','plur.html'],['🎪','festival/'],['🎨','buzz-studio.html'],['⚒','forge/']];
+    ['🎓','university/'],['🐝','bqueenbee-live.html'],['🎧','listening.html'],['⬡','bfood.html'],['🏛','bsymposium.html'],['⚙','stack.html'],['🐜','bantfarm.html'],['♫','bset.html'],['🪩','plur.html'],['🎪','festival/'],['🎨','buzz-studio.html'],['⚒','forge/'],
+      '—',
+      ['⚑ the FLEET','fleet-hosted/'],
+      ['acid','fleet-hosted/gallery/acid-cascade.html'],['indigo','fleet-hosted/gallery/indigo-index.html'],['resonance','fleet-hosted/gallery/resonance.html'],
+      ['dash','fleet-hosted/lab/bnr-dashboard.html'],['flower','fleet-hosted/lab/flower-lab.html'],['spliff','fleet-hosted/lab/spliff-lab.html'],
+      ['blend','fleet-hosted/lab/blend-lab.html'],['intake','fleet-hosted/lab/intake-tracker.html'],['edible','fleet-hosted/lab/edible-tracker.html']];
   var b=document.createElement('nav');b.id='tbar';
   /* THE BAR HAS TWO SHAPES (founder order, 2026-08-25).
      A 39-link horizontal strip was 2,272px wide: SIX links reachable at 390px,
