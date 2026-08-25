@@ -36,7 +36,9 @@
    +'body[data-reg="bee"] [data-reg="bee"],'
    +'body[data-reg="raver"] [data-reg="raver"],'
    +'body[data-reg="cypherpunk"] [data-reg="cypherpunk"]{display:revert}'
-   +'#bregctl{display:inline-flex;gap:4px;align-items:center;margin-left:10px;padding-left:10px;flex-shrink:0;'
+   /* the wrap itself is a span: under a bare span{} rule it read +4px (lang-lane
+      probe, b2b4eee). Pinned like its buttons — nobody's element selector. */
+   +'#bregctl{display:inline-flex;gap:4px;align-items:center;margin:0 0 0 10px;padding-left:10px;flex-shrink:0;min-height:0;height:auto;box-sizing:border-box;'
    +'border-left:1px solid #243026;vertical-align:middle}'
    /* margin/min-height/height/box-sizing pinned: any page's bare button{} rule
       (attest/bset carry min-height:40px;margin-top:8px) reaches these buttons for

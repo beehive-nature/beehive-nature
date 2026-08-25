@@ -17,10 +17,15 @@
     var host = document.getElementById('tbar'); if (!host) return setTimeout(pill, 400);
     var el = document.createElement('span');
     el.id = 'railsbadge';
-    el.style.cssText = 'display:inline-flex;align-items:center;gap:5px;margin-left:10px;padding-left:10px;' +
-      'border-left:1px solid #243026;font:10px "IBM Plex Mono",monospace;color:#8a9a8a;flex-shrink:0';
-    el.innerHTML = '<span id="rb-dot" style="width:7px;height:7px;border-radius:50%;background:#5f6f61;display:inline-block"></span>' +
-      '<span id="rb-txt">rails…</span>';
+    /* margin/min-height/height/box-sizing pinned on the wrap and both inner spans:
+       a page's bare span{} rule reaches every property an inline style leaves
+       open, and the tbar stretches to its tallest rider (see register.js /
+       lang.js, same law). The tour bar is nobody's element selector. */
+    el.style.cssText = 'display:inline-flex;align-items:center;gap:5px;margin:0 0 0 10px;padding-left:10px;' +
+      'border-left:1px solid #243026;font:10px "IBM Plex Mono",monospace;color:#8a9a8a;flex-shrink:0;' +
+      'min-height:0;height:auto;box-sizing:border-box';
+    el.innerHTML = '<span id="rb-dot" style="width:7px;height:7px;border-radius:50%;background:#5f6f61;display:inline-block;margin:0;min-height:0;box-sizing:border-box"></span>' +
+      '<span id="rb-txt" style="margin:0;min-height:0;height:auto;box-sizing:border-box">rails…</span>';
     host.appendChild(el);
     boot();
   }
