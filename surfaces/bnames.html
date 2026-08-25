@@ -304,9 +304,10 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
   }
   function strip(n){ return (n||'').trim().toLowerCase().replace(/\.b$/,''); }
 
-  /* --- .b unicove link factory (fixes /actions/ + encoding) --- */
-  var UNICOVE='https://unicove.com/en/vaulta';
-  function unicoveAction(action,params){ return UNICOVE+'/contract/kingbeelovis/actions/'+action+'?'+new URLSearchParams(params).toString(); }
+  /* --- .b wallet compose link factory (the Unicove dependency is dead —
+     founder ruled it out; the BNR composer in the wallet takes the handoff) --- */
+  var WALLET='./wallet.html';
+  function walletAction(action,params){ return WALLET+'?compose='+encodeURIComponent('kingbeelovis:'+action)+'&args='+encodeURIComponent(JSON.stringify(params)); }
 
   /* --- .b custody gate: DERIVED from independent reproduction, never typed ---
      DOUBLY INERT BY DESIGN and that is correct: verifyAtt() returns false and
@@ -585,9 +586,9 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
         '<pre style="border-color:var(--leaf);font-size:10px">' + txData + '</pre>' +
         '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">' +
         '<a id="dl-json" download="register-' + n + 'b.json" style="background:#1a3a1a;color:var(--leaf);border:1px solid var(--leaf);border-radius:8px;padding:10px 18px;font:12px IBM Plex Mono,monospace;cursor:pointer;text-decoration:none">D download .json</a>' +
-        '<a href="' + unicoveAction('registeracc', {registrant: registrant, domain_name: n, target: registrant}) + '" target="_blank" rel="noopener" style="background:#0d1a15;color:var(--cyan);border:1px solid var(--cyan);border-radius:8px;padding:10px 18px;font:12px IBM Plex Mono,monospace;cursor:pointer;text-decoration:none">OPEN IN UNICOVE</a>' +
+        '<a href="' + walletAction('registeracc', {registrant: registrant, domain_name: n, target: registrant}) + '" target="_blank" rel="noopener" style="background:#0d1a15;color:var(--cyan);border:1px solid var(--cyan);border-radius:8px;padding:10px 18px;font:12px IBM Plex Mono,monospace;cursor:pointer;text-decoration:none">COMPOSE IN THE WALLET</a>' +
         '</div>' +
-        '<div style="font-size:9px;color:var(--dim);margin-top:6px">download for Anchor/cleos · Unicove opens the action pre-filled with your wallet connected · the manual step IS the bot protection</div>';
+        '<div style="font-size:9px;color:var(--dim);margin-top:6px">download for Anchor/cleos · the wallet composer opens the action pre-filled, ABI-rendered, showing exactly what you sign · the manual step IS the bot protection</div>';
       // JSON download (Blob)
       setTimeout(function(){
         var blob = new Blob([txData], {type:'application/json'});
