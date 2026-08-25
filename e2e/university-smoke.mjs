@@ -57,7 +57,7 @@ const PORT = server.address().port;
 const BASE = `http://127.0.0.1:${PORT}`;
 
 let pass = 0, fail = 0;
-const ok = (name, cond) => { if (cond) { pass++; console.log(`PASS ${name}`); } else { fail++; console.log(`FAIL ${name}`); } };
+const ok = (name, cond, note = '') => { if (cond) { pass++; console.log(`PASS ${name}`); } else { fail++; console.log(`FAIL ${name}${note ? ' — ' + note : ''}`); } };
 
 const browser = await chromium.launch();
 const page = await browser.newPage();
@@ -303,6 +303,34 @@ const hasUni = (await page.locator('#surf option[value="university/index.html"]'
   ok(`review deck covers every surface (${onDisk}) and lists the university`,
      optCount === onDisk && hasUni,
      `deck lists ${optCount}, tree holds ${onDisk}, hasUni=${hasUni}`);
+}
+
+{
+  // THE FLEET CARD'S "N of them carrying behaviour fixes" — COMPUTED, never
+  // hand-maintained (founder item 6, cc1's find on a live surface; same species
+  // as the footer's "62 surfaces" and the deck's 58). The number of hosted
+  // files differing from the archive BEYOND the CDN-vendor line is the tree's
+  // truth; the card's sentence must agree with it. Rewording to "some of them"
+  // would dodge the check and lose the precision — the count is kept, and now
+  // it is checked.
+  const CDN_LINE = /cdn\.jsdelivr\.net\/npm\/chart\.js|\.\.\/vendor\/chart\.js/;
+  const strip = s => s.split('\n').filter(l => !CDN_LINE.test(l)).join('\n');
+  const twinDirs = ['lab', 'gallery'];
+  const differing = [];
+  for (const d of twinDirs) {
+    for (const f of (await readdir(join(ROOT, 'surfaces', 'fleet-hosted', d))).filter(x => x.endsWith('.html'))) {
+      const arch = await readFile(join(ROOT, 'surfaces', 'fleet', f), 'utf8');
+      const host = await readFile(join(ROOT, 'surfaces', 'fleet-hosted', d, f), 'utf8');
+      if (strip(arch) !== strip(host)) differing.push(`${d}/${f}`);
+    }
+  }
+  const cardTxt = await readFile(join(ROOT, 'surfaces', 'index.html'), 'utf8');
+  const WORDNUM = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9 };
+  const cm = cardTxt.match(/(\d+|one|two|three|four|five|six|seven|eight|nine) of them carrying behaviour fixes/);
+  const claimed = cm ? (/\d/.test(cm[1]) ? Number(cm[1]) : WORDNUM[cm[1]]) : null;
+  ok(`fleet card's "of them" matches the tree (${differing.length} hosted file(s) differ beyond the CDN line)`,
+     claimed === differing.length,
+     cm ? `card says ${claimed}, tree says ${differing.length}${differing.length ? ' · ' + differing.join(', ') : ''}` : 'card sentence not found — the number is load-bearing, keep the sentence shape');
 }
 
 // ── REACHABILITY ───────────────────────────────────────────────────────────
