@@ -36,7 +36,7 @@
    +'body[data-reg="bee"] [data-reg="bee"],'
    +'body[data-reg="raver"] [data-reg="raver"],'
    +'body[data-reg="cypherpunk"] [data-reg="cypherpunk"]{display:revert}'
-   +'#bregctl{display:inline-flex;gap:4px;align-items:center;margin-left:10px;padding-left:10px;'
+   +'#bregctl{display:inline-flex;gap:4px;align-items:center;margin-left:10px;padding-left:10px;flex-shrink:0;'
    +'border-left:1px solid #243026;vertical-align:middle}'
    +'#bregctl button{background:transparent;border:1px solid #243026;border-radius:6px;'
    +'color:#8a9a8a;font:10px "IBM Plex Mono",monospace;padding:2px 7px;cursor:pointer;line-height:1.5}'

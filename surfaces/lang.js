@@ -91,7 +91,7 @@
   function mount(){
     var host=document.getElementById('tbar');
     var wrap=document.createElement('span'); wrap.id='blangctl';
-    wrap.style.cssText='display:inline-flex;gap:5px;align-items:center;margin-left:10px;'
+    wrap.style.cssText='display:inline-flex;gap:5px;align-items:center;margin-left:10px;flex-shrink:0;'
       +'padding-left:10px;border-left:1px solid #243026;vertical-align:middle';
     var sel=document.createElement('select'); sel.id='blangsel';
     sel.setAttribute('aria-label','language');
