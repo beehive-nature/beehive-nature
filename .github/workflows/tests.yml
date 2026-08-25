@@ -82,7 +82,7 @@ jobs:
         run: |
           npm ci
           npx playwright --version
-          node -e "const b=require('playwright-core/browsers.json').browsers.find(x=>x.name==='chromium'); console.log('chromium build pinned by lockfile: r'+b.revision)"
+          npx playwright install --dry-run chromium
           npx playwright install --with-deps chromium
           node e2e.mjs
       - name: University smoke (browser suite — see Chromium note above)
