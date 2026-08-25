@@ -87,6 +87,8 @@ jobs:
           node e2e.mjs
       - name: University smoke (browser suite — see Chromium note above)
         working-directory: e2e
+        if: always()   # a sibling suite's red must not SKIP this one — every
+                       # suite fires every run, or a red stops being attributable
         run: node university-smoke.mjs
       # fleet-pixels: every chart-bearing hosted surface must DRAW (pixels
       # read back from the canvas, not merely load). fleet-bus: the
@@ -95,9 +97,11 @@ jobs:
       # repo-relative; the originals under surfaces/fleet/ are never touched.
       - name: Fleet pixels — the art draws, not just loads
         working-directory: e2e
+        if: always()
         run: node fleet-pixels.mjs
       - name: Fleet bus — the localStorage bus, both directions
         working-directory: e2e
+        if: always()
         run: node fleet-bus.mjs
       # FORGE FREEZE (founder ruling, dispatched 2026-08-24): orbit.html is
       # frozen art — CI fails on ANY edit to its committed blob. The hash is
