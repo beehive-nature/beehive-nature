@@ -973,15 +973,36 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 </section>
 
 <section>
-  <h2>✍ SIGN — your bzDiD signs, zero paste</h2>
-  <div class="law" id="sign-law">Connect your keychain above and bridge it once — after that
-  every transaction signs with your derived key. <b>Nothing manual, ever.</b></div>
+  <h2>✍ COMPOSER — the BNR contract surface, no Unicove</h2>
+  <div class="law" id="sign-law">Give it contract + action and it fetches the live ABI, renders
+  one field per argument, and <b>shows you exactly what you will sign</b> — action, authorization,
+  parsed args, signer, endpoint — before anything broadcasts. ABI-driven: the six bnames actions
+  and anything after work the same way. Mainnet signs with your bridged bzDiD key, zero paste;
+  the Jungle4 lane rehearses with a test key you paste (TESTNET-ONLY, memory-only) or a vault-held
+  one. The Unicove dependency is dead — this is ours.</div>
   <div class="row">
     <input id="tx-contract" placeholder="contract" value="kingbeelovis" spellcheck="false">
     <input id="tx-action" placeholder="action" value="registeracc" spellcheck="false">
+    <select id="tx-net" title="network" style="max-width:180px;flex:0 1 180px;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
+      <option value="main">Vaulta mainnet</option>
+      <option value="j4">Jungle4 · testnet</option>
+    </select>
+    <button id="tx-abi" class="green" style="font-size:11px">📥 load ABI</button>
+  </div>
+  <div class="row" id="tx-j4row" style="display:none">
+    <input id="tx-j4key" class="small" type="password" placeholder="Jungle4 test key (WIF 5…/PVT_K1…) — TESTNET-ONLY, never stored" spellcheck="false" autocomplete="off" style="flex:2">
+    <input id="tx-j4actor" class="small" placeholder="actor (12-char test account)" spellcheck="false" style="flex:1;min-width:160px">
+  </div>
+  <div id="tx-fields" style="display:none;margin-top:10px;border:1px solid var(--line);border-radius:10px;padding:11px 13px;background:var(--well)">
+    <div style="font-size:9.5px;color:var(--violet);letter-spacing:.09em;margin-bottom:7px" id="tx-fields-title">FIELDS — from the live ABI</div>
+    <div class="row" style="margin-top:0" id="tx-fields-row"></div>
   </div>
   <div class="row">
-    <input id="tx-data" class="small" placeholder='JSON args' value='{"registrant":"kingbeelovis","domain_name":"k","target":"kingbeelovis"}' style="flex:2" spellcheck="false">
+    <input id="tx-data" class="small" placeholder='JSON args (auto-built from fields; editable)' value='{"registrant":"kingbeelovis","domain_name":"k","target":"kingbeelovis"}' style="flex:2" spellcheck="false">
+  </div>
+  <div id="tx-preview" style="display:none;margin-top:10px;border:1px solid #2c4a5a;border-radius:10px;padding:11px 13px;background:#081820">
+    <div style="font-size:9.5px;color:var(--cyan);letter-spacing:.09em;margin-bottom:6px">EXACTLY WHAT YOU ARE SIGNING</div>
+    <pre id="tx-preview-body" style="margin-top:0;font-size:9.5px"></pre>
   </div>
   <div class="row">
     <button id="tx-k" class="green" style="font-size:11px">⏱ preset: reserve k.b</button>
@@ -1325,7 +1346,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   /* core-first signed-tx builder: the Rust core packs the envelope (byte-identical to eosjs,
      proven) and signs; the account passkey (PUB_WA) rides the eosjs WebAuthn provider;
      falls back to the vendored eosjs key provider on any failure */
-  async function buildSigned(info,refBlock,actionList,wa){
+  async function buildSigned(info,refBlock,actionList,wa,foreignKey){
     var expSec=Math.floor(Date.now()/1000)+120;
     var refNum=(info.head_block_num-3)&0xffff;
     if(!wa&&CORE&&K1&&K1.seed){
@@ -1341,7 +1362,10 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
       }catch(e){}
     }
     var prov,reqKeys,by;
-    if(wa&&wa.pub&&wa.credIdHex){
+    if(foreignKey&&foreignKey.wif){        // Jungle4 rehearsal: a pasted TESTNET key, memory-only
+      prov=new BN.JsSignatureProvider([foreignKey.wif]);
+      reqKeys=[foreignKey.pub]; by='eosjs+testkey';
+    } else if(wa&&wa.pub&&wa.credIdHex){
       prov=new BN.WebAuthnSignatureProvider();
       prov.keys[wa.pub]=wa.credIdHex;
       reqKeys=[wa.pub]; by='eosjs+passkey';
@@ -2236,47 +2260,198 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   }
   $('tx-k').onclick=function(){preset('k')};
   $('tx-q').onclick=function(){preset('q')};
-  $('tx-go').onclick=async function(){
+  /* URL prefill — the bnames walletAction() factory lands here:
+     wallet.html?compose=<contract:action>&args=<uri-encoded JSON> */
+  try {
+    var qp = new URLSearchParams(location.search);
+    if (qp.get('compose')) {
+      var parts = qp.get('compose').split(':');
+      $('tx-contract').value = parts[0] || 'kingbeelovis';
+      $('tx-action').value = parts[1] || '';
+      if (qp.get('args')) { $('tx-data').value = JSON.stringify(JSON.parse(qp.get('args'))); }
+      setTimeout(loadAbiUi, 400); // after the vendored lane is up
+    }
+  } catch (e) { /* bad params never break the page */ }
+  /* ── COMPOSER — the BNR contract surface (kills the Unicove dependency) ──
+     pushAction(account, action, data, auth) is the Vaulta adapter's new
+     capability: ABI-serialize (the vendored eosjs lane — the library the
+     founder's no-hand-roll ruling wants; @wharfkit/antelope is its fork,
+     L-verified but not double-vendored), sign, push to a ROTATED endpoint. */
+  var J4 = {
+    hosts: ['https://jungle4.cryptolions.io', 'https://jungle4.eosphere.io', 'https://jungle4.api.eosnation.io'],
+    chainId: '73e4385a2708e6d7048834fbc1079f2fabb17b3c125b146af438971e90716c4d' // PUBLIC-CONSTANT: Jungle4 chain id (live get_info)
+  };
+  function netIsJ4() { return $('tx-net').value === 'j4' }
+  async function j4Rpc(path, body) { // rotated read: parsed JSON on 2xx, walk on failure
+    var hs = J4.hosts.slice();
+    for (var j = hs.length - 1; j > 0; j--) {
+      var rr = Math.floor(Math.random() * (j + 1));
+      var tt = hs[j]; hs[j] = hs[rr]; hs[rr] = tt;
+    }
+    for (var i = 0; i < hs.length; i++) {
+      try {
+        var r = await fetchT(hs[i] + path, { method: 'POST',
+          headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        if (r.ok) return await r.json();
+      } catch (e) { /* next host */ }
+    }
+    throw new Error('all Jungle4 hosts unreachable');
+  }
+  async function composerAbi(contract) {
+    var r = netIsJ4()
+      ? await j4Rpc('/v1/chain/get_abi', { account_name: contract })
+      : await rpc().get_abi(contract);
+    return (r && r.abi) ? r.abi : null;
+  }
+  function fieldCast(type, v) {
+    if (type === 'bool') return v === 'true' || v === true;
+    return v; // name/asset/uint*/string travel as strings — the serializer owns the packing
+  }
+  function buildArgsFromFields() {
+    var o = {};
+    Array.prototype.forEach.call(document.querySelectorAll('.tx-f'), function (el) {
+      var v = el.value.trim();
+      if (v !== '') o[el.getAttribute('data-fn')] = fieldCast(el.getAttribute('data-ft'), v);
+    });
+    return o;
+  }
+  function preview(contract, action, args, signerLine) {
+    var actor = netIsJ4() ? ($('tx-j4actor').value.trim() || '(the 12-char test actor above)')
+      : (args.registrant || args.owner || args.from || args.account || SOUL || '(connects from your soul)');
+    var p = $('tx-preview'), b = $('tx-preview-body');
+    b.innerHTML =
+      '<b>action</b>  ' + contract + ':' + action + '\n' +
+      '<b>auth</b>    ' + actor + '@active\n' +
+      '<b>args</b>    ' + JSON.stringify(args) + '\n' +
+      '<b>signer</b>  ' + signerLine + '\n' +
+      '<b>network</b> ' + (netIsJ4() ? 'Jungle4 testnet · chain 73e4385a… (hard-checked)' : 'Vaulta mainnet · rotated public RPC');
+    p.style.display = 'block';
+  }
+  async function loadAbiUi() {
+    var out = $('tx-out'); out.style.display = 'block';
+    var contract = $('tx-contract').value.trim(), action = $('tx-action').value.trim();
+    if (!contract) { out.textContent = 'name a contract first'; return }
+    out.textContent = 'fetching the live ABI of ' + contract + (netIsJ4() ? ' (Jungle4)…' : '…');
+    try {
+      var abi = await composerAbi(contract);
+      if (!abi) throw new Error('no ABI on ' + contract + ' on ' + (netIsJ4() ? 'Jungle4' : 'mainnet'));
+      var act = abi.actions.filter(function (a) { return a.name === action; })[0];
+      if (!act) { out.textContent = 'action ' + action + ' not in the ABI. Has: ' + abi.actions.map(function (a) { return a.name; }).slice(0, 12).join(', '); return }
+      var st = abi.structs.filter(function (s) { return s.name === act.type; })[0];
+      var fields = (st && st.fields) || [];
+      $('tx-fields-title').textContent = 'FIELDS — from the live ABI of ' + contract + '::' + action + ' (' + fields.length + ')';
+      $('tx-fields-row').innerHTML = fields.map(function (f) {
+        return '<input class="small tx-f" data-fn="' + f.name + '" data-ft="' + (f.type || 'string') +
+          '" placeholder="' + f.name + ' · ' + (f.type || 'string') + '" spellcheck="false" style="min-width:170px;flex:1 1 170px">';
+      }).join('');
+      $('tx-fields').style.display = fields.length ? 'block' : 'none';
+      // keep any already-typed JSON that matches field names
+      var prev = {}; try { prev = JSON.parse($('tx-data').value); } catch (e) {}
+      Array.prototype.forEach.call(document.querySelectorAll('.tx-f'), function (el) {
+        var k = el.getAttribute('data-fn');
+        if (prev[k] !== undefined) el.value = String(prev[k]);
+      });
+      out.textContent = 'ABI loaded — ' + fields.length + ' field' + (fields.length === 1 ? '' : 's') + '. Fill them; the preview shows exactly what you sign.';
+      var args = buildArgsFromFields();
+      $('tx-data').value = JSON.stringify(args);
+      preview(contract, action, args, netIsJ4() ? 'the TESTNET key you paste below (never stored)' : 'your bridged bzDiD-derived K1 key');
+    } catch (e) { out.innerHTML = '<b style="color:var(--amber)">ABI error:</b> ' + e.message }
+  }
+  $('tx-abi').onclick = loadAbiUi;
+  $('tx-net').onchange = function () {
+    $('tx-j4row').style.display = netIsJ4() ? 'flex' : 'none';
+    loadAbiUi();
+  };
+  $('tx-fields-row') && document.addEventListener('input', function (ev) {
+    if (ev.target && ev.target.classList && ev.target.classList.contains('tx-f')) {
+      var args = buildArgsFromFields();
+      $('tx-data').value = JSON.stringify(args);
+      var signerLine = netIsJ4() ? 'the TESTNET key you paste below (never stored)' : 'your bridged bzDiD-derived K1 key';
+      preview($('tx-contract').value.trim(), $('tx-action').value.trim(), args, signerLine);
+    }
+  });
+  $('tx-data').addEventListener('input', function () {
+    try { preview($('tx-contract').value.trim(), $('tx-action').value.trim(), JSON.parse($('tx-data').value), '— see fields / key lane —'); } catch (e) { /* mid-typing */ }
+  });
+
+  async function pushAction(contract, action, data, auth, opts) {
+    opts = opts || {};
+    var hosts = opts.net === 'j4' ? J4.hosts : VH;
+    var abi = await composerAbi(contract);
+    if (!abi) throw new Error('no ABI on ' + contract);
+    var types = BN.Serialize.getTypesFromAbi(BN.Serialize.createInitialTypes(), abi);
+    var amap = new Map(); for (const a of abi.actions) amap.set(a.name, BN.Serialize.getType(types, a.type));
+    if (!amap.get(action)) throw new Error('action ' + action + ' not in ' + contract + ' ABI');
+    var actz = auth || [{ actor: (data.registrant || data.owner || data.from || data.account || SOUL), permission: 'active' }];
+    var sa = BN.Serialize.serializeAction({ types: types, actions: amap }, contract, action, actz, data, new TextEncoder(), new TextDecoder());
+    var info, ref;
+    if (opts.net === 'j4') {
+      info = await j4Rpc('/v1/chain/get_info', {});
+      if (!info || info.chain_id !== J4.chainId) throw new Error('chain-id guard: endpoint is not Jungle4 (' + ((info && info.chain_id) || 'no answer').slice(0, 10) + '…) — REFUSED');
+      ref = await j4Rpc('/v1/chain/get_block', { block_num_or_id: info.head_block_num - 3 });
+    } else {
+      if (!LIVE_HOST) { await pickHost(); if (!LIVE_HOST) throw new Error('no RPC host reachable'); }
+      info = await rpc().get_info();
+      ref = await rpc().get_block(info.head_block_num - 3);
+    }
+    var built = await buildSigned(info, ref, [{ account: contract, name: action, authorization: actz, data: sa.data }], opts.wa || null, opts.foreignKey || null);
+    var res = await postAny(hosts, '/v1/chain/send_transaction',
+      { signatures: built.signatures, compression: 0, packed_context_free_data: '', packed_trx: built.packedHex });
+    return { res: res, packed: built.packedHex, by: built.by, actz: actz };
+  }
+  window.BNRVAULTA = {
+    pushAction: pushAction,
+    CAPABILITIES: { balance: true, receiveAddress: true, send: true, pushAction: true }
+  };
+
+  $('tx-go').onclick = async function(){
     var out=$('tx-out'); out.style.display='block';
     var pulse=$('sigpulse');
     pulse.style.animation='none'; void pulse.getBoundingClientRect();
     pulse.style.animation='pulseout 1.2s ease-out 2';
-    if(!K1||!SOUL){out.textContent='connect your keychain first (the gold button above)';return}
-    var waCred=loadWaCred();
-    var useWa=$('tx-wa').checked&&waCred;
-    if(!BRIDGED&&!useWa){out.textContent='your bzDiD key is not on '+SOUL+'@active yet — run THE BRIDGE above first';return}
     var contract=$('tx-contract').value.trim(), action=$('tx-action').value.trim();
     var data; try{data=JSON.parse($('tx-data').value)}catch(e){out.textContent='invalid JSON: '+e.message;return}
     if(!contract||!action){out.textContent='contract + action required';return}
-    if(!LIVE_HOST){await pickHost(); if(!LIVE_HOST){out.textContent='no RPC host reachable';return}}
-    var actor=data.registrant||data.owner||data.from||data.account||SOUL;
-    var actz=[{actor:actor,permission:'active'}];
+    if(!LIVE_HOST && !netIsJ4()){await pickHost(); if(!LIVE_HOST){out.textContent='no RPC host reachable';return}}
     try{
+      if(netIsJ4()){
+        var wif, fk=null;
+        try{wif=parseWifAny($('tx-j4key').value)}catch(e){out.textContent='test key: '+e.message;return}
+        if(!wif){out.textContent='paste a Jungle4 TESTNET key (TESTNET-ONLY — never a mainnet key, never stored)';return}
+        var pub=null; try{pub=BN.PrivateKey.fromString(wif).getPublicKey().toLegacyString()}catch(e){}
+        fk={wif:wif,pub:pub};
+        var actor=$('tx-j4actor').value.trim();
+        if(!/^[a-z1-5]{12}$/.test(actor)){out.textContent='name the 12-char test actor that holds this key';return}
+        out.textContent='1/4 serializing '+contract+':'+action+' from the live Jungle4 ABI…';
+        var r=await pushAction(contract,action,data,[{actor:actor,permission:'active'}],{net:'j4',foreignKey:fk});
+        if(r.res&&r.res.transaction_id){
+          out.innerHTML='<b style="color:var(--leaf)">✓ SIGNED + BROADCAST on JUNGLE4 (testnet)</b>'+String.fromCharCode(10)+
+            '<b>transaction_id:</b> '+r.res.transaction_id+String.fromCharCode(10)+
+            '<b>signed by:</b> your pasted TESTNET key · lane: '+r.by+String.fromCharCode(10)+
+            'explorer: <a href="https://jungle4.eosq.eosnation.io/tx/'+r.res.transaction_id+'" target="_blank" rel="noopener">jungle4.eosq / '+r.res.transaction_id.slice(0,16)+'…</a>';
+        } else {
+          out.innerHTML='<b style="color:var(--amber)">jungle4 node said:</b> '+JSON.stringify(r.res&&r.res.error||r.res||{}).slice(0,400);
+        }
+        return;
+      }
+      if(!K1||!SOUL){out.textContent='connect your keychain first (the gold button above)';return}
+      var waCred=loadWaCred();
+      var useWa=$('tx-wa').checked&&waCred;
+      if(!BRIDGED&&!useWa){out.textContent='your bzDiD key is not on '+SOUL+'@active yet — run THE BRIDGE above first';return}
+      var actor2=data.registrant||data.owner||data.from||data.account||SOUL;
       out.textContent='1/4 serializing '+contract+':'+action+' from live ABI…';
-      var abi=await rpc().get_abi(contract);
-      if(!abi||!abi.abi)throw new Error('no ABI on '+contract+' — check the contract name');
-      var types=BN.Serialize.getTypesFromAbi(BN.Serialize.createInitialTypes(),abi.abi);
-      var amap=new Map(); for(const a of abi.abi.actions)amap.set(a.name,BN.Serialize.getType(types,a.type));
-      if(!amap.get(action))throw new Error('action '+action+' not in '+contract+' ABI (has: '+Array.from(amap.keys()).slice(0,10).join(', ')+')');
-      var sa=BN.Serialize.serializeAction({types:types,actions:amap},contract,action,actz,data,new TextEncoder(),new TextDecoder());
-      out.textContent='2/4 building tx + signing ('+(useWa?'account passkey — touch it':(CORE?'first-party Rust core':'vendored lane'))+')…';
-      var info=await rpc().get_info();
-      var ref=await rpc().get_block(info.head_block_num-3);
-      var built=await buildSigned(info,ref,[{account:contract,name:action,authorization:actz,data:sa.data}],useWa?waCred:null);
-      out.textContent='3/4 broadcasting…';
-      var res=await postAny(VH,'/v1/chain/send_transaction',
-        {signatures:built.signatures,compression:0,packed_context_free_data:'',packed_trx:built.packedHex});
-      if(res&&res.transaction_id){
+      var r2=await pushAction(contract,action,data,[{actor:actor2,permission:'active'}],{wa:useWa?waCred:null});
+      if(r2.res&&r2.res.transaction_id){
         out.innerHTML='<b style="color:var(--leaf)">✓ SIGNED + BROADCAST by your bzDiD key</b>'+String.fromCharCode(10)+
-          '<b>transaction_id:</b> '+res.transaction_id+String.fromCharCode(10)+
-          '<b>signed by:</b> '+K1.eosPub+' · core: '+built.by+String.fromCharCode(10)+
-          '<b>packed_trx:</b> '+built.packedHex.slice(0,128)+'…';
+          '<b>transaction_id:</b> '+r2.res.transaction_id+String.fromCharCode(10)+
+          '<b>signed by:</b> '+K1.eosPub+' · core: '+r2.by+String.fromCharCode(10)+
+          '<b>packed_trx:</b> '+r2.packed.slice(0,128)+'…';
       } else {
-        var msg=JSON.stringify(res&&res.error||res||{}).slice(0,400);
+        var msg=JSON.stringify(r2.res&&r2.res.error||r2.res||{}).slice(0,400);
         out.innerHTML='<b style="color:var(--amber)">node refused:</b> '+msg;
       }
     }catch(e){
-      out.innerHTML='<b style="color:var(--amber)">sign error:</b> '+e.message;
+      out.innerHTML='<b style="color:var(--amber)">sign error:</b> '+(e&&e.message||e);
     }
   };
 
