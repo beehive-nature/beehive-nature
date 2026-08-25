@@ -13,11 +13,16 @@
 //              if the bus were incidental.
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
-import { join, extname } from 'node:path';
+import { join, extname, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 
+// Resolve from THIS FILE, never a private absolute path: a hardcoded worktree
+// root makes the suite silently test someone else's tree wherever it is run.
 const ROOT = process.env.FLEET_HOSTED
-  || 'C:/Users/travi/wt-cD/surfaces/fleet-hosted';
+  // Resolve from THIS FILE, never a private absolute path: a hardcoded worktree
+  // root makes the suite silently test someone else's tree wherever it is run.
+  || join(dirname(fileURLToPath(import.meta.url)), '..', 'surfaces', 'fleet-hosted');
 
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css',
                 '.json': 'application/json' };

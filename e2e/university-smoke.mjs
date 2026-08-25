@@ -1,7 +1,7 @@
 // ad-hoc smoke for surfaces/university/index.html — not part of the committed suite
 import { createServer } from 'node:http';
 import { readFile, readdir } from 'node:fs/promises';
-import { extname, join } from 'node:path';
+import { extname, join, dirname, normalize } from 'node:path';
 import { chromium } from 'playwright';
 
 const ROOT = process.cwd().replace(/e2e$/, '');
@@ -19,15 +19,22 @@ const NOT_OURS = (dir, name) =>
   name === 'fleet' ||
   (dir.endsWith('fleet-hosted') && (name === 'gallery' || name === 'lab'));
 
-async function countSurfacesOnDisk(dir = join(ROOT, 'surfaces')) {
-  let n = 0;
+async function listSurfacesOnDisk(dir = join(ROOT, 'surfaces'), base = '') {
+  let out = [];
   for (const e of await readdir(dir, { withFileTypes: true })) {
     if (e.isDirectory() && NOT_OURS(dir, e.name)) continue;
-    const p = join(dir, e.name);
-    if (e.isDirectory()) n += await countSurfacesOnDisk(p);
-    else if (extname(e.name) === '.html') n++;
+    const rel = base ? base + '/' + e.name : e.name;
+    if (e.isDirectory()) out = out.concat(await listSurfacesOnDisk(join(dir, e.name), rel));
+    else if (extname(e.name) === '.html') out.push(rel);
   }
-  return n;
+  return out;
+}
+
+// The count and the reachability check walk the SAME list, deliberately: one rule
+// in one place. They are therefore correlated — if NOT_OURS is wrong, both agree
+// and both go green. That is a known property, not an accident.
+async function countSurfacesOnDisk() {
+  return (await listSurfacesOnDisk()).length;
 }
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json' };
 const server = createServer(async (req, res) => {
@@ -289,6 +296,73 @@ const hasUni = (await page.locator('#surf option[value="university/index.html"]'
   ok(`review deck covers every surface (${onDisk}) and lists the university`,
      optCount === onDisk && hasUni,
      `deck lists ${optCount}, tree holds ${onDisk}, hasUni=${hasUni}`);
+}
+
+// ── REACHABILITY ───────────────────────────────────────────────────────────
+// Existence and reachability are different properties. The two count assertions
+// above prove a surface is COUNTED; they cannot see a surface that exists, is
+// counted, and is unreachable from the front page. Three orphans slipped through
+// that gap in one night: dock.html, the review deck's three, and the whole fleet.
+//
+// RULE: every counted surface within TWO hops of the hub, and a 2-hop surface
+// must hang off an index.html that is ITSELF 1-hop — otherwise a chain of
+// orphans satisfies the rule. forge/* under forge/index.html and the fleet nine
+// under fleet-hosted/index.html both qualify.
+//
+// THE EXEMPTION LIST IS THE TRAP THIS COULD BECOME. It is narrow, every entry
+// carries its reason, and it FAILS THREE WAYS so it cannot rot into another
+// hand-maintained pointer: unreachable-and-unlisted, listed-but-gone, and
+// listed-but-actually-reachable.
+// It does NOT cover: surfaces/fleet/ or fleet-hosted/gallery|lab — those are not
+// counted at all (see NOT_OURS), so they never reach this check.
+const REACHABILITY_EXEMPT = [
+  { path: 'forge/orbit-v2.html',
+    reason: 'tinkering fork of the FROZEN orbit renderer — it exists so orbit.html ' +
+            'can stay byte-pinned (e2e/forge-freeze.mjs). A working file, not a ' +
+            'presented surface; presenting it would invite edits to the frozen one.' },
+];
+
+{
+  const BS = String.fromCharCode(92);
+  const toPosix = s => s.split(BS).join('/');
+  const resolveHref = (from, href) => {
+    if (/^[a-z]+:/i.test(href) || href.startsWith('#') || href.startsWith('//')) return null;
+    let h = href.split('#')[0].split('?')[0];
+    if (!h) return null;
+    if (h.endsWith('/')) h += 'index.html';
+    const abs = toPosix(normalize(join(dirname(from), h)));
+    return extname(abs) === '.html' ? abs : null;
+  };
+  const linksOf = async rel => {
+    try {
+      const html = await readFile(join(ROOT, 'surfaces', rel), 'utf8');
+      return [...html.matchAll(/href="([^"]+)"/g)]
+        .map(m => resolveHref(rel, m[1])).filter(Boolean);
+    } catch { return []; }
+  };
+
+  const hop1 = [...new Set(await linksOf('index.html'))];
+  const hop2 = [];
+  for (const p of hop1) if (p.endsWith('index.html')) hop2.push(...await linksOf(p));
+  const reachable = new Set([...hop1, ...hop2, 'index.html']);
+
+  const counted = await listSurfacesOnDisk();
+  const exemptPaths = new Set(REACHABILITY_EXEMPT.map(e => e.path));
+
+  const orphans = counted.filter(f => !reachable.has(f) && !exemptPaths.has(f));
+  ok(`every counted surface is reachable within 2 hops of the hub (${counted.length} surfaces, ${reachable.size} reachable)`,
+     orphans.length === 0,
+     orphans.length ? 'ORPHANED: ' + orphans.join(', ') : '');
+
+  const gone = REACHABILITY_EXEMPT.filter(e => !counted.includes(e.path));
+  ok('no exemption names a surface that no longer exists',
+     gone.length === 0,
+     gone.length ? 'STALE: ' + gone.map(e => e.path).join(', ') : '');
+
+  const needless = REACHABILITY_EXEMPT.filter(e => reachable.has(e.path));
+  ok('no exemption covers a surface that is actually reachable',
+     needless.length === 0,
+     needless.length ? 'NEEDLESS: ' + needless.map(e => e.path).join(', ') : '');
 }
 
 console.log(`\n${pass} passed, ${fail} failed` + (errors.length ? '\nerrors:\n' + errors.join('\n') : ''));
