@@ -56,8 +56,8 @@
       dot.style.background = '#7ddf8f'; dot.title = 'rails live';
       var B = (location.pathname.indexOf('/beehive-nature/') === 0 ? '/beehive-nature/' : '/');
       txt.innerHTML = 'rails <b style="color:#7ddf8f">LIVE</b> · <a href="' + B +
-        'surfaces/bnames.html" style="color:#00E5FF;text-decoration:none">connect</a> · <a href="' + B +
-        'surfaces/onboarding/" style="color:#7ddf8f;text-decoration:none">create bzDiD</a>';
+        'surfaces/bnames.html" style="color:#00E5FF;text-decoration:none;display:inline-flex;align-items:center;min-height:32px;padding:0 6px;border-radius:6px">connect</a> · <a href="' + B +
+        'surfaces/onboarding/" style="color:#7ddf8f;text-decoration:none;display:inline-flex;align-items:center;min-height:32px;padding:0 6px;border-radius:6px">create bzDiD</a>';
       return;
     }
     /* the soul's public 0x rail fingerprint — derived identifier, never a key */
