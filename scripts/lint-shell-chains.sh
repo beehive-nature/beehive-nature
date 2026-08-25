@@ -20,6 +20,47 @@
 # — you WANT that to stop). False positives dominate 4:1, so it stays out.
 #
 # Usage: sh scripts/lint-shell-chains.sh [paths…]   (default: tracked shell)
+# ---- SELFTEST ------------------------------------------------------------
+# LAW (founder, 2026-08-25): a checker is not LANDED until it has been run
+# against a KNOWN-BAD and a KNOWN-GOOD, and BOTH results appear in its report.
+# A green from an unvalidated checker is a claim about the checker, not the code.
+#
+# This lint has already failed that bar once: an earlier draft matched -[cq] and
+# would have fired on 66 legitimate `grep -q x && act` conditionals, and it
+# flagged its own source. Neither was visible by reading it.
+#
+#   B1 known-BAD   grep -c chained with &&   -> MUST fail (exit 1) and name it
+#   B2 known-GOOD  grep -q chained with &&   -> MUST pass (the -q regression guard)
+#   B3 known-GOOD  no chain at all           -> MUST pass
+if [ "${1:-}" = "--selftest" ]; then
+  T=$(mktemp -d 2>/dev/null) || { echo "selftest FAIL — mktemp"; exit 1; }
+  SELF=$(cd "$(dirname "$0")" && pwd)/$(basename "$0")
+  printf '#!/bin/sh
+grep -c foo bar.txt && echo next
+'   > "$T/bad.sh"
+  printf '#!/bin/sh
+grep -q foo bar.txt && echo found
+'  > "$T/good_q.sh"
+  printf '#!/bin/sh
+echo hello
+'                          > "$T/good_plain.sh"
+  st=0
+  echo "shell-chain lint selftest — one known-BAD, two known-GOOD:"
+  sh "$SELF" "$T/bad.sh" >"$T/o1" 2>&1; r1=$?
+  if [ "$r1" -ne 0 ] && grep -q 'grep -c chained' "$T/o1"; then
+    echo "  B1 known-BAD  grep -c && ... -> CAUGHT (exit $r1, named)"
+  else echo "  B1 known-BAD  NOT CAUGHT (exit $r1) — the lint is dead"; st=1; fi
+  sh "$SELF" "$T/good_q.sh" >"$T/o2" 2>&1; r2=$?
+  if [ "$r2" -eq 0 ]; then echo "  B2 known-GOOD grep -q && ... -> passed (exit 0)"
+  else echo "  B2 known-GOOD grep -q FALSELY FLAGGED (exit $r2) — would train dismissal"; st=1; fi
+  sh "$SELF" "$T/good_plain.sh" >"$T/o3" 2>&1; r3=$?
+  if [ "$r3" -eq 0 ]; then echo "  B3 known-GOOD plain script  -> passed (exit 0)"
+  else echo "  B3 known-GOOD FALSELY FLAGGED (exit $r3)"; st=1; fi
+  rm -rf "$T"
+  [ "$st" -eq 0 ] && echo "selftest ok — the lint can tell bad from good."                    || echo "selftest FAIL — a lint that cannot fail is not a lint."
+  exit $st
+fi
+
 set -u
 ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo .)
 cd "$ROOT" || exit 1

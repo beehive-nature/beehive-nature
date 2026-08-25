@@ -18,14 +18,14 @@
     '—',
     ['🎓','university/'],['🐝','bqueenbee-live.html'],['🎧','listening.html'],['⬡','bfood.html'],['🏛','bsymposium.html'],['⚙','stack.html'],['🐜','bantfarm.html'],['♫','bset.html'],['🪩','plur.html'],['🎪','festival/'],['🎨','buzz-studio.html'],['⚒','forge/']];
   var b=document.createElement('nav');b.id='tbar';
-  b.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:9998;display:flex;flex-wrap:nowrap;overflow-x:auto;gap:0 8px;padding:6px 12px;background:#111;border-top:1px solid #333;font:11px monospace;-webkit-overflow-scrolling:touch;scrollbar-width:none;white-space:nowrap;max-height:40px;box-sizing:border-box';
+  b.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:9998;display:flex;flex-wrap:nowrap;overflow-x:auto;gap:0 4px;padding:7px 12px;background:#111;border-top:1px solid #333;font:11px monospace;-webkit-overflow-scrolling:touch;scrollbar-width:none;white-space:nowrap;max-height:46px;box-sizing:border-box;-webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 34px),transparent 100%);mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 34px),transparent 100%)';
   b.innerHTML=L.map(function(x){
-    if(x==='—')return '<span style="color:#444">|</span>';
+    if(x==='—')return '<span style="align-self:stretch;width:1px;background:#333;margin:0 4px;flex-shrink:0"></span>';
     var h=(R+x[1])===location.pathname.replace(/index.html$/,'');
-    return '<a href="'+R+x[1]+'" style="color:'+(h?'#6f6':'#888')+';text-decoration:none;padding:2px 4px;flex-shrink:0">'+x[0]+'</a>';
+    return '<a href="'+R+x[1]+'" style="color:'+(h?'#6f6':'#888')+';background:'+(h?'#16241d':'transparent')+';box-shadow:'+(h?'inset 0 0 0 1px #2b4a3b':'none')+';border-radius:6px;text-decoration:none;padding:6px 9px;min-height:32px;display:inline-flex;align-items:center;flex-shrink:0">'+x[0]+'</a>';
   }).join('');
   document.body.appendChild(b);
-  document.body.style.paddingBottom='48px';
+  document.body.style.paddingBottom='52px'; /* initial only; agent-dock fit() refines to the measured bar */
 
   /* THE EXTERNAL-LINK LAW (founder, 2026-08-21): every hyperlink that leaves the dApp
      opens in a NEW tab, so the reader's BNRoSe session stays handy and fully functional.
