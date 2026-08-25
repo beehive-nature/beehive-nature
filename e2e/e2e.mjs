@@ -32,7 +32,8 @@ try {
 }
 
 await page.goto('http://localhost:8899/');
-const t = (name, v) => console.log(v ? '  ✓' : '  ✗', name);
+let pass = 0, fail = 0;
+const t = (name, v, note = '') => { console.log((v ? '  ✓ ' : '  ✗ ') + name + (note ? ' — ' + note : '')); v ? pass++ : fail++; };
 
 t('engine loaded (BZDIDKEY truthy, PREVIEW=false)', await page.evaluate(()=>!!window.BZDIDKEY && !PREVIEW));
 
@@ -84,3 +85,5 @@ if (r4.door==='passkey+phrase') {
 } else console.log('  – PRF door not taken (virtual authenticator lacks PRF); fallback rung verified instead');
 
 await browser.close(); srv.close();
+console.log(`\n${pass} passed, ${fail} failed`);
+process.exit(fail ? 1 : 0);
