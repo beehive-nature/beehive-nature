@@ -463,15 +463,30 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
       cc.style.display='block';
       $('sign-name').textContent=n;
       $('consent-check').checked=false;
-      $('sign-btn').disabled=true; $('sign-btn').style.opacity='.4';
+      refreshComposeGate();
     } else { cc.style.display='none'; }
+  }
+  // ── THE COMPOSE BUTTON'S DISABLED STATE HAS EXACTLY ONE OWNER ──────────
+  // Nothing else in this file assigns #sign-btn.disabled. Every path that
+  // could change the answer CALLS this; none of them writes the flag.
+  //
+  // Why a function and not "whichever handler runs last": ordering is
+  // invisible coupling. A reordered script tag, a listener registered a line
+  // earlier, or a second condition added to the wrong handler all change the
+  // result with nothing to see in review and no test that fails. Adding a
+  // condition means adding it HERE, once — never racing another writer.
+  function refreshComposeGate(){
+    var btn = $('sign-btn'); if (!btn) return;
+    var cb  = $('consent-check');
+    var consented = !!(cb && cb.checked);
+    var allowed = consented;            // the only condition today
+    btn.disabled = !allowed;
+    btn.style.opacity = allowed ? '1' : '.4';
   }
   // consent → enable sign
   document.addEventListener('change',function(e){
     if(e.target&&e.target.id==='consent-check'){
-      var btn=$('sign-btn');
-      btn.disabled=!e.target.checked;
-      btn.style.opacity=e.target.checked?'1':'.4';
+      refreshComposeGate();
     }
   });
   // sign → compose the action
