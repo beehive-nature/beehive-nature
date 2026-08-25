@@ -15,14 +15,26 @@
 # does not resolve is "could not determine", never "nothing to check" — the
 # same law scripts/identity-check.sh states for the §7 range.
 #
-# DOT LAW (mechanism named by zB, 2026-08-25) — the two are NOT interchangeable:
-#   git log  main..lane    TWO dots   — commit LISTS
-#   git diff main...lane   THREE dots — DIFFS and SCANS
-# A two-dot DIFF compares TIPS, so once main advances it renders main's new
-# content as deletions inside "your" delta. That is the phantom zC chased:
-# 8 hex runs and secret-scan hits that belonged to other seats. Three-dot
-# diffs from the merge-base and shows only your work. This script uses two
-# dots for every log/rev-list and three dots for every diff.
+# THE FOOTGUN — the dot count that means "only mine" is INVERTED between the
+# two commands. This is the whole trap; memorising "three dots" or "two dots"
+# as a single rule guarantees getting one of them wrong:
+#
+#   git log  main..lane     TWO dots    commits that are yours              OK
+#   git diff main..lane     TWO dots    diff of TIPS — peer work rides in   WRONG
+#                                       REVERSED (their adds show as -,
+#                                       their deletes show as +)
+#   git diff main...lane    THREE dots  merge-base to lane, only yours      OK
+#
+# Reproduced here, not taken on report (Cowork ran it with planted secrets):
+#   CASE A  two-dot surfaces a peer's content inside "your" delta.
+#   CASE B  worse — with an EMPTY subject (git log base..subject returns
+#           NOTHING), the two-dot diff STILL emits the peer's content. Measured
+#           against origin/lane/zB: subject 0 commits, two-dot 5 files / 12
+#           added lines of zB's work, three-dot 0 files. A seat with no work at
+#           all can file a security finding about someone else's code.
+#
+# SCOPE: secret-scan.sh in TREE mode has no direction and is immune. This
+# applies to the DELTA scan below only.
 #
 # Usage:  sh scripts/push-preflight.sh [base-ref]     (default: origin/main)
 set -u
