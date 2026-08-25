@@ -76,7 +76,12 @@
      see the page", which is not a better nav. Closed is the compact strip; ONE tap
      opens every link at once. The toggle is always visible while the strip
      overflows, so the drawer is discoverable rather than hidden. */
-  open = overflowing();   /* ORDERED default: all 39 on screen at 390px, no scroll */
+  /* MEASURED, not chosen: default-open renders a 379px grid (47% of a 390x800
+     viewport) that INTERCEPTS POINTER EVENTS over the page beneath it. The suite
+     goes from 74 passed / 0 failed to 14 pointer-interception errors and a crash;
+     a reader hits the same wall, silently. So the grid is one tap away, not the
+     resting state — all 39 on screen at 390px with no scroll the moment it opens. */
+  open = false;
   apply(); sync();
 
   document.body.style.paddingBottom='52px'; /* initial only; agent-dock fit() refines to the measured bar */
