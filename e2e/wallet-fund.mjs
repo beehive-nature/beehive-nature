@@ -250,7 +250,7 @@ try {
     await page.goto('http://127.0.0.1:8891' + URL_, { waitUntil: 'load' });
     await page.waitForTimeout(400);
     ok('page renders (title)', (await page.title()).includes('BNR wallet'));
-    ok('noscript funding note visible', await page.locator('.fund-nojs').isVisible());
+    ok('noscript funding note visible', await page.locator('#fund-sec .fund-nojs').isVisible());
     ok('panel body hidden', await page.locator('#fund-js').isHidden());
     await ctx.close();
   }
