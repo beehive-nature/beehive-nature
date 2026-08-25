@@ -49,6 +49,64 @@
 # applies to the DELTA scan below only.
 #
 # Usage:  sh scripts/push-preflight.sh [base-ref]     (default: origin/main)
+# locate() is defined HERE, ABOVE its callers. It previously sat further down
+# and the selftest below called it before definition — sh returns "command not
+# found" and the discriminator silently does nothing. The selftest caught that
+# on its first run (P3/P4 reported "the discriminator is dead"), which is the
+# fail-CLOSED behaviour this file exists to have. Same defect class the S7
+# header records: helpers defined after their callers.
+# Is this token actually IN the working tree? A hit that is not tells you the
+# scan direction is wrong far more often than it tells you a secret is hiding.
+locate() {
+  if git grep -qF -- "$1" -- . 2>/dev/null; then
+    echo "       present in the working tree — treat as a REAL hit."
+  else
+    echo "       NOT PRESENT in the working tree."
+    echo "       >> CHECK YOUR DOT COUNT BEFORE ESCALATING. A two-dot diff inverts"
+    echo "          signs: this may be a PEER'S line that was ALREADY REMOVED,"
+    echo "          surfaced as an addition in a delta that is not yours. Escalating"
+    echo "          it can cost someone a rotation they have already done."
+  fi
+}
+
+
+# ---- SELFTEST ------------------------------------------------------------
+# LAW (founder, 2026-08-25): a checker is not LANDED until it has been run
+# against a KNOWN-BAD and a KNOWN-GOOD, and BOTH results appear in its report.
+# A green from an unvalidated checker is a claim about the checker, not the code.
+#
+#   P1 known-BAD   unresolvable base ref  -> MUST exit 1 ("unknown", not "clean")
+#   P2 known-GOOD  empty subject          -> MUST exit 0, run ZERO checks, claim nothing
+#   P3 known-BAD   token absent from tree -> locate() MUST raise the dot-count warning
+#   P4 known-GOOD  token present in tree  -> locate() MUST call it a real hit
+if [ "${1:-}" = "--selftest" ]; then
+  SELF=$(cd "$(dirname "$0")" && pwd)/$(basename "$0")
+  st=0
+  echo "push-preflight selftest — known-BAD and known-GOOD:"
+  sh "$SELF" refs/heads/__no_such_ref__ >/tmp/ps1 2>&1; r=$?
+  if [ "$r" -ne 0 ] && grep -q "does not resolve" /tmp/ps1; then
+    echo "  P1 known-BAD  unresolvable base -> exit $r, refused (correct)"
+  else echo "  P1 known-BAD  unresolvable base -> exit $r WITHOUT refusing — fails OPEN"; st=1; fi
+  sh "$SELF" HEAD >/tmp/ps2 2>&1; r=$?
+  n=$(grep -c '^[1-6])' /tmp/ps2)
+  if [ "$r" -eq 0 ] && [ "$n" -eq 0 ] && grep -q 'NOT SCANNING' /tmp/ps2; then
+    echo "  P2 known-GOOD empty subject -> halted, $n checks ran, claims nothing (correct)"
+  else echo "  P2 known-GOOD empty subject -> exit $r with $n checks run — scanned an unconfirmed subject"; st=1; fi
+  # Built at RUNTIME from $$ so the literal never appears in this source —
+  # a hardcoded "absent" token is present the moment you write the test, and
+  # git grep finds it here. The fixture defeated itself on first run.
+  ABSENT="PVT_K1_selftestAbsent$$"
+  o=$(locate "$ABSENT")
+  case "$o" in *"CHECK YOUR DOT COUNT"*) echo "  P3 known-BAD  absent token -> dot-count warning raised (correct)";;
+                *) echo "  P3 known-BAD  absent token -> NO warning — the discriminator is dead"; st=1;; esac
+  o=$(locate "PREFLIGHT ok")
+  case "$o" in *"REAL hit"*) echo "  P4 known-GOOD present token -> called a real hit (correct)";;
+                *) echo "  P4 known-GOOD present token -> misreported"; st=1;; esac
+  rm -f /tmp/ps1 /tmp/ps2
+  [ "$st" -eq 0 ] && echo "selftest ok — refuses what it must, permits what it must."                    || echo "selftest FAIL — see above."
+  exit $st
+fi
+
 set -u
 cd "$(git rev-parse --show-toplevel 2>/dev/null || echo .)" || exit 1
 BASE_REF=${1:-origin/main}
@@ -101,20 +159,6 @@ echo "  direction: $BASE_REF..HEAD (base -> lane). Never lane -> base."
 # the word "secret"). Excluded from the ADDED-lines checks BY NAME — check 1
 # still scans it as part of the whole tree, so coverage is not lost.
 SELF=scripts/push-preflight.sh
-# Is this token actually IN the working tree? A hit that is not tells you the
-# scan direction is wrong far more often than it tells you a secret is hiding.
-locate() {
-  if git grep -qF -- "$1" -- . 2>/dev/null; then
-    echo "       present in the working tree — treat as a REAL hit."
-  else
-    echo "       NOT PRESENT in the working tree."
-    echo "       >> CHECK YOUR DOT COUNT BEFORE ESCALATING. A two-dot diff inverts"
-    echo "          signs: this may be a PEER'S line that was ALREADY REMOVED,"
-    echo "          surfaced as an addition in a delta that is not yours. Escalating"
-    echo "          it can cost someone a rotation they have already done."
-  fi
-}
-
 ADDED=$(git diff "$BASE_REF"...HEAD -- . ":(exclude)$SELF" | grep '^+' | grep -v '^+++')
 rc=0
 
