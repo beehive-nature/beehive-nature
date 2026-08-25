@@ -19,10 +19,13 @@
 // someone remembers to add it.
 import { createServer } from 'node:http';
 import { readFile, readdir } from 'node:fs/promises';
-import { join, extname, relative } from 'node:path';
+import { join, extname, relative, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 
-const ROOT = process.env.FLEET_HOSTED || 'C:/Users/travi/wt-cD/surfaces/fleet-hosted';
+// Resolve from THIS FILE, never a private absolute path (see fleet-bus.mjs).
+const ROOT = process.env.FLEET_HOSTED
+  || join(dirname(fileURLToPath(import.meta.url)), '..', 'surfaces', 'fleet-hosted');
 const MIN_PAINTED = 500;      // a real plot paints thousands; a stray border does not
 const MIN_COLOURS = 4;        // axis + grid + at least one series
 const EXPECT_MIN_TARGETS = 7; // an existence floor: a broken scan must FAIL, never pass empty

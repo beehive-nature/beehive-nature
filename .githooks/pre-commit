@@ -1,5 +1,6 @@
 #!/bin/sh
-# Pre-commit: delegate to the shared secret scan (rules, exemptions, and the
-# TESTNET-ONLY vector path are documented in scripts/secret-scan.sh).
-# CI runs the same script in `tree` mode on every push as the remote backstop.
-exec sh scripts/secret-scan.sh diff
+# Pre-commit: the shared scans — secrets in the staged diff, §7 identity on the
+# commit in progress. Both are DETECTION BEFORE PUBLICATION: hooks are
+# --no-verify-able and CI re-scans on push; never call this layer prevention.
+# Trailer half of §7 lives in commit-msg (a message does not exist yet here).
+sh scripts/secret-scan.sh diff && S7_STAGED=1 sh scripts/identity-check.sh

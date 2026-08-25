@@ -47,8 +47,12 @@ const RIDER_ALLOWLIST = [
 const MEASURE = process.argv.includes('--measure');
 const RUNS = 5;
 
+// The repo root derived from THIS FILE, never process.cwd() — the gate must
+// run identically from any directory (bZiq defect: target paths used to
+// resolve against the caller's cwd and broke every foreign invocation).
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+
 async function serveRoot() {
-  const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
   const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml' };
   const { readFile: rd } = await import('node:fs/promises');
   const srv = createServer(async (req, res) => {
@@ -107,7 +111,7 @@ const ok = (name, cond, note = '') => {
 };
 
 for (const rel of targets) {
-  const path = resolve(rel);
+  const path = resolve(ROOT, rel);
   const url = 'file://' + path.replace(/\\/g, '/');
   const src = await readFile(path, 'utf8');
   console.log(`\n### ${rel}`);
@@ -167,7 +171,7 @@ for (const rel of targets) {
 
   // M — mobile
   ok('M viewport meta', /name=["']viewport["']/i.test(src));
-  ok('M ≤600px media query exists', /@media\s*\(\s*max-width\s*:\s*([1-5]?[0-9]{1,2})px/.test(src));
+  ok('M ≤600px media query exists', /@media\s*\(\s*max-width\s*:\s*([1-5]?[0-9]{1,2}|600)px/.test(src));
   const mob = await browser.newPage({ viewport: { width: 375, height: 800 } });
   await mob.goto(url, { waitUntil: 'load' });
   await mob.waitForTimeout(300);
