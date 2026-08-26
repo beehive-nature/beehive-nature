@@ -94,7 +94,10 @@ for (const f of files) {
   ok(`${d}: every link clears the ${TAP_FLOOR}px tap floor`, m.small.length === 0, m.small.join(' | '));
   ok(`${d}: the bar leaves the footer ${CLEAR}px of room`, m.clearance === null || m.clearance >= CLEAR, `clearance=${m.clearance}px`);
   ok(`${d}: zero page errors`, errs.length === 0, errs.slice(0, 2).join(' | '));
-  m.links.forEach(h => allLinks.add(h.replace(/^\.\.\//, '')));
+  /* Strip the fragment before resolving. blanguage.html#skaists is a real
+     page plus an anchor, and the gate was treating the whole string as a
+     filename — a legitimate deep link read as a broken one. */
+  m.links.forEach(h => allLinks.add(h.replace(/^\.\.\//, '').split('#')[0]));
   await page.close();
 }
 
