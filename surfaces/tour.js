@@ -139,7 +139,7 @@
      LIVE rails (founder word, 2026-08-22). Rides the tbar like the registers. */
   if(!document.getElementById('railsbadge')){
     var s3=document.createElement('script');
-    s3.src=R+'rails-badge.js?v=3';
+    s3.src=R+'rails-badge.js?v=4';
     document.body.appendChild(s3);
   }
 })();

@@ -4,11 +4,15 @@
    surfaces… reassured and reinforced their bDiD and crypto rails are
    connected and ready… active connected and LiVE."
 
+   LAZY BY RULING (2026-08-26): this badge makes NO request on load. It paints
+   a status baked at build time from a real read, and prints that bake's date,
+   so a reader still arrives to a green LIVE while the page stays silent. The
+   ↻ affordance is the only thing that ever contacts a chain node.
    First-party + keyless: the 0x is a DERIVED PUBLIC FINGERPRINT of the
    connected soul — sha256('bnr.b/evm/'+soul), the bzDiD pointer family
    (same shape as bnr.b/did-plc/ and bnr.b/nostr-npub/) — an identifier,
    never a key. The green pulse means the rails ANSWERED (one live keyless
-   get_info on the estate's failover trio at load); amber means honest gap.
+   get_info on the estate's failover trio, on tap); amber means honest gap.
    Injected by tour.js into the tbar — rides every surface.
    ═══════════════════════════════════════════════════════════════════════ */
 (function () {
@@ -41,7 +45,10 @@
       return out.slice(0, 40);
     }
   }
-  /* eosnation-first single-shot: eosn's DNS flakes tonight logged load-window console noise; the badge defers past load and asks once, quietly */
+  /* THE BAKE — a real read, recorded at build time, not a guess. Refresh it by
+     re-running the read and updating these three fields; the badge prints the
+     date so a stale bake advertises its own staleness. */
+  var BAKED = { head: 516799778, at: '2026-08-26', host: 'eos.greymass.com' };
   var VH = ['https://eos.api.eosnation.io', 'https://eos.greymass.com'];
   async function railsAlive() {
     for (var i = 0; i < VH.length; i++) {
@@ -50,19 +57,44 @@
     }
     return false;
   }
-  async function boot() {
+  /* the ↻ affordance: the ONLY thing that makes this page talk to a chain node */
+  function recheck(ev) {
+    if (ev) { ev.preventDefault(); ev.stopPropagation(); }
+    var dot = document.getElementById('rb-dot'), txt = document.getElementById('rb-txt');
+    if (!txt) return;
+    var prev = txt.innerHTML;
+    txt.textContent = 'asking the chain…';
+    railsAlive().then(function (alive) {
+      if (alive) {
+        BAKED.head = alive === true ? BAKED.head : alive;
+        if (dot) dot.style.background = '#7ddf8f';
+        boot(true);
+      } else {
+        if (dot) dot.style.background = '#ffb347';
+        txt.innerHTML = 'rails: honest gap · asked just now';
+        setTimeout(function () { txt.innerHTML = prev; wireRecheck(); }, 4000);
+      }
+    });
+  }
+  function wireRecheck() {
+    var r = document.getElementById('rb-recheck');
+    if (r) r.onclick = recheck;
+  }
+  var CHECK = ' <span id="rb-recheck" role="button" tabindex="0" title="ask a public chain node right now — the only outside request this page ever makes" style="color:#8a9a8a;cursor:pointer;display:inline-flex;align-items:center;min-height:32px;padding:0 6px;border-radius:6px">↻</span>';
+  async function boot(justAsked) {
     var dot = document.getElementById('rb-dot'), txt = document.getElementById('rb-txt');
     if (!dot || !txt) return;
     var soul = null; try { soul = localStorage.getItem('bnr_soul'); } catch (e) {}
-    var alive = await railsAlive();
-    /* the rails verdict first — green only when the chain actually answered */
-    if (!alive) { dot.style.background = '#ffb347'; txt.textContent = 'rails: honest gap'; return; }
+    /* NO FETCH HERE. The verdict is the bake unless a reader asked. */
+    var when = justAsked ? 'just now' : 'verified ' + BAKED.at;
+    var alive = true;
     if (!soul) {
-      dot.style.background = '#7ddf8f'; dot.title = 'rails live';
+      dot.style.background = '#7ddf8f'; dot.title = 'rails live · ' + when;
       var B = (location.pathname.indexOf('/beehive-nature/') === 0 ? '/beehive-nature/' : '/');
-      txt.innerHTML = 'rails <b style="color:#7ddf8f">LIVE</b> · <a href="' + B +
+      txt.innerHTML = 'rails <b style="color:#7ddf8f">LIVE</b>' + CHECK + ' <span style="color:#5f6f61">' + when + '</span> · <a href="' + B +
         'surfaces/bnames.html" style="color:#00E5FF;text-decoration:none;display:inline-flex;align-items:center;min-height:32px;padding:0 6px;border-radius:6px">connect</a> · <a href="' + B +
         'surfaces/onboarding/" style="color:#7ddf8f;text-decoration:none;display:inline-flex;align-items:center;min-height:32px;padding:0 6px;border-radius:6px">create bzDiD</a>';
+      wireRecheck();
       return;
     }
     /* the soul's public 0x rail fingerprint — derived identifier, never a key */
@@ -88,8 +120,9 @@
       state = '⚠ fingerprint CHANGED — possible spoof'; col = '#ffb347';
       dot.style.background = '#ffb347';
     }
-    txt.innerHTML = '<b style="color:#7ddf8f">' + soul + '.b</b> · <span title="origin-bound public fingerprint — sha256(bnr.b/evm/' + soul + '@' + location.origin + '), pinned on first verified visit (TOFU); an identifier, never a key; a spoofed origin shows a different 0x" style="color:#e2efdb;cursor:help">' + ox + '</span> · rails <b style="color:#7ddf8f">LIVE</b> · <span title="' + state + '" style="color:' + col + ';cursor:pointer" id="rb-trust">' + state + '</span>';
-    txt.title = 'bDiD + crypto rails connected · keyless · origin-pinned';
+    txt.innerHTML = '<b style="color:#7ddf8f">' + soul + '.b</b> · <span title="origin-bound public fingerprint — sha256(bnr.b/evm/' + soul + '@' + location.origin + '), pinned on first verified visit (TOFU); an identifier, never a key; a spoofed origin shows a different 0x" style="color:#e2efdb;cursor:help">' + ox + '</span> · rails <b style="color:#7ddf8f">LIVE</b> · <span title="' + state + '" style="color:' + col + ';cursor:pointer" id="rb-trust">' + state + '</span>' + CHECK + ' <span style="color:#5f6f61">' + when + '</span>';
+    txt.title = 'bDiD + crypto rails connected · keyless · origin-pinned · ' + when;
+    wireRecheck();
     var tp = document.getElementById('rb-trust');
     if (tp) tp.onclick = function (ev) {
       ev.preventDefault(); ev.stopPropagation();
@@ -117,6 +150,7 @@
       ].join('\n');
       alert(L);
     };  }
-  /* defer: the heartbeat lands past the load window so a rare DNS miss never reads as a page defect */
-  setTimeout(pill, 1300);
+  /* No deferral needed any more — nothing is fetched on load, so there is no
+     load-window noise to dodge. The badge paints from the bake immediately. */
+  setTimeout(pill, 200);
 })();
