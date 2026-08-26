@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>the record — every screenshot the estate kept</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpolygon points='16,2 28.1,9 28.1,23 16,30 3.9,23 3.9,9' fill='none' stroke='%23c9a0ff' stroke-width='2.5'/%3E%3C/svg%3E">
+<style>
+/* estate palette, inlined from surfaces/tokens.css (beehive-nature @ main).
+   HUMAN SURFACE — accent skews purple (--violet / the idea hue); colour never alone, every image labelled. */
+:root{
+  --bg0:#07090b; --bg1:#0d1410; --bg2:#111a14; --bg3:#16211a; --well:#0a0f0b;
+  --ink:#e2efdb; --ink-hi:#eef7e9; --dim:#8a9a8a; --faint:#6f7f71;
+  --line:#243026; --line-hi:#37493c;
+  --violet:#c9a0ff; --idea:#a476ec; --ok:#3f9c55; --amber:#ffb347;
+  --glow:0 0 16px rgba(201,160,255,.14);
+  --mono:ui-monospace,'Cascadia Mono','SF Mono',Consolas,'IBM Plex Mono',monospace;
+}
+@media (prefers-reduced-motion:reduce){:root{--breath:0ms}}
+*{box-sizing:border-box;margin:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg1);color:var(--ink);font-family:var(--mono);font-size:13px;line-height:1.6;
+  background-image:linear-gradient(180deg,var(--bg2) 0%,var(--bg1) 14%,var(--bg0) 100%);min-height:100vh}
+.wrap{max-width:1100px;margin:0 auto;padding:30px 18px 110px}
+.hex{width:26px;height:30px;background:var(--violet);margin-bottom:18px;
+  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+  filter:drop-shadow(0 0 12px rgba(201,160,255,.4));
+  animation:breathe var(--breath,3.6s) ease-in-out infinite}
+@keyframes breathe{0%,100%{opacity:.6}50%{opacity:1}}
+h1{font-size:clamp(21px,5vw,30px);font-weight:600;letter-spacing:.02em;color:var(--ink-hi)}
+.rule{margin:14px 0 0;max-width:74ch;color:var(--dim);font-size:12.5px}
+.rule b{color:var(--violet);font-weight:700}
+.count{margin:16px 0 0;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+.entry{margin-top:42px;border-top:1px solid var(--line);padding-top:20px}
+.ehead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.date{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--violet);border:1px solid var(--line-hi);padding:3px 8px;white-space:nowrap}
+.commit{font-size:10px;color:var(--faint)}
+h2{font-size:16.5px;font-weight:600;color:var(--violet);letter-spacing:.01em}
+.line{margin-top:8px;max-width:78ch;color:var(--ink);font-size:13px}
+.shots{display:flex;gap:14px;overflow-x:auto;margin-top:16px;padding:4px 2px 10px;scroll-snap-type:x proximity}
+figure{flex:0 0 auto;max-width:min(390px,82vw);background:var(--well);border:1px solid var(--line);padding:8px;scroll-snap-align:start}
+figure.alone{border-style:dashed}
+figcaption{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 2px 2px;font-size:10px}
+.chip{letter-spacing:.12em;text-transform:uppercase;font-weight:700;padding:2px 7px;white-space:nowrap}
+.chip.before{border:1px solid var(--violet);color:var(--violet)}
+.chip.after{background:var(--violet);color:var(--bg0)}
+.chip.neutral{border:1px solid var(--line-hi);color:var(--dim)}
+.chip.alonechip{border:1px dashed var(--faint);color:var(--faint)}
+.srf{color:var(--dim)}
+img{display:block;width:100%;height:auto;max-height:66vh;object-fit:contain;background:var(--bg0)}
+a.raw{font-size:9.5px;color:var(--faint)}
+.foot{margin-top:56px;border-top:1px solid var(--line);padding-top:16px;color:var(--faint);font-size:10px;letter-spacing:.06em;line-height:2}
+nav{margin-top:26px;display:flex;gap:14px;flex-wrap:wrap;font-size:11px}
+nav a{color:var(--dim);text-decoration:none}
+nav a:hover{color:var(--violet)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hex" aria-hidden="true"></div>
+  <h1>the record</h1>
+  <p class="rule">Every screenshot the estate kept of its own pages — the newest at the top, newest first, scrolling. Each pair is the same page <b>before</b> and <b>after</b> a change, said in one line. A shot with no pair is shown alone. <b>Nothing here is ever retouched, cropped or rearranged. If a shot is ugly, that is what it looked like.</b> Tap any picture to see the file exactly as it was kept.</p>
+  <p class="count" id="count"></p>
+  <div id="list"></div>
+  <div class="foot" id="foot"></div>
+  <nav id="fleetnav"></nav>
+</div>
+<script src="tour.js?v=27"></script>
+<script>
+/* THE ARCHIVE — 76 shots, inventoried. kinds: before / after / alone (no pair, not hidden) / named variants.
+   The shots are the record: never edit, crop or retouch one. */
+var E=[
+ {d:'2026-08-26 · 15:42→15:51',c:'hub commit c7102fc',t:'the picture tool, quieted',
+  l:'The rainbow glow came off the refiner\u2019s title and its locked buttons now say, in words, why they are locked.',
+  i:[['review-pixelrefiner-BEFORE-390.png','before','the refiner'],['review-pixelrefiner-AFTER-390.png','after','the refiner']]},
+ {d:'2026-08-26 · 15:43→15:51',c:'hub commit c7102fc',t:'the biomass door, out of gold',
+  l:'Gold now means money amounts only \u2014 this door took the green of the living thing it is about.',
+  i:[['review-biomass-door-BEFORE-390.png','before','the biomass door'],['review-biomass-door-AFTER-390.png','after','the biomass door']]},
+ {d:'2026-08-26 · 14:58→15:18',c:'the door repos',t:'first light at three new addresses',
+  l:'Claim pages parked at three newly claimed addresses, photographed the hour they went up. No pairs \u2014 these were first light.',
+  i:[['doors-skaists-art-390.png','alone','skaists.art'],['doors-beehivebiomass-buzz-390.png','alone','beehivebiomass.buzz'],['doors-beehivebuds-buzz-390.png','alone','beehivebuds.buzz']]},
+ {d:'2026-08-25 · 22:50',t:'the word itself',
+  l:'Our name comes from the Latvian word for beautiful. The dictionary entry, set out in English and in Latvian \u2014 two languages, not a before and after.',
+  i:[['word-en.png','english','the word entry'],['word-lv.png','latvian','the word entry']]},
+ {d:'2026-08-25 · 22:24→22:28',t:'the honeycomb headings',
+  l:'The honeycomb headings of the four great pages, built on the workbench and then checked live.',
+  i:[['stack-hub.png','before','the hub'],['live-stack-hub.png','after','the hub'],['stack-skaists.png','before','skaists'],['live-stack-skaists.png','after','skaists'],['stack-plur.png','before','plur'],['live-stack-plur.png','after','plur'],['stack-bio.png','before','bio'],['live-stack-bio.png','after','bio']]},
+ {d:'2026-08-25 · 22:23',t:'the ribbon alone',
+  l:'The honeycomb ribbon by itself, so its colours can be judged apart from any page.',
+  i:[['band-hub-wide.png','alone','the hub, wide'],['band-hub.png','alone','the hub'],['band-skaists.png','alone','skaists'],['band-plur.png','alone','plur']]},
+ {d:'2026-08-25 · 22:16→22:19',t:'three more languages',
+  l:'Arabic, Japanese and Russian, each proofed before the page went live and again after.',
+  i:[['lang-ar.png','before','arabic'],['live-lang-ar.png','after','arabic'],['lang-ja.png','before','japanese'],['live-lang-ja.png','after','japanese'],['lang-ru.png','before','russian'],['live-lang-ru.png','after','russian']]},
+ {d:'2026-08-25 · 21:52',t:'the home page around six doors',
+  l:'The home page redrawn around the six doors \u2014 the wide screen and the phone. No pair was kept.',
+  i:[['hub6-desktop.png','alone','wide'],['hub6-phone.png','alone','phone']]},
+ {d:'2026-08-25 · 21:37→21:40',t:'a heading, tried three ways',
+  l:'Three drafts of the kandi bar\u2019s heading, each one then checked live.',
+  i:[['comet-a.png','before','draft one'],['live-comet-a.png','after','draft one'],['comet-b.png','before','draft two'],['live-comet-b.png','after','draft two'],['comet-c.png','before','draft three'],['live-comet-c.png','after','draft three']]},
+ {d:'2026-08-25 · 21:02',t:'the arrival, live',
+  l:'The arrival page as it opened for visitors.',
+  i:[['arrival-live.png','alone','the arrival page']]},
+ {d:'2026-08-25 · 20:29',c:'hub commit 542d986',t:'six doors, hung in a day',
+  l:'The six doors, photographed the day they were hung \u2014 each door its own colour, and one on a phone.',
+  i:[['door-index.png','alone','all six'],['door-beehivenature.png','alone','beehivenature'],['door-bnature-social.png','alone','bnature.social'],['door-bnature-bio.png','alone','bnature.bio'],['door-beehivebiomass.png','alone','beehivebiomass'],['door-skaists.png','alone','skaists'],['door-plur.png','alone','plur'],['door-plur-phone.png','alone','plur, phone']]},
+ {d:'2026-08-25 · 19:40',t:'three voices',
+  l:'Three voices the estate speaks in \u2014 the bee, the raver, the cypherpunk \u2014 laid side by side while the colours were being ruled.',
+  i:[['reg-bee.png','alone','the bee voice'],['reg-raver.png','alone','the raver voice'],['reg-cypherpunk.png','alone','the cypherpunk voice']]},
+ {d:'2026-08-25 · 19:10→19:15',t:'the crossing, proved at the bottom',
+  l:'Pages usually break at the bottom. The crossing page was photographed there first, then live.',
+  i:[['crossing-bottom.png','before','the bottom'],['crossing-live.png','after','live']]},
+ {d:'2026-08-25 · 17:39',t:'the kandi page, foot first',
+  l:'The bottom of the kandi page, kept exactly as it was.',
+  i:[['kandi-foot.png','alone','the kandi page']]},
+ {d:'2026-08-25 · 16:54→16:56',t:'the home page, rebuilt in a day',
+  l:'One day\u2019s rebuild of the home page: the workbench copy against the live one, wide and phone, and the filter row at the top.',
+  i:[['new-desktop.png','before','wide'],['live-hub-desktop.png','after','wide'],['new-phone.png','before','phone'],['live-hub-phone.png','after','phone'],['new-filter.png','before','the filter row'],['live-hub-top.png','after','the top, live']]},
+ {d:'2026-08-25 · 16:40',t:'the brief itself',
+  l:'The designer\u2019s whole brief, kept exactly as it arrived \u2014 wide and phone.',
+  i:[['brief-desktop.png','alone','wide'],['brief-phone.png','alone','phone']]},
+ {d:'2026-08-25 · 02:18→02:46',t:'first looks, then two of them live',
+  l:'First-look photos taken to decide what needed work; the dock and the museum were then photographed live.',
+  i:[['diag-dock_html.png','before','the dock'],['dock-live.png','after','the dock'],['diag-blight_museum_html.png','before','the museum'],['museum-live.png','after','the museum'],['diag-blight_index_html.png','alone','the fleet index'],['diag-blight_market_html.png','alone','the market'],['diag-blight_studio-gate_html.png','alone','the studio gate'],['diag-recover_html.png','alone','recovery']]},
+ {d:'2026-08-25 · 01:50',t:'the market, live',
+  l:'The market page as it stood.',
+  i:[['market-live.png','alone','the market']]},
+ {d:'2026-08-25 · 01:21→01:27',t:'two readings, simple and expert',
+  l:'The home page drawn two ways \u2014 simple and expert \u2014 each proven on the workbench and then live, wide and phone.',
+  i:[['desktop-simple.png','before','simple, wide'],['live-desktop-simple.png','after','simple, wide'],['desktop-expert.png','before','expert, wide'],['live-desktop-expert.png','after','expert, wide'],['phone-simple.png','before','simple, phone'],['live-phone-simple.png','after','simple, phone'],['phone-expert.png','before','expert, phone'],['live-phone-expert.png','after','expert, phone']]},
+ {d:'2026-08-25 · 01:27',t:'the masthead',
+  l:'The top of the home page \u2014 the first thing anyone sees.',
+  i:[['masthead.png','alone','the masthead']]}
+];
+(function(){
+  var n=0;
+  var out=E.map(function(e){
+    var figs=e.i.map(function(s){
+      n++;
+      var kind=s[1],chip,cls='';
+      if(kind==='before'){chip='<span class="chip before">before</span>'}
+      else if(kind==='after'){chip='<span class="chip after">after</span>'}
+      else if(kind==='alone'){chip='<span class="chip alonechip">no pair \u2014 kept alone</span>';cls=' class="alone"'}
+      else{chip='<span class="chip neutral">'+kind+'</span>'}
+      return '<figure'+cls+'><a class="raw" href="record/'+s[0]+'" target="_blank" rel="noopener"><img src="record/'+s[0]+'" alt="'+s[2]+' \u2014 as kept, unretouched" loading="lazy"></a>'+
+        '<figcaption>'+chip+'<span class="srf">'+s[2]+'</span><a class="raw" href="record/'+s[0]+'" target="_blank" rel="noopener">the file, untouched \u2197</a></figcaption></figure>';
+    }).join('');
+    return '<section class="entry"><div class="ehead"><span class="date">'+e.d+'</span><h2>'+e.t+'</h2>'+(e.c?'<span class="commit">'+e.c+'</span>':'')+'</div><p class="line">'+e.l+'</p><div class="shots">'+figs+'</div></section>';
+  }).join('');
+  document.getElementById('list').innerHTML=out;
+  document.getElementById('count').textContent=n+' photographs \u00b7 newest first \u00b7 the record does not retouch';
+  document.getElementById('foot').innerHTML='<b>the record</b> \u2014 a human surface of the beehive nature estate \u00b7 palette from tokens.css, purple for people \u00b7 every shot labelled, colour never alone<br>the shots are the record: never edited, never cropped, never retouched \u00b7 if a shot is ugly, that is what it looked like';
+})();
+</script>
+</body>
+</html>
