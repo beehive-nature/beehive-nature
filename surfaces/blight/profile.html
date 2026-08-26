@@ -387,6 +387,10 @@ $('fleetnav').innerHTML=(window.FLEET_NAV||[
  '<a href="./index.html">◈ fLeeT</a>','<a href="./museum.html">◈ museum</a>','<a href="./compare.html">◈ catalog</a>',
  '<a href="./gallery.html">◈ gallery</a>','<a href="./inscription-explorer.html">◈ explorer</a>','<a href="./bnri-gallery.html">◈ bNRi</a>']).join(' · ');
 </script>
-<script src="../tour.js?v=27"></script>
+<!-- no rider include, by law: this surface's runtime ledger is exactly two
+     origins — this page and one public RPC. the estate riders (tour.js and
+     its injected set) fetch skaists.dev at runtime, which would break the
+     zero-off-origin proof. the surface still registers in tour.js's L list
+     and the hub; it just carries its own plain fleetnav. -->
 </body>
 </html>
