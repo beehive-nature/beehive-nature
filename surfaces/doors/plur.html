@@ -62,6 +62,11 @@ a.t b{display:block;font-size:12.5px;font-weight:700;color:var(--accent)}
 a.t s{display:block;text-decoration:none;font-size:10.5px;color:var(--dim);margin-top:4px;line-height:1.6}
 a.t u{display:block;text-decoration:none;font-size:9.5px;color:var(--gold);margin-top:6px;line-height:1.5}
 a.t.p{border-left-color:var(--gold)}
+a.t.big{padding:19px}
+a.t.big b{font-size:15px;letter-spacing:-.01em}
+a.t.big s.do{font-size:11.5px;color:var(--dim);margin-top:8px;line-height:1.75}
+a.t.big s:not(.do){font-size:9.5px;color:var(--dimmer);margin-top:8px}
+@media (min-width:900px){.grid.verbs{grid-template-columns:repeat(2,1fr)}}
 .notyet{margin-top:34px;background:var(--inset);border:1px dashed var(--hot);padding:20px}
 .notyet h2{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
 .notyet p{font-size:11.5px;color:var(--dim);margin-top:10px;line-height:1.75;max-width:74ch}
@@ -105,11 +110,11 @@ footer a:hover{color:var(--gold)}
 <div class="wrap">
   <section>
     <div class="shead"><span class="dot"></span><h2>Everything behind this door</h2><em>open now · ⚠ marks a named limit</em><span class="n">4</span></div>
-    <div class="grid">
-      <a class="t" href="../bset.html"><b>the set the founder builds to</b><s>bset.html</s></a>
-      <a class="t" href="../festival/index.html"><b>your day on the floor, free</b><s>festival/index.html</s></a>
-      <a class="t" href="../kandi.html"><b>make it, name it, gift it</b><s>kandi.html</s></a>
-      <a class="t" href="../plur.html"><b>thirty years of floor wisdom, receipted</b><s>plur.html</s></a>
+    <div class="grid verbs">
+      <a class="t big" href="../bset.html"><b>Take the set as data →</b><s class="do">What is in the founder’s headphones while this gets built — EDM × русская музыка. Not an embed farm: the tracks are records, and the page hands you bset.json to keep.</s><s>bset.html</s></a>
+      <a class="t big" href="../festival/index.html"><b>Walk one day on the floor →</b><s class="do">Arrive with no ticket and no account, in your own tongue; find the rig, pair by light, make a kandi at the bar, read the economy board keylessly. The whole day, wire to wire, with nothing to sign up for.</s><s>festival/index.html</s></a>
+      <a class="t big" href="../kandi.html"><b>Make one and hand it over →</b><s class="do">String beads, spell a word, name who it is for. Gift it one way, or offer it to the crossing so it only moves when something lands back. What you receive rides your left arm forever.</s><s>kandi.html</s></a>
+      <a class="t big" href="../plur.html"><b>Walk the six wings →</b><s class="do">Where the word came from, whose floor it was first — Black, brown and queer — the law that tried to name the music, and Wing IV, which is the ritual kandi obeys. Read Wing IV and the bar downstairs stops being a toy.</s><s>plur.html</s></a>
     </div>
   </section>
 
