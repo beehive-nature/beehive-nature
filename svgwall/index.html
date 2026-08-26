@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>svg wall — inline vs data-URI · the measured delta</title>
+<style>
+:root{--void:#0b0e0c;--panel:#121713;--inset:#0e120f;--edge:#232b25;--ink:#e8eee6;--dim:#8fa295;--moss:#58d68d;--honey:#f0b429;--red:#e5484d}
+*{box-sizing:border-box;margin:0}
+html,body{background:var(--void);color:var(--ink);font:14px/1.45 "Segoe UI",system-ui,sans-serif}
+body{padding:16px 14px 40px}
+h1{font-size:22px;letter-spacing:-.3px}
+h1 span{background:linear-gradient(92deg,var(--moss),var(--honey));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--dim);font-size:12px;margin:2px 0 12px}
+.global{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.g{background:var(--panel);border:1px solid var(--edge);border-radius:10px;padding:8px 12px;min-width:110px}
+.g b{display:block;font-size:20px;color:var(--moss);font-variant-numeric:tabular-nums}
+.g span{color:var(--dim);font-size:10.5px;text-transform:uppercase;letter-spacing:.8px}
+.g.warn b{color:var(--honey)}
+.split{display:flex;gap:12px;align-items:stretch}
+@media (max-width:900px){.split{flex-direction:column}}
+.wall{flex:1;background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:10px;min-width:0}
+.wall h2{font-size:13px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.wall h2 b{color:var(--ink)}
+.nums{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:8px}
+.n{background:var(--inset);border:1px solid var(--edge);border-radius:8px;padding:6px 8px}
+.n b{display:block;font-size:16px;color:var(--moss);font-variant-numeric:tabular-nums}
+.n span{color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:.7px}
+.n.bad b{color:var(--red)}
+.stage{height:340px;overflow:hidden;border-radius:8px;background:
+	repeating-conic-gradient(#0d120f 0% 25%, #101612 0% 50%) 0 0/22px 22px;position:relative}
+.grid-inner{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:8px;will-change:transform}
+.grid-inner svg,.grid-inner img{width:100%;height:auto;display:block;border-radius:4px}
+.foot{color:var(--dim);font-size:11.5px;margin-top:12px}
+button{background:#1d2a20;border:1px solid #2c4634;color:var(--moss);font:inherit;padding:8px 14px;border-radius:9px;cursor:pointer;margin:10px 8px 0 0}
+button:hover{background:#24361f}
+#busy{color:var(--honey);font-size:12px;margin-left:6px}
+</style>
+</head>
+<body>
+<h1><span>svg wall</span> — inline SVG vs data-URI &lt;img&gt;, measured</h1>
+<p class="sub">our worst case: 50 BQueen-class pieces × 9,216 polygons each (460,800 polygons per wall).
+The SAME 50 generated strings are mounted two ways. No CDN, no build step, zero off-origin —
+the art is synthesized on this machine by a seeded PRNG. Numbers are live measurements, not claims.</p>
+
+<div class="global">
+	<div class="g"><b id="g-fps">—</b><span>fps (live)</span></div>
+	<div class="g"><b id="g-lt">0</b><span>long tasks</span></div>
+	<div class="g"><b id="g-ltms">0</b><span>long-task ms</span></div>
+	<div class="g warn"><b id="g-heap">—</b><span>js heap MB</span></div>
+	<div class="g"><b id="g-anim">on</b><span>transform anim (main thread)</span></div>
+</div>
+
+<div class="split">
+	<div class="wall" id="wall-a">
+		<h2>INLINE <b>&lt;svg&gt; trees</b> — the DOM owns every polygon</h2>
+		<div class="nums">
+			<div class="n"><b id="a-build">—</b><span>mount ms</span></div>
+			<div class="n"><b id="a-nodes">—</b><span>dom nodes</span></div>
+			<div class="n"><b id="a-re">—</b><span>re-render ms</span></div>
+			<div class="n" id="a-fpsbox"><b id="a-fps">—</b><span>fps · during re-render</span></div>
+		</div>
+		<div class="stage"><div class="grid-inner" id="grid-a"></div></div>
+	</div>
+	<div class="wall" id="wall-b">
+		<h2>DATA-URI <b>&lt;img&gt;</b> — one node per piece</h2>
+		<div class="nums">
+			<div class="n"><b id="b-build">—</b><span>mount + decode ms</span></div>
+			<div class="n"><b id="b-nodes">—</b><span>dom nodes</span></div>
+			<div class="n"><b id="b-re">—</b><span>re-render ms</span></div>
+			<div class="n" id="b-fpsbox"><b id="b-fps">—</b><span>fps · during re-render</span></div>
+		</div>
+		<div class="stage"><div class="grid-inner" id="grid-b"></div></div>
+	</div>
+</div>
+
+<div>
+	<button id="btn-both">re-render both walls</button>
+	<button id="btn-a">re-render inline only</button>
+	<button id="btn-b">re-render data-uri only</button>
+	<button id="btn-anim">pause transform anim</button>
+	<span id="busy"></span>
+</div>
+
+<p class="foot" id="foot">generating…</p>
+
+<script>
+"use strict";
+// ── seeded art: 50 deterministic BQueen-class pieces, 96×96 = 9,216 polygons each ──
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+var RAMPS=[
+	["#0b0e0c","#16241a","#1d772f","#3a9d5d","#58d68d","#0b0e0c","#f0b429","#f6d98a"],
+	["#0d0b12","#241735","#7c288a","#a05ac2","#2800ba","#0d0b12","#f0b429","#f4c09a"],
+	["#0b0e12","#122431","#1d5d77","#3aa2d6","#58c6d6","#0b0e12","#f0b429","#e8eee6"],
+	["#120b0b","#331a12","#77501d","#a8792a","#f0b429","#120b0b","#58d68d","#f4c09a"],
+	["#0b120c","#1b3312","#4d7751","#89a85c","#c6d698","#0b120c","#7c288a","#f6d98a"],
+	["#0c0b12","#2a1a4d","#4d2a8a","#8a5cd6","#c29af0","#0c0b12","#f0b429","#e8eee6"]
+];
+var W=96, CELL=10, PIECES=50; // 96*96 = 9,216 polygons; 50 pieces per wall
+function hash2(x,y,s){var h=x*374761393+y*668265263^s*974634;h=(h^h>>>13)*1274126177;return((h^h>>>16)>>>0)/4294967296}
+function pieceString(seed){
+	var R=mulberry32(seed),ramp=RAMPS[Math.floor(R()*RAMPS.length)],n=ramp.length;
+	var bandY=Math.floor(R()*40)+45, bandH=Math.floor(R()*14)+6;
+	var jewelX=Math.floor(R()*60)+18, jewelY=Math.floor(R()*60)+18, jewelR=Math.floor(R()*8)+7;
+	var jitter=R()*2-1;
+	var parts=new Array(W*W+1);
+	parts[W*W]="</svg>";
+	var head='<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 960 960\' shape-rendering=\'crispEdges\'>';
+	// background plate: one polygon (not counted in the 9,216 cell grid)
+	var out=[head,"<polygon points=\'0,0 960,0 960,960 0,960\' fill=\'",ramp[0],"\'/>"];
+	for(var y=0;y<W;y++){
+		for(var x=0;x<W;x++){
+			var h=hash2(x,y,seed),ci;
+			if(y>=bandY&&y<bandY+bandH&&h>0.18){ci=(h*3|0)+4}          // the crown band
+			else if((x-jewelX)*(x-jewelX)+(y-jewelY)*(y-jewelY)<jewelR*jewelR&&h>0.35){ci=(h*3|0)+3} // jewel cluster
+			else{var t=y/W+jitter*h*0.5;ci=Math.min(n-1,Math.max(1,Math.floor(t*(n-2))+ (h>0.8?1:0)))}
+			var px=x*CELL,py=y*CELL;
+			out.push("<polygon points=\'",px,",",py," ",px+CELL,",",py," ",px+CELL,",",py+CELL," ",px,",",py+CELL,"\' fill=\'",ramp[ci],"\'/>");
+		}
+	}
+	out.push("</svg>");
+	return out.join("");
+}
+// ── live meters ──────────────────────────────────────────────────────────────
+var fps=0,frames=0,lastT=performance.now(),totalFrames=0;
+var phaseT0=0,phaseF0=0;
+var ltCount=0,ltMs=0;
+try{new PerformanceObserver(function(l){l.getEntries().forEach(function(e){ltCount++;ltMs+=e.duration;
+	document.getElementById("g-lt").textContent=ltCount;
+	document.getElementById("g-ltms").textContent=Math.round(ltMs);})}).observe({entryTypes:["longtask"]})}catch(e){}
+function tick(t){
+	frames++;totalFrames++;
+	if(t-lastT>=500){
+		fps=Math.round(frames*1000/(t-lastT));
+		frames=0;lastT=t;
+		document.getElementById("g-fps").textContent=fps;
+		document.getElementById("g-fps").style.color=fps<30?"var(--red)":fps<50?"var(--honey)":"var(--moss)";
+		if(performance.memory)document.getElementById("g-heap").textContent=Math.round(performance.memory.usedJSHeapSize/1048576);
+	}
+	if(animOn){
+		ang+=0.35;if(ang>360)ang-=360;
+		ga.style.transform="translateY("+Math.sin(ang/57.3)*14+"px) rotateX(3deg)";
+		gb.style.transform="translateY("+Math.cos(ang/57.3)*14+"px) rotateX(3deg)";
+	}
+	requestAnimationFrame(tick);
+}
+var ang=0,animOn=true,ga=document.getElementById("grid-a"),gb=document.getElementById("grid-b");
+requestAnimationFrame(tick);
+function $(id){return document.getElementById(id)}
+function set(id,v){$(id).textContent=v}
+// fps DURING a phase, counted from the rAF timeline itself — if the main
+// thread starves rAF, the count is honestly near zero
+function phase(name){$("busy").textContent="· "+name;phaseT0=performance.now();phaseF0=totalFrames}
+function phaseFps(){var ms=performance.now()-phaseT0;if(ms<50)return null;return Math.round((totalFrames-phaseF0)*1000/ms)}
+function phaseDone(){$("busy").textContent=""}
+
+// ── the two mounts, same strings ─────────────────────────────────────────────
+var strings=[],uris=[];
+function buildInline(){
+	var t0=performance.now();
+	var frag="";
+	for(var i=0;i<PIECES;i++)frag+=strings[i];
+	ga.innerHTML=frag; // one parse of 460,800 polygons + 1 plate each
+	return performance.now()-t0;
+}
+function countNodes(el){return el.querySelectorAll("*").length}
+async function buildImgs(){
+	var t0=performance.now();
+	gb.replaceChildren();
+	var imgs=[];
+	for(var i=0;i<PIECES;i++){
+		var im=new Image();
+		im.src=uris[i];im.alt="piece "+i;
+		gb.appendChild(im);imgs.push(im);
+	}
+	await Promise.all(imgs.map(function(im){return im.decode()}));
+	return performance.now()-t0;
+}
+var reN=0;
+function rerenderInline(){reN++;return buildInline()}
+async function rerenderImgs(){
+	reN++;
+	var t0=performance.now();
+	var imgs=gb.querySelectorAll("img");
+	var jobs=[];
+	for(var i=0;i<imgs.length;i++){imgs[i].src=uris[i]+"#v"+reN;jobs.push(imgs[i].decode())}
+	await Promise.all(jobs);
+	return performance.now()-t0;
+}
+
+(async function main(){
+	phase("generating 50 pieces × 9,216 polygons…");
+	await new Promise(function(r){setTimeout(r,30)});
+	var t0=performance.now();
+	for(var i=0;i<PIECES;i++){
+		var s=pieceString(0xBEEF+i*7919);
+		strings.push(s);
+		uris.push("data:image/svg+xml,"+s.replace(/#/g,"%23"));
+	}
+	var genMs=performance.now()-t0;
+	var mb=strings.reduce(function(a,s){return a+s.length},0)/1048576;
+
+	phase("mounting INLINE wall (one 460,800-polygon parse)…");
+	var aBuild=buildInline();
+	set("a-build",Math.round(aBuild));
+	set("a-nodes",countNodes(ga).toLocaleString());
+
+	phase("mounting DATA-URI wall (50 decodes)…");
+	var bBuild=await buildImgs();
+	set("b-build",Math.round(bBuild));
+	set("b-nodes",countNodes(gb).toLocaleString());
+
+	// the React-style re-render: same art, committed again
+	phase("re-rendering INLINE wall…");
+	var aRe=rerenderInline();
+	set("a-re",Math.round(aRe));
+	set("a-fps",phaseFps());
+	set("a-nodes",countNodes(ga).toLocaleString());
+
+	phase("re-rendering DATA-URI wall…");
+	var bRe=await rerenderImgs();
+	set("b-re",Math.round(bRe));
+	set("b-fps",phaseFps());
+	set("b-nodes",countNodes(gb).toLocaleString());
+	phaseDone();
+
+	$("foot").innerHTML="<b>Receipt.</b> generation (shared source, both walls): "+Math.round(genMs)+
+		" ms · "+mb.toFixed(1)+" MB of SVG per wall. Inline mount <b>"+Math.round(aBuild)+" ms</b> / <b>"+countNodes(ga).toLocaleString()+
+		" DOM nodes</b>; data-URI mount+decode <b>"+Math.round(bBuild)+" ms</b> / <b>"+countNodes(gb).toLocaleString()+
+		" DOM nodes</b>. Re-render (React-commit equivalent): inline <b>"+Math.round(aRe)+" ms</b>, data-URI <b>"+
+		Math.round(bRe)+" ms</b> — min FPS shown per wall above; long tasks + heap in the global bar. "+
+		"The transform animation runs on the main thread for BOTH walls the whole time — when a mount chokes the thread, the FPS bar shows it.";
+
+	$("btn-both").onclick=async function(){
+		phase("re-rendering both…");
+		var r1=rerenderInline();set("a-re",Math.round(r1));set("a-fps",phaseFps());
+		var r2=await rerenderImgs();set("b-re",Math.round(r2));set("b-fps",phaseFps());
+		set("a-nodes",countNodes(ga).toLocaleString());set("b-nodes",countNodes(gb).toLocaleString());phaseDone();
+	};
+	$("btn-a").onclick=function(){phase("re-rendering inline…");
+		var r=rerenderInline();set("a-re",Math.round(r));set("a-fps",phaseFps());
+		set("a-nodes",countNodes(ga).toLocaleString());phaseDone()};
+	$("btn-b").onclick=async function(){phase("re-rendering data-uri…");
+		var r=await rerenderImgs();set("b-re",Math.round(r));set("b-fps",phaseFps());phaseDone()};
+	$("btn-anim").onclick=function(){animOn=!animOn;set("g-anim",animOn?"on":"paused");this.textContent=animOn?"pause transform anim":"resume transform anim"};
+})();
+</script>
+</body>
+</html>
