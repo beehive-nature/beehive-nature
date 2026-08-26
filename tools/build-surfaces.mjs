@@ -60,35 +60,41 @@ const TREE = countTree(SURF);
 
 const HEXPAL = ['#D655BB', '#86CC72', '#45C2DC', '#9C6FD6', '#E8B54B', '#6FA9E0', '#B79FE0'];
 
-/* One layer of comb. Each is a full-width row that slides inside a mask that
-   never moves — see the note above on the sheared right edge.
-   depth 0 = furthest back (big, slow, dim) … last = nearest (small, quick, bright) */
-const LAYERS = [
-  { cls: 'l0', size: 62, gap: 7, dur: 26, dir: 1, op: 0.30, blur: '1.2px' },
-  { cls: 'l1', size: 46, gap: 6, dur: 17, dir: -1, op: 0.72, blur: '0' },
-  { cls: 'l2', size: 30, gap: 5, dur: 11, dir: 1, op: 1.00, blur: '0' },
-];
-function hexBand(depth) {
-  /* a 1-layer band keeps the original look exactly: the mid layer alone */
-  const use = depth >= 3 ? LAYERS : depth === 2 ? [LAYERS[0], LAYERS[2]] : [LAYERS[1]];
+/* ── THE COMB WALL ─────────────────────────────────────────────────────────
+   A LAYER IS A COURSE, not a plane. Courses stack downward at 0.75 of a hex
+   height and alternate a half-tile offset — the real hexagonal tessellation,
+   so the rows interlock. Each course drifts on its own clock and direction;
+   deeper courses sit dimmer. The mask never moves (animating the clipper is
+   what sheared the right edge), and every row is generated wide enough to
+   overhang any viewport plus a full tile of travel. */
+const HEXW = 46, HEXH = 53, GAP = 6;
+const PITCH = Math.round(HEXH * 0.75);          /* vertical course spacing */
+function hexBand(courses) {
+  const n = Math.max(1, Math.min(3, courses | 0));
+  const step = HEXW + GAP;
+  const across = Math.ceil(2400 / step) + 2;
   let out = '';
-  for (const L of use) {
-    const step = L.size + L.gap;
-    const n = Math.ceil(2200 / step) + 2;   /* wide enough for any viewport + a full tile of travel */
+  for (let c = 0; c < n; c++) {
     let cells = '';
-    for (let i = 0; i < n; i++) {
-      cells += '<i style="background:' + HEXPAL[i % HEXPAL.length]
-        + ';width:' + L.size + 'px;height:' + Math.round(L.size * 1.15) + 'px'
-        + ';animation-duration:' + (2.4 + (i % 5) * 0.45).toFixed(1)
-        + 's;animation-delay:' + ((i % 7) * 0.19).toFixed(2) + 's"></i>';
+    for (let i = 0; i < across; i++) {
+      cells += '<i style="background:' + HEXPAL[(i + c * 3) % HEXPAL.length]
+        + ';animation-duration:' + (2.4 + ((i + c) % 5) * 0.45).toFixed(1)
+        + 's;animation-delay:' + (((i + c * 2) % 7) * 0.19).toFixed(2) + 's"></i>';
     }
-    out += '<div class="band ' + L.cls + '" style="gap:' + L.gap + 'px;opacity:' + L.op
-      + ';filter:blur(' + L.blur + ')'
-      + ';animation-duration:' + L.dur + 's;animation-name:'
-      + (L.dir > 0 ? 'hexdrift' : 'hexdriftb')
+    /* alternate courses shift half a tile — the interlock */
+    const shift = (c % 2 ? step / 2 : 0) - 80;
+    out += '<div class="band" style="top:' + (c * PITCH - 14) + 'px'
+      + ';left:' + shift + 'px'
+      + ';opacity:' + (1 - c * 0.16).toFixed(2)
+      + ';animation-duration:' + (15 + c * 6) + 's'
+      + ';animation-name:' + (c % 2 ? 'hexdriftb' : 'hexdrift')
       + ';--step:' + step + 'px">' + cells + '</div>';
   }
   return out;
+}
+function bandHeight(courses) {
+  const n = Math.max(1, Math.min(3, courses | 0));
+  return (n - 1) * PITCH + HEXH + 16;
 }
 
 const BASE_TOKENS = `
@@ -113,19 +119,18 @@ a{text-decoration:none}
 #veil{position:fixed;inset:0;pointer-events:none;z-index:3;opacity:.55;mix-blend-mode:multiply;
   background:repeating-linear-gradient(180deg,rgba(0,0,0,0) 0,rgba(0,0,0,0) 2px,rgba(0,0,0,.22) 3px,rgba(0,0,0,0) 4px)}
 header{position:relative;overflow:hidden;border-bottom:1px solid var(--line);padding-bottom:34px}
-/* the mask NEVER moves — animating it sheared the right edge (2026-08-26) */
-#bandwrap{position:absolute;top:0;left:0;right:0;height:78px;overflow:hidden}
-#bandwrap .band{position:absolute;top:-16px;left:-80px;display:flex;
+/* the mask NEVER moves — animating it sheared the right edge (2026-08-26).
+   Its height comes from the number of courses, set per page below. */
+#bandwrap{position:absolute;top:0;left:0;right:0;overflow:hidden;height:var(--bandh,78px)}
+#bandwrap .band{position:absolute;display:flex;gap:6px;
   animation-timing-function:linear;animation-iteration-count:infinite;will-change:transform}
-#bandwrap .band i{flex:none;display:block;
+#bandwrap .band i{flex:none;display:block;width:46px;height:53px;
   clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
   animation:hexpulse 3s ease-in-out infinite}
-#bandwrap .l0{top:-24px}
-#bandwrap .l2{top:2px}
 @keyframes hexpulse{0%{opacity:.10;transform:scale(.86)}50%{opacity:.95;transform:scale(1)}100%{opacity:.10;transform:scale(.86)}}
 @keyframes hexdrift{0%{transform:translateX(0)}100%{transform:translateX(calc(var(--step) * -1))}}
 @keyframes hexdriftb{0%{transform:translateX(calc(var(--step) * -1))}100%{transform:translateX(0)}}
-.eyebrow{position:relative;padding-top:86px;font-size:10px;letter-spacing:.34em;color:var(--dimmer);text-transform:uppercase}
+.eyebrow{position:relative;padding-top:calc(var(--bandh,78px) + 16px);font-size:10px;letter-spacing:.34em;color:var(--dimmer);text-transform:uppercase}
 .shead{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding-bottom:11px;border-bottom:1px solid var(--line)}
 .shead .dot{width:10px;height:10px;flex:none;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
 .shead h2{font-size:19px;font-weight:800;letter-spacing:-.01em}
@@ -216,7 +221,7 @@ a.t.big s:not(.do){font-size:9.5px;color:var(--dimmer);margin-top:8px}
 .notyet a{display:inline-flex;align-items:center;min-height:32px;padding:0 5px}
 @media (max-width:600px){
   .wrap{padding:0 14px}
-  .eyebrow{padding-top:60px;letter-spacing:.2em}
+  .eyebrow{padding-top:calc(var(--bandh,78px) + 4px);letter-spacing:.2em}
   .grid,.grid.verbs{grid-template-columns:1fr;gap:9px}
   section{padding:14px}.act{padding:16px}
   a.t:hover,.act:hover{transform:none}}`;
@@ -254,7 +259,7 @@ for (const d of E.domains) {
     : '';
 
   const html = head(d.host + ' — ' + d.who.replace(/^for /, ''), doorCss(d.accent))
-    + '<header>\n  <div id="bandwrap" aria-hidden="true">' + hexBand(d.layers || 1) + '</div>\n'
+    + '<header style="--bandh:' + bandHeight(d.layers || 1) + 'px">\n  <div id="bandwrap" aria-hidden="true">' + hexBand(d.layers || 1) + '</div>\n'
     + '  <div class="wrap">\n'
     + '    <p class="eyebrow" data-i18n="d.' + d.id + '.who">' + esc(d.who) + '</p>\n'
     + '    <h1>' + esc(d.host) + '</h1>\n'
@@ -288,7 +293,7 @@ for (const d of E.domains) {
       + '<s>' + b.live + ' open now</s></a>\n';
   }
   const html = head('the six doors — beehive nature', doorCss('#D655BB'))
-    + '<header>\n  <div id="bandwrap" aria-hidden="true">' + hexBand(3) + '</div>\n'
+    + '<header style="--bandh:' + bandHeight(3) + 'px">\n  <div id="bandwrap" aria-hidden="true">' + hexBand(3) + '</div>\n'
     + '  <div class="wrap">\n    <p class="eyebrow">six doors, six different strangers</p>\n'
     + '    <h1 style="color:var(--ink)">the six doors</h1>\n'
     + '    <p class="what">Six front doors, one organism. Each one answers a different person’s first '
@@ -338,7 +343,7 @@ h1+.lede{position:relative;color:var(--dim);font-size:13px;margin-top:18px;max-w
 section[hidden],a.t[hidden]{display:none}
 @media (max-width:600px){
   .wrap{padding:0 14px}
-  .eyebrow{padding-top:64px;letter-spacing:.22em}
+  .eyebrow{padding-top:calc(var(--bandh,78px) + 6px);letter-spacing:.22em}
   section{padding:14px;margin-top:26px}
   .grid{grid-template-columns:1fr;gap:9px}
   a.t{padding:15px}
@@ -399,7 +404,7 @@ const hub = head('beehive nature · the surfaces — six domains, one organism',
   + '<meta name="apple-mobile-web-app-capable" content="yes">\n'
   + '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">\n'
   + '<link rel="apple-touch-icon" href="bn-logo.jpg">\n')
-  + '<header>\n  <div id="bandwrap" aria-hidden="true">' + hexBand(3) + '</div>\n'
+  + '<header style="--bandh:' + bandHeight(3) + 'px">\n  <div id="bandwrap" aria-hidden="true">' + hexBand(3) + '</div>\n'
   + '  <div class="wrap">\n'
   + '    <p class="eyebrow">zero network · no password · no name</p>\n'
   + '    <div class="mark">\U0001F41D</div>\n'.replace('\\U0001F41D', '\u{1F41D}')
