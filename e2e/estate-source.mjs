@@ -75,7 +75,7 @@ ok('every domain has an id, a slug, an accent and one thing to do',
 
 /* 3 · THE LANGUAGE STACK — every string reachable by every tongue */
 {
-  const walk = (d, b = '') => readdirSync(d, { withFileTypes: true }).flatMap(e => {
+  var walk = (d, b = '') => readdirSync(d, { withFileTypes: true }).flatMap(e => {
     const r = b ? b + '/' + e.name : e.name;
     if (e.isDirectory()) return e.name === 'fleet' ? [] : walk(join(d, e.name), r);
     return e.name.endsWith('.html') ? [r] : [];
@@ -101,6 +101,38 @@ ok('every domain has an id, a slug, an accent and one thing to do',
   ok(`every docked tongue covers the whole corpus (${langs.length} languages, ${have.size} keys)`,
     thin.length === 0,
     thin.map(x => `${x.L} ${x.pct}%`).join(', '));
+
+  /* THE STALE-TRANSLATION CHECK. A key whose ENGLISH changed on the page but
+     not in the corpus is worse than an untranslated key: the page looks
+     translated and describes something that is no longer true. Tonight the
+     kandi bar gained a third arm and 26 tongues went on saying "THE TWO ARMS",
+     and four surfaces rendered one key with two different Englishes — the hub
+     tile's name and the door tile's verb — so a translated reader got
+     whichever one the corpus happened to hold, in the wrong place. Neither was
+     visible to any gate. Compare what the page says in English to what the
+     corpus thinks English is. */
+  {
+    const dec = t => t.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&ldquo;|&rdquo;/g, '\u201C')
+      .replace(/\s+/g, ' ').trim();
+    const drift = [], seen = {};
+    for (const f of walk(SURF)) {
+      const html = readFileSync(join(SURF, f), 'utf8');
+      for (const m of html.matchAll(/data-i18n="([^"]+)"[^>]*>([^<]*)</g)) {
+        const k = m[1], t = dec(m[2]);
+        if (!t) continue;
+        /* one key must render ONE English everywhere it appears */
+        if (seen[k] && seen[k].t !== t) drift.push(k + ': two Englishes (' + seen[k].f + ' vs ' + f + ')');
+        else if (!seen[k]) seen[k] = { t, f };
+        const e = corpus.strings[k];
+        if (e && e.en && dec(e.en) !== t) drift.push(k + ' in ' + f + ': corpus English is stale');
+      }
+    }
+    const uniq = [...new Set(drift)];
+    ok('the corpus English matches what the pages actually say',
+      uniq.length === 0,
+      uniq.length ? uniq.length + ' drifted: ' + uniq.slice(0, 4).join(' · ') : '');
+  }
 
   const generated = [...keys].filter(k => /^(s|d|m|hub)\./.test(k));
   ok('the generated pages are translatable (they carry i18n keys)',
