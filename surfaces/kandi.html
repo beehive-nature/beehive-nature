@@ -45,6 +45,8 @@ button.act:hover{background:var(--r);color:#0a0612}
 .xrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
 .xpanel{border:1px dashed #2b3f6b;padding:14px;margin-top:12px;display:none}
 /* the arrival — what a handed bracelet looks like when it lands */
+#comet{display:block;width:100%;height:132px;margin:-14px 0 -8px;pointer-events:none}
+@media (max-width:600px){#comet{height:104px}}
 .arrival{display:none;border:1px solid var(--p);border-left:4px solid var(--p);
   background:#0d0a12;padding:22px 20px;margin-bottom:22px}
 .arrival.open{display:block}
@@ -80,6 +82,7 @@ code{color:var(--ink)}
 </style></head><body>
 <main>
 <div class="arrival" id="arrival"></div>
+<canvas id="comet" aria-hidden="true"></canvas>
 <header>
   <h1>🍬 the kandi bar</h1>
   <div class="sub"><span data-i18n="kandi.bar">the kandi bar — make it, name it, gift it, cross it, show it</span></div>
@@ -549,6 +552,101 @@ $('rcvgo').onclick=function(){
 })();
 
 paint(); arms();
+})();
+</script>
+<script>
+/* ── THE COMET ─────────────────────────────────────────────────────────────
+   The logo rolls across and comes apart behind itself. Geometry is the
+   estate's own bComb lattice (blight/demo.html): RINGS 0..5, cell counts
+   1,6,12,18,24,30 — 91 hexagons, the same lattice the beam transmits. */
+(function(){
+  var c=document.getElementById('comet'); if(!c||!c.getContext) return;
+  var x=c.getContext('2d'), DPR=Math.min(window.devicePixelRatio||1,2);
+  var PAL=['#39c5cf','#D655BB','#e6b32e','#a78bfa','#7ddf8f','#45C2DC','#ff8c5a','#f4e04d'];
+  var W,H,SP,HR,RAD,cells,shed,px,rot,t0;
+
+  function build(){
+    W=c.clientWidth; H=c.clientHeight;
+    c.width=W*DPR; c.height=H*DPR; x.setTransform(DPR,0,0,DPR,0,0);
+    SP=Math.max(7,Math.min(11,H/13));      /* centre-to-centre spacing */
+    HR=SP*0.56;                            /* hexagon radius */
+    RAD=SP*5;                              /* outer ring radius = the wheel's radius */
+    cells=[];
+    for(var ring=0; ring<6; ring++){
+      var n = ring===0 ? 1 : ring*6;
+      for(var i=0;i<n;i++){
+        var a = ring===0 ? 0 : (Math.PI*2/n)*i - Math.PI/2;
+        cells.push({a:a, r:ring*SP, ring:ring,
+          col:PAL[(ring*3+i)%PAL.length],
+          /* the further out, the sooner it lets go — the rim sheds first */
+          drop:0.20+Math.random()*0.74-ring*0.010,
+          gone:false});
+      }
+    }
+    shed=[]; px=-RAD*2; rot=0; t0=0;
+  }
+
+  function hex(cx,cy,r,rt){
+    x.beginPath();
+    for(var i=0;i<6;i++){ var a=Math.PI/3*i+rt;
+      x[i?'lineTo':'moveTo'](cx+r*Math.cos(a),cy+r*Math.sin(a)); }
+    x.closePath();
+  }
+
+  function frame(now){
+    if(!t0) t0=now;
+    var span=W+RAD*4, dur=15000;
+    var p=((now-t0)%dur)/dur;
+    if(p<0.004 && px>0){ build(); t0=now; }   /* a fresh mandala each pass */
+    px=-RAD*2+span*p;
+    rot=px/RAD;                               /* ROLLING: turn tied to distance */
+    var cy=H/2;
+    x.clearRect(0,0,W,H);
+
+    /* the tail first, so the wheel rides over it */
+    for(var i=shed.length-1;i>=0;i--){
+      var s=shed[i];
+      s.life-=0.0072; s.sx+=s.vx; s.sy+=s.vy; s.vy+=0.006; s.rt+=s.vr;
+      if(s.life<=0){ shed.splice(i,1); continue; }
+      var blink=0.45+0.55*Math.abs(Math.sin(now/150+s.ph));
+      var al=Math.max(0,s.life)*blink;
+      x.globalAlpha=al*0.22; x.fillStyle=s.col;
+      hex(s.sx,s.sy,HR*(1.5+s.life*0.7),s.rt); x.fill();
+      x.globalAlpha=al; hex(s.sx,s.sy,HR*(0.55+s.life*0.45),s.rt); x.fill();
+    }
+    x.globalAlpha=1;
+
+    /* the mandala, rolling and letting go */
+    for(var k=0;k<cells.length;k++){
+      var q=cells[k]; if(q.gone) continue;
+      var a=q.a+rot, cxp=px+Math.cos(a)*q.r, cyp=cy+Math.sin(a)*q.r;
+      if(p>q.drop){
+        q.gone=true;
+        shed.push({sx:cxp,sy:cyp,col:q.col,life:1,
+          vx:-0.55-Math.random()*0.7, vy:(Math.random()-0.5)*0.5,
+          rt:rot, vr:(Math.random()-0.5)*0.09, ph:Math.random()*6.28});
+        continue;
+      }
+      var tw=0.72+0.28*Math.sin(now/260+k);
+      x.globalAlpha=tw;
+      x.fillStyle=q.col; hex(cxp,cyp,HR,rot); x.fill();
+      if(q.ring===0){ x.globalAlpha=1; x.strokeStyle='#ece5f7'; x.lineWidth=1; x.stroke(); }
+    }
+    x.globalAlpha=1;
+    requestAnimationFrame(frame);
+  }
+
+  build();
+  if(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches){
+    /* one still frame: the logo intact, nothing moving */
+    px=W/2; rot=0;
+    for(var k=0;k<cells.length;k++){ var q=cells[k];
+      x.globalAlpha=0.85; x.fillStyle=q.col;
+      hex(px+Math.cos(q.a)*q.r, H/2+Math.sin(q.a)*q.r, HR, 0); x.fill(); }
+    return;
+  }
+  requestAnimationFrame(frame);
+  addEventListener('resize',build);
 })();
 </script>
 <script src="blight/pointers.js"></script>
