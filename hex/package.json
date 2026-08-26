@@ -1,0 +1,6 @@
+{
+	"name": "hex",
+	"private": true,
+	"type": "module",
+	"description": "Hexagonal rendering path — mode alongside square, never a replacement"
+}
