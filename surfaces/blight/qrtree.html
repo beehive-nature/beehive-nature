@@ -1008,7 +1008,7 @@ function drawTree(progress){
 }
 function drawFlat(){
   var q=state.qr;if(!q)return;
-  var n=q.size+8,cell=Math.floor(Math.min(cv.width,cv.height)/n);
+  var n=q.size+8,cell=Math.floor(Math.min(cv.width,cv.height)/(n+2)); // +2 modules of outer margin — scanners want air beyond the quiet zone
   var w=cell*n,ox=(cv.width-w)/2,oy=(cv.height-w)/2;
   ctx.fillStyle=FLAT_LIGHT;ctx.fillRect(0,0,cv.width,cv.height);
   ctx.fillStyle=FLAT_DARK;
@@ -1061,6 +1061,6 @@ grow();
 })();
 </script>
 <div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(.6rem + 46px);z-index:9996;font:12px ui-monospace,monospace;opacity:.75"><a href="../index.html" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
-<script src="../tour.js?v=24"></script>
+<script src="../tour.js?v=23"></script>
 </body>
 </html>
