@@ -1,0 +1,12 @@
+[package]
+name = "reversibility"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "Independence-aware quorum over chain sources: a reorg is only detected when sources that CANNOT be the same machine disagree. std-only, zero dependencies."
+
+# ZERO DEPENDENCIES, DELIBERATELY. This crate decides whether a set of readings
+# may be trusted; it must not itself pull a supply chain in to do it, and it
+# must not be able to make a network call of its own. Talking to a chain is an
+# adapter's job — this crate only takes what an adapter already read.
+[dependencies]

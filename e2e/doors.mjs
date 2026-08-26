@@ -117,6 +117,24 @@ for (const f of files) {
     const text = await page.evaluate(() => (document.body.innerText || '').trim().length);
     if (text < 80) blank.push(`${target} (${text} chars)`);
   }
+  /* SELF-TEST FIRST — see the note at the top of this block. The checker
+     resolves a known-good fragment link and a known-dead link through the same
+     path it uses for real ones, and must separate them. */
+  {
+    const resolveLike = h => {
+      const bare = h.replace(/^\.\.\//, '').split('#')[0];
+      return bare.endsWith('/') ? bare + 'index.html' : bare;
+    };
+    const good = resolveLike('../blanguage.html#skaists');
+    const dead = resolveLike('../no-such-surface-' + 'deadbeef.html');
+    const goodResolves = existsSync(join(SURF, good));
+    const deadResolves = existsSync(join(SURF, dead));
+    ok('the link checker resolves a known-good FRAGMENT link (blanguage.html#skaists)',
+      goodResolves, 'resolved to ' + good);
+    ok('the link checker still refuses a known-dead link',
+      !deadResolves, 'resolved to ' + dead + ' and claimed it exists');
+  }
+
   ok(`every link the doors list resolves 200 (${allLinks.size} links)`, broken.length === 0, broken.join(', '));
   ok('every link the doors list renders body text', blank.length === 0, blank.join(', '));
   await page.close();
