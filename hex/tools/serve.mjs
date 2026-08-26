@@ -1,12 +1,20 @@
-// serve.mjs — zero-dep static server for the hex demo. Root = hex/.
-// Usage: node tools/serve.mjs [port]  → http://127.0.0.1:<port>/demo/
+// serve.mjs — zero-dep static server. Default root = hex/; pass --root <dir>
+// to serve elsewhere (e.g. the worktree root for the live surface).
+// Usage: node tools/serve.mjs [port] [--root <dir>]  → http://127.0.0.1:<port>/demo/
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
-import { dirname, extname, join, normalize } from "node:path";
+import { dirname, extname, join, normalize, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const PORT = Number(process.argv[2] ?? 8944);
+const args = process.argv.slice(2);
+let port = 8944;
+let rootArg = null;
+for (let i = 0; i < args.length; i++) {
+	if (args[i] === "--root") rootArg = args[++i];
+	else if (!isNaN(Number(args[i]))) port = Number(args[i]);
+}
+const ROOT = resolve(rootArg ?? join(dirname(fileURLToPath(import.meta.url)), ".."));
+const PORT = port;
 const MIME = {
 	".html": "text/html",
 	".js": "text/javascript",
