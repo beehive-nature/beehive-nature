@@ -1,5 +1,12 @@
 // forge-freeze.mjs — FORGE FREEZE (founder ruling, dispatched 2026-08-24).
 //
+// RULED 2026-08-26 (docs/RULINGS-2026-08-26.md R1) — DO NOT LIFT, DO NOT RE-PIN.
+// If a sweep moves these bytes the fix is to RESTORE THE FILE, never to update
+// PINNED_SHA256 to make a build pass. surfaces/forge/orbit-arweave-anchor.md
+// carries this same hash in the Rail 2 payload table: those bytes are destined
+// for permanent storage, and re-pinning would invalidate an anchor that cannot
+// be recalled. The tour.js?v= skew on this one file is accepted, not a defect.
+// Sweeps go through scripts/bump-rider.sh, which reads the frozen path from here.
 // surfaces/forge/orbit.html is frozen founder-approved art: CI fails on ANY
 // edit to its COMMITTED BLOB. The hash is taken from `git show HEAD:<path>`,
 // never the worktree copy — on a Windows checkout the working file may differ
