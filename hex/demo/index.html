@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>hex refine — FUNGI honeycomb</title>
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<header class="masthead">
+	<h1><span class="grad">hex refine</span></h1>
+	<p class="law">hex is a <b>mode</b> alongside square — never a replacement. the artist picks.</p>
+</header>
+
+<main>
+	<section class="controls" aria-label="render controls">
+		<div class="row" data-group="mode">
+			<span class="lbl">lattice</span>
+			<div class="seg" id="seg-mode">
+				<button data-v="square" class="on">square</button>
+				<button data-v="hex">hex</button>
+			</div>
+		</div>
+		<div class="row" id="row-orient">
+			<span class="lbl">orientation</span>
+			<div class="seg" id="seg-orient">
+				<button data-v="pointy" class="on">pointy-top</button>
+				<button data-v="flat">flat-top</button>
+			</div>
+		</div>
+		<div class="row">
+			<span class="lbl">dither</span>
+			<div class="seg" id="seg-dither">
+				<button data-v="diffuse" class="on">diffuse</button>
+				<button data-v="ordered">ordered</button>
+				<button data-v="off">off</button>
+			</div>
+		</div>
+		<div class="row">
+			<span class="lbl">palette</span>
+			<div class="seg" id="seg-palette">
+				<button data-v="16">16</button>
+				<button data-v="8">8</button>
+				<button data-v="6" class="on">6</button>
+				<button data-v="4">4</button>
+			</div>
+		</div>
+		<div class="row">
+			<span class="lbl">density <b id="den-v">44</b></span>
+			<input type="range" id="density" min="28" max="72" value="44">
+		</div>
+	</section>
+
+	<section class="stage">
+		<canvas id="cv"></canvas>
+	</section>
+
+	<section class="stats">
+		<div class="stat"><b id="st-cells">—</b><span>cells</span></div>
+		<div class="stat"><b id="st-colours">—</b><span>colours</span></div>
+		<div class="stat"><b id="st-ms">—</b><span>ms</span></div>
+	</section>
+
+	<section class="exports">
+		<button id="btn-svg">export svg</button>
+		<button id="btn-png">export png ×3</button>
+	</section>
+
+	<p class="foot">FUNGI sheet · seeds 1+7 · on-chain source, degraded ×16 upscale — the realistic input.
+	src: <a href="https://github.com/HappyOnigiri/PixelRefiner" rel="noopener">PixelRefiner</a> core (MIT) drives the palette · hex lattice by lane/hex</p>
+</main>
+
+<script type="module" src="./main.js"></script>
+</body>
+</html>
