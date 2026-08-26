@@ -76,7 +76,12 @@ ok('what I received can never be gifted or re-crossed', leftBtns>0 && !leftGift,
 await A.click('#left .xrow button'); await A.waitForTimeout(250);
 const ptr=await A.inputValue('#showout');
 ok('show it emits a [bX kandi] pointer in the estate grammar', /^\[bX kandi\]/.test(ptr), ptr.slice(0,60));
-ok('the pointer carries a link, not the bracelet itself', /kandi\.html\?k=/.test(ptr) && ptr.length<300, String(ptr.length));
+ok('the pointer carries a link, not the bracelet itself', /kandi\.html#k=/.test(ptr) && ptr.length<400, String(ptr.length));
+/* THE PRIVACY PROPERTY, gated: the piece must ride the FRAGMENT. A query
+   string is transmitted, so ?k= wrote the maker name, the made-FOR name, the
+   timestamp and the beads into the hosting server's request log every time
+   somebody opened a shared link. A fragment never leaves the browser. */
+ok('the shared piece never rides the query string', !/\?k=/.test(ptr) && !/\?[^#]*KND1/.test(ptr), ptr.slice(0,90));
 const url=(ptr.match(/https?:\/\/\S+/)||[])[0];
 const C=await b.newPage();
 await C.goto(url,{waitUntil:'load'}); await C.waitForTimeout(600);
