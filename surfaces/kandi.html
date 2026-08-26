@@ -41,6 +41,12 @@ button.act:hover{background:var(--r);color:#0a0612}
 .kc .tag.keep{color:var(--amber);border:1px dashed #5c4318}
 .kc .tag.trade{color:var(--ok);border:1px solid #1d4a2a}
 .kc .tag.ded{color:var(--amber);border:1px solid #5c4318}
+.kc .tag.cross{color:var(--u);border:1px solid #2b3f6b}
+.xrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+.xpanel{border:1px dashed #2b3f6b;padding:10px;margin-top:10px;display:none}
+.xpanel.open{display:block}
+.shout{width:100%;min-height:44px;resize:vertical;margin-top:8px;display:none}
+.shout.open{display:block}
 .kc button{margin-top:6px}
 .hand{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-top:9px}
 .hs{background:var(--well);border:1px solid var(--line);border-radius:9px;padding:8px;text-align:center;opacity:.35;transition:opacity .4s,border-color .4s}
@@ -101,7 +107,7 @@ code{color:var(--ink)}
 </section>
 
 <section>
-  <h2 class="arms">🫱🫲 <span data-i18n="kandi.arms">THE TWO ARMS — right arm trades, left arm keeps</span></h2>
+  <h2 class="arms">🫱🫲 <span data-i18n="kandi.arms">THE THREE ARMS — right trades, left keeps, the crossing swaps</span></h2>
   <div class="law"><b>The etiquette, enforced as written in the mUseUm:</b> tradeables ride the
   right arm; keepsakes and gifts received ride the left and <b>never re-trade</b>; never ask for
   a specific piece; and <b>what you gift leaves your arm</b> — a memory line stays, history kept.</div>
@@ -110,6 +116,23 @@ code{color:var(--ink)}
   <div class="karm" id="right"></div>
   <div style="font-size:10.5px;color:var(--amber);letter-spacing:.06em;margin-top:12px">LEFT ARM — keepsakes</div>
   <div class="karm" id="left"></div>
+
+  <div style="font-size:10.5px;color:var(--u);letter-spacing:.06em;margin-top:14px">THE CROSSING — offered, and only for another piece</div>
+  <div class="law" data-reg="bee">Some kandi you would never give away. Offer it to the crossing
+  instead: it stays yours until somebody puts a piece in your hand, and then the two swap at once.
+  Nothing leaves your arm for nothing.</div>
+  <div class="law" data-reg="raver">on respect, the kandi crosses. this is the arm for the piece you
+  would never hand over — it does not move until something lands. what comes back rides the left arm,
+  forever, because it was given to you.</div>
+  <div class="law" data-reg="cypherpunk">Mechanics, stated plainly: a crossing is TWO one-way handoffs
+  the page performs locally, not an escrow — there is no third party and nothing to trust but the floor.
+  Your side completes at the instant you paste theirs: your piece retires to the memory line and theirs
+  is written to <code>S.left</code> with <code>rcv:true</code>, so it can never re-trade. Same KND1
+  string, same FNV-1a/32 checksum, same retirement rule as the gift — a copy you already handed over
+  cannot be un-handed, which is why the piece leaves your arm rather than being marked "traded".</div>
+  <div class="karm" id="cross"></div>
+
+  <textarea id="showout" class="shout" readonly aria-label="a pointer to this kandi"></textarea>
   <div class="given" id="givenlog"></div>
 </section>
 
@@ -176,9 +199,13 @@ function rescueStranded(st){
 }
 var _rescued=0;
 var S=rescueStranded(load());
+/* the crossing arrives after some people already have a save; default it
+   rather than widening load()'s shape check, which would refuse — and
+   therefore erase — every arm strung before tonight. */
+if(S && !Array.isArray(S.cross)) S.cross=[];
 if(S&&_rescued) save();
 if(!S){ /* first visit: the mUseUm gifts every guest their first kandi */
-  S={v:1,right:[],left:[{maker:'the PLUR mUseUm',madefor:'you',beads:'0P1L2U3R',ts:Date.now(),rcv:true}],given:[]};
+  S={v:1,right:[],left:[{maker:'the PLUR mUseUm',madefor:'you',beads:'0P1L2U3R',ts:Date.now(),rcv:true}],cross:[],given:[]};
   save();
 }
 
@@ -259,14 +286,38 @@ function card(k,side,idx){
   d.appendChild(who);
   var tag=document.createElement('span');
   var dedicated = side==='right' && k.madefor;
-  tag.className='tag '+(side!=='right' ? 'keep' : (dedicated ? 'ded' : 'trade'));
-  tag.textContent = side!=='right' ? 'keepsake — never re-trades'
-    : (dedicated ? 'for '+k.madefor+' — gift it, do not trade it' : 'tradeable');
+  tag.className='tag '+(side==='cross' ? 'cross' : (side==='left' ? 'keep' : (dedicated ? 'ded' : 'trade')));
+  tag.textContent = side==='cross' ? 'offered — crosses only for another piece'
+    : (side==='left' ? 'keepsake — never re-trades'
+    : (dedicated ? 'for '+k.madefor+' — gift it, do not trade it' : 'tradeable'));
   d.appendChild(tag);
+  var row=document.createElement('div'); row.className='xrow';
+  function btn(label,fn){ var x=document.createElement('button'); x.className='act';
+    x.textContent=label; x.addEventListener('click',fn); row.appendChild(x); return x; }
   if(side==='right'){
-    var g=document.createElement('button'); g.className='act'; g.textContent='✦ gift it';
-    g.addEventListener('click',function(){ gift(idx); });
-    d.appendChild(g);
+    btn('✦ gift it',function(){ gift(idx); });
+    btn('⇄ offer to the crossing',function(){ toCross(idx); });
+  }
+  if(side==='cross'){
+    btn('⇄ cross it',function(){ openCross(idx); });
+    btn('↩ take it back',function(){ unCross(idx); });
+  }
+  /* show and tell: a POINTER, never the content — the estate's one grammar
+     (blight/pointers.js, the DM payload law). Thin enough for any channel. */
+  btn('◎ show it',function(){ showIt(k); });
+  d.appendChild(row);
+  if(side==='cross'){
+    var pan=document.createElement('div'); pan.className='xpanel'; pan.id='xp'+idx;
+    pan.innerHTML='<div class="law">Hand them <b>your</b> string, paste <b>theirs</b>. The swap happens '+
+      'the moment you paste — yours retires, theirs rides your left arm forever.</div>'+
+      '<textarea readonly class="xmine" style="width:100%;min-height:44px;resize:vertical"></textarea>'+
+      '<textarea class="xtheirs" placeholder="KND1|… — the piece they are crossing to you" '+
+      'style="width:100%;min-height:44px;resize:vertical;margin-top:6px"></textarea>'+
+      '<div class="xrow"><button class="act xcopy">copy mine</button>'+
+      '<button class="act xdo">complete the crossing</button>'+
+      '<button class="act xclose">close</button></div>'+
+      '<div class="err xerr"></div>';
+    d.appendChild(pan);
   }
   return d;
 }
@@ -277,13 +328,61 @@ function arms(){
       + '(a bug fixed 2026-08-25) — they are on your right arm now, ready to gift.';
       n.style.display='block'; }
   }
-  $('right').innerHTML=''; $('left').innerHTML='';
+  $('right').innerHTML=''; $('left').innerHTML=''; $('cross').innerHTML='';
   if(!S.right.length) $('right').innerHTML='<div style="color:var(--faint);font-size:10px;font-style:italic;padding:6px">nothing strung yet — the composer is open</div>';
   S.right.forEach(function(k,i){ $('right').appendChild(card(k,'right',i)); });
   S.left.forEach(function(k,i){ $('left').appendChild(card(k,'left',i)); });
+  if(!S.cross.length) $('cross').innerHTML='<div style="color:var(--faint);font-size:10px;font-style:italic;padding:6px">nothing offered — the crossing is for the piece you would never simply give away</div>';
+  S.cross.forEach(function(k,i){ $('cross').appendChild(card(k,'cross',i)); });
   $('givenlog').textContent=S.given.length
-    ? 'given away, remembered: '+S.given.map(function(g){return (g.beads.length)+' beads → '+(g.to||'the floor')}).join(' · ')
+    ? 'let go, remembered: '+S.given.map(function(g){return (g.beads.length)+' beads '+(g.crossed?'⇄ crossed with ':'→ ')+(g.to||'the floor')}).join(' · ')
     : '';
+}
+
+/* ---- the crossing: the third arm ----
+   THE LAW OF THIS ARM: nothing leaves for nothing. A piece here is not for
+   sale and not for gifting — it moves only when another piece lands, and what
+   lands rides the LEFT arm, eternal, because it was given to you. This is the
+   arm for work an artist would never hand over one-way. */
+function toCross(idx){ var k=S.right[idx]; if(!k) return;
+  S.right.splice(idx,1); S.cross.push(k); save(); arms(); }
+function unCross(idx){ var k=S.cross[idx]; if(!k) return;
+  S.cross.splice(idx,1); S.right.push(k); save(); arms(); }
+function openCross(idx){
+  var pan=document.getElementById('xp'+idx); if(!pan) return;
+  pan.classList.add('open');
+  pan.querySelector('.xmine').value=encode(S.cross[idx]);
+  pan.querySelector('.xcopy').onclick=function(){
+    var t=pan.querySelector('.xmine'); t.select();
+    try{ document.execCommand('copy'); }catch(e){}
+    if(navigator.clipboard) navigator.clipboard.writeText(t.value).catch(function(){});
+  };
+  pan.querySelector('.xclose').onclick=function(){ pan.classList.remove('open'); };
+  pan.querySelector('.xdo').onclick=function(){
+    var err=pan.querySelector('.xerr');
+    var r=decode(pan.querySelector('.xtheirs').value);
+    if(r.err){ err.textContent='refused — '+r.err; return; }
+    var mine=S.cross[idx]; if(!mine){ err.textContent='that piece is no longer on the crossing'; return; }
+    if(encode(mine)===pan.querySelector('.xtheirs').value.trim()){
+      err.textContent='that is your own string — a crossing needs two hands'; return; }
+    /* the swap, both halves at once: yours retires to the memory line, theirs
+       lands eternal. Order matters only for honesty — never take before giving. */
+    S.given.push({beads:mine.beads,to:(r.maker||'the floor'),ts:Date.now(),crossed:true});
+    S.cross.splice(idx,1);
+    S.left.push({maker:r.maker,madefor:r.madefor,beads:r.beads,ts:r.ts,rcv:true,crossed:true});
+    save(); err.textContent=''; arms();
+  };
+}
+/* show and tell — the DM payload law: a message is a POINTER, never content.
+   PTR is loaded from blight/pointers.js so every surface keeps one grammar. */
+function showIt(k){
+  var out=$('showout'); if(!out) return;
+  var line = (window.PTR && PTR.kandi)
+    ? PTR.kandi(encode(k), (k.beads.length)+' beads'+(k.madefor?' for '+k.madefor:''))
+    : location.href.replace(/[?#].*$/,'')+'?k='+encodeURIComponent(encode(k));
+  out.value=line; out.classList.add('open'); out.select();
+  try{ document.execCommand('copy'); }catch(e){}
+  if(navigator.clipboard) navigator.clipboard.writeText(line).catch(function(){});
 }
 
 /* ---- the gift ceremony ---- */
@@ -320,8 +419,20 @@ $('rcvgo').onclick=function(){
   save(); $('rcv').value=''; $('rerr').textContent=''; arms();
 };
 
+/* a [bX kandi] pointer opens here with the piece ready to receive — the link
+   IS the show-and-tell, and receiving stays a deliberate act, never automatic. */
+(function(){
+  var m=/[?&]k=([^&]+)/.exec(location.search); if(!m) return;
+  var str=''; try{ str=decodeURIComponent(m[1]); }catch(e){ return; }
+  var r=decode(str); if(r.err) return;
+  $('rcv').value=str;
+  $('rerr').textContent='somebody showed you this one — press receive to take it onto your left arm.';
+  setTimeout(function(){ $('rcv').scrollIntoView({block:'center'}); },200);
+})();
+
 paint(); arms();
 })();
 </script>
+<script src="blight/pointers.js"></script>
 <script src="tour.js?v=23"></script>
 </body></html>

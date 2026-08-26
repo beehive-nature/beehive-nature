@@ -57,7 +57,11 @@ const b=await chromium.launch();
     const S=JSON.parse(localStorage.getItem('bkandi'));
     return {left:S.left.length,right:S.right.length,
       lastRcv:S.left[S.left.length-1].rcv, lastFor:S.left[S.left.length-1].madefor,
-      leftGiftBtns:document.querySelectorAll('#left button').length};
+      /* Count TRADE affordances, not buttons. The original counted every
+         button under #left as proof the piece cannot move — a proxy, and the
+         harmless '◎ show it' share button broke it while the actual law held.
+         Assert the law: nothing on the left arm can be gifted or crossed. */
+      leftGiftBtns:[...document.querySelectorAll('#left button')].filter(x=>/gift|cross it|offer/i.test(x.textContent)).length};
   });
   ok('the RECEIVED copy lands on the left arm, marked received', rec.lastRcv===true && rec.lastFor==='Sam',
      `rcv=${rec.lastRcv} for=${rec.lastFor}`);

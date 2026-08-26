@@ -27,6 +27,10 @@ var PTR=(function(){
     room:function(sym,seed,note){ return emit('room',sym+' seed '+seed,base()+'market.html?piece='+encodeURIComponent(sym+':'+seed),note); },
     piece:function(sym,seed,note){ return emit('room',sym+' seed '+seed,base()+'inscription-explorer.html',note); },
     order:function(orderId,note){ return emit('order','order '+orderId,base()+'market.html?order='+encodeURIComponent(orderId),note); },
+    /* [bX kandi] — a bead stack shown to the floor. The piece IS its seed: a
+       KND1 string is ~30 chars and the bracelet renders from it, so the
+       pointer stays thin exactly as the law requires (same shape as song/score). */
+    kandi:function(str,note){ return emit('kandi',(String(str).split('|')[4]||'').length+' beads', base().replace(/blight\/$/,'')+'kandi.html?k='+encodeURIComponent(str),note); },
     song:function(seed,note){ return emit('song','seed '+seed,base()+'midi-organ.html?seed='+seed,note); },
     score:function(scoreB64,note){ return emit('score','a composition',base()+'studio-music.html?score='+encodeURIComponent(scoreB64),note); },
     accord:function(sym,seed,note){ return emit('accord','bAccord '+sym+' seed '+seed,base()+'farmers.html',note); },
