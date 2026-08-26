@@ -44,6 +44,21 @@ button.act:hover{background:var(--r);color:#0a0612}
 .kc .tag.cross{color:var(--u);border:1px solid #2b3f6b}
 .xrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
 .xpanel{border:1px dashed #2b3f6b;padding:14px;margin-top:12px;display:none}
+/* the arrival — what a handed bracelet looks like when it lands */
+.arrival{display:none;border:1px solid var(--p);border-left:4px solid var(--p);
+  background:#0d0a12;padding:22px 20px;margin-bottom:22px}
+.arrival.open{display:block}
+.arrival .from{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--faint)}
+.arrival .who{font-size:22px;color:var(--p);margin-top:8px;line-height:1.25}
+.arrival .who b{color:var(--ink);font-weight:400}
+.arrival .piece{display:flex;justify-content:center;padding:14px 0 6px}
+.arrival .note{font-size:11px;color:var(--faint);line-height:1.7;margin-top:6px;max-width:62ch}
+.arrival .acts{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}
+.arrival .acts button{font:12.5px 'IBM Plex Mono',ui-monospace,monospace;padding:11px 16px;
+  min-height:44px;cursor:pointer;border-radius:8px;background:#12101a;color:var(--ink);border:1px solid #3a2f52}
+.arrival .acts button.keep{background:var(--p);color:#0a0a0f;border-color:var(--p);font-weight:700}
+.arrival .acts button:hover{border-color:var(--cyan);color:var(--cyan)}
+.arrival .acts button.keep:hover{background:var(--ok);border-color:var(--ok);color:#0a0a0f}
 .xpanel.open{display:block}
 .shout{width:100%;min-height:44px;resize:vertical;margin-top:8px;display:none}
 .shout.open{display:block}
@@ -64,6 +79,7 @@ code{color:var(--ink)}
 @media (prefers-reduced-motion:reduce){.hs{transition:none}}
 </style></head><body>
 <main>
+<div class="arrival" id="arrival"></div>
 <header>
   <h1>🍬 the kandi bar</h1>
   <div class="sub"><span data-i18n="kandi.bar">the kandi bar — make it, name it, gift it, cross it, show it</span></div>
@@ -256,6 +272,10 @@ function clean(s){ s=String(s||'').replace(/\|/g,'').trim();
 function encode(k){
   var payload='KND1|'+(k.maker||'')+'|'+(k.madefor||'')+'|'+k.ts.toString(36)+'|'+k.beads;
   return payload+'|'+fnv(payload); }
+/* names are rendered as TEXT, never markup — the estate's charset check
+   already refuses most of it, but the arrival builds innerHTML, so escape. */
+function esc(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function decode(str){
   var p=String(str||'').trim().split('|');
   if(p.length!==6||p[0]!=='KND1') return {err:'not a KND1 kandi string'};
@@ -445,18 +465,58 @@ $('rcvgo').onclick=function(){
   save(); $('rcv').value=''; $('rerr').textContent=''; arms();
 };
 
-/* a [bX kandi] pointer opens here with the piece ready to receive — the link
-   IS the show-and-tell, and receiving stays a deliberate act, never automatic. */
+/* THE ARRIVAL. A handed bracelet lands ON the bracelet — not in a form.
+   Receiving is still a deliberate tap: nothing is written to your arm until
+   you say so, because a page that helps itself to your storage is a page that
+   decided for you. */
 (function(){
-  /* read the FRAGMENT, never the query: a fragment does not leave the
-     browser, so a shared piece never reaches the host's logs. The old ?k=
-     form is still accepted so links already handed out keep working. */
   var m=/[#?&]k=([^&]*)/.exec(location.hash+location.search); if(!m) return;
   var str=''; try{ str=decodeURIComponent(m[1]); }catch(e){ return; }
-  var r=decode(str); if(r.err) return;
+  var r=decode(str);
+  var box=$('arrival'); if(!box) return;
+  if(r.err){
+    box.className='arrival open';
+    box.innerHTML='<div class="from">a kandi was handed to you</div>'+
+      '<div class="who">but it did not survive the trip</div>'+
+      '<div class="note">'+esc(r.err)+' — ask them to send the string again. '+
+      'The checksum is what caught it; it catches a mistyped string, not a forged one.</div>';
+    return;
+  }
+  var maker=r.maker||'a stranger at the bar';
+  function paintArrival(kept){
+    box.className='arrival open';
+    box.innerHTML=
+      '<div class="from">'+(kept?'it is yours':'somebody handed you a kandi')+'</div>'+
+      '<div class="who">'+(kept?'on your left arm, ':'')+'made by <b>'+esc(maker)+'</b>'+
+        (r.madefor?' <span style="color:var(--faint)">for '+esc(r.madefor)+'</span>':'')+'</div>'+
+      '<div class="piece">'+braceSVG(r.beads,'190px')+'</div>'+
+      '<div class="note">'+(kept
+        ? 'It rides your left arm now and never re-trades — that is the floor\u2019s law, and here the law is code. Send one back and it becomes a crossing.'
+        : r.beads.length+' beads, checksum verified. Nothing is written to this browser until you keep it. A kandi string is a copy \u2014 whoever holds it can read the names in it.')+
+      '</div>'+
+      '<div class="acts">'+
+        (kept?'':'<button class="keep" id="arKeep">\u2665 keep it \u2014 onto my left arm</button>')+
+        '<button id="arBack">\u270e make one back for '+esc(maker)+' \u2192</button>'+
+        '<button id="arSkip">'+(kept?'close':'not now')+'</button>'+
+      '</div>';
+    var k=$('arKeep');
+    if(k) k.onclick=function(){
+      S.left.push({maker:r.maker,madefor:r.madefor,beads:r.beads,ts:r.ts,rcv:true});
+      save(); arms(); paintArrival(true);
+    };
+    $('arBack').onclick=function(){
+      /* the point of the whole page: answering is one tap, and the composer
+         opens already pointed at the person who thought of you. */
+      if(r.maker) $('madefor').value=r.maker;
+      $('word').focus();
+      $('word').scrollIntoView({block:'center'});
+    };
+    $('arSkip').onclick=function(){ box.className='arrival'; };
+  }
+  paintArrival(false);
+  /* the old receive box still works for a pasted string; it is no longer the
+     way a shared link arrives. */
   $('rcv').value=str;
-  $('rerr').textContent='somebody showed you this one — press receive to take it onto your left arm.';
-  setTimeout(function(){ $('rcv').scrollIntoView({block:'center'}); },200);
 })();
 
 paint(); arms();
