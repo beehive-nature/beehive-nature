@@ -398,6 +398,12 @@
       "i18n": "s.blight-workbench"
     },
     {
+      "file": "blight/pixelrefiner.html",
+      "domain": "nature",
+      "name": "smeared art in, crisp cells out",
+      "state": "working"
+    },
+    {
       "file": "bnames.html",
       "domain": "nature",
       "name": "names on our chain, read live",
