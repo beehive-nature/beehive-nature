@@ -116,7 +116,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9990;
   <form id="frm"><input id="addr" placeholder="0x… or name.base.eth" spellcheck="false"><button>enter</button></form>
   <div class="msg" id="dmsg"></div>
   <div class="seeds">
-    <button data-a="0x8e4cECd53bf2025ea0C8e69784355446C6355eBE">a collector's garden (example)</button>
+    <button data-a="0xfbd201472d5a439f1f0e408eb5dfaf6ea3687876">the founder's garden</button>
     <button id="vault">a crown from the vault</button>
   </div>
 </div>
@@ -342,7 +342,7 @@ async function fetchTraits(p){
       var sw=/^#[0-9a-fA-F]{6}$/.test(v)?'<span style="display:inline-block;width:10px;height:10px;border:1px solid #333;background:'+v+';margin-right:5px;vertical-align:-1px"></span>':'';
       return '<span style="display:inline-block;border:1px solid #1a1a2a;border-radius:5px;padding:3px 9px;margin:3px 4px 3px 0;font-size:10.5px">'+sw+kv[0]+' '+v+'</span>';}).join('');
 }
-var HOLDERS_LADDER=[['0x8e4cECd53bf2025ea0C8e69784355446C6355eBE','a collector (example)'],
+var HOLDERS_LADDER=[['0xfbd201472d5a439f1f0e408eb5dfaf6ea3687876','the founder'],
                    ['0xbcba79164beb12c1b1497c96bbf4346f1bc45dec','the veteran']];
 async function holderBal(col,addr){
   var r=await rpc([{to:col.c,data:'0x70a08231'+AD(addr)}]);
@@ -491,6 +491,6 @@ document.getElementById('vault').onclick=async function(){
 <script src="./pointers.js?v=2"></script>
 <script src="./toll.js?v=1"></script>
 <script src="./parlor.js?v=1"></script>
-<script src="../tour.js?v=27"></script>
+<script src="../tour.js?v=28"></script>
 </body>
 </html>

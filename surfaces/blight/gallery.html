@@ -54,7 +54,7 @@ body{background:var(--bg);color:#cfe8d6;font:13px/1.5 'IBM Plex Mono',monospace;
 </style>
 </head>
 <body>
-<div id="topbar"><span id="wing">a collector's garden · example</span></div>
+<div id="topbar"><span id="wing">the founder's garden · base</span></div>
 <div id="stage"><div id="frame"></div></div>
 <div id="deck">
   <div id="dots"></div>
@@ -72,7 +72,7 @@ body{background:var(--bg);color:#cfe8d6;font:13px/1.5 'IBM Plex Mono',monospace;
 <script>
 /* The GALLERY: art first, one piece at a time, a walking tour. The tech lives in the
    explorer (its own surface, its own frequency); here only the piece, its name, its
-   seed, its collection. Default wing: a collector's garden (example, not ours). The old default bloverai.base.eth was lost 2026-08-26 — its wallet's key is gone; nothing here reads it (RECEIPT_AUDIT_BLOVERAI_2026-08-26).
+   seed, its collection. Default wing: the founder's garden — bloverai.base.eth.
    All seven+ EVM ERC-20i families, fetched live, keyless, no keys no logins. */
 const W=v=>BigInt(v).toString(16).padStart(64,'0');
 const AD=a=>'0'.repeat(24)+a.replace(/^0x/,'').toLowerCase();
@@ -198,7 +198,7 @@ async function start(addr,wing){
   pieces=got;
   $('wing').textContent=wing;
   if(!pieces.length){
-    $('plaque').innerHTML='<div class="title" style="color:#e8b84a">this garden is quiet — no live inscriptions found</div><div class="sub">try any 0x… address or name.base.eth</div>';
+    $('plaque').innerHTML='<div class="title" style="color:#e8b84a">this garden is quiet — no live inscriptions found</div><div class="sub">try bloverai.base.eth, or any 0x… address</div>';
     return;
   }
   $('dots').innerHTML=pieces.map((_,k)=>'<i data-k="'+k+'"></i>').join('');
@@ -235,7 +235,7 @@ document.addEventListener('keydown',e=>{
   if(e.key==='ArrowLeft') show(idx-1);
   if(e.key===' '){ e.preventDefault(); $('bPlay').click(); }
 });
-start('0x8e4cECd53bf2025ea0C8e69784355446C6355eBE',"a collector's garden · example");
+start('0xfbd201472d5a439f1f0e408eb5dfaf6ea3687876',"the founder's garden · base");
 </script>
 <div id="wings" style="position:fixed;inset:0;background:#050508f5;z-index:60;display:none;overflow-y:auto;padding:70px 4vw 90px"><div id="wingsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;max-width:1100px;margin:0 auto"></div><div id="roomBack" style="display:none;max-width:1100px;margin:0 auto"></div></div><script>
 /* WINGS: every collection its own exhibit; every exhibit opens a room with the
@@ -310,6 +310,6 @@ document.getElementById('bWings').onclick=function(){ var w=_w('wings');
 document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeWings(); });
 
 </script>
-<script src="../tour.js?v=27"></script>
+<script src="../tour.js?v=28"></script>
 </body>
 </html>

@@ -152,7 +152,7 @@ try {
 
   /* ── E · name-form (.eth) input: resolve-then-confirm, honest failure ── */
   console.log('E · Basename input (Base RPC mocked, deterministic):');
-  const MOCK = '1111111111111111111111111111111111111111'; // arbitrary mock hex — resolution is mocked, the value means nothing (the old mock was the lost bloverai wallet's hex, 2026-08-26 audit)
+  const MOCK = 'fbd201472d5a439f1f0e408eb5dfaf6ea3687876'; // live-resolved hex of the probe below
   {
     const tally = {};
     const ctx = await armedContext(browser);
@@ -161,20 +161,20 @@ try {
     await page.goto('http://127.0.0.1:8891' + URL_, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(600);
     await waitBnrSign(page);
-    await page.fill('#fund-addr', 'example.base.eth');
+    await page.fill('#fund-addr', 'bloverai.base.eth');
     await page.waitForTimeout(250);
     ok('name never called invalid', !(await page.locator('#fund-stat').innerText()).includes('does not read'));
     ok('no RPC read until the user asks (read fires on user action only)', Object.keys(tally).length === 0, JSON.stringify(tally));
     let u = assertUrl(await goHref(page), 'sb.meldcrypto.com', 'USDC_BASE');
     ok('unresolved name kept out of URL', !u.searchParams.has('walletAddressLocked'));
     await page.locator('#fund-go').click(); // first tap = resolve + show, never launch
-    await page.waitForFunction(() => document.getElementById('fund-stat').textContent.includes('0x1111'), null, { timeout: 5000 });
+    await page.waitForFunction(() => document.getElementById('fund-stat').textContent.includes('0xfbd2'), null, { timeout: 5000 });
     ok('resolved hex SHOWN to the user before launch',
       (await page.locator('#fund-stat').innerText()).includes('0x' + MOCK));
     u = assertUrl(await goHref(page), 'sb.meldcrypto.com', 'USDC_BASE');
     ok('URL locks the resolved hex (not the name)', u.searchParams.get('walletAddressLocked') === '0x' + MOCK);
     await page.fill('#fund-addr', 'x');        // any edit…
-    await page.fill('#fund-addr', 'example.base.eth'); // …then back to the SAME name:
+    await page.fill('#fund-addr', 'bloverai.base.eth'); // …then back to the SAME name:
     // if the reset (resolved=null on input) were broken, re-typing the same
     // name would silently RE-ARM the stale lock — this asserts the specific
     // outcome (no lock until a fresh resolve), not mere absence after drift.

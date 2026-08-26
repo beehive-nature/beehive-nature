@@ -1,3 +1,23 @@
+# CORRECTION — 2026-08-26, founder-confirmed, same day
+
+**The order that produced this audit named the wrong identifier.** The identifiers were:
+
+- `bloverai.base.eth` / `0xfbd201472d5a439f1f0e408eb5dfaf6ea3687876` — **THE FOUNDER'S GARDEN.
+  Safely controlled.** Every repoint below was executed correctly against the wrong target,
+  and has been **reverted**.
+- `bqueenbee.base.eth` — **LOST. One device carried both the phone and the wallet.** The real
+  fix landed where it was always needed: the profile surface's example names the founder's
+  garden, and the museum carries the record as **Exhibit 10 · A name that went with the phone**.
+
+The false statements this document made ("lost", "its wallet's key is gone", "not the founder's
+any more") were untrue and went live for under an hour. They are struck by this correction, not
+erased — the text below stands as the record of what was said and why it was wrong. The method
+notes that survive untouched: the reference-hunting itself (name → address → every file), the
+list-before-change discipline, and the exclusions (the bLOVErAi agent concept is not the name;
+nothing here ever touched the bQueenBee agent surface).
+
+---
+
 # RECEIPT — the bloverai.base.eth audit: every reference, categorized, before anything changed
 
 **Audit ordered 2026-08-26.** The name `bloverai.base.eth` resolves to a smart wallet whose

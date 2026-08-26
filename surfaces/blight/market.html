@@ -93,14 +93,14 @@ nav:not(#tbar) button.on{color:var(--gold);border-color:#3d3410}
   <div class="pre" id="rpre"></div>
 </div></div>
 <script>
-/* FRONT-END MVP. Listings render live from chain state (an example collector's garden as the
+/* FRONT-END MVP. Listings render live from chain state (the founder's garden as the
    opening inventory), previews compute REAL cushion math from the ladders, and every
    signature button states plainly that it waits for the escrow contract. The five
    laws are not fine print — they are a tab. */
 const W=v=>BigInt(v).toString(16).padStart(64,'0');
 const AD=a=>'0'.repeat(24)+a.replace(/^0x/,'').toLowerCase();
 const HOSTS=['https://base-rpc.publicnode.com','https://base.drpc.org'];
-const LOV='0x8e4cECd53bf2025ea0C8e69784355446C6355eBE'; /* example collector — the old default (bloverai.base.eth) was lost 2026-08-26, see RECEIPT_AUDIT_BLOVERAI_2026-08-26 */
+const LOV='0xfbd201472d5a439f1f0e408eb5dfaf6ea3687876';
 const COLS=[
  {sym:'FUNGI',c:'0x7d9CE55D54FF3FEddb611fC63fF63ec01F26D15F',sel:'422b9e23',lv:[0,21000,525000,1050000,1575000,2100000],base:0,ou:true},
  {sym:'$FROGGI',c:'0x88A78C5035BdC8C9A8bb5c029e6cfCDD14B822FE',sel:'422b9e23',lv:[0,1000,3000,10000,30000,60000,120000],base:0},
@@ -251,6 +251,6 @@ buildInventory().then(()=>{ renderWall();
   if(!inventory.length) $('wall').innerHTML='<p style="color:var(--dim);grid-column:1/-1;text-align:center;padding:40px">the garden is quiet right now — try again shortly</p>'; });
 </script>
 <div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(.6rem + 46px);z-index:9997;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
-<script src="../tour.js?v=27"></script>
+<script src="../tour.js?v=28"></script>
 </body>
 </html>

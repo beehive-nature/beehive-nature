@@ -131,6 +131,19 @@ for (const href of seen) {
     document.documentElement.style.scrollBehavior = 'auto';
     window.scrollTo(0, document.documentElement.scrollHeight);
     await new Promise(r => setTimeout(r, 260));
+    /* LAZY-IMAGE SETTLE (2026-08-26, the record surface): scrolling to the
+       bottom wakes lazy loaders; the page then grows UNDER the fixed bar and
+       a single 260ms wait measures a footer that has already moved — the
+       record surface flaked here between CI and local runs with identical
+       bytes. Chase a stable scrollHeight (two agreeing reads, capped), the
+       same settle-and-remeasure instinct the rider-dressing poll below
+       already encodes. */
+    for (let i = 0, last = -1, same = 0; i < 12 && same < 2; i++) {
+      await new Promise(r => setTimeout(r, 120));
+      const h = document.documentElement.scrollHeight;
+      window.scrollTo(0, h);
+      if (h === last) same++; else { same = 0; last = h; }
+    }
     document.documentElement.style.scrollBehavior = prevSB;
     const el = document.getElementById('tbar');
     if (!el) return { h: null, covered: 0, who: '' };
