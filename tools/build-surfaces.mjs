@@ -199,6 +199,13 @@ a{color:var(--accent)}
 h1{position:relative;font-size:clamp(30px,6.4vw,64px);font-weight:800;letter-spacing:-.02em;
   line-height:.96;margin-top:14px;color:var(--accent)}
 .what{position:relative;color:var(--dim);font-size:13.5px;margin-top:18px;max-width:62ch;line-height:1.8}
+.origin{position:relative;margin-top:20px;max-width:62ch;background:var(--inset);
+  border:1px solid var(--line);border-left:3px solid var(--accent);padding:15px 17px}
+.origin p{font-size:12.5px;line-height:1.85;color:var(--ink)}
+.origin p b{color:var(--accent);font-weight:700}
+.origin .src{display:block;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--dimmer);margin-bottom:9px}
+.origin a{display:inline-flex;align-items:center;min-height:32px;margin-top:6px;font-size:11.5px}
 .act{position:relative;display:block;background:var(--tile);border:1px solid var(--line);
   border-left:3px solid var(--accent);padding:20px;margin-top:26px;max-width:62ch;
   transition:transform .16s,background .16s,border-color .16s}
@@ -268,6 +275,12 @@ for (const d of E.domains) {
     + '    <p class="eyebrow" data-i18n="d.' + d.id + '.who">' + esc(d.who) + '</p>\n'
     + '    <h1>' + esc(d.host) + '</h1>\n'
     + '    <p class="what" data-i18n="d.' + d.id + '.what">' + esc(d.what) + '</p>\n'
+    + (d.origin
+       ? '    <div class="origin"><span class="src">the name</span>'
+         + '<p data-i18n="d.' + d.id + '.origin">' + esc(d.origin) + '</p>'
+         + '<a href="../blanguage.html#skaists" data-i18n="d.' + d.id + '.originlink">'
+         + esc(d.originLink || 'the full word entry \u2192') + '</a></div>\n'
+       : '')
     + '    <a class="act" href="../' + d.act.href + '"><em>one thing to do</em>'
     + '<b data-i18n="d.' + d.id + '.act">' + esc(d.act.label) + ' →</b>'
     + '<s data-i18n="d.' + d.id + '.actsub">' + esc(d.act.sub) + '</s></a>\n'

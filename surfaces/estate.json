@@ -8,7 +8,8 @@
     "updated": "2026-08-26",
     "slugs": "A domain's FILE NAME is its slug, kept separate from its id: the published URLs (doors/beehivenature.html …) were already handed out, and a generator that renames a live URL breaks every link anyone saved. id is for CSS and data attributes; slug is for the path.",
     "band": "Each domain declares how many comb layers its header carries (founder, 2026-08-26: plur three, skaists two). A layer is a full comb at its own scale, speed, drift direction and opacity — back layers big/slow/dim, front small/quick/bright — so the eye reads depth from the layers disagreeing about how fast the world moves.",
-    "translated_strings": "Any field rendered with a data-i18n key (domain who/what/intro/act, surface name/verb/caveat) is a TRANSLATED string: editing its English strands 26 tongues on the old sentence until the corpus is redrafted. e2e/estate-source.mjs now fails on that drift."
+    "translated_strings": "Any field rendered with a data-i18n key (domain who/what/intro/act, surface name/verb/caveat) is a TRANSLATED string: editing its English strands 26 tongues on the old sentence until the corpus is redrafted. e2e/estate-source.mjs now fails on that drift.",
+    "origin": "A domain may carry an origin line — the founding story of its NAME, rendered above the fold on its door, ahead of everything else a stranger reads. It is a translated string like any other (d.<id>.origin), so its English cannot be edited without redrafting the corpus."
   },
   "domains": [
     {
@@ -82,7 +83,9 @@
         ]
       ],
       "slug": "skaists",
-      "layers": 2
+      "layers": 2,
+      "origin": "skaists is Latvian for beautiful. Karulis traces it to two roots — skaidrs, clear, and kaist, to glow — and the sense ran hot, then flushed, then bright, then beautiful. Its third dictionary sense is beautiful AND good: morally worth something, socially useful.",
+      "originLink": "the full word entry →"
     },
     {
       "id": "social",
