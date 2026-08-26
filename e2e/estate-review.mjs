@@ -77,6 +77,10 @@ console.log(`hub: ${cards} cards, ${hubLinks.length} local hrefs`);
 
 // 2 · crawl every hub-discovered local page
 const TBAR_MAX = 60; // px, collapsed strip at 1280px — see the paint check below
+const TBAR_CLEAR = 12; // px the fixed bar must leave between itself and the footer.
+// Not zero: zero passes a hairline, and a hairline is what shipped the bug —
+// a horizontal scrollbar in the founder's window ate a 5px gap and the bar
+// swallowed kandi's last footer line.
 const seen = new Set([...hubLinks, 'index.html']);
 const findings = [];
 for (const href of seen) {
@@ -114,15 +118,44 @@ for (const href of seen) {
       if (['tbar', 'bregctl', 'blangctl', 'railsbadge'].every(id => document.getElementById(id))) break;
       await new Promise(r => setTimeout(r, 50));
     }
+    /* THE BAR MUST NOT EAT THE FOOTER. Height alone cannot see this:
+       kandi measured a healthy 47px bar and still buried its last footer
+       line, because the page reserved only 6px more than the bar is tall
+       and a horizontal scrollbar ate the difference. So scroll to the
+       bottom and measure the real overlap against the last painted
+       content — that is the property a reader actually experiences. */
+    /* scroll-behavior:smooth turns this into an ANIMATION — the first cut
+       measured mid-flight and reported a 4268px 'occlusion' on the hub. Force
+       an instant jump, then let layout settle. */
+    const prevSB = document.documentElement.style.scrollBehavior;
+    document.documentElement.style.scrollBehavior = 'auto';
+    window.scrollTo(0, document.documentElement.scrollHeight);
+    await new Promise(r => setTimeout(r, 260));
+    document.documentElement.style.scrollBehavior = prevSB;
     const el = document.getElementById('tbar');
-    return el ? el.getBoundingClientRect().height : null;
+    if (!el) return { h: null, covered: 0, who: '' };
+    const bar = el.getBoundingClientRect();
+    /* Scope: the page FOOTER, which is what the bar actually ate on kandi.
+       An earlier cut measured every text leaf and flagged tall <pre> blocks and
+       mid-flight smooth-scroll positions — three broken probes in a row, each
+       reporting the same number before and after the fix, which is the tell.
+       The narrow property is the reported one and the one a reader hits: the
+       footer must end above the bar. */
+    const foot = document.querySelector('footer, .foot');
+    if (!foot) return { h: bar.height, clearance: null, who: '(no footer)' };
+    const fr = foot.getBoundingClientRect();
+    if (fr.height === 0) return { h: bar.height, clearance: null, who: '(footer hidden)' };
+    return { h: bar.height, clearance: Math.round(bar.top - fr.bottom), who: 'footer' };
   });
-  if (tbarH === null) { if (!clean.startsWith('onboarding')) findings.push(`NO TOURBAR: ${clean}`); }
-  else if (tbarH > TBAR_MAX) findings.push(`TBAR HEIGHT: ${clean}: ${Math.round(tbarH)}px > ${TBAR_MAX}px`);
+  if (tbarH.h === null) { if (!clean.startsWith('onboarding')) findings.push(`NO TOURBAR: ${clean}`); }
+  else {
+    if (tbarH.h > TBAR_MAX) findings.push(`TBAR HEIGHT: ${clean}: ${Math.round(tbarH.h)}px > ${TBAR_MAX}px`);
+    if (tbarH.clearance !== null && tbarH.clearance < TBAR_CLEAR) findings.push(`TBAR CLEARANCE: ${clean}: only ${tbarH.clearance}px between the ${tbarH.who} and the bar (need ${TBAR_CLEAR})`);
+  }
 }
 ok('every hub-listed surface exists and loads', !findings.some(f => f.startsWith('MISSING') || f.startsWith('LOAD FAIL') || f.startsWith('ERRORS')));
 ok('no broken intra-estate links', !findings.some(f => f.startsWith('BROKEN')));
-ok(`tour bar rides every surface at strip height (≤${TBAR_MAX}px @1280)`, !findings.some(f => f.startsWith('NO TOURBAR') || f.startsWith('TBAR HEIGHT')));
+ok(`tour bar rides every surface at strip height (≤${TBAR_MAX}px @1280) and leaves the footer room`, !findings.some(f => f.startsWith('NO TOURBAR') || f.startsWith('TBAR HEIGHT') || f.startsWith('TBAR CLEARANCE')));
 console.log(findings.length ? 'FINDINGS:\n' + findings.join('\n') : 'FINDINGS: none');
 if (netNotes.length) console.log('NET NOTES (external endpoints, not page defects):\n' + [...new Set(netNotes)].join('\n'));
 
