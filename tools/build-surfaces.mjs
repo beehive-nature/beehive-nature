@@ -407,7 +407,7 @@ const hub = head('beehive nature · the surfaces — six domains, one organism',
   + '<header style="--bandh:' + bandHeight(3) + 'px">\n  <div id="bandwrap" aria-hidden="true">' + hexBand(3) + '</div>\n'
   + '  <div class="wrap">\n'
   + '    <p class="eyebrow">zero network · no password · no name</p>\n'
-  + '    <div class="mark">\U0001F41D</div>\n'.replace('\\U0001F41D', '\u{1F41D}')
+  + '    <div class="mark">🐝</div>\n'
   + '    <h1>beehive nature</h1>\n'
   + '    <p class="lede" data-i18n="hub.lede">Six domains, one organism. Every door opens something real; '
   + 'nothing asks for a password or your name.</p>\n'
