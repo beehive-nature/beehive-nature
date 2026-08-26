@@ -7,7 +7,8 @@
     "binding_rule": "A door may not claim anything the estate does not currently do. state:\"roadmap\" never appears among a door’s open surfaces — only under \"not built yet\".",
     "updated": "2026-08-26",
     "slugs": "A domain's FILE NAME is its slug, kept separate from its id: the published URLs (doors/beehivenature.html …) were already handed out, and a generator that renames a live URL breaks every link anyone saved. id is for CSS and data attributes; slug is for the path.",
-    "band": "Each domain declares how many comb layers its header carries (founder, 2026-08-26: plur three, skaists two). A layer is a full comb at its own scale, speed, drift direction and opacity — back layers big/slow/dim, front small/quick/bright — so the eye reads depth from the layers disagreeing about how fast the world moves."
+    "band": "Each domain declares how many comb layers its header carries (founder, 2026-08-26: plur three, skaists two). A layer is a full comb at its own scale, speed, drift direction and opacity — back layers big/slow/dim, front small/quick/bright — so the eye reads depth from the layers disagreeing about how fast the world moves.",
+    "translated_strings": "Any field rendered with a data-i18n key (domain who/what/intro/act, surface name/verb/caveat) is a TRANSLATED string: editing its English strands 26 tongues on the old sentence until the corpus is redrafted. e2e/estate-source.mjs now fails on that drift."
   },
   "domains": [
     {

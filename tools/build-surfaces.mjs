@@ -170,6 +170,10 @@ function head(title, css, themeExtra) {
 }
 
 /* ── a door tile ─────────────────────────────────────────────────────────── */
+/* A VERB TILE CARRIES A DIFFERENT ENGLISH STRING than the hub tile for the same
+   surface, so it carries a different key (.verblabel, not .name). Sharing one
+   key made a single corpus entry hold two Englishes, and a translated reader
+   got whichever one the corpus happened to store, in the wrong place. */
 function tile(s, opts) {
   const ext = /^https?:/.test(s.file);
   const href = (opts.prefix || '') + s.file;
@@ -180,7 +184,7 @@ function tile(s, opts) {
     + ' data-dom="' + s.domain + '"'
     + ' data-q="' + esc((s.name + ' ' + (s.caveat || '') + ' ' + s.domain).toLowerCase()) + '">'
     + (opts.icon ? '<i>' + opts.icon + '</i>' : '')
-    + '<b data-i18n="' + s.i18n + '.name">' + esc(verb ? s.verb.label + ' →' : s.name) + '</b>'
+        + '<b data-i18n="' + s.i18n + (verb ? '.verblabel' : '.name') + '">' + esc(verb ? s.verb.label + ' →' : s.name) + '</b>'
     + (verb ? '<s class="do" data-i18n="' + s.i18n + '.verb">' + esc(s.verb.sub) + '</s>' : '')
     + '<s>' + esc(s.file) + '</s>'
     + (cav ? '<u data-i18n="' + s.i18n + '.caveat">⚠ ' + esc(cav) + '</u>' : '')
