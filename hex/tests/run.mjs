@@ -145,6 +145,30 @@ for (const [r, g, b] of [
 	eq("toneIndex(0.6) mirrors to 102", dither.toneIndex({ L: 0.6, a: 0, b: 0 }), 102);
 }
 {
+	// the verified table: shape, sanity, known rows, normalization
+	const ints = dither.JODOIN_TABLE_INTS;
+	eq("table carries 128 rows x 3", ints.length, 384);
+	let sumsOK = true;
+	let nonNeg = true;
+	for (let i = 0; i < 128; i++) {
+		const s = ints[i * 3] + ints[i * 3 + 1] + ints[i * 3 + 2];
+		if (s < 9998 || s > 10002) sumsOK = false;
+		for (let k = 0; k < 3; k++) if (ints[i * 3 + k] < 0) nonNeg = false;
+	}
+	ok("every row sums to ~10000 (9998..10002)", sumsOK, `row0=${ints[0] + ints[1] + ints[2]} row127=${ints[381] + ints[382] + ints[383]}`);
+	ok("no negative weights", nonNeg);
+	let normOK = true;
+	for (let i = 0; i < 128; i++) {
+		const s = dither.JODOIN_TRIPLES[i * 3] + dither.JODOIN_TRIPLES[i * 3 + 1] + dither.JODOIN_TRIPLES[i * 3 + 2];
+		if (Math.abs(s - 1) > 1e-12) normOK = false;
+	}
+	ok("JODOIN_TRIPLES rows normalized to 1", normOK);
+	eq("row 0 = (6691,0,3309)", [ints[0], ints[1], ints[2]], [6691, 0, 3309]);
+	eq("row 58 = (2800,2900,4300)", [ints[58 * 3], ints[58 * 3 + 1], ints[58 * 3 + 2]], [2800, 2900, 4300]);
+	eq("row 120 = (5556,4444,0)", [ints[120 * 3], ints[120 * 3 + 1], ints[120 * 3 + 2]], [5556, 4444, 0]);
+	eq("row 127 = (4920,3918,1162)", [ints[127 * 3], ints[127 * 3 + 1], ints[127 * 3 + 2]], [4920, 3918, 1162]);
+}
+{
 	// 50% grey field, black/white palette: tone preservation
 	const cells = [];
 	for (let r = 0; r < 32; r++) for (let q = 0; q < 32; q++) cells.push({ q, r, ok: resample.srgbToOklab(128, 128, 128) });
@@ -166,35 +190,51 @@ for (const [r, g, b] of [
 	eq("ordered tone preservation (4096 cells, tone 0.25)", whites / 4096, 0.25, 0.02);
 }
 {
-	// downstream routing on an even (L->R) row: forward 7/13 lands on (q+1,r),
-	// below 3/13 lands on (q,r+1). (1,0) is a zero-error relay (base exactly
-	// white) so it cannot contaminate (0,1) with redistribution.
+	// downstream routing on an even (L->R) row — expectations derived from the
+	// live weight table so the routing (not the numbers) is what's under test
+	const row = (L) => {
+		const i = dither.toneIndex({ L, a: 0, b: 0 });
+		return [0, 1, 2].map((s) => dither.JODOIN_TRIPLES[i * 3 + s]);
+	};
 	const base = (L) => ({ L, a: 0, b: 0 });
 	const cells = [
-		{ q: 0, r: 0, ok: base(0.75) }, // white, err -0.25
-		{ q: 1, r: 0, ok: base(1.0) }, // white, err 0 — silent relay
-		{ q: 0, r: 1, ok: base(0.51) }, // black iff below-error arrived: 0.51 - 3/13*0.25 = 0.4523
+		{ q: 0, r: 0, ok: base(0.8) }, // white, err -0.2
+		{ q: 1, r: 0, ok: base(1.0) }, // white; re-diffuses its own small error
+		{ q: 0, r: 1, ok: base(0.51) }, // black iff below-slot errors arrived
 		{ q: 5, r: 5, ok: base(0.51) }, // control: stays white
 	];
 	const quant = (v) => (v.L >= 0.5 ? { L: 1, a: 0, b: 0 } : { L: 0, a: 0, b: 0 });
+	const w0 = row(0.8); // weights active at (0,0)
+	const v1 = 1.0 + w0[0] * (0.8 - 1); // (1,0) diffused value
+	const w1 = row(v1); // weights active at (1,0)
+	const exp01 = 0.51 + w0[2] * (0.8 - 1) + w1[1] * (v1 - 1); // (0,1): slot2 from (0,0) + slot1 from (1,0)
 	const out = dither.diffuseHexError(cells, quant, { orientation: "pointy" });
-	ok("relay (1,0) stayed white (zero error)", out.get("1,0").L === 1, `chosen L=${out.get("1,0").L}`);
-	ok("below target (0,1) received 3/13 error", out.get("0,1").L === 0, `chosen L=${out.get("0,1").L} (0.51 - 3/13*0.25 = ${(0.51 - (3 / 13) * 0.25).toFixed(4)})`);
-	ok("control cell (5,5) untouched", out.get("5,5").L === 1, `chosen L=${out.get("5,5").L}`);
+	ok("derived expectation actually decides (exp01 < 0.45)", exp01 < 0.45, `exp01=${exp01.toFixed(4)}`);
+	ok("below target (0,1) received both slot errors -> black", out.get("0,1").L === 0, `chosen L=${out.get("0,1").L} vs exp01=${exp01.toFixed(4)}`);
+	ok("control cell (5,5) untouched -> white", out.get("5,5").L === 1, `chosen L=${out.get("5,5").L}`);
 }
 {
 	// serpentine mirroring: on the odd line r=1 the scan runs -q, so (1,1)'s
-	// error must flow forward to (0,1) (processed after it), not to (3,1).
+	// error must flow forward to (0,1) (processed after it), not to (2,1).
+	const row = (L) => {
+		const i = dither.toneIndex({ L, a: 0, b: 0 });
+		return [0, 1, 2].map((s) => dither.JODOIN_TRIPLES[i * 3 + s]);
+	};
 	const base = (L) => ({ L, a: 0, b: 0 });
 	const cells = [
-		{ q: 2, r: 0, ok: base(0.75) }, // white, err -0.25 -> below-left slot reaches (1,1)
-		{ q: 1, r: 1, ok: base(0.51) }, // 0.51 - 3/13*0.25 = 0.4523 -> black, err +0.4523
-		{ q: 0, r: 1, ok: base(0.49) }, // black alone; white iff mirrored forward error arrives: 0.49 + 7/13*0.4523 = 0.7335
+		{ q: 2, r: 0, ok: base(0.8) }, // white, err -0.2 -> below-left slot reaches (1,1)
+		{ q: 1, r: 1, ok: base(0.51) }, // -> black
+		{ q: 0, r: 1, ok: base(0.49) }, // black alone; white iff mirrored forward error arrives
 	];
 	const quant = (v) => (v.L >= 0.5 ? { L: 1, a: 0, b: 0 } : { L: 0, a: 0, b: 0 });
+	const w0 = row(0.8);
+	const v11 = 0.51 + w0[1] * (0.8 - 1); // (1,1) diffused value -> black
+	const w11 = row(v11);
+	const exp01 = 0.49 + w11[0] * v11; // (0,1): mirrored-forward (slot0) of (1,1)'s error (+v11)
 	const out = dither.diffuseHexError(cells, quant, { orientation: "pointy" });
-	ok("(1,1) received (2,0) below-left error", out.get("1,1").L === 0, `chosen L=${out.get("1,1").L}`);
-	ok("mirrored forward: (1,1) error reached (0,1)", out.get("0,1").L === 1, `chosen L=${out.get("0,1").L} (0.49 + 7/13*0.4523 = ${(0.49 + (7 / 13) * 0.4523).toFixed(4)})`);
+	ok("derived expectation actually decides (exp01 > 0.55)", exp01 > 0.55, `exp01=${exp01.toFixed(4)}`);
+	ok("(1,1) received (2,0) below-left error -> black", out.get("1,1").L === 0, `chosen L=${out.get("1,1").L} vs v11=${v11.toFixed(4)}`);
+	ok("mirrored forward: (1,1) error reached (0,1) -> white", out.get("0,1").L === 1, `chosen L=${out.get("0,1").L} vs exp01=${exp01.toFixed(4)}`);
 }
 
 // ── hexrender (DOM-free surface) ─────────────────────────────────────────────

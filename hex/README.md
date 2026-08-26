@@ -17,15 +17,16 @@ is passed in as a callback and used UNCHANGED (lattice-agnostic, not forked).
 
 ## Coefficient-table provenance (read this)
 
-The diffusion ALGORITHM is the published one, exactly. The tone-dependent
-coefficient TABLE is not: the brief carrying the paper's verified 128 triples
-did not reach this lane (searched repo, shared checkout, public web — nothing
-published exists in reachable open source). `JODOIN_TRIPLES` in `hexdither.ts`
-therefore holds the paper's constant-weight baseline (7/16, 3/16, 3/16,
-renormalized to sum 1), clearly marked. When the verified numbers arrive they
-drop into that ONE constant — nothing else changes. The void-and-cluster mask
-needs no such caveat: it is fully generated here (`tools/gen-voidcluster.mjs`,
-deterministic seed, converged, rank permutation proven).
+The diffusion ALGORITHM is the published one, exactly — serpentine scan, 3
+downstream neighbours (d10 forward, d-11 / d01 below), mirrored below-target
+swap on right-to-left lines, tone-dependent triples normalized to sum 1,
+levels 128-255 mirrored. The table is now the paper's VERIFIED numbers:
+Jodoin & Ostromoukhov, "Halftoning Over a Hexagonal Grid," Proc. SPIE 5008
+(2003), DOI 10.1117/12.473230 — 128 rows of integers (~10000 per row), held
+in `JODOIN_TABLE_INTS` (swappable constant; tests assert row sums, known
+rows, and per-row normalization). The void-and-cluster mask is fully
+generated here (`tools/gen-voidcluster.mjs`, deterministic seed, converged,
+rank permutation proven).
 
 ## Working on this lane
 

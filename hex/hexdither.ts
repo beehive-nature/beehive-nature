@@ -14,12 +14,11 @@
 // The quantizer is passed in as a callback and used UNCHANGED — it is
 // lattice-agnostic and is not forked here.
 //
-// PROVENANCE OF THE COEFFICIENT TABLE: the brief carrying the paper's verified
-// table did not reach this lane (searched the repo, the shared checkout, and
-// public sources — nothing published). The algorithm is exact; the numbers
-// below are the paper's constant-weight baseline geometry (7/16, 3/16, 3/16,
-// renormalized to sum 1). The verified table drops into JODOIN_TRIPLES — one
-// constant, one place — without touching anything else.
+// PROVENANCE OF THE COEFFICIENT TABLE: Jodoin & Ostromoukhov, "Halftoning Over
+// a Hexagonal Grid," Proc. SPIE 5008 (2003), DOI 10.1117/12.473230 — the
+// paper's tone-dependent table, 128 rows over levels 0-127 (levels 128-255
+// mirrored by symmetry via toneIndex), each row (d10, d-11, d01) as integers
+// summing to ~10000, renormalized here to sum to 1.
 //
 // ── METHOD 2: ordered dither ─────────────────────────────────────────────────
 // There is NO native hex Bayer. A void-and-cluster (Ulichney 1993) blue-noise
@@ -41,17 +40,48 @@ export type Quantizer = (ok: Ok3) => Ok3;
 // ── tone-dependent coefficient table ────────────────────────────────────────
 
 export const JODOIN_PROVENANCE =
-	"constant-weight baseline (7/16,3/16,3/16)/13 pending the paper's verified table — see hexdither.ts header";
+	"Jodoin & Ostromoukhov, Halftoning Over a Hexagonal Grid, Proc. SPIE 5008 (2003), DOI 10.1117/12.473230 — verified 128-row tone-dependent table (d10, d-11, d01), renormalized to sum 1 per row; levels 128-255 mirrored";
+
+/**
+ * The paper's verified table: 128 rows x (d10, d-11, d01), integers summing
+ * to ~10000 per row. Swappable constant — replace this array (or pass custom
+ * weights to diffuseHexError) without touching the algorithm.
+ */
+export const JODOIN_TABLE_INTS: readonly number[] = [
+	6691, 0, 3309, 6691, 0, 3309, 6576, 316, 3108, 6462, 629, 2909, 6348, 940, 2711, 6236, 1248, 2516,
+	6124, 1554, 2322, 6014, 1857, 2129, 5904, 2157, 1938, 5795, 2456, 1749, 5688, 2751, 1561, 5581, 3044,
+	1375, 5474, 3335, 1190, 5369, 3624, 1007, 5265, 3910, 825, 5161, 4194, 645, 4682, 4237, 1081, 4303,
+	4272, 1425, 3997, 4300, 1704, 3743, 4323, 1934, 3530, 4342, 2128, 3900, 4165, 1935, 4516, 3871, 1613,
+	4375, 3722, 1904, 4214, 3551, 2236, 4027, 3354, 2619, 4000, 3779, 2221, 3972, 4224, 1804, 3943, 4689,
+	1368, 3912, 5177, 911, 3879, 5690, 431, 3785, 5701, 514, 3693, 5712, 595, 3603, 5722, 675, 3514, 5733,
+	753, 3509, 5694, 798, 3504, 5655, 841, 3499, 5618, 883, 3494, 5581, 925, 3489, 5545, 965, 3485, 5510,
+	1005, 3480, 5476, 1044, 3476, 5442, 1082, 3471, 5409, 1120, 3399, 5139, 1462, 3333, 4891, 1776, 3272,
+	4664, 2064, 3216, 4454, 2330, 3164, 4260, 2576, 3116, 4080, 2804, 3071, 3912, 3017, 3029, 3756, 3215,
+	2990, 3610, 3400, 2954, 3473, 3574, 2919, 3344, 3737, 2887, 3223, 3890, 2856, 3109, 4034, 2827, 3002,
+	4171, 2800, 2900, 4300, 2774, 2804, 4422, 3134, 3401, 3466, 3460, 3942, 2598, 3757, 4435, 1808, 4029,
+	4886, 1086, 4278, 5300, 422, 4249, 5324, 427, 4220, 5347, 432, 4192, 5371, 437, 4163, 5395, 442, 4134,
+	5418, 447, 4106, 5442, 452, 4077, 5465, 457, 4049, 5489, 462, 4020, 5512, 467, 3992, 5536, 472, 3964,
+	5559, 477, 3936, 5582, 482, 3907, 5605, 487, 3879, 5628, 492, 3851, 5652, 497, 3823, 5675, 502, 3795,
+	5698, 507, 3768, 5721, 512, 3740, 5744, 517, 3712, 5767, 521, 3684, 5789, 526, 3743, 5747, 510, 3802,
+	5705, 493, 3860, 5663, 477, 3918, 5622, 461, 3975, 5580, 444, 4032, 5539, 428, 4089, 5498, 412, 4146,
+	5458, 396, 4202, 5417, 381, 4258, 5377, 365, 4313, 5337, 349, 4369, 5298, 334, 4424, 5258, 318, 4478,
+	5219, 303, 4532, 5180, 288, 4586, 5141, 273, 4640, 5103, 258, 4693, 5064, 243, 4746, 5026, 228, 4799,
+	4988, 213, 4851, 4950, 198, 4904, 4913, 183, 4955, 4876, 169, 5007, 4839, 154, 5058, 4802, 140, 5109,
+	4765, 126, 5160, 4729, 111, 5210, 4693, 97, 5260, 4657, 83, 5310, 4621, 69, 5360, 4585, 55, 5409, 4550,
+	41, 5458, 4514, 27, 5507, 4479, 14, 5556, 4444, 0, 5506, 4403, 91, 5448, 4356, 196, 5380, 4299, 321,
+	5299, 4232, 469, 5200, 4150, 650, 5077, 4048, 875, 4920, 3918, 1162,
+];
 
 /** 128 triples [wForward(d10), wBelow1(d-11), wBelow2(d01)], each summing to 1. */
-export const JODOIN_TRIPLES: Float64Array = buildUniformTriples(7 / 13, 3 / 13, 3 / 13);
+export const JODOIN_TRIPLES: Float64Array = normalizeTriples(JODOIN_TABLE_INTS);
 
-function buildUniformTriples(wf: number, wm: number, wo: number): Float64Array {
+function normalizeTriples(ints: readonly number[]): Float64Array {
 	const t = new Float64Array(128 * 3);
 	for (let i = 0; i < 128; i++) {
-		t[i * 3] = wf;
-		t[i * 3 + 1] = wm;
-		t[i * 3 + 2] = wo;
+		const s = ints[i * 3] + ints[i * 3 + 1] + ints[i * 3 + 2];
+		t[i * 3] = ints[i * 3] / s;
+		t[i * 3 + 1] = ints[i * 3 + 1] / s;
+		t[i * 3 + 2] = ints[i * 3 + 2] / s;
 	}
 	return t;
 }
