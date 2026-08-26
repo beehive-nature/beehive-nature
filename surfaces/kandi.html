@@ -71,11 +71,12 @@ code{color:var(--ink)}
   inbox. String beads, spell a word, name who it's for, then <b>gift</b> it, <b>cross</b> it, or
   <b>show</b> it. Each one hands you a short line of text and you carry it in whatever chat you
   already use, so there is no account here and nobody to sign up with. Your arms live in this
-  browser's own storage and no kandi is ever uploaded. Two things the page does by itself: it
-  asks a public chain node whether the chain is up — that is the badge at the bottom, and it
-  sends no kandi and no name, though that node does see your address — and if you pick a
-  language other than English it fetches the translation file from this same site. Your first
-  kandi is already waiting on your left arm.</div>
+  browser's own storage and no kandi is ever uploaded. The page makes no outside request at all
+  unless you ask for one: the rails badge at the bottom shows a status checked when this page was
+  built, and only reaches a public chain node if you tap its ↻ — which sends no kandi and no name,
+  though that node does see your address. The one other request is the translation file, fetched
+  from this same site if you pick a language other than English. Your first kandi is already
+  waiting on your left arm.</div>
   <div class="sub" data-reg="raver">make it. name it. do the handshake. peace, love, unity — and on
   respect, the kandi crosses. right arm trades, left arm keeps, and the crossing doesn't move until
   something lands in your hand. no feed, no room, nobody's inbox — the string goes hand to hand down
@@ -86,13 +87,16 @@ code{color:var(--ink)}
   <div class="sub" data-reg="cypherpunk">Format: <code>KND1|maker|for|ts36|beads|fnv</code> —
   beads as [0-9] color indices and [A-Z] letter beads; FNV-1a/32 over the payload, base36.
   <b>A checksum, not a signature</b> — it catches a mistyped string, not a forged one, and a maker
-  name is a claim, never an attestation. <b>&quot;zero network&quot; is deleted from this page rather
-  than softened</b>, because two requests are page-initiated beyond its own scripts:
-  <code>rails-badge.js</code> POSTs <code>{}</code> to <code>eos.api.eosnation.io</code> (falling back
-  to <code>eos.greymass.com</code>) about 1.3 s after load with no user action — it carries no kandi
-  and no soul name, but your IP, User-Agent and the timing of the visit reach a third party — and
-  <code>lang.js</code> GETs <code>lang-corpus.json</code> same-origin, only when your language is not
-  English. State is <code>localStorage</code> only (<code>bkandi</code> written here; the riders own
+  name is a claim, never an attestation. <b>This page makes no outside request on load.</b> Ruled
+  2026-08-26: <code>rails-badge.js</code> paints a status BAKED at build time from a real
+  <code>get_info</code> read (head 516799778, 2026-08-26) and prints that bake's date, so a stale
+  bake advertises its own staleness; it POSTs <code>{}</code> to <code>eos.api.eosnation.io</code>
+  (falling back to <code>eos.greymass.com</code>) <b>only when a reader taps ↻</b> — that request
+  carries no kandi and no soul name, but your IP, User-Agent and its timing reach a third party, which
+  is why it is now yours to choose. The only other request is <code>lang.js</code> GETting
+  <code>lang-corpus.json</code> same-origin, and only when your language is not English. Receipt: a
+  network capture of this page records zero cross-origin requests on load, and exactly one after the
+  tap. State is <code>localStorage</code> only (<code>bkandi</code> written here; the riders own
   <code>bregister</code>, <code>blang</code>, <code>btranslated_pref</code>, <code>bnr_rails_pin</code>),
   no cookies, no sessionStorage, no IndexedDB, and no XHR, WebSocket, sendBeacon or analytics tag
   anywhere in the chain. Gift, cross and show all terminate in the OS clipboard — the carrying is done
@@ -198,8 +202,7 @@ code{color:var(--ink)}
 </main>
 <footer>
   🍬 your kandi lives in this browser — no server holds one · a kandi string is plain text: whoever
-  sees it reads the names in it · a checksum, not a signature · the rails badge pings a public chain
-  node on load ·
+  sees it reads the names in it · a checksum, not a signature · no outside request unless you tap ↻ ·
   <a href="plur.html">🪩 the mUseUm (Wing IV is this page's law)</a> ·
   <a href="hardware/build.html">🔧 the festival</a> ·
   <a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/kandi.html" rel="noopener">view source</a> ·
