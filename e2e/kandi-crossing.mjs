@@ -45,22 +45,22 @@ await B2.goto(`${BASE}/kandi.html`,{waitUntil:'load'}); await B2.waitForTimeout(
 await mk(B2,'SILVER','ari');
 await B2.click('#right .xrow button:nth-child(2)'); await B2.waitForTimeout(250);
 await B2.click('#cross .xrow button:nth-child(1)'); await B2.waitForTimeout(250);
-const bStr=await B2.inputValue('#cross .xmine');
+const bStr=await B2.inputValue('#xmine');
 ok('the crossing panel shows your own string to hand over', /^KND1\|ari\|/.test(bStr), bStr.slice(0,26));
 
 // ── C · A crosses with B's piece
 await A.click('#cross .xrow button:nth-child(1)'); await A.waitForTimeout(250);
-const aStr=await A.inputValue('#cross .xmine');
-await A.fill('#cross .xtheirs', aStr);
-await A.click('#cross .xdo'); await A.waitForTimeout(250);
-ok('crossing with your OWN string is refused', /two hands/.test(await A.textContent('#cross .xerr')),
-   await A.textContent('#cross .xerr'));
-await A.fill('#cross .xtheirs','KND1|x|y|1|AB|zzzz');
-await A.click('#cross .xdo'); await A.waitForTimeout(250);
-ok('a tampered string is refused by checksum', /refused/.test(await A.textContent('#cross .xerr')),
-   await A.textContent('#cross .xerr'));
-await A.fill('#cross .xtheirs', bStr);
-await A.click('#cross .xdo'); await A.waitForTimeout(350);
+const aStr=await A.inputValue('#xmine');
+await A.fill('#xtheirs', aStr);
+await A.click('#xdo'); await A.waitForTimeout(250);
+ok('crossing with your OWN string is refused', /two hands/.test(await A.textContent('#xerr')),
+   await A.textContent('#xerr'));
+await A.fill('#xtheirs','KND1|x|y|1|AB|zzzz');
+await A.click('#xdo'); await A.waitForTimeout(250);
+ok('a tampered string is refused by checksum', /refused/.test(await A.textContent('#xerr')),
+   await A.textContent('#xerr'));
+await A.fill('#xtheirs', bStr);
+await A.click('#xdo'); await A.waitForTimeout(350);
 const sA=await st(A);
 ok('the crossing completes: mine leaves the crossing', sA.cross===0, JSON.stringify(sA));
 ok('theirs lands on my LEFT arm, received and eternal',

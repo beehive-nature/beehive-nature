@@ -43,7 +43,7 @@ button.act:hover{background:var(--r);color:#0a0612}
 .kc .tag.ded{color:var(--amber);border:1px solid #5c4318}
 .kc .tag.cross{color:var(--u);border:1px solid #2b3f6b}
 .xrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
-.xpanel{border:1px dashed #2b3f6b;padding:10px;margin-top:10px;display:none}
+.xpanel{border:1px dashed #2b3f6b;padding:14px;margin-top:12px;display:none}
 .xpanel.open{display:block}
 .shout{width:100%;min-height:44px;resize:vertical;margin-top:8px;display:none}
 .shout.open{display:block}
@@ -131,6 +131,16 @@ code{color:var(--ink)}
   string, same FNV-1a/32 checksum, same retirement rule as the gift — a copy you already handed over
   cannot be un-handed, which is why the piece leaves your arm rather than being marked "traded".</div>
   <div class="karm" id="cross"></div>
+  <div class="xpanel" id="xpanel">
+    <div class="law">Hand them <b>your</b> string, paste <b>theirs</b>. The swap happens the moment
+    you paste — yours retires to the memory line, theirs rides your left arm forever.</div>
+    <div style="font-size:10px;color:var(--faint);margin-top:8px">YOURS — hand this over</div>
+    <textarea id="xmine" readonly style="width:100%;min-height:44px;resize:vertical"></textarea>
+    <div style="font-size:10px;color:var(--faint);margin-top:8px">THEIRS — paste what they are crossing to you</div>
+    <textarea id="xtheirs" placeholder="KND1|…" style="width:100%;min-height:44px;resize:vertical"></textarea>
+    <div class="row" style="margin-top:8px"><button class="act" id="xcopy">copy mine</button><button class="act" id="xdo">complete the crossing</button><button class="act" id="xclose">close</button></div>
+    <div class="err" id="xerr"></div>
+  </div>
 
   <textarea id="showout" class="shout" readonly aria-label="a pointer to this kandi"></textarea>
   <div class="given" id="givenlog"></div>
@@ -306,19 +316,6 @@ function card(k,side,idx){
      (blight/pointers.js, the DM payload law). Thin enough for any channel. */
   btn('◎ show it',function(){ showIt(k); });
   d.appendChild(row);
-  if(side==='cross'){
-    var pan=document.createElement('div'); pan.className='xpanel'; pan.id='xp'+idx;
-    pan.innerHTML='<div class="law">Hand them <b>your</b> string, paste <b>theirs</b>. The swap happens '+
-      'the moment you paste — yours retires, theirs rides your left arm forever.</div>'+
-      '<textarea readonly class="xmine" style="width:100%;min-height:44px;resize:vertical"></textarea>'+
-      '<textarea class="xtheirs" placeholder="KND1|… — the piece they are crossing to you" '+
-      'style="width:100%;min-height:44px;resize:vertical;margin-top:6px"></textarea>'+
-      '<div class="xrow"><button class="act xcopy">copy mine</button>'+
-      '<button class="act xdo">complete the crossing</button>'+
-      '<button class="act xclose">close</button></div>'+
-      '<div class="err xerr"></div>';
-    d.appendChild(pan);
-  }
   return d;
 }
 function arms(){
@@ -349,29 +346,30 @@ function toCross(idx){ var k=S.right[idx]; if(!k) return;
 function unCross(idx){ var k=S.cross[idx]; if(!k) return;
   S.cross.splice(idx,1); S.right.push(k); save(); arms(); }
 function openCross(idx){
-  var pan=document.getElementById('xp'+idx); if(!pan) return;
-  pan.classList.add('open');
-  pan.querySelector('.xmine').value=encode(S.cross[idx]);
-  pan.querySelector('.xcopy').onclick=function(){
-    var t=pan.querySelector('.xmine'); t.select();
-    try{ document.execCommand('copy'); }catch(e){}
-    if(navigator.clipboard) navigator.clipboard.writeText(t.value).catch(function(){});
-  };
-  pan.querySelector('.xclose').onclick=function(){ pan.classList.remove('open'); };
-  pan.querySelector('.xdo').onclick=function(){
-    var err=pan.querySelector('.xerr');
-    var r=decode(pan.querySelector('.xtheirs').value);
+  var pan=$('xpanel'); if(!pan||!S.cross[idx]) return;
+  pan.classList.add("open");
+  $('xmine').value=encode(S.cross[idx]);
+  $('xtheirs').value=''; $('xerr').textContent='';
+  $('xcopy').onclick=function(){ var t=$('xmine'); t.select();
+    try{ document.execCommand("copy"); }catch(e){}
+    if(navigator.clipboard) navigator.clipboard.writeText(t.value).catch(function(){}); };
+  $('xclose').onclick=function(){ pan.classList.remove('open'); };
+  $('xdo').onclick=function(){
+    var err=$('xerr'), raw=$('xtheirs').value.trim();
+    var r=decode(raw);
     if(r.err){ err.textContent='refused — '+r.err; return; }
-    var mine=S.cross[idx]; if(!mine){ err.textContent='that piece is no longer on the crossing'; return; }
-    if(encode(mine)===pan.querySelector('.xtheirs').value.trim()){
-      err.textContent='that is your own string — a crossing needs two hands'; return; }
+    var mine=S.cross[idx];
+    if(!mine){ err.textContent='that piece is no longer on the crossing'; return; }
+    if(encode(mine)===raw){ err.textContent='that is your own string — a crossing needs two hands'; return; }
     /* the swap, both halves at once: yours retires to the memory line, theirs
-       lands eternal. Order matters only for honesty — never take before giving. */
+       lands eternal. Never take before giving. */
     S.given.push({beads:mine.beads,to:(r.maker||'the floor'),ts:Date.now(),crossed:true});
     S.cross.splice(idx,1);
     S.left.push({maker:r.maker,madefor:r.madefor,beads:r.beads,ts:r.ts,rcv:true,crossed:true});
-    save(); err.textContent=''; arms();
+    save(); err.textContent=''; pan.classList.remove('open'); arms();
   };
+  pan.scrollIntoView({block:'center'});
+
 }
 /* show and tell — the DM payload law: a message is a POINTER, never content.
    PTR is loaded from blight/pointers.js so every surface keeps one grammar. */
