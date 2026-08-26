@@ -1,0 +1,692 @@
+{
+  "_meta": {
+    "law": "THE REGISTRY. surfaces/index.html and surfaces/doors/*.html are GENERATED from this file by tools/build-surfaces.mjs — never hand-edited. e2e/estate-source.mjs rebuilds and fails if the committed HTML has drifted, so an edit that skips this file cannot survive a gate. Add a surface here and it appears on the hub and behind its door at once.",
+    "i18n": "Every generated string carries a data-i18n key so surfaces/lang.js can swap it. Keys are mechanical: a surface is s.<path-with-slashes-and-dots-as-dashes>, a domain is d.<id>.<field>. Missing translations fall back to English visibly and are counted — the corpus law, unchanged.",
+    "generated_by": "tools/build-surfaces.mjs",
+    "sorted_by": "workflow wf_635765f1-ce1 — every surface opened and judged, then a challenge pass for forced fits and roadmap claims",
+    "binding_rule": "A door may not claim anything the estate does not currently do. state:\"roadmap\" never appears among a door’s open surfaces — only under \"not built yet\".",
+    "updated": "2026-08-26",
+    "slugs": "A domain's FILE NAME is its slug, kept separate from its id: the published URLs (doors/beehivenature.html …) were already handed out, and a generator that renames a live URL breaks every link anyone saved. id is for CSS and data attributes; slug is for the path.",
+    "band": "Each domain declares how many comb layers its header carries (founder, 2026-08-26: plur three, skaists two). A layer is a full comb at its own scale, speed, drift direction and opacity — back layers big/slow/dim, front small/quick/bright — so the eye reads depth from the layers disagreeing about how fast the world moves."
+  },
+  "domains": [
+    {
+      "id": "nature",
+      "host": "beehivenature.com",
+      "accent": "#D655BB",
+      "label": "THE ORGANISM · START HERE",
+      "who": "for someone who just heard the name",
+      "what": "A hive, not a company. One organism across five more doors — and the place the galleries live. Everything here is free to open, and nothing asks for a password, a wallet, or your name.",
+      "intro": "The organism's front door and the whole identity journey in one place: get started, receive, your two addresses, offline recovery — beside the wallet, the .b name desk, and the open hardware that will hold the keys. The Dock grades itself: every claim carries a receipt or is marked UNVERIFIED and stops there. The nine hosted twins of the founder's 2026-08-03 build night live here too, nine of them carrying behaviour fixes beyond the vendored chart library; the originals under surfaces/fleet/ stay byte-for-byte.",
+      "act": {
+        "href": "dock.html",
+        "label": "See what is proven",
+        "sub": "The Dock grades this estate against itself — every claim carries a receipt, or is marked UNVERIFIED and stops there. Start with what we can prove."
+      },
+      "notYet": [],
+      "slug": "beehivenature",
+      "layers": 1
+    },
+    {
+      "id": "plur",
+      "host": "plur.earth",
+      "accent": "#B79FE0",
+      "label": "THE ART PLANET · THE DANCEFLOOR",
+      "who": "for a raver",
+      "what": "The dancefloor. Rave rules, ecstatic dance, and consent — rule 3 is no touching without consent, and it is not decoration. Kandi lives here: make it, name it, give it away.",
+      "intro": "Peace · love · unity · respect. The floor came before the industry did, and Wing IV of the mUseUm is the ritual the kandi bar actually enforces in code: right arm trades, left arm keeps, and the crossing moves only when something lands back.",
+      "act": {
+        "href": "kandi.html",
+        "label": "Make a kandi and give it away",
+        "sub": "String beads, spell a word, name who it is for — then gift it, cross it, or show it. It travels as a short line of text you carry yourself. No account, no inbox."
+      },
+      "notYet": [
+        [
+          "A private raver marketplace",
+          "ruled roadmap — there is no page behind it today"
+        ],
+        [
+          "A live erc20i inscription art market",
+          "ruled roadmap — the catalog and explorer are real; the market is not"
+        ]
+      ],
+      "slug": "plur",
+      "layers": 3
+    },
+    {
+      "id": "skaists",
+      "host": "skaists.social",
+      "accent": "#6FA9E0",
+      "label": "CONSCIOUS COMMUNITY · BSKY-STYLE APP IN WAITING",
+      "who": "for an artist, a DJ, a festival vendor",
+      "what": "Conscious community, and the instruments to make work that is yours. Governance is here too, because a community that holds money has to be able to see it.",
+      "intro": "The governance domain — owned and active. One deck for the DAO, the treasuries and the watch; a review is a signed receipt you choose to publish, never telemetry. The studios and the forge are here because the work and the money that carries it belong to the same people. Ruled 2026-08-25: this domain ships bsky-style.",
+      "act": {
+        "href": "blight/studio-music.html",
+        "label": "Compose something and export it",
+        "sub": "The Studio composes, loops and exports an inscription — a piece that is yours, made from a seed, with nothing between you and it."
+      },
+      "notYet": [
+        [
+          "Launch your own art money",
+          "the studios and the gate are real; issuing a token from them is not built"
+        ],
+        [
+          "A metaphysical marketplace",
+          "ruled roadmap — named here so this door does not promise it"
+        ],
+        [
+          "An inscriptions marketplace",
+          "ruled roadmap — same"
+        ]
+      ],
+      "slug": "skaists",
+      "layers": 2
+    },
+    {
+      "id": "social",
+      "host": "bnature.social",
+      "accent": "#45C2DC",
+      "label": "THE SOCIAL LAYER · BSKY-STYLE APP IN WAITING",
+      "who": "for someone who wants people",
+      "what": "The social layer: the feed, the meetings, the room. No marketplace — nothing here is for sale. Tongues dock as first-class passengers, and your name stays in your own language.",
+      "intro": "The social layer, ATProto-shaped. Tongues dock as first-class passengers, your name stays in your own language and aliases are pointers, never ownership. The symposium is receipted discourse; the studios and the hearth are rooms where you co-create with the hive and each other — no server anywhere.",
+      "act": {
+        "href": "forge/room.html",
+        "label": "Open the room",
+        "sub": "Two tabs, one shared field — open it in a second tab and both hands move the same piece. No server holds it."
+      },
+      "notYet": [
+        [
+          "A feed, DMs, and 1:1 video",
+          "the pointer grammar that carries a message exists; the transport does not. Not built, said plainly."
+        ]
+      ],
+      "slug": "bnature-social",
+      "layers": 1
+    },
+    {
+      "id": "bio",
+      "host": "bnature.bio",
+      "accent": "#86CC72",
+      "label": "THE HEALTH COMMONS",
+      "who": "for a scientist, or anyone with a health question",
+      "what": "The health commons. Read food honestly — what is covered, what is not, and the denominator on every cell. Evidence is graded, and where the grade is weak the page says so instead of rounding up.",
+      "intro": "The health commons. The bFood hexagon replaces the pyramid because a pyramid was a ranking and food is not ranked — every cell shows n/m so you can see the denominator, and nothing is silently zero. The labs and trackers are the founder’s own instruments; where a figure is a hypothesis, the page says hypothesis.",
+      "act": {
+        "href": "bfood.html",
+        "label": "Read the hexagon",
+        "sub": "The successor to the food pyramid: a pyramid was a ranking, and food is not ranked. Every cell shows n/m so you can see the denominator, and nothing is ever silently zero."
+      },
+      "notYet": [
+        [
+          "A CSA farmer’s market",
+          "ruled roadmap — the growers’ pages are real reading; buying through them is not built"
+        ]
+      ],
+      "slug": "bnature-bio",
+      "layers": 1
+    },
+    {
+      "id": "biomass",
+      "host": "beehivebiomass.com",
+      "accent": "#E8B54B",
+      "label": "FEED THE ORGANISM",
+      "who": "for someone with a machine to contribute",
+      "what": "Feed the organism. The storage network our data lives on runs on ordinary machines, and the two treasuries that pay for it are readable by anyone, keylessly, right now.",
+      "intro": "“beehivebiomass.com is the civilian marketplace” — the founder’s own words. The storage network our data lives on runs on ordinary machines, and the two treasuries that pay for it read keylessly with failover: a failed read renders amber and breaks the line, because a gap is data. Running a node docks locally (antd), never through a hosted page.",
+      "act": {
+        "href": "bantfarm.html",
+        "label": "Read the farm and the two treasuries",
+        "sub": "Live reads against real hosts, with failover — and a failed read renders amber and breaks the line, because a gap is data. Running a node itself docks locally (antd), never through a hosted page."
+      },
+      "notYet": [
+        [
+          "An alloy resource exchange",
+          "ruled roadmap — named here so this door does not promise it"
+        ],
+        [
+          "A live iron mesh",
+          "bMeshAsi says it plainest itself: no peers, no registry, no dispatch, no settlement. Nothing there moves value today."
+        ]
+      ],
+      "slug": "beehivebiomass",
+      "layers": 1
+    }
+  ],
+  "surfaces": [
+    {
+      "file": "bearth.html",
+      "domain": "bio",
+      "name": "what one food would cost the planet",
+      "state": "working",
+      "i18n": "s.bearth"
+    },
+    {
+      "file": "bfood.html",
+      "domain": "bio",
+      "name": "your nutrients, drawn honestly, never zero",
+      "state": "working",
+      "i18n": "s.bfood"
+    },
+    {
+      "file": "bigen.html",
+      "domain": "bio",
+      "name": "cannabis and cancer, graded honestly",
+      "state": "working",
+      "i18n": "s.bigen"
+    },
+    {
+      "file": "blongevity.html",
+      "domain": "bio",
+      "name": "your body builds its own cannabinoids",
+      "state": "working",
+      "i18n": "s.blongevity"
+    },
+    {
+      "file": "fleet-hosted/gallery/acid-cascade.html",
+      "domain": "bio",
+      "name": "The chronic inflammatory cascade, argued",
+      "state": "working",
+      "i18n": "s.fleet-hosted-gallery-acid-cascade"
+    },
+    {
+      "file": "fleet-hosted/gallery/indigo-index.html",
+      "domain": "bio",
+      "name": "Chronic disease economics against GDP",
+      "state": "working",
+      "i18n": "s.fleet-hosted-gallery-indigo-index",
+      "caveat": "the central figure is a stated hypothesis"
+    },
+    {
+      "file": "fleet-hosted/lab/blend-lab.html",
+      "domain": "bio",
+      "name": "Tobacco blend ratios, flavour and cost",
+      "state": "working",
+      "i18n": "s.fleet-hosted-lab-blend-lab"
+    },
+    {
+      "file": "fleet-hosted/lab/bnr-dashboard.html",
+      "domain": "bio",
+      "name": "Reads what the other instruments write",
+      "state": "partly",
+      "i18n": "s.fleet-hosted-lab-bnr-dashboard",
+      "caveat": "reads what the other instruments write"
+    },
+    {
+      "file": "fleet-hosted/lab/edible-tracker.html",
+      "domain": "bio",
+      "name": "Edible dosing, onset, and effect log",
+      "state": "working",
+      "i18n": "s.fleet-hosted-lab-edible-tracker"
+    },
+    {
+      "file": "fleet-hosted/lab/flower-lab.html",
+      "domain": "bio",
+      "name": "THCA blending calculator with session log",
+      "state": "working",
+      "i18n": "s.fleet-hosted-lab-flower-lab"
+    },
+    {
+      "file": "fleet-hosted/lab/intake-tracker.html",
+      "domain": "bio",
+      "name": "Daily cannabinoid intake against your RDI",
+      "state": "working",
+      "i18n": "s.fleet-hosted-lab-intake-tracker"
+    },
+    {
+      "file": "fleet-hosted/lab/spliff-lab.html",
+      "domain": "bio",
+      "name": "Roll composition against absorbed-THC target",
+      "state": "working",
+      "i18n": "s.fleet-hosted-lab-spliff-lab"
+    },
+    {
+      "file": "university/index.html",
+      "domain": "bio",
+      "name": "learn to read the evidence",
+      "state": "working",
+      "i18n": "s.university-index"
+    },
+    {
+      "file": "bantfarm.html",
+      "domain": "biomass",
+      "name": "two treasuries and the node farm, live",
+      "state": "working",
+      "i18n": "s.bantfarm"
+    },
+    {
+      "file": "bfactory.html",
+      "domain": "biomass",
+      "name": "the ratified plan, made walkable",
+      "state": "roadmap",
+      "i18n": "s.bfactory",
+      "caveat": "its own banner: nothing is built"
+    },
+    {
+      "file": "blight/coop.html",
+      "domain": "biomass",
+      "name": "hemp biomass, ranked by criticality",
+      "state": "partly",
+      "i18n": "s.blight-coop",
+      "caveat": "the index is a fixed table, not a live feed"
+    },
+    {
+      "file": "bmeshasi.html",
+      "domain": "biomass",
+      "name": "pledge your iron, metered, paid first",
+      "state": "roadmap",
+      "i18n": "s.bmeshasi",
+      "caveat": "says it plainly itself: does not exist yet"
+    },
+    {
+      "file": "b4b.html",
+      "domain": "nature",
+      "name": "our receipts, measured on Base",
+      "state": "working",
+      "i18n": "s.b4b",
+      "unsorted": true
+    },
+    {
+      "file": "biq.html",
+      "domain": "nature",
+      "name": "compose a cited wiki proposal, never post",
+      "state": "working",
+      "i18n": "s.biq",
+      "unsorted": true
+    },
+    {
+      "file": "blight/bnri-gallery.html",
+      "domain": "nature",
+      "name": "the fleet's own art",
+      "state": "working",
+      "i18n": "s.blight-bnri-gallery"
+    },
+    {
+      "file": "blight/c1-aid.html",
+      "domain": "nature",
+      "name": "taxonomy sizing, from the tree's own numbers",
+      "state": "working",
+      "i18n": "s.blight-c1-aid",
+      "unsorted": true
+    },
+    {
+      "file": "blight/compare.html",
+      "domain": "nature",
+      "name": "the ERC-20i family, artist by artist",
+      "state": "working",
+      "i18n": "s.blight-compare"
+    },
+    {
+      "file": "blight/demo.html",
+      "domain": "nature",
+      "name": "the logo is the transmission",
+      "state": "partly",
+      "i18n": "s.blight-demo",
+      "caveat": "the beam encoder is real; this page is its demo"
+    },
+    {
+      "file": "blight/farmers.html",
+      "domain": "nature",
+      "name": "stalls, bAccords, settled in fUSD",
+      "state": "partly",
+      "i18n": "s.blight-farmers",
+      "caveat": "reads as a plan — settlement is not built",
+      "unsorted": true
+    },
+    {
+      "file": "blight/gallery.html",
+      "domain": "nature",
+      "name": "a walking tour of on-chain art",
+      "state": "working",
+      "i18n": "s.blight-gallery"
+    },
+    {
+      "file": "blight/index.html",
+      "domain": "nature",
+      "name": "one operation, many frequencies",
+      "state": "working",
+      "i18n": "s.blight-index"
+    },
+    {
+      "file": "blight/inscription-explorer.html",
+      "domain": "nature",
+      "name": "whose art shall we visit?",
+      "state": "working",
+      "i18n": "s.blight-inscription-explorer"
+    },
+    {
+      "file": "blight/market.html",
+      "domain": "nature",
+      "name": "inscriptions, honestly traded",
+      "state": "roadmap",
+      "i18n": "s.blight-market",
+      "caveat": "a design surface — no market runs behind it",
+      "unsorted": true
+    },
+    {
+      "file": "blight/midi-organ.html",
+      "domain": "nature",
+      "name": "the seed becomes sound",
+      "state": "working",
+      "i18n": "s.blight-midi-organ"
+    },
+    {
+      "file": "blight/museum.html",
+      "domain": "nature",
+      "name": "what \"on-chain\" actually means",
+      "state": "working",
+      "i18n": "s.blight-museum"
+    },
+    {
+      "file": "blight/vaulta-reader.html",
+      "domain": "nature",
+      "name": "the b-indexer's read path, keyless",
+      "state": "working",
+      "i18n": "s.blight-vaulta-reader",
+      "unsorted": true
+    },
+    {
+      "file": "blight/workbench.html",
+      "domain": "nature",
+      "name": "the instrument (tech bench)",
+      "state": "working",
+      "i18n": "s.blight-workbench"
+    },
+    {
+      "file": "bnames.html",
+      "domain": "nature",
+      "name": "names on our chain, read live",
+      "state": "partly",
+      "i18n": "s.bnames",
+      "caveat": "reads the chain live; reserving is founder-gated for now"
+    },
+    {
+      "file": "dock.html",
+      "domain": "nature",
+      "name": "what is proven, and what is not",
+      "state": "working",
+      "i18n": "s.dock"
+    },
+    {
+      "file": "fleet-hosted/index.html",
+      "domain": "nature",
+      "name": "Nine surfaces, one night, one hand",
+      "state": "working",
+      "i18n": "s.fleet-hosted-index",
+      "unsorted": true
+    },
+    {
+      "file": "hardware/build.html",
+      "domain": "nature",
+      "name": "climb from user to producer",
+      "state": "working",
+      "i18n": "s.hardware-build"
+    },
+    {
+      "file": "hardware/index.html",
+      "domain": "nature",
+      "name": "open hardware you can actually read",
+      "state": "working",
+      "i18n": "s.hardware-index"
+    },
+    {
+      "file": "hardware/lab.html",
+      "domain": "nature",
+      "name": "device reviews, science and art",
+      "state": "partly",
+      "i18n": "s.hardware-lab",
+      "caveat": "one device has bench numbers; the rest read pending"
+    },
+    {
+      "file": "hardware/security.html",
+      "domain": "nature",
+      "name": "security events, read honestly",
+      "state": "working",
+      "i18n": "s.hardware-security"
+    },
+    {
+      "file": "keys/addresses.html",
+      "domain": "nature",
+      "name": "one soul, two mailing addresses",
+      "state": "partly",
+      "i18n": "s.keys-addresses",
+      "caveat": "the derivation grammar is real; the rendered addresses are shapes"
+    },
+    {
+      "file": "listening.html",
+      "domain": "nature",
+      "name": "one seed, sound and sight",
+      "state": "working",
+      "i18n": "s.listening"
+    },
+    {
+      "file": "onboarding/index.html",
+      "domain": "nature",
+      "name": "the two-minute held-hand join ceremony",
+      "state": "partly",
+      "i18n": "s.onboarding-index",
+      "caveat": "key derivation is real; the auth steps are labelled simulated"
+    },
+    {
+      "file": "onboarding/receive.html",
+      "domain": "nature",
+      "name": "catch a beam of light, camera only",
+      "state": "working",
+      "i18n": "s.onboarding-receive"
+    },
+    {
+      "file": "recover.html",
+      "domain": "nature",
+      "name": "your 24 words, your keys, offline",
+      "state": "working",
+      "i18n": "s.recover"
+    },
+    {
+      "file": "stack.html",
+      "domain": "nature",
+      "name": "one engine diagram, honest parts included",
+      "state": "working",
+      "i18n": "s.stack"
+    },
+    {
+      "file": "wallet.html",
+      "domain": "nature",
+      "name": "one soul, every chain, zero custody",
+      "state": "working",
+      "i18n": "s.wallet"
+    },
+    {
+      "file": "bset.html",
+      "domain": "plur",
+      "name": "the set the founder builds to",
+      "state": "working",
+      "i18n": "s.bset",
+      "verb": {
+        "label": "Take the set as data",
+        "sub": "What is in the founder’s headphones while this gets built — EDM × русская музыка. Not an embed farm: the tracks are records, and the page hands you bset.json to keep."
+      }
+    },
+    {
+      "file": "festival/index.html",
+      "domain": "plur",
+      "name": "your day on the floor, free",
+      "state": "working",
+      "i18n": "s.festival-index",
+      "verb": {
+        "label": "Walk one day on the floor",
+        "sub": "Arrive with no ticket and no account, in your own tongue; find the rig, pair by light, make a kandi at the bar, read the economy board keylessly."
+      }
+    },
+    {
+      "file": "kandi.html",
+      "domain": "plur",
+      "name": "make it, name it, gift it",
+      "state": "working",
+      "i18n": "s.kandi",
+      "verb": {
+        "label": "Make one and hand it over",
+        "sub": "String beads, spell a word, name who it is for. Gift it one way, or offer it to the crossing so it only moves when something lands back. What you receive rides your left arm forever."
+      }
+    },
+    {
+      "file": "plur.html",
+      "domain": "plur",
+      "name": "thirty years of floor wisdom, receipted",
+      "state": "working",
+      "i18n": "s.plur",
+      "verb": {
+        "label": "Walk the six wings",
+        "sub": "Where the word came from, whose floor it was first — Black, brown and queer — the law that tried to name the music, and Wing IV, which is the ritual kandi obeys."
+      }
+    },
+    {
+      "file": "blight/studio-gate.html",
+      "domain": "skaists",
+      "name": "drop a layer, get a verdict",
+      "state": "working",
+      "i18n": "s.blight-studio-gate"
+    },
+    {
+      "file": "blight/studio-music.html",
+      "domain": "skaists",
+      "name": "compose, loop, export an inscription",
+      "state": "working",
+      "i18n": "s.blight-studio-music"
+    },
+    {
+      "file": "dao-dashboard/index.html",
+      "domain": "skaists",
+      "name": "how a treasury says I don't know",
+      "state": "roadmap",
+      "i18n": "s.dao-dashboard-index",
+      "caveat": "every figure is a fixture, not a measurement"
+    },
+    {
+      "file": "fleet-hosted/gallery/resonance.html",
+      "domain": "skaists",
+      "name": "Consciousness, Earth frequency, plant medicine",
+      "state": "partly",
+      "i18n": "s.fleet-hosted-gallery-resonance",
+      "caveat": "an argument drawn as a dashboard, not measurement"
+    },
+    {
+      "file": "forge/hexfield.html",
+      "domain": "skaists",
+      "name": "roll a seed, grow a lattice",
+      "state": "working",
+      "i18n": "s.forge-hexfield"
+    },
+    {
+      "file": "forge/index.html",
+      "domain": "skaists",
+      "name": "instruments, not presets, for artists",
+      "state": "working",
+      "i18n": "s.forge-index"
+    },
+    {
+      "file": "forge/orbit.html",
+      "domain": "skaists",
+      "name": "seeded rose curves in SVG",
+      "state": "working",
+      "i18n": "s.forge-orbit"
+    },
+    {
+      "file": "review.html",
+      "domain": "skaists",
+      "name": "attestation, never telemetry",
+      "state": "working",
+      "i18n": "s.review"
+    },
+    {
+      "file": "royalguard.html",
+      "domain": "skaists",
+      "name": "one deck, three doors, zero custody",
+      "state": "partly",
+      "i18n": "s.royalguard",
+      "caveat": "reads the decks it can; some panels are held"
+    },
+    {
+      "file": "attest.html",
+      "domain": "social",
+      "name": "one tongue, one evening, signed",
+      "state": "working",
+      "i18n": "s.attest"
+    },
+    {
+      "file": "blanguage.html",
+      "domain": "social",
+      "name": "dock your tongue, no permission",
+      "state": "working",
+      "i18n": "s.blanguage"
+    },
+    {
+      "file": "blight/hearth.html",
+      "domain": "social",
+      "name": "co-create with the hive's AI",
+      "state": "partly",
+      "i18n": "s.blight-hearth",
+      "caveat": "a keyword router, not a model"
+    },
+    {
+      "file": "blight/pulse.html",
+      "domain": "social",
+      "name": "bX pointers live on the relay",
+      "state": "partly",
+      "i18n": "s.blight-pulse",
+      "caveat": "the read path is live against public relays; broadcast is held"
+    },
+    {
+      "file": "bqueenbee-live.html",
+      "domain": "social",
+      "name": "talk to the hive's machine referee",
+      "state": "partly",
+      "i18n": "s.bqueenbee-live",
+      "caveat": "answers from a page-local knowledge base, not a model"
+    },
+    {
+      "file": "bsymposium.html",
+      "domain": "social",
+      "name": "two food protocols, both receipted",
+      "state": "working",
+      "i18n": "s.bsymposium"
+    },
+    {
+      "file": "btranslated.html",
+      "domain": "social",
+      "name": "your name in your tongue",
+      "state": "partly",
+      "i18n": "s.btranslated",
+      "caveat": "section two carries its own DEMO badge"
+    },
+    {
+      "file": "buzz-studio.html",
+      "domain": "social",
+      "name": "paint a comb together, live",
+      "state": "working",
+      "i18n": "s.buzz-studio"
+    },
+    {
+      "file": "devroom.html",
+      "domain": "social",
+      "name": "builders' findings, written for strangers",
+      "state": "working",
+      "i18n": "s.devroom"
+    },
+    {
+      "file": "forge/huddle.html",
+      "domain": "social",
+      "name": "the same room, across machines",
+      "state": "partly",
+      "i18n": "s.forge-huddle",
+      "caveat": "you supply your own venue URL — we ship no server"
+    },
+    {
+      "file": "forge/room.html",
+      "domain": "social",
+      "name": "two tabs, one shared field",
+      "state": "working",
+      "i18n": "s.forge-room"
+    }
+  ]
+}

@@ -7,36 +7,69 @@
 <meta name="color-scheme" content="dark">
 <title>bnature.social — someone who wants people</title>
 <meta name="theme-color" content="#06110C">
-<style>
-:root{
+<style>:root{
   --void:#06110C; --panel:#0A1310; --tile:#0C1412; --inset:#08120E; --lift:#111C17;
   --ink:#E9F2EC; --dim:#8FA79A; --dimmer:#648176; --line:#1E2B26; --hot:#2F4A3C;
-  --accent:#45C2DC; --gold:#E8B54B; --ember:#FF7A6B;
-  --sem-value:#D655BB; --sem-solution:#86CC72; --sem-system:#45C2DC;
-  --sem-science:#B79FE0; --sem-harm:var(--ember);
+  --magenta:#D655BB; --green:#86CC72; --cyan:#45C2DC; --lilac:#B79FE0;
+  --blue:#6FA9E0; --gold:#E8B54B; --ember:#FF7A6B;
+  --sem-value:var(--magenta); --sem-solution:var(--green); --sem-system:var(--cyan);
+  --sem-science:var(--lilac); --sem-harm:var(--ember);
   --mono:ui-monospace,"Cascadia Mono","SF Mono",Menlo,Consolas,monospace;
-  --max:1080px;
+  --accent:#45C2DC; --max:1080px;
 }
-/* SEMANTIC COLOUR — meanings picked first, one hue fitted to each; this door
-   wears its own domain's hue and nothing else competes with it. */
+
+/* SEMANTIC COLOUR — the meanings were picked FIRST and a hue fitted to each;
+   every domain wears the meaning it embodies, and --sem-harm is declared for
+   the estate palette and deliberately unused here: nothing on this page is a
+   harm. DEPTH LADDER: --void ground · --panel slab · --tile door · --inset well. */
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{background:var(--void);color:var(--ink);font:14px/1.7 var(--mono);
-  min-height:100vh;padding-bottom:96px;-webkit-text-size-adjust:100%}
-a{text-decoration:none;color:var(--accent)}
-::selection{background:var(--accent);color:var(--void)}
-.wrap{max-width:var(--max);margin:0 auto;padding:0 22px}
+  min-height:100vh;padding-bottom:96px;-webkit-text-size-adjust:100%;position:relative}
+a{text-decoration:none}
 #veil{position:fixed;inset:0;pointer-events:none;z-index:3;opacity:.55;mix-blend-mode:multiply;
   background:repeating-linear-gradient(180deg,rgba(0,0,0,0) 0,rgba(0,0,0,0) 2px,rgba(0,0,0,.22) 3px,rgba(0,0,0,0) 4px)}
 header{position:relative;overflow:hidden;border-bottom:1px solid var(--line);padding-bottom:34px}
-#bandwrap{position:absolute;top:0;left:0;right:0;height:64px;overflow:hidden;animation:hexdrift 9s linear infinite}
-#band{position:absolute;top:-14px;left:-60px;display:flex;gap:6px;opacity:.8}
-#band i{width:42px;height:48px;flex:none;display:block;
+/* the mask NEVER moves — animating it sheared the right edge (2026-08-26) */
+#bandwrap{position:absolute;top:0;left:0;right:0;height:78px;overflow:hidden}
+#bandwrap .band{position:absolute;top:-16px;left:-80px;display:flex;
+  animation-timing-function:linear;animation-iteration-count:infinite;will-change:transform}
+#bandwrap .band i{flex:none;display:block;
   clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
   animation:hexpulse 3s ease-in-out infinite}
+#bandwrap .l0{top:-24px}
+#bandwrap .l2{top:2px}
 @keyframes hexpulse{0%{opacity:.10;transform:scale(.86)}50%{opacity:.95;transform:scale(1)}100%{opacity:.10;transform:scale(.86)}}
-@keyframes hexdrift{0%{transform:translateX(0)}100%{transform:translateX(-48px)}}
-.eyebrow{position:relative;padding-top:78px;font-size:10px;letter-spacing:.3em;color:var(--dimmer);text-transform:uppercase}
+@keyframes hexdrift{0%{transform:translateX(0)}100%{transform:translateX(calc(var(--step) * -1))}}
+@keyframes hexdriftb{0%{transform:translateX(calc(var(--step) * -1))}100%{transform:translateX(0)}}
+.eyebrow{position:relative;padding-top:86px;font-size:10px;letter-spacing:.34em;color:var(--dimmer);text-transform:uppercase}
+.shead{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding-bottom:11px;border-bottom:1px solid var(--line)}
+.shead .dot{width:10px;height:10px;flex:none;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
+.shead h2{font-size:19px;font-weight:800;letter-spacing:-.01em}
+.shead em{font-style:normal;font-size:9.5px;letter-spacing:.18em;color:var(--dimmer);text-transform:uppercase}
+.shead .n{margin-left:auto;font-size:9.5px;letter-spacing:.14em;color:var(--dimmer);text-transform:uppercase}
+.intro{color:var(--dim);font-size:11.5px;line-height:1.8;margin:14px 0 16px;max-width:104ch}
+section{margin-top:38px;scroll-margin-top:18px;background:var(--panel);border:1px solid var(--line);padding:20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:14px}
+a.t{display:block;background:var(--tile);border:1px solid var(--line);border-left:3px solid var(--line);
+  padding:20px;color:var(--ink);transition:transform .16s,border-color .16s,background .16s}
+a.t:hover,a.t:focus-visible{transform:translateY(-2px);background:var(--lift);outline:none}
+a.t i{font-style:normal;font-size:16px;line-height:1;display:block}
+a.t b{display:block;font-size:13.5px;font-weight:700;margin-top:9px;letter-spacing:-.01em}
+a.t s{display:block;text-decoration:none;font-size:11px;color:var(--dim);margin-top:5px;line-height:1.6}
+a.t u{display:block;text-decoration:none;font-size:9.5px;color:var(--gold);margin-top:6px;line-height:1.5}
+a.t.p{border-left-color:var(--gold)}
+a.t.x b::after{content:" \2197";font-weight:400;opacity:.55}
+footer{max-width:1280px;margin:52px auto 0;padding:22px 22px 0;border-top:1px solid var(--line);
+  color:var(--dimmer);font-size:10px;letter-spacing:.1em;line-height:2.2;text-transform:uppercase}
+footer a{color:var(--dim);display:inline-flex;align-items:center;min-height:32px;padding:0 5px}
+footer a:hover{color:var(--gold)}
+@media (prefers-reduced-motion:reduce){
+  #bandwrap .band,#bandwrap .band i{animation:none}#bandwrap .band i{opacity:.55}
+  a.t{transition:none}a.t:hover{transform:none}}
+a{color:var(--accent)}
+::selection{background:var(--accent);color:var(--void)}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 22px}
 h1{position:relative;font-size:clamp(30px,6.4vw,64px);font-weight:800;letter-spacing:-.02em;
   line-height:.96;margin-top:14px;color:var(--accent)}
 .what{position:relative;color:var(--dim);font-size:13.5px;margin-top:18px;max-width:62ch;line-height:1.8}
@@ -47,23 +80,13 @@ h1{position:relative;font-size:clamp(30px,6.4vw,64px);font-weight:800;letter-spa
 .act b{display:block;font-size:17px;font-weight:800;color:var(--accent);letter-spacing:-.01em}
 .act s{display:block;text-decoration:none;font-size:12px;color:var(--dim);margin-top:8px;line-height:1.75}
 .act em{display:block;font-style:normal;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--dimmer);margin-bottom:9px}
-section{margin-top:34px;background:var(--panel);border:1px solid var(--line);padding:20px}
-.shead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-bottom:11px;border-bottom:1px solid var(--line)}
-.shead .dot{width:9px;height:9px;flex:none;background:var(--accent);
-  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
-.shead h2{font-size:14px;font-weight:800;letter-spacing:.02em;color:var(--accent)}
-.shead em{font-style:normal;font-size:9.5px;letter-spacing:.18em;color:var(--dimmer);text-transform:uppercase}
-.shead .n{margin-left:auto;font-size:9.5px;letter-spacing:.14em;color:var(--dimmer);text-transform:uppercase}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));gap:12px;margin-top:14px}
-a.t{display:block;background:var(--tile);border:1px solid var(--line);border-left:3px solid var(--accent);
-  padding:15px;color:var(--ink);min-height:44px;transition:transform .16s,background .16s,border-color .16s}
-a.t:hover,a.t:focus-visible{transform:translateY(-2px);background:var(--lift);border-color:var(--accent);outline:none}
-a.t b{display:block;font-size:12.5px;font-weight:700;color:var(--accent)}
-a.t s{display:block;text-decoration:none;font-size:10.5px;color:var(--dim);margin-top:4px;line-height:1.6}
-a.t u{display:block;text-decoration:none;font-size:9.5px;color:var(--gold);margin-top:6px;line-height:1.5}
-a.t.p{border-left-color:var(--gold)}
+.shead .dot,section.d .dot{background:var(--accent)}
+.shead h2{color:var(--accent);font-size:14px}
+a.t{border-left-color:var(--accent)}
+a.t b{color:var(--accent)}
+a.t:hover{border-color:var(--accent)}
 a.t.big{padding:19px}
-a.t.big b{font-size:15px;letter-spacing:-.01em}
+a.t.big b{font-size:15px}
 a.t.big s.do{font-size:11.5px;color:var(--dim);margin-top:8px;line-height:1.75}
 a.t.big s:not(.do){font-size:9.5px;color:var(--dimmer);margin-top:8px}
 @media (min-width:900px){.grid.verbs{grid-template-columns:repeat(2,1fr)}}
@@ -71,64 +94,49 @@ a.t.big s:not(.do){font-size:9.5px;color:var(--dimmer);margin-top:8px}
 .notyet h2{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
 .notyet p{font-size:11.5px;color:var(--dim);margin-top:10px;line-height:1.75;max-width:74ch}
 .notyet li{list-style:none;font-size:12px;color:var(--dim);margin-top:11px;padding-left:16px;position:relative;line-height:1.7}
-.notyet li::before{content:"—";position:absolute;left:0;color:var(--dimmer)}
+.notyet li::before{content:"\2014";position:absolute;left:0;color:var(--dimmer)}
 .notyet li b{color:var(--ink);font-weight:700}
-footer{max-width:var(--max);margin:44px auto 0;padding:20px 22px 0;border-top:1px solid var(--line);
-  color:var(--dimmer);font-size:10px;letter-spacing:.1em;line-height:2.2;text-transform:uppercase}
-/* THE 32px TAP FLOOR is the estate design floor and applies to EVERY link, not
-   just the big ones: footer links and the inline (read the plan) links measured
-   11-14px and failed the doors gate on first run. */
-footer a{color:var(--dim);display:inline-flex;align-items:center;min-height:32px;padding:0 5px}
-footer a:hover{color:var(--gold)}
 .notyet a{display:inline-flex;align-items:center;min-height:32px;padding:0 5px}
 @media (max-width:600px){
   .wrap{padding:0 14px}
   .eyebrow{padding-top:60px;letter-spacing:.2em}
-  .grid{grid-template-columns:1fr;gap:9px}
-  section{padding:14px}
-  .act{padding:16px}
-  a.t:hover,.act:hover{transform:none}
-}
-@media (prefers-reduced-motion:reduce){
-  #band i,#bandwrap{animation:none}#band i{opacity:.5}
-  a.t,.act{transition:none}a.t:hover,.act:hover{transform:none}
-}
-</style>
+  .grid,.grid.verbs{grid-template-columns:1fr;gap:9px}
+  section{padding:14px}.act{padding:16px}
+  a.t:hover,.act:hover{transform:none}}</style>
 </head>
 <body>
 <div id="veil" aria-hidden="true"></div>
 <header>
-  <div id="bandwrap" aria-hidden="true"><div id="band"><i style="background:#D655BB;animation-duration:2.4s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:2.9s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:3.3s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:3.8s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:4.2s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:2.4s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:2.9s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:3.3s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:3.8s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:4.2s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:2.4s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:2.9s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:3.3s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:3.8s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:4.2s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:2.4s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:2.9s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:3.3s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:3.8s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:4.2s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:2.4s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:2.9s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:3.3s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:3.8s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:4.2s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:2.4s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:2.9s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:3.3s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:3.8s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:4.2s;animation-delay:0.19s"></i></div></div>
+  <div id="bandwrap" aria-hidden="true"><div class="band l1" style="gap:6px;opacity:0.72;filter:blur(0);animation-duration:17s;animation-name:hexdriftb;--step:52px"><i style="background:#D655BB;width:46px;height:53px;animation-duration:2.4s;animation-delay:0.00s"></i><i style="background:#86CC72;width:46px;height:53px;animation-duration:2.9s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:46px;height:53px;animation-duration:3.3s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:46px;height:53px;animation-duration:3.8s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:46px;height:53px;animation-duration:4.2s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:46px;height:53px;animation-duration:2.4s;animation-delay:0.95s"></i><i style="background:#B79FE0;width:46px;height:53px;animation-duration:2.9s;animation-delay:1.14s"></i><i style="background:#D655BB;width:46px;height:53px;animation-duration:3.3s;animation-delay:0.00s"></i><i style="background:#86CC72;width:46px;height:53px;animation-duration:3.8s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:46px;height:53px;animation-duration:4.2s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:46px;height:53px;animation-duration:2.4s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:46px;height:53px;animation-duration:2.9s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:46px;height:53px;animation-duration:3.3s;animation-delay:0.95s"></i><i style="background:#B79FE0;width:46px;height:53px;animation-duration:3.8s;animation-delay:1.14s"></i><i style="background:#D655BB;width:46px;height:53px;animation-duration:4.2s;animation-delay:0.00s"></i><i style="background:#86CC72;width:46px;height:53px;animation-duration:2.4s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:46px;height:53px;animation-duration:2.9s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:46px;height:53px;animation-duration:3.3s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:46px;height:53px;animation-duration:3.8s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:46px;height:53px;animation-duration:4.2s;animation-delay:0.95s"></i><i style="background:#B79FE0;width:46px;height:53px;animation-duration:2.4s;animation-delay:1.14s"></i><i style="background:#D655BB;width:46px;height:53px;animation-duration:2.9s;animation-delay:0.00s"></i><i style="background:#86CC72;width:46px;height:53px;animation-duration:3.3s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:46px;height:53px;animation-duration:3.8s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:46px;height:53px;animation-duration:4.2s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:46px;height:53px;animation-duration:2.4s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:46px;height:53px;animation-duration:2.9s;animation-delay:0.95s"></i><i style="background:#B79FE0;width:46px;height:53px;animation-duration:3.3s;animation-delay:1.14s"></i><i style="background:#D655BB;width:46px;height:53px;animation-duration:3.8s;animation-delay:0.00s"></i><i style="background:#86CC72;width:46px;height:53px;animation-duration:4.2s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:46px;height:53px;animation-duration:2.4s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:46px;height:53px;animation-duration:2.9s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:46px;height:53px;animation-duration:3.3s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:46px;height:53px;animation-duration:3.8s;animation-delay:0.95s"></i><i style="background:#B79FE0;width:46px;height:53px;animation-duration:4.2s;animation-delay:1.14s"></i><i style="background:#D655BB;width:46px;height:53px;animation-duration:2.4s;animation-delay:0.00s"></i><i style="background:#86CC72;width:46px;height:53px;animation-duration:2.9s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:46px;height:53px;animation-duration:3.3s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:46px;height:53px;animation-duration:3.8s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:46px;height:53px;animation-duration:4.2s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:46px;height:53px;animation-duration:2.4s;animation-delay:0.95s"></i><i style="background:#B79FE0;width:46px;height:53px;animation-duration:2.9s;animation-delay:1.14s"></i><i style="background:#D655BB;width:46px;height:53px;animation-duration:3.3s;animation-delay:0.00s"></i><i style="background:#86CC72;width:46px;height:53px;animation-duration:3.8s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:46px;height:53px;animation-duration:4.2s;animation-delay:0.38s"></i></div></div>
   <div class="wrap">
-    <p class="eyebrow">for someone who wants people</p>
+    <p class="eyebrow" data-i18n="d.social.who">for someone who wants people</p>
     <h1>bnature.social</h1>
-    <p class="what">The social layer: the feed, the meetings, the room. No marketplace — nothing here is for sale. Tongues dock as first-class passengers, and your name stays in your own language.</p>
-    <a class="act" href="../forge/room.html"><em>one thing to do</em><b>Open the room →</b><s>Two tabs, one shared field — open it in a second tab and both hands move the same piece. No server holds it. Ruled 2026-08-25: this domain ships bsky-style, with these surfaces docked in.</s></a>
+    <p class="what" data-i18n="d.social.what">The social layer: the feed, the meetings, the room. No marketplace — nothing here is for sale. Tongues dock as first-class passengers, and your name stays in your own language.</p>
+    <a class="act" href="../forge/room.html"><em>one thing to do</em><b data-i18n="d.social.act">Open the room →</b><s data-i18n="d.social.actsub">Two tabs, one shared field — open it in a second tab and both hands move the same piece. No server holds it.</s></a>
   </div>
 </header>
 
 <div class="wrap">
-  <section>
+  <section class="d">
     <div class="shead"><span class="dot"></span><h2>Everything behind this door</h2><em>open now · ⚠ marks a named limit</em><span class="n">11</span></div>
     <div class="grid">
-      <a class="t" href="../attest.html"><b>one tongue, one evening, signed</b><s>attest.html</s></a>
-      <a class="t" href="../blanguage.html"><b>dock your tongue, no permission</b><s>blanguage.html</s></a>
-      <a class="t" href="../bsymposium.html"><b>two food protocols, both receipted</b><s>bsymposium.html</s></a>
-      <a class="t" href="../buzz-studio.html"><b>paint a comb together, live</b><s>buzz-studio.html</s></a>
-      <a class="t" href="../devroom.html"><b>builders' findings, written for strangers</b><s>devroom.html</s></a>
-      <a class="t" href="../forge/room.html"><b>two tabs, one shared field</b><s>forge/room.html</s></a>
-      <a class="t p" href="../blight/hearth.html"><b>co-create with the hive's AI</b><s>blight/hearth.html</s><u>⚠ a keyword router, not a model</u></a>
-      <a class="t p" href="../blight/pulse.html"><b>bX pointers live on the relay</b><s>blight/pulse.html</s><u>⚠ the read path is live against public relays; broadcast is held</u></a>
-      <a class="t p" href="../bqueenbee-live.html"><b>talk to the hive's machine referee</b><s>bqueenbee-live.html</s><u>⚠ answers from a page-local knowledge base, not a model</u></a>
-      <a class="t p" href="../btranslated.html"><b>your name in your tongue</b><s>btranslated.html</s><u>⚠ section two carries its own DEMO badge</u></a>
-      <a class="t p" href="../forge/huddle.html"><b>the same room, across machines</b><s>forge/huddle.html</s><u>⚠ you supply your own venue URL — we ship no server</u></a>
+    <a class="t" href="../attest.html" data-dom="social" data-q="one tongue, one evening, signed  social"><b data-i18n="s.attest.name">one tongue, one evening, signed</b><s>attest.html</s></a>
+    <a class="t" href="../blanguage.html" data-dom="social" data-q="dock your tongue, no permission  social"><b data-i18n="s.blanguage.name">dock your tongue, no permission</b><s>blanguage.html</s></a>
+    <a class="t" href="../bsymposium.html" data-dom="social" data-q="two food protocols, both receipted  social"><b data-i18n="s.bsymposium.name">two food protocols, both receipted</b><s>bsymposium.html</s></a>
+    <a class="t" href="../buzz-studio.html" data-dom="social" data-q="paint a comb together, live  social"><b data-i18n="s.buzz-studio.name">paint a comb together, live</b><s>buzz-studio.html</s></a>
+    <a class="t" href="../devroom.html" data-dom="social" data-q="builders' findings, written for strangers  social"><b data-i18n="s.devroom.name">builders' findings, written for strangers</b><s>devroom.html</s></a>
+    <a class="t" href="../forge/room.html" data-dom="social" data-q="two tabs, one shared field  social"><b data-i18n="s.forge-room.name">two tabs, one shared field</b><s>forge/room.html</s></a>
+    <a class="t p" href="../blight/hearth.html" data-dom="social" data-q="co-create with the hive's ai a keyword router, not a model social"><b data-i18n="s.blight-hearth.name">co-create with the hive's AI</b><s>blight/hearth.html</s><u data-i18n="s.blight-hearth.caveat">⚠ a keyword router, not a model</u></a>
+    <a class="t p" href="../blight/pulse.html" data-dom="social" data-q="bx pointers live on the relay the read path is live against public relays; broadcast is held social"><b data-i18n="s.blight-pulse.name">bX pointers live on the relay</b><s>blight/pulse.html</s><u data-i18n="s.blight-pulse.caveat">⚠ the read path is live against public relays; broadcast is held</u></a>
+    <a class="t p" href="../bqueenbee-live.html" data-dom="social" data-q="talk to the hive's machine referee answers from a page-local knowledge base, not a model social"><b data-i18n="s.bqueenbee-live.name">talk to the hive's machine referee</b><s>bqueenbee-live.html</s><u data-i18n="s.bqueenbee-live.caveat">⚠ answers from a page-local knowledge base, not a model</u></a>
+    <a class="t p" href="../btranslated.html" data-dom="social" data-q="your name in your tongue section two carries its own demo badge social"><b data-i18n="s.btranslated.name">your name in your tongue</b><s>btranslated.html</s><u data-i18n="s.btranslated.caveat">⚠ section two carries its own DEMO badge</u></a>
+    <a class="t p" href="../forge/huddle.html" data-dom="social" data-q="the same room, across machines you supply your own venue url — we ship no server social"><b data-i18n="s.forge-huddle.name">the same room, across machines</b><s>forge/huddle.html</s><u data-i18n="s.forge-huddle.caveat">⚠ you supply your own venue URL — we ship no server</u></a>
     </div>
   </section>
 
   <div class="notyet">
     <h2>Not built yet — named, so this door does not promise it</h2>
-    <p>The rule this estate works to: a door may not claim anything the estate does not currently do.
-    Everything above is a page you can open right now. Everything below is not, and says so.</p>
+    <p>A door may not claim anything the estate does not currently do. Everything above is a page you can open right now. Everything below is not, and says so.</p>
     <ul>
     <li><b>A feed, DMs, and 1:1 video</b> — the pointer grammar that carries a message exists; the transport does not. Not built, said plainly.</li>
     </ul>
@@ -137,7 +145,7 @@ footer a:hover{color:var(--gold)}
 
 <footer>
   <div>bnature.social · one of six doors · paths for now, no DNS · a door may not claim what the estate does not do</div>
-  <div><a href="./">all six doors</a> · <a href="../">the hub</a> · <a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/doors/bnature-social.html" rel="noopener">view source</a></div>
+  <div><a href="./">all six doors</a> · <a href="../">the hub</a> · <a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/estate.json" rel="noopener">the registry</a></div>
 </footer>
 
 <script src="../tour.js?v=23"></script>

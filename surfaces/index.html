@@ -5,29 +5,13 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
 <meta name="color-scheme" content="dark">
-<title>beehive nature · the surfaces — five domains, one organism</title>
-<link rel="manifest" href="manifest.webmanifest">
+<title>beehive nature · the surfaces — six domains, one organism</title>
 <meta name="theme-color" content="#06110C">
+<link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="bn-logo.jpg">
-<style>
-/* ── BEEHIVE NATURE · THE SURFACES ─────────────────────────────────────────
-   Built to the founder's redesign brief, 2026-08-25. Values measured off his
-   component, not eyeballed.
-
-   DEPTH LADDER     --void ground · --panel domain slab · --tile door · --inset well
-   SEMANTIC COLOUR  the meanings were picked FIRST, then a hue was fitted to
-                    each, and every domain wears the meaning it embodies:
-                      value=magenta   the crown brand — beehivenature.com
-                      solution=green  what grows — beehivebiomass.com
-                      science=lilac   made & studied things — plur.earth
-                      system=cyan     the network of people — bnature.social
-                      harm=ember      declared for the estate palette and NOT
-                                      USED here: nothing on this page is a harm.
-                    skaists.social wears civic blue — governance reads plainly.
-   ─────────────────────────────────────────────────────────────────────── */
-:root{
+<style>:root{
   --void:#06110C; --panel:#0A1310; --tile:#0C1412; --inset:#08120E; --lift:#111C17;
   --ink:#E9F2EC; --dim:#8FA79A; --dimmer:#648176; --line:#1E2B26; --hot:#2F4A3C;
   --magenta:#D655BB; --green:#86CC72; --cyan:#45C2DC; --lilac:#B79FE0;
@@ -37,70 +21,74 @@
   --mono:ui-monospace,"Cascadia Mono","SF Mono",Menlo,Consolas,monospace;
   --max:1280px;
 }
+
+/* SEMANTIC COLOUR — the meanings were picked FIRST and a hue fitted to each;
+   every domain wears the meaning it embodies, and --sem-harm is declared for
+   the estate palette and deliberately unused here: nothing on this page is a
+   harm. DEPTH LADDER: --void ground · --panel slab · --tile door · --inset well. */
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{background:var(--void);color:var(--ink);font:14px/1.6 var(--mono);
+body{background:var(--void);color:var(--ink);font:14px/1.7 var(--mono);
   min-height:100vh;padding-bottom:96px;-webkit-text-size-adjust:100%;position:relative}
 a{text-decoration:none}
-::selection{background:var(--magenta);color:var(--void)}
-.wrap{max-width:var(--max);margin:0 auto;padding:0 22px}
-
-/* the CRT scanline veil — his, at his opacity */
 #veil{position:fixed;inset:0;pointer-events:none;z-index:3;opacity:.55;mix-blend-mode:multiply;
   background:repeating-linear-gradient(180deg,rgba(0,0,0,0) 0,rgba(0,0,0,0) 2px,rgba(0,0,0,.22) 3px,rgba(0,0,0,0) 4px)}
-
-/* ── header ── */
 header{position:relative;overflow:hidden;border-bottom:1px solid var(--line);padding-bottom:34px}
-#band{position:absolute;top:-14px;left:-60px;display:flex;gap:6px;opacity:.85;pointer-events:none}
-#band i{width:46px;height:53px;flex:none;display:block;
+/* the mask NEVER moves — animating it sheared the right edge (2026-08-26) */
+#bandwrap{position:absolute;top:0;left:0;right:0;height:78px;overflow:hidden}
+#bandwrap .band{position:absolute;top:-16px;left:-80px;display:flex;
+  animation-timing-function:linear;animation-iteration-count:infinite;will-change:transform}
+#bandwrap .band i{flex:none;display:block;
   clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
   animation:hexpulse 3s ease-in-out infinite}
+#bandwrap .l0{top:-24px}
+#bandwrap .l2{top:2px}
 @keyframes hexpulse{0%{opacity:.10;transform:scale(.86)}50%{opacity:.95;transform:scale(1)}100%{opacity:.10;transform:scale(.86)}}
-@keyframes hexdrift{0%{transform:translateX(0)}100%{transform:translateX(-52px)}}
-#bandwrap{position:absolute;top:0;left:0;right:0;height:70px;overflow:hidden;animation:hexdrift 9s linear infinite}
+@keyframes hexdrift{0%{transform:translateX(0)}100%{transform:translateX(calc(var(--step) * -1))}}
+@keyframes hexdriftb{0%{transform:translateX(calc(var(--step) * -1))}100%{transform:translateX(0)}}
 .eyebrow{position:relative;padding-top:86px;font-size:10px;letter-spacing:.34em;color:var(--dimmer);text-transform:uppercase}
-.mark{position:relative;font-size:34px;line-height:1;margin-top:22px}
-h1{position:relative;font-family:var(--mono);font-size:clamp(34px,7.4vw,86px);font-weight:800;
-  letter-spacing:-.02em;line-height:.92;text-transform:lowercase;margin-top:6px;
-  background:linear-gradient(96deg,var(--green) 2%,var(--cyan) 26%,var(--lilac) 52%,var(--magenta) 76%,var(--gold) 98%);
-  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
-h1+.lede{position:relative;color:var(--dim);font-size:13px;margin-top:18px;max-width:64ch;line-height:1.75}
-
-/* ── the count strip ── */
-.pstrip{position:relative;display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
-.pstat{background:var(--inset);border:1px solid var(--line);padding:11px 18px 10px;min-width:104px}
-.pstat b{display:block;font-size:32px;line-height:1;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
-.pstat small{display:block;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--dimmer);margin-top:8px}
-.pstat .c1{color:var(--green)}.pstat .c2{color:var(--magenta)}.pstat .c3{color:var(--lilac)}.pstat .c4{color:var(--cyan)}
-
-/* ── the manifest band ── */
-#manifest{background:var(--panel);border:1px solid var(--line);margin-top:30px;padding:22px;
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:22px}
-#manifest h3{font-size:9.5px;letter-spacing:.2em;color:var(--gold);font-weight:700;text-transform:uppercase}
-#manifest p{font-size:11.5px;line-height:1.75;color:var(--dim);margin-top:9px}
-
-/* ── section heads ── */
 .shead{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding-bottom:11px;border-bottom:1px solid var(--line)}
 .shead .dot{width:10px;height:10px;flex:none;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
 .shead h2{font-size:19px;font-weight:800;letter-spacing:-.01em}
 .shead em{font-style:normal;font-size:9.5px;letter-spacing:.18em;color:var(--dimmer);text-transform:uppercase}
 .shead .n{margin-left:auto;font-size:9.5px;letter-spacing:.14em;color:var(--dimmer);text-transform:uppercase}
 .intro{color:var(--dim);font-size:11.5px;line-height:1.8;margin:14px 0 16px;max-width:104ch}
-
 section{margin-top:38px;scroll-margin-top:18px;background:var(--panel);border:1px solid var(--line);padding:20px}
-
-/* ── the door ── */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:14px}
-.startsec .grid{grid-template-columns:repeat(auto-fill,minmax(360px,1fr))}
 a.t{display:block;background:var(--tile);border:1px solid var(--line);border-left:3px solid var(--line);
   padding:20px;color:var(--ink);transition:transform .16s,border-color .16s,background .16s}
 a.t:hover,a.t:focus-visible{transform:translateY(-2px);background:var(--lift);outline:none}
 a.t i{font-style:normal;font-size:16px;line-height:1;display:block}
 a.t b{display:block;font-size:13.5px;font-weight:700;margin-top:9px;letter-spacing:-.01em}
 a.t s{display:block;text-decoration:none;font-size:11px;color:var(--dim);margin-top:5px;line-height:1.6}
-a.t.x b::after{content:" ↗";font-weight:400;opacity:.55}
-
-/* ── search + domain filter ── */
+a.t u{display:block;text-decoration:none;font-size:9.5px;color:var(--gold);margin-top:6px;line-height:1.5}
+a.t.p{border-left-color:var(--gold)}
+a.t.x b::after{content:" \2197";font-weight:400;opacity:.55}
+footer{max-width:1280px;margin:52px auto 0;padding:22px 22px 0;border-top:1px solid var(--line);
+  color:var(--dimmer);font-size:10px;letter-spacing:.1em;line-height:2.2;text-transform:uppercase}
+footer a{color:var(--dim);display:inline-flex;align-items:center;min-height:32px;padding:0 5px}
+footer a:hover{color:var(--gold)}
+@media (prefers-reduced-motion:reduce){
+  #bandwrap .band,#bandwrap .band i{animation:none}#bandwrap .band i{opacity:.55}
+  a.t{transition:none}a.t:hover{transform:none}}
+a{color:var(--ink)}
+::selection{background:var(--magenta);color:var(--void)}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 22px}
+.mark{position:relative;font-size:34px;line-height:1;margin-top:22px}
+h1{position:relative;font-family:var(--mono);font-size:clamp(34px,7.4vw,86px);font-weight:800;
+  letter-spacing:-.02em;line-height:.92;text-transform:lowercase;margin-top:6px;
+  background:linear-gradient(96deg,var(--green) 2%,var(--cyan) 26%,var(--lilac) 52%,var(--magenta) 76%,var(--gold) 98%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+h1+.lede{position:relative;color:var(--dim);font-size:13px;margin-top:18px;max-width:64ch;line-height:1.75}
+.pstrip{position:relative;display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+.pstat{background:var(--inset);border:1px solid var(--line);padding:11px 18px 10px;min-width:104px}
+.pstat b{display:block;font-size:32px;line-height:1;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.pstat small{display:block;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--dimmer);margin-top:8px}
+.pstat .c1{color:var(--green)}.pstat .c2{color:var(--magenta)}.pstat .c3{color:var(--lilac)}.pstat .c4{color:var(--cyan)}
+#manifest{background:var(--panel);border:1px solid var(--line);margin-top:30px;padding:22px;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:22px}
+#manifest h3{font-size:9.5px;letter-spacing:.2em;color:var(--gold);font-weight:700;text-transform:uppercase}
+#manifest p{font-size:11.5px;line-height:1.75;color:var(--dim);margin-top:9px}
 #find{margin-top:38px}
 #dsearch{width:100%;background:var(--inset);border:1px solid var(--line);color:var(--ink);
   font:12.5px var(--mono);padding:15px 17px;min-height:48px}
@@ -113,235 +101,215 @@ a.t.x b::after{content:" ↗";font-weight:400;opacity:.55}
 #chips button[aria-pressed="true"]{background:var(--ink);color:var(--void);border-color:var(--ink);font-weight:700}
 #tally{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--dimmer);margin-top:12px}
 section[hidden],a.t[hidden]{display:none}
-
-footer{max-width:var(--max);margin:52px auto 0;padding:22px 22px 0;border-top:1px solid var(--line);
-  color:var(--dimmer);font-size:10px;letter-spacing:.1em;line-height:2.2;text-transform:uppercase}
-footer a{color:var(--dim)}footer a:hover{color:var(--gold)}
-
 @media (max-width:600px){
   .wrap{padding:0 14px}
   .eyebrow{padding-top:64px;letter-spacing:.22em}
   section{padding:14px;margin-top:26px}
   .grid{grid-template-columns:1fr;gap:9px}
-  .startsec .grid{grid-template-columns:1fr}
   a.t{padding:15px}
   .pstat{flex:1 1 40%;min-width:0;padding:10px 12px}
-  .pstat b{font-size:32px}
-  #manifest{padding:16px;gap:16px}
-  .shead h2{font-size:16px}
-  a.t:hover{transform:none}
-}
-@media (prefers-reduced-motion:reduce){
-  #band i{animation:none;opacity:.5}#bandwrap{animation:none}
-  a.t{transition:none}a.t:hover{transform:none}
-}
-section.nature .dot{background:#D655BB}
+  a.t:hover{transform:none}}section.nature .dot{background:#D655BB}
 section.nature .shead h2{color:#D655BB}
 section.nature a.t{border-left-color:#D655BB}
 section.nature a.t b{color:#D655BB}
 section.nature a.t:hover{border-color:#D655BB}
-section.biomass .dot{background:#86CC72}
-section.biomass .shead h2{color:#86CC72}
-section.biomass a.t{border-left-color:#86CC72}
-section.biomass a.t b{color:#86CC72}
-section.biomass a.t:hover{border-color:#86CC72}
 section.plur .dot{background:#B79FE0}
 section.plur .shead h2{color:#B79FE0}
 section.plur a.t{border-left-color:#B79FE0}
 section.plur a.t b{color:#B79FE0}
 section.plur a.t:hover{border-color:#B79FE0}
-section.social .dot{background:#45C2DC}
-section.social .shead h2{color:#45C2DC}
-section.social a.t{border-left-color:#45C2DC}
-section.social a.t b{color:#45C2DC}
-section.social a.t:hover{border-color:#45C2DC}
 section.skaists .dot{background:#6FA9E0}
 section.skaists .shead h2{color:#6FA9E0}
 section.skaists a.t{border-left-color:#6FA9E0}
 section.skaists a.t b{color:#6FA9E0}
 section.skaists a.t:hover{border-color:#6FA9E0}
+section.social .dot{background:#45C2DC}
+section.social .shead h2{color:#45C2DC}
+section.social a.t{border-left-color:#45C2DC}
+section.social a.t b{color:#45C2DC}
+section.social a.t:hover{border-color:#45C2DC}
+section.bio .dot{background:#86CC72}
+section.bio .shead h2{color:#86CC72}
+section.bio a.t{border-left-color:#86CC72}
+section.bio a.t b{color:#86CC72}
+section.bio a.t:hover{border-color:#86CC72}
+section.biomass .dot{background:#E8B54B}
+section.biomass .shead h2{color:#E8B54B}
+section.biomass a.t{border-left-color:#E8B54B}
+section.biomass a.t b{color:#E8B54B}
+section.biomass a.t:hover{border-color:#E8B54B}
 </style>
 </head>
 <body>
 <div id="veil" aria-hidden="true"></div>
 <header>
-  <div id="bandwrap" aria-hidden="true"><div id="band"><i style="background:#D655BB;animation-duration:2.4s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:2.9s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:3.3s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:3.8s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:4.2s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:2.4s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:2.9s;animation-delay:1.14s"></i><i style="background:#86CC72;animation-duration:3.3s;animation-delay:0.00s"></i><i style="background:#45C2DC;animation-duration:3.8s;animation-delay:0.19s"></i><i style="background:#D655BB;animation-duration:4.2s;animation-delay:0.38s"></i><i style="background:#E8B54B;animation-duration:2.4s;animation-delay:0.57s"></i><i style="background:#9C6FD6;animation-duration:2.9s;animation-delay:0.76s"></i><i style="background:#D655BB;animation-duration:3.3s;animation-delay:0.95s"></i><i style="background:#86CC72;animation-duration:3.8s;animation-delay:1.14s"></i><i style="background:#45C2DC;animation-duration:4.2s;animation-delay:0.00s"></i><i style="background:#9C6FD6;animation-duration:2.4s;animation-delay:0.19s"></i><i style="background:#E8B54B;animation-duration:2.9s;animation-delay:0.38s"></i><i style="background:#6FA9E0;animation-duration:3.3s;animation-delay:0.57s"></i><i style="background:#B79FE0;animation-duration:3.8s;animation-delay:0.76s"></i><i style="background:#86CC72;animation-duration:4.2s;animation-delay:0.95s"></i><i style="background:#45C2DC;animation-duration:2.4s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:2.9s;animation-delay:0.00s"></i><i style="background:#E8B54B;animation-duration:3.3s;animation-delay:0.19s"></i><i style="background:#9C6FD6;animation-duration:3.8s;animation-delay:0.38s"></i><i style="background:#D655BB;animation-duration:4.2s;animation-delay:0.57s"></i><i style="background:#86CC72;animation-duration:2.4s;animation-delay:0.76s"></i><i style="background:#45C2DC;animation-duration:2.9s;animation-delay:0.95s"></i><i style="background:#9C6FD6;animation-duration:3.3s;animation-delay:1.14s"></i><i style="background:#E8B54B;animation-duration:3.8s;animation-delay:0.00s"></i><i style="background:#6FA9E0;animation-duration:4.2s;animation-delay:0.19s"></i><i style="background:#B79FE0;animation-duration:2.4s;animation-delay:0.38s"></i><i style="background:#86CC72;animation-duration:2.9s;animation-delay:0.57s"></i><i style="background:#45C2DC;animation-duration:3.3s;animation-delay:0.76s"></i><i style="background:#D655BB;animation-duration:3.8s;animation-delay:0.95s"></i></div></div>
+  <div id="bandwrap" aria-hidden="true"><div class="band l0" style="gap:7px;opacity:0.3;filter:blur(1.2px);animation-duration:26s;animation-name:hexdrift;--step:69px"><i style="background:#D655BB;width:62px;height:71px;animation-duration:2.4s;animation-delay:0.00s"></i><i style="background:#86CC72;width:62px;height:71px;animation-duration:2.9s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:62px;height:71px;animation-duration:3.3s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:62px;height:71px;animation-duration:3.8s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:62px;height:71px;animation-duration:4.2s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:62px;height:71px;animation-duration:2.4s;animation-delay:0.95s"></i><i style="background:#B79FE0;width:62px;height:71px;animation-duration:2.9s;animation-delay:1.14s"></i><i style="background:#D655BB;width:62px;height:71px;animation-duration:3.3s;animation-delay:0.00s"></i><i style="background:#86CC72;width:62px;height:71px;animation-duration:3.8s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:62px;height:71px;animation-duration:4.2s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:62px;height:71px;animation-duration:2.4s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:62px;height:71px;animation-duration:2.9s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:62px;height:71px;animation-duration:3.3s;animation-delay:0.95s"></i><i style="background:#B79FE0;width:62px;height:71px;animation-duration:3.8s;animation-delay:1.14s"></i><i style="background:#D655BB;width:62px;height:71px;animation-duration:4.2s;animation-delay:0.00s"></i><i style="background:#86CC72;width:62px;height:71px;animation-duration:2.4s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:62px;height:71px;animation-duration:2.9s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:62px;height:71px;animation-duration:3.3s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:62px;height:71px;animation-duration:3.8s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:62px;height:71px;animation-duration:4.2s;animation-delay:0.95s"></i><i style="background:#B79FE0;width:62px;height:71px;animation-duration:2.4s;animation-delay:1.14s"></i><i style="background:#D655BB;width:62px;height:71px;animation-duration:2.9s;animation-delay:0.00s"></i><i style="background:#86CC72;width:62px;height:71px;animation-duration:3.3s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:62px;height:71px;animation-duration:3.8s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:62px;height:71px;animation-duration:4.2s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:62px;height:71px;animation-duration:2.4s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:62px;height:71px;animation-duration:2.9s;animation-delay:0.95s"></i><i style="background:#B79FE0;width:62px;height:71px;animation-duration:3.3s;animation-delay:1.14s"></i><i style="background:#D655BB;width:62px;height:71px;animation-duration:3.8s;animation-delay:0.00s"></i><i style="background:#86CC72;width:62px;height:71px;animation-duration:4.2s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:62px;height:71px;animation-duration:2.4s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:62px;height:71px;animation-duration:2.9s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:62px;height:71px;animation-duration:3.3s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:62px;height:71px;animation-duration:3.8s;animation-delay:0.95s"></i></div><div class="band l1" style="gap:6px;opacity:0.72;filter:blur(0);animation-duration:17s;animation-name:hexdriftb;--step:52px"><i style="background:#D655BB;width:46px;height:53px;animation-duration:2.4s;animation-delay:0.00s"></i><i style="background:#86CC72;width:46px;height:53px;animation-duration:2.9s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:46px;height:53px;animation-duration:3.3s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:46px;height:53px;animation-duration:3.8s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:46px;height:53px;animation-duration:4.2s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:46px;height:53px;animation-duration:2.4s;animation-delay:0.95s"></i><i style="background:#B79FE0;width:46px;height:53px;animation-duration:2.9s;animation-delay:1.14s"></i><i style="background:#D655BB;width:46px;height:53px;animation-duration:3.3s;animation-delay:0.00s"></i><i style="background:#86CC72;width:46px;height:53px;animation-duration:3.8s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:46px;height:53px;animation-duration:4.2s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:46px;height:53px;animation-duration:2.4s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:46px;height:53px;animation-duration:2.9s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:46px;height:53px;animation-duration:3.3s;animation-delay:0.95s"></i><i style="background:#B79FE0;width:46px;height:53px;animation-duration:3.8s;animation-delay:1.14s"></i><i style="background:#D655BB;width:46px;height:53px;animation-duration:4.2s;animation-delay:0.00s"></i><i style="background:#86CC72;width:46px;height:53px;animation-duration:2.4s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:46px;height:53px;animation-duration:2.9s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:46px;height:53px;animation-duration:3.3s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:46px;height:53px;animation-duration:3.8s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:46px;height:53px;animation-duration:4.2s;animation-delay:0.95s"></i><i style="background:#B79FE0;width:46px;height:53px;animation-duration:2.4s;animation-delay:1.14s"></i><i style="background:#D655BB;width:46px;height:53px;animation-duration:2.9s;animation-delay:0.00s"></i><i style="background:#86CC72;width:46px;height:53px;animation-duration:3.3s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:46px;height:53px;animation-duration:3.8s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:46px;height:53px;animation-duration:4.2s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:46px;height:53px;animation-duration:2.4s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:46px;height:53px;animation-duration:2.9s;animation-delay:0.95s"></i><i style="background:#B79FE0;width:46px;height:53px;animation-duration:3.3s;animation-delay:1.14s"></i><i style="background:#D655BB;width:46px;height:53px;animation-duration:3.8s;animation-delay:0.00s"></i><i style="background:#86CC72;width:46px;height:53px;animation-duration:4.2s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:46px;height:53px;animation-duration:2.4s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:46px;height:53px;animation-duration:2.9s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:46px;height:53px;animation-duration:3.3s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:46px;height:53px;animation-duration:3.8s;animation-delay:0.95s"></i><i style="background:#B79FE0;width:46px;height:53px;animation-duration:4.2s;animation-delay:1.14s"></i><i style="background:#D655BB;width:46px;height:53px;animation-duration:2.4s;animation-delay:0.00s"></i><i style="background:#86CC72;width:46px;height:53px;animation-duration:2.9s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:46px;height:53px;animation-duration:3.3s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:46px;height:53px;animation-duration:3.8s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:46px;height:53px;animation-duration:4.2s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:46px;height:53px;animation-duration:2.4s;animation-delay:0.95s"></i><i style="background:#B79FE0;width:46px;height:53px;animation-duration:2.9s;animation-delay:1.14s"></i><i style="background:#D655BB;width:46px;height:53px;animation-duration:3.3s;animation-delay:0.00s"></i><i style="background:#86CC72;width:46px;height:53px;animation-duration:3.8s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:46px;height:53px;animation-duration:4.2s;animation-delay:0.38s"></i></div><div class="band l2" style="gap:5px;opacity:1;filter:blur(0);animation-duration:11s;animation-name:hexdrift;--step:35px"><i style="background:#D655BB;width:30px;height:35px;animation-duration:2.4s;animation-delay:0.00s"></i><i style="background:#86CC72;width:30px;height:35px;animation-duration:2.9s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:30px;height:35px;animation-duration:3.3s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:30px;height:35px;animation-duration:3.8s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:30px;height:35px;animation-duration:4.2s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:30px;height:35px;animation-duration:2.4s;animation-delay:0.95s"></i><i style="background:#B79FE0;width:30px;height:35px;animation-duration:2.9s;animation-delay:1.14s"></i><i style="background:#D655BB;width:30px;height:35px;animation-duration:3.3s;animation-delay:0.00s"></i><i style="background:#86CC72;width:30px;height:35px;animation-duration:3.8s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:30px;height:35px;animation-duration:4.2s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:30px;height:35px;animation-duration:2.4s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:30px;height:35px;animation-duration:2.9s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:30px;height:35px;animation-duration:3.3s;animation-delay:0.95s"></i><i style="background:#B79FE0;width:30px;height:35px;animation-duration:3.8s;animation-delay:1.14s"></i><i style="background:#D655BB;width:30px;height:35px;animation-duration:4.2s;animation-delay:0.00s"></i><i style="background:#86CC72;width:30px;height:35px;animation-duration:2.4s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:30px;height:35px;animation-duration:2.9s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:30px;height:35px;animation-duration:3.3s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:30px;height:35px;animation-duration:3.8s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:30px;height:35px;animation-duration:4.2s;animation-delay:0.95s"></i><i style="background:#B79FE0;width:30px;height:35px;animation-duration:2.4s;animation-delay:1.14s"></i><i style="background:#D655BB;width:30px;height:35px;animation-duration:2.9s;animation-delay:0.00s"></i><i style="background:#86CC72;width:30px;height:35px;animation-duration:3.3s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:30px;height:35px;animation-duration:3.8s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:30px;height:35px;animation-duration:4.2s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:30px;height:35px;animation-duration:2.4s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:30px;height:35px;animation-duration:2.9s;animation-delay:0.95s"></i><i style="background:#B79FE0;width:30px;height:35px;animation-duration:3.3s;animation-delay:1.14s"></i><i style="background:#D655BB;width:30px;height:35px;animation-duration:3.8s;animation-delay:0.00s"></i><i style="background:#86CC72;width:30px;height:35px;animation-duration:4.2s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:30px;height:35px;animation-duration:2.4s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:30px;height:35px;animation-duration:2.9s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:30px;height:35px;animation-duration:3.3s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:30px;height:35px;animation-duration:3.8s;animation-delay:0.95s"></i><i style="background:#B79FE0;width:30px;height:35px;animation-duration:4.2s;animation-delay:1.14s"></i><i style="background:#D655BB;width:30px;height:35px;animation-duration:2.4s;animation-delay:0.00s"></i><i style="background:#86CC72;width:30px;height:35px;animation-duration:2.9s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:30px;height:35px;animation-duration:3.3s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:30px;height:35px;animation-duration:3.8s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:30px;height:35px;animation-duration:4.2s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:30px;height:35px;animation-duration:2.4s;animation-delay:0.95s"></i><i style="background:#B79FE0;width:30px;height:35px;animation-duration:2.9s;animation-delay:1.14s"></i><i style="background:#D655BB;width:30px;height:35px;animation-duration:3.3s;animation-delay:0.00s"></i><i style="background:#86CC72;width:30px;height:35px;animation-duration:3.8s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:30px;height:35px;animation-duration:4.2s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:30px;height:35px;animation-duration:2.4s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:30px;height:35px;animation-duration:2.9s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:30px;height:35px;animation-duration:3.3s;animation-delay:0.95s"></i><i style="background:#B79FE0;width:30px;height:35px;animation-duration:3.8s;animation-delay:1.14s"></i><i style="background:#D655BB;width:30px;height:35px;animation-duration:4.2s;animation-delay:0.00s"></i><i style="background:#86CC72;width:30px;height:35px;animation-duration:2.4s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:30px;height:35px;animation-duration:2.9s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:30px;height:35px;animation-duration:3.3s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:30px;height:35px;animation-duration:3.8s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:30px;height:35px;animation-duration:4.2s;animation-delay:0.95s"></i><i style="background:#B79FE0;width:30px;height:35px;animation-duration:2.4s;animation-delay:1.14s"></i><i style="background:#D655BB;width:30px;height:35px;animation-duration:2.9s;animation-delay:0.00s"></i><i style="background:#86CC72;width:30px;height:35px;animation-duration:3.3s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:30px;height:35px;animation-duration:3.8s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:30px;height:35px;animation-duration:4.2s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:30px;height:35px;animation-duration:2.4s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:30px;height:35px;animation-duration:2.9s;animation-delay:0.95s"></i><i style="background:#B79FE0;width:30px;height:35px;animation-duration:3.3s;animation-delay:1.14s"></i><i style="background:#D655BB;width:30px;height:35px;animation-duration:3.8s;animation-delay:0.00s"></i><i style="background:#86CC72;width:30px;height:35px;animation-duration:4.2s;animation-delay:0.19s"></i></div></div>
   <div class="wrap">
     <p class="eyebrow">zero network · no password · no name</p>
-    <div class="mark">🐝</div>
+    <div class="mark">U0001F41D</div>
     <h1>beehive nature</h1>
-    <p class="lede">Five domains, one organism. Every door opens something real; nothing asks for a password or your name.</p>
-    <!-- measured, not typed: 63 surfaces is the count the smoke suite asserts
-         against the tree; 5 domains and 3 orgs are the founder's owned web
-         properties and GitHub organisations (beehive-nature, beehive-biomass,
-         skaists); 11 chains is the live chainkeys row count on kingbeelovis. -->
+    <p class="lede" data-i18n="hub.lede">Six domains, one organism. Every door opens something real; nothing asks for a password or your name.</p>
+    <!-- COUNTED, never typed: the surface number is walked off the tree at build
+         time the same way e2e/university-smoke.mjs counts it, so it cannot drift.
+         6 domains and 3 orgs are the founder's owned properties and GitHub
+         organisations; 11 chains is the live chainkeys row count on kingbeelovis. -->
     <div class="pstrip hero">
       <div class="pstat"><b data-hero-number class="c1">70</b><small data-hero-caption>surfaces</small></div>
-      <div class="pstat"><b data-hero-number class="c2">5</b><small data-hero-caption>domains</small></div>
+      <div class="pstat"><b data-hero-number class="c2">6</b><small data-hero-caption>domains</small></div>
       <div class="pstat"><b data-hero-number class="c3">3</b><small data-hero-caption>orgs</small></div>
       <div class="pstat"><b data-hero-number class="c4">11</b><small data-hero-caption>chains</small></div>
     </div>
     <div id="manifest">
-      <div><h3>01 · WHAT IT IS</h3><p>One organism across five domains — identity, plants, art, social, governance. Not a company. A hive.</p></div>
-      <div><h3>02 · HOW IT PROVES</h3><p>Every claim carries a receipt or is marked UNVERIFIED and stops there.</p></div>
-      <div><h3>03 · WHAT IT COSTS</h3><p>Nothing. No login, no key custody, no telemetry. Your keys, your resources, no one in between.</p></div>
-      <div><h3>04 · WHO IT'S FOR</h3><p>Built for the poor starving artist. “10Ve the first ingredient.”</p></div>
+    <div><h3>01 · WHAT IT IS</h3><p data-i18n="m.1">One organism across six domains — identity, the floor, community, the social layer, health, and the machines that carry it. Not a company. A hive.</p></div>
+    <div><h3>02 · HOW IT PROVES</h3><p data-i18n="m.2">Every claim carries a receipt or is marked UNVERIFIED and stops there.</p></div>
+    <div><h3>03 · WHAT IT COSTS</h3><p data-i18n="m.3">Nothing. No login, no key custody, no telemetry. Your keys, your resources, no one in between.</p></div>
+    <div><h3>04 · WHO IT’S FOR</h3><p data-i18n="m.4">Built for the poor starving artist. “10Ve the first ingredient.”</p></div>
     </div>
   </div>
 </header>
 
 <div class="wrap">
-<section id="doors" class="startsec">
-  <div class="shead"><span class="dot" style="background:var(--ink)"></span><h2 style="color:var(--ink)">⌂ THE SIX DOORS</h2><em>six front doors, six different strangers</em><span class="n">6 doors</span></div>
-  <p class="intro">Each door answers one person’s first question and gives them one thing to do. A door lists only what you can open now; anything not built is named under it rather than promised. Paths for now — no DNS yet.</p>
-  <div class="grid">
-    <a class="t" href="doors/beehivenature.html" data-dom="doors" data-q="beehivenature.com someone who heard the name" style="border-left-color:#D655BB"><i>⌂</i><b style="color:#D655BB">beehivenature.com</b><s>someone who heard the name</s></a>
-    <a class="t" href="doors/plur.html" data-dom="doors" data-q="plur.earth a raver" style="border-left-color:#B79FE0"><i>🪩</i><b style="color:#B79FE0">plur.earth</b><s>a raver</s></a>
-    <a class="t" href="doors/skaists.html" data-dom="doors" data-q="skaists.social an artist, dj, vendor" style="border-left-color:#6FA9E0"><i>🎛</i><b style="color:#6FA9E0">skaists.social</b><s>an artist, DJ, vendor</s></a>
-    <a class="t" href="doors/bnature-social.html" data-dom="doors" data-q="bnature.social someone who wants people" style="border-left-color:#45C2DC"><i>💬</i><b style="color:#45C2DC">bnature.social</b><s>someone who wants people</s></a>
-    <a class="t" href="doors/bnature-bio.html" data-dom="doors" data-q="bnature.bio a scientist, a health question" style="border-left-color:#86CC72"><i>🧬</i><b style="color:#86CC72">bnature.bio</b><s>a scientist, a health question</s></a>
-    <a class="t" href="doors/beehivebiomass.html" data-dom="doors" data-q="beehivebiomass.com someone with a machine" style="border-left-color:#E8B54B"><i>⚙</i><b style="color:#E8B54B">beehivebiomass.com</b><s>someone with a machine</s></a>
-    <a class="t" href="doors/index.html" data-dom="doors" data-q="all six on one page pick the one that sounds like you" style="border-left-color:#E9F2EC"><i>▦</i><b style="color:#E9F2EC">all six on one page</b><s>pick the one that sounds like you</s></a>
-  </div>
-</section>
-
-<section id="start" class="startsec">
-  <div class="shead"><span class="dot" style="background:var(--gold)"></span><h2 style="color:var(--gold)">★ START HERE</h2><em>six doors that explain the rest</em><span class="n">6 doors</span></div>
-  <div class="grid">
-    <a class="t" href="dock.html" style="border-left-color:#D655BB" data-dom="start" data-q="the dock proven, and unbuilt — the grader that marks every claim "><i>⚓</i><b style="color:#D655BB">the Dock</b><s>proven, and unbuilt — the grader that marks every claim</s></a>
-    <a class="t" href="onboarding/index.html" style="border-left-color:#D655BB" data-dom="start" data-q="your keys, your resources no one in between — the whole identity journey "><i>🚪</i><b style="color:#D655BB">Your keys, your resources</b><s>no one in between — the whole identity journey</s></a>
-    <a class="t" href="blight/demo.html" style="border-left-color:#D655BB" data-dom="start" data-q="the blightbeam the logo is the transmission — screen to camera, no network "><i>📡</i><b style="color:#D655BB">the bLiGhTbeAM</b><s>the logo is the transmission — screen to camera, no network</s></a>
-    <a class="t" href="plur.html" style="border-left-color:#B79FE0" data-dom="start" data-q="the plur museum peace love unity respect — the art planet's front room "><i>🪩</i><b style="color:#B79FE0">the PLUR mUseUm</b><s>peace love unity respect — the art planet's front room</s></a>
-    <a class="t" href="bfood.html" style="border-left-color:#86CC72" data-dom="start" data-q="the bfood hexagon the pyramid's successor "><i>⬡</i><b style="color:#86CC72">the bFood Hexagon</b><s>the pyramid's successor</s></a>
-    <a class="t" href="dao-dashboard/index.html" style="border-left-color:#6FA9E0" data-dom="start" data-q="bnr dao dashboard skaists.social, live — treasuries and votes "><i>🏛</i><b style="color:#6FA9E0">BNR DAO dashboard</b><s>skaists.social, live — treasuries and votes</s></a>
-  </div>
-</section>
-
 <div id="find">
   <div class="shead"><span class="dot" style="background:var(--ink)"></span><h2 style="font-size:15px">⬡ ALL SURFACES</h2><em>search, or filter by domain</em></div>
   <label for="dsearch" style="position:absolute;left:-9999px">search the doors</label>
-  <input id="dsearch" type="search" autocomplete="off" placeholder="search 75 doors — name, tagline, domain…">
+  <input id="dsearch" type="search" autocomplete="off" placeholder="search 70 doors — name, tagline, domain…">
   <div id="chips">
     <button type="button" data-f="all" aria-pressed="true">all domains</button>
     <button type="button" data-f="nature" aria-pressed="false">beehivenature</button>
-    <button type="button" data-f="biomass" aria-pressed="false">beehivebiomass</button>
     <button type="button" data-f="plur" aria-pressed="false">plur</button>
-    <button type="button" data-f="social" aria-pressed="false">bnature</button>
     <button type="button" data-f="skaists" aria-pressed="false">skaists</button>
+    <button type="button" data-f="social" aria-pressed="false">bnature</button>
+    <button type="button" data-f="bio" aria-pressed="false">bnature</button>
+    <button type="button" data-f="biomass" aria-pressed="false">beehivebiomass</button>
   </div>
-  <p id="tally">75 doors across 5 domains</p>
+  <p id="tally">70 doors across 6 domains</p>
 </div>
 
-<section class="nature" id="nature">
-  <div class="shead"><span class="dot"></span><h2>beehivenature.com</h2><em>THE ORGANISM · START HERE</em><span class="n">22 doors</span></div>
-  <p class="intro">The organism's front door and the whole identity journey in one place: get started, receive, your two addresses, offline recovery — beside the wallet, the .b name desk, and the open hardware that will hold the keys. The Dock grades itself: every claim carries a receipt or is marked UNVERIFIED and stops there.</p>
+<section id="doors" class="doorrow">
+  <div class="shead"><span class="dot" style="background:var(--ink)"></span><h2 style="color:var(--ink)">⌂ THE SIX DOORS</h2><em>six front doors, six different strangers</em><span class="n">6 doors</span></div>
+  <p class="intro">Each door answers one person’s first question and gives them one thing to do. A door lists only what you can open now; anything not built is named under it rather than promised. Paths for now — no DNS yet.</p>
   <div class="grid">
-    <a class="t" href="dock.html" data-dom="nature" data-q="the dock proven, and unbuilt beehivenature.com"><i>⚓</i><b>the Dock</b><s>proven, and unbuilt</s></a>
-    <a class="t" href="stack.html" data-dom="nature" data-q="the engine room what runs under bnrose beehivenature.com"><i>⚙</i><b>the Engine Room</b><s>what runs under BNRoSe</s></a>
-    <a class="t" href="university/index.html" data-dom="nature" data-q="beehive university the curriculum is receipts beehivenature.com"><i>🎓</i><b>Beehive University</b><s>the curriculum is receipts</s></a>
-    <a class="t" href="wallet.html" data-dom="nature" data-q="the bnr wallet one soul, every chain beehivenature.com"><i>👛</i><b>the BNR wallet</b><s>one soul, every chain</s></a>
-    <a class="t" href="onboarding/index.html" data-dom="nature" data-q="your keys, your resources no one in between beehivenature.com"><i>🚪</i><b>Your keys, your resources</b><s>no one in between</s></a>
-    <a class="t" href="onboarding/receive.html" data-dom="nature" data-q="receive on the blightnetwork beehivenature.com"><i>📥</i><b>Receive</b><s>on the bLighTnetWorK</s></a>
-    <a class="t" href="blight/demo.html" data-dom="nature" data-q="the blightbeam the logo is the transmission beehivenature.com"><i>📡</i><b>the bLiGhTbeAM</b><s>the logo is the transmission</s></a>
-    <a class="t" href="keys/addresses.html" data-dom="nature" data-q="your two addresses did:plc + npub, one root beehivenature.com"><i>🗝</i><b>your two addresses</b><s>did:plc + npub, one root</s></a>
-    <a class="t" href="recover.html" data-dom="nature" data-q="bzdid offline recovery 24 words, no service alive beehivenature.com"><i>🛟</i><b>bzDiD offline recovery</b><s>24 words, no service alive</s></a>
-    <a class="t" href="bnames.html" data-dom="nature" data-q="the .b name desk reserve · trade · resolve beehivenature.com"><i>🏷</i><b>the .b name desk</b><s>reserve · trade · resolve</s></a>
-    <a class="t" href="hardware/index.html" data-dom="nature" data-q="open hardware guide hardware you can read beehivenature.com"><i>🔌</i><b>Open Hardware Guide</b><s>hardware you can read</s></a>
-    <a class="t" href="hardware/build.html" data-dom="nature" data-q="become a producer build the locks beehivenature.com"><i>🏗</i><b>Become a Producer</b><s>build the locks</s></a>
-    <a class="t" href="hardware/lab.html" data-dom="nature" data-q="the lab science and art beehivenature.com"><i>🧪</i><b>The Lab</b><s>science and art</s></a>
-    <a class="t" href="hardware/security.html" data-dom="nature" data-q="security events read honestly beehivenature.com"><i>🛡</i><b>Security Events</b><s>read honestly</s></a>
-    <a class="t" href="bqueenbee-live.html" data-dom="nature" data-q="bqueenbee live machine agent, never a person beehivenature.com"><i>🐝</i><b>bQueenBee live</b><s>machine agent, never a person</s></a>
-    <a class="t" href="bantfarm.html" data-dom="nature" data-q="the bantfarm two treasuries, keyless beehivenature.com"><i>🐜</i><b>the bANTfarm</b><s>two treasuries, keyless</s></a>
-    <a class="t" href="bmeshasi.html" data-dom="nature" data-q="bmeshasi the community iron exchange beehivenature.com"><i>🕸</i><b>bMeshAsi</b><s>the community iron exchange</s></a>
-    <a class="t" href="biq.html" data-dom="nature" data-q="the biq composer cite or stop beehivenature.com"><i>🧠</i><b>the bIQ Composer</b><s>cite or stop</s></a>
-    <a class="t" href="b4b.html" data-dom="nature" data-q="bnr × base receipted on-chain beehivenature.com"><i>🤖</i><b>BNR × Base</b><s>receipted on-chain</s></a>
-    <a class="t" href="blight/pulse.html" data-dom="nature" data-q="the pulse bx pointers, live relay beehivenature.com"><i>💓</i><b>the pulse</b><s>bX pointers, live relay</s></a>
-    <a class="t" href="blight/vaulta-reader.html" data-dom="nature" data-q="vaulta reader the read path, keyless beehivenature.com"><i>📖</i><b>Vaulta Reader</b><s>the read path, keyless</s></a>
-    <a class="t x" href="https://beehive-nature.github.io/bnr-design-system/" target="_blank" rel="noopener" data-dom="nature" data-q="bnr-design-system the design lane's repo of record beehivenature.com"><i>🗂</i><b>bnr-design-system</b><s>the design lane's repo of record</s></a>
+    <a class="t" href="doors/beehivenature.html" data-dom="doors" data-q="beehivenature.com for someone who just heard the name" style="border-left-color:#D655BB"><b style="color:#D655BB">beehivenature.com</b><s data-i18n="d.nature.who">for someone who just heard the name</s></a>
+    <a class="t" href="doors/plur.html" data-dom="doors" data-q="plur.earth for a raver" style="border-left-color:#B79FE0"><b style="color:#B79FE0">plur.earth</b><s data-i18n="d.plur.who">for a raver</s></a>
+    <a class="t" href="doors/skaists.html" data-dom="doors" data-q="skaists.social for an artist, a dj, a festival vendor" style="border-left-color:#6FA9E0"><b style="color:#6FA9E0">skaists.social</b><s data-i18n="d.skaists.who">for an artist, a DJ, a festival vendor</s></a>
+    <a class="t" href="doors/bnature-social.html" data-dom="doors" data-q="bnature.social for someone who wants people" style="border-left-color:#45C2DC"><b style="color:#45C2DC">bnature.social</b><s data-i18n="d.social.who">for someone who wants people</s></a>
+    <a class="t" href="doors/bnature-bio.html" data-dom="doors" data-q="bnature.bio for a scientist, or anyone with a health question" style="border-left-color:#86CC72"><b style="color:#86CC72">bnature.bio</b><s data-i18n="d.bio.who">for a scientist, or anyone with a health question</s></a>
+    <a class="t" href="doors/beehivebiomass.html" data-dom="doors" data-q="beehivebiomass.com for someone with a machine to contribute" style="border-left-color:#E8B54B"><b style="color:#E8B54B">beehivebiomass.com</b><s data-i18n="d.biomass.who">for someone with a machine to contribute</s></a>
+    <a class="t" href="doors/index.html" data-dom="doors" data-q="all six doors" style="border-left-color:var(--ink)"><b>all six on one page</b><s>pick the one that sounds like you</s></a>
   </div>
 </section>
-<section class="biomass" id="biomass">
-  <div class="shead"><span class="dot"></span><h2>beehivebiomass.com</h2><em>THE PLANT ECONOMY</em><span class="n">17 doors</span></div>
-  <p class="intro">“beehivebiomass.com is the civilian marketplace” — the founder's own words. Seven of the nine surfaces he built in 82 minutes on 2026-08-03 live here: the six lab benches and the ACiD cascade. What you open are hosted twins of his archive, nine of them carrying behaviour fixes beyond the vendored chart library; the originals under surfaces/fleet/ stay byte-for-byte, and the smoke suite recomputes that number against the tree on every run rather than trusting this sentence.</p>
+
+<section class="nature" id="nature">
+  <div class="shead"><span class="dot"></span><h2>beehivenature.com</h2><em>THE ORGANISM · START HERE</em><span class="n">29 doors</span></div>
+  <p class="intro" data-i18n="d.nature.intro">The organism's front door and the whole identity journey in one place: get started, receive, your two addresses, offline recovery — beside the wallet, the .b name desk, and the open hardware that will hold the keys. The Dock grades itself: every claim carries a receipt or is marked UNVERIFIED and stops there. The nine hosted twins of the founder's 2026-08-03 build night live here too, nine of them carrying behaviour fixes beyond the vendored chart library; the originals under surfaces/fleet/ stay byte-for-byte.</p>
   <div class="grid">
-    <a class="t" href="fleet-hosted/index.html" data-dom="biomass" data-q="the fleet nine surfaces, one night beehivebiomass.com"><i>⚑</i><b>the fleet</b><s>nine surfaces, one night</s></a>
-    <a class="t" href="fleet-hosted/lab/bnr-dashboard.html" data-dom="biomass" data-q="bnr dashboard collective command center beehivebiomass.com"><i>📊</i><b>BNR Dashboard</b><s>collective command center</s></a>
-    <a class="t" href="fleet-hosted/lab/flower-lab.html" data-dom="biomass" data-q="bn flower lab thca blending + research beehivebiomass.com"><i>🌸</i><b>BN Flower Lab</b><s>THCA blending + research</s></a>
-    <a class="t" href="fleet-hosted/lab/spliff-lab.html" data-dom="biomass" data-q="bn spliff lab science-based blender beehivebiomass.com"><i>🌿</i><b>BN Spliff Lab</b><s>science-based blender</s></a>
-    <a class="t" href="fleet-hosted/lab/blend-lab.html" data-dom="biomass" data-q="blend lab tobacco blending calculator beehivebiomass.com"><i>⚗</i><b>Blend Lab</b><s>tobacco blending calculator</s></a>
-    <a class="t" href="fleet-hosted/lab/intake-tracker.html" data-dom="biomass" data-q="daily intake tracker consumption vs rdi beehivebiomass.com"><i>📈</i><b>Daily Intake Tracker</b><s>consumption vs RDI</s></a>
-    <a class="t" href="fleet-hosted/lab/edible-tracker.html" data-dom="biomass" data-q="edible &amp; effects nutrition + session effects beehivebiomass.com"><i>🍯</i><b>Edible &amp; Effects</b><s>nutrition + session effects</s></a>
-    <a class="t" href="fleet-hosted/gallery/acid-cascade.html" data-dom="biomass" data-q="bn acid the disease cascade, painted beehivebiomass.com"><i>🌀</i><b>BN ACiD</b><s>the disease cascade, painted</s></a>
-    <a class="t" href="bfood.html" data-dom="biomass" data-q="the bfood hexagon the pyramid's successor beehivebiomass.com"><i>⬡</i><b>the bFood Hexagon</b><s>the pyramid's successor</s></a>
-    <a class="t" href="blongevity.html" data-dom="biomass" data-q="the fat education your body builds cannabinoids beehivebiomass.com"><i>🫀</i><b>the fat education</b><s>your body builds cannabinoids</s></a>
-    <a class="t" href="bigen.html" data-dom="biomass" data-q="bigen evidence library cannabis &amp; cancer, exhibit 001 beehivebiomass.com"><i>🧬</i><b>BiGen evidence library</b><s>cannabis &amp; cancer, exhibit 001</s></a>
-    <a class="t" href="bearth.html" data-dom="biomass" data-q="bearth what it costs the planet beehivebiomass.com"><i>🌍</i><b>bEarth</b><s>what it costs the planet</s></a>
-    <a class="t" href="bfactory.html" data-dom="biomass" data-q="the bfactory the river's source beehivebiomass.com"><i>🏭</i><b>the bFactory</b><s>the river's source</s></a>
-    <a class="t" href="blight/coop.html" data-dom="biomass" data-q="the coop hemp biomass downstream beehivebiomass.com"><i>🌾</i><b>the Coop</b><s>hemp biomass downstream</s></a>
-    <a class="t" href="blight/farmers.html" data-dom="biomass" data-q="the farmers market the community's private party beehivebiomass.com"><i>🧺</i><b>the Farmers Market</b><s>the community's private party</s></a>
-    <a class="t x" href="https://beehive-biomass.github.io/bNATURE.bio/" target="_blank" rel="noopener" data-dom="biomass" data-q="bnature.bio hemp lots: who says so beehivebiomass.com"><i>🧾</i><b>bNATURE.bio</b><s>hemp lots: who says so</s></a>
-    <a class="t x" href="https://beehive-biomass.github.io/bnr-design/" target="_blank" rel="noopener" data-dom="biomass" data-q="bnr-design styleguide v0.1 beehivebiomass.com"><i>🖌</i><b>bnr-design</b><s>styleguide v0.1</s></a>
+    <a class="t" href="b4b.html" data-dom="nature" data-q="our receipts, measured on base  nature"><b data-i18n="s.b4b.name">our receipts, measured on Base</b><s>b4b.html</s></a>
+    <a class="t" href="biq.html" data-dom="nature" data-q="compose a cited wiki proposal, never post  nature"><b data-i18n="s.biq.name">compose a cited wiki proposal, never post</b><s>biq.html</s></a>
+    <a class="t" href="blight/bnri-gallery.html" data-dom="nature" data-q="the fleet's own art  nature"><b data-i18n="s.blight-bnri-gallery.name">the fleet's own art</b><s>blight/bnri-gallery.html</s></a>
+    <a class="t" href="blight/c1-aid.html" data-dom="nature" data-q="taxonomy sizing, from the tree's own numbers  nature"><b data-i18n="s.blight-c1-aid.name">taxonomy sizing, from the tree's own numbers</b><s>blight/c1-aid.html</s></a>
+    <a class="t" href="blight/compare.html" data-dom="nature" data-q="the erc-20i family, artist by artist  nature"><b data-i18n="s.blight-compare.name">the ERC-20i family, artist by artist</b><s>blight/compare.html</s></a>
+    <a class="t" href="blight/gallery.html" data-dom="nature" data-q="a walking tour of on-chain art  nature"><b data-i18n="s.blight-gallery.name">a walking tour of on-chain art</b><s>blight/gallery.html</s></a>
+    <a class="t" href="blight/index.html" data-dom="nature" data-q="one operation, many frequencies  nature"><b data-i18n="s.blight-index.name">one operation, many frequencies</b><s>blight/index.html</s></a>
+    <a class="t" href="blight/inscription-explorer.html" data-dom="nature" data-q="whose art shall we visit?  nature"><b data-i18n="s.blight-inscription-explorer.name">whose art shall we visit?</b><s>blight/inscription-explorer.html</s></a>
+    <a class="t" href="blight/midi-organ.html" data-dom="nature" data-q="the seed becomes sound  nature"><b data-i18n="s.blight-midi-organ.name">the seed becomes sound</b><s>blight/midi-organ.html</s></a>
+    <a class="t" href="blight/museum.html" data-dom="nature" data-q="what &quot;on-chain&quot; actually means  nature"><b data-i18n="s.blight-museum.name">what &quot;on-chain&quot; actually means</b><s>blight/museum.html</s></a>
+    <a class="t" href="blight/vaulta-reader.html" data-dom="nature" data-q="the b-indexer's read path, keyless  nature"><b data-i18n="s.blight-vaulta-reader.name">the b-indexer's read path, keyless</b><s>blight/vaulta-reader.html</s></a>
+    <a class="t" href="blight/workbench.html" data-dom="nature" data-q="the instrument (tech bench)  nature"><b data-i18n="s.blight-workbench.name">the instrument (tech bench)</b><s>blight/workbench.html</s></a>
+    <a class="t" href="dock.html" data-dom="nature" data-q="what is proven, and what is not  nature"><b data-i18n="s.dock.name">what is proven, and what is not</b><s>dock.html</s></a>
+    <a class="t" href="fleet-hosted/index.html" data-dom="nature" data-q="nine surfaces, one night, one hand  nature"><b data-i18n="s.fleet-hosted-index.name">Nine surfaces, one night, one hand</b><s>fleet-hosted/index.html</s></a>
+    <a class="t" href="hardware/build.html" data-dom="nature" data-q="climb from user to producer  nature"><b data-i18n="s.hardware-build.name">climb from user to producer</b><s>hardware/build.html</s></a>
+    <a class="t" href="hardware/index.html" data-dom="nature" data-q="open hardware you can actually read  nature"><b data-i18n="s.hardware-index.name">open hardware you can actually read</b><s>hardware/index.html</s></a>
+    <a class="t" href="hardware/security.html" data-dom="nature" data-q="security events, read honestly  nature"><b data-i18n="s.hardware-security.name">security events, read honestly</b><s>hardware/security.html</s></a>
+    <a class="t" href="listening.html" data-dom="nature" data-q="one seed, sound and sight  nature"><b data-i18n="s.listening.name">one seed, sound and sight</b><s>listening.html</s></a>
+    <a class="t" href="onboarding/receive.html" data-dom="nature" data-q="catch a beam of light, camera only  nature"><b data-i18n="s.onboarding-receive.name">catch a beam of light, camera only</b><s>onboarding/receive.html</s></a>
+    <a class="t" href="recover.html" data-dom="nature" data-q="your 24 words, your keys, offline  nature"><b data-i18n="s.recover.name">your 24 words, your keys, offline</b><s>recover.html</s></a>
+    <a class="t" href="stack.html" data-dom="nature" data-q="one engine diagram, honest parts included  nature"><b data-i18n="s.stack.name">one engine diagram, honest parts included</b><s>stack.html</s></a>
+    <a class="t" href="wallet.html" data-dom="nature" data-q="one soul, every chain, zero custody  nature"><b data-i18n="s.wallet.name">one soul, every chain, zero custody</b><s>wallet.html</s></a>
+    <a class="t p" href="blight/demo.html" data-dom="nature" data-q="the logo is the transmission the beam encoder is real; this page is its demo nature"><b data-i18n="s.blight-demo.name">the logo is the transmission</b><s>blight/demo.html</s><u data-i18n="s.blight-demo.caveat">⚠ the beam encoder is real; this page is its demo</u></a>
+    <a class="t p" href="blight/farmers.html" data-dom="nature" data-q="stalls, baccords, settled in fusd reads as a plan — settlement is not built nature"><b data-i18n="s.blight-farmers.name">stalls, bAccords, settled in fUSD</b><s>blight/farmers.html</s><u data-i18n="s.blight-farmers.caveat">⚠ reads as a plan — settlement is not built</u></a>
+    <a class="t p" href="bnames.html" data-dom="nature" data-q="names on our chain, read live reads the chain live; reserving is founder-gated for now nature"><b data-i18n="s.bnames.name">names on our chain, read live</b><s>bnames.html</s><u data-i18n="s.bnames.caveat">⚠ reads the chain live; reserving is founder-gated for now</u></a>
+    <a class="t p" href="hardware/lab.html" data-dom="nature" data-q="device reviews, science and art one device has bench numbers; the rest read pending nature"><b data-i18n="s.hardware-lab.name">device reviews, science and art</b><s>hardware/lab.html</s><u data-i18n="s.hardware-lab.caveat">⚠ one device has bench numbers; the rest read pending</u></a>
+    <a class="t p" href="keys/addresses.html" data-dom="nature" data-q="one soul, two mailing addresses the derivation grammar is real; the rendered addresses are shapes nature"><b data-i18n="s.keys-addresses.name">one soul, two mailing addresses</b><s>keys/addresses.html</s><u data-i18n="s.keys-addresses.caveat">⚠ the derivation grammar is real; the rendered addresses are shapes</u></a>
+    <a class="t p" href="onboarding/index.html" data-dom="nature" data-q="the two-minute held-hand join ceremony key derivation is real; the auth steps are labelled simulated nature"><b data-i18n="s.onboarding-index.name">the two-minute held-hand join ceremony</b><s>onboarding/index.html</s><u data-i18n="s.onboarding-index.caveat">⚠ key derivation is real; the auth steps are labelled simulated</u></a>
+    <a class="t" href="blight/market.html" data-dom="nature" data-q="inscriptions, honestly traded a design surface — no market runs behind it nature"><b data-i18n="s.blight-market.name">inscriptions, honestly traded</b><s>blight/market.html</s></a>
   </div>
 </section>
 <section class="plur" id="plur">
-  <div class="shead"><span class="dot"></span><h2>plur.earth</h2><em>THE ART PLANET</em><span class="n">22 doors</span></div>
-  <p class="intro">Peace · love · unity · respect — the art planet. Inscription art lives on-chain, so the artwork is the record: no server can take it down, no gallery can decline to hang it. Seeds become sound (the Organ, the Studio) and sight (orbit, hexfield); orbit.html is byte-pinned so a piece made against it renders the same way in five years.</p>
+  <div class="shead"><span class="dot"></span><h2>plur.earth</h2><em>THE ART PLANET · THE DANCEFLOOR</em><span class="n">4 doors</span></div>
+  <p class="intro" data-i18n="d.plur.intro">Peace · love · unity · respect. The floor came before the industry did, and Wing IV of the mUseUm is the ritual the kandi bar actually enforces in code: right arm trades, left arm keeps, and the crossing moves only when something lands back.</p>
   <div class="grid">
-    <a class="t" href="plur.html" data-dom="plur" data-q="the plur museum peace love unity respect plur.earth"><i>🪩</i><b>the PLUR mUseUm</b><s>peace love unity respect</s></a>
-    <a class="t" href="festival/index.html" data-dom="plur" data-q="the festival the attendee experience plur.earth"><i>🎪</i><b>the festival</b><s>the attendee experience</s></a>
-    <a class="t" href="kandi.html" data-dom="plur" data-q="the kandi bar make it, name it, gift it plur.earth"><i>🔗</i><b>the kandi bar</b><s>make it, name it, gift it</s></a>
-    <a class="t" href="bset.html" data-dom="plur" data-q="the set i build to what's in the headphones plur.earth"><i>🎧</i><b>the set I build to</b><s>what's in the headphones</s></a>
-    <a class="t" href="listening.html" data-dom="plur" data-q="the listening room on-chain sound, forkable plur.earth"><i>🎵</i><b>the Listening Room</b><s>on-chain sound, forkable</s></a>
-    <a class="t" href="blight/gallery.html" data-dom="plur" data-q="inscription art gallery a walking tour plur.earth"><i>🖼</i><b>Inscription Art Gallery</b><s>a walking tour</s></a>
-    <a class="t" href="blight/museum.html" data-dom="plur" data-q="blight museum what on-chain means plur.earth"><i>🏛</i><b>bLighT Museum</b><s>what on-chain means</s></a>
-    <a class="t" href="blight/bnri-gallery.html" data-dom="plur" data-q="bnri the fleet's own art plur.earth"><i>🔷</i><b>BNRi</b><s>the fleet's own art</s></a>
-    <a class="t" href="blight/inscription-explorer.html" data-dom="plur" data-q="living collections explore the inscriptions plur.earth"><i>🔎</i><b>living collections</b><s>explore the inscriptions</s></a>
-    <a class="t" href="blight/compare.html" data-dom="plur" data-q="blight catalog artist by artist plur.earth"><i>📐</i><b>bLighT Catalog</b><s>artist by artist</s></a>
-    <a class="t" href="blight/market.html" data-dom="plur" data-q="the demarketplace inscriptions, honestly traded plur.earth"><i>🏪</i><b>the DeMarketPlace</b><s>inscriptions, honestly traded</s></a>
-    <a class="t" href="forge/index.html" data-dom="plur" data-q="the bbuzz forge sound + sight, artist-first plur.earth"><i>⚒</i><b>the bBuzz forge</b><s>sound + sight, artist-first</s></a>
-    <a class="t" href="forge/orbit.html" data-dom="plur" data-q="orbit the seed becomes sight plur.earth"><i>🪐</i><b>orbit</b><s>the seed becomes sight</s></a>
-    <a class="t" href="forge/hexfield.html" data-dom="plur" data-q="hexfield the seed becomes field plur.earth"><i>⬡</i><b>hexfield</b><s>the seed becomes field</s></a>
-    <a class="t" href="forge/room.html" data-dom="plur" data-q="the two-tab room multiplayer you can feel plur.earth"><i>🚪</i><b>the two-tab room</b><s>multiplayer you can feel</s></a>
-    <a class="t" href="forge/huddle.html" data-dom="plur" data-q="the huddle the forge, across machines plur.earth"><i>👥</i><b>the huddle</b><s>the forge, across machines</s></a>
-    <a class="t" href="blight/index.html" data-dom="plur" data-q="blight fleet one operation, many frequencies plur.earth"><i>💡</i><b>bLighT fLeeT</b><s>one operation, many frequencies</s></a>
-    <a class="t" href="blight/studio-music.html" data-dom="plur" data-q="blight studio music creation mvp plur.earth"><i>🎛</i><b>bLighT Studio</b><s>music creation MVP</s></a>
-    <a class="t" href="blight/studio-gate.html" data-dom="plur" data-q="studio gate trait pre-flight plur.earth"><i>🚦</i><b>Studio Gate</b><s>trait pre-flight</s></a>
-    <a class="t" href="blight/midi-organ.html" data-dom="plur" data-q="blight organ the seed becomes sound plur.earth"><i>🎹</i><b>bLighT Organ</b><s>the seed becomes sound</s></a>
-    <a class="t" href="blight/workbench.html" data-dom="plur" data-q="blight workbench the instrument plur.earth"><i>🔧</i><b>bLighT Workbench</b><s>the instrument</s></a>
-    <a class="t" href="blight/c1-aid.html" data-dom="plur" data-q="c-1 aid taxonomy sizing plur.earth"><i>🧮</i><b>C-1 Aid</b><s>taxonomy sizing</s></a>
-  </div>
-</section>
-<section class="social" id="social">
-  <div class="shead"><span class="dot"></span><h2>bnature.social</h2><em>THE SOCIAL LAYER · BSKY-STYLE APP IN WAITING</em><span class="n">7 doors</span></div>
-  <p class="intro">The social layer, ATProto-shaped. Tongues dock as first-class passengers, your name stays in your own language and aliases are pointers, never ownership. The symposium is receipted discourse; the studios and the hearth are rooms where you co-create with the hive and each other — no server anywhere. Ruled 2026-08-25: this domain ships bsky-style with these surfaces docked in.</p>
-  <div class="grid">
-    <a class="t" href="devroom.html" data-dom="social" data-q="the builders dev room the pre-wiki stage bnature.social"><i>🛠</i><b>the builders dev room</b><s>the pre-wiki stage</s></a>
-    <a class="t" href="bsymposium.html" data-dom="social" data-q="the bsymposium receipted discourse bnature.social"><i>🏛</i><b>the bSymposium</b><s>receipted discourse</s></a>
-    <a class="t" href="attest.html" data-dom="social" data-q="one tongue, one evening the attestation campaign bnature.social"><i>✍</i><b>one tongue, one evening</b><s>the attestation campaign</s></a>
-    <a class="t" href="blanguage.html" data-dom="social" data-q="the blanguagedock every language first-class bnature.social"><i>🌐</i><b>the BlanguageDOCK</b><s>every language first-class</s></a>
-    <a class="t" href="btranslated.html" data-dom="social" data-q="btranslated your name, your tongue bnature.social"><i>🔤</i><b>bTranslated</b><s>your name, your tongue</s></a>
-    <a class="t" href="buzz-studio.html" data-dom="social" data-q="the buzz studio co-create, no server anywhere bnature.social"><i>🎨</i><b>the bUZZ Studio</b><s>co-create, no server anywhere</s></a>
-    <a class="t" href="blight/hearth.html" data-dom="social" data-q="the hearth co-create with the hive's ai bnature.social"><i>🔥</i><b>the hearth</b><s>co-create with the hive's AI</s></a>
+    <a class="t" href="bset.html" data-dom="plur" data-q="the set the founder builds to  plur"><b data-i18n="s.bset.name">the set the founder builds to</b><s>bset.html</s></a>
+    <a class="t" href="festival/index.html" data-dom="plur" data-q="your day on the floor, free  plur"><b data-i18n="s.festival-index.name">your day on the floor, free</b><s>festival/index.html</s></a>
+    <a class="t" href="kandi.html" data-dom="plur" data-q="make it, name it, gift it  plur"><b data-i18n="s.kandi.name">make it, name it, gift it</b><s>kandi.html</s></a>
+    <a class="t" href="plur.html" data-dom="plur" data-q="thirty years of floor wisdom, receipted  plur"><b data-i18n="s.plur.name">thirty years of floor wisdom, receipted</b><s>plur.html</s></a>
   </div>
 </section>
 <section class="skaists" id="skaists">
-  <div class="shead"><span class="dot"></span><h2>skaists.social</h2><em>GOVERNANCE &amp; THE GUARD · BSKY-STYLE APP IN WAITING</em><span class="n">7 doors</span></div>
-  <p class="intro">The governance domain — owned and active. One deck for the DAO, the treasuries and the watch. A review is a signed receipt you choose to publish, never telemetry; the guards review the peer reviewers. Indigo Index and Resonance hang here by founder ruling — disease economics and collective resonance are civic instruments, read by the same eyes that read the treasuries.</p>
+  <div class="shead"><span class="dot"></span><h2>skaists.social</h2><em>CONSCIOUS COMMUNITY · BSKY-STYLE APP IN WAITING</em><span class="n">9 doors</span></div>
+  <p class="intro" data-i18n="d.skaists.intro">The governance domain — owned and active. One deck for the DAO, the treasuries and the watch; a review is a signed receipt you choose to publish, never telemetry. The studios and the forge are here because the work and the money that carries it belong to the same people. Ruled 2026-08-25: this domain ships bsky-style.</p>
   <div class="grid">
-    <a class="t" href="dao-dashboard/index.html" data-dom="skaists" data-q="bnr dao dashboard skaists.social, live skaists.social"><i>🏛</i><b>BNR DAO dashboard</b><s>skaists.social, live</s></a>
-    <a class="t" href="royalguard.html" data-dom="skaists" data-q="the royal guard dao · treasuries · wallet skaists.social"><i>💂</i><b>the ROYAL GUARD</b><s>DAO · treasuries · wallet</s></a>
-    <a class="t" href="review.html" data-dom="skaists" data-q="the royal review receipts, never telemetry skaists.social"><i>👑</i><b>the Royal Review</b><s>receipts, never telemetry</s></a>
-    <a class="t" href="fleet-hosted/gallery/indigo-index.html" data-dom="skaists" data-q="bn indigo index disease economics × gdp skaists.social"><i>🟦</i><b>BN Indigo Index</b><s>disease economics × GDP</s></a>
-    <a class="t" href="fleet-hosted/gallery/resonance.html" data-dom="skaists" data-q="bn resonance consciousness + plant medicine skaists.social"><i>🎚</i><b>BN Resonance</b><s>consciousness + plant medicine</s></a>
-    <a class="t x" href="https://skaists.github.io/sovereignty-explorer/" target="_blank" rel="noopener" data-dom="skaists" data-q="sovereignty explorer counts what the old economy leaves skaists.social"><i>🧭</i><b>sovereignty explorer</b><s>counts what the old economy leaves</s></a>
-    <a class="t x" href="https://skaists.github.io/beehive-WELLness/" target="_blank" rel="noopener" data-dom="skaists" data-q="beehive-wellness the nutrition-literacy tree skaists.social"><i>🌳</i><b>beehive-WELLness</b><s>the nutrition-literacy tree</s></a>
+    <a class="t" href="blight/studio-gate.html" data-dom="skaists" data-q="drop a layer, get a verdict  skaists"><b data-i18n="s.blight-studio-gate.name">drop a layer, get a verdict</b><s>blight/studio-gate.html</s></a>
+    <a class="t" href="blight/studio-music.html" data-dom="skaists" data-q="compose, loop, export an inscription  skaists"><b data-i18n="s.blight-studio-music.name">compose, loop, export an inscription</b><s>blight/studio-music.html</s></a>
+    <a class="t" href="forge/hexfield.html" data-dom="skaists" data-q="roll a seed, grow a lattice  skaists"><b data-i18n="s.forge-hexfield.name">roll a seed, grow a lattice</b><s>forge/hexfield.html</s></a>
+    <a class="t" href="forge/index.html" data-dom="skaists" data-q="instruments, not presets, for artists  skaists"><b data-i18n="s.forge-index.name">instruments, not presets, for artists</b><s>forge/index.html</s></a>
+    <a class="t" href="forge/orbit.html" data-dom="skaists" data-q="seeded rose curves in svg  skaists"><b data-i18n="s.forge-orbit.name">seeded rose curves in SVG</b><s>forge/orbit.html</s></a>
+    <a class="t" href="review.html" data-dom="skaists" data-q="attestation, never telemetry  skaists"><b data-i18n="s.review.name">attestation, never telemetry</b><s>review.html</s></a>
+    <a class="t p" href="fleet-hosted/gallery/resonance.html" data-dom="skaists" data-q="consciousness, earth frequency, plant medicine an argument drawn as a dashboard, not measurement skaists"><b data-i18n="s.fleet-hosted-gallery-resonance.name">Consciousness, Earth frequency, plant medicine</b><s>fleet-hosted/gallery/resonance.html</s><u data-i18n="s.fleet-hosted-gallery-resonance.caveat">⚠ an argument drawn as a dashboard, not measurement</u></a>
+    <a class="t p" href="royalguard.html" data-dom="skaists" data-q="one deck, three doors, zero custody reads the decks it can; some panels are held skaists"><b data-i18n="s.royalguard.name">one deck, three doors, zero custody</b><s>royalguard.html</s><u data-i18n="s.royalguard.caveat">⚠ reads the decks it can; some panels are held</u></a>
+    <a class="t" href="dao-dashboard/index.html" data-dom="skaists" data-q="how a treasury says i don't know every figure is a fixture, not a measurement skaists"><b data-i18n="s.dao-dashboard-index.name">how a treasury says I don't know</b><s>dao-dashboard/index.html</s></a>
+  </div>
+</section>
+<section class="social" id="social">
+  <div class="shead"><span class="dot"></span><h2>bnature.social</h2><em>THE SOCIAL LAYER · BSKY-STYLE APP IN WAITING</em><span class="n">11 doors</span></div>
+  <p class="intro" data-i18n="d.social.intro">The social layer, ATProto-shaped. Tongues dock as first-class passengers, your name stays in your own language and aliases are pointers, never ownership. The symposium is receipted discourse; the studios and the hearth are rooms where you co-create with the hive and each other — no server anywhere.</p>
+  <div class="grid">
+    <a class="t" href="attest.html" data-dom="social" data-q="one tongue, one evening, signed  social"><b data-i18n="s.attest.name">one tongue, one evening, signed</b><s>attest.html</s></a>
+    <a class="t" href="blanguage.html" data-dom="social" data-q="dock your tongue, no permission  social"><b data-i18n="s.blanguage.name">dock your tongue, no permission</b><s>blanguage.html</s></a>
+    <a class="t" href="bsymposium.html" data-dom="social" data-q="two food protocols, both receipted  social"><b data-i18n="s.bsymposium.name">two food protocols, both receipted</b><s>bsymposium.html</s></a>
+    <a class="t" href="buzz-studio.html" data-dom="social" data-q="paint a comb together, live  social"><b data-i18n="s.buzz-studio.name">paint a comb together, live</b><s>buzz-studio.html</s></a>
+    <a class="t" href="devroom.html" data-dom="social" data-q="builders' findings, written for strangers  social"><b data-i18n="s.devroom.name">builders' findings, written for strangers</b><s>devroom.html</s></a>
+    <a class="t" href="forge/room.html" data-dom="social" data-q="two tabs, one shared field  social"><b data-i18n="s.forge-room.name">two tabs, one shared field</b><s>forge/room.html</s></a>
+    <a class="t p" href="blight/hearth.html" data-dom="social" data-q="co-create with the hive's ai a keyword router, not a model social"><b data-i18n="s.blight-hearth.name">co-create with the hive's AI</b><s>blight/hearth.html</s><u data-i18n="s.blight-hearth.caveat">⚠ a keyword router, not a model</u></a>
+    <a class="t p" href="blight/pulse.html" data-dom="social" data-q="bx pointers live on the relay the read path is live against public relays; broadcast is held social"><b data-i18n="s.blight-pulse.name">bX pointers live on the relay</b><s>blight/pulse.html</s><u data-i18n="s.blight-pulse.caveat">⚠ the read path is live against public relays; broadcast is held</u></a>
+    <a class="t p" href="bqueenbee-live.html" data-dom="social" data-q="talk to the hive's machine referee answers from a page-local knowledge base, not a model social"><b data-i18n="s.bqueenbee-live.name">talk to the hive's machine referee</b><s>bqueenbee-live.html</s><u data-i18n="s.bqueenbee-live.caveat">⚠ answers from a page-local knowledge base, not a model</u></a>
+    <a class="t p" href="btranslated.html" data-dom="social" data-q="your name in your tongue section two carries its own demo badge social"><b data-i18n="s.btranslated.name">your name in your tongue</b><s>btranslated.html</s><u data-i18n="s.btranslated.caveat">⚠ section two carries its own DEMO badge</u></a>
+    <a class="t p" href="forge/huddle.html" data-dom="social" data-q="the same room, across machines you supply your own venue url — we ship no server social"><b data-i18n="s.forge-huddle.name">the same room, across machines</b><s>forge/huddle.html</s><u data-i18n="s.forge-huddle.caveat">⚠ you supply your own venue URL — we ship no server</u></a>
+  </div>
+</section>
+<section class="bio" id="bio">
+  <div class="shead"><span class="dot"></span><h2>bnature.bio</h2><em>THE HEALTH COMMONS</em><span class="n">13 doors</span></div>
+  <p class="intro" data-i18n="d.bio.intro">The health commons. The bFood hexagon replaces the pyramid because a pyramid was a ranking and food is not ranked — every cell shows n/m so you can see the denominator, and nothing is silently zero. The labs and trackers are the founder’s own instruments; where a figure is a hypothesis, the page says hypothesis.</p>
+  <div class="grid">
+    <a class="t" href="bearth.html" data-dom="bio" data-q="what one food would cost the planet  bio"><b data-i18n="s.bearth.name">what one food would cost the planet</b><s>bearth.html</s></a>
+    <a class="t" href="bfood.html" data-dom="bio" data-q="your nutrients, drawn honestly, never zero  bio"><b data-i18n="s.bfood.name">your nutrients, drawn honestly, never zero</b><s>bfood.html</s></a>
+    <a class="t" href="bigen.html" data-dom="bio" data-q="cannabis and cancer, graded honestly  bio"><b data-i18n="s.bigen.name">cannabis and cancer, graded honestly</b><s>bigen.html</s></a>
+    <a class="t" href="blongevity.html" data-dom="bio" data-q="your body builds its own cannabinoids  bio"><b data-i18n="s.blongevity.name">your body builds its own cannabinoids</b><s>blongevity.html</s></a>
+    <a class="t" href="fleet-hosted/gallery/acid-cascade.html" data-dom="bio" data-q="the chronic inflammatory cascade, argued  bio"><b data-i18n="s.fleet-hosted-gallery-acid-cascade.name">The chronic inflammatory cascade, argued</b><s>fleet-hosted/gallery/acid-cascade.html</s></a>
+    <a class="t" href="fleet-hosted/gallery/indigo-index.html" data-dom="bio" data-q="chronic disease economics against gdp the central figure is a stated hypothesis bio"><b data-i18n="s.fleet-hosted-gallery-indigo-index.name">Chronic disease economics against GDP</b><s>fleet-hosted/gallery/indigo-index.html</s></a>
+    <a class="t" href="fleet-hosted/lab/blend-lab.html" data-dom="bio" data-q="tobacco blend ratios, flavour and cost  bio"><b data-i18n="s.fleet-hosted-lab-blend-lab.name">Tobacco blend ratios, flavour and cost</b><s>fleet-hosted/lab/blend-lab.html</s></a>
+    <a class="t" href="fleet-hosted/lab/edible-tracker.html" data-dom="bio" data-q="edible dosing, onset, and effect log  bio"><b data-i18n="s.fleet-hosted-lab-edible-tracker.name">Edible dosing, onset, and effect log</b><s>fleet-hosted/lab/edible-tracker.html</s></a>
+    <a class="t" href="fleet-hosted/lab/flower-lab.html" data-dom="bio" data-q="thca blending calculator with session log  bio"><b data-i18n="s.fleet-hosted-lab-flower-lab.name">THCA blending calculator with session log</b><s>fleet-hosted/lab/flower-lab.html</s></a>
+    <a class="t" href="fleet-hosted/lab/intake-tracker.html" data-dom="bio" data-q="daily cannabinoid intake against your rdi  bio"><b data-i18n="s.fleet-hosted-lab-intake-tracker.name">Daily cannabinoid intake against your RDI</b><s>fleet-hosted/lab/intake-tracker.html</s></a>
+    <a class="t" href="fleet-hosted/lab/spliff-lab.html" data-dom="bio" data-q="roll composition against absorbed-thc target  bio"><b data-i18n="s.fleet-hosted-lab-spliff-lab.name">Roll composition against absorbed-THC target</b><s>fleet-hosted/lab/spliff-lab.html</s></a>
+    <a class="t" href="university/index.html" data-dom="bio" data-q="learn to read the evidence  bio"><b data-i18n="s.university-index.name">learn to read the evidence</b><s>university/index.html</s></a>
+    <a class="t p" href="fleet-hosted/lab/bnr-dashboard.html" data-dom="bio" data-q="reads what the other instruments write reads what the other instruments write bio"><b data-i18n="s.fleet-hosted-lab-bnr-dashboard.name">Reads what the other instruments write</b><s>fleet-hosted/lab/bnr-dashboard.html</s><u data-i18n="s.fleet-hosted-lab-bnr-dashboard.caveat">⚠ reads what the other instruments write</u></a>
+  </div>
+</section>
+<section class="biomass" id="biomass">
+  <div class="shead"><span class="dot"></span><h2>beehivebiomass.com</h2><em>FEED THE ORGANISM</em><span class="n">4 doors</span></div>
+  <p class="intro" data-i18n="d.biomass.intro">“beehivebiomass.com is the civilian marketplace” — the founder’s own words. The storage network our data lives on runs on ordinary machines, and the two treasuries that pay for it read keylessly with failover: a failed read renders amber and breaks the line, because a gap is data. Running a node docks locally (antd), never through a hosted page.</p>
+  <div class="grid">
+    <a class="t" href="bantfarm.html" data-dom="biomass" data-q="two treasuries and the node farm, live  biomass"><b data-i18n="s.bantfarm.name">two treasuries and the node farm, live</b><s>bantfarm.html</s></a>
+    <a class="t p" href="blight/coop.html" data-dom="biomass" data-q="hemp biomass, ranked by criticality the index is a fixed table, not a live feed biomass"><b data-i18n="s.blight-coop.name">hemp biomass, ranked by criticality</b><s>blight/coop.html</s><u data-i18n="s.blight-coop.caveat">⚠ the index is a fixed table, not a live feed</u></a>
+    <a class="t" href="bfactory.html" data-dom="biomass" data-q="the ratified plan, made walkable its own banner: nothing is built biomass"><b data-i18n="s.bfactory.name">the ratified plan, made walkable</b><s>bfactory.html</s></a>
+    <a class="t" href="bmeshasi.html" data-dom="biomass" data-q="pledge your iron, metered, paid first says it plainly itself: does not exist yet biomass"><b data-i18n="s.bmeshasi.name">pledge your iron, metered, paid first</b><s>bmeshasi.html</s></a>
   </div>
 </section>
 </div>
 
 <footer>
-  <div>70 surfaces · three orgs · one organism · built for the poor starving artist · “10Ve the first ingredient”</div>
-  <div><a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/architecture/HOMEOSTASIS-v1.md">HOMEOSTASIS v1</a> · <a href="https://beehive-nature.github.io/bnr-design-system/">bnr-design-system</a> · <a href="https://github.com/beehive-nature/beehive-nature">the tree</a></div>
+  <div>70 surfaces · six domains · three orgs · one organism · built for the poor starving artist · “10Ve the first ingredient”</div>
+  <div><a href="doors/">the six doors</a> · <a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/estate.json">the registry</a> · <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/architecture/HOMEOSTASIS-v1.md">HOMEOSTASIS v1</a></div>
 </footer>
 
 <script>
@@ -349,25 +317,22 @@ section.skaists a.t:hover{border-color:#6FA9E0}
   /* search + domain filter. Everything is already in the DOM — this only
      hides; no fetch, no index, no network. */
   var q=document.getElementById("dsearch"), chips=document.getElementById("chips"),
-      tally=document.getElementById("tally"), tiles=[].slice.call(document.querySelectorAll("a.t[data-dom]")),
+      tally=document.getElementById("tally"),
+      tiles=[].slice.call(document.querySelectorAll("a.t[data-dom]")),
       secs=[].slice.call(document.querySelectorAll("section[id]")), f="all";
-  var TOTAL=75;
+  var TOTAL=70, NDOM=6;
   function run(){
     var s=(q.value||"").trim().toLowerCase(), shown=0;
     tiles.forEach(function(t){
       var d=t.getAttribute("data-dom");
-      var okF=(f==="all")||d===f||d==="start";
+      var okF=(f==="all")||d===f||d==="doors";
       var okQ=!s||t.getAttribute("data-q").indexOf(s)>=0;
       var on=okF&&okQ; t.hidden=!on;
-      if(on&&d!=="start") shown++;
+      if(on&&d!=="doors") shown++;
     });
-    secs.forEach(function(sec){
-      var any=sec.querySelectorAll("a.t:not([hidden])").length;
-      sec.hidden = any===0;
-    });
-    tally.textContent = (s||f!=="all")
-      ? shown+" of "+TOTAL+" doors shown"
-      : TOTAL+" doors across 5 domains";
+    secs.forEach(function(sec){ sec.hidden = sec.querySelectorAll("a.t:not([hidden])").length===0; });
+    tally.textContent=(s||f!=="all") ? shown+" of "+TOTAL+" doors shown"
+      : TOTAL+" doors across "+NDOM+" domains";
   }
   q.addEventListener("input",run);
   chips.addEventListener("click",function(e){
@@ -379,7 +344,7 @@ section.skaists a.t:hover{border-color:#6FA9E0}
   });
 })();
 </script>
-<script src="agent-dock.js?v=4"></script>
-<script src="tour.js?v=22"></script>
+<script src="agent-dock.js?v=5"></script>
+<script src="tour.js?v=23"></script>
 </body>
 </html>

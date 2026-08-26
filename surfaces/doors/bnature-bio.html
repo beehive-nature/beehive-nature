@@ -7,36 +7,69 @@
 <meta name="color-scheme" content="dark">
 <title>bnature.bio — a scientist, or anyone with a health question</title>
 <meta name="theme-color" content="#06110C">
-<style>
-:root{
+<style>:root{
   --void:#06110C; --panel:#0A1310; --tile:#0C1412; --inset:#08120E; --lift:#111C17;
   --ink:#E9F2EC; --dim:#8FA79A; --dimmer:#648176; --line:#1E2B26; --hot:#2F4A3C;
-  --accent:#86CC72; --gold:#E8B54B; --ember:#FF7A6B;
-  --sem-value:#D655BB; --sem-solution:#86CC72; --sem-system:#45C2DC;
-  --sem-science:#B79FE0; --sem-harm:var(--ember);
+  --magenta:#D655BB; --green:#86CC72; --cyan:#45C2DC; --lilac:#B79FE0;
+  --blue:#6FA9E0; --gold:#E8B54B; --ember:#FF7A6B;
+  --sem-value:var(--magenta); --sem-solution:var(--green); --sem-system:var(--cyan);
+  --sem-science:var(--lilac); --sem-harm:var(--ember);
   --mono:ui-monospace,"Cascadia Mono","SF Mono",Menlo,Consolas,monospace;
-  --max:1080px;
+  --accent:#86CC72; --max:1080px;
 }
-/* SEMANTIC COLOUR — meanings picked first, one hue fitted to each; this door
-   wears its own domain's hue and nothing else competes with it. */
+
+/* SEMANTIC COLOUR — the meanings were picked FIRST and a hue fitted to each;
+   every domain wears the meaning it embodies, and --sem-harm is declared for
+   the estate palette and deliberately unused here: nothing on this page is a
+   harm. DEPTH LADDER: --void ground · --panel slab · --tile door · --inset well. */
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{background:var(--void);color:var(--ink);font:14px/1.7 var(--mono);
-  min-height:100vh;padding-bottom:96px;-webkit-text-size-adjust:100%}
-a{text-decoration:none;color:var(--accent)}
-::selection{background:var(--accent);color:var(--void)}
-.wrap{max-width:var(--max);margin:0 auto;padding:0 22px}
+  min-height:100vh;padding-bottom:96px;-webkit-text-size-adjust:100%;position:relative}
+a{text-decoration:none}
 #veil{position:fixed;inset:0;pointer-events:none;z-index:3;opacity:.55;mix-blend-mode:multiply;
   background:repeating-linear-gradient(180deg,rgba(0,0,0,0) 0,rgba(0,0,0,0) 2px,rgba(0,0,0,.22) 3px,rgba(0,0,0,0) 4px)}
 header{position:relative;overflow:hidden;border-bottom:1px solid var(--line);padding-bottom:34px}
-#bandwrap{position:absolute;top:0;left:0;right:0;height:64px;overflow:hidden;animation:hexdrift 9s linear infinite}
-#band{position:absolute;top:-14px;left:-60px;display:flex;gap:6px;opacity:.8}
-#band i{width:42px;height:48px;flex:none;display:block;
+/* the mask NEVER moves — animating it sheared the right edge (2026-08-26) */
+#bandwrap{position:absolute;top:0;left:0;right:0;height:78px;overflow:hidden}
+#bandwrap .band{position:absolute;top:-16px;left:-80px;display:flex;
+  animation-timing-function:linear;animation-iteration-count:infinite;will-change:transform}
+#bandwrap .band i{flex:none;display:block;
   clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
   animation:hexpulse 3s ease-in-out infinite}
+#bandwrap .l0{top:-24px}
+#bandwrap .l2{top:2px}
 @keyframes hexpulse{0%{opacity:.10;transform:scale(.86)}50%{opacity:.95;transform:scale(1)}100%{opacity:.10;transform:scale(.86)}}
-@keyframes hexdrift{0%{transform:translateX(0)}100%{transform:translateX(-48px)}}
-.eyebrow{position:relative;padding-top:78px;font-size:10px;letter-spacing:.3em;color:var(--dimmer);text-transform:uppercase}
+@keyframes hexdrift{0%{transform:translateX(0)}100%{transform:translateX(calc(var(--step) * -1))}}
+@keyframes hexdriftb{0%{transform:translateX(calc(var(--step) * -1))}100%{transform:translateX(0)}}
+.eyebrow{position:relative;padding-top:86px;font-size:10px;letter-spacing:.34em;color:var(--dimmer);text-transform:uppercase}
+.shead{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding-bottom:11px;border-bottom:1px solid var(--line)}
+.shead .dot{width:10px;height:10px;flex:none;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
+.shead h2{font-size:19px;font-weight:800;letter-spacing:-.01em}
+.shead em{font-style:normal;font-size:9.5px;letter-spacing:.18em;color:var(--dimmer);text-transform:uppercase}
+.shead .n{margin-left:auto;font-size:9.5px;letter-spacing:.14em;color:var(--dimmer);text-transform:uppercase}
+.intro{color:var(--dim);font-size:11.5px;line-height:1.8;margin:14px 0 16px;max-width:104ch}
+section{margin-top:38px;scroll-margin-top:18px;background:var(--panel);border:1px solid var(--line);padding:20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:14px}
+a.t{display:block;background:var(--tile);border:1px solid var(--line);border-left:3px solid var(--line);
+  padding:20px;color:var(--ink);transition:transform .16s,border-color .16s,background .16s}
+a.t:hover,a.t:focus-visible{transform:translateY(-2px);background:var(--lift);outline:none}
+a.t i{font-style:normal;font-size:16px;line-height:1;display:block}
+a.t b{display:block;font-size:13.5px;font-weight:700;margin-top:9px;letter-spacing:-.01em}
+a.t s{display:block;text-decoration:none;font-size:11px;color:var(--dim);margin-top:5px;line-height:1.6}
+a.t u{display:block;text-decoration:none;font-size:9.5px;color:var(--gold);margin-top:6px;line-height:1.5}
+a.t.p{border-left-color:var(--gold)}
+a.t.x b::after{content:" \2197";font-weight:400;opacity:.55}
+footer{max-width:1280px;margin:52px auto 0;padding:22px 22px 0;border-top:1px solid var(--line);
+  color:var(--dimmer);font-size:10px;letter-spacing:.1em;line-height:2.2;text-transform:uppercase}
+footer a{color:var(--dim);display:inline-flex;align-items:center;min-height:32px;padding:0 5px}
+footer a:hover{color:var(--gold)}
+@media (prefers-reduced-motion:reduce){
+  #bandwrap .band,#bandwrap .band i{animation:none}#bandwrap .band i{opacity:.55}
+  a.t{transition:none}a.t:hover{transform:none}}
+a{color:var(--accent)}
+::selection{background:var(--accent);color:var(--void)}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 22px}
 h1{position:relative;font-size:clamp(30px,6.4vw,64px);font-weight:800;letter-spacing:-.02em;
   line-height:.96;margin-top:14px;color:var(--accent)}
 .what{position:relative;color:var(--dim);font-size:13.5px;margin-top:18px;max-width:62ch;line-height:1.8}
@@ -47,23 +80,13 @@ h1{position:relative;font-size:clamp(30px,6.4vw,64px);font-weight:800;letter-spa
 .act b{display:block;font-size:17px;font-weight:800;color:var(--accent);letter-spacing:-.01em}
 .act s{display:block;text-decoration:none;font-size:12px;color:var(--dim);margin-top:8px;line-height:1.75}
 .act em{display:block;font-style:normal;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--dimmer);margin-bottom:9px}
-section{margin-top:34px;background:var(--panel);border:1px solid var(--line);padding:20px}
-.shead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-bottom:11px;border-bottom:1px solid var(--line)}
-.shead .dot{width:9px;height:9px;flex:none;background:var(--accent);
-  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
-.shead h2{font-size:14px;font-weight:800;letter-spacing:.02em;color:var(--accent)}
-.shead em{font-style:normal;font-size:9.5px;letter-spacing:.18em;color:var(--dimmer);text-transform:uppercase}
-.shead .n{margin-left:auto;font-size:9.5px;letter-spacing:.14em;color:var(--dimmer);text-transform:uppercase}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));gap:12px;margin-top:14px}
-a.t{display:block;background:var(--tile);border:1px solid var(--line);border-left:3px solid var(--accent);
-  padding:15px;color:var(--ink);min-height:44px;transition:transform .16s,background .16s,border-color .16s}
-a.t:hover,a.t:focus-visible{transform:translateY(-2px);background:var(--lift);border-color:var(--accent);outline:none}
-a.t b{display:block;font-size:12.5px;font-weight:700;color:var(--accent)}
-a.t s{display:block;text-decoration:none;font-size:10.5px;color:var(--dim);margin-top:4px;line-height:1.6}
-a.t u{display:block;text-decoration:none;font-size:9.5px;color:var(--gold);margin-top:6px;line-height:1.5}
-a.t.p{border-left-color:var(--gold)}
+.shead .dot,section.d .dot{background:var(--accent)}
+.shead h2{color:var(--accent);font-size:14px}
+a.t{border-left-color:var(--accent)}
+a.t b{color:var(--accent)}
+a.t:hover{border-color:var(--accent)}
 a.t.big{padding:19px}
-a.t.big b{font-size:15px;letter-spacing:-.01em}
+a.t.big b{font-size:15px}
 a.t.big s.do{font-size:11.5px;color:var(--dim);margin-top:8px;line-height:1.75}
 a.t.big s:not(.do){font-size:9.5px;color:var(--dimmer);margin-top:8px}
 @media (min-width:900px){.grid.verbs{grid-template-columns:repeat(2,1fr)}}
@@ -71,66 +94,51 @@ a.t.big s:not(.do){font-size:9.5px;color:var(--dimmer);margin-top:8px}
 .notyet h2{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
 .notyet p{font-size:11.5px;color:var(--dim);margin-top:10px;line-height:1.75;max-width:74ch}
 .notyet li{list-style:none;font-size:12px;color:var(--dim);margin-top:11px;padding-left:16px;position:relative;line-height:1.7}
-.notyet li::before{content:"—";position:absolute;left:0;color:var(--dimmer)}
+.notyet li::before{content:"\2014";position:absolute;left:0;color:var(--dimmer)}
 .notyet li b{color:var(--ink);font-weight:700}
-footer{max-width:var(--max);margin:44px auto 0;padding:20px 22px 0;border-top:1px solid var(--line);
-  color:var(--dimmer);font-size:10px;letter-spacing:.1em;line-height:2.2;text-transform:uppercase}
-/* THE 32px TAP FLOOR is the estate design floor and applies to EVERY link, not
-   just the big ones: footer links and the inline (read the plan) links measured
-   11-14px and failed the doors gate on first run. */
-footer a{color:var(--dim);display:inline-flex;align-items:center;min-height:32px;padding:0 5px}
-footer a:hover{color:var(--gold)}
 .notyet a{display:inline-flex;align-items:center;min-height:32px;padding:0 5px}
 @media (max-width:600px){
   .wrap{padding:0 14px}
   .eyebrow{padding-top:60px;letter-spacing:.2em}
-  .grid{grid-template-columns:1fr;gap:9px}
-  section{padding:14px}
-  .act{padding:16px}
-  a.t:hover,.act:hover{transform:none}
-}
-@media (prefers-reduced-motion:reduce){
-  #band i,#bandwrap{animation:none}#band i{opacity:.5}
-  a.t,.act{transition:none}a.t:hover,.act:hover{transform:none}
-}
-</style>
+  .grid,.grid.verbs{grid-template-columns:1fr;gap:9px}
+  section{padding:14px}.act{padding:16px}
+  a.t:hover,.act:hover{transform:none}}</style>
 </head>
 <body>
 <div id="veil" aria-hidden="true"></div>
 <header>
-  <div id="bandwrap" aria-hidden="true"><div id="band"><i style="background:#D655BB;animation-duration:2.4s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:2.9s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:3.3s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:3.8s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:4.2s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:2.4s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:2.9s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:3.3s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:3.8s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:4.2s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:2.4s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:2.9s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:3.3s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:3.8s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:4.2s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:2.4s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:2.9s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:3.3s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:3.8s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:4.2s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:2.4s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:2.9s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:3.3s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:3.8s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:4.2s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:2.4s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:2.9s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:3.3s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:3.8s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:4.2s;animation-delay:0.19s"></i></div></div>
+  <div id="bandwrap" aria-hidden="true"><div class="band l1" style="gap:6px;opacity:0.72;filter:blur(0);animation-duration:17s;animation-name:hexdriftb;--step:52px"><i style="background:#D655BB;width:46px;height:53px;animation-duration:2.4s;animation-delay:0.00s"></i><i style="background:#86CC72;width:46px;height:53px;animation-duration:2.9s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:46px;height:53px;animation-duration:3.3s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:46px;height:53px;animation-duration:3.8s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:46px;height:53px;animation-duration:4.2s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:46px;height:53px;animation-duration:2.4s;animation-delay:0.95s"></i><i style="background:#B79FE0;width:46px;height:53px;animation-duration:2.9s;animation-delay:1.14s"></i><i style="background:#D655BB;width:46px;height:53px;animation-duration:3.3s;animation-delay:0.00s"></i><i style="background:#86CC72;width:46px;height:53px;animation-duration:3.8s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:46px;height:53px;animation-duration:4.2s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:46px;height:53px;animation-duration:2.4s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:46px;height:53px;animation-duration:2.9s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:46px;height:53px;animation-duration:3.3s;animation-delay:0.95s"></i><i style="background:#B79FE0;width:46px;height:53px;animation-duration:3.8s;animation-delay:1.14s"></i><i style="background:#D655BB;width:46px;height:53px;animation-duration:4.2s;animation-delay:0.00s"></i><i style="background:#86CC72;width:46px;height:53px;animation-duration:2.4s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:46px;height:53px;animation-duration:2.9s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:46px;height:53px;animation-duration:3.3s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:46px;height:53px;animation-duration:3.8s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:46px;height:53px;animation-duration:4.2s;animation-delay:0.95s"></i><i style="background:#B79FE0;width:46px;height:53px;animation-duration:2.4s;animation-delay:1.14s"></i><i style="background:#D655BB;width:46px;height:53px;animation-duration:2.9s;animation-delay:0.00s"></i><i style="background:#86CC72;width:46px;height:53px;animation-duration:3.3s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:46px;height:53px;animation-duration:3.8s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:46px;height:53px;animation-duration:4.2s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:46px;height:53px;animation-duration:2.4s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:46px;height:53px;animation-duration:2.9s;animation-delay:0.95s"></i><i style="background:#B79FE0;width:46px;height:53px;animation-duration:3.3s;animation-delay:1.14s"></i><i style="background:#D655BB;width:46px;height:53px;animation-duration:3.8s;animation-delay:0.00s"></i><i style="background:#86CC72;width:46px;height:53px;animation-duration:4.2s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:46px;height:53px;animation-duration:2.4s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:46px;height:53px;animation-duration:2.9s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:46px;height:53px;animation-duration:3.3s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:46px;height:53px;animation-duration:3.8s;animation-delay:0.95s"></i><i style="background:#B79FE0;width:46px;height:53px;animation-duration:4.2s;animation-delay:1.14s"></i><i style="background:#D655BB;width:46px;height:53px;animation-duration:2.4s;animation-delay:0.00s"></i><i style="background:#86CC72;width:46px;height:53px;animation-duration:2.9s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:46px;height:53px;animation-duration:3.3s;animation-delay:0.38s"></i><i style="background:#9C6FD6;width:46px;height:53px;animation-duration:3.8s;animation-delay:0.57s"></i><i style="background:#E8B54B;width:46px;height:53px;animation-duration:4.2s;animation-delay:0.76s"></i><i style="background:#6FA9E0;width:46px;height:53px;animation-duration:2.4s;animation-delay:0.95s"></i><i style="background:#B79FE0;width:46px;height:53px;animation-duration:2.9s;animation-delay:1.14s"></i><i style="background:#D655BB;width:46px;height:53px;animation-duration:3.3s;animation-delay:0.00s"></i><i style="background:#86CC72;width:46px;height:53px;animation-duration:3.8s;animation-delay:0.19s"></i><i style="background:#45C2DC;width:46px;height:53px;animation-duration:4.2s;animation-delay:0.38s"></i></div></div>
   <div class="wrap">
-    <p class="eyebrow">for a scientist, or anyone with a health question</p>
+    <p class="eyebrow" data-i18n="d.bio.who">for a scientist, or anyone with a health question</p>
     <h1>bnature.bio</h1>
-    <p class="what">The health commons. Read food honestly — what is covered, what is not, and the denominator on every cell. Evidence is graded, and where the grade is weak the page says so instead of rounding up.</p>
-    <a class="act" href="../bfood.html"><em>one thing to do</em><b>Read the hexagon →</b><s>The successor to the food pyramid: a pyramid was a ranking, and food is not ranked. Every cell shows n/m so you can see the denominator, and nothing is ever silently zero.</s></a>
+    <p class="what" data-i18n="d.bio.what">The health commons. Read food honestly — what is covered, what is not, and the denominator on every cell. Evidence is graded, and where the grade is weak the page says so instead of rounding up.</p>
+    <a class="act" href="../bfood.html"><em>one thing to do</em><b data-i18n="d.bio.act">Read the hexagon →</b><s data-i18n="d.bio.actsub">The successor to the food pyramid: a pyramid was a ranking, and food is not ranked. Every cell shows n/m so you can see the denominator, and nothing is ever silently zero.</s></a>
   </div>
 </header>
 
 <div class="wrap">
-  <section>
+  <section class="d">
     <div class="shead"><span class="dot"></span><h2>Everything behind this door</h2><em>open now · ⚠ marks a named limit</em><span class="n">13</span></div>
     <div class="grid">
-      <a class="t" href="../bearth.html"><b>what one food would cost the planet</b><s>bearth.html</s></a>
-      <a class="t" href="../bfood.html"><b>your nutrients, drawn honestly, never zero</b><s>bfood.html</s></a>
-      <a class="t" href="../bigen.html"><b>cannabis and cancer, graded honestly</b><s>bigen.html</s></a>
-      <a class="t" href="../blongevity.html"><b>your body builds its own cannabinoids</b><s>blongevity.html</s></a>
-      <a class="t" href="../fleet-hosted/gallery/acid-cascade.html"><b>The chronic inflammatory cascade, argued</b><s>fleet-hosted/gallery/acid-cascade.html</s></a>
-      <a class="t" href="../fleet-hosted/gallery/indigo-index.html"><b>Chronic disease economics against GDP</b><s>fleet-hosted/gallery/indigo-index.html</s></a>
-      <a class="t" href="../fleet-hosted/lab/blend-lab.html"><b>Tobacco blend ratios, flavour and cost</b><s>fleet-hosted/lab/blend-lab.html</s></a>
-      <a class="t" href="../fleet-hosted/lab/edible-tracker.html"><b>Edible dosing, onset, and effect log</b><s>fleet-hosted/lab/edible-tracker.html</s></a>
-      <a class="t" href="../fleet-hosted/lab/flower-lab.html"><b>THCA blending calculator with session log</b><s>fleet-hosted/lab/flower-lab.html</s></a>
-      <a class="t" href="../fleet-hosted/lab/intake-tracker.html"><b>Daily cannabinoid intake against your RDI</b><s>fleet-hosted/lab/intake-tracker.html</s></a>
-      <a class="t" href="../fleet-hosted/lab/spliff-lab.html"><b>Roll composition against absorbed-THC target</b><s>fleet-hosted/lab/spliff-lab.html</s></a>
-      <a class="t" href="../university/index.html"><b>learn to read the evidence</b><s>university/index.html</s></a>
-      <a class="t p" href="../fleet-hosted/lab/bnr-dashboard.html"><b>Reads what the other instruments write</b><s>fleet-hosted/lab/bnr-dashboard.html</s><u>⚠ reads what the other instruments write</u></a>
+    <a class="t" href="../bearth.html" data-dom="bio" data-q="what one food would cost the planet  bio"><b data-i18n="s.bearth.name">what one food would cost the planet</b><s>bearth.html</s></a>
+    <a class="t" href="../bfood.html" data-dom="bio" data-q="your nutrients, drawn honestly, never zero  bio"><b data-i18n="s.bfood.name">your nutrients, drawn honestly, never zero</b><s>bfood.html</s></a>
+    <a class="t" href="../bigen.html" data-dom="bio" data-q="cannabis and cancer, graded honestly  bio"><b data-i18n="s.bigen.name">cannabis and cancer, graded honestly</b><s>bigen.html</s></a>
+    <a class="t" href="../blongevity.html" data-dom="bio" data-q="your body builds its own cannabinoids  bio"><b data-i18n="s.blongevity.name">your body builds its own cannabinoids</b><s>blongevity.html</s></a>
+    <a class="t" href="../fleet-hosted/gallery/acid-cascade.html" data-dom="bio" data-q="the chronic inflammatory cascade, argued  bio"><b data-i18n="s.fleet-hosted-gallery-acid-cascade.name">The chronic inflammatory cascade, argued</b><s>fleet-hosted/gallery/acid-cascade.html</s></a>
+    <a class="t" href="../fleet-hosted/gallery/indigo-index.html" data-dom="bio" data-q="chronic disease economics against gdp the central figure is a stated hypothesis bio"><b data-i18n="s.fleet-hosted-gallery-indigo-index.name">Chronic disease economics against GDP</b><s>fleet-hosted/gallery/indigo-index.html</s></a>
+    <a class="t" href="../fleet-hosted/lab/blend-lab.html" data-dom="bio" data-q="tobacco blend ratios, flavour and cost  bio"><b data-i18n="s.fleet-hosted-lab-blend-lab.name">Tobacco blend ratios, flavour and cost</b><s>fleet-hosted/lab/blend-lab.html</s></a>
+    <a class="t" href="../fleet-hosted/lab/edible-tracker.html" data-dom="bio" data-q="edible dosing, onset, and effect log  bio"><b data-i18n="s.fleet-hosted-lab-edible-tracker.name">Edible dosing, onset, and effect log</b><s>fleet-hosted/lab/edible-tracker.html</s></a>
+    <a class="t" href="../fleet-hosted/lab/flower-lab.html" data-dom="bio" data-q="thca blending calculator with session log  bio"><b data-i18n="s.fleet-hosted-lab-flower-lab.name">THCA blending calculator with session log</b><s>fleet-hosted/lab/flower-lab.html</s></a>
+    <a class="t" href="../fleet-hosted/lab/intake-tracker.html" data-dom="bio" data-q="daily cannabinoid intake against your rdi  bio"><b data-i18n="s.fleet-hosted-lab-intake-tracker.name">Daily cannabinoid intake against your RDI</b><s>fleet-hosted/lab/intake-tracker.html</s></a>
+    <a class="t" href="../fleet-hosted/lab/spliff-lab.html" data-dom="bio" data-q="roll composition against absorbed-thc target  bio"><b data-i18n="s.fleet-hosted-lab-spliff-lab.name">Roll composition against absorbed-THC target</b><s>fleet-hosted/lab/spliff-lab.html</s></a>
+    <a class="t" href="../university/index.html" data-dom="bio" data-q="learn to read the evidence  bio"><b data-i18n="s.university-index.name">learn to read the evidence</b><s>university/index.html</s></a>
+    <a class="t p" href="../fleet-hosted/lab/bnr-dashboard.html" data-dom="bio" data-q="reads what the other instruments write reads what the other instruments write bio"><b data-i18n="s.fleet-hosted-lab-bnr-dashboard.name">Reads what the other instruments write</b><s>fleet-hosted/lab/bnr-dashboard.html</s><u data-i18n="s.fleet-hosted-lab-bnr-dashboard.caveat">⚠ reads what the other instruments write</u></a>
     </div>
   </section>
 
   <div class="notyet">
     <h2>Not built yet — named, so this door does not promise it</h2>
-    <p>The rule this estate works to: a door may not claim anything the estate does not currently do.
-    Everything above is a page you can open right now. Everything below is not, and says so.</p>
+    <p>A door may not claim anything the estate does not currently do. Everything above is a page you can open right now. Everything below is not, and says so.</p>
     <ul>
     <li><b>A CSA farmer’s market</b> — ruled roadmap — the growers’ pages are real reading; buying through them is not built</li>
     </ul>
@@ -139,7 +147,7 @@ footer a:hover{color:var(--gold)}
 
 <footer>
   <div>bnature.bio · one of six doors · paths for now, no DNS · a door may not claim what the estate does not do</div>
-  <div><a href="./">all six doors</a> · <a href="../">the hub</a> · <a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/doors/bnature-bio.html" rel="noopener">view source</a></div>
+  <div><a href="./">all six doors</a> · <a href="../">the hub</a> · <a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/estate.json" rel="noopener">the registry</a></div>
 </footer>
 
 <script src="../tour.js?v=23"></script>
