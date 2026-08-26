@@ -404,6 +404,12 @@
       "state": "working"
     },
     {
+      "file": "blight/qrtree.html",
+      "domain": "nature",
+      "name": "the URL lives in the code",
+      "state": "working"
+    },
+    {
       "file": "bnames.html",
       "domain": "nature",
       "name": "names on our chain, read live",

@@ -11,7 +11,7 @@
     '—',
     ['organ','blight/midi-organ.html'],['studio','blight/studio-music.html'],['gate','blight/studio-gate.html'],
     ['bench','blight/workbench.html'],['pulse','blight/pulse.html'],['hearth','blight/hearth.html'],
-    ['refine','blight/pixelrefiner.html'],
+    ['refine','blight/pixelrefiner.html'],['qrtree','blight/qrtree.html'],
     '—',
     ['reader','blight/vaulta-reader.html'],['c1','blight/c1-aid.html'],
     '—',
