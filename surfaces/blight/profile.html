@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>holder — the profile half that needs no server</title>
+<style>
+/* ── ENTITY TOKENS · inlined from surfaces/tokens.css + docs/tokens.css ─────
+   Axis B entity hues (founder-ruled). This is a HUMAN surface: the identity
+   rim and the doing-accent skew purple — --sovereign (human / ALL SOULS) and
+   --you (the primary actor). Purple is the claim, never the only carrier:
+   every colour below appears with its word. */
+:root{
+  --ai:#45C2DC;            /* robots · measured numbers */
+  --biomass:#86CC72;       /* life · held / settled */
+  --sovereign:#9C6FD6;     /* human / sovereignty — the identity rim */
+  --sovereign-soft:#B79FE0;/* member seats */
+  --you:#D655BB;           /* YOU / primary actor — the doing accent */
+  --info:#6FA9E0;          /* informational, kept apart from --ai */
+  --guard:#B7A8F7;         /* guard / refusal — never error-red */
+  --b-value:#E8B54B;       /* honey — amounts only, dark chip only */
+  /* SEMANTIC COLOUR — meanings picked first, then hues from the validated set.
+     harm = what a write-home would risk (guard violet, dashed, never red)
+     solution = settled-on-chain (biomass green) · value = amounts (honey chip)
+     system = the RPC fabric (info blue) · science = measured counts (ai cyan) */
+  --sem-harm:var(--guard);
+  --sem-solution:var(--biomass);
+  --sem-value:var(--b-value);
+  --sem-system:var(--info);
+  --sem-science:var(--ai);
+  --bg:#06110C;            /* the void */
+  --bg-card:#0C1412;       /* the panel */
+  --bg-well:#08100D;       /* the inset */
+  --ink:#E9F2EC; --ink-mut:#8FA79C; --ink-dim:#648176; --line:#1E2B26;
+  --font-ui:ui-sans-serif,system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --font-mono:ui-monospace,"Cascadia Mono","SF Mono",Menlo,Consolas,monospace;
+  --s1:6px;--s2:12px;--s3:18px;--s4:24px;--radius:12px;
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+*{box-sizing:border-box;margin:0}
+html,body{background:var(--bg)}
+body{font:13px/1.6 var(--font-ui);color:var(--ink);padding:var(--s3) var(--s2) 60px;max-width:880px;margin:0 auto}
+a{color:var(--sovereign-soft)}
+h1{font-size:clamp(22px,6vw,30px);letter-spacing:-.4px;line-height:1.2}
+h1.grad{background:linear-gradient(92deg,var(--sovereign),var(--you));-webkit-background-clip:text;background-clip:text;color:transparent}
+.law{color:var(--ink-mut);font-size:12.5px;margin-top:2px}
+.law b{color:var(--sovereign-soft)}
+.panel{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);padding:var(--s3);margin-top:var(--s2)}
+.well{background:var(--bg-well);border:1px solid var(--line);border-radius:var(--radius);padding:var(--s2)}
+.bar{display:flex;gap:var(--s1);flex-wrap:wrap}
+.bar input{flex:1;min-width:210px;background:var(--bg-well);border:1px solid var(--line);border-radius:9px;color:var(--ink);font:12.5px var(--font-mono);padding:10px 12px}
+.bar input:focus{outline:none;border-color:var(--you)}
+button.do{background:var(--you);border:0;color:#1a0716;font:600 13px var(--font-ui);padding:10px 16px;border-radius:9px;cursor:pointer}
+button.do:active{transform:translateY(1px)}
+.hint{font-size:11px;color:var(--ink-dim);margin-top:6px}
+.hint code{font:11px var(--font-mono);color:var(--ink-mut);cursor:pointer;border-bottom:1px dashed var(--ink-dim)}
+.msg{font-size:12px;color:var(--ink-mut);margin-top:8px;min-height:1.2em}
+/* identity */
+.idrow{display:flex;gap:var(--s3);align-items:center;flex-wrap:wrap}
+.pfp{width:104px;height:104px;border-radius:14px;border:2px solid var(--sovereign);background:var(--bg-well);flex:none;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.pfp .none{font-size:10px;color:var(--ink-dim);text-align:center;padding:6px}
+.pfp svg{width:100%;height:100%;display:block}
+.pfptag{position:absolute;bottom:-1px;left:-1px;right:-1px;background:rgba(6,17,12,.82);color:var(--sovereign-soft);font-size:9.5px;letter-spacing:.6px;text-transform:uppercase;text-align:center;padding:2px 0;border-radius:0 0 12px 12px}
+.who{min-width:0}
+.short{font:600 17px var(--font-mono);color:var(--ink);word-break:break-all}
+.subline{font-size:11px;color:var(--ink-mut);margin-top:2px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.chip{border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:11px;color:var(--ink-mut)}
+.chip b{color:var(--sem-solution)}
+.chip .amt{font:11px var(--font-mono);color:var(--sem-value)}
+/* hero stats */
+.stats{display:flex;gap:var(--s2);margin-top:var(--s2);flex-wrap:wrap}
+.stat{flex:1;min-width:120px;background:var(--bg-well);border:1px solid var(--line);border-radius:var(--radius);padding:var(--s2) var(--s3)}
+.stat b{display:block;font-size:34px;line-height:1.1;font-family:var(--font-mono);color:var(--sovereign-soft)}
+.stat.science b{color:var(--sem-science)}
+.stat .l{display:block;font-size:10px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.9px;margin-top:2px}
+/* wall */
+.wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:var(--s2);margin-top:var(--s2)}
+.piece{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);padding:var(--s2);opacity:0;transform:translateY(6px)}
+.piece.in{opacity:1;transform:none;transition:opacity var(--dur,260ms) ease,transform var(--dur,260ms) ease}
+.piece.crown{border-color:var(--sovereign)}
+.piece .art{background:var(--bg-well);border-radius:8px;overflow:hidden;aspect-ratio:1}
+.piece .art svg{width:100%;height:100%;display:block}
+.piece .lab{margin-top:8px;font-size:11px;color:var(--ink-mut)}
+.piece .lab b{color:var(--ink);font-size:12px}
+.piece .lab .pips{color:var(--sem-solution);letter-spacing:1px}
+.piece .lab .crownword{color:var(--sovereign-soft);font-size:10px;text-transform:uppercase;letter-spacing:.6px}
+/* non-goals — the honest other half: dashed rim, no fill (non-value state law) */
+.gaps{border:1.5px dashed var(--sovereign);border-radius:var(--radius);padding:var(--s3);margin-top:var(--s2)}
+.gaps h2{font-size:13px;color:var(--sovereign-soft);text-transform:uppercase;letter-spacing:1px}
+.gaps p{font-size:12px;color:var(--ink-mut);margin-top:4px}
+.gaps ul{list-style:none;margin-top:10px;display:grid;gap:8px}
+.gaps li{font-size:12.5px;color:var(--ink-mut)}
+.gaps li b{color:var(--ink)}
+.gaps li i{font-style:normal;color:var(--ink-dim);font-size:11px}
+.record{margin-top:var(--s2);font-size:12px;color:var(--ink);background:var(--bg-well);border-left:3px solid var(--sem-system);border-radius:0 9px 9px 0;padding:10px 12px}
+.scope{font-size:11px;color:var(--ink-dim);margin-top:10px}
+.foot{margin-top:var(--s3);font-size:11px;color:var(--ink-dim)}
+.foot b{color:var(--ink-mut)}
+nav#fleetnav{margin-top:var(--s4);font-size:11.5px;color:var(--ink-dim)}
+@media (max-width:600px){
+  .idrow{align-items:flex-start}
+  .stat b{font-size:30px}
+  .wall{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+}
+</style>
+</head>
+<body>
+<h1 class="grad">holder</h1>
+<p class="law">the half of a profile that needs <b>no server</b> — identity and art read
+straight from the chain. this is a HUMAN surface: the purple rim is the person,
+<b>--sovereign / --you</b>, and every colour carries its word.</p>
+
+<section class="panel">
+  <div class="bar">
+    <input id="addr" type="text" spellcheck="false" autocomplete="off"
+      placeholder="0x… address, or name.eth / name.base.eth">
+    <button class="do" id="go">read the chain</button>
+  </div>
+  <p class="hint">read-only: <b>no wallet connect, no signing, no keys</b>. typing an address is the whole gesture.
+  try <code id="chip-founder">the founder's garden</code></p>
+  <p class="msg" id="msg">the chain is the record — paste an address to begin.</p>
+</section>
+
+<section class="panel" id="identity" hidden>
+  <div class="idrow">
+    <div class="pfp" id="pfp"><div class="none">no art yet —<br>the rim is sovereign</div><div class="pfptag" id="pfptag" hidden>pfp · art they own</div></div>
+    <div class="who">
+      <div class="short" id="short">0x0000…0000</div>
+      <div class="subline" id="subline">address shorthand · always present, owned or not</div>
+      <div class="chips" id="chips"></div>
+    </div>
+  </div>
+</section>
+
+<div class="stats">
+  <div class="stat pstat"><b data-hero-number id="st-pieces">—</b><span class="l">pieces held · from chain</span></div>
+  <div class="stat science"><b id="st-reads">0</b><span class="l">chain reads · eth_call</span></div>
+  <div class="stat"><b id="st-tokens">0</b><span class="l">tokens with balance</span></div>
+</div>
+
+<div class="wall" id="wall"></div>
+
+<p class="record" id="record"><b>nothing is stored.</b> reload gives the same result from the same address,
+because the chain is the record — this page keeps no state, sets no cookie, writes nothing.</p>
+
+<div class="gaps">
+  <h2>the half that needs somewhere to live</h2>
+  <p>the chain knows what you <b>hold</b>. it cannot know what you <b>did here</b> —
+  these live only where someone writes them down, and naming them is this page's second half:</p>
+  <ul>
+    <li><b>nickname</b> — <i>a name people call you: a write, not a balance</i></li>
+    <li><b>quest streaks</b> — <i>time-crossing state; chains price that in gas</i></li>
+    <li><b>referrals</b> — <i>who brought whom: a social edge, off-chain by nature</i></li>
+    <li><b>claim tracking</b> — <i>claimed-today lives in a day, not an address</i></li>
+    <li><b>gallery submissions</b> — <i>curation is a choice, and choices need a keeper</i></li>
+  </ul>
+</div>
+
+<p class="scope">scope, honestly: the estate's own bNRi insignias live as off-chain hex manifests — no public
+contract to read. the on-chain half here is the ERC20i family on Base: FUNGI · $FROGGI · PEPI v1/v2 ·
+JELLI · JEDI · MiDi · TRUFFI, read as balances + holder-seeded + enumerated inscriptions.</p>
+
+<p class="foot"><b>provenance.</b> one self-contained file · keyless public RPCs (publicnode → drpc, rotated,
+read-only eth_call) · contracts as listed above · art decoded from chain bytes on your machine ·
+no CDN, no build step, no server, no keys. degraded gracefully: an address that holds nothing gets
+its shorthand — that IS the profile.</p>
+<nav id="fleetnav"></nav>
+
+<script>
+"use strict";
+/* ── the read path — proven against the estate's inscription-explorer ───── */
+const W=v=>BigInt(v).toString(16).padStart(64,'0');
+const AD=a=>'0'.repeat(24)+a.replace(/^0x/,'').toLowerCase();
+const HOSTS=['https://base-rpc.publicnode.com','https://base.drpc.org'];
+const COLS=[
+ {sym:'FUNGI',c:'0x7d9CE55D54FF3FEddb611fC63fF63ec01F26D15F',sel:'422b9e23',lv:[0,21000,525000,1050000,1575000,2100000],base:0,names:['level 0','level 1','level 2','level 3','level 4','crown']},
+ {sym:'$FROGGI',c:'0x88A78C5035BdC8C9A8bb5c029e6cfCDD14B822FE',sel:'422b9e23',lv:[0,1000,3000,10000,30000,60000,120000],base:0,names:['egg','hatchling','tadpole','froglet','frog','elder frog','crown']},
+ {sym:'PEPI v2',c:'0x28a5e71BFc02723eAC17E39c84c5190415C0de9F',sel:'a435130b',lv:[0,11,22,33,44,56],base:1,names:['Egg Mass','Tadpole','Baby','Teenager','Adult','Mature']},
+ {sym:'PEPI v1',c:'0x19706c142d33376240e418d6385f05691a5fa8e2',sel:'a435130b',lv:[0,11,22,33,44,56],base:1,names:['Egg Mass','Tadpole','Baby','Teenager','Adult','Mature']},
+ {sym:'JELLI',c:'0xA1b9d812926a529D8B002E69FCd070c8275eC73c',sel:'422b9e23',lv:[0,1000,21000,105000,420000,1050000],base:0,names:['level 0','level 1','level 2','level 3','level 4','crown']},
+ {sym:'JEDI',c:'0xA058c6f2A56BaAFD5dE4BCAD8f2Cb26F6A32b7D1',sel:'422b9e23',lv:[0,10500,105000,1050000],base:0,names:['padawan','knight','master','crown']},
+ {sym:'MiDi',c:'0x569e1A337b095B1A6c8F206158072cEDb6325b56',sel:'422b9e23',lv:null,base:0},
+ {sym:'TRUFFI',c:'0x2496a9AF81A87eD0b17F6edEaf4Ac57671d24f38',sel:'a62f5b1b',lv:null,base:0},
+];
+let reads=0,lastHost='';
+/* render-only mend: some chain art carries empty transform args that
+   Chromium warns about; normalize so the console stays honest */
+const fixSvg=s=>String(s).replace(/translate\(\)/g,'translate(0)');
+function decodeString(hex){
+  const h=hex.replace(/^0x/,'');
+  const off=parseInt(h.slice(0,64),16);
+  if(!(off===0x20)) throw 0;
+  const len=parseInt(h.slice(off*2,off*2+64),16);
+  if(!(len>=0&&len<=16384)) throw 0;
+  let out='';
+  for(let i=0;i<len;i++){
+    const b=parseInt(h.slice((off+32+i)*2,(off+32+i)*2+2),16);
+    if(Number.isNaN(b)) throw 0;
+    out+=String.fromCharCode(b);
+  }
+  try{ return fixSvg(decodeURIComponent(escape(out))); }catch(e){ return fixSvg(out); }
+}
+async function rpc(calls){
+  reads+=calls.length;
+  document.getElementById('st-reads').textContent=reads;
+  for(const h of HOSTS){
+    const ctl=new AbortController(); const kill=setTimeout(()=>ctl.abort(),9000);
+    try{
+      const r=await fetch(h,{method:'POST',headers:{'Content-Type':'application/json'},signal:ctl.signal,
+        body:JSON.stringify(calls.map((c,i)=>({jsonrpc:'2.0',id:i,method:'eth_call',params:[{to:c.to,data:c.data},'latest']})))});
+      const j=await r.json(); clearTimeout(kill);
+      if(Array.isArray(j)){ lastHost=new URL(h).host; return j.map(x=>x.result??null); }
+    }catch(e){ clearTimeout(kill); }
+  }
+  return null;
+}
+/* on-chain name resolution — registry eth_calls only, zero extra origins */
+const RC=[1n,0x8082n,0x800000000000808an,0x8000000080008000n,0x808bn,0x80000001n,0x8000000080008081n,0x8000000000008009n,0x8an,0x88n,0x80008009n,0x8000000an,0x8000808bn,0x800000000000008bn,0x8000000000008089n,0x8000000000008003n,0x8000000000008002n,0x8000000000000080n,0x800an,0x800000008000000an,0x8000000080008081n,0x8000000000008080n,0x80000001n,0x8000000080008008n];
+const KROT=[[0,36,3,41,18],[1,44,10,45,2],[62,6,43,15,61],[28,55,25,21,56],[27,20,39,8,14]];
+const M64=(1n<<64n)-1n;
+function keccak256(bytes){
+  const rot=(x,n)=>n===0n?x:((x<<n)|(x>>(64n-n)))&M64;
+  let A=Array.from({length:5},()=>[0n,0n,0n,0n,0n]);
+  const rate=136,pad=rate-(bytes.length%rate);
+  const msg=new Uint8Array(bytes.length+pad);
+  msg.set(bytes);msg[bytes.length]=0x01;msg[msg.length-1]|=0x80;
+  for(let off=0;off<msg.length;off+=rate){
+    for(let i=0;i<17;i++){let l=0n;for(let b=7;b>=0;b--)l=(l<<8n)|BigInt(msg[off+i*8+b]);A[i%5][(i/5)|0]^=l;}
+    for(let r=0;r<24;r++){
+      const C=[0,1,2,3,4].map(x=>A[x][0]^A[x][1]^A[x][2]^A[x][3]^A[x][4]);
+      const D=[0,1,2,3,4].map(x=>C[(x+4)%5]^rot(C[(x+1)%5],1n));
+      for(let x=0;x<5;x++)for(let y=0;y<5;y++)A[x][y]^=D[x];
+      const B=[[],[],[],[],[]];
+      for(let x=0;x<5;x++)for(let y=0;y<5;y++)B[y][(2*x+3*y)%5]=rot(A[x][y],BigInt(KROT[x][y]));
+      for(let x=0;x<5;x++)for(let y=0;y<5;y++)A[x][y]=B[x][y]^((~B[(x+1)%5][y]&M64)&B[(x+2)%5][y]);
+      A[0][0]^=RC[r];
+    }
+  }
+  const out=new Uint8Array(32);let p=0;
+  for(let i=0;i<4;i++){let l=A[i%5][(i/5)|0];for(let b=0;b<8;b++)out[p++]=Number((l>>BigInt(8*b))&0xFFn);}
+  return out;
+}
+function namehash(name){
+  let node=new Uint8Array(32);
+  if(name){
+    const L=name.split('.');
+    for(let i=L.length-1;i>=0;i--){
+      const lh=keccak256(new TextEncoder().encode(L[i]));
+      const cat=new Uint8Array(64);cat.set(node);cat.set(lh,32);
+      node=keccak256(cat);
+    }
+  }
+  return '0x'+[...node].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function resolveOnChain(name){
+  const isBase=/\.base\.eth$/i.test(name);
+  const REG=isBase?'0xB94704422c2a1E396835A571837Aa5AE53285a95':'0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e';
+  const node=namehash(name.toLowerCase()).slice(2);
+  const call=async(to,data)=>{const r=await rpc([{to,data}]);return r&&r[0]&&r[0]!=='0x'?r[0]:null};
+  const own=await call(REG,'0x02571be3'+node);
+  if(!own||/^0x0*$/.test(own))return null;
+  const rs=await call(REG,'0x0178b8bf'+node);
+  if(!rs||/^0x0*$/.test(rs))return null;
+  const a=await call('0x'+rs.slice(26),'0x3b3b57de'+node);
+  return a&&!/^0x0*$/.test(a)?'0x'+a.slice(26):null;
+}
+async function resolveInput(v){
+  v=String(v||'').trim();
+  if(/^0x[0-9a-fA-F]{40}$/.test(v))return{addr:v.toLowerCase(),asTyped:v};
+  if(/.(base.)?eth$/i.test(v)){
+    const oc=await resolveOnChain(v);
+    if(oc)return{addr:oc,asTyped:v};
+  }
+  return null;
+}
+const lvlOf=(s,col)=>{if(!col.lv)return null;let l=col.base;for(let i=1;i<col.lv.length;i++)if(s>=col.lv[i])l++;return l-col.base};
+const pipmax=col=>col.lv?col.lv.length-1-col.base:0;
+const pips=(n,max)=>{let s='';for(let k=0;k<Math.max(max,1);k++)s+=k<n?'●':'·';return s};
+const shortOf=s=>s.slice(0,6)+'…'+s.slice(-4);
+const $=id=>document.getElementById(id);
+const fmt=bal=>{const b=Number(bal)/1e9;return b>=1e6?(b/1e6).toFixed(1)+'M':b>=1e3?(b/1e3).toFixed(1)+'k':String(Math.round(b*100)/100)};
+
+async function visit(v){
+  const msg=$('msg');msg.style.color='var(--ink-mut)';
+  msg.textContent='resolving…';
+  const r=await resolveInput(v);
+  if(!r){msg.style.color='var(--guard)';msg.textContent='that did not resolve — paste the full 0x… address (40 hex chars)';return}
+  msg.textContent='reading the chain…';
+  const a=r.addr;
+  $('identity').hidden=false;
+  $('short').textContent=shortOf(r.asTyped);
+  $('subline').textContent=r.asTyped.toLowerCase()!==a&&/^0x/.test(r.asTyped)===false
+    ?('resolved on-chain from '+r.asTyped+' · shorthand always present')
+    :'address shorthand · always present, owned or not';
+  /* balances for every token — one batch */
+  const balRes=await rpc(COLS.map(col=>({to:col.c,data:'0x70a08231'+AD(a)})));
+  const held=[];
+  COLS.forEach((col,i)=>{
+    if(balRes&&balRes[i]&&balRes[i]!=='0x'&&BigInt(balRes[i])>0n)held.push({col,bal:BigInt(balRes[i])});
+  });
+  const chips=$('chips');chips.innerHTML='';
+  held.forEach(h=>{
+    const c=document.createElement('span');c.className='chip';
+    c.innerHTML='<b>'+h.col.sym+'</b> · <span class="amt">'+fmt(h.bal)+'</span> held';
+    chips.appendChild(c);
+  });
+  if(!held.length)chips.innerHTML='<span class="chip">no balances on these contracts — <b>the shorthand IS the profile</b></span>';
+  $('st-tokens').textContent=held.length;
+  /* art: live piece per token + enumerated inscriptions, batched in phases */
+  const found=[];
+  let phase=[];
+  held.forEach(h=>phase.push({to:h.col.c,data:h.col.sel+W(Number(h.bal/1000000000n))+W(0)+(h.col.sel==='a62f5b1b'?AD(a):W(0))}));
+  held.forEach(h=>phase.push({to:h.col.c,data:'0x9c216508'+AD(a)}));
+  const liveRes=phase.length?await rpc(phase):[];
+  const artCalls=[];
+  held.forEach((h,i)=>{
+    const live=liveRes[i];
+    if(live&&live.length>200){try{found.push({svg:decodeString(live),col:h.col,seed:Number(h.bal/1000000000n)})}catch(e){}}
+  });
+  const enumCalls=[];
+  held.forEach((h,i)=>{
+    const cnt=liveRes[held.length+i];
+    const n=cnt&&cnt!=='0x'?Number(BigInt(cnt)):0;
+    for(let k=0;k<Math.min(n,8);k++)enumCalls.push({to:h.col.c,data:'0x0fd9587e'+AD(a)+W(BigInt(k))});
+  });
+  const recRes=enumCalls.length?await rpc(enumCalls):[];
+  recRes.forEach((rec,i)=>{
+    if(!rec||rec==='0x')return;
+    const w=(rec.replace(/^0x/,'').match(/.{64}/g)||[]).slice(0,3);
+    if(w.length<2)return;
+    const col=COLS.find(c=>c.c===enumCalls[i].to);
+    const s=BigInt('0x'+w[0]);
+    artCalls.push({to:col.c,svgSeed:s,extra:w});
+  });
+  const artPhase=artCalls.map(ac=>{
+    const col=COLS.find(c=>c.c===ac.to);
+    const data=col.sel==='a62f5b1b'
+      ?col.sel+W(ac.svgSeed)+W(0)+AD(a)
+      :col.sel+W(ac.svgSeed)+W(0);
+    return {to:ac.to,seed:Number(ac.svgSeed),data};
+  });
+  const artRes=artPhase.length?await rpc(artPhase):[];
+  artRes.forEach((res,i)=>{
+    if(res&&res.length>200){try{
+      const col=COLS.find(c=>c.c===artPhase[i].to);
+      found.push({svg:decodeString(res),col,seed:artPhase[i].seed});
+    }catch(e){}}
+  });
+  /* dedupe by seed+contract, crown-first */
+  const seen=new Set();const pieces=[];
+  found.forEach(p=>{const k=p.col.c+':'+p.seed;if(seen.has(k))return;seen.add(k);pieces.push(p)});
+  pieces.sort((x,y)=>{const la=x.col.lv?lvlOf(x.seed,x.col):-1,lb=y.col.lv?lvlOf(y.seed,y.col):-1;
+    if(lb!==la)return lb-la;return (y.seed||0)-(x.seed||0)});
+  $('st-pieces').textContent=pieces.length;
+  const wall=$('wall');wall.innerHTML='';
+  pieces.forEach((p,i)=>{
+    const el=document.createElement('div');
+    const crown=p.col.lv&&lvlOf(p.seed,p.col)===pipmax(p.col)&&pipmax(p.col)>0;
+    el.className='piece'+(crown?' crown':'');
+    el.innerHTML='<div class="art">'+p.svg+'</div><div class="lab"></div>';
+    const lab=el.querySelector('.lab');
+    const lv=p.col.lv?lvlOf(p.seed,p.col):null;
+    lab.innerHTML='<b>'+p.col.sym+'</b> '+(crown?'<span class="crownword">crown</span> ':'')+
+      (lv!==null?'<span class="pips">'+pips(lv,pipmax(p.col))+'</span> '+(p.col.names?p.col.names[lv]:'level '+lv)+' ':'')+
+      '· <span style="font-family:var(--font-mono)">seed '+String(p.seed||0).toLocaleString()+'</span>';
+    wall.appendChild(el);
+    setTimeout(()=>el.classList.add('in'),70*i);
+  });
+  if(pieces.length){
+    const pfp=$('pfp');
+    pfp.innerHTML=pieces[0].svg+'<div class="pfptag">pfp · art they own</div>';
+  }
+  msg.textContent=pieces.length
+    ?('rendered from chain · '+lastHost+' · '+reads+' reads · nothing stored')
+    :'this address holds nothing on these contracts — the shorthand IS the profile (graceful by law)';
+  msg.style.color='var(--ink-mut)';
+}
+
+$('go').addEventListener('click',()=>visit($('addr').value));
+$('addr').addEventListener('keydown',e=>{if(e.key==='Enter')visit($('addr').value)});
+$('chip-founder').addEventListener('click',()=>{
+  $('addr').value='0xfbd201472d5a439f1f0e408eb5dfaf6ea3687876';
+  visit($('addr').value);
+});
+$('fleetnav').innerHTML=(window.FLEET_NAV||[
+ '<a href="./index.html">◈ fLeeT</a>','<a href="./museum.html">◈ museum</a>','<a href="./compare.html">◈ catalog</a>',
+ '<a href="./gallery.html">◈ gallery</a>','<a href="./inscription-explorer.html">◈ explorer</a>','<a href="./bnri-gallery.html">◈ bNRi</a>']).join(' · ');
+</script>
+<script src="../tour.js?v=27"></script>
+</body>
+</html>
