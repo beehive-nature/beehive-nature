@@ -3650,7 +3650,7 @@ function refine(isAuto){
   if(g&&mode!=='force'){$('fw').value=g.outW;$('fh').value=g.outH}   // prefill the correction, in the open
   $('outSize').textContent=r.result.width+' × '+r.result.height+' px';
   $('dl').disabled=false;
-  setStatus('grid '+(g?(g.outW+'×'+g.outH+' detected'):'<u>forced '+opts.forcePixelsW+'×'+opts.forcePixelsH+'</u>')
+  setStatus('grid '+(mode==='force'?'<u>forced '+opts.forcePixelsW+'×'+opts.forcePixelsH+'</u>':(g?(g.outW+'×'+g.outH+' detected'):'—'))
     +' → <b>'+r.result.width+'×'+r.result.height+'</b> in '+ms+'ms'
     +(mode==='auto'&&g?' — near-miss? correct W × H above and press REFINE':''));
 }
