@@ -1,0 +1,168 @@
+/* i18n-coverage.mjs — THE DENOMINATOR NOBODY HAD.
+ *
+ * The founder found hardware/lab.html rendering ONE Russian string on a page
+ * where Russian was selected. Every gate we had was green, because every gate
+ * measured the wrong thing:
+ *
+ *   estate-source  : every data-i18n key EXISTS in the corpus        ✔ green
+ *   estate-source  : every tongue covers every corpus KEY            ✔ green
+ *   the round-trip : the door keys SAY the right thing               ✔ green
+ *
+ * All three measure keys that exist. None of them can see a string that was
+ * never keyed at all — an unkeyed paragraph is invisible to a checker that
+ * only walks `[data-i18n]`. 100% of the keys can be perfect while 3% of the
+ * page is translated.
+ *
+ * So this measures the PAGE, not the corpus: how much of what a reader can
+ * actually see is reachable by a tongue.
+ *
+ * TWO FAILURE STATES, IDENTICAL TO A READER, SEPARATED HERE (founder, item 3):
+ *   UNKEYED       — the text carries no data-i18n at all. No tongue can ever
+ *                   reach it. It renders in English forever and no gate knows.
+ *   EMPTY CELL    — the text is keyed, and the corpus has that key, but the
+ *                   chosen tongue's cell is missing. lang.js falls back to
+ *                   English visibly and counts it, which is the corpus law
+ *                   working as designed.
+ * A reader sees English either way. A report that conflates them sends the
+ * next seat to fix the wrong thing, so this one never does — and NOTHING here
+ * changes the render. No debug marker ever reaches a reader.
+ *
+ * Usage:  node e2e/i18n-coverage.mjs [lang]        (default ru)
+ *         node e2e/i18n-coverage.mjs ru --json     (machine-readable)
+ */
+import { createServer } from 'node:http';
+import { readFile, readdir } from 'node:fs/promises';
+import { extname, join, dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { chromium } from 'playwright';
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+const ROOT = resolve(HERE, '..');
+const SURF = join(ROOT, 'surfaces');
+const LANG = process.argv.find(a => /^[a-z]{2}(-[a-z]{2})?$/.test(a)) || 'ru';
+const AS_JSON = process.argv.includes('--json');
+
+const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json' };
+const server = createServer(async (req, res) => {
+  try {
+    let rel = decodeURIComponent(req.url.split('?')[0]).replace(/^\//, '') || 'index.html';
+    if (rel.endsWith('/')) rel += 'index.html';
+    const orig = rel;
+    rel = rel.replace(/^surfaces\//, '');
+    const p = join(SURF, rel);
+    let body;
+    try { body = await readFile(extname(p) ? p : join(p, 'index.html')); }
+    catch { const q = join(ROOT, orig); body = await readFile(extname(q) ? q : join(q, 'index.html')); }
+    res.writeHead(200, { 'content-type': MIME[extname(rel)] || 'application/octet-stream', 'cache-control': 'no-store' });
+    res.end(body);
+  } catch { res.writeHead(404); res.end('nf'); }
+});
+await new Promise(r => server.listen(0, '127.0.0.1', r));
+const BASE = `http://127.0.0.1:${server.address().port}`;
+
+const corpus = JSON.parse(await readFile(join(SURF, 'lang-corpus.json'), 'utf8'));
+
+async function walk(dir, base = '') {
+  let out = [];
+  for (const e of await readdir(dir, { withFileTypes: true })) {
+    if (e.isDirectory() && e.name === 'fleet' && !base) continue;
+    const rel = base ? base + '/' + e.name : e.name;
+    if (e.isDirectory()) out = out.concat(await walk(join(dir, e.name), rel));
+    else if (e.name.endsWith('.html')) out.push(rel);
+  }
+  return out;
+}
+const pages = (await walk(SURF)).sort();
+
+const browser = await chromium.launch();
+const rows = [];
+
+for (const page of pages) {
+  const p = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  try {
+    await p.goto(`${BASE}/${page}`, { waitUntil: 'load' });
+    await p.evaluate(l => { try { localStorage.setItem('blang', l); } catch (e) {} }, LANG);
+    await p.reload({ waitUntil: 'load' });
+    await p.waitForTimeout(700);
+
+    const m = await p.evaluate(() => {
+      /* A VISIBLE STRING is a leaf element carrying real words that a reader
+         can see. Leaves only, so a paragraph is not counted again for every
+         ancestor; the estate's injected chrome is excluded because the tour
+         bar and the dock are not this page's content. */
+      const CHROME = '#tbar, #adOrb, #adPanel, #tbarMore, #railsbadge, #bregctl, #blangctl, #veil, #bandwrap';
+      const out = { visible: 0, keyed: 0, keys: [], unkeyedSamples: [] };
+      for (const n of document.querySelectorAll('body *')) {
+        if (n.children.length) continue;
+        if (n.closest(CHROME)) continue;
+        if (['SCRIPT', 'STYLE', 'NOSCRIPT', 'CANVAS', 'SVG', 'PATH', 'OPTION'].includes(n.tagName)) continue;
+        const t = (n.textContent || '').trim();
+        if (t.length < 3) continue;                 // glyphs and separators are not strings
+        if (!/[A-Za-zА-Яа-яЀ-ӿ]/.test(t)) continue;   // pure numbers/punctuation
+        const r = n.getBoundingClientRect();
+        if (r.width === 0 && r.height === 0) continue;
+        out.visible++;
+        const holder = n.closest('[data-i18n]');
+        if (holder) { out.keyed++; out.keys.push(holder.getAttribute('data-i18n')); }
+        else if (out.unkeyedSamples.length < 3) out.unkeyedSamples.push(t.slice(0, 60));
+      }
+      return out;
+    });
+
+    /* Of the keyed strings, how many can this tongue actually fill? Split the
+       two states the reader cannot tell apart. */
+    let filled = 0, emptyCell = 0, missingKey = 0;
+    const emptySamples = [];
+    for (const k of m.keys) {
+      const e = corpus.strings[k];
+      if (!e) { missingKey++; continue; }
+      if (e[LANG] && String(e[LANG]).trim()) filled++;
+      else { emptyCell++; if (emptySamples.length < 3) emptySamples.push(k); }
+    }
+    const unkeyed = m.visible - m.keyed;
+    rows.push({
+      page,
+      visible: m.visible,
+      keyed: m.keyed,
+      filled,
+      unkeyed,
+      emptyCell,
+      missingKey,
+      pct: m.visible ? Math.round((filled / m.visible) * 100) : 100,
+      unkeyedSamples: m.unkeyedSamples,
+      emptySamples,
+    });
+  } catch (e) {
+    rows.push({ page, error: String(e).slice(0, 80) });
+  }
+  await p.close();
+}
+
+await browser.close();
+server.close();
+
+if (AS_JSON) {
+  console.log(JSON.stringify({ lang: LANG, rows }, null, 1));
+} else {
+  const ok = rows.filter(r => !r.error);
+  const totV = ok.reduce((a, r) => a + r.visible, 0);
+  const totF = ok.reduce((a, r) => a + r.filled, 0);
+  const totU = ok.reduce((a, r) => a + r.unkeyed, 0);
+  const totE = ok.reduce((a, r) => a + r.emptyCell, 0);
+
+  console.log(`i18n COVERAGE — what a ${LANG} reader can actually read`);
+  console.log(`surfaces measured : ${ok.length}`);
+  console.log(`visible strings   : ${totV}`);
+  console.log(`reach ${LANG}          : ${totF}  (${Math.round(totF / totV * 100)}%)`);
+  console.log(`UNKEYED           : ${totU}  — no tongue can ever reach these`);
+  console.log(`keyed, EMPTY CELL : ${totE}  — falls back to English visibly, by the corpus law`);
+  console.log('');
+  console.log('TEN WORST BY PERCENTAGE (of surfaces with 10+ visible strings):');
+  console.log('  ' + 'pct'.padStart(4) + '  ' + 'vis'.padStart(4) + ' ' + 'keyed'.padStart(5) + ' ' + 'fill'.padStart(4) + ' ' + 'unkey'.padStart(5) + ' ' + 'empty'.padStart(5) + '  page');
+  ok.filter(r => r.visible >= 10).sort((a, b) => a.pct - b.pct || b.visible - a.visible).slice(0, 10)
+    .forEach(r => console.log('  ' + String(r.pct + '%').padStart(4) + '  ' + String(r.visible).padStart(4) + ' ' +
+      String(r.keyed).padStart(5) + ' ' + String(r.filled).padStart(4) + ' ' +
+      String(r.unkeyed).padStart(5) + ' ' + String(r.emptyCell).padStart(5) + '  ' + r.page));
+  const errs = rows.filter(r => r.error);
+  if (errs.length) { console.log('\nnot measured:'); errs.forEach(r => console.log('  ' + r.page + ' — ' + r.error)); }
+}
