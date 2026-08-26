@@ -134,9 +134,13 @@ code{color:var(--ink)}
   someone — the dedication rides with it forever). Either way it strings onto your <b>right
   arm</b>, because it is yours until you gift it; the made-FOR law binds the copy they receive.</div>
   <div class="pal" id="pal" aria-label="bead colors"></div>
+  <div style="font-size:10px;color:var(--faint);margin-top:6px;line-height:1.6">Letters are white beads, like the
+  real thing — tap a colour to thread one in, or turn on <b>thread colour</b> and every word comes out alternating.</div>
   <div class="row">
     <input id="word" placeholder="word beads (A–Z)" maxlength="12" style="flex:1;min-width:140px">
     <button class="act" id="addword">add word</button>
+    <button class="act" id="thread" type="button" aria-pressed="false"
+      title="letters are white beads, like the real thing — thread a colour between them">○ thread colour</button>
     <button class="act" id="undo">⌫ last bead</button>
     <button class="act" id="clear">clear</button>
   </div>
@@ -306,17 +310,42 @@ function braceSVG(beads,scale){
 
 /* ---- composer ---- */
 var draft=[];
+var threadOn=false, threadCol=null, threadWalk=0;
 COLS.forEach(function(c,i){ var b=document.createElement('button');
   b.style.background=c; b.title='bead '+i; b.setAttribute('aria-label','color bead '+i);
-  b.addEventListener('click',function(){ if(draft.length<40){ draft.push(String(i)); paint(); } });
+  b.addEventListener('click',function(){
+    threadCol=i;                      /* the last colour you touched is the one you thread */
+    [].forEach.call($('pal').children,function(x,j){ x.style.outline = j===i ? '2px solid var(--ink)' : ''; });
+    if(draft.length<40){ draft.push(String(i)); paint(); } });
   $('pal').appendChild(b); });
 function paint(){ $('preview').innerHTML=draft.length?braceSVG(draft.join(''),'min(300px,80vw)')
   :'<span style="color:var(--faint);font-size:10.5px;font-style:italic">an empty string — tap beads or add a word</span>'; }
+$('thread').onclick=function(){
+  threadOn=!threadOn;
+  this.setAttribute('aria-pressed',threadOn?'true':'false');
+  this.textContent=(threadOn?'◉':'○')+' thread colour';
+  this.style.color=threadOn?'var(--ok)':'';
+  this.style.borderColor=threadOn?'#1d4a2a':'';
+};
+/* between, never trailing — a colour sits BETWEEN two letters on a real string */
+function threadWord(letters){
+  if(!threadOn||letters.length<2) return letters;
+  var out=[];
+  for(var i=0;i<letters.length;i++){
+    out.push(letters[i]);
+    if(i<letters.length-1){
+      out.push(String(threadCol===null ? (threadWalk++%COLS.length) : threadCol));
+    }
+  }
+  return out;
+}
 $('addword').onclick=function(){
   var w=$('word').value.toUpperCase().replace(/[^A-Z]/g,'').slice(0,12);
   if(!w){ $('cerr').textContent='letters A–Z only'; return; }
   if(draft.length+w.length>40){ $('cerr').textContent='a bracelet caps at 40 beads — honest wrists'; return; }
-  draft=draft.concat(w.split('')); $('word').value=''; $('cerr').textContent=''; paint(); };
+  var beadsIn=threadWord(w.split(''));
+  if(draft.length+beadsIn.length>40){ $('cerr').textContent='forty beads is the string — threading this word would overflow it'; return; }
+  draft=draft.concat(beadsIn); $('word').value=''; $('cerr').textContent=''; paint(); };
 $('word').addEventListener('keydown',function(e){ if(e.key==='Enter') $('addword').click(); });
 $('undo').onclick=function(){ draft.pop(); paint(); };
 $('clear').onclick=function(){ draft=[]; paint(); };
