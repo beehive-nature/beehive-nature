@@ -416,6 +416,13 @@
       "state": "working"
     },
     {
+      "file": "blight/profile.html",
+      "domain": "nature",
+      "name": "the profile half that needs no server",
+      "state": "working",
+      "caveat": "read-only: holdings, PFP and shorthand from chain; nickname/quests/referrals/claims/submissions named as the half that needs a writable home"
+    },
+    {
       "file": "bnames.html",
       "domain": "nature",
       "name": "names on our chain, read live",
