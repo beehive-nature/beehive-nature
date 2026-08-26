@@ -423,6 +423,13 @@
       "caveat": "read-only: holdings, PFP and shorthand from chain; nickname/quests/referrals/claims/submissions named as the half that needs a writable home"
     },
     {
+      "file": "record.html",
+      "domain": "nature",
+      "name": "every screenshot we ever kept",
+      "state": "working",
+      "caveat": "the shots are the record — never edited, cropped or retouched; ugly is what it looked like"
+    },
+    {
       "file": "bnames.html",
       "domain": "nature",
       "name": "names on our chain, read live",
