@@ -65,3 +65,76 @@ cannot certify one that travelled right, and the reader doing the reading is a m
 that drafted it. Under the corpus law every line remains **⚙ machine-drafted until a human who speaks
 the tongue attests it**, and nothing in this receipt upgrades that. What it changes is that the estate
 now knows six of its strings were lying in five languages, which it did not know an hour ago.
+
+
+---
+
+# RUN 2 — every door key, every tongue
+
+**2026-08-26, second pass.** Founder: *"ROUND-TRIP EVERY KEY THAT APPEARS ON A DOOR, IN EVERY TONGUE…
+That's the arrival surface, it's bounded, and the twelve findings were already there."*
+
+## Method, unchanged
+
+Twenty-six agents, one per tongue, each handed **only** the target strings and forbidden from reading
+`strings[key].en`. A reading counted as a defect only when the string **names a different thing** — a
+wrong word, a false friend landing as an unrelated everyday word, a verb that makes the phrase
+nonsense, or an unintended violent/religious/medical/sexual reading. Register and idiom preferences
+were explicitly **not** defects; the first run's 70 flags were mostly those, and they drowned the
+signal.
+
+| | |
+|---|---|
+| keys round-tripped | **111** — every key rendered on any of the seven door pages |
+| tongues | **26** |
+| blind readings | **2880** |
+| came back with a changed sense | **40** |
+| corrected and merged | **37**, across 22 tongues |
+
+Tongues corrected: ar · bn · da · de · es · fi · fr · gd · he · hi · ja · ko · lv · nb · nl · ru · sv · th · tr · uk · ur · zh
+
+## The worst three, by how far the sense travelled
+
+**1. `d.plur.actsub` · de**
+
+- was: `Perlen auffädeln, ein Wort buchstabieren, sagen, für wen es ist — dann verschenk es, kreuz es, oder zeig es. E`
+- now: `Perlen auffädeln, ein Wort buchstabieren, sagen, für wen es ist — dann verschenk es, biete es der Kreuzung an,`
+- The old "kreuz es" was a bare imperative of kreuzen on an object, which in German says "cross-breed it" or "cross it out" rather than "cross it" in the sense of offering it to the crossing; the fix uses the same wording the companion string s.kandi.verb already uses for that mechanism ("biete es der
+
+**2. `s.keys-addresses.name` · fr**
+
+- was: `une âme, deux adresses postales`
+- now: `une âme, deux adresses de réception`
+- the old "deux adresses postales" said two physical post-office mailing addresses, sending a French reader to the letterbox instead of to the two chain addresses this keys-and-addresses surface derives; "adresses de réception" keeps the English's "address you receive at" sense with no postal qualifie
+
+**3. `d.nature.what` · nl**
+
+- was: `Een korf, geen bedrijf. Één organisme over nog vijf deuren — en de plek waar de galerijen wonen. Alles hier is`
+- now: `Een korf, geen bedrijf. Één organisme over nog vijf deuren — en de plek waar de galerieën wonen. Alles hier is`
+- The old 'galerijen' is the plural of 'galerij', the open-air walkway of an apartment block or a covered shopping arcade, so the line said the place where the apartment walkways live; 'galerieën' is the plural for art galleries.
+
+## The unaudited remainder — on record, so it is not rediscovered
+
+A round-trip is only worth what it covers, so what it does **not** cover is stated as a number rather
+than left to be found later:
+
+| | keys | key×tongue cells |
+|---|---|---|
+| corpus total | 354 | 9204 |
+| audited by round-trip (door keys + run 1) | 114 | 2964 |
+| **never round-tripped** | **240** | **6240** |
+
+**68% of the corpus has never been read back.** The bulk of it
+is the `h.*` heading set (164 keys) — the older estate surfaces — plus 11
+`f.*`, 10 `plur.*` and a long tail. Those surfaces are not less important than
+the doors; they are simply not what this run was scoped to, and the doors are the arrival surface where
+a stranger lands first.
+
+## What this still is not
+
+A blind back-translation remains a **smoke alarm, not a proof**. It finds a sense that travelled wrong;
+it cannot certify one that travelled right, and the reader is a machine like the drafter. Under the
+corpus law every line stays **⚙ machine-drafted until a human who speaks the tongue attests it**, and
+37 corrections do not change that. What changed is that 37 strings on the estate's
+arrival surface stopped saying something other than what they meant, and 240 keys are now
+*known* to be unexamined rather than assumed fine.
