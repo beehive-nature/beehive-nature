@@ -66,20 +66,43 @@ code{color:var(--ink)}
 <main>
 <header>
   <h1>🍬 the kandi bar</h1>
-  <div class="sub"><span data-i18n="kandi.bar">the kandi bar — make it, name it, gift it through interlocked hands</span></div>
-  <div class="sub" data-reg="bee">This is the mUseUm's ritual wing, alive. String beads, spell a
-  word, and gift the bracelet to anyone — the gift travels as a little text string they paste
-  here. Everything lives only in your own browser; nothing is sent anywhere, ever. Your first
+  <div class="sub"><span data-i18n="kandi.bar">the kandi bar — make it, name it, gift it, cross it, show it</span></div>
+  <div class="sub" data-reg="bee">This is the mUseUm's ritual wing, alive — a social page with no
+  inbox. String beads, spell a word, name who it's for, then <b>gift</b> it, <b>cross</b> it, or
+  <b>show</b> it. Each one hands you a short line of text and you carry it in whatever chat you
+  already use, so there is no account here and nobody to sign up with. Your arms live in this
+  browser's own storage and no kandi is ever uploaded. Two things the page does by itself: it
+  asks a public chain node whether the chain is up — that is the badge at the bottom, and it
+  sends no kandi and no name, though that node does see your address — and if you pick a
+  language other than English it fetches the translation file from this same site. Your first
   kandi is already waiting on your left arm.</div>
-  <div class="sub" data-reg="raver">make it. name it. do the handshake. peace, love, unity —
-  and on respect, the kandi crosses. right arm trades, left arm keeps, and what somebody made
-  FOR you never re-trades — that's not a setting, that's the floor's law, and here the floor's
-  law is code.</div>
+  <div class="sub" data-reg="raver">make it. name it. do the handshake. peace, love, unity — and on
+  respect, the kandi crosses. right arm trades, left arm keeps, and the crossing doesn't move until
+  something lands in your hand. no feed, no room, nobody's inbox — the string goes hand to hand down
+  whatever channel you two already share, and the moment it lands it's theirs. what somebody made FOR
+  you never re-trades: no gift button, no crossing button, ever, on that arm — that much really is
+  code. and a string is a copy, not a token: once you've handed it over you can't un-hand it, which
+  is exactly why the piece leaves your arm when you give it.</div>
   <div class="sub" data-reg="cypherpunk">Format: <code>KND1|maker|for|ts36|beads|fnv</code> —
   beads as [0-9] color indices and [A-Z] letter beads; FNV-1a/32 over the payload, base36.
-  <b>A checksum, not a signature</b> — kandi trust is floor trust, stated plainly. State:
-  <code>localStorage</code> only, zero network, zero custody; names are validated to a strict
-  charset and rendered as text, never markup. Digital kandi copies — the culture's answer is the
+  <b>A checksum, not a signature</b> — it catches a mistyped string, not a forged one, and a maker
+  name is a claim, never an attestation. <b>&quot;zero network&quot; is deleted from this page rather
+  than softened</b>, because two requests are page-initiated beyond its own scripts:
+  <code>rails-badge.js</code> POSTs <code>{}</code> to <code>eos.api.eosnation.io</code> (falling back
+  to <code>eos.greymass.com</code>) about 1.3 s after load with no user action — it carries no kandi
+  and no soul name, but your IP, User-Agent and the timing of the visit reach a third party — and
+  <code>lang.js</code> GETs <code>lang-corpus.json</code> same-origin, only when your language is not
+  English. State is <code>localStorage</code> only (<code>bkandi</code> written here; the riders own
+  <code>bregister</code>, <code>blang</code>, <code>btranslated_pref</code>, <code>bnr_rails_pin</code>),
+  no cookies, no sessionStorage, no IndexedDB, and no XHR, WebSocket, sendBeacon or analytics tag
+  anywhere in the chain. Gift, cross and show all terminate in the OS clipboard — the carrying is done
+  by the person, and <b>&quot;show it&quot; copies a <code>#k=</code> fragment, not a query</b>, so a
+  shared piece never enters the host's request log; it does still put the maker and made-FOR names in
+  the opener's address bar and history, because the piece IS its seed. Arriving with a fragment only
+  pre-fills the receive box and never writes storage. No DM transport, no relay, no inbox, no video:
+  open, not built, and said plainly. The table below is every path this audit found — not a proof that
+  none was missed, which is why view source is in the footer. Names are validated to a strict charset
+  and rendered as text, never markup. Digital kandi copies — the culture's answer is the
   retirement rule, so gifting removes the piece from your arm and keeps a memory line, the same
   shape as the corpus's withdrawal law.</div>
 </header>
@@ -174,7 +197,9 @@ code{color:var(--ink)}
 </section>
 </main>
 <footer>
-  🍬 nothing here is sent anywhere · localStorage only · a checksum, not a signature ·
+  🍬 your kandi lives in this browser — no server holds one · a kandi string is plain text: whoever
+  sees it reads the names in it · a checksum, not a signature · the rails badge pings a public chain
+  node on load ·
   <a href="plur.html">🪩 the mUseUm (Wing IV is this page's law)</a> ·
   <a href="hardware/build.html">🔧 the festival</a> ·
   <a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/kandi.html" rel="noopener">view source</a> ·
@@ -420,7 +445,10 @@ $('rcvgo').onclick=function(){
 /* a [bX kandi] pointer opens here with the piece ready to receive — the link
    IS the show-and-tell, and receiving stays a deliberate act, never automatic. */
 (function(){
-  var m=/[?&]k=([^&]+)/.exec(location.search); if(!m) return;
+  /* read the FRAGMENT, never the query: a fragment does not leave the
+     browser, so a shared piece never reaches the host's logs. The old ?k=
+     form is still accepted so links already handed out keep working. */
+  var m=/[#?&]k=([^&]*)/.exec(location.hash+location.search); if(!m) return;
   var str=''; try{ str=decodeURIComponent(m[1]); }catch(e){ return; }
   var r=decode(str); if(r.err) return;
   $('rcv').value=str;
