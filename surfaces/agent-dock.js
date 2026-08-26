@@ -80,7 +80,12 @@
       var h = Math.ceil(bar.getBoundingClientRect().height);
       if(!h) return;                       // bar present but unlaid — keep fail-safe
       o.style.bottom = (h + 10) + 'px';    // 10px above the REAL bar
-      document.body.style.paddingBottom = (h + 6) + 'px';
+      /* +22, not +6: the old hairline let a horizontal scrollbar or a zoom
+         step push the footer under the bar (founder-reported on kandi).
+         Never shrink what a page already reserved for itself. */
+      var need = h + 22;
+      var cur = parseFloat(getComputedStyle(document.body).paddingBottom) || 0;
+      if (cur < need) document.body.style.paddingBottom = need + 'px';
     }
     fit();
     addEventListener('resize', fit);

@@ -89,7 +89,22 @@
   open = false;
   apply(); sync();
 
-  document.body.style.paddingBottom='52px'; /* initial only; agent-dock fit() refines to the measured bar */
+  /* Reserve the bar's own room, and never take room a page already reserved.
+     tour.js owns this because the bar is tour.js's: a page should not have to
+     know a fixed bar was injected under it. Re-measured after the riders mount
+     (they change the bar's height) and on resize. */
+  function fitPad(){
+    var bar=document.getElementById('tbar'); if(!bar) return;
+    var h=Math.ceil(bar.getBoundingClientRect().height); if(!h) return;
+    var need=h+22;
+    var cur=parseFloat(getComputedStyle(document.body).paddingBottom)||0;
+    if(cur<need) document.body.style.paddingBottom=need+'px';
+  }
+  document.body.style.paddingBottom='69px'; /* fail-safe before measurement */
+  fitPad();
+  setTimeout(fitPad,500);   /* after register/lang/rails mount into the bar */
+  setTimeout(fitPad,1500);
+  addEventListener('resize',fitPad);
 
   /* THE EXTERNAL-LINK LAW (founder, 2026-08-21): every hyperlink that leaves the dApp
      opens in a NEW tab, so the reader's BNRoSe session stays handy and fully functional.
