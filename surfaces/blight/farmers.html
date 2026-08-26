@@ -79,7 +79,7 @@ nav:not(#tbar) button.on{color:var(--gold);border-color:#3d3410}
 
 <div class="gate">
   <b>private party</b> — the door opens to the community: holders, farmers, artists, .b neighbors.<br>
-  this is the MVP demo: stalls render live from the founder's garden; bAccords are real artifacts you can send.
+  this is the MVP demo: stalls render live from an example collector's garden; bAccords are real artifacts you can send.
   DAO-gated entry, fUSD settlement and the escrow dock with the contract.
 </div>
 
@@ -116,7 +116,7 @@ nav:not(#tbar) button.on{color:var(--gold);border-color:#3d3410}
 
 <div id="about" style="display:none">
   <p>this is the MVP demo surface for <b style="color:var(--leaf)">beehivenature.com</b> — the farmers market.<br>
-  stalls render live from chain state (the founder's garden as the opening produce).<br>
+  stalls render live from chain state (an example collector's garden as the opening produce).<br>
   bAccord cards generate as real PNGs in-browser; accord notes carry deep links to the rooms.<br>
   docking next: DAO-gated entry, fUSD settlement, the audited escrow, and the bLOVErAi co-creation hearth.<br>
   the public market lives next door: <a href="./market.html" style="color:var(--cyan)">the DeMarketPlace</a> — USDC + exSat, inquire flow.</p>
@@ -129,7 +129,7 @@ nav:not(#tbar) button.on{color:var(--gold);border-color:#3d3410}
 const W=v=>BigInt(v).toString(16).padStart(64,'0');
 const AD=a=>'0'.repeat(24)+a.replace(/^0x/,'').toLowerCase();
 const HOSTS=['https://base-rpc.publicnode.com','https://base.drpc.org'];
-const LOV='0xfbd201472d5a439f1f0e408eb5dfaf6ea3687876';
+const LOV='0x8e4cECd53bf2025ea0C8e69784355446C6355eBE'; /* example collector — the old default (bloverai.base.eth) was lost 2026-08-26, see RECEIPT_AUDIT_BLOVERAI_2026-08-26 */
 const COLS=[
  {sym:'FUNGI',c:'0x7d9CE55D54FF3FEddb611fC63fF63ec01F26D15F',sel:'422b9e23',lv:[0,21000,525000,1050000,1575000,2100000],base:0,ou:true},
  {sym:'$FROGGI',c:'0x88A78C5035BdC8C9A8bb5c029e6cfCDD14B822FE',sel:'422b9e23',lv:[0,1000,3000,10000,30000,60000,120000],base:0},
