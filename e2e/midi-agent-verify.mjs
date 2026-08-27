@@ -48,6 +48,34 @@ const browser = await chromium.launch({ args:['--no-sandbox'] });
   check('prompt window: bMiDi replies', agentLines1 === agentLines0 + 1, agentLines1 + ' agent lines');
   check('prompt window: the reply is painted on the pad', h6 !== h5);
 
+  /* the master visualist: FULL canvas, smaller+variable hexes, words */
+  await page.fill('#chatin', 'mandala bloom');
+  await page.press('#chatin', 'Enter');
+  await page.waitForTimeout(2500);
+  const cov = await page.evaluate(() => {
+    const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+    const img = ctx.getImageData(0, 0, cv.width, cv.height).data;
+    const hex = artGround().replace('#', '');
+    const gr = parseInt(hex.slice(0, 2), 16), gg = parseInt(hex.slice(2, 4), 16), gb = parseInt(hex.slice(4, 6), 16);
+    const W = cv.width, H = cv.height;
+    const ink = [[0,0],[1,0],[0,1],[1,1]].map(([qx, qy]) => {
+      let n = 0, tot = 0;
+      for (let y = qy * H / 2 | 0; y < (qy + 1) * H / 2; y += 3)
+        for (let x = qx * W / 2 | 0; x < (qx + 1) * W / 2; x += 3) {
+          tot++;
+          const i = (y * W + x) * 4;
+          if (Math.abs(img[i] - gr) + Math.abs(img[i + 1] - gg) + Math.abs(img[i + 2] - gb) > 60) n++;
+        }
+      return n / tot;
+    });
+    return { ink, W, minR: ART.minR, maxR: ART.maxR, ratio: ART.maxR / ART.minR };
+  });
+  check('full-canvas: every quadrant carries ink', cov.ink.every(f => f > 0.015), cov.ink.map(f => (f * 100).toFixed(1) + '%').join(' · '));
+  check('hexes are smaller (maxR < canvas/24)', cov.maxR < cov.W / 24, 'maxR=' + cov.maxR.toFixed(1) + ' of ' + cov.W + 'px');
+  check('hexes are variable (maxR/minR > 1.6)', cov.ratio > 1.6, 'ratio=' + cov.ratio.toFixed(2));
+  const lastWord = await page.evaluate(() => window.__lastWord);
+  check('bMiDi writes words on the lattice', lastWord === 'MANDALA', lastWord);
+
   /* level 5: the container AND the bare score — the top keeps every rung */
   await page.fill('#in', '1500000');
   await page.click('#read');

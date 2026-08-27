@@ -513,7 +513,8 @@ function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a
 /* pick the palette row for this performance: contract bar pairs for the tier */
 function paletteRow(seedRow){
   var art=toLvl1(S.tier);
-  return BAR[art][seedRow%10];
+  seedRow=((seedRow%10)+10)%10;   /* the clock can be briefly negative at start — normalize */
+  return BAR[art][seedRow];
 }
 /* the artwork ground: the contract's own background colour */
 function artGround(){
@@ -568,7 +569,10 @@ function drawForm(f,tNow){
   if(tNow<f.noteT)alpha=(tNow-f.startT)/(f.noteT-f.startT);
   else if(tNow>f.dieT)alpha=Math.max(0,1-(tNow-f.dieT)/(f.endT-f.dieT+1e-9));
   var cx=f.cx*S2,cy=f.cy*S2;
-  var scale=(f.rad*S2)/(hexR*18+1);
+  /* smaller, VARIABLE hexes: the lattice pitch is fixed per form, the cell
+     size swells at the core and thins at the fringe — texture, not tiling */
+  var R0=hexR*0.5,scale=(f.rad*S2)/(R0*18+1);
+  var maxD=0;for(var d=0;d<f.cells.length;d++){var dd=Math.abs(f.cells[d][0])+Math.abs(f.cells[d][1]);if(dd>maxD)maxD=dd;}
   for(var k=0;k<f.Cn;k++){
     var ang=k/f.Cn*6.2832,cos=Math.cos(ang),sin=Math.sin(ang);
     for(var c=0;c<f.cells.length;c++){
@@ -576,10 +580,12 @@ function drawForm(f,tNow){
       var ord=hash01(cc[0],cc[1],k,f.i);
       if(alpha<1&&ord>alpha)continue;
       var px=cc[0]*cos-cc[1]*sin,py=cc[0]*sin+cc[1]*cos;
-      var hxp=hexCenter(Math.round(px*scale),Math.round(py*scale));
-      var X=cx+(hxp[0]-S2/2),Y=cy+(hxp[1]-S2/2);
+      var dd=(Math.abs(cc[0])+Math.abs(cc[1]))/(maxD||1);
+      var Rv=R0*(0.55+0.55*(1-dd))*(0.8+0.4*hash01(cc[0],cc[1],k+9,f.i));
+      var P=hexAt(cx,cy,Math.round(px*scale),Math.round(py*scale),R0);
       var rim=ord<0.22;
-      drawHex(X,Y,hexR*0.82,f.pair[rim?1:0],0.6*(0.7+ord*0.5),'lighter');
+      drawHex(P[0],P[1],Rv,f.pair[rim?1:0],0.6*(0.7+ord*0.5),'lighter');
+      artStat(Rv);
     }
   }
 }
@@ -861,21 +867,64 @@ function sect(t){                       /* the journey's intensity envelope */
 }
 var padStart=performance.now(),padRaf=false,blooms=[],lastMove=0;
 function padNow(){return (performance.now()-padStart)/1000}
-/* the ambient field: drifting, breathing forms in the tier's palette rows —
-   the afterglow wipe keeps their trails, which is the layered luminous look */
+/* ── the LOCAL lattice: (q,r)=(0,0) maps exactly to the form's center.
+   the old code reused the canvas-absolute hexCenter and then subtracted
+   S2/2 — which pinned every form toward the top-left corner and clipped
+   half its cells off-screen. this is the fix at the root. ── */
+function hexAt(cx,cy,q,r,R){
+  var w=Math.sqrt(3)*R;
+  return[cx+q*w+(r&1?w/2:0),cy+r*R*1.5];
+}
+/* the rig reads this: hexes must be smaller AND variable */
+var ART={minR:1e9,maxR:0,cells:0};
+function artStat(R){if(R<ART.minR)ART.minR=R;if(R>ART.maxR)ART.maxR=R;ART.cells++}
+/* the ambient field: full-canvas placement (hash-spread centers across the
+   whole sheet, not a middle band), variable cell sizes, and the HALO —
+   concentric energy rings spanning the canvas, the grey/sage field */
 function ambientForms(t,inten){
   var fr=mulberry32(((S.seed||0)>>>0)^0xB00B1E5);
   var n=3+Math.round(inten*4);
   for(var i=0;i<n;i++){
     var type=Math.floor(fr()*FORMS.length),cells=FORMS[type](fr),pair=paletteRow(Math.floor(fr()*10));
-    var ph=t*0.10+i*2.09,cx=S2*(0.5+0.24*Math.sin(ph)),cy=S2*(0.5+0.24*Math.cos(ph*1.3+1));
+    var ph=t*0.10+i*2.09;
+    var cx=S2*(0.14+0.72*hash01(i,7,((S.seed||0)>>>0),3))+S2*0.10*Math.sin(ph);
+    var cy=S2*(0.14+0.72*hash01(i,11,((S.seed||0)>>>0),5))+S2*0.10*Math.cos(ph*1.3+1);
     var al=(0.10+inten*0.16)*(0.7+0.3*Math.sin(t*0.5+i*2.2));
     var rot=t*0.05*(i%2?1:-1)+i;
-    var sc=(0.18+0.05*Math.sin(t*0.23+i))*S2/(hexR*18+1);
+    var R0=hexR*(0.42+0.16*hash01(i,13,0,1));
+    var sc=(0.22+0.06*Math.sin(t*0.23+i))*S2/(R0*18+1);
+    var maxD=0;for(var d=0;d<cells.length;d++){var dd=Math.abs(cells[d][0])+Math.abs(cells[d][1]);if(dd>maxD)maxD=dd;}
     for(var c=0;c<cells.length;c++){
       var px=cells[c][0]*Math.cos(rot)-cells[c][1]*Math.sin(rot),py=cells[c][0]*Math.sin(rot)+cells[c][1]*Math.cos(rot);
-      var hxp=hexCenter(Math.round(px*sc),Math.round(py*sc));
-      drawHex(cx+(hxp[0]-S2/2),cy+(hxp[1]-S2/2),hexR*0.92,pair[c%2],Math.max(0.03,al),'lighter');
+      var dd=(Math.abs(cells[c][0])+Math.abs(cells[c][1]))/(maxD||1);
+      var Rv=R0*(0.5+0.6*(1-dd))*(0.75+0.5*hash01(cells[c][0],cells[c][1],i,9));
+      var P=hexAt(cx,cy,Math.round(px*sc),Math.round(py*sc),R0);
+      drawHex(P[0],P[1],Rv,pair[c%2],Math.max(0.03,al),'lighter');
+      artStat(Rv);
+    }
+  }
+  /* the halo: five sparse concentric rings reaching into the corners */
+  var hp=paletteRow(Math.floor(t*0.02)%10);
+  for(var ring=0;ring<5;ring++){
+    var RR=S2*(0.15+0.115*ring),nR=Math.max(16,Math.round(RR/(hexR*0.5)));
+    for(var k=0;k<nR;k++){
+      if((k+ring)%3)continue;
+      var a=k/nR*6.2832+t*0.03*(ring%2?1:-1);
+      var Rv=hexR*(0.30+0.18*hash01(k,ring,3,1));
+      drawHex(S2/2+RR*Math.cos(a),S2/2+RR*Math.sin(a),Rv,hp[ring%2],(0.05+0.05*inten)*(0.6+0.4*Math.sin(t*0.4+k)),'lighter');
+      artStat(Rv);
+    }
+  }
+  /* the shimmer: a fine breathing starfield across the WHOLE lattice — no
+     dead corners, continuous mid-scale between the dust and the figures */
+  var sp=paletteRow(Math.floor(t*0.013)%10);
+  for(var gy=0;gy<S2;gy+=hexR*2.3){
+    for(var gx=0;gx<S2;gx+=hexR*2.0){
+      var fl=hash01(gx|0,gy|0,Math.floor(t*1.7),((S.seed||0)>>>0)&0xffff);
+      if(fl<0.90)continue;
+      var Rv=hexR*(0.16+0.22*hash01(gy|0,gx|0,5,7));
+      drawHex(gx,gy,Rv,sp[fl>0.955?1:0],0.10+0.10*hash01(gx|0,7,2,9),'lighter');
+      artStat(Rv);
     }
   }
   ctx2d.globalCompositeOperation='source-over';
@@ -904,6 +953,10 @@ function renderJourney(t){       /* level 5: the 3:33 visual container */
     for(var s=0;s<6;s++)drawHex(fr()*S2,fr()*S2,hexR*0.7,paletteRow(s),0.35,'lighter');
     ctx2d.globalCompositeOperation='source-over';
   }
+  /* the journey writes its sections on the lattice */
+  var SECS=[[0,'RISE'],[26,'BASS'],[64,'ARPS'],[128,'FULL'],[160,'PEAK'],[184,'FALL'],[200,'REST']];
+  var si=0;for(var s2=0;s2<SECS.length;s2++)if(t>=SECS[s2][0])si=s2;
+  if(si!==S.__sec){S.__sec=si;paintWord(SECS[si][1],S2/2,S2*0.5);}
 }
 /* ── blooms: hex mandalas — the agent's answers and the pointer's touch ── */
 function addBloom(seedNum,x,y,big,still){
@@ -928,19 +981,66 @@ function paintBloom(bl,grow,fade){
   var type=Math.floor(fr()*FORMS.length),cells=FORMS[type](fr);
   var pairs=[paletteRow(Math.floor(fr()*10)),paletteRow(Math.floor(fr()*10)),paletteRow(Math.floor(fr()*10))];
   var layers=bl.big?5:3,rot=padNow()*0.12;
+  var R0=hexR*(bl.big?0.55:0.42);
+  var maxD=0;for(var d=0;d<cells.length;d++){var dd=Math.abs(cells[d][0])+Math.abs(cells[d][1]);if(dd>maxD)maxD=dd;}
   for(var L=0;L<layers;L++){
-    var pair=pairs[L%3],sc=(0.12+0.11*L)*S2/(hexR*18+1),lr=rot*(L%2?1:-1);
+    var pair=pairs[L%3],sc=(0.16+0.13*L)*(bl.big?1.35:1)*S2/(R0*18+1),lr=rot*(L%2?1:-1);
     var nShow=Math.ceil(cells.length*grow);
     for(var c=0;c<nShow;c++){
       var px=cells[c][0]*Math.cos(lr)-cells[c][1]*Math.sin(lr),py=cells[c][0]*Math.sin(lr)+cells[c][1]*Math.cos(lr);
-      var hxp=hexCenter(Math.round(px*sc),Math.round(py*sc));
+      var dd=(Math.abs(cells[c][0])+Math.abs(cells[c][1]))/(maxD||1);
       var ord=hash01(cells[c][0],cells[c][1],L,bl.seed&0xffff);
-      drawHex(bl.x+(hxp[0]-S2/2),bl.y+(hxp[1]-S2/2),hexR*0.95,pair[ord<0.3?1:0],(0.4+0.45*ord)*fade,'lighter');
+      var Rv=R0*(0.5+0.6*(1-dd))*(0.75+0.5*hash01(cells[c][0],cells[c][1],L+3,bl.seed&0xffff));
+      var P=hexAt(bl.x,bl.y,Math.round(px*sc),Math.round(py*sc),R0);
+      drawHex(P[0],P[1],Rv,pair[ord<0.3?1:0],(0.4+0.45*ord)*fade,'lighter');
+      artStat(Rv);
     }
   }
   ctx2d.globalCompositeOperation='source-over';
 }
-function reducedCompose(){ambient(padNow());paintBlooms()}
+/* ══ THE HEX FONT — bMiDi writes in hexes, 3×5 dot-matrix ══════════════════
+   words are part of the art: replies stamp their keyword, the journey
+   announces its sections, the level paints its own rung. */
+var GLY={A:[2,5,7,5,5],B:[6,5,6,5,6],C:[3,4,4,4,3],D:[6,5,5,5,6],E:[7,4,6,4,7],F:[7,4,6,4,4],
+G:[3,4,5,5,3],H:[5,5,7,5,5],I:[7,2,2,2,7],J:[1,1,1,5,2],K:[5,5,6,5,5],L:[4,4,4,4,7],
+M:[5,7,5,5,5],N:[6,5,5,5,5],O:[2,5,5,5,2],P:[6,5,6,4,4],Q:[2,5,5,6,3],R:[6,5,6,5,5],
+S:[3,4,2,1,6],T:[7,2,2,2,2],U:[5,5,5,5,7],V:[5,5,5,2,2],W:[5,5,5,7,5],X:[5,5,2,5,5],
+Y:[5,5,2,2,2],Z:[7,1,2,4,7],'0':[7,5,5,5,7],'1':[2,6,2,2,7],'2':[6,1,2,4,7],'3':[7,1,3,1,7],
+'4':[5,5,7,1,1],'5':[7,4,6,1,6],'6':[3,4,7,5,7],'7':[7,1,2,2,2],'8':[7,5,7,5,7],'9':[7,5,7,1,6],' ':[0,0,0,0,0]};
+var WORDS=[];
+function paintWord(word,x,y,pair){
+  word=String(word||'').toUpperCase().replace(/[^A-Z0-9 ]/g,'').slice(0,10);
+  if(!word.trim())return null;
+  window.__lastWord=word;
+  WORDS.push({w:word,x:x==null?S2/2:x,y:y==null?S2*0.5:y,t0:padNow(),pair:pair||paletteRow(4)});
+  if(WORDS.length>2)WORDS.shift();
+  if(REDUCED)reducedCompose();
+  return word;
+}
+function drawWords(){
+  for(var b=0;b<WORDS.length;b++){
+    var wd=WORDS[b],age=padNow()-wd.t0;
+    if(age>9){WORDS.splice(b,1);b--;continue}
+    var grow=Math.min(1,age/0.9),fade=age>6?Math.max(0,1-(age-6)/3):1;
+    var R0=hexR*0.42,cols=wd.w.length*4-1;
+    for(var ch=0;ch<wd.w.length;ch++){
+      var g=GLY[wd.w[ch]]||GLY[' '];
+      for(var row=0;row<5;row++)for(var col=0;col<3;col++){
+        if(!((g[row]>>(2-col))&1))continue;
+        var ord=hash01(ch,row,col,cols);
+        if(ord>grow)continue;
+        var P=hexAt(wd.x,wd.y,(ch*4+col)-Math.floor(cols/2),row-2,R0);
+        var Rv=R0*(0.8+0.35*hash01(ch,col,row,7));
+        /* a dark backing cell first — the luminous letter reads through the void */
+        drawHex(P[0],P[1],Rv*2.0,'#020804',0.5*fade,'source-over');
+        drawHex(P[0],P[1],Rv,wd.pair[row%2],(0.55+0.35*ord)*fade,'lighter');
+        artStat(Rv);
+      }
+    }
+  }
+  ctx2d.globalCompositeOperation='source-over';
+}
+function reducedCompose(){ambient(padNow());paintBlooms();drawWords()}
 function fmtT(s){s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
 function containerUI(){
   var cb=$('container'),pr=$('progress'),pf=$('progfill');
@@ -970,6 +1070,7 @@ function padFrame(){
     else renderPlaying(t);
   }else ambient(t);
   paintBlooms();
+  drawWords();
   containerUI();
   requestAnimationFrame(padFrame);
 }
@@ -1051,6 +1152,7 @@ function promptRoute(qRaw){
     $('in').value=sm[1];visit(sm[1]);
     bmidiSay('seed '+n.toLocaleString()+' — level '+lvlOf(n)+'. '+
       (lvlOf(n)===5?'the container opens: 3:33 at 162. say "play the journey".':'the piece resolves as the balance rises.'));
+    paintWord('L'+lvlOf(n));
     return;
   }
   var cm=/contract\s*(0x[0-9a-fA-F]{40})/i.exec(q);
@@ -1064,6 +1166,7 @@ function promptRoute(qRaw){
     if(S.tier===0){bmidiSay('level zero paints silence — the same piece, still unresolved. sound begins at 1,000 whole tokens.');return}
     if(sounding)stopSound();
     startPlayback(/journey|container|psytrance|162/.test(lq)&&S.tier===5?'container':'score');
+    paintWord(/journey|container|psytrance|162/.test(lq)&&S.tier===5?'JOURNEY':'SCORE');
     return;
   }
   if(/buy|token|price|swap|pool|hold|get midi|invest/.test(lq)){
@@ -1072,21 +1175,24 @@ function promptRoute(qRaw){
     if(pitch.scrollIntoView)pitch.scrollIntoView({behavior:REDUCED?'auto':'smooth',block:'center'});
     pitch.style.outline='1px solid var(--sem-value)';
     bmidiSay(PITCH_SAY+' the popup is open — your wallet signs, the page never sees a key.');
-    bloomFor(lq);return;
+    bloomFor(lq);paintWord('MIDI');return;
   }
   if(/who|you|bmidi|agent|what are you/.test(lq)){
     bmidiSay('bMiDi — resident visual sound aigenT. strictly abstract, psychedelic: the alex grey / amanda sage lineage, painted in the token\u2019s own palette on the hex lattice it was born on.');
-    bloomFor(lq);return;
+    bloomFor(lq);paintWord('BMIDI');return;
   }
   if(/level|ladder|resolve|tier/.test(lq)){
     bmidiSay('the balance is the resolution: 1,000 opens sound, 21,000 adds the drone, 105,000 the echo, 420,000 the octave arps, and 1,050,000+ carries the full ensemble — the 3:33 container at 162.');
-    bloomFor(lq);return;
+    bloomFor(lq);paintWord('L'+S.tier);return;
   }
   /* the default: the prompt IS a seed — same words, same mandala, forever */
   var words=q.split(/\s+/).length,cells=(h%400)+120;
   bloomFor(lq);
+  var key=q.toUpperCase().replace(/[^A-Z0-9 ]/g,'').split(/\s+/).filter(function(x){return x.length>2})
+    .sort(function(a,b){return b.length-a.length})[0]||'BLOOM';
+  paintWord(key);
   bmidiSay(['your words as geometry — ','the lattice answers — ','painted from your phrase — '][h%3]+
-    cells+' hexes, '+words+' word'+(words>1?'s':'')+' in. the prompt was the seed: say it again and the same mandala returns.');
+    cells+' hexes, '+words+' word'+(words>1?'s':'')+' in. the prompt was the seed: say it again and the same mandala returns — and the word rides the lattice: '+key+'.');
 }
 $('say').addEventListener('click',function(){promptRoute($('chatin').value);$('chatin').value=''});
 $('chatin').addEventListener('keydown',function(e){if(e.key==='Enter'){promptRoute($('chatin').value);$('chatin').value=''}});
