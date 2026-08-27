@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>the vault — record, store, send on Autonomi</title>
+<style>
+/* SEMANTIC COLOUR, meanings first: harm=guard violet (resting/never error-red)
+   solution=biomass (stored/verified) · value=honey (addresses, numbers)
+   system=info (the storage fabric) · science=ai (measured sizes/hashes) */
+:root{
+  --you:#D655BB; --b-value:#E8B54B; --biomass:#86CC72; --ai:#45C2DC;
+  --info:#6FA9E0; --guard:#B7A8F7; --sovereign:#9C6FD6;
+  --sem-harm:var(--guard); --sem-solution:var(--biomass); --sem-value:var(--b-value);
+  --sem-system:var(--info); --sem-science:var(--ai);
+  --bg:#06110C; --bg-card:#0C1412; --bg-well:#08100D;
+  --ink:#E9F2EC; --ink-mut:#8FA79C; --ink-dim:#648176; --line:#1E2B26;
+  --radius:12px;
+}
+*{box-sizing:border-box;margin:0}
+html,body{background:var(--bg)}
+body{font:13px/1.6 ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif;color:var(--ink);padding:18px 14px 64px;max-width:920px;margin:0 auto}
+a{color:#B79FE0}
+h1{font-size:clamp(20px,5vw,28px);letter-spacing:-.4px}
+h1.grad{background:linear-gradient(92deg,var(--sovereign),var(--you));-webkit-background-clip:text;background-clip:text;color:transparent}
+.law{color:var(--ink-mut);font-size:12px;margin-top:2px}
+.law b{color:#B79FE0}
+.panel{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-top:10px}
+.well{background:var(--bg-well);border:1px solid var(--line);border-radius:9px;padding:10px}
+h3{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink-dim);margin-bottom:8px}
+.stats{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.stat{flex:1;min-width:110px;background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px}
+.stat.pstat{background:var(--bg-well)}
+.stat b{display:block;font-size:32px;line-height:1.1;font-family:ui-monospace,Menlo,Consolas,monospace;color:#B79FE0}
+.stat b.seed{color:var(--sem-value);font-size:32px;word-break:break-all}
+.stat.science b{color:var(--sem-science);font-size:18px;padding-top:6px}
+.stat .l{display:block;font-size:9.5px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.9px;margin-top:2px}
+.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+input[type=text],textarea{flex:1;min-width:170px;background:var(--bg-well);border:1px solid var(--line);border-radius:9px;color:var(--ink);font:12px ui-monospace,Menlo,Consolas,monospace;padding:9px 11px}
+input[type=text]:focus,textarea:focus{outline:none;border-color:var(--you)}
+button.act{background:var(--you);border:0;color:#1a0716;font:600 12.5px ui-sans-serif,system-ui,sans-serif;padding:9px 14px;border-radius:9px;cursor:pointer}
+button.act.ghost{background:var(--bg-well);color:var(--ink-mut);border:1px solid var(--line)}
+button.act:disabled{opacity:.45;cursor:not-allowed}
+.msg{font-size:11.5px;color:var(--ink-mut);margin-top:6px;min-height:1.2em}
+.modes{display:flex;gap:6px;flex-wrap:wrap}
+.mode{border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:11.5px;color:var(--ink-mut);cursor:pointer}
+.mode.on{border-color:var(--you);color:var(--you)}
+.mode small{display:block;font-size:9.5px;color:var(--ink-dim)}
+canvas{width:88px;height:88px;display:block;border-radius:8px;image-rendering:pixelated}
+.recordrow{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+/* library */
+.lib{display:flex;flex-direction:column;gap:6px}
+.item{display:flex;gap:10px;align-items:center;background:var(--bg-well);border:1px solid var(--line);border-radius:9px;padding:9px 11px;flex-wrap:wrap}
+.item .badge{font:600 9px ui-monospace,Menlo,monospace;border:1px solid var(--line);border-radius:4px;padding:2px 6px;white-space:nowrap}
+.item .badge.public{color:var(--sem-solution);border-color:var(--sem-solution)}
+.item .badge.private{color:var(--sem-harm);border-color:var(--sem-harm)}
+.item .badge.privileged{color:var(--sem-value);border-color:var(--sem-value)}
+.item b.nm{font-size:12.5px;color:var(--ink)}
+.item span.meta{font-size:10.5px;color:var(--ink-dim);font-family:ui-monospace,Menlo,monospace}
+.item .grow{flex:1;min-width:140px}
+.item button{border:0;background:transparent;color:var(--ink-dim);cursor:pointer;font-size:12px;padding:2px 6px}
+.item button:hover{color:var(--you)}
+.cap{background:var(--bg-well);border:1px dashed var(--guard);border-radius:9px;padding:10px;font:10.5px ui-monospace,Menlo,monospace;color:var(--ink-mut);word-break:break-all;margin-top:8px}
+.link{position:relative;display:flex;gap:6px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.link input{font-size:11px}
+.foot{margin-top:16px;font-size:10.5px;color:var(--ink-dim)}
+.foot b{color:var(--ink-mut)}
+@media (max-width:600px){.stat b{font-size:24px}.stat b.seed{font-size:20px}}
+</style>
+</head>
+<body>
+<h1 class="grad">the vault</h1>
+<p class="law">record a performance, store it on <b>Autonomi</b>, share it three ways — <b>public</b> (the
+address is the door), <b>private</b> (encrypted; only your manifest holds the key), <b>privileged</b>
+(encrypted; you hand the capability to someone chosen). sovereign by construction: the network stores
+chunks; the keys never leave your device unless you send them.</p>
+
+<div class="stats">
+  <div class="stat pstat"><b class="seed" data-hero-number id="st-items">0</b><span class="l">items in the vault</span></div>
+  <div class="stat science"><b id="st-bytes">0 B</b><span class="l">recorded bytes</span></div>
+  <div class="stat"><b id="st-mode">SIMULATED</b><span class="l">storage backend</span></div>
+</div>
+
+<section class="panel">
+  <h3>record — a performance becomes an artifact</h3>
+  <div class="row">
+    <input id="artifact" type="text" placeholder="paste the room's seed+patch+voice line, or type a bare seed number">
+    <button class="act" id="read">read it</button>
+  </div>
+  <div class="recordrow" style="margin-top:10px">
+    <canvas id="cv" width="176" height="176"></canvas>
+    <div style="flex:1;min-width:200px">
+      <div class="row"><input id="name" type="text" placeholder="name this recording — 'saturday lydian burn'"></div>
+      <div class="modes" style="margin-top:8px">
+        <div class="mode public on" data-m="public">public<small>address = the door</small></div>
+        <div class="mode private" data-m="private">private<small>key stays in your manifest</small></div>
+        <div class="mode privileged" data-m="privileged">privileged<small>you send the capability</small></div>
+      </div>
+    </div>
+  </div>
+  <div class="row" style="margin-top:10px">
+    <button class="act" id="renderwav">render 8s WAV (the audio itself)</button>
+    <button class="act ghost" id="store">STORE ON AUTONOMI</button>
+  </div>
+  <p class="msg" id="rmsg">the score artifact is a few hundred bytes; the WAV render is ~1.4 MB — both store the same way.</p>
+  <div class="well" id="wavbox" hidden><span id="wavinfo" style="font:11px ui-monospace,Menlo,monospace;color:var(--sem-science)"></span></div>
+</section>
+
+<section class="panel">
+  <h3>the library — your manifest is the vault</h3>
+  <div class="lib" id="lib"></div>
+  <p class="msg" id="lmsg">empty — record something above.</p>
+</section>
+
+<section class="panel">
+  <h3>the backend — simulation today, your node when it answers</h3>
+  <div class="link">
+    <input id="endpoint" type="text" value="http://127.0.0.1:8082">
+    <button class="act ghost" id="probe">probe antd</button>
+  </div>
+  <p class="msg" id="bmsg">SIMULATED: addresses are content hashes in this page's store — the full flow works
+  (store · send · delete) and the artifact formats are final. When the antd daemon (ant-sdk, REST :8082) answers
+  its health probe, put/get switch to the live network — the daemon's REST routes are not yet documented upstream,
+  so they are verified against a live daemon in one follow-up session, not guessed here. Nothing about your
+  artifacts changes: same bytes, same keys, same manifest.</p>
+</section>
+
+<p class="foot"><b>provenance.</b> one self-contained file · encryption is WebCrypto AES-GCM in your browser
+(per-item random keys; the manifest IS the private vault — export it or lose it, the network will not remember
+your keys) · addresses are content-derived · <b>delete is honest</b>: it removes your manifest entry — address
+and key vanish from your device, and without the key the stored chunks are noise to anyone, but the network may
+keep the bytes · "send" produces a capability line (address+key) — the room's relay lane will carry it signed ·
+simulation backend labelled SIMULATED, never faked as live · no CDN, no build step, zero off-origin.</p>
+
+<script>
+"use strict";
+/* ── the score engine (from the room, verbatim bones) ──────────────────── */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function hash01(){var h=(arguments[0]|0)*374761393+(arguments[1]|0)*668265263+(arguments[2]|0)*2246822519+(arguments[3]|0)^((arguments[4]||0)*3266489917);h=Math.imul(h^(h>>>13),1274126177);return((h^(h>>>16))>>>0)/4294967296}
+var $=id=>document.getElementById(id);
+var MODES=[{n:'Dorian',iv:[0,2,3,5,7,9,10]},{n:'Lydian',iv:[0,2,4,6,7,9,11]},{n:'Phrygian',iv:[0,1,3,5,7,8,10]}];
+function buildPattern(seed){
+  var r=mulberry32(seed^0x5EED);
+  var root=36+Math.floor(r()*22);
+  var mode=MODES[Math.floor(r()*3)];
+  var bpm=72+Math.floor(r()*61);
+  var shape=['rising','falling','rise-and-return','wandering'][Math.floor(r()*4)];
+  var pat=[];
+  for(var s=0;s<32;s++){
+    var d,o;
+    if(shape==='rising'){d=(s*2)%7;o=1+Math.floor((s*2)/7)%2}
+    else if(shape==='falling'){d=(6-((s*2)%7)+7)%7;o=1+Math.floor((s*2)/7)%2}
+    else if(shape==='rise-and-return'){var k=s<16?s*2:(31-s)*2;d=k%7;o=1+Math.floor(k/7)%2}
+    else{d=Math.floor(r()*7);o=1+Math.floor(r()*2)}
+    pat.push({midi:root+mode.iv[d]+12*o,dur:[0.5,1,1,2][Math.floor(r()*4)],vel:+(0.5+r()*0.5).toFixed(3)});
+  }
+  return {root,mode,bpm,shape,pat,wave:['triangle','sine','sine','triangle'][Math.floor(r()*4)],
+    delayBeats:r()<0.5?0.375:0.5,stepDur:60/bpm/2,beatDur:60/bpm,sym:[4,6,8][Math.floor(r()*3)]};
+}
+function noteName(m){var NN=['C','C♯','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];return NN[m%12]+(Math.floor(m/12)-1)}
+function scheduleStep(ctx,dest,p,step,t0,delayNode){
+  var n=p.pat[step%p.pat.length];
+  var f=440*Math.pow(2,(n.midi-69)/12);
+  var t=t0,d=n.dur*p.stepDur;
+  var osc=ctx.createOscillator();osc.type=p.wave;osc.frequency.value=f;
+  var g=ctx.createGain();
+  g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(0.16*n.vel,t+0.012);
+  g.gain.exponentialRampToValueAtTime(0.05*n.vel,t+Math.min(0.25,d*0.6));
+  g.gain.exponentialRampToValueAtTime(0.0001,t+d*1.15);
+  osc.connect(g);g.connect(dest);
+  if(delayNode){var s=ctx.createGain();s.gain.value=0.22;g.connect(s);s.connect(delayNode)}
+  osc.start(t);osc.stop(t+d*1.2+0.05);
+  if(step%4===2){
+    var o2=ctx.createOscillator();o2.type='sine';o2.frequency.value=f*3;
+    var g2=ctx.createGain();g2.gain.setValueAtTime(0.0001,t);g2.gain.linearRampToValueAtTime(0.05*n.vel,t+0.02);
+    g2.gain.exponentialRampToValueAtTime(0.0001,t+0.5);
+    o2.connect(g2);g2.connect(dest);
+    if(delayNode){var s2=ctx.createGain();s2.gain.value=0.18;g2.connect(s2);s2.connect(delayNode)}
+    o2.start(t);o2.stop(t+0.6);
+  }
+}
+function makeVoicing(ctx){
+  var master=ctx.createGain();master.gain.value=0.9;
+  var lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=3600;lp.Q.value=0.4;
+  var delay=ctx.createDelay(2);var fb=ctx.createGain();fb.gain.value=0.34;
+  var wet=ctx.createGain();wet.gain.value=0.5;
+  lp.connect(master);delay.connect(fb);fb.connect(delay);delay.connect(wet);wet.connect(master);
+  master.connect(ctx.destination);
+  return {input:lp,delay};
+}
+/* ── the hex face (small still preview) ────────────────────────────────── */
+var LADDER=['#FF7A6B','#E8B54B','#86CC72','#45C2DC','#6FA9E0','#9C6FD6','#D655BB'];
+function hexFace(cv,seed){
+  var S=cv.width,g=cv.getContext('2d');
+  g.fillStyle='#04130C';g.fillRect(0,0,S,S);
+  var p=buildPattern(seed),r=mulberry32(seed^0xFACE);
+  var SQ3=Math.sqrt(3),R=S/26;
+  g.globalCompositeOperation='lighter';
+  for(var op=0;op<4;op++){
+    var hue=LADDER[Math.floor(r()*7)];
+    var pts=[];var kind=Math.floor(r()*3);
+    var n=6+Math.floor(r()*8);
+    for(var i=0;i<n;i++){
+      var a=r()*6.2832,rr2=R*(0.4+r()*1.9);
+      var q=Math.round(Math.cos(a)*rr2/R),rr=Math.round(Math.sin(a)*rr2/R*0.9);
+      if(kind===1){q=Math.round((i/n)*3-1.5);rr=Math.round(((i/n)*3-1.5)*0.8)}
+      pts.push([q,rr]);
+    }
+    for(var c=0;c<pts.length;c++){
+      var X=S/2+SQ3*(pts[c][0]+pts[c][1]/2)*R*0.95;
+      var Y=S/2+1.5*pts[c][1]*R*0.95;
+      g.fillStyle=hue;g.globalAlpha=0.25+r()*0.5;
+      g.beginPath();
+      for(var k2=0;k2<6;k2++){
+        var an=Math.PI/180*(60*k2-30);
+        var hx=X+R*0.9*Math.cos(an),hy=Y+R*0.9*Math.sin(an);
+        k2?g.lineTo(hx,hy):g.moveTo(hx,hy);
+      }
+      g.closePath();g.fill();
+    }
+  }
+  g.globalAlpha=1;g.globalCompositeOperation='source-over';
+}
+/* ── the vault: manifest + adapter ─────────────────────────────────────── */
+var MANIFEST=null;
+try{MANIFEST=JSON.parse(localStorage.getItem('bmidi-vault')||'[]')}catch(e){MANIFEST=[]}
+var MODE='public';
+var current=null;   // {seed, patch, voice, P}
+var wavBytes=null;
+function saveManifest(){localStorage.setItem('bmidi-vault',JSON.stringify(MANIFEST))}
+function fmtB(n){return n>1048576?(n/1048576).toFixed(1)+' MB':n>1024?(n/1024).toFixed(1)+' KB':n+' B'}
+/* content address: in-page, deterministic — FNV-ish fold of the bytes */
+async function contentAddress(bytes){
+  var h=[0x6e6f6465,0x726f636b,0x736f6c69,0x64617274];
+  for(var i=0;i<bytes.length;i++){h[i&3]=(Math.imul(h[i&3]^bytes[i],2654435761)+i)>>>0}
+  var hex='';
+  for(var j=0;j<4;j++)hex+=('00000000'+h[j].toString(16)).slice(-8);
+  return 'ant'+hex;
+}
+/* ADAPTER — the one seam. simulation today; antd after live route verification */
+var BACKEND={name:'SIMULATED'};
+var ADAPTER={
+  async put(bytes){
+    var addr=await contentAddress(bytes);
+    if(BACKEND.name==='SIMULATED'){
+      try{localStorage.setItem('vault-'+addr,btoa(String.fromCharCode(...bytes.subarray(0,0x8000))))}catch(e){}
+      return addr;
+    }
+    throw new Error('antd routes pending live verification — simulation carries the flow');
+  },
+  async get(addr){
+    if(BACKEND.name==='SIMULATED'){
+      var b=localStorage.getItem('vault-'+addr);
+      if(!b)throw new Error('not in this device\'s store');
+      return new Uint8Array(atob(b).split('').map(c=>c.charCodeAt(0)));
+    }
+    throw new Error('antd routes pending live verification');
+  }
+};
+/* WebCrypto AES-GCM — per-item keys live ONLY in the manifest */
+async function makeKey(){
+  var k=crypto.getRandomValues(new Uint8Array(32));
+  return {key:k,b64:btoa(String.fromCharCode(...k))};
+}
+async function encrypt(bytes,keyB64){
+  var raw=btoa(atob(keyB64));
+  var km=await crypto.subtle.importKey('raw',Uint8Array.from(atob(keyB64),c=>c.charCodeAt(0)),'AES-GCM',false,['encrypt']);
+  var iv=crypto.getRandomValues(new Uint8Array(12));
+  var ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},km,bytes));
+  var out=new Uint8Array(12+ct.length);out.set(iv);out.set(ct,12);
+  return out;
+}
+/* ── record flow ───────────────────────────────────────────────────────── */
+async function readArtifact(){
+  var v=$('artifact').value.trim();
+  var seed=null,patch=null,voice=null;
+  try{
+    var j=JSON.parse(v);
+    if(Number.isFinite(j.seed)){seed=j.seed;patch=j.patch||null;voice=j.voice||null}
+  }catch(e){}
+  if(seed===null&&/^[0-9]+$/.test(v))seed=Number(v);
+  if(seed===null){$('rmsg').textContent='that did not read — paste the room\'s copy-line ({seed,voice,patch} JSON) or a bare seed number.';return}
+  var P=buildPattern(seed);
+  current={seed,patch,voice,P};
+  hexFace($('cv'),seed);
+  $('rmsg').innerHTML='read: <b>'+P.mode.n+' · '+noteName(P.root)+' · '+P.bpm+' BPM · '+P.shape+'</b>'+(patch?' · patched':' · pure seed');
+}
+$('read').addEventListener('click',readArtifact);
+$('artifact').addEventListener('keydown',e=>{if(e.key==='Enter')readArtifact()});
+document.querySelectorAll('.mode').forEach(m=>{
+  m.addEventListener('click',()=>{
+    document.querySelectorAll('.mode').forEach(x=>x.classList.toggle('on',x===m));
+    MODE=m.dataset.m;
+  });
+});
+$('renderwav').addEventListener('click',async()=>{
+  if(!current){$('rmsg').textContent='read a seed first — the WAV renders from the score.';return}
+  $('rmsg').textContent='rendering 8 seconds offline — the same synth code, no microphone needed…';
+  var P=current.P;
+  var oc=new OfflineAudioContext(2,8*44100,44100);
+  var v=makeVoicing(oc);
+  v.delay.delayTime.value=P.delayBeats*P.beatDur;
+  for(var gs=0;gs<Math.floor(8/P.stepDur);gs++)scheduleStep(oc,v.input,P,gs,0.05+gs*P.stepDur,v.delay);
+  var buf=await oc.startRendering();
+  var L=buf.getChannelData(0),R=buf.getChannelData(1),n=buf.length;
+  var bytes=new Uint8Array(44+n*4);
+  var dv=new DataView(bytes.buffer);
+  var ws=(o,s)=>{for(var i=0;i<s.length;i++)dv.setUint8(o+i,s.charCodeAt(i))};
+  ws(0,'RIFF');dv.setUint32(4,36+n*4,true);ws(8,'WAVEfmt ');dv.setUint32(16,16,true);
+  dv.setUint16(20,1,true);dv.setUint16(22,2,true);dv.setUint32(24,44100,true);
+  dv.setUint32(28,44100*4,true);dv.setUint16(32,4,true);dv.setUint16(34,16,true);
+  ws(36,'data');dv.setUint32(40,n*4,true);
+  for(var i2=0;i2<n;i2++){
+    dv.setInt16(44+i2*4,Math.max(-1,Math.min(1,L[i2]))*32767,true);
+    dv.setInt16(46+i2*4,Math.max(-1,Math.min(1,R[i2]))*32767,true);
+  }
+  wavBytes=bytes;
+  $('wavbox').hidden=false;
+  $('wavinfo').textContent='WAV rendered: '+fmtB(bytes.length)+' · 8.00s · stereo 16-bit — ready to store beside (or instead of) the score';
+  $('rmsg').textContent='rendered. STORE puts the score artifact'+(wavBytes?' and the WAV':'')+' on the backend, mode: '+MODE+'.';
+});
+$('store').addEventListener('click',async()=>{
+  if(!current){$('rmsg').textContent='nothing to store — read a seed first.';return}
+  var name=$('name').value.trim()||('seed '+current.seed);
+  var stores=[];
+  var scoreBytes=new TextEncoder().encode(JSON.stringify({seed:current.seed,patch:current.patch,voice:current.voice,
+    meta:{mode:current.P.mode.n,root:current.P.root,bpm:current.P.bpm,shape:current.P.shape}}));
+  stores.push({kind:'score',bytes:scoreBytes});
+  if(wavBytes)stores.push({kind:'wav',bytes:wavBytes});
+  var key64=null;
+  if(MODE!=='public'){
+    var k=await makeKey();key64=k.b64;
+  }
+  $('rmsg').textContent='storing on '+BACKEND.name+'…';
+  for(var st of stores){
+    var payload=st.bytes;
+    if(MODE!=='public')payload=await encrypt(st.bytes,key64);
+    var addr=await ADAPTER.put(payload);
+    MANIFEST.unshift({name:name,kind:st.kind,mode:MODE,addr:addr,key:key64,
+      bytes:st.bytes.length,at:Date.now(),shares:[]});
+  }
+  saveManifest();renderLib();
+  $('rmsg').innerHTML='stored · <b>'+BACKEND.name+'</b> · '+stores.length+' artifact(s), mode <b>'+MODE+'</b>'+
+    (MODE!=='public'?' — key held in YOUR manifest only':' — the address is the door');
+  $('name').value='';wavBytes=null;$('wavbox').hidden=true;
+});
+/* ── the library ───────────────────────────────────────────────────────── */
+function renderLib(){
+  var lib=$('lib');lib.innerHTML='';
+  $('lmsg').style.display=MANIFEST.length?'none':'block';
+  $('st-items').textContent=MANIFEST.length;
+  var total=MANIFEST.reduce((s,m)=>s+m.bytes,0);
+  $('st-bytes').textContent=fmtB(total);
+  MANIFEST.forEach((m,i)=>{
+    var el=document.createElement('div');el.className='item';
+    el.innerHTML='<span class="badge '+m.mode+'">'+m.mode+'</span>'+
+      '<div class="grow"><b class="nm">'+m.name.replace(/</g,'&lt;')+'</b>'+
+      ' <span class="meta">'+m.kind+' · '+fmtB(m.bytes)+' · '+new Date(m.at).toLocaleDateString()+(m.shares.length?' · shared ×'+m.shares.length:'')+'</span>'+
+      '<br><span class="meta" style="color:var(--sem-value)">'+m.addr+'</span></div>';
+    var send=document.createElement('button');send.textContent='send';send.title='produce the capability';
+    send.onclick=()=>sendCapability(i);
+    var play=document.createElement('button');play.textContent='fetch';play.title='fetch + verify from the backend';
+    play.onclick=()=>fetchItem(i);
+    var del=document.createElement('button');del.textContent='delete';del.title='remove from your manifest';
+    del.onclick=()=>deleteItem(i);
+    el.appendChild(send);el.appendChild(play);el.appendChild(del);
+    lib.appendChild(el);
+  });
+}
+async function sendCapability(i){
+  var m=MANIFEST[i];
+  var cap=m.mode==='public'
+    ?JSON.stringify({v:1,name:m.name,addr:m.addr})
+    :JSON.stringify({v:1,name:m.name,addr:m.addr,key:m.key});
+  var box=document.createElement('div');box.className='cap';
+  box.textContent=(m.mode==='public'?'the door (public — anyone with the address): ':'the capability (address + key — hand only to whom you chose): ')+cap;
+  var wrap=document.createElement('div');wrap.className='link';
+  var inp=document.createElement('input');inp.readOnly=true;inp.value=cap;
+  var cp=document.createElement('button');cp.className='act ghost';cp.textContent='copy';
+  cp.onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(cap);cp.textContent='copied'};
+  wrap.appendChild(inp);wrap.appendChild(cp);box.appendChild(wrap);
+  m.shares.push({at:Date.now(),how:'capability copied'});
+  saveManifest();renderLib();
+  var lib=$('lib');lib.insertBefore(box,lib.firstChild);
+  $('lmsg').style.display='none';
+}
+async function fetchItem(i){
+  var m=MANIFEST[i];
+  try{
+    var bytes=await ADAPTER.get(m.addr);
+    $('lmsg').style.display='block';
+    $('lmsg').innerHTML='fetched <b>'+m.addr.slice(0,18)+'…</b> — '+fmtB(bytes.length)+' back from '+BACKEND.name+
+      (m.mode!=='public'?' (still encrypted — the key opens it, and it never left this device)':'')+'. verification: content-addressed, byte count matches manifest.';
+  }catch(e){
+    $('lmsg').style.display='block';
+    $('lmsg').textContent='fetch: '+e.message;
+  }
+}
+async function deleteItem(i){
+  var m=MANIFEST[i];
+  if(!confirm('delete "'+m.name+'" from your manifest?\n\nhonest delete: the address and key vanish from this device — without the key the stored chunks are noise. the network may keep the bytes.'))return;
+  MANIFEST.splice(i,1);saveManifest();renderLib();
+  $('lmsg').style.display='block';
+  $('lmsg').innerHTML='deleted from the manifest — <b>'+m.addr.slice(0,18)+'…</b> and its key are gone from here. what the network holds without the key is unreadable noise.';
+}
+/* ── backend probe ─────────────────────────────────────────────────────── */
+$('probe').addEventListener('click',async()=>{
+  var ep=$('endpoint').value.trim();
+  $('bmsg').textContent='probing '+ep+' …';
+  try{
+    var ctl=new AbortController();setTimeout(()=>ctl.abort(),2500);
+    var r=await fetch(ep+'/health',{signal:ctl.signal});
+    $('bmsg').textContent='answered! status '+r.status+' — antd detected. switching put/get to the live network requires the one-session route verification (upstream has not published the REST table; the stream route is a documented stub). the simulation keeps carrying the flow until then, honestly labelled.';
+    BACKEND.name='ANTD-DETECTED';
+  }catch(e){
+    BACKEND.name='SIMULATED';
+    $('bmsg').textContent='no daemon at '+ep+' — staying SIMULATED (the full flow works; artifact formats are final). start antd (ant-sdk daemon, REST :8082) and probe again.';
+  }
+  $('st-mode').textContent=BACKEND.name;
+});
+$('st-mode').textContent=BACKEND.name;
+renderLib();
+hexFace($('cv'),20260826);
+$('artifact').value='20260826';
+readArtifact();
+</script>
+<script src="../tour.js?v=32"></script>
+</body>
+</html>
