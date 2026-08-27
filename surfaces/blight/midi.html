@@ -85,6 +85,19 @@ nav#fleetnav{margin-top:24px;font-size:11.5px;color:var(--ink-dim)}
 .pitch .num b.ok{color:var(--sem-solution)}
 .pitch .num span{font-size:10px;color:var(--ink-dim)}
 button.copy{background:var(--bg-well);border:1px solid var(--line);color:var(--ink);font:600 11px ui-monospace,Menlo,Consolas,monospace;padding:7px 12px;border-radius:8px;cursor:pointer;margin-top:10px}
+/* the swap popup — first-party chrome, the depth ladder's top rung */
+.modal{position:fixed;inset:0;background:rgba(3,8,6,.78);display:flex;align-items:flex-start;justify-content:center;padding:9vh 14px 20px;z-index:50}
+.modal[hidden]{display:none}
+.sheet{background:var(--bg-card);border:1px solid var(--line);border-radius:14px;padding:16px;max-width:430px;width:100%;box-shadow:0 18px 60px rgba(0,0,0,.5)}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.sheet-head b{font-size:14px}
+.sheet-head .x{background:var(--bg-well);border:1px solid var(--line);color:var(--ink-mut);border-radius:8px;width:28px;height:28px;cursor:pointer;font-size:12px}
+.sw-line{font-size:12px;color:var(--ink-mut);margin:6px 0}
+.sw-note{font-size:11px;color:var(--ink-dim);margin:8px 0 0}
+.sw-lab{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.9px;color:var(--ink-dim);margin-top:10px}
+#sw-eth{width:100%;background:var(--bg-well);border:1px solid var(--line);border-radius:9px;color:var(--ink);font:13px ui-monospace,Menlo,Consolas,monospace;padding:10px 12px;margin-top:4px}
+#sw-eth:focus{outline:none;border-color:var(--you)}
+.sw-quote{font-size:12.5px;color:var(--ink);background:var(--bg-well);border-left:3px solid var(--sem-value);border-radius:0 9px 9px 0;padding:9px 12px;margin-top:10px;min-height:1.4em}
 button.copy:active{transform:translateY(1px)}
 @media (max-width:600px){.stat b{font-size:24px}.stat.science b{font-size:14px}}
 </style>
@@ -148,7 +161,8 @@ performance, every time, forever.</p>
   <p style="font-size:12.5px;margin-top:6px;color:var(--ink-mut)">every balance is the same piece at a higher
   resolution — and only <b style="color:var(--sem-value)">1,050,000+ whole MiDi</b> carries the <b>level-5
   container: a 3:33 psytrance journey at 162 BPM</b>, the full ensemble, hex by hex. this page reads the
-  chain and never touches your wallet; the numbers below are read live from the contract this surface
+  chain; the swap popup below is the one write it can ever propose — your wallet signs it, the page never
+  sees a key. the numbers below are read live from the contract this surface
   performs — <b>MiDi B</b>, the deployment with the renounced owner, the burned supply and the live pool.
   same name, same symbol, never interchangeable. <b>features are equal on every deployment</b> — A and C
   are instrument contracts, your balance sets your level wherever it lives, and future deployments can be
@@ -160,10 +174,11 @@ performance, every time, forever.</p>
     <div class="num"><b id="pi-pool">…</b><span>the live pool — WETH against MiDi, the counterparty of every buy</span></div>
     <div class="num"><b id="pi-supply">…</b><span>total supply — whole tokens, fixed by the contract</span></div>
   </div>
+  <button class="act" id="swapbtn" style="width:100%;margin-top:12px">click here — swap ETH for MiDi from your wallet</button>
   <button class="copy" id="copyaddr">copy the contract address</button>
-  <p class="hint">to buy: swap WETH for MiDi through the pool on any Base interface you trust, then paste your
-  address above — your balance becomes the seed and the piece resolves to your level. numbers are read live
-  at load; refresh for the current state.</p>
+  <p class="hint">the swap popup builds the trade in this page and your wallet signs it — the page never sees
+  a key, and nothing connects until you press. after it lands, paste your address above: your balance is the
+  seed and the piece resolves to your level. numbers are read live at load; refresh for the current state.</p>
 </section>
 
 <p class="record" id="record"><b>nothing is stored, nothing is sampled.</b> the seed is the whole
@@ -185,6 +200,28 @@ chrome only</b> · the sound is Web Audio oscillators, synthesized live — no a
 build step, zero off-origin beyond the RPC read · under <b>reduced motion</b> the performance rests as
 one composed, silent frame — a quiet one, not a lesser one.</p>
 <nav id="fleetnav"></nav>
+
+<div class="modal" id="swapmodal" hidden>
+  <div class="sheet" role="dialog" aria-label="swap ETH for MiDi">
+    <div class="sheet-head"><b>get MiDi in your wallet</b><button class="x" id="swapclose" aria-label="close">✕</button></div>
+    <p class="sw-line">ETH → MiDi through the live 1% pool · <b>MiDi B</b>, the canonical holding — the swap
+    rides B's pool even while the surface reads another instrument contract.</p>
+    <div id="sw-connect">
+      <p class="sw-note">this page builds the swap; your wallet signs it. the page never sees a key, and
+      window.ethereum is touched only by your click — nothing auto-connects. works with any injected wallet:
+      Base Wallet, Coinbase Wallet, MetaMask, Rabby.</p>
+      <button class="act" id="sw-connectbtn" style="width:100%;margin-top:10px">connect your wallet</button>
+    </div>
+    <div id="sw-trade" hidden>
+      <p class="sw-line">wallet · <span id="sw-acct" style="font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--ink)"></span> · Base</p>
+      <label class="sw-lab" for="sw-eth">you pay (ETH)</label>
+      <input id="sw-eth" type="text" inputmode="decimal" value="0.01" spellcheck="false" autocomplete="off">
+      <p class="sw-quote" id="sw-quote">quoting from the pool…</p>
+      <button class="voice" id="sw-go" style="width:100%">swap — i sign in my wallet</button>
+      <p class="sw-note" id="sw-status">1% slippage guard · 20-minute deadline · quote read live from the pool's quoter</p>
+    </div>
+  </div>
+</div>
 
 <script>
 "use strict";
@@ -1030,10 +1067,12 @@ function promptRoute(qRaw){
     return;
   }
   if(/buy|token|price|swap|pool|hold|get midi|invest/.test(lq)){
+    $('swapbtn').click();           /* the sales close: the trade, one tap away */
     var pitch=$('pitch');
     if(pitch.scrollIntoView)pitch.scrollIntoView({behavior:REDUCED?'auto':'smooth',block:'center'});
     pitch.style.outline='1px solid var(--sem-value)';
-    bmidiSay(PITCH_SAY);bloomFor(lq);return;
+    bmidiSay(PITCH_SAY+' the popup is open — your wallet signs, the page never sees a key.');
+    bloomFor(lq);return;
   }
   if(/who|you|bmidi|agent|what are you/.test(lq)){
     bmidiSay('bMiDi — resident visual sound aigenT. strictly abstract, psychedelic: the alex grey / amanda sage lineage, painted in the token\u2019s own palette on the hex lattice it was born on.');
@@ -1117,6 +1156,77 @@ $('copyaddr').addEventListener('click',function(){
   var done=function(){btn.textContent='copied — '+t.slice(0,8)+'…'+t.slice(-6)};
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(done,done);
   else done();
+});
+/* ══ THE SWAP POPUP — the page builds the trade, the wallet signs it ════════
+   ETH -> MiDi through the live 1% UniswapV3 pool on MiDi B (the canonical
+   holding) via SwapRouter02; the quote is read live from QuoterV2. selectors
+   computed with this page's own keccak, byte-verified against the contracts'
+   code on Base (e2e/midi-swap-facts.mjs). no widget, no keys, no
+   auto-connect: window.ethereum is touched only by your click. */
+var SWAP={
+  router:'0x2626664c2603336E57B271c5C0b26F421741e481',  /* SwapRouter02 on Base */
+  quoter:'0x3d4e44Eb1374240CE5F1B871ab261CD16335B76a',  /* QuoterV2 on Base */
+  weth:'0x4200000000000000000000000000000000000006',
+  midi:null,acct:null,quote:null,ethWei:0n
+};
+function swapStatus(t){$('sw-status').innerHTML=t}
+$('swapbtn').addEventListener('click',function(){
+  SWAP.midi=CONTRACTS[2].addr;           /* B — the swap always rides the canonical pool */
+  $('swapmodal').hidden=false;
+  if(SWAP.acct){$('sw-connect').hidden=true;$('sw-trade').hidden=false;quoteSwap();}
+});
+$('swapclose').addEventListener('click',function(){$('swapmodal').hidden=true});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')$('swapmodal').hidden=true});
+async function ensureBase(){
+  var cid=await window.ethereum.request({method:'eth_chainId'});
+  if(cid==='0x2105')return true;
+  try{await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:'0x2105'}]});}
+  catch(e){
+    try{await window.ethereum.request({method:'wallet_addEthereumChain',params:[{chainId:'0x2105',chainName:'Base',nativeCurrency:{name:'Ether',symbol:'ETH',decimals:18},rpcUrls:['https://mainnet.base.org'],blockExplorerUrls:['https://basescan.org']}]});}
+    catch(e2){swapStatus('your wallet would not switch to Base — no swap was built, nothing was sent.');return false}
+  }
+  return (await window.ethereum.request({method:'eth_chainId'}))==='0x2105';
+}
+$('sw-connectbtn').addEventListener('click',async function(){
+  if(!window.ethereum){swapStatus('no injected wallet found — this popup works with Base Wallet, Coinbase Wallet, MetaMask or Rabby in this browser. nothing was touched.');return}
+  try{
+    var acct=await window.ethereum.request({method:'eth_requestAccounts'});
+    if(!acct||!acct.length){swapStatus('no account shared — nothing was touched.');return}
+    if(!await ensureBase())return;
+    SWAP.acct=acct[0];
+    $('sw-acct').textContent=SWAP.acct.slice(0,8)+'…'+SWAP.acct.slice(-6);
+    $('sw-connect').hidden=true;$('sw-trade').hidden=false;
+    swapStatus('connected — quote read live; 1% slippage guard; 20-minute deadline.');
+    quoteSwap();
+  }catch(e){swapStatus(String(e&&e.message||e).slice(0,120)+' — nothing was touched.')}
+});
+async function quoteSwap(){
+  var v=parseFloat($('sw-eth').value);
+  if(!(v>0)){$('sw-quote').textContent='type an ETH amount';SWAP.quote=null;return}
+  SWAP.ethWei=BigInt(Math.round(v*1e18));
+  $('sw-quote').textContent='quoting from the pool…';
+  var q=await rpc([{to:SWAP.quoter,data:'0xc6a5026a'+AD(SWAP.weth)+AD(SWAP.midi)+W(SWAP.ethWei)+W(10000)+W(0)}]);
+  if(!q||!q[0]||q[0]==='0x'){$('sw-quote').textContent='the quoter did not answer right now — nothing invented; try again.';SWAP.quote=null;return}
+  SWAP.quote=BigInt('0x'+q[0].slice(2,66));
+  var whole=Number(SWAP.quote/1000000000n);
+  var lv=lvlOf(Math.floor(whole));
+  $('sw-quote').innerHTML='≈ <b style="color:var(--sem-value)">'+whole.toLocaleString(undefined,{maximumFractionDigits:0})+
+    ' MiDi</b> · lands level '+lv+(lv===5?' — the 3:33 container opens':'');
+}
+$('sw-eth').addEventListener('input',function(){clearTimeout(SWAP.qt);SWAP.qt=setTimeout(quoteSwap,450)});
+$('sw-go').addEventListener('click',async function(){
+  if(!SWAP.quote||!SWAP.acct){swapStatus('no live quote — nothing was sent.');return}
+  var minOut=SWAP.quote*99n/100n;
+  var deadline=Math.floor(Date.now()/1000)+1200;
+  /* exactInputSingle((tokenIn,tokenOut,fee,recipient,deadline,amountIn,minOut,sqrtPriceLimit)):
+     amountIn=0 with msg.value — SwapRouter02 wraps the ETH itself */
+  var data='0x414bf389'+W(SWAP.weth)+W(SWAP.midi)+W(10000)+W(SWAP.acct)+W(deadline)+W(0)+W(minOut)+W(0);
+  swapStatus('your wallet has the trade — sign it or refuse it; the page cannot sign for you.');
+  try{
+    var hash=await window.ethereum.request({method:'eth_sendTransaction',params:[{from:SWAP.acct,to:SWAP.router,value:'0x'+SWAP.ethWei.toString(16),data:data}]});
+    swapStatus('sent — tx <a href="https://basescan.org/tx/'+hash+'" target="_blank" rel="noopener">'+hash.slice(0,14)+'…</a>. '+
+      'when it lands, paste your address above: your balance is the seed, the piece resolves to your level.');
+  }catch(e){swapStatus(String(e&&e.message||e).slice(0,140)+' — nothing was sent.')}
 });
 /* the opening face: level 0 by law — the static IS the piece's first state */
 setSeed(7,extraOfSeed(7),'opening face — level zero, the static').then(function(){
