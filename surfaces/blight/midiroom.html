@@ -1,0 +1,691 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>bMiDi · the room — beginner, DJ, producer</title>
+<style>
+/* ── estate tokens, ROYGBIV ladder, SEMANTIC COLOUR meanings first ──────
+     harm = guard violet (resting states, never error-red)
+     solution = biomass (settled/deterministic) · value = honey (numbers)
+     system = info (the room fabric) · science = ai (measured score)      */
+:root{
+  --you:#D655BB; --b-value:#E8B54B; --biomass:#86CC72; --ai:#45C2DC;
+  --info:#6FA9E0; --guard:#B7A8F7; --sovereign:#9C6FD6;
+  --sem-harm:var(--guard); --sem-solution:var(--biomass); --sem-value:var(--b-value);
+  --sem-system:var(--info); --sem-science:var(--ai);
+  --bg:#06110C; --bg-card:#0C1412; --bg-well:#08100D;
+  --ink:#E9F2EC; --ink-mut:#8FA79C; --ink-dim:#648176; --line:#1E2B26;
+  --radius:12px;
+}
+*{box-sizing:border-box;margin:0}
+html,body{background:var(--bg)}
+body{font:13px/1.6 ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif;color:var(--ink);
+  padding:18px 12px 64px;max-width:1080px;margin:0 auto}
+a{color:#B79FE0}
+h1{font-size:clamp(20px,5vw,28px);letter-spacing:-.4px;line-height:1.2}
+h1.grad{background:linear-gradient(92deg,var(--sovereign),var(--you));-webkit-background-clip:text;background-clip:text;color:transparent}
+.law{color:var(--ink-mut);font-size:12px;margin-top:2px}
+.law b{color:#B79FE0}
+/* the LEVEL toggle — one organism, three densities */
+.levels{display:flex;gap:4px;background:var(--bg-well);border:1px solid var(--line);border-radius:11px;padding:4px;margin-top:12px}
+.levels button{flex:1;border:0;background:transparent;color:var(--ink-dim);font:650 12px ui-sans-serif,system-ui,sans-serif;
+  text-transform:uppercase;letter-spacing:1px;padding:9px 6px;border-radius:8px;cursor:pointer}
+.levels button.on{background:var(--bg-card);color:var(--you);box-shadow:inset 0 0 0 1px var(--line)}
+.levels button small{display:block;font:400 9.5px ui-sans-serif;letter-spacing:.4px;text-transform:none;color:inherit;opacity:.75}
+.panel{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-top:10px}
+.well{background:var(--bg-well);border:1px solid var(--line);border-radius:9px;padding:10px}
+h3{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink-dim);margin-bottom:8px}
+/* stats + stage */
+.stats{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.stat{flex:1;min-width:110px;background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px}
+.stat.pstat{background:var(--bg-well)}
+.stat b{display:block;font-size:32px;line-height:1.1;font-family:ui-monospace,Menlo,Consolas,monospace;color:#B79FE0;word-break:break-all}
+.stat b.seed{color:var(--sem-value);font-size:32px}
+.stat.science b{color:var(--sem-science);font-size:18px;padding-top:4px}
+.stat .l{display:block;font-size:9.5px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.9px;margin-top:2px}
+.stage{position:relative;display:flex;align-items:center;justify-content:center;padding:12px}
+canvas{width:100%;max-width:520px;height:auto;display:block;border-radius:10px;image-rendering:pixelated}
+.playrow{display:flex;flex-direction:column;align-items:center;gap:6px}
+button.voice{background:var(--you);border:0;color:#1a0716;font:650 15px/1.2 ui-sans-serif,system-ui,sans-serif;padding:16px 30px;border-radius:12px;cursor:pointer;box-shadow:0 0 24px rgba(214,85,187,.18)}
+button.voice.off{background:var(--bg-well);color:var(--ink-mut);border:1px solid var(--line);box-shadow:none}
+button.voice:disabled{background:var(--bg-well);color:var(--ink-dim);border:1px dashed var(--guard);cursor:not-allowed;box-shadow:none}
+.plain{font-size:11px;color:var(--ink-dim);text-align:center;max-width:480px}
+/* bMiDi — the synergy panel */
+.ask{display:flex;gap:6px;flex-wrap:wrap}
+.ask input{flex:1;min-width:190px;background:var(--bg-well);border:1px solid var(--line);border-radius:9px;color:var(--ink);font:12.5px ui-monospace,Menlo,Consolas,monospace;padding:10px 12px}
+.ask input:focus{outline:none;border-color:var(--you)}
+button.act{background:var(--you);border:0;color:#1a0716;font:600 12.5px ui-sans-serif,system-ui,sans-serif;padding:10px 14px;border-radius:9px;cursor:pointer}
+button.act.ghost{background:var(--bg-well);color:var(--ink-mut);border:1px solid var(--line)}
+.proposals{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.prop{flex:1;min-width:150px;max-width:220px;background:var(--bg-well);border:1px solid var(--line);border-radius:10px;padding:10px;cursor:pointer}
+.prop:hover{border-color:var(--sovereign)}
+.prop b{display:block;font:600 12px ui-monospace,Menlo,monospace;color:var(--sem-value)}
+.prop span{display:block;font-size:10.5px;color:var(--ink-mut)}
+.prop .q{margin-top:6px;font-size:10px;color:var(--sovereign-soft,#B79FE0)}
+/* queue / setlist */
+.queue{display:flex;flex-direction:column;gap:6px}
+.qitem{display:flex;align-items:center;gap:10px;background:var(--bg-well);border:1px solid var(--line);border-radius:9px;padding:8px 10px}
+.qitem.now{border-color:var(--you)}
+.qitem b{font:600 12px ui-monospace,Menlo,monospace;color:var(--sem-value);min-width:86px}
+.qitem span{font-size:11px;color:var(--ink-mut);flex:1}
+.qitem button{border:0;background:transparent;color:var(--ink-dim);cursor:pointer;font-size:12px;padding:2px 6px}
+.qitem button:hover{color:var(--you)}
+/* DJ controls */
+.djrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.knob{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:9.5px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.7px}
+.knob input[type=range]{width:130px;accent-color:var(--ai)}
+.knob b{font:600 12px ui-monospace,Menlo,monospace;color:var(--sem-science)}
+.pads{display:flex;gap:6px;flex-wrap:wrap}
+.pad{width:52px;height:40px;border-radius:8px;border:1px solid var(--line);background:var(--bg-well);color:var(--ink-mut);font:600 10px ui-sans-serif;cursor:pointer}
+.pad:active{background:var(--bg-card);color:var(--you)}
+.pad:disabled{opacity:.4;cursor:not-allowed}
+/* producer steps */
+.steps{display:grid;grid-template-columns:repeat(32,1fr);gap:2px;margin-top:8px}
+.st{height:26px;border-radius:4px;background:var(--bg-well);border:1px solid var(--line);cursor:pointer}
+.st.hi{background:var(--biomass);border-color:var(--biomass)}
+.st.md{background:#3f6b4c;border-color:#3f6b4c}
+.st.lo{background:#24402d;border-color:#24402d}
+.st:nth-child(4n+1){margin-left:4px}
+.patchbox{font:10.5px ui-monospace,Menlo,monospace;color:var(--ink-mut);background:var(--bg-well);border:1px solid var(--line);border-radius:8px;padding:8px;word-break:break-all;margin-top:8px}
+/* room log */
+.room{display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto}
+.ev{display:flex;gap:8px;align-items:baseline;font-size:11px}
+.ev .k{font:600 9px ui-monospace,Menlo,monospace;border:1px solid var(--line);border-radius:4px;padding:1px 5px;color:var(--sem-system);white-space:nowrap}
+.ev .f{color:var(--sovereign-soft,#B79FE0);white-space:nowrap;font-size:10px}
+.ev .c{color:var(--ink-mut)}
+.legend{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.lg{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--ink-mut);border:1px solid var(--line);border-radius:999px;padding:2px 9px}
+.lg i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.foot{margin-top:16px;font-size:10.5px;color:var(--ink-dim)}
+.foot b{color:var(--ink-mut)}
+.msg{font-size:11.5px;color:var(--ink-mut);margin-top:6px;min-height:1.2em}
+@media (max-width:600px){.stat b{font-size:22px}.stat.science b{font-size:14px}.steps{grid-template-columns:repeat(16,1fr)}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<h1 class="grad">bMiDi · the room</h1>
+<p class="law">one organism, <b>three densities</b> — the same performance whether you came to listen,
+to DJ, or to produce. the synergy is the gold: you say what you want in plain words, bMiDi searches
+seed space, you queue what sings. everything is math from one integer — nothing stored, nothing fetched.</p>
+
+<div class="levels" id="levels">
+  <button data-lv="beginner" class="on">beginner<small>press play, feel it</small></button>
+  <button data-lv="dj">dj<small>queue · sync · filter · pads</small></button>
+  <button data-lv="producer">producer<small>steps · voice · patch</small></button>
+</div>
+
+<div class="stats">
+  <div class="stat pstat"><b class="seed" data-hero-number id="st-seed">—</b><span class="l">the seed · the whole performance</span></div>
+  <div class="stat science"><b id="st-mode">—</b><span class="l">mode · key · tempo</span></div>
+  <div class="stat science"><b id="st-shape">—</b><span class="l">shape · voice · symmetry</span></div>
+</div>
+
+<section class="panel">
+  <div class="stage"><canvas id="cv" width="8" height="8"></canvas></div>
+  <div class="playrow">
+    <button class="voice" id="voice" disabled>the room is waiting for its seed</button>
+    <p class="plain" id="plainwords">nothing sounds until you press the button — sound never starts on its own.</p>
+  </div>
+</section>
+
+<section class="panel" id="p-ask">
+  <h3>ask bMiDi — plain words in, seeds out</h3>
+  <div class="ask">
+    <input id="askin" type="text" placeholder="e.g. something dorian, slow, around 90 · fast lydian for a peak · wandering and dark">
+    <button class="act" id="ask">ask bMiDi</button>
+  </div>
+  <div class="proposals" id="proposals"></div>
+  <p class="msg" id="askmsg">bMiDi composes by SEARCHING seed space — the score is a pure function, so asking is scanning.</p>
+</section>
+
+<section class="panel" id="p-queue" hidden>
+  <h3>the setlist — the room's discography</h3>
+  <div class="queue" id="queue"></div>
+  <p class="msg" id="qmsg">empty — ask bMiDi above, or tap a proposal. the setlist is the room's memory of tonight.</p>
+</section>
+
+<section class="panel" id="p-dj" hidden>
+  <h3>dj controls — the performance deck</h3>
+  <div class="djrow">
+    <div class="knob">filter<b id="fv-cut">14.0</b><input type="range" id="cut" min="1" max="14.2" step="0.1" value="14"></div>
+    <div class="knob">delay<b id="fv-del">0.30</b><input type="range" id="del" min="0" max="0.7" step="0.02" value="0.3"></div>
+    <button class="act ghost" id="tap">tap bpm</button>
+    <button class="act ghost" id="sync">sync — find seeds at <span id="tapv">—</span></button>
+    <button class="act ghost" id="energy">the drop</button>
+  </div>
+  <div class="pads" style="margin-top:10px">
+    <button class="pad" id="pad1" disabled>spark</button>
+    <button class="pad" id="pad2" disabled>5th stab</button>
+    <button class="pad" id="pad3" disabled>octave</button>
+    <button class="pad" id="pad4" disabled>rest</button>
+  </div>
+  <p class="msg">deck fx live on top of the score — the composition never changes; the night does.</p>
+</section>
+
+<section class="panel" id="p-producer" hidden>
+  <h3>producer — the score under your hands</h3>
+  <p class="msg" style="margin-top:0">tap a step to cycle its weight (off / soft / full). edits layer as a <b>patch</b> on the seed — seed + patch is still a reproducible artifact, copy it below.</p>
+  <div class="steps" id="steps"></div>
+  <div class="djrow" style="margin-top:12px">
+    <div class="knob">wave<b id="fv-wave">tri</b><input type="range" id="wave" min="0" max="1" step="1" value="0"></div>
+    <div class="knob">drone<b id="fv-drone">0.05</b><input type="range" id="drone" min="0" max="0.12" step="0.005" value="0.05"></div>
+    <button class="act ghost" id="copypatch">copy seed+patch</button>
+    <button class="act ghost" id="clearpatch">clear patch</button>
+  </div>
+  <div class="patchbox" id="patchbox">patch: none — the pure seed plays</div>
+</section>
+
+<section class="panel">
+  <h3>the room log — one signed line per moment</h3>
+  <div class="room" id="room"></div>
+  <p class="msg">this demo keeps the room LOCAL — the relay lane wires this exact log to buzz: every line becomes a signed Nostr event, bMiDi answers with its own key, and the setlist becomes the channel's history. same page, same file, one origin more.</p>
+</section>
+
+<div class="legend" id="legend"></div>
+<p class="foot"><b>provenance.</b> one self-contained file · web-based — the estate stack ethos: no installed client, no CDN, no build step, zero off-origin · the score, the art and the room are math from one seed · sound is Web Audio oscillators only · under reduced motion the room rests as one composed silent frame · the bMiDi "agent" here runs entirely on your machine as a demo of the search loop — the real one lives behind the relay lane.</p>
+
+<script>
+"use strict";
+/* ══ deterministic core (the midi.html engine, carried over) ═════════════ */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function hash01(){var h=(arguments[0]|0)*374761393+(arguments[1]|0)*668265263+(arguments[2]|0)*2246822519+(arguments[3]|0)^((arguments[4]||0)*3266489917);h=Math.imul(h^(h>>>13),1274126177);return((h^(h>>>16))>>>0)/4294967296}
+var $=id=>document.getElementById(id);
+var REDUCED=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var LADDER=[{n:'root',c:'#FF7A6B'},{n:'sacral',c:'#E8B54B'},{n:'solar',c:'#86CC72'},
+  {n:'heart',c:'#45C2DC'},{n:'throat',c:'#6FA9E0'},{n:'brow',c:'#9C6FD6'},{n:'crown',c:'#D655BB'}];
+function hueToRgb(h,s,l){var a=s*Math.min(l,1-l);var f=n=>{var k=(n+h/30)%12;return l-a*Math.max(Math.min(k-3,9-k,1),-1)};return[f(0),f(8),f(4)]}
+function rgbOf(name,dV){var i=LADDER.findIndex(x=>x.n===name);var rgb=hueToRgb(i/7*360,0.62,0.52+(dV||0));return rgb}
+function css(rgb,a){return 'rgba('+Math.round(rgb[0]*255)+','+Math.round(rgb[1]*255)+','+Math.round(rgb[2]*255)+','+(a===undefined?1:a)+')'}
+var MODES=[{n:'Dorian',iv:[0,2,3,5,7,9,10]},{n:'Lydian',iv:[0,2,4,6,7,9,11]},{n:'Phrygian',iv:[0,1,3,5,7,8,10]}];
+function buildPattern(seed){
+  var r=mulberry32(seed^0x5EED);
+  var root=36+Math.floor(r()*22);
+  var mode=MODES[Math.floor(r()*3)];
+  var bpm=72+Math.floor(r()*61);
+  var shapeName=['rising','falling','rise-and-return','wandering'][Math.floor(r()*4)];
+  var steps=32,pat=[];
+  for(var s=0;s<steps;s++){
+    var d,o;
+    if(shapeName==='rising'){d=(s*2)%7;o=1+Math.floor((s*2)/7)%2}
+    else if(shapeName==='falling'){d=(6-((s*2)%7)+7)%7;o=1+Math.floor((s*2)/7)%2}
+    else if(shapeName==='rise-and-return'){var k=s<16?s*2:(31-s)*2;d=k%7;o=1+Math.floor(k/7)%2}
+    else{d=Math.floor(r()*7);o=1+Math.floor(r()*2)}
+    pat.push({midi:root+mode.iv[d]+12*o,dur:[0.5,1,1,2][Math.floor(r()*4)],vel:+(0.5+r()*0.5).toFixed(3)});
+  }
+  return {root:root,mode:mode,bpm:bpm,shape:shapeName,pat:pat,
+    wave:['triangle','sine','sine','triangle'][Math.floor(r()*4)],
+    delayBeats:r()<0.5?0.375:0.5,stepDur:60/bpm/2,beatDur:60/bpm,
+    sym:[4,6,8][Math.floor(r()*3)]};
+}
+var FORMS=[
+  function ring(rr){var R=4+rr()*7,out=[],thick=1+(rr()*2|0);
+    for(var x=-14;x<=14;x++)for(var y=-14;y<=14;y++){var d2=x*x+y*y;
+      if(d2<=(R+thick)*(R+thick)&&d2>=(R-0.5)*(R-0.5))out.push([x,y])}return out},
+  function spokes(rr){var k=3+(rr()*4|0),L=6+rr()*7,out=[];
+    for(var i=0;i<k;i++){var a=i/k*6.2832;
+      for(var t=2;t<L;t++)out.push([Math.round(Math.cos(a)*t),Math.round(Math.sin(a)*t)])}return out},
+  function cluster(rr){var L=10+rr()*18,out=[],x=0,y=0;
+    for(var i=0;i<L;i++){out.push([Math.round(x),Math.round(y)]);
+      x+=(rr()-0.5)*2.6;y+=(rr()-0.5)*2.6}return out},
+  function checker(rr){var w=4+(rr()*5|0),h=4+(rr()*5|0),out=[];
+    for(var x=0;x<w;x++)for(var y=0;y<h;y++)if((x+y)%2===0)out.push([x-(w>>1),y-(h>>1)]);return out},
+  function serpent(rr){var L=16+rr()*14,out=[],x=-8,y=0,a=0;
+    for(var i=0;i<L;i++){out.push([Math.round(x),Math.round(y)]);
+      a+=(rr()-0.5)*1.5;x+=Math.cos(a)*1.8;y+=Math.sin(a)*1.8}return out},
+  function wedge(rr){var k=3+(rr()*4|0),L=5+rr()*6,out=[],span=6.2832/k*0.5,phase=rr()*6.28;
+    for(var i=0;i<k;i++){var b=i*6.2832/k+phase;
+      for(var t=2;t<L;t++)for(var u=-t*0.4;u<=t*0.4;u+=1){
+        var a2=b+u/t*span;out.push([Math.round(Math.cos(a2)*t),Math.round(Math.sin(a2)*t)])}}return out}
+];
+function formForStep(seed,P,gs){
+  var s=gs%32,l=Math.floor(gs/32)%4;
+  var fr=mulberry32(((seed>>>0)^0xF0B0)+gs*7919);
+  var note=P.pat[s];
+  var lead=(0.5+fr()*1.0)*P.beatDur;
+  var noteT=gs*P.stepDur;
+  var hold=note.dur*P.stepDur*(0.9+fr()*0.5);
+  var die=(0.25+fr()*0.4)*P.beatDur;
+  var cells=FORMS[Math.floor(fr()*FORMS.length)](fr);
+  return {gs:gs,start:noteT-lead,end:noteT+hold+die,noteT:noteT,dieStart:noteT+hold,
+    cells:cells,hue:LADDER[Math.floor(fr()*7)].n,
+    Cn:[P.sym,4,6,8][Math.floor(fr()*4)],mirror:fr()<0.7,depth:fr()<0.18,
+    cx:0.5+(fr()*0.5-0.25),cy:0.5+(fr()*0.5-0.25),rad:0.12+fr()*0.16,
+    rim:cells.length<=26&&fr()<0.5,id:gs};
+}
+function fieldForms(seed,P){
+  var out=[];
+  for(var i=0;i<3;i++){
+    var fr=mulberry32((seed^0xF1E1D)+i*911);
+    out.push({start:-2,end:1e9,cells:FORMS[i%3==0?0:2](fr),hue:LADDER[2+i*2>6?6:2+i*2].n,
+      Cn:P.sym,mirror:true,depth:false,cx:0.5,cy:0.5,rad:0.34,field:true,rim:false,id:-1-i});
+  }
+  return out;
+}
+var G=72,S=520,cell=1,ctx2d=null;
+function setupCanvas(){
+  var cv=$('cv'),dpr=Math.min(window.devicePixelRatio||1,2);
+  var cssW=Math.min(cv.parentElement.clientWidth-8,520);
+  S=Math.round(cssW*dpr);cv.width=S;cv.height=S;cv.style.height=cssW+'px';
+  cell=S/G;ctx2d=cv.getContext('2d');ctx2d.imageSmoothingEnabled=false;
+}
+function drawGround(){
+  ctx2d.globalCompositeOperation='source-over';
+  ctx2d.fillStyle='#04130C';ctx2d.fillRect(0,0,S,S);
+  ctx2d.globalCompositeOperation='multiply';
+  for(var i=0;i<10;i++){
+    var x=hash01(i,7,S,3)*S,y=hash01(i,11,S,5)*S,w=S*(0.18+hash01(i,13,S,9)*0.2);
+    ctx2d.fillStyle='rgba(70,110,86,0.20)';ctx2d.fillRect(x,y,w,w*0.8);
+  }
+}
+var rimBudget=0;
+function drawForm(f,tNow){
+  var grow=Math.max(0.08,(f.noteT!==undefined?f.noteT-f.start:0.5));
+  var alpha=1;
+  if(tNow!==null&&tNow!==undefined){
+    if(tNow<f.start||tNow>f.end)return;
+    if(tNow<f.start+grow)alpha=(tNow-f.start)/grow;
+    else if(tNow>f.dieStart)alpha=Math.max(0,1-(tNow-f.dieStart)/(f.end-f.dieStart+1e-9));
+  }
+  var cx=f.cx*S,cy=f.cy*S;
+  var rgb=rgbOf(f.hue,0);
+  var comp=f.depth?'multiply':'lighter';
+  for(var k=0;k<f.Cn;k++){
+    var ang=k/f.Cn*6.2832,cos=Math.cos(ang),sin=Math.sin(ang);
+    for(var mi=0;mi<(f.mirror?2:1);mi++){
+      var mys=mi?-1:1;
+      for(var c=0;c<f.cells.length;c++){
+        var cc=f.cells[c];
+        var jx=(hash01(cc[0],cc[1],k,f.id,mi)-0.5)*0.06;
+        var jy=(hash01(cc[1],cc[0],k+9,f.id,mi)-0.5)*0.06;
+        var js=1+(hash01(cc[0]+3,cc[1]+5,k,f.id,mi)-0.5)*0.06;
+        var jv=(hash01(cc[0]+7,cc[1]+2,k,f.id,mi)-0.5)*0.06;
+        var ord=hash01(cc[0]+1,cc[1]+4,3,f.id,mi);
+        if(alpha<1&&ord>alpha)continue;
+        var px=cc[0]*mys;
+        var X=cx+(px*cos-cc[1]*sin)*cell*2.2*(1+jx);
+        var Y=cy+(px*sin+cc[1]*cos)*cell*2.2*(1+jy);
+        var sz=Math.max(1,cell*(f.field?2.0:1.6)*js);
+        ctx2d.globalCompositeOperation=comp;
+        ctx2d.fillStyle=css(rgb,(f.field?0.10:0.62)*(1+jv*3));
+        ctx2d.fillRect(X-sz/2,Y-sz/2,sz,sz);
+        if(f.rim&&rimBudget<G*G*0.15){
+          var hi=(LADDER.findIndex(x=>x.n===f.hue)+3)%7;
+          var rgb2=rgbOf(LADDER[hi].n,0);
+          ctx2d.fillStyle=css(rgb2,(f.field?0.08:0.5)*(1+jv*3));
+          ctx2d.fillRect(X-sz/2,Y-sz/2-sz*0.9,sz,sz*0.55);
+          rimBudget++;
+        }
+      }
+    }
+  }
+}
+function renderFrame(tNow,forms){
+  rimBudget=0;drawGround();
+  for(var i=0;i<forms.length;i++)drawForm(forms[i],tNow);
+  ctx2d.globalCompositeOperation='source-over';
+}
+/* ══ the audio channel, now with a live voice ═══════════════════════════ */
+var VOICE={wave:0,drone:0.05,cut:14,del:0.3};
+var WAVES=['triangle','sine'];
+var sounding=false,actx=null,voicing=null,P=null,schedTimer=null,t0=0,stepCursor=0,rafOn=false;
+var fields=[],currentSeed=null,queue=[],patch=null,FX={cutOverride:null,until:0};
+function applyPatch(pat){
+  if(!patch)return pat;
+  var p2=JSON.parse(JSON.stringify(pat));
+  for(var i=0;i<32;i++){
+    if(patch.v[i]===0){p2.pat[i].vel=0}
+    else if(patch.v[i]===0.5){p2.pat[i].vel=Math.min(0.5,p2.pat[i].vel*0.6)}
+  }
+  return p2;
+}
+function scheduleStep(ctx,dest,p,step,t0,delayNode){
+  var n=p.pat[step%p.pat.length];
+  if(!n.vel||n.vel<=0)return;
+  var f=440*Math.pow(2,(n.midi-69)/12);
+  var t=t0,d=n.dur*p.stepDur;
+  var osc=ctx.createOscillator();osc.type=WAVES[VOICE.wave];osc.frequency.value=f;
+  var g=ctx.createGain();
+  g.gain.setValueAtTime(0.0001,t);
+  g.gain.linearRampToValueAtTime(0.16*n.vel,t+0.012);
+  g.gain.exponentialRampToValueAtTime(0.05*n.vel,t+Math.min(0.25,d*0.6));
+  g.gain.exponentialRampToValueAtTime(0.0001,t+d*1.15);
+  osc.connect(g);g.connect(dest);
+  if(delayNode){var s=ctx.createGain();s.gain.value=VOICE.del;g.connect(s);s.connect(delayNode)}
+  osc.start(t);osc.stop(t+d*1.2+0.05);
+  if(step%4===2){
+    var o2=ctx.createOscillator();o2.type='sine';o2.frequency.value=f*3;
+    var g2=ctx.createGain();
+    g2.gain.setValueAtTime(0.0001,t);g2.gain.linearRampToValueAtTime(0.05*n.vel,t+0.02);
+    g2.gain.exponentialRampToValueAtTime(0.0001,t+0.5);
+    o2.connect(g2);g2.connect(dest);
+    if(delayNode){var s2=ctx.createGain();s2.gain.value=VOICE.del*0.8;g2.connect(s2);s2.connect(delayNode)}
+    o2.start(t);o2.stop(t+0.6);
+  }
+}
+function makeVoicing(ctx){
+  var master=ctx.createGain();master.gain.value=0.9;
+  var lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=Math.pow(2,VOICE.cut)*100;lp.Q.value=0.8;
+  var delay=ctx.createDelay(2);var fb=ctx.createGain();fb.gain.value=0.34;
+  var wet=ctx.createGain();wet.gain.value=0.5;
+  lp.connect(master);delay.connect(fb);fb.connect(delay);delay.connect(wet);wet.connect(master);
+  master.connect(ctx.destination);
+  return {input:lp,delay:delay,lp:lp};
+}
+function activeForms(tNow){
+  var out=fields.slice();
+  var span=(tNow!==null&&tNow!==undefined)?tNow:1e9;
+  var lo=Math.max(0,Math.floor((span-4)/P.stepDur)),hi=Math.ceil(span/P.stepDur)+4;
+  for(var gs=lo;gs<hi;gs++){
+    var f=formForStep(currentSeed,P,gs);
+    if(span>=f.start&&span<=f.end)out.push(f);
+  }
+  return out;
+}
+function frame(ts){
+  if(!sounding){rafOn=false;return}
+  var tNow=actx.currentTime-t0;
+  renderFrame(tNow,activeForms(tNow));
+  requestAnimationFrame(frame);
+}
+function climaxTime(){
+  var cyc=32*4*P.stepDur,best=0,bt=0;
+  for(var t=0;t<cyc;t+=P.beatDur/2){
+    var n=0,fs=activeForms(t);
+    fs.forEach(f=>{if(!f.field)n+=f.cells.length*f.Cn*(f.mirror?2:1)});
+    if(n>best){best=n;bt=t}
+  }
+  return bt;
+}
+function restingFace(){renderFrame(climaxTime(),activeForms(climaxTime()))}
+var droneNodes=null;
+function startSound(){
+  if(REDUCED||!P)return;
+  actx=new (window.AudioContext||window.webkitAudioContext)();
+  voicing=makeVoicing(actx);
+  voicing.delay.delayTime.value=P.delayBeats*P.beatDur;
+  var dr=actx.createOscillator();dr.type='sine';dr.frequency.value=440*Math.pow(2,(P.root-69)/12)/2;
+  var dr5=actx.createOscillator();dr5.type='sine';dr5.frequency.value=440*Math.pow(2,(P.root+7-69)/12)/2;
+  var dg=actx.createGain();dg.gain.value=VOICE.drone;
+  var lfo=actx.createOscillator();lfo.frequency.value=0.11;
+  var lfg=actx.createGain();lfg.gain.value=VOICE.drone*0.4;
+  lfo.connect(lfg);lfg.connect(dg.gain);
+  dr.connect(dg);dr5.connect(dg);dg.connect(voicing.input);
+  dr.start();dr5.start();lfo.start();
+  droneNodes={dr:dr,dr5:dr5,dg:dg};
+  t0=actx.currentTime+0.08;stepCursor=0;
+  var playP=applyPatch(P);
+  var pump=function(){
+    if(!sounding)return;
+    var ahead=actx.currentTime+0.14;
+    while(t0+stepCursor*P.stepDur<ahead){
+      scheduleStep(actx,voicing.input,playP,stepCursor,t0+stepCursor*P.stepDur,voicing.delay);
+      stepCursor++;
+    }
+    schedTimer=setTimeout(pump,40);
+  };
+  pump();
+  if(!rafOn){rafOn=true;requestAnimationFrame(frame)}
+}
+function stopSound(){
+  sounding=false;
+  if(schedTimer){clearTimeout(schedTimer);schedTimer=null}
+  if(actx){try{actx.close()}catch(e){}actx=null}
+  restingFace();
+}
+/* ══ the room log ═══════════════════════════════════════════════════════ */
+function roomEvent(kind,from,content){
+  var el=document.createElement('div');el.className='ev';
+  el.innerHTML='<span class="k">'+kind+'</span><span class="f">'+from+'</span><span class="c">'+content+'</span>';
+  var r=$('room');r.insertBefore(el,r.firstChild);
+  while(r.children.length>40)r.removeChild(r.lastChild);
+}
+/* ══ the bMiDi agent — local demo of the search loop ═══════════════════ */
+function parseAsk(q){
+  q=String(q||'').toLowerCase();
+  var want={};
+  ['dorian','lydian','phrygian'].forEach(m=>{if(q.includes(m))want.mode=m});
+  var bpm=q.match(/(\d{2,3})\s*bpm/);if(bpm)want.bpm=Number(bpm[1]);
+  var slow=q.match(/\b(\d{2,3})\b/);if(slow&&!bpm)want.bpm=Number(slow[1]);
+  if(/slow|languid|late ?night/.test(q))want.bpmLo=88;
+  if(/fast|peak|drive|energetic/.test(q))want.bpmHi=104;
+  if(/rising|build/.test(q))want.shape='rising';
+  if(/falling|release|comedown/.test(q))want.shape='falling';
+  if(/wandering|dark|strange/.test(q))want.shape='wandering';
+  if(/light|bright|airy/.test(q))want.hue=['heart','throat'];
+  if(/dark|ground|heavy/.test(q))want.hue=['root','brow'];
+  return want;
+}
+function scanSeeds(want,n){
+  var found=[],r=mulberry32(0xBACC);
+  var guard=0;
+  while(found.length<n&&guard++<9000){
+    var seed=1+Math.floor(r()*140000000);
+    if(seed===currentSeed)continue;
+    var p=buildPattern(seed);
+    var score=0;
+    if(want.mode){if(p.mode.n.toLowerCase()!==want.mode){continue}score+=3}
+    if(want.bpm){if(Math.abs(p.bpm-want.bpm)>6)continue;score+=3-Math.abs(p.bpm-want.bpm)/3}
+    if(want.bpmLo&&p.bpm>want.bpmLo)continue;
+    if(want.bpmHi&&p.bpm<want.bpmHi)continue;
+    if(want.shape){if(p.shape!==want.shape)continue;score+=2}
+    score+=r()*0.9;   /* stable tie-break: the same ask returns the same finds */
+    found.push({seed:seed,p:p,score:score});
+  }
+  found.sort((a,b)=>b.score-a.score);
+  return found.slice(0,n);
+}
+function askBMiDi(){
+  var q=$('askin').value;
+  if(!q.trim()){$('askmsg').textContent='say it in plain words — "dorian, slow, around 90" — bMiDi turns it into seeds.';return}
+  var want=parseAsk(q);
+  var got=scanSeeds(want,3);
+  roomEvent('ask','you',q.replace(/</g,'&lt;'));
+  if(!got.length){$('askmsg').textContent='nothing in seed space matched that — loosen a word and ask again.';roomEvent('say','bMiDi','no match — loosen a word');return}
+  $('askmsg').textContent='bMiDi searched seed space — tap a card to queue it.';
+  roomEvent('say','bMiDi',got.length+' seeds found');
+  var box=$('proposals');box.innerHTML='';
+  got.forEach(g=>{
+    var el=document.createElement('div');el.className='prop';
+    el.innerHTML='<b>seed '+g.seed.toLocaleString()+'</b>'+
+      '<span>'+g.p.mode.n+' · '+noteName(g.p.root)+' · '+g.p.bpm+' BPM</span>'+
+      '<span>'+g.p.shape+' · '+g.p.wave+' · C'+g.p.sym+'n</span>'+
+      '<div class="q">＋ queue this</div>';
+    el.onclick=()=>{queueSeed(g.seed,'from your ask: "'+q.slice(0,40)+'"')};
+    box.appendChild(el);
+  });
+}
+function noteName(m){var NN=['C','C♯','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];return NN[m%12]+(Math.floor(m/12)-1)}
+/* ══ the setlist ═════════════════════════════════════════════════════════ */
+function queueSeed(seed,why){
+  queue.push({seed:seed,why:why||''});
+  renderQueue();
+  roomEvent('queue','you','seed '+seed.toLocaleString()+(why?' — '+why.replace(/</g,'&lt;'):''));
+  if(!currentSeed)playSeed(seed,'first in the setlist');
+}
+function playSeed(seed,why){
+  currentSeed=seed;
+  P=buildPattern(seed);
+  patch=null;renderSteps();
+  setupCanvas();fields=fieldForms(seed,P);
+  var wasSounding=sounding;
+  if(sounding)stopSound();
+  restingFace();
+  $('st-seed').textContent=seed.toLocaleString();
+  $('st-mode').textContent=P.mode.n+' · '+noteName(P.root)+' · '+P.bpm+' BPM';
+  $('st-shape').textContent=P.shape+' 32 · '+P.wave+' · C'+P.sym+'n';
+  var v=$('voice');
+  if(REDUCED){
+    v.disabled=true;v.textContent='reduced motion — the room rests, one silent frame';v.classList.add('off');
+    $('plainwords').textContent='your device asks for reduced motion: the room stays whole and still, and nothing sounds. a quiet one, not a lesser one.';
+  }else{
+    v.disabled=false;v.classList.remove('off');
+    v.textContent=wasSounding?'SILENCE — let the room rest':'PLAY THE ROOM — nothing sounds until you press this';
+    if(wasSounding){v.classList.add('off')}
+  }
+  renderQueue();
+  updatePatchbox();
+  roomEvent('play',wasSounding?'you':'—',wasSounding?'now playing seed '+seed.toLocaleString():('stage set to seed '+seed.toLocaleString()+(why?' — '+why:'')));
+  if(wasSounding){$('voice').click()}
+}
+function renderQueue(){
+  var q=$('queue');q.innerHTML='';
+  $('qmsg').style.display=queue.length?'none':'block';
+  queue.forEach((it,i)=>{
+    var el=document.createElement('div');el.className='qitem'+(it.seed===currentSeed?' now':'');
+    var p=buildPattern(it.seed);
+    el.innerHTML='<b>'+String(i+1).padStart(2,'0')+'</b><b style="min-width:110px">'+it.seed.toLocaleString()+'</b>'+
+      '<span>'+p.mode.n+' · '+p.bpm+' BPM · '+p.shape+(it.why?' — '+it.why:'')+'</span>';
+    var play=document.createElement('button');play.textContent='▶';play.title='play now';
+    play.onclick=()=>playSeed(it.seed,'from the setlist');
+    var rm=document.createElement('button');rm.textContent='✕';rm.title='remove';
+    rm.onclick=()=>{queue.splice(i,1);renderQueue();roomEvent('queue','you','removed seed '+it.seed.toLocaleString())};
+    el.appendChild(play);el.appendChild(rm);
+    q.appendChild(el);
+  });
+}
+/* ══ dj controls ═══════════════════════════════════════════════════════ */
+var taps=[];
+$('tap').addEventListener('click',()=>{
+  var now=performance.now();
+  if(taps.length&&now-taps[taps.length-1]>2500)taps=[];
+  taps.push(now);if(taps.length>6)taps.shift();
+  if(taps.length>=2){
+    var avg=(taps[taps.length-1]-taps[0])/(taps.length-1);
+    var bpm=Math.round(60000/avg);
+    $('tapv').textContent=bpm;
+    roomEvent('tap','you',bpm+' BPM by hand');
+  }
+});
+$('sync').addEventListener('click',()=>{
+  var bpm=Number($('tapv').textContent);
+  if(!bpm){$('qmsg').textContent='tap a tempo first — the button needs a number to sync to.';return}
+  var got=scanSeeds({bpm:bpm,mode:P?P.mode.n.toLowerCase():null},3);
+  roomEvent('sync','you','find seeds near '+bpm+' BPM');
+  if(!got.length){$('qmsg').textContent='no seeds near that tempo — try another tap.';return}
+  got.forEach(g=>queueSeed(g.seed,'synced to your '+bpm+' BPM tap'));
+  roomEvent('say','bMiDi',got.length+' synced seeds queued');
+});
+$('energy').addEventListener('click',()=>{
+  if(!sounding||!voicing){return}
+  var now=actx.currentTime;
+  voicing.lp.frequency.cancelScheduledValues(now);
+  voicing.lp.frequency.setValueAtTime(Math.pow(2,14)*100,now);
+  voicing.lp.frequency.exponentialRampToValueAtTime(Math.pow(2,2.2)*100,now+0.9);
+  voicing.lp.frequency.exponentialRampToValueAtTime(Math.pow(2,VOICE.cut)*100,now+3.4);
+  roomEvent('drop','you','the drop — filter dive, three beats back');
+});
+function stab(mult,dur){
+  if(!sounding||!actx)return;
+  var f=440*Math.pow(2,(P.root-69)/12)*mult;
+  var t=actx.currentTime+0.02;
+  var o=actx.createOscillator();o.type='sine';o.frequency.value=f;
+  var g=actx.createGain();
+  g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(0.22,t+0.008);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.connect(g);g.connect(voicing.input);
+  var s=actx.createGain();s.gain.value=VOICE.del;g.connect(s);s.connect(voicing.delay);
+  o.start(t);o.stop(t+dur+0.1);
+  roomEvent('pad','you','stab ×'+mult);
+}
+$('pad1').addEventListener('click',()=>stab(2,0.4));
+$('pad2').addEventListener('click',()=>stab(3,0.35));
+$('pad3').addEventListener('click',()=>stab(4,0.5));
+$('pad4').addEventListener('click',()=>{
+  if(!sounding||!voicing)return;
+  var now=actx.currentTime;
+  voicing.lp.frequency.cancelScheduledValues(now);
+  voicing.lp.frequency.setValueAtTime(Math.pow(2,VOICE.cut)*100,now);
+  voicing.lp.frequency.linearRampToValueAtTime(Math.pow(2,3)*100,now+0.25);
+  voicing.lp.frequency.linearRampToValueAtTime(Math.pow(2,VOICE.cut)*100,now+1.4);
+  roomEvent('pad','you','a breath of rest');
+});
+$('cut').addEventListener('input',function(){
+  VOICE.cut=Number(this.value);$('fv-cut').textContent=VOICE.cut.toFixed(1);
+  if(voicing&&actx)voicing.lp.frequency.setTargetAtTime(Math.pow(2,VOICE.cut)*100,actx.currentTime,0.03);
+});
+$('del').addEventListener('input',function(){VOICE.del=Number(this.value);$('fv-del').textContent=VOICE.del.toFixed(2)});
+/* ══ producer ═══════════════════════════════════════════════════════════ */
+function renderSteps(){
+  var box=$('steps');box.innerHTML='';
+  if(!P){return}
+  for(var i=0;i<32;i++){
+    (function(i){
+      var el=document.createElement('div');
+      var cur=patch?patch.v[i]:1;
+      el.className='st '+(cur===1?'hi':cur===0.5?'md':'lo');
+      el.title='step '+(i+1);
+      el.onclick=function(){
+        patch=patch||{v:new Array(32).fill(1)};
+        patch.v[i]=patch.v[i]===1?0.5:patch.v[i]===0.5?0:1;
+        renderSteps();updatePatchbox();
+        roomEvent('patch','you','step '+(i+1)+' → '+['off','soft','full'][patch.v[i]===1?2:patch.v[i]===0.5?1:0]);
+      };
+      box.appendChild(el);
+    })(i);
+  }
+}
+function updatePatchbox(){
+  if(!patch){$('patchbox').textContent='patch: none — the pure seed plays';return}
+  var changed=patch.v.filter(v=>v!==1).length;
+  $('patchbox').textContent='patch: '+changed+' steps reshaped · seed+patch = '+
+    JSON.stringify({seed:currentSeed,patch:patch.v.map(v=>v===1?null:v===0.5?'soft':'off')});
+}
+$('copypatch').addEventListener('click',()=>{
+  var artifact=JSON.stringify({seed:currentSeed,voice:{wave:WAVES[VOICE.wave],drone:VOICE.drone},patch:patch?patch.v:null});
+  navigator.clipboard&&navigator.clipboard.writeText(artifact);
+  $('patchbox').textContent='copied: '+artifact;
+  roomEvent('patch','you','seed+voice+patch copied — a whole performance, in your clipboard');
+});
+$('clearpatch').addEventListener('click',()=>{patch=null;renderSteps();updatePatchbox();roomEvent('patch','you','patch cleared — the pure seed again')});
+$('wave').addEventListener('input',function(){VOICE.wave=Number(this.value);$('fv-wave').textContent=WAVES[VOICE.wave]});
+$('drone').addEventListener('input',function(){
+  VOICE.drone=Number(this.value);$('fv-drone').textContent=VOICE.drone.toFixed(3);
+  if(droneNodes&&actx)droneNodes.dg.gain.setTargetAtTime(VOICE.drone,actx.currentTime,0.05);
+});
+/* ══ levels ═════════════════════════════════════════════════════════════ */
+var LEVEL='beginner';
+$('levels').addEventListener('click',e=>{
+  var b=e.target.closest('button');if(!b)return;
+  LEVEL=b.dataset.lv;
+  for(const x of $('levels').querySelectorAll('button'))x.classList.toggle('on',x===b);
+  $('p-queue').hidden=LEVEL==='beginner';
+  $('p-dj').hidden=LEVEL!=='dj';
+  $('p-producer').hidden=LEVEL!=='producer';
+  roomEvent('view','you','density: '+LEVEL);
+});
+/* ══ wiring ═════════════════════════════════════════════════════════════ */
+$('ask').addEventListener('click',askBMiDi);
+$('askin').addEventListener('keydown',e=>{if(e.key==='Enter')askBMiDi()});
+$('voice').addEventListener('click',function(){
+  if(!P||REDUCED)return;
+  if(!sounding){
+    sounding=true;this.classList.remove('off');this.textContent='SILENCE — let the room rest';
+    $('pad1').disabled=$('pad2').disabled=$('pad3').disabled=$('pad4').disabled=false;
+    startSound();roomEvent('play','you','the room opens — sound by your hand only');
+  }else{
+    stopSound();this.classList.add('off');this.textContent='PLAY THE ROOM — nothing sounds until you press this';
+    $('pad1').disabled=$('pad2').disabled=$('pad3').disabled=$('pad4').disabled=true;
+    roomEvent('play','you','silence — the room rests');
+  }
+});
+(function(){
+  var lg=$('legend');
+  LADDER.forEach(function(c){
+    var s=document.createElement('span');s.className='lg';
+    s.innerHTML='<i style="background:'+c.c+'"></i>'+c.n;
+    lg.appendChild(s);
+  });
+})();
+/* boot: an opening seed, and bMiDi already proposing tonight's set */
+playSeed(20260826,'the opening face');
+roomEvent('hello','bMiDi','the room is local in this demo — one file, zero origins beyond nothing; the relay lane signs these lines');
+var opening=scanSeeds({mode:'lydian',bpm:96},3);
+opening.forEach(g=>queueSeed(g.seed,'bMiDi\'s opening set'));
+$('askmsg').textContent='bMiDi already queued an opening set — ask for anything in plain words.';
+renderQueue();
+</script>
+<script src="../tour.js?v=29"></script>
+</body>
+</html>

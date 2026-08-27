@@ -437,6 +437,13 @@
       "caveat": "seed from the MiDi contract on Base, read-only; block-sprite medium, score-driven performance — visual and audio siblings from one timeline; Web Audio oscillators only, sound never autoplays; reduced motion rests as one composed silent frame"
     },
     {
+      "file": "blight/midiroom.html",
+      "domain": "nature",
+      "name": "the bMiDi room — three densities",
+      "state": "working",
+      "caveat": "demo of the bMiDi agent loop: plain-word ask → deterministic seed-space search → setlist; beginner/DJ/producer level toggle; the room log is LOCAL — the relay lane signs it to buzz; agent runs on-device in this demo, zero off-origin"
+    },
+    {
       "file": "bnames.html",
       "domain": "nature",
       "name": "names on our chain, read live",
