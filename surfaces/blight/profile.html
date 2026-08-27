@@ -380,7 +380,11 @@ async function visit(v){
 $('go').addEventListener('click',()=>visit($('addr').value));
 $('addr').addEventListener('keydown',e=>{if(e.key==='Enter')visit($('addr').value)});
 $('chip-founder').addEventListener('click',()=>{
-  $('addr').value='0xfbd201472d5a439f1f0e408eb5dfaf6ea3687876';
+  // bqueenbee.base.eth — founder-controlled since the 2026-08-26 ruling; the
+  // old hardcoded garden (bloverai.base.eth / 0xfbd20147…) was lost with its
+  // wallet key and may never be presented as the founder's again
+  // (RECEIPT_AUDIT_BLOVERAI_2026-08-26).
+  $('addr').value='bqueenbee.base.eth';
   visit($('addr').value);
 });
 $('fleetnav').innerHTML=(window.FLEET_NAV||[

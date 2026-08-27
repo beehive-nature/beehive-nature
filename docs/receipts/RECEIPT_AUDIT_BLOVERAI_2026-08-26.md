@@ -49,3 +49,23 @@ Nothing in the estate may present `0xfbd20147…` or `bloverai.base.eth` as the 
 estate's. After this audit: the gallery, explorer, market and farm read the example collector;
 the wallet-fund test mocks a neutral hex. The historical commits keep their bytes and their
 moment — that is what actually happened, and history stays.
+
+## FOLLOW-UP · founder ruling executed (zB, 2026-08-26 later)
+
+The founder ruled after this audit: **live code repoints to `bqueenbee.base.eth`, which is
+controlled** — the earlier reading of the do-not-touch fence ("repointing TO it would be
+touching") was wrong, and the neutral example collector was an interim default only.
+
+- `bqueenbee.base.eth` resolved on-chain via the wallet's own path (Base L2 resolver
+  `0xC6d566A56A1aFf6508b41f6c90ff131615583BCD`, keccak in-page): **`0x100fd362abf7ef7f7a7ca3c331d4c718c6f45479`**.
+  The same call returns `0xfbd20147…` for the lost name — method validated both directions.
+  (api.base.domains remains TLS-dead from this box; the RPC walk is the working resolver.)
+- **MISSED by the original audit and named by the founder:** `surfaces/blight/profile.html`
+  — the "founder's garden" chip still hardcoded the LOST address `0xfbd20147…` behind
+  founder-claim wording. It now fills `bqueenbee.base.eth`.
+- Repointed to the founder's garden (name where the page resolves names, hex where the
+  code is address-only): `profile.html` (chip), `gallery.html` (default wing + header
+  comment), `inscription-explorer.html` (quick-button + HOLDERS_LADDER 'the founder'),
+  `market.html` / `farmers.html` (LOV). `bqueenbee.base.eth` itself otherwise untouched.
+- The interim example-collector default (`0x8e4cECd…`) is retired from live code; its
+  story stays in this receipt. History commits unchanged.

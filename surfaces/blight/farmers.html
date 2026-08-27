@@ -129,7 +129,7 @@ nav:not(#tbar) button.on{color:var(--gold);border-color:#3d3410}
 const W=v=>BigInt(v).toString(16).padStart(64,'0');
 const AD=a=>'0'.repeat(24)+a.replace(/^0x/,'').toLowerCase();
 const HOSTS=['https://base-rpc.publicnode.com','https://base.drpc.org'];
-const LOV='0x8e4cECd53bf2025ea0C8e69784355446C6355eBE'; /* example collector — the old default (bloverai.base.eth) was lost 2026-08-26, see RECEIPT_AUDIT_BLOVERAI_2026-08-26 */
+const LOV='0x100fd362abf7ef7f7a7ca3c331d4c718c6f45479'; /* bqueenbee.base.eth — resolved 2026-08-26 via the Base L2 resolver, founder-controlled per the ruling. Two defaults back: bloverai.base.eth, lost with its wallet key 2026-08-26 (RECEIPT_AUDIT_BLOVERAI_2026-08-26). */
 const COLS=[
  {sym:'FUNGI',c:'0x7d9CE55D54FF3FEddb611fC63fF63ec01F26D15F',sel:'422b9e23',lv:[0,21000,525000,1050000,1575000,2100000],base:0,ou:true},
  {sym:'$FROGGI',c:'0x88A78C5035BdC8C9A8bb5c029e6cfCDD14B822FE',sel:'422b9e23',lv:[0,1000,3000,10000,30000,60000,120000],base:0},
