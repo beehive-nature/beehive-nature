@@ -175,16 +175,23 @@ seed space, you queue what sings. everything is math from one integer — nothin
     <button class="act ghost" id="clearpatch">clear patch</button>
   </div>
   <div class="patchbox" id="patchbox">patch: none — the pure seed plays</div>
+  <h3 style="margin-top:14px">the plugin cache — the ever-changing musician's shelf</h3>
+  <div class="djrow">
+    <input id="kitname" type="text" placeholder="name this kit — 'friday dark dorian'…" style="flex:1;min-width:160px;background:var(--bg-well);border:1px solid var(--line);border-radius:9px;color:var(--ink);font:12px ui-monospace,Menlo,monospace;padding:8px 10px">
+    <button class="act ghost" id="savekit">save kit</button>
+  </div>
+  <div class="queue" id="kits" style="margin-top:8px"></div>
+  <p class="msg">a kit = the seed + your patch + the voice, on this device (v0: localStorage). the master copy lane is named and waiting: <b>autonomi</b> for private master storage, <b>htmx + sqlite</b> as the local cache server for synthesizers, drum kits and loops — same shelf, deeper cellar.</p>
 </section>
 
 <section class="panel">
   <h3>the room log — one signed line per moment</h3>
   <div class="room" id="room"></div>
-  <p class="msg">this demo keeps the room LOCAL — the relay lane wires this exact log to buzz: every line becomes a signed Nostr event, bMiDi answers with its own key, and the setlist becomes the channel's history. same page, same file, one origin more.</p>
+  <p class="msg">the room runs <b>LOCAL</b> in this demo — every line stays on your device. pass <b>?relay=wss://…</b> and the SAME page goes live: it subscribes read-only to <b>#bMiDi-room</b> on your buzz relay (performances land in the setlist as signed events arrive; publishing is the key lane). one origin more, same file.</p>
 </section>
 
 <div class="legend" id="legend"></div>
-<p class="foot"><b>provenance.</b> one self-contained file · web-based — the estate stack ethos: no installed client, no CDN, no build step, zero off-origin · the score, the art and the room are math from one seed · sound is Web Audio oscillators only · under reduced motion the room rests as one composed silent frame · the bMiDi "agent" here runs entirely on your machine as a demo of the search loop — the real one lives behind the relay lane.</p>
+<p class="foot"><b>provenance.</b> one self-contained file · web-based — the estate stack ethos: no installed client, no CDN, no build step · the blocks are HEXAGONS on a pointy-top axial lattice — the bComb idiom · the score, the art and the room are math from one seed · with ?relay= the only origin beyond this page is YOUR relay · sound is Web Audio oscillators only · under reduced motion the room rests as one composed silent frame · the bMiDi "agent" here runs entirely on your machine as a demo of the search loop — the real one lives behind the relay. storage lanes, named: <b>autonomi</b> private master storage · <b>htmx + sqlite</b> local cache server for synthesizers, drum kits, loops — the kit shelf above is their v0.</p>
 
 <script>
 "use strict";
@@ -220,9 +227,11 @@ function buildPattern(seed){
     sym:[4,6,8][Math.floor(r()*3)]};
 }
 var FORMS=[
-  function ring(rr){var R=4+rr()*7,out=[],thick=1+(rr()*2|0);
-    for(var x=-14;x<=14;x++)for(var y=-14;y<=14;y++){var d2=x*x+y*y;
-      if(d2<=(R+thick)*(R+thick)&&d2>=(R-0.5)*(R-0.5))out.push([x,y])}return out},
+  function ring(rr){var R=4+rr()*7,out=[],t=1+(rr()*2|0);
+    /* true hex ring: cube-distance metric on the axial lattice */
+    for(var q=-14;q<=14;q++)for(var r=-14;r<=14;r++){
+      var h=q*q+q*r+r*r;
+      if(h<=(R+t)*(R+t)&&h>=(R-0.5)*(R-0.5))out.push([q,r])}return out},
   function spokes(rr){var k=3+(rr()*4|0),L=6+rr()*7,out=[];
     for(var i=0;i<k;i++){var a=i/k*6.2832;
       for(var t=2;t<L;t++)out.push([Math.round(Math.cos(a)*t),Math.round(Math.sin(a)*t)])}return out},
@@ -263,12 +272,22 @@ function fieldForms(seed,P){
   }
   return out;
 }
-var G=72,S=520,cell=1,ctx2d=null;
+var G=72,S=520,cell=1,ctx2d=null,SQ3=Math.sqrt(3),HEXP=null;
+/* the block is a HEXAGON — pointy-top, the bComb idiom; cells are AXIAL (q,r) */
+function hexPathOf(R){
+  var p=new Path2D();
+  for(var k=0;k<6;k++){
+    var a=Math.PI/180*(60*k-30);
+    var x=R*Math.cos(a),y=R*Math.sin(a);
+    k?p.lineTo(x,y):p.moveTo(x,y);
+  }
+  p.closePath();return p;
+}
 function setupCanvas(){
   var cv=$('cv'),dpr=Math.min(window.devicePixelRatio||1,2);
   var cssW=Math.min(cv.parentElement.clientWidth-8,520);
   S=Math.round(cssW*dpr);cv.width=S;cv.height=S;cv.style.height=cssW+'px';
-  cell=S/G;ctx2d=cv.getContext('2d');ctx2d.imageSmoothingEnabled=false;
+  cell=S/G;HEXP=hexPathOf(cell*1.02);ctx2d=cv.getContext('2d');ctx2d.imageSmoothingEnabled=false;
 }
 function drawGround(){
   ctx2d.globalCompositeOperation='source-over';
@@ -276,7 +295,8 @@ function drawGround(){
   ctx2d.globalCompositeOperation='multiply';
   for(var i=0;i<10;i++){
     var x=hash01(i,7,S,3)*S,y=hash01(i,11,S,5)*S,w=S*(0.18+hash01(i,13,S,9)*0.2);
-    ctx2d.fillStyle='rgba(70,110,86,0.20)';ctx2d.fillRect(x,y,w,w*0.8);
+    ctx2d.fillStyle='rgba(70,110,86,0.20)';
+    ctx2d.save();ctx2d.translate(x,y);ctx2d.scale(w/2,(w*0.8)/2);ctx2d.fill(HEXP);ctx2d.restore();
   }
 }
 var rimBudget=0;
@@ -304,17 +324,19 @@ function drawForm(f,tNow){
         var ord=hash01(cc[0]+1,cc[1]+4,3,f.id,mi);
         if(alpha<1&&ord>alpha)continue;
         var px=cc[0]*mys;
-        var X=cx+(px*cos-cc[1]*sin)*cell*2.2*(1+jx);
-        var Y=cy+(px*sin+cc[1]*cos)*cell*2.2*(1+jy);
-        var sz=Math.max(1,cell*(f.field?2.0:1.6)*js);
+        /* axial (q,r) -> pixel, pointy-top lattice, then the symmetry stamp */
+        var ax=(SQ3*px+SQ3/2*cc[1]), ay=1.5*cc[1];
+        var X=cx+(ax*cos-ay*sin)*cell*1.35*(1+jx);
+        var Y=cy+(ax*sin+ay*cos)*cell*1.35*(1+jy);
+        var sz=cell*(f.field?2.1:1.5)*js;
         ctx2d.globalCompositeOperation=comp;
         ctx2d.fillStyle=css(rgb,(f.field?0.10:0.62)*(1+jv*3));
-        ctx2d.fillRect(X-sz/2,Y-sz/2,sz,sz);
+        ctx2d.save();ctx2d.translate(X,Y);ctx2d.scale(sz/(cell*1.02),sz/(cell*1.02));ctx2d.fill(HEXP);ctx2d.restore();
         if(f.rim&&rimBudget<G*G*0.15){
           var hi=(LADDER.findIndex(x=>x.n===f.hue)+3)%7;
           var rgb2=rgbOf(LADDER[hi].n,0);
           ctx2d.fillStyle=css(rgb2,(f.field?0.08:0.5)*(1+jv*3));
-          ctx2d.fillRect(X-sz/2,Y-sz/2-sz*0.9,sz,sz*0.55);
+          ctx2d.save();ctx2d.translate(X,Y-sz*0.95);ctx2d.scale(sz/(cell*1.02)*0.5,sz/(cell*1.02)*0.5);ctx2d.fill(HEXP);ctx2d.restore();
           rimBudget++;
         }
       }
@@ -434,12 +456,46 @@ function stopSound(){
   if(actx){try{actx.close()}catch(e){}actx=null}
   restingFace();
 }
-/* ══ the room log ═══════════════════════════════════════════════════════ */
+/* ══ the room log — local by default, LIVE when ?relay=wss://… is passed ──
+   read-only Nostr (NIP-01): performances are kind 30078 events tagged
+   #bMiDi-room carrying {"seed":N,…} — they land in the setlist as they
+   arrive; chat lines are kind 1 with the same tag. publishing needs the
+   key lane; reading needs nothing.                                        */
+var RELAY=null;
+try{var u=new URL(location.href);RELAY=u.searchParams.get('relay')}catch(e){}
 function roomEvent(kind,from,content){
   var el=document.createElement('div');el.className='ev';
   el.innerHTML='<span class="k">'+kind+'</span><span class="f">'+from+'</span><span class="c">'+content+'</span>';
   var r=$('room');r.insertBefore(el,r.firstChild);
   while(r.children.length>40)r.removeChild(r.lastChild);
+}
+function connectRelay(){
+  if(!RELAY)return;
+  var ws;
+  try{ws=new WebSocket(RELAY)}catch(e){roomEvent('err','relay','could not open '+RELAY);return}
+  roomEvent('relay','room','connecting '+RELAY+' — read-only, your keys never leave this page');
+  ws.onopen=()=>{
+    ws.send(JSON.stringify(['REQ','bmidi-1',{kinds:[30078,1],'#t':['bMiDi-room'],limit:20}]));
+    roomEvent('relay','room','subscribed to #bMiDi-room — performances land in the setlist');
+  };
+  ws.onmessage=(m)=>{
+    var msg;try{msg=JSON.parse(m.data)}catch(e){return}
+    if(msg[0]!=='EVENT')return;
+    var ev=msg[2];
+    if(ev.kind===30078){
+      try{
+        var body=JSON.parse(ev.content);
+        if(body&&Number.isFinite(body.seed)){
+          queueSeed(body.seed,'from the room · '+String(ev.pubkey).slice(0,10)+'…');
+          roomEvent('perf',String(ev.pubkey).slice(0,10)+'…','seed '+body.seed.toLocaleString()+' signed and live');
+        }
+      }catch(e){}
+    }else if(ev.kind===1){
+      roomEvent('chat',String(ev.pubkey).slice(0,10)+'…',String(ev.content).slice(0,120).replace(/</g,'&lt;'));
+    }
+  };
+  ws.onclose=()=>roomEvent('relay','room','connection closed — the room keeps its memory locally');
+  ws.onerror=()=>roomEvent('err','relay','socket error — is the relay up?');
 }
 /* ══ the bMiDi agent — local demo of the search loop ═══════════════════ */
 function parseAsk(q){
@@ -639,6 +695,44 @@ $('copypatch').addEventListener('click',()=>{
   roomEvent('patch','you','seed+voice+patch copied — a whole performance, in your clipboard');
 });
 $('clearpatch').addEventListener('click',()=>{patch=null;renderSteps();updatePatchbox();roomEvent('patch','you','patch cleared — the pure seed again')});
+/* ── the plugin cache — kits on this device; autonomi/htmx-sqlite is the cellar lane ── */
+function loadKits(){try{return JSON.parse(localStorage.getItem('bmidi-kits')||'[]')}catch(e){return[]}}
+function saveKits(k){try{localStorage.setItem('bmidi-kits',JSON.stringify(k))}catch(e){}}
+function renderKits(){
+  var box=$('kits');box.innerHTML='';
+  var kits=loadKits();
+  if(!kits.length){box.innerHTML='<p class="msg" style="margin:0">the shelf is empty — shape a performance, name it, save it.</p>';return}
+  kits.forEach((kit,i)=>{
+    var el=document.createElement('div');el.className='qitem';
+    el.innerHTML='<b>'+String(i+1).padStart(2,'0')+'</b><span><b style="min-width:0">'+kit.name.replace(/</g,'&lt;')+'</b> — seed '+kit.seed.toLocaleString()+(kit.patched?' · patched':' · pure')+'</span>';
+    var load=document.createElement('button');load.textContent='▶';load.title='load kit';
+    load.onclick=()=>{
+      playSeed(kit.seed,'kit: '+kit.name);
+      if(kit.patch){patch={v:kit.patch.slice()};renderSteps();updatePatchbox()}
+      if(kit.voice){VOICE.wave=kit.voice.wave?WAVES.indexOf(kit.voice.wave):0;VOICE.drone=kit.voice.drone??0.05;
+        $('wave').value=VOICE.wave;$('fv-wave').textContent=WAVES[VOICE.wave];
+        $('drone').value=VOICE.drone;$('fv-drone').textContent=VOICE.drone.toFixed(3)}
+      roomEvent('kit','you','loaded "'+kit.name.replace(/</g,'&lt;')+'" off the shelf');
+    };
+    var rm=document.createElement('button');rm.textContent='✕';
+    rm.onclick=()=>{kits.splice(i,1);saveKits(kits);renderKits();roomEvent('kit','you','removed "'+kit.name.replace(/</g,'&lt;')+'"')};
+    el.appendChild(load);el.appendChild(rm);
+    box.appendChild(el);
+  });
+}
+$('savekit').addEventListener('click',()=>{
+  var name=$('kitname').value.trim();
+  if(!name){$('kitname').placeholder='name it first — the shelf needs labels';return}
+  if(!currentSeed)return;
+  var kits=loadKits();
+  kits.unshift({name:name,seed:currentSeed,patched:!!patch,patch:patch?patch.v.slice():null,
+    voice:{wave:WAVES[VOICE.wave],drone:VOICE.drone}});
+  saveKits(kits.slice(0,24));
+  $('kitname').value='';
+  renderKits();
+  roomEvent('kit','you','saved "'+name.replace(/</g,'&lt;')+'" — seed+patch+voice on this device');
+});
+renderKits();
 $('wave').addEventListener('input',function(){VOICE.wave=Number(this.value);$('fv-wave').textContent=WAVES[VOICE.wave]});
 $('drone').addEventListener('input',function(){
   VOICE.drone=Number(this.value);$('fv-drone').textContent=VOICE.drone.toFixed(3);
@@ -680,6 +774,7 @@ $('voice').addEventListener('click',function(){
 })();
 /* boot: an opening seed, and bMiDi already proposing tonight's set */
 playSeed(20260826,'the opening face');
+connectRelay();
 roomEvent('hello','bMiDi','the room is local in this demo — one file, zero origins beyond nothing; the relay lane signs these lines');
 var opening=scanSeeds({mode:'lydian',bpm:96},3);
 opening.forEach(g=>queueSeed(g.seed,'bMiDi\'s opening set'));
