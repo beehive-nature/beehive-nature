@@ -117,6 +117,9 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9990;
   <div class="msg" id="dmsg"></div>
   <div class="seeds">
     <button data-a="0xfbd201472d5a439f1f0e408eb5dfaf6ea3687876">the founder's garden</button>
+    <!-- a named exhibit, added 2026-08-26. NOT a default: the founder.s garden
+         above it is what loads when nobody has chosen. -->
+    <button data-a="bqueenbee.base.eth">bQueenBee&#39;s Lost Purse</button>
     <button id="vault">a crown from the vault</button>
   </div>
 </div>
@@ -343,6 +346,10 @@ async function fetchTraits(p){
       return '<span style="display:inline-block;border:1px solid #1a1a2a;border-radius:5px;padding:3px 9px;margin:3px 4px 3px 0;font-size:10.5px">'+sw+kv[0]+' '+v+'</span>';}).join('');
 }
 var HOLDERS_LADDER=[['0xfbd201472d5a439f1f0e408eb5dfaf6ea3687876','the founder'],
+  /* the exhibit, second rung — bqueenbee.base.eth resolved 2026-08-26 via the
+     Base L2 resolver. Shown BECAUSE it is a named exhibit; it never takes the
+     first rung, which the default holds. */
+  ['0x100fd362abf7ef7f7a7ca3c331d4c718c6f45479',"bQueenBee's Lost Purse"], /* bqueenbee.base.eth, resolved 2026-08-26 */
                    ['0xbcba79164beb12c1b1497c96bbf4346f1bc45dec','the veteran']];
 async function holderBal(col,addr){
   var r=await rpc([{to:col.c,data:'0x70a08231'+AD(addr)}]);
