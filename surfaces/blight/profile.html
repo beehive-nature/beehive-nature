@@ -163,8 +163,7 @@ straight from the chain. this is a HUMAN surface: the purple rim is the person,
     <button class="do" id="go">read the chain</button>
   </div>
   <p class="hint">read-only: <b>no wallet connect, no signing, no keys</b>. typing an address is the whole gesture.
-  try <code id="chip-founder">the founder's garden — bloverai.base.eth</code></p>
-  <p class="msg" id="msg">the chain is the record — paste an address to begin.</p>
+  try <code id="chip-founder">the founder's garden — bloverai.base.eth</code></p>  <p class="msg" id="msg">the chain is the record — paste an address to begin.</p>
 </section>
 
 <section class="panel" id="identity" hidden>
@@ -260,6 +259,173 @@ async function rpc(calls){
   }
   return null;
 }
+/* ── THE PERSON SCAN (order 2026-08-26) ──────────────────────────────────
+   Discovery follows the PERSON, not a hardcoded contract list: one family
+   of eth_getLogs for ERC-20 Transfers naming this address as RECIPIENT
+   returns every token it has ever received — bounded by their activity,
+   not the chain's deployments. New collections appear with no deploy here.
+   Public RPCs cap eth_getLogs ranges (measured 2026-08-26: 10k blocks on
+   mainnet.base.org and drpc, 50 on 1rpc, archive-locked on publicnode), so
+   the first walk chunks adaptively — size halves on a range error, grows
+   cautiously on dense windows — and ALWAYS shows progress, never a silent
+   wait. Balances + interface probes batch through Multicall3 in ONE
+   round trip; art fetches only for contracts with a non-zero balance.
+   The cache is FORWARD-ONLY: per address we store the discovered contract
+   set and the last scanned block; a repeat visit walks only new blocks.
+
+   REGISTRY SEAM (designed, deliberately NOT built — the log walk ships
+   first): an optional on-chain registry where a creator ANNOUNCES a
+   collection (address + interface hint + metadata pointer). Registered
+   collections need no scan at all — the registry read subsumes discovery
+   for them, and this scan remains the fallback that catches everything
+   unregistered. Seam point: scanPerson() merges registrySet with
+   logWalkSet before probeAndHold(); the registry adds a read, not a
+   path, and changes no cache semantics.
+
+   JEDI LAW (order 2): JEDI has NO liquidity pool and cannot be bought.
+   It is readable here — a holder sees what they hold — and this surface
+   NEVER offers a buy path for any collection, pooled or not: the profile
+   reads; the market sells; never the twain. */
+const TRANSFER_TOPIC='0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'; // PUBLIC-CONSTANT: ERC-20 Transfer event signature, not a secret
+const MULTICALL3='0xcA11bde05977b3631167028862bE2a173976CA11';
+const scanStats={ms:0,bytes:0,requests:0,walkMs:0};
+const _fetch=window.fetch.bind(window);
+async function scanFetch(url,opts){
+  const t0=performance.now();
+  const r=await _fetch(url,opts);
+  scanStats.requests++;
+  try{scanStats.bytes+=(await r.clone().text()).length;}catch(e){}
+  scanStats.ms+=performance.now()-t0;
+  return r;
+}
+async function scanRpc(body){ // single JSON-RPC via scanFetch, host rotation
+  for(const h of HOSTS){
+    try{
+      const r=await scanFetch(h,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+      const j=await r.json();
+      if(!j.error) return j;
+    }catch(e){}
+  }
+  return null; // every host failed (range cap, down, or rate) — caller adapts
+}
+const SCAN_RECENT=1000000; /* ~10 weeks. The naive full-history walk measured
+  350s / 10,097 requests / 959 KB on public RPCs (10k-block caps everywhere,
+  archive locked) and lost windows to rate-limit refusals — too slow and
+  unreliable to run inline. So: the first visit scans the recent window
+  (what you came to see — your newest inscriptions), then scanDeeper()
+  walks the rest of history in the background, ten windows per idle pass,
+  floor growing downward across visits until it reaches zero. The forward-
+  only law holds for lastBlock; floorBlock only ever decreases. */
+async function scanPerson(a,onProg){
+  const key='bnr.pscan.v1:'+a;
+  let cache=null; try{cache=JSON.parse(localStorage.getItem(key)||'null');}catch(e){}
+  const found=new Set(cache?cache.contracts:[]);
+  const nb=await scanRpc({jsonrpc:'2.0',id:1,method:'eth_blockNumber'});
+  const latest=parseInt(nb.result,16);
+  const floor=cache?cache.floorBlock:Math.max(0,latest-SCAN_RECENT);
+  const from0=cache?cache.lastBlock+1:floor;
+  let size=10000,cursor=from0,refused=0;
+  const tw=performance.now();
+  const walker=async()=>{ /* two walkers — gentler than four; rate limits
+     were the 350s walk's real killer */
+    while(true){
+      if(cursor>latest)return;
+      const lo=cursor; cursor=Math.min(lo+size,latest+1);
+      const hi=cursor-1;
+      const j=await scanRpc({jsonrpc:'2.0',id:1,method:'eth_getLogs',params:[{fromBlock:'0x'+lo.toString(16),toBlock:'0x'+hi.toString(16),topics:[TRANSFER_TOPIC,null,AD(a)]}]});
+      if(!j){ if(size>10000){size=Math.max(10000,size>>1);cursor=lo;continue;}
+        refused++; continue; }
+      (j.result||[]).forEach(l=>l.address&&found.add(l.address.toLowerCase()));
+      if(onProg)onProg(lo,hi,latest,found.size);
+    }
+  };
+  await Promise.all([walker(),walker()]);
+  scanStats.walkMs=Math.round(performance.now()-tw);
+  localStorage.setItem(key,JSON.stringify({contracts:[...found].sort(),lastBlock:latest,floorBlock:floor,ts:Date.now()}));
+  return {contracts:[...found],cached:!!cache,refused,latest,floor,first:!cache};
+}
+async function scanDeeper(a){ /* one background pass: ten 10k windows downward —
+  one window per request; hosts cap at 10k and a bigger ask is silently refused */
+  const key='bnr.pscan.v1:'+a;
+  let cache=null; try{cache=JSON.parse(localStorage.getItem(key)||'null');}catch(e){}
+  if(!cache||cache.floorBlock<=0)return false;
+  let lo=cache.floorBlock;
+  for(let w=0;w<10&&lo>0;w++){
+    const hi=lo-1, loW=Math.max(0,hi-9999);
+    const j=await scanRpc({jsonrpc:'2.0',id:1,method:'eth_getLogs',params:[{fromBlock:'0x'+loW.toString(16),toBlock:'0x'+hi.toString(16),topics:[TRANSFER_TOPIC,null,AD(a)]}]});
+    if(!j)break; /* hosts unresponsive — the next idle pass retries */
+    const set=new Set(cache.contracts); let added=0;
+    (j.result||[]).forEach(l=>{if(l.address&&!set.has(l.address.toLowerCase())){set.add(l.address.toLowerCase());added++;}});
+    cache={contracts:[...set].sort(),lastBlock:cache.lastBlock,floorBlock:loW,ts:Date.now()};
+    localStorage.setItem(key,JSON.stringify(cache));
+    if(added)console.info('deep scan: +'+added+' older contract(s) found down to block '+loW+' — revisit to render them');
+    lo=loW;
+  }
+  return lo>0;
+}
+/* Multicall3 aggregate3 encoding/decoding (allowFailure=true so one bad
+   contract never poisons the batch) */
+function agg3Data(calls){
+  /* aggregate3((address,bool,bytes)[]) — dynamic array of dynamic structs:
+    a PER-ELEMENT OFFSET TABLE sits between the length word and the tuples,
+    offsets measured from the length word (first tuple at N*32; the tuple's
+    bytes offset is 0x60 = its three head words). Shape byte-verified
+    against live successful Base aggregate3 transactions — three earlier
+    drafts of this encoder were wrong three different ways, each caught by
+    the chain answering empty or reverting. */
+  const N=calls.length;
+  const cd=calls.map(c=>c.data.replace(/^0x/,'').toLowerCase());
+  const pad=h=>h.length%64?h+'0'.repeat(64-(h.length%64)):h;
+  let offTable='',tuples='',acc=N*32;
+  for(let i=0;i<N;i++){
+    offTable+=W(acc);
+    acc+=96+32+pad(cd[i]).length/2;
+    tuples+=calls[i].to.toLowerCase().replace(/^0x/,'').padStart(64,'0')+W(1)+W(96)+W(cd[i].length/2)+pad(cd[i]);
+  }
+  return '0x82ad56cb'+W(0x20)+W(N)+offTable+tuples;
+}
+function agg3Decode(hex){
+  /* return shape (byte-verified against live returns): [0x20][N][N elem
+     offsets, relative to the length word][per element: success flag, bytes
+     offset (rel. to element start), bytes length, bytes data] */
+  const h=hex.replace(/^0x/,'');
+  if(h.length<130)return null;
+  const n=parseInt(h.slice(64,128),16);
+  const base=128;
+  const out=[];
+  for(let i=0;i<n;i++){
+    const o=parseInt(h.slice(base+i*64,base+i*64+64),16);
+    const ep=128+o*2; /* element offsets are relative to the array BODY
+      (right after the length word = char 128), not the length word itself */
+    const success=parseInt(h.slice(ep,ep+64),16);
+    const bo=parseInt(h.slice(ep+64,ep+128),16);
+    const dp=ep+bo*2;
+    const len=parseInt(h.slice(dp,dp+64),16);
+    out.push(success&&len>0?'0x'+h.slice(dp+64,dp+64+len*2):'0x');
+  }
+  return out;
+}
+async function aggregate3(calls){ // [{to,data}] -> results[] (null per failure)
+  if(!calls.length)return [];
+  const j=await scanRpc({jsonrpc:'2.0',id:1,method:'eth_call',params:[{to:MULTICALL3,data:agg3Data(calls)},'latest']});
+  if(!j||!j.result||j.result==='0x')return calls.map(()=>null);
+  try{ return agg3Decode(j.result); }catch(e){ return calls.map(()=>null); }
+}
+const FAMILY_SELS=['422b9e23','a435130b','a62f5b1b']; // FUNGI-shape, PEPI-shape, TRUFFI-shape
+async function discoverArtSels(held){ // for contracts outside COLS: find a selector that returns art, batched
+  const unknown=held.filter(h=>!h.known);
+  if(!unknown.length)return;
+  const calls=[];
+  unknown.forEach(h=>FAMILY_SELS.forEach(s=>calls.push({to:h.col.c,data:s+W(h.seed)+W(0)})));
+  const res=await aggregate3(calls);
+  unknown.forEach((h,i)=>{
+    for(let k=0;k<FAMILY_SELS.length;k++){
+      const r=res&&res[i*FAMILY_SELS.length+k];
+      if(r&&r.length>200){h.col.sel=FAMILY_SELS[k];break;}
+    }
+  });
+}
+
 /* on-chain name resolution — registry eth_calls only, zero extra origins */
 const RC=[1n,0x8082n,0x800000000000808an,0x8000000080008000n,0x808bn,0x80000001n,0x8000000080008081n,0x8000000000008009n,0x8an,0x88n,0x80008009n,0x8000000an,0x8000808bn,0x800000000000008bn,0x8000000000008089n,0x8000000000008003n,0x8000000000008002n,0x8000000000000080n,0x800an,0x800000008000000an,0x8000000080008081n,0x8000000000008080n,0x80000001n,0x8000000080008008n];
 const KROT=[[0,36,3,41,18],[1,44,10,45,2],[62,6,43,15,61],[28,55,25,21,56],[27,20,39,8,14]];
@@ -338,12 +504,45 @@ async function visit(v){
   $('subline').textContent=r.asTyped.toLowerCase()!==a&&/^0x/.test(r.asTyped)===false
     ?('resolved on-chain from '+r.asTyped+' · shorthand always present')
     :'address shorthand · always present, owned or not';
-  /* balances for every token — one batch */
-  const balRes=await rpc(COLS.map(col=>({to:col.c,data:'0x70a08231'+AD(a)})));
-  const held=[];
-  COLS.forEach((col,i)=>{
-    if(balRes&&balRes[i]&&balRes[i]!=='0x'&&BigInt(balRes[i])>0n)held.push({col,bal:BigInt(balRes[i])});
+  /* THE PERSON SCAN: discovery by the wallet's own transfer history, then
+     one Multicall3 round trip for every balance + interface probe */
+  msg.textContent='scanning the wallet\u2019s history — every token it ever received\u2026';
+  const scan=await scanPerson(a,(from,to,latest,nTok)=>{
+    msg.textContent='person scan · block '+to.toLocaleString()+' of '+latest.toLocaleString()+' ('+Math.round(to/latest*100)+'%) · '+nTok+' token'+(nTok===1?'':'s')+' seen so far';
   });
+  if(scan.refused)console.warn('person scan: '+scan.refused+' window(s) refused by every host at floor size — skipped, cached forward-only');
+  msg.textContent='probing '+scan.contracts.length+' contract'+(scan.contracts.length===1?'':'s')+' — one Multicall3 round trip\u2026';
+  const probeCalls=[];
+  scan.contracts.forEach(c=>{
+    probeCalls.push({to:c,data:'0x70a08231'+AD(a)});            /* balance */
+    probeCalls.push({to:c,data:'0x422b9e23'+W(0)+W(0)});        /* family meta probe */
+    probeCalls.push({to:c,data:'a435130b'+W(0)+W(0)});          /* PEPI-shape probe */
+  });
+  const probeRes=await aggregate3(probeCalls);
+  const held=[];
+  scan.contracts.forEach((c,i)=>{
+    const balRaw=probeRes&&probeRes[i*3];
+    const ifA=probeRes&&probeRes[i*3+1], ifB=probeRes&&probeRes[i*3+2];
+    if(!balRaw||balRaw==='0x'||BigInt(balRaw)===0n)return;      /* art only for non-zero */
+    if(!((ifA&&ifA.length>2)||(ifB&&ifB.length>2)))return;      /* must speak an inscription interface */
+    const known=COLS.find(x=>x.c.toLowerCase()===c);
+    const col=known?known:{sym:c.slice(0,6)+'\u2026'+c.slice(-4),c,sel:'422b9e23',lv:null,base:0};
+    held.push({col,bal:BigInt(balRaw),known:!!known,seed:Number(BigInt(balRaw)/1000000000n)});
+  });
+  await discoverArtSels(held); /* unknown contracts: find the selector that returns their art */
+  /* hybrid coverage: the scan is DISCOVERY (new collections need no deploy
+     here); the known family additionally gets one Multicall3 balance pass so
+     estate collections render instantly even when their receipts predate the
+     walked window — the deep scan reaches those blocks over time, but the
+     founder should not stare at an empty wall while it walks */
+  const famRes=await aggregate3(COLS.map(c=>({to:c.c,data:'0x70a08231'+AD(a)})));
+  const seenC=new Set(held.map(h=>h.col.c.toLowerCase()));
+  COLS.forEach((col,i)=>{
+    const b=famRes&&famRes[i];
+    if(b&&b!=='0x'&&BigInt(b)>0n&&!seenC.has(col.c.toLowerCase()))
+      held.push({col,bal:BigInt(b),known:true,seed:Number(BigInt(b)/1000000000n)});
+  });
+  window.__scanStats=scanStats;
   const chips=$('chips');chips.innerHTML='';
   held.forEach(h=>{
     const c=document.createElement('span');c.className='chip';
@@ -417,9 +616,14 @@ async function visit(v){
     pfp.innerHTML=pieces[0].svg+'<div class="pfptag">profile picture · art they own</div>';
   }
   msg.textContent=pieces.length
-    ?('rendered from chain · '+lastHost+' · '+reads+' reads · nothing stored')
-    :'this address holds nothing on these contracts — the shorthand IS the profile (graceful by law)';
+    ?('rendered from chain · '+lastHost+' · '+reads+' reads · nothing stored · person scan '+(scanStats.walkMs/1000).toFixed(1)+'s walk · '+scanStats.requests+' requests · '+Math.round(scanStats.bytes/1024)+' KB · '+(scan.cached?'repeat visit (new blocks only)':'first walk (full history)'))
+    :'this address holds nothing readable — the shorthand IS the profile (graceful by law) · person scan '+(scanStats.walkMs/1000).toFixed(1)+'s · '+scanStats.requests+' requests · '+Math.round(scanStats.bytes/1024)+' KB · '+(scan.cached?'repeat visit':'first walk');
   msg.style.color='var(--ink-mut)';
+  /* deep history continues in the background — ten windows per idle pass,
+     floor growing downward; newly found older contracts render on the next
+     visit (never mid-read) */
+  const deeper=async()=>{ if(await scanDeeper(a)) setTimeout(deeper,400); };
+  setTimeout(deeper,800);
 }
 
 /* ══════════ THE ADDRESS BOOK ══════════════════════════════════════════════

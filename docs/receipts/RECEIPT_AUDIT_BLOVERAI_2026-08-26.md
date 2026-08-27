@@ -16,6 +16,18 @@ notes that survive untouched: the reference-hunting itself (name → address →
 list-before-change discipline, and the exclusions (the bLOVErAi agent concept is not the name;
 nothing here ever touched the bQueenBee agent surface).
 
+## ADDENDUM — the Purse is kept, and the lore is the point
+
+Founder's word, later the same day: he controls `bloverai.base.eth` — the correction above
+stands, and the garden remains the default everywhere. The lost wallet is **bQueenBee's Lost
+Purse** (`bqueenbee.base.eth` → `0x100fd362abf7ef7f7a7ca3c331d4c718c6f45479`), and it stays —
+phone and passkey gone, holdings kept on display as a **named exhibit, never a default**
+(explorer exhibit row + holders-ladder second rung; the first rung is the founder's garden).
+The reason is the egg: the Purse still holds **52.24 $FROGGI**, and on FROGGI's own ladder
+(`0x88A78C5035BdC8C9A8bb5c029e6cfCDD14B822FE`, levels 0 / 1,000 / 3,000 / 10,000 / 30,000 /
+60,000 / 120,000 — egg, hatchling, tadpole, froglet, frog, elder frog, crown) a seed of **52
+reads "egg"**. She already has a FROGGI egg in it, and it waits there.
+
 ---
 
 # RECEIPT — the bloverai.base.eth audit: every reference, categorized, before anything changed
