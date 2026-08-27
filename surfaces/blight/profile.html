@@ -98,6 +98,29 @@ button.do:active{transform:translateY(1px)}
 .foot{margin-top:var(--s3);font-size:11px;color:var(--ink-dim)}
 .foot b{color:var(--ink-mut)}
 nav#fleetnav{margin-top:var(--s4);font-size:11.5px;color:var(--ink-dim)}
+/* ── the address book ── */
+.book .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.book .row.full{grid-template-columns:1fr}
+.book label{display:block;font-size:11px;color:var(--ink-dim);margin-bottom:4px}
+.book input,.book select{width:100%;background:var(--bg-well);border:1px solid var(--line);border-radius:9px;color:var(--ink);font:12.5px var(--font-mono);padding:9px 11px}
+.book input:focus,.book select:focus{outline:none;border-color:var(--you)}
+.book .add{margin-top:10px;background:none;border:1px solid var(--you);color:var(--you);border-radius:9px;padding:9px 16px;font:inherit;cursor:pointer}
+.book .add:hover{background:var(--you);color:var(--bg)}
+.entry{margin-top:10px;background:var(--bg-well);border:1px solid var(--line);border-left:3px solid var(--sem-science);border-radius:0 9px 9px 0;padding:10px 12px}
+.entry.star{border-left-color:var(--you)}
+.entry .el{font-size:12.5px;color:var(--ink)}
+.entry .ev{font-size:11.5px;color:var(--ink-mut);word-break:break-all}
+.entry .en{display:inline-block;font-size:10px;letter-spacing:.06em;border:1px solid var(--line);border-radius:99px;padding:2px 9px;color:var(--ink-dim);margin-top:6px}
+.entry .res{font-size:10.5px;color:var(--sem-science);margin-top:5px;word-break:break-all}
+.entry .acts{margin-top:8px;display:flex;gap:10px;flex-wrap:wrap}
+.entry .acts button{background:none;border:none;color:var(--ink-dim);font:10.5px var(--font-mono);cursor:pointer;padding:0;text-decoration:underline}
+.entry .acts button:hover{color:var(--you)}
+.entry .acts button.rm:hover{color:var(--sem-harm)}
+.entry .starflag{font-size:10px;color:var(--you);margin-left:8px}
+.book .empty{margin-top:10px;font-size:11.5px;color:var(--ink-dim);border:1px dashed var(--line);border-radius:9px;padding:10px 12px}
+.book .take{margin-top:12px;font-size:11px;color:var(--ink-dim)}
+.book .take button{background:none;border:1px solid var(--line);color:var(--ink-dim);border-radius:9px;padding:6px 12px;font:11px var(--font-mono);cursor:pointer;margin-left:8px}
+.book .take button:hover{border-color:var(--you);color:var(--you)}
 @media (max-width:600px){
   .idrow{align-items:flex-start}
   .stat b{font-size:30px}
@@ -111,10 +134,32 @@ nav#fleetnav{margin-top:var(--s4);font-size:11.5px;color:var(--ink-dim)}
 straight from the chain. this is a HUMAN surface: the purple rim is the person,
 <b>--sovereign / --you</b>, and every colour carries its word.</p>
 
+<section class="panel book" id="book">
+  <h2 style="font-size:14px;color:var(--you);margin-bottom:4px">your names and addresses — add as many as you like</h2>
+  <p class="hint" style="margin-bottom:10px">every entry is three things: <b>what you call it</b>, <b>the name or address</b>, and
+  <b>which network</b> it lives on. the network is your say — the same address on two networks is correct, and never an error.
+  a name that carries <code>.eth</code>, <code>.base.eth</code> or <code>.sol</code> can be resolved right here to what it points at.</p>
+  <div class="row">
+    <div><label for="b-label">what you call it — your own words</label>
+      <input id="b-label" type="text" spellcheck="false" autocomplete="off" placeholder="my art wallet · cold · phone one"></div>
+    <div><label for="b-net">which network it belongs to</label>
+      <select id="b-net"></select></div>
+  </div>
+  <div class="row full" style="margin-top:8px">
+    <div><label for="b-val">the name or address</label>
+      <input id="b-val" type="text" spellcheck="false" autocomplete="off" placeholder="a name ending .eth · .base.eth · .sol, or the address as you use it"></div>
+  </div>
+  <button class="add" id="b-add">add this entry</button>
+  <div id="b-list"></div>
+  <p class="take">this book lives on <b>this device only</b> — nothing is sent anywhere, and an empty book is a complete profile.
+    <button id="b-copy">take your book with you</button></p>
+</section>
+
 <section class="panel">
   <div class="bar">
     <input id="addr" type="text" spellcheck="false" autocomplete="off"
-      placeholder="0x… address, or name.eth / name.base.eth">
+      placeholder="your name or address, whatever you already use"
+      aria-label="your name or address, whatever you already use">
     <button class="do" id="go">read the chain</button>
   </div>
   <p class="hint">read-only: <b>no wallet connect, no signing, no keys</b>. typing an address is the whole gesture.
@@ -124,7 +169,7 @@ straight from the chain. this is a HUMAN surface: the purple rim is the person,
 
 <section class="panel" id="identity" hidden>
   <div class="idrow">
-    <div class="pfp" id="pfp"><div class="none">no art yet —<br>the rim is sovereign</div><div class="pfptag" id="pfptag" hidden>pfp · art they own</div></div>
+    <div class="pfp" id="pfp"><div class="none">no art yet —<br>the rim is sovereign</div><div class="pfptag" id="pfptag" hidden>profile picture · art they own</div></div>
     <div class="who">
       <div class="short" id="short">0x0000…0000</div>
       <div class="subline" id="subline">address shorthand · always present, owned or not</div>
@@ -161,7 +206,7 @@ because the chain is the record — this page keeps no state, sets no cookie, wr
 contract to read. the on-chain half here is the ERC20i family on Base: FUNGI · $FROGGI · PEPI v1/v2 ·
 JELLI · JEDI · MiDi · TRUFFI, read as balances + holder-seeded + enumerated inscriptions.</p>
 
-<p class="foot"><b>provenance.</b> one self-contained file · keyless public RPCs (publicnode → drpc, rotated,
+<p class="foot"><b>provenance.</b> one self-contained file · keyless public endpoints (publicnode → drpc, rotated,
 read-only eth_call) · contracts as listed above · art decoded from chain bytes on your machine ·
 no CDN, no build step, no server, no keys. degraded gracefully: an address that holds nothing gets
 its shorthand — that IS the profile.</p>
@@ -369,13 +414,229 @@ async function visit(v){
   });
   if(pieces.length){
     const pfp=$('pfp');
-    pfp.innerHTML=pieces[0].svg+'<div class="pfptag">pfp · art they own</div>';
+    pfp.innerHTML=pieces[0].svg+'<div class="pfptag">profile picture · art they own</div>';
   }
   msg.textContent=pieces.length
     ?('rendered from chain · '+lastHost+' · '+reads+' reads · nothing stored')
     :'this address holds nothing on these contracts — the shorthand IS the profile (graceful by law)';
   msg.style.color='var(--ink-mut)';
 }
+
+/* ══════════ THE ADDRESS BOOK ══════════════════════════════════════════════
+   A person carries many entries — often several on the SAME network. Never
+   dedupe. The network is the person's assertion. Zero entries is a valid
+   profile. Storage: this device only (the storage decision stays open —
+   records the person carries, never rows in a database of ours). */
+(function(){
+  const NETWORKS=[
+    ['Ethereum',''],['Base',''],['Arbitrum',''],['Optimism',''],['Polygon',''],
+    ['Solana',''],['Bitcoin',''],
+    ['Vaulta','account names, not addresses'],['exSat',''],['Zano',''],
+    ['Arweave',''],['Autonomi',''],['Hive','']
+  ];
+  const KEY='holder-book-v1';
+  const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  let book;
+  try{book=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){book=[]}
+  if(!Array.isArray(book))book=[];
+  const save=()=>localStorage.setItem(KEY,JSON.stringify(book));
+
+  /* — tiny sha256 (first-party, no library) — */
+  const K=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+  const rotr=(x,n)=>(x>>>n)|(x<<(32-n));
+  function sha256(bytes){
+    const h=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+    const l=bytes.length, blocks=(l+9+63)>>6;
+    const w=new Uint32Array(64);
+    for(let blk=0;blk<blocks;blk++){
+      w.fill(0);
+      for(let i=0;i<64;i++){
+        const p=blk*64+i;
+        if(p<l)w[i>>2]|=bytes[p]<<(24-(i&3)*8);
+        else if(p===l)w[i>>2]|=0x80<<(24-(i&3)*8);
+      }
+      if(blk===blocks-1)w[15]=(l*8)>>>0; /* length word lives only in the last block, never over message bytes */
+      for(let i=16;i<64;i++){
+        const s0=rotr(w[i-15],7)^rotr(w[i-15],18)^(w[i-15]>>>3);
+        const s1=rotr(w[i-2],17)^rotr(w[i-2],19)^(w[i-2]>>>10);
+        w[i]=(w[i-16]+s0+w[i-7]+s1)>>>0;
+      }
+      let[a,b,c,d,e,f,g,j]=h;
+      for(let i=0;i<64;i++){
+        const S1=rotr(e,6)^rotr(e,11)^rotr(e,25);
+        const ch=(e&f)^(~e&g);
+        const t1=(j+S1+ch+K[i]+w[i])>>>0;
+        const S0=rotr(a,2)^rotr(a,13)^rotr(a,22);
+        const maj=(a&b)^(a&c)^(b&c);
+        const t2=(S0+maj)>>>0;
+        j=g;g=f;f=e;e=(d+t1)>>>0;d=c;c=b;b=a;a=(t1+t2)>>>0;
+      }
+      h[0]=(h[0]+a)>>>0;h[1]=(h[1]+b)>>>0;h[2]=(h[2]+c)>>>0;h[3]=(h[3]+d)>>>0;
+      h[4]=(h[4]+e)>>>0;h[5]=(h[5]+f)>>>0;h[6]=(h[6]+g)>>>0;h[7]=(h[7]+j)>>>0;
+    }
+    const out=new Uint8Array(32);
+    h.forEach((x,k)=>{out[k*4]=x>>>24;out[k*4+1]=(x>>>16)&255;out[k*4+2]=(x>>>8)&255;out[k*4+3]=x&255});
+    return out;
+  }
+  /* — base58 (the alphabet Solana addresses use) — */
+  const B58='123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+  const b58enc=bytes=>{let n=0n;for(const b of bytes)n=n*256n+BigInt(b);let s='';while(n>0n){s=B58[Number(n%58n)]+s;n/=58n}for(const b of bytes){if(b===0)s=B58[0]+s;else break}return s};
+  const b58dec=s=>{const AL={};for(let i=0;i<B58.length;i++)AL[B58[i]]=i;
+    let n=0n;for(const c of s)n=n*58n+BigInt(AL[c]);
+    const out=[];while(n>0n){out.unshift(Number(n%256n));n/=256n}return new Uint8Array(out)};
+  /* — program-derived address search with the on-curve test — */
+  const P=2n**255n-19n, D=((-121665n)*pow2(121666n,P-2n,P)%P+P)%P;
+  function pow2(b,e,m){let r=1n;b%=m;while(e>0n){if(e&1n)r=r*b%m;b=b*b%m;e>>=1n}return r}
+  function onCurve(u8){
+    let y=0n;for(let i=31;i>=0;i--)y=(y<<8n)|BigInt(u8[i]);y&=(1n<<255n)-1n;if(y>=P)return false;
+    const xx=(y*y-1n)*pow2(D*y*y+1n,P-2n,P)%P;
+    return pow2(xx,(P-1n)/2n,P)===1n;
+  }
+  function pda(seeds,prog){
+    const enc=new TextEncoder();
+    /* typed arrays are not flattened by Array.flat — pour the bytes by hand.
+       the bump seed sits WITH the seeds, before the program id — that is the layout. */
+    const body=[];
+    for(const s of seeds)for(const b of s)body.push(b);
+    for(const p of prog)body.push(p);
+    for(let bump=255;bump>=0;bump--){
+      const h=sha256(new Uint8Array([...body.slice(0,body.length-32),bump,...body.slice(body.length-32),...enc.encode('ProgramDerivedAddress')]));
+      if(!onCurve(h))return h;
+    }
+    return null;
+  }
+  const SOL_HOSTS=['https://solana-rpc.publicnode.com','https://api.mainnet-beta.solana.com'];
+  const NAME_PROG_BYTES=(()=>{ /* namesLPneVptA9Z5rqUDD9tMTWEJwofgaYwp8cawRkX */
+    const AL={};for(let i=0;i<B58.length;i++)AL[B58[i]]=i;
+    const s='namesLPneVptA9Z5rqUDD9tMTWEJwofgaYwp8cawRkX';
+    let n=0n;for(const c of s)n=n*58n+BigInt(AL[c]);
+    const out=new Uint8Array(32);let i=31;
+    while(n>0n&&i>=0){out[i--]=Number(n%256n);n/=256n}
+    return out;
+  })();
+  async function solRpc(method,params){
+    for(const h of SOL_HOSTS){
+      try{
+        const r=await fetch(h,{method:'POST',headers:{'content-type':'application/json'},
+          body:JSON.stringify({jsonrpc:'2.0',id:1,method,params})});
+        if(r.ok){const j=await r.json();if(j&&j.result!==undefined)return j.result}
+      }catch(e){}
+    }
+    return null;
+  }
+  async function resolveSol(name){
+    /* 2026: the old .sol registry accounts were retired; Solana names now live
+       under the one root account, and .sol resolves through it (the name
+       service's own tooling does the same). Owner read from the registry. */
+    const enc=new TextEncoder();
+    const pre=b=>sha256(new Uint8Array([...enc.encode('SPL Name Service'),...b]));
+    const zero=new Uint8Array(32);
+    const ROOT=b58dec('58PwtjSDuFHuUkYjH9BYnnQKHfwo9reZhC2zMJv9JPkx');
+    const key=pda([pre(enc.encode(name)),zero,ROOT],NAME_PROG_BYTES);
+    if(!key)return null;
+    const res=await solRpc('getAccountInfo',[b58enc(key),{encoding:'base64'}]);
+    const b64=res&&res.value&&res.value.data&&res.value.data[0];
+    if(!b64)return null;
+    const bin=atob(b64), owner=new Uint8Array(32);
+    for(let i=0;i<32;i++)owner[i]=bin.charCodeAt(i);
+    /* a registry owner that is itself a program (off-curve) means the name is
+       tokenized or held by a contract — never report that as a wallet */
+    if(onCurve(owner))return b58enc(owner);
+    return {heldByProgram:true};
+  }
+  /* — name resolution dispatch: .eth · .base.eth · .sol — */
+  async function resolveAny(v){
+    v=String(v||'').trim();
+    if(/\.sol$/i.test(v)){
+      const r=await resolveSol(v.replace(/\.sol$/i,''));
+      if(r&&r.heldByProgram)return{addr:null,kind:'Solana name',note:'this name is held as a token — the registry points at a program, not a wallet'};
+      return{addr:r,kind:'Solana name'};
+    }
+    if(/\.base\.eth$/i.test(v)){const a=await resolveOnChain(v);return a?{addr:a,kind:'Base name'}:{addr:null,kind:''}}
+    if(/\.eth$/i.test(v)){const a=await resolveEnsMainnet(v);if(a&&a.failed)return{addr:null,kind:'',note:'Ethereum name — '+a.failed};return a?{addr:a,kind:'Ethereum name'}:{addr:null,kind:''}}
+    return{addr:null,kind:''};
+  }
+  /* plain .eth lives on Ethereum mainnet — its own registry walk, keyless public endpoints */
+  const ETH_HOSTS=['https://ethereum-rpc.publicnode.com','https://eth.drpc.org'];
+  let ethLastErr='';
+  async function ethCall(to,data){
+    for(const h of ETH_HOSTS){
+      try{
+        const r=await fetch(h,{method:'POST',headers:{'content-type':'application/json'},
+          body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_call',params:[{to,data},'latest']})});
+        if(r.ok){const j=await r.json();if(j&&j.result!==undefined&&j.result!=='0x')return j.result;ethLastErr=(j&&j.error&&j.error.message)||'empty result from '+h}
+        else ethLastErr='http '+r.status+' from '+h;
+      }catch(e){ethLastErr=String(e&&e.message||e)+' from '+h}
+    }
+    return null;
+  }
+  async function resolveEnsMainnet(name){
+    const node=namehash(name.toLowerCase()).slice(2);
+    const REG='0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e';
+    const own=await ethCall(REG,'0x02571be3'+node);
+    if(!own||/^0x0*$/.test(own))return{failed:ethLastErr||'name not on the registry'};
+    const rs=await ethCall(REG,'0x0178b8bf'+node);
+    if(!rs||/^0x0*$/.test(rs))return{failed:ethLastErr||'no resolver set'};
+    const a=await ethCall('0x'+rs.slice(26),'0x3b3b57de'+node);
+    return a&&!/^0x0*$/.test(a)?'0x'+a.slice(26):{failed:ethLastErr||'resolver has no address'};
+  }
+  /* — render — */
+  const el=id=>document.getElementById(id);
+  const netSel=el('b-net');
+  NETWORKS.forEach(([n,note])=>{const o=document.createElement('option');o.value=n;o.textContent=note?(n+' — '+note):n;netSel.appendChild(o)});
+  function render(){
+    const list=el('b-list');
+    if(!book.length){list.innerHTML='<div class="empty">no entries yet — an empty book is a complete profile.</div>';return}
+    list.innerHTML=book.map((e,i)=>
+      '<div class="entry'+(e.star?' star':'')+'" data-i="'+i+'">'+
+      '<div class="el">'+esc(e.label||'(no label yet)')+(e.star?'<span class="starflag">★ where to send me things on '+esc(e.network)+'</span>':'')+'</div>'+
+      '<div class="ev">'+esc(e.value)+'</div>'+
+      '<span class="en">'+esc(e.network)+'</span>'+
+      (e.resolved?'<div class="res">'+esc(e.resolved.kind)+' · resolves to '+esc(e.resolved.addr)+'</div>':
+        e.resolveTried&&e.isName?(e.resolvedNote?'<div class="res" style="color:var(--guard)">'+esc(e.resolvedNote)+'</div>':'<div class="res" style="color:var(--guard)">did not resolve — kept as written</div>'):'')+
+      '<div class="acts">'+
+      (e.isName&&!e.resolved?'<button class="try">resolve this name</button>':'')+
+      '<button class="star">'+(e.star?'this is not the send-to place':'make this the send-to place')+'</button>'+
+      '<button class="rm">take this entry out</button></div></div>'
+    ).join('');
+    list.querySelectorAll('.entry').forEach(node=>{
+      const i=+node.dataset.i;
+      node.querySelector('.rm').onclick=()=>{book.splice(i,1);save();render()};
+      node.querySelector('.star').onclick=()=>{
+        const net=book[i].network;
+        book.forEach((e,k)=>{if(k!==i&&e.network===net)e.star=false});
+        book[i].star=!book[i].star;save();render();
+      };
+      const tryB=node.querySelector('.try');
+      if(tryB)tryB.onclick=async()=>{tryB.textContent='resolving…';await tryResolve(i)};
+    });
+  }
+  async function tryResolve(i){
+    let r;
+    try{r=await resolveAny(book[i].value)}
+    catch(err){book[i].resolveTried=true;book[i].resolvedNote='resolution could not reach the network — '+String(err&&err.message||err).slice(0,90);save();render();return}
+    book[i].resolveTried=true;
+    if(r&&r.addr)book[i].resolved=r;
+    else if(r&&r.note)book[i].resolvedNote=r.note;
+    save();render();
+  }
+  el('b-add').addEventListener('click',async()=>{
+    const label=el('b-label').value.trim(), value=el('b-val').value.trim(), network=netSel.value;
+    if(!value){el('b-val').focus();return}
+    const isName=/\.(sol|(base\.)?eth)$/i.test(value);
+    book.push({label,value,network,star:false,isName,resolved:null,resolveTried:false});
+    save();render();
+    el('b-label').value='';el('b-val').value='';
+    if(isName)tryResolve(book.length-1);
+  });
+  el('b-copy').addEventListener('click',async()=>{
+    const text=book.map(e=>[e.label,e.value,e.network,e.star?'the send-to place':''].filter(Boolean).join(' · ')).join('\n')||'(an empty book)';
+    try{await navigator.clipboard.writeText(text);el('b-copy').textContent='copied — it is yours to carry'}
+    catch(e){el('b-copy').textContent='select and copy below';console.log(text)}
+    setTimeout(()=>{el('b-copy').textContent='take your book with you'},2600);
+  });
+  render();
+})();
 
 $('go').addEventListener('click',()=>visit($('addr').value));
 $('addr').addEventListener('keydown',e=>{if(e.key==='Enter')visit($('addr').value)});
@@ -393,6 +654,6 @@ $('fleetnav').innerHTML=(window.FLEET_NAV||[
      self + the public RPC + the estate's own rail. If a stricter two-origin
      claim is wanted, that needs a founder-ruled rider variant — not a
      per-surface opt-out of a shared law. -->
-<script src="../tour.js?v=28"></script>
+<script src="../tour.js?v=29"></script>
 </body>
 </html>
