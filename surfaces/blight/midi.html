@@ -74,13 +74,14 @@ resolves, hex by hex, voice by voice, until level five carries the full ensemble
 performance, every time, forever.</p>
 
 <section class="panel">
-  <div class="bar">
+  <div class="ladder" id="contracts" style="margin-top:0"></div>
+  <div class="bar" style="margin-top:10px">
     <input id="in" type="text" spellcheck="false" autocomplete="off"
       placeholder="0x… address, a name (.eth / .base.eth), or type a seed number">
     <button class="act" id="read">read the seed from the chain</button>
   </div>
   <p class="hint">read-only eth_call to a keyless public RPC — no wallet connect, no signing, no keys.
-  try <code id="demo1" style="cursor:pointer;color:var(--ink-mut);border-bottom:1px dashed var(--ink-dim)">a real holder</code> ·
+  try <code id="demo1" style="cursor:pointer;color:var(--ink-mut);border-bottom:1px dashed var(--ink-dim)">the founder's garden — bloverai.base.eth</code> ·
   <code id="demo2" style="cursor:pointer;color:var(--ink-mut);border-bottom:1px dashed var(--ink-dim)">another holder</code></p>
   <p class="msg" id="msg">the contract holds the score — give the performance its seed.</p>
 </section>
@@ -129,7 +130,14 @@ var $=id=>document.getElementById(id);
 var REDUCED=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 var AD=a=>'0'.repeat(24)+a.replace(/^0x/,'').toLowerCase();
 var HOSTS=['https://base-rpc.publicnode.com','https://base.drpc.org'];
-var MIDI_C='0x569e1A337b095B1A6c8F206158072cEDb6325b56';
+/* the three MiDi contracts — same name, same symbol, NOT interchangeable.
+   the state labels are the lesson: they are read live where cheap, stated where not. */
+var CONTRACTS=[
+ {k:'A',addr:'0x569e1A337b095B1A6c8F206158072cEDb6325b56',state:'owner live · pool empty'},
+ {k:'C',addr:'0x2d448bc9a98d28cb094722c2b8208916a248d5ac',state:'owner live · pool empty'},
+ {k:'B',addr:'0xf7Cf2DF510bc0EC400232874f2fB4F2cDf9352d6',state:'owner ZERO — renounced · pool 3.70 WETH'}
+];
+var MIDI_C=CONTRACTS[2].addr; /* default: B — the one with a live pool and a renounced owner */
 
 </script>
 <script>
@@ -669,8 +677,27 @@ async function visit(v){
 }
 $('read').addEventListener('click',()=>visit($('in').value));
 $('in').addEventListener('keydown',e=>{if(e.key==='Enter')visit($('in').value)});
-$('demo1').addEventListener('click',()=>{$('in').value='0x57eF1444664F8D77B8e15707b9e9a4Bc8BA88264';visit($('in').value)});
-$('demo2').addEventListener('click',()=>{$('in').value='0x8253bC78E5e053B71fE38F4B664dfA3009AfD31c';visit($('in').value)});
+$('demo1').addEventListener('click',()=>{$('in').value='bloverai.base.eth';visit($('in').value)});
+$('demo2').addEventListener('click',()=>{$('in').value=MIDI_C===CONTRACTS[2].addr?'0x9f06c1d5b14a9a9a8263ae310e616ed86c20331f':'0x57eF1444664F8D77B8e15707b9e9a4Bc8BA88264';visit($('in').value)});
+/* the three-contract switcher — never presented as interchangeable */
+function renderContracts(){
+  var box=$('contracts');box.innerHTML='';
+  CONTRACTS.forEach(function(c){
+    var d=document.createElement('div');
+    d.className='rung'+(c.addr===MIDI_C?' on':'');
+    d.style.cursor='pointer';
+    d.innerHTML='<b>MiDi '+c.k+'</b>'+c.addr.slice(0,10)+'…'+c.addr.slice(-6)+' · '+c.state;
+    d.addEventListener('click',function(){
+      if(MIDI_C===c.addr)return;
+      MIDI_C=c.addr;
+      renderContracts();
+      $('msg').textContent='now reading MiDi '+c.k+' ('+c.addr.slice(0,10)+'…'+c.addr.slice(-6)+') — '+c.state+'. same name, same symbol, NOT the same contract: balances, owners and pools differ.';
+      visit($('in').value||'1500000');
+    });
+    box.appendChild(d);
+  });
+}
+renderContracts();
 $('voice').addEventListener('click',function(){
   if(!S.melody||REDUCED)return;
   if(S.tier===0){$('msg').textContent='level zero paints silence — the same piece, still unresolved. sound begins at 1,000.';return;}
@@ -683,6 +710,6 @@ $('fleetnav').innerHTML=(window.FLEET_NAV||[
 /* the opening face: level 0 by law — the static IS the piece's first state */
 setSeed(7,extraOfSeed(7),'opening face — level zero, the static');
 </script>
-<script src="../tour.js?v=30"></script>
+<script src="../tour.js?v=31"></script>
 </body>
 </html>
