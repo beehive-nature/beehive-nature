@@ -11,7 +11,7 @@
     '—',
     ['organ','blight/midi-organ.html'],['studio','blight/studio-music.html'],['gate','blight/studio-gate.html'],
     ['bench','blight/workbench.html'],['pulse','blight/pulse.html'],['hearth','blight/hearth.html'],
-    ['refine','blight/pixelrefiner.html'],['qrtree','blight/qrtree.html'],['roses','blight/qrroses.html'],['holder','blight/profile.html'],['record','record.html'],['midi','blight/midi.html'],
+    ['refine','blight/pixelrefiner.html'],['qrtree','blight/qrtree.html'],['roses','blight/qrroses.html'],['holder','blight/profile.html'],['record','record.html'],['midi','blight/midi.html'],['room','blight/midiroom.html'],
     '—',
     ['reader','blight/vaulta-reader.html'],['c1','blight/c1-aid.html'],
     '—',
