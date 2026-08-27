@@ -51,6 +51,8 @@ canvas{width:100%;max-width:560px;height:auto;display:block;border-radius:10px}
 button.voice{background:var(--you);border:0;color:#1a0716;font:650 15px/1.2 ui-sans-serif,system-ui,sans-serif;padding:16px 28px;border-radius:12px;cursor:pointer;box-shadow:0 0 24px rgba(214,85,187,.18)}
 button.voice.off{background:var(--bg-well);color:var(--ink-mut);border:1px solid var(--line);box-shadow:none}
 button.voice:disabled{background:var(--bg-well);color:var(--ink-dim);border:1px dashed var(--guard);cursor:not-allowed;box-shadow:none}
+button.voice.sub{font:600 12px/1.2 ui-sans-serif,system-ui,sans-serif;padding:10px 16px;box-shadow:none;background:var(--bg-well);color:var(--ink-mut);border:1px solid var(--line)}
+button.voice.sub:not(.off):not(:disabled){border-color:var(--you);color:var(--ink)}
 .plain{font-size:11px;color:var(--ink-dim);text-align:center;max-width:460px}
 .legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .lg{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--ink-mut);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
@@ -128,11 +130,12 @@ performance, every time, forever.</p>
   <div class="progress" id="progress" hidden><i id="progfill"></i></div>
   <div class="playrow">
     <button class="voice" id="voice" disabled>click here to listen to what bMiDi paints</button>
+    <button class="voice sub" id="voice2" hidden>or the bare score — the contract&rsquo;s own performance</button>
     <p class="plain" id="plainwords">nothing sounds until you press the button — sound never starts on its own.</p>
   </div>
   <div class="bar" style="margin-top:12px">
     <input id="chatin" type="text" spellcheck="false" autocomplete="off"
-      placeholder="talk to bMiDi — try: bloom for me · play the journey · why buy MiDi · seed 1500000">
+      placeholder="talk to bMiDi — try: play the journey · play the score · contract 0x… · seed 1500000 · why buy MiDi">
     <button class="act" id="say">say</button>
   </div>
   <div class="chat" id="chat"><p class="agent">the scratch pad is my voice — ask and i will paint. i work strictly abstract, psychedelic: the alex grey / amanda sage lineage, in the token&rsquo;s own palette on the lattice it was born on.</p></div>
@@ -147,7 +150,10 @@ performance, every time, forever.</p>
   container: a 3:33 psytrance journey at 162 BPM</b>, the full ensemble, hex by hex. this page reads the
   chain and never touches your wallet; the numbers below are read live from the contract this surface
   performs — <b>MiDi B</b>, the deployment with the renounced owner, the burned supply and the live pool.
-  same name, same symbol, never interchangeable.</p>
+  same name, same symbol, never interchangeable. <b>features are equal on every deployment</b> — A and C
+  are instrument contracts, your balance sets your level wherever it lives, and future deployments can be
+  added live: say <i>contract 0x…</i> to bMiDi and it validates the candidate against the chain before it
+  joins the switcher. B is the canonical holding: the only MiDi renounced with a live pool.</p>
   <div class="nums">
     <div class="num"><b id="pi-owner">…</b><span>owner — renounced means nobody can mint or change the score</span></div>
     <div class="num"><b id="pi-burn">…</b><span>burned — sent to the dead address, gone from every sale</span></div>
@@ -548,6 +554,10 @@ function renderScore(tNow,noGround){
 /* ── the audio — Web Audio oscillators, contract parameters ──
    tier gates the ensemble: 1 melody · 2 +drone · 3 +echo · 4 +arp · 5 +pad */
 var sounding=false,actx=null,voice=null,t0=0,cursor=0,schedT=null;
+/* playMode: 'container' (the 3:33 arrangement, level 5) or 'score' (the bare
+   contract performance — available at EVERY level, 5 included: a level-5
+   holder keeps every lower-level feature, nothing is taken away at the top) */
+var playMode='score';
 function midiHz(m){return 440*Math.pow(2,(m-69)/12);}
 function waveFor(inst){
   if(inst<8)return'triangle';
@@ -622,7 +632,7 @@ function startSound(){
   actx=new (window.AudioContext||window.webkitAudioContext)();
   voice=makeVoicing();
   t0=actx.currentTime+0.08;cursor=0;
-  if(S.tier===5){startContainer();return}
+  if(S.tier===5&&playMode==='container'){startContainer();return}
   buildDrone();
   var pump=function(){
     if(!sounding)return;
@@ -644,8 +654,10 @@ function stopSound(){
   sounding=false;
   if(schedT){clearTimeout(schedT);schedT=null;}
   if(actx){try{actx.close()}catch(e){}actx=null;}
-  var v=$('voice');v.classList.add('off');
+  var v=$('voice');v.classList.add('off');v.hidden=false;
   v.textContent=S.tier===5?'enter the container — 3:33 at 162':'click here to listen to what bMiDi paints';
+  var v2=$('voice2');v2.classList.add('off');v2.hidden=S.tier!==5;
+  v2.textContent='or the bare score — the contract\u2019s own performance';
   if(REDUCED)restingFace();
 }
 /* the composed rest frame — the climax scan finds the fullest moment */
@@ -673,7 +685,7 @@ function renderLadder(){
   LADDER_LABELS.forEach(function(lab,i){
     var d=document.createElement('div');
     d.className='rung'+(i===S.tier?' on':'');
-    d.innerHTML='<b>level '+i+'</b>'+lab+' whole tokens'+(i===0?' · static, no music':i===5?' · full ensemble':'');
+    d.innerHTML='<b>level '+i+'</b>'+lab+' whole tokens'+(i===0?' · static, no music':i===5?' · full ensemble + the 3:33 container — every rung below stays playable':'');
     l.appendChild(d);
   });
 }
@@ -712,18 +724,21 @@ async function setSeed(seed,extra,label){
   var v=$('voice');
   v.classList.remove('off');
   v.textContent=S.tier===5?'enter the container — 3:33 at 162':'click here to listen to what bMiDi paints';
+  var v2=$('voice2');
+  v2.classList.remove('off');v2.hidden=S.tier!==5;
+  v2.textContent='or the bare score — the contract\u2019s own performance';
   var cb=$('container');
   if(S.tier===5){cb.className='container';cb.textContent='3:33 · 162 BPM · psytrance — level 5';}
   else{cb.className='container idle';cb.textContent='ambient · level '+S.tier+' — the pad never sleeps';}
   if(REDUCED){
-    v.disabled=true;v.classList.add('off');
+    v.disabled=true;v.classList.add('off');v2.disabled=true;v2.classList.add('off');
     $('plainwords').textContent='your device asks for reduced motion: you get the performance at rest — one composed, silent frame. a quiet one, not a lesser one.';
   }else if(S.tier===0){
     v.disabled=false;
     $('plainwords').textContent='level zero — the piece is still static; it resolves into sound as the balance crosses 1,000. the button stays honest: pressing it paints silence.';
   }else if(S.tier===5){
     v.disabled=false;
-    $('plainwords').textContent='level five: the page arranges the contract\u2019s score into a 3:33 psytrance journey at 162 BPM — kick, rolling bass, arps, and the motif over the drone. the picture leads all of it.';
+    $('plainwords').textContent='level five: the container arranges the contract\u2019s score into a 3:33 psytrance journey at 162 BPM — and the bare score beneath it stays yours too; nothing at the top removes a lower rung.';
   }else{
     v.disabled=false;
     $('plainwords').textContent='nothing sounds until you press the button — sound never starts on its own. the picture leads the music: hexes arrive before their notes.';
@@ -766,19 +781,27 @@ function renderContracts(){
 }
 renderContracts();
 $('prov-c').textContent=MIDI_C;   /* the provenance names the contract actually being read */
-$('voice').addEventListener('click',function(){
+function startPlayback(mode){
   if(!S.melody||REDUCED)return;
   if(S.tier===0){$('msg').textContent='level zero paints silence — the same piece, still unresolved. sound begins at 1,000.';return;}
-  if(!sounding){
-    sounding=true;this.classList.remove('off');
-    this.textContent=S.tier===5?'the container runs — silence closes it':'silence — let the score rest';
-    startSound();
-    if(typeof bmidiSay==='function')bmidiSay(S.tier===5
-      ?'the 3:33 container at 162 BPM opens — watch the pad, i answer in hexes.'
-      :'the score plays — the picture leads the music: hexes arrive before their notes.');
+  if(sounding){stopSound();return}
+  playMode=mode;
+  sounding=true;
+  var v=$('voice'),v2=$('voice2');
+  if(S.tier===5&&mode==='container'){
+    v.classList.remove('off');v.textContent='the container runs — silence closes it';
+    v2.hidden=true;
+    if(typeof bmidiSay==='function')bmidiSay('the 3:33 container at 162 BPM opens — watch the pad, i answer in hexes.');
+  }else{
+    v2.hidden=S.tier!==5;
+    if(S.tier===5){v2.classList.remove('off');v2.textContent='the bare score plays — silence closes it';v.hidden=true;}
+    else{v.classList.remove('off');v.textContent='silence — let the score rest';}
+    if(typeof bmidiSay==='function')bmidiSay('the bare score plays — every lower rung stays yours at the top.');
   }
-  else stopSound();
-});
+  startSound();
+}
+$('voice').addEventListener('click',function(){startPlayback(S.tier===5?'container':'score')});
+$('voice2').addEventListener('click',function(){startPlayback('score')});
 $('fleetnav').innerHTML=(window.FLEET_NAV||[
  '<a href="./index.html">◈ fLeeT</a>','<a href="./museum.html">◈ museum</a>','<a href="./compare.html">◈ catalog</a>',
  '<a href="./gallery.html">◈ gallery</a>','<a href="./inscription-explorer.html">◈ explorer</a>','<a href="./bnri-gallery.html">◈ bNRi</a>']).join(' · ');
@@ -884,15 +907,20 @@ function reducedCompose(){ambient(padNow());paintBlooms()}
 function fmtT(s){s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
 function containerUI(){
   var cb=$('container'),pr=$('progress'),pf=$('progfill');
-  if(sounding&&S.tier===5&&actx){
+  if(sounding&&S.tier===5&&playMode==='container'&&actx){
     var el=Math.max(0,actx.currentTime-t0);
     cb.className='container';
     cb.textContent='psytrance · 162 BPM · '+fmtT(el)+' / 3:33';
     pr.hidden=false;pf.style.width=Math.min(100,el/CONT.dur*100)+'%';
     if(el>=CONT.dur+0.5){stopSound();bmidiSay('the container closes — 3:33 at 162. the lattice keeps breathing; say the word for another journey.')}
+  }else if(sounding){
+    cb.className='container idle';
+    cb.textContent='the bare score plays · level '+S.tier;
+    pr.hidden=true;
   }else{
     cb.className='container'+(S.tier===5?'':' idle');
     if(S.tier!==5)cb.textContent='ambient · level '+S.tier+' — the pad never sleeps';
+    else cb.textContent='3:33 · 162 BPM · psytrance — plus the bare score, every rung below stays yours';
     pr.hidden=true;
   }
 }
@@ -901,7 +929,7 @@ function padFrame(){
   var t=sounding&&actx?(actx.currentTime-t0):padNow();
   if(sounding){
     if(S.tier===0)drawStatic(t);
-    else if(S.tier===5)renderJourney(t);
+    else if(S.tier===5&&playMode==='container')renderJourney(t);
     else renderPlaying(t);
   }else ambient(t);
   paintBlooms();
@@ -988,11 +1016,17 @@ function promptRoute(qRaw){
       (lvlOf(n)===5?'the container opens: 3:33 at 162. say "play the journey".':'the piece resolves as the balance rises.'));
     return;
   }
-  if(/play|listen|sound|hear|perform|journey/.test(lq)){
+  var cm=/contract\s*(0x[0-9a-fA-F]{40})/i.exec(q);
+  if(cm){
+    bmidiSay('validating '+cm[1].slice(0,10)+'… live — a MiDi instrument contract answers getMeta with a score or it does not switch.');
+    validateAndAddContract(cm[1]);
+    return;
+  }
+  if(/play|listen|sound|hear|perform|journey|container|psytrance/.test(lq)){
     if(REDUCED){bmidiSay('your device asks for reduced motion — the journey rests as one composed, silent frame. a quiet one, not a lesser one.');return}
     if(S.tier===0){bmidiSay('level zero paints silence — the same piece, still unresolved. sound begins at 1,000 whole tokens.');return}
-    if(!sounding)$('voice').click();
-    bmidiSay(S.tier===5?'the 3:33 container at 162 BPM — watch the pad, i answer in hexes.':'the score plays — the picture leads the music: hexes arrive before their notes.');
+    if(sounding)stopSound();
+    startPlayback(/journey|container|psytrance|162/.test(lq)&&S.tier===5?'container':'score');
     return;
   }
   if(/buy|token|price|swap|pool|hold|get midi|invest/.test(lq)){
@@ -1017,6 +1051,25 @@ function promptRoute(qRaw){
 }
 $('say').addEventListener('click',function(){promptRoute($('chatin').value);$('chatin').value=''});
 $('chatin').addEventListener('keydown',function(e){if(e.key==='Enter'){promptRoute($('chatin').value);$('chatin').value=''}});
+/* future contracts: bMiDi validates any candidate live (getMeta must answer
+   a score) before it joins the switcher — equal access for deployments that
+   did not exist when this page was written */
+async function validateAndAddContract(addr){
+  addr=addr.toLowerCase();
+  var res=await rpc([{to:addr,data:SEL_GETMETA+W(1)+W(extraOfSeed(1))}]);
+  var ok=false;
+  if(res&&res[0]&&res[0]!=='0x'){try{var m=JSON.parse(decodeAbiString(res[0]));ok=!!(m&&m.scale)}catch(e){}}
+  if(!ok){bmidiSay('that address did not answer as a MiDi instrument contract — nothing switched, nothing faked.');return}
+  if(!CONTRACTS.some(function(c){return c.addr.toLowerCase()===addr})){
+    CONTRACTS.push({k:'+',addr:addr,state:'added by you — validated live via getMeta'});
+  }
+  MIDI_C=addr;
+  renderContracts();
+  $('prov-c').textContent=MIDI_C;
+  readPitch();
+  bmidiSay('now reading '+addr.slice(0,10)+'…'+addr.slice(-6)+' — features are equal on every deployment: your balance sets your level. the pitch below reads THIS contract live; B stays the canonical holding, the only MiDi renounced with a live pool.');
+  visit($('in').value||'1500000');
+}
 /* ══ THE PITCH — live numbers from the active contract, read at load ═══════ */
 var WETH_C='0x4200000000000000000000000000000000000006';
 var V3_FACTORY='0x33128a8fC17869897dcE68Ed026d694621f6FDfd';

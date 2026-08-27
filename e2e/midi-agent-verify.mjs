@@ -48,12 +48,14 @@ const browser = await chromium.launch({ args:['--no-sandbox'] });
   check('prompt window: bMiDi replies', agentLines1 === agentLines0 + 1, agentLines1 + ' agent lines');
   check('prompt window: the reply is painted on the pad', h6 !== h5);
 
-  /* level 5: the container */
+  /* level 5: the container AND the bare score — the top keeps every rung */
   await page.fill('#in', '1500000');
   await page.click('#read');
   await page.waitForFunction(() => /score from the contract/.test(document.getElementById('msg').textContent), null, { timeout:45000 });
   const badge = await page.textContent('#container');
   check('level 5 badge: 3:33 · 162', /3:33/.test(badge) && /162/.test(badge), badge.trim());
+  const v2vis = await page.evaluate(() => !document.getElementById('voice2').hidden);
+  check('level 5 shows BOTH plays (container + bare score)', v2vis);
   await page.click('#voice');
   await page.waitForTimeout(3000);
   const run = await page.textContent('#container');
@@ -68,6 +70,55 @@ const browser = await chromium.launch({ args:['--no-sandbox'] });
   await page.waitForTimeout(600);
   const closed = await page.textContent('#voice');
   check('container closes back to its invite', /3:33 at 162/.test(closed), closed.trim());
+  const bothBack = await page.evaluate(() => !document.getElementById('voice').hidden && !document.getElementById('voice2').hidden);
+  check('after closing, both plays are offered again', bothBack);
+
+  /* the bare score at level 5 — a top holder keeps the lower-rung performance */
+  await page.click('#voice2');
+  await page.waitForTimeout(2500);
+  const bareBadge = await page.textContent('#container');
+  check('bare score at L5 plays (no container clock)', /bare score plays · level 5/.test(bareBadge.trim()), bareBadge.trim());
+  const bareMoving = await snap();
+  await page.waitForTimeout(1500);
+  check('bare score visuals animate', bareMoving !== await snap());
+  await page.click('#voice2');
+  await page.waitForTimeout(500);
+
+  /* prompt modes: journey vs score */
+  await page.fill('#chatin', 'play the journey');
+  await page.press('#chatin', 'Enter');
+  await page.waitForTimeout(1200);
+  const jm = await page.textContent('#container');
+  check('prompt "play the journey" → container mode', /psytrance · 162 BPM/.test(jm), jm.trim());
+  await page.fill('#chatin', 'play the score');
+  await page.press('#chatin', 'Enter');
+  await page.waitForTimeout(1200);
+  const sm2 = await page.textContent('#container');
+  check('prompt "play the score" → bare score mode', /bare score plays/.test(sm2), sm2.trim());
+  await page.fill('#chatin', 'silence');
+  await page.press('#chatin', 'Enter');
+  await page.waitForTimeout(600);
+
+  /* future contracts: validated live before joining; impostors refused */
+  await page.fill('#chatin', 'contract 0x7d9Ce55D54FF3FEddb611fC63fF63ec01F26D15F');
+  await page.press('#chatin', 'Enter');
+  await page.waitForTimeout(5000);
+  const refuse = await page.evaluate(() => [...document.querySelectorAll('#chat p.agent')].pop().textContent);
+  check('non-MiDi contract refused honestly', /did not answer as a MiDi instrument/.test(refuse), refuse.slice(0,70));
+  const stillB = await page.evaluate(() => document.querySelectorAll('#contracts .rung b')[2].textContent);
+  await page.fill('#chatin', 'contract 0x569e1A337b095B1A6c8F206158072cEDb6325b56');
+  await page.press('#chatin', 'Enter');
+  await page.waitForTimeout(6000);
+  const switched = await page.evaluate(() => document.querySelector('#prov-c').textContent);
+  check('contract route switches to a validated instrument contract', /0x569e1A33/i.test(switched), switched.trim());
+  const back = await page.evaluate(() => [...document.querySelectorAll('#chat p.agent')].pop().textContent);
+  check('switch line carries the equal-access law', /equal on every deployment/.test(back), back.slice(0,80));
+  /* back to B — the canonical holding */
+  await page.evaluate(() => { document.querySelectorAll('#contracts .rung')[2].click(); });
+  await page.waitForTimeout(1500);
+  const provB = await page.evaluate(() => document.querySelector('#prov-c').textContent);
+  check('switcher returns to B (canonical)', /0xf7Cf2DF5/i.test(provB), provB.trim());
+  await page.waitForFunction(() => /RENOUNCED/.test(document.getElementById('pi-owner').textContent), null, { timeout:30000 });
   await page.screenshot({ path:'e2e/shots-zb-visual/midi-agent-390.png', fullPage:true });
 
   /* the pitch: live numbers for MiDi B */
