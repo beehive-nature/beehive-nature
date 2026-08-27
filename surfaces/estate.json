@@ -444,6 +444,13 @@
       "caveat": "demo of the bMiDi agent loop: plain-word ask → deterministic seed-space search → setlist; beginner/DJ/producer level toggle; the room log is LOCAL — the relay lane signs it to buzz; agent runs on-device in this demo, zero off-origin"
     },
     {
+      "file": "blight/midivault.html",
+      "domain": "nature",
+      "name": "the vault — music on Autonomi",
+      "state": "working",
+      "caveat": "record/store/delete/send created music: score artifacts + offline-rendered WAVs; public (address=door), private (AES-GCM, key only in local manifest), privileged (capability = address+key); SIMULATED backend labelled, antd adapter awaits live route verification"
+    },
+    {
       "file": "bnames.html",
       "domain": "nature",
       "name": "names on our chain, read live",
