@@ -430,6 +430,13 @@
       "caveat": "the shots are the record — never edited, cropped or retouched; ugly is what it looked like"
     },
     {
+      "file": "blight/midi.html",
+      "domain": "nature",
+      "name": "one seed, a performance",
+      "state": "working",
+      "caveat": "seed from the MiDi contract on Base, read-only; block-sprite medium, score-driven performance — visual and audio siblings from one timeline; Web Audio oscillators only, sound never autoplays; reduced motion rests as one composed silent frame"
+    },
+    {
       "file": "bnames.html",
       "domain": "nature",
       "name": "names on our chain, read live",
