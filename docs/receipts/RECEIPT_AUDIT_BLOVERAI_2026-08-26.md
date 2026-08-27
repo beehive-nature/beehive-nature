@@ -28,6 +28,18 @@ The reason is the egg: the Purse still holds **52.24 $FROGGI**, and on FROGGI's 
 60,000 / 120,000 — egg, hatchling, tadpole, froglet, frog, elder frog, crown) a seed of **52
 reads "egg"**. She already has a FROGGI egg in it, and it waits there.
 
+## ADDENDUM 2 — the renewal: the name goes home, the Purse keeps the address
+
+2026-08-27: the founder renewed all his .base.eth names (and added some) from a new
+account. `bqueenbee.base.eth` is founder-controlled again and was re-pointed — it now
+resolves to **0xfbd20147…, the founder's garden**, aliasing `bloverai.base.eth`. So the
+paragraph above is now history where it says the name leads to the Purse: the Purse is
+henceforth **the address `0x100fd362abf7ef7f7a7ca3c331d4c718c6f45479`**, nameless, and every
+exhibit that shows it pins the ADDRESS, never the name (explorer exhibit button +
+holders-ladder rung two; museum Exhibit 10 carries the correction on its wall). The
+wallet itself is unchanged and unreachable, egg inside — names follow their owner;
+exhibits keep their artefact.
+
 ---
 
 # RECEIPT — the bloverai.base.eth audit: every reference, categorized, before anything changed

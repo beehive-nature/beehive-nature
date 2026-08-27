@@ -53,8 +53,10 @@ try {
 /* ---------- 2. explorer: the Purse is a named exhibit, never the default ---------- */
 try {
   await page.goto('http://127.0.0.1:8894/surfaces/blight/inscription-explorer.html', { waitUntil:'domcontentloaded', timeout:30000 });
-  const btn = await page.$eval('button[data-a="bqueenbee.base.eth"]', b => b.textContent.trim());
-  check('explorer purse exhibit button', /Lost Purse/.test(btn), JSON.stringify(btn));
+  const btn = await page.$eval('button[data-a="0x100fd362abf7ef7f7a7ca3c331d4c718c6f45479"]', b => b.textContent.trim());
+  check('explorer purse exhibit button (address-pinned)', /Lost Purse/.test(btn), JSON.stringify(btn));
+  const noName = await page.$$eval('button[data-a="bqueenbee.base.eth"]', bs => bs.length);
+  check('explorer purse never points at the name', noName === 0, 'found ' + noName);
   const ladder = await page.evaluate(() => HOLDERS_LADDER.map(r => [r[0], r[1]]));
   check('explorer ladder rung 1 = founder garden', ladder[0][0] === GARDEN, JSON.stringify(ladder[0]));
   check('explorer ladder rung 2 = the Purse', ladder[1][0] === PURSE && /Lost Purse/.test(ladder[1][1]), JSON.stringify(ladder[1]));
