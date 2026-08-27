@@ -218,15 +218,23 @@ const W=v=>BigInt(v).toString(16).padStart(64,'0');
 const AD=a=>'0'.repeat(24)+a.replace(/^0x/,'').toLowerCase();
 const HOSTS=['https://base-rpc.publicnode.com','https://base.drpc.org'];
 const COLS=[
- {sym:'FUNGI',c:'0x7d9CE55D54FF3FEddb611fC63fF63ec01F26D15F',sel:'422b9e23',lv:[0,21000,525000,1050000,1575000,2100000],base:0,names:['level 0','level 1','level 2','level 3','level 4','crown']},
- {sym:'$FROGGI',c:'0x88A78C5035BdC8C9A8bb5c029e6cfCDD14B822FE',sel:'422b9e23',lv:[0,1000,3000,10000,30000,60000,120000],base:0,names:['egg','hatchling','tadpole','froglet','frog','elder frog','crown']},
- {sym:'PEPI v2',c:'0x28a5e71BFc02723eAC17E39c84c5190415C0de9F',sel:'a435130b',lv:[0,11,22,33,44,56],base:1,names:['Egg Mass','Tadpole','Baby','Teenager','Adult','Mature']},
- {sym:'PEPI v1',c:'0x19706c142d33376240e418d6385f05691a5fa8e2',sel:'a435130b',lv:[0,11,22,33,44,56],base:1,names:['Egg Mass','Tadpole','Baby','Teenager','Adult','Mature']},
- {sym:'JELLI',c:'0xA1b9d812926a529D8B002E69FCd070c8275eC73c',sel:'422b9e23',lv:[0,1000,21000,105000,420000,1050000],base:0,names:['level 0','level 1','level 2','level 3','level 4','crown']},
- {sym:'JEDI',c:'0xA058c6f2A56BaAFD5dE4BCAD8f2Cb26F6A32b7D1',sel:'422b9e23',lv:[0,10500,105000,1050000],base:0,names:['padawan','knight','master','crown']},
- {sym:'MiDi',c:'0x569e1A337b095B1A6c8F206158072cEDb6325b56',sel:'422b9e23',lv:null,base:0},
- {sym:'TRUFFI',c:'0x2496a9AF81A87eD0b17F6edEaf4Ac57671d24f38',sel:'a62f5b1b',lv:null,base:0},
+ /* deg/cnt/idx = each collection's own dialect (ABI census 2026-08-27,
+    e2e/abi-truth.mjs): FUNGI and PEPI speak sporesDegree + mushroom*, JELLI
+    polypsDegree + medusa*, FROGGI/JEDI/TRUFFI dynamicInscription + inscription*.
+    MiDi is the cassette model — balance-derived, no degree. */
+ {sym:'FUNGI',c:'0x7d9CE55D54FF3FEddb611fC63fF63ec01F26D15F',sel:'422b9e23',deg:'a775188a',cnt:'9c216508',idx:'0fd9587e',lv:[0,21000,525000,1050000,1575000,2100000],base:0,names:['level 0','level 1','level 2','level 3','level 4','crown']},
+ {sym:'$FROGGI',c:'0x88A78C5035BdC8C9A8bb5c029e6cfCDD14B822FE',sel:'422b9e23',deg:'2bd1a011',cnt:'fb700e5b',idx:'c7218d5b',lv:[0,1000,3000,10000,30000,60000,120000],base:0,names:['egg','hatchling','tadpole','froglet','frog','elder frog','crown']},
+ {sym:'PEPI v2',c:'0x28a5e71BFc02723eAC17E39c84c5190415C0de9F',sel:'a435130b',deg:'a775188a',cnt:'9c216508',idx:'0fd9587e',lv:[0,11,22,33,44,56],base:1,names:['Egg Mass','Tadpole','Baby','Teenager','Adult','Mature']},
+ {sym:'PEPI v1',c:'0x19706c142d33376240e418d6385f05691a5fa8e2',sel:'a435130b',deg:'a775188a',cnt:'9c216508',idx:'0fd9587e',lv:[0,11,22,33,44,56],base:1,names:['Egg Mass','Tadpole','Baby','Teenager','Adult','Mature']},
+ {sym:'JELLI',c:'0xA1b9d812926a529D8B002E69FCd070c8275eC73c',sel:'422b9e23',deg:'68b77feb',cnt:'3ebccc57',idx:'e5100df8',lv:[0,1000,21000,105000,420000,1050000],base:0,names:['level 0','level 1','level 2','level 3','level 4','crown']},
+ {sym:'JEDI',c:'0xA058c6f2A56BaAFD5dE4BCAD8f2Cb26F6A32b7D1',sel:'422b9e23',deg:'2bd1a011',cnt:'fb700e5b',idx:'c7218d5b',lv:[0,10500,105000,1050000],base:0,names:['padawan','knight','master','crown']},
+ {sym:'MiDi',c:'0x569e1A337b095B1A6c8F206158072cEDb6325b56',sel:'422b9e23',deg:null,cnt:'9c216508',idx:'0fd9587e',lv:null,base:0},
+ {sym:'TRUFFI',c:'0x2496a9AF81A87eD0b17F6edEaf4Ac57671d24f38',sel:'a62f5b1b',deg:'2bd1a011',cnt:'fb700e5b',idx:'c7218d5b',lv:null,base:0},
 ];
+/* the fidelity law: a record's OWN words ARE the getSvg tuple — feed them
+   verbatim (2 words for the spore families, 3 for PEPI and TRUFFI, whose
+   third word is the creator address). never re-derive. */
+function recArt(col,w){return col.sel+W(0x20)+w.slice(0,3).join('')}
 let reads=0,lastHost='';
 /* render-only mend: some chain art carries empty transform args that
    Chromium warns about; normalize so the console stays honest */
@@ -551,26 +559,35 @@ async function visit(v){
   });
   if(!held.length)chips.innerHTML='<span class="chip">no balances on these contracts — <b>the shorthand IS the profile</b></span>';
   $('st-tokens').textContent=held.length;
-  /* art: live piece per token + enumerated inscriptions, batched in phases.
-     TUPLE ABI (probe 2026-08-27): the art selectors take ONE tuple — sel + 0x20
-     offset word + (seed, extra). The old inline form reverts outright on both
-     PEPIs and returns a ~60KB poison string for FROGGI at high seeds (which the
-     decoder's length guard rightly drops). TRUFFI appends the owner address. */
+  /* art: the account's DEGREE inscription is the live piece (the record the
+     ecosystem renders), enumerated records follow — both feed getSvg verbatim.
+     TUPLE ABI: sel + 0x20 + the record's words. TRUFFI's record carries its
+     creator address as the third word, exactly as its getSvg wants. */
   const found=[];
+  window.__rawPieces=[];
   let phase=[];
-  held.forEach(h=>phase.push({to:h.col.c,data:h.col.sel+W(0x20)+W(Number(h.bal/1000000000n))+W(0)+(h.col.sel==='a62f5b1b'?AD(a):'')}));
-  held.forEach(h=>phase.push({to:h.col.c,data:'0x9c216508'+AD(a)}));
+  held.forEach(h=>phase.push(h.col.deg
+    ?{to:h.col.c,data:'0x'+h.col.deg+AD(a)}
+    :{to:h.col.c,data:h.col.sel+W(0x20)+W(Number(h.bal/1000000000n))+W(0)+(h.col.sel==='a62f5b1b'?AD(a):'')}));
+  held.forEach(h=>phase.push({to:h.col.c,data:'0x'+h.col.cnt+AD(a)}));
   const liveRes=phase.length?await rpc(phase):[];
   const artCalls=[];
   held.forEach((h,i)=>{
     const live=liveRes[i];
-    if(live&&live.length>200){try{found.push({svg:decodeString(live),col:h.col,seed:Number(h.bal/1000000000n)})}catch(e){}}
+    if(!live||live==='0x')return;
+    if(live.length<=202){
+      /* a degree RECORD — render through getSvg verbatim */
+      const w=(live.replace(/^0x/,'').match(/.{64}/g)||[]);
+      if(w.length>=2)artCalls.push({to:h.col.c,words:w,seed:Number(BigInt('0x'+w[0]))});
+    }else if(live.length>200){
+      try{const svg=decodeString(live);found.push({svg,col:h.col,seed:Number(h.bal/1000000000n)});window.__rawPieces.push({sym:h.col.sym,svg});}catch(e){}
+    }
   });
   const enumCalls=[];
   held.forEach((h,i)=>{
     const cnt=liveRes[held.length+i];
     const n=cnt&&cnt!=='0x'?Number(BigInt(cnt)):0;
-    for(let k=0;k<Math.min(n,8);k++)enumCalls.push({to:h.col.c,data:'0x0fd9587e'+AD(a)+W(BigInt(k))});
+    for(let k=0;k<Math.min(n,8);k++)enumCalls.push({to:h.col.c,data:'0x'+h.col.idx+AD(a)+W(BigInt(k))});
   });
   const recRes=enumCalls.length?await rpc(enumCalls):[];
   recRes.forEach((rec,i)=>{
@@ -578,22 +595,16 @@ async function visit(v){
     const w=(rec.replace(/^0x/,'').match(/.{64}/g)||[]).slice(0,3);
     if(w.length<2)return;
     const col=COLS.find(c=>c.c===enumCalls[i].to);
-    const s=BigInt('0x'+w[0]);
-    artCalls.push({to:col.c,svgSeed:s,extra:w});
+    artCalls.push({to:col.c,words:w,seed:Number(BigInt('0x'+w[0]))});
   });
-  const artPhase=artCalls.map(ac=>{
-    const col=COLS.find(c=>c.c===ac.to);
-    /* enumerated records carry the holder's real extra (w[1]) — the per-account
-       derived word that makes the art theirs; the old call discarded it */
-    const extra=ac.extra&&ac.extra[1]?BigInt('0x'+ac.extra[1]):0n;
-    const data=col.sel+W(0x20)+W(ac.svgSeed)+W(extra)+(col.sel==='a62f5b1b'?AD(a):'');
-    return {to:ac.to,seed:Number(ac.svgSeed),data};
-  });
+  const artPhase=artCalls.map(ac=>({to:ac.to,seed:ac.seed,data:recArt(COLS.find(c=>c.c===ac.to),ac.words)}));
   const artRes=artPhase.length?await rpc(artPhase):[];
   artRes.forEach((res,i)=>{
     if(res&&res.length>200){try{
       const col=COLS.find(c=>c.c===artPhase[i].to);
-      found.push({svg:decodeString(res),col,seed:artPhase[i].seed});
+      const svg=decodeString(res);
+      found.push({svg,col,seed:artPhase[i].seed});
+      window.__rawPieces.push({sym:col.sym,svg});
     }catch(e){}}
   });
   /* dedupe by seed+contract, crown-first */

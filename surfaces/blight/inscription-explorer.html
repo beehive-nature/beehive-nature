@@ -159,15 +159,25 @@ const W=v=>BigInt(v).toString(16).padStart(64,'0');
 const AD=a=>'0'.repeat(24)+a.replace(/^0x/,'').toLowerCase();
 const HOSTS=['https://base-rpc.publicnode.com','https://base.drpc.org','https://base.llamarpc.com'];
 const COLS=[
- {sym:'PEPI v2',c:'0x28a5e71BFc02723eAC17E39c84c5190415C0de9F',sel:'a435130b',lv:[0,11,22,33,44,56],base:1,names:['Egg Mass','Tadpole','Baby','Teenager','Adult','Mature']},
- {sym:'PEPI v1',c:'0x19706c142d33376240e418d6385f05691a5fa8e2',sel:'a435130b',lv:[0,11,22,33,44,56],base:1,names:['Egg Mass','Tadpole','Baby','Teenager','Adult','Mature']},
- {sym:'FUNGI',c:'0x7d9CE55D54FF3FEddb611fC63fF63ec01F26D15F',sel:'422b9e23',lv:[0,21000,525000,1050000,1575000,2100000],base:0,meta:true},
- {sym:'$FROGGI',c:'0x88A78C5035BdC8C9A8bb5c029e6cfCDD14B822FE',sel:'422b9e23',lv:[0,1000,3000,10000,30000,60000,120000],base:0,meta:true},
- {sym:'JELLI',c:'0xA1b9d812926a529D8B002E69FCd070c8275eC73c',sel:'422b9e23',lv:[0,1000,21000,105000,420000,1050000],base:0,meta:true},
- {sym:'JEDI',c:'0xA058c6f2A56BaAFD5dE4BCAD8f2Cb26F6A32b7D1',sel:'422b9e23',lv:[0,10500,105000,1050000],base:0,meta:true},
- {sym:'TRUFFI',c:'0x2496a9AF81A87eD0b17F6edEaf4Ac57671d24f38',sel:'a62f5b1b',lv:null,base:0},
- {sym:'MiDi',c:'0x569e1A337b095B1A6c8F206158072cEDb6325b56',sel:'422b9e23',lv:null,base:0,meta:true},
+ /* deg = the account's OWN inscription record (sporesDegree / polypsDegree /
+    dynamicInscription — the canonical "your picture"); cnt/idx = each
+    collection's enumeration dialect. verified against the contracts' ABIs
+    2026-08-27 (e2e/abi-truth.mjs): FUNGI and PEPI name them mushroom*, JELLI
+    medusa*, FROGGI/JEDI/TRUFFI inscription*. */
+ {sym:'PEPI v2',c:'0x28a5e71BFc02723eAC17E39c84c5190415C0de9F',sel:'a435130b',deg:'a775188a',cnt:'9c216508',idx:'0fd9587e',lv:[0,11,22,33,44,56],base:1,names:['Egg Mass','Tadpole','Baby','Teenager','Adult','Mature']},
+ {sym:'PEPI v1',c:'0x19706c142d33376240e418d6385f05691a5fa8e2',sel:'a435130b',deg:'a775188a',cnt:'9c216508',idx:'0fd9587e',lv:[0,11,22,33,44,56],base:1,names:['Egg Mass','Tadpole','Baby','Teenager','Adult','Mature']},
+ {sym:'FUNGI',c:'0x7d9Ce55D54FF3FEddb611fC63fF63ec01F26D15F',sel:'422b9e23',deg:'a775188a',cnt:'9c216508',idx:'0fd9587e',lv:[0,21000,525000,1050000,1575000,2100000],base:0,meta:true},
+ {sym:'$FROGGI',c:'0x88A78C5035BdC8C9A8bb5c029e6cfCDD14B822FE',sel:'422b9e23',deg:'2bd1a011',cnt:'fb700e5b',idx:'c7218d5b',lv:[0,1000,3000,10000,30000,60000,120000],base:0,meta:true},
+ {sym:'JELLI',c:'0xA1b9d812926a529D8B002E69FCd070c8275eC73c',sel:'422b9e23',deg:'68b77feb',cnt:'3ebccc57',idx:'e5100df8',lv:[0,1000,21000,105000,420000,1050000],base:0,meta:true},
+ {sym:'JEDI',c:'0xA058c6f2A56BaAFD5dE4BCAD8f2Cb26F6A32b7D1',sel:'422b9e23',deg:'2bd1a011',cnt:'fb700e5b',idx:'c7218d5b',lv:[0,10500,105000,1050000],base:0,meta:true},
+ {sym:'TRUFFI',c:'0x2496a9AF81A87eD0b17F6edEaf4Ac57671d24f38',sel:'a62f5b1b',deg:'2bd1a011',cnt:'fb700e5b',idx:'c7218d5b',lv:null,base:0},
+ {sym:'MiDi',c:'0x569e1A337b095B1A6c8F206158072cEDb6325b56',sel:'422b9e23',deg:null,cnt:'9c216508',idx:'0fd9587e',lv:null,base:0,meta:true},
 ];
+/* record → art: the record's OWN words ARE the getSvg tuple — two fields for
+   the spore families, three for PEPI (seed, seed2, extra) and TRUFFI (the
+   third word is the creator address, exactly as getSvg wants it). this is
+   the fidelity law: feed the record verbatim, never a re-derivation. */
+function recArt(col,w){return col.sel+W(0x20)+w.slice(0,3).join('')}
 function decodeString(hex){
   const h=hex.replace(/^0x/,'');
   const off=parseInt(h.slice(0,64),16);
@@ -277,28 +287,44 @@ async function visit(v){
     msg.textContent='that name did not answer — try again, or paste the 0x… address'; return; }
   msg.textContent='reading the chain…';
   const found=[];
+  window.__rawPieces=[];
   for(const col of COLS){
     const bal=await rpc([{to:col.c,data:'0x70a08231'+AD(a)}]);
     if(!bal||!bal[0]||bal[0]==='0x'||BigInt(bal[0])<=0n) continue;
     const seed=Number(BigInt(bal[0])/1000000000n);
-    const liveCall={to:col.c,data:col.sel+W(0x20)+W(seed)+W(0)+(col.sel==='a62f5b1b'?AD(a):'')};
-    const cnt=await rpc([{to:col.c,data:'0x9c216508'+AD(a)}]);
+    /* the live piece IS the account's degree inscription — the record the
+       ecosystem renders, not our balance-derived approximation */
+    const liveCall=col.deg
+      ?{to:col.c,data:'0x'+col.deg+AD(a)}
+      :{to:col.c,data:col.sel+W(0x20)+W(seed)+W(0)+(col.sel==='a62f5b1b'?AD(a):'')};
+    const cnt=await rpc([{to:col.c,data:'0x'+col.cnt+AD(a)}]);
     const n=cnt&&cnt[0]&&cnt[0]!=='0x'?Number(BigInt(cnt[0])):0;
     const calls=[liveCall];
-    for(let i=0;i<Math.min(n,8);i++) calls.push({to:col.c,data:'0x0fd9587e'+AD(a)+W(BigInt(i))});
+    for(let i=0;i<Math.min(n,8);i++) calls.push({to:col.c,data:'0x'+col.idx+AD(a)+W(BigInt(i))});
     const res=await rpc(calls);
-    if(res&&res[0]&&res[0].length>200){
-      try{ found.push({svg:decodeString(res[0]),col,seed,lvln:lvlOf(seed,col)}); }catch(e){}
+    if(res&&res[0]&&res[0]!=='0x'){
+      if(res[0].length<=202){
+        /* a RECORD (seed, extra[, third]) — render through getSvg verbatim */
+        const w=(res[0].replace(/^0x/,'').match(/.{64}/g)||[]);
+        if(w.length>=2){
+          const art=await rpc([{to:col.c,data:recArt(col,w)}]);
+          const s=Number(BigInt('0x'+w[0]));
+          if(art&&art[0]&&art[0].length>200){
+            try{const svg=decodeString(art[0]);found.push({svg,col,seed:s,lvln:lvlOf(s,col)});window.__rawPieces.push({sym:col.sym,svg});}catch(e){}
+          }
+        }
+      }else if(res[0].length>200){
+        try{const svg=decodeString(res[0]);found.push({svg,col,seed,lvln:lvlOf(seed,col)});window.__rawPieces.push({sym:col.sym,svg});}catch(e){}
+      }
     }
     for(let i=1;res&&i<res.length;i++){
       const rec=res[i]; if(!rec||rec==='0x') continue;
       const w=(rec.replace(/^0x/,'').match(/.{64}/g)||[]).slice(0,3);
       if(w.length<2) continue;
       const s=BigInt('0x'+w[0]);
-      const data=col.sel+W(0x20)+w[0]+w[1]+(col.sel==='a62f5b1b'?AD(a):'');
-      const sr=await rpc([{to:col.c,data}]);
+      const sr=await rpc([{to:col.c,data:recArt(col,w)}]);
       if(sr&&sr[0]&&sr[0].length>200){
-        try{ found.push({svg:decodeString(sr[0]),col,seed:Number(s),lvln:lvlOf(Number(s),col)}); }catch(e){}
+        try{const svg=decodeString(sr[0]);found.push({svg,col,seed:Number(s),lvln:lvlOf(Number(s),col)});window.__rawPieces.push({sym:col.sym,svg});}catch(e){}
       }
     }
   }
