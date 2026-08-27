@@ -620,7 +620,7 @@ async function visit(v){
     else if(r&&r.note)book[i].resolvedNote=r.note;
     save();render();
   }
-  el('b-add').addEventListener('click',async()=>{
+  function addFromForm(){
     const label=el('b-label').value.trim(), value=el('b-val').value.trim(), network=netSel.value;
     if(!value){el('b-val').focus();return}
     const isName=/\.(sol|(base\.)?eth)$/i.test(value);
@@ -628,7 +628,10 @@ async function visit(v){
     save();render();
     el('b-label').value='';el('b-val').value='';
     if(isName)tryResolve(book.length-1);
-  });
+  }
+  el('b-add').addEventListener('click',addFromForm);
+  /* typing is the whole gesture: Enter adds the entry from either field */
+  ['b-label','b-val'].forEach(id=>el(id).addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addFromForm()}}));
   el('b-copy').addEventListener('click',async()=>{
     const text=book.map(e=>[e.label,e.value,e.network,e.star?'the send-to place':''].filter(Boolean).join(' · ')).join('\n')||'(an empty book)';
     try{await navigator.clipboard.writeText(text);el('b-copy').textContent='copied — it is yours to carry'}
