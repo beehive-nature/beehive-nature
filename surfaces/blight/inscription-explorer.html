@@ -281,7 +281,7 @@ async function visit(v){
     const bal=await rpc([{to:col.c,data:'0x70a08231'+AD(a)}]);
     if(!bal||!bal[0]||bal[0]==='0x'||BigInt(bal[0])<=0n) continue;
     const seed=Number(BigInt(bal[0])/1000000000n);
-    const liveCall={to:col.c,data:col.sel+W(seed)+W(0)+(col.sel==='a62f5b1b'?AD(a):W(0))};
+    const liveCall={to:col.c,data:col.sel+W(0x20)+W(seed)+W(0)+(col.sel==='a62f5b1b'?AD(a):'')};
     const cnt=await rpc([{to:col.c,data:'0x9c216508'+AD(a)}]);
     const n=cnt&&cnt[0]&&cnt[0]!=='0x'?Number(BigInt(cnt[0])):0;
     const calls=[liveCall];
@@ -295,7 +295,7 @@ async function visit(v){
       const w=(rec.replace(/^0x/,'').match(/.{64}/g)||[]).slice(0,3);
       if(w.length<2) continue;
       const s=BigInt('0x'+w[0]);
-      const data=col.sel==='a62f5b1b'?col.sel+w[0]+w[1]+AD(a):col.sel+w.join('');
+      const data=col.sel+W(0x20)+w[0]+w[1]+(col.sel==='a62f5b1b'?AD(a):'');
       const sr=await rpc([{to:col.c,data}]);
       if(sr&&sr[0]&&sr[0].length>200){
         try{ found.push({svg:decodeString(sr[0]),col,seed:Number(s),lvln:lvlOf(Number(s),col)}); }catch(e){}
@@ -387,7 +387,7 @@ async function crownExpedition(){
   if(!holders.length){
     msg.textContent='rolling an unheld crown — the chain would render exactly this if captured…';
     var useed=top+Math.floor(Math.random()*top)+1;
-    var ures=await rpc([{to:col.c,data:col.sel+W(useed)+W(0)+W(0)}]);
+    var ures=await rpc([{to:col.c,data:col.sel+W(0x20)+W(useed)+W(0)}]);
     if(ures&&ures[0]&&ures[0].length>200){
       try{ return {svg:decodeString(ures[0]),col:col,seed:useed,lvln:lvlOf(useed,col),holder:'an unheld roll'}; }catch(e){}
     }
@@ -396,7 +396,7 @@ async function crownExpedition(){
   var pick=holders[Math.floor(Math.random()*Math.min(holders.length,12))];
   msg.textContent='crown found · holder '+pick.a.slice(0,10)+'… · reading its art…';
   var seed=Math.floor(pick.bal);
-  var res=await rpc([{to:col.c,data:col.sel+W(seed)+W(0)+W(0)}]);
+  var res=await rpc([{to:col.c,data:col.sel+W(0x20)+W(seed)+W(0)}]);
   if(!res||!res[0]||res[0].length<200){ msg.textContent='art unreadable — press again'; return null; }
   var svg=null; try{ svg=decodeString(res[0]); }catch(e){}
   if(!svg){ msg.textContent='art unreadable — press again'; return null; }

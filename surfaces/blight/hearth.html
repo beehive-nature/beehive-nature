@@ -110,7 +110,7 @@ async function respond(q){
   const say=document.createElement('div'); say.textContent=r.say;
   m.appendChild(say);
   if(r.kind==='art'){
-    const res=await rpc([{to:r.col.c,data:r.col.sel+W(r.seed)+W(0)+W(0)}]);
+    const res=await rpc([{to:r.col.c,data:r.col.sel+W(0x20)+W(r.seed)+W(0)}]);
     if(res&&res[0]&&res[0].length>200){
       try{
         const svg=decodeString(res[0]);

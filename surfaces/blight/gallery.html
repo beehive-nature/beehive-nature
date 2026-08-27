@@ -190,10 +190,11 @@ async function loadGarden(addr){
   for(const col of COLS){
     const bal=await rpc([{to:col.c,data:'0x70a08231'+AD(addr)}]);
     if(!bal||!bal[0]||bal[0]==='0x'||BigInt(bal[0])<=0n) continue;
-    // live seed = floor(balance); frozen records via holder index (up to 8)
+    // live seed = floor(balance); frozen records via holder index (up to 8).
+    // TUPLE ABI: sel + 0x20 + (seed, extra) — inline forms revert on PEPI and
+    // poison FROGGI at high seeds (probe 2026-08-27). TRUFFI appends the owner.
     const seed=Number(BigInt(bal[0])/1000000000n);
-    const calls=[{to:col.c,data:col.sel+W(seed)+W(0)+W(0)}];
-    if(col.sel==='a62f5b1b') calls[0]={to:col.c,data:col.sel+W(seed)+W(0)+AD(addr)};
+    const calls=[{to:col.c,data:col.sel+W(0x20)+W(seed)+W(0)+(col.sel==='a62f5b1b'?AD(addr):'')}];
     const mcRes=await rpc(['0x9c216508'+AD(addr)].map(d=>({to:col.c,data:d})),H(col));
     const mc=mcRes&&mcRes[0];
     const n=mc&&mc!=='0x'?Number(BigInt(mc)):0;
@@ -208,7 +209,7 @@ async function loadGarden(addr){
       const w=(rec.replace(/^0x/,'').match(/.{64}/g)||[]).slice(0,3);
       if(w.length<2) continue;
       const s=BigInt('0x'+w[0]);
-      const svgRes=await rpc([{to:col.c,data:col.sel+w.slice(0,col.sel==='a62f5b1b'?2:3).join('')+(col.sel==='a62f5b1b'?AD(addr):'')}],H(col));
+      const svgRes=await rpc([{to:col.c,data:col.sel+W(0x20)+w[0]+w[1]+(col.sel==='a62f5b1b'?AD(addr):'')}],H(col));
       if(svgRes&&svgRes[0]&&svgRes[0].length>200){
         try{ found.push({svg:decodeString(svgRes[0]),sym:col.sym,seed:Number(s),lvln:lvlNum(Number(s),col),pipmax:col.lv?col.lv.length-1-col.base:0}); }catch(e){}
       }

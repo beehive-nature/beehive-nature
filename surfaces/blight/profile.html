@@ -551,10 +551,14 @@ async function visit(v){
   });
   if(!held.length)chips.innerHTML='<span class="chip">no balances on these contracts — <b>the shorthand IS the profile</b></span>';
   $('st-tokens').textContent=held.length;
-  /* art: live piece per token + enumerated inscriptions, batched in phases */
+  /* art: live piece per token + enumerated inscriptions, batched in phases.
+     TUPLE ABI (probe 2026-08-27): the art selectors take ONE tuple — sel + 0x20
+     offset word + (seed, extra). The old inline form reverts outright on both
+     PEPIs and returns a ~60KB poison string for FROGGI at high seeds (which the
+     decoder's length guard rightly drops). TRUFFI appends the owner address. */
   const found=[];
   let phase=[];
-  held.forEach(h=>phase.push({to:h.col.c,data:h.col.sel+W(Number(h.bal/1000000000n))+W(0)+(h.col.sel==='a62f5b1b'?AD(a):W(0))}));
+  held.forEach(h=>phase.push({to:h.col.c,data:h.col.sel+W(0x20)+W(Number(h.bal/1000000000n))+W(0)+(h.col.sel==='a62f5b1b'?AD(a):'')}));
   held.forEach(h=>phase.push({to:h.col.c,data:'0x9c216508'+AD(a)}));
   const liveRes=phase.length?await rpc(phase):[];
   const artCalls=[];
@@ -579,9 +583,10 @@ async function visit(v){
   });
   const artPhase=artCalls.map(ac=>{
     const col=COLS.find(c=>c.c===ac.to);
-    const data=col.sel==='a62f5b1b'
-      ?col.sel+W(ac.svgSeed)+W(0)+AD(a)
-      :col.sel+W(ac.svgSeed)+W(0);
+    /* enumerated records carry the holder's real extra (w[1]) — the per-account
+       derived word that makes the art theirs; the old call discarded it */
+    const extra=ac.extra&&ac.extra[1]?BigInt('0x'+ac.extra[1]):0n;
+    const data=col.sel+W(0x20)+W(ac.svgSeed)+W(extra)+(col.sel==='a62f5b1b'?AD(a):'');
     return {to:ac.to,seed:Number(ac.svgSeed),data};
   });
   const artRes=artPhase.length?await rpc(artPhase):[];

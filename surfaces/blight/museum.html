@@ -437,7 +437,8 @@ function drawGlyph(text){
   const DEAD='0x000000000000000000000000000000000000dEaD';
   const rec=await call('base','0x28a5e71bfc02723eac17e39c84c5190415c0de9f','0x0fd9587e'+AD(DEAD)+W(0));
   if(rec){ const w=(rec.slice(2).match(/.{64}/g)||[]).slice(0,3);
-    const svg=await call('base','0x28a5e71bfc02723eac17e39c84c5190415c0de9f','0xa435130b'+w.join(''));
+    /* tuple ABI: sel + 0x20 + (seed, extra) — the inline form reverts on PEPi (probe 2026-08-27) */
+    const svg=await call('base','0x28a5e71bfc02723eac17e39c84c5190415c0de9f','0xa435130b'+W(32)+w[0]+w[1]);
     if(svg){ const s=decStr(svg);
       document.getElementById('pepiArt').innerHTML=s;
       document.getElementById('pepiBytes').textContent=s.length.toLocaleString()+' bytes'; } }
@@ -449,7 +450,7 @@ function drawGlyph(text){
   if(sd){ tri=(sd.slice(2).match(/.{64}/g)||[]).slice(0,3).join(''); }
   else {
     const bal=await call('base',FROGGI,'0x70a08231'+AD(DEAD));
-    if(bal){ const seed=BigInt(bal)/(10n**9n); tri=W(seed)+W(0n)+W(0n); }
+    if(bal){ const seed=BigInt(bal)/(10n**9n); tri=W(32)+W(seed)+W(0n); }
   }
   if(tri){ const svg=await call('base',FROGGI,'0x422b9e23'+tri);
     if(svg){ const s=decStr(svg);
@@ -502,7 +503,7 @@ function drawGlyph(text){
   if(rec){
     const w=(rec.slice(2).match(/.{64}/g)||[]);
     if(w.length>=3){
-      const ctl=await call('base',P2,'0xa435130b'+w.slice(0,3).join(''));
+      const ctl=await call('base',P2,'0xa435130b'+W(32)+w[0]+w[1]);
       if(ctl){ const s=decStr(ctl);
         document.getElementById('trapCtl').innerHTML=s;
         document.getElementById('trapCtlBytes').textContent=s.length.toLocaleString()+' bytes of SVG, stored seed '+BigInt('0x'+w[0]);
@@ -512,7 +513,7 @@ function drawGlyph(text){
       const jraw=await (async()=>{ for(const url of RPC.base){ try{
           const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
             body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_call',
-              params:[{to:P2,data:'0xa435130b'+zeroW+w[1]+w[2]},'latest']})});
+              params:[{to:P2,data:'0xa435130b'+W(32)+zeroW+w[1]},'latest']})});
           const j=await r.json(); if(j.error) return j.error; }catch(e){} } return null; })();
       const err=jraw&&jraw.message?jraw.message:null;
       document.getElementById('trapBad').innerHTML=
