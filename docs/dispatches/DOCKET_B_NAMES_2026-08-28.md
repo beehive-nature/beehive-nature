@@ -78,7 +78,13 @@
 - `beehivenature` (13 chars) — **LAWFUL**, no options needed
 - `beehivenaturereserve` (20 chars) — **LAWFUL**, no options needed
 
-No lawful-form alternatives are required. All three ride the normal batches.
+No lawful-form alternatives are required. All four length-watch names ride the normal batches:
+- beehivebiomass (14) — Batch 1
+- beehivenature (13) — Batch 3
+- primeminister (13) — Batch 5
+- beehivenaturereserve (20) — Batch 4
+
+No options needed. No auto-picks. The ABI said string; the chain said yes.
 
 ## 3 · THE BATCHES (5 transactions, 46 registeracc actions total)
 
