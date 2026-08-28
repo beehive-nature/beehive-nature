@@ -58,19 +58,6 @@ jobs:
       - name: Estate registry — counts computed, not written
         if: always()
         run: node scripts/estate-check.mjs
-      # the language lane (2026-08-28): first the checker-silence proof — the
-      # coverage instrument must count a keyed string AND an unkeyed string
-      # through the same path before it reports anything; then the measure on
-      # the arrival set (four redesigned + seven doors + one tap from each
-      # door) with the floors ratchet — keyed% may never regress below the
-      # recorded line. The 240-key deep backlog stays a recorded number, not
-      # a demand: floors hold, they never require.
-      - name: Language — coverage gate selftest (checker-silence law)
-        if: always()
-        run: node e2e/i18n-coverage.mjs --selftest
-      - name: Language — coverage measure on the arrival set, floors enforced
-        if: always()
-        run: node e2e/i18n-coverage.mjs --set e2e/lang-coverage-set.json ru --floors
       # estate-source: every data-i18n key in the tree exists in the corpus,
       # every docked tongue covers every key, and the corpus English matches
       # what the pages say (the stale-translation check).
@@ -180,6 +167,22 @@ jobs:
         if: always()   # a sibling suite's red must not SKIP this one — every
                        # suite fires every run, or a red stops being attributable
         run: node university-smoke.mjs
+      # the language lane (2026-08-28), browser-side like every playwright
+      # suite: first the checker-silence proof — the coverage instrument must
+      # count a keyed string AND an unkeyed string through the same path
+      # before it reports anything; then the measure on the arrival set
+      # (four redesigned + seven doors + one tap from each door) with the
+      # floors ratchet — keyed% may never regress below the recorded line.
+      # The 240-key deep backlog stays a recorded number, not a demand:
+      # floors hold, they never require.
+      - name: Language — coverage gate selftest (checker-silence law)
+        if: always()
+        working-directory: e2e
+        run: node i18n-coverage.mjs --selftest
+      - name: Language — coverage measure on the arrival set, floors enforced
+        if: always()
+        working-directory: e2e
+        run: node i18n-coverage.mjs --set lang-coverage-set.json ru --floors
       # fleet-pixels: every chart-bearing hosted surface must DRAW (pixels
       # read back from the canvas, not merely load). fleet-bus: the
       # localStorage data bus asserted both directions (same origin reads;
