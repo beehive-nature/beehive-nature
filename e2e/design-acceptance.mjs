@@ -41,7 +41,13 @@ const RIDER_ALLOWLIST = [
   /\/tour\.js/, /\/register\.js/, /\/lang\.js/, /\/rails-badge\.js/,
   /\/agent-dock\.js/,
   /\/manifest\.webmanifest/, /\/bn-logo\.(jpg|png)/, /\/icon-180\.png/,
-  /\.(json|css)(\?|$)/
+  /\.(json|css)(\?|$)/,
+  /* the wallet's first-party vendored riders — the bzDiD key carrier and the
+     bnr-keys/bnr-sign Rust-core glue under onboarding/vendor (added when the
+     master design pass first ran this gate over surfaces/wallet.html;
+     first-party files, named by exact path) */
+  /\/onboarding\/bzdid-key\.js/, /\/onboarding\/vendor\/bnr-(sign|keys|qr)\.js/,
+  /\/onboarding\/vendor\/bip39-wordlist\.js/, /\/(vault|arweave)\.js/
 ];
 
 const MEASURE = process.argv.includes('--measure');

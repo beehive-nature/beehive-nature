@@ -7,61 +7,69 @@
 <link rel="stylesheet" href="tokens.css">
 <title>the BNR wallet — one soul, every chain</title>
 <style>
-:root{--bg:#07090b;--panel:#0e1611;--well:#0a0f0b;--ink:#e2efdb;--dim:#8a9a8a;--faint:#5f6f61;
+/* SEMANTIC COLOUR — meanings picked FIRST, hues second (master design pass
+   2026-08-28): harm = guard violet · solution = biomass green (the one accent)
+   value = gold (b amounts only) · system = info blue · science = ai cyan.
+   Entity hues ride tokens.css; this page's chrome accent is biomass. */
+:root{--bg:#06110C;--panel:#0C1412;--well:#0E1A12;--ink:#E9F2EC;--dim:#8FA79C;--faint:#648176;
+  --line2:#1E2B26;
+  --sem-harm:#B7A8F7;--sem-solution:#86CC72;--sem-value:#E8B54B;--sem-system:#6FA9E0;--sem-science:#45C2DC;
  }
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:13px/1.65 'IBM Plex Mono',monospace;padding:30px 14px 90px}
+body{background:var(--bg);color:var(--ink);font:13px/1.65 'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;padding:0 14px 90px}
 main{max-width:980px;margin:0 auto}
-header{text-align:center;margin-bottom:14px;padding-bottom:14px;position:relative}
-header::after{content:'';position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:min(560px,84%);height:2px;
- background:linear-gradient(90deg,transparent,var(--gold),var(--cyan),transparent);opacity:.55}
-h1{font-size:clamp(19px,4.5vw,27px);font-weight:400;letter-spacing:.04em;color:var(--gold)}
-/* the headline carries the argument, in the page's own token language:
-   gold = the one soul (value), leaf = every chain alive (live),
-   cyan = the rails that carry it (system) — the stops encode the claim
-   "one soul, every chain"; they are not decoration */
-h1 .h1-arg{background:linear-gradient(94deg,var(--gold) 0%,var(--gold) 30%,var(--leaf) 64%,var(--cyan) 100%);
- -webkit-background-clip:text;background-clip:text;color:var(--gold);-webkit-text-fill-color:transparent}
+.crumbs{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 0 9px;border-bottom:1px solid var(--line2);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.crumbs a{color:var(--dim)} .crumbs .here{color:var(--ink)} .crumbs .badge-live{margin-left:auto;display:inline-flex;align-items:center;gap:7px;color:var(--dim);font-size:10px;letter-spacing:.14em}
+.crumbs .badge-live i{width:8px;height:8px;border-radius:50%;background:#86CC72}
+.kicker{font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:var(--faint);margin-top:22px}
+header{margin-bottom:14px;padding-bottom:14px;position:relative}
+h1{font-size:clamp(30px,5.5vw,40px);font-weight:600;letter-spacing:-.01em;line-height:1.1;
+  background:linear-gradient(92deg,#E9F2EC 55%,#86CC72);-webkit-background-clip:text;background-clip:text;color:transparent}
 header p{color:var(--dim);font-size:11px;margin-top:8px;max-width:780px;margin-inline:auto;line-height:1.85}
-section{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:15px 16px;margin-top:14px}
-h2{font-size:11.5px;color:var(--violet);font-weight:400;letter-spacing:.09em;margin-bottom:9px}
-.law{color:var(--dim);font-size:10.5px;line-height:1.85}.law b{color:var(--ink)}
-a{color:var(--cyan)}
+section{background:var(--panel);border:1px solid var(--line2);border-radius:12px;padding:16px;margin-top:14px;position:relative}
+section::before{content:'';position:absolute;top:-1px;left:-1px;width:10px;height:10px;
+ clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:#86CC72;opacity:.0}
+h2{font-size:13px;color:var(--ink);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:9px;
+ display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+h2::before{content:'';width:10px;height:10px;flex:none;
+ clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:#86CC72}
+.law{color:var(--dim);font-size:11px;line-height:1.85}.law b{color:var(--ink)}
+a{color:#86CC72}
 .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-input{background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;
+input{background:var(--well);color:var(--ink);border:1px solid var(--line2);border-radius:10px;
  padding:10px 12px;font:13px 'IBM Plex Mono',monospace;flex:1;min-width:180px}
 input.small{font-size:11px}
-button{background:#26123a;color:var(--violet);border:1px solid var(--line);border-radius:8px;
+button{background:var(--well);color:#86CC72;border:1px solid var(--line2);border-radius:8px;
  padding:10px 16px;cursor:pointer;font:12px 'IBM Plex Mono',monospace;min-height:40px}
-button:hover{background:var(--violet);color:#000}
+button:hover{background:#86CC72;color:#06110C}
 button:disabled{opacity:.4;cursor:not-allowed}
-button.gold{background:#33270a;color:var(--gold);border-color:#4d3d12}
-button.gold:hover{background:var(--gold);color:#000}
-button.green{background:#1a3a1a;color:var(--leaf);border-color:#2c552c}
-button.green:hover{background:var(--leaf);color:#000}
-.badge{display:inline-block;font-size:9px;letter-spacing:.1em;border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--gold)}
+button.gold{background:#86CC72;color:#06110C;border-color:#86CC72}
+button.gold:hover{background:#A9E29A}
+button.green{background:var(--well);color:#86CC72;border-color:#2C552C}
+button.green:hover{background:#86CC72;color:#06110C}
+.badge{display:inline-block;font-size:9px;letter-spacing:.1em;border:1px solid var(--line2);border-radius:4px;padding:1px 6px;color:var(--dim)}
 .chains{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));margin-top:12px}
-.chain{background:var(--well);border:1px solid var(--line);border-radius:10px;padding:13px 15px;position:relative;overflow:hidden}
-.chain .cn{font-size:14px;color:var(--gold);display:flex;align-items:center;gap:8px}
-.chain .cb{font-size:22px;color:var(--leaf);margin-top:6px;font-variant-numeric:tabular-nums}
-.chain .cd{font-size:9.5px;color:var(--dim);margin-top:4px;line-height:1.6}
+.chain{background:var(--well);border:1px solid var(--line2);border-radius:10px;padding:13px 15px;position:relative;overflow:hidden}
+.chain .cn{font-size:14px;color:var(--ink);display:flex;align-items:center;gap:8px}
+.chain .cb{font-size:22px;color:var(--ink);margin-top:6px;font-variant-numeric:tabular-nums}
+.chain .cd{font-size:9.5px;color:var(--faint);margin-top:4px;line-height:1.6}
 .chain .stat{font-size:9px;letter-spacing:.08em;margin-top:6px}
-.stat.ok{color:var(--leaf)} .stat.err{color:var(--amber)}
-.chain.connected{border-color:var(--leaf)} .chain.connected::before{box-shadow:inset 0 0 20px rgba(125,223,143,.06)}
+.stat.ok{color:#86CC72} .stat.err{color:var(--amber,#ffb347)}
+.chain.connected{border-color:#86CC72}
 /* ── the hero number ── the home-chain balance is the page's thesis figure:
    10px uppercase caption, number 32px+ mobile-first (9.5vw on a phone),
    full-row on wide grids. CSS-only promotion of the live #v-bal read. */
 #ch-vaulta{grid-column:1/-1}
 #ch-vaulta .cn{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
 #ch-vaulta .cn .badge{font-size:9px;margin-left:3px}
-#ch-vaulta .cb{font-size:clamp(34px,9.5vw,46px);line-height:1.15;color:var(--gold)}
-pre{background:#060a08;border:1px solid var(--line);border-radius:8px;padding:11px 13px;font-size:9.5px;
+#ch-vaulta .cb{font-size:clamp(34px,9.5vw,46px);line-height:1.15;color:var(--ink)}
+pre{background:var(--well);border:1px solid var(--line2);border-radius:8px;padding:11px 13px;font-size:9.5px;
  color:var(--dim);line-height:1.7;white-space:pre-wrap;word-break:break-word;margin-top:10px}
 pre b{color:var(--ink)}
 .readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:10px}
-.rd{background:var(--well);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
-.rd .k{font-size:9px;color:var(--dim);letter-spacing:.08em}
-.rd .v{font-size:16px;color:var(--leaf);margin-top:2px;font-variant-numeric:tabular-nums}
+.rd{background:var(--well);border:1px solid var(--line2);border-radius:8px;padding:10px 12px}
+.rd .k{font-size:9px;color:var(--faint);letter-spacing:.08em}
+.rd .v{font-size:16px;color:var(--ink);margin-top:2px;font-variant-numeric:tabular-nums}
 /* ── the keychain ring ── */
 .ring-wrap{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-top:10px}
 .ring-wrap svg{flex:0 0 auto}
@@ -73,19 +81,34 @@ pre b{color:var(--ink)}
 .node-breathe{animation:breathe 3s ease-in-out infinite}
 .bridge-arc{stroke-dasharray:5 5;animation:dashflow 3s linear infinite}
 .stamp{display:inline-block;font-size:10px;letter-spacing:.14em;padding:3px 10px;border-radius:5px;
- border:1px solid var(--amber);color:var(--amber);transform:rotate(-2deg)}
-.stamp.ok{border-color:var(--leaf);color:var(--leaf)}
-.keycard{flex:1;min-width:230px;background:var(--well);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
-.keycard .kt{font-size:10px;letter-spacing:.1em;color:var(--violet)}
+ border:1px solid var(--amber,#ffb347);color:var(--amber,#ffb347);transform:rotate(-2deg)}
+.stamp.ok{border-color:#86CC72;color:#86CC72}
+.keycard{flex:1;min-width:230px;background:var(--well);border:1px solid var(--line2);border-radius:10px;padding:12px 14px}
+.keycard .kt{font-size:10px;letter-spacing:.1em;color:var(--dim)}
 .keycard .kp{font-size:10.5px;color:var(--ink);margin-top:4px;word-break:break-all}
-.keycard .kd{font-size:9.5px;color:var(--dim);margin-top:3px}
+.keycard .kd{font-size:9.5px;color:var(--faint);margin-top:3px}
 /* ── the key forge ── */
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-.chip{background:var(--well);border:1px solid var(--line);border-radius:9px;padding:8px 12px;cursor:pointer;min-width:210px;flex:1 1 210px;max-width:340px}
-.chip:hover{border-color:var(--violet)}
-.chip .cc{font-size:10px;color:var(--violet);letter-spacing:.05em;word-break:break-all}
+.chip{background:var(--well);border:1px solid var(--line2);border-radius:9px;padding:8px 12px;cursor:pointer;min-width:210px;flex:1 1 210px;max-width:340px}
+.chip:hover{border-color:#86CC72}
+.chip .cc{font-size:10px;color:var(--dim);letter-spacing:.05em;word-break:break-all}
 .chip .cv{font-size:10px;color:var(--ink);margin-top:3px;word-break:break-all}
 .chip .cx{font-size:9px;color:var(--faint);margin-top:3px}
+/* ── the receipt ladder (master design pass — copy lands word-for-word;
+   the live lanes speak through the composer's own receipt line) ── */
+.ladder{margin:14px 0 4px}
+.lcap{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:10px}
+.lrow{display:flex;gap:14px;align-items:stretch}
+.ltrack{display:flex;flex-direction:column;align-items:center;width:26px;flex:none}
+.ldot{width:22px;height:24px;flex:none;display:flex;align-items:center;justify-content:center;
+ clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+ box-shadow:inset 0 0 0 1px var(--line2);color:var(--faint);font-size:11px;font-weight:700}
+.ltail{flex:1;width:0;min-height:18px;border-left:1px dashed var(--line2);margin:4px 0}
+.lrow:last-child .ltail{display:none}
+.lbody{padding:0 0 18px;min-width:0}
+.llabel{font-size:12.5px;font-weight:700;letter-spacing:.08em}
+.lbadge{white-space:nowrap;font-size:10px;padding:2px 9px;border-radius:6px;border:1px dashed var(--line2);color:var(--faint);margin-left:10px}
+.lline{font-size:11px;color:var(--dim);margin-top:3px;line-height:1.7;max-width:66ch}
 @media (prefers-reduced-motion: reduce){
  .ring-orbit,.node-breathe,.sig-pulse,.bridge-arc,.breathing,.qr-pulse{animation:none !important}
 }
@@ -100,6 +123,7 @@ pre b{color:var(--ink)}
  section:has(> #chains){order:-2}
  #kc-sec{order:-1}
 }
+@media (max-width:600px){body{padding:0 10px 70px}section{padding:13px 12px}}
 .qr-pulse{animation:qr-pulse-k 2.4s ease-in-out infinite}
 @keyframes qr-pulse-k{0%,100%{opacity:.85}50%{opacity:.25}}
 footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
@@ -137,8 +161,13 @@ var WALLET_PROFILE = {
 </head>
 <body>
 <main>
+<nav class="crumbs" aria-label="you are here">
+  <a href="index.html">beehive nature</a><span class="sub">▸</span><span class="here">the wallet</span>
+  <span class="badge-live"><i></i>keys live in tab memory only</span>
+</nav>
 <header>
-  <h1><span aria-hidden="true">🗝</span> <span class="h1-arg">the BNR wallet</span></h1>
+  <div class="kicker">zero storage · zero custody · first-party, adapter-native</div>
+  <h1><span aria-hidden="true">🗝</span> the BNR wallet</h1>
   <p data-reg="bee">One identity, every chain. Your bzDiD is your wallet — connect it once
   and see your balances across all your chains, sign transactions, and hold your keys.
   Nothing leaves your browser.</p>
@@ -451,8 +480,8 @@ var WALLET_PROFILE = {
   The chain is the source of truth.</div>
   <div class="chains" id="chains">
     <div class="chain" id="ch-vaulta">
-      <div class="cn">⚓ Vaulta <span class="badge">A</span></div>
-      <div class="cb" id="v-bal">—</div>
+      <div class="cn hero-caption">⚓ Vaulta <span class="badge">A</span></div>
+      <div class="cb" id="v-bal" data-hero-number>—</div>
       <div class="cd" id="v-info">core balance + RAM + resources</div>
       <div class="stat" id="v-stat">waiting…</div>
     </div>
@@ -1005,6 +1034,24 @@ var WALLET_PROFILE = {
   the Jungle4 lane rehearses with a test key you paste (TESTNET-ONLY, memory-only). The Unicove
   dependency is dead — this is ours, on the adapter contract: the worker builds, the vault signs,
   the outbox persists, and nothing is called "sent" until the rail is read back.</div>
+  <div class="ladder" id="receipt-ladder" aria-label="the receipt ladder — the order is law">
+    <div class="lcap">the receipt ladder — every state is a first-class visual · the order is law</div>
+    <div class="lrow"><div class="ltrack"><span class="ldot">1</span><span class="ltail"></span></div>
+      <div class="lbody"><span class="llabel" style="color:#E9F2EC">BUILD</span><span class="lbadge">done</span>
+      <div class="lline">the live ABI renders one field per argument — you see exactly what you will sign: action, authorization, parsed args, signer, endpoint.</div></div></div>
+    <div class="lrow"><div class="ltrack"><span class="ldot">2</span><span class="ltail"></span></div>
+      <div class="lbody"><span class="llabel" style="color:#D655BB">SIGN</span><span class="lbadge">done</span>
+      <div class="lline">your derived bzDiD key signs in tab memory — zero paste. the signature is yours, the bytes are final.</div></div></div>
+    <div class="lrow"><div class="ltrack"><span class="ldot">3</span><span class="ltail"></span></div>
+      <div class="lbody"><span class="llabel" style="color:#E9F2EC">PERSIST</span><span class="lbadge">done</span>
+      <div class="lline">the signed bytes land in the outbox BEFORE any network. persistence precedes submission — the order is law.</div></div></div>
+    <div class="lrow"><div class="ltrack"><span class="ldot">…</span><span class="ltail"></span></div>
+      <div class="lbody"><span class="llabel" style="color:#6FA9E0">SUBMIT</span><span class="lbadge" style="border-style:dashed;border-color:#6FA9E0;color:#6FA9E0">SUBMITTED — awaiting read-back, not done</span>
+      <div class="lline">the stored bytes broadcast to the rail. a retry resubmits the identical bytes — it never re-signs, never rebuilds. submitted is NOT done.</div></div></div>
+    <div class="lrow"><div class="ltrack"><span class="ldot" style="box-shadow:inset 0 0 0 1px #86CC72;color:#86CC72">✓</span></div>
+      <div class="lbody"><span class="llabel" style="color:#86CC72">CONFIRM</span><span class="lbadge" style="border-color:#86CC72;background:#86CC72;color:#06110C;font-weight:700">CONFIRMED — read back from the rail</span>
+      <div class="lline">a block read says so, or nothing does. the receipt names what was read — only the read-back earns the terminal look.</div></div></div>
+  </div>
   <div id="adapter-states" style="margin:8px 0;display:flex;gap:6px;flex-wrap:wrap"></div>
   <div class="row">
     <input id="tx-contract" placeholder="contract" value="" spellcheck="false">
