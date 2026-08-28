@@ -195,3 +195,52 @@ receipt, resource numbers beside LiveKit under load, and the parked state.
 - Lane B (z1.1) untouched.
 - Founder's acts are founder's acts: DNS, OCI console, his npub. Never faked,
   never simulated.
+
+---
+
+## Addendum — z2.1 independent verification pass (2026-08-28, ~17:15 UTC)
+
+Seat z2.1 (dispatched by the chief, Fable 5, with the same lane order) re-ran
+the source read and the box audit WITHOUT first reading this file — every pin
+re-derived independently, then reconciled:
+
+- **Same pins, independently**: estate mirror `skaists/buzz @ 191a577` (clone
+  `~/buzz-src`), upstream parent read `d8281b9c9339`, relay line `relay-v0.2.1`
+  (Cargo.toml + CHANGELOG), image `ghcr.io/block/buzz:0.2.1` with index digest
+  `sha256:4e31b7c7abb7` — byte-identical to `/opt/buzz/IMAGE-PINS.txt`. arm64
+  manifest confirmed in the 0.2.1 index (amd64 + arm64 + 2 attestations).
+  Desktop line independence confirmed the same way (desktop 0.5.x vs relay
+  0.2.1 in one tree; docker.yml: only `relay-v*` publishes the image, as bare
+  semver).
+- **main.rs:234 re-verified**: `require_relay_membership && relay_owner_pubkey
+  .is_none()` → hard boot error. This reconciles the two source layers:
+  config.rs warn-and-ignores an INVALID owner value at parse time; main.rs
+  refuses to BOOT closed-mode ownerless. Fail-closed is structural, confirmed.
+- **Staged box state audited live — every §6 claim green**: `/opt/buzz` at the
+  pin; `.env` mode 600 ubuntu with the exact §3 knobs (`RELAY_OWNER_PUBKEY=`
+  empty as parked); six images present; **zero containers**; iptables INPUT
+  ACCEPT 80/443 "buzz relay" beside the BNR-relay 8080 and LiveKit 7880 rules.
+  Secrets were not read (names/patterns only — the law held from z2.2 to z2.1).
+- **FOUNDER ACT #1 EVIDENCED — DNS IS LIVE**: `skaists.buzz` A →
+  `129.153.202.144` answering on Google DoH AND the box resolver (the §8.1
+  two-resolver gate passes, ~17:10 UTC). The Windows-local resolver gave no
+  answer (local cache quirk; not a runbook gate). Ingress probe from the
+  founder's network: TCP to the box :80/:443 connects-then-resets (curl exit
+  56, no timeout — consistent with open OCI ingress and no listener yet;
+  DEFINITIVE ingress proof only exists once Caddy listens).
+- **Owner-order note for bring-up**: the chief's dispatch to z2.1 orders a
+  box-created owner identity at first launch with the founder added as MEMBER
+  — i.e. §4.6's fallback path, not the ideal. Executed as one motion:
+  `buzz-admin generate-key` on-box → pubkey into `RELAY_OWNER_PUBKEY` →
+  single first `up` (the binary refuses ownerless boot, so there is no window
+  where the relay exists open or admin-less). The founder's npub then enters
+  via `add-member --role member` per dispatch step 6.
+
+**Standing state: READY at the founder gate.** DNS done (public evidence);
+awaiting his word ("done" — his OCI ingress act with it) and his npub. Bring-up
+follows §8 with the owner motion above folded into step 0.
+
+*Artifacts from this pass (local disk, not repo cargo): the Lane-G-revised
+`~/buzz-relay-deploy.sh` (dash-syntax clean, property-grepped) — kept as the
+external-S3 migration pattern reference per §4.1, NOT the runbook of record;
+`~/buzz-src` mirror clone.*
