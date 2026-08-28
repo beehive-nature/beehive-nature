@@ -70,8 +70,8 @@
   {
    "d": "plur.earth",
    "fam": "plur",
-   "repo": "plur-earth (A4)",
-   "state": "SEAT-OPEN"
+   "repo": "plur-earth",
+   "state": "DNS-PENDING"
   },
   {
    "d": "plur.asia",
@@ -899,8 +899,8 @@
   "families": 8,
   "domains": 26,
   "domainsLive": 1,
-  "domainsPending": 19,
-  "domainsSeatOpen": 6,
+  "domainsPending": 20,
+  "domainsSeatOpen": 5,
   "byFamily": {
    "beehivenature": 33,
    "plur": 5,
