@@ -1,13 +1,35 @@
 #!/usr/bin/env node
 /* build-atlas.mjs — the hub renders FROM the registry, statically.
-   The page's family sections, rows and counts are written as raw HTML so
-   crawlers (and the university-smoke reachability walk) see every surface
-   without executing a single script; the in-page JS only adds search.
-   Run after editing estate.json:  node scripts/build-atlas.mjs
+   THE MASTER DESIGN PASS (2026-08-28, wiring lane): three org houses over the
+   eight families, every count computed from estate.json's org axis at BUILD —
+   zero runtime fetch (the design's preview fetch is preview-only and does not
+   ship). The hex-band masthead is lifted BYTE-TRUE from surfaces/doors/index.html
+   at build (read, never retyped — preservation law: diff, don't trust). The
+   in-page JS adds only search. Run after editing estate.json:
+     node scripts/build-atlas.mjs
    CI (scripts/estate-check.mjs) fails if the page drifts from the registry. */
 import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
 
 const E = JSON.parse(readFileSync('estate.json', 'utf8'));
+const c = E.counts;
+
+/* ── the preservation lift: the doors' hex band, byte-true ─────────────────
+   The band markup and its CSS are READ from surfaces/doors/index.html and
+   embedded verbatim. If the doors change, the next build carries the change;
+   nothing here re-derives the pattern. */
+const doorsHtml = readFileSync('surfaces/doors/index.html', 'utf8');
+const bandLine = doorsHtml.split('\n').map(l => l.trim()).find(l => l.startsWith('<div id="bandwrap"'));
+if (!bandLine) throw new Error('PRESERVATION SOURCE MISSING: the doors hex band was not found in surfaces/doors/index.html');
+/* the band CSS is a CONTIGUOUS block from '#bandwrap{' through the hexdriftb
+   keyframe — line-picking once orphaned a continuation rule and the unclosed
+   brace ate the rest of the sheet. The lift self-checks brace balance. */
+const dLines = doorsHtml.split('\n');
+const cssStart = dLines.findIndex(l => l.trim().startsWith('#bandwrap{'));
+const cssEnd = dLines.findIndex(l => /@keyframes hexdriftb/.test(l));
+if (cssStart < 0 || cssEnd < cssStart) throw new Error('PRESERVATION SOURCE MISSING: the doors band CSS block was not found');
+const bandCss = dLines.slice(cssStart, cssEnd + 1).map(l => '  ' + l.trim()).join('\n');
+const open = (bandCss.match(/\{/g) || []).length, close = (bandCss.match(/\}/g) || []).length;
+if (open !== close) throw new Error('BAND LIFT BROKEN: braces unbalanced (' + open + ' vs ' + close + ') — the doors CSS block moved');
 
 /* the fleet sentence is COMPUTED like everything else: hosted copies that
    differ from the founder's originals beyond the CDN vendor line
@@ -20,6 +42,7 @@ for (const d of ['lab', 'gallery']) {
     if (strip(readFileSync('surfaces/fleet/' + f, 'utf8')) !== strip(readFileSync('surfaces/fleet-hosted/' + d + '/' + f, 'utf8'))) fleetN++;
   }
 }
+
 const GLOSS = {
   beehivenature: 'the organism itself — what it is, how it proves it, how to join',
   skaists: 'the makers\u2019 workshop — instruments, art, and labs',
@@ -31,37 +54,71 @@ const GLOSS = {
   bnr: 'the kernel\u2019s public face — quests for curious minds'
 };
 const DOORS = {
-  beehivenature: [['doors/beehivenature.html', 'the door']],
-  skaists: [['doors/skaists.html', 'the door']],
-  bnature: [['doors/bnature-social.html', 'social door'], ['doors/bnature-bio.html', 'bio door']],
-  beehivebiomass: [['doors/beehivebiomass.html', 'the door']],
-  plur: [['doors/plur.html', 'the door']]
+  beehivenature: [['doors/beehivenature.html', 'the door →']],
+  skaists: [['doors/skaists.html', 'the door →']],
+  bnature: [['doors/bnature-social.html', 'social door →'], ['doors/bnature-bio.html', 'bio door →']],
+  beehivebiomass: [['doors/beehivebiomass.html', 'the door →']],
+  plur: [['doors/plur.html', 'the door →']]
 };
-const c = E.counts;
+const ORGS = [
+  { id: 'skaists', label: 'skaists', line: 'the culture face — the makers, the dancefloor, the music universe', gh: 'https://github.com/skaists',
+    hex: 'linear-gradient(90deg,#FBFB9F,#86CC72,#45C2DC,#6FA9E0,#9C6FD6)', pill: '#B79FE0', house: 'sk' },
+  { id: 'beehive-nature', label: 'beehive-nature', line: 'the organism / protocol face — what it is, how it proves it, how to join', gh: 'https://github.com/beehive-nature',
+    hex: 'linear-gradient(92deg,#E9F2EC 55%,#D655BB)', pill: '#D655BB', house: 'bn' },
+  { id: 'beehive-biomass', label: 'beehive-biomass', line: 'the machine / supply face — machines, farms, bandwidth', gh: 'https://github.com/beehive-biomass',
+    hex: 'linear-gradient(92deg,#E9F2EC 55%,#86CC72)', pill: '#86CC72', house: 'bm' }
+];
+const nOrgs = ORGS.length;
 
-const chips = E.families.map(f =>
-  `<a href="#fam-${f}">${f} <span class="n">${(c.byFamily[f] || 0)}</span></a>`).join('\n');
+const dec = t => (t || '').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&');
 
-const sections = E.families.map(f => {
+/* families grouped by the registry's own org field (the axis is the authority) */
+const famOrg = f => (E.domains.find(d => d.fam === f) || {}).org || (E.surfaces.find(s => s.family === f) || {}).org;
+
+const famBlock = (f, house) => {
   const doms = E.domains.filter(d => d.fam === f);
-  const srfs = E.surfaces.filter(s => s.family === f);
-  const doorHtml = (DOORS[f] || []).map(d => `<a class="doorlink" href="${d[0]}">${d[1]} →</a>`).join(' ');
-  const domHtml = doms.map(d =>
-    `<span class="dom ${d.state}" title="front repo: ${d.repo || 'none yet'}">${d.d}<span class="st">${d.state}</span></span>`).join('');
-  const shown = srfs.filter(s => s.presented !== false);
-  const uncounted = srfs.filter(s => s.counted === false).length;
-  const shownN = shown.length ? `${shown.length} surface${shown.length === 1 ? '' : 's'}` : 'an open seat — the domain waits for its first surface';
+  const all = E.surfaces.filter(s => s.family === f);
+  const counted = all.filter(s => s.counted !== false).length;
+  const honoured = all.length - counted.length;
+  const shown = all.filter(s => s.presented !== false);
   const rows = shown.map(s =>
-    `<a class="srf" data-t="${f} ${s.id} ${s.gloss.replace(/"/g, '&quot;')}" href="${s.path.replace(/^surfaces\//, '')}">` +
-    `<span class="nm">${s.id.replace(/-/g, ' ')}${s.warn ? '<span class="warn">⚠</span>' : ''}</span>` +
+    `<a class="srf" data-t="${(famOrg(f) + ' ' + f + ' ' + s.id + ' ' + dec(s.gloss)).replace(/"/g, '&quot;')}" href="${s.path.replace(/^surfaces\//, '')}">` +
+    `<span class="nm">${s.id.replace(/-/g, ' ')}${s.warn ? '<span class="warn" title="a named limit">⚠</span>' : ''}</span>` +
     `<span class="gl">${s.gloss}</span></a>`).join('\n');
-  return `<section class="fam" id="fam-${f}">
-<div class="famhead"><h2>${f}</h2><span class="gloss">${GLOSS[f] || ''}</span>${doorHtml}</div>
+  const domHtml = doms.map(d => {
+    const st = d.state === 'LIVE' ? 'live' : d.state === 'DNS-PENDING' ? 'dns' : 'seat';
+    return `<span class="dom ${st}" title="front repo: ${d.repo || 'none yet'}">${d.d}<span class="st">${d.state}</span></span>`;
+  }).join('');
+  const doorHtml = (DOORS[f] || []).map(d => `<a class="doorlink" href="${d[0]}">${d[1]}</a>`).join(' ');
+  const countLine = counted === 0 && honoured === 0
+    ? 'an open seat — the domain waits for its first surface · ' + doms.length + ' domains'
+    : counted + (counted === 1 ? ' surface' : ' surfaces') + (honoured ? ' · ' + honoured + ' honoured uncounted (the founder\u2019s art)' : '') + ' · ' + doms.length + (doms.length === 1 ? ' domain' : ' domains');
+  return `<section class="fam ${house}" id="fam-${f}">
+<div class="famhead"><span class="hexdot ${house}"></span><h3>${f}</h3><span class="gloss">${GLOSS[f] || ''}</span>${doorHtml}</div>
 <div class="doms">${domHtml}</div>
-<div class="famcount">${shownN}${uncounted ? ` · ${uncounted} honoured uncounted (the founder's art)` : ''}${doms.length ? ` · ${doms.length} domain${doms.length === 1 ? '' : 's'}` : ''}</div>
+<div class="famcount">${countLine}</div>
 <div class="rows">${rows || '<span class="gl" style="padding:8px 2px"></span>'}</div>
 </section>`;
+};
+
+const houses = ORGS.map(o => {
+  const fams = E.families.filter(f => famOrg(f) === o.id);
+  const counted = (c.byOrg[o.id] || 0);
+  const nd = E.domains.filter(d => d.org === o.id).length;
+  return `<section class="org" id="org-${o.id}">
+<div class="orghead"><span class="orghex" style="background:${o.hex}"></span>
+<h2 style="background:${o.hex};-webkit-background-clip:text;background-clip:text;color:transparent">${o.label}</h2>
+<span class="orgline">${o.line}</span>
+<a class="gh" href="${o.gh}">${o.gh.replace('https://', '')} →</a></div>
+<div class="orgcount">${counted} surfaces · ${nd} domains · ${fams.length}${fams.length === 1 ? ' family' : ' families'} — computed from the registry\u2019s org field</div>
+${fams.map(f => famBlock(f, o.house)).join('\n')}
+</section>`;
 }).join('\n');
+
+const orgPills = ORGS.map(o =>
+  `<a href="#org-${o.id}" style="border-color:${o.pill}">${o.label} <span class="n">${c.byOrg[o.id] || 0}</span></a>`).join('\n');
+const famPills = E.families.map(f =>
+  `<a href="#fam-${f}">${f} <span class="n">${c.byFamily[f] || 0}</span></a>`).join('\n');
 
 const json = JSON.stringify(E);
 
@@ -76,74 +133,102 @@ const page = `<!doctype html>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="bn-logo.jpg">
-<title>beehive nature · the atlas — every surface, every domain, live</title>
-<meta name="description" content="26 domains, one organism. Every surface the estate has built, grouped by family, honest about what is live — computed from the registry, never hand-written.">
+<title>beehive nature · the atlas — every surface, every org, every domain, live</title>
+<meta name="description" content="One estate, three orgs, eight families. Every surface the estate has built, grouped by the org that answers for it — computed from the registry, never hand-written.">
 <style>
-/* THE ATLAS — sprint 2026-08-28 lane A2, rendered by scripts/build-atlas.mjs.
-   One ground, one accent, one job per screen. Sections are STATIC HTML from
-   estate.json (crawlers see every surface); JS adds only search. Palette law:
-   biomass green is the one accent (alive/estate), ai cyan = infrastructure
-   state; gold never appears (b amounts only — this page carries none).
-   Depth ladder: void ground · panel slab · inset well. */
+/* THE ATLAS — master design pass 2026-08-28, rendered by scripts/build-atlas.mjs.
+   SEMANTIC COLOUR — meanings picked FIRST, hues second:
+   harm = guard violet · solution = biomass green (the estate's one accent)
+   value = gold (b amounts only — none on this page) · system = info blue
+   science = ai cyan (infrastructure state: DNS, warn marks). Org hues are
+   IDENTITY (skaists prism · beehive-nature magenta · beehive-biomass green),
+   meaning-bearing per the org axis. The hex band is the doors' art, lifted
+   byte-true — chrome is calm, the art lives. */
 :root{
-  --void:#06110C; --panel:#0B1A12; --inset:#0E2418; --line:#1E3A2A;
-  --ink:#E9F2EC; --dim:#8FA89A;
-  --biomass:#86CC72; --ai:#45C2DC;
+  --void:#06110C; --panel:#0B1A12; --inset:#0E2418; --line:#1E3A2A; --line2:#1E2B26;
+  --ink:#E9F2EC; --dim:#8FA79C; --faint:#648176;
+  --biomass:#86CC72; --ai:#45C2DC; --b-value:#E8B54B; --info:#6FA9E0;
+  --guard:#B7A8F7; --sovereign:#9C6FD6; --you:#D655BB;
+  --sem-harm:var(--guard); --sem-solution:var(--biomass); --sem-value:var(--b-value);
+  --sem-system:var(--info); --sem-science:var(--ai);
 }
-html{background:var(--void);color:var(--ink);
-  font:15px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;}
-body{margin:0;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
-.wrap{max-width:1060px;margin:0 auto;padding:0 20px}
+html{background:var(--void);color:var(--ink);-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--void);font:14px/1.6 ui-monospace,'Cascadia Mono','SF Mono',Menlo,Consolas,monospace}
 a{color:var(--biomass);text-decoration:none}
 a:hover{text-decoration:underline}
+::selection{background:var(--biomass);color:var(--void)}
 .skip{position:absolute;left:-9999px}
 .skip:focus{left:8px;top:8px;background:var(--inset);padding:8px 12px;border-radius:8px;z-index:9}
-.hero{padding:44px 0 8px}
-.kicker{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
-h1{font-size:clamp(32px,6vw,44px);line-height:1.08;margin:10px 0 8px;font-weight:600;
-  background:linear-gradient(92deg,var(--ink) 55%,var(--biomass));
-  -webkit-background-clip:text;background-clip:text;color:transparent}
-.lede{color:var(--dim);max-width:56ch;margin:0 0 14px}
-.counts{font-size:12.5px;color:var(--dim);margin-bottom:18px}
-.counts b{color:var(--ink);font-weight:600}
-#q{width:100%;box-sizing:border-box;background:var(--inset);color:var(--ink);
-  border:1px solid var(--line);border-radius:10px;padding:13px 16px;font:inherit;
-  outline:none;transition:border-color .15s}
+.wrap{max-width:1060px;margin:0 auto;padding:0 clamp(14px,3vw,20px)}
+/* the masthead + the doors' band (byte-true lift) */
+header.mast{position:relative;overflow:hidden;border-bottom:1px solid var(--line);padding-bottom:26px}
+#bandwrap{--bandh:149px}
+${bandCss}
+@media (prefers-reduced-motion:reduce){#bandwrap *{animation:none !important}}
+.crumbs{position:relative;display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:157px;padding:9px 0;border-bottom:1px solid var(--line);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.crumbs .here{color:var(--ink)} .crumbs .sub{color:var(--dim)}
+.crumbs .badge{margin-left:auto;display:inline-flex;align-items:center;gap:7px;color:var(--dim);font-size:10px;letter-spacing:.14em}
+.crumbs .badge i{width:8px;height:8px;border-radius:50%;background:var(--biomass)}
+.kicker{position:relative;margin:22px 0 0;font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:var(--faint)}
+h1{position:relative;font-size:clamp(32px,6vw,44px);line-height:1.08;margin:10px 0 8px;font-weight:600;
+  background:linear-gradient(92deg,#E9F2EC 55%,#86CC72);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{position:relative;color:var(--dim);max-width:56ch;margin:0 0 14px;font-size:14px;line-height:1.7}
+.stat{position:relative;display:flex;flex-direction:column;gap:2px;margin:0 0 6px}
+.stat .num{font-size:38px;line-height:1;font-weight:600;font-variant-numeric:tabular-nums}
+.stat .cap{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.counts{position:relative;font-size:12.5px;color:var(--dim);margin:0 0 18px}
+.counts b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+#q{position:relative;width:100%;box-sizing:border-box;background:var(--inset);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:13px 16px;font:15px/1.4 ui-monospace,Menlo,Consolas,monospace;outline:none;transition:border-color .15s}
 #q:focus{border-color:var(--biomass)}
-#shown{font-size:11.5px;color:var(--dim);margin:8px 2px 0;min-height:16px}
-.band{display:block;width:100%;height:56px;margin:18px 0 4px;color:var(--line)}
-.famjump{display:flex;flex-wrap:wrap;gap:8px;padding:10px 0 22px}
-.famjump a{font-size:12px;padding:6px 11px;border:1px solid var(--line);border-radius:999px;
-  background:var(--panel);color:var(--ink)}
+#shown{font-size:11.5px;color:var(--faint);margin:8px 2px 0;min-height:16px}
+.orgnav{display:flex;flex-wrap:wrap;gap:8px;padding:16px 0 4px}
+.orgnav a{font-size:12px;padding:7px 13px;border:1px solid;border-radius:999px;background:#0A1310;color:var(--ink)}
+.orgnav a:hover{text-decoration:none;background:#111C17}
+.famjump{display:flex;flex-wrap:wrap;gap:8px;padding:8px 0 22px}
+.famjump a{font-size:12px;padding:6px 11px;border:1px solid var(--line2);border-radius:999px;background:#0C1412;color:var(--dim)}
 .famjump a:hover{border-color:var(--biomass);text-decoration:none}
-.famjump .n{color:var(--dim)}
-section.fam{background:var(--panel);border:1px solid var(--line);border-radius:12px;
-  padding:18px 18px 10px;margin:0 0 18px}
-section.fam.hidden{display:none}
+.n{color:var(--faint);font-variant-numeric:tabular-nums}
+section.org{border:1px solid var(--line2);border-radius:14px;padding:clamp(12px,2.5vw,18px);margin:0 0 22px;scroll-margin-top:18px;background:var(--panel)}
+section.org.bn{border-color:var(--line)}
+section.org.hidden,section.fam.hidden{display:none}
+.orghead{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 14px;margin-bottom:12px;background:var(--inset);border-radius:10px;padding:8px 12px;margin-left:-6px;margin-right:-6px}
+.orghex{width:12px;height:13px;flex:none;align-self:center;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
+.orghead h2{font-size:20px;font-weight:700;margin:0;letter-spacing:-.01em}
+.orgline{color:var(--dim);font-size:12.5px;flex:1 1 240px}
+.orghead .gh{font-size:11px;color:var(--dim)}
+.orgcount{color:var(--faint);font-size:11.5px;margin:0 2px 12px}
+section.fam{border:1px solid;border-radius:12px;padding:clamp(14px,2.5vw,18px) clamp(12px,2.5vw,18px) 10px;margin:0 0 14px;scroll-margin-top:18px}
+section.fam.sk{background:#0A1310;border-color:var(--line2)}
+section.fam.bn{background:#0B1A12;border-color:var(--line)}
+section.fam.bm{background:#0C1412;border-color:var(--line2)}
 .famhead{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 14px;margin-bottom:4px}
-.famhead h2{font-size:18px;font-weight:600;margin:0}
-.famhead .gloss{color:var(--dim);font-size:12.5px;flex:1 1 260px}
+.hexdot{width:10px;height:10px;flex:none;align-self:center;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
+.hexdot.sk{background:#B79FE0}.hexdot.bn{background:var(--you)}.hexdot.bm{background:var(--biomass)}
+.famhead h3{font-size:17px;font-weight:600;margin:0}
+.famhead .gloss{color:var(--dim);font-size:12.5px;flex:1 1 240px}
 .doorlink{font-size:12px}
 .doms{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
-.dom{font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid var(--line);color:var(--dim)}
+.dom{white-space:nowrap;font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid var(--line2);color:var(--dim)}
 .dom .st{margin-left:6px}
-.dom.LIVE{border-color:var(--biomass)}.dom.LIVE .st{color:var(--biomass)}
-.dom.DNS-PENDING .st{color:var(--ai)}
-.dom.SEAT-OPEN .st{color:var(--dim)}
-.rows{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:0 18px}
-.srf{display:block;padding:7px 8px;border-bottom:1px solid var(--line);border-radius:6px}
-.srf:hover{background:var(--inset);text-decoration:none}
+.dom.live{border-color:var(--biomass)}.dom.live .st{color:var(--biomass)}
+.dom.dns .st{color:var(--ai)}
+.dom.seat .st{color:var(--faint)}
+.famcount{color:var(--dim);font-size:11.5px;margin:8px 2px 6px}
+.rows{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:0 18px}
+.srf{display:block;padding:8px;border-bottom:1px solid var(--line2);border-radius:6px;min-height:44px;box-sizing:border-box}
+.srf:hover{background:#111C17;text-decoration:none}
 .srf .nm{color:var(--ink);font-size:13.5px}
 .srf:hover .nm{color:var(--biomass)}
 .srf .gl{color:var(--dim);font-size:11.5px;display:block;margin-top:1px}
 .srf .warn{color:var(--ai);font-size:11px;margin-left:5px}
-.famcount{color:var(--dim);font-size:11.5px;margin:8px 2px 6px}
-footer{color:var(--dim);font-size:12px;border-top:1px solid var(--line);
-  margin-top:28px;padding:16px 0 84px}
-footer .m{margin-top:6px;max-width:72ch}
-@media (max-width:640px){
-  .hero{padding-top:30px}
-  section.fam{padding:14px 12px 8px}
+footer{color:var(--dim);font-size:12px;border-top:1px solid var(--line);margin-top:28px;padding:16px 0 84px}
+footer .m{margin-top:6px;max-width:72ch;color:var(--faint);line-height:1.8}
+footer b{color:var(--ink);font-variant-numeric:tabular-nums}
+@media (max-width:600px){
+  .crumbs{margin-top:120px}
+  #bandwrap{--bandh:112px}
+  section.fam{padding:13px 12px 8px}
+  section.org{padding:12px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -152,42 +237,40 @@ footer .m{margin-top:6px;max-width:72ch}
 <a class="skip" href="#families">skip to the families</a>
 <div class="wrap">
 
-<header class="hero">
-  <div class="kicker">zero network · no password · no name</div>
+<header class="mast" data-art>
+  ${bandLine}
+  <nav class="crumbs" aria-label="you are here">
+    <span class="here">beehive nature</span><span class="sub">▸</span><span class="sub">the atlas</span>
+    <span class="badge"><i></i>static · search is the only script</span>
+  </nav>
+  <p class="kicker">zero network · no password · no name</p>
   <h1>beehive nature</h1>
-  <p class="lede">one organism, eight families. every surface the estate has built lives
-  below, grouped by the domain it answers to — honest about what is live,
-  what is waiting on dns, and what is still an open seat.</p>
-  <div class="counts" id="counts"><b>${c.surfaces}</b> surfaces · <b>${c.domains}</b> domains · <b>${c.families}</b> families · every number computed from the registry</div>
+  <p class="lede">one estate, three orgs, eight families. every surface the estate has built lives
+  below, grouped by the org that answers for it and the domain it answers to — honest about
+  what is live, what is waiting on dns, and what is still an open seat.</p>
+  <div class="stat" aria-live="polite">
+    <span class="num" data-hero-number>${c.surfaces}</span>
+    <span class="cap" data-hero-caption>surfaces · every number computed from the registry</span>
+  </div>
+  <p class="counts"><b>${c.surfaces}</b> surfaces · <b>${c.domains}</b> domains · <b>${c.families}</b> families · <b>${nOrgs}</b> orgs · every number computed from the registry</p>
   <input id="q" type="search" placeholder="search the estate — a name, a feeling, a tool" aria-label="search the estate">
   <div id="shown" aria-live="polite"></div>
 </header>
 
-<svg class="band" viewBox="0 0 1060 56" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-  <defs><polygon id="hx" points="14,0 42,0 56,28 42,56 14,56 0,28"/></defs>
-  <g fill="none" stroke="currentColor" stroke-width="1">
-    <use href="#hx" x="0"/><use href="#hx" x="58"/><use href="#hx" x="116"/><use href="#hx" x="174"/>
-    <use href="#hx" x="232"/><use href="#hx" x="290"/><use href="#hx" x="348"/><use href="#hx" x="406"/>
-    <use href="#hx" x="464"/><use href="#hx" x="522"/><use href="#hx" x="580"/><use href="#hx" x="638"/>
-    <use href="#hx" x="696"/><use href="#hx" x="754"/><use href="#hx" x="812"/><use href="#hx" x="870"/>
-    <use href="#hx" x="928"/><use href="#hx" x="986"/>
-  </g>
-  <use href="#hx" x="232" fill="#86CC72" opacity=".18"/>
-  <use href="#hx" x="522" fill="#86CC72" opacity=".10"/>
-  <use href="#hx" x="812" fill="#45C2DC" opacity=".10"/>
-</svg>
-
 <!--ATLAS-STATIC-START-->
+<nav class="orgnav" aria-label="the three orgs">
+${orgPills}
+</nav>
 <nav class="famjump" id="families" aria-label="the eight families">
-${chips}
+${famPills}
 </nav>
 <main id="list">
-${sections}
+${houses}
 </main>
 <!--ATLAS-STATIC-END-->
 
 <footer>
-  <div id="foot"><a href="../estate.json">the registry</a> · <a href="doors/index.html">the doors</a> · <a href="https://github.com/beehive-nature/beehive-nature">the code</a> — ${c.surfaces} surfaces · ${c.domains} domains</div>
+  <div><a href="../estate.json">the registry</a> · <a href="doors/index.html">the doors</a> · <a href="https://github.com/beehive-nature/beehive-nature">the code</a> — <b>${c.surfaces}</b> surfaces · <b>${c.domains}</b> domains · <b>${nOrgs}</b> orgs</div>
   <div class="m">the counts on this page render from the registry and cannot be hand-written —
   CI proves it every push. the fleet's hosted copies stay the founder's art:
   ${fleetN} of them carrying behaviour fixes, kept honest to his originals beyond the vendor line.
@@ -201,7 +284,8 @@ ${json}
 </script>
 
 <script>
-/* the atlas is static HTML from the registry; this script adds ONLY search. */
+/* the atlas is static HTML from the registry; this script adds ONLY search —
+   rows hide, empty families hide, empty org houses hide, the count shows. */
 (() => {
   const E = JSON.parse(document.getElementById('estate').textContent.replace(/<!--[\\s\\S]*?-->/g, '').trim());
   const q = document.getElementById('q'), shown = document.getElementById('shown');
@@ -217,7 +301,11 @@ ${json}
       const any = [...s.querySelectorAll('.srf')].some(r => r.style.display !== 'none');
       s.classList.toggle('hidden', t && !any);
     });
-    shown.textContent = t ? visible + ' of ' + E.counts.surfaces + ' counted surfaces shown' : '';
+    document.querySelectorAll('section.org').forEach(s => {
+      const any = [...s.querySelectorAll('.srf')].some(r => r.style.display !== 'none');
+      s.classList.toggle('hidden', t && !any);
+    });
+    shown.textContent = t ? visible + (visible === 1 ? ' surface matches' : ' surfaces match') + ' — each hit sits inside its own house; empty houses are hidden' : '';
   };
   q.addEventListener('input', apply);
 })();
@@ -229,4 +317,4 @@ ${json}
 `;
 
 writeFileSync('surfaces/index.html', page);
-console.log('atlas built — ' + E.surfaces.length + ' rows listed · ' + c.surfaces + ' counted · ' + page.length + ' bytes');
+console.log('atlas built — ' + E.surfaces.length + ' rows listed · ' + c.surfaces + ' counted · ' + nOrgs + ' orgs · band lifted byte-true from doors · ' + page.length + ' bytes');
