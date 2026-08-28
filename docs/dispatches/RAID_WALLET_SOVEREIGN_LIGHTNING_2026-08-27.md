@@ -148,13 +148,13 @@ One URI carrying `sp` + `lno` (+ on-chain params) — "Both ride in one BIP 321 
 - **What (README, quoted):** "deduce the recipient of a lightning payment… identifies whether the payee is a user of a non-custodial wallet, custodial exchange, or something else" — via invoice hints + graph knowledge (e.g. ACINQ LSP hint ⇒ Phoenix).
 - **Verdict: TAKE.** Tiny, MIT, Rust — drops into wallet-relay as the classifier that makes our spend-view say *who* (custodial vs self-custodial) without a chain-analysis vendor. Small enough to audit line-by-line; rewrite-into-crate after reading.
 
-### 6.4 The DAO Safe *(base:0x37Caccb1611CE564c064555cc97770fF14FcA440)* — ON-CHAIN RECEIPT
+### 6.4 A third party's Safe on Base *(base:0x37Caccb1611CE564c064555cc97770fF14FcA440)* — ON-CHAIN RECEIPT, STUDY MATERIAL
 - `eth_getCode` → canonical Safe-proxy bytecode shape (`0x6080604052…` masterCopy-read-from-slot-0, solc 0.7.6 — Safe 1.3.0-generation; **version UNVERIFIED**, impl naming API errored).
 - `eth_getStorageAt(0)` → implementation `0xfb1bffc9d739b8d520daf37df666da4c687191ea`.
 - `eth_call getOwners()` → **3 owners** (raw hex, decoded):
   `0x927604e15866259f3a25948804afe306ba2f1db4`, `0x5fed072ab05b0fd64c0c9a0f7ab51b4e7b66ab63`, `0x73c5f4294544ba9d37c348790c5de05736550702`
 - `getThreshold()` selector attempt reverted — **threshold UNVERIFIED** (selector not recomputed this session).
-- **Verdict:** this is the treasury the wallet's DAO lane speaks to (Safe on Base — matches our Base presence). Wallet action: read-only Safe integration (balances/multisig proposals surfaced in the ops panel); the three owner addresses go to the founder for confirmation before anything signs.
+- **CORRECTED 2026-08-28 (founder statement):** this Safe is **NOT the estate's — it belongs to Sam, TRUFFi's dev.** A boarding fact about a third party's treasury, read as study material. The original §6.4 verdict wrongly called it "the DAO's treasury" and asked the founder to confirm the owners — that ask is VOID, and no estate surface wires, displays, or labels this Safe as ours, ever. Read-back rule now explicitly covers Safe addresses: any order touching one states WHOSE Safe it is, confirmed against a founder statement, before executing.
 
 ---
 
@@ -204,7 +204,7 @@ Deterministic avatar per operator pubkey, rendered by our generative stack in th
 ---
 
 ## OPEN QUESTIONS FOR FOUNDER
-1. **Safe owners** — the three addresses read on-chain (§6.4): confirm they're ours before the treasury panel treats them as known. Threshold re-read pending (selector reverted).
+1. **Safe owners — VOID (corrected 2026-08-28):** the Safe read on-chain (§6.4) is Sam, TRUFFi's dev's — NOT the estate's, founder-confirmed. Nothing waits on the founder; the address is third-party study material only. Read-back rule extended: any order touching a Safe states whose it is, founder-confirmed, first.
 2. **Fedimint guardianship** — do we seed the first federation with estate boxes (bNr, Oracle VPS, yours), or ship Cashu-mint-solo first and federate later? (Recommendation: cdk first, Fedimint when a community asks.)
 3. **Ark** — adopt-as-pattern only until bark's license is read and an operator-runnable ASP exists; or commit earlier? (Recommendation: pattern-only for now.)
 4. **ElTor** — green-light a paid-circuit reading room for bMeshAsi (license archaeology on the C fork + circuit-payment design), or shelf? Founder called it "heavy like gold" — recommend the reading room, no code.

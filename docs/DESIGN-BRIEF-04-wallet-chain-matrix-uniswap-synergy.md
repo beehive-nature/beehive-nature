@@ -47,7 +47,7 @@ Legend: **Read** = first-party balance/tx path · **Sign** = custody tier path �
 |---|---|---|---|
 | **ETH** | public JSON-RPC `eth_getBalance`/`balanceOf` + Multicall3 batching (person-scan lane pattern) | Tier 1/2/3, EIP-1559, Permit2 allowances | proven patterns in-repo |
 | **ARB** | same; Arbiscan/Blockscout keyless-OK (memory law) | same | proven |
-| **BASE** | same; `mainnet.base.org` keyless-OK | same | proven; MiDi + DAO Safe live here |
+| **BASE** | same; `mainnet.base.org` keyless-OK | same | proven; MiDi lives here |
 | **ExSAT** | same once RPC endpoint verified | same | **VERIFY exSAT public RPC + incumbent DEX** (no canonical Uniswap — see verdict); xBTC = 1:1 staked BTC ~$171M |
 | **Vaulta** | Vaulta EVM endpoints + native EOS-line APIs | firmware ✓ (Vaulta in Tier-3 list) | **VERIFY current EVM RPC** (EOS→Vaulta rebrand) |
 | **stables** | ERC-20 reads on every EVM chain above + SPL (Solana) + **HBD on HIVE** | per family | spend-view law: shown as token units, never fiat-converted itemization (KISS ruling) |
