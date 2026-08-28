@@ -51,6 +51,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      # SPRINT-2026-08-28 A1: the registry is the single source — every count
+      # on the hub computes from estate.json; this proves the registry is
+      # internally honest (surfaces once each, states enum, LIVE files exist,
+      # counts == recomputed). A hand-written count anywhere fails here.
+      - name: Estate registry — counts computed, not written
+        if: always()
+        run: node scripts/estate-check.mjs
       # dock-claims re-derives the Dock's three hero numbers from source
       # (chain-zano tree hash, #[ignore] census, STATUS.md sentence) and
       # compares them against what the page prints. Static: node + git only.
