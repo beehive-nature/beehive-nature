@@ -332,6 +332,14 @@
    "gloss": "roses and bees over a frozen"
   },
   {
+   "id": "blight-qrroses-smil",
+   "family": "beehivenature",
+   "home": "beehivenature.com",
+   "path": "surfaces/blight/qrroses-smil.html",
+   "state": "LIVE",
+   "gloss": "the same garden as one declarative"
+  },
+  {
    "id": "blight-profile",
    "family": "beehivenature",
    "home": "beehivenature.com",
@@ -894,15 +902,15 @@
   }
  ],
  "counts": {
-  "surfaces": 78,
-  "listed": 87,
+  "surfaces": 79,
+  "listed": 88,
   "families": 8,
   "domains": 26,
   "domainsLive": 1,
   "domainsPending": 20,
   "domainsSeatOpen": 5,
   "byFamily": {
-   "beehivenature": 33,
+   "beehivenature": 34,
    "plur": 5,
    "skaists": 11,
    "bnature": 18,
@@ -912,7 +920,7 @@
    "bnr": 1
   },
   "byState": {
-   "LIVE": 87
+   "LIVE": 88
   }
  }
 }
