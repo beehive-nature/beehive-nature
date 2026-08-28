@@ -1,0 +1,17 @@
+# bClaude DEPLOYMENT — claude-code harness on the relay box (founder GO, 2026-08-28 ~23:05 UTC)
+**Order:** new agent, claude code harness, set from the box running the buzz relay; buzzagent shared resources left default.
+
+## State: DEPLOYED AND LIVE — waiting only on Anthropic auth (founder ask, below) + the in-hive mention receipt.
+
+- **Fence held:** nothing on the desktop was touched — no global defaults, no existing bee records. bClaude is a separate, box-resident agent.
+- **The stack on the box** (`/opt/buzz-bclaude/`): `buzz-acp` built from the exact mirror commit (`skaists/buzz @191a577`, aarch64, 5m48s niced build), Claude Code CLI 2.1.251 (claude.ai installer, node 22), adapter `@agentclientprotocol/claude-agent-acp` (both at /usr/bin).
+- **Identity:** its own key minted on-box (`nostr-tools`, pubkey `abbb9dfce4399f39d1841e7b51dbaf4380b7adbc89d820f0c217d242522763bf` <!-- PUBLIC-CONSTANT: bClaude nostr public key -->, npub `npub14waeml8y8x0nn5vyrea4rka0gwqt0tdu38vzpuxzzlfyy538vwlsqe2696`); nsec at `/opt/buzz-bclaude/bclaude.nsec` and `/etc/buzz-bclaude/bclaude.env`, both 600, never printed or committed.
+- **Joined through the FRONT DOOR:** claimed the door-page standing invite (`v2.nyPIIUO…`, unlimited, the door carries the live code — the lane-G memorized one had been replaced) via `POST /api/invites/claim` with NIP-98 → **200 `{"status":"joined","role":"member"}`**; relay log confirms "relay member added via v2 invite" + NIP-43 member-added published. Roster: **member, never admin/owner.** (First claim attempt with the stale code honestly returned 403 invite_invalid — the door re-sourcing fixed it.)
+- **Service:** systemd `buzz-bclaude.service` — `buzz-acp --relay-url wss://skaists.buzz --agent-command claude-agent-acp --respond-to owner-only --agent-owner <founder pubkey> <!-- PUBLIC-CONSTANT: owner gate is the founder public key, not a secret -->`, system prompt names it bClaude, member-never-admin. **HARD CAPS as Lane H: CPUQuota=150%, CPUWeight=30, MemoryMax=2G, Nice=15, IO 7.** Running: NIP-42 auth successful as abbb9dfc <!-- PUBLIC-CONSTANT: public key -->, presence online, "0 channels discovered — idle until added to one" (the founder's desktop gesture: add bClaude to a channel, then mention it).
+- **Door latency with bClaude live:** 37.8 / 37.9 / 38.8 / 37.8 / 38.2 ms — identical to the 37–41 ms baseline. The hives, LiveKit, and the compute node keep absolute priority.
+
+## THE ONE FOUNDER ASK — Anthropic auth for Claude Code (at this step, as ordered)
+bClaude's Claude Code harness needs an Anthropic credential before its first answer. Nothing is stored in the repo; the destination is the 600 env file on the box (`/etc/buzz-bclaude/bclaude.env`, field `ANTHROPIC_API_KEY=`). Hand it over by whichever channel you prefer — if you paste it here I will write it to that file and nowhere else (it will transit this chat once; if you prefer zero chat transit, name your channel and I'll take it there). After it lands: `sudo systemctl restart buzz-bclaude` from my side, then the receipt run.
+
+## RECEIPT (pending)
+bClaude answers a mention in the hive, from the box, as itself — the founder's screen. Sequence after auth: he adds bClaude to a channel (desktop gesture), mentions it once, and the answer should render from npub14waeml… . I will verify from the box side (relay logs: abbb9dfc message events out; bclaude.log: harness turn) and the founder's screen is the visual receipt.
