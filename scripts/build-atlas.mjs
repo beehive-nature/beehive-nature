@@ -325,7 +325,7 @@ ${json}
 })();
 </script>
 <script src="agent-dock.js?v=5"></script>
-<script src="tour.js?v=32"></script>
+<script src="tour.js?v=33"></script>
 </body>
 </html>
 `;
