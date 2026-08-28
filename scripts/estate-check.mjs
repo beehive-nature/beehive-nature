@@ -30,11 +30,14 @@ const domSet = new Set(reg.domains.map(d => d.d));
 if (domSet.size !== reg.domains.length) fail('duplicate domain entry');
 for (const s of reg.surfaces) if (!domSet.has(s.home)) fail('surface ' + s.id + ' home not a known domain: ' + s.home);
 
-/* the counts block must equal what the registry itself computes — no hand numbers survive */
+/* the counts block must equal what the registry itself computes — no hand numbers survive.
+   CENSUS LAW: a surface with counted:false is listed but not counted (the
+   founder-art fleet copies; the rule mirrors e2e/university-smoke.mjs NOT_OURS) */
 const byFam = {}; reg.families.forEach(f => byFam[f] = 0);
-for (const s of reg.surfaces) byFam[s.family]++;
+for (const s of reg.surfaces) if (s.counted !== false) byFam[s.family]++;
 const recomputed = {
-  surfaces: reg.surfaces.length,
+  surfaces: reg.surfaces.filter(s => s.counted !== false).length,
+  listed: reg.surfaces.length,
   families: reg.families.length,
   domains: reg.domains.length,
   domainsLive: reg.domains.filter(d => d.state === 'LIVE').length,
@@ -52,6 +55,17 @@ const page = readFileSync('surfaces/index.html', 'utf8');
 const m = page.match(/<!--ESTATE-JSON-START-->([\s\S]*?)<!--ESTATE-JSON-END-->/);
 if (!m) fail('surfaces/index.html lost its ESTATE-JSON markers');
 const embedded = JSON.parse(m[1]);
-if (JSON.stringify(embedded) !== JSON.stringify(reg)) fail('the hub\u2019s embedded registry drifted from estate.json — re-embed before landing');
+if (JSON.stringify(embedded) !== JSON.stringify(reg)) fail('the hub\u2019s embedded registry drifted from estate.json — run scripts/build-atlas.mjs');
 
-console.log('PASS estate-check — ' + reg.surfaces.length + ' surfaces once each · ' + reg.domains.length + ' domains · counts computed, not written · hub embed in sync');
+/* the STATIC atlas must carry an href for every registry surface — a page
+   rendered from a stale generator fails here, before CI's crawl does */
+const stat = page.match(/<!--ATLAS-STATIC-START-->([\s\S]*?)<!--ATLAS-STATIC-END-->/);
+if (!stat) fail('surfaces/index.html lost its ATLAS-STATIC markers — run scripts/build-atlas.mjs');
+const hrefs = new Set([...stat[1].matchAll(/href="([^"]+)"/g)].map(x => x[1]));
+for (const s of reg.surfaces) {
+  if (s.presented === false) continue;   // counted by the tree, deliberately not presented (orbit-v2 law)
+  const rel = s.path.replace(/^surfaces\//, '');
+  if (!hrefs.has(rel)) fail('surface missing from the static atlas: ' + rel + ' — run scripts/build-atlas.mjs');
+}
+
+console.log('PASS estate-check — ' + reg.counts.surfaces + ' counted · ' + reg.counts.listed + ' listed · ' + reg.domains.length + ' domains · counts computed, not written · hub static + embed in sync');

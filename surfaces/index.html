@@ -12,11 +12,12 @@
 <title>beehive nature · the atlas — every surface, every domain, live</title>
 <meta name="description" content="26 domains, one organism. Every surface the estate has built, grouped by family, honest about what is live — computed from the registry, never hand-written.">
 <style>
-/* THE ATLAS — sprint 2026-08-28 lane A2. One ground, one accent, one job per
-   screen. Counts render from the embedded registry; the numbers cannot lie.
-   Palette law: biomass green is the one accent (alive/estate), ai cyan =
-   infrastructure state; gold never appears here (b amounts only, and this
-   page carries none). Depth ladder: void ground · panel slab · inset well. */
+/* THE ATLAS — sprint 2026-08-28 lane A2, rendered by scripts/build-atlas.mjs.
+   One ground, one accent, one job per screen. Sections are STATIC HTML from
+   estate.json (crawlers see every surface); JS adds only search. Palette law:
+   biomass green is the one accent (alive/estate), ai cyan = infrastructure
+   state; gold never appears (b amounts only — this page carries none).
+   Depth ladder: void ground · panel slab · inset well. */
 :root{
   --void:#06110C; --panel:#0B1A12; --inset:#0E2418; --line:#1E3A2A;
   --ink:#E9F2EC; --dim:#8FA89A;
@@ -30,8 +31,6 @@ a{color:var(--biomass);text-decoration:none}
 a:hover{text-decoration:underline}
 .skip{position:absolute;left:-9999px}
 .skip:focus{left:8px;top:8px;background:var(--inset);padding:8px 12px;border-radius:8px;z-index:9}
-
-/* hero — one job: tell the stranger where they are, then get out of the way */
 .hero{padding:44px 0 8px}
 .kicker{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
 h1{font-size:clamp(32px,6vw,44px);line-height:1.08;margin:10px 0 8px;font-weight:600;
@@ -40,24 +39,17 @@ h1{font-size:clamp(32px,6vw,44px);line-height:1.08;margin:10px 0 8px;font-weight
 .lede{color:var(--dim);max-width:56ch;margin:0 0 14px}
 .counts{font-size:12.5px;color:var(--dim);margin-bottom:18px}
 .counts b{color:var(--ink);font-weight:600}
-/* the search owns its space — nothing floats near it, ever again */
 #q{width:100%;box-sizing:border-box;background:var(--inset);color:var(--ink);
   border:1px solid var(--line);border-radius:10px;padding:13px 16px;font:inherit;
   outline:none;transition:border-color .15s}
 #q:focus{border-color:var(--biomass)}
 #shown{font-size:11.5px;color:var(--dim);margin:8px 2px 0;min-height:16px}
-
-/* the estate's mark: a quiet hex band, not a collage */
 .band{display:block;width:100%;height:56px;margin:18px 0 4px;color:var(--line)}
-
-/* family jump chips */
 .famjump{display:flex;flex-wrap:wrap;gap:8px;padding:10px 0 22px}
 .famjump a{font-size:12px;padding:6px 11px;border:1px solid var(--line);border-radius:999px;
   background:var(--panel);color:var(--ink)}
 .famjump a:hover{border-color:var(--biomass);text-decoration:none}
 .famjump .n{color:var(--dim)}
-
-/* family sections — the domains appear once, here, nowhere else */
 section.fam{background:var(--panel);border:1px solid var(--line);border-radius:12px;
   padding:18px 18px 10px;margin:0 0 18px}
 section.fam.hidden{display:none}
@@ -71,8 +63,6 @@ section.fam.hidden{display:none}
 .dom.LIVE{border-color:var(--biomass)}.dom.LIVE .st{color:var(--biomass)}
 .dom.DNS-PENDING .st{color:var(--ai)}
 .dom.SEAT-OPEN .st{color:var(--dim)}
-
-/* surface rows: dense but breathing */
 .rows{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:0 18px}
 .srf{display:block;padding:7px 8px;border-bottom:1px solid var(--line);border-radius:6px}
 .srf:hover{background:var(--inset);text-decoration:none}
@@ -81,11 +71,9 @@ section.fam.hidden{display:none}
 .srf .gl{color:var(--dim);font-size:11.5px;display:block;margin-top:1px}
 .srf .warn{color:var(--ai);font-size:11px;margin-left:5px}
 .famcount{color:var(--dim);font-size:11.5px;margin:8px 2px 6px}
-
 footer{color:var(--dim);font-size:12px;border-top:1px solid var(--line);
   margin-top:28px;padding:16px 0 84px}
 footer .m{margin-top:6px;max-width:72ch}
-noscript p{color:var(--dim);padding:14px 2px}
 @media (max-width:640px){
   .hero{padding-top:30px}
   section.fam{padding:14px 12px 8px}
@@ -103,7 +91,7 @@ noscript p{color:var(--dim);padding:14px 2px}
   <p class="lede">one organism, eight families. every surface the estate has built lives
   below, grouped by the domain it answers to — honest about what is live,
   what is waiting on dns, and what is still an open seat.</p>
-  <div class="counts" id="counts">counting the estate…</div>
+  <div class="counts" id="counts"><b>78</b> surfaces · <b>26</b> domains · <b>8</b> families · every number computed from the registry</div>
   <input id="q" type="search" placeholder="search the estate — a name, a feeling, a tool" aria-label="search the estate">
   <div id="shown" aria-live="polite"></div>
 </header>
@@ -122,977 +110,166 @@ noscript p{color:var(--dim);padding:14px 2px}
   <use href="#hx" x="812" fill="#45C2DC" opacity=".10"/>
 </svg>
 
-<nav class="famjump" id="families" aria-label="the eight families"></nav>
-<main id="list"></main>
+<!--ATLAS-STATIC-START-->
+<nav class="famjump" id="families" aria-label="the eight families">
+<a href="#fam-beehivenature">beehivenature <span class="n">33</span></a>
+<a href="#fam-plur">plur <span class="n">5</span></a>
+<a href="#fam-skaists">skaists <span class="n">11</span></a>
+<a href="#fam-bnature">bnature <span class="n">18</span></a>
+<a href="#fam-beehivebiomass">beehivebiomass <span class="n">5</span></a>
+<a href="#fam-beehivebuds">beehivebuds <span class="n">0</span></a>
+<a href="#fam-midi">midi <span class="n">5</span></a>
+<a href="#fam-bnr">bnr <span class="n">1</span></a>
+</nav>
+<main id="list">
+<section class="fam" id="fam-beehivenature">
+<div class="famhead"><h2>beehivenature</h2><span class="gloss">the organism itself — what it is, how it proves it, how to join</span><a class="doorlink" href="doors/beehivenature.html">the door →</a></div>
+<div class="doms"><span class="dom SEAT-OPEN" title="front repo: none yet">beehivenature.com<span class="st">SEAT-OPEN</span></span><span class="dom DNS-PENDING" title="front repo: beehivenature-buzz">beehivenature.buzz<span class="st">DNS-PENDING</span></span></div>
+<div class="famcount">33 surfaces · 2 domains</div>
+<div class="rows"><a class="srf" data-t="beehivenature doors-beehivenature beehivenature.comfor someone who just heard the name" href="doors/beehivenature.html"><span class="nm">doors beehivenature</span><span class="gl">beehivenature.comfor someone who just heard the name</span></a>
+<a class="srf" data-t="beehivenature doors all six on one pagepick the one that sounds like you" href="doors/index.html"><span class="nm">doors</span><span class="gl">all six on one pagepick the one that sounds like you</span></a>
+<a class="srf" data-t="beehivenature b4b our receipts, measured on" href="b4b.html"><span class="nm">b4b</span><span class="gl">our receipts, measured on</span></a>
+<a class="srf" data-t="beehivenature blight-bnri-gallery the fleet's own" href="blight/bnri-gallery.html"><span class="nm">blight bnri gallery</span><span class="gl">the fleet's own</span></a>
+<a class="srf" data-t="beehivenature blight-c1-aid taxonomy sizing, from the tree's own" href="blight/c1-aid.html"><span class="nm">blight c1 aid</span><span class="gl">taxonomy sizing, from the tree's own</span></a>
+<a class="srf" data-t="beehivenature blight-compare the ERC-20i family, artist by" href="blight/compare.html"><span class="nm">blight compare</span><span class="gl">the ERC-20i family, artist by</span></a>
+<a class="srf" data-t="beehivenature blight-gallery a walking tour of on-chain" href="blight/gallery.html"><span class="nm">blight gallery</span><span class="gl">a walking tour of on-chain</span></a>
+<a class="srf" data-t="beehivenature blight one operation, many" href="blight/index.html"><span class="nm">blight</span><span class="gl">one operation, many</span></a>
+<a class="srf" data-t="beehivenature blight-inscription-explorer whose art shall we" href="blight/inscription-explorer.html"><span class="nm">blight inscription explorer</span><span class="gl">whose art shall we</span></a>
+<a class="srf" data-t="beehivenature blight-museum what &quot;on-chain&quot; actually" href="blight/museum.html"><span class="nm">blight museum</span><span class="gl">what &quot;on-chain&quot; actually</span></a>
+<a class="srf" data-t="beehivenature blight-pixelrefiner smeared art in, crisp cells" href="blight/pixelrefiner.html"><span class="nm">blight pixelrefiner</span><span class="gl">smeared art in, crisp cells</span></a>
+<a class="srf" data-t="beehivenature blight-qrtree the URL lives in the" href="blight/qrtree.html"><span class="nm">blight qrtree</span><span class="gl">the URL lives in the</span></a>
+<a class="srf" data-t="beehivenature blight-qrroses roses and bees over a frozen" href="blight/qrroses.html"><span class="nm">blight qrroses</span><span class="gl">roses and bees over a frozen</span></a>
+<a class="srf" data-t="beehivenature blight-profile the profile half that needs no" href="blight/profile.html"><span class="nm">blight profile</span><span class="gl">the profile half that needs no</span></a>
+<a class="srf" data-t="beehivenature record every screenshot we ever" href="record.html"><span class="nm">record</span><span class="gl">every screenshot we ever</span></a>
+<a class="srf" data-t="beehivenature blight-vaulta-reader the b-indexer's read path," href="blight/vaulta-reader.html"><span class="nm">blight vaulta reader</span><span class="gl">the b-indexer's read path,</span></a>
+<a class="srf" data-t="beehivenature blight-workbench the instrument (tech" href="blight/workbench.html"><span class="nm">blight workbench</span><span class="gl">the instrument (tech</span></a>
+<a class="srf" data-t="beehivenature dock what is proven, and what is" href="dock.html"><span class="nm">dock</span><span class="gl">what is proven, and what is</span></a>
+<a class="srf" data-t="beehivenature fleet-hosted Nine surfaces, one night, one" href="fleet-hosted/index.html"><span class="nm">fleet hosted</span><span class="gl">Nine surfaces, one night, one</span></a>
+<a class="srf" data-t="beehivenature hardware-build climb from user to" href="hardware/build.html"><span class="nm">hardware build</span><span class="gl">climb from user to</span></a>
+<a class="srf" data-t="beehivenature hardware open hardware you can actually" href="hardware/index.html"><span class="nm">hardware</span><span class="gl">open hardware you can actually</span></a>
+<a class="srf" data-t="beehivenature hardware-security security events, read" href="hardware/security.html"><span class="nm">hardware security</span><span class="gl">security events, read</span></a>
+<a class="srf" data-t="beehivenature onboarding-receive catch a beam of light, camera" href="onboarding/receive.html"><span class="nm">onboarding receive</span><span class="gl">catch a beam of light, camera</span></a>
+<a class="srf" data-t="beehivenature recover your 24 words, your keys," href="recover.html"><span class="nm">recover</span><span class="gl">your 24 words, your keys,</span></a>
+<a class="srf" data-t="beehivenature stack one engine diagram, honest parts" href="stack.html"><span class="nm">stack</span><span class="gl">one engine diagram, honest parts</span></a>
+<a class="srf" data-t="beehivenature wallet one soul, every chain, zero" href="wallet.html"><span class="nm">wallet</span><span class="gl">one soul, every chain, zero</span></a>
+<a class="srf" data-t="beehivenature blight-demo the logo is the the beam encoder is real; this page is its de" href="blight/demo.html"><span class="nm">blight demo<span class="warn">⚠</span></span><span class="gl">the logo is the the beam encoder is real; this page is its de</span></a>
+<a class="srf" data-t="beehivenature blight-farmers stalls, bAccords, settled in reads as a plan — settlement is not b" href="blight/farmers.html"><span class="nm">blight farmers<span class="warn">⚠</span></span><span class="gl">stalls, bAccords, settled in reads as a plan — settlement is not b</span></a>
+<a class="srf" data-t="beehivenature bnames names on our chain, read reads the chain live; reserving is founder-gated" href="bnames.html"><span class="nm">bnames<span class="warn">⚠</span></span><span class="gl">names on our chain, read reads the chain live; reserving is founder-gated</span></a>
+<a class="srf" data-t="beehivenature hardware-lab device reviews, science and one device has bench numbers; the rest re" href="hardware/lab.html"><span class="nm">hardware lab<span class="warn">⚠</span></span><span class="gl">device reviews, science and one device has bench numbers; the rest re</span></a>
+<a class="srf" data-t="beehivenature keys-addresses one soul, two mailing the derivation grammar is real; the ren" href="keys/addresses.html"><span class="nm">keys addresses<span class="warn">⚠</span></span><span class="gl">one soul, two mailing the derivation grammar is real; the ren</span></a>
+<a class="srf" data-t="beehivenature onboarding the two-minute held-hand join key derivation is real; the au" href="onboarding/index.html"><span class="nm">onboarding<span class="warn">⚠</span></span><span class="gl">the two-minute held-hand join key derivation is real; the au</span></a>
+<a class="srf" data-t="beehivenature blight-market inscriptions, honestly" href="blight/market.html"><span class="nm">blight market</span><span class="gl">inscriptions, honestly</span></a></div>
+</section>
+<section class="fam" id="fam-plur">
+<div class="famhead"><h2>plur</h2><span class="gloss">the rave heart — sets, festivals, kandi, floor wisdom</span><a class="doorlink" href="doors/plur.html">the door →</a></div>
+<div class="doms"><span class="dom SEAT-OPEN" title="front repo: plur-earth (A4)">plur.earth<span class="st">SEAT-OPEN</span></span><span class="dom DNS-PENDING" title="front repo: plur-asia">plur.asia<span class="st">DNS-PENDING</span></span><span class="dom DNS-PENDING" title="front repo: plur-quest">plur.quest<span class="st">DNS-PENDING</span></span><span class="dom DNS-PENDING" title="front repo: plur-lat">plur.lat<span class="st">DNS-PENDING</span></span></div>
+<div class="famcount">5 surfaces · 4 domains</div>
+<div class="rows"><a class="srf" data-t="plur doors-plur plur.earthfor a raver" href="doors/plur.html"><span class="nm">doors plur</span><span class="gl">plur.earthfor a raver</span></a>
+<a class="srf" data-t="plur bset the set the founder builds" href="bset.html"><span class="nm">bset</span><span class="gl">the set the founder builds</span></a>
+<a class="srf" data-t="plur festival your day on the floor," href="festival/index.html"><span class="nm">festival</span><span class="gl">your day on the floor,</span></a>
+<a class="srf" data-t="plur kandi make it, name it, gift" href="kandi.html"><span class="nm">kandi</span><span class="gl">make it, name it, gift</span></a>
+<a class="srf" data-t="plur plur thirty years of floor wisdom," href="plur.html"><span class="nm">plur</span><span class="gl">thirty years of floor wisdom,</span></a></div>
+</section>
+<section class="fam" id="fam-skaists">
+<div class="famhead"><h2>skaists</h2><span class="gloss">the makers’ workshop — instruments, art, and labs</span><a class="doorlink" href="doors/skaists.html">the door →</a></div>
+<div class="doms"><span class="dom LIVE" title="front repo: beehive-nature (main)">skaists.dev<span class="st">LIVE</span></span><span class="dom DNS-PENDING" title="front repo: skaists-com">skaists.com<span class="st">DNS-PENDING</span></span><span class="dom DNS-PENDING" title="front repo: skaists-art">skaists.art<span class="st">DNS-PENDING</span></span><span class="dom DNS-PENDING" title="front repo: skaists-store">skaists.store<span class="st">DNS-PENDING</span></span><span class="dom DNS-PENDING" title="front repo: skaists-xyz">skaists.xyz<span class="st">DNS-PENDING</span></span><span class="dom DNS-PENDING" title="front repo: skaists-buzz">skaists.buzz<span class="st">DNS-PENDING</span></span><span class="dom DNS-PENDING" title="front repo: skaists-quest">skaists.quest<span class="st">DNS-PENDING</span></span><span class="dom DNS-PENDING" title="front repo: skaists-lol">skaists.lol<span class="st">DNS-PENDING</span></span><span class="dom SEAT-OPEN" title="front repo: none yet">skaists.social<span class="st">SEAT-OPEN</span></span></div>
+<div class="famcount">11 surfaces · 1 honoured uncounted (the founder's art) · 9 domains</div>
+<div class="rows"><a class="srf" data-t="skaists doors-skaists skaists.socialfor an artist, a DJ, a festival vendor" href="doors/skaists.html"><span class="nm">doors skaists</span><span class="gl">skaists.socialfor an artist, a DJ, a festival vendor</span></a>
+<a class="srf" data-t="skaists blight-studio-gate drop a layer, get a" href="blight/studio-gate.html"><span class="nm">blight studio gate</span><span class="gl">drop a layer, get a</span></a>
+<a class="srf" data-t="skaists blight-studio-music compose, loop, export an" href="blight/studio-music.html"><span class="nm">blight studio music</span><span class="gl">compose, loop, export an</span></a>
+<a class="srf" data-t="skaists forge-hexfield roll a seed, grow a" href="forge/hexfield.html"><span class="nm">forge hexfield</span><span class="gl">roll a seed, grow a</span></a>
+<a class="srf" data-t="skaists forge instruments, not presets, for" href="forge/index.html"><span class="nm">forge</span><span class="gl">instruments, not presets, for</span></a>
+<a class="srf" data-t="skaists forge-orbit seeded rose curves in" href="forge/orbit.html"><span class="nm">forge orbit</span><span class="gl">seeded rose curves in</span></a>
+<a class="srf" data-t="skaists review attestation, never" href="review.html"><span class="nm">review</span><span class="gl">attestation, never</span></a>
+<a class="srf" data-t="skaists fleet-hosted-gallery-resonance Consciousness, Earth frequency, plant an argum" href="fleet-hosted/gallery/resonance.html"><span class="nm">fleet hosted gallery resonance<span class="warn">⚠</span></span><span class="gl">Consciousness, Earth frequency, plant an argum</span></a>
+<a class="srf" data-t="skaists royalguard one deck, three doors, zero reads the decks it can; some panels are" href="royalguard.html"><span class="nm">royalguard<span class="warn">⚠</span></span><span class="gl">one deck, three doors, zero reads the decks it can; some panels are</span></a>
+<a class="srf" data-t="skaists dao-dashboard how a treasury says I don't" href="dao-dashboard/index.html"><span class="nm">dao dashboard</span><span class="gl">how a treasury says I don't</span></a>
+<a class="srf" data-t="skaists index the atlas you are reading — every surface, every domain, honest state" href="index.html"><span class="nm">index</span><span class="gl">the atlas you are reading — every surface, every domain, honest state</span></a></div>
+</section>
+<section class="fam" id="fam-bnature">
+<div class="famhead"><h2>bnature</h2><span class="gloss">people and living systems — rooms to talk, honest science</span><a class="doorlink" href="doors/bnature-social.html">social door →</a> <a class="doorlink" href="doors/bnature-bio.html">bio door →</a></div>
+<div class="doms"><span class="dom DNS-PENDING" title="front repo: bNATURE.bio">bnature.bio<span class="st">DNS-PENDING</span></span><span class="dom SEAT-OPEN" title="front repo: none yet">bnature.social<span class="st">SEAT-OPEN</span></span><span class="dom DNS-PENDING" title="front repo: bnature-buzz">bnature.buzz<span class="st">DNS-PENDING</span></span></div>
+<div class="famcount">26 surfaces · 8 honoured uncounted (the founder's art) · 3 domains</div>
+<div class="rows"><a class="srf" data-t="bnature doors-bnature-social bnature.socialfor someone who wants people" href="doors/bnature-social.html"><span class="nm">doors bnature social</span><span class="gl">bnature.socialfor someone who wants people</span></a>
+<a class="srf" data-t="bnature doors-bnature-bio bnature.biofor a scientist, or anyone with a health question" href="doors/bnature-bio.html"><span class="nm">doors bnature bio</span><span class="gl">bnature.biofor a scientist, or anyone with a health question</span></a>
+<a class="srf" data-t="bnature attest one tongue, one evening," href="attest.html"><span class="nm">attest</span><span class="gl">one tongue, one evening,</span></a>
+<a class="srf" data-t="bnature blanguage dock your tongue, no" href="blanguage.html"><span class="nm">blanguage</span><span class="gl">dock your tongue, no</span></a>
+<a class="srf" data-t="bnature bsymposium two food protocols, both" href="bsymposium.html"><span class="nm">bsymposium</span><span class="gl">two food protocols, both</span></a>
+<a class="srf" data-t="bnature buzz-studio paint a comb together," href="buzz-studio.html"><span class="nm">buzz studio</span><span class="gl">paint a comb together,</span></a>
+<a class="srf" data-t="bnature devroom builders' findings, written for" href="devroom.html"><span class="nm">devroom</span><span class="gl">builders' findings, written for</span></a>
+<a class="srf" data-t="bnature forge-room two tabs, one shared" href="forge/room.html"><span class="nm">forge room</span><span class="gl">two tabs, one shared</span></a>
+<a class="srf" data-t="bnature blight-hearth co-create with the hive's a keyword router, not a model" href="blight/hearth.html"><span class="nm">blight hearth<span class="warn">⚠</span></span><span class="gl">co-create with the hive's a keyword router, not a model</span></a>
+<a class="srf" data-t="bnature blight-pulse bX pointers live on the the read path is live against public relays" href="blight/pulse.html"><span class="nm">blight pulse<span class="warn">⚠</span></span><span class="gl">bX pointers live on the the read path is live against public relays</span></a>
+<a class="srf" data-t="bnature bqueenbee-live talk to the hive's machine answers from a page-local knowledge" href="bqueenbee-live.html"><span class="nm">bqueenbee live<span class="warn">⚠</span></span><span class="gl">talk to the hive's machine answers from a page-local knowledge</span></a>
+<a class="srf" data-t="bnature btranslated your name in your section two carries its own DEMO badge" href="btranslated.html"><span class="nm">btranslated<span class="warn">⚠</span></span><span class="gl">your name in your section two carries its own DEMO badge</span></a>
+<a class="srf" data-t="bnature forge-huddle the same room, across you supply your own venue URL — we ship no" href="forge/huddle.html"><span class="nm">forge huddle<span class="warn">⚠</span></span><span class="gl">the same room, across you supply your own venue URL — we ship no</span></a>
+<a class="srf" data-t="bnature bearth what one food would cost the" href="bearth.html"><span class="nm">bearth</span><span class="gl">what one food would cost the</span></a>
+<a class="srf" data-t="bnature bfood your nutrients, drawn honestly, never" href="bfood.html"><span class="nm">bfood</span><span class="gl">your nutrients, drawn honestly, never</span></a>
+<a class="srf" data-t="bnature bigen cannabis and cancer, graded" href="bigen.html"><span class="nm">bigen</span><span class="gl">cannabis and cancer, graded</span></a>
+<a class="srf" data-t="bnature blongevity your body builds its own" href="blongevity.html"><span class="nm">blongevity</span><span class="gl">your body builds its own</span></a>
+<a class="srf" data-t="bnature fleet-hosted-gallery-acid-cascade The chronic inflammatory cascade," href="fleet-hosted/gallery/acid-cascade.html"><span class="nm">fleet hosted gallery acid cascade</span><span class="gl">The chronic inflammatory cascade,</span></a>
+<a class="srf" data-t="bnature fleet-hosted-gallery-indigo-index Chronic disease economics against" href="fleet-hosted/gallery/indigo-index.html"><span class="nm">fleet hosted gallery indigo index</span><span class="gl">Chronic disease economics against</span></a>
+<a class="srf" data-t="bnature fleet-hosted-lab-blend-lab Tobacco blend ratios, flavour and" href="fleet-hosted/lab/blend-lab.html"><span class="nm">fleet hosted lab blend lab</span><span class="gl">Tobacco blend ratios, flavour and</span></a>
+<a class="srf" data-t="bnature fleet-hosted-lab-edible-tracker Edible dosing, onset, and effect" href="fleet-hosted/lab/edible-tracker.html"><span class="nm">fleet hosted lab edible tracker</span><span class="gl">Edible dosing, onset, and effect</span></a>
+<a class="srf" data-t="bnature fleet-hosted-lab-flower-lab THCA blending calculator with session" href="fleet-hosted/lab/flower-lab.html"><span class="nm">fleet hosted lab flower lab</span><span class="gl">THCA blending calculator with session</span></a>
+<a class="srf" data-t="bnature fleet-hosted-lab-intake-tracker Daily cannabinoid intake against your" href="fleet-hosted/lab/intake-tracker.html"><span class="nm">fleet hosted lab intake tracker</span><span class="gl">Daily cannabinoid intake against your</span></a>
+<a class="srf" data-t="bnature fleet-hosted-lab-spliff-lab Roll composition against absorbed-THC" href="fleet-hosted/lab/spliff-lab.html"><span class="nm">fleet hosted lab spliff lab</span><span class="gl">Roll composition against absorbed-THC</span></a>
+<a class="srf" data-t="bnature university learn to read the" href="university/index.html"><span class="nm">university</span><span class="gl">learn to read the</span></a>
+<a class="srf" data-t="bnature fleet-hosted-lab-bnr-dashboard Reads what the other instruments reads what the o" href="fleet-hosted/lab/bnr-dashboard.html"><span class="nm">fleet hosted lab bnr dashboard<span class="warn">⚠</span></span><span class="gl">Reads what the other instruments reads what the o</span></a></div>
+</section>
+<section class="fam" id="fam-beehivebiomass">
+<div class="famhead"><h2>beehivebiomass</h2><span class="gloss">the physical network — machines, farms, bandwidth</span><a class="doorlink" href="doors/beehivebiomass.html">the door →</a></div>
+<div class="doms"><span class="dom SEAT-OPEN" title="front repo: none yet">beehivebiomass.com<span class="st">SEAT-OPEN</span></span><span class="dom DNS-PENDING" title="front repo: beehivebiomass-buzz">beehivebiomass.buzz<span class="st">DNS-PENDING</span></span></div>
+<div class="famcount">5 surfaces · 2 domains</div>
+<div class="rows"><a class="srf" data-t="beehivebiomass doors-beehivebiomass beehivebiomass.comfor someone with a machine to contribute" href="doors/beehivebiomass.html"><span class="nm">doors beehivebiomass</span><span class="gl">beehivebiomass.comfor someone with a machine to contribute</span></a>
+<a class="srf" data-t="beehivebiomass bantfarm two treasuries and the node farm," href="bantfarm.html"><span class="nm">bantfarm</span><span class="gl">two treasuries and the node farm,</span></a>
+<a class="srf" data-t="beehivebiomass blight-coop hemp biomass, ranked by the index is a fixed table, not a live" href="blight/coop.html"><span class="nm">blight coop<span class="warn">⚠</span></span><span class="gl">hemp biomass, ranked by the index is a fixed table, not a live</span></a>
+<a class="srf" data-t="beehivebiomass bfactory the ratified plan, made" href="bfactory.html"><span class="nm">bfactory</span><span class="gl">the ratified plan, made</span></a>
+<a class="srf" data-t="beehivebiomass bmeshasi pledge your iron, metered, paid" href="bmeshasi.html"><span class="nm">bmeshasi</span><span class="gl">pledge your iron, metered, paid</span></a></div>
+</section>
+<section class="fam" id="fam-beehivebuds">
+<div class="famhead"><h2>beehivebuds</h2><span class="gloss">the buds line — founder-gated, waiting its seat</span></div>
+<div class="doms"><span class="dom SEAT-OPEN" title="front repo: none yet">beehivebuds.com<span class="st">SEAT-OPEN</span></span><span class="dom DNS-PENDING" title="front repo: beehivebuds-buzz">beehivebuds.buzz<span class="st">DNS-PENDING</span></span></div>
+<div class="famcount">an open seat — the domain waits for its first surface · 2 domains</div>
+<div class="rows"><span class="gl" style="padding:8px 2px"></span></div>
+</section>
+<section class="fam" id="fam-midi">
+<div class="famhead"><h2>midi</h2><span class="gloss">the music universe — one seed, on-chain scores, the vault</span></div>
+<div class="doms"><span class="dom DNS-PENDING" title="front repo: midi-blue">midi.blue<span class="st">DNS-PENDING</span></span></div>
+<div class="famcount">5 surfaces · 1 domain</div>
+<div class="rows"><a class="srf" data-t="midi blight-midi-organ the seed becomes" href="blight/midi-organ.html"><span class="nm">blight midi organ</span><span class="gl">the seed becomes</span></a>
+<a class="srf" data-t="midi blight-midi one seed, a" href="blight/midi.html"><span class="nm">blight midi</span><span class="gl">one seed, a</span></a>
+<a class="srf" data-t="midi blight-midiroom the bMiDi room — three" href="blight/midiroom.html"><span class="nm">blight midiroom</span><span class="gl">the bMiDi room — three</span></a>
+<a class="srf" data-t="midi blight-midivault the vault — music on" href="blight/midivault.html"><span class="nm">blight midivault</span><span class="gl">the vault — music on</span></a>
+<a class="srf" data-t="midi listening one seed, sound and" href="listening.html"><span class="nm">listening</span><span class="gl">one seed, sound and</span></a></div>
+</section>
+<section class="fam" id="fam-bnr">
+<div class="famhead"><h2>bnr</h2><span class="gloss">the kernel’s public face — quests for curious minds</span></div>
+<div class="doms"><span class="dom DNS-PENDING" title="front repo: bnr-baby">bnr.baby<span class="st">DNS-PENDING</span></span><span class="dom DNS-PENDING" title="front repo: bnr-quest">bnr.quest<span class="st">DNS-PENDING</span></span><span class="dom DNS-PENDING" title="front repo: bnr-lol">bnr.lol<span class="st">DNS-PENDING</span></span></div>
+<div class="famcount">1 surface · 3 domains</div>
+<div class="rows"><a class="srf" data-t="bnr biq compose a cited wiki proposal, never" href="biq.html"><span class="nm">biq</span><span class="gl">compose a cited wiki proposal, never</span></a></div>
+</section>
+</main>
+<!--ATLAS-STATIC-END-->
 
 <footer>
-  <div id="foot"></div>
+  <div id="foot"><a href="../estate.json">the registry</a> · <a href="doors/index.html">the doors</a> · <a href="https://github.com/beehive-nature/beehive-nature">the code</a> — 78 surfaces · 26 domains</div>
   <div class="m">the counts on this page render from the registry and cannot be hand-written —
-  CI proves it every push. the full manifesto lives behind the
-  <a href="doors/beehivenature.html">beehivenature door</a>.</div>
+  CI proves it every push. the fleet's hosted copies stay the founder's art:
+  9 of them carrying behaviour fixes, kept honest to his originals beyond the vendor line.
+  the full manifesto lives behind the <a href="doors/beehivenature.html">beehivenature door</a>.</div>
 </footer>
-
-<noscript><p>the atlas renders its family sections with javascript, but every surface is
-reachable at its path — and <a href="doors/index.html">the doors page</a> works without it.</p></noscript>
-
-</div>
 
 <script type="application/json" id="estate">
 <!--ESTATE-JSON-START-->
-{
- "v": 1,
- "generated": "2026-08-28",
- "source": "surfaces/index.html panels + RULING_DOMAIN_ATLAS_2026-08-27",
- "families": [
-  "beehivenature",
-  "plur",
-  "skaists",
-  "bnature",
-  "beehivebiomass",
-  "beehivebuds",
-  "midi",
-  "bnr"
- ],
- "domains": [
-  {
-   "d": "skaists.dev",
-   "fam": "skaists",
-   "repo": "beehive-nature (main)",
-   "state": "LIVE"
-  },
-  {
-   "d": "skaists.com",
-   "fam": "skaists",
-   "repo": "skaists-com",
-   "state": "DNS-PENDING"
-  },
-  {
-   "d": "skaists.art",
-   "fam": "skaists",
-   "repo": "skaists-art",
-   "state": "DNS-PENDING"
-  },
-  {
-   "d": "skaists.store",
-   "fam": "skaists",
-   "repo": "skaists-store",
-   "state": "DNS-PENDING"
-  },
-  {
-   "d": "skaists.xyz",
-   "fam": "skaists",
-   "repo": "skaists-xyz",
-   "state": "DNS-PENDING"
-  },
-  {
-   "d": "skaists.buzz",
-   "fam": "skaists",
-   "repo": "skaists-buzz",
-   "state": "DNS-PENDING"
-  },
-  {
-   "d": "skaists.quest",
-   "fam": "skaists",
-   "repo": "skaists-quest",
-   "state": "DNS-PENDING"
-  },
-  {
-   "d": "skaists.lol",
-   "fam": "skaists",
-   "repo": "skaists-lol",
-   "state": "DNS-PENDING"
-  },
-  {
-   "d": "skaists.social",
-   "fam": "skaists",
-   "repo": null,
-   "state": "SEAT-OPEN"
-  },
-  {
-   "d": "plur.earth",
-   "fam": "plur",
-   "repo": "plur-earth (A4)",
-   "state": "SEAT-OPEN"
-  },
-  {
-   "d": "plur.asia",
-   "fam": "plur",
-   "repo": "plur-asia",
-   "state": "DNS-PENDING"
-  },
-  {
-   "d": "plur.quest",
-   "fam": "plur",
-   "repo": "plur-quest",
-   "state": "DNS-PENDING"
-  },
-  {
-   "d": "plur.lat",
-   "fam": "plur",
-   "repo": "plur-lat",
-   "state": "DNS-PENDING"
-  },
-  {
-   "d": "bnature.bio",
-   "fam": "bnature",
-   "repo": "bNATURE.bio",
-   "state": "DNS-PENDING"
-  },
-  {
-   "d": "bnature.social",
-   "fam": "bnature",
-   "repo": null,
-   "state": "SEAT-OPEN"
-  },
-  {
-   "d": "bnature.buzz",
-   "fam": "bnature",
-   "repo": "bnature-buzz",
-   "state": "DNS-PENDING"
-  },
-  {
-   "d": "beehivenature.com",
-   "fam": "beehivenature",
-   "repo": null,
-   "state": "SEAT-OPEN"
-  },
-  {
-   "d": "beehivenature.buzz",
-   "fam": "beehivenature",
-   "repo": "beehivenature-buzz",
-   "state": "DNS-PENDING"
-  },
-  {
-   "d": "beehivebiomass.com",
-   "fam": "beehivebiomass",
-   "repo": null,
-   "state": "SEAT-OPEN"
-  },
-  {
-   "d": "beehivebiomass.buzz",
-   "fam": "beehivebiomass",
-   "repo": "beehivebiomass-buzz",
-   "state": "DNS-PENDING"
-  },
-  {
-   "d": "beehivebuds.com",
-   "fam": "beehivebuds",
-   "repo": null,
-   "state": "SEAT-OPEN"
-  },
-  {
-   "d": "beehivebuds.buzz",
-   "fam": "beehivebuds",
-   "repo": "beehivebuds-buzz",
-   "state": "DNS-PENDING"
-  },
-  {
-   "d": "midi.blue",
-   "fam": "midi",
-   "repo": "midi-blue",
-   "state": "DNS-PENDING"
-  },
-  {
-   "d": "bnr.baby",
-   "fam": "bnr",
-   "repo": "bnr-baby",
-   "state": "DNS-PENDING"
-  },
-  {
-   "d": "bnr.quest",
-   "fam": "bnr",
-   "repo": "bnr-quest",
-   "state": "DNS-PENDING"
-  },
-  {
-   "d": "bnr.lol",
-   "fam": "bnr",
-   "repo": "bnr-lol",
-   "state": "DNS-PENDING"
-  }
- ],
- "surfaces": [
-  {
-   "id": "doors-beehivenature",
-   "family": "beehivenature",
-   "home": "beehivenature.com",
-   "path": "surfaces/doors/beehivenature.html",
-   "state": "LIVE",
-   "gloss": "beehivenature.comfor someone who just heard the name"
-  },
-  {
-   "id": "doors-plur",
-   "family": "plur",
-   "home": "plur.earth",
-   "path": "surfaces/doors/plur.html",
-   "state": "LIVE",
-   "gloss": "plur.earthfor a raver"
-  },
-  {
-   "id": "doors-skaists",
-   "family": "skaists",
-   "home": "skaists.dev",
-   "path": "surfaces/doors/skaists.html",
-   "state": "LIVE",
-   "gloss": "skaists.socialfor an artist, a DJ, a festival vendor"
-  },
-  {
-   "id": "doors-bnature-social",
-   "family": "bnature",
-   "home": "bnature.social",
-   "path": "surfaces/doors/bnature-social.html",
-   "state": "LIVE",
-   "gloss": "bnature.socialfor someone who wants people"
-  },
-  {
-   "id": "doors-bnature-bio",
-   "family": "bnature",
-   "home": "bnature.social",
-   "path": "surfaces/doors/bnature-bio.html",
-   "state": "LIVE",
-   "gloss": "bnature.biofor a scientist, or anyone with a health question"
-  },
-  {
-   "id": "doors-beehivebiomass",
-   "family": "beehivebiomass",
-   "home": "beehivebiomass.com",
-   "path": "surfaces/doors/beehivebiomass.html",
-   "state": "LIVE",
-   "gloss": "beehivebiomass.comfor someone with a machine to contribute"
-  },
-  {
-   "id": "doors",
-   "family": "beehivenature",
-   "home": "beehivenature.com",
-   "path": "surfaces/doors/index.html",
-   "state": "LIVE",
-   "gloss": "all six on one pagepick the one that sounds like you"
-  },
-  {
-   "id": "b4b",
-   "family": "beehivenature",
-   "home": "beehivenature.com",
-   "path": "surfaces/b4b.html",
-   "state": "LIVE",
-   "gloss": "our receipts, measured on"
-  },
-  {
-   "id": "biq",
-   "family": "bnr",
-   "home": "bnr.quest",
-   "path": "surfaces/biq.html",
-   "state": "LIVE",
-   "gloss": "compose a cited wiki proposal, never"
-  },
-  {
-   "id": "blight-bnri-gallery",
-   "family": "beehivenature",
-   "home": "beehivenature.com",
-   "path": "surfaces/blight/bnri-gallery.html",
-   "state": "LIVE",
-   "gloss": "the fleet's own"
-  },
-  {
-   "id": "blight-c1-aid",
-   "family": "beehivenature",
-   "home": "beehivenature.com",
-   "path": "surfaces/blight/c1-aid.html",
-   "state": "LIVE",
-   "gloss": "taxonomy sizing, from the tree's own"
-  },
-  {
-   "id": "blight-compare",
-   "family": "beehivenature",
-   "home": "beehivenature.com",
-   "path": "surfaces/blight/compare.html",
-   "state": "LIVE",
-   "gloss": "the ERC-20i family, artist by"
-  },
-  {
-   "id": "blight-gallery",
-   "family": "beehivenature",
-   "home": "beehivenature.com",
-   "path": "surfaces/blight/gallery.html",
-   "state": "LIVE",
-   "gloss": "a walking tour of on-chain"
-  },
-  {
-   "id": "blight",
-   "family": "beehivenature",
-   "home": "beehivenature.com",
-   "path": "surfaces/blight/index.html",
-   "state": "LIVE",
-   "gloss": "one operation, many"
-  },
-  {
-   "id": "blight-inscription-explorer",
-   "family": "beehivenature",
-   "home": "beehivenature.com",
-   "path": "surfaces/blight/inscription-explorer.html",
-   "state": "LIVE",
-   "gloss": "whose art shall we"
-  },
-  {
-   "id": "blight-midi-organ",
-   "family": "midi",
-   "home": "midi.blue",
-   "path": "surfaces/blight/midi-organ.html",
-   "state": "LIVE",
-   "gloss": "the seed becomes"
-  },
-  {
-   "id": "blight-museum",
-   "family": "beehivenature",
-   "home": "skaists.art",
-   "path": "surfaces/blight/museum.html",
-   "state": "LIVE",
-   "gloss": "what &quot;on-chain&quot; actually"
-  },
-  {
-   "id": "blight-pixelrefiner",
-   "family": "beehivenature",
-   "home": "beehivenature.com",
-   "path": "surfaces/blight/pixelrefiner.html",
-   "state": "LIVE",
-   "gloss": "smeared art in, crisp cells"
-  },
-  {
-   "id": "blight-qrtree",
-   "family": "beehivenature",
-   "home": "beehivenature.com",
-   "path": "surfaces/blight/qrtree.html",
-   "state": "LIVE",
-   "gloss": "the URL lives in the"
-  },
-  {
-   "id": "blight-qrroses",
-   "family": "beehivenature",
-   "home": "beehivenature.com",
-   "path": "surfaces/blight/qrroses.html",
-   "state": "LIVE",
-   "gloss": "roses and bees over a frozen"
-  },
-  {
-   "id": "blight-profile",
-   "family": "beehivenature",
-   "home": "beehivenature.com",
-   "path": "surfaces/blight/profile.html",
-   "state": "LIVE",
-   "gloss": "the profile half that needs no"
-  },
-  {
-   "id": "record",
-   "family": "beehivenature",
-   "home": "beehivenature.com",
-   "path": "surfaces/record.html",
-   "state": "LIVE",
-   "gloss": "every screenshot we ever"
-  },
-  {
-   "id": "blight-midi",
-   "family": "midi",
-   "home": "midi.blue",
-   "path": "surfaces/blight/midi.html",
-   "state": "LIVE",
-   "gloss": "one seed, a"
-  },
-  {
-   "id": "blight-midiroom",
-   "family": "midi",
-   "home": "midi.blue",
-   "path": "surfaces/blight/midiroom.html",
-   "state": "LIVE",
-   "gloss": "the bMiDi room — three"
-  },
-  {
-   "id": "blight-midivault",
-   "family": "midi",
-   "home": "midi.blue",
-   "path": "surfaces/blight/midivault.html",
-   "state": "LIVE",
-   "gloss": "the vault — music on"
-  },
-  {
-   "id": "blight-vaulta-reader",
-   "family": "beehivenature",
-   "home": "beehivenature.com",
-   "path": "surfaces/blight/vaulta-reader.html",
-   "state": "LIVE",
-   "gloss": "the b-indexer's read path,"
-  },
-  {
-   "id": "blight-workbench",
-   "family": "beehivenature",
-   "home": "beehivenature.com",
-   "path": "surfaces/blight/workbench.html",
-   "state": "LIVE",
-   "gloss": "the instrument (tech"
-  },
-  {
-   "id": "dock",
-   "family": "beehivenature",
-   "home": "beehivenature.com",
-   "path": "surfaces/dock.html",
-   "state": "LIVE",
-   "gloss": "what is proven, and what is"
-  },
-  {
-   "id": "fleet-hosted",
-   "family": "beehivenature",
-   "home": "beehivenature.com",
-   "path": "surfaces/fleet-hosted/index.html",
-   "state": "LIVE",
-   "gloss": "Nine surfaces, one night, one"
-  },
-  {
-   "id": "hardware-build",
-   "family": "beehivenature",
-   "home": "beehivenature.com",
-   "path": "surfaces/hardware/build.html",
-   "state": "LIVE",
-   "gloss": "climb from user to"
-  },
-  {
-   "id": "hardware",
-   "family": "beehivenature",
-   "home": "beehivenature.com",
-   "path": "surfaces/hardware/index.html",
-   "state": "LIVE",
-   "gloss": "open hardware you can actually"
-  },
-  {
-   "id": "hardware-security",
-   "family": "beehivenature",
-   "home": "beehivenature.com",
-   "path": "surfaces/hardware/security.html",
-   "state": "LIVE",
-   "gloss": "security events, read"
-  },
-  {
-   "id": "listening",
-   "family": "midi",
-   "home": "midi.blue",
-   "path": "surfaces/listening.html",
-   "state": "LIVE",
-   "gloss": "one seed, sound and"
-  },
-  {
-   "id": "onboarding-receive",
-   "family": "beehivenature",
-   "home": "beehivenature.com",
-   "path": "surfaces/onboarding/receive.html",
-   "state": "LIVE",
-   "gloss": "catch a beam of light, camera"
-  },
-  {
-   "id": "recover",
-   "family": "beehivenature",
-   "home": "beehivenature.com",
-   "path": "surfaces/recover.html",
-   "state": "LIVE",
-   "gloss": "your 24 words, your keys,"
-  },
-  {
-   "id": "stack",
-   "family": "beehivenature",
-   "home": "beehivenature.com",
-   "path": "surfaces/stack.html",
-   "state": "LIVE",
-   "gloss": "one engine diagram, honest parts"
-  },
-  {
-   "id": "wallet",
-   "family": "beehivenature",
-   "home": "beehivenature.com",
-   "path": "surfaces/wallet.html",
-   "state": "LIVE",
-   "gloss": "one soul, every chain, zero"
-  },
-  {
-   "id": "blight-demo",
-   "family": "beehivenature",
-   "home": "beehivenature.com",
-   "path": "surfaces/blight/demo.html",
-   "state": "LIVE",
-   "gloss": "the logo is the the beam encoder is real; this page is its de",
-   "warn": true
-  },
-  {
-   "id": "blight-farmers",
-   "family": "beehivenature",
-   "home": "beehivenature.com",
-   "path": "surfaces/blight/farmers.html",
-   "state": "LIVE",
-   "gloss": "stalls, bAccords, settled in reads as a plan — settlement is not b",
-   "warn": true
-  },
-  {
-   "id": "bnames",
-   "family": "beehivenature",
-   "home": "beehivenature.com",
-   "path": "surfaces/bnames.html",
-   "state": "LIVE",
-   "gloss": "names on our chain, read reads the chain live; reserving is founder-gated",
-   "warn": true
-  },
-  {
-   "id": "hardware-lab",
-   "family": "beehivenature",
-   "home": "beehivenature.com",
-   "path": "surfaces/hardware/lab.html",
-   "state": "LIVE",
-   "gloss": "device reviews, science and one device has bench numbers; the rest re",
-   "warn": true
-  },
-  {
-   "id": "keys-addresses",
-   "family": "beehivenature",
-   "home": "beehivenature.com",
-   "path": "surfaces/keys/addresses.html",
-   "state": "LIVE",
-   "gloss": "one soul, two mailing the derivation grammar is real; the ren",
-   "warn": true
-  },
-  {
-   "id": "onboarding",
-   "family": "beehivenature",
-   "home": "beehivenature.com",
-   "path": "surfaces/onboarding/index.html",
-   "state": "LIVE",
-   "gloss": "the two-minute held-hand join key derivation is real; the au",
-   "warn": true
-  },
-  {
-   "id": "blight-market",
-   "family": "beehivenature",
-   "home": "skaists.store",
-   "path": "surfaces/blight/market.html",
-   "state": "LIVE",
-   "gloss": "inscriptions, honestly"
-  },
-  {
-   "id": "bset",
-   "family": "plur",
-   "home": "plur.earth",
-   "path": "surfaces/bset.html",
-   "state": "LIVE",
-   "gloss": "the set the founder builds"
-  },
-  {
-   "id": "festival",
-   "family": "plur",
-   "home": "plur.earth",
-   "path": "surfaces/festival/index.html",
-   "state": "LIVE",
-   "gloss": "your day on the floor,"
-  },
-  {
-   "id": "kandi",
-   "family": "plur",
-   "home": "plur.earth",
-   "path": "surfaces/kandi.html",
-   "state": "LIVE",
-   "gloss": "make it, name it, gift"
-  },
-  {
-   "id": "plur",
-   "family": "plur",
-   "home": "plur.earth",
-   "path": "surfaces/plur.html",
-   "state": "LIVE",
-   "gloss": "thirty years of floor wisdom,"
-  },
-  {
-   "id": "blight-studio-gate",
-   "family": "skaists",
-   "home": "skaists.dev",
-   "path": "surfaces/blight/studio-gate.html",
-   "state": "LIVE",
-   "gloss": "drop a layer, get a"
-  },
-  {
-   "id": "blight-studio-music",
-   "family": "skaists",
-   "home": "skaists.dev",
-   "path": "surfaces/blight/studio-music.html",
-   "state": "LIVE",
-   "gloss": "compose, loop, export an"
-  },
-  {
-   "id": "forge-hexfield",
-   "family": "skaists",
-   "home": "skaists.dev",
-   "path": "surfaces/forge/hexfield.html",
-   "state": "LIVE",
-   "gloss": "roll a seed, grow a"
-  },
-  {
-   "id": "forge",
-   "family": "skaists",
-   "home": "skaists.dev",
-   "path": "surfaces/forge/index.html",
-   "state": "LIVE",
-   "gloss": "instruments, not presets, for"
-  },
-  {
-   "id": "forge-orbit",
-   "family": "skaists",
-   "home": "skaists.dev",
-   "path": "surfaces/forge/orbit.html",
-   "state": "LIVE",
-   "gloss": "seeded rose curves in"
-  },
-  {
-   "id": "review",
-   "family": "skaists",
-   "home": "skaists.dev",
-   "path": "surfaces/review.html",
-   "state": "LIVE",
-   "gloss": "attestation, never"
-  },
-  {
-   "id": "fleet-hosted-gallery-resonance",
-   "family": "skaists",
-   "home": "skaists.dev",
-   "path": "surfaces/fleet-hosted/gallery/resonance.html",
-   "state": "LIVE",
-   "gloss": "Consciousness, Earth frequency, plant an argum",
-   "warn": true
-  },
-  {
-   "id": "royalguard",
-   "family": "skaists",
-   "home": "skaists.dev",
-   "path": "surfaces/royalguard.html",
-   "state": "LIVE",
-   "gloss": "one deck, three doors, zero reads the decks it can; some panels are",
-   "warn": true
-  },
-  {
-   "id": "dao-dashboard",
-   "family": "skaists",
-   "home": "skaists.dev",
-   "path": "surfaces/dao-dashboard/index.html",
-   "state": "LIVE",
-   "gloss": "how a treasury says I don't"
-  },
-  {
-   "id": "attest",
-   "family": "bnature",
-   "home": "bnature.social",
-   "path": "surfaces/attest.html",
-   "state": "LIVE",
-   "gloss": "one tongue, one evening,"
-  },
-  {
-   "id": "blanguage",
-   "family": "bnature",
-   "home": "bnature.social",
-   "path": "surfaces/blanguage.html",
-   "state": "LIVE",
-   "gloss": "dock your tongue, no"
-  },
-  {
-   "id": "bsymposium",
-   "family": "bnature",
-   "home": "bnature.social",
-   "path": "surfaces/bsymposium.html",
-   "state": "LIVE",
-   "gloss": "two food protocols, both"
-  },
-  {
-   "id": "buzz-studio",
-   "family": "bnature",
-   "home": "bnature.social",
-   "path": "surfaces/buzz-studio.html",
-   "state": "LIVE",
-   "gloss": "paint a comb together,"
-  },
-  {
-   "id": "devroom",
-   "family": "bnature",
-   "home": "bnature.social",
-   "path": "surfaces/devroom.html",
-   "state": "LIVE",
-   "gloss": "builders' findings, written for"
-  },
-  {
-   "id": "forge-room",
-   "family": "bnature",
-   "home": "bnature.social",
-   "path": "surfaces/forge/room.html",
-   "state": "LIVE",
-   "gloss": "two tabs, one shared"
-  },
-  {
-   "id": "blight-hearth",
-   "family": "bnature",
-   "home": "bnature.social",
-   "path": "surfaces/blight/hearth.html",
-   "state": "LIVE",
-   "gloss": "co-create with the hive's a keyword router, not a model",
-   "warn": true
-  },
-  {
-   "id": "blight-pulse",
-   "family": "bnature",
-   "home": "bnature.social",
-   "path": "surfaces/blight/pulse.html",
-   "state": "LIVE",
-   "gloss": "bX pointers live on the the read path is live against public relays",
-   "warn": true
-  },
-  {
-   "id": "bqueenbee-live",
-   "family": "bnature",
-   "home": "bnature.social",
-   "path": "surfaces/bqueenbee-live.html",
-   "state": "LIVE",
-   "gloss": "talk to the hive's machine answers from a page-local knowledge",
-   "warn": true
-  },
-  {
-   "id": "btranslated",
-   "family": "bnature",
-   "home": "bnature.social",
-   "path": "surfaces/btranslated.html",
-   "state": "LIVE",
-   "gloss": "your name in your section two carries its own DEMO badge",
-   "warn": true
-  },
-  {
-   "id": "forge-huddle",
-   "family": "bnature",
-   "home": "bnature.social",
-   "path": "surfaces/forge/huddle.html",
-   "state": "LIVE",
-   "gloss": "the same room, across you supply your own venue URL — we ship no",
-   "warn": true
-  },
-  {
-   "id": "bearth",
-   "family": "bnature",
-   "home": "bnature.bio",
-   "path": "surfaces/bearth.html",
-   "state": "LIVE",
-   "gloss": "what one food would cost the"
-  },
-  {
-   "id": "bfood",
-   "family": "bnature",
-   "home": "bnature.bio",
-   "path": "surfaces/bfood.html",
-   "state": "LIVE",
-   "gloss": "your nutrients, drawn honestly, never"
-  },
-  {
-   "id": "bigen",
-   "family": "bnature",
-   "home": "bnature.bio",
-   "path": "surfaces/bigen.html",
-   "state": "LIVE",
-   "gloss": "cannabis and cancer, graded"
-  },
-  {
-   "id": "blongevity",
-   "family": "bnature",
-   "home": "bnature.bio",
-   "path": "surfaces/blongevity.html",
-   "state": "LIVE",
-   "gloss": "your body builds its own"
-  },
-  {
-   "id": "fleet-hosted-gallery-acid-cascade",
-   "family": "bnature",
-   "home": "bnature.bio",
-   "path": "surfaces/fleet-hosted/gallery/acid-cascade.html",
-   "state": "LIVE",
-   "gloss": "The chronic inflammatory cascade,"
-  },
-  {
-   "id": "fleet-hosted-gallery-indigo-index",
-   "family": "bnature",
-   "home": "bnature.bio",
-   "path": "surfaces/fleet-hosted/gallery/indigo-index.html",
-   "state": "LIVE",
-   "gloss": "Chronic disease economics against"
-  },
-  {
-   "id": "fleet-hosted-lab-blend-lab",
-   "family": "bnature",
-   "home": "bnature.bio",
-   "path": "surfaces/fleet-hosted/lab/blend-lab.html",
-   "state": "LIVE",
-   "gloss": "Tobacco blend ratios, flavour and"
-  },
-  {
-   "id": "fleet-hosted-lab-edible-tracker",
-   "family": "bnature",
-   "home": "bnature.bio",
-   "path": "surfaces/fleet-hosted/lab/edible-tracker.html",
-   "state": "LIVE",
-   "gloss": "Edible dosing, onset, and effect"
-  },
-  {
-   "id": "fleet-hosted-lab-flower-lab",
-   "family": "bnature",
-   "home": "bnature.bio",
-   "path": "surfaces/fleet-hosted/lab/flower-lab.html",
-   "state": "LIVE",
-   "gloss": "THCA blending calculator with session"
-  },
-  {
-   "id": "fleet-hosted-lab-intake-tracker",
-   "family": "bnature",
-   "home": "bnature.bio",
-   "path": "surfaces/fleet-hosted/lab/intake-tracker.html",
-   "state": "LIVE",
-   "gloss": "Daily cannabinoid intake against your"
-  },
-  {
-   "id": "fleet-hosted-lab-spliff-lab",
-   "family": "bnature",
-   "home": "bnature.bio",
-   "path": "surfaces/fleet-hosted/lab/spliff-lab.html",
-   "state": "LIVE",
-   "gloss": "Roll composition against absorbed-THC"
-  },
-  {
-   "id": "university",
-   "family": "bnature",
-   "home": "bnature.bio",
-   "path": "surfaces/university/index.html",
-   "state": "LIVE",
-   "gloss": "learn to read the"
-  },
-  {
-   "id": "fleet-hosted-lab-bnr-dashboard",
-   "family": "bnature",
-   "home": "bnature.bio",
-   "path": "surfaces/fleet-hosted/lab/bnr-dashboard.html",
-   "state": "LIVE",
-   "gloss": "Reads what the other instruments reads what the o",
-   "warn": true
-  },
-  {
-   "id": "bantfarm",
-   "family": "beehivebiomass",
-   "home": "beehivebiomass.com",
-   "path": "surfaces/bantfarm.html",
-   "state": "LIVE",
-   "gloss": "two treasuries and the node farm,"
-  },
-  {
-   "id": "blight-coop",
-   "family": "beehivebiomass",
-   "home": "beehivebiomass.com",
-   "path": "surfaces/blight/coop.html",
-   "state": "LIVE",
-   "gloss": "hemp biomass, ranked by the index is a fixed table, not a live",
-   "warn": true
-  },
-  {
-   "id": "bfactory",
-   "family": "beehivebiomass",
-   "home": "beehivebiomass.com",
-   "path": "surfaces/bfactory.html",
-   "state": "LIVE",
-   "gloss": "the ratified plan, made"
-  },
-  {
-   "id": "bmeshasi",
-   "family": "beehivebiomass",
-   "home": "beehivebiomass.com",
-   "path": "surfaces/bmeshasi.html",
-   "state": "LIVE",
-   "gloss": "pledge your iron, metered, paid"
-  }
- ],
- "counts": {
-  "surfaces": 85,
-  "families": 8,
-  "domains": 26,
-  "domainsLive": 1,
-  "domainsPending": 19,
-  "domainsSeatOpen": 6,
-  "byFamily": {
-   "beehivenature": 33,
-   "plur": 5,
-   "skaists": 10,
-   "bnature": 26,
-   "beehivebiomass": 5,
-   "beehivebuds": 0,
-   "midi": 5,
-   "bnr": 1
-  },
-  "byState": {
-   "LIVE": 85
-  }
- }
-}
+{"v":1,"generated":"2026-08-28","source":"surfaces/index.html panels + RULING_DOMAIN_ATLAS_2026-08-27","families":["beehivenature","plur","skaists","bnature","beehivebiomass","beehivebuds","midi","bnr"],"domains":[{"d":"skaists.dev","fam":"skaists","repo":"beehive-nature (main)","state":"LIVE"},{"d":"skaists.com","fam":"skaists","repo":"skaists-com","state":"DNS-PENDING"},{"d":"skaists.art","fam":"skaists","repo":"skaists-art","state":"DNS-PENDING"},{"d":"skaists.store","fam":"skaists","repo":"skaists-store","state":"DNS-PENDING"},{"d":"skaists.xyz","fam":"skaists","repo":"skaists-xyz","state":"DNS-PENDING"},{"d":"skaists.buzz","fam":"skaists","repo":"skaists-buzz","state":"DNS-PENDING"},{"d":"skaists.quest","fam":"skaists","repo":"skaists-quest","state":"DNS-PENDING"},{"d":"skaists.lol","fam":"skaists","repo":"skaists-lol","state":"DNS-PENDING"},{"d":"skaists.social","fam":"skaists","repo":null,"state":"SEAT-OPEN"},{"d":"plur.earth","fam":"plur","repo":"plur-earth (A4)","state":"SEAT-OPEN"},{"d":"plur.asia","fam":"plur","repo":"plur-asia","state":"DNS-PENDING"},{"d":"plur.quest","fam":"plur","repo":"plur-quest","state":"DNS-PENDING"},{"d":"plur.lat","fam":"plur","repo":"plur-lat","state":"DNS-PENDING"},{"d":"bnature.bio","fam":"bnature","repo":"bNATURE.bio","state":"DNS-PENDING"},{"d":"bnature.social","fam":"bnature","repo":null,"state":"SEAT-OPEN"},{"d":"bnature.buzz","fam":"bnature","repo":"bnature-buzz","state":"DNS-PENDING"},{"d":"beehivenature.com","fam":"beehivenature","repo":null,"state":"SEAT-OPEN"},{"d":"beehivenature.buzz","fam":"beehivenature","repo":"beehivenature-buzz","state":"DNS-PENDING"},{"d":"beehivebiomass.com","fam":"beehivebiomass","repo":null,"state":"SEAT-OPEN"},{"d":"beehivebiomass.buzz","fam":"beehivebiomass","repo":"beehivebiomass-buzz","state":"DNS-PENDING"},{"d":"beehivebuds.com","fam":"beehivebuds","repo":null,"state":"SEAT-OPEN"},{"d":"beehivebuds.buzz","fam":"beehivebuds","repo":"beehivebuds-buzz","state":"DNS-PENDING"},{"d":"midi.blue","fam":"midi","repo":"midi-blue","state":"DNS-PENDING"},{"d":"bnr.baby","fam":"bnr","repo":"bnr-baby","state":"DNS-PENDING"},{"d":"bnr.quest","fam":"bnr","repo":"bnr-quest","state":"DNS-PENDING"},{"d":"bnr.lol","fam":"bnr","repo":"bnr-lol","state":"DNS-PENDING"}],"surfaces":[{"id":"doors-beehivenature","family":"beehivenature","home":"beehivenature.com","path":"surfaces/doors/beehivenature.html","state":"LIVE","gloss":"beehivenature.comfor someone who just heard the name"},{"id":"doors-plur","family":"plur","home":"plur.earth","path":"surfaces/doors/plur.html","state":"LIVE","gloss":"plur.earthfor a raver"},{"id":"doors-skaists","family":"skaists","home":"skaists.dev","path":"surfaces/doors/skaists.html","state":"LIVE","gloss":"skaists.socialfor an artist, a DJ, a festival vendor"},{"id":"doors-bnature-social","family":"bnature","home":"bnature.social","path":"surfaces/doors/bnature-social.html","state":"LIVE","gloss":"bnature.socialfor someone who wants people"},{"id":"doors-bnature-bio","family":"bnature","home":"bnature.social","path":"surfaces/doors/bnature-bio.html","state":"LIVE","gloss":"bnature.biofor a scientist, or anyone with a health question"},{"id":"doors-beehivebiomass","family":"beehivebiomass","home":"beehivebiomass.com","path":"surfaces/doors/beehivebiomass.html","state":"LIVE","gloss":"beehivebiomass.comfor someone with a machine to contribute"},{"id":"doors","family":"beehivenature","home":"beehivenature.com","path":"surfaces/doors/index.html","state":"LIVE","gloss":"all six on one pagepick the one that sounds like you"},{"id":"b4b","family":"beehivenature","home":"beehivenature.com","path":"surfaces/b4b.html","state":"LIVE","gloss":"our receipts, measured on"},{"id":"biq","family":"bnr","home":"bnr.quest","path":"surfaces/biq.html","state":"LIVE","gloss":"compose a cited wiki proposal, never"},{"id":"blight-bnri-gallery","family":"beehivenature","home":"beehivenature.com","path":"surfaces/blight/bnri-gallery.html","state":"LIVE","gloss":"the fleet's own"},{"id":"blight-c1-aid","family":"beehivenature","home":"beehivenature.com","path":"surfaces/blight/c1-aid.html","state":"LIVE","gloss":"taxonomy sizing, from the tree's own"},{"id":"blight-compare","family":"beehivenature","home":"beehivenature.com","path":"surfaces/blight/compare.html","state":"LIVE","gloss":"the ERC-20i family, artist by"},{"id":"blight-gallery","family":"beehivenature","home":"beehivenature.com","path":"surfaces/blight/gallery.html","state":"LIVE","gloss":"a walking tour of on-chain"},{"id":"blight","family":"beehivenature","home":"beehivenature.com","path":"surfaces/blight/index.html","state":"LIVE","gloss":"one operation, many"},{"id":"blight-inscription-explorer","family":"beehivenature","home":"beehivenature.com","path":"surfaces/blight/inscription-explorer.html","state":"LIVE","gloss":"whose art shall we"},{"id":"blight-midi-organ","family":"midi","home":"midi.blue","path":"surfaces/blight/midi-organ.html","state":"LIVE","gloss":"the seed becomes"},{"id":"blight-museum","family":"beehivenature","home":"skaists.art","path":"surfaces/blight/museum.html","state":"LIVE","gloss":"what &quot;on-chain&quot; actually"},{"id":"blight-pixelrefiner","family":"beehivenature","home":"beehivenature.com","path":"surfaces/blight/pixelrefiner.html","state":"LIVE","gloss":"smeared art in, crisp cells"},{"id":"blight-qrtree","family":"beehivenature","home":"beehivenature.com","path":"surfaces/blight/qrtree.html","state":"LIVE","gloss":"the URL lives in the"},{"id":"blight-qrroses","family":"beehivenature","home":"beehivenature.com","path":"surfaces/blight/qrroses.html","state":"LIVE","gloss":"roses and bees over a frozen"},{"id":"blight-profile","family":"beehivenature","home":"beehivenature.com","path":"surfaces/blight/profile.html","state":"LIVE","gloss":"the profile half that needs no"},{"id":"record","family":"beehivenature","home":"beehivenature.com","path":"surfaces/record.html","state":"LIVE","gloss":"every screenshot we ever"},{"id":"blight-midi","family":"midi","home":"midi.blue","path":"surfaces/blight/midi.html","state":"LIVE","gloss":"one seed, a"},{"id":"blight-midiroom","family":"midi","home":"midi.blue","path":"surfaces/blight/midiroom.html","state":"LIVE","gloss":"the bMiDi room — three"},{"id":"blight-midivault","family":"midi","home":"midi.blue","path":"surfaces/blight/midivault.html","state":"LIVE","gloss":"the vault — music on"},{"id":"blight-vaulta-reader","family":"beehivenature","home":"beehivenature.com","path":"surfaces/blight/vaulta-reader.html","state":"LIVE","gloss":"the b-indexer's read path,"},{"id":"blight-workbench","family":"beehivenature","home":"beehivenature.com","path":"surfaces/blight/workbench.html","state":"LIVE","gloss":"the instrument (tech"},{"id":"dock","family":"beehivenature","home":"beehivenature.com","path":"surfaces/dock.html","state":"LIVE","gloss":"what is proven, and what is"},{"id":"fleet-hosted","family":"beehivenature","home":"beehivenature.com","path":"surfaces/fleet-hosted/index.html","state":"LIVE","gloss":"Nine surfaces, one night, one"},{"id":"hardware-build","family":"beehivenature","home":"beehivenature.com","path":"surfaces/hardware/build.html","state":"LIVE","gloss":"climb from user to"},{"id":"hardware","family":"beehivenature","home":"beehivenature.com","path":"surfaces/hardware/index.html","state":"LIVE","gloss":"open hardware you can actually"},{"id":"hardware-security","family":"beehivenature","home":"beehivenature.com","path":"surfaces/hardware/security.html","state":"LIVE","gloss":"security events, read"},{"id":"listening","family":"midi","home":"midi.blue","path":"surfaces/listening.html","state":"LIVE","gloss":"one seed, sound and"},{"id":"onboarding-receive","family":"beehivenature","home":"beehivenature.com","path":"surfaces/onboarding/receive.html","state":"LIVE","gloss":"catch a beam of light, camera"},{"id":"recover","family":"beehivenature","home":"beehivenature.com","path":"surfaces/recover.html","state":"LIVE","gloss":"your 24 words, your keys,"},{"id":"stack","family":"beehivenature","home":"beehivenature.com","path":"surfaces/stack.html","state":"LIVE","gloss":"one engine diagram, honest parts"},{"id":"wallet","family":"beehivenature","home":"beehivenature.com","path":"surfaces/wallet.html","state":"LIVE","gloss":"one soul, every chain, zero"},{"id":"blight-demo","family":"beehivenature","home":"beehivenature.com","path":"surfaces/blight/demo.html","state":"LIVE","gloss":"the logo is the the beam encoder is real; this page is its de","warn":true},{"id":"blight-farmers","family":"beehivenature","home":"beehivenature.com","path":"surfaces/blight/farmers.html","state":"LIVE","gloss":"stalls, bAccords, settled in reads as a plan — settlement is not b","warn":true},{"id":"bnames","family":"beehivenature","home":"beehivenature.com","path":"surfaces/bnames.html","state":"LIVE","gloss":"names on our chain, read reads the chain live; reserving is founder-gated","warn":true},{"id":"hardware-lab","family":"beehivenature","home":"beehivenature.com","path":"surfaces/hardware/lab.html","state":"LIVE","gloss":"device reviews, science and one device has bench numbers; the rest re","warn":true},{"id":"keys-addresses","family":"beehivenature","home":"beehivenature.com","path":"surfaces/keys/addresses.html","state":"LIVE","gloss":"one soul, two mailing the derivation grammar is real; the ren","warn":true},{"id":"onboarding","family":"beehivenature","home":"beehivenature.com","path":"surfaces/onboarding/index.html","state":"LIVE","gloss":"the two-minute held-hand join key derivation is real; the au","warn":true},{"id":"blight-market","family":"beehivenature","home":"skaists.store","path":"surfaces/blight/market.html","state":"LIVE","gloss":"inscriptions, honestly"},{"id":"bset","family":"plur","home":"plur.earth","path":"surfaces/bset.html","state":"LIVE","gloss":"the set the founder builds"},{"id":"festival","family":"plur","home":"plur.earth","path":"surfaces/festival/index.html","state":"LIVE","gloss":"your day on the floor,"},{"id":"kandi","family":"plur","home":"plur.earth","path":"surfaces/kandi.html","state":"LIVE","gloss":"make it, name it, gift"},{"id":"plur","family":"plur","home":"plur.earth","path":"surfaces/plur.html","state":"LIVE","gloss":"thirty years of floor wisdom,"},{"id":"blight-studio-gate","family":"skaists","home":"skaists.dev","path":"surfaces/blight/studio-gate.html","state":"LIVE","gloss":"drop a layer, get a"},{"id":"blight-studio-music","family":"skaists","home":"skaists.dev","path":"surfaces/blight/studio-music.html","state":"LIVE","gloss":"compose, loop, export an"},{"id":"forge-hexfield","family":"skaists","home":"skaists.dev","path":"surfaces/forge/hexfield.html","state":"LIVE","gloss":"roll a seed, grow a"},{"id":"forge","family":"skaists","home":"skaists.dev","path":"surfaces/forge/index.html","state":"LIVE","gloss":"instruments, not presets, for"},{"id":"forge-orbit","family":"skaists","home":"skaists.dev","path":"surfaces/forge/orbit.html","state":"LIVE","gloss":"seeded rose curves in"},{"id":"review","family":"skaists","home":"skaists.dev","path":"surfaces/review.html","state":"LIVE","gloss":"attestation, never"},{"id":"fleet-hosted-gallery-resonance","family":"skaists","home":"skaists.dev","path":"surfaces/fleet-hosted/gallery/resonance.html","state":"LIVE","gloss":"Consciousness, Earth frequency, plant an argum","warn":true,"counted":false},{"id":"royalguard","family":"skaists","home":"skaists.dev","path":"surfaces/royalguard.html","state":"LIVE","gloss":"one deck, three doors, zero reads the decks it can; some panels are","warn":true},{"id":"dao-dashboard","family":"skaists","home":"skaists.dev","path":"surfaces/dao-dashboard/index.html","state":"LIVE","gloss":"how a treasury says I don't"},{"id":"attest","family":"bnature","home":"bnature.social","path":"surfaces/attest.html","state":"LIVE","gloss":"one tongue, one evening,"},{"id":"blanguage","family":"bnature","home":"bnature.social","path":"surfaces/blanguage.html","state":"LIVE","gloss":"dock your tongue, no"},{"id":"bsymposium","family":"bnature","home":"bnature.social","path":"surfaces/bsymposium.html","state":"LIVE","gloss":"two food protocols, both"},{"id":"buzz-studio","family":"bnature","home":"bnature.social","path":"surfaces/buzz-studio.html","state":"LIVE","gloss":"paint a comb together,"},{"id":"devroom","family":"bnature","home":"bnature.social","path":"surfaces/devroom.html","state":"LIVE","gloss":"builders' findings, written for"},{"id":"forge-room","family":"bnature","home":"bnature.social","path":"surfaces/forge/room.html","state":"LIVE","gloss":"two tabs, one shared"},{"id":"blight-hearth","family":"bnature","home":"bnature.social","path":"surfaces/blight/hearth.html","state":"LIVE","gloss":"co-create with the hive's a keyword router, not a model","warn":true},{"id":"blight-pulse","family":"bnature","home":"bnature.social","path":"surfaces/blight/pulse.html","state":"LIVE","gloss":"bX pointers live on the the read path is live against public relays","warn":true},{"id":"bqueenbee-live","family":"bnature","home":"bnature.social","path":"surfaces/bqueenbee-live.html","state":"LIVE","gloss":"talk to the hive's machine answers from a page-local knowledge","warn":true},{"id":"btranslated","family":"bnature","home":"bnature.social","path":"surfaces/btranslated.html","state":"LIVE","gloss":"your name in your section two carries its own DEMO badge","warn":true},{"id":"forge-huddle","family":"bnature","home":"bnature.social","path":"surfaces/forge/huddle.html","state":"LIVE","gloss":"the same room, across you supply your own venue URL — we ship no","warn":true},{"id":"bearth","family":"bnature","home":"bnature.bio","path":"surfaces/bearth.html","state":"LIVE","gloss":"what one food would cost the"},{"id":"bfood","family":"bnature","home":"bnature.bio","path":"surfaces/bfood.html","state":"LIVE","gloss":"your nutrients, drawn honestly, never"},{"id":"bigen","family":"bnature","home":"bnature.bio","path":"surfaces/bigen.html","state":"LIVE","gloss":"cannabis and cancer, graded"},{"id":"blongevity","family":"bnature","home":"bnature.bio","path":"surfaces/blongevity.html","state":"LIVE","gloss":"your body builds its own"},{"id":"fleet-hosted-gallery-acid-cascade","family":"bnature","home":"bnature.bio","path":"surfaces/fleet-hosted/gallery/acid-cascade.html","state":"LIVE","gloss":"The chronic inflammatory cascade,","counted":false},{"id":"fleet-hosted-gallery-indigo-index","family":"bnature","home":"bnature.bio","path":"surfaces/fleet-hosted/gallery/indigo-index.html","state":"LIVE","gloss":"Chronic disease economics against","counted":false},{"id":"fleet-hosted-lab-blend-lab","family":"bnature","home":"bnature.bio","path":"surfaces/fleet-hosted/lab/blend-lab.html","state":"LIVE","gloss":"Tobacco blend ratios, flavour and","counted":false},{"id":"fleet-hosted-lab-edible-tracker","family":"bnature","home":"bnature.bio","path":"surfaces/fleet-hosted/lab/edible-tracker.html","state":"LIVE","gloss":"Edible dosing, onset, and effect","counted":false},{"id":"fleet-hosted-lab-flower-lab","family":"bnature","home":"bnature.bio","path":"surfaces/fleet-hosted/lab/flower-lab.html","state":"LIVE","gloss":"THCA blending calculator with session","counted":false},{"id":"fleet-hosted-lab-intake-tracker","family":"bnature","home":"bnature.bio","path":"surfaces/fleet-hosted/lab/intake-tracker.html","state":"LIVE","gloss":"Daily cannabinoid intake against your","counted":false},{"id":"fleet-hosted-lab-spliff-lab","family":"bnature","home":"bnature.bio","path":"surfaces/fleet-hosted/lab/spliff-lab.html","state":"LIVE","gloss":"Roll composition against absorbed-THC","counted":false},{"id":"university","family":"bnature","home":"bnature.bio","path":"surfaces/university/index.html","state":"LIVE","gloss":"learn to read the"},{"id":"fleet-hosted-lab-bnr-dashboard","family":"bnature","home":"bnature.bio","path":"surfaces/fleet-hosted/lab/bnr-dashboard.html","state":"LIVE","gloss":"Reads what the other instruments reads what the o","warn":true,"counted":false},{"id":"bantfarm","family":"beehivebiomass","home":"beehivebiomass.com","path":"surfaces/bantfarm.html","state":"LIVE","gloss":"two treasuries and the node farm,"},{"id":"blight-coop","family":"beehivebiomass","home":"beehivebiomass.com","path":"surfaces/blight/coop.html","state":"LIVE","gloss":"hemp biomass, ranked by the index is a fixed table, not a live","warn":true},{"id":"bfactory","family":"beehivebiomass","home":"beehivebiomass.com","path":"surfaces/bfactory.html","state":"LIVE","gloss":"the ratified plan, made"},{"id":"bmeshasi","family":"beehivebiomass","home":"beehivebiomass.com","path":"surfaces/bmeshasi.html","state":"LIVE","gloss":"pledge your iron, metered, paid"},{"id":"index","family":"skaists","home":"skaists.dev","path":"surfaces/index.html","state":"LIVE","gloss":"the atlas you are reading — every surface, every domain, honest state"},{"id":"forge-orbit-v2","family":"skaists","home":"skaists.xyz","path":"surfaces/forge/orbit-v2.html","state":"LIVE","gloss":"tinkering fork of the frozen orbit renderer — counted by the tree, deliberately not presented (presenting invites edits to the pinned original)","presented":false}],"counts":{"surfaces":78,"listed":87,"families":8,"domains":26,"domainsLive":1,"domainsPending":19,"domainsSeatOpen":6,"byFamily":{"beehivenature":33,"plur":5,"skaists":11,"bnature":18,"beehivebiomass":5,"beehivebuds":0,"midi":5,"bnr":1},"byState":{"LIVE":87}}}
 <!--ESTATE-JSON-END-->
 </script>
 
 <script>
-/* render the atlas from the embedded registry — the page is a view, the
-   registry is the truth, and CI fails if the two drift apart. */
+/* the atlas is static HTML from the registry; this script adds ONLY search. */
 (() => {
   const E = JSON.parse(document.getElementById('estate').textContent.replace(/<!--[\s\S]*?-->/g, '').trim());
-  const GLOSS = {
-    beehivenature: 'the organism itself — what it is, how it proves it, how to join',
-    skaists: 'the makers\u2019 workshop — instruments, art, and labs',
-    bnature: 'people and living systems — rooms to talk, honest science',
-    beehivebiomass: 'the physical network — machines, farms, bandwidth',
-    beehivebuds: 'the buds line — founder-gated, waiting its seat',
-    plur: 'the rave heart — sets, festivals, kandi, floor wisdom',
-    midi: 'the music universe — one seed, on-chain scores, the vault',
-    bnr: 'the kernel\u2019s public face — quests for curious minds'
-  };
-  const DOORS = {
-    beehivenature: [['doors/beehivenature.html','the door']],
-    skaists: [['doors/skaists.html','the door']],
-    bnature: [['doors/bnature-social.html','social door'],['doors/bnature-bio.html','bio door']],
-    beehivebiomass: [['doors/beehivebiomass.html','the door']],
-    plur: [['doors/plur.html','the door']]
-  };
-
-  const c = E.counts;
-  document.getElementById('counts').innerHTML =
-    '<b>'+c.surfaces+'</b> surfaces · <b>'+c.domains+'</b> domains · <b>'+
-    c.families+'</b> families · every number computed from the registry';
-  document.getElementById('foot').innerHTML =
-    '<a href="../estate.json">the registry</a> · <a href="doors/index.html">the doors</a> · '+
-    '<a href="https://github.com/beehive-nature/beehive-nature">the code</a> — '+
-    c.surfaces+' surfaces · '+c.domains+' domains';
-
-  /* jump chips */
-  document.getElementById('families').innerHTML = E.families.map(f => {
-    const n = c.byFamily[f] || 0;
-    return '<a href="#fam-'+f+'">'+f+' <span class="n">'+n+'</span></a>';
-  }).join('');
-
-  /* family sections — domains appear once, here */
-  document.getElementById('list').innerHTML = E.families.map(f => {
-    const doms = E.domains.filter(d => d.fam === f);
-    const srfs = E.surfaces.filter(s => s.family === f);
-    const doorHtml = (DOORS[f] || []).map(d =>
-      '<a class="doorlink" href="'+d[0]+'">'+d[1]+' →</a>').join(' ');
-    const domHtml = doms.map(d =>
-      '<span class="dom '+d.state+'" title="front repo: '+(d.repo||'none yet')+'">'+d.d+
-      '<span class="st">'+d.state+'</span></span>').join('');
-    const rows = srfs.map(s =>
-      '<a class="srf" data-t="'+f+' '+s.id+' '+s.gloss.replace(/"/g,'&quot;')+'" href="'+s.path.replace(/^surfaces\//,'')+'">'+
-      '<span class="nm">'+s.id.replace(/-/g,' ')+(s.warn?'<span class="warn">⚠</span>':'')+'</span>'+
-      '<span class="gl">'+s.gloss+'</span></a>').join('');
-    return '<section class="fam" id="fam-'+f+'">'+
-      '<div class="famhead"><h2>'+f+'</h2><span class="gloss">'+(GLOSS[f]||'')+'</span>'+doorHtml+'</div>'+
-      '<div class="doms">'+domHtml+'</div>'+
-      '<div class="famcount">'+srfs.length+' surface'+(srfs.length===1?'':'s')+(doms.length?' · '+doms.length+' domain'+(doms.length===1?'':'s'):'')+'</div>'+
-      '<div class="rows">'+(rows||'<span class="gl" style="padding:8px 2px">an open seat — the domain waits for its first surface</span>')+'</div>'+
-      '</section>';
-  }).join('');
-
-  /* search — one field, filters everything, sections hide when empty */
   const q = document.getElementById('q'), shown = document.getElementById('shown');
   const apply = () => {
     const t = q.value.trim().toLowerCase();
@@ -1106,7 +283,7 @@ reachable at its path — and <a href="doors/index.html">the doors page</a> work
       const any = [...s.querySelectorAll('.srf')].some(r => r.style.display !== 'none');
       s.classList.toggle('hidden', t && !any);
     });
-    shown.textContent = t ? visible + ' of ' + E.counts.surfaces + ' shown' : '';
+    shown.textContent = t ? visible + ' of ' + E.counts.surfaces + ' counted surfaces shown' : '';
   };
   q.addEventListener('input', apply);
 })();

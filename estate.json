@@ -616,7 +616,8 @@
    "path": "surfaces/fleet-hosted/gallery/resonance.html",
    "state": "LIVE",
    "gloss": "Consciousness, Earth frequency, plant an argum",
-   "warn": true
+   "warn": true,
+   "counted": false
   },
   {
    "id": "royalguard",
@@ -766,7 +767,8 @@
    "home": "bnature.bio",
    "path": "surfaces/fleet-hosted/gallery/acid-cascade.html",
    "state": "LIVE",
-   "gloss": "The chronic inflammatory cascade,"
+   "gloss": "The chronic inflammatory cascade,",
+   "counted": false
   },
   {
    "id": "fleet-hosted-gallery-indigo-index",
@@ -774,7 +776,8 @@
    "home": "bnature.bio",
    "path": "surfaces/fleet-hosted/gallery/indigo-index.html",
    "state": "LIVE",
-   "gloss": "Chronic disease economics against"
+   "gloss": "Chronic disease economics against",
+   "counted": false
   },
   {
    "id": "fleet-hosted-lab-blend-lab",
@@ -782,7 +785,8 @@
    "home": "bnature.bio",
    "path": "surfaces/fleet-hosted/lab/blend-lab.html",
    "state": "LIVE",
-   "gloss": "Tobacco blend ratios, flavour and"
+   "gloss": "Tobacco blend ratios, flavour and",
+   "counted": false
   },
   {
    "id": "fleet-hosted-lab-edible-tracker",
@@ -790,7 +794,8 @@
    "home": "bnature.bio",
    "path": "surfaces/fleet-hosted/lab/edible-tracker.html",
    "state": "LIVE",
-   "gloss": "Edible dosing, onset, and effect"
+   "gloss": "Edible dosing, onset, and effect",
+   "counted": false
   },
   {
    "id": "fleet-hosted-lab-flower-lab",
@@ -798,7 +803,8 @@
    "home": "bnature.bio",
    "path": "surfaces/fleet-hosted/lab/flower-lab.html",
    "state": "LIVE",
-   "gloss": "THCA blending calculator with session"
+   "gloss": "THCA blending calculator with session",
+   "counted": false
   },
   {
    "id": "fleet-hosted-lab-intake-tracker",
@@ -806,7 +812,8 @@
    "home": "bnature.bio",
    "path": "surfaces/fleet-hosted/lab/intake-tracker.html",
    "state": "LIVE",
-   "gloss": "Daily cannabinoid intake against your"
+   "gloss": "Daily cannabinoid intake against your",
+   "counted": false
   },
   {
    "id": "fleet-hosted-lab-spliff-lab",
@@ -814,7 +821,8 @@
    "home": "bnature.bio",
    "path": "surfaces/fleet-hosted/lab/spliff-lab.html",
    "state": "LIVE",
-   "gloss": "Roll composition against absorbed-THC"
+   "gloss": "Roll composition against absorbed-THC",
+   "counted": false
   },
   {
    "id": "university",
@@ -831,7 +839,8 @@
    "path": "surfaces/fleet-hosted/lab/bnr-dashboard.html",
    "state": "LIVE",
    "gloss": "Reads what the other instruments reads what the o",
-   "warn": true
+   "warn": true,
+   "counted": false
   },
   {
    "id": "bantfarm",
@@ -865,10 +874,28 @@
    "path": "surfaces/bmeshasi.html",
    "state": "LIVE",
    "gloss": "pledge your iron, metered, paid"
+  },
+  {
+   "id": "index",
+   "family": "skaists",
+   "home": "skaists.dev",
+   "path": "surfaces/index.html",
+   "state": "LIVE",
+   "gloss": "the atlas you are reading — every surface, every domain, honest state"
+  },
+  {
+   "id": "forge-orbit-v2",
+   "family": "skaists",
+   "home": "skaists.xyz",
+   "path": "surfaces/forge/orbit-v2.html",
+   "state": "LIVE",
+   "gloss": "tinkering fork of the frozen orbit renderer — counted by the tree, deliberately not presented (presenting invites edits to the pinned original)",
+   "presented": false
   }
  ],
  "counts": {
-  "surfaces": 85,
+  "surfaces": 78,
+  "listed": 87,
   "families": 8,
   "domains": 26,
   "domainsLive": 1,
@@ -877,15 +904,15 @@
   "byFamily": {
    "beehivenature": 33,
    "plur": 5,
-   "skaists": 10,
-   "bnature": 26,
+   "skaists": 11,
+   "bnature": 18,
    "beehivebiomass": 5,
    "beehivebuds": 0,
    "midi": 5,
    "bnr": 1
   },
   "byState": {
-   "LIVE": 85
+   "LIVE": 87
   }
  }
 }
