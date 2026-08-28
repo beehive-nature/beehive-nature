@@ -244,3 +244,58 @@ follows §8 with the owner motion above folded into step 0.
 `~/buzz-relay-deploy.sh` (dash-syntax clean, property-grepped) — kept as the
 external-S3 migration pattern reference per §4.1, NOT the runbook of record;
 `~/buzz-src` mirror clone.*
+
+## 11 · G-live — first start executed + owner model corrected (z2.2, 17:05–17:16 UTC)
+
+The founder said **done** and handed his npub (hex
+`d44163340ce7dd9df1cfe14505ebe1112fb6819eb215b0169e166d3d47ef19bf` — PUBLIC-CONSTANT,
+a Nostr pubkey) at ~17:04 UTC. Executed per §8:
+
+- **DNS gate passed**: both resolvers (box systemd + Google DoH) → 129.153.202.144.
+- **First start** `up -d --wait` — ALL HEALTHY (relay, postgres, redis, minio,
+  minio-init completed, caddy). Boot receipts: *"Deployment community ensured"
+  host=skaists.buzz community=b824a99e-fac8-470f-be90-10a391c1d5a5*; *"Relay
+  owner bootstrapped"*; NIP-43 membership list published; listening
+  0.0.0.0:3000; in-container `/_readiness` 200 OK.
+- **OWNER MODEL CORRECTED (narrated, not hidden)**: z2.2's first motion misread
+  the dispatch and put the founder's npub in `RELAY_OWNER_PUBKEY`. The chief's
+  ruled shape — carried in z2.1's addendum and in both dispatches once re-read:
+  "create the owner identity, THEN set RELAY_OWNER_PUBKEY" with the founder
+  arriving later "as member" — is **box identity = owner, founder = member**.
+  Corrected at 17:14: `buzz-admin generate-key` on-box (secret persisted
+  `/opt/buzz/owner/owner-identity.txt`, mode 600, never printed; pubkey
+  `a376d91372a42773f14ede4d18fc42b695d1d5982a9611e7906e96df288587a3` — PUBLIC-CONSTANT,
+  a Nostr pubkey), swapped into `.env`, relay recreated and re-healthy, boot
+  receipt re-confirmed owner = box key. The founder's stale row (demoted to
+  admin by the swap) was removed and re-added `--role member`.
+  **CLI quirk recorded**: this build rejects bech32 npub at `add-member`
+  ("invalid pubkey") despite its own doc comment — pass 64-char hex.
+- **Final roster (the ruled shape, exact)**: box `a376d913…` = owner ·
+  founder `d4416334…` = member.
+
+### Blocker: OCI ingress 80/443 is NOT open to the internet (founder act #2 did not take)
+
+Evidence, three independent vantages:
+1. Let's Encrypt (authoritative): **TCP connect TIMEOUT** on
+   `129.153.202.144` for BOTH challenge types (tls-alpn-01 on 443 and http-01
+   on 80), attempts 1–3 across 17:05–17:07 UTC. Caddy retries every ~120s on
+   its own (staging + production directories both tried).
+2. check-host.net, 4 nodes in 4 countries (fi/ir/ru/ua): **all
+   "Connection timed out"** on :443.
+3. Dev-box probes are DISQUALIFIED for this box+network: the founder's wifi
+   middlebox completes TCP handshakes locally (connect "OK" in 7ms, then zero
+   bytes ever arrive) — a known-filter illusion, documented so no future seat
+   trusts it.
+
+OS-side is ready and persisted (iptables INPUT ACCEPT 80/443 +
+netfilter-persistent; Caddy listening on 0.0.0.0:80/443). The closed gate is
+the Oracle Cloud layer: Security List and/or VNIC NSG. Fix (founder hands):
+Console → Networking → VCN → (subnet Security Lists AND the instance VNIC's
+Network Security Groups — rules must pass EVERY applicable layer): Add
+Ingress Rule, stateful, source 0.0.0.0/0, TCP, dest 80; repeat for 443.
+No re-deploy needed: Caddy obtains the certificate on its next retry (~2 min)
+after the path opens; z2.2 then finishes §8 verification (TLS + NIP-11 +
+external curl) and hands the join line.
+
+**Standing state: STACK LIVE, CLOSED, CORRECT — blocked only on the founder's
+ingress fix. Receipt (§10) unchanged: his Windows desktop renders channels.**
