@@ -44,6 +44,16 @@
 | 36 | bnr | AVAILABLE | — | — | 4 |
 | 37 | bn | AVAILABLE | — | — | 4 |
 | 38 | bqueenbee | AVAILABLE | — | — | 4 |
+| 39 | luna | AVAILABLE | — | — | 5 |
+| 40 | love | AVAILABLE | — | — | 5 |
+| 41 | lover | AVAILABLE | — | — | 5 |
+| 42 | countess | AVAILABLE | — | — | 5 |
+| 43 | count | AVAILABLE | — | — | 5 |
+| 44 | duke | AVAILABLE | — | — | 5 |
+| 45 | lord | AVAILABLE | — | — | 5 |
+| 46 | minister | AVAILABLE | — | — | 5 |
+| 47 | primeminister | AVAILABLE | — | — | 5 |
+| 48 | dao | AVAILABLE | — | — | 5 |
 
 **TAKEN (2):** inga and remington — both already held by kingbeelovis, both expire 2027-08-01. **Nothing to do.**
 
@@ -70,7 +80,7 @@
 
 No lawful-form alternatives are required. All three ride the normal batches.
 
-## 3 · THE BATCHES (4 transactions, 36 registeracc actions total)
+## 3 · THE BATCHES (5 transactions, 46 registeracc actions total)
 
 Every action: `account=kingbeelovis`, `name=registeracc`, `authorization=[{actor:kingbeelovis, permission:active}]`, `data={registrant:kingbeelovis, domain_name:<name>, target:kingbeelovis}`.
 
@@ -78,6 +88,7 @@ Every action: `account=kingbeelovis`, `name=registeracc`, `authorization=[{actor
 **Batch 2 (10 names):** skaists · lovernment · wenpin · aaron · william · ella · adan · michael · ej · *(9 — remington was slotted here, taken, removed)*
 **Batch 3 (10 names):** sutphen · mark · zander · berlin · janus · regina · isaac · jason · beehivenature · skaistsdao
 **Batch 4 (7 names):** buzz · usad · busad · beehivenaturereserve · bnr · bn · bqueenbee
+**Batch 5 (10 names):** luna · love · lover · countess · count · duke · lord · minister · primeminister · dao
 
 ### Raw paste-ready blocks
 
@@ -103,9 +114,14 @@ Each block is a complete Vaulta transaction JSON — paste into any Vaulta-signi
 {"actions":[{"account":"kingbeelovis","name":"registeracc","authorization":[{"actor":"kingbeelovis","permission":"active"}],"data":{"registrant":"kingbeelovis","domain_name":"buzz","target":"kingbeelovis"}},{"account":"kingbeelovis","name":"registeracc","authorization":[{"actor":"kingbeelovis","permission":"active"}],"data":{"registrant":"kingbeelovis","domain_name":"usad","target":"kingbeelovis"}},{"account":"kingbeelovis","name":"registeracc","authorization":[{"actor":"kingbeelovis","permission":"active"}],"data":{"registrant":"kingbeelovis","domain_name":"busad","target":"kingbeelovis"}},{"account":"kingbeelovis","name":"registeracc","authorization":[{"actor":"kingbeelovis","permission":"active"}],"data":{"registrant":"kingbeelovis","domain_name":"beehivenaturereserve","target":"kingbeelovis"}},{"account":"kingbeelovis","name":"registeracc","authorization":[{"actor":"kingbeelovis","permission":"active"}],"data":{"registrant":"kingbeelovis","domain_name":"bnr","target":"kingbeelovis"}},{"account":"kingbeelovis","name":"registeracc","authorization":[{"actor":"kingbeelovis","permission":"active"}],"data":{"registrant":"kingbeelovis","domain_name":"bn","target":"kingbeelovis"}},{"account":"kingbeelovis","name":"registeracc","authorization":[{"actor":"kingbeelovis","permission":"active"}],"data":{"registrant":"kingbeelovis","domain_name":"bqueenbee","target":"kingbeelovis"}}]}
 ```
 
+**Batch 5:**
+```json
+{"actions":[{"account":"kingbeelovis","name":"registeracc","authorization":[{"actor":"kingbeelovis","permission":"active"}],"data":{"registrant":"kingbeelovis","domain_name":"luna","target":"kingbeelovis"}},{"account":"kingbeelovis","name":"registeracc","authorization":[{"actor":"kingbeelovis","permission":"active"}],"data":{"registrant":"kingbeelovis","domain_name":"love","target":"kingbeelovis"}},{"account":"kingbeelovis","name":"registeracc","authorization":[{"actor":"kingbeelovis","permission":"active"}],"data":{"registrant":"kingbeelovis","domain_name":"lover","target":"kingbeelovis"}},{"account":"kingbeelovis","name":"registeracc","authorization":[{"actor":"kingbeelovis","permission":"active"}],"data":{"registrant":"kingbeelovis","domain_name":"countess","target":"kingbeelovis"}},{"account":"kingbeelovis","name":"registeracc","authorization":[{"actor":"kingbeelovis","permission":"active"}],"data":{"registrant":"kingbeelovis","domain_name":"count","target":"kingbeelovis"}},{"account":"kingbeelovis","name":"registeracc","authorization":[{"actor":"kingbeelovis","permission":"active"}],"data":{"registrant":"kingbeelovis","domain_name":"duke","target":"kingbeelovis"}},{"account":"kingbeelovis","name":"registeracc","authorization":[{"actor":"kingbeelovis","permission":"active"}],"data":{"registrant":"kingbeelovis","domain_name":"lord","target":"kingbeelovis"}},{"account":"kingbeelovis","name":"registeracc","authorization":[{"actor":"kingbeelovis","permission":"active"}],"data":{"registrant":"kingbeelovis","domain_name":"minister","target":"kingbeelovis"}},{"account":"kingbeelovis","name":"registeracc","authorization":[{"actor":"kingbeelovis","permission":"active"}],"data":{"registrant":"kingbeelovis","domain_name":"primeminister","target":"kingbeelovis"}},{"account":"kingbeelovis","name":"registeracc","authorization":[{"actor":"kingbeelovis","permission":"active"}],"data":{"registrant":"kingbeelovis","domain_name":"dao","target":"kingbeelovis"}}]}
+```
+
 ### RAM estimate (honest)
 
-36 names × ~0.85 A ≈ **30.6 A** total (resellable). Per batch: B1 ≈ 8.5 A · B2 ≈ 7.65 A · B3 ≈ 8.5 A · B4 ≈ 5.95 A.
+46 names × ~0.85 A ≈ **39.1 A** total (resellable). Per batch: B1 ≈ 8.5 A · B2 ≈ 7.65 A · B3 ≈ 8.5 A · B4 ≈ 5.95 A · B5 ≈ 8.5 A.
 
 ### Wallet-composer prefills
 
@@ -113,14 +129,15 @@ The composer boots per-action; for the multi-action batches the raw blocks above
 
 ## 4 · FOUNDER SIGN-STEPS (numbered, stupid easy)
 
-You sign **4 transactions**. Each is one ceremony. Each registers ~10 names.
+You sign **5 transactions**. Each is one ceremony. Each registers ~10 names.
 
 1. **Open your Vaulta wallet** (the wallet surface or any signing tool) as `kingbeelovis@active`.
 2. **Batch 1** — paste the Batch 1 JSON block. Review: 10 `registeracc` calls, your account on every line. **Sign.**
 3. **Batch 2** — paste Batch 2. 9 calls (remington dropped — already yours). **Sign.**
 4. **Batch 3** — paste Batch 3. 10 calls. **Sign.**
 5. **Batch 4** — paste Batch 4. 7 calls. **Sign.**
-6. **Done.** 36 names registered. ~30.6 A RAM (resellable). Fee: 0.0000 per name. Expires: 365 days from each registration.
+6. **Batch 5** — paste Batch 5. 10 calls (luna · love · lover · the nobility · dao). **Sign.**
+7. **Done.** 46 names registered. ~39.1 A RAM (resellable). Fee: 0.0000 per name. Expires: 365 days from each registration.
 
 **What you already own (no action):** inga (expires 2027-08-01) · remington (expires 2027-08-01).
 
