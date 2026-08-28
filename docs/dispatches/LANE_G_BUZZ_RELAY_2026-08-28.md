@@ -400,3 +400,68 @@ targets as root — create the dir before first `up` (cost one 404 debug).
 **Handed to the founder (again, this time proven): Add Community →
 `wss://skaists.buzz`** — his key is owner+member, the blocker is deleted from
 his app. Strangers: the invite link, or the door.
+
+## 14 · LANE G2 — hive #2 stamped: beehivenature.buzz (z2.2, 18:30–19:10 UTC)
+
+Founder-ruled PERMANENT name: `beehivenature.buzz` (the organism family hive).
+The §9 blueprint was pressed a second time on the same box — this section is
+what the second pressing taught.
+
+**Preflight (18:30 UTC):** 22 GiB RAM available / 37 G disk free beside hive
+#1 + LiveKit (hive #1 stack all healthy). Ingress already proven open — no
+new founder firewall act.
+
+**Stamp (built + healthy, closed from second zero):**
+- `/opt/buzz-bn` = byte-copy of the pinned tree (`191a577`), project renamed
+  `buzz-prod-bn` (own volumes/networks/postgres/minio).
+- Overlay `compose.bn.yml`: relay publishes NO host ports (`!reset []`) —
+  the G1 caddy reaches it on the shared docker network as alias `relay-bn`
+  (external network `buzz-prod_buzz-net`). ONE caddy, ONE 80/443, SNI-routed
+  sites: `skaists.buzz` → relay, `beehivenature.buzz` → relay-bn.
+- Own `.env` (600): same image pin `ghcr.io/block/buzz:0.2.1`, hostname
+  family, CORS `https://beehivenature.buzz,tauri://localhost,
+  http://tauri.localhost`, membership+token true, git GUI false, fresh
+  on-box secrets, `RELAY_OWNER_PUBKEY` = founder (his same npub).
+- Boot receipts: **"Deployment community ensured" host=beehivenature.buzz**
+  (community `d108440c-e61e-4f61-9176-b7dfbe8cd15b` — hive #2's permanent
+  identity), owner bootstrapped = founder, roster = founder **owner** +
+  box identity **admin** (the ruled shape, first try).
+
+**The defect the second pressing caught (lesson → blueprint):** the
+"byte-identical" tree copy carried **G1's runtime `.env`** — the first boot
+seeded hive #2's community as `host=skaists.buzz` (separate DB, so a SHADOW
+skaists community inside hive #2) and reused G1's secrets. Caught by reading
+the boot receipt against the expected host (the receipt-reading habit is now
+a blueprint gate: **the seed host MUST equal the ruled hostname or the stamp
+is void**). Fixed by full restamp: `down -v` (volumes wiped — minutes old,
+nothing of value), true hive-2 env written, clean re-up, receipt verified.
+Also: `cp -a src dst` nests when dst pre-exists (mkdir first = tree at
+`dst/src`) — copy as one sudo motion then chown.
+
+**buzz.xyz inventory (best-effort, read-only, per dispatch §5):**
+`https://beehive-nature.communities.buzz.xyz` is a LIVE buzz relay,
+software `block/buzz` **v0.2.1** — same version as ours — with
+`auth_required: true, restricted_writes: true, payment_required: false`,
+pairing relay `wss://pairing.buzz.xyz`, instance id `12f6870117ef…`.
+Nothing anonymously readable past NIP-11 (closed like ours). The founder's
+app carries `buzz-community-onboarding-complete.v1:
+wss://beehive-nature.communities.buzz.xyz:d4416334… = true` — he HAS
+completed onboarding there; reading its rooms needs his key in the app.
+**Replaying that history into hive #2 is a separate founder word — not
+attempted.**
+
+**DNS gate (the founder's only act):** at press time `beehivenature.buzz`
+still resolves to the registrar parking IP `192.64.119.240` on both
+resolvers (stable ~40 min of polling) — the A record to `129.153.202.144`
+has not landed. Per dispatch: never ask him to re-do it. **The lane is
+armed to self-complete:** `~/lane-g2-complete.sh` (idempotent, WSL-runnable)
+gates on two-resolver agreement, then runs cert wait → NIP-11 verify →
+mint durable stranger invite (admin secret ssh→stdin) → door-bn (organism
+re-skin, code embedded) → stranger-class join proof from the founder's
+machine → status receipts; a 12-minute watcher automation drives it and
+lands the receipts here on completion. Caddy issues the cert on its own
+retry the moment the record flips.
+
+**Standing state: hive #2 BUILT, HEALTHY, CLOSED, CORRECT — the one pending
+thing is the DNS A record landing (founder's act, not re-requested). Join
+line to be handed only after the machine-proven join (dispatch §8).**
