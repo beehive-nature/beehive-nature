@@ -224,11 +224,70 @@
     return { txid: tx.id, status: res.status, ok: res.ok, text: res.text };
   }
 
-  window.BNRAR = {
+  /* ── the adapter-contract split (SPEC-ADAPTER-CONTRACT-1, B3) ──────────
+     buildUnsigned: everything up to but NOT INCLUDING the signature — the
+     worker calls this with the JWK's PUBLIC parts only ({kty,n,e}); what
+     comes back is the sigData (exactly what an Arweave key signs) plus the
+     unsigned wire. signRaw: the vault's half — RSA-PSS over sigData. The
+     adapter never holds the private key; the vault never knows the rail. */
+  async function buildUnsigned(publicJwk, data, tags, opts) {
+    opts = opts || {};
+    var owner = jwkOwner(publicJwk);
+    var anchor = opts.anchor || await txAnchor();
+    var reward = opts.reward || await fee(data ? data.length : 0, opts.target || '');
+    var root = await chunkRoot(data);
+    var tagList = [];
+    for (var i = 0; i < tags.length; i++) tagList.push([str(tags[i].name), str(tags[i].value)]);
+    var sigData = await deepHash([
+      str('2'), owner, str(opts.target || ''), str(opts.quantity || '0'),
+      str(reward), unb64u(anchor), tagList,
+      str(String(data.length)), root
+    ]);
+    return {
+      sigData: sigData,
+      wire: {
+        format: 2,
+        last_tx: anchor,
+        owner: publicJwk.n,
+        tags: tags.map(function (t) { return { name: b64u(str(t.name)), value: b64u(str(t.value)) }; }),
+        target: opts.target || '',
+        quantity: opts.quantity || '0',
+        data: data && data.length ? b64u(data) : '',
+        data_size: String(data ? data.length : 0),
+        data_root: root.length ? b64u(root) : '',
+        reward: reward
+      }
+    };
+  }
+  async function signRaw(jwk, sigData) {   // the vault's half: PSS over the deepHash output
+    var key = await importSigner(jwk);
+    var sig = new Uint8Array(await subtle.sign({ name: 'RSA-PSS', saltLength: 32 }, key, sigData));
+    var id = await sha256(sig);
+    return { signature: b64u(sig), id: b64u(id) };
+  }
+  async function txStatus(txid) {          // the rail read for confirm(): GET /tx/{id}
+    var order = shuffled();
+    for (var i = 0; i < order.length; i++) {
+      try {
+        var r = await fetch(order[i] + '/tx/' + encodeURIComponent(txid), { method: 'GET' });
+        var text = await r.text();
+        if (r.status === 200) {
+          var body = null; try { body = JSON.parse(text) } catch (e) {}
+          return { gateway: order[i], status: r.status, tx: body && body.status, confirmations: (body && body.confirmations) || 0 };
+        }
+        if (r.status === 404 || r.status === 410) return { gateway: order[i], status: r.status, tx: 'unknown' };
+        if (r.status >= 400 && r.status < 500) return { gateway: order[i], status: r.status, tx: 'refused' };
+      } catch (e) { /* walk */ }
+    }
+    return { gateway: null, status: 0, tx: 'unreachable' };
+  }
+
+  globalThis.BNRAR = {
     GATEWAYS: GATEWAYS,
     CAPABILITIES: { balance: true, receiveAddress: true, send: true, publish: true, chunked: false },
     b64u: b64u, unb64u: unb64u, deepHash: deepHash, chunkRoot: chunkRoot,
     addressOf: addressOf, balance: balance, fee: fee, spotPrice: spotPrice,
-    txAnchor: txAnchor, buildTx: buildTx, publish: publish, send: send
+    txAnchor: txAnchor, buildTx: buildTx, publish: publish, send: send,
+    buildUnsigned: buildUnsigned, signRaw: signRaw, postTx: postTx, txStatus: txStatus
   };
 })();

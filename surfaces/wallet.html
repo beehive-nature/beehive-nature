@@ -910,10 +910,8 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
           }
         }
         go.addEventListener('click', async function () {
-          var A = window.BNRAR, V = window.BNRVAULT;
-          if (!A || !V) return;
-          var e = arEntry();
-          if (!e) { paint('seal an arweave JWK in the vault first', 'var(--amber)'); return; }
+          var W = window.BNRWALLET, V = window.BNRVAULT;
+          if (!W) { paint('the wallet shell did not load', 'var(--amber)'); return; }
           go.disabled = true;
           paint('fetching the committed manifest…');
           try {
@@ -926,29 +924,34 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
                 ORBIT.sha256.slice(0, 16) + '… . A drifted file is never anchored; nothing was sent.', 'var(--amber)');
               return;
             }
-            paint('payload verified (' + bytes.length + ' B, sha256 pinned) — unlocking the JWK from the vault and signing…');
-            var jwk = JSON.parse(V.reveal(e.id).secret);
-            var r = await A.publish(bytes, ORBIT.tags.map(function (t) { return { name: t[0], value: t[1]}; }), jwk);
-            if (r.ok) {
-              paint('⚓ ANCHORED — tx ' + r.txid);
+            paint('payload verified (' + bytes.length + ' B, sha256 pinned) — the contract path: the worker builds, the vault signs, the outbox persists…');
+            var jwk = null, e = V && arEntry();
+            if (e) {
+              jwk = JSON.parse(V.reveal(e.id).secret);      // the vault's key, revealed only into the signing call
+            } else {
+              // demo lane: a RUNTIME-generated JWK, never stored, never funded —
+              // the gateway's verdict on it is the honest one, and the actual
+              // anchor waits for the founder loading a funded JWK (stated)
+              paint('no vault JWK — generating a runtime TEST key (unfunded, memory-only)…');
+              var kp = await crypto.subtle.generateKey({ name: 'RSA-PSS', modulusLength: 4096, publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' }, true, ['sign']);
+              jwk = await crypto.subtle.exportKey('jwk', kp.privateKey);
+            }
+            var r = await W.walletPublish(bytes, ORBIT.tags, { jwk: jwk });
+            if (r && r.phase === 'confirmed') {
+              paint('⚓ ANCHORED — read back from the gateway: ' + (r.evidence && r.evidence.read));
               var a = document.createElement('a');
-              a.href = 'https://arweave.net/' + r.txid;
+              a.href = 'https://arweave.net/' + r.ref;
               a.target = '_blank'; a.rel = 'noopener noreferrer';
-              a.textContent = 'live on arweave: ' + r.txid;
+              a.textContent = 'live on arweave: ' + r.ref;
               a.style.color = 'var(--cyan)';
               stat.appendChild(document.createElement('br'));
               stat.appendChild(a);
-            } else if (r.text.indexOf('verification') >= 0 || r.text.indexOf('fund') >= 0) {
-              var bal = await A.balance(await A.addressOf(jwk));
-              var fee = await A.fee(bytes.length);
-              var need = parseInt(fee, 10) || 0, have = parseInt(bal, 10) || 0;
+            } else if (r && r.phase === 'failed' && /verification|fund/i.test(JSON.stringify(r.evidence || {}))) {
               paint('the gateway rejected the tx — for an UNFUNDED key this is the expected verdict ' +
                 '(arweave-js gets the identical answer): everything is proven except the money. ' +
-                'This address holds ' + (have / 1e12) + ' AR and the anchor needs ' + (need / 1e12) +
-                ' AR — short by ' + ((need - have) / 1e12) + ' AR. Fund it and tap again.', 'var(--amber)');
-            } else {
-              paint('gateway said ' + r.status + ': ' + String(r.text).slice(0, 120), 'var(--amber)');
+                'The signed anchor sits in the outbox; fund this address (or seal a funded JWK in the vault) and tap again.', 'var(--amber)');
             }
+            // every other phase already spoke through tx-out (refused / submitted / faulted — all honest)
           } catch (err) {
             paint('publish failed: ' + (err && err.message ? err.message : err), 'var(--amber)');
           } finally {
@@ -1062,7 +1065,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 <script src="onboarding/vendor/bnr-qr.js?v=1"></script>
 <script src="onboarding/vendor/bip39-wordlist.js"></script>
 <script src="vault.js?v=2"></script>
-<script src="arweave.js?v=1"></script>
+<script src="arweave.js?v=2"></script>
 <script>
 (function(){
   var $=function(i){return document.getElementById(i)};
@@ -2504,7 +2507,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   }
   function wallWalk(x, key) {
     if (typeof x === 'string') {
-      if (key === 'd' && /^[A-Za-z0-9_-]{40,}$/.test(x)) wallThrow();   // JWK private exponent
+      if (key && /^(d|p|q|dp|dq|qi)$/.test(key) && /^[A-Za-z0-9_-]{40,}$/.test(x)) wallThrow();   // JWK private parameters — any of them
       if (/PRIVATE KEY-----/.test(x)) wallThrow();                      // PEM block
       for (var i = 0; i < WALL_EXACT.length; i++) if (WALL_EXACT[i].test(x)) wallThrow();
       return;
@@ -2599,10 +2602,15 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     for (var i = 0; i < s.length; i++) u[i] = s.charCodeAt(i);
     return u;
   }
-  function vaultSign(intent, opts) {
+  async function vaultSign(intent, opts) {
     var payload = b64ToBytes(intent.unsigned_bytes);
     var digest = hexS(BN.sha256(payload));   // BN.sha256 gives bytes; hexS is the byte-wise hex
     if (digest !== intent.digest) throw new Error('vault refused: digest mismatch (intent says ' + intent.digest.slice(0, 12) + '…, bytes hash ' + digest.slice(0, 12) + '…)');
+    if (intent.rail === 'arweave') {                         // B3: the JWK signs the deepHash output — RSA-PSS, vault-held
+      if (!opts || !opts.jwk || !opts.jwk.d) throw new Error('arweave intents sign with a vault-held JWK — none was revealed');
+      var s = await window.BNRAR.signRaw(opts.jwk, payload);
+      return { signatures: [s.signature], ar_id: s.id, by: 'arweave-jwk' };
+    }
     var digestBytes = hexB(digest);
     if (opts && opts.wif) {                                  // Jungle4 rehearsal: pasted TESTNET key, memory-only
       return { signatures: [BN.PrivateKey.fromString(opts.wif).sign(digestBytes).toString()], by: 'eosjs+testkey' };
@@ -2717,7 +2725,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     $('tx-preview-body').innerHTML += '<b>intent</b>   ' + intent.intent_id + '\n<b>digest</b>  ' + intent.digest.slice(0, 32) + '…\n<b>in words</b> ' + intent.human_summary;
     out.textContent = '2/5 the vault signs the digest…';
     var sgn;
-    try { sgn = vaultSign(intent, opts.wif ? { wif: opts.wif } : null) }
+    try { sgn = await vaultSign(intent, opts.wif ? { wif: opts.wif } : (opts.jwk ? { jwk: opts.jwk } : null)) }
     catch (e) { out.innerHTML = '<b style="color:var(--amber)">vault refused:</b> ' + (e && e.message || e); return null }
     var entry = {
       intent_id: intent.intent_id, rail: 'vaulta', network: net,
@@ -2764,11 +2772,66 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 
   spawnAdapter('vaulta', 'wallet-adapter-vaulta.js');   // document-relative: same dir as this page
   spawnAdapter('hive', 'wallet-adapter-hive.js');
+  spawnAdapter('arweave', 'wallet-adapter-arweave.js');
+
+  /* ── walletPublish() — the Arweave anchor seam (B3, closes Rail 2 as
+     wallet feature work): the adapter builds from the JWK's PUBLIC parts,
+     the vault signs the deepHash output with the private JWK, the outbox
+     persists before submit, and confirm reads the gateway back. */
+  async function walletPublish(bytes, tags, opts) {
+    opts = opts || {};
+    var out = $('tx-out');
+    if (!ADAPTERS.arweave || !ADAPTERS.arweave.attached) {
+      if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">arweave adapter not attached</b> — ' + ((ADAPTERS.arweave && ADAPTERS.arweave.state) || 'never spawned'); }
+      return null;
+    }
+    if (!hasCap('arweave', 'buildPublish')) {
+      if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">buildPublish is not declared by the arweave adapter</b> — the call path does not exist. Nothing was dispatched.'; }
+      return null;
+    }
+    if (!opts.jwk || !opts.jwk.d) {
+      if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">no signing JWK</b> — seal one in THE VAULT above, or run the demo lane which generates a runtime TEST key (unfunded — the gateway verdict will say so honestly).'; }
+      return null;
+    }
+    var publicJwk = { kty: 'RSA', n: opts.jwk.n, e: opts.jwk.e || 'AQAB' };   // public parts ONLY cross the seam
+    var b64in = btoa(String.fromCharCode.apply(null, bytes.length > 30000 ? bytes.subarray(0, 30000) : bytes));
+    if (bytes.length > 30000) throw new Error('payload over 30 KB — chunked upload is a later lane; the anchor payload is small');
+    var intent;
+    try {
+      intent = await callAdapter('arweave', 'buildPublish', { public_jwk: publicJwk, payload_b64: b64in, tags: tags }, 25000);
+    } catch (e) {
+      if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">build failed:</b> ' + (e && e.message || e); }
+      return null;
+    }
+    var sgn;
+    try { sgn = await vaultSign(intent, { jwk: opts.jwk }) }
+    catch (e) {
+      if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">vault refused:</b> ' + (e && e.message || e); }
+      return null;
+    }
+    var entry = {
+      intent_id: intent.intent_id, rail: 'arweave', network: 'mainnet',
+      human_summary: intent.human_summary, digest: intent.digest,
+      unsigned_bytes: intent.unsigned_bytes,
+      signed_bytes: JSON.stringify({ wire: intent.wire_json, signature: sgn.signatures[0], id: sgn.ar_id }),
+      phase: 'signed', ref: null, block_hint: null,
+      expires_at: intent.expires_at, signed_by: sgn.by,
+      created_at: new Date().toISOString(), updated_at: new Date().toISOString(), evidence: null
+    };
+    outboxPut(entry);
+    if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--cyan)">signed (' + sgn.by + ') and PERSISTED in the outbox — submitting the identical bytes to a rotated gateway…</b>'; }
+    return submitAndConfirm(entry, function (msg, phase) {
+      var o = $('tx-out'); o.style.display = 'block';
+      o.innerHTML = '<b style="color:' + phaseColor(phase) + '">' + esc(msg) + '</b>';
+    });
+  }
+
   renderOutbox();
 
   window.BNRWALLET = {
     adapters: ADAPTERS,
     walletAction: walletAction,
+    walletPublish: walletPublish,
     callAdapter: callAdapter,
     hasCap: hasCap,
     _telemetry: TELEMETRY,

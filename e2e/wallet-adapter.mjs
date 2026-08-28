@@ -32,7 +32,7 @@ const ok = (name, cond, detail) => {
 
 const J4_CHAIN = '73e4385a2708e6d7048834fbc1079f2fabb17b3c125b146af438971e90716c4d'; // PUBLIC-CONSTANT: Jungle4 chain id
 const MAIN_CHAIN = 'aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906'; // PUBLIC-CONSTANT: Vaulta mainnet chain id
-const RPC_RE = /^https:\/\/(eos\.api\.eosnation\.io|eos\.greymass\.com|api\.eosn\.io|jungle4\.cryptolions\.io|jungle4\.eosphere\.io|jungle4\.api\.eosnation\.io|api\.hive\.blog)(\/|$)/;
+const RPC_RE = /^https:\/\/(eos\.api\.eosnation\.io|eos\.greymass\.com|api\.eosn\.io|jungle4\.cryptolions\.io|jungle4\.eosphere\.io|jungle4\.api\.eosnation\.io|api\.hive\.blog|arweave\.net|ar-io\.dev|gateway\.ardrive\.io)(\/|$)/;
 const J4_WIF = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'; // TESTNET-ONLY: eosio's documented dev key, chain-significant nowhere
 const COMMIT_ABI = {
   account_name: 'banchor22222',
@@ -65,6 +65,25 @@ function mockChain(ctx, opts = {}) {
   ctx.route(RPC_RE, async route => {
     if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors });
     const u = new URL(route.request().url());
+    const json = (obj, status = 200) => route.fulfill({ status, headers: cors, contentType: 'application/json', body: JSON.stringify(obj) });
+    if (/arweave|ar-io|ardrive/.test(u.host)) {
+      const text = (t, status = 200) => route.fulfill({ status, headers: cors, body: String(t) });
+      if (u.pathname.startsWith('/price/')) return text('1000');
+      if (u.pathname === '/tx_anchor') return text('MOCKANCHOR' + 'a'.repeat(24));
+      if (u.pathname === '/spot_price') return text('20.5');
+      if (u.pathname.startsWith('/wallet/') && u.pathname.endsWith('/balance')) return text('0');
+      if (u.pathname === '/tx' && route.request().method() === 'POST') {
+        const body = JSON.parse(route.request().postData());
+        if (!body.signature || !body.id || !body.owner) return route.fulfill({ status: 400, headers: cors, body: 'malformed tx' });
+        state.arAccepted = body.id;                                  // idempotent by id — the rail's own dedupe
+        return route.fulfill({ status: 202, headers: cors, body: '' });
+      }
+      if (u.pathname.startsWith('/tx/')) {                           // the confirm rail read
+        if (state.arConfirm) return json({ status: 'confirmed', confirmations: 20 });
+        return json({ status: 'pending', confirmations: 0 });
+      }
+      return text('');
+    }
     if (/api\.hive\.blog/.test(u.host)) {
       const accounts = [{ balance: '425.103 HIVE' }];
       return route.fulfill({ status: 200, headers: cors, contentType: 'application/json',
@@ -72,7 +91,6 @@ function mockChain(ctx, opts = {}) {
     }
     const isJ4Host = /jungle4/.test(u.host);
     const chain = opts.mainAsJ4 ? MAIN_CHAIN : (isJ4Host ? J4_CHAIN : MAIN_CHAIN);
-    const json = (obj, status = 200) => route.fulfill({ status, headers: cors, contentType: 'application/json', body: JSON.stringify(obj) });
     if (u.pathname.endsWith('/get_abi')) {
       const want = JSON.parse(route.request().postData()).account_name;
       return json(want === 'banchor22222' ? COMMIT_ABI : BNAME_ABI);
@@ -314,6 +332,55 @@ try {
       (await p9.locator('#tx-contract').inputValue()) === 'kingbeelovis' &&
       (await p9.locator('#tx-action').inputValue()) === 'registeracc');
     await c9.close();
+  }
+
+  /* ── 10 · the SECOND WRITE ADAPTER (§9.7 — the contract tested as a
+         contract): arweave buildPublish end-to-end + the JWK wall ──────── */
+  console.log('10 · arweave adapter (§9.7):');
+  {
+    const c10 = await browser.newContext(); const rail10 = mockChain(c10); rail10.arConfirm = true;
+    const p10 = await c10.newPage();
+    await p10.goto(WALLET, { waitUntil: 'load' });
+    await p10.waitForFunction(() => window.BNRWALLET && BNRWALLET.adapters.arweave && BNRWALLET.adapters.arweave.attached &&
+      BNRWALLET.adapters.vaulta.attached, null, { timeout: 25000 });
+    const desc = await p10.evaluate(() => ({ ar: BNRWALLET.adapters.arweave.caps, vt: BNRWALLET.adapters.vaulta.caps }));
+    ok('arweave describes with buildPublish — two WRITE adapters now attached (§9.7 closed)',
+      desc.ar.rail === 'arweave' && desc.ar.capabilities.includes('buildPublish') && desc.ar.contract_version === '1' &&
+      desc.vt.capabilities.includes('buildAction'), JSON.stringify(desc.ar.capabilities));
+    const r = await p10.evaluate(async () => {
+      const kp = await crypto.subtle.generateKey({ name: 'RSA-PSS', modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' }, true, ['sign']);
+      const jwk = await crypto.subtle.exportKey('jwk', kp.privateKey);        // runtime TEST key — vault side, never crosses the seam
+      const bytes = new TextEncoder().encode('lane-b B3 anchor proof — the contract path, not a direct publish');
+      const entry = await window.BNRWALLET.walletPublish(bytes, [['App-Name', 'bnr-lane-b'], ['Type', 'anchor-proof']], { jwk: jwk });
+      return entry && { phase: entry.phase, ref: entry.ref, evidence: entry.evidence, id: entry.intent_id };
+    });
+    ok('publish end-to-end: build (public JWK only) → vault sign → outbox → submit → CONFIRMED from the gateway read',
+      r && r.phase === 'confirmed' && /^arweave:/.test(r.id) && r.ref && r.ref.length === 43 &&
+      /GET \/tx\/.*@ https:\/\/(arweave\.net|ar-io\.dev|gateway\.ardrive\.io)/.test(r.evidence.read), JSON.stringify(r && { phase: r.phase, ev: r.evidence }));
+    const obx10 = await p10.evaluate(() => JSON.parse(localStorage.getItem('bnr_outbox_v1') || '[]').filter(e => e.rail === 'arweave'));
+    ok('the arweave entry lives in the same outbox under the same phases', obx10.length === 1 && obx10[0].phase === 'confirmed' && obx10[0].signed_by === 'arweave-jwk');
+    await c10.close();
+  }
+
+  /* ── 11 · §9.3 MUTATION, arweave shape: a leaking JWK private param ───── */
+  console.log('11 · JWK wall mutation:');
+  {
+    const c11 = await browser.newContext(); mockChain(c11);
+    await c11.route(/wallet-adapter-arweave\.js/, async route => {
+      const src = await readFile(join(ROOT, 'surfaces', 'wallet-adapter-arweave.js'), 'utf8');
+      const from = "return { unit: 'AR', quantity: String(winston), winston: String(winston) };";
+      if (!src.includes(from)) return route.fulfill({ status: 500, contentType: 'text/plain', body: 'mutation anchor missing' });
+      const to = "return { unit: 'AR', quantity: String(winston), winston: String(winston), p: '" + 'A'.repeat(342) + "' };";
+      return route.fulfill({ status: 200, contentType: 'text/javascript', body: src.replace(from, to) });
+    });
+    const p11 = await c11.newPage();
+    await p11.goto(WALLET, { waitUntil: 'load' });
+    await p11.waitForFunction(() => window.BNRWALLET && BNRWALLET.adapters.arweave && BNRWALLET.adapters.arweave.attached, null, { timeout: 25000 });
+    const r = await p11.evaluate(() => window.BNRWALLET.callAdapter('arweave', 'balance', { address: 'x'.repeat(43) }).then(
+      () => 'LEAKED THROUGH', e => e.message));
+    ok('JWK private parameter in a response: rejected by the wall, never reaches the caller',
+      /REDACTION WALL/.test(String(r)), String(r).slice(0, 90));
+    await c11.close();
   }
 
   await ctx.close();
