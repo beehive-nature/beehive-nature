@@ -46,4 +46,12 @@ const recomputed = {
 const a = JSON.stringify(recomputed), b = JSON.stringify(reg.counts);
 if (a !== b) { console.error('counts block drifted from the registry itself:\n  recomputed: ' + a + '\n  declared : ' + b); process.exit(1); }
 
-console.log('PASS estate-check — ' + reg.surfaces.length + ' surfaces once each · ' + reg.domains.length + ' domains · counts computed, not written');
+/* the hub embeds the registry between markers — the embedded copy must equal
+   the file, or the page renders stale numbers CI can't see */
+const page = readFileSync('surfaces/index.html', 'utf8');
+const m = page.match(/<!--ESTATE-JSON-START-->([\s\S]*?)<!--ESTATE-JSON-END-->/);
+if (!m) fail('surfaces/index.html lost its ESTATE-JSON markers');
+const embedded = JSON.parse(m[1]);
+if (JSON.stringify(embedded) !== JSON.stringify(reg)) fail('the hub\u2019s embedded registry drifted from estate.json — re-embed before landing');
+
+console.log('PASS estate-check — ' + reg.surfaces.length + ' surfaces once each · ' + reg.domains.length + ' domains · counts computed, not written · hub embed in sync');
