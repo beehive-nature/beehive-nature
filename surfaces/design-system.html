@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#06110C">
+<link rel="stylesheet" href="tokens.css">
+<title>beehive nature · the system — the living style guide</title>
+<style>
+/* SEMANTIC COLOUR — meanings picked FIRST, hues second (the two-axis law
+   this page documents): axis b entity identity (ai · biomass · sovereign ·
+   you) · axis a ui semantics (primary · info · verified · guard · b-value).
+   tokens.css is the only color source; this page demonstrates it. */
+:root{
+  --void:#06110C; --panel:#0C1412; --well:#0E1A12; --line:#1E2B26;
+  --ink:#E9F2EC; --dim:#8FA79C; --faint:#648176;
+  --ai:#45C2DC; --ai-deep:#57CDE4; --biomass:#86CC72; --sovereign:#9C6FD6;
+  --sovereign-soft:#B79FE0; --you:#D655BB; --info:#6FA9E0; --guard:#B7A8F7;
+  --b-value:#E8B54B;
+  --sem-harm:var(--guard); --sem-solution:var(--biomass); --sem-value:var(--b-value);
+  --sem-system:var(--info); --sem-science:var(--ai);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{overflow-x:hidden}
+body{background:var(--void);color:var(--ink);
+ font:13px/1.65 ui-monospace,'Cascadia Mono','SF Mono',Menlo,Consolas,monospace}
+main{max-width:980px;margin:0 auto;padding:0 20px 90px}
+a{color:var(--biomass);text-decoration:none}
+a:hover{text-decoration:underline}
+header.mast{position:relative;overflow:hidden;border-bottom:1px solid var(--line);padding-bottom:30px}
+#bandwrap{--bandh:149px}
+  #bandwrap{position:absolute;top:0;left:0;right:0;overflow:hidden;height:var(--bandh,78px)}
+  #bandwrap .band{position:absolute;display:flex;gap:6px;
+  animation-timing-function:linear;animation-iteration-count:infinite;will-change:transform}
+  #bandwrap .band i{flex:none;display:block;width:46px;height:53px;
+  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+  animation:hexpulse 3s ease-in-out infinite}
+  @keyframes hexpulse{0%{opacity:.10;transform:scale(.86)}50%{opacity:.95;transform:scale(1)}100%{opacity:.10;transform:scale(.86)}}
+  @keyframes hexdrift{0%{transform:translateX(0)}100%{transform:translateX(calc(var(--step) * -1))}}
+  @keyframes hexdriftb{0%{transform:translateX(calc(var(--step) * -1))}100%{transform:translateX(0)}}
+.kicker{position:relative;margin:0;padding-top:165px;font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:var(--faint)}
+h1{position:relative;font-size:clamp(32px,6vw,46px);line-height:1.06;font-weight:600;margin:12px 0 8px;
+  background:linear-gradient(92deg,#E9F2EC 55%,#86CC72);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{position:relative;color:var(--dim);font-size:12.5px;max-width:62ch;line-height:1.8}
+section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;margin-top:18px;scroll-margin-top:18px}
+.shead{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding-bottom:11px;border-bottom:1px solid var(--line);margin-bottom:14px}
+.shead .dot{width:10px;height:10px;flex:none;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:var(--biomass)}
+.shead h2{font-size:13px;font-weight:700;margin:0;letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
+.shead em{font-style:normal;font-size:9.5px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase;margin-left:auto}
+.axis{margin:0 0 12px;font-size:11px;color:var(--faint);letter-spacing:.12em;text-transform:uppercase}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:10px}
+.chipbox{background:var(--void);border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px}
+.hexswatch{width:26px;height:30px;flex:none;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
+.chipbox .cn{font-size:12.5px}
+.chipbox .cd{font-size:10.5px;color:var(--faint)}
+.chromerow{display:flex;gap:8px;flex-wrap:wrap}
+.chromerow span{font-size:10.5px;color:var(--dim);border:1px solid var(--line);border-radius:6px;padding:5px 10px}
+.laws{margin-top:14px;background:var(--well);border:1px dashed #2F4A3C;border-radius:10px;padding:12px 14px;font-size:11px;line-height:1.9;color:var(--dim)}
+.laws b{color:var(--ink);font-weight:400}
+.duo{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.wellbox{background:var(--void);border:1px solid var(--line);border-radius:10px;padding:14px}
+.wellbox .k{font-size:10.5px;color:var(--faint);margin-bottom:8px}
+.slab{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
+.inwell{background:var(--well);border:1px solid var(--line);border-radius:8px;padding:10px;font-size:10.5px;color:var(--dim)}
+.rhythm{display:flex;flex-direction:column;gap:6px}
+.rhythm .r{display:flex;align-items:center;gap:10px}
+.rhythm .r i{height:14px;background:rgba(134,204,114,.5)}
+.rhythm .r span{font-size:10.5px;color:var(--dim)}
+.spec{display:flex;flex-direction:column;gap:14px}
+.spec .cap{font-size:10px;color:var(--faint);margin-top:4px;letter-spacing:.1em;text-transform:uppercase}
+.baddges,.pillrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.crumbdemo{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--void);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.pill{font-size:12px;padding:6px 11px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--ink)}
+.pill .n{color:var(--faint)}
+.pill.on{border-color:var(--biomass)}
+.demo-h{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding:11px 0;border-bottom:1px solid var(--line)}
+.demo-h b{font-size:15px;font-weight:700;color:var(--ink)}
+.ctrls{display:flex;flex-direction:column;gap:10px}
+.btn{background:var(--well);color:var(--biomass);border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer;font:11.5px ui-monospace,Menlo,monospace;min-height:44px}
+.btn:hover{background:var(--biomass);color:var(--void)}
+.btn.primary{background:var(--biomass);color:var(--void);border-color:var(--biomass)}
+.btn.primary:hover{background:#A9E29A}
+.btn[disabled]{background:var(--well);color:var(--dim);border-style:dashed;cursor:default;opacity:.6}
+input[type=search]{width:100%;box-sizing:border-box;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:13px 16px;font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;outline:none}
+input[type=search]:focus{border-color:var(--biomass)}
+.stat-chips{display:flex;gap:6px;flex-wrap:wrap}
+.stat-chips span{background:var(--well);border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:10px;color:var(--dim)}
+.stat-chips b{color:var(--ink);font-weight:400}
+.doordemo{background:var(--well);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.doordemo .rn{font-size:17px;color:var(--ink)}
+.doordemo .rs{color:var(--dim);font-size:10.5px;margin-top:6px;line-height:1.7}
+.doordemo .rs b{color:var(--ink);font-weight:400}
+.wire{flex:1 1 170px;min-width:0;background:var(--void);border:1px solid var(--line);border-radius:8px;padding:9px 11px;font:12px ui-monospace,monospace;color:var(--ai);word-break:break-all}
+.joinrow{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap;margin-top:10px}
+.comet-law{margin:12px 0 0;font-size:11px;line-height:1.9;color:var(--dim);max-width:80ch}
+.comet-law b{color:var(--ink);font-weight:400}
+footer{color:var(--faint);font-size:12px;border-top:1px solid var(--line);margin-top:28px;padding:16px 0 0;line-height:1.8}
+footer .m{margin-top:6px;max-width:72ch}
+  #comet{display:block;width:100%;height:132px;margin:-14px 0 -8px;pointer-events:none}
+  @media (max-width:600px){#comet{height:104px}}
+@media (prefers-reduced-motion:reduce){#bandwrap *{animation:none !important}}
+@media (max-width:600px){
+  .kicker{padding-top:120px}
+  #bandwrap{--bandh:112px}
+  section{padding:14px 12px}
+  main{padding:0 12px 70px}
+}
+</style>
+</head>
+<body>
+<header class="mast" data-art>
+<div id="bandwrap" aria-hidden="true"><div class="band" style="top:-14px;left:-80px;opacity:1.00;animation-duration:15s;animation-name:hexdrift;--step:52px"><i style="background:#D655BB;animation-duration:2.4s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:2.9s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:3.3s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:3.8s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:4.2s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:2.4s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:2.9s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:3.3s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:3.8s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:4.2s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:2.4s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:2.9s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:3.3s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:3.8s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:4.2s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:2.4s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:2.9s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:3.3s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:3.8s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:4.2s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:2.4s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:2.9s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:3.3s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:3.8s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:4.2s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:2.4s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:2.9s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:3.3s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:3.8s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:4.2s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:2.4s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:2.9s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:3.3s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:3.8s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:4.2s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:2.4s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:2.9s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:3.3s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:3.8s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:4.2s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:2.4s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:2.9s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:3.3s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:3.8s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:4.2s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:2.4s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:2.9s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:3.3s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:3.8s;animation-delay:1.14s"></i></div><div class="band" style="top:26px;left:-54px;opacity:0.84;animation-duration:21s;animation-name:hexdriftb;--step:52px"><i style="background:#9C6FD6;animation-duration:2.9s;animation-delay:0.38s"></i><i style="background:#E8B54B;animation-duration:3.3s;animation-delay:0.57s"></i><i style="background:#6FA9E0;animation-duration:3.8s;animation-delay:0.76s"></i><i style="background:#B79FE0;animation-duration:4.2s;animation-delay:0.95s"></i><i style="background:#D655BB;animation-duration:2.4s;animation-delay:1.14s"></i><i style="background:#86CC72;animation-duration:2.9s;animation-delay:0.00s"></i><i style="background:#45C2DC;animation-duration:3.3s;animation-delay:0.19s"></i><i style="background:#9C6FD6;animation-duration:3.8s;animation-delay:0.38s"></i><i style="background:#E8B54B;animation-duration:4.2s;animation-delay:0.57s"></i><i style="background:#6FA9E0;animation-duration:2.4s;animation-delay:0.76s"></i><i style="background:#B79FE0;animation-duration:2.9s;animation-delay:0.95s"></i><i style="background:#D655BB;animation-duration:3.3s;animation-delay:1.14s"></i><i style="background:#86CC72;animation-duration:3.8s;animation-delay:0.00s"></i><i style="background:#45C2DC;animation-duration:4.2s;animation-delay:0.19s"></i><i style="background:#9C6FD6;animation-duration:2.4s;animation-delay:0.38s"></i><i style="background:#E8B54B;animation-duration:2.9s;animation-delay:0.57s"></i><i style="background:#6FA9E0;animation-duration:3.3s;animation-delay:0.76s"></i><i style="background:#B79FE0;animation-duration:3.8s;animation-delay:0.95s"></i><i style="background:#D655BB;animation-duration:4.2s;animation-delay:1.14s"></i><i style="background:#86CC72;animation-duration:2.4s;animation-delay:0.00s"></i><i style="background:#45C2DC;animation-duration:2.9s;animation-delay:0.19s"></i><i style="background:#9C6FD6;animation-duration:3.3s;animation-delay:0.38s"></i><i style="background:#E8B54B;animation-duration:3.8s;animation-delay:0.57s"></i><i style="background:#6FA9E0;animation-duration:4.2s;animation-delay:0.76s"></i><i style="background:#B79FE0;animation-duration:2.4s;animation-delay:0.95s"></i><i style="background:#D655BB;animation-duration:2.9s;animation-delay:1.14s"></i><i style="background:#86CC72;animation-duration:3.3s;animation-delay:0.00s"></i><i style="background:#45C2DC;animation-duration:3.8s;animation-delay:0.19s"></i><i style="background:#9C6FD6;animation-duration:4.2s;animation-delay:0.38s"></i><i style="background:#E8B54B;animation-duration:2.4s;animation-delay:0.57s"></i><i style="background:#6FA9E0;animation-duration:2.9s;animation-delay:0.76s"></i><i style="background:#B79FE0;animation-duration:3.3s;animation-delay:0.95s"></i><i style="background:#D655BB;animation-duration:3.8s;animation-delay:1.14s"></i><i style="background:#86CC72;animation-duration:4.2s;animation-delay:0.00s"></i><i style="background:#45C2DC;animation-duration:2.4s;animation-delay:0.19s"></i><i style="background:#9C6FD6;animation-duration:2.9s;animation-delay:0.38s"></i><i style="background:#E8B54B;animation-duration:3.3s;animation-delay:0.57s"></i><i style="background:#6FA9E0;animation-duration:3.8s;animation-delay:0.76s"></i><i style="background:#B79FE0;animation-duration:4.2s;animation-delay:0.95s"></i><i style="background:#D655BB;animation-duration:2.4s;animation-delay:1.14s"></i><i style="background:#86CC72;animation-duration:2.9s;animation-delay:0.00s"></i><i style="background:#45C2DC;animation-duration:3.3s;animation-delay:0.19s"></i><i style="background:#9C6FD6;animation-duration:3.8s;animation-delay:0.38s"></i><i style="background:#E8B54B;animation-duration:4.2s;animation-delay:0.57s"></i><i style="background:#6FA9E0;animation-duration:2.4s;animation-delay:0.76s"></i><i style="background:#B79FE0;animation-duration:2.9s;animation-delay:0.95s"></i><i style="background:#D655BB;animation-duration:3.3s;animation-delay:1.14s"></i><i style="background:#86CC72;animation-duration:3.8s;animation-delay:0.00s"></i><i style="background:#45C2DC;animation-duration:4.2s;animation-delay:0.19s"></i></div><div class="band" style="top:66px;left:-80px;opacity:0.68;animation-duration:27s;animation-name:hexdrift;--step:52px"><i style="background:#B79FE0;animation-duration:3.3s;animation-delay:0.76s"></i><i style="background:#D655BB;animation-duration:3.8s;animation-delay:0.95s"></i><i style="background:#86CC72;animation-duration:4.2s;animation-delay:1.14s"></i><i style="background:#45C2DC;animation-duration:2.4s;animation-delay:0.00s"></i><i style="background:#9C6FD6;animation-duration:2.9s;animation-delay:0.19s"></i><i style="background:#E8B54B;animation-duration:3.3s;animation-delay:0.38s"></i><i style="background:#6FA9E0;animation-duration:3.8s;animation-delay:0.57s"></i><i style="background:#B79FE0;animation-duration:4.2s;animation-delay:0.76s"></i><i style="background:#D655BB;animation-duration:2.4s;animation-delay:0.95s"></i><i style="background:#86CC72;animation-duration:2.9s;animation-delay:1.14s"></i><i style="background:#45C2DC;animation-duration:3.3s;animation-delay:0.00s"></i><i style="background:#9C6FD6;animation-duration:3.8s;animation-delay:0.19s"></i><i style="background:#E8B54B;animation-duration:4.2s;animation-delay:0.38s"></i><i style="background:#6FA9E0;animation-duration:2.4s;animation-delay:0.57s"></i><i style="background:#B79FE0;animation-duration:2.9s;animation-delay:0.76s"></i><i style="background:#D655BB;animation-duration:3.3s;animation-delay:0.95s"></i><i style="background:#86CC72;animation-duration:3.8s;animation-delay:1.14s"></i><i style="background:#45C2DC;animation-duration:4.2s;animation-delay:0.00s"></i><i style="background:#9C6FD6;animation-duration:2.4s;animation-delay:0.19s"></i><i style="background:#E8B54B;animation-duration:2.9s;animation-delay:0.38s"></i><i style="background:#6FA9E0;animation-duration:3.3s;animation-delay:0.57s"></i><i style="background:#B79FE0;animation-duration:3.8s;animation-delay:0.76s"></i><i style="background:#D655BB;animation-duration:4.2s;animation-delay:0.95s"></i><i style="background:#86CC72;animation-duration:2.4s;animation-delay:1.14s"></i><i style="background:#45C2DC;animation-duration:2.9s;animation-delay:0.00s"></i><i style="background:#9C6FD6;animation-duration:3.3s;animation-delay:0.19s"></i><i style="background:#E8B54B;animation-duration:3.8s;animation-delay:0.38s"></i><i style="background:#6FA9E0;animation-duration:4.2s;animation-delay:0.57s"></i><i style="background:#B79FE0;animation-duration:2.4s;animation-delay:0.76s"></i><i style="background:#D655BB;animation-duration:2.9s;animation-delay:0.95s"></i><i style="background:#86CC72;animation-duration:3.3s;animation-delay:1.14s"></i><i style="background:#45C2DC;animation-duration:3.8s;animation-delay:0.00s"></i><i style="background:#9C6FD6;animation-duration:4.2s;animation-delay:0.19s"></i><i style="background:#E8B54B;animation-duration:2.4s;animation-delay:0.38s"></i><i style="background:#6FA9E0;animation-duration:2.9s;animation-delay:0.57s"></i><i style="background:#B79FE0;animation-duration:3.3s;animation-delay:0.76s"></i><i style="background:#D655BB;animation-duration:3.8s;animation-delay:0.95s"></i><i style="background:#86CC72;animation-duration:4.2s;animation-delay:1.14s"></i><i style="background:#45C2DC;animation-duration:2.4s;animation-delay:0.00s"></i><i style="background:#9C6FD6;animation-duration:2.9s;animation-delay:0.19s"></i><i style="background:#E8B54B;animation-duration:3.3s;animation-delay:0.38s"></i><i style="background:#6FA9E0;animation-duration:3.8s;animation-delay:0.57s"></i><i style="background:#B79FE0;animation-duration:4.2s;animation-delay:0.76s"></i><i style="background:#D655BB;animation-duration:2.4s;animation-delay:0.95s"></i><i style="background:#86CC72;animation-duration:2.9s;animation-delay:1.14s"></i><i style="background:#45C2DC;animation-duration:3.3s;animation-delay:0.00s"></i><i style="background:#9C6FD6;animation-duration:3.8s;animation-delay:0.19s"></i><i style="background:#E8B54B;animation-duration:4.2s;animation-delay:0.38s"></i><i style="background:#6FA9E0;animation-duration:2.4s;animation-delay:0.57s"></i></div></div>
+  <p class="kicker">bnr design · the system — d-1 two-axis law, senary rhythm, zero fetch</p>
+  <h1>beehive nature · the system</h1>
+  <p class="lede">three rooms, three jobs, one blood. this page is the blood: every hue, size, gap, menu and badge the hub, the wallet and the buzz room inherit. restraint lives in the chrome — the living art rides on top, un-tamed.</p>
+</header>
+<main>
+
+<section>
+  <div class="shead"><span class="dot"></span><h2>01 · palette — docs/tokens.css, the only color source</h2><em>colors never operate singular — every chip sits on its real ground</em></div>
+  <p class="axis">axis b · entity identity (founder-ruled)</p>
+  <div class="grid">
+    <div class="chipbox"><span class="hexswatch" style="background:#45C2DC"></span><div><div class="cn" style="color:#45C2DC">--ai · #45C2DC</div><div class="cd">robots / bLOVErAi — machine base</div></div></div>
+    <div class="chipbox"><span class="hexswatch" style="background:#57CDE4"></span><div><div class="cn" style="color:#57CDE4">--ai-deep · #57CDE4</div><div class="cd">AI accents; ranges --ai ↔ --info</div></div></div>
+    <div class="chipbox"><span class="hexswatch" style="background:#86CC72"></span><div><div class="cn" style="color:#86CC72">--biomass · #86CC72</div><div class="cd">life · the estate's alive accent</div></div></div>
+    <div class="chipbox"><span class="hexswatch" style="background:#9C6FD6"></span><div><div class="cn" style="color:#9C6FD6">--sovereign · #9C6FD6</div><div class="cd">human / sovereignty · ALL SOULS</div></div></div>
+    <div class="chipbox"><span class="hexswatch" style="background:#B79FE0"></span><div><div class="cn" style="color:#B79FE0">--sovereign-soft · #B79FE0</div><div class="cd">member seats</div></div></div>
+    <div class="chipbox"><span class="hexswatch" style="background:#D655BB"></span><div><div class="cn" style="color:#D655BB">--you · #D655BB</div><div class="cd">YOU / primary actor (magenta)</div></div></div>
+    <div class="chipbox"><span class="hexswatch" style="background:linear-gradient(90deg,#FBFB9F,#86CC72,#45C2DC,#6FA9E0,#9C6FD6)"></span><div><div class="cn" style="color:#E9F2EC">--rainbow</div><div class="cd">SKAISTS — reads --flow, mirrors in rtl</div></div></div>
+  </div>
+  <p class="axis" style="margin-top:16px">axis a · ui semantics (kernel palette law)</p>
+  <div class="grid">
+    <div class="chipbox"><span class="hexswatch" style="background:#D655BB"></span><div><div class="cn" style="color:#D655BB">--primary → var(--you)</div><div class="cd">active / doing</div></div></div>
+    <div class="chipbox"><span class="hexswatch" style="background:#6FA9E0"></span><div><div class="cn" style="color:#6FA9E0">--info · #6FA9E0</div><div class="cd">informational — kept apart from --ai</div></div></div>
+    <div class="chipbox"><span class="hexswatch" style="background:#86CC72"></span><div><div class="cn" style="color:#86CC72">--verified → var(--biomass)</div><div class="cd">settled / confirmed-by-test / alive</div></div></div>
+    <div class="chipbox"><span class="hexswatch" style="background:#B7A8F7"></span><div><div class="cn" style="color:#B7A8F7">--guard · #B7A8F7</div><div class="cd">guard refusal — NEVER error-red</div></div></div>
+    <div class="chipbox"><span style="display:inline-flex;align-items:center;background:#0C1412;border:1px solid #1E2B26;border-radius:6px;padding:4px 9px;color:#E8B54B;font-size:12.5px;font-variant-numeric:tabular-nums">12.5 b</span><div><div class="cn" style="color:#E8B54B">--b-value · #E8B54B</div><div class="cd">honey — b amounts ONLY, dark chip only</div></div></div>
+  </div>
+  <p class="axis" style="margin-top:16px">chrome — dark-first: the mandala sings on black</p>
+  <div class="chromerow">
+    <span style="background:#06110C">--bg #06110C</span>
+    <span style="background:#0C1412">--bg-card #0C1412</span>
+    <span style="color:#E9F2EC">--ink #E9F2EC</span>
+    <span>--ink-mut #8FA79C</span>
+    <span style="color:#648176">--ink-dim #648176 · 4.53:1 on --bg</span>
+    <span style="background:#1E2B26;color:#8FA79C">--line #1E2B26</span>
+    <span style="background:#0E1A12;border-style:dashed;border-color:#648176">--well #0E1A12 · DERIVED — registered 2026-08-28: inset well on --bg-card (--bg lightened toward --biomass); the system's one extension, named here so no hex is ever stray</span>
+  </div>
+  <pre class="laws"><b>the four hue laws.</b> gold <b style="color:#E8B54B">#E8B54B</b> paints b amounts only, always on a dark chip (1.88:1 on paper — the chip inversion is its AA path). cyan <b style="color:#45C2DC">#45C2DC</b> is infrastructure and wires only. one ground and one accent per surface — the hub wears biomass, the wallet wears biomass with cyan wires, the buzz room wears biomass with cyan for the relay. refusal wears <b style="color:#B7A8F7">guard violet</b>, never error-red.</pre>
+</section>
+
+<section>
+  <div class="shead"><span class="dot"></span><h2>02 · depth ladder &amp; rhythm</h2><em>void ground · panel slab · inset well</em></div>
+  <div class="duo">
+    <div class="wellbox">
+      <div class="k">--void #06110C — the ground</div>
+      <div class="slab">
+        <div class="k">panel — one slab per job</div>
+        <div class="inwell">inset well — --well #0E1A12, the registered derived ground. a surface may tint its panel family toward its accent (the hub runs #0B1A12 / #0E2418) but never mints a hue silently — an extension is registered in the token table or it does not exist.</div>
+      </div>
+    </div>
+    <div>
+      <div class="k" style="font-size:10.5px;color:#648176;margin-bottom:10px">senary rhythm — every gap a multiple of 6 · --radius 12 · pills 999</div>
+      <div class="rhythm">
+        <div class="r"><i style="width:6px"></i><span>--s1 · 6px</span></div>
+        <div class="r"><i style="width:12px"></i><span>--s2 · 12px</span></div>
+        <div class="r"><i style="width:18px"></i><span>--s3 · 18px</span></div>
+        <div class="r"><i style="width:24px"></i><span>--s4 · 24px</span></div>
+        <div class="r"><i style="width:36px"></i><span>--s5 · 36px</span></div>
+        <div class="r"><i style="width:48px"></i><span>--s6 · 48px</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><span class="dot"></span><h2>03 · type — system mono, zero fetch</h2><em>casings are the payload — transcribe, never normalize</em></div>
+  <div class="spec">
+    <div><div style="font-size:clamp(32px,6vw,44px);line-height:1.08;font-weight:600;background:linear-gradient(92deg,#E9F2EC 55%,#86CC72);-webkit-background-clip:text;background-clip:text;color:transparent">display — one per surface</div><div class="cap">clamp(32px,6vw,44px)/1.08 · 600 · ink→accent gradient allowed here only</div></div>
+    <div><div style="font-size:19px;font-weight:700;letter-spacing:-.01em">section head — bzDiD · bLighTnetWorK · bQueenBee</div><div class="cap">19px · 700 · payload casings verbatim</div></div>
+    <div><div style="font-size:13px;color:#E9F2EC">body — human words on a stranger's first fold. 13px on 1.65, muted <span style="color:#8FA79C">#8FA79C</span> for the second voice.</div><div class="cap">13px/1.65 · 400</div></div>
+    <div><div style="font-size:11.5px;color:#8FA79C;letter-spacing:.12em;text-transform:uppercase">label — the panel's job, stated once</div><div class="cap">11.5px · .12em · uppercase · --ink-mut</div></div>
+    <div><div style="font-size:10px;color:#648176;letter-spacing:.34em;text-transform:uppercase">eyebrow — zero network · no password · no name</div><div class="cap">10px · .34em · uppercase · --ink-dim</div></div>
+    <div><div style="font-size:38px;line-height:1;font-weight:600;font-variant-numeric:tabular-nums" data-hero-number>1,247</div><div class="cap" data-hero-caption>hero figure — 38px · tabular-nums · every count COMPUTED, never typed</div></div>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><span class="dot"></span><h2>04 · identity — the bComb lattice</h2><em>rings 0..5 · 1,6,12,18,24,30 · 91 cells</em></div>
+  <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap">
+    <div style="flex:none">
+      <svg viewBox="-60 -60 120 120" width="132" height="132" role="img" aria-label="the bComb mandala — 91 cells" id="mandala"></svg>
+    </div>
+    <div style="flex:1 1 280px;font-size:11.5px;color:#8FA79C;line-height:1.85">the mandala is the estate's mark — the same lattice the beam transmits. as chrome it appears only two ways: the <b style="color:#E9F2EC;font-weight:400">hex dot</b> <span style="display:inline-block;width:10px;height:10px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:#86CC72;vertical-align:-1px"></span> marking a section head, and the pulsing <b style="color:#E9F2EC;font-weight:400">hex band</b> riding a masthead. as art it is the comet below — kept, working, un-tamed.</div>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><span class="dot"></span><h2>05 · menus &amp; navigation</h2><em>one crumb bar · pills for families · footer as index</em></div>
+  <p class="axis" style="margin:0 0 8px">the crumb bar — every surface's first line: where you are, what state it is in</p>
+  <nav class="crumbdemo" aria-label="crumb bar demo">
+    <a href="#nav">the hive</a><span style="color:#648176">▸</span><span style="color:#E9F2EC">wallet</span>
+    <span style="margin-left:auto;display:inline-flex;align-items:center;gap:7px;color:#8FA79C;font-size:10px"><span style="width:8px;height:8px;border-radius:50%;background:#86CC72"></span>static · zero network</span>
+  </nav>
+  <p class="axis" style="margin:14px 0 8px">family jump pills — counts computed from the registry</p>
+  <div class="pillrow">
+    <a class="pill" href="index.html#fam-beehivenature">beehivenature <span class="n">33</span></a>
+    <a class="pill" href="index.html#fam-plur">plur <span class="n">5</span></a>
+    <a class="pill on" href="index.html#fam-skaists">skaists <span class="n">11</span></a>
+    <a class="pill" href="index.html#fam-bnature">bnature <span class="n">18</span></a>
+  </div>
+  <p class="axis" style="margin:14px 0 8px">the section head — hex dot, job, honest count at the right</p>
+  <div class="demo-h">
+    <span style="width:10px;height:10px;flex:none;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:#86CC72"></span>
+    <b>everything behind this door</b>
+    <em style="font-style:normal;font-size:9.5px;letter-spacing:.18em;color:#648176;text-transform:uppercase">open now · ⚠ marks a named limit</em>
+    <span style="margin-left:auto;font-size:9.5px;letter-spacing:.14em;color:#648176;text-transform:uppercase">4</span>
+  </div>
+  <p class="axis" style="margin:14px 0 8px">the footer index — every room names its siblings, dim, uppercase, 32px touch targets</p>
+  <footer style="border-top:1px solid #1E2B26;padding-top:12px;color:#648176;font-size:10px;letter-spacing:.1em;line-height:2.2;text-transform:uppercase">
+    <a href="index.html" style="display:inline-flex;align-items:center;min-height:32px;padding:0 5px;color:#8FA79C">the hub</a> ·
+    <a href="wallet.html" style="display:inline-flex;align-items:center;min-height:32px;padding:0 5px;color:#8FA79C">the wallet</a> ·
+    <a href="buzz-studio.html" style="display:inline-flex;align-items:center;min-height:32px;padding:0 5px;color:#8FA79C">the buzz room</a> ·
+    <a href="../estate.json" style="display:inline-flex;align-items:center;min-height:32px;padding:0 5px;color:#8FA79C">the registry</a>
+  </footer>
+</section>
+
+<section id="nav">
+  <div class="shead"><span class="dot"></span><h2>06 · state badges — honest about what is live</h2><em>state is a word beside a hue, never a hue alone</em></div>
+  <div class="baddges">
+    <span style="font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid #86CC72;color:#8FA79C">skaists.dev<span style="margin-left:6px;color:#86CC72">LIVE</span></span>
+    <span style="font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid #1E2B26;color:#8FA79C">skaists.buzz<span style="margin-left:6px;color:#45C2DC">DNS-PENDING</span></span>
+    <span style="font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid #1E2B26;color:#8FA79C">skaists.social<span style="margin-left:6px;color:#648176">SEAT-OPEN</span></span>
+    <span style="font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid #1E2B26;color:#8FA79C">onboarding<span style="margin-left:6px;color:#45C2DC">⚠ named limit</span></span>
+    <span style="font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid #1E2B26;color:#8FA79C"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#648176;margin-right:7px;vertical-align:1px"></span>staged — first boot pending</span>
+    <span style="font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid #1E2B26;color:#8FA79C"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#86CC72;margin-right:7px;vertical-align:1px"></span>live</span>
+    <span style="font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid #1E2B26;color:#86CC72">✓ verified</span>
+    <span style="font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid #1E2B26;background:#06110C;color:#E8B54B;font-variant-numeric:tabular-nums">3.2000 b</span>
+    <span style="font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid #B7A8F7;color:#B7A8F7">guard: refused</span>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><span class="dot"></span><h2>07 · controls &amp; the guarantee door</h2><em>44px targets · reachability is an opt-in click</em></div>
+  <div class="duo">
+    <div class="ctrls">
+      <input type="search" placeholder="search the estate — a name, a feeling, a tool" aria-label="search demo">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button type="button" class="btn primary">primary — one per panel</button>
+        <button type="button" class="btn">act</button>
+        <button type="button" class="btn" disabled>waiting — says why</button>
+      </div>
+      <div class="stat-chips">
+        <span>you: <b>hex-a1</b></span>
+        <span>peers: <b>just you</b></span>
+        <span>ops merged: <b>0</b></span>
+      </div>
+    </div>
+    <div class="doordemo">
+      <div class="rn"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#648176;margin-right:7px;vertical-align:1px"></span>skaists.buzz</div>
+      <div class="rs">state: <b>staged — first boot pending</b> · no request leaves this page to render it</div>
+      <div class="joinrow">
+        <code class="wire">wss://skaists.buzz</code>
+        <button type="button" class="btn">copy</button>
+      </div>
+      <div style="font-size:10px;color:#648176;margin-top:8px">the guarantee door: name · state · join render with ZERO page-open network. the wire is cyan because it is a wire.</div>
+    </div>
+  </div>
+</section>
+
+<section data-art="comet">
+  <div class="shead"><span class="dot"></span><h2>08 · the living art — preservation law</h2><em>kept, working, un-tamed</em></div>
+  <canvas id="comet" aria-hidden="true"></canvas>
+  <p class="comet-law">restraint applies to the chrome, never to this. two pieces survive every redesign byte-true: the <b>hex band</b> (this page's masthead — hexpulse · hexdrift, the doors' courses) and <b>THE COMET</b> above — the 91-cell bComb mandala rolling across, turn tied to distance, the rim shedding first. do not reinterpret, simplify, or tastefully remove. the estate's signature = calm terminal chrome WITH living art on top.</p>
+</section>
+
+<footer>
+  <div>the system · docs/tokens.css is the only color source · every count computed from estate.json · orbit.html is byte-pinned, never touched</div>
+  <div class="m">next in sequence: the hub (menus + atlas), the wallet, the buzz room — three rooms, three jobs, one blood.</div>
+</footer>
+</main>
+<script>
+/* the static mandala — the same lattice the comet rolls, as chrome */
+(function(){
+  var PAL=['#39c5cf','#D655BB','#e6b32e','#a78bfa','#7ddf8f','#45C2DC','#ff8c5a','#f4e04d'];
+  var SP=10, HR=5.6, out='';
+  for(var ring=0; ring<6; ring++){
+    var n = ring===0 ? 1 : ring*6;
+    for(var i=0;i<n;i++){
+      var a = ring===0 ? 0 : (Math.PI*2/n)*i - Math.PI/2;
+      var cx=Math.cos(a)*ring*SP, cy=Math.sin(a)*ring*SP, pts=[];
+      for(var j=0;j<6;j++){ var b=Math.PI/3*j;
+        pts.push((cx+HR*Math.cos(b)).toFixed(1)+','+(cy+HR*Math.sin(b)).toFixed(1)); }
+      out+='<polygon points="'+pts.join(' ')+'" fill="'+PAL[(ring*3+i)%8]+'" opacity="0.9"'+
+        (ring===0?' stroke="#ece5f7" stroke-width="1"':'')+'/>';
+    }
+  }
+  document.getElementById('mandala').innerHTML=out;
+})();
+</script>
+<script>
+/* ── THE COMET ─────────────────────────────────────────────────────────────
+   The logo rolls across and comes apart behind itself. Geometry is the
+   estate's own bComb lattice (blight/demo.html): RINGS 0..5, cell counts
+   1,6,12,18,24,30 — 91 hexagons, the same lattice the beam transmits. */
+(function(){
+  var c=document.getElementById('comet'); if(!c||!c.getContext) return;
+  var x=c.getContext('2d'), DPR=Math.min(window.devicePixelRatio||1,2);
+  var PAL=['#39c5cf','#D655BB','#e6b32e','#a78bfa','#7ddf8f','#45C2DC','#ff8c5a','#f4e04d'];
+  var W,H,SP,HR,RAD,cells,shed,px,rot,t0;
+
+  function build(){
+    W=c.clientWidth; H=c.clientHeight;
+    c.width=W*DPR; c.height=H*DPR; x.setTransform(DPR,0,0,DPR,0,0);
+    SP=Math.max(7,Math.min(11,H/13));      /* centre-to-centre spacing */
+    HR=SP*0.56;                            /* hexagon radius */
+    RAD=SP*5;                              /* outer ring radius = the wheel's radius */
+    cells=[];
+    for(var ring=0; ring<6; ring++){
+      var n = ring===0 ? 1 : ring*6;
+      for(var i=0;i<n;i++){
+        var a = ring===0 ? 0 : (Math.PI*2/n)*i - Math.PI/2;
+        cells.push({a:a, r:ring*SP, ring:ring,
+          col:PAL[(ring*3+i)%PAL.length],
+          /* the further out, the sooner it lets go — the rim sheds first */
+          drop:0.20+Math.random()*0.74-ring*0.010,
+          gone:false});
+      }
+    }
+    shed=[]; px=-RAD*2; rot=0; t0=0;
+  }
+
+  function hex(cx,cy,r,rt){
+    x.beginPath();
+    for(var i=0;i<6;i++){ var a=Math.PI/3*i+rt;
+      x[i?'lineTo':'moveTo'](cx+r*Math.cos(a),cy+r*Math.sin(a)); }
+    x.closePath();
+  }
+
+  function frame(now){
+    if(!t0) t0=now;
+    var span=W+RAD*4, dur=15000;
+    var p=((now-t0)%dur)/dur;
+    if(p<0.004 && px>0){ build(); t0=now; }   /* a fresh mandala each pass */
+    px=-RAD*2+span*p;
+    rot=px/RAD;                               /* ROLLING: turn tied to distance */
+    var cy=H/2;
+    x.clearRect(0,0,W,H);
+
+    /* the tail first, so the wheel rides over it */
+    for(var i=shed.length-1;i>=0;i--){
+      var s=shed[i];
+      s.life-=0.0072; s.sx+=s.vx; s.sy+=s.vy; s.vy+=0.006; s.rt+=s.vr;
+      if(s.life<=0){ shed.splice(i,1); continue; }
+      var blink=0.45+0.55*Math.abs(Math.sin(now/150+s.ph));
+      var al=Math.max(0,s.life)*blink;
+      x.globalAlpha=al*0.22; x.fillStyle=s.col;
+      hex(s.sx,s.sy,HR*(1.5+s.life*0.7),s.rt); x.fill();
+      x.globalAlpha=al; hex(s.sx,s.sy,HR*(0.55+s.life*0.45),s.rt); x.fill();
+    }
+    x.globalAlpha=1;
+
+    /* the mandala, rolling and letting go */
+    for(var k=0;k<cells.length;k++){
+      var q=cells[k]; if(q.gone) continue;
+      var a=q.a+rot, cxp=px+Math.cos(a)*q.r, cyp=cy+Math.sin(a)*q.r;
+      if(p>q.drop){
+        q.gone=true;
+        shed.push({sx:cxp,sy:cyp,col:q.col,life:1,
+          vx:-0.55-Math.random()*0.7, vy:(Math.random()-0.5)*0.5,
+          rt:rot, vr:(Math.random()-0.5)*0.09, ph:Math.random()*6.28});
+        continue;
+      }
+      var tw=0.72+0.28*Math.sin(now/260+k);
+      x.globalAlpha=tw;
+      x.fillStyle=q.col; hex(cxp,cyp,HR,rot); x.fill();
+      if(q.ring===0){ x.globalAlpha=1; x.strokeStyle='#ece5f7'; x.lineWidth=1; x.stroke(); }
+    }
+    x.globalAlpha=1;
+    requestAnimationFrame(frame);
+  }
+
+  build();
+  if(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches){
+    /* one still frame: the logo intact, nothing moving */
+    px=W/2; rot=0;
+    for(var k=0;k<cells.length;k++){ var q=cells[k];
+      x.globalAlpha=0.85; x.fillStyle=q.col;
+      hex(px+Math.cos(q.a)*q.r, H/2+Math.sin(q.a)*q.r, HR, 0); x.fill(); }
+    return;
+  }
+  requestAnimationFrame(frame);
+  addEventListener('resize',build);
+})();
+</script>
+<script src="tour.js?v=32"></script>
+</body>
+</html>
