@@ -47,7 +47,11 @@ const RIDER_ALLOWLIST = [
      master design pass first ran this gate over surfaces/wallet.html;
      first-party files, named by exact path) */
   /\/onboarding\/bzdid-key\.js/, /\/onboarding\/vendor\/bnr-(sign|keys|qr)\.js/,
-  /\/onboarding\/vendor\/bip39-wordlist\.js/, /\/(vault|arweave)\.js/
+  /\/onboarding\/vendor\/bip39-wordlist\.js/, /\/(vault|arweave)\.js/,
+  /* the market's live chain reads (founder source-confirmed: host-rotated Base
+     RPC, zero caching — the surface is honestly live): itemized by exact host */
+  /^https:\/\/base-rpc\.publicnode\.com\//,
+  /^https:\/\/base\.drpc\.org\//
 ];
 
 const MEASURE = process.argv.includes('--measure');

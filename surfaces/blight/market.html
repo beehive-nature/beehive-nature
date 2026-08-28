@@ -7,13 +7,19 @@
 <meta http-equiv="Expires" content="0">
 <title>the DeMarketPlace — inscriptions, honestly traded</title>
 <style>
+/* SEMANTIC COLOUR — meanings picked FIRST, hues second:
+   harm = guard violet · solution = biomass green · value = gold (b amounts only)
+   system = info blue · science = ai cyan (infrastructure: wires, chain reads). */
+:root{--guard:#B7A8F7;--biomass:#86CC72;--b-value:#E8B54B;--info:#6FA9E0;--ai:#45C2DC;
+ --sem-harm:var(--guard);--sem-solution:var(--biomass);--sem-value:var(--b-value);--sem-system:var(--info);--sem-science:var(--ai);}
 :root{--bg:#050508;--ink:#cfe8d6;--cyan:#00E5FF;--gold:#FFD700;--dim:#5a6478;--line:#16161f;--ok:#9FFF3D;--warn:#e8b84a}
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#0a0a0f;color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;
   background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="97"><g fill="none" stroke="%23141a17"><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z"/><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z" transform="translate(28,48)"/></g></svg>')}
 
 header{padding:46px 20px 10px;text-align:center}
-h1{font-size:clamp(20px,4.5vw,28px);color:var(--cyan);font-weight:400;letter-spacing:.06em;text-shadow:0 0 16px rgba(0,229,255,.3)}
+h1{font-size:clamp(26px,5vw,36px);font-weight:600;letter-spacing:-.01em;
+ background-image:linear-gradient(92deg,#E9F2EC 55%,#45C2DC);-webkit-background-clip:text;background-clip:text;color:transparent}
 header p{color:var(--dim);font-size:11.5px;margin-top:8px;letter-spacing:.04em}
 /* every nav rule below is scoped :not(#tbar): tour.js injects <nav id="tbar">
    into every surface, and a bare-element nav rule restyles that injected bar —
@@ -24,9 +30,13 @@ nav:not(#tbar) button{background:#0b0b12;color:var(--dim);border:1px solid var(-
   cursor:pointer;font:12.5px 'IBM Plex Mono',monospace}
 nav:not(#tbar) button.on{color:var(--gold);border-color:#3d3410}
 #wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;max-width:1200px;margin:26px auto 120px;padding:0 16px}
+.herofig{display:flex;flex-direction:column;gap:2px;margin:8px 0 4px}
+.herofig .num{font-size:38px;line-height:1;font-weight:600;font-variant-numeric:tabular-nums}
+.herofig .cap{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+section.laws{background:#0b0b12;border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:14px}
 .card{background:#0b0b12;border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .card .art{background:#0d0d15;padding:12px;border-bottom:1px solid var(--line);min-height:180px;display:flex;align-items:center;justify-content:center}
-.card .art svg{width:100%;max-height:210px;height:auto}
+.card .art svg{width:100%;height:auto;max-height:220px;min-height:120px;object-fit:contain}
 .card .body{padding:12px 14px}
 .card .n{color:var(--cyan);font-size:13px}
 .card .m{color:var(--dim);font-size:10.5px;margin-top:3px}
@@ -61,11 +71,13 @@ nav:not(#tbar) button.on{color:var(--gold);border-color:#3d3410}
 .pre .go button{width:100%;background:none;border:1px solid #1d3a26;color:var(--ok);border-radius:8px;padding:9px;cursor:pointer;font:12px ui-monospace,monospace}
 .pre .go button:hover{background:var(--ok);color:#000}
 .note{color:var(--dim);font-size:10px;margin-top:14px;text-align:center}
+ @media (max-width:600px){body{padding:14px 10px 80px}section.laws{padding:12px}}
 </style>
 </head>
 <body>
 <header>
   <h1>⧉ the DeMarketPlace</h1>
+  <div class="herofig"><span class="num" id="liveListings" data-hero-number>…</span><span class="cap" data-hero-caption>live listings · read from the chain, zero cache</span></div>
   <p>inscriptions, honestly traded — every transfer is an art event, so every trade says what it does</p>
 </header>
 <nav>
@@ -81,11 +93,12 @@ nav:not(#tbar) button.on{color:var(--gold);border-color:#3d3410}
   <p class="note">front-end MVP: the flows, the previews and the laws are live; signatures wait for the audited escrow contract.</p>
 </div>
 <div id="laws" style="display:none">
-  <div class="law"><div class="i">1</div><div><div class="t">every transfer is an art event</div><div class="d">listing, buying, canceling — each leg fires the capture arithmetic. there are no neutral hops, so there are no hidden ones.</div></div></div>
+  <section class="laws"><div class="law"><div class="i">1</div><div><div class="t">every transfer is an art event</div><div class="d">listing, buying, canceling — each leg fires the capture arithmetic. there are no neutral hops, so there are no hidden ones.</div></div></div>
   <div class="law"><div class="i">2</div><div><div class="t">exact amount or nothing</div><div class="d">art escrows and delivers whole — the attached seed amount, never a fraction. fees come off the payment side, never the art side.</div></div></div>
   <div class="law"><div class="i">3</div><div><div class="t">the cushion is shown</div><div class="d">destruction happens only when a trade's whole-token delta exceeds the holder's spore cushion. both parties see that number before anyone signs.</div></div></div>
   <div class="law"><div class="i">4</div><div><div class="t">o/u collections trade conservative</div><div class="d">FUNGI and PEPI v1 carry the over/under bug. they trade whole-for-whole with the art re-roll disclosed — no split fills, no multi-hop item legs.</div></div></div>
   <div class="law"><div class="i">5</div><div><div class="t">art never touches a pool</div><div class="d">proven twice: liquidity moves dissolve inscriptions. payment routes anywhere; the item walks a straight bridge only.</div></div></div>
+  </section>
   <p class="note">the north star: the Ethereum item model moves one inscription by unique id, carrying exactly its backing — settlement where no arithmetic can go wrong.</p>
 </div>
 <div id="room"><button class="close">esc ✕</button><div class="inner">
@@ -103,7 +116,7 @@ const HOSTS=['https://base-rpc.publicnode.com','https://base.drpc.org'];
 const LOV='0xfbd201472d5a439f1f0e408eb5dfaf6ea3687876';
 const COLS=[
  {sym:'FUNGI',c:'0x7d9CE55D54FF3FEddb611fC63fF63ec01F26D15F',sel:'422b9e23',lv:[0,21000,525000,1050000,1575000,2100000],base:0,ou:true},
- {sym:'$FROGGI',c:'0x88A78C5035BdC8C9A8bb5c029e6cfCDD14B822FE',sel:'422b9e23',lv:[0,1000,3000,10000,30000,60000,120000],base:0},
+ {sym:'$FROGGI',c:'0x88A78C5035BdC8C9A8bb5c029e6cfCDD14B822FE',sel:'422b9e23',lv:[0,1000,3000,10000,30000,60000,120000],base:0,ou:true},
  {sym:'JELLI',c:'0xA1b9d812926a529D8B002E69FCd070c8275eC73c',sel:'422b9e23',lv:[0,1000,21000,105000,420000,1050000],base:0},
  {sym:'PEPI v2',c:'0x28a5e71BFc02723eAC17E39c84c5190415C0de9F',sel:'a435130b',lv:[0,11,22,33,44,56],base:1},
  {sym:'PEPI v1',c:'0x19706c142d33376240e418d6385f05691a5fa8e2',sel:'a435130b',lv:[0,11,22,33,44,56],base:1,ou:true},
@@ -142,22 +155,28 @@ async function buildInventory(){
   const found=[];
   for(const col of COLS){
     const bal=await rpc([{to:col.c,data:'0x70a08231'+AD(LOV)}]);
-    if(!bal||!bal[0]||bal[0]==='0x'||BigInt(bal[0])<=0n) continue;
+    if(!bal||!bal[0]||bal[0]==='0x' ||BigInt(bal[0])<=0n) continue;
     const seed=Number(BigInt(bal[0])/1000000000n);
-    const res=await rpc([{to:col.c,data:col.sel+W(0x20)+W(seed)+W(0)}]);
+    /* BUYER TRUTH (2026-08-28): the card renders the art a buyer RECEIVES for
+       the LISTING amount — level-true art at getSvg(listing), dots at
+       lvlOf(listing), one value driving all three. The seller full-balance
+       seed rides the numbers line only, never the product. */
+    const whole=Math.max(1,Math.floor(seed*0.4));
+    const res=await rpc([{to:col.c,data:col.sel+W(0x20)+W(whole)+W(0)}]);
     if(res&&res[0]&&res[0].length>200){
-      try{ found.push({svg:decodeString(res[0]),col,seed,lvln:lvlOf(seed,col)}); }catch(e){}
+      try{ found.push({svg:decodeString(res[0]),col,seed,whole,lvln:lvlOf(whole,col)}); }catch(e){}
     }
   }
   found.sort((a,b)=>((b.lvln??-1)-(a.lvln??-1))||((b.seed||0)-(a.seed||0)));
   inventory=found.slice(0,8);
 }
-function listingOf(p){ const whole=Math.max(1,Math.floor(p.seed*0.4));
+function listingOf(p){ const whole=p.whole!==undefined?p.whole:Math.max(1,Math.floor(p.seed*0.4));
   const unit=PRICES[p.col.sym]||0.001;
   const usdc=Math.max(1,Math.round(whole*unit*100)/100);
   return {whole,usdc}; }
 function renderWall(){
   const w=$('wall'); w.innerHTML='';
+  const hn=document.getElementById('liveListings'); if(hn) hn.textContent=inventory.length;
   inventory.forEach((p,i)=>{
     const L=listingOf(p);
     const card=document.createElement('div'); card.className='card';
@@ -166,8 +185,8 @@ function renderWall(){
     const disc=document.createElement('div');
     disc.className='cushion'+(p.col.ou?'':' quiet');
     disc.textContent=p.col.ou
-      ? 'law 4: '+p.col.sym+' carries the o/u bug — delivery re-rolls the art; seed + level travel intact.'
-      : 'clean arithmetic — art moves as-is; fresh roll only on the extra.';
+      ? 'representative — exact art rolls on delivery (seed '+p.seed.toLocaleString()+' · level '+lvlOf(p.seed,p.col)+' travel intact)'
+      : 'level-true: this art is exactly what '+L.whole.toLocaleString()+' holds at delivery';
     body.innerHTML='<div class="n">'+p.col.sym+'</div>'+
       '<div class="m"><b>'+pips(p.lvln??0,pipmax(p.col))+'</b> seed '+p.seed.toLocaleString()+' · listing '+L.whole.toLocaleString()+' exact</div>'+
       '<div class="price"><span class="p">'+L.usdc.toLocaleString()+' USDC</span><span class="u">spot · exact-amount</span></div>'+
@@ -186,7 +205,7 @@ function preview(i){
   $('rart').innerHTML=p.svg;
   $('rpre').innerHTML='<div class="h">before anyone signs</div>'+
     'you receive <span style="color:var(--ok)">'+L.whole.toLocaleString()+' '+p.col.sym+' — exact amount</span><br>'+
-    'the seed travels: <span style="color:var(--cyan)">'+p.seed.toLocaleString()+' · level '+(p.lvln??'?')+'</span><br>'+
+    'your level at delivery: <span style="color:var(--ok)">'+L.whole.toLocaleString()+' · level '+(p.lvln??'?')+'</span><br>'+'seller’s full seed (not the product): <span style="color:var(--cyan)">'+p.seed.toLocaleString()+' · level '+lvlOf(p.seed,p.col)+'</span><br>'+
     'seller\u2019s spore cushion after: <span class="'+(safe?'':'risk')+'">'+cushion.toLocaleString()+' '+(safe?'— safe (law 3)':'— DISSOLUTION RISK')+'</span><br>'+
     (p.col.ou?'<span class="risk">law 4: o/u collection — the art re-rolls on delivery; seed + level intact</span><br>':'')+
     'payment routes freely · art walks a straight bridge (law 5)'+
