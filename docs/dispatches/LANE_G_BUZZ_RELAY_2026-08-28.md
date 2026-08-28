@@ -465,3 +465,49 @@ retry the moment the record flips.
 **Standing state: hive #2 BUILT, HEALTHY, CLOSED, CORRECT — the one pending
 thing is the DNS A record landing (founder's act, not re-requested). Join
 line to be handed only after the machine-proven join (dispatch §8).**
+
+### G2-COMPLETE receipts (watcher run, 20:09 UTC)
+
+The founder's A record landed at ~20:05 UTC (Google DoH flipped first; the
+box's systemd cache held the stale parking entry until a routine
+`resolvectl flush-caches` — operator hygiene, not a founder act). The armed
+chain then fired **end-to-end in 17 seconds**:
+
+- **GATE-PASSED** — both resolvers → 129.153.202.144.
+- **TLS-200** — caddy had already issued the production cert on its own
+  retries the moment public DNS flipped (LE's validators read public DNS,
+  not the box cache).
+- **NIP-11 served** for beehivenature.buzz; hive #2 door verified from the
+  founder's machine through real DNS (`<title>beehivenature.buzz — the
+  organism hive</title>`, 200).
+- **INVITE minted**: `v2.A6Qrg5Ph0nqY5FDTb5uTxmfASybtEl2tDeZ-1id0p48` —
+  unlimited uses, expires 2026-09-27; stranger join URL
+  `https://beehivenature.buzz/invite/v2.A6Qrg5Ph0nqY5FDTb5uTxmfASybtEl2tDeZ-1id0p48`.
+- **DOOR-BN live** — organism-family re-skin (name, live dot, wss line +
+  copy, invite link), code embedded, one file, zero outbound.
+- **STRANGER-CLASS JOIN PROVEN from the founder's machine**: fresh identity
+  claimed the invite → `{"community_id":"d108440c…","host":"beehivenature.buzz",
+  "role":"member","status":"joined"}` → WS auth-notice → NIP-42 AUTH accepted
+  → starter channels created → **verified twice more independently**:
+  post-auth REQ over `wss://beehivenature.buzz` renders `#general` (a483c5e6)
+  + `#introductions` (91155c0f), and hive #2's postgres holds exactly 2
+  kind-9007 events.
+
+**Two proof-hygiene lessons for the blueprint (both bit during this run):**
+(1) a client's PRE-auth REQ is discarded by the closed relay — always re-REQ
+after the AUTH OK (the join client's initial render of "0 channels" was this
+artifact, not an empty hive); (2) parameterize EVERY string in proof tooling
+— a stale hardcoded `wss://skaists.buzz` log line inside the join client
+momentarily mislabeled hive #2's connection; the DB + post-auth REQ
+cross-check settled it. Receipts now require a second, independent read
+(the DB count) for any claim of "channels rendered".
+
+**Bonus receipt, hive #1:** hive #1's postgres shows two kind-9007 channels
+created by `d4416334…` (the founder's key) at **18:16 UTC** — his desktop
+app joined skaists.buzz and ran its onboarding on its own after the §13
+unblock. The G1 receipt exists in signed events; his word remains the formal
+close.
+
+**HANDED (proven from this machine on this network): hive #2 join line =
+`wss://beehivenature.buzz`** (founder is owner on the roster). Strangers:
+the invite link, or the door at `https://beehivenature.buzz`.
