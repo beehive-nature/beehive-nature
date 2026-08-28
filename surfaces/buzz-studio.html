@@ -6,91 +6,153 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="color-scheme" content="dark">
-<title>🐝🎨 the bUZZ Studio — co-create in real time, with no server anywhere</title>
+<title>the bUZZ Studio — paint together, no server anywhere</title>
 <style>
-:root{--bg:#07090b;--panel:#0e1611;--well:#0a0f0b;--ink:#e2efdb;--dim:#8a9a8a;--faint:#5f6f61;
- --line:#243026;--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--leaf:#7ddf8f;--amber:#ffb347}
+/* SEMANTIC COLOUR — meanings picked FIRST, hues second:
+   harm = guard violet · solution = biomass green (the estate's one accent, alive)
+   value = gold (b amounts only — none on this page) · system = info blue
+   science = ai cyan (infrastructure: the room, the wire). One accent in play:
+   biomass. Cyan appears only where a wire is meant. */
+:root{
+  --void:#06110C; --panel:#0B1A12; --inset:#0E2418; --line:#1E3A2A;
+  --ink:#E9F2EC; --dim:#8FA89A; --faint:#648176;
+  --biomass:#86CC72; --ai:#45C2DC; --b-value:#E8B54B; --info:#6FA9E0; --guard:#B7A8F7;
+  --sem-harm:var(--guard); --sem-solution:var(--biomass); --sem-value:var(--b-value);
+  --sem-system:var(--info); --sem-science:var(--ai);
+  --radius:12px;
+}
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{overflow-x:hidden}
-body{background:var(--bg);color:var(--ink);font:13px/1.65 'IBM Plex Mono',monospace;padding:30px 14px 90px}
+body{background:var(--void);color:var(--ink);
+ font:13px/1.65 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+ padding:26px 14px 90px}
 main{max-width:960px;margin:0 auto}
-header{text-align:center;margin-bottom:8px}
-h1{font-size:clamp(19px,5vw,28px);color:var(--gold);font-weight:400}
+header{text-align:center;margin-bottom:6px}
+h1{font-size:clamp(32px,6vw,44px);line-height:1.1;font-weight:600;margin:10px 0 6px;
+ background-image:linear-gradient(105deg,var(--biomass) 20%,#DFF5E0 90%);
+ -webkit-background-clip:text;background-clip:text;color:transparent}
 .sub{color:var(--dim);font-size:11.5px;margin-top:8px;max-width:700px;margin-inline:auto;line-height:1.8}
-section{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:15px 16px;margin-top:14px}
-h2{font-size:11.5px;color:var(--violet);font-weight:400;letter-spacing:.09em;margin-bottom:9px}
+.sub b{color:var(--ink);font-weight:400}
+a{color:var(--biomass)}
+/* D4 — one live figure, the comb's own count */
+.herofig{margin:18px auto 4px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.herofig .num{font-size:38px;line-height:1;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+.herofig .cap{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.ministats{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+.stat{display:inline-block;background:var(--inset);border:1px solid var(--line);border-radius:8px;
+ padding:5px 10px;margin:2px 2px 0 0;font-size:10px;color:var(--dim)}
+.stat b{color:var(--ink);font-weight:400}
+section{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:15px 16px;margin-top:14px}
+h2{font-size:11.5px;color:var(--dim);font-weight:400;letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px}
+h2 b{color:var(--biomass);font-weight:400}
 .law{color:var(--dim);font-size:10.5px;line-height:1.85}
-.law b{color:var(--ink)}
-a{color:var(--cyan)}
+.law b{color:var(--ink);font-weight:400}
+/* the room — the guarantee door */
+.room{background:var(--inset);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:4px}
+.roomname{font-size:17px;color:var(--ink)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--faint);margin-right:7px;vertical-align:1px}
+.dot.live{background:var(--biomass)}
+.roomstate{color:var(--dim);font-size:10.5px;margin-top:6px;line-height:1.7}
+.roomstate b{color:var(--ink);font-weight:400}
+.joinline{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap;margin-top:10px}
+.joincode{flex:1 1 210px;min-width:0;background:var(--void);border:1px solid var(--line);border-radius:8px;
+ padding:9px 11px;font:12px ui-monospace,monospace;color:var(--ai);word-break:break-all}
+button.act{background:var(--inset);color:var(--biomass);border:1px solid var(--line);border-radius:8px;
+ padding:8px 14px;cursor:pointer;font:11.5px ui-monospace,SFMono-Regular,Menlo,monospace;min-height:40px;margin:6px 6px 0 0}
+button.act:hover{background:var(--biomass);color:var(--void)}
+button.act.primary{background:var(--biomass);color:var(--void)}
+button.act.primary:hover{background:#A9E29A}
 #comb{display:block;width:100%;max-width:640px;margin:10px auto 0;touch-action:none;
- background:var(--well);border:1px solid var(--line);border-radius:12px}
+ background:var(--void);border:1px solid var(--line);border-radius:12px}
 #comb polygon{cursor:pointer}
 #palette{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin-top:10px}
 #palette button{width:42px;height:42px;border-radius:9px;border:2px solid var(--line);cursor:pointer;padding:0}
-#palette button[aria-pressed="true"]{border-color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.35)}
-#palette button.erase{background:var(--well);color:var(--dim);font-size:16px}
-button.act{background:#26123a;color:var(--violet);border:1px solid var(--line);border-radius:8px;
- padding:8px 14px;cursor:pointer;font:11.5px 'IBM Plex Mono',monospace;min-height:40px;margin:6px 6px 0 0}
-button.act:hover{background:var(--violet);color:#000}
-textarea{width:100%;min-height:56px;background:var(--well);color:var(--ink);border:1px solid var(--line);
- border-radius:7px;padding:8px;font:9.5px 'IBM Plex Mono',monospace;resize:vertical;word-break:break-all}
-.stat{display:inline-block;background:var(--well);border:1px solid var(--line);border-radius:7px;
- padding:5px 10px;margin:4px 5px 0 0;font-size:10px;color:var(--dim)}
-.stat b{color:var(--ink);font-weight:400}
-pre{background:var(--well);border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:8px;
+#palette button[aria-pressed="true"]{border-color:var(--biomass);box-shadow:0 0 0 2px rgba(134,204,114,.35)}
+#palette button.erase{background:var(--void);color:var(--dim);font-size:16px}
+textarea{width:100%;min-height:56px;background:var(--inset);color:var(--ink);border:1px solid var(--line);
+ border-radius:8px;padding:8px;font:9.5px ui-monospace,monospace;resize:vertical;word-break:break-all}
+pre{background:var(--inset);border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:8px;
  font-size:9.5px;line-height:1.6;overflow-x:auto;color:var(--dim);white-space:pre-wrap;word-break:break-all}
-.design{border:1px dashed #3d3410;background:#141207;border-radius:9px;padding:11px 13px;
- font-size:10.5px;color:var(--gold);line-height:1.8;margin-top:10px}
+.ladder{background:var(--inset);border:1px solid var(--line);border-radius:10px;padding:11px 13px;
+ font-size:10.5px;color:var(--dim);line-height:1.85;margin-top:8px}
+.ladder b{color:var(--ink);font-weight:400}
 footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
+@media (max-width:600px){
+  body{padding:18px 10px 70px}
+  section{padding:13px 12px}
+  .herofig .num{font-size:34px}
+  .joincode{font-size:11px}
+}
 </style>
 </head>
 <body>
 <main>
 <header>
-  <h1>🐝🎨 the bUZZ Studio</h1>
-  <div class="sub" data-reg="bee">Paint a comb <b style="color:var(--ink)">together, live</b> —
-  another tab on this device joins instantly, and a friend joins with a copy-paste handshake:
-  <b style="color:var(--ink)">no account, no server, no company in the middle</b>. When you both
-  paint the same cell, the math (not a referee) decides — and it always agrees with itself.</div>
+  <h1>the bUZZ Studio</h1>
+  <div class="sub" data-reg="bee">Paint a comb <b>together, live</b> — another tab on this
+    device joins instantly, and a friend joins with a copy-paste handshake:
+    <b>no account, no server, no company in the middle</b>. When you both paint the same
+    cell, the math (not a referee) decides — and it always agrees with itself.</div>
   <div class="sub" data-reg="raver">the co-creation genesis: a 24×21 comb, painted many-hands
-  live — CRDT-merged (order can't break it), peered tab-to-tab instantly and human-to-human by
-  the pairing ceremony, exported as inscription-grade SVG with a provenance card. bAiGenTs join
-  as peers the day the room rails land — same document, same laws.</div>
+    live — CRDT-merged (order can't break it), peered tab-to-tab instantly and human-to-human by
+    the pairing ceremony, exported as inscription-grade SVG with a provenance card. bAiGenTs join
+    as peers the day the room rails land — same document, same laws.</div>
   <div class="sub" data-reg="cypherpunk">Genesis engineering, stated openly: the document is a
-  per-cell LWW CRDT — (lamport, clientId, color), merge = max — <b>provably convergent, ~40
-  auditable lines, zero dependencies</b>; Yjs (MIT) docks when documents outgrow cells (strokes,
-  layers, text), per the BS-1 receipt. Transport tier 1: BroadcastChannel (same device, now).
-  Tier 2: manual-SDP WebRTC DataChannel — serverless, no signaling, no STUN — the copy-paste
-  pairing ceremony as transport, working same-network today and named honestly for what NAT
-  does to it; <b>the seam is shaped exactly for x0xd</b> (post-quantum P2P, no intermediary)
-  the day its code is public. Export: 2D greedy-merged SVG (the PNG2rectSVG lesson applied) +
-  an FNV provenance card.</div>
+    per-cell LWW CRDT — (lamport, clientId, color), merge = max — <b>provably convergent, ~40
+    auditable lines, zero dependencies</b>; Yjs (MIT) docks when documents outgrow cells (strokes,
+    layers, text), per the BS-1 receipt. Transport tier 1: BroadcastChannel (same device, now).
+    Tier 2: manual-SDP WebRTC DataChannel — serverless, no signaling, no STUN — the copy-paste
+    pairing ceremony as transport, working same-network today and named honestly for what NAT
+    does to it; <b>the seam is shaped exactly for x0xd</b> (post-quantum P2P, no intermediary)
+    the day its code is public. Export: 2D greedy-merged SVG (the PNG2rectSVG lesson applied) +
+    an FNV provenance card.</div>
+  <div class="herofig" aria-live="polite">
+    <span class="num" id="painted" data-hero-number>0</span>
+    <span class="cap" data-hero-caption>cells painted · live · every hand, one math</span>
+  </div>
+  <div class="ministats">
+    <span class="stat">you: <b id="me">…</b></span>
+    <span class="stat">peers: <b id="peers">just you</b></span>
+    <span class="stat">ops merged: <b id="ops">0</b></span>
+  </div>
 </header>
 
 <section>
-  <h2>THE COMB — every cell answers every hand</h2>
-  <svg id="comb" viewBox="0 0 640 486" aria-label="shared hex canvas"></svg>
-  <div id="palette" role="group" aria-label="palette"></div>
-  <div style="text-align:center;margin-top:8px">
-    <span class="stat">you: <b id="me">…</b></span>
-    <span class="stat">peers: <b id="peers">just you</b></span>
-    <span class="stat">cells painted: <b id="painted">0</b></span>
-    <span class="stat">ops merged: <b id="ops">0</b></span>
+  <h2>the room — <b>the guarantee door</b></h2>
+  <div class="room">
+    <div class="roomname"><span class="dot" id="roomdot"></span><span id="roomname">skaists.buzz</span></div>
+    <div class="roomstate" id="roomstate">the hive's buzz room — join it in the Buzz desktop app:
+      <b>Add Community</b>, paste the address below. This page is the estate-owned door: it renders
+      the room's name, state and join line <b>whether or not the relay is up</b> — the app is the
+      enhancement, never the requirement.</div>
+    <div class="joinline">
+      <code class="joincode" id="joincode">wss://skaists.buzz</code>
+      <button class="act primary" id="copywss">copy join address</button>
+    </div>
+    <div class="roomstate" id="roomprobe" style="margin-top:8px">state: staged — first boot pending
+      as of 2026-08-28 · <b>no request leaves this page to render it</b></div>
+    <button class="act" id="checkroom" style="margin-top:2px">check the room now (opt-in probe)</button>
   </div>
-  <div class="law" style="margin-top:9px;text-align:center">open this page in a
-  <b>second tab</b> right now and paint — that is the CRDT working with zero setup. drag to
-  paint; the ⌫ swatch erases.</div>
 </section>
 
 <section>
-  <h2>THE PAIRING CEREMONY — a friend joins with no server anywhere</h2>
+  <h2>the comb — every cell answers every hand</h2>
+  <svg id="comb" viewBox="0 0 640 486" aria-label="shared hex canvas"></svg>
+  <div id="palette" role="group" aria-label="palette"></div>
+  <div class="law" style="margin-top:9px;text-align:center">open this page in a
+    <b>second tab</b> right now and paint — that is the CRDT working with zero setup. drag to
+    paint; the ⌫ swatch erases.</div>
+</section>
+
+<section>
+  <h2>the pairing ceremony — a friend joins with no server anywhere</h2>
   <div class="law"><b>The bLighT doctrine as transport:</b> two browsers exchange two blocks of
-  text — by chat, by QR, by reading it aloud if you like — and then talk <b>directly</b>,
-  peer-to-peer, encrypted by WebRTC itself. No signaling server, no STUN, no account.
-  <b>Honest range:</b> without any helper this reaches peers on the same network today
-  (NAT decides the rest) — and this exact seam is shaped for <b>x0x</b>, Autonomi's announced
-  post-quantum live layer: when its daemon is public, the ceremony stays and the reach goes
-  planetary.</div>
+    text — by chat, by QR, by reading it aloud if you like — and then talk <b>directly</b>,
+    peer-to-peer, encrypted by WebRTC itself. No signaling server, no STUN, no account.
+    <b>Honest range:</b> without any helper this reaches peers on the same network today
+    (NAT decides the rest) — and this exact seam is shaped for <b>x0x</b>, Autonomi's announced
+    post-quantum live layer: when its daemon is public, the ceremony stays and the reach goes
+    planetary.</div>
   <div>
     <button class="act" id="mkoffer">1 · host: create the invite</button>
     <button class="act" id="mkanswer">2 · guest: paste invite → make reply</button>
@@ -101,26 +163,26 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 </section>
 
 <section>
-  <h2>EXPORT — inscription-grade, provenance first</h2>
+  <h2>export — inscription-grade, provenance first</h2>
   <div class="law">The comb exports as a <b>2D greedy-merged SVG</b> — the byte-discipline the
-  inscription lane demands (the PNG2rectSVG lesson: horizontal-only merging is not enough) —
-  with a provenance card naming the contributors' marks, the op count, and the state seed.
-  <b>The original never mutates; an export is a fork with provenance</b> — the Listening Room's
-  fork law, applied to paint.</div>
+    inscription lane demands (the PNG2rectSVG lesson: horizontal-only merging is not enough) —
+    with a provenance card naming the contributors' marks, the op count, and the state seed.
+    <b>The original never mutates; an export is a fork with provenance</b> — the Listening Room's
+    fork law, applied to paint.</div>
   <button class="act" id="dosvg">⬡ export SVG + provenance</button>
   <button class="act" id="clear">✦ fresh comb (yours only — peers keep theirs until they press too)</button>
   <pre id="svgout" style="display:none"></pre>
 </section>
 
 <section>
-  <h2>WHAT DOCKS NEXT — the receipt's own ladder</h2>
-  <div class="design">BS-1 GO (founder, 10³): genesis = this page. Next rungs, in order:
-  <b>Yjs (MIT)</b> when the document outgrows cells · <b>voice while you draw</b> — one LiveKit
-  room per studio (Apache-2.0; the venue the broom-agent lane already proved with live
-  barge-in) · <b>bAiGenTs as peers</b> — the room-AI seat shape, editing the same document
-  under the same CRDT law · <b>x0xd transport</b> when public — the pairing ceremony above is
-  its keyhole · <b>sound panels</b> — Web Audio in the modular-synth idiom beside the paint.
-  Each rung lands as a receipt, never as a promise dressed as a feature.</div>
+  <h2>what docks next — the receipt's own ladder</h2>
+  <div class="ladder">BS-1 GO (founder, 10³): genesis = this page. Next rungs, in order:
+    <b>Yjs (MIT)</b> when the document outgrows cells · <b>voice while you draw</b> — one LiveKit
+    room per studio (Apache-2.0; the venue the broom-agent lane already proved with live
+    barge-in) · <b>bAiGenTs as peers</b> — the room-AI seat shape, editing the same document
+    under the same CRDT law · <b>x0xd transport</b> when public — the pairing ceremony above is
+    its keyhole · <b>sound panels</b> — Web Audio in the modular-synth idiom beside the paint.
+    Each rung lands as a receipt, never as a promise dressed as a feature.</div>
 </section>
 </main>
 <footer>
@@ -132,6 +194,47 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 (function(){
 "use strict";
 var $=function(id){return document.getElementById(id)};
+/* ---- TURNKEY (lane C law a): this page is data-driven. Point it at any
+   hive's relay by editing ROOM — nothing else assumes this estate. The room
+   card renders from this block; the static markup above is the no-JS floor
+   and mirrors it. */
+var ROOM={
+  name:'skaists.buzz',
+  wss:'wss://skaists.buzz',
+  web:'https://skaists.buzz/',
+  state:'staged — first boot pending as of 2026-08-28 (lane G brings it up)'
+};
+function renderRoom(){
+  $('roomname').textContent=ROOM.name;
+  $('joincode').textContent=ROOM.wss;
+  $('roomprobe').innerHTML='state: '+ROOM.state+' · <b>no request leaves this page to render it</b>';
+}
+/* THE RUB LAW (lane C law b): the door renders everything from data — zero
+   dependence on the relay. The probe below is OPT-IN (a click) and only ever
+   ADDS a verdict; it is not part of rendering. no-cors reachability: we learn
+   that something answered, never read a byte of it. */
+$('checkroom').onclick=function(){
+  $('roomprobe').textContent='state: probing reachability…';
+  var ctrl=(typeof AbortSignal!=='undefined'&&AbortSignal.timeout)?AbortSignal.timeout(4500):null;
+  fetch(ROOM.web,{mode:'no-cors',signal:ctrl}).then(function(){
+    $('roomdot').classList.add('live');
+    $('roomprobe').textContent='state: answering ✓ · reachability probed just now · the join line stands';
+  },function(){
+    $('roomprobe').textContent='state: not answering right now · probed just now · this door never needed the relay — the join line stands for when it returns';
+  });
+};
+$('copywss').onclick=function(){
+  var b=this;
+  function done(){ b.textContent='copied ✓'; setTimeout(function(){ b.textContent='copy join address'; },1600); }
+  function fallback(){
+    var t=document.createElement('textarea'); t.value=ROOM.wss; document.body.appendChild(t);
+    t.select(); try{document.execCommand('copy');done();}catch(e){} document.body.removeChild(t);
+  }
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(ROOM.wss).then(done,fallback);
+  }else fallback();
+};
+renderRoom();
 /* ---- the document: per-cell LWW CRDT — provably convergent ----
    state[i] = {t: lamport, c: clientId, k: colorIndex|-1}. merge(a,b): higher t wins;
    tie → higher c wins. Commutative, associative, idempotent → every replica converges
