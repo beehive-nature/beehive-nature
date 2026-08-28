@@ -128,7 +128,7 @@ async function walk(dir, base = '') {
   return out;
 }
 const pages = SET_ARG
-  ? JSON.parse(readFileSync(join(ROOT, SET_ARG), 'utf8')).filter(f => existsSync(join(SURF, f)))
+  ? JSON.parse(readFileSync(existsSync(join(ROOT, SET_ARG)) ? join(ROOT, SET_ARG) : join(HERE, SET_ARG), 'utf8')).filter(f => existsSync(join(SURF, f)))
   : (await walk(SURF)).sort();
 
 const browser = await chromium.launch();
