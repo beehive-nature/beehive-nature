@@ -133,8 +133,8 @@ const page = `<!doctype html>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="bn-logo.jpg">
-<title>beehive nature · the atlas — every surface, every org, every domain, live</title>
-<meta name="description" content="One estate, three orgs, eight families. Every surface the estate has built, grouped by the org that answers for it — computed from the registry, never hand-written.">
+<title>beehive nature reserve · the atlas — every surface, every org, every domain, live</title>
+<meta name="description" content="One estate, three orgs, eight families. Every surface beehive nature reserve has built, grouped by the org that answers for it — computed from the registry, never hand-written.">
 <style>
 /* THE ATLAS — master design pass 2026-08-28, rendered by scripts/build-atlas.mjs.
    SEMANTIC COLOUR — meanings picked FIRST, hues second:
@@ -160,10 +160,23 @@ a:hover{text-decoration:underline}
 .skip{position:absolute;left:-9999px}
 .skip:focus{left:8px;top:8px;background:var(--inset);padding:8px 12px;border-radius:8px;z-index:9}
 .wrap{max-width:1060px;margin:0 auto;padding:0 clamp(14px,3vw,20px)}
-/* the masthead + the doors' band (byte-true lift) */
+/* the masthead is FULL-BLEED edge-to-edge (founder art ruling 2026-08-28):
+   the lifted doors' band bytes are untouched — the presentation wrapper
+   anchors bandwrap to the viewport edges, and on ultrawide the COURSES scale
+   by stepped CSS zoom (uniform, so there is no seam and no repeat-jolt; the
+   drift/pulse transforms run untouched inside the zoom). */
 header.mast{position:relative;overflow:hidden;border-bottom:1px solid var(--line);padding-bottom:26px}
 #bandwrap{--bandh:149px}
 ${bandCss}
+#bandwrap .band{zoom:1}
+@media (min-width:1799px){#bandwrap .band{zoom:1.1}header.mast #bandwrap{--bandh:164px}.crumbs{margin-top:172px}}
+@media (min-width:1999px){#bandwrap .band{zoom:1.25}header.mast #bandwrap{--bandh:186px}.crumbs{margin-top:194px}}
+@media (min-width:2499px){#bandwrap .band{zoom:1.5}header.mast #bandwrap{--bandh:224px}.crumbs{margin-top:234px}}
+@media (min-width:2999px){#bandwrap .band{zoom:1.8}header.mast #bandwrap{--bandh:268px}.crumbs{margin-top:280px}}
+@media (min-width:3400px){#bandwrap .band{zoom:2.1}header.mast #bandwrap{--bandh:313px}.crumbs{margin-top:327px}}
+@media (min-width:3900px){#bandwrap .band{zoom:2.45}header.mast #bandwrap{--bandh:365px}.crumbs{margin-top:381px}}
+@media (min-width:4400px){#bandwrap .band{zoom:2.8}header.mast #bandwrap{--bandh:417px}.crumbs{margin-top:435px}}
+@media (min-width:4900px){#bandwrap .band{zoom:3.15}header.mast #bandwrap{--bandh:469px}.crumbs{margin-top:489px}}
 @media (prefers-reduced-motion:reduce){#bandwrap *{animation:none !important}}
 .crumbs{position:relative;display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:157px;padding:9px 0;border-bottom:1px solid var(--line);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
 .crumbs .here{color:var(--ink)} .crumbs .sub{color:var(--dim)}
@@ -235,16 +248,15 @@ footer b{color:var(--ink);font-variant-numeric:tabular-nums}
 </head>
 <body>
 <a class="skip" href="#families">skip to the families</a>
-<div class="wrap">
-
 <header class="mast" data-art>
   ${bandLine}
+  <div class="wrap">
   <nav class="crumbs" aria-label="you are here">
-    <span class="here">beehive nature</span><span class="sub">▸</span><span class="sub">the atlas</span>
+    <span class="here">beehive nature reserve</span><span class="sub">▸</span><span class="sub">the atlas</span>
     <span class="badge"><i></i>static · search is the only script</span>
   </nav>
   <p class="kicker">zero network · no password · no name</p>
-  <h1>beehive nature</h1>
+  <h1>beehive nature reserve</h1>
   <p class="lede">one estate, three orgs, eight families. every surface the estate has built lives
   below, grouped by the org that answers for it and the domain it answers to — honest about
   what is live, what is waiting on dns, and what is still an open seat.</p>
@@ -255,8 +267,10 @@ footer b{color:var(--ink);font-variant-numeric:tabular-nums}
   <p class="counts"><b>${c.surfaces}</b> surfaces · <b>${c.domains}</b> domains · <b>${c.families}</b> families · <b>${nOrgs}</b> orgs · every number computed from the registry</p>
   <input id="q" type="search" placeholder="search the estate — a name, a feeling, a tool" aria-label="search the estate">
   <div id="shown" aria-live="polite"></div>
+  </div>
 </header>
 
+<div class="wrap">
 <!--ATLAS-STATIC-START-->
 <nav class="orgnav" aria-label="the three orgs">
 ${orgPills}
