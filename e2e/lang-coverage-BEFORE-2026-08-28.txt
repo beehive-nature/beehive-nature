@@ -1,0 +1,23 @@
+i18n COVERAGE — what a ru reader can actually read
+surfaces measured : 79 (from e2e/lang-coverage-set.json)
+visible strings   : 6427
+keyed             : 405  (6% of visible — the axis every tongue can reach)
+reach ru          : 405  (6%)
+UNKEYED           : 6022  — no tongue can ever reach these
+keyed, EMPTY CELL : 0  — falls back to English visibly, by the corpus law
+
+PER TONGUE — non-empty cells for the 306 keys this set uses:
+  ru 100% · cs 100% · gd 100% · es 100% · nl 100% · de 100% · fr 100% · zh 100% · th 100% · lv 100% · uk 100% · ar 100% · he 100% · hi 100% · bn 100% · fa 100% · nl-be 100% · ko 100% · ur 100% · ja 100% · da 100% · nb 100% · sv 100% · fi 100% · tr 100% · hu 100%
+
+TEN WORST BY PERCENTAGE (of surfaces with 10+ visible strings):
+   pct   vis keyed key% fill unkey empty  page
+    0%   327     1   0%    1   326     0  bset.html
+    0%   240     0   0%    0   240     0  index.html
+    0%   226     0   0%    0   226     0  wallet.html
+    0%   127     0   0%    0   127     0  bmeshasi.html
+    0%   125     0   0%    0   125     0  devroom.html
+    0%   114     0   0%    0   114     0  fleet-hosted/gallery/acid-cascade.html
+    0%   113     0   0%    0   113     0  design-system.html
+    0%    96     0   0%    0    96     0  fleet-hosted/gallery/indigo-index.html
+    0%    95     0   0%    0    95     0  bnames.html
+    0%    66     0   0%    0    66     0  dock.html

@@ -58,6 +58,25 @@ jobs:
       - name: Estate registry — counts computed, not written
         if: always()
         run: node scripts/estate-check.mjs
+      # the language lane (2026-08-28): first the checker-silence proof — the
+      # coverage instrument must count a keyed string AND an unkeyed string
+      # through the same path before it reports anything; then the measure on
+      # the arrival set (four redesigned + seven doors + one tap from each
+      # door) with the floors ratchet — keyed% may never regress below the
+      # recorded line. The 240-key deep backlog stays a recorded number, not
+      # a demand: floors hold, they never require.
+      - name: Language — coverage gate selftest (checker-silence law)
+        if: always()
+        run: node e2e/i18n-coverage.mjs --selftest
+      - name: Language — coverage measure on the arrival set, floors enforced
+        if: always()
+        run: node e2e/i18n-coverage.mjs --set e2e/lang-coverage-set.json ru --floors
+      # estate-source: every data-i18n key in the tree exists in the corpus,
+      # every docked tongue covers every key, and the corpus English matches
+      # what the pages say (the stale-translation check).
+      - name: Language — corpus integrity (estate-source)
+        if: always()
+        run: node e2e/estate-source.mjs
       # dock-claims re-derives the Dock's three hero numbers from source
       # (chain-zano tree hash, #[ignore] census, STATUS.md sentence) and
       # compares them against what the page prints. Static: node + git only.

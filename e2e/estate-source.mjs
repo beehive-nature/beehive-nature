@@ -49,28 +49,28 @@ ok('every domain has an id, a slug, an accent and one thing to do',
   ok('every registered surface exists on disk', missingFiles.length === 0, missingFiles.map(s => s.file).join(', '));
 }
 
-/* 2 · THE DRIFT CHECK — rebuild and compare, byte for byte */
+/* 2 · THE DRIFT CHECK — the hub is generated, and regeneration must be
+   idempotent (2026-08-28 update: the hub moved to scripts/build-atlas.mjs
+   from the ROOT estate.json in the atlas lane; tools/build-surfaces.mjs no
+   longer generates it. The doors are HAND-KEPT since the byte-true hex-band
+   and A3 redesign rulings — no generator owns them, so their integrity is
+   the language checks below (§3) plus estate-check's registry laws; a drift
+   rebuild for them would hand-back a page the rulings superseded). What stays
+   enforced here: rebuilding the hub from its registry must reproduce the
+   committed page byte for byte — a hand-edit to generated output cannot
+   survive, the edit has to happen in the generator. */
 {
-  const tmp = mkdtempSync(join(tmpdir(), 'estate-'));
-  try {
-    execFileSync(process.execPath, [join(ROOT, 'tools', 'build-surfaces.mjs'), '--out', tmp], { stdio: 'pipe' });
-    const rel = ['index.html', ...readdirSync(join(tmp, 'doors')).map(f => 'doors/' + f)];
-    const drifted = [];
-    for (const r of rel) {
-      const a = readFileSync(join(tmp, r), 'utf8');
-      const b = existsSync(join(SURF, r)) ? readFileSync(join(SURF, r), 'utf8') : null;
-      if (b === null) { drifted.push(r + ' (missing)'); continue; }
-      if (a !== b) {
-        // name the first differing line so the fix is obvious
-        const A = a.split('\n'), B = b.split('\n');
-        let i = 0; while (i < A.length && i < B.length && A[i] === B[i]) i++;
-        drifted.push(`${r} (line ${i + 1})`);
-      }
-    }
-    ok(`the committed pages match the registry (${rel.length} generated files)`,
-      drifted.length === 0,
-      drifted.length ? drifted.join(', ') + ' — run: node tools/build-surfaces.mjs' : '');
-  } finally { rmSync(tmp, { recursive: true, force: true }); }
+  /* build-atlas reads estate.json + doors relative to its cwd and writes
+     surfaces/index.html in place — so idempotence is proven against the
+     COMMITTED tree: capture HEAD's version, regenerate, compare, and
+     restore HEAD if they differ so this gate never leaves mutation behind */
+  const committed = execFileSync('git', ['show', 'HEAD:surfaces/index.html'], { cwd: ROOT });
+  execFileSync(process.execPath, [join(ROOT, 'scripts', 'build-atlas.mjs')], { stdio: 'pipe', cwd: ROOT });
+  const regenerated = readFileSync(join(SURF, 'index.html'));
+  const same = Buffer.compare(Buffer.from(committed), regenerated) === 0;
+  if (!same) writeFileSync(join(SURF, 'index.html'), committed);
+  ok('the committed hub matches its registry regeneration (byte for byte)', same,
+     same ? '' : 'run: node scripts/build-atlas.mjs and commit');
 }
 
 /* 3 · THE LANGUAGE STACK — every string reachable by every tongue */
