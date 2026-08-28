@@ -14,7 +14,7 @@
    science = ai cyan (infrastructure: the room, the wire). One accent in play:
    biomass. Cyan appears only where a wire is meant. */
 :root{
-  --void:#06110C; --panel:#0B1A12; --inset:#0E2418; --line:#1E3A2A;
+  --void:#06110C; --panel:#0C1412; --inset:#0E1A12; --line:#1E2B26;
   --ink:#E9F2EC; --dim:#8FA89A; --faint:#648176;
   --biomass:#86CC72; --ai:#45C2DC; --b-value:#E8B54B; --info:#6FA9E0; --guard:#B7A8F7;
   --sem-harm:var(--guard); --sem-solution:var(--biomass); --sem-value:var(--b-value);
@@ -43,7 +43,15 @@ a{color:var(--biomass)}
  padding:5px 10px;margin:2px 2px 0 0;font-size:10px;color:var(--dim)}
 .stat b{color:var(--ink);font-weight:400}
 section{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:15px 16px;margin-top:14px}
-h2{font-size:11.5px;color:var(--dim);font-weight:400;letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px}
+h2{font-size:13px;color:var(--ink);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;
+ display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+h2::before{content:'';width:10px;height:10px;flex:none;
+ clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:var(--biomass)}
+h2 b{color:var(--biomass);font-weight:700}
+.crumbs{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 0 9px;border-bottom:1px solid var(--line);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.crumbs a{color:var(--dim)} .crumbs .here{color:var(--ink)} .crumbs .badge-live{margin-left:auto;display:inline-flex;align-items:center;gap:7px;color:var(--dim);font-size:10px;letter-spacing:.14em}
+.crumbs .badge-live i{width:8px;height:8px;border-radius:50%;background:var(--biomass)}
+.kicker{font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:var(--faint);margin-top:20px}
 h2 b{color:var(--biomass);font-weight:400}
 .law{color:var(--dim);font-size:10.5px;line-height:1.85}
 .law b{color:var(--ink);font-weight:400}
@@ -87,7 +95,12 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 </head>
 <body>
 <main>
+<nav class="crumbs" aria-label="you are here">
+  <a href="index.html">beehive nature</a><span class="sub">▸</span><span class="here">the buzz room</span>
+  <span class="badge-live"><i></i>no account · no server · no company in the middle</span>
+</nav>
 <header>
+  <div class="kicker">the co-creation genesis · crdt-merged · order can't break it</div>
   <h1>the bUZZ Studio</h1>
   <div class="sub" data-reg="bee">Paint a comb <b>together, live</b> — another tab on this
     device joins instantly, and a friend joins with a copy-paste handshake:
@@ -129,8 +142,9 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
       <code class="joincode" id="joincode">wss://skaists.buzz</code>
       <button class="act primary" id="copywss">copy join address</button>
     </div>
-    <div class="roomstate" id="roomprobe" style="margin-top:8px">state: staged — first boot pending
-      as of 2026-08-28 · <b>no request leaves this page to render it</b></div>
+    <div style="margin-top:10px"><a id="roomdoor" href="https://skaists.buzz" style="display:inline-flex;align-items:center;min-height:32px;font-size:12px">the web door is open — a standing invite →</a></div>
+    <div class="roomstate" id="roomprobe" style="margin-top:8px">state: live — as of 2026-08-28 ·
+      <b>no request leaves this page to render it</b></div>
     <button class="act" id="checkroom" style="margin-top:2px">check the room now (opt-in probe)</button>
   </div>
 </section>
@@ -202,11 +216,13 @@ var ROOM={
   name:'skaists.buzz',
   wss:'wss://skaists.buzz',
   web:'https://skaists.buzz/',
-  state:'staged — first boot pending as of 2026-08-28 (lane G brings it up)'
+  state:'live — as of 2026-08-28',
+  door:{ href:'https://skaists.buzz', label:'the web door is open — a standing invite →' }
 };
 function renderRoom(){
   $('roomname').textContent=ROOM.name;
   $('joincode').textContent=ROOM.wss;
+  if(ROOM.door&&ROOM.door.href){$('roomdoor').href=ROOM.door.href;$('roomdoor').textContent=ROOM.door.label;}
   $('roomprobe').innerHTML='state: '+ROOM.state+' · <b>no request leaves this page to render it</b>';
 }
 /* THE RUB LAW (lane C law b): the door renders everything from data — zero
