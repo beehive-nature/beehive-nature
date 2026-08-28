@@ -52,3 +52,21 @@ Nothing to figure out: paste the three env values in the agent's env editor (the
 
 ## Receipt state
 **Awaiting the founder's screen:** an agent in his hive answering a message through this endpoint. Everything up to his paste is measured and green. Fences held: bLOVErAi durable path NOT on this node; no hosted provider wired anywhere; Buzz's own relay-mesh shared compute untouched.
+
+## FOLLOW-UP (2026-08-28 PM) — founder reports desktop "isn't connecting" + Compute screen "mesh-llm feature not enabled"
+
+### 1 · The wire bug — FOUND and FIXED: Caddy was rewriting the upstream Host
+Symptom: door 200, NIP-11 200, /api/join-policy 200 — but the real WebSocket handshake at wss://skaists.buzz returned **404 "relay: no community is configured for this host"** (the relay's fail-closed row-zero tenant binding — by design — rejecting the Host Caddy sent upstream, which was the dial address `relay:3000`, not `skaists.buzz`).
+**Fix:** `header_up Host {host}` added to both relay proxies in the Caddyfile (skaists.buzz + beehivenature.buzz blocks; backup `.pre-lane-h` predates all Lane H edits). One reload initially never applied (a failed `caddy fmt` broke the `&&` chain — read-back caught it); after the true reload:
+- **wss://skaists.buzz handshake = HTTP/1.1 101 Switching Protocols** (real upgrade, verified externally)
+- door 200 · NIP-11 200 · join-policy 200 · /compute 401-without-key — no regressions
+- direct-to-relay with Host: skaists.buzz = 101 (relay itself was never wrong; lane G's blind verify had tested that path, missing the Caddy hop)
+- beehivenature.buzz: same fix applied to its block; externally untestable until its DNS leaves the registrar parking spot (its ACME is failing against the parked IP — pre-existing)
+- the /compute route addition does NOT shadow the root/WS/NIP-11 matchers (all four verified green side by side)
+The founder's desktop should now connect: his invite-claim and /query bridge traffic were already reaching the relay (logged, pubkey d44163…); only the WS was dead.
+
+### 2 · mesh-llm — SCOPING ONLY (nothing applied, per order)
+**The Compute screen error is a COMPILE-TIME property of the desktop binary, not config.** `desktop/src-tauri/Cargo.toml` defines `mesh-llm` as an optional cargo feature (OFF by default; pulls `iroh` + the Mesh-LLM v0.75.1 crates sdk/host-runtime/client/node/system/events). Without it, `#[cfg(not(feature = "mesh-llm"))]` compiles in `mesh_llm_stubs.rs`, whose every command returns exactly `"mesh-llm feature not enabled"`. The full module IS in-tree (coordinator/discovery/identity/usage/recovery) — gated, not absent.
+**To enable:** build the desktop from this tree with `--features mesh-llm` (Rust, the Mesh-LLM git deps at tag v0.75.1). No runtime flag exists; no official release binary carries it as shipped to us.
+**What it would talk to:** discovery rides plain nostr status notes (kind = MESH_STATUS_KIND) + the NIP-43 membership roster — our relay 0.2.1 already serves both (NIP-43 is in its supported_nips); member-to-member serving is p2p (iroh). No relay change needed for the founder's member-machine-sharing vision. NOTE: the relay's own `BUZZ_MESH=on` env is a DIFFERENT mesh (inter-relay transport, runtime-opt-in) — untouched.
+**Awaiting founder word before any build** — enabling changes what member machines offer each other.
