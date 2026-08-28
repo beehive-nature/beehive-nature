@@ -144,3 +144,35 @@ before BF-1. If any piece already landed, **verify before executing.**
 receipts re-verified byte-level and SHA-pinned (§3a), BF-1 opened (code lap live), BF-2
 ruled (platform Canvas/SVG). §3b artist-first and §5 DSP safety remain load-bearing
 exactly as drafted. Next: BF-1 first build session. 🐜**
+
+---
+
+## ADDENDUM · lane C2 (2026-08-28) — PATTERN NOTE: the covenant-zapper (BOLT12-offer-in-profile-metadata, zappable)
+
+**What boards: a PATTERN, nothing else.** The upstream that demonstrated it —
+`gudnuf/bolt12-covenant-zapper`, a Bitcoin++ 2024 hackathon project — is
+**UNLICENSED** (verified 2026-08-28: GitHub license API 404, no LICENSE file at
+the repo root). Not one line of it boards; any estate implementation is
+first-party code, written by us.
+
+**The pattern, in our own words:** a Lightning **BOLT12 offer** — a static,
+recipient-generated payment code (`lno1…`) — placed in a Nostr profile's
+**Kind-0 metadata**. The profile becomes **zappable**: any wallet or client
+that speaks offers requests an invoice against it and pays directly; the zap
+receipt rides as a signed event. **What it replaces:** LNURL-pay's answering
+host — with an offer there is no pay-server to run, no invoice endpoint to
+keep alive, and no custody surface of ours anywhere in the loop. Payer
+privacy rides the offer's blinded paths.
+
+**Why the forge cares:** artist-first value flow with zero estate-run payment
+infrastructure. Every artist's profile carries their OWN offer — value flows
+peer-to-wallet, the hive never holds keys, and nobody's income depends on a
+server we operate. It is the receive-side twin of the A-metering rail
+(b-denominated compute settlement): value IN to creators, compute OUT to
+agents, both sides intermediary-free. Pairs with §7's sovereign self-art:
+the artist's identity, keys, and now their payment rail are all theirs.
+
+**Standing clause:** BOLT12 itself is public protocol documentation (BOLT #12);
+this note boards the pattern only. Any future implementation re-applies the
+§3a discipline — raw license reads and pins on every library it touches —
+before boarding.
