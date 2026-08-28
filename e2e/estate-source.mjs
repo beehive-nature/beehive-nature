@@ -14,7 +14,7 @@
    every generated string carries a data-i18n key, and every key in the whole
    tree exists in the corpus — a missing key is a string no tongue can ever
    reach, and it would fall back to English forever without anyone noticing. */
-import { readFileSync, mkdtempSync, rmSync, readdirSync, existsSync } from 'node:fs';
+import { readFileSync, mkdtempSync, rmSync, readdirSync, existsSync, writeFileSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';

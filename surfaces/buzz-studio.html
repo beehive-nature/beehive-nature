@@ -96,11 +96,11 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 <body>
 <main>
 <nav class="crumbs" aria-label="you are here">
-  <a href="index.html">beehive nature</a><span class="sub">▸</span><span class="here">the buzz room</span>
-  <span class="badge-live"><i></i>no account · no server · no company in the middle</span>
+  <a href="index.html">beehive nature</a><span class="sub">▸</span><span class="here" data-i18n="bz.crumb">the buzz room</span>
+  <span class="badge-live"><i></i><span data-i18n="bz.badge">no account · no server · no company in the middle</span></span>
 </nav>
 <header>
-  <div class="kicker">the co-creation genesis · crdt-merged · order can't break it</div>
+  <div class="kicker" data-i18n="bz.kicker">the co-creation genesis · crdt-merged · order can't break it</div>
   <h1>the bUZZ Studio</h1>
   <div class="sub" data-reg="bee">Paint a comb <b>together, live</b> — another tab on this
     device joins instantly, and a friend joins with a copy-paste handshake:
@@ -121,7 +121,7 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     an FNV provenance card.</div>
   <div class="herofig" aria-live="polite">
     <span class="num" id="painted" data-hero-number>0</span>
-    <span class="cap" data-hero-caption>cells painted · live · every hand, one math</span>
+    <span class="cap" data-hero-caption data-i18n="bz.hero.cap">cells painted · live · every hand, one math</span>
   </div>
   <div class="ministats">
     <span class="stat">you: <b id="me">…</b></span>
@@ -134,18 +134,15 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   <h2>the room — <b>the guarantee door</b></h2>
   <div class="room">
     <div class="roomname"><span class="dot" id="roomdot"></span><span id="roomname">skaists.buzz</span></div>
-    <div class="roomstate" id="roomstate">the hive's buzz room — join it in the Buzz desktop app:
-      <b>Add Community</b>, paste the address below. This page is the estate-owned door: it renders
-      the room's name, state and join line <b>whether or not the relay is up</b> — the app is the
-      enhancement, never the requirement.</div>
+    <div class="roomstate" id="roomstate"><span data-i18n="bz.room.a">the hive's buzz room — join it in the Buzz desktop app:</span> <b data-i18n="bz.room.add">Add Community</b>, <span data-i18n="bz.room.b">paste the address below. This page is the estate-owned door: it renders the room's name, state and join line</span> <b data-i18n="bz.room.rel">whether or not the relay is up</b> <span data-i18n="bz.room.c">— the app is the enhancement, never the requirement.</span></div>
     <div class="joinline">
       <code class="joincode" id="joincode">wss://skaists.buzz</code>
-      <button class="act primary" id="copywss">copy join address</button>
+      <button class="act primary" id="copywss" data-i18n="bz.copy">copy join address</button>
     </div>
-    <div style="margin-top:10px"><a id="roomdoor" href="https://skaists.buzz" style="display:inline-flex;align-items:center;min-height:32px;font-size:12px">the web door is open — a standing invite →</a></div>
+    <div style="margin-top:10px"><a id="roomdoor" href="https://skaists.buzz" style="display:inline-flex;align-items:center;min-height:32px;font-size:12px" data-i18n="bz.door">the web door is open — a standing invite →</a></div>
     <div class="roomstate" id="roomprobe" style="margin-top:8px">state: live — as of 2026-08-28 ·
       <b>no request leaves this page to render it</b></div>
-    <button class="act" id="checkroom" style="margin-top:2px">check the room now (opt-in probe)</button>
+    <button class="act" id="checkroom" style="margin-top:2px" data-i18n="bz.probe.btn">check the room now (opt-in probe)</button>
   </div>
 </section>
 
@@ -154,7 +151,7 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   <svg id="comb" viewBox="0 0 640 486" aria-label="shared hex canvas"></svg>
   <div id="palette" role="group" aria-label="palette"></div>
   <div class="law" style="margin-top:9px;text-align:center">open this page in a
-    <b>second tab</b> right now and paint — that is the CRDT working with zero setup. drag to
+    <b data-i18n="bz.comb.b">second tab</b> <span data-i18n="bz.comb.hint">right now and paint — that is the CRDT working with zero setup. drag to paint; the ⌫ swatch erases.</span> — that is the CRDT working with zero setup. drag to
     paint; the ⌫ swatch erases.</div>
 </section>
 
@@ -203,7 +200,7 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   the studios: <a href="blight/studio-music.html">music</a> · <a href="listening.html">listening</a>
   · <a href="blight/studio-gate.html">the gate</a> · <a href="index.html" data-i18n="law.hive">← the hive</a>
 </footer>
-<script src="tour.js?v=32"></script>
+<script src="tour.js?v=33"></script>
 <script>
 (function(){
 "use strict";

@@ -162,11 +162,11 @@ var WALLET_PROFILE = {
 <body>
 <main>
 <nav class="crumbs" aria-label="you are here">
-  <a href="index.html">beehive nature</a><span class="sub">▸</span><span class="here">the wallet</span>
-  <span class="badge-live"><i></i>keys live in tab memory only</span>
+  <a href="index.html" data-i18n="hub.name">beehive nature reserve</a><span class="sub">▸</span><span class="here" data-i18n="wl.crumb">the wallet</span>
+  <span class="badge-live"><i></i><span data-i18n="wl.badge">keys live in tab memory only</span></span>
 </nav>
 <header>
-  <div class="kicker">zero storage · zero custody · first-party, adapter-native</div>
+  <div class="kicker" data-i18n="wl.kicker">zero storage · zero custody · first-party, adapter-native</div>
   <h1><span aria-hidden="true">🗝</span> the BNR wallet</h1>
   <p data-reg="bee">One identity, every chain. Your bzDiD is your wallet — connect it once
   and see your balances across all your chains, sign transactions, and hold your keys.
@@ -1035,22 +1035,22 @@ var WALLET_PROFILE = {
   dependency is dead — this is ours, on the adapter contract: the worker builds, the vault signs,
   the outbox persists, and nothing is called "sent" until the rail is read back.</div>
   <div class="ladder" id="receipt-ladder" aria-label="the receipt ladder — the order is law">
-    <div class="lcap">the receipt ladder — every state is a first-class visual · the order is law</div>
+    <div class="lcap" data-i18n="wl.ld.cap">the receipt ladder — every state is a first-class visual · the order is law</div>
     <div class="lrow"><div class="ltrack"><span class="ldot">1</span><span class="ltail"></span></div>
-      <div class="lbody"><span class="llabel" style="color:#E9F2EC">BUILD</span><span class="lbadge">done</span>
-      <div class="lline">the live ABI renders one field per argument — you see exactly what you will sign: action, authorization, parsed args, signer, endpoint.</div></div></div>
+      <div class="lbody"><span class="llabel" style="color:#E9F2EC" data-i18n="wl.ld.build">BUILD</span><span class="lbadge" data-i18n="wl.ld.done">done</span>
+      <div class="lline" data-i18n="wl.ld.build.l">the live ABI renders one field per argument — you see exactly what you will sign: action, authorization, parsed args, signer, endpoint.</div></div></div>
     <div class="lrow"><div class="ltrack"><span class="ldot">2</span><span class="ltail"></span></div>
-      <div class="lbody"><span class="llabel" style="color:#D655BB">SIGN</span><span class="lbadge">done</span>
-      <div class="lline">your derived bzDiD key signs in tab memory — zero paste. the signature is yours, the bytes are final.</div></div></div>
+      <div class="lbody"><span class="llabel" style="color:#D655BB" data-i18n="wl.ld.sign">SIGN</span><span class="lbadge" data-i18n="wl.ld.done">done</span>
+      <div class="lline" data-i18n="wl.ld.sign.l">your derived bzDiD key signs in tab memory — zero paste. the signature is yours, the bytes are final.</div></div></div>
     <div class="lrow"><div class="ltrack"><span class="ldot">3</span><span class="ltail"></span></div>
-      <div class="lbody"><span class="llabel" style="color:#E9F2EC">PERSIST</span><span class="lbadge">done</span>
-      <div class="lline">the signed bytes land in the outbox BEFORE any network. persistence precedes submission — the order is law.</div></div></div>
+      <div class="lbody"><span class="llabel" style="color:#E9F2EC" data-i18n="wl.ld.persist">PERSIST</span><span class="lbadge" data-i18n="wl.ld.done">done</span>
+      <div class="lline" data-i18n="wl.ld.persist.l">the signed bytes land in the outbox BEFORE any network. persistence precedes submission — the order is law.</div></div></div>
     <div class="lrow"><div class="ltrack"><span class="ldot">…</span><span class="ltail"></span></div>
-      <div class="lbody"><span class="llabel" style="color:#6FA9E0">SUBMIT</span><span class="lbadge" style="border-style:dashed;border-color:#6FA9E0;color:#6FA9E0">SUBMITTED — awaiting read-back, not done</span>
-      <div class="lline">the stored bytes broadcast to the rail. a retry resubmits the identical bytes — it never re-signs, never rebuilds. submitted is NOT done.</div></div></div>
+      <div class="lbody"><span class="llabel" style="color:#6FA9E0" data-i18n="wl.ld.submit">SUBMIT</span><span class="lbadge" style="border-style:dashed;border-color:#6FA9E0;color:#6FA9E0" data-i18n="wl.ld.submitted">SUBMITTED — awaiting read-back, not done</span>
+      <div class="lline" data-i18n="wl.ld.submit.l">the stored bytes broadcast to the rail. a retry resubmits the identical bytes — it never re-signs, never rebuilds. submitted is NOT done.</div></div></div>
     <div class="lrow"><div class="ltrack"><span class="ldot" style="box-shadow:inset 0 0 0 1px #86CC72;color:#86CC72">✓</span></div>
-      <div class="lbody"><span class="llabel" style="color:#86CC72">CONFIRM</span><span class="lbadge" style="border-color:#86CC72;background:#86CC72;color:#06110C;font-weight:700">CONFIRMED — read back from the rail</span>
-      <div class="lline">a block read says so, or nothing does. the receipt names what was read — only the read-back earns the terminal look.</div></div></div>
+      <div class="lbody"><span class="llabel" style="color:#86CC72" data-i18n="wl.ld.confirm">CONFIRM</span><span class="lbadge" style="border-color:#86CC72;background:#86CC72;color:#06110C;font-weight:700" data-i18n="wl.ld.confirmed">CONFIRMED — read back from the rail</span>
+      <div class="lline" data-i18n="wl.ld.confirm.l">a block read says so, or nothing does. the receipt names what was read — only the read-back earns the terminal look.</div></div></div>
   </div>
   <div id="adapter-states" style="margin:8px 0;display:flex;gap:6px;flex-wrap:wrap"></div>
   <div class="row">
@@ -1126,7 +1126,7 @@ var WALLET_PROFILE = {
   static · derived keys live in tab memory only · vault secrets sealed with PBKDF2+AES-GCM · Rust core: crates/bnr-keys · AGPL-3.0-only · <a href="index.html">the hub</a> · this page: surfaces/wallet.html
 </footer>
 <script src="agent-dock.js?v=5"></script>
-<script src="tour.js?v=32"></script>
+<script src="tour.js?v=33"></script>
 <script src="onboarding/bzdid-key.js"></script>
 <script src="onboarding/vendor/bnr-sign.js?v=6"></script>
 <script src="onboarding/vendor/bnr-keys.js?v=1"></script>

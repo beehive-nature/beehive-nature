@@ -33,9 +33,9 @@
  "bset.html": 0,
  "bsymposium.html": 7,
  "btranslated.html": 8,
- "buzz-studio.html": 2,
+ "buzz-studio.html": 31,
  "dao-dashboard/index.html": 5,
- "design-system.html": 0,
+ "design-system.html": 21,
  "devroom.html": 0,
  "dock.html": 0,
  "doors/beehivebiomass.html": 27,
@@ -65,7 +65,7 @@
  "hardware/index.html": 7,
  "hardware/lab.html": 11,
  "hardware/security.html": 10,
- "index.html": 0,
+ "index.html": 27,
  "kandi.html": 8,
  "keys/addresses.html": 8,
  "listening.html": 12,
@@ -77,5 +77,5 @@
  "royalguard.html": 0,
  "stack.html": 7,
  "university/index.html": 6,
- "wallet.html": 0
+ "wallet.html": 9
 }

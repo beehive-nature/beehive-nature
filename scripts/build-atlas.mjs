@@ -87,14 +87,16 @@ const famBlock = (f, house) => {
     `<span class="gl">${s.gloss}</span></a>`).join('\n');
   const domHtml = doms.map(d => {
     const st = d.state === 'LIVE' ? 'live' : d.state === 'DNS-PENDING' ? 'dns' : 'seat';
-    return `<span class="dom ${st}" title="front repo: ${d.repo || 'none yet'}">${d.d}<span class="st">${d.state}</span></span>`;
+    return `<span class="dom ${st}" title="front repo: ${d.repo || 'none yet'}">${d.d}<span class="st">${d.state === 'LIVE' ? '<span data-i18n="hub.st.live">LIVE</span>' : d.state === 'DNS-PENDING' ? '<span data-i18n="hub.st.dns">DNS-PENDING</span>' : '<span data-i18n="hub.st.seat">SEAT-OPEN</span>'}</span></span>`;
   }).join('');
   const doorHtml = (DOORS[f] || []).map(d => `<a class="doorlink" href="${d[0]}">${d[1]}</a>`).join(' ');
+  const wSurfaces = '<span data-i18n="hub.w.surfaces">surfaces</span>';
+  const wDomains = '<span data-i18n="hub.w.domains">domains</span>';
   const countLine = counted === 0 && honoured === 0
-    ? 'an open seat — the domain waits for its first surface · ' + doms.length + ' domains'
-    : counted + (counted === 1 ? ' surface' : ' surfaces') + (honoured ? ' · ' + honoured + ' honoured uncounted (the founder\u2019s art)' : '') + ' · ' + doms.length + (doms.length === 1 ? ' domain' : ' domains');
+    ? '<span data-i18n="hub.openseat">an open seat — the domain waits for its first surface</span> · ' + doms.length + ' ' + wDomains
+    : counted + ' ' + wSurfaces + (honoured ? ' · ' + honoured + ' <span data-i18n="hub.honoured">honoured uncounted (the founder’s art)</span>' : '') + ' · ' + doms.length + ' ' + wDomains;
   return `<section class="fam ${house}" id="fam-${f}">
-<div class="famhead"><span class="hexdot ${house}"></span><h3>${f}</h3><span class="gloss">${GLOSS[f] || ''}</span>${doorHtml}</div>
+<div class="famhead"><span class="hexdot ${house}"></span><h3>${f}</h3><span class="gloss" data-i18n="hub.gl.${f}">${GLOSS[f] || ''}</span>${doorHtml}</div>
 <div class="doms">${domHtml}</div>
 <div class="famcount">${countLine}</div>
 <div class="rows">${rows || '<span class="gl" style="padding:8px 2px"></span>'}</div>
@@ -108,7 +110,7 @@ const houses = ORGS.map(o => {
   return `<section class="org" id="org-${o.id}">
 <div class="orghead"><span class="orghex" style="background:${o.hex}"></span>
 <h2 style="background:${o.hex};-webkit-background-clip:text;background-clip:text;color:transparent">${o.label}</h2>
-<span class="orgline">${o.line}</span>
+<span class="orgline" data-i18n="hub.org.${o.id}.line">${o.line}</span>
 <a class="gh" href="${o.gh}">${o.gh.replace('https://', '')} →</a></div>
 <div class="orgcount">${counted} surfaces · ${nd} domains · ${fams.length}${fams.length === 1 ? ' family' : ' families'} — computed from the registry\u2019s org field</div>
 ${fams.map(f => famBlock(f, o.house)).join('\n')}
@@ -252,19 +254,17 @@ footer b{color:var(--ink);font-variant-numeric:tabular-nums}
   ${bandLine}
   <div class="wrap">
   <nav class="crumbs" aria-label="you are here">
-    <span class="here">beehive nature reserve</span><span class="sub">▸</span><span class="sub">the atlas</span>
-    <span class="badge"><i></i>static · search is the only script</span>
+    <span class="here" data-i18n="hub.name">beehive nature reserve</span><span class="sub">▸</span><span class="sub" data-i18n="hub.crumb.atlas">the atlas</span>
+    <span class="badge"><i></i><span data-i18n="hub.badge.static">static · search is the only script</span></span>
   </nav>
-  <p class="kicker">zero network · no password · no name</p>
-  <h1>beehive nature reserve</h1>
-  <p class="lede">one estate, three orgs, eight families. every surface the estate has built lives
-  below, grouped by the org that answers for it and the domain it answers to — honest about
-  what is live, what is waiting on dns, and what is still an open seat.</p>
+  <p class="kicker" data-i18n="hub.kicker">zero network · no password · no name</p>
+  <h1 data-i18n="hub.name">beehive nature reserve</h1>
+  <p class="lede" data-i18n="hub.lede">one estate, three orgs, eight families. every surface the estate has built lives below, grouped by the org that answers for it and the domain it answers to — honest about what is live, what is waiting on dns, and what is still an open seat.</p>
   <div class="stat" aria-live="polite">
     <span class="num" data-hero-number>${c.surfaces}</span>
-    <span class="cap" data-hero-caption>surfaces · every number computed from the registry</span>
+    <span class="cap" data-hero-caption data-i18n="hub.hero.cap">surfaces · every number computed from the registry</span>
   </div>
-  <p class="counts"><b>${c.surfaces}</b> surfaces · <b>${c.domains}</b> domains · <b>${c.families}</b> families · <b>${nOrgs}</b> orgs · every number computed from the registry</p>
+  <p class="counts"><b>${c.surfaces}</b> <span data-i18n="hub.w.surfaces">surfaces</span> · <b>${c.domains}</b> <span data-i18n="hub.w.domains">domains</span> · <b>${c.families}</b> <span data-i18n="hub.w.families">families</span> · <b>${nOrgs}</b> <span data-i18n="hub.w.orgs">orgs</span> · <span data-i18n="hub.counts.tail">every number computed from the registry</span></p>
   <input id="q" type="search" placeholder="search the estate — a name, a feeling, a tool" aria-label="search the estate">
   <div id="shown" aria-live="polite"></div>
   </div>
@@ -284,11 +284,11 @@ ${houses}
 <!--ATLAS-STATIC-END-->
 
 <footer>
-  <div><a href="../estate.json">the registry</a> · <a href="doors/index.html">the doors</a> · <a href="https://github.com/beehive-nature/beehive-nature">the code</a> — <b>${c.surfaces}</b> surfaces · <b>${c.domains}</b> domains · <b>${nOrgs}</b> orgs</div>
+  <div><a href="../estate.json" data-i18n="hub.foot.registry">the registry</a> · <a href="doors/index.html" data-i18n="hub.foot.doors">the doors</a> · <a href="https://github.com/beehive-nature/beehive-nature" data-i18n="hub.foot.code">the code</a> — <b>${c.surfaces}</b> surfaces · <b>${c.domains}</b> domains · <b>${nOrgs}</b> orgs</div>
   <div class="m">the counts on this page render from the registry and cannot be hand-written —
   CI proves it every push. the fleet's hosted copies stay the founder's art:
   ${fleetN} of them carrying behaviour fixes, kept honest to his originals beyond the vendor line.
-  the full manifesto lives behind the <a href="doors/beehivenature.html">beehivenature door</a>.</div>
+  the full manifesto lives behind the <a href="doors/beehivenature.html" data-i18n="hub.foot.door">beehivenature door</a>.</div>
 </footer>
 
 <script type="application/json" id="estate">
