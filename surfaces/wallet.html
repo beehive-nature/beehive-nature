@@ -819,8 +819,10 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   one field per argument, and <b>shows you exactly what you will sign</b> — action, authorization,
   parsed args, signer, endpoint — before anything broadcasts. ABI-driven: the six bnames actions
   and anything after work the same way. Mainnet signs with your bridged bzDiD key, zero paste;
-  the Jungle4 lane rehearses with a test key you paste (TESTNET-ONLY, memory-only) or a vault-held
-  one. The Unicove dependency is dead — this is ours.</div>
+  the Jungle4 lane rehearses with a test key you paste (TESTNET-ONLY, memory-only). The Unicove
+  dependency is dead — this is ours, on the adapter contract: the worker builds, the vault signs,
+  the outbox persists, and nothing is called "sent" until the rail is read back.</div>
+  <div id="adapter-states" style="margin:8px 0;display:flex;gap:6px;flex-wrap:wrap"></div>
   <div class="row">
     <input id="tx-contract" placeholder="contract" value="kingbeelovis" spellcheck="false">
     <input id="tx-action" placeholder="action" value="registeracc" spellcheck="false">
@@ -848,7 +850,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   <div class="row">
     <button id="tx-k" class="green" style="font-size:11px">⏱ preset: reserve k.b</button>
     <button id="tx-q" class="green" style="font-size:11px">⏱ preset: reserve q.b</button>
-    <button id="tx-go" class="green" style="flex:1">SIGN + BROADCAST with bzDiD key</button>
+    <button id="tx-go" class="green" style="flex:1">COMPOSE — build · sign · outbox · read the rail back</button>
   </div>
   <div class="row" id="tx-wa-row" style="display:none">
     <label class="law" style="display:flex;align-items:center;gap:7px;cursor:pointer">
@@ -857,6 +859,14 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     </label>
   </div>
   <pre id="tx-out" style="display:none"></pre>
+</section>
+
+<section>
+  <h2>📤 OUTBOX — signed bytes persist here BEFORE they submit</h2>
+  <div class="law">The order is law: <b>build → sign → persist → submit → confirm by reading the
+  rail</b>. A retry resubmits the identical stored bytes — it never re-signs, never rebuilds.
+  Nothing shows "sent" until a block read says so; the receipt names what was read.</div>
+  <div id="outbox-list"></div>
 </section>
 
 <section>
@@ -2214,85 +2224,384 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     try { preview($('tx-contract').value.trim(), $('tx-action').value.trim(), JSON.parse($('tx-data').value), '— see fields / key lane —'); } catch (e) { /* mid-typing */ }
   });
 
-  async function pushAction(contract, action, data, auth, opts) {
-    opts = opts || {};
-    var hosts = opts.net === 'j4' ? J4.hosts : VH;
-    var abi = await composerAbi(contract);
-    if (!abi) throw new Error('no ABI on ' + contract);
-    var types = BN.Serialize.getTypesFromAbi(BN.Serialize.createInitialTypes(), abi);
-    var amap = new Map(); for (const a of abi.actions) amap.set(a.name, BN.Serialize.getType(types, a.type));
-    if (!amap.get(action)) throw new Error('action ' + action + ' not in ' + contract + ' ABI');
-    var actz = auth || [{ actor: (data.registrant || data.owner || data.from || data.account || SOUL), permission: 'active' }];
-    var sa = BN.Serialize.serializeAction({ types: types, actions: amap }, contract, action, actz, data, new TextEncoder(), new TextDecoder());
-    var info, ref;
-    if (opts.net === 'j4') {
-      info = await j4Rpc('/v1/chain/get_info', {});
-      if (!info || info.chain_id !== J4.chainId) throw new Error('chain-id guard: endpoint is not Jungle4 (' + ((info && info.chain_id) || 'no answer').slice(0, 10) + '…) — REFUSED');
-      ref = await j4Rpc('/v1/chain/get_block', { block_num_or_id: info.head_block_num - 3 });
-    } else {
-      if (!LIVE_HOST) { await pickHost(); if (!LIVE_HOST) throw new Error('no RPC host reachable'); }
-      info = await rpc().get_info();
-      ref = await rpc().get_block(info.head_block_num - 3);
-    }
-    var built = await buildSigned(info, ref, [{ account: contract, name: action, authorization: actz, data: sa.data }], opts.wa || null, opts.foreignKey || null);
-    var res = await postAny(hosts, '/v1/chain/send_transaction',
-      { signatures: built.signatures, compression: 0, packed_context_free_data: '', packed_trx: built.packedHex });
-    return { res: res, packed: built.packedHex, by: built.by, actz: actz };
+  /* pushAction is retired: its lane IS the adapter contract now — the worker
+     builds, the vault signs, the shell owns the outbox, confirm reads the rail.
+     The ack-as-receipt (a checkmarked "signed and broadcast" line that a
+     submit response used to print) died
+     with it; that shape reported a claim as a fact. */
+
+  /* ══ THE ADAPTER SHELL — SPEC-ADAPTER-CONTRACT-1 in the browser carrier ══
+     One dedicated Web Worker per rail (vaulta, hive — arweave when its lane
+     lands), JSON-RPC 2.0 over postMessage. The shell KNOWS THE CONTRACT and
+     never the rail: capabilities come from describe() at attach, a capability
+     not declared is UNREACHABLE (no message is ever dispatched), every
+     response crosses the redaction wall, and the OUTBOX lives here — build →
+     sign → PERSIST THE SIGNED BYTES → submit → confirm by reading the rail.
+     Nothing here reports "sent" from an ack: the receipt is the chain read. */
+  var ADAPTERS = {};                    // rail -> {worker, caps, attached, state, pending}
+  var TELEMETRY = {};                   // rail -> {sent, recv} — the gate's proof of "path gone"
+  var nextRpcId = 1;
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c] }) }
+
+  function spawnAdapter(rail, script) {
+    var a = { worker: null, caps: null, attached: false, state: 'spawning', pending: new Map() };
+    ADAPTERS[rail] = a;
+    TELEMETRY[rail] = { sent: 0, recv: 0 };
+    var boot = function () {
+      a.state = 'spawning';
+      a.worker = new Worker(script);
+      a.worker.onmessage = function (ev) {
+        var m = ev.data;
+        if (!m || m.jsonrpc !== '2.0' || typeof m.id !== 'number') return;
+        var p = a.pending.get(m.id);
+        if (!p) return;
+        clearTimeout(p.timer); a.pending.delete(m.id);
+        TELEMETRY[rail].recv++;
+        if (m.error) {
+          // the wall covers errors too — a hostile adapter does not get an
+          // exfiltration lane by failing loudly
+          try { wall(m.error.message) } catch (e) { crash(rail, 'redaction wall: error message carried key-shaped material'); p.rej(e); return }
+          p.rej(rpcError(m.error));
+        }
+        else {
+          try { p.res(wall(m.result)); }          // every response crosses the redaction wall
+          catch (e) { p.rej(e); }
+        }
+      };
+      a.worker.onerror = function () { crash(rail, 'worker error') };
+      callAdapter(rail, 'describe', {}, 8000).then(function (d) {
+        if (!d || d.rail !== rail || d.contract_version !== '1' || !Array.isArray(d.capabilities) || !d.capabilities.length) {
+          crash(rail, 'describe incomplete — adapter not attached (contract §9.1)');
+          return;
+        }
+        a.caps = d; a.attached = true; a.state = 'attached';
+        paintAdapterStates();
+      }, function (e) { crash(rail, 'describe failed: ' + (e && e.message || e)) });
+    };
+    a.respawn = boot;
+    boot();
   }
-  window.BNRVAULTA = {
-    pushAction: pushAction,
-    CAPABILITIES: { balance: true, receiveAddress: true, send: true, pushAction: true }
+
+  function crash(rail, why) {
+    var a = ADAPTERS[rail];
+    if (!a) return;
+    a.pending.forEach(function (p) { clearTimeout(p.timer); p.rej(rpcError({ code: -32010, message: 'adapter ' + rail + ' faulted: ' + why })) });
+    a.pending.clear();
+    try { a.worker.terminate() } catch (e) {}
+    a.attached = false; a.caps = null; a.state = 'down — ' + why;   // ONE rail, never the wallet (§6)
+    paintAdapterStates();
+  }
+
+  function rpcError(e) {
+    var err = new Error(e && e.message || String(e));
+    err.code = e && e.code;
+    return err;
+  }
+
+  function callAdapter(rail, method, params, ms) {
+    var a = ADAPTERS[rail];
+    if (!a || !a.worker) return Promise.reject(new Error('no ' + rail + ' adapter'));
+    if (!a.attached && method !== 'describe') return Promise.reject(new Error(rail + ' adapter not attached'));
+    return new Promise(function (res, rej) {
+      var id = nextRpcId++;
+      var timer = setTimeout(function () {
+        a.pending.delete(id);
+        rej(rpcError({ code: -32011, message: method + ' on ' + rail + ' timed out' }));
+      }, ms || 15000);
+      a.pending.set(id, { res: res, rej: rej, timer: timer });
+      TELEMETRY[rail].sent++;
+      a.worker.postMessage({ jsonrpc: '2.0', id: id, method: method, params: params });
+    });
+  }
+
+  /* THE REDACTION WALL (wallet law L1, contract §4.1) — shell-side, on every
+     adapter response: no method on this contract returns key material. A hit
+     quarantines the adapter: the response never reaches the caller.
+     Matching is EXACT-VALUE, never substring-of-the-serialization: legitimate
+     blobs (base64 unsigned_bytes, hex digests) are long and must not trip a
+     fuzzy WIF regex — a key is exactly key-shaped, whole. */
+  var WALL_EXACT = [
+    /^5[HJK][1-9A-HJ-NP-Za-km-z]{49}$/,                // WIF (uncompressed), exactly 51
+    /^[LK][1-9A-HJ-NP-Za-km-z]{51}$/,                  // WIF (compressed), exactly 52
+    /^PVT_[K1R]_[1-9A-HJ-NP-Za-km-z]+$/,               // Antelope explicit private
+    /^xprv[1-9A-HJ-NP-Za-km-z]{50,}$/                  // BIP32 extended private
+  ];
+  function wallThrow() {
+    var err = new Error('REDACTION WALL: adapter response carried key-shaped material — quarantined');
+    err.code = -32012; err.wall = true;
+    throw err;
+  }
+  function wallWalk(x, key) {
+    if (typeof x === 'string') {
+      if (key === 'd' && /^[A-Za-z0-9_-]{40,}$/.test(x)) wallThrow();   // JWK private exponent
+      if (/PRIVATE KEY-----/.test(x)) wallThrow();                      // PEM block
+      for (var i = 0; i < WALL_EXACT.length; i++) if (WALL_EXACT[i].test(x)) wallThrow();
+      return;
+    }
+    if (Array.isArray(x)) { for (var j = 0; j < x.length; j++) wallWalk(x[j]); return }
+    if (x && typeof x === 'object') {
+      var ks = Object.keys(x);
+      for (var k = 0; k < ks.length; k++) wallWalk(x[ks[k]], ks[k]);
+    }
+  }
+  function wall(result) {
+    wallWalk(result);
+    return result;
+  }
+
+  /* the capability gate (contract §9.2): an undeclared capability is not
+     erroring — its call path is GONE. No worker message is dispatched. */
+  function hasCap(rail, cap) {
+    var a = ADAPTERS[rail];
+    return !!(a && a.attached && a.caps && a.caps.capabilities && a.caps.capabilities.indexOf(cap) >= 0);
+  }
+
+  function paintAdapterStates() {
+    var el = $('adapter-states');
+    if (!el) return;
+    el.innerHTML = Object.keys(ADAPTERS).map(function (rail) {
+      var a = ADAPTERS[rail];
+      var color = a.attached ? 'var(--leaf)' : 'var(--amber)';
+      var label = a.attached ? rail + ' ✓ ' + a.caps.capabilities.length + ' caps' : rail + ' — ' + a.state;
+      return '<span style="border:1px solid ' + color + ';color:' + color + ';border-radius:6px;padding:2px 8px;font-size:9.5px">' + label + '</span>';
+    }).join(' ');
+  }
+
+  /* ── THE OUTBOX (wallet law L3, contract §6) — the shell owns it ──
+     Order is fixed: build → sign → PERSIST THE SIGNED BYTES → submit.
+     Retry resubmits the IDENTICAL stored bytes — never re-signs, never
+     rebuilds. intent_id is the idempotency key on every resubmission. */
+  var OUTBOX_KEY = 'bnr_outbox_v1';
+  function outboxRead() { try { var o = JSON.parse(localStorage.getItem(OUTBOX_KEY) || '[]'); return Array.isArray(o) ? o : [] } catch (e) { return [] } }
+  function outboxWrite(list) {
+    try { localStorage.setItem(OUTBOX_KEY, JSON.stringify(list.slice(-40))) } catch (e) {}
+  }
+  function outboxPut(entry) {
+    var list = outboxRead();
+    for (var i = 0; i < list.length; i++) if (list[i].intent_id === entry.intent_id) { list[i] = entry; break }
+    if (i === list.length) list.push(entry);
+    outboxWrite(list);
+    renderOutbox();
+  }
+  function outboxGet(id) {
+    var list = outboxRead();
+    for (var i = 0; i < list.length; i++) if (list[i].intent_id === id) return list[i];
+    return null;
+  }
+  function phaseColor(p) {
+    return p === 'confirmed' ? 'var(--leaf)' : (p === 'failed' || p === 'expired') ? 'var(--amber)' : 'var(--cyan)';
+  }
+  function renderOutbox() {
+    var el = $('outbox-list');
+    if (!el) return;
+    var list = outboxRead().slice().reverse();
+    if (!list.length) { el.innerHTML = '<div style="font-size:10px;color:var(--faint)">empty — the first composed action persists here the moment it is signed, BEFORE it is submitted</div>'; return }
+    el.innerHTML = list.map(function (e) {
+      return '<div style="border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:6px;background:var(--well)">' +
+        '<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">' +
+        '<span style="font-size:10px;color:var(--faint)">' + esc(e.intent_id.slice(0, 24)) + '… · ' + esc(e.rail) + ' · ' + esc(e.network) + '</span>' +
+        '<span style="font-size:10px;color:' + phaseColor(e.phase) + ';border:1px solid ' + phaseColor(e.phase) + ';border-radius:5px;padding:0 6px">' + esc(e.phase) + '</span></div>' +
+        '<div style="font-size:10.5px;color:var(--ink);margin-top:4px">' + esc(e.human_summary || '') + '</div>' +
+        (e.evidence ? '<div style="font-size:9.5px;color:var(--dim);margin-top:3px">read: ' + esc(typeof e.evidence === 'string' ? e.evidence : JSON.stringify(e.evidence)) + '</div>' : '') +
+        (e.ref ? '<div style="font-size:9.5px;color:var(--dim)">tx ' + esc(e.ref.slice(0, 32)) + '…</div>' : '') +
+        ((e.phase === 'signed' || e.phase === 'submitted') ? '<button class="obx-retry" data-id="' + esc(e.intent_id) + '" style="font-size:10px;margin-top:5px">resubmit the identical stored bytes</button>' : '') +
+        '</div>';
+    }).join('');
+    Array.prototype.forEach.call(el.querySelectorAll('.obx-retry'), function (b) {
+      b.onclick = function () { retryOutbox(b.getAttribute('data-id')) };
+    });
+  }
+  async function retryOutbox(intentId) {
+    var e = outboxGet(intentId);
+    if (!e || !e.signed_bytes) return;
+    await submitAndConfirm(e, function (msg, phase) {
+      var o = $('tx-out'); o.style.display = 'block';
+      o.innerHTML = '<b style="color:' + phaseColor(phase) + '">' + esc(msg) + '</b>';
+    });
+  }
+
+  /* ── THE VAULT SIGNS (contract §4) — the only key-holding party. The
+     adapter's digest is re-derived from the unsigned bytes and CHECKED
+     before anything signs: the vault signs what it can account for. */
+  function b64ToBytes(b) {
+    var s = atob(b), u = new Uint8Array(s.length);
+    for (var i = 0; i < s.length; i++) u[i] = s.charCodeAt(i);
+    return u;
+  }
+  function vaultSign(intent, opts) {
+    var payload = b64ToBytes(intent.unsigned_bytes);
+    var digest = hexS(BN.sha256(payload));   // BN.sha256 gives bytes; hexS is the byte-wise hex
+    if (digest !== intent.digest) throw new Error('vault refused: digest mismatch (intent says ' + intent.digest.slice(0, 12) + '…, bytes hash ' + digest.slice(0, 12) + '…)');
+    var digestBytes = hexB(digest);
+    if (opts && opts.wif) {                                  // Jungle4 rehearsal: pasted TESTNET key, memory-only
+      return { signatures: [BN.PrivateKey.fromString(opts.wif).sign(digestBytes).toString()], by: 'eosjs+testkey' };
+    }
+    if (CORE && K1 && K1.seed) {                             // mainnet: the first-party Rust core
+      var sig65 = CORE.sign(K1.seed, digestBytes);
+      return { signatures: [CORE.sigK1(sig65)], by: 'rust-core' };
+    }
+    if (K1 && K1.wif) {                                      // vendored eosjs fallback
+      var prov = new BN.JsSignatureProvider([K1.wif]);
+      var chainId = hexS(payload.slice(0, 32));
+      var packed = payload.slice(32, payload.length - 32);
+      var sgn = prov.sign({ chainId: chainId, requiredKeys: [K1.pubK1], serializedTransaction: packed, abis: [] });
+      return { signatures: sgn.signatures, by: 'eosjs' };
+    }
+    throw new Error('no signing lane: connect your keychain (mainnet) or paste a TESTNET key (jungle4 lane)');
+  }
+
+  /* ── submit, then confirm BY READING THE RAIL (wallet law L4) ──
+     submit's clean return is an ack, never a terminal state. confirmed can
+     only come from a confirm that read the block back and names what it
+     read. The UI shows submitted as "not sent yet". */
+  async function submitAndConfirm(entry, ui) {
+    var say = ui || function () {};
+    say('submitting the identical stored bytes…', 'signed');
+    try {
+      var r = await callAdapter(entry.rail, 'submit', { intent_id: entry.intent_id, signed_bytes: entry.signed_bytes }, 20000);
+      entry.ref = r.ref; entry.block_hint = r.block_hint;
+      entry.phase = 'submitted'; entry.updated_at = new Date().toISOString();
+      outboxPut(entry);
+      say('SUBMITTED — the node accepted bytes. This is NOT "sent". Reading the rail back…', 'submitted');
+    } catch (e) {
+      if (e && e.code === -32005) {                          // the rail refused — duplicate window, auth, expiry
+        entry.phase = 'failed'; entry.evidence = { read: 'send_transaction refusal', detail: e.message };
+        entry.updated_at = new Date().toISOString();
+        outboxPut(entry);
+        say('FAILED — the rail refused: ' + e.message, 'failed');
+        return entry;
+      }
+      say('submit faulted (' + (e && e.message || e) + ') — the SIGNED BYTES ARE PERSISTED; the retry resubmits them identically, it never re-signs', 'signed');
+      return entry;                                          // network class: stay phase 'signed'; the entry IS the state
+    }
+    /* non-terminal chatter only speaks while this flow owns the entry — an
+       in-flight confirm may return after another flow (a retry, a tampered
+       window) already finished it, and the last honest message must stay
+       the last on screen */
+    var speak = function (msg, ph) {
+      var c = outboxGet(entry.intent_id);
+      if (c && (c.phase === 'confirmed' || c.phase === 'failed' || c.phase === 'expired') && c !== entry) return;
+      say(msg, ph);
+    };
+    for (var attempt = 0; attempt < 14; attempt++) {
+      await new Promise(function (r2) { setTimeout(r2, 2200) });
+      /* the outbox is the state, not this closure: if another flow (a retry,
+         a tampered window) moved the entry, this loop yields to it */
+      var cur = outboxGet(entry.intent_id);
+      if (cur && cur.phase !== entry.phase) {
+        if (cur.phase === 'confirmed' || cur.phase === 'failed' || cur.phase === 'expired') return cur;
+        entry.expires_at = cur.expires_at;      // adopt the live window
+      }
+      try {
+        var c = await callAdapter(entry.rail, 'confirm', { ref: entry.ref, block_hint: entry.block_hint, network: entry.network }, 12000);
+        if (c.phase === 'confirmed' || c.phase === 'failed' || c.phase === 'expired') {
+          entry.phase = c.phase; entry.evidence = c.evidence; entry.updated_at = new Date().toISOString();
+          outboxPut(entry);
+          say(c.phase === 'confirmed'
+            ? 'CONFIRMED — read back from the rail: ' + (c.evidence && c.evidence.read) + (c.evidence && c.evidence.status ? ' · status ' + c.evidence.status : '') + ' · tx ' + entry.ref
+            : c.phase.toUpperCase() + ' — ' + JSON.stringify(c.evidence || {}),
+            c.phase);
+          return entry;
+        }
+        speak('submitted — rail read says: not visible yet (' + (c.evidence && c.evidence.read) + '). Reading again…', 'submitted');
+      } catch (e2) {
+        speak('confirm read faulted (' + (e2 && e2.message || e2) + ') — retrying the rail read; bytes are safe in the outbox', 'submitted');
+      }
+      if (entry.expires_at && Date.now() > new Date(entry.expires_at).getTime() + 30000) {
+        entry.phase = 'expired'; entry.evidence = { read: 'expiration passed without a confirming block read' };
+        entry.updated_at = new Date().toISOString();
+        outboxPut(entry);
+        say('EXPIRED — the intent\'s window closed without landing. Build it again if you still want it.', 'expired');
+        return entry;
+      }
+    }
+    speak('still submitted after the read window — the entry stays in the outbox; its evidence updates on any later read', 'submitted');
+    return entry;
+  }
+
+  /* ── walletAction() — THE SEAM that retired Unicove ──
+     One call: compose an arbitrary Vaulta action through the adapter
+     contract. bnames' walletAction() URL factory lands here via ?compose=. */
+  async function walletAction(contract, action, data, auth, opts) {
+    opts = opts || {};
+    var net = opts.network === 'j4' ? 'jungle4' : 'mainnet';
+    var out = $('tx-out'); out.style.display = 'block';
+    if (!ADAPTERS.vaulta || !ADAPTERS.vaulta.attached) {
+      out.innerHTML = '<b style="color:var(--amber)">vaulta adapter not attached</b> — ' + ((ADAPTERS.vaulta && ADAPTERS.vaulta.state) || 'never spawned');
+      return null;
+    }
+    if (!hasCap('vaulta', 'buildAction')) {                  // path GONE, not erroring (§9.2)
+      out.innerHTML = '<b style="color:var(--amber)">buildAction is not declared by the vaulta adapter</b> — the call path does not exist. Nothing was dispatched.';
+      return null;
+    }
+    out.textContent = '1/5 building intent — ' + contract + ':' + action + ' on ' + net + ' (ABI → serialized action → envelope → digest)…';
+    var intent;
+    try {
+      intent = await callAdapter('vaulta', 'buildAction', { account: contract, action: action, data: data, auth: auth, network: net }, 25000);
+    } catch (e) {
+      out.innerHTML = '<b style="color:var(--amber)">build failed:</b> ' + (e && e.message || e);
+      return null;
+    }
+    preview(contract, action, data, net === 'jungle4' ? 'the TESTNET key you paste (never stored)' : 'your bridged bzDiD-derived K1 key');
+    $('tx-preview-body').innerHTML += '<b>intent</b>   ' + intent.intent_id + '\n<b>digest</b>  ' + intent.digest.slice(0, 32) + '…\n<b>in words</b> ' + intent.human_summary;
+    out.textContent = '2/5 the vault signs the digest…';
+    var sgn;
+    try { sgn = vaultSign(intent, opts.wif ? { wif: opts.wif } : null) }
+    catch (e) { out.innerHTML = '<b style="color:var(--amber)">vault refused:</b> ' + (e && e.message || e); return null }
+    var entry = {
+      intent_id: intent.intent_id, rail: 'vaulta', network: net,
+      human_summary: intent.human_summary, digest: intent.digest,
+      unsigned_bytes: intent.unsigned_bytes,
+      signed_bytes: JSON.stringify({ network: net, packed_hex: intent.packed_hex, signatures: sgn.signatures }),
+      phase: 'signed', ref: null, block_hint: null,
+      expires_at: intent.expires_at, signed_by: sgn.by,
+      created_at: new Date().toISOString(), updated_at: new Date().toISOString(), evidence: null
+    };
+    outboxPut(entry);                                        // PERSIST BEFORE SUBMIT — the law
+    out.textContent = '3/5 signed (' + sgn.by + ') and PERSISTED in the outbox — submitting the identical bytes…';
+    return submitAndConfirm(entry, function (msg, phase) {
+      var color = phase === 'confirmed' ? 'var(--leaf)' : (phase === 'failed' || phase === 'expired') ? 'var(--amber)' : 'var(--cyan)';
+      out.innerHTML = '<b style="color:' + color + '">' + esc(msg) + '</b>';
+    });
+  }
+
+  /* the composer's GO now walks the contract pipeline */
+  $('tx-go').onclick = async function () {
+    var out = $('tx-out'); out.style.display = 'block';
+    var pulse = $('sigpulse');
+    pulse.style.animation = 'none'; void pulse.getBoundingClientRect();
+    pulse.style.animation = 'pulseout 1.2s ease-out 2';
+    var contract = $('tx-contract').value.trim(), action = $('tx-action').value.trim();
+    var data; try { data = JSON.parse($('tx-data').value) } catch (e) { out.textContent = 'invalid JSON: ' + e.message; return }
+    if (!contract || !action) { out.textContent = 'contract + action required'; return }
+    if (netIsJ4()) {
+      var wif;
+      try { wif = parseWifAny($('tx-j4key').value) } catch (e) { out.textContent = 'test key: ' + e.message; return }
+      if (!wif) { out.textContent = 'paste a Jungle4 TESTNET key (TESTNET-ONLY — never a mainnet key, never stored)'; return }
+      var actor = $('tx-j4actor').value.trim();
+      if (!/^[a-z1-5]{12}$/.test(actor)) { out.textContent = 'name the 12-char test actor that holds this key'; return }
+      await walletAction(contract, action, data, [{ actor: actor, permission: 'active' }], { network: 'j4', wif: wif });
+      return;
+    }
+    if (!K1 || !SOUL) { out.textContent = 'connect your keychain first (the gold button above)'; return }
+    var waCred = loadWaCred();
+    var useWa = $('tx-wa').checked && waCred;
+    if (!BRIDGED && !useWa) { out.textContent = 'your bzDiD key is not on ' + SOUL + '@active yet — run THE BRIDGE above first'; return }
+    var actor2 = data.registrant || data.owner || data.from || data.account || SOUL;
+    await walletAction(contract, action, data, [{ actor: actor2, permission: 'active' }], { network: 'main' });
   };
 
-  $('tx-go').onclick = async function(){
-    var out=$('tx-out'); out.style.display='block';
-    var pulse=$('sigpulse');
-    pulse.style.animation='none'; void pulse.getBoundingClientRect();
-    pulse.style.animation='pulseout 1.2s ease-out 2';
-    var contract=$('tx-contract').value.trim(), action=$('tx-action').value.trim();
-    var data; try{data=JSON.parse($('tx-data').value)}catch(e){out.textContent='invalid JSON: '+e.message;return}
-    if(!contract||!action){out.textContent='contract + action required';return}
-    if(!LIVE_HOST && !netIsJ4()){await pickHost(); if(!LIVE_HOST){out.textContent='no RPC host reachable';return}}
-    try{
-      if(netIsJ4()){
-        var wif, fk=null;
-        try{wif=parseWifAny($('tx-j4key').value)}catch(e){out.textContent='test key: '+e.message;return}
-        if(!wif){out.textContent='paste a Jungle4 TESTNET key (TESTNET-ONLY — never a mainnet key, never stored)';return}
-        var pub=null; try{pub=BN.PrivateKey.fromString(wif).getPublicKey().toLegacyString()}catch(e){}
-        fk={wif:wif,pub:pub};
-        var actor=$('tx-j4actor').value.trim();
-        if(!/^[a-z1-5]{12}$/.test(actor)){out.textContent='name the 12-char test actor that holds this key';return}
-        out.textContent='1/4 serializing '+contract+':'+action+' from the live Jungle4 ABI…';
-        var r=await pushAction(contract,action,data,[{actor:actor,permission:'active'}],{net:'j4',foreignKey:fk});
-        if(r.res&&r.res.transaction_id){
-          out.innerHTML='<b style="color:var(--leaf)">✓ SIGNED + BROADCAST on JUNGLE4 (testnet)</b>'+String.fromCharCode(10)+
-            '<b>transaction_id:</b> '+r.res.transaction_id+String.fromCharCode(10)+
-            '<b>signed by:</b> your pasted TESTNET key · lane: '+r.by+String.fromCharCode(10)+
-            'explorer: <a href="https://jungle4.eosq.eosnation.io/tx/'+r.res.transaction_id+'" target="_blank" rel="noopener">jungle4.eosq / '+r.res.transaction_id.slice(0,16)+'…</a>';
-        } else {
-          out.innerHTML='<b style="color:var(--amber)">jungle4 node said:</b> '+JSON.stringify(r.res&&r.res.error||r.res||{}).slice(0,400);
-        }
-        return;
-      }
-      if(!K1||!SOUL){out.textContent='connect your keychain first (the gold button above)';return}
-      var waCred=loadWaCred();
-      var useWa=$('tx-wa').checked&&waCred;
-      if(!BRIDGED&&!useWa){out.textContent='your bzDiD key is not on '+SOUL+'@active yet — run THE BRIDGE above first';return}
-      var actor2=data.registrant||data.owner||data.from||data.account||SOUL;
-      out.textContent='1/4 serializing '+contract+':'+action+' from live ABI…';
-      var r2=await pushAction(contract,action,data,[{actor:actor2,permission:'active'}],{wa:useWa?waCred:null});
-      if(r2.res&&r2.res.transaction_id){
-        out.innerHTML='<b style="color:var(--leaf)">✓ SIGNED + BROADCAST by your bzDiD key</b>'+String.fromCharCode(10)+
-          '<b>transaction_id:</b> '+r2.res.transaction_id+String.fromCharCode(10)+
-          '<b>signed by:</b> '+K1.eosPub+' · core: '+r2.by+String.fromCharCode(10)+
-          '<b>packed_trx:</b> '+r2.packed.slice(0,128)+'…';
-      } else {
-        var msg=JSON.stringify(r2.res&&r2.res.error||r2.res||{}).slice(0,400);
-        out.innerHTML='<b style="color:var(--amber)">node refused:</b> '+msg;
-      }
-    }catch(e){
-      out.innerHTML='<b style="color:var(--amber)">sign error:</b> '+(e&&e.message||e);
-    }
+  spawnAdapter('vaulta', 'wallet-adapter-vaulta.js');   // document-relative: same dir as this page
+  spawnAdapter('hive', 'wallet-adapter-hive.js');
+  renderOutbox();
+
+  window.BNRWALLET = {
+    adapters: ADAPTERS,
+    walletAction: walletAction,
+    callAdapter: callAdapter,
+    hasCap: hasCap,
+    _telemetry: TELEMETRY,
+    _crash: crash
   };
 
   /* ── PAY: receive · send · swap ───────────────────────────── */
