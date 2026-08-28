@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /* estate-check.mjs — the registry is the single source; this proves it.
    Validates estate.json: schema, uniqueness, enum states, family membership,
-   every LIVE path exists on disk, and the counts block == recomputed counts.
-   Exit 0 = the registry is honest; anything else fails CI. */
+   every LIVE path exists on disk, the org axis (founder-ruled map), and the
+   counts block == recomputed counts. Exit 0 = the registry is honest. */
 import { readFileSync, existsSync } from 'node:fs';
 
 const reg = JSON.parse(readFileSync('estate.json', 'utf8'));
@@ -11,6 +11,9 @@ const fail = (m) => { console.error('FAIL estate-check: ' + m); process.exit(1);
 if (reg.v !== 1) fail('payload must carry v:1 (payloads-carry-v law)');
 const STATES = new Set(['LIVE', 'DNS-PENDING', 'BUILT-UNHOSTED', 'SEAT-OPEN']);
 const DSTATES = new Set(['LIVE', 'DNS-PENDING', 'SEAT-OPEN']);
+/* the founder-ruled org axis — a row outside it is a typo or a new org
+   nobody ruled in; both stop here */
+const ORGS = new Set(['skaists', 'beehive-nature', 'beehive-biomass']);
 const fams = new Set(reg.families);
 if (fams.size !== reg.families.length) fail('duplicate family name');
 
@@ -20,11 +23,13 @@ for (const s of reg.surfaces) {
   if (paths.has(s.path)) fail('duplicate surface path: ' + s.path); paths.add(s.path);
   if (!fams.has(s.family)) fail('surface ' + s.id + ' in unknown family ' + s.family);
   if (!STATES.has(s.state)) fail('surface ' + s.id + ' bad state ' + s.state);
+  if (!ORGS.has(s.org)) fail('surface ' + s.id + ' missing or invalid org: ' + JSON.stringify(s.org));
   if (s.state === 'LIVE' && !existsSync(s.path)) fail('LIVE surface file missing: ' + s.path);
 }
 for (const d of reg.domains) {
   if (!fams.has(d.fam)) fail('domain ' + d.d + ' in unknown family ' + d.fam);
   if (!DSTATES.has(d.state)) fail('domain ' + d.d + ' bad state ' + d.state);
+  if (!ORGS.has(d.org)) fail('domain ' + d.d + ' missing or invalid org: ' + JSON.stringify(d.org));
 }
 const domSet = new Set(reg.domains.map(d => d.d));
 if (domSet.size !== reg.domains.length) fail('duplicate domain entry');
@@ -35,6 +40,8 @@ for (const s of reg.surfaces) if (!domSet.has(s.home)) fail('surface ' + s.id + 
    founder-art fleet copies; the rule mirrors e2e/university-smoke.mjs NOT_OURS) */
 const byFam = {}; reg.families.forEach(f => byFam[f] = 0);
 for (const s of reg.surfaces) if (s.counted !== false) byFam[s.family]++;
+const byOrg = {};
+for (const s of reg.surfaces) if (s.counted !== false) byOrg[s.org] = (byOrg[s.org] || 0) + 1;
 const recomputed = {
   surfaces: reg.surfaces.filter(s => s.counted !== false).length,
   listed: reg.surfaces.length,
@@ -45,7 +52,11 @@ const recomputed = {
   domainsSeatOpen: reg.domains.filter(d => d.state === 'SEAT-OPEN').length,
   byFamily: byFam,
   byState: { LIVE: reg.surfaces.filter(s => s.state === 'LIVE').length },
+  byOrg: byOrg,
 };
+/* the org axis sums to the whole — a bucket typo leaks rows and stops here */
+const orgSum = Object.values(byOrg).reduce((a, b) => a + b, 0);
+if (orgSum !== recomputed.surfaces) fail('per-org counts sum to ' + orgSum + ' but counted surfaces are ' + recomputed.surfaces);
 const a = JSON.stringify(recomputed), b = JSON.stringify(reg.counts);
 if (a !== b) { console.error('counts block drifted from the registry itself:\n  recomputed: ' + a + '\n  declared : ' + b); process.exit(1); }
 
@@ -68,4 +79,4 @@ for (const s of reg.surfaces) {
   if (!hrefs.has(rel)) fail('surface missing from the static atlas: ' + rel + ' — run scripts/build-atlas.mjs');
 }
 
-console.log('PASS estate-check — ' + reg.counts.surfaces + ' counted · ' + reg.counts.listed + ' listed · ' + reg.domains.length + ' domains · counts computed, not written · hub static + embed in sync');
+console.log('PASS estate-check — ' + reg.counts.surfaces + ' counted · ' + reg.counts.listed + ' listed · ' + reg.domains.length + ' domains · orgs ' + Object.entries(reg.counts.byOrg).map(([k, v]) => k + ':' + v).join(' · ') + ' (sum ' + orgSum + ') · counts computed, not written · hub static + embed in sync');
