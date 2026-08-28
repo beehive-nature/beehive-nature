@@ -870,6 +870,17 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 </section>
 
 <section>
+  <h2>🗺 CHAIN MATRIX — the sixteen rails, from data</h2>
+  <div class="law">Every rail the wallet will ever owe you, one row each: <b>how it's read</b>
+  (first-party path first), <b>how it's signed</b> (custody tier), and <b>tonight's honest state</b>.
+  Rendered from the data block below the fold — never typed prose — and every count you see is
+  computed from it at render. The doctrine: PROTOCOL paths may be core, SERVICE degrades
+  gracefully, gaps say they are gaps.</div>
+  <div id="matrix-summary" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0"></div>
+  <div id="matrix-body"></div>
+</section>
+
+<section>
   <h2>📊 SUMMARY</h2>
   <div class="readout">
     <div class="rd"><div class="k">SOUL</div><div class="v" id="sum-soul" style="font-size:13px">—</div></div>
@@ -2603,6 +2614,56 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     _telemetry: TELEMETRY,
     _crash: crash
   };
+
+  /* ══ THE CHAIN MATRIX — Brief 04 Part 3 as DATA (matrix law 4: counts
+     computed at render, never typed). Read = first-party path; Sign = custody
+     tier path; State = tonight's honest badge. PROTOCOL may be core, SERVICE
+     degrades, gaps are gaps. ═══════════════════════════════════════════ */
+  var CHAIN_MATRIX = [
+    { family: 'EVM', name: 'ETH', unit: 'ETH', read: 'public JSON-RPC eth_getBalance + balanceOf, Multicall3 batching', sign: 'Tier 1/2/3 · EIP-1559 · Permit2', state: 'PROVEN' },
+    { family: 'EVM', name: 'Arbitrum', unit: 'ETH · ANT', read: 'same + Arbiscan/Blockscout keyless — the derived bzDiD address reads live on this page', sign: 'Tier 1/2/3 · Permit2', state: 'LIVE' },
+    { family: 'EVM', name: 'Base', unit: 'ETH', read: 'same; mainnet.base.org keyless — MiDi lives here', sign: 'Tier 1/2/3 · Permit2', state: 'PROVEN' },
+    { family: 'EVM', name: 'exSAT', unit: 'BTC', read: 'EVM reads once the public RPC is verified — no canonical Uniswap, our own GPL v3; xBTC = 1:1 staked BTC', sign: 'Tier 1/2/3', state: 'VERIFY' },
+    { family: 'EVM', name: 'Vaulta', unit: 'A', read: 'native EOS-line APIs through the adapter contract on this page', sign: 'bzDiD K1 or passkey · firmware ✓', state: 'LIVE' },
+    { family: 'EVM', name: 'stables', unit: 'USDC & kin', read: 'ERC-20 reads on every EVM rail + SPL + HBD on Hive', sign: 'per family · token units, never fiat itemization', state: 'PROVEN' },
+    { family: 'Bitcoin', name: 'BTC', unit: 'BTC', read: 'Esplora/Blockbook/Electrum UTXOs; mempool.space keyless; operator bitcoind for sovereignty', sign: 'firmware ✓ · silent payments receive (sp1q default posture)', state: 'PROVEN' },
+    { family: 'Bitcoin', name: 'Lightning', unit: 'sats', read: 'LDK in-process channel state — no third party at all', sign: 'LDK keys per tier · BOLT12 offers', state: 'STUDY' },
+    { family: 'Independent', name: 'Solana', unit: 'SOL', read: 'public getBalance/getTokenAccountsByOwner (rate-limited) → operator RPC', sign: 'firmware ✓ · public RPC is SERVICE — degrade gracefully', state: 'VERIFY' },
+    { family: 'Independent', name: 'Hive', unit: 'HIVE · HBD', read: 'condenser getAccounts → HIVE/HBD/HP/RC, keyless — reads live on this page', sign: 'active-key transfers · firmware ✓', state: 'LIVE' },
+    { family: 'Independent', name: 'Zano', unit: 'ZANO', read: 'native daemon/API — privacy chain, reads may be per-output', sign: 'firmware ✓', state: 'VERIFY' },
+    { family: 'Hard tail', name: 'Bitcoin Cash', unit: 'BCH', read: 'Electrum/Blockbook, cashaddr', sign: 'FIRMWARE GAP — BCH sighash differs from BTC', state: 'GAP' },
+    { family: 'Hard tail', name: 'Zcash', unit: 'ZEC', read: 't-addr via lightwalletd; UA/z-addr by VIEW KEY — same scanner shape as silent payments', sign: 'FIRMWARE GAP — shielded signing is local-heavy', state: 'GAP' },
+    { family: 'Hard tail', name: 'Monero', unit: 'XMR', read: 'view-only wallet rpc, private view key never leaves the client', sign: 'FIRMWARE GAP — cold files or Tier 1/2 software keys', state: 'GAP' },
+    { family: 'Hard tail', name: 'Autonomi', unit: 'ANT', read: 'antd/CLI wallet reads — REST routes unpublished upstream, verify against the live daemon, never guess', sign: 'keypair per tier', state: 'VERIFY' },
+    { family: 'Hard tail', name: 'Arweave', unit: 'AR', read: 'gateway GraphQL winston, multi-gateway rotation — never hard-code arweave.net', sign: 'native JWK Tier 1/2 · firmware ✓', state: 'VERIFY' }
+  ];
+  (function renderMatrix() {
+    var STATE_COLORS = { LIVE: 'var(--leaf)', PROVEN: 'var(--cyan)', VERIFY: 'var(--violet)', GAP: 'var(--amber)', STUDY: 'var(--dim)' };
+    var byState = {}, byFamily = {};
+    CHAIN_MATRIX.forEach(function (c) { byState[c.state] = (byState[c.state] || 0) + 1; byFamily[c.family] = (byFamily[c.family] || 0) + 1 });
+    var sum = $('matrix-summary');
+    sum.innerHTML = '<span style="border:1px solid var(--line);border-radius:6px;padding:2px 9px;font-size:10px">' + CHAIN_MATRIX.length + ' rails · computed</span>' +
+      Object.keys(byState).map(function (s) {
+        return '<span style="border:1px solid ' + STATE_COLORS[s] + ';color:' + STATE_COLORS[s] + ';border-radius:6px;padding:2px 9px;font-size:10px">' + byState[s] + ' ' + s.toLowerCase() + '</span>';
+      }).join('');
+    var families = [];
+    CHAIN_MATRIX.forEach(function (c) { if (families.indexOf(c.family) < 0) families.push(c.family) });
+    $('matrix-body').innerHTML = families.map(function (f) {
+      var rows = CHAIN_MATRIX.filter(function (c) { return c.family === f });
+      return '<div style="margin-bottom:10px">' +
+        '<div style="font-size:9.5px;color:var(--faint);letter-spacing:.09em;margin-bottom:5px">' + f.toUpperCase() + ' FAMILY — ' + rows.length + ' rail' + (rows.length === 1 ? '' : 's') + '</div>' +
+        rows.map(function (c) {
+          return '<div style="border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:5px;background:var(--well)">' +
+            '<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline">' +
+            '<span style="font-size:11.5px;font-weight:600">' + esc(c.name) + ' <span style="color:var(--faint);font-weight:400;font-size:9.5px">' + esc(c.unit) + '</span></span>' +
+            '<span style="font-size:9px;color:' + STATE_COLORS[c.state] + ';border:1px solid ' + STATE_COLORS[c.state] + ';border-radius:5px;padding:0 6px;letter-spacing:.06em">' + esc(c.state) + '</span></div>' +
+            '<div style="font-size:10px;color:var(--dim);margin-top:4px"><b style="color:var(--ink)">read</b> ' + esc(c.read) + '</div>' +
+            '<div style="font-size:10px;color:var(--dim);margin-top:2px"><b style="color:var(--ink)">sign</b> ' + esc(c.sign) + '</div>' +
+            '</div>';
+        }).join('') + '</div>';
+    }).join('');
+    window.__CHAIN_MATRIX = CHAIN_MATRIX;   // the gate's oracle: render vs data
+  })();
 
   /* ── PAY: receive · send · swap ───────────────────────────── */
   function payStat(m){ $('pay-stat').innerHTML=m }
