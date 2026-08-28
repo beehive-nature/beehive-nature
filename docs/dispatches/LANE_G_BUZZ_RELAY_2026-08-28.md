@@ -299,3 +299,34 @@ external curl) and hands the join line.
 
 **Standing state: STACK LIVE, CLOSED, CORRECT — blocked only on the founder's
 ingress fix. Receipt (§10) unchanged: his Windows desktop renders channels.**
+
+## 12 · G-LIVE — belay executed, TLS live, join line handed (z2.2, 17:20 UTC)
+
+**Founder ruled: "mistake. belay last."** Belayed: the §11 owner-model
+correction is REVERSED — `RELAY_OWNER_PUBKEY` = founder hex again
+(`d44163340ce7dd9df1cfe14505ebe1112fb6819eb215b0169e166d3d47ef19bf` — PUBLIC-CONSTANT,
+a Nostr pubkey), relay recreated, boot receipt re-confirmed *"Relay owner
+bootstrapped"* = founder key; the box identity row removed from the roster
+(its secret stays archived on-box at `/opt/buzz/owner/owner-identity.txt`,
+mode 600, in case the estate ever wants it). **Final roster: founder =
+owner, sole member.** z2.1's addendum owner-order note is hereby superseded
+by the founder's own ruling in-conversation.
+
+The ingress blocker ALSO resolved itself in the same window — the founder's
+OCI rules had landed moments after the §11 report: Caddy log shows
+tls-alpn-01 key authentication **served to four Let's Encrypt validation
+vantage IPs** and **"certificate obtained successfully"** from the PRODUCTION
+directory (acme-v02). Verified end-to-end from the box:
+
+- `https://skaists.buzz/` through Caddy → **status 200**, tls verify 0
+- cert: `CN=skaists.buzz`, issuer `Let's Encrypt YE1`, valid 2026-08-28 →
+  2026-11-26 (auto-renew rides caddy)
+- **NIP-11 live**: `{"name":"Buzz Relay", … supported_nips: […,42,43]}` —
+  NIP-42 auth + NIP-43 membership both advertised
+- readiness 200 in-container
+
+**Handed to the founder — the one join line: Add Community →
+`wss://skaists.buzz`.** Receipt (§10) remains his Windows desktop rendering
+channels; if the desktop cannot reach the relay from the filtered wifi, that
+is a NEW fact to surface (the wifi middlebox documented in §11 lies to local
+probes — a hotspot test separates network from relay).
