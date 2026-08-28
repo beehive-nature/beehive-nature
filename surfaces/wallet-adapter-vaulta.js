@@ -48,15 +48,14 @@ async function railPost(net, path, body) {
       var res = await fetch(hs[i] + path, { method: 'POST', signal: ctl.signal,
         headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       if (res.ok) return await res.json();
-      lastErr = new Error('host ' + hs[i] + ' said ' + res.status);
-      if (res.status >= 400 && res.status < 500) {
-        // a real rail refusal (e.g. duplicate tx, bad auth) — parse and surface it
-        var d = null; try { d = await res.json() } catch (e) {}
-        if (d && d.error) {
-          var msg = (d.error.details && d.error.details[0] && d.error.details[0].message) || d.error.what || 'rail refused';
-          var err = new Error(msg); err.code = E.SUBMIT_REFUSED; throw err;
-        }
+      // an HTTP answer with a parseable error body is the RAIL SAYING NO — a
+      // verdict, not a network fault: surface it, never walk around it
+      var d = null; try { d = await res.json() } catch (e) {}
+      if (d && d.error) {
+        var msg = (d.error.details && d.error.details[0] && d.error.details[0].message) || d.error.what || 'rail refused';
+        var err = new Error(msg); err.code = E.SUBMIT_REFUSED; throw err;
       }
+      lastErr = new Error('host ' + hs[i] + ' said ' + res.status);
     } catch (e) {
       if (e && e.code) throw e;
       lastErr = e;
