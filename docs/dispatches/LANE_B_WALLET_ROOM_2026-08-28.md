@@ -20,4 +20,6 @@
 - These cannot both hold. Either (a) point this seat at the canonical spec text (a repo path or a paste to commit verbatim), or (b) rule that the seat authors it fresh from the raid + Brief 03 + Brief 04's PROTOCOL/SERVICE/PATTERN classing. One word un-parks the lane; B1→B3 then run whole per the plan.
 
 ## Park note
-B1 landed live; B2 (chain matrix from data) and B3 (Arweave buildPublish) run next per the plan.
+- **B2 — DONE @d2ac439 (live at skaists.dev/surfaces/wallet.html, CI green 3/3, 390px shot `e2e/shots-lane-b/wallet-B2-matrix-live-390.png`).** The sixteen-rail chain matrix renders from the data block: every count computed (16 rails · 3 live · 4 proven · 5 verify · 1 study · 3 gap), every row carries read path + custody-tier sign path + honest state badge. Gate `e2e/wallet-matrix.mjs` 8/8 incl. the never-typed mutation.
+
+B1 + B2 landed live; B3 (Arweave buildPublish) runs next per the plan.
