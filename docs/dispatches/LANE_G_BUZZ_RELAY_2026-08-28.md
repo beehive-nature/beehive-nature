@@ -330,3 +330,73 @@ directory (acme-v02). Verified end-to-end from the box:
 channels; if the desktop cannot reach the relay from the filtered wifi, that
 is a NEW fact to surface (the wifi middlebox documented in §11 lies to local
 probes — a hotspot test separates network from relay).
+
+## 13 · join_policy_required — diagnosed, fixed, proven (z2.2, 18:00–18:15 UTC)
+
+Founder report: desktop join against skaists.buzz fails `join_policy_required`,
+"same error as buzzbuild". Standard ruled: SCALABILITY — a stranger on any
+network must be able to join. No founder acts; both ends of the wire are ours.
+
+**Diagnosis (evidence chain, every link read from source or disk):**
+1. **Our relay cannot emit that string.** `join_policy_required` exists in
+   exactly four places server-side, all in `api/invites.rs` claim paths, and
+   only fire when a join policy EXISTS (`state.config.join_policy` is Some) —
+   ours is None. A URL-only join never claims at all
+   (`communityOnboarding.tsx:181` — `inviteCode ? "claiming" : "connecting"`).
+2. **The desktop parks a failed join forever.** The onboarding transaction
+   persists to webview localStorage (`buzz-community-onboarding-transaction.v1`)
+   and `start()` REJECTS any different relay URL while one is pending
+   (communityOnboarding.tsx:348) — the overlay replays `transaction.error`
+   under "Joining {community}" with a Retry that cannot work.
+3. **Smoking gun (app closed; classic-level read of the webview leveldb —
+   snappy hides it from grep):** the parked transaction is a **deep-link join
+   to `wss://buzzbuild.communities.buzz.xyz`** from 2026-08-28T16:25Z, stage
+   `claiming`, error `join_policy_required` — buzz.xyz's own relay demanded a
+   policy receipt for that invite; the app can't retry; the transaction
+   blocked every new join, ours included. The founder's app identity in the
+   same storage = `d4416334…` (exactly the npub he handed us). The stored
+   origin prefix is `http://tauri.localhost` — the very Windows origin our
+   CORS carries.
+
+**Machine fix (surgical, no founder act):** deleted the single localStorage
+key from the live leveldb with classic-level (`_http://tauri.localhost\x00\x01
+buzz-community-onboarding-transaction.v1`); verified zero onboarding-
+transaction keys remain; full leveldb backup kept at
+`~/lane-g-join/leveldb-backup-laneG`. Identity/keys live Rust-side — untouched.
+
+**Stranger door (the scalability fix at the source):**
+- Box identity re-added as **admin** (the operator's minting hand; founder
+  stays owner; secret never left the box — piped ssh→stdin into the signer).
+- NIP-98 quirk recorded: the deployed relay parses the Authorization payload
+  as the **bare event object** (bridge.rs `from_str::<Event>`), not NIP-98's
+  `["EVENT", ev]` envelope — our client matches the deployment.
+- Minted the durable invite: `v2.nyPIIUOZTvKbsN7ie0RwNohd_phcep0Xe3dsQGda5wk`,
+  **unlimited uses, expires 2026-09-27**; join URL
+  `https://skaists.buzz/invite/v2.nyPIIUOZTvKbsN7ie0RwNohd_phcep0Xe3dsQGda5wk`.
+  Claim is membership-gate-EXEMPT by design (invites.rs header comment) — any
+  stranger with a buzz key claims and becomes a member. No policy configured
+  → no receipt demanded → no buzzbuild replay.
+
+**Full join PROVEN from this exact machine on this exact network** (the head
+of §10's receipt, stranger-class): fresh identity
+`npub1jplld47ctknp0806leyr9el2pmp3ef8q0anxdr6nkztwndyupu6qac79t6` (test
+member, scratch file local) → claim `POST /api/invites/claim` → **200
+joined** → WS `wss://skaists.buzz` → NOTICE auth-required → NIP-42 AUTH
+accepted → rendered the channel tree (0 channels — fresh community) →
+created **#general** and **#introductions** (kind 9007, both `OK accepted`)
+→ re-REQ rendered both. Channels rendered, not readiness codes.
+
+**RUB LAW — the estate web door is live at `https://skaists.buzz`:** Caddy
+content-negotiation (`@door` = path `/` AND `Accept text/html*` → one-file
+static door; NIP-11, WebSockets, `/api/*`, `/invite/*`, `/media/*` all stay
+on the relay). The door: hive name, live-state dot (same-origin NIP-11 +
+join-policy probe), the wss line with copy button, and the stranger invite
+link — no stranger ever dead-ends inside their app again. One file, zero
+outbound calls, estate palette. Verified: browser GET / → door 200 (box-side
+AND from Windows through real DNS); NIP-11 → relay info doc; `/invite/<code>`
+→ 200; `/api/join-policy` → `{}` 200. Lesson: docker auto-creates bind-mount
+targets as root — create the dir before first `up` (cost one 404 debug).
+
+**Handed to the founder (again, this time proven): Add Community →
+`wss://skaists.buzz`** — his key is owner+member, the blocker is deleted from
+his app. Strangers: the invite link, or the door.
