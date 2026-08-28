@@ -104,6 +104,36 @@ pre b{color:var(--ink)}
 @keyframes qr-pulse-k{0%,100%{opacity:.85}50%{opacity:.25}}
 footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
 </style>
+<script>
+/* ══ THE KIT PROFILE — every estate-only fact this surface carries lives HERE,
+   never in logic (founder north star: any combination of surfaces is a
+   TURNKEY KIT an outside artist deploys to their own domain; a kit copy
+   edits this block and nothing else). Public-protocol facts (RPC hosts,
+   chain ids, gateways) are NOT estate assumptions and stay in their rails. */
+var WALLET_PROFILE = {
+  canonical_home: 'https://skaists.dev/surfaces/wallet.html',   // the origin guard's "real home" hint
+  composer: {                                                    // the composer's boot defaults
+    contract: 'kingbeelovis',
+    action: 'registeracc',
+    args: { registrant: 'kingbeelovis', domain_name: 'k', target: 'kingbeelovis' }
+  },
+  discovery_seeds: ['kingbeelovis', 'king'],                     // account-sweep hints for pasted keys
+  anchor: {                                                      // the Arweave anchor panel's payload profile
+    label: 'the orbit-manifest anchor · forge/orbit-manifests.md (1,926 B)',
+    path: 'forge/orbit-manifests.md',
+    sha256: '865f86caf55fab14be36746b4b5465025b04fae478072b09e13fcdbca3b7c406', // PUBLIC-CONSTANT: committed-blob sha256 (zA's pin)
+    tags: [
+      ['Content-Type', 'text/markdown'],
+      ['App-Name', 'Beehive-Nature'],
+      ['Type', 'orbit-manifest-anchor'],
+      ['Manifest-SHA256', '865f86caf55fab14be36746b4b5465025b04fae478072b09e13fcdbca3b7c406'], // PUBLIC-CONSTANT
+      ['Renderer-SHA256', '6e54b80deff87861e4ad0134799cbd8a28492ed9e851b26bdfd597f4258a6b29'], // PUBLIC-CONSTANT
+      ['Renderer-Commit', 'c3e49979a7429b49ab623e3347b8c94e36791780'], // PUBLIC-CONSTANT
+      ['Rail', '2']
+    ]
+  }
+};
+</script>
 </head>
 <body>
 <main>
@@ -852,20 +882,11 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
         if (!box || !go || !stat) return;
         /* the committed-blob law, runtime side: the payload is fetched from the
            deployment and its sha256 is checked against the PINNED hash before
-           anything is signed — a drifted file can never be anchored by mistake. */
-        var ORBIT = {
-          path: 'forge/orbit-manifests.md',
-          sha256: '865f86caf55fab14be36746b4b5465025b04fae478072b09e13fcdbca3b7c406', // PUBLIC-CONSTANT: committed-blob sha256 (zA's pin)
-          tags: [
-            ['Content-Type', 'text/markdown'],
-            ['App-Name', 'Beehive-Nature'],
-            ['Type', 'orbit-manifest-anchor'],
-            ['Manifest-SHA256', '865f86caf55fab14be36746b4b5465025b04fae478072b09e13fcdbca3b7c406'], // PUBLIC-CONSTANT
-            ['Renderer-SHA256', '6e54b80deff87861e4ad0134799cbd8a28492ed9e851b26bdfd597f4258a6b29'], // PUBLIC-CONSTANT
-            ['Renderer-Commit', 'c3e49979a7429b49ab623e3347b8c94e36791780'], // PUBLIC-CONSTANT
-            ['Rail', '2']
-          ]
-        };
+           anything is signed — a drifted file can never be anchored by mistake.
+           The profile (path, pin, tags, label) is KIT DATA — WALLET_PROFILE.anchor. */
+        var ORBIT = (window.WALLET_PROFILE && WALLET_PROFILE.anchor) || { path: '', sha256: '', tags: [] };
+        var optLabel = document.querySelector('#arw-what option[value="orbit-anchor"]');
+        if (optLabel && ORBIT.label) optLabel.textContent = ORBIT.label;
         function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
         function arEntry() {
           if (!window.BNRVAULT || !BNRVAULT.isUnlocked()) return null;
@@ -986,8 +1007,8 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   the outbox persists, and nothing is called "sent" until the rail is read back.</div>
   <div id="adapter-states" style="margin:8px 0;display:flex;gap:6px;flex-wrap:wrap"></div>
   <div class="row">
-    <input id="tx-contract" placeholder="contract" value="kingbeelovis" spellcheck="false">
-    <input id="tx-action" placeholder="action" value="registeracc" spellcheck="false">
+    <input id="tx-contract" placeholder="contract" value="" spellcheck="false">
+    <input id="tx-action" placeholder="action" value="" spellcheck="false">
     <select id="tx-net" title="network" style="max-width:180px;flex:0 1 180px;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
       <option value="main">Vaulta mainnet</option>
       <option value="j4">Jungle4 · testnet</option>
@@ -1003,7 +1024,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     <div class="row" style="margin-top:0" id="tx-fields-row"></div>
   </div>
   <div class="row">
-    <input id="tx-data" class="small" placeholder='JSON args (auto-built from fields; editable)' value='{"registrant":"kingbeelovis","domain_name":"k","target":"kingbeelovis"}' style="flex:2" spellcheck="false">
+    <input id="tx-data" class="small" placeholder='JSON args (auto-built from fields; editable)' value='' style="flex:2" spellcheck="false">
   </div>
   <div id="tx-preview" style="display:none;margin-top:10px;border:1px solid #2c4a5a;border-radius:10px;padding:11px 13px;background:#081820">
     <div style="font-size:9.5px;color:var(--cyan);letter-spacing:.09em;margin-bottom:6px">EXACTLY WHAT YOU ARE SIGNING</div>
@@ -1066,6 +1087,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 <script src="onboarding/vendor/bip39-wordlist.js"></script>
 <script src="vault.js?v=2"></script>
 <script src="arweave.js?v=2"></script>
+
 <script>
 (function(){
   var $=function(i){return document.getElementById(i)};
@@ -1591,7 +1613,9 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
       return 'that passkey lacks PRF (Bitwarden-class managers don\'t carry it) — delete it where it was saved, create one here with a platform provider (Windows Hello / Chrome profile / Google / iCloud), or import your soul with the recovery phrase';
     }
     if(/invalid domain|NotAllowedError.*domain|not allowed for this origin/i.test(m)||BAD_ORIGIN){
-      return 'passkeys CANNOT exist on this origin ('+location.hostname+' — WebAuthn needs a real domain, never an IP). You are on a local build server. The wallet lives at beehive-nature.github.io — open the public link in the banner above and every passkey lane works there.';
+      var homeMsg=(window.WALLET_PROFILE&&WALLET_PROFILE.canonical_home)||'';
+      return 'passkeys CANNOT exist on this origin ('+location.hostname+' — WebAuthn needs a real domain, never an IP). You are on a local build server.'+
+        (homeMsg?' The wallet lives at '+homeMsg.replace(/^https?:\/\//,'')+' — open the public link in the banner above and every passkey lane works there.':' Open this wallet on its real domain and every passkey lane works there.');
     }
     if(/NotAllowed|No available|not.*found|pending|aborted|InvalidState|timed out|credential|excluded|problem signing/i.test(m)){
       // covers: user cancelled the picker, the QR cross-device dead end (the
@@ -1605,11 +1629,13 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
      with the door out, instead of letting the ceremonies fail one by one. */
   var BAD_ORIGIN=/^\d+\.\d+\.\d+\.\d+$/.test(location.hostname);
   if(BAD_ORIGIN){
+    var KIT_HOME=(window.WALLET_PROFILE&&WALLET_PROFILE.canonical_home)||'';
     var b=document.createElement('div');
     b.style.cssText='position:sticky;top:0;z-index:50;background:#4a3a1d;color:#FFD700;border:2px solid #FFD700;border-radius:10px;padding:12px 14px;margin:10px 0;font-size:13px;line-height:1.6';
     b.innerHTML='<b>⚠ THIS IS A LOCAL BUILD SERVER ('+location.hostname+') — passkeys cannot work here.</b><br>'+
       'WebAuthn requires a real domain, and an IP address is never one: every passkey ceremony on this origin will fail with "invalid domain".<br>'+
-      '<b>The wallet\'s real home:</b> <a href="https://beehive-nature.github.io/beehive-nature/surfaces/wallet.html" style="color:#FFD700;text-decoration:underline">beehive-nature.github.io/beehive-nature/surfaces/wallet.html</a> — open that link, bookmark it, and every lane (passkeys, bridge, QR, devices, pay) works smooth.';
+      (KIT_HOME?'<b>The wallet\'s real home:</b> <a href="'+KIT_HOME+'" style="color:#FFD700;text-decoration:underline">'+KIT_HOME.replace(/^https?:\/\//,'')+'</a> — open that link, bookmark it, and every lane (passkeys, bridge, QR, devices, pay) works smooth.'
+               :'<b>Open this wallet on its real domain</b> — the kit profile carries no canonical home, so this copy\'s home is wherever you deployed it.');
     var main=document.querySelector('main');
     if(main)main.insertBefore(b,main.firstChild);
   }
@@ -2053,7 +2079,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
      this wallet knows (remembered from every successful read/bridge; seeded
      with the founder pair). No typing, no pairing, paste → found. */
   function acctDir(){ try{var d=JSON.parse(localStorage.getItem('bnr_acct_dir')||'[]');if(!Array.isArray(d))d=[]}catch(e){d=[]}
-    ['kingbeelovis','king'].forEach(function(n){ if(d.indexOf(n)<0)d.push(n) });   // founder pair seed
+    ((window.WALLET_PROFILE&&WALLET_PROFILE.discovery_seeds)||[]).forEach(function(n){ if(d.indexOf(n)<0)d.push(n) });   // kit-profile discovery seeds
     if(SOUL&&d.indexOf(SOUL)<0)d.push(SOUL);
     try{ localStorage.setItem('bnr_acct_dir',JSON.stringify(d)) }catch(e){}        // persist the merged set
     return d; }
@@ -2278,9 +2304,10 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 
   /* ── SIGN lane: bzDiD key signs, zero paste ───────────────── */
   function preset(name){
-    $('tx-contract').value=SOUL||'kingbeelovis';
-    $('tx-action').value='registeracc';
-    $('tx-data').value=JSON.stringify({registrant:SOUL||'kingbeelovis',domain_name:name,target:SOUL||'kingbeelovis'});
+    var pc=(window.WALLET_PROFILE&&WALLET_PROFILE.composer)||{};
+    $('tx-contract').value=SOUL||pc.contract||'';
+    $('tx-action').value=pc.action||'';
+    $('tx-data').value=JSON.stringify({registrant:SOUL||pc.contract||'',domain_name:name,target:SOUL||pc.contract||''});
   }
   $('tx-k').onclick=function(){preset('k')};
   $('tx-q').onclick=function(){preset('q')};
@@ -2290,7 +2317,7 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     var qp = new URLSearchParams(location.search);
     if (qp.get('compose')) {
       var parts = qp.get('compose').split(':');
-      $('tx-contract').value = parts[0] || 'kingbeelovis';
+      $('tx-contract').value = parts[0] || ((window.WALLET_PROFILE && WALLET_PROFILE.composer) || {}).contract || '';
       $('tx-action').value = parts[1] || '';
       if (qp.get('args')) { $('tx-data').value = JSON.stringify(JSON.parse(qp.get('args'))); }
       setTimeout(loadAbiUi, 400); // after the vendored lane is up
@@ -3183,7 +3210,13 @@ footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 
   window.addEventListener('beforeunload',scrubAll);
 
-  // boot: bundle check + Rust core arming + auto-connect balances from localStorage
+  // boot: kit-profile defaults → composer, bundle check + Rust core arming + auto-connect balances from localStorage
+  (function bootProfile(){
+    var pc=(window.WALLET_PROFILE&&WALLET_PROFILE.composer)||{};
+    if(!$('tx-contract').value && pc.contract)$('tx-contract').value=pc.contract;
+    if(!$('tx-action').value && pc.action)$('tx-action').value=pc.action;
+    try{ if(!$('tx-data').value && pc.args)$('tx-data').value=JSON.stringify(pc.args); }catch(e){}
+  })();
   BN=window.BnrSign||null;
   if(!BN){
     var s=document.createElement('div');s.className='law';

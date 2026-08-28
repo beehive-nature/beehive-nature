@@ -84,6 +84,41 @@ try {
     ok('hard-tail count follows the data (5 → still 5 with the renamed rail; summary stays computed)', /16 rails · computed/.test(sum2), sum2.slice(0, 60));
     await ctx.close();
   }
+  /* C · THE KIT PROFILE (founder north star, supplemented 2026-08-28): the
+     wallet's estate-only facts live in ONE data block — a turnkey copy edits
+     WALLET_PROFILE and nothing else. Proven by mutation: change the profile,
+     the composer boots differently. */
+  console.log('C · kit profile (config in data, never logic):');
+  {
+    const page = await browser.newPage();
+    await page.goto('http://127.0.0.1:8895/surfaces/wallet.html', { waitUntil: 'load' });
+    await page.waitForFunction(() => window.WALLET_PROFILE && window.__CHAIN_MATRIX, null, { timeout: 15000 });
+    const prof = await page.evaluate(() => window.WALLET_PROFILE);
+    ok('the kit profile carries every estate-only fact (home · composer · seeds · anchor)',
+      !!(prof.canonical_home && prof.composer && prof.composer.contract && Array.isArray(prof.discovery_seeds) &&
+         prof.anchor && prof.anchor.path && prof.anchor.sha256 && Array.isArray(prof.anchor.tags)), JSON.stringify(prof).slice(0, 90));
+    const booted = await page.evaluate(() => ({ c: document.getElementById('tx-contract').value, a: document.getElementById('tx-action').value, d: document.getElementById('tx-data').value }));
+    ok('composer boots FROM the profile (no hard-wired defaults in the markup)',
+      booted.c === prof.composer.contract && booted.a === prof.composer.action &&
+      JSON.parse(booted.d).registrant === prof.composer.args.registrant, JSON.stringify(booted));
+    await page.close();
+
+    const ctx = await browser.newContext();
+    await ctx.route(/surfaces\/wallet\.html/, async route => {
+      const src = await readFile(join(ROOT, 'surfaces', 'wallet.html'), 'utf8');
+      const anchor = "contract: 'kingbeelovis',";
+      if (!src.includes(anchor)) return route.fulfill({ status: 500, contentType: 'text/plain', body: 'mutation anchor missing' });
+      return route.fulfill({ status: 200, contentType: 'text/html',
+        body: src.replace(anchor, "contract: 'kitcopy11111',").replace("canonical_home: 'https://skaists.dev/surfaces/wallet.html'", "canonical_home: ''") });
+    });
+    const p2 = await ctx.newPage();
+    await p2.goto('http://127.0.0.1:8895/surfaces/wallet.html', { waitUntil: 'load' });
+    await p2.waitForFunction(() => window.WALLET_PROFILE, null, { timeout: 15000 });
+    const mutated = await p2.evaluate(() => document.getElementById('tx-contract').value);
+    ok('a kit copy edits the profile and the composer follows (defaults are data, never logic)',
+      mutated === 'kitcopy11111', mutated);
+    await ctx.close();
+  }
 } finally {
   await browser.close();
   server.close();
