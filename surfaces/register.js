@@ -64,9 +64,8 @@
    +'#bregctl button[aria-pressed="true"]::before{content:"●";font-size:8px}'
    +'#bregctl button:hover{border-color:#00E5FF;color:#00E5FF}'
    /* the once-introduction: one quiet line, dismissed by any choice or its own click */
-   +'#bregintro{display:block;width:100%;box-sizing:border-box;margin:2px 0 0;padding:6px 10px;'
-   +'border-top:1px solid #243026;color:#8a9a8a;font:10.5px "IBM Plex Mono",monospace;line-height:1.7;cursor:pointer}';
-
+   +'#bregintro{position:absolute;left:0;right:0;bottom:100%;display:block;width:100%;box-sizing:border-box;margin:0 0 2px;padding:6px 10px;'
+   +'background:#0d1410;border:1px solid #243026;border-radius:8px 8px 0 0;color:#8a9a8a;font:10.5px "IBM Plex Mono",monospace;line-height:1.7;cursor:pointer}';
   document.head.appendChild(css);
 
   function mount(){

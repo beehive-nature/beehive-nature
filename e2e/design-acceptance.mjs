@@ -191,6 +191,38 @@ for (const rel of targets) {
   ok('M headline shrinks on phone', parseFloat(m.h1) < h1Big, `phone=${m.h1} desktop=${h1Big}px`);
   await mob.close();
 
+  /* X  DESKTOP (and phone) — no viewport-dominating FIXED chrome. Born from the
+     2026-08-28 language-lane defect: the register intro was a display:block
+     width:100% span inside the tour bar's single-row flex — flex-shrink crushed
+     it to a sliver, the paragraph stacked ~300px tall, align-items:stretch
+     dragged every control to that height, and the bar became an ENORMOUS panel
+     hiding the page — at BOTH widths. Every gate had looked at 375px and none
+     of them looked AT the chrome. This probe does: any position:fixed element
+     covering ≥25% of viewport height and ≥50% of width fails, at 1440 AND 375 — served over localhost http, because the riders inject by absolute path and never mount under file://. */
+  {
+    const { srv: xsrv, base: xbase } = await serveRoot();
+    try {
+      for (const [label, vp] of [['desktop 1440', { width: 1440, height: 900 }], ['phone 375', { width: 375, height: 700 }]]) {
+        const dp = await browser.newPage({ viewport: vp });
+        await dp.goto(xbase + '/' + rel.split('\\').join('/'), { waitUntil: 'load' });
+        await dp.waitForTimeout(900);
+        const dom = await dp.evaluate(() => {
+          const bad = [];
+          for (const el of document.querySelectorAll('body *')) {
+            const cs = getComputedStyle(el);
+            if (cs.position !== 'fixed') continue;
+            const r = el.getBoundingClientRect();
+            if (r.height >= innerHeight * 0.25 && r.width >= innerWidth * 0.5)
+              bad.push(el.id || el.tagName.toLowerCase());
+          }
+          return bad;
+        });
+        ok('X no viewport-dominating fixed chrome (' + label + ' )', dom.length === 0, dom.join(', '));
+        await dp.close();
+      }
+    } finally { xsrv.close(); }
+  }
+
   // I1/I2 — INSTANT: ALL subresources counted; same-origin is never a free pass
   const subs = [], sizes = [];
   page.on('request', r => { if (r.resourceType() !== 'document') subs.push(r.url()); });
