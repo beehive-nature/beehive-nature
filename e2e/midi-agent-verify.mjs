@@ -6,6 +6,7 @@
    burned supply, real pool). */
 import { chromium } from 'playwright';
 const BASE = process.env.BASE || 'http://127.0.0.1:8912';
+const PAGE = process.env.PAGE || '/surfaces/blight/midi.html';
 const results = [];
 const check = (name, ok, detail='') => { results.push({name, ok}); console.log((ok?'PASS':'FAIL')+'  '+name+(detail?'  — '+detail:'')); };
 const hash = s => { let h=2166136261; for (const c of s) { h^=c.charCodeAt(0); h=Math.imul(h,16777619);} return (h>>>0).toString(16); };
@@ -20,7 +21,7 @@ const browser = await chromium.launch({ args:['--no-sandbox'] });
   page.on('pageerror', e => errors.push(String(e).slice(0,120)));
   const snap = () => page.evaluate(() => document.getElementById('cv').toDataURL()).then(hash);
 
-  await page.goto(BASE + '/surfaces/blight/midi.html', { waitUntil:'domcontentloaded', timeout:30000 });
+  await page.goto(BASE + PAGE, { waitUntil:'domcontentloaded', timeout:30000 });
   await page.waitForTimeout(3500);   /* level-0 static face */
 
   const h1 = await snap();
@@ -170,7 +171,7 @@ const browser = await chromium.launch({ args:['--no-sandbox'] });
   const errors = [];
   page.on('pageerror', e => errors.push(String(e).slice(0,120)));
   const snap = () => page.evaluate(() => document.getElementById('cv').toDataURL()).then(hash);
-  await page.goto(BASE + '/surfaces/blight/midi.html', { waitUntil:'domcontentloaded', timeout:30000 });
+  await page.goto(BASE + PAGE, { waitUntil:'domcontentloaded', timeout:30000 });
   await page.waitForTimeout(2500);
   const r1 = await snap();
   await page.waitForTimeout(2500);
