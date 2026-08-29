@@ -88,3 +88,17 @@ submission**, not "submitted".
 jargon-free allowlist request for the building's IT admin, with the WebBlocker exception
 menu path cited from WatchGuard's own docs (Subscription Services → WebBlocker →
 Exceptions → Add; global exempt list v12.3+).
+
+## SUBMISSION LOG UPDATE — 2026-08-29
+
+**FortiGuard: SUBMITTED ×2 (founder-confirmed).** skaists.buzz + beehivenature.buzz re-rating
+requests accepted by the form (Information Technology; contact lovis@skaists.dev). The live
+session's "context destroyed" error was the form POST navigating — the submit itself worked.
+Turnaround norm 1–2 weeks; often silent — re-check fortiguard.com/webfilter around
+2026-09-12, then monthly.
+
+**Still open (each human-gated, kit above has the drafted text):**
+- BrightCloud/OpenText (covers WatchGuard + Webroot — the founder's building): reCAPTCHA-gated
+  lookup + dispute; the one that fixes the building itself.
+- Zscaler: customers-only wall.
+- Cisco Umbrella: support-account wall.
