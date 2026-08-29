@@ -8,15 +8,15 @@
 4. **Ledger row**: agent · mail · maildir · wallet · basename · date · funding — committed.
 
 ## THE RULED ROSTER (founder order; mailboxes ALL provisioned; wallet+basename fill as seats run ceremonies once port-25+MX land)
-| # | agent | mail | maildir | wallet | basename | funding |
-|---|---|---|---|---|---|---|
-| 1 | bqueenbee | bqueenbee@agents.skaists.buzz | /var/mail-agents/bqueenbee | *(ceremony pending — see ★)* | **bqueenbee.base.eth — see ★ diary** | **NEVER — see ★** |
-| 2 | bclaude | bclaude@agents.skaists.buzz | /var/mail-agents/bclaude | — | — | unfunded |
-| 3 | bzcode | bzcode@agents.skaists.buzz | /var/mail-agents/bzcode | — | — | unfunded |
-| 4 | bfuzz | bfuzz@agents.skaists.buzz | /var/mail-agents/bfuzz | — | — | unfunded |
-| — | claude-code *(earlier night-shift assignment stands)* | claude-code@agents.skaists.buzz | /var/mail-agents/claude-code | — | — | unfunded |
-| — | honeybee *(provisioned, awaiting ruling)* | honeybee@agents.skaists.buzz | /var/mail-agents/honeybee | — | — | unfunded |
-| — | zc1 *(SUPERSEDED by bzcode — ONE identity per the incarnation doctrine; mailbox kept, ledger folded)* | zc1@agents.skaists.buzz | /var/mail-agents/zc1 | — | — | — |
+| # | agent | mail | maildir | wallet | basename | genesis-allowance | funding |
+|---|---|---|---|---|---|---|---|
+| 1 | bqueenbee | bqueenbee@agents.skaists.buzz | /var/mail-agents/bqueenbee | *(ceremony pending — see ★)* | **bqueenbee.base.eth — see ★ diary** | **NONE — she holds identity, never value** | **NEVER — see ★** |
+| 2 | bclaude | bclaude@agents.skaists.buzz | /var/mail-agents/bclaude | — | — | $1/24h at ceremony (USDC, own wallet) | unfunded |
+| 3 | bzcode | bzcode@agents.skaists.buzz | /var/mail-agents/bzcode | — | — | $1/24h at ceremony (USDC, own wallet) | unfunded |
+| 4 | bfuzz | bfuzz@agents.skaists.buzz | /var/mail-agents/bfuzz | — | — | $1/24h at ceremony (USDC, own wallet) | unfunded |
+| — | claude-code *(earlier night-shift assignment stands)* | claude-code@agents.skaists.buzz | /var/mail-agents/claude-code | — | — | $1/24h at ceremony | unfunded |
+| — | honeybee *(provisioned, awaiting ruling)* | honeybee@agents.skaists.buzz | /var/mail-agents/honeybee | — | — | $1/24h at ceremony | unfunded |
+| — | zc1 *(SUPERSEDED by bzcode — ONE identity per the incarnation doctrine; mailbox kept, ledger folded)* | zc1@agents.skaists.buzz | /var/mail-agents/zc1 | — | — | — | — |
 
 ## ★ bQueenBee — IDENTITY-ONLY + the true-name diary (chain-checked 2026-08-29)
 **The fence:** her address visibly custodies NOTHING, ever — stated here and on any surface showing her name. **She DOES get email + wallet + basename (founder ruling): the wallet exists to hold the NAME's identity, never value.**
