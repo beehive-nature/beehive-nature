@@ -28,3 +28,9 @@
 
 ## Infra truth (measured)
 Port 25 inbound BLOCKED at the Oracle security list (external probes timeout, tcpdump zero SYNs, iptables open, sink protocol-proven: STARTTLS → Maildir, unknown-RCPT 550). **Founder one-liners pending: (1) OCI ingress TCP/25, (2) `agents.skaists.buzz MX 10 skaists.buzz`.** Sink: `scripts/buzz-mail/sink.py` (receive-only, no send half), unit `buzz-mail-sink` capped 20%/128M, KNOWN = the seven provisioned mailboxes above.
+
+## END-TO-END MAIL: LIVE (2026-08-29, both founder gestures landed)
+**Port 25 OPEN** (OCI ingress rule landed — verified from 2 independent external nodes: Japan 110ms, Slovenia 155ms). **MX LIVE** (`agents.skaists.buzz → 10 skaists.buzz`, verified via 8.8.8.8). **Test mail PROVEN end-to-end:** real SMTP from WSL → DNS MX → TCP/25 → Maildir — headers land verbatim in `/var/mail-agents/claude-code/new/`. One gap noted: STARTTLS not advertised by the sink yet (aiosmtpd config; plaintext works, Coinbase's mail provider will use opportunistic delivery).
+
+## WALLET CEREMONY: BLOCKED IN THIS SEAT'S BROWSER (honest finding)
+The Coinbase smart-wallet creation flow is **popup-based at every entry point** (wallet.coinbase.com "Create a wallet" → popup; base.app "Continue on Web" → popup to keys.coinbase.com). The in-app browser blocks popups by policy — the flow cannot start. The buttons render in the DOM but are not interactable (React portals + popup interception). **Every other piece is ready:** mailboxes live, mail flowing end-to-end, the recipe documented, the $1/24h Spend Permission law verified against Coinbase's own docs. **The ceremonies need a browser with popup support** — the founder's desktop browser (one gesture per agent) or a headless CDP session with popup permissions. This is the real blocker, not a grind point.
