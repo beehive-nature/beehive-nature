@@ -131,7 +131,17 @@ impl Escrow {
     fn canonical(body: &Map<String, Value>) -> String {
         // sorted keys, no whitespace — the same canonicalization law as Python
         let sorted: std::collections::BTreeMap<&String, &Value> = body.iter().collect();
-        serde_json::to_string(&sorted).unwrap()
+        // …AND ascii-escaped, because Python's json.dumps has ensure_ascii=True
+        // by default while serde_json emits raw UTF-8. Without this the two
+        // forms hash the same event differently the moment any string carries a
+        // non-ASCII character — a voucher name, a memo, a cost-basis ref.
+        // Measured, not assumed: for a body whose voucher is "café", the real
+        // Python engine produces
+        //   cf3ff637cac68df120bb7b46aaf9af98ca816340db3be985323697b52408ebb2 // PUBLIC-CONSTANT (a hash of public test data)
+        // and the raw-UTF-8 rendering produces
+        //   9be613e3ef8df905e7dff23f9dd51ca8dfaf1ef9dd88d354c68f572268b5b85e // PUBLIC-CONSTANT (the WRONG rendering, kept as the counter-vector)
+        // Both vectors are asserted in tests/conformance.rs.
+        ensure_ascii(&serde_json::to_string(&sorted).unwrap())
     }
 
     fn hash(body: &Map<String, Value>, prev: &str) -> String {
@@ -379,4 +389,29 @@ fn fmt_fp8(v: u128) -> String {
 }
 fn hex(bytes: &[u8]) -> String {
     bytes.iter().map(|b| format!("{b:02x}")).collect()
+}
+
+/// Escape every non-ASCII scalar as `\uXXXX` (surrogate pairs above the BMP),
+/// matching Python's `ensure_ascii=True`. Non-ASCII can only appear inside JSON
+/// string literals, so a blanket pass over the rendered text is safe.
+fn ensure_ascii(s: &str) -> String {
+    if s.is_ascii() {
+        return s.to_string();
+    }
+    let mut out = String::with_capacity(s.len() + 8);
+    for ch in s.chars() {
+        if ch.is_ascii() {
+            out.push(ch);
+        } else {
+            let cp = ch as u32;
+            if cp <= 0xFFFF {
+                out.push_str(&format!("\\u{cp:04x}"));
+            } else {
+                let c = cp - 0x1_0000;
+                out.push_str(&format!("\\u{:04x}", 0xD800 + (c >> 10)));
+                out.push_str(&format!("\\u{:04x}", 0xDC00 + (c & 0x3FF)));
+            }
+        }
+    }
+    out
 }

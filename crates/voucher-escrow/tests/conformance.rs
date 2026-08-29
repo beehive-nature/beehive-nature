@@ -166,3 +166,37 @@ fn parse(a: &str) -> u128 {
     let (i, f) = a.split_once('.').unwrap();
     i.parse::<u128>().unwrap() * 10_000 + format!("{f:<04}").parse::<u128>().unwrap()
 }
+
+/// PROOF 17 — WIRE LAW v1, the ensure_ascii clause.
+///
+/// Python's `json.dumps` escapes non-ASCII by default; serde_json emits raw
+/// UTF-8. Without matching that, the two forms hash the SAME event differently
+/// the moment any string carries a non-ASCII character — a voucher name, a
+/// memo, a cost-basis ref — and the estate would have two laws again.
+///
+/// The expected hash below was produced by running the REAL Python engine's
+/// canonicalisation over this exact body (sorted keys, compact separators,
+/// ensure_ascii). It is a foreign oracle, not this crate's own output:
+///
+/// ```text
+/// canon: {"amount":"5.0000","chain_in":"vaulta","currency_in":"A","ts":1500,
+///         "type":"DEPOSIT","vaulta_tx":"tx1","voucher":"café"}
+/// hash : 30c1df09b4aed34617a490544e0405a73a3ca3c1dc74c0e47fc6157e0205f64c // PUBLIC-CONSTANT
+/// ```
+///
+/// The raw-UTF-8 rendering hashes to a DIFFERENT value, which is what this
+/// asserts against: it fails loudly if the escaping is ever dropped.
+#[test]
+fn proof_17_non_ascii_hashes_exactly_as_python() {
+    let mut es = Escrow::new();
+    let ev = es
+        .deposit("caf\u{e9}", 5 * Q, "tx1", "", "", 1500)
+        .expect("deposit");
+    assert_eq!(
+        ev["hash"].as_str().unwrap(),
+        // PUBLIC-CONSTANT: a test vector computed by the Python reference engine
+        "30c1df09b4aed34617a490544e0405a73a3ca3c1dc74c0e47fc6157e0205f64c", // PUBLIC-CONSTANT: a test vector from the Python reference engine
+        "a non-ASCII voucher must hash exactly as the Python engine hashes it"
+    );
+    assert_eq!(es.verify_chain().unwrap(), 1);
+}
