@@ -26,7 +26,7 @@
 ### scripts/buzz-meter/LICENSE (BSL 1.1) — the commercial moat (delayed-open)
 | path | what it is |
 |---|---|
-| `scripts/buzz-meter/meter.py` | the b-meter: SPEC-SPEND-RECEIPT-1 receipts, the P3 identity bindings, **the A/B + USDC voucher-prepay engine**, **the tithe book**, **bClaude's widened gate** (the bclaude.base.eth / bclaude@skaists.buzz voucher-prepay loop's accounting half) |
+| `scripts/buzz-meter/meter.py` + `voucher_escrow.py` (the hash-chained ledger core, merged 2026-08-29) | the b-meter: SPEC-SPEND-RECEIPT-1 receipts, the P3 identity bindings, **the A/B + USDC voucher-prepay engine**, **the tithe book**, **bClaude's widened gate** (the bclaude.base.eth / bclaude@skaists.buzz voucher-prepay loop's accounting half) |
 | `scripts/buzz-meter/rate_set.json` | the pricing law: tier ladder, cost bases, **the tithe law (10%, founder word alone)** |
 | `scripts/buzz-meter/gate.js` | the per-key bearer gate on /compute — the paid lane's door |
 

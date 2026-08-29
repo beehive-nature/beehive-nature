@@ -58,6 +58,11 @@ jobs:
       - name: Estate registry — counts computed, not written
         if: always()
         run: node scripts/estate-check.mjs
+      # Voucher/escrow engine battery (Seat-1 ledger core, merged 2026-08-29): tithe line,
+      # refuse-before-write, derived balances, hash chain, tamper evidence
+      - name: Voucher/escrow engine battery (moat ledger core)
+        if: always()
+        run: python3 scripts/buzz-meter/test_voucher_escrow.py
       # estate-source: every data-i18n key in the tree exists in the corpus,
       # every docked tongue covers every key, and the corpus English matches
       # what the pages say (the stale-translation check).

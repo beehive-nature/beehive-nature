@@ -30,10 +30,20 @@
 #       meter.py --selftest     (spec §7 acceptance checks, then exit)
 import json, os, re, sys, time, hashlib, subprocess, argparse
 
+# the escrow ledger core (merged 2026-08-29 from Seat-1's engine — one engine,
+# not two): hash-chained append-only JSONL, balances DERIVED never stored,
+# refuse-before-write. meter.py keeps the ruled duties (receipt emission, key
+# secrets, chain read-back, bindings/gate) and routes voucher BALANCES here.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from voucher_escrow import Escrow, RateSet, InsufficientVoucher, VoucherError, TITHE_RATE  # noqa: E402
+
 LOG = "/opt/buzz-compute/logs/usage.log"
 OUT = "/opt/buzz-meter/receipts"
 STATE = "/opt/buzz-meter/state/offset"
 RATE_SET = "/opt/buzz-meter/rate_set.json"
+ESCROW_LEDGER = "/opt/buzz-meter/escrow-ledger.jsonl"
+SETTLEMENT_DIR = "/opt/buzz-meter/settlement"
+RECEIPT_CHAIN = "/opt/buzz-meter/state/receipt-chain-tip"   # P1 receipts chain here too
 SERVICE = "buzz-compute.service"
 
 SCHEMA_VERSION = "1.0.0-draft"
@@ -143,8 +153,26 @@ def validate(r):
     # round-trip byte-identity
     assert canonical(json.loads(canonical(r))) == canonical(r)
 
+def read_receipt_tip():
+    # the P1 receipt chain (merged hardening, 2026-08-29): each receipt cites
+    # its predecessor through the schema's own provenance.prior_receipt_id
+    # seam — cross-receipt tamper evidence, the escrow engine's pattern
+    try:
+        with open(RECEIPT_CHAIN) as f: return f.read().strip() or None
+    except Exception: return None
+
+def write_receipt_tip(receipt_id):
+    os.makedirs(os.path.dirname(RECEIPT_CHAIN), exist_ok=True)
+    tmp = RECEIPT_CHAIN + ".tmp"
+    with open(tmp, "w") as f: f.write(receipt_id)
+    os.chmod(tmp, 0o600); os.replace(tmp, RECEIPT_CHAIN)
+
 def emit(receipt):
     os.makedirs(OUT, exist_ok=True)
+    if not receipt.get("provenance", {}).get("prior_receipt_id"):
+        receipt["provenance"]["prior_receipt_id"] = read_receipt_tip()
+        receipt["receipt_id"] = receipt_id(receipt)
+        validate(receipt)
     path = os.path.join(OUT, receipt["receipt_id"] + ".json")
     if os.path.exists(path):
         return False                       # append-only: never rewrite
@@ -153,6 +181,7 @@ def emit(receipt):
         f.write(json.dumps(receipt, indent=1, sort_keys=True))
     os.chmod(tmp, 0o600)
     os.replace(tmp, path)
+    write_receipt_tip(receipt["receipt_id"])
     return True
 
 def parse_stream(text, start_epoch, rate_set, key_ref, seen_tasks, live=False):
@@ -261,6 +290,10 @@ CHAIN_STATE = "/opt/buzz-meter/state/chain.json"
 VAULTA_HOSTS = ["https://eos.api.eosnation.io", "https://eos.greymass.com", "https://api.eosn.io"]
 WATCH_ACCOUNT = None                    # designated estate account (set in keys.json.meta)
 
+def escrow():
+    # the voucher/balance authority (merged 2026-08-29): one handle, one ledger
+    return Escrow(ESCROW_LEDGER)
+
 import urllib.request, secrets as pysecrets
 
 def load_ledger():
@@ -285,8 +318,13 @@ def cmd_newkey(args):
 
 def cmd_keys(args):
     led = load_ledger()
+    es = escrow()
     for k in led["keys"]:
-        print(k["id"], k["tier"], "balance_A:", k["balance_A"], "revoked:" if k["revoked"] else "active")
+        try:
+            bal = f"{es.balance(k['id'])} A (escrow)"
+        except Exception:
+            bal = f"{k.get('balance_A', 0.0)} A (legacy keys.json)"   # pre-migration rows
+        print(k["id"], k["tier"], "balance:", bal, "revoked:" if k["revoked"] else "active")
 
 def cmd_revoke(args):
     led = load_ledger()
@@ -348,8 +386,8 @@ def save_chain_state(st):
     with open(CHAIN_STATE, "w") as f: json.dump(st, f, indent=1)
 
 def emit_settlement_instruction(text):
-    os.makedirs("/opt/buzz-meter/settlement", exist_ok=True)
-    path = os.path.join("/opt/buzz-meter/settlement", time.strftime("instr-%Y%m%dT%H%M%SZ-") + hashlib.sha256(text.encode()).hexdigest()[:8] + ".json")
+    os.makedirs(SETTLEMENT_DIR, exist_ok=True)
+    path = os.path.join(SETTLEMENT_DIR, time.strftime("instr-%Y%m%dT%H%M%SZ-") + hashlib.sha256(text.encode()).hexdigest()[:8] + ".json")
     with open(path, "w") as f:
         json.dump({"kind": "settlement-instruction", "text": text,
                    "note": "INSTRUCTION ONLY — the meter never moves money (baton fence, Lane M P2)",
@@ -357,16 +395,19 @@ def emit_settlement_instruction(text):
     os.chmod(path, 0o600)
 
 def cmd_allocate(args):
+    # MERGED (2026-08-29): pool→key now lands as an escrow deposit (hash-chained,
+    # derived balance); keys.json stops storing balances entirely.
     kid, amount = args[2], float(args[3])
     led = load_ledger()
     if led["meta"].get("pool_A", 0.0) < amount: sys.exit("pool short")
     k = next((k for k in led["keys"] if k["id"] == kid), None)
     if not k: sys.exit("no such key")
     led["meta"]["pool_A"] = round(led["meta"]["pool_A"] - amount, 8)
-    k["balance_A"] = round(k["balance_A"] + amount, 8)
     save_ledger(led)
     emit_settlement_instruction(f"allocate {amount} A from estate pool to key {kid}")
-    print(f"allocated {amount} A to {kid}; pool now {led['meta']['pool_A']}")
+    instr = time.strftime("instr-%Y%m%dT%H%M%SZ-") + hashlib.sha256(f"allocate {kid} {amount}".encode()).hexdigest()[:8]
+    ev = escrow().deposit(kid, str(amount), vaulta_tx=instr)   # cited provenance
+    print(f"allocated {amount} A to {kid} via escrow event {ev['hash'][:12]}…; pool now {led['meta']['pool_A']}")
 
 # ── P3: identity binding, vouchers, the tithe book, bClaude's widened gate ──
 # The founder ruling: "buzz bClaude A vaulta voucher prepay API, 10% to me on
@@ -406,29 +447,66 @@ def cmd_bindings(args):
         print(x["pubkey"][:16] + "…", "↔", x["key_id"])
 
 def cmd_voucher(args):
-    # alloy framing: a credit IS a prepaid voucher for compute
+    # alloy framing: a credit IS a prepaid voucher for compute. MERGED
+    # (2026-08-29): the balance lands in the ESCROW ledger (hash-chained,
+    # derived, refuse-before-write) — keys.json no longer stores balances.
     kid, amount = args[2], float(args[3])
     led = load_ledger()
     if led["meta"].get("pool_A", 0.0) < amount: sys.exit("pool short")
     k = next((k for k in led["keys"] if k["id"] == kid), None)
     if not k: sys.exit("no such key")
     led["meta"]["pool_A"] = round(led["meta"]["pool_A"] - amount, 8)
-    k["balance_A"] = round(k["balance_A"] + amount, 8)
     save_ledger(led)
-    os.makedirs("/opt/buzz-meter/settlement", exist_ok=True)
-    path = os.path.join("/opt/buzz-meter/settlement", time.strftime("voucher-%Y%m%dT%H%M%SZ-") + hashlib.sha256((kid + str(amount) + str(time.time())).encode()).hexdigest()[:8] + ".json")
+    os.makedirs(SETTLEMENT_DIR, exist_ok=True)
+    ref = "voucher-" + time.strftime("%Y%m%dT%H%M%SZ-") + hashlib.sha256((kid + str(amount) + str(time.time())).encode()).hexdigest()[:8]
+    path = os.path.join(SETTLEMENT_DIR, ref + ".json")
     with open(path, "w") as f:
         json.dump({"kind": "prepaid-voucher", "key_id": kid, "amount_A": amount,
                    "framing": "a credit IS a prepaid voucher for compute (alloy ruling, Lane M P3)",
-                   "note": "INSTRUCTION ONLY — the meter never moves money; the A transfer that funded this voucher was read back from the chain (P2 chainpoll)",
+                   "note": "INSTRUCTION ONLY — the meter never moves money; the A that funded this voucher was read back from the chain (P2 chainpoll checkpoint)",
                    "created": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}, f, indent=1)
     os.chmod(path, 0o600)
-    print(f"voucher {amount} A → {kid} (pool now {led['meta']['pool_A']}); regen allowlist next")
+    ev = escrow().deposit(kid, str(amount), vaulta_tx=ref)   # provenance-cited deposit
+    print(f"voucher {amount} A → {kid} via escrow event {ev['hash'][:12]}… "
+          f"(pool now {led['meta']['pool_A']}); regen allowlist next")
+
+def cmd_charge(args):
+    # METERED CHARGE against a key's voucher — the escrow engine's core,
+    # reachable from the till: `meter.py charge <key-id> <class>:<qty> ...`
+    # e.g. charge bclaude-1 prefill_token:12000 decode_token:3400
+    from decimal import Decimal
+    from voucher_escrow import receipt_total, receipt_tithe
+    kid, pairs = args[2], []
+    for spec in args[3:]:
+        cls, _, qty = spec.partition(":")
+        pairs.append((cls, qty))
+    led = load_ledger()
+    if not any(k["id"] == kid for k in led["keys"]): sys.exit("no such meter key")
+    rate_set = load_rate_set()
+    tier = rate_set["tiers"]["paid_claude"]["cost_basis"]
+    per_million = {"prefill_token": Decimal(str(tier["prefill_token_per_million_usd"])),
+                   "decode_token": Decimal(str(tier["decode_token_per_million_usd"]))}
+    rs = RateSet(version=rate_set["version"], cost_basis_ref="anthropic-posted-2026-08",
+                 rates={c: per_million[c] / Decimal(1_000_000) for c, _ in pairs})
+    try:
+        ev = escrow().charge(kid, pairs, rs)
+    except InsufficientVoucher as e:
+        sys.exit(f"REFUSED (nothing written): {e}")
+    except VoucherError as e:
+        sys.exit(str(e))
+    print(f"charged {kid}: total {receipt_total(ev)} A incl. tithe {receipt_tithe(ev)} A "
+          f"— escrow event {ev['hash'][:12]}…, balance now {escrow().balance(kid)} A")
 
 def cmd_allowlist(args):
     # bClaude's widened answer-gate: founder + pubkeys bound to PAID keys with balance > 0
+    # (balance = the escrow-derived truth, merged 2026-08-29)
     led = load_ledger(); b = load_bindings()
-    paid_keys = {k["id"] for k in led["keys"] if k.get("tier") == "paid" and k.get("balance_A", 0) > 0 and not k.get("revoked")}
+    es = escrow()
+    paid_keys = set()
+    for k in led["keys"]:
+        if k.get("tier") == "paid" and not k.get("revoked"):
+            if float(es.balance(k["id"])) > 0:
+                paid_keys.add(k["id"])
     pks = [FOUNDER_PUBKEY] + sorted(x["pubkey"] for x in b["bindings"] if x["key_id"] in paid_keys)
     new = "\n".join(pks) + "\n"
     old = ""
@@ -460,6 +538,111 @@ def cmd_tithebook(args):
             tithe += r["line_items"][-1]["charged"]["value"]
     print(f"receipts with tithe: {n} | basis: {round(basis, 8)} A | tithe accrued (10% law): {round(tithe, 8)} A")
 
+# ── P4: basepoll — the USDC-on-Base funding rail (founder ruling 2026-08-29:
+# the second voucher funding door; A stays the unit of account) ──────────────
+# THE RIDER, standing law: the two rails are NOT symmetric, built per nature.
+#   A/VAULTA rail: GASLESS (users spend only own CPU/NET), proper Vaulta
+#   accounts, MEMO-NATIVE binding (memo = the meter key — NO binding table
+#   here; deposit events record sender + memo + tx when the estate runs a
+#   history-capable node). Do NOT import Base-rail machinery into this rail.
+#   USDC/BASE rail: tiny gas, no memo → the key↔Base-address BINDING TABLE
+#   stands below (basebind), same shape as P3's pubkey bindings.
+# Rate honesty: there is no live A/USDC market — the citable source is the
+# estate rate card (usdc_a_rate + usdc_a_rate_ref in keys.json.meta, founder-
+# set, versioned). When a market pair exists, the same seam reads it; the
+# rate_ref always names where the number came from.
+# ALL CONFIG CONFIG-FILLABLE AT FLIP-TIME: base_receive_address unset ⇒
+# basepoll idles (paid lane is HOLD; nothing blocks on it).
+
+BASE_BINDINGS = "/opt/buzz-meter/base-bindings.json"
+BASE_STATE = "/opt/buzz-meter/state/base-chain.json"
+BASE_RPC = "https://mainnet.base.org"                 # keyless, proven in-tree
+USDC_BASE = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"  # PUBLIC-CONSTANT: native USDC on Base
+TRANSFER_TOPIC = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"  # PUBLIC-CONSTANT: keccak(Transfer(address,address,uint256))
+
+def load_base_bindings():
+    try:
+        with open(BASE_BINDINGS) as f: return json.load(f)
+    except Exception: return {"bindings": []}
+
+def save_base_bindings(b):
+    tmp = BASE_BINDINGS + ".tmp"
+    with open(tmp, "w") as f: json.dump(b, f, indent=1, sort_keys=True)
+    os.chmod(tmp, 0o600); os.replace(tmp, BASE_BINDINGS)
+
+def cmd_basebind(args):
+    kid, addr = args[2], args[3].lower()
+    if not re.fullmatch(r"0x[0-9a-f]{40}", addr): sys.exit("base address must be 0x + 40-hex")
+    led = load_ledger()
+    if not any(k["id"] == kid for k in led["keys"]): sys.exit("no such meter key — issue it first (newkey)")
+    b = load_base_bindings()
+    b["bindings"] = [x for x in b["bindings"] if x["key_id"] != kid and x["base_address"] != addr]
+    b["bindings"].append({"key_id": kid, "base_address": addr,
+                          "bound": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())})
+    save_base_bindings(b)
+    print(f"base-bound {kid} ↔ {addr}")
+
+def cmd_basebindings(args):
+    for x in load_base_bindings()["bindings"]:
+        print(x["key_id"], "↔", x["base_address"])
+
+def base_rpc(method, params):
+    req = urllib.request.Request(BASE_RPC,
+        data=json.dumps({"jsonrpc": "2.0", "id": 1, "method": method, "params": params}).encode(),
+        headers={"Content-Type": "application/json"})
+    return json.loads(urllib.request.urlopen(req, timeout=15).read())
+
+def base_config():
+    led = load_ledger(); meta = led.get("meta", {})
+    return (meta.get("base_receive_address"), meta.get("usdc_contract") or USDC_BASE,
+            meta.get("usdc_a_rate"), meta.get("usdc_a_rate_ref"))
+
+def cmd_basepoll(args):
+    recv, usdc, rate, rate_ref = base_config()
+    if not (recv and rate and rate_ref):
+        print("basepoll: base_receive_address / usdc_a_rate / usdc_a_rate_ref unset in keys.json.meta "
+              "— CONFIG fillable at flip-time (paid lane HOLD); idling")
+        return
+    st = {}
+    try:
+        with open(BASE_STATE) as f: st = json.load(f)
+    except Exception: pass
+    tip = base_rpc("eth_blockNumber", [])
+    latest = int(tip["result"], 16)
+    frm = st.get("last_block") or max(0, latest - 10000)   # first run: last ~10k blocks
+    seen = set(st.get("seen_tx", []))
+    topic2 = "0x" + "0" * 24 + recv[2:].lower()
+    credited = 0
+    for start in range(frm, latest, 10000):
+        logs = base_rpc("eth_getLogs", [{
+            "address": usdc, "fromBlock": hex(start), "toBlock": hex(min(start + 9999, latest)),
+            "topics": [TRANSFER_TOPIC, None, topic2]}])
+        for lg in logs.get("result", []):
+            tx = lg["transactionHash"]
+            if tx in seen: continue
+            seen.add(tx)
+            sender = "0x" + lg["topics"][1][-40:]
+            usdc_amt = int(lg["data"], 16) / 1e6
+            b = load_base_bindings()
+            key = next((x["key_id"] for x in b["bindings"] if x["base_address"] == sender.lower()), None)
+            if not key:
+                emit_settlement_instruction(f"USDC {usdc_amt} from UNBOUND {sender} tx {tx} — no credit, founder word decides")
+                continue
+            try:
+                ev = escrow().deposit_usdc(key, str(usdc_amt), base_tx=tx,
+                                           rate_a_per_usdc=str(rate), rate_ref=rate_ref)
+                print(f"basepoll: credited {key} +{ev['amount']} A "
+                      f"({usdc_amt} USDC @ {rate} A/USDC, ref {rate_ref}) — event {ev['hash'][:12]}…")
+                credited += 1
+            except VoucherError as e:
+                emit_settlement_instruction(f"USDC deposit REFUSED by engine ({e}) — tx {tx}")
+    st["last_block"] = latest; st["seen_tx"] = sorted(seen)[-500:]
+    os.makedirs(os.path.dirname(BASE_STATE), exist_ok=True)
+    with open(BASE_STATE, "w") as f: json.dump(st, f, indent=1)
+    os.chmod(BASE_STATE, 0o600)
+    if credited == 0:
+        print(f"basepoll: no new USDC transfers (blocks {frm}…{latest})")
+
 def dispatch(argv):
     cmd = argv[1] if len(argv) > 1 else ""
     table = {
@@ -467,7 +650,9 @@ def dispatch(argv):
         "chainpoll": (cmd_chainpoll, 2), "allocate": (cmd_allocate, 4),
         "bind": (cmd_bind, 4), "bindings": (cmd_bindings, 2),
         "voucher": (cmd_voucher, 4), "allowlist": (cmd_allowlist, 2),
-        "tithebook": (cmd_tithebook, 2),
+        "charge": (cmd_charge, 4), "tithebook": (cmd_tithebook, 2),
+        "basebind": (cmd_basebind, 4), "basebindings": (cmd_basebindings, 2),
+        "basepoll": (cmd_basepoll, 2),
     }
     if cmd in table:
         fn, need = table[cmd]
