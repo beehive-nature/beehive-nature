@@ -333,17 +333,20 @@ def cmd_revoke(args):
     save_ledger(led); print("revoked", args[1])
 
 def chain_read_balance(account):
-    # two rotated reads must agree — a confirmed read, per the P2 ruling
+    # two rotated reads must agree — a confirmed read, per the P2 ruling.
+    # Reads the A CONTRACT balance (core.vaulta, symbol A) — the token the
+    # escrow denominates; nodeos core_liquid_balance still reports the legacy
+    # core symbol on these endpoints (the rename in place, measured 2026-08-29).
     import random
     hosts = VAULTA_HOSTS[:]; random.shuffle(hosts)
     vals = []
     for h in hosts[:2]:
         try:
-            req = urllib.request.Request(h + "/v1/chain/get_account",
-                data=json.dumps({"account_name": account}).encode(),
+            req = urllib.request.Request(h + "/v1/chain/get_currency_balance",
+                data=json.dumps({"code": A_CONTRACT, "account": account, "symbol": "A"}).encode(),
                 headers={"Content-Type": "application/json", "User-Agent": "bnr-till/1.0"})
             d = json.loads(urllib.request.urlopen(req, timeout=10).read())
-            bal = d.get("core_liquid_balance") or "0.0000 A"
+            bal = (d or ["0.0000 A"])[0]
             vals.append(float(bal.split()[0]))
         except Exception:
             pass
@@ -351,35 +354,79 @@ def chain_read_balance(account):
         return vals[0]
     return None                                    # not confirmed — no credit
 
+HISTORY_HOST = os.environ.get("CHAINPOLL_HOST", "https://eos.greymass.com")
+# eosnation's /v1/history/* is 410-gone (measured); GREYMASS SERVES HISTORY —
+# measured live 2026-08-29: get_actions 200 with full action traces incl. memos.
+A_CONTRACT = os.environ.get("CHAINPOLL_CONTRACT", "core.vaulta")   # the A token contract (read from live transfer traces, 2026-08-29)
+
+def read_transfers(account, num=100):
+    """MEMO-NATIVE FEED (the ruled A-rail binder): transfer actions TO the
+    account on the A contract, each row carrying from / memo / quantity /
+    trx_id — the same per-transfer shape basepoll uses for Base Transfer logs.
+    Deduped by (trx_id, seq) — history indices notify inline duplicates."""
+    req = urllib.request.Request(HISTORY_HOST + "/v1/history/get_actions",
+        data=json.dumps({"account_name": account, "skip": 0, "num": num}).encode(),
+        headers={"Content-Type": "application/json", "User-Agent": "bnr-till/1.0"})
+    d = json.loads(urllib.request.urlopen(req, timeout=15).read())
+    rows, seen = [], set()
+    for a in d.get("actions", []):
+        tr = a.get("action_trace", {}); act = tr.get("act", {})
+        data = act.get("data", {})
+        if act.get("name") != "transfer" or act.get("account") != A_CONTRACT: continue
+        if data.get("to") != account: continue
+        seq = a.get("account_action_seq")
+        key = (tr.get("trx_id"), seq)
+        if key in seen: continue
+        seen.add(key)
+        q = str(data.get("quantity", "0")).split()
+        rows.append({"seq": seq, "block": tr.get("block_num"), "trx_id": tr.get("trx_id"),
+                     "from": data.get("from"), "memo": data.get("memo", ""),
+                     "amount": q[0] if q else "0", "symbol": q[1] if len(q) > 1 else ""})
+    return rows
+
 def cmd_chainpoll(args):
     led = load_ledger()
-    acct = led.get("meta", {}).get("watch_account")
+    acct = os.environ.get("CHAINPOLL_ACCOUNT") or led.get("meta", {}).get("watch_account")
     if not acct:
         print("chainpoll: no watch_account designated (set in keys.json.meta) — idle"); return
     st = {}
     try:
         with open(CHAIN_STATE) as f: st = json.load(f)
     except Exception: pass
+    meter_keys = {k["id"] for k in led["keys"]}
+    try:
+        rows = read_transfers(acct)
+    except Exception as e:
+        print(f"chainpoll: action read failed ({e}) — nothing written"); return
+    if st.get("last_seq") is None:
+        st["last_seq"] = max((r["seq"] for r in rows if r["seq"] is not None), default=None)
+        save_chain_state(st)
+        print(f"chainpoll: memo-native checkpoint initialized at action seq {st['last_seq']} (no credit on first read)")
+        return
+    credited = 0
+    for r in sorted(rows, key=lambda x: x["seq"] if x["seq"] is not None else 0):
+        if r["seq"] is None or r["seq"] <= st["last_seq"]: continue
+        if r["memo"] in meter_keys:
+            ev = escrow().deposit(r["memo"], r["amount"], vaulta_tx=r["trx_id"],
+                                  sender=r["from"], memo=r["memo"])
+            print(f"chainpoll: +{r['amount']} {r.get('symbol') or 'A'} → key {r['memo']} "
+                  f"(from {r['from']}, memo-routed, tx {r['trx_id'][:16]}…) — event {ev['hash'][:12]}…")
+            credited += 1
+        else:
+            emit_settlement_instruction(
+                f"A {r['amount']} from {r['from']} tx {r['trx_id']} — memo "
+                f"'{r['memo'][:40]}' is not a meter key; no auto-credit, founder word decides")
+            print(f"chainpoll: {r['amount']} from {r['from']} — UNBOUND memo, settlement instruction written")
+            credited += 1
+        st["last_seq"] = r["seq"]
+    # DELTA CROSS-CHECK — never the binder (ruling 2026-08-29): two-host confirmed
+    # balance, logged for reconciliation; a mismatch is a flag, not a credit.
     bal = chain_read_balance(acct)
-    if bal is None:
-        print("chainpoll: read not confirmed this round — no credit, no checkpoint move"); return
-    prev = st.get("last_confirmed_balance")
-    if prev is None:
-        st["last_confirmed_balance"] = bal; save_chain_state(st)
-        print(f"chainpoll: checkpoint initialized at {bal} A (no credit on first read)"); return
-    if bal > prev:
-        credit = round(bal - prev, 8)
-        led["meta"]["pool_A"] = round(led["meta"].get("pool_A", 0.0) + credit, 8)
-        save_ledger(led)
-        st["last_confirmed_balance"] = bal; save_chain_state(st)
-        emit_settlement_instruction(f"credit {credit} A to estate pool (read-back of {acct}: {prev} -> {bal})")
-        print(f"chainpoll: +{credit} A credited to estate pool")
-    elif bal < prev:
-        # balance fell (spend by the account owner) — move checkpoint down, credit nothing
-        st["last_confirmed_balance"] = bal; save_chain_state(st)
-        print(f"chainpoll: balance decreased ({prev} -> {bal}) — checkpoint follows, no credit")
-    else:
-        print("chainpoll: unchanged")
+    st["cross_check_balance"] = bal
+    save_chain_state(st)
+    if credited == 0:
+        print(f"chainpoll: no new A transfers (watching actions on {acct}; cross-check balance "
+              f"{'confirmed: ' + str(bal) if bal is not None else 'unconfirmed this round'})")
 
 def save_chain_state(st):
     os.makedirs(os.path.dirname(CHAIN_STATE), exist_ok=True)
