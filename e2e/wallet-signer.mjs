@@ -445,12 +445,36 @@ try {
       }, file);
       ok(`${rail}: describe() answers with rail, version and a closed capability list`,
         d.desc && d.desc.rail === rail && d.desc.contract_version === '1' && Array.isArray(d.desc.capabilities), JSON.stringify(d.desc && d.desc.rail));
-      ok(`${rail}: declares ONLY balance — no write capability is claimed`,
-        JSON.stringify(d.desc.capabilities) === '["balance"]', JSON.stringify(d.desc.capabilities));
+      ok(`${rail}: claims NO write capability`,
+        !d.desc.capabilities.some(c => /^build|^submit|^sign|^mint/.test(c)), JSON.stringify(d.desc.capabilities));
       ok(`${rail}: an UNDECLARED write method is refused as UNSUPPORTED (§9.2)`,
         d.write.error && d.write.error.code === -32008, JSON.stringify(d.write.error));
-      ok(`${rail}: names the spec gap it is fenced by, rather than looking finished`,
-        /GAP \d/.test(d.desc.state_note || '') && d.desc.state === 'STUB', d.desc.state_note);
+      if (rail === 'solana') {
+        ok('solana: declares ONLY balance', JSON.stringify(d.desc.capabilities) === '["balance"]', JSON.stringify(d.desc.capabilities));
+        ok('solana: names the spec gap it is fenced by, rather than looking finished',
+          /GAP \d/.test(d.desc.state_note || '') && d.desc.state === 'STUB', d.desc.state_note);
+      } else {
+        /* the BTC rail is shaped for silent payments + BIP-353 + BOLT-12 from
+           the start (founder requirement): what is absent is DECLARED absent
+           with the thing that would close it, and the roadmap lives in
+           not_carried so "planned" can never read as "present". */
+        ok('bitcoin: carries balance AND receiveAddress (the reusable address)',
+          JSON.stringify(d.desc.capabilities) === '["balance","receiveAddress"]', JSON.stringify(d.desc.capabilities));
+        ok('bitcoin: names all four standards it is cut for (BIP-352/353/321 + BOLT-12)',
+          d.desc.standards && ['BIP-352', 'BIP-353', 'BIP-321', 'BOLT-12'].every(k => k in d.desc.standards),
+          JSON.stringify(Object.keys(d.desc.standards || {})));
+        ok('bitcoin: what is absent is DECLARED absent, each with its closing condition',
+          d.desc.not_carried && ['silentPaymentScan', 'buildSend', 'mintOffer'].every(k => (d.desc.not_carried[k] || '').length > 40),
+          JSON.stringify(Object.keys(d.desc.not_carried || {})));
+        ok('bitcoin: scanning is named as NOT carried — the wallet holds the address but does not watch it',
+          /does not|cannot see|not carried|indexer/i.test(d.desc.not_carried.silentPaymentScan));
+        ok('bitcoin: nothing in not_carried leaked into capabilities (planned never reads as present)',
+          Object.keys(d.desc.not_carried).every(k => !d.desc.capabilities.includes(k)));
+        ok('bitcoin: buildSend still cites GAP 2 (no covenants ⇒ no pre-signing cap)',
+          /GAP 2/.test(d.desc.not_carried.buildSend) && d.desc.state === 'PARTIAL', d.desc.state);
+        ok('bitcoin: minting an offer is refused as OUR-NODE-ONLY, never fetched from a third party',
+          /own node|OUR OWN node/i.test(d.desc.not_carried.mintOffer));
+      }
       ok(`${rail}: a malformed address is refused as BAD_PARAMS before any network call`,
         d.bad.error && d.bad.error.code === -32007, JSON.stringify(d.bad.error));
       ok(`${rail}: no adapter answer contains key material`,
@@ -479,6 +503,85 @@ try {
     const html = await page.locator('#rx-cards').innerHTML();
     ok('the receive panel prints the reason instead of an address',
       /no address shown/.test(html) && !/undefined|null|NaN/.test(html.replace(/nullable/g, '')), html.slice(0, 160));
+    await ctx.close();
+  }
+
+  /* ══ H · THE BITCOIN RAIL — silent payments, a payment name, one URI ══ */
+  console.log('H · BIP-352 + BIP-353 + BIP-321: one name, both rails:');
+  {
+    const ctx = await browser.newContext(); const seen = []; await mockRail(ctx, seen); await mockOther(ctx);
+    const page = await connectedPage(ctx);
+    const r = await page.evaluate(() => {
+      const P = window.BNRPAY, out = {};
+      const fromHex = s => Uint8Array.from(s.match(/../g).map(h => parseInt(h, 16)));
+      const hex = b => Array.from(b, x => x.toString(16).padStart(2, '0')).join('');
+      // bech32m must NOT be bech32 — the differential the whole rail rests on
+      out.constants = [P.BECH32M_CONST, P.BECH32_CONST];
+      try { P.bech32mDecode('A1LQFN3A', P.BECH32M_CONST, 90); out.bip350 = 'decoded' } catch (e) { out.bip350 = 'FAILED ' + e.message }
+      try { P.bech32mDecode('A12UEL5L', P.BECH32M_CONST, 90); out.crossReject = 'ACCEPTED A BECH32 STRING' } catch (e) { out.crossReject = /checksum/.test(e.message) ? 'rejected' : 'wrong: ' + e.message }
+      // a silent-payment address from two REAL curve points
+      const G = fromHex('0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798'); // PUBLIC-CONSTANT: the secp256k1 generator, a published curve parameter
+      const G2 = fromHex('02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5'); // PUBLIC-CONSTANT: 2G, likewise published
+      const sp = P.silentPaymentAddress(G, G2, 'mainnet');
+      out.sp = sp;
+      const back = P.decodeSilentPaymentAddress(sp);
+      out.roundTrip = hex(back.scanKey) === hex(G) && hex(back.spendKey) === hex(G2) && back.version === 0;
+      // a one-character corruption must die on the checksum
+      const bad = sp.slice(0, 20) + (sp[20] === 'q' ? 'p' : 'q') + sp.slice(21);
+      try { P.decodeSilentPaymentAddress(bad); out.corrupt = 'DECODED A CORRUPT ADDRESS' } catch (e) { out.corrupt = /checksum/.test(e.message) ? 'refused' : 'wrong: ' + e.message }
+      // the soul's own address, and that it is deterministic + soul-specific
+      out.soulSp = P.soulSilentPaymentAddress(new Uint8Array(32).fill(0x2a), 'gatesoul', 'mainnet');
+      out.soulSpAgain = P.soulSilentPaymentAddress(new Uint8Array(32).fill(0x2a), 'gatesoul', 'mainnet');
+      out.soulSpOther = P.soulSilentPaymentAddress(new Uint8Array(32).fill(0x2b), 'gatesoul', 'mainnet');
+      // the unified URI
+      const LNO = 'lno1pg257enxv4ezqcneype82um50ynhxgrwdajx283qfwdpl28qqmc78ymlvhmxcsywdk5wrjnj36jryg488qwlrnzyjczs';
+      const uri = P.buildBip321Uri({ silentPayment: out.soulSp, offer: LNO, label: 'gatesoul' });
+      out.uri = uri;
+      out.parsed = P.parseBip321Uri(uri);
+      try { P.parseBip321Uri('bitcoin:?req-unknownthing=1&sp=' + out.soulSp); out.reqParam = 'PAID AROUND IT' } catch (e) { out.reqParam = /required parameters/.test(e.message) ? 'refused' : 'wrong' }
+      // the payment name and the record the estate publishes
+      out.recordName = P.bip353RecordName('lovis@skaists.dev');
+      const rec = P.buildBip353Record('lovis@skaists.dev', uri);
+      out.rec = { name: rec.name, type: rec.type, value: rec.value, zoneLine: rec.zoneLine, dnssec: rec.dnssecRequired };
+      try { P.buildBip353Record('lovis@skaists.dev', 'https://example.com'); out.badUri = 'PUBLISHED IT' } catch (e) { out.badUri = 'refused' }
+      // resolution: the AD contract
+      const q = P.bip353Query('lovis@skaists.dev');
+      out.query = q.url;
+      out.signed = P.readBip353Answer({ Status: 0, AD: true, Answer: [{ type: 16, data: '"' + uri + '"' }] }, q.recordName).authenticated;
+      out.unsigned = P.readBip353Answer({ Status: 0, AD: false, Answer: [{ type: 16, data: '"' + uri + '"' }] }, q.recordName).authenticated;
+      return out;
+    });
+    ok('bech32m uses the BIP-350 constant, distinct from bech32',
+      r.constants[0] === 0x2bc830a3 && r.constants[1] === 1, JSON.stringify(r.constants));
+    ok('a BIP-350 vector decodes as bech32m', r.bip350 === 'decoded', r.bip350);
+    ok('a valid BECH32 string is REJECTED as bech32m (the wrong family = a dead address)',
+      r.crossReject === 'rejected', r.crossReject);
+    ok('a silent-payment address is sp1q… and 116 chars (version 0, 66-byte payload)',
+      /^sp1q/.test(r.sp) && r.sp.length === 116, r.sp);
+    ok('decode recovers BOTH public keys byte-for-byte', r.roundTrip === true);
+    ok('a ONE-CHARACTER corruption is refused on the checksum, never decoded to other keys',
+      r.corrupt === 'refused', r.corrupt);
+    ok('the soul derives its own reusable address, deterministically',
+      /^sp1q/.test(r.soulSp) && r.soulSp === r.soulSpAgain, r.soulSp);
+    ok('a different soul derives a different one', r.soulSp !== r.soulSpOther);
+    ok('ONE URI carries BOTH rails (silent payment + BOLT-12 offer)',
+      JSON.stringify(r.parsed.rails) === '["silent payment","BOLT-12 offer"]', JSON.stringify(r.parsed.rails));
+    ok('…and the address-less form is used, since a reusable identity needs no one-shot address',
+      r.uri.startsWith('bitcoin:?'), r.uri.slice(0, 40));
+    ok('an unknown req- parameter makes the wallet REFUSE, never pay around it', r.reqParam === 'refused', r.reqParam);
+    ok('the BIP-353 record name is <user>.user._bitcoin-payment.<domain>',
+      r.recordName === 'lovis.user._bitcoin-payment.skaists.dev', r.recordName);
+    ok('the published TXT value IS the unified URI — one name, both rails',
+      r.rec.type === 'TXT' && r.rec.value === r.uri && r.rec.dnssec === true);
+    ok('a paste-ready zone line is produced for a domain the estate already owns',
+      /^lovis\.user\._bitcoin-payment\.skaists\.dev\. 3600 IN TXT "bitcoin:/.test(r.rec.zoneLine), r.rec.zoneLine.slice(0, 70));
+    ok('it refuses to publish a URI it cannot read back', r.badUri === 'refused', r.badUri);
+    ok('the DoH query asks for the TXT with DNSSEC requested (do=true)',
+      r.query.includes('_bitcoin-payment') && r.query.includes('do=true'), r.query);
+    ok('a signed answer reports authenticated=true', r.signed === true);
+    ok('an UNSIGNED answer reports authenticated=false — never silently trusted', r.unsigned === false);
+    ok('building a payment name touched NO network (DNS is only asked when a user resolves one)',
+      seen.length === 0 || !seen.some(s => /dns/i.test(JSON.stringify(s))));
     await ctx.close();
   }
 

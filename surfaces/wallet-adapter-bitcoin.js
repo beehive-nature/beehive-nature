@@ -81,21 +81,77 @@ function fromSats(units) {
   return (neg ? '-' : '') + whole + (frac ? '.' + frac : '');
 }
 
+/* ── THE SHAPE THIS RAIL IS BUILT FOR (founder requirement, 2026-08-29).
+   This adapter's interface is cut for silent payments, payment names and
+   offers FROM THE START — not a blind stub that would have to be redesigned
+   when they land. Each capability below is either carried now, or DECLARED
+   ABSENT with the exact reason and the thing that would close it. §9.2 makes
+   an undeclared capability unreachable, so "planned" never masquerades as
+   "present": the roadmap lives in `not_carried`, never in `capabilities`.
+
+   Reference standards, named at source so a reader can check the shapes:
+     BIP-352  silent payments (the reusable sp1… address)
+     BIP-353  DNS payment instructions (name@domain → TXT → a BIP-321 URI)
+     BIP-321  the bitcoin: URI carrying MORE THAN ONE instruction
+     BOLT-12  offers (lno1…), minted by our OWN node, never a third party's
+   ── */
 var METHODS = {
   describe: function () {
     return {
       rail: 'bitcoin',
-      adapter_version: '0.1.0',
+      adapter_version: '0.2.0',
       contract_version: '1',
-      capabilities: ['balance'],
+      /* CARRIED NOW. receiveAddress serves the silent-payment address: it is
+         static and reusable by design, so index is meaningless here and the
+         answer says so rather than pretending to rotate. */
+      capabilities: ['balance', 'receiveAddress'],
       networks: ['mainnet'],
       units: ['BTC'],
-      state: 'STUB',
-      state_note: 'reads are real; there is no send path — SPEC-bSMARTWALLET-1 §5 GAP 2: ' +
-        'without covenants a Bitcoin L1 cap is NOT enforceable on-chain before signing, so ' +
-        'enforcement would be signer-side policy, and that is a founder ruling to make.',
+      state: 'PARTIAL',
+      standards: {
+        'BIP-352': 'silent-payment address held and decoded; SCANNING is not carried (see not_carried)',
+        'BIP-353': 'the payment-name record is BUILT first-party; resolution is DoH and labelled',
+        'BIP-321': 'the unified URI is built and parsed — one name, both rails',
+        'BOLT-12': 'offers are decoded; minting belongs to our own LN node, never to this adapter'
+      },
+      /* DECLARED ABSENT, each with the thing that would close it. None of
+         these is reachable from the shell — that is the point of saying it. */
+      not_carried: {
+        silentPaymentScan: 'BIP-352 scanning is O(every transaction) and needs an indexer or a full ' +
+          'node: the wallet HOLDS the reusable address but cannot see payments to it from a browser. ' +
+          'Closed by an estate scanning backend (or an operator bitcoind), not by more page code.',
+        buildSend: 'SPEC-bSMARTWALLET-1 §5 GAP 2 — WITHOUT COVENANTS a Bitcoin L1 spend cap is not ' +
+          'enforceable on-chain before signing at all, so enforcement is signer-side policy. That is a ' +
+          'founder ruling, not a default this adapter may pick.',
+        mintOffer: 'a BOLT-12 offer must be minted by OUR OWN node (LDK / Alby-Hub per RAIL-FORMULARY-1). ' +
+          'An adapter that fetched one from a third party would put someone else’s payment ' +
+          'instructions under the estate’s name.'
+      },
       service_note: 'Esplora public instances are SERVICE, not PROTOCOL. An operator bitcoind ' +
         'is the sovereign read. Unreachable answers RAIL_UNREACHABLE, never a zero balance.'
+    };
+  },
+  /* the reusable address, returned with its derivation named so the caller can
+     reproduce the keys elsewhere — an address nobody can rebuild keys for is a
+     trap, so the reference travels WITH the address, never separately. */
+  receiveAddress: function (p) {
+    p = p || {};
+    if (!p.silentPaymentAddress) {
+      var e = new Error('receiveAddress needs {silentPaymentAddress} — this adapter holds no keys and ' +
+        'derives nothing; the signer owns derivation and hands the address in');
+      e.code = E.BAD_PARAMS; throw e;
+    }
+    if (!/^sp1[02-9ac-hj-np-z]+$/.test(p.silentPaymentAddress)) {
+      var v = new Error('not a mainnet silent-payment address (expected sp1…)');
+      v.code = E.BAD_PARAMS; throw v;
+    }
+    return {
+      address: p.silentPaymentAddress,
+      derivation_ref: p.derivationRef || null,
+      reusable: true,
+      index_note: 'a silent-payment address is STATIC: the payer derives a fresh output from it per ' +
+        'payment, so there is no index to advance and none is invented here.',
+      scan_note: 'this rail does not scan — see describe().not_carried.silentPaymentScan.'
     };
   },
   balance: async function (p) {

@@ -5,7 +5,7 @@
    may not use this file except in compliance with the License. You may
    obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
    See /LICENSE and /NOTICE in this repository. Applies to the rails:
-   the wallet surface, the three rail adapters, the Arweave signer.
+   the wallet surface, the rail adapters, the Arweave signer.
    ─────────────────────────────────────────────────────────────────────── */
 /* surfaces/arweave.js — the Arweave adapter for the BNR wallet shell.
    First-party, no bundler (Turbo/ArDrive ruled out by founder order): a
