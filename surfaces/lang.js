@@ -19,6 +19,7 @@
     ['en','English'],
     ['ru','Русский'],
     ['uk','Українська'],
+    ['tt','Татар теле','Tatar'],
     ['cs','Čeština'],
     ['de','Deutsch'],
     ['nl','Nederlands'],
@@ -42,8 +43,7 @@
     ['bn','বাংলা'],
     ['ar','العربية'],
     ['he','עברית'],
-    ['fa','فارسی'],
-    ['tt','Татар теле']
+    ['fa','فارسی']
   ];
   var RTL={'ar':1,'he':1,'fa':1,'ur':1};
   var corpus=null;
@@ -108,7 +108,7 @@
       +'border-radius:6px;font:10px "IBM Plex Mono",monospace;padding:2px 4px;max-width:110px;'
       +'margin:0;min-height:0;height:auto;box-sizing:border-box';
     sel.innerHTML='<option value="" disabled>🌐</option>'+LANGS.map(function(L){
-      return '<option value="'+L[0]+'">'+L[1]+'</option>'; }).join('');
+      return '<option value="'+L[0]+'"'+(L[2]?' title="'+L[2]+'"':'')+'>'+L[1]+'</option>'; }).join('');
     sel.addEventListener('change',function(){ setPref(sel.value); });
     var note=document.createElement('span'); note.id='blangnote';
     note.style.cssText='font:9px "IBM Plex Mono",monospace;color:#FFD700;white-space:nowrap;'
