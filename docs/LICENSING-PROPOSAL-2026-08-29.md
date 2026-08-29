@@ -1,7 +1,7 @@
 # LICENSING PROPOSAL — the two-license split (VALUES RULED + STAGED, 2026-08-29)
 
-> ## ⚠ STATUS: STAGED PUBLISH-CORRECT — one commit away, and that commit is the FOUNDER's
-> All four values are ruled and applied (2026-08-29): **Licensor Travis Mark Remington
+> ## ✅ PUBLISHED 2026-08-29 — the founder ruled "push and start the 4-year BSL clock now."
+> **Change Date: August 29, 2030** (publish commit 2026-08-29 + 4 years). All four values final: **Licensor Travis Mark Remington
 > <lovis@skaists.dev>** · **Change Date = four years from the LICENSE PUBLISH commit**
 > · **Change License = GPL-2.0-or-later** · **Rails = Apache-2.0**. The files are named
 > for GitHub recognition (`LICENSE` at root = Apache-2.0, `scripts/buzz-meter/LICENSE`

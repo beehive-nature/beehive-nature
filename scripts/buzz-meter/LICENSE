@@ -2,11 +2,12 @@ License text copyright (c) 2020 MariaDB Corporation Ab, All Rights Reserved.
 "Business Source License" is a trademark of MariaDB Corporation Ab.
 
 ════════════════════════════════════════════════════════════════════════════
-⚠ STAGED — PUBLISH-CORRECT, NOT YET IN FORCE. All four ruled values are
-filled (founder ruling, 2026-08-29). This file licenses NOTHING until the
-founder makes the LICENSE PUBLISH commit — the one gesture that starts the
-clock and makes these terms binding. The Additional Use Grant wording
-remains the single open lawyer item, marked below.
+⚠ PUBLISHED AND IN FORCE — the founder's deliberate LICENSE PUBLISH (ruled
+2026-08-29: "push and start the 4-year BSL clock now"). The Change Date below
+is computed from the publish commit's date (2026-08-29 + 4 years). The BSL
+window is LIVE from the commit date. The Additional Use Grant wording remains
+the open IP-lawyer item (amendable by the Licensor; the grant shape below
+governs until amended).
 ════════════════════════════════════════════════════════════════════════════
 
 Parameters
@@ -22,30 +23,25 @@ Licensed Work:
 #   scripts/buzz-meter/gate.js    (the per-key bearer gate)
 
 Additional Use Grant:
-# ┌── ⚠ THE ONE REMAINING OPEN ITEM (IP LAWYER): the grant wording ─────────┐
-# │ All four ruled values are set; this block is the only thing between     │
-# │ this file and binding force at the founder's publish commit.            │
-# │ PROPOSED SHAPE (founder has NOT ruled the wording):                     │
+# ┌── ⚠ OPEN IP-LAWYER ITEM (amendable by the Licensor) ─────────────────────┐
+# │ In force from the publish commit under this shape:                      │
 # │   Non-production use (evaluation, research, internal testing,           │
 # │   modification) is permitted. Production use — operating the            │
 # │   voucher-prepay/tithe accounting for third parties or at               │
 # │   commercial scale — requires a commercial license from the Licensor.   │
 # │ ⚠ The coupling of this engine to the 10% founder tithe (a revenue       │
 # │   mechanism embedded in rate_set.json law text and meter.py receipt     │
-# │ lines) means the Additional Use Grant is not a standard copy-grant:     │
-# │ the lawyer must decide whether the tithe is (a) a license condition,    │
+# │ lines) means this grant is not a standard copy-grant: the lawyer        │
+# │ must decide whether the tithe is (a) a license condition,              │
 # │ (b) a separate contract, or (c) explicitly out of the license's         │
-# │ scope. DO NOT publish this block as boilerplate.                        │
+# │ scope — amendment expected.                                             │
 # └─────────────────────────────────────────────────────────────────────────┘
 
-Change Date:          Four (4) years from the date of the LICENSE PUBLISH
-                      commit that first makes this license binding.
-# ┌── FOUNDER (at the publish commit): replace the line above with the      ┐
-# │ literal date, e.g. "August 29, 2030" — computed from your publish       │
-# │ commit's date. BSL 1.1 auto-converts at the Change Date OR the fourth   │
-# │ anniversary of first public distribution, whichever comes FIRST; with   │
-# │ the publish commit as both, they coincide.                              │
-# └─────────────────────────────────────────────────────────────────────────┘
+Change Date:          August 29, 2030
+# Computed: publish commit dated 2026-08-29 + four years. BSL 1.1
+# auto-converts at the Change Date OR the fourth anniversary of first
+# public distribution, whichever comes FIRST; with the publish commit as
+# both, they coincide — the work becomes GPL-2.0-or-later on this date.
 
 Change License:       GPL-2.0-or-later
 
