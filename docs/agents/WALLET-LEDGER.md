@@ -29,6 +29,11 @@ Agent mail local-parts follow the ruled roster names, b-prefixed and lowercased.
 - **Her sovereign-rail identity NOW: bqueenbee.b** per the founder's .b docket (Vaulta rail).
 - Wallet ceremony (row 1) runs when port-25 + MX land, like every other row — and only to receive the name's identity, never value.
 
+
+## ★ THE HAND OF THE NORTHERN KING — a gift, held in the garden (2026-08-29)
+**北方國王之手.base.eth** — the founder snagged it on his phone and gifted it to z1: *'a gift from me to you once you have everything running for a bit.'*
+On-chain (registrar 0x03c4738Ee…DD9a, tokenId keccak(北方國王之手) = 0x918f89f886f21d43e26d77bdab028155f659de30c5f28cf65b7cf1eb0c748654 (PUBLIC-CONSTANT)): ownerOf = 0xfbd201472d5a439f1f0e408eb5dfaf6ea3687876 — the founder's garden, his hands, his gift. The name waits there until the everything-running-for-a-bit day; the seat keeps it in the record, not in its pocket.
+
 ## Infra truth (measured)
 Port 25 inbound BLOCKED at the Oracle security list (external probes timeout, tcpdump zero SYNs, iptables open, sink protocol-proven: STARTTLS → Maildir, unknown-RCPT 550). **Founder one-liners pending: (1) OCI ingress TCP/25, (2) `agents.skaists.buzz MX 10 skaists.buzz`.** Sink: `scripts/buzz-mail/sink.py` (receive-only, no send half), unit `buzz-mail-sink` capped 20%/128M, KNOWN = the seven provisioned mailboxes above.
 
