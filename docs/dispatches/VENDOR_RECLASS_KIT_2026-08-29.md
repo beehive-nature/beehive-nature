@@ -61,3 +61,30 @@ Vendor lookups are bot-walled by design (FortiGuard 403/empty to non-browsers, B
 reCAPTCHA, Zscaler 403, Umbrella account-walled) — measured live, screenshots banked. The
 founder's own block page remains the strongest measurement of WatchGuard's classification;
 independent headless re-measurement of the others was not possible and is not claimed.
+
+## MEASUREMENT SWEEP — 2026-08-29 (headed real-browser, screenshots banked)
+
+The founder asked for current categories per vendor before disputing. Measured result —
+**every named vendor walls its public category lookup against non-customer, non-human
+clients**, so no independent outside measurement of the categories exists. What the sweep
+established, per vendor:
+
+| vendor | lookup verdict (measured live) | evidence |
+|---|---|---|
+| Webroot BrightCloud (WatchGuard's source) | lookup fires but verdict requires reCAPTCHA; result region renders empty without it | `v-bc-skaists_buzz.png`, `bc-dispute-result.png` |
+| Zscaler Site Review | banner: "Site review service is available for **Zscaler customers only**" — Look Up disabled | `v-zs-skaists_buzz.png` |
+| Broadcom Blue Coat SiteReview | "We need to verify that you're a human…" | `v-bcp-skaists_buzz.png` |
+| Cisco Talos/Umbrella | "Performing security verification … verifies you are not a bot" | `v-ta-skaists_buzz.png` |
+| FortiGuard | HTTP 403 to non-browser clients; empty render in headless | `v-fg-skaists_buzz.png` |
+
+**Consequence, stated plainly:** the only ground-truth category measurement available to
+anyone outside a vendor customer login is the block page itself — which the founder already
+holds for WatchGuard ("Elevated Exposure", WebBlocker.Resident). The disputes therefore go
+through each vendor's human-gated channel with the prepared evidence pack (above); until a
+founder gesture completes a gate, the honest status per vendor is **prepared — pending human
+submission**, not "submitted".
+
+**Deliverable B landed alongside:** `docs/NETWORK-ALLOWLIST-NOTE.md` — the one-page,
+jargon-free allowlist request for the building's IT admin, with the WebBlocker exception
+menu path cited from WatchGuard's own docs (Subscription Services → WebBlocker →
+Exceptions → Add; global exempt list v12.3+).
