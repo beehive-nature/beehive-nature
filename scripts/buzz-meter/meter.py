@@ -287,7 +287,7 @@ def main():
 
 KEYS_FILE = "/opt/buzz-meter/keys.json"
 CHAIN_STATE = "/opt/buzz-meter/state/chain.json"
-VAULTA_HOSTS = ["https://eos.api.eosnation.io", "https://eos.greymass.com", "https://api.eosn.io"]
+VAULTA_HOSTS = ["https://eos.api.eosnation.io", "https://eos.greymass.com"]  # api.eosn.io DNS-dead 2026-08-29; two confirmed hosts = the rule
 WATCH_ACCOUNT = None                    # designated estate account (set in keys.json.meta)
 
 def escrow():
@@ -341,7 +341,7 @@ def chain_read_balance(account):
         try:
             req = urllib.request.Request(h + "/v1/chain/get_account",
                 data=json.dumps({"account_name": account}).encode(),
-                headers={"Content-Type": "application/json"})
+                headers={"Content-Type": "application/json", "User-Agent": "bnr-till/1.0"})
             d = json.loads(urllib.request.urlopen(req, timeout=10).read())
             bal = d.get("core_liquid_balance") or "0.0000 A"
             vals.append(float(bal.split()[0]))
@@ -589,7 +589,7 @@ def cmd_basebindings(args):
 def base_rpc(method, params):
     req = urllib.request.Request(BASE_RPC,
         data=json.dumps({"jsonrpc": "2.0", "id": 1, "method": method, "params": params}).encode(),
-        headers={"Content-Type": "application/json"})
+        headers={"Content-Type": "application/json", "User-Agent": "bnr-till/1.0"})
     return json.loads(urllib.request.urlopen(req, timeout=15).read())
 
 def base_config():
