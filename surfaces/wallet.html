@@ -7,7 +7,7 @@
   may not use this file except in compliance with the License. You may
   obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
   See /LICENSE and /NOTICE in this repository. Applies to the rails:
-  the wallet surface, the three rail adapters, the Arweave signer.
+  the wallet surface, the rail adapters, the Arweave signer.
 -->
 <html lang="en">
 <head>
@@ -609,6 +609,7 @@ var WALLET_PROFILE = {
       <button id="tx-tab-v" class="gold" style="flex:1">Vaulta · A</button>
       <button id="tx-tab-e" class="gold" style="flex:1">EVM · Base / Arbitrum</button>
       <button id="tx-tab-l" class="gold" style="flex:1">⚡ Lightning</button>
+      <button id="tx-tab-n" class="gold" style="flex:1">🏷 payment name</button>
     </div>
     <div id="tx-v" style="display:none;margin-top:8px">
       <div class="row">
@@ -647,6 +648,49 @@ var WALLET_PROFILE = {
       an NWC connection whose budget lives at the hub, and its live leg is parked at a relay ACL
       (<b>tools/ln-rail/README.md</b>). A BOLT-12 offer priced in a fiat currency has <b>no satoshi price
       until its invoice comes back</b>, so a sats cap refuses it here rather than pretending to check it.</div>
+    </div>
+
+    <!-- ══ PAYMENT NAME — BIP-353 over BIP-321, carrying BIP-352 + BOLT-12.
+         ONE name, BOTH rails, and the paying wallet chooses. ══ -->
+    <div id="tx-n" style="display:none;margin-top:8px">
+      <div class="row" style="margin-top:0">
+        <button id="pn-mine" class="gold" style="flex:1">🏷 mine — publish</button>
+        <button id="pn-theirs" class="gold" style="flex:1">🔎 theirs — resolve</button>
+      </div>
+
+      <div id="pn-mine-panel" style="display:none;margin-top:8px">
+        <div class="row">
+          <input id="pn-name" class="small" placeholder="the name to publish — you@yourdomain" spellcheck="false" autocomplete="off" style="flex:2;min-width:200px">
+          <input id="pn-offer" class="small" placeholder="your node's BOLT-12 offer (lno1…) — optional" spellcheck="false" autocomplete="off" style="flex:2;min-width:200px">
+          <button id="pn-build" class="gold">build the record</button>
+        </div>
+        <div id="pn-out" style="display:none;margin-top:8px"></div>
+        <div class="law" id="pn-mine-stat" style="margin-top:4px;min-height:18px">your silent-payment address derives from your soul — the record is built here, in this tab.</div>
+        <div class="law" style="margin-top:6px"><b>Self-hosted by construction.</b> A payment name is a
+        <b>DNS TXT record on a domain you already own</b> — no service, no account, nothing to depend on.
+        This builds the exact record; you publish it. The offer must be minted by <b>your own node</b>
+        (the estate's LDK / Alby-Hub per RAIL-FORMULARY-1) — this page will not mint one for you and will
+        not put a third party's offer under your name. <b>Honest limit:</b> this page <b>holds</b> your
+        silent-payment address but does not <b>scan</b> for payments to it — BIP-352 scanning walks every
+        transaction and wants an indexer. Your keys stay reproducible from the two contexts printed on the
+        card, so any BIP-352 wallet holding this soul can scan and spend. Nothing is stranded; it is simply
+        not watched from here.</div>
+      </div>
+
+      <div id="pn-theirs-panel" style="display:none;margin-top:8px">
+        <div class="row">
+          <input id="pn-lookup" class="small" placeholder="pay someone by name — name@domain" spellcheck="false" autocomplete="off" style="flex:3;min-width:220px">
+          <button id="pn-resolve" class="gold">🔎 resolve</button>
+        </div>
+        <div id="pn-res" style="display:none;margin-top:8px;border:1px solid var(--line2);border-radius:10px;padding:11px 13px;background:var(--well)"></div>
+        <div class="law" id="pn-theirs-stat" style="margin-top:4px;min-height:18px">nothing looked up yet.</div>
+        <div class="law" style="margin-top:6px">Resolution is the one leg that cannot be first-party in a
+        browser: a page cannot validate a DNSSEC chain without shipping a validating resolver. So this asks
+        a <b>DNS-over-HTTPS</b> resolver and reports whether <b>that resolver</b> says the answer was
+        authenticated. <b>Trusting that flag is trusting the resolver</b> — and the resolver sees which name
+        you looked up. An unauthenticated answer is shown as such and <b>must not be paid on</b>. The
+        sovereign path is the estate's own validating resolver.</div>
+      </div>
     </div>
     <div class="law" style="margin-top:6px">the EVM lane sends from your <b>derived</b> 0x address — fund it via
     📥 receive first (it is not your Vaulta account wrapped; it's a bzDiD-forged keypair). ETH moves native;
@@ -1813,6 +1857,216 @@ var WALLET_PROFILE = {
     return { walletPubkey:walletPubkey, relays:relays, secret:secret, lud16:u.searchParams.get('lud16')||null };
   }
 
+  /* ══════════════════════════════════════════════════════════════════════
+     THE BITCOIN RAIL — silent payments, a payment name, and the one URI that
+     carries both. BIP-352 · BIP-353 · BIP-321 · BOLT-12.
+
+     THE POINT: one payment name resolves to ONE URI holding BOTH a reusable
+     on-chain silent-payment address AND a Lightning offer, so the paying
+     wallet chooses the rail. That is the native form of what three separate
+     tools do by hand today.
+     ══════════════════════════════════════════════════════════════════════ */
+
+  /* bech32m (BIP-350) — NOT bech32. Same charset and polymod, different final
+     constant. Silent payments are bech32m; segwit v0 is bech32. Using the
+     wrong one yields a string that LOOKS right and is dead on arrival, so the
+     two are kept apart and the gate proves each rejects the other's checksum. */
+  var BECH32M_CONST=0x2bc830a3;  /* PUBLIC-CONSTANT: BIP-350 checksum constant */
+  var BECH32_CONST=1;            /* PUBLIC-CONSTANT: BIP-173 checksum constant */
+  var B32_CHARSET='qpzry9x8gf2tvdw0s3jn54khce6mua7l';
+  function b32Polymod(values){
+    var GEN=[0x3b6a57b2,0x26508e6d,0x1ea119fa,0x3d4233dd,0x2a1462b3], chk=1;
+    for(var i=0;i<values.length;i++){
+      var b=chk>>25; chk=((chk&0x1ffffff)<<5)^values[i];
+      for(var j=0;j<5;j++) if((b>>j)&1) chk^=GEN[j];
+    }
+    return chk>>>0;
+  }
+  function b32HrpExpand(hrp){
+    var out=[],i;
+    for(i=0;i<hrp.length;i++) out.push(hrp.charCodeAt(i)>>5);
+    out.push(0);
+    for(i=0;i<hrp.length;i++) out.push(hrp.charCodeAt(i)&31);
+    return out;
+  }
+  function bech32mEncode(hrp,words,constant){
+    var c=(constant===undefined)?BECH32M_CONST:constant;
+    var chk=(b32Polymod(b32HrpExpand(hrp).concat(words,[0,0,0,0,0,0]))^c)>>>0;
+    var cs=[]; for(var i=0;i<6;i++) cs.push((chk>>(5*(5-i)))&31);
+    return hrp+'1'+words.concat(cs).map(function(w){return B32_CHARSET[w]}).join('');
+  }
+  function bech32mDecode(str,constant,limit){
+    var c=(constant===undefined)?BECH32M_CONST:constant;
+    var s=String(str||'');
+    if(limit&&s.length>limit) throw new Error('too long: '+s.length+' > '+limit);
+    if(/[a-z]/.test(s)&&/[A-Z]/.test(s)) throw new Error('mixed case is not permitted in bech32');
+    s=s.toLowerCase();
+    var pos=s.lastIndexOf('1');
+    if(pos<1||pos+7>s.length) throw new Error('no separator, or the data part is too short');
+    var hrp=s.slice(0,pos), words=[];
+    for(var i=pos+1;i<s.length;i++){
+      var v=B32_CHARSET.indexOf(s[i]);
+      if(v<0) throw new Error('"'+s[i]+'" is outside the bech32 charset — b, i, o and 1 are never valid');
+      words.push(v);
+    }
+    if(b32Polymod(b32HrpExpand(hrp).concat(words))!==c)
+      throw new Error('checksum failed — this string is not valid '+(c===BECH32M_CONST?'bech32m':'bech32'));
+    return {prefix:hrp,words:words.slice(0,words.length-6)};
+  }
+  /* pad=false REFUSES leftover bits — what stops a corrupt address decoding
+     to a plausible-looking shorter payload */
+  function convertBits(data,from,to,pad){
+    var acc=0,bits=0,out=[],maxv=(1<<to)-1;
+    for(var i=0;i<data.length;i++){
+      var v=data[i];
+      if(v<0||(v>>from)!==0) throw new Error('value out of range in bit conversion');
+      acc=(acc<<from)|v; bits+=from;
+      while(bits>=to){ bits-=to; out.push((acc>>bits)&maxv) }
+    }
+    if(pad){ if(bits>0) out.push((acc<<(to-bits))&maxv) }
+    else if(bits>=from||((acc<<(to-bits))&maxv)) throw new Error('invalid padding in bit conversion');
+    return out;
+  }
+
+  /* ── BIP-352 SILENT PAYMENTS. The address is STATIC and REUSABLE and encodes
+     TWO public keys — a SCAN key and a SPEND key. The payer derives a fresh,
+     unlinkable on-chain output from it for every payment, so one published
+     string never causes address reuse. version 0 · B_scan(33)‖B_spend(33) ·
+     bech32m · hrp "sp" (mainnet) / "tsp" (testnet). 66 bytes is well past
+     bech32's 90-char limit, so the decode limit is raised DELIBERATELY. ── */
+  var SP_HRP={mainnet:'sp',testnet:'tsp'};
+  function silentPaymentAddress(scanPub33,spendPub33,network){
+    [scanPub33,spendPub33].forEach(function(k,i){
+      if(!(k instanceof Uint8Array)||k.length!==33)
+        throw new Error((i?'spend':'scan')+' key must be a 33-byte COMPRESSED public key');
+      if(k[0]!==2&&k[0]!==3)
+        throw new Error((i?'spend':'scan')+' key is not compressed (must start 0x02 or 0x03)');
+    });
+    var hrp=SP_HRP[network||'mainnet'];
+    if(!hrp) throw new Error('unknown network for a silent-payment address: '+network);
+    var payload=new Uint8Array(66);
+    payload.set(scanPub33,0); payload.set(spendPub33,33);
+    return bech32mEncode(hrp,[0].concat(convertBits(Array.from(payload),8,5,true)));
+  }
+  function decodeSilentPaymentAddress(addr){
+    var d=bech32mDecode(addr,BECH32M_CONST,1023);
+    if(d.prefix!=='sp'&&d.prefix!=='tsp')
+      throw new Error('not a silent-payment address (expected sp1… or tsp1…), got "'+d.prefix+'"');
+    if(!d.words.length) throw new Error('empty silent-payment payload');
+    var version=d.words[0];
+    var payload=convertBits(d.words.slice(1),5,8,false);
+    if(version!==0) throw new Error('silent-payment version '+version+' is not one this wallet reads — refusing to guess its layout');
+    if(payload.length!==66) throw new Error('a version-0 silent-payment address carries exactly 66 bytes, got '+payload.length);
+    var scan=Uint8Array.from(payload.slice(0,33)), spend=Uint8Array.from(payload.slice(33,66));
+    [scan,spend].forEach(function(k,i){
+      if(k[0]!==2&&k[0]!==3) throw new Error((i?'spend':'scan')+' key in this address is not a compressed public key');
+    });
+    return {version:version,network:d.prefix==='sp'?'mainnet':'testnet',scanKey:scan,spendKey:spend};
+  }
+  /* THE DERIVATION CONTEXTS ARE PUBLISHED ON PURPose. A silent-payment address
+     whose keys cannot be reproduced is a trap: this page holds the address but
+     does NOT scan for payments to it (scanning is O(all transactions) and needs
+     an indexer). Anyone holding this soul can rebuild both keys in any BIP-352
+     wallet from exactly these two context strings, and spend. */
+  var SP_SCAN_CTX=function(soul){ return 'btc-scan:'+soul },
+      SP_SPEND_CTX=function(soul){ return 'btc-spend:'+soul };
+  function soulSilentPaymentAddress(mprk,soul,network){
+    var s=BZDIDKEY.deriveK1Key(mprk,SP_SCAN_CTX(soul));
+    var p=BZDIDKEY.deriveK1Key(mprk,SP_SPEND_CTX(soul));
+    try{
+      return silentPaymentAddress(BN.secp.getPublicKey(s.seed,true),BN.secp.getPublicKey(p.seed,true),network||'mainnet');
+    } finally { s.seed.fill(0); p.seed.fill(0) }
+  }
+
+  /* ── BIP-321 — the bitcoin: URI, generalised to carry MORE THAN ONE payment
+     instruction. This is where the rails meet: one URI holds the silent
+     payment and the BOLT-12 offer together and the paying wallet chooses. An
+     address-less URI (bitcoin:?sp=…&lno=…) is legal, and is exactly the shape
+     a reusable-only identity wants. ── */
+  function buildBip321Uri(p){
+    p=p||{};
+    var body=p.address?String(p.address):'', q=[];
+    function add(k,v){ if(v!==undefined&&v!==null&&String(v).length) q.push(k+'='+encodeURIComponent(String(v))) }
+    add('sp',p.silentPayment); add('lno',p.offer); add('lightning',p.bolt11);
+    add('amount',p.amount); add('label',p.label); add('message',p.message);
+    if(!body&&!q.length) throw new Error('a bitcoin: URI must carry at least one payment instruction');
+    return 'bitcoin:'+body+(q.length?'?'+q.join('&'):'');
+  }
+  function parseBip321Uri(uri){
+    var s=String(uri||'').trim();
+    var m=/^bitcoin:([^?]*)(?:\?(.*))?$/i.exec(s);
+    if(!m) throw new Error('not a bitcoin: URI');
+    var out={address:m[1]||null,params:{},rails:[]};
+    if(m[2]) m[2].split('&').forEach(function(kv){
+      if(!kv)return;
+      var i=kv.indexOf('='), k=i<0?kv:kv.slice(0,i), v=i<0?'':decodeURIComponent(kv.slice(i+1).replace(/\+/g,' '));
+      out.params[k.toLowerCase()]=v;
+    });
+    if(out.address) out.rails.push('on-chain address');
+    if(out.params.sp) out.rails.push('silent payment');
+    if(out.params.lno) out.rails.push('BOLT-12 offer');
+    if(out.params.lightning) out.rails.push('BOLT-11 invoice');
+    out.silentPayment=out.params.sp||null; out.offer=out.params.lno||null;
+    out.bolt11=out.params.lightning||null; out.amount=out.params.amount||null;
+    /* a req- parameter a wallet does not implement must make it REFUSE the URI
+       outright (the bitcoin: URI rule since BIP-21) — never pay around it */
+    var req=Object.keys(out.params).filter(function(k){ return k.indexOf('req-')===0 });
+    if(req.length) throw new Error('this URI carries required parameters this wallet does not implement ('+
+      req.join(', ')+') — refusing rather than paying around them');
+    if(!out.rails.length) throw new Error('this bitcoin: URI names no payment instruction at all');
+    return out;
+  }
+
+  /* ── BIP-353 — a human-readable payment name, name@domain, published as a
+     DNSSEC-signed TXT record at <name>.user._bitcoin-payment.<domain> whose
+     value is a BIP-321 URI.
+
+     THE SELF-HOSTABLE HALF IS THE ONE THAT MATTERS: this builds the exact
+     record the estate publishes on its OWN domain, so having a payment name
+     requires no third party at all. That is the doctrine, and it is why the
+     record BUILDER is first-party while resolution is labelled below. ── */
+  function parsePaymentName(name){
+    var s=String(name||'').trim().toLowerCase().replace(/^₿/,'');
+    var m=/^([a-z0-9!#$%&'*+\-\/=?^_`{|}~.]{1,63})@([a-z0-9.-]{1,253})$/.exec(s);
+    if(!m) throw new Error('a payment name looks like name@domain (BIP-353)');
+    if(/\.\./.test(m[2])||/^\.|\.$/.test(m[2])) throw new Error('malformed domain in the payment name');
+    return {user:m[1],domain:m[2],name:m[1]+'@'+m[2]};
+  }
+  function bip353RecordName(name){
+    var p=parsePaymentName(name);
+    return p.user+'.user._bitcoin-payment.'+p.domain;
+  }
+  function buildBip353Record(name,uri){
+    var recName=bip353RecordName(name);
+    parseBip321Uri(uri);          /* refuse to publish a URI we cannot read back */
+    if(uri.length>1024) throw new Error('the URI is too long to publish comfortably in one TXT record');
+    return { name:recName, type:'TXT', ttl:3600, value:uri,
+      zoneLine:recName+'. 3600 IN TXT "'+uri.replace(/"/g,'\\"')+'"', dnssecRequired:true };
+  }
+  /* Resolution is the ONE place this rail cannot be first-party in a browser:
+     a page cannot validate a DNSSEC chain without shipping a validating
+     resolver. So it asks a DoH resolver and REPORTS whether that resolver
+     claims the answer was authenticated (the AD bit). Trusting AD is trusting
+     the resolver — which is why the answer is labelled, and why the sovereign
+     path is the estate's own validating resolver. AD false ⇒ do not pay. */
+  function bip353Query(name,dohBase){
+    var recName=bip353RecordName(name);
+    return { recordName:recName, accept:'application/dns-json',
+      url:(dohBase||'https://cloudflare-dns.com/dns-query')+
+        '?name='+encodeURIComponent(recName)+'&type=TXT&do=true' };
+  }
+  function readBip353Answer(json,recName){
+    var d=json||{};
+    if(d.Status!==0) throw new Error('DNS said status '+d.Status+' for '+recName+' — no payment record');
+    var answers=(d.Answer||[]).filter(function(a){ return a.type===16 });
+    if(!answers.length) throw new Error('no TXT record at '+recName+' — this name publishes no payment instructions');
+    /* a TXT record arrives as one or more quoted strings that CONCATENATE */
+    var value=answers.map(function(a){
+      return String(a.data||'').replace(/^"|"$/g,'').replace(/"\s+"/g,'');
+    }).join('');
+    return { recordName:recName, authenticated:d.AD===true, uri:value, parsed:parseBip321Uri(value) };
+  }
+
   /* ══ THE EVM RAIL REGISTRY — chains and assets as DATA, never as a branch.
      The signer reads decimals and the token contract from HERE, so adding a
      rail is a row, and no lane can quietly disagree with another about what
@@ -1873,6 +2127,11 @@ var WALLET_PROFILE = {
       var r=BZDIDKEY.deriveK1Key(mprk,'btc:'+soul);
       try{ return p2wpkhAddress(BN.secp.getPublicKey(r.seed,true),'bc') } finally { r.seed.fill(0) }
     });
+    /* the REUSABLE one: publish it forever, and every payer derives a fresh
+       output from it. This page holds it but does NOT scan — see the note. */
+    add('Bitcoin · silent payment (BIP-352)',SP_SCAN_CTX(soul)+' + '+SP_SPEND_CTX(soul),'BTC',
+      'static and reusable — payers derive a FRESH address per payment, so publishing it never causes address reuse',
+      function(){ return soulSilentPaymentAddress(mprk,soul,'mainnet') });
     add('Lightning · sats','ln:'+soul,'sats','the LN module’s own key — the NWC connection binds to this, never to the EVM signer',function(){
       var r=BZDIDKEY.deriveK1Key(mprk,'ln:'+soul);
       try{ return npubFromSeed(r.seed) } finally { r.seed.fill(0) }
@@ -3454,12 +3713,110 @@ var WALLET_PROFILE = {
     $('tx-v').style.display=which==='v'?'block':'none';
     $('tx-e').style.display=which==='e'?'block':'none';
     $('tx-l').style.display=which==='l'?'block':'none';
+    $('tx-n').style.display=which==='n'?'block':'none';
     if(which==='v')svRefresh();
     else if(which==='e')seRefresh();
   }
   $('tx-tab-v').onclick=function(){txTab('v')};
   $('tx-tab-e').onclick=function(){txTab('e')};
   $('tx-tab-l').onclick=function(){txTab('l')};
+  $('tx-tab-n').onclick=function(){txTab('n');pnSide('mine')};
+
+  /* ── PAYMENT NAME — one name, both rails ─────────────────────────────── */
+  function pnSide(which){
+    $('pn-mine-panel').style.display=which==='mine'?'block':'none';
+    $('pn-theirs-panel').style.display=which==='theirs'?'block':'none';
+  }
+  $('pn-mine').onclick=function(){pnSide('mine')};
+  $('pn-theirs').onclick=function(){pnSide('theirs')};
+
+  $('pn-build').onclick=function(){
+    $('pn-out').style.display='none';
+    if(!MPRK||!SOUL){ $('pn-mine-stat').textContent='connect your keychain first — the address derives from your soul'; return }
+    var name=($('pn-name').value||'').trim();
+    var offer=($('pn-offer').value||'').trim();
+    if(!name){ $('pn-mine-stat').textContent='type the name you want to publish, as you@yourdomain'; return }
+    var sp,rec,uri;
+    try{
+      sp=soulSilentPaymentAddress(MPRK,SOUL,'mainnet');
+      /* an offer that will not decode is REFUSED rather than published — a
+         broken lno1 under your own name is worse than no Lightning leg */
+      if(offer){
+        var od=decodeLnRequest(offer);
+        if(od.standard!=='BOLT-12'||od.kind!=='offer')
+          throw new Error('that is a '+od.standard+(od.kind?' '+od.kind:'')+', not a BOLT-12 offer — the name needs an lno1… offer');
+      }
+      uri=buildBip321Uri({silentPayment:sp,offer:offer||null,label:SOUL});
+      rec=buildBip353Record(name,uri);
+    }catch(e){ $('pn-mine-stat').innerHTML='<b style="color:var(--amber)">not built:</b> '+esc(e.message); return }
+    var rows=[
+      ['payment name',esc(name)],
+      ['DNS record',esc(rec.name)+' <span style="color:var(--faint)">TXT · DNSSEC required</span>'],
+      ['silent payment',esc(sp)],
+      ['BOLT-12 offer',offer?esc(offer):'<span style="color:var(--faint)">none — the name will reach on-chain only until your node mints one</span>'],
+      ['the URI',esc(uri)],
+      ['rails carried',parseBip321Uri(uri).rails.map(esc).join(' + ')],
+      ['scan context',esc(SP_SCAN_CTX(SOUL))+' <span style="color:var(--faint)">(reproduce your keys from this)</span>'],
+      ['spend context',esc(SP_SPEND_CTX(SOUL))]
+    ];
+    $('pn-out').innerHTML=
+      '<div style="border:1px solid #2c4a3a;border-radius:10px;padding:11px 13px;background:#081810">'+
+      rows.map(function(r){
+        return '<div style="display:flex;gap:10px;font-size:10.5px;line-height:1.9"><span style="color:var(--faint);flex:0 0 108px">'+
+          r[0]+'</span><span style="color:var(--ink);word-break:break-all">'+r[1]+'</span></div>' }).join('')+
+      '<div style="margin-top:9px;font-size:9.5px;color:var(--faint)">paste this line into your zone file:</div>'+
+      '<pre style="margin-top:4px;white-space:pre-wrap;word-break:break-all">'+esc(rec.zoneLine)+'</pre>'+
+      '<button id="pn-copy" style="font-size:10px;padding:5px 12px;margin-top:6px">copy the zone line</button>'+
+      '</div>';
+    $('pn-out').style.display='block';
+    $('pn-copy').onclick=function(){ copyText(rec.zoneLine,$('pn-copy')) };
+    $('pn-mine-stat').innerHTML='✓ built in this tab — <b>'+esc(name)+'</b> will reach '+
+      parseBip321Uri(uri).rails.length+' rail'+(parseBip321Uri(uri).rails.length===1?'':'s')+
+      ' once you publish it. Nothing was sent anywhere.';
+  };
+
+  $('pn-resolve').onclick=async function(){
+    $('pn-res').style.display='none';
+    var name=($('pn-lookup').value||'').trim();
+    if(!name){ $('pn-theirs-stat').textContent='type a payment name — name@domain'; return }
+    var q;
+    try{ q=bip353Query(name) }
+    catch(e){ $('pn-theirs-stat').innerHTML='<b style="color:var(--amber)">not a payment name:</b> '+esc(e.message); return }
+    $('pn-theirs-stat').textContent='asking DNS for '+q.recordName+' — the resolver sees this lookup…';
+    var ans;
+    try{
+      var r=await fetchT(q.url,{headers:{'Accept':q.accept}},12000);
+      ans=readBip353Answer(await r.json(),q.recordName);
+    }catch(e){ $('pn-theirs-stat').innerHTML='<b style="color:var(--amber)">no payment instructions:</b> '+esc(e.message); return }
+    var rows=[['name',esc(name)],['record',esc(ans.recordName)],
+      ['DNSSEC',ans.authenticated
+        ? '<b style="color:var(--leaf)">authenticated</b> <span style="color:var(--faint)">— by the resolver you asked; trusting this is trusting it</span>'
+        : '<b style="color:var(--amber)">NOT authenticated</b> — do not pay on this'],
+      ['rails',ans.parsed.rails.map(esc).join(' + ')]];
+    if(ans.parsed.silentPayment) rows.push(['silent payment',esc(ans.parsed.silentPayment)]);
+    if(ans.parsed.offer) rows.push(['BOLT-12 offer',esc(ans.parsed.offer)]);
+    if(ans.parsed.bolt11) rows.push(['BOLT-11',esc(ans.parsed.bolt11)]);
+    if(ans.parsed.address) rows.push(['on-chain address',esc(ans.parsed.address)]);
+    /* if the name carries an offer, read it the same way the LN lane would —
+       the amount is what the sats cap would speak on */
+    if(ans.parsed.offer){
+      try{
+        var od=decodeLnRequest(ans.parsed.offer);
+        rows.push(['the offer says',od.pricedInSats
+          ? esc(String(od.sats))+' sat'+(od.description?' · '+esc(od.description):'')
+          : (od.currency?esc(String(od.amount))+' minor units of '+esc(od.currency)+' — <b>no satoshi price offline</b>':'any amount')]);
+      }catch(e){ rows.push(['the offer','<b style="color:var(--amber)">does not decode:</b> '+esc(e.message)]) }
+    }
+    $('pn-res').innerHTML=rows.map(function(r){
+      return '<div style="display:flex;gap:10px;font-size:10.5px;line-height:1.9"><span style="color:var(--faint);flex:0 0 108px">'+
+        r[0]+'</span><span style="color:var(--ink);word-break:break-all">'+r[1]+'</span></div>' }).join('');
+    $('pn-res').style.display='block';
+    $('pn-theirs-stat').innerHTML=ans.authenticated
+      ? '✓ resolved — <b>one name, '+ans.parsed.rails.length+' rail'+(ans.parsed.rails.length===1?'':'s')+'</b>. Paying is not wired from this page.'
+      : '<b style="color:var(--amber)">resolved, but UNSIGNED.</b> The record exists; nothing proves it is the real one. Refuse it.';
+  };
+  $('pn-lookup').addEventListener('keydown',function(e){ if(e.key==='Enter')$('pn-resolve').click() });
+  $('pn-name').addEventListener('keydown',function(e){ if(e.key==='Enter')$('pn-build').click() });
 
   /* SEND · Vaulta A — the proven bridge/SIGN lane with eosio::transfer */
   function svRefresh(){
@@ -3621,7 +3978,15 @@ var WALLET_PROFILE = {
     toBaseUnits:toBaseUnits,fromBaseUnits:fromBaseUnits,
     decodeBolt11:decodeBolt11,decodeBolt12:decodeBolt12,decodeLnRequest:decodeLnRequest,
     parseNwcUri:parseNwcUri,
-    capAssert:capAssert,capAssertUnpriced:capAssertUnpriced,railAddresses:railAddresses};
+    capAssert:capAssert,capAssertUnpriced:capAssertUnpriced,railAddresses:railAddresses,
+    /* the Bitcoin rail: silent payments, the payment name, the unified URI */
+    bech32mEncode:bech32mEncode,bech32mDecode:bech32mDecode,convertBits:convertBits,
+    BECH32M_CONST:BECH32M_CONST,BECH32_CONST:BECH32_CONST,
+    silentPaymentAddress:silentPaymentAddress,decodeSilentPaymentAddress:decodeSilentPaymentAddress,
+    soulSilentPaymentAddress:soulSilentPaymentAddress,
+    buildBip321Uri:buildBip321Uri,parseBip321Uri:parseBip321Uri,
+    parsePaymentName:parsePaymentName,bip353RecordName:bip353RecordName,
+    buildBip353Record:buildBip353Record,bip353Query:bip353Query,readBip353Answer:readBip353Answer};
   function evmAddrOf(){ // address + fresh seed pair — seed stays in the local frame only
     var rec=BZDIDKEY.deriveK1Key(MPRK,'evm:'+SOUL);
     return {seed:rec.seed,addr:CORE.evmAddr(rec.seed)};

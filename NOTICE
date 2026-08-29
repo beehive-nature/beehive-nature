@@ -14,6 +14,8 @@ License. You may obtain a copy of the License at
                                         including the spend-cap engine
   surfaces/wallet-adapter-vaulta.js  — the Vaulta rail adapter
   surfaces/wallet-adapter-hive.js    — the Hive rail adapter
+  surfaces/wallet-adapter-solana.js  — the Solana rail adapter (read-only)
+  surfaces/wallet-adapter-bitcoin.js — the Bitcoin L1 rail adapter (read-only)
   surfaces/wallet-adapter-arweave.js — the Arweave buildPublish adapter
   surfaces/arweave.js                — the first-party Arweave signer
 
