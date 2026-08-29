@@ -186,6 +186,11 @@ def key_ref():
     return "estate-compute-key-1"
 
 def main():
+    # P2 ledger commands (keys / newkey / revoke / chainpoll / allocate) run
+    # without flags — route them before the argparse path
+    if len(sys.argv) > 1 and not sys.argv[1].startswith("-"):
+        dispatch(sys.argv)
+        return
     ap = argparse.ArgumentParser()
     ap.add_argument("--watch", action="store_true")
     ap.add_argument("--backfill", action="store_true")
@@ -230,6 +235,140 @@ def main():
             except Exception as e:
                 sys.stderr.write(f"watch error: {e}\n")
                 time.sleep(10)
+
+
+# ── P2: the key ledger + A-credits by chain read-back ──────────────────────
+# Guest keys are ISSUED on-box (secrets live only in keys.json, 600); the
+# qwen lane is the FREE tier, so issued keys pass the gate without charge.
+# A-credits: the meter polls the designated estate Vaulta account's balance
+# (keyless get_account, rotated hosts, two agreeing reads = confirmed); growth
+# above the checkpoint credits the estate pool; --allocate moves pool to a
+# key as a ledger entry + settlement INSTRUCTION — money never moves here
+# (baton fence). History APIs are 410-gone on public nodes, so attribution of
+# incoming transfers to keys is by founder instruction, not memo parsing.
+
+KEYS_FILE = "/opt/buzz-meter/keys.json"
+CHAIN_STATE = "/opt/buzz-meter/state/chain.json"
+VAULTA_HOSTS = ["https://eos.api.eosnation.io", "https://eos.greymass.com", "https://api.eosn.io"]
+WATCH_ACCOUNT = None                    # designated estate account (set in keys.json.meta)
+
+import urllib.request, secrets as pysecrets
+
+def load_ledger():
+    try:
+        with open(KEYS_FILE) as f: return json.load(f)
+    except Exception: return {"meta": {"watch_account": None, "pool_A": 0.0}, "keys": []}
+
+def save_ledger(led):
+    tmp = KEYS_FILE + ".tmp"
+    with open(tmp, "w") as f: json.dump(led, f, indent=1, sort_keys=True)
+    os.chmod(tmp, 0o600); os.replace(tmp, KEYS_FILE)
+
+def cmd_newkey(args):
+    led = load_ledger()
+    kid = args[2]
+    if any(k["id"] == kid for k in led["keys"]): sys.exit("key id exists")
+    secret = "bm-" + pysecrets.token_hex(24)
+    led["keys"].append({"id": kid, "secret": secret, "tier": "free", "balance_A": 0.0,
+                        "created": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "revoked": False})
+    save_ledger(led)
+    print(json.dumps({"id": kid, "OPENAI_COMPAT_API_KEY": secret, "tier": "free"}))
+
+def cmd_keys(args):
+    led = load_ledger()
+    for k in led["keys"]:
+        print(k["id"], k["tier"], "balance_A:", k["balance_A"], "revoked:" if k["revoked"] else "active")
+
+def cmd_revoke(args):
+    led = load_ledger()
+    for k in led["keys"]:
+        if k["id"] == args[2]: k["revoked"] = True
+    save_ledger(led); print("revoked", args[1])
+
+def chain_read_balance(account):
+    # two rotated reads must agree — a confirmed read, per the P2 ruling
+    import random
+    hosts = VAULTA_HOSTS[:]; random.shuffle(hosts)
+    vals = []
+    for h in hosts[:2]:
+        try:
+            req = urllib.request.Request(h + "/v1/chain/get_account",
+                data=json.dumps({"account_name": account}).encode(),
+                headers={"Content-Type": "application/json"})
+            d = json.loads(urllib.request.urlopen(req, timeout=10).read())
+            bal = d.get("core_liquid_balance") or "0.0000 A"
+            vals.append(float(bal.split()[0]))
+        except Exception:
+            pass
+    if len(vals) == 2 and abs(vals[0] - vals[1]) < 1e-6:
+        return vals[0]
+    return None                                    # not confirmed — no credit
+
+def cmd_chainpoll(args):
+    led = load_ledger()
+    acct = led.get("meta", {}).get("watch_account")
+    if not acct:
+        print("chainpoll: no watch_account designated (set in keys.json.meta) — idle"); return
+    st = {}
+    try:
+        with open(CHAIN_STATE) as f: st = json.load(f)
+    except Exception: pass
+    bal = chain_read_balance(acct)
+    if bal is None:
+        print("chainpoll: read not confirmed this round — no credit, no checkpoint move"); return
+    prev = st.get("last_confirmed_balance")
+    if prev is None:
+        st["last_confirmed_balance"] = bal; save_chain_state(st)
+        print(f"chainpoll: checkpoint initialized at {bal} A (no credit on first read)"); return
+    if bal > prev:
+        credit = round(bal - prev, 8)
+        led["meta"]["pool_A"] = round(led["meta"].get("pool_A", 0.0) + credit, 8)
+        save_ledger(led)
+        st["last_confirmed_balance"] = bal; save_chain_state(st)
+        emit_settlement_instruction(f"credit {credit} A to estate pool (read-back of {acct}: {prev} -> {bal})")
+        print(f"chainpoll: +{credit} A credited to estate pool")
+    elif bal < prev:
+        # balance fell (spend by the account owner) — move checkpoint down, credit nothing
+        st["last_confirmed_balance"] = bal; save_chain_state(st)
+        print(f"chainpoll: balance decreased ({prev} -> {bal}) — checkpoint follows, no credit")
+    else:
+        print("chainpoll: unchanged")
+
+def save_chain_state(st):
+    os.makedirs(os.path.dirname(CHAIN_STATE), exist_ok=True)
+    with open(CHAIN_STATE, "w") as f: json.dump(st, f, indent=1)
+
+def emit_settlement_instruction(text):
+    os.makedirs("/opt/buzz-meter/settlement", exist_ok=True)
+    path = os.path.join("/opt/buzz-meter/settlement", time.strftime("instr-%Y%m%dT%H%M%SZ-") + hashlib.sha256(text.encode()).hexdigest()[:8] + ".json")
+    with open(path, "w") as f:
+        json.dump({"kind": "settlement-instruction", "text": text,
+                   "note": "INSTRUCTION ONLY — the meter never moves money (baton fence, Lane M P2)",
+                   "created": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}, f, indent=1)
+    os.chmod(path, 0o600)
+
+def cmd_allocate(args):
+    kid, amount = args[2], float(args[3])
+    led = load_ledger()
+    if led["meta"].get("pool_A", 0.0) < amount: sys.exit("pool short")
+    k = next((k for k in led["keys"] if k["id"] == kid), None)
+    if not k: sys.exit("no such key")
+    led["meta"]["pool_A"] = round(led["meta"]["pool_A"] - amount, 8)
+    k["balance_A"] = round(k["balance_A"] + amount, 8)
+    save_ledger(led)
+    emit_settlement_instruction(f"allocate {amount} A from estate pool to key {kid}")
+    print(f"allocated {amount} A to {kid}; pool now {led['meta']['pool_A']}")
+
+# P2 command dispatch (appended main): meter.py keys|newkey <id>|revoke <id>|chainpoll|allocate <id> <A>
+def dispatch(argv):
+    cmd = argv[1] if len(argv) > 1 else ""
+    if cmd == "newkey" and len(argv) == 3: cmd_newkey(argv)
+    elif cmd == "keys": cmd_keys(argv)
+    elif cmd == "revoke" and len(argv) == 3: cmd_revoke(argv)
+    elif cmd == "chainpoll": cmd_chainpoll(argv)
+    elif cmd == "allocate" and len(argv) == 4: cmd_allocate(argv)
+    else:
+        print(__doc__); sys.exit(2)
 
 if __name__ == "__main__":
     main()
