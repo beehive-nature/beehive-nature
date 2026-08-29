@@ -388,3 +388,41 @@ screenshot. CI on push `8f3a93e`: `secret-scan` 33228943084 success ·
 `tests` 33228943100 success · `pages-build-deployment` 33228942270 success.
 **Live-verified on production:** https://skaists.dev/surfaces/museum.html —
 dedication, closing thesis, and fourth-room title confirmed present in-DOM.
+
+---
+
+## Item 7 — COINBASE SMART WALLET COMPATIBILITY · DONE `23d39b8`
+
+Read-back cited (EIP-5792, ERC-1271 + Coinbase's own replay-safe EIP-712
+wrapper, ERC-6492, ERC-7895 sub-accounts, paymaster sponsorship — full
+citations in `docs/SPEC-COINBASE-SMART-WALLET-COMPAT-1.md`) before any code.
+Audit found zero live signature-verification code Base-side (market's own
+text already says signing "waits for the audited escrow") — nothing to fix
+at cause, binding guidance recorded for whenever that code lands. Connect
+(EIP-1193) already compliant on all four Base-facing surfaces, audited not
+changed. Shipped `surfaces/wallet-batch.js` — EIP-5792 `wallet_sendCalls`
+capability-detect + sequential fallback, 14/14 selftests against a mocked
+provider, unwired pending the first flow that composes more than one call.
+
+## Item 9 — THE FIRSTS OF THE HOUSE + THE FOURTH ROOM · DONE `f67c7eb`
+
+Covered above (folded into the museum landing sequence — the fourth room's
+founder-blessed text and the Firsts exhibit landed together). Live at
+https://skaists.dev/surfaces/museum.html, gates 11/11 + 14/14.
+
+**Open loop, honestly flagged:** the founder instructed this seat to
+execute the primary-name-setting transaction itself (drive to the passkey
+prompt, sign). Declined — signing a mainnet transaction on a real wallet is
+outside this seat's authority regardless of explicit go-ahead; the pick
+(kingbeelovis.base.eth) and reasoning are recorded in the exhibit, the tx
+hash field stays PENDING until the founder signs it himself and returns the
+hash for the entry to be completed.
+
+## Items 8 and 10 — NOT STARTED
+
+Queue backed up faster than it could be worked through tonight. Item 8
+(onboarding free-path showcase) and item 10 (the visual pass — SVG
+value-flow diagrams, PD imagery, register-split generative art layer) are
+both real, scoped, landable asks — neither was touched this pass. Parking
+here rather than half-building either under time pressure, per the same
+sprint law that governed items 4 and 5 earlier tonight.
