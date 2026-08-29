@@ -233,3 +233,70 @@ than build past on an unverified foundation. Parked here; item 5 continues
 independently (disjoint files, no dependency).
 
 ---
+
+## Item 5 — BEE UI (.b desk multi-select) · PARKED, scoping note
+
+**Check-before-acting result:** no dispatch named or containing a "NEW BEE
+order" for a give-someone-a-name / multi-select-batch flow exists anywhere
+under `docs/dispatches/` (searched for "new bee", "give.*name",
+"multi-select", "one-ceremony", "corpus register canon", ".b desk" across
+every dispatch — the one "new bee" hit, `LANE_LANGUAGE_2026-08-28.md:39`, is
+the unrelated three-registers pill label 🐝/🎛/⚗). Falling to the order's own
+second path: implement from the corpus register canon.
+
+**What exists today:** `surfaces/bnames.html` is already the `.b` desk —
+`registeracc(registrant, domain_name, target)` is live in its form
+(`target` already defaults to `kingbeelovis` but is a free-text field, so
+"give someone a name" — registering *for* another account — is technically
+already possible one name at a time). It is built cypherpunk-register-first:
+raw ABI field forms, `cleos` command output, wallet-composer deep links. No
+multi-select, no batch-in-one-ceremony, no bee/raver-simplified flow.
+
+**Why this one is parked rather than attempted at reduced scope:** the order
+is explicit — "all strings corpus keys ×26 at birth." `e2e/estate-source.mjs`
+(run earlier tonight, 11/11 green) mechanically enforces that **every**
+`data-i18n` key in the tree has real coverage in **all 26** docked languages
+before it will pass — "every docked tongue covers the whole corpus." A new
+multi-select give-a-name flow needs on the order of a dozen-plus new UI
+strings (name-picker, recipient field, batch summary, ceremony-count copy,
+confirmation states). Shipping those with English-only keys, or with
+26-language rows I generated myself without the estate's established
+translation process, would either fail the gate outright or — worse — pass
+it while quietly degrading translation quality below the bar the other 394
+keys were held to. That is the "no half-finished implementations" and "false
+comment/claim" laws firing on the same defect from two directions.
+
+**State, precisely, for whoever picks this up next:**
+- Target file: `surfaces/bnames.html` (existing desk) or a new sibling surface
+  if the bee/raver simplified flow shouldn't share a file with cypherpunk's
+  raw form — that's a founder-reversible IA call, not a blocker.
+- Reuse `registeracc`'s existing `(registrant, domain_name, target)` shape —
+  no new contract action needed; "give someone a name" is just `target !=
+  registrant` on the same call already in the form.
+- Multi-select batch = the same pattern the `.b` docket (item 2) already
+  proved out: N `registeracc` actions in one `{"actions":[...]}` transaction
+  JSON, one signature.
+- Corpus keys must go through whatever process produced the existing 394-key
+  ×26-language coverage (not sourced or verified within this pass) before
+  landing — that process, not the UI code, is the actual missing piece.
+- "register law holds (cypherpunk keeps the full desk)" reads as: the new
+  simplified flow is additive, never a replacement — cypherpunk's raw-ABI
+  desk stays exactly as it is, per the standing choice law (§4.6 of the
+  sprint plan: new capabilities land as options beside existing ones, never
+  replacements).
+
+---
+
+## SUMMARY
+
+| item | status | receipt |
+|---|---|---|
+| 1 · level-truth unification | **DONE, live** | `2b95d47`, gates 28/28 + 11/11, https://skaists.dev/surfaces/blight/market.html + /surfaces/museum.html |
+| 2 · .b docket | **already closed**, confirmed fresh | `6fb1d87` (prior), spot-checked live 2026-08-29 |
+| 3 · Basenames research | **DONE** | this file, cited sources, one live chain read |
+| 4 · one-click Base desk | **PARKED** | missing verified mainnet RegistrarController address |
+| 5 · BEE UI multi-select | **PARKED** | missing corpus-translation process; no false-labeled coverage shipped |
+
+Nothing landed tonight regressed a gate: `design-acceptance` 28/28,
+`estate-source` 11/11, CI green on every push (`secret-scan`, `tests`,
+`pages-build-deployment`).
