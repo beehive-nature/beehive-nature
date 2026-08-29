@@ -289,6 +289,7 @@ ${houses}
   CI proves it every push. the fleet's hosted copies stay the founder's art:
   ${fleetN} of them carrying behaviour fixes, kept honest to his originals beyond the vendor line.
   the full manifesto lives behind the <a href="doors/beehivenature.html" data-i18n="hub.foot.door">beehivenature door</a>.</div>
+  <div class="m">⬡ the estate's address scheme: <button id="reg" type="button" style="font:inherit;background:var(--inset);color:var(--biomass);border:1px solid var(--line);border-radius:8px;padding:5px 10px;cursor:pointer">click to register the estate's address scheme (web+bnr)</button> — then follow <a href="web+bnr://skaists.dev">bnr://skaists.dev</a> to the hub itself.</div>
 </footer>
 
 <script type="application/json" id="estate">
@@ -322,6 +323,22 @@ ${json}
     shown.textContent = t ? visible + (visible === 1 ? ' surface matches' : ' surfaces match') + ' — each hit sits inside its own house; empty houses are hidden' : '';
   };
   q.addEventListener('input', apply);
+})();
+/* the estate address scheme — tier 1: register web+bnr on this origin.
+   the web+ prefix is a browser security rule (mdn: custom schemes must begin
+   web+, lowercase ascii; bare bnr:// cannot be registered from a page). */
+(() => {
+  const rb = document.getElementById('reg');
+  if (!rb) return;
+  rb.addEventListener('click', () => {
+    try {
+      navigator.registerProtocolHandler('web+bnr', '/r/?u=%s');
+      rb.textContent = 'registered ✓ — now follow an address below';
+      rb.disabled = true;
+    } catch (e) {
+      rb.textContent = 'registration refused: ' + (e.message || e);
+    }
+  });
 })();
 </script>
 <script src="agent-dock.js?v=5"></script>

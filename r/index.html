@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#06110C">
+<title>the bnr resolver — the estate's address scheme</title>
+<style>
+/* THE bnr RESOLVER — tier 1 of the estate address scheme (founder order 2026-08-29).
+   Rides the ruled identity law (SPEC-VAULTA-IDENTITY-1 v0.2): today it resolves
+   through LAYER-2 ANCHOR ADAPTERS (DNS/registry map — demotable, never rebinding
+   Layer-0); the LAYER-1 kernel (name -> H(name) -> Autonomi) is the sovereign lane.
+   One ground, one accent, honest failure — never a blank. */
+:root{--void:#06110C;--panel:#0B1A12;--inset:#0E2418;--line:#1E3A2A;
+  --ink:#E9F2EC;--dim:#8FA89A;--biomass:#86CC72;--ai:#45C2DC;}
+html{background:var(--void);color:var(--ink);
+  font:15px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+body{margin:0}
+.wrap{max-width:640px;margin:0 auto;padding:48px 20px 80px}
+.k{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
+h1{font-size:26px;margin:10px 0 18px;font-weight:600}
+.addr{background:var(--inset);border:1px solid var(--line);border-radius:10px;
+  padding:14px 16px;margin:14px 0;overflow-wrap:anywhere}
+.addr .scheme{color:var(--dim);font-size:12px}
+.addr .name{color:var(--biomass);font-size:17px}
+.hop{border-left:2px solid var(--line);margin:10px 0 10px 6px;padding:2px 0 2px 14px}
+.hop b{color:var(--ink);font-weight:600}
+.hop .layer{color:var(--ai);font-size:11px}
+.go{display:inline-block;margin:18px 0 6px;padding:11px 18px;border-radius:10px;
+  background:var(--biomass);color:#06110C;font-weight:600;text-decoration:none}
+.go:hover{text-decoration:underline}
+.fail{border-color:#FF7A6B}
+.fail .name{color:#FF7A6B}
+p{color:var(--dim)}
+a{color:var(--biomass)}
+.m{font-size:12px;color:var(--dim);border-top:1px solid var(--line);margin-top:26px;padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="k">bnr · the estate's address scheme</div>
+<h1>the resolver</h1>
+<div id="stage"><p class="k">reading the address…</p></div>
+<div class="m">layer-2 adapter resolution today (dns / the estate registry) — the ruled
+layer-1 kernel (name → H(name) → autonomi, append-only, owner-attested) is the sovereign
+lane; an adapter can never rebind a layer-0 keypair.
+<a href="/surfaces/index.html">the hub</a> · <a href="/surfaces/index.html#families">the atlas</a></div>
+</div>
+<script>
+(() => {
+  const stage = document.getElementById('stage');
+  const esc = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const raw = new URLSearchParams(location.search).get('u') || '';
+  const addr = decodeURIComponent(raw).trim();
+  const m = addr.match(/^(?:web\+bnr|bnr)(?::\/{0,2})(.+)$/i);
+  const esc2 = (s) => (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  if (!addr) {
+    stage.innerHTML = '<div class="addr fail"><div class="scheme">no address given</div><div class="name">this page resolves bnr:// addresses</div></div>'
+      + '<p>try <a href="/r/?u=' + encodeURIComponent('bnr://skaists.dev') + '">bnr://skaists.dev</a> — or register the scheme from <a href="/surfaces/index.html">the hub</a>.</p>';
+    return;
+  }
+  if (!m) {
+    stage.innerHTML = '<div class="addr fail"><div class="scheme">not an estate address</div><div class="name">' + esc2(addr.slice(0,120)) + '</div></div>'
+      + '<p>estate addresses look like <b>bnr://skaists.dev</b> (or web+bnr://… — the browser-registerable spelling of the same scheme).</p>';
+    return;
+  }
+  const name = m[1].replace(/\/+$/,'').toLowerCase();
+
+  /* LAYER-2 adapter map — the estate registry (estate.json counts law applies:
+     every name here is an owned domain or a ruled estate anchor) */
+  const ADAPTERS = {
+    'skaists.dev':        { to: '/surfaces/index.html',            what: 'the hub — every surface, every domain' },
+    'beehivenature.com':  { to: '/surfaces/index.html#fam-beehivenature', what: 'the organism family (dns pending — served via the hub)' },
+    'plur.earth':         { to: '/surfaces/index.html#fam-plur',   what: 'the plur family (dns pending — served via the hub)' },
+    'bnature.social':     { to: '/surfaces/index.html#fam-bnature', what: 'the bnature family (dns pending — served via the hub)' },
+    'bnature.bio':        { to: '/surfaces/index.html#fam-bnature', what: 'the living lane (dns pending — served via the hub)' },
+    'beehivebiomass.com': { to: '/surfaces/index.html#fam-beehivebiomass', what: 'the biomass family (dns pending — served via the hub)' },
+    'beehivebuds.buzz':   { to: '/surfaces/index.html#fam-beehivebuds', what: 'the buds family (founder-gated; dns pending)' },
+    'midi.blue':          { to: '/surfaces/index.html#fam-midi',   what: 'the midi family (dns pending — served via the hub)' },
+    'bnr.baby':           { to: '/surfaces/index.html#fam-bnr',    what: 'the bnr family (dns pending — served via the hub)' },
+  };
+
+  const hop = (t) => '<div class="hop"><span class="layer">' + t[0] + '</span><br>' + t[1] + '</div>';
+  const a = ADAPTERS[name];
+  if (a) {
+    stage.innerHTML =
+      '<div class="addr"><div class="scheme">estate address</div><div class="name">' + esc(addr) + '</div></div>'
+      + hop(['LAYER-2 · adapter: the estate registry (dns-anchored)', 'name recognized'])
+      + hop(['LAYER-2 · destination', esc(a.what)])
+      + '<a class="go" id="go" href="' + a.to + '">open ' + esc(name) + ' →</a>'
+      + '<p class="k" style="margin-top:6px">redirecting…</p>';
+    setTimeout(() => { location.replace(a.to); }, 900);
+  } else {
+    stage.innerHTML =
+      '<div class="addr fail"><div class="scheme">unknown address</div><div class="name">' + esc(name) + '</div></div>'
+      + hop(['LAYER-2 · adapter: the estate registry', 'no adapter answers this name — the resolver refuses rather than guess'])
+      + '<p>the honest answer is no, not yet. a name becomes an estate address when its owner anchors it —'
+      + ' nothing resolves by wishful thinking.</p>'
+      + '<a class="go" href="/surfaces/index.html">search the hub instead →</a>';
+  }
+})();
+</script>
+</body>
+</html>
