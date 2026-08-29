@@ -404,6 +404,7 @@ var EN={
  'st.p.brand':'brand road','st.p.fallback':'backup road','st.p.this':'this origin',
  'st.p.ok':'answered','st.p.no':'no answer'
 };
+function T_(k){ return EN[k] || k; }
 function A(k){ return 'data-i18n=' + k; }
 function row(o){
   var d=document.createElement('div'); d.className='organ pstat';
