@@ -359,14 +359,111 @@ def cmd_allocate(args):
     emit_settlement_instruction(f"allocate {amount} A from estate pool to key {kid}")
     print(f"allocated {amount} A to {kid}; pool now {led['meta']['pool_A']}")
 
-# P2 command dispatch (appended main): meter.py keys|newkey <id>|revoke <id>|chainpoll|allocate <id> <A>
+# ── P3: identity binding, vouchers, the tithe book, bClaude's widened gate ──
+# The founder ruling: "buzz bClaude A vaulta voucher prepay API, 10% to me on
+# top of the bill to anthropic." The Buzz identity (NIP-42 pubkey) IS the
+# billing identity — one binding table, no separate signup. A credit IS a
+# prepaid voucher for compute (alloy ruling); allocation emits voucher-framed
+# INSTRUCTIONS only. The tithe (10%, founder law) accrues in a computed book.
+
+BINDINGS = "/opt/buzz-meter/bindings.json"
+ALLOWLIST = "/opt/buzz-meter/bclaude-allowlist.txt"
+FOUNDER_PUBKEY = "d44163340ce7dd9df1cfe14505ebe1112fb6819eb215b0169e166d3d47ef19bf"  # PUBLIC-CONSTANT: founder's hive key (the owner gate)
+
+def load_bindings():
+    try:
+        with open(BINDINGS) as f: return json.load(f)
+    except Exception: return {"bindings": []}
+
+def save_bindings(b):
+    tmp = BINDINGS + ".tmp"
+    with open(tmp, "w") as f: json.dump(b, f, indent=1, sort_keys=True)
+    os.chmod(tmp, 0o600); os.replace(tmp, BINDINGS)
+
+def cmd_bind(args):
+    pk, kid = args[2].lower(), args[3]
+    if not re.fullmatch(r"[0-9a-f]{64}", pk): sys.exit("pubkey must be 64-hex")
+    led = load_ledger()
+    if not any(k["id"] == kid for k in led["keys"]): sys.exit("no such meter key — issue it first (newkey)")
+    b = load_bindings()
+    b["bindings"] = [x for x in b["bindings"] if x["pubkey"] != pk and x["key_id"] != kid]
+    b["bindings"].append({"pubkey": pk, "key_id": kid,
+                          "bound": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())})
+    save_bindings(b)
+    print(f"bound {pk[:8]}… ↔ {kid}")
+
+def cmd_bindings(args):
+    for x in load_bindings()["bindings"]:
+        print(x["pubkey"][:16] + "…", "↔", x["key_id"])
+
+def cmd_voucher(args):
+    # alloy framing: a credit IS a prepaid voucher for compute
+    kid, amount = args[2], float(args[3])
+    led = load_ledger()
+    if led["meta"].get("pool_A", 0.0) < amount: sys.exit("pool short")
+    k = next((k for k in led["keys"] if k["id"] == kid), None)
+    if not k: sys.exit("no such key")
+    led["meta"]["pool_A"] = round(led["meta"]["pool_A"] - amount, 8)
+    k["balance_A"] = round(k["balance_A"] + amount, 8)
+    save_ledger(led)
+    os.makedirs("/opt/buzz-meter/settlement", exist_ok=True)
+    path = os.path.join("/opt/buzz-meter/settlement", time.strftime("voucher-%Y%m%dT%H%M%SZ-") + hashlib.sha256((kid + str(amount) + str(time.time())).encode()).hexdigest()[:8] + ".json")
+    with open(path, "w") as f:
+        json.dump({"kind": "prepaid-voucher", "key_id": kid, "amount_A": amount,
+                   "framing": "a credit IS a prepaid voucher for compute (alloy ruling, Lane M P3)",
+                   "note": "INSTRUCTION ONLY — the meter never moves money; the A transfer that funded this voucher was read back from the chain (P2 chainpoll)",
+                   "created": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}, f, indent=1)
+    os.chmod(path, 0o600)
+    print(f"voucher {amount} A → {kid} (pool now {led['meta']['pool_A']}); regen allowlist next")
+
+def cmd_allowlist(args):
+    # bClaude's widened answer-gate: founder + pubkeys bound to PAID keys with balance > 0
+    led = load_ledger(); b = load_bindings()
+    paid_keys = {k["id"] for k in led["keys"] if k.get("tier") == "paid" and k.get("balance_A", 0) > 0 and not k.get("revoked")}
+    pks = [FOUNDER_PUBKEY] + sorted(x["pubkey"] for x in b["bindings"] if x["key_id"] in paid_keys)
+    new = "\n".join(pks) + "\n"
+    old = ""
+    try:
+        with open(ALLOWLIST) as f: old = f.read()
+    except Exception: pass
+    if new != old:
+        with open(ALLOWLIST, "w") as f: f.write(new)
+        os.chmod(ALLOWLIST, 0o600)
+        # the env-file form buzz-acp consumes (comma list), 600
+        envf = "/etc/buzz-bclaude/allowlist.env"
+        with open(envf + ".tmp", "w") as f: f.write("BUZZ_ACP_RESPOND_TO_ALLOWLIST=" + ",".join(pks) + chr(10))
+        os.chmod(envf + ".tmp", 0o600); os.replace(envf + ".tmp", envf)
+        os.system("sudo systemctl restart buzz-bclaude 2>/dev/null || systemctl restart buzz-bclaude")
+        print("allowlist regenerated + bClaude restarted:", len(pks), "pubkeys (founder + paid)")
+    else:
+        print("allowlist unchanged:", len(pks), "pubkeys")
+
+def cmd_tithebook(args):
+    # the founder's tax book — COMPUTED from receipts, never typed
+    import glob
+    basis = 0.0; tithe = 0.0; n = 0
+    for g in glob.glob(os.path.join(OUT, "*.json")):
+        r = json.load(open(g))
+        t = r["line_items"][-1].get("tithe")
+        if t:
+            n += 1
+            basis += sum(l["charged"]["value"] for l in r["line_items"][:-1])
+            tithe += r["line_items"][-1]["charged"]["value"]
+    print(f"receipts with tithe: {n} | basis: {round(basis, 8)} A | tithe accrued (10% law): {round(tithe, 8)} A")
+
 def dispatch(argv):
     cmd = argv[1] if len(argv) > 1 else ""
-    if cmd == "newkey" and len(argv) == 3: cmd_newkey(argv)
-    elif cmd == "keys": cmd_keys(argv)
-    elif cmd == "revoke" and len(argv) == 3: cmd_revoke(argv)
-    elif cmd == "chainpoll": cmd_chainpoll(argv)
-    elif cmd == "allocate" and len(argv) == 4: cmd_allocate(argv)
+    table = {
+        "newkey": (cmd_newkey, 3), "keys": (cmd_keys, 2), "revoke": (cmd_revoke, 3),
+        "chainpoll": (cmd_chainpoll, 2), "allocate": (cmd_allocate, 4),
+        "bind": (cmd_bind, 4), "bindings": (cmd_bindings, 2),
+        "voucher": (cmd_voucher, 4), "allowlist": (cmd_allowlist, 2),
+        "tithebook": (cmd_tithebook, 2),
+    }
+    if cmd in table:
+        fn, need = table[cmd]
+        if len(argv) < need: sys.exit(f"{cmd}: missing operand")
+        fn(argv)
     else:
         print(__doc__); sys.exit(2)
 

@@ -1,28 +1,37 @@
 {
-  "version": "rateset-v1",
-  "minted_at": "2026-08-29T00:00:00Z",
-  "unit": "A",
-  "tithe": {
-    "percent": 10,
-    "law": "FOUNDER LAW (Lane M rider, 2026-08-29): the Claude-agents API lane prices at PROVIDER COST BASIS + 10% TITHE in A — a distinct visible TITHE line on every receipt, never buried in the rate. The tithe percentage changes by founder word ALONE; rate_set versions track cost basis only. This number is law, not a parameter."
-  },
-  "tiers": {
-    "free_qwen": {
-      "tier": "FREE (founder tier-ladder ruling, 2026-08-29): the box/qwen compute lane — guest keys, no charge, capped fairly (the Lane-H service caps are the fair cap)",
-      "rates": {
-        "prefill_token": {"value": 0, "note": "local/qwen lane pricing is a later, separate founder question; free tier charges zero"},
-        "decode_token": {"value": 0, "note": "local/qwen lane pricing is a later, separate founder question; free tier charges zero"}
-      }
+ "version": "rateset-v2",
+ "minted_at": "2026-08-29T00:00:00Z",
+ "unit": "A",
+ "tithe": {
+  "percent": 10,
+  "law": "FOUNDER LAW (Lane M rider, 2026-08-29): the Claude-agents API lane prices at PROVIDER COST BASIS + 10% TITHE in A — a distinct visible TITHE line on every receipt, never buried in the rate. The tithe percentage changes by founder word ALONE; rate_set versions track cost basis only. This number is law, not a parameter."
+ },
+ "tiers": {
+  "free_qwen": {
+   "tier": "FREE (founder tier-ladder ruling, 2026-08-29): the box/qwen compute lane — guest keys, no charge, capped fairly (the Lane-H service caps are the fair cap)",
+   "rates": {
+    "prefill_token": {
+     "value": 0,
+     "note": "local/qwen lane pricing is a later, separate founder question; free tier charges zero"
     },
-    "paid_claude": {
-      "tier": "PAID (founder tier-ladder ruling): the Claude-agents lane — A-metered at provider cost basis + the 10% tithe",
-      "status": "PENDING_P3",
-      "cost_basis": {
-        "note": "P3 lands when the founder funds API credits: rate = Anthropic posted price per token class + the A-conversion reference (versioned HERE as cost basis moves); the tithe line is added on top per the law above. Never any other margin.",
-        "prefill_token_per_million": null,
-        "decode_token_per_million": null,
-        "a_conversion_reference": null
-      }
+    "decode_token": {
+     "value": 0,
+     "note": "local/qwen lane pricing is a later, separate founder question; free tier charges zero"
     }
+   }
+  },
+  "paid_claude": {
+   "tier": "PAID (founder tier-ladder ruling): the Claude-agents lane — A-metered at provider cost basis + the 10% tithe",
+   "status": "CLOSED_UNTIL_FUNDED — basis disclosed as reference",
+   "cost_basis": {
+    "note": "Anthropic POSTED API pricing as the DISCLOSED REFERENCE BASIS while credits are unfunded (founder P3-GO option B). Receipts on this lane, when it opens, bill at these posted rates converted to A via the a_conversion_reference, plus THE TITHE (10%, separate line, founder law). Until the founder funds API credits the lane stays CLOSED — nothing bills.",
+    "model_class": "sonnet-class (named per-model at lane open)",
+    "prefill_token_per_million_usd": 3,
+    "decode_token_per_million_usd": 15,
+    "a_conversion_reference": null,
+    "basis": "POSTED-REFERENCE (rate_set_ref carries this word — not a billed rate until the lane opens)"
+   },
+   "tithe_on_top": "the 10% tithe is ON TOP of the anthropic bill, never inside it"
   }
+ }
 }
