@@ -764,23 +764,23 @@ var WALLET_PROFILE = {
     <!-- 2 · TOP UP, told exactly how -->
     <div class="row" style="margin-top:10px;flex-wrap:wrap">
       <div style="flex:1;min-width:230px;border:1px solid var(--line);border-radius:9px;padding:10px">
-        <div style="font-size:11px;color:var(--cyan)">A · Vaulta — gasless</div>
-        <div class="law" style="margin-top:4px">send any amount of A to:</div>
+        <div style="font-size:11px;color:var(--cyan)" data-i18n="wl.vc.label.a">A · Vaulta — gasless</div>
+        <div class="law" style="margin-top:4px" data-i18n="wl.vc.a.send">send any amount of A to:</div>
         <div class="row" style="gap:6px"><code id="vc-a-dest" style="flex:1;word-break:break-all">—</code>
           <button class="gold vc-copy" style="min-height:32px;font-size:10px" data-copy="">copy</button></div>
-        <div class="law" style="margin-top:6px">with this EXACT memo (the memo IS the binding —
-        <b style="color:var(--amber)">no memo, no credit, money lost</b>):</div>
+        <div class="law" style="margin-top:6px"><span data-i18n="wl.vc.memo1">with this EXACT memo (the memo IS the binding —</span>
+        <b style="color:var(--amber)"><span data-i18n="wl.vc.memo2">no memo, no credit, money lost</span></b><span data-i18n="wl.vc.memo3">):</span></div>
         <div class="row" style="gap:6px"><code id="vc-a-memo" style="flex:1;word-break:break-all;color:var(--gold)">—</code>
           <button class="gold vc-copy" style="min-height:32px;font-size:10px" data-copy="">copy memo</button></div>
       </div>
       <div style="flex:1;min-width:230px;border:1px solid var(--line);border-radius:9px;padding:10px">
-        <div style="font-size:11px;color:var(--cyan)">USDC · Base — tiny gas</div>
-        <div class="law" style="margin-top:4px">send USDC (Base) to:</div>
+        <div style="font-size:11px;color:var(--cyan)" data-i18n="wl.vc.label.usdc">USDC · Base — tiny gas</div>
+        <div class="law" style="margin-top:4px" data-i18n="wl.vc.usdc.send">send USDC (Base) to:</div>
         <div class="row" style="gap:6px"><code id="vc-u-dest" style="flex:1;word-break:break-all">—</code>
           <button class="gold vc-copy" style="min-height:32px;font-size:10px" data-copy="">copy</button></div>
-        <div class="law" id="vc-u-rate" style="margin-top:6px">credited at — A per USDC (rate cited below)</div>
+        <div class="law" id="vc-u-rate" style="margin-top:6px" data-i18n="wl.vc.usdc.rate">credited at — A per USDC (rate cited below)</div>
         <div class="law" id="vc-u-ref" style="color:var(--faint)">rate: —</div>
-        <div class="law" style="margin-top:4px;color:var(--faint)">no memo needed on this rail — your bound address credits you</div>
+        <div class="law" style="margin-top:4px;color:var(--faint)" data-i18n="wl.vc.usdc.nomemo">no memo needed on this rail — your bound address credits you</div>
       </div>
     </div>
     <!-- 3 · SEE WHAT I SPENT — aggregate first, itemized one click down -->
@@ -788,10 +788,10 @@ var WALLET_PROFILE = {
       <div style="display:flex;gap:18px;flex-wrap:wrap;font-size:11px;color:var(--dim)">
         <span>spent total: <b id="vc-spent" style="color:var(--ink)">0.0000 A</b></span>
         <span>topped up: <b id="vc-dep">0.0000 A</b></span>
-        <span>tithe in there: <b id="vc-tithe" style="color:var(--gold)">0.0000 A</b> (the estate's 10%, shown never buried)</span>
+        <span>tithe in there: <b id="vc-tithe" style="color:var(--gold)">0.0000 A</b> <span data-i18n="wl.vc.tithe.note">(the estate's 10%, shown never buried)</span></span>
       </div>
       <details style="margin-top:8px">
-        <summary style="cursor:pointer;font-size:11px;color:var(--cyan)">itemized — every receipt, every line</summary>
+        <summary style="cursor:pointer;font-size:11px;color:var(--cyan)" data-i18n="wl.vc.itemized">itemized — every receipt, every line</summary>
         <div id="vc-receipts" class="law" style="margin-top:6px">—</div>
       </details>
     </div>

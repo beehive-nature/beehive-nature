@@ -6,13 +6,13 @@
 |---|---|---|---|
 | bfood.html | 578 | 12 | 2% |
 | plur.html | 417 | 77 | 18% |
-| blanguage.html | 355 | 12 | 3% |
+| blanguage.html | 356 | 12 | 3% |
 | bset.html | 327 | 1 | 0% |
 | index.html | 260 | 69 | 27% |
 | stack.html | 243 | 118 | 49% |
 | wallet.html | 242 | 24 | 10% |
 | bigen.html | 222 | 12 | 5% |
-| blight/museum.html | 216 | 10 | 5% |
+| blight/museum.html | 217 | 10 | 5% |
 | bearth.html | 170 | 9 | 5% |
 | hardware/index.html | 147 | 10 | 7% |
 | bsymposium.html | 141 | 10 | 7% |
@@ -31,7 +31,7 @@
 | bantfarm.html | 88 | 7 | 8% |
 | doors/beehivenature.html | 87 | 38 | 44% |
 | blight/c1-aid.html | 83 | 4 | 5% |
-| attest.html | 67 | 1 | 1% |
+| attest.html | 68 | 1 | 1% |
 | dock.html | 66 | 0 | 0% |
 | bfactory.html | 65 | 6 | 9% |
 | fleet-hosted/gallery/resonance.html | 62 | 0 | 0% |
@@ -61,6 +61,7 @@
 | blight/coop.html | 31 | 0 | 0% |
 | blight/studio-gate.html | 30 | 4 | 13% |
 | doors/plur.html | 29 | 12 | 41% |
+| blight/farmers.html | 28 | 0 | 0% |
 | doors/beehivebiomass.html | 26 | 7 | 27% |
 | doors/index.html | 26 | 6 | 23% |
 | fleet-hosted/lab/intake-tracker.html | 22 | 0 | 0% |
@@ -76,7 +77,6 @@
 | onboarding/index.html | 11 | 0 | 0% |
 | blight/bnri-gallery.html | 10 | 0 | 0% |
 | blight/midi-organ.html | 10 | 0 | 0% |
-| blight/farmers.html | 9 | 0 | 0% |
 | blight/hearth.html | 9 | 0 | 0% |
 | blight/market.html | 9 | 0 | 0% |
 | blight/inscription-explorer.html | 8 | 0 | 0% |
@@ -88,32 +88,33 @@
 
 | tongue | cells non-empty |
 |---|---|
-| ru | 633 / 633 |
-| cs | 633 / 633 |
-| gd | 633 / 633 |
-| es | 633 / 633 |
-| nl | 633 / 633 |
-| de | 633 / 633 |
-| fr | 633 / 633 |
-| zh | 633 / 633 |
-| th | 633 / 633 |
-| lv | 633 / 633 |
-| uk | 633 / 633 |
-| ar | 633 / 633 |
-| he | 633 / 633 |
-| hi | 633 / 633 |
-| bn | 633 / 633 |
-| fa | 633 / 633 |
-| nl-be | 633 / 633 |
-| ko | 633 / 633 |
-| ur | 633 / 633 |
-| ja | 633 / 633 |
-| da | 633 / 633 |
-| nb | 633 / 633 |
-| sv | 633 / 633 |
-| fi | 633 / 633 |
-| tr | 633 / 633 |
-| hu | 633 / 633 |
-| tt | 633 / 633 |
+| ru | 644 / 644 |
+| cs | 644 / 644 |
+| gd | 644 / 644 |
+| es | 644 / 644 |
+| nl | 644 / 644 |
+| de | 644 / 644 |
+| fr | 644 / 644 |
+| zh | 644 / 644 |
+| th | 644 / 644 |
+| lv | 644 / 644 |
+| uk | 644 / 644 |
+| ar | 644 / 644 |
+| he | 644 / 644 |
+| hi | 644 / 644 |
+| bn | 644 / 644 |
+| fa | 644 / 644 |
+| nl-be | 644 / 644 |
+| ko | 644 / 644 |
+| ur | 644 / 644 |
+| ja | 644 / 644 |
+| da | 644 / 644 |
+| nb | 644 / 644 |
+| sv | 644 / 644 |
+| fi | 644 / 644 |
+| tr | 644 / 644 |
+| hu | 644 / 644 |
+| tt | 644 / 644 |
+| sa | 644 / 644 |
 
 the ratchet law: keyed counts may never fall (enforced in CI). unkeyed prose is the recorded backlog — honest absence, English fallback visible, counted by the picker.
