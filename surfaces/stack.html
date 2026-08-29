@@ -8,7 +8,15 @@
 <meta name="color-scheme" content="dark">
 <title>the Engine Room — what actually runs under BNRoSe</title>
 <style>
-:root{--bg:#07090b;--panel:#0e1611;--well:#0a0f0b;--ink:#e2efdb;--dim:#8a9a8a;--faint:#5f6f61;
+/* SEMANTIC COLOUR — meanings picked FIRST, hues second (bound to docs/tokens.css
+   values: references, never repaints). alive/producing = --verified green ·
+   unreachable = --guard lilac (NEVER error-red: not seeing a thing is a guard
+   state, not a failure) · other answer / unsynced = --info blue · real hazard =
+   --sem-harm · not watched = --ink-dim. --b-value honey stays currency-only.
+   D-1 binds: every colour also carries its word — greyscale this board and it
+   still reads. */
+:root{--verified:#86CC72;--guard:#B7A8F7;--info:#6FA9E0;--sem-harm:#B7A8F7;--sem-solution:#86CC72;--sem-value:#E8B54B;--sem-system:#6FA9E0;--sem-science:#45C2DC;--ink-dim:#648176;
+--bg:#07090b;--panel:#0e1611;--well:#0a0f0b;--ink:#e2efdb;--dim:#8a9a8a;--faint:#5f6f61;
  --line:#243026;--cyan:#00E5FF;--gold:#FFD700;--leaf:#7ddf8f;--violet:#c9a0ff;
  /* rail identity chips — glyph + word always, never colour alone */
  --r-ant:#e0484f;--r-ar:#8a9aff;--r-vaulta:#7ddf8f;--r-hive:#e31337;--r-evm:#00E5FF;
@@ -18,8 +26,12 @@ html,body{overflow-x:hidden}
 body{background:var(--bg);color:var(--ink);font:13px/1.65 'IBM Plex Mono',monospace;padding:30px 14px 90px}
 main{max-width:960px;margin:0 auto}
 header{text-align:center;margin-bottom:8px}
-h1{font-size:clamp(19px,5vw,28px);color:var(--cyan);font-weight:400;letter-spacing:.05em;
- text-shadow:0 0 16px rgba(0,229,255,.25)}
+h1{font-size:clamp(26px,5vw,34px);font-weight:600;letter-spacing:-.01em;
+ background-image:linear-gradient(92deg,#e2efdb 45%,#00E5FF 90%);
+ -webkit-background-clip:text;background-clip:text;color:transparent}
+.herofig{display:flex;flex-direction:column;gap:2px;margin:10px auto 0;align-items:center}
+.herofig .num{font-size:38px;line-height:1;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink)}
+.herofig .cap{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
 .sub{color:var(--dim);font-size:11.5px;margin-top:8px;max-width:700px;margin-inline:auto;line-height:1.8}
 section{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:15px 16px;margin-top:14px}
 h2{font-size:11.5px;color:var(--violet);font-weight:400;letter-spacing:.09em;margin-bottom:9px}
@@ -53,6 +65,33 @@ td.n{color:var(--ink)}
 .door .dt{font-size:12px;color:var(--cyan)}
 .door .dd{font-size:10px;color:var(--dim);margin-top:2px;line-height:1.6}
 footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
+/* the organ board */
+.organ{background:var(--well);border:1px solid var(--line);border-radius:10px;padding:12px 13px;margin-top:10px}
+.organ .orow{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.organ .odot{width:9px;height:9px;flex:none;border-radius:50%;align-self:center}
+.organ .oname{font-size:12.5px;color:var(--ink)}
+.organ .oword{margin-left:auto;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase}
+.organ .omeans{font-size:10.5px;color:var(--dim);margin-top:6px;line-height:1.75}
+.organ .omeans b{color:var(--ink);font-weight:400}
+.organ .onm{font-size:10px;color:var(--faint);margin-top:3px;line-height:1.7}
+.organ .paths{display:flex;gap:6px 14px;flex-wrap:wrap;margin-top:7px;font-size:9.5px;color:var(--dim)}
+.organ .paths b{font-weight:400;color:var(--ink)}
+.organ .pdot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;vertical-align:0}
+.s-ok{color:var(--verified)} .s-guard{color:var(--guard)} .s-info{color:var(--info)}
+.s-harm{color:var(--sem-harm)} .s-dim{color:var(--ink-dim)}
+.bg-ok{background:var(--verified)} .bg-guard{background:var(--guard)} .bg-info{background:var(--info)}
+.bg-harm{background:var(--sem-harm)} .bg-dim{background:var(--ink-dim)}
+.legend{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+.legend .li{display:flex;gap:9px;align-items:baseline;flex-wrap:wrap;margin-top:7px;font-size:10px;line-height:1.7}
+.legend .lw{flex:none;width:110px;letter-spacing:.1em;text-transform:uppercase}
+.legend .lm{color:var(--dim);flex:1;min-width:220px}
+.legend .lm b{color:var(--ink);font-weight:400}
+.reread{margin-top:12px;background:none;border:1px solid var(--line);border-radius:8px;
+ color:var(--dim);font:10.5px 'IBM Plex Mono',monospace;padding:7px 13px;cursor:pointer;min-height:32px}
+.reread:hover{border-color:var(--cyan);color:var(--cyan)}
+.stamp{margin-left:10px;font-size:9.5px;color:var(--faint)}
+@media (max-width:600px){body{padding:16px 10px 80px}section{padding:13px 12px}
+ .organ .oword{margin-left:0;width:100%} .legend .lw{width:auto}}
 </style>
 </head>
 <body>
@@ -73,6 +112,24 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   function; per-surface rail usage below is <b>measured by endpoint grep, dated</b>, not
   self-reported. Bootstrap dependencies and unmigrated relays are named as debts, not hidden.</div>
 </header>
+
+<section id="organboard">
+  <h2><span data-i18n="st.b.h2">THE ORGANS — live status, read from where you sit</span></h2>
+  <div class="herofig"><span class="num" id="organCount" data-hero-number>…</span><span class="cap" data-hero-caption data-i18n="st.hero.cap">organs · read live from your network, just now</span></div>
+  <div class="law" style="margin-top:9px" data-i18n="st.b.law">every status on this board says what it means AND what it does not mean — a status board must never confuse "this is broken" with "I can't see it from here". these reads come from YOUR network, your browser, just now: a status here is a fact about the road as much as the organ.</div>
+  <div class="law" style="margin-top:6px" data-reg="raver" data-i18n="st.b.raver">the estate's heartbeats, drawn live — green when a road answers, lilac when a road goes quiet. never red for silence: silence is a guard, not a scream.</div>
+  <div class="law" style="margin-top:6px" data-reg="cypherpunk" data-i18n="st.b.cypher">probes: no-cors reach per road · NIP-11 identity (Accept: application/nostr+json) on each hive · the compute gate's 401 as the lock's own pulse. observer = your browser; every result is a path-relative fact.</div>
+  <div id="organBoard" style="margin-top:4px"></div>
+  <button class="reread" id="reread" data-i18n="st.reread">re-read just now</button><span class="stamp" id="stamp"></span>
+  <div class="legend">
+    <div class="li"><span class="lw s-ok" data-i18n="st.w.alive">alive</span><span class="lm"><b data-i18n="st.m.alive">means: it answered this page just now, over the road shown.</b> <span data-i18n="st.nm.alive">does NOT necessarily mean it will answer tomorrow, or from every road — an answer is a moment, not a promise.</span></span></div>
+    <div class="li"><span class="lw s-guard" data-i18n="st.w.guard">guard · no answer</span><span class="lm"><b data-i18n="st.m.guard">means: this road gave no answer.</b> <span data-i18n="st.nm.guard">does NOT necessarily mean the organ is down — the road can be the fault. the same box answered the whole planet while one filtered network saw nothing.</span></span></div>
+    <div class="li"><span class="lw s-guard" data-i18n="st.w.via">via fallback</span><span class="lm"><b data-i18n="st.m.via">means: the brand road went dark on your network; the backup road answered.</b> <span data-i18n="st.nm.via">does NOT mean down — up and unreachable are two different facts.</span></span></div>
+    <div class="li"><span class="lw s-info" data-i18n="st.w.other">other answer</span><span class="lm"><b data-i18n="st.m.other">means: it answered, but not in the expected shape.</b> <span data-i18n="st.nm.other">does NOT mean broken — versions and answers differ.</span></span></div>
+    <div class="li"><span class="lw s-dim" data-i18n="st.w.nw">not watched</span><span class="lm"><b data-i18n="st.m.nw">means: this page keeps no eye on this organ.</b> <span data-i18n="st.nm.nw">does NOT mean broken or idle — absence of a watch is not absence of function.</span></span></div>
+    <div class="li"><span class="lw s-harm" data-i18n="st.w.hazard">hazard</span><span class="lm"><b data-i18n="st.m.hazard">means: the two roads disagree about what this organ is.</b> <span data-i18n="st.nm.hazard">this one means exactly what it says — a split identity is the one state this board calls a hazard.</span></span></div>
+  </div>
+</section>
 
 <section>
   <h2><span data-i18n="h.170">THE SHAPE — root below, everything else above</span></h2>
@@ -290,6 +347,121 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   every claim on this page is either linked to its record or marked as a debt ·
   <a href="index.html">← the hub</a>
 </footer>
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id)};
+var T=6000;
+function reach(url){ return fetch(url,{mode:'no-cors',cache:'no-store',signal:AbortSignal.timeout(T)}).then(function(){return true},function(){return false}); }
+function ident(url){ return fetch(url,{cache:'no-store',headers:{'Accept':'application/nostr+json'},signal:AbortSignal.timeout(T)}).then(function(r){return r.ok?r.json():null},function(){return null}); }
+
+var ORGANS=[
+ {key:'st.o.hive1', name:'hive one', paths:[{k:'st.p.brand',host:'skaists.buzz'},{k:'st.p.fallback',host:'relay.skaists.dev'}],
+  probe:function(p){ var self=this;
+    return reach('https://'+p.host+'/').then(function(ok){
+      if(!ok) return {ok:false};
+      return ident('https://'+p.host+'/').then(function(j){
+        if(j&&j.name) return {ok:true, ident:j.name};
+        return {ok:true};
+      });
+    }); } },
+ {key:'st.o.hive2', name:'hive two', paths:[{k:'st.p.brand',host:'beehivenature.buzz'},{k:'st.p.fallback',host:'relay2.skaists.dev'}],
+  probe:function(p){ return reach('https://'+p.host+'/').then(function(ok){
+      if(!ok) return {ok:false};
+      return ident('https://'+p.host+'/').then(function(j){
+        if(j&&j.name) return {ok:true, ident:j.name};
+        return {ok:true};
+      });
+    }); } },
+ {key:'st.o.till', name:'till', paths:[{k:'st.p.brand',host:'skaists.buzz/compute/health'},{k:'st.p.fallback',host:'relay.skaists.dev/compute/health'}],
+  probe:function(p){ return reach('https://'+p.host).then(function(ok){return {ok:ok};}); } },
+ {key:'st.o.chainpoll', name:'chainpoll', nw:'st.nw.polls'},
+ {key:'st.o.basepoll', name:'basepoll', nw:'st.nw.polls'},
+ {key:'st.o.mail', name:'mail', nw:'st.nw.mail'},
+ {key:'st.o.alby', name:'alby', nw:'st.nw.alby'},
+ {key:'st.o.pages', name:'pages', paths:[{k:'st.p.this',host:new URL('index.html',location.href).href}],
+  probe:function(p){ return reach(p.host).then(function(ok){return {ok:ok};}); } }
+];
+var EN={
+ 'st.o.hive1':'hive one — skaists.buzz','st.o.hive2':'hive two — beehivenature.buzz',
+ 'st.o.till':'the till — the compute gate','st.o.chainpoll':'chainpoll — the read-back crediting',
+ 'st.o.basepoll':'basepoll — the base watcher','st.o.mail':'the mail sink — agents.skaists.buzz',
+ 'st.o.alby':'albyhub — the lightning heart','st.o.pages':'the pages — this estate' + String.fromCharCode(8217) + 's front doors',
+ 'st.w.alive':'alive','st.w.guard':'guard · no answer','st.w.via':'via fallback',
+ 'st.w.nw':'not watched','st.w.other':'other answer','st.w.hazard':'hazard','st.w.looking':'looking…',
+ 'st.m.alive':'means: it answered this page just now, over the road shown.',
+ 'st.nm.alive':'does NOT necessarily mean it will answer tomorrow, or from every road — an answer is a moment, not a promise.',
+ 'st.m.guard':'means: this road gave no answer.',
+ 'st.nm.guard':'does NOT necessarily mean the organ is down — the road can be the fault. the same box answered the whole planet while one filtered network saw nothing.',
+ 'st.m.via':'means: the brand road went dark on your network; the backup road answered.',
+ 'st.nm.via':'does NOT mean down — up and unreachable are two different facts.',
+ 'st.m.nw':'means: this page keeps no eye on this organ.',
+ 'st.nm.nw':'does NOT mean broken or idle — absence of a watch is not absence of function.',
+ 'st.m.other':'means: it answered, but not in the expected shape.',
+ 'st.nm.other':'does NOT mean broken — versions and answers differ.',
+ 'st.m.hazard':'means: the two roads disagree about what this organ is.',
+ 'st.nm.hazard':'this one means exactly what it says — a split identity is the one state this board calls a hazard.',
+ 'st.nw.polls':'internal organs — no public eye; the receipts are the record.',
+ 'st.nw.mail':'a browser cannot speak to a mail room — port 25 has no web eye.',
+ 'st.nw.alby':'the lightning heart keeps its own counsel — no public probe, by design.',
+ 'st.p.brand':'brand road','st.p.fallback':'backup road','st.p.this':'this origin',
+ 'st.p.ok':'answered','st.p.no':'no answer'
+};
+function A(k){ return 'data-i18n=' + k; }
+function row(o){
+  var d=document.createElement('div'); d.className='organ pstat';
+  d.innerHTML='<div class="orow"><span class="odot bg-dim"></span><span class="oname" ' + A(o.key) + '>' + EN[o.key] + '</span>' +
+    '<span class="oword s-dim" ' + A('st.w.looking') + '>' + EN['st.w.looking'] + '</span></div>' +
+    '<div class="omeans"></div><div class="paths"></div>';
+  $('organBoard').appendChild(d); return d;
+}
+function setRow(d, word, wcls, means, nm, o, pathStates, identName){
+  var w=d.querySelector('.oword'); w.setAttribute('data-i18n', word); w.textContent=EN[word]; w.className='oword ' + wcls; // word attr set post-hoc (quoted at runtime)
+  var dot=d.querySelector('.odot'); dot.className='odot ' + wcls.replace('s-', 'bg-');
+  var m=d.querySelector('.omeans');
+  m.innerHTML='<b ' + A('st.m.' + means) + '>' + EN['st.m.' + means] + '</b> <span ' + A('st.nm.' + nm) + '>' + EN['st.nm.' + nm] + '</span>' +
+    (identName ? ' — <b>' + identName + '</b>' : '') +
+    (o && o.nw ? ' <span ' + A(o.nw) + '>' + EN[o.nw] + '</span>' : '');
+  var pl=d.querySelector('.paths'); pl.innerHTML='';
+  if(o.paths) o.paths.forEach(function(p, i){
+    var st=pathStates ? pathStates[i] : null;
+    pl.innerHTML+='<span><b ' + A(p.k) + '>' + EN[p.k] + '</b> · ' +
+      (st === null ? '<span class="pdot bg-dim"></span><span ' + A('st.w.nw') + '>' + EN['st.w.nw'] + '</span>'
+       : st === true ? '<span class="pdot bg-ok"></span><span class="s-ok" ' + A('st.p.ok') + '>' + EN['st.p.ok'] + '</span>'
+       : '<span class="pdot bg-guard"></span><span class="s-guard" ' + A('st.p.no') + '>' + EN['st.p.no'] + '</span>') +
+      '</span>';
+  });
+}
+function aliveCount(){ var n=0; document.querySelectorAll('#organBoard .oword').forEach(function(w){ if(w.classList.contains('s-ok')) n++; }); return n; }
+function read(){
+  var stamp=document.getElementById('stamp');
+  if(stamp) stamp.textContent='';
+  $('organBoard').innerHTML='';
+  var jobs=ORGANS.map(function(o){
+    var d=row(o);
+    if(o.nw && !o.paths){ setRow(d,'st.w.nw','s-dim','nw','nw',o,null); return Promise.resolve(); }
+    return Promise.all(o.paths.map(function(p){ return o.probe(p); })).then(function(rs){
+      var oks=rs.map(function(r){return !!r.ok});
+      var idents=rs.map(function(r){return r&&r.ident?r.ident:null}).filter(Boolean);
+      var pathStates=oks;
+      if(oks[0]&&oks[1]) setRow(d,'st.w.alive','s-ok','alive','alive',o,pathStates,idents[0]||idents[1]||null);
+      else if(!oks[0]&&oks[1]) setRow(d,'st.w.via','s-guard','via','via',o,pathStates,idents[1]||null);
+      else if(oks[0]&&!oks[1]) setRow(d,'st.w.alive','s-ok','alive','alive',o,pathStates,idents[0]||null);
+      else setRow(d,'st.w.guard','s-guard','guard','guard',o,pathStates,null);
+    });
+  });
+  Promise.all(jobs).then(function(){
+    var n=aliveCount(); var el=document.getElementById('organCount'); if(el) el.textContent=n;
+    var stamp=document.getElementById('stamp');
+    if(stamp) stamp.textContent=T_('st.stamp')+' '+new Date().toLocaleTimeString();
+  });
+}
+var rb=document.getElementById('reread');
+if(rb) rb.addEventListener('click',read);
+read();
+})();
+</script>
+
 <script src="tour.js?v=33"></script>
 </body>
 </html>

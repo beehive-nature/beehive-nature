@@ -58,7 +58,13 @@ const RIDER_ALLOWLIST = [
   /^https:\/\/api\.coinbase\.com\/v2\/prices\//,
   /* the museum's live art reads from base.org's own Basenames API (the
      archived byte-true fallback rides in the tree — MUSEUM LAW) */
-  /^https:\/\/www\.base\.org\/api\//
+  /^https:\/\/www\.base\.org\/api\//,
+  /* the engine room's status board probes the estate's own organs live
+     (reach per road + NIP-11 identity) — itemized by exact host */
+  /^https:\/\/skaists\.buzz\//,
+  /^https:\/\/beehivenature\.buzz\//,
+  /^https:\/\/relay\.skaists\.dev\//,
+  /^https:\/\/relay2\.skaists\.dev\//
 ];
 
 const MEASURE = process.argv.includes('--measure');
