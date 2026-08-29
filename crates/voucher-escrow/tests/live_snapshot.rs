@@ -64,3 +64,62 @@ fn tamper_in_snapshot_is_caught() {
         "an edited snapshot event must break the chain under Rust verification too"
     );
 }
+
+/// THE ACCEPTANCE, UNDER RULE 3 — the live box ledger verified from its
+/// **stored bytes**, not from re-serialised values.
+///
+/// The two tests above verify the same snapshot through
+/// `verify_external_chain`, which re-renders each parsed body. That works on
+/// these six events, and it is the fragile path: it asks two serialisers in two
+/// languages to agree about float rendering, key order and string escaping,
+/// which no format guarantees. A five-event ledger written by the in-tree
+/// Python engine fails that way at event 2 on a single float digit — while
+/// another event with the same digit count passes. The divergence is
+/// value-specific and cannot be enumerated.
+///
+/// So the live ledger is also verified the way rule 3 requires: loaded with
+/// `from_jsonl`, which keeps each body's bytes exactly as the box wrote them,
+/// and checked against those. This is the test that keeps passing when the next
+/// unenumerable fork appears.
+#[test]
+fn live_chain_verifies_from_its_stored_bytes() {
+    let raw = std::fs::read_to_string(
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("fixtures/live-ledger-snapshot.jsonl"),
+    )
+    .expect("fixture present");
+
+    let es = Escrow::from_jsonl(&raw).expect("the live box ledger must load");
+    assert_eq!(es.event_count(), 6, "6 events in the snapshot");
+    assert_eq!(
+        es.verify_chain()
+            .expect("the live chain verifies from stored bytes"),
+        6
+    );
+
+    // and the money agrees with what the box reported, read the same way
+    assert_eq!(es.balance("bclau-paid-1"), "1.0000");
+    assert_eq!(es.balance("p3-test-key"), "0.5000");
+    assert_eq!(es.balance("live-proof-test-1"), "1.3400");
+    assert_eq!(es.balance("baseproof-1"), "29.3400");
+    assert_eq!(es.balance("estate-compute-key-1"), "0.0000");
+}
+
+/// …and an edited byte in the live snapshot is still caught through the
+/// stored-bytes path. Red-then-green in the same shape as the rest.
+#[test]
+fn tamper_in_the_live_snapshot_is_caught_from_stored_bytes() {
+    let raw = std::fs::read_to_string(
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("fixtures/live-ledger-snapshot.jsonl"),
+    )
+    .expect("fixture present");
+    // an attacker shrinks a credit in the file itself
+    let edited = raw.replacen("\"amount\":\"30.0000\"", "\"amount\":\"1.0000\"", 1);
+    assert_ne!(edited, raw, "the edit must actually land in the bytes");
+    let es = Escrow::from_jsonl(&edited).expect("still parses");
+    assert!(
+        es.verify_chain().is_err(),
+        "an edited stored byte must break the live chain"
+    );
+}
