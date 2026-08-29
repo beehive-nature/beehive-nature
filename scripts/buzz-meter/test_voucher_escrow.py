@@ -119,3 +119,57 @@ except TamperError as e:
 print("\n=== VOUCHER/ESCROW ENGINE — ALL PROOFS PASS ===")
 for i, p in enumerate(PASS, 1):
     print(f"  {i}. {p}")
+
+# ============================================================
+# USDC-ON-BASE RAIL — proofs 11–16 (Seat-1's extension, spec-enum rates)
+# ============================================================
+LEDGER2 = Path("/tmp/escrow-test/ledger-usdc.jsonl")
+if LEDGER2.exists():
+    LEDGER2.unlink()
+es2 = Escrow(LEDGER2)
+P2 = []
+
+# 11. USDC deposit requires tx AND rate_ref; refuses without either
+for kwargs in ({"base_tx": "", "rate_a_per_usdc": "2.5", "rate_ref": "pool@demo"},
+               {"base_tx": "0xabc", "rate_a_per_usdc": "2.5", "rate_ref": ""}):
+    try:
+        es2.deposit_usdc("member-x", "10.0", **kwargs)
+        raise SystemExit("FAIL: incomplete USDC deposit accepted")
+    except VoucherError:
+        pass
+P2.append("usdc deposit refuses without base_tx / rate_ref")
+
+# 12. USDC in, A credited at an explicit cited rate — balance is A-only
+ev = es2.deposit_usdc("member-x", "10.0", base_tx="0xbase123",
+                      rate_a_per_usdc="2.5", rate_ref="estate-rate-card@v1-demo")
+assert ev["currency_in"] == "USDC" and ev["chain_in"] == "base"
+assert ev["usdc_amount"] == "10.000000" and ev["rate_a_per_usdc"] == "2.5"
+assert es2.balance("member-x") == Decimal("25.0000")
+P2.append("10 USDC @ 2.5 A/USDC -> 25.0000 A credited; rate + rate_ref on the event")
+
+# 13. Mixed funding: A deposit stacks on the same voucher, one A balance
+es2.deposit("member-x", "5.0", vaulta_tx="vlt789")
+assert es2.balance("member-x") == Decimal("30.0000")
+P2.append("mixed rails (USDC-base + A-vaulta) sum to one A balance: 30.0000")
+
+# 14. Metering unchanged: charge against the mixed balance, tithe intact
+r = es2.charge("member-x", [("decode_token", 20_000)], rs)
+assert receipt_total(r) == Decimal("0.2200") and receipt_tithe(r) == Decimal("0.0200")
+assert es2.balance("member-x") == Decimal("29.7800")
+P2.append("charge on mixed-funded voucher: 0.2200 A incl. 0.0200 tithe")
+
+# 15. Dust refused: a USDC deposit whose credit rounds to zero A never lands
+try:
+    es2.deposit_usdc("member-x", "0.00001", base_tx="0xdust",
+                     rate_a_per_usdc="2.5", rate_ref="estate-rate-card@v1-demo")
+    raise SystemExit("FAIL: dust deposit accepted")
+except VoucherError:
+    P2.append("dust deposit (credits 0.0000 A) refused")
+
+# 16. Chain still verifies with the new event shape
+n = es2.verify_chain()
+P2.append(f"chain verifies with USDC events: {n} events")
+
+print("\n=== USDC-ON-BASE RAIL — ALL PROOFS PASS ===")
+for i, p in enumerate(P2, 11):
+    print(f"  {i}. {p}")

@@ -538,6 +538,111 @@ def cmd_tithebook(args):
             tithe += r["line_items"][-1]["charged"]["value"]
     print(f"receipts with tithe: {n} | basis: {round(basis, 8)} A | tithe accrued (10% law): {round(tithe, 8)} A")
 
+# ── P4: basepoll — the USDC-on-Base funding rail (founder ruling 2026-08-29:
+# the second voucher funding door; A stays the unit of account) ──────────────
+# THE RIDER, standing law: the two rails are NOT symmetric, built per nature.
+#   A/VAULTA rail: GASLESS (users spend only own CPU/NET), proper Vaulta
+#   accounts, MEMO-NATIVE binding (memo = the meter key — NO binding table
+#   here; deposit events record sender + memo + tx when the estate runs a
+#   history-capable node). Do NOT import Base-rail machinery into this rail.
+#   USDC/BASE rail: tiny gas, no memo → the key↔Base-address BINDING TABLE
+#   stands below (basebind), same shape as P3's pubkey bindings.
+# Rate honesty: there is no live A/USDC market — the citable source is the
+# estate rate card (usdc_a_rate + usdc_a_rate_ref in keys.json.meta, founder-
+# set, versioned). When a market pair exists, the same seam reads it; the
+# rate_ref always names where the number came from.
+# ALL CONFIG CONFIG-FILLABLE AT FLIP-TIME: base_receive_address unset ⇒
+# basepoll idles (paid lane is HOLD; nothing blocks on it).
+
+BASE_BINDINGS = "/opt/buzz-meter/base-bindings.json"
+BASE_STATE = "/opt/buzz-meter/state/base-chain.json"
+BASE_RPC = "https://mainnet.base.org"                 # keyless, proven in-tree
+USDC_BASE = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"  # PUBLIC-CONSTANT: native USDC on Base
+TRANSFER_TOPIC = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"  # PUBLIC-CONSTANT: keccak(Transfer(address,address,uint256))
+
+def load_base_bindings():
+    try:
+        with open(BASE_BINDINGS) as f: return json.load(f)
+    except Exception: return {"bindings": []}
+
+def save_base_bindings(b):
+    tmp = BASE_BINDINGS + ".tmp"
+    with open(tmp, "w") as f: json.dump(b, f, indent=1, sort_keys=True)
+    os.chmod(tmp, 0o600); os.replace(tmp, BASE_BINDINGS)
+
+def cmd_basebind(args):
+    kid, addr = args[2], args[3].lower()
+    if not re.fullmatch(r"0x[0-9a-f]{40}", addr): sys.exit("base address must be 0x + 40-hex")
+    led = load_ledger()
+    if not any(k["id"] == kid for k in led["keys"]): sys.exit("no such meter key — issue it first (newkey)")
+    b = load_base_bindings()
+    b["bindings"] = [x for x in b["bindings"] if x["key_id"] != kid and x["base_address"] != addr]
+    b["bindings"].append({"key_id": kid, "base_address": addr,
+                          "bound": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())})
+    save_base_bindings(b)
+    print(f"base-bound {kid} ↔ {addr}")
+
+def cmd_basebindings(args):
+    for x in load_base_bindings()["bindings"]:
+        print(x["key_id"], "↔", x["base_address"])
+
+def base_rpc(method, params):
+    req = urllib.request.Request(BASE_RPC,
+        data=json.dumps({"jsonrpc": "2.0", "id": 1, "method": method, "params": params}).encode(),
+        headers={"Content-Type": "application/json"})
+    return json.loads(urllib.request.urlopen(req, timeout=15).read())
+
+def base_config():
+    led = load_ledger(); meta = led.get("meta", {})
+    return (meta.get("base_receive_address"), meta.get("usdc_contract") or USDC_BASE,
+            meta.get("usdc_a_rate"), meta.get("usdc_a_rate_ref"))
+
+def cmd_basepoll(args):
+    recv, usdc, rate, rate_ref = base_config()
+    if not (recv and rate and rate_ref):
+        print("basepoll: base_receive_address / usdc_a_rate / usdc_a_rate_ref unset in keys.json.meta "
+              "— CONFIG fillable at flip-time (paid lane HOLD); idling")
+        return
+    st = {}
+    try:
+        with open(BASE_STATE) as f: st = json.load(f)
+    except Exception: pass
+    tip = base_rpc("eth_blockNumber", [])
+    latest = int(tip["result"], 16)
+    frm = st.get("last_block") or max(0, latest - 10000)   # first run: last ~10k blocks
+    seen = set(st.get("seen_tx", []))
+    topic2 = "0x" + "0" * 24 + recv[2:].lower()
+    credited = 0
+    for start in range(frm, latest, 10000):
+        logs = base_rpc("eth_getLogs", [{
+            "address": usdc, "fromBlock": hex(start), "toBlock": hex(min(start + 9999, latest)),
+            "topics": [TRANSFER_TOPIC, None, topic2]}])
+        for lg in logs.get("result", []):
+            tx = lg["transactionHash"]
+            if tx in seen: continue
+            seen.add(tx)
+            sender = "0x" + lg["topics"][1][-40:]
+            usdc_amt = int(lg["data"], 16) / 1e6
+            b = load_base_bindings()
+            key = next((x["key_id"] for x in b["bindings"] if x["base_address"] == sender.lower()), None)
+            if not key:
+                emit_settlement_instruction(f"USDC {usdc_amt} from UNBOUND {sender} tx {tx} — no credit, founder word decides")
+                continue
+            try:
+                ev = escrow().deposit_usdc(key, str(usdc_amt), base_tx=tx,
+                                           rate_a_per_usdc=str(rate), rate_ref=rate_ref)
+                print(f"basepoll: credited {key} +{ev['amount']} A "
+                      f"({usdc_amt} USDC @ {rate} A/USDC, ref {rate_ref}) — event {ev['hash'][:12]}…")
+                credited += 1
+            except VoucherError as e:
+                emit_settlement_instruction(f"USDC deposit REFUSED by engine ({e}) — tx {tx}")
+    st["last_block"] = latest; st["seen_tx"] = sorted(seen)[-500:]
+    os.makedirs(os.path.dirname(BASE_STATE), exist_ok=True)
+    with open(BASE_STATE, "w") as f: json.dump(st, f, indent=1)
+    os.chmod(BASE_STATE, 0o600)
+    if credited == 0:
+        print(f"basepoll: no new USDC transfers (blocks {frm}…{latest})")
+
 def dispatch(argv):
     cmd = argv[1] if len(argv) > 1 else ""
     table = {
@@ -546,6 +651,8 @@ def dispatch(argv):
         "bind": (cmd_bind, 4), "bindings": (cmd_bindings, 2),
         "voucher": (cmd_voucher, 4), "allowlist": (cmd_allowlist, 2),
         "charge": (cmd_charge, 4), "tithebook": (cmd_tithebook, 2),
+        "basebind": (cmd_basebind, 4), "basebindings": (cmd_basebindings, 2),
+        "basepoll": (cmd_basepoll, 2),
     }
     if cmd in table:
         fn, need = table[cmd]

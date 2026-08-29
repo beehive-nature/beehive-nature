@@ -143,19 +143,65 @@ class Escrow:
 
     # ---------- voucher operations ----------
 
-    def deposit(self, voucher: str, amount_a, vaulta_tx: str) -> dict:
+    def deposit(self, voucher: str, amount_a, vaulta_tx: str,
+                sender: str = "", memo: str = "") -> dict:
         """Top-up read back from the watch_account: every deposit cites its tx.
         The ref may be a chain tx id or the read-back evidence trail (the P2
         checkpoint/instruction id) where history APIs are 410-gone — cited
-        provenance is the law, a tx-shaped string is not."""
+        provenance is the law, a tx-shaped string is not.
+
+        A-RAIL RIDER (founder, 2026-08-29): the Vaulta rail is GASLESS and
+        MEMO-NATIVE — a proper Vaulta account sends with memo = the meter key,
+        so NO binding table exists on this rail. When the estate runs its own
+        history-capable node, sender + memo land here as first-class fields;
+        they are recorded when provided, never looked up from a table."""
         amt = _a(amount_a)
         if amt <= 0:
             raise VoucherError("deposit must be positive")
         if not vaulta_tx:
             raise VoucherError("deposit requires a vaulta_tx reference")
-        return self._append({
+        ev = {
             "type": "DEPOSIT", "voucher": voucher, "ts": time.time(),
             "amount": str(amt), "vaulta_tx": vaulta_tx,
+            "currency_in": "A", "chain_in": "vaulta",
+        }
+        if sender:
+            ev["sender"] = sender
+        if memo:
+            ev["memo"] = memo
+        return self._append(ev)
+
+    def deposit_usdc(self, voucher: str, usdc_amount, base_tx: str,
+                     rate_a_per_usdc, rate_ref: str) -> dict:
+        """
+        USDC-on-Base funding rail (founder ruling 2026-08-29: the second
+        funding door; A stays the unit of account). The voucher is credited
+        in A — the meter's unit of account never changes. The conversion is
+        EXPLICIT on the event: usdc_amount, the rate used (A per USDC), and
+        a versioned rate_ref naming where the rate was read. Balance math
+        sees only the credited A. This rail carries gas and no memo, so the
+        key↔Base-address BINDING TABLE (meter.py basebind) resolves which
+        voucher to credit — per the rails-are-not-symmetric rider.
+        """
+        usdc = Decimal(str(usdc_amount)).quantize(Decimal("0.000001"), rounding=ROUND_HALF_UP)
+        if usdc <= 0:
+            raise VoucherError("usdc deposit must be positive")
+        if not base_tx:
+            raise VoucherError("usdc deposit requires a base_tx reference")
+        if not rate_ref:
+            raise VoucherError("usdc deposit requires a rate_ref (where the rate was read)")
+        rate = Decimal(str(rate_a_per_usdc))
+        if rate <= 0:
+            raise VoucherError("conversion rate must be positive")
+        credited = _a(usdc * rate)
+        if credited <= 0:
+            raise VoucherError("credited A rounds to zero — deposit too small")
+        return self._append({
+            "type": "DEPOSIT", "voucher": voucher, "ts": time.time(),
+            "amount": str(credited),            # A — what balance math sees
+            "currency_in": "USDC", "chain_in": "base",
+            "usdc_amount": str(usdc), "base_tx": base_tx,
+            "rate_a_per_usdc": str(rate), "rate_ref": rate_ref,
         })
 
     def balance(self, voucher: str) -> Decimal:

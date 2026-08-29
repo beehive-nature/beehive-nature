@@ -1,0 +1,9 @@
+[package]
+name = "voucher-escrow"
+version = "0.1.0"
+edition = "2021"
+description = "Rust conformance core for the b-meter voucher/escrow engine (moat, BUSL-1.1) — same laws as scripts/buzz-meter/voucher_escrow.py, proven by the ported 16-proof battery"
+
+[dependencies]
+serde_json = "1"
+sha2 = "0.10"
