@@ -18,6 +18,7 @@ import { readFileSync, mkdtempSync, rmSync, readdirSync, existsSync, writeFileSy
 import { join, dirname, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { extractKeyedText } from './i18n-extract.mjs';
 import { execFileSync } from 'node:child_process';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -112,20 +113,17 @@ ok('every domain has an id, a slug, an accent and one thing to do',
      visible to any gate. Compare what the page says in English to what the
      corpus thinks English is. */
   {
-    const dec = t => t.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-      .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&ldquo;|&rdquo;/g, '\u201C')
-      .replace(/\s+/g, ' ').trim();
     const drift = [], seen = {};
     for (const f of walk(SURF)) {
       const html = readFileSync(join(SURF, f), 'utf8');
-      for (const m of html.matchAll(/data-i18n="([^"]+)"[^>]*>([^<]*)</g)) {
-        const k = m[1], t = dec(m[2]);
+      for (const m of html.matchAll(/data-i18n="([^"]+)"/g)) {
+        const k = m[1], t = extractKeyedText(html, m.index);
         if (!t) continue;
         /* one key must render ONE English everywhere it appears */
         if (seen[k] && seen[k].t !== t) drift.push(k + ': two Englishes (' + seen[k].f + ' vs ' + f + ')');
         else if (!seen[k]) seen[k] = { t, f };
         const e = corpus.strings[k];
-        if (e && e.en && dec(e.en) !== t) drift.push(k + ' in ' + f + ': corpus English is stale');
+        if (e && e.en && extractKeyedText('#<span>' + e.en + '</span>', 0) !== t) drift.push(k + ' in ' + f + ': corpus English is stale');
       }
     }
     const uniq = [...new Set(drift)];

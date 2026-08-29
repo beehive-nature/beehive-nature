@@ -56,6 +56,7 @@ const SET_ARG = process.argv.includes('--set') ? process.argv[process.argv.index
 const SELFTEST = process.argv.includes('--selftest');
 const USE_FLOORS = process.argv.includes('--floors');
 const SET_FLOORS = process.argv.includes('--set-floors');
+  const EMIT = process.argv.includes('--emit-md');
 
 /* ── SELFTEST — the instrument must see both states before it reports anything ──
    A checker that has only ever met keyed strings passes keyed strings; one that
@@ -244,6 +245,34 @@ if (AS_JSON) {
       String(r.unkeyed).padStart(5) + ' ' + String(r.emptyCell).padStart(5) + '  ' + r.page));
   const errs = rows.filter(r => r.error);
   if (errs.length) { console.log('\nnot measured:'); errs.forEach(r => console.log('  ' + r.page + ' — ' + r.error)); }
+
+  if (EMIT) {
+    const lines = [];
+    lines.push('# LANG COVERAGE — generated ' + new Date().toISOString().slice(0, 10) + ' by e2e/i18n-coverage.mjs --emit-md (lang=' + LANG + ')');
+    lines.push('');
+    lines.push('## per surface — visible strings vs keyed');
+    lines.push('');
+    lines.push('| surface | visible | keyed | keyed% |');
+    lines.push('|---|---|---|---|');
+    ok.sort((a, b) => b.visible - a.visible).forEach(r => lines.push('| ' + r.page + ' | ' + r.visible + ' | ' + r.keyed + ' | ' + (r.visible ? Math.round(r.keyed / r.visible * 100) : 100) + '% |'));
+    lines.push('');
+    lines.push('## per tongue — corpus cells non-empty');
+    lines.push('');
+    lines.push('| tongue | cells non-empty |');
+    lines.push('|---|---|');
+    const langs = corpus._meta.langs;
+    let totalCells = 0, filledCells = 0;
+    langs.forEach(L => {
+      let f = 0, t = 0;
+      for (const k of Object.keys(corpus.strings)) { t++; if (corpus.strings[k][L] && String(corpus.strings[k][L]).trim()) f++; }
+      totalCells = t; filledCells = f;
+      lines.push('| ' + L + ' | ' + f + ' / ' + t + ' |');
+    });
+    lines.push('');
+    lines.push('the ratchet law: keyed counts may never fall (enforced in CI). unkeyed prose is the recorded backlog — honest absence, English fallback visible, counted by the picker.');
+    writeFileSync('docs/LANG-COVERAGE.md', lines.join(String.fromCharCode(10)) + String.fromCharCode(10));
+    console.log('coverage table written: docs/LANG-COVERAGE.md');
+  }
 
   /* the ratchet: floors hold the recorded line; the deep backlog is a number
      here, not a demand. The ratchet only ever rises. */

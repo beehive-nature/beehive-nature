@@ -66,11 +66,20 @@
     var hit=0,total=0;
     nodes.forEach(function(el){
       var k=el.getAttribute('data-i18n'); total++;
-      if(el.dataset.i18nEn===undefined) el.dataset.i18nEn=el.textContent;
-      if(code==='en'){ el.textContent=el.dataset.i18nEn; hit++; return; }
+      /* MARKUP-AWARE SWAP (founder order: rich paragraphs ARE the argument).
+         If the English carries inline markup (links, emphasis), capture the
+         innerHTML once and restore it; a corpus rendering containing '<' is
+         set as HTML. Trust basis: the corpus is repo-committed and reviewed
+         like the page itself — same trust level as the document. Plain
+         renderings stay textContent. */
+      if(el.dataset.i18nEn===undefined){
+        if(el.innerHTML.indexOf('<')!==-1){ el.dataset.i18nEn=el.innerHTML; el.dataset.i18nRich='1'; }
+        else el.dataset.i18nEn=el.textContent;
+      }
+      if(code==='en'){ if(el.dataset.i18nRich) el.innerHTML=el.dataset.i18nEn; else el.textContent=el.dataset.i18nEn; hit++; return; }
       var s=corpus&&corpus.strings[k]&&corpus.strings[k][code];
-      if(s){ el.textContent=s; hit++; }
-      else { el.textContent=el.dataset.i18nEn; } /* honest fallback: English, counted */
+      if(s){ if(s.indexOf('<')!==-1) el.innerHTML=s; else el.textContent=s; hit++; }
+      else { if(el.dataset.i18nRich) el.innerHTML=el.dataset.i18nEn; else el.textContent=el.dataset.i18nEn; } /* honest fallback: English, counted */
     });
     /* THE COVERAGE COUNTER (founder defect order 2026-08-29): the old count was
        keys-present over [data-i18n] elements — a page reading English to every
