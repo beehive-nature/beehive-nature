@@ -151,8 +151,7 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   <svg id="comb" viewBox="0 0 640 486" aria-label="shared hex canvas"></svg>
   <div id="palette" role="group" aria-label="palette"></div>
   <div class="law" style="margin-top:9px;text-align:center">open this page in a
-    <b data-i18n="bz.comb.b">second tab</b> <span data-i18n="bz.comb.hint">right now and paint — that is the CRDT working with zero setup. drag to paint; the ⌫ swatch erases.</span> — that is the CRDT working with zero setup. drag to
-    paint; the ⌫ swatch erases.</div>
+    <b data-i18n="bz.comb.b">second tab</b> <span data-i18n="bz.comb.hint">right now and paint — that is the CRDT working with zero setup. drag to paint; the ⌫ swatch erases.</span></div>
 </section>
 
 <section>
@@ -212,6 +211,7 @@ var $=function(id){return document.getElementById(id)};
 var ROOM={
   name:'skaists.buzz',
   wss:'wss://skaists.buzz',
+  fallback:'wss://relay.skaists.dev',
   web:'https://skaists.buzz/',
   state:'live — as of 2026-08-28',
   door:{ href:'https://skaists.buzz', label:'the web door is open — a standing invite →' }
@@ -231,21 +231,34 @@ $('checkroom').onclick=function(){
   var ctrl=(typeof AbortSignal!=='undefined'&&AbortSignal.timeout)?AbortSignal.timeout(4500):null;
   fetch(ROOM.web,{mode:'no-cors',signal:ctrl}).then(function(){
     $('roomdot').classList.add('live');
-    $('roomprobe').textContent='state: answering ✓ · reachability probed just now · the join line stands';
+    window.__hiveAlive=ROOM.wss;
+    $('roomprobe').textContent='state: answering ✓ via '+ROOM.name+' · probed just now · the join line stands';
   },function(){
-    $('roomprobe').textContent='state: not answering right now · probed just now · this door never needed the relay — the join line stands for when it returns';
+    /* primary dead from this network — try the guaranteed path before declaring anything */
+    var fb=ROOM.fallback?ROOM.fallback.replace('wss://','https://'):null;
+    if(!fb){ $('roomprobe').textContent='state: not answering right now · probed just now · this door never needed the relay — the join line stands for when it returns'; return; }
+    var ctrl2=(typeof AbortSignal!=='undefined'&&AbortSignal.timeout)?AbortSignal.timeout(4500):null;
+    fetch(fb,{mode:'no-cors',signal:ctrl2}).then(function(){
+      $('roomdot').classList.add('live');
+      window.__hiveAlive=ROOM.fallback;
+      $('roomprobe').textContent='state: answering ✓ via '+fb.replace('https://','').replace(/\/+$/,'')+' · your network filters the '+ROOM.name+' name — the fallback is live, use it below';
+      $('joincode').textContent=ROOM.fallback;
+    },function(){
+      $('roomprobe').textContent='state: not answering right now · probed just now · this door never needed the relay — the join line stands for when it returns';
+    });
   });
 };
 $('copywss').onclick=function(){
   var b=this;
   function done(){ b.textContent='copied ✓'; setTimeout(function(){ b.textContent='copy join address'; },1600); }
-  function fallback(){
-    var t=document.createElement('textarea'); t.value=ROOM.wss; document.body.appendChild(t);
+  var target=window.__hiveAlive||ROOM.wss;
+  function copyFallback(){
+    var t=document.createElement('textarea'); t.value=target; document.body.appendChild(t);
     t.select(); try{document.execCommand('copy');done();}catch(e){} document.body.removeChild(t);
   }
   if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(ROOM.wss).then(done,fallback);
-  }else fallback();
+    navigator.clipboard.writeText(target).then(done,copyFallback);
+  }else copyFallback();
 };
 renderRoom();
 /* ---- the document: per-cell LWW CRDT — provably convergent ----
