@@ -585,7 +585,9 @@ var WALLET_PROFILE = {
     <select id="cap-unit" title="unit — caps are per-unit, never price-converted" style="max-width:86px;flex:0 1 86px;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:9px 8px;font:12px 'IBM Plex Mono',monospace">
       <option value="A">A</option>
       <option value="ETH">ETH</option>
+      <option value="USDC">USDC</option>
       <option value="ANT">ANT</option>
+      <option value="sats">sats</option>
     </select>
     <button id="cap-set" class="gold" style="min-height:34px">set</button>
     <button id="cap-clear" class="gold" style="min-height:34px">clear</button>
@@ -593,15 +595,20 @@ var WALLET_PROFILE = {
 
   <div id="rx-panel" style="display:none;margin-top:10px">
     <div style="display:flex;gap:14px;flex-wrap:wrap" id="rx-cards"></div>
-    <div class="law" style="margin-top:6px">each address derives from your soul — a fresh EVM address can be
-    forged in the key forge above (evm:<b>name</b> contexts); the Vaulta name receives A directly,
-    memo optional. QRs are drawn locally — nothing leaves this page.</div>
+    <div class="law" style="margin-top:6px"><b>One soul, every rail.</b> Each address above falls out of the
+    <b>same masterPRK</b> by context tag — Vaulta, one 0x address serving <b>both</b> EVM rails (Base and
+    Arbitrum share it), Solana, Bitcoin L1, Lightning, nostr. There is no second seed, no import, and no
+    "connect a wallet" step anywhere: a new bzDiD is never a keyless supplicant. A fresh address for any
+    rail can be forged in the key forge above (<b>evm:</b>name, <b>sol:</b>name, <b>btc:</b>name …).
+    QRs are drawn locally — nothing leaves this page. Where a rail cannot be derived honestly the card says
+    so and shows <b>no address</b>: a wrong receive address is the one mistake that cannot be undone.</div>
   </div>
 
   <div id="tx-panel" style="display:none;margin-top:10px">
     <div class="row" style="margin-top:0">
       <button id="tx-tab-v" class="gold" style="flex:1">Vaulta · A</button>
-      <button id="tx-tab-e" class="gold" style="flex:1">Arbitrum · ETH / ANT</button>
+      <button id="tx-tab-e" class="gold" style="flex:1">EVM · Base / Arbitrum</button>
+      <button id="tx-tab-l" class="gold" style="flex:1">⚡ Lightning</button>
     </div>
     <div id="tx-v" style="display:none;margin-top:8px">
       <div class="row">
@@ -614,15 +621,32 @@ var WALLET_PROFILE = {
     </div>
     <div id="tx-e" style="display:none;margin-top:8px">
       <div class="row">
-        <select id="se-asset" style="max-width:110px;flex:0 1 110px" title="asset">
-          <option value="eth">ETH</option>
-          <option value="ant">ANT</option>
-        </select>
+        <select id="se-rail" style="max-width:150px;flex:0 1 150px" title="EVM rail — chain id and token decimals come from the rail, never from this box"></select>
+        <select id="se-asset" style="max-width:110px;flex:0 1 110px" title="asset carried on the chosen rail"></select>
         <input id="se-to" placeholder="to — 0x… address" spellcheck="false" style="font-family:'IBM Plex Mono',monospace;flex:2">
-        <input id="se-amt" class="small" type="number" step="0.0001" min="0" placeholder="0.0000" style="max-width:130px;flex:0 1 130px" title="amount">
+        <input id="se-amt" class="small" inputmode="decimal" placeholder="0.00" style="max-width:130px;flex:0 1 130px" title="amount, in the asset's own units — typed exactly, never rounded">
         <button id="se-go" class="gold">📤 send</button>
       </div>
       <div class="law" id="se-stat" style="margin-top:4px;min-height:18px">derived address: — · gas: reading…</div>
+    </div>
+
+    <!-- ══ LIGHTNING — a MODULE of the orchestration, never a merge into the
+         EVM signer (R2). It reads a request offline: BOLT-11 invoice or
+         BOLT-12 offer, both, no node and no third party touched. ══ -->
+    <div id="tx-l" style="display:none;margin-top:8px">
+      <div class="row">
+        <input id="ln-req" placeholder="paste a BOLT-11 invoice (lnbc…) or a BOLT-12 offer (lno…)" spellcheck="false" autocomplete="off" style="font-family:'IBM Plex Mono',monospace;flex:3;min-width:220px">
+        <button id="ln-read" class="gold">🔎 read it</button>
+      </div>
+      <div id="ln-card" style="display:none;margin-top:8px;border:1px solid var(--line2);border-radius:10px;padding:11px 13px;background:var(--well)"></div>
+      <div class="law" id="ln-stat" style="margin-top:4px;min-height:18px">nothing pasted yet — reading happens entirely in this tab.</div>
+      <div class="law" style="margin-top:6px">Both standards, one door: the prefix decides which is read, and
+      <b>the read is offline</b> — no node, no lookup, nobody told what you are about to pay. Your
+      <b>spend cap runs on the decoded amount in sats</b> before anything could be sent. Honest limit,
+      stated because it is one: <b>paying</b> from this page is not wired — the estate's LN seam pays through
+      an NWC connection whose budget lives at the hub, and its live leg is parked at a relay ACL
+      (<b>tools/ln-rail/README.md</b>). A BOLT-12 offer priced in a fiat currency has <b>no satoshi price
+      until its invoice comes back</b>, so a sats cap refuses it here rather than pretending to check it.</div>
     </div>
     <div class="law" style="margin-top:6px">the EVM lane sends from your <b>derived</b> 0x address — fund it via
     📥 receive first (it is not your Vaulta account wrapped; it's a bzDiD-forged keypair). ETH moves native;
@@ -742,6 +766,19 @@ var WALLET_PROFILE = {
            visitor's browser. No server of ours sits in this path; the read
            fires only when the user asks to resolve a name. */
         var BASE_L2_RESOLVER = '0xC6d566A56A1aFf6508b41f6c90ff131615583BCD'; // PUBLIC-CONSTANT (Base L2Resolver, chain 8453)
+        /* THE REGISTRY, and why it is here. Assuming every Basename answers on
+           the one L2Resolver above is WRONG, and it was proven wrong against a
+           live name: a real registered name (its registry owner and resolver
+           both non-zero) answered 0x000…000 on that resolver, because ENS-style
+           names name THEIR OWN resolver and this one was a different contract.
+           The old lane called that "no address record" and told the user their
+           name was unresolvable. So: fast path stays the canonical resolver —
+           one request, unchanged, the privacy rotation intact — and ONLY when
+           it answers "no record" do we ask the registry which resolver actually
+           owns the name and try that one. A second request happens exactly when
+           the alternative was a wrong "not found". */
+        var BASE_REGISTRY = '0xB94704422c2a1E396835A571837Aa5AE53285a95'; // PUBLIC-CONSTANT (Basenames registry, chain 8453)
+        var SEL_RESOLVER = '0x0178b8bf'; // PUBLIC-CONSTANT: resolver(bytes32) selector
         /* FOUR public endpoints, all verified CORS-open and answering this exact
            eth_call. The FIRST choice per lookup is UNIFORMLY RANDOM (failover then
            walks the rest in random order). Founder privacy ruling 2026-08-24: a
@@ -778,21 +815,39 @@ var WALLET_PROFILE = {
             var t = order[j]; order[j] = order[r]; order[r] = t;
           }
           var i = 0;
-          function tryHost() {
-            if (i >= order.length) return Promise.resolve(null);
+          function callOn(host, to, callData) {
             var ctl = new AbortController();
             var t = setTimeout(function () { ctl.abort(); }, 9000);
-            return fetch(order[i++], {
+            return fetch(host, {
               method: 'POST', headers: { 'Content-Type': 'application/json' },
               signal: ctl.signal,
               body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_call',
-                params: [{ to: BASE_L2_RESOLVER, data: data }, 'latest'] })
+                params: [{ to: to, data: callData }, 'latest'] })
             }).then(function (r) { return r.json(); }).then(function (j) {
               clearTimeout(t);
-              var res = j && j.result || '';
-              var a = /^0x[0-9a-fA-F]{64}$/.test(res) ? '0x' + res.slice(-40).toLowerCase() : null;
-              return (a && /^0x0{40}$/.test(a)) ? null : a; // zero address = no record
-            }).catch(function () { clearTimeout(t); return tryHost(); });
+              return (j && j.result) || '';
+            });
+          }
+          function word2addr(res) {
+            var a = /^0x[0-9a-fA-F]{64}$/.test(res) ? '0x' + res.slice(-40).toLowerCase() : null;
+            return (a && /^0x0{40}$/.test(a)) ? null : a;   // zero address = no record
+          }
+          function tryHost() {
+            if (i >= order.length) return Promise.resolve(null);
+            var host = order[i++];
+            return callOn(host, BASE_L2_RESOLVER, data).then(function (res) {
+              var a = word2addr(res);
+              if (a) return a;                               // fast path: one request, as before
+              /* no record on the canonical resolver — ask the registry which
+                 resolver this name actually names, then try that one. Same
+                 host, so the privacy property (one operator, one lookup) holds. */
+              var nodeHex = hex(node);
+              return callOn(host, BASE_REGISTRY, SEL_RESOLVER + nodeHex.slice(2)).then(function (rr) {
+                var resolverAddr = word2addr(rr);
+                if (!resolverAddr || resolverAddr.toLowerCase() === BASE_L2_RESOLVER.toLowerCase()) return null;
+                return callOn(host, resolverAddr, data).then(word2addr);
+              }).catch(function () { return null; });
+            }).catch(function () { return tryHost(); });   // this host failed: walk to the next
           }
           return tryHost();
         }
@@ -1342,7 +1397,10 @@ var WALLET_PROFILE = {
   function ensureCtx(c){ if(CONTEXTS.indexOf(c)<0){CONTEXTS.push(c);saveContexts()} }
   function seedContexts(){
     if(!SOUL)return;
-    ensureCtx('vaulta:'+SOUL); ensureCtx('evm:'+SOUL); ensureCtx('nostr:'+SOUL);
+    /* one soul, every rail — the four value rails plus comms, all from the
+       same masterPRK, all present the moment the keychain connects */
+    ensureCtx('vaulta:'+SOUL); ensureCtx('evm:'+SOUL); ensureCtx('sol:'+SOUL);
+    ensureCtx('btc:'+SOUL); ensureCtx('ln:'+SOUL); ensureCtx('nostr:'+SOUL);
     $('forge-soulname').textContent=SOUL; $('fs2').textContent=SOUL; $('fs3').textContent=SOUL;
   }
   // derive the public material for a context (never persists; keys live only with MPRK)
@@ -1353,11 +1411,23 @@ var WALLET_PROFILE = {
   }
   function deriveFor(ctx){
     if(!MPRK)return null;
+    /* sol: is the one context on a DIFFERENT curve — a Solana address is an
+       ed25519 key, so it takes deriveRecordKey, not deriveK1Key. Handled first
+       precisely so it can never fall through to the secp path below. */
+    if(/^sol:/.test(ctx)){
+      var sr=BZDIDKEY.deriveRecordKey(MPRK,ctx);
+      try{ return {kind:'Solana', value:solanaAddress(sr.publicKey)} } finally { sr.seed.fill(0) }
+    }
     var rec=BZDIDKEY.deriveK1Key(MPRK,ctx);
-    if(/^nostr:/.test(ctx)){
+    if(/^nostr:/.test(ctx)||/^ln:/.test(ctx)){
       var np=npubFromSeed(rec.seed);
       rec.seed.fill(0);
-      return {kind:'nostr npub', value:np};
+      return {kind:/^ln:/.test(ctx)?'Lightning (NWC key)':'nostr npub', value:np};
+    }
+    if(/^btc:/.test(ctx)){
+      var bp=BN.secp.getPublicKey(rec.seed,true);   // 33B COMPRESSED — P2WPKH takes nothing else
+      rec.seed.fill(0);
+      return {kind:'Bitcoin bc1', value:p2wpkhAddress(bp,'bc')};
     }
     if(CORE){
       var out;
@@ -1386,7 +1456,22 @@ var WALLET_PROFILE = {
     }
     box.innerHTML='';
     CONTEXTS.forEach(function(c){
-      var d=deriveFor(c);
+      /* PER-CONTEXT ISOLATION. One rail that cannot derive must not take the
+         keychain down with it — before this, a single throwing context broke
+         renderForge, which broke keychainOn, which meant a stranger's whole
+         wallet failed to connect because one address kind was unavailable.
+         Caught by e2e/wallet-signer.mjs §G, which deliberately breaks one. */
+      var d;
+      try{ d=deriveFor(c) }
+      catch(err){
+        var bad=document.createElement('div'); bad.className='chip';
+        bad.style.borderStyle='dashed';
+        bad.innerHTML='<div class="cc">'+esc(c)+' <span style="color:var(--faint)">· not derivable here</span></div>'+
+          '<div class="cv" style="color:var(--amber)">no address shown — '+esc(err.message||String(err))+'</div>'+
+          '<div class="cx">a wrong address cannot be undone, so this chip stays empty</div>';
+        box.appendChild(bad);
+        return;
+      }
       var el=document.createElement('div'); el.className='chip'; el.title='click to copy';
       el.innerHTML='<div class="cc">'+c+' <span style="color:var(--faint)">· '+d.kind+'</span></div>'+
         '<div class="cv">'+d.value+'</div>'+
@@ -1415,14 +1500,22 @@ var WALLET_PROFILE = {
   $('forge-vaulta').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('vaulta:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ vaulta key for <b>'+SOUL+'</b>'; };
   $('forge-nostr').onclick=function(){ if(!SOUL){$('forge-stat').textContent='connect your soul first';return} ensureCtx('nostr:'+SOUL); renderForge(); $('forge-stat').innerHTML='✓ npub for <b>'+SOUL+'</b> — the real NIP-19 address of your derived secp256k1 pair (the comms lane: <a href="keys/addresses.html">your two addresses</a>)'; };
 
-  /* ── EVM reads: the derived address IS the wallet on Arbitrum ── */
-  async function evmCall(method,params){
-    for(var i=0;i<EVRPC.length;i++){
+  /* ── EVM reads: the derived address IS the wallet, on every EVM rail. The
+     rail argument defaults to arbitrum so the balance lanes written before
+     Base landed keep reading exactly what they always read. Hosts are walked
+     in RANDOM order per call — the same privacy ruling the FUND panel's
+     resolver runs under: no single operator gets to learn every lookup. ── */
+  async function evmCall(method,params,railKey){
+    var hosts=railKey?railOf(railKey).hosts.slice():EVRPC.slice();
+    for(var j=hosts.length-1;j>0;j--){ var r0=Math.floor(Math.random()*(j+1)); var t=hosts[j]; hosts[j]=hosts[r0]; hosts[r0]=t }
+    for(var i=0;i<hosts.length;i++){
       try{
-        var r=await fetchT(EVRPC[i],{method:'POST',headers:{'Content-Type':'application/json'},
+        var r=await fetchT(hosts[i],{method:'POST',headers:{'Content-Type':'application/json'},
           body:JSON.stringify({jsonrpc:'2.0',id:1,method:method,params:params})});
         var d=await r.json();
         if(d&&d.result!==undefined)return d.result;
+        if(d&&d.error&&/insufficient|revert|underpriced|nonce|already known/i.test(d.error.message||''))
+          return d.error;      /* the rail SAYING NO is a verdict — surface it, never walk past it */
       }catch(e){}
     }
     return null;
@@ -1464,6 +1557,333 @@ var WALLET_PROFILE = {
   }
   function hexB(h){h=h.replace(/^0x/,'');var o=new Uint8Array(h.length>>1);for(var i=0;i<o.length;i++)o[i]=parseInt(h.substr(i*2,2),16);return o}
   function hexS(b){var s='';for(var i=0;i<b.length;i++)s+=b[i].toString(16).padStart(2,'0');return s}
+
+  /* ══════════════════════════════════════════════════════════════════════
+     RAIL CORE — the primitives the four rails need and the vendored bundles
+     do not carry. Every function here is proven against a PUBLISHED vector
+     in e2e/wallet-signer.mjs BEFORE it is allowed to render an address or
+     size a transfer: a wrong receive address loses funds and a wrong decimal
+     multiplies a payment, so "no number" beats "a number". Pure functions —
+     callers pass bytes in and scrub their own seeds.
+     ══════════════════════════════════════════════════════════════════════ */
+
+  /* RIPEMD-160 (ISO/IEC 10118-3) — absent from bnr-sign; hash160 needs it. */
+  function ripemd160(msg){
+    var ZL=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,7,4,13,1,10,6,15,3,12,0,9,5,2,14,11,8,
+            3,10,14,4,9,15,8,1,2,7,0,6,13,11,5,12,1,9,11,10,0,8,12,4,13,3,7,15,14,5,6,2,
+            4,0,5,9,7,12,2,10,14,1,3,8,11,6,15,13];
+    var ZR=[5,14,7,0,9,2,11,4,13,6,15,8,1,10,3,12,6,11,3,7,0,13,5,10,14,15,8,12,4,9,1,2,
+            15,5,1,3,7,14,6,9,11,8,12,2,10,0,4,13,8,6,4,1,3,11,15,0,5,12,2,13,9,7,10,14,
+            12,15,10,4,1,5,8,7,6,2,13,14,0,3,9,11];
+    var SL=[11,14,15,12,5,8,7,9,11,13,14,15,6,7,9,8,7,6,8,13,11,9,7,15,7,12,15,9,11,7,13,12,
+            11,13,6,7,14,9,13,15,14,8,13,6,5,12,7,5,11,12,14,15,14,15,9,8,9,14,5,6,8,6,5,12,
+            9,15,5,11,6,8,13,12,5,12,13,14,11,8,5,6];
+    var SR=[8,9,9,11,13,15,15,5,7,7,8,11,14,14,12,6,9,13,15,7,12,8,9,11,7,7,12,7,6,15,13,11,
+            9,7,15,11,8,6,6,14,12,13,5,14,13,13,7,5,15,5,8,11,14,14,6,14,6,9,12,9,12,5,15,8,
+            8,5,12,9,12,5,14,6,8,13,6,5,15,13,11,11];
+    var KL=[0x00000000,0x5a827999,0x6ed9eba1,0x8f1bbcdc,0xa953fd4e];
+    var KR=[0x50a28be6,0x5c4dd124,0x6d703ef3,0x7a6d76e9,0x00000000];
+    function f(j,x,y,z){
+      if(j<16)return x^y^z;
+      if(j<32)return (x&y)|(~x&z);
+      if(j<48)return (x|~y)^z;
+      if(j<64)return (x&z)|(y&~z);
+      return x^(y|~z);
+    }
+    function rotl(x,n){ return (x<<n)|(x>>>(32-n)) }
+    var len=msg.length;
+    var padded=new Uint8Array((((len+8)>>6)+1)<<6);
+    padded.set(msg); padded[len]=0x80;
+    var dv=new DataView(padded.buffer);
+    dv.setUint32(padded.length-8,(len<<3)>>>0,true);
+    dv.setUint32(padded.length-4,Math.floor(len/536870912),true);
+    var h=[0x67452301,0xefcdab89,0x98badcfe,0x10325476,0xc3d2e1f0];
+    var X=new Array(16);
+    for(var off=0;off<padded.length;off+=64){
+      for(var i=0;i<16;i++)X[i]=dv.getUint32(off+i*4,true);
+      var al=h[0],bl=h[1],cl=h[2],dl=h[3],el=h[4];
+      var ar=h[0],br=h[1],cr=h[2],dr=h[3],er=h[4],T;
+      for(var j=0;j<80;j++){
+        T=(rotl((al+f(j,bl,cl,dl)+X[ZL[j]]+KL[j>>4])|0,SL[j])+el)|0;
+        al=el; el=dl; dl=rotl(cl,10); cl=bl; bl=T;
+        T=(rotl((ar+f(79-j,br,cr,dr)+X[ZR[j]]+KR[j>>4])|0,SR[j])+er)|0;
+        ar=er; er=dr; dr=rotl(cr,10); cr=br; br=T;
+      }
+      T=(h[1]+cl+dr)|0;
+      h[1]=(h[2]+dl+er)|0; h[2]=(h[3]+el+ar)|0;
+      h[3]=(h[4]+al+br)|0; h[4]=(h[0]+bl+cr)|0; h[0]=T;
+    }
+    var out=new Uint8Array(20), odv=new DataView(out.buffer);
+    for(var k=0;k<5;k++)odv.setUint32(k*4,h[k]>>>0,true);
+    return out;
+  }
+  function hash160(bytes){ return ripemd160(BN.sha256(bytes)) }
+
+  /* P2WPKH (BIP-173): witness v0 + 20-byte hash160, bech32 over the hrp.
+     bech32, NOT bech32m — segwit v0 is bech32 by BIP-350, and mixing the two
+     produces a valid-LOOKING dead address that eats whatever is sent to it. */
+  function p2wpkhAddress(pubkeyCompressed,hrp){
+    if(!(pubkeyCompressed instanceof Uint8Array)||pubkeyCompressed.length!==33)
+      throw new Error('P2WPKH needs a 33-byte COMPRESSED pubkey');
+    var h=hash160(pubkeyCompressed);
+    return BN.bech32.encode(hrp||'bc',[0].concat(BN.bech32.toWords(h)));
+  }
+
+  /* Solana address = base58(32-byte ed25519 public key). No version byte, no
+     checksum — the bundle's base58 carries leading zero bytes to leading '1's
+     (probed, and re-proven in the gate against an independent implementation). */
+  function solanaAddress(ed25519PublicKey){
+    if(!(ed25519PublicKey instanceof Uint8Array)||ed25519PublicKey.length!==32)
+      throw new Error('a Solana address is exactly a 32-byte ed25519 public key');
+    return BN.Numeric.binaryToBase58(ed25519PublicKey);
+  }
+
+  /* EXACT decimal -> base units. THE irreversible-on-bug arithmetic: USDC is
+     6 decimals and ETH is 18, so one shared float path sends 10^12x the
+     intent. String math only. MORE precision than the asset carries is
+     REFUSED, never rounded — silently truncating someone's amount is a lie. */
+  function toBaseUnits(amount,decimals){
+    var s=String(amount).trim();
+    if(!/^\d+(\.\d+)?$/.test(s)) throw new Error('amount must be a plain decimal number (no sign, no exponent): '+s);
+    if(!Number.isInteger(decimals)||decimals<0||decimals>36) throw new Error('bad decimals: '+decimals);
+    var p=s.split('.'), whole=p[0], frac=p[1]||'';
+    if(frac.length>decimals)
+      throw new Error('this asset carries '+decimals+' decimals; '+s+' asks for '+frac.length+' — refused, not rounded');
+    while(frac.length<decimals)frac+='0';
+    var v=BigInt(whole+frac);
+    if(v<=0n) throw new Error('amount must be greater than zero');
+    return v;
+  }
+  function fromBaseUnits(units,decimals){
+    var v=BigInt(units), neg=v<0n; if(neg)v=-v;
+    var s=v.toString().padStart(decimals+1,'0');
+    var whole=s.slice(0,s.length-decimals), frac=decimals?s.slice(s.length-decimals):'';
+    frac=frac.replace(/0+$/,'');
+    return (neg?'-':'')+whole+(frac?'.'+frac:'');
+  }
+
+  /* BOLT-11 decode — LOCAL and offline. No node, no third party, no lookup:
+     the wallet tells you what an invoice asks for before any rail is touched,
+     which is what lets the spend cap speak to Lightning at all. */
+  function decodeBolt11(invoice){
+    var inv=String(invoice||'').trim().toLowerCase();
+    if(!/^ln(bcrt|bc|tb|sb)/.test(inv)) throw new Error('not a BOLT-11 invoice (expected an lnbc… / lntb… string)');
+    var dec=null;
+    try{ dec=BN.bech32.decode(inv,2000) }
+    catch(e){ throw new Error('invoice is not valid bech32: '+e.message) }
+    var hrp=dec.prefix, words=Array.from(dec.words);
+    var m=/^ln(bcrt|bc|tb|sb)((\d+)([munp])?)?$/.exec(hrp);
+    if(!m) throw new Error('unparseable invoice prefix: '+hrp);
+    var network={bc:'mainnet',tb:'testnet',bcrt:'regtest',sb:'simnet'}[m[1]];
+    var msats=null;
+    if(m[3]){
+      var DIV={m:1000n,u:1000000n,n:1000000000n,p:1000000000000n};
+      var num=BigInt(m[3]);
+      if(m[4]){
+        var d=DIV[m[4]], numer=num*100000000000n;   /* 1 BTC = 1e11 msat */
+        if(numer%d!==0n) throw new Error('invoice amount is not a whole number of millisatoshi');
+        msats=numer/d;
+      } else msats=num*100000000000n;
+    }
+    if(words.length<7+104) throw new Error('invoice data too short to carry a timestamp and a signature');
+    var body=words.slice(0,words.length-104);
+    var ts=0; for(var i=0;i<7;i++)ts=ts*32+body[i];
+    var tags={}, pos=7;
+    var TAGNAME={1:'payment_hash',13:'description',6:'expiry',16:'payment_secret'};
+    function wordsToBytes(w){
+      var bits=0,val=0,out=[];
+      for(var k=0;k<w.length;k++){ val=(val<<5)|w[k]; bits+=5;
+        while(bits>=8){ bits-=8; out.push((val>>bits)&0xff) } }
+      return Uint8Array.from(out);
+    }
+    while(pos+3<=body.length){
+      var type=body[pos], len=body[pos+1]*32+body[pos+2];
+      pos+=3;
+      if(pos+len>body.length)break;
+      var chunk=body.slice(pos,pos+len);
+      pos+=len;
+      var name=TAGNAME[type];
+      if(name==='payment_hash'){
+        if(len===52)tags.payment_hash=hexS(wordsToBytes(chunk).slice(0,32));
+      } else if(name==='description'){
+        try{ tags.description=new TextDecoder().decode(wordsToBytes(chunk)) }catch(e){}
+      } else if(name==='expiry'){
+        var e=0; for(var q=0;q<chunk.length;q++)e=e*32+chunk[q]; tags.expiry=e;
+      }
+    }
+    var expiry=tags.expiry==null?3600:tags.expiry;
+    return { standard:'BOLT-11', network:network, msats:msats,
+      sats: msats===null?null:Number(msats/1000n),
+      pricedInSats: msats!==null,
+      timestamp:ts, expiry:expiry, expiresAt:ts+expiry,
+      paymentHash:tags.payment_hash||null, description:tags.description||null };
+  }
+
+  /* BOLT-12 OFFER decode — the reusable request everyone moved to. bech32
+     WITHOUT a checksum (BOLT-12 dropped it), and a '+' may split a long offer
+     across lines. Payload is TLV: BigSize type, BigSize length, value.
+
+     THE PROPERTY THAT MATTERS TO A SPEND CAP: an offer may be priced in a
+     FIAT currency, and then its satoshi cost is NOT knowable offline — it is
+     fixed only when the invoice comes back. sats stays null for those, and
+     the cap treats an unpriced offer as uncappable rather than waving it by. */
+  function decodeBolt12(offer){
+    var s=String(offer||'').trim().toLowerCase().replace(/\+\s*/g,'');
+    var m=/^(lno|lni|lnr)1([a-z0-9]+)$/.exec(s);
+    if(!m) throw new Error('not a BOLT-12 string (expected lno1… offer, lni1… invoice, or lnr1… request)');
+    var KIND={lno:'offer',lni:'invoice',lnr:'invoice_request'}[m[1]];
+    var CH='qpzry9x8gf2tvdw0s3jn54khce6mua7l';
+    var words=[];
+    for(var i=0;i<m[2].length;i++){
+      var v=CH.indexOf(m[2][i]);
+      /* b, i, o and 1 are excluded from bech32 precisely because they are the
+         characters people mis-transcribe — name the offender, never skip it */
+      if(v<0) throw new Error('"'+m[2][i]+'" is outside the bech32 charset (position '+i+') — b, i, o and 1 are never valid');
+      words.push(v);
+    }
+    var acc=0,bits=0,bytes=[];
+    for(var w=0;w<words.length;w++){
+      acc=(acc<<5)|words[w]; bits+=5;
+      if(bits>=8){ bits-=8; bytes.push((acc>>bits)&0xff) }
+    }
+    if(bits>=5||((acc<<(8-bits))&0xff)!==0) throw new Error('BOLT-12 padding is not zero — the string is corrupt');
+    var b=Uint8Array.from(bytes), p=0;
+    function bigsize(){
+      if(p>=b.length) throw new Error('truncated TLV');
+      var f=b[p++];
+      if(f<0xfd) return BigInt(f);
+      var n=f===0xfd?2:f===0xfe?4:8, v=0n;
+      if(p+n>b.length) throw new Error('truncated BigSize');
+      for(var k=0;k<n;k++)v=(v<<8n)|BigInt(b[p++]);
+      return v;
+    }
+    function tu64(sl){ var v=0n; for(var k=0;k<sl.length;k++)v=(v<<8n)|BigInt(sl[k]); return v }
+    var T={2:'chains',4:'metadata',6:'currency',8:'amount',10:'description',12:'features',
+           14:'absolute_expiry',16:'paths',18:'issuer',20:'quantity_max',22:'issuer_id'};
+    var out={standard:'BOLT-12',kind:KIND,currency:null,amount:null,description:null,
+             issuer:null,absoluteExpiry:null,issuerId:null,quantityMax:null,types:[]};
+    var lastType=-1n;
+    while(p<b.length){
+      var type=bigsize(), len=Number(bigsize());
+      if(type<=lastType) throw new Error('TLV types must strictly ascend — the string is corrupt');
+      lastType=type;
+      if(p+len>b.length) throw new Error('TLV record runs past the end');
+      var val=b.subarray(p,p+len); p+=len;
+      var name=T[Number(type)];
+      out.types.push(name||('unknown:'+type));
+      if(name==='currency'){ try{ out.currency=new TextDecoder().decode(val) }catch(e){} }
+      else if(name==='amount') out.amount=tu64(val);
+      else if(name==='description'){ try{ out.description=new TextDecoder().decode(val) }catch(e){} }
+      else if(name==='issuer'){ try{ out.issuer=new TextDecoder().decode(val) }catch(e){} }
+      else if(name==='absolute_expiry') out.absoluteExpiry=Number(tu64(val));
+      else if(name==='quantity_max') out.quantityMax=Number(tu64(val));
+      else if(name==='issuer_id') out.issuerId=hexS(val);
+    }
+    out.msats=(out.amount!==null&&!out.currency)?out.amount:null;
+    out.sats=out.msats===null?null:Number(out.msats/1000n);
+    out.pricedInSats=out.msats!==null;
+    return out;
+  }
+
+  /* ONE DOOR, TWO STANDARDS — BOLT-11 and BOLT-12 live side by side and
+     nothing guesses: the prefix decides. BOLT-12 is tested first because its
+     prefixes are unambiguous; BOLT-11's separator '1' sits AFTER the optional
+     amount (lnbc2500u1…), so it can never anchor the test. */
+  function decodeLnRequest(str){
+    var s=String(str||'').trim().toLowerCase();
+    if(/^(lno|lni|lnr)1/.test(s))    return decodeBolt12(s);
+    if(/^ln(bcrt|bc|tb|sb)/.test(s)) return decodeBolt11(s);
+    throw new Error('not a Lightning request — expected a BOLT-11 invoice (lnbc…) or a BOLT-12 offer (lno…)');
+  }
+
+  /* NWC (NIP-47) pairing URI parse — the LN allowance connection. The BUDGET
+     lives at the wallet the URI points at, never here; this reads the address
+     so the surface can name exactly what the connection is bound to. */
+  function parseNwcUri(uri){
+    var s=String(uri||'').trim();
+    if(!/^nostr\+walletconnect:\/\//i.test(s)) throw new Error('expected a nostr+walletconnect://… pairing URI');
+    var u;
+    try{ u=new URL(s.replace(/^nostr\+walletconnect/i,'https')) }catch(e){ throw new Error('malformed pairing URI') }
+    var walletPubkey=(u.hostname||'').replace(/^\//,'').toLowerCase();
+    var relays=u.searchParams.getAll('relay');
+    var secret=u.searchParams.get('secret');
+    if(!/^[0-9a-f]{64}$/.test(walletPubkey)) throw new Error('pairing URI carries no 32-byte wallet pubkey');
+    if(!relays.length) throw new Error('pairing URI names no relay');
+    if(!secret||!/^[0-9a-f]{1,64}$/.test(secret)) throw new Error('pairing URI carries no client secret');
+    return { walletPubkey:walletPubkey, relays:relays, secret:secret, lud16:u.searchParams.get('lud16')||null };
+  }
+
+  /* ══ THE EVM RAIL REGISTRY — chains and assets as DATA, never as a branch.
+     The signer reads decimals and the token contract from HERE, so adding a
+     rail is a row, and no lane can quietly disagree with another about what
+     "1" means. Every address below is a PUBLIC protocol fact, and every one
+     was read back from the chain itself before it landed (symbol + decimals
+     via eth_call on the rail's own public RPC — a page is never its own
+     witness). NOT estate config: these stay out of WALLET_PROFILE. ══ */
+  var EVM_RAILS={
+    base:{
+      chainId:8453, label:'Base', explorer:'https://basescan.org/tx/',
+      hosts:['https://mainnet.base.org','https://base.publicnode.com','https://1rpc.io/base','https://base.drpc.org'],
+      assets:{
+        ETH:{symbol:'ETH',decimals:18,contract:null},
+        USDC:{symbol:'USDC',decimals:6,contract:'0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'} // PUBLIC-CONSTANT: Circle-native USDC on Base — chain-confirmed symbol=USDC decimals=6
+      }
+    },
+    arbitrum:{
+      chainId:42161, label:'Arbitrum One', explorer:'https://arbiscan.io/tx/',
+      hosts:['https://arb1.arbitrum.io/rpc','https://arbitrum-one-rpc.publicnode.com'],
+      assets:{
+        ETH:{symbol:'ETH',decimals:18,contract:null},
+        ANT:{symbol:'ANT',decimals:18,contract:'0xa78d8321B20c4Ef90eCd72f2588AA985A4BDb684'} // PUBLIC-CONSTANT: ANT (Autonomi) on Arbitrum One
+      }
+    }
+  };
+  function railOf(k){ var r=EVM_RAILS[k]; if(!r)throw new Error('no such EVM rail: '+k); return r }
+  function assetOf(k,a){ var x=railOf(k).assets[a]; if(!x)throw new Error(a+' is not carried on '+railOf(k).label); return x }
+  window.__EVM_RAILS=EVM_RAILS;   // the gate's oracle: the signer vs the data
+
+  /* ══ R1 — ONE IDENTITY, EVERY RAIL. Every address below falls out of the
+     SAME masterPRK by context tag; there is no second seed, no import, no
+     "connect a wallet" anywhere. Each derivation scrubs its own seed before
+     returning, and a rail whose address this page cannot derive HONESTLY is
+     returned with err set and NO value — a wrong receive address is the one
+     mistake that cannot be undone, so we show nothing instead. ══ */
+  function railAddresses(mprk,soul){
+    var out=[];
+    function add(t,ctx,unit,note,fn){
+      var rec=null;
+      try{
+        rec=fn();
+        out.push({t:t,ctx:ctx,unit:unit,note:note,v:rec});
+      }catch(e){ out.push({t:t,ctx:ctx,unit:unit,note:note,v:null,err:e.message}) }
+    }
+    if(soul) out.push({t:'Vaulta · A',ctx:'vaulta:'+soul,unit:'A',v:soul,
+      note:'your account name receives A directly — memo optional'});
+    if(!mprk) return out;
+    if(CORE) add('Base + Arbitrum · ETH · USDC · ANT','evm:'+soul,'ETH',
+      'ONE 0x address, both EVM rails — the same key signs on chain 8453 and 42161',function(){
+        var r=BZDIDKEY.deriveK1Key(mprk,'evm:'+soul);
+        try{ return CORE.evmAddr(r.seed) } finally { r.seed.fill(0) }
+      });
+    add('Solana · SOL','sol:'+soul,'SOL','base58 of the derived ed25519 key — receive-ready; sending is not wired',function(){
+      var r=BZDIDKEY.deriveRecordKey(mprk,'sol:'+soul);
+      try{ return solanaAddress(r.publicKey) } finally { r.seed.fill(0) }
+    });
+    add('Bitcoin L1 · BTC','btc:'+soul,'BTC','native segwit P2WPKH (BIP-173) — receive-ready; sending is not wired',function(){
+      var r=BZDIDKEY.deriveK1Key(mprk,'btc:'+soul);
+      try{ return p2wpkhAddress(BN.secp.getPublicKey(r.seed,true),'bc') } finally { r.seed.fill(0) }
+    });
+    add('Lightning · sats','ln:'+soul,'sats','the LN module’s own key — the NWC connection binds to this, never to the EVM signer',function(){
+      var r=BZDIDKEY.deriveK1Key(mprk,'ln:'+soul);
+      try{ return npubFromSeed(r.seed) } finally { r.seed.fill(0) }
+    });
+    add('nostr · npub','nostr:'+soul,null,'the comms lane',function(){
+      var r=BZDIDKEY.deriveK1Key(mprk,'nostr:'+soul);
+      try{ return npubFromSeed(r.seed) } finally { r.seed.fill(0) }
+    });
+    return out;
+  }
+
   /* core-first signed-tx builder: the Rust core packs the envelope (byte-identical to eosjs,
      proven) and signs; the account passkey (PUB_WA) rides the eosjs WebAuthn provider;
      falls back to the vendored eosjs key provider on any failure */
@@ -2950,13 +3370,13 @@ var WALLET_PROFILE = {
   var CHAIN_MATRIX = [
     { family: 'EVM', name: 'ETH', unit: 'ETH', read: 'public JSON-RPC eth_getBalance + balanceOf, Multicall3 batching', sign: 'Tier 1/2/3 · EIP-1559 · Permit2', state: 'PROVEN' },
     { family: 'EVM', name: 'Arbitrum', unit: 'ETH · ANT', read: 'same + Arbiscan/Blockscout keyless — the derived bzDiD address reads live on this page', sign: 'Tier 1/2/3 · Permit2', state: 'LIVE' },
-    { family: 'EVM', name: 'Base', unit: 'ETH', read: 'same; mainnet.base.org keyless — MiDi lives here', sign: 'Tier 1/2/3 · Permit2', state: 'PROVEN' },
+    { family: 'EVM', name: 'Base', unit: 'ETH · USDC', read: 'same; mainnet.base.org keyless — MiDi lives here, and the derived bzDiD address now READS and SIGNS on chain 8453: ETH plus Circle-native USDC at its true 6 decimals', sign: 'Tier 1/2/3 · EIP-155 first-party signer · the spend cap is enforced INSIDE the signer, not by the button', state: 'LIVE' },
     { family: 'EVM', name: 'exSAT', unit: 'BTC', read: 'EVM reads once the public RPC is verified — no canonical Uniswap, our own GPL v3; xBTC = 1:1 staked BTC', sign: 'Tier 1/2/3', state: 'VERIFY' },
     { family: 'EVM', name: 'Vaulta', unit: 'A', read: 'native EOS-line APIs through the adapter contract on this page', sign: 'bzDiD K1 or passkey · firmware ✓', state: 'LIVE' },
     { family: 'EVM', name: 'stables', unit: 'USDC & kin', read: 'ERC-20 reads on every EVM rail + SPL + HBD on Hive', sign: 'per family · token units, never fiat itemization', state: 'PROVEN' },
-    { family: 'Bitcoin', name: 'BTC', unit: 'BTC', read: 'Esplora/Blockbook/Electrum UTXOs; mempool.space keyless; operator bitcoind for sovereignty', sign: 'firmware ✓ · silent payments receive (sp1q default posture)', state: 'PROVEN' },
-    { family: 'Bitcoin', name: 'Lightning', unit: 'sats', read: 'LDK in-process channel state — no third party at all', sign: 'LDK keys per tier · BOLT12 offers', state: 'STUDY' },
-    { family: 'Independent', name: 'Solana', unit: 'SOL', read: 'public getBalance/getTokenAccountsByOwner (rate-limited) → operator RPC', sign: 'firmware ✓ · public RPC is SERVICE — degrade gracefully', state: 'VERIFY' },
+    { family: 'Bitcoin', name: 'BTC', unit: 'BTC', read: 'Esplora/Blockbook/Electrum UTXOs; mempool.space keyless; operator bitcoind for sovereignty', sign: 'firmware ✓ · silent payments receive (sp1q default posture) · a native-segwit P2WPKH receive address derives in this tab from the same soul, proven against the published BIP-173 and BIP-84 vectors; the spending path stays unwired', state: 'PROVEN' },
+    { family: 'Bitcoin', name: 'Lightning', unit: 'sats', read: 'BOLT-11 invoices AND BOLT-12 offers decode LOCALLY in this tab — amount, payment hash, expiry, issuer; no node contacted, nobody told what you are about to pay', sign: 'the sats cap speaks on the decoded amount; paying rides an NWC connection whose budget lives at the hub (1000 sat/day, live) and whose live leg is parked at a relay ACL — tools/ln-rail/README.md', state: 'VERIFY' },
+    { family: 'Independent', name: 'Solana', unit: 'SOL', read: 'public getBalance/getTokenAccountsByOwner (rate-limited) → operator RPC', sign: 'firmware ✓ · public RPC is SERVICE — degrade gracefully · a receive address derives in this tab from the same soul (ed25519 to base58); the spending path stays unwired', state: 'VERIFY' },
     { family: 'Independent', name: 'Hive', unit: 'HIVE · HBD', read: 'condenser getAccounts → HIVE/HBD/HP/RC, keyless — reads live on this page', sign: 'active-key transfers · firmware ✓', state: 'LIVE' },
     { family: 'Independent', name: 'Zano', unit: 'ZANO', read: 'native daemon/API — privacy chain, reads may be per-output', sign: 'firmware ✓', state: 'VERIFY' },
     { family: 'Hard tail', name: 'Bitcoin Cash', unit: 'BCH', read: 'Electrum/Blockbook, cashaddr', sign: 'FIRMWARE GAP — BCH sighash differs from BTC', state: 'GAP' },
@@ -3002,28 +3422,21 @@ var WALLET_PROFILE = {
   }
   /* RECEIVE — every address of this soul, QRs drawn locally */
   function rxRender(){
-    var cards=[];
-    if(SOUL){
-      cards.push({t:'Vaulta · A',v:SOUL,note:'send A to this account name — memo optional'});
-    }
-    var evmAddr=null;
-    if(MPRK&&CORE){
-      var es=BZDIDKEY.deriveK1Key(MPRK,'evm:'+SOUL).seed;
-      evmAddr=CORE.evmAddr(es); es.fill(0);
-    }
-    if(evmAddr)cards.push({t:'Arbitrum · ETH + ANT',v:evmAddr,note:'the derived bzDiD keypair — fund before sending'});
-    if(MPRK){
-      var nr=BZDIDKEY.deriveK1Key(MPRK,'nostr:'+SOUL);
-      cards.push({t:'nostr · npub',v:npubFromSeed(nr.seed),note:'the comms lane'});
-      nr.seed.fill(0);
-    }
+    var cards=railAddresses(MPRK,SOUL);
     if(!cards.length){ $('rx-cards').innerHTML='<div class="law">connect your keychain first — the addresses derive from your soul.</div>'; return }
     $('rx-cards').innerHTML=cards.map(function(c,i){
+      /* honest-empty: a rail this page could not derive shows the REASON and
+         no address at all. Half an address is worse than none. */
+      if(!c.v) return '<div style="flex:1 1 220px;max-width:280px;border:1px dashed var(--line2);border-radius:10px;padding:10px;background:var(--well)">'+
+        '<div style="font-size:10px;color:var(--faint)">'+esc(c.t)+'</div>'+
+        '<div style="font-size:10.5px;color:var(--amber);margin-top:8px;line-height:1.7">no address shown — '+esc(c.err||'not derivable here')+'</div>'+
+        '<div style="font-size:9px;color:var(--dim);margin-top:6px">a wrong receive address cannot be undone, so this page shows none.</div></div>';
       return '<div style="flex:1 1 220px;max-width:280px;border:1px solid #2c4a3a;border-radius:10px;padding:10px;background:#081810">'+
-        '<div style="font-size:10px;color:var(--faint)">'+c.t+'</div>'+
+        '<div style="font-size:10px;color:var(--faint)">'+esc(c.t)+'</div>'+
         qrSvg(c.v)+
-        '<div style="font-size:11px;font-family:IBM Plex Mono,monospace;word-break:break-all;color:var(--leaf);margin-top:6px">'+c.v+'</div>'+
-        '<div style="font-size:9px;color:var(--dim);margin:4px 0">'+c.note+'</div>'+
+        '<div style="font-size:11px;font-family:IBM Plex Mono,monospace;word-break:break-all;color:var(--leaf);margin-top:6px">'+esc(c.v)+'</div>'+
+        '<div style="font-size:9px;color:var(--dim);margin:4px 0">'+esc(c.note)+'</div>'+
+        '<div style="font-size:8.5px;color:var(--faint);margin-bottom:4px">context <b>'+esc(c.ctx)+'</b></div>'+
         '<button class="rxc" data-i="'+i+'" style="font-size:10px;padding:4px 10px">copy</button></div>';
     }).join('');
     Array.prototype.forEach.call(document.querySelectorAll('.rxc'),function(b){
@@ -3040,10 +3453,13 @@ var WALLET_PROFILE = {
     localStorage.setItem('bnr_tx_tab',which);
     $('tx-v').style.display=which==='v'?'block':'none';
     $('tx-e').style.display=which==='e'?'block':'none';
-    if(which==='v')svRefresh(); else seRefresh();
+    $('tx-l').style.display=which==='l'?'block':'none';
+    if(which==='v')svRefresh();
+    else if(which==='e')seRefresh();
   }
   $('tx-tab-v').onclick=function(){txTab('v')};
   $('tx-tab-e').onclick=function(){txTab('e')};
+  $('tx-tab-l').onclick=function(){txTab('l')};
 
   /* SEND · Vaulta A — the proven bridge/SIGN lane with eosio::transfer */
   function svRefresh(){
@@ -3069,14 +3485,42 @@ var WALLET_PROFILE = {
       return u+': <b>'+caps[u]+'</b>/day · '+used.toFixed(4)+' signed today'+(used>=caps[u]?' — <b style="color:var(--amber)">cap hit</b>':'');
     }).join(' · '):'unset — no limit';
   }
-  function capGate(unit,amt){
+  /* ── capAssert IS THE CAP. It THROWS, and it is called from inside the
+     signing primitives themselves — not from the buttons. That is the whole
+     point of R4 "signer-authoritative": a cap that only the call site checks
+     is a cap that the next lane someone adds will quietly forget, and a
+     forgotten cap is worse than no cap because the owner believes in it.
+     e2e/wallet-signer.mjs proves this by DELETING the call-site check from
+     the served page and showing the signer still refuses. ── */
+  function CapRefused(msg){ var e=new Error(msg); e.name='CapRefused'; e.capRefused=true; return e }
+  function capAssert(unit,amt){
     var caps=capLoad();
-    if(!(unit in caps)) return true;
-    if(capUsed(unit)+amt<=caps[unit]+1e-9) return true;
-    $('pay-stat').innerHTML='<b style="color:var(--amber)">spend cap speaks:</b> '+amt+' '+unit+' would pass your '+
-      caps[unit]+' '+unit+'/day ('+capUsed(unit).toFixed(4)+' already signed today). The engine refuses to sign '+
-      'past the cap YOU set — raise or clear it above. No one is asked.';
-    return false;
+    if(!(unit in caps)) return;                       /* unset = no limit: the autonomy default */
+    var a=Number(amt);
+    if(!isFinite(a)||a<0) throw CapRefused('the cap cannot size "'+amt+' '+unit+'" — refused rather than guessed');
+    var used=capUsed(unit);
+    if(used+a<=caps[unit]+1e-9) return;
+    throw CapRefused(a+' '+unit+' would pass your '+caps[unit]+' '+unit+'/day cap ('+
+      used.toFixed(4)+' already signed today). The engine refuses to sign past the cap YOU set.');
+  }
+  /* the UX skin over the same authority: buttons use this for a kind message,
+     but nothing depends on them remembering to. */
+  function capGate(unit,amt){
+    try{ capAssert(unit,amt); return true }
+    catch(e){
+      if(!e.capRefused) throw e;
+      $('pay-stat').innerHTML='<b style="color:var(--amber)">spend cap speaks:</b> '+e.message+
+        ' Raise or clear it above. No one is asked.';
+      return false;
+    }
+  }
+  /* An amount the cap CANNOT size (a BOLT-12 offer priced in fiat, say) is not
+     the same as an amount under the cap. When a cap exists for the unit and the
+     price is unknowable here, the honest answer is refusal, not a shrug. */
+  function capAssertUnpriced(unit,what){
+    if(unit in capLoad())
+      throw CapRefused('you set a '+capLoad()[unit]+' '+unit+'/day cap, and '+what+
+        ' carries no '+unit+' price this page can read — so it cannot be checked against your cap. Refused.');
   }
   function capRecord(unit,amt){
     var l=capLedger(); l.push({d:capToday(),u:unit,a:amt});
@@ -3167,74 +3611,182 @@ var WALLET_PROFILE = {
     }
     return new Uint8Array(item(x));   // the outer call carries the LIST header too
   }
-  window.BNRPAY={rlp:rlp,evmSendRaw:evmSendRaw,parseWif:parseWifAny};  // first-party pay-lane API: RLP encoder, EVM tx builder, WIF normalizer (receipt-tested; keys stay in the tab frame)
+  /* first-party pay-lane API. Keys stay in the tab frame; nothing here holds,
+     returns, or transmits a seed. This is also the gate's handle on the rail
+     core — every primitive below is proven against a published vector in
+     e2e/wallet-signer.mjs before it is trusted with an address or an amount. */
+  window.BNRPAY={rlp:rlp,evmSendRaw:evmSendRaw,parseWif:parseWifAny,
+    rails:EVM_RAILS,
+    ripemd160:ripemd160,hash160:hash160,p2wpkhAddress:p2wpkhAddress,solanaAddress:solanaAddress,
+    toBaseUnits:toBaseUnits,fromBaseUnits:fromBaseUnits,
+    decodeBolt11:decodeBolt11,decodeBolt12:decodeBolt12,decodeLnRequest:decodeLnRequest,
+    parseNwcUri:parseNwcUri,
+    capAssert:capAssert,capAssertUnpriced:capAssertUnpriced,railAddresses:railAddresses};
   function evmAddrOf(){ // address + fresh seed pair — seed stays in the local frame only
     var rec=BZDIDKEY.deriveK1Key(MPRK,'evm:'+SOUL);
     return {seed:rec.seed,addr:CORE.evmAddr(rec.seed)};
   }
+  /* the rail and asset pickers are RENDERED FROM EVM_RAILS — add a row to the
+     registry and the surface grows a rail; there is no second list to forget */
+  function seRailKey(){ return $('se-rail').value||'base' }
+  function seAssetKey(){ return $('se-asset').value||'ETH' }
+  function renderRailPickers(){
+    var cur=$('se-rail').value;
+    $('se-rail').innerHTML=Object.keys(EVM_RAILS).map(function(k){
+      return '<option value="'+k+'">'+esc(EVM_RAILS[k].label)+'</option>' }).join('');
+    if(cur&&EVM_RAILS[cur])$('se-rail').value=cur;
+    renderAssetPicker();
+  }
+  function renderAssetPicker(){
+    var rail=railOf(seRailKey()), cur=$('se-asset').value;
+    $('se-asset').innerHTML=Object.keys(rail.assets).map(function(a){
+      return '<option value="'+a+'">'+esc(a)+'</option>' }).join('');
+    if(cur&&rail.assets[cur])$('se-asset').value=cur;
+  }
   async function seRefresh(){
     if(!MPRK||!CORE||!SOUL){$('se-stat').textContent='connect your keychain first';return}
+    var railKey=seRailKey(), rail=railOf(railKey), asset=assetOf(railKey,seAssetKey());
     var p=evmAddrOf(); var addr=p.addr; p.seed.fill(0);
-    var wei=await evmCall('eth_getBalance',[addr,'latest']);
-    var nonce=await evmCall('eth_getTransactionCount',[addr,'pending']);
-    var gp=await evmCall('eth_gasPrice',[]);
-    if(wei!==null&&gp!==null){
-      $('se-stat').innerHTML='derived: <b>'+addr.slice(0,12)+'…'+addr.slice(-6)+'</b> · '+
-        (parseInt(wei,16)/1e18).toFixed(6)+' ETH · nonce '+(nonce?parseInt(nonce,16):'0')+' · gas '+(parseInt(gp,16)/1e9).toFixed(3)+' gwei';
-    } else $('se-stat').textContent='arbitrum read failed — retry in a moment';
+    $('se-stat').textContent='reading '+rail.label+'…';
+    var wei=await evmCall('eth_getBalance',[addr,'latest'],railKey);
+    var nonce=await evmCall('eth_getTransactionCount',[addr,'pending'],railKey);
+    var gp=await evmCall('eth_gasPrice',[],railKey);
+    if(wei===null||gp===null){ $('se-stat').textContent=rail.label+' read failed — retry in a moment'; return }
+    var held='';
+    if(asset.contract){
+      var b=await evmCall('eth_call',[{to:asset.contract,data:'0x70a08231'+'0'.repeat(24)+addr.slice(2)},'latest'],railKey);
+      held=(b&&b.slice)?' · <b>'+fromBaseUnits(BigInt(b),asset.decimals)+' '+asset.symbol+'</b>':' · '+asset.symbol+' unread';
+    }
+    $('se-stat').innerHTML='<b>'+esc(rail.label)+'</b> (chain '+rail.chainId+') · derived <b>'+addr.slice(0,10)+'…'+addr.slice(-6)+'</b> · '+
+      fromBaseUnits(BigInt(wei),18)+' ETH'+held+' · nonce '+(nonce&&nonce.slice?parseInt(nonce,16):'0')+
+      ' · gas '+(parseInt(gp,16)/1e9).toFixed(4)+' gwei';
   }
-  async function evmSendRaw(to,asset,amtEth){
-    var CH=42161n; // Arbitrum One — PUBLIC-CONSTANT
+  /* ══ THE EVM SIGNER — one function for every EVM rail and every asset on it.
+     Chain id and token decimals are READ FROM THE REGISTRY, never branched on
+     here: the old lane hard-coded 42161 and 1e18, which made Base unreachable
+     and would have sent 10^12x on any 6-decimal token.
+
+     THE CAP LIVES INSIDE THIS FUNCTION. Nothing signs on an EVM rail without
+     passing capAssert first, whatever the caller remembered to check. ══ */
+  async function evmSendRaw(railKey,to,assetKey,amount){
+    var rail=railOf(railKey), asset=assetOf(railKey,assetKey);
+    if(!/^0x[0-9a-fA-F]{40}$/.test(to)) throw new Error('recipient must be a 0x… 20-byte address');
+    var units=toBaseUnits(amount,asset.decimals);          /* exact; throws before any key is touched */
+    capAssert(asset.symbol,Number(amount));                /* SIGNER-AUTHORITATIVE — see capAssert */
+
+    var CH=BigInt(rail.chainId);
     var p=evmAddrOf(); var from=p.addr;
-    var value=0n, data=new Uint8Array(0);
-    var toB=hexB(to.replace(/^0x/,''));   // rlp takes BYTES — a '0x…' string would be TEXT-encoded
-    if(asset==='ant'){
-      toB=hexB(ANT.replace(/^0x/,''));
-      var units=BigInt(Math.round(amtEth*1e18));
-      data=hexB('a9059cbb'+'0'.repeat(24)+to.replace(/^0x/,'')+units.toString(16).padStart(64,'0'));
-    } else {
-      value=BigInt(Math.round(amtEth*1e18));
-    }
-    var nonce=parseInt(await evmCall('eth_getTransactionCount',[from,'pending']),16)||0;
-    var gasPrice=BigInt(await evmCall('eth_gasPrice',[])||'0x0');
-    var gas=21000n;
-    if(asset==='ant'){
-      var est=await evmCall('eth_estimateGas',[{from:from,to:to,value:'0x0',data:'0x'+hexS(data)}]);
-      if(est)gas=BigInt(parseInt(est,16));
-    }
-    var pay=rlp([nonce,gasPrice,gas,toB,value,data,CH,0n,0n]);
-    var hash=BN.keccak_256(pay);
-    var sig=BN.secp.sign(hash,p.seed);
-    var v=35n+2n*CH+BigInt(sig.recovery||0);
-    var rb=new Uint8Array(32); new Uint8Array(sig.r.toString(16).padStart(64,'0').match(/../g).map(function(h){return parseInt(h,16)})).forEach(function(b,i){rb[i]=b});
-    var sb=new Uint8Array(32); new Uint8Array(sig.s.toString(16).padStart(64,'0').match(/../g).map(function(h){return parseInt(h,16)})).forEach(function(b,i){sb[i]=b});
-    var raw=rlp([nonce,gasPrice,gas,toB,value,data,v,rb,sb]);
-    p.seed.fill(0);
-    return {rawHex:'0x'+hexS(raw),from:from,gas:gas,gasPrice:gasPrice};
-  }
-  $('se-go').onclick=async function(){
-    var to=$('se-to').value.trim(), asset=$('se-asset').value, amt=parseFloat($('se-amt').value);
-    if(!MPRK||!CORE){payStat('connect your keychain first');return}
-    if(!/^0x[0-9a-fA-F]{40}$/.test(to)){$('se-stat').textContent='recipient must be a 0x… 20-byte address';return}
-    if(!(amt>0)){$('se-stat').textContent='amount must be > 0';return}
-    if(!capGate(asset==='eth'?'ETH':'ANT',amt))return;
-    $('se-stat').textContent='building + signing locally (EIP-155, first-party)…';
     try{
-      var t=await evmSendRaw(to,asset,amt);
-      var fee=Number(t.gas*t.gasPrice)/1e18;
-      $('se-stat').textContent='broadcasting… fee ≈ '+fee.toFixed(6)+' ETH';
-      var txid=await evmCall('eth_sendRawTransaction',[t.rawHex]);
-      if(txid&&/^0x[0-9a-f]{64}$/i.test(txid)){
-        await seRefresh();   // refresh first, so the receipt line stays on top
-        $('se-stat').innerHTML='<b style="color:var(--leaf)">✓ broadcast</b> · tx '+txid.slice(0,20)+'… (from '+t.from.slice(0,10)+'…)';
-        payStat('📤 Arbitrum '+asset.toUpperCase()+' sent — tx '+txid);
-        capRecord(asset==='eth'?'ETH':'ANT',amt);
+      var value=0n, data=new Uint8Array(0);
+      var toB=hexB(to.replace(/^0x/,''));   // rlp takes BYTES — a '0x…' string would be TEXT-encoded
+      var callTarget=to;
+      if(asset.contract){
+        callTarget=asset.contract;
+        toB=hexB(asset.contract.replace(/^0x/,''));
+        data=hexB('a9059cbb'+'0'.repeat(24)+to.replace(/^0x/,'')+units.toString(16).padStart(64,'0'));
       } else {
-        $('se-stat').innerHTML='<b style="color:var(--amber)">rpc refused:</b> '+String(txid&&txid.message||txid).slice(0,200);
+        value=units;
       }
-    }catch(e){ $('se-stat').textContent='send error: '+e.message }
-    $('se-to').value='';$('se-amt').value='';
+      var nonceHex=await evmCall('eth_getTransactionCount',[from,'pending'],railKey);
+      var nonce=nonceHex&&nonceHex.slice?parseInt(nonceHex,16):0;
+      var gpHex=await evmCall('eth_gasPrice',[],railKey);
+      var gasPrice=BigInt(gpHex&&gpHex.slice?gpHex:'0x0');
+      if(gasPrice<=0n) throw new Error(rail.label+' gave no gas price — refusing to sign a tx priced at zero');
+      var gas=21000n;
+      if(asset.contract){
+        /* estimate against the TOKEN CONTRACT, which is what the tx calls —
+           estimating against the recipient (the old lane's bug) measures the
+           wrong thing and silently leaves an ERC-20 transfer at 21000 gas */
+        var est=await evmCall('eth_estimateGas',
+          [{from:from,to:callTarget,value:'0x0',data:'0x'+hexS(data)}],railKey);
+        if(est&&est.slice) gas=BigInt(parseInt(est,16))*12n/10n;   /* +20% headroom */
+        else throw new Error('the rail would not estimate gas for this transfer — refusing to guess it');
+      }
+      var pay=rlp([nonce,gasPrice,gas,toB,value,data,CH,0n,0n]);
+      var hash=BN.keccak_256(pay);
+      var sig=BN.secp.sign(hash,p.seed);
+      var v=35n+2n*CH+BigInt(sig.recovery||0);
+      var rb=new Uint8Array(32); new Uint8Array(sig.r.toString(16).padStart(64,'0').match(/../g).map(function(h){return parseInt(h,16)})).forEach(function(b,i){rb[i]=b});
+      var sb=new Uint8Array(32); new Uint8Array(sig.s.toString(16).padStart(64,'0').match(/../g).map(function(h){return parseInt(h,16)})).forEach(function(b,i){sb[i]=b});
+      var raw=rlp([nonce,gasPrice,gas,toB,value,data,v,rb,sb]);
+      return {rawHex:'0x'+hexS(raw),from:from,gas:gas,gasPrice:gasPrice,
+              chainId:rail.chainId,rail:railKey,asset:asset.symbol,units:units,
+              to:to,callTarget:callTarget,explorer:rail.explorer};
+    } finally { p.seed.fill(0); }   /* the seed is scrubbed on EVERY exit, refusals included */
+  }
+  $('se-rail').addEventListener('change',function(){ renderAssetPicker(); seRefresh() });
+  $('se-asset').addEventListener('change',seRefresh);
+  $('se-go').onclick=async function(){
+    var to=$('se-to').value.trim(), amt=$('se-amt').value.trim();
+    var railKey=seRailKey(), assetKey=seAssetKey();
+    if(!MPRK||!CORE){payStat('connect your keychain first');return}
+    var rail=railOf(railKey), asset=assetOf(railKey,assetKey);
+    $('se-stat').textContent='building + signing locally on '+rail.label+' (EIP-155, first-party)…';
+    try{
+      /* the amount is a STRING all the way to the signer — parseFloat here
+         would re-introduce exactly the drift toBaseUnits exists to remove */
+      var t=await evmSendRaw(railKey,to,assetKey,amt);
+      var fee=fromBaseUnits(t.gas*t.gasPrice,18);
+      $('se-stat').textContent='broadcasting on '+rail.label+'… fee ≈ '+fee+' ETH';
+      var txid=await evmCall('eth_sendRawTransaction',[t.rawHex],railKey);
+      if(txid&&txid.slice&&/^0x[0-9a-f]{64}$/i.test(txid)){
+        await seRefresh();   // refresh first, so the receipt line stays on top
+        $('se-stat').innerHTML='<b style="color:var(--leaf)">✓ broadcast on '+esc(rail.label)+'</b> · '+
+          '<a href="'+rail.explorer+txid+'" target="_blank" rel="noopener noreferrer">'+txid.slice(0,20)+'…</a>'+
+          ' (from '+t.from.slice(0,10)+'…)';
+        payStat('📤 '+rail.label+' '+asset.symbol+' sent — tx '+txid);
+        capRecord(asset.symbol,Number(amt));
+        $('se-to').value='';$('se-amt').value='';   /* cleared only on success — a refusal keeps your typing */
+      } else {
+        $('se-stat').innerHTML='<b style="color:var(--amber)">'+esc(rail.label)+' refused:</b> '+
+          esc(String(txid&&txid.message||txid).slice(0,200));
+      }
+    }catch(e){
+      $('se-stat').innerHTML=e.capRefused
+        ? '<b style="color:var(--amber)">spend cap speaks:</b> '+esc(e.message)+' Nothing was signed.'
+        : '<b style="color:var(--amber)">refused before signing:</b> '+esc(e.message);
+    }
   };
+
+  /* ── LIGHTNING — read a request, cap it, never pretend to pay it ── */
+  $('ln-read').onclick=function(){
+    var raw=$('ln-req').value;
+    $('ln-card').style.display='none';
+    if(!raw.trim()){ $('ln-stat').textContent='paste a BOLT-11 invoice or a BOLT-12 offer first'; return }
+    var d;
+    try{ d=decodeLnRequest(raw) }
+    catch(e){ $('ln-stat').innerHTML='<b style="color:var(--amber)">not read:</b> '+esc(e.message); return }
+    var rows=[['standard',d.standard+(d.kind?' '+d.kind:'')+(d.network?' · '+d.network:'')]];
+    if(d.pricedInSats) rows.push(['amount',d.sats.toLocaleString()+' sat'+(d.msats!=null?' ('+d.msats+' msat)':'')]);
+    else if(d.currency!=null&&d.amount!=null) rows.push(['amount',String(d.amount)+' minor units of '+d.currency+
+      ' — <b>no satoshi price until the invoice comes back</b>']);
+    else rows.push(['amount','any amount (the payer chooses)']);
+    if(d.description) rows.push(['description',d.description]);
+    if(d.issuer) rows.push(['issuer',d.issuer]);
+    if(d.paymentHash) rows.push(['payment hash',d.paymentHash]);
+    if(d.expiresAt) rows.push(['expires',new Date(d.expiresAt*1000).toISOString().replace('T',' ').slice(0,19)+'Z'+
+      (d.expiresAt*1000<Date.now()?' — <b style="color:var(--amber)">already expired</b>':'')]);
+    if(d.issuerId) rows.push(['issuer id',d.issuerId]);
+    $('ln-card').innerHTML=rows.map(function(r){
+      return '<div style="display:flex;gap:10px;font-size:10.5px;line-height:1.9"><span style="color:var(--faint);flex:0 0 96px">'+
+        r[0]+'</span><span style="color:var(--ink);word-break:break-all">'+r[1]+'</span></div>' }).join('');
+    $('ln-card').style.display='block';
+    /* the cap speaks on the decoded amount — the same authority the EVM
+       signer answers to, on a rail whose payment leg is not even wired */
+    try{
+      if(d.pricedInSats) capAssert('sats',d.sats);
+      else capAssertUnpriced('sats',d.standard==='BOLT-12'?'this offer':'an any-amount invoice');
+      $('ln-stat').innerHTML='✓ read locally — nothing left this tab.'+
+        (('sats' in capLoad())
+          ? (d.pricedInSats?' <b style="color:var(--leaf)">Within your sats cap.</b>':'')
+          : ' <span style="color:var(--faint)">No sats cap set — set one above and this lane obeys it too.</span>')+
+        ' <b>Paying is not wired here</b> (the LN seam pays through NWC; its live leg is parked at a relay ACL).';
+    }catch(e){
+      if(!e.capRefused) throw e;
+      $('ln-stat').innerHTML='<b style="color:var(--amber)">spend cap speaks:</b> '+esc(e.message);
+    }
+  };
+  $('ln-req').addEventListener('keydown',function(e){ if(e.key==='Enter')$('ln-read').click() });
 
   /* SWAP · A ↔ RAM — eosio buyrambytes / sellram, live rammarket quote */
   var SW_BUY=true;
@@ -3342,6 +3894,7 @@ var WALLET_PROFILE = {
   window.addEventListener('beforeunload',scrubAll);
 
   // boot: kit-profile defaults → composer, bundle check + Rust core arming + auto-connect balances from localStorage
+  renderRailPickers();   // the send panel's rails are DATA — rendered before any read
   (function bootProfile(){
     var pc=(window.WALLET_PROFILE&&WALLET_PROFILE.composer)||{};
     if(!$('tx-contract').value && pc.contract)$('tx-contract').value=pc.contract;
