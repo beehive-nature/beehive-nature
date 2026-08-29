@@ -1031,11 +1031,20 @@
    "state": "LIVE",
    "gloss": "the royal art collection —",
    "org": "skaists"
+  },
+  {
+   "id": "fieldnotes",
+   "family": "skaists",
+   "home": "skaists.dev",
+   "path": "surfaces/fieldnotes.html",
+   "state": "LIVE",
+   "gloss": "the logbook — receipts, measurements, honest costs",
+   "org": "skaists"
   }
  ],
  "counts": {
-  "surfaces": 81,
-  "listed": 90,
+  "surfaces": 82,
+  "listed": 91,
   "families": 8,
   "domains": 26,
   "domainsLive": 2,
@@ -1044,7 +1053,7 @@
   "byFamily": {
    "beehivenature": 35,
    "plur": 5,
-   "skaists": 12,
+   "skaists": 13,
    "bnature": 18,
    "beehivebiomass": 5,
    "beehivebuds": 0,
@@ -1052,11 +1061,11 @@
    "bnr": 1
   },
   "byState": {
-   "LIVE": 90
+   "LIVE": 91
   },
   "byOrg": {
    "beehive-nature": 52,
-   "skaists": 24,
+   "skaists": 25,
    "beehive-biomass": 5
   }
  },
