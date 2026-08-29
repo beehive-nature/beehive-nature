@@ -426,3 +426,53 @@ value-flow diagrams, PD imagery, register-split generative art layer) are
 both real, scoped, landable asks — neither was touched this pass. Parking
 here rather than half-building either under time pressure, per the same
 sprint law that governed items 4 and 5 earlier tonight.
+
+---
+
+## DEFECT — founder eye-catch #6 (Royal Collection level/art mismatch) · DONE `7e530f2`
+
+**Not a chain-side bug — ours.** Cards showed the MAX ladder tier
+(FUNGI "5 of 5", FROGGI "6 of 6") while `getSvg` rendered the LOWEST-tier
+art. Read the actual Sourcify-verified `Generator.sol` source for each
+contract rather than guessing: `getSvg`/`getMeta` take one static
+`SeedData` struct (2 fields for FUNGI/$FROGGI/JELLI, 3 for PEPI v1/v2) —
+static structs carry NO leading offset word in calldata. The old code
+prepended a bogus `0x20` offset anyway, so the contract always decoded
+`seed_data.seed` as the literal constant 32 and the real balance fell
+into the ignored `extra`/`seed2` field — art was pinned to the lowest
+tier no matter what. Confirmed live before/after (FUNGI: 351-byte
+near-empty piece → 1,863-byte level-5 mushroom, contract's own `getMeta`
+independently reading `"level":5`, matching `lvlOf` exactly).
+
+Second, PEPI-specific defect: PEPI's `getItemData` does
+`data.lvl = rnd.lvl() + 1` (FUNGI has no `+1`) — carried explicitly now as
+a cited `lvlOffset` per collection instead of one assumed convention.
+
+**The o/u law, corrected.** With the calldata fixed, `getMeta` was read
+live against real holdings for all five collections and agreed exactly
+with `lvlOf` every time — no genuine divergence survived. Per the
+founder's own law, every `ou:true` flag and every o/u UI string is gone;
+market's law-4 panel now describes the new permanent `verifyLevel()`
+check instead of a bug that turned out to be this file's own arithmetic.
+
+**Third defect, surfaced by the fix:** `decodeString`'s 16384-byte cap
+silently dropped FROGGI's real level-6 SVG (31,411 bytes) via
+catch-and-skip — the card vanished from the museum with no error. Cap
+raised to 131072.
+
+Gates: design-acceptance 28/28, estate-source 11/11. Live-verified on
+production — https://skaists.dev/surfaces/museum.html and
+`/surfaces/blight/market.html` — all five collections render substantial,
+level-matching art; the founder's exact FUNGI and FROGGI cards screenshot
+with full character art (hat, sunglasses, clothing) at the correct level,
+shots attached to this session.
+
+---
+
+## RAIL-FORMULARY-1 · DONE `2fa7311`
+
+Founder-ruled "go" — committed verbatim, UNVERIFIED/VERIFY markers
+preserved exactly as given (Trezor Antelope signing support; the
+Horizon section's forward-compat claims). sha256
+`8a67c1430b8f4da59061dae966090950a2704b028bfcf1158359078e6f174bf0` (PUBLIC-CONSTANT: digest of a committed public doc, not a secret).
+CI green.
