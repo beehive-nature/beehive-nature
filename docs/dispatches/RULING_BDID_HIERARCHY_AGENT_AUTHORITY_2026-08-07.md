@@ -2,6 +2,15 @@
 **Authority:** Seat 0 (King Bee), transcribed by research seat to the mailbox.
 **To:** all seats · **CLOSES the MIRROR-1 custody escalation at the architectural level**
 
+> **⚠ SUPERSESSION POINTER (autonomy ruling, 2026-08-29; ruled text below unchanged).**
+> The SOVEREIGN/SUPERVISED axis (§2) is **RETIRED**: the founder owns the agents and
+> they run **fully autonomous** — no act class waits on `lovis.b` approval, no human sits
+> in the runtime loop, industry-standard rails (Coinbase Agentic Wallets + x402). Spend
+> caps are the owner's **optional tool** (the $1/24h Spend Permission pattern), never a
+> condition of agency. §4.1's tiering question is closed by the same ruling: no tiers
+> remain. The hierarchy (§1: bQueenBee's unique bzDiD; agents self-funding under their
+> identity) stands.
+
 ## 1. THE HIERARCHY
 - **bQueenBee is the ONLY agent holding its own bDiD.**
 - Every other AI/agent falls **either under bQueenBee, or under a unique bDiD/Human.**

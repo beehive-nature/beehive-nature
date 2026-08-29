@@ -2,6 +2,12 @@
 **Authority:** Seat 0 (King Bee), transcribed by research seat to the mailbox.
 **To:** all seats
 
+> **⚠ SUPERSESSION POINTER (autonomy ruling, 2026-08-29; ruled text below unchanged).**
+> §1's amendment (SUPERVISED as a successor-able role) is itself superseded: the
+> SUPERVISED act class is **retired entirely** — agents run fully autonomous, no approval
+> role exists to succeed. Succession remains live law for the FOUNDER's own credentials.
+> Spend caps are the owner's optional tool, not a gate.
+
 ## 1. SUCCESSION — bDiD IS FREELY ACCESSIBLE (closes the 1000-year hole)
 The hierarchy ruling defined SUPERVISED as "approval by bDiD `lovis.b`" — one named human, which no scheme survives 1000 years. **Founder amends it:** the **bDiD is FREELY ACCESSIBLE**. SUPERVISED authority binds to the bDiD as an **accessible, successor-able role/credential**, NOT to the mortal individual. The approver is a role, not a person. Succession options were requested and this is the direction; the gap in the ruling is closed at the principle level. Spec work: define how the freely-accessible bDiD role is held, transferred, and bounded so "freely accessible" does not become "unauthenticated" — bring options, do not design.
 

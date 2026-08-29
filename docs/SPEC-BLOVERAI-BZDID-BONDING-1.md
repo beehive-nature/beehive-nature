@@ -11,9 +11,10 @@ RULING_BDID_HIERARCHY_AGENT_AUTHORITY_2026-08-07, RULING_KISS_BDID_PASSKEY_WALLE
 From RULING_BDID_HIERARCHY_AGENT_AUTHORITY (2026-08-07):
 - bQueenBee is the ONLY agent holding its own bzDiD; every other agent falls
   under bQueenBee or under a unique human bzDiD.
-- Authority axis: SOVEREIGN (agent acts on own authority within scope) vs
-  SUPERVISED (requires approval by bzDiD lovis.b). Access is universal; authority
-  level is the variable.
+- Authority axis (as ruled 2026-08-07): SOVEREIGN vs SUPERVISED (approval by
+  bzDiD lovis.b). **SUPERSEDED by the autonomy ruling 2026-08-29: agents run
+  fully autonomous — the founder owns them, no act class waits on approval,
+  and spend caps are the owner's optional tool.** Access is universal.
 - Agents are self-funding (earn resources under their identity).
 
 From RULING_KISS_BDID_PASSKEY_WALLET (2026-08-08):
@@ -86,10 +87,13 @@ not seat design decisions"):
 
 1. **SOVEREIGN/SUPERVISED TIERING (S4.1)** — which specific act classes an agent
    may perform on its own authority vs which require lovis.b approval.
-   UNRULED. This spec does not define the boundary.
+   **RESOLVED by the autonomy ruling 2026-08-29: no tiering remains — all acts
+   proceed on the agent's own authority within its scope. Optional spend caps
+   (ceiling, expiry, revocation) are the owner's tool, not an approval gate.**
 
 2. **ATTENUATION MECHANISM (S4.2)** — how a sub-agent's spend authority is scoped
-   (ceiling, expiry, revocation, purpose-binding). Candidate: caveat-based
+   (ceiling, expiry, revocation, purpose-binding) — **as an owner's optional
+   tool, not a gate**, per the autonomy ruling 2026-08-29. Candidate: caveat-based
    delegation (EIP-2255 fork). UNRULED. Cite-or-stop before writing spec text.
 
 3. **ERC-7710 DELEGATION** — not referenced in the existing rulings. If this is
@@ -129,10 +133,11 @@ rungs in SPEC-AUTHENTICATOR-LADDER-1):
 - The agent never signs the enrollment itself
 
 When the agent needs to PERFORM actions (spend, deploy, transact):
-- The authority axis applies: SOVEREIGN acts proceed within scope; SUPERVISED
-  acts require lovis.b approval
-- The specific act classification is UNRULED (S4.1) — this spec does not
-  enumerate which acts are sovereign vs supervised
+- All acts proceed on the agent's own authority within its scope (autonomy
+  ruling 2026-08-29 — no SUPERVISED act class remains)
+- Optional spend caps (the $X/day, revocable pattern) are the owner's tool,
+  enforced at the strongest layer available — never an approval gate on the
+  agent
 
 ---
 

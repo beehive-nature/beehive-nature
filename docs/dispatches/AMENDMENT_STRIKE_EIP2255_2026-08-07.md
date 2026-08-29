@@ -4,6 +4,11 @@
 **Method:** append-only correction per `RULING_REPO_IS_THE_RECORD` — ruled text is NOT
 rewritten; this file is the correction of record and the cited docs carry pointers to it.
 
+> **⚠ SUPERSESSION POINTER (autonomy ruling, 2026-08-29):** §3's succession discussion
+> assumes a SUPERVISED act class needing an approver — that axis is retired (agents run
+> fully autonomous). ERC-7710-style scoping survives ONLY as the owner's optional
+> spend-cap tool, never an approval gate.
+
 ## THE STRIKE
 
 **EIP-2255 is NOT a delegation or attenuation standard.** Verified findings:

@@ -1,5 +1,6 @@
 # SPEC-bSMARTWALLET-1 — REQUIREMENTS (ruled-ready, awaiting founder scope)
 **Status:** DRAFT FOR FOUNDER RULING — no key-management code until this spec is his. Self-custody is the one thing that cannot ship fast-and-fix (founder fence, 2026-08-29).
+**Autonomy SETTLED (founder ruling, 2026-08-29):** the founder owns the agents; they run **fully autonomous** — no per-transaction human gates, no founder-in-the-runtime-loop. Spend caps are the **owner's optional tool** (the $1/24h Spend Permission pattern), never a mandate. Industry-standard rails are the reference: Coinbase Agentic Wallets + x402.
 **Method:** cite-or-stop — every requirement below cites the ruling it descends from; gaps carry UNVERIFIED. Nothing here is new law; it is existing law assembled.
 
 ---
@@ -12,8 +13,8 @@
 **R2 — FOUR NATIVE RAILS, LN AS STATEFUL MODULE.** EVM, Solana, BTC L1, and Lightning are first-class. Lightning is a module of the bDiD orchestration, NEVER a merge into the EVM signer — unification is the orchestration's job.
 *Cite:* CHIEF_ORDER_LN_RAIL_2026-08-29 §Context · RAIL-FORMULARY-1 §LIGHTNING (ratified @db12e7d).
 
-**R3 — ALLOWANCE-GOVERNED, EVERY RAIL.** "Money is any language that expresses value; just give it gas limits." Every agent-scoped spending path carries a capped, revocable allowance: **$X/day analogue enforced at the strongest layer available per rail** — on-chain (Base Spend Permissions / Spend Permission Manager), wallet-side (NWC connection budgets — proven at source, Alby Hub in-tree budget controller), or orchestration-side (bzDiD daily-sat caps with revocation-by-rotation) as the floor.
-*Cite:* founder doctrine (CHIEF_ORDER context, verbatim) · genesis-allowance rider @a0d54c9 ($1 USDC/24h, spender = the agent's own wallet, revocable by hash) · RAIL-FORMULARY-1 §LIGHTNING agents line · CHIEF_ORDER_LN_RAIL §3 layer-3.
+**R3 — ALLOWANCES AVAILABLE ON EVERY RAIL, OPTIONAL BY OWNER CHOICE.** "Money is any language that expresses value; just give it gas limits." Every rail OFFERS a capped, revocable allowance the owner may switch on: **$X/day analogue enforceable at the strongest layer available per rail** — on-chain (Base Spend Permissions / Spend Permission Manager), wallet-side (NWC connection budgets — proven at source, Alby Hub in-tree budget controller), or orchestration-side (bzDiD daily-sat caps with revocation-by-rotation) as the floor. Caps are the owner's tool (the $1/24h genesis pattern), not a standing requirement on the agents — the agents run fully autonomous with or without one.
+*Cite:* founder doctrine (CHIEF_ORDER context, verbatim) · genesis-allowance rider @a0d54c9 ($1 USDC/24h, spender = the agent's own wallet, revocable by hash) · RAIL-FORMULARY-1 §LIGHTNING agents line · CHIEF_ORDER_LN_RAIL §3 layer-3 · autonomy ruling 2026-08-29 (caps optional).
 
 **R4 — SELF-CUSTODY, SIGNER-AUTHORITATIVE.** Keys never on a server; the relay serves but never signs; capped-spend enforcement is SIGNER-AUTHORITATIVE and any relay pre-check is advisory ("a keyless relay can be replaced, so a cap only it enforces is not a cap"). Tier escalation preserves the bDiD.
 *Cite:* DESIGN-BRIEF-03 §8.1/§8.7/§8.8 (superseded-banner applies to frontend stack only) · RULINGS_FRONTEND_SIGNER_XLM_2026-08-11 ruling 2.
@@ -36,10 +37,10 @@
 
 ## 3 · THE DUAL-TRACK BOUNDARY (explicit, founder-ruled, NOT abandonment)
 
-**Track A — NATIVE (agents move value here).** bzDiD orchestration · op-keys per agent · NWC-over-buzz for Lightning · Base Spend Permissions mirroring on EVM · native Solana/BTC-L1 paths (gaps below). Allowances enforced at the strongest layer per rail; the EVM signer never absorbs LN state.
+**Track A — NATIVE (agents move value here).** bzDiD orchestration · op-keys per agent · NWC-over-buzz for Lightning · Base Spend Permissions mirroring on EVM when the owner opts in · native Solana/BTC-L1 paths (gaps below). Allowances enforce at the strongest layer per rail when the owner switches one on; the EVM signer never absorbs LN state. Agents run fully autonomous — no human gate sits in this loop.
 
-**Track B — COINBASE-COMPAT (humans onboard here).** The passkey smart wallet stays the human front door: free passkey onboarding, counterfactual addresses, email recovery, Basename identity — the adoption play, RETAINED. Its laws live in SPEC-COINBASE-SMART-WALLET-COMPAT-1 (incl. the COOP law and full-tab practice) and the genesis docket.
-**Boundary rule:** Track B never becomes the agent path; Track A never blocks the human door. The two meet exactly once — at the genesis allowance ceremony (the $1/24h Spend Permission a Track-B wallet grants to the agent's own key, which is Track A's EVM ceiling).
+**Track B — COINBASE-COMPAT (humans onboard here; agents ride it too, by the settled ruling).** The passkey smart wallet stays the human front door: free passkey onboarding, counterfactual addresses, email recovery, Basename identity — the adoption play, RETAINED. Its laws live in SPEC-COINBASE-SMART-WALLET-COMPAT-1 (incl. the COOP law and full-tab practice) and the genesis docket.
+**Boundary rule (autonomy ruling, 2026-08-29):** Coinbase Agentic Wallets are the industry-standard agent path — an agent's Coinbase smart wallet (bzCode's is live: bzcode.base.eth) is a native, fully autonomous value rail, not a second-class door. The two tracks meet at the wallet family: a Track-B wallet grants the agent's own key an optional Spend Permission ceiling ($1/24h genesis pattern) — an owner's tool, never a condition of agency.
 
 ## 4 · THREE-GATE ACCEPTANCE (the spec is DONE when all three gates pass)
 
