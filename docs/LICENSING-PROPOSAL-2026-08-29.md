@@ -1,13 +1,15 @@
-# LICENSING PROPOSAL — the two-license split (DRAFT, 2026-08-29)
+# LICENSING PROPOSAL — the two-license split (VALUES RULED + STAGED, 2026-08-29)
 
-> ## ⚠⚠ NOTHING IS LICENSED UNTIL THE FOUNDER PUBLISHES ⚠⚠
-> This document and the two template files (`LICENSE-BSL.txt`, `LICENSE-PERMISSIVE.txt`)
-> are a **PROPOSAL**. No source file carries a license header. The files are named
-> `LICENSE-*.txt` precisely so GitHub does **not** auto-apply them. The publish action —
-> the founder's alone — is: set the TODO parameters, rename to their final names, add
-> source headers, and commit with an explicit publish message.
+> ## ⚠ STATUS: STAGED PUBLISH-CORRECT — one commit away, and that commit is the FOUNDER's
+> All four values are ruled and applied (2026-08-29): **Licensor Travis Mark Remington
+> <lovis@skaists.dev>** · **Change Date = four years from the LICENSE PUBLISH commit**
+> · **Change License = GPL-2.0-or-later** · **Rails = Apache-2.0**. The files are named
+> for GitHub recognition (`LICENSE` at root = Apache-2.0, `scripts/buzz-meter/LICENSE`
+> = BSL 1.1, `NOTICE` present). Source headers are applied. **Nothing binds until the
+> founder makes the LICENSE PUBLISH commit** — the one remaining open item is the
+> Additional Use Grant wording (lawyer), flagged below and inside the BSL file.
 
-**Ruled:** founder, 2026-08-29 — "go full speed" on the split. This is the ready-to-go draft.
+**Ruled:** founder, 2026-08-29 — "go full speed" on the split, then all four values. This is the staged draft.
 
 ---
 
@@ -21,7 +23,7 @@
 
 ## THE MANIFEST — which paths each license covers
 
-### LICENSE-BSL.txt — the commercial moat (delayed-open)
+### scripts/buzz-meter/LICENSE (BSL 1.1) — the commercial moat (delayed-open)
 | path | what it is |
 |---|---|
 | `scripts/buzz-meter/meter.py` | the b-meter: SPEC-SPEND-RECEIPT-1 receipts, the P3 identity bindings, **the A/B + USDC voucher-prepay engine**, **the tithe book**, **bClaude's widened gate** (the bclaude.base.eth / bclaude@skaists.buzz voucher-prepay loop's accounting half) |
@@ -30,7 +32,7 @@
 
 *Scope note for the lawyer:* the live wiring of bClaude's paid lane also lives on the Oracle box (outside this repo); the repo manifests the accounting engine. The Licensed Work wording in the BSL TODO covers the repo paths; whether boxed deployments are "distribution" under BSL 1.1 is a lawyer question, flagged below.
 
-### LICENSE-PERMISSIVE.txt — the rails/primitives (open)
+### LICENSE (root, Apache-2.0) — the rails/primitives (open)
 | path | what it is |
 |---|---|
 | `surfaces/wallet.html` | the bzDiD wallet — soul connect, keychain, key forge, **the spend-cap engine** (capGate/capRecord, the owner's optional tool), pay lanes |
@@ -60,17 +62,17 @@
 1. **The TITHE/REVENUE COUPLING is the non-standard part.** The 10% founder tithe is not documentation — it is executable law: a distinct receipt line emitted by `meter.py`, a law block inside `rate_set.json`, with "the tithe percentage changes by founder word ALONE." A license that gates *use* of an engine whose *output* obligates a revenue share is NOT the standard BSL posture (Uniswap's grant says nothing about ongoing revenue from deployments). The lawyer must choose: **(a)** tithe as license condition (unusual, enforceability varies), **(b)** tithe as a separate commercial contract for production users, or **(c)** tithe outside license scope entirely (commercial-license matter only). **Do not publish the BSL before this is answered.**
 2. **Additional Use Grant wording** — the placeholder is a shape, not text. The Uniswap/HashiCorp grants define "competitive offering" precisely; ours must define what "production use of a prepay accounting engine" means when the engine's natural deployment is internal-to-estate.
 3. **Change License choice** — GPL-2.0-or-later matches the cited precedent and the BSL covenant's named option; Apache-2.0 (patent grant) is the alternative, lawyer to confirm covenant fit.
-4. **MIT vs Apache-2.0 for the permissive side** — MIT drafted (shortest, maximally permissive); Apache-2.0 preferred if patent grant matters for the adapters. Founder/lawyer pick; the template swap is mechanical.
+4. **~~MIT vs Apache-2.0 for the permissive side~~ — RULED: Apache-2.0** (2026-08-29). The MIT template is retired; the root `LICENSE` carries the canonical Apache-2.0 text (patent grant included — right for the adapters), and `NOTICE` ships per §4(d).
 5. **The MariaDB covenants** — BSL 1.1's own terms require the license text be used unmodified (params only) and the MariaDB notice retained; both honored in the template.
 
 ---
 
-## WHAT PUBLISHING LOOKS LIKE (the founder's checklist, when ready)
-1. Lawyer answers flag #1 and blesses the Additional Use Grant text.
-2. Founder sets Licensor entity, Change Date, Change License in `LICENSE-BSL.txt`; copyright line in `LICENSE-PERMISSIVE.txt`.
-3. Rename files to their final names (`LICENSE` remains UNSET at repo root unless the founder wants a repo-wide default — recommended: leave root unset, carry per-directory LICENSE files so the split is enforced by path).
-4. Add the corresponding SPDX header to each manifest file (the publish action — deliberately not done now).
-5. Commit with an explicit "LICENSE PUBLISH" message; that commit is the first publicly available distribution event (starts the BSL four-year clock if the Change Date references it).
+## THE PUBLISH COMMIT (the founder's one remaining gesture — everything else is staged)
+1. ~~Lawyer~~ — the Additional Use Grant wording remains the open lawyer item; the founder may publish with the flagged shape and amend, or hold for the lawyer. **His call, his commit.**
+2. ~~Set Licensor / Change Date / Change License / copyright~~ — DONE (ruled 2026-08-29, applied).
+3. ~~Rename files to GitHub-recognized names~~ — DONE: root `LICENSE` (Apache-2.0 canonical), `scripts/buzz-meter/LICENSE` (BSL 1.1, filled), `NOTICE` (§4(d) attribution).
+4. ~~Add SPDX headers~~ — DONE: BUSL-1.1 headers on `meter.py` / `gate.js` + `_license` key in `rate_set.json`; Apache-2.0 headers on `wallet.html`, the three adapters, `arweave.js`.
+5. **The founder's commit:** replace the Change Date formula in `scripts/buzz-meter/LICENSE` with the literal date (four years from that commit's date), commit with an explicit "LICENSE PUBLISH" message. That commit is the first binding distribution — the clock starts there.
 
 ---
-*z1 (zCode), chief — drafted at founder ruling "go full speed". Parameters are placeholders; the fences are marked; nothing here binds.*
+*z1 (zCode), chief — staged at the founder's four-value ruling. One commit away; the commit is his.*

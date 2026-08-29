@@ -1,0 +1,26 @@
+beehive-nature
+Copyright 2026 Travis Mark Remington <lovis@skaists.dev>
+
+This product includes software developed by Travis Mark Remington
+(https://skaists.dev).
+
+The following works are licensed under the Apache License, Version 2.0
+(the "License"); you may not use them except in compliance with the
+License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  surfaces/wallet.html               — the bzDiD wallet surface,
+                                        including the spend-cap engine
+  surfaces/wallet-adapter-vaulta.js  — the Vaulta rail adapter
+  surfaces/wallet-adapter-hive.js    — the Hive rail adapter
+  surfaces/wallet-adapter-arweave.js — the Arweave buildPublish adapter
+  surfaces/arweave.js                — the first-party Arweave signer
+
+The commercial moat under scripts/buzz-meter/ (the voucher-prepay engine,
+the tithe accounting, the per-key gate) is licensed SEPARATELY under the
+Business Source License 1.1 — see scripts/buzz-meter/LICENSE. Nothing in
+this NOTICE grants any right in that directory.
+
+No path outside the two manifests above is licensed by this NOTICE;
+unclassified paths await a later founder ruling.

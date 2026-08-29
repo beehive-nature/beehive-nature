@@ -1,4 +1,13 @@
 #!/usr/bin/env python3
+# ─── LICENSE ────────────────────────────────────────────────────────────────
+# SPDX-License-Identifier: BUSL-1.1
+# Licensor: Travis Mark Remington <lovis@skaists.dev>
+# The b-meter commercial moat — Business Source License 1.1, see LICENSE
+# in this directory. Change Date: four years from the LICENSE PUBLISH
+# commit. Change License: GPL-2.0-or-later. Non-production use per the
+# Additional Use Grant in that LICENSE; production use requires a
+# commercial license from the Licensor.
+# ────────────────────────────────────────────────────────────────────────────
 # buzz-meter — the LANE M b-meter sidecar (P1: receipts, no money touched).
 #
 # Reads the EXISTING llama-server usage log and emits SPEND RECEIPTS per

@@ -1,3 +1,12 @@
+/* ─── LICENSE ──────────────────────────────────────────────────────────────
+   SPDX-License-Identifier: Apache-2.0
+   Copyright 2026 Travis Mark Remington <lovis@skaists.dev>
+   Licensed under the Apache License, Version 2.0 (the "License"); you
+   may not use this file except in compliance with the License. You may
+   obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+   See /LICENSE and /NOTICE in this repository. Applies to the rails:
+   the wallet surface, the three rail adapters, the Arweave signer.
+   ─────────────────────────────────────────────────────────────────────── */
 /* surfaces/arweave.js — the Arweave adapter for the BNR wallet shell.
    First-party, no bundler (Turbo/ArDrive ruled out by founder order): a
    format-2 data transaction built and signed in the browser with WebCrypto
