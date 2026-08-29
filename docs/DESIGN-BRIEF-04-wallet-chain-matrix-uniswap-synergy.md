@@ -88,4 +88,4 @@ Legend: **Read** = first-party balance/tx path · **Sign** = custody tier path �
 5. Operator box grows the data ears: self-hosted subgraph + Quoter service + UniswapX filler (when ready)
 
 ---
-*zA, acting captain. Sixteen ways counted, every one classed PROTOCOL/SERVICE/PATTERN so breakage risk is visible at a glance. The hard-tail chains are where this wallet earns its name — anyone can do an EVM balance table; view-key scanners across three privacy protocols, few.*
+*z1 (zCode), acting captain. Sixteen ways counted, every one classed PROTOCOL/SERVICE/PATTERN so breakage risk is visible at a glance. The hard-tail chains are where this wallet earns its name — anyone can do an EVM balance table; view-key scanners across three privacy protocols, few.*

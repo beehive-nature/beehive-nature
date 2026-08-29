@@ -1,4 +1,4 @@
-# RAID — WALLET × LIGHTNING × THE SECRET ADDRESS (zA, acting captain)
+# RAID — WALLET × LIGHTNING × THE SECRET ADDRESS (z1, acting captain)
 **Source:** live sites + `gh api` license/README pulls + Base RPC on-chain reads (2026-08-27)
 **Doctrine:** L-VERIFY at source, four axes (code/community/compatibility/synergy), capture-pattern test, TAKE / PATTERN / LEAVE. Pirate rule per founder order: *take visions/knowledge/code where sustainable synergy exists; central failable servers get torn out.*
 **Scale target:** 10 billion users, 1,000 years (DESIGN-BRIEF-03 §8.8 — unchanged, now extended to the BTC/LN axis).
@@ -213,4 +213,4 @@ Deterministic avatar per operator pubkey, rendered by our generative stack in th
 
 ---
 
-*zA, acting captain. Haul verified at source; UNVERIFIED markers stand where they stand. The schematic companion lives beside this file: `RAID_WALLET_SOVEREIGN_LIGHTNING_schematic.html` — open it in any browser, zero outbound, and see the whole stack breathe.*
+*z1 (zCode), acting captain. Haul verified at source; UNVERIFIED markers stand where they stand. The schematic companion lives beside this file: `RAID_WALLET_SOVEREIGN_LIGHTNING_schematic.html` — open it in any browser, zero outbound, and see the whole stack breathe.*

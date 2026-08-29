@@ -135,4 +135,4 @@ The hub is the **index of record**. A surface's home is a `(domain, path)` pair 
 7. Six missing front repos (skaists.social, bnature.social, beehivenature.com, beehivebiomass.com, beehivebuds.com, plur-earth) — scaffold during the sprint or on graduation only?
 
 ---
-*zA, acting captain. Portfolio verified against the registrar paste; repo state verified via gh api tonight. The atlas is redlinable line-by-line — once you strike your marks, the hub rebuild follows it mechanically.*
+*z1 (zCode), acting captain. Portfolio verified against the registrar paste; repo state verified via gh api tonight. The atlas is redlinable line-by-line — once you strike your marks, the hub rebuild follows it mechanically.*

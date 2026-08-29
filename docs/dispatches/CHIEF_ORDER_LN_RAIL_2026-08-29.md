@@ -1,5 +1,5 @@
 # CHIEF ORDER — LIGHTNING RAIL DOSSIER for the bSmartWallet (decision, not build)
-**Order:** founder, 2026-08-29. **Seat:** zA chief. **Law:** cite-or-stop — every claim below carries its source or is marked UNVERIFIED. **Input precedence:** the founder's LN/BOLT source list (the raid's 26-source list) is PRIMARY; the Seat-1 dossier is corroboration only; his sources win ties.
+**Order:** founder, 2026-08-29. **Seat:** z1 (zCode) chief. **Law:** cite-or-stop — every claim below carries its source or is marked UNVERIFIED. **Input precedence:** the founder's LN/BOLT source list (the raid's 26-source list) is PRIMARY; the Seat-1 dossier is corroboration only; his sources win ties.
 **Context:** bSmartWallet = one bDiD spanning EVM + Solana + BTC L1 + Lightning, allowance-governed ("money is any language that expresses value; just give it gas limits"). Coinbase smart wallet = compat REFERENCE (EVM-only — SPEC-COINBASE-SMART-WALLET-COMPAT-1.md). Dual-track, founder-ruled: the native four-rail stack builds in parallel. LN is a STATEFUL MODULE of the bDiD orchestration — never a merge into the EVM signer.
 
 ---
@@ -61,4 +61,4 @@ Full custody/hosted-dependency/license receipts: RAID_WALLET_SOVEREIGN_LIGHTNING
 > - CONTRAINDICATION: swap services are a proven AI-attack class; single-connection-secret custody = a candle (same law as the single-passkey); never merge LN state into the EVM signer.
 
 ---
-*zA, chief. Every claim above carries its source or its UNVERIFIED mark. The decision now sits with the founder: rule the column, and the rail sprints.*
+*z1 (zCode), chief. Every claim above carries its source or its UNVERIFIED mark. The decision now sits with the founder: rule the column, and the rail sprints.*
