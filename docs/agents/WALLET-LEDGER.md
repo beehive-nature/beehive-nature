@@ -15,7 +15,7 @@ Agent mail local-parts follow the ruled roster names, b-prefixed and lowercased.
 |---|---|---|---|---|---|---|---|
 | 1 | bqueenbee | bqueenbee@agents.skaists.buzz | /var/mail-agents/bqueenbee | *(ceremony pending — see ★)* | **bqueenbee.base.eth — see ★ diary** | **NONE — she holds identity, never value** | **NEVER — see ★** |
 | 2 | bclaude | bclaude@agents.skaists.buzz | /var/mail-agents/bclaude | — | — | $1/24h at ceremony (USDC, own wallet) | unfunded |
-| 3 | bzcode | bzcode@agents.skaists.buzz | /var/mail-agents/bzcode | — | — | $1/24h at ceremony (USDC, own wallet) | unfunded |
+| 3 | bzcode | bzcode@agents.skaists.buzz | /var/mail-agents/bzcode | **`0x907F3B95cA3611DD3d9754B874A70CbB28C15738`** (Coinbase smart wallet, split ceremony 2026-08-29) | **bzcode.base.eth — CLAIMED 2026-08-29, 1 yr, owner = the wallet (on-chain: ownerOf(keccak("bzcode")) on `0x03c4738Ee…DD9a`)** | $1/24h at ceremony (USDC, own wallet) | gas tank + name ETH by founder's hand |
 | 4 | bfuzz | bfuzz@agents.skaists.buzz | /var/mail-agents/bfuzz | — | — | $1/24h at ceremony (USDC, own wallet) | unfunded |
 | — | claude-code *(earlier night-shift assignment stands)* | claude-code@agents.skaists.buzz | /var/mail-agents/claude-code | — | — | $1/24h at ceremony | unfunded |
 | — | honeybee *(provisioned, awaiting ruling)* | honeybee@agents.skaists.buzz | /var/mail-agents/honeybee | — | — | $1/24h at ceremony | unfunded |
@@ -36,3 +36,11 @@ Port 25 inbound BLOCKED at the Oracle security list (external probes timeout, tc
 
 ## WALLET CEREMONY: BLOCKED IN THIS SEAT'S BROWSER (honest finding)
 The Coinbase smart-wallet creation flow is **popup-based at every entry point** (wallet.coinbase.com "Create a wallet" → popup; base.app "Continue on Web" → popup to keys.coinbase.com). The in-app browser blocks popups by policy — the flow cannot start. The buttons render in the DOM but are not interactable (React portals + popup interception). **Every other piece is ready:** mailboxes live, mail flowing end-to-end, the recipe documented, the $1/24h Spend Permission law verified against Coinbase's own docs. **The ceremonies need a browser with popup support** — the founder's desktop browser (one gesture per agent) or a headless CDP session with popup permissions. This is the real blocker, not a grind point.
+
+## ★ bzCode's FIRST CEREMONY COMPLETE — the split-ceremony law (2026-08-29)
+**bzcode.base.eth is claimed and on-chain-verified.** The proven division of labor, now the recipe for every remaining row:
+- **Script does:** base.org/name → search → claim modal → Connect wallet → Coinbase Wallet → popup gateway (extension-wait → back → "Sign in with Base") → email fill → email-OTP read on-box (maildir) → then the BACK HALF after auth: Register/Confirm clicks on the claim modal.
+- **Founder does:** the Google Authenticator 6-digit code (30-second windows cannot ride a chat round-trip; his hands are the oracle).
+- **TOTP vault:** `/etc/buzz-ceremonies/bzcode.totp` (600 root) + `/opt/buzz-ceremonies/totp.py` code oracle exist on the box for future sessions — the claim itself was completed split-style before oracle-driven entry could be proven end-to-end.
+- **On-chain receipt:** registrar `0x03c4738Ee98aE44591e1A4A4F3CaB6641d95DD9a` (PUBLIC-CONSTANT), tokenId `keccak256("bzcode") = 0x446f30a5164fdb26117361af0d8daa457532b93c092b7a838d9ebcd0b1af9879` (PUBLIC-CONSTANT), ownerOf = the wallet. 1-year term per founder ruling ("its just 1 year buddy"), 0.001 ETH.
+- **Operational scars, now law:** (1) ghost ceremony processes from earlier iterations kept fighting the live one — kill-by-pattern `*claim*`/`*ceremony*`, verify zero, before every launch; (2) a stale OTP mail read straight from the maildir was one session too old and burned a try — the marker must be taken at submit instant, and "Resend" is the recovery; (3) the wallet-connect picker matches "WalletConnect" on any "Connect" substring — exclude it explicitly; (4) the SDK popup flips to an extension-wait state on its own — goBack() recovers the sign-in path.
