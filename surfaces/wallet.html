@@ -736,6 +736,78 @@ var WALLET_PROFILE = {
   that looks fine.</div>
 </section>
 
+<!-- ══ THE VOUCHER — prepaid compute, the money engine with a face ══ -->
+<section id="voucher-sec" style="border-color:#2c4a3a">
+  <h2>🎟 <span data-i18n="wl.vh2">THE VOUCHER — prepay compute, metered fair</span></h2>
+  <p data-reg="bee">Prepay for compute work — models, vRAM, whatever the estate meters —
+  and watch every last drop of it itemized here. Top up from either chain, spend at metered
+  rates, and the estate's 10% tithe is always visible, never buried.</p>
+  <p data-reg="raver">Two rails in, one A balance, receipts with the tithe line — the same
+  hash-chained ledger the till meters with, rendered live from the estate oracle
+  (skaists.buzz). Refusals read as sentences, not codes.</p>
+  <p data-reg="cypherpunk">voucher_escrow semantics, live: balances DERIVED from a
+  hash-chained append-only event log (never stored), refuse-before-write enforced at the
+  engine, memo-native binding on the A rail (memo = meter key, no binding table), binding
+  table on the USDC rail, every deposit cites its tx. This panel is a read-only view over
+  that ledger via the estate oracle; the box owns the writes.</p>
+
+  <div class="row" style="align-items:center;flex-wrap:wrap">
+    <input id="vc-key" placeholder="your meter key — e.g. bclau-paid-1" spellcheck="false" autocomplete="off" style="flex:2;min-width:200px">
+    <button id="vc-go" class="gold" style="min-height:40px">look up</button>
+    <span style="font-size:10.5px;color:var(--faint)" id="vc-src">—</span>
+  </div>
+
+  <div id="vc-panel" style="display:none;margin-top:12px">
+    <!-- 1 · SEE MY BALANCE -->
+    <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+      <span id="vc-balance" style="font-size:clamp(30px,7vw,44px);font-weight:600;color:var(--leaf)">0.0000</span>
+      <span style="font-size:14px;color:var(--dim)">A</span>
+      <span style="font-size:10.5px;color:var(--faint)" id="vc-sub">—</span>
+    </div>
+    <!-- 2 · TOP UP, told exactly how -->
+    <div class="row" style="margin-top:10px;flex-wrap:wrap">
+      <div style="flex:1;min-width:230px;border:1px solid var(--line);border-radius:9px;padding:10px">
+        <div style="font-size:11px;color:var(--cyan)">A · Vaulta — gasless</div>
+        <div class="law" style="margin-top:4px">send any amount of A to:</div>
+        <div class="row" style="gap:6px"><code id="vc-a-dest" style="flex:1;word-break:break-all">—</code>
+          <button class="gold vc-copy" style="min-height:32px;font-size:10px" data-copy="">copy</button></div>
+        <div class="law" style="margin-top:6px">with this EXACT memo (the memo IS the binding —
+        <b style="color:var(--amber)">no memo, no credit, money lost</b>):</div>
+        <div class="row" style="gap:6px"><code id="vc-a-memo" style="flex:1;word-break:break-all;color:var(--gold)">—</code>
+          <button class="gold vc-copy" style="min-height:32px;font-size:10px" data-copy="">copy memo</button></div>
+      </div>
+      <div style="flex:1;min-width:230px;border:1px solid var(--line);border-radius:9px;padding:10px">
+        <div style="font-size:11px;color:var(--cyan)">USDC · Base — tiny gas</div>
+        <div class="law" style="margin-top:4px">send USDC (Base) to:</div>
+        <div class="row" style="gap:6px"><code id="vc-u-dest" style="flex:1;word-break:break-all">—</code>
+          <button class="gold vc-copy" style="min-height:32px;font-size:10px" data-copy="">copy</button></div>
+        <div class="law" id="vc-u-rate" style="margin-top:6px">credited at — A per USDC (rate cited below)</div>
+        <div class="law" id="vc-u-ref" style="color:var(--faint)">rate: —</div>
+        <div class="law" style="margin-top:4px;color:var(--faint)">no memo needed on this rail — your bound address credits you</div>
+      </div>
+    </div>
+    <!-- 3 · SEE WHAT I SPENT — aggregate first, itemized one click down -->
+    <div style="margin-top:12px;border-top:1px solid var(--line);padding-top:8px">
+      <div style="display:flex;gap:18px;flex-wrap:wrap;font-size:11px;color:var(--dim)">
+        <span>spent total: <b id="vc-spent" style="color:var(--ink)">0.0000 A</b></span>
+        <span>topped up: <b id="vc-dep">0.0000 A</b></span>
+        <span>tithe in there: <b id="vc-tithe" style="color:var(--gold)">0.0000 A</b> (the estate's 10%, shown never buried)</span>
+      </div>
+      <details style="margin-top:8px">
+        <summary style="cursor:pointer;font-size:11px;color:var(--cyan)">itemized — every receipt, every line</summary>
+        <div id="vc-receipts" class="law" style="margin-top:6px">—</div>
+      </details>
+    </div>
+    <!-- 4 · KNOW WHEN YOU'RE OUT -->
+    <div class="row" style="margin-top:12px;align-items:center;flex-wrap:wrap">
+      <input id="vc-afford-amt" class="small" type="number" min="0" step="0.0001" placeholder="job cost in A" style="max-width:150px;flex:0 1 150px">
+      <button id="vc-afford-go" class="gold" style="min-height:36px">can I afford it?</button>
+      <span id="vc-afford-out" class="law" style="flex:2;min-width:180px">—</span>
+    </div>
+  </div>
+  <div class="law" id="vc-err" style="display:none;margin-top:8px;color:var(--amber)"></div>
+</section>
+
 <!-- ══ FUND — Meld hosted checkout (no server of ours · public key only) ══ -->
 <section id="fund-sec" style="border-color:#4a3a1d" data-meld-public-key="" data-meld-env="sandbox">
   <style>
@@ -3656,6 +3728,86 @@ var WALLET_PROFILE = {
   }
 
   renderOutbox();
+
+  /* ── THE VOUCHER panel — a live view over the estate oracle's escrow ledger.
+     The box (skaists.buzz/voucher, estate-owned) serves balance/topup/receipts/
+     afford checks straight from the same hash-chained ledger the till meters
+     with. Totals computed there from events; this panel only renders. ───── */
+  (function voucherPanel(){
+    var API = 'https://relay.skaists.dev/voucher/v1/voucher/';   // the guaranteed-path host (skaists.buzz is DNS-filtered on some ISPs — the dual-home law; same box, same route)
+    var $v = function(id){ return document.getElementById(id) };
+    function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c] }) }
+    function err(msg){ $v('vc-err').style.display = msg ? 'block' : 'none';
+      if (msg) $v('vc-err').textContent = msg }
+    async function load(key){
+      err(''); $v('vc-src').textContent = 'reading the estate oracle…';
+      try {
+        var r = await fetch(API + encodeURIComponent(key) + '/view');
+        var d = await r.json();
+        if (!r.ok || d.message) { $v('vc-panel').style.display = 'none';
+          err(d.message || ('the oracle answered HTTP ' + r.status)); return }
+        $v('vc-balance').textContent = d.balance;
+        $v('vc-sub').textContent = 'your voucher balance — live from the hash-chained ledger';
+        var a = d.topup.rail_a, u = d.topup.rail_usdc;
+        $v('vc-a-dest').textContent = a.send_to || '—';
+        $v('vc-a-memo').textContent = a.memo || key;
+        $v('vc-u-dest').textContent = u.send_to || '—';
+        $v('vc-u-rate').textContent = 'credited at ' + u.rate_a_per_usdc + ' A per USDC — stated before you send';
+        $v('vc-u-ref').textContent = 'rate: ' + u.rate_ref;
+        $v('vc-spent').textContent = d.spent_total + ' A';
+        $v('vc-dep').textContent = d.deposited_total + ' A';
+        $v('vc-tithe').textContent = d.tithe_total + ' A';
+        $v('vc-receipts').innerHTML = (d.receipts || []).length ? (d.receipts || []).map(function(rc){
+          return '<div style="border:1px solid var(--line);border-radius:8px;padding:8px;margin-top:6px">' +
+            '<div style="font-size:10.5px;color:var(--dim)">receipt ' + new Date((rc.ts||0)*1000).toISOString().slice(0,16).replace('T',' ') +
+            ' · total <b style="color:var(--ink)">' + rc.total + ' A</b> · basis ' + esc(rc.cost_basis_ref) + '</div>' +
+            '<table style="width:100%;font-size:10px;color:var(--dim);border-collapse:collapse;margin-top:4px">' +
+            rc.line_items.map(function(li){
+              var t = li.resource === 'tithe.founder';
+              return '<tr style="border-top:1px solid var(--line)"><td style="padding:3px 6px 3px 0">' + esc(li.resource) + '</td>' +
+                '<td style="padding:3px 6px 3px 0;text-align:right">× ' + esc(li.quantity) + ' @ ' + esc(li.rate) + '</td>' +
+                '<td style="padding:3px 0;text-align:right;color:' + (t ? 'var(--gold)' : 'var(--ink)') + '"><b>' + esc(li.charged) + ' A</b>' +
+                (t ? ' (the tithe)' : '') + '</td></tr>';
+            }).join('') + '</table></div>';
+        }).join('') : '<div style="color:var(--faint)">no metered charges yet — top up and the first receipt lands here</div>';
+        $v('vc-panel').style.display = 'block';
+        $v('vc-src').textContent = 'source: ' + d.source;
+        try { localStorage.setItem('bnr-vc-key', key) } catch(e) {}
+      } catch(e) {
+        $v('vc-src').textContent = '';
+        err('the estate oracle is unreachable right now — nothing is wrong with your voucher, try again in a moment');
+      }
+    }
+    $v('vc-go').onclick = function(){ var k = $v('vc-key').value.trim();
+      if (k) load(k) };
+    $v('vc-key').addEventListener('keydown', function(e){ if (e.key === 'Enter') $v('vc-go').click() });
+    Array.prototype.forEach.call(document.querySelectorAll('.vc-copy'), function(b){
+      b.onclick = function(){
+        var code = b.parentElement.querySelector('code');
+        var text = code ? code.textContent : '';
+        if (navigator.clipboard) navigator.clipboard.writeText(text).then(function(){
+          var old = b.textContent; b.textContent = '✓ copied';
+          setTimeout(function(){ b.textContent = old }, 1200);
+        });
+      };
+    });
+    $v('vc-afford-go').onclick = async function(){
+      var k = $v('vc-key').value.trim(), amt = parseFloat($v('vc-afford-amt').value);
+      var out = $v('vc-afford-out');
+      if (!k) { out.textContent = 'look up your key first'; return }
+      if (!(amt > 0)) { out.textContent = 'enter what the job costs in A'; return }
+      out.textContent = 'asking the engine…';
+      try {
+        var r = await fetch(API + encodeURIComponent(k) + '/afford?amount=' + amt);
+        var d = await r.json();
+        out.textContent = d.message || '—';
+        out.style.color = d.ok ? 'var(--leaf)' : 'var(--amber)';
+      } catch(e) { out.textContent = 'the oracle is unreachable — try again in a moment'; out.style.color = 'var(--amber)' }
+    };
+    try { var saved = localStorage.getItem('bnr-vc-key');
+      if (saved) { $v('vc-key').value = saved; load(saved) } } catch(e) {}
+  })();
 
   window.BNRWALLET = {
     adapters: ADAPTERS,

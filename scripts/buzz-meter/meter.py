@@ -690,6 +690,109 @@ def cmd_basepoll(args):
     if credited == 0:
         print(f"basepoll: no new USDC transfers (blocks {frm}…{latest})")
 
+# ── P5: the voucher bridge — a tiny loopback JSON service so the STATIC wallet
+# surface can show a stranger their live voucher state (balance, top-up doors,
+# receipts, afford-check). Zero deps: http.server. CORS: the estate's own
+# surfaces only. Key IDs are public ledger references; the bm-… bearer secrets
+# are NEVER served here. The page is a VIEW over the same escrow the till uses —
+# totals computed from events, never stored.
+#
+#   GET /v1/voucher/<key>/view            balance + top-up doors + receipts
+#   GET /v1/voucher/<key>/afford?amount=X plain-sentence afford check
+
+VOUCHER_PORT = int(os.environ.get("VOUCHER_PORT", "8092"))
+VOUCHER_ORIGINS = os.environ.get("VOUCHER_ORIGINS", "https://skaists.dev,https://beehivenature.com").split(",")
+
+def voucher_view(key_id):
+    from decimal import Decimal as _D
+    led = load_ledger()
+    meta = led.get("meta", {})
+    es = escrow()
+    bal = str(es.balance(key_id))
+    events = list(es._events())
+    deposits = [e for e in events if e.get("voucher") == key_id and e.get("type") == "DEPOSIT"]
+    charges = [e for e in events if e.get("voucher") == key_id and e.get("type") == "CHARGE"]
+    dep_total = str(sum((_D(e["amount"]) for e in deposits), _D("0")))
+    chg_total = str(sum((_D(li["charged"]) for e in charges for li in e["line_items"]), _D("0")))
+    tithe_total = str(sum((_D(li["charged"]) for e in charges for li in e["line_items"]
+                           if li.get("resource") == "tithe.founder"), _D("0")))
+    receipts = [{
+        "ts": e.get("ts"), "cost_basis_ref": e.get("cost_basis_ref"),
+        "total": str(sum((_D(li["charged"]) for li in e["line_items"]), _D("0"))),
+        "line_items": e["line_items"],
+    } for e in charges[-10:]]
+    return {
+        "key": key_id, "currency": "A", "balance": bal,
+        "deposited_total": dep_total, "spent_total": chg_total, "tithe_total": tithe_total,
+        "topup": {
+            "rail_a": {
+                "label": "A · Vaulta (gasless — you spend only your own CPU/NET)",
+                "send_to": meta.get("watch_account"),
+                "memo": key_id,
+                "memo_law": "the memo IS the binding — no memo, no credit. Paste it exactly.",
+            },
+            "rail_usdc": {
+                "label": "USDC · Base (tiny gas, no memo needed — your bound address credits you)",
+                "send_to": meta.get("base_receive_address"),
+                "rate_a_per_usdc": meta.get("usdc_a_rate"),
+                "rate_ref": meta.get("usdc_a_rate_ref"),
+            },
+        },
+        "receipts": receipts,
+        "source": "estate oracle · skaists.buzz → the same escrow ledger the till meters with",
+    }
+
+def cmd_serve(args):
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+    from urllib.parse import urlparse, parse_qs
+
+    class H(BaseHTTPRequestHandler):
+        def _send(self, code, obj):
+            body = json.dumps(obj).encode()
+            self.send_response(code)
+            self.send_header("Content-Type", "application/json")
+            origin = self.headers.get("Origin", "")
+            allow = VOUCHER_ORIGINS[0]
+            if origin and (origin in VOUCHER_ORIGINS or origin.startswith("http://localhost:") or origin.startswith("http://127.0.0.1:")):
+                allow = origin  # reflect allowlisted origins (estate surfaces + local dev)
+            self.send_header("Access-Control-Allow-Origin", allow)
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            self.wfile.write(body)
+        def do_GET(self):
+            u = urlparse(self.path)
+            parts = [p for p in u.path.split("/") if p]
+            if len(parts) == 4 and parts[0] == "v1" and parts[1] == "voucher":
+                key = parts[2]
+                if not re.fullmatch(r"[a-z0-9._-]{1,64}", key):
+                    return self._send(400, {"message": "that key doesn't look like a meter key"})
+                if parts[3] == "view":
+                    return self._send(200, voucher_view(key))
+                if parts[3] == "afford":
+                    amt = (parse_qs(u.query).get("amount") or ["0"])[0]
+                    led = load_ledger()
+                    if not any(k["id"] == key for k in led["keys"]):
+                        return self._send(200, {"ok": False,
+                            "message": "no meter key by that name — check the id you were issued"})
+                    try:
+                        want = float(amt)
+                    except ValueError:
+                        return self._send(200, {"ok": False, "message": "enter an amount in A"})
+                    if want <= 0:
+                        return self._send(200, {"ok": False, "message": "enter an amount in A"})
+                    have = float(str(escrow().balance(key)))
+                    if have >= want:
+                        return self._send(200, {"ok": True,
+                            "message": f"yes — a {want:.4f} A job fits inside your {have:.4f} A balance"})
+                    return self._send(200, {"ok": False,
+                        "message": f"not enough balance — this job needs {want:.4f} A and you have "
+                                   f"{have:.4f} A. Top up below to keep going."})
+            self._send(404, {"message": "unknown path"})
+        def log_message(self, *a):
+            pass
+    print(f"voucher bridge on {os.environ.get("VOUCHER_BIND", "172.18.0.1")}:{VOUCHER_PORT} (caddy proxies skaists.buzz/voucher/*)")
+    ThreadingHTTPServer((os.environ.get("VOUCHER_BIND", "172.18.0.1"), VOUCHER_PORT), H).serve_forever()
+
 def dispatch(argv):
     cmd = argv[1] if len(argv) > 1 else ""
     table = {
@@ -699,7 +802,7 @@ def dispatch(argv):
         "voucher": (cmd_voucher, 4), "allowlist": (cmd_allowlist, 2),
         "charge": (cmd_charge, 4), "tithebook": (cmd_tithebook, 2),
         "basebind": (cmd_basebind, 4), "basebindings": (cmd_basebindings, 2),
-        "basepoll": (cmd_basepoll, 2),
+        "basepoll": (cmd_basepoll, 2), "serve": (cmd_serve, 2),
     }
     if cmd in table:
         fn, need = table[cmd]
