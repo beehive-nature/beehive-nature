@@ -19,6 +19,9 @@ Licensed Work:
 # and the bClaude paid-lane wiring — as manifested in this directory:
 #   scripts/buzz-meter/meter.py   (receipts, vouchers, tithe book,
 #                                  identity bindings, bClaude gate)
+#   scripts/buzz-meter/voucher_escrow.py + test_voucher_escrow.py
+#                                (the hash-chained voucher/escrow ledger core,
+#                                  merged 2026-08-29)
 #   scripts/buzz-meter/rate_set.json   (the pricing law + tithe law)
 #   scripts/buzz-meter/gate.js    (the per-key bearer gate)
 
