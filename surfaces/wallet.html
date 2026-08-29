@@ -718,22 +718,19 @@ var WALLET_PROFILE = {
      the collection's own contract at read time; nothing is cached, stored, or
      redrawn by this page. ══ -->
 <section id="insc-sec" style="border-color:#3a2c55">
-  <h2>🎨 INSCRIPTIONS — your garden, drawn on-chain</h2>
-  <div class="law">ERC-20i: the art lives <b>in the token</b>, and its tier is your balance. This
-  panel reads the pieces your address holds straight from each collection's contract and draws them
-  at their <b>true tier</b> — through the estate's <b>one</b> level-truth module (<b>level-truth.js</b>),
-  the same one the market and the museum use, so a level can never mean two things on two surfaces.
-  Keyless, read-only, nothing signed.</div>
+  <h2>🎨 <span data-i18n="wl.insc.h2">INSCRIPTIONS — your garden, drawn on-chain</span></h2>
+  <div class="law"><span data-i18n="wl.insc.law">ERC-20i: the art lives in the token, and its tier is your balance.</span> Drawn at
+  <b>true tier</b> through the estate's one level-truth module — the same one the market and the museum
+  use. Keyless, read-only, nothing signed.</div>
   <div class="row" style="margin-top:8px">
     <input id="insc-addr" class="small" placeholder="0x… address or a .base.eth name — defaults to your connected soul" spellcheck="false" autocomplete="off" style="flex:2;min-width:220px;font-family:'IBM Plex Mono',monospace">
-    <button id="insc-go" class="gold">🎨 draw the garden</button>
+    <button id="insc-go" class="gold">🎨 <span data-i18n="wl.insc.go">draw the garden</span></button>
   </div>
   <div class="law" id="insc-stat" style="margin-top:6px;min-height:20px">— connect your keychain, or type an address —</div>
   <div id="insc-grid" style="display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));margin-top:12px"></div>
-  <div class="law" style="margin-top:8px"><b>The level law, enforced not labelled:</b> for every piece the
-  page's own ladder arithmetic is checked against the collection's <b>own getMeta</b> at read time. Agreement
-  is the pass. A disagreement is printed as a <b>GATE FAILURE</b> on the card — never smoothed into a number
-  that looks fine.</div>
+  <div class="law" style="margin-top:8px"><b>The level law, enforced not labelled:</b> every piece's tier is
+  checked against the collection's <b>own getMeta</b> at read time. A disagreement prints as a
+  <b>GATE FAILURE</b> on the card, never smoothed into a number that looks fine.</div>
 </section>
 
 <!-- ══ FUND — Meld hosted checkout (no server of ours · public key only) ══ -->
