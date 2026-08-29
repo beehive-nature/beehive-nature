@@ -3007,6 +3007,15 @@ name = "vocabulary"
 version = "0.1.0"
 
 [[package]]
+name = "voucher-escrow"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+]
+
+[[package]]
 name = "wait-timeout"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"

@@ -28,6 +28,7 @@ members = [
     "crates/dispute-engine",
     "crates/dro-signer",
     "crates/escrow-core",
+    "crates/voucher-escrow",
     "crates/escrow-engine",
     "crates/event-bus",
     "crates/mastery-ledger",

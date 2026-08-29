@@ -1,0 +1,17 @@
+[package]
+name = "voucher-escrow"
+version = "0.1.0"
+edition.workspace = true
+# NOT the workspace license. The workspace is AGPL-3.0-only; this crate is
+# MOAT code and rides the published Business Source License 1.1 with the rest
+# of the voucher-prepay / tithe engine (scripts/buzz-meter/LICENSE), Change
+# Date August 29, 2030 → GPL-2.0-or-later. Inheriting here would have
+# relicensed the moat by accident.
+license = "BUSL-1.1"
+publish = false
+description = "The voucher/escrow money engine in kernel form — i128 raw-unit money, closed Meterable enum, refuse-before-write, hash-chained ledger, 10% tithe as a distinct line. Conformance battery shared with the Python reference."
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
