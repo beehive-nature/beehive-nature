@@ -132,7 +132,7 @@
   /* the language toggle (every corpus-docked tongue, corpus-law honest) rides every page — see lang.js */
   if(!document.getElementById('blangctl')){
     var s2=document.createElement('script');
-    s2.src=R+'lang.js?v=16';
+    s2.src=R+'lang.js?v=17';
     document.body.appendChild(s2);
   }
 
