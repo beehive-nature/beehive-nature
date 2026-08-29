@@ -130,15 +130,17 @@ footer{max-width:960px;margin:24px auto 0;color:var(--faint);font-size:10px;text
   <div>nameplate rule: no attribution label until the holding address is founder-verified — anonymously-held pieces carry the honest address</div>
 </footer>
 </main>
+<script src="level-truth.js?v=1"></script>
 <script src="tour.js?v=33"></script>
 <script>
 (function(){
 "use strict";
 var $=function(id){return document.getElementById(id)};
 var GARDEN='0xfbd201472d5a439f1f0e408eb5dfaf6ea3687876';
-var HOSTS=['https://base-rpc.publicnode.com','https://base.drpc.org'];
-var W=function(v){return BigInt(v).toString(16).padStart(64,'0')};
-var AD=function(a){return '0'.repeat(24)+a.replace(/^0x/,'').toLowerCase()};
+/* SHARED level-truth module (level-truth.js) — the same lvlOf/ladder table
+   market.html uses, so the Royal Collection's dots and market's dots can
+   never disagree about what a collection's level means. */
+var HOSTS=LevelTruth.HOSTS, W=LevelTruth.W, AD=LevelTruth.AD;
 async function rpc(calls){
   for(var h=0;h<HOSTS.length;h++){
     try{
@@ -150,17 +152,7 @@ async function rpc(calls){
   }
   return null;
 }
-function decodeString(hex){
-  var h=hex.replace(/^0x/,'');
-  var off=parseInt(h.slice(0,64),16);
-  var len=parseInt(h.slice(off*2,off*2+64),16);
-  var out='';
-  for(var i=0;i<len;i++){
-    var b=parseInt(h.slice((off+32+i)*2,(off+32+i)*2+2),16);
-    out+=String.fromCharCode(b);
-  }
-  return out;
-}
+var decodeString=LevelTruth.decodeString;
 /* LUNA SEALS — archived in the tree, live read from base.org */
 var SEALS=[
   {name:'luni',label:'the primary seal',tokenId:'17274236440657507002379994135247555599625635973284987701770750070407992801555' /* PUBLIC-CONSTANT */},
@@ -194,14 +186,17 @@ function renderSeals(){
       });
   });
 }
-/* ROYAL COLLECTION — PEPI from the garden, getSvg live */
-var ROYAL=[
-  {sym:'PEPI v2',c:'0x28a5e71BFc02723eAC17E39c84c5190415C0de9F',sel:'a435130b'},
-  {sym:'PEPI v1',c:'0x19706c142d33376240e418d6385f05691a5fa8e2',sel:'a435130b'},
-  {sym:'FUNGI',c:'0x7d9Ce55D54FF3FEddb611fC63fF63ec01F26D15F',sel:'422b9e23'},
-  {sym:'$FROGGI',c:'0x88A78C5035BdC8C9A8bb5c029e6cfCDD14B822FE',sel:'422b9e23'},
-  {sym:'JELLI',c:'0xA1b9d812926a529D8B002E69FCd070c8275eC73c',sel:'422b9e23'}
-];
+/* ROYAL COLLECTION — PEPI from the garden, getSvg live.
+   LEVEL-TRUTH UNIFICATION (2026-08-28): same LevelTruth.COLLECTIONS table
+   market.html reads, so the Royal Collection's level dots can never drift
+   from the DeMarketPlace's. Every plinth's driver is balanceOf(GARDEN) —
+   the founder's own holdings, cited per card — never a listing amount, so
+   there is no buyer/seller split here; the seed IS the level input. */
+var ROYAL_ORDER=['PEPI v2','PEPI v1','FUNGI','$FROGGI','JELLI'];
+var ROYAL=ROYAL_ORDER.map(function(sym){
+  return LevelTruth.COLLECTIONS.filter(function(c){return c.sym===sym})[0];
+});
+var lvlOf=LevelTruth.lvlOf, pipmax=LevelTruth.pipmax, pips=LevelTruth.pips;
 async function renderRoyal(){
   var g=$('royalGrid');g.innerHTML='';
   var count=0;
@@ -215,11 +210,13 @@ async function renderRoyal(){
     var svg;
     try{svg=decodeString(art[0]);}catch(e){continue}
     count++;
+    var lvln=lvlOf(seed,col);
     var d=document.createElement('div');d.className='plinth';
     d.innerHTML='<div class="frame">'+svg+'</div>'+
       '<div class="plate"><div class="pname">'+col.sym+'</div>'+
-      '<div class="pmeta"><b>seed</b> '+seed.toLocaleString()+' · drawn from getSvg at page-open<br>'+
+      '<div class="pmeta"><b>'+pips(lvln??0,pipmax(col))+'</b> <b>seed</b> '+seed.toLocaleString()+' · level '+(lvln??'?')+' of '+pipmax(col)+' · balanceOf(garden), drawn from getSvg at page-open<br>'+
       '<b>contract</b> '+col.c.slice(0,8)+'…'+col.c.slice(-4)+'</div>'+
+      (col.ou?'<div class="pmeta" style="color:var(--guard)">o/u collection — chain art may not agree exactly with the ladder tier this seed implies (law 4, same class as the DeMarketPlace)</div>':'')+
       '<div class="plabel hold">holder: 0xFBD2… — pending attribution read-back</div></div>';
     g.appendChild(d);
   }

@@ -38,7 +38,7 @@ import { fileURLToPath } from 'node:url';
    page-open, same-origin or not, is a dependency the surface must argue for
    in the open — the gate will not wave it through. */
 const RIDER_ALLOWLIST = [
-  /\/tour\.js/, /\/register\.js/, /\/lang\.js/, /\/rails-badge\.js/,
+  /\/tour\.js/, /\/register\.js/, /\/lang\.js/, /\/rails-badge\.js/, /\/level-truth\.js/,
   /\/agent-dock\.js/,
   /\/manifest\.webmanifest/, /\/bn-logo\.(jpg|png)/, /\/icon-180\.png/,
   /\.(json|css)(\?|$)/,

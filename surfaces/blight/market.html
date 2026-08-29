@@ -105,48 +105,18 @@ section.laws{background:#0b0b12;border:1px solid var(--line);border-radius:12px;
   <div class="art" id="rart"></div>
   <div class="pre" id="rpre"></div>
 </div></div>
+<script src="../level-truth.js?v=1"></script>
 <script>
 /* FRONT-END MVP. Listings render live from chain state (the founder's garden as the
    opening inventory), previews compute REAL cushion math from the ladders, and every
    signature button states plainly that it waits for the escrow contract. The five
    laws are not fine print — they are a tab. */
-const W=v=>BigInt(v).toString(16).padStart(64,'0');
-const AD=a=>'0'.repeat(24)+a.replace(/^0x/,'').toLowerCase();
-const HOSTS=['https://base-rpc.publicnode.com','https://base.drpc.org'];
+/* SHARED level-truth module (level-truth.js) \u2014 one lvlOf, one ladder table,
+   one pips renderer, so market and museum can never disagree on what
+   "level" means for a collection again. */
+const {W,AD,HOSTS,decodeString,rpc,lvlOf,pipmax,pips}=LevelTruth;
+const COLS=LevelTruth.COLLECTIONS;
 const LOV='0xfbd201472d5a439f1f0e408eb5dfaf6ea3687876';
-const COLS=[
- {sym:'FUNGI',c:'0x7d9CE55D54FF3FEddb611fC63fF63ec01F26D15F',sel:'422b9e23',lv:[0,21000,525000,1050000,1575000,2100000],base:0,ou:true},
- {sym:'$FROGGI',c:'0x88A78C5035BdC8C9A8bb5c029e6cfCDD14B822FE',sel:'422b9e23',lv:[0,1000,3000,10000,30000,60000,120000],base:0,ou:true},
- {sym:'JELLI',c:'0xA1b9d812926a529D8B002E69FCd070c8275eC73c',sel:'422b9e23',lv:[0,1000,21000,105000,420000,1050000],base:0},
- {sym:'PEPI v2',c:'0x28a5e71BFc02723eAC17E39c84c5190415C0de9F',sel:'a435130b',lv:[0,11,22,33,44,56],base:1},
- {sym:'PEPI v1',c:'0x19706c142d33376240e418d6385f05691a5fa8e2',sel:'a435130b',lv:[0,11,22,33,44,56],base:1,ou:true},
-];
-function decodeString(hex){
-  const h=hex.replace(/^0x/,'');
-  const off=parseInt(h.slice(0,64),16); if(!(off===0x20)) throw 0;
-  const len=parseInt(h.slice(off*2,off*2+64),16); if(!(len>=0&&len<=16384)) throw 0;
-  let out='';
-  for(let i=0;i<len;i++){ const b=parseInt(h.slice((off+32+i)*2,(off+32+i)*2+2),16);
-    if(Number.isNaN(b)) throw 0; out+=String.fromCharCode(b); }
-  try{ return decodeURIComponent(escape(out)); }catch(e){ return out; }
-}
-async function rpc(calls){
-  for(const h of HOSTS){
-    const ctl=new AbortController(); const kill=setTimeout(()=>ctl.abort(),8000);
-    try{
-      const r=await fetch(h,{method:'POST',headers:{'Content-Type':'application/json'},signal:ctl.signal,
-        body:JSON.stringify(calls.map((c,i)=>({jsonrpc:'2.0',id:i,method:'eth_call',params:[{to:c.to,data:c.data},'latest']})))});
-      const j=await r.json(); clearTimeout(kill);
-      if(Array.isArray(j)) return j.map(x=>x.result??null);
-    }catch(e){ clearTimeout(kill); }
-  }
-  return null;
-}
-const lvlOf=(s,col)=>{ if(!col.lv) return null; let l=col.base;
-  for(let i=1;i<col.lv.length;i++) if(s>=col.lv[i]) l++;
-  return l-col.base; };
-const pipmax=col=>col.lv?col.lv.length-1-col.base:0;
-const pips=(n,max)=>{ let s=''; for(let k=0;k<Math.max(max,1);k++) s+=k<n?'\u25CF':'\u00B7'; return s; };
 let inventory=[];
 const PRICES={'FUNGI':0.00041,'$FROGGI':0.004,'JELLI':0.0009,'PEPI v2':3.2,'PEPI v1':0.55};
 const fromLine='\nfrom: bsy: [your handle] | npub: [your address] (bind: /keys/addresses)';
@@ -188,7 +158,7 @@ function renderWall(){
       ? '<span>representative — exact art rolls on delivery</span> (<span>seed</span> '+p.seed.toLocaleString()+' · <span>level</span> '+lvlOf(p.seed,p.col)+' <span>travel intact)</span>'
       : '<span>level-true: this art is exactly what</span> '+L.whole.toLocaleString()+' <span>holds at delivery</span>';
     body.innerHTML='<div class="n">'+p.col.sym+'</div>'+
-      '<div class="m"><b>'+pips(p.lvln??0,pipmax(p.col))+'</b> <span>seed</span> '+p.seed.toLocaleString()+' · <span>listing</span> '+L.whole.toLocaleString()+' <span>exact</span></div>''+
+      '<div class="m"><b>'+pips(p.lvln??0,pipmax(p.col))+'</b> <span>seed</span> '+p.seed.toLocaleString()+' · <span>listing</span> '+L.whole.toLocaleString()+' <span>exact</span></div>'+
       '<div class="price"><span class="p">'+L.usdc.toLocaleString()+' USDC</span><span class="u">spot · exact-amount</span></div>'+
       '<div class="acts"><button class="buy" data-i="'+i+'"><span>inquire</span></button><button data-v="'+i+'"><span>view</span></button></div>';
     body.appendChild(disc);
