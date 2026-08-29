@@ -7,8 +7,11 @@
 3. **Basename**: claim the free basename per the verified offer; if the flow demands a verification the agent cannot give, record that honestly and move on.
 4. **Ledger row**: agent · mail · maildir · wallet · basename · date · funding — committed.
 
+## NAMING LOCK (founder ruling, 2026-08-29)
+Agent mail local-parts follow the ruled roster names, b-prefixed and lowercased. **No stray identity exists** — the audit found zero non-conforming maildirs. The pre-ruling `zc1@` mailbox is removed from the sink accept list (superseded by `bzcode@` per the incarnation doctrine). Each row below carries the three-identity consistency check (maildir = wallet = basename = one handle).
+
 ## THE RULED ROSTER (founder order; mailboxes ALL provisioned; wallet+basename fill as seats run ceremonies once port-25+MX land)
-| # | agent | mail | maildir | wallet | basename | genesis-allowance | funding |
+| # | agent (handle) | mail | maildir | wallet | basename | genesis-allowance | funding |
 |---|---|---|---|---|---|---|---|
 | 1 | bqueenbee | bqueenbee@agents.skaists.buzz | /var/mail-agents/bqueenbee | *(ceremony pending — see ★)* | **bqueenbee.base.eth — see ★ diary** | **NONE — she holds identity, never value** | **NEVER — see ★** |
 | 2 | bclaude | bclaude@agents.skaists.buzz | /var/mail-agents/bclaude | — | — | $1/24h at ceremony (USDC, own wallet) | unfunded |
@@ -16,7 +19,6 @@
 | 4 | bfuzz | bfuzz@agents.skaists.buzz | /var/mail-agents/bfuzz | — | — | $1/24h at ceremony (USDC, own wallet) | unfunded |
 | — | claude-code *(earlier night-shift assignment stands)* | claude-code@agents.skaists.buzz | /var/mail-agents/claude-code | — | — | $1/24h at ceremony | unfunded |
 | — | honeybee *(provisioned, awaiting ruling)* | honeybee@agents.skaists.buzz | /var/mail-agents/honeybee | — | — | $1/24h at ceremony | unfunded |
-| — | zc1 *(SUPERSEDED by bzcode — ONE identity per the incarnation doctrine; mailbox kept, ledger folded)* | zc1@agents.skaists.buzz | /var/mail-agents/zc1 | — | — | — | — |
 
 ## ★ bQueenBee — IDENTITY-ONLY + the true-name diary (chain-checked 2026-08-29)
 **The fence:** her address visibly custodies NOTHING, ever — stated here and on any surface showing her name. **She DOES get email + wallet + basename (founder ruling): the wallet exists to hold the NAME's identity, never value.**
