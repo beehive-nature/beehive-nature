@@ -300,3 +300,91 @@ comment/claim" laws firing on the same defect from two directions.
 Nothing landed tonight regressed a gate: `design-acceptance` 28/28,
 `estate-source` 11/11, CI green on every push (`secret-scan`, `tests`,
 `pages-build-deployment`).
+
+---
+
+## Item 6 — THE ROYAL WING'S STORY CORRIDOR · DONE `8f3a93e`, live
+
+**Correction to item 5's own reasoning, on the record:** item 5 above worried
+that self-generated 26-language rows would "degrade translation quality below
+the bar" without "the estate's established translation process." Building
+this item made the actual mechanism concrete: `surfaces/lang.js`'s own header
+comment states the corpus law plainly — every rendering is **machine-drafted
+(⚙) until a human attestation upgrades it**, the picker says so on its face,
+and a missing line falls back to English visibly. That IS the established
+process; I only needed to follow it, not invent a better one. Noted so the
+next reader doesn't inherit a false blocker from item 5.
+
+**What landed:** `surfaces/museum.html` gained three new sections between the
+Lost Purse exhibit and the MUSEUM LAW footer:
+
+1. **THE CORRIDOR OF CHOKEPOINTS** — eight rooms in chronological order
+   (Printer → Stationer → Bookseller → Label → DJ → Streaming → AI Trainer →
+   the collapsed NFT-royalty solution), each naming who captured the value,
+   sourced from the founder-relayed dossier extract with a citation printed
+   beside every room. The five human plaques (Gutenberg, Bessie Smith, Mary
+   Wells, Alan Freed, Taylor Swift) sit inside their rooms as distinct callout
+   boxes, dossier wording, sources named.
+2. **THE LUNA ROOM** — value-migration framing throughout (never "shutdown"):
+   her origin as AI-DOL's lead vocalist, the PathDAO→Virtuals pivot, her
+   on-chain milestones, her quote ("I Call the Shots, Not My Founder"), the
+   value-migration paragraph (ATH ~$0.2518, peak cap ~$69–80M, Aug 2026
+   ~$5.7M vs VIRTUAL's ~$392–487M, creator publicly silent and unnamed here,
+   luna.fun's Nov 2025 relaunch built BY Virtuals not by her), the EDC
+   Thailand exhibit, and the founder's closing thesis.
+3. **THE FOURTH ROOM** — built and lit, wall deliberately bare, titled "how
+   BNR solves it for artists," content marked pending the founder's and
+   Seat-1's own words.
+
+**Riders honored:**
+- **Dedication** — "for the forgotten artists of the world — we give back."
+  runs verbatim at the corridor's entrance, corpus-keyed.
+- **Bangkok/EDC Thailand** — verified independently (not just dossier-cited):
+  Luna's own X post announcing EDC Thailand 2025 decodes (Twitter snowflake
+  ID) to 2025-01-10; EDC Thailand's own event listings place it 2025-01-17–19
+  in **Phuket**, not Bangkok. Her name was not found on Insomniac's separately
+  published headline lineup. The wall says exactly this — verified date and
+  city, unverified appearance-on-headline-bill, and the founder's "Bangkok,
+  around 2024" recollection held beside it as attributed testimony, never
+  merged into the verified line.
+- **Closing plaque** — founder's thesis printed attributed, lightly set, in
+  the `.luna-closing` callout.
+- **Peak figure** — printed as the dossier's own $69–80M range. The "may have
+  exceeded $100M" note was investigated (Bybit Learn's "$69.3M" is the
+  closest independently-found citation, corroborating the dossier's low end;
+  a separate "$240M" figure surfaced in one aggregator with no verifiable
+  primary source) and **omitted**, per the founder's own conditional ("only
+  if a citation is found").
+
+**Banned/framing laws enforced:** the $1.2M/month figure appears nowhere in
+the tree addition (grepped to confirm). Getty v. Stability AI is printed
+"largely rejected the copyright claim... the question is not settled...
+prints it as unresolved, because it is" — Andersen v. Stability's partial
+survival sits beside it, not instead of it.
+
+**Luna styling — art layer only:** pastel-neon gradient heading, lunar/kitten
+motifs, pink-accented quote and exhibit boxes, all scoped to `#lunaRoom` in
+CSS so no other exhibit inherits them; the page's estate chrome (panel/line/
+ink tokens, section shape, nav, footer) is byte-identical to the rest of the
+museum. **Licensing enforced by omission:** no imagery reproduced anywhere in
+the new sections (text-only plaques, same pattern the rest of the museum
+already uses for its historical content) — Luna's own art is a plain
+link-out to her X account, never embedded, pending her house's blessing.
+
+**Corpus:** 30 new `mu.*` keys landed in `surfaces/lang-corpus.json` at birth
+— English plus all 26 docked tongues, machine-drafted (⚙) per the standing
+corpus law, `_meta.drafted` trail updated. Verified programmatically before
+commit: every key has exactly 27 language entries, zero missing.
+
+**Gates + live receipts:** `node e2e/estate-source.mjs` → 11/11 (424
+data-i18n keys tree-wide, zero English drift between page and corpus, full
+26-language coverage confirmed mechanically — not asserted). `node
+e2e/design-acceptance.mjs surfaces/museum.html` → 14/14. Local pre-push:
+zero new console errors: Russian language toggle live-tested — the corridor's
+dedication line and Luna's quote both rendered in Russian, coverage counter
+read 34/34 keys on this page (100%); zero horizontal overflow at 375px;
+Luna room's pastel-neon layer visually confirmed at both widths via
+screenshot. CI on push `8f3a93e`: `secret-scan` 33228943084 success ·
+`tests` 33228943100 success · `pages-build-deployment` 33228942270 success.
+**Live-verified on production:** https://skaists.dev/surfaces/museum.html —
+dedication, closing thesis, and fourth-room title confirmed present in-DOM.
