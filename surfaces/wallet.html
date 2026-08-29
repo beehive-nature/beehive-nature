@@ -1473,19 +1473,16 @@ var WALLET_PROFILE = {
       rec.seed.fill(0);
       return {kind:'Bitcoin bc1', value:p2wpkhAddress(bp,'bc')};
     }
+    if(/^evm:/.test(ctx)){
+      /* one EVM path for every caller, armed core or not — see evmAddressFromSeed */
+      var addr=evmAddressFromSeed(rec.seed);
+      rec.seed.fill(0);
+      return {kind:'EVM 0x', value:addr};
+    }
     if(CORE){
-      var out;
-      if(/^evm:/.test(ctx))out={kind:'EVM 0x', value:CORE.evmAddr(rec.seed)};
-      else out={kind:/^vaulta:/.test(ctx)?'Vaulta K1':'K1', value:CORE.eosPub(rec.seed), pubK1:CORE.pubK1(rec.seed)};
+      var out={kind:/^vaulta:/.test(ctx)?'Vaulta K1':'K1', value:CORE.eosPub(rec.seed), pubK1:CORE.pubK1(rec.seed)};
       rec.seed.fill(0);
       return out;
-    }
-    if(/^evm:/.test(ctx)){
-      var pub=BN.secp.getPublicKey(rec.seed,false);           // 65B uncompressed
-      var h=BN.keccak_256(pub.slice(1,65));                    // keccak(X‖Y)
-      rec.seed.fill(0);
-      var addr='0x'+Array.from(h.slice(12)).map(function(b){return b.toString(16).padStart(2,'0')}).join('');
-      return {kind:'EVM 0x', value:addr};
     }
     var w=wif37(rec.seed); rec.seed.fill(0);
     var pk=BN.PrivateKey.fromString(w);
@@ -1662,6 +1659,25 @@ var WALLET_PROFILE = {
     return out;
   }
   function hash160(bytes){ return ripemd160(BN.sha256(bytes)) }
+
+  /* ── THE EVM ADDRESS, ONE WAY, FOR EVERY CALLER. The Rust core when it is
+     armed; a first-party JS path (keccak of the uncompressed key, low 20
+     bytes) when it is not. Both MUST produce the same address and the gate
+     asserts it byte-for-byte.
+
+     WHY THIS EXISTS: the core arms asynchronously (bnr-keys.wasm), and three
+     call sites disagreed about that. The key forge had this JS fallback, while
+     railAddresses gated the whole EVM card on CORE and the signer called
+     CORE.evmAddr outright. So a keychain connected BEFORE the wasm finished —
+     a slow network, a cold cache — showed NO EVM address at all and threw
+     "cannot read properties of null" on send. Caught on the live site, not
+     locally, because locally the wasm is always already warm. ── */
+  function evmAddressFromSeed(seed){
+    if(CORE) return CORE.evmAddr(seed);
+    var pub=BN.secp.getPublicKey(seed,false);   // 65B uncompressed
+    var h=BN.keccak_256(pub.slice(1,65));       // keccak(X‖Y), low 20 bytes
+    return '0x'+hexS(h.slice(12));
+  }
 
   /* P2WPKH (BIP-173): witness v0 + 20-byte hash160, bech32 over the hrp.
      bech32, NOT bech32m — segwit v0 is bech32 by BIP-350, and mixing the two
@@ -2114,10 +2130,10 @@ var WALLET_PROFILE = {
     if(soul) out.push({t:'Vaulta · A',ctx:'vaulta:'+soul,unit:'A',v:soul,
       note:'your account name receives A directly — memo optional'});
     if(!mprk) return out;
-    if(CORE) add('Base + Arbitrum · ETH · USDC · ANT','evm:'+soul,'ETH',
+    add('Base + Arbitrum · ETH · USDC · ANT','evm:'+soul,'ETH',
       'ONE 0x address, both EVM rails — the same key signs on chain 8453 and 42161',function(){
         var r=BZDIDKEY.deriveK1Key(mprk,'evm:'+soul);
-        try{ return CORE.evmAddr(r.seed) } finally { r.seed.fill(0) }
+        try{ return evmAddressFromSeed(r.seed) } finally { r.seed.fill(0) }
       });
     add('Solana · SOL','sol:'+soul,'SOL','base58 of the derived ed25519 key — receive-ready; sending is not wired',function(){
       var r=BZDIDKEY.deriveRecordKey(mprk,'sol:'+soul);
@@ -3979,6 +3995,7 @@ var WALLET_PROFILE = {
     decodeBolt11:decodeBolt11,decodeBolt12:decodeBolt12,decodeLnRequest:decodeLnRequest,
     parseNwcUri:parseNwcUri,
     capAssert:capAssert,capAssertUnpriced:capAssertUnpriced,railAddresses:railAddresses,
+    evmAddressFromSeed:evmAddressFromSeed,coreArmed:function(){return !!CORE},
     /* the Bitcoin rail: silent payments, the payment name, the unified URI */
     bech32mEncode:bech32mEncode,bech32mDecode:bech32mDecode,convertBits:convertBits,
     BECH32M_CONST:BECH32M_CONST,BECH32_CONST:BECH32_CONST,
@@ -3989,7 +4006,7 @@ var WALLET_PROFILE = {
     buildBip353Record:buildBip353Record,bip353Query:bip353Query,readBip353Answer:readBip353Answer};
   function evmAddrOf(){ // address + fresh seed pair — seed stays in the local frame only
     var rec=BZDIDKEY.deriveK1Key(MPRK,'evm:'+SOUL);
-    return {seed:rec.seed,addr:CORE.evmAddr(rec.seed)};
+    return {seed:rec.seed,addr:evmAddressFromSeed(rec.seed)};
   }
   /* the rail and asset pickers are RENDERED FROM EVM_RAILS — add a row to the
      registry and the surface grows a rail; there is no second list to forget */

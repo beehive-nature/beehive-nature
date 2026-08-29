@@ -585,6 +585,47 @@ try {
     await ctx.close();
   }
 
+  /* ══ I · THE WASM RACE — the EVM rail must not depend on the Rust core
+     having finished loading. Found on the LIVE site, where a keychain
+     connected before bnr-keys.wasm resolved produced no EVM address at all
+     and threw on send. Locally the wasm is always warm, which is exactly why
+     this gate BLOCKS it instead of hoping. ══ */
+  console.log('I · the EVM rail with the Rust core absent (the live-only race):');
+  {
+    const ctx = await browser.newContext(); const seen = []; await mockRail(ctx, seen); await mockOther(ctx);
+    // the armed address first, for comparison
+    const warm = await browser.newContext(); await mockRail(warm, []); await mockOther(warm);
+    const warmPage = await connectedPage(warm);
+    const armed = await warmPage.evaluate(() => ({
+      core: window.BNRPAY.coreArmed(),
+      addr: window.BNRPAY.railAddresses(new Uint8Array(32).fill(0x2a), 'gatesoul').find(c => /Base \+ Arbitrum/.test(c.t)).v
+    }));
+    await warm.close();
+    ok('with the core armed, an EVM address derives', armed.core === true && /^0x[0-9a-f]{40}$/i.test(armed.addr), JSON.stringify(armed));
+
+    // now BLOCK the wasm entirely and repeat
+    await ctx.route(/bnr-keys\.wasm/, r => r.abort());
+    const page = await connectedPage(ctx);
+    const cold = await page.evaluate(() => {
+      const P = window.BNRPAY;
+      const cards = P.railAddresses(new Uint8Array(32).fill(0x2a), 'gatesoul');
+      const evm = cards.find(c => /Base \+ Arbitrum/.test(c.t));
+      let signed = null;
+      return P.evmSendRaw('base', '0x742c8f2e0ce07Dd3f7E78A31E5A97D45c50fF2c8', 'ETH', '0.001')
+        .then(t => ({ core: P.coreArmed(), addr: evm && evm.v, err: evm && evm.err, from: t.from, signed: true }))
+        .catch(e => ({ core: P.coreArmed(), addr: evm && evm.v, err: evm && evm.err, signErr: e.message }));
+    });
+    ok('the core is genuinely ABSENT in this run (the block worked)', cold.core === false, JSON.stringify(cold.core));
+    ok('the EVM address still derives with NO core — the card is not blank',
+      /^0x[0-9a-f]{40}$/i.test(cold.addr || ''), cold.addr || cold.err);
+    ok('and it is the SAME address the armed core produces (the two paths agree byte-for-byte)',
+      (cold.addr || '').toLowerCase() === (armed.addr || '').toLowerCase(), `cold=${cold.addr} armed=${armed.addr}`);
+    ok('the signer still signs with no core, from that same address',
+      cold.signed === true && (cold.from || '').toLowerCase() === (armed.addr || '').toLowerCase(),
+      cold.signErr || cold.from);
+    await ctx.close();
+  }
+
   ok('NOTHING leaked to the live network (every rail host was mocked)', leaked.length === 0,
     leaked.slice(0, 5).join(' , '));
 
