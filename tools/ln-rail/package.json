@@ -1,0 +1,11 @@
+{
+  "name": "@bnr/ln-rail",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "LN rail module: MCP->NWC bridge (ours; getalby's is unlicensed pattern-only) + SwapAdapter seam (no live default). See docs/dispatches/CHIEF_ORDER_LN_RAIL_2026-08-29.md.",
+  "dependencies": {
+    "nostr-tools": "^2.10.0",
+    "websocket-polyfill": "^1.0.0"
+  }
+}

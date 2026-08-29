@@ -71,3 +71,4 @@ __pycache__/
 # third-party source snapshots: preserved for sponsor-mirroring, never republished
 archive-staging/
 .hubshots/
+tools/ln-rail/node_modules/
