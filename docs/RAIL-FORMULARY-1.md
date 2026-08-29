@@ -40,6 +40,13 @@ what you reach for when first-line is contraindicated.
 - ANT for scale / AR for permanence, merit-routed per the
   ruled AR/ANT doctrine; private → zbData.
 
+### LIGHTNING (BTC-native, the fourth rail) — FOUNDER-RULED 2026-08-29 ("fire all guns")
+*(ratified verbatim from CHIEF_ORDER_LN_RAIL_2026-08-29.md §5; receipts + citations live there)*
+- HUMANS: 1st LDK module w/ BOLT12 offers + BIP-352 receive (raid R1) · self-hosted quickstart = Alby Hub pattern (Apache-2.0) until the native module cruises.
+- AGENTS: 1st NWC/NIP-47 over buzz relays (per-agent connection secrets = op-keys) · allowance = **daily-sat caps, revocable by rotation, enforced in the bzDiD orchestration module** (never the EVM signer) · float = cdk e-cash, operator-minted, phase 2.
+- SWAPS: pluggable adapter, **no live default** — Boltz service dead 2026-08-03 (AI-assisted attacks; refunds live; cite: boltz.exchange banner + press). Successor candidate: Blockstream Swaps (beta). Operator-box swaps inherit the attack class knowingly.
+- CONTRAINDICATION: swap services are a proven AI-attack class; single-connection-secret custody = a candle (same law as the single-passkey); never merge LN state into the EVM signer.
+
 ### HORIZON (forward-compat, not yet built)
 - Future retail EVMs (Robinhood's chain named as the horizon)
   INHERIT THE BASE PAYMENTS COLUMN: the EVM-compat work
