@@ -4,7 +4,7 @@
 
 ## THE RECIPE — `provision(agent)`, documented once, run many times
 1. **Mailbox** (seconds, on-box): `for d in cur new tmp; do sudo mkdir -p /var/mail-agents/<agent>/$d; done && sudo chmod 700 /var/mail-agents/<agent>` — add `<agent>` to `KNOWN` in `scripts/buzz-mail/sink.py`, `sudo systemctl restart buzz-mail-sink`. Address: `<agent>@agents.skaists.buzz`.
-2. **Smart wallet** (seat browser, ~5 min): Coinbase smart-wallet flow with the agent's mail address; OTP read on-box: `sudo ls -t /var/mail-agents/<agent>/new | head -1` → `sudo cat` it (6-digit code in the body). The ESTATE records and vaults the recovery factor; the agent's session holds only session keys.
+2. **Smart wallet** (native path, per the 2026-08-29 scope ruling): the bzDiD wallet at `surfaces/wallet.html` + `surfaces/onboarding/` — create-in-place, no popup, no OTP ceremony; keys derive from the soul (WebAuthn PRF), the EVM lane forges the agent's 0x address, sends sign locally. Optional spend cap = the owner's tool on the PAY panel. *(History: bzcode/bclaude's wallets were born through the Coinbase smart-wallet ceremony before the native ruling — receipts stand; the ceremony scripts themselves were stripped from the tree 2026-08-29.)*
 3. **Basename**: claim the free basename per the verified offer; if the flow demands a verification the agent cannot give, record that honestly and move on.
 4. **Ledger row**: agent · mail · maildir · wallet · basename · date · funding — committed.
 

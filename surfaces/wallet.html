@@ -25,6 +25,8 @@ main{max-width:980px;margin:0 auto}
 header{margin-bottom:14px;padding-bottom:14px;position:relative}
 h1{font-size:clamp(30px,5.5vw,40px);font-weight:600;letter-spacing:-.01em;line-height:1.1;
   background:linear-gradient(92deg,#E9F2EC 55%,#86CC72);-webkit-background-clip:text;background-clip:text;color:transparent}
+h1 .h1-arg{background:linear-gradient(92deg,#FFD700 0%,#7DDF8F 52%,#00E5FF 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
 header p{color:var(--dim);font-size:11px;margin-top:8px;max-width:780px;margin-inline:auto;line-height:1.85}
 section{background:var(--panel);border:1px solid var(--line2);border-radius:12px;padding:16px;margin-top:14px;position:relative}
 section::before{content:'';position:absolute;top:-1px;left:-1px;width:10px;height:10px;
@@ -167,7 +169,7 @@ var WALLET_PROFILE = {
 </nav>
 <header>
   <div class="kicker" data-i18n="wl.kicker">zero storage · zero custody · first-party, adapter-native</div>
-  <h1><span aria-hidden="true">🗝</span> the BNR wallet</h1>
+  <h1><span aria-hidden="true">🗝</span> the BNR wallet <span class="h1-arg">— one soul, every chain</span></h1>
   <p data-reg="bee">One identity, every chain. Your bzDiD is your wallet — connect it once
   and see your balances across all your chains, sign transactions, and hold your keys.
   Nothing leaves your browser.</p>
@@ -562,6 +564,22 @@ var WALLET_PROFILE = {
   </div>
   <div class="law" id="pay-law">receive needs nothing (addresses below are yours to hand out) ·
   send signs with your bzDiD keys exactly like every lane here · swap rides the chain's own market</div>
+
+  <!-- ══ SPEND CAP — the owner's optional tool. Set it, forget it: the engine
+       refuses to SIGN past it (a policy you wrote, enforced at your own key —
+       never a human gate, never an approval step; unset = no limit). ══ -->
+  <div class="row" id="cap-row" style="margin-top:8px;align-items:center;flex-wrap:wrap">
+    <span style="font-size:10.5px;color:var(--faint);flex:0 0 auto">spend cap · optional, owner's tool:</span>
+    <span id="cap-view" style="font-size:10.5px;color:var(--cyan);flex:1 1 auto;min-width:120px">unset — no limit</span>
+    <input id="cap-amt" class="small" type="number" min="0" step="0.0001" placeholder="amount/day" title="amount per rolling day, per unit" style="max-width:110px;flex:0 1 110px">
+    <select id="cap-unit" title="unit — caps are per-unit, never price-converted" style="max-width:86px;flex:0 1 86px;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:9px 8px;font:12px 'IBM Plex Mono',monospace">
+      <option value="A">A</option>
+      <option value="ETH">ETH</option>
+      <option value="ANT">ANT</option>
+    </select>
+    <button id="cap-set" class="gold" style="min-height:34px">set</button>
+    <button id="cap-clear" class="gold" style="min-height:34px">clear</button>
+  </div>
 
   <div id="rx-panel" style="display:none;margin-top:10px">
     <div style="display:flex;gap:14px;flex-wrap:wrap" id="rx-cards"></div>
@@ -2908,6 +2926,9 @@ var WALLET_PROFILE = {
     walletPublish: walletPublish,
     callAdapter: callAdapter,
     hasCap: hasCap,
+    capGate: capGate,
+    capRecord: capRecord,
+    capLoad: capLoad,
     _telemetry: TELEMETRY,
     _crash: crash
   };
@@ -3021,12 +3042,59 @@ var WALLET_PROFILE = {
       (BRIDGED?' · bridge ✓ (K1 signs)':' · <b style="color:var(--amber)">not bridged — the bridge below adds your bzDiD key first</b>');
   }
   function validAcct(s){ return /^[a-z1-5]{1,12}$/.test(s||'')&&/[a-z]/.test(s||'') }
+  /* ── SPEND CAP — the owner's optional tool, enforced at SIGN time. A per-unit
+     rolling-day ledger in this browser's storage. capGate() runs in every send
+     and buy lane BEFORE a tx is built: over-cap ⇒ the engine refuses to sign —
+     the owner's own pre-written policy speaking, never an approval prompt, never
+     a human in the loop; unset = no limit (autonomy default). ─────────────── */
+  var CAP_KEY='bnr-spend-cap', CAP_LEDGER='bnr-cap-ledger';
+  function capLoad(){ try{ return JSON.parse(localStorage.getItem(CAP_KEY))||{} }catch(e){ return {} } }
+  function capLedger(){ try{ return JSON.parse(localStorage.getItem(CAP_LEDGER))||[] }catch(e){ return [] } }
+  function capToday(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0') }
+  function capUsed(unit){ var t=capToday(); return capLedger().reduce(function(s,e){ return (e.d===t&&e.u===unit)?s+e.a:s },0) }
+  function capView(){
+    var caps=capLoad(), units=Object.keys(caps);
+    $('cap-view').innerHTML=units.length?units.map(function(u){
+      var used=capUsed(u);
+      return u+': <b>'+caps[u]+'</b>/day · '+used.toFixed(4)+' signed today'+(used>=caps[u]?' — <b style="color:var(--amber)">cap hit</b>':'');
+    }).join(' · '):'unset — no limit';
+  }
+  function capGate(unit,amt){
+    var caps=capLoad();
+    if(!(unit in caps)) return true;
+    if(capUsed(unit)+amt<=caps[unit]+1e-9) return true;
+    $('pay-stat').innerHTML='<b style="color:var(--amber)">spend cap speaks:</b> '+amt+' '+unit+' would pass your '+
+      caps[unit]+' '+unit+'/day ('+capUsed(unit).toFixed(4)+' already signed today). The engine refuses to sign '+
+      'past the cap YOU set — raise or clear it above. No one is asked.';
+    return false;
+  }
+  function capRecord(unit,amt){
+    var l=capLedger(); l.push({d:capToday(),u:unit,a:amt});
+    try{ localStorage.setItem(CAP_LEDGER,JSON.stringify(l)) }catch(e){}
+    capView();
+  }
+  $('cap-set').onclick=function(){
+    var u=$('cap-unit').value, a=parseFloat($('cap-amt').value);
+    if(!(a>0)){$('cap-view').textContent='enter an amount > 0 first';return}
+    var caps=capLoad(); caps[u]=a;
+    try{ localStorage.setItem(CAP_KEY,JSON.stringify(caps)) }catch(e){}
+    $('cap-amt').value=''; capView();
+    $('pay-stat').textContent='cap set — '+a+' '+u+'/day. Signs past it are refused locally; nothing else changes.';
+  };
+  $('cap-clear').onclick=function(){
+    var u=$('cap-unit').value, caps=capLoad(); delete caps[u];
+    try{ localStorage.setItem(CAP_KEY,JSON.stringify(caps)) }catch(e){}
+    capView(); $('pay-stat').textContent='cap cleared for '+u+' — no limit again';
+  };
+  capView();
+
   $('sv-go').onclick=async function(){
     var to=$('sv-to').value.trim(), amt=parseFloat($('sv-amt').value), memo=$('sv-memo').value;
     if(!SOUL){payStat('connect your soul first');return}
     if(!validAcct(to)){$('sv-stat').textContent='recipient must be a Vaulta account: 1-12 chars a-z 1-5';return}
     if(!(amt>0)){$('sv-stat').textContent='amount must be > 0';return}
     if(!K1||!BRIDGED){$('sv-stat').textContent='your bzDiD key is not on '+SOUL+'@active yet — run THE BRIDGE below first';return}
+    if(!capGate('A',amt))return;
     var q=amt.toFixed(4)+' A';
     $('sv-stat').textContent='1/4 serializing transfer…';
     try{
@@ -3046,6 +3114,7 @@ var WALLET_PROFILE = {
       if(res&&res.transaction_id){
         $('sv-stat').innerHTML='<b style="color:var(--leaf)">✓ sent '+q+' → '+to+'</b> · tx '+res.transaction_id.slice(0,16)+'…';
         payStat('📤 Vaulta transfer broadcast — tx '+res.transaction_id);
+        capRecord('A',amt);
         readVaulta(SOUL);
       } else {
         var msg=JSON.stringify(res&&res.error||res||{}).slice(0,300);
@@ -3138,6 +3207,7 @@ var WALLET_PROFILE = {
     if(!MPRK||!CORE){payStat('connect your keychain first');return}
     if(!/^0x[0-9a-fA-F]{40}$/.test(to)){$('se-stat').textContent='recipient must be a 0x… 20-byte address';return}
     if(!(amt>0)){$('se-stat').textContent='amount must be > 0';return}
+    if(!capGate(asset==='eth'?'ETH':'ANT',amt))return;
     $('se-stat').textContent='building + signing locally (EIP-155, first-party)…';
     try{
       var t=await evmSendRaw(to,asset,amt);
@@ -3148,6 +3218,7 @@ var WALLET_PROFILE = {
         await seRefresh();   // refresh first, so the receipt line stays on top
         $('se-stat').innerHTML='<b style="color:var(--leaf)">✓ broadcast</b> · tx '+txid.slice(0,20)+'… (from '+t.from.slice(0,10)+'…)';
         payStat('📤 Arbitrum '+asset.toUpperCase()+' sent — tx '+txid);
+        capRecord(asset==='eth'?'ETH':'ANT',amt);
       } else {
         $('se-stat').innerHTML='<b style="color:var(--amber)">rpc refused:</b> '+String(txid&&txid.message||txid).slice(0,200);
       }
@@ -3176,6 +3247,8 @@ var WALLET_PROFILE = {
     if(!SOUL||!K1||!BRIDGED){$('sw-stat').textContent='needs your bridged bzDiD key — run THE BRIDGE below first';return}
     var n=parseInt($('sw-amt').value,10)||0;
     if(!(n>0)){$('sw-stat').textContent='enter bytes of RAM';return}
+    var swCapCost=null;
+    if(SW_BUY){ var cp=await ramPrice(); if(cp!==null){ swCapCost=cp*n; if(!capGate('A',swCapCost))return; } }
     var args=SW_BUY?{payer:SOUL,receiver:SOUL,bytes:n}:{account:SOUL,bytes:n};
     var act=SW_BUY?'buyrambytes':'sellram';
     $('sw-stat').textContent='1/3 serializing eosio::'+act+'…';
@@ -3195,6 +3268,7 @@ var WALLET_PROFILE = {
       if(res&&res.transaction_id){
         $('sw-stat').innerHTML='<b style="color:var(--leaf)">✓ swapped</b> · tx '+res.transaction_id.slice(0,16)+'…';
         payStat('🔁 '+(SW_BUY?'bought ':'sold ')+n.toLocaleString()+' B RAM — tx '+res.transaction_id);
+        if(swCapCost!==null)capRecord('A',swCapCost);
         readVaulta(SOUL);
       } else {
         var msg=JSON.stringify(res&&res.error||res||{}).slice(0,300);
