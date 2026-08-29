@@ -14,6 +14,7 @@
 
 ## EXECUTION STATE (this seat fills as it goes)
 - [ ] Account created at wallet.coinbase.com (passkey ceremony — Windows Hello gesture is the founder's screen)
+  - **LIVE FINDING 2026-08-29 (the COOP interjection, caught in the act):** this seat drove wallet.coinbase.com in the in-app browser and clicked Create; the SDK popup opened as a detached tab, and keys.coinbase.com refused with *"This app doesn't support smart wallets — window.opener is inaccessible"*, linking **smartwallet.dev/guides/tips/popup-tips#cross-origin-opener-policy** (the authoritative COOP citation, captured). The IAB severs `window.opener` regardless of headers — our estate hosts send no COOP (pre-check above), so this is a BROWSER-capability limit, not a surface defect. Desktop computer-use tools were not present in this session; the click-through therefore rests at the founder's Chrome (where his Base docs tab is already open), Windows Hello as the gesture. **Standing law added: any estate surface that opens Base/Coinbase popups must never carry `COOP: same-origin`; the popup needs its opener.**
 - [ ] Address recorded (counterfactual until first tx — expected)
 - [ ] Funded with small ETH **on Base** (founder's hands send)
 - [ ] Recovery phrase set (optional, post-funding)
