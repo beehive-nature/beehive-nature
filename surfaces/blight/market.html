@@ -76,32 +76,32 @@ section.laws{background:#0b0b12;border:1px solid var(--line);border-radius:12px;
 </head>
 <body>
 <header>
-  <h1>⧉ the DeMarketPlace</h1>
-  <div class="herofig"><span class="num" id="liveListings" data-hero-number>…</span><span class="cap" data-hero-caption>live listings · read from the chain, zero cache</span></div>
-  <p>inscriptions, honestly traded — every transfer is an art event, so every trade says what it does</p>
+  <h1>⧉ <span data-i18n="mk.h1">the DeMarketPlace</span></h1>
+  <div class="herofig"><span class="num" id="liveListings" data-hero-number>…</span><span class="cap" data-hero-caption data-i18n="mk.hero.cap">live listings · read from the chain, zero cache</span></div>
+  <p data-i18n="mk.tag">inscriptions, honestly traded — every transfer is an art event, so every trade says what it does</p>
 </header>
 <nav>
-  <button id="tBrowse" class="on">◉ browse</button>
-  <button id="tMine">◌ my listings</button>
-  <button id="tLaws">⚖ how it settles</button>
+  <button id="tBrowse" class="on">◉ <span data-i18n="mk.tab.browse">browse</span></button>
+  <button id="tMine">◌ <span data-i18n="mk.tab.mine">my listings</span></button>
+  <button id="tLaws">⚖ <span data-i18n="mk.tab.laws">how it settles</span></button>
 </nav>
 <div id="wall"></div>
 <div id="rev" style="position:fixed;left:10px;bottom:54px;z-index:80;color:#333;font:9px ui-monospace,monospace;pointer-events:none">market rev 3</div>
 <div id="mine" style="display:none">
-  <p>listing is an exact-amount act.<br>when settlement docks, this page signs with your wallet.</p>
-  <p style="color:var(--warn)">◌ connect wallet — docking soon</p>
-  <p class="note">front-end MVP: the flows, the previews and the laws are live; signatures wait for the audited escrow contract.</p>
+  <p><span data-i18n="mk.mine.a">listing is an exact-amount act.</span><br><span data-i18n="mk.mine.b">when settlement docks, this page signs with your wallet.</span></p>
+  <p style="color:var(--warn)">◌ <span data-i18n="mk.mine.connect">connect wallet — docking soon</span></p>
+  <p class="note" data-i18n="mk.mine.mvp">front-end MVP: the flows, the previews and the laws are live; signatures wait for the audited escrow contract.</p>
 </div>
 <div id="laws" style="display:none">
-  <section class="laws"><div class="law"><div class="i">1</div><div><div class="t">every transfer is an art event</div><div class="d">listing, buying, canceling — each leg fires the capture arithmetic. there are no neutral hops, so there are no hidden ones.</div></div></div>
-  <div class="law"><div class="i">2</div><div><div class="t">exact amount or nothing</div><div class="d">art escrows and delivers whole — the attached seed amount, never a fraction. fees come off the payment side, never the art side.</div></div></div>
+  <section class="laws"><div class="law"><div class="i">1</div><div><div class="t" data-i18n="mk.l1.t">every transfer is an art event</div><div class="d" data-i18n="mk.l1.d">listing, buying, canceling — each leg fires the capture arithmetic. there are no neutral hops, so there are no hidden ones.</div></div></div>
+  <div class="law"><div class="i">2</div><div><div class="t" data-i18n="mk.l2.t">exact amount or nothing</div><div class="d" data-i18n="mk.l2.d">art escrows and delivers whole — the attached seed amount, never a fraction. fees come off the payment side, never the art side.</div></div></div>
   <div class="law"><div class="i">3</div><div><div class="t">the cushion is shown</div><div class="d">destruction happens only when a trade's whole-token delta exceeds the holder's spore cushion. both parties see that number before anyone signs.</div></div></div>
-  <div class="law"><div class="i">4</div><div><div class="t">o/u collections trade conservative</div><div class="d">FUNGI and PEPI v1 carry the over/under bug. they trade whole-for-whole with the art re-roll disclosed — no split fills, no multi-hop item legs.</div></div></div>
-  <div class="law"><div class="i">5</div><div><div class="t">art never touches a pool</div><div class="d">proven twice: liquidity moves dissolve inscriptions. payment routes anywhere; the item walks a straight bridge only.</div></div></div>
+  <div class="law"><div class="i">4</div><div><div class="t" data-i18n="mk.l4.t">o/u collections trade conservative</div><div class="d" data-i18n="mk.l4.d">FUNGI and PEPI v1 carry the over/under bug. they trade whole-for-whole with the art re-roll disclosed — no split fills, no multi-hop item legs.</div></div></div>
+  <div class="law"><div class="i">5</div><div><div class="t" data-i18n="mk.l5.t">art never touches a pool</div><div class="d" data-i18n="mk.l5.d">proven twice: liquidity moves dissolve inscriptions. payment routes anywhere; the item walks a straight bridge only.</div></div></div>
   </section>
-  <p class="note">the north star: the Ethereum item model moves one inscription by unique id, carrying exactly its backing — settlement where no arithmetic can go wrong.</p>
+  <p class="note" data-i18n="mk.north">the north star: the Ethereum item model moves one inscription by unique id, carrying exactly its backing — settlement where no arithmetic can go wrong.</p>
 </div>
-<div id="room"><button class="close">esc ✕</button><div class="inner">
+<div id="room"><button class="close">esc <span data-i18n="mk.room.close">✕</span></button><div class="inner">
   <div class="art" id="rart"></div>
   <div class="pre" id="rpre"></div>
 </div></div>
@@ -185,12 +185,12 @@ function renderWall(){
     const disc=document.createElement('div');
     disc.className='cushion'+(p.col.ou?'':' quiet');
     disc.textContent=p.col.ou
-      ? 'representative — exact art rolls on delivery (seed '+p.seed.toLocaleString()+' · level '+lvlOf(p.seed,p.col)+' travel intact)'
-      : 'level-true: this art is exactly what '+L.whole.toLocaleString()+' holds at delivery';
+      ? '<span data-i18n="mk.card.rep">representative — exact art rolls on delivery</span> (<span data-i18n="mk.card.seed">seed</span> '+p.seed.toLocaleString()+' · <span data-i18n="mk.card.level">level</span> '+lvlOf(p.seed,p.col)+' <span data-i18n="mk.card.intact">travel intact)</span>'
+      : '<span data-i18n="mk.card.true">level-true: this art is exactly what</span> '+L.whole.toLocaleString()+' <span data-i18n="mk.card.holds">holds at delivery</span>';
     body.innerHTML='<div class="n">'+p.col.sym+'</div>'+
-      '<div class="m"><b>'+pips(p.lvln??0,pipmax(p.col))+'</b> seed '+p.seed.toLocaleString()+' · listing '+L.whole.toLocaleString()+' exact</div>'+
-      '<div class="price"><span class="p">'+L.usdc.toLocaleString()+' USDC</span><span class="u">spot · exact-amount</span></div>'+
-      '<div class="acts"><button class="buy" data-i="'+i+'">inquire</button><button data-v="'+i+'">view</button></div>';
+      '<div class="m"><b>'+pips(p.lvln??0,pipmax(p.col))+'</b> <span data-i18n="mk.card.seed">seed</span> '+p.seed.toLocaleString()+' · <span data-i18n="mk.card.listing">listing</span> '+L.whole.toLocaleString()+' <span data-i18n="mk.card.exact">exact</span></div>''+
+      '<div class="price"><span class="p">'+L.usdc.toLocaleString()+' USDC</span><span class="u" data-i18n="mk.card.spot">spot · exact-amount</span></div>'+
+      '<div class="acts"><button class="buy" data-i="'+i+'"><span data-i18n="mk.card.inquire">inquire</span></button><button data-v="'+i+'"><span data-i18n="mk.card.view">view</span></button></div>';
     body.appendChild(disc);
     card.appendChild(art); card.appendChild(body); w.appendChild(card);
   });
@@ -203,9 +203,9 @@ function preview(i){
   const cushion=p.seed-L.whole;
   const safe=cushion>=1;
   $('rart').innerHTML=p.svg;
-  $('rpre').innerHTML='<div class="h">before anyone signs</div>'+
-    'you receive <span style="color:var(--ok)">'+L.whole.toLocaleString()+' '+p.col.sym+' — exact amount</span><br>'+
-    'your level at delivery: <span style="color:var(--ok)">'+L.whole.toLocaleString()+' · level '+(p.lvln??'?')+'</span><br>'+'seller’s full seed (not the product): <span style="color:var(--cyan)">'+p.seed.toLocaleString()+' · level '+lvlOf(p.seed,p.col)+'</span><br>'+
+  $('rpre').innerHTML='<div class="h" data-i18n="mk.pre.h">before anyone signs</div>'+
+    '<span data-i18n="mk.pre.receive">you receive</span> <span style="color:var(--ok)">'+L.whole.toLocaleString()+' '+p.col.sym+' — <span data-i18n="mk.pre.exactamt">exact amount</span></span><br>'+
+    '<span data-i18n="mk.pre.yourlevel">your level at delivery:</span> <span style="color:var(--ok)">'+L.whole.toLocaleString()+' · level '+(p.lvln??'?')+'</span><br>'+'seller’s full seed (not the product): <span style="color:var(--cyan)">'+p.seed.toLocaleString()+' · level '+lvlOf(p.seed,p.col)+'</span><br>'+
     'seller\u2019s spore cushion after: <span class="'+(safe?'':'risk')+'">'+cushion.toLocaleString()+' '+(safe?'— safe (law 3)':'— DISSOLUTION RISK')+'</span><br>'+
     (p.col.ou?'<span class="risk">law 4: o/u collection — the art re-rolls on delivery; seed + level intact</span><br>':'')+
     'payment routes freely · art walks a straight bridge (law 5)'+

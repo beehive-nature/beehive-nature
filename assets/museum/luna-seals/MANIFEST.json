@@ -1,0 +1,38 @@
+{
+  "archived": "2026-08-28",
+  "law": "byte-true archival — every exhibit carries its chain-read fallback in the tree",
+  "items": [
+    {
+      "name": "luni.base.eth",
+      "contract": "0x03c4738Ee98aE44591e1A4A4F3CaB6641d95DD9a",
+      "svg_sha256": "77adbd51bcbf7cee9e372628c77950d0d0a283dcd3a2f22d9b639145919a16ec" /* PUBLIC-CONSTANT: archived public chain art receipt */,
+      "svg_bytes": 126616,
+      "meta_sha256": "b7914c6fbbe0245c41d8df3e69e4f28cd240d6ab497fe66b419e17c3284403b7" /* PUBLIC-CONSTANT */,
+      "meta_bytes": 335
+    },
+    {
+      "name": "lunispurse.base.eth",
+      "contract": "0x03c4738Ee98aE44591e1A4A4F3CaB6641d95DD9a",
+      "svg_sha256": "ede9fad229e734c17d84c02b67688eb1271f252ca51492c7f204fbb617ac9705" /* PUBLIC-CONSTANT: archived public chain art receipt */,
+      "svg_bytes": 16382,
+      "meta_sha256": "3c7a2fbc23837a2bba135fe239f00c8f47f6120f6a3d425410c6839bd387e43b" /* PUBLIC-CONSTANT */,
+      "meta_bytes": 330
+    },
+    {
+      "name": "blunatic.base.eth",
+      "contract": "0x03c4738Ee98aE44591e1A4A4F3CaB6641d95DD9a",
+      "svg_sha256": "3f8edd35fc734f239bfa6329cbe82655f5afde8cd6c6552a629dfa3c21515799" /* PUBLIC-CONSTANT: archived public chain art receipt */,
+      "svg_bytes": 173356,
+      "meta_sha256": "1a39632d92872ed95962badc89fc3d425c11e250ffd90aa7977895e5cc6c7d22" /* PUBLIC-CONSTANT */,
+      "meta_bytes": 322
+    },
+    {
+      "name": "blunatics.base.eth",
+      "contract": "0x03c4738Ee98aE44591e1A4A4F3CaB6641d95DD9a",
+      "svg_sha256": "05b16aab358ba305e6ede9aa09f544cda29051ea92c6f41635dcfd97537c0b90" /* PUBLIC-CONSTANT: archived public chain art receipt */,
+      "svg_bytes": 16263,
+      "meta_sha256": "756a6b81aad0ddbd8deaae429cdb389dbb98866ff647c251fe7c17d37f9943a3" /* PUBLIC-CONSTANT */,
+      "meta_bytes": 326
+    }
+  ]
+}

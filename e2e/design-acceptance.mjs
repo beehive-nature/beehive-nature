@@ -51,7 +51,10 @@ const RIDER_ALLOWLIST = [
   /* the market's live chain reads (founder source-confirmed: host-rotated Base
      RPC, zero caching — the surface is honestly live): itemized by exact host */
   /^https:\/\/base-rpc\.publicnode\.com\//,
-  /^https:\/\/base\.drpc\.org\//
+  /^https:\/\/base\.drpc\.org\//,
+  /* the museum's live art reads from base.org's own Basenames API (the
+     archived byte-true fallback rides in the tree — MUSEUM LAW) */
+  /^https:\/\/www\.base\.org\/api\//
 ];
 
 const MEASURE = process.argv.includes('--measure');

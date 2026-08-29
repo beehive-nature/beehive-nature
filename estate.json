@@ -1022,11 +1022,20 @@
    "state": "LIVE",
    "gloss": "the living style guide — the",
    "org": "beehive-nature"
+  },
+  {
+   "id": "museum",
+   "family": "skaists",
+   "home": "skaists.art",
+   "path": "surfaces/museum.html",
+   "state": "LIVE",
+   "gloss": "the royal art collection —",
+   "org": "skaists"
   }
  ],
  "counts": {
-  "surfaces": 80,
-  "listed": 89,
+  "surfaces": 81,
+  "listed": 90,
   "families": 8,
   "domains": 26,
   "domainsLive": 2,
@@ -1035,7 +1044,7 @@
   "byFamily": {
    "beehivenature": 35,
    "plur": 5,
-   "skaists": 11,
+   "skaists": 12,
    "bnature": 18,
    "beehivebiomass": 5,
    "beehivebuds": 0,
@@ -1043,11 +1052,11 @@
    "bnr": 1
   },
   "byState": {
-   "LIVE": 89
+   "LIVE": 90
   },
   "byOrg": {
    "beehive-nature": 52,
-   "skaists": 23,
+   "skaists": 24,
    "beehive-biomass": 5
   }
  },

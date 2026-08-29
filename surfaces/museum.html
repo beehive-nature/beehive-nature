@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="color-scheme" content="dark">
+<title>the royal collection — the estate's museum on Base</title>
+<style>
+/* SEMANTIC COLOUR — meanings picked FIRST, hues second:
+   harm = guard violet · solution = biomass green · value = gold (b amounts only
+   — the royal gold is the collection's own, not a b amount) · system = info blue
+   science = ai cyan (infrastructure: chain reads, RPC wires). One accent:
+   the royal gold, because this is the collection's house. */
+:root{
+  --void:#060907; --panel:#0B120D; --inset:#0E1810; --line:#1E2B22;
+  --ink:#E9F2EC; --dim:#8FA89A; --faint:#648176;
+  --gold:#E8B54B; --biomass:#86CC72; --ai:#45C2DC; --info:#6FA9E0; --guard:#B7A8F7;
+  --b-value:#E8B54B;
+  --sem-harm:var(--guard); --sem-solution:var(--biomass); --sem-value:var(--b-value);
+  --sem-system:var(--info); --sem-science:var(--ai);
+  --radius:12px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{overflow-x:hidden}
+body{background:var(--void);color:var(--ink);
+ font:13px/1.65 ui-monospace,'Cascadia Mono','SF Mono',Menlo,Consolas,monospace;
+ padding:0 14px 90px}
+main{max-width:960px;margin:0 auto}
+a{color:var(--biomass);text-decoration:none}
+a:hover{text-decoration:underline}
+.crumbs{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 0 9px;border-bottom:1px solid var(--line);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.crumbs a{color:var(--dim)} .crumbs .here{color:var(--ink)}
+.crumbs .badge{margin-left:auto;display:inline-flex;align-items:center;gap:7px;color:var(--dim);font-size:10px;letter-spacing:.14em}
+.crumbs .badge i{width:8px;height:8px;border-radius:50%;background:var(--biomass)}
+.kicker{font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:var(--faint);margin-top:20px}
+h1{font-size:clamp(32px,6vw,44px);line-height:1.08;margin:10px 0 6px;font-weight:600;
+ background-image:linear-gradient(92deg,#E9F2EC 40%,#E8B54B 85%);
+ -webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{color:var(--dim);font-size:12.5px;max-width:62ch;line-height:1.8;margin-bottom:18px}
+.lede b{color:var(--ink);font-weight:400}
+.herofig{display:flex;flex-direction:column;gap:2px;margin:0 0 6px}
+.herofig .num{font-size:38px;line-height:1;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink)}
+.herofig .cap{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+section{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-top:16px}
+section.gold{border-color:#3d3410}
+h2{font-size:13px;color:var(--ink);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;
+ display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+h2::before{content:'';width:10px;height:10px;flex:none;
+ clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:var(--gold)}
+h2 em{font-style:normal;font-size:9.5px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase;margin-left:auto}
+.law{color:var(--dim);font-size:11px;line-height:1.85}
+.law b{color:var(--ink);font-weight:400}
+/* exhibit plinth */
+.plinth{background:var(--inset);border:1px solid var(--line);border-radius:10px;padding:14px;margin-top:12px}
+.plinth .frame{background:var(--void);border:1px solid var(--line);border-radius:8px;padding:10px;display:flex;align-items:center;justify-content:center;min-height:180px}
+.plinth .frame svg,.plinth .frame img{width:100%;max-width:400px;height:auto;max-height:220px}
+.plinth .plate{margin-top:10px;padding:10px 12px;border-top:1px solid var(--line)}
+.plinth .pname{font-size:15px;color:var(--ink)}
+.plinth .pmeta{font-size:10.5px;color:var(--dim);margin-top:4px;line-height:1.7}
+.plinth .pmeta b{color:var(--ink);font-weight:400}
+.plinth .plabel{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;margin-top:6px;color:var(--faint)}
+.plinth .plabel.hold{color:var(--dim)}
+.plinth .plabel.archived{color:var(--guard)}
+/* wings */
+.wing-title{font-size:15px;color:var(--gold);font-weight:600;margin:24px 0 4px;letter-spacing:.02em}
+.wing-sub{font-size:10.5px;color:var(--faint);margin-bottom:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+footer{max-width:960px;margin:24px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
+@media (max-width:600px){
+  body{padding:0 10px 70px}
+  section{padding:13px 12px}
+  .herofig .num{font-size:34px}
+  .grid{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<main>
+<nav class="crumbs" aria-label="you are here">
+  <a href="index.html" data-i18n="hub.name">beehive nature reserve</a><span class="sub">▸</span><span class="here" data-i18n="mu.crumb">the museum</span>
+  <span class="badge"><i></i><span data-i18n="mu.badge">live chain reads · archived fallbacks</span></span>
+</nav>
+<header>
+  <div class="kicker" data-i18n="mu.kicker">the estate's royal art collection on Base</div>
+  <h1 data-i18n="mu.h1">the royal collection</h1>
+  <p class="lede" data-i18n="mu.lede">the estate's museum on Base — the royal art collection (PEPI inscriptions, art drawn live from the contracts' own getSvg), the Luna Seals (four .base.eth name NFTs, their identity art archived byte-true), and bQueenBee's Lost Purse as the ruled exhibit. every exhibit reads the chain live at page-open and carries its archived fallback in the tree — a dead RPC degrades to the archive, never to a broken frame.</p>
+  <div class="herofig">
+    <span class="num" id="exhibitCount" data-hero-number>…</span>
+    <span class="cap" data-hero-caption data-i18n="mu.hero.cap">exhibits · live chain reads, archived fallbacks</span>
+  </div>
+</header>
+
+<!-- THE LUNA SEALS -->
+<section class="gold">
+  <h2>THE LUNA SEALS <em data-i18n="mu.seals.em">four .base.eth name NFTs · archived byte-true</em></h2>
+  <div class="law" data-i18n="mu.seals.law">The Countess's papers, held by the estate. Four Basenames on Base — <b>luni</b>, <b>lunispurse</b>, <b>blunatic</b>, <b>blunatics</b> — their cardImage.svg and metadata archived sha256-receipted in the tree. The live read pulls the SVG from base.org's own API; the archive is the floor.</div>
+  <div class="grid" id="sealsGrid"></div>
+</section>
+
+<!-- THE ROYAL COLLECTION -->
+<section>
+  <h2>THE ROYAL COLLECTION <em data-i18n="mu.royal.em">PEPI inscriptions · art from getSvg live</em></h2>
+  <div class="law" data-i18n="mu.royal.law">The founder's PEPI inscriptions, drawn live from the contracts' own <b>getSvg</b> — the chain's own art, not a cached image. The collection renders whatever the garden holds at page-open, with levels and seeds live from balance.</div>
+  <div class="grid" id="royalGrid"></div>
+</section>
+
+<!-- THE LOST PURSE -->
+<section>
+  <h2>THE LOST PURSE <em data-i18n="mu.purse.em">the ruled exhibit · address-pinned forever</em></h2>
+  <div class="law" data-i18n="mu.purse.law"><b>An identity with exactly one key is a countdown, not a design.</b> The Purse is address <b>0x100fd362abf7ef7f7a7ca3c331d4c718c6f45479</b> — pinned forever, the name re-pointed to the garden by the 2026-08-27 renewal. Exhibits pin the artefact; names follow their owner.</div>
+  <div class="plinth">
+    <div class="plate">
+      <div class="pname">bQueenBee's Lost Purse</div>
+      <div class="pmeta">
+        <b>address:</b> 0x100fd362abf7ef7f7a7ca3c331d4c718c6f45479<br>
+        <b>held at:</b> museum Exhibit 10<br>
+        <b>the record:</b> an identity with exactly one key is a countdown, not a design
+      </div>
+      <div class="plabel hold" data-i18n="mu.purse.label">holder: 0x100fd362… — the address is the exhibit, never the name</div>
+    </div>
+  </div>
+</section>
+
+<pre style="background:var(--inset);border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:14px;font-size:9.5px;color:var(--dim);white-space:pre-wrap;word-break:break-all">MUSEUM LAW: every exhibit = live chain read + archived byte-true fallback. A dead RPC or vanished API degrades to the archive, never to a broken frame, and says so honestly. No attribution label until the holding address is founder-verified (Safe precedent).</pre>
+<footer>
+  <div data-i18n="mu.foot.1">the museum · every exhibit = live chain read + archived byte-true fallback · a dead RPC degrades to the archive, never to a broken frame</div>
+  <div data-i18n="mu.foot.2">nameplate rule: no attribution label until the holding address is founder-verified — anonymously-held pieces carry the honest address</div>
+</footer>
+</main>
+<script src="tour.js?v=33"></script>
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id)};
+var GARDEN='0xfbd201472d5a439f1f0e408eb5dfaf6ea3687876';
+var HOSTS=['https://base-rpc.publicnode.com','https://base.drpc.org'];
+var W=function(v){return BigInt(v).toString(16).padStart(64,'0')};
+var AD=function(a){return '0'.repeat(24)+a.replace(/^0x/,'').toLowerCase()};
+async function rpc(calls){
+  for(var h=0;h<HOSTS.length;h++){
+    try{
+      var r=await fetch(HOSTS[h],{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(calls.map(function(c,i){return {jsonrpc:'2.0',id:i,method:'eth_call',params:[{to:c.to,data:c.data},'latest']}}))});
+      var j=await r.json();
+      if(Array.isArray(j))return j.map(function(x){return x.result??null});
+    }catch(e){}
+  }
+  return null;
+}
+function decodeString(hex){
+  var h=hex.replace(/^0x/,'');
+  var off=parseInt(h.slice(0,64),16);
+  var len=parseInt(h.slice(off*2,off*2+64),16);
+  var out='';
+  for(var i=0;i<len;i++){
+    var b=parseInt(h.slice((off+32+i)*2,(off+32+i)*2+2),16);
+    out+=String.fromCharCode(b);
+  }
+  return out;
+}
+/* LUNA SEALS — archived in the tree, live read from base.org */
+var SEALS=[
+  {name:'luni',label:'the primary seal',tokenId:'17274236440657507002379994135247555599625635973284987701770750070407992801555' /* PUBLIC-CONSTANT */},
+  {name:'lunispurse',label:'the purse companion',tokenId:'97881514085064409563023375023174569268475361509243097059581490466049624033855' /* PUBLIC-CONSTANT */},
+  {name:'blunatic',label:'the singular',tokenId:'21432406802359624689973612195074629082879213568847654324229001310686011301719' /* PUBLIC-CONSTANT */},
+  {name:'blunatics',label:'the plural',tokenId:'27738337844641698031141516600394743351372219386668849063258483207839065835219' /* PUBLIC-CONSTANT */}
+];
+function renderSeals(){
+  var g=$('sealsGrid');g.innerHTML='';
+  SEALS.forEach(function(s){
+    var d=document.createElement('div');d.className='plinth';
+    d.innerHTML='<div class="frame"><div style="color:var(--dim);font-size:11px;padding:40px 20px">reading ' + s.name + '…</div></div>'+
+      '<div class="plate"><div class="pname">'+s.name+'.base.eth</div>'+
+      '<div class="pmeta"><b>Basenames ERC-721</b> · tokenId '+s.tokenId.slice(0,16)+'…<br>'+
+      '<b>'+s.label+'</b> · contract 0x03c4…DD9a</div>'+
+      '<div class="plabel hold">holder: 0x20a0… — pending attribution read-back (Safe precedent: no label until verified)</div></div>';
+    g.appendChild(d);
+    /* live read from base.org's own API — degrades to archive note */
+    fetch('https://www.base.org/api/basenames/'+s.name+'.base.eth/assets/cardImage.svg')
+      .then(function(r){return r.ok?r.text():Promise.reject('HTTP '+r.status)})
+      .then(function(svg){
+        var f=d.querySelector('.frame');
+        f.innerHTML=svg;
+        var sv=f.querySelector('svg');
+        if(sv){sv.removeAttribute('height');sv.removeAttribute('width');sv.style.width='100%';sv.style.height='auto';sv.style.maxHeight='220px';}
+      })
+      .catch(function(){
+        var f=d.querySelector('.frame');
+        f.innerHTML='<div style="color:var(--guard);font-size:10.5px;padding:40px 20px;text-align:center;line-height:2">ARCHIVED — live read unavailable<br>sha256 in assets/museum/luna-seals/'+s.name+'.cardImage.svg</div>';
+        var l=d.querySelector('.plabel');if(l){l.classList.add('archived');l.textContent='ARCHIVED — live read failed, archive is the floor';}
+      });
+  });
+}
+/* ROYAL COLLECTION — PEPI from the garden, getSvg live */
+var ROYAL=[
+  {sym:'PEPI v2',c:'0x28a5e71BFc02723eAC17E39c84c5190415C0de9F',sel:'a435130b'},
+  {sym:'PEPI v1',c:'0x19706c142d33376240e418d6385f05691a5fa8e2',sel:'a435130b'},
+  {sym:'FUNGI',c:'0x7d9Ce55D54FF3FEddb611fC63fF63ec01F26D15F',sel:'422b9e23'},
+  {sym:'$FROGGI',c:'0x88A78C5035BdC8C9A8bb5c029e6cfCDD14B822FE',sel:'422b9e23'},
+  {sym:'JELLI',c:'0xA1b9d812926a529D8B002E69FCd070c8275eC73c',sel:'422b9e23'}
+];
+async function renderRoyal(){
+  var g=$('royalGrid');g.innerHTML='';
+  var count=0;
+  for(var i=0;i<ROYAL.length;i++){
+    var col=ROYAL[i];
+    var bal=await rpc([{to:col.c,data:'0x70a08231'+AD(GARDEN)}]);
+    if(!bal||!bal[0]||bal[0]==='0x'||BigInt(bal[0])<=0n)continue;
+    var seed=Number(BigInt(bal[0])/1000000000n);
+    var art=await rpc([{to:col.c,data:col.sel+W(0x20)+W(seed)+W(0)}]);
+    if(!art||!art[0]||art[0].length<200)continue;
+    var svg;
+    try{svg=decodeString(art[0]);}catch(e){continue}
+    count++;
+    var d=document.createElement('div');d.className='plinth';
+    d.innerHTML='<div class="frame">'+svg+'</div>'+
+      '<div class="plate"><div class="pname">'+col.sym+'</div>'+
+      '<div class="pmeta"><b>seed</b> '+seed.toLocaleString()+' · drawn from getSvg at page-open<br>'+
+      '<b>contract</b> '+col.c.slice(0,8)+'…'+col.c.slice(-4)+'</div>'+
+      '<div class="plabel hold">holder: 0xFBD2… — pending attribution read-back</div></div>';
+    g.appendChild(d);
+  }
+  return count;
+}
+async function init(){
+  renderSeals();
+  var royal=await renderRoyal();
+  $('exhibitCount').textContent=SEALS.length+royal+1;/* +1 for the Purse */
+}
+init();
+})();
+</script>
+</body>
+</html>
