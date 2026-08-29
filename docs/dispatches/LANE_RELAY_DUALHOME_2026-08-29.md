@@ -48,3 +48,23 @@ When they land: certs issue automatically, `https://relay.skaists.dev` goes live
 | founder's own bees (this box, `%APPDATA%\xyz.block.buzz.app\agents\*`) | `wss://skaists.buzz` in agent configs | **affected today without VPN** | after DNS: switch agent relay env to `wss://relay.skaists.dev` (one-paste, same lane H pattern) |
 
 **Recommended order:** DNS gesture → verify both fallback hostnames live → flip founder-side agent configs to the fallback → schedule the media-base dual-home for the next relay maintenance window.
+
+## CLOSURE — 2026-08-29, all green
+
+**DNS landed (founder):** `relay` + `relay2` A records live at Namecheap. Certs issued within seconds of propagation (Let's Encrypt, renewal window armed).
+
+**One fix the proof caught:** the fallback vhosts initially passed the client Host through — the relay 404'd the wss upgrade (it validates Host against BUZZ_DOMAIN; control experiment: primary 101, fallback 404, same process). Fixed caddy-side: `header_up Host <primary-domain>` per fallback block — pure hostname alias, zero relay changes.
+
+**Verified from the FOUNDER'S FILTERED PATH** (the network that resets .buzz):
+- `wss://relay.skaists.dev` → **101, then OPEN with NIP-42 AUTH challenge** (real WebSocket, real relay)
+- `wss://relay2.skaists.dev` → same ✓
+- NIP-11 identity on both ✓ · `/compute` → **401 bearer gate alive** ✓
+- External nodes: Germany/Iran/Turkey 200 OK (relay) · Finland/India/US 200 OK (relay2)
+
+**Real-path failover proof (no stubs):** on the filtered network, the probe cascaded primary (filter-killed) → fallback (answered), dot live, **join line switched to `wss://relay.skaists.dev`** — shot: `e2e/shots-wiring/failover-REAL-390.png`.
+
+**Follow-ons landed same night:**
+- **Media dual-home:** `BUZZ_MEDIA_BASE_URL`/`BUZZ_MEDIA_SERVER_DOMAIN` → fallback names on both hives; `BUZZ_CORS_ORIGINS` += fallback + `https://skaists.dev` (estate pages can now speak to their own relay). Both relay containers recreated (env backups: `.env.bak-20260829-dualhome`); the bn recreate needed its compose file pair explicit (`-f compose.yml -f compose.bn.yml`) — the bare up grabbed the wrong port map and was corrected; both `healthy` post-recreate.
+- **Founder's bees:** `managed-agents.json` backed up (`*.bak-20260829-dualhome`), 3 relay URLs switched to `wss://relay.skaists.dev`; JSON re-validated. Bees reconnect on the app's next cycle/restart.
+
+**Fence note:** the desktop app on this box still needs its own restart (or next reconnect cycle) to ride the fallback; the brand `skaists.buzz` remains the primary everywhere a non-filtered network connects.
