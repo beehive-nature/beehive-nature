@@ -161,7 +161,91 @@ async function verifyLevel(col, seed, extra, seed2){
   return {agree: theirs === ours, ours: ours, theirs: theirs};
 }
 
+/* LIVE PRICE (founder eye-catch #7, 2026-08-29): market's USDC numbers were a
+   fabricated per-symbol unit-price table, mislabeled "spot." READ-BACK done
+   before any wiring, per the order: no escrow/lister-set ask exists yet
+   (market.html's own text says signing "waits for the audited escrow") — so
+   "fixed ask" is not the answer. What DOES exist, verified live 2026-08-29
+   three independent ways, is a real Uniswap v3 pool on Base for every one of
+   the five ERC20i tokens against WETH: (1) called the Base Uniswap v3
+   Factory's own getPool(token,WETH,fee) directly (0x33128a8fC17869897dcE68E
+   d026d694621f6FDfD) and got a nonzero pool back for each collection; (2)
+   that address matches DexScreener's independently-indexed pair for
+   FUNGI/$FROGGI; (3) it matches GeckoTerminal's independently-indexed top
+   pool for JELLI/PEPI v1/PEPI v2. Two aggregators, never trusted alone, both
+   agreeing with a call this file makes itself. So the honest label is SPOT,
+   sourced from the collection's OWN pool — never a hand-set ask. "Art never
+   touches a pool" (market's law 5) governs moving the INSCRIPTION itself;
+   the underlying ERC20i token trading against WETH on Uniswap is a separate,
+   real, live fact, and is what a card's price must reflect.
+   Two legs, per founder direction ("rip from coinbase.com/wallet"):
+     - ETH-USD: Coinbase's OWN public price endpoint, api.coinbase.com/v2/
+       prices/ETH-USD/spot — cited, the one new off-origin host this file
+       adds to the estate.
+     - per-token spot: the pool's own slot0() read directly over the SAME
+       Base RPC hosts already allowlisted for every other live read on this
+       page — no third-party price API sits in the runtime path, nothing to
+       rate-limit (GeckoTerminal's did, live, during this verification —
+       429'd after a handful of calls) or silently drift from chain truth.
+   Pool addresses below are immutable once deployed — a Uniswap v3 pool's
+   token0/token1/fee never change post-deploy — so holding them as a static
+   table is exactly as sound as this file's contract addresses and level
+   ladders already are (also one-time-verified, held static, read live). */
+var POOLS = {
+  'FUNGI':   {pool:'0x8ce9b689018fc94f44540b62ba6e10dc8b346448', dec:9, quoteIsToken0:true},
+  '$FROGGI': {pool:'0x3ad33cb275c9c48d5b91d5ed6f1afeb6d8b6693c', dec:9, quoteIsToken0:true},
+  'JELLI':   {pool:'0x0e0d68bb6db9b219e6fb5f8578079ac8dbf8c495', dec:9, quoteIsToken0:true},
+  'PEPI v2': {pool:'0xdf6d5270d0e4aeb4938cdf12665202365c559fec', dec:9, quoteIsToken0:false},
+  'PEPI v1': {pool:'0x7e708e16ac409704a24c768627cb1a33aec42bc0', dec:9, quoteIsToken0:false}
+};
+
+var _ethUsdCache = null;
+/* Coinbase spot, cached 60s in-tab only (no persistence) — cheap insurance
+   against firing five near-simultaneous requests for the same major leg,
+   never a substitute for the live per-pool read below. */
+async function ethUsd(){
+  if(_ethUsdCache && (Date.now()-_ethUsdCache.t) < 60000) return _ethUsdCache.v;
+  try{
+    var ctl = new AbortController();
+    var kill = setTimeout(function(){ ctl.abort(); }, 8000);
+    var r = await fetch('https://api.coinbase.com/v2/prices/ETH-USD/spot', {signal: ctl.signal});
+    clearTimeout(kill);
+    var j = await r.json();
+    var v = j && j.data && parseFloat(j.data.amount);
+    if(!(v > 0)) return null;
+    _ethUsdCache = {v: v, t: Date.now()};
+    return v;
+  }catch(e){ return null; }
+}
+
+/* slot0() takes no args; the first returned word's low 160 bits are
+   sqrtPriceX96 (the rest of the tuple — tick, observation indices, the
+   unlocked flag — rides in later words this card has no use for). */
+async function poolSqrtPriceX96(poolAddr){
+  var res = await rpc([{to: poolAddr, data: '0x3850c7bd'}]);
+  if(!res || !res[0] || res[0].length < 66) return null;
+  try{ return BigInt('0x' + res[0].slice(2,66)); }catch(e){ return null; }
+}
+
+/* Live USD spot for ONE whole token of a collection. Null on ANY failed leg
+   — Coinbase unreachable, both RPC hosts failing the pool read, a pool this
+   table doesn't carry — NEVER a stale or fabricated number standing in
+   (honesty law: on failure the caller must show "price unavailable"). */
+async function tokenSpotUsd(col){
+  var p = POOLS[col.sym]; if(!p) return null;
+  var usd = await ethUsd(); if(!usd) return null;
+  var sqrtP = await poolSqrtPriceX96(p.pool); if(sqrtP === null) return null;
+  var ratio = Number(sqrtP) / Math.pow(2,96);
+  var raw = ratio * ratio; // token1 raw-units per token0 raw-unit
+  var priceInWeth = p.quoteIsToken0
+    ? 1 / (raw * Math.pow(10, 18 - p.dec))   // token0=WETH(18), token1=ERC20i(dec)
+    : raw * Math.pow(10, p.dec - 18);         // token0=ERC20i(dec), token1=WETH(18)
+  if(!(priceInWeth > 0) || !isFinite(priceInWeth)) return null;
+  return priceInWeth * usd;
+}
+
 global.LevelTruth = {HOSTS:HOSTS, COLLECTIONS:COLLECTIONS, W:W, AD:AD,
   decodeString:decodeString, rpc:rpc, lvlOf:lvlOf, pipmax:pipmax, pips:pips,
-  svgCallData:svgCallData, metaCallData:metaCallData, verifyLevel:verifyLevel};
+  svgCallData:svgCallData, metaCallData:metaCallData, verifyLevel:verifyLevel,
+  POOLS:POOLS, ethUsd:ethUsd, tokenSpotUsd:tokenSpotUsd};
 })(window);

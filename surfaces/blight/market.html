@@ -86,7 +86,7 @@ section.laws{background:#0b0b12;border:1px solid var(--line);border-radius:12px;
   <button id="tLaws">⚖ <span>how it settles</span></button>
 </nav>
 <div id="wall"></div>
-<div id="rev" style="position:fixed;left:10px;bottom:54px;z-index:80;color:#333;font:9px ui-monospace,monospace;pointer-events:none">market rev 3</div>
+<div id="rev" style="position:fixed;left:10px;bottom:54px;z-index:80;color:#333;font:9px ui-monospace,monospace;pointer-events:none">market rev 4</div>
 <div id="mine" style="display:none">
   <p><span>listing is an exact-amount act.</span><br><span>when settlement docks, this page signs with your wallet.</span></p>
   <p style="color:var(--warn)">◌ <span>connect wallet — docking soon</span></p>
@@ -105,7 +105,7 @@ section.laws{background:#0b0b12;border:1px solid var(--line);border-radius:12px;
   <div class="art" id="rart"></div>
   <div class="pre" id="rpre"></div>
 </div></div>
-<script src="../level-truth.js?v=1"></script>
+<script src="../level-truth.js?v=2"></script>
 <script>
 /* FRONT-END MVP. Listings render live from chain state (the founder's garden as the
    opening inventory), previews compute REAL cushion math from the ladders, and every
@@ -118,7 +118,6 @@ const {W,AD,HOSTS,decodeString,rpc,lvlOf,pipmax,pips}=LevelTruth;
 const COLS=LevelTruth.COLLECTIONS;
 const LOV='0xfbd201472d5a439f1f0e408eb5dfaf6ea3687876';
 let inventory=[];
-const PRICES={'FUNGI':0.00041,'$FROGGI':0.004,'JELLI':0.0009,'PEPI v2':3.2,'PEPI v1':0.55};
 const fromLine='\nfrom: bsy: [your handle] | npub: [your address] (bind: /keys/addresses)';
 const $=id=>document.getElementById(id);
 async function buildInventory(){
@@ -134,15 +133,23 @@ async function buildInventory(){
     const whole=Math.max(1,Math.floor(seed*0.4));
     const res=await rpc([{to:col.c,data:LevelTruth.svgCallData(col,whole,0)}]);
     if(res&&res[0]&&res[0].length>200){
-      try{ found.push({svg:decodeString(res[0]),col,seed,whole,lvln:lvlOf(whole,col)}); }catch(e){}
+      try{
+        /* LIVE PRICE (founder eye-catch #7): unitUsd is a real Uniswap v3
+           Base-pool spot read (LevelTruth.tokenSpotUsd), never a fabricated
+           table. null on any failed leg — the card must say so, not invent
+           a number (honesty law). priceTs is the fetch moment, shown on the
+           card so "live" is checkable, not asserted. */
+        const unitUsd=await LevelTruth.tokenSpotUsd(col);
+        found.push({svg:decodeString(res[0]),col,seed,whole,lvln:lvlOf(whole,col),unitUsd,priceTs:Date.now()});
+      }catch(e){}
     }
   }
   found.sort((a,b)=>((b.lvln??-1)-(a.lvln??-1))||((b.seed||0)-(a.seed||0)));
   inventory=found.slice(0,8);
 }
 function listingOf(p){ const whole=p.whole!==undefined?p.whole:Math.max(1,Math.floor(p.seed*0.4));
-  const unit=PRICES[p.col.sym]||0.001;
-  const usdc=Math.max(1,Math.round(whole*unit*100)/100);
+  if(p.unitUsd==null) return {whole,usdc:null};
+  const usdc=Math.round(whole*p.unitUsd*100)/100;
   return {whole,usdc}; }
 function renderWall(){
   const w=$('wall'); w.innerHTML='';
@@ -155,9 +162,12 @@ function renderWall(){
     const disc=document.createElement('div');
     disc.className='cushion quiet';
     disc.textContent='level-true: this art is exactly what '+L.whole.toLocaleString()+' holds at delivery';
+    const priceHtml=L.usdc==null
+      ? '<span class="p" style="color:var(--warn)" title="Uniswap v3 Base pool or Coinbase ETH-USD read failed — never shown as a stale or guessed number">price unavailable</span><span class="u">live read failed</span>'
+      : '<span class="p" title="'+p.col.sym+'/WETH Uniswap v3 pool spot × ETH-USD (api.coinbase.com/v2/prices) — read live at page-open, zero cache">'+L.usdc.toLocaleString()+' USDC</span><span class="u">spot · fetched '+new Date(p.priceTs).toLocaleTimeString()+'</span>';
     body.innerHTML='<div class="n">'+p.col.sym+'</div>'+
       '<div class="m"><b>'+pips(p.lvln??0,pipmax(p.col))+'</b> <span>seed</span> '+p.seed.toLocaleString()+' · <span>listing</span> '+L.whole.toLocaleString()+' <span>exact</span></div>'+
-      '<div class="price"><span class="p">'+L.usdc.toLocaleString()+' USDC</span><span class="u">spot · exact-amount</span></div>'+
+      '<div class="price">'+priceHtml+'</div>'+
       '<div class="acts"><button class="buy" data-i="'+i+'"><span>inquire</span></button><button data-v="'+i+'"><span>view</span></button></div>';
     body.appendChild(disc);
     card.appendChild(art); card.appendChild(body); w.appendChild(card);

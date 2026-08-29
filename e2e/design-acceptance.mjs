@@ -52,6 +52,10 @@ const RIDER_ALLOWLIST = [
      RPC, zero caching — the surface is honestly live): itemized by exact host */
   /^https:\/\/base-rpc\.publicnode\.com\//,
   /^https:\/\/base\.drpc\.org\//,
+  /* the market's live price read (founder eye-catch #7, 2026-08-29): Coinbase's
+     own public spot endpoint for the ETH-USD leg — the one new off-origin host
+     the fix adds; the per-token leg stays on the Base RPC hosts above */
+  /^https:\/\/api\.coinbase\.com\/v2\/prices\//,
   /* the museum's live art reads from base.org's own Basenames API (the
      archived byte-true fallback rides in the tree — MUSEUM LAW) */
   /^https:\/\/www\.base\.org\/api\//
