@@ -18739,7 +18739,7 @@
    "hu": "kicsi, nyilvános, megváltoztathatatlan adatokat hordoz — bájtonkénti ár, egyetlen fizetés."
   },
   "st.route.ant": {
-   "en": "carries large public and all private immutable data — priced per RECORD by node fullness: a calibrated quadratic in the node's record count, denominated in ANT (docs.autonomi.com · network-economics · quote-calculations, read 2026-08-29), and a file up to one chunk (~1–4 MB) costs one record's quote however small it is.",
+   "en": "carries large public and all private immutable data — priced per RECORD by node fullness, then ×3: ADR-0008 (PROPOSED, 2026-07-28, WithAutonomi/ant-node) sets a calibrated quadratic in the node's COMMITTED key count — price_per_record(n) = 0.00390625 + 0.03515625×(n/6000)² ANT, per its signed storage commitment, not raw files — and the client pays 3× the median quote; one record is up to 4 MiB, so a ~100 kB file is one record; merkle batches (64+ chunks) pad to a power of two, so 65 chunks pay as 128.",
    "ru": "несёт большие публичные и все приватные неизменяемые данные — цена за ЗАПИСЬ по наполненности узла: калиброванный квадрат от числа записей узла, в ANT (docs.autonomi.com · network-economics · quote-calculations, прочитано 2026-08-29), а файл до одного чанка (~1–4 МБ) стоит одну запись-квоту, каким бы маленьким ни был.",
    "uk": "несе великі публічні та всі приватні незмінювані дані — ціна за ЗАПИС за наповненістю вузла: калібрований квадрат від числа записів вузла, у ANT (docs.autonomi.com · network-economics · quote-calculations, прочитано 2026-08-29), а файл до одного чанка (~1–4 МБ) коштує одну запис-квоту, яким би малим не був.",
    "tt": "зур ачык һәм барлык приват үзгәрмәсле мәгълүмат тота — төйен тууы буенча ЯЗМА бәясе: төйен язмалары саныннан калибрланган квадрат, ANT белән (docs.autonomi.com · network-economics · quote-calculations, 2026-08-29да укылды), ә бер чанкка кадәр файл (~1–4 МБ) кечкенә булса да бер язма бәясенә тора.",
@@ -18827,6 +18827,36 @@
    "fi": "yksityinen muuttumaton data reitittyy aina Autonomiin",
    "tr": "özel değişmez veriler her zaman Autonomi'ye yönlendirilir",
    "hu": "a privát megváltoztathatatlan adatok mindig Autonomihoz route-olódnak"
+  },
+  "fn.e4.title": {
+   "en": "the threshold that moved",
+   "ru": "порог, который сдвинулся",
+   "cs": "práh, který se pohnul",
+   "es": "el umbral que se movió",
+   "nl": "de drempel die bewoog",
+   "de": "die Schwelle, die sich bewegte",
+   "fr": "le seuil qui a bougé",
+   "zh": "移动的阈值",
+   "th": "เกณฑ์ที่ขยับ",
+   "lv": "slieksnis, kas pārvietojās",
+   "uk": "поріг, який зсунувся",
+   "ar": "العتبة التي تحركت",
+   "he": "הסף שזז",
+   "hi": "सीमा जो हिल गई",
+   "bn": "সীমা যা সরে গেল",
+   "fa": "آستانه‌ای که جابه‌جا شد",
+   "nl-be": "de drempel die bewoog",
+   "ko": "움직인 임계값",
+   "ur": "حد جو ہل گیا",
+   "ja": "動いたしきい値",
+   "da": "grænsen der flyttede sig",
+   "nb": "terskelen som flyttet seg",
+   "sv": "tröskeln som flyttade sig",
+   "fi": "kynnys joka siirtyi",
+   "tr": "yer değiştiren eşik",
+   "hu": "az elmozdult küszöb",
+   "gd": "the threshold that moved",
+   "tt": "the threshold that moved"
   }
  }
 }
