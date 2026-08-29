@@ -98,19 +98,19 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 <main>
 <header>
   <h1>⚙ <span data-i18n="stack.h1">the Engine Room</span></h1>
-  <div class="sub" data-reg="bee">A visitor asked the best possible question: <i>"there's a lot
-  going on — which part shows me Autonomi?"</i> This page is the answer. One picture of what
-  actually runs under every door on the hub, in plain words, with the honest parts included.
-  <i>(He came back: "I like the use of multiple systems together, and the split between Arweave
-  & Autonomi based on size of file." — the page did its job, and the loop is on the record.)</i></div>
-  <div class="sub" data-reg="raver">The whole estate, one engine diagram: the identity root, the
+  <div class="sub" data-reg="bee"><span data-i18n="st.bee.1">A visitor asked the best possible question:</span> <i><span data-i18n="st.bee.2">"there's a lot
+  going on — which part shows me Autonomi?"</span></i> <span data-i18n="st.bee.3">This page is the answer. One picture of what
+  actually runs under every door on the hub, in plain words, with the honest parts included.</span>
+  <i><span data-i18n="st.bee.4">(He came back: "I like the use of multiple systems together, and the split between Arweave
+  & Autonomi based on size of file." — the page did its job, and the loop is on the record.)</span></i></div>
+  <div class="sub" data-reg="raver"><span data-i18n="st.rav.1">The whole estate, one engine diagram: the identity root, the
   rust kernel, the rails that carry data and value, and which door runs on what — measured, not
-  claimed. Born from a stranger's question: <i>"which part should I look at to see an
-  interesting use of Autonomi?"</i></div>
-  <div class="sub" data-reg="cypherpunk">Architecture disclosure: bzDiD root → rust coordination
+  claimed. Born from a stranger's question:</span> <i><span data-i18n="st.rav.2">"which part should I look at to see an
+  interesting use of Autonomi?"</span></i></div>
+  <div class="sub" data-reg="cypherpunk"><span data-i18n="st.cy.1">Architecture disclosure: bzDiD root → rust coordination
   kernel → adapter layer (storage, chains, relays) → dApps. Storage routing is a price-break
-  function; per-surface rail usage below is <b>measured by endpoint grep, dated</b>, not
-  self-reported. Bootstrap dependencies and unmigrated relays are named as debts, not hidden.</div>
+  function; per-surface rail usage below is</span> <b><span data-i18n="st.cy.2">measured by endpoint grep, dated</span></b><span data-i18n="st.cy.3">, not
+  self-reported. Bootstrap dependencies and unmigrated relays are named as debts, not hidden.</span></div>
 </header>
 
 <section id="organboard">
@@ -135,36 +135,37 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   <h2><span data-i18n="h.170">THE SHAPE — root below, everything else above</span></h2>
   <div id="flow">
     <div class="tier root"><div class="t">🐝 <span data-i18n="stack.t1">bzDiD — the identity root</span></div>
-      <div class="d">self-authenticating identity (Self-Auth + DiD), built to survive the loss of
-      <i>any</i> layer above it — including any single storage network. The root is yours;
-      everything else is replaceable. <a href="keys/addresses.html">see it live</a></div></div>
+      <div class="d"><span data-i18n="st.t1.1">self-authenticating identity (Self-Auth + DiD), built to survive the loss of</span>
+      <i><span data-i18n="st.t1.2">any</span></i><span data-i18n="st.t1.3"> layer above it — including any single storage network. The root is yours;
+      everything else is replaceable.</span> <a href="keys/addresses.html"><span data-i18n="st.t1.4">see it live</span></a></div></div>
     <div class="down">▼</div>
     <div class="tier"><div class="t"><span data-i18n="stack.t2">the coordination kernel — rust</span></div>
-      <div class="d">a public workspace of ~36 crates. Adapters plug into it; none of them is
-      load-bearing for identity. <a href="https://github.com/beehive-nature/beehive-nature" rel="noopener">source</a></div></div>
+      <div class="d"><span data-i18n="st.t2.1">a public workspace of ~36 crates. Adapters plug into it; none of them is
+      load-bearing for identity.</span> <a href="https://github.com/beehive-nature/beehive-nature" rel="noopener"><span data-i18n="st.t2.2">source</span></a></div></div>
     <div class="down">▼</div>
     <div class="tier"><div class="t"><span data-i18n="stack.t3">the adapter rails — storage, value, relays</span></div>
-      <div class="d"><b>Storage routes by a price-break law:</b>
-      <span class="chip c-ar">◈ Arweave</span> carries small public immutable data (≈100 kB and
-      under); <span class="chip c-ant">⬢ Autonomi</span> takes over where its per-byte price
-      wins — large public files and <b>private immutable data</b> (self-encrypted, paid in ANT,
-      downloads free forever). <b>The routing law exists for one person — the poor starving artist:</b> an inscription-sized artwork must cost cents to keep forever, and a lifetime's archive must not cost a lifetime. The split is not cleverness; it is who this was built for. <b>Value and state:</b> <span class="chip c-vaulta">▣ Vaulta</span>
-      (RAM/CPU/NET resource model — the .b registry lives here) ·
-      <span class="chip c-evm">⟠ Base + Ethereum</span> (the on-chain art the gallery reads
-      keylessly) · <span class="chip c-btc">₿ Bitcoin</span> (read via Esplora in the museum).
-      <b>Voice:</b> <span class="chip c-hive">◆ Hive</span> longform ·
-      <span class="chip c-social">☄ bSky + Nostr</span> relays.</div></div>
+      <div class="d"><b><span data-i18n="st.t3.1">Storage routes by a price-break law:</span></b>
+      <span class="chip c-ar">◈ Arweave</span><span data-i18n="st.t3.2"> carries small public immutable data (≈100 kB and
+      under);</span> <span class="chip c-ant">⬢ Autonomi</span><span data-i18n="st.t3.3"> takes over where its per-byte price
+      wins — large public files and</span> <b><span data-i18n="st.t3.4">private immutable data</span></b><span data-i18n="st.t3.5">(self-encrypted, paid in ANT,
+      downloads free forever).</span> <b><span data-i18n="st.t3.6">The routing law exists for one person — the poor starving artist:</span></b><span data-i18n="st.t3.7"> an inscription-sized artwork must cost cents to keep forever, and a lifetime's archive must not cost a lifetime. The split is not cleverness; it is who this was built for.</span> <b><span data-i18n="st.t3.8">Value and state:</span></b> <span class="chip c-vaulta">▣ Vaulta</span>
+      <span data-i18n="st.t3.9">(RAM/CPU/NET resource model — the .b registry lives here)</span> ·
+      <span class="chip c-evm">⟠ Base + Ethereum</span><span data-i18n="st.t3.10">(the on-chain art the gallery reads
+      keylessly)</span> · <span class="chip c-btc">₿ Bitcoin</span><span data-i18n="st.t3.11">(read via Esplora in the
+      museum)</span>.
+      <b><span data-i18n="st.t3.12">Voice:</span></b> <span class="chip c-hive">◆ Hive</span><span data-i18n="st.t3.13"> longform ·</span>
+      <span class="chip c-social">☄ bSky + Nostr</span><span data-i18n="st.t3.14"> relays.</span></div></div>
     <div class="down">▼</div>
     <div class="tier"><div class="t"><span data-i18n="stack.t4">the dApps — every card on the hub</span></div>
-      <div class="d">static, keyless pages. No logins, no custody, nothing to breach — each one a
-      read-and-compose window over the rails below it. <a href="index.html">back to the hub</a></div></div>
+      <div class="d"><span data-i18n="st.t4.1">static, keyless pages. No logins, no custody, nothing to breach — each one a
+      read-and-compose window over the rails below it.</span> <a href="index.html"><span data-i18n="st.t4.2">back to the hub</span></a></div></div>
   </div>
-  <div class="law" style="margin-top:11px"><b>The honest parts, stated before anyone asks:</b>
-  GitHub Pages currently serves these pages — a <b>temporary bootstrap crutch</b>, and any small
+  <div class="law" style="margin-top:11px"><b><span data-i18n="st.hon.1">The honest parts, stated before anyone asks:</span></b>
+  <span data-i18n="st.hon.2">GitHub Pages currently serves these pages — a</span> <b><span data-i18n="st.hon.3">temporary bootstrap crutch</span></b><span data-i18n="st.hon.4">, and any small
   server you might find behind a feature is the same. The mirror lane already hashes and stages
-  the evidence corpus for permanent storage, and the <b>bSky/Nostr relays are the last planned
-  migration</b> — once anchored to the chains and ANT/AR, redeploying relays and nodes becomes
-  autonomous. A page that hid its scaffolding would be advertising; this one is a receipt.</div>
+  the evidence corpus for permanent storage, and the</span> <b><span data-i18n="st.hon.5">bSky/Nostr relays are the last planned
+  migration</span></b><span data-i18n="st.hon.6"> — once anchored to the chains and ANT/AR, redeploying relays and nodes becomes
+  autonomous. A page that hid its scaffolding would be advertising; this one is a receipt.</span></div>
 </section>
 
 <section>
