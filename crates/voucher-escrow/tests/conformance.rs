@@ -200,3 +200,60 @@ fn proof_17_non_ascii_hashes_exactly_as_python() {
     );
     assert_eq!(es.verify_chain().unwrap(), 1);
 }
+
+/// PROOF 18 — THE CROSS-FORM ACCEPTANCE. A ledger written by the OTHER form
+/// verifies here, byte-for-byte, through `from_jsonl`.
+///
+/// The fixture in `tests/fixtures/python_ledger.jsonl` was written by the REAL
+/// in-tree `scripts/buzz-meter/voucher_escrow.py` — the same code the box runs
+/// — not by this crate. It is deliberately adversarial for everything that has
+/// forked the two forms so far:
+///
+///   · FLOAT timestamps (`1787997957.817159`), the class that made an intact
+///     chain report Tamper when verification re-serialised structs;
+///   · a NON-ASCII voucher (`café-Ω-voucher`), escaped as Python
+///     escapes it and as serde_json would not;
+///   · both funding rails, A/Vaulta and USDC/Base, in one chain.
+///
+/// It passes because `verify_chain` hashes the STORED BODY BYTES (rule 3) and
+/// never asks a serialiser to reproduce them. That is the whole point: this
+/// test would keep passing against divergences nobody has found yet.
+///
+/// Python's own reading of this ledger, for comparison:
+///   balance member-abc       = 29.5600
+///   balance café-Ω-voucher  = 1.0000
+#[test]
+fn proof_18_a_python_written_ledger_verifies_here() {
+    let text = include_str!("../../../fixtures/voucher-escrow/python_ledger.jsonl");
+    let es = Escrow::from_jsonl(text).expect("the Python ledger must load");
+    assert_eq!(es.event_count(), 5, "five events, as Python wrote them");
+    assert_eq!(
+        es.verify_chain().unwrap(),
+        5,
+        "a chain written by the other form must verify here"
+    );
+    // and the money agrees, which is the part that actually matters
+    assert_eq!(es.balance("member-abc"), "29.5600");
+    assert_eq!(es.balance("caf\u{e9}-\u{3a9}-voucher"), "1.0000");
+}
+
+/// PROOF 19 — the loader refuses rather than half-reads, and a real on-disk
+/// edit is still caught. Red-then-green in the same shape as proof 17.
+#[test]
+fn proof_19_a_tampered_or_malformed_line_is_refused() {
+    let text = include_str!("../../../fixtures/voucher-escrow/python_ledger.jsonl");
+
+    // one edited byte in a STORED body — an attacker with the ledger file
+    let tampered = text.replacen("\"charged\":\"0.2000\"", "\"charged\":\"0.0001\"", 1);
+    let es = Escrow::from_jsonl(&tampered).expect("still parses");
+    assert!(
+        matches!(es.verify_chain(), Err(VoucherError::Tamper(1))),
+        "an edited stored byte must break the chain at that event"
+    );
+
+    // a line that is not an event at all
+    assert!(Escrow::from_jsonl("{\"nope\":1}").is_err());
+    assert!(Escrow::from_jsonl("not json").is_err());
+    // blank lines are skipped, not treated as events
+    assert_eq!(Escrow::from_jsonl("\n\n").unwrap().event_count(), 0);
+}

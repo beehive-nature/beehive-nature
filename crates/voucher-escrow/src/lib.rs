@@ -49,8 +49,13 @@ pub enum VoucherError {
     NonPositive(&'static str),
     MissingRef(&'static str),
     DustRefused,
-    InsufficientVoucher { total: String, balance: String },
+    InsufficientVoucher {
+        total: String,
+        balance: String,
+    },
     Tamper(usize),
+    /// A stored line is not a well-formed event (loader only).
+    Malformed(usize, String),
 }
 
 impl std::fmt::Display for VoucherError {
@@ -66,6 +71,7 @@ impl std::fmt::Display for VoucherError {
                 "charge {total} A exceeds voucher balance {balance} A — refused, nothing written"
             ),
             VoucherError::Tamper(n) => write!(f, "chain broken at event {n}"),
+            VoucherError::Malformed(n, why) => write!(f, "stored event {n} is malformed: {why}"),
         }
     }
 }
@@ -121,6 +127,13 @@ pub fn fmt_a(quatch: u128) -> String {
 #[derive(Default)]
 pub struct Escrow {
     events: Vec<Value>,
+    /// THE BYTES EACH EVENT'S HASH WAS TAKEN OVER — kept, never re-derived.
+    ///
+    /// For events this crate appended: the canonical string it hashed.
+    /// For events loaded by [`Escrow::from_jsonl`]: the RAW bytes sliced out
+    /// of the stored line. `verify_chain` reads only from here, so no
+    /// serialiser ever gets a second opinion about what was written.
+    bodies: Vec<String>,
 }
 
 impl Escrow {
@@ -160,32 +173,98 @@ impl Escrow {
 
     fn append(&mut self, mut body: Map<String, Value>) -> Value {
         let prev = self.tip();
+        let canon = Self::canonical(&body);
         let h = Self::hash(&body, &prev);
         body.insert("prev".into(), json!(prev));
         body.insert("hash".into(), json!(h));
         let ev = Value::Object(body);
         self.events.push(ev.clone());
+        // keep the exact bytes we hashed; verify_chain will not re-render them
+        self.bodies.push(canon);
         ev
     }
 
     /// Walk the chain; Err(Tamper) on any break. Returns the event count.
+    ///
+    /// RULE 3 (founder ruling, 2026-08-29): this hashes the **stored body
+    /// bytes** — the bytes the hash was actually taken over — and never
+    /// re-serialises a struct to check them.
+    ///
+    /// That is not fastidiousness, it is the fix for an entire class. A chain
+    /// that verifies a *re-rendered* body is really asserting that two
+    /// serialisers agree about floats, key order and string escaping — which
+    /// no format guarantees and which has already failed here twice: once on a
+    /// float timestamp that two Rust writers spelled differently, once on
+    /// non-ASCII that Python escapes and serde_json does not. Verifying stored
+    /// bytes closes all of it at once, including the forks nobody has found yet.
     pub fn verify_chain(&self) -> Result<usize> {
         let mut prev = GENESIS_HASH.to_string();
         for (n, ev) in self.events.iter().enumerate() {
-            let body = {
-                let mut m = ev.as_object().unwrap().clone();
-                m.remove("prev");
-                m.remove("hash");
-                m
-            };
+            let stored_body = self
+                .bodies
+                .get(n)
+                .ok_or_else(|| VoucherError::Malformed(n, "no stored body bytes".into()))?;
+            let mut h = Sha256::new();
+            h.update(prev.as_bytes());
+            h.update(stored_body.as_bytes());
             if ev["prev"].as_str() != Some(prev.as_str())
-                || Self::hash(&body, &prev) != ev["hash"].as_str().unwrap()
+                || hex(&h.finalize()) != ev["hash"].as_str().unwrap()
             {
                 return Err(VoucherError::Tamper(n));
             }
             prev = ev["hash"].as_str().unwrap().to_string();
         }
         Ok(self.events.len())
+    }
+
+    /// Load a ledger written by the OTHER form — the box's Python engine —
+    /// from the JSONL text of its append-only log.
+    ///
+    /// Takes TEXT, not a path, on purpose: this crate is the pure state
+    /// machine and does no file I/O. The caller reads the file; this reads the
+    /// ledger.
+    ///
+    /// Each line's body bytes are recovered by **deleting the two chain fields
+    /// from the stored line**, never by re-serialising — see `verify_chain`.
+    /// The surgery is cross-checked against a real parse of the same line, so
+    /// a pathological line is refused rather than mis-sliced.
+    pub fn from_jsonl(text: &str) -> Result<Escrow> {
+        let mut es = Escrow::new();
+        for (n, line) in text
+            .lines()
+            .map(str::trim)
+            .filter(|l| !l.is_empty())
+            .enumerate()
+        {
+            let parsed: Value = serde_json::from_str(line)
+                .map_err(|e| VoucherError::Malformed(n, format!("not JSON: {e}")))?;
+            let obj = parsed
+                .as_object()
+                .ok_or_else(|| VoucherError::Malformed(n, "not a JSON object".into()))?;
+            let field = |k: &str| -> Result<String> {
+                obj.get(k)
+                    .and_then(|v| v.as_str())
+                    .map(str::to_string)
+                    .ok_or_else(|| VoucherError::Malformed(n, format!("missing string field {k}")))
+            };
+            let prev_parsed = field("prev")?;
+            let hash_parsed = field("hash")?;
+
+            let mut body = line.to_string();
+            let prev_cut = cut_string_field(&mut body, "prev");
+            let hash_cut = cut_string_field(&mut body, "hash");
+            if prev_cut.as_deref() != Some(prev_parsed.as_str())
+                || hash_cut.as_deref() != Some(hash_parsed.as_str())
+            {
+                return Err(VoucherError::Malformed(
+                    n,
+                    "chain fields could not be located unambiguously in the stored bytes".into(),
+                ));
+            }
+            es.events.push(parsed);
+            es.bodies.push(body);
+        }
+        Ok(es)
     }
 
     fn body_events(&self) -> impl Iterator<Item = &Value> {
@@ -366,8 +445,20 @@ impl Escrow {
     }
 
     /// test seam: mutate a stored event (tamper proofs)
+    /// Edit a stored event, as an attacker with the ledger file would.
+    ///
+    /// Under rule 3 the chain is verified against the STORED BODY BYTES, so
+    /// tampering has to change those bytes — that is what editing a ledger
+    /// actually is. Mutating only the parsed value would now be invisible, and
+    /// rightly so: nothing on disk changed. This re-renders the edited body
+    /// into the stored bytes, which is exactly the on-disk edit the proof is
+    /// about, and leaves the recorded `hash` untouched so the mismatch stands.
     pub fn tamper_event(&mut self, idx: usize, f: impl FnOnce(&mut Value)) {
         f(&mut self.events[idx]);
+        let mut m = self.events[idx].as_object().unwrap().clone();
+        m.remove("prev");
+        m.remove("hash");
+        self.bodies[idx] = Self::canonical(&m);
     }
     pub fn event_count(&self) -> usize {
         self.events.len()
@@ -389,6 +480,31 @@ fn fmt_fp8(v: u128) -> String {
 }
 fn hex(bytes: &[u8]) -> String {
     bytes.iter().map(|b| format!("{b:02x}")).collect()
+}
+
+/// Remove one `"key":"value"` pair from a rendered JSON object **by string
+/// surgery on the stored bytes**, returning the value, so that what remains is
+/// exactly the bytes that were hashed.
+///
+/// Safe because the two fields it is used for carry hex hashes, which contain
+/// no escapes and no quotes; the caller additionally cross-checks the result
+/// against a real parse, which is what makes this rigorous rather than merely
+/// convenient.
+fn cut_string_field(s: &mut String, key: &str) -> Option<String> {
+    let pat = format!("\"{key}\":\"");
+    let k = s.find(&pat)?;
+    let vstart = k + pat.len();
+    let vend = vstart + s[vstart..].find('"')?;
+    let value = s[vstart..vend].to_string();
+    let mut cut_start = k;
+    let mut cut_end = vend + 1;
+    if s[cut_end..].starts_with(',') {
+        cut_end += 1;
+    } else if cut_start > 0 && s.as_bytes()[cut_start - 1] == b',' {
+        cut_start -= 1;
+    }
+    s.replace_range(cut_start..cut_end, "");
+    Some(value)
 }
 
 /// Escape every non-ASCII scalar as `\uXXXX` (surrogate pairs above the BMP),
