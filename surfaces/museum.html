@@ -394,7 +394,7 @@ async function renderRoyal(){
     var bal=await rpc([{to:col.c,data:'0x70a08231'+AD(GARDEN)}]);
     if(!bal||!bal[0]||bal[0]==='0x'||BigInt(bal[0])<=0n)continue;
     var seed=Number(BigInt(bal[0])/1000000000n);
-    var art=await rpc([{to:col.c,data:col.sel+W(0x20)+W(seed)+W(0)}]);
+    var art=await rpc([{to:col.c,data:LevelTruth.svgCallData(col,seed,0)}]);
     if(!art||!art[0]||art[0].length<200)continue;
     var svg;
     try{svg=decodeString(art[0]);}catch(e){continue}
@@ -405,7 +405,6 @@ async function renderRoyal(){
       '<div class="plate"><div class="pname">'+col.sym+'</div>'+
       '<div class="pmeta"><b>'+pips(lvln??0,pipmax(col))+'</b> <b>seed</b> '+seed.toLocaleString()+' · level '+(lvln??'?')+' of '+pipmax(col)+' · balanceOf(garden), drawn from getSvg at page-open<br>'+
       '<b>contract</b> '+col.c.slice(0,8)+'…'+col.c.slice(-4)+'</div>'+
-      (col.ou?'<div class="pmeta" style="color:var(--guard)">o/u collection — chain art may not agree exactly with the ladder tier this seed implies (law 4, same class as the DeMarketPlace)</div>':'')+
       '<div class="plabel hold">holder: 0xFBD2… — pending attribution read-back</div></div>';
     g.appendChild(d);
   }

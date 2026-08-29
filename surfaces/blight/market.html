@@ -96,7 +96,7 @@ section.laws{background:#0b0b12;border:1px solid var(--line);border-radius:12px;
   <section class="laws"><div class="law"><div class="i">1</div><div><div class="t">every transfer is an art event</div><div class="d">listing, buying, canceling — each leg fires the capture arithmetic. there are no neutral hops, so there are no hidden ones.</div></div></div>
   <div class="law"><div class="i">2</div><div><div class="t">exact amount or nothing</div><div class="d">art escrows and delivers whole — the attached seed amount, never a fraction. fees come off the payment side, never the art side.</div></div></div>
   <div class="law"><div class="i">3</div><div><div class="t">the cushion is shown</div><div class="d">destruction happens only when a trade's whole-token delta exceeds the holder's spore cushion. both parties see that number before anyone signs.</div></div></div>
-  <div class="law"><div class="i">4</div><div><div class="t">o/u collections trade conservative</div><div class="d">FUNGI and PEPI v1 carry the over/under bug. they trade whole-for-whole with the art re-roll disclosed — no split fills, no multi-hop item legs.</div></div></div>
+  <div class="law"><div class="i">4</div><div><div class="t">the level you see is the level the chain draws</div><div class="d">every card's tier is checked live against the contract's own getMeta — agreement is the only pass. a real disagreement would print here named and cited; none has survived the check.</div></div></div>
   <div class="law"><div class="i">5</div><div><div class="t">art never touches a pool</div><div class="d">proven twice: liquidity moves dissolve inscriptions. payment routes anywhere; the item walks a straight bridge only.</div></div></div>
   </section>
   <p class="note">the north star: the Ethereum item model moves one inscription by unique id, carrying exactly its backing — settlement where no arithmetic can go wrong.</p>
@@ -132,7 +132,7 @@ async function buildInventory(){
        lvlOf(listing), one value driving all three. The seller full-balance
        seed rides the numbers line only, never the product. */
     const whole=Math.max(1,Math.floor(seed*0.4));
-    const res=await rpc([{to:col.c,data:col.sel+W(0x20)+W(whole)+W(0)}]);
+    const res=await rpc([{to:col.c,data:LevelTruth.svgCallData(col,whole,0)}]);
     if(res&&res[0]&&res[0].length>200){
       try{ found.push({svg:decodeString(res[0]),col,seed,whole,lvln:lvlOf(whole,col)}); }catch(e){}
     }
@@ -153,10 +153,8 @@ function renderWall(){
     const art=document.createElement('div'); art.className='art'; art.innerHTML=p.svg;
     const body=document.createElement('div'); body.className='body';
     const disc=document.createElement('div');
-    disc.className='cushion'+(p.col.ou?'':' quiet');
-    disc.textContent=p.col.ou
-      ? '<span>representative — exact art rolls on delivery</span> (<span>seed</span> '+p.seed.toLocaleString()+' · <span>level</span> '+lvlOf(p.seed,p.col)+' <span>travel intact)</span>'
-      : '<span>level-true: this art is exactly what</span> '+L.whole.toLocaleString()+' <span>holds at delivery</span>';
+    disc.className='cushion quiet';
+    disc.textContent='level-true: this art is exactly what '+L.whole.toLocaleString()+' holds at delivery';
     body.innerHTML='<div class="n">'+p.col.sym+'</div>'+
       '<div class="m"><b>'+pips(p.lvln??0,pipmax(p.col))+'</b> <span>seed</span> '+p.seed.toLocaleString()+' · <span>listing</span> '+L.whole.toLocaleString()+' <span>exact</span></div>'+
       '<div class="price"><span class="p">'+L.usdc.toLocaleString()+' USDC</span><span class="u">spot · exact-amount</span></div>'+
@@ -177,7 +175,6 @@ function preview(i){
     '<span>you receive</span> <span style="color:var(--ok)">'+L.whole.toLocaleString()+' '+p.col.sym+' — <span>exact amount</span></span><br>'+
     '<span>your level at delivery:</span> <span style="color:var(--ok)">'+L.whole.toLocaleString()+' · level '+(p.lvln??'?')+'</span><br>'+'seller’s full seed (not the product): <span style="color:var(--cyan)">'+p.seed.toLocaleString()+' · level '+lvlOf(p.seed,p.col)+'</span><br>'+
     'seller\u2019s spore cushion after: <span class="'+(safe?'':'risk')+'">'+cushion.toLocaleString()+' '+(safe?'— safe (law 3)':'— DISSOLUTION RISK')+'</span><br>'+
-    (p.col.ou?'<span class="risk">law 4: o/u collection — the art re-rolls on delivery; seed + level intact</span><br>':'')+
     'payment routes freely · art walks a straight bridge (law 5)'+
     '<div class="go"><button id=\"inquireMsg\">send inquiry — copies your offer note</button></div>'+
     '<div class="go"><button id=\"confirm\">\u25C9 confirm — when settlement docks</button></div>'+
