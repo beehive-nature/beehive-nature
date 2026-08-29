@@ -26,6 +26,12 @@
 #     changing the artifact the receipt pins. Path-scoped (this glob only;
 #     the 64-hex pattern stays armed everywhere else), founder-ruled
 #     2026-07-25 (DISPATCH-2026-07-25-B CC-3, on the fixtures/ basis).
+#   - crates/voucher-escrow/fixtures/: the LIVE escrow-ledger snapshot —
+#     hash-chained canonical JSONL where every byte is load-bearing (chain
+#     verification hashes the exact bytes), so a same-line marker would break
+#     the artifact it pins. Its 64-hex values are PUBLIC chain hashes of the
+#     append-only events, never key material. Path-scoped (this crate's
+#     fixtures only), on the dockets/*/receipt-*.json basis, 2026-08-29.
 #   - lines carrying a same-line TESTNET-ONLY marker — the sanctioned way to
 #     commit a throwaway testnet vector for the compat tests, e.g.:
 #       let s: [u8; 32] = hex!("...");  // TESTNET-ONLY throwaway compat vector
@@ -62,14 +68,14 @@ PROPTEST_RE='(^|[+:])cc [0-9a-fA-F]{64}([^0-9a-fA-F]|$)'
 case "$mode" in
 diff)
     names=$(git diff --cached --name-only --diff-filter=ACM | grep -Ei "$NAME_RE")
-    added=$(git diff --cached --diff-filter=ACM -- . ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' |
+    added=$(git diff --cached --diff-filter=ACM -- . ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' |
         grep '^+' | grep -v '^+++')
     hex=$(printf '%s\n' "$added" | grep -vF -e "$MARK" -e "$MARK2" | grep -vE "$PROPTEST_RE" | grep -nE "$HEX_RE")
     pem=$(printf '%s\n' "$added" | grep -nE "$PEM_RE")
     ;;
 tree)
     names=$(git ls-files | grep -Ei "$NAME_RE")
-    hex=$(git grep -InE "$HEX_RE" -- ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' | grep -vF -e "$MARK" -e "$MARK2" | grep -vE "$PROPTEST_RE")
+    hex=$(git grep -InE "$HEX_RE" -- ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' | grep -vF -e "$MARK" -e "$MARK2" | grep -vE "$PROPTEST_RE")
     pem=$(git grep -InE "$PEM_RE")
     ;;
 *)

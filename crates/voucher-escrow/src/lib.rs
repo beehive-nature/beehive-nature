@@ -170,8 +170,16 @@ impl Escrow {
 
     /// Walk the chain; Err(Tamper) on any break. Returns the event count.
     pub fn verify_chain(&self) -> Result<usize> {
+        Self::verify_external_chain(&self.events)
+    }
+
+    /// Verify an EXTERNAL event stream (e.g. a snapshot of the live on-box
+    /// Python ledger) against the same hash law — cross-language conformance:
+    /// the Rust core must confirm the Python engine's chain, byte-for-byte
+    /// canonical form (sorted keys, compact separators, ASCII-escaped).
+    pub fn verify_external_chain(events: &[Value]) -> Result<usize> {
         let mut prev = GENESIS_HASH.to_string();
-        for (n, ev) in self.events.iter().enumerate() {
+        for (n, ev) in events.iter().enumerate() {
             let body = {
                 let mut m = ev.as_object().unwrap().clone();
                 m.remove("prev");
@@ -185,7 +193,28 @@ impl Escrow {
             }
             prev = ev["hash"].as_str().unwrap().to_string();
         }
-        Ok(self.events.len())
+        Ok(events.len())
+    }
+
+    /// Derived balance of an external snapshot (same fold as balance_quatch).
+    pub fn external_balance(events: &[Value], voucher: &str) -> String {
+        let deposits: u128 = events
+            .iter()
+            .filter(|e| e["voucher"].as_str() == Some(voucher) && e["type"] == "DEPOSIT")
+            .map(|e| parse_a(e["amount"].as_str().unwrap()))
+            .fold(0u128, |a, b| a + b);
+        let charges: u128 = events
+            .iter()
+            .filter(|e| e["voucher"].as_str() == Some(voucher) && e["type"] == "CHARGE")
+            .map(|e| {
+                e["line_items"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .fold(0u128, |a, li| a + parse_a(li["charged"].as_str().unwrap()))
+            })
+            .fold(0u128, |a, b| a + b);
+        fmt_a(deposits.saturating_sub(charges))
     }
 
     fn body_events(&self) -> impl Iterator<Item = &Value> {
