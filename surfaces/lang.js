@@ -71,6 +71,29 @@
       if(s){ el.textContent=s; hit++; }
       else { el.textContent=el.dataset.i18nEn; } /* honest fallback: English, counted */
     });
+    /* THE COVERAGE COUNTER (founder defect order 2026-08-29): the old count was
+       keys-present over [data-i18n] elements — a page reading English to every
+       tongue showed a green 49/49. The carrier now counts VISIBLE STRINGS
+       covered: same walk as e2e/i18n-coverage.mjs (leaf elements, riders and
+       canvas excluded, on-screen, lettered text >= 3 chars). covered = the leaf
+       sits inside a data-i18n holder whose cell for this tongue is non-empty
+       (English counts keyed as covered — it is the source). */
+    var CHROME='#tbar,#adOrb,#adPanel,#tbarMore,#railsbadge,#bregctl,#blangctl,#veil,#bandwrap';
+    var vis=0, cov=0;
+    document.querySelectorAll('body *').forEach(function(n){
+      if(n.children.length) return;
+      if(n.closest && n.closest(CHROME)) return;
+      if(['SCRIPT','STYLE','NOSCRIPT','CANVAS','SVG','PATH','OPTION'].includes(n.tagName)) return;
+      var t=(n.textContent||'').trim();
+      if(t.length<3||!/[A-Za-zА-Яа-яЀ-ӿ]/.test(t)) return;
+      var r=n.getBoundingClientRect();
+      if(r.width===0&&r.height===0) return;
+      vis++;
+      var hold=n.closest('[data-i18n]');
+      if(hold){ var hk=hold.getAttribute('data-i18n');
+        if(code==='en'){ cov++; }
+        else if(corpus&&corpus.strings[hk]&&corpus.strings[hk][code]){ cov++; } }
+    });
     var sel=document.getElementById('blangsel');
     if(sel){ sel.value=code;
       var note=document.getElementById('blangnote');
@@ -78,12 +101,12 @@
         if(code==='en'){ note.textContent=''; note.title=''; }
         else{
           var att=corpus&&corpus._meta&&corpus._meta.attested&&corpus._meta.attested[code];
-          if(att){ note.textContent='✓ '+hit+'/'+total;
+          if(att){ note.textContent='✓ '+cov+'/'+vis;
             note.title='HUMAN-ATTESTED '+(att.by||'(name withheld)')+' · '+(att.date||'')+
               ' — a person who lives in this tongue signed these lines'; }
-          else{ note.textContent = total===0 ? '⚙ 0 docked here yet' : '⚙ '+hit+'/'+total;
+          else{ note.textContent = vis===0 ? '' : '⚙ '+cov+'/'+vis;
             note.title='machine-drafted ⚙ — human attestation upgrades it; '+
-              (total-hit)+' line(s) on this page fall back to English and say so here'; }
+              (vis-cov)+' of '+vis+' visible strings on this page are unkeyed — no tongue can reach them'; }
         }
       }
     }

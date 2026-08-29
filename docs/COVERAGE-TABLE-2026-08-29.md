@@ -1,8 +1,8 @@
 # THE COVERAGE TABLE — how translated the estate actually is
 
-**Measured:** 2026-08-29 · tool: e2e/i18n-coverage.mjs (rendered-DOM measurement, ru reader) · 90 surfaces · purpose: this table is the MAP for the body-prose keying lane (founder reframe: keying backlog, not translation backlog — no tongue can reach an unkeyed string).
+**Measured:** 2026-08-29 (post-fieldnotes keying) · tool: e2e/i18n-coverage.mjs (rendered-DOM measurement, ru reader) · 91 surfaces · purpose: the MAP for the body-prose keying lane (founder reframe: keying backlog, not translation backlog — no tongue can reach an unkeyed string).
 
-**Estate totals:** 7246 visible strings · 657 keyed (9%) · 6589 unkeyed · 0 empty cells (keyed strings never render wrong)
+**Estate totals:** 7305 visible strings · 700 keyed (10%) · 6605 unkeyed · 0 empty cells (keyed strings never render wrong)
 
 | surface | visible | keyed | unkeyed |
 |---|---|---|---|
@@ -12,16 +12,16 @@
 | bset.html | 327 | 1 | 326 |
 | record.html | 278 | 0 | 278 |
 | wallet.html | 242 | 24 | 218 |
+| blight/museum.html | 221 | 10 | 211 |
 | bigen.html | 222 | 12 | 210 |
-| blight/museum.html | 217 | 10 | 207 |
-| index.html | 258 | 69 | 189 |
+| index.html | 260 | 69 | 191 |
 | bearth.html | 170 | 9 | 161 |
 | hardware/index.html | 147 | 10 | 137 |
-| stack.html | 224 | 87 | 137 |
 | bsymposium.html | 141 | 10 | 131 |
 | bmeshasi.html | 127 | 0 | 127 |
 | blight/compare.html | 127 | 1 | 126 |
 | devroom.html | 125 | 0 | 125 |
+| stack.html | 242 | 119 | 123 |
 | fleet-hosted/gallery/acid-cascade.html | 114 | 0 | 114 |
 | blongevity.html | 120 | 9 | 111 |
 | university/index.html | 108 | 7 | 101 |
@@ -29,11 +29,11 @@
 | bnames.html | 95 | 0 | 95 |
 | design-system.html | 117 | 24 | 93 |
 | dao-dashboard/index.html | 91 | 5 | 86 |
+| bantfarm.html | 92 | 7 | 85 |
 | bqueenbee-live.html | 91 | 6 | 85 |
-| bantfarm.html | 91 | 7 | 84 |
 | blight/c1-aid.html | 83 | 4 | 79 |
+| museum.html | 121 | 43 | 78 |
 | festival/index.html | 94 | 18 | 76 |
-| museum.html | 117 | 43 | 74 |
 | attest.html | 67 | 1 | 66 |
 | dock.html | 66 | 0 | 66 |
 | fleet-hosted/gallery/resonance.html | 62 | 0 | 62 |
@@ -63,6 +63,7 @@
 | review.html | 39 | 6 | 33 |
 | blight/coop.html | 31 | 0 | 31 |
 | blight/qrroses-smil.html | 29 | 0 | 29 |
+| blight/farmers.html | 28 | 0 | 28 |
 | blight/index.html | 33 | 6 | 27 |
 | blight/pixelrefiner.html | 26 | 0 | 26 |
 | blight/studio-gate.html | 30 | 4 | 26 |
@@ -89,12 +90,12 @@
 | onboarding/index.html | 11 | 0 | 11 |
 | blight/bnri-gallery.html | 10 | 0 | 10 |
 | blight/midi-organ.html | 10 | 0 | 10 |
-| blight/farmers.html | 9 | 0 | 9 |
 | blight/hearth.html | 9 | 0 | 9 |
 | blight/market.html | 9 | 0 | 9 |
 | blight/inscription-explorer.html | 8 | 0 | 8 |
 | blight/pulse.html | 7 | 0 | 7 |
 | recover.html | 7 | 0 | 7 |
 | blight/gallery.html | 7 | 3 | 4 |
+| fieldnotes.html | 11 | 11 | 0 |
 
-*Per tongue: all 27 docked tongues (incl. tt, born 2026-08-29) at 100% non-empty across the 442+ keys this set uses — measured same pass. The gap is KEYING, never translation.*
+*Per tongue: all 27 docked tongues (incl. tt, born 2026-08-29) at 100% non-empty across the keys this set uses — measured same pass. The gap is KEYING, never translation.*
