@@ -99,13 +99,25 @@ const COLS=[
  {sym:'MiDi',c:'0x569e1A337b095B1A6c8F206158072cEDb6325b56',sel:'422b9e23',deg:null,cnt:'9c216508',idx:'0fd9587e',lv:null,base:0},
 ];
 /* the fidelity law: a record's OWN words ARE the getSvg tuple — feed verbatim */
-function recArt(col,w){return col.sel+W(0x20)+w.slice(0,3).join('')}
+/* SeedData is a STATIC struct — its fields encode back to back with NO
+   leading dynamic-offset word. The W(0x20) that used to sit here shifted
+   every field over by one, so the contract read seed=32 and RandLib.lvl()
+   returned the LOWEST tier for every piece in this gallery. Proven live
+   2026-08-29 against each contract's own getMeta: with the offset, FUNGI /
+   $FROGGI / JELLI all reported level 0 and PEPI v2 level 3; without it, 5 / 6
+   / 5 / 6 — matching level-truth.js's ladder exactly. Same root cause as
+   founder eye-catch #6; this surface kept its own copy and so kept the bug. */
+function recArt(col,w){return col.sel+w.slice(0,col.sel==='a435130b'?3:2).join('')}  /* PEPI (a435130b) is the 3-field struct {seed,seed2,extra}; the rest are {seed,extra} */
 function decodeString(hex){
   const h=hex.replace(/^0x/,'');
   const off=parseInt(h.slice(0,64),16);
   if(!(off===0x20)) throw 0;
   const len=parseInt(h.slice(off*2,off*2+64),16);
-  if(!(len>=0&&len<=16384)) throw 0;
+  /* cap raised 16 KB -> 128 KB, matching level-truth.js. $FROGGI's real
+     level-6 art measured 53,783 bytes live for the founder's garden (and
+     71,293 at the top rung) — the old cap threw, the call site caught and
+     skipped, and the piece vanished from the tour with no message. */
+  if(!(len>=0&&len<=131072)) throw 0;
   let out='';
   for(let i=0;i<len;i++){
     const b=parseInt(h.slice((off+32+i)*2,(off+32+i)*2+2),16);
@@ -203,7 +215,7 @@ async function loadGarden(addr){
     const seed=Number(BigInt(bal[0])/1000000000n);
     const calls=[col.deg
       ?{to:col.c,data:'0x'+col.deg+AD(addr)}
-      :{to:col.c,data:col.sel+W(0x20)+W(seed)+W(0)+(col.sel==='a62f5b1b'?AD(addr):'')}];
+      :{to:col.c,data:col.sel+W(seed)+W(0)+(col.sel==='a62f5b1b'?AD(addr):'')}];   // no offset word — see recArt
     const mcRes=await rpc(['0x'+col.cnt+AD(addr)].map(d=>({to:col.c,data:d})),H(col));
     const mc=mcRes&&mcRes[0];
     const n=mc&&mc!=='0x'?Number(BigInt(mc)):0;

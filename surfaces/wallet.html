@@ -713,6 +713,29 @@ var WALLET_PROFILE = {
   <div class="law" id="pay-stat" style="margin-top:6px;min-height:20px">— choose a lane above —</div>
 </section>
 
+<!-- ══ INSCRIPTIONS — the garden, drawn on-chain. The art is the hero: the
+     piece leads, the numbers stand beside it. Every SVG here is fetched from
+     the collection's own contract at read time; nothing is cached, stored, or
+     redrawn by this page. ══ -->
+<section id="insc-sec" style="border-color:#3a2c55">
+  <h2>🎨 INSCRIPTIONS — your garden, drawn on-chain</h2>
+  <div class="law">ERC-20i: the art lives <b>in the token</b>, and its tier is your balance. This
+  panel reads the pieces your address holds straight from each collection's contract and draws them
+  at their <b>true tier</b> — through the estate's <b>one</b> level-truth module (<b>level-truth.js</b>),
+  the same one the market and the museum use, so a level can never mean two things on two surfaces.
+  Keyless, read-only, nothing signed.</div>
+  <div class="row" style="margin-top:8px">
+    <input id="insc-addr" class="small" placeholder="0x… address or a .base.eth name — defaults to your connected soul" spellcheck="false" autocomplete="off" style="flex:2;min-width:220px;font-family:'IBM Plex Mono',monospace">
+    <button id="insc-go" class="gold">🎨 draw the garden</button>
+  </div>
+  <div class="law" id="insc-stat" style="margin-top:6px;min-height:20px">— connect your keychain, or type an address —</div>
+  <div id="insc-grid" style="display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));margin-top:12px"></div>
+  <div class="law" style="margin-top:8px"><b>The level law, enforced not labelled:</b> for every piece the
+  page's own ladder arithmetic is checked against the collection's <b>own getMeta</b> at read time. Agreement
+  is the pass. A disagreement is printed as a <b>GATE FAILURE</b> on the card — never smoothed into a number
+  that looks fine.</div>
+</section>
+
 <!-- ══ FUND — Meld hosted checkout (no server of ours · public key only) ══ -->
 <section id="fund-sec" style="border-color:#4a3a1d" data-meld-public-key="" data-meld-env="sandbox">
   <style>
@@ -895,6 +918,11 @@ var WALLET_PROFILE = {
           }
           return tryHost();
         }
+        /* the INSCRIPTIONS panel resolves names too. It calls THIS function
+           rather than carrying its own copy — one resolver, so the
+           registry-first fallback that made bclaude.base.eth resolvable can
+           never be present on one panel and missing on the other. */
+        window.__bnrResolveName = resolveName;
 
         var resolved = null;   // {name, addr} once the user has SEEN the resolved hex
         var resolving = false;
@@ -1261,6 +1289,10 @@ var WALLET_PROFILE = {
 <script src="onboarding/vendor/bip39-wordlist.js"></script>
 <script src="vault.js?v=2"></script>
 <script src="arweave.js?v=2"></script>
+<!-- the estate's ONE level-truth module — the same file market.html and
+     museum.html load. Imported, never re-derived: a third copy of the SeedData
+     decode is exactly how the lowest-tier-art bug comes back. -->
+<script src="level-truth.js?v=2"></script>
 
 <script>
 (function(){
@@ -3737,6 +3769,111 @@ var WALLET_PROFILE = {
   $('tx-tab-e').onclick=function(){txTab('e')};
   $('tx-tab-l').onclick=function(){txTab('l')};
   $('tx-tab-n').onclick=function(){txTab('n');pnSide('mine')};
+
+  /* ══ INSCRIPTIONS — the connected soul's garden, drawn from chain.
+     EVERY piece of chain arithmetic here comes from LevelTruth. This surface
+     builds NO calldata and decodes NO string of its own: the SeedData encoding
+     (a static struct, no leading offset word) and the 128 KB decode ceiling
+     live in that one module, and re-deriving either here is precisely how the
+     always-lowest-tier bug returns. ══ */
+  var LT = window.LevelTruth || null;
+  function inscTarget(){
+    var typed = ($('insc-addr').value||'').trim();
+    if(typed) return typed;
+    if(MPRK && SOUL){
+      var r = BZDIDKEY.deriveK1Key(MPRK,'evm:'+SOUL);
+      try{ return evmAddressFromSeed(r.seed) } finally { r.seed.fill(0) }
+    }
+    return null;
+  }
+  /* the art is handed to the browser as an <img> data URI rather than injected
+     as live markup: an SVG in an <img> cannot run script, and this is
+     contract-supplied content. Static art renders identically. */
+  function svgImg(svg){
+    var b64;
+    try{ b64 = btoa(unescape(encodeURIComponent(svg))) }catch(e){ return '' }
+    return '<img alt="on-chain inscription" loading="lazy" src="data:image/svg+xml;base64,'+b64+'" '+
+      'style="width:100%;aspect-ratio:1;object-fit:contain;display:block;background:#07060d;border-radius:10px">';
+  }
+  function inscCard(p){
+    var lvlLine = p.gate && p.gate.agree === false
+      ? '<div style="color:var(--amber);font-size:10.5px;margin-top:5px;line-height:1.6"><b>⚠ GATE FAILURE</b><br>'+
+        'this page reads level <b>'+p.gate.ours+'</b>; the contract’s own getMeta says <b>'+p.gate.theirs+'</b>. '+
+        'The number is not smoothed — the disagreement is the finding.</div>'
+      : '<div style="font-size:12px;color:var(--sem-value,#E8B54B);margin-top:5px;letter-spacing:.14em">'+
+        esc(LT.pips(p.lvl, LT.pipmax(p.col)))+' <span style="color:var(--dim);font-size:10px;letter-spacing:0">level '+p.lvl+
+        (p.gate && p.gate.agree ? ' · getMeta agrees' : '')+'</span></div>';
+    return '<div style="border:1px solid var(--line2);border-radius:12px;padding:10px;background:var(--well)">'+
+      svgImg(p.svg)+
+      '<div style="font-size:12.5px;font-weight:600;margin-top:8px">'+esc(p.col.sym)+'</div>'+
+      lvlLine+
+      '<div style="font-size:9.5px;color:var(--faint);margin-top:5px;line-height:1.7">balance <b style="color:var(--ink)">'+
+      p.balDisp+'</b><br>seed '+p.seed.toLocaleString()+' · '+p.svg.length.toLocaleString()+' bytes of art</div>'+
+      '</div>';
+  }
+  async function inscDraw(){
+    if(!LT){ $('insc-stat').innerHTML='<b style="color:var(--amber)">level-truth.js did not load</b> — the garden stays closed rather than guess a tier.'; return }
+    var target = inscTarget();
+    $('insc-grid').innerHTML='';
+    if(!target){ $('insc-stat').textContent='connect your keychain, or type an address — nothing is read until then'; return }
+    /* a .base.eth name resolves through the same registry-first path the FUND
+       panel uses; a raw 0x goes straight through */
+    if(!/^0x[0-9a-fA-F]{40}$/.test(target)){
+      $('insc-stat').textContent='resolving '+target+'…';
+      var resolved = await (window.__bnrResolveName ? window.__bnrResolveName(target) : Promise.resolve(null));
+      if(!resolved){ $('insc-stat').innerHTML='<b style="color:var(--amber)">that name has no address record</b> — paste a 0x… address instead.'; return }
+      target = resolved;
+    }
+    $('insc-stat').textContent='reading '+target.slice(0,10)+'… across '+LT.COLLECTIONS.length+' collections…';
+    var balCalls = LT.COLLECTIONS.map(function(c){ return {to:c.c, data:'0x70a08231'+LT.AD(target)} });
+    var bals = await LT.rpc(balCalls);
+    if(!bals){ $('insc-stat').innerHTML='<b style="color:var(--amber)">the rails did not answer</b> — no art is drawn rather than a wrong one.'; return }
+    var held = [];
+    for(var i=0;i<LT.COLLECTIONS.length;i++){
+      var b = bals[i];
+      if(!b || b==='0x') continue;
+      var raw; try{ raw = BigInt(b) }catch(e){ continue }
+      if(raw === 0n) continue;
+      /* the SAME normalisation market.html and museum.html use — whole tokens,
+         because the contract does not re-apply decimals() to SeedData.seed */
+      held.push({col: LT.COLLECTIONS[i], seed: Number(raw/1000000000n), raw: raw});
+    }
+    if(!held.length){
+      $('insc-grid').innerHTML =
+        '<div style="grid-column:1/-1;border:1px dashed var(--line2);border-radius:12px;padding:26px 18px;text-align:center">'+
+        '<div style="font-size:13px;color:var(--ink)">no inscriptions yet</div>'+
+        '<div style="font-size:10.5px;color:var(--dim);margin-top:7px;line-height:1.8;max-width:44ch;margin-inline:auto">'+
+        'This address holds none of the '+LT.COLLECTIONS.length+' ERC-20i collections this page reads. '+
+        'Nothing is drawn — an empty garden is empty, not a placeholder.</div></div>';
+      $('insc-stat').innerHTML='✓ read '+target.slice(0,10)+'… — <b>holds none of the '+LT.COLLECTIONS.length+' collections</b>.';
+      return;
+    }
+    $('insc-stat').textContent='drawing '+held.length+' piece'+(held.length===1?'':'s')+' at true tier…';
+    var pieces = [];
+    for(var k=0;k<held.length;k++){
+      var h = held[k];
+      var lvl = LT.lvlOf(h.seed, h.col);
+      var art = await LT.rpc([{to:h.col.c, data: LT.svgCallData(h.col, h.seed, 0)}]);
+      if(!art || !art[0] || art[0]==='0x') continue;
+      var svg; try{ svg = LT.decodeString(art[0]) }catch(e){ continue }
+      /* THE GATE: the collection's own getMeta, live, every time */
+      var gate = await LT.verifyLevel(h.col, h.seed, 0);
+      pieces.push({col:h.col, seed:h.seed, lvl:lvl, svg:svg, gate:gate,
+        balDisp: fromBaseUnits(h.raw, 9)+' '+h.col.sym});
+    }
+    if(!pieces.length){
+      $('insc-stat').innerHTML='<b style="color:var(--amber)">balances found, but no art decoded</b> — nothing is drawn rather than a broken frame.';
+      return;
+    }
+    pieces.sort(function(a,b){ return b.lvl-a.lvl || b.seed-a.seed });   // the highest tier leads
+    $('insc-grid').innerHTML = pieces.map(inscCard).join('');
+    var bad = pieces.filter(function(p){ return p.gate && p.gate.agree===false }).length;
+    $('insc-stat').innerHTML = '✓ <b>'+pieces.length+' piece'+(pieces.length===1?'':'s')+'</b> drawn from chain at true tier'+
+      (bad ? ' · <b style="color:var(--amber)">'+bad+' GATE FAILURE</b>' : ' · <b style="color:var(--leaf)">every level agrees with the contract’s own getMeta</b>')+
+      ' · '+esc(target.slice(0,10))+'…';
+  }
+  $('insc-go').onclick=inscDraw;
+  $('insc-addr').addEventListener('keydown',function(e){ if(e.key==='Enter')inscDraw() });
 
   /* ── PAYMENT NAME — one name, both rails ─────────────────────────────── */
   function pnSide(which){
