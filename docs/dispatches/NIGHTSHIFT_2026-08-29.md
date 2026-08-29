@@ -418,14 +418,103 @@ outside this seat's authority regardless of explicit go-ahead; the pick
 hash field stays PENDING until the founder signs it himself and returns the
 hash for the entry to be completed.
 
-## Items 8 and 10 — NOT STARTED
+## Item 11 — MARKET LIVE PRICE, founder eye-catch #7 · DONE `c70d9f6`
 
-Queue backed up faster than it could be worked through tonight. Item 8
-(onboarding free-path showcase) and item 10 (the visual pass — SVG
-value-flow diagrams, PD imagery, register-split generative art layer) are
-both real, scoped, landable asks — neither was touched this pass. Parking
-here rather than half-building either under time pressure, per the same
-sprint law that governed items 4 and 5 earlier tonight.
+**Read-back (denomination question answered before any wiring, per the
+order):** market.html's cards showed a USDC number labeled "spot" that was
+in fact `whole × PRICES[sym]` against a hand-typed table (FUNGI 0.00041,
+$FROGGI 0.004, JELLI 0.0009, PEPI v2 3.2, PEPI v1 0.55) — a fabricated
+placeholder, not a fixed lister ask (no escrow contract exists yet — the
+page's own text says signing "waits for the audited escrow") and not a real
+spot read either. Checked live, three independent ways, before writing any
+price code: (1) called the Base Uniswap v3 Factory's own
+`getPool(token,WETH,fee)` (`0x33128a8fC17869897dcE68Ed026d694621f6FDfD`)
+directly and got a nonzero pool back for all five collections; (2) cross-
+checked FUNGI/$FROGGI against DexScreener's independently-indexed pairs; (3)
+cross-checked JELLI/PEPI v1/PEPI v2 against GeckoTerminal's independently-
+indexed top pools (which 429'd mid-check on its own free-tier rate limit —
+noted as the aggregator's fragility, not evidence against the pools it did
+return before limiting). All three agree: every one of FUNGI, $FROGGI,
+JELLI, PEPI v1, PEPI v2 trades as a real ERC20i against WETH on a live
+Uniswap v3 Base pool. "Art never touches a pool" (market's law 5) governs
+moving the INSCRIPTION itself, never the underlying fungible token's own
+market — a separate, real, live fact that a card's price must reflect.
+
+**What landed:** `surfaces/level-truth.js` gains a static `POOLS` table (pool
+addresses are immutable post-deploy — same trust model this file already
+uses for its contract addresses and level ladders), `ethUsd()` (Coinbase's
+public spot endpoint, `api.coinbase.com/v2/prices/ETH-USD/spot` — the one
+new off-origin host), and `tokenSpotUsd()` (the pool's own `slot0()` read
+over the already-allowlisted Base RPC hosts — no third-party price API sits
+in the runtime path, nothing to rate-limit). `market.html` drops the
+`PRICES` table entirely, computes each card's USDC live per collection,
+shows the fetch timestamp on the card, and renders "price unavailable" —
+never a stale or guessed number — on any failed leg; the failure branch was
+forced live in-browser to confirm it actually paints, not just that the code
+has an else-clause. `level-truth.js?v` bumped 1→2 on both consuming
+surfaces; market's own build-stamp bumped rev 3→4.
+
+**Gates:** `node e2e/design-acceptance.mjs surfaces/blight/market.html
+surfaces/museum.html` → 28/28 (`api.coinbase.com/v2/prices/` itemized into
+the rider allowlist by exact host, same pattern as the RPC hosts). `node
+e2e/estate-source.mjs` → 11/11. CI on push `c70d9f6`: `secret-scan`
+33232916308 success · `tests` 33232916329 success · `pages-build-deployment`
+33232915768 success.
+
+**Live-verified (receipt = the URL):**
+https://skaists.dev/surfaces/blight/market.html — zero console errors,
+`market rev 4` in-DOM, all five cards showing real USDC numbers with fetch
+timestamps (FUNGI 620.34, $FROGGI 85.68, JELLI 30.33, PEPI v1 23.19, PEPI v2
+37.05 — read at 2026-08-29T22:06 local; the numbers move on reload because
+they are live, which is the point). Cross-checked against an independent
+by-hand computation from the same on-chain pool state done before any code
+was written — matched within normal price drift across the few minutes
+between the two reads. Local pre-push shots (`e2e/shot-market-price-fix.mjs`,
+kept for reuse) in `e2e/shots-lane-a/market-AFTER-local-{1280,390}.png`, zero
+console errors at both widths.
+
+---
+
+## Items 8 and 10 — SCOPED, NOT STARTED (for the next seat)
+
+Queue backed up faster than either could be worked through tonight — both
+are real, landable asks; parking rather than half-building under time
+pressure, per the same sprint law that governed items 4 and 5. State,
+precisely, so the next seat inherits them whole rather than re-deriving
+scope from a one-line memory:
+
+**Item 8 — the free-door onboarding page.** What exists today:
+`surfaces/onboarding/index.html` and `surfaces/onboarding/receive.html` are
+the current onboarding surfaces; neither currently showcases a "free path"
+concept. The founder's own naming ("free-door") and item 3's research
+tonight (the Basenames free-credential table — Coinbase Verification,
+Summer Pass, Buildathon NFT, base.eth holder, cb.id pre-2024-08-09, BNS
+owner) are the closest landed material naming what a "free door" into this
+estate could mean, but nothing on record ties that table to a required
+onboarding-page spec — the next seat's first move should be confirming with
+the founder whether "free-door onboarding" means surfacing THAT credential
+table as an entry path, some other free-tier account path (`.b` names are
+free per the open Bug-1 gate note in `CLAUDE.md` §6), or both. No half-built
+stub exists under either onboarding file for this — confirmed clean before
+writing this note.
+
+**Item 10 — the visual pass.** Named scope, from the original order: SVG
+value-flow diagrams (how value moves through the estate — candidate home:
+alongside the museum's existing Corridor of Chokepoints, which already
+narrates value capture in prose but carries no diagram), PD (public domain)
+imagery (subject to the same licensing-by-omission discipline the museum's
+Luna Room already established — no reproduced third-party art, sourced and
+attributed if used at all), and a register-split generative art layer (the
+three-registers doctrine — 🐝 new-bee / 🎛 raver / ⚗ cypherpunk — expressed
+as a generative visual rather than the current text-only pill labels).
+Candidate surfaces: `surfaces/museum.html` (value-flow, PD imagery) and
+whatever surface carries the register picker chrome tour-wide (`lang.js`/
+`tour.js` inject it; the generative layer would likely live beside that
+shared chrome, not duplicated per-page). No design gate exists yet for
+"generative art layer" specifically — the next seat should run
+`design-acceptance.mjs`'s existing five laws against whatever lands and flag
+if a sixth is needed, rather than inventing new gate criteria unasked
+(scope defense).
 
 ---
 
