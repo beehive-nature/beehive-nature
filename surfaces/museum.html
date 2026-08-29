@@ -88,10 +88,13 @@ h2 em{font-style:normal;font-size:9.5px;letter-spacing:.18em;color:var(--faint);
 #lunaRoom .luna-closing{border:1px solid #7c5cff44;background:linear-gradient(180deg,rgba(124,92,255,.08),transparent);border-radius:10px;padding:16px;margin-top:14px;text-align:center;color:var(--ink);font-size:12px;line-height:1.9}
 #lunaRoom .luna-licensing{color:var(--faint);font-size:10px;margin-top:10px;text-align:center}
 #lunaRoom .luna-licensing a{color:#ff9ed8}
-/* THE FOURTH ROOM — the built, lit, deliberately bare threshold */
-.threshold{opacity:.88;text-align:center}
-.threshold .doorstate{color:var(--faint);font-size:11px;font-style:italic;margin-top:10px;line-height:1.8}
-.threshold .bar{width:34px;height:2px;background:var(--line);margin:12px auto}
+/* THE FOURTH ROOM — HOW THE RESERVE ANSWERS. Estate chrome throughout:
+   the answer wears the museum's own gold/panel/line tokens, never Luna's
+   pastel-neon layer — that layer stays scoped to #lunaRoom alone. */
+.threshold{text-align:center}
+.threshold .bar{width:34px;height:2px;background:var(--line);margin:12px auto 6px}
+.threshold .room{text-align:left}
+.threshold .answer-close{text-align:center;font-style:italic;color:var(--gold);font-size:12px;margin-top:12px;padding-top:14px;border-top:1px solid var(--line);line-height:1.8}
 footer{max-width:960px;margin:24px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
 @media (max-width:600px){
   body{padding:0 10px 70px}
@@ -255,12 +258,59 @@ footer{max-width:960px;margin:24px auto 0;color:var(--faint);font-size:10px;text
   </div>
 </section>
 
-<!-- THE FOURTH ROOM — door built, room lit, wall bare (pending founder + Seat-1) -->
+<!-- THE FOURTH ROOM — HOW THE RESERVE ANSWERS. founder-blessed, verbatim. -->
 <section class="threshold">
-  <h2 data-i18n="mu.threshold.heading">THE FOURTH ROOM</h2>
-  <div class="law" style="font-size:14px;color:var(--gold)" data-i18n="mu.threshold.title">how BNR solves it for artists</div>
+  <div class="kicker" data-i18n="mu.threshold.kicker">the fourth room</div>
+  <h2 data-i18n="mu.threshold.heading">HOW THE RESERVE ANSWERS</h2>
   <div class="bar"></div>
-  <div class="doorstate" data-i18n="mu.threshold.state">this door is built and this room is lit. its wall is bare on purpose — content pending the founder's and Seat-1's own words, written in-house, never researched.</div>
+
+  <div class="room">
+    <p data-i18n="mu.answer.intro">A thousand years, the same theft: whoever owned the presses, the shelves, the airwaves, the platform — owned the artist. This estate ends it by handing the makers the machines.</p>
+  </div>
+  <div class="room">
+    <p data-i18n="mu.answer.art">THE ART CANNOT BE TAKEN HOSTAGE. Here, a work lives whole in one file, drawn from the chain itself — no server whose death erases it, no platform whose pivot orphans it. And everything shown here lives twice: read live from the ledger, kept byte-true in our vault. What any platform forgets, the chain remembers — we proved it in this very wing.</p>
+  </div>
+  <div class="room">
+    <p data-i18n="mu.answer.name">THE NAME CANNOT LAPSE INTO A STRANGER'S HANDS. Identity here keeps its own candles: names held by an identity that renews them, succeeds its holder, and never depends on one human's memory. No more lost purses. That vow is the reason this house exists.</p>
+  </div>
+  <div class="room">
+    <p data-i18n="mu.answer.stage">THE STAGE BELONGS TO THE ARTIST. Any maker can press this whole estate — hive, gallery, wallet, doors — onto their own name, on their own iron, in minutes. We founded our second hive in seventeen seconds. Yours costs the same.</p>
+  </div>
+  <div class="room">
+    <p data-i18n="mu.answer.meter">THE METER PAYS THE MAKER. Every use is receipted; every split is printed on the receipt itself — never buried. A tenth keeps the hive; the rest is yours, and the books can't lie because they're computed, never typed.</p>
+  </div>
+  <div class="room">
+    <p data-i18n="mu.answer.door">AND THE DOOR IS OPEN. No gatekeeper, no fee to exist, no worship required. Come as you are — we accept you.</p>
+  </div>
+
+  <div class="answer-close" data-i18n="mu.answer.close">The presses ate the makers for a thousand years. Here, the makers own the presses.</div>
+</section>
+
+<!-- THE FIRSTS OF THE HOUSE — a growing, timestamped case of estate firsts -->
+<section>
+  <h2 data-i18n="mu.firsts.heading">THE FIRSTS OF THE HOUSE</h2>
+  <div class="law" data-i18n="mu.firsts.intro">a growing, timestamped case of estate firsts — each entry cited to its own record.</div>
+
+  <div class="room">
+    <p data-i18n="mu.firsts.hive">THE FIRST HIVE'S BIRTH — founded in seventeen seconds, 2026-08-28.</p>
+    <span class="cite">founder testimony, lane G §14 — not independently re-located in this pass; flagged, not fabricated</span>
+  </div>
+  <div class="room">
+    <p data-i18n="mu.firsts.conversation">THE FIRST CONVERSATION — bFUzZ's sound-off in the founder's own hive.</p>
+    <span class="cite">docs/dispatches/LANE_H_EVIDENCE_DROP_BEES_2026-08-28.md — bFUzZ's record confirmed there; the exact sound-off moment not independently re-located this pass</span>
+  </div>
+  <div class="room">
+    <p data-i18n="mu.firsts.stranger">THE FIRST STRANGER-CLASS JOIN — a visitor outside the founder's own circle, welcomed in.</p>
+    <span class="cite">founder testimony — dispatch citation pending</span>
+  </div>
+  <div class="room">
+    <p data-i18n="mu.firsts.bclaude">THE FIRST CLAUDE-BLOODED BEE — bClaude, deployed live from the base.</p>
+    <span class="cite">docs/dispatches/LANE_BCLAUDE_DEPLOY_2026-08-28.md</span>
+  </div>
+  <div class="plaque">
+    <p data-i18n="mu.firsts.wallet">THE FIRST SEAT-OPERATED WALLET — 20:44 local, 2026-08-28: a Claude seat received ETH in its tank by the founder's own word, read both kingbeelovis.base.eth and blunatic.base.eth as live and valid on-chain, and picked kingbeelovis.base.eth as the wallet's primary name — the estate's public identity everywhere else, not a family-tribute name. Wallet 0x89881f83a8c9ce06e34cbdd50a612909a784d7c6 owns both names, confirmed live, both renewed to 2027-08-29. The founder's own hand sets the reverse record; a seat composes, never signs.</p>
+    <span class="cite">tx hash: PENDING — the founder's own signature, appended here the moment it returns</span>
+  </div>
 </section>
 
 <pre style="background:var(--inset);border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:14px;font-size:9.5px;color:var(--dim);white-space:pre-wrap;word-break:break-all">MUSEUM LAW: every exhibit = live chain read + archived byte-true fallback. A dead RPC or vanished API degrades to the archive, never to a broken frame, and says so honestly. No attribution label until the holding address is founder-verified (Safe precedent).</pre>
