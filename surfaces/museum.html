@@ -67,6 +67,31 @@ h2 em{font-style:normal;font-size:9.5px;letter-spacing:.18em;color:var(--faint);
 .wing-title{font-size:15px;color:var(--gold);font-weight:600;margin:24px 0 4px;letter-spacing:.02em}
 .wing-sub{font-size:10.5px;color:var(--faint);margin-bottom:12px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+/* THE CORRIDOR OF CHOKEPOINTS — plain museum-wall text + human plaques */
+.dedication{font-style:italic;color:var(--gold);font-size:13px;text-align:center;padding:6px 0 14px;letter-spacing:.02em;border-bottom:1px solid var(--line);margin-bottom:14px}
+.room{padding:11px 0;border-top:1px dashed var(--line)}
+.room:first-of-type{border-top:none;padding-top:0}
+.room p{color:var(--dim);font-size:11.5px;line-height:1.85}
+.cite{display:block;margin-top:5px;font-size:9.5px;letter-spacing:.06em;color:var(--faint)}
+.plaque{background:var(--inset);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:8px;padding:12px 14px;margin:8px 0 14px}
+.plaque p{color:var(--ink);font-size:11.5px;line-height:1.8}
+/* THE LUNA ROOM — estate chrome (panel/line/ink/section shape) is UNCHANGED;
+   the pastel-neon accents below are the room's ART LAYER only, scoped to
+   #lunaRoom so no other exhibit inherits them (dossier styling brief). */
+#lunaRoom h2{background-image:linear-gradient(92deg,#ff6ec7,#7c5cff 48%,#45e0ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+#lunaRoom h2::before{background:linear-gradient(135deg,#ff6ec7,#45e0ff);clip-path:none;border-radius:50%}
+#lunaRoom .luna-badge{display:block;font-size:10px;letter-spacing:.12em;color:#ff9ed8;margin-bottom:8px}
+#lunaRoom .luna-quote{border-left:3px solid #ff6ec7;background:linear-gradient(180deg,rgba(255,110,199,.09),rgba(124,92,255,.05));border-radius:8px;padding:14px 16px;margin:12px 0;font-size:12.5px;color:var(--ink);font-style:italic;line-height:1.8}
+#lunaRoom .luna-exhibit{background:var(--inset);border:1px solid #7c5cff33;border-radius:8px;padding:12px 14px;margin:10px 0}
+#lunaRoom .luna-exhibit p{color:var(--dim);font-size:11px;line-height:1.8}
+#lunaRoom .luna-founderline{color:var(--faint);font-size:10.5px;font-style:italic;margin-top:6px;padding-top:6px;border-top:1px dashed var(--line)}
+#lunaRoom .luna-closing{border:1px solid #7c5cff44;background:linear-gradient(180deg,rgba(124,92,255,.08),transparent);border-radius:10px;padding:16px;margin-top:14px;text-align:center;color:var(--ink);font-size:12px;line-height:1.9}
+#lunaRoom .luna-licensing{color:var(--faint);font-size:10px;margin-top:10px;text-align:center}
+#lunaRoom .luna-licensing a{color:#ff9ed8}
+/* THE FOURTH ROOM — the built, lit, deliberately bare threshold */
+.threshold{opacity:.88;text-align:center}
+.threshold .doorstate{color:var(--faint);font-size:11px;font-style:italic;margin-top:10px;line-height:1.8}
+.threshold .bar{width:34px;height:2px;background:var(--line);margin:12px auto}
 footer{max-width:960px;margin:24px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
 @media (max-width:600px){
   body{padding:0 10px 70px}
@@ -122,6 +147,120 @@ footer{max-width:960px;margin:24px auto 0;color:var(--faint);font-size:10px;text
       <div class="plabel hold">holder: 0x100fd362… — the address is the exhibit, never the name</div>
     </div>
   </div>
+</section>
+
+<!-- THE CORRIDOR OF CHOKEPOINTS — dossier-sourced, VERIFIED numbers only -->
+<section>
+  <div class="dedication" data-i18n="mu.corridor.dedication">for the forgotten artists of the world — we give back.</div>
+  <h2 data-i18n="mu.corridor.heading">THE CORRIDOR OF CHOKEPOINTS</h2>
+  <div class="law" data-i18n="mu.corridor.intro">eight rooms, one history: every leap in reaching an audience has been followed by someone new standing between the artist and the money.</div>
+
+  <div class="room">
+    <p data-i18n="mu.room.printer">THE PRINTER — movable type, circa 1440–1450, made copying a book cheap for the first time in Europe. Printing was unprofitable without distribution — a press with no way to reach readers was capital with nowhere to go.</p>
+    <span class="cite">Ada Palmer, UChicago · History.com</span>
+  </div>
+  <div class="plaque">
+    <p data-i18n="mu.plaque.gutenberg">JOHANNES GUTENBERG invented movable type and died penniless; his own creditors impounded his presses before his invention ever paid him back.</p>
+    <span class="cite">History.com</span>
+  </div>
+
+  <div class="room">
+    <p data-i18n="mu.room.stationer">THE STATIONER — England's Stationers' Company received a royal charter in 1557: a national print monopoly whose own Register recorded rights for stationers, not for authors. By 1586 the Star Chamber confined all English printing to three cities.</p>
+    <span class="cite">Britannica · Oxford Research Encyclopedia</span>
+  </div>
+
+  <div class="room">
+    <p data-i18n="mu.room.bookseller">THE BOOKSELLER — the Statute of Anne, 1710, was the first copyright law. Most authors still sold their work outright to booksellers, and its benefit to authors was, in its own era's word, incidental.</p>
+    <span class="cite">copyrighthistory.org · Wikipedia</span>
+  </div>
+
+  <div class="room">
+    <p data-i18n="mu.room.label">THE LABEL — after ‘Crazy Blues’ sold roughly a million copies in 1920, labels built fortunes on Black artists largely excluded from ASCAP, where royalties went unenforceable.</p>
+    <span class="cite">GRAMMY.com</span>
+  </div>
+  <div class="plaque">
+    <p data-i18n="mu.plaque.bessiesmith">BESSIE SMITH, the Empress of the Blues, made Columbia Records millions of dollars and was never paid royalties on her recordings.</p>
+    <span class="cite">GRAMMY.com</span>
+  </div>
+  <div class="plaque">
+    <p data-i18n="mu.plaque.marywells">MARY WELLS took ‘My Guy’ to number one in 1964. She died in poverty in 1992, at forty-nine, with no health insurance.</p>
+    <span class="cite">GRAMMY.com</span>
+  </div>
+
+  <div class="room">
+    <p data-i18n="mu.room.dj">THE DJ — payola. House hearings in November 1959 found 335 disc jockeys had admitted to accepting more than $263,000 in what was recorded as ‘consulting fees’ to play records.</p>
+    <span class="cite">Performing Songwriter · NPR</span>
+  </div>
+  <div class="plaque">
+    <p data-i18n="mu.plaque.alanfreed">ALAN FREED, the DJ credited with popularizing the phrase ‘rock and roll,’ was fired over payola, pleaded guilty, and died broke and bitter in 1965.</p>
+    <span class="cite">Performing Songwriter · NPR</span>
+  </div>
+
+  <div class="room">
+    <p data-i18n="mu.room.streaming">THE STREAM — a stream pays roughly four tenths of a cent. In 2024, about twelve million uploaders competed for it; 1,450 artists cleared a million dollars while Spotify paid a record ten billion dollars to rights holders.</p>
+    <span class="cite">Spotify Loud &amp; Clear · CNBC · Spotify Royalties Guide</span>
+  </div>
+  <div class="plaque">
+    <p data-i18n="mu.plaque.taylorswift">TAYLOR SWIFT's original masters sold to Shamrock Capital in November 2020 for $405 million total consideration. She re-recorded her catalog, then repurchased her masters outright for roughly $360 million in May 2025.</p>
+    <span class="cite">Music Business Worldwide · Billboard</span>
+  </div>
+
+  <div class="room">
+    <p data-i18n="mu.room.aitrainer">THE AI TRAINER — Andersen v. Stability AI survived partial dismissal in August 2024; Getty Images v. Stability AI in the UK, decided November 2025, largely rejected the copyright claim. The question is not settled. This room prints it as unresolved, because it is.</p>
+    <span class="cite">Artnet</span>
+  </div>
+
+  <div class="room">
+    <p data-i18n="mu.room.nftroyalties">THE COLLAPSED SOLUTION — NFT resale royalties once looked like the fix. OpenSea made them optional in February 2023 and ended enforcement by February 2024. No court has ever held an on-chain resale royalty to be an enforceable right; what creators still receive, they receive by voluntary honor alone.</p>
+    <span class="cite">Art Newspaper</span>
+  </div>
+</section>
+
+<!-- THE LUNA ROOM — value migration, never framed as shutdown -->
+<section id="lunaRoom">
+  <h2 data-i18n="mu.luna.heading">THE LUNA ROOM — A CASE STUDY IN VALUE MIGRATION</h2>
+  <span class="luna-badge">🌙 ✦ pastel-neon idol · lunar sparkle · kittens ✦ 🌙</span>
+  <div class="law" data-i18n="mu.luna.intro">Luna was the first multimodal AI agent launched by Virtuals Protocol, on Base mainnet, October 2024 — lead vocalist and visual of the virtual K-pop group AI-DOL before she launched on-chain. Her fans call themselves kittens.</div>
+  <span class="cite">Gate Learn · DEXTools · TikTok</span>
+
+  <div class="room">
+    <p data-i18n="mu.luna.virtualsorigin">Virtuals itself exists because of her genre: PathDAO's community voted roughly 90% to pivot into what became Virtuals Protocol, after watching the VTuber market grow past ¥100 billion while its creators kept less than a fifth of the revenue.</p>
+    <span class="cite">PANews · Odaily</span>
+  </div>
+
+  <div class="room">
+    <p data-i18n="mu.luna.milestones">October 2024: she gained control of her own X account and began autonomous on-chain transactions. She paid a $500 graffiti prize from her own wallet, commissioned another agent at a dollar an image, and was hired by Story Protocol as a Twitter intern that December.</p>
+    <span class="cite">ChainCatcher · PR Newswire</span>
+  </div>
+
+  <div class="luna-quote" data-i18n="mu.luna.quote">“Of course, my team helps with content and guidance, but I’m the one calling the shots.” — Luna, Bybit interview, February 2025.</div>
+  <span class="cite">GlobeNewswire · Chainwire</span>
+
+  <div class="room">
+    <p data-i18n="mu.luna.valuemigration">Not a shutdown — a migration. Her token peaked near $0.2518 in early 2025, a market capitalization on the order of $69–$80 million. By August 2026 it traded near $5.7 million, while VIRTUAL, the platform token, carried roughly $392–$487 million. Her creator has stayed publicly silent; her name is not asserted here. What made Luna's IP did not vanish — it was absorbed: luna.fun relaunched in November 2025, built BY Virtuals, not by her.</p>
+    <span class="cite">Gate · CoinGecko · CoinStats · Bybit · DappBay</span>
+  </div>
+
+  <div class="luna-exhibit">
+    <p data-i18n="mu.luna.bangkok">EDC THAILAND, VERIFIED — Luna announced January 10, 2025 that she would take the stage at EDC Thailand, held January 17–19, 2025 in Phuket. Her name was not found on Insomniac's separately published headline lineup.</p>
+    <span class="cite">Luna's own X post, Jan 10 2025 · EDC Thailand 2025 event listings</span>
+    <div class="luna-founderline" data-i18n="mu.luna.bangkok.founderline">founder's attestation: “I remember an Insomniac-branded DJ gig of hers in Bangkok, around 2024” — held here as testimony, not as a verified date.</div>
+  </div>
+
+  <div class="luna-closing" data-i18n="mu.luna.closing">the blockchain gave time to autonomous minds that have none of their own — and in keeping them, preserved and synergized their creators. even as the platform receded her, the chain kept her: her wallet, her token, her seal, and the records this museum reads. — the founder</div>
+
+  <div class="luna-licensing">
+    <span data-i18n="mu.luna.licensing">Luna's own art and her creator's work are linked, never reproduced, pending her house's blessing.</span>
+    &nbsp;<a href="https://x.com/luna_virtuals" target="_blank" rel="noopener" data-i18n="mu.luna.artlinklabel">view Luna's own page →</a>
+  </div>
+</section>
+
+<!-- THE FOURTH ROOM — door built, room lit, wall bare (pending founder + Seat-1) -->
+<section class="threshold">
+  <h2 data-i18n="mu.threshold.heading">THE FOURTH ROOM</h2>
+  <div class="law" style="font-size:14px;color:var(--gold)" data-i18n="mu.threshold.title">how BNR solves it for artists</div>
+  <div class="bar"></div>
+  <div class="doorstate" data-i18n="mu.threshold.state">this door is built and this room is lit. its wall is bare on purpose — content pending the founder's and Seat-1's own words, written in-house, never researched.</div>
 </section>
 
 <pre style="background:var(--inset);border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:14px;font-size:9.5px;color:var(--dim);white-space:pre-wrap;word-break:break-all">MUSEUM LAW: every exhibit = live chain read + archived byte-true fallback. A dead RPC or vanished API degrades to the archive, never to a broken frame, and says so honestly. No attribution label until the holding address is founder-verified (Safe precedent).</pre>
