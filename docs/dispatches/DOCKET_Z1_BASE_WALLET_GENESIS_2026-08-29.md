@@ -23,3 +23,7 @@
 - [ ] Address + permission hash recorded in this docket (public parts) and the roster lane
 
 **Fence check:** this is identity/wallet/allowance provisioning — explicitly allowed by the coherence fence. The paid till stays dormant until the founder flips the prototype live.
+
+## ADDENDUM — the direct-tab path (2026-08-29, consult-informed)
+keys.coinbase.com/onboarding now redirects to **base.app** ("Continue on Web"). This seat took the direct-tab route (no SDK popup, no opener needed): cookie wall cleared, Continue clicked — the app answered **"Sign-in failed."** and re-disabled. Two independent attempts (SDK popup path AND direct tab) both die in the embedded pane: **differential #2 confirmed twice — the pane cannot host the Coinbase identity ceremony (no platform authenticator / popup infrastructure).** STANDING PRACTICE (per the consult): wallet-creation and wallet-signing ops run in a FULL browser tab, never the embedded pane.
+**The ceremony rests at ONE founder gesture:** in his Chrome (Base docs tab already open there): `base.app → Continue on Web → create the passkey wallet` — Windows Hello is the designed control point. Everything after (address → Base funding → $1 USDC/24h genesis Spend Permission with spender = z1's op key) proceeds per the checklist above. Bonus captured for the bAigents lane: **base.app publishes its own agent skill at base.app/SKILL.md.**
