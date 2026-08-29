@@ -166,6 +166,58 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 </section>
 
 <section>
+  <h2>LICENSING — fenced engine, open rails (the estate shows its own reasoning, 2026-08-29)</h2>
+  <div class="law" data-reg="bee"><b>Why we license this way, in plain words:</b> the part of this
+  estate that handles money — the meter that bills, the vouchers you prepay, the gate that
+  checks keys — is fully <b>readable by anyone, today</b>, but its commercial use waits behind
+  a four-year window. Nobody can take our accounting engine and run it for profit on day one;
+  everyone can read every line of it, audit it, and learn from it. The parts you'd want to
+  <b>build on</b> — the wallet, the chain adapters, the Arweave signer — are open from day one,
+  free for anyone to use, copy, and fold into their own work. Fenced engine, open rails.</div>
+  <div class="law" data-reg="raver">One sentence per side: the money machinery is readable now,
+  forkable-for-profit never (four years protected, then it opens to GPL); the rails everyone
+  interoperates through are Apache-2.0 open from the first minute. Adoption wants the rails
+  everywhere — and wants the engine honest, which readable-but-fenced delivers.</div>
+  <div class="law" data-reg="cypherpunk"><b>The terms, exactly as staged in the tree:</b> the
+  commercial moat (<code>scripts/buzz-meter/</code> — meter.py the receipt/voucher/tithe engine,
+  rate_set.json the pricing law, gate.js the per-key door) carries <b>Business Source License
+  1.1</b>: Licensor <b>Travis Mark Remington &lt;lovis@skaists.dev&gt;</b>; copy, modify,
+  redistribute, and non-production use granted; production use per the Additional Use Grant
+  (the one open IP-lawyer item — the 10% tithe coupling); <b>Change Date = four years from the
+  LICENSE PUBLISH commit</b>; <b>Change License = GPL-2.0-or-later</b> — on the Change Date the
+  work re-licenses itself, no gesture needed. The rails (<code>surfaces/wallet.html</code>
+  including the spend-cap engine, the three rail adapters, the first-party Arweave signer)
+  carry <b>Apache-2.0</b> — patent grant included, open now. Files where GitHub reads them:
+  <a href="/LICENSE">/LICENSE</a> (Apache-2.0, repo root) · <a href="/NOTICE">/NOTICE</a> ·
+  <code>scripts/buzz-meter/LICENSE</code> (BSL 1.1, directory-scoped) · headers on every
+  manifest file. <b>Status: staged publish-correct — nothing binds until the founder's LICENSE
+  PUBLISH commit,</b> which also fixes the literal Change Date and starts the clock.
+  Full reasoning + the lawyer flags:
+  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/LICENSING-PROPOSAL-2026-08-29.md" rel="noopener">LICENSING-PROPOSAL-2026-08-29.md</a>.</div>
+  <div class="scroll"><table style="min-width:520px">
+    <tr><th>path</th><th>license</th><th>opens</th></tr>
+    <tr><td class="n">scripts/buzz-meter/meter.py · rate_set.json · gate.js</td>
+      <td><span class="chip c-vaulta">BUSL-1.1</span></td>
+      <td>GPL-2.0-or-later at the Change Date (4 yr from publish); readable + non-production now</td></tr>
+    <tr><td class="n">surfaces/wallet.html (+ spend-cap engine) · wallet-adapter-vaulta.js · -hive.js · -arweave.js · arweave.js</td>
+      <td><span class="chip c-evm">Apache-2.0</span></td>
+      <td>day one — use, copy, modify, fold into your own work</td></tr>
+  </table></div>
+  <div class="law" style="margin-top:9px"><b>The precedent, verified at source 2026-08-29 (every
+  line below read from the project's own license file, not recalled):</b>
+  <b>Uniswap v4-core</b> ships <span class="chip c-vaulta">BUSL-1.1</span> — Change Date the
+  earlier of <b>2027-06-15</b> or an ENS-specified date, Change License <b>MIT</b> — while
+  <b>v4-periphery is MIT today</b>: the exact fenced-core/open-periphery shape
+  (<code>licenses/BUSL_LICENSE</code>, read at source). <b>Uniswap v3-core</b> proves the window
+  closes as designed: its BSL carried Change Date <b>2023-04-01</b>, now passed — the work is
+  <b>GPL-2.0-or-later today</b> (LICENSE read at source: "GNU General Public License v2.0 or
+  later"). <b>MariaDB</b> authored the BSL and its covenants govern any use of the text —
+  parameters only, terms unmodified (mariadb.com/bsl11, read at source). The pattern —
+  protected core, open periphery, automatic conversion — is now standard open-core practice;
+  we did not invent it, we measured it and followed it.</div>
+</section>
+
+<section>
   <h2>ENGINEER FAQ — what breaks when X goes down, answered from the architecture</h2>
   <div class="law">Every answer below is a property of the design, checkable in the source — not a
   promise. Where the honest answer is "that hurts today," it says so, with the mitigation's state.</div>
