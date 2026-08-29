@@ -68,3 +68,31 @@ When they land: certs issue automatically, `https://relay.skaists.dev` goes live
 - **Founder's bees:** `managed-agents.json` backed up (`*.bak-20260829-dualhome`), 3 relay URLs switched to `wss://relay.skaists.dev`; JSON re-validated. Bees reconnect on the app's next cycle/restart.
 
 **Fence note:** the desktop app on this box still needs its own restart (or next reconnect cycle) to ride the fallback; the brand `skaists.buzz` remains the primary everywhere a non-filtered network connects.
+
+## THE ORIGIN RULING — 2026-08-29 (founder: don't touch it until you know which it is)
+
+The fallback's NIP-11 carries `"origin":"wss://skaists.buzz"` (inside the `push` descriptor —
+the top-level document has no origin field at all). Measured at source, three ways:
+
+1. **NO CLIENT READS IT FOR RECONNECTION — source-truth across the monorepo.** Desktop
+   pairing reads `pairing_relay_url` + `supported_nips`; relay-members reads
+   `supported_nips`; the agent client (buzz-acp) never fetches NIP-11 at all; every
+   reconnect loop re-dials its CONFIGURED url (with `since` filters). The one `origin` in
+   nip11.rs line 203 is the push-lease descriptor, built from
+   `bind_community(db, host)` — the community row bound to its canonical host.
+2. **IT IS IDENTITY, LOAD-BEARING — it must stay skaists.buzz.** Per the lane G law the
+   community identity derives from the relay URL host at boot and scopes every member row;
+   `push.origin` reports that canonical identity to push-lease infrastructure. Changing it
+   would fork/misreport the community. And the Host-rewrite law means both roads already
+   serve it identically — the fallback is a pure alias, no identity split (no HAZARD).
+3. **The client-side fix is already shipped:** the estate door switches its join line to the
+   working road; agent configs point at the fallback; clients prefer their configured URL.
+   Two-things-one-name resolved: `push.origin` = identity string (stays), the join URL =
+   connection string (client's choice of road).
+
+**Rider fixed during the sweep:** the hive-2 agent configs still dialed the filtered
+`wss://beehivenature.buzz` (3 records) — switched to `wss://relay2.skaists.dev`
+(morning backup `.bak-20260829-dualhome` still stands), JSON re-validated. Behavioral note:
+the bees were last stopped 08:17 (pre-switch), so no live fallback session is in their logs
+yet — the source-truth (buzz-acp never reads NIP-11) makes the bounce structurally
+impossible regardless.
