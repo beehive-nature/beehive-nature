@@ -48,7 +48,7 @@ const AS_JSON = process.argv.includes('--json');
                      unkeyed string through the SAME measurement path; exit 1 if
                      the instrument cannot tell them apart
    --floors          ratchet gate: fail any measured page below its recorded floor
-                     (e2e/lang-coverage-floors.json, keyed% of visible). The deep
+                     (e2e/lang-coverage-floors.json, ABSOLUTE keyed count per page — the carrier changed 2026-08-29: a percentage regresses when other lanes land new UI; the law protects keys, not ratios). The deep
                      backlog stays a recorded number — floors hold the line, they
                      never demand the backlog be cleared.
    --set-floors      record the current keyed% as the floors (ratchet advance) */
@@ -252,16 +252,15 @@ if (AS_JSON) {
     const floors = existsSync(FLOORFILE) ? JSON.parse(readFileSync(FLOORFILE, 'utf8')) : {};
     if (SET_FLOORS) {
       for (const r of ok) {
-        const pct = r.visible ? Math.round(r.keyed / r.visible * 100) : 100;
-        if (!(r.page in floors) || pct > floors[r.page]) floors[r.page] = pct;
+        const n = r.keyed;
+        if (!(r.page in floors) || n > floors[r.page]) floors[r.page] = n;
       }
       writeFileSync(FLOORFILE, JSON.stringify(floors, null, 1) + '\n');
-      console.log('\nfloors advanced: ' + ok.length + ' pages recorded (ratchet only rises)');
+      console.log('\nfloors advanced (absolute keyed counts): ' + ok.length + ' pages recorded (ratchet only rises)');
     } else {
-      const breaches = ok.filter(r => r.visible >= 10 && floors[r.page] !== undefined &&
-        (r.visible ? Math.round(r.keyed / r.visible * 100) : 100) < floors[r.page]);
-      console.log('\n' + (breaches.length ? 'FAIL floors — keyed% regressed below the recorded line:' : 'PASS floors — no measured page fell below its recorded keyed%'));
-      breaches.forEach(r => console.log('  ' + r.page + ' — now ' + Math.round(r.keyed / r.visible * 100) + '%, floor ' + floors[r.page] + '%'));
+      const breaches = ok.filter(r => floors[r.page] !== undefined &&
+        r.keyed < floors[r.page]);
+      console.log('\n' + (breaches.length ? 'FAIL floors — a page LOST keyed strings (absolute-count ratchet):' : 'PASS floors — no page lost a single keyed string (absolute-count ratchet)'));
       if (breaches.length) process.exitCode = 1;
     }
   }
