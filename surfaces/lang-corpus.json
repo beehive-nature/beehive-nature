@@ -15018,7 +15018,8 @@
    "sv": "ORGANEN — livestatus, läst där du sitter",
    "fi": "ELIMET — live-tila, luettu sieltä missä istut",
    "tr": "ORGANLAR — canlı durum, oturduğunuz yerden okundu",
-   "hu": "SZERVEK — élő állapot, onnan olvasva ahol ülsz"
+   "hu": "SZERVEK — élő állapot, onnan olvasva ahol ülsz",
+   "tt": "ОРГАНАР — йәнле статус, сез утырган җирдән укылган"
   },
   "st.hero.cap": {
    "en": "organs · read live from your network, just now",
@@ -15047,7 +15048,8 @@
    "sv": "organ · läst live från ditt nätverk, just nu",
    "fi": "elintä · luettu livenä verkostasi juuri nyt",
    "tr": "organ · şu anda ağınızdan canlı okundu",
-   "hu": "szerv · épp most, az Ön hálózatából élőben olvasva"
+   "hu": "szerv · épp most, az Ön hálózatából élőben olvasva",
+   "tt": "орган · элегегенә сезнең челтәрдән йәнле укылды"
   },
   "st.b.law": {
    "en": "every status on this board says what it means AND what it does not mean — a status board must never confuse \"this is broken\" with \"I can't see it from here\". these reads come from YOUR network, your browser, just now: a status here is a fact about the road as much as the organ.",
@@ -15076,7 +15078,8 @@
    "sv": "varje status på den här tavlan säger vad den betyder OCH vad den inte betyder — en statustavla får aldrig blanda ihop \"den är trasig\" med \"jag ser den inte härifrån\". dessa avläsningar kommer från DITT nätverk, din webbläsare, just nu: en status här är ett faktum om vägen lika mycket som om organet.",
    "fi": "jokainen tämän taulun tila kertoo mitä se merkitsee JA mitä se ei merkitse — tilataulun ei koskaan saa sekoittaa \"tämä on rikki\" ja \"en näe sitä täältä\". nämä lukemat tulevat VERKOSTASI, selaimestasi, juuri nyt: tila täällä on yhtä paljon tie kuin elin.",
    "tr": "bu boardedeki her durum ne anlama geldiğini VE ne anlama gelmediğini söyler — bir durum panosu asla \"bozuk\" ile \"buradan göremiyorum\" ifadelerini karıştırmamalıdır. bu okumalar SİZİN ağınızdan, tarayıcınızdan, şu anda geliyor: buradaki durum, organ kadar yol hakkında da bir gerçektir.",
-   "hu": "ennek a táblának minden állapota megmondja, mit jelent ÉS mit nem jelent — egy állapottábla sosem keverheti össze a \"elromlott\" és a \"innen nem látom\" mondatokat. ezek az olvasások az ÖN hálózatából, böngészőjéből, éppen most jönnek: az állapot itt ugyanúgy az útról szól, mint a szervről."
+   "hu": "ennek a táblának minden állapota megmondja, mit jelent ÉS mit nem jelent — egy állapottábla sosem keverheti össze a \"elromlott\" és a \"innen nem látom\" mondatokat. ezek az olvasások az ÖN hálózatából, böngészőjéből, éppen most jönnek: az állapot itt ugyanúgy az útról szól, mint a szervről.",
+   "tt": "бу тактадагы һәр статус ни аңлатканын һәм ни аңлатмаганын әйтә — статус тактасы \"бу ватылган\" белән \"мин моннан күрмим\"не бертөрле итеп күрсәтмәргә тиеш. бу укылмалар СЕЗНЕҢ челтәрегездән, сезнең браузердан, элегегенә килә: монда статус юл турында да, орган турында да факт."
   },
   "st.b.raver": {
    "en": "the estate's heartbeats, drawn live — green when a road answers, lilac when a road goes quiet. never red for silence: silence is a guard, not a scream.",
@@ -15105,7 +15108,8 @@
    "sv": "godsets hjärtslag, ritat live — grönt när en väg svarar, lila när en väg tystnar. aldrig rött vid tystnad: tystnad är en vakt, inte ett skrik.",
    "fi": "kartanon sykkeet, piirretty livenä — vihreä kun tie vastaa, lilanpunainen kun tie vaikenee. ei koskaan punaista hiljaisuudesta: hiljaisuus on vartiota, ei huutoa.",
    "tr": "mülkün kalp atışları, canlı çizim — bir yol cevap verince yeşil, bir yol sessizleşince leylak. sessizlik için asla kırmızı: sessizlik bir nöbetçidir, çığlık değil.",
-   "hu": "a birtok szívverései, élőben rajzolva — zöld, amikor egy út válaszol, lila, amikor egy út elhallgat. sosem piros a csendért: a csend őrség, nem sikoltás."
+   "hu": "a birtok szívverései, élőben rajzolva — zöld, amikor egy út válaszol, lila, amikor egy út elhallgat. sosem piros a csendért: a csend őrség, nem sikoltás.",
+   "tt": "эстетның йөрәк кагулары, йәнле рәсем — юл җавап бирсә яшел, юл тын калса күкмерүчә. тынлык өчен кызыл юк: тынлык — сакчы, өндәнеш түгел."
   },
   "st.b.cypher": {
    "en": "probes: no-cors reach per road · NIP-11 identity (Accept: application/nostr+json) on each hive · the compute gate's 401 as the lock's own pulse. observer = your browser; every result is a path-relative fact.",
@@ -15134,7 +15138,8 @@
    "sv": "sonder: no-cors nåbarhet per väg · NIP-11 identitet (Accept: application/nostr+json) per bikupa · beräkningsportens 401 som låsets egen puls. observatör = din webbläsare; varje resultat är en väg-relaterad faktum.",
    "fi": "sondit: no-cors tavoitettavuus tietä kohden · NIP-11 identiteetti (Accept: application/nostr+json) kutakin tarhaa kohden · laskentaportin 401 lukon omaa sykettä. tarkkailija = selaimesi; jokainen tulos on tie-suhteellinen tosiasia.",
    "tr": "sorgular: yol başına no-cors erişilebilirlik · her kovanda NIP-11 kimlik (Accept: application/nostr+json) · işlem kapısının 401'i kilidin kendi nabzı. gözlemci = tarayıcınız; her sonuç yola-göre bir gerçek.",
-   "hu": "szondák: no-cors elérhetőség útonként · NIP-11 identitás (Accept: application/nostr+json) minden kaptárban · a számítási kapu 401-je magának a zárnak a pulzusa. megfigyelő = az Ön böngészője; minden eredmény úthoz viszonyított tény."
+   "hu": "szondák: no-cors elérhetőség útonként · NIP-11 identitás (Accept: application/nostr+json) minden kaptárban · a számítási kapu 401-je magának a zárnak a pulzusa. megfigyelő = az Ön böngészője; minden eredmény úthoz viszonyított tény.",
+   "tt": "пробалар: һәр юл буенча no-cос җитү · һәр умартада NIP-11 идентиклыгы (Accept: application/nostr+json) · исап капкасының 401ы — корының үз пульсы. күзәтче = сезнең браузер; һәр нәтиҗә юлга караган факт."
   },
   "st.reread": {
    "en": "re-read just now",
@@ -15163,7 +15168,8 @@
    "sv": "ls just nu",
    "fi": "luo juuri nyt",
    "tr": "şimdi yeniden oku",
-   "hu": "olvasd újra most"
+   "hu": "olvasd újra most",
+   "tt": "элегегенә яңадан укы"
   },
   "st.stamp": {
    "en": "read",
@@ -15192,7 +15198,8 @@
    "sv": "läst",
    "fi": "luettu",
    "tr": "okundu",
-   "hu": "olvasva"
+   "hu": "olvasva",
+   "tt": "укылды"
   },
   "st.w.alive": {
    "en": "alive",
@@ -15221,7 +15228,8 @@
    "sv": "i liv",
    "fi": "elossa",
    "tr": "canlı",
-   "hu": "élő"
+   "hu": "élő",
+   "tt": "тере"
   },
   "st.w.guard": {
    "en": "guard · no answer",
@@ -15250,7 +15258,8 @@
    "sv": "vakt · inget svar",
    "fi": "varti · ei vastausta",
    "tr": "nöbet · yanıt yok",
-   "hu": "őr · nincs válasz"
+   "hu": "őr · nincs válasz",
+   "tt": "сакчы · җавап юк"
   },
   "st.w.via": {
    "en": "via fallback",
@@ -15279,7 +15288,8 @@
    "sv": "via reserv",
    "fi": "varatien kautta",
    "tr": "yedek üzerinden",
-   "hu": "tartalékon át"
+   "hu": "tartalékon át",
+   "tt": "резерв аша"
   },
   "st.w.nw": {
    "en": "not watched",
@@ -15308,7 +15318,8 @@
    "sv": "inte bevakad",
    "fi": "ei valvottu",
    "tr": "izlenmiyor",
-   "hu": "megfigyeletlen"
+   "hu": "megfigyeletlen",
+   "tt": "күзәтелми"
   },
   "st.w.other": {
    "en": "other answer",
@@ -15337,7 +15348,8 @@
    "sv": "annat svar",
    "fi": "toinen vastaus",
    "tr": "başka yanıt",
-   "hu": "más válasz"
+   "hu": "más válasz",
+   "tt": "башка җавап"
   },
   "st.w.hazard": {
    "en": "hazard",
@@ -15366,7 +15378,8 @@
    "sv": "fara",
    "fi": "vaara",
    "tr": "tehlike",
-   "hu": "veszély"
+   "hu": "veszély",
+   "tt": "хәвеф"
   },
   "st.w.looking": {
    "en": "looking…",
@@ -15395,7 +15408,8 @@
    "sv": "tittar…",
    "fi": "katsoo…",
    "tr": "bakıyor…",
-   "hu": "néz…"
+   "hu": "néz…",
+   "tt": "карыйм…"
   },
   "st.m.alive": {
    "en": "means: it answered this page just now, over the road shown.",
@@ -15425,7 +15439,8 @@
    "sv": "means: it answered this page just now, over the road shown.",
    "fi": "means: it answered this page just now, over the road shown.",
    "tr": "means: it answered this page just now, over the road shown.",
-   "hu": "means: it answered this page just now, over the road shown."
+   "hu": "means: it answered this page just now, over the road shown.",
+   "tt": "бетен: ул элегегенә күрсәтелгән юл буенча бу биткә җавап бирде."
   },
   "st.nm.alive": {
    "en": "does NOT necessarily mean it will answer tomorrow, or from every road — an answer is a moment, not a promise.",
@@ -15454,7 +15469,8 @@
    "sv": "does NOT necessarily mean it will answer tomorrow, or from every road — an answer is a moment, not a promise.",
    "fi": "does NOT necessarily mean it will answer tomorrow, or from every road — an answer is a moment, not a promise.",
    "tr": "does NOT necessarily mean it will answer tomorrow, or from every road — an answer is a moment, not a promise.",
-   "hu": "does NOT necessarily mean it will answer tomorrow, or from every road — an answer is a moment, not a promise."
+   "hu": "does NOT necessarily mean it will answer tomorrow, or from every road — an answer is a moment, not a promise.",
+   "tt": "иртәгә җавап бирер дип мәҗбүри түгел, һәр юлдан да түгел — җавап ул мизгел, вәгъдә түгел."
   },
   "st.m.guard": {
    "en": "means: this road gave no answer.",
@@ -15483,7 +15499,8 @@
    "sv": "means: this road gave no answer.",
    "fi": "means: this road gave no answer.",
    "tr": "means: this road gave no answer.",
-   "hu": "means: this road gave no answer."
+   "hu": "means: this road gave no answer.",
+   "tt": "бетен: бу юл җавап бирмиде."
   },
   "st.nm.guard": {
    "en": "does NOT necessarily mean the organ is down — the road can be the fault. the same box answered the whole planet while one filtered network saw nothing.",
@@ -15512,7 +15529,8 @@
    "sv": "does NOT necessarily mean the organ is down — the road can be the fault. the same box answered the whole planet while one filtered network saw nothing.",
    "fi": "does NOT necessarily mean the organ is down — the road can be the fault. the same box answered the whole planet while one filtered network saw nothing.",
    "tr": "does NOT necessarily mean the organ is down — the road can be the fault. the same box answered the whole planet while one filtered network saw nothing.",
-   "hu": "does NOT necessarily mean the organ is down — the road can be the fault. the same box answered the whole planet while one filtered network saw nothing."
+   "hu": "does NOT necessarily mean the organ is down — the road can be the fault. the same box answered the whole planet while one filtered network saw nothing.",
+   "tt": "орган эшләми дип мәҗбүри түгел — юлда да гаеп булырга мөмкин. үк кибет бөтен планетага җавап бирде, ә бер фильтрлы челтәр берни күрмиде."
   },
   "st.m.via": {
    "en": "means: the brand road went dark on your network; the backup road answered.",
@@ -15541,7 +15559,8 @@
    "sv": "means: the brand road went dark on your network; the backup road answered.",
    "fi": "means: the brand road went dark on your network; the backup road answered.",
    "tr": "means: the brand road went dark on your network; the backup road answered.",
-   "hu": "means: the brand road went dark on your network; the backup road answered."
+   "hu": "means: the brand road went dark on your network; the backup road answered.",
+   "tt": "бетен: бренд юлы сезнең челтәрдә сүнде, резерв юлы җавап бирде."
   },
   "st.nm.via": {
    "en": "does NOT mean down — up and unreachable are two different facts.",
@@ -15570,7 +15589,8 @@
    "sv": "does NOT mean down — up and unreachable are two different facts.",
    "fi": "does NOT mean down — up and unreachable are two different facts.",
    "tr": "does NOT mean down — up and unreachable are two different facts.",
-   "hu": "does NOT mean down — up and unreachable are two different facts."
+   "hu": "does NOT mean down — up and unreachable are two different facts.",
+   "tt": "эшләми дигән сүз түгел — эшләү һәм җитү ике төрле факт."
   },
   "st.m.nw": {
    "en": "means: this page keeps no eye on this organ.",
@@ -15599,7 +15619,8 @@
    "sv": "means: this page keeps no eye on this organ.",
    "fi": "means: this page keeps no eye on this organ.",
    "tr": "means: this page keeps no eye on this organ.",
-   "hu": "means: this page keeps no eye on this organ."
+   "hu": "means: this page keeps no eye on this organ.",
+   "tt": "бетен: бу бит бу органга күз тотмый."
   },
   "st.nm.nw": {
    "en": "does NOT mean broken or idle — absence of a watch is not absence of function.",
@@ -15628,7 +15649,8 @@
    "sv": "does NOT mean broken or idle — absence of a watch is not absence of function.",
    "fi": "does NOT mean broken or idle — absence of a watch is not absence of function.",
    "tr": "does NOT mean broken or idle — absence of a watch is not absence of function.",
-   "hu": "does NOT mean broken or idle — absence of a watch is not absence of function."
+   "hu": "does NOT mean broken or idle — absence of a watch is not absence of function.",
+   "tt": "ватылган яки буш дигән сүз түгел — күзәтү булмавы эш булмавы түгел."
   },
   "st.m.other": {
    "en": "means: it answered, but not in the expected shape.",
@@ -15657,7 +15679,8 @@
    "sv": "means: it answered, but not in the expected shape.",
    "fi": "means: it answered, but not in the expected shape.",
    "tr": "means: it answered, but not in the expected shape.",
-   "hu": "means: it answered, but not in the expected shape."
+   "hu": "means: it answered, but not in the expected shape.",
+   "tt": "бетен: ул җавап бирде, ләкин көтелгән формада түгел."
   },
   "st.nm.other": {
    "en": "does NOT mean broken — versions and answers differ.",
@@ -15686,7 +15709,8 @@
    "sv": "does NOT mean broken — versions and answers differ.",
    "fi": "does NOT mean broken — versions and answers differ.",
    "tr": "does NOT mean broken — versions and answers differ.",
-   "hu": "does NOT mean broken — versions and answers differ."
+   "hu": "does NOT mean broken — versions and answers differ.",
+   "tt": "ватылган дигән сүз түгел — версияләр һәм җаваплар төрле була."
   },
   "st.m.hazard": {
    "en": "means: the two roads disagree about what this organ is.",
@@ -15715,7 +15739,8 @@
    "sv": "means: the two roads disagree about what this organ is.",
    "fi": "means: the two roads disagree about what this organ is.",
    "tr": "means: the two roads disagree about what this organ is.",
-   "hu": "means: the two roads disagree about what this organ is."
+   "hu": "means: the two roads disagree about what this organ is.",
+   "tt": "бетен: ике юл бу орган ничек икәненә каршы килә."
   },
   "st.nm.hazard": {
    "en": "this one means exactly what it says — a split identity is the one state this board calls a hazard.",
@@ -15744,7 +15769,8 @@
    "sv": "this one means exactly what it says — a split identity is the one state this board calls a hazard.",
    "fi": "this one means exactly what it says — a split identity is the one state this board calls a hazard.",
    "tr": "this one means exactly what it says — a split identity is the one state this board calls a hazard.",
-   "hu": "this one means exactly what it says — a split identity is the one state this board calls a hazard."
+   "hu": "this one means exactly what it says — a split identity is the one state this board calls a hazard.",
+   "tt": "бу барысын да турыннан туры аңлата — бүленгән идентиклык — бу такта хәвеф дигән бердәнбер халәт."
   },
   "st.nw.polls": {
    "en": "internal organs — no public eye; the receipts are the record.",
@@ -15773,7 +15799,8 @@
    "sv": "internal organs — no public eye; the receipts are the record.",
    "fi": "internal organs — no public eye; the receipts are the record.",
    "tr": "internal organs — no public eye; the receipts are the record.",
-   "hu": "internal organs — no public eye; the receipts are the record."
+   "hu": "internal organs — no public eye; the receipts are the record.",
+   "tt": "эчке органнар — җәмәгать күзе юк; алымнаулар үзе язма."
   },
   "st.nw.mail": {
    "en": "a browser cannot speak to a mail room — port 25 has no web eye.",
@@ -15802,7 +15829,8 @@
    "sv": "a browser cannot speak to a mail room — port 25 has no web eye.",
    "fi": "a browser cannot speak to a mail room — port 25 has no web eye.",
    "tr": "a browser cannot speak to a mail room — port 25 has no web eye.",
-   "hu": "a browser cannot speak to a mail room — port 25 has no web eye."
+   "hu": "a browser cannot speak to a mail room — port 25 has no web eye.",
+   "tt": "браузер почта бүлмәсенә сөйләшә алмый — 25 портында веб күзе юк."
   },
   "st.nw.alby": {
    "en": "the lightning heart keeps its own counsel — no public probe, by design.",
@@ -15831,7 +15859,8 @@
    "sv": "the lightning heart keeps its own counsel — no public probe, by design.",
    "fi": "the lightning heart keeps its own counsel — no public probe, by design.",
    "tr": "the lightning heart keeps its own counsel — no public probe, by design.",
-   "hu": "the lightning heart keeps its own counsel — no public probe, by design."
+   "hu": "the lightning heart keeps its own counsel — no public probe, by design.",
+   "tt": "йөрәк үз фекерен үзендә саклый — җәмәгать пробасы юк, махсус шулай."
   },
   "st.p.brand": {
    "en": "brand road",
@@ -15860,7 +15889,8 @@
    "sv": "brand road",
    "fi": "brand road",
    "tr": "brand road",
-   "hu": "brand road"
+   "hu": "brand road",
+   "tt": "бренд юлы"
   },
   "st.p.fallback": {
    "en": "backup road",
@@ -15889,7 +15919,8 @@
    "sv": "backup road",
    "fi": "backup road",
    "tr": "backup road",
-   "hu": "backup road"
+   "hu": "backup road",
+   "tt": "резерв юлы"
   },
   "st.p.this": {
    "en": "this origin",
@@ -15918,7 +15949,8 @@
    "sv": "this origin",
    "fi": "this origin",
    "tr": "this origin",
-   "hu": "this origin"
+   "hu": "this origin",
+   "tt": "бу чыганак"
   },
   "st.p.ok": {
    "en": "answered",
@@ -15947,7 +15979,8 @@
    "sv": "answered",
    "fi": "answered",
    "tr": "answered",
-   "hu": "answered"
+   "hu": "answered",
+   "tt": "җавап бирде"
   },
   "st.p.no": {
    "en": "no answer",
@@ -15976,7 +16009,8 @@
    "sv": "no answer",
    "fi": "no answer",
    "tr": "no answer",
-   "hu": "no answer"
+   "hu": "no answer",
+   "tt": "җавап юк"
   },
   "st.o.hive1": {
    "en": "hive one — skaists.buzz",
@@ -16005,7 +16039,8 @@
    "sv": "hive one — skaists.buzz",
    "fi": "hive one — skaists.buzz",
    "tr": "hive one — skaists.buzz",
-   "hu": "hive one — skaists.buzz"
+   "hu": "hive one — skaists.buzz",
+   "tt": "беренче умарта — skaists.buzz"
   },
   "st.o.hive2": {
    "en": "hive two — beehivenature.buzz",
@@ -16034,7 +16069,8 @@
    "sv": "hive two — beehivenature.buzz",
    "fi": "hive two — beehivenature.buzz",
    "tr": "hive two — beehivenature.buzz",
-   "hu": "hive two — beehivenature.buzz"
+   "hu": "hive two — beehivenature.buzz",
+   "tt": "икенче умарта — beehivenature.buzz"
   },
   "st.o.till": {
    "en": "the till — the compute gate",
@@ -16063,7 +16099,8 @@
    "sv": "the till — the compute gate",
    "fi": "the till — the compute gate",
    "tr": "the till — the compute gate",
-   "hu": "the till — the compute gate"
+   "hu": "the till — the compute gate",
+   "tt": "казна — исап капкасы"
   },
   "st.o.chainpoll": {
    "en": "chainpoll — the read-back crediting",
@@ -16092,7 +16129,8 @@
    "sv": "chainpoll — the read-back crediting",
    "fi": "chainpoll — the read-back crediting",
    "tr": "chainpoll — the read-back crediting",
-   "hu": "chainpoll — the read-back crediting"
+   "hu": "chainpoll — the read-back crediting",
+   "tt": "chainpoll — кире уку хисабы"
   },
   "st.o.basepoll": {
    "en": "basepoll — the base watcher",
@@ -16121,7 +16159,8 @@
    "sv": "basepoll — the base watcher",
    "fi": "basepoll — the base watcher",
    "tr": "basepoll — the base watcher",
-   "hu": "basepoll — the base watcher"
+   "hu": "basepoll — the base watcher",
+   "tt": "basepoll — база күзәтүчесе"
   },
   "st.o.mail": {
    "en": "the mail sink — agents.skaists.buzz",
@@ -16150,7 +16189,8 @@
    "sv": "the mail sink — agents.skaists.buzz",
    "fi": "the mail sink — agents.skaists.buzz",
    "tr": "the mail sink — agents.skaists.buzz",
-   "hu": "the mail sink — agents.skaists.buzz"
+   "hu": "the mail sink — agents.skaists.buzz",
+   "tt": "почта коесы — agents.skaists.buzz"
   },
   "st.o.alby": {
    "en": "albyhub — the lightning heart",
@@ -16179,7 +16219,8 @@
    "sv": "albyhub — the lightning heart",
    "fi": "albyhub — the lightning heart",
    "tr": "albyhub — the lightning heart",
-   "hu": "albyhub — the lightning heart"
+   "hu": "albyhub — the lightning heart",
+   "tt": "albyhub — найн йөрәк"
   },
   "st.o.pages": {
    "en": "the pages — this estate’s front doors",
@@ -16208,7 +16249,8 @@
    "sv": "the pages — this estate’s front doors",
    "fi": "the pages — this estate’s front doors",
    "tr": "the pages — this estate’s front doors",
-   "hu": "the pages — this estate’s front doors"
+   "hu": "the pages — this estate’s front doors",
+   "tt": "битләр — эстетның төп ишекләре"
   }
  }
 }
