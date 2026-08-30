@@ -42,6 +42,11 @@
   --info:          #6FA9E0;         /* informational — keep apart from --ai */
   --verified:      var(--biomass);  /* settled / confirmed-by-test / alive (green allowed) */
   --guard:         #B7A8F7;         /* guard refusal — NEVER error-red */
+  --rose:         #C41E3A;         /* love given to the living — the qrroses garden red.
+                                     ODD COUNTS ONLY in that garden: in Latvia an even bouquet
+                                     is for the grave; 3, 5, 7, 11 for the living.
+                                     Never a status, never an error, never currency. */
+  --rose-deep:    #8E1230;         /* --rose pressed toward the heart of the bloom (light variant below) */
   --b-value:      #E8B54B;  /* honey — the colour of b. b amounts ONLY, dark chip only
                                (ruled 2026-07-17; BRIEF-01 §0; write-back 2026-08-10).
                                1.88:1 on light grounds — never text on paper: invert to
@@ -100,6 +105,7 @@
     --you:#B4479D;            /* 4.54:1 — was 3.35 */
     --info:#4D759B;           /* 4.56:1 — was 2.33. The token the C-2 explainer caught. */
     --verified:#527C46;
+    --rose:#A3122B; --rose-deep:#6E0C1F;
     --guard:#736A9C;          /* 4.61:1 — was 1.97 */
   }
 }

@@ -5,7 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>bLighT QR ROSES — a frozen code, a living garden</title>
 <style>
-:root{
+/* SEMANTIC COLOUR — meanings picked FIRST, hues second (bound to docs/tokens.css;
+   --rose is NOT a semantic: it is love-given-to-the-living, the garden red, odd counts only). */
+:root{--sem-harm:#B7A8F7;--sem-solution:#86CC72;--sem-value:#E8B54B;--sem-system:#6FA9E0;--sem-science:#45C2DC;
+
   --bg:#07090b; --bg1:#0d1410; --panel:#111a14; --well:#0a0f0b; --line:#243026;
   --gold:#FFD700; --amber:#ffb347; --violet:#c9a0ff; --idea:#a476ec;
   --leaf:#7ddf8f; --works:#3f9c55; --ink:#e2efdb; --dim:#8a9a8a;
@@ -14,7 +17,8 @@
 *{margin:0;padding:0;box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--mono);font-size:13px;line-height:1.6}
-.wrap{max-width:1040px;margin:0 auto;padding:26px 20px 120px}
+section.wrap{background:var(--bg1);border-radius:12px}
+.wrap{max-width:1040px;margin:0 auto;padding:26px 20px 120px;border-radius:12px}
 h1{font-size:34px;line-height:1.15;letter-spacing:1px;
   background:linear-gradient(92deg,var(--violet) 0%,var(--gold) 60%,var(--amber) 100%);
   -webkit-background-clip:text;background-clip:text;color:transparent;
@@ -32,7 +36,7 @@ button.primary:hover{background:var(--violet);color:#000}
 .pane{background:var(--panel);border:1px solid var(--line);padding:12px 14px;border-radius:8px}
 .pane h3{color:var(--violet);font-size:13px;letter-spacing:1px}
 .pane .by{color:var(--dim);font-size:11px;margin-bottom:8px}
-.well{background:var(--well);border:1px solid var(--line);border-radius:5px;padding:10px;display:flex;align-items:center;justify-content:center;position:relative}
+.well{border:1px solid var(--line);border-radius:5px;padding:10px;display:flex;align-items:center;justify-content:center;position:relative;background:var(--well);}
 #cv{max-width:100%;height:auto}
 .facts{font-size:11.5px;color:var(--dim);line-height:1.95}
 .facts b{color:var(--gold)} .facts i{color:var(--violet);font-style:normal}
@@ -44,17 +48,21 @@ nav:not(#tbar){margin-top:24px;display:flex;gap:14px;flex-wrap:wrap;font-size:11
 nav:not(#tbar) a{color:var(--dim);text-decoration:none}
 nav:not(#tbar) a:hover{color:var(--violet)}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+.herofig{display:flex;flex-direction:column;gap:2px;margin:10px 0 2px}.herofig .num{font-size:38px;line-height:1;font-weight:600;font-variant-numeric:tabular-nums;color:var(--rose)}.herofig .cap{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.pstat{background:var(--well)}
+@media (max-width:600px){body{padding:14px 10px 80px}.wrap{padding:16px 12px 110px}h1{font-size:24px}}
 </style>
 </head>
 <body>
-<div class="wrap">
+<section class="wrap">
 <h1>QR ROSES</h1>
+  <div class="herofig"><span class="num" id="stemCount" data-hero-number>7</span><span class="cap" data-hero-caption data-i18n="qr.hero.cap">stems · odd counts only — for the living</span></div>
 <div class="sub">The estate's name made literal: <b>BNRoSe's roses, Beehive Nature's bees</b> — over a
 code that never moves. The plate is soil: stems root at its edge and climb <b>outward and
 upward</b>, blooms open late, bees arrive after the roses and <b>may cross the code — ECC H has
 budget, and every bee path is decoder-gated frame by frame</b>. The modules, the three finder
 squares and the quiet zone are frozen in every single frame: a camera samples one frame, and
-every frame must scan. Palette from the estate tokens — two golds, two purples, no new hues.</div>
+every frame must scan. The blooms are ROSES — layered spiralling petals in <b>--rose</b>, a token minted for this garden: <b>love given to the living</b>. <b>ODD NUMBERS ONLY</b> — stems, leaves, petal layers: in Latvia an even-numbered bouquet is for the grave; 3, 5, 7, 11 are for the living, and the generator cannot produce an even count (audited across seeds by the gate). The founder's wife is Latvian; Riga's flower shops stay open all night for exactly this.</div>
 
 <div class="bar">
   <input type="text" id="url" spellcheck="false" autocomplete="off" placeholder="paste a link…">
@@ -65,7 +73,7 @@ every frame must scan. Palette from the estate tokens — two golds, two purples
 <div class="split">
   <div class="pane"><h3>THE GARDEN — still core, living skin</h3>
     <div class="by" id="phase">the garden grows</div>
-    <div class="well"><canvas id="cv" width="760" height="760"></canvas></div></div>
+    <div class="well pstat"><canvas id="cv" width="760" height="760"></canvas></div></div>
   <div class="pane"><h3>THE CODE, FROZEN</h3><div class="by">what never moves</div>
     <div class="facts" id="facts">—</div>
     <div class="status" id="status">planting…</div></div>
@@ -929,10 +937,17 @@ var qrcodegen;
 var Q=window.qrcodegen.QrCode;
 var $=function(id){return document.getElementById(id)};
 var cv=$('cv'),ctx=cv.getContext('2d');
-var T={gold:'#FFD700',amber:'#ffb347',violet:'#c9a0ff',idea:'#a476ec',leaf:'#7ddf8f',works:'#3f9c55',bg:'#07090b',ink:'#e2efdb'};
+var T={gold:'#FFD700',amber:'#ffb347',violet:'#c9a0ff',idea:'#a476ec',leaf:'#7ddf8f',works:'#3f9c55',bg:'#07090b',ink:'#e2efdb',rose:'#C41E3A',roseDeep:'#8E1230'}; /* rose tokens bound to docs/tokens.css — love given to the living; odd counts only */
 var FLAT_DARK='#10131a',FLAT_LIGHT='#f4f4ee';
 var state={qr:null,url:'',core:null,geo:null,garden:null,t0:performance.now()};
-window.__qrroses=state; // the frame gate reads live animation state — which frame, which bee, where
+window.__qrroses=state;
+/* ODD-LAW AUDIT HOOK — the gate replays seeds through the same generator and
+   fails on any even count (stems, leaves per stem, petal layers). In Latvia an
+   even bouquet is for the grave; the generator cannot produce one. */
+window.__qrrosesAudit=function(seed){
+  var g=makeGarden(seed);
+  return {stems:g.stems.length,leaves:g.stems.map(function(x){return x.leaves}),petalLayers:[9,7,5],bees:g.bees.length};
+}; // the frame gate reads live animation state — which frame, which bee, where
 var REDUCE=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // deterministic garden per payload
@@ -963,7 +978,7 @@ function build(url){
     'error correction — <b>H</b> (~30% recoverable — the bees\' budget)<br>'+
     'version — <b>'+q.version+'</b> · matrix <b>'+N+'×'+N+'</b> · <b>'+dark+'</b> dark modules<br>'+
     'frozen — <b>every frame</b>: modules · finder squares · quiet zone<br>'+
-    'roses — outside quiet zone + 2 modules, always<br>'+
+    'roses — real rose form, red, outside quiet zone + 2 modules, always<br>'+
     'redirect server — <b>none. the URL is the code.</b>';
   $('dl').disabled=false;
   return true;
@@ -989,7 +1004,7 @@ function makeGarden(seed){
       x:rx,y:ry,dx:dirx,dy:diry,up:up,
       len:70+r()*60,delay:i*260+wobble(r),
       curve:(r()-0.5)*1.4,phase:r()*6.28,
-      bloomP:0.72+0.26*r(), bloomHue:r(),leaves:2+Math.floor(r()*3)
+      bloomP:0.72+0.26*r(), bloomHue:r(),leaves:3+2*Math.floor(r()*2) /* ODD LAW: 3 or 5 — even is for the grave */
     });
   }
   function wobble(rr){return rr()*400}
@@ -1042,26 +1057,53 @@ function drawStem(st,growP,leafP,bloomP,sway){
   // the bloom opens late, at the grown tip
   if(bloomP>0&&growP>=0.99&&last){
     var R=state.geo.cell*2.6;
-    drawBloom(last.x+st.dx*R*0.95,last.y+(st.dy-0.3)*R*0.95,bloomP,st.bloomHue,sway,st.phase);
+    var bx=last.x+st.dx*R*0.95,by=last.y+(st.dy-0.3)*R*0.95;
+    /* PLATE LAW: bloom center must sit outside quiet zone + 2 modules (6 cells
+       beyond the code square); push outward along the stem if the curl bent in */
+    var g=state.geo,margin=6*g.cell;
+    var x0=g.ox-margin,y0=g.oy-margin,x1=g.ox+g.pw+margin,y1=g.oy+g.pw+margin;
+    if(bx>x0&&bx<x1&&by>y0&&by<y1){
+      var dxs=st.dx,dys=st.dy,len=Math.hypot(dxs,dys)||1;dxs/=len;dys/=len;
+      var cx=g.ox+g.pw/2,cy=g.oy+g.pw/2;
+      if(Math.abs(bx-cx)/g.pw>Math.abs(by-cy)/g.pw){bx=dxs>0?x1+R:(dxs<0?x0-R:bx);}
+      else{by=dys>0?y1+R:(dys<0?y0-R:by);}
+    }
+    drawBloom(bx,by,bloomP,st.bloomHue,sway,st.phase);
   }
 }
 function leafAt(st,i){return 0.25+0.55*(i/(st.leaves+1))}
 function drawBloom(x,y,p,hue,sway,phase){
   var R=state.geo.cell*2.6;
+  /* THE ROSE — three odd layers (9/7/5 petals) spiralling around a bud heart. ODD LAW:
+     rotation offsets quarter-turn the spiral so no even symmetry reads.
+     hue only picks deep-vs-bright red; the bloom is always red. */
+  var layers=[{n:9,rad:1.00,tilt:0.50,w:0.46,h:0.30,fill:T.rose,edge:'rgba(0,0,0,0.18)'},
+              {n:7,rad:0.72,tilt:0.78,w:0.42,h:0.27,fill:T.roseDeep,edge:'rgba(0,0,0,0.22)'},
+              {n:5,rad:0.46,tilt:1.15,w:0.38,h:0.25,fill:T.rose,edge:'rgba(255,255,255,0.14)'}];
   ctx.save();ctx.translate(x,y);ctx.rotate(sway*Math.sin(phase+performance.now()*0.0006));
-  var ring=6,ri,rr,a;
-  for(ri=0;ri<2;ri++){
-    var rad=R*(1-ri*0.36)*p;
-    ctx.fillStyle=ri===0?(hue<0.5?T.violet:T.idea):(hue<0.5?T.idea:T.violet);
-    for(a=0;a<ring;a++){
-      var th=a/ring*6.283+ri*0.52;
-      ctx.beginPath();ctx.ellipse(Math.cos(th)*rad*0.62,Math.sin(th)*rad*0.62,rad*0.52,rad*0.34,th,0,6.29);ctx.fill();
+  var li,pi,a,rad,tilt;var spin=phase*0.35;
+  for(li=0;li<layers.length;li++){
+    var L=layers[li];rad=R*L.rad*p;tilt=L.tilt+spin*(li%2?1:-1)*0.22;
+    for(pi=0;pi<L.n;pi++){
+      a=pi/L.n*6.283+tilt;
+      var px=Math.cos(a)*rad*0.55,py=Math.sin(a)*rad*0.55;
+      ctx.save();ctx.translate(px,py);ctx.rotate(a+Math.PI/2);
+      ctx.fillStyle=L.fill;
+      ctx.beginPath();ctx.ellipse(0,0,rad*L.w,rad*L.h*1.15,0,0,6.29);ctx.fill();
+      ctx.strokeStyle=L.edge;ctx.lineWidth=Math.max(0.6,rad*0.03);ctx.stroke();
+      ctx.restore();
     }
   }
-  ctx.fillStyle=T.gold;
-  ctx.beginPath();ctx.arc(0,0,R*0.3*p,0,6.29);ctx.fill();
-  ctx.fillStyle=T.amber;
-  for(a=0;a<5;a++){var th2=a/5*6.283;ctx.beginPath();ctx.arc(Math.cos(th2)*R*0.14,Math.sin(th2)*R*0.14,R*0.07*p,0,6.29);ctx.fill()}
+  /* the heart: a tight spiral bud — the signature of a rose, not a daisy */
+  ctx.strokeStyle='rgba(0,0,0,0.35)';ctx.lineWidth=Math.max(0.8,R*0.045);ctx.lineCap='round';
+  ctx.beginPath();
+  var budR=R*0.16*p,ang0=spin*1.3;
+  for(pi=0;pi<=40;pi++){
+    var f=pi/40,a2=ang0+f*4.4,rr=budR*f;
+    var sx=Math.cos(a2)*rr,sy=Math.sin(a2)*rr*0.72;
+    if(pi===0)ctx.moveTo(sx,sy);else ctx.lineTo(sx,sy);
+  }
+  ctx.stroke();
   ctx.restore();
 }
 function drawBee(b,t){
