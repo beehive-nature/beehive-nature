@@ -65,80 +65,8 @@ a{color:var(--cyan)}
 </header>
 <main>
 
-<section id="bind">
-  <h2>1 · <span data-i18n="h.165">WHO SIGNS — bind by passkey tap only</span></h2>
-  <div class="law">recovery phrases never enter this page — asking again would be a harvest surface.
-  one passkey tap re-derives your bzDiD record key on this device; only signatures ever leave it.
-  guest mode composes UNSIGNED receipts (still publishable; guards will mark them unverified).</div>
-  <button id="bindBtn">🔑 bind with passkey</button>
-  <button id="guestBtn">👤 stay guest (unsigned)</button>
-  <div class="st" id="bindSt">unbound — receipts compose as UNSIGNED</div>
-</section>
-
-<section id="compose">
-  <h2>2 · <span data-i18n="h.166">REVIEW RECEIPT — one surface, one verdict, ≤140 chars</span></h2>
-  <label for="surf">surface</label>
-  <select id="surf"></select>
-  <label for="verdict">verdict</label>
-  <select id="verdict">
-    <option value="✅ works">✅ works — walked it, it held</option>
-    <option value="🐛 bug">🐛 bug — something broke (say what in the note)</option>
-    <option value="🕳 gap">🕳 gap — something missing</option>
-    <option value="💡 idea">💡 idea — an improvement</option>
-  </select>
-  <label for="rnote">note (≤140)</label>
-  <input id="rnote" maxlength="140" placeholder="what you saw, in one line">
-  <button id="mkReview" class="gold">compose receipt</button>
-  <button id="cpReview" style="display:none">📋 copy</button>
-  <div class="out" id="reviewOut"></div>
-  <div class="law" style="margin-top:8px">publishing rides any client you already hold — paste it
-  as a Nostr note or a Bluesky post (the feed below reads both), or hand it to the founder
-  directly. the in-page publish path docks with TASK&nbsp;6b (E2E), and pretending it is wired
-  before then would be a lie.</div>
-</section>
-
-<section id="guard">
-  <h2>3 · <span data-i18n="h.167">GUARD VERDICT — verify a receipt, then weigh it</span></h2>
-  <div class="law">paste a full receipt block (line + pub + sig). the check is arithmetic — an
-  Ed25519 signature either verifies or it does not. guards weight reviews in the tally; they never
-  gate or delete them, and no page decides who is real.</div>
-  <textarea id="gIn" placeholder="[bX review] ✅ works blight/farmers.html — https://… — from: fp:… — note: …&#10;pub: <64 hex>&#10;sig: <128 hex>"></textarea>
-  <button id="gCheck">verify signature</button>
-  <div class="st" id="gSt"></div>
-  <label for="gVerdict">guard verdict</label>
-  <select id="gVerdict">
-    <option value="✓ verified">✓ verified — signature and standing check out</option>
-    <option value="✗ unverified">✗ unverified — no or bad signature</option>
-    <option value="⚖ contested">⚖ contested — receipt disputed on substance</option>
-  </select>
-  <button id="mkGuard" class="gold">compose guard verdict</button>
-  <button id="cpGuard" style="display:none">📋 copy</button>
-  <div class="out" id="guardOut"></div>
-</section>
-
-<section id="ai">
-  <h2>4 · <span data-i18n="h.168">bLOVErAi WINDOW — W-3: your AI, your device</span></h2>
-  <div class="law">this window builds a review prompt and hands it to whatever AI you already
-  hold — nothing is sent anywhere by this page. the in-browser model (W-1) docks later; no lane
-  ever proxies your words through a hive server.</div>
-  <label for="aiSurf">surface to review</label>
-  <select id="aiSurf"></select>
-  <label for="aiFocus">focus</label>
-  <select id="aiFocus">
-    <option value="correctness — does every claim on the page hold against its receipts">correctness</option>
-    <option value="clarity — would a newcomer at 3am understand each step">clarity</option>
-    <option value="accessibility — contrast, keyboard path, small-screen behavior">accessibility</option>
-    <option value="safety — could any wording nudge a user into harm or disclosure">safety</option>
-  </select>
-  <label for="aiExtra">anything specific (optional)</label>
-  <input id="aiExtra" placeholder="e.g. the camera step confused my mother">
-  <button id="mkPrompt" class="gold">build the prompt</button>
-  <button id="cpPrompt" style="display:none">📋 copy</button>
-  <div class="out" id="promptOut"></div>
-</section>
-
 <section id="tally">
-  <h2>5 · <span data-i18n="h.169">THE TALLY — only what was deliberately published</span></h2>
+  <h2>1 · <span data-i18n="h.169">THE TALLY — only what was deliberately published</span></h2>
   <div class="law">reads the live rails (Nostr relay + Bluesky public AppView) for the
   <b>[bX review]</b> and <b>[bX guard]</b> grammar. a reviewer who walked every page and published
   nothing appears nowhere — that is the design, not a gap. verdict colors are a
@@ -170,6 +98,79 @@ a{color:var(--cyan)}
   </details>
   <div id="feed"></div>
 </section>
+<section id="bind">
+  <h2>2 · <span data-i18n="h.165">WHO SIGNS — bind by passkey tap only</span></h2>
+  <div class="law">recovery phrases never enter this page — asking again would be a harvest surface.
+  one passkey tap re-derives your bzDiD record key on this device; only signatures ever leave it.
+  guest mode composes UNSIGNED receipts (still publishable; guards will mark them unverified).</div>
+  <button id="bindBtn">🔑 bind with passkey</button>
+  <button id="guestBtn">👤 stay guest (unsigned)</button>
+  <div class="st" id="bindSt">unbound — receipts compose as UNSIGNED</div>
+</section>
+
+<section id="compose">
+  <h2>3 · <span data-i18n="h.166">REVIEW RECEIPT — one surface, one verdict, ≤140 chars</span></h2>
+  <label for="surf">surface</label>
+  <select id="surf"></select>
+  <label for="verdict">verdict</label>
+  <select id="verdict">
+    <option value="✅ works">✅ works — walked it, it held</option>
+    <option value="🐛 bug">🐛 bug — something broke (say what in the note)</option>
+    <option value="🕳 gap">🕳 gap — something missing</option>
+    <option value="💡 idea">💡 idea — an improvement</option>
+  </select>
+  <label for="rnote">note (≤140)</label>
+  <input id="rnote" maxlength="140" placeholder="what you saw, in one line">
+  <button id="mkReview" class="gold">compose receipt — sign in to add yours</button>
+  <button id="cpReview" style="display:none">📋 copy</button>
+  <div class="out" id="reviewOut"></div>
+  <div class="law" style="margin-top:8px">publishing rides any client you already hold — paste it
+  as a Nostr note or a Bluesky post (the feed below reads both), or hand it to the founder
+  directly. the in-page publish path docks with TASK&nbsp;6b (E2E), and pretending it is wired
+  before then would be a lie.</div>
+</section>
+
+<section id="guard">
+  <h2>4 · <span data-i18n="h.167">GUARD VERDICT — verify a receipt, then weigh it</span></h2>
+  <div class="law">paste a full receipt block (line + pub + sig). the check is arithmetic — an
+  Ed25519 signature either verifies or it does not. guards weight reviews in the tally; they never
+  gate or delete them, and no page decides who is real.</div>
+  <textarea id="gIn" placeholder="[bX review] ✅ works blight/farmers.html — https://… — from: fp:… — note: …&#10;pub: <64 hex>&#10;sig: <128 hex>"></textarea>
+  <button id="gCheck">verify signature</button>
+  <div class="st" id="gSt"></div>
+  <label for="gVerdict">guard verdict</label>
+  <select id="gVerdict">
+    <option value="✓ verified">✓ verified — signature and standing check out</option>
+    <option value="✗ unverified">✗ unverified — no or bad signature</option>
+    <option value="⚖ contested">⚖ contested — receipt disputed on substance</option>
+  </select>
+  <button id="mkGuard" class="gold">compose guard verdict</button>
+  <button id="cpGuard" style="display:none">📋 copy</button>
+  <div class="out" id="guardOut"></div>
+</section>
+
+<section id="ai">
+  <h2>5 · <span data-i18n="h.168">bLOVErAi WINDOW — W-3: your AI, your device</span></h2>
+  <div class="law">this window builds a review prompt and hands it to whatever AI you already
+  hold — nothing is sent anywhere by this page. the in-browser model (W-1) docks later; no lane
+  ever proxies your words through a hive server.</div>
+  <label for="aiSurf">surface to review</label>
+  <select id="aiSurf"></select>
+  <label for="aiFocus">focus</label>
+  <select id="aiFocus">
+    <option value="correctness — does every claim on the page hold against its receipts">correctness</option>
+    <option value="clarity — would a newcomer at 3am understand each step">clarity</option>
+    <option value="accessibility — contrast, keyboard path, small-screen behavior">accessibility</option>
+    <option value="safety — could any wording nudge a user into harm or disclosure">safety</option>
+  </select>
+  <label for="aiExtra">anything specific (optional)</label>
+  <input id="aiExtra" placeholder="e.g. the camera step confused my mother">
+  <button id="mkPrompt" class="gold">build the prompt</button>
+  <button id="cpPrompt" style="display:none">📋 copy</button>
+  <div class="out" id="promptOut"></div>
+</section>
+
+
 
 </main>
 <footer>

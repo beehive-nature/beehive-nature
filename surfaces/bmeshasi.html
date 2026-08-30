@@ -342,7 +342,7 @@ footer{max-width:940px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
     if(document.visibilityState!=='visible') return;
     var vi=0;
     (function vNext(){
-      if(vi>=VH.length){ amber('vhead',true); $('vhead').textContent='read failed — honest gap'; return; }
+      if(vi>=VH.length){ amber('vhead',true); $('vhead').textContent='couldn’t reach the chain from your network — the page is fine, the data isn’t loading'; return; }
       fetch(VH[vi]+'/v1/chain/get_info',{method:'POST',body:'{}'})
         .then(function(r){ if(!r.ok) throw 0; return r.json(); })
         .then(function(d){ amber('vhead',false); $('vhead').textContent='#'+d.head_block_num.toLocaleString('en-US');
@@ -351,7 +351,7 @@ footer{max-width:940px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
     })();
     var hi=0;
     (function hNext(){
-      if(hi>=HH.length){ amber('hhead',true); $('hhead').textContent='read failed — honest gap'; return; }
+      if(hi>=HH.length){ amber('hhead',true); $('hhead').textContent='couldn’t reach the chain from your network — the page is fine, the data isn’t loading'; return; }
       fetch(HH[hi],{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({jsonrpc:'2.0',method:'condenser_api.get_dynamic_global_properties',params:[],id:1})})
         .then(function(r){ if(!r.ok) throw 0; return r.json(); })

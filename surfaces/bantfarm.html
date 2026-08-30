@@ -324,10 +324,10 @@ async function initToken(){
   var d=await erpc('eth_call',[{to:ANT,data:'0x313ce567'},'latest']);
   var s=await erpc('eth_call',[{to:ANT,data:'0x18160ddd'},'latest']);
   if(d){ DEC=parseInt(d,16); $('antdec').textContent=DEC; $('antdec').classList.remove('nm'); }
-  else $('antdec').innerHTML='<span class="err">fetch failed — declared, not zeroed</span>';
+  else $('antdec').innerHTML='<span class="err">couldn’t reach the chain from your network — the page is fine, the data isn’t loading (declared, not zeroed)</span>';
   if(s&&DEC!==null){ $('antsupply').innerHTML=fmt(BigInt(s),DEC,0)+' <s>ANT</s>'; $('antsupply').classList.remove('nm');
     $('supplysrc').textContent='totalSupply() · live · '+ANT.slice(0,10)+'…'; }
-  else $('antsupply').innerHTML='<span class="err">fetch failed</span>';
+  else $('antsupply').innerHTML='<span class="err">couldn’t reach the chain from your network</span>';
 }
 async function readEvm(addr){
   if(!/^0x[0-9a-fA-F]{40}$/.test(addr)){ $('antsrc').textContent='that is not an EVM address'; return; }
@@ -336,9 +336,9 @@ async function readEvm(addr){
   var eth=await erpc('eth_getBalance',[addr,'latest']);
   if(bal!==null&&DEC!==null){ $('antbal').innerHTML=fmt(BigInt(bal),DEC,4)+' <s>ANT</s>'; $('antbal').classList.remove('nm');
     $('antsrc').textContent='balanceOf('+addr.slice(0,8)+'…) · live'; }
-  else $('antbal').innerHTML='<span class="err">fetch failed — a failure, never zero</span>';
+  else $('antbal').innerHTML='<span class="err">couldn’t reach the chain — a failure, never zero</span>';
   if(eth!==null){ $('ethbal').innerHTML=fmt(BigInt(eth),18,5)+' <s>ETH</s>'; $('ethbal').classList.remove('nm'); }
-  else $('ethbal').innerHTML='<span class="err">fetch failed</span>';
+  else $('ethbal').innerHTML='<span class="err">couldn’t reach the chain from your network</span>';
 }
 $('evmgo').onclick=function(){ readEvm($('evmaddr').value.trim()); };
 $('evmvault').onclick=function(){ $('evmaddr').value=VAULT; readEvm(VAULT); };

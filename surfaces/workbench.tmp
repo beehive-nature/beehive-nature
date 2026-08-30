@@ -64,7 +64,7 @@
     <input id="addr" placeholder="0x… holder address" spellcheck="false">
     <button id="go">View</button>
     <button id="scan">Scan all collections</button>
-  </div>
+    </div>
   <div class="bar">
     <input id="rpc" placeholder="RPC endpoint" spellcheck="false">
     <input id="custom" placeholder="…or a custom token contract 0x…" spellcheck="false">

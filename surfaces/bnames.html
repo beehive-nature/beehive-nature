@@ -414,7 +414,7 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
   function drawConst(){
     var svg=$('const'), rows=live.rows, n=rows.length, NS='http://www.w3.org/2000/svg';
     svg.innerHTML='';
-    if(!rows.length){ svg.innerHTML='<text x="480" y="150" text-anchor="middle" fill="#8a9a8a" font-size="12">read failed — honest gap</text>'; return; }
+    if(!rows.length){ svg.innerHTML='<text x="480" y="150" text-anchor="middle" fill="#8a9a8a" font-size="12">couldn’t reach the chain from your network</text>'; return; }
     var cx=480, cy=150;
     function node(nx,ny,name,opts){
       opts=opts||{}; var g=document.createElementNS(NS,'g');
@@ -480,7 +480,7 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
       var b={json:true,code:'kingbeelovis',scope:'kingbeelovis',table:'domains',limit:500};
       if(nextk)b.lower_bound=nextk;
       var d=await post('/v1/chain/get_table_rows',b);
-      if(!d){ $('count').textContent='read failed'; return; }
+      if(!d){ $('count').textContent='couldn’t reach the chain'; $('count').title='couldn’t reach the chain from your network — the page is fine, the data isn’t loading (public endpoints can be blocked; a VPN or another network may reach it)'; return; }
       rows=rows.concat(d.rows||[]); more=d.more; nextk=d.next_key;
     }
     live.rows=rows; live.byName={};

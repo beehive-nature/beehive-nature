@@ -12034,7 +12034,7 @@
    "sa": "कोशः"
   },
   "wl.badge": {
-   "en": "keys live in tab memory only",
+   "en": "your keys stay in this tab only — gone when you close it",
    "ru": "ключи живут только в памяти вкладки",
    "cs": "klíče žijí jen v paměti záložky",
    "gd": "tha iuchraichean beò ann an cuimhne na taba a-mhàin",
@@ -20245,6 +20245,9 @@
    "hu": "szárak · csak páratlan — az élőknek",
    "sa": "नाळाः युग्मरहिताः एव — जीवेभ्यः",
    "gd": "stems · odd counts only — for the living"
+  },
+  "wl.lede": {
+   "en": ""
   }
  }
 }

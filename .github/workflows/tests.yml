@@ -172,6 +172,10 @@ jobs:
         if: always()   # a sibling suite's red must not SKIP this one — every
                        # suite fires every run, or a red stops being attributable
         run: node university-smoke.mjs
+      - name: No page errors anywhere (the helper-missing gate — the T_ class)
+        if: always()
+        working-directory: e2e
+        run: node no-page-errors.mjs
       # the language lane (2026-08-28), browser-side like every playwright
       # suite: first the checker-silence proof — the coverage instrument must
       # count a keyed string AND an unkeyed string through the same path

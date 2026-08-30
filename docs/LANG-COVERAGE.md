@@ -1,4 +1,4 @@
-# LANG COVERAGE — generated 2026-08-29 by e2e/i18n-coverage.mjs --emit-md (lang=ru)
+# LANG COVERAGE — generated 2026-08-30 by e2e/i18n-coverage.mjs --emit-md (lang=ru)
 
 ## per surface — visible strings vs keyed
 
@@ -9,7 +9,7 @@
 | blanguage.html | 356 | 12 | 3% |
 | bset.html | 327 | 1 | 0% |
 | index.html | 260 | 69 | 27% |
-| stack.html | 243 | 118 | 49% |
+| stack.html | 244 | 118 | 48% |
 | wallet.html | 242 | 24 | 10% |
 | bigen.html | 222 | 12 | 5% |
 | blight/museum.html | 217 | 10 | 5% |
@@ -26,9 +26,9 @@
 | fleet-hosted/gallery/indigo-index.html | 96 | 0 | 0% |
 | bnames.html | 95 | 0 | 0% |
 | festival/index.html | 94 | 18 | 19% |
+| bantfarm.html | 91 | 7 | 8% |
 | bqueenbee-live.html | 91 | 6 | 7% |
 | dao-dashboard/index.html | 91 | 5 | 5% |
-| bantfarm.html | 88 | 7 | 8% |
 | doors/beehivenature.html | 87 | 38 | 44% |
 | blight/c1-aid.html | 83 | 4 | 5% |
 | attest.html | 68 | 1 | 1% |
@@ -88,33 +88,33 @@
 
 | tongue | cells non-empty |
 |---|---|
-| ru | 644 / 644 |
-| cs | 644 / 644 |
-| gd | 644 / 644 |
-| es | 644 / 644 |
-| nl | 644 / 644 |
-| de | 644 / 644 |
-| fr | 644 / 644 |
-| zh | 644 / 644 |
-| th | 644 / 644 |
-| lv | 644 / 644 |
-| uk | 644 / 644 |
-| ar | 644 / 644 |
-| he | 644 / 644 |
-| hi | 644 / 644 |
-| bn | 644 / 644 |
-| fa | 644 / 644 |
-| nl-be | 644 / 644 |
-| ko | 644 / 644 |
-| ur | 644 / 644 |
-| ja | 644 / 644 |
-| da | 644 / 644 |
-| nb | 644 / 644 |
-| sv | 644 / 644 |
-| fi | 644 / 644 |
-| tr | 644 / 644 |
-| hu | 644 / 644 |
-| tt | 644 / 644 |
-| sa | 644 / 644 |
+| ru | 645 / 646 |
+| cs | 645 / 646 |
+| gd | 645 / 646 |
+| es | 645 / 646 |
+| nl | 645 / 646 |
+| de | 645 / 646 |
+| fr | 645 / 646 |
+| zh | 645 / 646 |
+| th | 645 / 646 |
+| lv | 645 / 646 |
+| uk | 645 / 646 |
+| ar | 645 / 646 |
+| he | 645 / 646 |
+| hi | 645 / 646 |
+| bn | 645 / 646 |
+| fa | 645 / 646 |
+| nl-be | 645 / 646 |
+| ko | 645 / 646 |
+| ur | 645 / 646 |
+| ja | 645 / 646 |
+| da | 645 / 646 |
+| nb | 645 / 646 |
+| sv | 645 / 646 |
+| fi | 645 / 646 |
+| tr | 645 / 646 |
+| hu | 645 / 646 |
+| tt | 645 / 646 |
+| sa | 645 / 646 |
 
 the ratchet law: keyed counts may never fall (enforced in CI). unkeyed prose is the recorded backlog — honest absence, English fallback visible, counted by the picker.
