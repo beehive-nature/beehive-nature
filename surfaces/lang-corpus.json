@@ -20214,6 +20214,37 @@
    "gd": "(the estate's 10%, shown never buried)",
    "tt": "(the estate's 10%, shown never buried)",
    "sa": "(the estate's 10%, shown never buried)"
+  },
+  "qr.hero.cap": {
+   "en": "stems · odd counts only — for the living",
+   "ru": "стеблей · только нечётные — для живых",
+   "uk": "стеблин · лише непарні — для живих",
+   "tt": "сабаклар · гына так — өчен",
+   "cs": "stonků · jen lichaté — pro živé",
+   "es": "tallos · solo impares — para los vivos",
+   "nl": "stengels · alleen oneven — voor de levenden",
+   "de": "Stiele · nur ungerade — für die Lebenden",
+   "fr": "tiges · uniquement impaires — pour les vivants",
+   "zh": "支花茎 · 只取奇数 — 献给生者",
+   "th": "ลำต้น · เลขคี่เท่านั้น — เพื่อชีวิต",
+   "lv": "stublēni · tikai nepāra — dzīvajiem",
+   "ar": "سيقان · أعداد فردية فقط — للأحياء",
+   "he": "גבעולים · אי-זוגי בלבד — לחיים",
+   "hi": "तने · केवल विषम — जीवों के लिए",
+   "bn": "কাণ্ড · শুধু অজোড় — জীবদের জন্য",
+   "fa": "ساقه · فقط فرد — برای زندگان",
+   "nl-be": "stengels · alleen oneven — voor de levenden",
+   "ko": "줄기 · 홀수만 — 산 이들을 위해",
+   "ur": "تنے · صرف طاق — زندوں کے لیے",
+   "ja": "茎は奇数のみ — 生ける者へ",
+   "da": "stængler · kun ulige — til de levende",
+   "nb": "stilker · bare odde — for de levende",
+   "sv": "stjälkar · udda endast — för de levande",
+   "fi": "varsia · vain parittomat — eläville",
+   "tr": "sap · yalnızca tek — dirilere",
+   "hu": "szárak · csak páratlan — az élőknek",
+   "sa": "नाळाः युग्मरहिताः एव — जीवेभ्यः",
+   "gd": "stems · odd counts only — for the living"
   }
  }
 }
