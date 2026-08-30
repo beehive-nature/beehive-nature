@@ -254,7 +254,7 @@ footer b{color:var(--ink);font-variant-numeric:tabular-nums}
   ${bandLine}
   <div class="wrap">
   <nav class="crumbs" aria-label="you are here">
-    <span class="here" data-i18n="hub.name">beehive nature reserve</span><span class="sub">▸</span><span class="sub" data-i18n="hub.crumb.atlas">the atlas</span>
+    <span class="here" data-i18n="hub.name">beehive nature reserve</span><span class="sub">▸</span><span class="sub" data-i18n="hub.crumb.atlas">skaists atlas</span>
     <span class="badge"><i></i><span data-i18n="hub.badge.static">static · search is the only script</span></span>
   </nav>
   <p class="kicker" data-i18n="hub.kicker">zero network · no password · no name</p>
