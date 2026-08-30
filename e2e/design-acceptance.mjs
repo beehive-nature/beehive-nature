@@ -64,7 +64,9 @@ const RIDER_ALLOWLIST = [
   /^https:\/\/skaists\.buzz\//,
   /^https:\/\/beehivenature\.buzz\//,
   /^https:\/\/relay\.skaists\.dev\//,
-  /^https:\/\/relay2\.skaists\.dev\//
+  /^https:\/\/relay2\.skaists\.dev\//,
+  /* the house crest of von Zutphen — first-party regalia, committed in the tree */
+  /assets\/seals\//
 ];
 
 const MEASURE = process.argv.includes('--measure');
