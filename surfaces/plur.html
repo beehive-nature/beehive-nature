@@ -1,973 +1,864 @@
-<!doctype html>
-<!-- BNR surface: the PLUR mUseUm — founder-ordered 2026-08-21 ("add in the PLUR Lore
-     and that will be our next mUseUm"). Every exhibit below is either a cited RECORD
-     or lore honestly labeled LORE; where the adversarial verify pass corrected a
-     popular telling, the correction is DISPLAYED, not hidden. Research: 6-wing fleet
-     + verify (wf_b7e9b43f-ff5, 12 agents, 900k tokens), 2026-08-21. Island showcase
-     rebuilt 2026-08-22 per DISPATCH_ZCODE_PLUR_WAVE — composed from the verified
-     payloads in docs/dispatches/payloads/, never re-researched. -->
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="dark">
-<title>the PLUR mUseUm — peace · love · unity · respect, receipted</title>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PLUR — four words, every mouth</title>
 <style>
-:root{--bg:#0a0612;--panel:#120b1d;--well:#0d0816;--line:#2a1f3d;--ink:#ece5f7;--dim:#9d92b3;--faint:#6b6180;
- --p:#39c5cf;--l:#D655BB;--u:#e6b32e;--r:#a78bfa;--ok:#7ddf8f;--amber:#ffb347;--cyan:#45C2DC}
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{overflow-x:hidden}
-body{background:var(--bg);color:var(--ink);font:13.5px/1.7 'IBM Plex Mono',ui-monospace,monospace;padding:28px 14px 90px}
-main{max-width:900px;margin:0 auto;position:relative;z-index:1}
-a{color:var(--cyan)}
-header{text-align:center;margin-bottom:6px}
-h1{font-size:clamp(21px,5.5vw,30px);font-weight:400;letter-spacing:.05em;
- text-shadow:0 0 24px rgba(167,139,250,.5)}
-h1 .P{color:var(--p)}h1 .L{color:var(--l)}h1 .U{color:var(--u)}h1 .R{color:var(--r)}
-.four{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:10px;font-size:12px;letter-spacing:.12em}
-.four span{padding:2px 10px;border:1px solid var(--line);border-radius:99px}
-.four .fp{color:var(--p)}.four .fl{color:var(--l)}.four .fu{color:var(--u)}.four .fr{color:var(--r)}
-.sub{color:var(--dim);font-size:11.5px;margin:12px auto 0;max-width:680px;line-height:1.85}
-.combwrap{text-align:center;margin:16px 0 4px}
-.combwrap svg{width:min(300px,74vw);height:auto;filter:drop-shadow(0 0 12px rgba(167,139,250,.28))}
-#comb polygon{stroke:#0a0612;stroke-width:1;opacity:.3;animation:cp var(--d,3s) ease-in-out var(--dl,0s) infinite alternate}
-@keyframes cp{from{opacity:.22}to{opacity:.95}}
-section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 17px;margin-top:16px}
-h2{font-size:12px;font-weight:400;letter-spacing:.08em;margin-bottom:4px}
-.w1 h2{color:var(--p)}.w2 h2{color:var(--l)}.w3 h2{color:var(--u)}.w4 h2{color:var(--r)}.w5 h2{color:var(--p)}.w6 h2{color:var(--l)}
-.wl{color:var(--dim);font-size:10.5px;line-height:1.85;margin-bottom:8px}
-.wl b{color:var(--ink)}
-.beads{display:flex;gap:7px;justify-content:center;margin:14px 0 0}
-.beads i{width:9px;height:9px;border-radius:50%;display:block;opacity:.85}
-.ex{background:var(--well);border:1px solid var(--line);border-radius:9px;padding:10px 12px;margin-top:9px;font-size:11px;line-height:1.75;color:var(--dim)}
-.ex b{color:var(--ink)}
-.w1 .ex{border-left:3px solid var(--p)}.w2 .ex{border-left:3px solid var(--l)}
-.w3 .ex{border-left:3px solid var(--u)}.w4 .ex{border-left:3px solid var(--r)}
-.w5 .ex{border-left:3px solid var(--p)}.w6 .ex{border-left:3px solid var(--l)}
-.wib h2{color:var(--cyan)}.wib .ex{border-left:3px solid var(--cyan)}
-.kb{display:inline-block;font-size:8.5px;letter-spacing:.08em;border-radius:5px;padding:1px 7px;margin-bottom:5px;vertical-align:middle}
-.kb.rec{background:#12331f;color:var(--ok);border:1px solid #1d4a2a}
-.kb.lor{background:transparent;color:var(--amber);border:1px dashed #5c4318}
-.q{border-left:2px solid var(--faint);padding:2px 0 2px 10px;margin:6px 0;color:var(--ink);font-style:italic}
-.src{font-size:9px;color:var(--faint);margin-top:5px;line-height:1.6}
-.vn{font-size:9px;color:var(--amber);margin-top:4px;line-height:1.6}
-.vn::before{content:'⚖ '}
-.hand{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:9px}
-.hs{background:var(--well);border:1px solid var(--line);border-radius:9px;padding:8px;text-align:center}
-.hs svg{width:64px;height:64px}
-.hs .t{font-size:9.5px;letter-spacing:.08em;margin-top:3px}
-.hs:nth-child(1) .t{color:var(--p)}.hs:nth-child(2) .t{color:var(--l)}
-.hs:nth-child(3) .t{color:var(--u)}.hs:nth-child(4) .t{color:var(--r)}
-.rib{display:flex;gap:2px;overflow-x:auto;margin-top:14px;padding:10px 2px 2px;position:relative;scrollbar-width:thin}
-.rib::before{content:'';position:absolute;left:0;right:0;top:27px;height:2px;background:var(--line)}
-.rib .cell{flex:0 0 auto;background:none;border:0;color:var(--ink);cursor:pointer;font:inherit;text-align:center;padding:0 5px;position:relative;z-index:1}
-.rib .cell svg{width:32px;height:35px;display:block;margin:0 auto}
-.rib .cell polygon{fill:var(--c);opacity:.85;transition:opacity .3s}
-.rib .cell:hover polygon,.rib .cell:focus-visible polygon{opacity:1}
-.rib .cell:focus-visible{outline:1px dashed var(--cyan);outline-offset:2px;border-radius:6px}
-.rib .cell i{display:block;font-style:normal;font-size:9.5px;letter-spacing:.05em;margin-top:2px}
-.rib .cell em{display:block;font-style:normal;font-size:8px;color:var(--dim);max-width:80px;margin:0 auto;line-height:1.45}
-.wg{display:block;margin:0 auto 8px;width:54px;height:44px;opacity:.95}
-footer{max-width:900px;margin:24px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2;position:relative;z-index:1}
-code{color:var(--ink)}
-.rig{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
-.beam{position:absolute;top:-25%;width:2px;height:150%;opacity:.08;
- background:linear-gradient(to bottom,transparent,var(--c),transparent);
- transform-origin:50% 0;animation:sway 12s ease-in-out infinite alternate}
-@keyframes sway{from{transform:rotate(-12deg)}to{transform:rotate(12deg)}}
-@media (prefers-reduced-motion:reduce){.beam,#comb polygon{animation:none}#comb polygon{opacity:.6}.rib .cell polygon{transition:none}}
-body.still .beam,body.still #comb polygon{animation-play-state:paused}
-</style></head><body>
-<div class="rig" aria-hidden="true"></div>
-<main>
-<header>
-  <h1>🪩 the <span class="P">P</span><span class="L">L</span><span class="U">U</span><span class="R">R</span> mUseUm</h1>
-  <div class="four" aria-hidden="true"><span class="fp">PEACE</span><span class="fl">LOVE</span><span class="fu">UNITY</span><span class="fr">RESPECT</span></div>
-  <div class="sub"><span data-i18n="plur.sub">a museum of the four words — every exhibit is either a cited RECORD or lore honestly labeled LORE</span></div>
-  <div class="sub" data-reg="bee">Welcome in. This is the story of four words that keep half a million
-  strangers safe in a field for three days. Some of it is documented — those exhibits carry a green
-  RECORD badge and a source you can click. Some of it lives the way culture actually lives, told
-  and retold — those wear an amber LORE badge, and telling you which is which is how this museum
-  respects you.</div>
-  <div class="sub" data-reg="raver">thirty years of floor wisdom, receipted. the word, the roots,
-  the law they wrote against our beats, the handshake, the sensory floor, the living creed — six
-  wings, every kernel labeled record or lore, nothing prettier than the truth. this is your house.</div>
-  <div class="sub" data-reg="cypherpunk">Method: a six-wing research fleet with an adversarial
-  verify pass (every load-bearing claim re-fetched at its source; corrections are displayed in
-  amber ⚖ lines, not silently patched). Primary archives where they exist — legislation.gov.uk
-  enacted text, hyperreal.org via Wayback, municipal landmark records, court records as reported.
-  A claim without a source does not enter; a telling with variants enters as LORE with its
-  tellers named. The corpus law of this estate applied to cultural memory.</div>
-  <div class="combwrap" aria-hidden="true"><svg id="comb" viewBox="0 0 340 310"></svg></div>
-</header>
-
-<nav class="rib" aria-label="the era ribbon — twenty-six centuries, click what calls to you">
-  <button class="cell" data-go="e-bes" style="--c:#39c5cf"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>654 BC</i><em>Bes</em></button>
-  <button class="cell" data-go="e-loft" style="--c:#D655BB"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>1970</i><em>the Loft</em></button>
-  <button class="cell" data-go="e-pacha" style="--c:#e6b32e"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>1973</i><em>Pacha</em></button>
-  <button class="cell" data-go="e-amn" style="--c:#a78bfa"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>1976</i><em>Amnesia</em></button>
-  <button class="cell" data-go="e-cdm" style="--c:#45C2DC"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>1980</i><em>Café del Mar</em></button>
-  <button class="cell" data-go="e-tierno" style="--c:#7ddf8f"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>1984</i><em>"que se coloque"</em></button>
-  <button class="cell" data-go="e-trip" style="--c:#39c5cf"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>1987</i><em>the trip</em></button>
-  <button class="cell" data-go="e-ssol" style="--c:#D655BB"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>1988</i><em>Second Summer</em></button>
-  <button class="cell" data-go="e-plu" style="--c:#e6b32e"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>1990</i><em>PLU train car</em></button>
-  <button class="cell" data-go="e-plur" style="--c:#a78bfa"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>1993</i><em>PLUR</em></button>
-  <button class="cell" data-go="e-cja" style="--c:#45C2DC"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>1994</i><em>repetitive beats</em></button>
-  <button class="cell" data-go="e-ds" style="--c:#7ddf8f"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>1998</i><em>DanceSafe</em></button>
-  <button class="cell" data-go="e-unesco" style="--c:#39c5cf"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>1999</i><em>UNESCO · Circoloco</em></button>
-  <button class="cell" data-go="e-space" style="--c:#D655BB"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>2016</i><em>Space closes</em></button>
-  <button class="cell" data-go="e-tm" style="--c:#e6b32e"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>2023</i><em>the trademark</em></button>
-  <button class="cell" data-go="e-alfredo" style="--c:#a78bfa"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>2024</i><em>Alfredo</em></button>
-  <button class="cell" data-go="e-law" style="--c:#45C2DC"><svg viewBox="0 0 34 38" aria-hidden="true"><polygon points="17,1 32,9.5 32,28.5 17,37 2,28.5 2,9.5"/></svg><i>2026</i><em>this estate</em></button>
-</nav>
-
-<section class="w1">
-  <h2>Ⅰ · <span data-i18n="plur.w1">WING I · THE WORD — where PLUR was born</span></h2>
-  <svg class="wg" viewBox="0 0 64 48" aria-hidden="true"><rect x="8" y="14" width="36" height="20" rx="3" stroke="var(--p)" stroke-width="2.5" fill="none"/><rect x="44" y="8" width="12" height="26" rx="2" stroke="var(--p)" stroke-width="2.5" fill="none" opacity=".5"/><circle cx="18" cy="38" r="4" stroke="var(--p)" stroke-width="2.5" fill="none"/><circle cx="38" cy="38" r="4" stroke="var(--p)" stroke-width="2.5" fill="none"/><text x="26" y="27.5" text-anchor="middle" font-size="8" fill="var(--p)" font-family="IBM Plex Mono,monospace" letter-spacing="1">PLU</text></svg>
-  <div class="wl"><b>The legend says one DJ shouted it into being. The archive says it took a
-  train car, two coasts, a booklet, a mailing list, and a threat.</b> Both are in this wing —
-  labeled.</div>
-  <div class="ex" id="e-plu"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>July 4, 1990 — the three words appear.</b> Adam X — Frankie Bones' brother — paints
-  <b>"Peace Love Unity"</b> on a train car. The earliest reported physical appearance of the slogan
-  in the scene; the artifact itself does not survive. Bones himself calls 1990–1993 the
-  <i>"Peace Love Unity Movement"</i> era — P.L.U.M., no R yet.
-  <div class="src">Vice, "How Frankie Bones' Storm Rave Birthed the PLUR Movement" (Dan Wender, 2015) —
-  <a href="https://www.vice.com/en/article/how-frankie-bones-storm-rave-birthed-the-plur-movement/" target="_blank" rel="noopener">vice.com</a></div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>Storm Rave, Brooklyn: May 11, 1991 → December 12, 1992.</b> The party series that seeded the
-  US rave movement ran about nineteen months and <b>ended before the famous mic moment</b> — a
-  chronology that quietly undercuts every telling that places the fight "at a Storm Rave."
-  <div class="src">Vice (2015), dates as reported — <a href="https://www.vice.com/en/article/how-frankie-bones-storm-rave-birthed-the-plur-movement/" target="_blank" rel="noopener">vice.com</a></div></div>
-  <div class="ex" id="e-plur"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>The R rode in from San Francisco.</b> Around May 1993, Brian Behlendorf carries Geoff White's
-  booklet <i>Cybertribe Rising</i> — with its essay on the "4 Pillars of the House Community,"
-  one pillar being <b>respect</b> — to the East Coast. At a renegade party in the RFK Stadium
-  parking lot, Washington DC, early June 1993, when Laura LaGassa says "peace/love/unity," he adds:
-  <div class="q">"and don't forget Respect"</div>
-  <div class="src">Laura LaGassa's eyewitness email to NE-Raves, Nov 18 1996, archived on hyperreal.org —
-  <a href="https://web.archive.org/web/20260630024924/http://hyperreal.org/raves/spirit/plur/Origin_of_PLUR.html" target="_blank" rel="noopener">Wayback copy</a>
-  (the live hyperreal path now 404s; the archive is the citable copy)</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>The essay went to a mailing list — not Usenet.</b> LaGassa writes up the four pillars and posts
-  to the <b>NE-Raves mailing list</b> (a University of Maryland listserv), early June 1993 — no
-  acronym attached. The endlessly repeated "Respect was added on alt.rave" is not what the primary
-  account says.
-  <div class="src">The essay survives: <a href="https://web.archive.org/web/20260115233924/http://hyperreal.org/raves/spirit/plur/PLUR.html" target="_blank" rel="noopener">hyperreal.org via Wayback</a></div>
-  <div class="vn">verify pass: this card corrects this museum's own research brief, which had
-  repeated the alt.rave version. The gate caught its own side first.</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>The acronym: a signature.</b> Days later, ne-raver <b>Rishad Quazi</b> signs an email to the
-  list "PLUR." Per LaGassa: <i>"I'm about 99% sure it was Rishad. And if it wasn't Rishad, then it
-  probably was Dan [Freelove]"</i> — even the primary account carries its honest 1%.
-  <div class="q">"It caught on like wildfire"</div>
-  <div class="src">LaGassa email, 1996, hyperreal.org via Wayback (link above)</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>The mic moment, eyewitness version.</b> Late June 1993, a New York party thrown by the old
-  Storm Rave crew during the New Music Seminar. A scuffle between rival gang members. Bones jumps
-  on the turntables:
-  <div class="q">"…show some peace, love and unity right now I'm going to break your faces"</div>
-  <b>No "respect" in the shouted line</b> — and the acronym was already circulating on the list
-  before the shout. The legend runs the causality backwards.
-  <div class="src">LaGassa (she spun at this party), 1996 email, hyperreal.org via Wayback</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>Bones' own telling differs — and that is part of the record.</b> His 2015 essay
-  <i>"Peace Love Unity Revisited"</i> places the break-your-faces night in <b>the Bronx</b>, frames
-  Respect as "the fourth pillar" born of that night's disrespect, and says his June 1993 record
-  already carried "respect" on the label. That pressing, if verified against a physical copy, would
-  be an independently datable artifact — <b>this museum has not verified it</b>, and says so.
-  <div class="src">Frankie Bones, Tumblr, "PEACE LOVE UNITY REVISITED" —
-  <a href="https://www.tumblr.com/frankiebones/128339624913/peace-love-unity-revisited-the-origin-of-plur" target="_blank" rel="noopener">tumblr.com/frankiebones</a> · a record OF his telling, not confirmation of its contents</div></div>
-  <div class="ex"><span class="kb lor" data-i18n="plur.lore">LORE — told as lore</span><br>
-  <b>The canonical legend, earliest archived telling.</b> October 9, 1995: "stevie t," editor of
-  Peace Love Rave Magazine, tells NE-Raves the old-skool story — Bones giving a visionary speech at
-  a Storm Rave, the whole warehouse waving hands in unity, the speech retold until it became PLUR.
-  Beautiful, load-bearing, and told here as what it is: the tribe's own founding myth, already
-  polished by 1995.
-  <div class="src">stevie t via NE-Raves, archived on hyperreal.org's PLUR Origins page (Wayback link above)</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>The kernel this estate keeps:</b> the man who appended the R — Brian Behlendorf — went on to
-  co-create the <b>Apache web server</b>, and hyperreal.org, the archive that preserves PLUR's
-  primary record, is his project. The fourth pillar of the rave and the open web share a hand.
-  Respect, it turns out, ships as infrastructure.
-  <div class="src"><a href="https://en.wikipedia.org/wiki/Brian_Behlendorf" target="_blank" rel="noopener">Wikipedia: Brian Behlendorf</a> (Apache co-founder; creator of hyperreal.org and the sfraves list)</div></div>
-  <div class="beads" aria-hidden="true"></div>
-</section>
-
-<section class="w2">
-  <h2>Ⅱ · <span data-i18n="plur.w2">WING II · THE INHERITANCE — the floor was Black, brown, and queer first</span></h2>
-  <svg class="wg" viewBox="0 0 64 48" aria-hidden="true"><circle cx="32" cy="24" r="18" stroke="var(--l)" stroke-width="2.5" fill="none"/><circle cx="32" cy="24" r="12" stroke="var(--l)" stroke-width="1.2" fill="none" opacity=".5"/><circle cx="32" cy="24" r="3.2" fill="var(--l)"/></svg>
-  <div class="wl"><b>PLUR did not invent the sanctuary floor. It inherited one</b> — built decades
-  earlier by people the outside world would not have. This wing is the deed of inheritance.</div>
-  <div class="ex" id="e-loft"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>Valentine's Day 1970 — "Love Saves the Day."</b> David Mancuso's first Loft party, 647
-  Broadway, NYC: invitation-only, nothing sold, running past legal hours. The invitation's initials
-  wink at LSD while announcing an ethic of universal love.
-  <div class="q">"Once you walked into the Loft you were cut off from the outside world. You got
-  into a timeless, mindless state."</div>
-  <div class="src">Mancuso, quoted in Tim Lawrence, <i>Love Saves the Day</i> (Duke Univ. Press, 2003) —
-  <a href="https://www.timlawrence.info/articles2/2013/7/16/love-saves-the-day-david-mancuso-and-the-loft" target="_blank" rel="noopener">timlawrence.info</a></div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>Privacy was the legal architecture of the sanctuary.</b> Because nothing was sold, the Loft sat
-  outside licensing law — a design consciously drawing on the <b>Harlem rent-party tradition of the
-  1920s</b>. Mancuso described his own mixed crowd as "gay, straight, white, Spanish" — his words.
-  Larry Levan, Frankie Knuckles, and Nicky Siano were shaped on this floor.
-  <div class="src">Lawrence (2003); the crowd description is Mancuso's own interview phrasing</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>Paradise Garage, 84 King Street: Jan 28, 1978 → Sep 26, 1987.</b> Members-only, no alcohol,
-  Larry Levan resident — and per the NYC LGBT Historic Sites Project, it
-  <i>"did not discriminate among its membership based on race, class, or sexual identity."</i>
-  Its model was the Loft's, carried forward — the institutional bridge from 1970 to everything
-  rave inherited.
-  <div class="src"><a href="https://www.nyclgbtsites.org/site/paradise-garage/" target="_blank" rel="noopener">NYC LGBT Historic Sites Project</a>;
-  lineage per Brewster &amp; Broughton, <i>Last Night a DJ Saved My Life</i> (1999)</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>The Warehouse, 206 S. Jefferson St, Chicago — 1977, Frankie Knuckles resident to 1982.</b>
-  A private membership club, Saturday midnight to Sunday noon. Knuckles, 1995, on who the floor
-  sheltered:
-  <div class="q">"predominantly black, predominantly gay… Very soulful and very spiritual."
-  … "For most of the people that went there, it was church for them."</div>
-  <div class="src">Frankie Knuckles 1995 interview, republished by Red Bull Music Academy Daily (2018);
-  building facts per the City of Chicago Landmarks designation report</div>
-  <div class="vn">verify note: the more famous variant — "church for people who have fallen from
-  grace" — is quoted everywhere, but its original interview could not be traced. The verifiable
-  quote is displayed; the famous one is named as unverified.</div></div>
-  <div class="ex"><span class="kb lor" data-i18n="plur.lore">LORE — told as lore</span><br>
-  <b>How "house" got its name — two tellings, side by side.</b> The bin-label telling: Importes
-  Etc. on Printer's Row labeled records "As Heard at The Warehouse," shortened to "House" (told by
-  Chip E. and store veterans; variants exist). And Knuckles' own telling, on the record in 1995: a
-  South Side tavern sign reading <b>"WE PLAY HOUSE MUSIC"</b> — <i>"It's the same stuff that you
-  play at The Warehouse."</i> The museum displays both; the culture never picked one.
-  <div class="src">Importes Etc. oral history; Knuckles 1995 interview (RBMA Daily, 2018)</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>June 2023: the City of Chicago designates 206 S. Jefferson a Chicago Landmark as the
-  birthplace of house music.</b> Official municipal recognition that a Black gay membership club is
-  the origin point of the genre — dedication block party, October 5, 2024.
-  <div class="src">City of Chicago, Dept. of Planning &amp; Development landmark designation (2023)</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>Detroit: the Belleville Three.</b> Juan Atkins, Derrick May, Kevin Saunderson — high-school
-  friends — create techno; the 1988 UK compilation <i>Techno! The New Dance Sound of Detroit</i>
-  fixes the name in public. May, 1988:
-  <div class="q">"The music is just like Detroit, a complete mistake. It's like George Clinton and
-  Kraftwerk are stuck in an elevator with only a sequencer to keep them company."</div>
-  <div class="src">Stuart Cosgrove, "Seventh City Techno," The Face, May 1988; compilation per Discogs.
-  (Sources split on whether the quote first ran in The Face or the liner notes — both are 1988 print.)</div></div>
-  <div class="beads" aria-hidden="true"></div>
-</section>
-
-<section class="wib">
-  <h2>⚓ <span data-i18n="plur.wib">THE ISLAND · EIVISSA — for much of the world, rave was born here</span></h2>
-  <svg class="wg" viewBox="0 0 64 48" aria-hidden="true"><circle cx="32" cy="24" r="19" stroke="var(--cyan)" stroke-width="2.5" fill="none"/><circle cx="32" cy="24" r="15" stroke="var(--cyan)" stroke-width="1" fill="none" opacity=".45"/><path d="M25 33 v-7 M39 33 v-7 M25 26 q7 -9 14 0 M25 26 l-6 -6 M39 26 l6 -6 M25 33 l-4 5 M39 33 l4 5" stroke="var(--cyan)" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-  <div class="wl"><b>For much of the world, rave was born here.</b> Not the music — Chicago's
-  Warehouse and Detroit's Belleville Three made that, and Wing II holds their deed. The
-  <i>wave</i> was born here: a permissive window the transition opened, an uncovered dancefloor
-  under the trees, a mayor who blessed the party from the stage, and four London DJs who went
-  home and lit 1988. Around that showcase, the island's own twenty-six centuries — a dancing
-  god on the money, a goddess in the cave, a philosopher on the beach. The showcase first;
-  the deep history after, as it always was.</div>
-  <div class="ex" id="e-birth"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>THE BIRTHPLACE — the claim, on the record.</b> The genre at the root of UK acid house is
-  literally named for these islands — <b>Balearic beat</b>, for the Balearics — and its
-  canonical author is Amnesia's resident DJ <b>Alfredo</b>, whom the dance press titles the
-  "Father of the Balearic beat." In summer 1987 four London DJs heard him at Amnesia and went
-  home to open Shoom, Spectrum and The Trip; 1988 became the Second Summer of Love. That is
-  why the dance press treats Ibiza as the spiritual home of rave for much of the world — an
-  export chain with the island at its source, held honestly below in its record and lore
-  halves.
-  <div class="q">"Balearic beat was named for its popularity among European nightclub and beach
-  rave patrons on the Balearic island of Ibiza, a popular tourist destination."</div>
-  <div class="src">Wikipedia, "Balearic beat" (quote verbatim) · DJ Mag obituary, "DJ Alfredo,
-  Ibiza legend and 'Father of the Balearic beat'" · the 1987 cards below carry the chain in
-  full</div></div>
-  <div class="ex" id="e-tierno"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>THE SPANISH DOOR — the crown quote, verified to the night.</b> Madrid, 28–29 January 1984:
-  the Fiesta del Estudiante y la Radio — "24 Horas de Música y Radio," organized by RNE Radio
-  3's <i>Tiempo de Universidad</i> — fills the Palacio de los Deportes. Mayor <b>Enrique
-  Tierno Galván</b>, from the stage, to the rockeros:
-  <div class="q">"Rockeros: el que no esté colocado, que se coloque y al loro"</div>
-  <i>Colocado</i>: slang for high. <i>Al loro</i>: Madrid slang for keep your eyes open. An
-  elected mayor blessing the party from an official stage, to applause — nine years after
-  Franco (dead 20 November 1975, ending nearly four decades of dictatorship, into a peaceful
-  transition to democracy). The single best exhibit of official tolerance this wing holds.
-  Ten years later the British Parliament answered the same music by defining its beat in
-  statute to ban it — Wing III holds that door's other side.
-  <div class="src">El País, 29 January 1984 (contemporaneous report; quote verbatim including
-  the opening "Rockeros:") · Archivo RTVE footage, "el concierto del Estudiante y la Radio de
-  1984" · Franco dates per Britannica</div>
-  <div class="vn">verify pass: several retellings misplace the line at the San Isidro fiestas or
-  a spring festival — the contemporaneous El País report and the RTVE archive fix it at the
-  January 1984 student-radio festival. The "III Gran" edition number and the Santo Tomás de
-  Aquino framing appear in neither source and are dropped.</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>The door's legal hinge — decriminalization was a pre-existing condition, not a reform.</b>
-  Spain never criminalized drug possession for personal use: a 1974 Supreme Court doctrine
-  held possession criminal only when intended for third-party consumption —
-  <div class="q">"In 1974, the Spanish Supreme Court clarified that possession would only be
-  criminal if intended for third-party consumption, exempting personal use from
-  prosecution—a ruling maintained to this day."</div>
-  The 1983 penal reform narrowed punishable conduct further and wrote the distinction between
-  seriously harmful substances and cannabis into statute-era practice. The window closed in
-  1992: the Ley Corcuera (LO 1/1992) made <i>public</i> consumption a grave administrative
-  infraction — fined, never a crime — while private use stayed outside the criminal law
-  entirely, BOE art. 25.1 verbatim:
-  <div class="q">"el consumo en lugares, vías, establecimientos o transportes públicos, así
-  como la tenencia ilícita, aunque no estuviera destinada al tráfico, de drogas tóxicas,
-  estupefacientes o sustancias psicotrópicas"</div>
-  The permissive window c. 1975–1992 is exactly when the island's open-air scene formed.
-  <div class="src">TalkingDrugs, "Spain's Decriminalisation: Decades of Quiet Innovation"
-  (Valldaura, Ojeda, Rosell &amp; Roig, 2025 — quote verbatim) · BOE-A-1992-4252, art. 25.1
-  (verbatim) · 1983 reform per OJP/NCJRS abstract + TNI Spain country report</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>The material fact: the floor had no roof.</b> Through the 1980s the flagship clubs ran
-  open-air and all-night with no equivalent of UK licensing hours — DJ Alfredo began his
-  Amnesia residency in 1983 on an uncovered dancefloor under the trees, sets running to
-  sunrise, while Ku drew crowds in the thousands around its open-air pool:
-  <div class="q">"He was given his first Amnesia gig in 1983 and played under the trees that
-  still stand, on the open-air dancefloor that is now covered."</div>
-  This is what visiting Britons had no legal way to reproduce at home — the climate made the
-  architecture. And the 1990s closed both windows at once: national law in 1992, and stricter
-  noise and licensing regulation that roofed the open-air floors — Amnesia complying with a
-  retractable roof over the Terrace.
-  <div class="q">"The nineties brought stricter noise and licensing regulations to Ibiza.
-  Amnesia acquiesced to municipal regulations with a new retractable roof over the
-  Terrace."</div>
-  <div class="src">DJ Mag, "Celebrating 50 years of Amnesia" (both quotes verbatim); Amnesia's
-  own history page · the finca and its resident have their own cards directly below</div></div>
-  <div class="ex" id="e-mol"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>THE MOLECULE — history only: dates, people, laws, one botanical family tree. No chemistry,
-  no process, no dosage; that ceiling is this card's law.</b> The paper trail begins as a
-  clerical line: MDMA first appears in Merck's records in 1912, lab-journal name
-  "Methylsafrylamin," an unnamed intermediate in German patent No. 274 350 (filed 24 December
-  1912) on a route to a <i>styptic</i> — a clotting agent. It was never the product. The
-  famous origin — "Merck made it in 1912 as an appetite suppressant" — is a myth the company's
-  own archive demolished: no appetite-suppressant program existed 1900–1960, and the substance
-  was not pharmacologically tested at all until 1927, work then halted for economic reasons
-  (the rumor's likely root: a confusion with MDA, which Smith Kline French did test in the
-  1950s).
-  <div class="q">"Merck applied for this patent to protect an alternative chemical method for
-  synthesizing the styptic hydrastinine, not appetite suppressants."</div>
-  Alexander Shulgin did not invent it — he reintroduced it: re-synthesized and self-tested
-  September 1976, passed to psychotherapist Leo Zeff in 1977, and in 1978 published with David
-  E. Nichols the first report of its human psychopharmacology — the paper trail behind his
-  erroneous "father of MDMA" title. Then the quiet therapeutic era: an estimated few dozen
-  therapists (1978–85), Zeff introducing it to about four thousand people and training more
-  than 150 therapists, Greer and Tolbert treating over eighty patients 1980–85 — their
-  published reports became classics of the era's clinical literature.
-  <div class="src">Bernschneider-Reif, Öxler &amp; Freudenmann, Pharmazie 61 (2006) — the Merck
-  archive study (quote verbatim) · Freudenmann et al., Addiction 101 (2006) · Passie, Drug
-  Science, Policy and Law 4 (2018) · Benzenhöfer &amp; Passie, Addiction 105 (2010)</div>
-  <div class="vn">verify pass: the therapy-era line ships corrected — Greer &amp; Tolbert's
-  reports are "classics in the field" (the source's own words), not "the era's main clinical
-  account"; and the few-dozen estimate covers 1978–1985.</div></div>
-  <div class="ex"><span class="kb lor" data-i18n="plur.lore">LORE — told as lore</span><br>
-  <b>The molecule's street lore — the name, the open bar, the island leg.</b> "Ecstasy" dates
-  to circa 1981, chosen by a Los Angeles distribution network purely as marketing — the
-  anonymous distributor, quoted in Bruce Eisner's <i>Ecstasy: The MDMA Story</i> (1989):
-  <div class="q">"it would sell better than calling it 'Empathy'"</div>
-  Dallas, the Starck Club (opened May 1984): while it was still legal, ecstasy was sold openly
-  across the bar — by bartenders and via the cigarette girl — a trade the club's oral history
-  attributes to individual employees, not management. And how it reached Ibiza in the
-  mid-1980s: the standard histories point to the Bhagwan Rajneesh sannyasin network, which
-  Matthew Collin's <i>Altered State</i> documents building distribution channels beyond the
-  US — but the specific island-arrival story remains anecdotal; David Hillier, checking it,
-  found no smoking gun. Three tellings, tellers named; that is what lore is.
-  <div class="src">Eisner (1989) via hedweb.com · Red Bull Music Academy Daily, "Nightclubbing:
-  Starck Club" (2016 — named tellers) · Collin, <i>Altered State</i> (1997) tested in Vice
-  (2018)</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>The scheduling, the family tree, the other documented life.</b> Texas: Michael Clegg's
-  "Texas Group" mass-distributed the tablet in Dallas before the ban — the DEA's own figure,
-  as reported: "distributing upwards of 500,000 pills a month in Dallas at the time." The
-  answer was the DEA's first-ever use of its emergency scheduling power — Federal Register 31
-  May 1985, effective 1 July 1985:
-  <div class="q">"EFFECTIVE DATE: On July 1, 1985, MDMA will be subject to Schedule I
-  control."</div>
-  The botanical ancestry, stated as encyclopedic fact and nothing more: <b>safrole</b> — the
-  principal component of sassafras oil, from the sassafras tree (<i>Sassafras albidum</i>) —
-  is the classic historically documented precursor family associated with MDMA, and is
-  internationally controlled as a listed precursor:
-  <div class="q">"Safrole is listed as a Table I precursor under the United Nations Convention
-  Against Illicit Traffic in Narcotic Drugs and Psychotropic Substances."</div>
-  The founder's "sassafras tree bark oil" is exactly this family tree — named as ancestry,
-  never conflating the tree with the synthetic. And the molecule's other documented life
-  continues: MAPS's phase-3 trials met their primary endpoints (MAPP1, <i>Nature Medicine</i>
-  2021; MAPP2, 2023), but on 4 June 2024 an FDA advisory committee voted against approval and
-  on 9 August 2024 the FDA issued Lykos Therapeutics a Complete Response Letter requiring
-  another phase-3 trial — published by the FDA itself 4 September 2025. Unapproved as of 2026;
-  the research arc goes on.
-  <div class="src">RBMA Daily / Texas Monthly (DEA figure quote verbatim) · Federal Register 50
-  FR 23118 (quote verbatim, public domain) · Wikipedia "Safrole" (UN 1988 Table I, quote
-  verbatim) · Lykos press release + MAPS statement on the CRL</div></div>
-  <div class="ex" id="e-canna"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>CANNABIS &amp; THE KINGDOM — the legal ground.</b> Personal consumption is not
-  criminalized in Spain and carries an administrative penalty only in public; beneath it sits
-  the Supreme Court's <b>consumo compartido</b> doctrine — closed-group, non-commercial
-  consumption is not inherently criminal — the legal seed of the cannabis club model. The
-  honest counterweight, in force 1 July 2015: the Ley Mordaza (LO 4/2015) makes public
-  consumption or possession a <i>serious administrative infraction</i> under art. 36.16, fined
-  €601–30,000 — no criminal record, a real penalty, heavily used. Private use remains outside
-  both criminal and administrative sanction.
-  <div class="q">"Drug consumption and possession for personal use are not criminalized in
-  Spain and carry an administrative penalty only when performed in a public place"</div>
-  <div class="src">ICEERS, Spain legal information (quote verbatim) · BOE, LO 4/2015 arts.
-  36.16 + 39.1 (fine band verified in the consolidated text)</div>
-  <div class="vn">verify pass: a popular framing attributes the doctrine to the 1978
-  Constitution's privacy protections — the cited source says no such thing, and the
-  attribution is dropped here. The source itself flags the doctrine as "recently revised": the
-  2015 Supreme Court ceiling, two cards down.</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>The clubs — legalisation without commercialisation.</b> The Basque origin: Kalamudia's
-  1997 public protest plantation, repeated without prosecution, dissolved around 2001–02 into
-  local associations cultivating for their own members. <b>Pannagh</b>: founded in Bilbao 22
-  February 2003, registered 20 June 2003; its president Martín Barriuso arrested with two
-  members while harvesting for the club in 2005 — and the favorable Basque court outcome in
-  2006 (confiscated cannabis returned) is credited with precipitating the nationwide
-  expansion. The model as its international students codify it:
-  <div class="q">"Cannabis social clubs (CSCs) are private, non-profit organisations in which
-  cannabis is collectively grown and distributed to registered members."</div>
-  The first CSC dates to 2001; roughly 400 clubs exist; Uruguay later wrote CSCs into statute;
-  "the growth of the CSC model in Spain demonstrates that cannabis legalisation does not have
-  to mean commercialisation." The boom's numbers: Catalonia went from about 40 clubs in 2011
-  to more than 500 with over 165,000 members by 2014 (a club-federation president's count —
-  an advocate's figures, flagged as such) — the press dubbing Barcelona "the Amsterdam of
-  southern Europe." The arc bends back: the Constitutional Court annulled Navarra's
-  foral regulation (STC 144/2017) and Catalonia's Law 13/2017 in full (STC 100/2018, 19
-  September 2018) — narcotics regulation is exclusive state competence:
-  <div class="q">"marijuana's regulation must be in the hands of the State, which has sole
-  responsibility for establishing the criminal penalties for narcotics"</div>
-  And the Supreme Court's 2015 <b>Ebers</b> line drew the criminal ceiling: organized
-  cultivation and distribution by a club of 290 members constitutes trafficking — large
-  open-membership clubs over the line, the small closed-circle doctrine intact beneath it.
-  <div class="src">Pannagh's own history + ENCOD (dates confirmed) · Transform Drug Policy
-  Foundation briefing (quotes verbatim) · Reason (2016 — boom figures) · Ara English (STC
-  quotes) · Poder Judicial news release (Ebers, STS 484/2015)</div>
-  <div class="vn">verify pass: the Barcelona enforcement line ships corrected — over 50 clubs
-  closed under Mayor Trias's threatened 150-meter zoning plan (which would have shut about
-  80%), reversed by Mayor Colau before it took effect; the widely repeated "a third of the
-  city's 145 clubs ordered closed" is not in the cited source. Malta is likewise dropped —
-  the briefing names only Uruguay.</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>Hemp — the kingdom's strategic fiber.</b> From 1665 to 1808 the Spanish crown ran a
-  sustained military supply system for <i>cáñamo</i>: hemp made the fleet's match-cord,
-  rigging and sails, and royal policy tried to extend its harvest to the American possessions
-  to escape dependence on Russian hemp bought in the Baltic:
-  <div class="q">"con él se producía cuerda mecha, y jarcia y velas para el aparejo de los
-  veleros"</div>
-  <b>Callosa de Segura</b> (Alicante) is the living monument — self-styled <i>capital del
-  cáñamo</i>, Spain's leading maker of hemp rope, nets and espadrille soles until synthetic
-  fibers displaced the craft in the 1960s; its Museo del Cáñamo (founded 1986, an official
-  Museographic Collection since 24 March 1994) exhibits the whole cycle from seed to spun
-  thread. (The popular telling dates the town's hemp working to c. 1300 and calls medieval
-  Callosa the largest producer — trade lore, carried as tradition, not documented.) Modern
-  lawful hemp: under the EU framework only certified-seed varieties below 0.3% THC qualify,
-  and the EU's fibre-hemp area grew from 20,540 ha (2015) to 33,020 ha (2022) — France,
-  Germany and the Netherlands lead; Spain cultivates inside the framework, a legal fact, not a
-  leadership claim. This estate keeps its own hemp line on the board:
-  <a href="dao-dashboard/">the hemp-hearts commons price feed</a> on the DAO dashboard.
-  <div class="src">Díaz-Ordóñez, <i>Espacio Tiempo y Forma</i> IV/32 (2019) — crown supply
-  system (quote verbatim, ES) · Ayuntamiento de Callosa de Segura + es.wikipedia (museum
-  dates) · European Commission DG AGRI hemp page (quotes verbatim)</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>The island inside the model.</b> Ibiza's scene runs on the same national theory — and it
-  is municipally documented, not just promoted: the city council has issued opening licenses
-  to 17 cannabis associations since 2018, and in March 2024 voted to regulate new openings
-  through a municipal ordinance, suspending licenses for new associations meanwhile:
-  <div class="q">"el Consistorio ha dado licencia de apertura a 17 de estos establecimientos
-  desde 2018"</div>
-  November 2023: members of the island's Domus Club protested outside the Ibiza courts over a
-  police raid they said was carried out without a judicial order. The argument the kingdom has
-  had for thirty years, the island has out loud too.
-  <div class="src">Periódico de Ibiza (26 March 2024 — quote verbatim) · Cañamo magazine (Domus
-  Club raid coverage)</div></div>
-  <div class="ex" id="e-amn"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>Amnesia: a farmhouse renamed by a philosopher.</b> A centuries-old finca near Sant Rafel —
-  five generations of the Planells family — sold in 1970, then leased in May 1976 by Madrid
-  philosopher <b>Antonio Escohotado</b> (later the author of <i>Historia general de las drogas</i>),
-  who wanted a name that meant going out to forget your problems. It opened for dancing in 1976:
-  <div class="q">"non-stop dancing around the small central water pool"</div>
-  — and through the 1980s the floor had <b>no roof</b>. The open sky is the physical precondition
-  of the Balearic sunrise set.
-  <div class="src">DJ Mag, "Celebrating 50 years of Amnesia" anniversary feature</div></div>
-  <div class="ex" id="e-alfredo"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>Alfredo — the exile who built the floor.</b> Alfredo Fiorito: born Rosario, Argentina, 1953;
-  a journalist. He left in 1976, after the coup — his own words:
-  <div class="q">"I leave my country for political reasons."</div>
-  — invoking the Proceso and the 30,000 disappeared. He reached Ibiza that September; candlemaker,
-  delivery driver, bartender, then the decks. First Amnesia gig 1983; resident from 1984; the
-  all-genres sunrise style — house beside disco, reggae, flamenco, Pink Floyd — that the UK would
-  later bottle as "Balearic": <i>"I blurred the division between black and white music."</i> His
-  own memory of the floor: <i>"There were Italians, french, four or three English, Spanish, South
-  Americans, Germans"</i> — and his record box built to serve all of them at once. He died on the
-  island December 24, 2024, aged 71. Amnesia's farewell: <i>"Your music and vision shaped the
-  sound of Balearic beat."</i>
-  <div class="src">Test Pressing, "DJ Alfredo — R.I.P. In His Own Words"; RA / DJ Mag / Mixmag obituaries (death date verified across all three)</div>
-  <div class="vn">verify note: the widely quoted "straight, gay, bi-sexual, young, old…" crowd
-  description traces to Space Ibiza's promotional bio, not to verified Alfredo speech — his
-  verbatim floor description above is the one on the record. The mixed-floor ethos itself is the
-  veteran's own telling: memoir, honored as such.</div></div>
-  <div class="ex" id="e-trip"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>The 1987 pipeline — record half.</b> In summer 1987, around Paul Oakenfold's 24th birthday,
-  Oakenfold, Danny Rampling, Nicky Holloway and Johnny Walker heard Alfredo at Amnesia — a trip
-  entwined, in their own accounts, with first ecstasy. The trip is documented:
-  <i>"it's certainly true to say that the trip happened."</i> Home again: Rampling launches
-  <b>Shoom</b> (late 1987 — Wing III picks up this thread), Oakenfold opens <b>Spectrum</b>
-  (April 1988, after his smaller Future night), Holloway launches <b>The Trip</b> (May 1988).
-  Walker founded no club — he played Oakenfold's nights; the legend usually forgets that.
-  <div class="src">Ears To The House investigative verification; RA and DJ Mag Alfredo obituaries corroborate the four names</div></div>
-  <div class="ex"><span class="kb lor" data-i18n="plur.lore">LORE — told as lore</span><br>
-  <b>The 1987 pipeline — lore half.</b> "Four DJs brought house music to Britain" is the
-  participant-told founding myth, polished across decades of their own retellings. House was
-  already in the UK — Jazzy M's pirate show from 1986, house at the Haçienda's Nude night from
-  1986 — and UK–Ibiza traffic predates the trip (Trevor Fung had DJed the island since 1982).
-  The pipeline is real; the origin-point framing is canon, not chronicle. Alfredo's own wry
-  postscript, on the record:
-  <div class="q">"When I first went to play in London I discovered that everyone was playing my
-  records."</div>
-  <div class="src">Oakenfold/Rampling/Holloway oral histories; the challenge documented by Ears To The House; Alfredo per Test Pressing</div></div>
-  <div class="ex" style="border-left-width:5px"><span class="kb lor" data-i18n="plur.lore">LORE — told as lore</span><br>
-  <b>THE PREMIERE EXHIBIT — the founder's own night on the island.</b> Told by the one who
-  built this museum, in his words, preserved as spoken:
-  <div class="q">"Sexy deep Spanish House; Ibiza style — where it rains inside from the
-  ceiling, raving until sunup and sleeping along the beach. Late 90's–'00s… a bracelet as
-  your passport to all the clubs on the island."</div>
-  The rain from the ceiling is the island's own signature (the water fiestas of the era);
-  the bracelet-passport is the kandi law's grandfather — one band on a wrist opening every
-  door. The wilder details of that economy stay in the era they belong to; Wing IV carries
-  what the culture built to keep its people safe, and the mUseUm never instructs. This card
-  needs no external source: <b>the teller was there, and the teller is named.</b> Every
-  RECORD below is the receipts under his night.
-  <div class="src">the wOlf — LoVis waTer nakaMOTO, founder — first-person memoir, docked
-  2026-08-22 · the museum's lore law: a named teller IS the source for their own night</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>The oldest floor: Sa Caleta, late 8th century BC.</b> A Phoenician settlement on the south
-  coast — stone buildings, communal ovens, metalworking — abandoned around 600 BC in a planned,
-  peaceful move to the bay that became the town of Ebusus. The "traditional" founding date of 654
-  BC comes from Diodorus Siculus: <i>"The date of the founding of the colony falls one hundred and
-  sixty years after the settlement of Carthage."</i>
-  <div class="src">Sa Caleta site museum (Consell d'Eivissa); Diodorus Siculus, Library of History 5.16 (Loeb, at LacusCurtius)</div>
-  <div class="vn">verify pass: 654 BC is a modern computation — Diodorus gives only "160 years
-  after Carthage"; the 814 BC anchor is Timaeus's date, supplied in the Loeb editor's footnote.
-  Archaeology at Sa Caleta predates the literary date by roughly two generations.</div></div>
-  <div class="ex" id="e-bes"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>The centerpiece: the name itself.</b> Ibiza/Eivissa descends from the Phoenician-Punic
-  <b>ʾYBŠM</b> (Iboshim) via Greek Ebousos and Latin Ebusus — and the favored scholarly reading
-  (J. M. Solà-Solé) is <b>"island of Bes."</b> Bes: the Egyptian dwarf god of <b>music, dance,
-  and the protection of households</b> — warder of snakes, adorning doorways, beloved without a
-  single temple. The material evidence is the island's own money: <b>Punic coins minted on Ebusus
-  from the 3rd century BC pair the name with the image of Bes</b> — the dominant coin type for
-  centuries, imitated as far as Pompeii. In Solà-Solé's telling, settlers credited the island's
-  famed lack of venomous animals to Bes's snake-warding and named the island for him. An honest
-  label says "commonly interpreted as," never "means" — an alternative reads the name as "island
-  of fragrance." But the coins say what they say: <b>an island that stamped the god of the dance
-  on its money.</b> This estate, whose every door begins with a b, takes note.
-  <div class="src">Ashmolean Museum, "Bes: Ancient Egyptian God, Fighter, Dancer, Companion"; Ibicasa island-history series (Solà-Solé attribution); numismatic record via the Ebusus/Bes coin catalogues</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>The goddess in the cave.</b> Es Culleram, discovered 1907: a Punic sanctuary of <b>Tanit</b>
-  in Ibiza's northeast — on the order of 600 whole terracotta figures and over a thousand more
-  heads, many the winged-shawled bust of the goddess; a double-faced plaque (found 1917) carries
-  an older dedication to Resef-Melkart and a later one to Tanit — the cult changing hands in
-  stone. Below the town, <b>Puig des Molins</b>: the largest and best-preserved Phoenician-Punic
-  necropolis in the western Mediterranean (grave counts vary by survey — thousands of hypogea;
-  UNESCO's data says 5,000+ graves over 5+ hectares).
-  <div class="src">ibiza.travel heritage pages (Consell d'Eivissa); MAEF — Museu Arqueològic d'Eivissa i Formentera; UNESCO property 417 data</div></div>
-  <div class="ex"><span class="kb lor" data-i18n="plur.lore">LORE — told as lore</span><br>
-  <b>Es Vedrà — the island's offshore mythology, sorted honestly.</b> The sirens who tempted
-  Odysseus lived there, says the telling — no ancient source places them anywhere near; the
-  attribution is modern island tradition. "The third most magnetic point on Earth," says the other
-  telling — no study exists, and the islet is limestone with no iron; its own tellers say "it is
-  believed," never citing a measurement. And Tanit's holy island, says the third — the living
-  mythology projecting the island's <i>genuine, excavated</i> Tanit cult onto the rock offshore.
-  Three tellings, all real as tellings; the receipts live in the cave and the necropolis.
-  <div class="src">Island tradition per Diario de Ibiza and travel literature; geology per Emily Kaufman, "The History Buff's Guide to Ibiza"</div></div>
-  <div class="ex" id="e-unesco"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>UNESCO, 1999: "Ibiza, Biodiversity and Culture."</b> A mixed cultural-natural listing: Dalt
-  Vila's Renaissance fortifications, Sa Caleta, Puig des Molins — and
-  <div class="q">"the best-conserved marine meadows of Posidonia Oceanica (Neptune Grass) in the
-  Mediterranean"</div>
-  The famous "100,000-year-old" Posidonia claim is published science with honest error bars: a
-  2012 PLoS ONE study found a single clone spanning ~15 km near Formentera, its age
-  model-dependent on assumed growth rates. Old beyond argument; the headline number is a model.
-  <div class="src">UNESCO World Heritage Centre, property 417 (quote verbatim); Arnaud-Haond et al., PLoS ONE 7(2): e30454 (2012)</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>1932: the philosopher on the beach.</b> Walter Benjamin lived and wrote on Ibiza twice —
-  April–July 1932, and again in 1933 fleeing Hitler's Germany — based around Sant Antoni, sending
-  frequent letters including to Gershom Scholem. In an April 1932 letter he already frets that a
-  hotel being built at the port will change the island's character. The first documented case of
-  the island's oldest ritual: arriving, and worrying about who arrives next.
-  <div class="src">Vicente Valero, <i>Experiencia y pobreza: Walter Benjamin en Ibiza</i> (2001/2017); <i>Cartas de la época de Ibiza</i> (2008)</div></div>
-  <div class="ex" id="e-pacha"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>The hippie loading dock — and 1973, the hinge year.</b> American draft resisters avoiding
-  Vietnam and European dropouts escaping post-war conformity settled in communes in the island's
-  rural reaches. In 1973 the bohemia acquired institutions: the Hotel Club Punta Arabí invited the
-  island's hippies to sell crafts to its guests — the Punta Arabí Hippy Market, still the
-  island's first and largest — and <b>Pacha</b> opened in the Ses Feixes wetlands facing Ibiza
-  Town, built like an Ibicencan farmhouse, six years after Ricardo Urgell's first Pacha in Sitges.
-  Bar Anita in Sant Carles is remembered as the settlers' hub — the village's only telephone, the
-  de facto post office — a telling preserved by everyone and archived by no one.
-  <div class="src">Diario de Ibiza; Illes Balears tourism board (market, 1973, verified); Wikipedia: The Pacha Group (verified); Bar Anita per local heritage tellings — that last card is lore-grade and labeled in-line</div></div>
-  <div class="ex" id="e-cdm"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>The sunset counter-gift: chillout.</b> Café del Mar opens June 20, 1980 in Sant Antoni — a
-  bar aimed at the sunset, interior by Lluís Güell. <b>José Padilla</b>, resident from 1991 after
-  years of selling the venue his sunset mixtapes, launches the Café del Mar compilations in 1994
-  and selects the first six — the template the whole chillout genre was pressed from. He died
-  October 18, 2020, aged 64; the venue's tribute: <i>"the Godfather of Chillout."</i> And in 1988
-  the UK bottled the uptempo side as a genre: <i>Balearic Beats Vol. 1</i> (FFRR — Oakenfold,
-  Tong, Fung; sleeve notes by Terry Farley) — a landmark widely regarded as codifying the
-  Balearic sound for the UK market.
-  <div class="src">cafedelmar.com/about (verified); Wikipedia: José Padilla (DJ); RA obituary; Discogs FFRR 1988 + The Ransom Note</div>
-  <div class="vn">verify pass: "first record to package the sound" softened — the sources call it
-  a landmark of an already-live scene, and no source states primacy. The tribute quote is from
-  Café del Mar's own posted farewell, not the news piece that carried it.</div></div>
-  <div class="ex" id="e-space"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>The superclub arc, with its receipts.</b> Ku opens 1979 in San Rafael; renamed
-  <b>Privilege</b> in 1995; the 2003 Guinness World Records lists it the world's largest nightclub
-  — 6,500 m², capacity 10,000; closed after 2019; the site reopened as UNVRS in 2025.
-  <b>Space</b> (1989, Pepe Roselló) ends its 27-year run October 2, 2016 with a ~20-hour closing
-  fiesta, 100+ DJs, Carl Cox playing the final track. <b>DC10</b>, an unmarked farmhouse at the
-  end of the airport runway, hosts the first <b>Circoloco</b> in July 1999 — a free Monday
-  after-hours for roughly 80 people, no headliners, no ads — and grows into the underground's
-  defining institution. (Sources disagree on DC10's founding year, 1989 vs 1990 — displayed, not
-  resolved.)
-  <div class="src">Wikipedia: Privilege Ibiza (Guinness 2003 via its citation) / UNVRS / DC10; Ibiza Spotlight review of the last Space fiesta</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>And the state-vs-dance wing echoes on the island itself.</b> October 2017: San Antonio moves
-  to declare the West End a Special Acoustic Protection Zone after summer noise hit 85.9 dB — 20
-  over the legal limit — imposing 65 dB day / 55 dB night. <i>"This could and should be a turning
-  point for the area."</i> May 2024: shop alcohol sales banned 9:30pm–8am in the party zones under
-  the Balearic decree against excesses. May 24, 2024: roughly 1,000 march with Prou Eivissa
-  ("Enough Ibiza") for a tourism moratorium and housing for locals — tourism being over 80% of the
-  island's economy. The island that taught the world the open floor now argues, out loud and in
-  law, about who the floor is for. That argument is the tradition too.
-  <div class="src">RA news (ZPAE, quote: Pablo Valdés); DJ Mag (2024 ordinance; Prou Eivissa march); Wikipedia: 2024–2025 anti-tourism protests in Spain</div></div>
-  <div class="beads" aria-hidden="true"></div>
-</section>
-
-<section class="w3">
-  <h2>Ⅲ · <span data-i18n="plur.w3">WING III · THE STATE vs THE DANCE — the law that named the music</span></h2>
-  <svg class="wg" viewBox="0 0 64 48" aria-hidden="true"><rect x="16" y="10" width="32" height="28" rx="3" stroke="var(--u)" stroke-width="2.5" fill="none"/><path d="M16 10 q-7 4 0 9 M48 10 q7 4 0 9" stroke="var(--u)" stroke-width="2" fill="none" opacity=".6"/><line x1="24" y1="19" x2="40" y2="19" stroke="var(--u)" stroke-width="1.6"/><line x1="24" y1="24" x2="40" y2="24" stroke="var(--u)" stroke-width="1.6"/><line x1="24" y1="29" x2="34" y2="29" stroke="var(--u)" stroke-width="1.6"/></svg>
-  <div class="wl"><b>In 1994 the United Kingdom wrote a genre of music into criminal statute.</b>
-  This wing holds the exact words — and what the culture did next.</div>
-  <div class="ex" id="e-cja"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>The centerpiece. Criminal Justice and Public Order Act 1994, section 63(1)(b), enacted
-  text, verbatim:</b>
-  <div class="q">"music" includes sounds wholly or predominantly characterised by the emission of
-  a succession of repetitive beats</div>
-  Royal Assent November 3, 1994. The only place in UK statute law where a genre of music is
-  effectively defined — written to empower police to shut down raves.
-  <div class="src"><a href="https://www.legislation.gov.uk/ukpga/1994/33/section/63/enacted" target="_blank" rel="noopener">legislation.gov.uk — s.63, enacted</a> · verified verbatim against the statute by this museum's fact-check pass</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>The threshold tightened later.</b> As enacted, s.63 reached open-air gatherings of <b>100+
-  people</b> where amplified music plays at night, "likely to cause serious distress to the
-  inhabitants of the locality." The Anti-social Behaviour Act 2003 cut the number to <b>20</b>.
-  <div class="src"><a href="https://www.legislation.gov.uk/ukpga/1994/33/section/63/enacted" target="_blank" rel="noopener">legislation.gov.uk — enacted</a> vs <a href="https://www.legislation.gov.uk/ukpga/1994/33/section/63" target="_blank" rel="noopener">current text</a></div>
-  <div class="vn">verify pass correction: the cut to 20 applies to England &amp; Wales; the Scottish
-  version of s.63 retains the 100-person threshold.</div></div>
-  <div class="ex" id="e-ssol"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>What they were afraid of started in a gym.</b> Shoom — Danny Rampling's weekly all-nighter in
-  a Southwark Street fitness centre, late 1987, straight off the Ibiza/Amnesia trip — ignites UK
-  acid house; 1988–89 becomes the <b>Second Summer of Love</b>, smiley-face emblem and all. By 1989
-  the scene is throwing "orbital" raves around the M25 — Sunrise, Energy, Biology — with meeting
-  points released through BT's Voicebank answerphones, tens of thousands strong.
-  <div class="src">Mixmag Summer of Love retrospectives; Red Bull "The road to rave" (M25); Wikipedia: Shoom / Second Summer of Love / Acid house party</div></div>
-  <div class="ex"><span class="kb lor" data-i18n="plur.lore">LORE — told as lore</span><br>
-  <b>Whose smiley?</b> The best-known telling puts the acid-house smiley on Danny Rampling's Shoom
-  flyers from early 1988; another credits the Bomb the Bass "Beat Dis" sleeve (February 1988). Both
-  artifacts are real and dated; who was <i>first</i> genuinely varies by teller.
-  <div class="src">Scene oral history, retold in Matthew Collin's <i>Altered State</i> and elsewhere</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>Castlemorton Common, May 22–29, 1992.</b> The UK's largest illegal rave — estimates 20,000 to
-  40,000 — after police diverted traveller convoys from the Avon Free Festival. The media storm
-  around it is consistently cited as the direct inspiration for the 1994 Act's rave provisions.
-  Thirteen members of Spiral Tribe were tried for it at Worcester Crown Court in one of the longest,
-  most expensive cases in British legal history — around £4 million. <b>All were acquitted.</b>
-  <div class="src">DJ Mag, "The history of Spiral Tribe"; Wikipedia: Castlemorton Common Festival (attendance varies by source)</div></div>
-  <div class="ex"><span class="kb lor" data-i18n="plur.lore">LORE — told as lore</span><br>
-  <b>The travellers' telling: the police made the festival.</b> Operation Nomad shunted the convoys
-  over the county line, West Mercia stood back, and the first-night TV bulletins were the best
-  advertisement a free party ever had. The diversion and the coverage are documented; "they let it
-  happen" is a framing told differently by ravers, residents, and both police forces.
-  <div class="src">Free-party oral tradition, retold in DJ Mag, Vice, and BBC retrospectives</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>The culture answered in three registers.</b> On the street: the Advance Party alliance and
-  three London "Kill the Bill" demonstrations in 1994, ending in Hyde Park on October 9. On wax:
-  Autechre's <i>Anti EP</i> (Warp, Sept 1994), whose sealed sticker warned two tracks contained
-  repetitive beats — while the third was engineered so that
-  <div class="q">"Flutter has been programmed in such a way that no bars contain identical beats"</div>
-  — protest written in the drum programming itself. And on the road: Spiral Tribe and the sound
-  systems took their rigs to Europe, seeding the <b>teknival</b> movement. The law passed; the
-  dance routed around it.
-  <div class="src">GOV.UK FOI release on the 1994 CJB protests; Anti EP sticker text per Discogs/Warp documentation; DJ Mag Spiral Tribe history</div></div>
-  <div class="beads" aria-hidden="true"></div>
-</section>
-
-<section class="w4">
-  <h2>Ⅳ · <span data-i18n="plur.w4">WING IV · THE RITUAL — kandi, the handshake, respect in practice</span></h2>
-  <svg class="wg" viewBox="0 0 64 48" aria-hidden="true"><circle cx="32" cy="24" r="14" stroke="var(--r)" stroke-width="2.5" fill="none"/><circle cx="32" cy="10" r="3.4" fill="var(--p)"/><circle cx="44.5" cy="17.5" r="3.4" fill="var(--l)"/><circle cx="44.5" cy="30.5" r="3.4" fill="var(--u)"/><circle cx="32" cy="38" r="3.4" fill="var(--r)"/></svg>
-  <div class="wl"><b>A creed you can shake hands with.</b> Four gestures, a bracelet, free water,
-  and the strange history of governments deciding whether care is contraband.</div>
-  <div class="hand" aria-label="the four steps of the PLUR handshake">
-    <div class="hs"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M24 44 L24 22 M32 44 L32 14 M24 30 Q28 26 32 30" stroke="var(--p)" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M40 44 L40 22 M48 44 L48 14 M40 30 Q44 26 48 30" stroke="var(--p)" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".5"/></svg><div class="t">1 · PEACE</div></div>
-    <div class="hs"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 46 C18 36 14 24 22 18 C28 14 32 20 32 24" stroke="var(--l)" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M32 46 C46 36 50 24 42 18 C36 14 32 20 32 24" stroke="var(--l)" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".5"/></svg><div class="t">2 · LOVE</div></div>
-    <div class="hs"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="14" y="26" width="22" height="12" rx="6" stroke="var(--u)" stroke-width="3.5" fill="none"/><rect x="28" y="26" width="22" height="12" rx="6" stroke="var(--u)" stroke-width="3.5" fill="none" opacity=".5"/></svg><div class="t">3 · UNITY</div></div>
-    <div class="hs"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="16" y="27" width="32" height="10" rx="5" stroke="var(--r)" stroke-width="3" fill="none"/><circle cx="22" cy="45" r="3" fill="var(--p)"/><circle cx="30" cy="47" r="3" fill="var(--l)"/><circle cx="38" cy="47" r="3" fill="var(--u)"/><circle cx="46" cy="45" r="3" fill="var(--r)"/></svg><div class="t">4 · RESPECT</div></div>
-  </div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>The handshake, as practiced:</b> peace signs touch fingertip-to-fingertip; two half-hearts
-  join; hands clasp, fingers interlocked; then —
-  <div class="q">"trade your kandi through your interlocked hands, one at a time"</div>
-  Etiquette rides with it: tradeables on the right arm, keepsakes on the left; never ask for a
-  specific piece; never re-trade kandi made <i>for you</i>.
-  <div style="margin-top:6px">The ritual, live: <a href="kandi.html">🍬 the kandi bar</a> —
-  compose one, do the four-step handshake, gift it; the etiquette above enforced in code.</div>
-  <div class="src"><a href="https://iheartraves.com/blogs/post/how-to-trade-kandi-at-a-rave" target="_blank" rel="noopener">iHeartRaves, "How to Trade Kandi at a Rave"</a> — the ritual as codified in-scene</div>
-  <div class="vn">verify pass: the popular "bracelet slid over still-clasped hands" phrasing is not
-  what the source says — the trade goes <i>through</i> the interlocked hands. Corrected on display.</div></div>
-  <div class="ex"><span class="kb lor" data-i18n="plur.lore">LORE — told as lore</span><br>
-  <b>Where the handshake and kandi come from — honestly, nobody has the receipt.</b> No dated
-  primary source fixes the four-step exchange's origin; every credible telling makes it a 2000s
-  codification, learned person-to-person (the USC Digital Folklore Archives collects it from raver
-  informants). Kandi itself is traced in community tellings to 1990s "candy ravers" and the
-  friendship-bracelet exchange. The gestures postdate the 1993 motto by about a decade.
-  <div class="src">USC Digital Folklore Archives, "PLUR Handshake and the Exchanging of Kandi"; scene guides (Freedom Rave Wear, iHeartRaves)</div></div>
-  <div class="ex" id="e-ds"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>Respect-in-practice was raver-built — and it predates the famous names.</b> Toronto's
-  <b>TRIP!</b> (est. 1995): <i>"born … out of a need for appropriate drug and sex information
-  within the Toronto rave scene."</i> Then <b>DanceSafe</b>, founded 1998 by Emanuel Sferios in the
-  SF Bay Area — public drug-checking and volunteer booths stocked with
-  <div class="q">"free condoms, earplugs, water, fact-based drug information, and consent
-  education materials"</div>
-  <div class="src"><a href="https://dancesafe.org/about-us/" target="_blank" rel="noopener">dancesafe.org</a>; <a href="https://www.tripproject.ca/" target="_blank" rel="noopener">tripproject.ca</a> · both founding facts verified</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>PLURR — the fifth letter.</b> A circulating variant adds a second R: <b>Responsibility</b> —
-  to self and community, foregrounding harm reduction. The variant's existence in print is record;
-  every single-origin story for it is lore, credited only to unnamed veteran ravers.
-  <div class="src">Wikipedia "PLUR" (documents the variant); scene guides</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>2001, New Orleans: care prosecuted as contraband.</b> Federal prosecutors used the "crack
-  house" statute against the State Palace Theatre rave promoters — citing <b>bottled water, an
-  air-conditioned chill room, glow sticks, pacifiers and massage tables</b> as evidence of
-  facilitating drug use. The ACLU later got the glowstick/pacifier ban lifted on First Amendment
-  grounds. The exact items this wing calls respect-in-practice were, for a while, evidence.
-  <div class="src">Alternet, "Chemical Warfare: The RAVE Act" (2002); ACLU statements of the period</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>The UK wrote the opposite answer.</b> Home Office "Safer Clubbing" guidance (2002):
-  <div class="q">"It is therefore imperative that there is free and unrestricted, but monitored,
-  access to cold drinking water at all times."</div>
-  By 2010/2014 free potable water on request was a <b>mandatory statutory condition</b> on all
-  alcohol-licensed premises: <i>"The responsible person must ensure that free potable water is
-  provided on request…"</i> The rave-era water fight, ended by statute — in the ravers' favor.
-  <div class="src">Safer Clubbing (Home Office/LDPF, 2002), para 2.20 verified verbatim; Licensing Act 2003 Mandatory Conditions Order 2014, legislation.gov.uk</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>Consent, formalized.</b> The Association of Independent Festivals' "Safer Spaces" charter
-  (2017, relaunched 2022, with Rape Crisis England &amp; Wales, Good Night Out, Safe Gigs for Women,
-  Girls Against, UN Women) defines consent as agreement <i>"by choice … freedom and capacity to
-  make that choice,"</i> revocable at any time, and teaches bystander intervention. Respect,
-  operationalized — the fourth word grew teeth.
-  <div class="src">Association of Independent Festivals, Safer Spaces at Festivals charter</div></div>
-  <div class="beads" aria-hidden="true"></div>
-</section>
-
-<section class="w5">
-  <h2>Ⅴ · <span data-i18n="plur.w5">WING V · THE SENSORY FLOOR — the dance floor as a neurodivergent sanctuary</span></h2>
-  <svg class="wg" viewBox="0 0 64 48" aria-hidden="true"><path d="M8 40 L32 8 L56 40 Z" stroke="var(--p)" stroke-width="2.5" fill="none" stroke-linejoin="round"/><path d="M23 40 L32 25 L41 40" stroke="var(--p)" stroke-width="1.6" fill="none" opacity=".55"/></svg>
-  <div class="wl"><b>The founder of this estate calls his own register "hippy autistic PLUR."</b>
-  This wing is why that phrase is coherent — the floor as regulation, belonging, and design law.</div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>Stimming is regulation — per autistic adults themselves.</b> Kapp et al. 2019 (32 autistic
-  adults, via interviews and focus groups):
-  <div class="q">"Autistic adults highlighted the importance of stimming as an adaptive mechanism
-  that helps them to soothe or communicate intense emotions or thoughts"</div>
-  The study's own title carries the point: <i>"People should be allowed to do what they like."</i>
-  <div class="src">Kapp, Steward, Crane, Elliott, Elphick, Pellicano &amp; Russell (2019), <i>Autism</i> — quote verbatim from the abstract</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>The floor, first person.</b> DJ Mag's 2023 accessibility feature documents autistic ravers and
-  researchers: Daryl Okene on the dance floor —
-  <div class="q">"latching onto pieces of freedom in public spaces, where I can usually feel quite
-  socially anxious"</div>
-  — and artist Gus: <i>"To dance without inhibition — as though no one is watching."</i> Dr Cathy
-  Manning's design rule: ask autistic people what would help; that is how changes actually benefit
-  them. Named venues exist: Spectrum at Dalston Superstore, collectives e-numbers and MAD.
-  <div class="src">DJ Mag, "How can we make clubs more accessible to autistic ravers?" (Rihana Osman, Sept 2023)</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>The scene runs neurodivergent-rich.</b> DJ Mag reports an Association For Electronic Music
-  survey: <b>58%</b> of respondents working in electronic music demonstrated a neurodivergent
-  condition (38% clinically diagnosed), against a general-population estimate of 15–20%.
-  <div class="src">DJ Mag, "Why are there so many neurodivergent people in electronic music?" (Harold Heath, Sept 2023) — figures as reported; the survey's raw report was not independently fetched</div></div>
-  <div class="ex"><span class="kb lor" data-i18n="plur.lore">LORE — told as lore</span><br>
-  <b>"A rave is one big stim" — and its honest dissent.</b> The telling (Wrong Planet forum, 2013,
-  user metalab):
-  <div class="q">"It's like an entire social construct designed to revolve around and support
-  extreme hyper sensitivity."</div>
-  The same thread holds the variants that keep this card honest: other autistic users describe
-  raves as overwhelming, and one warns of seizure risk from the lights. The floor is sanctuary
-  <i>for some</i> — the culture's job is making that a choice, not a gamble.
-  <div class="src">wrongplanet.net, "Raves, stimming paradise?" (2013) — named tellers, dissent preserved</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>Sanctuary is being built into the infrastructure.</b> Glastonbury's Sensory Calm Spaces
-  (Bristol charity Diverse UK): first tent 2022, four across the site by 2024 — adjustable
-  lighting, weighted blankets, ear defenders, autism-trained staff. <i>"It gives us somewhere to
-  stop for a minute."</i> In the US, KultureCity (founded 2014) certifies venues Sensory Inclusive,
-  and Live Nation began certifying its venues with them.
-  <div class="src">ITV News West Country (June 2024); ABILITY Magazine on KultureCity × Live Nation</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>The flash laws — where rave lighting meets written design law.</b> WCAG 2.3.1, normative
-  verbatim: <i>"Web pages do not contain anything that flashes more than three times in any one
-  second period…"</i> The UK HSE's club guidance caps strobes at 4 flashes/second (as relayed by
-  the Epilepsy Society); Epilepsy Action places the danger band at 10–25 flashes/second; UK
-  broadcast rules hold the three-flash line. <b>This estate obeys the same law: nothing on these
-  pages flashes faster than 3 Hz</b> — this museum's own comb cycles at 5.2 seconds, and every
-  animation stops for <code>prefers-reduced-motion</code>.
-  <div class="src">W3C WCAG SC 2.3.1 (verbatim); Epilepsy Society / Epilepsy Action guidance (Epilepsy Society page verified via indexed text — direct fetch returns 403, declared honestly); Ofcom/ASA flashing-image rules</div></div>
-  <div class="beads" aria-hidden="true"></div>
-</section>
-
-<section class="w6">
-  <h2>Ⅵ · <span data-i18n="plur.w6">WING VI · THE LIVING LAW — PLUR now, and the register it rules here</span></h2>
-  <svg class="wg" viewBox="0 0 64 48" aria-hidden="true"><path d="M32 7 v28 M20 36 h24" stroke="var(--l)" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M14 13 h36" stroke="var(--l)" stroke-width="2" stroke-linecap="round"/><path d="M14 13 l-6.5 13 h13 Z M50 13 l-6.5 13 h13 Z" stroke="var(--l)" stroke-width="1.8" fill="none" stroke-linejoin="round" opacity=".85"/></svg>
-  <div class="wl"><b>Thirty-plus years on, the four words are still working — and still being
-  fought over.</b> The last wing is the present tense.</div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>The attendees are the headliners.</b> Pasquale Rotella's stated ethos, from his underground
-  days to EDC's half-million attendances: the true headliners at a rave are the crowd, not the
-  booked artists — and EDC prints its lineups <b>alphabetically, in equal-sized type</b>, to make
-  the point typographic. Insomniac sets up free kandi-making tables; Rotella collects kandi
-  himself.
-  <div class="src">LA Weekly, "EDC 30" + "Inside the World of the Kandi Kids"</div>
-  <div class="vn">verify pass: the source uses "headliners" (lowercase, in quotes) for attendees —
-  it does not establish capitalized "Headliners" as official branding. Displayed as the ethos it
-  documents, not the trademark it doesn't.</div></div>
-  <div class="ex" id="e-tm"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>The live tension: can four words be property?</b> February 10, 2023 — Insomniac Holdings, LLC
-  files US trademark application <b>serial 97790066</b> for the word "PLUR," covering clothing.
-  The community's recorded reaction: <i>"That's not very PLUR of them."</i> Frankie Bones — whom
-  the coverage credits with <b>popularizing</b> PLUR, not coining it — publicly supported the
-  filing. A Change.org petition, "PLUR is NOT for Sale" (June 15, 2025, Malorie Richards), asks
-  the USPTO to reject it:
-  <div class="q">"PLUR — Peace, Love, Unity, Respect — is not a brand. It's a way of life. …
-  You don't protect it — you restrict it."</div>
-  This museum takes no side; it files the dispute itself as the exhibit. A word born from a
-  mailing-list signature now has lawyers. The floor will decide what it always decides: what
-  people actually say to each other with their hands.
-  <div class="src">USPTO serial 97790066 (filing verified); Stereogum (Apr 2023); Extra Chill (June 2025);
-  <a href="https://www.change.org/p/plur-is-not-for-sale" target="_blank" rel="noopener">change.org petition</a> (verified)</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>The Belgian covenant.</b> Tomorrowland's motto, verbatim and official: <i>"Live Today, Love
-  Tomorrow, Unite Forever"</i> — its attendees the "People of Tomorrow," and its middle clause
-  institutionalized as <b>Love Tomorrow</b>, a standing impact platform with five pillars
-  (Responsibility, Nature, Innovation, Health, Respect) and measurable 2030 targets. An ethos
-  slogan with a budget.
-  <div class="src">Tomorrowland official channels; lovetomorrow.com</div></div>
-  <div class="ex"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>PLUR crosses oceans.</b> Japan: Osaka raver "Party Fish Yuri" founds PLURNET and explains the
-  four words on national TV after meeting kandi at Ultra Miami 2013. Brazil: <i>"Paz, Amor, União
-  e Respeito"</i> circulates in the scene's own press. South Africa: lifestyle media teaches the
-  kandi code — with this museum's honest note that this documents PLUR's <i>reach</i> into African
-  media, not yet a documented local kandi scene. Still taught at commercial events: Relentless
-  Beats' 2024 "Raver's Code." The four words never needed a passport.
-  <div class="src">iHeartRaves Raver Spotlight (2015); AfterMag Brazil (2022); Briefly.co.za (2025); Relentless Beats (2024)</div></div>
-  <div class="ex"><span class="kb lor" data-i18n="plur.lore">LORE — told as lore</span><br>
-  <b>The founding utterance stays alive precisely because it is lore.</b> Its own originator tells
-  it with shifting dates, boroughs, and wording; the Raver's Manifesto frames the whole culture as
-  one global tribal village; thirty-year veterans keep re-telling it because the telling <i>is</i>
-  the transmission. A museum that pinned it to one version would kill the thing it preserves.
-  <div class="src">Frankie Bones, Tumblr ("PLUR", "The Raver's Manifesto"); Vice (2015)</div></div>
-  <div class="ex" id="e-law"><span class="kb rec" data-i18n="plur.record">RECORD — cited</span><br>
-  <b>And here, PLUR is written law.</b> On this estate the founder — thirty years on the floor —
-  ruled the 🎛 raver register's constitution in his own words: <i>"antiracist, voluntarist, hippy
-  autistic PLUR vibe."</i> Every raver-register line estate-wide answers to it; machine drafts wear
-  ⚙ until his word upgrades them; and the honesty laws this museum runs on — literal language, no
-  signal prettier than the truth, sensory-safe by measurement — are the autistic clause, kept.
-  The toggle at the bottom of this very page is the exhibit, live.
-  <div class="src"><a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/RAVER-REGISTER-LAW.md" target="_blank" rel="noopener">RAVER-REGISTER-LAW.md</a> — ruled 2026-08-21, in force</div></div>
-  <div class="beads" aria-hidden="true"></div>
-</section>
-
-<section>
-  <div class="wl" style="margin-bottom:12px"><b>🏆 THE ARCHIVISTS — prestige to the ones who
-  kept the record.</b> Every wing above stands on someone who refused to let the culture's
-  memory rot: <b>hyperreal.org</b> — Brian Behlendorf's rave archive, still holding the
-  primary PLUR record thirty years on; <b>the Internet Archive's Wayback Machine</b> —
-  serving the pages the live web already lost; <b>Frankie Bones' own blog</b> — a founder
-  keeping his own tellings public, in his own voice, on his own page; the municipal
-  landmark registers and legislation archives that hold the statutes verbatim. The estate's
-  law of prestige, founder-ruled: <i>preserve the essence of the time, the place, and the
-  post.</i> Respect first — <b>then continuation</b>: the mirror law below is how this
-  ecosystem autonomously archives what its bees learn and publish, so the archivists'
-  work survives even the archivists.</div>
-  <div class="wl" style="margin-bottom:10px"><b>🗄 THE bDATA ARCHIVE — the mirror law.</b>
-  Every RECORD above cites a source on somebody's central server — and central servers rot,
-  move, and censor. The estate's answer is its own storage law: snapshots of every cited
-  source, hashed and routed to <b>Arweave</b> (small public forever-files) and <b>Autonomi</b>
-  (everything bigger) — the same AR/ANT split the bANTfarm runs on. <b>Status, honestly:</b>
-  the snapshot-and-manifest pipeline is dispatched; the uploads themselves cost real ANT and
-  AR and are executed by the founder's own hand (no seat holds keys or spends funds — law).
-  When a mirror lands, its card grows a 🗄 link beside the source; and here is the beauty, the founder's own words: <b>one contributor mirrors and spends the ANT/AR — and everyone has it forever.</b> Any hand can be the paying hand: pick a pending entry, upload with your own wallet, PR the transaction id back — and because both rails are content-addressed, your mirror either hashes to the manifest's sha256 or it doesn't. Sponsorship without trust; permanence as a gift. Until then this line is the promise, dated 2026-08-22, and the manifest will be public the way everything here is.</div>
-  <div class="wl" style="margin:0"><b>Museum method, in one line:</b> six research wings, every
-  load-bearing record adversarially re-fetched at its source, corrections shown in amber ⚖ lines,
-  lore labeled lore with its tellers named — the estate's corpus law applied to cultural memory.
-  A museum that labels its lore lies to no one. <span style="color:var(--faint)">Curated 2026-08-21 ·
-  the day's research fleet: 12 agents, 225 source fetches · Eivissa annex added 2026-08-22
-  (founder-ordered): 6 agents, 97 source fetches, same gate · the island showcase rebuilt
-  2026-08-22 (founder-ordered): Spanish door + molecule + cannabis &amp; hemp lanes, 24 claims
-  with 9 adversarial verdicts, composed from the two paid payloads — nobody re-paid for the
-  digging.</span></div>
-</section>
-</main>
-<footer>
-  🪩 <span class="P" style="color:var(--p)">P</span><span style="color:var(--l)">L</span><span style="color:var(--u)">U</span><span style="color:var(--r)">R</span> ·
-  reads only, cites always · <a href="hardware/build.html">🔧 the festival proving ground</a> ·
-  <a href="bset.html">♫ for the wOlf</a> ·
-  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/plur.html" target="_blank" rel="noopener">view source</a> ·
-  <a href="index.html" data-i18n="law.hive">← the hive</a>
-</footer>
-<script>
-(function(){
-"use strict";
-/* the comb hero — same deterministic 127-cell geometry the founder ruled highest-impact,
-   in the museum's four PLUR colors + two estate accents; CSS keyframes only, ≤3 Hz law */
-var COLS=['#39c5cf','#D655BB','#e6b32e','#a78bfa','#7ddf8f','#45C2DC'];
-var NS='http://www.w3.org/2000/svg';
-var comb=document.getElementById('comb');
-if(comb){
-  var S=12,cx=170,cy=155,frag=document.createDocumentFragment(),n=0;
-  for(var q=-6;q<=6;q++)for(var r=-6;r<=6;r++){
-    if(Math.abs(q+r)>6)continue;
-    var x=cx+S*1.7320508*(q+r/2), y=cy+S*1.5*r;
-    var ring=Math.max(Math.abs(q),Math.abs(r),Math.abs(q+r));
-    var hsh=(((q+7)*73856093)^((r+7)*19349663))>>>0;
-    var poly=document.createElementNS(NS,'polygon'),v=[];
-    for(var i=0;i<6;i++){var a=Math.PI/180*(60*i-30);
-      v.push((x+(S-1.2)*Math.cos(a)).toFixed(1)+','+(y+(S-1.2)*Math.sin(a)).toFixed(1));}
-    poly.setAttribute('points',v.join(' '));
-    poly.setAttribute('fill',COLS[hsh%6]);
-    poly.style.setProperty('--dl',(ring*.4+((hsh>>>8)%100)/100*1.5).toFixed(2)+'s');
-    poly.style.setProperty('--d',(2.6+((hsh>>>8)%100)/100*2.2).toFixed(2)+'s');
-    frag.appendChild(poly); n++;
+  :root{
+    --ai:#45C2DC; --biomass:#86CC72; --sovereign:#9C6FD6; --sovereign-soft:#B79FE0;
+    --you:#D655BB; --info:#6FA9E0; --b-value:#E8B54B; --guard:#B7A8F7;
+    --bg:#040B08; --ink:#E9F2EC; --ink-mut:#8FA79C; --ink-dim:#5B7368; --line:#16211C;
+    --rainbow:linear-gradient(100deg,#FBFB9F,#86CC72,#45C2DC,#6FA9E0,#9C6FD6,#D655BB);
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
   }
-  comb.appendChild(frag);
-}
-/* kandi bead dividers — one strand per wing, deterministic colors */
-document.querySelectorAll('.beads').forEach(function(b,wi){
-  for(var i=0;i<14;i++){ var d=document.createElement('i');
-    d.style.background=COLS[(wi*5+i*3)%6]; b.appendChild(d); }
-});
-/* the era ribbon — a map, not a corridor: click what calls to you */
-document.querySelectorAll('.rib .cell').forEach(function(b){
-  b.addEventListener('click',function(){
-    var t=document.getElementById(b.getAttribute('data-go'));
-    if(!t) return;
-    var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    t.setAttribute('tabindex','-1');
-    t.focus({preventScroll:true});
-    t.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:var(--font);overflow-x:hidden;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);}
+
+  /* ── the floor ── */
+  .open{min-height:88vh;display:grid;place-items:center;text-align:center;padding:70px 22px;position:relative}
+  .open .glow{position:absolute;inset:auto;width:min(78vw,620px);height:min(78vw,620px);border-radius:50%;
+    background:radial-gradient(circle,rgba(214,85,187,.14),rgba(69,194,220,.07) 45%,transparent 70%);
+    filter:blur(28px);animation:breathe 11s ease-in-out infinite}
+  .open .inner{position:relative;z-index:1}
+  .plur{font-size:clamp(3.4rem,17vw,10rem);font-weight:800;letter-spacing:.06em;line-height:.95;
+    background:var(--rainbow);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;
+    color:transparent;animation:drift 14s linear infinite;padding-bottom:.06em}
+  .expand{font-family:var(--mono);font-size:clamp(.68rem,2.4vw,.95rem);letter-spacing:.34em;
+    text-transform:uppercase;color:var(--ink-mut);margin-top:6px}
+  .open p{color:var(--ink-mut);max-width:34ch;margin:26px auto 0;font-size:1.04rem;line-height:1.6}
+  .open .floor{color:var(--ink);margin-top:20px;font-size:1.06rem;max-width:32ch}
+  .hint{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-dim);margin-top:38px}
+
+  @keyframes drift{to{background-position:220% 0}}
+  @keyframes breathe{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.13);opacity:1}}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+  /* ── a word's field ── */
+  .field{padding:78px 20px 88px;position:relative;border-top:1px solid var(--line)}
+  .field .en{font-size:clamp(2.6rem,11vw,6.6rem);font-weight:800;letter-spacing:-.02em;line-height:1;
+    text-align:center;color:var(--hue);text-shadow:0 0 62px var(--hue)}
+  .field .gloss{text-align:center;font-family:var(--mono);font-size:11px;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--ink-dim);margin-top:16px}
+  .f-peace{--hue:#8FE0C6}
+  .f-love{--hue:#D655BB}
+  .f-unity{--hue:#6FA9E0}
+  .f-respect{--hue:#E8B54B}
+
+  .constellation{max-width:1000px;margin:44px auto 0;display:flex;flex-wrap:wrap;
+    justify-content:center;align-items:center;gap:14px 26px}
+  .w{position:relative;padding:8px 6px;cursor:pointer;border:0;background:none;color:inherit;
+    font-family:inherit;text-align:center;border-radius:10px;transition:transform .22s,color .22s}
+  .w .t{display:block;font-size:var(--sz,1.6rem);line-height:1.2;color:var(--ink);
+    transition:color .22s,text-shadow .22s}
+  .w .r{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.05em;
+    color:var(--ink-dim);margin-top:3px;opacity:0;transition:opacity .22s}
+  .w:hover,.w:focus-visible{outline:none;transform:translateY(-3px)}
+  .w:hover .t,.w:focus-visible .t{color:var(--hue);text-shadow:0 0 26px var(--hue)}
+  .w:hover .r,.w:focus-visible .r{opacity:1}
+  .w.speaking .t{color:var(--hue);text-shadow:0 0 34px var(--hue)}
+  .w.novoice{cursor:default}
+  .w.novoice:hover{transform:none}
+  .w .mute{position:absolute;top:-4px;right:-2px;font-family:var(--mono);font-size:8px;
+    letter-spacing:.05em;color:var(--guard);opacity:0;transition:opacity .22s}
+  .w.novoice:hover .mute{opacity:.75}
+  .w[data-sz="xl"]{--sz:2.5rem}
+  .w[data-sz="l"]{--sz:2rem}
+  .w[data-sz="m"]{--sz:1.55rem}
+  .w[data-sz="s"]{--sz:1.25rem}
+  .w.root .t{color:var(--hue);opacity:.95}
+
+  /* ── the note ── */
+  .note{max-width:640px;margin:52px auto 0;padding:22px 24px;border-left:3px solid var(--hue);
+    background:rgba(255,255,255,.022);border-radius:0 12px 12px 0}
+  .note h3{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--hue);margin-bottom:11px}
+  .note p{color:var(--ink-mut);font-size:1rem;line-height:1.65}
+  .note p + p{margin-top:11px}
+  .note b{color:var(--ink);font-weight:600}
+  .note .big{font-size:1.5rem;color:var(--ink);letter-spacing:.02em;display:block;margin:14px 0;text-align:center}
+
+  /* ── voice bar ── */
+  .vb{position:sticky;top:0;z-index:40;background:rgba(4,11,8,.9);backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--line);padding:9px 20px}
+  .vb .in{max-width:1000px;margin:0 auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .vb select{font:inherit;font-size:12px;background:#0A1410;color:var(--ink);border:1px solid var(--line);
+    border-radius:999px;padding:5px 11px;max-width:210px}
+  .vb button{font:inherit;font-size:12px;font-weight:600;background:none;color:var(--ink-mut);
+    border:1px solid var(--line);border-radius:999px;padding:5px 13px;cursor:pointer}
+  .vb button:hover{color:var(--ink);border-color:var(--ai)}
+  .vb .st{font-family:var(--mono);font-size:10px;color:var(--ink-dim);margin-left:auto;letter-spacing:.04em}
+
+  footer{text-align:center;padding:64px 22px 84px;border-top:1px solid var(--line);color:var(--ink-dim);font-size:.86rem}
+  footer .m{font-family:var(--mono);letter-spacing:.16em;color:var(--sovereign-soft);margin-top:12px;font-size:.8rem}
+
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+  /* ── rose token — NEW, never a repaint (§4). rose-red = a gift offered to the living.
+       Latvian law: flowers to the living come in ODD numbers only; even is for the grave. ── */
+  :root{ --rose:#C81E3C; --rose-lift:#E8506B; --rose-deep:#7A1226; }
+
+  /* ── the rose gate ── */
+  .roses{padding:84px 20px 70px;border-top:1px solid var(--line);text-align:center;position:relative;overflow:hidden}
+  .roses h2{font-size:clamp(1.6rem,6vw,2.6rem);font-weight:800;letter-spacing:-.01em}
+  .roses h2 b{color:var(--rose)}
+  .roses .why{color:var(--ink-mut);max-width:46ch;margin:14px auto 0;line-height:1.6}
+  .roses .why b{color:var(--rose-lift);font-weight:600}
+  .bouquet{width:min(92vw,640px);height:auto;margin:26px auto 8px;display:block}
+  .petal{transform-origin:0 0;opacity:0}
+  .rp{opacity:0;transform-box:fill-box;transform-origin:center}
+  .bloomed .rp{animation:bloomr .7s cubic-bezier(.2,.8,.3,1) forwards}
+  @keyframes bloomr{from{opacity:0;transform:scale(.25)}to{opacity:1;transform:scale(1)}}
+  .bloomed .petal{animation:bloom .9s cubic-bezier(.2,.8,.3,1) forwards}
+  @keyframes bloom{from{opacity:0;transform:scale(.1) rotate(var(--pr,0deg))}to{opacity:1;transform:scale(1) rotate(var(--pr,0deg))}}
+  .rosehead{transform-origin:center}
+  .bloomed .rosehead{animation:sway 7.5s ease-in-out infinite}
+  .mourning .rosehead{animation:none}
+  @keyframes sway{0%,100%{transform:rotate(-1.6deg)}50%{transform:rotate(1.6deg)}}
+  .oddlaw{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-dim);margin-top:10px}
+  .oddpick{display:flex;gap:8px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+  .oddpick button{font-family:var(--mono);font-size:13px;padding:8px 16px;border-radius:999px;border:1px solid var(--line);
+    background:transparent;color:var(--ink-mut);cursor:pointer;transition:all .25s}
+  .oddpick button:hover{border-color:var(--rose);color:var(--ink)}
+  .oddpick button[aria-pressed="true"]{border-color:var(--rose);color:var(--rose-lift);background:rgba(200,30,60,.09)}
+  .roselinks{margin-top:22px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+  .roselinks a{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--rose-lift);text-decoration:none;
+    border:1px solid rgba(200,30,60,.4);border-radius:999px;padding:9px 16px;transition:all .25s}
+  .roselinks a:hover{background:rgba(200,30,60,.12);border-color:var(--rose)}
+
+  /* ── the conversation floor ── */
+  .talk{padding:80px 20px 90px;border-top:1px solid var(--line)}
+  .talk .wrap{max-width:760px;margin:0 auto}
+  .talk h2{font-size:clamp(1.7rem,6.4vw,2.8rem);font-weight:800;text-align:center;letter-spacing:-.01em}
+  .talk h2 .who{display:block;font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:.22em;
+    color:var(--ai);margin-top:10px}
+  .talk .sub{text-align:center;color:var(--ink-mut);max-width:48ch;margin:14px auto 0;line-height:1.6}
+  .tongues{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:26px;
+    font-family:var(--mono);font-size:12px;color:var(--ink-dim)}
+  .tongues select{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:10px;
+    padding:9px 12px;font-family:var(--mono);font-size:13px;max-width:44vw}
+  .tongues .arrow{color:var(--you);font-size:15px}
+  .seeds{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+  .seeds button{font-size:12.5px;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:transparent;
+    color:var(--ink-mut);cursor:pointer;transition:all .25s;font-family:var(--font)}
+  .seeds button:hover{border-color:var(--sovereign);color:var(--ink);transform:translateY(-1px)}
+  .thread{margin-top:28px;display:flex;flex-direction:column;gap:16px;min-height:40px}
+  .msg{border:1px solid var(--line);border-radius:16px;padding:16px 18px;animation:rise .5s ease both;max-width:92%}
+  .msg .tag{font-family:var(--mono);font-size:10px;letter-spacing:.16em;margin-bottom:8px}
+  .msg.you{align-self:flex-end;background:rgba(214,85,187,.07);border-color:rgba(214,85,187,.35)}
+  .msg.you .tag{color:var(--you)}
+  .msg.hive{align-self:flex-start;background:rgba(69,194,220,.05);border-color:rgba(69,194,220,.3)}
+  .msg.hive .tag{color:var(--ai)}
+  .msg.sys{align-self:center;background:transparent;border-style:dashed;color:var(--ink-dim);font-family:var(--mono);font-size:12px;text-align:center}
+  .live{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline}
+  .lw{border:1px solid rgba(69,194,220,.35);background:rgba(69,194,220,.06);border-radius:12px;color:var(--ink);
+    padding:7px 12px;font-size:1.25rem;line-height:1.3;cursor:pointer;transition:all .22s;animation:pop .45s cubic-bezier(.2,.9,.3,1.2) both;
+    font-family:var(--font)}
+  .lw:hover{transform:translateY(-2px) scale(1.04);border-color:var(--ai);box-shadow:0 0 22px rgba(69,194,220,.25)}
+  .lw.speaking{border-color:var(--ai);box-shadow:0 0 26px rgba(69,194,220,.5);color:var(--ai)}
+  .lw.novoice{cursor:default;opacity:.75}
+  @keyframes pop{from{opacity:0;transform:scale(.6) translateY(8px)}to{opacity:1;transform:none}}
+  .msg .rom{font-family:var(--mono);font-size:12px;color:var(--ink-dim);margin-top:8px;letter-spacing:.03em}
+  .msg .gloss{color:var(--ink-mut);font-size:.95rem;margin-top:6px;line-height:1.55}
+  .msg .coach{color:var(--ink-mut);font-size:.92rem;margin-top:12px;padding-top:10px;border-top:1px dashed var(--line);line-height:1.55}
+  .msg .try{margin-top:12px}
+  .msg .try button{font-size:12.5px;padding:7px 13px;border-radius:999px;border:1px solid rgba(134,204,114,.4);
+    background:transparent;color:var(--biomass);cursor:pointer;font-family:var(--font)}
+  .msg .try button:hover{background:rgba(134,204,114,.1)}
+  .composer{display:flex;gap:10px;margin-top:24px}
+  .composer input{flex:1;background:var(--bg);border:1px solid var(--line);border-radius:14px;color:var(--ink);
+    padding:14px 16px;font-size:1rem;font-family:var(--font);min-width:0}
+  .composer input:focus{outline:none;border-color:var(--you);box-shadow:0 0 0 3px rgba(214,85,187,.15)}
+  .composer button{border-radius:14px;border:1px solid var(--line);background:transparent;color:var(--ink);
+    padding:0 18px;font-size:1rem;cursor:pointer;transition:all .25s;font-family:var(--font)}
+  .composer .send{border-color:rgba(214,85,187,.5);color:var(--you)}
+  .composer .send:hover{background:rgba(214,85,187,.12)}
+  .composer .mic[data-live="1"]{border-color:var(--rose);color:var(--rose-lift);box-shadow:0 0 18px rgba(200,30,60,.35);animation:breathe 1.6s ease-in-out infinite}
+  .composer .mic:disabled{opacity:.4;cursor:default}
+  .talkst{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--ink-dim);text-align:center;margin-top:12px;min-height:15px}
+  .thinking{display:inline-flex;gap:5px;align-items:center}
+  .thinking i{width:6px;height:6px;border-radius:50%;background:var(--ai);animation:think 1.1s ease-in-out infinite;font-style:normal}
+  .thinking i:nth-child(2){animation-delay:.18s}.thinking i:nth-child(3){animation-delay:.36s}
+  @keyframes think{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:1;transform:translateY(-4px)}}
+
+  /* ── the cornerstone band ── */
+  .stone{padding:74px 20px 80px;border-top:1px solid var(--line)}
+  .stone .wrap{max-width:860px;margin:0 auto;text-align:center}
+  .stone h2{font-size:clamp(1.5rem,5.6vw,2.3rem);font-weight:800;letter-spacing:-.01em}
+  .stone .sub{color:var(--ink-mut);max-width:52ch;margin:14px auto 0;line-height:1.6}
+  .pillars{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-top:34px;text-align:left}
+  .pillar{border:1px solid var(--line);border-radius:14px;padding:18px;transition:all .3s;animation:rise .6s ease both}
+  .pillar:hover{transform:translateY(-3px);border-color:var(--pc)}
+  .pillar .word{font-weight:800;font-size:1.1rem;color:var(--pc)}
+  .pillar .is{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--ink-dim);margin-top:4px}
+  .pillar p{color:var(--ink-mut);font-size:.9rem;line-height:1.55;margin-top:10px}
+  .p-peace{--pc:var(--guard)} .p-love{--pc:var(--you)} .p-unity{--pc:var(--sovereign)} .p-respect{--pc:var(--info)}
+  .stone .dock{margin-top:30px;font-family:var(--mono);font-size:12.5px;color:var(--ink-mut)}
+  .stone .dock a{color:var(--b-value);text-decoration:none;border-bottom:1px dashed rgba(232,181,75,.5)}
+  .stone .dock a:hover{border-bottom-style:solid}
+
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation:none!important;transition:none!important}
+    .petal{opacity:1;transform:scale(1) rotate(var(--pr,0deg))}
+    .rp{opacity:1;transform:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="vb"><div class="in">
+  <select id="vsel"><option>voices…</option></select>
+  <button id="vsalam" type="button">▶ shalom · salām</button>
+  <span class="st" id="vst">—</span>
+</div></div>
+
+<section class="open">
+  <div class="glow"></div>
+  <div class="inner">
+    <div class="plur">PLUR</div>
+    <div class="expand">peace · love · unity · respect</div>
+    <p class="floor">Thirty years ago, first time on the floor, somebody said <b>come as you are — we accept you</b>.</p>
+    <p>Four words that were never anyone's property. Here they are in every tongue this house speaks. Touch one and hear it.</p>
+    <div class="hint" data-key="d.plur.hint">tap any word · then talk back with the hive ↓</div>
+  </div>
+</section>
+
+<section class="field f-peace">
+  <div class="en">peace</div>
+  <div class="gloss">the first word</div>
+  <div class="constellation">
+    <button class="w root" data-sz="xl" data-say="शान्तिः" data-lang="sa"><span class="t">शान्तिः</span><span class="r">śāntiḥ · sanskrit</span><span class="mute">no voice</span></button>
+    <button class="w root" data-sz="xl" data-say="שלום" data-lang="he"><span class="t">שלום</span><span class="r">shalom · hebrew</span><span class="mute">no voice</span></button>
+    <button class="w root" data-sz="xl" data-say="سلام" data-lang="ar"><span class="t">سلام</span><span class="r">salām · arabic</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="l" data-say="miers" data-lang="lv"><span class="t">miers</span><span class="r">latvian</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="l" data-say="мир" data-lang="ru"><span class="t">мир</span><span class="r">mir · russian · also "world"</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="мир" data-lang="uk"><span class="t">мир</span><span class="r">myr · ukrainian</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="тынычлык" data-lang="tt"><span class="t">тынычлык</span><span class="r">tınıçlıq · tatar</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="l" data-say="和平" data-lang="zh-CN"><span class="t">和平</span><span class="r">hépíng · chinese</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="l" data-say="平和" data-lang="ja"><span class="t">平和</span><span class="r">heiwa · japanese</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="평화" data-lang="ko"><span class="t">평화</span><span class="r">pyeonghwa · korean</span><span class="mute">no voice</span></button>
+    <button class="w root" data-sz="m" data-say="สันติภาพ" data-lang="th"><span class="t">สันติภาพ</span><span class="r">sǎntiphâap · thai</span><span class="mute">no voice</span></button>
+    <button class="w root" data-sz="m" data-say="शांति" data-lang="hi"><span class="t">शांति</span><span class="r">shānti · hindi</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="s" data-say="শান্তি" data-lang="bn"><span class="t">শান্তি</span><span class="r">shanti · bengali</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="صلح" data-lang="fa"><span class="t">صلح</span><span class="r">solh · persian</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="s" data-say="امن" data-lang="ur"><span class="t">امن</span><span class="r">aman · urdu</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="barış" data-lang="tr"><span class="t">barış</span><span class="r">turkish</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="s" data-say="béke" data-lang="hu"><span class="t">béke</span><span class="r">hungarian</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="s" data-say="rauha" data-lang="fi"><span class="t">rauha</span><span class="r">finnish</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="s" data-say="fred" data-lang="sv"><span class="t">fred</span><span class="r">swedish · danish · norwegian</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="paix" data-lang="fr"><span class="t">paix</span><span class="r">french</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="paz" data-lang="es"><span class="t">paz</span><span class="r">spanish</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="s" data-say="sìth" data-lang="gd"><span class="t">sìth</span><span class="r">gaelic</span><span class="mute">no voice</span></button>
+  </div>
+  <div class="note">
+    <h3>the word two peoples share</h3>
+    <span class="big">שלום · سلام</span>
+    <p><b>Shalom</b> and <b>salām</b> are the same word. One Semitic root — <b>S‑L‑M</b> — meaning whole, entire, unbroken. Not the absence of war; the state of nothing being missing.</p>
+    <p>Two peoples who have agreed on almost nothing for a century greet each other every day, in their own languages, with the same word. Nobody had to negotiate that. It was already true before anyone drew a border.</p>
+    <p>And <b>शान्तिः</b> travelled the other way — Sanskrit <i>śānti</i> walked east with the sutras into Thai <b>สันติภาพ</b> and stayed in Hindi as <b>शांति</b>. Peace has been crossing frontiers longer than the frontiers have existed.</p>
+  </div>
+</section>
+
+<section class="field f-love">
+  <div class="en">love</div>
+  <div class="gloss">mīlestība ir karalis</div>
+  <div class="constellation">
+    <button class="w root" data-sz="xl" data-say="mīlestība" data-lang="lv"><span class="t">mīlestība</span><span class="r">latvian</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="l" data-say="प्रेम" data-lang="sa"><span class="t">प्रेम</span><span class="r">prema · sanskrit</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="xl" data-say="愛" data-lang="ja"><span class="t">愛</span><span class="r">ai · ài · japanese · chinese</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="l" data-say="사랑" data-lang="ko"><span class="t">사랑</span><span class="r">sarang · korean</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="любов" data-lang="uk"><span class="t">любов</span><span class="r">liubov · ukrainian</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="мәхәббәт" data-lang="tt"><span class="t">мәхәббәт</span><span class="r">mäxäbbät · tatar</span><span class="mute">no voice</span></button>
+    <button class="w root" data-sz="l" data-say="عشق" data-lang="fa"><span class="t">عشق</span><span class="r">ʿeshq · persian · the burning kind</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="حب" data-lang="ar"><span class="t">حب</span><span class="r">ḥubb · arabic</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="אהבה" data-lang="he"><span class="t">אהבה</span><span class="r">ahava · hebrew</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="ความรัก" data-lang="th"><span class="t">ความรัก</span><span class="r">khwaam rák · thai</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="प्रेम" data-lang="hi"><span class="t">प्रेम</span><span class="r">prem · hindi</span><span class="mute">no voice</span></button>
+    <button class="w root" data-sz="m" data-say="aşk" data-lang="tr"><span class="t">aşk</span><span class="r">turkish · the consuming one</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="s" data-say="sevgi" data-lang="tr"><span class="t">sevgi</span><span class="r">turkish · the tender one</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="s" data-say="szeretet" data-lang="hu"><span class="t">szeretet</span><span class="r">hungarian</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="s" data-say="rakkaus" data-lang="fi"><span class="t">rakkaus</span><span class="r">finnish</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="amour" data-lang="fr"><span class="t">amour</span><span class="r">french</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="amor" data-lang="es"><span class="t">amor</span><span class="r">spanish</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="s" data-say="gaol" data-lang="gd"><span class="t">gaol</span><span class="r">gaelic</span><span class="mute">no voice</span></button>
+  </div>
+  <div class="note">
+    <h3>one english word, many real ones</h3>
+    <p>English has one word and makes it carry everything. Most of these don't. Turkish keeps <b>aşk</b> and <b>sevgi</b> apart — the fire and the tenderness — and using the wrong one is a real mistake. Persian <b>عشق</b> means a love that costs you something.</p>
+    <p>So "translation" is the wrong frame here. These aren't versions of an English word. They're distinctions English lost.</p>
+  </div>
+</section>
+
+<section class="field f-unity">
+  <div class="en">unity</div>
+  <div class="gloss">the hive word</div>
+  <div class="constellation">
+    <button class="w root" data-sz="xl" data-say="एकता" data-lang="sa"><span class="t">एकता</span><span class="r">ekatā · sanskrit · one-ness</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="l" data-say="vienotība" data-lang="lv"><span class="t">vienotība</span><span class="r">latvian</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="єдність" data-lang="uk"><span class="t">єдність</span><span class="r">yednist · ukrainian</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="берлек" data-lang="tt"><span class="t">берлек</span><span class="r">berlek · tatar</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="l" data-say="团结" data-lang="zh-CN"><span class="t">团结</span><span class="r">tuánjié · chinese</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="統一" data-lang="ja"><span class="t">統一</span><span class="r">tōitsu · japanese</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="단결" data-lang="ko"><span class="t">단결</span><span class="r">dangyeol · korean</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="وحدة" data-lang="ar"><span class="t">وحدة</span><span class="r">waḥda · arabic</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="אחדות" data-lang="he"><span class="t">אחדות</span><span class="r">achdut · hebrew</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="s" data-say="وحدت" data-lang="fa"><span class="t">وحدت</span><span class="r">vahdat · persian</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="ความสามัคคี" data-lang="th"><span class="t">ความสามัคคี</span><span class="r">sǎmákkhii · thai</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="एकता" data-lang="hi"><span class="t">एकता</span><span class="r">ektā · hindi</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="birlik" data-lang="tr"><span class="t">birlik</span><span class="r">turkish</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="s" data-say="egység" data-lang="hu"><span class="t">egység</span><span class="r">hungarian</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="s" data-say="ykseys" data-lang="fi"><span class="t">ykseys</span><span class="r">finnish</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="unité" data-lang="fr"><span class="t">unité</span><span class="r">french</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="unidad" data-lang="es"><span class="t">unidad</span><span class="r">spanish</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="s" data-say="aonachd" data-lang="gd"><span class="t">aonachd</span><span class="r">gaelic</span><span class="mute">no voice</span></button>
+  </div>
+  <div class="note">
+    <h3>one, made into a thing</h3>
+    <p>Sanskrit <b>एकता</b> is just <i>eka</i> — one — with a suffix that turns it into a noun. One‑ness. Hindi kept it unchanged for three thousand years. Turkish <b>birlik</b> does exactly the same trick with <i>bir</i>, its own word for one, from a completely unrelated family.</p>
+    <p>Two languages that share no ancestor reached for the same idea and built it the same way: take <i>one</i>, and make it something you can hold.</p>
+  </div>
+</section>
+
+<section class="field f-respect">
+  <div class="en">respect</div>
+  <div class="gloss">the one that has to be given</div>
+  <div class="constellation">
+    <button class="w root" data-sz="xl" data-say="כבוד" data-lang="he"><span class="t">כבוד</span><span class="r">kavod · hebrew · weight, honour</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="l" data-say="cieņa" data-lang="lv"><span class="t">cieņa</span><span class="r">latvian</span><span class="mute">no voice</span></button>
+    <button class="w root" data-sz="l" data-say="احترام" data-lang="ar"><span class="t">احترام</span><span class="r">iḥtirām · arabic</span><span class="mute">no voice</span></button>
+    <button class="w root" data-sz="m" data-say="хөрмәт" data-lang="tt"><span class="t">хөрмәт</span><span class="r">xörmät · tatar · from the arabic</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="повага" data-lang="uk"><span class="t">повага</span><span class="r">povaha · ukrainian</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="l" data-say="尊重" data-lang="zh-CN"><span class="t">尊重</span><span class="r">zūnzhòng · chinese</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="尊敬" data-lang="ja"><span class="t">尊敬</span><span class="r">sonkei · japanese</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="존중" data-lang="ko"><span class="t">존중</span><span class="r">jonjung · korean</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="सम्मान" data-lang="sa"><span class="t">सम्मान</span><span class="r">sammāna · sanskrit</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="सम्मान" data-lang="hi"><span class="t">सम्मान</span><span class="r">sammān · hindi</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="ความเคารพ" data-lang="th"><span class="t">ความเคารพ</span><span class="r">khwaam khaoróp · thai</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="s" data-say="احترام" data-lang="fa"><span class="t">احترام</span><span class="r">ehterām · persian</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="saygı" data-lang="tr"><span class="t">saygı</span><span class="r">turkish</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="s" data-say="tisztelet" data-lang="hu"><span class="t">tisztelet</span><span class="r">hungarian</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="s" data-say="kunnioitus" data-lang="fi"><span class="t">kunnioitus</span><span class="r">finnish</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="respect" data-lang="fr"><span class="t">respect</span><span class="r">french</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="m" data-say="respeto" data-lang="es"><span class="t">respeto</span><span class="r">spanish</span><span class="mute">no voice</span></button>
+    <button class="w" data-sz="s" data-say="urram" data-lang="gd"><span class="t">urram</span><span class="r">gaelic</span><span class="mute">no voice</span></button>
+  </div>
+  <div class="note">
+    <h3>respect has weight</h3>
+    <p>Hebrew <b>כבוד</b> comes from a root meaning <i>heavy</i>. To respect someone is to treat them as having weight — as something that can't be waved aside. It's the same root behind <i>glory</i>.</p>
+    <p>And <b>احترام</b> travelled: Arabic into Turkic, and Tatar says <b>хөрмәт</b> to this day. A word for respect crossed a language border and was kept. That's the thing the word describes, happening to the word itself.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+  CORPUS MANIFEST — door-intro law: every English string below is NEW and
+  must be folded into the Blanguage corpus as keys, translated ×27 with the
+  blind round-trip at birth, BEFORE this ships to a door. Keys reserved:
+    d.plur.roses.h · d.plur.roses.why · d.plur.roses.oddlaw · d.plur.roses.cut · d.plur.roses.museum
+    d.plur.talk.h · d.plur.talk.who · d.plur.talk.sub · d.plur.talk.yours
+    d.plur.talk.learning · d.plur.talk.send · d.plur.talk.hold · d.plur.talk.offline
+    d.plur.stone.h · d.plur.stone.sub · d.plur.stone.{peace,love,unity,respect}
+    d.plur.stone.dock
+═══════════════════════════════════════════════════════════════════ -->
+
+<section class="roses" id="roses" data-key="d.plur.roses">
+  <h2 data-key="d.plur.roses.h">roses for the <b>crossing</b></h2>
+  <p class="why" data-key="d.plur.roses.why">In Riga the flower shops never close, because you do not arrive
+    empty‑handed. <b>Red roses</b>, always an <b>odd number</b> — in Latvia, even flowers are for the grave.
+    The core is frozen; the garden is skin.</p>
+  <svg class="bouquet" id="bouquet" viewBox="0 0 640 460" role="img"
+       aria-label="a bouquet of red roses, always an odd number"></svg>
+  <div class="oddlaw" data-key="d.plur.roses.oddlaw">odd numbers only · 3 · 5 · 7 · 11 · even is for mourning</div>
+  <div class="oddpick" id="oddpick" role="group" aria-label="how many roses">
+    <button type="button" data-n="3">3 roses</button>
+    <button type="button" data-n="5" aria-pressed="true">5 roses</button>
+    <button type="button" data-n="7">7 roses</button>
+    <button type="button" data-n="11">11 roses</button>
+  </div>
+  <div class="roselinks">
+    <a href="qrroses.html" data-key="d.plur.roses.cut">✂ cut this bouquet as a QR rose</a>
+    <a href="qrtree.html">grow the QR tree</a>
+    <a href="blight/museum.html" data-key="d.plur.roses.museum">even roses stand at the Museum of the DeAD ⟶</a>
+  </div>
+</section>
+
+<section class="talk" id="talk" data-key="d.plur.talk">
+  <div class="wrap">
+    <h2 data-key="d.plur.talk.h">now say it back
+      <span class="who" data-key="d.plur.talk.who">bLOVErAi · Ai tutor · two‑way</span>
+    </h2>
+    <p class="sub" data-key="d.plur.talk.sub">Pick the tongue you live in and the one you want to learn.
+      Write or speak — the hive answers in both, and every word it gives you can be tapped and heard.
+      This is where a stranger stops reading the estate and starts <b>talking</b> to it.</p>
+
+    <div class="tongues">
+      <label>your tongue
+        <select id="myLang" aria-label="your tongue"></select>
+      </label>
+      <span class="arrow" aria-hidden="true">⇄</span>
+      <label>learning
+        <select id="learnLang" aria-label="the tongue you are learning"></select>
+      </label>
+    </div>
+
+    <div class="seeds" id="seeds">
+      <button type="button" data-seed="Teach me to say “peace” and greet someone with it.">☮ start with peace</button>
+      <button type="button" data-seed="Teach me the word for love, and how to tell someone I love them.">♥ start with love</button>
+      <button type="button" data-seed="How do I say “come as you are — we accept you”?">✦ come as you are</button>
+      <button type="button" data-seed="Greet me, then teach me to answer politely.">✋ just greet me</button>
+    </div>
+
+    <div class="thread" id="thread" aria-live="polite"></div>
+
+    <div class="composer">
+      <button type="button" class="mic" id="mic" title="hold to speak" aria-label="hold to speak">🎙</button>
+      <input id="say" type="text" autocomplete="off" spellcheck="false"
+             placeholder="write in your tongue, or hold the mic…" aria-label="your message">
+      <button type="button" class="send" id="send" data-key="d.plur.talk.send">send ↑</button>
+    </div>
+    <div class="talkst" id="talkst">—</div>
+  </div>
+</section>
+
+<section class="stone" data-key="d.plur.stone">
+  <div class="wrap">
+    <h2 data-key="d.plur.stone.h">four words are the whole constitution</h2>
+    <p class="sub" data-key="d.plur.stone.sub">Communication is the cornerstone of this estate.
+      Every law we have is one of these four words, written down carefully.</p>
+    <div class="pillars">
+      <div class="pillar p-peace" style="animation-delay:.05s">
+        <div class="word">peace</div><div class="is">→ the guard</div>
+        <p data-key="d.plur.stone.peace">A refusal is not an error. The guard that says no, gently, is peace working — which is why it is never painted alarm‑red.</p>
+      </div>
+      <div class="pillar p-love" style="animation-delay:.15s">
+        <div class="word">love</div><div class="is">→ the LOVErnment</div>
+        <p data-key="d.plur.stone.love">Law written as care. mīlestība ir karalis — love is king — is not the motto of the governance stack; it is its spec.</p>
+      </div>
+      <div class="pillar p-unity" style="animation-delay:.25s">
+        <div class="word">unity</div><div class="is">→ the hive</div>
+        <p data-key="d.plur.stone.unity">Many mouths, one corpus. Twenty‑seven tongues render every key, and one of them is here because a real person asked for her language.</p>
+      </div>
+      <div class="pillar p-respect" style="animation-delay:.35s">
+        <div class="word">respect</div><div class="is">→ bRESPECT</div>
+        <p data-key="d.plur.stone.respect">Hebrew keeps the secret: respect means weight. Meetings where every voice is given weight — that is the whole mechanism.</p>
+      </div>
+    </div>
+    <p class="dock" data-key="d.plur.stone.dock">every word on this page lives in the
+      <a href="blanguage.html">language dock</a> · 27 tongues · one corpus ·
+      <a href="index.html">back to the hive</a></p>
+  </div>
+</section>
+
+
+<footer>
+  <div>four words · every mouth this house speaks · beehive nature reserve</div>
+  <div class="m">come as you are · we accept you</div>
+</footer>
+
+<script>
+/* bvoice — the estate's shared voice module.
+   Any element with data-say + data-lang speaks. Zero network, zero deps.
+   Honest about absence: a tongue with no installed voice is LABELLED, never silently mute. */
+(function(){
+  "use strict";
+  var synth = window.speechSynthesis;
+  var words = [].slice.call(document.querySelectorAll('[data-say][data-lang]'));
+  var sel = document.getElementById('vsel'), st = document.getElementById('vst');
+  var salam = document.getElementById('vsalam');
+  var voices = [], byLang = {}, override = null, current = null;
+
+  if(!synth){
+    st.textContent = 'no speech engine in this browser';
+    words.forEach(function(w){ w.classList.add('novoice'); });
+    sel.disabled = salam.disabled = true;
+    window.bvoice = { speak:function(t,l,then){ if(then) then(); }, has:function(){ return false; } };
+    return;
+  }
+  function base(t){ return (t||'').toLowerCase().split(/[-_]/)[0]; }
+
+  function index(){
+    voices = synth.getVoices() || [];
+    byLang = {};
+    voices.forEach(function(v){ var b = base(v.lang); (byLang[b] = byLang[b]||[]).push(v); });
+    var have = {}, miss = {};
+    words.forEach(function(w){
+      var b = base(w.dataset.lang), ok = !!(byLang[b] && byLang[b].length);
+      w.classList.toggle('novoice', !ok);
+      ok ? have[b]=1 : miss[b]=1;
+    });
+    var h = Object.keys(have).length, m = Object.keys(miss).length;
+    st.textContent = h + ' tongues speak here · ' + m + ' have no voice on this machine';
+    fill();
+  }
+  function fill(){
+    sel.innerHTML = '';
+    var a = document.createElement('option');
+    a.value=''; a.textContent='match each tongue'; sel.appendChild(a);
+    voices.forEach(function(v,i){
+      var o=document.createElement('option'); o.value=String(i);
+      o.textContent = v.name + ' — ' + v.lang; sel.appendChild(o);
+    });
+    var s=null; try{ s = localStorage.getItem('bvoice'); }catch(e){}
+    if(s !== null && voices[s]){ sel.value = s; override = voices[s]; }
+  }
+  sel.addEventListener('change', function(){
+    override = sel.value === '' ? null : voices[sel.value];
+    try{ localStorage.setItem('bvoice', sel.value); }catch(e){}
   });
-});
-/* two soft beams behind everything */
-var rig=document.querySelector('.rig');
-if(rig){ for(var i=0;i<3;i++){ var bm=document.createElement('i'); bm.className='beam';
-  bm.style.left=(20+i*30)+'%'; bm.style.setProperty('--c',COLS[(i*2)%6]);
-  bm.style.animationDelay=(-i*3.7)+'s'; bm.style.animationDuration=(11+i*2.3)+'s';
-  rig.appendChild(bm); } }
-document.addEventListener('visibilitychange',function(){
-  document.body.classList.toggle('still',document.hidden); });
+  function pick(lang){
+    if(override) return override;
+    var b = base(lang), l = byLang[b];
+    if(!l || !l.length) return null;
+    for(var i=0;i<l.length;i++){ if(l[i].lang.toLowerCase().replace('_','-') === lang.toLowerCase()) return l[i]; }
+    return l[0];
+  }
+  function say(w, then){
+    var v = pick(w.dataset.lang);
+    if(!v){ if(then) then(); return; }
+    synth.cancel();
+    var u = new SpeechSynthesisUtterance(w.dataset.say);
+    u.voice = v; u.lang = v.lang; u.rate = .82;
+    if(current) current.classList.remove('speaking');
+    current = w; w.classList.add('speaking');
+    u.onend = u.onerror = function(){ w.classList.remove('speaking'); if(then) then(); };
+    synth.speak(u);
+  }
+  words.forEach(function(w){
+    w.addEventListener('click', function(){ if(!w.classList.contains('novoice')) say(w); });
+  });
+  salam.addEventListener('click', function(){
+    var pair = words.filter(function(w){
+      return (w.dataset.say === 'שלום' || w.dataset.say === 'سلام') && !w.classList.contains('novoice');
+    });
+    if(!pair.length){ st.textContent = 'no hebrew or arabic voice on this machine'; return; }
+    pair[0].scrollIntoView({block:'center'});
+    say(pair[0], function(){ if(pair[1]) setTimeout(function(){ say(pair[1]); }, 420); });
+  });
+  window.bvoice = {
+    speak: function(text, lang, then){
+      var v = pick(lang);
+      if(!v){ if(then) then(); return; }
+      synth.cancel();
+      var u = new SpeechSynthesisUtterance(text);
+      u.voice = v; u.lang = v.lang; u.rate = .82;
+      u.onend = u.onerror = function(){ if(then) then(); };
+      synth.speak(u);
+    },
+    has: function(lang){ return !!pick(lang); }
+  };
+  index();
+  if(typeof synth.onvoiceschanged !== 'undefined') synth.onvoiceschanged = index;
 })();
 </script>
-<script src="tour.js?v=34"></script>
-</body></html>
+<script>
+/* ─────────────────────────────────────────────────────────────
+   ROSES — drawn from live anatomy (founder's reference): rings of
+   gradient-shaded cupped petals painted outside-in, whorled heart,
+   sepals, thorned stems. rose-red is its own token (--rose): a gift
+   offered to the living. HARD LAW: odd counts only — 3/5/7/11.
+   An even bouquet is a funeral arrangement.
+   ───────────────────────────────────────────────────────────── */
+(function(){
+  "use strict";
+  var svg = document.getElementById('bouquet');
+  var NS = 'http://www.w3.org/2000/svg';
+  var reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function el(n,a){ var e=document.createElementNS(NS,n); for(var k in a) e.setAttribute(k,a[k]); return e; }
+  function mulberry(seed){ return function(){ seed|=0; seed=seed+0x6D2B79F5|0;
+    var t=Math.imul(seed^seed>>>15,1|seed); t=t+Math.imul(t^t>>>7,61|t)^t;
+    return ((t^t>>>14)>>>0)/4294967296; }; }
+  function lerp(a,b,t){ return a+(b-a)*t; }
+
+  function defs(){
+    var d=el('defs',{});
+    [['rg1','#5E0A1C','#BE1834'],['rg2','#6E0C22','#D0203E'],['rg3','#801030','#E23A52'],
+     ['rgm1','#2E0510','#701024'],['rgm2','#380714','#7E1228'],['rgm3','#420A1C','#8E1830']]
+    .forEach(function(g){
+      var lg=el('linearGradient',{id:g[0],x1:0,y1:1,x2:0,y2:0});
+      lg.appendChild(el('stop',{offset:0,'stop-color':g[1]}));
+      lg.appendChild(el('stop',{offset:1,'stop-color':g[2]}));
+      d.appendChild(lg);
+    });
+    return d;
+  }
+
+  /* one cupped petal in head-local coords, tip pointing outward with perspective squash */
+  function petal(parent, ang, len, wid, fill, delay){
+    var a=ang*Math.PI/180, ex=Math.cos(a), ey=Math.sin(a)*0.66;
+    var rot=Math.atan2(ey,ex)*180/Math.PI+90;
+    var g=el('g',{transform:'rotate('+rot+')'});
+    var w=wid,l=len;
+    var d='M0,0 C '+(-w*.55)+','+(-l*.08)+' '+(-w)+','+(-l*.35)+' '+(-w*.92)+','+(-l*.72)
+      +' C '+(-w*.6)+','+(-l*.98)+' '+(-w*.18)+','+(-l*1.06)+' 0,'+(-l)
+      +' C '+(w*.18)+','+(-l*1.06)+' '+(w*.6)+','+(-l*.98)+' '+(w*.92)+','+(-l*.72)
+      +' C '+w+','+(-l*.35)+' '+(w*.55)+','+(-l*.08)+' 0,0 Z';
+    g.appendChild(el('path',{d:d, fill:'url(#'+fill+')', stroke:'#2E0510','stroke-width':1.7,
+      class:'rp', style:'animation-delay:'+delay+'ms'}));
+    parent.appendChild(g);
+  }
+  function arc(parent,d,w,delay){
+    parent.appendChild(el('path',{d:d, fill:'none', stroke:'#3A0614','stroke-width':w,
+      'stroke-linecap':'round', class:'rp', style:'animation-delay:'+delay+'ms'}));
+  }
+
+  /* one rose head + sepals, built in local coords around (0,0) */
+  function rose(cx, cy, R, seed, delayBase, mourn, bow){
+    var rnd=mulberry(seed);
+    var head=el('g',{class:'rosehead', style:'transform-box:fill-box;transform-origin:center'});
+    var s=R/86, spin=Math.round(rnd()*24-12)+(bow||0), flip=rnd()<0.5?-1:1;
+    var G1=mourn?'rgm1':'rg1', G2=mourn?'rgm2':'rg2', G3=mourn?'rgm3':'rg3';
+    var g=el('g',{transform:'translate('+cx+','+cy+') rotate('+spin+') scale('+(s*flip)+','+s+')'});
+    var i;
+    /* outer ring — lower petals face the viewer, so they grow */
+    for(i=0;i<9;i++){ var a1=-90+i*40+(i%2?6:-6)+(rnd()*8-4);
+      var f1=Math.max(0,Math.sin(a1*Math.PI/180));
+      petal(g, a1, 52+22*f1, 30+8*f1, G1, delayBase+430+i*30); }
+    for(i=0;i<6;i++){ var a2=-70+i*60+(rnd()*8-4);
+      var f2=Math.max(0,Math.sin(a2*Math.PI/180));
+      petal(g, a2, 38+12*f2, 24+5*f2, G2, delayBase+270+i*30); }
+    for(i=0;i<5;i++){ petal(g, -70+i*72+(rnd()*10-5), 27, 18, G3, delayBase+130+i*30); }
+    for(i=0;i<4;i++){ petal(g, -45+i*95+(rnd()*10-5), 16, 12, G3, delayBase+40+i*25); }
+    /* the whorled heart */
+    arc(g,'M-8,-16 C -4,-24 8,-23 9,-14 C 10,-6 0,-3 -6,-8 C -10,-12 -8,-18 -2,-18',2.6, delayBase);
+    /* sepals + receptacle, tucked under */
+    var GRN='#4E8444', GRNL='#3E6E36';
+    [['M-16,58 C -28,66 -36,78 -38,92 C -26,84 -16,72 -10,62 Z',GRN],
+     ['M16,58 C 28,66 36,78 38,92 C 26,84 16,72 10,62 Z',GRN],
+     ['M-10,56 C -10,68 -6,76 0,79 C 6,76 10,68 10,56 C 3,61 -3,61 -10,56 Z','#5E9C50']]
+    .forEach(function(p,pi){
+      g.appendChild(el('path',{d:p[0], fill:p[1], stroke:GRNL,'stroke-width':2,
+        class:'rp', style:'animation-delay:'+(delayBase+520+pi*40)+'ms'}));
+    });
+    head.appendChild(g);
+    return head;
+  }
+
+  function bez(p0,p1,p2,p3,t){ var u=1-t;
+    return [u*u*u*p0[0]+3*u*u*t*p1[0]+3*u*t*t*p2[0]+t*t*t*p3[0],
+            u*u*u*p0[1]+3*u*u*t*p1[1]+3*u*t*t*p2[1]+t*t*t*p3[1]]; }
+
+  function leaf(x,y,ang,s){
+    return el('path',{d:'M'+x+','+y+' q '+(18*s)+','+(-26*s)+' '+(44*s)+','+(-18*s)+
+      ' q '+(-16*s)+','+(26*s)+' '+(-44*s)+','+(18*s)+' Z',
+      fill:'#5E9C50', stroke:'#3E6E36','stroke-width':1.2,
+      transform:'rotate('+ang+' '+x+' '+y+')'});
+  }
+
+  function draw(n, mourning){
+    /* THE LAW, both halves: to the LIVING an odd count; to the DEAD an even one.
+       Each side clamps toward its own parity — the generator cannot lay the wrong bouquet. */
+    if(!mourning && n % 2 === 0) n += 1;
+    if(mourning && n % 2 === 1) n += 1;
+    svg.innerHTML = '';
+    svg.classList.remove('bloomed');
+    svg.classList.toggle('mourning', !!mourning);
+    svg.appendChild(defs());
+    var cx=320, base=452, spread=Math.min(58, 300/Math.max(1,(n-1)/2));
+    var stems = el('g',{}), heads = el('g',{});
+    for(var i=0;i<n;i++){
+      var off = i-(n-1)/2;
+      var hx = cx + off*spread*1.9;
+      var hy = 140 + Math.abs(off)*26 + (i%2)*14;
+      var R  = n<=5 ? 66 : (n<=7 ? 56 : 44);
+      var p0=[cx,base], p3=[hx,hy+R*0.95], p1=[cx+off*spread*0.5,base-120], p2=[hx,hy+120];
+      stems.appendChild(el('path',{d:'M'+p0[0]+','+p0[1]+' C '+p1[0]+','+p1[1]+' '+p2[0]+','+p2[1]+' '+p3[0]+','+p3[1],
+        fill:'none', stroke:'#4E8444','stroke-width':4.5,'stroke-linecap':'round'}));
+      /* thorns — small hooks along each stem */
+      [0.42,0.66].forEach(function(t,ti){
+        var pt=bez(p0,p1,p2,p3,t), side=(i+ti)%2?1:-1;
+        stems.appendChild(el('path',{d:'M'+pt[0]+','+pt[1]+' l '+(9*side)+',-7 l '+(-8*side)+',11 Z',
+          fill:'#4E8444', stroke:'#3E6E36','stroke-width':1.2}));
+      });
+      if(i%2===0) stems.appendChild(leaf(lerp(cx,hx,.55), lerp(base,hy+120,.55), off*8-14, 1));
+      var bow = mourning ? Math.round((off===0?1:Math.sign(off))*8 + off*4) : 0;
+      heads.appendChild(rose(hx, hy, R, 7919+i*104729, i*160, mourning, bow));
+    }
+    /* the tie — a wrap at the stems' waist */
+    stems.appendChild(el('path',{d:'M'+(cx-26)+','+(base-58)+' q 26,16 52,0 l -4,14 q -22,12 -44,0 Z',
+      fill:mourning?'#42060F':'#C81E3C', stroke:mourning?'#1E0308':'#7A1226','stroke-width':1.5}));
+    svg.appendChild(stems); svg.appendChild(heads);
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ svg.classList.add('bloomed'); }); });
+  }
+
+  var pick = document.getElementById('oddpick');
+  pick.addEventListener('click', function(e){
+    var b = e.target.closest('button[data-n]'); if(!b) return;
+    [].forEach.call(pick.querySelectorAll('button'), function(x){ x.setAttribute('aria-pressed', x===b ? 'true':'false'); });
+    draw(parseInt(b.dataset.n,10));
+  });
+
+  /* exported for memorial surfaces (Museum of the DeAD): even, bowed, still.
+     bnRoses.draw(n, true) — mourning clamps to EVEN; living calls clamp to ODD. */
+  window.bnRoses = { draw: function(n, mourning){ draw(n, !!mourning); } };
+
+  if(reduced){ draw(5); svg.classList.add('bloomed'); }
+  else{
+    var seen=false;
+    new IntersectionObserver(function(en){
+      if(en[0].isIntersecting && !seen){ seen=true; draw(5); }
+    },{threshold:.3}).observe(svg);
+  }
+})();
+
+/* ─────────────────────────────────────────────────────────────
+   THE CONVERSATION FLOOR — two-way, multilingual, honest.
+   The hive answers via the Anthropic API; every word it gives
+   back is a live element that speaks through bvoice. If the
+   tutor cannot be reached from this copy, it says so plainly —
+   the words above keep speaking either way.
+   ───────────────────────────────────────────────────────────── */
+(function(){
+  "use strict";
+  var LANGS = [
+    ['en','English'],['lv','Latviešu · Latvian'],['tt','Татарча · Tatar'],['ru','Русский · Russian'],
+    ['uk','Українська · Ukrainian'],['zh-CN','中文 · Chinese'],['ja','日本語 · Japanese'],['ko','한국어 · Korean'],
+    ['th','ไทย · Thai'],['hi','हिन्दी · Hindi'],['bn','বাংলা · Bengali'],['fa','فارسی · Persian'],
+    ['ur','اردو · Urdu'],['ar','العربية · Arabic'],['he','עברית · Hebrew'],['tr','Türkçe · Turkish'],
+    ['hu','Magyar · Hungarian'],['fi','Suomi · Finnish'],['sv','Svenska · Swedish'],['de','Deutsch · German'],
+    ['nl','Nederlands · Dutch'],['fr','Français · French'],['es','Español · Spanish'],['pt','Português · Portuguese'],
+    ['it','Italiano · Italian'],['pl','Polski · Polish'],['gd','Gàidhlig · Gaelic'],['sa','संस्कृतम् · Sanskrit']
+  ];
+  var myL = document.getElementById('myLang'), lnL = document.getElementById('learnLang');
+  LANGS.forEach(function(l){
+    var a=document.createElement('option'); a.value=l[0]; a.textContent=l[1]; myL.appendChild(a);
+    var b=a.cloneNode(true); lnL.appendChild(b);
+  });
+  myL.value='en'; lnL.value='lv';
+  try{ var s=localStorage.getItem('plur.my'); if(s) myL.value=s;
+       var t=localStorage.getItem('plur.learn'); if(t) lnL.value=t; }catch(e){}
+  myL.onchange=function(){ try{localStorage.setItem('plur.my',myL.value)}catch(e){} };
+  lnL.onchange=function(){ try{localStorage.setItem('plur.learn',lnL.value)}catch(e){} };
+
+  var thread=document.getElementById('thread'), input=document.getElementById('say'),
+      send=document.getElementById('send'), st=document.getElementById('talkst'),
+      mic=document.getElementById('mic');
+  var history=[], busy=false;
+
+  function name(code){ for(var i=0;i<LANGS.length;i++) if(LANGS[i][0]===code) return LANGS[i][1]; return code; }
+
+  function bubble(cls, tagText){
+    var m=document.createElement('div'); m.className='msg '+cls;
+    if(tagText){ var t=document.createElement('div'); t.className='tag'; t.textContent=tagText; m.appendChild(t); }
+    thread.appendChild(m);
+    m.scrollIntoView({block:'nearest', behavior:'smooth'});
+    return m;
+  }
+
+  /* render one hive segment: big tappable words + romanization + gloss */
+  function liveWords(container, text, lang, delay0){
+    var row=document.createElement('div'); row.className='live';
+    var parts = text.split(/\s+/).filter(Boolean);
+    if(parts.length>14) parts=[text]; /* long sentence: one chip, still speakable */
+    parts.forEach(function(w,i){
+      var b=document.createElement('button'); b.type='button'; b.className='lw';
+      b.textContent=w; b.style.animationDelay=(delay0+i*70)+'ms';
+      b.dataset.say=w; b.dataset.lang=lang;
+      var ok = window.bvoice && window.bvoice.has(lang);
+      if(!ok){ b.classList.add('novoice'); b.title='no '+lang+' voice on this machine'; }
+      else b.addEventListener('click', function(){
+        b.classList.add('speaking');
+        window.bvoice.speak(w, lang, function(){ b.classList.remove('speaking'); });
+      });
+      row.appendChild(b);
+    });
+    container.appendChild(row);
+  }
+
+  function renderHive(data){
+    var m=bubble('hive','bLOVErAi · '+name(lnL.value).split(' · ')[0]);
+    (data.reply||[]).forEach(function(seg,si){
+      liveWords(m, seg.t||'', seg.lang||lnL.value, si*250);
+      if(seg.rom){ var r=document.createElement('div'); r.className='rom'; r.textContent=seg.rom; m.appendChild(r); }
+      if(seg.gloss){ var g=document.createElement('div'); g.className='gloss'; g.textContent=seg.gloss; m.appendChild(g); }
+    });
+    if(data.note){ var c=document.createElement('div'); c.className='coach'; c.textContent=data.note; m.appendChild(c); }
+    if(data.followup){
+      var tr=document.createElement('div'); tr.className='try';
+      var b=document.createElement('button'); b.type='button'; b.textContent='say it back: '+data.followup;
+      b.onclick=function(){ input.value=data.followup; input.focus(); };
+      tr.appendChild(b); m.appendChild(tr);
+    }
+    /* two-way: the hive speaks its first line aloud (send was the user's gesture) */
+    var first=(data.reply||[])[0];
+    if(first && window.bvoice && window.bvoice.has(first.lang||lnL.value))
+      window.bvoice.speak(first.t, first.lang||lnL.value);
+  }
+
+  function ask(text){
+    if(busy || !text.trim()) return;
+    busy=true; input.value='';
+    bubble('you','you · '+name(myL.value).split(' · ')[0]).appendChild(document.createTextNode(text));
+    var think=bubble('hive','bLOVErAi');
+    think.innerHTML+='<span class="thinking"><i></i><i></i><i></i></span>';
+    st.textContent='the hive is listening…';
+    history.push({role:'user', content:text});
+
+    var sys='You are bLOVErAi, the Beehive Nature estate\'s warm Ai language tutor on the PLUR page. '+
+      'PLUR = peace, love, unity, respect; the floor\'s law is "come as you are — we accept you". '+
+      'The learner\'s own language: '+name(myL.value)+' ('+myL.value+'). They are learning: '+name(lnL.value)+' ('+lnL.value+'). '+
+      'Be a two-way conversation partner: short turns, always give them something to SAY BACK. Gently correct mistakes with respect. '+
+      'Respond ONLY with JSON, no markdown fences, exactly: '+
+      '{"reply":[{"t":"short line in the learning language","lang":"'+lnL.value+'","rom":"romanization or null if Latin script","gloss":"meaning in the learner\'s language"}],'+
+      '"note":"one short teaching note written in the learner\'s language",'+
+      '"followup":"one short line in the learning language the learner should try saying next"}. '+
+      'Keep reply to 1-2 segments. Keep every line short enough to say aloud.';
+
+    fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-6', max_tokens:1000, system:sys, messages:history})
+    }).then(function(r){ return r.json(); })
+    .then(function(d){
+      think.remove();
+      var txt=(d.content||[]).map(function(c){return c.type==='text'?c.text:''}).join('').trim()
+        .replace(/```json|```/g,'').trim();
+      var data; try{ data=JSON.parse(txt); }catch(e){ data={reply:[{t:txt,lang:lnL.value,rom:null,gloss:''}]}; }
+      history.push({role:'assistant', content:txt});
+      renderHive(data);
+      st.textContent='tap any word the hive gave you to hear it';
+    })
+    .catch(function(){
+      think.remove();
+      bubble('sys').textContent='the tutor can\'t reach the hive from this copy — the words above still speak. try again, or open this page where the relay lives.';
+      st.textContent='offline · honest about it';
+      history.pop();
+    })
+    .finally(function(){ busy=false; });
+  }
+
+  send.onclick=function(){ ask(input.value); };
+  input.addEventListener('keydown', function(e){ if(e.key==='Enter') ask(input.value); });
+  document.getElementById('seeds').addEventListener('click', function(e){
+    var b=e.target.closest('button[data-seed]'); if(b) ask(b.dataset.seed);
+  });
+
+  /* voice in — honest about absence */
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ mic.disabled=true; mic.title='no speech recognition in this browser'; }
+  else{
+    var rec=null;
+    function stop(){ if(rec){ try{rec.stop()}catch(e){} } mic.dataset.live='0'; }
+    function start(){
+      rec=new SR(); rec.lang=myL.value; rec.interimResults=true;
+      mic.dataset.live='1'; st.textContent='listening in '+name(myL.value).split(' · ')[0]+'…';
+      rec.onresult=function(ev){
+        var s=''; for(var i=0;i<ev.results.length;i++) s+=ev.results[i][0].transcript;
+        input.value=s;
+      };
+      rec.onend=function(){ mic.dataset.live='0'; if(input.value.trim()) st.textContent='release sent nothing — press send when ready'; };
+      rec.onerror=function(){ mic.dataset.live='0'; st.textContent='the mic didn\'t catch that'; };
+      try{ rec.start(); }catch(e){ mic.dataset.live='0'; }
+    }
+    mic.addEventListener('pointerdown', start);
+    mic.addEventListener('pointerup', stop);
+    mic.addEventListener('pointerleave', stop);
+  }
+
+  st.textContent='pick your tongues, then touch a seed above ↑';
+})();
+</script>
+</body>
+</html>
