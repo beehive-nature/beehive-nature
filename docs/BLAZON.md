@@ -4,6 +4,19 @@
 
 **The regalia set is now FOUR:** Design's achievement (this, the ceremonial master) · Seat-1 crest v3 · house seal (chop) · ROOT seal (six tongues).
 
+## THE HOUSE MARK SYSTEM — one mark per job
+
+| mark | file | use |
+|---|---|---|
+| **ACHIEVEMENT** | assets/house/house-achievement.svg (.png) | ceremony, blazon pages, the dynasty root page |
+| **ROUNDEL** | assets/house/house-seal-roundel.svg (.png) | favicon, chips, small surfaces, wax/coin |
+| **LOCKUP** | assets/house/house-lockup-banner.png | signatures, letterheads, banners |
+| **AVATAR** | assets/house/house-avatar-square.png | profiles, social |
+
+**Never crop the achievement to make a small mark — use the roundel.**
+The roundel carries 北方國王 above the bee; the orbits exit left and right.
+These supersede all earlier crest/seal files as the house mark of record; the prior seals (assets/seals/) remain in history — promote, don't erase.
+
 **Source of the text:** the export's `text/x-dc` data layer (design-tool contract), read verbatim — not the rendered preview table. Status: **PROPOSED — the blazon is as Design wrote it; the founder's sign-off is the next seal in the chain.**
 
 ---
@@ -45,10 +58,10 @@ A birth-mark out of the sagas: an heir born with a serpent coiled around the iri
 For the archbishop Remington, and beneath his cross the single star of his son, Lt. John Remington, first of the line to America. The double-barred cross is the archiepiscopal one, so the office is legible without a word of it. One star leaves in this quarter; thirteen receive it two quarters on.
 *Source: **UNVERIFIED** — the archbishop Remington and Lt. John Remington are family-genealogy claims, not yet documented against public records.*
 
-### VII · CHINA
-**國王 · 北方**
-King, and the North. Set in a seal cartouche rather than on a shield, because China marks lineage with a stamp, not a coat.
-*Source: **UNVERIFIED** — the China lineage is a family claim, borne on the founder's word.*
+### VII · THE CHINESE NAME
+**北方國王** (reads top-to-bottom)
+King, and the North. Set in a seal cartouche rather than on a shield, because China marks lineage with a stamp, not a coat. The characters read downward — the seal convention.
+*Source: **UNVERIFIED** — the China lineage is a family claim, borne on the founder’s word. In the house mark system the characters stand in the roundel above the bee.*
 
 ### VIII · AMERICA
 **Thirteen mullets in annulo**

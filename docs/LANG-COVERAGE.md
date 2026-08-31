@@ -1,18 +1,18 @@
-# LANG COVERAGE — generated 2026-08-30 by e2e/i18n-coverage.mjs --emit-md (lang=ru)
+# LANG COVERAGE — generated 2026-08-31 by e2e/i18n-coverage.mjs --emit-md (lang=ru)
 
 ## per surface — visible strings vs keyed
 
 | surface | visible | keyed | keyed% |
 |---|---|---|---|
 | bfood.html | 578 | 12 | 2% |
-| plur.html | 417 | 77 | 18% |
 | blanguage.html | 356 | 12 | 3% |
 | bset.html | 327 | 1 | 0% |
+| plur.html | 262 | 0 | 0% |
 | index.html | 260 | 69 | 27% |
 | stack.html | 244 | 118 | 48% |
 | wallet.html | 242 | 24 | 10% |
 | bigen.html | 222 | 12 | 5% |
-| blight/museum.html | 217 | 10 | 5% |
+| blight/museum.html | 216 | 10 | 5% |
 | bearth.html | 170 | 9 | 5% |
 | hardware/index.html | 147 | 10 | 7% |
 | bsymposium.html | 141 | 10 | 7% |
