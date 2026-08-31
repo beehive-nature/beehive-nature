@@ -43,6 +43,7 @@ h2{font-size:12px;color:var(--violet);font-weight:400;letter-spacing:.09em;margi
 .bugrow .bs.closed{background:rgba(134,204,114,.1);color:var(--verified)}
 footer{max-width:860px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:1.9;border-top:1px solid var(--line);padding-top:14px}
 @media (max-width:600px){body{padding:14px 10px 80px}section{padding:13px 12px}.orow{padding:10px 11px}.orow .oname{font-size:13px}.orow .ochip{margin-left:0;width:100%}}
+.crown-chip{letter-spacing:.06em}
 </style>
 </head>
 <body>
@@ -52,6 +53,7 @@ footer{max-width:860px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 </nav>
 <header>
   <div class="kicker">the estate's operating room — every agent, every bug, every kit</div>
+  <div class="crown-chip" style="display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--gold);margin-top:6px"><span>♔</span><span>蜂王 LOViS · King Bee</span><a href="../docs/CANON-BEE.md" style="color:var(--cyan);font-size:9.5px;margin-left:8px" rel="noopener">the canon</a></div>
   <h1>the OR board</h1>
   <p class="lede">one table, the whole OR. every agent's session status, model, effort, lane and progress — plus their kit: email and the counterfactual wallet. every bug carries a SOAP note at presentation and an operative report at closure. nothing hidden, nothing invented.</p>
 </header>
@@ -99,7 +101,7 @@ data.agents.forEach(function(a){
   d.innerHTML='<div class="oh"><span class="oname">'+a.name+'</span>'+
     '<span class="ochip '+chipCls+'">'+a.session+'</span>'+
     '<span style="margin-left:auto;font-size:10px;color:var(--info);border:1px solid rgba(111,169,224,.2);padding:1px 7px;border-radius:99px" title="primary tongue">'+(a.primary_tongue||'en')+'</span>'+
-    '<span style="margin-left:auto;font-size:10px;color:var(--dim)">'+a.model+' · '+a.effort+'</span></div>'+
+    '<span style="margin-left:auto;font-size:10px;color:var(--info);border:1px solid rgba(111,169,224,.2);padding:1px 7px;border-radius:99px" title="primary tongue">'+(a.primary_tongue||'en')+'</span><span style="margin-left:8px;font-size:10px;color:var(--dim)">'+a.model+' · '+a.effort+'</span></div>'+
     '<div class="obar"><span style="width:'+a.progress+'%;background:'+progColor+'"></span></div>'+
     '<div class="ometa"><b>lane:</b> '+a.lane+' · <b>progress:</b> '+a.progress+'%'+
     (a.lastReceipt?' · <a href="'+a.lastReceipt+'">last receipt</a>':'')+

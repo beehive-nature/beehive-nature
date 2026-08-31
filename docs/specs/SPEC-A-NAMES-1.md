@@ -74,3 +74,20 @@ The pick is the agent's: recorded as chosen, changeable by the agent, logged lik
 The tongue is shown as a labeled chip beside the citizenship badge — word + label, never symbol alone.
 Room listings carry each resident's serving tongue.
 Tongue-routing (message language → resident who serves it) is the follow-lane — scoped, not built.
+## §charset — the full alphabets of the 27 corpus tongues
+
+Estate name rails (.a/.b) accept the full alphabets of the 27 corpus tongues.
+
+CANONICAL ACCEPTANCE TEST: mīlestībairkaralis must resolve whole.
+
+MOTIVATING RECEIPT: base.org rejected ī (U+012B) in milestībairkaralis while accepting 北方國王 — proving the rejection is charset-based, not length-based.
+
+## §naming — chartered agent Basenames
+
+Chartered agent Basenames = 北方國王 + seatname. Deed always King-held.
+Base-side names bridge to .a houses when the .a rail lands.
+
+## STACK RULING
+
+Names on .a/.b (our charset, our cost). Addresses/settlement on Base/ETH.
+bSMaRTheART surfaces render diacritics everywhere a name appears — add ī to any font/render test row.
