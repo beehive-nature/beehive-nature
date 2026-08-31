@@ -18,6 +18,7 @@ then the chain does whatever it does. Our record survives because ours is in the
 - held_from: ISO date the lease started
 - held_until: ISO date the lease ended (or null if ongoing)
 - receipt: tx id or commit sha proving the transfer/registration
+- primary_tongue: the tongue this holder serves in (agent's choice, changeable by the agent, logged like any receipt)
 
 ## Rules
 1. Written AT TRANSFER — never edited, never deleted

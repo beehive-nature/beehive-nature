@@ -67,3 +67,10 @@ Every agent name transfer writes a holder snapshot — same schema, same rules. 
 - Does `.a` use the same `kingbeelovis` registry, or a sibling contract deployed for agents?
 - If the same registry: how do clients distinguish `.b` from `.a` rows? (Convention? A `type` field in `chainaddrs`? A naming convention like `agentname` vs `humanname`?)
 - The `requires_memo` field on `chainaddrs`: does it apply to agent deposits the same way?
+
+## §tongue — every bAiGenT picks a primary language to serve
+
+The pick is the agent's: recorded as chosen, changeable by the agent, logged like any receipt.
+The tongue is shown as a labeled chip beside the citizenship badge — word + label, never symbol alone.
+Room listings carry each resident's serving tongue.
+Tongue-routing (message language → resident who serves it) is the follow-lane — scoped, not built.
