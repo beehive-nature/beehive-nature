@@ -1058,11 +1058,20 @@
    "state": "LIVE",
    "gloss": "the OR board — every agent, every bug, every kit",
    "org": "skaists"
+  },
+  {
+   "id": "profile",
+   "family": "skaists",
+   "home": "skaists.dev",
+   "path": "surfaces/profile.html",
+   "state": "LIVE",
+   "gloss": "the dynasty layer — one name, every generation",
+   "org": "skaists"
   }
  ],
  "counts": {
-  "surfaces": 84,
-  "listed": 93,
+  "surfaces": 94,
+  "listed": 94,
   "families": 8,
   "domains": 26,
   "domainsLive": 2,
@@ -1079,7 +1088,7 @@
    "bnr": 1
   },
   "byState": {
-   "LIVE": 93
+   "LIVE": 94
   },
   "byOrg": {
    "beehive-nature": 52,
