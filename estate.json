@@ -1049,11 +1049,20 @@
    "state": "LIVE",
    "gloss": "the estate hives and the public buzz directory, verified",
    "org": "skaists"
+  },
+  {
+   "id": "or-board",
+   "family": "skaists",
+   "home": "skaists.dev",
+   "path": "surfaces/or-board.html",
+   "state": "LIVE",
+   "gloss": "the OR board — every agent, every bug, every kit",
+   "org": "skaists"
   }
  ],
  "counts": {
-  "surfaces": 83,
-  "listed": 92,
+  "surfaces": 84,
+  "listed": 93,
   "families": 8,
   "domains": 26,
   "domainsLive": 2,
@@ -1062,7 +1071,7 @@
   "byFamily": {
    "beehivenature": 35,
    "plur": 5,
-   "skaists": 14,
+   "skaists": 15,
    "bnature": 18,
    "beehivebiomass": 5,
    "beehivebuds": 0,
@@ -1070,11 +1079,11 @@
    "bnr": 1
   },
   "byState": {
-   "LIVE": 92
+   "LIVE": 93
   },
   "byOrg": {
    "beehive-nature": 52,
-   "skaists": 26,
+   "skaists": 27,
    "beehive-biomass": 5
   }
  },

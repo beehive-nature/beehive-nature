@@ -1,0 +1,61 @@
+{
+  "agents": [
+    {
+      "name": "z2.1",
+      "session": "sunsetting",
+      "model": "5.3",
+      "effort": "medium",
+      "lane": "buzz-directory",
+      "progress": 100,
+      "lastReceipt": "https://skaists.dev/surfaces/buzz-directory.html",
+      "email": "z2.1@agents.skaists.buzz",
+      "wallet": "PENDING_CREATE2",
+      "walletSalt": null,
+      "note": "the workhorse seat — fieldnotes, organ board, QR roses, dual-home, buzz directory"
+    },
+    {
+      "name": "z2.2",
+      "session": "new",
+      "model": "5.3",
+      "effort": "medium",
+      "lane": "unassigned",
+      "progress": 0,
+      "lastReceipt": "",
+      "email": "z2.2@agents.skaists.buzz",
+      "wallet": "PENDING_CREATE2",
+      "walletSalt": null,
+      "note": "standby seat"
+    },
+    {
+      "name": "z1.1",
+      "session": "new",
+      "model": "5.3",
+      "effort": "high",
+      "lane": "relay-infra",
+      "progress": 80,
+      "lastReceipt": "https://skaists.dev/surfaces/stack.html",
+      "email": "z1.1@agents.skaists.buzz",
+      "wallet": "PENDING_CREATE2",
+      "walletSalt": null,
+      "note": "relay infrastructure, DNS, Caddy"
+    },
+    {
+      "name": "bClaude",
+      "session": "new",
+      "model": "claude-code",
+      "effort": "medium",
+      "lane": "b-meter",
+      "progress": 60,
+      "lastReceipt": "https://skaists.dev/surfaces/wallet.html",
+      "email": "bclaude@agents.skaists.buzz",
+      "wallet": "PENDING_CREATE2",
+      "walletSalt": null,
+      "note": "the paid-lane agent — bclaude.base.eth, voucher-prepay loop"
+    }
+  ],
+  "bugs": [
+    {"id": "BUG-001", "title": "design battery D4/D5/M gaps on qrroses.html", "status": "closed", "file": "bugs/BUG-001.md"},
+    {"id": "BUG-002", "title": "design battery D4/D5/M gaps on bmeshasi.html", "status": "scheduled", "file": "bugs/BUG-002.md"}
+  ],
+  "updated": "2026-08-31"
+}
