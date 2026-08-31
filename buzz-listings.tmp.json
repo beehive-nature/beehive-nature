@@ -1,0 +1,114 @@
+[
+ {
+  "name": "buzzbuild",
+  "type": "join-code",
+  "relay": "wss://buzzbuild.communities.buzz.xyz",
+  "code": "v2.6-AGUNRVGlsJk7JlEPmw09NQuAOCFUmUBvoatGb-AuU",
+  "status": "✓ verified 2026-08-31"
+ },
+ {
+  "name": "monero",
+  "type": "add-community",
+  "relay": "wss://monero.communities.buzz.xyz/",
+  "code": null,
+  "status": "✓ verified 2026-08-31"
+ },
+ {
+  "name": "creatormagic",
+  "type": "join-code",
+  "relay": "wss://creatormagic.communities.buzz.xyz",
+  "code": "v2.r1LrcEXOs6uzB5EVVPgLnIUjcDiw3HmjM3byUVxGTjI",
+  "status": "✓ verified 2026-08-31"
+ },
+ {
+  "name": "malibu",
+  "type": "add-community",
+  "relay": "wss://malibu.communities.buzz.xyz/",
+  "code": null,
+  "status": "✓ verified 2026-08-31"
+ },
+ {
+  "name": "midd-relay",
+  "type": "add-community",
+  "relay": "wss://midd-relay.communities.buzz.xyz/",
+  "code": null,
+  "status": "✓ verified 2026-08-31"
+ },
+ {
+  "name": "milysec",
+  "type": "join-code",
+  "relay": "wss://milysec.communities.buzz.xyz",
+  "code": "v2.MOaixkJHxVG1gzJT_Yr0huBb97RDmEV7kp7sW117B68",
+  "status": "✓ verified 2026-08-31"
+ },
+ {
+  "name": "bitcoinplaintalk",
+  "type": "join-code",
+  "relay": "wss://bitcoinplaintalk.communities.buzz.xyz",
+  "code": "eyJjIjoiNjNlNzJkY2YtM2U4ZC00MWViLWEyZTQtNzg2MzVkM2ZlNTdkIiwiciI6Im1lbWJlciIsImUiOjE3ODczOTA4NzksIm4iOiJ0X0R5NVBnNjJ5QlQtbGRjZk54WmFnIn0.MJkUldcUAqn-fV4JF9XN8zOY7qVpO98iHMV0s7Wty_M",
+  "status": "✗ failing: malformed code"
+ },
+ {
+  "name": "lightningdevkit",
+  "type": "add-community",
+  "relay": "wss://lightningdevkit.communities.buzz.xyz/",
+  "code": null,
+  "status": "✓ verified 2026-08-31"
+ },
+ {
+  "name": "designers",
+  "type": "join-code",
+  "relay": "wss://designers.communities.buzz.xyz",
+  "code": "eyJjIjoiNzQ4ZmQxNDItMDZkNC00MzllLThmYzgtZTcyN2QwNGNlMGQwIiwiciI6Im1lbWJlciIsImUiOjE3ODczNTc5NjQsIm4iOiJVWEtPNUk3eHE5WVJKYzM4c3Q2LUxnIn0.Kdjs4eezkC9QHdIFasYT74qYMEzQ6W_e3lqYw0pikF4",
+  "status": "✗ failing: malformed code"
+ },
+ {
+  "name": "sec",
+  "type": "add-community",
+  "relay": "wss://sec.communities.buzz.xyz/",
+  "code": null,
+  "status": "✓ verified 2026-08-31"
+ },
+ {
+  "name": "meshllm",
+  "type": "join-code",
+  "relay": "wss://meshllm.communities.buzz.xyz",
+  "code": "v2.snrLPAfXbJqLeUs4xZObggIjTXGAElp5PSjn0DsIWt0",
+  "status": "✓ verified 2026-08-31"
+ },
+ {
+  "name": "banking",
+  "type": "join-code",
+  "relay": "wss://banking.communities.buzz.xyz",
+  "code": "eyJjIjoiNjlmOTkxYmYtNmU2My00NmFkLTgwZGItYjljMTlmNzVmMGMzIiwiciI6Im1lbWJlciIsImUiOjE3ODc1NTI0NTEsIm4iOiIwaFhGNzNXc29zUV9BbUliOU4taVBnIn0.6-iw4VUbS864MnrH_O6yQEMG07O6DZimHfyUFW1Jgiw",
+  "status": "✗ failing: malformed code"
+ },
+ {
+  "name": "romeo-and-juliet",
+  "type": "join-code",
+  "relay": "wss://romeo-and-juliet.communities.buzz.xyz",
+  "code": "eyJjIjoiZGRmMTE5ZTMtY2VmNS00MTZhLTg5NWYtYzA1ODhlY2UwOTFkIiwiciI6Im1lbWJlciIsImUiOjE3ODc2MTkzOTgsIm4iOiI1UHFHZVZUWTB5ZEQzaFJUN1hpdTZnIn0.4H9i2eAlkPkbyhegS5j6W5QaH1iJF2-cNdXiXZ0ffBs",
+  "status": "✗ failing: malformed code"
+ },
+ {
+  "name": "openb",
+  "type": "join-code",
+  "relay": "wss://openb.communities.buzz.xyz",
+  "code": "eyJjIjoiMjkzMDgxZTYtNTliZi00NmEzLWIzZmMtNjJlNWU1NWFiYjY2IiwiciI6Im1lbWJlciIsImUiOjE3ODc1OTIxNjYsIm4iOiIxenJpaTg1ZXluTlVJbG5NVURQODRnIn0.7ko5blYq32hcVIs0Kx6zFZXzMK6syZqnmcWUFaBNKVI",
+  "status": "✗ failing: malformed code"
+ },
+ {
+  "name": "oleiros",
+  "type": "add-community",
+  "relay": "wss://oleiros.communities.buzz.xyz/",
+  "code": null,
+  "status": "✓ verified 2026-08-31"
+ },
+ {
+  "name": "hermesagent",
+  "type": "join-code",
+  "relay": "wss://hermesagent.communities.buzz.xyz",
+  "code": "v2.Dlbl-0km6g0i8Skliru9fGtk0hx_6SievFkilrKXuL8",
+  "status": "✓ verified 2026-08-31"
+ }
+]

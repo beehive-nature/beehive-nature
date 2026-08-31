@@ -1040,11 +1040,20 @@
    "state": "LIVE",
    "gloss": "the logbook — receipts, measurements, honest costs",
    "org": "skaists"
+  },
+  {
+   "id": "buzz-directory",
+   "family": "skaists",
+   "home": "skaists.dev",
+   "path": "surfaces/buzz-directory.html",
+   "state": "LIVE",
+   "gloss": "the estate hives and the public buzz directory, verified",
+   "org": "skaists"
   }
  ],
  "counts": {
-  "surfaces": 82,
-  "listed": 91,
+  "surfaces": 83,
+  "listed": 92,
   "families": 8,
   "domains": 26,
   "domainsLive": 2,
@@ -1053,7 +1062,7 @@
   "byFamily": {
    "beehivenature": 35,
    "plur": 5,
-   "skaists": 13,
+   "skaists": 14,
    "bnature": 18,
    "beehivebiomass": 5,
    "beehivebuds": 0,
@@ -1061,11 +1070,11 @@
    "bnr": 1
   },
   "byState": {
-   "LIVE": 91
+   "LIVE": 92
   },
   "byOrg": {
    "beehive-nature": 52,
-   "skaists": 25,
+   "skaists": 26,
    "beehive-biomass": 5
   }
  },

@@ -12,7 +12,7 @@
 | stack.html | 244 | 118 | 48% |
 | wallet.html | 242 | 24 | 10% |
 | bigen.html | 222 | 12 | 5% |
-| blight/museum.html | 216 | 10 | 5% |
+| blight/museum.html | 217 | 10 | 5% |
 | bearth.html | 170 | 9 | 5% |
 | hardware/index.html | 147 | 10 | 7% |
 | bsymposium.html | 141 | 10 | 7% |
@@ -61,7 +61,6 @@
 | blight/coop.html | 31 | 0 | 0% |
 | blight/studio-gate.html | 30 | 4 | 13% |
 | doors/plur.html | 29 | 12 | 41% |
-| blight/farmers.html | 28 | 0 | 0% |
 | doors/beehivebiomass.html | 26 | 7 | 27% |
 | doors/index.html | 26 | 6 | 23% |
 | fleet-hosted/lab/intake-tracker.html | 22 | 0 | 0% |
@@ -77,6 +76,7 @@
 | onboarding/index.html | 11 | 0 | 0% |
 | blight/bnri-gallery.html | 10 | 0 | 0% |
 | blight/midi-organ.html | 10 | 0 | 0% |
+| blight/farmers.html | 9 | 0 | 0% |
 | blight/hearth.html | 9 | 0 | 0% |
 | blight/market.html | 9 | 0 | 0% |
 | blight/inscription-explorer.html | 8 | 0 | 0% |
