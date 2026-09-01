@@ -9,8 +9,39 @@
      node scripts/build-atlas.mjs
    CI (scripts/estate-check.mjs) fails if the page drifts from the registry. */
 import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
+import { countSurfacesOnDisk, listSurfacesOnDisk, recomputeCounts } from './surface-count.mjs';
 
 const E = JSON.parse(readFileSync('estate.json', 'utf8'));
+
+/* ── the count is DERIVED FROM THE TREE, never stored ──────────────────────
+   The door's number is the tree's number. The registry's counted rows must
+   MIRROR the tree file-for-file (both directions, named on failure), and the
+   counts block is then rewritten from the recompute — so a registry edit can
+   never leave a stale number on the door again (the 94-on-the-door bug was
+   exactly that: rows grew, the stored block didn't). */
+const treeFiles = listSurfacesOnDisk().sort();
+const regCounted = E.surfaces.filter(s => s.counted !== false).map(s => s.path.replace(/^surfaces\//, '')).sort();
+const onlyTree = treeFiles.filter(f => !regCounted.includes(f));
+const onlyReg = regCounted.filter(f => !treeFiles.includes(f));
+if (onlyTree.length || onlyReg.length) {
+  console.error('COUNT DRIFT — the registry\'s counted rows and the tree disagree:');
+  if (onlyTree.length) console.error('  on disk, NOT in the registry (add rows or mark counted:false): ' + onlyTree.join(', '));
+  if (onlyReg.length) console.error('  in the registry, NOT on disk (register the file or drop the row): ' + onlyReg.join(', '));
+  process.exit(1);
+}
+const recomputed = recomputeCounts(E);
+if (recomputed.surfaces !== treeFiles.length) {
+  console.error('COUNT DRIFT — counted rows say ' + recomputed.surfaces + ' but the tree holds ' + treeFiles.length);
+  process.exit(1);
+}
+const countsBefore = JSON.stringify(E.counts);
+E.counts = recomputed;
+if (countsBefore !== JSON.stringify(E.counts)) {
+  /* the registry's own format is 1-space indent + trailing newline — kept,
+     so the diff is the counts block and nothing else */
+  writeFileSync('estate.json', JSON.stringify(E, null, 1) + '\n');
+  console.log('counts block re-derived from tree+rows — surfaces: ' + recomputed.surfaces + ' (was ' + JSON.parse(countsBefore).surfaces + ')');
+}
 const c = E.counts;
 
 /* ── the preservation lift: the doors' hex band, byte-true ─────────────────

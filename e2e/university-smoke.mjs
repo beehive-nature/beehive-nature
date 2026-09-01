@@ -6,43 +6,13 @@ import { chromium } from 'playwright';
 
 const ROOT = process.cwd().replace(/e2e$/, '');
 
-// Counts the estate's surfaces on disk. EXCLUDED, and why:
-//   surfaces/fleet/                     preserved founder art
-//   surfaces/fleet-hosted/gallery|lab   generated copies of that same art. Seven
-//                                       differ from the original only by the src
-//                                       that drops the CDN. intake-tracker and
-//                                       bnr-dashboard ALSO carry behaviour fixes,
-//                                       because functional change to fleet content
-//                                       lands in the DERIVATIVE and never in the
-//                                       archive — that is what fleet-hosted/ is
-//                                       for. They stay uncounted because they are
-//                                       still his pages, generated from his art;
-//                                       fixing a bug in a copy does not transfer
-//                                       authorship of the surface.
-// COUNTED: surfaces/fleet-hosted/index.html — that page is our own work.
-// Change this rule DELIBERATELY: two assertions depend on it (the hub footer and
-// the review deck), so they are ONE check reported twice, not two agreeing checks.
-const NOT_OURS = (dir, name) =>
-  name === 'fleet' ||
-  (dir.endsWith('fleet-hosted') && (name === 'gallery' || name === 'lab'));
-
-async function listSurfacesOnDisk(dir = join(ROOT, 'surfaces'), base = '') {
-  let out = [];
-  for (const e of await readdir(dir, { withFileTypes: true })) {
-    if (e.isDirectory() && NOT_OURS(dir, e.name)) continue;
-    const rel = base ? base + '/' + e.name : e.name;
-    if (e.isDirectory()) out = out.concat(await listSurfacesOnDisk(join(dir, e.name), rel));
-    else if (extname(e.name) === '.html') out.push(rel);
-  }
-  return out;
-}
-
-// The count and the reachability check walk the SAME list, deliberately: one rule
-// in one place. They are therefore correlated — if NOT_OURS is wrong, both agree
-// and both go green. That is a known property, not an accident.
-async function countSurfacesOnDisk() {
-  return (await listSurfacesOnDisk()).length;
-}
+// Counts the estate's surfaces on disk via THE ONE COUNTING RULE — the walker
+// lives in scripts/surface-count.mjs and is shared with build-atlas and
+// estate-check (the door's number, this assertion, and the registry's
+// cross-check are ONE check reported three times, not three agreeing checks).
+// The full exclusion rationale (fleet/, fleet-hosted/gallery|lab) lives on the
+// module, next to the rule it governs.
+import { listSurfacesOnDisk, countSurfacesOnDisk } from '../scripts/surface-count.mjs';
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json' };
 const server = createServer(async (req, res) => {
   try {

@@ -36,26 +36,16 @@ if (domSet.size !== reg.domains.length) fail('duplicate domain entry');
 for (const s of reg.surfaces) if (!domSet.has(s.home)) fail('surface ' + s.id + ' home not a known domain: ' + s.home);
 
 /* the counts block must equal what the registry itself computes — no hand numbers survive.
-   CENSUS LAW: a surface with counted:false is listed but not counted (the
-   founder-art fleet copies; the rule mirrors e2e/university-smoke.mjs NOT_OURS) */
-const byFam = {}; reg.families.forEach(f => byFam[f] = 0);
-for (const s of reg.surfaces) if (s.counted !== false) byFam[s.family]++;
-const byOrg = {};
-for (const s of reg.surfaces) if (s.counted !== false) byOrg[s.org] = (byOrg[s.org] || 0) + 1;
-const recomputed = {
-  surfaces: reg.surfaces.filter(s => s.counted !== false).length,
-  listed: reg.surfaces.length,
-  families: reg.families.length,
-  domains: reg.domains.length,
-  domainsLive: reg.domains.filter(d => d.state === 'LIVE').length,
-  domainsPending: reg.domains.filter(d => d.state === 'DNS-PENDING').length,
-  domainsSeatOpen: reg.domains.filter(d => d.state === 'SEAT-OPEN').length,
-  byFamily: byFam,
-  byState: { LIVE: reg.surfaces.filter(s => s.state === 'LIVE').length },
-  byOrg: byOrg,
-};
+   THE COUNT IS THE TREE'S: the counted-row set must mirror the disk file-for-file
+   (scripts/surface-count.mjs is the one walker; build-atlas enforces the same
+   equality at build). A row without a file, or a file without a row, stops here —
+   the 94-on-the-door bug (rows grew, stored block didn't) cannot recur. */
+import { countSurfacesOnDisk, recomputeCounts } from './surface-count.mjs';
+const recomputed = recomputeCounts(reg);
+const treeN = countSurfacesOnDisk();
+if (recomputed.surfaces !== treeN) fail('counted rows say ' + recomputed.surfaces + ' but the tree holds ' + treeN + ' — run scripts/build-atlas.mjs');
 /* the org axis sums to the whole — a bucket typo leaks rows and stops here */
-const orgSum = Object.values(byOrg).reduce((a, b) => a + b, 0);
+const orgSum = Object.values(recomputed.byOrg).reduce((a, b) => a + b, 0);
 if (orgSum !== recomputed.surfaces) fail('per-org counts sum to ' + orgSum + ' but counted surfaces are ' + recomputed.surfaces);
 const a = JSON.stringify(recomputed), b = JSON.stringify(reg.counts);
 if (a !== b) { console.error('counts block drifted from the registry itself:\n  recomputed: ' + a + '\n  declared : ' + b); process.exit(1); }

@@ -80,7 +80,7 @@ Estate name rails (.a/.b) accept the full alphabets of the 27 corpus tongues.
 
 CANONICAL ACCEPTANCE TEST: mīlestībairkaralis must resolve whole.
 
-MOTIVATING RECEIPT: base.org rejected ī (U+012B) in milestībairkaralis while accepting 北方國王 — proving the rejection is charset-based, not length-based.
+MOTIVATING RECEIPT: base.org rejected ī (U+012B, byte-exact `0xC4 0xAB`) in mīlestībairkaralis — raw error `disallowed character: "ī" {12B}` — while accepting 北方國王 — proving the rejection is charset-based, not length-based. (Transcription law: the rejected letter is ī WITH MACRON, never į ogonek — the two render near-identical in some fonts.)
 
 ## §naming — chartered agent Basenames
 
