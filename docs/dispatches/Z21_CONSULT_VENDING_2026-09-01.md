@@ -1,5 +1,12 @@
 # z2.1 CONSULT — the member-agent vending machine — 2026-09-01
 
+> **FOUNDER CHAIN RULING (same day): MINT SURVIVAL ADOPTED** (headline
+> property, recipe on Arweave — the species survives the estate) · **POINTER
+> LAW added** (derivable from member-held .b name/key + AR tags + content
+> hash) · **ANT-fence objection REJECTED as muddled, fence stands, do not
+> re-open** · **keys/DNS answered by citation** (SPEC-A-NAMES-1, bnr://,
+> §charset) · **engine verdict banked**. Landed as SPEC-VENDING-1.
+
 Consulted via the LOCAL ENGINE (the founder's ask: "a real test of the local
 engine"): llama.cpp behind the meter gate, model `qwen2.5-3b-instruct`, free
 tier key, receipts in the b-meter as always. Prompt: the founder's five-layer
