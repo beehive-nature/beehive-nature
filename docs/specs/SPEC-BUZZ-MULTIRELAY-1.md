@@ -49,6 +49,30 @@ A community entry holds an ordered address LIST instead of one string:
 - **§surface** — the community UI shows the active road as one quiet word
   (honesty law: the user can SEE they are on the guaranteed road).
 
+## §onboarding — the law that motivates the whole spec (founder, 2026-09-01)
+
+**A VPN can never be an onboarding step. Two hundred neighbors will not install
+one.** The road toggle (`buzz-road.mjs`) was a diagnostic — it told us where
+the wall was; it was never the answer. A guest's first minute inside the
+community must cost zero configuration, zero tools, zero network knowledge:
+open the invite, be in the room. Any design that requires the user to know
+what an SNI is has already failed the two hundred.
+
+## §launch-override — the founder's fact, verified at source
+
+`crates/buzz-acp/src/config.rs:240`:
+
+    #[arg(long, env = "BUZZ_RELAY_URL", default_value = "ws://localhost:3000")]
+
+- **BUZZ_RELAY_URL before launch** (or the `--relay` arg) sets the relay with
+  no app surgery; the relay address is also swappable inside the app. The same
+  relay under a different name clears a hostname-keying middlebox with no VPN.
+- **The default value is the ghost's origin**: any binding without an explicit
+  relay inherits `ws://localhost:3000` — which is how an empty `relay_url`
+  landed LoVis bee-laborer on the WSL dev relay's idle loop (cleaned
+  2026-09-01). A road-list client makes this class of accident impossible:
+  there is always an explicit, remembered road, never a silent default.
+
 ## §fractal — the server design (the next lane, named honestly)
 
 Roads-as-names protect against FILTERS, not against BOX LOSS. The founder's
