@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#07090b">
+<title>the comb — ⬡ one renderer at every zoom</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+/* SEMANTIC COLOUR — meanings picked FIRST, hues second, every hue read from
+   tokens.css (linked, not repainted): value = gold (capped = final value) ·
+   solution = leaf (the living comb, working) · system = cyan (bSAFE, the
+   network word) · science = violet (geometry, the canon) · harm = --flag,
+   DECLARED and deliberately unused: nothing on this page is a harm.
+   The three cell states are DATA and carry their words everywhere: nectar
+   translucent · honey amber · capped gold with the glyph. */
+:root{
+  --sem-value:var(--gold); --sem-solution:var(--leaf); --sem-system:var(--cyan);
+  --sem-science:var(--violet); --sem-harm:var(--flag);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{overflow-x:hidden}
+body{background:var(--bg0);color:var(--ink);font:13px/1.7 'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;padding:30px 14px 96px}
+main{max-width:880px;margin:0 auto}
+.crumbs{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:0 0 9px;border-bottom:1px solid var(--line);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.crumbs a{color:var(--dim)} .crumbs .here{color:var(--ink)}
+.kicker{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--faint);margin-top:20px}
+h1{font-size:clamp(28px,6vw,40px);line-height:1.1;margin:8px 0 6px;font-weight:600;
+ background-image:linear-gradient(92deg,var(--ink) 40%,var(--gold) 92%);
+ -webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{color:var(--dim);font-size:12px;max-width:72ch;line-height:1.85}
+.herofig{display:flex;flex-direction:column;gap:2px;margin:14px 0 4px}
+.herofig b{font-size:38px;line-height:1;font-weight:600;font-variant-numeric:tabular-nums;color:var(--gold)}
+.herofig span{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+section{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px;margin-top:16px}
+h2{font-size:12px;color:var(--violet);font-weight:400;letter-spacing:.09em;margin-bottom:9px}
+h2 b{color:var(--ink);font-weight:600}
+/* THE STAGE — the comb fills it at every zoom */
+#stage{position:relative;height:clamp(380px,62vh,640px);background:var(--bg0);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;touch-action:none;cursor:grab}
+#stage:active{cursor:grabbing}
+#stage:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+#comb{display:block;width:100%;height:100%}
+.hud{position:absolute;top:10px;left:10px;z-index:2;background:rgba(7,9,11,.78);border:1px solid var(--line);border-radius:var(--r-sm);padding:9px 11px;max-width:250px;font-size:10px;line-height:1.75;color:var(--dim)}
+.hud .crumb{color:var(--ink);font-size:10.5px}
+.hud .mode em{font-style:normal;color:var(--cyan)}
+.fbar{display:flex;height:6px;border-radius:3px;overflow:hidden;border:1px solid var(--line);margin:5px 0 3px}
+.fbar i{display:block;height:100%}
+.fbar .fn{background:var(--cyan);opacity:.45}.fbar .fh{background:var(--amber)}.fbar .fc{background:var(--gold)}
+.ctrls{position:absolute;top:10px;right:10px;z-index:2;display:flex;gap:6px}
+.ctrls button{min-width:40px;min-height:34px;background:rgba(7,9,11,.78);border:1px solid var(--line);border-radius:var(--r-sm);color:var(--dim);font:600 14px/1 ui-monospace,Menlo,Consolas,monospace;cursor:pointer}
+.ctrls button:hover{color:var(--gold);border-color:var(--gold)}
+/* THE LEGEND — the state key lives with the art it keys */
+.art{background:var(--well);border:1px solid var(--line);border-radius:var(--r-md);padding:10px 12px;margin-top:10px;font-size:10.5px;color:var(--dim);line-height:1.9}
+.art .row{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.art .dot{display:inline-block;width:11px;height:11px;border-radius:2px;transform:translateY(1.5px);border:1px solid var(--line)}
+.art .d-n{background:var(--cyan);opacity:.3}.art .d-h{background:var(--amber);opacity:.8}.art .d-c{background:var(--gold)}
+.art b{color:var(--ink);font-weight:400}
+.art .hint{color:var(--faint)}
+/* CANON + GEOMETRY panels */
+.law{color:var(--dim);font-size:11.5px;line-height:1.9}
+.law b{color:var(--ink);font-weight:400}
+.law .glyph{color:var(--gold)}
+.vocab{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:10px}
+.v{background:var(--well);border:1px solid var(--line);border-radius:var(--r-md);padding:11px 12px}
+.v b{display:block;font-size:12px;color:var(--gold);font-weight:600;letter-spacing:.04em}
+.v span{display:block;font-size:10.5px;color:var(--dim);line-height:1.8;margin-top:4px}
+.care{margin-top:12px;background:var(--well);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:var(--r-sm);padding:11px 13px;font-size:11px;color:var(--ink);line-height:1.85}
+.care b{color:var(--gold);letter-spacing:.18em;font-weight:600}
+.srclink{margin-top:10px;font-size:10.5px}
+.srclink a{color:var(--cyan)}
+.geo{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}
+.geo svg{flex:0 0 232px;width:232px;max-width:100%;height:auto;background:var(--bg0);border:1px solid var(--line);border-radius:var(--r-md)}
+.geo .txt{flex:1 1 260px;min-width:240px}
+.rings{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px;font-size:10px;color:var(--faint)}
+.rings i{font-style:normal;background:var(--well);border:1px solid var(--line);border-radius:var(--r-pill);padding:3px 9px}
+footer{max-width:880px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:1.95;border-top:1px solid var(--line);padding-top:14px}
+footer a{color:var(--dim)}
+@media (max-width:600px){
+  body{padding:14px 10px 84px}
+  section{padding:13px 12px;border-radius:var(--r-md)}
+  #stage{height:clamp(340px,58vh,520px)}
+  .hud{max-width:200px;padding:7px 9px;font-size:9.5px}
+  .geo svg{flex-basis:100%}
+}
+</style>
+</head>
+<body>
+<main>
+<nav class="crumbs" aria-label="you are here">
+  <a href="index.html">beehive nature reserve</a><span>▸</span><span class="here">the comb</span>
+</nav>
+
+<header>
+  <div class="kicker">⬡ canon geometry · the hexagonal explorer</div>
+  <h1>the comb</h1>
+  <p class="lede">the estate's own shape, drawn live: <b>CELL</b> = block · <b>CAPPED</b> = final ·
+  <b>COMB</b> = the ledger · <b>FRAME</b> = 7,776 cells. one renderer at every zoom —
+  combs of combs out, one cell → its receipts in. exact cells when you are close,
+  statistical heat when you are far. the comb fills; it never runs out of comb.</p>
+  <div class="herofig">
+    <b data-hero-number>7,776</b>
+    <span data-hero-caption>cells per frame · 6⁵ — the dao cap and the geometry are the same fact</span>
+  </div>
+</header>
+
+<section id="stageSec">
+  <h2>THE LIVING COMB <b>· drag · wheel / pinch · double-click a cell</b></h2>
+  <div id="stage" tabindex="0" role="application"
+       aria-label="the comb explorer: drag to pan, wheel or pinch to zoom, double-click to open one cell's receipts">
+    <canvas id="comb"></canvas>
+    <div class="hud" aria-live="polite">
+      <div class="crumb" id="hudCrumb">the frame</div>
+      <div class="mode" id="hudMode">exact cells · 30 px</div>
+      <div class="fbar" aria-hidden="true"><i class="fn" id="fbN"></i><i class="fh" id="fbH"></i><i class="fc" id="fbC"></i></div>
+      <div id="hudFill">frame fill — nectar –% · honey –% · capped –%</div>
+    </div>
+    <div class="ctrls">
+      <button id="zOut" type="button" aria-label="zoom out" title="zoom out — combs of combs out">−</button>
+      <button id="zReset" type="button" aria-label="reset to the frame" title="reset — back to the frame at ⬡ origin">⌂</button>
+      <button id="zIn" type="button" aria-label="zoom in" title="zoom in — one cell → its receipts in">+</button>
+    </div>
+  </div>
+  <div class="art">
+    <div class="row">
+      <span><i class="dot d-n"></i> <b>nectar</b> — translucent, just arrived</span>
+      <span><i class="dot d-h"></i> <b>honey</b> — amber, ripening</span>
+      <span><i class="dot d-c"></i> <b>capped</b> — sealed gold with the cell glyph ⬡</span>
+    </div>
+    <div class="row hint">one direction only: nectar → honey → capped. each cell ripens on its own clock,
+    staggered from the origin outward — the wave you watch is the comb filling.
+    zoom past a cell's rim and you are inside it, among its receipts.</div>
+  </div>
+</section>
+
+<section id="canonSec">
+  <h2>THE CANON <b>· four words, three states, one glyph — <a href="../docs/CANON-COMB.md" style="color:var(--cyan)">the canon in full →</a></b></h2>
+  <div class="vocab">
+    <div class="v"><b><span class="glyph">⬡</span> CELL</b><span>= block. one cell of the comb is one block of the chain. a cell has six neighbours — that is what being a cell means here.</span></div>
+    <div class="v"><b>CAPPED</b><span>= final. a wax seal — finality that is VISIBLE. you do not read a document to learn a cell is final; you look at it.</span></div>
+    <div class="v"><b>COMB</b><span>= the ledger. cells laid six-neighbour tight, nectar becoming honey becoming wax.</span></div>
+    <div class="v"><b>FRAME</b><span>= 7,776 cells = 6⁵. six neighbours, five layers — the dao cap and the geometry are the same fact.</span></div>
+    <div class="v"><b>STATES</b><span>nectar → honey → capped. one direction. the arrow does not run backwards.</span></div>
+    <div class="v"><b>bSAFE</b><span>= Secure Access For Everyone — the network the comb lives on.</span></div>
+  </div>
+  <div class="care"><b>CARE</b> — this is topology and vocabulary, NEVER a security claim.
+  the comb says what things are called and how they draw; it does not say the network is
+  secure, that finality is guaranteed, or that a seal proves authenticity.</div>
+</section>
+
+<section id="geoSec">
+  <h2>THE GEOMETRY <b>· five nested rings of six</b></h2>
+  <div class="geo">
+    <svg viewBox="-106 -106 212 212" role="img" aria-label="a frame drawn as five nested rings of six: a centre cell, its six neighbours, and four more sixfold rings out to ring five">
+      <g fill="none" stroke-linejoin="round">
+        <!-- the five nested rings, flat-top hulls of the sixfold clusters -->
+        <polygon points="26.06,0 13.03,22.57 -13.03,22.57 -26.06,0 -13.03,-22.57 13.03,-22.57" stroke="#FFD700" stroke-opacity=".28" stroke-width="1.6"/>
+        <polygon points="43.38,0 21.69,37.57 -21.69,37.57 -43.38,0 -21.69,-37.57 21.69,-37.57" stroke="#FFD700" stroke-opacity=".34" stroke-width="1.5"/>
+        <polygon points="60.7,0 30.35,52.57 -30.35,52.57 -60.7,0 -30.35,-52.57 30.35,-52.57" stroke="#FFD700" stroke-opacity=".42" stroke-width="1.4"/>
+        <polygon points="78.02,0 39.01,67.57 -39.01,67.57 -78.02,0 -39.01,-67.57 39.01,-67.57" stroke="#FFD700" stroke-opacity=".52" stroke-width="1.3"/>
+        <polygon points="95.34,0 47.67,82.57 -47.67,82.57 -95.34,0 -47.67,-82.57 47.67,-82.57" stroke="#FFD700" stroke-opacity=".66" stroke-width="1.3"/>
+        <!-- the centre cell and its six neighbours, pointy-top like the estate's hexes -->
+        <g stroke="#8a9a8a" stroke-width="1">
+          <polygon points="0,-10 8.66,-5 8.66,5 0,10 -8.66,5 -8.66,-5" fill="#FFD700" fill-opacity=".16"/>
+          <polygon points="17.32,-10 25.98,-5 25.98,5 17.32,10 8.66,5 8.66,-5" fill="#00E5FF" fill-opacity=".07"/>
+          <polygon points="-17.32,-10 -8.66,-5 -8.66,5 -17.32,10 -25.98,5 -25.98,-5" fill="#00E5FF" fill-opacity=".07"/>
+          <polygon points="8.66,5 17.32,10 17.32,20 8.66,25 0,20 0,10" fill="#ffb347" fill-opacity=".10"/>
+          <polygon points="-8.66,5 0,10 0,20 -8.66,25 -17.32,20 -17.32,10" fill="#ffb347" fill-opacity=".10"/>
+          <polygon points="8.66,-25 17.32,-20 17.32,-10 8.66,-5 0,-10 0,-20" fill="#ffb347" fill-opacity=".10"/>
+          <polygon points="-8.66,-25 0,-20 0,-10 -8.66,-5 -17.32,-10 -17.32,-20" fill="#ffb347" fill-opacity=".10"/>
+        </g>
+      </g>
+      <text x="28" y="-7" font-size="6.5" fill="#8a9a8a">ring 1 · six neighbours</text>
+      <text x="45.5" y="-7" font-size="6.5" fill="#8a9a8a">ring 2</text>
+      <text x="62.8" y="-7" font-size="6.5" fill="#8a9a8a">ring 3</text>
+      <text x="80.1" y="-7" font-size="6.5" fill="#8a9a8a">ring 4</text>
+      <text x="97.4" y="-7" font-size="6.5" fill="#8a9a8a" text-anchor="end" dx="-2">ring 5</text>
+    </svg>
+    <div class="txt">
+      <p class="law"><b>a frame draws as five nested rings of six.</b> six neighbours around one cell,
+      then ring upon sixfold ring, five layers deep — 6⁵ = 7,776 cell-places. the DAO caps its
+      membership at exactly that number: the cap and the geometry are the same fact, said once.</p>
+      <p class="law" style="margin-top:9px"><b>one renderer for every zoom.</b> the same function drew this
+      page's comb, every cell in it, and the comb inside each cell — there is no second renderer
+      hiding at another scale. zoom out and this frame is one cell in the estate comb; zoom out
+      again and that comb is one cell in a comb of combs. zoom in and a cell opens into its
+      receipts — the ledger all the way down, the ledger all the way up.</p>
+      <p class="law" style="margin-top:9px"><b>the LOD law: exact cells zoomed in, statistical heat zoomed out.</b>
+      when a cell is big enough to see, it is drawn exactly — its own state, its own seal. when it is
+      too small to see, it is never faked: the heat that stands for it is the measured average of
+      the receipts inside it.</p>
+      <div class="rings"><i>ring 1 · 6</i><i>ring 2 · 12</i><i>ring 3 · 18</i><i>ring 4 · 24</i><i>ring 5 · 30</i><i>6⁵ = 7,776</i></div>
+    </div>
+  </div>
+</section>
+
+<footer>the comb · a canon surface of the beehive nature estate · palette read live from
+<a href="tokens.css">tokens.css</a> — no colour invented here · zero network, the whole comb is
+local arithmetic · <a href="../docs/CANON-COMB.md">CANON-COMB</a> · <a href="stack.html">the engine room</a></footer>
+</main>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════
+   THE COMB — one renderer at every zoom.
+
+   WORLD  axial hex coordinates, pointy-top (the estate's house hexes are
+   pointy-top: band, hexdot). level ℓ cells have circumradius 3^ℓ world
+   units; level 0 is "the frame" at 30 px when zoom = 30.
+   RATIO  3 between levels, and the subdivision is EXACT: a level-ℓ cell
+   (q,r) contains, precisely and without gaps, the nineteen level-(ℓ−1)
+   cells (3q+dq, 3r+dr) with ring(dq,dr) ≤ 2 — one hex of side three is
+   nineteen hexes of side one. so a cell's receipts are its interior,
+   geometrically, not an overlay.
+   STATES nectar → honey → capped, one direction, staggered by a
+   deterministic hash so the same comb greets every visitor.
+   LOD    exact paint ≥ DETAIL_MIN px · statistical heat (the measured
+   average of the receipts inside) below it · recursion into the receipts
+   at ≥ RECEIPT_MIN px. one function draws every scale.
+   ═══════════════════════════════════════════════════════════════════ */
+(function(){
+'use strict';
+
+/* palette: read LIVE from tokens.css — the page cannot invent a colour */
+var css = getComputedStyle(document.documentElement);
+function tok(n, fb){ var v = css.getPropertyValue(n).trim(); return v || fb; }
+function rgb(h){ h = h.replace('#',''); return [parseInt(h.substr(0,2),16), parseInt(h.substr(2,2),16), parseInt(h.substr(4,2),16)]; }
+var PAL = {
+  bg0: rgb(tok('--bg0','#07090b')),   bg1: rgb(tok('--bg1','#0d1410')),
+  cyan: rgb(tok('--cyan','#00E5FF')), amber: rgb(tok('--amber','#ffb347')),
+  gold: rgb(tok('--gold','#FFD700'))
+};
+function rgba(c, a){ return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + (Math.round(a*1000)/1000) + ')'; }
+function mix(a, b, k){ return [a[0]+(b[0]-a[0])*k, a[1]+(b[1]-a[1])*k, a[2]+(b[2]-a[2])*k]; }
+
+var cv = document.getElementById('comb');
+var stage = document.getElementById('stage');
+var ctx = cv.getContext('2d');
+var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* thresholds in SCREEN pixels — the LOD law's two edges */
+var RECEIPT_MIN = 54;   /* at this size a cell opens into its receipts */
+var DETAIL_MIN  = 26;   /* below this, statistical heat stands in      */
+var EXACT_MIN   = 7;    /* below this, nothing — the heat covers it    */
+var GLYPH_MIN   = 20;   /* the ⬡ seal is drawn from here up           */
+var CYCLE = 150;        /* seconds per ripening cycle                 */
+var T_STATIC = 41.7;    /* reduced motion rests on one composed frame  */
+var SQ3 = Math.sqrt(3), LN3 = Math.log(3);
+
+var W = 0, H = 0, zoom = 30, camx = 0, camy = 0, T = reduced ? T_STATIC : 0;
+var stats = { exact:0, heat:0, nectar:0, honey:0, capped:0 };
+
+/* deterministic per-cell hash — same comb for everyone, forever */
+function h01(lev, q, r){
+  var h = 0x9E3779B9 ^ Math.imul(lev, 0x85EBCA6B) ^ Math.imul(q, 0xC2B2AE35) ^ Math.imul(r, 0x27D4EB2F);
+  h ^= h >>> 15; h = Math.imul(h, 0x2C1B3C6D);
+  h ^= h >>> 12; h = Math.imul(h, 0x297A2D39);
+  h ^= h >>> 15;
+  return (h >>> 0) / 4294967296;
+}
+function ring(q, r){ return (Math.abs(q) + Math.abs(r) + Math.abs(q + r)) / 2; }
+
+/* the three states — one direction, staggered from the origin outward */
+function state(lev, q, r){
+  /* the hash spread (0.94 of a cycle) means every ring of every comb shows
+     all three states at every moment — a healthy comb is always mid-fill
+     somewhere. the small per-ring lag is the wave: it still ripens outward,
+     gently, and the clock loops the season so the comb never stops filling */
+  var p = T / CYCLE + h01(lev, q, r) * 0.94 - ring(q, r) * 0.008;
+  p -= Math.floor(p);
+  if (p < 0.42) return { k:0, p: p / 0.42 };
+  if (p < 0.74) return { k:1, p: (p - 0.42) / 0.32 };
+  return { k:2, p: (p - 0.74) / 0.26 };
+}
+function scalar(s){ return s.k === 0 ? 0.12 + 0.26 * s.p : s.k === 1 ? 0.45 + 0.22 * s.p : 1; }
+function stateFill(s){
+  return s.k === 0 ? rgba(PAL.cyan, 0.10 + 0.20 * s.p)
+       : s.k === 1 ? rgba(PAL.amber, 0.38 + 0.42 * s.p)
+       :             rgba(PAL.gold, 0.90);
+}
+function rimCol(s){
+  return s.k === 0 ? rgba(PAL.cyan, 0.22)
+       : s.k === 1 ? rgba(PAL.amber, 0.45)
+       :             rgba(PAL.gold, 0.92);
+}
+/* statistical heat: the measured average of the nineteen receipts inside */
+var OFF19 = [];
+for (var dq = -2; dq <= 2; dq++) for (var dr = -2; dr <= 2; dr++)
+  if (ring(dq, dr) <= 2) OFF19.push([dq, dr]);
+function heatColor(a){
+  var c = a < 0.5 ? mix(PAL.cyan, PAL.amber, a * 2) : mix(PAL.amber, PAL.gold, (a - 0.5) * 2);
+  return rgba(c, a < 0.35 ? 0.34 : 0.34 + a * 0.5);
+}
+var STATE_KEYS = ['nectar', 'honey', 'capped'];
+function childAvg(lev, q, r){
+  var s = 0;
+  for (var i = 0; i < OFF19.length; i++) s += scalar(state(lev - 1, q * 3 + OFF19[i][0], r * 3 + OFF19[i][1]));
+  return s / OFF19.length;
+}
+
+/* pointy-top hex path — the house orientation */
+function hexPath(cx, cy, R, flat){
+  ctx.beginPath();
+  for (var i = 0; i < 6; i++){
+    var a = Math.PI / 180 * (60 * i + (flat ? 0 : -90));
+    var x = cx + R * Math.cos(a), y = cy + R * Math.sin(a);
+    i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+  }
+  ctx.closePath();
+}
+
+/* ── THE ONE RENDERER ─────────────────────────────────────────────────
+   exact paint when large, heat when small, recursion into the receipts
+   at RECEIPT_MIN. this one function is every zoom the comb has.       */
+function drawCell(lev, q, r, sx, sy, R){
+  if (sx + R < -4 || sx - R > W + 4 || sy + R < -4 || sy - R > H + 4) return;
+  if (R < EXACT_MIN) return;
+  var s = state(lev, q, r);
+  if (R >= RECEIPT_MIN){
+    stats.exact++; stats[STATE_KEYS[s.k]]++;
+    hexPath(sx, sy, R);
+    ctx.fillStyle = rgba(PAL.bg1, 1); ctx.fill();
+    ctx.fillStyle = stateFill(s); ctx.fill();
+    /* the receipts — this cell's interior, exactly these nineteen */
+    ctx.save();
+    hexPath(sx, sy, R * 0.985); ctx.clip();
+    var u = R / 3;
+    for (var i = 0; i < OFF19.length; i++){
+      var o = OFF19[i];
+      drawCell(lev - 1, q * 3 + o[0], r * 3 + o[1],
+               sx + (SQ3 / 3) * R * (o[0] + o[1] / 2), sy + 0.5 * R * o[1], u);
+    }
+    ctx.restore();
+    /* the wall, over the receipts */
+    hexPath(sx, sy, R);
+    ctx.lineWidth = Math.max(2, R / 15);
+    ctx.strokeStyle = rimCol(s);
+    ctx.stroke();
+  } else if (R >= DETAIL_MIN){
+    stats.exact++; stats[STATE_KEYS[s.k]]++;
+    hexPath(sx, sy, R);
+    ctx.fillStyle = rgba(PAL.bg1, 1); ctx.fill();
+    ctx.fillStyle = stateFill(s); ctx.fill();
+    ctx.lineWidth = Math.max(1, R / 26);
+    ctx.strokeStyle = rimCol(s); ctx.stroke();
+    if (s.k === 2 && R >= GLYPH_MIN){          /* the seal: ⬡ cut in the wax */
+      hexPath(sx, sy, R * 0.42);
+      ctx.lineWidth = Math.max(1.2, R / 15);
+      ctx.strokeStyle = rgba(PAL.bg0, 0.85);
+      ctx.stroke();
+    }
+  } else {
+    stats.heat++;
+    hexPath(sx, sy, R);
+    ctx.fillStyle = heatColor(childAvg(lev, q, r));
+    ctx.fill();
+  }
+}
+
+/* the frame's five nested rings, drawn at the level you are reading */
+function drawFrameMarks(){
+  var d = Math.round(Math.log(30 / zoom) / LN3);
+  var R = Math.pow(3, d) * zoom;
+  /* draw the rings while the frame is on a human scale: not when it has
+     shrunk to dust, not when one ring alone swamps the view */
+  if (R < 4 || 2.6 * R > 3 * Math.max(W, H)) return;
+  var ox = W / 2 + (0 - camx) * zoom, oy = H / 2 + (0 - camy) * zoom;
+  for (var k = 1; k <= 5; k++){
+    var rr = (1.732 * k + 0.874) * R;
+    hexPath(ox, oy, rr, true);
+    ctx.lineWidth = 1.25;
+    ctx.strokeStyle = rgba(PAL.gold, 0.09 + 0.05 * k);
+    ctx.stroke();
+  }
+}
+
+function render(){
+  stats.exact = stats.heat = stats.nectar = stats.honey = stats.capped = 0;
+  ctx.fillStyle = rgba(PAL.bg0, 1);
+  ctx.fillRect(0, 0, W, H);
+  var maxdim = Math.max(W, H);
+  var entry = Math.ceil(Math.log(maxdim / zoom) / LN3);
+  var Rw = Math.pow(3, entry);                 /* entry circumradius, world units */
+  /* the view's centre in entry-level axial coords */
+  var cq = (SQ3 / 3 * camx - camy / 3) / Rw, cr = (2 / 3 * camy) / Rw;
+  for (var q = Math.floor(cq) - 2; q <= Math.ceil(cq) + 2; q++)
+    for (var r = Math.floor(cr) - 2; r <= Math.ceil(cr) + 2; r++){
+      var wx = SQ3 * Rw * (q + r / 2), wy = 1.5 * Rw * r;
+      drawCell(entry, q, r, W / 2 + (wx - camx) * zoom, H / 2 + (wy - camy) * zoom, Rw * zoom);
+    }
+  drawFrameMarks();
+  window.__combStats = {
+    exact: stats.exact, heat: stats.heat,
+    nectar: stats.nectar, honey: stats.honey, capped: stats.capped,
+    entry: entry, zoom: Math.round(zoom * 100) / 100
+  };
+  hudMaybe();
+}
+
+/* ── HUD — the crumb says where in the self-similarity you are ──────── */
+var hudN = 0;
+function hudMaybe(){ if (++hudN % 6 === 0) hud(); }
+function hud(){
+  var d = Math.round(Math.log(30 / zoom) / LN3);
+  var leaf = Math.ceil(Math.log(Math.max(W, H) / zoom) / LN3);
+  while (Math.pow(3, leaf) * zoom >= RECEIPT_MIN) leaf--;
+  var leafR = Math.pow(3, leaf) * zoom;
+  var crumb;
+  if (d === 0) crumb = '⬡ the frame — 6⁵';
+  else if (d < 0){
+    var n = -d;
+    crumb = n === 1 ? 'one cell → its receipts in'
+         : n === 2 ? 'receipts of receipts'
+         : 'receipts of receipts of receipts…';
+  } else {
+    crumb = d === 1 ? 'combs of combs out — this frame is one cell'
+         : d === 2 ? 'two combs out — the frame is a receipt here'
+         : 'combs of combs of combs out…';
+  }
+  document.getElementById('hudCrumb').textContent = crumb;
+  document.getElementById('hudMode').innerHTML =
+    (leafR < DETAIL_MIN ? 'statistical heat' : 'exact cells') +
+    ' · <em>' + Math.round(leafR) + ' px</em>';
+  /* frame fill at the level you are reading — 91 cells, rings 0–5 */
+  var n = [0, 0, 0], tot = 0;
+  for (var q = -5; q <= 5; q++) for (var r = -5; r <= 5; r++){
+    if (ring(q, r) > 5) continue;
+    n[state(d, q, r).k]++; tot++;
+  }
+  var pn = Math.round(n[0] / tot * 100), ph = Math.round(n[1] / tot * 100), pc = 100 - pn - ph;
+  document.getElementById('fbN').style.width = pn + '%';
+  document.getElementById('fbH').style.width = ph + '%';
+  document.getElementById('fbC').style.width = pc + '%';
+  document.getElementById('hudFill').textContent =
+    'frame fill — nectar ' + pn + '% · honey ' + ph + '% · capped ' + pc + '%';
+}
+
+/* ── interaction: pan, wheel, pinch, double-click, keys, buttons ────── */
+function zoomAt(mx, my, f){
+  var nz = Math.min(Math.pow(3, 34), Math.max(Math.pow(3, -34), zoom * f));
+  f = nz / zoom;
+  var wx = camx + (mx - W / 2) / zoom, wy = camy + (my - H / 2) / zoom;
+  zoom = nz;
+  camx = wx - (mx - W / 2) / zoom;
+  camy = wy - (my - H / 2) / zoom;
+}
+var anim = null;
+function animateTo(z1, ax, ay, wx, wy){
+  if (reduced){ zoomAt(ax, ay, z1 / zoom); render(); return; }
+  anim = { t0: performance.now(), dur: 380, z0: zoom, z1: z1, ax: ax, ay: ay, wx: wx, wy: wy };
+}
+function animStep(now){
+  if (!anim) return false;
+  var k = Math.min(1, (now - anim.t0) / anim.dur);
+  k = 1 - Math.pow(1 - k, 3);
+  zoom = anim.z0 * Math.pow(anim.z1 / anim.z0, k);
+  camx = anim.wx - (anim.ax - W / 2) / zoom;
+  camy = anim.wy - (anim.ay - H / 2) / zoom;
+  if (k >= 1) anim = null;
+  return true;
+}
+var ptrs = new Map(), lastPinch = 0, down = null;
+stage.addEventListener('pointerdown', function(e){
+  stage.setPointerCapture(e.pointerId);
+  ptrs.set(e.pointerId, { x: e.offsetX, y: e.offsetY });
+  if (ptrs.size === 1) down = { x: e.offsetX, y: e.offsetY, camx: camx, camy: camy };
+  else { down = null; lastPinch = 0; }
+});
+stage.addEventListener('pointermove', function(e){
+  if (!ptrs.has(e.pointerId)) return;
+  var pts = Array.from(ptrs.values());
+  ptrs.set(e.pointerId, { x: e.offsetX, y: e.offsetY });
+  if (ptrs.size === 1 && down){
+    camx = down.camx - (e.offsetX - down.x) / zoom;
+    camy = down.camy - (e.offsetY - down.y) / zoom;
+    if (reduced) render();
+  } else if (ptrs.size === 2){
+    var a = Array.from(ptrs.values());
+    var dist = Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y);
+    var mx = (a[0].x + a[1].x) / 2, my = (a[0].y + a[1].y) / 2;
+    if (lastPinch) { anim = null; zoomAt(mx, my, dist / lastPinch); if (reduced) render(); }
+    lastPinch = dist;
+  }
+});
+function ptrUp(e){
+  ptrs.delete(e.pointerId);
+  if (ptrs.size < 2) lastPinch = 0;
+  if (ptrs.size === 0) down = null;
+}
+stage.addEventListener('pointerup', ptrUp);
+stage.addEventListener('pointercancel', ptrUp);
+stage.addEventListener('wheel', function(e){
+  e.preventDefault();
+  anim = null;
+  zoomAt(e.offsetX, e.offsetY, Math.exp(-e.deltaY * 0.0016));
+  if (reduced) render();
+}, { passive: false });
+stage.addEventListener('dblclick', function(e){
+  e.preventDefault();
+  var wx = camx + (e.offsetX - W / 2) / zoom, wy = camy + (e.offsetY - H / 2) / zoom;
+  animateTo(zoom * 3, e.offsetX, e.offsetY, wx, wy);
+});
+document.getElementById('zIn').addEventListener('click', function(){
+  animateTo(zoom * 2.4, W / 2, H / 2, camx, camy);
+});
+document.getElementById('zOut').addEventListener('click', function(){
+  animateTo(zoom / 2.4, W / 2, H / 2, camx, camy);
+});
+document.getElementById('zReset').addEventListener('click', function(){
+  animateTo(30, W / 2, H / 2, 0, 0);
+});
+stage.addEventListener('keydown', function(e){
+  var step = 60 / zoom;
+  if (e.key === '+' || e.key === '=') { zoomAt(W / 2, H / 2, 1.8); }
+  else if (e.key === '-' || e.key === '_') { zoomAt(W / 2, H / 2, 1 / 1.8); }
+  else if (e.key === '0') { animateTo(30, W / 2, H / 2, 0, 0); }
+  else if (e.key === 'ArrowLeft') { camx -= step; } else if (e.key === 'ArrowRight') { camx += step; }
+  else if (e.key === 'ArrowUp') { camy -= step; } else if (e.key === 'ArrowDown') { camy += step; }
+  else return;
+  e.preventDefault();
+  if (reduced) render();
+});
+
+/* ── sizing + the loop ───────────────────────────────────────────────── */
+function resize(){
+  var r = stage.getBoundingClientRect();
+  W = Math.round(r.width); H = Math.round(r.height);
+  var dpr = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  render();
+}
+if (typeof ResizeObserver !== 'undefined') new ResizeObserver(resize).observe(stage);
+else addEventListener('resize', resize);
+
+if (reduced){
+  /* motion rests: one composed frame, redrawn only when touched */
+  resize();
+} else {
+  resize();
+  var t0 = performance.now();
+  (function loop(now){
+    T = (now - t0) / 1000;
+    animStep(now);
+    render();
+    requestAnimationFrame(loop);
+  })(t0);
+}
+})();
+</script>
+<script src="tour.js?v=34"></script>
+</body>
+</html>

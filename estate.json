@@ -1085,18 +1085,27 @@
    "state": "LIVE",
    "gloss": "the dynasty layer — one name, every generation",
    "org": "skaists"
+  },
+  {
+   "id": "comb",
+   "family": "beehivenature",
+   "home": "skaists.dev",
+   "path": "surfaces/comb.html",
+   "state": "LIVE",
+   "gloss": "the comb — canon geometry, one renderer at every zoom",
+   "org": "beehive-nature"
   }
  ],
  "counts": {
-  "surfaces": 87,
-  "listed": 96,
+  "surfaces": 88,
+  "listed": 97,
   "families": 8,
   "domains": 26,
   "domainsLive": 4,
   "domainsPending": 17,
   "domainsSeatOpen": 5,
   "byFamily": {
-   "beehivenature": 36,
+   "beehivenature": 37,
    "plur": 5,
    "skaists": 17,
    "bnature": 18,
@@ -1106,10 +1115,10 @@
    "bnr": 1
   },
   "byState": {
-   "LIVE": 96
+   "LIVE": 97
   },
   "byOrg": {
-   "beehive-nature": 53,
+   "beehive-nature": 54,
    "skaists": 29,
    "beehive-biomass": 5
   }
