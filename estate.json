@@ -1070,7 +1070,7 @@
   }
  ],
  "counts": {
-  "surfaces": 94,
+  "surfaces": 85,
   "listed": 94,
   "families": 8,
   "domains": 26,
@@ -1080,7 +1080,7 @@
   "byFamily": {
    "beehivenature": 35,
    "plur": 5,
-   "skaists": 15,
+   "skaists": 16,
    "bnature": 18,
    "beehivebiomass": 5,
    "beehivebuds": 0,
@@ -1092,7 +1092,7 @@
   },
   "byOrg": {
    "beehive-nature": 52,
-   "skaists": 27,
+   "skaists": 28,
    "beehive-biomass": 5
   }
  },
