@@ -52,7 +52,7 @@
    "d": "skaists.buzz",
    "fam": "skaists",
    "repo": "skaists-buzz",
-   "state": "DNS-PENDING",
+   "state": "LIVE",
    "org": "skaists"
   },
   {
@@ -136,7 +136,7 @@
    "d": "beehivenature.buzz",
    "fam": "beehivenature",
    "repo": "beehivenature-buzz",
-   "state": "DNS-PENDING",
+   "state": "LIVE",
    "org": "beehive-nature"
   },
   {
@@ -250,6 +250,24 @@
    "state": "LIVE",
    "gloss": "beehivebiomass.comfor someone with a machine to contribute",
    "org": "beehive-biomass"
+  },
+  {
+   "id": "doors-skaists-buzz",
+   "family": "skaists",
+   "home": "skaists.buzz",
+   "path": "surfaces/doors/skaists-buzz.html",
+   "state": "LIVE",
+   "gloss": "the founder's hive door — both roads shown, clean road for filtered networks",
+   "org": "skaists"
+  },
+  {
+   "id": "doors-beehivenature-buzz",
+   "family": "beehivenature",
+   "home": "beehivenature.buzz",
+   "path": "surfaces/doors/beehivenature-buzz.html",
+   "state": "LIVE",
+   "gloss": "the science hive door — both roads shown, clean road for filtered networks",
+   "org": "beehive-nature"
   },
   {
    "id": "doors",
@@ -1070,17 +1088,17 @@
   }
  ],
  "counts": {
-  "surfaces": 85,
-  "listed": 94,
+  "surfaces": 87,
+  "listed": 96,
   "families": 8,
   "domains": 26,
-  "domainsLive": 2,
-  "domainsPending": 19,
+  "domainsLive": 4,
+  "domainsPending": 17,
   "domainsSeatOpen": 5,
   "byFamily": {
-   "beehivenature": 35,
+   "beehivenature": 36,
    "plur": 5,
-   "skaists": 16,
+   "skaists": 17,
    "bnature": 18,
    "beehivebiomass": 5,
    "beehivebuds": 0,
@@ -1088,11 +1106,11 @@
    "bnr": 1
   },
   "byState": {
-   "LIVE": 94
+   "LIVE": 96
   },
   "byOrg": {
-   "beehive-nature": 52,
-   "skaists": 28,
+   "beehive-nature": 53,
+   "skaists": 29,
    "beehive-biomass": 5
   }
  },

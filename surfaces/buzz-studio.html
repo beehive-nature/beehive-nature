@@ -217,11 +217,25 @@ var ROOM={
   state:'live — as of 2026-08-28',
   door:{ href:'https://skaists.buzz', label:'the web door is open — a standing invite →' }
 };
+/* ROAD MEMORY (2026-08-31): networks that filter the .buzz name (SNI-level —
+   proven on the founder's building wifi) kill the primary road. The probe
+   below learns which road answered and REMEMBERS it in localStorage, so the
+   next visit renders the working road first — no timeout, no VPN. Primary
+   success clears the memory: the .buzz name stays the community identity
+   (ORIGIN RULING) and every network that can say it, should. */
+function roadMemory(v){
+  try{ if(v) localStorage.setItem('bz.road',v); return localStorage.getItem('bz.road')||'primary'; }
+  catch(e){ return 'primary'; }
+}
 function renderRoom(){
+  var onFallback = roadMemory()==='fallback' && ROOM.fallback;
+  var fbWeb = ROOM.fallback ? ROOM.fallback.replace('wss://','https://') : null;
   $('roomname').textContent=ROOM.name;
-  $('joincode').textContent=ROOM.wss;
-  if(ROOM.door&&ROOM.door.href){$('roomdoor').href=ROOM.door.href;$('roomdoor').textContent=ROOM.door.label;}
-  $('roomprobe').innerHTML='state: '+ROOM.state+' · <b>no request leaves this page to render it</b>';
+  $('joincode').textContent=onFallback ? ROOM.fallback : ROOM.wss;
+  var door = (onFallback && fbWeb) ? { href:fbWeb, label:ROOM.door.label } : ROOM.door;
+  if(door&&door.href){$('roomdoor').href=door.href;$('roomdoor').textContent=door.label;}
+  $('roomprobe').innerHTML='state: '+ROOM.state+' · <b>no request leaves this page to render it</b>'+
+    (onFallback?' · <span style="color:var(--acc,#E8B54B)">on the remembered road — this network filters the '+ROOM.name+' name; probe to re-check</span>':'');
 }
 /* THE RUB LAW (lane C law b): the door renders everything from data — zero
    dependence on the relay. The probe below is OPT-IN (a click) and only ever
@@ -231,6 +245,7 @@ $('checkroom').onclick=function(){
   $('roomprobe').textContent='state: probing reachability…';
   var ctrl=(typeof AbortSignal!=='undefined'&&AbortSignal.timeout)?AbortSignal.timeout(4500):null;
   fetch(ROOM.web,{mode:'no-cors',signal:ctrl}).then(function(){
+    roadMemory('primary');
     $('roomdot').classList.add('live');
     window.__hiveAlive=ROOM.wss;
     $('roomprobe').textContent='state: answering ✓ via '+ROOM.name+' · probed just now · the join line stands';
@@ -240,9 +255,10 @@ $('checkroom').onclick=function(){
     if(!fb){ $('roomprobe').textContent='state: not answering right now · probed just now · this door never needed the relay — the join line stands for when it returns'; return; }
     var ctrl2=(typeof AbortSignal!=='undefined'&&AbortSignal.timeout)?AbortSignal.timeout(4500):null;
     fetch(fb,{mode:'no-cors',signal:ctrl2}).then(function(){
+      roadMemory('fallback');
       $('roomdot').classList.add('live');
       window.__hiveAlive=ROOM.fallback;
-      $('roomprobe').textContent='state: answering ✓ via '+fb.replace('https://','').replace(/\/+$/,'')+' · your network filters the '+ROOM.name+' name — the fallback is live, use it below';
+      $('roomprobe').textContent='state: answering ✓ via '+fb.replace('https://','').replace(/\/+$/,'')+' · your network filters the '+ROOM.name+' name — the fallback is live, remembered for next time';
       $('joincode').textContent=ROOM.fallback;
     },function(){
       $('roomprobe').textContent='state: not answering right now · probed just now · this door never needed the relay — the join line stands for when it returns';
@@ -252,7 +268,7 @@ $('checkroom').onclick=function(){
 $('copywss').onclick=function(){
   var b=this;
   function done(){ b.textContent='copied ✓'; setTimeout(function(){ b.textContent='copy join address'; },1600); }
-  var target=window.__hiveAlive||ROOM.wss;
+  var target=window.__hiveAlive||(roadMemory()==='fallback'&&ROOM.fallback?ROOM.fallback:ROOM.wss);
   function copyFallback(){
     var t=document.createElement('textarea'); t.value=target; document.body.appendChild(t);
     t.select(); try{document.execCommand('copy');done();}catch(e){} document.body.removeChild(t);
