@@ -1,0 +1,326 @@
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "version": "eosio::abi/1.2",
+    "types": [],
+    "structs": [
+        {
+            "name": "cert_row",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "agent_name",
+                    "type": "string"
+                },
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "member_key",
+                    "type": "string"
+                },
+                {
+                    "name": "ar_id",
+                    "type": "string"
+                },
+                {
+                    "name": "content_hash",
+                    "type": "string"
+                },
+                {
+                    "name": "template_id",
+                    "type": "string"
+                },
+                {
+                    "name": "tongue",
+                    "type": "string"
+                },
+                {
+                    "name": "minted",
+                    "type": "time_point_sec"
+                }
+            ]
+        },
+        {
+            "name": "config_row",
+            "base": "",
+            "fields": [
+                {
+                    "name": "admin",
+                    "type": "name"
+                },
+                {
+                    "name": "max_certs",
+                    "type": "uint64"
+                },
+                {
+                    "name": "certs_count",
+                    "type": "uint64"
+                },
+                {
+                    "name": "spec",
+                    "type": "string"
+                },
+                {
+                    "name": "initialized",
+                    "type": "bool"
+                }
+            ]
+        },
+        {
+            "name": "init",
+            "base": "",
+            "fields": [
+                {
+                    "name": "admin",
+                    "type": "name"
+                },
+                {
+                    "name": "max_certs",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "mint",
+            "base": "",
+            "fields": [
+                {
+                    "name": "agent_name",
+                    "type": "string"
+                },
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "member_key",
+                    "type": "string"
+                },
+                {
+                    "name": "ar_id",
+                    "type": "string"
+                },
+                {
+                    "name": "content_hash",
+                    "type": "string"
+                },
+                {
+                    "name": "templ",
+                    "type": "string"
+                },
+                {
+                    "name": "tongue",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "rate_row",
+            "base": "",
+            "fields": [
+                {
+                    "name": "rail",
+                    "type": "name"
+                },
+                {
+                    "name": "basis",
+                    "type": "asset"
+                },
+                {
+                    "name": "label",
+                    "type": "string"
+                },
+                {
+                    "name": "updated",
+                    "type": "time_point_sec"
+                }
+            ]
+        },
+        {
+            "name": "release",
+            "base": "",
+            "fields": [
+                {
+                    "name": "agent_name",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "rmrate",
+            "base": "",
+            "fields": [
+                {
+                    "name": "rail",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "setadmin",
+            "base": "",
+            "fields": [
+                {
+                    "name": "new_admin",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "setrate",
+            "base": "",
+            "fields": [
+                {
+                    "name": "rail",
+                    "type": "name"
+                },
+                {
+                    "name": "basis",
+                    "type": "asset"
+                },
+                {
+                    "name": "label",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "settithe",
+            "base": "",
+            "fields": [
+                {
+                    "name": "percent_bp",
+                    "type": "uint16"
+                },
+                {
+                    "name": "destination",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "tithe_row",
+            "base": "",
+            "fields": [
+                {
+                    "name": "percent_bp",
+                    "type": "uint16"
+                },
+                {
+                    "name": "destination",
+                    "type": "name"
+                },
+                {
+                    "name": "updated",
+                    "type": "time_point_sec"
+                }
+            ]
+        },
+        {
+            "name": "update",
+            "base": "",
+            "fields": [
+                {
+                    "name": "agent_name",
+                    "type": "string"
+                },
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "member_key",
+                    "type": "string"
+                },
+                {
+                    "name": "ar_id",
+                    "type": "string"
+                },
+                {
+                    "name": "content_hash",
+                    "type": "string"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "name": "init",
+            "type": "init",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "mint",
+            "type": "mint",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "release",
+            "type": "release",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "rmrate",
+            "type": "rmrate",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setadmin",
+            "type": "setadmin",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setrate",
+            "type": "setrate",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "settithe",
+            "type": "settithe",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "update",
+            "type": "update",
+            "ricardian_contract": ""
+        }
+    ],
+    "tables": [
+        {
+            "name": "certs",
+            "type": "cert_row",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "config",
+            "type": "config_row",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "rates",
+            "type": "rate_row",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "tithe",
+            "type": "tithe_row",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        }
+    ],
+    "ricardian_clauses": [],
+    "variants": [],
+    "action_results": []
+}

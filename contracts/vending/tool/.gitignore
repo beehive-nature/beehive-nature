@@ -1,0 +1,5 @@
+node_modules/
+last-mint.json
+hist-*.txt
+stub.wasm
+stub.abi
