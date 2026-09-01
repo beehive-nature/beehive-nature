@@ -54,6 +54,8 @@ members = [
     "crates/bnr-url",
     "crates/bnr-archive",
     "crates/reversibility",
+    "crates/banchor",
+    "crates/bheart-signer",
 ]
 
 [workspace.metadata]

@@ -1,0 +1,21 @@
+[package]
+name = "banchor"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "bHEartWALLet's SERVING organ — local MCP daemon on 127.0.0.1, bSEAT (system Chromium over CDP, accessibility-tree snapshots with @eN refs, NO screenshot vision on the durable path), bnr://+buzz:// resolution, content cache, session replay to disk."
+
+# BINDING LAW (anchor-daemon lane): this crate may never be a dependency of
+# bheart-signer. The wallet works fully with the anchor off — accelerator,
+# never a gate. Enforced socially here; enforced structurally by the fact that
+# crates/bheart-signer/Cargo.toml contains no `banchor` line, ever.
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha3 = { workspace = true }
+tungstenite = "0.29"
+tiktoken-rs = "0.12"
+httparse = "1.10"
+ureq = { version = "2.12", default-features = false, features = ["tls", "json"] }
+thiserror = "2"
+bnr-url = { path = "../bnr-url" }
