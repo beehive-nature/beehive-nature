@@ -86,6 +86,35 @@ metered through the b-meter like every other call — the local engine earns
 its keep by being consulted, and its verdict is recorded in the local-model
 lane memory.
 
+## §sizing-basis — verified at HEAD 2026-09-01 (block 517,840,695 · 02:43:07Z · RPC eos.api.eosnation.io)
+
+Both moving numbers re-read from the live chain before any sizing work; the
+pricing law discipline applies (inputs named + read date — these MOVE, re-read
+at build time):
+
+- **RAM PRICE at HEAD: 0.3413 EOS/KB marginal** — rammarket: base
+  74,756,615,180 B · quote 25,511,752.4698 EOS · weights 0.5/0.5 (constant-
+  product). **≈ $0.0257/KB** at EOS $0.075313 (CoinGecko, same minute). The
+  0.5% buyram fee makes effective buy price ≈ 0.3430 EOS/KB.
+- **BYTES-PER-ROW OVERHEAD: 112 B** per multi_index row for the primary-key
+  index, plus payload bytes, plus each secondary index bills its own entry.
+  Citation class: SECONDARY-SOURCED (canonical EOS Stack Exchange answer +
+  CDT multi_index documentation breakdowns; not yet read directly in leap
+  source — a build-time seat should confirm the constant in the leap/CDT
+  source before shipping the cost model). Worked example on OUR OWN row:
+  kingbeelovis/domains "oliver" = 166 B JSON payload → **≈ 278 B/row →
+  ≈ 0.093 EOS ≈ $0.007 per registry row at HEAD.**
+- **CPU/NET MODEL: BOTH LIVE — classic stake AND rent.** The estate's own
+  registrar (kingbeelovis) runs the CLASSIC STAKE model at HEAD: self-staked
+  1000 EOS CPU / 100 EOS NET, no refund pending, no REX. The REX rent market
+  exists and is ACTIVE but nearly empty: total_lent 228,384 EOS against
+  total_unlent 393,633,193 EOS (**0.058% utilization — rents price near the
+  floor**), 505,713 lifetime loans. Cost-line implication for the machine:
+  RENT = ongoing fee, zero capital bound (cheap today, floats with
+  utilization); STAKE = zero ongoing fee, capital locked (the estate's
+  current posture). The choice is per-account and reversible; it moves the
+  ONGOING line only, never the storage line.
+
 ## §order-of-work
 
 1. This spec (genesis + all five rulings) — THIS COMMIT.
