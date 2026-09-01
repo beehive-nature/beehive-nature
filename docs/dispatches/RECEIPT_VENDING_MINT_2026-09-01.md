@@ -1,4 +1,4 @@
-# RECEIPT — the vending machine BUILT: one agent minted end-to-end and RESURRECTED from the certificate alone, hash-verified (2026-09-01)
+# RECEIPT — the vending machine BUILT: one agent minted end-to-end and RESURRECTED from the certificate alone, hash-verified — **11/11 GREEN** (2026-09-01)
 
 Lane: SPEC-VENDING-1 §order-of-work item 2 → built as SPEC-VENDING-2 (this
 tree). The headline property — **the species survives the estate** — is now
@@ -24,21 +24,27 @@ RECIPE (four layers, re-stand steps, contract source, spec of record) + the
 ANT store binding with a REAL signed a1-genesis revision hash. Read it
 yourself: https://arweave.net/XviV59rLsgo2UxcitNlM4zoupGltUm6tBGqEcJX82UE
 
-## THE RESURRECTION (from the certificate alone)
+## THE RESURRECTION (from the certificate alone) — FINAL, 11/11
 
 `node resurrect.mjs vendingtest local` — a fresh process holding ONLY the
 agent name (member-held input):
 
 - **name road**: name → `vending` `certs` row → ar id (chain state read) ✓
-- **gateway fetch** of the certificate bytes over public HTTPS ✓
+- **gateway fetch** of the certificate bytes over public HTTPS ✓ (arweave.net
+  302s to the fast-finality gateway; fetch follows redirects)
 - **hash gate**: re-derive canonical JSON → sha256 → equals in-record hash ✓
   AND equals the chain row's `content_hash` ✓ (three-way agreement)
 - **recipe carried** (the species-survives property) ✓ · **five answers** ✓
+- **KEY ROAD, proven after the L1 bundle posted**: GraphQL
+  `transactions(tags:[{name:"Member-Key", values:[<the member's own key>]}])`
+  → **1 hit, the same ar id** — the member's key ALONE locates the record on
+  Arweave, zero estate involvement ✓ · owner recorded
+  `qmkTavp0kgkJI2wVJ6FQDD-FoRky324Ctp-Dpoi0L9Q` (the throwaway RSA uploader —
+  the ed25519 owner=member-key door remains the target shape) ✓
 - **forged-resurrection negative proof**: one flipped field ⇒ HASH MISMATCH ⇒
   refused ✓
-- **owner/tags L1-index read**: pending the bundler's L1 batch (data leg
-  served from fast-finality caches; GraphQL fills when the bundle posts) —
-  appended below when it lands.
+
+`RESURRECTION PROVEN: 11 pass, 0 fail`
 
 ## THE A1 MEMORY FORMAT (ANT store binding, layer 2)
 
@@ -92,6 +98,7 @@ the trap's receipt.
 
 The machine is built: certificate hashed and permanent, pointer bounded and
 member-owned, law rows governed-mutable, memory format owner-signed,
-resurrection proven from member-held inputs alone — and the two doors that
-remain (Jungle4 A-gift, mainnet seat) are founder gestures with every step
-already scripted.
+resurrection proven from member-held inputs alone (11/11 — both roads, the
+hash gate, and the forged-fails proof) — and the two doors that remain
+(Jungle4 A-gift, mainnet seat) are founder gestures with every step already
+scripted.

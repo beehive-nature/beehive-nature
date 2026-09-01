@@ -143,12 +143,14 @@ that rejection is law.
 
 ## §what-the-receipt-proves — and what it does not
 
-PROVEN (receipted): certificate format + hash law; free-tier AR upload of the
-real certificate; name-road derivation; in-place update; resurrection from
-member-held inputs with hash verification; forged-resurrection negative
-proof; A1 format; contract law rows on a Vaulta-class chain; compile.
+PROVEN (receipted, 11/11): certificate format + hash law; free-tier AR upload
+of the real certificate; name-road derivation; in-place update; resurrection
+from member-held inputs with hash verification; the KEY ROAD by GraphQL
+Member-Key tag search (the member's key alone finds the record — L1 bundle
+posted, 1 hit); forged-resurrection negative proof; A1 format; contract law
+rows on a Vaulta-class chain; compile.
 NOT YET (honestly): the pointer on a chain the estate does not control
 (Jungle4 = one founder gesture; mainnet = one ceremony); the ed25519 owner-
 equals-member-key door as the OPERATIONAL path (probed working, throttled
-during the mint window); the funded ANT write (custody-gated); the tags/
-owner L1-index read (bundlers batch — receipt updated when it lands).
+during the mint window — the RSA door + Member-Key tag carries the key road
+meanwhile); the funded ANT write (custody-gated).

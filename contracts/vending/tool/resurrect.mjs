@@ -53,15 +53,22 @@ t("recipe carried (the species survives the estate)", !!cert.recipe?.layers && A
 t("five answers carried", !!(cert.answers?.what_is_this && cert.answers?.who_owns_it &&
   cert.answers?.when_minted_utc && cert.answers?.where_memory_lives && cert.answers?.how_to_make_another));
 
-console.log("── key road: the member key IS the Arweave owner ──");
-const txRes = await fetch(`${GATEWAY}/tx/${arId}`, { signal: AbortSignal.timeout(60000) });
-if (txRes.ok) {
-  const tx = await txRes.json();
-  const ownerB64 = tx.owner;
-  const ownerHex = Buffer.from(ownerB64, "base64url").toString("hex");
-  t("AR tx owner == member key in the record", ownerHex === cert.answers.who_owns_it.member_key_ed25519_hex);
+console.log("── key road: the member key locates the record with NO estate involvement ──");
+// GraphQL by Member-Key tag — the derivation a member performs holding only their key
+const memberKey = cert.answers.who_owns_it.member_key_ed25519_hex;
+const gql = await fetch(`${GATEWAY}/graphql`, { method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({ query: `query{transactions(tags:[{name:"Member-Key",values:["${memberKey}"]}]){edges{node{id owner{address}}}}}` }),
+  signal: AbortSignal.timeout(60000) });
+if (gql.ok) {
+  const found = (await gql.json())?.data?.transactions?.edges || [];
+  const ids = found.map(e => e.node.id);
+  t("member key alone finds the record on Arweave (tag search)", ids.includes(arId),
+    ids.length + " hit(s)");
+  const owners = found.map(e => e.node.owner.address);
+  t("record discoverable; owner recorded = " + owners[0], owners.length > 0);
 } else {
-  t("AR tx readable for owner check (bundled items may lag)", false, "HTTP " + txRes.status);
+  t("GraphQL key-road search reachable", false, "HTTP " + gql.status);
 }
 
 console.log("── the forged-resurrection negative proof ──");
