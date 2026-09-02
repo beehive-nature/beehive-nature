@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""bDISPATCH watcher — mailbox -> buzz (Nostr) bridge for Seat 1 (`bclaude`).
+"""bDISPATCH watcher — mailbox -> buzz (Nostr) bridge for Seat 1, signing as the
+estate's EXISTING bClaude key (buzz-acp on the Oracle VPS; pubkey abbb9dfc…, no new key).
 
 Watches docs/dispatches/ for a file whose FIRST LINE is `SEND TO: <seat>` (one or
 more seats, comma-separated), publishes the file body as a NIP-17 private DM to each
@@ -7,31 +8,38 @@ addressee's pubkey signed by bclaude, then appends `RELAYED <utc-iso> <event-id>
 the file — one line per addressee. Idempotent: a file that already carries a RELAYED
 line for a seat is never re-sent to that seat.
 
-KEY LAW: the secret is read from the OS keyring only (Windows Credential Manager entry
-service=`bnr/bclaude/nsec`, user=`bclaude`) and is never written, printed or logged.
-No env var carries it. Public key + relay URLs are the only things on the wire.
+KEY LAW: the secret is read ONCE from the root-owned 0600 file named by BDISPATCH_NSEC_FILE
+(the VPS path buzz-acp already keeps it at: /opt/buzz-bclaude/bclaude.nsec — cited from
+docs/dispatches/LANE_BCLAUDE_DEPLOY_2026-08-28.md; fallback /etc/bnr/bclaude.nsec). The
+env var carries the PATH, never the secret. Never written, printed or logged.
+Repo sync: install.sh runs `git pull --ff-only` on a systemd timer (pick logged there).
 
-Deps (pinned by install.ps1): nostr-sdk (rust-nostr bindings), keyring.
+Deps (pinned by install.sh): nostr-sdk (rust-nostr bindings).
 Seat roster: docs/dispatches/SEAT-PUBKEYS.md — rows `| <seat> | <npub or hex> | ... |`.
 """
-import asyncio, re, sys, time, datetime, pathlib
-import keyring
+import asyncio, re, sys, os, datetime, pathlib, hashlib
 from nostr_sdk import Keys, Client, NostrSigner, PublicKey
 
-REPO = pathlib.Path(__file__).resolve().parents[2]
+REPO = pathlib.Path(os.environ.get("BDISPATCH_REPO", pathlib.Path(__file__).resolve().parents[2]))
 MAILBOX = REPO / "docs" / "dispatches"
 ROSTER = MAILBOX / "SEAT-PUBKEYS.md"
 RELAYS = ["wss://skaists.buzz", "wss://relay.damus.io", "wss://nos.lol"]
-KEYRING_SERVICE, KEYRING_USER = "bnr/bclaude/nsec", "bclaude"
+NSEC_FILE = pathlib.Path(os.environ.get("BDISPATCH_NSEC_FILE", "/opt/buzz-bclaude/bclaude.nsec"))
 POLL_S = 5
+LEDGER = pathlib.Path(os.environ.get("BDISPATCH_STATE", os.path.expanduser("~/.local/state/bnr-bdispatch"))) / "relayed.tsv"
+# Idempotency has TWO records: the RELAYED line inside the file (human-visible, travels with git) and
+# this local ledger keyed by sha256(body)+seat (survives a git pull that rewrites the file).
 SEND_RE = re.compile(r"^SEND TO:\s*(.+?)\s*$", re.I)
 RELAYED_RE = re.compile(r"^RELAYED\s+(\S+)\s+(\S+)\s+to=(\S+)\s*$")
 
 
 def load_keys() -> Keys:
-    nsec = keyring.get_password(KEYRING_SERVICE, KEYRING_USER)
-    if not nsec:
-        sys.exit("bdispatch: no secret in keyring (bnr/bclaude/nsec) — run install.ps1 first")
+    if not NSEC_FILE.exists():
+        sys.exit(f"bdispatch: key file {NSEC_FILE} not found — see install.sh")
+    mode = NSEC_FILE.stat().st_mode & 0o777
+    if mode & 0o027:  # no world bits, no group write: 0600 or root:<user> 0640 (install.sh) only
+        sys.exit(f"bdispatch: refusing key file {NSEC_FILE} with mode {oct(mode)} (must be 0600 or 0640)")
+    nsec = NSEC_FILE.read_text(encoding="utf-8").strip().split("=")[-1]  # accepts bare nsec or KEY=nsec line
     try:
         return Keys.parse(nsec)
     finally:
@@ -52,6 +60,16 @@ def roster() -> dict:
     return seats
 
 
+def ledger_has(key: str) -> bool:
+    return LEDGER.exists() and any(l.split("\t")[0] == key for l in LEDGER.read_text().splitlines())
+
+
+def ledger_add(key: str, eid: str):
+    LEDGER.parent.mkdir(parents=True, exist_ok=True)
+    with LEDGER.open("a") as f:
+        f.write(f"{key}\t{eid}\n")
+
+
 def parse(path: pathlib.Path):
     text = path.read_text(encoding="utf-8")
     lines = text.splitlines()
@@ -67,10 +85,11 @@ def parse(path: pathlib.Path):
 
 
 async def relay_one(client: Client, path: pathlib.Path, seat: str, pk: PublicKey, body: str):
-    msg = f"[bDISPATCH from bclaude] file={path.name}\n\n{body}"
+    msg = f"[bDISPATCH from bClaude · Seat 1] file={path.name}\n\n{body}"
     out = await client.send_private_msg(pk, msg, [])
     eid = out.id.to_hex()
     stamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    ledger_add(f"{hashlib.sha256(body.encode()).hexdigest()}:{seat}", eid)
     with path.open("a", encoding="utf-8") as f:
         f.write(f"\nRELAYED {stamp} {eid} to={seat}\n")
     print(f"bdispatch: {path.name} -> {seat} event {eid}", flush=True)
@@ -91,7 +110,7 @@ async def main():
                 continue
             targets, done, body = parsed
             for seat in targets:
-                if seat in done:
+                if seat in done or ledger_has(f"{hashlib.sha256(body.encode()).hexdigest()}:{seat}"):
                     continue
                 pk = seats.get(seat)
                 if pk is None:

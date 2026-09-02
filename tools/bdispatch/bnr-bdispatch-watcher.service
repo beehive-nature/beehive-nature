@@ -1,0 +1,25 @@
+# systemd USER unit — bDISPATCH watcher (mailbox docs/dispatches -> buzz, signed as bClaude).
+# Installed by tools/bdispatch/install.sh to ~/.config/systemd/user/. Survives reboot via
+# `loginctl enable-linger <user>` (install.sh does it). Secret never in this file: only the PATH.
+[Unit]
+Description=bnr bDISPATCH watcher — SEND TO: files -> Nostr DM to seat pubkeys (signed bClaude)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+Environment=BDISPATCH_REPO=%h/beehive-nature
+Environment=BDISPATCH_NSEC_FILE=/opt/buzz-bclaude/bclaude.nsec
+Environment=BDISPATCH_STATE=%h/.local/state/bnr-bdispatch
+ExecStart=/usr/bin/python3 %h/beehive-nature/tools/bdispatch/watcher.py
+Restart=always
+RestartSec=10
+# Same posture as buzz-bclaude.service (LANE_BCLAUDE_DEPLOY): hives and relay keep priority.
+Nice=15
+CPUWeight=30
+MemoryMax=512M
+NoNewPrivileges=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=default.target
