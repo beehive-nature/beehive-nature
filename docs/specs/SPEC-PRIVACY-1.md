@@ -118,3 +118,58 @@ layer 2); the AR recipe (layer 1) already rules the re-stand.
 3. M3 — build in `contracts/privacy/`: commitment/nullifier contract + the
    prover integration + the view-key disclosure kit + Treasury remittance
    hook.
+
+---
+
+## §m2-ruled — the fork (2026-09-03, Seat-1 under delegation, founder veto stands)
+
+**OPTION 2 — PLONK over BN254. Universal updatable setup, ONE ceremony ever.**
+Groth16's per-circuit ritual is retired for this lane. BLS12-381 stays the
+future lane, not this one (algorithm ids below make that swap a table row).
+
+## §m2.5-receipt — PLONK measured BEFORE building (threshold < 15 ms)
+
+`plonkbench` deployed on the rehearsal chain (same Spring v1.2.2 producer,
+CRYPTO_PRIMITIVES active): the PLONK verification at PRODUCTION op count —
+6 transcript keccaks, 2 modexp field inversions, 12 G1 scalar-muls, 12 G1
+adds, one pairing product over 4 pairs — toy instance, labeled exactly
+(generator-derived keys; a circuit-backed proof rides the same ops).
+
+**Billed cpu_usage_us: 7,263 / 5,173 / 5,209 / 7,953 — median ≈ 6.2 ms.**
+Negative control (broken pairing product): executed at 3,733 µs = rejected.
+vs the Groth16 baseline 6.1 ms: **PLONK costs the same on-chain** (the
+spec's earlier ~4–5 ms estimate was low; the measured number stands).
+**THRESHOLD PASSED (< 15 ms) → M3 built.** Ops notes: the WASM memory
+checker refuses aliased pointers (same-array operands AND shared
+exponent/modulus buffers both trip it — separate buffers everywhere).
+
+## §m3-receipt — the private note, LIVE on the rehearsal chain
+
+`contracts/privacy/note.cpp` (deployed as `noteacct4`; runner `m3final.sh`,
+witness values `m3.js`):
+
+- **[deposit]** executed, 140 µs — commitment row (bounded set, view tag,
+  algorithm id).
+- **[private transfer]** executed, **billed 4,293 µs** — the spend gate ran
+  the PLONK-shpe pairing product + transcript keccak + G1 mul, the nullifier
+  was inserted (double-spend gate armed), the new commitment landed.
+- **[forged transfer]** — replay of the spent nullifier: **REJECTED** by the
+  nullifier uniqueness constraint (the DB-level refusal fired; the explicit
+  DOUBLE-SPEND assert is the belt to that braces — the gate held either way).
+- **[withdraw]** executed, billed 5,400 µs — second note spent to a plain
+  recipient.
+- Final sets: 2 commitments + 2 nullifiers, every row carrying its algorithm
+  id (crypto-agility law), both tables hard-capped by the law row (bounded).
+
+**Labeled exactly (the lane law):** the FLOW is real (deposit → transfer →
+withdraw, commitment/nullifier sets, view-key tag on every commitment,
+owner-held disclosure off-chain — Zano's auditable-wallet pattern). The ZK
+STATEMENT inside the spend gate is the labeled toy (production op count,
+generator keys). Commitments are keccak256-v1 via the native intrinsic —
+Poseidon-bn254 is the named successor for the circuit lane (SNARK circuits
+want Poseidon). **The named next step of the ruled fork:** circom+snarkjs
+proving (cargo present in the lab; circom installable) + the faithful CDT
+port of the snarkjs PLONK verifier (a 256-bit field library + transcript +
+equation — hours of careful work, honestly beyond this pass) — then the toy
+constants in `spend_gate` become the real verifying key WITHOUT touching
+the flow, and the receipt upgrades from op-count-real to circuit-backed.
