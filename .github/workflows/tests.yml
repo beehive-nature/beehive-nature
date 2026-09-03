@@ -126,6 +126,12 @@ jobs:
         run: sh scripts/identity-check.sh
 
   node:
+    # latent hardening (z3.2, 2026-09-03): this job's whole history is 3–15 min
+    # (worst = cold npm/Playwright install); a 20-min cap bounds any future
+    # real hang at a third of the runner's 6h default, so a wedged battery can
+    # never again sit unnoticed for hours. No battery misbehaves today — this
+    # is the cap, not a fix.
+    timeout-minutes: 20
     runs-on: ubuntu-latest
     steps:
       # Full history: the §7 pushed-range check needs origin/main..HEAD
