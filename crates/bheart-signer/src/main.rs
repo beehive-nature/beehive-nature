@@ -66,7 +66,14 @@ struct Opts {
 }
 
 fn parse_opts(args: &[String]) -> Result<Opts, String> {
-    let mut o = Opts { keydir: None, alg: None, key_id: None, file: None, envelope: None, out: None };
+    let mut o = Opts {
+        keydir: None,
+        alg: None,
+        key_id: None,
+        file: None,
+        envelope: None,
+        out: None,
+    };
     let mut i = 0;
     while i < args.len() {
         let val = args
@@ -94,7 +101,10 @@ fn cmd_keygen(args: &[String]) -> i32 {
     };
     let alg = match o.alg.as_deref() {
         Some(a) => a,
-        None => return fail("keygen needs --alg (ml-dsa-44|ml-dsa-65|ml-dsa-87|ml-kem-512|ml-kem-768|ml-kem-1024)".into()),
+        None => return fail(
+            "keygen needs --alg (ml-dsa-44|ml-dsa-65|ml-dsa-87|ml-kem-512|ml-kem-768|ml-kem-1024)"
+                .into(),
+        ),
     };
     let result = if let Ok(sig) = alg::SigAlg::parse(alg) {
         keys::keygen_dsa(sig, o.keydir)
@@ -136,7 +146,10 @@ fn cmd_sign(args: &[String]) -> i32 {
                     if let Err(e) = std::fs::write(&path, &text) {
                         return fail(format!("write {path}: {e}"));
                     }
-                    println!("{}", json!({ "written": path, "alg": alg.id(), "key_id": kid, "envelope_type": "bheart.signature/1" }));
+                    println!(
+                        "{}",
+                        json!({ "written": path, "alg": alg.id(), "key_id": kid, "envelope_type": "bheart.signature/1" })
+                    );
                 }
                 None => println!("{text}"),
             }
@@ -151,9 +164,11 @@ fn cmd_verify(args: &[String]) -> i32 {
         Ok(o) => o,
         Err(e) => return fail(e),
     };
-    let (Some(kid), Some(file), Some(env_path)) =
-        (o.key_id.as_deref(), o.file.as_deref(), o.envelope.as_deref())
-    else {
+    let (Some(kid), Some(file), Some(env_path)) = (
+        o.key_id.as_deref(),
+        o.file.as_deref(),
+        o.envelope.as_deref(),
+    ) else {
         return fail("verify needs --key-id, --file, and --envelope".into());
     };
     let msg = match std::fs::read(file) {
@@ -174,7 +189,10 @@ fn cmd_verify(args: &[String]) -> i32 {
     };
     match envelope::verify_envelope(&env, &vk, &msg) {
         Ok(()) => {
-            println!("{}", json!({ "verified": true, "key_id": kid, "alg": env["alg"] }));
+            println!(
+                "{}",
+                json!({ "verified": true, "key_id": kid, "alg": env["alg"] })
+            );
             0
         }
         Err(e) => {
@@ -189,7 +207,10 @@ fn cmd_list(args: &[String]) -> i32 {
         Ok(o) => o,
         Err(e) => return fail(e),
     };
-    println!("{}", serde_json::to_string_pretty(&keys::list_keys(o.keydir)).unwrap());
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&keys::list_keys(o.keydir)).unwrap()
+    );
     0
 }
 
@@ -258,7 +279,9 @@ fn cmd_selftest() -> i32 {
             let kid = out["key_id"].as_str().unwrap().to_string();
             let (a, seed, ek) = keys::load_kem(&kid, Some(dir.clone())).unwrap();
             if let Ok((ct, ss1)) = pq::kem_encapsulate(a, &ek) {
-                ok &= pq::kem_decapsulate(a, &seed, &ct).map(|ss2| ss1 == ss2).unwrap_or(false);
+                ok &= pq::kem_decapsulate(a, &seed, &ct)
+                    .map(|ss2| ss1 == ss2)
+                    .unwrap_or(false);
             } else {
                 ok = false;
             }
@@ -266,7 +289,10 @@ fn cmd_selftest() -> i32 {
     }
     ok &= alg::SigAlg::parse("ml-dsa-65-hedged-2265").is_err(); // agility refusal
     let _ = std::fs::remove_dir_all(&dir);
-    println!("{}", json!({ "selftest": if ok { "PASS" } else { "FAIL" }, "covered": ["ml-dsa-44/65/87 roundtrip+tamper", "ml-kem-512/768/1024 roundtrip", "future-alg refusal", "keys never printed"] }));
+    println!(
+        "{}",
+        json!({ "selftest": if ok { "PASS" } else { "FAIL" }, "covered": ["ml-dsa-44/65/87 roundtrip+tamper", "ml-kem-512/768/1024 roundtrip", "future-alg refusal", "keys never printed"] })
+    );
     if ok {
         0
     } else {

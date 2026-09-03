@@ -119,7 +119,10 @@ pub fn serve_stdio(state: Arc<Mutex<SeatState>>) {
         let req: Value = match serde_json::from_str(trimmed) {
             Ok(v) => v,
             Err(e) => {
-                let _ = writeln!(out, r#"{{"jsonrpc":"2.0","id":null,"error":{{"code":-32700,"message":"parse error: {e}"}}}}"#);
+                let _ = writeln!(
+                    out,
+                    r#"{{"jsonrpc":"2.0","id":null,"error":{{"code":-32700,"message":"parse error: {e}"}}}}"#
+                );
                 out.flush().ok();
                 continue;
             }
@@ -237,7 +240,9 @@ fn write_simple(stream: &mut TcpStream, code: u16, msg: &str) -> std::io::Result
 }
 
 fn write_json_rpc_error(stream: &mut TcpStream, code: i32, msg: &str) -> std::io::Result<()> {
-    let payload = json!({ "jsonrpc": "2.0", "id": null, "error": { "code": code, "message": msg } }).to_string();
+    let payload =
+        json!({ "jsonrpc": "2.0", "id": null, "error": { "code": code, "message": msg } })
+            .to_string();
     let response = format!(
         "HTTP/1.1 400 Bad Request\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{}",
         payload.len(),
@@ -266,7 +271,11 @@ mod tests {
     #[test]
     fn tools_list_has_bseat_with_schema() {
         let state = Arc::new(Mutex::new(SeatState::new()));
-        let resp = dispatch(&state, &json!({ "jsonrpc": "2.0", "id": 2, "method": "tools/list" })).unwrap();
+        let resp = dispatch(
+            &state,
+            &json!({ "jsonrpc": "2.0", "id": 2, "method": "tools/list" }),
+        )
+        .unwrap();
         let tools = resp["result"]["tools"].as_array().unwrap();
         assert_eq!(tools.len(), 1);
         assert_eq!(tools[0]["name"], "bSEAT");
@@ -282,8 +291,12 @@ mod tests {
         )
         .unwrap();
         assert_eq!(resp["result"]["isError"], false);
-        let laws = resp["result"]["structuredContent"]["laws"].as_array().unwrap();
-        assert!(laws.iter().any(|l| l.as_str().unwrap().contains("PLAN-THEN-APPROVE")));
+        let laws = resp["result"]["structuredContent"]["laws"]
+            .as_array()
+            .unwrap();
+        assert!(laws
+            .iter()
+            .any(|l| l.as_str().unwrap().contains("PLAN-THEN-APPROVE")));
     }
 
     #[test]
@@ -296,12 +309,19 @@ mod tests {
         .unwrap();
         // unknown tool = JSON-RPC error; tool EXECUTION errors = isError result
         assert!(resp.get("error").is_some());
-        assert!(resp["error"]["message"].as_str().unwrap().contains("unknown tool"));
+        assert!(resp["error"]["message"]
+            .as_str()
+            .unwrap()
+            .contains("unknown tool"));
     }
 
     #[test]
     fn notifications_get_no_response() {
         let state = Arc::new(Mutex::new(SeatState::new()));
-        assert!(dispatch(&state, &json!({ "jsonrpc": "2.0", "method": "notifications/initialized" })).is_none());
+        assert!(dispatch(
+            &state,
+            &json!({ "jsonrpc": "2.0", "method": "notifications/initialized" })
+        )
+        .is_none());
     }
 }

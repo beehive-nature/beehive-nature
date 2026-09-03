@@ -63,7 +63,7 @@
 //! works fully with the anchor off. Grep this file's manifest: no `banchor`.
 
 use ml_dsa::{
-    Keypair, MlDsa44, MlDsa65, MlDsa87, Seed as DsaSeed, SignatureEncoding, SigningKey, Signer,
+    Keypair, MlDsa44, MlDsa65, MlDsa87, Seed as DsaSeed, SignatureEncoding, Signer, SigningKey,
     Verifier,
 };
 use ml_kem::{
@@ -116,7 +116,12 @@ pub fn dsa_sign(alg: SigAlg, seed: &[u8; 32], msg: &[u8]) -> Result<Vec<u8>, Str
     }
 }
 
-pub fn dsa_verify(alg: SigAlg, verifying_key: &[u8], msg: &[u8], sig: &[u8]) -> Result<bool, String> {
+pub fn dsa_verify(
+    alg: SigAlg,
+    verifying_key: &[u8],
+    msg: &[u8],
+    sig: &[u8],
+) -> Result<bool, String> {
     macro_rules! ver {
         ($params:ty, $vk_len:expr, $sig_len:expr) => {{
             if verifying_key.len() != $vk_len {
@@ -160,7 +165,10 @@ pub fn kem_generate(alg: KemAlg) -> Result<KemGenerated, String> {
             let mut seed = [0u8; 64];
             seed.copy_from_slice(dk.to_bytes().as_slice()); // ml-kem decapsulation_key.rs:231
             let ek_bytes = ek.to_bytes().to_vec(); // ml-kem encapsulation_key.rs:91
-            Ok(KemGenerated { seed, encapsulation_key: ek_bytes })
+            Ok(KemGenerated {
+                seed,
+                encapsulation_key: ek_bytes,
+            })
         }};
     }
     match alg {
@@ -170,7 +178,10 @@ pub fn kem_generate(alg: KemAlg) -> Result<KemGenerated, String> {
     }
 }
 
-pub fn kem_encapsulate(alg: KemAlg, encapsulation_key: &[u8]) -> Result<(Vec<u8>, [u8; 32]), String> {
+pub fn kem_encapsulate(
+    alg: KemAlg,
+    encapsulation_key: &[u8],
+) -> Result<(Vec<u8>, [u8; 32]), String> {
     macro_rules! enc {
         ($params:ty, $ek_len:expr, $ct_len:expr) => {{
             if encapsulation_key.len() != $ek_len {
@@ -225,8 +236,14 @@ mod tests {
         for alg in [SigAlg::MlDsa44, SigAlg::MlDsa65, SigAlg::MlDsa87] {
             let g = dsa_generate(alg);
             let sig = dsa_sign(alg, &g.seed, b"bheart milestone").unwrap();
-            assert!(dsa_verify(alg, &g.verifying_key, b"bheart milestone", &sig).unwrap(), "{alg} roundtrip");
-            assert!(!dsa_verify(alg, &g.verifying_key, b"tampered", &sig).unwrap(), "{alg} tamper must fail");
+            assert!(
+                dsa_verify(alg, &g.verifying_key, b"bheart milestone", &sig).unwrap(),
+                "{alg} roundtrip"
+            );
+            assert!(
+                !dsa_verify(alg, &g.verifying_key, b"tampered", &sig).unwrap(),
+                "{alg} tamper must fail"
+            );
         }
     }
 

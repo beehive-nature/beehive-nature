@@ -41,7 +41,10 @@ impl Replay {
             .unwrap_or_else(|| iso.replace(['-', ':', 'T'], ""));
         let path = dir.join(format!("{stem}-{stamp}.jsonl"));
         let file = OpenOptions::new().create(true).append(true).open(&path)?;
-        Ok(Replay { path, file: Some(file) })
+        Ok(Replay {
+            path,
+            file: Some(file),
+        })
     }
 
     /// Append one event, flushed immediately — a crash must not eat the tail.
@@ -68,7 +71,9 @@ impl Replay {
 /// (ISO-8601 UTC "YYYY-MM-DDTHH:MM:SSZ", epoch millis).
 /// Civil-from-days per Howard Hinnant's algorithm — no chrono dependency.
 pub fn now_iso() -> (String, u128) {
-    let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default();
+    let now = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap_or_default();
     let secs = now.as_secs() as i64;
     let millis = now.as_millis();
     let days = secs.div_euclid(86_400);
@@ -113,7 +118,12 @@ mod tests {
             let sod = 1767225600i64.rem_euclid(86_400);
             let (y, m, d) = civil_from_days(days);
             (
-                format!("{y:04}-{m:02}-{d:02}T{:02}:{:02}:{:02}Z", sod / 3600, (sod % 3600) / 60, sod % 60),
+                format!(
+                    "{y:04}-{m:02}-{d:02}T{:02}:{:02}:{:02}Z",
+                    sod / 3600,
+                    (sod % 3600) / 60,
+                    sod % 60
+                ),
                 0u128,
             )
         };
@@ -133,7 +143,10 @@ mod tests {
         let _ = std::fs::remove_dir_all(&dir);
         let mut r = Replay::open(&dir, "unit").unwrap();
         r.ev("session_start", json!({"chrome": "test"}));
-        r.ev("click", json!({"ref": "@e1", "name": un("More information...")}));
+        r.ev(
+            "click",
+            json!({"ref": "@e1", "name": un("More information...")}),
+        );
         r.close();
         let text = fs::read_to_string(&r.path).unwrap();
         let lines: Vec<&str> = text.lines().collect();

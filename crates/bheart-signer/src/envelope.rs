@@ -76,7 +76,9 @@ pub fn verify_envelope(envelope: &Value, verifying_key: &[u8], msg: &[u8]) -> Re
         .and_then(|a| a.as_str())
         .ok_or("envelope carries no top-level algorithm id")?;
     if env_alg != sig_alg.id() {
-        return Err(format!("top-level alg {env_alg:?} disagrees with signature alg {sig_alg_id:?}"));
+        return Err(format!(
+            "top-level alg {env_alg:?} disagrees with signature alg {sig_alg_id:?}"
+        ));
     }
     // digest: recompute with the NAMED algorithm, compare
     let digest_alg_id = envelope
@@ -94,9 +96,16 @@ pub fn verify_envelope(envelope: &Value, verifying_key: &[u8], msg: &[u8]) -> Re
     if claimed != actual {
         return Err("content digest mismatch — the signed bytes are not these bytes".into());
     }
-    let claimed_len = envelope.pointer("/content/bytes").and_then(|b| b.as_u64()).unwrap_or(0);
+    let claimed_len = envelope
+        .pointer("/content/bytes")
+        .and_then(|b| b.as_u64())
+        .unwrap_or(0);
     if claimed_len != msg.len() as u64 {
-        return Err(format!("content byte count {} != {}", claimed_len, msg.len()));
+        return Err(format!(
+            "content byte count {} != {}",
+            claimed_len,
+            msg.len()
+        ));
     }
     // signature bytes
     let sig_b64 = envelope
@@ -150,10 +159,16 @@ mod tests {
         let msg = b"the estate's deciding organ, milestone 1";
         let env = sign_envelope(SigAlg::MlDsa65, &kid, &seed, msg).unwrap();
         assert!(verify_envelope(&env, &vk, msg).is_ok());
-        assert!(verify_envelope(&env, &vk, b"different bytes").is_err(), "message tamper");
+        assert!(
+            verify_envelope(&env, &vk, b"different bytes").is_err(),
+            "message tamper"
+        );
         let mut forged = env.clone();
         forged["signature"]["b64u"] = json!("AAAA");
-        assert!(verify_envelope(&forged, &vk, msg).is_err(), "signature tamper");
+        assert!(
+            verify_envelope(&forged, &vk, msg).is_err(),
+            "signature tamper"
+        );
     }
 
     #[test]
@@ -163,7 +178,10 @@ mod tests {
         assert_eq!(env["alg"], "ml-dsa-44");
         assert_eq!(env["signature"]["alg"], "ml-dsa-44");
         assert_eq!(env["content"]["digest"]["alg"], "sha3-256");
-        assert!(env["signature"]["b64u"].as_str().unwrap().len() > 3000, "44 sig is ~2420 bytes b64");
+        assert!(
+            env["signature"]["b64u"].as_str().unwrap().len() > 3000,
+            "44 sig is ~2420 bytes b64"
+        );
         assert!(verify_envelope(&env, &vk, b"x").is_ok());
     }
 
@@ -191,6 +209,9 @@ mod tests {
         let (seed, _vk, kid) = dev_key(SigAlg::MlDsa65);
         let env = sign_envelope(SigAlg::MlDsa65, &kid, &seed, b"x").unwrap();
         let text = env.to_string();
-        assert!(!text.contains(&b64u(seed.as_slice())), "private seed leaked into the envelope");
+        assert!(
+            !text.contains(&b64u(seed.as_slice())),
+            "private seed leaked into the envelope"
+        );
     }
 }

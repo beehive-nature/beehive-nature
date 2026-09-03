@@ -55,20 +55,38 @@ mod tests {
 
     #[test]
     fn display_none_kills_subtree() {
-        assert_eq!(classify("none", "visible", "1", false), Vis::HiddenTree("display:none"));
+        assert_eq!(
+            classify("none", "visible", "1", false),
+            Vis::HiddenTree("display:none")
+        );
     }
 
     #[test]
     fn visibility_hidden_kills_subtree() {
-        assert_eq!(classify("block", "HIDDEN", "1", false), Vis::HiddenTree("visibility:hidden"));
-        assert_eq!(classify("block", "collapse", "1", false), Vis::HiddenTree("visibility:hidden"));
+        assert_eq!(
+            classify("block", "HIDDEN", "1", false),
+            Vis::HiddenTree("visibility:hidden")
+        );
+        assert_eq!(
+            classify("block", "collapse", "1", false),
+            Vis::HiddenTree("visibility:hidden")
+        );
     }
 
     #[test]
     fn low_opacity_strips_node_only() {
-        assert_eq!(classify("block", "visible", "0", false), Vis::HiddenNode("opacity<0.10"));
-        assert_eq!(classify("block", "visible", "0.05", false), Vis::HiddenNode("opacity<0.10"));
-        assert_eq!(classify("block", "visible", "0.099", false), Vis::HiddenNode("opacity<0.10"));
+        assert_eq!(
+            classify("block", "visible", "0", false),
+            Vis::HiddenNode("opacity<0.10")
+        );
+        assert_eq!(
+            classify("block", "visible", "0.05", false),
+            Vis::HiddenNode("opacity<0.10")
+        );
+        assert_eq!(
+            classify("block", "visible", "0.099", false),
+            Vis::HiddenNode("opacity<0.10")
+        );
     }
 
     #[test]
@@ -82,6 +100,9 @@ mod tests {
 
     #[test]
     fn aria_hidden_strips_node_only() {
-        assert_eq!(classify("block", "visible", "1", true), Vis::HiddenNode("aria-hidden"));
+        assert_eq!(
+            classify("block", "visible", "1", true),
+            Vis::HiddenNode("aria-hidden")
+        );
     }
 }

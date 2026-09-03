@@ -35,7 +35,10 @@ pub fn keys_dir() -> PathBuf {
     let user = std::env::var("USERPROFILE")
         .or_else(|_| std::env::var("HOME"))
         .unwrap_or_else(|_| ".".into());
-    PathBuf::from(user).join(".bheartwallet").join("bsigner").join("keys")
+    PathBuf::from(user)
+        .join(".bheartwallet")
+        .join("bsigner")
+        .join("keys")
 }
 
 /// Generate + persist an ML-DSA identity. Returns PUBLIC info + key_id only.
@@ -99,37 +102,65 @@ pub fn keygen_kem(alg: KemAlg, dir: Option<PathBuf>) -> Result<Value, String> {
 }
 
 /// Load a signature key: (alg, Zeroizing seed, verifying key bytes).
-pub fn load_dsa(key_id: &str, dir: Option<PathBuf>) -> Result<(SigAlg, Zeroizing<[u8; 32]>, Vec<u8>), String> {
+pub fn load_dsa(
+    key_id: &str,
+    dir: Option<PathBuf>,
+) -> Result<(SigAlg, Zeroizing<[u8; 32]>, Vec<u8>), String> {
     let dir = dir.unwrap_or_else(keys_dir);
-    let text = fs::read_to_string(dir.join(format!("{key_id}.json"))).map_err(|_| format!("no key {key_id} in {}", dir.display()))?;
+    let text = fs::read_to_string(dir.join(format!("{key_id}.json")))
+        .map_err(|_| format!("no key {key_id} in {}", dir.display()))?;
     let v: Value = serde_json::from_str(&text).map_err(|e| format!("keyset parse: {e}"))?;
     if v.get("kind").and_then(|k| k.as_str()) != Some("signature") {
         return Err(format!("{key_id} is not a signature key"));
     }
-    let alg = SigAlg::parse(v.get("alg").and_then(|a| a.as_str()).ok_or("keyset has no alg")?)?;
-    let seed_b64 = v.get("seed_b64u").and_then(|s| s.as_str()).ok_or("keyset has no seed")?;
+    let alg = SigAlg::parse(
+        v.get("alg")
+            .and_then(|a| a.as_str())
+            .ok_or("keyset has no alg")?,
+    )?;
+    let seed_b64 = v
+        .get("seed_b64u")
+        .and_then(|s| s.as_str())
+        .ok_or("keyset has no seed")?;
     let seed_vec = b64_decode(seed_b64).ok_or("seed undecodable")?;
     let mut seed = Zeroizing::new([0u8; 32]);
     seed.copy_from_slice(&seed_vec);
-    let vk_b64 = v.get("verifying_key_b64u").and_then(|s| s.as_str()).ok_or("keyset has no verifying key")?;
+    let vk_b64 = v
+        .get("verifying_key_b64u")
+        .and_then(|s| s.as_str())
+        .ok_or("keyset has no verifying key")?;
     let vk = b64_decode(vk_b64).ok_or("verifying key undecodable")?;
     Ok((alg, seed, vk))
 }
 
 /// Load a KEM key: (alg, Zeroizing decapsulation seed, encapsulation key).
-pub fn load_kem(key_id: &str, dir: Option<PathBuf>) -> Result<(KemAlg, Zeroizing<[u8; 64]>, Vec<u8>), String> {
+pub fn load_kem(
+    key_id: &str,
+    dir: Option<PathBuf>,
+) -> Result<(KemAlg, Zeroizing<[u8; 64]>, Vec<u8>), String> {
     let dir = dir.unwrap_or_else(keys_dir);
-    let text = fs::read_to_string(dir.join(format!("{key_id}.json"))).map_err(|_| format!("no key {key_id} in {}", dir.display()))?;
+    let text = fs::read_to_string(dir.join(format!("{key_id}.json")))
+        .map_err(|_| format!("no key {key_id} in {}", dir.display()))?;
     let v: Value = serde_json::from_str(&text).map_err(|e| format!("keyset parse: {e}"))?;
     if v.get("kind").and_then(|k| k.as_str()) != Some("kem") {
         return Err(format!("{key_id} is not a kem key"));
     }
-    let alg = KemAlg::parse(v.get("alg").and_then(|a| a.as_str()).ok_or("keyset has no alg")?)?;
-    let seed_b64 = v.get("seed_b64u").and_then(|s| s.as_str()).ok_or("keyset has no seed")?;
+    let alg = KemAlg::parse(
+        v.get("alg")
+            .and_then(|a| a.as_str())
+            .ok_or("keyset has no alg")?,
+    )?;
+    let seed_b64 = v
+        .get("seed_b64u")
+        .and_then(|s| s.as_str())
+        .ok_or("keyset has no seed")?;
     let seed_vec = b64_decode(seed_b64).ok_or("seed undecodable")?;
     let mut seed = Zeroizing::new([0u8; 64]);
     seed.copy_from_slice(&seed_vec);
-    let ek_b64 = v.get("encapsulation_key_b64u").and_then(|s| s.as_str()).ok_or("keyset has no encapsulation key")?;
+    let ek_b64 = v
+        .get("encapsulation_key_b64u")
+        .and_then(|s| s.as_str())
+        .ok_or("keyset has no encapsulation key")?;
     let ek = b64_decode(ek_b64).ok_or("encapsulation key undecodable")?;
     Ok((alg, seed, ek))
 }
@@ -183,7 +214,13 @@ pub fn now_iso() -> (String, u128) {
     let m = if mp < 10 { mp + 3 } else { mp - 9 };
     let y = if m <= 2 { y + 1 } else { y };
     (
-        format!("{y:04}-{:02}-{d:02}T{:02}:{:02}:{:02}Z", m, sod / 3600, (sod % 3600) / 60, sod % 60),
+        format!(
+            "{y:04}-{:02}-{d:02}T{:02}:{:02}:{:02}Z",
+            m,
+            sod / 3600,
+            (sod % 3600) / 60,
+            sod % 60
+        ),
         now_ms(),
     )
 }
@@ -226,12 +263,20 @@ mod tests {
         let dir = temp_dir("no-seed");
         let out = keygen_dsa(SigAlg::MlDsa65, Some(dir.clone())).unwrap();
         // the printed/public output must not contain the on-disk secret
-        let disk = fs::read_to_string(dir.join(format!("{}.json", out["key_id"].as_str().unwrap()))).unwrap();
+        let disk =
+            fs::read_to_string(dir.join(format!("{}.json", out["key_id"].as_str().unwrap())))
+                .unwrap();
         let disk: Value = serde_json::from_str(&disk).unwrap();
         let seed = disk["seed_b64u"].as_str().unwrap();
         let printed = out.to_string();
-        assert!(!printed.contains(seed), "NEVER PRINTED law broken: seed in keygen output");
-        assert!(out["verifying_key_b64u"].is_string(), "public key should be printed");
+        assert!(
+            !printed.contains(seed),
+            "NEVER PRINTED law broken: seed in keygen output"
+        );
+        assert!(
+            out["verifying_key_b64u"].is_string(),
+            "public key should be printed"
+        );
         let _ = fs::remove_dir_all(&dir);
     }
 
@@ -242,8 +287,12 @@ mod tests {
         let kid = out["key_id"].as_str().unwrap().to_string();
         let (alg, seed, vk) = load_dsa(&kid, Some(dir.clone())).unwrap();
         assert_eq!(alg, SigAlg::MlDsa65);
-        let env = crate::envelope::sign_envelope(alg, &kid, &seed, b"hello from the deciding organ").unwrap();
-        assert!(crate::envelope::verify_envelope(&env, &vk, b"hello from the deciding organ").is_ok());
+        let env =
+            crate::envelope::sign_envelope(alg, &kid, &seed, b"hello from the deciding organ")
+                .unwrap();
+        assert!(
+            crate::envelope::verify_envelope(&env, &vk, b"hello from the deciding organ").is_ok()
+        );
         let _ = fs::remove_dir_all(&dir);
     }
 

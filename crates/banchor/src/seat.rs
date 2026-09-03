@@ -52,7 +52,13 @@ pub enum SeatError {
 
 impl SeatState {
     pub fn new() -> Self {
-        SeatState { browser: None, page: None, replay: None, gate: PlanGate::new(), last_refs: HashMap::new() }
+        SeatState {
+            browser: None,
+            page: None,
+            replay: None,
+            gate: PlanGate::new(),
+            last_refs: HashMap::new(),
+        }
     }
 
     fn ev(&mut self, ev: &str, fields: Value) {
@@ -82,13 +88,20 @@ impl SeatState {
         if self.browser.is_some() {
             return Err(SeatError::AlreadyStarted);
         }
-        let headless = args.get("headless").and_then(|h| h.as_bool()).unwrap_or(true);
+        let headless = args
+            .get("headless")
+            .and_then(|h| h.as_bool())
+            .unwrap_or(true);
         let replay_dir = args
             .get("replay_dir")
             .and_then(|d| d.as_str())
             .map(PathBuf::from)
             .unwrap_or_else(|| crate::cache::home().join("banchor").join("replays"));
-        let stem = args.get("replay_stem").and_then(|s| s.as_str()).unwrap_or("session").to_string();
+        let stem = args
+            .get("replay_stem")
+            .and_then(|s| s.as_str())
+            .unwrap_or("session")
+            .to_string();
 
         let browser = Browser::launch(headless)?;
         let chrome_version = browser
@@ -131,7 +144,10 @@ impl SeatState {
     }
 
     fn navigate(&mut self, args: &Value) -> Result<Value, SeatError> {
-        let url = args.get("url").and_then(|u| u.as_str()).ok_or_else(|| SeatError::Gated("navigate needs url".into()))?;
+        let url = args
+            .get("url")
+            .and_then(|u| u.as_str())
+            .ok_or_else(|| SeatError::Gated("navigate needs url".into()))?;
         let risks = classify_url(url);
         if !risks.is_empty() && !args.get("force").is_some() {
             return self.gate_action(args.clone(), risks, format!("navigate {url}"));
@@ -167,9 +183,17 @@ impl SeatState {
                     let aria_hidden = axtree_role_hidden(node);
                     match page.style_for_backend(b) {
                         Ok(Some((display, visibility, opacity))) => {
-                            vis.insert(b, crate::visibility::classify(&display, &visibility, &opacity, aria_hidden));
+                            vis.insert(
+                                b,
+                                crate::visibility::classify(
+                                    &display,
+                                    &visibility,
+                                    &opacity,
+                                    aria_hidden,
+                                ),
+                            );
                         }
-                        Ok(None) => {} // no DOM node behind it
+                        Ok(None) => {}                     // no DOM node behind it
                         Err(_) => style_probe_errors += 1, // undetermined — axtree fails text closed
                     }
                 }
@@ -180,7 +204,12 @@ impl SeatState {
         let counts = tokens::count(&snap.text);
         let origin = page.current_url();
         let wrapped = untrusted::wrap(&snap.text, &origin);
-        self.last_refs = snap.refs.iter().cloned().map(|r| (r.r#ref.clone(), r)).collect();
+        self.last_refs = snap
+            .refs
+            .iter()
+            .cloned()
+            .map(|r| (r.r#ref.clone(), r))
+            .collect();
         let mut snap_json = snap.to_json();
         if let Some(obj) = snap_json.get_mut("stats").and_then(|s| s.as_object_mut()) {
             obj.insert("style_probe_errors".into(), json!(style_probe_errors));
@@ -219,7 +248,11 @@ impl SeatState {
 
         let risks = classify_click(&entry.role, &entry.name);
         if !risks.is_empty() && args.get("force").is_none() {
-            return self.gate_action(args.clone(), risks, format!("click {r} ({}) '{}'", entry.role, entry.name));
+            return self.gate_action(
+                args.clone(),
+                risks,
+                format!("click {r} ({}) '{}'", entry.role, entry.name),
+            );
         }
 
         let url_before = {
@@ -251,7 +284,12 @@ impl SeatState {
         }))
     }
 
-    fn gate_action(&mut self, action: Value, risks: Vec<Risk>, summary: String) -> Result<Value, SeatError> {
+    fn gate_action(
+        &mut self,
+        action: Value,
+        risks: Vec<Risk>,
+        summary: String,
+    ) -> Result<Value, SeatError> {
         let plan_id = self.gate.propose(action, risks.clone());
         self.ev(
             "gated",
@@ -270,16 +308,25 @@ impl SeatState {
     }
 
     fn describe_plan(&mut self, args: &Value) -> Result<Value, SeatError> {
-        let id = args.get("plan_id").and_then(|p| p.as_str()).ok_or_else(|| SeatError::Gated("plan needs plan_id".into()))?;
+        let id = args
+            .get("plan_id")
+            .and_then(|p| p.as_str())
+            .ok_or_else(|| SeatError::Gated("plan needs plan_id".into()))?;
         self.gate
             .describe_pending(id)
             .ok_or_else(|| SeatError::Gated("unknown plan id".into()))
     }
 
     fn approve(&mut self, args: &Value) -> Result<Value, SeatError> {
-        let id = args.get("plan_id").and_then(|p| p.as_str()).ok_or_else(|| SeatError::Gated("approve needs plan_id".into()))?;
+        let id = args
+            .get("plan_id")
+            .and_then(|p| p.as_str())
+            .ok_or_else(|| SeatError::Gated("approve needs plan_id".into()))?;
         let (action, risks) = self.gate.redeem(id).map_err(SeatError::Gated)?;
-        self.ev("approved", json!({ "risks": risks.iter().map(|r| r.as_str()).collect::<Vec<_>>() }));
+        self.ev(
+            "approved",
+            json!({ "risks": risks.iter().map(|r| r.as_str()).collect::<Vec<_>>() }),
+        );
         let forced = {
             let mut a = action.clone();
             if let Some(o) = a.as_object_mut() {
@@ -291,8 +338,12 @@ impl SeatState {
     }
 
     fn resolve(&mut self, args: &Value) -> Result<Value, SeatError> {
-        let url = args.get("url").and_then(|u| u.as_str()).ok_or_else(|| SeatError::Gated("resolve needs url".into()))?;
-        let record = crate::resolve::resolve_any(url).map_err(|e| SeatError::Gated(e.to_string()))?;
+        let url = args
+            .get("url")
+            .and_then(|u| u.as_str())
+            .ok_or_else(|| SeatError::Gated("resolve needs url".into()))?;
+        let record =
+            crate::resolve::resolve_any(url).map_err(|e| SeatError::Gated(e.to_string()))?;
         self.ev("resolved", json!({ "input": url, "record": record }));
         Ok(record)
     }
@@ -355,9 +406,21 @@ impl SeatState {
         let first = seat.handle(&json!({ "action": "snapshot" }))?;
 
         // click the first interactive link, if the page has one
-        let refs = first["snapshot"]["refs"].as_array().cloned().unwrap_or_default();
-        let link = refs.iter().find(|r| r["role"] == "link" && r["name"]["v"].as_str().map(|s| !s.is_empty()).unwrap_or(false));
-        eprintln!("[milestone1] phase 4/6: click {:?}", link.map(|l| l["ref"].clone()).unwrap_or(json!(null)));
+        let refs = first["snapshot"]["refs"]
+            .as_array()
+            .cloned()
+            .unwrap_or_default();
+        let link = refs.iter().find(|r| {
+            r["role"] == "link"
+                && r["name"]["v"]
+                    .as_str()
+                    .map(|s| !s.is_empty())
+                    .unwrap_or(false)
+        });
+        eprintln!(
+            "[milestone1] phase 4/6: click {:?}",
+            link.map(|l| l["ref"].clone()).unwrap_or(json!(null))
+        );
         let click = match link {
             Some(l) => {
                 let r = l["ref"].as_str().unwrap_or_default().to_string();
@@ -420,16 +483,21 @@ impl Default for SeatState {
 
 /// aria-hidden signal from the AX node's own properties.
 fn axtree_role_hidden(node: &Value) -> bool {
-    if node.get("ignored").and_then(|i| i.as_bool()).unwrap_or(false) {
+    if node
+        .get("ignored")
+        .and_then(|i| i.as_bool())
+        .unwrap_or(false)
+    {
         // Chromium's ignored covers aria-hidden AND uninteresting nodes;
         // too coarse to strip on, let CSS rules decide.
     }
     node.get("properties")
         .and_then(|p| p.as_array())
         .map(|props| {
-            props
-                .iter()
-                .any(|e| e.get("name").and_then(|n| n.as_str()) == Some("hidden") && e.get("value").map(|v| *v == json!(true)).unwrap_or(false))
+            props.iter().any(|e| {
+                e.get("name").and_then(|n| n.as_str()) == Some("hidden")
+                    && e.get("value").map(|v| *v == json!(true)).unwrap_or(false)
+            })
         })
         .unwrap_or(false)
 }

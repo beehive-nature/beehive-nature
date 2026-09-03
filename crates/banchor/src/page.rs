@@ -59,7 +59,11 @@ impl PageSession {
         // pushNodesByBackendIdsToFrontend ("Document needs to be requested
         // first", learned live on Chrome 151)
         conn.call("DOM.getDocument", json!({ "depth": 0 }))?;
-        Ok(PageSession { port, target_id, conn })
+        Ok(PageSession {
+            port,
+            target_id,
+            conn,
+        })
     }
 
     /// Navigate and wait for `document.readyState === "complete"` (or timeout).
@@ -98,16 +102,22 @@ impl PageSession {
     }
 
     pub fn current_url(&mut self) -> String {
-        self.eval_string("location.href").unwrap_or_default().unwrap_or_default()
+        self.eval_string("location.href")
+            .unwrap_or_default()
+            .unwrap_or_default()
     }
 
     pub fn title(&mut self) -> String {
-        self.eval_string("document.title").unwrap_or_default().unwrap_or_default()
+        self.eval_string("document.title")
+            .unwrap_or_default()
+            .unwrap_or_default()
     }
 
     /// The full accessibility tree (flat node list) — the snapshot's source.
     pub fn ax_tree(&mut self) -> Result<Vec<Value>, CdpError> {
-        let res = self.conn.call("Accessibility.getFullAXTree", json!({ "depth": 64 }))?;
+        let res = self
+            .conn
+            .call("Accessibility.getFullAXTree", json!({ "depth": 64 }))?;
         let nodes = res
             .get("nodes")
             .and_then(|n| n.as_array())
@@ -118,10 +128,14 @@ impl PageSession {
 
     /// Computed style strings for the DOM element behind `backend_node_id`.
     /// Returns (display, visibility, opacity) or None if unresolvable.
-    pub fn style_for_backend(&mut self, backend_node_id: u64) -> Result<Option<(String, String, String)>, CdpError> {
-        let pushed = self
-            .conn
-            .call("DOM.pushNodesByBackendIdsToFrontend", json!({ "backendNodeIds": [backend_node_id] }))?;
+    pub fn style_for_backend(
+        &mut self,
+        backend_node_id: u64,
+    ) -> Result<Option<(String, String, String)>, CdpError> {
+        let pushed = self.conn.call(
+            "DOM.pushNodesByBackendIdsToFrontend",
+            json!({ "backendNodeIds": [backend_node_id] }),
+        )?;
         let node_id = match first_node_id(&pushed) {
             Some(n) if n > 0 => n,
             _ => return Ok(None),
@@ -146,14 +160,17 @@ impl PageSession {
 
     /// Resolve a backend node id to its box-model center (viewport CSS px).
     pub fn box_center(&mut self, backend_node_id: u64) -> Result<Option<(f64, f64)>, CdpError> {
-        let pushed = self
-            .conn
-            .call("DOM.pushNodesByBackendIdsToFrontend", json!({ "backendNodeIds": [backend_node_id] }))?;
+        let pushed = self.conn.call(
+            "DOM.pushNodesByBackendIdsToFrontend",
+            json!({ "backendNodeIds": [backend_node_id] }),
+        )?;
         let node_id = match first_node_id(&pushed) {
             Some(n) if n > 0 => n,
             _ => return Ok(None),
         };
-        let model = self.conn.call("DOM.getBoxModel", json!({ "nodeId": node_id }))?;
+        let model = self
+            .conn
+            .call("DOM.getBoxModel", json!({ "nodeId": node_id }))?;
         let quad = model
             .pointer("/model/content")
             .and_then(|c| c.as_array())
@@ -211,9 +228,18 @@ fn encode_url(url: &str) -> String {
     let mut out = String::with_capacity(url.len());
     for b in url.bytes() {
         match b {
-            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' | b'.' | b'~' | b'/' | b':' | b'?' | b'=' | b'%' => {
-                out.push(b as char)
-            }
+            b'A'..=b'Z'
+            | b'a'..=b'z'
+            | b'0'..=b'9'
+            | b'-'
+            | b'_'
+            | b'.'
+            | b'~'
+            | b'/'
+            | b':'
+            | b'?'
+            | b'='
+            | b'%' => out.push(b as char),
             _ => out.push_str(&format!("%{b:02X}")),
         }
     }

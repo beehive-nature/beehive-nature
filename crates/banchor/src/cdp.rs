@@ -51,7 +51,11 @@ pub enum CdpError {
     #[error("ws: {0}")]
     Ws(#[from] tungstenite::Error),
     #[error("cdp error on {method}: {code} {message}")]
-    Method { method: String, code: i64, message: String },
+    Method {
+        method: String,
+        code: i64,
+        message: String,
+    },
     #[error("unexpected cdp shape on {0}")]
     Shape(String),
 }
@@ -125,7 +129,12 @@ pub struct CdpConn {
 impl CdpConn {
     pub fn connect(url: &str) -> Result<Self, CdpError> {
         let (ws, _) = connect(url)?;
-        Ok(CdpConn { ws: Box::new(ws), next_id: 0, events: Vec::new(), closed: false })
+        Ok(CdpConn {
+            ws: Box::new(ws),
+            next_id: 0,
+            events: Vec::new(),
+            closed: false,
+        })
     }
 
     fn send_text(&mut self, text: String) -> Result<(), CdpError> {
@@ -162,14 +171,19 @@ impl CdpConn {
                         }
                         return Ok(v.get("result").cloned().unwrap_or(Value::Null));
                     }
-                    if let (Some(m), Some(p)) = (v.get("method").and_then(|m| m.as_str()), v.get("params").cloned()) {
+                    if let (Some(m), Some(p)) = (
+                        v.get("method").and_then(|m| m.as_str()),
+                        v.get("params").cloned(),
+                    ) {
                         self.events.push((m.to_string(), p));
                     }
                 }
                 Message::Ping(p) => self.ws.send_msg(Message::Pong(p))?,
                 Message::Close(_) => {
                     self.closed = true;
-                    return Err(CdpError::Io(std::io::Error::other("cdp socket closed mid-call")));
+                    return Err(CdpError::Io(std::io::Error::other(
+                        "cdp socket closed mid-call",
+                    )));
                 }
                 _ => {}
             }

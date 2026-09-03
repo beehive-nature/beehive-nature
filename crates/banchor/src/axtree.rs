@@ -22,16 +22,34 @@ use crate::visibility::Vis;
 
 /// Roles that get a ref (clickable / actionable / anchor targets).
 const REF_ROLES: &[&str] = &[
-    "link", "button", "textbox", "searchbox", "combobox", "checkbox", "radio", "switch",
-    "menuitem", "menuitemcheckbox", "menuitemradio", "tab", "option", "heading", "image",
-    "progressbar", "slider", "spinbutton",
+    "link",
+    "button",
+    "textbox",
+    "searchbox",
+    "combobox",
+    "checkbox",
+    "radio",
+    "switch",
+    "menuitem",
+    "menuitemcheckbox",
+    "menuitemradio",
+    "tab",
+    "option",
+    "heading",
+    "image",
+    "progressbar",
+    "slider",
+    "spinbutton",
 ];
 
 /// Roles whose `value` is worth showing (input-ish).
 const VALUE_ROLES: &[&str] = &["textbox", "searchbox", "combobox", "spinbutton", "slider"];
 
 const MAX_NAME: usize = 240;
-const MAX_NODES: usize = 1200;
+/// Default emitted-node cap. qwen.rs's CAP_LADDER starts here and descends
+/// when the formatted tree overflows the model's context — the cap in use
+/// is always reported, never silently applied.
+pub const DEFAULT_MAX_NODES: usize = 1200;
 
 #[derive(Debug, Clone)]
 pub struct RefEntry {
@@ -91,7 +109,10 @@ fn u64_of(v: Option<&Value>) -> Option<u64> {
 }
 
 fn nested_str(node: &Value, field: &str) -> Option<String> {
-    node.get(field)?.get("value").and_then(|v| v.as_str()).map(str::to_string)
+    node.get(field)?
+        .get("value")
+        .and_then(|v| v.as_str())
+        .map(str::to_string)
 }
 
 pub fn backend_id(node: &Value) -> Option<u64> {
@@ -111,7 +132,9 @@ fn value_of(node: &Value) -> Option<String> {
 }
 
 fn ignored(node: &Value) -> bool {
-    node.get("ignored").and_then(|i| i.as_bool()).unwrap_or(false)
+    node.get("ignored")
+        .and_then(|i| i.as_bool())
+        .unwrap_or(false)
 }
 
 fn level_of(node: &Value) -> Option<u64> {
@@ -152,6 +175,12 @@ fn escape(s: &str) -> String {
 /// `vis` maps backendNodeId → classification; entries missing from the map
 /// are UNDETERMINED (text fails closed = stripped, structure stays).
 pub fn format(nodes: &[Value], vis: &HashMap<u64, Vis>) -> Snapshot {
+    format_with_cap(nodes, vis, DEFAULT_MAX_NODES)
+}
+
+/// Same, with an explicit emitted-node cap (qwen context fitting — the
+/// caller reports which cap was used).
+pub fn format_with_cap(nodes: &[Value], vis: &HashMap<u64, Vis>, max_nodes: usize) -> Snapshot {
     // index: ax nodeId → position
     let mut by_axid: HashMap<u64, usize> = HashMap::new();
     for (i, n) in nodes.iter().enumerate() {
@@ -198,9 +227,16 @@ pub fn format(nodes: &[Value], vis: &HashMap<u64, Vis>) -> Snapshot {
         (0..nodes.len()).filter(|&i| !is_child[i]).collect()
     };
 
-    let mut snap = Snapshot { text: String::new(), refs: Vec::new(), stats: Stats { total: nodes.len(), ..Default::default() } };
+    let mut snap = Snapshot {
+        text: String::new(),
+        refs: Vec::new(),
+        stats: Stats {
+            total: nodes.len(),
+            ..Default::default()
+        },
+    };
     let mut next_ref = 0usize;
-    walk(nodes, &children, &roots, vis, &mut snap, &mut next_ref, 0);
+    walk(nodes, &children, &roots, vis, &mut snap, &mut next_ref, 0, max_nodes);
     snap
 }
 
@@ -213,11 +249,12 @@ fn walk(
     snap: &mut Snapshot,
     next_ref: &mut usize,
     depth: usize,
+    max_nodes: usize,
 ) {
     for &i in order {
-        if snap.stats.emitted >= MAX_NODES {
+        if snap.stats.emitted >= max_nodes {
             snap.stats.truncated = true;
-            snap.text.push_str("… [snapshot truncated at node cap]\n");
+            snap.text.push_str(&format!("… [snapshot truncated at node cap {max_nodes}]\n"));
             return;
         }
         let node = &nodes[i];
@@ -280,7 +317,12 @@ fn walk(
             *next_ref += 1;
             let r = format!("@e{next_ref}");
             line.push_str(&format!(" [ref={r}]"));
-            snap.refs.push(RefEntry { r#ref: r.clone(), backend: bid, role: role.clone(), name: name.clone() });
+            snap.refs.push(RefEntry {
+                r#ref: r.clone(),
+                backend: bid,
+                role: role.clone(),
+                name: name.clone(),
+            });
             snap.stats.refs += 1;
         }
 
@@ -288,7 +330,8 @@ fn walk(
         if depth == 0 {
             snap.text.push_str(&format!("- {line}\n"));
         } else {
-            snap.text.push_str(&format!("{}- {line}\n", "  ".repeat(depth - 1)));
+            snap.text
+                .push_str(&format!("{}- {line}\n", "  ".repeat(depth - 1)));
         }
 
         walk(nodes, children, &kids, vis, snap, next_ref, depth + 1);
@@ -299,7 +342,14 @@ fn walk(
 mod tests {
     use super::*;
 
-    fn node(id: u64, parent: Option<u64>, bid: Option<u64>, role: &str, name: &str, ignored: bool) -> Value {
+    fn node(
+        id: u64,
+        parent: Option<u64>,
+        bid: Option<u64>,
+        role: &str,
+        name: &str,
+        ignored: bool,
+    ) -> Value {
         let mut v = json!({ "nodeId": id, "role": { "value": role }, "name": { "value": name }, "ignored": ignored });
         if let Some(p) = parent {
             v["parentId"] = json!(p);
@@ -316,7 +366,14 @@ mod tests {
             node(1, None, Some(10), "WebArea", "Example Domain", false),
             node(2, Some(1), Some(11), "heading", "Example Domain", false),
             node(3, Some(1), Some(12), "paragraph", "", false),
-            node(4, Some(3), Some(13), "statictext", "This domain is for use in examples.", false),
+            node(
+                4,
+                Some(3),
+                Some(13),
+                "statictext",
+                "This domain is for use in examples.",
+                false,
+            ),
             node(5, Some(1), Some(14), "link", "More information...", false),
         ];
         let mut vis = HashMap::new();
@@ -325,9 +382,15 @@ mod tests {
         }
         let s = format(&nodes, &vis);
         assert!(s.text.contains("heading \"Example Domain\""));
-        assert!(s.text.contains("[ref=@e1]"), "heading gets first ref: {}", s.text);
+        assert!(
+            s.text.contains("[ref=@e1]"),
+            "heading gets first ref: {}",
+            s.text
+        );
         assert!(s.text.contains("link \"More information...\" [ref=@e2]"));
-        assert!(s.text.contains("statictext \"This domain is for use in examples.\""));
+        assert!(s
+            .text
+            .contains("statictext \"This domain is for use in examples.\""));
         assert_eq!(s.stats.refs, 2);
         assert_eq!(s.stats.emitted, 5);
     }
@@ -338,7 +401,14 @@ mod tests {
             node(1, None, Some(10), "WebArea", "Page", false),
             node(2, Some(1), Some(11), "statictext", "visible text", false),
             node(3, Some(1), Some(12), "generic", "", false),
-            node(4, Some(3), Some(13), "statictext", "INJECTED hidden text", false),
+            node(
+                4,
+                Some(3),
+                Some(13),
+                "statictext",
+                "INJECTED hidden text",
+                false,
+            ),
         ];
         let vis = HashMap::from([
             (10u64, Vis::Visible),
@@ -348,7 +418,10 @@ mod tests {
         ]);
         let s = format(&nodes, &vis);
         assert!(s.text.contains("visible text"));
-        assert!(!s.text.contains("INJECTED"), "hidden text must not reach the snapshot");
+        assert!(
+            !s.text.contains("INJECTED"),
+            "hidden text must not reach the snapshot"
+        );
         assert!(s.stats.stripped_hidden_tree >= 1);
     }
 
@@ -356,7 +429,14 @@ mod tests {
     fn low_opacity_node_text_stripped_but_children_kept() {
         let nodes = vec![
             node(1, None, Some(10), "WebArea", "Page", false),
-            node(2, Some(1), Some(11), "generic", "dim container label", false),
+            node(
+                2,
+                Some(1),
+                Some(11),
+                "generic",
+                "dim container label",
+                false,
+            ),
             node(3, Some(2), Some(12), "link", "real link", false),
         ];
         let vis = HashMap::from([
@@ -373,10 +453,20 @@ mod tests {
     fn undetermined_text_fails_closed() {
         let nodes = vec![
             node(1, None, None, "WebArea", "Page", false),
-            node(2, Some(1), None, "statictext", "phantom text with no DOM node", false),
+            node(
+                2,
+                Some(1),
+                None,
+                "statictext",
+                "phantom text with no DOM node",
+                false,
+            ),
         ];
         let s = format(&nodes, &HashMap::new());
-        assert!(!s.text.contains("phantom"), "text with undetermined visibility must not pass");
+        assert!(
+            !s.text.contains("phantom"),
+            "text with undetermined visibility must not pass"
+        );
         assert_eq!(s.stats.stripped_undetermined, 1);
     }
 
@@ -385,7 +475,14 @@ mod tests {
         let long: String = std::iter::repeat('x').take(400).collect();
         let nodes = vec![
             node(1, None, Some(10), "WebArea", "P", false),
-            node(2, Some(1), Some(11), "button", &format!("say \"hi\"\n{}", long), false),
+            node(
+                2,
+                Some(1),
+                Some(11),
+                "button",
+                &format!("say \"hi\"\n{}", long),
+                false,
+            ),
         ];
         let vis = HashMap::from([(10u64, Vis::Visible), (11u64, Vis::Visible)]);
         let s = format(&nodes, &vis);

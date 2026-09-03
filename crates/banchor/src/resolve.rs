@@ -105,7 +105,11 @@ pub fn resolve_buzz(input: &str) -> Result<Value, ResolveError> {
         Some(i) => (&rest[..i], &rest[i..]),
         None => (rest, ""),
     };
-    if host.is_empty() || !host.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '.') {
+    if host.is_empty()
+        || !host
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '.')
+    {
         return Err(ResolveError::NotFound(format!("bad buzz host: {host}")));
     }
     let suffix = std::env::var("BUZZ_HOST_SUFFIX").unwrap_or_else(|_| ".buzz".into());

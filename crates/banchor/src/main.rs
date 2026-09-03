@@ -41,7 +41,10 @@ fn main() {
         Some("milestone1") => milestone1(&args[1..]),
         Some("resolve") => resolve_cmd(&args[1..]),
         Some("version") | None => {
-            println!("banchor {} — the serving organ of bHEartWALLet", env!("CARGO_PKG_VERSION"));
+            println!(
+                "banchor {} — the serving organ of bHEartWALLet",
+                env!("CARGO_PKG_VERSION")
+            );
             println!("laws: untrusted-data delimiters · strip-hidden · plan-then-approve · no-screenshot durable path · bsigner-independence");
         }
         Some(other) => {
@@ -71,7 +74,8 @@ fn serve(args: &[String]) {
 
 fn milestone1(args: &[String]) {
     let mut url = "https://example.com/".to_string();
-    let mut rich: Option<String> = Some("https://en.wikipedia.org/wiki/Chromium_(web_browser)".to_string());
+    let mut rich: Option<String> =
+        Some("https://en.wikipedia.org/wiki/Chromium_(web_browser)".to_string());
     let mut replay_dir: Option<String> = None;
     let mut i = 0;
     while i < args.len() {
@@ -105,9 +109,15 @@ fn milestone1(args: &[String]) {
 
     match seat::SeatState::milestone1(&url, rich.as_deref(), &dir) {
         Ok(receipt) => {
-            println!("{}", serde_json::to_string_pretty(&receipt).unwrap_or_default());
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&receipt).unwrap_or_default()
+            );
             // THE number, said out loud:
-            if let Some(n) = receipt.pointer("/page/counts/tokens/1/n").and_then(|v| v.as_u64()) {
+            if let Some(n) = receipt
+                .pointer("/page/counts/tokens/1/n")
+                .and_then(|v| v.as_u64())
+            {
                 eprintln!(
                     "[milestone1] snapshot token count (cl100k_base): {n} — replay: {}",
                     receipt["replay"].as_str().unwrap_or("?")
@@ -127,7 +137,10 @@ fn resolve_cmd(args: &[String]) {
         std::process::exit(2);
     };
     match resolve::resolve_any(url) {
-        Ok(record) => println!("{}", serde_json::to_string_pretty(&record).unwrap_or_default()),
+        Ok(record) => println!(
+            "{}",
+            serde_json::to_string_pretty(&record).unwrap_or_default()
+        ),
         Err(e) => {
             eprintln!("resolve FAILED: {e}");
             std::process::exit(1);

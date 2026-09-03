@@ -140,7 +140,12 @@ impl PlanGate {
         let summary = action.to_string();
         self.plans.insert(
             id.clone(),
-            Pending { action, risks, created: Instant::now(), summary },
+            Pending {
+                action,
+                risks,
+                created: Instant::now(),
+                summary,
+            },
         );
         id
     }
@@ -148,7 +153,10 @@ impl PlanGate {
     /// Redeem an approved plan. Errors on unknown/expired id (no hints about
     /// which ids exist — ids are quoted back by the caller, never guessed).
     pub fn redeem(&mut self, plan_id: &str) -> Result<(Value, Vec<Risk>), String> {
-        let pending = self.plans.remove(plan_id).ok_or("unknown or already-used plan id")?;
+        let pending = self
+            .plans
+            .remove(plan_id)
+            .ok_or("unknown or already-used plan id")?;
         if pending.created.elapsed() > PLAN_TTL {
             return Err("plan expired (10 min) — propose again".into());
         }
@@ -211,6 +219,9 @@ mod tests {
         let mut g = PlanGate::new();
         let a = json!({"action":"navigate","url":"https://a.test/login"});
         let b = json!({"action":"navigate","url":"https://a.test/login"});
-        assert_ne!(g.propose(a, vec![Risk::Auth]), g.propose(b, vec![Risk::Auth]));
+        assert_ne!(
+            g.propose(a, vec![Risk::Auth]),
+            g.propose(b, vec![Risk::Auth])
+        );
     }
 }

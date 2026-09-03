@@ -41,7 +41,8 @@ fn candidate_paths() -> Vec<PathBuf> {
         v.push(PathBuf::from(p));
     }
     let pf = std::env::var("ProgramFiles").unwrap_or_else(|_| r"C:\Program Files".into());
-    let pf86 = std::env::var("ProgramFiles(x86)").unwrap_or_else(|_| r"C:\Program Files (x86)".into());
+    let pf86 =
+        std::env::var("ProgramFiles(x86)").unwrap_or_else(|_| r"C:\Program Files (x86)".into());
     let la = std::env::var("LOCALAPPDATA").unwrap_or_default();
     for (dir, exe) in [
         (&pf, r"Google\Chrome\Application\chrome.exe"),
@@ -153,13 +154,22 @@ impl Browser {
         }
         let version = version.ok_or(BrowserError::Timeout)?;
         eprintln!("[banchor] devtools live on 127.0.0.1:{port}");
-        Ok(Browser { child, port, binary, version, profile_dir })
+        Ok(Browser {
+            child,
+            port,
+            binary,
+            version,
+            profile_dir,
+        })
     }
 }
 
 /// Ask the kernel for a free TCP port on loopback (bind :0, read it, drop).
 fn pick_free_port() -> Option<u16> {
-    std::net::TcpListener::bind(("127.0.0.1", 0)).ok().and_then(|l| l.local_addr().ok()).map(|a| a.port())
+    std::net::TcpListener::bind(("127.0.0.1", 0))
+        .ok()
+        .and_then(|l| l.local_addr().ok())
+        .map(|a| a.port())
 }
 
 fn line_hint(rx: &mpsc::Receiver<String>) -> String {

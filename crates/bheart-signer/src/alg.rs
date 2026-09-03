@@ -59,7 +59,9 @@ impl KemAlg {
             "ml-kem-512" => Ok(KemAlg::MlKem512),
             "ml-kem-768" => Ok(KemAlg::MlKem768),
             "ml-kem-1024" => Ok(KemAlg::MlKem1024),
-            other => Err(format!("crypto-agility: unknown kem algorithm id {other:?} — refuse rather than guess")),
+            other => Err(format!(
+                "crypto-agility: unknown kem algorithm id {other:?} — refuse rather than guess"
+            )),
         }
     }
 }
@@ -73,7 +75,9 @@ impl HashAlg {
     pub fn parse(id: &str) -> Result<Self, String> {
         match id {
             "sha3-256" => Ok(HashAlg::Sha3256),
-            other => Err(format!("crypto-agility: unknown hash algorithm id {other:?} — refuse rather than guess")),
+            other => Err(format!(
+                "crypto-agility: unknown hash algorithm id {other:?} — refuse rather than guess"
+            )),
         }
     }
 }

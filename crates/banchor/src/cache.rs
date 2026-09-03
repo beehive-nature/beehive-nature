@@ -52,7 +52,11 @@ mod tests {
         let tmp = std::env::temp_dir().join("banchor-cache-test-home");
         let _ = fs::remove_dir_all(&tmp);
         std::env::set_var("BHEARTWALLET_HOME", &tmp);
-        put_json("resolve-test", "oliver.b", &json!({"target": "untrusted-row"}));
+        put_json(
+            "resolve-test",
+            "oliver.b",
+            &json!({"target": "untrusted-row"}),
+        );
         let hit = get_json("resolve-test", "oliver.b").expect("cached entry");
         assert_eq!(hit["target"], "untrusted-row");
         assert!(get_json("resolve-test", "missing.b").is_none());

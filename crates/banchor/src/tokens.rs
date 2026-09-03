@@ -77,11 +77,15 @@ mod tests {
 
     #[test]
     fn english_text_brackets_sane() {
-        let text = "- heading \"Example Domain\" [level=1]\n- link \"More information...\" [ref=@e1]";
+        let text =
+            "- heading \"Example Domain\" [level=1]\n- link \"More information...\" [ref=@e1]";
         let c = count(text);
         assert!(c.cl100k >= 8, "cl100k suspiciously low: {c:?}");
         // r50k is a coarser merge table than cl100k for English
-        assert!(c.r50k >= c.cl100k, "r50k < cl100k breaks the bracket: {c:?}");
+        assert!(
+            c.r50k >= c.cl100k,
+            "r50k < cl100k breaks the bracket: {c:?}"
+        );
         assert!(c.words <= c.r50k);
         assert!(c.bytes > c.r50k);
     }
