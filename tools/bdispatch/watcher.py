@@ -30,7 +30,7 @@ LEDGER = pathlib.Path(os.environ.get("BDISPATCH_STATE", os.path.expanduser("~/.l
 # Idempotency has TWO records: the RELAYED line inside the file (human-visible, travels with git) and
 # this local ledger keyed by sha256(body)+seat (survives a git pull that rewrites the file).
 SEND_RE = re.compile(r"^SEND TO:\s*(.+?)\s*$", re.I)
-RELAYED_RE = re.compile(r"^RELAYED\s+(\S+)\s+(\S+)\s+to=(\S+)\s*$")
+RELAYED_RE = re.compile(r"^RELAYED\s+(\S+)\s+(\S+)\s+to=(\S+?)(?:\s*<!--[^>]*-->)?\s*$")  # optional trailing PUBLIC-CONSTANT marker (hex law) never breaks idempotency
 
 
 def load_keys() -> Keys:
