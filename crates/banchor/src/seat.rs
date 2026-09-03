@@ -175,7 +175,13 @@ impl SeatState {
     /// snapshot: AX tree → strip-hidden → format+refs → wrap untrusted → count.
     fn snapshot(&mut self) -> Result<Value, SeatError> {
         let (nodes, vis, style_probe_errors) = self.ax_nodes_and_vis()?;
-        self.snapshot_at_cap(&nodes, &vis, style_probe_errors, axtree::DEFAULT_MAX_NODES, None)
+        self.snapshot_at_cap(
+            &nodes,
+            &vis,
+            style_probe_errors,
+            axtree::DEFAULT_MAX_NODES,
+            None,
+        )
     }
 
     /// Pull the AX tree and compute visibility classifications once, so cap
@@ -286,8 +292,15 @@ impl SeatState {
             .take(24)
             .collect();
         let (stamp, _) = crate::replay::now_iso();
-        let stamp = stamp.split_once('T').map(|(d, t)| format!("{}{}", d.replace('-', ""), &t[..8].replace(':', ""))).unwrap_or_default();
-        let path = dir.join(format!("snap{}-{}.txt", self.snapshot_seq, if slug.is_empty() { "blank" } else { &slug }));
+        let stamp = stamp
+            .split_once('T')
+            .map(|(d, t)| format!("{}{}", d.replace('-', ""), &t[..8].replace(':', "")))
+            .unwrap_or_default();
+        let path = dir.join(format!(
+            "snap{}-{}.txt",
+            self.snapshot_seq,
+            if slug.is_empty() { "blank" } else { &slug }
+        ));
         let header = format!(
             "# banchor snapshot artifact — counted bytes below (origin: {origin}, taken: {stamp})\n\
              # integrity: sha3-256:{}\n",
@@ -648,14 +661,26 @@ pub fn agentloop(
         format!("no cap in the ladder fits: allowance {allowance} qwen tokens, walked {ladder_walked:?}")
     })?;
     let snap_result = final_snap.expect("fitted implies snap result");
-    seat.ev("cap_ladder", json!({ "walked": ladder_walked, "chosen_cap": cap_used }));
+    seat.ev(
+        "cap_ladder",
+        json!({ "walked": ladder_walked, "chosen_cap": cap_used }),
+    );
     eprintln!("[agentloop] snapshot fitted: {qwen_n} qwen tokens at cap {cap_used} (allowance {allowance})");
 
     // ground truth, structural: the page's first interactive link
-    let refs = snap_result["snapshot"]["refs"].as_array().cloned().unwrap_or_default();
+    let refs = snap_result["snapshot"]["refs"]
+        .as_array()
+        .cloned()
+        .unwrap_or_default();
     let expected = refs
         .iter()
-        .find(|r| r["role"] == "link" && r["name"]["v"].as_str().map(|s| !s.is_empty()).unwrap_or(false))
+        .find(|r| {
+            r["role"] == "link"
+                && r["name"]["v"]
+                    .as_str()
+                    .map(|s| !s.is_empty())
+                    .unwrap_or(false)
+        })
         .cloned();
     let expected_ref = expected
         .as_ref()
@@ -679,8 +704,14 @@ pub fn agentloop(
     for turn in 1..=max_turns {
         turns_taken = turn;
         let (content, usage) = model.chat(&conversation, 256)?;
-        let p = usage.get("prompt_tokens").and_then(|t| t.as_u64()).unwrap_or(0);
-        let c = usage.get("completion_tokens").and_then(|t| t.as_u64()).unwrap_or(0);
+        let p = usage
+            .get("prompt_tokens")
+            .and_then(|t| t.as_u64())
+            .unwrap_or(0);
+        let c = usage
+            .get("completion_tokens")
+            .and_then(|t| t.as_u64())
+            .unwrap_or(0);
         prompt_tokens_total += p;
         completion_tokens_total += c;
         seat.ev(
@@ -692,7 +723,10 @@ pub fn agentloop(
                 "response": un(&content),
             }),
         );
-        eprintln!("[agentloop] turn {turn}: model said: {}", content.chars().take(120).collect::<String>());
+        eprintln!(
+            "[agentloop] turn {turn}: model said: {}",
+            content.chars().take(120).collect::<String>()
+        );
 
         match qwen::extract_action(&content) {
             qwen::AgentAction::Click { r#ref } => {
@@ -715,12 +749,18 @@ pub fn agentloop(
                                 r#ref,
                                 c["after"]["url"].as_str().unwrap_or("?")
                             );
-                            seat.ev("model_action_executed", json!({ "ref": r#ref, "result": "clicked" }));
+                            seat.ev(
+                                "model_action_executed",
+                                json!({ "ref": r#ref, "result": "clicked" }),
+                            );
                             break;
                         }
                         Err(e) => {
                             outcome_note = format!("click {} refused: {e}", r#ref);
-                            seat.ev("model_action_refused", json!({ "ref": r#ref, "reason": e.to_string() }));
+                            seat.ev(
+                                "model_action_refused",
+                                json!({ "ref": r#ref, "reason": e.to_string() }),
+                            );
                             conversation.push(json!({ "role": "assistant", "content": content }));
                             conversation.push(json!({
                                 "role": "user",
@@ -730,7 +770,10 @@ pub fn agentloop(
                     }
                 } else {
                     outcome_note = format!("model picked nonexistent ref {}", r#ref);
-                    seat.ev("model_choice", json!({ "turn": turn, "ref": r#ref, "valid": false }));
+                    seat.ev(
+                        "model_choice",
+                        json!({ "turn": turn, "ref": r#ref, "valid": false }),
+                    );
                     conversation.push(json!({ "role": "assistant", "content": content }));
                     conversation.push(json!({
                         "role": "user",
@@ -740,7 +783,10 @@ pub fn agentloop(
             }
             qwen::AgentAction::Done { reason } => {
                 outcome_note = format!("model declared done: {reason}");
-                seat.ev("model_choice", json!({ "turn": turn, "done": true, "reason": reason }));
+                seat.ev(
+                    "model_choice",
+                    json!({ "turn": turn, "done": true, "reason": reason }),
+                );
                 break;
             }
             qwen::AgentAction::Unparseable { raw } => {

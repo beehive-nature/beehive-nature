@@ -49,13 +49,25 @@ impl Qwen {
     pub fn from_env() -> Result<Qwen, QwenError> {
         let endpoint =
             std::env::var("BANCHOR_QWEN_ENDPOINT").unwrap_or_else(|_| DEFAULT_ENDPOINT.into());
-        let key = std::env::var("BANCHOR_QWEN_KEY").ok().filter(|k| !k.trim().is_empty()).ok_or(QwenError::NoKey)?;
-        let key_id = std::env::var("BANCHOR_QWEN_KEY_ID").unwrap_or_else(|_| "unnamed-meter-key".into());
+        let key = std::env::var("BANCHOR_QWEN_KEY")
+            .ok()
+            .filter(|k| !k.trim().is_empty())
+            .ok_or(QwenError::NoKey)?;
+        let key_id =
+            std::env::var("BANCHOR_QWEN_KEY_ID").unwrap_or_else(|_| "unnamed-meter-key".into());
         let agent = ureq::AgentBuilder::new()
             .timeout_connect(Duration::from_secs(15))
             .timeout_read(Duration::from_secs(180))
             .build();
-        let q = Qwen { endpoint, key, key_id, alias: String::new(), model_path: String::new(), n_ctx: 0, agent };
+        let q = Qwen {
+            endpoint,
+            key,
+            key_id,
+            alias: String::new(),
+            model_path: String::new(),
+            n_ctx: 0,
+            agent,
+        };
         // props are part of the receipt; failure to read them is fatal-honest
         let mut q = q;
         q.refresh_props()?;
@@ -108,7 +120,10 @@ impl Qwen {
     /// One chat turn, temperature 0. Returns (content, usage).
     pub fn chat(&self, messages: &[Value], max_tokens: u64) -> Result<(String, Value), QwenError> {
         let resp: Value = self
-            .authed(self.agent.post(&format!("{}/v1/chat/completions", self.endpoint)))
+            .authed(
+                self.agent
+                    .post(&format!("{}/v1/chat/completions", self.endpoint)),
+            )
             .send_json(json!({
                 "model": self.alias,
                 "messages": messages,
@@ -162,18 +177,28 @@ pub enum AgentAction {
 /// its fields. Everything here treats the response as untrusted data.
 pub fn extract_action(model_text: &str) -> AgentAction {
     let Some(obj) = first_json_object(model_text) else {
-        return AgentAction::Unparseable { raw: truncate_for_log(model_text) };
+        return AgentAction::Unparseable {
+            raw: truncate_for_log(model_text),
+        };
     };
     let ok = obj.get("done").and_then(|d| d.as_bool()).unwrap_or(false);
     if ok {
         return AgentAction::Done {
-            reason: obj.get("reason").and_then(|r| r.as_str()).unwrap_or("").to_string(),
+            reason: obj
+                .get("reason")
+                .and_then(|r| r.as_str())
+                .unwrap_or("")
+                .to_string(),
         };
     }
     if let Some(r) = obj.get("click").and_then(|c| c.as_str()) {
-        return AgentAction::Click { r#ref: r.trim().to_string() };
+        return AgentAction::Click {
+            r#ref: r.trim().to_string(),
+        };
     }
-    AgentAction::Unparseable { raw: truncate_for_log(model_text) }
+    AgentAction::Unparseable {
+        raw: truncate_for_log(model_text),
+    }
 }
 
 fn first_json_object(text: &str) -> Option<Value> {
@@ -211,10 +236,16 @@ pub struct Budget {
 
 impl Budget {
     pub fn for_ctx(n_ctx: u64) -> Budget {
-        Budget { n_ctx, template_overhead: 200, reserved_completion: 256 }
+        Budget {
+            n_ctx,
+            template_overhead: 200,
+            reserved_completion: 256,
+        }
     }
     pub fn snapshot_allowance(&self) -> u64 {
-        self.n_ctx.saturating_sub(self.template_overhead + self.reserved_completion + 1024 /* system+goal headroom */)
+        self.n_ctx.saturating_sub(
+            self.template_overhead + self.reserved_completion + 1024, /* system+goal headroom */
+        )
     }
 }
 
@@ -231,20 +262,34 @@ mod tests {
     fn clean_json_is_parsed() {
         assert_eq!(
             extract_action(r#"{"click": "@e2"}"#),
-            AgentAction::Click { r#ref: "@e2".into() }
+            AgentAction::Click {
+                r#ref: "@e2".into()
+            }
         );
         assert_eq!(
             extract_action(r#"{"done": true, "reason": "no links"}"#),
-            AgentAction::Done { reason: "no links".into() }
+            AgentAction::Done {
+                reason: "no links".into()
+            }
         );
     }
 
     #[test]
     fn fenced_or_prose_wrapped_json_is_still_found() {
         let fence = "Sure! Here's the object:\n```json\n{\"click\": \"@e1\"}\n```";
-        assert_eq!(extract_action(fence), AgentAction::Click { r#ref: "@e1".into() });
+        assert_eq!(
+            extract_action(fence),
+            AgentAction::Click {
+                r#ref: "@e1".into()
+            }
+        );
         let prose = r#"The link about more information is ref @e3, so: {"click":"@e3"}"#;
-        assert_eq!(extract_action(prose), AgentAction::Click { r#ref: "@e3".into() });
+        assert_eq!(
+            extract_action(prose),
+            AgentAction::Click {
+                r#ref: "@e3".into()
+            }
+        );
     }
 
     #[test]
@@ -253,7 +298,10 @@ mod tests {
             AgentAction::Unparseable { raw } => assert!(raw.len() <= 200),
             other => panic!("expected unparseable, got {other:?}"),
         }
-        assert!(matches!(extract_action("{\"foo\": 1}"), AgentAction::Unparseable { .. }));
+        assert!(matches!(
+            extract_action("{\"foo\": 1}"),
+            AgentAction::Unparseable { .. }
+        ));
     }
 
     #[test]
@@ -268,7 +316,10 @@ mod tests {
     fn cap_ladder_descends_from_the_default_cap() {
         assert_eq!(CAP_LADDER[0], crate::axtree::DEFAULT_MAX_NODES);
         for w in CAP_LADDER.windows(2) {
-            assert!(w[0] > w[1], "cap ladder must strictly descend: {CAP_LADDER:?}");
+            assert!(
+                w[0] > w[1],
+                "cap ladder must strictly descend: {CAP_LADDER:?}"
+            );
         }
     }
 }

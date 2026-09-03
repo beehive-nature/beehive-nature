@@ -196,7 +196,8 @@ fn json_row(f: &str, text: &str, local: tokens::Counts, q: usize) -> serde_json:
 /// action → replay. Nothing spends; plan-then-approve stays in force.
 fn agentloop_cmd(args: &[String]) {
     let mut url = "https://example.com/".to_string();
-    let mut goal = "Click the link that leads to more information about example domains.".to_string();
+    let mut goal =
+        "Click the link that leads to more information about example domains.".to_string();
     let mut max_turns: u32 = 3;
     let mut replay_dir: Option<String> = None;
     let mut i = 0;
@@ -229,7 +230,10 @@ fn agentloop_cmd(args: &[String]) {
         .unwrap_or_else(|| std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("replays"));
     match seat::agentloop(&url, &goal, max_turns, &dir) {
         Ok(receipt) => {
-            println!("{}", serde_json::to_string_pretty(&receipt).unwrap_or_default());
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&receipt).unwrap_or_default()
+            );
             eprintln!(
                 "[agentloop] right_ref={} executed={} turns={} — replay: {}",
                 receipt["right_ref"],

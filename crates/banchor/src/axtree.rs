@@ -236,7 +236,16 @@ pub fn format_with_cap(nodes: &[Value], vis: &HashMap<u64, Vis>, max_nodes: usiz
         },
     };
     let mut next_ref = 0usize;
-    walk(nodes, &children, &roots, vis, &mut snap, &mut next_ref, 0, max_nodes);
+    walk(
+        nodes,
+        &children,
+        &roots,
+        vis,
+        &mut snap,
+        &mut next_ref,
+        0,
+        max_nodes,
+    );
     snap
 }
 
@@ -254,7 +263,8 @@ fn walk(
     for &i in order {
         if snap.stats.emitted >= max_nodes {
             snap.stats.truncated = true;
-            snap.text.push_str(&format!("… [snapshot truncated at node cap {max_nodes}]\n"));
+            snap.text
+                .push_str(&format!("… [snapshot truncated at node cap {max_nodes}]\n"));
             return;
         }
         let node = &nodes[i];
@@ -274,7 +284,16 @@ fn walk(
                 }
                 Some(Vis::HiddenNode(_)) => {
                     snap.stats.stripped_hidden_node += 1;
-                    walk(nodes, children, &kids, vis, snap, next_ref, depth + 1, max_nodes);
+                    walk(
+                        nodes,
+                        children,
+                        &kids,
+                        vis,
+                        snap,
+                        next_ref,
+                        depth + 1,
+                        max_nodes,
+                    );
                     continue; // node's own text dies, children live
                 }
                 None if is_textual(&role) && !ignored(node) => {
@@ -288,7 +307,16 @@ fn walk(
 
         let emit_this = !ignored(node) || role == "RootWebArea" || role == "WebArea";
         if !emit_this {
-            walk(nodes, children, &kids, vis, snap, next_ref, depth + 1, max_nodes);
+            walk(
+                nodes,
+                children,
+                &kids,
+                vis,
+                snap,
+                next_ref,
+                depth + 1,
+                max_nodes,
+            );
             continue;
         }
 
@@ -334,7 +362,16 @@ fn walk(
                 .push_str(&format!("{}- {line}\n", "  ".repeat(depth - 1)));
         }
 
-        walk(nodes, children, &kids, vis, snap, next_ref, depth + 1, max_nodes);
+        walk(
+            nodes,
+            children,
+            &kids,
+            vis,
+            snap,
+            next_ref,
+            depth + 1,
+            max_nodes,
+        );
     }
 }
 
