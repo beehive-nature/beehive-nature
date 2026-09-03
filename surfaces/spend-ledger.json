@@ -1,0 +1,827 @@
+{
+ "_note": [
+  "THE PUBLIC SPEND-RECEIPT RECORD — rehearsal copy. The live meter (scripts/buzz-meter/meter.py, SPEC-SPEND-RECEIPT-1) writes real receipts on the box; none are public yet, so this in-tree copy gives the auditor true-shaped rows. Free-tier rates are real law (rateset-v2); rateset-fixture-a prices NOTHING — an A-rate for the closed paid lane would be a tokenomics constant, and those are fence-held. Rows labelled FIXTURE are deliberately broken so the four verifier states are all present; the auditor catches each one.",
+  "VISIBILITY LAW (SPEC §3a): only visibility:\"public\" rows live in a public store — a private receipt written here would be published. The spender's private rows stay in the spender's store. Totals are computed at every read, never stored (the stored total_computed is itself re-derived and checked). CARE: this is topology and vocabulary, NEVER a security claim."
+ ],
+ "ledger": "spend-receipts-public-1",
+ "as_of": "2026-09-03T12:00:00Z",
+ "rate_sets": {
+  "rateset-v2": {
+   "version": "rateset-v2",
+   "minted_at": "2026-08-29T00:00:00Z",
+   "unit": "A",
+   "tithe": {
+    "percent": 10,
+    "law": "FOUNDER LAW (Lane M rider, 2026-08-29): the Claude-agents API lane prices at PROVIDER COST BASIS + 10% TITHE in A — a distinct visible TITHE line on every receipt, never buried in the rate. The tithe percentage changes by founder word ALONE; rate_set versions track cost basis only."
+   },
+   "tiers": {
+    "free_qwen": {
+     "tier": "FREE (founder tier-ladder ruling, 2026-08-29): the box/qwen compute lane — guest keys, no charge, capped fairly",
+     "rates": {
+      "prefill_token": {
+       "value": 0
+      },
+      "decode_token": {
+       "value": 0
+      }
+     }
+    },
+    "paid_claude": {
+     "tier": "PAID (founder tier-ladder ruling): A-metered at provider cost basis + the 10% tithe",
+     "status": "CLOSED_UNTIL_FUNDED — basis disclosed as reference; no rates are published here",
+     "cost_basis": {
+      "model_class": "sonnet-class",
+      "prefill_token_per_million_usd": 3,
+      "decode_token_per_million_usd": 15,
+      "a_conversion_reference": null,
+      "basis": "POSTED-REFERENCE — not a billed rate until the lane opens"
+     }
+    }
+   }
+  },
+  "rateset-fixture-a": {
+   "version": "rateset-fixture-a",
+   "minted_at": "2026-09-03T00:00:00Z",
+   "unit": "A",
+   "note": "FIXTURE RATES — not a rate ruling. The paid lane is CLOSED_UNTIL_FUNDed and its A-conversion is unruled (fence-held); these arbitrary round numbers exist only so the auditor has nonzero arithmetic to check.",
+   "tithe": {
+    "percent": 10,
+    "law": "same founder law — the tithe line is audited like any other"
+   },
+   "tiers": {
+    "rehearsal_paid_fixture": {
+     "tier": "FIXTURE lane — prices nothing",
+     "rates": {
+      "prefill_token": {
+       "value": "0.000003"
+      },
+      "decode_token": {
+       "value": "0.000015"
+      }
+     }
+    }
+   }
+  }
+ },
+ "anchors": [
+  {
+   "anchor_id": "rehearsal-anchor-1",
+   "anchored_at": "2026-09-03T10:30:00Z",
+   "where": "rehearsal:in-tree — the box's anchor service writes Arweave mainnet anchors once the rehearsal graduates",
+   "law": "two-tier anchoring: cheap checkpoints frequent, one anchor committing to the checkpoint head; refunds never wait for an anchor",
+   "covers": [ "sha256:0a4e94ecd0bdc3b6aaed25b166dcea9e9691d166f97e07246fc8caebe961d5b6", "sha256:c127738461448b44ff34ce1fd2eeb72a487dbe4a6b0e2b5ba465dd8b874fc090", "sha256:3b2bb18341290424197bca5994d4f0185805607349597737623bb2253d0b3845", "sha256:99dc01d555878f383729c7ac42692448a019b4d71a3d9a7ba066cc0a6c064d23" ], "_hexlaw": "PUBLIC-CONSTANT — content-addressed receipt ids are public by construction"
+  }
+ ],
+ "services": [
+  {
+   "name": "buzz-compute (free tier)",
+   "heartbeats": [
+    "2026-09-03T11:44:10Z",
+    "2026-09-03T11:59:41Z",
+    "2026-09-03T11:59:52Z"
+   ],
+   "note": "liveness derives from timestamps only — never a self-declared flag"
+  },
+  {
+   "name": "rehearsal seller A (FIXTURE rates)",
+   "heartbeats": [
+    "2026-09-03T09:00:00Z",
+    "2026-09-03T11:50:00Z"
+   ],
+   "note": "same rule; the record is a snapshot, so states are read as of as_of"
+  },
+  {
+   "name": "rehearsal seller B (retired)",
+   "heartbeats": [
+    "2026-08-28T08:00:00Z"
+   ],
+   "note": "same rule — no beat for days reads offline, whatever it claims"
+  }
+ ],
+ "receipts": [
+  {
+   "schema_version": "1.0.0-draft",
+   "receipt_id": "sha256:0a4e94ecd0bdc3b6aaed25b166dcea9e9691d166f97e07246fc8caebe961d5b6", "_hexlaw": "PUBLIC-CONSTANT — content-addressed receipt ids are public by construction",
+   "spender_bdid": {
+    "bzdid": null,
+    "note": "guest key qwen-3b (pre-bzdid)"
+   },
+   "seller": {
+    "name": "the estate — free compute"
+   },
+   "occurred_at": "2026-09-03T09:00:12Z",
+   "operation": {
+    "kind": "compute.generation",
+    "lane": "free_qwen"
+   },
+   "line_items": [
+    {
+     "adapter": "buzz-compute/llama.cpp",
+     "rail": "other",
+     "resource_class": "prefill_token",
+     "quantity": 1180,
+     "quantity_unit": "prefill_token",
+     "charged": {
+      "value": "0",
+      "unit": "A"
+     },
+     "rate": {
+      "value": 0,
+      "rate_set_ref": "rateset-v2",
+      "observed_at": "2026-08-29T00:00:00Z"
+     }
+    },
+    {
+     "adapter": "buzz-compute/llama.cpp",
+     "rail": "other",
+     "resource_class": "decode_token",
+     "quantity": 402,
+     "quantity_unit": "decode_token",
+     "charged": {
+      "value": "0",
+      "unit": "A"
+     },
+     "rate": {
+      "value": 0,
+      "rate_set_ref": "rateset-v2",
+      "observed_at": "2026-08-29T00:00:00Z"
+     }
+    },
+    {
+     "adapter": "buzz-compute/llama.cpp",
+     "rail": "other",
+     "resource_class": "decode_token",
+     "quantity": 0,
+     "quantity_unit": "tithe",
+     "charged": {
+      "value": "0",
+      "unit": "A"
+     },
+     "rate": {
+      "value": 0,
+      "rate_set_ref": "rateset-v2",
+      "observed_at": "2026-08-29T00:00:00Z"
+     },
+     "tithe": {
+      "percent": 10,
+      "law": "FOUNDER LAW: provider cost basis + 10% TITHE in A — a distinct visible line on every receipt, never buried in the rate"
+     }
+    }
+   ],
+   "visibility": "public",
+   "provenance": {
+    "caused_by": "llama-server usage.log print_timing",
+    "anchors": [],
+    "prior_receipt_id": null
+   },
+   "total_computed": {
+    "value": "0",
+    "unit": "A"
+   }
+  },
+  {
+   "schema_version": "1.0.0-draft",
+   "receipt_id": "sha256:c127738461448b44ff34ce1fd2eeb72a487dbe4a6b0e2b5ba465dd8b874fc090", "_hexlaw": "PUBLIC-CONSTANT — content-addressed receipt ids are public by construction",
+   "spender_bdid": {
+    "bzdid": null,
+    "note": "guest key qwen-3b (pre-bzdid)"
+   },
+   "seller": {
+    "name": "the estate — free compute"
+   },
+   "occurred_at": "2026-09-03T09:07:44Z",
+   "operation": {
+    "kind": "compute.generation",
+    "lane": "free_qwen"
+   },
+   "line_items": [
+    {
+     "adapter": "buzz-compute/llama.cpp",
+     "rail": "other",
+     "resource_class": "prefill_token",
+     "quantity": 3411,
+     "quantity_unit": "prefill_token",
+     "charged": {
+      "value": "0",
+      "unit": "A"
+     },
+     "rate": {
+      "value": 0,
+      "rate_set_ref": "rateset-v2",
+      "observed_at": "2026-08-29T00:00:00Z"
+     }
+    },
+    {
+     "adapter": "buzz-compute/llama.cpp",
+     "rail": "other",
+     "resource_class": "decode_token",
+     "quantity": 1290,
+     "quantity_unit": "decode_token",
+     "charged": {
+      "value": "0",
+      "unit": "A"
+     },
+     "rate": {
+      "value": 0,
+      "rate_set_ref": "rateset-v2",
+      "observed_at": "2026-08-29T00:00:00Z"
+     }
+    },
+    {
+     "adapter": "buzz-compute/llama.cpp",
+     "rail": "other",
+     "resource_class": "decode_token",
+     "quantity": 0,
+     "quantity_unit": "tithe",
+     "charged": {
+      "value": "0",
+      "unit": "A"
+     },
+     "rate": {
+      "value": 0,
+      "rate_set_ref": "rateset-v2",
+      "observed_at": "2026-08-29T00:00:00Z"
+     },
+     "tithe": {
+      "percent": 10,
+      "law": "FOUNDER LAW: provider cost basis + 10% TITHE in A — a distinct visible line on every receipt, never buried in the rate"
+     }
+    }
+   ],
+   "visibility": "public",
+   "provenance": {
+    "caused_by": "llama-server usage.log print_timing",
+    "anchors": [],
+    "prior_receipt_id": "sha256:0a4e94ecd0bdc3b6aaed25b166dcea9e9691d166f97e07246fc8caebe961d5b6", "_hexlaw": "PUBLIC-CONSTANT — content-addressed receipt ids are public by construction"
+   },
+   "total_computed": {
+    "value": "0",
+    "unit": "A"
+   }
+  },
+  {
+   "schema_version": "1.0.0-draft",
+   "receipt_id": "sha256:3b2bb18341290424197bca5994d4f0185805607349597737623bb2253d0b3845", "_hexlaw": "PUBLIC-CONSTANT — content-addressed receipt ids are public by construction",
+   "spender_bdid": {
+    "bzdid": null,
+    "note": "rehearsal spender (FIXTURE)"
+   },
+   "seller": {
+    "name": "rehearsal seller A (FIXTURE rates)"
+   },
+   "occurred_at": "2026-09-03T09:15:02Z",
+   "operation": {
+    "kind": "compute.generation",
+    "lane": "rehearsal_paid_fixture"
+   },
+   "line_items": [
+    {
+     "adapter": "rehearsal/paid-lane",
+     "rail": "other",
+     "resource_class": "prefill_token",
+     "quantity": 4096,
+     "quantity_unit": "prefill_token",
+     "charged": {
+      "value": "0.012288",
+      "unit": "A"
+     },
+     "rate": {
+      "value": "0.000003",
+      "rate_set_ref": "rateset-fixture-a",
+      "observed_at": "2026-09-03T00:00:00Z"
+     }
+    },
+    {
+     "adapter": "rehearsal/paid-lane",
+     "rail": "other",
+     "resource_class": "decode_token",
+     "quantity": 512,
+     "quantity_unit": "decode_token",
+     "charged": {
+      "value": "0.00768",
+      "unit": "A"
+     },
+     "rate": {
+      "value": "0.000015",
+      "rate_set_ref": "rateset-fixture-a",
+      "observed_at": "2026-09-03T00:00:00Z"
+     }
+    },
+    {
+     "adapter": "rehearsal/paid-lane",
+     "rail": "other",
+     "resource_class": "decode_token",
+     "quantity": 0,
+     "quantity_unit": "tithe",
+     "charged": {
+      "value": "0.0019968",
+      "unit": "A"
+     },
+     "rate": {
+      "value": 0,
+      "rate_set_ref": "rateset-fixture-a",
+      "observed_at": "2026-09-03T00:00:00Z"
+     },
+     "tithe": {
+      "percent": 10,
+      "law": "FOUNDER LAW: provider cost basis + 10% TITHE in A — a distinct visible line on every receipt, never buried in the rate"
+     }
+    }
+   ],
+   "visibility": "public",
+   "provenance": {
+    "caused_by": "FIXTURE generator — exercises nonzero arithmetic",
+    "anchors": [],
+    "prior_receipt_id": "sha256:c127738461448b44ff34ce1fd2eeb72a487dbe4a6b0e2b5ba465dd8b874fc090", "_hexlaw": "PUBLIC-CONSTANT — content-addressed receipt ids are public by construction"
+   },
+   "total_computed": {
+    "value": "0.0219648",
+    "unit": "A"
+   }
+  },
+  {
+   "schema_version": "1.0.0-draft",
+   "receipt_id": "sha256:99dc01d555878f383729c7ac42692448a019b4d71a3d9a7ba066cc0a6c064d23", "_hexlaw": "PUBLIC-CONSTANT — content-addressed receipt ids are public by construction",
+   "spender_bdid": {
+    "bzdid": null,
+    "note": "rehearsal spender (FIXTURE)"
+   },
+   "seller": {
+    "name": "rehearsal seller A (FIXTURE rates)"
+   },
+   "occurred_at": "2026-09-03T09:41:19Z",
+   "operation": {
+    "kind": "compute.generation",
+    "lane": "rehearsal_paid_fixture"
+   },
+   "line_items": [
+    {
+     "adapter": "rehearsal/paid-lane",
+     "rail": "other",
+     "resource_class": "prefill_token",
+     "quantity": 15360,
+     "quantity_unit": "prefill_token",
+     "charged": {
+      "value": "0.04608",
+      "unit": "A"
+     },
+     "rate": {
+      "value": "0.000003",
+      "rate_set_ref": "rateset-fixture-a",
+      "observed_at": "2026-09-03T00:00:00Z"
+     }
+    },
+    {
+     "adapter": "rehearsal/paid-lane",
+     "rail": "other",
+     "resource_class": "decode_token",
+     "quantity": 2048,
+     "quantity_unit": "decode_token",
+     "charged": {
+      "value": "0.03072",
+      "unit": "A"
+     },
+     "rate": {
+      "value": "0.000015",
+      "rate_set_ref": "rateset-fixture-a",
+      "observed_at": "2026-09-03T00:00:00Z"
+     }
+    },
+    {
+     "adapter": "rehearsal/paid-lane",
+     "rail": "other",
+     "resource_class": "decode_token",
+     "quantity": 0,
+     "quantity_unit": "tithe",
+     "charged": {
+      "value": "0.00768",
+      "unit": "A"
+     },
+     "rate": {
+      "value": 0,
+      "rate_set_ref": "rateset-fixture-a",
+      "observed_at": "2026-09-03T00:00:00Z"
+     },
+     "tithe": {
+      "percent": 10,
+      "law": "FOUNDER LAW: provider cost basis + 10% TITHE in A — a distinct visible line on every receipt, never buried in the rate"
+     }
+    }
+   ],
+   "visibility": "public",
+   "provenance": {
+    "caused_by": "FIXTURE generator — exercises nonzero arithmetic",
+    "anchors": [],
+    "prior_receipt_id": "sha256:3b2bb18341290424197bca5994d4f0185805607349597737623bb2253d0b3845", "_hexlaw": "PUBLIC-CONSTANT — content-addressed receipt ids are public by construction"
+   },
+   "total_computed": {
+    "value": "0.08448",
+    "unit": "A"
+   }
+  },
+  {
+   "schema_version": "1.0.0-draft",
+   "receipt_id": "sha256:c4d4e72497ce7668384e06b4111b4910370f52f339b7ce110af8d385240b119a", "_hexlaw": "PUBLIC-CONSTANT — content-addressed receipt ids are public by construction",
+   "spender_bdid": {
+    "bzdid": null,
+    "note": "guest key qwen-3b (pre-bzdid)"
+   },
+   "seller": {
+    "name": "the estate — free compute"
+   },
+   "occurred_at": "2026-09-03T11:48:03Z",
+   "operation": {
+    "kind": "compute.generation",
+    "lane": "free_qwen"
+   },
+   "line_items": [
+    {
+     "adapter": "buzz-compute/llama.cpp",
+     "rail": "other",
+     "resource_class": "prefill_token",
+     "quantity": 742,
+     "quantity_unit": "prefill_token",
+     "charged": {
+      "value": "0",
+      "unit": "A"
+     },
+     "rate": {
+      "value": 0,
+      "rate_set_ref": "rateset-v2",
+      "observed_at": "2026-08-29T00:00:00Z"
+     }
+    },
+    {
+     "adapter": "buzz-compute/llama.cpp",
+     "rail": "other",
+     "resource_class": "decode_token",
+     "quantity": 118,
+     "quantity_unit": "decode_token",
+     "charged": {
+      "value": "0",
+      "unit": "A"
+     },
+     "rate": {
+      "value": 0,
+      "rate_set_ref": "rateset-v2",
+      "observed_at": "2026-08-29T00:00:00Z"
+     }
+    },
+    {
+     "adapter": "buzz-compute/llama.cpp",
+     "rail": "other",
+     "resource_class": "decode_token",
+     "quantity": 0,
+     "quantity_unit": "tithe",
+     "charged": {
+      "value": "0",
+      "unit": "A"
+     },
+     "rate": {
+      "value": 0,
+      "rate_set_ref": "rateset-v2",
+      "observed_at": "2026-08-29T00:00:00Z"
+     },
+     "tithe": {
+      "percent": 10,
+      "law": "FOUNDER LAW: provider cost basis + 10% TITHE in A — a distinct visible line on every receipt, never buried in the rate"
+     }
+    }
+   ],
+   "visibility": "public",
+   "provenance": {
+    "caused_by": "llama-server usage.log print_timing",
+    "anchors": [],
+    "prior_receipt_id": "sha256:99dc01d555878f383729c7ac42692448a019b4d71a3d9a7ba066cc0a6c064d23", "_hexlaw": "PUBLIC-CONSTANT — content-addressed receipt ids are public by construction"
+   },
+   "total_computed": {
+    "value": "0",
+    "unit": "A"
+   }
+  },
+  {
+   "schema_version": "1.0.0-draft",
+   "receipt_id": "sha256:d2beffc1c0a016f039be55c46b0854c4734f39ff55f65f34720ee87e3e734d18", "_hexlaw": "PUBLIC-CONSTANT — content-addressed receipt ids are public by construction",
+   "spender_bdid": {
+    "bzdid": null,
+    "note": "rehearsal spender (FIXTURE)"
+   },
+   "seller": {
+    "name": "rehearsal seller A (FIXTURE rates)"
+   },
+   "occurred_at": "2026-09-03T11:52:40Z",
+   "operation": {
+    "kind": "compute.generation",
+    "lane": "paid_claude (not yet open)",
+    "note": "FIXTURE — INCONCLUSIVE by construction: the rate set is not published, so no honest auditor can price it"
+   },
+   "line_items": [
+    {
+     "adapter": "future/paid-lane",
+     "rail": "other",
+     "resource_class": "prefill_token",
+     "quantity": 9000,
+     "quantity_unit": "prefill_token",
+     "charged": {
+      "value": "0.036",
+      "unit": "A"
+     },
+     "rate": {
+      "value": "0.000004",
+      "rate_set_ref": "rateset-open-0",
+      "observed_at": "2026-09-03T00:00:00Z"
+     }
+    },
+    {
+     "adapter": "future/paid-lane",
+     "rail": "other",
+     "resource_class": "decode_token",
+     "quantity": 700,
+     "quantity_unit": "decode_token",
+     "charged": {
+      "value": "0.0126",
+      "unit": "A"
+     },
+     "rate": {
+      "value": "0.000018",
+      "rate_set_ref": "rateset-open-0",
+      "observed_at": "2026-09-03T00:00:00Z"
+     }
+    },
+    {
+     "adapter": "future/paid-lane",
+     "rail": "other",
+     "resource_class": "decode_token",
+     "quantity": 0,
+     "quantity_unit": "tithe",
+     "charged": {
+      "value": "0.00486",
+      "unit": "A"
+     },
+     "rate": {
+      "value": 0,
+      "rate_set_ref": "rateset-open-0",
+      "observed_at": "2026-09-03T00:00:00Z"
+     },
+     "tithe": {
+      "percent": 10,
+      "law": "FOUNDER LAW: provider cost basis + 10% TITHE in A — a distinct visible line on every receipt, never buried in the rate"
+     }
+    }
+   ],
+   "visibility": "public",
+   "provenance": {
+    "caused_by": "FIXTURE generator — cites a rate set the public record does not carry",
+    "anchors": [],
+    "prior_receipt_id": "sha256:c4d4e72497ce7668384e06b4111b4910370f52f339b7ce110af8d385240b119a", "_hexlaw": "PUBLIC-CONSTANT — content-addressed receipt ids are public by construction"
+   },
+   "total_computed": {
+    "value": "0.05346",
+    "unit": "A"
+   }
+  },
+  {
+   "schema_version": "1.0.0-draft",
+   "receipt_id": "sha256:cfe6ece27e8742ad8465d79b9760945ef47fb47f3bf42afe0b0a555c634c87ad", "_hexlaw": "PUBLIC-CONSTANT — content-addressed receipt ids are public by construction",
+   "spender_bdid": {
+    "bzdid": null,
+    "note": "rehearsal spender (FIXTURE)"
+   },
+   "seller": {
+    "name": "rehearsal seller A (FIXTURE rates)"
+   },
+   "occurred_at": "2026-09-03T11:58:55Z",
+   "operation": {
+    "kind": "compute.generation",
+    "lane": "rehearsal_paid_fixture",
+    "note": "FIXTURE — over-captured: the auditor must catch quantity × rate ≠ charged"
+   },
+   "line_items": [
+    {
+     "adapter": "rehearsal/paid-lane",
+     "rail": "other",
+     "resource_class": "prefill_token",
+     "quantity": 2048,
+     "quantity_unit": "prefill_token",
+     "charged": {
+      "value": "0.006144",
+      "unit": "A"
+     },
+     "rate": {
+      "value": "0.000003",
+      "rate_set_ref": "rateset-fixture-a",
+      "observed_at": "2026-09-03T00:00:00Z"
+     }
+    },
+    {
+     "adapter": "rehearsal/paid-lane",
+     "rail": "other",
+     "resource_class": "decode_token",
+     "quantity": 256,
+     "quantity_unit": "decode_token",
+     "charged": {
+      "value": "0.0192",
+      "unit": "A"
+     },
+     "rate": {
+      "value": "0.000015",
+      "rate_set_ref": "rateset-fixture-a",
+      "observed_at": "2026-09-03T00:00:00Z"
+     }
+    },
+    {
+     "adapter": "rehearsal/paid-lane",
+     "rail": "other",
+     "resource_class": "decode_token",
+     "quantity": 0,
+     "quantity_unit": "tithe",
+     "charged": {
+      "value": "0.0009984",
+      "unit": "A"
+     },
+     "rate": {
+      "value": 0,
+      "rate_set_ref": "rateset-fixture-a",
+      "observed_at": "2026-09-03T00:00:00Z"
+     },
+     "tithe": {
+      "percent": 10,
+      "law": "FOUNDER LAW: provider cost basis + 10% TITHE in A — a distinct visible line on every receipt, never buried in the rate"
+     }
+    }
+   ],
+   "visibility": "public",
+   "provenance": {
+    "caused_by": "FIXTURE generator — over-capture on the decode line",
+    "anchors": [],
+    "prior_receipt_id": "sha256:d2beffc1c0a016f039be55c46b0854c4734f39ff55f65f34720ee87e3e734d18", "_hexlaw": "PUBLIC-CONSTANT — content-addressed receipt ids are public by construction"
+   },
+   "total_computed": {
+    "value": "0.0263424",
+    "unit": "A"
+   }
+  },
+  {
+   "schema_version": "1.0.0-draft",
+   "receipt_id": "sha256:3b2bb18341290424197bca5994d4f0185805607349597737623bb2253d0b3845", "_hexlaw": "PUBLIC-CONSTANT — content-addressed receipt ids are public by construction",
+   "spender_bdid": {
+    "bzdid": null,
+    "note": "rehearsal spender (FIXTURE)"
+   },
+   "seller": {
+    "name": "rehearsal seller A (FIXTURE rates)"
+   },
+   "occurred_at": "2026-09-03T12:04:31Z",
+   "operation": {
+    "kind": "compute.generation",
+    "lane": "rehearsal_paid_fixture",
+    "note": "FIXTURE — tampered after signing: content hash must fail"
+   },
+   "line_items": [
+    {
+     "adapter": "rehearsal/paid-lane",
+     "rail": "other",
+     "resource_class": "prefill_token",
+     "quantity": 4096,
+     "quantity_unit": "prefill_token",
+     "charged": {
+      "value": "0.012288",
+      "unit": "A"
+     },
+     "rate": {
+      "value": "0.000003",
+      "rate_set_ref": "rateset-fixture-a",
+      "observed_at": "2026-09-03T00:00:00Z"
+     }
+    },
+    {
+     "adapter": "rehearsal/paid-lane",
+     "rail": "other",
+     "resource_class": "decode_token",
+     "quantity": 512,
+     "quantity_unit": "decode_token",
+     "charged": {
+      "value": "0.00768",
+      "unit": "A"
+     },
+     "rate": {
+      "value": "0.000015",
+      "rate_set_ref": "rateset-fixture-a",
+      "observed_at": "2026-09-03T00:00:00Z"
+     }
+    },
+    {
+     "adapter": "rehearsal/paid-lane",
+     "rail": "other",
+     "resource_class": "decode_token",
+     "quantity": 0,
+     "quantity_unit": "tithe",
+     "charged": {
+      "value": "0.0019968",
+      "unit": "A"
+     },
+     "rate": {
+      "value": 0,
+      "rate_set_ref": "rateset-fixture-a",
+      "observed_at": "2026-09-03T00:00:00Z"
+     },
+     "tithe": {
+      "percent": 10,
+      "law": "FOUNDER LAW: provider cost basis + 10% TITHE in A — a distinct visible line on every receipt, never buried in the rate"
+     }
+    }
+   ],
+   "visibility": "public",
+   "provenance": {
+    "caused_by": "FIXTURE generator — exercises nonzero arithmetic",
+    "anchors": [],
+    "prior_receipt_id": "sha256:cfe6ece27e8742ad8465d79b9760945ef47fb47f3bf42afe0b0a555c634c87ad", "_hexlaw": "PUBLIC-CONSTANT — content-addressed receipt ids are public by construction"
+   },
+   "total_computed": {
+    "value": "0.0219648",
+    "unit": "A"
+   }
+  },
+  {
+   "schema_version": "1.0.0-draft",
+   "receipt_id": "sha256:b4792e64eb161fc917b6cf1f4082fc5d2034c0423724126831859b4893e7f776", "_hexlaw": "PUBLIC-CONSTANT — content-addressed receipt ids are public by construction",
+   "spender_bdid": {
+    "bzdid": null,
+    "note": "rehearsal spender (FIXTURE)"
+   },
+   "seller": {
+    "name": "rehearsal seller A (FIXTURE rates)"
+   },
+   "occurred_at": "2026-09-03T09:30:00Z",
+   "operation": {
+    "kind": "compute.generation",
+    "lane": "rehearsal_paid_fixture",
+    "note": "FIXTURE — forward_only must fail: bTiMeLine runs one way"
+   },
+   "line_items": [
+    {
+     "adapter": "rehearsal/paid-lane",
+     "rail": "other",
+     "resource_class": "prefill_token",
+     "quantity": 512,
+     "quantity_unit": "prefill_token",
+     "charged": {
+      "value": "0.001536",
+      "unit": "A"
+     },
+     "rate": {
+      "value": "0.000003",
+      "rate_set_ref": "rateset-fixture-a",
+      "observed_at": "2026-09-03T00:00:00Z"
+     }
+    },
+    {
+     "adapter": "rehearsal/paid-lane",
+     "rail": "other",
+     "resource_class": "decode_token",
+     "quantity": 64,
+     "quantity_unit": "decode_token",
+     "charged": {
+      "value": "0.00096",
+      "unit": "A"
+     },
+     "rate": {
+      "value": "0.000015",
+      "rate_set_ref": "rateset-fixture-a",
+      "observed_at": "2026-09-03T00:00:00Z"
+     }
+    },
+    {
+     "adapter": "rehearsal/paid-lane",
+     "rail": "other",
+     "resource_class": "decode_token",
+     "quantity": 0,
+     "quantity_unit": "tithe",
+     "charged": {
+      "value": "0.0002496",
+      "unit": "A"
+     },
+     "rate": {
+      "value": 0,
+      "rate_set_ref": "rateset-fixture-a",
+      "observed_at": "2026-09-03T00:00:00Z"
+     },
+     "tithe": {
+      "percent": 10,
+      "law": "FOUNDER LAW: provider cost basis + 10% TITHE in A — a distinct visible line on every receipt, never buried in the rate"
+     }
+    }
+   ],
+   "visibility": "public",
+   "provenance": {
+    "caused_by": "FIXTURE generator — occurred_at runs backwards against its prior",
+    "anchors": [],
+    "prior_receipt_id": "sha256:99dc01d555878f383729c7ac42692448a019b4d71a3d9a7ba066cc0a6c064d23", "_hexlaw": "PUBLIC-CONSTANT — content-addressed receipt ids are public by construction"
+   },
+   "total_computed": {
+    "value": "0.0027456",
+    "unit": "A"
+   }
+  }
+ ]
+}

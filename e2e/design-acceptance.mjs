@@ -48,6 +48,11 @@ const RIDER_ALLOWLIST = [
      first-party files, named by exact path) */
   /\/onboarding\/bzdid-key\.js/, /\/onboarding\/vendor\/bnr-(sign|keys|qr)\.js/,
   /\/onboarding\/vendor\/bip39-wordlist\.js/, /\/(vault|arweave)\.js/,
+  /* the spend-receipt auditor rider — one first-party engine shared by
+     surfaces/comb.html's verifier lane and surfaces/wallet.html's receipts
+     panel (z3.2 build, 2026-09-03); reads only same-origin spend-ledger.json
+     (the json rule above) and carries no other dependency */
+  /\/spend-audit\.js/,
   /* the market's live chain reads (founder source-confirmed: host-rotated Base
      RPC, zero caching — the surface is honestly live): itemized by exact host */
   /^https:\/\/base-rpc\.publicnode\.com\//,

@@ -806,6 +806,21 @@ var WALLET_PROFILE = {
   <div class="law" id="vc-err" style="display:none;margin-top:8px;color:var(--amber)"></div>
 </section>
 
+<!-- ══ RECEIPTS — the public spend record, recomputed here (SPEC-SPEND-RECEIPT-1) ══ -->
+<section id="receipts-sec" style="border-color:var(--gold)">
+  <h2>🧾 THE RECEIPTS — every bill recomputed here</h2>
+  <p class="law">the voucher panel above reads <b>your</b> balance live from the estate oracle; this panel
+  reads the estate's <b>public</b> spend-receipt record (SPEC-SPEND-RECEIPT-1, the same shape the b-meter
+  writes) and recomputes every bill in-page — <b>price × burned = owed</b>, summed from the line items,
+  never from a stored total. each receipt's verdict is drawn as a comb cell:
+  <b>PENDING_ANCHOR</b> = honey · <b>PASSED</b> = capped, sealed ⬡ · <b>FAILED</b> = the flag hue #c07f1c
+  (the validated failure colour — never a new red) · <b>INCONCLUSIVE</b> = nectar. verification carries
+  <b>no keys</b>: content hash, exact arithmetic and the forward-only chain are checked from the public
+  record alone. private receipts never appear here — visibility is storage law (§3a): only rows marked
+  public live in a public store. paste any receipt and the same auditor checks yours.</p>
+  <div id="receiptsBody" style="margin-top:12px"></div>
+</section>
+
 <!-- ══ FUND — Meld hosted checkout (no server of ours · public key only) ══ -->
 <section id="fund-sec" style="border-color:#4a3a1d" data-meld-public-key="" data-meld-env="sandbox">
   <style>
@@ -5134,5 +5149,7 @@ var WALLET_PROFILE = {
   prfNote();
 })();
 </script>
+<script src="spend-audit.js?v=1"></script>
+<script>if (window.SpendAudit) SpendAudit.mountPanel(document.getElementById('receiptsBody'));</script>
 </body>
 </html>

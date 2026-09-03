@@ -193,9 +193,25 @@ footer a{color:var(--dim)}
   </div>
 </section>
 
+<section id="verifierSec">
+  <h2>THE VERIFIER <b>· price × burned = owed, recomputed from the public checkpoints</b></h2>
+  <p class="law">the audit half of the comb: every bill in the estate's public spend-receipt record is
+  <b>recomputed here, in your page</b> — owed = Σ quantity × rate, summed from the line items, never read
+  from a stored total. the verdict of each audit is drawn as a comb cell:
+  <b>PENDING_ANCHOR</b> = honey · <b>PASSED</b> = capped, sealed ⬡ · <b>FAILED</b> = the flag hue #c07f1c
+  (the estate's validated failure colour — never a new red) · <b>INCONCLUSIVE</b> = nectar, the record does
+  not carry the verdict yet. verification needs <b>no keys</b> — content hashes, exact arithmetic and the
+  chain are checked from the public record alone, so a stranger can audit any session. seller liveness
+  derives from <b>timestamps only</b>, never a self-declared flag; the seller score is computed from
+  <b>this public record only</b>, never self-reported. paste any receipt below the strip and the same
+  engine audits yours.</p>
+  <div id="verifierBody" style="margin-top:12px"></div>
+</section>
+
 <footer>the comb · a canon surface of the beehive nature estate · palette read live from
 <a href="tokens.css">tokens.css</a> — no colour invented here · zero network, the whole comb is
-local arithmetic · <a href="../docs/CANON-COMB.md">CANON-COMB</a> · <a href="stack.html">the engine room</a></footer>
+local arithmetic · <a href="../docs/CANON-COMB.md">CANON-COMB</a> · <a href="stack.html">the engine room</a> ·
+<a href="wallet.html#receipts-sec">your receipts on the wallet</a></footer>
 </main>
 
 <script>
@@ -546,6 +562,8 @@ if (reduced){
 }
 })();
 </script>
+<script src="spend-audit.js?v=1"></script>
+<script>if (window.SpendAudit) SpendAudit.mountPanel(document.getElementById('verifierBody'));</script>
 <script src="tour.js?v=34"></script>
 </body>
 </html>
