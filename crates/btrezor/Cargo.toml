@@ -1,0 +1,15 @@
+[package]
+name = "btrezor"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "BNR signer scaffold (C1): Trezor device access over HID, BNR-owned chain registry with mandatory chain-id verification, and the process-boundary interface the dashboard calls. Scaffold only — this crate cannot sign."  # renamed btrezor per Seat-1 naming ruling 2026-09-03; the C1 lane is UNCHANGED
+
+[dependencies]
+# Official client from trezor/trezor-firmware. Pinned EXACT per the hash-pin
+# law; the content hash is recorded in the workspace Cargo.lock.
+# NO Suite, NO WalletConnect anywhere in this tree (C1 fence).
+trezor-client = { version = "=0.1.6", default-features = false, features = ["ethereum"] }
+thiserror = "2"
+
+[dev-dependencies]

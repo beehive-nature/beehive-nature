@@ -1,7 +1,7 @@
 //! banchor — bHEartWALLet's SERVING organ.
 //!
 //! One install, two organs: this one serves (browser, resolution, cache,
-//! replay). The deciding organ lives in crates/bheart-signer and NEVER
+//! replay). The deciding organ lives in crates/bsigner and NEVER
 //! depends on this crate — the wallet works fully with the anchor off.
 //!
 //! BINARIES:

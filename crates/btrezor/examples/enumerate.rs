@@ -8,7 +8,7 @@
 //!
 //! This example cannot sign. There is no signing capability in the crate.
 
-use bsigner::{chain_registry, device};
+use btrezor::{chain_registry, device};
 
 fn main() {
     println!("bsigner C1 receipt — {}", env!("CARGO_PKG_VERSION"));

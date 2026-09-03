@@ -1,5 +1,12 @@
 //! `bsigner` — the BNR signer scaffold (dispatch order C1).
 //!
+//! **NAMING RULING (Seat-1 under founder delegation, 2026-09-03):** this
+//! crate was renamed `btrezor` so the canon name `bsigner` could pass to
+//! bHEartWALLet's deciding organ (crates/bsigner). The C1 lane, fences, and
+//! scope here are UNCHANGED. The recorded direction: **btrezor is intended
+//! to become a BACKEND of bsigner** — hardware signing behind the same
+//! organ interface — not a permanent sibling. Do not re-litigate.
+//!
 //! SPEC_KEYRING-1 §8 ruled that the dashboard UI plus this signer together
 //! *are* the BNR wallet. This crate is the scaffold for the signer half: the
 //! device rail, the chain registry, and the process boundary. It is

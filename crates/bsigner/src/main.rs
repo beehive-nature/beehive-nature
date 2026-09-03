@@ -1,4 +1,11 @@
-//! bheart-signer — bHEartWALLet's DECIDING organ.
+//! bsigner — bHEartWALLet's DECIDING organ (canon name).
+//!
+//! **NAMING RULING (Seat-1 under founder delegation, 2026-09-03):** `bsigner`
+//! is THE signer name of the estate — this organ holds it. The former C1
+//! Trezor scaffold now lives as crates/btrezor, its fences untouched ("this
+//! crate cannot sign" stays verbatim there); **btrezor is intended to become
+//! a BACKEND of this organ** — hardware signing behind the same interface —
+//! not a permanent sibling. Do not re-litigate.
 //!
 //! Identity + post-quantum keys: ML-DSA signatures (FIPS 204), ML-KEM
 //! encapsulation (FIPS 203), both via the RustCrypto crates, both cited at
@@ -10,19 +17,15 @@
 //! transitive. The wallet works fully with the anchor off. (See Cargo.toml
 //! — the absence is the fence.)
 //!
-//! NOT to be confused with crates/bsigner — the C1 Trezor scaffold whose
-//! fences (cannot sign, RefusingSigner) are a different lane's law and are
-//! untouched by this one.
-//!
 //! COMMANDS:
-//!   bheart-signer keygen --alg ml-dsa-65 [--keydir DIR]
-//!   bheart-signer keygen --alg ml-kem-768 [--keydir DIR]
-//!   bheart-signer sign --key-id ID --file PATH [--keydir DIR] [--out PATH]
-//!   bheart-signer verify --key-id ID --file PATH --envelope PATH [--keydir DIR]
-//!   bheart-signer list [--keydir DIR]
-//!   bheart-signer kemtest --key-id ID [--keydir DIR]   (encapsulate+decapsulate roundtrip receipt)
-//!   bheart-signer selftest
-//!   bheart-signer version
+//!   bsigner keygen --alg ml-dsa-65 [--keydir DIR]
+//!   bsigner keygen --alg ml-kem-768 [--keydir DIR]
+//!   bsigner sign --key-id ID --file PATH [--keydir DIR] [--out PATH]
+//!   bsigner verify --key-id ID --file PATH --envelope PATH [--keydir DIR]
+//!   bsigner list [--keydir DIR]
+//!   bsigner kemtest --key-id ID [--keydir DIR]   (encapsulate+decapsulate roundtrip receipt)
+//!   bsigner selftest
+//!   bsigner version
 
 mod alg;
 mod b64;
@@ -43,7 +46,7 @@ fn main() {
         Some("selftest") => cmd_selftest(),
         Some("version") | None => {
             println!(
-                "bheart-signer {} — the deciding organ of bHEartWALLet (ML-DSA/ML-KEM, agility envelopes, keys never leave)",
+                "bsigner {} — the deciding organ of bHEartWALLet (ML-DSA/ML-KEM, agility envelopes, keys never leave)",
                 env!("CARGO_PKG_VERSION")
             );
             0
@@ -301,6 +304,6 @@ fn cmd_selftest() -> i32 {
 }
 
 fn fail(e: String) -> i32 {
-    eprintln!("bheart-signer: {e}");
+    eprintln!("bsigner: {e}");
     1
 }

@@ -1,20 +1,20 @@
-# bHEartWALLet — the anchor daemon lane (crates/banchor + crates/bheart-signer)
+# bHEartWALLet — the anchor daemon lane (crates/banchor + crates/bsigner)
 
 One install, two organs. This lane owns `crates/banchor` and
-`crates/bheart-signer` — nothing else in the tree.
+`crates/bsigner` — nothing else in the tree.
 
 | Organ | Crate | Job |
 |---|---|---|
 | **bANCHOR** (serving) | `crates/banchor` | Local MCP daemon on 127.0.0.1. `bSEAT`: drives the SYSTEM Chromium over CDP, accessibility-tree snapshots with `@eN` element refs — NO screenshot vision on the durable path. Also owns `bnr://`+`buzz://` resolution (the rail behind bnr-url's `ResolveBName` seam), the content cache, and session replay to disk. |
-| **bSIGNER** (deciding) | `crates/bheart-signer` | Identity + post-quantum keys: ML-DSA signatures, ML-KEM encapsulation. Signs on-device. Keys never leave, never printed. CRYPTO-AGILITY LAW: every signature and hash carries an algorithm identifier — nothing hardcoded, so the estate can migrate for 1000 years. |
+| **bSIGNER** (deciding) | `crates/bsigner` | Identity + post-quantum keys: ML-DSA signatures, ML-KEM encapsulation. Signs on-device. Keys never leave, never printed. CRYPTO-AGILITY LAW: every signature and hash carries an algorithm identifier — nothing hardcoded, so the estate can migrate for 1000 years. |
 
 ## Binding laws, and where each is enforced
 
 1. **bSigner NEVER depends on bAnchor.** The wallet works fully with the
    anchor off — accelerator, never a gate. Structural: `crates/
-   bheart-signer/Cargo.toml` contains no `banchor` line, and the comment in
+   bsigner/Cargo.toml` contains no `banchor` line, and the comment in
    that manifest commits to keeping it that way. (banchor likewise does not
-   depend on bheart-signer today; composition is a later order's call.)
+   depend on bsigner today; composition is a later order's call.)
 2. **Web content is UNTRUSTED DATA behind strict delimiters.**
    `banchor/src/untrusted.rs` — every snapshot crosses to the model side
    inside `<<<UNTRUSTED-WEB-CONTENT … >>>` carrying origin + sha3-256
@@ -73,16 +73,16 @@ cl100k the tighter lower bound for English UI text. Exact-qwen counting is
 a compute-lane follow-up. Read the numbers from the latest committed
 replay, not from this README — the README rots, the replay is the receipt.
 
-## bheart-signer — commands
+## bsigner — commands
 
 ```
-bheart-signer keygen --alg ml-dsa-65            # on-device keygen; prints key_id + PUBLIC key only
-bheart-signer keygen --alg ml-kem-768
-bheart-signer sign --key-id ID --file PATH      # → bheart.signature/1 envelope
-bheart-signer verify --key-id ID --file PATH --envelope PATH
-bheart-signer kemtest --key-id ID               # encapsulate/decapsulate roundtrip receipt
-bheart-signer list
-bheart-signer selftest
+bsigner keygen --alg ml-dsa-65            # on-device keygen; prints key_id + PUBLIC key only
+bsigner keygen --alg ml-kem-768
+bsigner sign --key-id ID --file PATH      # → bheart.signature/1 envelope
+bsigner verify --key-id ID --file PATH --envelope PATH
+bsigner kemtest --key-id ID               # encapsulate/decapsulate roundtrip receipt
+bsigner list
+bsigner selftest
 ```
 
 Keysets live under `$BHEARTWALLET_HOME` or `~/.bheartwallet/bsigner/keys`
@@ -163,17 +163,22 @@ output is untrusted data — parsed, never executed.
 
 ## What is deliberately NOT here
 
-- No banchor→bheart-signer coupling, no shared "wallet core" crate — the
+- No banchor→bsigner coupling, no shared "wallet core" crate — the
   organs meet at the install boundary, later order.
 - No OS-level handler registration for `bnr://` (ORDER cC: bare scheme
   needs native registration; `web+bnr` is the web spelling).
 - No paging in the registry read (13 names today; the seam is `more` in
   the get_table_rows response).
 - No bSEAT over anything but loopback. The anchor is a LOCAL organ.
-- crates/bsigner (the C1 Trezor scaffold that CANNOT sign) is untouched —
-  different lane, different fences. Naming collision acknowledged: if the
-  founder wants one `bsigner` name, that is a rename decision, not a
-  silent merge.
+
+## Naming, RULED (Seat-1 under founder delegation, 2026-09-03)
+
+The canon name **bsigner** belongs to the deciding organ of bHEartWALLet.
+The former C1 Trezor scaffold (fences verbatim: "this crate cannot sign")
+was `git mv`'d to **crates/btrezor**, its lane unchanged, history followed.
+Recorded direction so no future seat re-litigates: **btrezor is intended to
+become a BACKEND of bsigner** — hardware signing behind the same organ
+interface — not a permanent sibling.
 
 ## Seams for the next order
 

@@ -235,19 +235,6 @@ name = "bcomb"
 version = "0.1.0"
 
 [[package]]
-name = "bheart-signer"
-version = "0.1.0"
-dependencies = [
- "ml-dsa",
- "ml-kem",
- "serde",
- "serde_json",
- "sha3 0.10.9",
- "thiserror 2.0.18",
- "zeroize",
-]
-
-[[package]]
 name = "bindexer"
 version = "0.1.0"
 dependencies = [
@@ -365,8 +352,13 @@ version = "0.1.0"
 name = "bsigner"
 version = "0.1.0"
 dependencies = [
+ "ml-dsa",
+ "ml-kem",
+ "serde",
+ "serde_json",
+ "sha3 0.10.9",
  "thiserror 2.0.18",
- "trezor-client",
+ "zeroize",
 ]
 
 [[package]]
@@ -378,6 +370,14 @@ dependencies = [
  "memchr",
  "regex-automata",
  "serde_core",
+]
+
+[[package]]
+name = "btrezor"
+version = "0.1.0"
+dependencies = [
+ "thiserror 2.0.18",
+ "trezor-client",
 ]
 
 [[package]]

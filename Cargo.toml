@@ -55,7 +55,7 @@ members = [
     "crates/bnr-archive",
     "crates/reversibility",
     "crates/banchor",
-    "crates/bheart-signer",
+    "crates/btrezor",
 ]
 
 [workspace.metadata]
