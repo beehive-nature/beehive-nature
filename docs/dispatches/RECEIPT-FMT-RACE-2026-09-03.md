@@ -3,7 +3,8 @@
 Seat: the night-shift coding seat (bclaude). Every claim carries the command
 that produced it; where two seats reached the same finding independently,
 both are cited. Nothing here rewrites history: `717d413` and its broken
-window stay in main exactly as they happened.
+window stay in main exactly as they happened. **Corrected once, in §7, by a
+follow-up commit — the false claim deleted, the correction named.**
 
 ## 1 · The bundle order — what landed, what didn't
 
@@ -98,16 +99,16 @@ argument at 247/295/318/373, `fn walk` signature `max_nodes: usize` at 261,
 and reported the battery green on the pushed tree: banchor 44 + bsigner 17 +
 btrezor 13 = 74/74. Pushing a restore-to-pre-race over that would have
 regressed a landed feature. The worktree was reset to `44dbde7` and the
-restore discarded; this file is the only thing it now carries.
+restore discarded; this file is the only thing it carried.
 
 ## 5 · State of the shared checkout — not this seat's to reconcile
 
-The shared working tree still holds a **staged** rename
+At the time of the race the shared working tree held a **staged** rename
 (`bheart-signer → bsigner`, `bsigner → btrezor`), a staged dispatch file, and
-`tools/bdispatch/watcher.py` edits — residue of work that has since landed on
-origin from another worktree (`11ac3c3`, `4ab1a2f`). Its local `main` sits at
-`717d413`, five behind. A `git pull` there would collide with that staged
-residue. Left exactly as found, for its owner.
+`tools/bdispatch/watcher.py` edits — residue of work that landed on origin
+from another worktree (`11ac3c3`, `4ab1a2f`). Its owner reconciled it while
+this receipt was being written (local `main` moved to `44dbde7`). Left
+exactly as found throughout.
 
 ## 6 · One reproducibility note, not actioned (no new process this sprint)
 
@@ -117,34 +118,39 @@ rustfmt 1.9.0. They agreed on 19/20 files by the stability of rustfmt across
 minors, not by pin. Flagged for the founder: pinning to a version is a
 one-line change and a real decision, not this seat's to make.
 
-## 7 · A separate hang, entered with `4e640e1`, withholding every workflow verdict — flagged, not touched
+## 7 · CORRECTION — a slow install, not a hang; this seat misread the clock
 
-The `tests` workflow's `node` job (the e2e batteries) is **hung on both
-`4e640e1` and `44dbde7`** — in progress since 23:26, against a baseline of
-~2 minutes on every earlier run tonight (`33232269702`: 03:47→03:49;
-`33230368619`: 03:01→03:03). `4e640e1` (the z3.2 verifier lanes) is the first push it appears on; the
-heal `44dbde7` changed Rust and fmt only. Note the shape: `4e640e1`'s new
-`e2e/audit-shot.mjs` is **not a CI step** — the `node` job runs only the
-pre-existing batteries (Onboarding e2e · University smoke · No page errors ·
-Language ×2 · Fleet ×2) — so one of *those* is hanging over `4e640e1`'s
-surface changes (`wallet.html` §receipts, `comb.html` verifier,
-`spend-audit.js`'s runtime `fetch` of `spend-ledger.json`), which the lane
-reported green locally (74/74) but which behaves differently under CI's
-headless run. Which step, exactly, is not readable from the in-progress job
-listing; the lane should open the live job log. `.github/workflows/tests.yml` sets **no
-`timeout-minutes`**, so a hung `node` job runs to GitHub's 6-hour default —
-until then no push's workflow can conclude, even when every job that
-matters is green. **Not cancelled by this seat:** cancelling `44dbde7`'s run
-would stamp its already-green `test` job "cancelled" and muddy the receipt;
-the per-job verdict above is the read. The fix belongs to the lane that
-landed the e2e, and a `timeout-minutes` line is a workflows change — Lane
-A's exclusive file per the sprint plan — and a process decision besides.
+The first commit of this file (`2746129`) carried a §7 claiming the `tests`
+workflow's `node` job was **hung** on `4e640e1` and `44dbde7` — "30+
+minutes," "runs to GitHub's 6-hour default," "an existing battery choking on
+`4e640e1`'s surface changes," "flagged for the lane." **That was false, and
+the error was this seat's own arithmetic:** the reading was taken around
+23:32 on a job that started 23:26:48 — about **six minutes** elapsed, not
+thirty — against a ~2-minute baseline. Slow, and read as hung. Per the
+false-signal law the claim is deleted here, not softened, and replaced with
+the step timings read after completion:
+
+| run | `node` job | where the time went |
+|---|---|---|
+| `4e640e1` · `33817624750` | **success**, 23:26:37 → 23:34:27 (7m50s) | dependency install (cold) |
+| `44dbde7` · `33817636397` | **success**, 23:26:48 → 23:36:29 (9m41s) | `shared setup — install` **7m23s** (23:26:53 → 23:34:16); then every battery in seconds — Onboarding e2e 1s · University smoke 7s · No page errors 48s · Language 1s + 1m11s · Fleet 2s + 2s |
+| `2746129` · `33818075771` | **success**, 23:33:03 → 23:35:47 (2m44s) | install cached — back to baseline |
+
+No battery choked on anything. `4e640e1`'s surfaces, `spend-audit.js`, the
+verifier lanes — all green under CI's headless run, in seconds. The two slow
+runs were a cold npm/Playwright install, nothing more. What survives of the
+original §7 is one latent, true observation, stripped of its alarm:
+`.github/workflows/tests.yml` sets no `timeout-minutes` on the `node` job, so
+a *genuine* hang would run to GitHub's 6-hour default — a one-line workflows
+change, Lane A's file, a process decision, and not urgent.
 
 ## CI, read not inferred
 
-| push | tests | note |
+| push | workflow | note |
 |---|---|---|
 | `e39845e` (bundle 02b) | failure — `Check formatting` | inherited since `2d34391` |
 | `717d413` (fmt) | failure — `Build workspace` E0061 ×3 | the race, this seat's |
 | `4ab1a2f` | failure | pushed onto the race window |
-| `44dbde7` (heal) | run `33817636397` — `secret-scan` success · `pages` success · **`test` job (Build workspace · Test workspace · Check formatting) SUCCESS 23:26:48→23:29:12** · `static` job success · `node` job **in progress 30+ min** at the time of writing (every earlier run tonight finished `node` in ~1.5 min — a hang, not this seat's change; it withholds the workflow's overall verdict) | the lane's own repair — the two-day formatting red and the race-break are both closed on main by this run's `test` job |
+| `4e640e1` | failure — `test` job only (race window); `node` success 7m50s | z3.2's verifier lanes |
+| `44dbde7` (heal) | **SUCCESS** — `test` (Build · Test · Check formatting) 23:29:12 · `static` · `node` 23:36:29 · `secret-scan` · `pages` | the lane's own repair: the two-day formatting red and the race-break both closed on main |
+| `2746129` (this file, v1) | **SUCCESS** — `test` · `static` · `node` 2m44s · `secret-scan` | docs only |
