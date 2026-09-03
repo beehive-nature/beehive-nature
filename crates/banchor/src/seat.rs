@@ -589,13 +589,21 @@ fn axtree_role_hidden(node: &Value) -> bool {
 /// Laws in force: plan-then-approve (the click goes through the same
 /// classifier — a risky target would gate, not run); nothing spends; the
 /// model's output is UNTRUSTED data (parsed, never executed); the snapshot
-/// cap is reported, never silent. The harness knows ground truth
-/// structurally (the page's first link ref) and judges the model's pick.
+/// cap is reported, never silent.
+///
+/// GROUND TRUTH, two judge modes (named in every receipt):
+/// - `expect-substr`: the caller DECLARES the expectation; the pick is right
+///   when the chosen element's accessible name contains the substring
+///   (case-insensitive). For busy pages, where "first link" is chrome, not
+///   content — the honest discrimination test.
+/// - `first-link` (fallback): the pick must equal the first link ref in the
+///   snapshot. For minimal pages with exactly one meaningful link.
 pub fn agentloop(
     url: &str,
     goal: &str,
     max_turns: u32,
     replay_dir: &Path,
+    expect_substr: Option<&str>,
 ) -> Result<Value, Box<dyn std::error::Error>> {
     let model = qwen::Qwen::from_env()?;
     let budget = qwen::Budget::for_ctx(model.n_ctx);
@@ -687,6 +695,11 @@ pub fn agentloop(
         .and_then(|e| e["ref"].as_str())
         .unwrap_or("(no link on page)")
         .to_string();
+    let judge = match expect_substr {
+        Some(s) => json!({ "mode": "expect-substr", "expect": s }),
+        None => json!({ "mode": "first-link", "expect": expected_ref }),
+    };
+    eprintln!("[agentloop] judge: {judge}");
 
     // conversation
     let mut conversation = vec![
@@ -730,12 +743,21 @@ pub fn agentloop(
 
         match qwen::extract_action(&content) {
             qwen::AgentAction::Click { r#ref } => {
-                if seat.last_refs.contains_key(&r#ref) {
-                    let right = r#ref == expected_ref;
-                    picked = Some(json!({ "ref": r#ref, "right_ref": right }));
+                if let Some(entry) = seat.last_refs.get(&r#ref).cloned() {
+                    // judge on the DECLARED mode; the picked name is untrusted
+                    // data, judged by substring only — never executed
+                    let right = match expect_substr {
+                        Some(s) => entry.name.to_lowercase().contains(&s.to_lowercase()),
+                        None => r#ref == expected_ref,
+                    };
+                    picked = Some(json!({
+                        "ref": r#ref,
+                        "name": { "__untrusted": true, "v": entry.name },
+                        "right_ref": right,
+                    }));
                     seat.ev(
                         "model_choice",
-                        json!({ "turn": turn, "ref": r#ref, "expected": expected_ref, "right_ref": right }),
+                        json!({ "turn": turn, "ref": r#ref, "judge": judge, "right_ref": right }),
                     );
                     let clicked = seat.handle(&json!({
                         "action": "click", "ref": r#ref,
@@ -828,7 +850,7 @@ pub fn agentloop(
             "allowance": allowance,
             "counts": snap_result["counts"],
         },
-        "expected_ref": expected_ref,
+        "judge": judge,
         "picked": picked,
         "right_ref": right_ref,
         "executed": executed,

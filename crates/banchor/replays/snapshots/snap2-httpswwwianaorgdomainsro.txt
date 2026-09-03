@@ -1,0 +1,277 @@
+# banchor snapshot artifact — counted bytes below (origin: https://www.iana.org/domains/root, taken: 20260903234426)
+# integrity: sha3-256:UWDcP9tbh4JS4mmTdKEBUQsbOlx9tUiK70tt9t-Hh48
+- RootWebArea "Root Zone Management"
+    - banner
+      - generic:
+        - generic:
+          - link "Homepage" [ref=@e1]
+            - image "Homepage" [ref=@e2]
+          - list
+            - listitem
+              - link "Domains" [ref=@e3]
+                - StaticText "Domains"
+                  - InlineTextBox "Domains"
+            - listitem
+              - link "Protocols" [ref=@e4]
+                - StaticText "Protocols"
+                  - InlineTextBox "Protocols"
+            - listitem
+              - link "Numbers" [ref=@e5]
+                - StaticText "Numbers"
+                  - InlineTextBox "Numbers"
+            - listitem
+              - link "About" [ref=@e6]
+                - StaticText "About"
+                  - InlineTextBox "About"
+    - generic:
+      - article
+        - main
+          - heading "Root Zone Management" [ref=@e7]
+            - StaticText "Root Zone Management"
+              - InlineTextBox "Root Zone Management"
+          - paragraph
+            - StaticText "The Domain Name System (DNS) root zone is the highest-level of the naming hierarchy, principally composed of delegations of top-level domains (such as "
+              - InlineTextBox "The Domain Name System (DNS) root zone is the highest-level of the naming hierarchy, principally composed of "
+              - InlineTextBox "delegations of top-level domains (such as "
+            - StaticText ".edu"
+              - InlineTextBox ".edu"
+            - StaticText " or "
+              - InlineTextBox " or "
+            - StaticText ".in"
+              - InlineTextBox ".in"
+            - StaticText "). In managing the DNS root zone, IANA responsibilities include assigning managers for these domains, recording technical delegation data in the root zone, and publishing a registry of related information."
+              - InlineTextBox "). In managing the DNS root zone, IANA responsibilities "
+              - InlineTextBox "include assigning managers for these domains, recording technical delegation data in the root zone, and "
+              - InlineTextBox "publishing a registry of related information."
+          - list
+            - listitem
+              - link "Top-level Domains The Top-Level Domain Registry (also known as the Root Zone Database) is the authoritative record of top-level domains, including the organization that manages the domains, technical details and contact information." [ref=@e8]
+                - heading "Top-level Domains" [ref=@e9]
+                  - StaticText "Top-level Domains"
+                    - InlineTextBox "Top-level Domains"
+                - paragraph
+                  - StaticText "The Top-Level Domain Registry (also known as the "
+                    - InlineTextBox "The Top-Level Domain Registry "
+                    - InlineTextBox "(also known as the "
+                  - StaticText "Root Zone Database"
+                    - InlineTextBox "Root Zone "
+                    - InlineTextBox "Database"
+                  - StaticText ") is the authoritative record of top-level domains, including the organization that manages the domains, technical details and contact information."
+                    - InlineTextBox ") is the authoritative "
+                    - InlineTextBox "record of top-level domains, "
+                    - InlineTextBox "including the organization that "
+                    - InlineTextBox "manages the domains, "
+                    - InlineTextBox "technical details and contact "
+                    - InlineTextBox "information."
+            - listitem
+              - link "Files and Downloads The root zone DNS data is available for download as a DNS zone file along with associated trust information, and in other formats." [ref=@e10]
+                - heading "Files and Downloads" [ref=@e11]
+                  - StaticText "Files and Downloads"
+                    - InlineTextBox "Files and Downloads"
+                - paragraph
+                  - StaticText "The root zone DNS data is available for download as a DNS zone file along with associated trust information, and in other formats."
+                    - InlineTextBox "The root zone DNS data is "
+                    - InlineTextBox "available for download as a "
+                    - InlineTextBox "DNS zone file along with "
+                    - InlineTextBox "associated trust information, "
+                    - InlineTextBox "and in other formats."
+            - listitem
+              - link "Delegation Management Existing TLD managers can maintain their delegation details through our online interface." [ref=@e12]
+                - heading "Delegation Management" [ref=@e13]
+                  - StaticText "Delegation Management"
+                    - InlineTextBox "Delegation Management"
+                - paragraph
+                  - StaticText "Existing TLD managers can maintain their delegation details through our online interface."
+                    - InlineTextBox "Existing TLD managers can "
+                    - InlineTextBox "maintain their delegation "
+                    - InlineTextBox "details through our online "
+                    - InlineTextBox "interface."
+            - listitem
+              - link "Instructions and Guides Articles covering the rules governing what top-level domains are permissible, the procedures to register and update top-level domains, and other related topics." [ref=@e14]
+                - heading "Instructions and Guides" [ref=@e15]
+                  - StaticText "Instructions and Guides"
+                    - InlineTextBox "Instructions and Guides"
+                - paragraph
+                  - StaticText "Articles covering the rules governing what top-level domains are permissible, the procedures to register and update top-level domains, and other related topics."
+                    - InlineTextBox "Articles covering the rules "
+                    - InlineTextBox "governing what top-level "
+                    - InlineTextBox "domains are permissible, the "
+                    - InlineTextBox "procedures to register and "
+                    - InlineTextBox "update top-level domains, and "
+                    - InlineTextBox "other related topics."
+            - listitem
+              - link "Root Zone DNSSEC Information Information about DNSSEC in the root zone, including the trust anchor for the DNS." [ref=@e16]
+                - heading "Root Zone DNSSEC Information" [ref=@e17]
+                  - StaticText "Root Zone DNSSEC Information"
+                    - InlineTextBox "Root Zone DNSSEC "
+                    - InlineTextBox "Information"
+                - paragraph
+                  - StaticText "Information about DNSSEC in the root zone, including the trust anchor for the DNS."
+                    - InlineTextBox "Information about DNSSEC in "
+                    - InlineTextBox "the root zone, including the "
+                    - InlineTextBox "trust anchor for the DNS."
+        - navigation
+            - heading "Domain Names" [ref=@e18]
+              - StaticText "Domain Names"
+                - InlineTextBox "Domain Names"
+            - list
+              - listitem
+                - link "Overview" [ref=@e19]
+                  - StaticText "Overview"
+                    - InlineTextBox "Overview"
+              - listitem
+                - link "Root Zone Management" [ref=@e20]
+                  - StaticText "Root Zone Management"
+                    - InlineTextBox "Root Zone Management"
+              - list
+                - listitem
+                  - link "Overview" [ref=@e21]
+                    - StaticText "Overview"
+                      - InlineTextBox "Overview"
+                - listitem
+                  - link "Top-Level Domains" [ref=@e22]
+                    - StaticText "Top-Level Domains"
+                      - InlineTextBox "Top-Level Domains"
+                - listitem
+                  - link "Files and Downloads" [ref=@e23]
+                    - StaticText "Files and Downloads"
+                      - InlineTextBox "Files and Downloads"
+                - listitem
+                  - link "Manage Delegations" [ref=@e24]
+                    - StaticText "Manage Delegations"
+                      - InlineTextBox "Manage Delegations"
+                - listitem
+                  - link "Instructions & Guides" [ref=@e25]
+                    - StaticText "Instructions & Guides"
+                      - InlineTextBox "Instructions & Guides"
+              - listitem
+                - link ".INT Registry" [ref=@e26]
+                  - StaticText ".INT Registry"
+                    - InlineTextBox ".INT Registry"
+              - listitem
+                - link ".ARPA Registry" [ref=@e27]
+                  - StaticText ".ARPA Registry"
+                    - InlineTextBox ".ARPA Registry"
+              - listitem
+                - link "IDN Practices Repository" [ref=@e28]
+                  - StaticText "IDN Practices Repository"
+                    - InlineTextBox "IDN Practices Repository"
+              - listitem
+                - link "Root Key Signing Key (DNSSEC)" [ref=@e29]
+                  - StaticText "Root Key Signing Key (DNSSEC)"
+                    - InlineTextBox "Root Key Signing Key (DNSSEC)"
+              - listitem
+                - link "Reserved Domains" [ref=@e30]
+                  - StaticText "Reserved Domains"
+                    - InlineTextBox "Reserved Domains"
+    - contentinfo
+      - generic:
+        - LayoutTable
+            - LayoutTableRow
+              - LayoutTableCell "Domain Names"
+                - link "Domain Names" [ref=@e31]
+                  - StaticText "Domain Names"
+                    - InlineTextBox "Domain Names"
+              - LayoutTableCell "Root Zone Registry .INT Registry .ARPA Registry IDN Repository"
+                - list
+                  - listitem
+                    - link "Root Zone Registry" [ref=@e32]
+                      - StaticText "Root Zone Registry"
+                        - InlineTextBox "Root Zone Registry"
+                  - listitem
+                    - link ".INT Registry" [ref=@e33]
+                      - StaticText ".INT Registry"
+                        - InlineTextBox ".INT Registry"
+                  - listitem
+                    - link ".ARPA Registry" [ref=@e34]
+                      - StaticText ".ARPA Registry"
+                        - InlineTextBox ".ARPA Registry"
+                  - listitem
+                    - link "IDN Repository" [ref=@e35]
+                      - StaticText "IDN Repository"
+                        - InlineTextBox "IDN Repository"
+            - LayoutTableRow
+              - LayoutTableCell "Number Resources"
+                - link "Number Resources" [ref=@e36]
+                  - StaticText "Number Resources"
+                    - InlineTextBox "Number Resources"
+              - LayoutTableCell "Number Registries RIR Allocation Data Abuse Information"
+                - list
+                  - listitem
+                    - link "Number Registries" [ref=@e37]
+                      - StaticText "Number Registries"
+                        - InlineTextBox "Number Registries"
+                  - listitem
+                    - link "RIR Allocation Data" [ref=@e38]
+                      - StaticText "RIR Allocation Data"
+                        - InlineTextBox "RIR Allocation Data"
+                  - listitem
+                    - link "Abuse Information" [ref=@e39]
+                      - StaticText "Abuse Information"
+                        - InlineTextBox "Abuse Information"
+            - LayoutTableRow
+              - LayoutTableCell "Protocols"
+                - link "Protocols" [ref=@e40]
+                  - StaticText "Protocols"
+                    - InlineTextBox "Protocols"
+              - LayoutTableCell "Protocol Registries Time Zone Database"
+                - list
+                  - listitem
+                    - link "Protocol Registries" [ref=@e41]
+                      - StaticText "Protocol Registries"
+                        - InlineTextBox "Protocol Registries"
+                  - listitem
+                    - link "Time Zone Database" [ref=@e42]
+                      - StaticText "Time Zone Database"
+                        - InlineTextBox "Time Zone Database"
+            - LayoutTableRow
+              - LayoutTableCell "About Us"
+                - link "About Us" [ref=@e43]
+                  - StaticText "About Us"
+                    - InlineTextBox "About Us"
+              - LayoutTableCell "News Performance The Organization Archive Contact Us"
+                - list
+                  - listitem
+                    - link "News" [ref=@e44]
+                      - StaticText "News"
+                        - InlineTextBox "News"
+                  - listitem
+                    - link "Performance" [ref=@e45]
+                      - StaticText "Performance"
+                        - InlineTextBox "Performance"
+                  - listitem
+                    - link "The Organization" [ref=@e46]
+                      - StaticText "The Organization"
+                        - InlineTextBox "The Organization"
+                  - listitem
+                    - link "Archive" [ref=@e47]
+                      - StaticText "Archive"
+                        - InlineTextBox "Archive"
+                  - listitem
+                    - link "Contact Us" [ref=@e48]
+                      - StaticText "Contact Us"
+                        - InlineTextBox "Contact Us"
+        - generic:
+          - paragraph
+            - StaticText "The IANA functions coordinate the Internet’s globally unique identifiers, and are provided by "
+              - InlineTextBox "The IANA functions coordinate the Internet’s globally unique identifiers, and are provided by "
+            - link "Public Technical Identifiers" [ref=@e49]
+              - StaticText "Public Technical Identifiers"
+                - InlineTextBox "Public Technical Identifiers"
+            - StaticText ", an affiliate of "
+              - InlineTextBox ", an affiliate of "
+            - link "ICANN" [ref=@e50]
+              - StaticText "ICANN"
+                - InlineTextBox "ICANN"
+            - StaticText "."
+              - InlineTextBox "."
+        - generic:
+          - list
+            - listitem
+              - link "Privacy Policy" [ref=@e51]
+                - StaticText "Privacy Policy"
+                  - InlineTextBox "Privacy Policy"
+            - listitem
+              - link "Terms of Service" [ref=@e52]
+                - StaticText "Terms of Service"
+                  - InlineTextBox "Terms of Service"

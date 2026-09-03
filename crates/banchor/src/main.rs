@@ -200,6 +200,7 @@ fn agentloop_cmd(args: &[String]) {
         "Click the link that leads to more information about example domains.".to_string();
     let mut max_turns: u32 = 3;
     let mut replay_dir: Option<String> = None;
+    let mut expect_substr: Option<String> = None;
     let mut i = 0;
     while i < args.len() {
         match args[i].as_str() {
@@ -219,6 +220,10 @@ fn agentloop_cmd(args: &[String]) {
                 replay_dir = Some(args[i + 1].clone());
                 i += 2;
             }
+            "--expect-substr" if i + 1 < args.len() => {
+                expect_substr = Some(args[i + 1].clone());
+                i += 2;
+            }
             other => {
                 eprintln!("agentloop: unknown flag {other:?}");
                 std::process::exit(2);
@@ -228,7 +233,7 @@ fn agentloop_cmd(args: &[String]) {
     let dir = replay_dir
         .map(std::path::PathBuf::from)
         .unwrap_or_else(|| std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("replays"));
-    match seat::agentloop(&url, &goal, max_turns, &dir) {
+    match seat::agentloop(&url, &goal, max_turns, &dir, expect_substr.as_deref()) {
         Ok(receipt) => {
             println!(
                 "{}",

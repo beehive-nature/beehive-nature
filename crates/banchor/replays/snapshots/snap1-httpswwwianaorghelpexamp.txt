@@ -1,0 +1,189 @@
+# banchor snapshot artifact — counted bytes below (origin: https://www.iana.org/help/example-domains, taken: 20260903234305)
+# integrity: sha3-256:0cZHxBYl1YYYVfQNG2Frdv7BrmtRYd1SQ8ysHEw5UPM
+- RootWebArea "Example Domains"
+    - banner
+      - generic:
+        - generic:
+          - link "Homepage" [ref=@e1]
+            - image "Homepage" [ref=@e2]
+          - list
+            - listitem
+              - link "Domains" [ref=@e3]
+                - StaticText "Domains"
+                  - InlineTextBox "Domains"
+            - listitem
+              - link "Protocols" [ref=@e4]
+                - StaticText "Protocols"
+                  - InlineTextBox "Protocols"
+            - listitem
+              - link "Numbers" [ref=@e5]
+                - StaticText "Numbers"
+                  - InlineTextBox "Numbers"
+            - listitem
+              - link "About" [ref=@e6]
+                - StaticText "About"
+                  - InlineTextBox "About"
+    - generic:
+      - article
+        - main
+          - list
+            - listitem
+              - link "← Instructions and Guides" [ref=@e7]
+                - generic:
+                  - StaticText "←"
+                - StaticText "Instructions and Guides"
+                  - InlineTextBox "Instructions and Guides"
+          - heading "Example Domains" [ref=@e8]
+            - StaticText "Example Domains"
+              - InlineTextBox "Example Domains"
+              - paragraph
+                - StaticText "As described in "
+                  - InlineTextBox "As described in "
+                - link "RFC 2606" [ref=@e9]
+                  - StaticText "RFC 2606"
+                    - InlineTextBox "RFC 2606"
+                - StaticText " and "
+                  - InlineTextBox " and "
+                - link "RFC 6761" [ref=@e10]
+                  - StaticText "RFC 6761"
+                    - InlineTextBox "RFC 6761"
+                - StaticText ", a number of domains such as example.com and example.org are maintained for documentation purposes. These domains may be used as illustrative examples in documents without prior coordination with us. They are not available for registration…"
+                  - InlineTextBox ", a number of domains such as example.com and example.org are maintained for documentation "
+                  - InlineTextBox "purposes. These domains may be used as illustrative examples in documents without prior coordination with us. They are not available for "
+                  - InlineTextBox "registration or transfer."
+              - paragraph
+                - StaticText "We provide a web service on the example domain hosts to provide basic information on the purpose of the domain. These web services are provided as best effort, but are not designed to support production applications. While incidental traffi…"
+                  - InlineTextBox "We provide a web service on the example domain hosts to provide basic information on the purpose of the domain. These web services are "
+                  - InlineTextBox "provided as best effort, but are not designed to support production applications. While incidental traffic for incorrectly configured applications is "
+                  - InlineTextBox "expected, please do not design applications that require the example domains to have operating HTTP service."
+              - heading "Further Reading" [ref=@e11]
+                - StaticText "Further Reading"
+                  - InlineTextBox "Further Reading"
+              - list
+                - listitem
+                  - ListMarker "■ "
+                  - link "IANA-managed Reserved Domains" [ref=@e12]
+                    - StaticText "IANA-managed Reserved Domains"
+                      - InlineTextBox "IANA-managed Reserved Domains"
+              - generic:
+                - StaticText "Last revised "
+                  - InlineTextBox "Last revised "
+                - time
+                  - StaticText "9 years ago"
+                    - InlineTextBox "9 years ago"
+                - StaticText "."
+                  - InlineTextBox "."
+        - navigation
+    - contentinfo
+      - generic:
+        - LayoutTable
+            - LayoutTableRow
+              - LayoutTableCell "Domain Names"
+                - link "Domain Names" [ref=@e13]
+                  - StaticText "Domain Names"
+                    - InlineTextBox "Domain Names"
+              - LayoutTableCell "Root Zone Registry .INT Registry .ARPA Registry IDN Repository"
+                - list
+                  - listitem
+                    - link "Root Zone Registry" [ref=@e14]
+                      - StaticText "Root Zone Registry"
+                        - InlineTextBox "Root Zone Registry"
+                  - listitem
+                    - link ".INT Registry" [ref=@e15]
+                      - StaticText ".INT Registry"
+                        - InlineTextBox ".INT Registry"
+                  - listitem
+                    - link ".ARPA Registry" [ref=@e16]
+                      - StaticText ".ARPA Registry"
+                        - InlineTextBox ".ARPA Registry"
+                  - listitem
+                    - link "IDN Repository" [ref=@e17]
+                      - StaticText "IDN Repository"
+                        - InlineTextBox "IDN Repository"
+            - LayoutTableRow
+              - LayoutTableCell "Number Resources"
+                - link "Number Resources" [ref=@e18]
+                  - StaticText "Number Resources"
+                    - InlineTextBox "Number Resources"
+              - LayoutTableCell "Number Registries RIR Allocation Data Abuse Information"
+                - list
+                  - listitem
+                    - link "Number Registries" [ref=@e19]
+                      - StaticText "Number Registries"
+                        - InlineTextBox "Number Registries"
+                  - listitem
+                    - link "RIR Allocation Data" [ref=@e20]
+                      - StaticText "RIR Allocation Data"
+                        - InlineTextBox "RIR Allocation Data"
+                  - listitem
+                    - link "Abuse Information" [ref=@e21]
+                      - StaticText "Abuse Information"
+                        - InlineTextBox "Abuse Information"
+            - LayoutTableRow
+              - LayoutTableCell "Protocols"
+                - link "Protocols" [ref=@e22]
+                  - StaticText "Protocols"
+                    - InlineTextBox "Protocols"
+              - LayoutTableCell "Protocol Registries Time Zone Database"
+                - list
+                  - listitem
+                    - link "Protocol Registries" [ref=@e23]
+                      - StaticText "Protocol Registries"
+                        - InlineTextBox "Protocol Registries"
+                  - listitem
+                    - link "Time Zone Database" [ref=@e24]
+                      - StaticText "Time Zone Database"
+                        - InlineTextBox "Time Zone Database"
+            - LayoutTableRow
+              - LayoutTableCell "About Us"
+                - link "About Us" [ref=@e25]
+                  - StaticText "About Us"
+                    - InlineTextBox "About Us"
+              - LayoutTableCell "News Performance The Organization Archive Contact Us"
+                - list
+                  - listitem
+                    - link "News" [ref=@e26]
+                      - StaticText "News"
+                        - InlineTextBox "News"
+                  - listitem
+                    - link "Performance" [ref=@e27]
+                      - StaticText "Performance"
+                        - InlineTextBox "Performance"
+                  - listitem
+                    - link "The Organization" [ref=@e28]
+                      - StaticText "The Organization"
+                        - InlineTextBox "The Organization"
+                  - listitem
+                    - link "Archive" [ref=@e29]
+                      - StaticText "Archive"
+                        - InlineTextBox "Archive"
+                  - listitem
+                    - link "Contact Us" [ref=@e30]
+                      - StaticText "Contact Us"
+                        - InlineTextBox "Contact Us"
+        - generic:
+          - paragraph
+            - StaticText "The IANA functions coordinate the Internet’s globally unique identifiers, and are provided by "
+              - InlineTextBox "The IANA functions coordinate the Internet’s globally unique identifiers, and are provided by "
+            - link "Public Technical Identifiers" [ref=@e31]
+              - StaticText "Public Technical Identifiers"
+                - InlineTextBox "Public Technical Identifiers"
+            - StaticText ", an affiliate of "
+              - InlineTextBox ", an affiliate of "
+            - link "ICANN" [ref=@e32]
+              - StaticText "ICANN"
+                - InlineTextBox "ICANN"
+            - StaticText "."
+              - InlineTextBox "."
+        - generic:
+          - list
+            - listitem
+              - link "Privacy Policy" [ref=@e33]
+                - StaticText "Privacy Policy"
+                  - InlineTextBox "Privacy Policy"
+            - listitem
+              - link "Terms of Service" [ref=@e34]
+                - StaticText "Terms of Service"
+                  - InlineTextBox "Terms of Service"
+- InlineTextBox "←"
+- InlineTextBox "←"
