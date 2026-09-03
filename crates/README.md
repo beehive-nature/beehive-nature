@@ -119,6 +119,48 @@ only — at-rest encryption is an OPEN follow-up, not done, not claimed. What
 DOES hold and is tested: keys never leave the device (no network code in
 the crate), never printed (mechanically asserted), zeroized in memory.
 
+## M2 — the gate number CLOSED, and the first local-model loop (RECEIPT)
+
+**The ruler:** the compute lane's own served tokenizer — llama.cpp
+`/tokenize` on `qwen2.5-3b-instruct` (q4_k_m), reached through the Lane-M
+meter gate (bearer key from env, secret never in the tree; replays record
+only the meter key id for attribution). Counting id: `qwen2.5`.
+
+**The same three snapshots, re-counted** (committed artifacts, counted
+byte-for-byte under `crates/banchor/replays/snapshots/`; the artifacts
+carry a 2-line provenance header, which is why they read slightly above
+the bare-tree counts in the replay events):
+
+| page | whitespace | cl100k_base | r50k_base | **qwen2.5** | fits n_ctx 4096? |
+|---|---|---|---|---|---|
+| example.com | 83 | 185 | 272 | **196** | yes, trivially |
+| iana.org (post-click) | 899 | 1,849 | 4,853 | **1,897** | yes |
+| Wikipedia Chromium article | 4,570 | 9,625 | 41,911 | **9,992** | **NO** |
+
+Bare-tree counts in the replay events (no header): example.com 118 cl100k /
+215 qwen. The qwen ruler lands INSIDE the cl100k/r50k bracket, near its
+tight end — Agent Mode's snapshot budget on this server is a cl100k-like
+economy, not an r50k-like one.
+
+**The server's context is 4,096 tokens** (`/props` → n_ctx; model artifact
+/opt/buzz-compute/models/qwen2.5-3b-instruct-q4_k_m.gguf). The article does
+not fit at the default 1,200-node cap; the cap ladder descends until the
+wrapped tree fits, and the cap USED is reported in every replay
+(`cap_ladder` event): the article fitted at **cap 300 = 2,332 qwen tokens**
+against a 2,616-token snapshot allowance. That truncation is not free: on
+the article run the goal's target link was BELOW the cut, and the model
+clicked a plausible in-article link instead — the measured cost of a 4,096
+context on article-class pages.
+
+**The loop** (`banchor agentloop`, receipt replay
+`agentloop-20260903-230639.jsonl`): snapshot → qwen2.5-3b → one chosen
+action → real click → replay. example.com run: the model answered exactly
+`{"click": "@e2"}` — the right ref — in **ONE turn** (400 prompt tokens,
+8 completion tokens; snapshot 215 qwen at cap 1200), the click executed,
+page landed on iana.org. Plan-then-approve held throughout (the click
+passed the same spend/auth/OAuth classifier; nothing spent). The model's
+output is untrusted data — parsed, never executed.
+
 ## What is deliberately NOT here
 
 - No banchor→bheart-signer coupling, no shared "wallet core" crate — the

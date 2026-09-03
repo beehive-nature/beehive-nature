@@ -25,6 +25,7 @@ mod cache;
 mod cdp;
 mod mcp;
 mod page;
+mod qwen;
 mod replay;
 mod resolve;
 mod seat;
@@ -39,6 +40,8 @@ fn main() {
     match args.first().map(String::as_str) {
         Some("serve") => serve(&args[1..]),
         Some("milestone1") => milestone1(&args[1..]),
+        Some("agentloop") => agentloop_cmd(&args[1..]),
+        Some("qwen-count") => qwen_count_cmd(&args[1..]),
         Some("resolve") => resolve_cmd(&args[1..]),
         Some("version") | None => {
             println!(
@@ -48,7 +51,7 @@ fn main() {
             println!("laws: untrusted-data delimiters · strip-hidden · plan-then-approve · no-screenshot durable path · bsigner-independence");
         }
         Some(other) => {
-            eprintln!("unknown command {other:?} — serve | milestone1 | resolve | version");
+            eprintln!("unknown command {other:?} — serve | milestone1 | agentloop | qwen-count | resolve | version");
             std::process::exit(2);
         }
     }
@@ -126,6 +129,117 @@ fn milestone1(args: &[String]) {
         }
         Err(e) => {
             eprintln!("milestone1 FAILED: {e}");
+            std::process::exit(1);
+        }
+    }
+}
+
+/// M2 — count files with the compute lane's own Qwen2.5 tokenizer, beside
+/// the local BPE bracket. THE ruler for the Agent-Mode question.
+fn qwen_count_cmd(args: &[String]) {
+    if args.is_empty() {
+        eprintln!("qwen-count: need one or more snapshot text files");
+        std::process::exit(2);
+    }
+    let model = match qwen::Qwen::from_env() {
+        Ok(m) => m,
+        Err(e) => {
+            eprintln!("qwen-count FAILED: {e}");
+            std::process::exit(1);
+        }
+    };
+    let mut rows = Vec::new();
+    for f in args {
+        let text = match std::fs::read_to_string(f) {
+            Ok(t) => t,
+            Err(e) => {
+                eprintln!("qwen-count FAILED: read {f}: {e}");
+                std::process::exit(1);
+            }
+        };
+        let local = tokens::count(&text);
+        let q = match model.tokenize(&text) {
+            Ok(n) => n,
+            Err(e) => {
+                eprintln!("qwen-count FAILED: {e}");
+                std::process::exit(1);
+            }
+        };
+        rows.push(json_row(f, &text, local, q));
+    }
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&serde_json::json!({
+            "tokenizer": {
+                "alg": qwen::TOKENIZER_ALG,
+                "served_model": model.alias,
+                "artifact": model.model_path,
+                "n_ctx": model.n_ctx,
+                "source": "llama.cpp /tokenize on the compute node, via the Lane-M meter gate",
+            },
+            "files": rows,
+        }))
+        .unwrap_or_default()
+    );
+}
+
+fn json_row(f: &str, text: &str, local: tokens::Counts, q: usize) -> serde_json::Value {
+    let mut counts = local.to_json();
+    if let Some(arr) = counts.get_mut("tokens").and_then(|t| t.as_array_mut()) {
+        arr.push(serde_json::json!({ "alg": qwen::TOKENIZER_ALG, "n": q }));
+    }
+    let _ = text;
+    serde_json::json!({ "file": f, "counts": counts })
+}
+
+/// M2 — the first real loop: snapshot → local qwen2.5-3b → one chosen
+/// action → replay. Nothing spends; plan-then-approve stays in force.
+fn agentloop_cmd(args: &[String]) {
+    let mut url = "https://example.com/".to_string();
+    let mut goal = "Click the link that leads to more information about example domains.".to_string();
+    let mut max_turns: u32 = 3;
+    let mut replay_dir: Option<String> = None;
+    let mut i = 0;
+    while i < args.len() {
+        match args[i].as_str() {
+            "--url" if i + 1 < args.len() => {
+                url = args[i + 1].clone();
+                i += 2;
+            }
+            "--goal" if i + 1 < args.len() => {
+                goal = args[i + 1].clone();
+                i += 2;
+            }
+            "--max-turns" if i + 1 < args.len() => {
+                max_turns = args[i + 1].parse().unwrap_or(3);
+                i += 2;
+            }
+            "--replay-dir" if i + 1 < args.len() => {
+                replay_dir = Some(args[i + 1].clone());
+                i += 2;
+            }
+            other => {
+                eprintln!("agentloop: unknown flag {other:?}");
+                std::process::exit(2);
+            }
+        }
+    }
+    let dir = replay_dir
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(|| std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("replays"));
+    match seat::agentloop(&url, &goal, max_turns, &dir) {
+        Ok(receipt) => {
+            println!("{}", serde_json::to_string_pretty(&receipt).unwrap_or_default());
+            eprintln!(
+                "[agentloop] right_ref={} executed={} turns={} — replay: {}",
+                receipt["right_ref"],
+                receipt["executed"],
+                receipt["turns_taken"],
+                receipt["replay"].as_str().unwrap_or("?")
+            );
+        }
+        Err(e) => {
+            eprintln!("agentloop FAILED: {e}");
             std::process::exit(1);
         }
     }

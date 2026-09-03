@@ -1,0 +1,307 @@
+# banchor snapshot artifact — counted bytes below (origin: https://en.wikipedia.org/wiki/Chromium_(web_browser), taken: 20260903230804)
+# integrity: sha3-256:UFVlt_RPskLdVfLLE8vssQjKg65GDLVye-dsACAiwqI
+- RootWebArea "Chromium (web browser) - Wikipedia"
+  - generic:
+    - generic:
+    - link "Jump to content" [ref=@e1]
+      - StaticText "Jump to content"
+        - InlineTextBox "Jump "
+        - InlineTextBox "to "
+        - InlineTextBox "content"
+      - banner
+          - navigation "Site"
+            - generic:
+          - link "Wikipedia The Free Encyclopedia" [ref=@e2]
+              - image "Wikipedia" [ref=@e3]
+              - image "The Free Encyclopedia" [ref=@e4]
+          - search
+                - form
+                  - generic:
+                    - generic:
+                      - searchbox "Search Wikipedia" [ref=@e5]
+                          - generic:
+                  - button "Search" [ref=@e6]
+                    - StaticText "Search"
+                      - InlineTextBox "Search"
+          - navigation "Personal tools"
+              - generic:
+                  - list
+                    - listitem
+                      - link "Donate" [ref=@e7]
+                        - StaticText "Donate"
+                          - InlineTextBox "Donate"
+                    - listitem
+                      - link "Create account" [ref=@e8]
+                        - StaticText "Create account"
+                          - InlineTextBox "Create account"
+                    - listitem
+                      - link "Log in" [ref=@e9]
+                        - StaticText "Log in"
+                          - InlineTextBox "Log in"
+    - generic:
+          - generic:
+            - generic:
+            - generic:
+          - generic:
+            - navigation "Contents"
+              - generic:
+                - generic:
+                  - generic:
+                    - heading "Contents" [ref=@e10]
+                      - StaticText "Contents"
+                        - InlineTextBox "Contents"
+                    - button "Hide Contents" [ref=@e11]
+                      - StaticText "hide"
+                        - InlineTextBox "hide"
+                  - list
+                    - listitem
+                      - link "(Top)" [ref=@e12]
+                        - generic:
+                          - StaticText "(Top)"
+                            - InlineTextBox "(Top)"
+                    - listitem
+                      - link "Licensing" [ref=@e13]
+                        - generic:
+                          - StaticText "Licensing"
+                            - InlineTextBox "Licensing"
+                      - list
+                    - listitem
+                      - link "Differences from Google Chrome" [ref=@e14]
+                        - generic:
+                          - StaticText "Differences from Google Chrome"
+                            - InlineTextBox "Differences from Google "
+                            - InlineTextBox "Chrome"
+                      - button "Toggle Differences from Google Chrome subsection" [ref=@e15]
+                        - generic:
+                          - StaticText "Toggle Differences from Google Chrome subsection"
+                            - InlineTextBox "Toggle Differences from Google Chrome subsection"
+                      - list
+                        - listitem
+                          - link "Features" [ref=@e16]
+                            - generic:
+                              - StaticText "Features"
+                                - InlineTextBox "Features"
+                          - list
+                        - listitem
+                          - link "Branding and licensing" [ref=@e17]
+                            - generic:
+                              - StaticText "Branding and licensing"
+                                - InlineTextBox "Branding and licensing"
+                          - list
+                    - listitem
+                      - link "Development" [ref=@e18]
+                        - generic:
+                          - StaticText "Development"
+                            - InlineTextBox "Development"
+                      - button "Toggle Development subsection" [ref=@e19]
+                        - generic:
+                          - StaticText "Toggle Development subsection"
+                            - InlineTextBox "Toggle Development subsection"
+                      - list
+                        - listitem
+                          - link "Contributors" [ref=@e20]
+                            - generic:
+                              - StaticText "Contributors"
+                                - InlineTextBox "Contributors"
+                          - list
+                        - listitem
+                          - link "Architecture" [ref=@e21]
+                            - generic:
+                              - StaticText "Architecture"
+                                - InlineTextBox "Architecture"
+                          - list
+                        - listitem
+                          - link "Programming languages" [ref=@e22]
+                            - generic:
+                              - StaticText "Programming languages"
+                                - InlineTextBox "Programming "
+                                - InlineTextBox "languages"
+                          - list
+                        - listitem
+                          - link "Logistics" [ref=@e23]
+                            - generic:
+                              - StaticText "Logistics"
+                                - InlineTextBox "Logistics"
+                          - list
+                    - listitem
+                      - link "History" [ref=@e24]
+                        - generic:
+                          - StaticText "History"
+                            - InlineTextBox "History"
+                      - button "Toggle History subsection" [ref=@e25]
+                        - generic:
+                          - StaticText "Toggle History subsection"
+                            - InlineTextBox "Toggle History subsection"
+                      - list
+                        - listitem
+                          - link "2008 to 2010" [ref=@e26]
+                            - generic:
+                              - StaticText "2008 to 2010"
+                                - InlineTextBox "2008 to 2010"
+                          - list
+                        - listitem
+                          - link "2011" [ref=@e27]
+                            - generic:
+                              - StaticText "2011"
+                                - InlineTextBox "2011"
+                          - list
+                        - listitem
+                          - link "Since 2012" [ref=@e28]
+                            - generic:
+                              - StaticText "Since 2012"
+                                - InlineTextBox "Since 2012"
+                          - list
+                    - listitem
+                      - link "Third-party ports" [ref=@e29]
+                        - generic:
+                          - StaticText "Third-party ports"
+                            - InlineTextBox "Third-party ports"
+                      - list
+                    - listitem
+                      - link "Browsers based on Chromium" [ref=@e30]
+                        - generic:
+                          - StaticText "Browsers based on Chromium"
+                            - InlineTextBox "Browsers based on "
+                            - InlineTextBox "Chromium"
+                      - button "Toggle Browsers based on Chromium subsection" [ref=@e31]
+                        - generic:
+                          - StaticText "Toggle Browsers based on Chromium subsection"
+                            - InlineTextBox "Toggle Browsers based on Chromium subsection"
+                      - list
+                        - listitem
+                          - link "Proprietary" [ref=@e32]
+                            - generic:
+                              - StaticText "Proprietary"
+                                - InlineTextBox "Proprietary"
+                          - list
+                        - listitem
+                          - link "Free and open-source" [ref=@e33]
+                            - generic:
+                              - StaticText "Free and open-source"
+                                - InlineTextBox "Free and open-source"
+                          - list
+                    - listitem
+                      - link "Use in app frameworks" [ref=@e34]
+                        - generic:
+                          - StaticText "Use in app frameworks"
+                            - InlineTextBox "Use in app frameworks"
+                      - list
+                    - listitem
+                      - link "References" [ref=@e35]
+                        - generic:
+                          - StaticText "References"
+                            - InlineTextBox "References"
+                      - list
+                    - listitem
+                      - link "External links" [ref=@e36]
+                        - generic:
+                          - StaticText "External links"
+                            - InlineTextBox "External links"
+                      - list
+          - main
+            - sectionheader
+              - heading "Chromium (web browser)" [ref=@e37]
+                  - StaticText "Chromium (web browser)"
+                    - InlineTextBox "Chromium (web browser)"
+              - generic:
+                - generic:
+                  - navigation "Namespaces"
+                    - generic:
+                        - list
+                          - listitem
+                            - link "Article" [ref=@e38]
+                                - StaticText "Article"
+                                  - InlineTextBox "Article"
+                              - generic:
+                          - listitem
+                            - link "Talk" [ref=@e39]
+                                - StaticText "Talk"
+                                  - InlineTextBox "Talk"
+                              - generic:
+                - generic:
+                  - navigation "Views"
+                    - generic:
+                        - list
+                          - listitem
+                            - link "Read" [ref=@e40]
+                                - StaticText "Read"
+                                  - InlineTextBox "Read"
+                              - generic:
+                          - listitem
+                            - link "Edit" [ref=@e41]
+                                - StaticText "Edit"
+                                  - InlineTextBox "Edit"
+                              - generic:
+                          - listitem
+                            - link "View history" [ref=@e42]
+                                - StaticText "View history"
+                                  - InlineTextBox "View history"
+                              - generic:
+                  - navigation "Page tools"
+                    - generic:
+              - generic:
+                - navigation "Appearance"
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - StaticText "Appearance"
+                            - InlineTextBox "Appearance"
+                        - button "Hide Appearance" [ref=@e43]
+                          - StaticText "hide"
+                            - InlineTextBox "hide"
+                      - generic:
+                        - generic:
+                          - StaticText "Text"
+                            - InlineTextBox "Text"
+                          - list
+                            - listitem
+                                - form
+                                  - generic:
+                                    - LabelText
+                                        - StaticText "Small"
+                                          - InlineTextBox "Small"
+                                  - generic:
+                                    - LabelText
+                                        - StaticText "Standard"
+                                          - InlineTextBox "Standard"
+                                  - generic:
+                                    - LabelText
+                                        - StaticText "Large"
+                                          - InlineTextBox "Large"
+                      - generic:
+                        - generic:
+                          - StaticText "Width"
+                            - InlineTextBox "Width"
+                          - list
+                            - listitem
+                                - form
+                                  - generic:
+                                    - LabelText
+                                        - StaticText "Standard"
+                                          - InlineTextBox "Standard"
+                                  - generic:
+                                    - LabelText
+                                        - StaticText "Wide"
+                                          - InlineTextBox "Wide"
+                      - generic:
+                        - generic:
+                          - StaticText "Color"
+                            - InlineTextBox "Color"
+                          - list
+                            - listitem
+                                - form
+                                  - generic:
+                                    - LabelText
+                                        - StaticText "Automatic"
+                                          - InlineTextBox "Automatic"
+                                  - generic:
+                                    - LabelText
+                                        - StaticText "Light"
+                                          - InlineTextBox "Light"
+                                  - generic:
+… [snapshot truncated at node cap 300]
+… [snapshot truncated at node cap 300]
+… [snapshot truncated at node cap 300]
+… [snapshot truncated at node cap 300]
+… [snapshot truncated at node cap 300]

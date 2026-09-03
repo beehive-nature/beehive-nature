@@ -18,6 +18,7 @@ use crate::axtree;
 use crate::browser::Browser;
 use crate::cdp::CdpError;
 use crate::page::PageSession;
+use crate::qwen;
 use crate::replay::{un, Replay};
 use crate::tokens;
 use crate::untrusted;
@@ -30,6 +31,7 @@ pub struct SeatState {
     pub gate: PlanGate,
     /// last snapshot's refs, for click lookup
     last_refs: HashMap<String, axtree::RefEntry>,
+    snapshot_seq: usize,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -58,6 +60,7 @@ impl SeatState {
             replay: None,
             gate: PlanGate::new(),
             last_refs: HashMap::new(),
+            snapshot_seq: 0,
         }
     }
 
@@ -171,6 +174,15 @@ impl SeatState {
 
     /// snapshot: AX tree → strip-hidden → format+refs → wrap untrusted → count.
     fn snapshot(&mut self) -> Result<Value, SeatError> {
+        let (nodes, vis, style_probe_errors) = self.ax_nodes_and_vis()?;
+        self.snapshot_at_cap(&nodes, &vis, style_probe_errors, axtree::DEFAULT_MAX_NODES, None)
+    }
+
+    /// Pull the AX tree and compute visibility classifications once, so cap
+    /// retries (qwen fitting) re-format without re-probing the page.
+    fn ax_nodes_and_vis(
+        &mut self,
+    ) -> Result<(Vec<serde_json::Value>, HashMap<u64, Vis>, u64), SeatError> {
         let (page, _replay) = self.require_page()?;
         let nodes = page.ax_tree()?;
 
@@ -199,10 +211,27 @@ impl SeatState {
                 }
             }
         }
+        Ok((nodes, vis, style_probe_errors))
+    }
 
-        let snap = axtree::format(&nodes, &vis);
+    /// Format at a given node cap, wrap, count (local BPEs), dump the exact
+    /// counted text beside the replay (byte-exact counting artifact), and
+    /// record everything. `qwen_n` rides along when the qwen ruler counted
+    /// this same text.
+    fn snapshot_at_cap(
+        &mut self,
+        nodes: &[serde_json::Value],
+        vis: &HashMap<u64, Vis>,
+        style_probe_errors: u64,
+        cap: usize,
+        qwen_n: Option<usize>,
+    ) -> Result<Value, SeatError> {
+        let snap = axtree::format_with_cap(nodes, vis, cap);
         let counts = tokens::count(&snap.text);
-        let origin = page.current_url();
+        let origin = {
+            let (page, _replay) = self.require_page()?;
+            page.current_url()
+        };
         let wrapped = untrusted::wrap(&snap.text, &origin);
         self.last_refs = snap
             .refs
@@ -210,24 +239,62 @@ impl SeatState {
             .cloned()
             .map(|r| (r.r#ref.clone(), r))
             .collect();
+        self.snapshot_seq += 1;
+        let text_path = self.dump_snapshot_text(&snap.text, &origin);
         let mut snap_json = snap.to_json();
         if let Some(obj) = snap_json.get_mut("stats").and_then(|s| s.as_object_mut()) {
             obj.insert("style_probe_errors".into(), json!(style_probe_errors));
+            obj.insert("node_cap".into(), json!(cap));
+        }
+        let mut counts_json = counts.to_json();
+        if let Some(n) = qwen_n {
+            if let Some(arr) = counts_json.get_mut("tokens").and_then(|t| t.as_array_mut()) {
+                arr.push(json!({ "alg": crate::qwen::TOKENIZER_ALG, "n": n }));
+            }
         }
         self.ev(
             "snapshot",
             json!({
                 "page": { "url": { "__untrusted": true, "v": origin } },
-                "counts": counts.to_json(),
+                "counts": counts_json,
                 "snapshot": snap_json,
+                "text_path": text_path.display().to_string(),
             }),
         );
         Ok(json!({
             "url": origin,
-            "counts": counts.to_json(),
-            "snapshot": snap.to_json(),
+            "counts": counts_json,
+            "snapshot": snap_json,
+            "text_path": text_path.display().to_string(),
             "untrusted_block": wrapped,
         }))
+    }
+
+    /// The exact counted text, on disk beside the replay — so any future
+    /// tokenizer re-counts the SAME bytes (M2 law: same snapshots, new ruler).
+    fn dump_snapshot_text(&mut self, text: &str, origin: &str) -> std::path::PathBuf {
+        let dir = self
+            .replay
+            .as_ref()
+            .map(|r| r.path.parent().map(|p| p.to_path_buf()).unwrap_or_default())
+            .unwrap_or_default()
+            .join("snapshots");
+        let _ = std::fs::create_dir_all(&dir);
+        let slug: String = origin
+            .chars()
+            .filter(|c| c.is_ascii_alphanumeric())
+            .take(24)
+            .collect();
+        let (stamp, _) = crate::replay::now_iso();
+        let stamp = stamp.split_once('T').map(|(d, t)| format!("{}{}", d.replace('-', ""), &t[..8].replace(':', ""))).unwrap_or_default();
+        let path = dir.join(format!("snap{}-{}.txt", self.snapshot_seq, if slug.is_empty() { "blank" } else { &slug }));
+        let header = format!(
+            "# banchor snapshot artifact — counted bytes below (origin: {origin}, taken: {stamp})\n\
+             # integrity: sha3-256:{}\n",
+            crate::b64::sha3_256_b64u(text.as_bytes())
+        );
+        let _ = std::fs::write(&path, header + text);
+        path
     }
 
     fn click(&mut self, args: &Value) -> Result<Value, SeatError> {
@@ -500,4 +567,229 @@ fn axtree_role_hidden(node: &Value) -> bool {
             })
         })
         .unwrap_or(false)
+}
+
+/// M2 — THE AGENT LOOP: snapshot → local qwen2.5-3b on the compute node →
+/// one chosen action → replay. The FIRST end-to-end run where a LOCAL model
+/// drives the click.
+///
+/// Laws in force: plan-then-approve (the click goes through the same
+/// classifier — a risky target would gate, not run); nothing spends; the
+/// model's output is UNTRUSTED data (parsed, never executed); the snapshot
+/// cap is reported, never silent. The harness knows ground truth
+/// structurally (the page's first link ref) and judges the model's pick.
+pub fn agentloop(
+    url: &str,
+    goal: &str,
+    max_turns: u32,
+    replay_dir: &Path,
+) -> Result<Value, Box<dyn std::error::Error>> {
+    let model = qwen::Qwen::from_env()?;
+    let budget = qwen::Budget::for_ctx(model.n_ctx);
+
+    let mut seat = SeatState::new();
+    eprintln!(
+        "[agentloop] model {} (n_ctx {}) via meter key {:?}",
+        model.alias, model.n_ctx, model.key_id
+    );
+    seat.handle(&json!({
+        "action": "start",
+        "headless": true,
+        "replay_dir": replay_dir.display().to_string(),
+        "replay_stem": "agentloop",
+    }))?;
+    seat.ev(
+        "agent_start",
+        json!({
+            "goal": goal,
+            "model": {
+                "alias": model.alias,
+                "artifact": model.model_path,
+                "n_ctx": model.n_ctx,
+                "meter_key_id": model.key_id,
+                "endpoint": qwen::DEFAULT_ENDPOINT,
+                "tokenizer_alg": qwen::TOKENIZER_ALG,
+            },
+            "budget": {
+                "n_ctx": budget.n_ctx,
+                "template_overhead": budget.template_overhead,
+                "reserved_completion": budget.reserved_completion,
+                "snapshot_allowance": budget.snapshot_allowance(),
+            },
+        }),
+    );
+
+    seat.handle(&json!({ "action": "navigate", "url": url }))?;
+
+    // snapshot, qwen-fitted: cap ladder descends until the wrapped tree fits
+    let allowance = budget.snapshot_allowance() as usize;
+    let (nodes, vis, style_errors) = seat.ax_nodes_and_vis()?;
+    let mut fitted: Option<(String, usize, usize)> = None; // (wrapped, qwen_n, cap)
+    let mut ladder_walked: Vec<Value> = Vec::new();
+    let mut final_snap: Option<Value> = None;
+    for &cap in qwen::CAP_LADDER {
+        let probe = axtree::format_with_cap(&nodes, &vis, cap);
+        let origin = {
+            let (page, _r) = seat.require_page()?;
+            page.current_url()
+        };
+        let wrapped = untrusted::wrap(&probe.text, &origin);
+        let n = model.tokenize(&wrapped)?;
+        ladder_walked.push(json!({ "cap": cap, "qwen_tokens": n, "fits": n <= allowance }));
+        if n <= allowance {
+            let result = seat.snapshot_at_cap(&nodes, &vis, style_errors, cap, Some(n))?;
+            let wrapped = result["untrusted_block"].as_str().unwrap_or("").to_string();
+            fitted = Some((wrapped, n, cap));
+            final_snap = Some(result);
+            break;
+        }
+    }
+    let (wrapped, qwen_n, cap_used) = fitted.ok_or_else(|| {
+        format!("no cap in the ladder fits: allowance {allowance} qwen tokens, walked {ladder_walked:?}")
+    })?;
+    let snap_result = final_snap.expect("fitted implies snap result");
+    seat.ev("cap_ladder", json!({ "walked": ladder_walked, "chosen_cap": cap_used }));
+    eprintln!("[agentloop] snapshot fitted: {qwen_n} qwen tokens at cap {cap_used} (allowance {allowance})");
+
+    // ground truth, structural: the page's first interactive link
+    let refs = snap_result["snapshot"]["refs"].as_array().cloned().unwrap_or_default();
+    let expected = refs
+        .iter()
+        .find(|r| r["role"] == "link" && r["name"]["v"].as_str().map(|s| !s.is_empty()).unwrap_or(false))
+        .cloned();
+    let expected_ref = expected
+        .as_ref()
+        .and_then(|e| e["ref"].as_str())
+        .unwrap_or("(no link on page)")
+        .to_string();
+
+    // conversation
+    let mut conversation = vec![
+        json!({ "role": "system", "content": qwen::SYSTEM_PROMPT }),
+        json!({ "role": "user", "content": qwen::user_prompt(goal, &wrapped) }),
+    ];
+
+    let mut turns_taken: u32 = 0;
+    let mut picked: Option<Value> = None;
+    let mut executed = false;
+    let mut outcome_note = String::new();
+    let mut prompt_tokens_total: u64 = 0;
+    let mut completion_tokens_total: u64 = 0;
+
+    for turn in 1..=max_turns {
+        turns_taken = turn;
+        let (content, usage) = model.chat(&conversation, 256)?;
+        let p = usage.get("prompt_tokens").and_then(|t| t.as_u64()).unwrap_or(0);
+        let c = usage.get("completion_tokens").and_then(|t| t.as_u64()).unwrap_or(0);
+        prompt_tokens_total += p;
+        completion_tokens_total += c;
+        seat.ev(
+            "model_turn",
+            json!({
+                "turn": turn,
+                "prompt_tokens": p,
+                "completion_tokens": c,
+                "response": un(&content),
+            }),
+        );
+        eprintln!("[agentloop] turn {turn}: model said: {}", content.chars().take(120).collect::<String>());
+
+        match qwen::extract_action(&content) {
+            qwen::AgentAction::Click { r#ref } => {
+                if seat.last_refs.contains_key(&r#ref) {
+                    let right = r#ref == expected_ref;
+                    picked = Some(json!({ "ref": r#ref, "right_ref": right }));
+                    seat.ev(
+                        "model_choice",
+                        json!({ "turn": turn, "ref": r#ref, "expected": expected_ref, "right_ref": right }),
+                    );
+                    let clicked = seat.handle(&json!({
+                        "action": "click", "ref": r#ref,
+                        "reason": "agentloop — action chosen by the local model",
+                    }));
+                    match clicked {
+                        Ok(c) => {
+                            executed = true;
+                            outcome_note = format!(
+                                "clicked {} → {}",
+                                r#ref,
+                                c["after"]["url"].as_str().unwrap_or("?")
+                            );
+                            seat.ev("model_action_executed", json!({ "ref": r#ref, "result": "clicked" }));
+                            break;
+                        }
+                        Err(e) => {
+                            outcome_note = format!("click {} refused: {e}", r#ref);
+                            seat.ev("model_action_refused", json!({ "ref": r#ref, "reason": e.to_string() }));
+                            conversation.push(json!({ "role": "assistant", "content": content }));
+                            conversation.push(json!({
+                                "role": "user",
+                                "content": format!("The action was refused ({e}). Respond with ONE JSON object: a different valid ref, or {{\"done\": true, \"reason\": \"…\"}}."),
+                            }));
+                        }
+                    }
+                } else {
+                    outcome_note = format!("model picked nonexistent ref {}", r#ref);
+                    seat.ev("model_choice", json!({ "turn": turn, "ref": r#ref, "valid": false }));
+                    conversation.push(json!({ "role": "assistant", "content": content }));
+                    conversation.push(json!({
+                        "role": "user",
+                        "content": format!("There is no ref {} in the snapshot. Respond with ONE JSON object using a ref that appears in the snapshot, or {{\"done\": true, \"reason\": \"…\"}}.", r#ref),
+                    }));
+                }
+            }
+            qwen::AgentAction::Done { reason } => {
+                outcome_note = format!("model declared done: {reason}");
+                seat.ev("model_choice", json!({ "turn": turn, "done": true, "reason": reason }));
+                break;
+            }
+            qwen::AgentAction::Unparseable { raw } => {
+                outcome_note = "model output unparseable".into();
+                seat.ev("model_choice", json!({ "turn": turn, "parse": "failed" }));
+                conversation.push(json!({ "role": "assistant", "content": raw }));
+                conversation.push(json!({
+                    "role": "user",
+                    "content": "Respond with ONE JSON object only: {\"click\": \"@eN\"} or {\"done\": true, \"reason\": \"…\"}.",
+                }));
+            }
+        }
+    }
+
+    let right_ref = picked
+        .as_ref()
+        .and_then(|p| p["right_ref"].as_bool())
+        .unwrap_or(false);
+    seat.ev(
+        "agent_end",
+        json!({
+            "right_ref": right_ref,
+            "executed": executed,
+            "turns_taken": turns_taken,
+            "outcome": outcome_note,
+        }),
+    );
+    let end = seat.handle(&json!({ "action": "end" }))?;
+
+    let receipt = json!({
+        "milestone": "M2-agent-loop",
+        "what": "first loop where a LOCAL model (qwen2.5-3b on the compute node) chose and drove the click",
+        "model": { "alias": model.alias, "n_ctx": model.n_ctx, "meter_key_id": model.key_id },
+        "goal": goal,
+        "url": url,
+        "snapshot": {
+            "qwen_tokens": qwen_n,
+            "node_cap_used": cap_used,
+            "allowance": allowance,
+            "counts": snap_result["counts"],
+        },
+        "expected_ref": expected_ref,
+        "picked": picked,
+        "right_ref": right_ref,
+        "executed": executed,
+        "turns_taken": turns_taken,
+        "tokens": { "prompt_total": prompt_tokens_total, "completion_total": completion_tokens_total },
+        "outcome": outcome_note,
+        "replay": end["replay"],
+    });
+    Ok(receipt)
 }
