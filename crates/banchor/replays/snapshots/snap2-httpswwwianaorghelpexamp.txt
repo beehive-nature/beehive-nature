@@ -1,4 +1,4 @@
-# banchor snapshot artifact — counted bytes below (origin: https://www.iana.org/help/example-domains, taken: 20260904043029)
+# banchor snapshot artifact — counted bytes below (origin: https://www.iana.org/help/example-domains, taken: 20260904043157)
 # integrity: sha3-256:O1heFEdqu4ysJiNSbZq1iJKyAnlVt_WbkyeEf-K86Vk
 - rootwebarea "Example Domains"
     - banner

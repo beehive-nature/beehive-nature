@@ -58,6 +58,7 @@ pub fn agentloop_tool_schema() -> Value {
             "properties": {
                 "url": { "type": "string", "description": "page to drive, e.g. https://example.com/" },
                 "goal": { "type": "string", "description": "what to click, in plain words" },
+                "goal_audio": { "type": "string", "description": "VOICE IN: path to a wav on the daemon host, or the literal 'mic' to record the daemon machine's default mic (whisper.cpp on estate iron, no hosted ASR) — the transcript becomes the goal with full provenance in the replay" },
                 "expect_substr": { "type": "string", "description": "DECLARED judge: substring the correct element's accessible name must contain (omitted = first-link judge)" },
                 "max_turns": { "type": "integer", "default": 3, "description": "model turns allowed when feedback is needed" },
                 "replay_dir": { "type": "string", "description": "where the loop's replay + snapshot artifacts land (default: ~/.bheartwallet/banchor/replays)" }
@@ -131,6 +132,10 @@ pub fn dispatch(state: &Arc<Mutex<SeatState>>, req: &Value) -> Option<Value> {
                         .get("expect_substr")
                         .and_then(|e| e.as_str())
                         .map(str::to_string);
+                    let goal_audio = arguments
+                        .get("goal_audio")
+                        .and_then(|g| g.as_str())
+                        .map(str::to_string);
                     let replay_dir = arguments
                         .get("replay_dir")
                         .and_then(|d| d.as_str())
@@ -144,9 +149,42 @@ pub fn dispatch(state: &Arc<Mutex<SeatState>>, req: &Value) -> Option<Value> {
                             }
                         }));
                     }
+                    // VOICE IN over MCP: a wav path on the daemon host, or
+                    // "mic" for the daemon's own default capture device
+                    let mut goal = goal;
+                    let mut goal_provenance: Option<Value> = None;
+                    if let Some(audio) = goal_audio {
+                        let wav = if audio == "mic" {
+                            std::env::temp_dir().join("banchor-voice-goal.wav")
+                        } else {
+                            std::path::PathBuf::from(audio)
+                        };
+                        match crate::voice::goal_from_audio(&wav) {
+                            Ok((t, p)) => {
+                                goal = t;
+                                goal_provenance = Some(p);
+                            }
+                            Err(e) => {
+                                return Some(json!({
+                                    "jsonrpc": "2.0", "id": id,
+                                    "result": {
+                                        "content": [{ "type": "text", "text": e.to_string() }],
+                                        "isError": true,
+                                    }
+                                }))
+                            }
+                        }
+                    }
                     let dir = replay_dir
                         .unwrap_or_else(|| crate::cache::home().join("banchor").join("replays"));
-                    match crate::seat::agentloop(&url, &goal, max_turns, &dir, expect.as_deref()) {
+                    match crate::seat::agentloop(
+                        &url,
+                        &goal,
+                        max_turns,
+                        &dir,
+                        expect.as_deref(),
+                        goal_provenance.clone(),
+                    ) {
                         Ok(v) => Ok(json!({
                             "content": [{ "type": "text", "text": serde_json::to_string_pretty(&v).unwrap_or_default() }],
                             "isError": false,

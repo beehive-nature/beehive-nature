@@ -57,7 +57,7 @@ impl Qwen {
             std::env::var("BANCHOR_QWEN_KEY_ID").unwrap_or_else(|_| "unnamed-meter-key".into());
         let agent = ureq::AgentBuilder::new()
             .timeout_connect(Duration::from_secs(15))
-            .timeout_read(Duration::from_secs(180))
+            .timeout_read(Duration::from_secs(480)) // 16k-window prefills on 3 threads take minutes
             .build();
         let q = Qwen {
             endpoint,
@@ -242,26 +242,39 @@ pub const FIT_ATTEMPTS: &[(bool, usize)] = &[
 ];
 
 /// Prompt budget: n_ctx minus chat-template overhead, minus reserved
-/// completion tokens. All three named in the receipt.
+/// completion tokens — then CLAMPED to the ROAD's ceiling
+/// (`BANCHOR_MAX_PROMPT_TOKENS`, default 5000): the estate's TLS edge cuts
+/// silent responses at ~100s (measured live, M4: a 14k-token prefill —
+/// ~10 min on 3 threads — dies with rustls peer-close while the server
+/// itself is fine). A prompt that cannot prefill in time never reaches
+/// the model, so the budget respects both walls and names both in the
+/// receipt.
 #[derive(Debug, Clone, Copy)]
 pub struct Budget {
     pub n_ctx: u64,
     pub template_overhead: u64,
     pub reserved_completion: u64,
+    pub road_cap: u64,
 }
 
 impl Budget {
     pub fn for_ctx(n_ctx: u64) -> Budget {
+        let road_cap = std::env::var("BANCHOR_MAX_PROMPT_TOKENS")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(5000);
         Budget {
             n_ctx,
             template_overhead: 200,
             reserved_completion: 256,
+            road_cap,
         }
     }
     pub fn snapshot_allowance(&self) -> u64 {
-        self.n_ctx.saturating_sub(
+        let by_ctx = self.n_ctx.saturating_sub(
             self.template_overhead + self.reserved_completion + 1024, /* system+goal headroom */
-        )
+        );
+        by_ctx.min(self.road_cap)
     }
 }
 
