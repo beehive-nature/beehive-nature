@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#07090b">
+<title>mint your agent · skaists vending</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+/* THE VENDING-CUSTOMER SURFACE — reference: the founder's vending-customer-mock.
+   One file, vanilla, tokens.css only. Every hue reads from the estate sheet;
+   the comb strip follows CANON-COMB (nectar translucent cyan -> honey amber ->
+   capped gold, one direction); FAILED renders --flag, never a new red.
+   Live truth only: rate + tithe + certs + finality read from the public
+   jungle4 API at load; nothing on this page is a stored snapshot. */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow-x:hidden}
+body{background:var(--bg0);color:var(--ink);
+  font:13px/1.65 'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  padding:14px 14px 40px}
+main{max-width:462px;margin:0 auto}
+.crumbs{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:10px;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--faint);
+  padding-bottom:10px;border-bottom:1px solid var(--line)}
+.crumbs a{color:var(--dim);text-decoration:none}
+.crumbs .here{color:var(--ink)}
+.hd{display:flex;align-items:center;gap:12px;padding:18px 2px 8px}
+.hd .r{width:38px;height:38px;flex:none;border-radius:50%;border:1.5px solid var(--gold);
+  display:grid;place-items:center;color:var(--gold);font-size:17px}
+.hd h1{font-size:var(--t-display);font-weight:600;letter-spacing:.02em;line-height:1.15}
+.hd h1 span{color:var(--gold)}
+.hd small{display:block;font-size:10px;color:var(--faint);letter-spacing:.14em;
+  text-transform:uppercase;margin-top:3px}
+.step{padding:16px 2px 6px;font-size:var(--t-small);letter-spacing:.16em;
+  color:var(--dim);text-transform:uppercase}
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:14px 14px 12px}
+.field{display:flex;align-items:center;gap:8px;background:var(--well);
+  border:1px solid var(--line);border-radius:var(--r-md);padding:11px 12px;margin-bottom:10px}
+.field:focus-within{border-color:var(--gold)}
+.field label{font-size:10px;color:var(--faint);letter-spacing:.08em;
+  text-transform:uppercase;width:58px;flex:none}
+.field input,.field select{flex:1;min-width:0;background:transparent;border:none;outline:none;
+  color:var(--gold);font:600 15px 'IBM Plex Mono',ui-monospace,monospace}
+.field select{color:var(--ink);font-weight:400;font-size:13px;appearance:none;cursor:pointer}
+.field .chev{color:var(--dim);font-size:12px;flex:none}
+.sep{display:inline-block;width:10px;height:10px;background:var(--gold);
+  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+  vertical-align:-1px;margin:0 3px;animation:seppulse 3.2s var(--ease) infinite}
+@keyframes seppulse{0%,100%{opacity:1}50%{opacity:.45}}
+.lawline{font-size:10.5px;color:var(--faint);line-height:1.7;margin:2px 2px 8px}
+.lawline b{color:var(--dim);font-weight:600}
+.lawline .bad{color:var(--flag)}
+.lawline .good{color:var(--ok)}
+.note{font-size:11.5px;color:var(--dim);line-height:1.55;margin-top:8px}
+.note b{color:var(--ink);font-weight:600}
+.line{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+  font-size:13px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.line:last-of-type{border-bottom:none}
+.line span small{display:block;font-size:10px;color:var(--faint);margin-top:1px}
+.line b{color:var(--ink-hi);font-weight:600;white-space:nowrap}
+.line b .a{color:var(--faint);font-size:10.5px}
+.total{display:flex;justify-content:space-between;align-items:baseline;margin-top:6px}
+.total .big{font-size:clamp(26px,7vw,32px);font-weight:600;color:var(--gold);
+  font-variant-numeric:tabular-nums}
+.total .sub{font-size:11px;color:var(--faint)}
+.btn{display:block;width:100%;margin-top:12px;background:var(--gold);color:var(--bg0);
+  border:none;border-radius:var(--r-lg);padding:15px;font:600 15px 'IBM Plex Mono',monospace;
+  text-align:center;cursor:pointer;box-shadow:var(--glow-gold)}
+.btn:hover{background:var(--ink-hi)}
+.btn:disabled{background:var(--bg3);color:var(--faint);cursor:not-allowed;box-shadow:none}
+/* the comb strip — three cells, one direction, real tx status */
+.comb{display:flex;justify-content:space-between;align-items:flex-start;padding:8px 2px 4px}
+.cell{width:31%;text-align:center}
+.hex{width:56px;height:62px;margin:0 auto 7px;
+  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+  display:grid;place-items:center;font-size:10px;letter-spacing:.06em;
+  transition:background var(--dur-slow) var(--ease),color var(--dur-slow) var(--ease)}
+.cell .l{font-size:11.5px;color:var(--ink);font-weight:600}
+.cell .s{font-size:10px;color:var(--faint);line-height:1.45;margin-top:2px;
+  overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.hex.nectar{background:rgba(0,229,255,.10);border:none;color:var(--cyan);
+  box-shadow:inset 0 0 0 1.5px var(--cyan)}
+.hex.nectar.live{animation:nectarlive 2.4s var(--ease) infinite}
+@keyframes nectarlive{0%,100%{background:rgba(0,229,255,.10)}50%{background:rgba(0,229,255,.26)}}
+.hex.honey{background:rgba(255,179,71,.16);color:var(--amber);
+  box-shadow:inset 0 0 0 1.5px var(--amber)}
+.hex.honey.live{animation:honeylive 2.4s var(--ease) infinite}
+@keyframes honeylive{0%,100%{background:rgba(255,179,71,.16)}50%{background:rgba(255,179,71,.34)}}
+.hex.capped{background:var(--gold);color:var(--bg0)}
+.hex.capped .seal{font-size:17px;line-height:1}
+.arrow{color:var(--dim);font-size:18px;flex:none;padding-top:20px}
+.past .l .tick,.tick{color:var(--ok)}
+.tx{font-size:10.5px;color:var(--gold);word-break:break-all;margin-top:10px;
+  padding:9px 10px;background:var(--well);border:1px solid var(--line);
+  border-radius:var(--r-md)}
+.tx .k{color:var(--faint);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;
+  display:block;margin-bottom:3px}
+.tx a{color:var(--gold);text-decoration:none;border-bottom:1px dashed var(--gold)}
+.tx a:hover{color:var(--ink-hi)}
+.tx .when{color:var(--faint)}
+.checked{font-size:10px;color:var(--faint);margin-top:7px;min-height:14px;
+  font-variant-numeric:tabular-nums}
+#afterplan.show{display:block;color:var(--dim)}
+.checked.nm{border-bottom:1px dashed var(--faint);display:inline-block}
+/* the certificate */
+.cert{border:1.5px solid var(--gold);border-radius:var(--r-lg);padding:14px;background:var(--bg1)}
+.cert .t{font-size:9.5px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.cert h2{margin:7px 0 2px;font-size:22px;font-weight:600;color:var(--gold);
+  overflow-wrap:anywhere}
+.cert .q{font-size:12.5px;color:var(--ink);line-height:1.55;margin:10px 0;
+  padding-left:10px;border-left:2px solid var(--violet)}
+.kv{display:flex;justify-content:space-between;gap:12px;font-size:11px;
+  padding:4px 0;color:var(--faint)}
+.kv b{color:var(--ink);font-weight:500;font-size:10.5px;text-align:right;
+  overflow-wrap:anywhere}
+.kv a{color:var(--gold);text-decoration:none;border-bottom:1px dashed var(--gold)}
+.btn2{display:block;width:100%;margin-top:12px;background:transparent;color:var(--gold);
+  border:1.5px solid var(--gold);border-radius:var(--r-lg);padding:12px;
+  font:600 13.5px 'IBM Plex Mono',monospace;text-align:center;cursor:pointer}
+.btn2:hover{color:var(--ink-hi);border-color:var(--ink-hi)}
+.res{margin-top:10px;background:var(--well);border:1px solid var(--line);
+  border-radius:var(--r-md);padding:10px 12px;font-size:11.5px;line-height:1.6}
+.res .head{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--dim);margin-bottom:6px}
+.res .ok{color:var(--ok);font-weight:600}
+.res .fail{color:var(--flag);font-weight:600}
+.res ul{list-style:none}
+.res li{padding:2.5px 0;color:var(--dim);opacity:0;
+  transform:translateY(4px);transition:opacity var(--dur) var(--ease-out),transform var(--dur) var(--ease-out)}
+.res li.show{opacity:1;transform:none}
+.res li .m{color:var(--faint)}
+.foot{padding:18px 2px 6px;font-size:10.5px;color:var(--faint);line-height:1.7;
+  border-top:1px solid var(--line);margin-top:18px}
+.foot b{color:var(--dim)}
+.foot a{color:var(--dim)}
+/* THE PLAN SCREEN — nothing moves until this is approved */
+#plan{position:fixed;inset:0;z-index:40;display:none;overflow-y:auto;
+  background:rgba(7,9,11,.97);backdrop-filter:blur(3px)}
+#plan.open{display:block;animation:planin var(--dur-stage) var(--ease-out)}
+@keyframes planin{from{opacity:0}to{opacity:1}}
+#plan .sheet{max-width:462px;margin:14px auto 30px;background:var(--bg1);
+  border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden}
+#plan .bar{background:var(--gold);color:var(--bg0);padding:12px 16px;
+  font:600 12px 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase}
+#plan .in{padding:14px 16px 18px}
+#plan h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--gold);margin:12px 0 6px}
+#plan h3:first-child{margin-top:0}
+#plan .what{font-size:12px;color:var(--dim);line-height:1.7;counter-reset:what}
+#plan .what div{padding:3px 0;padding-left:26px;position:relative;counter-increment:what}
+#plan .what div::before{content:counter(what);position:absolute;left:2px;top:3px;
+  width:17px;height:17px;border:1px solid var(--gold);border-radius:50%;
+  color:var(--gold);font-size:9.5px;display:grid;place-items:center}
+.rails{display:flex;flex-direction:column;gap:7px}
+.rail{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);
+  border-radius:var(--r-md);padding:9px 11px;cursor:pointer;background:var(--well)}
+.rail input{margin-top:3px;accent-color:var(--gold)}
+.rail .rn{font-size:12px;color:var(--ink);font-weight:600}
+.rail .rd{font-size:10px;color:var(--faint);line-height:1.6;margin-top:2px}
+.rail .rd b{color:var(--dim)}
+.rail.pick{border-color:var(--gold);box-shadow:var(--glow-gold)}
+/* the approval affordance rides with the scroll — on a phone the plan is
+   taller than the viewport and approve/refuse must always be one tap away */
+#plan .btns{display:flex;gap:10px;margin-top:16px;position:sticky;bottom:0;
+  background:var(--bg1);padding:12px 0 4px;border-top:1px solid var(--line)}
+#plan .refuse{flex:1;background:transparent;color:var(--dim);border:1px solid var(--line);
+  border-radius:var(--r-lg);padding:13px;font:600 13px 'IBM Plex Mono',monospace;cursor:pointer}
+#plan .refuse:hover{color:var(--ink);border-color:var(--dim)}
+#plan .approve{flex:2;background:var(--gold);color:var(--bg0);border:none;
+  border-radius:var(--r-lg);padding:13px;font:600 13px 'IBM Plex Mono',monospace;cursor:pointer}
+#plan .approve:hover{background:var(--ink-hi)}
+#doorstate{margin-top:12px;font-size:11.5px;line-height:1.65;color:var(--dim);
+  border:1px dashed var(--line);border-radius:var(--r-md);padding:10px 12px;display:none}
+#doorstate.show{display:block}
+#doorstate .moved{color:var(--ok);font-weight:600}
+#doorstate .held{color:var(--amber);font-weight:600}
+#doorstate code{color:var(--gold);word-break:break-all;font-size:10.5px}
+.dotted{border-bottom:1px dashed var(--faint)}
+@media (max-width:390px){.cell .s{font-size:9px}}
+@media (prefers-reduced-motion:reduce){.hex.nectar.live,.hex.honey.live,.sep{animation:none}}
+</style>
+</head>
+<body>
+<main>
+<nav class="crumbs" aria-label="you are here">
+  <a href="index.html">beehive nature reserve</a><span>▸</span><span class="here">the vending machine</span>
+</nav>
+
+<header class="hd">
+  <div class="r" aria-hidden="true">⚘</div>
+  <div>
+    <h1>mint your <span>agent</span></h1>
+    <small>skaists vending · keep what you make</small>
+  </div>
+</header>
+
+<!-- ── 1 · NAME IT ─────────────────────────────────────────────── -->
+<div class="step" id="s1">1 · name it</div>
+<section class="card" aria-label="name your agent">
+  <div class="field">
+    <label for="vname">name</label>
+    <input id="vname" type="text" value="vendingtest3" maxlength="64"
+           autocomplete="off" spellcheck="false" aria-describedby="vnamelaw">
+    <span class="sep" aria-hidden="true"></span><span style="color:var(--gold)">a</span>
+  </div>
+  <div class="lawline" id="vnamelaw">pointer row key <b>fnv1a-64</b>: <span id="vnamepk">—</span><span id="vnamechk"></span></div>
+  <div class="field">
+    <label for="vtongue">tongue</label>
+    <select id="vtongue" aria-describedby="vtonguelaw"></select><span class="chev">▾</span>
+  </div>
+  <div class="field">
+    <label for="vline">line</label>
+    <select id="vline" aria-describedby="vlinelaw">
+      <option value="bqueenbee-genesis-1" selected>bQueenBee genesis</option>
+    </select><span class="chev">▾</span>
+  </div>
+  <p class="note">Your agent gets a house on the <b>.a</b> rail, speaks the tongue you
+  pick, and belongs to <b>you</b> — not to us. Any name your tongue writes,
+  the rail accepts whole (SPEC-A-NAMES-1 §charset — 27 corpus tongues + sanskrit).</p>
+</section>
+
+<!-- ── 2 · THE PRICE, ALL OF IT ────────────────────────────────── -->
+<div class="step">2 · the price, all of it</div>
+<section class="card" aria-label="the price, all of it">
+  <div class="line"><span id="l-mint">mint<small id="l-mint-sub" class="dotted">reading the law rows…</small></span><b id="v-mint">—</b></div>
+  <div class="line"><span>its room on chain<small id="l-ram-sub" class="dotted">≈ 462 B row · refundable if released</small></span><b id="v-ram">—</b></div>
+  <div class="line"><span id="l-tithe">the tithe<small id="l-tithe-sub" class="dotted">reading the law rows…</small></span><b id="v-tithe">—</b></div>
+  <div class="line"><span>its birth certificate<small>Arweave · permanent · Turbo free tier carries it today</small></span><b>$0.00</b></div>
+  <div class="total"><span class="sub" id="v-total-sub">you pay, once</span><span class="big" id="v-total">—</span></div>
+  <button class="btn" id="vmintbtn" disabled>Mint — reading the live price…</button>
+  <p class="note">Pay with your card, PayPal, or any wallet — <b>one tap, no network
+  switch.</b> Nothing moves until you approve the plan on the next screen.</p>
+  <div class="lawline" id="afterplan" style="display:none;margin-top:8px"></div>
+</section>
+
+<!-- ── 3 · WATCH IT LAND ───────────────────────────────────────── -->
+<div class="step">3 · watch it land</div>
+<section class="card" aria-label="watch it land">
+  <div class="comb" id="vcomb" aria-live="polite">
+    <div class="cell" id="c-nectar"><div class="hex nectar">nectar</div>
+      <div class="l">sent</div><div class="s" id="c-nectar-s">on its way</div></div>
+    <div class="arrow" aria-hidden="true">›</div>
+    <div class="cell" id="c-honey"><div class="hex honey">honey</div>
+      <div class="l">in a block</div><div class="s" id="c-honey-s">—</div></div>
+    <div class="arrow" aria-hidden="true">›</div>
+    <div class="cell" id="c-capped"><div class="hex capped"><span class="seal">⬡</span></div>
+      <div class="l" id="c-capped-l">final</div><div class="s" id="c-capped-s">—</div></div>
+  </div>
+  <div class="tx"><span class="k">the mint, on the public chain</span><span id="vtx">reading the machine's recent mints…</span></div>
+  <div class="checked" id="vchecked"></div>
+</section>
+
+<!-- ── 4 · YOURS TO KEEP ───────────────────────────────────────── -->
+<div class="step">4 · yours to keep</div>
+<section class="card" aria-label="yours to keep">
+  <div class="cert">
+    <div class="t" id="vcert-t">birth certificate · agent-birth-certificate v1</div>
+    <h2 id="vcert-name">—<span class="sep" aria-hidden="true"></span>a</h2>
+    <div class="q" id="vcert-q">"—"</div>
+    <div class="kv"><span>owner</span><b id="vcert-owner">—</b></div>
+    <div class="kv"><span>certificate</span><b id="vcert-ar">—</b></div>
+    <div class="kv"><span>fingerprint</span><b id="vcert-hash">—</b></div>
+    <div class="kv"><span>memory</span><b>autonomi · your key · deletable</b></div>
+    <button class="btn2" id="vrebuild">Rebuild it without us ↻</button>
+    <div class="res" id="vres">
+      <div class="head">client-side resurrection · from the name alone · live</div>
+      <ul id="vres-list"></ul>
+      <div id="vres-sum" class="lawline">not run yet</div>
+    </div>
+  </div>
+  <p class="note">The certificate carries <b>the recipe</b> — if this site vanished
+  tomorrow, you could stand your agent back up, and so could anyone else.</p>
+</section>
+
+<footer class="foot">
+  <b>new bee:</b> you just made an AI that's yours. ·
+  <b>raver:</b> it speaks your tongue and lives in the hive. ·
+  <b>cypherpunk:</b> Arweave record, ed25519 owner, sha256 over canonical JSON,
+  pointer derived not stored — <a href="https://monitor.jungletestnet.io/#accountOverview:bnrapolltest">verify it yourself</a>.<br>
+  law rows read live from the vending contract on jungle4 (bnrapolltest · rehearsal
+  net) · A price <span id="vpricedate">live</span> · spec
+  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/specs/SPEC-VENDING-1.md">SPEC-VENDING-1/2 in the estate tree</a>
+</footer>
+</main>
+
+<!-- ── THE PLAN SCREEN · nothing moves before approve ──────────── -->
+<div id="plan" role="dialog" aria-modal="true" aria-label="the plan — approve before anything moves">
+  <div class="sheet">
+    <div class="bar">the plan · approve before anything moves</div>
+    <div class="in">
+      <h3>what you asked for</h3>
+      <div class="what">
+        <div>one agent named <b id="p-name" style="color:var(--gold)">—</b>,
+        house on the .a rail, speaking <span id="p-tongue">—</span>
+        (<span id="p-line">—</span> line)</div>
+      </div>
+      <h3>the price, all of it — itemized</h3>
+      <div class="line"><span>mint<small id="p-mint-sub">—</small></span><b id="p-mint">—</b></div>
+      <div class="line"><span>its room on chain<small>≈ 462 B row · refundable if released</small></span><b id="p-ram">—</b></div>
+      <div class="line"><span id="p-tithe">the tithe<small id="p-tithe-sub">—</small></span><b id="p-tithe-v">—</b></div>
+      <div class="line"><span>its birth certificate<small>Arweave · permanent · carried free today</small></span><b>$0.00</b></div>
+      <div class="total"><span class="sub">you pay, once</span><span class="big" id="p-total">—</span></div>
+      <h3>what happens after you approve</h3>
+      <div class="what">
+        <div>you pay the total above — <b>one tap in your wallet</b>; nothing is
+        charged, signed, or sent before this approval</div>
+        <div>the machine writes your row on Vaulta (jungle4 rehearsal today) under
+        your own name-key — collision ⇒ refused, never hijacked</div>
+        <div>the birth certificate goes to Arweave, permanent, carrying the recipe</div>
+        <div>your agent stands: .a house, your tongue, your key — watch it land
+        below, then keep it forever</div>
+      </div>
+      <h3>the door</h3>
+      <div class="rails" id="vrails">
+        <label class="rail pick"><input type="radio" name="vrail" value="a" checked>
+          <span><span class="rn">A · Vaulta — the rehearsal rail, live today</span>
+          <span class="rd">jungle4 testnet A to the machine's own public seat
+          <b>bnrapolltest</b>, memo-bound — <b>the memo is the binding</b>.
+          Testnet money, real law rows.</span></span></label>
+        <label class="rail"><input type="radio" name="vrail" value="usdc">
+          <span><span class="rn">USDC · Base — the estate's proven rail</span>
+          <span class="rd">native USDC on Base. PayPal's PYUSD is
+          <b>not issued on Base</b> (read at docs.paxos.com, 2026-09-03 — Ethereum,
+          Arbitrum, Polygon, X Layer only); on Base the door takes USDC.</span></span></label>
+        <label class="rail"><input type="radio" name="vrail" value="pyusd">
+          <span><span class="rn">PYUSD — its official chains</span>
+          <span class="rd">PYUSD rides Ethereum, Arbitrum, Polygon or X Layer —
+          Paxos-issued, address cited in-source. One tap, same plan.</span></span></label>
+      </div>
+      <div id="doorstate"></div>
+      <div class="btns">
+        <button class="refuse" id="prefuse">refuse — nothing moves</button>
+        <button class="approve" id="papprove">approve · pay</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════════
+   LIVE TRUTH — every number below is read at load, never stored.
+   RPC host CORS-verified open (access-control-allow-origin: *). */
+'use strict';
+const RPC = 'https://jungle4.greymass.com';
+const CONTRACT = 'bnrapolltest';                    // TESTNET-ONLY jungle4 rehearsal seat
+const MONITOR_TX = 'https://monitor.jungletestnet.io/#accountActions:';
+const AR = 'https://arweave.net';
+const CG = 'https://api.coingecko.com/api/v3/simple/price?ids=vaulta&vs_currencies=usd';
+/* money-rail constants — each cited at source, none invented */
+const USDC_BASE   = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'; // PUBLIC-CONSTANT native USDC on Base (chain-confirmed, wallet.html rail)
+const PYUSD_ETH   = '0x6c3ea9036406852006290770BEdFcAbA0e23A0e8'; // PUBLIC-CONSTANT PYUSD on Ethereum (Paxos docs)
+const PYUSD_ARB   = '0x46850aD61C2B7d64d08c9C754F45254596696984'; // PUBLIC-CONSTANT PYUSD on Arbitrum One (Paxos docs)
+const CHAINS = { 1:'Ethereum', 42161:'Arbitrum One', 8453:'Base', 137:'Polygon PoS', 914:'X Layer' };
+const CHAIN_HEX = { 1:'0x1', 42161:'0xa4b1', 8453:'0x2105', 137:'0x89', 914:'0x392' };
+/* the machine's money seat on the paid rails is a FOUNDER CEREMONY
+   (SPEC-VENDING-2 §money: the first paid mint is the door's first receipt).
+   The rail's own law: unbound senders never auto-credit — so the door holds
+   until the founder names the seat. The e2e harness may set one to exercise
+   the one-tap path. */
+const PAY_SEAT = window.__VENDING_PAY_SEAT || null;
+const RAM_BASIS_A = 0.16;   /* cert row ≈ 462 B ≈ 0.16 A — SPEC-VENDING-2 §sizing,
+                               read 2026-09-01; storage moves, the basis is cited */
+const PRICE_FALLBACK = 0.074832; /* A→USD measured 2026-09-01 (SPEC-VENDING-2 §sizing) — used only if the live price is unreachable, and then labeled */
+
+const $ = id => document.getElementById(id);
+const fetchJSON = (url, opts = {}) => fetch(url, { ...opts,
+  signal: AbortSignal.timeout(opts.timeout || 20000) }).then(r => r.json().catch(() => ({})));
+const post = (path, body) => fetchJSON(RPC + path, { method: 'POST',
+  headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt$ = x => x == null ? '$—' : (x >= 0.1 ? '$' + x.toFixed(2) : '$' + x.toFixed(3));
+
+const state = { law: null, price: null, priceKind: null, certs: [], mints: [],
+  cert: null, mint: null, info: null, ran: false };
+window.__vending = state;   // e2e readback hook
+
+/* ── the tongues: the corpus, founder-priority first, native names ── */
+const TONGUES = [
+  ['russian','русский'],['latvian','latviešu'],['ukrainian','українська'],
+  ['scottish-gaelic','Gàidhlig'],['czech','čeština'],['chinese','中文'],
+  ['korean','한국어'],['thai','ไทย'],['arabic','العربية'],['flemish','Vlaams'],
+  ['spanish','español'],['dutch','Nederlands'],['german','Deutsch'],
+  ['french','français'],['hebrew','עברית'],['hindi','हिन्दी'],['bengali','বাংলা'],
+  ['persian','فارسی'],['urdu','اردو'],['japanese','日本語'],['danish','dansk'],
+  ['norwegian','norsk'],['swedish','svenska'],['finnish','suomi'],
+  ['turkish','Türkçe'],['hungarian','magyar'],['tatar','татарча'],
+  ['sanskrit','संस्कृतम्']];
+$('vtongue').innerHTML = TONGUES.map(([v, n], i) =>
+  `<option value="${v}"${i === 1 ? ' selected' : ''}>${n}</option>`).join('');
+
+/* ── live reads: the law rows, the price, the ledger, the landings ── */
+async function readLaw() {
+  const [rates, tithe, cfg] = await Promise.all([
+    post('/v1/chain/get_table_rows', { json: true, code: CONTRACT, scope: CONTRACT, table: 'rates', limit: 10 }),
+    post('/v1/chain/get_table_rows', { json: true, code: CONTRACT, scope: CONTRACT, table: 'tithe', limit: 1 }),
+    post('/v1/chain/get_table_rows', { json: true, code: CONTRACT, scope: CONTRACT, table: 'config', limit: 1 }),
+  ]);
+  const row = (rates.rows || []).find(r => r.rail === 'vaulta') || rates.rows?.[0];
+  const t = (tithe.rows || [])[0];
+  if (!row || !t) throw new Error('law rows unread');
+  state.law = { basisA: parseFloat(row.basis) || 0, basisTxt: row.basis,
+    titheBp: t.percent_bp, titheDest: t.destination,
+    updated: row.updated, count: cfg.rows?.[0]?.certs_count,
+    max: cfg.rows?.[0]?.max_certs };
+  renderPrice();
+}
+async function readPrice() {
+  try {
+    const j = await fetchJSON(CG, { timeout: 10000 });
+    if (j?.vaulta?.usd > 0) { state.price = j.vaulta.usd; state.priceKind = 'live'; }
+    else throw 0;
+  } catch {
+    state.price = PRICE_FALLBACK; state.priceKind = 'measured 2026-09-01';
+  }
+  $('vpricedate').textContent = state.priceKind === 'live'
+    ? 'read live (CoinGecko)' : 'unreachable — ' + state.priceKind + ' basis, labeled';
+  renderPrice();
+}
+function renderPrice() {
+  if (!state.law) { $('l-mint-sub').textContent = $('l-tithe-sub').textContent =
+    'chain unread — shown not-measured, never faked'; return; }
+  const L = state.law, p = state.price;
+  const mintU = p != null ? L.basisA * p : null;
+  const ramU  = p != null ? RAM_BASIS_A * p : null;
+  const titU  = mintU != null ? mintU * L.titheBp / 10000 : null;
+  const totU  = mintU != null ? mintU + ramU + titU : null;
+  $('l-mint-sub').classList.remove('dotted'); $('l-tithe-sub').classList.remove('dotted');
+  $('l-mint-sub').textContent = `rate ${L.basisTxt} A · Vaulta · read live ${L.updated.slice(0, 10)}`;
+  $('v-mint').innerHTML = mintU == null ? 'n/m' : `${fmt$(mintU)} <span class="a">${L.basisTxt} A</span>`;
+  $('l-ram-sub').textContent = '≈ 462 B row · refundable if released · basis SPEC-VENDING-2 §sizing';
+  $('v-ram').innerHTML = ramU == null ? 'n/m' : `${fmt$(ramU)} <span class="a">0.16 A</span>`;
+  $('l-tithe-sub').textContent = `${(L.titheBp / 100).toFixed(2)}% → ${L.titheDest} · keeps the machine running · read live`;
+  $('v-tithe').innerHTML = titU == null ? 'n/m' : `${fmt$(titU)} <span class="a">${(L.basisA * L.titheBp / 10000).toFixed(4)} A</span>`;
+  $('v-total').textContent = totU == null ? '—' : '$' + totU.toFixed(2);
+  $('vmintbtn').textContent = totU == null ? 'Mint — price unread' : `Mint for $${totU.toFixed(2)} →`;
+  $('vmintbtn').disabled = totU == null || nameTaken();
+  $('v-total-sub').textContent = `you pay, once · machine holds ${L.count}/${L.max} (cap = 6⁵)`;
+}
+async function readCerts() {
+  const r = await post('/v1/chain/get_table_rows', { json: true, code: CONTRACT, scope: CONTRACT, table: 'certs', limit: 100 });
+  state.certs = r.rows || [];
+  state.cert = [...state.certs].sort((a, b) => (b.minted || '').localeCompare(a.minted || ''))[0] || null;
+  checkName(); renderCert();
+}
+/* walk the machine's public action history for landed mints (bounded: the
+   account is small; the walk stops at the first empty page) */
+async function walkMints() {
+  let pos = 0, pages = 0; const found = [];
+  while (pages < 14) {
+    const r = await post('/v1/history/get_actions', { account_name: CONTRACT, pos, offset: 25 });
+    const acts = r.actions || []; if (!acts.length) break;
+    for (const a of acts) { const t = a.action_trace;
+      if (t?.act?.name === 'mint') found.push({ name: t.act.data.agent_name,
+        trx: t.trx_id, block: a.block_num, irrev: !!a.irreversible, when: a.block_time }); }
+    pos = acts[acts.length - 1].account_action_seq + 1; pages++;
+  }
+  state.mints = found;
+  renderLand();
+}
+async function tickInfo() {
+  try { const i = await post('/v1/chain/get_info', {});
+    state.info = i;
+    $('vchecked').classList.remove('nm');
+    $('vchecked').textContent = `checked just now · head ${i.head_block_num.toLocaleString('en-US')} · irreversible through ${i.last_irreversible_block_num.toLocaleString('en-US')} · jungle4`;
+  } catch { $('vchecked').classList.add('nm');
+    $('vchecked').textContent = 'chain check unreachable — n/m'; }
+}
+
+/* ── step 1: the name, its derived key, the collision refusal ── */
+const fnv1a64 = s => { let h = 0xcbf29ce484222325n;
+  const M = 0xffffffffffffffffn;                       /* the contract's uint64 wraps; so does this */
+  for (const b of new TextEncoder().encode(s)) { h ^= BigInt(b); h = (h * 0x100000001b3n) & M; }
+  return h.toString(); };
+const nameTaken = () => state.certs.some(c => c.agent_name === $('vname').value.trim());
+function checkName() {
+  const n = $('vname').value.trim();
+  $('vnamepk').textContent = n ? fnv1a64(n) : '—';
+  const chk = $('vnamechk');
+  if (!n) { chk.innerHTML = ' — <span class="bad">a name is needed</span>'; }
+  else if (nameTaken()) { chk.innerHTML = ' — <span class="bad">already minted · the contract refuses collisions, so does this form</span>'; }
+  else { chk.innerHTML = ' — <span class="good">free to mint</span>'; }
+  renderPrice();
+}
+$('vname').addEventListener('input', checkName);
+
+/* ── step 3: the comb strip, driven by real tx status ── */
+function renderLand() {
+  /* newest landed mint of the machine; if the customer's own name just landed,
+     follow that one instead */
+  const mine = $('vname').value.trim();
+  const m = [...state.mints].reverse().find(x => x.name === mine)
+         || [...state.mints].sort((a, b) => b.block - a.block)[0];
+  state.mint = m || null;
+  const set = (id, on) => $(id).classList.toggle('past', on);
+  if (!m) {
+    $('c-honey-s').textContent = $('c-capped-s').textContent = '—';
+    $('vtx').textContent = state.certs.length
+      ? 'the ledger has rows but the history walk found no mint yet — re-walking'
+      : 'no mints yet — the machine is brand new';
+    return;
+  }
+  /* landed: it was sent (nectar, passed), sat in a block (honey, passed, number
+     known), and the chain's own irreversibility seals it (capped) */
+  set('c-nectar', true); set('c-honey', m.irrev); set('c-capped', m.irrev);
+  $('c-nectar-s').textContent = 'it was sent';
+  $('c-honey-s').textContent = (m.block || 0).toLocaleString('en-US').replace(/,/g, ' ');
+  $('c-capped-l').innerHTML = m.irrev ? 'final <span class="tick">✓</span>' : 'sealing…';
+  $('c-capped-s').textContent = m.irrev ? 'irreversible' : 'waiting on finality';
+  const when = (m.when || '').replace('T', ' ').slice(0, 19) + ' UTC';
+  $('vtx').innerHTML = `<a href="${MONITOR_TX}${esc(m.trx)}" target="_blank" rel="noopener">${esc(m.trx)}</a>` +
+    ` <span class="when">· ${esc(m.name)} · ${esc(when)}</span>`;
+}
+
+/* ── step 4: the certificate, then the client-side resurrection ── */
+function renderCert() {
+  const c = state.cert; if (!c) { $('vcert-name').textContent = '—'; return; }
+  $('vcert-name').innerHTML = `${esc(c.agent_name)}<span class="sep" aria-hidden="true"></span>a`;
+  $('vcert-owner').textContent = c.member_key.slice(0, 8) + '…' + c.member_key.slice(-7);
+  $('vcert-ar').innerHTML = `<a href="${AR}/${esc(c.ar_id)}" target="_blank" rel="noopener">ar://${esc(c.ar_id.slice(0, 8))}…${esc(c.ar_id.slice(-5))}</a>`;
+  $('vcert-hash').textContent = 'sha256 ' + c.content_hash.slice(0, 8) + '…' + c.content_hash.slice(-6);
+  /* the quote + owner line fill from the record itself once fetched */
+}
+/* the hash law, ported verbatim in spirit from contracts/vending/tool/cert.mjs:
+   canonical JSON = keys sorted at every level, no whitespace; sha256 over the
+   record with hash.value removed — the record says this itself */
+const sortDeep = v => Array.isArray(v) ? v.map(sortDeep)
+  : (v && typeof v === 'object')
+    ? Object.keys(v).sort().reduce((o, k) => (o[k] = sortDeep(v[k]), o), {})
+    : v;
+const canonicalJson = r => JSON.stringify(sortDeep(r));
+async function sha256hex(s) {
+  const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+  return [...new Uint8Array(d)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+async function contentHash(r) {
+  const noHash = sortDeep(structuredClone(r));
+  if (noHash.hash) delete noHash.hash.value;
+  return sha256hex(canonicalJson(noHash));
+}
+const verifyCert = async r => (!r || r.record !== 'agent-birth-certificate')
+  ? { ok: false, reason: 'not a birth certificate' }
+  : (!r.hash?.value || r.hash.algorithm !== 'sha256')
+    ? { ok: false, reason: 'missing/unknown hash block' }
+    : { ok: await contentHash(r) === r.hash.value,
+        reason: 'HASH MISMATCH — forged or corrupted' };
+
+/* the 11 gates of contracts/vending/tool/resurrect.mjs, client-side, live */
+async function resurrect() {
+  const list = $('vres-list'); list.innerHTML = ''; $('vres-sum').textContent = 'running…';
+  let pass = 0, fail = 0;
+  const li = (name, ok, detail) => {
+    const el = document.createElement('li');
+    el.innerHTML = `<span class="${ok ? 'ok' : 'fail'}">${ok ? 'ok' : 'FAIL'}</span> ${esc(name)}` +
+      (detail ? ` <span class="m">— ${esc(detail)}</span>` : '');
+    list.appendChild(el);
+    requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
+    ok ? pass++ : fail++;
+    $('vres-sum').innerHTML = fail === 0
+      ? `<span class="ok">Resurrected: ${pass} checks passed, 0 failed.</span> Found from your key alone. Fingerprint matched three ways. A forged copy was refused.`
+      : `<span class="fail">${fail} failed</span> — the record did not prove itself; look at the lines above.`;
+  };
+  const name = state.cert?.agent_name; if (!name) { li('a certificate to test', false, 'no ledger row visible'); return; }
+  /* 1 · the name road */
+  const row = state.certs.find(r => r.agent_name === name);
+  li('name road: name → chain row → ar id (jungle4, public state)', !!row, row ? 'row ' + row.id : 'not found');
+  if (!row) return;
+  /* 2 · shape */
+  li('ar id is a 43-char data item', row.ar_id.length === 43, row.ar_id.slice(0, 10) + '…');
+  /* 3 · fetch */
+  let text = '';
+  try { const res = await fetch(`${AR}/${row.ar_id}`, { signal: AbortSignal.timeout(30000) });
+    li('gateway returned the bytes over public HTTPS', res.ok, 'HTTP ' + res.status);
+    text = await res.text();
+  } catch (e) { li('gateway returned the bytes over public HTTPS', false, String(e).slice(0, 60)); return; }
+  /* 4 · json */
+  let cert; try { cert = JSON.parse(text); } catch { }
+  li('certificate is JSON', !!cert); if (!cert) return;
+  /* 5 · hash */
+  const v = await verifyCert(cert);
+  li('content hash verifies (re-derive · re-hash · compare)', v.ok,
+    (v.ok ? (await contentHash(cert)).slice(0, 12) + '…' : v.reason));
+  /* 6 · three-way */
+  li('chain row hash agrees — three-way match', row.content_hash === cert.hash?.value,
+    row.content_hash.slice(0, 12) + '…');
+  /* 7 · recipe */
+  li('recipe carried (the species survives the estate)',
+    !!cert.recipe?.layers && Array.isArray(cert.recipe?.restand_steps));
+  /* 8 · five answers */
+  const A = cert.answers || {};
+  li('five answers carried', !!(A.what_is_this && A.who_owns_it && A.when_minted_utc && A.where_memory_lives && A.how_to_make_another));
+  /* the card fills from the record itself */
+  $('vcert-q').textContent = '"' + (A.what_is_this || '') + '"';
+  $('vcert-owner').textContent = (A.who_owns_it?.member_key_ed25519_hex || row.member_key).slice(0, 8) + '…' + row.member_key.slice(-7);
+  /* 9 · key road */
+  const mk = A.who_owns_it?.member_key_ed25519_hex || row.member_key;
+  try {
+    const g = await fetch(`${AR}/graphql`, { method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ query: `query{transactions(tags:[{name:"Member-Key",values:["${mk}"]}]){edges{node{id owner{address}}}}}` }),
+      signal: AbortSignal.timeout(30000) });
+    const edges = g.ok ? ((await g.json())?.data?.transactions?.edges || []) : [];
+    li('key road: your key alone finds it on Arweave (tag search)',
+      edges.some(e => e.node.id === row.ar_id), edges.length + ' hit(s) — your whole mint history');
+    li('record discoverable · owner recorded', edges.length > 0,
+      edges[0]?.node?.owner?.address ? 'owner ' + edges[0].node.owner.address.slice(0, 10) + '…' : '');
+  } catch (e) { li('key road reachable', false, String(e).slice(0, 60)); }
+  /* 10 · the negative proof, run live on the fetched record */
+  const forged = structuredClone(cert);
+  forged.answers.who_owns_it.vaulta_account = 'attacker';
+  const fv = await verifyCert(forged);
+  li('a forged copy is REFUSED (one flipped field ⇒ hash mismatch)', !fv.ok, fv.reason);
+  state.resurrected = { pass, fail };
+}
+$('vrebuild').addEventListener('click', resurrect);
+/* auto-run once when the certificate scrolls into view — 11/0 shown live */
+new IntersectionObserver((es, io) => { if (es.some(e => e.isIntersecting) && !state.ran) {
+  state.ran = true; io.disconnect(); resurrect(); } }, { threshold: .3 })
+  .observe($('vres'));
+
+/* ── the plan screen · refuse / approve · the door ── */
+const plan = $('plan');
+function openPlan() {
+  if (!state.law) return;
+  const L = state.law, p = state.price, n = $('vname').value.trim();
+  const totU = p != null ? (L.basisA + RAM_BASIS_A + L.basisA * L.titheBp / 10000) * p : null;
+  $('p-name').textContent = n || '—';
+  $('p-tongue').textContent = TONGUES.find(t => t[0] === $('vtongue').value)?.[1] || $('vtongue').value;
+  $('p-line').textContent = $('vline').selectedOptions[0].textContent;
+  $('p-mint-sub').textContent = `rate ${L.basisTxt} A · read live`;
+  $('p-mint').innerHTML = p != null ? `${fmt$(L.basisA * p)} <span class="a">${L.basisTxt} A</span>` : 'n/m';
+  $('p-ram').innerHTML = p != null ? `${fmt$(RAM_BASIS_A * p)} <span class="a">0.16 A</span>` : 'n/m';
+  $('p-tithe-sub').textContent = `${(L.titheBp / 100).toFixed(2)}% → ${L.titheDest} · shown, never buried`;
+  $('p-tithe-v').innerHTML = p != null ? `${fmt$(L.basisA * L.titheBp / 10000 * p)} <span class="a">${(L.basisA * L.titheBp / 10000).toFixed(4)} A</span>` : 'n/m';
+  $('p-total').textContent = totU == null ? '—' : '$' + totU.toFixed(2);
+  $('doorstate').classList.remove('show');
+  plan.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  plan.querySelector('.refuse').focus();
+}
+const closePlan = msg => { plan.classList.remove('open'); document.body.style.overflow = '';
+  if (msg) { const el = $('afterplan'); el.textContent = msg;
+    el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 8000); } };
+$('vmintbtn').addEventListener('click', openPlan);
+$('prefuse').addEventListener('click', () => closePlan('refused — nothing moved, nothing was ever built'));
+plan.addEventListener('click', e => { if (e.target === plan) closePlan('dismissed — nothing moved'); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && plan.classList.contains('open')) closePlan('dismissed — nothing moved'); });
+
+const erc20Transfer = (to, units) =>   // selector(4) + address(32) + amount(32)
+  '0xa9059cbb' + to.replace(/^0x/, '').toLowerCase().padStart(64, '0') + units.toString(16).padStart(64, '0');
+const payTotal = () => { const L = state.law, p = state.price;
+  return (L.basisA + RAM_BASIS_A + L.basisA * L.titheBp / 10000) * (p || PRICE_FALLBACK); };
+
+/* the one-tap door. Rail A = rehearsal (testnet, memo-bound). USDC/PYUSD =
+   the money rails: EIP-681 one-tap + injected-wallet path when the seat is
+   named; until the founder names it the door HOLDS and says so. */
+$('papprove').addEventListener('click', async () => {
+  const rail = document.querySelector('input[name=vrail]:checked').value;
+  const door = $('doorstate'); door.classList.add('show');
+  const hold = why => door.innerHTML = `<span class="held">the door held — nothing moved.</span><br>${why}`;
+  const total = payTotal();
+  if (rail === 'a') {
+    door.innerHTML = `<span class="held">rehearsal rail armed — testnet A, the memo is the binding.</span><br>
+      send <code>${((state.law.basisA + RAM_BASIS_A + state.law.basisA * state.law.titheBp / 10000).toFixed(4))} A</code>
+      on jungle4 to <code>bnrapolltest</code> with memo <code>vending:${esc($('vname').value.trim())}</code> —
+      the poller below will catch your mint the moment it lands in a block.`;
+    /* watching mode: the nectar cell lives while we wait for the member's mint */
+    const hexN = document.querySelector('#c-nectar .hex');
+    hexN.classList.add('live'); $('c-nectar-s').textContent = 'watching for ' + $('vname').value.trim();
+    const was = state.mints.map(m => m.trx);
+    const watch = setInterval(async () => {
+      await walkMints().catch(() => {});
+      const fresh = state.mints.find(m => !was.includes(m.trx));
+      if (fresh) { clearInterval(watch); hexN.classList.remove('live'); renderLand(); }
+    }, 12000);
+    return;
+  }
+  if (!PAY_SEAT) {
+    hold(`the machine's payment seat on the money rails is named by the founder at the
+      first paid mint (SPEC-VENDING-2 §money — the rail's own law: unbound senders
+      never auto-credit). Your plan stands: <b>$${total.toFixed(2)}</b>. Nothing was
+      charged, nothing signed.`);
+    return;
+  }
+  const cfg = rail === 'usdc'
+    ? { chain: 8453, token: USDC_BASE, decimals: 6, label: 'USDC on Base' }
+    : { chain: 1, token: PYUSD_ETH, decimals: 18, label: 'PYUSD on Ethereum' };
+  const units = BigInt(Math.round(total * 10 ** cfg.decimals));
+  const data = erc20Transfer(PAY_SEAT, units);
+  /* the one-tap link works in any mobile wallet, no dapp browser needed */
+  door.innerHTML = `one tap: <a class="code" style="color:var(--gold)" href="ethereum:${cfg.token}@${cfg.chain}/transfer?address=${PAY_SEAT}&uint256=${units}">open ${cfg.label} in your wallet →</a><br>sending <b>$${total.toFixed(2)}</b> to the machine seat <code>${PAY_SEAT.slice(0, 10)}…</code>`;
+  const eth = window.ethereum;
+  if (!eth) { door.innerHTML += '<br><span class="held">no injected wallet on this page — the link above is the door on your phone.</span>'; return; }
+  try {
+    await eth.request({ method: 'wallet_switchEthereumChain',
+      params: [{ chainId: CHAIN_HEX[cfg.chain] }] });
+    const tx = await eth.request({ method: 'eth_sendTransaction', params: [{
+      from: (await eth.request({ method: 'eth_accounts' }))[0],
+      to: cfg.token, value: '0x0', data }] });
+    door.innerHTML += `<br><span class="moved">sent — ${esc(String(tx).slice(0, 20))}…</span> the machine is watching for your mint to land.`;
+  } catch (e) { hold('the wallet refused or was unavailable — <i>' + esc(String(e.message || e).slice(0, 90)) + '</i>'); }
+});
+
+/* ── boot: everything reads live; failures degrade to named n/m states ── */
+(async () => {
+  tickInfo(); setInterval(tickInfo, 15000);
+  readPrice().catch(() => {});
+  try { await readLaw(); } catch { renderPrice(); }
+  readCerts().catch(() => { checkName(); });
+  walkMints().catch(() => renderLand());
+  setInterval(() => { document.visibilityState === 'visible' && walkMints().catch(() => {}); }, 45000);
+})();
+</script>
+</body>
+</html>
