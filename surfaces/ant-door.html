@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>the Autonomi door — skaists</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    font: 16px/1.6 system-ui, sans-serif;
+    background: var(--bg, #101010); color: var(--fg, #eee4cf);
+    min-height: 100vh; display: flex; flex-direction: column;
+    padding: clamp(16px, 5vw, 48px); gap: 20px; max-width: 720px; margin: 0 auto;
+  }
+  h1 { font-size: clamp(20px, 6vw, 32px); font-weight: 650; letter-spacing: .3px; }
+  h1 .bee { color: var(--amber, #d9a441); }
+  .sub { color: var(--dim, #9a8f7a); font-size: 14px; }
+  .card {
+    border: 1px solid var(--line, #2c2822); border-radius: 12px;
+    padding: 18px; background: var(--panel, #181512);
+  }
+  .card h2 { font-size: 15px; color: var(--amber, #d9a441); margin-bottom: 10px; letter-spacing: .5px; }
+  img#content {
+    max-width: 100%; border-radius: 8px; display: block;
+    image-rendering: auto; min-height: 120px;
+  }
+  .placeholder {
+    display: grid; place-items: center; min-height: 140px;
+    color: var(--dim, #9a8f7a); font-size: 14px;
+    border: 1px dashed var(--line, #2c2822); border-radius: 8px;
+  }
+  .placeholder.err { color: var(--flag, #c07f1c); border-color: var(--flag, #c07f1c); }
+  .addr {
+    font: 12px/1.4 ui-monospace, monospace; word-break: break-all;
+    color: var(--dim, #9a8f7a); background: #0b0a09; border-radius: 6px;
+    padding: 8px 10px; margin-top: 10px;
+  }
+  .badge {
+    display: inline-block; font-size: 11px; letter-spacing: 1px;
+    border: 1px solid var(--amber, #d9a441); color: var(--amber, #d9a441);
+    border-radius: 4px; padding: 2px 8px; margin-top: 10px;
+  }
+  .note { font-size: 13.5px; color: var(--dim, #9a8f7a); }
+  .note b { color: var(--fg, #eee4cf); font-weight: 600; }
+  .three { display: grid; gap: 8px; margin-top: 8px; }
+  .three div { font-size: 13.5px; padding-left: 12px; border-left: 2px solid var(--line, #2c2822); }
+  .three b { color: var(--amber, #d9a441); font-weight: 600; }
+  footer { margin-top: auto; padding-top: 18px; font-size: 12px; color: var(--dim, #9a8f7a); }
+  footer a { color: var(--amber, #d9a441); }
+</style>
+</head>
+<body>
+  <h1><span class="bee">⬡</span> the Autonomi door</h1>
+  <p class="sub">estate page · reads Autonomi bytes same-origin — no plugin, no visitor-side daemon</p>
+
+  <div class="card">
+    <h2>PUBLIC DATA FROM THE NETWORK</h2>
+    <div id="stage" class="placeholder">fetching through the estate's door…</div>
+    <div class="addr" id="addr">autonomi://711c7e20006ff3e0ac6c1f3063286a0c1a3e4c409642e8c526173fa60bb7078a</div> <!-- PUBLIC-CONSTANT: mainnet public DataMap (docs example) -->
+    <span class="badge" id="state-badge">· · ·</span>
+  </div>
+
+  <div class="card">
+    <h2>WHAT YOU ARE LOOKING AT — THREE AUDIENCES</h2>
+    <div class="three">
+      <div><b>the neighbor</b> — this image lives on the Autonomi network, not on our servers. Your browser fetched it through the estate's door, in one same-origin request. Nothing to install, nothing to configure.</div>
+      <div><b>the builder</b> — the page calls <span id="apiref">/ant/v1/data/public/&lt;address&gt;</span> on this origin; Caddy proxies to a local read-only antd gateway (GET-only, all other endpoints refused). Open your network tab: one request, this origin, no third parties.</div>
+      <div><b>the cypherpunk</b> — the door is a bridge, not the destination. Direct browser access — the page itself speaking the network's post-quantum protocol — lands when Autonomi's WASM client ships. When that day comes, this door retires and the fetch goes peer-to-peer. The estate holds no keys here: public data, public reads.</div>
+    </div>
+  </div>
+
+  <footer>
+    served via the estate's door · direct browser access lands when Autonomi's WASM client ships ·
+    <a href="https://relay.skaists.dev">relay.skaists.dev</a>
+  </footer>
+
+<script>
+(async () => {
+  const ADDR = "711c7e20006ff3e0ac6c1f3063286a0c1a3e4c409642e8c526173fa60bb7078a"; // PUBLIC-CONSTANT: mainnet public DataMap
+  const stage = document.getElementById("stage");
+  const badge = document.getElementById("state-badge");
+  try {
+    const res = await fetch(`/ant/v1/data/public/${ADDR}`);   // SAME-ORIGIN: no CORS, no daemon
+    if (!res.ok) throw new Error(`door answered ${res.status}`);
+    const { data } = await res.json();
+    const bytes = Uint8Array.from(atob(data), c => c.charCodeAt(0));
+    const blob = new Blob([bytes], { type: "image/jpeg" });
+    const img = new Image();
+    img.id = "content"; img.alt = "public Autonomi data (JPEG)";
+    img.src = URL.createObjectURL(blob);
+    stage.replaceWith(img);
+    badge.textContent = `${bytes.length.toLocaleString()} BYTES · SAME-ORIGIN · LIVE`;
+  } catch (e) {
+    stage.classList.add("err");
+    stage.textContent = "the door did not answer — " + e.message;
+    badge.textContent = "UNREACHABLE";
+  }
+})();
+</script>
+</body>
+</html>
