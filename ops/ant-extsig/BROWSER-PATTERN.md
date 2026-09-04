@@ -63,3 +63,41 @@ fiction.
 License posture: antd/ant-sdk/ant-webex = MIT OR Apache-2.0 (repo LICENSE
 files verified) — clean to interoperate; nothing copied into the tree by
 this lane beyond this report.
+
+## UPDATE 2026-09-04 (the sharpened ask: stock Firefox, no daemon, no plugin)
+
+Target: one estate page on Autonomi, opened in stock Firefox via a WebRTC
+Direct browser client. **The client does not exist. Per the order, this lane
+reports what is missing and stops — no upload was attempted, no tutorial
+written.** Every road probed at source today:
+
+| what | state at HEAD | evidence |
+|---|---|---|
+| `WithAutonomi/ant-browser-sdk` | **EMPTY placeholder** — created 2026-09-02, 0 files, tree 409 | GitHub API: size 0, no branches with content |
+| `ant-wasm` | **WIP** — dashed box in ant-sdk's architecture diagram; no repo in the org (29 repos enumerated), no `@autonomi/ant-wasm` on npm (Not found) | ant-sdk README + npm registry |
+| the official desktop UI (`ant-ui`) | reaches the network via **Tauri `invoke`** (Rust side) — `utils/daemon-api.ts` imports `@tauri-apps/api/core`; there is no in-page network client to extract | source read |
+| `app.autonomi.com` | unrelated hosted app ("Alalaas"); zero wasm/WebRTC/localhost markers in its scripts | fetched + scanned |
+| shipped browser roads | ant-webex + the Chrome-store extension — both **require a local daemon**; excluded by the order's "no daemon, no plugin" | their READMEs |
+
+**What is missing, exactly** (the gap between here and the target):
+
+1. **A browser-capable transport for saorsa.** The network speaks pure
+   post-quantum QUIC (ML-KEM-768 + ML-DSA-65, `saorsa-transport`) — a
+   browser tab cannot open that socket. Someone must ship a
+   WebRTC-datachannel or WebTransport bridge with the PQC handshake
+   compiled to WASM. That is the entire content of the empty
+   `ant-browser-sdk` repo's implied scope (and of the dashed ant-wasm box).
+2. **A JS/npm distribution.** Nothing publishable exists on npm
+   (`@autonomi/ant-wasm`, `ant-wasm`, `@autonomi/antd`: all Not found).
+3. **The bootstrap + fetch story in-page** (peer discovery, then
+   DataMap→chunk fetch), which today only exists in Rust (`ant-core`) and
+   behind antd's REST.
+
+**The re-run trigger**: the `WithAutonomi/ant-browser-sdk` repo gaining
+content, or an `@autonomi/*` wasm package appearing on npm. On that day the
+lane re-opens: upload the one-file skaists page, open it in stock Firefox,
+and write the three-audience tutorial (docs/tutorials/) as a community
+contribution.
+
+**x0x rider (standing)**: box/laptop only — not mobile — until flood limits
+land.
