@@ -1103,18 +1103,27 @@
    "state": "LIVE",
    "gloss": "the vending machine — mint your agent, keep what you make",
    "org": "beehive-nature"
+  },
+  {
+   "id": "privacy-lens",
+   "family": "beehivenature",
+   "home": "skaists.dev",
+   "path": "surfaces/privacy-lens.html",
+   "state": "LIVE",
+   "gloss": "the privacy lens — the private note, both sides of the glass",
+   "org": "beehive-nature"
   }
  ],
  "counts": {
-  "surfaces": 89,
-  "listed": 98,
+  "surfaces": 90,
+  "listed": 99,
   "families": 8,
   "domains": 26,
   "domainsLive": 4,
   "domainsPending": 17,
   "domainsSeatOpen": 5,
   "byFamily": {
-   "beehivenature": 38,
+   "beehivenature": 39,
    "plur": 5,
    "skaists": 17,
    "bnature": 18,
@@ -1124,10 +1133,10 @@
    "bnr": 1
   },
   "byState": {
-   "LIVE": 98
+   "LIVE": 99
   },
   "byOrg": {
-   "beehive-nature": 55,
+   "beehive-nature": 56,
    "skaists": 29,
    "beehive-biomass": 5
   }
