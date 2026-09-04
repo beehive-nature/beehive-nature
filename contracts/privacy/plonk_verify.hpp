@@ -137,6 +137,10 @@ static void calculateChallenges( const plonk_ctx* c, plonk_keccak_fn kec,
 // L_i(ξ) = ω^(i−1)·Zh / (n·(ξ − ω^(i−1))); the nLagrange raw values are
 // batch-inverted together with Zh in ONE inversion (l.388, inverseArray).
 #define PL_NL ( ( N_PUBLIC > 1 ) ? N_PUBLIC : 1 )
+// z2.1 F1: the Lagrange batch rides field256's f_batch_invert, whose prefix
+// buffer holds 8 — a future vk with nPublic ≥ 7 must fail HERE, at compile
+// time, never as a runtime overflow.
+static_assert( PL_NL + 1 <= 8, "f_batch_invert prefix[8] bound: regenerate field256 with a larger buffer before shipping a 7+-public vk" );
 static void calculateLagrange( const plonk_ctx* c, const pl_chals* ch, u256 L[PL_NL] ) {
    u256 n; f256_set_u64( n, 1 );
    for ( int i = 0; i < PL_POWER; ++i ) { u256 t; f256_copy( t, n ); f256_add_raw( t, t, t ); f256_copy( n, t ); }
