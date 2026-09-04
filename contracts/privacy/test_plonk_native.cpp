@@ -114,7 +114,7 @@ int main( int argc, char** argv ) {
    if ( argc < 4 ) { fprintf( stderr, "usage: %s proof.hex pubs.hex oraclescalars.txt\n", argv[0] ); return 2; }
    std::vector<unsigned char> proof = read_hex_file( argv[1] );
    std::vector<unsigned char> pubs  = read_hex_file( argv[2] );
-   if ( proof.size() != 768 || pubs.size() != 64 ) { fprintf( stderr, "bad input sizes %zu %zu\n", proof.size(), pubs.size() ); return 2; }
+   if ( proof.size() != 768 || pubs.size() != 32 * N_PUBLIC ) { fprintf( stderr, "bad input sizes %zu %zu\n", proof.size(), pubs.size() ); return 2; }
 
    // oracle file: KEY hex lines
    FILE* f = fopen( argv[3], "r" );
@@ -122,7 +122,7 @@ int main( int argc, char** argv ) {
    char key[64], hex[128];
    static char o_beta[128], o_gamma[128], o_alpha[128], o_alpha2[128], o_xi[128], o_betaxi[128],
                o_xin[128], o_zh[128], o_v1[128], o_v2[128], o_v3[128], o_v4[128], o_v5[128],
-               o_u[128], o_L1[128], o_L2[128], o_pi[128], o_r0[128], o_d2[128], o_d3[128], o_e[128];
+               o_u[128], o_L1[128], o_L2[128], o_L3[128], o_L4[128], o_pi[128], o_r0[128], o_d2[128], o_d3[128], o_e[128];
    while ( fscanf( f, "%63s %127s", key, hex ) == 2 ) {
       if (!strcmp(key,"BETA")) strcpy(o_beta,hex);   if (!strcmp(key,"GAMMA")) strcpy(o_gamma,hex);
       if (!strcmp(key,"ALPHA")) strcpy(o_alpha,hex); if (!strcmp(key,"ALPHA2")) strcpy(o_alpha2,hex);
@@ -132,6 +132,7 @@ int main( int argc, char** argv ) {
       if (!strcmp(key,"V3")) strcpy(o_v3,hex);       if (!strcmp(key,"V4")) strcpy(o_v4,hex);
       if (!strcmp(key,"V5")) strcpy(o_v5,hex);       if (!strcmp(key,"U")) strcpy(o_u,hex);
       if (!strcmp(key,"L1")) strcpy(o_L1,hex);       if (!strcmp(key,"L2")) strcpy(o_L2,hex);
+      if (!strcmp(key,"L3")) strcpy(o_L3,hex);       if (!strcmp(key,"L4")) strcpy(o_L4,hex);
       if (!strcmp(key,"PI")) strcpy(o_pi,hex);       if (!strcmp(key,"R0")) strcpy(o_r0,hex);
       if (!strcmp(key,"D2")) strcpy(o_d2,hex);       if (!strcmp(key,"D3")) strcpy(o_d3,hex);
       if (!strcmp(key,"E")) strcpy(o_e,hex);
@@ -169,6 +170,7 @@ int main( int argc, char** argv ) {
    pl_sf( &ctx, pl_word( proof.data(), 23 ), sc.zw );
    calculateLagrange( &ctx, &ch, sc.L );
    chk( "L1", sc.L[0], o_L1 );           chk( "L2", sc.L[1], o_L2 );
+   chk( "L3", sc.L[2], o_L3 );           chk( "L4", sc.L[3], o_L4 );
    calculatePI( &ctx, sc.L, pubs.data(), sc.pi );
    chk( "PI", sc.pi, o_pi );
    calculateR0( &ctx, &ch, &sc );

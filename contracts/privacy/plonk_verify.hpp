@@ -31,7 +31,7 @@
 #include "vk_constants.hpp"
 #include <string.h>
 
-static_assert( N_PUBLIC == 2, "vk binds this circuit (spend.circom): exactly 2 public signals" );
+static_assert( N_PUBLIC == 4, "vk binds this circuit (payment.circom): 4 public signals (root, nullifier, commitment_out, fee)" );
 
 typedef void (*plonk_keccak_fn)( const unsigned char* in, unsigned len, unsigned char out[32] );
 
@@ -77,14 +77,14 @@ static void calculateChallenges( const plonk_ctx* c, plonk_keccak_fn kec,
                                  const unsigned char* proof, const unsigned char* pubs,
                                  pl_chals* ch ) {
    // β: 16 vk point words + nPublic pub words + A,B,C proof words
-   // (l.263-290; 704 + 32·nPublic bytes — 768 here)
-   unsigned char t[768];
+   // (l.263-290; 704 + 32·nPublic bytes)
+   unsigned char t[704 + 32 * N_PUBLIC];
    memcpy( t +   0, VK_QM, 64 ); memcpy( t +  64, VK_QL, 64 );
    memcpy( t + 128, VK_QR, 64 ); memcpy( t + 192, VK_QO, 64 );
    memcpy( t + 256, VK_QC, 64 ); memcpy( t + 320, VK_S1, 64 );
    memcpy( t + 384, VK_S2, 64 ); memcpy( t + 448, VK_S3, 64 );
-   memcpy( t + 512, pubs, 64 );
-   memcpy( t + 576, proof, 192 );            // A ‖ B ‖ C
+   memcpy( t + 512, pubs, 32 * N_PUBLIC );
+   memcpy( t + 512 + 32 * N_PUBLIC, proof, 192 );   // A ‖ B ‖ C
    pl_kec_sf( c, kec, t, sizeof t, ch->beta );
 
    // γ: keccak(β as one word) (l.294)
@@ -134,30 +134,35 @@ static void calculateChallenges( const plonk_ctx* c, plonk_keccak_fn kec,
 }
 
 // ════ Phase 3 · calculateLagrange (template l.363-419) ════
-// L_i(ξ) = ω^(i−1)·Zh / (n·(ξ − ω^(i−1))); the two L_i^raw numerators-side
-// values are batch-inverted together with Zh in ONE inversion (l.388).
-static void calculateLagrange( const plonk_ctx* c, const pl_chals* ch, u256 L[2] ) {
+// L_i(ξ) = ω^(i−1)·Zh / (n·(ξ − ω^(i−1))); the nLagrange raw values are
+// batch-inverted together with Zh in ONE inversion (l.388, inverseArray).
+#define PL_NL ( ( N_PUBLIC > 1 ) ? N_PUBLIC : 1 )
+static void calculateLagrange( const plonk_ctx* c, const pl_chals* ch, u256 L[PL_NL] ) {
    u256 n; f256_set_u64( n, 1 );
    for ( int i = 0; i < PL_POWER; ++i ) { u256 t; f256_copy( t, n ); f256_add_raw( t, t, t ); f256_copy( n, t ); }
-   u256 w; f256_set_u64( w, 1 );
-   u256 arr[3];                                  // [Zh, L1raw, L2raw]
-   f256_copy( arr[0], ch->zh );
-   u256 tmp;
-   f_sub( &c->fq, ch->xi, w, tmp );              // ξ − 1
-   f_mul( &c->fq, n, tmp, arr[1] );              // n·(ξ − 1)
    u256 om; pl_sf( c, VK_W1, om );
-   f_mul( &c->fq, w, om, w );                    // w = ω
-   f_sub( &c->fq, ch->xi, w, tmp );              // ξ − ω
-   f_mul( &c->fq, n, tmp, arr[2] );              // n·(ξ − ω)
-   f_batch_invert( &c->fq, arr, 3 );
-   f_mul( &c->fq, arr[1], ch->zh, L[0] );        // L1 = L1raw⁻¹·Zh
-   f_mul( &c->fq, arr[2], ch->zh, tmp );
-   f_mul( &c->fq, tmp, om, L[1] );               // L2 = ω·L2raw⁻¹·Zh (l.404-414)
+   u256 w; f256_set_u64( w, 1 );                    // ω^(i−1), starts at 1
+   u256 arr[PL_NL + 1];                             // [Zh, L1raw, …, L{nL}raw]
+   f256_copy( arr[0], ch->zh );
+   for ( int i = 1; i <= PL_NL; ++i ) {
+      u256 diff;
+      f_sub( &c->fq, ch->xi, w, diff );             // ξ − ω^(i−1)
+      f_mul( &c->fq, n, diff, arr[i] );             // n·(ξ − ω^(i−1))
+      f_mul( &c->fq, w, om, w );                    // w ← ω^i
+   }
+   f_batch_invert( &c->fq, arr, PL_NL + 1 );
+   f256_set_u64( w, 1 );                            // ω^0 again for the scale pass
+   for ( int i = 1; i <= PL_NL; ++i ) {             // L_i = ω^(i−1)·raw_i⁻¹·Zh
+      u256 t;
+      f_mul( &c->fq, arr[i], ch->zh, t );           // (l.393-414; L1 has no ω)
+      f_mul( &c->fq, t, w, L[i - 1] );
+      f_mul( &c->fq, w, om, w );
+   }
 }
 
 // ════ Phase 4 · calculatePI (template l.424-445) ════
 // PI accumulates SUBTRACTIONS in the template: pl = pl − pub_i·L_(i+1).
-static void calculatePI( const plonk_ctx* c, const u256 L[2],
+static void calculatePI( const plonk_ctx* c, const u256 L[PL_NL],
                          const unsigned char* pubs, u256 pi ) {
    u256 acc, p, t;
    f256_set_u64( acc, 0 );
@@ -172,7 +177,7 @@ static void calculatePI( const plonk_ctx* c, const u256 L[2],
 // ════ Phase 5 · calculateR0 (template l.447-477) ════
 struct pl_scalars {                    // parsed proof evaluations (phase-1-checked)
    u256 a, b, c, s1, s2, zw;
-   u256 L[2], pi, r0;
+   u256 L[PL_NL], pi, r0;
    u256 d2, d3;                        // D-phase scalar multipliers (below)
    u256 e;                             // E-phase scalar (phase 8)
 };
@@ -378,11 +383,11 @@ static int checkPairing( const plonk_ctx* c, const pl_chals* ch,
 // Returns 0 = proof ACCEPTED. Any phase-1 failure returns 1; intrinsic or
 // pairing failures throw (eosio::check) or return the pairing result.
 static int plonk_verify( plonk_keccak_fn kec, const unsigned char* proof768,
-                         const unsigned char* pubs64 ) {
+                         const unsigned char* pubs /* 32·N_PUBLIC bytes */ ) {
    plonk_ctx ctx; plonk_ctx_init( &ctx );
    if ( !plonk_checkProofData( &ctx, proof768 ) ) return 1;
 
-   pl_chals ch; calculateChallenges( &ctx, kec, proof768, pubs64, &ch );
+   pl_chals ch; calculateChallenges( &ctx, kec, proof768, pubs, &ch );
    pl_scalars sc;
    pl_sf( &ctx, pl_word( proof768, 18 ), sc.a );
    pl_sf( &ctx, pl_word( proof768, 19 ), sc.b );
@@ -391,7 +396,7 @@ static int plonk_verify( plonk_keccak_fn kec, const unsigned char* proof768,
    pl_sf( &ctx, pl_word( proof768, 22 ), sc.s2 );
    pl_sf( &ctx, pl_word( proof768, 23 ), sc.zw );
    calculateLagrange( &ctx, &ch, sc.L );
-   calculatePI( &ctx, sc.L, pubs64, sc.pi );
+   calculatePI( &ctx, sc.L, pubs, sc.pi );
    calculateR0( &ctx, &ch, &sc );
    calculateD_scalars( &ctx, &ch, &sc );
    calculateE_scalar( &ctx, &ch, &sc );

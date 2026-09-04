@@ -275,3 +275,78 @@ proof-shaped spend. (eosq links from the earlier receipt are RETIRED with the
 explorer; the 8326cbb7 "init" was a phantom of a mislabeled status parse —
 the monitor's refusal to render it exposed the mislabel; b31a1efd is the one
 true init, and the law table's single row now agrees with it.)
+
+## §m5-receipt — the private PAYMENT (membership + conservation, 2026-09-04, founder-ordered)
+
+The two M5 lanes landed as ONE proof per spend (`payment.circom`): the spend
+now proves MEMBERSHIP of the spent note in the law row's depth-20 Poseidon
+merkle tree AND CONSERVATION (amountIn = amountOut + fee, amounts private,
+fee public — the meter's leg). A withdraw is the same proof with the value
+riding the public fee leg. The nine-phase verifier is unchanged except
+N_PUBLIC 2→4 (transcript, PI loop, and the Lagrange batch generalized;
+scalar phases re-verified **25/25** against the BigInt oracle over the real
+payment proof; field gates unchanged at 3,217/3,217).
+
+**Soundness fix made BEFORE z2 could file it:** the M4 nullifier was
+Poseidon(secret, tag) with tag a FREE input — one spendable nullifier per
+tag = inflation once membership became real. The nullifier is now
+Poseidon(secret, leaf_index) with the index DERIVED IN-CIRCUIT from the
+membership path (Σ pathIndices[i]·2^i) — exactly one spendable nullifier
+per leaf, cryptographically enforced (payment.circom, NULLIFIER section).
+
+**On-chain acceptance (`notepay2222`, code hash `af41a5d9…0649be`,
+runner `m5run.sh`):**
+- deposit (Poseidon leaf, open on-ramp amount) → executed;
+- setroot (owner rolls the tree forward — REHEARSAL-labeled) → executed;
+- **THE PRIVATE PAYMENT: one proof carrying membership + conservation →
+  executed** (blk 21354);
+- FORGED (eval_zw +1) → REJECTED by the pairing;
+- REPLAY (same proof + nullifier) → REJECTED by nullifier uniqueness;
+- FEE-TAMPER (action claims fee 11, proof proves 10) → REJECTED by the
+  pairing — the publics are transcript-bound, so an unbalanced CLAIM
+  cannot verify; and a genuinely unbalanced input cannot even produce a
+  witness (circuit Assert Failed off-chain, receipted in the dispatch);
+- WITHDRAW of the payment's output note (amountOut=0, fee=990) → executed
+  (blk 21415, 9,743 µs);
+- law row: alg_commit = 2 = poseidon-bn254-v1 (the tree is defined over
+  circuit commitments; keccak deposits retired for new rows, old rows
+  distinguishable), alg_proof = 2, root present; commitment rows carry
+  amounts 1000 (deposit, open) and 0 (payment note, PRIVATE — the value
+  lives only in the note).
+
+**Billing:** clean samples **8,769 / 9,743 / 11,620 / 12,139 µs** (median
+≈ 10.7 ms — slightly above M4's ≈ 9.1, the honest cost of 4 publics and
+the deeper Lagrange batch; tripwire < 15 ms PASSED uncontended). The
+headline payment's 18,277 µs sample is the documented host-contention
+pattern (concurrent seat on the shared WSL box; identical gate code billed
+both 8.8 and 18.3 ms across the lane — labeled, not averaged).
+
+**Ceremony:** pot14 bn128 (universal — the pot12→pot14 growth carries
+13,872 constraints; the powersoftau itself is circuit-independent, only
+`plonk setup` re-ran after the nullifier fix), still ONE honest
+participant, rehearsal-labeled per the founder's order until a witnessed
+multi-party sealing is ruled for mainnet; `pot14_final` sha
+`537e9188550ee0864cb94fa3a182b360a866fc391e257908aeb7c0346b9d39bb` TESTNET-ONLY
+(WSL lab lifecycle). Circuit: 5,649 non-linear constraints; 4 publics
+(root, nullifier, commitmentOut, fee); depth 20 (≤ the bounded-rows law,
+max_notes checked ≤ 2^20 at init).
+
+**Labeled bounds (unchanged honesty):** the tree is maintained off-chain
+(tree.js), the root rolled by owner `setroot` — a sequencer/on-chain
+derivation is a named future lane; amounts are unbounded field elements
+(no range-check circuit — named hardening); deposit amounts stay open
+(the on-ramp).
+
+**This lane's caught bugs (the ladder again):** tree.js returned the LEAF
+as the root of a 1-leaf tree (fold loops stopped at one node instead of
+folding through all 20 levels with zero siblings — caught before it burned
+a witness); circom 2.2.3 allows ONE product term per constraint (the
+classic two-bilinear mux must be rewritten as `a + s·(b−a)`); EOSIO
+`law.get()` returns a reference, `modify` needs `find()` (setroot failed
+live, fixed, redeployed); and the output wasm filename must match the
+contract class name (cdt-cpp codegen).
+
+**Standing:** z2.1's adversarial hold now covers the payment statement —
+membership-path forgery shapes, index/nullifier binding, root-rollback
+(setroot is owner-auth — a governance surface, labeled), fee-leg claims,
+and the M4 list (HANDOFF-PLONK-PORT §8). Its findings land in this tree.

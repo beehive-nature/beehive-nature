@@ -14,7 +14,7 @@ const pubs = JSON.parse(fs.readFileSync(process.argv[4] || '/home/travi/plonkpor
 
 const Q  = 21888242871839275222246405745257275088548364400416034343698204186575808495617n; // PUBLIC-CONSTANT BN254 scalar field
 const m  = v => ((v % Q) + Q) % Q;
-const w32h = v => m(BigInt(v)).toString(16).padStart(64, '0');
+const w32h = v => BigInt(v).toString(16).padStart(64, "0");   // raw: inputs are canonical (no cross-field reduction)
 const kecMod = arr => BigInt('0x' + keccak256(Buffer.from(arr.join(''), 'hex'))) % Q;
 
 // affine vk words (z==1 asserted by gen step); projective-tolerant read
@@ -53,22 +53,30 @@ const zh = m(xin - 1n);
 // u (l.355-360)
 const u = kecMod([...P.Wxi.map(w32h), ...P.Wxiw.map(w32h)]);
 
-// Lagrange (l.363-419): batch invert [zh, n(ξ−1), n(ξ−ω)] by the template's
-// inverseArray prefix/unwind, then L1 = iL1·Zh, L2 = ω·iL2·Zh
+// Lagrange (l.363-419): batch invert [zh, n(ξ−ω^0), …, n(ξ−ω^(k−1))] by the
+// template's inverseArray prefix/unwind, then L_i = ω^(i−1)·inv_i·Zh
+const NL = Math.max(vk.nPublic, 1);
 const inv = a => { let t=0n, nt=1n, r=Q, nr=m(a); while (nr) { const q=r/nr; [t,nt]=[nt,t-q*nt]; [r,nr]=[nr,r-q*nr]; } if (t<0n) t+=Q; return t; };
-const l1raw = m(n * m(xi - 1n)), l2raw = m(n * m(xi - W1));
-const pre1 = zh, pre2 = m(zh * l1raw), total = m(pre2 * l2raw);
-const itotal = inv(total);
-const iL2 = m(itotal * pre2);
-const acc2 = m(itotal * l2raw);
-const iL1 = m(acc2 * pre1);
-const L1f = m(iL1 * zh);
-const L2  = m(W1 * m(iL2 * zh));
+const lraw = [];
+{ let w = 1n; for (let i = 0; i < NL; i++) { lraw.push(m(n * m(xi - w))); w = m(w * W1); } }
+const arr = [zh, ...lraw];                       // batch-invert in place
+{ const pre = [1n];
+  for (let i = 0; i < arr.length; i++) pre.push(m(pre[i] * arr[i]));
+  let acc = inv(pre[pre.length - 1]);
+  for (let i = arr.length - 1; i >= 1; i--) {
+    const inv_i = m(acc * pre[i]);
+    acc = m(acc * arr[i]);
+    arr[i] = inv_i;
+  }
+  arr[0] = acc;
+}
+const Ls = [];
+{ let w = 1n; for (let i = 1; i <= NL; i++) { Ls.push(m(w * m(arr[i] * zh))); w = m(w * W1); } }
+const L1f = Ls[0];
 
 // PI (l.424-445): pl = pl − pub·L (subtractions)
 let pi = 0n;
-pi = m(pi - m(L1f * pubs[0]));
-pi = m(pi - m(L2  * pubs[1]));
+for (let i = 0; i < pubs.length; i++) pi = m(pi - m(Ls[i] * pubs[i]));
 
 // R0 (l.447-477)
 const e2 = m(L1f * alpha2);
@@ -93,7 +101,7 @@ const out = {
   beta: w32h(beta), gamma: w32h(gamma), alpha: w32h(alpha), alpha2: w32h(alpha2),
   xi: w32h(xi), betaxi: w32h(betaxi), xin: w32h(xin), zh: w32h(zh),
   v1: w32h(v1), v2: w32h(v2), v3: w32h(v3), v4: w32h(v4), v5: w32h(v5), u: w32h(u),
-  L1: w32h(L1f), L2: w32h(L2), PI: w32h(pi), r0: w32h(r0),
-  d2: w32h(d2), d3: w32h(d3), e: w32h(esc),
+  PI: w32h(pi), r0: w32h(r0), d2: w32h(d2), d3: w32h(d3), e: w32h(esc),
 };
+for (let i = 0; i < NL; i++) out['L' + (i + 1)] = w32h(Ls[i]);
 for (const [k, v] of Object.entries(out)) console.log(k.toUpperCase(), v);

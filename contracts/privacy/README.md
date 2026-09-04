@@ -1,10 +1,31 @@
 # contracts/privacy — the estate-run privacy layer (Lane: SPEC-PRIVACY-1)
 
-The M4 state: the PLONK port LANDED — the spend gate runs the real
-nine-phase verifier over real circuit proofs. Receipts: SPEC-PRIVACY-1
-§m4-receipt + docs/dispatches/RECEIPT-PLONK-M4.md.
+The M5 state: the private PAYMENT — one proof per spend carries
+MEMBERSHIP (depth-20 Poseidon merkle, root in the law row) + CONSERVATION
+(amounts hidden, fee public for the meter) + the index-bound nullifier.
+Receipts: SPEC-PRIVACY-1 §m5-receipt + docs/dispatches/RECEIPT-PAYMENT-M5.md
+(M4: §m4-receipt + RECEIPT-PLONK-M4.md).
 
-## The verifier stack (M4)
+## The payment stack (M5)
+
+- `payment.circom` — the statement: membership path + nullifier =
+  Poseidon(secret, leaf_index) (index derived in-circuit — one spend per
+  leaf) + out-commitment + conservation amountIn = amountOut + fee.
+  4 publics (root, nullifier, commitmentOut, fee). Circom rule learned:
+  ONE product term per constraint (`a + s·(b−a)`, not `a·(1−s)+b·s`).
+- `tree.js` — the off-chain append-only depth-20 Poseidon tree (insert,
+  prove, root; zero chain zeros[l]=H(zeros[l-1],zeros[l-1]); bit=1=right
+  child; folds exactly LEVELS times — a 1-leaf tree folds with zero
+  siblings). Root rolled on-chain by owner `setroot` (rehearsal-labeled).
+- `m5prep.js` — witness builder (note creation; payment assembly with the
+  conservation pre-check that refuses unbalanced inputs early).
+- `m5run.sh` — the acceptance pass (deposit → setroot → PAYMENT →
+  forged/replay/fee-tamper refusals → withdraw).
+- Ceremony: pot14 bn128, ONE honest participant (universal — per-circuit
+  work is only `plonk setup`), rehearsal-labeled until a witnessed
+  multi-party sealing is ruled for mainnet.
+
+## The verifier stack (M4, still the engine)
 
 - `field256.hpp` — 4×64-limb modular arithmetic for BN254's two 254-bit
   fields (Montgomery reduction; shift-subtract oracle; Fermat inversion +
