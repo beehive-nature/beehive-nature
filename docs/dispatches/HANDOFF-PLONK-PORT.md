@@ -18,6 +18,7 @@ wrong-field edge cases, replay. File+function cited in every finding.
   ```
   nodeos -e -p eosio --plugin eosio::chain_api_plugin --plugin eosio::producer_plugin \
     --plugin eosio::producer_api_plugin --plugin eosio::http_plugin \
+    --plugin eosio::trace_api_plugin --trace-no-abis \
     --access-control-allow-origin='*' --http-validate-host=false \
     --http-server-address=127.0.0.1:8888 \
     --signature-provider=EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV=KEY:5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3 \
@@ -43,7 +44,7 @@ wrong-field edge cases, replay. File+function cited in every finding.
    (T-of `6bcb40a2…7cedc`) or fix the reinterpret_cast in minibios.
 4. `create account eosio <name> <bench.pub>` — accounts need no staking on
    this chain.
-Also: jungle4 is DEAD by founder ruling — do not retry it.
+Also: **jungle4 is LIVE via bnrapolltest powerup (24h from 2026-09-03T23:57Z, tx def01e80…); public explorer links expected in the M3 receipt.** M3 is deployed there as `notelab11111` (sponsored pattern below). NOTE the resource traps: stake→CPU ≈ 172µs on this chain, Fuel does not co-sign cleos pushes, eosio.rentcpu does not exist (Vaulta system), and token transfers assert inside cf_system — the ONLY reliable payer is the FIRST-AUTHORIZER SPONSOR pattern: each transaction = [core.vaulta deposit(bnrapolltest, 0.000N A) as first action, real action second], signed -p bnrapolltest -p notelab11111 — polltest's rented 792k CPU pays; vary the deposit amount per tx or the chain sees duplicates.
 
 ## 3 · WASM-MEMORY LAWS (learned live, twice)
 
