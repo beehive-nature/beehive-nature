@@ -76,25 +76,29 @@ writeFileSync("last-mint.json", JSON.stringify({
 
 // 5. the pointer row on the Vaulta chain (name road); re-mints ride vending::update
 //    (the bounded in-place path — one row per agent, history lives on Arweave)
-if (TARGET === "local") {
-  const wif = execSync(`wsl -e bash -lc "cat ~/vchain/member.key"`).toString().trim();
+if (TARGET === "local" || TARGET === "jungle4") {
+  const wif = TARGET === "jungle4"
+    ? process.env.BNRAPOLL_WIF
+    : execSync(`wsl -e bash -lc "cat ~/vchain/member.key"`).toString().trim();
+  const RPC = TARGET === "jungle4" ? "https://jungle4.greymass.com" : "http://127.0.0.1:8888";
+  const CONTRACT = TARGET === "jungle4" ? "bnrapolltest" : "vending";
   const eosjsPkg = (await import("eosjs")).default;
   const { Api, JsonRpc } = eosjsPkg;
   const { JsSignatureProvider } = await import("eosjs/dist/eosjs-jssig.js");
-  const rpc = new JsonRpc("http://127.0.0.1:8888", {});
+  const rpc = new JsonRpc(RPC, {});
   const api = new Api({ rpc, signatureProvider: new JsSignatureProvider([wif]),
                         textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
-  const existing = await rpc.get_table_rows({ json: true, code: "vending", scope: "vending",
+  const existing = await rpc.get_table_rows({ json: true, code: CONTRACT, scope: CONTRACT,
     table: "certs", limit: 100 });
   const already = (existing.rows || []).some(r => r.agent_name === NAME);
   const r = await api.transact({ actions: [{
-    account: "vending", name: already ? "update" : "mint",
+    account: CONTRACT, name: already ? "update" : "mint",
     authorization: [{ actor: MEMBER_ACCT, permission: "active" }],
     data: already
       ? { agent_name: NAME, owner: MEMBER_ACCT, member_key: pubHex, ar_id: up.id, content_hash: hash }
       : { agent_name: NAME, owner: MEMBER_ACCT, member_key: pubHex,
           ar_id: up.id, content_hash: hash, templ: TEMPLATE, tongue: TONGUE },
-  }]}, { blocksBehind: 3, expireSeconds: 60 });
-  console.log("VAULTA POINTER ROW (" + (already ? "update" : "mint") + ", local rehearsal) tx=" + r.transaction_id);
+  }]}, { blocksBehind: 3, expireSeconds: 300 });
+  console.log("VAULTA POINTER ROW (" + (already ? "update" : "mint") + ", " + TARGET + ") tx=" + r.transaction_id);
 }
 console.log("MINT-DONE ar=" + up.id + " hash=" + hash.slice(0, 16) + "…");

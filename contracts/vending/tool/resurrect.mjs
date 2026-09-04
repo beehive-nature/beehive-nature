@@ -14,7 +14,7 @@ import { verifyCertificate, canonicalJson, contentHash } from "./cert.mjs";
 const NAME = process.argv[2];
 const TARGET = process.argv[3] || "local";
 const RPC = TARGET === "local" ? "http://127.0.0.1:8888" : "https://jungle4.greymass.com";
-const CONTRACT = "vending";
+const CONTRACT = TARGET === "jungle4" ? "bnrapolltest" : "vending";
 const GATEWAY = "https://arweave.net";
 let pass = 0, fail = 0;
 const t = (name, v, detail = "") => {

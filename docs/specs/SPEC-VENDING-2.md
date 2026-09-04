@@ -83,23 +83,23 @@ The law and the pointer, never bulk history (§layers layer 3):
   receipted run is a **local Spring 1.2.2 chain** (Vaulta's own consensus
   family) — deploy + law rows + mint + update all executed there.
 
-## §deploy-doors — the honest map (all probed live 2026-09-01)
+## §deploy-doors — the honest map (probed live 2026-09-01; LANDMARKED 2026-09-04)
 
-- **Jungle4 (Vaulta community testnet)**: Greymass Fuel carries ordinary
-  actions INCLUDING `setcode/setabi` (receipted: reached the RAM check) — but
-  every resource-acquiring action (`delegatebw`, `buyram`, `buyrambytes`,
-  `buyramself`) is fuel-blocked, REX `rentcpu` needs a fund deposit in **A**,
-  `core.vaulta::buyram` (fuel-covered!) needs **A**, and **A has no faucet**.
-  Chain-side staking yields ~2 µs CPU per EOS chain-wide (even producers) —
-  the 8-29 era when `bnrapolltest` transacted freely is gone.
-  **THE UNBLOCK = ONE FOUNDER GESTURE**: ~5 A from `kingbeelovis@jungle4`
-  (111.5 A idle) to `bnrapolltest`; then fuel-covered `core.vaulta::buyram` →
-  `setcode` → law rows → mint. Every step is already scripted in
-  `contracts/vending/tool/`.
+- **Jungle4 (Vaulta community testnet) — LANDED 2026-09-04**: the founder's
+  powerup gesture (1 day CPU/NET, tx def01e80…) broke the A-paralysis. The
+  vending contract is DEPLOYED at `bnrapolltest` (code hash a0fe4fdc…), law
+  rows live (rates[vaulta]=0.6000 A, tithe=1000 bp→kingbeelovis), and the
+  mint + resurrection re-ran 11/11 against chain state the estate does not
+  control. Traps banked during the landing: **setcode bills 264 KB on Spring
+  (not wasm size — buy RAM first)**; **eosjs hex-JSON setabi stores an EMPTY
+  ABI on greymass — push the ABI via cleos**. The 2026-09-01 A-paralysis map
+  (fuel covers setcode/rentcpu/powerup but no resource action; A has no
+  faucet; ~2 µs/EOS staking) stays here as history: powerup was the door that
+  opened it.
 - **Vaulta mainnet**: no agent-held account (correctly — wallet ceremony
   law). The contract's mainnet seat is a founder ceremony; the code and ABI
-  are compiled and proven.
-- **Local Spring 1.2.2** (the rehearsal that ran): WSL, custom genesis,
+  are compiled and proven, and the Jungle4 landing IS the rehearsal of record.
+- **Local Spring 1.2.2** (the 2026-09-01 rehearsal): WSL, custom genesis,
   chain_id `8a34ec7d…`, accounts `vending`/`bnrapolltest`/`kingbeelovis`,
   setcode tx `abc1726b…`, law rows + mint + update receipted.
 
@@ -143,14 +143,16 @@ that rejection is law.
 
 ## §what-the-receipt-proves — and what it does not
 
-PROVEN (receipted, 11/11): certificate format + hash law; free-tier AR upload
-of the real certificate; name-road derivation; in-place update; resurrection
-from member-held inputs with hash verification; the KEY ROAD by GraphQL
-Member-Key tag search (the member's key alone finds the record — L1 bundle
-posted, 1 hit); forged-resurrection negative proof; A1 format; contract law
-rows on a Vaulta-class chain; compile.
-NOT YET (honestly): the pointer on a chain the estate does not control
-(Jungle4 = one founder gesture; mainnet = one ceremony); the ed25519 owner-
-equals-member-key door as the OPERATIONAL path (probed working, throttled
-during the mint window — the RSA door + Member-Key tag carries the key road
-meanwhile); the funded ANT write (custody-gated).
+PROVEN (receipted, 11/11 — first on the local Spring rehearsal 2026-09-01,
+then AGAIN on Jungle4 2026-09-04 after the founder's powerup gesture):
+certificate format + hash law; free-tier AR upload of the real certificate;
+name-road derivation against chain state the estate does not control;
+in-place update; resurrection from member-held inputs with hash verification;
+the KEY ROAD by GraphQL Member-Key tag search (the member's key alone finds
+the record — and its whole mint history); forged-resurrection negative proof;
+A1 format; contract law rows on a Vaulta-class chain; compile.
+NOT YET (honestly): the ed25519 owner-equals-member-key door as the
+OPERATIONAL path (probed working, throttled during the mint window — the RSA
+door + Member-Key tag carries the key road meanwhile); the funded ANT write
+(custody-gated); the Vaulta MAINNET seat (founder ceremony — the code,
+scripts, and now a full public-testnet landing exist to rehearse it).

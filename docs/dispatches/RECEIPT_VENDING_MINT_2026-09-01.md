@@ -1,4 +1,42 @@
-# RECEIPT — the vending machine BUILT: one agent minted end-to-end and RESURRECTED from the certificate alone, hash-verified — **11/11 GREEN** (2026-09-01)
+# RECEIPT — the vending machine BUILT: one agent minted end-to-end and RESURRECTED from the certificate alone, hash-verified — **11/11 GREEN** (2026-09-01) · **LANDED ON JUNGLE4 2026-09-04: 11/11 GREEN AGAIN ON THE PUBLIC TESTNET**
+
+## THE JUNGLE4 LANDING (2026-09-04, the founder's powerup gesture def01e80…)
+
+The A-paralysis broke the moment the founder's powerup landed (1 day CPU/NET,
+2026-09-03T23:57Z). The whole chain ran from `contracts/vending/tool/` with no
+decision points:
+
+| step | tx / value |
+|---|---|
+| RAM 72 KB | `b1fe7725a0d1578630fcc8b6fbd6f1d8db4dc730ebd6779c0a0552b0d37d042e` <!-- PUBLIC-CONSTANT: jungle4 txid --> |
+| RAM +208 KB (setcode bills 264 KB on Spring — NOT just wasm size; trap banked) | `17d1df0c4ad51e674a5dc2a9b683e8ad8be05403c30bad2164a5e3b2f1102000` <!-- PUBLIC-CONSTANT: jungle4 txid --> |
+| **setcode vending → bnrapolltest** (988 µs of powerup CPU) | `24b904391a5b405c7916976190da5451d14cd16b5ac02d39159823a4a6f41c35` <!-- PUBLIC-CONSTANT: jungle4 txid --> · code hash `a0fe4fdcf5dffc0323c458819c178a74bb7b46bdcf22c13df82ac22bacb76109` <!-- PUBLIC-CONSTANT --> |
+| setabi (cleos re-push; the eosjs hex-JSON path stored an EMPTY abi on greymass — trap banked) | `822fd09465a2ed208d3f757f7da5e045aefb6c01e9dd71bc19eb585c17e0cafa` <!-- PUBLIC-CONSTANT: jungle4 txid --> |
+| law: init(admin=bnrapolltest, max_certs=7776) | `0c540808f00e151b6453fa7f3b193448c85b9e7f13af6758897727936288b9fb` <!-- PUBLIC-CONSTANT: jungle4 txid --> |
+| law: setrate vaulta = 0.6000 A | `71f0cee9f20549b4c93999afbc38cb0e20e82e42ef0c57936a6bd886c66e7f4a` <!-- PUBLIC-CONSTANT: jungle4 txid --> |
+| law: settithe 1000 bp → kingbeelovis | `59207c1ad86d91f1f8fe44e77353be516136c296abb9c4ade22f9808161480b0` <!-- PUBLIC-CONSTANT: jungle4 txid --> |
+| **THE MINT** (`vending::mint`, vendingtest) | **`d150f7d5f3b722ff05355c49d93ab2565a4437a8220da92588e40a328811d54e`** <!-- PUBLIC-CONSTANT: jungle4 txid --> |
+| certificate (Jungle4 mint) | 3234 B · sha256 `f148272a98e9499d08aaca424ae908200012005d2d6b5c3a9c1794ae0962ab75` <!-- PUBLIC-CONSTANT --> · ar://`ITC5RPTM2zpzd0b8ehHBlFnYizDtVd9Wd9tAVIAcwPo` (winc 0) |
+
+**PUBLIC EXPLORER LINKS:**
+- the mint tx: https://eosauthority.com/tx/d150f7d5f3b722ff05355c49d93ab2565a4437a8220da92588e40a328811d54e?network=jungle <!-- PUBLIC-CONSTANT: jungle4 mint txid in explorer URL -->
+- the account + pointer row: https://eosauthority.com/account/bnrapolltest?network=jungle
+(the machine-verifiable leg, any public Jungle4 API: `get_table_rows
+code=bnrapolltest scope=bnrapolltest table=certs` → the row with ar_id
+ITC5RPTM… + content_hash f148272a… — read back live through both
+jungle4.greymass.com and jungle4.cryptolions.io)
+
+**RESURRECTION ON JUNGLE4 — `node resurrect.mjs vendingtest jungle4` — 11
+pass, 0 fail**: the name road now reads chain state the estate DOES NOT
+CONTROL; the key road returns 4 hits (every certificate this member key ever
+minted — the member's own history, derivable, estate-free); hash gate
+three-way green; forged-resurrection refused. The receipt's remaining "not
+yet" from 2026-09-01 is now closed.
+
+Cost of the landing, honestly: ~58.7 EOS in RAM (quota 292,213 B, most of it
+the 264 KB setcode bill — sellram recovers what release frees), ~1 s of
+powerup CPU, $0 Arweave.
+
 
 Lane: SPEC-VENDING-1 §order-of-work item 2 → built as SPEC-VENDING-2 (this
 tree). The headline property — **the species survives the estate** — is now
