@@ -1,0 +1,46 @@
+<!doctype html>
+<!-- ANT-DOOR CROSS-ORIGIN READ PROOF (2026-09-04): this page is served by
+     GitHub Pages at https://skaists.dev/ant-door-cors.html and READS Autonomi
+     bytes through the estate door at relay.skaists.dev/ant/* — a cross-origin
+     GET granted by the door's CORS read rule (GET-only, origin
+     https://skaists.dev). The badge and image below are the assertion
+     surface for e2e/ant-door-cors-shot.mjs. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ant door — cross-origin read</title>
+<style>
+  body { margin: 0; font-family: system-ui, sans-serif; background: #101418; color: #e8e4d8; }
+  main { max-width: 480px; margin: 0 auto; padding: 24px 16px; }
+  #state-badge { display: inline-block; padding: 6px 10px; border: 1px solid #8a7a4a; border-radius: 6px; font-size: 12px; letter-spacing: .04em; }
+  img#content { max-width: 100%; margin-top: 16px; border-radius: 8px; }
+  p { color: #b8b2a4; font-size: 14px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<main>
+  <h1>the door, read from skaists.dev</h1>
+  <p id="state-badge">READING…</p>
+  <p>This page lives on <strong>skaists.dev</strong> and reads Autonomi content
+     through the estate door on <strong>relay.skaists.dev</strong> — a
+     cross-origin GET. The door grants CORS reads to skaists.dev pages only,
+     GET only, rate-limited per visitor.</p>
+  <img id="content" alt="Autonomi content served through the estate door" hidden>
+</main>
+<script>
+const ADDR = "711c7e20006ff3e0ac6c1f3063286a0c1a3e4c409642e8c526173fa60bb7078a"; // PUBLIC-CONSTANT — known mainnet public DataMap (Autonomi docs' example JPEG), not a key
+const DOOR = "https://relay.skaists.dev/ant/v1/data/public/" + ADDR;
+fetch(DOOR)
+  .then(r => { if (!r.ok) throw new Error("door answered " + r.status); return r.arrayBuffer(); })
+  .then(buf => {
+    document.getElementById("state-badge").textContent =
+      buf.byteLength + " BYTES · CROSS-ORIGIN · LIVE";
+    const img = document.getElementById("content");
+    img.src = URL.createObjectURL(new Blob([buf], { type: "image/jpeg" }));
+    img.hidden = false;
+  })
+  .catch(e => { document.getElementById("state-badge").textContent = "DOOR REFUSED: " + e.message; });
+</script>
+</body>
+</html>
