@@ -168,6 +168,23 @@ a{color:var(--cyan)}
   <button id="mkPrompt" class="gold">build the prompt</button>
   <button id="cpPrompt" style="display:none">📋 copy</button>
   <div class="out" id="promptOut"></div>
+
+  <div class="note" style="margin-top:14px">
+    <span class="t">W-1 DOCKED — THE IN-BROWSER MODEL (2026-09-04)</span>
+    <p style="font-size:10.5px;line-height:1.75;color:var(--dim)">a local model runs
+    <b style="color:var(--ink)">in this tab</b> — no box, no server — so the pocket works
+    even when the compute node is unreachable. the model loads
+    <b style="color:var(--gold)">≈204 MB once</b>, caches in this browser, and answers
+    offline from then on. vendored web-llm (Apache-2.0, L-VERIFY 2026-09-04) ·
+    SmolLM2-360M-Instruct (Apache-2.0) · needs a WebGPU browser (Chrome/Edge 113+).</p>
+    <button id="w1wake" class="gold">⏵ wake the pocket model</button>
+    <div class="st" id="w1st">— asleep — nothing fetched, nothing sent —</div>
+    <label for="w1ask">ask it here (the built prompt above lands here once it wakes)</label>
+    <textarea id="w1ask" placeholder="your question — answered on your device"></textarea>
+    <button id="w1go" disabled>⚡ answer on this device</button>
+    <div class="out" id="w1out"></div>
+    <div class="st" id="w1wire">the wire — counting starts when the model is ready</div>
+  </div>
 </section>
 
 
@@ -179,6 +196,82 @@ a{color:var(--cyan)}
   who is real — people attest, arithmetic verifies · <a href="index.html" data-i18n="law.hive">← the hive</a>
 </footer>
 
+<script>
+/* W-1 — the in-browser model docks in the bLOVErAi window (founder order
+   2026-09-04): a local model IN THE BROWSER TAB — no box, no server — so the
+   pocket works even when the compute node is unreachable.
+   L-VERIFY: mlc-ai/web-llm @ 56d318cd (Apache-2.0, LICENSE sha256 d412ab9d…
+   59ad, byte-identical), package 0.2.84 vendored at ./blight/web-llm.mjs
+   (unmodified bytes beyond one same-line hex-law marker comment); model
+   SmolLM2-360M-Instruct-q4f16_1-MLC (Apache-2.0), ≈204 MB fetched ONCE from
+   huggingface.co, then served from this browser's Cache Storage — the wire
+   panel counts every request after ready, and the honest target is zero. */
+(function(){
+"use strict";
+var $=function(i){return document.getElementById(i)};
+var MODEL='SmolLM2-360M-Instruct-q4f16_1-MLC';
+var MB=204;
+var engine=null, readyAt=0, wireCount=0, wireLog=[];
+try{
+  new PerformanceObserver(function(list){
+    list.getEntries().forEach(function(e){
+      if(!readyAt) return;
+      wireCount++; wireLog.push(String(e.name).replace(/^https?:\/\//,'').slice(0,64));
+      renderWire();
+    });
+  }).observe({entryTypes:['resource']});
+}catch(e){}
+function renderWire(){
+  $('w1wire').innerHTML='the wire — <b class="'+(wireCount?'bad':'ok')+'">'+wireCount+
+    ' request'+(wireCount===1?'':'s')+' since ready</b>'+(wireLog.length?
+    '<br>'+wireLog.slice(-6).join('<br>'):' — nothing leaves this tab to answer you');
+}
+$('w1wake').onclick=async function(){
+  if(engine) return;
+  $('w1wake').disabled=true;
+  $('w1st').innerHTML='loading the model — <b>≈'+MB+' MB, once</b>. it caches in this '+
+    'browser; after this the pocket works with the network off.'+
+    '<br><span id="w1prog" class="st">starting…</span>';
+  try{
+    var m=await import('./blight/web-llm.mjs');
+    engine=await m.CreateMLCEngine(MODEL,{initProgressCallback:function(r){
+      var p=$('w1prog'); if(!p) return;
+      p.textContent=String(r.text||'').replace(/\s+/g,' ').slice(0,110)+' · '+Math.round((r.progress||0)*100)+'%';
+    }});
+    readyAt=performance.now(); wireCount=0; wireLog=[];
+    $('w1st').innerHTML='<span class="ok">model ready</span> — SmolLM2-360M · cached in '+
+      'this browser · next visit loads from disk, no network';
+    renderWire();
+    var built=($('promptOut').style.display==='block')?$('promptOut').textContent+'\n\n':'';
+    $('w1ask').value=built+'Answer in at most six sentences, plainly.';
+    $('w1go').disabled=false;
+  }catch(e){
+    $('w1wake').disabled=false;
+    $('w1st').innerHTML='<span class="bad">the model did not wake:</span> '+
+      String(e&&e.message?e.message:e).slice(0,160)+
+      (typeof navigator.gpu==='undefined'?' — this browser has no WebGPU; the pocket needs Chrome/Edge 113+':'');
+  }
+};
+$('w1go').onclick=async function(){
+  var q=$('w1ask').value.trim(); if(!q||!engine) return;
+  $('w1go').disabled=true;
+  var out=$('w1out'); out.style.display='block'; out.textContent='';
+  renderWire();
+  try{
+    var chunks=await engine.chat.completions.create({
+      messages:[{role:'user',content:q}], temperature:0.7, max_tokens:220, stream:true
+    });
+    for await (var c of chunks){
+      var d=(c.choices&&c.choices[0]&&c.choices[0].delta&&c.choices[0].delta.content)||'';
+      if(d){ out.textContent+=d; out.scrollTop=out.scrollHeight; }
+    }
+    out.textContent+='\n— SmolLM2-360M · on your device · zero requests to answer';
+    renderWire();
+  }catch(e){ out.innerHTML='<span class="bad">'+String(e&&e.message?e.message:e).slice(0,180)+'</span>'; }
+  $('w1go').disabled=false;
+};
+})();
+</script>
 <script src="tour.js?v=34"></script>
 <script src="onboarding/bzdid-key.js"></script>
 <script src="blight/pointers.js?v=2"></script>
@@ -196,7 +289,7 @@ a{color:var(--cyan)}
     'blight/gallery.html','blight/inscription-explorer.html','blight/compare.html',
     'blight/bnri-gallery.html','blight/market.html','blight/farmers.html','blight/coop.html',
     'blight/hearth.html','blight/pulse.html','blight/midi-organ.html','blight/studio-music.html',
-    'blight/studio-gate.html','blight/vaulta-reader.html','blight/workbench.html','blight/pixelrefiner.html','blight/qrtree.html','blight/qrroses.html','blight/qrroses-smil.html','museum.html','fieldnotes.html','buzz-directory.html','or-board.html','comb.html','design-system.html','blight/profile.html','record.html','blight/midi.html','blight/midiroom.html','blight/midivault.html','review.html',
+    'blight/studio-gate.html','blight/vaulta-reader.html','blight/workbench.html','blight/pixelrefiner.html','blight/qrtree.html','blight/qrroses.html','blight/qrroses-smil.html','museum.html','fieldnotes.html','buzz-directory.html','or-board.html','comb.html','vending.html','design-system.html','blight/profile.html','record.html','blight/midi.html','blight/midiroom.html','blight/midivault.html','review.html',
     'university/index.html','biq.html','bsymposium.html','blongevity.html','b4b.html','bqueenbee-live.html','listening.html','profile.html','doors/skaists-buzz.html','doors/beehivenature-buzz.html',
     'plur.html','kandi.html','festival/index.html','bfood.html','bearth.html','bfactory.html','bigen.html','blanguage.html',
     'attest.html','buzz-studio.html','bset.html','bantfarm.html','stack.html','btranslated.html','dao-dashboard/index.html','blight/c1-aid.html','bmeshasi.html','royalguard.html','bnames.html','wallet.html',

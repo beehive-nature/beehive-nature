@@ -53,6 +53,16 @@ const RIDER_ALLOWLIST = [
      panel (z3.2 build, 2026-09-03); reads only same-origin spend-ledger.json
      (the json rule above) and carries no other dependency */
   /\/spend-audit\.js/,
+  /* W-1, the in-browser model (founder order 2026-09-04): vendored
+     @mlc-ai/web-llm (Apache-2.0, L-VERIFY @56d318cd) served same-origin at
+     surfaces/blight/web-llm.mjs, imported ONLY on the user's wake click —
+     nothing model-shaped loads at page-open. The one-time model fetch
+     (≈204 MB, SmolLM2-360M-Instruct q4f16; hosts OBSERVED in the receipt
+     run: huggingface.co · raw.githubusercontent.com · us.aws.cdn.hf.co —
+     then Cache Storage, zero network thereafter, offline proven) is
+     likewise click-time and so outside this gate's page-open count by
+     construction; named here so the dependency is argued in the open. */
+  /\/web-llm\.mjs/,
   /* the market's live chain reads (founder source-confirmed: host-rotated Base
      RPC, zero caching — the surface is honestly live): itemized by exact host */
   /^https:\/\/base-rpc\.publicnode\.com\//,
