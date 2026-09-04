@@ -254,9 +254,12 @@ private:
             f256_copy( filled[i], cur );
             poseidon2( pc, cur, z, cur );
          } else {
-            // going RIGHT: sibling is filled[i]; the parent becomes the new filled[i]
+            // going RIGHT: sibling is filled[i] — and filled[i] does NOT
+            // change (Tornado's law, found live at insert #4: updating it
+            // here poisons the next right-turn with an incomplete subtree —
+            // root(4+) silently diverged from the canonical fold while
+            // roots 1..3 matched; tree.js was RIGHT all along)
             poseidon2( pc, filled[i], cur, h );
-            f256_copy( filled[i], h );
             f256_copy( cur, h );
          }
       }

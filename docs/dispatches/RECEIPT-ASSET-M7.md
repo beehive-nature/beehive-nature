@@ -84,3 +84,34 @@ actual settlement in its asset is Lane M's off-chain meter lane — here
 it is publicly declared and transcript-bound only. z2.1's remaining
 labeled surfaces unchanged (init/deposit auth shape, ceremony label,
 WASM insert cost, 64-bit width). Findings land in wt-z4.
+
+## Re-measure (founder-ordered, quiet box) + THE TREE LAW found live
+
+Three-of-each on a fresh account, per-step roots cross-checked RAW against
+tree.js before every payment push (runner: `measure-m7.sh`):
+
+- **pure verify (a withdraw — no insert): 11,561 µs** — the 15 ms
+  tripwire's subject, PASSED, and UNCHANGED from M6's 11,971 µs: the 5th
+  public, the fee mux, and the asset path cost nothing measurable (PLONK
+  verify cost is independent of circuit size).
+- **deposits (the 20-Poseidon insert): 30.0 / 21.5 / 29.7 ms — min 21.5 ms.**
+- **payments (verify + the out-note insert): 35.8 / 38.1 / 42.2 ms — min
+  35.8 ms.** A clean payment genuinely bills > 15 ms — and what grew is
+  NOT M7: it is M6's on-chain-root design (the WASM Poseidon insert
+  bundled into deposit/transfer). M5's 140 µs deposits were the pre-M6
+  setroot era — no insert existed. The named optimization lane (native
+  Poseidon / precomputed-Montgomery) is the lever.
+
+**THE TREE LAW (the re-measure's catch, a liveness bug found and fixed
+live):** the incremental insert's RIGHT branch must NOT update
+`filled[i]` — my extra `filled[i] = parent` poisoned the level-1 subtree
+at insert #2, which insert #3's doubly-right path consumed: roots 1..3
+matched the canonical fold and **root(4+) silently diverged** — every
+proof against a ≥4-leaf root would fail (spendability died past three
+notes; never a soundness issue — the wrong root bound a state no witness
+could reach). Found by the per-step root cross-check; one line removed
+(`note.cpp` tree_insert, the law cited at site); re-proven: six known
+inserts now match tree.js's canonical fold EXACTLY, and the full
+deposit→payment ladder ×3 runs ALL GREEN with every step's root
+cross-checked. tree.js was right all along. The M7 acceptance receipts
+(≤3-leaf roots throughout) stand uncorrected.
