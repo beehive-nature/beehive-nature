@@ -24,6 +24,7 @@ fn main() {
         seller_did: "did:plc:seller".into(),
         multisig_address: "tn-buyer-standin".into(),
         asset_id: TESTNET_FUSD.into(),
+        payment_id: String::new(), // balance-poll example: no pid binding on this path
     };
 
     // Poll until the wallet has refreshed and the asset is visible.

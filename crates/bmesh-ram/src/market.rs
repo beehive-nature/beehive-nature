@@ -88,7 +88,6 @@ impl RamMarket {
     /// The live chain's state satisfies `base == max_ram_size − reserved` exactly;
     /// callers capture it that way. No constructor asserts it here — the chain,
     /// not the model, owns that law (see tests for the live cross-check).
-
     /// `buyram` (db:49-100): ceil'd 0.5% fee leaves the curve; the fee-net amount
     /// is converted quote→base by `direct_convert` (es:71-74: out first, then
     /// `quote += from`, `base -= out`); `total_ram_stake += after_fee` (db:88).

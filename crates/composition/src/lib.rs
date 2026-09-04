@@ -244,6 +244,9 @@ async fn zano_loop(
                         seller_did: target.seller_did.clone(),
                         multisig_address: target.multisig_address.clone(),
                         asset_id: config.asset_id.clone(),
+                        // the composed path polls balances (no pid binding); the HF6
+                        // scan path keys attribution when it is wired here
+                        payment_id: String::new(),
                     };
                     let now = std::time::SystemTime::now()
                         .duration_since(std::time::UNIX_EPOCH)

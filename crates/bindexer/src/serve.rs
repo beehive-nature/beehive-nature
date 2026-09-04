@@ -48,7 +48,7 @@ fn route(conn: &Connection, method: &str, path: &str) -> (&'static str, String) 
     }
     let seg: Vec<&str> = path.trim_matches('/').split('/').collect();
     let out = match (
-        seg.get(0).copied(),
+        seg.first().copied(),
         seg.get(1).copied(),
         seg.get(2).copied(),
     ) {

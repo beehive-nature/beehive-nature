@@ -83,10 +83,17 @@ static std::vector<unsigned char> read_hex_file( const char* path ) {
    if ( !f ) { fprintf( stderr, "open %s\n", path ); exit( 2 ); }
    std::vector<unsigned char> out;
    int hi = -1;
+   // the FIRST whitespace-delimited token only — fixture lines carry a
+   // same-line hex-law marker after the hex (marker letters would otherwise
+   // be consumed as nibbles)
    for ( int c = fgetc( f ); c != EOF; c = fgetc( f ) ) {
-      int v = (c == '\n' || c == '\r' || c == ' ') ? -2 : hexv( (char)c );
-      if ( v == -1 ) continue;
-      if ( v >= 0 ) { if ( hi < 0 ) hi = v; else { out.push_back( (unsigned char)((hi << 4) | v) ); hi = -1; } }
+      if ( c == '\n' || c == '\r' || c == ' ' || c == '\t' ) {
+         if ( !out.empty() || hi >= 0 ) break;
+         continue;
+      }
+      int v = hexv( (char)c );
+      if ( v < 0 ) { fprintf( stderr, "bad hex in %s\n", path ); exit( 2 ); }
+      if ( hi < 0 ) hi = v; else { out.push_back( (unsigned char)((hi << 4) | v) ); hi = -1; }
    }
    fclose( f );
    return out;
@@ -123,7 +130,9 @@ int main( int argc, char** argv ) {
    static char o_beta[128], o_gamma[128], o_alpha[128], o_alpha2[128], o_xi[128], o_betaxi[128],
                o_xin[128], o_zh[128], o_v1[128], o_v2[128], o_v3[128], o_v4[128], o_v5[128],
                o_u[128], o_L1[128], o_L2[128], o_L3[128], o_L4[128], o_pi[128], o_r0[128], o_d2[128], o_d3[128], o_e[128];
-   while ( fscanf( f, "%63s %127s", key, hex ) == 2 ) {
+   char oline[256];
+   while ( fgets( oline, sizeof oline, f ) ) {
+      if ( sscanf( oline, "%63s %127s", key, hex ) != 2 ) continue;   // per LINE — fixture markers must not shift the key/hex pairing
       if (!strcmp(key,"BETA")) strcpy(o_beta,hex);   if (!strcmp(key,"GAMMA")) strcpy(o_gamma,hex);
       if (!strcmp(key,"ALPHA")) strcpy(o_alpha,hex); if (!strcmp(key,"ALPHA2")) strcpy(o_alpha2,hex);
       if (!strcmp(key,"XI")) strcpy(o_xi,hex);       if (!strcmp(key,"BETAXI")) strcpy(o_betaxi,hex);

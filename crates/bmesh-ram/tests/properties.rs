@@ -74,8 +74,8 @@ fn double_path_agrees_with_exact_integer_math_on_this_corpus() {
         40_000_000_000,
     ] {
         let dbl = bancor_output(m.quote_units, m.base_bytes, qaf);
-        let exact = ((qaf as u128) * (m.base_bytes as u128))
-            / ((m.quote_units as u128) + (qaf as u128)) as u128;
+        let exact =
+            ((qaf as u128) * (m.base_bytes as u128)) / ((m.quote_units as u128) + (qaf as u128));
         let diff = (dbl as i128 - exact as i128).abs();
         assert!(
             diff <= 4,

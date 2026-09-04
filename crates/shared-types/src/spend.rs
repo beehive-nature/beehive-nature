@@ -81,18 +81,13 @@ pub enum Denom {
 
 /// RULED 2026-08-08. Default `Private`; widening is gated on informed consent that shows
 /// privacy AND cost together. Widening later cannot un-publish what was already written.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Visibility {
+    #[default]
     Private,
     Parent,
     Public,
-}
-
-impl Default for Visibility {
-    fn default() -> Self {
-        Visibility::Private
-    }
 }
 
 // ---------------------------------------------------------------------------
