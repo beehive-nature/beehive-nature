@@ -1,0 +1,18 @@
+# ant-extsig — the member-signed memory write (external-signer harness)
+# The estate binary NEVER holds a member key: it prepares and resumes; the
+# member's wallet (member-pay.mjs, ethers) pays between the two.
+[package]
+name = "ant-extsig"
+version = "0.2.0"
+edition = "2021"
+
+[dependencies]
+ant-core = { git = "https://github.com/WithAutonomi/ant-client", features = ["devnet"] }
+ant-node = "0.18.1"
+ant-protocol = "2.3.5"
+tokio = { version = "1", features = ["full"] }
+serde_json = "1"
+hex = "0.4"
+
+[profile.dev]
+debug = 0
