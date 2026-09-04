@@ -1,0 +1,6 @@
+{
+  "name": "voice-scribe",
+  "private": true,
+  "type": "module",
+  "dependencies": { "nostr-tools": "^2.10.4" }
+}

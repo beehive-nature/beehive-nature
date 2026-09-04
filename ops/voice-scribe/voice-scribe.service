@@ -1,0 +1,19 @@
+[Unit]
+Description=voice-scribe — NIP-98-gated speech-to-text door (whisper.cpp) for the buzz phone room
+After=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/opt/voice-scribe
+ExecStart=/usr/bin/node /opt/voice-scribe/voice-scribe.mjs
+Environment=VOICE_BIND=172.18.0.1
+Environment=VOICE_PORT=8093
+Environment=VOICE_CANONICAL_URL=https://skaists.buzz/voice
+Environment=VOICE_MODEL=/opt/voice-scribe/whisper.cpp/models/ggml-large-v3-turbo-q5_0.bin
+Environment=VOICE_LANGS=lv,th,ru,uk
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
