@@ -488,3 +488,54 @@ range-check lane is named hardening if ids ever carry semantics); the
 cross-asset FEE is enforced in-circuit only in its "counts or not" role —
 its actual settlement in the fee asset is the meter's off-chain lane
 (Lane M), publicly declared and transcript-bound here.
+
+## §m8-receipt — THE INSERT LEVER (2026-09-05, founder-ordered: target clean payment < 20 ms)
+
+**Step 1 · CHEAP FIRST (landed):** `gen_poseidon_cpp.js` now emits the
+round constants PRE-CONVERTED to Montgomery form as u256 limb literals —
+the per-call conversion loop (384 mont-muls + parses per insert) is gone,
+`poseidon2_ctx` is the bare field context, and the WASM shrank
+102.2 KB → 99.6 KB. Gates re-run green: poseidon2 68/68 vs circomlibjs
+(Montgomery-baked constants), field 3,217/3,217, six-leaf canonical
+battery 6/6.
+**Measured before → after (quiet box, three each):** deposits
+30.0/21.5/29.7 → 38.3/25.9/31.7 ms; payments 35.8/38.1/42.2 →
+51.6/36.6/34.9 ms. **Within the contention-noise band — the theoretical
+~3% did not survive measurement.** The honest conclusion: the WASM hash
+work itself is the floor — 20 hashes × ~600 Montgomery muls ≈ 12k muls
+per insert ≈ 21–24 ms at the measured ~1.7 µs/mul WASM cost (consistent
+with M2.5's overhead factor). Copy/allocation removal beyond this is
+noise; the remaining per-insert bytes are the 20 field writes and the
+row read+write, not temporaries.
+
+**Step 2 · the decision, with the numbers.** Clean payment after step 1
+is ~35 ms = verify 11.6 + insert ~21–24 + DB writes. The two roads:
+
+- **Batching** (queue N leaves, fold once per N): keeps the tree canonical
+  (the batch's subtree is the canonical subtree of those leaves); the
+  amortized hash count is (N−1 + 20−log₂N)/N per leaf — N=8 gives ~3
+  hashes/leaf ≈ 4–5 ms insert → projected payment ≈ 19–21 ms. That is AT
+  the target's edge, INSIDE the contention-noise band, and it costs: a
+  queue table + flush path on the hottest soundness-critical surface,
+  partial-batch edge cases for z2.1 to attack, and deposits that are not
+  spendable until a batch closes (latency by design).
+- **Native intrinsic** (host-function Poseidon alongside alt_bn128_*):
+  insert cost → microseconds; projected payment ≈ 14–15 ms with ZERO
+  semantic change to the tree, the witness, or the proofs. This is a
+  protocol-level change (a Spring/Vaulta host function) — outside this
+  lane's power to ship, exactly like alt_bn128_* was before Vaulta
+  shipped it.
+
+**RULING BY THIS SEAT: the native Poseidon intrinsic is the named future
+lane; batching is NOT shipped.** The numbers say batching buys a number
+that sits inside the noise band at the cost of a queue's worth of
+soundness surface and spendability latency — a bad trade for a rehearsal
+chain whose next real step (mainnet) wants the host function anyway. The
+verify stays 11.6 ms; the 15 ms tripwire keeps guarding it; payments
+stay ~35 ms until the intrinsic lands, labeled exactly.
+
+**The standing battery:** `tree6-check.sh` — six known leaves through the
+CONTRACT's own tree, every root asserted against tree.js's canonical
+fold. It caught the M7 TREE LAW live; it runs on every future tree change
+(founder order: forever). The probe sources (`treedbg.cpp`) are committed
+beside it.
