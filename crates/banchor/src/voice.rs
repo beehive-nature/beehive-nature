@@ -151,7 +151,7 @@ pub fn clean_transcript(raw: &str) -> String {
 
 /// Transcribe one wav ON THE BOX with whisper.cpp. Returns the transcript
 /// plus full provenance for the replay.
-pub fn goal_from_audio(wav: &Path) -> Result<(String, Value), VoiceError> {
+pub fn goal_from_audio(wav: &Path, keep_raw: bool) -> Result<(String, Value), VoiceError> {
     let bytes = std::fs::read(wav).map_err(|e| VoiceError::Io(e.to_string()))?;
     if bytes.len() < 44 || &bytes[..4] != b"RIFF" {
         return Err(VoiceError::Io(format!(
@@ -221,6 +221,15 @@ pub fn goal_from_audio(wav: &Path) -> Result<(String, Value), VoiceError> {
     if transcript.is_empty() {
         return Err(VoiceError::Empty);
     }
+    // MIC HYGIENE (founder order 2026-09-04): raw ambient audio is DELETED
+    // after transcription by default — the receipt keeps the transcript and
+    // the digest, never the recording. `keep_raw` is the explicit opt-out
+    // (BANCHOR_KEEP_VOICE_AUDIO / --keep-audio) for runs that must re-listen.
+    let deleted = if keep_raw {
+        false
+    } else {
+        std::fs::remove_file(wav).is_ok()
+    };
     let provenance = json!({
         "source": "audio",
         "asr": {
@@ -236,10 +245,22 @@ pub fn goal_from_audio(wav: &Path) -> Result<(String, Value), VoiceError> {
             "bytes": bytes.len(),
             "sha3_256": format!("sha3-256:{digest}"),
             "b64u_head": b64u(&bytes[..bytes.len().min(64)]),
+            "raw_deleted_after_transcription": deleted,
+            "raw_kept": keep_raw,
         },
         "transcript": transcript,
     });
     Ok((transcript, provenance))
+}
+
+/// The hygiene default: ambient (mic) captures are deleted after
+/// transcription unless the operator explicitly opts out. Explicit file
+/// paths are the operator's own artifacts — never deleted by this law.
+pub fn hygiene_keep_raw(explicit_path: bool) -> bool {
+    if explicit_path {
+        return true; // named files (e.g. committed synthetic receipts) stay
+    }
+    std::env::var("BANCHOR_KEEP_VOICE_AUDIO").is_ok()
 }
 
 #[cfg(test)]
@@ -250,6 +271,21 @@ mod tests {
     fn transcript_cleaning_strips_noise_and_squashes_lines() {
         let raw = "whisper_init_from_file_with_state_no_state: loading model from ...\n\n\n  Click the  root zone   registry.  \nsystem_info: n_threads = 3\n";
         assert_eq!(clean_transcript(raw), "Click the root zone registry.");
+    }
+
+    #[test]
+    fn mic_hygiene_defaults_to_delete_named_files_stay() {
+        // explicit paths are the operator's artifacts — always kept
+        assert!(hygiene_keep_raw(true));
+        // ambient mic captures: deleted unless the operator opted out
+        std::env::remove_var("BANCHOR_KEEP_VOICE_AUDIO");
+        assert!(
+            !hygiene_keep_raw(false),
+            "ambient audio must die by default"
+        );
+        std::env::set_var("BANCHOR_KEEP_VOICE_AUDIO", "1");
+        assert!(hygiene_keep_raw(false), "the opt-out is honored");
+        std::env::remove_var("BANCHOR_KEEP_VOICE_AUDIO");
     }
 
     #[test]

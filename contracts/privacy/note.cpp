@@ -1,33 +1,34 @@
-// note.cpp — the private PAYMENT note (SPEC-PRIVACY-1, M5: membership +
-// conservation; M4 was the port).
+// note.cpp — the private PAYMENT note (SPEC-PRIVACY-1, M6: soundness —
+// on-chain root + range checks; M5 was membership+conservation).
 //
 // SOUND BY CONSTRUCTION / ISOLATED BY DESIGN — never stronger language.
 //
 // WHAT IS REAL HERE (labeled exactly, per the lane law):
 //  - The FLOW: deposit -> private payment -> withdraw, with commitment and
 //    nullifier sets, double-spend refusal by nullifier uniqueness, bounded
-//    fixed-size rows only (the chain holds law + commitments + nullifiers,
-//    never bulk history).
+//    fixed-size rows only (the chain holds law + tree + commitments +
+//    nullifiers, never bulk history).
+//  - THE ON-CHAIN INCREMENTAL MERKLE TREE (founder order 2026-09-05):
+//    deposit APPENDS the leaf and computes the root itself — 20 Poseidon
+//    hashes in-contract (poseidon2.hpp, bit-exact with circomlib by a
+//    68/68 vector gate). There is NO root setter anywhere in this
+//    contract: the law row's root only ever ADVANCES via deposit, making
+//    root-rollback structurally impossible (z2.1's list, closed by
+//    construction). The witness-side tree (tree.js) is a VIEW of the same
+//    definition — every root it computes must equal the chain's.
 //  - THE PAYMENT STATEMENT (payment.circom, one PLONK proof per spend):
-//    MEMBERSHIP — the spent note's Poseidon commitment is a leaf of the
-//    depth-20 Poseidon merkle tree whose ROOT lives in the law row (the
-//    tree is maintained off-chain, owner `setroot` — REHEARSAL-labeled;
-//    on-chain derivation is a named future lane); NULLIFIER =
-//    Poseidon(secret, tag) bound to the same secret; OUTPUT note commitment
-//    public; CONSERVATION amountIn = amountOut + fee with amounts PRIVATE
-//    and the FEE PUBLIC — the meter bills the public leg (Lane M). A
-//    withdraw is the same proof with the value riding the public fee leg.
-//  - CRYPTO-AGILITY LAW: every stored hash/proof carries its algorithm id.
-//    ALG_COMMIT = 2 = poseidon-bn254-v1 since M5 (the tree is DEFINED over
-//    circuit Poseidon commitments; keccak256-v1 = 1 was the M3 deposit hash,
-//    old rows distinguishable). ALG_PROOF = 2 = plonk-bn254-v1 (nine-phase
-//    verifier, plonk_verify.hpp; vk: payment.circom, pot14 one-honest-seat
-//    ceremony, rehearsal-labeled until a witnessed multi-party sealing is
-//    ruled for mainnet — founder order 2026-09-04).
-//  - LABELED BOUNDS: amounts are unbounded field elements in-circuit this
-//    pass (no range-check circuit — value semantics rest on the openly
-//    recorded deposit amounts; the range-check lane is named hardening).
-//    Deposits record amounts openly (the on-ramp); payment-created notes
+//    MEMBERSHIP of the spent note in the contract-computed tree; NULLIFIER
+//    = Poseidon(secret, leaf_index) (index derived in-circuit — one
+//    spendable nullifier per leaf); OUTPUT note commitment public;
+//    CONSERVATION amountIn = amountOut + fee with amounts PRIVATE and the
+//    FEE PUBLIC (the meter's leg); RANGE CHECKS — every amount decomposed
+//    to 64 bits in-circuit, so conservation cannot wrap mod p (an
+//    overflow spend has no satisfying witness).
+//  - CRYPTO-AGILITY LAW: ALG_COMMIT = 2 = poseidon-bn254-v1 (tree leaves),
+//    ALG_PROOF = 2 = plonk-bn254-v1 (nine-phase verifier, plonk_verify.hpp;
+//    vk: payment.circom, pot14 one-honest-seat ceremony, rehearsal-labeled
+//    until a witnessed multi-party sealing is ruled for mainnet).
+//  - Deposits record amounts openly (the on-ramp); payment-created notes
 //    record amount 0 = PRIVATE (the real value lives only in the note).
 //  - The VIEW-KEY TAG: unchanged (owner-held off-chain disclosure, Zano's
 //    auditable-wallet pattern).
@@ -38,6 +39,8 @@
 #include <eosio/crypto_ext.hpp>
 #include <eosio/system.hpp>
 #include "plonk_verify.hpp"
+#include "poseidon2.hpp"
+#include "tree_zeros.hpp"
 #include <vector>
 using namespace eosio;
 
@@ -50,13 +53,6 @@ public:
    static constexpr uint8_t ALG_COMMIT_POSEIDON_V1  = 2;   // poseidon-bn254-v1 (tree leaves)
    static constexpr uint8_t ALG_PROOF_PLONK_V1      = 2;   // plonk-bn254-v1 payment proof
 
-   // the depth-20 all-zero Poseidon tree's root (zeros[0]=0,
-   // zeros[l]=Poseidon(zeros[l-1], zeros[l-1]); tree.js agrees) — the law
-   // row's root BEFORE any deposit
-   static constexpr unsigned char EMPTY_ROOT_[32] = {
-      33,52,231,106,197,210,26,171,24,108,43,225,221,143,132,238,
-      136,10,30,70,234,247,18,249,211,113,182,223,34,25,31,62 };
-
    // ── the LAW row (governed-mutable, exactly one) ──
    struct [[eosio::table("law"), eosio::contract("note")]] law_row {
       uint64_t id;                 // 0 forever
@@ -64,10 +60,64 @@ public:
       uint8_t  alg_proof;          // spend-proof algorithm id
       uint64_t max_notes;          // BOUNDED: commitments table hard cap (≤ 2^20: tree depth)
       uint64_t max_nullifiers;     // BOUNDED: nullifier table hard cap
-      checksum256 root;            // the Poseidon merkle root the payment proofs check against
+      checksum256 root;            // the merkle root the CONTRACT computes (no setter exists)
       uint64_t primary_key()const { return id; }
    };
    using law_index = eosio::multi_index<"law"_n, law_row>;
+
+   // ── the incremental merkle tree (singleton; advanced by deposit only) ──
+   // (CDT table reflection cannot carry array members — 20 named fields)
+   struct [[eosio::table("tree"), eosio::contract("note")]] tree_row {
+      uint64_t id;                 // 0 forever
+      uint64_t next_index;         // the next leaf slot (≤ 2^20)
+      checksum256 f0;
+      checksum256 f1;
+      checksum256 f2;
+      checksum256 f3;
+      checksum256 f4;
+      checksum256 f5;
+      checksum256 f6;
+      checksum256 f7;
+      checksum256 f8;
+      checksum256 f9;
+      checksum256 f10;
+      checksum256 f11;
+      checksum256 f12;
+      checksum256 f13;
+      checksum256 f14;
+      checksum256 f15;
+      checksum256 f16;
+      checksum256 f17;
+      checksum256 f18;
+      checksum256 f19;
+      uint64_t primary_key()const { return id; }
+   };
+   using tree_index = eosio::multi_index<"tree"_n, tree_row>;
+   static const checksum256& tf( const tree_row& r, int i ) {
+      switch ( i ) {
+         case 0: return r.f0;
+         case 1: return r.f1;
+         case 2: return r.f2;
+         case 3: return r.f3;
+         case 4: return r.f4;
+         case 5: return r.f5;
+         case 6: return r.f6;
+         case 7: return r.f7;
+         case 8: return r.f8;
+         case 9: return r.f9;
+         case 10: return r.f10;
+         case 11: return r.f11;
+         case 12: return r.f12;
+         case 13: return r.f13;
+         case 14: return r.f14;
+         case 15: return r.f15;
+         case 16: return r.f16;
+         case 17: return r.f17;
+         case 18: return r.f18;
+         case 19: return r.f19;
+      }
+      return r.f0;
+   }
 
    // ── commitment set (bounded, fixed-size rows) ──
    struct [[eosio::table("commitments"), eosio::contract("note")]] commitment_row {
@@ -98,27 +148,27 @@ public:
       law.emplace( get_self(), [&]( auto& r ) {
          r.id = 0; r.alg_commit = ALG_COMMIT_POSEIDON_V1; r.alg_proof = ALG_PROOF_PLONK_V1;
          r.max_notes = max_notes; r.max_nullifiers = max_nulls;
-         memcpy( (void*)r.root.data(), EMPTY_ROOT_, 32 );
+         unsigned char e[32]; memcpy( e, ZERO_[20], 32 ); t256( e );
+         memcpy( (void*)r.root.data(), e, 32 );            // T(empty root)
       });
-   }
-
-   // ── setroot: the owner rolls the merkle root forward after deposits ──
-   // REHEARSAL-LABELED: the tree is maintained off-chain (tree.js); the root
-   // here is what payment proofs check membership against. On-chain
-   // derivation (incremental tree in-contract) is a named future lane.
-   [[eosio::action]] void setroot( const checksum256& new_root ) {
-      require_auth( get_self() );
-      law_index law( get_self(), get_self().value );
-      auto itr = law.find( 0 );
-      eosio::check( itr != law.end(), "law not initialized" );
-      law.modify( itr, get_self(), [&]( auto& r ) { r.root = new_root; } );
+      tree_index tr( get_self(), get_self().value );
+      eosio::check( tr.begin() == tr.end(), "tree already set" );
+      tr.emplace( get_self(), [&]( auto& r ) {
+         r.id = 0; r.next_index = 0;
+         unsigned char e[32];
+         checksum256* fs[20] = { &r.f0, &r.f1, &r.f2, &r.f3, &r.f4, &r.f5, &r.f6, &r.f7,
+                                 &r.f8, &r.f9, &r.f10, &r.f11, &r.f12, &r.f13, &r.f14, &r.f15,
+                                 &r.f16, &r.f17, &r.f18, &r.f19 };
+         for ( int i = 0; i < 20; ++i ) { memcpy( e, ZERO_[i], 32 ); t256( e ); memcpy( (void*)fs[i]->data(), e, 32 ); }
+      });
    }
 
    // ── deposit: public value in, Poseidon commitment leaf out ──
    // commitment = Poseidon(secret, amount) computed by the depositor
    // (off-chain); the chain stores c + viewtag + algorithm id, the amount
-   // recorded OPENLY (the on-ramp; the off-chain tree appends c and the
-   // owner rolls the root via setroot).
+   // recorded OPENLY (the on-ramp), AND appends c to the incremental merkle
+   // tree ITSELF — the root in the law row is contract-computed (there is
+   // no setter; root-rollback is structurally impossible).
    [[eosio::action]] void deposit( const checksum256& c, uint32_t viewtag, uint64_t amount ) {
       law_index law( get_self(), get_self().value );
       auto lr = law.get( 0, "law not initialized" );
@@ -129,6 +179,7 @@ public:
          r.c = c; r.viewtag = viewtag; r.alg = lr.alg_commit;
          r.deposited = current_time_point().sec_since_epoch(); r.amount = amount;
       });
+      tree_insert( c );
    }
 
    // ── private payment: proof + nullifier in, new note out ──
@@ -152,6 +203,7 @@ public:
          r.deposited = current_time_point().sec_since_epoch();
          r.amount = 0;   // PRIVATE since M5: conservation is proven in-circuit
       });
+      tree_insert( to_commitment );   // the new note becomes a SPENDABLE leaf
    }
 
    // ── withdraw: proof + nullifier in, public value out ──
@@ -167,6 +219,74 @@ public:
    }
 
 private:
+   // ── the on-chain incremental merkle insert (Tornado's algorithm over the
+   // C++ Poseidon; 20 hashes per deposit) ──
+   // filled[i] = the last complete LEFT subtree at level i; the root only
+   // ever ADVANCES here — no setter exists anywhere in the contract.
+   __attribute__( ( noinline ) )
+   void tree_insert( const checksum256& leaf ) {
+      tree_index tr( get_self(), get_self().value );
+      auto titr = tr.find( 0 );
+      eosio::check( titr != tr.end(), "tree not initialized" );
+      eosio::check( titr->next_index < (1ull << 20), "tree FULL (depth-20 bounded-rows law)" );
+      // 12KB of Montgomery constants is too big for the WASM stack — a
+      // fixed-address static scratch, fully re-initialized on every call
+      // (deterministic: no state survives the action)
+      static poseidon2_ctx pc_scratch;
+      poseidon2_ctx* pc = &pc_scratch;
+      poseidon2_ctx_init( pc, PL_Q );
+      u256 cur, z, h;
+      u256 filled[20];
+      for ( int i = 0; i < 20; ++i ) {
+         const auto fb = tf( *titr, i ).extract_as_byte_array();
+         f256_from_be( filled[i], fb.data() );
+      }
+      const auto lb = leaf.extract_as_byte_array();
+      f256_from_be( cur, lb.data() );
+      uint64_t idx = titr->next_index;
+      for ( int i = 0; i < 20; ++i ) {
+         if ( ((idx >> i) & 1ull) == 0 ) {
+            // going LEFT: sibling is the level's zero hash; filled[i] ← cur
+            f256_from_be( z, ZERO_[i] );
+            f256_copy( filled[i], cur );
+            poseidon2( pc, cur, z, cur );
+         } else {
+            // going RIGHT: sibling is filled[i]; the parent becomes the new filled[i]
+            poseidon2( pc, filled[i], cur, h );
+            f256_copy( filled[i], h );
+            f256_copy( cur, h );
+         }
+      }
+      unsigned char be[32];
+      tr.modify( titr, get_self(), [&]( auto& row ) {
+         row.next_index += 1;
+         checksum256* fs[20] = { &row.f0, &row.f1, &row.f2, &row.f3, &row.f4, &row.f5, &row.f6, &row.f7,
+                                 &row.f8, &row.f9, &row.f10, &row.f11, &row.f12, &row.f13, &row.f14, &row.f15,
+                                 &row.f16, &row.f17, &row.f18, &row.f19 };
+         for ( int i = 0; i < 20; ++i ) {
+            f256_to_be( be, filled[i] ); t256( be );
+            memcpy( (void*)fs[i]->data(), be, 32 );
+         }
+      });
+      law_index law( get_self(), get_self().value );
+      auto litr = law.find( 0 );
+      eosio::check( litr != law.end(), "law not initialized" );
+      f256_to_be( be, cur ); t256( be );
+      law.modify( litr, get_self(), [&]( auto& r ) { memcpy( (void*)r.root.data(), be, 32 ); } );
+   }
+
+   // T(b): reverse the 32 bytes, then swap the 16-byte halves (an
+   // involution). CDT checksum256 extract_as_byte_array() returns T(memory
+   // bytes) — action params pass through decode+extract unchanged (T∘T),
+   // but values WRITTEN by memcpy must be stored pre-transformed so a later
+   // extract returns the true bytes (the M1 gotcha, mapped exactly in M6).
+   static void t256( unsigned char b[32] ) {
+      unsigned char t[32];
+      for ( int i = 0; i < 32; ++i ) t[i] = b[31 - i];
+      for ( int i = 0; i < 16; ++i ) { unsigned char x = t[i]; t[i] = t[16 + i]; t[16 + i] = x; }
+      memcpy( b, t, 32 );
+   }
+
    static uint64_t pk_of( const checksum256& h ) {
       auto d = h.data();
       return ( (uint64_t)d[0] << 32 ) | (uint64_t)d[1];

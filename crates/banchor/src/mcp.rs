@@ -154,12 +154,18 @@ pub fn dispatch(state: &Arc<Mutex<SeatState>>, req: &Value) -> Option<Value> {
                     let mut goal = goal;
                     let mut goal_provenance: Option<Value> = None;
                     if let Some(audio) = goal_audio {
-                        let wav = if audio == "mic" {
+                        let mic_capture = audio == "mic";
+                        let wav = if mic_capture {
                             std::env::temp_dir().join("banchor-voice-goal.wav")
                         } else {
-                            std::path::PathBuf::from(audio)
+                            std::path::PathBuf::from(&audio)
                         };
-                        match crate::voice::goal_from_audio(&wav) {
+                        match crate::voice::goal_from_audio(
+                            &wav,
+                            // MIC HYGIENE: mic captures deleted after transcription
+                            // unless BANCHOR_KEEP_VOICE_AUDIO; named files stay
+                            crate::voice::hygiene_keep_raw(!mic_capture),
+                        ) {
                             Ok((t, p)) => {
                                 goal = t;
                                 goal_provenance = Some(p);

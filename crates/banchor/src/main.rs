@@ -204,6 +204,7 @@ fn agentloop_cmd(args: &[String]) {
     let mut expect_substr: Option<String> = None;
     let mut goal_audio: Option<String> = None;
     let mut capture_seconds: u32 = 5;
+    let mut keep_audio = false;
     let mut i = 0;
     while i < args.len() {
         match args[i].as_str() {
@@ -222,6 +223,10 @@ fn agentloop_cmd(args: &[String]) {
             "--capture-seconds" if i + 1 < args.len() => {
                 capture_seconds = args[i + 1].parse().unwrap_or(5);
                 i += 2;
+            }
+            "--keep-audio" => {
+                keep_audio = true;
+                i += 1;
             }
             "--max-turns" if i + 1 < args.len() => {
                 max_turns = args[i + 1].parse().unwrap_or(3);
@@ -245,7 +250,8 @@ fn agentloop_cmd(args: &[String]) {
     // iron) replaces the typed goal; provenance rides every replay
     let mut goal_provenance: Option<serde_json::Value> = None;
     if let Some(ref audio) = goal_audio {
-        let wav = if audio == "mic" {
+        let mic_capture = audio == "mic";
+        let wav = if mic_capture {
             let tmp = std::env::temp_dir().join("banchor-voice-goal.wav");
             if let Err(e) = voice::capture_mic(&tmp, capture_seconds) {
                 eprintln!("agentloop FAILED: {e}");
@@ -255,7 +261,10 @@ fn agentloop_cmd(args: &[String]) {
         } else {
             std::path::PathBuf::from(audio)
         };
-        match voice::goal_from_audio(&wav) {
+        // MIC HYGIENE: ambient captures are deleted after transcription
+        // (transcript + digest stay in the receipt) unless --keep-audio
+        let keep_raw = keep_audio || voice::hygiene_keep_raw(!mic_capture);
+        match voice::goal_from_audio(&wav, keep_raw) {
             Ok((transcript, provenance)) => {
                 eprintln!("[agentloop] voice goal: \"{transcript}\"");
                 goal = transcript;
