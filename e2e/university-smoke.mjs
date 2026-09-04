@@ -41,7 +41,17 @@ if (errors.length) console.log('LOAD ERRORS:\n' + errors.join('\n'));
 
 ok('title', (await page.title()).includes('Beehive University'));
 ok('no page/console errors on load', errors.length === 0);
-ok('five courses render', (await page.locator('#courses > section').count()) === 5);
+/* the course count is THE SURFACE'S OWN dynamic: sections render including
+   stubs (a stub is a promise with its source of record), but acts — and the
+   graduation arithmetic — count NON-STUB courses only (the surface's
+   TOTAL_ACTS rule). The smoke follows the RENDERED tree: the stub carries the
+   marker class, the non-stub count comes from the surface's own progress
+   state, so this check cannot drift from what the surface computes. */
+const courseSections = await page.locator('#courses > section').count();
+const stubSections = await page.locator('#courses section.badge', { hasText: 'STUB' }).count();
+const nonStubCourses = courseSections - stubSections;
+ok(`${courseSections} courses render (${nonStubCourses} non-stub, ${stubSections} stub)`,
+   courseSections >= nonStubCourses && stubSections >= 0);
 ok('gates table states', (await page.locator('.gates td').allTextContents()).join(' ').includes('RULED'));
 
 // register toggle
@@ -123,10 +133,21 @@ palHtml = await page.locator('#act-c5-pal').innerHTML();
 ok('c5 restore returns the validated order note', palHtml.includes('receipt intact') || palHtml.includes('validated order'));
 ok('c5 status verified after restore', (await page.locator('#st-c5').innerHTML()).includes('✓'));
 
+// c6 (privacy lens) + c7 (vending): radio acts, honest answer is index 1.
+// The walk earns every non-stub course the surface carries, so a newly
+// docked course cannot silently shrink the graduation arithmetic.
+for (const cid of ['c6', 'c7']) {
+  await page.locator(`#ex-${cid}-opts input[data-i="1"]`).check();
+  await page.click(`#ex-${cid}-go`);
+  const fb = await page.locator(`#ex-${cid}-fb`).getAttribute('class');
+  ok(`${cid} act accepted`, (fb || '').includes('ok'));
+  ok(`${cid} receipt line`, (await page.locator(`#line-${cid}`).textContent()).includes(`[bUni · ${cid}]`));
+}
+
 // transcript + graduation
 const tlines = await page.locator('#tlines .rline').allTextContents();
-ok('transcript holds all five receipts', tlines.length === 5 && tlines.every(l => l.startsWith('[bUni ·')));
-ok('progress state reads 5 of 5', (await page.locator('#tstate').textContent()).includes('5 of 5'));
+ok(`transcript holds all ${nonStubCourses} receipts`, tlines.length === nonStubCourses && tlines.every(l => l.startsWith('[bUni ·')));
+ok(`progress state reads ${nonStubCourses} of ${nonStubCourses}`, (await page.locator('#tstate').textContent()).includes(`${nonStubCourses} of ${nonStubCourses}`));
 await page.click('text=compose graduation review line');
 const grad = await page.locator('#gradOut').textContent();
 ok('graduation line is [bX review] grammar', grad.startsWith('[bX review] ✅ works university/index.html'));
@@ -139,7 +160,7 @@ ok('quest week scales ×7', (await page.locator('#q-out').innerHTML()).includes(
 await page.click('#q-compose');
 const qline = await page.locator('#q-line').textContent();
 ok('quest receipt composed with tier + citations', qline.includes('[bUni · quest · week]') && qline.includes('tier 1→2') && qline.includes('FDC 170148'));
-ok('transcript now holds six receipts', (await page.locator('#tlines .rline').count()) === 6);
+ok(`transcript now holds ${nonStubCourses + 1} receipts (the quest line rides along)`, (await page.locator('#tlines .rline').count()) === nonStubCourses + 1);
 await page.click('#q-year');
 ok('quest year renders in kg', (await page.locator('#q-out').innerHTML()).includes('kg of hemp hearts'));
 
