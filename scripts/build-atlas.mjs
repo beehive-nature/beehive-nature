@@ -84,6 +84,35 @@ const GLOSS = {
   midi: 'the music universe — one seed, on-chain scores, the vault',
   bnr: 'the kernel\u2019s public face — quests for curious minds'
 };
+/* THE FOUR OBJECTIONS — autonomi's own community named why people hesitate;
+   the estate answers each by construction. Three audiences per answer (the
+   register law's bee / raver / cypherpunk). EN is the corpus anchor: the
+   generator emits it inside the spans, lang-corpus carries the tongues. */
+const FOUR = {
+  kicker: 'the four objections, answered by design',
+  title: 'what stops people — and what we built about it',
+  intro: 'autonomi\u2019s own community named four reasons people hesitate. the estate answers each one by construction, not by promise — and writes the answers on the door.',
+  q1: 'do I want this permanent?',
+  a1: 'arweave keeps what you choose forever; autonomi keeps what you choose private — and deletable. two vaults, your call per record.',
+  'a1.bee': 'your agent\u2019s birth certificate lives on arweave — permanent by physics, not by promise. your everyday files live on autonomi — private, and gone the day you delete them.',
+  'a1.raver': 'the mixtape you want forever is forever. the selfies you don\u2019t? gone when you tap delete. no vault holds both hostage.',
+  'a1.cypher': 'permanence is a per-record property: arweave for the receipt of you, autonomi for the self that changes. lock-in requires immutability — deletion stays a first-class verb.',
+  q2: 'do I trust it with personal data?',
+  a2: 'encrypted under your own key before it leaves your device — the estate stores locked boxes, never the keys.',
+  'a2.bee': 'your files are locked with YOUR key before they travel. the estate can store them; it can never open them.',
+  'a2.raver': 'we built the locker. we never had a copy of your key. that is the whole point of a locker.',
+  'a2.cypher': 'client-side encryption under keys the estate never sees; the storage layer holds ciphertext and minimal pointers. trust is not required — verification is.',
+  q3: 'my phone already backs up for free — where is my login-anywhere?',
+  a3: 'one install, your own name (.b), every device — your stuff follows your name, not the machine.',
+  'a3.bee': 'install once, claim your .b name, sign in anywhere with it. new phone? same name, everything still yours.',
+  'a3.raver': 'your name is your login — same room, same crew, same files, from any phone. no new account per app, ever.',
+  'a3.cypher': 'the .b name is a self-sovereign pointer: keys you hold, a name you own, sessions anywhere — login-anywhere without an identity provider.',
+  q4: 'tracking every crypto transaction for tax is agony.',
+  a4: 'the meter receipts every spend the moment it happens — and sets the tax aside for you as it goes.',
+  'a4.bee': 'every spend prints its own receipt, and the tax slice is put aside automatically. april-you says thanks.',
+  'a4.raver': 'no spreadsheet hell. the house keeps the books and holds the tax bit aside while you spend.',
+  'a4.cypher': 'the meter emits signed, resource-denominated receipts per spend; the liability accrues to a reserved bucket at spend time — auditability without the ledger chores.'
+};
 const DOORS = {
   beehivenature: [['doors/beehivenature.html', 'the door →']],
   skaists: [['doors/skaists.html', 'the door →']],
@@ -227,6 +256,17 @@ h1{position:relative;font-size:clamp(32px,6vw,44px);line-height:1.08;margin:10px
 #q{position:relative;width:100%;box-sizing:border-box;background:var(--inset);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:13px 16px;font:15px/1.4 ui-monospace,Menlo,Consolas,monospace;outline:none;transition:border-color .15s}
 #q:focus{border-color:var(--biomass)}
 #shown{font-size:11.5px;color:var(--faint);margin:8px 2px 0;min-height:16px}
+.four{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:clamp(12px,2.5vw,18px);margin:0 0 22px}
+.four .kick{color:var(--faint);font-size:10px;letter-spacing:.34em;text-transform:uppercase;margin:0 0 10px}
+.four .fourhead h2{font-size:20px;font-weight:700;margin:0;letter-spacing:-.01em}
+.four .fourintro{color:var(--dim);font-size:12.5px;line-height:1.75;max-width:76ch;margin:0 2px 14px}
+.four .row{background:var(--inset);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:10px}
+.four .q{color:var(--b-value);font-size:13px;line-height:1.6;margin:0}
+.four .a{color:var(--ink);font-size:13.5px;line-height:1.65;margin:7px 0 0}
+.four .regs{display:flex;flex-direction:column;gap:4px;margin-top:9px}
+.four .reg{display:flex;gap:8px;align-items:baseline;font-size:11.5px;line-height:1.7;color:var(--dim)}
+.four .reg .who{flex:none;color:var(--faint);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;min-width:104px}
+@media (max-width:600px){.four{padding:13px 12px}.four .reg .who{min-width:88px}}
 .orgnav{display:flex;flex-wrap:wrap;gap:8px;padding:16px 0 4px}
 .orgnav a{font-size:12px;padding:7px 13px;border:1px solid;border-radius:999px;background:#0A1310;color:var(--ink)}
 .orgnav a:hover{text-decoration:none;background:#111C17}
@@ -302,6 +342,47 @@ footer b{color:var(--ink);font-variant-numeric:tabular-nums}
 </header>
 
 <div class="wrap">
+<section class="four" aria-label="the four objections, answered by design">
+<p class="kick" data-i18n="hub.four.kicker">the four objections, answered by design</p>
+<div class="fourhead"><h2 data-i18n="hub.four.title">what stops people — and what we built about it</h2></div>
+<p class="fourintro" data-i18n="hub.four.intro">autonomi's own community named four reasons people hesitate. the estate answers each one by construction, not by promise — and writes the answers on the door.</p>
+<div class="row">
+<p class="q">“<span data-i18n="hub.four.q1">do I want this permanent?</span>”</p>
+<p class="a" data-i18n="hub.four.a1">arweave keeps what you choose forever; autonomi keeps what you choose private — and deletable. two vaults, your call per record.</p>
+<div class="regs">
+<div class="reg"><span class="who">🐝 the new bee</span><span class="t" data-i18n="hub.four.a1.bee">your agent's birth certificate lives on arweave — permanent by physics, not by promise. your everyday files live on autonomi — private, and gone the day you delete them.</span></div>
+<div class="reg"><span class="who">🪩 the raver</span><span class="t" data-i18n="hub.four.a1.raver">the mixtape you want forever is forever. the selfies you don't? gone when you tap delete. no vault holds both hostage.</span></div>
+<div class="reg"><span class="who">🕶 the cypherpunk</span><span class="t" data-i18n="hub.four.a1.cypher">permanence is a per-record property: arweave for the receipt of you, autonomi for the self that changes. lock-in requires immutability — deletion stays a first-class verb.</span></div>
+</div>
+</div>
+<div class="row">
+<p class="q">“<span data-i18n="hub.four.q2">do I trust it with personal data?</span>”</p>
+<p class="a" data-i18n="hub.four.a2">encrypted under your own key before it leaves your device — the estate stores locked boxes, never the keys.</p>
+<div class="regs">
+<div class="reg"><span class="who">🐝 the new bee</span><span class="t" data-i18n="hub.four.a2.bee">your files are locked with YOUR key before they travel. the estate can store them; it can never open them.</span></div>
+<div class="reg"><span class="who">🪩 the raver</span><span class="t" data-i18n="hub.four.a2.raver">we built the locker. we never had a copy of your key. that is the whole point of a locker.</span></div>
+<div class="reg"><span class="who">🕶 the cypherpunk</span><span class="t" data-i18n="hub.four.a2.cypher">client-side encryption under keys the estate never sees; the storage layer holds ciphertext and minimal pointers. trust is not required — verification is.</span></div>
+</div>
+</div>
+<div class="row">
+<p class="q">“<span data-i18n="hub.four.q3">my phone already backs up for free — where is my login-anywhere?</span>”</p>
+<p class="a" data-i18n="hub.four.a3">one install, your own name (.b), every device — your stuff follows your name, not the machine.</p>
+<div class="regs">
+<div class="reg"><span class="who">🐝 the new bee</span><span class="t" data-i18n="hub.four.a3.bee">install once, claim your .b name, sign in anywhere with it. new phone? same name, everything still yours.</span></div>
+<div class="reg"><span class="who">🪩 the raver</span><span class="t" data-i18n="hub.four.a3.raver">your name is your login — same room, same crew, same files, from any phone. no new account per app, ever.</span></div>
+<div class="reg"><span class="who">🕶 the cypherpunk</span><span class="t" data-i18n="hub.four.a3.cypher">the .b name is a self-sovereign pointer: keys you hold, a name you own, sessions anywhere — login-anywhere without an identity provider.</span></div>
+</div>
+</div>
+<div class="row">
+<p class="q">“<span data-i18n="hub.four.q4">tracking every crypto transaction for tax is agony.</span>”</p>
+<p class="a" data-i18n="hub.four.a4">the meter receipts every spend the moment it happens — and sets the tax aside for you as it goes.</p>
+<div class="regs">
+<div class="reg"><span class="who">🐝 the new bee</span><span class="t" data-i18n="hub.four.a4.bee">every spend prints its own receipt, and the tax slice is put aside automatically. april-you says thanks.</span></div>
+<div class="reg"><span class="who">🪩 the raver</span><span class="t" data-i18n="hub.four.a4.raver">no spreadsheet hell. the house keeps the books and holds the tax bit aside while you spend.</span></div>
+<div class="reg"><span class="who">🕶 the cypherpunk</span><span class="t" data-i18n="hub.four.a4.cypher">the meter emits signed, resource-denominated receipts per spend; the liability accrues to a reserved bucket at spend time — auditability without the ledger chores.</span></div>
+</div>
+</div>
+</section>
 <!--ATLAS-STATIC-START-->
 <nav class="orgnav" aria-label="the three orgs">
 ${orgPills}
