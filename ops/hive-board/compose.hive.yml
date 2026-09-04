@@ -1,0 +1,7 @@
+# OR-BOARD LANE (2026-09-03) — the engine room read door: keyless public
+# board.json (profiles kind 0/10100 + #general presence + roster, derived from
+# the relay DB by hive-board.timer). Same shape as compose.door/join.
+services:
+  caddy:
+    volumes:
+      - ./hive:/srv/hive:ro
