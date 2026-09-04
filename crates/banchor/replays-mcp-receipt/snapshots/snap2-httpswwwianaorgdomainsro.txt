@@ -1,0 +1,132 @@
+# banchor snapshot artifact — counted bytes below (origin: https://www.iana.org/domains/root, taken: 20260904010447)
+# integrity: sha3-256:6CBiE80CKxBmqaqWzNvov93oLIkct1K3H8COSlxePlU
+- rootwebarea "Root Zone Management"
+    - banner
+      - generic:
+        - generic:
+          - link "Homepage" [ref=@e1]
+            - image "Homepage" [ref=@e2]
+          - list
+            - listitem
+              - link "Domains" [ref=@e3]
+            - listitem
+              - link "Protocols" [ref=@e4]
+            - listitem
+              - link "Numbers" [ref=@e5]
+            - listitem
+              - link "About" [ref=@e6]
+    - generic:
+      - article
+        - main
+          - heading "Root Zone Management" [ref=@e7]
+          - paragraph
+          - list
+            - listitem
+              - link "Top-level Domains The Top-Level Domain Registry (also known as the Root Zone Database) is the authoritative record of top-level domains, including the organization that manages the domains, technical details and contact information." [ref=@e8]
+                - heading "Top-level Domains" [ref=@e9]
+                - paragraph
+            - listitem
+              - link "Files and Downloads The root zone DNS data is available for download as a DNS zone file along with associated trust information, and in other formats." [ref=@e10]
+                - heading "Files and Downloads" [ref=@e11]
+                - paragraph
+            - listitem
+              - link "Delegation Management Existing TLD managers can maintain their delegation details through our online interface." [ref=@e12]
+                - heading "Delegation Management" [ref=@e13]
+                - paragraph
+            - listitem
+              - link "Instructions and Guides Articles covering the rules governing what top-level domains are permissible, the procedures to register and update top-level domains, and other related topics." [ref=@e14]
+                - heading "Instructions and Guides" [ref=@e15]
+                - paragraph
+            - listitem
+              - link "Root Zone DNSSEC Information Information about DNSSEC in the root zone, including the trust anchor for the DNS." [ref=@e16]
+                - heading "Root Zone DNSSEC Information" [ref=@e17]
+                - paragraph
+        - navigation
+            - heading "Domain Names" [ref=@e18]
+            - list
+              - listitem
+                - link "Overview" [ref=@e19]
+              - listitem
+                - link "Root Zone Management" [ref=@e20]
+              - list
+                - listitem
+                  - link "Overview" [ref=@e21]
+                - listitem
+                  - link "Top-Level Domains" [ref=@e22]
+                - listitem
+                  - link "Files and Downloads" [ref=@e23]
+                - listitem
+                  - link "Manage Delegations" [ref=@e24]
+                - listitem
+                  - link "Instructions & Guides" [ref=@e25]
+              - listitem
+                - link ".INT Registry" [ref=@e26]
+              - listitem
+                - link ".ARPA Registry" [ref=@e27]
+              - listitem
+                - link "IDN Practices Repository" [ref=@e28]
+              - listitem
+                - link "Root Key Signing Key (DNSSEC)" [ref=@e29]
+              - listitem
+                - link "Reserved Domains" [ref=@e30]
+    - contentinfo
+      - generic:
+        - layouttable
+            - layouttablerow
+              - layouttablecell "Domain Names"
+                - link "Domain Names" [ref=@e31]
+              - layouttablecell "Root Zone Registry .INT Registry .ARPA Registry IDN Repository"
+                - list
+                  - listitem
+                    - link "Root Zone Registry" [ref=@e32]
+                  - listitem
+                    - link ".INT Registry" [ref=@e33]
+                  - listitem
+                    - link ".ARPA Registry" [ref=@e34]
+                  - listitem
+                    - link "IDN Repository" [ref=@e35]
+            - layouttablerow
+              - layouttablecell "Number Resources"
+                - link "Number Resources" [ref=@e36]
+              - layouttablecell "Number Registries RIR Allocation Data Abuse Information"
+                - list
+                  - listitem
+                    - link "Number Registries" [ref=@e37]
+                  - listitem
+                    - link "RIR Allocation Data" [ref=@e38]
+                  - listitem
+                    - link "Abuse Information" [ref=@e39]
+            - layouttablerow
+              - layouttablecell "Protocols"
+                - link "Protocols" [ref=@e40]
+              - layouttablecell "Protocol Registries Time Zone Database"
+                - list
+                  - listitem
+                    - link "Protocol Registries" [ref=@e41]
+                  - listitem
+                    - link "Time Zone Database" [ref=@e42]
+            - layouttablerow
+              - layouttablecell "About Us"
+                - link "About Us" [ref=@e43]
+              - layouttablecell "News Performance The Organization Archive Contact Us"
+                - list
+                  - listitem
+                    - link "News" [ref=@e44]
+                  - listitem
+                    - link "Performance" [ref=@e45]
+                  - listitem
+                    - link "The Organization" [ref=@e46]
+                  - listitem
+                    - link "Archive" [ref=@e47]
+                  - listitem
+                    - link "Contact Us" [ref=@e48]
+        - generic:
+          - paragraph
+            - link "Public Technical Identifiers" [ref=@e49]
+            - link "ICANN" [ref=@e50]
+        - generic:
+          - list
+            - listitem
+              - link "Privacy Policy" [ref=@e51]
+            - listitem
+              - link "Terms of Service" [ref=@e52]

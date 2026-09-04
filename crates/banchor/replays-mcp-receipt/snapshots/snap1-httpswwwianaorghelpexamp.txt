@@ -1,0 +1,142 @@
+# banchor snapshot artifact — counted bytes below (origin: https://www.iana.org/help/example-domains, taken: 20260904010341)
+# integrity: sha3-256:O1heFEdqu4ysJiNSbZq1iJKyAnlVt_WbkyeEf-K86Vk
+- rootwebarea "Example Domains"
+    - banner
+      - generic:
+        - generic:
+          - link "Homepage" →/ [ref=@e1]
+            - image "Homepage" [ref=@e2]
+          - list
+            - listitem
+              - link "Domains" →/domains [ref=@e3]
+                - statictext "Domains"
+            - listitem
+              - link "Protocols" →/protocols [ref=@e4]
+                - statictext "Protocols"
+            - listitem
+              - link "Numbers" →/numbers [ref=@e5]
+                - statictext "Numbers"
+            - listitem
+              - link "About" →/about [ref=@e6]
+                - statictext "About"
+    - generic:
+      - article
+        - main
+          - list
+            - listitem
+              - link "← Instructions and Guides" →/help [ref=@e7]
+                - generic:
+                - statictext "Instructions and Guides"
+          - heading "Example Domains" [ref=@e8]
+            - statictext "Example Domains"
+              - paragraph
+                - statictext "As described in "
+                - link "RFC 2606" →/go/rfc2606 [ref=@e9]
+                  - statictext "RFC 2606"
+                - statictext " and "
+                - link "RFC 6761" →/go/rfc6761 [ref=@e10]
+                  - statictext "RFC 6761"
+                - statictext ", a number of domains such as example.com and example.org are maintained for documentation purposes. These domains may be used as illustrative examples in documents without prior coordination with us. They are not available for registration…"
+              - paragraph
+                - statictext "We provide a web service on the example domain hosts to provide basic information on the purpose of the domain. These web services are provided as best effort, but are not designed to support production applications. While incidental traffi…"
+              - heading "Further Reading" [ref=@e11]
+                - statictext "Further Reading"
+              - list
+                - listitem
+                  - listmarker "■ "
+                  - link "IANA-managed Reserved Domains" →/domains/reserved [ref=@e12]
+                    - statictext "IANA-managed Reserved Domains"
+              - generic:
+                - statictext "Last revised "
+                - time
+                  - statictext "9 years ago"
+                - statictext "."
+        - navigation
+    - contentinfo
+      - generic:
+        - layouttable
+            - layouttablerow
+              - layouttablecell "Domain Names"
+                - link "Domain Names" →/domains [ref=@e13]
+                  - statictext "Domain Names"
+              - layouttablecell "Root Zone Registry .INT Registry .ARPA Registry IDN Repository"
+                - list
+                  - listitem
+                    - link "Root Zone Registry" →/domains/root [ref=@e14]
+                      - statictext "Root Zone Registry"
+                  - listitem
+                    - link ".INT Registry" →/domains/int [ref=@e15]
+                      - statictext ".INT Registry"
+                  - listitem
+                    - link ".ARPA Registry" →/domains/arpa [ref=@e16]
+                      - statictext ".ARPA Registry"
+                  - listitem
+                    - link "IDN Repository" →/domains/idn-tables [ref=@e17]
+                      - statictext "IDN Repository"
+            - layouttablerow
+              - layouttablecell "Number Resources"
+                - link "Number Resources" →/numbers [ref=@e18]
+                  - statictext "Number Resources"
+              - layouttablecell "Number Registries RIR Allocation Data Abuse Information"
+                - list
+                  - listitem
+                    - link "Number Registries" →/numbers/registries [ref=@e19]
+                      - statictext "Number Registries"
+                  - listitem
+                    - link "RIR Allocation Data" →/numbers/allocations/ [ref=@e20]
+                      - statictext "RIR Allocation Data"
+                  - listitem
+                    - link "Abuse Information" →/help/abuse [ref=@e21]
+                      - statictext "Abuse Information"
+            - layouttablerow
+              - layouttablecell "Protocols"
+                - link "Protocols" →/protocols [ref=@e22]
+                  - statictext "Protocols"
+              - layouttablecell "Protocol Registries Time Zone Database"
+                - list
+                  - listitem
+                    - link "Protocol Registries" →/protocols [ref=@e23]
+                      - statictext "Protocol Registries"
+                  - listitem
+                    - link "Time Zone Database" →/time-zones [ref=@e24]
+                      - statictext "Time Zone Database"
+            - layouttablerow
+              - layouttablecell "About Us"
+                - link "About Us" →/about [ref=@e25]
+                  - statictext "About Us"
+              - layouttablecell "News Performance The Organization Archive Contact Us"
+                - list
+                  - listitem
+                    - link "News" →/news [ref=@e26]
+                      - statictext "News"
+                  - listitem
+                    - link "Performance" →/performance [ref=@e27]
+                      - statictext "Performance"
+                  - listitem
+                    - link "The Organization" →/about/organization [ref=@e28]
+                      - statictext "The Organization"
+                  - listitem
+                    - link "Archive" →/archive [ref=@e29]
+                      - statictext "Archive"
+                  - listitem
+                    - link "Contact Us" →/contact [ref=@e30]
+                      - statictext "Contact Us"
+        - generic:
+          - paragraph
+            - statictext "The IANA functions coordinate the Internet’s globally unique identifiers, and are provided by "
+            - link "Public Technical Identifiers" →pti.icann.org [ref=@e31]
+              - statictext "Public Technical Identifiers"
+            - statictext ", an affiliate of "
+            - link "ICANN" →icann.org/ [ref=@e32]
+              - statictext "ICANN"
+            - statictext "."
+        - generic:
+          - list
+            - listitem
+              - link "Privacy Policy" →icann.org/privacy/policy [ref=@e33]
+                - statictext "Privacy Policy"
+            - listitem
+              - link "Terms of Service" →icann.org/privacy/tos [ref=@e34]
+                - statictext "Terms of Service"
+- inlinetextbox "←"
+- inlinetextbox "←"

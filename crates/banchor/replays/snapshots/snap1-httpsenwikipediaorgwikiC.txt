@@ -1,17 +1,13 @@
-# banchor snapshot artifact — counted bytes below (origin: https://en.wikipedia.org/wiki/Chromium_(web_browser), taken: 20260903230804)
-# integrity: sha3-256:UFVlt_RPskLdVfLLE8vssQjKg65GDLVye-dsACAiwqI
-- RootWebArea "Chromium (web browser) - Wikipedia"
+# banchor snapshot artifact — counted bytes below (origin: https://en.wikipedia.org/wiki/Chromium_(web_browser), taken: 20260904010047)
+# integrity: sha3-256:OH5ZVut-ljVBZdWytfB6fSjECNCMjNAfT_26ALTp_YQ
+- rootwebarea
   - generic:
     - generic:
     - link "Jump to content" [ref=@e1]
-      - StaticText "Jump to content"
-        - InlineTextBox "Jump "
-        - InlineTextBox "to "
-        - InlineTextBox "content"
       - banner
-          - navigation "Site"
+          - navigation
             - generic:
-          - link "Wikipedia The Free Encyclopedia" [ref=@e2]
+          - link "Wikipedia The Free Encyclopedia" →/wiki/Main_Page [ref=@e2]
               - image "Wikipedia" [ref=@e3]
               - image "The Free Encyclopedia" [ref=@e4]
           - search
@@ -21,287 +17,193 @@
                       - searchbox "Search Wikipedia" [ref=@e5]
                           - generic:
                   - button "Search" [ref=@e6]
-                    - StaticText "Search"
-                      - InlineTextBox "Search"
-          - navigation "Personal tools"
+          - navigation
               - generic:
                   - list
                     - listitem
-                      - link "Donate" [ref=@e7]
-                        - StaticText "Donate"
-                          - InlineTextBox "Donate"
+                      - link "Donate" →donate.wikimedia.org/?wmf_source=donate& [ref=@e7]
                     - listitem
-                      - link "Create account" [ref=@e8]
-                        - StaticText "Create account"
-                          - InlineTextBox "Create account"
+                      - link "Create account" →/w/index.php?title=Special:CreateAccount [ref=@e8]
                     - listitem
-                      - link "Log in" [ref=@e9]
-                        - StaticText "Log in"
-                          - InlineTextBox "Log in"
+                      - link "Log in" →/w/index.php?title=Special:UserLogin&ret [ref=@e9]
     - generic:
           - generic:
             - generic:
-            - generic:
           - generic:
-            - navigation "Contents"
+            - navigation
               - generic:
                 - generic:
                   - generic:
                     - heading "Contents" [ref=@e10]
-                      - StaticText "Contents"
-                        - InlineTextBox "Contents"
                     - button "Hide Contents" [ref=@e11]
-                      - StaticText "hide"
-                        - InlineTextBox "hide"
                   - list
                     - listitem
                       - link "(Top)" [ref=@e12]
                         - generic:
-                          - StaticText "(Top)"
-                            - InlineTextBox "(Top)"
                     - listitem
                       - link "Licensing" [ref=@e13]
                         - generic:
-                          - StaticText "Licensing"
-                            - InlineTextBox "Licensing"
                       - list
                     - listitem
                       - link "Differences from Google Chrome" [ref=@e14]
                         - generic:
-                          - StaticText "Differences from Google Chrome"
-                            - InlineTextBox "Differences from Google "
-                            - InlineTextBox "Chrome"
                       - button "Toggle Differences from Google Chrome subsection" [ref=@e15]
                         - generic:
-                          - StaticText "Toggle Differences from Google Chrome subsection"
-                            - InlineTextBox "Toggle Differences from Google Chrome subsection"
                       - list
                         - listitem
                           - link "Features" [ref=@e16]
                             - generic:
-                              - StaticText "Features"
-                                - InlineTextBox "Features"
                           - list
                         - listitem
                           - link "Branding and licensing" [ref=@e17]
                             - generic:
-                              - StaticText "Branding and licensing"
-                                - InlineTextBox "Branding and licensing"
                           - list
                     - listitem
                       - link "Development" [ref=@e18]
                         - generic:
-                          - StaticText "Development"
-                            - InlineTextBox "Development"
                       - button "Toggle Development subsection" [ref=@e19]
                         - generic:
-                          - StaticText "Toggle Development subsection"
-                            - InlineTextBox "Toggle Development subsection"
                       - list
                         - listitem
                           - link "Contributors" [ref=@e20]
                             - generic:
-                              - StaticText "Contributors"
-                                - InlineTextBox "Contributors"
                           - list
                         - listitem
                           - link "Architecture" [ref=@e21]
                             - generic:
-                              - StaticText "Architecture"
-                                - InlineTextBox "Architecture"
                           - list
                         - listitem
                           - link "Programming languages" [ref=@e22]
                             - generic:
-                              - StaticText "Programming languages"
-                                - InlineTextBox "Programming "
-                                - InlineTextBox "languages"
                           - list
                         - listitem
                           - link "Logistics" [ref=@e23]
                             - generic:
-                              - StaticText "Logistics"
-                                - InlineTextBox "Logistics"
                           - list
                     - listitem
                       - link "History" [ref=@e24]
                         - generic:
-                          - StaticText "History"
-                            - InlineTextBox "History"
                       - button "Toggle History subsection" [ref=@e25]
                         - generic:
-                          - StaticText "Toggle History subsection"
-                            - InlineTextBox "Toggle History subsection"
                       - list
                         - listitem
                           - link "2008 to 2010" [ref=@e26]
                             - generic:
-                              - StaticText "2008 to 2010"
-                                - InlineTextBox "2008 to 2010"
                           - list
                         - listitem
                           - link "2011" [ref=@e27]
                             - generic:
-                              - StaticText "2011"
-                                - InlineTextBox "2011"
                           - list
                         - listitem
                           - link "Since 2012" [ref=@e28]
                             - generic:
-                              - StaticText "Since 2012"
-                                - InlineTextBox "Since 2012"
                           - list
                     - listitem
                       - link "Third-party ports" [ref=@e29]
                         - generic:
-                          - StaticText "Third-party ports"
-                            - InlineTextBox "Third-party ports"
                       - list
                     - listitem
                       - link "Browsers based on Chromium" [ref=@e30]
                         - generic:
-                          - StaticText "Browsers based on Chromium"
-                            - InlineTextBox "Browsers based on "
-                            - InlineTextBox "Chromium"
                       - button "Toggle Browsers based on Chromium subsection" [ref=@e31]
                         - generic:
-                          - StaticText "Toggle Browsers based on Chromium subsection"
-                            - InlineTextBox "Toggle Browsers based on Chromium subsection"
                       - list
                         - listitem
                           - link "Proprietary" [ref=@e32]
                             - generic:
-                              - StaticText "Proprietary"
-                                - InlineTextBox "Proprietary"
                           - list
                         - listitem
                           - link "Free and open-source" [ref=@e33]
                             - generic:
-                              - StaticText "Free and open-source"
-                                - InlineTextBox "Free and open-source"
                           - list
                     - listitem
                       - link "Use in app frameworks" [ref=@e34]
                         - generic:
-                          - StaticText "Use in app frameworks"
-                            - InlineTextBox "Use in app frameworks"
                       - list
                     - listitem
                       - link "References" [ref=@e35]
                         - generic:
-                          - StaticText "References"
-                            - InlineTextBox "References"
                       - list
                     - listitem
                       - link "External links" [ref=@e36]
                         - generic:
-                          - StaticText "External links"
-                            - InlineTextBox "External links"
                       - list
           - main
             - sectionheader
               - heading "Chromium (web browser)" [ref=@e37]
-                  - StaticText "Chromium (web browser)"
-                    - InlineTextBox "Chromium (web browser)"
               - generic:
                 - generic:
-                  - navigation "Namespaces"
+                  - navigation
                     - generic:
                         - list
                           - listitem
-                            - link "Article" [ref=@e38]
-                                - StaticText "Article"
-                                  - InlineTextBox "Article"
+                            - link "Article" →/wiki/Chromium_(web_browser) [ref=@e38]
                               - generic:
                           - listitem
-                            - link "Talk" [ref=@e39]
-                                - StaticText "Talk"
-                                  - InlineTextBox "Talk"
+                            - link "Talk" →/wiki/Talk:Chromium_(web_browser) [ref=@e39]
                               - generic:
                 - generic:
-                  - navigation "Views"
+                  - navigation
                     - generic:
                         - list
                           - listitem
-                            - link "Read" [ref=@e40]
-                                - StaticText "Read"
-                                  - InlineTextBox "Read"
+                            - link "Read" →/wiki/Chromium_(web_browser) [ref=@e40]
                               - generic:
                           - listitem
-                            - link "Edit" [ref=@e41]
-                                - StaticText "Edit"
-                                  - InlineTextBox "Edit"
-                              - generic:
-                          - listitem
-                            - link "View history" [ref=@e42]
-                                - StaticText "View history"
-                                  - InlineTextBox "View history"
-                              - generic:
-                  - navigation "Page tools"
-                    - generic:
-              - generic:
-                - navigation "Appearance"
-                  - generic:
-                    - generic:
-                      - generic:
-                        - generic:
-                          - StaticText "Appearance"
-                            - InlineTextBox "Appearance"
-                        - button "Hide Appearance" [ref=@e43]
-                          - StaticText "hide"
-                            - InlineTextBox "hide"
-                      - generic:
-                        - generic:
-                          - StaticText "Text"
-                            - InlineTextBox "Text"
-                          - list
-                            - listitem
-                                - form
-                                  - generic:
-                                    - LabelText
-                                        - StaticText "Small"
-                                          - InlineTextBox "Small"
-                                  - generic:
-                                    - LabelText
-                                        - StaticText "Standard"
-                                          - InlineTextBox "Standard"
-                                  - generic:
-                                    - LabelText
-                                        - StaticText "Large"
-                                          - InlineTextBox "Large"
-                      - generic:
-                        - generic:
-                          - StaticText "Width"
-                            - InlineTextBox "Width"
-                          - list
-                            - listitem
-                                - form
-                                  - generic:
-                                    - LabelText
-                                        - StaticText "Standard"
-                                          - InlineTextBox "Standard"
-                                  - generic:
-                                    - LabelText
-                                        - StaticText "Wide"
-                                          - InlineTextBox "Wide"
-                      - generic:
-                        - generic:
-                          - StaticText "Color"
-                            - InlineTextBox "Color"
-                          - list
-                            - listitem
-                                - form
-                                  - generic:
-                                    - LabelText
-                                        - StaticText "Automatic"
-                                          - InlineTextBox "Automatic"
-                                  - generic:
-                                    - LabelText
-                                        - StaticText "Light"
-                                          - InlineTextBox "Light"
-                                  - generic:
-… [snapshot truncated at node cap 300]
-… [snapshot truncated at node cap 300]
-… [snapshot truncated at node cap 300]
-… [snapshot truncated at node cap 300]
-… [snapshot truncated at node cap 300]
+… [tree truncated at node cap 150 — interactive targets beyond the cut continue below]
+--- interactive targets beyond the tree cut (55 shown, 719 more not listed) ---
+- link "Edit" →/w/index.php?title=Chromium_(web_browser [ref=@e41]
+- link "View history" →/w/index.php?title=Chromium_(web_browser [ref=@e42]
+- button "Hide Appearance" [ref=@e43]
+- link "" →en.wikipedia.org/wiki/File:Chromium_Logo [ref=@e44]
+- image "" [ref=@e45]
+- link "" →en.wikipedia.org/wiki/File:Chromium_140_ [ref=@e46]
+- image "" [ref=@e47]
+- link "home page" →en.wikipedia.org/wiki/Home_page [ref=@e48]
+- link "Wikipedia" →en.wikipedia.org/wiki/Wikipedia [ref=@e49]
+- link "Original author" →en.wikipedia.org/wiki/Programmer [ref=@e50]
+- link "Google" →en.wikipedia.org/wiki/Google [ref=@e51]
+- link "[1]" [ref=@e52]
+- link "Developers" →en.wikipedia.org/wiki/Programmer [ref=@e53]
+- link "[2]" [ref=@e54]
+- link "[3]" [ref=@e55]
+- link "[1]" [ref=@e56]
+- link "C++" →en.wikipedia.org/wiki/C++ [ref=@e57]
+- link "[4]" [ref=@e58]
+- link "HTML" →en.wikipedia.org/wiki/HTML [ref=@e59]
+- link "CSS" →en.wikipedia.org/wiki/CSS [ref=@e60]
+- link "JavaScript" →en.wikipedia.org/wiki/JavaScript [ref=@e61]
+- link "UI" →en.wikipedia.org/wiki/User_interface [ref=@e62]
+- link "[5]" [ref=@e63]
+- link "[6]" [ref=@e64]
+- link "Engines" →en.wikipedia.org/wiki/Software_engine [ref=@e65]
+- link "V8" →en.wikipedia.org/wiki/V8_(JavaScript_eng [ref=@e66]
+- link "Blink" →en.wikipedia.org/wiki/Blink_(browser_eng [ref=@e67]
+- link "WebKit" →en.wikipedia.org/wiki/WebKit [ref=@e68]
+- link "iOS" →en.wikipedia.org/wiki/IOS [ref=@e69]
+- link "iPadOS" →en.wikipedia.org/wiki/IPadOS [ref=@e70]
+- link "[7]" [ref=@e71]
+- link "Operating system" →en.wikipedia.org/wiki/Operating_system [ref=@e72]
+- link "Android 10" →en.wikipedia.org/wiki/Android_10 [ref=@e73]
+- link "BSD" →en.wikipedia.org/wiki/BSD [ref=@e74]
+- link "iOS 18" →en.wikipedia.org/wiki/IOS_18 [ref=@e75]
+- link "iPadOS 18" →en.wikipedia.org/wiki/IPadOS_18 [ref=@e76]
+- link "Linux" →en.wikipedia.org/wiki/Linux [ref=@e77]
+- link "macOS 12" →en.wikipedia.org/wiki/MacOS_12 [ref=@e78]
+- link "Windows 10" →en.wikipedia.org/wiki/Windows_10 [ref=@e79]
+- link "Platform" →en.wikipedia.org/wiki/Computing_platform [ref=@e80]
+- link "IA-32" →en.wikipedia.org/wiki/IA-32 [ref=@e81]
+- link "x86-64" →en.wikipedia.org/wiki/X86-64 [ref=@e82]
+- link "ARM" →en.wikipedia.org/wiki/ARM_architecture [ref=@e83]
+- link "ARM64" →en.wikipedia.org/wiki/AArch64 [ref=@e84]
+- link "License" →en.wikipedia.org/wiki/Software_license [ref=@e85]
+- link "LGPL" →en.wikipedia.org/wiki/GNU_Lesser_General [ref=@e86]
+- link "BSD-3" →en.wikipedia.org/wiki/BSD_licenses [ref=@e87]
+- link "[8]" [ref=@e88]
+- link "[9]" [ref=@e89]
+- link "chromium .org" →chromium.org/ [ref=@e90]
+- link "Repository" →en.wikipedia.org/wiki/Repository_(versio [ref=@e91]
+- link "chromium .googlesource .com /chromium /src" →chromium.googlesource.com/chromium/src [ref=@e92]
+- link "Edit this at Wikidata" →wikidata.org/wiki/Q48524#P1324 [ref=@e93]
+- image "Edit this at Wikidata" [ref=@e94]
+- link "free and open-source" →en.wikipedia.org/wiki/Free_and_open-sour [ref=@e95]

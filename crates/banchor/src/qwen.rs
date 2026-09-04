@@ -221,9 +221,25 @@ fn truncate_for_log(s: &str) -> String {
 
 // ── context budget (the honest cap) ─────────────────────────────────
 
-/// Snapshot token caps tried in order when the formatted tree overflows
-/// the model's context. The cap actually used is REPORTED, never silent.
-pub const CAP_LADDER: &[usize] = &[1200, 800, 500, 300, 150, 80, 40];
+/// Fitting attempts tried in order when a snapshot overflows the model's
+/// context: (lean, node_cap). Full tree first (a page that fits whole
+/// should be seen whole); then LEAN at descending caps — M3 smart
+/// truncation: pure text pruned first, interactive targets survive, and
+/// targets past the tree cap ride the beyond-cut index. The attempt that
+/// actually fitted is REPORTED, never silent. Lean caps are ordered to
+/// prefer TARGET VISIBILITY on link-dense pages: a smaller tree frees
+/// tokens for a bigger beyond-cut index, so the ladder tries the
+/// tree/index-balanced caps first and only then spends tokens on structure.
+pub const FIT_ATTEMPTS: &[(bool, usize)] = &[
+    (false, crate::axtree::DEFAULT_MAX_NODES), // full, if it fits
+    (true, 150),
+    (true, 80),
+    (true, 300),
+    (true, 500),
+    (true, 1200),
+    (true, 40),
+    (true, 20),
+];
 
 /// Prompt budget: n_ctx minus chat-template overhead, minus reserved
 /// completion tokens. All three named in the receipt.
@@ -313,13 +329,17 @@ mod tests {
     }
 
     #[test]
-    fn cap_ladder_descends_from_the_default_cap() {
-        assert_eq!(CAP_LADDER[0], crate::axtree::DEFAULT_MAX_NODES);
-        for w in CAP_LADDER.windows(2) {
-            assert!(
-                w[0] > w[1],
-                "cap ladder must strictly descend: {CAP_LADDER:?}"
-            );
-        }
+    fn fit_attempts_start_full_then_lean_prefers_target_visibility() {
+        let (first_lean, first_cap) = FIT_ATTEMPTS[0];
+        assert!(!first_lean, "the first attempt must be the FULL tree");
+        assert_eq!(first_cap, crate::axtree::DEFAULT_MAX_NODES);
+        assert!(FIT_ATTEMPTS[1..].iter().all(|(lean, _)| *lean));
+        let caps: Vec<usize> = FIT_ATTEMPTS[1..].iter().map(|(_, c)| *c).collect();
+        // the tree/index-BALANCED caps come before the structure-heavy ones:
+        // a smaller tree frees tokens for a bigger beyond-cut index
+        let pos = |c: usize| caps.iter().position(|x| *x == c).expect("cap in ladder");
+        assert!(pos(150) < pos(300) && pos(80) < pos(300) && pos(300) < pos(1200));
+        // emergency floors exist for pathological pages
+        assert!(caps.contains(&40) && caps.contains(&20));
     }
 }

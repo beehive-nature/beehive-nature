@@ -174,21 +174,33 @@ impl SeatState {
 
     /// snapshot: AX tree → strip-hidden → format+refs → wrap untrusted → count.
     fn snapshot(&mut self) -> Result<Value, SeatError> {
-        let (nodes, vis, style_probe_errors) = self.ax_nodes_and_vis()?;
+        let (nodes, vis, style_probe_errors, hrefs) = self.ax_nodes_and_vis()?;
         self.snapshot_at_cap(
             &nodes,
             &vis,
             style_probe_errors,
             axtree::DEFAULT_MAX_NODES,
             None,
+            false,
+            axtree::INDEX_CAP,
+            &hrefs,
         )
     }
 
-    /// Pull the AX tree and compute visibility classifications once, so cap
-    /// retries (qwen fitting) re-format without re-probing the page.
+    /// Pull the AX tree, compute visibility classifications, and collect
+    /// hrefs for ref-candidate links — once, so cap retries (qwen fitting)
+    /// re-format without re-probing the page.
     fn ax_nodes_and_vis(
         &mut self,
-    ) -> Result<(Vec<serde_json::Value>, HashMap<u64, Vis>, u64), SeatError> {
+    ) -> Result<
+        (
+            Vec<serde_json::Value>,
+            HashMap<u64, Vis>,
+            u64,
+            HashMap<u64, String>,
+        ),
+        SeatError,
+    > {
         let (page, _replay) = self.require_page()?;
         let nodes = page.ax_tree()?;
 
@@ -217,7 +229,23 @@ impl SeatState {
                 }
             }
         }
-        Ok((nodes, vis, style_probe_errors))
+        // hrefs for interactive candidates (untrusted, display-only)
+        let mut hrefs: HashMap<u64, String> = HashMap::new();
+        for node in &nodes {
+            let role = axtree::role_of(node);
+            if axtree::is_ref_role(&role) {
+                if let Some(b) = axtree::backend_id(node) {
+                    if !hrefs.contains_key(&b) {
+                        if let Some(h) = page.href_for_backend(b) {
+                            if !h.is_empty() && !h.starts_with('#') {
+                                hrefs.insert(b, h);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        Ok((nodes, vis, style_probe_errors, hrefs))
     }
 
     /// Format at a given node cap, wrap, count (local BPEs), dump the exact
@@ -231,8 +259,11 @@ impl SeatState {
         style_probe_errors: u64,
         cap: usize,
         qwen_n: Option<usize>,
+        lean: bool,
+        index_cap: usize,
+        hrefs: &HashMap<u64, String>,
     ) -> Result<Value, SeatError> {
-        let snap = axtree::format_with_cap(nodes, vis, cap);
+        let snap = axtree::format_mode(nodes, vis, cap, lean, index_cap, hrefs);
         let counts = tokens::count(&snap.text);
         let origin = {
             let (page, _replay) = self.require_page()?;
@@ -251,6 +282,7 @@ impl SeatState {
         if let Some(obj) = snap_json.get_mut("stats").and_then(|s| s.as_object_mut()) {
             obj.insert("style_probe_errors".into(), json!(style_probe_errors));
             obj.insert("node_cap".into(), json!(cap));
+            obj.insert("mode".into(), json!(if lean { "lean" } else { "full" }));
         }
         let mut counts_json = counts.to_json();
         if let Some(n) = qwen_n {
@@ -642,38 +674,74 @@ pub fn agentloop(
 
     seat.handle(&json!({ "action": "navigate", "url": url }))?;
 
-    // snapshot, qwen-fitted: cap ladder descends until the wrapped tree fits
+    // snapshot, qwen-fitted: M3 attempts — full tree first, then lean
+    // (text pruned, targets survive + beyond-cut index) at descending caps.
+    // Two-phase per attempt: tokenize the tree WITHOUT the index, size the
+    // index to the REMAINING allowance (~16 qwen tokens per index line,
+    // measured), then tokenize the whole thing for the honest number.
     let allowance = budget.snapshot_allowance() as usize;
-    let (nodes, vis, style_errors) = seat.ax_nodes_and_vis()?;
-    let mut fitted: Option<(String, usize, usize)> = None; // (wrapped, qwen_n, cap)
+    let (nodes, vis, style_errors, hrefs) = seat.ax_nodes_and_vis()?;
+    let mut fitted: Option<(String, usize, usize, bool)> = None; // (wrapped, qwen_n, cap, lean)
     let mut ladder_walked: Vec<Value> = Vec::new();
     let mut final_snap: Option<Value> = None;
-    for &cap in qwen::CAP_LADDER {
-        let probe = axtree::format_with_cap(&nodes, &vis, cap);
+    for &(lean, cap) in qwen::FIT_ATTEMPTS {
         let origin = {
             let (page, _r) = seat.require_page()?;
             page.current_url()
         };
-        let wrapped = untrusted::wrap(&probe.text, &origin);
-        let n = model.tokenize(&wrapped)?;
-        ladder_walked.push(json!({ "cap": cap, "qwen_tokens": n, "fits": n <= allowance }));
+        // phase 1: tree only, no index → what does the skeleton cost?
+        let tree_only = axtree::format_mode(&nodes, &vis, cap, lean, 0, &hrefs);
+        let n_tree = model.tokenize(&untrusted::wrap(&tree_only.text, &origin))?;
+        let beyond = tree_only.beyond_cut.len();
+        let budget_entries = allowance.saturating_sub(n_tree) / 24; // measured: ~20 qwen tokens/index line with href
+        let index_cap = budget_entries.min(axtree::INDEX_CAP);
+        // phase 2: with the budget-sized index
+        let probe = axtree::format_mode(&nodes, &vis, cap, lean, index_cap, &hrefs);
+        let wrapped_probe = untrusted::wrap(&probe.text, &origin);
+        let n = model.tokenize(&wrapped_probe)?;
+        ladder_walked.push(json!({
+            "mode": if lean { "lean" } else { "full" },
+            "cap": cap,
+            "qwen_tree_only": n_tree,
+            "qwen_tokens": n,
+            "text_pruned": probe.stats.text_pruned,
+            "targets_beyond_cut": beyond,
+            "indexed": probe.stats.indexed,
+            "targets_unindexed": probe.stats.targets_unindexed,
+            "fits": n <= allowance,
+        }));
         if n <= allowance {
-            let result = seat.snapshot_at_cap(&nodes, &vis, style_errors, cap, Some(n))?;
+            let result = seat.snapshot_at_cap(
+                &nodes,
+                &vis,
+                style_errors,
+                cap,
+                Some(n),
+                lean,
+                index_cap,
+                &hrefs,
+            )?;
             let wrapped = result["untrusted_block"].as_str().unwrap_or("").to_string();
-            fitted = Some((wrapped, n, cap));
+            fitted = Some((wrapped, n, cap, lean));
             final_snap = Some(result);
             break;
         }
     }
-    let (wrapped, qwen_n, cap_used) = fitted.ok_or_else(|| {
-        format!("no cap in the ladder fits: allowance {allowance} qwen tokens, walked {ladder_walked:?}")
+    let (wrapped, qwen_n, cap_used, lean_used) = fitted.ok_or_else(|| {
+        format!("no fit attempt fits: allowance {allowance} qwen tokens, walked {ladder_walked:?}")
     })?;
     let snap_result = final_snap.expect("fitted implies snap result");
     seat.ev(
         "cap_ladder",
-        json!({ "walked": ladder_walked, "chosen_cap": cap_used }),
+        json!({
+            "walked": ladder_walked,
+            "chosen": { "mode": if lean_used { "lean" } else { "full" }, "cap": cap_used },
+        }),
     );
-    eprintln!("[agentloop] snapshot fitted: {qwen_n} qwen tokens at cap {cap_used} (allowance {allowance})");
+    eprintln!(
+        "[agentloop] snapshot fitted: {qwen_n} qwen tokens, mode {} cap {cap_used} (allowance {allowance})",
+        if lean_used { "lean" } else { "full" }
+    );
 
     // ground truth, structural: the page's first interactive link
     let refs = snap_result["snapshot"]["refs"]
@@ -710,6 +778,7 @@ pub fn agentloop(
     let mut turns_taken: u32 = 0;
     let mut picked: Option<Value> = None;
     let mut executed = false;
+    let mut gated_plan: Option<Value> = None;
     let mut outcome_note = String::new();
     let mut prompt_tokens_total: u64 = 0;
     let mut completion_tokens_total: u64 = 0;
@@ -745,9 +814,15 @@ pub fn agentloop(
             qwen::AgentAction::Click { r#ref } => {
                 if let Some(entry) = seat.last_refs.get(&r#ref).cloned() {
                     // judge on the DECLARED mode; the picked name is untrusted
-                    // data, judged by substring only — never executed
+                    // data, judged by whitespace-normalized substring — never
+                    // executed. (AX names carry odd spacing from split text
+                    // nodes: "chromium .org" must match "chromium.org".)
                     let right = match expect_substr {
-                        Some(s) => entry.name.to_lowercase().contains(&s.to_lowercase()),
+                        Some(s) => {
+                            let squash =
+                                |x: &str| x.split_whitespace().collect::<String>().to_lowercase();
+                            squash(&entry.name).contains(&squash(s))
+                        }
                         None => r#ref == expected_ref,
                     };
                     picked = Some(json!({
@@ -764,6 +839,26 @@ pub fn agentloop(
                         "reason": "agentloop — action chosen by the local model",
                     }));
                     match clicked {
+                        Ok(c)
+                            if c.get("status").and_then(|s| s.as_str())
+                                == Some("needs_approval") =>
+                        {
+                            // PLAN-THEN-APPROVE held: the model chose a
+                            // spend/auth/oauth-class target. The loop STOPS
+                            // and hands the plan to the caller — approval is
+                            // a separate bSEAT action, never automatic.
+                            outcome_note = format!(
+                                "gated by plan-then-approve: {} — approve via bSEAT {{action:'approve', plan_id:{}}} to execute",
+                                c["risks"],
+                                c["plan_id"].as_str().unwrap_or("?")
+                            );
+                            gated_plan = Some(c.clone());
+                            seat.ev(
+                                "model_action_gated",
+                                json!({ "ref": r#ref, "plan_id": c["plan_id"], "risks": c["risks"] }),
+                            );
+                            break;
+                        }
                         Ok(c) => {
                             executed = true;
                             outcome_note = format!(
@@ -846,14 +941,17 @@ pub fn agentloop(
         "url": url,
         "snapshot": {
             "qwen_tokens": qwen_n,
+            "mode": if lean_used { "lean" } else { "full" },
             "node_cap_used": cap_used,
             "allowance": allowance,
+            "stats": snap_result["snapshot"]["stats"],
             "counts": snap_result["counts"],
         },
         "judge": judge,
         "picked": picked,
         "right_ref": right_ref,
         "executed": executed,
+        "gated_plan": gated_plan,
         "turns_taken": turns_taken,
         "tokens": { "prompt_total": prompt_tokens_total, "completion_total": completion_tokens_total },
         "outcome": outcome_note,

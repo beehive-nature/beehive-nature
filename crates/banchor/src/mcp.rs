@@ -44,8 +44,31 @@ pub fn bseat_tool_schema() -> Value {
     })
 }
 
+/// M3 — the agent loop as a TOOL: "go to X, click Y" with the declared
+/// judge, driven by the LOCAL qwen2.5-3b on the compute node. Any estate
+/// agent can call it. Plan-then-approve stays mandatory: if the model picks
+/// a spend/auth/OAuth target, the loop STOPS and returns `gated_plan`
+/// (plan_id + risks) — execution only via a separate bSEAT approve call.
+pub fn agentloop_tool_schema() -> Value {
+    json!({
+        "name": "agentloop",
+        "description": "Go to X, click Y — one local-model agent loop: snapshot the page, let qwen2.5-3b (compute lane, Lane-M metered) pick ONE action, execute the click, save the replay. Judged against a DECLARED expectation (expect_substr: the picked element's accessible name must contain it) or first-link fallback. Snapshots are strip-hidden, UNTRUSTED-delimited, qwen-token-fitted (lean mode prunes text before targets; targets past the cut ride a clickable index). If the model's pick is spend/auth/OAuth-class, plan-then-approve GATES it: the loop returns gated_plan{plan_id,risks} and does NOT execute — approve separately via bSEAT {action:'approve', plan_id}. Needs BANCHOR_QWEN_KEY in the daemon env.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "url": { "type": "string", "description": "page to drive, e.g. https://example.com/" },
+                "goal": { "type": "string", "description": "what to click, in plain words" },
+                "expect_substr": { "type": "string", "description": "DECLARED judge: substring the correct element's accessible name must contain (omitted = first-link judge)" },
+                "max_turns": { "type": "integer", "default": 3, "description": "model turns allowed when feedback is needed" },
+                "replay_dir": { "type": "string", "description": "where the loop's replay + snapshot artifacts land (default: ~/.bheartwallet/banchor/replays)" }
+            },
+            "required": ["url", "goal"]
+        }
+    })
+}
+
 fn tools() -> Vec<Value> {
-    vec![bseat_tool_schema()]
+    vec![bseat_tool_schema(), agentloop_tool_schema()]
 }
 
 /// Dispatch one JSON-RPC request. `None` for notifications (no id).
@@ -72,21 +95,72 @@ pub fn dispatch(state: &Arc<Mutex<SeatState>>, req: &Value) -> Option<Value> {
         "tools/call" => {
             let name = params.get("name").and_then(|n| n.as_str()).unwrap_or("");
             let arguments = params.get("arguments").cloned().unwrap_or(json!({}));
-            if name != "bSEAT" {
-                Err(format!("unknown tool {name:?} — the organ serves bSEAT"))
-            } else {
-                let mut s = state.lock().expect("seat poisoned");
-                match s.handle(&arguments) {
-                    Ok(v) => Ok(json!({
-                        "content": [{ "type": "text", "text": serde_json::to_string_pretty(&v).unwrap_or_default() }],
-                        "isError": false,
-                        "structuredContent": v,
-                    })),
-                    Err(e) => Ok(json!({
-                        "content": [{ "type": "text", "text": e.to_string() }],
-                        "isError": true,
-                    })),
+            match name {
+                "bSEAT" => {
+                    let mut s = state.lock().expect("seat poisoned");
+                    match s.handle(&arguments) {
+                        Ok(v) => Ok(json!({
+                            "content": [{ "type": "text", "text": serde_json::to_string_pretty(&v).unwrap_or_default() }],
+                            "isError": false,
+                            "structuredContent": v,
+                        })),
+                        Err(e) => Ok(json!({
+                            "content": [{ "type": "text", "text": e.to_string() }],
+                            "isError": true,
+                        })),
+                    }
                 }
+                "agentloop" => {
+                    // the loop runs in its OWN seat/session — the shared
+                    // bSEAT seat state is untouched by it
+                    let url = arguments
+                        .get("url")
+                        .and_then(|u| u.as_str())
+                        .unwrap_or("")
+                        .to_string();
+                    let goal = arguments
+                        .get("goal")
+                        .and_then(|g| g.as_str())
+                        .unwrap_or("")
+                        .to_string();
+                    let max_turns = arguments
+                        .get("max_turns")
+                        .and_then(|m| m.as_u64())
+                        .unwrap_or(3) as u32;
+                    let expect = arguments
+                        .get("expect_substr")
+                        .and_then(|e| e.as_str())
+                        .map(str::to_string);
+                    let replay_dir = arguments
+                        .get("replay_dir")
+                        .and_then(|d| d.as_str())
+                        .map(std::path::PathBuf::from);
+                    if url.is_empty() || goal.is_empty() {
+                        return Some(json!({
+                            "jsonrpc": "2.0", "id": id,
+                            "result": {
+                                "content": [{ "type": "text", "text": "agentloop needs url and goal" }],
+                                "isError": true,
+                            }
+                        }));
+                    }
+                    let dir = replay_dir
+                        .unwrap_or_else(|| crate::cache::home().join("banchor").join("replays"));
+                    match crate::seat::agentloop(&url, &goal, max_turns, &dir, expect.as_deref()) {
+                        Ok(v) => Ok(json!({
+                            "content": [{ "type": "text", "text": serde_json::to_string_pretty(&v).unwrap_or_default() }],
+                            "isError": false,
+                            "structuredContent": v,
+                        })),
+                        Err(e) => Ok(json!({
+                            "content": [{ "type": "text", "text": e.to_string() }],
+                            "isError": true,
+                        })),
+                    }
+                }
+                other => Err(format!(
+                    "unknown tool {other:?} — the organ serves bSEAT and agentloop"
+                )),
             }
         }
         m => Err(format!("method not found: {m}")),
@@ -269,7 +343,7 @@ mod tests {
     }
 
     #[test]
-    fn tools_list_has_bseat_with_schema() {
+    fn tools_list_has_bseat_and_agentloop_with_schemas() {
         let state = Arc::new(Mutex::new(SeatState::new()));
         let resp = dispatch(
             &state,
@@ -277,9 +351,29 @@ mod tests {
         )
         .unwrap();
         let tools = resp["result"]["tools"].as_array().unwrap();
-        assert_eq!(tools.len(), 1);
+        assert_eq!(tools.len(), 2);
         assert_eq!(tools[0]["name"], "bSEAT");
         assert!(tools[0]["inputSchema"]["properties"]["action"]["enum"].is_array());
+        assert_eq!(tools[1]["name"], "agentloop");
+        let required = tools[1]["inputSchema"]["required"].as_array().unwrap();
+        assert!(required.iter().any(|r| r == "url"));
+        assert!(required.iter().any(|r| r == "goal"));
+        // the declared judge + the gate are named in the tool contract
+        let desc = tools[1]["description"].as_str().unwrap();
+        assert!(desc.contains("expect_substr"));
+        assert!(desc.contains("plan-then-approve"));
+    }
+
+    #[test]
+    fn agentloop_tool_requires_url_and_goal() {
+        let state = Arc::new(Mutex::new(SeatState::new()));
+        let resp = dispatch(
+            &state,
+            &json!({ "jsonrpc": "2.0", "id": 7, "method": "tools/call",
+                     "params": { "name": "agentloop", "arguments": { "goal": "no url" } } }),
+        )
+        .unwrap();
+        assert_eq!(resp["result"]["isError"], true);
     }
 
     #[test]

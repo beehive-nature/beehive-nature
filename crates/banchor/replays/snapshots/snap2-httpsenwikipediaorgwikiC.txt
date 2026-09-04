@@ -1,17 +1,14 @@
-# banchor snapshot artifact — counted bytes below (origin: https://en.wikipedia.org/wiki/Chromium_(web_browser)#Browsers_based_on_Chromium, taken: 20260903231029)
-# integrity: sha3-256:ql5gncB4J0rrm0zTQ1XXVfvCBEWiubC_08JJdm1a9AQ
-- RootWebArea "Chromium (web browser) - Wikipedia"
+# banchor snapshot artifact — counted bytes below (origin: https://en.wikipedia.org/wiki/Chromium_(web_browser), taken: 20260904010255)
+# integrity: sha3-256:t8qVryhxo2up4Y2qGtwU2iCCCT-pJpdoJqL7xphxKbU
+- rootwebarea "Chromium (web browser) - Wikipedia"
   - generic:
     - generic:
     - link "Jump to content" [ref=@e1]
-      - StaticText "Jump to content"
-        - InlineTextBox "Jump "
-        - InlineTextBox "to "
-        - InlineTextBox "content"
+      - statictext "Jump to content"
       - banner
           - navigation "Site"
             - generic:
-          - link "Wikipedia The Free Encyclopedia" [ref=@e2]
+          - link "Wikipedia The Free Encyclopedia" →/wiki/Main_Page [ref=@e2]
               - image "Wikipedia" [ref=@e3]
               - image "The Free Encyclopedia" [ref=@e4]
           - search
@@ -21,23 +18,19 @@
                       - searchbox "Search Wikipedia" [ref=@e5]
                           - generic:
                   - button "Search" [ref=@e6]
-                    - StaticText "Search"
-                      - InlineTextBox "Search"
+                    - statictext "Search"
           - navigation "Personal tools"
               - generic:
                   - list
                     - listitem
-                      - link "Donate" [ref=@e7]
-                        - StaticText "Donate"
-                          - InlineTextBox "Donate"
+                      - link "Donate" →donate.wikimedia.org/?wmf_source=donate& [ref=@e7]
+                        - statictext "Donate"
                     - listitem
-                      - link "Create account" [ref=@e8]
-                        - StaticText "Create account"
-                          - InlineTextBox "Create account"
+                      - link "Create account" →/w/index.php?title=Special:CreateAccount [ref=@e8]
+                        - statictext "Create account"
                     - listitem
-                      - link "Log in" [ref=@e9]
-                        - StaticText "Log in"
-                          - InlineTextBox "Log in"
+                      - link "Log in" →/w/index.php?title=Special:UserLogin&ret [ref=@e9]
+                        - statictext "Log in"
     - generic:
           - generic:
             - generic:
@@ -48,194 +41,158 @@
                 - generic:
                   - generic:
                     - heading "Contents" [ref=@e10]
-                      - StaticText "Contents"
-                        - InlineTextBox "Contents"
+                      - statictext "Contents"
                     - button "Hide Contents" [ref=@e11]
-                      - StaticText "hide"
-                        - InlineTextBox "hide"
+                      - statictext "hide"
                   - list
                     - listitem
                       - link "(Top)" [ref=@e12]
                         - generic:
-                          - StaticText "(Top)"
-                            - InlineTextBox "(Top)"
+                          - statictext "(Top)"
                     - listitem
                       - link "Licensing" [ref=@e13]
                         - generic:
-                          - StaticText "Licensing"
-                            - InlineTextBox "Licensing"
+                          - statictext "Licensing"
                       - list
                     - listitem
                       - link "Differences from Google Chrome" [ref=@e14]
                         - generic:
-                          - StaticText "Differences from Google Chrome"
-                            - InlineTextBox "Differences from Google "
-                            - InlineTextBox "Chrome"
+                          - statictext "Differences from Google Chrome"
                       - button "Toggle Differences from Google Chrome subsection" [ref=@e15]
                         - generic:
-                          - StaticText "Toggle Differences from Google Chrome subsection"
-                            - InlineTextBox "Toggle Differences from Google Chrome subsection"
+                          - statictext "Toggle Differences from Google Chrome subsection"
                       - list
                         - listitem
                           - link "Features" [ref=@e16]
                             - generic:
-                              - StaticText "Features"
-                                - InlineTextBox "Features"
+                              - statictext "Features"
                           - list
                         - listitem
                           - link "Branding and licensing" [ref=@e17]
                             - generic:
-                              - StaticText "Branding and licensing"
-                                - InlineTextBox "Branding and licensing"
+                              - statictext "Branding and licensing"
                           - list
                     - listitem
                       - link "Development" [ref=@e18]
                         - generic:
-                          - StaticText "Development"
-                            - InlineTextBox "Development"
+                          - statictext "Development"
                       - button "Toggle Development subsection" [ref=@e19]
                         - generic:
-                          - StaticText "Toggle Development subsection"
-                            - InlineTextBox "Toggle Development subsection"
+                          - statictext "Toggle Development subsection"
                       - list
                         - listitem
                           - link "Contributors" [ref=@e20]
                             - generic:
-                              - StaticText "Contributors"
-                                - InlineTextBox "Contributors"
+                              - statictext "Contributors"
                           - list
                         - listitem
                           - link "Architecture" [ref=@e21]
                             - generic:
-                              - StaticText "Architecture"
-                                - InlineTextBox "Architecture"
+                              - statictext "Architecture"
                           - list
                         - listitem
                           - link "Programming languages" [ref=@e22]
                             - generic:
-                              - StaticText "Programming languages"
-                                - InlineTextBox "Programming "
-                                - InlineTextBox "languages"
+                              - statictext "Programming languages"
                           - list
                         - listitem
                           - link "Logistics" [ref=@e23]
                             - generic:
-                              - StaticText "Logistics"
-                                - InlineTextBox "Logistics"
+                              - statictext "Logistics"
                           - list
                     - listitem
                       - link "History" [ref=@e24]
                         - generic:
-                          - StaticText "History"
-                            - InlineTextBox "History"
+                          - statictext "History"
                       - button "Toggle History subsection" [ref=@e25]
                         - generic:
-                          - StaticText "Toggle History subsection"
-                            - InlineTextBox "Toggle History subsection"
+                          - statictext "Toggle History subsection"
                       - list
                         - listitem
                           - link "2008 to 2010" [ref=@e26]
                             - generic:
-                              - StaticText "2008 to 2010"
-                                - InlineTextBox "2008 to 2010"
+                              - statictext "2008 to 2010"
                           - list
                         - listitem
                           - link "2011" [ref=@e27]
                             - generic:
-                              - StaticText "2011"
-                                - InlineTextBox "2011"
+                              - statictext "2011"
                           - list
                         - listitem
                           - link "Since 2012" [ref=@e28]
                             - generic:
-                              - StaticText "Since 2012"
-                                - InlineTextBox "Since 2012"
+                              - statictext "Since 2012"
                           - list
                     - listitem
                       - link "Third-party ports" [ref=@e29]
                         - generic:
-                          - StaticText "Third-party ports"
-                            - InlineTextBox "Third-party ports"
+                          - statictext "Third-party ports"
                       - list
                     - listitem
                       - link "Browsers based on Chromium" [ref=@e30]
                         - generic:
-                          - StaticText "Browsers based on Chromium"
-                            - InlineTextBox "Browsers based on "
-                            - InlineTextBox "Chromium"
+                          - statictext "Browsers based on Chromium"
                       - button "Toggle Browsers based on Chromium subsection" [ref=@e31]
                         - generic:
-                          - StaticText "Toggle Browsers based on Chromium subsection"
-                            - InlineTextBox "Toggle Browsers based on Chromium subsection"
+                          - statictext "Toggle Browsers based on Chromium subsection"
                       - list
                         - listitem
                           - link "Proprietary" [ref=@e32]
                             - generic:
-                              - StaticText "Proprietary"
-                                - InlineTextBox "Proprietary"
+                              - statictext "Proprietary"
                           - list
                         - listitem
                           - link "Free and open-source" [ref=@e33]
                             - generic:
-                              - StaticText "Free and open-source"
-                                - InlineTextBox "Free and open-source"
+                              - statictext "Free and open-source"
                           - list
                     - listitem
                       - link "Use in app frameworks" [ref=@e34]
                         - generic:
-                          - StaticText "Use in app frameworks"
-                            - InlineTextBox "Use in app frameworks"
+                          - statictext "Use in app frameworks"
                       - list
                     - listitem
                       - link "References" [ref=@e35]
                         - generic:
-                          - StaticText "References"
-                            - InlineTextBox "References"
+                          - statictext "References"
                       - list
                     - listitem
                       - link "External links" [ref=@e36]
                         - generic:
-                          - StaticText "External links"
-                            - InlineTextBox "External links"
+                          - statictext "External links"
                       - list
           - main
             - sectionheader
               - heading "Chromium (web browser)" [ref=@e37]
-                  - StaticText "Chromium (web browser)"
-                    - InlineTextBox "Chromium (web browser)"
+                  - statictext "Chromium (web browser)"
               - generic:
                 - generic:
                   - navigation "Namespaces"
                     - generic:
                         - list
                           - listitem
-                            - link "Article" [ref=@e38]
-                                - StaticText "Article"
-                                  - InlineTextBox "Article"
+                            - link "Article" →/wiki/Chromium_(web_browser) [ref=@e38]
+                                - statictext "Article"
                               - generic:
                           - listitem
-                            - link "Talk" [ref=@e39]
-                                - StaticText "Talk"
-                                  - InlineTextBox "Talk"
+                            - link "Talk" →/wiki/Talk:Chromium_(web_browser) [ref=@e39]
+                                - statictext "Talk"
                               - generic:
                 - generic:
                   - navigation "Views"
                     - generic:
                         - list
                           - listitem
-                            - link "Read" [ref=@e40]
-                                - StaticText "Read"
-                                  - InlineTextBox "Read"
+                            - link "Read" →/wiki/Chromium_(web_browser) [ref=@e40]
+                                - statictext "Read"
                               - generic:
                           - listitem
-                            - link "Edit" [ref=@e41]
-                                - StaticText "Edit"
-                                  - InlineTextBox "Edit"
+                            - link "Edit" →/w/index.php?title=Chromium_(web_browser [ref=@e41]
+                                - statictext "Edit"
                               - generic:
                           - listitem
-                            - link "View history" [ref=@e42]
-                                - StaticText "View history"
-                                  - InlineTextBox "View history"
+                            - link "View history" →/w/index.php?title=Chromium_(web_browser [ref=@e42]
+                                - statictext "View history"
                               - generic:
                   - navigation "Page tools"
                     - generic:
@@ -245,69 +202,55 @@
                     - generic:
                       - generic:
                         - generic:
-                          - StaticText "Appearance"
-                            - InlineTextBox "Appearance"
+                          - statictext "Appearance"
                         - button "Hide Appearance" [ref=@e43]
-                          - StaticText "hide"
-                            - InlineTextBox "hide"
+                          - statictext "hide"
                       - generic:
                         - generic:
-                          - StaticText "Text"
-                            - InlineTextBox "Text"
+                          - statictext "Text"
                           - list
                             - listitem
                                 - form
                                   - generic:
-                                    - LabelText
-                                        - StaticText "Small"
-                                          - InlineTextBox "Small"
+                                    - labeltext
+                                        - statictext "Small"
                                   - generic:
-                                    - LabelText
-                                        - StaticText "Standard"
-                                          - InlineTextBox "Standard"
+                                    - labeltext
+                                        - statictext "Standard"
                                   - generic:
-                                    - LabelText
-                                        - StaticText "Large"
-                                          - InlineTextBox "Large"
+                                    - labeltext
+                                        - statictext "Large"
                       - generic:
                         - generic:
-                          - StaticText "Width"
-                            - InlineTextBox "Width"
+                          - statictext "Width"
                           - list
                             - listitem
                                 - form
                                   - generic:
-                                    - LabelText
-                                        - StaticText "Standard"
-                                          - InlineTextBox "Standard"
+                                    - labeltext
+                                        - statictext "Standard"
                                   - generic:
-                                    - LabelText
-                                        - StaticText "Wide"
-                                          - InlineTextBox "Wide"
+                                    - labeltext
+                                        - statictext "Wide"
                       - generic:
                         - generic:
-                          - StaticText "Color"
-                            - InlineTextBox "Color"
+                          - statictext "Color"
                           - list
                             - listitem
                                 - form
                                   - generic:
-                                    - LabelText
-                                        - StaticText "Automatic"
-                                          - InlineTextBox "Automatic"
+                                    - labeltext
+                                        - statictext "Automatic"
                                   - generic:
-                                    - LabelText
-                                        - StaticText "Light"
-                                          - InlineTextBox "Light"
+                                    - labeltext
+                                        - statictext "Light"
                                   - generic:
-                                    - LabelText
-                                        - StaticText "Dark"
-                                          - InlineTextBox "Dark"
+                                    - labeltext
+                                        - statictext "Dark"
             - generic "Chromium (web browser)"
                 - generic:
                 - generic:
-                  - StaticText "From Wikipedia, the free encyclopedia"
-                    - InlineTextBox "From Wikipedia, the free encyclopedia"
+                  - statictext "From Wikipedia, the free encyclopedia"
               - generic:
                 - generic:
               - generic:
@@ -315,897 +258,1107 @@
                     - table
                         - row
                           - columnheader "Chromium"
-                            - StaticText "Chromium"
-                              - InlineTextBox "Chromium"
+                            - statictext "Chromium"
                         - row
                           - cell
-                            - link [ref=@e44]
+                            - link →en.wikipedia.org/wiki/File:Chromium_Logo [ref=@e44]
                               - image [ref=@e45]
                         - row
                           - cell "Chromium version 140, showing the home page of Wikipedia"
-                            - link [ref=@e46]
+                            - link →en.wikipedia.org/wiki/File:Chromium_140_ [ref=@e46]
                               - image [ref=@e47]
                             - generic:
-                              - StaticText "Chromium version 140, showing the "
-                                - InlineTextBox "Chromium version 140, showing the "
-                              - link "home page" [ref=@e48]
-                                - StaticText "home page"
-                                  - InlineTextBox "home "
-                                  - InlineTextBox "page"
-                              - StaticText " of "
-                                - InlineTextBox " of "
-                              - link "Wikipedia" [ref=@e49]
-                                - StaticText "Wikipedia"
-                                  - InlineTextBox "Wikipedia"
+                              - statictext "Chromium version 140, showing the "
+                              - link "home page" →en.wikipedia.org/wiki/Home_page [ref=@e48]
+                                - statictext "home page"
+                              - statictext " of "
+                              - link "Wikipedia" →en.wikipedia.org/wiki/Wikipedia [ref=@e49]
+                                - statictext "Wikipedia"
                         - row
                           - rowheader "Original author"
-                            - link "Original author" [ref=@e50]
-                              - StaticText "Original author"
-                                - InlineTextBox "Original author"
+                            - link "Original author" →en.wikipedia.org/wiki/Programmer [ref=@e50]
+                              - statictext "Original author"
                           - cell "Google[1]"
-                            - link "Google" [ref=@e51]
-                              - StaticText "Google"
-                                - InlineTextBox "Google"
+                            - link "Google" →en.wikipedia.org/wiki/Google [ref=@e51]
+                              - statictext "Google"
                             - superscript
                               - link "[1]" [ref=@e52]
                                 - generic:
                                   - generic:
-                                    - StaticText "["
-                                      - InlineTextBox "["
-                                  - StaticText "1"
-                                    - InlineTextBox "1"
+                                    - statictext "["
+                                  - statictext "1"
                                   - generic:
-                                    - StaticText "]"
-                                      - InlineTextBox "]"
+                                    - statictext "]"
                         - row
                           - rowheader "Developers"
-                            - link "Developers" [ref=@e53]
-                              - StaticText "Developers"
-                                - InlineTextBox "Developers"
+                            - link "Developers" →en.wikipedia.org/wiki/Programmer [ref=@e53]
+                              - statictext "Developers"
                           - cell "The Chromium Projects,[2] controlled by Google[3]"
-                            - StaticText "The Chromium Projects,"
-                              - InlineTextBox "The Chromium Projects,"
+                            - statictext "The Chromium Projects,"
                             - superscript
                               - link "[2]" [ref=@e54]
                                 - generic:
                                   - generic:
-                                    - StaticText "["
-                                      - InlineTextBox "["
-                                  - StaticText "2"
-                                    - InlineTextBox "2"
+                                    - statictext "["
+                                  - statictext "2"
                                   - generic:
-                                    - StaticText "]"
-                                      - InlineTextBox "]"
-                            - StaticText " controlled by Google"
-                              - InlineTextBox "controlled by Google"
+                                    - statictext "]"
+                            - statictext " controlled by Google"
                             - superscript
                               - link "[3]" [ref=@e55]
                                 - generic:
                                   - generic:
-                                    - StaticText "["
-                                      - InlineTextBox "["
-                                  - StaticText "3"
-                                    - InlineTextBox "3"
+                                    - statictext "["
+                                  - statictext "3"
                                   - generic:
-                                    - StaticText "]"
-                                      - InlineTextBox "]"
+                                    - statictext "]"
                         - row
                           - rowheader "Release"
-                            - StaticText "Release"
-                              - InlineTextBox "Release"
+                            - statictext "Release"
                           - cell "2 September 2008; 18 years ago[1]"
-                            - StaticText "2"
-                              - InlineTextBox "2"
-                            - StaticText " "
-                              - InlineTextBox " "
-                            - StaticText "September 2008"
-                              - InlineTextBox "September 2008"
-                            - StaticText ";"
-                              - InlineTextBox ";"
-                            - StaticText " "
-                              - InlineTextBox " "
-                            - StaticText "18 years ago"
-                              - InlineTextBox "18 "
-                              - InlineTextBox "years ago"
+                            - statictext "2"
+                            - statictext " "
+                            - statictext "September 2008"
+                            - statictext ";"
+                            - statictext " "
+                            - statictext "18 years ago"
                             - superscript
                               - link "[1]" [ref=@e56]
                                 - generic:
                                   - generic:
-                                    - StaticText "["
-                                      - InlineTextBox "["
-                                  - StaticText "1"
-                                    - InlineTextBox "1"
+                                    - statictext "["
+                                  - statictext "1"
                                   - generic:
-                                    - StaticText "]"
-                                      - InlineTextBox "]"
+                                    - statictext "]"
                         - row
                           - rowheader "Written in"
-                            - StaticText "Written in"
-                              - InlineTextBox "Written in"
+                            - statictext "Written in"
                           - cell "C++ primarily,[4] HTML, CSS, JavaScript for UI and test suite[5][6]"
-                            - link "C++" [ref=@e57]
-                              - StaticText "C++"
-                                - InlineTextBox "C++"
-                            - StaticText " primarily,"
-                              - InlineTextBox " primarily,"
+                            - link "C++" →en.wikipedia.org/wiki/C++ [ref=@e57]
+                              - statictext "C++"
+                            - statictext " primarily,"
                             - superscript
                               - link "[4]" [ref=@e58]
                                 - generic:
                                   - generic:
-                                    - StaticText "["
-                                      - InlineTextBox "["
-                                  - StaticText "4"
-                                    - InlineTextBox "4"
+                                    - statictext "["
+                                  - statictext "4"
                                   - generic:
-                                    - StaticText "]"
-                                      - InlineTextBox "]"
-                            - StaticText " "
-                              - InlineTextBox " "
-                            - link "HTML" [ref=@e59]
-                              - StaticText "HTML"
-                                - InlineTextBox "HTML"
-                            - StaticText ", "
-                              - InlineTextBox ", "
-                            - link "CSS" [ref=@e60]
-                              - StaticText "CSS"
-                                - InlineTextBox "CSS"
-                            - StaticText ", "
-                              - InlineTextBox ", "
-                            - link "JavaScript" [ref=@e61]
-                              - StaticText "JavaScript"
-                                - InlineTextBox "JavaScript"
-                            - StaticText " for "
-                              - InlineTextBox " for "
-                            - link "UI" [ref=@e62]
-                              - StaticText "UI"
-                                - InlineTextBox "UI"
-                            - StaticText " and test suite"
-                              - InlineTextBox " and "
-                              - InlineTextBox "test suite"
+                                    - statictext "]"
+                            - link "HTML" →en.wikipedia.org/wiki/HTML [ref=@e59]
+                              - statictext "HTML"
+                            - statictext ", "
+                            - link "CSS" →en.wikipedia.org/wiki/CSS [ref=@e60]
+                              - statictext "CSS"
+                            - statictext ", "
+                            - link "JavaScript" →en.wikipedia.org/wiki/JavaScript [ref=@e61]
+                              - statictext "JavaScript"
+                            - statictext " for "
+                            - link "UI" →en.wikipedia.org/wiki/User_interface [ref=@e62]
+                              - statictext "UI"
+                            - statictext " and test suite"
                             - superscript
                               - link "[5]" [ref=@e63]
                                 - generic:
                                   - generic:
-                                    - StaticText "["
-                                      - InlineTextBox "["
-                                  - StaticText "5"
-                                    - InlineTextBox "5"
+                                    - statictext "["
+                                  - statictext "5"
                                   - generic:
-                                    - StaticText "]"
-                                      - InlineTextBox "]"
+                                    - statictext "]"
                             - superscript
                               - link "[6]" [ref=@e64]
                                 - generic:
                                   - generic:
-                                    - StaticText "["
-                                      - InlineTextBox "["
-                                  - StaticText "6"
-                                    - InlineTextBox "6"
+                                    - statictext "["
+                                  - statictext "6"
                                   - generic:
-                                    - StaticText "]"
-                                      - InlineTextBox "]"
+                                    - statictext "]"
                         - row
                           - rowheader "Engines"
-                            - link "Engines" [ref=@e65]
-                              - StaticText "Engines"
-                                - InlineTextBox "Engines"
+                            - link "Engines" →en.wikipedia.org/wiki/Software_engine [ref=@e65]
+                              - statictext "Engines"
                           - cell "V8, Blink (WebKit on iOS/iPadOS)[7]"
-                            - link "V8" [ref=@e66]
-                              - StaticText "V8"
-                                - InlineTextBox "V8"
-                            - StaticText ", "
-                              - InlineTextBox ", "
-                            - link "Blink" [ref=@e67]
-                              - StaticText "Blink"
-                                - InlineTextBox "Blink"
-                            - StaticText " ("
-                              - InlineTextBox " ("
-                            - link "WebKit" [ref=@e68]
-                              - StaticText "WebKit"
-                                - InlineTextBox "WebKit"
-                            - StaticText " on "
-                              - InlineTextBox " on "
-                            - link "iOS" [ref=@e69]
-                              - StaticText "iOS"
-                                - InlineTextBox "iOS"
-                            - StaticText "/"
-                              - InlineTextBox "/"
-                            - link "iPadOS" [ref=@e70]
-                              - StaticText "iPadOS"
-                                - InlineTextBox "iPadOS"
-                            - StaticText ")"
-                              - InlineTextBox ")"
+                            - link "V8" →en.wikipedia.org/wiki/V8_(JavaScript_eng [ref=@e66]
+                              - statictext "V8"
+                            - statictext ", "
+                            - link "Blink" →en.wikipedia.org/wiki/Blink_(browser_eng [ref=@e67]
+                              - statictext "Blink"
+                            - statictext " ("
+                            - link "WebKit" →en.wikipedia.org/wiki/WebKit [ref=@e68]
+                              - statictext "WebKit"
+                            - statictext " on "
+                            - link "iOS" →en.wikipedia.org/wiki/IOS [ref=@e69]
+                              - statictext "iOS"
+                            - statictext "/"
+                            - link "iPadOS" →en.wikipedia.org/wiki/IPadOS [ref=@e70]
+                              - statictext "iPadOS"
+                            - statictext ")"
                             - superscript
                               - link "[7]" [ref=@e71]
                                 - generic:
                                   - generic:
-                                    - StaticText "["
-                                      - InlineTextBox "["
-                                  - StaticText "7"
-                                    - InlineTextBox "7"
+                                    - statictext "["
+                                  - statictext "7"
                                   - generic:
-                                    - StaticText "]"
-                                      - InlineTextBox "]"
+                                    - statictext "]"
                         - row
                           - rowheader "Operating system"
-                            - link "Operating system" [ref=@e72]
-                              - StaticText "Operating system"
-                                - InlineTextBox "Operating system"
+                            - link "Operating system" →en.wikipedia.org/wiki/Operating_system [ref=@e72]
+                              - statictext "Operating system"
                           - cell "Android 10 or later BSD iOS 18 or later iPadOS 18 or later Linux macOS 12 or later Windows 10 or later"
                               - list
                                 - listitem
-                                  - link "Android 10" [ref=@e73]
-                                    - StaticText "Android 10"
-                                      - InlineTextBox "Android 10"
-                                  - StaticText " or later"
-                                    - InlineTextBox " or later"
+                                  - link "Android 10" →en.wikipedia.org/wiki/Android_10 [ref=@e73]
+                                    - statictext "Android 10"
+                                  - statictext " or later"
                                 - listitem
-                                  - link "BSD" [ref=@e74]
-                                    - StaticText "BSD"
-                                      - InlineTextBox "BSD"
+                                  - link "BSD" →en.wikipedia.org/wiki/BSD [ref=@e74]
+                                    - statictext "BSD"
                                 - listitem
-                                  - link "iOS 18" [ref=@e75]
-                                    - StaticText "iOS 18"
-                                      - InlineTextBox "iOS 18"
-                                  - StaticText " or later"
-                                    - InlineTextBox " or later"
+                                  - link "iOS 18" →en.wikipedia.org/wiki/IOS_18 [ref=@e75]
+                                    - statictext "iOS 18"
+                                  - statictext " or later"
                                 - listitem
-                                  - link "iPadOS 18" [ref=@e76]
-                                    - StaticText "iPadOS 18"
-                                      - InlineTextBox "iPadOS 18"
-                                  - StaticText " or later"
-                                    - InlineTextBox " or later"
+                                  - link "iPadOS 18" →en.wikipedia.org/wiki/IPadOS_18 [ref=@e76]
+                                    - statictext "iPadOS 18"
+                                  - statictext " or later"
                                 - listitem
-                                  - link "Linux" [ref=@e77]
-                                    - StaticText "Linux"
-                                      - InlineTextBox "Linux"
+                                  - link "Linux" →en.wikipedia.org/wiki/Linux [ref=@e77]
+                                    - statictext "Linux"
                                 - listitem
-                                  - link "macOS 12" [ref=@e78]
-                                    - StaticText "macOS 12"
-                                      - InlineTextBox "macOS 12"
-                                  - StaticText " or later"
-                                    - InlineTextBox " or later"
+                                  - link "macOS 12" →en.wikipedia.org/wiki/MacOS_12 [ref=@e78]
+                                    - statictext "macOS 12"
+                                  - statictext " or later"
                                 - listitem
-                                  - link "Windows 10" [ref=@e79]
-                                    - StaticText "Windows 10"
-                                      - InlineTextBox "Windows 10"
-                                  - StaticText " or later"
-                                    - InlineTextBox " or later"
+                                  - link "Windows 10" →en.wikipedia.org/wiki/Windows_10 [ref=@e79]
+                                    - statictext "Windows 10"
+                                  - statictext " or later"
                         - row
                           - rowheader "Platform"
-                            - link "Platform" [ref=@e80]
-                              - StaticText "Platform"
-                                - InlineTextBox "Platform"
+                            - link "Platform" →en.wikipedia.org/wiki/Computing_platform [ref=@e80]
+                              - statictext "Platform"
                           - cell "IA-32, x86-64, ARM, ARM64"
-                            - link "IA-32" [ref=@e81]
-                              - StaticText "IA-32"
-                                - InlineTextBox "IA-32"
-                            - StaticText ", "
-                              - InlineTextBox ", "
-                            - link "x86-64" [ref=@e82]
-                              - StaticText "x86-64"
-                                - InlineTextBox "x86-64"
-                            - StaticText ", "
-                              - InlineTextBox ", "
-                            - link "ARM" [ref=@e83]
-                              - StaticText "ARM"
-                                - InlineTextBox "ARM"
-                            - StaticText ", "
-                              - InlineTextBox ", "
-                            - link "ARM64" [ref=@e84]
-                              - StaticText "ARM64"
-                                - InlineTextBox "ARM64"
+                            - link "IA-32" →en.wikipedia.org/wiki/IA-32 [ref=@e81]
+                              - statictext "IA-32"
+                            - statictext ", "
+                            - link "x86-64" →en.wikipedia.org/wiki/X86-64 [ref=@e82]
+                              - statictext "x86-64"
+                            - statictext ", "
+                            - link "ARM" →en.wikipedia.org/wiki/ARM_architecture [ref=@e83]
+                              - statictext "ARM"
+                            - statictext ", "
+                            - link "ARM64" →en.wikipedia.org/wiki/AArch64 [ref=@e84]
+                              - statictext "ARM64"
                         - row
                           - rowheader "License"
-                            - link "License" [ref=@e85]
-                              - StaticText "License"
-                                - InlineTextBox "License"
+                            - link "License" →en.wikipedia.org/wiki/Software_license [ref=@e85]
+                              - statictext "License"
                           - cell "LGPL, BSD-3 and others[8][9]"
-                            - link "LGPL" [ref=@e86]
-                              - StaticText "LGPL"
-                                - InlineTextBox "LGPL"
-                            - StaticText ", "
-                              - InlineTextBox ", "
-                            - link "BSD-3" [ref=@e87]
-                              - StaticText "BSD-3"
-                                - InlineTextBox "BSD-3"
-                            - StaticText " and others"
-                              - InlineTextBox " and "
-                              - InlineTextBox "others"
+                            - link "LGPL" →en.wikipedia.org/wiki/GNU_Lesser_General [ref=@e86]
+                              - statictext "LGPL"
+                            - statictext ", "
+                            - link "BSD-3" →en.wikipedia.org/wiki/BSD_licenses [ref=@e87]
+                              - statictext "BSD-3"
+                            - statictext " and others"
                             - superscript
                               - link "[8]" [ref=@e88]
                                 - generic:
                                   - generic:
-                                    - StaticText "["
-                                      - InlineTextBox "["
-                                  - StaticText "8"
-                                    - InlineTextBox "8"
+                                    - statictext "["
+                                  - statictext "8"
                                   - generic:
-                                    - StaticText "]"
-                                      - InlineTextBox "]"
+                                    - statictext "]"
                             - superscript
                               - link "[9]" [ref=@e89]
                                 - generic:
                                   - generic:
-                                    - StaticText "["
-                                      - InlineTextBox "["
-                                  - StaticText "9"
-                                    - InlineTextBox "9"
+                                    - statictext "["
+                                  - statictext "9"
                                   - generic:
-                                    - StaticText "]"
-                                      - InlineTextBox "]"
+                                    - statictext "]"
                         - row
                           - rowheader "Website"
-                            - StaticText "Website"
-                              - InlineTextBox "Website"
+                            - statictext "Website"
                           - cell "chromium .org"
-                            - link "chromium .org" [ref=@e90]
-                              - StaticText "chromium"
-                                - InlineTextBox "chromium"
-                              - StaticText ".org"
-                                - InlineTextBox ".org"
+                            - link "chromium .org" →chromium.org/ [ref=@e90]
+                              - statictext "chromium"
+                              - statictext ".org"
                         - row
                           - rowheader "Repository"
-                            - link "Repository" [ref=@e91]
-                              - StaticText "Repository"
-                                - InlineTextBox "Repository"
+                            - link "Repository" →en.wikipedia.org/wiki/Repository_(versio [ref=@e91]
+                              - statictext "Repository"
                           - cell "chromium .googlesource .com /chromium /src Edit this at Wikidata"
                               - list
                                 - listitem
-                                  - link "chromium .googlesource .com /chromium /src" [ref=@e92]
-                                    - StaticText "chromium"
-                                      - InlineTextBox "chromium"
-                                    - StaticText ".googlesource"
-                                      - InlineTextBox ".googlesource"
-                                    - StaticText ".com"
-                                      - InlineTextBox ".com"
-                                    - StaticText "/chromium"
-                                      - InlineTextBox "/chromium"
-                                    - StaticText "/src"
-                                      - InlineTextBox "/src"
-                                  - StaticText " "
-                                    - InlineTextBox " "
-                                  - link "Edit this at Wikidata" [ref=@e93]
+                                  - link "chromium .googlesource .com /chromium /src" →chromium.googlesource.com/chromium/src [ref=@e92]
+                                    - statictext "chromium"
+                                    - statictext ".googlesource"
+                                    - statictext ".com"
+                                    - statictext "/chromium"
+                                    - statictext "/src"
+                                  - link "Edit this at Wikidata" →wikidata.org/wiki/Q48524#P1324 [ref=@e93]
                                     - image "Edit this at Wikidata" [ref=@e94]
                     - paragraph
                       - generic:
-                        - StaticText "Chromium"
-                          - InlineTextBox "Chromium"
-                      - StaticText " is a "
-                        - InlineTextBox " is a "
-                      - link "free and open-source" [ref=@e95]
-                        - StaticText "free and open-source"
-                          - InlineTextBox "free and open-source"
-                      - StaticText " "
-                        - InlineTextBox " "
-                      - link "web browser" [ref=@e96]
-                        - StaticText "web browser"
-                          - InlineTextBox "web browser"
-                      - StaticText " project, primarily developed and maintained by "
-                        - InlineTextBox "project, primarily developed and maintained by "
-                      - link "Google" [ref=@e97]
-                        - StaticText "Google"
-                          - InlineTextBox "Google"
-                      - StaticText "."
-                        - InlineTextBox "."
+                        - statictext "Chromium"
+                      - statictext " is a "
+                      - link "free and open-source" →en.wikipedia.org/wiki/Free_and_open-sour [ref=@e95]
+                        - statictext "free and open-source"
+                      - link "web browser" →en.wikipedia.org/wiki/Web_browser [ref=@e96]
+                        - statictext "web browser"
+                      - statictext " project, primarily developed and maintained by "
+                      - link "Google" →en.wikipedia.org/wiki/Google [ref=@e97]
+                        - statictext "Google"
+                      - statictext "."
                       - superscript
                         - link "[3]" [ref=@e98]
                           - generic:
                             - generic:
-                              - StaticText "["
-                                - InlineTextBox "["
-                            - StaticText "3"
-                              - InlineTextBox "3"
+                              - statictext "["
+                            - statictext "3"
                             - generic:
-                              - StaticText "]"
-                                - InlineTextBox "]"
-                      - StaticText " It is a widely used "
-                        - InlineTextBox "It is a widely used "
-                      - link "codebase" [ref=@e99]
-                        - StaticText "codebase"
-                          - InlineTextBox "codebase"
-                      - StaticText ", providing the vast majority of "
-                        - InlineTextBox ", providing the vast majority "
-                        - InlineTextBox "of "
-                      - link "code" [ref=@e100]
-                        - StaticText "code"
-                          - InlineTextBox "code"
-                      - StaticText " for "
-                        - InlineTextBox " for "
-                      - link "Google Chrome" [ref=@e101]
-                        - StaticText "Google Chrome"
-                          - InlineTextBox "Google Chrome"
-                      - StaticText " and many other browsers, including "
-                        - InlineTextBox " and many other browsers, "
-                        - InlineTextBox "including "
-                      - link "Microsoft Edge" [ref=@e102]
-                        - StaticText "Microsoft Edge"
-                          - InlineTextBox "Microsoft Edge"
-                      - StaticText ", "
-                        - InlineTextBox ", "
-                      - link "Opera" [ref=@e103]
-                        - StaticText "Opera"
-                          - InlineTextBox "Opera"
-                      - StaticText ", "
-                        - InlineTextBox ", "
-                      - link "Vivaldi" [ref=@e104]
-                        - StaticText "Vivaldi"
-                          - InlineTextBox "Vivaldi"
-                      - StaticText ", "
-                        - InlineTextBox ", "
-                      - link "Brave" [ref=@e105]
-                        - StaticText "Brave"
-                          - InlineTextBox "Brave"
-                      - StaticText ", "
-                        - InlineTextBox ", "
-                      - link "Samsung Browser" [ref=@e106]
-                        - StaticText "Samsung Browser"
-                          - InlineTextBox "Samsung Browser"
-                      - StaticText " and "
-                        - InlineTextBox " and "
-                      - link "Ungoogled Chromium" [ref=@e107]
-                        - StaticText "Ungoogled Chromium"
-                          - InlineTextBox "Ungoogled Chromium"
-                      - StaticText ". The code is also used by several "
-                        - InlineTextBox ". The code "
-                        - InlineTextBox "is also used by several "
-                      - link "app frameworks" [ref=@e108]
-                        - StaticText "app frameworks"
-                          - InlineTextBox "app frameworks"
-                      - StaticText "."
-                        - InlineTextBox "."
+                              - statictext "]"
+                      - statictext " It is a widely used "
+                      - link "codebase" →en.wikipedia.org/wiki/Codebase [ref=@e99]
+                        - statictext "codebase"
+                      - statictext ", providing the vast majority of "
+                      - link "code" →en.wikipedia.org/wiki/Source_code [ref=@e100]
+                        - statictext "code"
+                      - statictext " for "
+                      - link "Google Chrome" →en.wikipedia.org/wiki/Google_Chrome [ref=@e101]
+                        - statictext "Google Chrome"
+                      - statictext " and many other browsers, including "
+                      - link "Microsoft Edge" →en.wikipedia.org/wiki/Microsoft_Edge [ref=@e102]
+                        - statictext "Microsoft Edge"
+                      - statictext ", "
+                      - link "Opera" →en.wikipedia.org/wiki/Opera_(web_browser [ref=@e103]
+                        - statictext "Opera"
+                      - statictext ", "
+                      - link "Vivaldi" →en.wikipedia.org/wiki/Vivaldi_(web_brows [ref=@e104]
+                        - statictext "Vivaldi"
+                      - statictext ", "
+                      - link "Brave" →en.wikipedia.org/wiki/Brave_(web_browser [ref=@e105]
+                        - statictext "Brave"
+                      - statictext ", "
+                      - link "Samsung Browser" →en.wikipedia.org/wiki/Samsung_Browser [ref=@e106]
+                        - statictext "Samsung Browser"
+                      - statictext " and "
+                      - link "Ungoogled Chromium" →en.wikipedia.org/wiki/Ungoogled_Chromium [ref=@e107]
+                        - statictext "Ungoogled Chromium"
+                      - statictext ". The code is also used by several "
+                      - link "app frameworks" →en.wikipedia.org/wiki/Application_framew [ref=@e108]
+                        - statictext "app frameworks"
+                      - statictext "."
                   - region "Licensing"
                     - generic:
                       - heading "Licensing" [ref=@e109]
-                        - StaticText "Licensing"
-                          - InlineTextBox "Licensing"
-                      - link "edit" [ref=@e110]
-                        - StaticText "edit"
-                          - InlineTextBox "edit"
+                        - statictext "Licensing"
+                      - link "edit" →/w/index.php?title=Chromium_(web_browser [ref=@e110]
+                        - statictext "edit"
                     - paragraph
-                      - StaticText "Chromium is a "
-                        - InlineTextBox "Chromium is a "
-                      - link "free and open-source software" [ref=@e111]
-                        - StaticText "free and open-source software"
-                          - InlineTextBox "free and open-source software"
-                      - StaticText " project. Owing to its origins in the "
-                        - InlineTextBox " project. "
-                        - InlineTextBox "Owing to its origins in the "
-                      - link "WebKit" [ref=@e112]
-                        - StaticText "WebKit"
-                          - InlineTextBox "WebKit"
-                      - StaticText " project, Chromium incorporates code subject to a variety of licenses, including "
-                        - InlineTextBox " project, Chromium "
-                        - InlineTextBox "incorporates code subject to a variety of licenses, "
-                        - InlineTextBox "including "
-                      - link "LGPL" [ref=@e113]
-                        - StaticText "LGPL"
-                          - InlineTextBox "LGPL"
-                      - StaticText ", "
-                        - InlineTextBox ", "
-                      - link "MIT" [ref=@e114]
-                        - StaticText "MIT"
-                          - InlineTextBox "MIT"
-                      - StaticText ", "
-                        - InlineTextBox ", "
-                      - link "Ms-PL" [ref=@e115]
-                        - StaticText "Ms-PL"
-                          - InlineTextBox "Ms-PL"
-                      - StaticText ", and "
-                        - InlineTextBox ", and "
-                      - link "MPL" [ref=@e116]
-                        - StaticText "MPL"
-                          - InlineTextBox "MPL"
-                      - StaticText " (with the MPL/"
-                        - InlineTextBox " (with the "
-                        - InlineTextBox "MPL/"
-                      - link "GPL" [ref=@e117]
-                        - StaticText "GPL"
-                          - InlineTextBox "GPL"
-                      - StaticText "/LGPL "
-                        - InlineTextBox "/LGPL "
-                      - link "tri-license" [ref=@e118]
-                        - StaticText "tri-license"
-                          - InlineTextBox "tri-license"
-                      - StaticText " clause)."
-                        - InlineTextBox " clause)."
+                      - statictext "Chromium is a "
+                      - link "free and open-source software" →en.wikipedia.org/wiki/Free_and_open-sour [ref=@e111]
+                        - statictext "free and open-source software"
+                      - statictext " project. Owing to its origins in the "
+                      - link "WebKit" →en.wikipedia.org/wiki/WebKit [ref=@e112]
+                        - statictext "WebKit"
+                      - statictext " project, Chromium incorporates code subject to a variety of licenses, including "
+                      - link "LGPL" →en.wikipedia.org/wiki/LGPL [ref=@e113]
+                        - statictext "LGPL"
+                      - statictext ", "
+                      - link "MIT" →en.wikipedia.org/wiki/MIT_License [ref=@e114]
+                        - statictext "MIT"
+                      - statictext ", "
+                      - link "Ms-PL" →en.wikipedia.org/wiki/Ms-PL [ref=@e115]
+                        - statictext "Ms-PL"
+                      - statictext ", and "
+                      - link "MPL" →en.wikipedia.org/wiki/Mozilla_Public_Lic [ref=@e116]
+                        - statictext "MPL"
+                      - statictext " (with the MPL/"
+                      - link "GPL" →en.wikipedia.org/wiki/GPL [ref=@e117]
+                        - statictext "GPL"
+                      - statictext "/LGPL "
+                      - link "tri-license" →en.wikipedia.org/wiki/Tri-license [ref=@e118]
+                        - statictext "tri-license"
+                      - statictext " clause)."
                       - superscript
                         - link "[9]" [ref=@e119]
                           - generic:
                             - generic:
-                              - StaticText "["
-                                - InlineTextBox "["
-                            - StaticText "9"
-                              - InlineTextBox "9"
+                              - statictext "["
+                            - statictext "9"
                             - generic:
-                              - StaticText "]"
-                                - InlineTextBox "]"
-                      - StaticText " Original Google-authored portions and some portions written by Apple are shared under the "
-                        - InlineTextBox " Original Google-"
-                        - InlineTextBox "authored portions and some portions written by Apple are "
-                        - InlineTextBox "shared under the "
-                      - link "3-clause BSD license" [ref=@e120]
-                        - StaticText "3-clause BSD license"
-                          - InlineTextBox "3-clause BSD license"
-                      - StaticText "."
-                        - InlineTextBox "."
+                              - statictext "]"
+                      - statictext " Original Google-authored portions and some portions written by Apple are shared under the "
+                      - link "3-clause BSD license" →en.wikipedia.org/wiki/3-clause_BSD_licen [ref=@e120]
+                        - statictext "3-clause BSD license"
+                      - statictext "."
                       - superscript
                         - link "[8]" [ref=@e121]
                           - generic:
                             - generic:
-                              - StaticText "["
-                                - InlineTextBox "["
-                            - StaticText "8"
-                              - InlineTextBox "8"
+                              - statictext "["
+                            - statictext "8"
                             - generic:
-                              - StaticText "]"
-                                - InlineTextBox "]"
+                              - statictext "]"
                     - paragraph
-                      - StaticText "This licensing permits any party to "
-                        - InlineTextBox "This licensing permits any party to "
-                      - link "build" [ref=@e122]
-                        - StaticText "build"
-                          - InlineTextBox "build"
-                      - StaticText " the "
-                        - InlineTextBox " the "
-                      - link "codebase" [ref=@e123]
-                        - StaticText "codebase"
-                          - InlineTextBox "codebase"
-                      - StaticText " and share the resulting "
-                        - InlineTextBox "and share the resulting "
-                      - link "browser" [ref=@e124]
-                        - StaticText "browser"
-                          - InlineTextBox "browser"
-                      - StaticText " "
-                        - InlineTextBox " "
-                      - link "executable" [ref=@e125]
-                        - StaticText "executable"
-                          - InlineTextBox "executable"
-                      - StaticText " with the Chromium name and logo. Thus many "
-                        - InlineTextBox " with the "
-                        - InlineTextBox "Chromium name and logo. Thus many "
-                      - link "Linux distributions" [ref=@e126]
-                        - StaticText "Linux distributions"
-                          - InlineTextBox "Linux distributions"
-                      - StaticText " do this, as well as "
-                        - InlineTextBox "do this, as well as "
-                      - link "FreeBSD" [ref=@e127]
-                        - StaticText "FreeBSD"
-                          - InlineTextBox "FreeBSD"
-                      - StaticText " and "
-                        - InlineTextBox " and "
-                      - link "OpenBSD" [ref=@e128]
-                        - StaticText "OpenBSD"
-                          - InlineTextBox "OpenBSD"
-                      - StaticText "."
-                        - InlineTextBox "."
+                      - statictext "This licensing permits any party to "
+                      - link "build" →en.wikipedia.org/wiki/Build_(software) [ref=@e122]
+                        - statictext "build"
+                      - statictext " the "
+                      - link "codebase" →en.wikipedia.org/wiki/Codebase [ref=@e123]
+                        - statictext "codebase"
+                      - statictext " and share the resulting "
+                      - link "browser" →en.wikipedia.org/wiki/Web_browser [ref=@e124]
+                        - statictext "browser"
+                      - link "executable" →en.wikipedia.org/wiki/Executable [ref=@e125]
+                        - statictext "executable"
+                      - statictext " with the Chromium name and logo. Thus many "
+                      - link "Linux distributions" →en.wikipedia.org/wiki/Linux_distribution [ref=@e126]
+                        - statictext "Linux distributions"
+                      - statictext " do this, as well as "
+                      - link "FreeBSD" →en.wikipedia.org/wiki/FreeBSD [ref=@e127]
+                        - statictext "FreeBSD"
+                      - statictext " and "
+                      - link "OpenBSD" →en.wikipedia.org/wiki/OpenBSD [ref=@e128]
+                        - statictext "OpenBSD"
+                      - statictext "."
                       - superscript
                         - link "[10]" [ref=@e129]
                           - generic:
                             - generic:
-                              - StaticText "["
-                                - InlineTextBox "["
-                            - StaticText "10"
-                              - InlineTextBox "10"
+                              - statictext "["
+                            - statictext "10"
                             - generic:
-                              - StaticText "]"
-                                - InlineTextBox "]"
-                      - StaticText " Chromium also forms the basis of "
-                        - InlineTextBox "Chromium also forms the basis of "
-                      - link "Electron" [ref=@e130]
-                        - StaticText "Electron"
-                          - InlineTextBox "Electron"
-                      - StaticText ", which in turn is used for many commercial and proprietary "
-                        - InlineTextBox ", which in turn "
-                        - InlineTextBox "is used for many commercial and proprietary "
-                      - link "cross-platform" [ref=@e131]
-                        - StaticText "cross-platform"
-                          - InlineTextBox "cross-"
-                          - InlineTextBox "platform"
-                      - StaticText " applications, such as "
-                        - InlineTextBox " applications, such as "
-                      - link "Slack" [ref=@e132]
-                        - StaticText "Slack"
-                          - InlineTextBox "Slack"
-                      - StaticText "."
-                        - InlineTextBox "."
+                              - statictext "]"
+                      - statictext " Chromium also forms the basis of "
+                      - link "Electron" →en.wikipedia.org/wiki/Electron_(software [ref=@e130]
+                        - statictext "Electron"
+                      - statictext ", which in turn is used for many commercial and proprietary "
+                      - link "cross-platform" →en.wikipedia.org/wiki/Cross-platform [ref=@e131]
+                        - statictext "cross-platform"
+                      - statictext " applications, such as "
+                      - link "Slack" →en.wikipedia.org/wiki/Slack_(software) [ref=@e132]
+                        - statictext "Slack"
+                      - statictext "."
                     - paragraph
-                      - StaticText "Many Chromium-based browsers, such as "
-                        - InlineTextBox "Many Chromium-based browsers, such as "
-                      - link "Google Chrome" [ref=@e133]
-                        - StaticText "Google Chrome"
-                          - InlineTextBox "Google "
-                          - InlineTextBox "Chrome"
-                      - StaticText " and "
-                        - InlineTextBox " and "
-                      - link "Microsoft Edge" [ref=@e134]
-                        - StaticText "Microsoft Edge"
-                          - InlineTextBox "Microsoft Edge"
-                      - StaticText ", include the proprietary components, such as proprietary wrapper libraries for "
-                        - InlineTextBox ", include the proprietary "
-                        - InlineTextBox "components, such as proprietary wrapper libraries for "
-                      - link "hardware acceleration" [ref=@e135]
-                        - StaticText "hardware acceleration"
-                          - InlineTextBox "hardware acceleration"
-                      - StaticText "."
-                        - InlineTextBox "."
+                      - statictext "Many Chromium-based browsers, such as "
+                      - link "Google Chrome" →en.wikipedia.org/wiki/Google_Chrome [ref=@e133]
+                        - statictext "Google Chrome"
+                      - statictext " and "
+                      - link "Microsoft Edge" →en.wikipedia.org/wiki/Microsoft_Edge [ref=@e134]
+                        - statictext "Microsoft Edge"
+                      - statictext ", include the proprietary components, such as proprietary wrapper libraries for "
+                      - link "hardware acceleration" →en.wikipedia.org/wiki/Hardware_accelerat [ref=@e135]
+                        - statictext "hardware acceleration"
+                      - statictext "."
                       - superscript
                         - link "[11]" [ref=@e136]
                           - generic:
                             - generic:
-                              - StaticText "["
-                                - InlineTextBox "["
-                            - StaticText "11"
-                              - InlineTextBox "11"
+                              - statictext "["
+                            - statictext "11"
                             - generic:
-                              - StaticText "]"
-                                - InlineTextBox "]"
+                              - statictext "]"
                   - region "Differences from Google Chrome"
                     - generic:
                       - heading "Differences from Google Chrome" [ref=@e137]
-                        - StaticText "Differences from Google Chrome"
-                          - InlineTextBox "Differences from Google Chrome"
-                      - link "edit" [ref=@e138]
-                        - StaticText "edit"
-                          - InlineTextBox "edit"
+                        - statictext "Differences from Google Chrome"
+                      - link "edit" →/w/index.php?title=Chromium_(web_browser [ref=@e138]
+                        - statictext "edit"
                     - paragraph
-                      - StaticText "Chromium provides the vast majority of source code for "
-                        - InlineTextBox "Chromium provides the vast majority of source code for "
-                      - link "Google Chrome" [ref=@e139]
-                        - StaticText "Google Chrome"
-                          - InlineTextBox "Google Chrome"
-                      - StaticText ", but there are important differences."
-                        - InlineTextBox ", but there are important differences."
+                      - statictext "Chromium provides the vast majority of source code for "
+                      - link "Google Chrome" →en.wikipedia.org/wiki/Google_Chrome [ref=@e139]
+                        - statictext "Google Chrome"
+                      - statictext ", but there are important differences."
                     - region "Features"
                       - generic:
                         - heading "Features" [ref=@e140]
-                          - StaticText "Features"
-                            - InlineTextBox "Features"
-                        - link "edit" [ref=@e141]
-                          - StaticText "edit"
-                            - InlineTextBox "edit"
+                          - statictext "Features"
+                        - link "edit" →/w/index.php?title=Chromium_(web_browser [ref=@e141]
+                          - statictext "edit"
                       - paragraph
-                        - StaticText "Chromium lacks the following "
-                          - InlineTextBox "Chromium lacks the following "
-                        - link "Chrome" [ref=@e142]
-                          - StaticText "Chrome"
-                            - InlineTextBox "Chrome"
-                        - StaticText " features:"
-                          - InlineTextBox " features:"
+                        - statictext "Chromium lacks the following "
+                        - link "Chrome" →en.wikipedia.org/wiki/Google_Chrome [ref=@e142]
+                          - statictext "Chrome"
+                        - statictext " features:"
                         - superscript
                           - link "[10]" [ref=@e143]
                             - generic:
                               - generic:
-                                - StaticText "["
-                                  - InlineTextBox "["
-                              - StaticText "10"
-                                - InlineTextBox "10"
+                                - statictext "["
+                              - statictext "10"
                               - generic:
-                                - StaticText "]"
-                                  - InlineTextBox "]"
+                                - statictext "]"
                       - list
                         - listitem
-                          - ListMarker "• "
-                          - StaticText "Automatic browser updates"
-                            - InlineTextBox "Automatic browser updates"
+                          - listmarker "• "
+                          - statictext "Automatic browser updates"
                         - listitem
-                          - ListMarker "• "
-                          - StaticText "API keys for some "
-                            - InlineTextBox "API keys for some "
-                          - link "Google services" [ref=@e144]
-                            - StaticText "Google services"
-                              - InlineTextBox "Google services"
-                          - StaticText ", including browser sync"
-                            - InlineTextBox ", including browser sync"
+                          - listmarker "• "
+                          - statictext "API keys for some "
+                          - link "Google services" →en.wikipedia.org/wiki/List_of_Google_pro [ref=@e144]
+                            - statictext "Google services"
+                          - statictext ", including browser sync"
                           - superscript
                             - link "[12]" [ref=@e145]
                               - generic:
                                 - generic:
-                                  - StaticText "["
-                                    - InlineTextBox "["
-                                - StaticText "12"
-                                  - InlineTextBox "12"
+                                  - statictext "["
+                                - statictext "12"
                                 - generic:
-                                  - StaticText "]"
-                                    - InlineTextBox "]"
+                                  - statictext "]"
                         - listitem
-                          - ListMarker "• "
-                          - StaticText "The "
-                            - InlineTextBox "The "
-                          - link "Widevine" [ref=@e146]
-                            - StaticText "Widevine"
-                              - InlineTextBox "Widevine"
-                          - StaticText " "
-                            - InlineTextBox " "
-                          - link "DRM" [ref=@e147]
-                            - StaticText "DRM"
-                              - InlineTextBox "DRM"
-                          - StaticText " module"
-                            - InlineTextBox " module"
+                          - listmarker "• "
+                          - statictext "The "
+                          - link "Widevine" →en.wikipedia.org/wiki/Widevine [ref=@e146]
+                            - statictext "Widevine"
+                          - link "DRM" →en.wikipedia.org/wiki/Digital_rights_man [ref=@e147]
+                            - statictext "DRM"
+                          - statictext " module"
                         - listitem
-                          - ListMarker "• "
-                          - StaticText "Licensed "
-                            - InlineTextBox "Licensed "
-                          - link "codecs" [ref=@e148]
-                            - StaticText "codecs"
-                              - InlineTextBox "codecs"
-                          - StaticText " for the popular "
-                            - InlineTextBox " for the popular "
-                          - link "H.264" [ref=@e149]
-                            - StaticText "H.264"
-                              - InlineTextBox "H.264"
-                          - StaticText " video and "
-                            - InlineTextBox " video and "
-                          - link "AAC" [ref=@e150]
-                            - StaticText "AAC"
-                              - InlineTextBox "AAC"
-                          - StaticText " audio formats"
-                            - InlineTextBox " audio formats"
+                          - listmarker "• "
+                          - statictext "Licensed "
+                          - link "codecs" →en.wikipedia.org/wiki/Codec [ref=@e148]
+                            - statictext "codecs"
+                          - statictext " for the popular "
+                          - link "H.264" →en.wikipedia.org/wiki/Advanced_Video_Cod [ref=@e149]
+                            - statictext "H.264"
+                          - statictext " video and "
+                          - link "AAC" →en.wikipedia.org/wiki/Advanced_Audio_Cod [ref=@e150]
+                            - statictext "AAC"
+                          - statictext " audio formats"
                         - listitem
-                          - ListMarker "• "
-                          - link "Tracking mechanisms" [ref=@e151]
-                            - StaticText "Tracking mechanisms"
-                              - InlineTextBox "Tracking mechanisms"
-                          - StaticText " for usage and crash reports"
-                            - InlineTextBox " for usage and crash reports"
+                          - listmarker "• "
+                          - link "Tracking mechanisms" →en.wikipedia.org/wiki/Google_Chrome#User [ref=@e151]
+                            - statictext "Tracking mechanisms"
+                          - statictext " for usage and crash reports"
                     - region "Branding and licensing"
                       - generic:
                         - heading "Branding and licensing" [ref=@e152]
-                          - StaticText "Branding and licensing"
-                            - InlineTextBox "Branding and licensing"
-                        - link "edit" [ref=@e153]
-                          - StaticText "edit"
-                            - InlineTextBox "edit"
+                          - statictext "Branding and licensing"
+                        - link "edit" →/w/index.php?title=Chromium_(web_browser [ref=@e153]
+                          - statictext "edit"
                       - paragraph
-                        - StaticText "Google first chose the name \"Chrome\" with intention to minimize "
-                          - InlineTextBox "Google first chose the name \"Chrome\" with intention to minimize "
-                        - link "chrome" [ref=@e154]
+                        - statictext "Google first chose the name \"Chrome\" with intention to minimize "
+                        - link "chrome" →en.wikipedia.org/wiki/User_interface_chr [ref=@e154]
                           - generic:
-                            - StaticText "chrome"
-                              - InlineTextBox "chrome"
-                        - StaticText " for its browser."
-                          - InlineTextBox " for its browser."
+                            - statictext "chrome"
+                        - statictext " for its browser."
                         - superscript
                           - link "[13]" [ref=@e155]
                             - generic:
                               - generic:
-                                - StaticText "["
-                                  - InlineTextBox "["
-                              - StaticText "13"
-                                - InlineTextBox "13"
+                                - statictext "["
+                              - statictext "13"
                               - generic:
-                                - StaticText "]"
-                                  - InlineTextBox "]"
-                        - StaticText " Then the open-source release was named \"Chromium\" because "
-                          - InlineTextBox " Then the "
-                          - InlineTextBox "open-source release was named \"Chromium\" because "
-                        - link "chromium" [ref=@e156]
-                          - StaticText "chromium"
-                            - InlineTextBox "chromium"
-                        - StaticText " metal is used to make "
-                          - InlineTextBox " metal is used to make "
-                        - link "chrome plating" [ref=@e157]
-                          - StaticText "chrome plating"
-                            - InlineTextBox "chrome "
-                            - InlineTextBox "plating"
-                        - StaticText "."
-                          - InlineTextBox "."
+                                - statictext "]"
+                        - statictext " Then the open-source release was named \"Chromium\" because "
+                        - link "chromium" →en.wikipedia.org/wiki/Chromium [ref=@e156]
+                          - statictext "chromium"
+                        - statictext " metal is used to make "
+                        - link "chrome plating" →en.wikipedia.org/wiki/Chrome_plating [ref=@e157]
+                          - statictext "chrome plating"
+                        - statictext "."
                         - superscript
                           - link "[1]" [ref=@e158]
                             - generic:
                               - generic:
-                                - StaticText "["
-                                  - InlineTextBox "["
-                              - StaticText "1"
-                                - InlineTextBox "1"
+                                - statictext "["
+                              - statictext "1"
                               - generic:
-                                - StaticText "]"
-                                  - InlineTextBox "]"
+                                - statictext "]"
                       - paragraph
-                        - StaticText "Chrome has the same "
-                          - InlineTextBox "Chrome has the same "
-                        - link "user interface" [ref=@e159]
-                          - StaticText "user interface"
-                            - InlineTextBox "user interface"
-                        - StaticText " functionality as Chromium, but with a Google-branded color scheme. Unlike Chromium, Chrome is not open-source; its binaries are licensed as "
-                          - InlineTextBox " functionality as Chromium, but with a Google-branded color "
-                          - InlineTextBox "scheme. Unlike Chromium, Chrome is not open-source; its binaries are licensed as "
-                        - link "freeware" [ref=@e160]
-                          - StaticText "freeware"
-                            - InlineTextBox "freeware"
-                        - StaticText " under the Google Chrome Terms of Service."
-                          - InlineTextBox " under the "
-                          - InlineTextBox "Google Chrome Terms of Service."
+                        - statictext "Chrome has the same "
+                        - link "user interface" →en.wikipedia.org/wiki/User_interface [ref=@e159]
+                          - statictext "user interface"
+                        - statictext " functionality as Chromium, but with a Google-branded color scheme. Unlike Chromium, Chrome is not open-source; its binaries are licensed as "
+                        - link "freeware" →en.wikipedia.org/wiki/Freeware [ref=@e160]
+                          - statictext "freeware"
+                        - statictext " under the Google Chrome Terms of Service."
                         - superscript
                           - link "[14]" [ref=@e161]
                             - generic:
                               - generic:
-                                - StaticText "["
-                                  - InlineTextBox "["
-                              - StaticText "14"
-                                - InlineTextBox "14"
+                                - statictext "["
+                              - statictext "14"
                               - generic:
-                                - StaticText "]"
-                                  - InlineTextBox "]"
+                                - statictext "]"
                   - region "Development"
                     - generic:
                       - heading "Development" [ref=@e162]
-                        - StaticText "Development"
-                          - InlineTextBox "Development"
-                      - link "edit" [ref=@e163]
-                        - StaticText "edit"
-                          - InlineTextBox "edit"
+                        - statictext "Development"
+                      - link "edit" →/w/index.php?title=Chromium_(web_browser [ref=@e163]
+                        - statictext "edit"
                     - paragraph
-                      - StaticText "The Chromium browser "
-                        - InlineTextBox "The Chromium browser "
-                      - link "codebase" [ref=@e164]
-                        - StaticText "codebase"
-                          - InlineTextBox "codebase"
-                      - StaticText " contains over 36 million "
-                        - InlineTextBox " contains over 36 million "
-                      - link "source lines of code" [ref=@e165]
-                        - StaticText "source lines of code"
-                          - InlineTextBox "source lines of code"
-                      - StaticText ", excluding "
-                        - InlineTextBox ", excluding "
-                      - link "comments" [ref=@e166]
-                        - StaticText "comments"
-                          - InlineTextBox "comments"
-                      - StaticText " and "
-                        - InlineTextBox "and "
-                      - link "blank lines" [ref=@e167]
-                        - StaticText "blank lines"
-                          - InlineTextBox "blank lines"
-                      - StaticText "."
-                        - InlineTextBox "."
+                      - statictext "The Chromium browser "
+                      - link "codebase" →en.wikipedia.org/wiki/Codebase [ref=@e164]
+                        - statictext "codebase"
+                      - statictext " contains over 36 million "
+                      - link "source lines of code" →en.wikipedia.org/wiki/Source_lines_of_co [ref=@e165]
+                        - statictext "source lines of code"
+                      - statictext ", excluding "
+                      - link "comments" →en.wikipedia.org/wiki/Comment_(computer_ [ref=@e166]
+                        - statictext "comments"
+                      - statictext " and "
+                      - link "blank lines" →en.wikipedia.org/wiki/Blank_line [ref=@e167]
+                        - statictext "blank lines"
+                      - statictext "."
                       - superscript
                         - link "[4]" [ref=@e168]
                           - generic:
                             - generic:
-                              - StaticText "["
-                                - InlineTextBox "["
-                            - StaticText "4"
-                              - InlineTextBox "4"
+                              - statictext "["
+                            - statictext "4"
                             - generic:
-                              - StaticText "]"
-                                - InlineTextBox "]"
+                              - statictext "]"
                     - region "Contributors"
                       - generic:
                         - heading "Contributors" [ref=@e169]
-                          - StaticText "Contributors"
-                            - InlineTextBox "Contributors"
-                        - link "edit" [ref=@e170]
-                          - StaticText "edit"
-                            - InlineTextBox "edit"
+                          - statictext "Contributors"
+                        - link "edit" →/w/index.php?title=Chromium_(web_browser [ref=@e170]
+                          - statictext "edit"
                       - paragraph
-                        - StaticText "Chromium has been a Google project since its inception,"
-                          - InlineTextBox "Chromium has been a Google project since its inception,"
+                        - statictext "Chromium has been a Google project since its inception,"
                         - superscript
                           - link "[1]" [ref=@e171]
                             - generic:
                               - generic:
-                                - StaticText "["
-                                  - InlineTextBox "["
-                              - StaticText "1"
-                                - InlineTextBox "1"
+                                - statictext "["
+                              - statictext "1"
                               - generic:
-                                - StaticText "]"
-                                  - InlineTextBox "]"
+                                - statictext "]"
                         - superscript
                           - link "[3]" [ref=@e172]
                             - generic:
                               - generic:
-                                - StaticText "["
-                                  - InlineTextBox "["
-                              - StaticText "3"
-                                - InlineTextBox "3"
+                                - statictext "["
+                              - statictext "3"
                               - generic:
-… [snapshot truncated at node cap 1200]
-… [snapshot truncated at node cap 1200]
-… [snapshot truncated at node cap 1200]
-… [snapshot truncated at node cap 1200]
-… [snapshot truncated at node cap 1200]
-… [snapshot truncated at node cap 1200]
-… [snapshot truncated at node cap 1200]
-… [snapshot truncated at node cap 1200]
-… [snapshot truncated at node cap 1200]
+                                - statictext "]"
+                        - statictext " and Google employees have done the bulk of the "
+                        - link "development" →en.wikipedia.org/wiki/Software_developme [ref=@e173]
+                          - statictext "development"
+                        - statictext " work."
+                        - superscript
+                          - link "[15]" [ref=@e174]
+                            - generic:
+                              - generic:
+                                - statictext "["
+                              - statictext "15"
+                              - generic:
+                                - statictext "]"
+                      - paragraph
+                        - statictext "Google refers to this project and the offshoot "
+                        - link "ChromiumOS" →en.wikipedia.org/wiki/ChromiumOS [ref=@e175]
+                          - statictext "ChromiumOS"
+                        - statictext " as \"the Chromium projects\","
+                        - superscript
+                          - link "[2]" [ref=@e176]
+                            - generic:
+                              - generic:
+                                - statictext "["
+                              - statictext "2"
+                              - generic:
+                                - statictext "]"
+                        - statictext " and its employees use @chromium.org "
+                        - link "email" →en.wikipedia.org/wiki/Email [ref=@e177]
+                          - statictext "email"
+                        - statictext " addresses for this development work. However, in terms of governance, the Chromium projects are not independent entities; Google retains firm control of them."
+                        - superscript
+                          - link "[3]" [ref=@e178]
+                            - generic:
+                              - generic:
+                                - statictext "["
+                              - statictext "3"
+                              - generic:
+                                - statictext "]"
+                      - paragraph
+                        - statictext "The Chromium "
+                        - link "browser" →en.wikipedia.org/wiki/Web_browser [ref=@e179]
+                          - statictext "browser"
+                        - statictext " codebase is widely used, so others have made important contributions, most notably "
+                        - link "Microsoft" →en.wikipedia.org/wiki/Microsoft [ref=@e180]
+                          - statictext "Microsoft"
+                        - statictext ", "
+                        - link "Avast" →en.wikipedia.org/wiki/Avast [ref=@e181]
+                          - statictext "Avast"
+                        - statictext ", "
+                        - link "Igalia" →en.wikipedia.org/wiki/Igalia [ref=@e182]
+                          - statictext "Igalia"
+                        - statictext ", "
+                        - link "Yandex" →en.wikipedia.org/wiki/Yandex [ref=@e183]
+                          - statictext "Yandex"
+                        - statictext ", "
+                        - link "Intel" →en.wikipedia.org/wiki/Intel [ref=@e184]
+                          - statictext "Intel"
+                        - statictext ", "
+                        - link "Samsung" →en.wikipedia.org/wiki/Samsung [ref=@e185]
+                          - statictext "Samsung"
+                        - statictext ", "
+                        - link "LG" →en.wikipedia.org/wiki/LG [ref=@e186]
+                          - statictext "LG"
+                        - statictext ", "
+                        - link "Opera" →en.wikipedia.org/wiki/Opera_(company) [ref=@e187]
+                          - statictext "Opera"
+                        - statictext ", "
+                        - link "Vivaldi" →en.wikipedia.org/wiki/Vivaldi_Technologi [ref=@e188]
+                          - statictext "Vivaldi"
+                        - statictext ", and "
+                        - link "Brave" →en.wikipedia.org/wiki/Brave_(web_browser [ref=@e189]
+                          - statictext "Brave"
+                        - statictext "."
+                        - superscript
+                          - link "[15]" [ref=@e190]
+                            - generic:
+                              - generic:
+                                - statictext "["
+                              - statictext "15"
+                              - generic:
+                                - statictext "]"
+                        - superscript
+                          - link "[3]" [ref=@e191]
+                            - generic:
+                              - generic:
+                                - statictext "["
+                              - statictext "3"
+                              - generic:
+                                - statictext "]"
+                        - statictext " Some employees of these companies also have @chromium.org email addresses."
+                    - region "Architecture"
+                      - generic:
+                        - heading "Architecture" [ref=@e192]
+                          - statictext "Architecture"
+                        - link "edit" →/w/index.php?title=Chromium_(web_browser [ref=@e193]
+                          - statictext "edit"
+                      - paragraph
+                        - statictext "Google designed the first multi-"
+                        - link "process" →en.wikipedia.org/wiki/Process_(computing [ref=@e194]
+                          - statictext "process"
+                        - statictext " browser."
+                        - superscript
+                          - link "[16]" [ref=@e195]
+                            - generic:
+                              - generic:
+                                - statictext "["
+                              - statictext "16"
+                              - generic:
+                                - statictext "]"
+                        - superscript
+                          - link "[17]" [ref=@e196]
+                            - generic:
+                              - generic:
+                                - statictext "["
+                              - statictext "17"
+                              - generic:
+                                - statictext "]"
+                        - statictext " Compared to single-process designs, this architecture has better responsiveness with many browser "
+                        - link "tabs" →en.wikipedia.org/wiki/Tab_(interface) [ref=@e197]
+                          - statictext "tabs"
+                        - statictext " open and security benefits of "
+                        - link "process isolation" →en.wikipedia.org/wiki/Process_isolation [ref=@e198]
+                          - statictext "process isolation"
+                        - statictext ", but with the trade-off of higher memory usage."
+                        - superscript
+                          - link "[18]" [ref=@e199]
+                            - generic:
+                              - generic:
+                                - statictext "["
+                              - statictext "18"
+                              - generic:
+                                - statictext "]"
+                        - superscript
+                          - link "[19]" [ref=@e200]
+                            - generic:
+                              - generic:
+                                - statictext "["
+                              - statictext "19"
+                              - generic:
+                                - statictext "]"
+                        - statictext " This was later refined as per-process website isolation, providing additional security."
+                        - superscript
+                          - link "[18]" [ref=@e201]
+                            - generic:
+                              - generic:
+                                - statictext "["
+                              - statictext "18"
+                              - generic:
+                                - statictext "]"
+                      - paragraph
+                        - statictext "Another important design decision was for the browser's "
+                        - link "user interface" →en.wikipedia.org/wiki/User_interface [ref=@e202]
+                          - statictext "user interface"
+                        - statictext " to be "
+                        - link "minimalistic" →en.wikipedia.org/wiki/Minimalism_(comput [ref=@e203]
+                          - statictext "minimalistic"
+                        - statictext "."
+                        - superscript
+                          - link "[17]" [ref=@e204]
+                            - generic:
+                              - generic:
+                                - statictext "["
+                              - statictext "17"
+                              - generic:
+                                - statictext "]"
+                        - superscript
+                          - link "[20]" [ref=@e205]
+                            - generic:
+                              - generic:
+                                - statictext "["
+                              - statictext "20"
+                              - generic:
+                                - statictext "]"
+                        - superscript
+                          - link "[21]" [ref=@e206]
+                            - generic:
+                              - generic:
+                                - statictext "["
+                              - statictext "21"
+                              - generic:
+                                - statictext "]"
+                      - paragraph
+                        - statictext "The "
+                        - link "browser engine" →en.wikipedia.org/wiki/Browser_engine [ref=@e207]
+                          - statictext "browser engine"
+                        - statictext " was originally based on "
+                        - link "Apple" →en.wikipedia.org/wiki/Apple_Inc. [ref=@e208]
+                          - statictext "Apple"
+                        - statictext "'s "
+                        - link "WebKit" →en.wikipedia.org/wiki/WebKit [ref=@e209]
+                          - statictext "WebKit"
+                        - statictext ", which Google deemed the \"obvious choice\" of available options."
+                        - superscript
+                          - link "[22]" [ref=@e210]
+                            - generic:
+                              - generic:
+                                - statictext "["
+                              - statictext "22"
+                              - generic:
+                                - statictext "]"
+                        - statictext " However, Google's novel multi-process design required engine changes. This divergence from Apple's version increased over time, so in 2013 Google officially "
+                        - link "forked" →en.wikipedia.org/wiki/Fork_(software_dev [ref=@e211]
+                          - statictext "forked"
+                        - statictext " its version as the "
+                        - link "Blink" →en.wikipedia.org/wiki/Blink_(browser_eng [ref=@e212]
+                          - statictext "Blink"
+                        - statictext " engine."
+                        - superscript
+                          - link "[22]" [ref=@e213]
+                            - generic:
+                              - generic:
+                                - statictext "["
+                              - statictext "22"
+                              - generic:
+                                - statictext "]"
+                        - superscript
+                          - link "[23]" [ref=@e214]
+                            - generic:
+                              - generic:
+                                - statictext "["
+                              - statictext "23"
+                              - generic:
+                                - statictext "]"
+                        - statictext " However, as of 2025, Google is still working on getting the Blink engine onto "
+                        - link "iOS" →en.wikipedia.org/wiki/IOS [ref=@e215]
+                          - statictext "iOS"
+                        - statictext ", and has released experimental code for it."
+                        - superscript
+                          - link "[24]" [ref=@e216]
+                            - generic:
+                              - generic:
+                                - statictext "["
+                              - statictext "24"
+                              - generic:
+                                - statictext "]"
+                    - region "Programming languages"
+                      - generic:
+                        - heading "Programming languages" [ref=@e217]
+                          - statictext "Programming languages"
+                        - link "edit" →/w/index.php?title=Chromium_(web_browser [ref=@e218]
+                          - statictext "edit"
+                      - paragraph
+                        - link "C++" →en.wikipedia.org/wiki/C++ [ref=@e219]
+                          - statictext "C++"
+                        - statictext " is the primary "
+                        - link "language" →en.wikipedia.org/wiki/Programming_langua [ref=@e220]
+                          - statictext "language"
+                        - statictext ", comprising over half of the codebase."
+                        - superscript
+                          - link "[4]" [ref=@e221]
+                            - generic:
+                              - generic:
+                                - statictext "["
+                              - statictext "4"
+                              - generic:
+                                - statictext "]"
+                        - statictext " This includes the "
+                        - link "Blink" →en.wikipedia.org/wiki/Blink_(browser_eng [ref=@e222]
+                          - statictext "Blink"
+                        - statictext " and "
+                        - link "V8" →en.wikipedia.org/wiki/V8_(JavaScript_eng [ref=@e223]
+                          - statictext "V8"
+                        - link "engines" →en.wikipedia.org/wiki/Software_engine [ref=@e224]
+                          - statictext "engines"
+                        - statictext ", the implementation of "
+                        - link "HTTP" →en.wikipedia.org/wiki/HTTP [ref=@e225]
+                          - statictext "HTTP"
+                        - statictext " and other "
+                        - link "protocols" →en.wikipedia.org/wiki/Communication_prot [ref=@e226]
+                          - statictext "protocols"
+                        - statictext ", the internal "
+                        - link "caching" →en.wikipedia.org/wiki/Web_cache [ref=@e227]
+                          - statictext "caching"
+                        - statictext " system, the "
+                        - link "extension" →en.wikipedia.org/wiki/Browser_extension [ref=@e228]
+                          - statictext "extension"
+                        - statictext " API, and most of the "
+                        - link "user interface" →en.wikipedia.org/wiki/User_interface [ref=@e229]
+                          - statictext "user interface"
+                        - statictext "."
+                        - superscript
+                          - link "[25]" [ref=@e230]
+                            - generic:
+                              - generic:
+                                - statictext "["
+                              - statictext "25"
+                              - generic:
+                                - statictext "]"
+                      - paragraph
+                        - statictext "The rest of the user interface, called the WebUI, is implemented in "
+                        - link "HTML" →en.wikipedia.org/wiki/HTML [ref=@e231]
+                          - statictext "HTML"
+                        - statictext ", "
+                        - link "CSS" →en.wikipedia.org/wiki/CSS [ref=@e232]
+                          - statictext "CSS"
+                        - statictext ", and "
+                        - link "JavaScript" →en.wikipedia.org/wiki/JavaScript [ref=@e233]
+                          - statictext "JavaScript"
+                        - statictext " (usually via "
+                        - link "TypeScript" →en.wikipedia.org/wiki/TypeScript [ref=@e234]
+                          - statictext "TypeScript"
+                        - link "transpilation" →en.wikipedia.org/wiki/Transpilation [ref=@e235]
+                          - statictext "transpilation"
+                        - statictext ")."
+                        - superscript
+                          - link "[25]" [ref=@e236]
+                            - generic:
+                              - generic:
+                                - statictext "["
+                              - statictext "25"
+                              - generic:
+                                - statictext "]"
+                        - superscript
+                          - link "[5]" [ref=@e237]
+                            - generic:
+                              - generic:
+                                - statictext "["
+                              - statictext "5"
+                              - generic:
+                                - statictext "]"
+                        - statictext " An extensive collection of "
+                        - link "web platform" →en.wikipedia.org/wiki/Web_platform [ref=@e238]
+                          - statictext "web platform"
+                        - statictext " tests is also written in these languages plus "
+                        - link "XML" →en.wikipedia.org/wiki/XML [ref=@e239]
+                          - statictext "XML"
+                        - statictext "."
+                        - superscript
+                          - link "[6]" [ref=@e240]
+                            - generic:
+                              - generic:
+                                - statictext "["
+                              - statictext "6"
+                              - generic:
+                                - statictext "]"
+                        - superscript
+                          - link "[4]" [ref=@e241]
+                            - generic:
+                              - generic:
+                                - statictext "["
+                              - statictext "4"
+                              - generic:
+                                - statictext "]"
+                      - paragraph
+                        - statictext "Third-party "
+                        - link "libraries" →en.wikipedia.org/wiki/Library_(computing [ref=@e242]
+                          - statictext "libraries"
+                        - statictext " that provide essential functionality,"
+                        - superscript
+                          - link "[26]" [ref=@e243]
+                            - generic:
+                              - generic:
+                                - statictext "["
+                              - statictext "26"
+                              - generic:
+                                - statictext "]"
+                        - statictext " such as "
+                        - link "SQLite" →en.wikipedia.org/wiki/SQLite [ref=@e244]
+                          - statictext "SQLite"
+                        - statictext " and numerous "
+                        - link "codecs" →en.wikipedia.org/wiki/Codec [ref=@e245]
+                          - statictext "codecs"
+                        - statictext ", are written in "
+                        - link "C" →en.wikipedia.org/wiki/C_(programming_lan [ref=@e246]
+                          - statictext "C"
+… [tree truncated at node cap 1200 — interactive targets beyond the cut continue below]
+--- interactive targets beyond the tree cut (160 shown, 408 more not listed) ---
+- link "[27]" [ref=@e247]
+- link "[28]" [ref=@e248]
+- link "Rust" →en.wikipedia.org/wiki/Rust_(programming_ [ref=@e249]
+- link "[4]" [ref=@e250]
+- link "mobile" →en.wikipedia.org/wiki/Mobile_computing [ref=@e251]
+- link "operating systems" →en.wikipedia.org/wiki/Operating_system [ref=@e252]
+- link "Android" →en.wikipedia.org/wiki/Android_(operating [ref=@e253]
+- link "Java" →en.wikipedia.org/wiki/Java_(programming_ [ref=@e254]
+- link "Kotlin" →en.wikipedia.org/wiki/Kotlin_(programmin [ref=@e255]
+- link "iOS" →en.wikipedia.org/wiki/IOS [ref=@e256]
+- link "Objective-C" →en.wikipedia.org/wiki/Objective-C [ref=@e257]
+- link "Swift" →en.wikipedia.org/wiki/Swift_(programming [ref=@e258]
+- link "[5]" [ref=@e259]
+- link "[4]" [ref=@e260]
+- link "Python" →en.wikipedia.org/wiki/Python_(programmin [ref=@e261]
+- link "[4]" [ref=@e262]
+- link "[29]" [ref=@e263]
+- heading "Logistics" [ref=@e264]
+- link "edit" →/w/index.php?title=Chromium_(web_browser [ref=@e265]
+- link "bug tracking system" →en.wikipedia.org/wiki/Bug_tracking_syste [ref=@e266]
+- link "[30]" [ref=@e267]
+- link "email" →en.wikipedia.org/wiki/Email [ref=@e268]
+- link "continuous integration" →en.wikipedia.org/wiki/Continuous_integra [ref=@e269]
+- link "builds" →en.wikipedia.org/wiki/Build_(software) [ref=@e270]
+- link "[31]" [ref=@e271]
+- link "version number" →en.wikipedia.org/wiki/Version_number [ref=@e272]
+- link "[32]" [ref=@e273]
+- link "branch points" →en.wikipedia.org/wiki/Branching_(version [ref=@e274]
+- link "Google Chrome" →en.wikipedia.org/wiki/Google_Chrome [ref=@e275]
+- link "development cycle" →en.wikipedia.org/wiki/Google_Chrome#Rele [ref=@e276]
+- link "[33]" [ref=@e277]
+- heading "History" [ref=@e278]
+- link "edit" →/w/index.php?title=Chromium_(web_browser [ref=@e279]
+- heading "2008 to 2010" [ref=@e280]
+- link "edit" →/w/index.php?title=Chromium_(web_browser [ref=@e281]
+- link "Google Chrome" →en.wikipedia.org/wiki/Google_Chrome [ref=@e282]
+- link "[1]" [ref=@e283]
+- link "[34]" [ref=@e284]
+- link "[35]" [ref=@e285]
+- link "user" →en.wikipedia.org/wiki/User_(computing) [ref=@e286]
+- link "passwords" →en.wikipedia.org/wiki/Password [ref=@e287]
+- link "security" →en.wikipedia.org/wiki/Computer_security [ref=@e288]
+- link "hackers" →en.wikipedia.org/wiki/Hacker [ref=@e289]
+- link "plaintext" →en.wikipedia.org/wiki/Plaintext [ref=@e290]
+- link "[36]" [ref=@e291]
+- link "[37]" [ref=@e292]
+- link "" →en.wikipedia.org/wiki/File:File-Chromium [ref=@e293]
+- image "" [ref=@e294]
+- link "alpha" →en.wikipedia.org/wiki/Alpha_software [ref=@e295]
+- link "Linux" →en.wikipedia.org/wiki/Linux [ref=@e296]
+- link "GTK+" →en.wikipedia.org/wiki/GTK+ [ref=@e297]
+- link "GNOME" →en.wikipedia.org/wiki/GNOME [ref=@e298]
+- link "[38]" [ref=@e299]
+- link "[39]" [ref=@e300]
+- link "[40]" [ref=@e301]
+- link "[41]" [ref=@e302]
+- link "JavaScript engine" →en.wikipedia.org/wiki/JavaScript_engine [ref=@e303]
+- link "[42]" [ref=@e304]
+- link "minimalism" →en.wikipedia.org/wiki/Minimalism_(comput [ref=@e305]
+- link "[21]" [ref=@e306]
+- link "PDF" →en.wikipedia.org/wiki/PDF [ref=@e307]
+- link "WebM" →en.wikipedia.org/wiki/WebM [ref=@e308]
+- link "VP8" →en.wikipedia.org/wiki/VP8 [ref=@e309]
+- link "HTML video" →en.wikipedia.org/wiki/HTML_video [ref=@e310]
+- link "URL" →en.wikipedia.org/wiki/URL [ref=@e311]
+- link "[43]" [ref=@e312]
+- link "[44]" [ref=@e313]
+- link "hardware acceleration" →en.wikipedia.org/wiki/Hardware_accelerat [ref=@e314]
+- link "[45]" [ref=@e315]
+- link "[46]" [ref=@e316]
+- link "[47]" [ref=@e317]
+- link "ChromeOS" →en.wikipedia.org/wiki/ChromeOS [ref=@e318]
+- link "cloud" →en.wikipedia.org/wiki/Cloud_computing [ref=@e319]
+- link "web applications" →en.wikipedia.org/wiki/Web_application [ref=@e320]
+- link "[47]" [ref=@e321]
+- link "phishing" →en.wikipedia.org/wiki/Phishing [ref=@e322]
+- link "sandboxing" →en.wikipedia.org/wiki/Sandbox_(computer_ [ref=@e323]
+- link "Adobe Flash" →en.wikipedia.org/wiki/Adobe_Flash [ref=@e324]
+- link "WebGL" →en.wikipedia.org/wiki/WebGL [ref=@e325]
+- link "Chrome Web Store" →en.wikipedia.org/wiki/Chrome_Web_Store [ref=@e326]
+- link "[48]" [ref=@e327]
+- link "[49]" [ref=@e328]
+- link "[50]" [ref=@e329]
+- heading "2011" [ref=@e330]
+- link "edit" →/w/index.php?title=Chromium_(web_browser [ref=@e331]
+- link "" →en.wikipedia.org/wiki/File:Chromium_11_L [ref=@e332]
+- image "" [ref=@e333]
+- link "[51]" [ref=@e334]
+- link "user interface" →en.wikipedia.org/wiki/User_interface [ref=@e335]
+- link "URL" →en.wikipedia.org/wiki/URL [ref=@e336]
+- link "the Web" →en.wikipedia.org/wiki/The_Web [ref=@e337]
+- link "web page" →en.wikipedia.org/wiki/Web_page [ref=@e338]
+- link "[52]" [ref=@e339]
+- link "[53]" [ref=@e340]
+- link "executable" →en.wikipedia.org/wiki/Executable [ref=@e341]
+- link "web applications" →en.wikipedia.org/wiki/Web_application [ref=@e342]
+- link "plug-ins" →en.wikipedia.org/wiki/Plug-in_(computing [ref=@e343]
+- link "cloud computing" →en.wikipedia.org/wiki/Cloud_computing [ref=@e344]
+- link "touch" →en.wikipedia.org/wiki/Touchscreen [ref=@e345]
+- link "[54]" [ref=@e346]
+- link "[55]" [ref=@e347]
+- link "malware" →en.wikipedia.org/wiki/Malware [ref=@e348]
+- link "CSS" →en.wikipedia.org/wiki/CSS [ref=@e349]
+- link "[56]" [ref=@e350]
+- link "[57]" [ref=@e351]
+- link "WebKit" →en.wikipedia.org/wiki/WebKit [ref=@e352]
+- link "image" →en.wikipedia.org/wiki/Image [ref=@e353]
+- link "Android" →en.wikipedia.org/wiki/Android_(operating [ref=@e354]
+- link "[58]" [ref=@e355]
+- link "[59]" [ref=@e356]
+- link "[60]" [ref=@e357]
+- link "GPU" →en.wikipedia.org/wiki/GPU [ref=@e358]
+- link "Web Audio API" →en.wikipedia.org/wiki/Web_Audio_API [ref=@e359]
+- link "Google Native Client" →en.wikipedia.org/wiki/Google_Native_Clie [ref=@e360]
+- link "[61]" [ref=@e361]
+- link "[62]" [ref=@e362]
+- link "Skia" →en.wikipedia.org/wiki/Skia_Graphics_Engi [ref=@e363]
+- link "[63]" [ref=@e364]
+- link "[64]" [ref=@e365]
+- heading "Since 2012" [ref=@e366]
+- link "edit" →/w/index.php?title=Chromium_(web_browser [ref=@e367]
+- link "" →en.wikipedia.org/wiki/File:Chromium_Mate [ref=@e368]
+- image "" [ref=@e369]
+- link "[65]" [ref=@e370]
+- link "[66]" [ref=@e371]
+- link "API" →en.wikipedia.org/wiki/API [ref=@e372]
+- link "web applications" →en.wikipedia.org/wiki/Web_application [ref=@e373]
+- link "webcam" →en.wikipedia.org/wiki/Webcam [ref=@e374]
+- link "microphone" →en.wikipedia.org/wiki/Microphone [ref=@e375]
+- link "[67]" [ref=@e376]
+- link "[68]" [ref=@e377]
+- link "GPU" →en.wikipedia.org/wiki/GPU [ref=@e378]
+- link "Windows" →en.wikipedia.org/wiki/Microsoft_Windows [ref=@e379]
+- link "QUIC" →en.wikipedia.org/wiki/QUIC [ref=@e380]
+- link "[69]" [ref=@e381]
+- link "[70]" [ref=@e382]
+- link "WebKit" →en.wikipedia.org/wiki/WebKit [ref=@e383]
+- link "rendering engine" →en.wikipedia.org/wiki/Browser_engine [ref=@e384]
+- link "forked" →en.wikipedia.org/wiki/Fork_(software_dev [ref=@e385]
+- link "Blink" →en.wikipedia.org/wiki/Blink_(browser_eng [ref=@e386]
+- link "[22]" [ref=@e387]
+- link "[23]" [ref=@e388]
+- link "browser extension" →en.wikipedia.org/wiki/Browser_extension [ref=@e389]
+- link "[71]" [ref=@e390]
+- link "malware" →en.wikipedia.org/wiki/Malware [ref=@e391]
+- link "[72]" [ref=@e392]
+- link "process" →en.wikipedia.org/wiki/Process_(computing [ref=@e393]
+- link "[18]" [ref=@e394]
+- link "[73]" [ref=@e395]
+- link "[74]" [ref=@e396]
+- link "[75]" [ref=@e397]
+- link "[12]" [ref=@e398]
+- link "Intel" →en.wikipedia.org/wiki/Intel [ref=@e399]
+- link "AMD" →en.wikipedia.org/wiki/AMD [ref=@e400]
+- link "SSE3" →en.wikipedia.org/wiki/SSE3 [ref=@e401]
+- link "[76]" [ref=@e402]
+- link "Windows 10" →en.wikipedia.org/wiki/Windows_10 [ref=@e403]
+- link "[77]" [ref=@e404]
+- heading "Third-party ports" [ref=@e405]
+- link "edit" →/w/index.php?title=Chromium_(web_browser [ref=@e406]

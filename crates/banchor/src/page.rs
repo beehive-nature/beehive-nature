@@ -126,6 +126,38 @@ impl PageSession {
         Ok(nodes)
     }
 
+    /// The href attribute behind a backend node (links only in practice).
+    /// Returned UNTRUSTED — page-supplied, shown (domain-shortened),
+    /// never executed. Kills the "two links, similar names" ambiguity a
+    /// name-only snapshot cannot: "home page" vs "chromium .org".
+    pub fn href_for_backend(&mut self, backend_node_id: u64) -> Option<String> {
+        let pushed = self
+            .conn
+            .call(
+                "DOM.pushNodesByBackendIdsToFrontend",
+                json!({ "backendNodeIds": [backend_node_id] }),
+            )
+            .ok()?;
+        let node_id = first_node_id(&pushed)?;
+        if node_id <= 0 {
+            return None;
+        }
+        let attrs = self
+            .conn
+            .call("DOM.getAttributes", json!({ "nodeId": node_id }))
+            .ok()?;
+        let arr = attrs.get("attributes").and_then(|a| a.as_array())?;
+        // attributes is a FLAT [name, value, name, value, …] array
+        let mut i = 0;
+        while i + 1 < arr.len() {
+            if arr[i].as_str() == Some("href") {
+                return arr[i + 1].as_str().map(str::to_string);
+            }
+            i += 2;
+        }
+        None
+    }
+
     /// Computed style strings for the DOM element behind `backend_node_id`.
     /// Returns (display, visibility, opacity) or None if unresolvable.
     pub fn style_for_backend(
