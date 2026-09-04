@@ -22,14 +22,25 @@
 //! The funding check itself lives in `escrow-core`; this crate reports
 //! what it sees and never invents what it doesn't (`fee_buffer_zano` is
 //! the *observed* native balance — zero is reported as zero).
+//!
+//! The HF6 transfer read path lives in [`hf6`]: `get_recent_txs_and_info3`,
+//! (payment_id, asset_id) deposit attribution, the three named refusals,
+//! and read-only gateway types. Its module doc is that lane's contract.
 
 #![forbid(unsafe_code)]
+
+pub mod hf6;
 
 use std::fmt;
 
 use normalizer::RawChainAction;
 use serde_json::{json, Value};
 use shared_types::SourceChain;
+
+pub use hf6::{
+    attribute_deposits, hf6_readiness, parse_recent_txs, readiness_facts, DepositAttribution,
+    Hf6Error, Subtransfer, TransferEntry, WalletTx, HF6_HEIGHT, HF6_MIN_VERSION,
+};
 
 /// What the order (not the chain) knows about an escrow being watched.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -41,6 +52,9 @@ pub struct OrderContext {
     pub multisig_address: String,
     /// Asset id (hex) the escrow is denominated in (e.g. testnet fUSD).
     pub asset_id: String,
+    /// The escrow's expected payment id — HF6 attribution keys on
+    /// (payment_id, asset_id); this is the order-known half of that key.
+    pub payment_id: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -118,6 +132,55 @@ impl ZanoWatcher {
         let obs = self.observe_balances(&ctx.asset_id)?;
         Ok(funding_action(ctx, obs, observed_at_unix))
     }
+
+    /// The HF6 start gate: refuse to scan unless the daemon reports
+    /// version ≥ 2.2.1.501 and height ≥ 3,833,000. Probes `get_info` on the
+    /// same RPC endpoint; a probe that cannot read BOTH facts is a named
+    /// refusal — no fallback.
+    pub fn require_hf6(&self) -> Result<(), Hf6Error> {
+        let body = json!({"jsonrpc": "2.0", "id": "0", "method": "get_info"});
+        let response = self
+            .agent
+            .post(&self.rpc_url)
+            .send_string(&body.to_string())
+            .map_err(|_| Hf6Error::ReadinessUnreadable { what: "transport" })
+            .and_then(|r| {
+                r.into_string()
+                    .map_err(|_| Hf6Error::ReadinessUnreadable { what: "transport" })
+            })
+            .and_then(|s| {
+                serde_json::from_str::<Value>(&s)
+                    .map_err(|_| Hf6Error::ReadinessUnreadable { what: "not JSON" })
+            })?;
+        let (version, height) = readiness_facts(&response)?;
+        hf6_readiness(&version, height)
+    }
+
+    /// The HF6 read path: one `get_recent_txs_and_info3` scan, refused
+    /// before it starts unless the daemon passes [`require_hf6`], parsed
+    /// with the module's named refusals, attributed on (payment_id,
+    /// asset_id), and mapped to `OrderFunded` raw actions for the order's
+    /// own key. Gateway entries parse and are skipped (read path only).
+    ///
+    /// NOTE: the `info3` parameter surface is UNVERIFIED at source — the
+    /// call sends no params and relies on wallet defaults; when the params
+    /// are verified they land here, not in the pure module.
+    pub fn scan_deposits(&self, ctx: &OrderContext) -> Result<Vec<RawChainAction>, Hf6Error> {
+        self.require_hf6()?;
+        let body = json!({"jsonrpc": "2.0", "id": "0", "method": "get_recent_txs_and_info3"});
+        let response = self
+            .agent
+            .post(&self.rpc_url)
+            .send_string(&body.to_string())
+            .map_err(|_| Hf6Error::BadResponse("transport"))?
+            .into_string()
+            .map_err(|_| Hf6Error::BadResponse("transport"))?;
+        let parsed: Value =
+            serde_json::from_str(&response).map_err(|_| Hf6Error::BadResponse("not JSON"))?;
+        let txs = parse_recent_txs(&parsed)?;
+        let attrs = attribute_deposits(&txs);
+        Ok(deposit_actions(ctx, &txs, &attrs))
+    }
 }
 
 /// Pure mapping: an observation with no asset yet is `None`; an observed
@@ -148,6 +211,59 @@ pub fn funding_action(
         block_num: 0,
         tx_id: format!("balance-{}-{}", ctx.order_id, observed_at_unix),
     })
+}
+
+/// Pure mapping: the order's own (payment_id, asset_id) attribution becomes
+/// a block-anchored `zano:transfer` raw action per contributing tx — the
+/// deposit's `tx_hash` is the REAL tx id and `block_num` its height (unlike
+/// balance observations, which stay synthetic). The observed native balance
+/// is not available per-tx here; the fee buffer stays the balance-poller's
+/// fact (`fee_buffer_zano: None` on this path).
+pub fn deposit_actions(
+    ctx: &OrderContext,
+    txs: &[WalletTx],
+    attrs: &[DepositAttribution],
+) -> Vec<RawChainAction> {
+    let Some(own) = attrs
+        .iter()
+        .find(|d| d.payment_id == ctx.payment_id && d.asset_id.eq_ignore_ascii_case(&ctx.asset_id))
+    else {
+        return Vec::new();
+    };
+    let credited = own.credited();
+    if credited == 0 {
+        return Vec::new();
+    }
+    txs.iter()
+        .filter(|tx| {
+            let TransferEntry::Ordinary {
+                subtransfers_by_pid,
+            } = &tx.entry
+            else {
+                return false;
+            };
+            subtransfers_by_pid.iter().any(|s| {
+                s.payment_id == ctx.payment_id && s.asset_id.eq_ignore_ascii_case(&ctx.asset_id)
+            })
+        })
+        .map(|tx| RawChainAction {
+            source_chain: SourceChain::Zano,
+            contract: "zano".to_string(),
+            action_name: "transfer".to_string(),
+            data: json!({
+                "order_id": ctx.order_id,
+                "buyer_did": ctx.buyer_did,
+                "seller_did": ctx.seller_did,
+                "amount": credited,
+                "asset_id": ctx.asset_id,
+                "payment_id": ctx.payment_id,
+                "multisig_address": ctx.multisig_address,
+                "timestamp": tx.timestamp,
+            }),
+            block_num: tx.height,
+            tx_id: tx.tx_hash.clone(),
+        })
+        .collect()
 }
 
 /// Parse a `getbalance` response (shape per `COMMAND_RPC_GET_BALANCE`:
@@ -200,6 +316,7 @@ mod tests {
             seller_did: "did:plc:seller".into(),
             multisig_address: "msig-addr-9".into(),
             asset_id: "625829188fa787fb71153aa09d251c162be072eaf5402888032d014d7ad4bf9e".into(), // TESTNET-ONLY public asset id fixture
+            payment_id: "pid-1".into(),
         }
     }
 
@@ -314,5 +431,48 @@ mod tests {
         };
         // Observed zero rides through as zero — escrow-core will refuse it.
         assert_eq!(o.fee_buffer_zano, Some(0));
+    }
+
+    /// The HF6 deposit path: attribution on (pid, asset) becomes a
+    /// block-anchored action with the REAL tx hash — named values asserted.
+    #[test]
+    fn deposit_attribution_maps_to_block_anchored_action() {
+        let response = serde_json::json!({
+            "result": {"transfers": [{
+                "tx_hash": "real-tx-hash-1",
+                "height": 3833500,
+                "timestamp": 1790000000,
+                "remote_addresses": ["Zan...buyer"],
+                "payment_id": "",
+                "subtransfers_by_pid": [
+                    {"payment_id": "pid-1", "asset_id": ctx().asset_id, "amount": 1_234, "is_income": true},
+                    {"payment_id": "pid-2", "asset_id": ctx().asset_id, "amount": 9_999, "is_income": true}
+                ]
+            }]}
+        });
+        let txs = parse_recent_txs(&response).unwrap();
+        let attrs = attribute_deposits(&txs);
+        let actions = deposit_actions(&ctx(), &txs, &attrs);
+        assert_eq!(actions.len(), 1, "only the order's own pid maps");
+        let raw = &actions[0];
+        assert_eq!(
+            raw.tx_id, "real-tx-hash-1",
+            "the REAL tx id, not a synthetic observation"
+        );
+        assert_eq!(raw.block_num, 3_833_500, "block-anchored height");
+        assert_eq!(
+            raw.data["amount"], 1_234,
+            "credited = the pid-1 income only"
+        );
+        assert_eq!(
+            raw.data["payment_id"], "pid-1",
+            "the attribution key rides the action"
+        );
+        let event = normalize(raw.clone()).unwrap().unwrap();
+        assert_eq!(
+            event.event_type,
+            EventType::OrderFunded,
+            "normalizes as funding"
+        );
     }
 }
