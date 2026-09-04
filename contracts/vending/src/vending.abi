@@ -4,6 +4,24 @@
     "types": [],
     "structs": [
         {
+            "name": "auditmark",
+            "base": "",
+            "fields": [
+                {
+                    "name": "sess",
+                    "type": "uint64"
+                },
+                {
+                    "name": "state",
+                    "type": "uint8"
+                },
+                {
+                    "name": "audit_hash",
+                    "type": "string"
+                }
+            ]
+        },
+        {
             "name": "cert_row",
             "base": "",
             "fields": [
@@ -42,6 +60,20 @@
                 {
                     "name": "minted",
                     "type": "time_point_sec"
+                }
+            ]
+        },
+        {
+            "name": "charge",
+            "base": "",
+            "fields": [
+                {
+                    "name": "sess",
+                    "type": "uint64"
+                },
+                {
+                    "name": "units",
+                    "type": "uint64"
                 }
             ]
         },
@@ -120,6 +152,64 @@
             ]
         },
         {
+            "name": "nonce_row",
+            "base": "",
+            "fields": [
+                {
+                    "name": "value",
+                    "type": "uint64"
+                },
+                {
+                    "name": "session",
+                    "type": "uint64"
+                },
+                {
+                    "name": "amount",
+                    "type": "asset"
+                },
+                {
+                    "name": "at",
+                    "type": "time_point_sec"
+                }
+            ]
+        },
+        {
+            "name": "opensess",
+            "base": "",
+            "fields": [
+                {
+                    "name": "sess",
+                    "type": "uint64"
+                },
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "agent_name",
+                    "type": "string"
+                },
+                {
+                    "name": "rail",
+                    "type": "name"
+                },
+                {
+                    "name": "ceiling",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "pause",
+            "base": "",
+            "fields": [
+                {
+                    "name": "sess",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
             "name": "rate_row",
             "base": "",
             "fields": [
@@ -130,6 +220,10 @@
                 {
                     "name": "basis",
                     "type": "asset"
+                },
+                {
+                    "name": "tithe_bp",
+                    "type": "uint16"
                 },
                 {
                     "name": "label",
@@ -152,12 +246,90 @@
             ]
         },
         {
+            "name": "resume",
+            "base": "",
+            "fields": [
+                {
+                    "name": "sess",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "rmnonce",
+            "base": "",
+            "fields": [
+                {
+                    "name": "sess",
+                    "type": "uint64"
+                },
+                {
+                    "name": "nonce",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
             "name": "rmrate",
             "base": "",
             "fields": [
                 {
                     "name": "rail",
                     "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "session_row",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "agent_name",
+                    "type": "string"
+                },
+                {
+                    "name": "rail",
+                    "type": "name"
+                },
+                {
+                    "name": "state",
+                    "type": "uint8"
+                },
+                {
+                    "name": "credit",
+                    "type": "asset"
+                },
+                {
+                    "name": "burned",
+                    "type": "asset"
+                },
+                {
+                    "name": "ceiling",
+                    "type": "asset"
+                },
+                {
+                    "name": "audit_state",
+                    "type": "uint8"
+                },
+                {
+                    "name": "audit_hash",
+                    "type": "string"
+                },
+                {
+                    "name": "opened",
+                    "type": "time_point_sec"
+                },
+                {
+                    "name": "updated",
+                    "type": "time_point_sec"
                 }
             ]
         },
@@ -184,6 +356,10 @@
                     "type": "asset"
                 },
                 {
+                    "name": "tithe_bp",
+                    "type": "uint16"
+                },
+                {
                     "name": "label",
                     "type": "string"
                 }
@@ -200,6 +376,28 @@
                 {
                     "name": "destination",
                     "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "settle",
+            "base": "",
+            "fields": [
+                {
+                    "name": "sess",
+                    "type": "uint64"
+                },
+                {
+                    "name": "payer",
+                    "type": "name"
+                },
+                {
+                    "name": "nonce",
+                    "type": "uint64"
+                },
+                {
+                    "name": "amount",
+                    "type": "asset"
                 }
             ]
         },
@@ -250,6 +448,16 @@
     ],
     "actions": [
         {
+            "name": "auditmark",
+            "type": "auditmark",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "charge",
+            "type": "charge",
+            "ricardian_contract": ""
+        },
+        {
             "name": "init",
             "type": "init",
             "ricardian_contract": ""
@@ -260,8 +468,28 @@
             "ricardian_contract": ""
         },
         {
+            "name": "opensess",
+            "type": "opensess",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "pause",
+            "type": "pause",
+            "ricardian_contract": ""
+        },
+        {
             "name": "release",
             "type": "release",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "resume",
+            "type": "resume",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "rmnonce",
+            "type": "rmnonce",
             "ricardian_contract": ""
         },
         {
@@ -282,6 +510,11 @@
         {
             "name": "settithe",
             "type": "settithe",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "settle",
+            "type": "settle",
             "ricardian_contract": ""
         },
         {
@@ -306,8 +539,22 @@
             "key_types": []
         },
         {
+            "name": "nonces",
+            "type": "nonce_row",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
             "name": "rates",
             "type": "rate_row",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "sessions",
+            "type": "session_row",
             "index_type": "i64",
             "key_names": [],
             "key_types": []

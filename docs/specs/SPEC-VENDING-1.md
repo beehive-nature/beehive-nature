@@ -115,8 +115,44 @@ at build time):
   current posture). The choice is per-account and reversible; it moves the
   ONGOING line only, never the storage line.
 
+## §x402 — the meter rules (ruled 2026-09-04 from docs/raids/X402-SORT-2026-09-01.md — RULES only, never Hedera code)
+
+The x402 sort's z3.3 rows land here and in the contract's meter actions.
+Mechanisms travel, not files: the estate rail is Vaulta/Arweave/Autonomi, so
+every Hedera SDK call the raided repos make is replaced by the estate's own
+rail — what is lifted is the RULE shape.
+
+1. **credit-only-from-settlement + pause-not-kill** (pinout `session.mjs`
+   shape): `settle` is the ONLY credit path and every credit is keyed on a
+   single-use nonce — a replayed payment credits exactly once and is refused
+   the second time. A session that cannot pay is PAUSED, never deleted;
+   charges refuse while paused; top-up + `resume` bring it back.
+2. **rate table = cost basis + tithe field** (pinout `compute/rates.json`
+   shape): every rates row carries its own `tithe_bp` beside the basis. The
+   estate's field is cost basis + tithe — not a margin.
+3. **`upto` ceiling with nonce burn even at zero** (Tally `X402UptoProxy` /
+   `verifyAgainst` shape): the ceiling is signed once at open; charges clamp
+   under it (over-max refused); a settle consumes its nonce EVEN when the
+   settled amount is zero.
+4. **the pure 9-check audit fn → the four verifier states** (Tally
+   `audit.ts` shape; states = z3.2's comb cells): a pure function over the
+   public record only — checks named `arithmetic_fraud`, `over_capture`,
+   `over_max`, `terms_mismatch`, `nonce_replay`, `pause_integrity`,
+   `tithe_split`, `anchor_pending`, `clock_sanity` — returning
+   **PENDING_ANCHOR = honey · PASSED = capped · FAILED = the --flag hue
+   #c07f1c (never a new red) · INCONCLUSIVE = nectar**, with z3.2's
+   precedence: `failed ? FAILED : inconclusive ? INCONCLUSIVE : covered ?
+   PASSED : PENDING_ANCHOR`.
+
+**THE STATEFUL PARTY**: single-use nonces need one stateful party — in the
+estate that party is the meter contract on Vaulta, not a box. Jungle4 is the
+rehearsal; deep-links render-verified.
+
 ## §order-of-work
 
 1. This spec (genesis + all five rulings) — THIS COMMIT.
 2. The build lane (AR recipe format, ANT store binding, Vaulta rate/tithe
    tables, Base PayPal door wiring) — opens when the founder opens it.
+3. §x402 meter rules — ruled 2026-09-04, built into the contract's meter
+   actions + `tool/x402audit.mjs` (receipt: docs/dispatches/
+   RECEIPT_VENDING_X402_METER_2026-09-04.md).

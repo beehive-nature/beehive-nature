@@ -1,4 +1,6 @@
-// vending — the member-agent vending machine's Vaulta half (SPEC-VENDING-1 §layers 3).
+// vending — the member-agent vending machine's Vaulta half (SPEC-VENDING-1 §layers 3)
+// + THE METER (§x402, ruled 2026-09-04 from docs/raids/X402-SORT-2026-09-01.md —
+// RULES only, never Hedera code; the estate rail replaces every SDK call).
 //
 // THE LAW AND THE POINTER, NEVER BULK HISTORY (the bounded-rows ruling):
 //   Vaulta carries (a) the rate table and tithe percentage as governed-mutable
@@ -7,19 +9,22 @@
 //   content hash that makes any resurrection provable. Revisions, memory,
 //   bulk mint history: those live on Arweave + Autonomi, never here.
 //
-// POINTER LAW (SPEC-VENDING-1 §pointer-law, ruled): the certificate's location
-// is DERIVED from what the member holds — the agent name resolves this row
-// (name road); the member's ed25519 key resolves the Arweave owner/tags
-// directly (key road, no estate involvement at all). This contract is the
-// name road's stop, not a lookup table the estate curates: rows are written
-// by the member's own action and erased by the member's own action.
-//
-// IDENTITY BY CITATION (do not re-specify — SPEC-VENDING-1 §already-answered):
-//   .a/.b naming, suffixless storage, bnr:// resolution and the 27-tongue
-//   charset are SPEC-A-NAMES-1 law. This contract accepts ANY UTF-8 agent
-//   name (mīlestībairkaralis-class names mint whole); the primary key is a
-//   FNV-1a-64 of the bytes, with exact-string collision REFUSAL so no name
-//   can ever silently hijack another's certificate row.
+// THE METER (x402 rules, cited shapes):
+//   credit-only-from-settlement — `settle` is the ONLY credit path and every
+//     credit is keyed on a single-use nonce, so a replayed payment credits
+//     once and is refused the second time (pinout session.mjs / idempotent
+//     credit keyed on the settlement).
+//   pause-not-kill — a session that cannot pay is PAUSED, never deleted;
+//     charges refuse while paused; a top-up + `resume` bring it back
+//     (pinout session.mjs pause-at-zero).
+//   rate = cost basis + tithe — every rates row carries its own tithe_bp
+//     beside the basis (pinout compute/rates.json shape; the estate's field
+//     is cost basis + tithe, not margin).
+//   upto ceiling with nonce burn even at zero — the ceiling is signed once
+//     at opensess; charges clamp under it; a settle consumes its nonce even
+//     when the amount is zero (Tally X402UptoProxy capture rule).
+//   THE STATEFUL PARTY — single-use nonces need one stateful party; in the
+//     estate that party is THIS contract on Vaulta, not a box (raid §residue).
 //
 // Deploy posture: Jungle4 rehearsal under bnrapolltest (TESTNET-ONLY). The
 // mainnet home is a founder-gated gesture (same law as bdomain2: the code is
@@ -46,12 +51,43 @@ TABLE config_row {
 };
 
 // ── rates: the meter's price table (governed-mutable; one row per rail) ────
+//   x402 rule: the row IS cost basis + tithe (pinout compute/rates.json shape)
 TABLE rate_row {
     name            rail;     // vaulta / autonomi / arweave / base / ... (name-encodable)
-    asset           basis;    // per-call basis in A (the b-meter reads this)
+    asset           basis;    // per-call cost basis in A (the b-meter reads this)
+    uint16_t        tithe_bp; // the tithe split for this rail, basis points
     string          label;    // human words for the row
     time_point_sec  updated;
     uint64_t primary_key() const { return rail.value; }
+};
+
+// ── sessions: the metered session (pinout session.mjs state machine, RULE) ──
+//   ACTIVE ↔ PAUSED — pause-not-kill; credit only via settle; charges clamp
+//   under the upto ceiling signed once at open
+TABLE session_row {
+    uint64_t        id;           // caller-chosen, collision-refused
+    name            owner;        // the member
+    string          agent_name;   // the metered agent
+    name            rail;         // which rates row prices the units
+    uint8_t         state;        // 0=ACTIVE 1=PAUSED 2=CLOSED
+    asset           credit;       // summed settlements (credit-only-from-settlement)
+    asset           burned;       // summed charges
+    asset           ceiling;      // the upto max, signed once at open
+    uint8_t         audit_state;  // 255=none, else the four-state verdict
+    string          audit_hash;   // sha256 hex of the pure audit record
+    time_point_sec  opened;
+    time_point_sec  updated;
+    uint64_t primary_key() const { return id; }
+};
+
+// ── nonces: THE STATEFUL PARTY (Tally X402UptoProxy: burn even at zero) ────
+//   row presence = spent. Single-use, chain-held, no box.
+TABLE nonce_row {
+    uint64_t        value;     // the single-use nonce
+    uint64_t        session;   // which session it credited
+    asset           amount;    // the settled amount (may be 0 — still burned)
+    time_point_sec  at;
+    uint64_t primary_key() const { return value; }
 };
 
 // ── tithe: THE TITHE = 10% founder-word-only (singleton, governed) ─────────
@@ -80,6 +116,8 @@ public:
     using contract::contract;
     using rates    = multi_index<"rates"_n, rate_row>;
     using certs    = multi_index<"certs"_n, cert_row>;
+    using sessions = multi_index<"sessions"_n, session_row>;
+    using nonces   = multi_index<"nonces"_n, nonce_row>;
     using config_tbl = singleton<"config"_n, config_row>;
     using tithe_tbl  = singleton<"tithe"_n, tithe_row>;
 
@@ -98,10 +136,12 @@ public:
     }
 
     // ── the governed law: rate + tithe rows (founder word, no redeploy) ────
-    [[eosio::action]] void setrate(name rail, asset basis, string label) {
+    //   x402: the row is cost basis + tithe_bp (compute/rates.json shape)
+    [[eosio::action]] void setrate(name rail, asset basis, uint16_t tithe_bp, string label) {
         config_tbl cfgt(get_self(), get_self().value);
         require_auth(cfgt.get().admin);
         check(basis.symbol == CORE_SYMBOL, "basis must be core A");
+        check(tithe_bp <= 10000, "tithe is basis points, max 10000");
         rates rs(get_self(), get_self().value);
         auto itr = rs.find(rail.value);
         if (itr == rs.end()) {
@@ -109,10 +149,10 @@ public:
             for (auto& r : rs) { n++; if (n > 32) break; } // bounded count, bounded loop
             check(n <= 32, "rate table bounded at 32 rails"); // rows stay BOUNDED
             rs.emplace(get_self(), [&](auto& r){ r.rail=rail; r.basis=basis;
-                r.label=label; r.updated=current_time_point(); });
+                r.tithe_bp=tithe_bp; r.label=label; r.updated=current_time_point(); });
         } else {
             rs.modify(itr, same_payer, [&](auto& r){ r.basis=basis;
-                r.label=label; r.updated=current_time_point(); });
+                r.tithe_bp=tithe_bp; r.label=label; r.updated=current_time_point(); });
         }
     }
 
@@ -187,6 +227,107 @@ public:
             auto cfg = cfgt.get();
             if (cfg.certs_count > 0) { cfg.certs_count--; cfgt.set(cfg, get_self()); }
         }
+    }
+
+    // ── THE METER (x402 rules; Jungle4 rehearsal, member-auth/member-RAM) ──
+
+    // open a metered session: the upto CEILING is signed once, here
+    [[eosio::action]] void opensess(uint64_t sess, name owner, string agent_name,
+                                    name rail, asset ceiling) {
+        require_auth(owner);
+        check(ceiling.symbol == CORE_SYMBOL, "ceiling must be core A");
+        rates rs(get_self(), get_self().value);
+        rs.require_find(rail.value, "no such rail rate");
+        sessions ss(get_self(), get_self().value);
+        check(ss.find(sess) == ss.end(), "session id exists");
+        ss.emplace(owner, [&](auto& s){
+            s.id=sess; s.owner=owner; s.agent_name=agent_name; s.rail=rail;
+            s.state=0; s.credit=asset{0, CORE_SYMBOL}; s.burned=asset{0, CORE_SYMBOL};
+            s.ceiling=ceiling; s.audit_state=255; s.audit_hash="";
+            s.opened=current_time_point(); s.updated=s.opened;
+        });
+    }
+
+    // CREDIT-ONLY-FROM-SETTLEMENT: the one credit path, keyed on a single-use
+    // nonce. The nonce BURNS even when the amount is zero (Tally capture rule)
+    // and a replay is refused — a replayed payment credits exactly once.
+    [[eosio::action]] void settle(uint64_t sess, name payer, uint64_t nonce, asset amount) {
+        require_auth(payer);
+        check(amount.symbol == CORE_SYMBOL && amount.amount >= 0, "settle in core A");
+        sessions ss(get_self(), get_self().value);
+        auto sitr = ss.require_find(sess, "no such session");
+        check(sitr->state != 2, "session closed");
+        nonces ns(get_self(), get_self().value);
+        check(ns.find(nonce) == ns.end(), "nonce spent — replay refused");
+        ns.emplace(payer, [&](auto& n){ n.value=nonce; n.session=sess;
+            n.amount=amount; n.at=current_time_point(); }); // BURN, even at zero
+        ss.modify(sitr, same_payer, [&](auto& s){
+            s.credit += amount; s.updated = current_time_point(); });
+    }
+
+    // burn a charge against the rate basis — pause-at-zero semantics (pinout
+    // session.mjs): burn whole payable units, never overdraw, and when the
+    // balance runs out the session PAUSES (a committed state change — the
+    // session outlives its balance; nothing is killed or reverted)
+    [[eosio::action]] void charge(uint64_t sess, uint64_t units) {
+        sessions ss(get_self(), get_self().value);
+        auto sitr = ss.require_find(sess, "no such session");
+        require_auth(sitr->owner);
+        check(sitr->state == 0, "session paused — resume first (pause, not kill)");
+        check(units >= 1 && units <= 1000000000, "units 1..1e9");
+        rates rs(get_self(), get_self().value);
+        auto ritr = rs.require_find(sitr->rail.value, "rate row vanished");
+        int64_t perUnit = ritr->basis.amount;
+        check(perUnit > 0, "rate basis is zero");
+        int64_t cost = perUnit * (int64_t)units;
+        check(sitr->burned.amount + cost <= sitr->ceiling.amount,
+              "over ceiling — upto max refused (verifyAgainst rule)");
+        int64_t available = sitr->credit.amount - sitr->burned.amount; // never negative by construction
+        int64_t payableUnits = available / perUnit;
+        int64_t burnUnits = payableUnits < (int64_t)units ? payableUnits : (int64_t)units;
+        ss.modify(sitr, same_payer, [&](auto& s){
+            s.burned.amount += perUnit * burnUnits;
+            if (s.credit.amount - s.burned.amount < perUnit) s.state = 1; // PAUSE AT ZERO
+            s.updated = current_time_point(); });
+    }
+
+    [[eosio::action]] void pause(uint64_t sess) {
+        sessions ss(get_self(), get_self().value);
+        auto sitr = ss.require_find(sess, "no such session");
+        require_auth(sitr->owner);
+        check(sitr->state == 0, "not active");
+        ss.modify(sitr, same_payer, [&](auto& s){ s.state = 1; s.updated = current_time_point(); });
+    }
+
+    [[eosio::action]] void resume(uint64_t sess) {
+        sessions ss(get_self(), get_self().value);
+        auto sitr = ss.require_find(sess, "no such session");
+        require_auth(sitr->owner);
+        check(sitr->state == 1, "not paused");
+        ss.modify(sitr, same_payer, [&](auto& s){ s.state = 0; s.updated = current_time_point(); });
+    }
+
+    // the pure 9-check audit runs OFF-chain (public record only); its verdict
+    // lands here — bounded: two fields on the session row, never a history
+    [[eosio::action]] void auditmark(uint64_t sess, uint8_t state, string audit_hash) {
+        sessions ss(get_self(), get_self().value);
+        auto sitr = ss.require_find(sess, "no such session");
+        require_auth(sitr->owner);
+        check(state <= 3, "state 0..3 (PASSED/PENDING_ANCHOR/FAILED/INCONCLUSIVE)");
+        check(audit_hash.size() == 64, "audit hash: sha256 hex (64)");
+        ss.modify(sitr, same_payer, [&](auto& s){
+            s.audit_state = state; s.audit_hash = audit_hash; s.updated = current_time_point(); });
+    }
+
+    // bounded nonce table: the owner may sweep their spent nonces
+    [[eosio::action]] void rmnonce(uint64_t sess, uint64_t nonce) {
+        sessions ss(get_self(), get_self().value);
+        auto sitr = ss.require_find(sess, "no such session");
+        require_auth(sitr->owner);
+        nonces ns(get_self(), get_self().value);
+        auto nitr = ns.require_find(nonce, "no such nonce");
+        check(nitr->session == sess, "nonce belongs to another session");
+        ns.erase(nitr);
     }
 
 private:

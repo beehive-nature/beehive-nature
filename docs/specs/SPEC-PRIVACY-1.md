@@ -255,3 +255,23 @@ added, state survived).
 
 **Then z2 breaks it** (order 2, standing): the attack list lives in
 docs/dispatches/HANDOFF-PLONK-PORT.md §8 — every finding cited file+line.
+
+## §m3.5-receipt — M3 LIVE ON JUNGLE4 (2026-09-04, the 24h window)
+
+Account `notelab11111` (created from bnrapolltest per founder order; RAM via
+bnrvrfy3.gm; every transaction paid by the first-authorizer sponsor pattern —
+see HANDOFF §2). Explorer links in the FOUNDER-RULED format, each rendered
+headlessly with the action row READ BACK before issuing (the monitor's router
+answers its search box; a cold deep-load needs the search entered once):
+
+- init — monitor.jungletestnet.io/#accountActions:b31a1efddd4b660392971bbe8faf63868576b60439634b5cf39bea2d55051fc7 <!-- PUBLIC-CONSTANT: jungle4 tx id --> · 540 µs
+- deposit — monitor.jungletestnet.io/#accountActions:6a7ed2ba0137aa1a84d3fad3b7064aa558b1c2712a793ed2abed73986ecbee29 <!-- PUBLIC-CONSTANT: jungle4 tx id --> · 533 µs
+- **private transfer — monitor.jungletestnet.io/#accountActions:3cd367ffe35bd2d902213afe9d18686c9365ee2bb77113b41451543b2cdedcd6 <!-- PUBLIC-CONSTANT: jungle4 tx id --> · 5,654 µs**
+- withdraw — monitor.jungletestnet.io/#accountActions:fb9e615541a771ac3be931cbfdfc2d27d63f207c446729ada4fd75a41b1c7876 <!-- PUBLIC-CONSTANT: jungle4 tx id --> · 4,523 µs
+
+The forged replay (reuse of the transfer's nullifier) was REJECTED — and the
+5.6 ms pairing path ran FIRST, so the double-spend gate refused a fully
+proof-shaped spend. (eosq links from the earlier receipt are RETIRED with the
+explorer; the 8326cbb7 "init" was a phantom of a mislabeled status parse —
+the monitor's refusal to render it exposed the mislabel; b31a1efd is the one
+true init, and the law table's single row now agrees with it.)

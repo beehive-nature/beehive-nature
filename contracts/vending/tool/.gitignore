@@ -3,3 +3,6 @@ last-mint.json
 hist-*.txt
 stub.wasm
 stub.abi
+
+meter-events*.json
+meter-txs*.json

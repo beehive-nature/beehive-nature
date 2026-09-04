@@ -12,6 +12,7 @@ wrong-field edge cases, replay. File+function cited in every finding.
   `C:\Users\travi\zkbench\`. Node + snarkjs at `/tmp/zk/node_modules` (npm;
   `/tmp` does NOT survive a WSL restart — reinstall snarkjs if gone:
   `npm i snarkjs` in /tmp/zk). `cargo` present (`~/.cargo/bin`).
+- KEY LAW (founder-ruled 2026-09-04): **seats never write private keys to disk in plaintext** — keys live in keosd (encrypted wallet) and root-owned 0600 files only; the bnrapolltest plaintext incident (Temp/vault-keys.py) was found, migrated to keosd, and deleted — do not repeat it.
 - Chain state (does NOT survive WSL restart): nodeos producing on
   `127.0.0.1:8888`, data/config at `/tmp/nd/{data,config}`. If dead, boot:
 
