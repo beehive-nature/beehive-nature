@@ -1,10 +1,38 @@
 # contracts/privacy — the estate-run privacy layer (Lane: SPEC-PRIVACY-1)
 
-The M5 state: the private PAYMENT — one proof per spend carries
-MEMBERSHIP (depth-20 Poseidon merkle, root in the law row) + CONSERVATION
-(amounts hidden, fee public for the meter) + the index-bound nullifier.
-Receipts: SPEC-PRIVACY-1 §m5-receipt + docs/dispatches/RECEIPT-PAYMENT-M5.md
-(M4: §m4-receipt + RECEIPT-PLONK-M4.md).
+The M6 state: SOUNDNESS — the merkle root is CONTRACT-COMPUTED (setroot
+deleted; deposit/transfer append leaves and fold 20 Poseidon hashes
+in-contract) and every amount is 64-bit range-checked in-circuit
+(conservation cannot wrap mod p). One proof per spend: membership +
+conservation + range checks + the index-bound nullifier.
+Receipts: SPEC-PRIVACY-1 §m6-receipt + docs/dispatches/RECEIPT-SOUNDNESS-M6.md
+(M5: §m5-receipt + RECEIPT-PAYMENT-M5.md; M4: §m4-receipt + RECEIPT-PLONK-M4.md).
+
+## The M6 soundness stack
+
+- `poseidon2.hpp` — circomlib's t=3 Poseidon in C++ over field256
+  (constants PARSED from circomlib by `gen_poseidon_cpp.js`, Montgomery
+  domain; static-scratch context — the WASM stack rejects 12KB locals).
+  Gate: `test_poseidon.cpp` = 68/68 vs circomlibjs before any chain use.
+  `tree_zeros.hpp` — the generated depth-20 zero chain.
+- `payment.circom` + range checks (Num2Bits(64) on in/out/fee — an
+  overflow spend has NO satisfying witness; receipted).
+- `note.cpp` — `tree_insert` (Tornado's incremental algorithm) on deposit
+  AND transfer (payment notes are spendable leaves); NO root setter in
+  the ABI; `t256()` compensates the checksum256 T-law at every storage
+  write (extract_as_byte_array returns T(memory) — params survive the
+  double-T, stored bytes need pre-compensation; the M1 gotcha mapped
+  exactly).
+- `m6run.sh` — the acceptance pass (contract-computed root → payment →
+  forged/replay/fee-tamper → overflow witness refusal → phantom-leaf
+  rejection → withdraw).
+
+## Billing (honest split)
+
+Pure verify (withdraw, no insert): 11,971 µs — tripwire < 15 ms PASSED.
+Deposit 29.8 ms / payment 55.8 ms carry the 20-Poseidon insert in WASM
+(no native Poseidon intrinsic — precomputed-Montgomery/native lane
+named). Contention labels per the M4/M5 law.
 
 ## The payment stack (M5)
 

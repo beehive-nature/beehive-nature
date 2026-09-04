@@ -221,7 +221,7 @@ pub fn format_with_cap(nodes: &[Value], vis: &HashMap<u64, Vis>, max_nodes: usiz
 /// ref'd link has one, its line carries a shortened target — the honest
 /// cure for name ambiguity: "home page" vs "chromium .org" reads as
 /// →en.wikipedia.org vs →chromium.org, and the model stops guessing.
-pub const INDEX_CAP: usize = 160;
+pub const INDEX_CAP: usize = 600; // hard ceiling; the per-attempt budget clamps it (M4: raised so a bigger window can BUY more index)
 
 pub fn format_mode(
     nodes: &[Value],

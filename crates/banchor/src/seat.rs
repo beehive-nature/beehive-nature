@@ -636,6 +636,7 @@ pub fn agentloop(
     max_turns: u32,
     replay_dir: &Path,
     expect_substr: Option<&str>,
+    goal_provenance: Option<Value>,
 ) -> Result<Value, Box<dyn std::error::Error>> {
     let model = qwen::Qwen::from_env()?;
     let budget = qwen::Budget::for_ctx(model.n_ctx);
@@ -645,6 +646,9 @@ pub fn agentloop(
         "[agentloop] model {} (n_ctx {}) via meter key {:?}",
         model.alias, model.n_ctx, model.key_id
     );
+    if let Some(p) = goal_provenance.as_ref() {
+        eprintln!("[agentloop] goal source: {}", p["source"]);
+    }
     seat.handle(&json!({
         "action": "start",
         "headless": true,
@@ -655,6 +659,7 @@ pub fn agentloop(
         "agent_start",
         json!({
             "goal": goal,
+            "goal_source": goal_provenance,
             "model": {
                 "alias": model.alias,
                 "artifact": model.model_path,
@@ -938,6 +943,7 @@ pub fn agentloop(
         "what": "first loop where a LOCAL model (qwen2.5-3b on the compute node) chose and drove the click",
         "model": { "alias": model.alias, "n_ctx": model.n_ctx, "meter_key_id": model.key_id },
         "goal": goal,
+        "goal_source": goal_provenance,
         "url": url,
         "snapshot": {
             "qwen_tokens": qwen_n,

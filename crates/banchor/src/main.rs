@@ -32,6 +32,7 @@ mod seat;
 mod tokens;
 mod untrusted;
 mod visibility;
+mod voice;
 
 use std::sync::{Arc, Mutex};
 
@@ -201,6 +202,9 @@ fn agentloop_cmd(args: &[String]) {
     let mut max_turns: u32 = 3;
     let mut replay_dir: Option<String> = None;
     let mut expect_substr: Option<String> = None;
+    let mut goal_audio: Option<String> = None;
+    let mut capture_seconds: u32 = 5;
+    let mut keep_audio = false;
     let mut i = 0;
     while i < args.len() {
         match args[i].as_str() {
@@ -211,6 +215,18 @@ fn agentloop_cmd(args: &[String]) {
             "--goal" if i + 1 < args.len() => {
                 goal = args[i + 1].clone();
                 i += 2;
+            }
+            "--goal-audio" if i + 1 < args.len() => {
+                goal_audio = Some(args[i + 1].clone());
+                i += 2;
+            }
+            "--capture-seconds" if i + 1 < args.len() => {
+                capture_seconds = args[i + 1].parse().unwrap_or(5);
+                i += 2;
+            }
+            "--keep-audio" => {
+                keep_audio = true;
+                i += 1;
             }
             "--max-turns" if i + 1 < args.len() => {
                 max_turns = args[i + 1].parse().unwrap_or(3);
@@ -230,10 +246,47 @@ fn agentloop_cmd(args: &[String]) {
             }
         }
     }
+    // VOICE IN: a spoken goal (mic → wav → whisper.cpp on the estate's own
+    // iron) replaces the typed goal; provenance rides every replay
+    let mut goal_provenance: Option<serde_json::Value> = None;
+    if let Some(ref audio) = goal_audio {
+        let mic_capture = audio == "mic";
+        let wav = if mic_capture {
+            let tmp = std::env::temp_dir().join("banchor-voice-goal.wav");
+            if let Err(e) = voice::capture_mic(&tmp, capture_seconds) {
+                eprintln!("agentloop FAILED: {e}");
+                std::process::exit(1);
+            }
+            tmp
+        } else {
+            std::path::PathBuf::from(audio)
+        };
+        // MIC HYGIENE: ambient captures are deleted after transcription
+        // (transcript + digest stay in the receipt) unless --keep-audio
+        let keep_raw = keep_audio || voice::hygiene_keep_raw(!mic_capture);
+        match voice::goal_from_audio(&wav, keep_raw) {
+            Ok((transcript, provenance)) => {
+                eprintln!("[agentloop] voice goal: \"{transcript}\"");
+                goal = transcript;
+                goal_provenance = Some(provenance);
+            }
+            Err(e) => {
+                eprintln!("agentloop FAILED: {e}");
+                std::process::exit(1);
+            }
+        }
+    }
     let dir = replay_dir
         .map(std::path::PathBuf::from)
         .unwrap_or_else(|| std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("replays"));
-    match seat::agentloop(&url, &goal, max_turns, &dir, expect_substr.as_deref()) {
+    match seat::agentloop(
+        &url,
+        &goal,
+        max_turns,
+        &dir,
+        expect_substr.as_deref(),
+        goal_provenance,
+    ) {
         Ok(receipt) => {
             println!(
                 "{}",

@@ -350,3 +350,78 @@ contract class name (cdt-cpp codegen).
 membership-path forgery shapes, index/nullifier binding, root-rollback
 (setroot is owner-auth — a governance surface, labeled), fee-leg claims,
 and the M4 list (HANDOFF-PLONK-PORT §8). Its findings land in this tree.
+
+## §m6-receipt — SOUNDNESS: on-chain root + range checks (2026-09-04, founder-ordered)
+
+The two labels promoted from hardening to soundness landed:
+
+**1 · RANGE CHECKS.** Every amount (in, out, fee) is decomposed to 64 bits
+in-circuit (`Num2Bits(64)` ×3, +192 constraints; 12,166 total, pot14
+reused — the ceremony is universal). Conservation can no longer wrap mod p:
+the receipt is an "overflow" spend (amountIn = 2^64, out = 2^64−10, fee =
+10 — integers that BALANCE exactly) **refused at witness generation**
+(circuit Assert Failed: the range check has no satisfying witness for
+2^64).
+
+**2 · ON-CHAIN INCREMENTAL MERKLE — setroot DELETED.** The contract appends
+leaves and computes the root itself: `tree_insert` runs Tornado's
+incremental algorithm over `poseidon2.hpp` — the circomlib t=3 Poseidon in
+C++ over field256, constants PARSED from circomlib's own
+poseidon_constants.circom (never retyped) and kept in Montgomery form; a
+fixed-address static scratch carries the 12KB context (the WASM stack
+rejects it), re-initialized per action. Deposit inserts its leaf; transfer
+inserts the payment's out-note (a note created by payment is spendable);
+**the ABI has no root setter** — root-rollback is structurally impossible.
+
+**The T law, mapped exactly (this lane's discovery):** CDT's
+`checksum256::extract_as_byte_array()` returns T(memory bytes) where T =
+reverse-then-swap-16-byte-halves (an involution). Action params survive
+(decode writes T, extract applies T again → identity), but bytes written
+by `memcpy` come back transformed — the M4/M5 gates worked because they
+assembled publics from PARAMS; M6's gate reads the root from STORAGE and
+initially fed the pairing T(root). The evidence chain that pinned it: the
+bare probe accepted (params), the payment rejected (stored root),
+T(display) == proof root (involution), and after storing roots
+pre-transformed the payment EXECUTED. The M1-era gotcha now has its exact
+mechanism; `t256()` compensates at every storage write.
+
+**On-chain acceptance (`paynote1111`, code hash `99aba03e…006136`,
+runner `m6run.sh`):**
+- init: the law row displays the RAW empty root (2134e7… — the T
+  compensation visible in the display itself);
+- **deposit: the CONTRACT computed the root** — and the payment proven
+  against it EXECUTED (the three-way agreement chain — contract root ==
+  tree.js root == proof root — is proven by execution, the strongest
+  cross-check; the display-level comparison also passes post-fix);
+- **THE PAYMENT executed** (blk 40553) — membership + conservation +
+  range checks + the index-bound nullifier in one proof;
+- FORGED / REPLAY / FEE-TAMPER: all REJECTED (pairing / uniqueness /
+  transcript-bound publics);
+- **OVERFLOW: refused at witness generation**;
+- **PHANTOM-LEAF: rejected with nowhere to land** — a REAL note commitment
+  (P(777, 1000)), inserted only into the off-chain tree, proven honestly
+  for that root (off-chain verify OK!), and refused on-chain because the
+  contract's tree never contained it (its root was never the chain's);
+- WITHDRAW of the payment's out-note (leaf 1 of the CONTRACT's tree)
+  executed — proving the out-note-insert design end to end.
+
+**Billing, honestly split:** the pure VERIFY bill = **11,971 µs** (the
+withdraw carries no insert — in band with M5's ≈ 10.7 ms; tripwire
+< 15 ms PASSED). Deposit = 29,837 µs and the payment action = 55,835 µs
+because they now carry the 20-Poseidon insert (~12k Montgomery muls in
+WASM — no native Poseidon intrinsic exists; a precomputed-Montgomery /
+native lane is named). Contention on the shared WSL box still inflates
+samples (the documented M4/M5 pattern; labeled, not averaged).
+
+**Gates this lane added:** poseidon2 vs circomlibjs on 66 vectors + 2
+structural zero-chain checks = **68/68 BEFORE any chain use**; the M5
+oracle suite re-ran 25/25 against the range-check circuit's vk.
+
+**z2.1 coordination (per the founder's order):** root-rollback and
+index-binding were on its list — both are now closed BY CONSTRUCTION:
+there is no setter (deleted from the ABI; the root only advances via
+deposit/transfer inserts), and the nullifier is bound to the path-derived
+leaf index (M5). Its review should say so; the remaining honest surfaces
+it may still probe are labeled: the owner-auth on init/deposit flow
+(governance), the one-participant ceremony label, and the WASM insert
+cost. Findings land in this tree.

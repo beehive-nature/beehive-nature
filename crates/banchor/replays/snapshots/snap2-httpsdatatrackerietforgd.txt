@@ -1,0 +1,227 @@
+# banchor snapshot artifact — counted bytes below (origin: https://datatracker.ietf.org/doc/html/rfc6761, taken: 20260904042920)
+# integrity: sha3-256:yx0izyMWeZOIxpvyFMdozcWnkB3xKfgm93403GwJisw
+- rootwebarea "RFC 6761 - Special-Use Domain Names"
+  - generic:
+    - generic:
+      - generic:
+        - button "Toggle theme" [ref=@e1]
+          - generic:
+            - generic:
+      - button "Toggle metadata sidebar" [ref=@e2]
+          - generic:
+      - generic:
+          - linebreak "\n"
+            - generic:
+              - link "1918" [ref=@e3]
+              - link "2606" [ref=@e4]
+              - heading "Special-Use Domain Names" [ref=@e5]
+              - link "Section 2 of RFC 5741" [ref=@e6]
+              - link "http://www.rfc-editor.org/info/rfc6761" [ref=@e7]
+              - link "BCP 78" [ref=@e8]
+              - link "http://trustee.ietf.org/license-info" [ref=@e9]
+              - separator
+              - link "RFC 6761" [ref=@e10]
+              - heading "1. Introduction" [ref=@e11]
+                - link "1" [ref=@e12]
+              - link "RFC5735" [ref=@e13]
+              - link "RFC1112" [ref=@e14]
+              - link "RFC5771" [ref=@e15]
+              - link "RFC5735" [ref=@e16]
+              - link "RFC5735" [ref=@e17]
+              - link "RFC1034" [ref=@e18]
+              - link "RFC2606" [ref=@e19]
+              - link "RFC2606" [ref=@e20]
+              - heading "2. Terminology" [ref=@e21]
+                - link "2" [ref=@e22]
+              - link "RFC2119" [ref=@e23]
+              - heading "3. Applicability" [ref=@e24]
+                - link "3" [ref=@e25]
+              - link "RFC1112" [ref=@e26]
+              - separator
+              - link "RFC 6761" [ref=@e27]
+              - link "RFC1034" [ref=@e28]
+              - link "RFC1035" [ref=@e29]
+              - link "RFC1034" [ref=@e30]
+              - link "RFC1035" [ref=@e31]
+              - separator
+              - link "RFC 6761" [ref=@e32]
+              - heading "4. Procedure" [ref=@e33]
+                - link "4" [ref=@e34]
+              - link "RFC5226" [ref=@e35]
+              - link "RFC1112" [ref=@e36]
+              - link "RFC3927" [ref=@e37]
+              - link "RFC4862" [ref=@e38]
+              - heading "5. Domain Name Reservation Considerations" [ref=@e39]
+                - link "5" [ref=@e40]
+              - separator
+              - link "RFC 6761" [ref=@e41]
+              - separator
+              - link "RFC 6761" [ref=@e42]
+              - heading "6. Initial Registry" [ref=@e43]
+                - link "6" [ref=@e44]
+              - link "RFC1918" [ref=@e45]
+              - link "RFC2606" [ref=@e46]
+              - heading "6.1. Domain Name Reservation Considerations for Private Addresses" [ref=@e47]
+                - link "6.1" [ref=@e48]
+              - link "RFC1918" [ref=@e49]
+              - separator
+              - link "RFC 6761" [ref=@e50]
+              - heading "6.2. Domain Name Reservation Considerations for \"test.\"" [ref=@e51]
+                - link "6.2" [ref=@e52]
+              - separator
+              - link "RFC 6761" [ref=@e53]
+              - heading "6.3. Domain Name Reservation Considerations for \"localhost.\"" [ref=@e54]
+                - link "6.3" [ref=@e55]
+              - separator
+              - link "RFC 6761" [ref=@e56]
+              - heading "6.4. Domain Name Reservation Considerations for \"invalid.\"" [ref=@e57]
+                - link "6.4" [ref=@e58]
+              - separator
+              - link "RFC 6761" [ref=@e59]
+              - heading "6.5. Domain Name Reservation Considerations for Example Domains" [ref=@e60]
+                - link "6.5" [ref=@e61]
+              - separator
+              - link "RFC 6761" [ref=@e62]
+              - link "http://res-dom.iana.org" [ref=@e63]
+              - heading "7. Security Considerations" [ref=@e64]
+                - link "7" [ref=@e65]
+              - heading "8. IANA Considerations" [ref=@e66]
+                - link "8" [ref=@e67]
+              - link "Section 6" [ref=@e68]
+              - link "RFC5226" [ref=@e69]
+              - separator
+              - link "RFC 6761" [ref=@e70]
+              - heading "9. References" [ref=@e71]
+                - link "9" [ref=@e72]
+              - heading "9.1. Normative References" [ref=@e73]
+                - link "9.1" [ref=@e74]
+              - generic:
+              - link "BCP 14" [ref=@e75]
+              - link "RFC 2119" [ref=@e76]
+              - generic:
+              - link "RFC 1034" [ref=@e77]
+              - generic:
+              - link "RFC 1035" [ref=@e78]
+              - generic:
+              - link "BCP 26" [ref=@e79]
+              - link "RFC 5226" [ref=@e80]
+              - heading "9.2. Informative References" [ref=@e81]
+                - link "9.2" [ref=@e82]
+              - generic:
+              - link "RFC 1112" [ref=@e83]
+              - generic:
+              - link "BCP 5" [ref=@e84]
+              - link "RFC 1918" [ref=@e85]
+              - generic:
+              - link "BCP 32" [ref=@e86]
+              - link "RFC 2606" [ref=@e87]
+              - generic:
+              - link "RFC 3927" [ref=@e88]
+              - generic:
+              - link "RFC 4862" [ref=@e89]
+              - generic:
+              - link "BCP 153" [ref=@e90]
+              - link "RFC 5735" [ref=@e91]
+              - generic:
+              - link "BCP 51" [ref=@e92]
+              - link "RFC 5771" [ref=@e93]
+              - separator
+              - link "RFC 6761" [ref=@e94]
+      - generic:
+        - generic:
+              - link "Datatracker" [ref=@e95]
+              - paragraph
+                - linebreak "\n"
+            - tablist
+              - tab "Info" [ref=@e96]
+                  - generic:
+              - tab "Contents" [ref=@e97]
+                  - generic:
+              - tab "Prefs" [ref=@e98]
+                  - generic:
+            - generic:
+              - tabpanel "Info"
+                - table
+                    - row
+                      - rowheader "Document type"
+                      - cell "RFC - Proposed Standard February 2013 View errata Report errata Updates RFC 2606, RFC 1918 Was draft-cheshire-dnsext-special-names (individual in int area)"
+                        - linebreak "\n"
+                        - linebreak "\n"
+                        - link "View errata" [ref=@e99]
+                        - link "Report errata" [ref=@e100]
+                        - generic:
+                          - link "RFC 2606" [ref=@e101]
+                          - link "RFC 1918" [ref=@e102]
+                        - generic:
+                          - link "draft-cheshire-dnsext-special-names" [ref=@e103]
+                    - row
+                      - rowheader "Select version"
+                      - cell "02 03 RFC 6761"
+                        - list
+                          - listitem
+                            - link "02" [ref=@e104]
+                          - listitem
+                            - link "03" [ref=@e105]
+                          - listitem
+                            - link "RFC 6761" [ref=@e106]
+                    - row
+                      - rowheader "Compare versions"
+                      - cell
+                        - form
+                            - combobox "draft-cheshire-dnsext-special-names-03" = "Remove all items draft-cheshire-dnsext-special-names-03" [ref=@e107]
+                              - button "Remove all items" [ref=@e108]
+                              - textbox = "draft-cheshire-dnsext-special-names-03" [ref=@e109]
+                            - combobox "RFC 6761" = "Remove all items RFC 6761" [ref=@e110]
+                              - button "Remove all items" [ref=@e111]
+                              - textbox = "RFC 6761" [ref=@e112]
+                          - button "Side-by-side" [ref=@e113]
+                          - button "Inline" [ref=@e114]
+                    - row
+                      - rowheader "Authors"
+                      - cell "S. Cheshire Compose email to cheshire@apple.com , M. Krochmal Compose email to marc@apple.com Email authors"
+                        - link "S. Cheshire" [ref=@e115]
+                        - link "Compose email to cheshire@apple.com" [ref=@e116]
+                            - generic:
+                        - link "M. Krochmal" [ref=@e117]
+                        - link "Compose email to marc@apple.com" [ref=@e118]
+                            - generic:
+                        - linebreak "\n"
+                        - link "Email authors" [ref=@e119]
+                    - row
+                      - rowheader "RFC stream"
+                      - cell "IETF Logo"
+                        - image "IETF Logo" [ref=@e120]
+                    - row
+                      - rowheader "Other formats"
+                      - cell " txt  html  bibtex"
+                        - generic:
+                          - link " txt" [ref=@e121]
+                              - generic:
+                          - link " html" [ref=@e122]
+                              - generic:
+                          - link " bibtex" [ref=@e123]
+                              - generic:
+                - link "Report a datatracker bug " [ref=@e124]
+                    - generic:
+- inlinetextbox ""
+- inlinetextbox ""
+- inlinetextbox ""
+- inlinetextbox ""
+- inlinetextbox ""
+- inlinetextbox ""
+- inlinetextbox ""
+- inlinetextbox ""
+- inlinetextbox ""
+- inlinetextbox ""
+- inlinetextbox ""
+- inlinetextbox ""
+- inlinetextbox ""
+- inlinetextbox ""
+- inlinetextbox ""
+- inlinetextbox ""
+- inlinetextbox ""
+- inlinetextbox ""
+- inlinetextbox ""
+- inlinetextbox ""
+- inlinetextbox ""
+- inlinetextbox ""

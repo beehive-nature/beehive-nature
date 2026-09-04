@@ -26,6 +26,7 @@
 pragma circom 2.0.0;
 
 include "circomlib/circuits/poseidon.circom";
+include "circomlib/circuits/comparators.circom";
 
 template Payment(levels) {
     // private
@@ -69,6 +70,14 @@ template Payment(levels) {
 
     // conservation — value in = value out + public fee/tithe
     amountIn === amountOut + fee;
+
+    // RANGE CHECKS (SOUNDNESS, founder order 2026-09-05): every amount is
+    // decomposed to 64 bits, so conservation cannot wrap mod p — an
+    // "overflow" spend (e.g. amountIn = 2^64 with matching out+fee mod p)
+    // has no satisfying witness.
+    component rcIn = Num2Bits(64); rcIn.in <== amountIn;
+    component rcOut = Num2Bits(64); rcOut.in <== amountOut;
+    component rcFee = Num2Bits(64); rcFee.in <== fee;
 
     // membership — Poseidon merkle path from the spent commitment to root
     component hasher[levels];
