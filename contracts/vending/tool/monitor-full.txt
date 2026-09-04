@@ -1,0 +1,188 @@
+Main
+Monitor
+Become BP 
+Jungle as of 2026-09-03 18:26:31
+285 020 457
+
+Head Block
+
+285 020 455 -2
+
+Irreversible Block
+
+ohtigertiger
+
+Block Producer
+
+36 498 004
+
+Transactions
+
+21 331 075
+
+Non-empty blocks
+
+0 / 991
+
+TPS Live / All time high
+
+0 / 2000
+
+APS Live / All time high
+
+3.10.0
+
+System Contract
+
+Actions and Tools
+ Key Pairs
+Generate Keys
+ Create Account
+ Native  EVM 
+ PowerUp
+Get Resources
+ Jungle Faucet
+Get «native» tokens
+ Block-Explorers
+Unicove  Hyperion  Bloks 
+ Data
+Tables  REX Pool
+ Wallets
+Anchor 
+ P2P
+Show List
+ API
+Show Endpoints
+ Multisig
+Multisignature, Multi-signature
+Create 
+ Issue NFT
+SimpleAssets 
+ Jungle Node
+ Install Register
+Status
+ System
+ All Nodes
+ Transactions
+ Legend
+#	Name	Answered	Block No.	Produced	Block No.	Blocks	TXs	 Organisation	Votes
+ 1[2ms]	lioninjungle	1sec	285020453	1sec	285020453	13331522	1820731	CryptoLions.io	134 076 297 A18.91%
+ 2[3ms]	ohtigertiger	4sec	285020446	0 sec	285020456	13607872	1836134	CryptoLions.io	134 075 743 A18.91%
+ 3[1105ms]	eosphereiobp	4sec	285020446	—	—	13303664	1732544	EOSphere	24 950 501 A3.51%
+ 4 [—ms]	ivote4eosusa	0 sec	—	—	—	12921906	1684693	EOSUSA	21 691 951 A3.06%
+ 5[935ms]	detroitdhole	4sec	285020447	—	—	5078414	780245	DetroitLedgerTec	21 690 889 A3.05%
+ 6[545ms]	alohaeostest	5sec	285020444	—	—	13473835	1880208	Aloha EOS	21 657 315 A3.05%
+ 7 [—ms]	eosriobrazil	0 sec	—	—	—	12460050	1704066	EOS Rio	21 657 304 A3.05%
+ 8—	eosamsterdam	—	—	—	—	—	—	jungle.eosamsterdam.net	21 657 101 A3.05%
+ 9 [—ms]	eosarabianet	0 sec	—	—	—	11081589	1505013	EOS Arabia	21 656 976 A3.05%
+ 10[371ms]	eosnationftw	5sec	285020442	—	—	12656268	1661200	EOS Nation	21 656 974 A3.05%
+ 11 [—ms]	aus1genereos	0 sec	—	—	—	12198874	1526011	GenerEOS	21 656 666 A3.05%
+ 12[2ms]	gorillapower	4sec	285020447	—	—	12121087	1758017	CryptoLions.io	12 760 490 A1.8%
+ 13[2ms]	jumpingfrogs	3sec	285020448	7sec	285020441	13263930	1820261	CryptoLions.io	12 760 166 A1.8%
+ 14[2ms]	iliketurtles 🐢 	4sec	285020447	—	—	3994873	792626	CryptoLions.io	12 760 107 A1.8%
+ 15[2ms]	thebluewhale	6sec	285020441	—	—	13192431	1805791	CryptoLions.io	12 760 107 A1.8%
+ 16[2ms]	funnyhamster	0 sec	285020455	—	—	13232643	1854903	CryptoLions.io	12 760 104 A1.8%
+ 17[2ms]	bigpolarbear	2sec	285020452	—	—	5917648	974283	CryptoLions.io	12 760 104 A1.8%
+ 18[2ms]	batinthedark	3sec	285020449	—	—	13138327	1890065	CryptoLions.io	12 760 008 A1.8%
+ 19[1ms]	clevermonkey	2sec	285020451	—	—	3293935	716716	CryptoLions.io	12 760 008 A1.8%
+ 20[3ms]	bighornsheep	1sec	285020452	—	—	3133654	589775	CryptoLions.io	12 760 002 A1.8%
+ 21[1ms]	hungryolddog	0 sec	285020455	—	—	555027	189285	CryptoLions.io	12 759 492 A1.79%
+ 22[1ms]	ssssssssnake	6sec	285020442	—	—	114524	5	CryptoLions.io	12 759 473 A1.79%
+ 23[2ms]	wealthyhorse	7sec	285020441	—	—	114528	4	CryptoLions.io	12 759 473 A1.79%
+ 24[2ms]	hippopotamus	3sec	285020450	—	—	13036856	1579697	CryptoLions.io	12 759 402 A1.79%
+ 25[2ms]	proudrooster	2sec	285020451	—	—	229345	2537	CryptoLions.io	12 759 402 A1.79%
+ 26[2ms]	spideronaweb	0 sec	285020454	—	—	114516	39	CryptoLions.io	12 759 377 A1.79%
+ 27[2ms]	thesilentowl	6sec	285020443	—	—	114528	13	CryptoLions.io	12 759 377 A1.79%
+ 28[2ms]	littlerabbit	1sec	285020453	—	—	237177	1732	CryptoLions.io	12 758 859 A1.79%
+ 29[1ms]	pythoncolors	3sec	285020449	—	—	188076	134	CryptoLions.io	12 758 849 A1.79%
+ 30[3ms]	soaringeagle	0 sec	285020453	—	—	114516	4	CryptoLions.io	12 758 752 A1.79%
+ 31 [—ms]	fgmttestnet1	0 sec	—	—	—	2240938	215732	Figment.io	1 665 A0%
+ 32 [—ms]	eoseouldotio	0 sec	—	—	—	12056979	1200229	EOSeoul	1 177 A0%
+ 33—	eosdacserval	—	—	—	—	—	—	eosdac.io	1 013 A0%
+ 34 [—ms]	mytestbp1234	0 sec	—	—	—	—	—	jungle_test_bp	275 A0%
+ 35 [—ms]	cannonjungle	0 sec	—	—	—	—	—	EOSCannon	145 A0%
+ 36 [—ms]	zombiezombie	0 sec	—	—	—	—	—	Kevin Heifner	120 A0%
+ 37—	jjjaykejayke	—	—	—	—	—	—	jayke.cn	101 A0%
+ 38—	babymidnight	—	—	—	—	—	—	babymidnight.com	101 A0%
+ 39—	bptester1231	—	—	—	—	—	—	www.bitmars.one	0 A0%
+ 41—	eosindiatest	—	—	—	—	—	—	blocksindia.com	0 A0%
+ 42—	eversejungle	—	—	—	—	—	—	example.com	0 A0%
+ 43—	junglejungle	—	—	—	—	—	—	jungletestnet.io	0 A0%
+ 44—	keystest.eo2	—	—	—	—	—	—	keystest.eo2.com	0 A0%
+ 46 [—ms]	sentnlagents	0 sec	—	—	—	—	—	Sentnl.io	0 A0%
+FAQ and Tips
+🌱 What is the Chain ID of Jungle?
+🌱 Is there Hyperion History API?
+🌱 Where I can take Snapshots/Backups of Jungle?
+🌱 How to initializing a node for the first time?
+🌱 How to create a native Jungle (Vaulta Testnet) account with command line?
+🌱 How to power up native Jungle account with command line?
+🌱 How to get native testnet EOS tokens and EOS EVM testnet tokens?
+🌱 How to send test tokens to other test account with command line?
+🌱 How to get balance of native Vaulta Testnet tokens with command line?
+🌱 How to show live data using Pinax Firehose & Substreams?
+🌱 How to create Jungle 4 account using Anchor mobile?
+🌱 How to create Jungle 4 account using @wharfkit/cli command line?
+Jungle animals here right now
+4
+For review and remove
+Total Processed Blocks: 285020457
+285020440	rngoracle.gm::commit	rngoracle.gm	{"oracle":"rsfui4ahy.gm","cycle_id":...		
+
+
+285020440	rngoracle.gm::commit	rngoracle.gm	{"oracle":"rsfui4ahy.gm","cycle_id":...		
+Primary Secondary Success Danger Warning Info Light Dark Accent 1 Accent 2 Accent 3 Link
+🐍 Pssst! Wanna some Jungle Magic? 🌿
+
+Subscribe to Jungle gossip and delve into the wild side of EOS development!
+
+ Join the Tribe!
+
+You can unsubscribe anytime.
+
+Jungle Testnet Monitor ver. 4.2.1
+© 2018–2026, CryptoLions and Jungle Community. All rights reserved
+
+Feedback
+
+  
+  
+  
+bnrapolltest
+Overview
+Tokens
+Activity
+Contract
+General
+Created by junglefaucet on 2026-08-29 09:59:18
+Total A
+core.vaulta
+87.5000 A
+Available:
+83.5000 A
+Delegated: 
+4.0000 A
+Total EOS
+eosio
+27.6445 EOS
+Permissions
+active
+board
+memo
+owner
+Resources
+RAM
+91.69%
+266,660 / 290,813 bytes
+NET
+0% used
+30,563 / 3,052,250,307 bytes
+Self-staked: 1
+Staked by others: 198,000
+Total in NET: 198,001
+CPU
+0.09% used
+2,018 / 2,268,095 time
+Self-staked: 1
+Staked by others: 792,000
+Total in CPU: 792,001

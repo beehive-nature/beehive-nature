@@ -1,0 +1,12 @@
+import { chromium } from "playwright";
+import { writeFileSync } from "node:fs";
+const browser = await chromium.launch({ args: ["--no-sandbox"] });
+const page = await browser.newPage({ viewport: { width: 1280, height: 2400 } });
+await page.goto("https://monitor.jungletestnet.io/#accountOverview:bnrapolltest", { waitUntil: "domcontentloaded", timeout: 45000 });
+await page.waitForTimeout(10000);
+const text = (await page.locator("body").innerText().catch(() => "")) || "";
+writeFileSync("monitor-full.txt", text);
+const i = text.indexOf("bnrapolltest");
+console.log("first bnrapolltest at char:", i, "of", text.length);
+if (i >= 0) console.log("---CONTEXT---\n" + text.slice(Math.max(0, i - 200), i + 1800));
+await browser.close();

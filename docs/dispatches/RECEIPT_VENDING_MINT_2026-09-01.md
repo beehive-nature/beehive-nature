@@ -18,13 +18,28 @@ decision points:
 | **THE MINT** (`vending::mint`, vendingtest) | **`d150f7d5f3b722ff05355c49d93ab2565a4437a8220da92588e40a328811d54e`** <!-- PUBLIC-CONSTANT: jungle4 txid --> |
 | certificate (Jungle4 mint) | 3234 B · sha256 `f148272a98e9499d08aaca424ae908200012005d2d6b5c3a9c1794ae0962ab75` <!-- PUBLIC-CONSTANT --> · ar://`ITC5RPTM2zpzd0b8ehHBlFnYizDtVd9Wd9tAVIAcwPo` (winc 0) |
 
-**PUBLIC EXPLORER LINKS:**
-- the mint tx: https://eosauthority.com/tx/d150f7d5f3b722ff05355c49d93ab2565a4437a8220da92588e40a328811d54e?network=jungle <!-- PUBLIC-CONSTANT: jungle4 mint txid in explorer URL -->
-- the account + pointer row: https://eosauthority.com/account/bnrapolltest?network=jungle
-(the machine-verifiable leg, any public Jungle4 API: `get_table_rows
-code=bnrapolltest scope=bnrapolltest table=certs` → the row with ar_id
-ITC5RPTM… + content_hash f148272a… — read back live through both
-jungle4.greymass.com and jungle4.cryptolions.io)
+**PUBLIC EXPLORER LINK — CORRECTED 2026-09-04 (the founder could not find the
+account; the correction is receipted):** EOS Authority's Jungle page renders
+"Sorry, the account bnrapolltest could not be found on Jungle Testnet" — its
+jungle index is stale (render-verified via headless Chromium; the SPA 200s
+regardless, which is how the dead link slipped into the first landing note —
+lesson banked: a link is verified when the DATA renders, not when the page
+loads). The LIVE, render-verified explorer is the official Jungle monitor by
+CryptoLions:
+- **the account (screenshot `contracts/vending/tool/monitor-account-view.png`):
+  https://monitor.jungletestnet.io/#accountOverview:bnrapolltest** — shows
+  "Created by junglefaucet on 2026-08-29 09:59:18", 87.5000 A (core.vaulta)
+  + 27.6445 EOS (eosio), permissions active/board/memo/owner, and the
+  Resources block carrying the powerup (CPU 2,018 / 2,268,095 µs; NET
+  30,563 / 3,052,250,307 B; RAM 266,660 / 290,813 B at read time).
+- the same page's **Contract tab renders all six vending actions** (init,
+  setrate, settithe, mint, update, release — screenshot
+  `monitor-contract-tab.png`).
+- the mint tx d150f7d5… and the pointer row remain machine-verifiable through
+  any public Jungle4 API (`cleos -u https://jungle4.greymass.com get account
+  bnrapolltest`; `get_table_rows code=bnrapolltest scope=bnrapolltest
+  table=certs` — read back live through both jungle4.greymass.com and
+  jungle4.cryptolions.io).
 
 **RESURRECTION ON JUNGLE4 — `node resurrect.mjs vendingtest jungle4` — 11
 pass, 0 fail**: the name road now reads chain state the estate DOES NOT
