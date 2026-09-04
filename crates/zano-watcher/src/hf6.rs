@@ -616,7 +616,7 @@ mod tests {
             "gateway entries contribute no attribution keys"
         );
         assert!(
-            attrs.iter().all(|d| d.payment_id != ""),
+            attrs.iter().all(|d| !d.payment_id.is_empty()),
             "no empty-pid key invented from gateway traffic"
         );
     }
