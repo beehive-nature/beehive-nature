@@ -81,3 +81,14 @@ the init/deposit auth shape (governance), the one-participant ceremony
 label (until a witnessed multi-party sealing is ruled), the WASM insert
 cost, and the range-check width (64-bit — a founder-ruled bound).
 Findings land in this tree.
+
+## Provenance note (the shared-checkout sweep, healed)
+
+This lane's 14 files (all of contracts/privacy's M6 additions + the spec
+§m6-receipt + this receipt) landed on main inside the concurrent seat's
+commit `1057b6e` ("MIC HYGIENE") — its broad add swept the in-flight work
+mid-debug. Content verified INTACT at HEAD: sha256 of every swept file
+matches this seat's final tree (note.cpp, poseidon2.hpp spot-verified
+byte-identical; the on-chain receipts above were produced from exactly
+these bytes). The banked law held: heal = a descendant commit that
+documents the truth (this note), never a rewrite.
