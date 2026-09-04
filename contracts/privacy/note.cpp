@@ -126,6 +126,7 @@ public:
       uint8_t     alg;             // commitment algorithm id
       uint64_t    deposited;       // block time of deposit (audit floor, not history)
       uint64_t    amount;          // deposit: the open on-ramp amount · payment note: 0 = PRIVATE (in-circuit)
+      uint64_t    asset;          // deposit: the open on-ramp asset · payment note: 0 = PRIVATE (in-circuit)
       uint64_t    primary_key()const { return c.data()[0] >> 32 | (uint64_t)(c.data()[1] & 0xffffffff) << 0; }
    };
    using commitment_index = eosio::multi_index<"commitments"_n, commitment_row>;
@@ -169,7 +170,7 @@ public:
    // recorded OPENLY (the on-ramp), AND appends c to the incremental merkle
    // tree ITSELF — the root in the law row is contract-computed (there is
    // no setter; root-rollback is structurally impossible).
-   [[eosio::action]] void deposit( const checksum256& c, uint32_t viewtag, uint64_t amount ) {
+   [[eosio::action]] void deposit( const checksum256& c, uint32_t viewtag, uint64_t amount, uint64_t asset ) {
       law_index law( get_self(), get_self().value );
       auto lr = law.get( 0, "law not initialized" );
       commitment_index cs( get_self(), get_self().value );
@@ -178,6 +179,7 @@ public:
       cs.emplace( get_self(), [&]( auto& r ) {
          r.c = c; r.viewtag = viewtag; r.alg = lr.alg_commit;
          r.deposited = current_time_point().sec_since_epoch(); r.amount = amount;
+         r.asset = asset;
       });
       tree_insert( c );
    }
@@ -190,9 +192,9 @@ public:
    // amount is PRIVATE — the row stores 0, labeled. The nullifier hit
    // refuses the double-spend.
    [[eosio::action]] void transfer( const checksum256& nullifier, const checksum256& to_commitment,
-                                    uint32_t to_viewtag, uint64_t fee,
+                                    uint32_t to_viewtag, uint64_t fee, uint64_t fee_asset,
                                     const std::vector<uint8_t>& proof ) {
-      payment_gate( nullifier, to_commitment, fee, proof );
+      payment_gate( nullifier, to_commitment, fee, fee_asset, proof );
       law_index law( get_self(), get_self().value );
       auto lr = law.get( 0, "law not initialized" );
       commitment_index cs( get_self(), get_self().value );
@@ -202,6 +204,7 @@ public:
          r.c = to_commitment; r.viewtag = to_viewtag; r.alg = lr.alg_commit;
          r.deposited = current_time_point().sec_since_epoch();
          r.amount = 0;   // PRIVATE since M5: conservation is proven in-circuit
+         r.asset = 0;    // PRIVATE since M7: the asset binds inside the commitment
       });
       tree_insert( to_commitment );   // the new note becomes a SPENDABLE leaf
    }
@@ -211,10 +214,10 @@ public:
    // (amountOut = 0 in the circuit); the out-commitment is not stored.
    // Rehearsed settlement: no token rails on the rehearsal chain — the
    // row-level truth (nullifier + fee = value out + recipient) is the receipt.
-   [[eosio::action]] void withdraw( const checksum256& nullifier, name recipient, uint64_t fee,
+   [[eosio::action]] void withdraw( const checksum256& nullifier, name recipient, uint64_t fee, uint64_t fee_asset,
                                     const checksum256& note_commitment,
                                     const std::vector<uint8_t>& proof ) {
-      payment_gate( nullifier, note_commitment, fee, proof );
+      payment_gate( nullifier, note_commitment, fee, fee_asset, proof );
       require_auth( get_self() );
    }
 
@@ -292,6 +295,12 @@ private:
       return ( (uint64_t)d[0] << 32 ) | (uint64_t)d[1];
    }
 
+   // a uint64 as a 32-byte BE word, shifts ≤ 56 only (the M7 UB law above)
+   static void u64_to_be32_word( unsigned char* dst, uint64_t v ) {
+      memset( dst, 0, 24 );
+      for ( int i = 0; i < 8; ++i ) dst[24 + i] = (unsigned char)( ( v >> (8 * (7 - i)) ) & 0xff );
+   }
+
    // keccak bridge: plonk_verify takes a plain function pointer
    static void pl_kec_eosio( const unsigned char* in, unsigned len, unsigned char out[32] ) {
       auto h = keccak( (const char*)in, len );
@@ -308,19 +317,25 @@ private:
    // (measured in M4: per-caller inlining billed inconsistently).
    __attribute__( ( noinline ) )
    void payment_gate( const checksum256& nullifier, const checksum256& out_commitment,
-                      uint64_t fee, const std::vector<uint8_t>& proof ) {
+                      uint64_t fee, uint64_t fee_asset, const std::vector<uint8_t>& proof ) {
       eosio::check( proof.size() == 24 * 32, "proof: expected 24 words (768 bytes)" );
       law_index law( get_self(), get_self().value );
       auto lr = law.get( 0, "law not initialized" );
-      unsigned char pubs[4 * 32];
+      unsigned char pubs[5 * 32];
       const auto rt = lr.root.extract_as_byte_array();
       const auto n  = nullifier.extract_as_byte_array();
       const auto c  = out_commitment.extract_as_byte_array();
       memcpy( pubs,       rt.data(), 32 );              // [0] root — from the law row
       memcpy( pubs + 32,  n.data(),  32 );              // [1] nullifier
       memcpy( pubs + 64,  c.data(),  32 );              // [2] out commitment
-      for ( int b = 0; b < 32; ++b )                    // [3] fee as BE word
-         pubs[96 + b] = (unsigned char)( (fee >> (8 * (31 - b))) & 0xff );
+      // [3] fee, [4] feeAsset as BE words. THE M7 LAW: shifting a uint64 by
+      // ≥64 is UB — wasm's i64.shr_u takes the shift MOD 64, which once
+      // compiled a repeated-byte fee word that silently desynced the whole
+      // transcript (found by dumping the contract's assembled publics and
+      // word-diffing against the proof; M6's build had lucked into correct
+      // codegen). Write the 8 value bytes with shifts ≤ 56 and zero-fill.
+      u64_to_be32_word( pubs + 96, fee );
+      u64_to_be32_word( pubs + 128, fee_asset );
       int32_t r = plonk_verify( pl_kec_eosio, proof.data(), pubs );
       eosio::check( r == 0, "payment proof REJECTED — plonk pairing false" );
       // nullifier insert (bounded + unique = double-spend refusal)

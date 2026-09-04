@@ -1,12 +1,38 @@
 # contracts/privacy — the estate-run privacy layer (Lane: SPEC-PRIVACY-1)
 
-The M6 state: SOUNDNESS — the merkle root is CONTRACT-COMPUTED (setroot
-deleted; deposit/transfer append leaves and fold 20 Poseidon hashes
-in-contract) and every amount is 64-bit range-checked in-circuit
-(conservation cannot wrap mod p). One proof per spend: membership +
-conservation + range checks + the index-bound nullifier.
-Receipts: SPEC-PRIVACY-1 §m6-receipt + docs/dispatches/RECEIPT-SOUNDNESS-M6.md
-(M5: §m5-receipt + RECEIPT-PAYMENT-M5.md; M4: §m4-receipt + RECEIPT-PLONK-M4.md).
+The M7 state: PER-ASSET CONSERVATION — a note binds (secret, amount,
+asset) as Poseidon(secret, Poseidon(amount, asset)); spends are same-asset
+only (a cross-asset spend has NO witness — refused at generation); value
+balances within the asset; the fee leg (fee + feeAsset, public,
+transcript-bound) may be a DIFFERENT asset — the meter's A against a note
+earned in b — in which case it does not touch the note's value and settles
+outside the shielded balance. One proof per spend: membership (root
+contract-computed, no setter) + per-asset conservation + 64-bit range
+checks + the index-bound nullifier. Receipts: SPEC-PRIVACY-1 §m7-receipt +
+docs/dispatches/RECEIPT-ASSET-M7.md (M6/M5/M4 receipts behind them).
+
+**THE M7 LAW (found live, receipted):** shifting a uint64 by ≥64 is UB —
+wasm's i64.shr_u takes the shift MOD 64, which compiled a repeated-byte
+fee word that silently desynced the transcript (the pairing refused a
+snarkjs-valid proof). Found by dumping the contract's assembled publics
+and word-diffing against the proof. `u64_to_be32_word` writes only
+shifts ≤ 56. M6's build had lucked into correct codegen — UB that worked
+until it didn't.
+
+## The M7 stack
+
+- `payment.circom` — 5 publics (root, nullifier, commitmentOut, fee,
+  feeAsset); assetIn === assetOut (the cross-asset refusal); feeFromNote
+  = fee·[feeAsset == assetIn] (one product — the circom rule); range
+  checks carried over. 13,204 constraints; pot14 reused (universal).
+- `m7prep.js` — the witness builder (note <amount> <asset>; payment
+  <amountOut> <fee> <feeAsset>; crossasset = the refusal fixture).
+- `m7run.sh` — the acceptance pass (two assets, one set; same-asset
+  payment each; the meter's cross-asset fee; cross-asset refused at
+  witness; forged/replay).
+- `note.cpp` — deposit records amount AND asset openly; payment rows keep
+  both private (0, labeled); transfer/withdraw carry fee_asset; the
+  M6 tree/root machinery unchanged.
 
 ## The M6 soundness stack
 

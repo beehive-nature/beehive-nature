@@ -31,7 +31,7 @@
 #include "vk_constants.hpp"
 #include <string.h>
 
-static_assert( N_PUBLIC == 4, "vk binds this circuit (payment.circom): 4 public signals (root, nullifier, commitment_out, fee)" );
+static_assert( N_PUBLIC == 5, "vk binds this circuit (payment.circom): 5 public signals (root, nullifier, commitment_out, fee, feeAsset)" );
 
 typedef void (*plonk_keccak_fn)( const unsigned char* in, unsigned len, unsigned char out[32] );
 

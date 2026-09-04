@@ -425,3 +425,66 @@ leaf index (M5). Its review should say so; the remaining honest surfaces
 it may still probe are labeled: the owner-auth on init/deposit flow
 (governance), the one-participant ceremony label, and the WASM insert
 cost. Findings land in this tree.
+
+## §m7-receipt — PER-ASSET CONSERVATION (2026-09-04, founder-ruled: the pool holds many assets and b is never gas)
+
+**The statement (payment.circom, 5 publics: root, nullifier,
+commitmentOut, fee, feeAsset):** a note binds (secret, amount, asset) as
+commitment = Poseidon(secret, Poseidon(amount, asset)) — single-asset by
+construction, and the tree hashing stays on the proven t=3 Poseidon
+everywhere. `assetIn === assetOut` in-circuit: **a cross-asset spend has
+NO satisfying witness** (receipted: Assert Failed at the asset line).
+Value balances within the asset: amountIn = amountOut + feeFromNote where
+feeFromNote = fee·[feeAsset == assetIn] — the fee counts against the note
+only in its own asset; a fee in a DIFFERENT asset (the meter's A against
+a note earned in b) leaves the note intact and settles publicly, outside
+the shielded balance. Range checks and the contract-computed root carry
+over unchanged (still no setter; every leaf contract-appended).
+
+**On-chain acceptance (`paynote3333`, code hash `efcff944…15ae8`,
+runner `m7run.sh`):**
+- TWO ASSETS, ONE SET: deposits 1000/asset-1 and 500/asset-2 into the
+  same tree (18–19 ms each, assets recorded openly at the on-ramp);
+- **payment 1 (asset-1 note, same-asset fee 10): EXECUTED, 37,831 µs**
+  (blk 51823);
+- **payment 2 (asset-2 b-note, fee 3 in asset 1 — the meter's
+  cross-asset leg, note value intact at 500): EXECUTED, 41,336 µs**
+  (blk 51873);
+- **cross-asset attempt (asset-1 in → asset-2 out): REFUSED AT WITNESS
+  GENERATION** (the circuit's asset assert — no witness exists);
+- FORGED (eval_zw +1) REJECTED by the pairing; REPLAY REJECTED by
+  nullifier uniqueness;
+- final tables: 4 commitments (deposits open: 1000/1, 500/2; payment
+  notes private: 0/0 labeled), nullifiers 2 (alg 2), tree next_index=4 —
+  every leaf appended by the contract itself.
+
+**The M7 law, found live (the lane's discovery):** shifting a uint64 by
+≥64 is undefined behavior — wasm's `i64.shr_u` takes the shift MOD 64,
+which compiled a REPEATED-BYTE fee word (0a at every 8th byte) into the
+publics, silently desyncing the whole Fiat-Shamir transcript: the pairing
+refused a snarkjs-valid proof while every scalar matched the oracle (the
+oracle fed the same UB-free values) and every constant verified against
+snarkjs's own exports. Found by DUMPING the contract's assembled publics
+and word-diffing them against the proof — the mismatched word was the
+fee. `u64_to_be32_word()` now writes only shifts ≤ 56. M6's build had
+lucked into correct codegen for the same UB — UB that worked until it
+didn't; the fix is law, the comment cites it at the site.
+
+**Gates (all re-run on the M7 stack):** field 3,217/3,217 · poseidon2
+68/68 vs circomlibjs · keccak vectors OK · scalar phases 26/26 (L5 joins
+the batch; F1's compile-time bound covers the 5th public) · the oracle
+regenerates byte-identically from the refreshed fixtures (z2.1 F3's set
+now carries the M7 vk/proof/forged — the old set would fail the
+N_PUBLIC=5 size check).
+
+**Billing:** deposits 18–19 ms, payments 37.8/41.3 ms (verify ~12 ms +
+the 20-Poseidon insert — unchanged shape from M6; the pure-verify
+reference stays the M6 withdraw at 11,971 µs; tripwire < 15 ms holds for
+the verify). Ceremony unchanged: pot14, one honest participant,
+rehearsal-labeled until a witnessed multi-party sealing is ruled.
+
+**Labeled bounds:** asset ids are unbounded field elements (a
+range-check lane is named hardening if ids ever carry semantics); the
+cross-asset FEE is enforced in-circuit only in its "counts or not" role —
+its actual settlement in the fee asset is the meter's off-chain lane
+(Lane M), publicly declared and transcript-bound here.
