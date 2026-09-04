@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#07090b">
+<title>the privacy lens · notelab11111</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+/* THE PRIVACY LENS — a two-lens explorer over the live private-note
+   rehearsal on jungle4 (SPEC-PRIVACY-1 §m3.5). One file, vanilla,
+   tokens.css only; comb cells follow CANON-COMB; every hue reads from the
+   estate sheet; identity never rides color alone (glyph + label always).
+   The four chips are SEMANTICS, not decoration:
+     ○ PUBLIC          anyone, from the chain, forever
+     ● PRIVATE         only the key-holder — the chain cannot derive it
+     ◐ PRIVATE AFTER M5 open in this M3 rehearsal row; private once the M5
+                       payment statement governs (amounts live in the note)
+     ◉ NEVER HIDDEN    the audit skeleton the design PROMISES to keep visible */
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{overflow-x:hidden}
+body{background:var(--bg0);color:var(--ink);
+  font:13px/1.65 'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  padding:14px 14px 44px}
+main{max-width:560px;margin:0 auto}
+.crumbs{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:10px;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--faint);
+  padding-bottom:10px;border-bottom:1px solid var(--line)}
+.crumbs a{color:var(--dim);text-decoration:none}
+.crumbs .here{color:var(--ink)}
+.hd{padding:16px 2px 4px}
+.kicker{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--faint)}
+h1{font-size:clamp(22px,5.5vw,30px);line-height:1.12;margin:6px 0 6px;font-weight:600;
+  background-image:linear-gradient(92deg,var(--ink) 40%,var(--gold) 92%);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{color:var(--dim);font-size:11.5px;line-height:1.75;max-width:64ch}
+.lede b{color:var(--ink);font-weight:600}
+/* the lens toggle */
+.lenses{display:flex;gap:8px;margin:14px 0 4px}
+.lenses button{flex:1;background:var(--well);border:1px solid var(--line);
+  border-radius:var(--r-lg);color:var(--dim);padding:11px 8px;cursor:pointer;
+  font:600 12px 'IBM Plex Mono',monospace;letter-spacing:.04em}
+.lenses button[aria-pressed="true"]{color:var(--gold);border-color:var(--gold);
+  box-shadow:var(--glow-gold);background:var(--bg2)}
+.lenses button small{display:block;font-weight:400;font-size:9.5px;color:var(--faint);margin-top:3px}
+.panel{display:none}
+.panel.on{display:block;animation:lenin var(--dur-stage) var(--ease-out)}
+@keyframes lenin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+/* chips — glyph + label + hue, never hue alone */
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:9px;
+  letter-spacing:.06em;border-radius:var(--r-pill);padding:1px 7px 1px 5px;
+  border:1px solid var(--line);vertical-align:1px;white-space:nowrap}
+.chip i{font-style:normal;font-size:10px;line-height:1}
+.chip.pub{color:var(--cyan);border-color:rgba(0,229,255,.35)}
+.chip.priv{color:var(--violet);border-color:rgba(201,160,255,.35)}
+.chip.pm5{color:var(--amber);border-color:rgba(255,179,71,.35)}
+.chip.nev{color:var(--gold);border-color:rgba(255,215,0,.4)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 10px;margin:10px 0 2px;font-size:10px;color:var(--faint)}
+.legend .chip{cursor:help}
+/* the comb strip — three cells over the three live flows */
+.comb{display:flex;justify-content:space-between;align-items:flex-start;
+  padding:10px 2px 6px}
+.cell{width:31%;text-align:center}
+.hex{width:54px;height:60px;margin:0 auto 7px;
+  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+  display:grid;place-items:center;font-size:9.5px;letter-spacing:.04em;
+  transition:background var(--dur-slow) var(--ease)}
+.hex.nectar{background:rgba(0,229,255,.10);color:var(--cyan);box-shadow:inset 0 0 0 1.5px var(--cyan)}
+.hex.nectar.live{animation:nlive 2.4s var(--ease) infinite}
+@keyframes nlive{0%,100%{background:rgba(0,229,255,.10)}50%{background:rgba(0,229,255,.26)}}
+.hex.honey{background:rgba(255,179,71,.16);color:var(--amber);box-shadow:inset 0 0 0 1.5px var(--amber)}
+.hex.honey.live{animation:hlive 2.4s var(--ease) infinite}
+@keyframes hlive{0%,100%{background:rgba(255,179,71,.16)}50%{background:rgba(255,179,71,.34)}}
+.hex.capped{background:var(--gold);color:var(--bg0)}
+.hex .seal{font-size:16px;line-height:1}
+.cell a{display:block;text-decoration:none;color:var(--ink)}
+.cell .l{font-size:11px;font-weight:600}
+.cell .s{font-size:9.5px;color:var(--faint);line-height:1.45;font-variant-numeric:tabular-nums}
+.cell a:hover .l{color:var(--gold)}
+.arrow{color:var(--dim);font-size:17px;flex:none;padding-top:19px}
+.checked{font-size:9.5px;color:var(--faint);margin:4px 0 8px;min-height:13px;font-variant-numeric:tabular-nums}
+/* cards + rows */
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:13px 14px;margin-top:12px}
+.card>h2{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.card>h2 b{color:var(--gold);font-weight:600}
+.plumb{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;
+  font-size:11px;color:var(--dim);padding:4px 0}
+.plumb b{color:var(--ink);font-weight:600}
+details.raw{margin-top:6px}
+details.raw summary{cursor:pointer;font-size:10px;color:var(--faint);list-style:none}
+details.raw summary::before{content:'▸ ';color:var(--dim)}
+details.raw[open] summary::before{content:'▾ '}
+details.raw pre{font-size:9.5px;line-height:1.7;color:var(--faint);white-space:pre-wrap;
+  word-break:break-all;background:var(--well);border:1px solid var(--line);
+  border-radius:var(--r-md);padding:8px 10px;margin-top:6px}
+.act{border:1px solid var(--line);border-radius:var(--r-md);padding:10px 12px;margin-top:9px;
+  background:var(--well)}
+.act .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.act .nm{font-size:13px;font-weight:600;color:var(--ink)}
+.act .nm .dot{color:var(--cyan)}
+.act .cpu{font-size:9.5px;color:var(--faint);font-variant-numeric:tabular-nums}
+.frow{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+  padding:4.5px 0;border-bottom:1px dashed var(--line);font-size:11px}
+.frow:last-child{border-bottom:none}
+.frow .fk{color:var(--faint);flex:none}
+.frow .fv{color:var(--ink);text-align:right;overflow-wrap:anywhere;word-break:break-all}
+.frow .fv a{color:var(--gold);text-decoration:none;border-bottom:1px dashed var(--gold)}
+.tx{font-size:10px;color:var(--gold);word-break:break-all;margin-top:8px;padding:7px 9px;
+  background:var(--well);border:1px solid var(--line);border-radius:var(--r-md)}
+.tx .k{color:var(--faint);font-size:9px;letter-spacing:.08em;text-transform:uppercase;
+  display:block;margin-bottom:3px}
+.tx a{color:var(--gold);text-decoration:none;border-bottom:1px dashed var(--gold)}
+.wall{border:1px dashed var(--violet);border-radius:var(--r-md);padding:10px 12px;
+  margin-top:11px;font-size:11px;line-height:1.7;color:var(--dim)}
+.wall b{color:var(--violet)}
+.wall .why{color:var(--faint);font-size:10px}
+/* owner's lens */
+.ownkey{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.ownkey input{flex:1;min-width:200px;background:var(--well);border:1px solid var(--line);
+  border-radius:var(--r-md);color:var(--gold);padding:10px 12px;outline:none;
+  font:12px 'IBM Plex Mono',monospace}
+.ownkey input:focus{border-color:var(--gold)}
+.ownkey button{background:var(--gold);color:var(--bg0);border:none;border-radius:var(--r-md);
+  padding:10px 16px;font:600 12px 'IBM Plex Mono',monospace;cursor:pointer}
+.ownkey button:hover{background:var(--ink-hi)}
+.ownkey button.ghost{background:transparent;color:var(--gold);border:1.5px solid var(--gold)}
+.lawline{font-size:10.5px;color:var(--faint);line-height:1.7;margin-top:8px}
+.lawline b{color:var(--dim);font-weight:600}
+.note-row{border:1px solid var(--line);border-radius:var(--r-md);padding:10px 12px;
+  margin-top:9px;background:var(--well);font-size:11px}
+.note-row.locked{border-style:dashed}
+.note-row .nh{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.note-row .nh b{color:var(--ink);font-size:11.5px;word-break:break-all}
+.note-row .body{color:var(--dim);line-height:1.7;margin-top:5px}
+.note-row .body .yours{color:var(--ok);font-weight:600}
+.note-row .body .spent{color:var(--amber)}
+.note-row .body .live{color:var(--leaf)}
+.demoline{border:1px dashed var(--line);border-radius:var(--r-md);padding:9px 11px;
+  margin-top:11px;font-size:10.5px;color:var(--dim);line-height:1.7}
+.demoline b{color:var(--ink)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.two .col{border:1px solid var(--line);border-radius:var(--r-md);padding:8px 10px;font-size:10px}
+.two .col h4{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-bottom:5px}
+.two .col .v{color:var(--dim);word-break:break-all;line-height:1.65}
+.two .col.key h4{color:var(--violet)}
+.two .col.key .v{color:var(--violet)}
+.foot{padding:18px 2px 6px;font-size:10.5px;color:var(--faint);line-height:1.75;
+  border-top:1px solid var(--line);margin-top:18px}
+.foot b{color:var(--dim)}
+.foot a{color:var(--dim)}
+@media (prefers-reduced-motion:reduce){.hex.nectar.live,.hex.honey.live{animation:none}}
+</style>
+</head>
+<body>
+<main>
+<nav class="crumbs" aria-label="you are here">
+  <a href="index.html">beehive nature reserve</a><span>▸</span><span class="here">the privacy lens</span>
+</nav>
+
+<header class="hd">
+  <div class="kicker">⬡ full understanding · the private note, both sides of the glass</div>
+  <h1>the privacy lens</h1>
+  <p class="lede">one note contract, <b>notelab11111</b>, live on the public jungle4
+  rehearsal chain — read by two very different people. The <b>stranger</b> sees
+  everything the chain will ever say. The <b>owner</b> holds the only key that
+  opens a note. Same bytes, different worlds — and the border between them is
+  not a promise, it is arithmetic.</p>
+  <div class="legend" aria-label="the four chip classes">
+    <span class="chip pub"><i>○</i>PUBLIC</span>
+    <span class="chip priv"><i>●</i>PRIVATE</span>
+    <span class="chip pm5"><i>◐</i>PRIVATE AFTER M5</span>
+    <span class="chip nev"><i>◉</i>NEVER HIDDEN</span>
+  </div>
+</header>
+
+<div class="lenses" role="group" aria-label="which lens">
+  <button id="lstranger" aria-pressed="true">stranger's lens<small>what anyone can see</small></button>
+  <button id="lowner" aria-pressed="false">owner's lens<small>what your key unlocks</small></button>
+</div>
+
+<!-- ═══════════ THE STRANGER'S LENS ═══════════ -->
+<section class="panel on" id="pstranger" aria-label="the stranger's lens">
+  <div class="card">
+    <h2>the three flows <b>· status read live</b></h2>
+    <div class="comb" id="vcomb" aria-live="polite">
+      <div class="cell" id="f-deposit"><a id="f-deposit-a" href="#" target="_blank" rel="noopener">
+        <div class="hex nectar">deposit</div><div class="l">value walks in</div></a>
+        <div class="s" id="f-deposit-s">reading…</div></div>
+      <div class="arrow" aria-hidden="true">›</div>
+      <div class="cell" id="f-transfer"><a id="f-transfer-a" href="#" target="_blank" rel="noopener">
+        <div class="hex nectar">transfer</div><div class="l">value moves, sealed</div></a>
+        <div class="s" id="f-transfer-s">reading…</div></div>
+      <div class="arrow" aria-hidden="true">›</div>
+      <div class="cell" id="f-withdraw"><a id="f-withdraw-a" href="#" target="_blank" rel="noopener">
+        <div class="hex nectar"><span class="seal">⬡</span></div><div class="l">value walks out</div></a>
+        <div class="s" id="f-withdraw-s">reading…</div></div>
+    </div>
+    <div class="checked" id="vchecked"></div>
+    <p class="lawline">the comb speaks the estate's canon: <b>nectar</b> (sent, not yet seen) →
+    <b>honey</b> (in a block) → <b>capped</b> (irreversible — the wax seal). Click a cell:
+    each lands on the official monitor at the exact action, deep-link verified.</p>
+  </div>
+
+  <div class="card">
+    <h2>the plumbing <b>· folded, never hidden</b></h2>
+    <div class="plumb" id="vplumb">reading the sponsor actions…</div>
+    <details class="raw"><summary>unfold anyway — nothing is hidden, only folded</summary>
+      <pre id="vplumbraw">…</pre></details>
+    <p class="lawline">the sponsor law: <b>the machine pays, the member never does</b>.
+    Every transaction here was carried by a sponsor's CPU and RAM — that is
+    plumbing, not privacy. Folded for the same reason you don't read the water
+    bill to learn someone's name.</p>
+  </div>
+
+  <div class="card">
+    <h2>the ledger <b>· every action, every field, chipped</b></h2>
+    <div id="vacts">reading notelab11111's public history…</div>
+    <div class="wall" id="vwall">
+      <b>the wall:</b> which note did the transfer spend? <span class="chip priv"><i>●</i>PRIVATE</span><br>
+      The chain holds the nullifier <span style="color:var(--ink)">8f412716…</span> and the
+      commitment <span style="color:var(--ink)">33df36ad…</span> in different tables with no
+      public link between them. Not "we won't tell you" — <i>the information is not
+      there to tell</i>. Only the owner's key can name the spent note.
+      <div class="why">this row exists to show you the wall, not to climb it</div>
+    </div>
+    <div class="lawline"><b>what M5 changes:</b> when the payment statement governs
+    (SPEC-PRIVACY-1 §m5 — membership + conservation, Poseidon tree, PLONK proof),
+    the <span class="chip pm5"><i>◐</i>PRIVATE AFTER M5</span> fields stop being
+    readable in the row: the value will live only inside the note. The audit
+    skeleton — the <span class="chip nev"><i>◉</i>NEVER HIDDEN</span> rows — stays
+    exactly as visible as it is right now.</div>
+  </div>
+</section>
+
+<!-- ═══════════ THE OWNER'S LENS ═══════════ -->
+<section class="panel" id="powner" aria-label="the owner's lens">
+  <div class="card">
+    <h2>your key <b>· the only door</b></h2>
+    <p class="lawline">every commitment row carries a public <b>view tag</b> — four bytes
+    that mean nothing to anyone except the key that made them. Paste your view
+    key and the lens derives each row's tag and unlocks <b>which note is yours,
+    from whom, and its balance</b>. Add the note secret and it proves the note
+    and names the nullifier that spent it. The key never leaves this page:
+    there is no server, and the derivation runs in your browser.</p>
+    <div class="ownkey">
+      <input id="ovk" type="text" placeholder="view key — 64 hex chars" spellcheck="false" aria-label="your view key">
+      <input id="osk" type="text" placeholder="note secret — optional, 64 hex" spellcheck="false" aria-label="your note secret" style="color:var(--violet)">
+      <button id="ounlock">unlock</button>
+    </div>
+    <div id="ownout"></div>
+  </div>
+
+  <div class="card">
+    <h2>the live notes <b id="onotecount">…</b></h2>
+    <div id="onotes">reading the commitment set…</div>
+    <p class="lawline">the two rehearsal notes above stay locked to everyone —
+    <b>including us</b>: their keys were random per run and never recorded, on
+    purpose. A member's key never leaves their device. That is not a missing
+    feature; that is the privacy working.</p>
+    <div class="demoline" id="odemo">
+      <b>hold a key of your own:</b> mint a demo note in this page — the same
+      arithmetic the chain's rehearsal used (commitment = SHA3-256(secret‖amount),
+      view tag = SHA3-256(viewkey‖commitment), nullifier = SHA3-256(secret‖"null-v1") —
+      contracts/privacy/m3.js, mirrored exactly) — then unlock it below and watch
+      the stranger's view and the owner's view split apart. The demo never touches
+      the chain; the arithmetic is identical.
+      <div class="ownkey" style="margin-top:8px">
+        <button class="ghost" id="omint">mint a demo note under a fresh key</button>
+      </div>
+    </div>
+    <div id="odemout"></div>
+  </div>
+
+  <div class="card">
+    <h2>what the owner sees that the chain never will</h2>
+    <div class="frow"><span class="fk">which note is yours</span>
+      <span class="fv"><span class="chip priv"><i>●</i>PRIVATE</span> view-tag match</span></div>
+    <div class="frow"><span class="fk">from whom it came</span>
+      <span class="fv"><span class="chip priv"><i>●</i>PRIVATE</span> your records + your key</span></div>
+    <div class="frow"><span class="fk">its balance (after M5)</span>
+      <span class="fv"><span class="chip pm5"><i>◐</i>PRIVATE AFTER M5</span> lives in the note</span></div>
+    <div class="frow"><span class="fk">which nullifier spent it</span>
+      <span class="fv"><span class="chip priv"><i>●</i>PRIVATE</span> provable only by the owner</span></div>
+    <div class="frow"><span class="fk">selective disclosure</span>
+      <span class="fv"><span class="chip priv"><i>●</i>PRIVATE</span> owner→auditor, off-chain, by design</span></div>
+    <p class="lawline">the disclosure law (SPEC-PRIVACY-1 §m3): the owner can
+    <b>prove their own history</b> to an auditor they choose — disclosure by the
+    key-holder, never de-privacy by the system. The chain never sees the
+    disclosure.</p>
+  </div>
+</section>
+
+<footer class="foot">
+  <b>new bee:</b> the world can see THAT your money moved — never whose it was,
+  and after M5 never how much. · <b>raver:</b> your key is the only door; lose it
+  and even we cannot open your notes — that's not a bug in the support flow,
+  it's the product. · <b>cypherpunk:</b> keccak-v1 commitments, nullifier set
+  with no public link, view tags = Zano's auditable-wallet pattern, M5 =
+  Poseidon(secret, leaf_index) membership + conservation behind a PLONK gate
+  measured ≈9–11 ms on-chain — <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/specs/SPEC-PRIVACY-1.md">SPEC-PRIVACY-1</a>,
+  every claim receipted.<br>
+  read live from jungle4 (notelab11111 · rehearsal net · law row alg_commit 1 ·
+  alg_proof 1) · the M5 payment statement landed on the rehearsal chain as
+  notepay2222 — old and new rows distinguishable forever (crypto-agility law)
+</footer>
+</main>
+
+<script>
+'use strict';
+/* ═══ LIVE TRUTH — notelab11111 on jungle4, read at load, never stored ═══ */
+const RPC = 'https://jungle4.greymass.com';
+const ACCT = 'notelab11111';                 // TESTNET-ONLY jungle4 rehearsal seat
+const MONITOR_TX = 'https://monitor.jungletestnet.io/#accountActions:';
+const FLOWS = {                               // receipted txids (SPEC-PRIVACY-1 §m3.5) — the lens verifies them LIVE
+  deposit:  '6a7ed2ba0137aa1a84d3fad3b7064aa558b1c2712a793ed2abed73986ecbee29', // PUBLIC-CONSTANT jungle4 deposit txid
+  transfer: '3cd367ffe35bd2d902213afe9d18686c9365ee2bb77113b41451543b2cdedcd6', // PUBLIC-CONSTANT jungle4 private-transfer txid
+  withdraw: 'fb9e615541a771ac3be931cbfdfc2d27d63f207c446729ada4fd75a41b1c7876', // PUBLIC-CONSTANT jungle4 withdraw txid
+  init:     'b31a1efddd4b660392971bbe8faf63868576b60439634b5cf39bea2d55051fc7'  // PUBLIC-CONSTANT jungle4 init txid
+};
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const post = (path, body) => fetch(RPC + path, { method: 'POST',
+  headers: { 'content-type': 'application/json' }, body: JSON.stringify(body),
+  signal: AbortSignal.timeout(20000) }).then(r => r.json().catch(() => ({})));
+const hex = b => [...b].map(x => x.toString(16).padStart(2, '0')).join('');
+const state = { acts: [], commits: [], nulls: [], law: null, info: null, localNotes: [] };
+window.__lens = state;
+
+/* ═══ SHA3-256 in-file (keccak-f[1600], NIST padding) — because the browser's
+   subtle-crypto has no SHA3, and the note arithmetic is SHA3 (m3.js law).
+   Self-checked at boot against NIST vectors; if the check fails the owner's
+   lens degrades honestly instead of lying. ═══ */
+const RC = [0x0000000000000001n,0x0000000000008082n,0x800000000000808an,0x8000000080008000n,
+  0x000000000000808bn,0x0000000080000001n,0x8000000080008081n,0x8000000000008009n,
+  0x000000000000008an,0x0000000000000088n,0x0000000080008009n,0x000000008000000an,
+  0x000000008000808bn,0x800000000000008bn,0x8000000000008089n,0x8000000000008003n,
+  0x8000000000008002n,0x8000000000000080n,0x000000000000800an,0x800000008000000an,
+  0x8000000080008081n,0x8000000000008080n,0x0000000080000001n,0x8000000080008008n];
+const ROT = [[0,36,3,41,18],[1,44,10,45,2],[62,6,43,15,61],[28,55,25,21,56],[27,20,39,8,14]];
+const M64 = 0xffffffffffffffffn;                     /* BigInt does not wrap — mask every rotation */
+const rotl = (v, r) => r ? (((v << BigInt(r)) | (v >> BigInt(64 - r))) & M64) : v;
+function keccakF(S){ // S: 25 BigInt lanes, flat index x + 5y (the reference mapping)
+  for (let round = 0; round < 24; round++) {
+    const C = new Array(5), D = new Array(5);
+    for (let x = 0; x < 5; x++) C[x] = S[x] ^ S[x+5] ^ S[x+10] ^ S[x+15] ^ S[x+20];
+    for (let x = 0; x < 5; x++) D[x] = C[(x+4)%5] ^ rotl(C[(x+1)%5], 1);
+    for (let x = 0; x < 5; x++) for (let y = 0; y < 5; y++) S[x+5*y] ^= D[x];
+    const B = new Array(25).fill(0n);
+    for (let x = 0; x < 5; x++) for (let y = 0; y < 5; y++)
+      B[y + 5*((2*x+3*y)%5)] = rotl(S[x+5*y], ROT[x][y]);   /* ρ then π: B[y,2x+3y] = rot(A[x,y]) */
+    for (let y = 0; y < 5; y++) for (let x = 0; x < 5; x++) /* χ: across x, within one y */
+      S[x+5*y] = B[x+5*y] ^ ((~B[(x+1)%5 + 5*y] & M64) & B[(x+2)%5 + 5*y]);
+    S[0] ^= RC[round];
+  }
+  return S;
+}
+function sha3_256(bytes){ // SHA3-256: rate 136 B, pad 0x06 … 0x80
+  const RATE = 136, padded = bytes.concat(0x06);
+  const blocks = [];
+  for (let i = 0; i < padded.length; i += RATE) {
+    const b = padded.slice(i, i + RATE);
+    while (b.length < RATE) b.push(0);
+    blocks.push(b);
+  }
+  blocks[blocks.length - 1][RATE - 1] |= 0x80;
+  let S = new Array(25).fill(0n);
+  for (const b of blocks) {
+    for (let i = 0; i < RATE / 8; i++) {
+      let lane = 0n;
+      for (let j = 7; j >= 0; j--) lane = (lane << 8n) | BigInt(b[i*8+j]);
+      S[i] ^= lane;
+    }
+    S = keccakF(S);
+  }
+  const out = new Uint8Array(32);
+  for (let i = 0; i < 4; i++) {
+    let lane = S[i];
+    for (let j = 0; j < 8; j++) { out[i*8+j] = Number(lane & 0xffn); lane >>= 8n; }
+  }
+  return out;
+}
+const K = arr => hex(sha3_256(arr));          // hex digest of a byte array
+const bytesOf = hexstr => hexstr.match(/.{2}/g)?.map(x => parseInt(x, 16)) || [];
+const utf8 = s => [...new TextEncoder().encode(s)];
+let SHA3_OK = false;
+(function selfcheck(){
+  const v0 = K([]); const v1 = K(utf8('abc'));
+  SHA3_OK = v0 === 'a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a' // PUBLIC-CONSTANT NIST SHA3-256("") vector
+          && v1 === '3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532'; // PUBLIC-CONSTANT NIST SHA3-256("abc") vector
+  state.sha3 = SHA3_OK ? 'self-check passed (NIST vectors)' : 'SELF-CHECK FAILED';
+})();
+
+/* the note arithmetic, mirroring contracts/privacy/m3.js exactly */
+const amtBytes = amt => bytesOf(amt.toString(16).padStart(16, '0'));
+const derive = {
+  commitment: (sk, amt) => K(bytesOf(sk).concat(amtBytes(amt))),
+  viewtag: (vk, c) => { const t = K(bytesOf(vk).concat(bytesOf(c))); return parseInt(t.slice(0, 8), 16) >>> 0; },
+  nullifier: sk => K(bytesOf(sk).concat(utf8('null-v1'))),
+};
+
+/* ═══ chips ═══ */
+const CHIP = {
+  pub:  t => `<span class="chip pub"><i>○</i>PUBLIC</span>`,
+  priv: () => `<span class="chip priv"><i>●</i>PRIVATE</span>`,
+  pm5:  () => `<span class="chip pm5"><i>◐</i>PRIVATE AFTER M5</span>`,
+  nev:  () => `<span class="chip nev"><i>◉</i>NEVER HIDDEN</span>`,
+};
+
+/* ═══ live reads ═══ */
+async function readAll(){
+  const [hist, commits, nulls, law] = await Promise.all([
+    post('/v1/history/get_actions', { account_name: ACCT, pos: 0, offset: 100 }),
+    post('/v1/chain/get_table_rows', { json: true, code: ACCT, scope: ACCT, table: 'commitments', limit: 50 }),
+    post('/v1/chain/get_table_rows', { json: true, code: ACCT, scope: ACCT, table: 'nullifiers', limit: 50 }),
+    post('/v1/chain/get_table_rows', { json: true, code: ACCT, scope: ACCT, table: 'law', limit: 5 }),
+  ]);
+  state.acts = (hist.actions || []).map(a => ({ seq: a.account_action_seq, block: a.block_num,
+    trx: a.action_trace?.trx_id, act: a.action_trace?.act, irrev: !!a.irreversible, when: a.block_time }));
+  state.commits = commits.rows || []; state.nulls = nulls.rows || []; state.law = (law.rows || [])[0] || null;
+  renderStranger(); renderOwnerStatic();
+}
+async function tickInfo(){
+  try { const i = await post('/v1/chain/get_info', {}); state.info = i;
+    $('vchecked').textContent = `checked just now · head ${i.head_block_num.toLocaleString('en-US')} · irreversible through ${i.last_irreversible_block_num.toLocaleString('en-US')} · jungle4`;
+  } catch { $('vchecked').textContent = 'chain check unreachable — n/m'; }
+}
+
+/* ═══ the stranger's lens ═══ */
+const fmtWhen = t => (t || '').replace('T', ' ').slice(0, 19) + ' UTC';
+function flowState(name, txid){
+  const a = state.acts.find(x => x.trx === txid);
+  const cell = $('f-' + name), hexEl = cell.querySelector('.hex'), s = $('f-' + name + '-s');
+  const link = $('f-' + name + '-a'); link.href = MONITOR_TX + txid;
+  if (!a) { s.textContent = 'not seen on chain (yet)'; hexEl.classList.add('live'); return; }
+  hexEl.classList.remove('nectar'); hexEl.classList.add(a.irrev ? 'capped' : 'honey');
+  if (!a.irrev) hexEl.classList.add('live');
+  s.innerHTML = `${a.irrev ? 'final ✓ irreversible' : 'in a block · sealing'} · ${(a.block||0).toLocaleString('en-US').replace(/,/g,' ')}<br>${fmtWhen(a.when)}`;
+}
+function renderStranger(){
+  /* the comb strip carries the three FLOWS; init rides in the ledger below */
+  for (const [name, txid] of Object.entries(FLOWS)) { if (name === 'init') continue; flowState(name, txid); }
+  /* plumbing: everything that is not the contract's own four actions */
+  const plumb = state.acts.filter(a => !(a.act?.account === ACCT));
+  const ram = plumb.filter(a => a.act?.name === 'buyrambytes');
+  const code = plumb.filter(a => a.act?.name === 'setcode' || a.act?.name === 'setabi');
+  $('vplumb').innerHTML =
+    `<span class="chip nev"><i>◉</i>NEVER HIDDEN</span> <b>${plumb.length} sponsor actions</b> folded: ` +
+    `${ram.length} RAM buys (${ram.reduce((n,a)=>n+(a.act?.data?.bytes||0),0).toLocaleString('en-US')} bytes), ` +
+    `${code.length} code/ABI sets — paid by <b>bnrapolltest</b>, the sponsor law`;
+  $('vplumbraw').textContent = plumb.map(a =>
+    `seq ${a.seq} · blk ${a.block} · ${a.act?.account}::${a.act?.name} · ${JSON.stringify(a.act?.data).slice(0, 90)}${JSON.stringify(a.act?.data).length > 90 ? '…' : ''}`
+  ).join('\n');
+  /* the ledger: the contract's own actions, every field chipped */
+  const own = state.acts.filter(a => a.act?.account === ACCT);
+  const rows = own.map(a => {
+    const d = a.act?.data || {}, n = a.act?.name;
+    let fields = '';
+    const f = (k, v, chip) => `<div class="frow"><span class="fk">${k}</span><span class="fv">${v} ${chip}</span></div>`;
+    if (n === 'init') fields =
+      f('max notes', d.max_notes, CHIP.nev()) + f('max nullifiers', d.max_nulls, CHIP.nev());
+    if (n === 'deposit') fields =
+      f('amount in', d.amount + ' (the on-ramp stays open)', CHIP.pub()) +
+      f('commitment', `<span style="color:var(--gold)">${esc((d.c||'').slice(0,10))}…</span> the note itself`, CHIP.pub()) +
+      f('view tag', d.viewtag + ' — meaningful only to its key', CHIP.pub()) +
+      f('who owns it', 'the chain cannot say', CHIP.priv());
+    if (n === 'transfer') fields =
+      f('fee', d.fee, CHIP.pub()) +
+      f('nullifier', `<span style="color:var(--gold)">${esc((d.nullifier||'').slice(0,10))}…</span> — a receipt stub, spent once`, CHIP.nev()) +
+      f('to-amount', d.to_amount + ' — open in this M3 rehearsal row', CHIP.pm5()) +
+      f('to-commitment', `<span style="color:var(--gold)">${esc((d.to_commitment||'').slice(0,10))}…</span>`, CHIP.pub()) +
+      f('which note it spent', 'not on the chain — only the owner can name it', CHIP.priv());
+    if (n === 'withdraw') fields =
+      f('amount out', d.amount + ' (public money at the exit)', CHIP.pub()) +
+      f('recipient', `<b style="color:var(--cyan)">${esc(d.recipient)}</b>`, CHIP.pub()) +
+      f('fee', d.fee, CHIP.pub()) +
+      f('nullifier', `<span style="color:var(--gold)">${esc((d.nullifier||'').slice(0,10))}…</span>`, CHIP.nev());
+    return `<div class="act"><div class="top">
+      <span class="nm"><span class="dot">◆</span> ${esc(n)} · notelab11111</span>
+      <span class="cpu">blk ${a.block} · ${fmtWhen(a.when)} · ${a.irrev ? '<span style="color:var(--ok)">final ✓</span>' : 'sealing'}</span></div>
+      ${fields}
+      <div class="tx"><span class="k">the action on the official monitor</span><a href="${MONITOR_TX}${esc(a.trx)}" target="_blank" rel="noopener">${esc(a.trx)}</a></div>
+    </div>`;
+  });
+  $('vacts').innerHTML = rows.join('') || 'no contract actions found';
+}
+
+/* ═══ the owner's lens ═══ */
+function noteCard(c, yours){
+  const spent = state.nulls.find(n => n.n === (yours?.nullifier));
+  const born = c.local ? 'just now, in this page' :
+    (c.deposited ? new Date((c.deposited||0)*1000).toISOString().slice(0,19).replace('T',' ') + ' UTC' : '');
+  return `<div class="note-row ${yours ? '' : 'locked'}">
+    <div class="nh"><b>${esc(c.c.slice(0, 12))}…${esc(c.c.slice(-6))}</b>
+      ${yours ? '<span class="chip priv"><i>●</i>YOURS</span>' : '<span class="chip priv"><i>●</i>PRIVATE</span>'}</div>
+    <div class="body">${yours ? `
+      <span class="yours">unlocked by your view key.</span> born ${born} ·
+      from ${yours.from} ·
+      balance <b style="color:var(--gold)">${c.amount}</b>
+      ${yours.secretOk
+        ? (spent ? `· <span class="spent">spent</span>: nullifier ${spent.n.slice(0,8)}… at ${new Date((spent.spent_at||0)*1000).toISOString().slice(0,16).replace('T',' ')} UTC` : '· live — no nullifier matches, the note is unspent')
+        : '· add the note secret to prove it and name its nullifier'}
+    ` : `
+      locked — its view tag (${c.viewtag}) is public bytes that mean nothing
+      without the key that made them. Balance ${c.amount} sits open in this M3
+      rehearsal row <span class="chip pm5"><i>◐</i>PRIVATE AFTER M5</span>; the row itself
+      <span class="chip nev"><i>◉</i>NEVER HIDDEN</span>.
+    `}</div></div>`;
+}
+function renderOwnerStatic(){
+  $('onotecount').textContent = `· ${state.commits.length} live in the set`;
+  $('onotes').innerHTML = state.commits.map(c => noteCard(c, null)).join('')
+    || 'the commitment set is empty';
+}
+function unlock(){
+  const out = $('ownout');
+  if (!SHA3_OK) { out.innerHTML = `<p class="lawline" style="color:var(--flag)">the SHA3 primitive failed its self-check — the owner's lens refuses to guess. n/m</p>`; return; }
+  const vk = $('ovk').value.trim().toLowerCase().replace(/^0x/, '');
+  const sk = $('osk').value.trim().toLowerCase().replace(/^0x/, '');
+  if (!/^[0-9a-f]{64}$/.test(vk)) { out.innerHTML = `<p class="lawline" style="color:var(--amber)">a view key is 64 hex chars — paste one (or mint a demo note below to hold a real pair).</p>`; return; }
+  let any = false;
+  /* the lens matches the chain's live rows AND this page's demo notes — the
+     same derivation, honestly labeled */
+  const rows = state.commits.concat(state.localNotes || []);
+  $('onotes').innerHTML = rows.map(c => {
+    const tag = derive.viewtag(vk, c.c);
+    const mine = tag === (c.viewtag >>> 0);
+    if (!mine) return noteCard(c, null);
+    any = true;
+    const secretOk = /^[0-9a-f]{64}$/.test(sk) && derive.commitment(sk, c.amount) === c.c;
+    return noteCard(c, { from: c.local ? 'your own key ceremony, this page (demo)'
+        : 'the machine\'s sponsored deposit (auth notelab11111)',
+      secretOk, nullifier: secretOk ? derive.nullifier(sk) : null });
+  }).join('');
+  out.innerHTML = any
+    ? `<p class="lawline"><span style="color:var(--ok)">✓ ${any ? 'note(s) unlocked — see above' : ''}</span> — matched by view-tag derivation, live against the chain's own rows.</p>`
+    : `<p class="lawline">no note opens under this key — the derivation ran on every live commitment row and none is yours. (honest answer, never a guess.)</p>`;
+}
+function mintDemo(){
+  const rnd = n => hex(crypto.getRandomValues(new Uint8Array(n)));
+  const sk = rnd(32), vk = rnd(32), amt = 1000 + Math.floor(Math.random() * 9000);
+  const c = derive.commitment(sk, amt), tag = derive.viewtag(vk, c), nul = derive.nullifier(sk);
+  state.demo = { sk, vk, amt, c, tag, nul };
+  $('odemout').innerHTML = `
+    <div class="two">
+      <div class="col"><h4>as the chain sees it (stranger)</h4><div class="v">
+        commitment <span style="color:var(--gold)">${esc(c.slice(0,16))}…</span><br>
+        view tag ${tag} ${CHIP.pub()}<br>
+        balance — not the chain's business ${CHIP.priv()}<br>
+        who — not the chain's business ${CHIP.priv()}</div></div>
+      <div class="col key"><h4>as your key sees it (owner)</h4><div class="v">
+        secret ${esc(sk.slice(0,10))}… (never leaves this page)<br>
+        balance <b>${amt}</b> ${CHIP.priv()}<br>
+        nullifier ${esc(nul.slice(0,10))}… ${CHIP.priv()}<br>
+        view key ${esc(vk.slice(0,10))}… — yours alone</div></div>
+    </div>
+    <div class="ownkey" style="margin-top:9px">
+      <button class="ghost" id="odemo-unlock">unlock it in the owner's lens →</button>
+      <button class="ghost" id="odemo-copy">copy the key pair</button></div>
+    <p class="lawline">this note lives only in this page — labeled demo because it is not on the
+    chain; the arithmetic is the chain's own (m3.js mirrored; SHA3 self-check
+    ${SHA3_OK ? '<span style="color:var(--ok)">passed</span>' : '<span style="color:var(--flag)">FAILED</span>'}).</p>`;
+  $('odemo-unlock').onclick = () => {
+    /* the demo note joins the lens's local overlay — the unlock runs the real
+       matcher (chain rows + demo) with the demo's own keys */
+    if (!state.localNotes.some(n => n.c === c))
+      state.localNotes.push({ c, viewtag: tag, amount: amt,
+        deposited: Math.floor(Date.now() / 1000), local: true });
+    $('ovk').value = vk; $('osk').value = sk; unlock();
+    $('ovk').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+  $('odemo-copy').onclick = () => navigator.clipboard.writeText(
+    `view key ${vk}\nsecret ${sk}\ncommitment ${c}\nviewtag ${tag}\nnullifier ${nul}\namount ${amt}`);
+}
+$('ounlock').addEventListener('click', unlock);
+$('omint').addEventListener('click', mintDemo);
+
+/* lens toggle (+ ?lens= deep-link from the EDU course) */
+function setLens(which){
+  const stranger = which !== 'owner';
+  $('lstranger').setAttribute('aria-pressed', stranger ? 'true' : 'false');
+  $('lowner').setAttribute('aria-pressed', stranger ? 'false' : 'true');
+  $('pstranger').classList.toggle('on', stranger);
+  $('powner').classList.toggle('on', !stranger);
+  state.lens = stranger ? 'stranger' : 'owner';
+}
+$('lstranger').addEventListener('click', () => setLens('stranger'));
+$('lowner').addEventListener('click', () => setLens('owner'));
+setLens(new URLSearchParams(location.search).get('lens'));
+
+/* boot */
+(async () => {
+  tickInfo(); setInterval(tickInfo, 15000);
+  try { await readAll(); } catch (e) {
+    $('vacts').textContent = 'chain unread — the lens shows nothing it did not read (n/m)';
+    $('onotes').textContent = 'chain unread (n/m)';
+  }
+})();
+</script>
+</body>
+</html>

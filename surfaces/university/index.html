@@ -379,6 +379,30 @@ var COURSES=[
     hex:['#3f9c55','#a476ec','#c07f1c','#0092a6'],
     rline:function(){ return '[bUni · c5] pair law passed: validated order restored — worst adjacent ΔE '+K.dE_tritan+' (tritan) with green⊗orange held non-adjacent (protan '+K.dE_protan+'); reorder = revalidate'; }
   }
+},
+{ id:'c6', glyph:'🔒', name:'how your private note works',
+  src:'SPEC-PRIVACY-1 (§m3 design · §m3.5 the live jungle4 rehearsal · §m5 the payment statement) · the two-lens explorer surfaces/privacy-lens.html',
+  srcl:'https://github.com/beehive-nature/beehive-nature/blob/main/docs/specs/SPEC-PRIVACY-1.md',
+  prose:{
+   bee:'Your money can live on a public chain without the chain knowing whose it is. The trick is the <b>note</b>: when value walks in, the chain does not store "Travis sent 1000" — it stores a sealed commitment, a scrambled fingerprint that cannot be turned back into the note. When you spend, you show a <b>nullifier</b> — a receipt stub that proves "some note was destroyed" without saying which one. The chain checks the stub was never used before (no double-spending, ever) and never learns which note it was. Two things stay visible to everyone forever: THAT value moved, and THAT each sealed note can only be spent once. Two things are yours alone: which notes are yours (a <b>view key</b> recognizes its own notes by their tag) and — once the M5 upgrade governs — how much a moved note carries. Lose the key and even the estate cannot open your notes. That is not a support gap; that is the product.',
+   raver:'The private note runs on four visibility classes, and the lens shows all four live. <b>PUBLIC</b> — anyone reading the chain sees the commitment (the sealed fingerprint), the nullifier (the spent-once stub), the fees, the timestamps. <b>NEVER HIDDEN</b> — the promise that the audit skeleton (the commitment set, the nullifier set, the fact that value moved) stays visible in every future version; privacy here never becomes anonymity. <b>PRIVATE</b> — which note is yours, which note a nullifier spent, who stands behind a commitment: the chain literally does not contain these facts; your view key derives them. <b>PRIVATE AFTER M5</b> — the amounts sit open in today\'s rehearsal rows, honestly labeled; the M5 payment statement (Poseidon merkle membership + conservation behind a PLONK proof measured ≈9–11 ms on-chain) moves the value inside the note where only your key reaches it. Even the plumbing is honest: a sponsor pays every transaction so the machine\'s fuel is public knowledge, not a hidden cost.',
+   cypherpunk:'The note system as built and receipted (SPEC-PRIVACY-1): commitment = SHA3-256(secret‖amount_be16) (alg keccak256-v1; Poseidon-bn254 is the named successor), view tag = SHA3-256(viewkey‖commitment)[0..4] — Zano\'s auditable-wallet pattern, selective disclosure stays owner→auditor and off-chain; spend = nullifier insert + gate proof, and the nullifier↔commitment link exists nowhere on chain — the unlinkability is structural, not procedural. M5 (notepay2222, rehearsal) upgrades the statement to membership (depth-20 Poseidon tree, nullifier = Poseidon(secret, leaf_index) with the index derived IN-CIRCUIT — one spendable nullifier per leaf, the free-tag inflation bug fixed before z2 could file it) + conservation (amountIn = amountOut + fee; fee public = the meter\'s leg; unbalanced claims cannot verify — the publics are transcript-bound). Verify cost ≈9–11 ms uncontended (tripwire &lt;15 ms), pot14 universal ceremony, rehearsal-labeled. Bounded-rows law: the chain holds law + commitment set + nullifier set, never bulk history — history lives under the member\'s key. Walk the live rehearsal at <a href="../privacy-lens.html?lens=stranger">the stranger\'s lens</a> (notelab11111 on jungle4, every field chipped) and <a href="../privacy-lens.html?lens=owner">the owner\'s lens</a> (paste a key, or mint a demo note and unlock it — the SHA3 runs in your browser, self-checked against NIST vectors).'
+  },
+  act:{
+    h:'🔍 ACT — what does the chain actually learn from a private transfer?',
+    q:'A private transfer just executed on the public chain. Tick the honest sentence about what ANY stranger reading that chain now knows:',
+    kind:'radio',
+    opts:['nothing at all — a private transfer is invisible on chain',
+          'that some sealed value moved and can never move twice — but not whose it was, and after M5 not how much',
+          'the sender, the recipient and the amount — privacy is only in the wallet UI'],
+    ans:1,
+    follow:'exactly — THAT it moved and THAT it cannot double-spend are <b>never hidden</b> (the nullifier set is the double-spend gate); <b>whose</b> and <b>which note was spent</b> are not on the chain at all (the nullifier↔commitment link does not exist there); the amount rides openly in today\'s rehearsal row and moves <b>into the note at M5</b>. now walk it live: the <a href="../privacy-lens.html?lens=stranger">stranger\'s lens</a> (sponsor plumbing folded, every field chipped PUBLIC · PRIVATE · PRIVATE AFTER M5 · NEVER HIDDEN) and the <a href="../privacy-lens.html?lens=owner">owner\'s lens</a> (mint a demo note under a fresh key and watch the two views split apart).',
+    rline:function(){ return '[bUni · c6] private-note lens walked: stranger sees THAT value moved (commitment + nullifier sets never hidden, link structurally absent); owner key names which/from whom/balance; M5 takes amounts into the note — SPEC-PRIVACY-1 §m3·§m3.5·§m5'; }
+  }
+},
+{ id:'c7', glyph:'🤖', name:'how the vending machine mints you an agent', stub:true,
+  stubNote:'STUB — the machine is already live at <a href="../vending.html">surfaces/vending.html</a> (four steps, all live: the price read from the contract\'s own law rows, the mint watched onto the chain, the birth certificate verified client-side 11/0, the pay door plan-then-approve). the COURSE opens when the founder opens the curriculum seat — the machine does not teach itself into existence.',
+  srcl:'https://github.com/beehive-nature/beehive-nature/blob/main/docs/specs/SPEC-VENDING-1.md'
 }
 ];
 
@@ -461,7 +485,7 @@ function renderStatus(){
       : '<span style="color:var(--c-gap)">○ '+r.txt+'</span>'+(r.machine?'<span class="machine">⚙</span>':'');
   });
   var n=COURSES.filter(function(c){return done[c.id];}).length;
-  $('tstate').textContent=n+' of 5 acts receipted this browser — the transcript is local-only; the credential is the signed receipt you publish, not this list.';
+  $('tstate').textContent=n+' of '+TOTAL_ACTS+' acts receipted this browser — the transcript is local-only; the credential is the signed receipt you publish, not this list.';
 }
 var T_LINES=[];
 function addTranscript(line,c){
@@ -480,8 +504,15 @@ function addTranscript(line,c){
 }
 /* ===== course DOM ===== */
 var host=$('courses');
+var TOTAL_ACTS=COURSES.filter(function(c){return !c.stub;}).length;
 COURSES.forEach(function(c){
   var sec=document.createElement('section');
+  if(c.stub){ /* a stub is a promise with its source of record, never a fake lesson */
+    sec.innerHTML='<h2>'+c.glyph+' '+c.name.toUpperCase()+' · <span class="badge">STUB</span></h2>'
+      +'<div class="law">source of record: <a href="'+c.srcl+'">'+c.srcl.replace(/^.*\/blob\/main\//,'')+'</a></div>'
+      +'<div class="prose">'+c.stubNote+'</div>';
+    host.appendChild(sec); return;
+  }
   var status='<span id="st-'+c.id+'"></span>';
   var srcLink='<a href="'+c.srcl+'">'+c.src+'</a>';
   var html='<h2>'+c.glyph+' '+c.name.toUpperCase()+' · '+status+'</h2>'
@@ -595,7 +626,7 @@ function renderGrad(){
    : 'Five instruments, receipted: panel-completeness (2 of a family inside the word "total"), requirement ontology (EAR/RDA/AI/UL/DV + the scaling split + definitional shortfalls), the brake law (intake-adequacy ≠ status; both true, both published), the witness law (two independent oracles; failed fetch ≠ value; truncation shapes known), the pair law (fg⊗bg composited; validated sets; reorder = revalidate). Graduation: emit a signed <b>[bX review]</b> on the deck — Ed25519 over the line, verifiable by arithmetic, publishable on any rail you hold. The signature <i>is</i> the diploma.';
 }
 function gradLine(){
-  var line='[bX review] ✅ works university/index.html — https://beehive-nature.github.io/beehive-nature/surfaces/university/index.html — from: fp:(bind at the deck) — note: graduate walk — '+(COURSES.filter(function(c){return done[c.id];}).length)+'/5 acts receipted, gates read';
+  var line='[bX review] ✅ works university/index.html — https://beehive-nature.github.io/beehive-nature/surfaces/university/index.html — from: fp:(bind at the deck) — note: graduate walk — '+(COURSES.filter(function(c){return done[c.id];}).length)+'/'+TOTAL_ACTS+' acts receipted, gates read';
   var el=$('gradOut'); el.style.display='block'; el.textContent=line;
   var b=$('gcp'); b.style.display='inline-block';
   b.onclick=function(){ navigator.clipboard.writeText(line).then(function(){ b.textContent='✓ copied'; setTimeout(function(){ b.textContent='📋 copy'; },1500); }); };
