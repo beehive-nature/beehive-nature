@@ -32,12 +32,16 @@
 const ADDR = "711c7e20006ff3e0ac6c1f3063286a0c1a3e4c409642e8c526173fa60bb7078a"; // PUBLIC-CONSTANT — known mainnet public DataMap (Autonomi docs' example JPEG), not a key
 const DOOR = "https://relay.skaists.dev/ant/v1/data/public/" + ADDR;
 fetch(DOOR)
-  .then(r => { if (!r.ok) throw new Error("door answered " + r.status); return r.arrayBuffer(); })
-  .then(buf => {
+  .then(r => { if (!r.ok) throw new Error("door answered " + r.status); return r.json(); })
+  .then(({ data }) => {
+    // the door answers a JSON envelope {data: base64}; decode only to COUNT —
+    // the paint rides a data: URL (explicit MIME) because Brave Shields
+    // (default ON) can refuse blob: object-URL paints.
+    const n = Uint8Array.from(atob(data), c => c.charCodeAt(0)).length;
     document.getElementById("state-badge").textContent =
-      buf.byteLength + " BYTES · CROSS-ORIGIN · LIVE";
+      n + " BYTES · CROSS-ORIGIN · LIVE";
     const img = document.getElementById("content");
-    img.src = URL.createObjectURL(new Blob([buf], { type: "image/jpeg" }));
+    img.src = "data:image/jpeg;base64," + data;
     img.hidden = false;
   })
   .catch(e => { document.getElementById("state-badge").textContent = "DOOR REFUSED: " + e.message; });

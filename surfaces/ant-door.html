@@ -84,12 +84,13 @@
   try {
     const res = await fetch(`/ant/v1/data/public/${ADDR}`);   // SAME-ORIGIN: no CORS, no daemon
     if (!res.ok) throw new Error(`door answered ${res.status}`);
-    const { data } = await res.json();
+    const { data } = await res.json();          // the door answers a JSON envelope: {data: base64}
     const bytes = Uint8Array.from(atob(data), c => c.charCodeAt(0));
-    const blob = new Blob([bytes], { type: "image/jpeg" });
     const img = new Image();
     img.id = "content"; img.alt = "public Autonomi data (JPEG)";
-    img.src = URL.createObjectURL(blob);
+    // data: URL, not a blob: object URL — Brave Shields (default ON) can refuse
+    // the blob: paint; a data: URL with the explicit MIME paints everywhere.
+    img.src = "data:image/jpeg;base64," + data;
     stage.replaceWith(img);
     badge.textContent = `${bytes.length.toLocaleString()} BYTES · SAME-ORIGIN · LIVE`;
   } catch (e) {

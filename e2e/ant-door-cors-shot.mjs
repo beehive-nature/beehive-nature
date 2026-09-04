@@ -3,10 +3,15 @@
 // GETs the estate door on relay.skaists.dev and renders the Autonomi bytes.
 // Proves: CORS allow-origin lands, GET-only holds, the read works from the
 // estate's public front door origin. Run: node e2e/ant-door-cors-shot.mjs
+// BRAVE=1 runs it in founder-Brave (Shields default ON) — the honest browser.
 import { chromium } from "playwright";
 
 const URL = "https://skaists.dev/ant-door-cors.html";
-const browser = await chromium.launch({ args: ["--no-sandbox"] });
+const brave = process.env.BRAVE === "1";
+const browser = await chromium.launch({
+  args: ["--no-sandbox"],
+  ...(brave ? { executablePath: "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe", channel: undefined } : {}),
+});
 const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
 
 const requests = [];
@@ -18,20 +23,22 @@ await page.waitForTimeout(9000); // the Autonomi fetch can take a few seconds
 
 const badge = await page.locator("#state-badge").innerText();
 const imgVisible = await page.locator("img#content").isVisible();
+// BROKEN-IMAGE LAW: only naturalWidth proves the bytes DECODED into pixels.
+const imgLoaded = await page.locator("img#content").evaluate(el => el.complete && el.naturalWidth > 0);
 console.log("badge:", JSON.stringify(badge));
-console.log("image rendered:", imgVisible);
+console.log("image painted (naturalWidth):", imgLoaded, "| visible:", imgVisible);
 
 const doorHit = requests.some(u => u.startsWith("https://relay.skaists.dev/ant/v1/data/public/"));
-const others = requests.filter(u => !u.startsWith("https://skaists.dev/") && !u.startsWith("blob:") && !u.startsWith("https://relay.skaists.dev/ant/"));
+const others = requests.filter(u => !u.startsWith("https://skaists.dev/") && !u.startsWith("data:") && !u.startsWith("https://relay.skaists.dev/ant/"));
 console.log("requests (" + requests.length + "):");
 for (const r of requests) console.log("  " + r);
 console.log("door hit (cross-origin GET):", doorHit ? "YES ✓" : "NO ✗");
 console.log("unexpected third-party requests:", others.length === 0 ? "NONE ✓" : others);
 
-await page.screenshot({ path: "e2e/shots-ant-door/ant-door-cors-390.png", fullPage: true });
-console.log("SCREENSHOT: e2e/shots-ant-door/ant-door-cors-390.png");
+await page.screenshot({ path: `e2e/shots-ant-door/ant-door-cors-390${brave ? "-brave-shields" : ""}.png`, fullPage: true });
+console.log(`SCREENSHOT: e2e/shots-ant-door/ant-door-cors-390${brave ? "-brave-shields" : ""}.png`);
 
-const pass = imgVisible && /BYTES.*CROSS-ORIGIN.*LIVE/.test(badge) && doorHit && others.length === 0;
-console.log(pass ? "RECEIPT PASS" : "RECEIPT FAIL");
+const pass = imgVisible && imgLoaded && /BYTES.*CROSS-ORIGIN.*LIVE/.test(badge) && doorHit && others.length === 0;
+console.log((brave ? "[BRAVE·SHIELDS-ON] " : "") + (pass ? "RECEIPT PASS" : "RECEIPT FAIL"));
 await browser.close();
 process.exit(pass ? 0 : 1);
