@@ -6,7 +6,7 @@
 //! - control_1: fee computed by FLOOR division  (quant/200) instead of the source's
 //!   ceil (quant+199)/200                        → v1b-style discriminator fails
 //! - control_2: truncating casts replaced by rounding in bancor_input
-//!                                              → the cost_for_bytes(5) vector flips
+//!   → the cost_for_bytes(5) vector flips
 //! - control_3: reserves SWAPPED in the buy direction (out computed against the
 //!   wrong side)                                 → the V1 live vector fails
 

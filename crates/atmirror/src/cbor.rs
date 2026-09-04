@@ -288,7 +288,7 @@ impl<'a> Reader<'a> {
                 self.skip(depth + 1)?;
             }
             7 => match initial & 0x1f {
-                20 | 21 | 22 => {}
+                20..=22 => {}
                 25 => {
                     self.take(2)?;
                 }

@@ -696,8 +696,8 @@ impl Delegation {
 
     /// Is this delegation within its time bounds at `now` (unix seconds)?
     pub fn valid_at(&self, now: i64) -> bool {
-        let after_start = self.not_before.map_or(true, |nb| now >= nb);
-        let before_end = self.expires_at.map_or(true, |exp| now <= exp);
+        let after_start = self.not_before.is_none_or(|nb| now >= nb);
+        let before_end = self.expires_at.is_none_or(|exp| now <= exp);
         after_start && before_end
     }
 

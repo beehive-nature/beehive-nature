@@ -762,7 +762,7 @@ mod tests {
         // truncation -> Truncated, at any cut point, never a panic.
         for cut in [0, 1, 65, 97, 99, item.len() - 1] {
             assert!(
-                matches!(parse_ed25519_data_item(&item[..cut]), Err(_)),
+                parse_ed25519_data_item(&item[..cut]).is_err(),
                 "cut at {cut} must refuse, not accept"
             );
         }

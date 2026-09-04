@@ -47,7 +47,7 @@ pub fn prepare_newaccount(
 }
 
 pub fn prepare_mint_walkthrough(
-    creator: &str,
+    _creator: &str,
     new_account: &str,
     device_addresses: &[Value],
 ) -> Value {

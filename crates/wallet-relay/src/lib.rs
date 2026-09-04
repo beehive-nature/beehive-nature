@@ -333,7 +333,7 @@ async fn arweave_status(State(s): State<AppState>, Path(tx_id): Path<String>) ->
     }
     let tx_id_resp = tx_id.clone();
     // Cache check — if cached, skip network fetch and use cached body
-    let cached_body: Option<String> = crate::cache::cache()
+    let _cached_body: Option<String> = crate::cache::cache()
         .get(&tx_id)
         .and_then(|b| String::from_utf8(b).ok());
     let pool = s.pool.clone();
