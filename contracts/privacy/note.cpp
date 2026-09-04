@@ -1,4 +1,4 @@
-// note.cpp — M3: the private note (SPEC-PRIVACY-1, PLONK fork ruled).
+// note.cpp — the private note (SPEC-PRIVACY-1, PLONK fork, M4: the port).
 //
 // SOUND BY CONSTRUCTION / ISOLATED BY DESIGN — never stronger language.
 //
@@ -9,18 +9,25 @@
 //    never bulk history).
 //  - The VIEW-KEY TAG: every commitment carries a tag derived from the
 //    owner's view key — wallets scan tags; the owner can prove their own
-//    history to a chosen auditor with the view key OFF-chain (Zato's
+//    history to a chosen auditor with the view key OFF-chain (Zano's
 //    auditable-wallet pattern). Disclosure never touches the chain.
 //  - CRYPTO-AGILITY LAW: every stored hash/proof carries its algorithm id.
-//    ALG_COMMIT = keccak256-v1 (rehearsal choice — the native intrinsic;
-//    Poseidon-bn254 is the named successor when the real circuit lane lands,
-//    because SNARK circuits want Poseidon).
-//    ALG_PROOF  = plonk-bn254-v1-toy (see the spend-proof paragraph).
-//  - The SPEND PROOF call runs the PLONK verification op-count measured in
-//    M2.5 (pairing product + muls + transcript keccaks): TOY instance,
-//    generator-derived keys — a circuit-backed proof (circom+snarkjs +
-//    verifier port) is the named next step of the ruled fork. The on-chain
-//    gate is real: the pairing product must check or the spend refuses.
+//    ALG_COMMIT = keccak256-v1 (rehearsal choice; the deposit commitment's
+//    hash — the note-statement commitment inside the circuit is Poseidon;
+//    swapping the deposit hash to Poseidon is a named future lane).
+//    ALG_PROOF  = plonk-bn254-v1 (was plonk-bn254-v1-TOY until M4): the
+//    spend gate now runs the full nine-phase PLONK verification
+//    (plonk_verify.hpp, ported verbatim from snarkjs's
+//    verifier_plonk.sol.ejs) over a REAL circuit proof — circom +
+//    circomlib Poseidon, powersoftau pot12 one-honest-participant ceremony
+//    (rehearsal-labeled), snarkjs 0.7.6 prover. Old rows keep id 1; new
+//    proofs carry id 2 — the ids make toy and real distinguishable.
+//  - The circuit statement (spend.circom): knowledge of (secret, amount,
+//    tag) with commitment = Poseidon(secret, amount), nullifier =
+//    Poseidon(secret, tag), public (commitment, nullifier). It BINDS the
+//    nullifier to the note's secret. It does NOT prove membership of the
+//    commitment in the chain's set (merkle-root public input) or value
+//    conservation — labeled future lanes, per §m3-design.
 //  - BLS12-381 remains the FUTURE lane (BLS_PRIMITIVES2 lives on mainnet);
 //    nothing here depends on BN254 forever — algorithm ids make the swap a
 //    table row, not a rewrite.
@@ -28,6 +35,8 @@
 #include <eosio/eosio.hpp>
 #include <eosio/crypto_ext.hpp>
 #include <eosio/system.hpp>
+#include "plonk_verify.hpp"
+#include <vector>
 using namespace eosio;
 
 class [[eosio::contract("note")]] note : public contract {
@@ -35,8 +44,9 @@ public:
    using contract::contract;
 
    // ── algorithm ids (crypto-agility law; one byte in each row) ──
-   static constexpr uint8_t ALG_COMMIT_KECCAK256_V1 = 1;   // keccak256 commitment
-   static constexpr uint8_t ALG_PROOF_PLONK_TOY_V1  = 1;   // plonk-bn254-v1-toy spend proof
+   static constexpr uint8_t ALG_COMMIT_KECCAK256_V1 = 1;   // keccak256 deposit commitment
+   static constexpr uint8_t ALG_PROOF_PLONK_TOY_V1  = 1;   // retired (M3 toy instance)
+   static constexpr uint8_t ALG_PROOF_PLONK_V1      = 2;   // plonk-bn254-v1: circuit-backed spend proof
 
    // ── the LAW row (governed-mutable, exactly one) ──
    struct [[eosio::table("law"), eosio::contract("note")]] law_row {
@@ -75,7 +85,7 @@ public:
       law_index law( get_self(), get_self().value );
       eosio::check( law.begin() == law.end(), "law already set" );
       law.emplace( get_self(), [&]( auto& r ) {
-         r.id = 0; r.alg_commit = ALG_COMMIT_KECCAK256_V1; r.alg_proof = ALG_PROOF_PLONK_TOY_V1;
+         r.id = 0; r.alg_commit = ALG_COMMIT_KECCAK256_V1; r.alg_proof = ALG_PROOF_PLONK_V1;
          r.max_notes = max_notes; r.max_nullifiers = max_nulls;
       });
    }
@@ -95,13 +105,17 @@ public:
       });
    }
 
-   // ── private transfer: nullifier in, new commitments out ──
-   // spend_gate() = the PLONK-shape pairing check (M2.5 op count; toy keys,
-   // labeled). A failed pairing refuses the transfer. The nullifier hit
-   // refuses the double-spend. Rows stay bounded.
+   // ── private transfer: proof + nullifier in, new commitment out ──
+   // spend_gate() = the nine-phase PLONK verify (plonk_verify.hpp) over the
+   // caller's circuit proof; publics = (note commitment ‖ nullifier). A
+   // failed pairing refuses the transfer. The nullifier hit refuses the
+   // double-spend. Rows stay bounded. The FLOW is unchanged from M3 — only
+   // the gate's constants and equation were ported (the handoff's swap point).
    [[eosio::action]] void transfer( const checksum256& nullifier, const checksum256& to_commitment,
-                                    uint32_t to_viewtag, uint64_t to_amount, uint64_t fee ) {
-      spend_gate( nullifier );
+                                    uint32_t to_viewtag, uint64_t to_amount, uint64_t fee,
+                                    const checksum256& note_commitment,
+                                    const std::vector<uint8_t>& proof ) {
+      spend_gate( nullifier, note_commitment, proof );
       law_index law( get_self(), get_self().value );
       auto lr = law.get( 0, "law not initialized" );
       commitment_index cs( get_self(), get_self().value );
@@ -117,9 +131,11 @@ public:
       });
    }
 
-   // ── withdraw: nullifier in, value out to a plain account ──
-   [[eosio::action]] void withdraw( const checksum256& nullifier, name recipient, uint64_t amount, uint64_t fee ) {
-      spend_gate( nullifier );
+   // ── withdraw: proof + nullifier in, value out to a plain account ──
+   [[eosio::action]] void withdraw( const checksum256& nullifier, name recipient, uint64_t amount, uint64_t fee,
+                                    const checksum256& note_commitment,
+                                    const std::vector<uint8_t>& proof ) {
+      spend_gate( nullifier, note_commitment, proof );
       // rehearsed settlement: no token rails wired on the rehearsal chain —
       // the row-level truth (nullifier + amount + recipient) is the receipt.
       require_auth( get_self() );
@@ -131,45 +147,31 @@ private:
       return ( (uint64_t)d[0] << 32 ) | (uint64_t)d[1];
    }
 
-   // The spend gate: pairing product (4 pairs, M2.5 op-count) + a transcript
-   // keccak + one mul — the same intrinsics a production PLONK verify calls.
-   // TOY-LABELED: generator-derived instance; the circuit lane replaces the
-   // constants with the real verifying key without touching the flow.
-   static constexpr unsigned char G1PT_[64] = {
-      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2 };
-   static constexpr unsigned char NEGPT_[64] = {
-      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-      0x30,0x64,0x4e,0x72,0xe1,0x31,0xa0,0x29,0xb8,0x50,0x45,0xb6,0x81,0x81,0x58,0x5d,
-      0x97,0x81,0x6a,0x91,0x68,0x71,0xca,0x8d,0x3c,0x20,0x8c,0x16,0xd8,0x7c,0xfd,0x45 };
-   static constexpr unsigned char G2PT_[128] = {
-      0x2e,0x18,0xea,0xb0,0x94,0x52,0xc6,0x88,0x2c,0x1e,0x9d,0x12,0xd9,0x19,0x31,0xf1,
-      0x3f,0xc5,0x02,0x97,0x0e,0x96,0x88,0xd2,0x72,0x04,0x4a,0x7c,0x91,0xe1,0x83,0x8b,
-      0x0d,0x3c,0x00,0x32,0xec,0x67,0x27,0x0f,0x96,0xe2,0xf6,0xbd,0xd1,0x71,0x00,0x2e,
-      0x97,0x27,0x29,0x06,0x57,0x77,0xe4,0xd5,0x2d,0xe1,0x1d,0xea,0xa1,0x6e,0x2b,0x57,
-      0x03,0xed,0x4a,0xe3,0x5d,0x17,0xab,0x81,0x31,0x76,0xe4,0xad,0x9a,0x6f,0xa8,0xdc,
-      0xa1,0x2e,0x8c,0x67,0x9b,0x38,0xa8,0xcf,0xfe,0x5a,0xe4,0x4c,0xbc,0xe8,0x19,0x22,
-      0x2c,0x66,0x9f,0x23,0xc1,0xd8,0xb1,0x1f,0x83,0xf7,0xe2,0x13,0xaa,0xde,0x1a,0xe3,
-      0x56,0x25,0x51,0x95,0xca,0x90,0xbc,0x7e,0x78,0xa8,0x09,0xc3,0x20,0xa9,0x93,0xa1 };
+   // keccak bridge: plonk_verify takes a plain function pointer
+   static void pl_kec_eosio( const unsigned char* in, unsigned len, unsigned char out[32] ) {
+      auto h = keccak( (const char*)in, len );
+      const auto a = h.extract_as_byte_array();
+      memcpy( out, a.data(), 32 );
+   }
 
-   void spend_gate( const checksum256& nullifier ) {
-      // transcript keccak over the nullifier (production op: the challenge
-      // binds the proof to THIS nullifier)
-      auto t1 = keccak( (const char*)nullifier.data(), 32 );
-      (void)t1;
-      // one G1 mul (production op shape)
-      unsigned char out[64];
-      unsigned char g1b[64]; for (int b=0;b<64;++b) g1b[b]=G1PT_[b];
-      eosio::check( alt_bn128_mul((const char*)G1PT_,64,(const char*)g1b,32,(char*)out,64) == 0, "mul" );
-      // pairing product: e(-A,B)·e(α,β)·e(vk_x,γ)·e(C,δ) — 4 pairs, one call
-      unsigned char pairs[768];
-      for ( int p = 0; p < 4; ++p ) {
-         const unsigned char* g1 = (p==0||p==3) ? NEGPT_ : G1PT_;
-         for ( int b = 0; b < 64; ++b ) pairs[p*192+b] = g1[b];
-         for ( int b = 0; b < 128; ++b ) pairs[p*192+64+b] = G2PT_[b];
-      }
-      int32_t r = alt_bn128_pair( (const char*)pairs, sizeof(pairs) );
-      eosio::check( r == 0, "spend proof REJECTED — pairing product false" );
+   // The spend gate (M4, the port): full nine-phase PLONK verification of
+   // the caller's proof over publics (note_commitment ‖ nullifier), then the
+   // nullifier insert — bounded + unique = double-spend refusal. vk: the
+   // spend.circom ceremony (vk_constants.hpp provenance header).
+   // noinline: with -O3 the huge verifier inlined differently per caller and
+   // billed 7–9 ms inside transfer but 14–18 ms inside withdraw — same code,
+   // same inputs. Outlined, both actions bill the same (measured, §m4-receipt).
+   __attribute__( ( noinline ) )
+   void spend_gate( const checksum256& nullifier, const checksum256& note_commitment,
+                    const std::vector<uint8_t>& proof ) {
+      eosio::check( proof.size() == 24 * 32, "proof: expected 24 words (768 bytes)" );
+      unsigned char pubs[64];
+      const auto c = note_commitment.extract_as_byte_array();
+      const auto n = nullifier.extract_as_byte_array();
+      memcpy( pubs,      c.data(), 32 );
+      memcpy( pubs + 32, n.data(), 32 );
+      int32_t r = plonk_verify( pl_kec_eosio, proof.data(), pubs );
+      eosio::check( r == 0, "spend proof REJECTED — plonk pairing false" );
       // nullifier insert (bounded + unique = double-spend refusal)
       law_index law( get_self(), get_self().value );
       auto lr = law.get( 0, "law not initialized" );

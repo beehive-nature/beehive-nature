@@ -173,3 +173,85 @@ port of the snarkjs PLONK verifier (a 256-bit field library + transcript +
 equation — hours of careful work, honestly beyond this pass) — then the toy
 constants in `spend_gate` become the real verifying key WITHOUT touching
 the flow, and the receipt upgrades from op-count-real to circuit-backed.
+
+## §m4-receipt — the port LANDED: circuit-backed PLONK verifies on-chain (2026-09-04)
+
+The ruled fork's last step, executed. `contracts/privacy/` now holds the
+full stack: `field256.hpp` (4×64-limb modular arithmetic — Montgomery
+reduction + shift-subtract oracle), `plonk_verify.hpp` (the nine phases
+ported verbatim from snarkjs `templates/verifier_plonk.sol.ejs`, line-cited),
+`vk_constants.hpp` (generated from the ceremony vk), `spend.circom` (the
+note statement: Poseidon(secret,amount), Poseidon(secret,tag), both public
+commitment+nullifier), and the proving/receipt scripts. `note.cpp`'s
+`spend_gate` runs the REAL verifier — the FLOW is unchanged from M3.
+
+**The test ladder every layer passed BEFORE the one above it:**
+- field256 vs python big-int known vectors: **3,217/3,217** (both BN254
+  fields, edges 0/1/m−1, exponentiation, batch inversion, BE round-trip).
+- keccak (test rig) vs standard vectors: OK.
+- the scalar phases (challenges β..u, Lagrange, PI, R₀, D-scalars, E-scalar)
+  vs an independent BigInt oracle (`oracle_scalars.js`) over the REAL vk +
+  REAL proof: **23/23**.
+- on-chain probe (bare verify action): executed — then the full flow.
+
+**On-chain acceptance (account `plonknote11`, code hash
+`1ed34e44…356343`, CRYPTO_PRIMITIVES chain):**
+- deposit → executed (M3 flow unchanged, keccak commitment, alg 1);
+- **private transfer, REAL circuit proof → executed, billed 9,132 µs**
+  (blk 12672);
+- **forged proof (eval_zw tampered +1) → REJECTED**: "spend proof REJECTED
+  — plonk pairing false";
+- **replay (same proof + nullifier) → REJECTED** by the nullifier
+  uniqueness constraint (tx failed; the M3 belt-and-braces shape — the
+  table's unique index is the enforcer that fired);
+- withdraw with a second real proof (same secret, tag=2 → different
+  nullifier) → executed;
+- law row: `alg_proof = 2 = ALG_PROOF_PLONK_V1` (crypto-agility bump; old
+  rows keep 1 — toy and real distinguishable forever).
+
+**Billing, honestly measured:** 15 executed verifies across the lane:
+low-load cluster **6,911–10,429 µs** (min 6.9, median ≈ 9.1 ms) — in the
+6–9 ms band, tripwire < 15 ms PASSED uncontended. A concurrent seat
+sharing the WSL host inflated samples to 12.6–18.4 ms (identical wasm —
+the noinline rebuild was byte-identical, the linker had already folded the
+call sites; the variance tracks host load, not the verifier). The 15 ms
+tripwire is honored on uncontended numbers; contended samples are labeled
+as such, not averaged away.
+
+**Bugs the ladder caught (the process story, for z2):** (1) the batch
+inversion built the Fermat exponent as q−1 instead of q−2 — every
+"inversion" returned 1 by Fermat — caught by python vectors; (2)
+`f256_to_be` round-tripped limb-reversed against `f256_from_be` — every
+BE serialization incl. `alt_bn128_mul` scalars would have been wrong
+on-chain — caught by the oracle (the mismatch had a limb-swap signature)
+and a BE round-trip gate was added to the standing test; (3) `pl_g1_neg`
+computed y−qf instead of qf−y — an invalid point that the chain's own
+`alt_bn128_add` refused ("plonk: D+d3") — caught by the on-chain probe
+after the native gates passed, exactly why the probe exists: point phases
+have no native oracle, the chain is their test.
+
+**Labeled exactly:** the statement BINDS nullifier↔commitment↔secret; it
+does NOT prove membership of the commitment in the chain's set (merkle
+root public input = named future lane) nor value conservation (amounts
+still rehearsed openly). The ceremony is pot12 bn128 with ONE honest
+participant (this rehearsal seat) — dev-rehearsal labeled; a production
+ceremony needs more participants (the ptau chain lives in the WSL lab,
+burned with its /tmp-class lifecycle; `pot12_final` sha
+`fe12ac40…a75ad` TESTNET-ONLY rehearsal artifact). Deposit commitments
+stay keccak256-v1 (flow law); the Poseidon deposit hash is a named future
+lane. Inversions run as pure-WASM Fermat `a^(q−2)` (one batched call,
+no mod_exp intrinsic — one fewer aliasing surface); on a non-invertible
+value the EVM verifier reverts early while the port computes 0 and the
+FINAL PAIRING still refuses — same verdict, different path.
+
+**Handoff corrections (verified, not trusted):** circom was NOT staged
+(built now, 2.2.3); the bnrzk wallet did NOT exist (created);
+`calculateF` uses five `g1_mulAccC` (handoff said two — source wins);
+M2.5's "p−2" modexp constant is actually the base field (timing bench
+only); `pk_of` and `primary_key` derive the row key differently (M3
+legacy — the unique index is the real enforcer, proven live again);
+nodeos was restarted mid-lane by a concurrent seat (trace_api_plugin
+added, state survived).
+
+**Then z2 breaks it** (order 2, standing): the attack list lives in
+docs/dispatches/HANDOFF-PLONK-PORT.md §8 — every finding cited file+line.
