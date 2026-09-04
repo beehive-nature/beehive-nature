@@ -79,6 +79,65 @@ await page.waitForFunction(() => document.querySelector('#vnamechk').innerText.i
 ok('live collision refusal against the real ledger', true);
 await page.screenshot({ path: join(OUT, 'vending-1b-name-taken.png') });
 ok('mint button disabled while taken', await page.locator('#vmintbtn').isDisabled());
+
+/* 1c · CANONICALIZATION — founder order 2026-09-03. The rail test:
+   "mīlestība ir karalis" survives whole; messy spellings land on the SAME
+   canonical form (same key, same collision class); zero-width and
+   non-breaking characters are REFUSED, never stripped. */
+const fnvOracle = s => { let h = 0xcbf29ce484222325n;
+  const M = 0xffffffffffffffffn;
+  for (const b of Buffer.from(s, 'utf8')) { h ^= BigInt(b); h = (h * 0x100000001b3n) & M; }
+  return h.toString(); };
+const cleanName = 'mīlestība ir karalis';
+await page.fill('#vname', cleanName);
+ok('THE RAIL TEST — mīlestība ir karalis survives whole (free to mint, no marker)',
+  (await page.locator('#vnamechk').innerText()).includes('free to mint')
+  && !(await page.locator('#vcanon').isVisible())
+  && (await page.locator('#vnamepk').innerText()) === fnvOracle(cleanName),
+  await page.locator('#vnamepk').innerText());
+const messy = '  MĪLESTĪBA   IR  karalis ';
+await page.fill('#vname', messy);
+const canonShown = await page.locator('#vcanonform').innerText();
+ok('messy spelling canonicalizes to the SAME form (marker shown, same key)',
+  canonShown === cleanName && (await page.locator('#vcanon').isVisible())
+  && (await page.locator('#vnamepk').innerText()) === fnvOracle(cleanName)
+  && (await page.locator('#vcanon').innerText()).includes('normalized from your input'),
+  `"${canonShown}"`);
+/* NFC: a decomposed spelling (i + combining macron) lands on the same key */
+await page.fill('#vname', cleanName.normalize('NFD'));
+ok('decomposed input NFC-normalizes onto the same key',
+  (await page.locator('#vnamepk').innerText()) === fnvOracle(cleanName)
+  && (await page.locator('#vcanonform').innerText()) === cleanName);
+/* refusal classes — refused, never stripped */
+await page.fill('#vname', 'mīlestība\u200Bir');
+ok('zero-width character REFUSED (U+200B named, mint disabled)',
+  (await page.locator('#vnamechk').innerText()).includes('U+200B')
+  && (await page.locator('#vnamechk').innerText()).includes('refused')
+  && await page.locator('#vmintbtn').isDisabled());
+await page.fill('#vname', 'mīlestība\u00A0ir');
+ok('non-breaking space REFUSED (U+00A0 named)',
+  (await page.locator('#vnamechk').innerText()).includes('U+00A0'));
+/* per-tongue lowercasing: Turkish İ → i */
+await page.fill('#vname', 'İR');
+await page.selectOption('#vtongue', 'turkish');
+ok('per-tongue lowercase (Turkish İ→i)', (await page.locator('#vcanonform').innerText()) === 'ir');
+await page.selectOption('#vtongue', 'latvian');
+/* collision check runs on the CANONICAL form */
+await page.fill('#vname', '  VENDINGTEST2  ');
+await page.waitForFunction(() => document.querySelector('#vnamechk').innerText.includes('already minted'));
+ok('collision check runs on the canonical form ("  VENDINGTEST2  " hits vendingtest2)', true);
+/* the PLAN shows the canonical form, marked */
+await page.fill('#vname', '  Mīlestība  Ir Karalis ');
+await page.locator('#vmintbtn').click();
+await page.waitForSelector('#plan.open');
+ok('the plan shows the canonical name + the normalization marker',
+  (await page.locator('#p-name').innerText()) === cleanName
+  && (await page.locator('#p-canon').innerText()).includes('normalized from your input')
+  && (await page.locator('#p-canonform').innerText()) === cleanName,
+  await page.locator('#p-canonform').innerText());
+await page.locator('#prefuse').click();
+await page.waitForFunction(() => !document.getElementById('plan').classList.contains('open'));
+await page.screenshot({ path: join(OUT, 'vending-1c-canonical.png') });
 await page.fill('#vname', 'vendingtest3');
 
 /* 2 · THE PRICE — every line live, $ never n/m */

@@ -82,6 +82,37 @@ CANONICAL ACCEPTANCE TEST: mīlestībairkaralis must resolve whole.
 
 MOTIVATING RECEIPT: base.org rejected ī (U+012B, byte-exact `0xC4 0xAB`) in mīlestībairkaralis — raw error `disallowed character: "ī" {12B}` — while accepting 北方國王 — proving the rejection is charset-based, not length-based. (Transcription law: the rejected letter is ī WITH MACRON, never į ogonek — the two render near-identical in some fonts.)
 
+### §charset/norm — canonical name normalization (PROPOSAL 2026-09-03, pending the founder's word)
+
+Founder-ordered onto the vending surface 2026-09-03 (shipped same-breath in
+`surfaces/vending.html`, `canonicalName()`); proposed here as the RAIL-WIDE
+rule — the founder's word makes it law for kingbeelovis and .a/.b resolution.
+Acceptance is unchanged: every tongue's alphabet still enters whole. What the
+rule fixes is the ONE SPELLING a name resolves to:
+
+1. **REJECT** any name containing zero-width (U+200B ZWSP, U+200C ZWNJ,
+   U+200D ZWJ, U+2060 WORD JOINER, U+FEFF BOM) or non-breaking (U+00A0 NBSP,
+   U+2007 FIGURE SPACE, U+202F NARROW NBSP) characters — refusal, never
+   silent stripping: these characters exist to make one name LOOK like
+   another while hashing differently (or worse, identically).
+2. **NFC** normalize (one composed spelling per character).
+3. **Trim**, then collapse every run of whitespace to ONE ASCII space (U+0020).
+4. **Lowercase per tongue** — locale-aware (`toLocaleLowerCase` with the
+   minting member's picked tongue: lv, tr, cs, …), so the casing law is
+   deterministic per tongue, not per JS engine default.
+5. The canonical form is what is **hashed** (FNV-1a-64 pk), what the
+   **collision check** runs on, what is **displayed**, and what is **minted**.
+   Wherever the canonical form differs from what the member typed, the
+   interface shows the canonical form marked **"normalized from your
+   input"** (the vending plan screen does; rail UIs follow it).
+
+THE RAIL TEST (extends the acceptance test above): `mīlestība ir karalis`
+survives WHOLE through this pipeline — already NFC, single ASCII spaces,
+already lowercase, so canonical == input and no normalization marker shows.
+And `  MĪLESTĪBA   IR  KARALIS ` (messy case, runs of spaces, padding) lands
+on that SAME canonical form — therefore the same key, the same collision
+class, the same agent. Two spellings, one name.
+
 ## §naming — chartered agent Basenames
 
 Chartered agent Basenames = 北方國王 + seatname. Deed always King-held.

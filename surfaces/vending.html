@@ -205,6 +205,7 @@ main{max-width:462px;margin:0 auto}
     <span class="sep" aria-hidden="true"></span><span style="color:var(--gold)">a</span>
   </div>
   <div class="lawline" id="vnamelaw">pointer row key <b>fnv1a-64</b>: <span id="vnamepk">—</span><span id="vnamechk"></span></div>
+  <div class="lawline" id="vcanon" style="display:none">minted as <b id="vcanonform" style="color:var(--gold)"></b><span class="sep" aria-hidden="true"></span>a · <span style="color:var(--amber)">normalized from your input</span></div>
   <div class="field">
     <label for="vtongue">tongue</label>
     <select id="vtongue" aria-describedby="vtonguelaw"></select><span class="chev">▾</span>
@@ -217,7 +218,9 @@ main{max-width:462px;margin:0 auto}
   </div>
   <p class="note">Your agent gets a house on the <b>.a</b> rail, speaks the tongue you
   pick, and belongs to <b>you</b> — not to us. Any name your tongue writes,
-  the rail accepts whole (SPEC-A-NAMES-1 §charset — 27 corpus tongues + sanskrit).</p>
+  the rail accepts whole (SPEC-A-NAMES-1 §charset — 27 corpus tongues + sanskrit).
+  Names are minted <b>canonical</b>: NFC, trimmed, whitespace folded, lowercased
+  per your tongue — and invisible look-alike characters are refused, never stripped.</p>
 </section>
 
 <!-- ── 2 · THE PRICE, ALL OF IT ────────────────────────────────── -->
@@ -294,6 +297,8 @@ main{max-width:462px;margin:0 auto}
         <div>one agent named <b id="p-name" style="color:var(--gold)">—</b>,
         house on the .a rail, speaking <span id="p-tongue">—</span>
         (<span id="p-line">—</span> line)</div>
+        <div id="p-canon" style="display:none">minted as <b id="p-canonform" style="color:var(--gold)">—</b>
+        — <span style="color:var(--amber)">normalized from your input</span></div>
       </div>
       <h3>the price, all of it — itemized</h3>
       <div class="line"><span>mint<small id="p-mint-sub">—</small></span><b id="p-mint">—</b></div>
@@ -372,7 +377,7 @@ const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;
 const fmt$ = x => x == null ? '$—' : (x >= 0.1 ? '$' + x.toFixed(2) : '$' + x.toFixed(3));
 
 const state = { law: null, price: null, priceKind: null, certs: [], mints: [],
-  cert: null, mint: null, info: null, ran: false };
+  cert: null, mint: null, info: null, ran: false, canonName: '', nameChanged: false };
 window.__vending = state;   // e2e readback hook
 
 /* ── the tongues: the corpus, founder-priority first, native names ── */
@@ -434,7 +439,7 @@ function renderPrice() {
   $('v-tithe').innerHTML = titU == null ? 'n/m' : `${fmt$(titU)} <span class="a">${(L.basisA * L.titheBp / 10000).toFixed(4)} A</span>`;
   $('v-total').textContent = totU == null ? '—' : '$' + totU.toFixed(2);
   $('vmintbtn').textContent = totU == null ? 'Mint — price unread' : `Mint for $${totU.toFixed(2)} →`;
-  $('vmintbtn').disabled = totU == null || nameTaken();
+  $('vmintbtn').disabled = totU == null || !state.canonName || nameTaken();
   $('v-total-sub').textContent = `you pay, once · machine holds ${L.count}/${L.max} (cap = 6⁵)`;
 }
 async function readCerts() {
@@ -467,28 +472,63 @@ async function tickInfo() {
     $('vchecked').textContent = 'chain check unreachable — n/m'; }
 }
 
-/* ── step 1: the name, its derived key, the collision refusal ── */
+/* ── step 1: the name, its derived key, the collision refusal ──
+   CANONICALIZATION LAW (founder order 2026-09-03, before the fnv key,
+   before display, before the collision check): NFC · trim · collapse
+   whitespace runs to one ASCII space · lowercase per tongue · REFUSE
+   zero-width and non-breaking characters (never silently strip — they make
+   one name look like another). The canonical form is what is hashed,
+   collision-checked, displayed, and minted. Rail test: "mīlestība ir
+   karalis" survives whole. */
+const REJECT_CP = /[\u200B\u200C\u200D\u2060\uFEFF\u00A0\u2007\u202F]/;
+const TONGUE_LOCALE = { russian:'ru', latvian:'lv', ukrainian:'uk', 'scottish-gaelic':'gd',
+  czech:'cs', chinese:'zh', korean:'ko', thai:'th', arabic:'ar', flemish:'nl-BE',
+  spanish:'es', dutch:'nl', german:'de', french:'fr', hebrew:'he', hindi:'hi',
+  bengali:'bn', persian:'fa', urdu:'ur', japanese:'ja', danish:'da', norwegian:'nb',
+  swedish:'sv', finnish:'fi', turkish:'tr', hungarian:'hu', tatar:'tt', sanskrit:'sa' };
+function canonicalName(raw, tongue){
+  const m = raw.match(REJECT_CP);
+  if (m) return { error: 'zero-width or non-breaking character refused (U+' +
+    m[0].codePointAt(0).toString(16).toUpperCase().padStart(4, '0') +
+    ') — it can make one name look like another' };
+  const collapsed = raw.normalize('NFC').replace(/\s+/g, ' ').trim();
+  const loc = TONGUE_LOCALE[tongue];
+  const canonical = loc ? collapsed.toLocaleLowerCase(loc) : collapsed.toLowerCase();
+  return { canonical, changed: canonical !== raw };
+}
 const fnv1a64 = s => { let h = 0xcbf29ce484222325n;
   const M = 0xffffffffffffffffn;                       /* the contract's uint64 wraps; so does this */
   for (const b of new TextEncoder().encode(s)) { h ^= BigInt(b); h = (h * 0x100000001b3n) & M; }
   return h.toString(); };
-const nameTaken = () => state.certs.some(c => c.agent_name === $('vname').value.trim());
+const nameTaken = () => state.certs.some(c => c.agent_name === state.canonName);
 function checkName() {
-  const n = $('vname').value.trim();
-  $('vnamepk').textContent = n ? fnv1a64(n) : '—';
+  const r = canonicalName($('vname').value, $('vtongue').value);
   const chk = $('vnamechk');
-  if (!n) { chk.innerHTML = ' — <span class="bad">a name is needed</span>'; }
-  else if (nameTaken()) { chk.innerHTML = ' — <span class="bad">already minted · the contract refuses collisions, so does this form</span>'; }
-  else { chk.innerHTML = ' — <span class="good">free to mint</span>'; }
+  $('vcanon').style.display = 'none';
+  if (r.error) {
+    state.canonName = ''; state.nameChanged = false;
+    $('vnamepk').textContent = '—';
+    chk.innerHTML = ' — <span class="bad">' + esc(r.error) + '</span>';
+  } else {
+    const n = r.canonical;
+    state.canonName = n; state.nameChanged = r.changed;
+    $('vnamepk').textContent = n ? fnv1a64(n) : '—';
+    if (n && r.changed) { $('vcanon').style.display = '';
+      $('vcanonform').textContent = n; }
+    if (!n) { chk.innerHTML = ' — <span class="bad">a name is needed</span>'; }
+    else if (nameTaken()) { chk.innerHTML = ' — <span class="bad">already minted · the contract refuses collisions, so does this form</span>'; }
+    else { chk.innerHTML = ' — <span class="good">free to mint</span>'; }
+  }
   renderPrice();
 }
 $('vname').addEventListener('input', checkName);
+$('vtongue').addEventListener('change', checkName);
 
 /* ── step 3: the comb strip, driven by real tx status ── */
 function renderLand() {
   /* newest landed mint of the machine; if the customer's own name just landed,
      follow that one instead */
-  const mine = $('vname').value.trim();
+  const mine = state.canonName;
   const m = [...state.mints].reverse().find(x => x.name === mine)
          || [...state.mints].sort((a, b) => b.block - a.block)[0];
   state.mint = m || null;
@@ -622,9 +662,11 @@ new IntersectionObserver((es, io) => { if (es.some(e => e.isIntersecting) && !st
 const plan = $('plan');
 function openPlan() {
   if (!state.law) return;
-  const L = state.law, p = state.price, n = $('vname').value.trim();
+  const L = state.law, p = state.price, n = state.canonName;
   const totU = p != null ? (L.basisA + RAM_BASIS_A + L.basisA * L.titheBp / 10000) * p : null;
   $('p-name').textContent = n || '—';
+  $('p-canon').style.display = n && state.nameChanged ? '' : 'none';
+  $('p-canonform').textContent = n;
   $('p-tongue').textContent = TONGUES.find(t => t[0] === $('vtongue').value)?.[1] || $('vtongue').value;
   $('p-line').textContent = $('vline').selectedOptions[0].textContent;
   $('p-mint-sub').textContent = `rate ${L.basisTxt} A · read live`;
@@ -662,11 +704,11 @@ $('papprove').addEventListener('click', async () => {
   if (rail === 'a') {
     door.innerHTML = `<span class="held">rehearsal rail armed — testnet A, the memo is the binding.</span><br>
       send <code>${((state.law.basisA + RAM_BASIS_A + state.law.basisA * state.law.titheBp / 10000).toFixed(4))} A</code>
-      on jungle4 to <code>bnrapolltest</code> with memo <code>vending:${esc($('vname').value.trim())}</code> —
+      on jungle4 to <code>bnrapolltest</code> with memo <code>vending:${esc(state.canonName)}</code> —
       the poller below will catch your mint the moment it lands in a block.`;
     /* watching mode: the nectar cell lives while we wait for the member's mint */
     const hexN = document.querySelector('#c-nectar .hex');
-    hexN.classList.add('live'); $('c-nectar-s').textContent = 'watching for ' + $('vname').value.trim();
+    hexN.classList.add('live'); $('c-nectar-s').textContent = 'watching for ' + (state.canonName || 'your mint');
     const was = state.mints.map(m => m.trx);
     const watch = setInterval(async () => {
       await walkMints().catch(() => {});
