@@ -1,0 +1,12 @@
+[Unit]
+Description=invite rotation — skaists.buzz standing invite (DRY-RUN until founder grants bClaude admin)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/invite-rotate
+EnvironmentFile=/opt/invite-rotate/secrets/prod.env
+# cutover when the founder grants admin: ROTATE_DRY_RUN=0 + the owner secret
+# in prod.env. Until then this unit writes nothing, ever.
+ExecStart=/usr/bin/node /opt/invite-rotate/invite-rotate.mjs

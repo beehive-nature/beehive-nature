@@ -1,0 +1,6 @@
+{
+  "name": "invite-rotate",
+  "private": true,
+  "type": "module",
+  "dependencies": { "nostr-tools": "^2.10.4" }
+}

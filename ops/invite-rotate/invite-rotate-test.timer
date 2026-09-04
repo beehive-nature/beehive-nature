@@ -1,0 +1,9 @@
+[Unit]
+Description=hourly invite rotation check — throwaway community
+
+[Timer]
+OnCalendar=hourly
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,47 @@
+# the THROWAWAY rehearsal stack — private buzz-relay + postgres + minio,
+# loopback only, own database. Nothing here can reach skaists.buzz. The
+# relay image is the estate-pinned ghcr.io/block/buzz:0.2.1 (IMAGE-PINS line).
+# redis IS required: the NIP-98 HTTP replay guard is redis-backed and fail-closed.
+name: invite-rotate-test
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: buzz
+      POSTGRES_PASSWORD: rotate-throwaway
+      POSTGRES_DB: buzz
+    restart: unless-stopped
+  minio:
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
+    command: server /data
+    environment:
+      MINIO_ROOT_USER: rotate
+      MINIO_ROOT_PASSWORD: rotate-throwaway
+    restart: unless-stopped
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+  relay:
+    image: ghcr.io/block/buzz:0.2.1
+    depends_on: [postgres, minio, redis]
+    ports:
+      - "127.0.0.1:3311:3000"
+    environment:
+      BUZZ_BIND_ADDR: 0.0.0.0:3000
+      RELAY_URL: ws://rotate-test.local          # dev posture -> http landing urls
+      BUZZ_DOMAIN: rotate-test.local             # the throwaway tenant host
+      DATABASE_URL: postgres://buzz:rotate-throwaway@postgres:5432/buzz
+      BUZZ_AUTO_MIGRATE: "true"
+      BUZZ_REQUIRE_RELAY_MEMBERSHIP: "true"
+      BUZZ_REQUIRE_AUTH_TOKEN: "true"
+      RELAY_OWNER_PUBKEY: ${ROTATE_OWNER_PUBKEY} # from /opt/invite-rotate/secrets/
+      BUZZ_RELAY_PRIVATE_KEY: ${ROTATE_RELAY_KEY}
+      BUZZ_S3_ENDPOINT: http://minio:9000
+      BUZZ_S3_BUCKET: buzz-media
+      BUZZ_S3_ACCESS_KEY: rotate
+      BUZZ_S3_SECRET_KEY: rotate-throwaway
+      BUZZ_S3_ADDRESSING_STYLE: path
+      BUZZ_GIT_REPO_PATH: /data/git
+      REDIS_URL: redis://redis:6379
+      RUST_LOG: buzz_relay=info
+    restart: unless-stopped

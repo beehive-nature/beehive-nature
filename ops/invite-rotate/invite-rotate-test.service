@@ -1,0 +1,12 @@
+[Unit]
+Description=invite rotation — THROWAWAY test community (rotate-test.local)
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/invite-rotate
+EnvironmentFile=/opt/invite-rotate/secrets/test.env
+ExecStart=/usr/bin/node /opt/invite-rotate/invite-rotate.mjs
+# test shape: short TTL + small margin so rotations are observable
+# (the timer's job is to PROVE the rotation; the prod unit carries the 30d shape)
