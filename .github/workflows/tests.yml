@@ -92,6 +92,16 @@ jobs:
       - name: Sprint closing receipt — claims re-derived, not reported
         if: always()
         run: node scripts/sprint-close.mjs docs/dispatches/S26-0825.sprint.json
+      # X402 ENGINE PARITY (z3.2, 2026-09-04): the pure 9-check meter audit
+      # exists twice by design — the node tool the contract's auditmark pins
+      # (contracts/vending/tool/x402audit.mjs) and the browser port on
+      # surfaces/vending.html §x402-sec (surfaces/x402-meter.js). This runs
+      # BOTH over the session-42 receipt's four demonstrations and fails on
+      # any drift in verdict, check name or note bytes — a port that silently
+      # disagrees with its tool is a fake verifier wearing the tool's name.
+      - name: x402 engine parity — tool and surface agree byte-for-byte
+        if: always()
+        run: node e2e/x402-engine-parity.mjs
       # THE WORKFLOW ASSERTS ITS OWN SHAPE (zA ruling, 2026-08-24): every
       # suite step carries if:always() or this step fails the run — the
       # next step someone adds cannot reintroduce silent skipping.

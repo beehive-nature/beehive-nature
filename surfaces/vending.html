@@ -276,6 +276,22 @@ main{max-width:462px;margin:0 auto}
   tomorrow, you could stand your agent back up, and so could anyone else.</p>
 </section>
 
+<!-- ── 5 · THE METER'S OWN RECEIPT (x402) ──────────────────────── -->
+<div class="step" id="x402-sec">5 · the meter's own receipt</div>
+<section class="card" aria-label="the x402 meter receipt — session 42, audited in your page">
+  <p class="note" style="margin:0 0 10px">The machine that charges you is itself metered:
+  <b>credit lands only from settled single-use nonces</b> (a replayed payment credits
+  exactly once — and a settle burns its nonce <b>even at zero</b>) · charges clamp under a
+  <b>ceiling signed once</b> at open · a session that cannot pay is <b>paused, never
+  killed</b> · the tithe rides every rate row and is audited as its own split. Session 42 —
+  one metered rehearsal session on jungle4, every step a landed transaction — is re-audited
+  <b>here, in your page</b>, by the same pure 9-check law the contract pins
+  (<a href="https://github.com/beehive-nature/beehive-nature/blob/main/contracts/vending/tool/x402audit.mjs">tool/x402audit.mjs</a>,
+  held to this page's engine by a parity gate). Tap a cell to see each of the four
+  verifier states demonstrated, not asserted.</p>
+  <div id="x402body" aria-live="polite" style="color:var(--dim);font-size:11px">reading the meter session…</div>
+</section>
+
 <footer class="foot">
   <b>new bee:</b> you just made an AI that's yours. ·
   <b>raver:</b> it speaks your tongue and lives in the hive. ·
@@ -283,7 +299,8 @@ main{max-width:462px;margin:0 auto}
   pointer derived not stored — <a href="https://monitor.jungletestnet.io/#accountOverview:bnrapolltest">verify it yourself</a>.<br>
   law rows read live from the vending contract on jungle4 (bnrapolltest · rehearsal
   net) · A price <span id="vpricedate">live</span> · spec
-  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/specs/SPEC-VENDING-1.md">SPEC-VENDING-1/2 in the estate tree</a>
+  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/specs/SPEC-VENDING-1.md">SPEC-VENDING-1/2 in the estate tree</a> ·
+  the meter receipt <a href="#x402-sec">audited in your page</a>
 </footer>
 </main>
 
@@ -751,6 +768,28 @@ $('papprove').addEventListener('click', async () => {
   readCerts().catch(() => { checkName(); });
   walkMints().catch(() => renderLand());
   setInterval(() => { document.visibilityState === 'visible' && walkMints().catch(() => {}); }, 45000);
+})();
+
+/* ── 5 · the x402 meter receipt — the audit recomputed in this page.
+   The record is the receipt's own bytes (x402-session42.json); the session,
+   rate and nonce rows are re-read LIVE from the rehearsal chain when it
+   answers, and the pure 9-check audit runs either way — keylessly. Failure
+   degrades to a named state, never a fake verdict. */
+</script>
+<script src="x402-meter.js?v=1"></script>
+<script>
+(async () => {
+  const body = document.getElementById('x402body');
+  try {
+    const r = await fetch('x402-session42.json', { signal: AbortSignal.timeout(10000) });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const record = await r.json();
+    if (!window.X402Meter) throw new Error('engine absent');
+    await X402Meter.mountPanel(body, { record });
+  } catch (e) {
+    body.innerHTML = '<span style="color:var(--amber)">the meter receipt is unreadable (' +
+      esc(String(e.message || e)) + ') — the panel rests rather than guess</span>';
+  }
 })();
 </script>
 </body>

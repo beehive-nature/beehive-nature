@@ -53,6 +53,13 @@ const RIDER_ALLOWLIST = [
      panel (z3.2 build, 2026-09-03); reads only same-origin spend-ledger.json
      (the json rule above) and carries no other dependency */
   /\/spend-audit\.js/,
+  /* the x402 meter-session auditor rider (z3.2, 2026-09-04) — the pure
+     9-check audit recomputed in-page on surfaces/vending.html §x402-sec;
+     reads only same-origin x402-session42.json (the json rule above) plus
+     the same public rehearsal-RPC host the rest of that surface already
+     reads, and is held to contracts/vending/tool/x402audit.mjs by
+     e2e/x402-engine-parity.mjs */
+  /\/x402-meter\.js/,
   /* W-1, the in-browser model (founder order 2026-09-04): vendored
      @mlc-ai/web-llm (Apache-2.0, L-VERIFY @56d318cd) served same-origin at
      surfaces/blight/web-llm.mjs, imported ONLY on the user's wake click —

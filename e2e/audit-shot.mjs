@@ -7,7 +7,8 @@
 //      read back, so the four states are proven as PAINT, including the
 //      FAILED chip at exactly the --flag/--cat-bug hue rgb(192,127,28),
 //      never a new red.
-// Shots: the wallet receipts panel and the comb verifier lane at 390px.
+// Shots: the wallet receipts panel, the comb verifier lane, and the vending
+// surface's x402 meter receipt — all at 390px.
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
@@ -105,6 +106,51 @@ async function prove(page, sectionSel, label) {
   ok('comb: zero page errors', errors.length === 0, errors.join(' | '));
   await page.locator('#verifierSec').screenshot({ path: join(OUT, 'comb-verifier-390.png') });
   console.log('shot → e2e/shots-comb/comb-verifier-390.png');
+  await ctx.close();
+}
+
+/* 3 · the x402 meter receipt on the vending surface at 390px (z3.2, 2026-09-04).
+   Different engine, same proving law: the panel's own census (__x402Stats —
+   one demonstration per verifier state) AND the paint of every state's comb
+   chip read back, FAILED at exactly rgb(192,127,28). */
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on('pageerror', e => errors.push(String(e).slice(0, 120)));
+  await page.goto(BASE + '/surfaces/vending.html', { waitUntil: 'load' });
+  await page.waitForFunction(() => window.__x402Stats, null, { timeout: 30000 });
+  await page.locator('#x402-sec').scrollIntoViewIfNeeded();
+  await page.waitForTimeout(400);
+  const stats = await page.evaluate(() => window.__x402Stats);
+  ok('vending: the meter panel reports its census', !!stats, JSON.stringify(stats && stats.byState));
+  ok('vending: all four states demonstrated in the page',
+    stats && stats.byState && ['PASSED', 'PENDING_ANCHOR', 'FAILED', 'INCONCLUSIVE'].every(s => stats.byState[s] === 1),
+    stats ? Object.entries(stats.byState).map(([k, v]) => k + ' ' + v).join(' · ') : 'no stats');
+  ok('vending: the 9-check law ran (PASSED view)', stats && stats.viewResults && stats.viewResults.PASSED &&
+    stats.viewResults.PASSED.checks.length === 9 && stats.viewResults.PASSED.checks.every(c => c.ok),
+    stats && stats.viewResults ? stats.viewResults.PASSED.checks.filter(c => c.ok).length + '/9 ok' : 'no results');
+  const chips = await page.evaluate(() => {
+    const out = [];
+    document.querySelectorAll('#x402body svg[aria-label]').forEach(sv => {
+      const poly = sv.querySelector('polygon');
+      if (!poly) return;
+      const cs = getComputedStyle(poly);
+      const m = (sv.getAttribute('aria-label') || '').match(/^([A-Z_]+)/);
+      out.push({ state: m ? m[1] : '?', fill: cs.fill, op: cs.fillOpacity });
+    });
+    return out;
+  });
+  for (const [state, fill] of Object.entries(EXPECT)) {
+    const n = chips.filter(c => c.state.startsWith(state)).length;
+    ok('vending: ' + state + ' chips painted (' + n + ')', n > 0);
+    ok('vending: ' + state + ' paint is exactly ' + fill,
+      chips.some(c => c.state.startsWith(state) && c.fill === fill),
+      chips.filter(c => c.state.startsWith(state)).map(c => c.fill).join(' | ') || 'none');
+  }
+  ok('vending: zero page errors', errors.length === 0, errors.join(' | '));
+  await page.locator('#x402-sec').screenshot({ path: join(OUT, 'vending-x402-390.png') });
+  console.log('shot → e2e/shots-comb/vending-x402-390.png');
   await ctx.close();
 }
 

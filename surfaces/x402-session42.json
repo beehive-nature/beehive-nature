@@ -1,0 +1,59 @@
+{
+ "_note": [
+  "THE X402 METER RECEIPT — session 42 on jungle4 (bnrapolltest, the estate's rehearsal seat; Vaulta is the production rail). This is the receipt's own bytes: the session row, the rate row, the nonce rows, and the event log. Every event is a LANDED transaction — the log was rebuilt from the chain's own action history (get_actions walk, 2026-09-04), every timestamp a block time; the three REFUSED probes carry no tx and no timestamp because a refusal lands nothing. Refusals are receipts too: they are named here in place. The mid-session charges (1 and 3 units) and the second settle are chain truth the dispatch receipt did not itemize — the arithmetic lands exactly with them: 0.6000 A × 8 units = 4.8000 A burned, credit 7.0000 A = 0 + 3 + 2 + 2 across four single-use nonces, one burned at zero.",
+  "The audit is NOT trusted from this file: surfaces/x402-meter.js recomputes the pure 9-check audit in the reader's page, over the live chain rows when the rail answers (fetchLive) and over these bytes when it does not — labelled either way. The four verifier states are demonstrated, not asserted: the pass-1 view (anchor stripped) audits PENDING_ANCHOR, a forged charge audits FAILED, a malformed anchor audits INCONCLUSIVE. e2e/x402-engine-parity.mjs holds this port to contracts/vending/tool/x402audit.mjs — one law, two engines, proven equal.",
+  "CARE: this is topology and vocabulary, NEVER a security claim."
+ ],
+ "record": "x402-meter-receipt-1",
+ "session": 42,
+ "as_of": "2026-09-04T01:32:15Z",
+ "contract": "bnrapolltest — jungle4 TESTNET-ONLY rehearsal seat (SPEC-VENDING-1 §x402: the stateful party is the meter contract on Vaulta)",
+ "monitor": "https://monitor.jungletestnet.io/#accountActions:",
+ "sess": {
+  "id": 42,
+  "owner": "bnrapolltest",
+  "agent_name": "vendingtest2",
+  "rail": "vaulta",
+  "state": 0,
+  "credit": "7.0000 A",
+  "burned": "4.8000 A",
+  "ceiling": "5.0000 A",
+  "audit_state": 0,
+  "audit_hash": "5900f0543b84a696fe44539347c880000894d64b461c1519b1f8a22a8f5c069f", "_hexlaw": "PUBLIC-CONSTANT — jungle4 session row, chain-pinned audit record hash",
+  "opened": "2026-09-04T01:28:41",
+  "updated": "2026-09-04T01:32:15"
+ },
+ "rate": {
+  "rail": "vaulta",
+  "basis": "0.6000 A",
+  "tithe_bp": 1000,
+  "label": "the b-meter basis + tithe, founder-word law (x402 rates shape)",
+  "updated": "2026-09-04T01:27:12",
+  "tx": "b0e9b16b619e2e9556f3fa64d701a8a6329736030ba2853b7c2f5cd3c803e1da", "_hexlaw": "PUBLIC-CONSTANT — jungle4 txid, the v2 rate row (cost basis + tithe field)"
+ },
+ "nonces": [
+  {"value": 420001, "session": 42, "amount": "0.0000 A", "at": "2026-09-04T01:28:41"},
+  {"value": 420002, "session": 42, "amount": "3.0000 A", "at": "2026-09-04T01:28:43"},
+  {"value": 420003, "session": 42, "amount": "2.0000 A", "at": "2026-09-04T01:28:45"},
+  {"value": 420004, "session": 42, "amount": "2.0000 A", "at": "2026-09-04T01:29:54"}
+ ],
+ "events": [
+  {"kind": "open",    "at": "2026-09-04T01:28:41.000", "tx": "2d022d4f990f5037e3bd7eb005c1410f025f55edf09e6030f08121e977391400", "_hexlaw": "PUBLIC-CONSTANT — jungle4 txid", "note": "opensess — the upto ceiling 5.0000 A signed ONCE"},
+  {"kind": "settle",  "nonce": 420001, "amount": "0.0000 A", "at": "2026-09-04T01:28:41.500", "tx": "c952fd825f0e16219ed0916c875c1e8d07cc166500fa85aad25b746e695826f1", "_hexlaw": "PUBLIC-CONSTANT — jungle4 txid", "note": "settle ZERO — the nonce burns anyway (Tally rule)"},
+  {"kind": "refused", "note": "settle REPLAY on nonce 420001 — refused: nonce spent, nothing credited twice"},
+  {"kind": "settle",  "nonce": 420002, "amount": "3.0000 A", "at": "2026-09-04T01:28:43.500", "tx": "cc776c19c663621c5da5fb7dcfcdf08115345823d8044415a79e821a19bde3f1", "_hexlaw": "PUBLIC-CONSTANT — jungle4 txid", "note": "the real credit"},
+  {"kind": "charge",  "units": 2, "whilePaused": false, "at": "2026-09-04T01:28:43.500", "tx": "e8c5e437e626e3f5089f410d116e919099e5a58b6e162ca3756e318388ce50ae", "_hexlaw": "PUBLIC-CONSTANT — jungle4 txid", "note": "2 units → burned 1.2000 A"},
+  {"kind": "charge",  "units": 1, "whilePaused": false, "at": "2026-09-04T01:28:44.500", "tx": "608f449082ded975d9ca0ba9d41c42e95c1e5f51b234693c514a5b86f3f6e46a", "_hexlaw": "PUBLIC-CONSTANT — jungle4 txid", "note": "chain truth the dispatch receipt did not itemize"},
+  {"kind": "settle",  "nonce": 420003, "amount": "2.0000 A", "at": "2026-09-04T01:28:45.000", "tx": "b6cd8f46f75c8dd02c23afc65deabc885abae979892512b8cdd33e37da359c77", "_hexlaw": "PUBLIC-CONSTANT — jungle4 txid", "note": "top-up"},
+  {"kind": "charge",  "units": 3, "whilePaused": false, "at": "2026-09-04T01:28:46.500", "tx": "433392990254043f2a478b4a4070bedf2bfe2a03be79b0fe6c5a94ea4aa54d63", "_hexlaw": "PUBLIC-CONSTANT — jungle4 txid", "note": "chain truth the dispatch receipt did not itemize"},
+  {"kind": "refused", "note": "charge 1000 units (600 A) — refused: over ceiling, the upto max refused (verifyAgainst rule)"},
+  {"kind": "charge",  "units": 2, "whilePaused": false, "at": "2026-09-04T01:29:49.000", "tx": "5f0315c47ab5903ea687c309b9490b0d3aa640a0c12f29ea14f521bbdcd46fb3", "_hexlaw": "PUBLIC-CONSTANT — jungle4 txid", "note": "the edge charge — burned to 4.8000 A, headroom zero, committed"},
+  {"kind": "pause",   "at": "2026-09-04T01:29:49.000", "tx": "5f0315c47ab5903ea687c309b9490b0d3aa640a0c12f29ea14f521bbdcd46fb3", "_hexlaw": "PUBLIC-CONSTANT — jungle4 txid (the edge charge's own tx)", "note": "state → 1 (PAUSED) — pause, not kill"},
+  {"kind": "refused", "note": "charge 1 unit WHILE PAUSED — refused: session paused, resume first"},
+  {"kind": "settle",  "nonce": 420004, "amount": "2.0000 A", "at": "2026-09-04T01:29:54.500", "tx": "571dcea745e572d2ebf6f17c0234838e9c443a56a315ca40496fd9102a649320", "_hexlaw": "PUBLIC-CONSTANT — jungle4 txid", "note": "top-up WHILE PAUSED — the session LIVES while paused"},
+  {"kind": "resume",  "at": "2026-09-04T01:29:59.000", "tx": "3847107ab6a450767d8a89cd86ab58ef1fa72fb2bcf3b7221f2ee8320dfa7bc5", "_hexlaw": "PUBLIC-CONSTANT — jungle4 txid", "note": "resume → ACTIVE"},
+  {"kind": "auditmark", "state": 1, "at": "2026-09-04T01:31:56.500", "tx": "925a7f43621a78cde850f72070de350012cf42784e1516d775b7c5fac690ebf9", "_hexlaw": "PUBLIC-CONSTANT — jungle4 txid", "note": "pass 1 → PENDING_ANCHOR (honey), record pinned"},
+  {"kind": "anchor",  "hash": "9003f12af1da77e732ef10b6cd09588efe43a0a4369b8a3056e8928c688754ae", "at": "2026-09-04T01:31:56.500", "tx": "925a7f43621a78cde850f72070de350012cf42784e1516d775b7c5fac690ebf9", "_hexlaw": "PUBLIC-CONSTANT — the pass-1 pinned record, sha256", "note": "the pass-1 audit record, pinned on chain — the anchor of record"},
+  {"kind": "auditmark", "state": 0, "at": "2026-09-04T01:32:15.500", "tx": "de9cc2028645f98d0a9a8c0167b0a87fdc8b99fb8a75cfcbece26d8b6ad4a87b", "_hexlaw": "PUBLIC-CONSTANT — jungle4 txid", "note": "pass 2 → PASSED (capped), record pinned"}
+ ]
+}
