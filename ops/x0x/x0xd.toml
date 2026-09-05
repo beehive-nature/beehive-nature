@@ -1,0 +1,13 @@
+# x0xd on the hive box — lane x0x (2026-09-05). Loopback API only.
+api_address = "127.0.0.1:12700"
+log_level = "info"
+log_format = "text"
+data_dir = "/var/lib/x0x/data"
+identity_dir = "/var/lib/x0x/identity"
+zero_peer_restart_secs = 600
+
+[update]
+enabled = false
+
+[history]
+enabled = true

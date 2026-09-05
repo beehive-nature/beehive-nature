@@ -1,0 +1,40 @@
+[Unit]
+Description=x0x agent daemon (post-quantum gossip mesh)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=x0x
+Group=x0x
+ExecStart=/usr/local/bin/x0xd --config /etc/x0x/x0xd.toml
+ExecStartPre=/usr/local/bin/x0xd --config /etc/x0x/x0xd.toml --check
+Restart=always
+RestartSec=5
+# resource caps (lane order: capped unit)
+MemoryMax=512M
+MemoryHigh=384M
+CPUQuota=100%
+TasksMax=64
+IPAccounting=yes
+# hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=true
+LockPersonality=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+SystemCallArchitectures=native
+CapabilityBoundingSet=
+AmbientCapabilities=
+StateDirectory=x0x
+ReadWritePaths=/var/lib/x0x
+
+[Install]
+WantedBy=multi-user.target
