@@ -70,6 +70,13 @@ jobs:
       - name: x402 meter battery (x402-RAID-Z33)
         if: always()
         run: python3 scripts/buzz-meter/test_x402_meter.py
+      # PEER FUNNEL testnet runner selftest (z3.3 Order C, 2026-09-05): the
+      # one-broadcast tool cannot rot — keccak + EIP-155 RLP hash vectors and
+      # the sign/recover roundtrip proven every push (key parts skip cleanly
+      # where no key exists)
+      - name: Funnel broadcast selftest (vectors + sign/recover)
+        if: always()
+        run: node scripts/funnel/broadcast.mjs --selftest
       # estate-source: every data-i18n key in the tree exists in the corpus,
       # every docked tongue covers every key, and the corpus English matches
       # what the pages say (the stale-translation check).
