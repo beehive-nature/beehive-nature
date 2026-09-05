@@ -1119,6 +1119,143 @@ var WALLET_PROFILE = {
   </script>
 </section>
 
+<!-- ══ PEER FUNNEL — the first mile in: fiat → USDC on Peer's escrow, estate = bare to ══ -->
+<section id="peer-sec" style="border-color:#2c4a3a">
+  <h2>🏧 FIAT IN — the Peer funnel (SPEC-PEER-FUNNEL-1)</h2>
+  <p class="law">the estate is a <b>seller, not an operator</b>: its Base address below is a bare
+  <b>to</b> on Peer's live escrow (EscrowV2 + OrchestratorV3 on Base) — it signs nothing, grants
+  no allowance, runs no relayer. a customer's fiat (Venmo &amp; co.) settles as USDC straight
+  into it. the estate is <b>never the LP</b> — a third party holds the USDC and takes the fiat;
+  if the estate played LP its own USDC would just come home (a fiat receipt, not new money).
+  the 10% tithe rides the customer's intent itself as one <b>referralFees</b> entry — paid
+  inside Peer's settlement before the balance lands, no second transaction; when no referral
+  was attached, the split still happens as ONE estate-side exact-multi instruction (seller +
+  tithe in a single payment — the fallback, SPEC §receive). settlement finality is one vendor
+  signature until the estate's own witness set exists — priced as such, never hidden.</p>
+  <div class="row" style="align-items:center;flex-wrap:wrap;gap:8px">
+    <span class="law">receive address (bare <b>to</b>):</span>
+    <code style="word-break:break-all">0x89881F83A8C9CE06E34cbDD50A612909a784d7C6</code>
+    <button class="gold" id="peer-copy" style="min-height:32px;font-size:10px">copy</button>
+  </div>
+  <div class="row" style="margin-top:10px;align-items:center;flex-wrap:wrap">
+    <button class="gold" id="peer-read" style="min-height:40px">read the funnel — settlements to this address</button>
+    <span class="law" id="peer-stat" style="flex:2;min-width:200px">the receive call is keyless: USDC Transfer logs from the orchestrator, public Base RPC picked at random — the page only reads.</span>
+  </div>
+  <div id="peer-rows" class="law" style="margin-top:10px"></div>
+  <details style="margin-top:10px">
+    <summary style="cursor:pointer;font-size:11px;color:var(--cyan)">the intent shape — tithe attached at signal time</summary>
+    <div class="law" style="margin-top:6px">the customer's <code>signalIntent</code> carries the split itself (≤10 referral
+    recipients, ≤50%, paid from the release before the net lands — <code>ReferralFeeLib</code>, read at source):
+    <code style="display:block;margin-top:6px;white-space:pre-wrap">to:            0x89881F83…d7C6   ← the estate, bare recipient
+referralFees:  [ { recipient: — founder word fills the tithe address —,
+                   basisPoints: 1000 } ]        ← the 10% law, one entry</code>
+    the recipient address is founder word — shown unfilled rather than invented.</div>
+  </details>
+  <script>
+    (function () {
+      try {
+        var ESTATE_TO = '0x89881F83A8C9CE06E34cbDD50A612909a784d7C6'.toLowerCase(); // PUBLIC-CONSTANT: estate receive address (bare to), SPEC-PEER-FUNNEL-1
+        var ORCH = '0x014025fDE093f8701d86e9f38e2C3a9b779cb5c7'.toLowerCase();    // PUBLIC-CONSTANT: Peer OrchestratorV3 on Base (PEER-SORT-2026-09-02 §2)
+        var USDC = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'.toLowerCase();    // PUBLIC-CONSTANT: native USDC on Base
+        var TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'; // PUBLIC-CONSTANT: keccak(Transfer(address,address,uint256))
+        var HOSTS = ['https://mainnet.base.org', 'https://base.publicnode.com', 'https://1rpc.io/base', 'https://base.drpc.org'];
+        var pad = function (a) { return '0x' + '0'.repeat(24) + a.slice(2).toLowerCase(); };
+        var copyBtn = document.getElementById('peer-copy');
+        if (copyBtn) copyBtn.addEventListener('click', function () {
+          var t = '0x89881F83A8C9CE06E34cbDD50A612909a784d7C6';
+          if (navigator.clipboard) navigator.clipboard.writeText(t);
+          copyBtn.textContent = 'copied';
+          setTimeout(function () { copyBtn.textContent = 'copy'; }, 1400);
+        });
+        var btn = document.getElementById('peer-read');
+        var stat = document.getElementById('peer-stat');
+        var rows = document.getElementById('peer-rows');
+        function rpc(host, method, params) {
+          var ctl = new AbortController();
+          var t = setTimeout(function () { ctl.abort(); }, 12000);
+          return fetch(host, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+            signal: ctl.signal,
+            body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: method, params: params })
+          }).then(function (r) { return r.json(); }).then(function (j) {
+            clearTimeout(t);
+            if (j.error) throw new Error(j.error.message || 'rpc error');
+            return j.result;
+          });
+        }
+        if (btn) btn.addEventListener('click', function () {
+          // random host per lookup, failover walk — no operator learns "this IP
+          // watches the funnel", and one refusing host never ends the read
+          var order = HOSTS.slice();
+          for (var j2 = order.length - 1; j2 > 0; j2--) {
+            var r2 = Math.floor(Math.random() * (j2 + 1));
+            var tt = order[j2]; order[j2] = order[r2]; order[r2] = tt;
+          }
+          btn.disabled = true;
+          stat.textContent = 'reading USDC transfers from the orchestrator to the estate address (random public RPC, walking back \u22482 days of blocks)\u2026';
+          rows.innerHTML = '';
+          function finish(found, okChunks, failChunks) {
+            btn.disabled = false;
+            if (!found.length) {
+              stat.textContent = 'read complete \u2014 no funnel settlements yet (' + okChunks + ' chunks read clean' +
+                (failChunks ? ', ' + failChunks + ' chunk(s) refused by this RPC \u2014 their range was skipped' : '') +
+                '). the honest-empty state: the path is live the moment a customer intent names this address.';
+              rows.innerHTML = '<span style="color:var(--faint)">\u2014 no rows \u2014</span>';
+              return;
+            }
+            stat.textContent = found.length + ' settlement' + (found.length > 1 ? 's' : '') + ' read keylessly from public Base RPC \u2014 every row is the ONE seller-side event (USDC Transfer from the orchestrator):';
+            rows.innerHTML = found.slice(-20).reverse().map(function (lg) {
+              var amt = parseInt(lg.data, 16) / 1e6;
+              return '<div style="border:1px solid var(--line);border-radius:8px;padding:8px;margin-top:6px">' +
+                '<b style="color:var(--leaf)">' + amt.toFixed(6) + ' USDC</b> from OrchestratorV3 \u00b7 ' +
+                '<a href="https://basescan.org/tx/' + lg.transactionHash + '" target="_blank" rel="noopener" style="color:var(--cyan)">' + lg.transactionHash.slice(0, 18) + '\u2026</a>' +
+                ' <span style="color:var(--faint)">block ' + parseInt(lg.blockNumber, 16) + '</span></div>';
+            }).join('');
+          }
+          function walkOn(i) {
+            if (i >= order.length) {
+              btn.disabled = false;
+              /* EVERY host refused — the wall, not the truth: never say "no
+                 settlements" when the public record was never read */
+              stat.textContent = 'no public Base RPC could be read from this network. nothing was sent \u2014 the receive call only reads; try another network or in a moment.';
+              return;
+            }
+            var host = order[i];
+            rpc(host, 'eth_blockNumber', []).then(function (tipHex) {
+              var tip = parseInt(tipHex, 16);
+              var found = [], okChunks = 0, failChunks = 0, chain = Promise.resolve();
+              var _loop = function (chunk) {   // 10k-block chunks, walk back, stop at first hit
+                chain = chain.then(function () {
+                  if (found.length) return null;
+                  return rpc(host, 'eth_getLogs', [{
+                    address: USDC, fromBlock: '0x' + (tip - chunk * 10000 - 9999).toString(16),
+                    toBlock: '0x' + (tip - chunk * 10000).toString(16),
+                    topics: [TRANSFER_TOPIC, pad(ORCH), pad(ESTATE_TO)]
+                  }]).then(function (logs) {
+                    (logs || []).forEach(function (lg) { found.push(lg); });
+                    okChunks++;
+                    if (!found.length) stat.textContent = 'walking the public record back\u2026 ' +
+                      ((chunk + 1) * 10) + 'k blocks read, no settlements yet\u2026';
+                    return null;
+                  }).catch(function () { failChunks++; return null; });  // one chunk failing never kills the read
+                });
+              };
+              for (var c = 0; c < 10; c++) _loop(c);
+              return chain.then(function () {
+                if (okChunks === 0) return walkOn(i + 1);   // this host refused the whole read — next
+                finish(found, okChunks, failChunks);
+              });
+            }).catch(function () { return walkOn(i + 1); });  // host unreachable — next
+          }
+          walkOn(0);
+        });
+      } catch (err) {
+        var s = document.getElementById('peer-stat');
+        if (s) s.textContent = 'funnel panel failed to start: ' + (err && err.message ? err.message : err);
+      }
+    })();
+  </script>
+</section>
+
 <!-- ══ ARWEAVE — publish & anchor (first-party signer · vault custody) ══ -->
 <section id="arw-sec" style="border-color:#4a3a1d">
   <h2>📡 ARWEAVE — publish &amp; anchor, no middleman</h2>
