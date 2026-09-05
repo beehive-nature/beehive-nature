@@ -1,0 +1,463 @@
+<!doctype html>
+<!-- watch.html — THE WATCH-TOGETHER ROOM (POC, 2026-09-04).
+     One file. Three audiences in one surface:
+       · the STREAMER (founder) — the ingest card carries the one RTMP line
+         (OBS or ffmpeg, over the x0x tailnet forward to the box) + the
+         ticker curl that updates the now-playing line
+       · the MEMBER — the Buzz room beside the video, the /join view reused
+         verbatim in an iframe: SAME relay (skaists.buzz behind
+         relay.skaists.dev), SAME origin (canonical-origin law), SAME
+         identity (localStorage is shared by origin — join once, watch later)
+       · the GUEST/PAYER — the meter strip: a jungle4 session number is the
+         ticket; the playlist door on the box checks the live session
+         receipt READ-ONLY; when credit runs out the video PAUSES, nothing
+         is killed — chat keeps living; a top-up + resume un-pauses it.
+     The four audit states are drawn as comb cells in z3.2's verifier
+     vocabulary (surfaces/spend-audit.js): PASSED=capped ⬡ ·
+     PENDING_ANCHOR=honey · FAILED=flag · INCONCLUSIVE=nectar.
+     CARE (verbatim, wherever these states are drawn):
+     this is topology and vocabulary, NEVER a security claim.
+     Palette: tokens.css ONLY (served at /tokens.css from the relay origin).
+     390px first; ≥880px the room moves beside the video. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>watch — the skaists.buzz room</title>
+<link rel="stylesheet" href="/tokens.css">
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg0); color: var(--ink);
+    font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+    font-size: var(--t-body); line-height: var(--lh-body);
+    display: flex; flex-direction: column; min-height: 100dvh;
+  }
+  /* ── header ─────────────────────────────────────────────────────────── */
+  header {
+    display: flex; align-items: baseline; gap: var(--s2);
+    padding: var(--s2) var(--s3); border-bottom: 1px solid var(--line);
+    background: var(--bg1);
+  }
+  header .hex { color: var(--leaf); letter-spacing: .3em; font-size: var(--t-micro);
+    text-transform: uppercase; }
+  header h1 { font-size: var(--t-h2); font-weight: 600; color: var(--ink-hi); }
+  header .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--faint);
+    align-self: center; flex: none; }
+  header .dot.on { background: var(--ok); box-shadow: 0 0 10px var(--ok); }
+  header .dot.off { background: var(--flag); box-shadow: 0 0 10px var(--flag); }
+  @media (prefers-reduced-motion: no-preference) {
+    header .dot.on { animation: breathe 2.4s infinite; }
+    @keyframes breathe { 50% { opacity: .5; } }
+  }
+  header .st { font-size: var(--t-small); color: var(--dim); }
+  /* ── the ticker line (streamer-updated) ─────────────────────────────── */
+  #ticker {
+    display: flex; gap: var(--s3); overflow-x: auto; white-space: nowrap;
+    padding: var(--s2) var(--s3); border-bottom: 1px solid var(--line);
+    background: var(--bg2); font-size: var(--t-small); scrollbar-width: none;
+  }
+  #ticker::-webkit-scrollbar { display: none; }
+  #ticker .k { color: var(--faint); text-transform: uppercase; letter-spacing: .12em;
+    font-size: var(--t-micro); }
+  #ticker b { color: var(--gold); font-weight: 600; }
+  #ticker .none { color: var(--faint); }
+  /* ── layout: video column + room column ─────────────────────────────── */
+  main { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+  .stage { display: flex; flex-direction: column; min-height: 0; flex: 1; }
+  @media (min-width: 880px) { .stage { flex-direction: row; } }
+  .left { display: flex; flex-direction: column; min-height: 0; flex: 1 1 58%; }
+  .roomside { display: flex; flex-direction: column; min-height: 0;
+    flex: 1 1 42%; border-left: 1px solid var(--line); background: var(--bg1); }
+  /* ── the video tile ─────────────────────────────────────────────────── */
+  .tile { position: relative; background: #000; aspect-ratio: 16 / 9; }
+  .tile video { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .tile .veil {
+    position: absolute; inset: 0; display: none; place-items: center;
+    background: color-mix(in srgb, var(--bg0) 78%, transparent);
+    text-align: center; padding: var(--s4);
+  }
+  .tile .veil.show { display: grid; }
+  .tile .veil .big { font-size: var(--t-h1); color: var(--amber); font-weight: 600; }
+  .tile .veil .why { color: var(--dim); font-size: var(--t-small); margin-top: var(--s2);
+    max-width: 34ch; }
+  .tile .veil .hint { color: var(--faint); font-size: var(--t-law); margin-top: var(--s3); }
+  /* ── the meter strip (the guest's register) ─────────────────────────── */
+  .meter { padding: var(--s2) var(--s3) var(--s3); border-bottom: 1px solid var(--line);
+    background: var(--bg1); }
+  .meter .row { display: flex; gap: var(--s2); align-items: center; flex-wrap: wrap; }
+  .meter label { font-size: var(--t-micro); color: var(--faint);
+    text-transform: uppercase; letter-spacing: .12em; }
+  .meter input {
+    background: var(--bg0); border: 1px solid var(--line-hi); color: var(--gold);
+    border-radius: var(--r-sm); padding: 6px 8px; width: 9ch;
+    font: 600 var(--t-body) ui-monospace, monospace; text-align: center;
+  }
+  .meter button {
+    background: var(--gold); color: var(--bg0); border: none;
+    border-radius: var(--r-sm); padding: 7px 12px;
+    font: 600 var(--t-small) ui-monospace, monospace; cursor: pointer;
+  }
+  .meter button:hover { background: var(--ink-hi); }
+  .meter .nums { font-size: var(--t-small); color: var(--dim);
+    font-variant-numeric: tabular-nums; }
+  .meter .nums b { color: var(--ink-hi); }
+  .chip {
+    display: inline-block; border-radius: var(--r-pill); padding: 2px 9px;
+    font-size: var(--t-micro); letter-spacing: .1em; text-transform: uppercase;
+    border: 1px solid var(--line-hi); color: var(--dim);
+  }
+  .chip.active { color: var(--ok); border-color: var(--ok); }
+  .chip.paused { color: var(--amber); border-color: var(--amber); }
+  .chip.nosess { color: var(--flag); border-color: var(--flag); }
+  /* the four audit cells — z3.2's comb vocabulary (CARE line below them) */
+  .comb { display: flex; justify-content: space-between; gap: var(--s1);
+    padding: var(--s2) 0 2px; }
+  .cell { width: 25%; text-align: center; }
+  .cell .h {
+    width: 44px; height: 49px; margin: 0 auto 5px;
+    clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+    display: grid; place-items: center; font-size: var(--t-micro);
+    background: var(--bg3); color: var(--faint);
+    transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+  }
+  .cell .l { font-size: var(--t-micro); color: var(--dim); font-weight: 600;
+    letter-spacing: .04em; }
+  .cell .s { font-size: var(--t-micro); color: var(--faint); line-height: 1.4;
+    margin-top: 1px; }
+  .cell.lit .l { color: var(--ink-hi); }
+  .h.capped { background: var(--gold); color: var(--bg0); }
+  .h.capped .seal { font-size: 15px; line-height: 1; }
+  .h.honey { background: rgba(255, 179, 71, .14); color: var(--amber);
+    box-shadow: inset 0 0 0 1.5px var(--amber); }
+  .h.flag { background: rgba(192, 127, 28, .16); color: var(--cat-bug);
+    box-shadow: inset 0 0 0 1.5px var(--cat-bug); }
+  .h.nectar { background: rgba(0, 229, 255, .08); color: var(--cyan);
+    box-shadow: inset 0 0 0 1.5px var(--cyan); }
+  @media (prefers-reduced-motion: no-preference) {
+    .cell.lit .h.honey { animation: ripen 2.4s var(--ease) infinite; }
+    @keyframes ripen { 50% { background: rgba(255, 179, 71, .3); } }
+  }
+  .care { font-size: var(--t-law); color: var(--faint); line-height: var(--lh-law);
+    margin-top: var(--s2); }
+  /* ── the room (the member's register) ──────────────────────────────── */
+  .roomhead {
+    display: flex; align-items: baseline; gap: var(--s2);
+    padding: var(--s2) var(--s3); border-bottom: 1px solid var(--line);
+  }
+  .roomhead .t { font-size: var(--t-micro); color: var(--faint);
+    text-transform: uppercase; letter-spacing: .14em; }
+  .roomhead b { color: var(--ink-hi); font-size: var(--t-small); }
+  #roomframe { flex: 1; width: 100%; border: 0; min-height: 340px;
+    background: var(--bg0); }
+  /* ── the ingest card (the streamer's register) ──────────────────────── */
+  details.ingest { border-top: 1px solid var(--line); background: var(--bg1);
+    font-size: var(--t-small); }
+  details.ingest summary {
+    cursor: pointer; padding: var(--s2) var(--s3); color: var(--dim);
+    font-size: var(--t-micro); text-transform: uppercase; letter-spacing: .12em;
+    list-style: none;
+  }
+  details.ingest summary::before { content: "+ "; color: var(--gold); }
+  details.ingest[open] summary::before { content: "− "; }
+  details.ingest .body { padding: 0 var(--s3) var(--s3); }
+  details.ingest pre {
+    background: var(--well); border: 1px solid var(--line); border-radius: var(--r-md);
+    padding: var(--s2) var(--s3); color: var(--leaf); font-size: var(--t-micro);
+    overflow-x: auto; margin-top: var(--s2); line-height: 1.7;
+  }
+  details.ingest .law { color: var(--faint); font-size: var(--t-law);
+    margin-top: var(--s2); line-height: var(--lh-law); }
+  footer { padding: var(--s2) var(--s3); border-top: 1px solid var(--line);
+    color: var(--faint); font-size: var(--t-law); line-height: var(--lh-law);
+    background: var(--bg1); }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<header>
+  <span class="hex">estate · live</span>
+  <h1>the watch room</h1>
+  <span class="dot" id="dot"></span>
+  <span class="st" id="st">checking the stream…</span>
+</header>
+
+<div id="ticker" aria-live="polite">
+  <span><span class="k">now </span><b id="tk-now" class="none">—</b></span>
+  <span><span class="k">set time </span><b id="tk-set" class="none">—</b></span>
+  <span><span class="k">next </span><b id="tk-next" class="none">—</b></span>
+</div>
+
+<main>
+<div class="stage">
+  <section class="left">
+    <div class="tile">
+      <video id="v" playsinline controls preload="none"></video>
+      <div class="veil" id="veil">
+        <div>
+          <div class="big" id="veil-big">PAUSED — credit at zero</div>
+          <div class="why" id="veil-why">the session lives; nothing was killed. top up the receipt and the picture resumes.</div>
+          <div class="hint" id="veil-hint">polling the meter every 2s…</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="meter">
+      <div class="row">
+        <label for="sess">receipt №</label>
+        <input id="sess" inputmode="numeric" autocomplete="off" spellcheck="false">
+        <button id="go">watch</button>
+        <span class="chip nosess" id="chip">no session</span>
+        <span class="nums" id="nums"></span>
+      </div>
+      <div class="comb" id="comb" aria-label="the four audit states">
+        <div class="cell" id="c-passed"><div class="h capped"><span class="seal">⬡</span></div>
+          <div class="l">PASSED</div><div class="s">capped</div></div>
+        <div class="cell" id="c-pending"><div class="h honey">◈</div>
+          <div class="l">PENDING_ANCHOR</div><div class="s">honey</div></div>
+        <div class="cell" id="c-failed"><div class="h flag">▲</div>
+          <div class="l">FAILED</div><div class="s">flag</div></div>
+        <div class="cell" id="c-inconclusive"><div class="h nectar">◇</div>
+          <div class="l">INCONCLUSIVE</div><div class="s">nectar</div></div>
+      </div>
+      <div class="care">the four audit states, z3.2's comb vocabulary: this is
+        topology and vocabulary, NEVER a security claim. the live session's own
+        audit verdict is the lit cell; the verdict is recomputed by the pure
+        audit (tool/x402audit.mjs), this surface only reads it.</div>
+    </div>
+
+    <details class="ingest">
+      <summary>go live — the streamer's line</summary>
+      <div class="body">
+        <div>OBS or ffmpeg, one RTMP line over the x0x tailnet forward
+          (127.0.0.1:19350 → box :1935). Two renditions (480/288) are packed
+          on the box by ffmpeg; Caddy serves the segments same-origin.</div>
+        <pre id="obsline">stream URL  rtmp://127.0.0.1:19350/live
+stream key  general?s=&lt;the standing stream key&gt;
+
+ticker      curl -X POST http://127.0.0.1:18094/live/ticker/general \
+              -H "authorization: Bearer &lt;stream key&gt;" \
+              -H "content-type: application/json" \
+              -d '{"now":"…","set":"21:00","next":"…"}'</pre>
+        <div class="law">the door never writes to the meter. it READS the live
+          session receipt (jungle4) and refuses the playlist when the credit is
+          out — pause, not kill. the room and the ticker stay alive either way.</div>
+      </div>
+    </details>
+  </section>
+
+  <section class="roomside">
+    <div class="roomhead">
+      <span class="t">the room</span> <b>#general · skaists.buzz</b>
+    </div>
+    <iframe id="roomframe" src="/join/" title="the skaists.buzz room"></iframe>
+  </section>
+</div>
+</main>
+
+<footer>same relay · same origin (canonical-origin law) · the playlist door is
+read-only · pause-not-kill · tokens.css only — the estate's own palette.
+watch-room POC 2026-09-04.</footer>
+
+<script src="/watch/hls.min.js"></script>
+<script>
+'use strict';
+/* ── exact decimals on strings ("1.2000 A" → BigInt scale 1e4 for A) ———
+   the estate law: no float ever touches a meter quantity (spend-audit §). */
+function units(s) { // "1.2000 A" → 12000n
+  var m = String(s || '').trim().match(/^(\d+)\.(\d+)/);
+  if (!m) { var w = String(s || '').trim().match(/^(\d+)(?!\.)/); return w ? BigInt(w[1]) * 10000n : 0n; }
+  return BigInt(m[1]) * 10000n + BigInt((m[2] + '0000').slice(0, 4));
+}
+function fmtU(n) {
+  var f = (n % 10000n).toString().padStart(4, '0').replace(/0+$/, '');
+  return (n / 10000n).toString() + (f ? '.' + f : '');
+}
+function fmtA(n) { var s = fmtU(n); return s + ' A'; }
+
+const ROOM = 'general';
+const $ = (id) => document.getElementById(id);
+const video = $('v'), veil = $('veil');
+const state = {
+  sess: null, hls: null, mode: 'idle', // idle|live|paused
+  startedAt: 0, playedAt: 0, latSum: 0, latN: 0, latLast: null, kbps: null,
+};
+window.__watch = state; // the e2e reads its numbers here
+
+/* ── the four audit cells ────────────────────────────────────────────── */
+// 255 (and any unknown) = the record does not carry a verdict yet → nectar
+const AUDIT = { 0: 'passed', 1: 'pending', 2: 'failed', 3: 'inconclusive' };
+function litAudit(a) {
+  const lit = AUDIT[a] ?? 'inconclusive';
+  ['passed', 'pending', 'failed', 'inconclusive'].forEach(k => {
+    $('c-' + k).classList.toggle('lit', k === lit);
+  });
+}
+
+/* ── session read (through the door — the door is the read-only relay) ── */
+async function readSession(id) {
+  try {
+    const r = await fetch('/live/session/' + id + '.json', { cache: 'no-store' });
+    if (!r.ok) return null;
+    const j = await r.json();
+    return j.ok ? j : null;
+  } catch { return null; }
+}
+
+/* ── the meter strip ─────────────────────────────────────────────────── */
+function paintStrip(j) {
+  const chip = $('chip'), nums = $('nums');
+  if (!j) {
+    chip.className = 'chip nosess'; chip.textContent = 'no session';
+    nums.textContent = ''; litAudit(null); return;
+  }
+  const s = j.sess;
+  const rem = units(s.credit) - units(s.burned);
+  const live = s.state === 0 && rem > 0n;
+  chip.className = 'chip ' + (live ? 'active' : 'paused');
+  chip.textContent = live ? 'ACTIVE' : 'PAUSED';
+  nums.innerHTML = 'credit <b>' + s.credit + '</b> · burned <b>' + s.burned +
+    '</b> · left <b>' + fmtA(rem) + '</b>' + (j.rate ? ' · ' + j.rate.basis + '/unit' : '');
+  litAudit(s.audit_state);
+}
+
+/* ── the player ──────────────────────────────────────────────────────── */
+function teardownVeil() { veil.classList.remove('show'); }
+function showVeil(big, why, hint) {
+  $('veil-big').textContent = big;
+  $('veil-why').textContent = why;
+  $('veil-hint').textContent = hint;
+  veil.classList.add('show');
+}
+
+function attach(sess) {
+  if (state.hls) { try { state.hls.destroy(); } catch {} state.hls = null; }
+  const src = '/live/' + ROOM + '/master.m3u8?session=' + encodeURIComponent(sess);
+  state.startedAt = performance.now();
+  if (window.Hls && Hls.isSupported()) {
+    const hls = new Hls({
+      lowLatencyMode: false, liveSyncDurationCount: 3, maxBufferLength: 12,
+      backBufferLength: 30, enableWorker: true,
+      fragLoadingMaxRetry: 2, fragLoadingRetryDelay: 800,
+      manifestLoadingMaxRetry: 2, levelLoadingMaxRetry: 3,
+    });
+    state.hls = hls; state.mode = 'live';
+    hls.on(Hls.Events.ERROR, (ev, d) => {
+      if (!d.fatal) {
+        if (d.details === 'manifestLoadError' || d.details === 'levelLoadError') maybePaused();
+        return;
+      }
+      // 402 on a playlist = the credit is out (the door refuses, read-only)
+      if (d.details === 'manifestLoadError' || d.details === 'manifestLoadTimeOut' ||
+          d.details === 'levelLoadError' || d.details === 'levelLoadTimeOut') { maybePaused(); return; }
+      hls.destroy(); state.hls = null; state.mode = 'idle';
+      say('the road hiccuped — re-attaching…', false);
+      selfHeal('fatal: ' + d.details);
+    });
+    hls.loadSource(src); hls.attachMedia(video);
+    hls.on(Hls.Events.FRAG_CHANGED, () => {
+      if (hls.latency != null && isFinite(hls.latency)) { state.latSum += hls.latency; state.latN++; state.latLast = hls.latency; }
+      const l = hls.levels && hls.levels[hls.currentLevel];
+      if (l && l.bitrate) state.kbps = Math.round(l.bitrate / 1000);
+    });
+  } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    video.src = src; state.mode = 'live'; // iPhone Safari — native HLS
+  } else { say('no HLS player on this device', true); return; }
+  state.sess = sess;
+  video.removeEventListener('ended', onEnded);
+  video.removeEventListener('error', onMediaErr);
+  video.addEventListener('ended', onEnded);
+  video.addEventListener('error', onMediaErr);
+  localStorage.setItem('watch.session', sess);
+  video.play().catch(() => {}); // autoplay needs the first touch; controls are there
+}
+
+/* self-heal: a churny ingest road can break segments under the player
+   (sequence resets, pruned files). If the player dies for any reason that
+   is NOT the meter, re-attach from a fresh master after a short beat. */
+let healTimer = null;
+function selfHeal(why) {
+  if (healTimer || !state.sess) return;
+  console.warn('re-attaching:', why);
+  healTimer = setTimeout(() => {
+    healTimer = null;
+    if (state.mode === 'paused' || !state.sess) return; // meter pause owns the player
+    teardownVeil();
+    attach(state.sess);
+  }, 3000);
+}
+
+function onEnded() { if (state.mode === 'live') selfHeal('stream ended while live'); }
+function onMediaErr() { selfHeal('media element error'); }
+
+/* pause-not-kill: the door refused a playlist poll — PAUSE and keep polling */
+let pausePoll = null;
+async function maybePaused() {
+  if (!state.sess || state.mode !== 'live') return;
+  video.pause({ __meter: true });
+  state.mode = 'paused';
+  showVeil('PAUSED — credit at zero',
+    'the session lives; nothing was killed. the room and the ticker keep running. top up the receipt and the picture resumes.',
+    'polling the meter every 2s…');
+  say('paused — the meter ran out', false);
+  const j = await readSession(state.sess);
+  if (j) paintStrip(j);
+  if (pausePoll) return;
+  pausePoll = setInterval(async () => {
+    const j = await readSession(state.sess);
+    if (j) paintStrip(j);
+    if (j && j.sess.state === 0 && units(j.sess.credit) - units(j.sess.burned) > 0n) {
+      clearInterval(pausePoll); pausePoll = null;
+      teardownVeil(); state.mode = 'live';
+      if (state.hls) { state.hls.startLoad(-1); }
+      video.play().catch(() => {});
+      say('resumed — credit on the receipt', false);
+    }
+  }, 2000);
+}
+
+function say(t, bad) {
+  $('st').textContent = t;
+  $('dot').className = 'dot ' + (bad ? 'off' : 'on');
+}
+
+/* ── wiring ──────────────────────────────────────────────────────────── */
+$('go').addEventListener('click', () => {
+  const v = $('sess').value.trim();
+  if (!/^\d+$/.test(v)) { say('a receipt number is digits only', true); return; }
+  teardownVeil(); attach(v);
+  readSession(v).then(paintStrip);
+});
+$('sess').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('go').click(); });
+
+/* stream health + ticker + session heartbeat */
+async function pollHealth() {
+  try {
+    const r = await fetch('/live/health', { cache: 'no-store' });
+    const j = await r.json();
+    if (j.publishing) { if (state.mode === 'idle') say('live — enter a receipt № to watch', false); }
+    else say('offline — the streamer is not publishing', true);
+  } catch { say('the door is unreachable', true); }
+}
+async function pollTicker() {
+  try {
+    const r = await fetch('/live/ticker/' + ROOM + '.json', { cache: 'no-store' });
+    if (!r.ok) return;
+    const j = await r.json();
+    const put = (id, v) => { const el = $(id); el.textContent = v || '—'; el.className = v ? '' : 'none'; };
+    put('tk-now', j.now); put('tk-set', j.set); put('tk-next', j.next);
+  } catch {}
+}
+setInterval(pollHealth, 5000); setInterval(pollTicker, 5000);
+pollHealth(); pollTicker();
+
+/* first paint: the receipt the phone remembers, or a fresh greeting */
+const saved = localStorage.getItem('watch.session');
+if (saved) { $('sess').value = saved; }
+setInterval(async () => { if (state.sess) { const j = await readSession(state.sess); if (j) paintStrip(j); } }, 4000);
+litAudit(null);
+</script>
+</body>
+</html>

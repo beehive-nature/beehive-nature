@@ -1,0 +1,22 @@
+# buzz-live.service — THE WATCH-TOGETHER ROOM box unit (POC 2026-09-04).
+# Pattern: buzz-meter-gate.service (Lane M). One process: RTMP inlet on
+# loopback :1935 (x0x tailnet only) + ffmpeg packager (2 renditions) +
+# the read-only playlist door on 127.0.0.1:8094 + 172.18.0.1:8094.
+# The door NEVER writes to the meter; it reads the live session receipt.
+[Unit]
+Description=Buzz live door (watch-room POC) — RTMP inlet + HLS packager + read-only meter gate
+After=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+ExecStart=/usr/bin/node /opt/buzz-watch/live-door.mjs
+EnvironmentFile=/etc/buzz-watch/live.env
+CPUQuota=400%
+MemoryMax=1G
+Nice=5
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

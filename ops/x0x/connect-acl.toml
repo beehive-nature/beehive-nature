@@ -10,4 +10,4 @@ enabled = true
 description = "hive-laptop tailnet forward to box daemon API"
 agent_id = "be9ad64af9f53b2c748c7dc78f0be0c9b051041d7bae164d1bf34505a656cb89" # PUBLIC-CONSTANT agent id (hive-laptop)
 machine_id = "1a05aaabde68266ce32bee35a009e22b7b6c59ff9bcbc514ef317130550439b0" # PUBLIC-CONSTANT machine id
-targets = ["127.0.0.1:12700"]
+targets = ["127.0.0.1:12700", "127.0.0.1:1935", "127.0.0.1:8094"]
