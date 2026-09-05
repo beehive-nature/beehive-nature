@@ -1,0 +1,76 @@
+{
+  "what": "headroom TextCrusher before/after on the milestone-1 replay corpus (z3.1 order B, 2026-09-05)",
+  "ruler": {
+    "alg": "qwen2.5",
+    "artifact": "/opt/buzz-compute/models/qwen2.5-3b-instruct-q4_k_m.gguf",
+    "n_ctx": 16384,
+    "served_model": "qwen2.5-3b-instruct",
+    "source": "llama.cpp /tokenize on the compute node, via the Lane-M meter gate"
+  },
+  "pages": [
+    {
+      "page": "https://example.com/",
+      "goal": "more information about example domains",
+      "file": "crates/banchor/replays/snapshots/snap1-httpsexamplecom.txt",
+      "bytes": 547,
+      "qwen_before": 161,
+      "crush_050": {
+        "qwen_after": 161,
+        "saved": 0,
+        "segments": "7/7",
+        "protected_lines": 4
+      },
+      "crush_025": {
+        "qwen_after": 161,
+        "saved": 0,
+        "segments": "",
+        "protected_lines": 4
+      },
+      "tokenizer_alg": "qwen2.5",
+      "crush_alg": "headroom.text-crusher/1"
+    },
+    {
+      "page": "https://www.iana.org/help/example-domains",
+      "goal": "Root Zone Registry",
+      "file": "crates/banchor/replays/snapshots/snap1-httpswwwianaorghelpexamp.txt",
+      "bytes": 6793,
+      "qwen_before": 1552,
+      "crush_050": {
+        "qwen_after": 1439,
+        "saved": 113,
+        "segments": "97/110",
+        "protected_lines": 36
+      },
+      "crush_025": {
+        "qwen_after": 1407,
+        "saved": 145,
+        "segments": "",
+        "protected_lines": 36
+      },
+      "tokenizer_alg": "qwen2.5",
+      "crush_alg": "headroom.text-crusher/1"
+    },
+    {
+      "page": "https://en.wikipedia.org/wiki/Chromium_(web_browser)",
+      "goal": "Chromium official website",
+      "file": "crates/banchor/replays/snapshots/snap2-httpsenwikipediaorgwikiC.txt",
+      "bytes": 99267,
+      "qwen_before": 24092,
+      "crush_050": {
+        "qwen_after": 22510,
+        "saved": 1582,
+        "segments": "671/962",
+        "protected_lines": 816
+      },
+      "crush_025": {
+        "qwen_after": 22137,
+        "saved": 1955,
+        "segments": "",
+        "protected_lines": 816
+      },
+      "tokenizer_alg": "qwen2.5",
+      "crush_alg": "headroom.text-crusher/1"
+    }
+  ],
+  "note": "the crushable pool is bounded by the protection law: every [ref=@ line (M3: targets stay addressable) and every # provenance line passes verbatim; on the lean-format article artifact 816 of ~1772 lines are protected, so the extractive ceiling on THIS corpus is ~20% — measured savings 0% (tiny page, correct passthrough), 7-8% (busy pages). example.com regenerated fresh 2026-09-05 (the M2-era example.com artifact was never committed); iana+wikipedia are the committed 2026-09-04 artifacts, counted as-committed."
+}

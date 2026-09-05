@@ -15,6 +15,7 @@ members = [
     "crates/atmirror",
     "crates/b-token",
     "crates/bsigner",
+    "crates/headroom-textcrusher",
     "crates/bnr-shell",
     "crates/capability",
     "crates/inscription-gate",

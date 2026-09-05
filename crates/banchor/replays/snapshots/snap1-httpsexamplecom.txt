@@ -1,0 +1,10 @@
+# banchor snapshot artifact — counted bytes below (origin: https://example.com/, taken: 20260905063515)
+# integrity: sha3-256:irbQfGqbibJ6OLwOhy4HLHJjf9puyLNjsgfpFYogFXE
+- rootwebarea "Example Domain"
+      - heading "Example Domain" [ref=@e1]
+        - statictext "Example Domain"
+      - paragraph
+        - statictext "This domain is for use in documentation examples without needing permission. Avoid use in operations."
+      - paragraph
+        - link "Learn more" →iana.org/domains/example [ref=@e2]
+          - statictext "Learn more"

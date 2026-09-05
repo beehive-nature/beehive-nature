@@ -689,6 +689,10 @@ pub fn agentloop(
     let mut fitted: Option<(String, usize, usize, bool)> = None; // (wrapped, qwen_n, cap, lean)
     let mut ladder_walked: Vec<Value> = Vec::new();
     let mut final_snap: Option<Value> = None;
+    // the last probe, kept for the crush rung (z3.1 order B: headroom
+    // TextCrusher, offline — the rung BELOW the ladder, not a rung of it)
+    let mut last_probe: Option<(String, usize, bool, usize)> = None; // (text, qwen_n, lean, cap)
+    let mut crush_rung: Option<Value> = None;
     for &(lean, cap) in qwen::FIT_ATTEMPTS {
         let origin = {
             let (page, _r) = seat.require_page()?;
@@ -704,6 +708,7 @@ pub fn agentloop(
         let probe = axtree::format_mode(&nodes, &vis, cap, lean, index_cap, &hrefs);
         let wrapped_probe = untrusted::wrap(&probe.text, &origin);
         let n = model.tokenize(&wrapped_probe)?;
+        last_probe = Some((probe.text.clone(), n, lean, cap));
         ladder_walked.push(json!({
             "mode": if lean { "lean" } else { "full" },
             "cap": cap,
@@ -732,6 +737,64 @@ pub fn agentloop(
             break;
         }
     }
+    // THE CRUSH RUNG (z3.1 order B): when even the leanest ladder attempt
+    // does not fit, headroom's TextCrusher compresses the leanest probe
+    // toward the allowance — interactive refs and provenance protected,
+    // the goal as the relevance query, offline by construction (no
+    // network capability exists in the vendored crate). Never a ladder
+    // rung: it only runs when the ladder has already failed.
+    if fitted.is_none() {
+        if let Some((probe_text, n_before, lean, cap)) = last_probe {
+            let origin = {
+                let (page, _r) = seat.require_page()?;
+                page.current_url()
+            };
+            let mut rung: Vec<Value> = Vec::new();
+            for ratio in [0.6f64, 0.4, 0.25, 0.15] {
+                let outcome = crate::crush::crush_snapshot(&probe_text, goal, ratio);
+                let wrapped_crushed = untrusted::wrap(&outcome.text, &origin);
+                let n = model.tokenize(&wrapped_crushed)?;
+                let fits = n <= allowance;
+                rung.push(json!({
+                    "target_ratio": ratio,
+                    "qwen_before": n_before,
+                    "qwen_after": n,
+                    "fits": fits,
+                    "lines_in": outcome.lines_in,
+                    "lines_out": outcome.lines_out,
+                    "protected_lines": outcome.protected_lines,
+                    "segments_kept": outcome.segments_kept,
+                    "segments_total": outcome.segments_total,
+                }));
+                if fits {
+                    let result = seat.snapshot_at_cap(
+                        &nodes,
+                        &vis,
+                        style_errors,
+                        cap,
+                        Some(n),
+                        lean,
+                        0,
+                        &hrefs,
+                    )?;
+                    final_snap = Some(result);
+                    crush_rung = Some(json!({
+                        "alg": crate::crush::CRUSH_ALG,
+                        "chosen_ratio": ratio,
+                        "walked": rung,
+                        "offline": "vendored headroom offline-only cut — no network capability exists in it",
+                    }));
+                    fitted = Some((wrapped_crushed, n, cap, lean));
+                    break;
+                }
+            }
+            if crush_rung.is_none() {
+                crush_rung = Some(
+                    json!({ "alg": crate::crush::CRUSH_ALG, "walked": rung, "result": "no ratio fit the allowance" }),
+                );
+            }
+        }
+    }
     let (wrapped, qwen_n, cap_used, lean_used) = fitted.ok_or_else(|| {
         format!("no fit attempt fits: allowance {allowance} qwen tokens, walked {ladder_walked:?}")
     })?;
@@ -741,6 +804,7 @@ pub fn agentloop(
         json!({
             "walked": ladder_walked,
             "chosen": { "mode": if lean_used { "lean" } else { "full" }, "cap": cap_used },
+            "crush_rung": crush_rung,
         }),
     );
     eprintln!(

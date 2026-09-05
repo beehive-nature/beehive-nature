@@ -23,6 +23,7 @@ mod b64;
 mod browser;
 mod cache;
 mod cdp;
+mod crush;
 mod mcp;
 mod page;
 mod qwen;
@@ -137,8 +138,43 @@ fn milestone1(args: &[String]) {
 
 /// M2 — count files with the compute lane's own Qwen2.5 tokenizer, beside
 /// the local BPE bracket. THE ruler for the Agent-Mode question.
+/// With `--crush RATIO [--goal TEXT]`: each file is counted BEFORE and
+/// AFTER headroom-crushing (the z3.1 order-B measurement — refs and `#`
+/// headers protected, everything else extractively compressed against
+/// the goal), both counts carrying their algorithm ids.
 fn qwen_count_cmd(args: &[String]) {
-    if args.is_empty() {
+    let mut files: Vec<&String> = Vec::new();
+    let mut crush_ratio: Option<f64> = None;
+    let mut goal = String::new();
+    let mut i = 0;
+    while i < args.len() {
+        match args[i].as_str() {
+            "--crush" if i + 1 < args.len() => {
+                crush_ratio = args[i + 1].parse().ok();
+                if crush_ratio.is_none() {
+                    eprintln!(
+                        "qwen-count: --crush needs a ratio 0..1 (got {:?})",
+                        args[i + 1]
+                    );
+                    std::process::exit(2);
+                }
+                i += 2;
+            }
+            "--goal" if i + 1 < args.len() => {
+                goal = args[i + 1].clone();
+                i += 2;
+            }
+            other => {
+                if other.starts_with("--") {
+                    eprintln!("qwen-count: unknown flag {other:?}");
+                    std::process::exit(2);
+                }
+                files.push(&args[i]);
+                i += 1;
+            }
+        }
+    }
+    if files.is_empty() {
         eprintln!("qwen-count: need one or more snapshot text files");
         std::process::exit(2);
     }
@@ -150,7 +186,7 @@ fn qwen_count_cmd(args: &[String]) {
         }
     };
     let mut rows = Vec::new();
-    for f in args {
+    for f in files {
         let text = match std::fs::read_to_string(f) {
             Ok(t) => t,
             Err(e) => {
@@ -166,7 +202,31 @@ fn qwen_count_cmd(args: &[String]) {
                 std::process::exit(1);
             }
         };
-        rows.push(json_row(f, &text, local, q));
+        let mut row = json_row(f, &text, local, q);
+        if let Some(ratio) = crush_ratio {
+            let outcome = crush::crush_snapshot(&text, &goal, ratio);
+            let cq = match model.tokenize(&outcome.text) {
+                Ok(n) => n,
+                Err(e) => {
+                    eprintln!("qwen-count FAILED: {e}");
+                    std::process::exit(1);
+                }
+            };
+            let clocal = tokens::count(&outcome.text);
+            row["crushed"] = json_row(f, &outcome.text, clocal, cq);
+            row["crushed"]["crush"] = outcome.to_json();
+            row["crushed"]["counts"]["tokens"].as_array_mut().unwrap().push(
+                serde_json::json!({ "alg": "headroom.text-crusher/1", "note": "transform id — token counts above are still qwen2.5" }),
+            );
+            row["before_after_qwen"] = serde_json::json!({
+                "before": q,
+                "after": cq,
+                "saved": q.saturating_sub(cq),
+                "tokenizer_alg": qwen::TOKENIZER_ALG,
+                "crush_alg": crush::CRUSH_ALG,
+            });
+        }
+        rows.push(row);
     }
     println!(
         "{}",
@@ -178,6 +238,12 @@ fn qwen_count_cmd(args: &[String]) {
                 "n_ctx": model.n_ctx,
                 "source": "llama.cpp /tokenize on the compute node, via the Lane-M meter gate",
             },
+            "crush": crush_ratio.map(|r| serde_json::json!({
+                "applied": true, "target_ratio": r,
+                "goal": goal,
+                "alg": crush::CRUSH_ALG,
+                "offline": "vendored headroom, offline-only cut — no network capability exists in it (proofs in crates/headroom-textcrusher)",
+            })).unwrap_or(serde_json::json!({"applied": false})),
             "files": rows,
         }))
         .unwrap_or_default()

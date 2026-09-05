@@ -19,3 +19,9 @@ httparse = "1.10"
 ureq = { version = "2.12", default-features = false, features = ["tls", "json"] }
 thiserror = "2"
 bnr-url = { path = "../bnr-url" }
+# VENDORED offline cut of headroom's TextCrusher (z3.1 order B, 2026-09-05):
+# deterministic extractive prose compression for the snapshot path. Offline
+# ONLY — regex + icu_segmenter, no network capability exists in it (proofs
+# inside that crate). banchor's own ureq line above is the CDP/loop client
+# and touches only the local browser + the compute door.
+headroom-textcrusher = { path = "../headroom-textcrusher" }

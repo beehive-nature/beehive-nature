@@ -1,0 +1,14 @@
+[package]
+name = "headroom-textcrusher"
+version = "0.1.0"
+edition.workspace = true
+# Apache-2.0 AT SOURCE (overrides the workspace AGPL field — the vendored
+# code keeps its own license). L-VERIFY 2026-09-05: LICENSE + NOTICE read
+# in the upstream repo root (github.com/chopratejas/headroom, HEAD
+# e59cf1012a2b277689555833fd221a92279f777d, cloned and read at source).
+license = "Apache-2.0"
+description = "VENDORED from headroom (chopratejas/headroom) HEAD e59cf101: TextCrusher — the fast deterministic extractive prose compressor (recency + BM25 relevance + salience, one O(n) pass, zero models, zero network) + the BM25 relevance rung it calls. OFFLINE-ONLY CUT: the upstream anonymous telemetry beacon (Python layer) and the hf-hub/ureq network client (upstream headroom-core's tokenizer downloads) are NOT part of this crate — the dependency allowlist is regex + icu_segmenter only, enforced by test (src/offline_proof.rs)."
+
+[dependencies]
+regex = "1"
+icu_segmenter = { version = "2.2", features = ["compiled_data"] }
