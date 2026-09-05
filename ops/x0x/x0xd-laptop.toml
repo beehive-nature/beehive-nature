@@ -1,0 +1,17 @@
+# x0xd laptop ON-DEMAND profile (lane x0x round 5, 2026-09-05).
+# The founder's building wifi saturated at default gossip (~6 Mbps sustained
+# relay burden from a default Leaf). This profile shrinks the eager fan-out:
+# active view 6 -> 2, passive 30 -> 6. There is NO byte-rate cap in v0.41.2 —
+# noted upstream in saorsa-labs/x0x#505 as a second data point.
+api_address = "127.0.0.1:12700"
+log_level = "warn"
+
+[gossip]
+active_view_size = 2
+passive_view_size = 6
+
+[peer_relay]
+enabled = false
+
+[update]
+enabled = false
