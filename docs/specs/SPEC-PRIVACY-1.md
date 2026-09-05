@@ -633,3 +633,69 @@ invalid name (paynote8888) makes every later cleos call die as "invalid
 http request", a red herring. (3) A stale account (paynote5555, an M8-era
 measurement deploy) carries old-format table rows that fail unpack —
 fresh account per milestone, the lane's standing pattern.
+
+## §m10-receipt — THE BONDED DISPUTE (2026-09-05, dispatched: the third z2.1 raid row)
+
+Tally's row (X402-SORT-2026-09-01: `anchor.ts:postDispute` → z2.1 — "a
+dispute costs a bond — spam-resistant by fee, not by moderator"), lifted
+onto the M9 anchoring:
+
+**THE MECHANISM (note.cpp, cited per the law).** `postbond(owner,
+amount)` — the challenger's escrow row, authed by the challenger only.
+`challenge(anchor_id, challenger)` — authed by the challenger; the
+CONTRACT adjudicates BY RECOMPUTATION ALONE (`fold_chain_at`): it folds
+the checkpoint chain from the nullifiers table up to the anchor's seq
+(the same link formula as `checkpoint_step`; a density guard refuses a
+gappy table) and compares against the committed head:
+- **VALID (recomputed ≠ committed):** the anchorer's accrued revenue is
+  SLASHED to the challenger — payouts row += bond + accrued (the bond
+  returns; the slash is the punishment), accrued → 0;
+- **INVALID (recomputed == committed):** the bond is FORFEITED to the
+  anchorer (accrued += bond).
+ONE dispute per anchor, ever — the disputes row settles it permanently.
+Window: law.dispute_window BLOCKS (converted by law.block_ms — see the
+clock note). **NO ADMIN anywhere:** the only auths in the whole dispute
+path are the challenger's own on postbond/challenge; nobody moderates —
+the recomputation is the judge. Bounded transitively: disputes ≤ anchors,
+payouts ≤ distinct challengers, escrow is per-challenger.
+
+**THE CLOCK DEVIATION, receipted:** the dispatch ordered the window in
+blocks; this node's eos-vm REJECTS the `get_block_num` host import (the
+set-code validation error `{"module":"env","fn":"get_block_num"}` is the
+receipt), so the window keeps its ordered BLOCK unit and converts by the
+law's declared cadence (block_ms=500 on the rehearsal chain) onto the
+block TIMESTAMP — the clock this chain does provide.
+
+**On-chain acceptance (m10run.sh; law 20/3/1/64 + bond 15 / window 40
+blocks / 500 ms):**
+- INSTANCE A (the DEFAULT build — what ships; `disputenote2`, code hash
+  c40e1165…): ladder → anchor 1 (accrued 5); **INVALID challenge inside
+  the window → bond FORFEITED: accrued 5+15 = 20**, escrow drained,
+  disputes row valid=0; ladder to seq 4; batch anchor (accrued 27 → 7);
+  **THE STRANGER'S AUDIT STILL PASS** (the dispute path touches no chain
+  data — anchors 1,2 + singleton heads recompute MATCH); double-dispute
+  REFUSED ("settled forever"); no-bond REFUSED; post-window challenge
+  REFUSED ("dispute window closed — the anchor is final"; 22 s sleep).
+- INSTANCE B (the `-DM10_PROBE` build — the ATTACK FIXTURE, treedbg law:
+  `badanchor(seq, false_head)` exists ONLY in probe builds; the shipped
+  default wasm has no such action and a different code hash, 04c02dee…):
+  ladder to seq 2 (accrued 8); badanchor commits a LYING head (abab…);
+  **VALID challenge → SLASH: accrued 8 → 0, disputes valid=1 slashed=8,
+  payouts challnote111 = 23 (bond 15 + slash 8)**.
+
+**Billing:** postbond 219–287 µs · challenge 256 µs (invalid, 1-nullifier
+recompute) / 273 µs (valid, 2-nullifier recompute) · the on-chain fold is
+O(n) keccaks over nullifiers ≤ seq — rehearsal scale, the bound labeled
+(an invalid challenge at seq n re-folds the whole prefix; a real-scale
+lane wants the recomputation inside a claimed-prefix + witness shape —
+NAMED, not built).
+
+**Honest bounds:** on the DEFAULT build an anchor row can only carry a
+head the contract itself computed (anchor() copies the live singleton),
+so the VALID path cannot fire from the honest action set — the probe
+build is the exercise of the lying-anchorer state the machinery exists
+to punish (the guard is not dead code in the class: any future
+attestation-shaped anchor, migration, or bug lands exactly here). The
+bond escrow and payouts are rehearsal COUNTERS (no token rails; the
+meter's off-chain lane settles real value against them — M5's labeled
+pattern).

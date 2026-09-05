@@ -60,6 +60,23 @@
 //    METER-REVENUE LEG: the checkpoint's `accrued` counts only transfer
 //    fees in the law's anchor_asset — a withdraw's fee leg is VALUE-OUT,
 //    not a meter cut (M5 law), so withdrawals checkpoint but never accrue.
+//  - THE BONDED DISPUTE (M10, the third z2.1 raid row — Tally
+//    anchor.ts:postDispute: "a dispute costs a bond — spam-resistant by
+//    fee, not by moderator"): a challenger posts a bond (postbond — an
+//    authed escrow row) and challenges an anchor's (seq, head) inside a
+//    block window (law.dispute_window; the CLOCK is the block timestamp
+//    via the law's declared cadence — this node's eos-vm rejects the
+//    get_block_num host import, receipted in §m10). The CONTRACT adjudicates by
+//    RECOMPUTATION, on-chain, alone: it folds the checkpoint chain from
+//    the nullifiers table up to the anchor's seq (the same link formula
+//    as checkpoint_step) and compares. A VALID challenge (recomputed ≠
+//    committed) SLASHES the anchorer's accrued revenue to the challenger
+//    (payouts row; bond returns — the challenger was right); an INVALID
+//    one FORFEITS the bond to the anchorer (accrued += bond). One
+//    dispute per anchor, ever (the disputes row settles it); window
+//    closed = final; NO ADMIN anywhere — the only auth is the
+//    challenger's own on postbond/challenge. Recomputation is O(n)
+//    keccaks over the nullifiers ≤ seq (rehearsal scale; labeled bound).
 
 #include <eosio/eosio.hpp>
 #include <eosio/crypto_ext.hpp>
@@ -68,6 +85,7 @@
 #include "poseidon2.hpp"
 #include "tree_zeros.hpp"
 #include <vector>
+#include <algorithm>
 using namespace eosio;
 
 class [[eosio::contract("note")]] note : public contract {
@@ -91,6 +109,12 @@ public:
       uint64_t anchor_batch;       // M9: checkpoints per amortized anchor (the batching bound)
       uint64_t anchor_asset;       // M9: the asset anchor solvency is denominated in
       uint64_t max_anchors;        // M9: BOUNDED: anchors table hard cap
+      uint64_t dispute_bond;       // M10: the bond a challenge escrows (anchor_asset units)
+      uint64_t dispute_window;     // M10: challenge window, in BLOCKS from the anchor's block
+      uint64_t block_ms;           // M10: the chain's declared block cadence (ms) — the
+                                   // window's BLOCK count converts to the timestamp clock
+                                   // (this node's eos-vm rejects the get_block_num host
+                                   // import; the timestamp is the clock it does give)
       checksum256 root;            // the merkle root the CONTRACT computes (no setter exists)
       uint64_t primary_key()const { return id; }
    };
@@ -115,11 +139,44 @@ public:
       uint64_t    id;              // anchor ordinal (1, 2, …)
       uint64_t    seq;             // the checkpoint head it commits (checkpoint.seq at commit)
       checksum256 head;            // the checkpoint chain head at commit
-      uint64_t    at;              // block time
+      uint64_t    at;              // block time — ALSO the dispute window's clock (M10)
       uint8_t     alg;             // the checkpoint-chain algorithm id it was built with
       uint64_t primary_key()const { return id; }
    };
    using anchor_index = eosio::multi_index<"anchors"_n, anchor_row>;
+
+   // ── the BOND ESCROW (M10 — a challenger's posted bond; rehearsal
+   // counter, no token rails: the row IS the custody, labeled in the spec).
+   // BOUNDED transitively: only challenge-authed parties post, disputes are
+   // one-per-anchor, so live escrow rows ≤ anchors + challengers ≤ small. ──
+   struct [[eosio::table("escrow"), eosio::contract("note")]] escrow_row {
+      name     owner;
+      uint64_t amount;             // in anchor_asset fee units
+      uint64_t primary_key()const { return owner.value; }
+   };
+   using escrow_index = eosio::multi_index<"escrow"_n, escrow_row>;
+
+   // ── the DISPUTES (M10 — append-only, one per anchor; the row SETTLES
+   // the anchor forever; bounded by max_anchors transitively) ──
+   struct [[eosio::table("disputes"), eosio::contract("note")]] dispute_row {
+      uint64_t anchor_id;          // the anchor challenged
+      name     challenger;
+      bool     valid;              // true = recomputed ≠ committed (slash); false = bond forfeit
+      uint64_t slashed;            // the accrued amount transferred when valid
+      uint64_t at;                 // block time
+      uint64_t primary_key()const { return anchor_id; }
+   };
+   using dispute_index = eosio::multi_index<"disputes"_n, dispute_row>;
+
+   // ── the PAYOUTS (M10 — the challenger's claim when a slash lands;
+   // settlement of the claim is the meter's off-chain lane, the row is the
+   // receipt; bounded by distinct challengers ≤ anchors) ──
+   struct [[eosio::table("payouts"), eosio::contract("note")]] payout_row {
+      name     owner;
+      uint64_t amount;             // bond + slashed, in anchor_asset fee units
+      uint64_t primary_key()const { return owner.value; }
+   };
+   using payout_index = eosio::multi_index<"payouts"_n, payout_row>;
 
    // ── the incremental merkle tree (singleton; advanced by deposit only) ──
    // (CDT table reflection cannot carry array members — 20 named fields)
@@ -206,12 +263,16 @@ public:
    // ── init / law ──
    [[eosio::action]] void init( uint64_t max_notes, uint64_t max_nulls,
                                 uint64_t anchor_cost, uint64_t anchor_batch,
-                                uint64_t anchor_asset, uint64_t max_anchors ) {
+                                uint64_t anchor_asset, uint64_t max_anchors,
+                                uint64_t dispute_bond, uint64_t dispute_window, uint64_t block_ms ) {
       require_auth( get_self() );
       eosio::check( max_notes <= (1ull << 20), "max_notes exceeds the tree depth bound (2^20)" );
       eosio::check( anchor_cost > 0, "anchor_cost must be > 0 — an empty anchor must be impossible" );
       eosio::check( anchor_batch > 0, "anchor_batch must be > 0" );
       eosio::check( max_anchors > 0, "max_anchors must be > 0" );
+      eosio::check( dispute_bond > 0, "dispute_bond must be > 0 — a free dispute is spammable" );
+      eosio::check( dispute_window > 0, "dispute_window must be > 0" );
+      eosio::check( block_ms > 0, "block_ms must be > 0 (the window needs a clock)" );
       law_index law( get_self(), get_self().value );
       eosio::check( law.begin() == law.end(), "law already set" );
       law.emplace( get_self(), [&]( auto& r ) {
@@ -219,6 +280,7 @@ public:
          r.max_notes = max_notes; r.max_nullifiers = max_nulls;
          r.anchor_cost = anchor_cost; r.anchor_batch = anchor_batch;
          r.anchor_asset = anchor_asset; r.max_anchors = max_anchors;
+         r.dispute_bond = dispute_bond; r.dispute_window = dispute_window; r.block_ms = block_ms;
          unsigned char e[32]; memcpy( e, ZERO_[20], 32 ); t256( e );
          memcpy( (void*)r.root.data(), e, 32 );            // T(empty root)
       });
@@ -330,7 +392,7 @@ public:
       if ( nid == 0 ) nid = 1;    // empty table → start the ordinals at 1
       as.emplace( get_self(), [&]( auto& r ) {
          r.id = nid; r.seq = citr->seq; r.head = citr->head;
-         r.at = current_time_point().sec_since_epoch();
+         r.at = current_time_point().sec_since_epoch();   // the dispute window's clock (M10)
          r.alg = citr->alg;
       });
       ck.modify( citr, get_self(), [&]( auto& r ) {
@@ -359,6 +421,109 @@ public:
       eosio::check( projected >= lr.anchor_cost || cr.pend + 1 >= lr.anchor_batch,
                     "ADMIT REFUSED — seller cannot afford its own anchor (revenue < cost and the session does not complete a batch)" );
    }
+
+   // ── BONDED DISPUTE (M10) — postbond: the challenger escrows bond
+   // material (authed by the challenger only — no admin anywhere). The
+   // escrow row is the custody: on the rehearsal chain there are no token
+   // rails, so the row IS the bond (labeled; the meter's off-chain lane
+   // settles real value against it).
+   [[eosio::action]] void postbond( name owner, uint64_t amount ) {
+      require_auth( owner );
+      eosio::check( amount > 0, "bond amount must be > 0" );
+      escrow_index es( get_self(), get_self().value );
+      auto eitr = es.find( owner.value );
+      if ( eitr == es.end() ) {
+         es.emplace( owner, [&]( auto& r ) { r.owner = owner; r.amount = amount; } );
+      } else {
+         es.modify( eitr, owner, [&]( auto& r ) { r.amount += amount; } );
+      }
+   }
+
+   // ── BONDED DISPUTE (M10) — challenge: bond at stake against an
+   // anchor's (seq, head), adjudicated ON-CHAIN BY RECOMPUTATION ALONE
+   // (no admin, no moderator — spam-resistant by fee). The contract folds
+   // the checkpoint chain from the nullifiers table up to the anchor's
+   // seq (the SAME link formula as checkpoint_step) and compares:
+   //    recomputed ≠ committed  → VALID: the anchorer's accrued revenue
+   //                              is SLASHED to the challenger (payouts
+   //                              row += bond + accrued; accrued = 0);
+   //    recomputed == committed → INVALID: the bond is FORFEITED to the
+   //                              anchorer (accrued += bond).
+   // ONE dispute per anchor, ever (the disputes row settles it); the
+   // window is law.dispute_window blocks from the anchor's block.
+   [[eosio::action]] void challenge( uint64_t anchor_id, name challenger ) {
+      require_auth( challenger );
+      law_index law( get_self(), get_self().value );
+      auto lr = law.get( 0, "law not initialized" );
+      anchor_index as( get_self(), get_self().value );
+      auto aitr = as.find( anchor_id );
+      eosio::check( aitr != as.end(), "no such anchor" );
+      dispute_index ds( get_self(), get_self().value );
+      eosio::check( ds.find( anchor_id ) == ds.end(),
+                    "anchor already disputed — settled forever (one dispute per anchor)" );
+      // the window: law.dispute_window BLOCKS from the anchor's block,
+      // measured on the timestamp clock this chain actually provides (the
+      // block count converts by the law's declared cadence — this node's
+      // eos-vm rejects the get_block_num host import; receipted in §m10)
+      uint64_t now_sec = current_time_point().sec_since_epoch();
+      uint64_t window_sec = ( lr.dispute_window * lr.block_ms + 999 ) / 1000;
+      eosio::check( now_sec <= aitr->at + window_sec,
+                    "challenge REFUSED — dispute window closed (the anchor is final)" );
+      escrow_index es( get_self(), get_self().value );
+      auto eitr = es.find( challenger.value );
+      eosio::check( eitr != es.end() && eitr->amount >= lr.dispute_bond,
+                    "challenge REFUSED — no bond posted (postbond first)" );
+      es.modify( eitr, challenger, [&]( auto& r ) { r.amount -= lr.dispute_bond; } );
+      // ── adjudication: recompute the chain head at the anchor's seq ──
+      unsigned char recomputed[32];
+      fold_chain_at( aitr->seq, recomputed );
+      const auto committed = aitr->head.extract_as_byte_array();
+      bool valid = memcmp( recomputed, committed.data(), 32 ) != 0;
+      ckpt_index ck( get_self(), get_self().value );
+      auto citr = ck.find( 0 );
+      eosio::check( citr != ck.end(), "checkpoint not initialized" );
+      uint64_t slashed = 0;
+      if ( valid ) {
+         slashed = citr->accrued;
+         payout_index ps( get_self(), get_self().value );
+         auto pitr = ps.find( challenger.value );
+         if ( pitr == ps.end() ) {
+            ps.emplace( challenger, [&]( auto& r ) { r.owner = challenger; r.amount = lr.dispute_bond + slashed; } );
+         } else {
+            ps.modify( pitr, challenger, [&]( auto& r ) { r.amount += lr.dispute_bond + slashed; } );
+         }
+         ck.modify( citr, challenger, [&]( auto& r ) { r.accrued = 0; } );
+      } else {
+         // the bond is forfeited to the anchorer (joins accrued revenue)
+         ck.modify( citr, challenger, [&]( auto& r ) { r.accrued += lr.dispute_bond; } );
+      }
+      ds.emplace( challenger, [&]( auto& r ) {
+         r.anchor_id = anchor_id; r.challenger = challenger; r.valid = valid;
+         r.slashed = slashed; r.at = current_time_point().sec_since_epoch();
+      });
+   }
+
+#ifdef M10_PROBE
+   // ── ATTACK FIXTURE (probe builds ONLY — compiled with -DM10_PROBE; the
+   // production build has NO such action, and the shipped wasm never
+   // contains it). Simulates a LYING ANCHORER: appends an anchor row with
+   // an arbitrary claimed head — the exact state the bonded dispute exists
+   // to punish. Same pattern as treedbg.cpp: probe sources live in-tree,
+   // the acceptance labels which build exercised what.
+   [[eosio::action]] void badanchor( uint64_t seq, const checksum256& false_head ) {
+      law_index law( get_self(), get_self().value );
+      auto lr = law.get( 0, "law not initialized" );
+      anchor_index as( get_self(), get_self().value );
+      eosio::check( (uint64_t)std::distance(as.begin(), as.end()) < lr.max_anchors, "anchors FULL (bounded)" );
+      uint64_t nid = as.available_primary_key();
+      if ( nid == 0 ) nid = 1;
+      as.emplace( get_self(), [&]( auto& r ) {
+         r.id = nid; r.seq = seq; r.head = false_head;
+         r.at = current_time_point().sec_since_epoch();
+         r.alg = ALG_CKPT_KECCAK256_V1;
+      });
+   }
+#endif
 
 private:
    // ── the on-chain incremental merkle insert (Tornado's algorithm over the
@@ -496,6 +661,41 @@ private:
          row.fee = fee; row.fee_asset = fee_asset;
       });
       checkpoint_step( nullifier, fee, fee_asset, withdraw_leg );
+   }
+
+   // ── THE ON-CHAIN RECOMPUTATION (M10) — fold the checkpoint chain from
+   // the nullifiers table up to `upto_seq`, using the SAME link formula
+   // as checkpoint_step (link = keccak(seq ‖ nullifier ‖ fee ‖ feeAsset);
+   // head' = keccak(head ‖ link); genesis = 32 zero bytes). Returns the
+   // TRUE fold bytes (no storage, so no T-compensation). O(n) keccacs
+   // over the nullifiers ≤ seq — rehearsal scale, the bound is labeled in
+   // the spec. The density guard refuses a gappy table (seqs are 1..N by
+   // construction — one checkpoint per settlement).
+   __attribute__( ( noinline ) )
+   void fold_chain_at( uint64_t upto_seq, unsigned char out[32] ) {
+      struct link_row { uint64_t seq; checksum256 n; uint64_t fee; uint64_t fee_asset; };
+      std::vector<link_row> rows;
+      nullifier_index ns( get_self(), get_self().value );
+      for ( auto itr = ns.begin(); itr != ns.end(); ++itr )
+         if ( itr->seq <= upto_seq ) rows.push_back( { itr->seq, itr->n, itr->fee, itr->fee_asset } );
+      eosio::check( rows.size() == upto_seq,
+                    "nullifier table not dense — cannot recompute (seqs must be 1..seq)" );
+      std::sort( rows.begin(), rows.end(),
+                 []( const link_row& a, const link_row& b ) { return a.seq < b.seq; } );
+      unsigned char head[32]; memset( head, 0, 32 );   // genesis (true bytes)
+      unsigned char a[128], b[64];
+      for ( const auto& r : rows ) {
+         u64_to_be32_word( a,      r.seq );
+         memcpy(     a + 32, r.n.extract_as_byte_array().data(), 32 );
+         u64_to_be32_word( a + 64, r.fee );
+         u64_to_be32_word( a + 96, r.fee_asset );
+         auto lh = keccak( (const char*)a, 128 );
+         memcpy( b,      head, 32 );
+         memcpy( b + 32, lh.extract_as_byte_array().data(), 32 );
+         auto hh = keccak( (const char*)b, 64 );
+         memcpy( head, hh.extract_as_byte_array().data(), 32 );
+      }
+      memcpy( out, head, 32 );
    }
 
    // ── TIER 1 · the checkpoint fold (M9) — cheap (two native keccaks),

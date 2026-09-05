@@ -1,5 +1,22 @@
 # contracts/privacy — the estate-run privacy layer (Lane: SPEC-PRIVACY-1)
 
+The M10 state: THE BONDED DISPUTE (the third z2.1 raid row — Tally
+postDispute: "a dispute costs a bond — spam-resistant by fee, not by
+moderator") on top of the M9 anchoring. `postbond` escrows a challenger's
+bond; `challenge(anchor_id, challenger)` is adjudicated BY RECOMPUTATION
+ALONE (`fold_chain_at` folds the nullifiers table to the anchor's seq
+with the same link formula as `checkpoint_step`): recomputed ≠ committed
+→ VALID → the anchorer's accrued revenue is SLASHED to the challenger
+(payouts row; bond returns); recomputed == committed → INVALID → the bond
+is FORFEITED to the anchorer. One dispute per anchor ever; the window is
+law.dispute_window BLOCKS converted by law.block_ms onto the block
+timestamp (this node's eos-vm rejects the get_block_num host import —
+receipted in §m10); NO ADMIN — the only auths are the challenger's own.
+Runner `m10run.sh`: the DEFAULT build exercises forfeit + audit-still-
+PASS + double/no-bond/window refusals; the `-DM10_PROBE` build (attack
+fixture, treedbg law — `badanchor` exists only there) exercises the
+SLASH. Receipt: SPEC-PRIVACY-1 §m10-receipt.
+
 The M9 state: THE X402 ANCHORING SUBSYSTEM — two-tier anchoring +
 admit-before-quote lifted from X402-SORT-2026-09-01.md's z2.1 rows (pinout's
 mechanisms, estate rails). TIER 1: every settlement (transfer, withdraw)
