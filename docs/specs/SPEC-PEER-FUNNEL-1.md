@@ -60,9 +60,9 @@ the gating service signs `hashReferralFees` (`:791`), so the LP's gating
 signer must accept the split — an LP-selection fact, priced before the
 intent, never discovered after.
 
-The tithe referral recipient address is founder word (the 10 % law is
-founder law); the wallet shows the SHAPE with the recipient unfilled rather
-than inventing an address.
+The tithe referral recipient is the founder-filed address
+(`0x8fD7252A29FB759755E30A15E966932EaAD91b75`, docs/dispatches/tithe-address.txt
+@ 9952f366 — founder word, 2026-09-05); the wallet card shows it verbatim.
 
 ### exact-multi after settlement (the fallback split)
 
@@ -91,6 +91,6 @@ Every funnel exit is on-chain RULE: the LP's `releaseFundsToPayer`
 
 1. ✅ §receive — this section + the wallet's receive call (keyless
    `eth_getLogs`, honest-empty) — landed with this spec.
-2. Tithe referral address by founder word → the intent card fills.
+2. ✅ Tithe referral address filed (9952f366) — the intent card fills.
 3. exact-multi sweep on Base (compose-never-sign first; hook contract when
    the estate deploys and the registry door exists).
