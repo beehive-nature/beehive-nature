@@ -60,15 +60,37 @@ pastes `x0x://invite/…`; group cards carry no join capability; the live public
 groups (Phase-B Fleet Dogfood etc.) have `request_access_enabled:false`.
 Public groups are world-READABLE, member-JOIN is invite-only.
 
-## Tailnet forward — BLOCKED by the wall, syntax banked
+## Tailnet forward — PROVEN (round 4, 2026-09-05)
 
-`x0x forward add --local 127.0.0.1:<port> --peer <box-agent-hex> --target-port
-12700` on the laptop is the one-liner that forwards laptop loopback to the
-box's loopback REST/GUI. It requires a laptop↔box QUIC session, which the box
-egress wall makes impossible (hole-punching also dies: the box's outbound
-high-port UDP leg is dropped). Until the founder opens egress, the box GUI was
-receipted over an SSH tunnel instead (`e2e/shots-x0x/gui-box-ssh-tunnel.png`,
-labeled as SSH, NOT tailnet).
+After the founder's OCI ingress **All-Protocols/all-ports stateful** rule
+landed (the only rule kind that matches non-initial IP fragments — the
+>1500 B PQ ServerHello flights arrive fragmented; see upstream data issue
+saorsa-labs/x0x#505), the box joined the mesh on its own: **peers 8→28,
+FullCone NAT, direct connections**, agent `hive-box` **joined hive-porch**
+via laptop-minted invite (member 3, active, posted
+`96680c7c…2323d4f7d` fan_out 6).
+
+The forward, end to end: laptop CLI
+`x0x forward add --local 127.0.0.1:18080 --peer <box-hex> --target-port 12700`
+→ `curl http://127.0.0.1:18080/health` on the laptop answers **HTTP 200 in
+~90 ms with the BOX daemon's own health JSON** (its peers/uptime), laptop
+loopback → box loopback over post-quantum QUIC.
+
+**LAWS found landing it (each one bit us):**
+1. **Connect ACL on BOTH ends**: default DENY with the ACL file absent — the
+   TARGET side gates the loopback connect, but v0.41.2's ORIGIN side also
+   refuses forward creation with `409 no connect ACL loaded` until the
+   laptop carries its own ACL. In-tree: `ops/x0x/connect-acl.toml` (box) +
+   `C:\Users\travi\x0x-win\connect-acl.toml` (laptop mirror).
+2. **Trust on BOTH sides**: the outbound `open_peer_stream` enforces the
+   LOCAL trust decision — `contacts add` + `trust set <peer> trusted` is
+   needed on the laptop for the box agent AND on the box for the laptop,
+   else the local listener accepts TCP and closes in <1 ms with ZERO logs
+   and zero stream counters anywhere.
+3. **`x0x machines connect <box-machine-id>`** forces the direct transport
+   session (printed `outcome: Direct` to 129.153.202.144:5483) when gossip
+   view shuffling hasn't paired the two agents yet; `peer probe` alone says
+   "Peer not found" until a session exists.
 
 ## Upstream defect found (shipped at v0.41.2 AND at HEAD)
 

@@ -1,0 +1,13 @@
+# connect ACL — hive box (lane x0x, 2026-09-05). Verbatim what runs on the box
+# at /etc/x0x/connect-acl.toml. Default is DENY with the file absent; this file
+# enables exactly ONE tailnet forward path: the laptop agent → box loopback
+# daemon API (REST/GUI). The laptop carries the mirror ACL at
+# C:\Users\travi\x0x-win\connect-acl.toml (box pair → laptop loopback 12700).
+[connect]
+enabled = true
+
+[[connect.allow]]
+description = "hive-laptop tailnet forward to box daemon API"
+agent_id = "be9ad64af9f53b2c748c7dc78f0be0c9b051041d7bae164d1bf34505a656cb89" # PUBLIC-CONSTANT agent id (hive-laptop)
+machine_id = "1a05aaabde68266ce32bee35a009e22b7b6c59ff9bcbc514ef317130550439b0" # PUBLIC-CONSTANT machine id
+targets = ["127.0.0.1:12700"]
