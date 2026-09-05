@@ -539,3 +539,97 @@ CONTRACT's own tree, every root asserted against tree.js's canonical
 fold. It caught the M7 TREE LAW live; it runs on every future tree change
 (founder order: forever). The probe sources (`treedbg.cpp`) are committed
 beside it.
+
+## §m9-receipt — THE X402 ANCHORING (2026-09-05, dispatched: two-tier anchoring + admit-before-quote)
+
+The z2.1 rows of X402-SORT-2026-09-01.md, lifted as mechanisms onto the M7
+contract (pinout's shapes, the estate's rails; code cited file+function):
+
+**TIER 1 — CHECKPOINTS (pinout session.mjs:doSettle / ledger.mjs).** Every
+settlement (transfer AND withdraw — payment_gate → checkpoint_step in
+`note.cpp`) folds the checkpoint chain INLINE: link = keccak(seq ‖
+nullifier ‖ fee ‖ feeAsset); head' = keccak(head ‖ link); genesis = 32
+zero bytes. Two native keccaks — the settlement and its checkpoint land in
+ONE action. **Refunds never wait for an anchor:** no action reads the
+anchors table but `anchor()` itself, and the contract has no deferred path
+anywhere (the refund-shaped leg — withdraw — executes fully in its own
+action, receipted below at 9,349 µs).
+
+**TIER 2 — ANCHORS (pinout ledger.mjs: the anchor binds the checkpoint
+chain head, sequence_number + running_hash).** `anchor()` appends ONE
+bounded row — {id, seq, head, at, alg} — committing the CHAIN HEAD, never
+a receipt list; max_anchors bounds the table (bounded-rows law).
+PERMISSIONLESS (any stranger may anchor what they paid for); the two
+justified paths are the entire anti-spam story, per pinout doSettle:
+batch path (pend ≥ anchor_batch — amortized) or priority path (accrued ≥
+anchor_cost — "priority only when revenue ≥ anchor cost"). An anchor with
+nothing new, or one the revenue cannot justify, is REFUSED. The cost is
+deducted from accrued revenue when covered; a batch-path deficit is
+forgiven (REHEARSAL label: no token rails — accrued is a counter, the
+row-level truth is the receipt).
+
+**ADMIT-BEFORE-QUOTE (pinout guards.mjs:sellerSolvency → z2.1).**
+`admit(expected_fee, expected_asset)` — the solvency gate IN FRONT of the
+quote: refuses new metered business the seller cannot afford to anchor
+(discharge either by projected revenue ≥ anchor_cost or by the session
+completing the batch). PURE — no state; the transaction trace IS the
+receipt. Honest bound: the quote itself is off-chain (Lane M), so the gate
+cannot FORCE the quoter to call it — but a seller that quoted while
+admit() would throw is PROVABLY insolvent-at-quote from the public record
+alone. The punishment lane is the raid's bonded-dispute row (Tally
+anchor.ts:postDispute → "a dispute costs a bond") — NAMED NEXT, not built
+here.
+
+**METER-REVENUE LEG:** `accrued` counts only transfer fees in the law's
+anchor_asset; a withdraw's fee leg is VALUE-OUT, not a meter cut (M5 law)
+— withdrawals checkpoint but never accrue. Nullifier rows now carry seq +
+fee + fee_asset, so the audit recomputes the chain from the nullifiers
+table alone — no history plugin, the chain's own tables suffice.
+
+**On-chain acceptance (`anchornote2`, code hash 754bf974…dc285af90,
+runner `m9run.sh`, law anchor_cost=20 / anchor_batch=3 / anchor_asset=1):**
+- ADMIT(5,1) REFUSED — "seller cannot afford its own anchor (revenue <
+  cost and the session does not complete a batch)"; ADMIT(25,1) executed
+  (251 µs) — the quote gate passes only when solvent;
+- deposits — checkpoint UNTOUCHED (seq 0, the on-ramp is not a
+  settlement);
+- payment 1 (fee 25) → seq 1, pend 1, accrued 25;
+- **ANCHOR fires on the PRIORITY path** (accrued 25 ≥ 20, batch 1 < 3) —
+  230 µs, accrued → 5 (cost deducted);
+- payments 2–3 (fees 3, 4) → accrued 12, pend 2;
+- **ANCHOR REFUSED** — "batch not full and revenue below anchor cost
+  (deferred)" — no premature anchor the revenue cannot justify;
+- WITHDRAW (fee leg 497 = value-out) → seq 4, pend 3, accrued UNCHANGED;
+- **ANCHOR fires on the BATCH path** (pend 3 ≥ 3) — 286 µs, deficit 12 <
+  20 → 0 (forgiven, labeled);
+- **THE STRANGER'S AUDIT (m9audit.js): recomputed the chain from the
+  nullifiers table alone — anchor 1 (seq 1), anchor 2 (seq 4), and the
+  singleton head all MATCH. AUDIT PASS.**
+
+**Billing:** admit 251 µs · anchors 230–286 µs (two table rows) ·
+withdraw 9,349 µs (verify + checkpoint, no insert — in band with the M6
+pure-verify 11,971 µs reference) · payments 32,948–45,884 µs (verify +
+the 20-Poseidon insert — the M8 shape unchanged; the checkpoint adds two
+native keccaks, inside noise). The tree is UNTOUCHED by M9 (no tree
+change → tree6-check not re-triggered; contract/tree.js agreement
+re-proven live anyway: the 4-leaf chain root equals tree.js's fold,
+printed side by side in the run).
+
+**The M9 DISPLAY LAW (found live):** the table hex for a row's nullifier
+and the checkpoint head is ALREADY the byte form that flows through the
+fold — m9audit.js uses it raw (genesis zeros). The M6 T-compensation
+lives on the extract()-of-memcpy'd-storage path INSIDE the contract, not
+in the table display; the audit was written T-compensating first and the
+mismatch (measured, variant-tested: raw-vs-T × zero-genesis-vs-T-zero →
+matchRaw) pinned the law.
+
+**Runner traps caught by the ladder (banked):** (1) out-notes are saved
+in m7-prev SCHEMA (secretOut/commitmentOut) while m7prep spends note
+SCHEMA — spending an out-note silently proved against STALE inputs
+(pairing-false against a healthy chain); m9run.sh converts schemas before
+spending and inserts the out-note into tree.js ONLY when the chain
+accepted the payment. (2) EOSIO account names take a-z1-5 only — an
+invalid name (paynote8888) makes every later cleos call die as "invalid
+http request", a red herring. (3) A stale account (paynote5555, an M8-era
+measurement deploy) carries old-format table rows that fail unpack —
+fresh account per milestone, the lane's standing pattern.

@@ -1,5 +1,39 @@
 # contracts/privacy — the estate-run privacy layer (Lane: SPEC-PRIVACY-1)
 
+The M9 state: THE X402 ANCHORING SUBSYSTEM — two-tier anchoring +
+admit-before-quote lifted from X402-SORT-2026-09-01.md's z2.1 rows (pinout's
+mechanisms, estate rails). TIER 1: every settlement (transfer, withdraw)
+folds a CHECKPOINT inline (`checkpoint_step` in `note.cpp`) — head' =
+keccak(head ‖ keccak(seq ‖ nullifier ‖ fee ‖ feeAsset)), two native
+keccaks, atomic with the settlement; nothing ever waits on an anchor (no
+action reads the anchors table but `anchor()` itself; there is no deferred
+path in the contract). TIER 2: `anchor()` commits ONE bounded row per
+anchor — (seq, head), the CHAIN HEAD, never a receipt list — and is
+permissionless; it fires only on the batch path (pend ≥ anchor_batch) or
+the priority path (accrued ≥ anchor_cost — "priority only when revenue ≥
+anchor cost"), else REFUSED. ADMIT-BEFORE-QUOTE: `admit(expected_fee,
+expected_asset)` — the seller-solvency gate in front of the quote; pure,
+the transaction trace is the receipt; a seller that quoted while admit()
+would throw is provably insolvent-at-quote from the public record. The
+nullifier rows carry seq + fee legs, so `m9audit.js` recomputes the whole
+chain from the nullifiers table alone and checks every anchor commits the
+recomputed head. Receipt: SPEC-PRIVACY-1 §m9-receipt; runner `m9run.sh`
+(law: anchor_cost=20, anchor_batch=3, anchor_asset=1).
+
+**THE M9 DISPLAY LAW (measured live):** the table hex for a row's
+nullifier and the checkpoint head is ALREADY the byte form that flows
+through the fold — the stranger's audit uses it RAW (genesis = 32 zero
+bytes). The M6 T-compensation lives on the extract()-of-memcpy'd-storage
+path INSIDE the contract, not in the table display.
+
+**THE M9 RUNNER TRAP (caught by the ladder):** out-notes are saved in
+m7-prev SCHEMA (secretOut/commitmentOut); m7prep spends note SCHEMA —
+spending an out-note silently proved against STALE inputs (pairing-false
+on a valid chain). The runner now converts schemas before spending and
+inserts an out-note into tree.js ONLY when the chain accepted the payment.
+(Also: EOSIO account names take a-z1-5 only — an invalid name turns every
+later cleos call into "invalid http request", a red herring.)
+
 The M7 state: PER-ASSET CONSERVATION — a note binds (secret, amount,
 asset) as Poseidon(secret, Poseidon(amount, asset)); spends are same-asset
 only (a cross-asset spend has NO witness — refused at generation); value

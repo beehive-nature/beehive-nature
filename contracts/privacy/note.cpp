@@ -34,6 +34,32 @@
 //    auditable-wallet pattern).
 //  - BLS12-381 remains the FUTURE lane; algorithm ids make the swap a table
 //    row, not a rewrite.
+//  - THE X402 ANCHORING SUBSYSTEM (M9, from X402-SORT-2026-09-01.md —
+//    pinout's two-tier shape, lifted as mechanism not code):
+//    TIER 1 · every settlement (transfer, withdraw) folds a CHECKPOINT
+//    inline — head' = keccak(head ‖ keccak(seq ‖ nullifier ‖ fee ‖
+//    feeAsset)) — cheap (native intrinsic), unconditional, atomic with the
+//    settlement. Nothing ever waits on an anchor: no action reads the
+//    anchors table but anchor() itself, and there is no deferred path
+//    anywhere in this contract (the refund-shaped leg — withdraw — executes
+//    fully in its own action).
+//    TIER 2 · anchor() commits ONE bounded row per anchor: (seq, head) —
+//    the checkpoint CHAIN HEAD, never a list of receipts (pinout
+//    ledger.mjs). Permissionless: any stranger may call it; the two
+//    justified paths are the entire anti-spam story — batch path (pend ≥
+//    anchor_batch: amortized, one row per N settlements) or priority path
+//    (accrued revenue ≥ anchor_cost — pinout doSettle: "priority only when
+//    revenue ≥ anchor cost"). An empty or premature anchor is REFUSED.
+//    ADMIT-BEFORE-QUOTE · admit(expected_fee, expected_asset) — the
+//    seller-solvency gate in FRONT of the quote (pinout guards.mjs:
+//    sellerSolvency → z2.1): refuses new metered business the seller cannot
+//    afford to anchor. Pure check, no state — the transaction trace is the
+//    receipt. A seller that quoted while admit() would throw is provably
+//    insolvent-at-quote from the public record alone (the bonded-dispute
+//    lane is the named punishment path).
+//    METER-REVENUE LEG: the checkpoint's `accrued` counts only transfer
+//    fees in the law's anchor_asset — a withdraw's fee leg is VALUE-OUT,
+//    not a meter cut (M5 law), so withdrawals checkpoint but never accrue.
 
 #include <eosio/eosio.hpp>
 #include <eosio/crypto_ext.hpp>
@@ -52,6 +78,7 @@ public:
    static constexpr uint8_t ALG_COMMIT_KECCAK256_V1 = 1;   // retired (M3 deposit hash)
    static constexpr uint8_t ALG_COMMIT_POSEIDON_V1  = 2;   // poseidon-bn254-v1 (tree leaves)
    static constexpr uint8_t ALG_PROOF_PLONK_V1      = 2;   // plonk-bn254-v1 payment proof
+   static constexpr uint8_t ALG_CKPT_KECCAK256_V1   = 1;   // keccak256-v1 checkpoint chain (M9)
 
    // ── the LAW row (governed-mutable, exactly one) ──
    struct [[eosio::table("law"), eosio::contract("note")]] law_row {
@@ -60,10 +87,39 @@ public:
       uint8_t  alg_proof;          // spend-proof algorithm id
       uint64_t max_notes;          // BOUNDED: commitments table hard cap (≤ 2^20: tree depth)
       uint64_t max_nullifiers;     // BOUNDED: nullifier table hard cap
+      uint64_t anchor_cost;        // M9: cost of one anchor, in anchor_asset fee units
+      uint64_t anchor_batch;       // M9: checkpoints per amortized anchor (the batching bound)
+      uint64_t anchor_asset;       // M9: the asset anchor solvency is denominated in
+      uint64_t max_anchors;        // M9: BOUNDED: anchors table hard cap
       checksum256 root;            // the merkle root the CONTRACT computes (no setter exists)
       uint64_t primary_key()const { return id; }
    };
    using law_index = eosio::multi_index<"law"_n, law_row>;
+
+   // ── the CHECKPOINT chain head (singleton; tier 1 — folded inline by
+   // every settlement; the anchor commits to THIS, not to receipts) ──
+   struct [[eosio::table("checkpoint"), eosio::contract("note")]] ckpt_row {
+      uint64_t    id;              // 0 forever
+      uint64_t    seq;             // settlements checkpointed (the chain length)
+      checksum256 head;            // the running hash — genesis = 32 zero bytes
+      uint64_t    accrued;         // meter fees accrued in anchor_asset since the last anchor
+      uint64_t    pend;            // checkpoints since the last anchor (the open batch)
+      uint8_t     alg;             // checkpoint-chain algorithm id (crypto-agility law)
+      uint64_t primary_key()const { return id; }
+   };
+   using ckpt_index = eosio::multi_index<"checkpoint"_n, ckpt_row>;
+
+   // ── the ANCHORS (tier 2 — bounded, append-only; one row commits ONE
+   // checkpoint chain head; there is no receipt list anywhere in this row) ──
+   struct [[eosio::table("anchors"), eosio::contract("note")]] anchor_row {
+      uint64_t    id;              // anchor ordinal (1, 2, …)
+      uint64_t    seq;             // the checkpoint head it commits (checkpoint.seq at commit)
+      checksum256 head;            // the checkpoint chain head at commit
+      uint64_t    at;              // block time
+      uint8_t     alg;             // the checkpoint-chain algorithm id it was built with
+      uint64_t primary_key()const { return id; }
+   };
+   using anchor_index = eosio::multi_index<"anchors"_n, anchor_row>;
 
    // ── the incremental merkle tree (singleton; advanced by deposit only) ──
    // (CDT table reflection cannot carry array members — 20 named fields)
@@ -132,25 +188,47 @@ public:
    using commitment_index = eosio::multi_index<"commitments"_n, commitment_row>;
 
    // ── nullifier set (bounded; uniqueness = double-spend refusal) ──
+   // M9: each row carries its checkpoint seq + the fee legs, so the
+   // checkpoint chain is RECOMPUTABLE from this table alone (sorted by
+   // seq) — the audit needs no history plugin, the chain's own tables
+   // suffice.
    struct [[eosio::table("nullifiers"), eosio::contract("note")]] nullifier_row {
       checksum256 n;
       uint8_t     alg;             // proof algorithm id that justified the spend
       uint64_t    spent_at;
-      uint64_t    primary_key()const { return n.data()[0] >> 32 | (uint64_t)(n.data()[1] & 0xffffffff) << 0; }
+      uint64_t    seq;             // M9: the checkpoint this settlement folded
+      uint64_t    fee;             // M9: the settlement's public fee leg
+      uint64_t    fee_asset;       // M9: the settlement's fee asset
+      uint64_t primary_key()const { return n.data()[0] >> 32 | (uint64_t)(n.data()[1] & 0xffffffff) << 0; }
    };
    using nullifier_index = eosio::multi_index<"nullifiers"_n, nullifier_row>;
 
    // ── init / law ──
-   [[eosio::action]] void init( uint64_t max_notes, uint64_t max_nulls ) {
+   [[eosio::action]] void init( uint64_t max_notes, uint64_t max_nulls,
+                                uint64_t anchor_cost, uint64_t anchor_batch,
+                                uint64_t anchor_asset, uint64_t max_anchors ) {
       require_auth( get_self() );
       eosio::check( max_notes <= (1ull << 20), "max_notes exceeds the tree depth bound (2^20)" );
+      eosio::check( anchor_cost > 0, "anchor_cost must be > 0 — an empty anchor must be impossible" );
+      eosio::check( anchor_batch > 0, "anchor_batch must be > 0" );
+      eosio::check( max_anchors > 0, "max_anchors must be > 0" );
       law_index law( get_self(), get_self().value );
       eosio::check( law.begin() == law.end(), "law already set" );
       law.emplace( get_self(), [&]( auto& r ) {
          r.id = 0; r.alg_commit = ALG_COMMIT_POSEIDON_V1; r.alg_proof = ALG_PROOF_PLONK_V1;
          r.max_notes = max_notes; r.max_nullifiers = max_nulls;
+         r.anchor_cost = anchor_cost; r.anchor_batch = anchor_batch;
+         r.anchor_asset = anchor_asset; r.max_anchors = max_anchors;
          unsigned char e[32]; memcpy( e, ZERO_[20], 32 ); t256( e );
          memcpy( (void*)r.root.data(), e, 32 );            // T(empty root)
+      });
+      ckpt_index ck( get_self(), get_self().value );
+      eosio::check( ck.begin() == ck.end(), "checkpoint already set" );
+      ck.emplace( get_self(), [&]( auto& r ) {
+         r.id = 0; r.seq = 0;
+         unsigned char z[32]; memset( z, 0, 32 ); t256( z );   // genesis head = 32 zero bytes (stored pre-transformed)
+         memcpy( (void*)r.head.data(), z, 32 );
+         r.accrued = 0; r.pend = 0; r.alg = ALG_CKPT_KECCAK256_V1;
       });
       tree_index tr( get_self(), get_self().value );
       eosio::check( tr.begin() == tr.end(), "tree already set" );
@@ -194,7 +272,7 @@ public:
    [[eosio::action]] void transfer( const checksum256& nullifier, const checksum256& to_commitment,
                                     uint32_t to_viewtag, uint64_t fee, uint64_t fee_asset,
                                     const std::vector<uint8_t>& proof ) {
-      payment_gate( nullifier, to_commitment, fee, fee_asset, proof );
+      payment_gate( nullifier, to_commitment, fee, fee_asset, proof, /*withdraw_leg=*/false );
       law_index law( get_self(), get_self().value );
       auto lr = law.get( 0, "law not initialized" );
       commitment_index cs( get_self(), get_self().value );
@@ -214,11 +292,72 @@ public:
    // (amountOut = 0 in the circuit); the out-commitment is not stored.
    // Rehearsed settlement: no token rails on the rehearsal chain — the
    // row-level truth (nullifier + fee = value out + recipient) is the receipt.
+   // M9: the withdraw checkpoints (it is a settlement) but its fee leg is
+   // VALUE-OUT, not a meter cut — it never accrues anchor revenue.
    [[eosio::action]] void withdraw( const checksum256& nullifier, name recipient, uint64_t fee, uint64_t fee_asset,
                                     const checksum256& note_commitment,
                                     const std::vector<uint8_t>& proof ) {
-      payment_gate( nullifier, note_commitment, fee, fee_asset, proof );
+      payment_gate( nullifier, note_commitment, fee, fee_asset, proof, /*withdraw_leg=*/true );
       require_auth( get_self() );
+   }
+
+   // ── TIER 2 · the anchor (M9) — one bounded row committing the checkpoint
+   // chain head (seq + head), NEVER a list of receipts (pinout ledger.mjs:
+   // the anchor binds to the checkpoint head). PERMISSIONLESS — any stranger
+   // may call it (the buyer can anchor what they paid for); the two
+   // justified paths are the entire anti-spam story:
+   //    batch path : pend >= anchor_batch   (amortized — one row per N
+   //                                        settlements; the sweep always lands)
+   //    priority   : accrued >= anchor_cost (pinout doSettle: "priority only
+   //                                        when revenue ≥ anchor cost")
+   // An anchor with nothing new to commit, or one the accrued revenue
+   // cannot justify, is REFUSED. The anchor cost is deducted from accrued
+   // revenue when covered; on the batch path a deficit is forgiven (no
+   // token rails on the rehearsal chain — the row-level truth is the
+   // receipt, labeled in SPEC-PRIVACY-1 §m9).
+   [[eosio::action]] void anchor() {
+      law_index law( get_self(), get_self().value );
+      auto lr = law.get( 0, "law not initialized" );
+      ckpt_index ck( get_self(), get_self().value );
+      auto citr = ck.find( 0 );
+      eosio::check( citr != ck.end(), "checkpoint not initialized" );
+      eosio::check( citr->pend >= 1, "anchor REFUSED — no checkpoints since the last anchor" );
+      eosio::check( citr->pend >= lr.anchor_batch || citr->accrued >= lr.anchor_cost,
+                    "anchor REFUSED — batch not full and revenue below anchor cost (deferred)" );
+      anchor_index as( get_self(), get_self().value );
+      eosio::check( (uint64_t)std::distance(as.begin(), as.end()) < lr.max_anchors, "anchors FULL (bounded)" );
+      uint64_t nid = as.available_primary_key();
+      if ( nid == 0 ) nid = 1;    // empty table → start the ordinals at 1
+      as.emplace( get_self(), [&]( auto& r ) {
+         r.id = nid; r.seq = citr->seq; r.head = citr->head;
+         r.at = current_time_point().sec_since_epoch();
+         r.alg = citr->alg;
+      });
+      ck.modify( citr, get_self(), [&]( auto& r ) {
+         r.accrued = ( r.accrued >= lr.anchor_cost ) ? r.accrued - lr.anchor_cost : 0;
+         r.pend = 0;
+      });
+   }
+
+   // ── ADMIT-BEFORE-QUOTE (M9) — the seller-solvency gate IN FRONT of the
+   // quote (pinout guards.mjs:sellerSolvency → z2.1): refuse new metered
+   // business the seller cannot afford to anchor. The seller's standing
+   // obligation after the quoted session = ONE anchor covering the backlog
+   // plus this session; it discharges either by revenue (projected accrued ≥
+   // anchor_cost) or by count (the session completes the batch — the batch
+   // path then fires regardless of revenue). PURE: no state written; the
+   // transaction trace IS the receipt. The quote path (Lane M) runs this
+   // on-chain before quoting; a seller that quoted while admit() would
+   // throw is PROVABLY insolvent-at-quote from the public record alone
+   // (bonded dispute = the named punishment lane).
+   [[eosio::action]] void admit( uint64_t expected_fee, uint64_t expected_asset ) {
+      law_index law( get_self(), get_self().value );
+      auto lr = law.get( 0, "law not initialized" );
+      ckpt_index ck( get_self(), get_self().value );
+      auto cr = ck.get( 0, "checkpoint not initialized" );
+      uint64_t projected = cr.accrued + ( expected_asset == lr.anchor_asset ? expected_fee : 0 );
+      eosio::check( projected >= lr.anchor_cost || cr.pend + 1 >= lr.anchor_batch,
+                    "ADMIT REFUSED — seller cannot afford its own anchor (revenue < cost and the session does not complete a batch)" );
    }
 
 private:
@@ -318,9 +457,12 @@ private:
    // (vk_constants.hpp provenance header).
    // noinline: keeps the verifier one shared body across both actions
    // (measured in M4: per-caller inlining billed inconsistently).
+   // M9: every settlement then folds its CHECKPOINT inline (tier 1) — the
+   // settlement and its checkpoint land in ONE action; nothing waits.
    __attribute__( ( noinline ) )
    void payment_gate( const checksum256& nullifier, const checksum256& out_commitment,
-                      uint64_t fee, uint64_t fee_asset, const std::vector<uint8_t>& proof ) {
+                      uint64_t fee, uint64_t fee_asset, const std::vector<uint8_t>& proof,
+                      bool withdraw_leg ) {
       eosio::check( proof.size() == 24 * 32, "proof: expected 24 words (768 bytes)" );
       law_index law( get_self(), get_self().value );
       auto lr = law.get( 0, "law not initialized" );
@@ -342,12 +484,50 @@ private:
       int32_t r = plonk_verify( pl_kec_eosio, proof.data(), pubs );
       eosio::check( r == 0, "payment proof REJECTED — plonk pairing false" );
       // nullifier insert (bounded + unique = double-spend refusal)
+      ckpt_index ck( get_self(), get_self().value );
+      auto cr = ck.get( 0, "checkpoint not initialized" );
       nullifier_index ns( get_self(), get_self().value );
       eosio::check( (uint64_t)std::distance(ns.begin(), ns.end()) < lr.max_nullifiers, "nullifier set FULL (bounded)" );
       eosio::check( ns.find( pk_of(nullifier) ) == ns.end(), "DOUBLE-SPEND — nullifier already spent" );
       ns.emplace( get_self(), [&]( auto& row ) {
          row.n = nullifier; row.alg = lr.alg_proof;
          row.spent_at = current_time_point().sec_since_epoch();
+         row.seq = cr.seq + 1;       // the checkpoint this settlement folds (M9)
+         row.fee = fee; row.fee_asset = fee_asset;
+      });
+      checkpoint_step( nullifier, fee, fee_asset, withdraw_leg );
+   }
+
+   // ── TIER 1 · the checkpoint fold (M9) — cheap (two native keccaks),
+   // unconditional, INLINE with the settlement. link = keccak(seq ‖
+   // nullifier ‖ fee ‖ feeAsset); head' = keccak(head ‖ link). The anchor
+   // commits to (seq, head) — the CHAIN HEAD, never a receipt list. METER
+   // REVENUE: only transfer fees in the law's anchor_asset accrue; a
+   // withdraw's fee leg is VALUE-OUT, not a meter cut.
+   __attribute__( ( noinline ) )
+   void checkpoint_step( const checksum256& nullifier, uint64_t fee, uint64_t fee_asset, bool withdraw_leg ) {
+      law_index law( get_self(), get_self().value );
+      auto lr = law.get( 0, "law not initialized" );
+      ckpt_index ck( get_self(), get_self().value );
+      auto citr = ck.find( 0 );
+      eosio::check( citr != ck.end(), "checkpoint not initialized" );
+      uint64_t seq = citr->seq + 1;
+      unsigned char a[128], b[64];
+      u64_to_be32_word( a,      seq );
+      memcpy(     a + 32, nullifier.extract_as_byte_array().data(), 32 );
+      u64_to_be32_word( a + 64, fee );
+      u64_to_be32_word( a + 96, fee_asset );
+      auto lh = keccak( (const char*)a, 128 );
+      memcpy( b,      citr->head.extract_as_byte_array().data(), 32 );
+      memcpy( b + 32, lh.extract_as_byte_array().data(), 32 );
+      auto hh = keccak( (const char*)b, 64 );
+      unsigned char be[32];
+      memcpy( be, hh.extract_as_byte_array().data(), 32 ); t256( be );   // T law: stored pre-transformed
+      ck.modify( citr, get_self(), [&]( auto& r ) {
+         r.seq = seq;
+         memcpy( (void*)r.head.data(), be, 32 );
+         if ( !withdraw_leg && fee_asset == lr.anchor_asset ) r.accrued += fee;
+         r.pend += 1;
       });
    }
 };
