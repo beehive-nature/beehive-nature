@@ -312,9 +312,23 @@ $('wake').addEventListener('click', async () => {
   try {
     const reg = await navigator.serviceWorker.register('./sw.js');
     await navigator.serviceWorker.ready;
-    /* the worker claims this page's fetches from here on */
+    /* the import must not race the worker's claim of this page — a module
+       fetch dispatched exactly at the controller change aborts (measured:
+       'Failed to fetch dynamically imported module'). Wait for control. */
+    await new Promise(res => {
+      if (navigator.serviceWorker.controller) return res();
+      navigator.serviceWorker.addEventListener('controllerchange', res, { once: true });
+      setTimeout(res, 3000);   /* no SW control after 3s → import anyway, named degrade */
+    });
     btn.textContent = 'loading the mind — ≈277 MB once, estate rails only…';
-    const m = await import('../blight/web-llm.mjs');
+    /* the engine rides the SRI gate like every artifact: fetch through the
+       worker (hash-enforced), then import the VERIFIED bytes as a blob —
+       Chrome refuses module scripts reconstructed by a service worker
+       (measured: 200 + full body, import still 'Failed to fetch dynamically
+       imported module'), and a blob of already-verified bytes sidesteps the
+       quirk without weakening the pin */
+    const engineSrc = await (await fetch('../blight/web-llm.mjs')).text();
+    const m = await import(URL.createObjectURL(new Blob([engineSrc], { type: 'text/javascript' })));
     S.engine = await m.CreateMLCEngine(MODEL_ID, {
       appConfig: { model_list: [{
         model: MODEL_DOOR,

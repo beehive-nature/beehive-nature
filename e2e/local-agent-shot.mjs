@@ -54,7 +54,13 @@ let phase = 'closed';
 const hosts = { cold: new Set(), warm: new Set(), offline: new Set() };
 page.on('request', r => {
   if (phase === 'closed') return;
-  try { hosts[phase].add(new URL(r.url()).host); } catch {}
+  try {
+    const u = new URL(r.url());
+    /* blob: URLs carry their creating origin in the scheme data — an empty
+       host there is the SAME-ORIGIN verified-bytes module, never a rail */
+    if (u.protocol === 'blob:') { hosts[phase].add('blob(same-origin)'); return; }
+    hosts[phase].add(u.host);
+  } catch {}
 });
 
 await page.goto(`${BASE}/surfaces/local-agent/index.html`, { waitUntil: 'load' });
@@ -87,7 +93,7 @@ ok('cold: the page ANSWERED a prompt', coldAnswer.length > 40 && !/refused|unrea
 
 const banned = [...hosts.cold].filter(h => /huggingface|jsdelivr|githubusercontent/i.test(h));
 ok('cold: ZERO banned hosts (hf · jsdelivr · githubusercontent)', banned.length === 0, banned.join(' | ') || 'none');
-const foreign = [...hosts.cold].filter(h => h !== 'relay.skaists.dev' && !h.startsWith('127.0.0.1'));
+const foreign = [...hosts.cold].filter(h => h !== 'relay.skaists.dev' && h !== 'blob(same-origin)' && !h.startsWith('127.0.0.1'));
 ok('cold: every host is an estate rail', foreign.length === 0, [...hosts.cold].join(' · '));
 
 await page.waitForTimeout(800);

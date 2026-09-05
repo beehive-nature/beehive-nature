@@ -65,12 +65,30 @@ The page states this in its footer, in the open.
 
 ## TRAPS BANKED
 
+- **Chrome refuses module scripts reconstructed by a service worker** — the
+  SW served web-llm.mjs at 200 with full verified body, and the dynamic
+  import still failed with 'Failed to fetch dynamically imported module'
+  (reproduced 30s, control without SW: import ok). The page therefore fetches
+  the engine THROUGH the hash-enforcing worker and imports the VERIFIED bytes
+  as a blob module — the pin is enforced, the quirk sidestepped. A blob:
+  resource reports an EMPTY host in network censuses — same-origin by
+  construction, folded in the gate as 'blob(same-origin)'.
+- A module fetch dispatched exactly at the SW controller change aborts — the
+  page waits for `navigator.serviceWorker.controller` before importing.
 - The engine appends `/resolve/main/` (HF repo shape) to `model_url` — the
   door answers with a `resolve/main → ..` symlink and the SW strips the prefix
   before pin lookup.
 - web-llm 0.2.84 fetches `tensor-cache.json` (not only `ndarray-cache.json` —
   the manifest ships under both names, byte-identical); a 404 there kills the
   load inside the engine's own `Cache.add`.
+- Buffering 8 × 30–65 MB shard bodies inside ONE service worker kills it
+  mid-flight (ERR_FAILED with no page-visible SW logs — SW console does not
+  reach playwright's page console) → shards hash WHILE STREAMING through an
+  in-worker incremental SHA-256 (self-tested 5/5 vs NIST + node), inference
+  refuses on any final mismatch.
+- Two concurrent WebGPU model loads on this iGPU = the second stalls — model
+  receipts run strictly serial, and a probe that throws must still close its
+  browser or the orphan eats the GPU for the next run.
 - The W-1 receipt's web-llm.mjs hash (80cdd52b) was the pre-marker stock
   file; the committed vendored blob hashes
   `8b7a58eaf5a3722f822e4e4e6a4697af28182919cdad892ec7c50758bf7418c2` <!-- PUBLIC-CONSTANT: vendored engine, this tree --> —

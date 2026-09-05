@@ -127,6 +127,7 @@ self.addEventListener('fetch', e => {
   if (!file || file.includes('/') || !PINS[file]) return;   /* not ours to gate */
 
   e.respondWith((async () => {
+    try {
     const cache = await caches.open(CACHE);
     const hit = await cache.match(url.href);
     if (hit) { report({ type: 'sri', file, ok: true, cached: true }); return hit; }
@@ -175,5 +176,10 @@ self.addEventListener('fetch', e => {
         : { type: 'sri', file, ok: false, why: 'HASH MISMATCH (streamed) — pinned ' + PINS[file].slice(0, 12) + '… got ' + got.slice(0, 12) + '…' });
     })().catch(err => report({ type: 'sri', file, ok: false, why: 'verify stream broke — ' + String(err && err.message || err) }));
     return new Response(toEngine, { status: 200, headers });
+    } catch (err) {
+      /* the gate itself broke — that is a refusal, never a silent pass-through */
+      report({ type: 'sri', file, ok: false, why: 'gate internal — ' + String(err && err.message || err) });
+      return new Response('SRI gate error for ' + file + ': ' + (err && err.message), { status: 410 });
+    }
   })());
 });
