@@ -122,6 +122,7 @@ secret-scan shape rules before any future row carries a 64-hex hash.
 | **A87** | **L-VERIFY searxng/searxng — GNU AGPL-3.0**, raw `LICENSE` at HEAD `a1144dda3e97668c9d445022b7019c224cd4bb1e` (`master`, 2026-09-03), 34520 bytes | Cowork, 2026-09-03: same method = `57c8ff33c9c0cfc3ef00e650a1cc910d7ee479a8bc509f6c9209a7c2a11399d6` PUBLIC-CONSTANT | **AGPL §13 binds any hosted instance of a modified copy** (footer "Source code" link is the built-in compliance hook, `templates/simple/base.html:70`). No phone-home to searxng.org in code; JSON API is OFF by default — `search.formats: [html]` only (`searx/settings.yml:84-86`) |
 | **A88** | **L-VERIFY astral-sh/uv — Apache-2.0 OR MIT** (`Cargo.toml:16` `license = "MIT OR Apache-2.0"`), at HEAD `0e886db78e891c0a148992f13190223f92537aaa` (`main`, 2026-09-03): `LICENSE-APACHE` 11357 bytes (stock text, same hash as trivy's), `LICENSE-MIT` 1077 bytes | Cowork, 2026-09-03: `LICENSE-APACHE` = `c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4` PUBLIC-CONSTANT · `LICENSE-MIT` = `860e3d7a86b84e6a7012c7a635fc64df475cebc6cce34dfeb73a5982ec58176c` PUBLIC-CONSTANT | Liftable under either. No telemetry code in `crates/`; `--offline` swaps in an `OfflineMiddleware` that refuses all network (`crates/uv-client/src/base_client.rs:714-716`) — a warmed cache installs fully offline |
 
+
 ---
 
 ## B. UNVERIFIED REGISTER — label as such wherever used
