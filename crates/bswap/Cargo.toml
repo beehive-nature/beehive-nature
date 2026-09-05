@@ -1,0 +1,13 @@
+[package]
+name = "bswap"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "bswap — adaptor-signature atomic swap (SWAP-LOCK). Script side on BTC (testnet-first); no-script side = the Zano leg the frozen CLSAG proto already signs (A64: Zano HTLC is gone at HEAD; do not add one). Pattern source: BasicSwap's XMR path per docs/raids/SWAP-SORT-2026-09-02.md §5 — mechanisms travel, code does not. SOUND BY CONSTRUCTION / ISOLATED BY DESIGN — never stronger language."
+
+[dependencies]
+k256 = { version = "0.13", features = ["ecdsa", "arithmetic"] }
+curve25519-dalek = { workspace = true }
+sha2 = { workspace = true }
+hex = "0.4"
+bech32 = "0.9"

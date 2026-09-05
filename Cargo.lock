@@ -236,6 +236,12 @@ name = "bcomb"
 version = "0.1.0"
 
 [[package]]
+name = "bech32"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d86b93f97252c47b41663388e6d155714a9d0c398b99f1005cbc5f978b29f445"
+
+[[package]]
 name = "bindexer"
 version = "0.1.0"
 dependencies = [
@@ -371,6 +377,17 @@ dependencies = [
  "memchr",
  "regex-automata",
  "serde_core",
+]
+
+[[package]]
+name = "bswap"
+version = "0.1.0"
+dependencies = [
+ "bech32",
+ "curve25519-dalek",
+ "hex",
+ "k256",
+ "sha2 0.10.9",
 ]
 
 [[package]]
