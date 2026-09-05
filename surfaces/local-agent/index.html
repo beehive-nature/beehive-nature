@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#07090b">
+<title>the local agent · a mind in your page</title>
+<link rel="stylesheet" href="../tokens.css">
+<style>
+/* THE LOCAL AGENT (z3.2, 2026-09-05) — WebLLM vendored whole into ONE
+   surface: the engine, the wasm, the tokenizer and a small Qwen model all
+   load from the estate's own rails with SRI pins enforced by ./sw.js —
+   zero HuggingFace, zero jsdelivr at render. WebGPU absent → the honest
+   fallback to the P1 sidecar (the estate's metered compute door), stated
+   on-page. One file, vanilla, tokens.css only; comb-cell states carry the
+   custody panel (verified = capped ⬡ · loading = honey · refused = flag).
+
+   SEMANTIC COLOUR — meanings picked first, hues from tokens.css only:
+   harm = --flag (the validated failure hue, never a new red) ·
+   solution = leaf · value = gold (capped = sealed value) ·
+   system = cyan (the estate's wire/nectar word) · science = violet. */
+:root{--sem-harm:var(--flag); --sem-solution:var(--leaf); --sem-value:var(--gold);
+  --sem-system:var(--cyan); --sem-science:var(--violet)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow-x:hidden}
+body{background:var(--bg0);color:var(--ink);
+  font:13px/1.65 'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  padding:14px 14px 44px}
+main{max-width:462px;margin:0 auto}
+.crumbs{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:10px;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--faint);
+  padding-bottom:10px;border-bottom:1px solid var(--line)}
+.crumbs a{color:var(--dim);text-decoration:none}
+.crumbs .here{color:var(--ink)}
+.hd{display:flex;align-items:center;gap:12px;padding:18px 2px 8px}
+.hd .r{width:40px;height:40px;flex:none;
+  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+  background:linear-gradient(160deg,var(--gold),var(--amber));
+  display:grid;place-items:center;color:var(--bg0);font-size:19px;
+  animation:hexpulse 3.4s var(--ease) infinite}
+@keyframes hexpulse{0%,100%{filter:brightness(1)}50%{filter:brightness(.72)}}
+.hd h1{font-size:var(--t-display);font-weight:600;letter-spacing:.02em;line-height:1.15;
+  background:linear-gradient(92deg,var(--gold),var(--amber) 64%,var(--cyan));
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.hd h1 span{background:inherit;-webkit-background-clip:text;background-clip:text;
+  color:transparent;font-weight:700}
+.hd small{display:block;font-size:10px;color:var(--faint);letter-spacing:.14em;
+  text-transform:uppercase;margin-top:3px}
+.step{padding:16px 2px 6px;font-size:var(--t-small);letter-spacing:.16em;
+  color:var(--dim);text-transform:uppercase}
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:14px 14px 12px}
+.pstatband{display:flex;gap:8px}
+.pstat{flex:1;background:var(--well);border:1px solid var(--line);
+  border-radius:var(--r-md);padding:10px 10px 8px;text-align:center}
+.pstat .n{display:block;font-size:19px;font-weight:600;color:var(--gold);
+  font-variant-numeric:tabular-nums;line-height:1.1}
+.pstat.hero .n{font-size:34px;color:var(--gold)}
+.pstat .l{display:block;font-size:9px;letter-spacing:.1em;text-transform:
+  uppercase;color:var(--faint);margin-top:4px;line-height:1.5}
+.note{font-size:11.5px;color:var(--dim);line-height:1.6;margin-top:8px}
+.note b{color:var(--ink);font-weight:600}
+.note .bad{color:var(--flag)} .note .good{color:var(--ok)}
+.route{display:flex;gap:8px;align-items:flex-start;border:1px solid var(--line);
+  border-radius:var(--r-md);padding:10px 12px;margin-top:10px;background:var(--well)}
+.route .dot{width:10px;height:10px;flex:none;border-radius:50%;margin-top:5px;
+  animation:dotb 2.2s var(--ease) infinite}
+@keyframes dotb{0%,100%{opacity:1}50%{opacity:.35}}
+.route.a .dot{background:var(--leaf)} .route.b .dot{background:var(--amber)}
+.route .rt{font-size:11px;color:var(--dim);line-height:1.6}
+.route .rt b{color:var(--ink)}
+.route.off{opacity:.55}.route.off .dot{animation:none;background:var(--faint)}
+.ask{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.ask textarea{width:100%;background:var(--well);color:var(--ink);
+  border:1px solid var(--line);border-radius:var(--r-md);padding:10px;
+  font:12px 'IBM Plex Mono',monospace;min-height:64px;resize:vertical}
+.ask textarea:focus{border-color:var(--gold);outline:none}
+.btn{display:block;width:100%;margin-top:10px;background:var(--gold);color:var(--bg0);
+  border:none;border-radius:var(--r-lg);padding:14px;
+  font:600 14px 'IBM Plex Mono',monospace;text-align:center;cursor:pointer;
+  box-shadow:var(--glow-gold)}
+.btn:hover{background:var(--ink-hi)}
+.btn:disabled{background:var(--bg3);color:var(--faint);cursor:not-allowed;box-shadow:none}
+.btn2{display:block;width:100%;margin-top:8px;background:transparent;color:var(--gold);
+  border:1.5px solid var(--gold);border-radius:var(--r-lg);padding:11px;
+  font:600 12.5px 'IBM Plex Mono',monospace;text-align:center;cursor:pointer}
+.btn2:hover{color:var(--ink-hi);border-color:var(--ink-hi)}
+.answer{margin-top:10px;background:var(--well);border:1px solid var(--line);
+  border-left:3px solid var(--gold);border-radius:var(--r-md);padding:11px 12px;
+  font-size:12px;line-height:1.7;color:var(--ink);white-space:pre-wrap;display:none}
+.answer.show{display:block}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.stat{border:1px solid var(--line);border-radius:99px;padding:3px 10px;
+  font-size:10px;color:var(--dim);font-variant-numeric:tabular-nums}
+.stat b{color:var(--gold)}
+.field{display:flex;align-items:center;gap:8px;background:var(--well);
+  border:1px solid var(--line);border-radius:var(--r-md);padding:10px 12px;margin-top:8px}
+.field:focus-within{border-color:var(--gold)}
+.field label{font-size:9.5px;color:var(--faint);letter-spacing:.08em;
+  text-transform:uppercase;width:74px;flex:none}
+.field input{flex:1;min-width:0;background:transparent;border:none;outline:none;
+  color:var(--gold);font:600 13px 'IBM Plex Mono',monospace}
+.wire{margin-top:10px;background:var(--bg1);border:1px solid var(--line);
+  border-radius:var(--r-md);padding:10px 12px;font-size:10.5px;color:var(--dim);
+  line-height:1.8}
+.wire b{color:var(--ink)} .wire .ok{color:var(--ok)} .wire .bad{color:var(--flag)}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:10px;color:var(--dim)}
+.foot{padding:18px 2px 6px;font-size:10.5px;color:var(--faint);line-height:1.75;
+  border-top:1px solid var(--line);margin-top:18px}
+.foot b{color:var(--dim)} .foot a{color:var(--dim)}
+#sriRows .row{display:flex;align-items:center;gap:8px;font-size:10px;
+  color:var(--dim);padding:3.5px 0;border-top:1px solid var(--line)}
+#sriRows .row:first-child{border-top:none}
+#sriRows .fn{flex:1;min-width:0;overflow-wrap:anywhere;color:var(--ink)}
+#sriRows .h{color:var(--faint);font-variant-numeric:tabular-nums}
+@media (max-width:390px){.note{font-size:11px}.stat{font-size:9px}}
+@media (prefers-reduced-motion:reduce){.hd .r,.route .dot{animation:none}}
+</style>
+</head>
+<body>
+<main>
+<nav class="crumbs" aria-label="you are here">
+  <a href="../index.html">beehive nature reserve</a><span>▸</span><span class="here">the local agent</span>
+</nav>
+
+<header class="hd">
+  <div class="r" aria-hidden="true">⬡</div>
+  <div>
+    <h1>the <span>local</span> agent</h1>
+    <small>skaists · a mind that runs in your page</small>
+  </div>
+</header>
+
+<section class="card" aria-label="what this is">
+  <div class="pstatband">
+    <div class="pstat hero"><span class="n">277</span><span class="l">MB once · then cached</span></div>
+    <div class="pstat"><span class="n">17</span><span class="l">sha256 pins enforced</span></div>
+    <div class="pstat"><span class="n">0</span><span class="l">hf · jsdelivr at render</span></div>
+  </div>
+  <p class="note" style="margin:8px 0 0">An agent you can talk to that lives <b>in this
+  tab</b> — its engine, its wasm, its tokenizer and its whole 0.5-billion-parameter
+  Qwen mind load from <b>the estate's own rails</b>, pinned by sha256 and enforced
+  by this page's service worker before a single byte runs: <b>zero HuggingFace,
+  zero jsdelivr, ever</b>. Once loaded it answers with the network reading
+  <b>zero</b>. Nothing you type leaves your device on the local path.</p>
+  <div class="route a" id="routeA">
+    <span class="dot" aria-hidden="true"></span>
+    <span class="rt"><b>route A · the local mind</b> — your browser has WebGPU:
+    Qwen2.5-0.5B-Instruct runs in this tab. <span id="gpuName" style="color:var(--faint)"></span></span>
+  </div>
+  <div class="route b" id="routeB" style="display:none">
+    <span class="dot" aria-hidden="true"></span>
+    <span class="rt"><b>route B · the P1 sidecar</b> — your browser has <b>no
+    WebGPU</b>, so the local mind cannot run here. The estate's shared compute
+    door carries the answer instead — <b>stated plainly, never faked</b>: that
+    path is metered (the b-meter law) and your words ride the estate's own rail,
+    not this page.</span>
+  </div>
+</section>
+
+<div class="step" id="talk">talk to it</div>
+<section class="card" aria-label="talk to the agent">
+  <div class="ask">
+    <textarea id="prompt" aria-label="your prompt">say something true about bees, in two sentences.</textarea>
+    <button class="btn" id="wake">⏵ wake the local mind</button>
+  </div>
+  <div class="answer" id="answer" aria-live="polite"></div>
+  <div class="stats" id="stats"></div>
+
+  <div id="p1box" style="display:none;margin-top:4px">
+    <p class="note">The P1 sidecar — <b>the estate's compute door</b> behind
+    <span style="color:var(--gold)">relay.skaists.dev/compute</span>. It is
+    <b>metered with the founder's own law</b>: a member key is required
+    (qwen rides the free tier; the door refuses anonymous by construction —
+    that is the door's honesty, not this page's). Your key never leaves this
+    tab except to the estate's own door, as the bearer.</p>
+    <div class="field"><label for="p1key">member key</label>
+      <input id="p1key" type="password" autocomplete="off" spellcheck="false" placeholder="the key your wallet surface issued"></div>
+    <div class="field"><label for="p1model">model id</label>
+      <input id="p1model" type="text" autocomplete="off" spellcheck="false" value="qwen"></div>
+    <button class="btn" id="p1ask">ask the sidecar →</button>
+  </div>
+</section>
+
+<div class="step">the wire — the honest reading</div>
+<section class="card" aria-label="the wire">
+  <div class="wire" id="wire">counting starts when the mind wakes.</div>
+</section>
+
+<div class="step">the mind's custody — every byte pinned</div>
+<section class="card" aria-label="custody">
+  <p class="note" style="margin:0 0 8px">Seventeen artifacts, seventeen sha256 pins,
+  enforced by <b>this page's own service worker</b>. The engine bundle, the wasm
+  and every small file are hashed <b>before a byte is served</b>; the eight
+  weight shards (30–65 MB each) hash <b>while they stream</b> — and inference
+  <b>refuses</b> if any final hash disagrees. Verified = capped ⬡ ·
+  refused = the flag hue.</p>
+  <div id="sriRows"><div class="row"><span class="fn">waiting for the first fetch…</span></div></div>
+</section>
+
+<footer class="foot">
+  <b>engine</b> @mlc-ai/web-llm 0.2.84, Apache-2.0, L-VERIFY'd 2026-09-04 — vendored
+  same-origin (<a href="../blight/web-llm.mjs">bytes</a> · <a href="../blight/web-llm.LICENSE">LICENSE</a>);
+  its bundled TVMjs runtime is @mlc-ai/web-runtime (Apache-2.0 at
+  <a href="https://github.com/apache/tvm">apache/tvm</a>, L-VERIFY'd 2026-09-05 —
+  <a href="../blight/tvmjs.LICENSE">LICENSE</a>).<br>
+  <b>mind</b> Qwen2.5-0.5B-Instruct (weights Apache-2.0, read at the model card
+  2026-09-05) · MLC q4f16 build ≈277 MB once, then cached.<br>
+  <b>rails</b> engine + wasm + tokenizer same-origin; weights on the estate door
+  <span style="color:var(--gold)">relay.skaists.dev/model</span> (GET-only, rate-limited).
+  The permanent Arweave/Autonomi re-home is <b>priced and pending the founder's
+  word</b> — the upload door answered with an x402 invoice (0.241453 USDC-Base per
+  5 MB; ≈13 USDC for the mind), a founder-gesture-class spend this seat does not
+  make unruled.<br>
+  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/2026-09-05-local-agent-webllm.md">the receipt is in the estate tree</a>
+</footer>
+</main>
+
+<script>
+/* ════════════════════════════════════════════════════════════════════
+   THE LOCAL AGENT — route fork, SRI service worker, the vendored engine.
+   Laws: nothing model-shaped at page-open; every failure degrades to a
+   NAMED state, never a fake answer; the wire reports what actually moved. */
+'use strict';
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const MODEL_ID = 'Qwen2.5-0.5B-Instruct-q4f16_1-MLC';
+const MODEL_DOOR = 'https://relay.skaists.dev/model/Qwen2.5-0.5B-Instruct-q4f16_1-MLC';
+const P1_DOOR = 'https://relay.skaists.dev/compute/v1/chat/completions';
+
+const S = { gpu: null, engine: null, wakeT0: 0, wire: [], sri: {}, route: null };
+window.__localAgent = S;                       // the gates' readback hook
+
+/* ── the wire: every resource request since page-open, host-censused ── */
+try {
+  new PerformanceObserver(list => {
+    for (const e of list.getEntries()) S.wire.push(e.name);
+  }).observe({ type: 'resource', buffered: true });
+} catch {}
+const ESTATE_HOSTS = location.hostname === '127.0.0.1' || location.hostname === 'localhost'
+  ? [location.host, 'relay.skaists.dev'] : [location.host, 'relay.skaists.dev'];
+function wireHtml() {
+  const byHost = {};
+  S.wire.forEach(u => { try { const h = new URL(u).host; byHost[h] = (byHost[h] || 0) + 1; } catch {} });
+  const hosts = Object.keys(byHost);
+  const banned = hosts.filter(h => /huggingface|jsdelivr|githubusercontent/.test(h));
+  const estateOnly = hosts.length && !banned.length && hosts.every(h => ESTATE_HOSTS.includes(h));
+  return `<b>${S.wire.length}</b> request(s) since page-open · hosts: ` +
+    (hosts.map(h => `<b>${esc(h)}</b>×${byHost[h]}`).join(' · ') || 'none yet') +
+    `<br>${banned.length ? '<span class="bad">BANNED HOST SEEN: ' + esc(banned.join(', ')) + '</span>'
+      : estateOnly ? '<span class="ok">estate rails only — zero HuggingFace, zero jsdelivr</span>'
+      : 'warming up…'}`;
+}
+function paintWire() { $('wire').innerHTML = wireHtml(); S.wireState = { estateOnly: (S.wire.length > 0) && S.wire.every(u => { try { const h = new URL(u).host; return ESTATE_HOSTS.includes(h); } catch { return false; } }), hosts: [...new Set(S.wire.map(u => { try { return new URL(u).host; } catch { return '?'; } }))] }; }
+setInterval(paintWire, 1200);
+
+/* ── SRI: the service worker's verdicts, drawn as comb cells ── */
+const CHIP = {
+  verified: '<svg width="14" height="14" viewBox="0 0 14 14" style="flex:none"><polygon points="7,0.7 12.1,3.65 12.1,9.55 7,12.5 1.9,9.55 1.9,3.65" fill="var(--gold)" fill-opacity=".92" stroke="var(--gold)" stroke-width="1.2"/><polygon points="7,4.1 9.5,5.55 9.5,8.45 7,9.9 4.5,8.45 4.5,5.55" fill="none" stroke="rgba(7,9,11,.85)" stroke-width="1.1"/></svg>',
+  loading: '<svg width="14" height="14" viewBox="0 0 14 14" style="flex:none"><polygon points="7,0.7 12.1,3.65 12.1,9.55 7,12.5 1.9,9.55 1.9,3.65" fill="var(--amber)" fill-opacity=".62" stroke="var(--amber)" stroke-width="1.2"/></svg>',
+  refused: '<svg width="14" height="14" viewBox="0 0 14 14" style="flex:none"><polygon points="7,0.7 12.1,3.65 12.1,9.55 7,12.5 1.9,9.55 1.9,3.65" fill="#c07f1c" fill-opacity=".8" stroke="#c07f1c" stroke-width="1.2"/></svg>'
+};
+function paintSri() {
+  const rows = Object.keys(S.sri).sort();
+  if (!rows.length) return;
+  $('sriRows').innerHTML = rows.map(f => {
+    const v = S.sri[f];
+    return `<div class="row">${CHIP[v.state]}<span class="fn">${esc(f)}</span>` +
+      `<span class="h">${v.state === 'refused' ? esc(v.why || 'refused') : v.hash ? v.hash.slice(0, 10) + '…' + v.hash.slice(-6) : ''}</span></div>`;
+  }).join('');
+  S.sriCensus = { verified: 0, loading: 0, refused: 0 };
+  rows.forEach(f => S.sriCensus[S.sri[f].state]++);
+}
+navigator.serviceWorker?.addEventListener('message', ev => {
+  const m = ev.data || {};
+  if (m.type !== 'sri') return;
+  S.sri[m.file] = m.ok
+    ? { state: 'verified', hash: m.cached ? '(cached) verified' : (m.streamed ? 'verified while streaming' : 'verified') }
+    : { state: 'refused', why: m.why };
+  if (!m.ok) { S.refused = true;
+    $('answer').classList.add('show');
+    $('answer').innerHTML = '<span style="color:var(--flag)">integrity refused — ' + esc(m.file) +
+      ': ' + esc(m.why || 'hash mismatch') + '. nothing unverified answers; the panel rests rather than guess.</span>';
+    ['wake', 'p1ask'].forEach(id => { const b = $(id); if (b) b.disabled = true; }); }
+  paintSri();
+});
+
+/* ── the fork: WebGPU present → local; absent → P1, stated ── */
+(async () => {
+  let ad = null;
+  try { if (navigator.gpu) ad = await navigator.gpu.requestAdapter(); } catch {}
+  S.gpu = !!ad;
+  S.route = ad ? 'local' : 'p1';
+  if (!ad) {
+    $('routeA').classList.add('off');
+    $('routeA').querySelector('.rt').innerHTML = '<b>route A · the local mind</b> — <span class="bad">no WebGPU here</span>; the in-tab engine cannot run in this browser.';
+    $('routeB').style.display = '';
+    $('p1box').style.display = '';
+    $('wake').style.display = 'none';
+    return;
+  }
+  try { const info = ad.requestAdapterInfo ? await ad.requestAdapterInfo() : null;
+    $('gpuName').textContent = info && (info.vendor || info.description) ? '· ' + [info.vendor, info.description].filter(Boolean).join(' ') : ''; } catch {}
+})();
+
+/* ── route A: wake → SW gate → vendored engine → the estate door ── */
+$('wake').addEventListener('click', async () => {
+  if (S.engine) return ask();
+  const btn = $('wake'); btn.disabled = true;
+  S.wakeT0 = performance.now();
+  btn.textContent = 'opening the SRI gate…';
+  try {
+    const reg = await navigator.serviceWorker.register('./sw.js');
+    await navigator.serviceWorker.ready;
+    /* the worker claims this page's fetches from here on */
+    btn.textContent = 'loading the mind — ≈277 MB once, estate rails only…';
+    const m = await import('../blight/web-llm.mjs');
+    S.engine = await m.CreateMLCEngine(MODEL_ID, {
+      appConfig: { model_list: [{
+        model: MODEL_DOOR,
+        model_id: MODEL_ID,
+        model_lib: new URL('./qwen05/Qwen2-0.5B-Instruct-q4f16_1_cs1k-webgpu.wasm', location.href).toString(),
+        vram_required_MB: 945, low_resource_required: true,
+        overrides: { context_window_size: 4096 }
+      }] },
+      initProgressCallback: r => {
+        btn.textContent = 'loading the mind — ' + Math.round((r.progress || 0) * 100) + '% · ' + String(r.text || '').slice(0, 46);
+      }
+    });
+    btn.textContent = 'the mind is awake — ask it ⏵';
+    btn.disabled = false;
+    addStat('loaded', ((performance.now() - S.wakeT0) / 1000).toFixed(1) + ' s');
+    ask();
+  } catch (e) {
+    btn.disabled = false; btn.textContent = '⏵ try again';
+    $('answer').classList.add('show');
+    $('answer').innerHTML = '<span style="color:var(--amber)">the mind did not wake: ' +
+      esc(String(e && e.message || e)).slice(0, 220) + '</span>';
+  }
+});
+
+async function ask() {
+  if (S.refused) return;
+  const q = $('prompt').value.trim(); if (!q) return;
+  const out = $('answer'); out.classList.add('show');
+  out.textContent = '…'; let toks = 0, t0 = 0, first = 0;
+  try {
+    const stream = await S.engine.chat.completions.create({
+      messages: [{ role: 'user', content: q }], max_tokens: 220, stream: true, temperature: 0.7
+    });
+    let text = '';
+    for await (const chunk of stream) {
+      const d = chunk.choices?.[0]?.delta?.content || '';
+      if (d) { if (!first) first = performance.now(); toks++; text += d; out.textContent = text; }
+    }
+    const dt = (performance.now() - first) / 1000;
+    addStat('tokens', toks + '');
+    if (dt > 0 && toks > 1) addStat('speed', (toks / dt).toFixed(1) + ' tok/s');
+    addStat('path', 'local · 0 requests to answer');
+  } catch (e) {
+    out.innerHTML = '<span style="color:var(--amber)">the local mind refused: ' + esc(String(e && e.message || e)).slice(0, 200) + '</span>';
+  }
+}
+function addStat(k, v) {
+  let el = document.querySelector('#stats [data-k="' + k + '"]');
+  if (!el) { el = document.createElement('span'); el.className = 'stat'; el.dataset.k = k; $('stats').appendChild(el); }
+  el.innerHTML = esc(k) + ' <b>' + esc(v) + '</b>';
+}
+
+/* ── route B: the P1 sidecar — metered, member-key, estate door ── */
+$('p1key').value = localStorage.getItem('local-agent-p1-key') || '';
+$('p1key').addEventListener('change', () => localStorage.setItem('local-agent-p1-key', $('p1key').value));
+$('p1ask').addEventListener('click', async () => {
+  const key = $('p1key').value.trim(), model = $('p1model').value.trim() || 'qwen';
+  const out = $('answer'); out.classList.add('show');
+  if (!key) { out.innerHTML = '<span style="color:var(--amber)">the door is metered — a member key is needed (the b-meter law; keys issue from the wallet surface). Nothing was sent.</span>'; return; }
+  out.textContent = 'asking the sidecar…'; const t0 = performance.now();
+  try {
+    const r = await fetch(P1_DOOR, { method: 'POST',
+      headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
+      body: JSON.stringify({ model, messages: [{ role: 'user', content: $('prompt').value.trim() }], max_tokens: 220 }) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { out.innerHTML = '<span style="color:var(--amber)">the door answered ' + r.status + ': ' + esc(j?.error?.message || 'refused') + '</span> — an honest no, never a guess.'; return; }
+    const text = j.choices?.[0]?.message?.content || '';
+    const dt = ((performance.now() - t0) / 1000).toFixed(1);
+    out.textContent = text;
+    addStat('path', 'P1 sidecar · estate door');
+    addStat('round-trip', dt + ' s');
+  } catch (e) {
+    out.innerHTML = '<span style="color:var(--amber)">the sidecar was unreachable: ' + esc(String(e && e.message || e)).slice(0, 160) + '</span>';
+  }
+});
+</script>
+</body>
+</html>

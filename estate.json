@@ -414,6 +414,15 @@
    "org": "beehive-nature"
   },
   {
+   "id": "local-agent",
+   "family": "skaists",
+   "home": "skaists.dev",
+   "path": "surfaces/local-agent/index.html",
+   "state": "LIVE",
+   "gloss": "the local agent — a Qwen mind that runs in your page",
+   "org": "skaists"
+  },
+  {
    "id": "record",
    "family": "beehivenature",
    "home": "beehivenature.com",
@@ -1124,8 +1133,8 @@
   }
  ],
  "counts": {
-  "surfaces": 91,
-  "listed": 100,
+  "surfaces": 92,
+  "listed": 101,
   "families": 8,
   "domains": 26,
   "domainsLive": 4,
@@ -1134,7 +1143,7 @@
   "byFamily": {
    "beehivenature": 39,
    "plur": 5,
-   "skaists": 18,
+   "skaists": 19,
    "bnature": 18,
    "beehivebiomass": 5,
    "beehivebuds": 0,
@@ -1142,11 +1151,11 @@
    "bnr": 1
   },
   "byState": {
-   "LIVE": 100
+   "LIVE": 101
   },
   "byOrg": {
    "beehive-nature": 56,
-   "skaists": 30,
+   "skaists": 31,
    "beehive-biomass": 5
   }
  },

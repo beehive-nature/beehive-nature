@@ -72,3 +72,4 @@ __pycache__/
 archive-staging/
 .hubshots/
 tools/ln-rail/node_modules/
+e2e/.local-agent-profile/
