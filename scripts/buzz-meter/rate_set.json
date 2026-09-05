@@ -11,6 +11,19 @@
   "percent": 10,
   "law": "FOUNDER LAW (Lane M rider, 2026-08-29): the Claude-agents API lane prices at PROVIDER COST BASIS + 10% TITHE in A — a distinct visible TITHE line on every receipt, never buried in the rate. The tithe percentage changes by founder word ALONE; rate_set versions track cost basis only. This number is law, not a parameter."
  },
+ "lanes": {
+  "law": "x402-RAID-Z33 (pinout compute/rates.json + lanePricing, read at source): a lane rate is COST BASIS x (1 + margin); in the estate the margin IS the 10% tithe and rides as its OWN line, never inside the rate. 1 credit = 1 second. A lane whose basis is unset or stale is NOT OFFERED (NotPriced) — the option disappears rather than mis-prices (the xorv stale-rate rule). Versions track cost basis only: no lane below carries a basis yet, so the version does not move.",
+  "compute_edge": {
+   "lane": "compute_edge",
+   "unit": "second (1 credit = 1 second)",
+   "resource_class": "mesh_second",
+   "cost_basis_a_per_second": null,
+   "cost_basis_ref": null,
+   "observed_at": null,
+   "stale_after_s": 86400,
+   "note": "the basis lands the day a citable per-second source exists (the lane-H service meters seconds; the A conversion rides the same seam as a_conversion_reference). Until then this lane is priced nowhere and offered nowhere."
+  }
+ },
  "tiers": {
   "free_qwen": {
    "tier": "FREE (founder tier-ladder ruling, 2026-08-29): the box/qwen compute lane — guest keys, no charge, capped fairly (the Lane-H service caps are the fair cap)",

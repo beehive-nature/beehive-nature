@@ -26,6 +26,18 @@ Laws implemented (from the ruled record):
 - Refuse-before-write: an over-balance charge writes NOTHING.
 - Deposits reference a Vaulta tx (the watch_account read-back seam).
 
+x402-RAID-Z33 laws (2026-09-04, pinout/tally rows read at source):
+- CREDIT FROM SETTLEMENT: a deposit is keyed on its settlement id — a
+  replayed settlement credits ONCE (idempotent return of the original event).
+  The credited amount is the OBSERVED settled transfer's own amount, never a
+  price table (the declared-vs-observed context check lives in
+  x402_meter.credit_from_settlement).
+- UPTO CAPTURE: settle_upto() consumes the quote's nonce even on a ZERO
+  settle; the settled amount is min(metered, ceiling), never above the
+  signed ceiling; advertised max must equal signed max. The nonce set IS the
+  ledger — append-only and restart-surviving, so the qisma RAM-nonce trap
+  cannot exist here.
+
 MERGE NOTE (z1, 2026-08-29): Seat-1's engine merged into the till. The closed
 resource enum is RECONCILED to the estate's ONE enum — SPEC-SPEND-RECEIPT-1's
 class set plus the Lane M dispatch additions (prefill_token / decode_token),
@@ -75,6 +87,16 @@ class TamperError(VoucherError):
     """Hash chain broken — the ledger was edited."""
 
 
+class NonceReplay(VoucherError):
+    """Quote nonce already consumed — single use, even on a zero settle.
+    Nothing was written (the original settle stands)."""
+
+
+class TermsMismatch(VoucherError):
+    """Advertised terms != signed terms (e.g. quote max != signed max —
+    the 'quote $0.10, sign $100' shape). Nothing was written."""
+
+
 @dataclass(frozen=True)
 class RateSet:
     """Versioned pricing law. Rates are A per unit of the CLOSED resource enum."""
@@ -118,6 +140,26 @@ class Escrow:
             tip = ev["hash"]
         return tip
 
+    def _settlement_seen(self, voucher: str, tx_ref: str) -> dict | None:
+        """The idempotency seam (x402-RAID-Z33): a settlement is keyed on
+        (voucher, tx-ref). Returns the ORIGINAL deposit event when the same
+        settlement is presented again — the caller credits nothing twice."""
+        for ev in self._events():
+            if ev.get("voucher") != voucher or ev.get("type") != "DEPOSIT":
+                continue
+            if ev.get("vaulta_tx") == tx_ref or ev.get("base_tx") == tx_ref:
+                return ev
+        return None
+
+    def upto_quote_used(self, quote_id: str) -> dict | None:
+        """The nonce set IS the ledger: any event carrying upto.quote_id means
+        the nonce is consumed. Append-only, so it survives restart (the qisma
+        RAM-nonce trap cannot exist in this engine)."""
+        for ev in self._events():
+            if ev.get("upto", {}).get("quote_id") == quote_id:
+                return ev
+        return None
+
     @staticmethod
     def _hash(ev_body: dict, prev: str) -> str:
         canon = json.dumps(ev_body, sort_keys=True, separators=(",", ":"))
@@ -150,11 +192,18 @@ class Escrow:
         checkpoint/instruction id) where history APIs are 410-gone — cited
         provenance is the law, a tx-shaped string is not.
 
+        x402-RAID-Z33: the (voucher, vaulta_tx) pair IS the settlement key —
+        a replayed settlement returns the ORIGINAL event and credits once
+        (pinout: idempotent credit keyed on sha256 of the settled transfer).
+
         A-RAIL RIDER (founder, 2026-08-29): the Vaulta rail is GASLESS and
         MEMO-NATIVE — a proper Vaulta account sends with memo = the meter key,
         so NO binding table exists on this rail. When the estate runs its own
         history-capable node, sender + memo land here as first-class fields;
         they are recorded when provided, never looked up from a table."""
+        replay = self._settlement_seen(voucher, vaulta_tx)
+        if replay is not None:
+            return replay
         amt = _a(amount_a)
         if amt <= 0:
             raise VoucherError("deposit must be positive")
@@ -193,6 +242,9 @@ class Escrow:
         rate = Decimal(str(rate_a_per_usdc))
         if rate <= 0:
             raise VoucherError("conversion rate must be positive")
+        replay = self._settlement_seen(voucher, base_tx)
+        if replay is not None:
+            return replay
         credited = _a(usdc * rate)
         if credited <= 0:
             raise VoucherError("credited A rounds to zero — deposit too small")
@@ -256,6 +308,104 @@ class Escrow:
             "type": "CHARGE", "voucher": voucher, "ts": time.time(),
             "cost_basis_ref": rate_set.cost_basis_ref,
             "line_items": line_items,
+        })
+
+    def settle_upto(self, voucher: str, quote_id: str, advertised_max_a,
+                    signed_max_a, usage: list[tuple[str, Decimal | int | str]],
+                    rate_set: RateSet) -> dict:
+        """
+        The `upto` capture (x402-RAID-Z33, Tally X402UptoProxy + handleComplete
+        read at source, ported to the estate's ledger):
+
+        1. NONCE: the quote is single-use. A second settle for the same
+           quote_id raises NonceReplay and writes nothing. A ZERO settle
+           (empty usage) still consumes the nonce — the proxy's "nonce burn
+           even at amount 0" — because the append below happens regardless.
+        2. TERMS: advertised max must equal signed max — the quote the member
+           SAW is the quote the signature bound ("no quote $0.10, sign $100").
+           Mismatch raises TermsMismatch, nothing written (fail-atomic: a
+           rejected settle burns no nonce, mirroring the proxy's revert).
+        3. CEILING: settled = min(metered, ceiling). The tithe stays a distinct
+           line on top of the clamped basis; the TOTAL never exceeds the
+           signed ceiling.
+        4. SOLVENCY: refuse-before-write — an above-balance settle raises
+           InsufficientVoucher and writes nothing.
+
+        Not ported (EVM-specific, recorded): high-s rejection and the
+        facilitator address bound in the signature — this seam has no ECDSA
+        signature yet; when bSigner signs quotes, s-value and binder laws
+        live in that organ, not here.
+        """
+        advertised = _a(advertised_max_a)
+        signed = _a(signed_max_a)
+        if advertised != signed:
+            raise TermsMismatch(
+                f"advertised max {advertised} != signed max {signed} — nothing written")
+        if advertised <= 0:
+            raise VoucherError("upto ceiling must be positive")
+        if self.upto_quote_used(quote_id) is not None:
+            raise NonceReplay(f"quote {quote_id} already settled — nonce consumed")
+        # metered basis at the quote's rate law
+        basis = Decimal("0")
+        line_items = []
+        for resource, qty in usage:
+            q = Decimal(str(qty))
+            if q <= 0:
+                raise VoucherError(f"quantity must be positive: {resource}={qty}")
+            rate = rate_set.rate(resource)
+            charged = _a(q * rate)
+            basis += charged
+            line_items.append({
+                "resource": resource, "quantity": str(q),
+                "rate": str(rate), "rate_set_ref": rate_set.version,
+                "charged": str(charged),
+            })
+        # clamp the BASIS so basis + tithe <= ceiling (charge = min(metered,
+        # ceiling) with the tithe kept a distinct line, never inside the rate).
+        # Q4 per-line rounding must not desync Σ lines from the basis — the
+        # last line absorbs the sub-tick difference.
+        ceiling_basis = (advertised / (Decimal("1") + TITHE_RATE)).quantize(Q4)
+        settled_basis = min(basis, ceiling_basis)
+        if settled_basis < basis:                      # the clamp actually bit
+            scale = settled_basis / basis
+            scaled = [_a(Decimal(li["charged"]) * scale) for li in line_items]
+            scaled[-1] = _a(settled_basis - sum(scaled[:-1]))
+            for li, ch in zip(line_items, scaled):
+                li["charged"] = str(ch)
+        tithe = _a(settled_basis * TITHE_RATE)
+        total = _a(settled_basis) + tithe
+        if total > advertised:                         # rounding pushed over — shave the basis
+            excess = total - advertised
+            settled_basis = _a(settled_basis - excess)
+            for i in range(len(line_items)):
+                take = min(excess, Decimal(line_items[i]["charged"]))
+                line_items[i]["charged"] = str(_a(Decimal(line_items[i]["charged"]) - take))
+                excess -= take
+                if excess <= 0:
+                    break
+            tithe = _a(settled_basis * TITHE_RATE)
+            total = _a(settled_basis) + tithe
+        if line_items:
+            line_items.append({
+                "resource": "tithe.founder", "quantity": "1",
+                "rate": str(TITHE_RATE), "rate_set_ref": rate_set.version,
+                "charged": str(tithe),
+            })
+        bal = self.balance(voucher)
+        if total > bal:
+            raise InsufficientVoucher(
+                f"upto settle {total} A exceeds voucher balance {bal} A — refused, nothing written")
+        return self._append({
+            "type": "CHARGE", "voucher": voucher, "ts": time.time(),
+            "cost_basis_ref": rate_set.cost_basis_ref,
+            "line_items": line_items,                # [] on a zero settle
+            "upto": {
+                "quote_id": quote_id, "ceiling_a": str(advertised),
+                "metered_basis_a": str(_a(basis)),
+                "settled_a": str(total),
+                "law": "ceiling signed once; settled = min(metered, ceiling); "
+                       "nonce consumed even at zero; advertised == signed",
+            },
         })
 
 

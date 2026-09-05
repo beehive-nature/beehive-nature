@@ -63,6 +63,13 @@ jobs:
       - name: Voucher/escrow engine battery (moat ledger core)
         if: always()
         run: python3 scripts/buzz-meter/test_voucher_escrow.py
+      # x402-RAID-Z33 battery (z3.3, 2026-09-04): credit-from-settlement,
+      # pause-not-kill, upto ceiling (nonce burn even at zero), lane cost
+      # basis + tithe, the 4-state receipt, and the three NAMED halt tests
+      # (budget / fraud / infra) — 37 proofs
+      - name: x402 meter battery (x402-RAID-Z33)
+        if: always()
+        run: python3 scripts/buzz-meter/test_x402_meter.py
       # estate-source: every data-i18n key in the tree exists in the corpus,
       # every docked tongue covers every key, and the corpus English matches
       # what the pages say (the stale-translation check).
