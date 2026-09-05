@@ -73,9 +73,11 @@ ok('room history rendered', await page.locator('div.text-sm > div').count() > 0 
 ok('the community is skaists.buzz', body.includes('skaists.buzz'), '');
 
 // write path: the phone speaks
-await page.locator('input[placeholder="say hello"]').fill('hello from a phone with one address — no app, no extension, no second machine');
+const composer = page.locator('input[placeholder^="message #"], textarea').last();
+await composer.waitFor({ state: 'visible', timeout: 20000 });
+await composer.fill('hello from a phone with one address — no app, no extension, no second machine');
 await page.screenshot({ path: join(OUT, 'join-390-composing.png') });
-await page.getByRole('button', { name: 'send' }).click();
+await composer.press('Enter');
 await page.waitForFunction(
   () => document.body.innerText.includes('hello from a phone with one address'),
   null, { timeout: 20000 },
