@@ -44,6 +44,7 @@
 pub mod chain_registry;
 pub mod channel;
 pub mod device;
+pub mod zano_proto;
 
 pub use chain_registry::{
     AntelopeChain, ChainError, ChainKey, EvmChain, Provenance, VerifiedEvmChain, ANTELOPE_CHAINS,
@@ -54,6 +55,10 @@ pub use channel::{
     SignRequest, SignerChannel,
 };
 pub use device::{enumerate, ethereum_address, DeviceError, DeviceSummary, ETH_PATH_ACCOUNT_0};
+pub use zano_proto::{
+    is_gateway_address_prefix, GATEWAY_ADDRESS_NOT_SUPPORTED, GATEWAY_PREFIX_GWIZ,
+    GATEWAY_PREFIX_GWZ,
+};
 
 #[cfg(test)]
 mod fence_tests {

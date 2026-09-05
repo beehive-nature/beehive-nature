@@ -5,9 +5,30 @@ option java_outer_classname = "TrezorMessageZano";
 option java_package = "com.satoshilabs.trezor.lib.protobuf";
 
 // =============================================================================
-// messages-zano.proto  —  AUTHORITATIVE DRAFT v0.3
+// messages-zano.proto  —  AUTHORITATIVE DRAFT v0.4
 //
 // Multi-round host <-> Trezor-firmware contract for ON-DEVICE Zano signing.
+//
+// CHANGES FROM v0.3 (v0.4, 2026-09-05 — ADDITIVE ONLY, per
+// docs/audits/ZANO-HF6-VS-PROTO-2026-09-01.md; frozen decisions untouched):
+//   * tx version 4 prefix layout DOCUMENTED at ZanoSignInput.tx_prefix_hash —
+//     the out-of-band serialization contract's INPUT changed at HF6; every
+//     byte cited to hyle-team/zano @ e5f56e11 (the audit's HEAD).
+//   * optional payment_id added on ZanoSignSetOutput (field 6) and optional
+//     encrypted_payment_id (8 bytes) on ZanoSignSetOutputAck (field 6) — the
+//     HF6 intrinsic per-output payment id word; without it the host cannot
+//     rebuild the v4 prefix the device signed.
+//   * v1 REFUSE RULE recorded: gateway destinations (base58 prefixes gwZ/gwiZ)
+//     are rejected with the named failure ZanoGatewayAddressNotSupported —
+//     tx_out_gateway is a different output type the v0.3 ack cannot express.
+//   Nothing existing is renumbered, reopened, or removed. The derivation
+//   path (SLIP-0010 m/44'/1018' all-hardened), the 3/2-CLSAG GGX
+//   single-pass round, the 1/8 rule, and the seed-class flag are UNTOUCHED —
+//   a diff that touches them fails the gate (asserted by crates/btrezor
+//   fence tests). Per A64: nothing the audit marked nonexistent at the
+//   audited HEAD is added here.
+//
+// CHANGES FROM v0.2 (kept, v0.3):
 //
 // CHANGES FROM v0.2:
 //   * CLSAG signing round PROMOTED from TBD to CONFIRMED against clsag.cpp
@@ -146,9 +167,28 @@ message ZanoSignSetInputAck {
 message ZanoSignSetOutput {
     required uint32 output_index = 1;
     required bytes  dest_address = 2;
+    // V1 REFUSE RULE (v0.4, audit §C): a dest_address whose base58 prefix is
+    // gwZ (0x656e) or gwiZ (0x14276e) — currency_config.h:35-36 @ e5f56e11 —
+    // names a GATEWAY destination: a single 32-byte key that serializes as
+    // tx_out_gateway{version, gateway_addr, asset_id, amount, payment_id}
+    // (currency_basic.h:356-371), a DIFFERENT output type with no stealth
+    // address, no commitments, no concealing point — nothing this ack's four
+    // required fields can express. v1 firmware REFUSES it with the named
+    // failure ZanoGatewayAddressNotSupported (crates/btrezor owns the
+    // constant). Supporting gateways is a new ack shape and a separate
+    // decision, never an amendment here.
     required uint64 amount = 3;                // shown on trusted display; firmware re-blinds
     optional bytes  asset_id = 4;             // native ZANO for v1
     optional bool   is_change = 5;
+    // v0.4 ADDITIVE (audit B2): the sender's payment id for this output.
+    // Absent or 0 = none. HF6 makes the payment id intrinsic per output:
+    // encrypted_payment_id = payment_id ^ amount_mask.m_u64[1], where
+    // amount_mask = Hs(CRYPTO_HDS_OUT_AMOUNT_MASK, h) is the SAME keccak
+    // scalar whose m_u64[0] already masks encrypted_amount
+    // (currency_format_utils.cpp:1552-1560 @ e5f56e11). Wallet policy bans
+    // self-directed outputs carrying a nonzero pid (wallet2.cpp:8586-8610,
+    // audit B3) — host-side policy, consensus enforcement UNVERIFIED.
+    optional uint64 payment_id = 6;
 }
 /** @next ZanoSignSetOutput @next ZanoSignRangeProof */
 message ZanoSignSetOutputAck {
@@ -157,6 +197,14 @@ message ZanoSignSetOutputAck {
     required bytes concealing_point = 3;       // Zarcanum Q
     required bytes ecdh_info = 4;
     optional bytes blinded_asset_id = 5;       // multi-asset; v2+
+    // v0.4 ADDITIVE (audit B1/B2): the HF6 intrinsic payment-id word, ALWAYS
+    // 8 bytes (payment-id size 8: currency_config.h:54), computed on-device
+    // as payment_id ^ amount_mask.m_u64[1] (same mask as encrypted_amount,
+    // currency_format_utils.cpp:1552-1560). The word is 8 zero bytes when no
+    // pid was set. The host MUST place this word in the v4 prefix's
+    // tx_out_zarcanum.encrypted_payment_id position or it cannot rebuild the
+    // prefix bytes whose hash the device signed.
+    optional bytes encrypted_payment_id = 6;
 }
 
 /**
@@ -210,6 +258,105 @@ message ZanoSignInput {
     required bytes  hmac = 2;                   // must match ZanoSignSetInputAck.hmac
     required bytes  tx_prefix_hash = 3;         // message m (byte-identical to daemon)
     // Ring + pseudo_out are already device-side (sealed from SetInput); not re-sent.
+    //
+    // =========================================================================
+    // THE v4 PREFIX LAYOUT — what keccak sees before m exists (v0.4, audit B1;
+    // every citation below read at hyle-team/zano @ e5f56e11, the audit HEAD)
+    //
+    // m = keccak256(serialized transaction_prefix) — get_transaction_prefix_hash
+    // serializes the prefix with binary_archive and cn_fast_hash's the bytes
+    // (currency_format_utils_transactions.cpp:658-666). The FUNCTION is
+    // unchanged by HF6; the BLOB it hashes is not. In the normal signature
+    // mode the signer's message is m UNCHANGED: prepare_prefix_hash_for_sign
+    // returns tx_id as-is (definition :4982, `tx_hash_for_signature = tx_id`
+    // :4986; call site :3210), and the separate-signature mode that re-hashes
+    // input subsets is barred from gateway ins/outs
+    // (blockchain_storage.cpp:7191-7203, audit B4).
+    //
+    // BYTE PRIMITIVES (src/serialization/serialization.h + binary_archive.h):
+    //   VARINT_FIELD -> LEB128-style uvarint (serialization.h:95-100 ->
+    //     binary_archive.h:87-91, tools::read_varint)
+    //   FIELD on an integer -> FIXED-WIDTH LITTLE-ENDIAN bytes, NOT varint
+    //     (serializer dispatch serialization.h:33-35 -> serialize_int ->
+    //     serialize_uint, binary_archive.h:60-66) — this distinction is
+    //     load-bearing in the layout below
+    //   FIELD on a blob (public_key / key_image / hash) -> raw bytes
+    //     (serialization.h:29-31 -> binary_archive.h:79-81); 32 bytes for
+    //     crypto::public_key and crypto::key_image
+    //   container (std::vector) -> uvarint element count, then elements
+    //     (begin_array, binary_archive.h:97-100)
+    //   variant -> ONE tag byte (variant_tag_type = uint8_t,
+    //     binary_archive.h:32; read_variant_tag -> serialize_int, :112), then
+    //     the held value by the rules above
+    //
+    // THE PREFIX, FIELD BY FIELD (transaction_prefix::serialize,
+    // currency_basic.h:1191-1211):
+    //   1. version            uvarint, value 4 under HF6 (VARINT_FIELD;
+    //                        TRANSACTION_VERSION_POST_HF6 = 4,
+    //                        currency_config.h:44; mandatory after height
+    //                        3833000, currency_config.h:318 + audit B1)
+    //   2. vin               uvarint count + one txin_v per input
+    //                        (variant tags currency_basic.h:1391-1393,1437,
+    //                        1443,1467: txin_gen=0, txin_to_key=1,
+    //                        txin_multisig=2, txin_zc_input=37,
+    //                        txin_gateway=65). The only input type this proto
+    //                        signs is txin_zc_input (tag 37), whose body
+    //                        (currency_basic.h:378-393) is:
+    //                          key_offsets: uvarint count + one txout_ref_v
+    //                            each (variant, currency_basic.h:251:
+    //                            uint64 global index = tag 26 + 8 LE bytes,
+    //                            or ref_by_id = tag 25 + 32-byte id + uvarint
+    //                            n, currency_basic.h:240-250)
+    //                          k_image: 32 raw bytes (key_image blob)
+    //                          etc_details: uvarint count + one variant each
+    //                            (txin_etc_details_v, currency_basic.h:266:
+    //                            signed_parts=17 {uvarint n_outs, uvarint
+    //                            n_extras}, extra_attachment_info=18)
+    //   3. extra             uvarint count + one extra_v each (1 tag byte +
+    //                        object; the tag table is
+    //                        currency_basic.h:1400-1437 — pub_key=22,
+    //                        payer2=31, receiver2=32, ...). WHICH entries a v4
+    //                        tx may carry is governed by the HF6 type table
+    //                        (hardfork_specific_terms.h:82-104, audit B4) —
+    //                        the host builds extra; the device only hashes it.
+    //   4. vout              the v4 arm (FIELD_TRANSITION_VER,
+    //                        currency_basic.h:1207): uvarint count + one
+    //                        tx_out_v each (variant tags currency_basic.h:1440,
+    //                        1464, 1468: tx_out_bare=36, tx_out_zarcanum=63,
+    //                        tx_out_gateway=66). The confidential output this
+    //                        proto builds is tx_out_zarcanum (tag 63), whose
+    //                        body (currency_basic.h:405-425,
+    //                        BEGIN_VERSIONED_SERIALIZE with
+    //                        TX_OUT_ZARCANUM_CURRENT_VERSION = 0) is a LEADING
+    //                        UVARINT VERSION BYTE (VERSION_TO_MEMBER,
+    //                        serialization.h:113-124,134-136) followed by:
+    //                          stealth_address     32 raw bytes
+    //                          concealing_point    32 raw bytes
+    //                          amount_commitment   32 raw bytes
+    //                          blinded_asset_id    32 raw bytes
+    //                          encrypted_amount   8 LE bytes (FIELD uint64)
+    //                          encrypted_payment_id 8 LE bytes (FIELD uint64;
+    //                            the v0.4 ack word — NEW at HF6; the pre-HF6
+    //                            tx_out_zarcanum_v1, tag 38, ends at
+    //                            mix_attr-less v1 layout,
+    //                            currency_basic_backward_comp.inl:147-171)
+    //                          mix_attr           1 byte (FIELD uint8)
+    //                        NOTE — in the PREFIX the four points ride
+    //                        1/8-PREMULTIPLIED as the daemon stores them
+    //                        (struct comments currency_basic.h:407-410). This
+    //                        is the daemon's prefix convention and is
+    //                        SEPARATE from this proto's ring-member law
+    //                        (host sends RAW there, firmware applies 1/8
+    //                        internally): the prefix bytes are what the daemon
+    //                        will serialize, not host discretion.
+    //   5. hardfork_id       1 byte (FIELD uint8; present because v4 >=
+    //                        TRANSACTION_VERSION_PRE_HF5 —
+    //                        currency_basic.h:1210-1211)
+    //
+    // A host that serializes v3 outputs produces a different m than any
+    // post-HF6 daemon will accept (audit B1 consequence): the v4 test
+    // vectors for this contract MUST be generated from v4 prefixes.
+    // =========================================================================
 }
 /**
  * Return: CLSAG_GGX_signature — EXACT fields from clsag.h. r_g and r_x together
@@ -265,8 +412,14 @@ message ZanoSignAck {
 //   B. Multi-asset context fields for Confidential Assets (v2+). Native-only
 //      v1 uses the single explicit-asset path. [tx-builder]
 //   (OUT OF BAND) tx_prefix_hash must be byte-identical to the daemon —
-//   serialization contract, vector-tested, not defined here.
+//   vector-tested. The v4 prefix layout the bytes follow is DOCUMENTED in
+//   this file at ZanoSignInput.tx_prefix_hash (v0.4); what stays out of
+//   band is only the vector set itself, generated from v4 prefixes.
 //
+// CLOSED in v0.4: the out-of-band contract's INPUT is now defined at source
+//   (v4 prefix layout, every byte cited); the intrinsic encrypted_payment_id
+//   word rides SetOutputAck; gateway destinations are a named refusal, not a
+//   gap.
 // CLOSED in v0.3 (was TBD #1): generate_CLSAG_GGX is single-pass, computes
 // K1/K2 before the challenge, reads no BP+ data, expects RAW pseudo_out points.
 // =============================================================================
