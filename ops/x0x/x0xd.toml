@@ -1,5 +1,6 @@
 # x0xd on the hive box — lane x0x (2026-09-05). Loopback API only.
 api_address = "127.0.0.1:12700"
+bind_address = "0.0.0.0:5483"
 log_level = "info"
 log_format = "text"
 data_dir = "/var/lib/x0x/data"
