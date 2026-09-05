@@ -24,6 +24,12 @@
 //!   bsigner verify --key-id ID --file PATH --envelope PATH [--keydir DIR]
 //!   bsigner list [--keydir DIR]
 //!   bsigner kemtest --key-id ID [--keydir DIR]   (encapsulate+decapsulate roundtrip receipt)
+//!   bsigner x402pay --key-id ID --offer PATH --policy PATH [--keydir DIR] [--out PATH]
+//!     (the PRE-SIGNATURE OFFER GATE: verifies the pinned seller's signature
+//!      on the offer, checks the allowlist + expiry + per-signature cap +
+//!      remaining budget BEFORE any signing, validates the exact-multi split
+//!      invariants, then emits ONE signed instruction paying seller + tithe
+//!      together — signed, never submitted; see src/x402.rs for the laws)
 //!   bsigner selftest
 //!   bsigner version
 
@@ -32,6 +38,7 @@ mod b64;
 mod envelope;
 mod keys;
 mod pq;
+mod x402;
 
 use serde_json::{json, Value};
 
@@ -43,6 +50,7 @@ fn main() {
         Some("verify") => cmd_verify(&args[1..]),
         Some("list") => cmd_list(&args[1..]),
         Some("kemtest") => cmd_kemtest(&args[1..]),
+        Some("x402pay") => cmd_x402pay(&args[1..]),
         Some("selftest") => cmd_selftest(),
         Some("version") | None => {
             println!(
@@ -66,6 +74,8 @@ struct Opts {
     file: Option<String>,
     envelope: Option<String>,
     out: Option<String>,
+    offer: Option<String>,
+    policy: Option<String>,
 }
 
 fn parse_opts(args: &[String]) -> Result<Opts, String> {
@@ -76,6 +86,8 @@ fn parse_opts(args: &[String]) -> Result<Opts, String> {
         file: None,
         envelope: None,
         out: None,
+        offer: None,
+        policy: None,
     };
     let mut i = 0;
     while i < args.len() {
@@ -90,6 +102,8 @@ fn parse_opts(args: &[String]) -> Result<Opts, String> {
             "--file" => o.file = Some(val),
             "--envelope" => o.envelope = Some(val),
             "--out" => o.out = Some(val),
+            "--offer" => o.offer = Some(val),
+            "--policy" => o.policy = Some(val),
             other => return Err(format!("unknown flag {other:?}")),
         }
         i += 2;
@@ -257,6 +271,86 @@ fn cmd_kemtest(args: &[String]) -> i32 {
     }
 }
 
+fn cmd_x402pay(args: &[String]) -> i32 {
+    let o = match parse_opts(args) {
+        Ok(o) => o,
+        Err(e) => return fail(e),
+    };
+    let (Some(kid), Some(offer_path), Some(policy_path)) =
+        (o.key_id.as_deref(), o.offer.as_deref(), o.policy.as_deref())
+    else {
+        return fail("x402pay needs --key-id, --offer, and --policy".into());
+    };
+    let read_json = |path: &str| -> Result<Value, String> {
+        std::fs::read_to_string(path)
+            .map_err(|e| format!("read {path}: {e}"))
+            .and_then(|t| serde_json::from_str(&t).map_err(|e| format!("parse {path}: {e}")))
+    };
+    let offer_doc = match read_json(offer_path) {
+        Ok(v) => v,
+        Err(e) => return fail(e),
+    };
+    let policy_doc = match read_json(policy_path) {
+        Ok(v) => v,
+        Err(e) => return fail(e),
+    };
+    let (policy, used_default_cap) = match x402::parse_policy(&policy_doc) {
+        Ok(p) => p,
+        Err(e) => return fail(e),
+    };
+    // THE GATE — every refusal below happens BEFORE any key is touched
+    let instruction = match x402::gate(&offer_doc, &policy) {
+        Ok(i) => i,
+        Err(refusal) => {
+            // a refusal is a receipt, not a crash: the organ said NO, on the record
+            println!(
+                "{}",
+                json!({
+                    "signed": false,
+                    "refusal": refusal,
+                    "gate": "pre-signature (x402-RAID-Z31): allowlist, pinned seller sig, expiry, asset, per-signature cap, remaining budget, split invariants — all checked before signing"
+                })
+            );
+            return 1;
+        }
+    };
+    let (alg, seed, _vk) = match keys::load_dsa(kid, o.keydir.clone()) {
+        Ok(x) => x,
+        Err(e) => return fail(e),
+    };
+    let signature = match envelope::sign_envelope(alg, kid, &seed, &x402::canonical(&instruction)) {
+        Ok(env) => env,
+        Err(e) => return fail(e),
+    };
+    let payment = json!({
+        "signed": true,
+        "instruction": instruction,
+        "signature": signature,
+        "default_cap_applied": used_default_cap,
+        "note": "signed, never submitted — submission is the rail adapter's job (qisma signCascade shape)",
+    });
+    let text = serde_json::to_string_pretty(&payment).unwrap();
+    match o.out {
+        Some(path) => {
+            if let Err(e) = std::fs::write(&path, &text) {
+                return fail(format!("write {path}: {e}"));
+            }
+            println!(
+                "{}",
+                json!({
+                    "written": path,
+                    "kind": payment["instruction"]["kind"],
+                    "outputs": payment["instruction"]["outputs"].as_array().map(Vec::len),
+                    "amount_atomic": payment["instruction"]["amount_atomic"],
+                    "memo": payment["instruction"]["memo"],
+                })
+            );
+        }
+        None => println!("{text}"),
+    }
+    0
+}
+
 fn cmd_selftest() -> i32 {
     // exercise every public surface once; exit code is the receipt
     let dir = std::env::temp_dir().join("bheart-selftest");
@@ -291,10 +385,79 @@ fn cmd_selftest() -> i32 {
         }
     }
     ok &= alg::SigAlg::parse("ml-dsa-65-hedged-2265").is_err(); // agility refusal
+                                                                // x402 gate pass: a good offer signs ONE exact-multi instruction, an
+                                                                // over-cap offer is refused BEFORE signing, and the payment verifies offline
+    {
+        use crate::pq::dsa_generate;
+        let g = dsa_generate(alg::SigAlg::MlDsa44);
+        let seller_seed = zeroize::Zeroizing::new(g.seed);
+        let buyer = dsa_generate(alg::SigAlg::MlDsa44);
+        let buyer_seed = zeroize::Zeroizing::new(buyer.seed);
+        let now = keys::now_ms() as u64;
+        let offer = json!({
+            "pay_to": "selftsellr11", "rail": "vaulta",
+            "asset": {"symbol": "A", "precision": 4},
+            "amount_atomic": 6_000, "expires_at_ms": now + 60_000,
+            "nonce": 1, "tithe_bp": 1_000,
+            "outputs": [
+                {"to": "selftsellr11", "amount_atomic": 5_400, "role": "seller"},
+                {"to": "selfttithe11", "amount_atomic": 600, "role": "tithe"},
+            ],
+        });
+        let sig = envelope::sign_envelope(
+            alg::SigAlg::MlDsa44,
+            "selftest-seller",
+            &seller_seed,
+            &x402::canonical(&offer),
+        )
+        .unwrap();
+        let offer_doc = json!({"kind": "x402.offer/1", "offer": offer, "seller_sig": sig});
+        let policy_doc = json!({
+            "payer": "selftpayer11",
+            "remaining_budget_atomic": 50_000,
+            "asset": {"symbol": "A", "precision": 4},
+            "now_ms": now,
+            "allowlist": [{
+                "pay_to": "selftsellr11", "rail": "vaulta",
+                "seller_key_id": "selftest-seller",
+                "seller_vk_b64u": b64::b64u(&g.verifying_key),
+            }],
+        });
+        let (policy, _) = x402::parse_policy(&policy_doc).unwrap();
+        let instruction = x402::gate(&offer_doc, &policy);
+        ok &= instruction.is_ok();
+        if let Ok(instruction) = instruction {
+            let pay_sig = envelope::sign_envelope(
+                alg::SigAlg::MlDsa44,
+                "selftest-buyer",
+                &buyer_seed,
+                &x402::canonical(&instruction),
+            )
+            .unwrap();
+            ok &= x402::verify_payment(
+                &json!({"instruction": instruction, "signature": pay_sig}),
+                &buyer.verifying_key,
+            )
+            .is_ok();
+        }
+        let mut over = offer_doc.clone();
+        over["offer"]["amount_atomic"] = json!(1_000_000);
+        over["offer"]["outputs"][0]["amount_atomic"] = json!(999_100);
+        // re-sign the tampered body so ONLY the cap check can refuse it
+        let over_sig = envelope::sign_envelope(
+            alg::SigAlg::MlDsa44,
+            "selftest-seller",
+            &seller_seed,
+            &x402::canonical(&over["offer"]),
+        )
+        .unwrap();
+        over["seller_sig"] = over_sig;
+        ok &= matches!(x402::gate(&over, &policy), Err(r) if r.contains("over per-signature cap"));
+    }
     let _ = std::fs::remove_dir_all(&dir);
     println!(
         "{}",
-        json!({ "selftest": if ok { "PASS" } else { "FAIL" }, "covered": ["ml-dsa-44/65/87 roundtrip+tamper", "ml-kem-512/768/1024 roundtrip", "future-alg refusal", "keys never printed"] })
+        json!({ "selftest": if ok { "PASS" } else { "FAIL" }, "covered": ["ml-dsa-44/65/87 roundtrip+tamper", "ml-kem-512/768/1024 roundtrip", "future-alg refusal", "keys never printed", "x402 pre-signature gate + exact-multi sign/verify + over-cap refusal"] })
     );
     if ok {
         0

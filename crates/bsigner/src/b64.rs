@@ -25,6 +25,32 @@ pub fn b64u(bytes: &[u8]) -> String {
     out
 }
 
+/// Decode base64url no-padding (the x402 gate reads pinned public keys this
+/// way). Returns None on any character outside the alphabet — malformed
+/// input is a refusal, never a guess.
+pub fn b64u_decode(s: &str) -> Option<Vec<u8>> {
+    let mut out = Vec::with_capacity(s.len() * 3 / 4 + 3);
+    let mut acc: u32 = 0;
+    let mut bits = 0u32;
+    for c in s.chars() {
+        let v = match c {
+            'A'..='Z' => c as u32 - 'A' as u32,
+            'a'..='z' => c as u32 - 'a' as u32 + 26,
+            '0'..='9' => c as u32 - '0' as u32 + 52,
+            '-' => 62,
+            '_' => 63,
+            _ => return None,
+        };
+        acc = (acc << 6) | v;
+        bits += 6;
+        if bits >= 8 {
+            bits -= 8;
+            out.push((acc >> bits) as u8);
+        }
+    }
+    Some(out)
+}
+
 pub fn sha3_256_b64u(bytes: &[u8]) -> String {
     use sha3::{Digest, Sha3_256};
     let mut h = Sha3_256::new();
