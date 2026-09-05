@@ -263,6 +263,33 @@ async function compose() {
   return buildLegacyTx({ nonce, gasPrice, gas, to: from, value: 0n, data }, CHAIN_ID, d);
 }
 
+// ── tithe-split on a REAL token (the founder's testnet tokens, 2026-09-05):
+// ONE ERC-20 transfer() moving exactly 10% of the token balance to the filed
+// tithe address — the after-settlement tithe demonstrated on the token the
+// funnel settles in. Guards: tithe file, token balance, ETH for gas.
+const USDC_TESTNET = '0x036cbd53842c5426634e7929541ec2318f3dcf7e';  // PUBLIC-CONSTANT: Circle USDC on Base Sepolia (identified live: name/symbol USDC, 6 decimals)
+const SEL_TRANSFER = 'a9059cbb';                                     // PUBLIC-CONSTANT: keccak(transfer(address,uint256))[0:4]
+
+async function composeTokenTithe(token) {
+  const d = readKey();
+  const from = addressFromPubHex(pubHexFromPriv(d));
+  if (from !== '0xb43b94ae967f0ae2e1bc7b5453086ab308f537af')
+    throw new Error('unexpected key owner ' + from + ' — this runner is for the issued funnel-test key only');
+  if (!existsSync(TITHE_FILE)) throw new Error('TITHE ADDRESS NOT POSTED — refusing');
+  const tithe = readFileSync(TITHE_FILE, 'utf8').trim();
+  const balRaw = await rpc('eth_call', [{ to: token, data: '0x70a08231' + '0'.repeat(24) + from.slice(2) }, 'latest']);
+  const bal = BigInt(balRaw);
+  const amt = bal / 10n;                                       // THE TITHE — exactly 10%
+  if (amt <= 0n) throw new Error('token balance is zero — nothing to tithe');
+  const eth = BigInt(await rpc('eth_getBalance', [from, 'latest']));
+  const gasPrice = BigInt(await rpc('eth_gasPrice', []));
+  if (eth < 65000n * gasPrice) throw new Error('not enough ETH for gas');
+  const nonce = BigInt(await rpc('eth_getTransactionCount', [from, 'latest']));
+  const data = hexToBytes('0x' + SEL_TRANSFER + '0'.repeat(24) + tithe.slice(2).toLowerCase()
+    + amt.toString(16).padStart(64, '0'));
+  return buildLegacyTx({ nonce, gasPrice, gas: 65000n, to: token, value: 0n, data }, CHAIN_ID, d);
+}
+
 async function main() {
   const mode = process.argv[2] || '';
   if (mode === '--selftest') return selftest();
@@ -275,6 +302,15 @@ async function main() {
     if (hash !== tx.txHash) console.log('note: node assigned a different hash than local — verify on the explorer');
     return;
   }
-  console.log('usage: broadcast.mjs --selftest | --compose | --broadcast');
+  if (mode === '--tithe-token') {
+    const token = (process.argv[3] || USDC_TESTNET).toLowerCase();
+    const send = process.argv[4] === '--send';
+    const tx = await composeTokenTithe(token);
+    console.log(JSON.stringify({ token, txHash: tx.txHash, sender: tx.sender, rawTx: process.env.SHOW_RAW ? tx.rawTx : undefined }, null, 1));
+    if (!send) { console.log('composed + signed, NOT sent (append --send)'); return; }
+    console.log('BROADCAST:', await rpc('eth_sendRawTransaction', [tx.rawTx]));
+    return;
+  }
+  console.log('usage: broadcast.mjs --selftest | --compose | --broadcast | --tithe-token [token] [--send]');
 }
 main().catch((e) => { console.error(String(e && e.message || e)); process.exit(1); });
