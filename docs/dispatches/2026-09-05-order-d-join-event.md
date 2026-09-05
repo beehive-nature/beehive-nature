@@ -114,3 +114,18 @@ nothing is lost, nothing is guessed.
   web dist).
 - psql -t -A INSERT..RETURNING appends "INSERT 0 1" — pipe through
   head -1 when capturing.
+
+## RIDER (2026-09-05, fork @5dc78307c) — the phone app OPENS the flow, not a rebuild
+
+z4.2.2's landing (e96d58a2, surfaces/watch.html) embeds the relay's /join/
+view VERBATIM in an iframe: same relay, same origin, and the identity the
+flow mints lives in the origin's localStorage — "join once, watch later,"
+every surface the same member. The rider reuses exactly that: the mobile
+change is now a LAUNCHER — pair() dispatches a pasted wss:// URL to
+https://<host>/join/ via url_launcher (external browser, the in-tree
+pattern at message_content.dart:459), where the proven flow runs: the view
+self-prefills when served by the relay, fetches the kind-34550 material
+off the wire, mints on-device, joins. The Dart protocol port
+(join_by_address.dart) is REMOVED from the PR — superseded by the web
+flow it duplicated. Everything else stands (relay, wire-first door,
+publish ritual, receipts).
