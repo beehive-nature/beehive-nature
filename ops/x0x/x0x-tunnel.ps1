@@ -31,8 +31,8 @@ switch ($Action) {
     & $x0x machines connect $BOX_MACHINE 2>$null | Out-Null
     # arm the forward (idempotent: port-busy = already armed by a live daemon)
     & $x0x forward add --local 127.0.0.1:18080 --peer $BOX_AGENT --target-port 12700 2>$null | Out-Null
-    foreach ($i in 1..10) {
-      Start-Sleep -Seconds 3
+    foreach ($i in 1..15) {
+      Start-Sleep -Seconds 4
       try { $r = Invoke-WebRequest -Uri 'http://127.0.0.1:18080/health' -UseBasicParsing -TimeoutSec 20
             if ($r.StatusCode -eq 200) { Write-Host "tunnel UP: 127.0.0.1:18080 -> box 12700 (HTTP 200)"; exit 0 } } catch {}
     }
