@@ -6,7 +6,7 @@
 #   status-> daemon + forward + tunnel reachability.
 # One-time state already persisted in %APPDATA%\x0x: identity, contacts+trust
 # (both sides), and the connect ACL at <script dir>\connect-acl.toml.
-param([Parameter(Position=0)][ValidateSet('up','down','status')]$Action='status')
+param([Parameter(Position=0)][ValidateSet('up','down','status')]$Action='status', [int]$IdleMinutes = 10)
 
 $ErrorActionPreference = 'Stop'
 $dir  = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -34,7 +34,15 @@ switch ($Action) {
     foreach ($i in 1..15) {
       Start-Sleep -Seconds 4
       try { $r = Invoke-WebRequest -Uri 'http://127.0.0.1:18080/health' -UseBasicParsing -TimeoutSec 20
-            if ($r.StatusCode -eq 200) { Write-Host "tunnel UP: 127.0.0.1:18080 -> box 12700 (HTTP 200)"; exit 0 } } catch {}
+            if ($r.StatusCode -eq 200) {
+              # wifi law: the daemon NEVER idles on the building network — a hidden
+              # timer brings the tunnel down after IdleMinutes unless re-upped
+              Start-Process powershell -WindowStyle Hidden -ArgumentList @(
+                '-NoProfile','-Command',
+                "Start-Sleep -Seconds ($IdleMinutes*60); & '$PSCommandPath' down"
+              )
+              Write-Host "tunnel UP: 127.0.0.1:18080 -> box 12700 (HTTP 200) - auto-down in $IdleMinutes min"
+              exit 0 } } catch {}
     }
     Write-Error 'tunnel did not answer through 18080'; exit 1
   }
