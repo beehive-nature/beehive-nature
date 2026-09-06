@@ -107,6 +107,38 @@ and reverse-proxies REST/SSE/WS — with it the GUI comes fully alive
 Session-token law verified: `/gui?token=` accepts ONLY a 10-minute session
 token (`POST /auth/session`); the durable token is never accepted in a URL.
 
+## UPGRADE RUNBOOK (box, founder-order swaps only — `[update] enabled=false`)
+
+v0.41.2 → v0.41.3 is STAGED (2026-09-06): 0.41.3 carries the GUI one-char fix
+(verified at tag) but NOT the ant-quic fragment fix — **the OCI any/any
+stateful ingress STAYS until a release ships ant-quic ≥0.27.49** (check:
+`gh release view <tag> -R saorsa-labs/x0x`, then Cargo.lock/notes). One paste
+over SSH when `wsl -e ssh oracle` answers (2026-09-06: port 22 filtered from
+the laptop — box itself healthy, QUIC-alive on 5483, HTTPS doors 200, daemon
+0.41.2 with 33 peers / ~39 h uptime receipted THROUGH the tailnet):
+
+```bash
+cd /tmp && rm -rf x0x-rel3 && mkdir x0x-rel3 && cd x0x-rel3
+for f in x0x-linux-arm64-gnu.tar.gz x0x-linux-arm64-gnu.tar.gz.sha256 x0x-linux-arm64-gnu.tar.gz.asc; do
+  curl -sfLO "https://github.com/saorsa-labs/x0x/releases/download/v0.41.3/$f"; done
+sha256sum -c x0x-linux-arm64-gnu.tar.gz.sha256 && gpg --verify x0x-linux-arm64-gnu.tar.gz.asc x0x-linux-arm64-gnu.tar.gz
+tar xzf x0x-linux-arm64-gnu.tar.gz && x0x-linux-arm64-gnu/x0xd --version
+sudo cp /usr/local/bin/x0xd /usr/local/bin/x0xd-0.41.2.bak   # keep the known-good
+sudo cp /usr/local/bin/x0x   /usr/local/bin/x0x-0.41.2.bak
+sudo install -m755 x0x-linux-arm64-gnu/x0xd x0x-linux-arm64-gnu/x0x /usr/local/bin/
+sudo systemctl restart x0x && sleep 40
+export X0X_API_TOKEN=$(sudo cat /var/lib/x0x/data/api-token)
+x0x --api 127.0.0.1:12700 health            # version 0.41.3, peers > 0
+x0x --api 127.0.0.1:12700 agent             # SAME agent id 1ca00a42…8df66367
+x0x --api 127.0.0.1:12700 group list        # hive-porch still seated
+sudo /usr/local/bin/x0xd --config /etc/x0x/x0xd.toml --check | grep -A3 "Exec ACL"  # acl_missing = exec still OFF
+```
+
+Then on the laptop: `powershell C:\Users\travi\x0x-win\x0x-tunnel.ps1 up` →
+`curl 127.0.0.1:18080/health` shows version 0.41.3 → the served `/gui` now
+parses clean (upstream fixed the `});` at 0.41.3; `e2e/x0x-gui-proxy.mjs` is
+retired-until-needed) → `…down`.
+
 ## Local receipt artifacts (untracked, laptop)
 
 `e2e/x0x-gui-shot.mjs` (token-from-file screenshotter), `e2e/x0x-gui-proxy.mjs`
