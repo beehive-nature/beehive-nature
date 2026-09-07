@@ -127,11 +127,12 @@ test('reviewed reading families adopt the theme; dark tools wait for complete ad
     assert.equal(p.body.attrs['data-bee-theme'],'shared',path);
     assert.equal(p.body.attrs['data-bee-adapter'],adapter,path);
   }
-  for(const path of ['bqueenbee-live.html','review.html','comb.html','forge/room.html']){
+  for(const path of ['bqueenbee-live.html','review.html','comb.html']){
     const p=page({url:'https://skaists.dev/surfaces/'+path});
     assert.equal(p.body.attrs['data-bee-theme'],'pending',path);
     assert.equal(p.document.documentElement.attrs['data-bee-light'],'false',path);
   }
+  assert.match(read('surfaces/forge/room.html'),/<body data-reg="bee" data-bee-theme="custom">/);
 });
 test('shared reading colors clear the text contrast floor without replacing data tokens',()=>{
   const css=page().ids.get('bregstyle').textContent;
@@ -155,10 +156,10 @@ test('every current estate HTML has one resolvable shared loader; frozen art sta
     assert.equal(tags.length,1,p+' must load the shared shell once');
     const target=resolve(dirname(resolve(root,p)),tags[0][1].split('?')[0]);
     assert.equal(target,resolve(root,'surfaces/tour.js'),p+' must resolve to the shared tour');
-    if(p!=='surfaces/forge/orbit.html')assert.match(tags[0][1],/tour\.js\?v=39$/,p);
+    if(p!=='surfaces/forge/orbit.html')assert.match(tags[0][1],/tour\.js\?v=40$/,p);
   }
   for(const p of ['scripts/build-atlas.mjs','tools/build-surfaces.mjs']){
-    assert.match(read(p),/tour\.js\?v=39/);assert.doesNotMatch(read(p),/tour\.js\?v=(?!39\b)\d+/);
+    assert.match(read(p),/tour\.js\?v=40/);assert.doesNotMatch(read(p),/tour\.js\?v=(?!40\b)\d+/);
   }
 });
 test('tour language bootstrap waits for view labels, with a script-error fallback',()=>{

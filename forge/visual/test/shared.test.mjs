@@ -49,7 +49,7 @@ function room() {
 }
 
 // 4. Deterministic conflict: same param edited on both sides — Yjs resolves
-//    last-writer-wins identically on BOTH peers (no split-brain).
+//    the same-key conflict identically on BOTH peers (no split-brain).
 {
   const { A, B, flush } = room();
   A.setSeed('duel');
@@ -86,6 +86,25 @@ function room() {
   let threw = false;
   try { createSharedPiece({ Y, transport: {} }); } catch (e) { threw = true; }
   ok('misconfigured transport rejected loudly', threw);
+}
+
+// 8. A late joiner can apply the complete history and keep receiving later deltas.
+{
+  const pending=[];
+  const A=createSharedPiece({Y,transport:{send:bytes=>pending.push(bytes)}});
+  A.setSeed('already-playing');A.setParam('density',17);
+  pending.length=0; // A browser channel has no replay of messages sent before joining.
+  const snapshot=A.snapshot();
+  A.setParam('hueBase',210);
+  const B=createSharedPiece({Y,transport:{send:bytes=>A.receive(bytes)}});
+  B.receive(pending.shift()); // A later dependent delta can arrive before its snapshot.
+  B.receive(snapshot);B.receive(snapshot); // Applying a snapshot twice is harmless.
+  ok('late snapshot fills causal history after a newer delta, idempotently',
+    JSON.stringify(A.state())===JSON.stringify(B.state())&&B.state().seed==='already-playing');
+  B.setParam('hueDrift',30);
+  ok('late joiner can edit back after snapshot synchronization',
+    JSON.stringify(A.state())===JSON.stringify(B.state())&&A.state().params.hueDrift===30);
+  A.destroy();B.destroy();
 }
 
 console.log(failed === 0 ? '\nALL MULTIPLAYER TESTS PASS' : `\n${failed} FAILURE(S)`);

@@ -134,7 +134,7 @@
   function loadLanguage(){
     if(document.getElementById('blangctl')) return;
     var s2=document.createElement('script');
-    s2.src=R+'lang.js?v=23';
+    s2.src=R+'lang.js?v=24';
     document.body.appendChild(s2);
   }
   /* Mount view labels before language scans them. Independent async loads
