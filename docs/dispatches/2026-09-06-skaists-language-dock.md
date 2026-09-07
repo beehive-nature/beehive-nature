@@ -68,3 +68,14 @@ Record the candidate, main parent, workflows and live byte parity in the PR
 release comment. Rollback is a forward revert of that integration merge,
 preserving later independent work, followed by the same gates and byte check.
 No box, node, wallet or DNS mutation belongs to this lane.
+
+## Embedded colour follow-up
+
+After PR #8 published, source review found that changing the embedded page's
+gold text token to New bee green left some legacy buttons on fixed brown
+backgrounds. Pair their foreground and background explicitly, retain a
+pressed-state ring for voice buttons, darken amber caveat text for the light
+canvas, and pair handoff links and preformatted answer text with their new
+backgrounds. This is confined to the embedded New bee reading; no standalone
+agent markup or answer changes. The hub's dock cache version advances again.
+The same build, source and CI gates apply to this follow-up.

@@ -177,13 +177,17 @@
       if (doc.getElementById('adReading')) return;
       var style = doc.createElement('style'); style.id = 'adReading';
       style.textContent =
-        'html.ad-bee{color-scheme:light;--bg:#f6f7f2;--ink:#18362a;--dim:#435f4e;--line:#ccd7cf;--gold:#326b39;--cyan:#29628f;--violet:#65509a}' +
+        'html.ad-bee{color-scheme:light;--bg:#f6f7f2;--ink:#18362a;--dim:#435f4e;--line:#ccd7cf;--gold:#326b39;--cyan:#29628f;--violet:#65509a;--amber:#876119}' +
         'html.ad-bee body{background:var(--bg);color:var(--ink);font:16px/1.7 system-ui,-apple-system,sans-serif;padding:20px 16px}' +
         'html.ad-bee h1{font-size:24px;letter-spacing:0;text-shadow:none}' +
         'html.ad-bee header p,html.ad-bee .law,html.ad-bee .msg,html.ad-bee .note{font-size:16px!important}' +
         'html.ad-bee section,html.ad-bee .msg{background:#fff;color:var(--ink);border-color:var(--line)}' +
         'html.ad-bee section h2,html.ad-bee .machine,html.ad-bee .badge,html.ad-bee footer,html.ad-bee .who,html.ad-bee .msg a{font-size:14px;letter-spacing:0}' +
         'html.ad-bee input,html.ad-bee button{font-family:inherit!important;font-size:16px!important;min-width:0;min-height:44px}' +
+        'html.ad-bee button{background:#326b39!important;color:#fff!important;border-color:#326b39!important;opacity:1}' +
+        'html.ad-bee button[aria-pressed=true]{outline:2px solid #65509a;outline-offset:2px;font-weight:700}' +
+        'html.ad-bee .po-bee{background:#fff;color:var(--cyan);border-color:var(--line);font-size:14px}' +
+        'html.ad-bee .msg pre{color:var(--ink)!important;font-size:14px!important}' +
         'html.ad-bee input,html.ad-bee #seeds button,html.ad-bee #quick button{background:#fff!important;color:var(--ink)!important;border-color:var(--line)!important}';
       doc.head.appendChild(style);
       doc.addEventListener('keydown', function (e) { if (e.key === 'Escape') setOpen(false); });
