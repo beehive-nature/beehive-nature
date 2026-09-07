@@ -5,7 +5,7 @@
   const q = document.getElementById('q');
   const family = document.getElementById('family-filter');
   const form = document.querySelector('.search-form');
-  const shown = document.getElementById('shown');
+  const resultCount = document.getElementById('result-count');
   const clear = document.getElementById('clear');
   const empty = document.getElementById('empty');
   const collection = document.getElementById('collection');
@@ -26,7 +26,7 @@
     document.querySelectorAll('#list .org').forEach(section => {
       section.hidden = !section.querySelector('.fam:not([hidden])');
     });
-    shown.firstChild.textContent = count + ' ';
+    resultCount.textContent = String(count);
     empty.hidden = count > 0 || !terms.length && !family.value;
     clear.hidden = !q.value && !family.value;
     document.querySelectorAll('[data-family-link]').forEach(link => {

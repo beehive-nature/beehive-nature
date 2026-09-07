@@ -92,7 +92,7 @@ const limit = s => s.limitKey && corpus[s.limitKey]
   ? text(s.limitKey, s.limit) : esc(s.limit || '');
 const surface = s => `<article class="srf" data-family="${esc(s.family)}" data-org="${esc(s.org)}" data-t="${esc([s.id,label(s),s.gloss,s.home,s.family,s.org,s.limit].join(' '))}"><a class="surface-link" href="${esc(s.path.replace(/^surfaces\//,''))}">
   <div class="row-title"><span class="nm">${esc(label(s))}</span><span class="row-arrow" aria-hidden="true">↗</span></div>
-  <div class="gl">${description(s)}${s.path === 'surfaces/fleet-hosted/index.html' ? `<p>The hosted copies preserve the founder's art: ${fleetN} of them carrying behaviour fixes, compared with the originals beyond the vendor line.</p>` : ''}</div>
+  <div class="gl">${description(s)}${s.path === 'surfaces/fleet-hosted/index.html' ? `<p>The hosted copies preserve the founder's art, with ${fleetN} of them carrying behaviour fixes compared with the originals beyond the vendor line.</p>` : ''}</div>
   ${s.limit ? `<div class="surface-limit"><span aria-hidden="true">△</span> ${limit(s)}</div>` : ''}
   <div class="row-meta"><span>${esc(s.family)}</span><span class="page-state">${s.state === 'LIVE' ? text('atlas.published','Published page') : esc(s.state)}</span>${s.warn && !s.limit ? `<span class="surface-limit">${text('atlas.limit','Named limit')}</span>` : ''}</div>
 </a><details class="row-trace"><summary>${text('atlas.source','Source & limits')}</summary><dl><dt>id</dt><dd>${esc(s.id)}</dd><dt>path</dt><dd><a href="https://github.com/beehive-nature/beehive-nature/blob/main/${esc(s.path)}" target="_blank" rel="noopener">${esc(s.path)} ↗</a></dd><dt>org</dt><dd>${esc(s.org)}</dd><dt>home</dt><dd>${esc(s.home)}</dd><dt>page</dt><dd>${esc(s.state)}</dd><dt>limit</dt><dd>${s.limit ? limit(s) : text('atlas.unspecified','Not specified in this registry row')}</dd></dl></details></article>`;
@@ -154,7 +154,7 @@ ${bandCss}
   <div class="wrap mast-content">
     <nav class="mast-nav" aria-label="Primary"><a class="wordmark" href="index.html">skaists<span>.dev</span></a><span data-language-host></span></nav>
     <div class="welcome">
-      <div class="welcome-copy"><p class="eyebrow">${text('m.4','')}</p><h1><span data-reg="bee">${text('atlas.heading','A place for your creativity.')}</span><span data-reg="raver">${text('hub.name','')}</span><span data-reg="cypherpunk">${text('hub.name','')}</span></h1><p class="intro" data-reg="bee">${text('atlas.intro','Art, people, science and tools — made in the open.')}</p><p class="intro" data-reg="raver">${text('atlas.raver','Carry a garden. Make a sound. Find your people.')}</p><p class="intro" data-reg="cypherpunk">${text('atlas.cypher','Inspect the implementation, provenance and limits of each surface.')}</p><p class="begin-note" data-reg="bee">${text('atlas.progressive','Choose a place to begin. The rest is here when you want it.')}</p></div>
+      <div class="welcome-copy"><p class="eyebrow">${text('m.4','')}</p><h1><span data-reg="bee">${text('atlas.heading','A place for your creativity.')}</span><span data-reg="raver">${text('hub.name','')}</span><span data-reg="cypherpunk">${text('hub.name','')}</span></h1><p class="intro" data-reg="bee">${text('atlas.intro','Art, science and tools made in the open — with people to meet.')}</p><p class="intro" data-reg="raver">${text('atlas.raver','Carry a garden. Make a sound. Find your people.')}</p><p class="intro" data-reg="cypherpunk">${text('atlas.cypher','Inspect the implementation, provenance and limits of each surface.')}</p><p class="begin-note" data-reg="bee">${text('atlas.progressive','Choose a place to begin. The rest is here when you want it.')}</p></div>
       <div class="start"><p class="eyebrow">${text('atlas.start','Start here')}</p>${starters}</div>
     </div>
     <div class="art-stage" data-reg="raver"><a class="art-piece fungi" href="blight/gallery.html"><img src="atlas-art/fungi.svg" width="240" height="240" alt="FUNGi on-chain mushroom artwork"><span><b>FUNGi</b><span>ERC20i</span></span></a><a class="art-piece froggi" href="blight/gallery.html"><img src="atlas-art/froggi.svg" width="240" height="240" alt="FROGGi on-chain frog artwork"><span><b>FROGGi</b><span>ERC20i</span></span></a><a class="art-piece pepi" href="blight/gallery.html"><img src="atlas-art/pepi.svg" width="240" height="240" alt="PEPi on-chain pixel artwork"><span><b>PEPi</b><span>ERC20i</span></span></a><p class="art-caption">${text('atlas.art','On-chain artwork snapshots. Open the gallery to explore.')} <a href="atlas-art/provenance.json">${text('h.016','SOURCES')} ↗</a></p></div>
@@ -170,7 +170,7 @@ ${bandCss}
     <form class="search-form" role="search" onsubmit="return false">
       <label for="q">${text('atlas.simpleSearch','Search for something')}</label>
       <div class="search-controls"><div class="search-field"><span aria-hidden="true">⌕</span><input id="q" name="q" type="search" autocomplete="off" spellcheck="false" aria-describedby="shown"><kbd aria-hidden="true">/</kbd></div><label class="sr-only" for="family-filter">${text('hub.w.families','families')}</label><select id="family-filter" name="family"><option value="" data-i18n="atlas.topics">${esc(corpus['atlas.topics']?.en || 'All topics')}</option>${E.families.map(f=>`<option value="${f}">${f}</option>`).join('')}</select></div>
-      <div class="search-meta"><output id="shown" aria-live="polite">${E.surfaces.filter(s => s.presented !== false).length} ${text('atlas.results','results')}</output><button type="reset" id="clear" hidden>${text('atlas.clear','Clear filters')}</button></div>
+      <div class="search-meta"><output id="shown" aria-live="polite">${text('atlas.results','Results')}: <bdi id="result-count">${E.surfaces.filter(s => s.presented !== false).length}</bdi></output><button type="reset" id="clear" hidden>${text('atlas.clear','Clear filters')}</button></div>
     </form>
     <p class="state-note">${text('atlas.state','Published describes the page; each tool discloses its own readiness.')}</p>
     <noscript><p class="state-note">${text('atlas.nojs','Every destination is available below. Enable JavaScript to switch views and filter the estate.')}</p></noscript>
@@ -182,7 +182,7 @@ ${bandCss}
 </div>
 </details>
 </main>
-<footer class="wrap footer"><div><a class="wordmark" href="index.html">skaists<span>.dev</span></a><p>${text('hub.name','')}</p></div><div class="footer-links"><a href="onboarding/index.html">${text('reg.bee','')}</a><a href="doors/index.html">${text('hub.foot.doors','')}</a><a href="../estate.json">${text('hub.foot.registry','')}</a><a href="https://github.com/beehive-nature/beehive-nature" target="_blank" rel="noopener">${text('hub.foot.code','')} ↗</a></div><p class="footer-count"><b>${c.surfaces}</b> surfaces · <b>${c.domains}</b> domains · ${text('hub.counts.tail','')}</p><details class="address"><summary>web+bnr</summary><button id="reg" type="button">Register web+bnr addresses</button><a href="web+bnr://skaists.dev">bnr://skaists.dev</a><p id="protocol-status" role="status"></p></details></footer>
+<footer class="wrap footer"><div><a class="wordmark" href="index.html">skaists<span>.dev</span></a><p>${text('hub.name','')}</p></div><div class="footer-links"><a href="onboarding/index.html">${text('reg.bee','')}</a><a href="doors/index.html">${text('hub.foot.doors','')}</a><a href="../estate.json">${text('hub.foot.registry','')}</a><a href="https://github.com/beehive-nature/beehive-nature" target="_blank" rel="noopener">${text('hub.foot.code','')} ↗</a></div><p class="footer-count"><b>${c.surfaces}</b> ${text('hub.w.surfaces','surfaces')} · <b>${c.domains}</b> ${text('hub.w.domains','domains')} · ${text('hub.counts.tail','')}</p><details class="address"><summary>web+bnr</summary><button id="reg" type="button">Register web+bnr addresses</button><a href="web+bnr://skaists.dev">bnr://skaists.dev</a><p id="protocol-status" role="status"></p></details></footer>
 <div class="wrap estate-navigation"><details><summary>${text('atlas.browse','Explore the estate')}</summary><div data-tour-host></div></details></div>
 <script type="application/json" id="estate">
 <!--ESTATE-JSON-START-->
@@ -190,7 +190,7 @@ ${JSON.stringify(E)}
 <!--ESTATE-JSON-END-->
 </script>
 <script src="atlas-search.js?v=1" defer></script>
-<script src="atlas.js?v=2" defer></script>
+<script src="atlas.js?v=3" defer></script>
 <script src="agent-dock.js?v=5"></script>
 <script src="tour.js?v=34"></script>
 </body>

@@ -1158,9 +1158,10 @@
    "home": "skaists.dev",
    "path": "surfaces/index.html",
    "state": "LIVE",
-   "gloss": "Find art, music and people, then explore the complete estate.",
+   "gloss": "Art, science and tools made in the open — with people to meet.",
    "org": "skaists",
-   "label": "skaists atlas"
+   "label": "skaists atlas",
+   "descriptionKey": "atlas.intro"
   },
   {
    "id": "forge-orbit-v2",
