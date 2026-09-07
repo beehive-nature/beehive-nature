@@ -106,12 +106,14 @@ fi
 if [ -n "$hex" ]; then
     echo "BLOCKED: 48+ char hex run(s) (key/seed/vector-shaped)." >&2
     echo "Deliberate testnet vector? Same-line $MARK. Public chain constant? Same-line $MARK2." >&2
-    printf '%s\n' "$hex" | head -10 >&2
+    # Report locations only. A scanner must not copy the suspected secret
+    # into terminal/CI logs while refusing it (AGENTS.md secrets law).
+    printf '%s\n' "$hex" | head -10 | awk -F: -v mode="$mode" '{ if (mode == "tree") print $1 ":" $2 ": [REDACTED matching content]"; else print "added-line " $1 ": [REDACTED matching content]" }' >&2
     fail=1
 fi
 if [ -n "$pem" ]; then
     echo "BLOCKED: PEM private-key block(s):" >&2
-    printf '%s\n' "$pem" | head -10 >&2
+    printf '%s\n' "$pem" | head -10 | awk -F: -v mode="$mode" '{ if (mode == "tree") print $1 ":" $2 ": [REDACTED matching content]"; else print "added-line " $1 ": [REDACTED matching content]" }' >&2
     fail=1
 fi
 

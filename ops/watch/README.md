@@ -1,5 +1,11 @@
 # ops/watch — THE WATCH-TOGETHER ROOM (POC, 2026-09-04)
 
+**Current laptop transport (Astra, 2026-09-06):**
+`x0x-tunnel.ps1 up -Media` opens the four scoped SSH forwards without starting
+a laptop P2P daemon. `stream-laptop.sh` uses that path. The x0x tailnet text
+below records the original POC. Video still consumes its configured encoder
+bitrate; see `../x0x/LAPTOP-NETWORK.md` for shared-network limits.
+
 One-file surface + box ops. The founder streams from OBS/ffmpeg on the
 laptop → RTMP over the x0x tailnet forward → the box transcodes with
 ffmpeg to HLS (2 renditions) → Caddy serves `/live/<room>/*` same-origin

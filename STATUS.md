@@ -32,6 +32,44 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-09-06` — **Astra continuity audit: seven primitives mapped; archive
+  receiving seam added without changing v1 bytes.** `cargo test -p bnr-archive
+  --locked` → 14 passed, 0 failed on Windows. Offline verification checks the
+  complete manifest/batch set, integrity, framing, order and admission budgets;
+  tests recover from serialized artifacts after deleting the temporary source,
+  and refuse corrupt/incomplete inputs. Manifest authority, freshness, independent
+  retrieval, durable event replay and billion-user capacity remain OPEN. No
+  constitutional parameter or policy changed. Dispatch:
+  `docs/dispatches/2026-09-06-astra-kernel-continuity.md`.
+- `2026-09-06` — **Astra laptop network repair installed.** Existing helper
+  silently started a local mesh daemon; replacement uses one scoped SSH
+  transport with loopback forwards and renewable automatic expiry. Four offline
+  lifecycle tests pass; actual Windows access and WSL expiry observed. Helper
+  left down. Router failure mechanism and direct local-node safety UNVERIFIED.
+  Repro: `bash e2e/box-tunnel.test.sh`. Dispatch and rollback:
+  `docs/dispatches/2026-09-06-astra-change-receipt.md`.
+- `2026-09-06` — **Astra voice worker repair deployed to bnr.** Serialized,
+  bounded processing; failure-safe queue release; child deadlines and bounded
+  output; DynamicUser/private spool/read-only system/3G memory cap. `npm test`
+  in `ops/voice-scribe` → 6 passed. Live signed synthetic audio returned 200
+  and deletion confirmation; spool empty, public health 200. Existing key-
+  possession admission policy remains limited. No customer audio inspected.
+  Dispatch: `docs/dispatches/2026-09-06-astra-change-receipt.md`.
+- `2026-09-06` — **Astra CI and secret-log repair.** Tests/secret-scan workflow
+  tokens explicitly read-only; actions pinned. Scanner refuses matching content
+  while logging locations, not bytes. Repro: `bash e2e/secret-scan-output.test.sh`.
+  Hooks/push CI remain detection, not protected-branch enforcement. Dispatch:
+  `docs/dispatches/2026-09-06-astra-stack-audit.md`.
+- `2026-09-06` — **Astra estate and production baseline recorded.** Paginated
+  inventory: 86 scoped repos, including 47 personal study forks; 39 selected
+  originals/org repos, one empty mirror. `skaists.dev` resolves to Pages, host
+  8080 is wallet-relay. Root disk 93% used and bitcoind failed; full recovery,
+  deployment provenance, live OCI evidence and license/readiness gates OPEN.
+  Invite rotation intentionally remains dry-run. Commands and captured refs:
+  `docs/dispatches/2026-09-06-astra-repository-inventory.md` and
+  `docs/dispatches/2026-09-06-astra-stack-audit.md`. This is a bounded audit,
+  not blanket cryptographic or production certification.
+
 - `2026-07-25` — **DISPATCH-B executed: offline-or-fail is atmirror's
   default; v0.2 conformance proven; canonical manifest tracked; CC-4
   escalated on law.** CC-1 (`85dbc7f`): verify/restore no longer silently

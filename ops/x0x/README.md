@@ -1,5 +1,11 @@
 # ops/x0x — x0x agent daemon on the hive box (lane x0x, 2026-09-05)
 
+**Current laptop default (Astra, 2026-09-06):**
+[`LAPTOP-NETWORK.md`](LAPTOP-NETWORK.md) documents the shared-network outage,
+measurements and replacement helper. `x0x-tunnel.ps1 up` now uses scoped SSH
+forwarding and starts no laptop mesh daemon. The tailnet walkthroughs below
+are historical receipts. Box x0x stays on 0.41.3 with its identity and ACLs.
+
 **What runs on the box** (verbatim in-tree: `x0x.service` + `x0xd.toml`):
 
 - `x0xd` v0.41.2 (saorsa-labs/x0x, pre-built linux-arm64-gnu, option A) at
