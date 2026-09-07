@@ -188,3 +188,36 @@ candidate.
 
 Pre-existing dead-code warnings in axtree/cdp (unused `format`,
 `ClickOutcome`, …) are untouched by this lane and remain as on main.
+
+## 7. Corrections after review round 2 (2026-09-07, same build session)
+
+[Re-review packet](2026-09-07-astra-g2a-rereview.md) at `cd50ac3b`: two
+P1 findings remained. Both fixed; tests **77 passed / 0 failed**; fmt
+clean; PR #18 and issue #16 remain open; the corrected head replaces
+`cd50ac3b` as the pinned candidate.
+
+- **P1 (repeated `end` erased an admission gap)** — the terminal
+  disposition is now an explicit `EndDisposition` (`Failed { path, why }`
+  / `Gappy { path }` / `Clean`) stored on EVERY end outcome, not only
+  failed ones. An ended-with-gaps session (successful final marker,
+  refused receipts before it) replays `receipt_complete:false,
+  gaps:true` with its path on every subsequent `end`, forever; a failed
+  final write still replays its `EndReceiptIncomplete`; a fresh `start`
+  resets only its own state. Regression
+  `repeated_end_after_admission_gap_stays_incomplete` runs the reviewer's
+  combined sequence verbatim (oversized action receipt → first end
+  incomplete → second end still incomplete with the same path).
+- **P1 (agent-loop finalization lost the original error)** — the click
+  receipt-failure arm now RETAINS the typed `SeatError` (not a formatted
+  note) and sets `executed = true` when the action happened
+  (ReceiptAfterAction is an executed action, never "refused"). The
+  finalization boundary is extracted into `agentloop_finalize`, whose law
+  is: cleanup always runs via `end`, but an in-flight receipt failure
+  OUTRANKS whatever cleanup reports — the caller receives the ORIGINAL
+  typed error (write-failure mode: not the secondary
+  `EndReceiptIncomplete`; admission mode: not an `Ok` summary — even
+  though end succeeded and stored its gap marker, which the test verifies
+  happened). The success path now carries `receipt_complete`/`gaps` from
+  `end` into the loop summary instead of discarding them. Regressions:
+  both fault modes at the boundary + the healthy control, using the real
+  `record_after_action` and fault sinks (no browser, no model).

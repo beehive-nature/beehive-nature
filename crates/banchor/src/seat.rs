@@ -41,10 +41,21 @@ pub struct SeatState {
     /// small records (e.g. session_end) write fine. A fresh `start` resets
     /// its own state; a completed failed session is never reclassified.
     receipt_gaps: bool,
-    /// G2-A: the disposition of a FAILED `end` (path + why), preserved
-    /// through cleanup so a repeated `end` reports the same incomplete
-    /// truth instead of upgrading to "complete".
-    end_incomplete: Option<(String, String)>,
+    /// G2-A: the PERMANENT terminal disposition of `end` — survives cleanup
+    /// and every repeated `end`. Failed = the final write itself refused;
+    /// Gappy = ended with refused receipts stored as gaps; Clean = ended.
+    end_disposition: Option<EndDisposition>,
+}
+
+/// How a session ENDED — replayed verbatim by any later `end` call so a
+/// repeated end can never upgrade an incomplete session to complete
+/// (review round 2: the first round only preserved FAILED ends and let an
+/// admission-gap session be re-reported as clean on the second call).
+#[derive(Clone, Debug)]
+enum EndDisposition {
+    Failed { path: String, why: String },
+    Gappy { path: String },
+    Clean,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -97,7 +108,7 @@ impl SeatState {
             snapshot_seq: 0,
             halted: false,
             receipt_gaps: false,
-            end_incomplete: None,
+            end_disposition: None,
         }
     }
 
@@ -218,7 +229,7 @@ impl SeatState {
         // a NEW explicit session resets its own completeness state; the
         // previous session's failure disposition is never carried in.
         self.receipt_gaps = false;
-        self.end_incomplete = None;
+        self.end_disposition = None;
         Ok(out)
     }
 
@@ -559,13 +570,25 @@ impl SeatState {
     }
 
     fn end(&mut self) -> Result<Value, SeatError> {
-        // A previously-FAILED end keeps its disposition forever: cleanup
-        // erased the sink, but the incomplete truth survives repeated end.
+        // The terminal disposition outlives cleanup and every repeated
+        // `end`: a FAILED final write, an ended-with-gaps session, and a
+        // clean end are three different permanent truths — replaying any
+        // of them must never upgrade to "complete".
         if self.replay.is_none() {
-            if let Some((path, why)) = self.end_incomplete.clone() {
-                return Err(SeatError::EndReceiptIncomplete { path, why });
-            }
-            return Ok(json!({ "ended": true, "receipt_complete": true, "replay": null }));
+            return match self.end_disposition.clone() {
+                Some(EndDisposition::Failed { path, why }) => {
+                    Err(SeatError::EndReceiptIncomplete { path, why })
+                }
+                Some(EndDisposition::Gappy { path }) => Ok(json!({
+                    "ended": true,
+                    "receipt_complete": false,
+                    "gaps": true,
+                    "replay": path,
+                })),
+                Some(EndDisposition::Clean) | None => {
+                    Ok(json!({ "ended": true, "receipt_complete": true, "replay": null }))
+                }
+            };
         }
         // Cleanup ALWAYS runs: page closed, refs cleared, chromium dropped
         // (its Drop erases the temp profile) — even when the receipt fails.
@@ -595,17 +618,30 @@ impl SeatState {
             Some(Err(source)) => {
                 let path = replay_path.unwrap_or_default();
                 let why = source.to_string();
-                self.end_incomplete = Some((path.clone(), why.clone()));
+                self.end_disposition = Some(EndDisposition::Failed {
+                    path: path.clone(),
+                    why: why.clone(),
+                });
                 Err(SeatError::EndReceiptIncomplete { path, why })
             }
             // A successful session_end record does NOT retroactively
-            // complete a session with refused receipts — gaps stay gaps.
-            _ => Ok(json!({
-                "ended": true,
-                "receipt_complete": !had_gaps,
-                "gaps": had_gaps,
-                "replay": replay_path,
-            })),
+            // complete a session with refused receipts — gaps stay gaps,
+            // across cleanup and every repeated end.
+            _ => {
+                if had_gaps {
+                    self.end_disposition = Some(EndDisposition::Gappy {
+                        path: replay_path.clone().unwrap_or_default(),
+                    });
+                } else {
+                    self.end_disposition = Some(EndDisposition::Clean);
+                }
+                Ok(json!({
+                    "ended": true,
+                    "receipt_complete": !had_gaps,
+                    "gaps": had_gaps,
+                    "replay": replay_path,
+                }))
+            }
         }
     }
 
@@ -983,10 +1019,13 @@ pub fn agentloop(
     let mut executed = false;
     let mut gated_plan: Option<Value> = None;
     let mut outcome_note = String::new();
-    // G2-A review: set when a receipt failure ends the loop — after it, no
-    // model request and no further action may occur (invariant asserted
-    // by the loop structure below: only end/cleanup follows).
-    let mut receipt_failure_exit = false;
+    // G2-A review round 2: the ORIGINAL typed error is retained through
+    // finalization — after a receipt failure, no model request and no
+    // further action may occur (invariant asserted by the loop structure:
+    // only end/cleanup follows), and whatever cleanup reports, the caller
+    // receives THIS error, never a secondary end failure and never a
+    // success summary over an acknowledged failure.
+    let mut receipt_failure: Option<SeatError> = None;
     let mut prompt_tokens_total: u64 = 0;
     let mut completion_tokens_total: u64 = 0;
 
@@ -1083,22 +1122,27 @@ pub fn agentloop(
                             // A receipt failure is NOT a refused click: the
                             // action may have HAPPENED (ReceiptAfterAction)
                             // or recording is failing outright. Either way
-                            // the session halts — exit immediately, keep
-                            // the ORIGINAL outcome (never re-bury it under
-                            // a secondary receipt error), and ask the
-                            // model for NOTHING further: a second pick
-                            // could double-execute the first.
+                            // the session halts — exit immediately, RETAIN
+                            // the original typed error (round 2: it must
+                            // survive finalization and reach the caller),
+                            // and ask the model for NOTHING further: a
+                            // second pick could double-execute the first.
                             if matches!(
                                 e,
                                 SeatError::ReceiptAfterAction { .. } | SeatError::Receipt(_)
                             ) {
+                                if matches!(e, SeatError::ReceiptAfterAction { .. }) {
+                                    // the action HAPPENED — reporting it as
+                                    // unexecuted would contradict the facts
+                                    executed = true;
+                                }
                                 outcome_note = match &e {
                                     SeatError::ReceiptAfterAction { action, .. } => {
                                         format!("{action} executed but its receipt failed: {e}")
                                     }
                                     _ => format!("recording failed around click: {e}"),
                                 };
-                                receipt_failure_exit = true;
+                                receipt_failure = Some(e);
                                 break;
                             }
                             outcome_note = format!("click {} refused: {e}", r#ref);
@@ -1162,11 +1206,11 @@ pub fn agentloop(
                 "executed": executed,
                 "turns_taken": turns_taken,
                 "outcome": outcome_note,
-                "receipt_failure_exit": receipt_failure_exit,
+                "receipt_failure_exit": receipt_failure.is_some(),
             }),
         )?;
     }
-    let end = seat.handle(&json!({ "action": "end" }))?;
+    let end = agentloop_finalize(&mut seat, receipt_failure)?;
 
     let receipt = json!({
         "milestone": "M2-agent-loop",
@@ -1191,9 +1235,28 @@ pub fn agentloop(
         "turns_taken": turns_taken,
         "tokens": { "prompt_total": prompt_tokens_total, "completion_total": completion_tokens_total },
         "outcome": outcome_note,
+        "receipt_complete": end["receipt_complete"],
+        "gaps": end["gaps"],
         "replay": end["replay"],
     });
     Ok(receipt)
+}
+
+/// Agent-loop finalization boundary (review round 2). Cleanup ALWAYS runs
+/// via `end` (which closes the page, drops chromium, and records or
+/// preserves the session's terminal disposition) — but an in-flight
+/// receipt failure OUTRANKS whatever cleanup reports: the caller receives
+/// the ORIGINAL typed error, never a secondary end failure replacing it,
+/// and never a success summary over an acknowledged post-action failure.
+fn agentloop_finalize(
+    seat: &mut SeatState,
+    receipt_failure: Option<SeatError>,
+) -> Result<Value, SeatError> {
+    let end_outcome = seat.handle(&json!({ "action": "end" }));
+    match receipt_failure {
+        Some(original) => Err(original),
+        None => end_outcome,
+    }
 }
 
 #[cfg(test)]
@@ -1375,6 +1438,136 @@ mod g2a_review_regressions {
             other => panic!("repeated end must keep the incomplete disposition, got {other:?}"),
         };
         assert_eq!(first, second);
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+}
+
+#[cfg(test)]
+mod g2a_round2_regressions {
+    //! Review round 2: (a) the terminal disposition must survive a SUCCESSFUL
+    //! end-with-gaps too — a repeated end can never upgrade it to complete;
+    //! (b) the agent-loop finalization boundary must return the ORIGINAL
+    //! post-action receipt error, never a secondary end failure, never a
+    //! success summary over an acknowledged failure.
+    use super::*;
+    use crate::replay::fault::{Fault, FaultSink};
+    use crate::replay::{Replay, MAX_RECORD_BYTES};
+
+    fn tmp(name: &str) -> PathBuf {
+        let dir = std::env::temp_dir().join(format!("banchor-g2a-r2-{name}"));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        dir
+    }
+
+    /// The reviewer's combined sequence, verbatim: oversized ACTION receipt
+    /// (admission gap, writer unpoisoned) → first end reports incomplete →
+    /// the SECOND end must report the same gap, not complete.
+    #[test]
+    fn repeated_end_after_admission_gap_stays_incomplete() {
+        let dir = tmp("admission");
+        let mut seat = SeatState::new();
+        seat.replay = Some(Replay::open(&dir, "admission").unwrap());
+        let huge = "x".repeat(MAX_RECORD_BYTES);
+        match seat.record_after_action("click", "click", json!({ "blob": huge })) {
+            Err(SeatError::ReceiptAfterAction { .. }) => {}
+            other => panic!("expected ReceiptAfterAction, got {other:?}"),
+        }
+        let first = seat.handle(&json!({ "action": "end" })).unwrap();
+        assert_eq!(first["receipt_complete"], json!(false));
+        assert_eq!(first["gaps"], json!(true));
+        let first_path = first["replay"]
+            .as_str()
+            .expect("path on first end")
+            .to_string();
+        let second = seat.handle(&json!({ "action": "end" })).unwrap();
+        assert_eq!(
+            second["receipt_complete"],
+            json!(false),
+            "repeated end must not upgrade an admission-gap session to complete"
+        );
+        assert_eq!(second["gaps"], json!(true));
+        assert_eq!(second["replay"].as_str(), Some(first_path.as_str()));
+        // cleanup ran on the first end and stays run
+        let status = seat.handle(&json!({ "action": "status" })).unwrap();
+        assert_eq!(status["browser_alive"], json!(false));
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Write-failure mode at the finalization boundary: the ORIGINAL
+    /// ReceiptAfterAction(WriteFailed) is returned even though end hits the
+    /// poisoned writer and would report EndReceiptIncomplete.
+    #[test]
+    fn agentloop_returns_original_post_action_write_error() {
+        let dir = tmp("writefail");
+        let mut seat = SeatState::new();
+        seat.replay = Some(Replay::attach(
+            dir.join("refused.jsonl"),
+            Box::new(FaultSink::new(Fault::RefuseWrite)),
+        ));
+        let original = match seat.record_after_action("click", "click", json!({ "n": 1 })) {
+            Err(e @ SeatError::ReceiptAfterAction { .. }) => e,
+            other => panic!("expected ReceiptAfterAction, got {other:?}"),
+        };
+        let fingerprint = original.to_string();
+        assert!(fingerprint.contains("HAPPENED"));
+        match agentloop_finalize(&mut seat, Some(original)) {
+            Err(returned) => {
+                assert_eq!(returned.to_string(), fingerprint);
+                assert!(
+                    !returned.to_string().contains("INCOMPLETE — session_end"),
+                    "the cleanup error must not replace the original action-happened error"
+                );
+            }
+            Ok(_) => panic!("an acknowledged post-action failure must not become Ok"),
+        }
+        // cleanup still ran
+        assert!(seat.replay.is_none());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Admission mode: the ORIGINAL ReceiptAfterAction(RecordTooLarge) is
+    /// returned (end would have SUCCEEDED with a gap marker — Ok must not
+    /// swallow the typed refusal), and end's gap marker did get stored.
+    #[test]
+    fn agentloop_returns_original_post_action_admission_error() {
+        let dir = tmp("admitfail");
+        let replay = Replay::open(&dir, "admitfail").unwrap();
+        let path = replay.path.clone();
+        let mut seat = SeatState::new();
+        seat.replay = Some(replay);
+        let huge = "x".repeat(MAX_RECORD_BYTES);
+        let original = match seat.record_after_action("click", "click", json!({ "blob": huge })) {
+            Err(e @ SeatError::ReceiptAfterAction { .. }) => e,
+            other => panic!("expected ReceiptAfterAction, got {other:?}"),
+        };
+        let fingerprint = original.to_string();
+        assert!(fingerprint.contains("admission bound"));
+        match agentloop_finalize(&mut seat, Some(original)) {
+            Err(returned) => assert_eq!(returned.to_string(), fingerprint),
+            Ok(_) => panic!("an oversized-receipt refusal must not become a success summary"),
+        }
+        assert!(seat.replay.is_none());
+        let stored = std::fs::read_to_string(&path).unwrap();
+        assert!(
+            stored.contains("\"gaps\":true"),
+            "end stored its gap marker"
+        );
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Healthy control through the same boundary: no failure in flight →
+    /// end's result passes through with its completeness fields.
+    #[test]
+    fn agentloop_finalize_healthy_control() {
+        let dir = tmp("healthy");
+        let mut seat = SeatState::new();
+        seat.replay = Some(Replay::open(&dir, "healthy").unwrap());
+        seat.record("probe", json!({ "n": 1 })).unwrap();
+        let out = agentloop_finalize(&mut seat, None).unwrap();
+        assert_eq!(out["receipt_complete"], json!(true));
+        assert_eq!(out["gaps"], json!(false));
+        assert!(out["replay"].as_str().is_some());
         let _ = std::fs::remove_dir_all(&dir);
     }
 }
