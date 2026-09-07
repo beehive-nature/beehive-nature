@@ -23,6 +23,7 @@
       ['acid','fleet-hosted/gallery/acid-cascade.html'],['indigo','fleet-hosted/gallery/indigo-index.html'],['resonance','fleet-hosted/gallery/resonance.html'],
       ['dash','fleet-hosted/lab/bnr-dashboard.html'],['flower','fleet-hosted/lab/flower-lab.html'],['spliff','fleet-hosted/lab/spliff-lab.html'],
       ['blend','fleet-hosted/lab/blend-lab.html'],['intake','fleet-hosted/lab/intake-tracker.html'],['edible','fleet-hosted/lab/edible-tracker.html']];
+  var inlineHost=document.querySelector('[data-tour-host]');
   var b=document.createElement('nav');b.id='tbar';
   /* THE BAR HAS TWO SHAPES (founder order, 2026-08-25).
      A 39-link horizontal strip was 2,272px wide: SIX links reachable at 390px,
@@ -40,7 +41,10 @@
     var h=(R+x[1])===location.pathname.replace(/index.html$/,'');
     return '<a href="'+R+x[1]+'" style="color:'+(h?'#6f6':'#888')+';background:'+(h?'#16241d':'transparent')+';box-shadow:'+(h?'inset 0 0 0 1px #2b4a3b':'none')+';border-radius:6px;text-decoration:none;padding:6px 9px;min-height:32px;display:inline-flex;align-items:center;flex-shrink:0">'+x[0]+'</a>';
   }).join('');
-  document.body.appendChild(b);
+  if(inlineHost){
+    b.style.cssText='display:flex;flex-wrap:wrap;gap:8px;padding:16px 0;font:14px/1.5 system-ui,sans-serif';
+    inlineHost.appendChild(b);
+  }else document.body.appendChild(b);
 
   /* the toggle: only earns its place when the strip actually overflows */
   var tg=document.createElement('button');tg.id='tbarMore';tg.type='button';
@@ -55,6 +59,7 @@
   function seatToggle(){ tg.style.bottom=Math.max(7,Math.round((b.getBoundingClientRect().height-32)/2))+'px'; }
   function overflowing(){ return b.scrollWidth>b.clientWidth+2; }
   function apply(){
+    if(inlineHost){ tg.style.display='none'; return; }
     if(open){
       b.style.flexWrap='wrap'; b.style.overflowX='hidden'; b.style.overflowY='auto';
       b.style.maxHeight='78vh'; b.style.rowGap='6px'; b.style.paddingRight='46px';
@@ -74,7 +79,7 @@
     }
     seatToggle();
   }
-  function sync(){ tg.style.display = (open||overflowing()) ? 'inline-flex' : 'none'; seatToggle(); }
+  function sync(){ if(inlineHost) return; tg.style.display = (open||overflowing()) ? 'inline-flex' : 'none'; seatToggle(); }
   tg.addEventListener('click',function(){ open=!open; apply(); sync(); });
   addEventListener('resize',function(){ if(!open) sync(); else seatToggle(); });
   /* DRAWER, not a permanent grid. Open-by-default measured 379px at 390px — 47%
@@ -95,13 +100,14 @@
      know a fixed bar was injected under it. Re-measured after the riders mount
      (they change the bar's height) and on resize. */
   function fitPad(){
+    if(inlineHost) return;
     var bar=document.getElementById('tbar'); if(!bar) return;
     var h=Math.ceil(bar.getBoundingClientRect().height); if(!h) return;
     var need=h+22;
     var cur=parseFloat(getComputedStyle(document.body).paddingBottom)||0;
     if(cur<need) document.body.style.paddingBottom=need+'px';
   }
-  document.body.style.paddingBottom='69px'; /* fail-safe before measurement */
+  if(!inlineHost) document.body.style.paddingBottom='69px'; /* fail-safe before measurement */
   fitPad();
   setTimeout(fitPad,500);   /* after register/lang/rails mount into the bar */
   setTimeout(fitPad,1500);
@@ -126,13 +132,13 @@
   /* the technical-register toggle (🐝/🎛/⚗) rides every page — see register.js */
   if(!document.getElementById('bregctl')){
     var s=document.createElement('script');
-    s.src=R+'register.js?v=5';
+    s.src=R+'register.js?v=6';
     document.body.appendChild(s);
   }
   /* the language toggle (every corpus-docked tongue, corpus-law honest) rides every page — see lang.js */
   if(!document.getElementById('blangctl')){
     var s2=document.createElement('script');
-    s2.src=R+'lang.js?v=17';
+    s2.src=R+'lang.js?v=18';
     document.body.appendChild(s2);
   }
 

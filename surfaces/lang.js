@@ -123,7 +123,7 @@
     try{ document.dispatchEvent(new CustomEvent('blang',{detail:{lang:code}})); }catch(e){}
   }
   function mount(){
-    var host=document.getElementById('tbar');
+    var host=document.querySelector('[data-language-host]')||document.getElementById('tbar');
     /* margin/min-height/height/box-sizing pinned on all three elements below:
        an inline style only wins the properties it SETS — any page's bare
        select{}/span{} rule reaches these controls through every property left
@@ -154,7 +154,7 @@
   }
   function load(cb){
     if(corpus) return cb();
-    fetch(R+'lang-corpus.json?v=11').then(function(r){return r.json()})
+    fetch(R+'lang-corpus.json?v=12').then(function(r){return r.json()})
       .then(function(j){ corpus=j;
         /* the withdrawal law reaches the renderer: a withdrawn tongue stops rendering
            estate-wide (history kept in the corpus file); its picker entry says so. */

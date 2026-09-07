@@ -203,8 +203,9 @@
    "home": "beehivenature.com",
    "path": "surfaces/doors/beehivenature.html",
    "state": "LIVE",
-   "gloss": "beehivenature.comfor someone who just heard the name",
-   "org": "beehive-nature"
+   "gloss": "for someone who just heard the name",
+   "org": "beehive-nature",
+   "descriptionKey": "d.nature.who"
   },
   {
    "id": "doors-plur",
@@ -212,8 +213,9 @@
    "home": "plur.earth",
    "path": "surfaces/doors/plur.html",
    "state": "LIVE",
-   "gloss": "plur.earthfor a raver",
-   "org": "skaists"
+   "gloss": "for a raver",
+   "org": "skaists",
+   "descriptionKey": "d.plur.who"
   },
   {
    "id": "doors-skaists",
@@ -221,8 +223,9 @@
    "home": "skaists.dev",
    "path": "surfaces/doors/skaists.html",
    "state": "LIVE",
-   "gloss": "skaists.socialfor an artist, a DJ, a festival vendor",
-   "org": "skaists"
+   "gloss": "for an artist, a DJ, a festival vendor",
+   "org": "skaists",
+   "descriptionKey": "d.skaists.who"
   },
   {
    "id": "doors-bnature-social",
@@ -230,8 +233,9 @@
    "home": "bnature.social",
    "path": "surfaces/doors/bnature-social.html",
    "state": "LIVE",
-   "gloss": "bnature.socialfor someone who wants people",
-   "org": "beehive-nature"
+   "gloss": "for someone who wants people",
+   "org": "beehive-nature",
+   "descriptionKey": "d.social.who"
   },
   {
    "id": "doors-bnature-bio",
@@ -239,8 +243,9 @@
    "home": "bnature.social",
    "path": "surfaces/doors/bnature-bio.html",
    "state": "LIVE",
-   "gloss": "bnature.biofor a scientist, or anyone with a health question",
-   "org": "beehive-nature"
+   "gloss": "for a scientist, or anyone with a health question",
+   "org": "beehive-nature",
+   "descriptionKey": "d.bio.who"
   },
   {
    "id": "doors-beehivebiomass",
@@ -248,8 +253,9 @@
    "home": "beehivebiomass.com",
    "path": "surfaces/doors/beehivebiomass.html",
    "state": "LIVE",
-   "gloss": "beehivebiomass.comfor someone with a machine to contribute",
-   "org": "beehive-biomass"
+   "gloss": "for someone with a machine to contribute",
+   "org": "beehive-biomass",
+   "descriptionKey": "d.biomass.who"
   },
   {
    "id": "doors-skaists-buzz",
@@ -275,7 +281,7 @@
    "home": "beehivenature.com",
    "path": "surfaces/doors/index.html",
    "state": "LIVE",
-   "gloss": "all six on one pagepick the one that sounds like you",
+   "gloss": "Six front doors, each with a different place to begin.",
    "org": "beehive-nature"
   },
   {
@@ -284,8 +290,9 @@
    "home": "beehivenature.com",
    "path": "surfaces/b4b.html",
    "state": "LIVE",
-   "gloss": "our receipts, measured on",
-   "org": "beehive-nature"
+   "gloss": "our receipts, measured on Base",
+   "org": "beehive-nature",
+   "descriptionKey": "s.b4b.name"
   },
   {
    "id": "biq",
@@ -293,8 +300,9 @@
    "home": "bnr.quest",
    "path": "surfaces/biq.html",
    "state": "LIVE",
-   "gloss": "compose a cited wiki proposal, never",
-   "org": "beehive-nature"
+   "gloss": "compose a cited wiki proposal, never post",
+   "org": "beehive-nature",
+   "descriptionKey": "s.biq.name"
   },
   {
    "id": "blight-bnri-gallery",
@@ -302,8 +310,9 @@
    "home": "beehivenature.com",
    "path": "surfaces/blight/bnri-gallery.html",
    "state": "LIVE",
-   "gloss": "the fleet's own",
-   "org": "beehive-nature"
+   "gloss": "the fleet's own art",
+   "org": "beehive-nature",
+   "descriptionKey": "s.blight-bnri-gallery.name"
   },
   {
    "id": "blight-c1-aid",
@@ -311,8 +320,9 @@
    "home": "beehivenature.com",
    "path": "surfaces/blight/c1-aid.html",
    "state": "LIVE",
-   "gloss": "taxonomy sizing, from the tree's own",
-   "org": "beehive-nature"
+   "gloss": "taxonomy sizing, from the tree's own numbers",
+   "org": "beehive-nature",
+   "descriptionKey": "s.blight-c1-aid.name"
   },
   {
    "id": "blight-compare",
@@ -320,8 +330,9 @@
    "home": "beehivenature.com",
    "path": "surfaces/blight/compare.html",
    "state": "LIVE",
-   "gloss": "the ERC-20i family, artist by",
-   "org": "beehive-nature"
+   "gloss": "the ERC-20i family, artist by artist",
+   "org": "beehive-nature",
+   "descriptionKey": "s.blight-compare.name"
   },
   {
    "id": "blight-gallery",
@@ -329,8 +340,10 @@
    "home": "beehivenature.com",
    "path": "surfaces/blight/gallery.html",
    "state": "LIVE",
-   "gloss": "a walking tour of on-chain",
-   "org": "beehive-nature"
+   "gloss": "a walking tour of on-chain art",
+   "org": "beehive-nature",
+   "descriptionKey": "s.blight-gallery.name",
+   "label": "ERC20i gallery"
   },
   {
    "id": "blight",
@@ -338,8 +351,9 @@
    "home": "beehivenature.com",
    "path": "surfaces/blight/index.html",
    "state": "LIVE",
-   "gloss": "one operation, many",
-   "org": "beehive-nature"
+   "gloss": "one operation, many frequencies",
+   "org": "beehive-nature",
+   "descriptionKey": "s.blight-index.name"
   },
   {
    "id": "blight-inscription-explorer",
@@ -347,8 +361,10 @@
    "home": "beehivenature.com",
    "path": "surfaces/blight/inscription-explorer.html",
    "state": "LIVE",
-   "gloss": "whose art shall we",
-   "org": "beehive-nature"
+   "gloss": "whose art shall we visit?",
+   "org": "beehive-nature",
+   "descriptionKey": "s.blight-inscription-explorer.name",
+   "label": "Inscription explorer"
   },
   {
    "id": "blight-midi-organ",
@@ -356,8 +372,9 @@
    "home": "midi.blue",
    "path": "surfaces/blight/midi-organ.html",
    "state": "LIVE",
-   "gloss": "the seed becomes",
-   "org": "skaists"
+   "gloss": "the seed becomes sound",
+   "org": "skaists",
+   "descriptionKey": "s.blight-midi-organ.name"
   },
   {
    "id": "blight-museum",
@@ -365,8 +382,10 @@
    "home": "skaists.art",
    "path": "surfaces/blight/museum.html",
    "state": "LIVE",
-   "gloss": "what &quot;on-chain&quot; actually",
-   "org": "skaists"
+   "gloss": "what \"on-chain\" actually means",
+   "org": "skaists",
+   "descriptionKey": "s.blight-museum.name",
+   "label": "bLIGHT museum"
   },
   {
    "id": "blight-pixelrefiner",
@@ -374,7 +393,7 @@
    "home": "beehivenature.com",
    "path": "surfaces/blight/pixelrefiner.html",
    "state": "LIVE",
-   "gloss": "smeared art in, crisp cells",
+   "gloss": "smeared art in, crisp cells out",
    "org": "beehive-nature"
   },
   {
@@ -383,7 +402,7 @@
    "home": "beehivenature.com",
    "path": "surfaces/blight/qrtree.html",
    "state": "LIVE",
-   "gloss": "the URL lives in the",
+   "gloss": "the URL lives in the code",
    "org": "beehive-nature"
   },
   {
@@ -392,7 +411,7 @@
    "home": "beehivenature.com",
    "path": "surfaces/blight/qrroses.html",
    "state": "LIVE",
-   "gloss": "roses and bees over a frozen",
+   "gloss": "roses and bees over a frozen code",
    "org": "beehive-nature"
   },
   {
@@ -401,8 +420,9 @@
    "home": "beehivenature.com",
    "path": "surfaces/blight/qrroses-smil.html",
    "state": "LIVE",
-   "gloss": "the same garden as one declarative",
-   "org": "beehive-nature"
+   "gloss": "A declarative, animated rose garden.",
+   "org": "beehive-nature",
+   "label": "Declarative rose garden"
   },
   {
    "id": "blight-profile",
@@ -410,8 +430,9 @@
    "home": "beehivenature.com",
    "path": "surfaces/blight/profile.html",
    "state": "LIVE",
-   "gloss": "the profile half that needs no",
-   "org": "beehive-nature"
+   "gloss": "the profile half that needs no server",
+   "org": "beehive-nature",
+   "limit": "read-only: holdings, PFP and shorthand from chain; nickname/quests/referrals/claims/submissions named as the half that needs a writable home"
   },
   {
    "id": "local-agent",
@@ -420,7 +441,8 @@
    "path": "surfaces/local-agent/index.html",
    "state": "LIVE",
    "gloss": "the local agent — a Qwen mind that runs in your page",
-   "org": "skaists"
+   "org": "skaists",
+   "label": "Local agent"
   },
   {
    "id": "record",
@@ -428,8 +450,9 @@
    "home": "beehivenature.com",
    "path": "surfaces/record.html",
    "state": "LIVE",
-   "gloss": "every screenshot we ever",
-   "org": "beehive-nature"
+   "gloss": "every screenshot we ever kept",
+   "org": "beehive-nature",
+   "limit": "the shots are the record — never edited, cropped or retouched; ugly is what it looked like"
   },
   {
    "id": "blight-midi",
@@ -437,8 +460,9 @@
    "home": "midi.blue",
    "path": "surfaces/blight/midi.html",
    "state": "LIVE",
-   "gloss": "one seed, a",
-   "org": "skaists"
+   "gloss": "one seed, a performance",
+   "org": "skaists",
+   "limit": "seed from the MiDi contract on Base, read-only; block-sprite medium, score-driven performance — visual and audio siblings from one timeline; Web Audio oscillators only, sound never autoplays; reduced motion rests as one composed silent frame"
   },
   {
    "id": "blight-midiroom",
@@ -446,8 +470,9 @@
    "home": "midi.blue",
    "path": "surfaces/blight/midiroom.html",
    "state": "LIVE",
-   "gloss": "the bMiDi room — three",
-   "org": "skaists"
+   "gloss": "the bMiDi room — three densities",
+   "org": "skaists",
+   "limit": "demo of the bMiDi agent loop: plain-word ask → deterministic seed-space search → setlist; beginner/DJ/producer level toggle; the room log is LOCAL — the relay lane signs it to buzz; agent runs on-device in this demo, zero off-origin"
   },
   {
    "id": "blight-midivault",
@@ -455,8 +480,9 @@
    "home": "midi.blue",
    "path": "surfaces/blight/midivault.html",
    "state": "LIVE",
-   "gloss": "the vault — music on",
-   "org": "skaists"
+   "gloss": "the vault — music on Autonomi",
+   "org": "skaists",
+   "limit": "record/store/delete/send created music: score artifacts + offline-rendered WAVs; public (address=door), private (AES-GCM, key only in local manifest), privileged (capability = address+key); SIMULATED backend labelled, antd adapter awaits live route verification"
   },
   {
    "id": "blight-vaulta-reader",
@@ -464,8 +490,9 @@
    "home": "beehivenature.com",
    "path": "surfaces/blight/vaulta-reader.html",
    "state": "LIVE",
-   "gloss": "the b-indexer's read path,",
-   "org": "beehive-nature"
+   "gloss": "the b-indexer's read path, keyless",
+   "org": "beehive-nature",
+   "descriptionKey": "s.blight-vaulta-reader.name"
   },
   {
    "id": "blight-workbench",
@@ -473,8 +500,9 @@
    "home": "beehivenature.com",
    "path": "surfaces/blight/workbench.html",
    "state": "LIVE",
-   "gloss": "the instrument (tech",
-   "org": "beehive-nature"
+   "gloss": "the instrument (tech bench)",
+   "org": "beehive-nature",
+   "descriptionKey": "s.blight-workbench.name"
   },
   {
    "id": "dock",
@@ -482,8 +510,10 @@
    "home": "beehivenature.com",
    "path": "surfaces/dock.html",
    "state": "LIVE",
-   "gloss": "what is proven, and what is",
-   "org": "beehive-nature"
+   "gloss": "what is proven, and what is not",
+   "org": "beehive-nature",
+   "descriptionKey": "s.dock.name",
+   "label": "Evidence dock"
   },
   {
    "id": "fleet-hosted",
@@ -491,8 +521,9 @@
    "home": "beehivenature.com",
    "path": "surfaces/fleet-hosted/index.html",
    "state": "LIVE",
-   "gloss": "Nine surfaces, one night, one",
-   "org": "beehive-nature"
+   "gloss": "Nine surfaces, one night, one hand",
+   "org": "beehive-nature",
+   "descriptionKey": "s.fleet-hosted-index.name"
   },
   {
    "id": "hardware-build",
@@ -500,8 +531,9 @@
    "home": "beehivenature.com",
    "path": "surfaces/hardware/build.html",
    "state": "LIVE",
-   "gloss": "climb from user to",
-   "org": "beehive-nature"
+   "gloss": "climb from user to producer",
+   "org": "beehive-nature",
+   "descriptionKey": "s.hardware-build.name"
   },
   {
    "id": "hardware",
@@ -509,8 +541,9 @@
    "home": "beehivenature.com",
    "path": "surfaces/hardware/index.html",
    "state": "LIVE",
-   "gloss": "open hardware you can actually",
-   "org": "beehive-nature"
+   "gloss": "open hardware you can actually read",
+   "org": "beehive-nature",
+   "descriptionKey": "s.hardware-index.name"
   },
   {
    "id": "hardware-security",
@@ -518,8 +551,9 @@
    "home": "beehivenature.com",
    "path": "surfaces/hardware/security.html",
    "state": "LIVE",
-   "gloss": "security events, read",
-   "org": "beehive-nature"
+   "gloss": "security events, read honestly",
+   "org": "beehive-nature",
+   "descriptionKey": "s.hardware-security.name"
   },
   {
    "id": "listening",
@@ -527,8 +561,9 @@
    "home": "midi.blue",
    "path": "surfaces/listening.html",
    "state": "LIVE",
-   "gloss": "one seed, sound and",
-   "org": "skaists"
+   "gloss": "one seed, sound and sight",
+   "org": "skaists",
+   "descriptionKey": "s.listening.name"
   },
   {
    "id": "onboarding-receive",
@@ -536,8 +571,9 @@
    "home": "beehivenature.com",
    "path": "surfaces/onboarding/receive.html",
    "state": "LIVE",
-   "gloss": "catch a beam of light, camera",
-   "org": "beehive-nature"
+   "gloss": "catch a beam of light, camera only",
+   "org": "beehive-nature",
+   "descriptionKey": "s.onboarding-receive.name"
   },
   {
    "id": "recover",
@@ -545,8 +581,9 @@
    "home": "beehivenature.com",
    "path": "surfaces/recover.html",
    "state": "LIVE",
-   "gloss": "your 24 words, your keys,",
-   "org": "beehive-nature"
+   "gloss": "your 24 words, your keys, offline",
+   "org": "beehive-nature",
+   "descriptionKey": "s.recover.name"
   },
   {
    "id": "stack",
@@ -554,8 +591,9 @@
    "home": "beehivenature.com",
    "path": "surfaces/stack.html",
    "state": "LIVE",
-   "gloss": "one engine diagram, honest parts",
-   "org": "beehive-nature"
+   "gloss": "one engine diagram, honest parts included",
+   "org": "beehive-nature",
+   "descriptionKey": "s.stack.name"
   },
   {
    "id": "wallet",
@@ -563,8 +601,10 @@
    "home": "beehivenature.com",
    "path": "surfaces/wallet.html",
    "state": "LIVE",
-   "gloss": "one soul, every chain, zero",
-   "org": "beehive-nature"
+   "gloss": "one soul, every chain, zero custody",
+   "org": "beehive-nature",
+   "descriptionKey": "s.wallet.name",
+   "label": "Wallet"
   },
   {
    "id": "blight-demo",
@@ -572,9 +612,12 @@
    "home": "beehivenature.com",
    "path": "surfaces/blight/demo.html",
    "state": "LIVE",
-   "gloss": "the logo is the the beam encoder is real; this page is its de",
+   "gloss": "the logo is the transmission",
    "warn": true,
-   "org": "beehive-nature"
+   "org": "beehive-nature",
+   "descriptionKey": "s.blight-demo.name",
+   "limit": "the beam encoder is real; this page is its demo",
+   "limitKey": "s.blight-demo.caveat"
   },
   {
    "id": "blight-farmers",
@@ -582,9 +625,12 @@
    "home": "beehivenature.com",
    "path": "surfaces/blight/farmers.html",
    "state": "LIVE",
-   "gloss": "stalls, bAccords, settled in reads as a plan — settlement is not b",
+   "gloss": "stalls, bAccords, settled in fUSD",
    "warn": true,
-   "org": "beehive-nature"
+   "org": "beehive-nature",
+   "descriptionKey": "s.blight-farmers.name",
+   "limit": "reads as a plan — settlement is not built",
+   "limitKey": "s.blight-farmers.caveat"
   },
   {
    "id": "bnames",
@@ -592,9 +638,12 @@
    "home": "beehivenature.com",
    "path": "surfaces/bnames.html",
    "state": "LIVE",
-   "gloss": "names on our chain, read reads the chain live; reserving is founder-gated",
+   "gloss": "names on our chain, read live",
    "warn": true,
-   "org": "beehive-nature"
+   "org": "beehive-nature",
+   "descriptionKey": "s.bnames.name",
+   "limit": "reads the chain live; reserving is founder-gated for now",
+   "limitKey": "s.bnames.caveat"
   },
   {
    "id": "hardware-lab",
@@ -602,9 +651,12 @@
    "home": "beehivenature.com",
    "path": "surfaces/hardware/lab.html",
    "state": "LIVE",
-   "gloss": "device reviews, science and one device has bench numbers; the rest re",
+   "gloss": "device reviews, science and art",
    "warn": true,
-   "org": "beehive-nature"
+   "org": "beehive-nature",
+   "descriptionKey": "s.hardware-lab.name",
+   "limit": "one device has bench numbers; the rest read pending",
+   "limitKey": "s.hardware-lab.caveat"
   },
   {
    "id": "keys-addresses",
@@ -612,9 +664,12 @@
    "home": "beehivenature.com",
    "path": "surfaces/keys/addresses.html",
    "state": "LIVE",
-   "gloss": "one soul, two mailing the derivation grammar is real; the ren",
+   "gloss": "one soul, two mailing addresses",
    "warn": true,
-   "org": "beehive-nature"
+   "org": "beehive-nature",
+   "descriptionKey": "s.keys-addresses.name",
+   "limit": "the derivation grammar is real; the rendered addresses are shapes",
+   "limitKey": "s.keys-addresses.caveat"
   },
   {
    "id": "onboarding",
@@ -622,9 +677,13 @@
    "home": "beehivenature.com",
    "path": "surfaces/onboarding/index.html",
    "state": "LIVE",
-   "gloss": "the two-minute held-hand join key derivation is real; the au",
+   "gloss": "the two-minute held-hand join ceremony",
    "warn": true,
-   "org": "beehive-nature"
+   "org": "beehive-nature",
+   "descriptionKey": "s.onboarding-index.name",
+   "limit": "key derivation is real; the auth steps are labelled simulated",
+   "limitKey": "s.onboarding-index.caveat",
+   "label": "Join the hive"
   },
   {
    "id": "blight-market",
@@ -632,8 +691,10 @@
    "home": "skaists.store",
    "path": "surfaces/blight/market.html",
    "state": "LIVE",
-   "gloss": "inscriptions, honestly",
-   "org": "skaists"
+   "gloss": "inscriptions, honestly traded",
+   "org": "skaists",
+   "descriptionKey": "s.blight-market.name",
+   "limit": "a design surface — no market runs behind it"
   },
   {
    "id": "bset",
@@ -641,8 +702,9 @@
    "home": "plur.earth",
    "path": "surfaces/bset.html",
    "state": "LIVE",
-   "gloss": "the set the founder builds",
-   "org": "skaists"
+   "gloss": "the set the founder builds to",
+   "org": "skaists",
+   "descriptionKey": "s.bset.name"
   },
   {
    "id": "festival",
@@ -650,8 +712,9 @@
    "home": "plur.earth",
    "path": "surfaces/festival/index.html",
    "state": "LIVE",
-   "gloss": "your day on the floor,",
-   "org": "skaists"
+   "gloss": "your day on the floor, free",
+   "org": "skaists",
+   "descriptionKey": "s.festival-index.name"
   },
   {
    "id": "kandi",
@@ -659,8 +722,9 @@
    "home": "plur.earth",
    "path": "surfaces/kandi.html",
    "state": "LIVE",
-   "gloss": "make it, name it, gift",
-   "org": "skaists"
+   "gloss": "make it, name it, gift it",
+   "org": "skaists",
+   "descriptionKey": "s.kandi.name"
   },
   {
    "id": "plur",
@@ -668,8 +732,10 @@
    "home": "plur.earth",
    "path": "surfaces/plur.html",
    "state": "LIVE",
-   "gloss": "thirty years of floor wisdom,",
-   "org": "skaists"
+   "gloss": "thirty years of floor wisdom, receipted",
+   "org": "skaists",
+   "descriptionKey": "s.plur.name",
+   "label": "PLUR"
   },
   {
    "id": "blight-studio-gate",
@@ -677,8 +743,9 @@
    "home": "skaists.dev",
    "path": "surfaces/blight/studio-gate.html",
    "state": "LIVE",
-   "gloss": "drop a layer, get a",
-   "org": "skaists"
+   "gloss": "drop a layer, get a verdict",
+   "org": "skaists",
+   "descriptionKey": "s.blight-studio-gate.name"
   },
   {
    "id": "blight-studio-music",
@@ -686,8 +753,10 @@
    "home": "skaists.dev",
    "path": "surfaces/blight/studio-music.html",
    "state": "LIVE",
-   "gloss": "compose, loop, export an",
-   "org": "skaists"
+   "gloss": "compose, loop, export an inscription",
+   "org": "skaists",
+   "descriptionKey": "s.blight-studio-music.name",
+   "label": "Music studio"
   },
   {
    "id": "forge-hexfield",
@@ -695,8 +764,9 @@
    "home": "skaists.dev",
    "path": "surfaces/forge/hexfield.html",
    "state": "LIVE",
-   "gloss": "roll a seed, grow a",
-   "org": "skaists"
+   "gloss": "roll a seed, grow a lattice",
+   "org": "skaists",
+   "descriptionKey": "s.forge-hexfield.name"
   },
   {
    "id": "forge",
@@ -704,8 +774,9 @@
    "home": "skaists.dev",
    "path": "surfaces/forge/index.html",
    "state": "LIVE",
-   "gloss": "instruments, not presets, for",
-   "org": "skaists"
+   "gloss": "instruments, not presets, for artists",
+   "org": "skaists",
+   "descriptionKey": "s.forge-index.name"
   },
   {
    "id": "forge-orbit",
@@ -713,8 +784,9 @@
    "home": "skaists.dev",
    "path": "surfaces/forge/orbit.html",
    "state": "LIVE",
-   "gloss": "seeded rose curves in",
-   "org": "skaists"
+   "gloss": "seeded rose curves in SVG",
+   "org": "skaists",
+   "descriptionKey": "s.forge-orbit.name"
   },
   {
    "id": "review",
@@ -722,8 +794,9 @@
    "home": "skaists.dev",
    "path": "surfaces/review.html",
    "state": "LIVE",
-   "gloss": "attestation, never",
-   "org": "skaists"
+   "gloss": "attestation, never telemetry",
+   "org": "skaists",
+   "descriptionKey": "s.review.name"
   },
   {
    "id": "fleet-hosted-gallery-resonance",
@@ -731,10 +804,13 @@
    "home": "skaists.dev",
    "path": "surfaces/fleet-hosted/gallery/resonance.html",
    "state": "LIVE",
-   "gloss": "Consciousness, Earth frequency, plant an argum",
+   "gloss": "Consciousness, Earth frequency, plant medicine",
    "warn": true,
    "counted": false,
-   "org": "skaists"
+   "org": "skaists",
+   "descriptionKey": "s.fleet-hosted-gallery-resonance.name",
+   "limit": "an argument drawn as a dashboard, not measurement",
+   "limitKey": "s.fleet-hosted-gallery-resonance.caveat"
   },
   {
    "id": "royalguard",
@@ -742,9 +818,12 @@
    "home": "skaists.dev",
    "path": "surfaces/royalguard.html",
    "state": "LIVE",
-   "gloss": "one deck, three doors, zero reads the decks it can; some panels are",
+   "gloss": "one deck, three doors, zero custody",
    "warn": true,
-   "org": "skaists"
+   "org": "skaists",
+   "descriptionKey": "s.royalguard.name",
+   "limit": "reads the decks it can; some panels are held",
+   "limitKey": "s.royalguard.caveat"
   },
   {
    "id": "dao-dashboard",
@@ -752,8 +831,10 @@
    "home": "skaists.dev",
    "path": "surfaces/dao-dashboard/index.html",
    "state": "LIVE",
-   "gloss": "how a treasury says I don't",
-   "org": "skaists"
+   "gloss": "how a treasury says I don't know",
+   "org": "skaists",
+   "descriptionKey": "s.dao-dashboard-index.name",
+   "limit": "every figure is a fixture, not a measurement"
   },
   {
    "id": "attest",
@@ -761,8 +842,9 @@
    "home": "bnature.social",
    "path": "surfaces/attest.html",
    "state": "LIVE",
-   "gloss": "one tongue, one evening,",
-   "org": "beehive-nature"
+   "gloss": "one tongue, one evening, signed",
+   "org": "beehive-nature",
+   "descriptionKey": "s.attest.name"
   },
   {
    "id": "blanguage",
@@ -770,8 +852,9 @@
    "home": "bnature.social",
    "path": "surfaces/blanguage.html",
    "state": "LIVE",
-   "gloss": "dock your tongue, no",
-   "org": "beehive-nature"
+   "gloss": "dock your tongue, no permission",
+   "org": "beehive-nature",
+   "descriptionKey": "s.blanguage.name"
   },
   {
    "id": "bsymposium",
@@ -779,8 +862,9 @@
    "home": "bnature.social",
    "path": "surfaces/bsymposium.html",
    "state": "LIVE",
-   "gloss": "two food protocols, both",
-   "org": "beehive-nature"
+   "gloss": "two food protocols, both receipted",
+   "org": "beehive-nature",
+   "descriptionKey": "s.bsymposium.name"
   },
   {
    "id": "buzz-studio",
@@ -788,8 +872,9 @@
    "home": "bnature.social",
    "path": "surfaces/buzz-studio.html",
    "state": "LIVE",
-   "gloss": "paint a comb together,",
-   "org": "beehive-nature"
+   "gloss": "paint a comb together, live",
+   "org": "beehive-nature",
+   "descriptionKey": "s.buzz-studio.name"
   },
   {
    "id": "devroom",
@@ -797,8 +882,10 @@
    "home": "bnature.social",
    "path": "surfaces/devroom.html",
    "state": "LIVE",
-   "gloss": "builders' findings, written for",
-   "org": "beehive-nature"
+   "gloss": "builders' findings, written for strangers",
+   "org": "beehive-nature",
+   "descriptionKey": "s.devroom.name",
+   "label": "Builder room"
   },
   {
    "id": "forge-room",
@@ -806,8 +893,9 @@
    "home": "bnature.social",
    "path": "surfaces/forge/room.html",
    "state": "LIVE",
-   "gloss": "two tabs, one shared",
-   "org": "beehive-nature"
+   "gloss": "two tabs, one shared field",
+   "org": "beehive-nature",
+   "descriptionKey": "s.forge-room.name"
   },
   {
    "id": "blight-hearth",
@@ -815,9 +903,12 @@
    "home": "bnature.social",
    "path": "surfaces/blight/hearth.html",
    "state": "LIVE",
-   "gloss": "co-create with the hive's a keyword router, not a model",
+   "gloss": "co-create with the hive's AI",
    "warn": true,
-   "org": "beehive-nature"
+   "org": "beehive-nature",
+   "descriptionKey": "s.blight-hearth.name",
+   "limit": "a keyword router, not a model",
+   "limitKey": "s.blight-hearth.caveat"
   },
   {
    "id": "blight-pulse",
@@ -825,9 +916,12 @@
    "home": "bnature.social",
    "path": "surfaces/blight/pulse.html",
    "state": "LIVE",
-   "gloss": "bX pointers live on the the read path is live against public relays",
+   "gloss": "bX pointers live on the relay",
    "warn": true,
-   "org": "beehive-nature"
+   "org": "beehive-nature",
+   "descriptionKey": "s.blight-pulse.name",
+   "limit": "the read path is live against public relays; broadcast is held",
+   "limitKey": "s.blight-pulse.caveat"
   },
   {
    "id": "bqueenbee-live",
@@ -835,9 +929,12 @@
    "home": "bnature.social",
    "path": "surfaces/bqueenbee-live.html",
    "state": "LIVE",
-   "gloss": "talk to the hive's machine answers from a page-local knowledge",
+   "gloss": "talk to the hive's machine referee",
    "warn": true,
-   "org": "beehive-nature"
+   "org": "beehive-nature",
+   "descriptionKey": "s.bqueenbee-live.name",
+   "limit": "answers from a page-local knowledge base, not a model",
+   "limitKey": "s.bqueenbee-live.caveat"
   },
   {
    "id": "btranslated",
@@ -845,9 +942,12 @@
    "home": "bnature.social",
    "path": "surfaces/btranslated.html",
    "state": "LIVE",
-   "gloss": "your name in your section two carries its own DEMO badge",
+   "gloss": "your name in your tongue",
    "warn": true,
-   "org": "beehive-nature"
+   "org": "beehive-nature",
+   "descriptionKey": "s.btranslated.name",
+   "limit": "section two carries its own DEMO badge",
+   "limitKey": "s.btranslated.caveat"
   },
   {
    "id": "forge-huddle",
@@ -855,9 +955,12 @@
    "home": "bnature.social",
    "path": "surfaces/forge/huddle.html",
    "state": "LIVE",
-   "gloss": "the same room, across you supply your own venue URL — we ship no",
+   "gloss": "the same room, across machines",
    "warn": true,
-   "org": "beehive-nature"
+   "org": "beehive-nature",
+   "descriptionKey": "s.forge-huddle.name",
+   "limit": "you supply your own venue URL — we ship no server",
+   "limitKey": "s.forge-huddle.caveat"
   },
   {
    "id": "bearth",
@@ -865,8 +968,10 @@
    "home": "bnature.bio",
    "path": "surfaces/bearth.html",
    "state": "LIVE",
-   "gloss": "what one food would cost the",
-   "org": "beehive-nature"
+   "gloss": "what one food would cost the planet",
+   "org": "beehive-nature",
+   "descriptionKey": "s.bearth.name",
+   "label": "bEarth"
   },
   {
    "id": "bfood",
@@ -874,8 +979,10 @@
    "home": "bnature.bio",
    "path": "surfaces/bfood.html",
    "state": "LIVE",
-   "gloss": "your nutrients, drawn honestly, never",
-   "org": "beehive-nature"
+   "gloss": "your nutrients, drawn honestly, never zero",
+   "org": "beehive-nature",
+   "descriptionKey": "s.bfood.name",
+   "label": "bFood"
   },
   {
    "id": "bigen",
@@ -883,8 +990,10 @@
    "home": "bnature.bio",
    "path": "surfaces/bigen.html",
    "state": "LIVE",
-   "gloss": "cannabis and cancer, graded",
-   "org": "beehive-nature"
+   "gloss": "cannabis and cancer, graded honestly",
+   "org": "beehive-nature",
+   "descriptionKey": "s.bigen.name",
+   "label": "bIGEN"
   },
   {
    "id": "blongevity",
@@ -892,8 +1001,9 @@
    "home": "bnature.bio",
    "path": "surfaces/blongevity.html",
    "state": "LIVE",
-   "gloss": "your body builds its own",
-   "org": "beehive-nature"
+   "gloss": "your body builds its own cannabinoids",
+   "org": "beehive-nature",
+   "descriptionKey": "s.blongevity.name"
   },
   {
    "id": "fleet-hosted-gallery-acid-cascade",
@@ -901,9 +1011,10 @@
    "home": "bnature.bio",
    "path": "surfaces/fleet-hosted/gallery/acid-cascade.html",
    "state": "LIVE",
-   "gloss": "The chronic inflammatory cascade,",
+   "gloss": "The chronic inflammatory cascade, argued",
    "counted": false,
-   "org": "beehive-nature"
+   "org": "beehive-nature",
+   "descriptionKey": "s.fleet-hosted-gallery-acid-cascade.name"
   },
   {
    "id": "fleet-hosted-gallery-indigo-index",
@@ -911,9 +1022,11 @@
    "home": "bnature.bio",
    "path": "surfaces/fleet-hosted/gallery/indigo-index.html",
    "state": "LIVE",
-   "gloss": "Chronic disease economics against",
+   "gloss": "Chronic disease economics against GDP",
    "counted": false,
-   "org": "beehive-nature"
+   "org": "beehive-nature",
+   "descriptionKey": "s.fleet-hosted-gallery-indigo-index.name",
+   "limit": "the central figure is a stated hypothesis"
   },
   {
    "id": "fleet-hosted-lab-blend-lab",
@@ -921,9 +1034,10 @@
    "home": "bnature.bio",
    "path": "surfaces/fleet-hosted/lab/blend-lab.html",
    "state": "LIVE",
-   "gloss": "Tobacco blend ratios, flavour and",
+   "gloss": "Tobacco blend ratios, flavour and cost",
    "counted": false,
-   "org": "beehive-nature"
+   "org": "beehive-nature",
+   "descriptionKey": "s.fleet-hosted-lab-blend-lab.name"
   },
   {
    "id": "fleet-hosted-lab-edible-tracker",
@@ -931,9 +1045,10 @@
    "home": "bnature.bio",
    "path": "surfaces/fleet-hosted/lab/edible-tracker.html",
    "state": "LIVE",
-   "gloss": "Edible dosing, onset, and effect",
+   "gloss": "Edible dosing, onset, and effect log",
    "counted": false,
-   "org": "beehive-nature"
+   "org": "beehive-nature",
+   "descriptionKey": "s.fleet-hosted-lab-edible-tracker.name"
   },
   {
    "id": "fleet-hosted-lab-flower-lab",
@@ -941,9 +1056,10 @@
    "home": "bnature.bio",
    "path": "surfaces/fleet-hosted/lab/flower-lab.html",
    "state": "LIVE",
-   "gloss": "THCA blending calculator with session",
+   "gloss": "THCA blending calculator with session log",
    "counted": false,
-   "org": "beehive-nature"
+   "org": "beehive-nature",
+   "descriptionKey": "s.fleet-hosted-lab-flower-lab.name"
   },
   {
    "id": "fleet-hosted-lab-intake-tracker",
@@ -951,9 +1067,10 @@
    "home": "bnature.bio",
    "path": "surfaces/fleet-hosted/lab/intake-tracker.html",
    "state": "LIVE",
-   "gloss": "Daily cannabinoid intake against your",
+   "gloss": "Daily cannabinoid intake against your RDI",
    "counted": false,
-   "org": "beehive-nature"
+   "org": "beehive-nature",
+   "descriptionKey": "s.fleet-hosted-lab-intake-tracker.name"
   },
   {
    "id": "fleet-hosted-lab-spliff-lab",
@@ -961,9 +1078,10 @@
    "home": "bnature.bio",
    "path": "surfaces/fleet-hosted/lab/spliff-lab.html",
    "state": "LIVE",
-   "gloss": "Roll composition against absorbed-THC",
+   "gloss": "Roll composition against absorbed-THC target",
    "counted": false,
-   "org": "beehive-nature"
+   "org": "beehive-nature",
+   "descriptionKey": "s.fleet-hosted-lab-spliff-lab.name"
   },
   {
    "id": "university",
@@ -971,8 +1089,9 @@
    "home": "bnature.bio",
    "path": "surfaces/university/index.html",
    "state": "LIVE",
-   "gloss": "learn to read the",
-   "org": "beehive-nature"
+   "gloss": "learn to read the evidence",
+   "org": "beehive-nature",
+   "descriptionKey": "s.university-index.name"
   },
   {
    "id": "fleet-hosted-lab-bnr-dashboard",
@@ -980,10 +1099,13 @@
    "home": "bnature.bio",
    "path": "surfaces/fleet-hosted/lab/bnr-dashboard.html",
    "state": "LIVE",
-   "gloss": "Reads what the other instruments reads what the o",
+   "gloss": "Reads what the other instruments write",
    "warn": true,
    "counted": false,
-   "org": "beehive-nature"
+   "org": "beehive-nature",
+   "descriptionKey": "s.fleet-hosted-lab-bnr-dashboard.name",
+   "limit": "reads what the other instruments write",
+   "limitKey": "s.fleet-hosted-lab-bnr-dashboard.caveat"
   },
   {
    "id": "bantfarm",
@@ -991,8 +1113,9 @@
    "home": "beehivebiomass.com",
    "path": "surfaces/bantfarm.html",
    "state": "LIVE",
-   "gloss": "two treasuries and the node farm,",
-   "org": "beehive-biomass"
+   "gloss": "two treasuries and the node farm, live",
+   "org": "beehive-biomass",
+   "descriptionKey": "s.bantfarm.name"
   },
   {
    "id": "blight-coop",
@@ -1000,9 +1123,12 @@
    "home": "beehivebiomass.com",
    "path": "surfaces/blight/coop.html",
    "state": "LIVE",
-   "gloss": "hemp biomass, ranked by the index is a fixed table, not a live",
+   "gloss": "hemp biomass, ranked by criticality",
    "warn": true,
-   "org": "beehive-biomass"
+   "org": "beehive-biomass",
+   "descriptionKey": "s.blight-coop.name",
+   "limit": "the index is a fixed table, not a live feed",
+   "limitKey": "s.blight-coop.caveat"
   },
   {
    "id": "bfactory",
@@ -1010,8 +1136,10 @@
    "home": "beehivebiomass.com",
    "path": "surfaces/bfactory.html",
    "state": "LIVE",
-   "gloss": "the ratified plan, made",
-   "org": "beehive-biomass"
+   "gloss": "the ratified plan, made walkable",
+   "org": "beehive-biomass",
+   "descriptionKey": "s.bfactory.name",
+   "limit": "its own banner: nothing is built"
   },
   {
    "id": "bmeshasi",
@@ -1019,8 +1147,10 @@
    "home": "beehivebiomass.com",
    "path": "surfaces/bmeshasi.html",
    "state": "LIVE",
-   "gloss": "pledge your iron, metered, paid",
-   "org": "beehive-biomass"
+   "gloss": "pledge your iron, metered, paid first",
+   "org": "beehive-biomass",
+   "descriptionKey": "s.bmeshasi.name",
+   "limit": "says it plainly itself: does not exist yet"
   },
   {
    "id": "index",
@@ -1028,8 +1158,9 @@
    "home": "skaists.dev",
    "path": "surfaces/index.html",
    "state": "LIVE",
-   "gloss": "the atlas you are reading — every surface, every domain, honest state",
-   "org": "skaists"
+   "gloss": "Explore the estate through art, people, science and open tools.",
+   "org": "skaists",
+   "label": "skaists atlas"
   },
   {
    "id": "forge-orbit-v2",
@@ -1047,8 +1178,9 @@
    "home": "skaists.dev",
    "path": "surfaces/design-system.html",
    "state": "LIVE",
-   "gloss": "the living style guide — the",
-   "org": "beehive-nature"
+   "gloss": "The shared visual language, tokens and components.",
+   "org": "beehive-nature",
+   "label": "Design system"
   },
   {
    "id": "museum",
@@ -1056,8 +1188,9 @@
    "home": "skaists.art",
    "path": "surfaces/museum.html",
    "state": "LIVE",
-   "gloss": "the royal art collection —",
-   "org": "skaists"
+   "gloss": "The royal art collection and the stories it carries.",
+   "org": "skaists",
+   "label": "Royal art collection"
   },
   {
    "id": "fieldnotes",
@@ -1084,7 +1217,8 @@
    "path": "surfaces/or-board.html",
    "state": "LIVE",
    "gloss": "the OR board — every agent, every bug, every kit",
-   "org": "skaists"
+   "org": "skaists",
+   "label": "OR board"
   },
   {
    "id": "ant-door",
@@ -1093,7 +1227,8 @@
    "path": "surfaces/ant-door.html",
    "state": "LIVE",
    "gloss": "the Autonomi door — mainnet bytes read same-origin through the estate GET-only door",
-   "org": "skaists"
+   "org": "skaists",
+   "label": "Autonomi door"
   },
   {
    "id": "profile",
@@ -1120,7 +1255,8 @@
    "path": "surfaces/vending.html",
    "state": "LIVE",
    "gloss": "the vending machine — mint your agent, keep what you make",
-   "org": "beehive-nature"
+   "org": "beehive-nature",
+   "label": "Vending machine"
   },
   {
    "id": "privacy-lens",
@@ -1129,7 +1265,8 @@
    "path": "surfaces/privacy-lens.html",
    "state": "LIVE",
    "gloss": "the privacy lens — the private note, both sides of the glass",
-   "org": "beehive-nature"
+   "org": "beehive-nature",
+   "label": "Privacy lens"
   },
   {
    "id": "watch",
@@ -1138,7 +1275,8 @@
    "path": "surfaces/watch.html",
    "state": "LIVE",
    "gloss": "the watch room — one screen, the room shares it",
-   "org": "beehive-nature"
+   "org": "beehive-nature",
+   "label": "Watch room"
   }
  ],
  "counts": {

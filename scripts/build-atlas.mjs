@@ -5,7 +5,7 @@
    zero runtime fetch (the design's preview fetch is preview-only and does not
    ship). The hex-band masthead is lifted BYTE-TRUE from surfaces/doors/index.html
    at build (read, never retyped — preservation law: diff, don't trust). The
-   in-page JS adds only search. Run after editing estate.json:
+   in-page JS adds search and reading preferences. Run after editing estate.json:
      node scripts/build-atlas.mjs
    CI (scripts/estate-check.mjs) fails if the page drifts from the registry. */
 import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
@@ -74,390 +74,128 @@ for (const d of ['lab', 'gallery']) {
   }
 }
 
-const GLOSS = {
-  beehivenature: 'the organism itself — what it is, how it proves it, how to join',
-  skaists: 'the makers\u2019 workshop — instruments, art, and labs',
-  bnature: 'people and living systems — rooms to talk, honest science',
-  beehivebiomass: 'the physical network — machines, farms, bandwidth',
-  beehivebuds: 'the buds line — founder-gated, waiting its seat',
-  plur: 'the rave heart — sets, festivals, kandi, floor wisdom',
-  midi: 'the music universe — one seed, on-chain scores, the vault',
-  bnr: 'the kernel\u2019s public face — quests for curious minds'
-};
-/* THE FOUR OBJECTIONS — autonomi's own community named why people hesitate;
-   the estate answers each by construction. Three audiences per answer (the
-   register law's bee / raver / cypherpunk). EN is the corpus anchor: the
-   generator emits it inside the spans, lang-corpus carries the tongues. */
-const FOUR = {
-  kicker: 'the four objections, answered by design',
-  title: 'what stops people — and what we built about it',
-  intro: 'autonomi\u2019s own community named four reasons people hesitate. the estate answers each one by construction, not by promise — and writes the answers on the door.',
-  q1: 'do I want this permanent?',
-  a1: 'arweave keeps what you choose forever; autonomi keeps what you choose private — and deletable. two vaults, your call per record.',
-  'a1.bee': 'your agent\u2019s birth certificate lives on arweave — permanent by physics, not by promise. your everyday files live on autonomi — private, and gone the day you delete them.',
-  'a1.raver': 'the mixtape you want forever is forever. the selfies you don\u2019t? gone when you tap delete. no vault holds both hostage.',
-  'a1.cypher': 'permanence is a per-record property: arweave for the receipt of you, autonomi for the self that changes. lock-in requires immutability — deletion stays a first-class verb.',
-  q2: 'do I trust it with personal data?',
-  a2: 'encrypted under your own key before it leaves your device — the estate stores locked boxes, never the keys.',
-  'a2.bee': 'your files are locked with YOUR key before they travel. the estate can store them; it can never open them.',
-  'a2.raver': 'we built the locker. we never had a copy of your key. that is the whole point of a locker.',
-  'a2.cypher': 'client-side encryption under keys the estate never sees; the storage layer holds ciphertext and minimal pointers. trust is not required — verification is.',
-  q3: 'my phone already backs up for free — where is my login-anywhere?',
-  a3: 'one install, your own name (.b), every device — your stuff follows your name, not the machine.',
-  'a3.bee': 'install once, claim your .b name, sign in anywhere with it. new phone? same name, everything still yours.',
-  'a3.raver': 'your name is your login — same room, same crew, same files, from any phone. no new account per app, ever.',
-  'a3.cypher': 'the .b name is a self-sovereign pointer: keys you hold, a name you own, sessions anywhere — login-anywhere without an identity provider.',
-  q4: 'tracking every crypto transaction for tax is agony.',
-  a4: 'the meter receipts every spend the moment it happens — and sets the tax aside for you as it goes.',
-  'a4.bee': 'every spend prints its own receipt, and the tax slice is put aside automatically. april-you says thanks.',
-  'a4.raver': 'no spreadsheet hell. the house keeps the books and holds the tax bit aside while you spend.',
-  'a4.cypher': 'the meter emits signed, resource-denominated receipts per spend; the liability accrues to a reserved bucket at spend time — auditability without the ledger chores.'
-};
-const DOORS = {
-  beehivenature: [['doors/beehivenature.html', 'the door →']],
-  skaists: [['doors/skaists.html', 'the door →']],
-  bnature: [['doors/bnature-social.html', 'social door →'], ['doors/bnature-bio.html', 'bio door →']],
-  beehivebiomass: [['doors/beehivebiomass.html', 'the door →']],
-  plur: [['doors/plur.html', 'the door →']]
-};
+/* The registry owns membership, counts, descriptions and explicit limits.
+   The language corpus supplies existing human-readable renderings. */
+const corpus = JSON.parse(readFileSync('surfaces/lang-corpus.json', 'utf8')).strings;
+const esc = value => String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+const text = (key, fallback) => `<span data-i18n="${esc(key)}">${esc(corpus[key]?.en || fallback)}</span>`;
 const ORGS = [
-  { id: 'skaists', label: 'skaists', line: 'the culture face — the makers, the dancefloor, the music universe', gh: 'https://github.com/skaists',
-    hex: 'linear-gradient(90deg,#FBFB9F,#86CC72,#45C2DC,#6FA9E0,#9C6FD6)', pill: '#B79FE0', house: 'sk' },
-  { id: 'beehive-nature', label: 'beehive-nature', line: 'the organism / protocol face — what it is, how it proves it, how to join', gh: 'https://github.com/beehive-nature',
-    hex: 'linear-gradient(92deg,#E9F2EC 55%,#D655BB)', pill: '#D655BB', house: 'bn' },
-  { id: 'beehive-biomass', label: 'beehive-biomass', line: 'the machine / supply face — machines, farms, bandwidth', gh: 'https://github.com/beehive-biomass',
-    hex: 'linear-gradient(92deg,#E9F2EC 55%,#86CC72)', pill: '#86CC72', house: 'bm' }
+  {id:'skaists', mark:'sk', label:'skaists'},
+  {id:'beehive-nature', mark:'bn', label:'beehive-nature'},
+  {id:'beehive-biomass', mark:'bm', label:'beehive-biomass'}
 ];
-const nOrgs = ORGS.length;
-
-const dec = t => (t || '').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&');
-
-/* families grouped by the registry's own org field (the axis is the authority) */
-const famOrg = f => (E.domains.find(d => d.fam === f) || {}).org || (E.surfaces.find(s => s.family === f) || {}).org;
-
-const famBlock = (f, house) => {
-  const doms = E.domains.filter(d => d.fam === f);
-  const all = E.surfaces.filter(s => s.family === f);
-  const counted = all.filter(s => s.counted !== false).length;
-  const honoured = all.length - counted.length;
-  const shown = all.filter(s => s.presented !== false);
-  const rows = shown.map(s =>
-    `<a class="srf" data-t="${(famOrg(f) + ' ' + f + ' ' + s.id + ' ' + dec(s.gloss)).replace(/"/g, '&quot;')}" href="${s.path.replace(/^surfaces\//, '')}">` +
-    `<span class="nm">${s.id.replace(/-/g, ' ')}${s.warn ? '<span class="warn" title="a named limit">⚠</span>' : ''}</span>` +
-    `<span class="gl">${s.gloss}</span></a>`).join('\n');
-  const domHtml = doms.map(d => {
-    const st = d.state === 'LIVE' ? 'live' : d.state === 'DNS-PENDING' ? 'dns' : 'seat';
-    return `<span class="dom ${st}" title="front repo: ${d.repo || 'none yet'}">${d.d}<span class="st">${d.state === 'LIVE' ? '<span data-i18n="hub.st.live">LIVE</span>' : d.state === 'DNS-PENDING' ? '<span data-i18n="hub.st.dns">DNS-PENDING</span>' : '<span data-i18n="hub.st.seat">SEAT-OPEN</span>'}</span></span>`;
-  }).join('');
-  const doorHtml = (DOORS[f] || []).map(d => `<a class="doorlink" href="${d[0]}">${d[1]}</a>`).join(' ');
-  const wSurfaces = '<span data-i18n="hub.w.surfaces">surfaces</span>';
-  const wDomains = '<span data-i18n="hub.w.domains">domains</span>';
-  const countLine = counted === 0 && honoured === 0
-    ? '<span data-i18n="hub.openseat">an open seat — the domain waits for its first surface</span> · ' + doms.length + ' ' + wDomains
-    : counted + ' ' + wSurfaces + (honoured ? ' · ' + honoured + ' <span data-i18n="hub.honoured">honoured uncounted (the founder’s art)</span>' : '') + ' · ' + doms.length + ' ' + wDomains;
-  return `<section class="fam ${house}" id="fam-${f}">
-<div class="famhead"><span class="hexdot ${house}"></span><h3>${f}</h3><span class="gloss" data-i18n="hub.gl.${f}">${GLOSS[f] || ''}</span>${doorHtml}</div>
-<div class="doms">${domHtml}</div>
-<div class="famcount">${countLine}</div>
-<div class="rows">${rows || '<span class="gl" style="padding:8px 2px"></span>'}</div>
-</section>`;
+const familyOrg = family => E.domains.find(d => d.fam === family)?.org || E.surfaces.find(s => s.family === family)?.org;
+const label = s => s.label || s.id.replace(/-/g, ' ');
+const description = s => s.descriptionKey && corpus[s.descriptionKey]
+  ? text(s.descriptionKey, s.gloss) : esc(s.gloss);
+const limit = s => s.limitKey && corpus[s.limitKey]
+  ? text(s.limitKey, s.limit) : esc(s.limit || '');
+const surface = s => `<article class="srf" data-family="${esc(s.family)}" data-org="${esc(s.org)}" data-t="${esc([s.id,label(s),s.gloss,s.home,s.family,s.org,s.limit].join(' '))}"><a class="surface-link" href="${esc(s.path.replace(/^surfaces\//,''))}">
+  <div class="row-title"><span class="nm">${esc(label(s))}</span><span class="row-arrow" aria-hidden="true">↗</span></div>
+  <div class="gl">${description(s)}</div>
+  ${s.limit ? `<div class="surface-limit"><span aria-hidden="true">△</span> ${limit(s)}</div>` : ''}
+  <div class="row-meta"><span>${esc(s.family)}</span><span class="page-state">${s.state === 'LIVE' ? text('atlas.published','Published page') : esc(s.state)}</span>${s.warn && !s.limit ? `<span class="surface-limit">${text('atlas.limit','Named limit')}</span>` : ''}</div>
+</a><details class="row-trace"><summary>${text('atlas.source','Source & limits')}</summary><dl><dt>id</dt><dd>${esc(s.id)}</dd><dt>path</dt><dd><a href="https://github.com/beehive-nature/beehive-nature/blob/main/${esc(s.path)}" target="_blank" rel="noopener">${esc(s.path)} ↗</a></dd><dt>org</dt><dd>${esc(s.org)}</dd><dt>home</dt><dd>${esc(s.home)}</dd><dt>page</dt><dd>${esc(s.state)}</dd><dt>limit</dt><dd>${s.limit ? limit(s) : text('atlas.unspecified','Not specified in this registry row')}</dd></dl></details></article>`;
+const families = family => {
+  const rows = E.surfaces.filter(s => s.family === family && s.presented !== false);
+  const domains = E.domains.filter(d => d.fam === family);
+  const count = E.surfaces.filter(s => s.family === family && s.counted !== false).length;
+  return `<section class="fam" id="fam-${family}" data-family="${family}">
+    <div class="famhead"><div><h3>${esc(family)}</h3><p>${text('hub.gl.'+family,'')}</p></div><span class="family-count">${count}</span></div>
+    <div class="rows">${rows.length ? rows.map(surface).join('\n') : `<p class="open-seat">${text('hub.openseat','')}</p>`}</div>
+    <details class="domain-details"><summary>${text('atlas.domains','Domains & ownership')} <span>${domains.length}</span></summary><div class="doms">${domains.map(d => `<div class="dom"><span>${esc(d.d)}</span><span class="st ${d.state === 'LIVE' ? 'live' : 'pending'}">${text(d.state === 'LIVE' ? 'hub.st.live' : d.state === 'DNS-PENDING' ? 'hub.st.dns' : 'hub.st.seat',d.state)}</span></div>`).join('')}</div></details>
+  </section>`;
 };
-
-const houses = ORGS.map(o => {
-  const fams = E.families.filter(f => famOrg(f) === o.id);
-  const counted = (c.byOrg[o.id] || 0);
-  const nd = E.domains.filter(d => d.org === o.id).length;
-  return `<section class="org" id="org-${o.id}">
-<div class="orghead"><span class="orghex" style="background:${o.hex}"></span>
-<h2 style="background:${o.hex};-webkit-background-clip:text;background-clip:text;color:transparent">${o.label}</h2>
-<span class="orgline" data-i18n="hub.org.${o.id}.line">${o.line}</span>
-<a class="gh" href="${o.gh}">${o.gh.replace('https://', '')} →</a></div>
-<div class="orgcount">${counted} surfaces · ${nd} domains · ${fams.length}${fams.length === 1 ? ' family' : ' families'} — computed from the registry\u2019s org field</div>
-${fams.map(f => famBlock(f, o.house)).join('\n')}
-</section>`;
+const houses = ORGS.map(o => `<section class="org ${o.mark}" id="org-${o.id}" data-org="${o.id}">
+  <div class="orghead"><span class="org-mark" aria-hidden="true">${o.mark}</span><div><h2>${o.label}</h2><p>${text('hub.org.'+o.id+'.line','')}</p></div><a class="org-source" href="https://github.com/${o.id}" target="_blank" rel="noopener">GitHub ↗</a></div>
+  ${E.families.filter(f => familyOrg(f) === o.id).map(families).join('\n')}
+</section>`).join('\n');
+const starters = [
+  {id:'blight-gallery',number:'01',mark:'art',action:'Explore art',help:'Look around the gallery.'},
+  {id:'blight-studio-music',number:'02',mark:'music',action:'Make music',help:'Create a piece of your own.'},
+  {id:'buzz-directory',number:'03',mark:'people',action:'Meet the hive',help:'Find a community to visit.'}
+].map(item => {
+  const s = E.surfaces.find(s => s.id === item.id && s.presented !== false);
+  if (!s) throw new Error('Start destination missing from registry: '+item.id);
+  const picture = item.mark === 'art'
+    ? '<img src="atlas-art/fungi.svg" width="80" height="80" alt="">'
+    : item.mark === 'music'
+      ? '<svg viewBox="0 0 80 80" fill="none" aria-hidden="true"><path d="M17 34v12m9-24v36m9-43v50m10-40v30m9-24v18m9-14v10" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>'
+      : '<svg viewBox="0 0 80 80" fill="none" aria-hidden="true"><path d="m40 12 15 9v18l-15 9-15-9V21Zm-15 27 15 9v18l-15 9-15-9V48Zm30 0 15 9v18l-15 9-15-9V48Z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg>';
+  return `<a class="start-link ${item.mark}" href="${esc(s.path.replace(/^surfaces\//,''))}"><span class="start-picture" aria-hidden="true">${picture}</span><div><strong>${text('atlas.'+item.mark+'Action',item.action)}</strong><span class="start-help">${text('atlas.'+item.mark+'Help',item.help)}</span><span class="start-technical" data-reg="cypherpunk">${description(s)}</span></div><span class="start-arrow" aria-hidden="true">→</span></a>`;
 }).join('\n');
-
-const orgPills = ORGS.map(o =>
-  `<a href="#org-${o.id}" style="border-color:${o.pill}">${o.label} <span class="n">${c.byOrg[o.id] || 0}</span></a>`).join('\n');
-const famPills = E.families.map(f =>
-  `<a href="#fam-${f}">${f} <span class="n">${c.byFamily[f] || 0}</span></a>`).join('\n');
-
-const json = JSON.stringify(E);
-
+const side = ORGS.map(o => `<div class="side-house ${o.mark}"><a class="side-org" href="#org-${o.id}"><span>${o.label}</span><b>${c.byOrg[o.id] || 0}</b></a>${E.families.filter(f => familyOrg(f) === o.id).map(f => `<a class="side-family" href="#fam-${f}" data-family-link="${f}">${esc(f)}<span>${c.byFamily[f] || 0}</span></a>`).join('')}</div>`).join('\n');
 const page = `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="color-scheme" content="dark">
-<meta name="theme-color" content="#06110C">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f6f7f2">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="bn-logo.jpg">
-<title>beehive nature reserve · the atlas — every surface, every org, every domain, live</title>
-<meta name="description" content="One estate, three orgs, eight families. Every surface beehive nature reserve has built, grouped by the org that answers for it — computed from the registry, never hand-written.">
+<link rel="stylesheet" href="atlas.css?v=1">
+<title>skaists · beehive nature reserve</title>
+<meta name="description" content="Explore the beehive nature reserve: on-chain art, music, people, science and open tools. Find a place to begin, then browse the whole estate.">
 <style>
-/* THE ATLAS — master design pass 2026-08-28, rendered by scripts/build-atlas.mjs.
-   SEMANTIC COLOUR — meanings picked FIRST, hues second:
-   harm = guard violet · solution = biomass green (the estate's one accent)
-   value = gold (b amounts only — none on this page) · system = info blue
-   science = ai cyan (infrastructure state: DNS, warn marks). Org hues are
-   IDENTITY (skaists prism · beehive-nature magenta · beehive-biomass green),
-   meaning-bearing per the org axis. The hex band is the doors' art, lifted
-   byte-true — chrome is calm, the art lives. */
-:root{
-  --void:#06110C; --panel:#0B1A12; --inset:#0E2418; --line:#1E3A2A; --line2:#1E2B26;
-  --ink:#E9F2EC; --dim:#8FA79C; --faint:#648176;
-  --biomass:#86CC72; --ai:#45C2DC; --b-value:#E8B54B; --info:#6FA9E0;
-  --guard:#B7A8F7; --sovereign:#9C6FD6; --you:#D655BB;
-  --sem-harm:var(--guard); --sem-solution:var(--biomass); --sem-value:var(--b-value);
-  --sem-system:var(--info); --sem-science:var(--ai);
-}
-html{background:var(--void);color:var(--ink);-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--void);font:14px/1.6 ui-monospace,'Cascadia Mono','SF Mono',Menlo,Consolas,monospace}
-a{color:var(--biomass);text-decoration:none}
-a:hover{text-decoration:underline}
-::selection{background:var(--biomass);color:var(--void)}
-.skip{position:absolute;left:-9999px}
-.skip:focus{left:8px;top:8px;background:var(--inset);padding:8px 12px;border-radius:8px;z-index:9}
-.wrap{max-width:1060px;margin:0 auto;padding:0 clamp(14px,3vw,20px)}
-/* the masthead is FULL-BLEED edge-to-edge (founder art ruling 2026-08-28):
-   the lifted doors' band bytes are untouched — the presentation wrapper
-   anchors bandwrap to the viewport edges, and on ultrawide the COURSES scale
-   by stepped CSS zoom (uniform, so there is no seam and no repeat-jolt; the
-   drift/pulse transforms run untouched inside the zoom). */
-header.mast{position:relative;overflow:hidden;border-bottom:1px solid var(--line);padding-bottom:26px}
-#bandwrap{--bandh:149px}
+/* Founder-preserved artwork, lifted verbatim from the doors. SEMANTIC COLOUR:
+   biomass green = living systems; guard violet = limits; information blue =
+   system evidence; honey is reserved for b value, not navigation. */
 ${bandCss}
-#bandwrap .band{zoom:1}
-@media (min-width:1799px){#bandwrap .band{zoom:1.1}header.mast #bandwrap{--bandh:164px}.crumbs{margin-top:172px}}
-@media (min-width:1999px){#bandwrap .band{zoom:1.25}header.mast #bandwrap{--bandh:186px}.crumbs{margin-top:194px}}
-@media (min-width:2499px){#bandwrap .band{zoom:1.5}header.mast #bandwrap{--bandh:224px}.crumbs{margin-top:234px}}
-@media (min-width:2999px){#bandwrap .band{zoom:1.8}header.mast #bandwrap{--bandh:268px}.crumbs{margin-top:280px}}
-@media (min-width:3400px){#bandwrap .band{zoom:2.1}header.mast #bandwrap{--bandh:313px}.crumbs{margin-top:327px}}
-@media (min-width:3900px){#bandwrap .band{zoom:2.45}header.mast #bandwrap{--bandh:365px}.crumbs{margin-top:381px}}
-@media (min-width:4400px){#bandwrap .band{zoom:2.8}header.mast #bandwrap{--bandh:417px}.crumbs{margin-top:435px}}
-@media (min-width:4900px){#bandwrap .band{zoom:3.15}header.mast #bandwrap{--bandh:469px}.crumbs{margin-top:489px}}
-@media (prefers-reduced-motion:reduce){#bandwrap *{animation:none !important}}
-.crumbs{position:relative;display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:157px;padding:9px 0;border-bottom:1px solid var(--line);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
-.crumbs .here{color:var(--ink)} .crumbs .sub{color:var(--dim)}
-.crumbs .badge{margin-left:auto;display:inline-flex;align-items:center;gap:7px;color:var(--dim);font-size:10px;letter-spacing:.14em}
-.crumbs .badge i{width:8px;height:8px;border-radius:50%;background:var(--biomass)}
-.kicker{position:relative;margin:22px 0 0;font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:var(--faint)}
-h1{position:relative;font-size:clamp(32px,6vw,44px);line-height:1.08;margin:10px 0 8px;font-weight:600;
-  background:linear-gradient(92deg,#E9F2EC 55%,#86CC72);-webkit-background-clip:text;background-clip:text;color:transparent}
-.lede{position:relative;color:var(--dim);max-width:56ch;margin:0 0 14px;font-size:14px;line-height:1.7}
-.stat{position:relative;display:flex;flex-direction:column;gap:2px;margin:0 0 6px}
-.stat .num{font-size:38px;line-height:1;font-weight:600;font-variant-numeric:tabular-nums}
-.stat .cap{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
-.counts{position:relative;font-size:12.5px;color:var(--dim);margin:0 0 18px}
-.counts b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
-#q{position:relative;width:100%;box-sizing:border-box;background:var(--inset);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:13px 16px;font:15px/1.4 ui-monospace,Menlo,Consolas,monospace;outline:none;transition:border-color .15s}
-#q:focus{border-color:var(--biomass)}
-#shown{font-size:11.5px;color:var(--faint);margin:8px 2px 0;min-height:16px}
-.four{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:clamp(12px,2.5vw,18px);margin:0 0 22px}
-.four .kick{color:var(--faint);font-size:10px;letter-spacing:.34em;text-transform:uppercase;margin:0 0 10px}
-.four .fourhead h2{font-size:20px;font-weight:700;margin:0;letter-spacing:-.01em}
-.four .fourintro{color:var(--dim);font-size:12.5px;line-height:1.75;max-width:76ch;margin:0 2px 14px}
-.four .row{background:var(--inset);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:10px}
-.four .q{color:var(--b-value);font-size:13px;line-height:1.6;margin:0}
-.four .a{color:var(--ink);font-size:13.5px;line-height:1.65;margin:7px 0 0}
-.four .regs{display:flex;flex-direction:column;gap:4px;margin-top:9px}
-.four .reg{display:flex;gap:8px;align-items:baseline;font-size:11.5px;line-height:1.7;color:var(--dim)}
-.four .reg .who{flex:none;color:var(--faint);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;min-width:104px}
-@media (max-width:600px){.four{padding:13px 12px}.four .reg .who{min-width:88px}}
-.orgnav{display:flex;flex-wrap:wrap;gap:8px;padding:16px 0 4px}
-.orgnav a{font-size:12px;padding:7px 13px;border:1px solid;border-radius:999px;background:#0A1310;color:var(--ink)}
-.orgnav a:hover{text-decoration:none;background:#111C17}
-.famjump{display:flex;flex-wrap:wrap;gap:8px;padding:8px 0 22px}
-.famjump a{font-size:12px;padding:6px 11px;border:1px solid var(--line2);border-radius:999px;background:#0C1412;color:var(--dim)}
-.famjump a:hover{border-color:var(--biomass);text-decoration:none}
-.n{color:var(--faint);font-variant-numeric:tabular-nums}
-section.org{border:1px solid var(--line2);border-radius:14px;padding:clamp(12px,2.5vw,18px);margin:0 0 22px;scroll-margin-top:18px;background:var(--panel)}
-section.org.bn{border-color:var(--line)}
-section.org.hidden,section.fam.hidden{display:none}
-.orghead{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 14px;margin-bottom:12px;background:var(--inset);border-radius:10px;padding:8px 12px;margin-left:-6px;margin-right:-6px}
-.orghex{width:12px;height:13px;flex:none;align-self:center;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
-.orghead h2{font-size:20px;font-weight:700;margin:0;letter-spacing:-.01em}
-.orgline{color:var(--dim);font-size:12.5px;flex:1 1 240px}
-.orghead .gh{font-size:11px;color:var(--dim)}
-.orgcount{color:var(--faint);font-size:11.5px;margin:0 2px 12px}
-section.fam{border:1px solid;border-radius:12px;padding:clamp(14px,2.5vw,18px) clamp(12px,2.5vw,18px) 10px;margin:0 0 14px;scroll-margin-top:18px}
-section.fam.sk{background:#0A1310;border-color:var(--line2)}
-section.fam.bn{background:#0B1A12;border-color:var(--line)}
-section.fam.bm{background:#0C1412;border-color:var(--line2)}
-.famhead{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 14px;margin-bottom:4px}
-.hexdot{width:10px;height:10px;flex:none;align-self:center;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
-.hexdot.sk{background:#B79FE0}.hexdot.bn{background:var(--you)}.hexdot.bm{background:var(--biomass)}
-.famhead h3{font-size:17px;font-weight:600;margin:0}
-.famhead .gloss{color:var(--dim);font-size:12.5px;flex:1 1 240px}
-.doorlink{font-size:12px}
-.doms{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
-.dom{white-space:nowrap;font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid var(--line2);color:var(--dim)}
-.dom .st{margin-left:6px}
-.dom.live{border-color:var(--biomass)}.dom.live .st{color:var(--biomass)}
-.dom.dns .st{color:var(--ai)}
-.dom.seat .st{color:var(--faint)}
-.famcount{color:var(--dim);font-size:11.5px;margin:8px 2px 6px}
-.rows{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:0 18px}
-.srf{display:block;padding:8px;border-bottom:1px solid var(--line2);border-radius:6px;min-height:44px;box-sizing:border-box}
-.srf:hover{background:#111C17;text-decoration:none}
-.srf .nm{color:var(--ink);font-size:13.5px}
-.srf:hover .nm{color:var(--biomass)}
-.srf .gl{color:var(--dim);font-size:11.5px;display:block;margin-top:1px}
-.srf .warn{color:var(--ai);font-size:11px;margin-left:5px}
-footer{color:var(--dim);font-size:12px;border-top:1px solid var(--line);margin-top:28px;padding:16px 0 84px}
-footer .m{margin-top:6px;max-width:72ch;color:var(--faint);line-height:1.8}
-footer b{color:var(--ink);font-variant-numeric:tabular-nums}
-@media (max-width:600px){
-  .crumbs{margin-top:120px}
-  #bandwrap{--bandh:112px}
-  section.fam{padding:13px 12px 8px}
-  section.org{padding:12px}
-}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
-<body>
-<a class="skip" href="#families">skip to the families</a>
+<body data-reg="bee">
+<a class="skip" href="#explore">${text('atlas.browse','Explore the estate')}</a>
+<div class="mode-bar"><div class="wrap mode-inner"><a class="mode-home" href="index.html" aria-label="skaists home">⬡ <span>skaists</span></a><div data-register-host aria-describedby="view-explainer"></div><a class="mode-proof" href="#explore">${text('atlas.everything','Explore everything')} ↓</a></div><p class="sr-only" id="view-explainer">${text('atlas.view','Choose how this page speaks to you')}. ${text('atlas.canonical','Same facts. Three ways to read them.')}</p></div>
 <header class="mast" data-art>
   ${bandLine}
-  <div class="wrap">
-  <nav class="crumbs" aria-label="you are here">
-    <span class="here" data-i18n="hub.name">beehive nature reserve</span><span class="sub">▸</span><span class="sub" data-i18n="hub.crumb.atlas">skaists atlas</span>
-    <span class="badge"><i></i><span data-i18n="hub.badge.static">static · search is the only script</span></span>
-  </nav>
-  <p class="kicker" data-i18n="hub.kicker">zero network · no password · no name</p>
-  <h1 data-i18n="hub.name">beehive nature reserve</h1>
-  <p class="lede" data-i18n="hub.lede">one estate, three orgs, eight families. every surface the estate has built lives below, grouped by the org that answers for it and the domain it answers to — honest about what is live, what is waiting on dns, and what is still an open seat.</p>
-  <div class="stat" aria-live="polite">
-    <span class="num" data-hero-number>${c.surfaces}</span>
-    <span class="cap" data-hero-caption data-i18n="hub.hero.cap">surfaces · every number computed from the registry</span>
-  </div>
-  <p class="counts"><b>${c.surfaces}</b> <span data-i18n="hub.w.surfaces">surfaces</span> · <b>${c.domains}</b> <span data-i18n="hub.w.domains">domains</span> · <b>${c.families}</b> <span data-i18n="hub.w.families">families</span> · <b>${nOrgs}</b> <span data-i18n="hub.w.orgs">orgs</span> · <span data-i18n="hub.counts.tail">every number computed from the registry</span></p>
-  <input id="q" type="search" placeholder="search the estate — a name, a feeling, a tool" aria-label="search the estate">
-  <div id="shown" aria-live="polite"></div>
+  <div class="wrap mast-content">
+    <nav class="mast-nav" aria-label="Primary"><a class="wordmark" href="index.html">skaists<span>.dev</span></a><span data-language-host></span></nav>
+    <div class="welcome">
+      <div class="welcome-copy"><p class="eyebrow">${text('m.4','')}</p><h1><span data-reg="bee">${text('atlas.heading','A place for your creativity.')}</span><span data-reg="raver">${text('hub.name','')}</span><span data-reg="cypherpunk">${text('hub.name','')}</span></h1><p class="intro" data-reg="bee">${text('atlas.intro','Art, people, science and tools — made in the open.')}</p><p class="intro" data-reg="raver">${text('atlas.raver','Carry a garden. Make a sound. Find your people.')}</p><p class="intro" data-reg="cypherpunk">${text('atlas.cypher','Inspect the implementation, provenance and limits of each surface.')}</p><p class="begin-note" data-reg="bee">${text('atlas.progressive','Choose a place to begin. The rest is here when you want it.')}</p></div>
+      <div class="start"><p class="eyebrow">${text('atlas.start','Start here')}</p>${starters}</div>
+    </div>
+    <div class="art-stage" data-reg="raver"><a class="art-piece fungi" href="blight/gallery.html"><img src="atlas-art/fungi.svg" width="240" height="240" alt="FUNGi on-chain mushroom artwork"><span><b>FUNGi</b><span>ERC20i</span></span></a><a class="art-piece froggi" href="blight/gallery.html"><img src="atlas-art/froggi.svg" width="240" height="240" alt="FROGGi on-chain frog artwork"><span><b>FROGGi</b><span>ERC20i</span></span></a><a class="art-piece pepi" href="blight/gallery.html"><img src="atlas-art/pepi.svg" width="240" height="240" alt="PEPi on-chain pixel artwork"><span><b>PEPi</b><span>ERC20i</span></span></a><p class="art-caption">${text('atlas.art','On-chain artwork snapshots. Open the gallery to explore.')} <a href="atlas-art/provenance.json">${text('h.016','SOURCES')} ↗</a></p></div>
+    <details class="architecture"><summary>${text('atlas.source','Source & limits')}</summary><div class="counts"><span><b data-hero-number>${c.surfaces}</b> ${text('hub.w.surfaces','surfaces')}</span><span><b>${c.families}</b> ${text('hub.w.families','families')}</span><span><b>${ORGS.length}</b> ${text('hub.w.orgs','orgs')}</span></div><div class="architecture-grid"><div><span>registry</span><a href="../estate.json">estate.json · v${E.v}</a></div><div><span>render</span><a href="https://github.com/beehive-nature/beehive-nature/blob/main/scripts/build-atlas.mjs" target="_blank" rel="noopener">build-atlas.mjs ↗</a></div><div><span>kernel</span><a href="dock.html">BNRoSe · ${text('s.dock.name','')}</a></div><div><span>continuity</span><a href="../docs/dispatches/2026-09-06-astra-kernel-continuity.md">${text('atlas.proof','Read the evidence')} ↗</a></div></div></details>
   </div>
 </header>
-
-<div class="wrap">
-<section class="four" aria-label="the four objections, answered by design">
-<p class="kick" data-i18n="hub.four.kicker">the four objections, answered by design</p>
-<div class="fourhead"><h2 data-i18n="hub.four.title">what stops people — and what we built about it</h2></div>
-<p class="fourintro" data-i18n="hub.four.intro">autonomi's own community named four reasons people hesitate. the estate answers each one by construction, not by promise — and writes the answers on the door.</p>
-<div class="row">
-<p class="q">“<span data-i18n="hub.four.q1">do I want this permanent?</span>”</p>
-<p class="a" data-i18n="hub.four.a1">arweave keeps what you choose forever; autonomi keeps what you choose private — and deletable. two vaults, your call per record.</p>
-<div class="regs">
-<div class="reg"><span class="who">🐝 the new bee</span><span class="t" data-i18n="hub.four.a1.bee">your agent's birth certificate lives on arweave — permanent by physics, not by promise. your everyday files live on autonomi — private, and gone the day you delete them.</span></div>
-<div class="reg"><span class="who">🪩 the raver</span><span class="t" data-i18n="hub.four.a1.raver">the mixtape you want forever is forever. the selfies you don't? gone when you tap delete. no vault holds both hostage.</span></div>
-<div class="reg"><span class="who">🕶 the cypherpunk</span><span class="t" data-i18n="hub.four.a1.cypher">permanence is a per-record property: arweave for the receipt of you, autonomi for the self that changes. lock-in requires immutability — deletion stays a first-class verb.</span></div>
+<main class="wrap" id="explore">
+<details class="collection" id="collection"><summary><span>${text('atlas.everything','Explore everything')}</span><span class="collection-chevron" aria-hidden="true">⌄</span></summary>
+<div class="atlas">
+  <aside class="sidebar"><div class="side-inner"><p class="eyebrow">${text('hub.crumb.atlas','')}</p><nav aria-label="Organisations and families">${side}</nav><div class="side-proof"><span aria-hidden="true">↳</span><a href="dock.html">${text('s.dock.name','')}</a><a href="../estate.json">${text('hub.foot.registry','')} ↗</a></div></div></aside>
+  <div class="catalogue">
+    <div class="catalogue-heading"><h2>${text('atlas.browse','Explore the estate')}</h2><a href="doors/index.html">${text('hub.foot.doors','')} ↗</a></div>
+    <form class="search-form" role="search" onsubmit="return false">
+      <label for="q">${text('atlas.simpleSearch','Search for something')}</label>
+      <div class="search-controls"><div class="search-field"><span aria-hidden="true">⌕</span><input id="q" name="q" type="search" autocomplete="off" spellcheck="false" aria-describedby="shown"><kbd aria-hidden="true">/</kbd></div><label class="sr-only" for="family-filter">${text('hub.w.families','families')}</label><select id="family-filter" name="family"><option value="" data-i18n="atlas.topics">${esc(corpus['atlas.topics']?.en || 'All topics')}</option>${E.families.map(f=>`<option value="${f}">${f}</option>`).join('')}</select></div>
+      <div class="search-meta"><output id="shown" aria-live="polite">${E.surfaces.filter(s => s.presented !== false).length} ${text('atlas.results','results')}</output><button type="reset" id="clear" hidden>${text('atlas.clear','Clear filters')}</button></div>
+    </form>
+    <p class="state-note">${text('atlas.state','Published describes the page; each tool discloses its own readiness.')}</p>
+    <noscript><p class="state-note">${text('atlas.nojs','Every destination is available below. Enable JavaScript to switch views and filter the estate.')}</p></noscript>
+    <div id="empty" class="empty" hidden><span aria-hidden="true">⌕</span><p>${text('atlas.empty','No matching surfaces. Try another word or clear the filters.')}</p></div>
+    <!--ATLAS-STATIC-START-->
+    <div id="list">${houses}</div>
+    <!--ATLAS-STATIC-END-->
+  </div>
 </div>
-</div>
-<div class="row">
-<p class="q">“<span data-i18n="hub.four.q2">do I trust it with personal data?</span>”</p>
-<p class="a" data-i18n="hub.four.a2">encrypted under your own key before it leaves your device — the estate stores locked boxes, never the keys.</p>
-<div class="regs">
-<div class="reg"><span class="who">🐝 the new bee</span><span class="t" data-i18n="hub.four.a2.bee">your files are locked with YOUR key before they travel. the estate can store them; it can never open them.</span></div>
-<div class="reg"><span class="who">🪩 the raver</span><span class="t" data-i18n="hub.four.a2.raver">we built the locker. we never had a copy of your key. that is the whole point of a locker.</span></div>
-<div class="reg"><span class="who">🕶 the cypherpunk</span><span class="t" data-i18n="hub.four.a2.cypher">client-side encryption under keys the estate never sees; the storage layer holds ciphertext and minimal pointers. trust is not required — verification is.</span></div>
-</div>
-</div>
-<div class="row">
-<p class="q">“<span data-i18n="hub.four.q3">my phone already backs up for free — where is my login-anywhere?</span>”</p>
-<p class="a" data-i18n="hub.four.a3">one install, your own name (.b), every device — your stuff follows your name, not the machine.</p>
-<div class="regs">
-<div class="reg"><span class="who">🐝 the new bee</span><span class="t" data-i18n="hub.four.a3.bee">install once, claim your .b name, sign in anywhere with it. new phone? same name, everything still yours.</span></div>
-<div class="reg"><span class="who">🪩 the raver</span><span class="t" data-i18n="hub.four.a3.raver">your name is your login — same room, same crew, same files, from any phone. no new account per app, ever.</span></div>
-<div class="reg"><span class="who">🕶 the cypherpunk</span><span class="t" data-i18n="hub.four.a3.cypher">the .b name is a self-sovereign pointer: keys you hold, a name you own, sessions anywhere — login-anywhere without an identity provider.</span></div>
-</div>
-</div>
-<div class="row">
-<p class="q">“<span data-i18n="hub.four.q4">tracking every crypto transaction for tax is agony.</span>”</p>
-<p class="a" data-i18n="hub.four.a4">the meter receipts every spend the moment it happens — and sets the tax aside for you as it goes.</p>
-<div class="regs">
-<div class="reg"><span class="who">🐝 the new bee</span><span class="t" data-i18n="hub.four.a4.bee">every spend prints its own receipt, and the tax slice is put aside automatically. april-you says thanks.</span></div>
-<div class="reg"><span class="who">🪩 the raver</span><span class="t" data-i18n="hub.four.a4.raver">no spreadsheet hell. the house keeps the books and holds the tax bit aside while you spend.</span></div>
-<div class="reg"><span class="who">🕶 the cypherpunk</span><span class="t" data-i18n="hub.four.a4.cypher">the meter emits signed, resource-denominated receipts per spend; the liability accrues to a reserved bucket at spend time — auditability without the ledger chores.</span></div>
-</div>
-</div>
-</section>
-<!--ATLAS-STATIC-START-->
-<nav class="orgnav" aria-label="the three orgs">
-${orgPills}
-</nav>
-<nav class="famjump" id="families" aria-label="the eight families">
-${famPills}
-</nav>
-<main id="list">
-${houses}
+</details>
 </main>
-<!--ATLAS-STATIC-END-->
-
-<footer>
-  <div><a href="../estate.json" data-i18n="hub.foot.registry">the registry</a> · <a href="doors/index.html" data-i18n="hub.foot.doors">the doors</a> · <a href="https://github.com/beehive-nature/beehive-nature" data-i18n="hub.foot.code">the code</a> — <b>${c.surfaces}</b> surfaces · <b>${c.domains}</b> domains · <b>${nOrgs}</b> orgs</div>
-  <div class="m">the counts on this page render from the registry and cannot be hand-written —
-  CI proves it every push. the fleet's hosted copies stay the founder's art:
-  ${fleetN} of them carrying behaviour fixes, kept honest to his originals beyond the vendor line.
-  the full manifesto lives behind the <a href="doors/beehivenature.html" data-i18n="hub.foot.door">beehivenature door</a>.</div>
-  <div class="m">⬡ the estate's address scheme: <button id="reg" type="button" style="font:inherit;background:var(--inset);color:var(--biomass);border:1px solid var(--line);border-radius:8px;padding:5px 10px;cursor:pointer">click to register the estate's address scheme (web+bnr)</button> — then follow <a href="web+bnr://skaists.dev">bnr://skaists.dev</a> to the hub itself.</div>
-</footer>
-
+<footer class="wrap footer"><div><a class="wordmark" href="index.html">skaists<span>.dev</span></a><p>${text('hub.name','')}</p></div><div class="footer-links"><a href="onboarding/index.html">${text('reg.bee','')}</a><a href="doors/index.html">${text('hub.foot.doors','')}</a><a href="../estate.json">${text('hub.foot.registry','')}</a><a href="https://github.com/beehive-nature/beehive-nature" target="_blank" rel="noopener">${text('hub.foot.code','')} ↗</a></div><p class="footer-count"><b>${c.surfaces}</b> surfaces · <b>${c.domains}</b> domains · ${text('hub.counts.tail','')}</p><details class="address"><summary>web+bnr</summary><button id="reg" type="button">Register web+bnr addresses</button><a href="web+bnr://skaists.dev">bnr://skaists.dev</a><p id="protocol-status" role="status"></p></details></footer>
+<div class="wrap estate-navigation"><details><summary>${text('atlas.browse','Explore the estate')}</summary><div data-tour-host></div></details></div>
 <script type="application/json" id="estate">
 <!--ESTATE-JSON-START-->
-${json}
+${JSON.stringify(E)}
 <!--ESTATE-JSON-END-->
 </script>
-
-<script>
-/* the atlas is static HTML from the registry; this script adds ONLY search —
-   rows hide, empty families hide, empty org houses hide, the count shows. */
-(() => {
-  const E = JSON.parse(document.getElementById('estate').textContent.replace(/<!--[\\s\\S]*?-->/g, '').trim());
-  const q = document.getElementById('q'), shown = document.getElementById('shown');
-  const apply = () => {
-    const t = q.value.trim().toLowerCase();
-    let visible = 0;
-    document.querySelectorAll('.srf').forEach(r => {
-      const hit = !t || r.dataset.t.toLowerCase().includes(t);
-      r.style.display = hit ? '' : 'none';
-      if (hit) visible++;
-    });
-    document.querySelectorAll('section.fam').forEach(s => {
-      const any = [...s.querySelectorAll('.srf')].some(r => r.style.display !== 'none');
-      s.classList.toggle('hidden', t && !any);
-    });
-    document.querySelectorAll('section.org').forEach(s => {
-      const any = [...s.querySelectorAll('.srf')].some(r => r.style.display !== 'none');
-      s.classList.toggle('hidden', t && !any);
-    });
-    shown.textContent = t ? visible + (visible === 1 ? ' surface matches' : ' surfaces match') + ' — each hit sits inside its own house; empty houses are hidden' : '';
-  };
-  q.addEventListener('input', apply);
-})();
-/* the estate address scheme — tier 1: register web+bnr on this origin.
-   the web+ prefix is a browser security rule (mdn: custom schemes must begin
-   web+, lowercase ascii; bare bnr:// cannot be registered from a page). */
-(() => {
-  const rb = document.getElementById('reg');
-  if (!rb) return;
-  rb.addEventListener('click', () => {
-    try {
-      navigator.registerProtocolHandler('web+bnr', '/r/?u=%s');
-      rb.textContent = 'registered ✓ — now follow an address below';
-      rb.disabled = true;
-    } catch (e) {
-      rb.textContent = 'registration refused: ' + (e.message || e);
-    }
-  });
-})();
-</script>
+<script src="atlas-search.js?v=1" defer></script>
+<script src="atlas.js?v=2" defer></script>
 <script src="agent-dock.js?v=5"></script>
-<script src="tour.js?v=33"></script>
+<script src="tour.js?v=34"></script>
 </body>
 </html>
 `;
-
-writeFileSync('surfaces/index.html', page);
-console.log('atlas built — ' + E.surfaces.length + ' rows listed · ' + c.surfaces + ' counted · ' + nOrgs + ' orgs · band lifted byte-true from doors · ' + page.length + ' bytes');
+// Whitespace-only template slots should not become dirty generated lines.
+writeFileSync('surfaces/index.html', page.replace(/^ +$/gm, ''));
+console.log('atlas built — '+E.surfaces.length+' listed · '+c.surfaces+' counted · preserved doors artwork · '+page.length+' bytes');

@@ -69,7 +69,10 @@
   document.head.appendChild(css);
 
   function mount(){
-    var host=document.getElementById('tbar');
+    /* A page can give the same estate-wide control a prominent, in-flow
+       home. There is still one preference and one bregister event. */
+    var pageHost=document.querySelector('[data-register-host]');
+    var host=pageHost||document.getElementById('tbar');
     var wrap=document.createElement('span'); wrap.id='bregctl';
     wrap.setAttribute('role','group'); wrap.setAttribute('aria-label','reading register — three readings of every page');
     REGS.forEach(function(R){
@@ -94,7 +97,7 @@
     /* the once-introduction — one quiet line carrying the three definitions
        verbatim (corpus-keyed as reg.intro), gone after the first choice */
     var seen=false; try{ seen=!!localStorage.getItem('bregintro'); }catch(e){}
-    if(!seen&&host){
+    if(!seen&&host&&!pageHost){
       var line=document.createElement('span'); line.id='bregintro';
       line.setAttribute('data-i18n','reg.intro');
       line.setAttribute('role','note');
