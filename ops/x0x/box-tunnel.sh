@@ -45,7 +45,7 @@ if [[ $action == _watch ]]; then
   exit 0
 fi
 
-[[ $lease_seconds =~ ^[0-9]+$ ]] && (( lease_seconds >= 1 && lease_seconds <= 7200 )) || { echo 'Lease must be 1..7200 seconds' >&2; exit 2; }
+[[ $lease_seconds =~ ^[0-9]+$ ]] && (( lease_seconds >= 1 && lease_seconds <= 600 )) || { echo 'Lease must be 1..600 seconds (10-minute maximum)' >&2; exit 2; }
 [[ $mode == api || $mode == media ]] || { echo 'Mode must be api or media' >&2; exit 2; }
 exec 9>"$cache/lock"
 flock -x 9

@@ -41,7 +41,7 @@ flowchart LR
 ```powershell
 & C:\Users\travi\x0x-win\x0x-tunnel.ps1 up
 & C:\Users\travi\x0x-win\x0x-tunnel.ps1 status
-& C:\Users\travi\x0x-win\x0x-tunnel.ps1 up -IdleMinutes 20
+& C:\Users\travi\x0x-win\x0x-tunnel.ps1 up -IdleMinutes 5
 & C:\Users\travi\x0x-win\x0x-tunnel.ps1 down
 ```
 
@@ -57,8 +57,19 @@ No local P2P daemon is launched. A unique SSH control socket identifies each
 session. `up` renews the current lease; the watcher for an old connection
 cannot close a replacement. `down` closes only this helper's transport.
 All listeners bind to loopback. No router port forwarding, UPnP, global VPN,
-or new cloud port is required. The default lease is ten minutes; it is an
+or new cloud port is required. The default and maximum lease is ten minutes; it is an
 expiry from the latest `up`, **not** an activity detector.
+
+This is **one canonical transport path**, with two entry points:
+`x0x-tunnel.ps1` → WSL `box-tunnel.sh` → one SSH control master.
+The ten-minute auto-down is implemented in `box-tunnel.sh`'s `_watch` loop,
+which checks the per-session expiry every two seconds. The wrapper passes
+`IdleMinutes * 60`; it allows 1–10 minutes, and the Bash helper independently
+refuses more than 600 seconds. Another explicit `up` renews the same session.
+Normal expiry occurs at the deadline plus watcher/scheduler latency; it is not
+a hard real-time network cutoff. The API and media modes share this leash.
+The former direct x0x tailnet-forward recipe in the historical receipt is not
+an alternate supported laptop startup path on the shared network.
 
 Other builders can run `bash ops/x0x/box-tunnel.sh up 600 api` on Linux, or
 use the PowerShell wrapper in WSL. Configure the `oracle` SSH alias first

@@ -32,6 +32,18 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-09-06` — **Founder promotes Astra to lead; zCode review reconciled.**
+  The ten-minute leash was delegated to Bash, not removed; review found the
+  override ceiling too permissive and reduced both entry points to 600 seconds.
+  `bash e2e/box-tunnel.test.sh` → 5 PASS cases; installed default access and
+  Windows rejection above ten minutes checked. Prior/current/installed
+  nostr-tools versions all read 2.25.2. All 13 governance Rust diffs equal
+  rustfmt(base). Source and rollback:
+  `docs/dispatches/2026-09-06-astra-zcode-reconciliation.md`.
+  zCode owns the gated integration handoff and the next capacity/recovery lane;
+  model, effort, session type and acceptance criteria are in
+  `docs/dispatches/2026-09-06-zcode-task-docket.md`. Ready-to-claim does not mean
+  execution has started; main parity and recovery stay open until receipted.
 - `2026-09-06` — **Astra PR identity check repaired after CI reproduced the
   false rejection.** The PR job checked GitHub's synthetic merge author; push
   static CI passed on the same contribution. The workflow now supplies actual

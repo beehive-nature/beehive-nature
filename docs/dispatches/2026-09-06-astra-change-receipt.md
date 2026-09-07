@@ -98,5 +98,11 @@ Deployment results are appended below after verification.
 - Existing dependencies were reused; the newly pinned package version
   matches the installed nostr-tools 2.25.2. No dependency update was deployed.
 
+Review reconciliation: the pre-deployment backup lockfile, current lockfile
+and installed package all independently report nostr-tools **2.25.2**. The
+old `^2.10.4` was a range, not an observed installed version. See
+[the zCode reconciliation](2026-09-06-astra-zcode-reconciliation.md) for these
+paths, the ten-minute maximum correction, and exact-rustfmt governance review.
+
 The synthetic check proves the restricted service can process audio and
 clean up. It does not establish a 120-second-note latency SLA under load.

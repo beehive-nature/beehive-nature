@@ -104,7 +104,7 @@ door checks a live jungle4 meter session — read-only, pause-not-kill.
 ## Streamer's quickstart (OBS)
 
 ```
-x0x-tunnel.ps1 up        # + the two lane forwards (stream-laptop.sh up does both)
+x0x-tunnel.ps1 up -Media # one SSH transport, four forwards, 10-minute auto-down
 OBS → Stream → Server: rtmp://127.0.0.1:19350/live  Key: general?s=<STREAM_KEY>
 curl -X POST http://127.0.0.1:18094/live/ticker/general \
   -H "authorization: Bearer <STREAM_KEY>" -H "content-type: application/json" \
@@ -113,3 +113,7 @@ curl -X POST http://127.0.0.1:18094/live/ticker/general \
 
 The stream key lives in `/etc/buzz-watch/live.env` on the box (600) and
 `~/.watch-stream-key` on the laptop — never in the repo.
+
+Run `up -Media` again to renew the same ten-minute lease when continuing a
+session, and `down` when finished. The current SSH path is specified in
+`ops/x0x/LAPTOP-NETWORK.md`; older tailnet observations above are historical.

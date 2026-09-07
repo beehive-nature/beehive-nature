@@ -1,9 +1,11 @@
 # Compatibility entry point: on apartment/shared networks, use one SSH
 # connection to the box. This helper never starts a laptop P2P daemon.
 # The SSH key stays in WSL. See ops/x0x/LAPTOP-NETWORK.md.
+# The 10-minute auto-down leash is enforced by box-tunnel.sh's _watch loop.
+# This wrapper can shorten it; another up renews the same scoped session.
 param(
   [Parameter(Position=0)][ValidateSet('up','down','status')][string]$Action='status',
-  [ValidateRange(1,120)][int]$IdleMinutes=10,
+  [ValidateRange(1,10)][int]$IdleMinutes=10,
   [switch]$Media
 )
 $ErrorActionPreference = 'Stop'

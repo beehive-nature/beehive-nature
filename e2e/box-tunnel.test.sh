@@ -30,6 +30,20 @@ MOCK
 chmod +x "$test_root/bin/ssh"
 
 touch "$test_root/unrelated-session"
+# Both entry points use this lease implementation: no-argument up is 600s;
+# direct Bash callers cannot bypass the apartment-network maximum either.
+before=$(date +%s)
+bash "$helper" up >/dev/null
+default_session=$(cat "$XDG_CACHE_HOME/bnr-box-tunnel/current")
+deadline=$(cat "$default_session/expires")
+after=$(date +%s)
+(( deadline >= before + 600 && deadline <= after + 600 ))
+if bash "$helper" up 601 api >/dev/null 2>&1; then echo 'FAIL accepted an overlong lease'; exit 1; fi
+[[ $(cat "$default_session/expires") == "$deadline" ]]
+[[ -f $default_session/control.live ]]
+bash "$helper" down >/dev/null
+echo 'PASS default lease is 600 seconds; overlong renewal is refused without extending it'
+
 bash "$helper" up 2 api >/dev/null
 first=$(cat "$XDG_CACHE_HOME/bnr-box-tunnel/current")
 bash "$helper" up 7 api >/dev/null
