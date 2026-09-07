@@ -61,6 +61,9 @@ jobs:
       - name: Estate registry — counts computed, not written
         if: always()
         run: node scripts/estate-check.mjs
+      - name: Front door — search, source parity and accessible art
+        if: always()
+        run: node --test e2e/atlas.test.mjs
       - name: Voice worker — bounded queue and child lifetime
         if: always()
         working-directory: ops/voice-scribe
