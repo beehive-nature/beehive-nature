@@ -1,0 +1,22 @@
+{
+  "blender": "4.5.13 LTS",
+  "cells": 180,
+  "fps": 24,
+  "frames": 144,
+  "seconds": 6,
+  "dimensions": [
+    720,
+    720
+  ],
+  "samples": 4,
+  "engine": "BLENDER_EEVEE_NEXT",
+  "cpu_threads": 4,
+  "endpoint_max_error": 1.734723475976807e-17,
+  "source": "green-teal BN logo.jpg",
+  "motion": "Periodic radial expansion and vertical rise with ring phases",
+  "color_meaning": {
+    "purple": "humans",
+    "teal": "AI",
+    "green": "biomass"
+  }
+}

@@ -9,6 +9,9 @@ are not three interchangeable UI skins or an invented organization mapping.
 
 ## See the studies
 
+- [Feeling in bloom](motion/index.html) — three-expression artist studio, with
+  SVG exports and an optional six-second Blender loop. Serve through local HTTP.
+- [Motion package notes](motion/README.md) — controls, measured sizes and rebuild steps.
 - `renders/original-blooms.png` — teal, green and purple-led originals together.
 - `renders/teal-original.png` — teal / AI.
 - `renders/green-original.png` — green / biomass.
