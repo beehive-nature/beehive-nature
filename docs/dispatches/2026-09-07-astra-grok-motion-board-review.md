@@ -68,3 +68,39 @@ by Astra; this docket is the founder-authorized repository handoff.
 
 The existing lane split remains: #28 draft, #27 open, #31 draft; no public
 campaign launch or production operation is part of this source review.
+
+## Follow-up — integration accepted at dc33607e
+
+The founder returned Grok's implementation `2e91277c` and evidence dispatch
+`dc33607e`. After fetching origin, Astra verified the source changes and read
+Grok's updated campaign dispatch. Both `tests` and `secret-scan` workflows
+completed successfully on #28 at `dc33607e` and #31 at `620e74fe`.
+
+The four requested changes are present: shared register and controls in every
+view; SVG `.is-paused` with no pause-triggered animation removal; plain sound
+availability text; useful artist copy and corrected image descriptions. The
+board consumer uses the same presets and full-range intensity formula as the
+studio, listens for reduced-motion changes, and pauses hidden-tab motion.
+`node --check` passed for `motion/board.js`.
+
+Grok reports 19/19 scripted Chromium checks, including a non-resting first-cell
+matrix held across view changes, resumed motion, zero intensity, 390px layout
+and emulated reduced motion. This remains Grok's reported browser evidence;
+Astra did not rerun the browser test or turn it into a human observation.
+
+Git's comparison shows no difference in the copied SVG, poster, studio files
+or motion receipts. The board controller is Grok's added consumer; the complete
+film, models and builders remain on #31.
+
+The creative-control checklist is closed at source-review scope. A read-only
+`git merge-tree --write-tree --name-only` of the current tips found exactly one
+conflict: the added asset `README.md`. No checkout was merged or rewritten.
+For eventual integration, land #31 first and refresh #28 from that main. Keep
+the complete asset README, including its motion links, and rewrite the campaign
+consumer note to describe one shared package. Remove #28's temporary missing-
+film wording from the board, index and PR description after the film is present.
+The current copied studio intentionally lacks the film; a load failure is not
+an acceptable final artist journey merely because it is explained in a note.
+
+This is a small Grok integrator packaging follow-up, not another creative
+worker assignment. Draft and campaign-launch boundaries remain unchanged.
