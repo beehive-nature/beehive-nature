@@ -74,13 +74,13 @@ if (SELFTEST) {
     da:'Å',nb:'Ø',sv:'Ö',fi:'Ö',tr:'İ',hu:'Ő',sa:'क'};
   const languages=['en',...corpus._meta.langs];
   if(languages.some(lang=>!examples[lang])) throw new Error('A docked language needs a selftest example');
-  const fixture = '<!doctype html><html><body>'+languages.map(lang=>
+  const fixture = '<!doctype html><html><head><meta charset="utf-8"></head><body>'+languages.map(lang=>
     '<p data-i18n="selftest.'+lang+'">'+examples[lang]+'</p><p>'+examples[lang]+'</p>').join('')+
     '<p data-i18n="selftest.rich"><span>中</span><em>ก</em></p>'+
     '<p hidden data-i18n="selftest.hidden">hidden words</p>'+
     '<div id="tbar"><span data-i18n="selftest.chrome">navigation words</span></div>'+
     '<p>12345 · —</p></body></html>';
-  const srv = createServer((q, s) => { s.writeHead(200, { 'content-type': 'text/html' }); s.end(fixture); });
+  const srv = createServer((q, s) => { s.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }); s.end(fixture); });
   await new Promise(r => srv.listen(0, '127.0.0.1', r));
   let browser;
   try {
@@ -94,6 +94,7 @@ if (SELFTEST) {
       JSON.stringify(m.keys)===JSON.stringify(expectedKeys) && m.unkeyedSamples.length===3;
     console.log((good?'PASS':'FAIL')+' i18n-coverage selftest — '+languages.length+
       ' languages, short labels, keyed/unkeyed and nested holders: '+m.keyed+'/'+m.visible);
+    if(!good) console.error(JSON.stringify({charset:await p.evaluate(()=>document.characterSet),expectedKeys,measured:m}));
     process.exitCode=good?0:1;
   } finally {if(browser) await browser.close();srv.close();}
   process.exit(process.exitCode||0);

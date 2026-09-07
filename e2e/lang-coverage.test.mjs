@@ -3,7 +3,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
-import {readFileSync} from 'node:fs';
+import {readFileSync,existsSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import {inspectCoverage,validatePageSet} from './coverage-gate.mjs';
 const {measureVisibleText,summarizeCoverage}=createRequire(import.meta.url)('../surfaces/lang.js');
@@ -116,4 +116,11 @@ test('missing observations, invalid floors and floor breaches fail before format
   assert.deepEqual(gate.breaches,[{page:'index.html',keyed:4,floor:5}]);
   // JSON is a representation of the same failed gate, not an alternative gate.
   assert.equal(JSON.parse(JSON.stringify({rows:[good],gate})).gate.passed,false);
+});
+
+test('the arrival set contains current surfaces and retains every recorded floor',()=>{
+  const pages=validatePageSet(JSON.parse(readFileSync(new URL('./lang-coverage-set.json',import.meta.url),'utf8')));
+  const floors=JSON.parse(readFileSync(new URL('./lang-coverage-floors.json',import.meta.url),'utf8'));
+  for(const page of pages) assert.ok(existsSync(new URL('../surfaces/'+page,import.meta.url)),page+' must exist');
+  for(const page of Object.keys(floors)) assert.ok(pages.includes(page),page+' floor must remain measured');
 });

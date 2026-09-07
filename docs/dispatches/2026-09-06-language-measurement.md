@@ -66,3 +66,26 @@ successful translation delivery, correct meaning or human attestation.
 Published coverage must be described as structural corpus reach with these
 limits. Remaining unkeyed prose and semantic review belong to the language
 lane, not a claim of full translation from this repair.
+
+## Candidate CI correction
+
+The first candidate `46ccaa26` failed its browser job in run `34086632948`:
+
+```text
+FAIL i18n-coverage selftest — 29 languages, short labels, keyed/unkeyed and nested holders: 30/59
+FAIL measurement — beehivebiomass.html: Error: Requested surface does not exist
+```
+
+The other missing paths were `beehivenature.html`, `bnature-bio.html`,
+`bnature-social.html` and `skaists.html`. All five were already absent from
+the candidate tree; the old checker filtered them away. Their real `doors/`
+destinations already appear in the arrival set and retain their floor entries.
+Remove the stale aliases explicitly; keep every floor and the missing-page
+failure behavior. A new source test verifies that the requested surfaces exist
+and every recorded floor remains measured.
+
+The Unicode browser fixture also omitted its charset declaration. Add UTF-8
+in both its HTTP header and HTML metadata; a failed selftest now prints its
+charset and measured keys for diagnosis. This changes the instrument fixture,
+not the page renderer or expected 31/60 count. The corrected candidate must
+pass browser CI before merge. Local Node coverage grows to 26 tests.
