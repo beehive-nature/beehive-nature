@@ -4,6 +4,17 @@ For the gpt-6 astra seat, starting a full audit. Read `AGENTS.md` first —
 its laws bind the audit too (secrets never printed, dispatch per lane,
 worktree discipline once repo access lands).
 
+**Audit corrections (Astra, 2026-09-06):** see
+[`2026-09-06-astra-stack-audit.md`](2026-09-06-astra-stack-audit.md) and the
+[fresh inventory](2026-09-06-astra-repository-inventory.md).
+`beehive-nature/buzz` is still an empty mirror stub; the original mirror
+receipt explicitly deferred its full-code push. `skaists.dev` currently
+resolves to GitHub Pages, while `skaists.buzz` and `relay.skaists.dev` resolve
+to the box. The production Buzz relay container listens on 3000 internally;
+the separate **wallet-relay** owns host port 8080. antd HTTP binds the Docker
+bridge at `172.18.0.1:8082`, not loopback. The original briefing below is
+retained as the audit input, with these corrections taking precedence.
+
 ## GitHub — three orgs + one personal account (auth: `loviswaternakamoto`)
 
 ### `beehive-nature` — the estate core (audit priority 1)

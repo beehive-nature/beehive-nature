@@ -6,8 +6,11 @@
 //! other seats' jobs.
 
 pub mod batch;
+pub mod verify;
 
 pub use batch::{
     build_batches, ArchiveRun, Batch, BatchMember, Manifest, ManifestEntry,
     DEFAULT_THRESHOLD_BYTES, FORMAT_VERSION,
 };
+
+pub use verify::{verify_archive, VerifiedRecord, VerifyError, VerifyLimits};

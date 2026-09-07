@@ -1,5 +1,18 @@
 # ops/x0x — x0x agent daemon on the hive box (lane x0x, 2026-09-05)
 
+**Current laptop default (Astra, 2026-09-06):**
+[`LAPTOP-NETWORK.md`](LAPTOP-NETWORK.md) documents the shared-network outage,
+measurements and replacement helper. `x0x-tunnel.ps1 up` now uses scoped SSH
+forwarding and starts no laptop mesh daemon. The tailnet walkthroughs below
+are historical receipts. Box x0x stays on 0.41.3 with its identity and ACLs.
+
+**One canonical, leashed path:** `x0x-tunnel.ps1` delegates to WSL
+`box-tunnel.sh`; its `_watch` loop supplies the **10-minute auto-down**.
+Both entry points enforce a 600-second maximum per lease; explicit `up`
+renews it. API and `-Media` modes use that same transport and watcher.
+Use [the current operator guide](LAPTOP-NETWORK.md), not the retired direct
+tailnet-forward recipe below, for laptop startup.
+
 **What runs on the box** (verbatim in-tree: `x0x.service` + `x0xd.toml`):
 
 - `x0xd` v0.41.2 (saorsa-labs/x0x, pre-built linux-arm64-gnu, option A) at
@@ -60,7 +73,7 @@ pastes `x0x://invite/…`; group cards carry no join capability; the live public
 groups (Phase-B Fleet Dogfood etc.) have `request_access_enabled:false`.
 Public groups are world-READABLE, member-JOIN is invite-only.
 
-## Tailnet forward — PROVEN (round 4, 2026-09-05)
+## Historical receipt — direct tailnet forward (2026-09-05; retired laptop startup path)
 
 After the founder's OCI ingress **All-Protocols/all-ports stateful** rule
 landed (the only rule kind that matches non-initial IP fragments — the
