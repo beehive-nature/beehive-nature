@@ -15,7 +15,10 @@ LAWS ENCODED HERE
   explicitly declared artifact. A root classified `secret-reference` emits
   location, permissions, uid/gid and recovery owner ONLY — no digest, no
   footprint, and its tree is never walked. A defensive guard then scans the
-  serialized output and refuses (exit 3) if sensitive markers appear.
+  serialized output and refuses (exit 3) if sensitive markers appear
+  (case-insensitively — real secrets arrive lowercase) or if any key-shaped
+  hex run appears that the tool did not itself compute (computed digests
+  are allowlisted at computation time; field NAMES are never exempted).
 * FAIL CLOSED: anything that cannot be computed is an error status, never a
   silent pass. Exit codes:
     0  inventory clean
@@ -37,8 +40,11 @@ import hashlib
 import json
 import os
 import pwd
+import re
 import socket
 import sys
+
+HEX_RUN_RE = re.compile(r"[0-9a-fA-F]{48,}")
 
 
 def err_code(err):
@@ -79,6 +85,9 @@ STATUS_PRECEDENCE = (
     "unknown-classification",
     "missing",
 )
+# Matched CASE-INSENSITIVELY against the serialized output: real secrets
+# arrive lowercase (nsec1…, "authorization: bearer", "private key"), and a
+# case-sensitive guard is a guard that only catches shouted secrets.
 GUARD_MARKERS = (
     "PRIVATE KEY",
     "BEGIN RSA",
@@ -204,10 +213,12 @@ def check_filesystem(mount, reserve_bytes):
     }
 
 
-def inventory_root(root, errors):
+def inventory_root(root, errors, computed_digests):
     """Resolve one declared root. Never raises — failures become statuses,
     every defect is recorded (a root with several reports the most
-    recovery-critical one and carries the full list in `defects`)."""
+    recovery-critical one and carries the full list in `defects`).
+    Every digest THIS TOOL computes is registered in computed_digests: the
+    output guard allows exactly those hex runs and no others."""
     out = {
         "id": root.get("id", "<unnamed>"),
         "path": root.get("path"),
@@ -262,6 +273,7 @@ def inventory_root(root, errors):
                 entry["sha256"] = digest_file(apath)
                 entry["bytes"] = os.lstat(apath).st_size
                 entry["status"] = "ok"
+                computed_digests.add(entry["sha256"])
             except OSError as err:
                 entry["status"] = "unreadable:%s" % err_code(err)
                 defects.append("unreadable-artifact")
@@ -290,6 +302,7 @@ def inventory_root(root, errors):
             if os.path.exists(exe):
                 try:
                     rep["executable_sha256"] = digest_file(exe)
+                    computed_digests.add(rep["executable_sha256"])
                 except OSError as err:
                     rep["executable_status"] = "unreadable:%s" % err_code(err)
                     defects.append("unreadable-restart-dependency")
@@ -336,7 +349,9 @@ def main(argv=None):
 
     roots = config["roots"]
     measurement_errors = []
-    resolved = [inventory_root(r, measurement_errors) for r in roots]
+    computed_digests = set()
+    resolved = [inventory_root(r, measurement_errors, computed_digests)
+                for r in roots]
 
     deleted, scan_errors = scan_deleted_executables(roots)
     deleted_paths = [f["exe"][: -len(" (deleted)")] for f in deleted]
@@ -370,10 +385,21 @@ def main(argv=None):
     }
 
     text = json.dumps(report, indent=2, sort_keys=True)
+    folded = text.lower()
     for marker in GUARD_MARKERS:
-        if marker in text:
+        if marker.lower() in folded:
             print("sensitive-content guard tripped on marker %r — "
-                  "output withheld" % marker, file=sys.stderr)
+                  "output withheld; the marker word carries no secret "
+                  "value" % marker, file=sys.stderr)
+            return 3
+    for run in HEX_RUN_RE.findall(text):
+        if run.lower() not in computed_digests:
+            # Key-shaped hex that this tool did NOT compute (a digest it
+            # computed is allowlisted at computation time — field NAMES are
+            # never exempted). The offending value is never echoed.
+            print("sensitive-content guard tripped: key-shaped hex run "
+                  "matching no digest this tool computed — output "
+                  "withheld, value never echoed", file=sys.stderr)
             return 3
 
     attention = [r["id"] for r in resolved if r.get("status") in ATTENTION_STATUSES]

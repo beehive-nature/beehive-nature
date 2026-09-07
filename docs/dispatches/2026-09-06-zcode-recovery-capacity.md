@@ -305,3 +305,39 @@ code-shaped). Pre-repair and post-repair history files untouched.
 **Handoff:** #4 remains open; acceptance per the docket belongs to a
 fresh G3 review session — inputs: this section, §8, the tool at this
 commit, the fixture battery, and the three snapshots.
+
+## 10. Third bounded correction — the guard (G3 findings F1+F2, same build session)
+
+The G3 review ([dispatch](2026-09-07-zcode-g3-negative-review.md))
+independently confirmed every core claim and found the output guard
+case-sensitive and hex-blind. Both fixed here; still no capacity work.
+
+1. **Markers match case-insensitively** — real secrets arrive lowercase
+   (`nsec1…`, `authorization: bearer`, "private key"); the guard folds
+   both sides before comparing. The marker WORD named in the stderr trip
+   message carries no secret value.
+2. **Key-shaped hex is checked against a registry of digests the TOOL
+   COMPUTED** — every artifact/restart digest is registered at computation
+   time; any 48+ hex run in the serialized output that is not one of those
+   exact values trips the guard. No field NAME is exempt: a config field
+   literally named `sha256` carrying an uncomputed hex run refuses the
+   same as a `notes` leak. (The `not-applicable` restart branch echoes
+   only the method, so no uncomputed field rides it at all.) The hex trip
+   message never echoes the offending value.
+
+**Tests added:** four trip cases — lowercase `nsec1…` in notes, an
+assembled 64-hex key shape in notes, lowercase `authorization: bearer` +
+"private key" phrasing, and a `sha256`-NAMED config field on a normally
+echoed restart block — each asserts **exit 3, empty stdout, and no value
+echo to stderr**; plus the POSITIVE case: the clean census's computed
+digest appears in output verbatim (guard does not eat legitimate hashes).
+Sentinels are assembled at runtime (32-hex halves) so the test file never
+contains a literal 48+ hex run. ALL PASS non-root; the earlier rounds'
+regressions all still pass.
+
+**Box:** fixed tool re-staged, sha256 parity verified against the
+committed ref, snapshot regenerated READ-ONLY (attention set unchanged:
+dev-relay-build + vending-probe; computed digests — bitcoind, the prod
+fork binary, buzz-acp, ant-node, antd, ant CLI, voice sources — pass the
+new guard unchanged). The new pinned commit goes to the G3 reviewer;
+#4 stays open until that verification passes.

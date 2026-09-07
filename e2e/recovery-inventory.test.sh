@@ -184,7 +184,10 @@ set -e
 [[ $rc2 -eq 0 ]] || { echo "FAIL clean census should exit 0, got $rc2"; exit 1; }
 grep -q '"status": "ok"' "$T/out2.json" || { echo 'FAIL clean root not ok'; exit 1; }
 grep -q '"method": "not-applicable"' "$T/out2.json" || { echo 'FAIL not-applicable designation missing from output'; exit 1; }
-echo 'PASS clean census exits 0; explicit not-applicable designation is the only restart exemption'
+# POSITIVE hex case: a digest the TOOL computed survives the guard verbatim.
+clean_digest=$(sha256sum "$T/host/clean/daemon" | cut -d' ' -f1)
+grep -q "$clean_digest" "$T/out2.json" || { echo 'FAIL computed digest absent from clean output'; exit 1; }
+echo 'PASS clean census exits 0; not-applicable designation healthy; computed digests pass the guard verbatim'
 
 # ---- run 3: the guard refuses sensitive notes ----------------------------
 sneaky_notes="rotate BEGIN OPENSSH $guard_marker soon"
@@ -199,5 +202,53 @@ set -e
 [[ $rc3 -eq 3 ]] || { echo "FAIL guard should exit 3, got $rc3"; exit 1; }
 [[ ! -s "$T/out3.json" ]] || { echo 'FAIL guard emitted output despite tripping'; exit 1; }
 echo 'PASS sensitive-content guard withholds output (exit 3)'
+
+# ---- run 4: the G3 findings — lowercase + key-shaped material -------------
+# Sentinels are ASSEMBLED at runtime so this test file never contains a
+# literal 64-hex run (each half is 32 hex — under the 48 scan threshold).
+hex_a=4f3edf983ac636a65a832ccacf2c14b0
+hex_b=a2a09d1f7c3d2e5f80a1b2c3d4e5f607
+key_hex="$hex_a$hex_b"
+guard_case() { # name, notes-string (config heredoc reads $sentinel_notes)
+  sentinel_notes=$2
+  cat > "$T/config-g4.json" <<JSON
+{"roots": [{"id": "g4", "path": "$T/host/clean", "classification":
+  "reproducible-artifact", "restart": {"method": "not-applicable"},
+  "notes": "$sentinel_notes"}]}
+JSON
+  set +e
+  PROC_DIR="$T/proc-clean" python3 "$tool" --config "$T/config-g4.json" \
+    > "$T/out4.json" 2> "$T/err4.txt"
+  rc4=$?
+  set -e
+  [[ $rc4 -eq 3 ]] || { echo "FAIL guard case '$1' should exit 3, got $rc4"; exit 1; }
+  [[ ! -s "$T/out4.json" ]] || { echo "FAIL guard case '$1' emitted stdout"; exit 1; }
+  if grep -qF -e "$hex_a" -e "$hex_b" -e 'nsec1' -e 'SENTINEL' "$T/err4.txt" 2>/dev/null; then
+    echo "FAIL guard case '$1' echoed the value to stderr"; exit 1
+  fi
+}
+guard_case 'lowercase-nsec' \
+  "rotate soon: nsec1zzqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"
+guard_case 'key-shaped-hex-in-notes' "found key $key_hex on disk"
+guard_case 'lowercase-bearer' \
+  "authorization: bearer eyJhbGciOiJub25lIn0.SENTINEL-TOKEN and private key words"
+# A config field NAMED sha256 gets no exemption — only digests the tool
+# computed are allowlisted. (Carried on a normally-echoed restart block;
+# the not-applicable branch echoes only the method, so nothing rides it.)
+cat > "$T/config-g5.json" <<JSON
+{"roots": [{"id": "g5", "path": "$T/host/clean", "classification":
+  "authoritative-state",
+  "restart": {"executable": null, "unit": null, "method": "manual",
+              "sha256": "$key_hex"}}]}
+JSON
+set +e
+PROC_DIR="$T/proc-clean" python3 "$tool" --config "$T/config-g5.json" \
+  > "$T/out5.json" 2> "$T/err5.txt"
+rc5=$?
+set -e
+[[ $rc5 -eq 3 ]] || { echo "FAIL fake sha256-named field should exit 3, got $rc5"; exit 1; }
+[[ ! -s "$T/out5.json" ]] || { echo 'FAIL fake sha256-named field emitted stdout'; exit 1; }
+grep -qF -e "$hex_a" -e "$hex_b" "$T/err5.txt" && { echo 'FAIL fake sha256 case echoed value to stderr'; exit 1; }
+echo 'PASS lowercase nsec / key-shaped hex / lowercase bearer / sha256-named config field all trip the guard with empty stdout and no stderr echo'
 
 echo 'ALL PASS recovery-inventory fixtures'
