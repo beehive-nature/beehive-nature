@@ -210,7 +210,7 @@ test('manual seed and tech choices survive a round-trip through other views', ()
 });
 
 test('room authors its own theme and uses the shared shell', () => {
-  assert.match(room, /tour\.js\?v=40/);
+  assert.match(room, /tour\.js\?v=41/);
   assert.match(tour, /register\.js\?v=9/);
   assert.match(register, /an authored theme can use data-bee-theme="custom"/);
   assert.doesNotMatch(register, /forge\/room\.html/);

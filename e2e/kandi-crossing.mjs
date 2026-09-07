@@ -88,8 +88,10 @@ await C.goto(url,{waitUntil:'load'}); await C.waitForTimeout(600);
 const pre=await C.inputValue('#rcv');
 ok('opening the pointer pre-loads the piece but does NOT auto-take it',
    /^KND1\|/.test(pre) && (await st(C)).left===1, `rcv=${pre.slice(0,18)}`);
-await C.click('#rcvgo'); await C.waitForTimeout(250);
-ok('pressing receive takes it onto the left arm', (await st(C)).left===2);
+await C.click('#rcvgo'); await C.waitForTimeout(200);
+ok('looking at a pasted string does not take it yet', (await st(C)).left===1);
+await C.click('#rcvkeep'); await C.waitForTimeout(250);
+ok('pressing keep takes it onto the left arm', (await st(C)).left===2);
 
 await b.close(); srv.close();
 console.log(`\n${pass} passed, ${fail} failed`);
