@@ -1,6 +1,4 @@
-# Festival hypothesis brief — one page
-
-Canonical copy for the integrator path: [`festival-pilot-brief.md`](festival-pilot-brief.md).
+# Festival pilot brief — one page
 
 **Status:** hypothesis and proposed pilot, not a booking, not a commercial claim.  
 **Date:** 2026-09-07 · **Lane:** Grok #27 creative pack · **No outreach executed.**
@@ -54,8 +52,14 @@ Need, host commitment, costs, and willingness to pay remain **UNKNOWN** until so
 
 ## Money
 
-Budget and willingness to pay: **UNKNOWN**. This brief must not be cited as a forecast.
+Budget, host fee, and willingness to pay: **UNKNOWN**. This brief must not be cited as a forecast.
 
-## What this is not
+## Non-goals
 
-Not a Festival Producer dApp. Not the attendee showcase wing. Not a public campaign. The older festival-attendee dispatch remains a separate surface plan.
+- No scraped promoter lists or cold outreach from this lane.
+- No public Home / Buzz / Bluesky posts, ads, or purchases.
+- No Festival Producer dApp and no rewrite of the attendee showcase wing.
+- No gift-code changes in the campaign PR.
+- No claim that five interviews prove demand.
+
+Same text is mirrored at `festival-hypothesis-brief.md` for earlier board links.

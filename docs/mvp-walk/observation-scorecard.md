@@ -1,5 +1,7 @@
 # Empty newcomer scorecard
 
+Canonical combined sheet: [`newcomer-observation-scorecard.md`](newcomer-observation-scorecard.md).
+
 About five willing people. One row per person. No private payloads. Agent fixtures are not rows.
 
 **Tested version:** URL _________________ · SHA / Pages head _________________ · view ________ · date ________  

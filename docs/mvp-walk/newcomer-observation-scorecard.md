@@ -1,6 +1,4 @@
-# Newcomer observation guide — kandi gift loop
-
-Canonical combined sheet: [`newcomer-observation-scorecard.md`](newcomer-observation-scorecard.md).
+# Newcomer observation — guide and empty scorecard
 
 **Purpose:** watch whether a willing newcomer can make a bracelet and complete a handoff without being taught the clicks. Methods follow the spirit of the [GDS moderated usability-testing guidance](https://www.gov.uk/service-manual/user-research/using-moderated-usability-testing) and the [completion-rate principle](https://www.gov.uk/service-manual/measuring-success/measuring-completion-rate). This is an engineering observation sheet, not a statistical guarantee and not a gate for ordinary fixes.
 
@@ -38,12 +36,39 @@ Do not name Peace, Love, Unity, Respect, KND1, arms, or Keep unless the person a
 | Receiver Keep on their own device | Observed receiver Keep |
 | You clicked Keep in a fixture | Not a human observation |
 
+## Empty scorecard
+
+About five willing people. One row per person. No private payloads. Agent fixtures are not rows.
+
+**Tested version:** URL _________________ · SHA / Pages head _________________ · view ________ · date ________  
+**Observer:** _________________ · **Coaching rule:** no hints unless they ask to stop.
+
+| # | Willing? (Y/N) | Device / browser | Time to first bracelet (s) | Time to completed handoff (s) | Unassisted completion (Y/N) | Assisted (Y/N) | Decline (Y/N) | Technical failure (what) | Recovery (Y/N) | Receiver Keep observed (Y/N) | First confusion (their words) | Notes (no strings) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 |  |  |  |  |  |  |  |  |  |  |  |  |
+| 2 |  |  |  |  |  |  |  |  |  |  |  |  |
+| 3 |  |  |  |  |  |  |  |  |  |  |  |  |
+| 4 |  |  |  |  |  |  |  |  |  |  |  |  |
+| 5 |  |  |  |  |  |  |  |  |  |  |  |  |
+
+**Tally (fill after real sessions)**
+
+- Attempted: ___
+- Unassisted completions: ___
+- Assisted: ___
+- Declines: ___
+- Technical failures: ___
+- Observed receiver Keeps: ___
+
+**Known attempts so far:** none. This sheet shipped empty on 2026-09-07.
+
 ## After
 
-- Fill one row on `observation-scorecard.md`.
 - Store only aggregate volunteered notes. No `KND1|…` strings, no hidden tracking, no names you would not print on a poster.
-- Agent walkthroughs of this board stay labeled as agent fixtures.
+- Agent walkthroughs of the campaign board stay labeled as agent fixtures.
 
 ## What this guide does not do
 
 It does not recruit people. It does not claim the matriarch has accepted the page. It does not replace the gift-code PR’s negative tests.
+
+Split copies of the guide and the empty table remain at `observation-guide.md` and `observation-scorecard.md` for earlier board links.
