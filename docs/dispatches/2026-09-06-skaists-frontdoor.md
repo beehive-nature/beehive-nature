@@ -83,6 +83,13 @@ SVG provenance/content. The new suite runs in the existing static CI job.
 The normal corpus and browser CI remain required; their result belongs to
 the exact candidate commit, not to this prose.
 
+The first remote browser job reported 77 university-smoke passes and one
+failure: `fleet card's "of them" matches the tree ... card sentence not
+found`. The redesign had omitted the computed count of hosted copies with
+behaviour fixes. The correction restores that count on the fleet directory
+card using the existing `fleetN` calculation; the original check is unchanged.
+This failure was caused by this lane, not inherited from main.
+
 No screenshots, browser interaction, viewport measurement or manual visual
 QA were performed in this lane: the applied Sites building skill restricts
 those to an explicit browser-testing request. This is a named verification

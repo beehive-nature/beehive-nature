@@ -92,7 +92,7 @@ const limit = s => s.limitKey && corpus[s.limitKey]
   ? text(s.limitKey, s.limit) : esc(s.limit || '');
 const surface = s => `<article class="srf" data-family="${esc(s.family)}" data-org="${esc(s.org)}" data-t="${esc([s.id,label(s),s.gloss,s.home,s.family,s.org,s.limit].join(' '))}"><a class="surface-link" href="${esc(s.path.replace(/^surfaces\//,''))}">
   <div class="row-title"><span class="nm">${esc(label(s))}</span><span class="row-arrow" aria-hidden="true">↗</span></div>
-  <div class="gl">${description(s)}</div>
+  <div class="gl">${description(s)}${s.path === 'surfaces/fleet-hosted/index.html' ? `<p>The hosted copies preserve the founder's art: ${fleetN} of them carrying behaviour fixes, compared with the originals beyond the vendor line.</p>` : ''}</div>
   ${s.limit ? `<div class="surface-limit"><span aria-hidden="true">△</span> ${limit(s)}</div>` : ''}
   <div class="row-meta"><span>${esc(s.family)}</span><span class="page-state">${s.state === 'LIVE' ? text('atlas.published','Published page') : esc(s.state)}</span>${s.warn && !s.limit ? `<span class="surface-limit">${text('atlas.limit','Named limit')}</span>` : ''}</div>
 </a><details class="row-trace"><summary>${text('atlas.source','Source & limits')}</summary><dl><dt>id</dt><dd>${esc(s.id)}</dd><dt>path</dt><dd><a href="https://github.com/beehive-nature/beehive-nature/blob/main/${esc(s.path)}" target="_blank" rel="noopener">${esc(s.path)} ↗</a></dd><dt>org</dt><dd>${esc(s.org)}</dd><dt>home</dt><dd>${esc(s.home)}</dd><dt>page</dt><dd>${esc(s.state)}</dd><dt>limit</dt><dd>${s.limit ? limit(s) : text('atlas.unspecified','Not specified in this registry row')}</dd></dl></details></article>`;
