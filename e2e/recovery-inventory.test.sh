@@ -12,7 +12,8 @@ trap 'rm -rf -- "$T"' EXIT
 # ---- the synthetic host -------------------------------------------------
 mkdir -p "$T/host/devrelay/target/debug" "$T/host/secrets" "$T/host/state" \
          "$T/host/probe" "$T/host/nodeps" "$T/host/badexe" "$T/host/badart" \
-         "$T/host/locked/inner" "$T/proc/42" "$T/proc/77"
+         "$T/host/norestart" "$T/host/nullrestart" "$T/host/static" \
+         "$T/host/locked/CUSTOMER-OBJECT-SENTINEL" "$T/proc/42" "$T/proc/77"
 printf 'dev relay binary bytes\n' > "$T/host/devrelay/target/debug/buzz-relay"
 printf 'chainstate bytes\n' > "$T/host/state/chain.dat"
 # SECRET CONTENT: must never reach the inventory output in any form.
@@ -26,9 +27,10 @@ ln -s "$T/host/devrelay/target/debug/buzz-relay (deleted)" "$T/proc/42/exe"
 # A pid directory the scanner CANNOT read (non-root): a partial scan that
 # must be recorded, never silently dropped.
 chmod 000 "$T/proc/77"
-# A subdirectory the walker CANNOT read (non-root): an incomplete
-# measurement that must surface as partially-unreadable.
-chmod 000 "$T/host/locked/inner"
+# A DISCOVERED subdirectory the walker CANNOT read (non-root): its NAME is
+# exactly the class of object name the inventory must never emit — the
+# permission failure is reported as root/op/code, without the path.
+chmod 000 "$T/host/locked/CUSTOMER-OBJECT-SENTINEL"
 
 cat > "$T/config-defects.json" <<JSON
 {
@@ -51,14 +53,20 @@ cat > "$T/config-defects.json" <<JSON
      "restart": {"unit": null, "executable": null, "method": "unknown"}},
     {"id": "no-deps-at-all", "path": "$T/host/nodeps",
      "classification": "reproducible-artifact", "restart": {}},
+    {"id": "no-restart-key", "path": "$T/host/norestart",
+     "classification": "reproducible-artifact"},
+    {"id": "null-restart", "path": "$T/host/nullrestart",
+     "classification": "reproducible-artifact", "restart": null},
     {"id": "unreadable-exe", "path": "$T/host/badexe",
      "classification": "reproducible-artifact",
      "restart": {"executable": "$T/host/state", "method": "manual"}},
     {"id": "dir-as-artifact", "path": "$T/host/badart",
      "classification": "reproducible-artifact",
-     "artifacts": [{"path": "$T/host/state", "kind": "artifact"}]},
+     "artifacts": [{"path": "$T/host/state", "kind": "artifact"}],
+     "restart": {"method": "not-applicable"}},
     {"id": "locked-tree", "path": "$T/host/locked",
-     "classification": "rebuildable-index-cache"}
+     "classification": "rebuildable-index-cache",
+     "restart": {"method": "not-applicable"}}
   ]
 }
 JSON
@@ -86,12 +94,27 @@ assert sec["status"] == "secret-recorded"
 assert sec["recovery_owner"] == "founder"
 for forbidden in ("footprint_bytes", "artifacts", "sha256", "notes"):
     assert forbidden not in sec, (forbidden, sec)
-# Unknown/unreadable restart dependencies must surface, never pass as ok.
+# Unknown/unreadable restart dependencies must surface, never pass as ok —
+# including the shapes that carry NO restart information at all (key absent,
+# explicit null); only the explicit "not-applicable" designation exempts a
+# root, and that is asserted in the clean run below.
 assert roots["probe-unknown"]["status"] == "unknown-restart-dependency", roots["probe-unknown"]
 assert roots["no-deps-at-all"]["status"] == "unknown-restart-dependency", roots["no-deps-at-all"]
+assert roots["no-restart-key"]["status"] == "unknown-restart-dependency", roots["no-restart-key"]
+assert roots["no-restart-key"]["restart"]["method"] == "undeclared"
+assert roots["null-restart"]["status"] == "unknown-restart-dependency", roots["null-restart"]
+assert roots["null-restart"]["restart"]["method"] == "undeclared"
 assert roots["unreadable-exe"]["status"] == "unreadable-restart-dependency", roots["unreadable-exe"]
-assert str(roots["unreadable-exe"]["restart"].get("executable_status", "")).startswith("unreadable")
+exstat = roots["unreadable-exe"]["restart"].get("executable_status", "")
+assert exstat.startswith("unreadable:") and "/" not in exstat, exstat
 assert roots["dir-as-artifact"]["status"] == "unreadable-artifact", roots["dir-as-artifact"]
+# Error reports are code-shaped: root id + operation + errno code, and
+# NOTHING that could carry a discovered path or object name.
+for e in r["measurement_errors"]:
+    assert set(e) <= {"root", "op", "code", "errno"}, e
+    assert "/" not in json.dumps(e), e
+assert r["measurement_errors"] == [] or all(
+    e["code"].startswith("E") for e in r["measurement_errors"]), r["measurement_errors"]
 assert r["deleted_executables"][0]["pid"] == 42
 assert r["deleted_executables"][0]["inside_declared_roots"] == ["dev-build"], r["deleted_executables"]
 fs = r["filesystems"][0]
@@ -103,6 +126,9 @@ if grep -q 'SENTINEL-SECRET-CONTENT' "$T/out.json"; then
 fi
 if grep -q 'SENTINEL-SECRET-NOTES-NEVER-EMIT' "$T/out.json"; then
   echo 'FAIL secret-reference notes passed through into output'; exit 1
+fi
+if grep -q 'CUSTOMER-OBJECT-SENTINEL' "$T/out.json"; then
+  echo 'FAIL discovered object name reached inventory output'; exit 1
 fi
 if grep -q "$guard_marker" "$T/out.json"; then
   echo 'FAIL key material marker reached inventory output'; exit 1
@@ -120,7 +146,7 @@ r = json.load(open(sys.argv[1], encoding="utf-8"))
 roots = {x["id"]: x for x in r["roots"]}
 assert roots["locked-tree"]["status"] == "partially-unreadable", roots["locked-tree"]
 assert any(e.get("root") == "locked-tree" for e in r["measurement_errors"]), r["measurement_errors"]
-assert any(e.get("error") == "proc-permission-denied" for e in r["scan_errors"]), r["scan_errors"]
+assert any(e.get("code") == "EACCES" and e.get("pid") for e in r["scan_errors"]), r["scan_errors"]
 print("permission-failure assertions ok")
 PY
 fi
@@ -130,8 +156,9 @@ echo 'PASS missing/unknown/unreadable dependencies, deleted-exe-under-build-tree
 # PROC_DIR is pinned to an EMPTY fixture: scanning the real /proc as an
 # unprivileged user is (correctly) a partial scan — permission-denied pids
 # are recorded and force exit 2 — so a clean run needs a fully readable
-# proc by construction.
-mkdir -p "$T/host/clean" "$T/proc-clean"
+# proc by construction. The static root proves the ONE designation that
+# exempts a root from restart-declaration ("not-applicable") stays healthy.
+mkdir -p "$T/host/clean" "$T/proc-clean" "$T/host/static"
 printf 'healthy binary\n' > "$T/host/clean/daemon"
 mkdir -p "$T/units/etc/systemd/system"
 touch "$T/units/etc/systemd/system/clean.service"
@@ -142,7 +169,10 @@ cat > "$T/config-clean.json" <<JSON
     {"id": "clean", "path": "$T/host/clean",
      "classification": "authoritative-state",
      "artifacts": [{"path": "$T/host/clean/daemon", "kind": "binary"}],
-     "restart": {"unit": "clean.service", "executable": "$T/host/clean/daemon"}}
+     "restart": {"unit": "clean.service", "executable": "$T/host/clean/daemon"}},
+    {"id": "no-restart-needed", "path": "$T/host/static",
+     "classification": "reproducible-artifact",
+     "restart": {"method": "not-applicable"}}
   ]
 }
 JSON
@@ -153,7 +183,8 @@ rc2=$?
 set -e
 [[ $rc2 -eq 0 ]] || { echo "FAIL clean census should exit 0, got $rc2"; exit 1; }
 grep -q '"status": "ok"' "$T/out2.json" || { echo 'FAIL clean root not ok'; exit 1; }
-echo 'PASS clean census exits 0'
+grep -q '"method": "not-applicable"' "$T/out2.json" || { echo 'FAIL not-applicable designation missing from output'; exit 1; }
+echo 'PASS clean census exits 0; explicit not-applicable designation is the only restart exemption'
 
 # ---- run 3: the guard refuses sensitive notes ----------------------------
 sneaky_notes="rotate BEGIN OPENSSH $guard_marker soon"

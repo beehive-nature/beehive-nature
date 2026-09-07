@@ -258,3 +258,50 @@ post-repair snapshots from the original run are kept unchanged as history.
 
 **Acceptance:** moved to a fresh G3 review session per the docket, with
 the corrected tool, the negative tests, and this section as its inputs.
+
+## 9. Second bounded correction (two review findings, same session)
+
+Astra verified `ef31fca9` (7/7 green, corrected snapshot flags both
+expected items, Bitcoin wording accepted) and found two remaining gaps.
+Both confirmed real; both fixed here. Still no capacity work repeated.
+
+1. **Omitted or null restart information still passed.** A missing
+   `restart` key and an explicit `"restart": null` both fell into the
+   `restart is None` branch, which recorded `restart: None` and raised no
+   defect — exit 0. Fix: absent/null/undeclared restart is now
+   `unknown-restart-dependency` by default (reported as
+   `{"method": "undeclared"}`); the ONE exemption is an explicit
+   designation `"restart": {"method": "not-applicable"}`, which is echoed
+   in the output so the declaration itself is auditable. Silence is no
+   longer readable as "fine". (All 15 roots in the box config declare a
+   restart, so the box snapshot's attention set is unchanged:
+   dev-relay-build + vending-probe.)
+2. **Measurement errors exposed discovered object names.** `str(err)` on
+   walked OSErrors embedded the discovered path verbatim — an unreadable
+   directory named `CUSTOMER-OBJECT-SENTINEL` appeared in the JSON,
+   violating #4's prohibition on emitting object names. Fix: every error
+   report is now structured `{root, op, code, errno}` (or
+   `{op, code, pid}` for the proc scan) — operation + symbolic errno
+   (`EACCES`, `EISDIR`), NEVER `str(err)`, never a discovered path; the
+   same normalization applies to artifact/restart `unreadable:` statuses
+   and the statvfs failure status.
+
+**Regression tests added** for both reproducible cases: a root with no
+restart key and one with `"restart": null` both assert
+`unknown-restart-dependency` + `{"method": "undeclared"}`; a mode-000
+DISCOVERED directory literally named `CUSTOMER-OBJECT-SENTINEL` inside a
+declared root asserts `partially-unreadable` + code-shaped
+`measurement_errors` (keys ⊆ {root, op, code, errno}, no `/` in any
+entry) and greps the whole output for the name; the proc-permission
+assertion now requires the `EACCES` code shape; the clean census gains a
+`not-applicable` root to prove the designation stays healthy at exit 0.
+ALL PASS non-root.
+
+**Snapshot:** the read-only post-correction snapshot at
+`fixtures/recovery-inventory/box-2026-09-07-post-correction.json` was
+regenerated with this final tool (same attention set, errors now
+code-shaped). Pre-repair and post-repair history files untouched.
+
+**Handoff:** #4 remains open; acceptance per the docket belongs to a
+fresh G3 review session — inputs: this section, §8, the tool at this
+commit, the fixture battery, and the three snapshots.

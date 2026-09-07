@@ -31,6 +31,7 @@ Environment:
 
 import argparse
 import datetime
+import errno
 import grp
 import hashlib
 import json
@@ -38,6 +39,14 @@ import os
 import pwd
 import socket
 import sys
+
+
+def err_code(err):
+    """OSError → its symbolic errno name (EACCES, EISDIR, …). NEVER str(err):
+    the string form embeds the discovered path, and #4 forbids emitting
+    discovered object names — error reports carry the operation and code,
+    nothing else."""
+    return errno.errorcode.get(err.errno, "ERR%s" % err.errno)
 
 CLASSIFICATIONS = (
     "authoritative-state",
@@ -115,7 +124,8 @@ def footprint(path, errors, root_id):
     total = 0
 
     def on_error(err):
-        errors.append({"root": root_id, "error": str(err)})
+        errors.append({"root": root_id, "op": "listdir",
+                       "code": err_code(err), "errno": err.errno})
 
     for dirpath, _dirnames, filenames in os.walk(path, followlinks=False,
                                                  onerror=on_error):
@@ -123,7 +133,8 @@ def footprint(path, errors, root_id):
             try:
                 total += os.lstat(os.path.join(dirpath, name)).st_size
             except OSError as err:
-                errors.append({"root": root_id, "error": str(err)})
+                errors.append({"root": root_id, "op": "lstat",
+                               "code": err_code(err), "errno": err.errno})
     return total
 
 
@@ -139,16 +150,19 @@ def scan_deleted_executables(roots):
     try:
         entries = sorted(os.listdir(proc_dir))
     except OSError as err:
-        return findings, ["proc-scan-unavailable: %s" % err]
+        return findings, [{"op": "proc-listdir", "code": err_code(err),
+                           "errno": err.errno}]
     for name in entries:
         if not name.isdigit():
             continue
         exe = os.path.join(proc_dir, name, "exe")
         try:
             target = os.readlink(exe)
-        except PermissionError:
+        except PermissionError as err:
             # A pid we cannot read = a PARTIAL scan, not an empty finding.
-            errors.append({"error": "proc-permission-denied", "pid": int(name)})
+            # Pid + code only: no path, no discovered object names.
+            errors.append({"op": "proc-readlink", "code": err_code(err),
+                           "pid": int(name)})
             continue
         except OSError:
             continue  # kernel thread or gone — no exe is normal, not an error
@@ -156,8 +170,9 @@ def scan_deleted_executables(roots):
             continue
         try:
             uid = os.stat(exe).st_uid
-        except PermissionError:
-            errors.append({"error": "proc-permission-denied", "pid": int(name)})
+        except PermissionError as err:
+            errors.append({"op": "proc-stat", "code": err_code(err),
+                           "pid": int(name)})
             uid = None
         except OSError:
             uid = None
@@ -177,7 +192,7 @@ def check_filesystem(mount, reserve_bytes):
         st = os.statvfs(mount)
     except OSError as err:
         return {"mount": mount, "reserve_bytes": reserve_bytes,
-                "status": "statvfs-failed: %s" % err}
+                "status": "statvfs-failed:%s" % err_code(err)}
     free = st.f_bavail * st.f_frsize
     return {
         "mount": mount,
@@ -248,13 +263,20 @@ def inventory_root(root, errors):
                 entry["bytes"] = os.lstat(apath).st_size
                 entry["status"] = "ok"
             except OSError as err:
-                entry["status"] = "unreadable: %s" % err
+                entry["status"] = "unreadable:%s" % err_code(err)
                 defects.append("unreadable-artifact")
         out["artifacts"].append(entry)
 
     restart = root.get("restart")
     if restart is None:
-        out["restart"] = None
+        # Absent or null restart information is a DEFECT by default — the
+        # census cannot assume a root needs no restart; it must be TOLD via
+        # an explicit "not-applicable" designation. Silence is not "fine".
+        defects.append("unknown-restart-dependency")
+        out["restart"] = {"method": "undeclared"}
+    elif restart.get("method") == "not-applicable":
+        # The one explicit designation that a root has no restart dependency.
+        out["restart"] = {"method": "not-applicable"}
     else:
         rep = dict(restart)
         exe = restart.get("executable")
@@ -269,7 +291,7 @@ def inventory_root(root, errors):
                 try:
                     rep["executable_sha256"] = digest_file(exe)
                 except OSError as err:
-                    rep["executable_status"] = "unreadable: %s" % err
+                    rep["executable_status"] = "unreadable:%s" % err_code(err)
                     defects.append("unreadable-restart-dependency")
             else:
                 rep["executable_status"] = "missing-restart-dependency"
