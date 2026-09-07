@@ -79,4 +79,7 @@ test('view toggle remembers limits disclosure and does not own a second gift eng
   assert.equal((page.match(/function gift\(/g)||[]).length, 1);
   assert.match(tour, /register\.js\?v=9/);
   assert.match(register, /body\[data-reg="bee"\]\[data-bee-theme="shared"\]/);
+  /* page-local display: on [data-reg] children would beat register.js hide */
+  const phaseCss = page.slice(page.indexOf('.giftphase .gp b'), page.indexOf('#giftstr.copy-needed'));
+  assert.doesNotMatch(phaseCss, /display\s*:/);
 });

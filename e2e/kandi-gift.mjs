@@ -281,6 +281,10 @@ const st=p=>p.evaluate(()=>{const S=JSON.parse(localStorage.getItem('bkandi'));
   }));
   ok('view toggle preserves the prepared export and does not retire it',
      kept.open && /^KND1\|/.test(kept.exp) && kept.right===1, JSON.stringify(kept));
+  const labels=await p.evaluate(()=>[...document.querySelectorAll('#giftphase[data-phase="prepared"] [data-reg]')]
+    .filter(el=>el.offsetParent!==null).map(el=>el.getAttribute('data-reg')));
+  ok('only the active view\'s prepared label is painted', labels.length===1 && labels[0]==='cypherpunk',
+     JSON.stringify(labels));
   await p.close();
 }
 

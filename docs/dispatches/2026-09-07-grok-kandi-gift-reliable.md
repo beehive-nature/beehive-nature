@@ -60,16 +60,22 @@ refuse those names honestly — that is not a silent reinterpret.
   remembered per view. Composer draft, prepared export and language are not
   reset on toggle.
 
-## Tests
+## Tests (ran on this seat)
 
-| File | What it proves |
+| File | Receipt |
 | --- | --- |
-| `e2e/kandi-gift.mjs` | repeated give, cancel, target change, stale complete, clipboard reject, quota on string/complete, preview+keep+duplicate+malformed, merge + refuse stale tabs, Unicode names, bead leftovers, Show preview, view-toggle preserve |
-| `e2e/kandi-views.test.mjs` | shared light New bee, one engine, escrow denied, keyed labels vs corpus, disclosure memory |
-| `e2e/kandi-arms.mjs` | existing arms/gift/receive laws, now via finish + keep; handshake does not retire |
-| `e2e/kandi-crossing.mjs` | existing crossing + Show fragment; receive is look-then-keep |
-| `e2e/kandi-arrival.mjs` | unchanged arrival preview / Keep / mangled |
-| `e2e/kandi-thread.mjs` | unchanged threading |
+| `e2e/kandi-gift.mjs` | 30 passed, 0 failed — repeated give, cancel, target change, stale complete, clipboard reject, quota on string/complete, preview+keep+duplicate+malformed, merge + refuse stale tabs, Unicode names, bead leftovers, Show preview, view-toggle preserve + one painted phase label |
+| `e2e/kandi-views.test.mjs` | 5 passed — shared light New bee, one engine, escrow denied, keyed labels vs corpus, disclosure memory; page-local phase CSS must not set `display` on `[data-reg]` children |
+| `e2e/kandi-arms.mjs` | 13 passed — arms/gift/receive laws via finish + keep; handshake does not retire |
+| `e2e/kandi-crossing.mjs` | 16 passed — crossing + Show fragment; receive is look-then-keep |
+| `e2e/kandi-arrival.mjs` | 10 passed — arrival preview / Keep / mangled |
+| `e2e/kandi-thread.mjs` | 11 passed — threading unchanged |
+| `e2e/estate-source.mjs` | 11 passed — new keys exist in every docked tongue; English matches the page |
+| `e2e/register.test.mjs` | 15 passed — shared loader / theme contract unchanged |
+
+Browser check in this VM (Playwright Chromium, reduced motion): New bee is the shared cream canvas; a `PLUR` piece named `Jānis` / `Анна` stays on the right arm through the handshake; the same export survives Raver and Cypherpunk toggles; **I handed it over** then retires it and keeps the full KND1 on the memory line. First screenshot pass showed all three phase labels stacked — a page-local `display:block` on `.gp b` / `.why` beat `register.js` hide. That rule was removed; only the active view's label paints.
+
+This is a served-page check in this VM, not matriarch acceptance and not a claim the public Pages deploy has moved.
 
 ## Astra — CI note
 
