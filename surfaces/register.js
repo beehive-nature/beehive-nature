@@ -1,114 +1,90 @@
-/* register.js — the estate-wide reading-register toggle, FOUNDER CANON 2026-08-28.
-   Loaded by tour.js on every surface, so the choice is IN PLACE on every page and travels
-   with the reader (localStorage 'bregister', same local-first pattern as btranslated_pref).
-
-   THE CANON (founder-ruled, verbatim definitions):
-   - new bee  = "the apple of the decentralized OS eco" (polished, human, zero jargon)
-   - raver    = "everything expressed through art, graphics, animation"
-   - cypherpunk = "everything a computer scientist/engineer will want"
-
-   THE LAWS, baked in rather than remembered:
-   - One set of constants. A register changes PROSE and DENSITY, never a number — three
-     renderings of one truth, so the registers can never disagree about a fact.
-   - new bee is the DEFAULT and is never a downgrade: guided, minimal, generous.
-   - Raver is mid-density and vivid — vividness lives in chrome, never in data encodings.
-   - Cypherpunk is dense and receipts-forward.
-   - THE TOGGLE IS OBVIOUS: three NAMED pills (icon + word), 44px touch targets,
-     active state unmistakable and never carried by colour alone (filled pill +
-     pressed ring + aria-pressed). A first-time visitor SEES that three readings exist:
-     the control introduces itself once — one quiet line with the three definitions.
-   - Standing law unchanged: move the detail, never delete it — registers relocate
-     content, never erase it.
-
-   Page contract: mark register-specific prose with data-reg="bee|raver|cypherpunk".
-   Unmarked content renders in every register. A page with no data-reg content still
-   carries the toggle — the preference is estate-wide, the prose arrives per page. */
+/* Shared three-view control: New bee (default), Raver, Cypherpunk.
+   FOUNDER CANON 2026-08-28: one set of facts, capabilities and access.
+   Views change prose/density, never constants. Unmarked content stays shared.
+   Existing [data-register-host] is reused; otherwise mount in flow at the top.
+   Contract: body[data-reg], data-reg variants, bregister event {reg}, and
+   same-origin localStorage bregister. Page-specific presentations are separate;
+   shared chrome does not claim every page has three authored presentations. */
 (function(){
-  if(document.getElementById('bregctl')) return;
-  /* labels + the intro line are CORPUS KEYS (reg.*) — one key one English;
-     lang.js swaps them like any other string, so the canon speaks every tongue */
-  var REGS=[['bee','🐝','reg.bee'],
-            ['raver','🎛','reg.raver'],
-            ['cypherpunk','⚗','reg.cypherpunk']];
+  if(window.__bnrRegister || document.getElementById('bregctl')) return;
+  window.__bnrRegister=true;
+  var script=document.currentScript;
+  var home=new URL('index.html',script&&script.src||location.href).href;
+  var REGS=[['bee','🐝','reg.bee','new bee'],['raver','🎛','reg.raver','raver'],['cypherpunk','⚗','reg.cypherpunk','cypherpunk']];
   function pref(){ try{ var v=localStorage.getItem('bregister');
     return (v==='raver'||v==='cypherpunk')?v:'bee'; }catch(e){ return 'bee'; } }
-  function setPref(r){ try{ localStorage.setItem('bregister',r); }catch(e){} apply(r); }
   function apply(r){
+    if(!document.body) return;
     document.body.setAttribute('data-reg',r);
     REGS.forEach(function(R){
       var b=document.getElementById('breg-'+R[0]);
-      if(b) b.setAttribute('aria-pressed', String(R[0]===r));
+      if(b) b.setAttribute('aria-pressed',String(R[0]===r));
     });
-    try{ document.dispatchEvent(new CustomEvent('bregister',{detail:{reg:r}})); }catch(e){}
+    document.dispatchEvent(new CustomEvent('bregister',{detail:{reg:r}}));
   }
-  /* the visibility mechanism: CSS attribute matching, no per-page wiring */
-  var css=document.createElement('style');
-  css.textContent=
-    '[data-reg]:not(body){display:none}'
-   +'body[data-reg="bee"] [data-reg="bee"],'
-   +'body[data-reg="raver"] [data-reg="raver"],'
-   +'body[data-reg="cypherpunk"] [data-reg="cypherpunk"]{display:revert}'
-   /* the wrap itself is a span: under a bare span{} rule it read +4px (lang-lane
-      probe, b2b4eee). Pinned like its buttons — nobody's element selector. */
-   +'#bregctl{display:inline-flex;gap:5px;align-items:center;margin:0 0 0 10px;padding-left:10px;flex-shrink:0;min-height:0;height:auto;box-sizing:border-box;'
-   +'border-left:1px solid #243026;vertical-align:middle}'
-   /* CANON: 44px touch targets, named pills, unmistakable active state —
-      filled pill + ring + bold + leading dot, never colour alone. Property
-      pinning law preserved (the tour bar is nobody's element selector). */
-   +'#bregctl button{background:transparent;border:1px solid #243026;border-radius:999px;'
-   +'color:#8a9a8a;font:11px "IBM Plex Mono",monospace;padding:0 12px;cursor:pointer;line-height:1;'
-   +'margin:0;min-height:44px;height:44px;box-sizing:border-box;display:inline-flex;'
-   +'align-items:center;gap:6px;white-space:nowrap}'
-   +'#bregctl button[aria-pressed="true"]{border-color:#FFD700;color:#FFD700;font-weight:700;'
-   +'background:rgba(255,215,0,.10);box-shadow:0 0 0 2px rgba(255,215,0,.35)}'
-   +'#bregctl button[aria-pressed="true"]::before{content:"●";font-size:8px}'
-   +'#bregctl button:hover{border-color:#00E5FF;color:#00E5FF}'
-   /* the once-introduction: one quiet line, dismissed by any choice or its own click */
-   +'#bregintro{position:absolute;left:0;right:0;bottom:100%;display:block;width:100%;box-sizing:border-box;margin:0 0 2px;padding:6px 10px;'
-   +'background:#0d1410;border:1px solid #243026;border-radius:8px 8px 0 0;color:#8a9a8a;font:10.5px "IBM Plex Mono",monospace;line-height:1.7;cursor:pointer}';
+  var css=document.createElement('style'); css.id='bregstyle';
+  /* Scope colors to chrome, not page data encodings. Pin element properties:
+     the estate has many bare button/span/a rules. */
+  css.textContent=`
+    [data-reg]:not(body){display:none}
+    body[data-reg="bee"] [data-reg="bee"],body[data-reg="raver"] [data-reg="raver"],body[data-reg="cypherpunk"] [data-reg="cypherpunk"]{display:revert}
+    #bregbar,#bregctl{--reg-bg:#f6f7f2;--reg-ink:#18362a;--reg-line:#8a9e90;--reg-active:#326b39;--reg-on:#fff;--reg-font:system-ui,-apple-system,'Segoe UI',sans-serif;color-scheme:light}
+    body[data-reg="raver"] #bregbar,body[data-reg="raver"] #bregctl{--reg-bg:#0e1b19;--reg-ink:#e9f2ec;--reg-line:#729889;--reg-active:#b7a8f7;--reg-on:#101724;color-scheme:dark}
+    body[data-reg="cypherpunk"] #bregbar,body[data-reg="cypherpunk"] #bregctl{--reg-bg:#06110c;--reg-ink:#e9f2ec;--reg-line:#729889;--reg-active:#86cc72;--reg-on:#06110c;--reg-font:ui-monospace,'Cascadia Mono',Consolas,monospace;color-scheme:dark}
+    #bregbar{position:relative;inset:auto;z-index:auto;display:flex;flex:0 0 auto;order:-1;grid-column:1/-1;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;box-sizing:border-box;width:100%;min-width:0;max-width:none;height:auto;min-height:68px;margin:0 0 16px;padding:12px clamp(12px,3vw,40px);border:0;border-bottom:1px solid var(--reg-line);background:var(--reg-bg);color:var(--reg-ink);font:1rem/1.5 var(--reg-font);text-align:start}
+    #bregbar [data-register-host]{display:block;flex:0 1 auto;min-width:0;max-width:100%;margin:0;padding:0}
+    #bregctl{position:static;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;box-sizing:border-box;min-width:0;max-width:100%;height:auto;min-height:0;margin:0;padding:0;border:0;background:var(--reg-bg);color:var(--reg-ink);font:1rem/1.5 var(--reg-font)}
+    #bregctl button{appearance:none;position:relative;inset:auto;display:inline-flex;flex:1 1 auto;align-items:center;justify-content:center;gap:8px;box-sizing:border-box;width:auto;min-width:0;max-width:100%;height:auto;min-height:44px;margin:0;padding:10px 14px;border:1px solid var(--reg-line);border-radius:6px;background:var(--reg-bg);color:var(--reg-ink);font:400 .875rem/1.4 var(--reg-font);letter-spacing:normal;text-transform:none;text-align:center;white-space:normal;overflow-wrap:anywhere;cursor:pointer;box-shadow:none;transform:none;text-decoration:none;opacity:1}
+    #bregctl button span{display:inline;position:static;width:auto;height:auto;min-height:0;margin:0;padding:0;border:0;background:none;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit}
+    #bregctl button[aria-pressed="true"]{background:var(--reg-active);border-color:var(--reg-active);color:var(--reg-on);font-weight:600}
+    #bregctl button::before{content:'✓';display:inline-block;visibility:hidden;font:inherit}
+    #bregctl button[aria-pressed="true"]::before{visibility:visible}
+    #bregctl button:hover{border-color:var(--reg-active);text-decoration:underline;text-underline-offset:3px}
+    #bregctl button:focus-visible,#bregbar a:focus-visible{outline:2px solid var(--reg-active);outline-offset:3px}
+    #bregbar .breg-home{position:static;display:inline-flex;flex:0 0 auto;align-items:center;box-sizing:border-box;min-height:44px;width:auto;height:auto;margin:0;padding:6px 8px;border:0;border-radius:6px;background:transparent;color:var(--reg-ink);font:600 1rem/1.5 var(--reg-font);text-transform:none;letter-spacing:normal;text-decoration:none}
+    #bregbar .breg-home:hover{text-decoration:underline}
+    #bregdescription{position:absolute;display:block;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+    @media(max-width:600px){#bregbar{gap:4px;padding:8px 10px}#bregbar [data-register-host]{flex:1 1 100%}#bregctl{gap:4px}#bregctl button{padding:8px;font-size:.875rem}}
+    @media(forced-colors:active){#bregctl button[aria-pressed="true"]{outline:2px solid Highlight;outline-offset:-3px}}
+  `;
   document.head.appendChild(css);
-
   function mount(){
-    /* A page can give the same estate-wide control a prominent, in-flow
-       home. There is still one preference and one bregister event. */
-    var pageHost=document.querySelector('[data-register-host]');
-    var host=pageHost||document.getElementById('tbar');
-    var wrap=document.createElement('span'); wrap.id='bregctl';
-    wrap.setAttribute('role','group'); wrap.setAttribute('aria-label','reading register — three readings of every page');
+    if(document.getElementById('bregctl')) return;
+    var host=document.querySelector('[data-register-host]');
+    if(!host){
+      var bar=document.createElement('div'); bar.id='bregbar';
+      var link=document.createElement('a'); link.className='breg-home'; link.href=home;
+      link.textContent='⬡ skaists'; link.setAttribute('aria-label','skaists home'); bar.appendChild(link);
+      host=document.createElement('div'); host.setAttribute('data-register-host','');
+      host.setAttribute('aria-describedby','bregdescription'); bar.appendChild(host);
+      var description=document.createElement('span'); description.id='bregdescription';
+      description.setAttribute('data-i18n','atlas.view');
+      description.textContent='Choose how this page speaks to you'; bar.appendChild(description);
+      /* Centered tools use body as a horizontal flex row. A new sibling
+         would squeeze their main column; put the control inside that column. */
+      var parent=document.body;
+      var layout=getComputedStyle(parent);
+      if((layout.display==='flex'||layout.display==='inline-flex') && /^row/.test(layout.flexDirection)){
+        parent=document.querySelector('body > main')||parent;
+      }
+      parent.insertBefore(bar,parent.firstChild);
+    }
+    var wrap=document.createElement('div'); wrap.id='bregctl';
+    wrap.setAttribute('role','group'); wrap.setAttribute('aria-label','View');
+    var described=host.getAttribute('aria-describedby');
+    if(described) wrap.setAttribute('aria-describedby',described);
     REGS.forEach(function(R){
-      var b=document.createElement('button');
-      b.id='breg-'+R[0];
+      var b=document.createElement('button'); b.type='button'; b.id='breg-'+R[0];
       b.setAttribute('aria-pressed','false');
-      b.appendChild(document.createTextNode(R[1]));
-      var w=document.createElement('span'); w.className='w'; w.setAttribute('data-i18n',R[2]);
-      w.textContent=R[0]==='bee'?'new bee':R[0];
-      b.appendChild(w);
-      b.addEventListener('click',function(){ try{ localStorage.setItem('bregintro','1'); }catch(e){}
-        var intro=document.getElementById('bregintro'); if(intro) intro.remove();
-        setPref(R[0]); });
+      var icon=document.createElement('span'); icon.setAttribute('aria-hidden','true');
+      icon.textContent=R[1]; b.appendChild(icon);
+      var word=document.createElement('span'); word.setAttribute('data-i18n',R[2]); word.textContent=R[3]; b.appendChild(word);
+      b.addEventListener('click',function(){try{localStorage.setItem('bregister',R[0]);}catch(e){} apply(R[0]);});
       wrap.appendChild(b);
     });
-    if(host){ host.appendChild(wrap); }
-    else{ /* no tour bar (rare) — float it, same control, bottom-right */
-      wrap.style.cssText+=';position:fixed;right:10px;bottom:10px;background:#0d1410;'
-        +'border:1px solid #243026;border-radius:8px;padding:5px 8px;z-index:9999;margin:0';
-      document.body.appendChild(wrap);
-    }
-    /* the once-introduction — one quiet line carrying the three definitions
-       verbatim (corpus-keyed as reg.intro), gone after the first choice */
-    var seen=false; try{ seen=!!localStorage.getItem('bregintro'); }catch(e){}
-    if(!seen&&host&&!pageHost){
-      var line=document.createElement('span'); line.id='bregintro';
-      line.setAttribute('data-i18n','reg.intro');
-      line.setAttribute('role','note');
-      line.textContent='three readings of every page — new bee: the apple of the decentralized OS eco · raver: everything expressed through art, graphics, animation · cypherpunk: everything a computer scientist/engineer will want. pick yours; it travels with you.';
-      line.addEventListener('click',function(){ try{ localStorage.setItem('bregintro','1'); }catch(e){} line.remove(); });
-      host.appendChild(line);
-    }
-    apply(pref());
+    host.appendChild(wrap); apply(pref());
   }
-  /* stay in sync when another tab changes the choice */
-  window.addEventListener('storage',function(e){ if(e.key==='bregister') apply(pref()); });
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',mount);
+  window.addEventListener('storage',function(e){if(e.key==='bregister'||e.key===null) apply(pref());});
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',mount,{once:true});
   else mount();
 })();

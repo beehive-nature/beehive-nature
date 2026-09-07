@@ -136,7 +136,7 @@ const page = `<!doctype html>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="bn-logo.jpg">
-<link rel="stylesheet" href="atlas.css?v=1">
+<link rel="stylesheet" href="atlas.css?v=2">
 <title>skaists · beehive nature reserve</title>
 <meta name="description" content="Explore the beehive nature reserve: on-chain art, music, people, science and open tools. Find a place to begin, then browse the whole estate.">
 <style>
@@ -192,7 +192,7 @@ ${JSON.stringify(E)}
 <script src="atlas-search.js?v=1" defer></script>
 <script src="atlas.js?v=3" defer></script>
 <script src="agent-dock.js?v=7"></script>
-<script src="tour.js?v=36"></script>
+<script src="tour.js?v=37"></script>
 </body>
 </html>
 `;

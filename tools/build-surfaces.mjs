@@ -293,7 +293,7 @@ for (const d of E.domains) {
     + 'a door may not claim what the estate does not do</div>\n'
     + '  <div><a href="./">all six doors</a> · <a href="../">the hub</a> · '
     + '<a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/estate.json" rel="noopener">the registry</a></div>\n'
-    + '</footer>\n\n<script src="../tour.js?v=23"></' + 'script>\n</body>\n</html>\n';
+    + '</footer>\n\n<script src="../tour.js?v=37"></' + 'script>\n</body>\n</html>\n';
 
   writeFileSync(join(OUT, 'doors', (d.slug||d.id) + '.html'), html);
   built.push({ id: d.id, host: d.host, live: live.length, notYet: dead.length + d.notYet.length });
@@ -322,7 +322,7 @@ for (const d of E.domains) {
     + '<footer>\n  <div>six doors · paths for now, no DNS · a door may not claim what the estate does not do</div>\n'
     + '  <div><a href="../">the hub</a> · '
     + '<a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/estate.json" rel="noopener">the registry</a></div>\n'
-    + '</footer>\n<script src="../tour.js?v=23"></' + 'script>\n</body>\n</html>\n';
+    + '</footer>\n<script src="../tour.js?v=37"></' + 'script>\n</body>\n</html>\n';
   writeFileSync(join(OUT, 'doors', 'index.html'), html);
 }
 
@@ -486,7 +486,7 @@ const hub = head('beehive nature · the surfaces — six domains, one organism',
   + '  });\n'
   + '})();\n</' + 'script>\n'
   + '<script src="agent-dock.js?v=5"></' + 'script>\n'
-  + '<script src="tour.js?v=23"></' + 'script>\n</body>\n</html>\n';
+  + '<script src="tour.js?v=37"></' + 'script>\n</body>\n</html>\n';
 
 writeFileSync(join(OUT, 'index.html'), hub);
 

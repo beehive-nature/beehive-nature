@@ -129,18 +129,21 @@
     }
   },true);
 
-  /* the technical-register toggle (🐝/🎛/⚗) rides every page — see register.js */
-  if(!document.getElementById('bregctl')){
-    var s=document.createElement('script');
-    s.src=R+'register.js?v=6';
-    document.body.appendChild(s);
-  }
   /* the language toggle (every corpus-docked tongue, corpus-law honest) rides every page — see lang.js */
-  if(!document.getElementById('blangctl')){
+  function loadLanguage(){
+    if(document.getElementById('blangctl')) return;
     var s2=document.createElement('script');
-    s2.src=R+'lang.js?v=21';
+    s2.src=R+'lang.js?v=22';
     document.body.appendChild(s2);
   }
+  /* Mount view labels before language scans them. Independent async loads
+     could otherwise leave the newly inserted buttons in English. */
+  if(!document.getElementById('bregctl')){
+    var s=document.createElement('script');
+    s.src=R+'register.js?v=7';
+    s.onload=loadLanguage; s.onerror=loadLanguage;
+    document.body.appendChild(s);
+  }else loadLanguage();
 
   /* the rails badge — every surface's reassurance line: soul 0x fingerprint +
      LIVE rails (founder word, 2026-08-22). Rides the tbar like the registers. */
