@@ -73,6 +73,9 @@ jobs:
       - name: Box tunnel — renewable lease and scoped shutdown
         if: always()
         run: bash e2e/box-tunnel.test.sh
+      - name: Recovery inventory — missing dependency + secret-free output
+        if: always()
+        run: bash e2e/recovery-inventory.test.sh
       - name: Secret scanner — refused content stays out of logs
         if: always()
         run: bash e2e/secret-scan-output.test.sh
