@@ -65,3 +65,14 @@ not removed.
 This is a served-page check in this VM, not matriarch acceptance, not a
 live jam across machines, and not a claim the public Pages deploy has
 moved.
+
+## §7 identity
+
+The first push authored as the seat (`b15efd6`). That is a §7 miss:
+seats are committers + trailers, never authors. The tree was rewritten
+once to founder-author / seat-committer (`d404e03`) with a Co-authored-by
+trailer. The PR-event static range (`base..head`) is green on that
+shape, including the Front door step with `e2e/forge-room-views.test.mjs`.
+The push-event static on the force-push itself failed closed: GitHub's
+`before` was the discarded seat-authored tip, which this checkout no
+longer resolves. This descendant is the cure — not another force.
