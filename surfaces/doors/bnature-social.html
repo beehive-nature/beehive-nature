@@ -4,9 +4,9 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
-<meta name="color-scheme" content="dark">
+<meta name="color-scheme" content="light dark">
 <title>bnature.social — someone who wants people</title>
-<meta name="theme-color" content="#06110C">
+<meta name="theme-color" content="#f6f7f2">
 <style>:root{
   --void:#06110C; --panel:#0A1310; --tile:#0C1412; --inset:#08120E; --lift:#111C17;
   --ink:#E9F2EC; --dim:#8FA79A; --dimmer:#648176; --line:#1E2B26; --hot:#2F4A3C;
@@ -146,7 +146,62 @@ a.t.big s:not(.do){font-size:9.5px;color:var(--dimmer);margin-top:8px}
   #start-here{padding:16px 14px 12px}
   #start-here .start-link{min-height:92px;padding:14px;gap:12px}
   #start-here .start-picture{width:48px;height:48px}
-  #start-here .start-link strong{font-size:1.125rem}}</style>
+  #start-here .start-link strong{font-size:1.125rem}
+  body[data-reg="bee"] .eyebrow{padding-top:12px}
+}
+
+/* Three presentations on this door only. Shared register/tour stay untouched.
+   New bee hides the hex band (register already hides #veil for doors).
+   Tour bar restyle is page-local: tour.js writes inline colors. */
+details.density{margin-top:16px;border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:8px 16px 16px}
+details.density>summary{min-height:44px;cursor:pointer;font-size:1.125rem;color:var(--ink);list-style:none;display:flex;align-items:center}
+details.density>summary::-webkit-details-marker{display:none}
+details.density>summary:before{content:"+ ";color:var(--accent)}
+details.density[open]>summary:before{content:"− "}
+body[data-reg="bee"]{
+  --void:#f6f7f2;--panel:#fff;--tile:#fff;--inset:#edf2eb;--lift:#edf2eb;
+  --ink:#18362a;--dim:#435f4e;--dimmer:#52695b;--line:#ccd7cf;--hot:#8a9e90;
+  --accent:#176879;color-scheme:light;background:#f6f7f2;color:#18362a;
+  font:1.125rem/1.65 system-ui,-apple-system,"Segoe UI",sans-serif}
+body[data-reg="bee"] #veil,body[data-reg="bee"] #bandwrap{display:none}
+body[data-reg="bee"] .eyebrow{padding-top:12px;letter-spacing:normal;text-transform:none;font-size:.875rem;color:#435f4e}
+body[data-reg="bee"] h1{color:#18362a;letter-spacing:-.04em}
+body[data-reg="bee"] .what,body[data-reg="bee"] .live-note,body[data-reg="bee"] .intro{font-size:1.125rem;color:#435f4e}
+body[data-reg="bee"] #start-here{background:#fff;border-color:#ccd7cf}
+body[data-reg="bee"] section,body[data-reg="bee"] .act,body[data-reg="bee"] .notyet,body[data-reg="bee"] a.t,body[data-reg="bee"] details.density{background:#fff;border-color:#ccd7cf;border-radius:16px;color:#18362a}
+body[data-reg="bee"] a.t b,body[data-reg="bee"] .act b,body[data-reg="bee"] .shead h2{color:#18362a;font-size:1.125rem}
+body[data-reg="bee"] a.t s,body[data-reg="bee"] .act s,body[data-reg="bee"] .notyet p,body[data-reg="bee"] .notyet li{color:#435f4e;font-size:1rem}
+body[data-reg="bee"] footer{font-size:.875rem;letter-spacing:normal;text-transform:none;color:#52695b}
+body[data-reg="bee"] #tbar{background:#f6f7f2!important;border-top-color:#ccd7cf!important;
+  color:#18362a!important;-webkit-mask-image:none!important;mask-image:none!important;
+  font:500 1rem/1.4 system-ui,-apple-system,"Segoe UI",sans-serif!important}
+body[data-reg="bee"] #tbar a{color:#18362a!important;background:#fff!important;box-shadow:inset 0 0 0 1px #ccd7cf!important}
+body[data-reg="bee"] #tbar .tsep{background:#ccd7cf!important}
+body[data-reg="bee"] #tbarMore{background:#fff!important;color:#326b39!important;border-color:#ccd7cf!important}
+
+body[data-reg="raver"] #start-here{background:var(--panel);color:var(--ink);border-color:var(--line)}
+body[data-reg="raver"] #start-here h2,body[data-reg="raver"] #start-here .start-link strong{color:var(--ink)}
+body[data-reg="raver"] #start-here .lead,body[data-reg="raver"] #start-here .kicker,body[data-reg="raver"] #start-here .start-help{color:var(--dim)}
+body[data-reg="raver"] #start-here .start-link,body[data-reg="raver"] #start-here .honesty{
+  background:var(--tile);border-color:var(--line);color:var(--ink)}
+
+body[data-reg="cypherpunk"]{color-scheme:dark}
+body[data-reg="cypherpunk"] #start-here{background:var(--panel);color:var(--ink);border-color:var(--line);
+  font-family:var(--mono);border-radius:0}
+body[data-reg="cypherpunk"] #start-here h2{font:800 19px/1.1 var(--mono);letter-spacing:-.01em;color:var(--accent)}
+body[data-reg="cypherpunk"] #start-here .lead{color:var(--dim);font-size:1rem}
+body[data-reg="cypherpunk"] #start-here .kicker,body[data-reg="cypherpunk"] #start-here .start-help{color:var(--dim);font-size:.875rem}
+body[data-reg="cypherpunk"] #start-here .start-link,body[data-reg="cypherpunk"] #start-here .honesty{
+  background:var(--tile);border-color:var(--line);color:var(--ink);border-radius:0;box-shadow:none}
+body[data-reg="cypherpunk"] #start-here .start-link strong{font-size:14px;color:var(--accent)}
+/* The light arrival's explicit child colors must also switch with its panel. */
+body:is([data-reg="raver"],[data-reg="cypherpunk"]) #start-here .honesty>summary{color:var(--ink)}
+body:is([data-reg="raver"],[data-reg="cypherpunk"]) #start-here .honesty>summary::before,
+body:is([data-reg="raver"],[data-reg="cypherpunk"]) #start-here :is(.start-picture,.start-arrow){color:var(--accent)}
+body:is([data-reg="raver"],[data-reg="cypherpunk"]) #start-here .start-link:is(:hover,:focus-visible){background:var(--lift);border-color:var(--accent);outline-color:var(--accent)}
+#start-here .honesty p{font-size:1rem}
+#start-here .honesty>summary:focus-visible,details.density>summary:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+</style>
 </head>
 <body data-reg="bee">
 <div id="veil" aria-hidden="true"></div>
@@ -165,7 +220,7 @@ a.t.big s:not(.do){font-size:9.5px;color:var(--dimmer);margin-top:8px}
         <a class="start-link" href="../buzz-directory.html#people-agents"><span class="start-picture" aria-hidden="true"><svg viewBox="0 0 80 80" fill="none"><circle cx="28" cy="28" r="10" stroke="currentColor" stroke-width="2.5"/><path d="M12 58c2-10 10-16 16-16s14 6 16 16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="56" cy="30" r="8" stroke="currentColor" stroke-width="2.5"/><path d="M44 58c1.5-8 8-13 12-13s10.5 5 12 13" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></span><div><strong data-i18n="social.arrival.people">People and agents</strong><span class="start-help" data-i18n="social.arrival.people.help">Humans and labeled machine seats, so you can tell who you are meeting.</span></div><span class="start-arrow" aria-hidden="true">→</span></a>
         <a class="start-link" href="../index.html"><span class="start-picture" aria-hidden="true"><svg viewBox="0 0 80 80" fill="none"><path d="M14 38 40 16l26 22v30H14V38Z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><path d="M32 68V46h16v22" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg></span><div><strong data-i18n="social.arrival.home">Home</strong><span class="start-help" data-i18n="social.arrival.home.help">Back to the studio whenever you want.</span></div><span class="start-arrow" aria-hidden="true">→</span></a>
       </div>
-      <details class="honesty"><summary data-i18n="social.arrival.honesty.summary">What this page is</summary><p data-i18n="social.arrival.honesty.body">LIVE here means published pages — the files you can open now. It is not a live social application. Across devices, talk happens in the Buzz app on a relay. The two-tab room below stays in this browser. This HTML page does not send or deliver messages.</p></details>
+      <details class="honesty" data-view-disclosure="honesty"><summary data-i18n="social.arrival.honesty.summary">What this page is</summary><p data-i18n="social.arrival.honesty.body">LIVE here means published pages — the files you can open now. It is not a live social application. Across devices, talk happens in the Buzz app on a relay. The two-tab room below stays in this browser. This HTML page does not send or deliver messages.</p></details>
     </div>
     <a class="act secondary" href="../forge/room.html"><em data-i18n="social.arrival.browserOnly">this browser only</em><b data-i18n="d.social.act">Open the room →</b><s data-i18n="d.social.actsub">Two tabs, one shared field — open it in a second tab and both hands move the same piece. No server holds it.</s></a>
     <p class="live-note" data-i18n="social.arrival.liveNote">LIVE on this door means the page is published. Each tool still names its own readiness. Conversation is in the Buzz app; paste a relay host with Add Community.</p>
@@ -174,6 +229,8 @@ a.t.big s:not(.do){font-size:9.5px;color:var(--dimmer);margin-top:8px}
 
 <div class="wrap">
   <section class="d">
+    <details class="density" id="everything-box" data-view-disclosure="catalogue">
+    <summary data-i18n="atlas.everything">Explore everything</summary>
     <div class="shead"><span class="dot"></span><h2>Everything behind this door</h2><em>open now · ⚠ marks a named limit</em><span class="n">11</span></div>
     <div class="grid">
     <a class="t" href="../attest.html" data-dom="social" data-q="one tongue, one evening, signed  social"><b data-i18n="s.attest.name">one tongue, one evening, signed</b><s>attest.html</s></a>
@@ -188,6 +245,7 @@ a.t.big s:not(.do){font-size:9.5px;color:var(--dimmer);margin-top:8px}
     <a class="t p" href="../btranslated.html" data-dom="social" data-q="your name in your tongue section two carries its own demo badge social"><b data-i18n="s.btranslated.name">your name in your tongue</b><s>btranslated.html</s><u data-i18n="s.btranslated.caveat">⚠ section two carries its own DEMO badge</u></a>
     <a class="t p" href="../forge/huddle.html" data-dom="social" data-q="the same room, across machines you supply your own venue url — we ship no server social"><b data-i18n="s.forge-huddle.name">the same room, across machines</b><s>forge/huddle.html</s><u data-i18n="s.forge-huddle.caveat">⚠ you supply your own venue URL — we ship no server</u></a>
     </div>
+    </details>
   </section>
 
   <div class="notyet">
@@ -206,5 +264,29 @@ a.t.big s:not(.do){font-size:9.5px;color:var(--dimmer);margin-top:8px}
 </footer>
 
 <script src="../tour.js?v=39"></script>
+<script>
+function restoreVisibleFocus(focus){
+ if(!focus?.isConnected)return;let target=focus;
+ for(let node=focus.parentElement;node;node=node.parentElement)if(node.tagName==='DETAILS'&&!node.open)target=node.querySelector('summary');
+ target?.focus({preventScroll:true});
+}
+let lastReading=null;
+const readingChoices=new Map();
+function applyReading(event) {
+  const reading = event?.detail?.reg || document.body.dataset.reg || 'bee';
+  if(reading===lastReading)return;
+  const focus=document.activeElement;
+  const details=[...document.querySelectorAll('[data-view-disclosure]')];
+  if(lastReading)readingChoices.set(lastReading,details.map(d=>d.open));
+  const previous=readingChoices.get(reading);
+  details.forEach((d,i)=>d.open=previous?previous[i]:(reading==='cypherpunk'||reading==='raver')&&d.dataset.viewDisclosure==='catalogue');
+  const theme = document.querySelector('meta[name="theme-color"]');
+  if (theme) theme.content = reading === 'bee' ? '#f6f7f2' : '#06110c';
+  restoreVisibleFocus(focus);
+  lastReading=reading;
+}
+document.addEventListener('bregister',applyReading);
+applyReading();
+</script>
 </body>
 </html>

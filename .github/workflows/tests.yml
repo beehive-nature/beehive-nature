@@ -63,7 +63,7 @@ jobs:
         run: node scripts/estate-check.mjs
       - name: Front door — search, source parity and accessible art
         if: always()
-        run: node --test e2e/atlas.test.mjs e2e/agent-dock.test.mjs e2e/lang-coverage.test.mjs e2e/register.test.mjs e2e/social-arrival.test.mjs e2e/first-click.test.mjs
+        run: node --test e2e/atlas.test.mjs e2e/agent-dock.test.mjs e2e/lang-coverage.test.mjs e2e/register.test.mjs e2e/social-arrival.test.mjs e2e/first-click.test.mjs e2e/social-three-view.test.mjs
       - name: Voice worker — bounded queue and child lifetime
         if: always()
         working-directory: ops/voice-scribe
