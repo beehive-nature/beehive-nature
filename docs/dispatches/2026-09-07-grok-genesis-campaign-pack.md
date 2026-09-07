@@ -44,6 +44,7 @@ Canonical coordination: issue #10. This dispatch is the filesystem receipt.
 - `docs/mvp-walk/festival-pilot-brief.md` (hypothesis brief; older filename kept as alias)
 - `docs/mvp-walk/observation-guide.md`, `observation-scorecard.md`, `festival-hypothesis-brief.md`
 - `docs/mvp-walk/assets/genesis/*` + `PROVENANCE.md` + `build-blooms.mjs`
+- `docs/mvp-walk/assets/genesis-3d/` — #31 stills, six supplied originals, README, originals-receipt (no GLB / blend)
 - `docs/mvp-walk/assets/storyboard/newbee-15s-poster.svg`, `BEATS.md`
 - `docs/mvp-walk/assets/plur-paired-hands-v1.png` and prompt
 - `docs/dispatches/2026-09-07-plur-paired-hands.md` (Astra’s still receipt, carried for the PNG)
@@ -55,7 +56,7 @@ No `surfaces/` edits. No estate-row / atlas / review.html ritual. No kandi gift 
 ## Limits (named)
 
 - Board-not-film: no original video, no completed audio, no continuous two-person animation.
-- Genesis SVGs are **provisional reconstructions** with chosen geometry/stops. They do not establish exact founder originals. Founder JPEGs should replace them if recovered.
+- Genesis SVGs remain **provisional reconstructions**. Supplied originals and Astra 3D stills are now on the board under distinct labels. Continuous PLUR film remains open.
 - Claim-to-proof rows that need people are empty. Agent clicks are not newcomers.
 - Gift engine is live via Astra integration on main (`a70dafe`). This PR does not edit it.
 - No public post, recipient message, ad, or purchase.
@@ -76,7 +77,51 @@ Addressed [comment 5575327549](https://github.com/beehive-nature/beehive-nature/
 - Local preview `http://127.0.0.1:4178/docs/mvp-walk/marketing.html` after the Astra-gap revision: provisional-reconstruction copy on the marks; storyboard-not-film banner present; Step captions, 4.0s / 8.5s / 11.0s jumps, and Raver toggle keep one poster on the stage (the four-panel PLUR PNG never enters the player; it is shown once in `#plur`); claim table has separate arrival vs paste rows and the failed-write correction; festival card starts from experiences and names offline tolerance untested. First 390px pass showed a broken poster because `newbee-15s-poster.svg` had non-UTF-8 / control bytes; rewritten as well-formed UTF-8 XML and re-checked — poster paints, still does not swap. Agent fixture, not a newcomer.
 - §7 local commits: founder author, seat committer, Co-authored-by trailer parsed.
 - Issue comments on #27 and #10: **403** (named).
-- Repository CI: subscribed on this branch; result not claimed here until the check returns.
+- Repository CI: `610474a` and `921b292` each finished 8/8 green. Later heads must speak for themselves.
+
+## 2026-09-07 revision — source-review edits, originals, Raver prototype
+
+Kept draft PR #28. Issue #27 stays open. No campaign launch. No mint or contract change. Astra retains shared theme and original-based 3D on draft PR #31 (`ffb44283`).
+
+### A. Two remaining source-review edits ([comment 5575759413](https://github.com/beehive-nature/beehive-nature/pull/28#issuecomment-5575759413))
+
+1. Scorecard / guides now use **two clocks**: time to local handoff completion, and time to receiver Keep. Only declines **before starting** are excluded from the attempted-handoff denominator. Declines after starting stay in that denominator and still get no completion time.
+2. Festival briefs keep discovery neutral. “What happened?” comes first, then what went well, then what was hard. “What went wrong?” is not used. Hypothetical text-string questions moved to a **concept-reaction** section after the night is written down.
+
+### B. Provenance refresh
+
+Copied lightweight #31 stills, six supplied originals, README, and originals-receipt into `docs/mvp-walk/assets/genesis-3d/`. Did **not** copy GLBs or the Blender master.
+
+| Label | Status on this board |
+|---|---|
+| Supplied originals (LoVis and his mother) | Present. Purple = humans, teal = AI, green = biomass. |
+| New 3D interpretation stills | Present. Depth/lighting are the study. |
+| Provisional reconstructed SVGs | Still provisional. Not replaced. |
+
+Continuous PLUR film remains an open production deliverable.
+
+### C. Raver composition prototype — honest status
+
+**Working CSS/SVG-adjacent motion, not a mock screenshot and not a 3D/film deliverable.**
+
+Real on the board:
+
+- User-chosen expressions: gentle breathing, connected/shared rhythm, celebration (`Play motion` / `Pause` / intensity range).
+- Reduced-motion: motion does not run; the still stays.
+- Sound control: deliberate tap only. **No audio asset** — the button reports that instead of playing a fake bed.
+- Same People / Art / skaists Home / LOVErnment DAO links in every view. New bee is the default.
+- FUNGi / FROGGi / PEPi snapshots linked from `surfaces/atlas-art/` with provenance.json credits. Snapshots are not recast as changed chain art.
+
+Not real:
+
+- No completed audio bed.
+- No GLB viewer (optional 3D still only).
+- No shipped artist animation, no inferred mood, no DAO activity counts.
+- Continuous two-person PLUR film still open.
+
+Measured sizes copied onto this branch (decimal): original JPEGs 11.0–82.7 kB; teal PNGs 561–689 kB; 3D stills 1.06–1.14 MB; original-blooms.png 1.92 MB. #31 GLBs 5.41–6.09 MB and Blender master 7.76 MB were **not** copied. Astra’s 180-cell SVG probe (34.9 kB / 9.5 kB gzip) remains a size probe, not finished art.
+
+Recommend compact reproducible artwork plus optional rich 3D.
 
 ## Distribution
 

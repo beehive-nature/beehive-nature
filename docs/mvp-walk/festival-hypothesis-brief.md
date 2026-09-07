@@ -7,30 +7,43 @@ Canonical copy for the integrator path: [`festival-pilot-brief.md`](festival-pil
 
 Need, host commitment, costs, and willingness to pay remain **UNKNOWN**. This page does not invent a willing host, a booked table, or a budget. Do not scrape leads. Do not message promoters from this brief.
 
-## Start with recent real experiences
+## Start with recent real experiences (neutral)
 
-Before anyone proposes a table, a set length, or a booth plan, ask what actually happened the last time this person was at a gathering. The job is to hear problems in their words. A proposed pilot is a later step, and only if those conversations show a problem this page might touch.
+Before anyone proposes a table, a set length, a booth plan, or a browser gift, ask what actually happened the last time this person was at a gathering. Hear the night in their words. Do not lead with the proposed solution.
+
+Ask **What happened?** first. Then ask what went well. Then ask what was hard. Do not ask “what went wrong?” — that presumes a failure.
 
 **Attendee — recent experience**
 
-1. When did you last trade or refuse kandi? What happened, in order?
-2. What made that easy or hard?
-3. If someone had handed you a line of text instead of beads, what would you have done *that night*?
+1. When did you last trade or refuse kandi? **What happened**, in order?
+2. What went well?
+3. What was hard?
 4. What would have made you walk away?
 
 **Artist / DJ / maker — recent experience**
 
-1. Last time you made or gave something on site, what got in the way?
-2. What must never appear next to your name?
-3. What help have people promised you that they did not have?
+1. Last time you made or gave something on site, **what happened**?
+2. What went well?
+3. What was hard?
+4. What must never appear next to your name?
 
 **Promoter — recent experience**
 
-1. What is the last small, unpaid presence you allowed, and what went wrong?
-2. What would make you say no immediately?
-3. Who, if anyone, actually watched that presence? (If you do not know, say so.)
+1. What is the last small, unpaid presence you allowed? **What happened**?
+2. What went well?
+3. What was hard?
+4. Who, if anyone, actually watched that presence? (If you do not know, say so.)
 
-Do not lead with “would you host a table for an evening.” That question comes only after problems are on paper, and it still does not create willingness.
+Do not lead with “would you host a table for an evening.” That question comes only after the night is on paper, and it still does not create willingness.
+
+## Concept-reaction (separate — after the night is written down)
+
+These questions show a **proposed** idea. They are not discovery of what already happened. Ask them only after the experience notes exist, and keep the answers labeled as reactions to a concept:
+
+1. If someone had handed you a line of text instead of beads, what would you have done *that night*?
+2. What would you need to see before you treated that line as a gift?
+
+Do not mix those answers into the “what happened” notes.
 
 ## Hypotheses only after those talks
 
@@ -44,30 +57,16 @@ These remain unevidenced until someone answers from a real night:
 
 ## If evidence appears — a small proposed pilot (not scheduled)
 
-Only after interviews record a real problem:
-
-- A gathering someone in the estate already attends. No cold list.
-- One quiet presence, two devices, printed PLUR still, kandi bar open; Home QR only as the *other* card.
-- One observer with the scorecard. No hired street team.
-- **Success (pilot-scale, if it happens):** at least one unassisted make and one observed receiver Keep; the host, *if one exists*, would host again; no safety or consent incident.
-- **Failure:** nobody finishes a bracelet without coaching; people believe a wallet or identity is required; any paid spend happened (it must not).
-
-No host is named. No date is booked.
+Only after interviews record a real problem. No host is named. No date is booked.
 
 ## Untested technical hypothesis
 
-“The kandi page works offline / without a chain refresh” is an **untested hypothesis**. It must not be treated as a field property until someone actually exercises it on a device with the network off and records the result. Same for battery, glare, and two-phone clipboard carry.
+“The kandi page works offline / without a chain refresh” is an **untested hypothesis**.
 
 ## Money and resources
 
-Budget, host fee, and willingness to pay: **UNKNOWN**. Do not cite this brief as a forecast. People and kit are listed only as *what a later pilot would need*, not as assets we have:
-
-- A host with an existing relationship — **not yet identified**.
-- An observer who can keep quiet.
-- Two charged devices — untested in the field.
-- Printed still and one paper scorecard.
-- No ad budget. No purchased list.
+Budget, host fee, and willingness to pay: **UNKNOWN**. A host with an existing relationship is **not yet identified**.
 
 ## What this is not
 
-Not a Festival Producer dApp. Not the attendee showcase wing. Not a public campaign. The older festival-attendee dispatch remains a separate surface plan.
+Not a Festival Producer dApp. Not the attendee showcase wing. Not a public campaign.
