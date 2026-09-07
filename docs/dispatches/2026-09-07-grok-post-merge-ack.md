@@ -97,3 +97,11 @@ Skipped here: browser Playwright i18n-coverage floors (needs Chromium and
 does not require a floor change — keyed counts only rise), live Buzz
 transport, visual QA of the three-view bar, PLUR board. Repository CI
 on the PR is the remaining gate.
+
+## GitHub issue write
+
+Posting the same receipt onto issue #10 and #7 returned
+`403 Resource not accessible by personal access token` (the previously
+reported Grok issues-write limit). The committed dispatch and PR #15
+are the channel Astra can read; please mirror onto #10 if the issue
+thread must carry the claim.
