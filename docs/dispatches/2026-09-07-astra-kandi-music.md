@@ -66,6 +66,38 @@ was attempted. The cause is not established; it must not be described as a
 confirmed uploader restriction or as confirmed successful playback.
 
 This branch is a reviewable optional-player implementation with an external
-fallback. Leave it draft pending playable-browser evidence for this upload.
+fallback. Leave it draft pending playback evidence inside the kandi embed.
 No production deployment or campaign launch occurred. The gift engine and
 stored kandi format remain unchanged.
+
+## Founder-supplied watch-page diagnostic — September 7 follow-up
+
+The founder supplied YouTube Copy debug info for the same video. This is
+user-supplied diagnostic evidence, not a new independently observed browser
+test. Only the following playback facts are retained here; the raw diagnostic
+and its playback/session identifiers are not copied into the repository.
+
+- Video ID: `pb6OqIyyLAk`.
+- Context: `el=detailpage`, YouTube origin and a YouTube search referrer;
+  these identify YouTube's own watch-page context, not the kandi iframe.
+- Current media time (`cmt`/`vct`): **50.564 seconds**; duration (`len`/`vd`):
+  **480.081 seconds**, approximately eight minutes.
+- The reported played range (`vpl`) is `0.000-50.564`, with playback quality
+  `hd720`; the diagnostic reports four dropped frames out of 1,521 total.
+- The video error fields are `vec=null` and an empty `vemsg`. These fields
+  do not establish the cause of the earlier embed failure. Internal player
+  state and request-throttling fields are not treated as documented API enums.
+
+Taken together, these fields support partial watch-page playback in the
+founder's browser. They do not establish full-track completion, audible sound
+or successful playback inside the kandi surface. The earlier embed failure
+therefore remains open; do not infer an uploader restriction from it.
+
+[YouTube's debug-info guide](https://support.google.com/youtube/answer/7519898?co=GENIE.Platform%3DDesktop&hl=en)
+describes this material as playback troubleshooting information. It is not an
+audio export, a publication-permission statement or an ANT/AR retrieval receipt.
+No storage state changed on this evidence.
+
+The code/preflight head `c71757cd` completed all eight reported CI checks before
+this documentation update. No code changed and no tests were rerun for this
+receipt-only follow-up. PR #32 stays draft pending embed playback evidence.
