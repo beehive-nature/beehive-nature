@@ -19,7 +19,7 @@ use crate::browser::Browser;
 use crate::cdp::CdpError;
 use crate::page::PageSession;
 use crate::qwen;
-use crate::replay::{un, Replay};
+use crate::replay::{un, ReceiptError, Replay};
 use crate::tokens;
 use crate::untrusted;
 use crate::visibility::Vis;
@@ -32,6 +32,10 @@ pub struct SeatState {
     /// last snapshot's refs, for click lookup
     last_refs: HashMap<String, axtree::RefEntry>,
     snapshot_seq: usize,
+    /// G2-A: a receipt failed mid-session. While set, every action except
+    /// `end`/`status` is refused — recording failed, so acting further
+    /// would spend without a receipt. No automatic retries, ever.
+    halted: bool,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -44,6 +48,26 @@ pub enum SeatError {
     UnknownRef(String),
     #[error("gated: {0}")]
     Gated(String),
+    /// G2-A: a receipt could not be recorded (no external action was in
+    /// flight for this event — e.g. a snapshot or a gate note).
+    #[error("receipt recording failed — session halted: {0}")]
+    Receipt(#[from] ReceiptError),
+    /// G2-A: the action HAD ALREADY HAPPENED when its receipt failed. The
+    /// action is not undone (it cannot be), is not retried (it must not
+    /// be), and the session is halted — report the split honestly.
+    #[error("action {action:?} HAPPENED but its receipt could NOT be recorded ({source}) — session halted; end runs cleanup; do not retry the action blind")]
+    ReceiptAfterAction {
+        action: String,
+        source: ReceiptError,
+    },
+    /// G2-A: `end` cleaned everything up, but the session_end receipt
+    /// itself could not be written — the replay is incomplete and MUST NOT
+    /// be treated as a complete record.
+    #[error("end: replay {path} is INCOMPLETE — session_end receipt failed ({source}); browser closed and resources cleaned regardless")]
+    EndReceiptIncomplete { path: String, source: ReceiptError },
+    /// G2-A: the session halted on a receipt failure; only end/status run.
+    #[error("session halted: receipt recording failed earlier — only end/status are accepted; no further actions execute")]
+    Halted,
     #[error(transparent)]
     Browser(#[from] crate::browser::BrowserError),
     #[error(transparent)]
@@ -61,18 +85,53 @@ impl SeatState {
             gate: PlanGate::new(),
             last_refs: HashMap::new(),
             snapshot_seq: 0,
+            halted: false,
         }
     }
 
-    fn ev(&mut self, ev: &str, fields: Value) {
-        if let Some(r) = self.replay.as_mut() {
-            r.ev(ev, fields);
+    /// Record a receipt for an event with no external action in flight.
+    /// Any recording failure halts the session and propagates.
+    fn record(&mut self, ev: &str, fields: Value) -> Result<(), SeatError> {
+        let Some(r) = self.replay.as_mut() else {
+            return Err(SeatError::NotStarted);
+        };
+        if let Err(source) = r.ev(ev, fields) {
+            self.halted = true;
+            return Err(SeatError::Receipt(source));
         }
+        Ok(())
     }
 
-    /// Handle one bSEAT action. This is the whole tool.
+    /// Record the receipt of an action that ALREADY happened. On failure
+    /// the error says the action happened; the session halts; the action is
+    /// neither retried nor claimed undone.
+    fn record_after_action(
+        &mut self,
+        action: &str,
+        ev: &str,
+        fields: Value,
+    ) -> Result<(), SeatError> {
+        let Some(r) = self.replay.as_mut() else {
+            return Err(SeatError::NotStarted);
+        };
+        if let Err(source) = r.ev(ev, fields) {
+            self.halted = true;
+            return Err(SeatError::ReceiptAfterAction {
+                action: action.to_string(),
+                source,
+            });
+        }
+        Ok(())
+    }
+
+    /// Handle one bSEAT action. This is the whole tool. A halted session
+    /// (receipt recording failed) accepts only end/status — cleanup and
+    /// observation, never further actions.
     pub fn handle(&mut self, args: &Value) -> Result<Value, SeatError> {
         let action = args.get("action").and_then(|a| a.as_str()).unwrap_or("");
+        if self.halted && !matches!(action, "end" | "status") {
+            return Err(SeatError::Halted);
+        }
         match action {
             "start" => self.start(args),
             "navigate" => self.navigate(args),
@@ -116,7 +175,10 @@ impl SeatState {
         let binary = browser.binary.display().to_string();
         let mut replay = Replay::open(&replay_dir, &stem)
             .map_err(|e| SeatError::Gated(format!("replay open: {e}")))?;
-        replay.ev(
+        // The FIRST receipt is a gate: if it cannot be recorded, the
+        // session never starts (browser + replay drop on this early
+        // return — cleanup runs on failure too).
+        if let Err(source) = replay.ev(
             "session_start",
             json!({
                 "organ": "banchor",
@@ -124,7 +186,11 @@ impl SeatState {
                 "chrome": { "binary": binary, "version": chrome_version, "headless": headless, "source": "system chromium (never vendored)" },
                 "durable_path": "accessibility-tree + geometry; NO screenshot vision",
             }),
-        );
+        ) {
+            drop(replay);
+            drop(browser); // Drop kills chromium + erases the temp profile
+            return Err(SeatError::Receipt(source));
+        }
         let out = json!({
             "started": true,
             "chrome": { "binary": binary, "version": chrome_version, "headless": headless },
@@ -132,18 +198,17 @@ impl SeatState {
         });
         self.browser = Some(browser);
         self.replay = Some(replay);
+        self.halted = false;
         Ok(out)
     }
 
-    fn require_page(&mut self) -> Result<(&mut PageSession, &mut Replay), SeatError> {
+    fn require_page(&mut self) -> Result<&mut PageSession, SeatError> {
         if self.page.is_none() {
             let port = self.browser.as_ref().ok_or(SeatError::NotStarted)?.port;
             self.page = Some(PageSession::open(port, "about:blank")?);
-            self.ev("page_opened", json!({ "url": "about:blank" }));
+            self.record("page_opened", json!({ "url": "about:blank" }))?;
         }
-        let page = self.page.as_mut().expect("just set");
-        let replay = self.replay.as_mut().ok_or(SeatError::NotStarted)?;
-        Ok((page, replay))
+        Ok(self.page.as_mut().expect("just set"))
     }
 
     fn navigate(&mut self, args: &Value) -> Result<Value, SeatError> {
@@ -155,18 +220,22 @@ impl SeatState {
         if !risks.is_empty() && !args.get("force").is_some() {
             return self.gate_action(args.clone(), risks, format!("navigate {url}"));
         }
-        let (page, replay) = self.require_page()?;
-        page.navigate(url)?;
-        let final_url = page.current_url();
-        let title = page.title();
-        replay.ev(
+        // The action happens INSIDE this block; its receipt comes after —
+        // so a recording failure reports "action happened, receipt did not".
+        let (final_url, title) = {
+            let page = self.require_page()?;
+            page.navigate(url)?;
+            (page.current_url(), page.title())
+        };
+        self.record_after_action(
+            "navigate",
             "navigated",
             json!({
                 "requested": { "__untrusted": true, "v": url },
                 "landed": { "__untrusted": true, "v": final_url },
                 "title": { "__untrusted": true, "v": title },
             }),
-        );
+        )?;
         // navigation invalidates all refs
         self.last_refs.clear();
         Ok(json!({ "url": final_url, "title": title }))
@@ -201,7 +270,7 @@ impl SeatState {
         ),
         SeatError,
     > {
-        let (page, _replay) = self.require_page()?;
+        let page = self.require_page()?;
         let nodes = page.ax_tree()?;
 
         // classify visibility for every DOM-backed node we might emit
@@ -266,7 +335,7 @@ impl SeatState {
         let snap = axtree::format_mode(nodes, vis, cap, lean, index_cap, hrefs);
         let counts = tokens::count(&snap.text);
         let origin = {
-            let (page, _replay) = self.require_page()?;
+            let page = self.require_page()?;
             page.current_url()
         };
         let wrapped = untrusted::wrap(&snap.text, &origin);
@@ -290,7 +359,7 @@ impl SeatState {
                 arr.push(json!({ "alg": crate::qwen::TOKENIZER_ALG, "n": n }));
             }
         }
-        self.ev(
+        self.record(
             "snapshot",
             json!({
                 "page": { "url": { "__untrusted": true, "v": origin } },
@@ -298,7 +367,7 @@ impl SeatState {
                 "snapshot": snap_json,
                 "text_path": text_path.display().to_string(),
             }),
-        );
+        )?;
         Ok(json!({
             "url": origin,
             "counts": counts_json,
@@ -367,27 +436,33 @@ impl SeatState {
             );
         }
 
-        let url_before = {
-            let (page, replay) = self.require_page()?;
+        // The click is the action; its receipt follows, so a recording
+        // failure reports the split (clicked-but-unreceipted) and halts.
+        // (Also fixes a pre-existing mislabel: the output's "url_before"
+        // used to carry the POST-click URL; it is now captured before.)
+        let (url_before, url_after, at) = {
+            let page = self.require_page()?;
+            let before = page.current_url();
             let (x, y) = page
                 .click_backend(backend)?
                 .ok_or_else(|| SeatError::UnknownRef(format!("{r} (element has no box)")))?;
-            let url_after = page.current_url();
-            replay.ev(
-                "click",
-                json!({
-                    "ref": r,
-                    "role": entry.role,
-                    "name": un(&entry.name),
-                    "at": [x, y],
-                    "navigated_to": un(&url_after),
-                }),
-            );
-            self.last_refs.clear();
-            url_after
+            (before, page.current_url(), [x, y])
         };
+        self.record_after_action(
+            "click",
+            "click",
+            json!({
+                "ref": r,
+                "role": entry.role,
+                "name": un(&entry.name),
+                "at": at,
+                "navigated_to": un(&url_after),
+            }),
+        )?;
+        self.last_refs.clear();
 
-        // post-click snapshot — the receipt of what the click did
+        // post-click snapshot — the receipt of what the click did. A halt
+        // from the click's receipt stops this too (handle gates actions).
         let after = self.snapshot()?;
         Ok(json!({
             "clicked": { "ref": r, "role": entry.role, "name": { "__untrusted": true, "v": entry.name } },
@@ -403,14 +478,14 @@ impl SeatState {
         summary: String,
     ) -> Result<Value, SeatError> {
         let plan_id = self.gate.propose(action, risks.clone());
-        self.ev(
+        self.record(
             "gated",
             json!({
                 "summary": summary,
                 "risks": risks.iter().map(|r| r.as_str()).collect::<Vec<_>>(),
                 "plan_id": plan_id,
             }),
-        );
+        )?;
         Ok(json!({
             "status": "needs_approval",
             "plan_id": plan_id,
@@ -435,10 +510,13 @@ impl SeatState {
             .and_then(|p| p.as_str())
             .ok_or_else(|| SeatError::Gated("approve needs plan_id".into()))?;
         let (action, risks) = self.gate.redeem(id).map_err(SeatError::Gated)?;
-        self.ev(
+        // The approval receipt comes BEFORE executing the approved action:
+        // if it cannot be recorded, the action does not run (and the plan
+        // stays consumed — approvals are single-use, never auto-retried).
+        self.record(
             "approved",
             json!({ "risks": risks.iter().map(|r| r.as_str()).collect::<Vec<_>>() }),
-        );
+        )?;
         let forced = {
             let mut a = action.clone();
             if let Some(o) = a.as_object_mut() {
@@ -456,24 +534,44 @@ impl SeatState {
             .ok_or_else(|| SeatError::Gated("resolve needs url".into()))?;
         let record =
             crate::resolve::resolve_any(url).map_err(|e| SeatError::Gated(e.to_string()))?;
-        self.ev("resolved", json!({ "input": url, "record": record }));
+        self.record("resolved", json!({ "input": url, "record": record }))?;
         Ok(record)
     }
 
     fn end(&mut self) -> Result<Value, SeatError> {
+        // Cleanup ALWAYS runs: page closed, refs cleared, chromium dropped
+        // (its Drop erases the temp profile) — even when the receipt fails.
         if let Some(p) = self.page.as_mut() {
             p.close();
         }
         self.page = None;
         self.last_refs.clear();
-        self.ev("session_end", json!({ "ok": true }));
+        let was_halted = self.halted;
+        let end_receipt = self.replay.as_mut().map(|r| {
+            r.ev(
+                "session_end",
+                json!({ "ok": !was_halted, "halted": was_halted }),
+            )
+        });
         if let Some(r) = self.replay.as_mut() {
             r.close();
         }
         let replay_path = self.replay.as_ref().map(|r| r.path.display().to_string());
         self.browser = None; // Drop kills chromium + erases the temp profile
         self.replay = None;
-        Ok(json!({ "ended": true, "replay": replay_path }))
+        match end_receipt {
+            // `end` never claims a complete receipt when its write failed:
+            // the replay is explicitly incomplete.
+            Some(Err(source)) => Err(SeatError::EndReceiptIncomplete {
+                path: replay_path.unwrap_or_default(),
+                source,
+            }),
+            _ => Ok(json!({
+                "ended": true,
+                "receipt_complete": true,
+                "replay": replay_path,
+            })),
+        }
     }
 
     fn status(&self) -> Value {
@@ -483,6 +581,7 @@ impl SeatState {
             "browser_alive": self.browser.is_some(),
             "page_open": self.page.is_some(),
             "refs_live": self.last_refs.len(),
+            "halted": self.halted,
             "replay": self.replay.as_ref().map(|r| r.path.display().to_string()),
             "laws": [
                 "bSigner NEVER depends on bAnchor (wallet works with the anchor off)",
@@ -655,7 +754,7 @@ pub fn agentloop(
         "replay_dir": replay_dir.display().to_string(),
         "replay_stem": "agentloop",
     }))?;
-    seat.ev(
+    seat.record(
         "agent_start",
         json!({
             "goal": goal,
@@ -675,7 +774,7 @@ pub fn agentloop(
                 "snapshot_allowance": budget.snapshot_allowance(),
             },
         }),
-    );
+    )?;
 
     seat.handle(&json!({ "action": "navigate", "url": url }))?;
 
@@ -695,7 +794,7 @@ pub fn agentloop(
     let mut crush_rung: Option<Value> = None;
     for &(lean, cap) in qwen::FIT_ATTEMPTS {
         let origin = {
-            let (page, _r) = seat.require_page()?;
+            let page = seat.require_page()?;
             page.current_url()
         };
         // phase 1: tree only, no index → what does the skeleton cost?
@@ -746,7 +845,7 @@ pub fn agentloop(
     if fitted.is_none() {
         if let Some((probe_text, n_before, lean, cap)) = last_probe {
             let origin = {
-                let (page, _r) = seat.require_page()?;
+                let page = seat.require_page()?;
                 page.current_url()
             };
             let mut rung: Vec<Value> = Vec::new();
@@ -799,14 +898,14 @@ pub fn agentloop(
         format!("no fit attempt fits: allowance {allowance} qwen tokens, walked {ladder_walked:?}")
     })?;
     let snap_result = final_snap.expect("fitted implies snap result");
-    seat.ev(
+    seat.record(
         "cap_ladder",
         json!({
             "walked": ladder_walked,
             "chosen": { "mode": if lean_used { "lean" } else { "full" }, "cap": cap_used },
             "crush_rung": crush_rung,
         }),
-    );
+    )?;
     eprintln!(
         "[agentloop] snapshot fitted: {qwen_n} qwen tokens, mode {} cap {cap_used} (allowance {allowance})",
         if lean_used { "lean" } else { "full" }
@@ -865,7 +964,7 @@ pub fn agentloop(
             .unwrap_or(0);
         prompt_tokens_total += p;
         completion_tokens_total += c;
-        seat.ev(
+        seat.record(
             "model_turn",
             json!({
                 "turn": turn,
@@ -873,7 +972,7 @@ pub fn agentloop(
                 "completion_tokens": c,
                 "response": un(&content),
             }),
-        );
+        )?;
         eprintln!(
             "[agentloop] turn {turn}: model said: {}",
             content.chars().take(120).collect::<String>()
@@ -899,10 +998,10 @@ pub fn agentloop(
                         "name": { "__untrusted": true, "v": entry.name },
                         "right_ref": right,
                     }));
-                    seat.ev(
+                    seat.record(
                         "model_choice",
                         json!({ "turn": turn, "ref": r#ref, "judge": judge, "right_ref": right }),
-                    );
+                    )?;
                     let clicked = seat.handle(&json!({
                         "action": "click", "ref": r#ref,
                         "reason": "agentloop — action chosen by the local model",
@@ -922,10 +1021,10 @@ pub fn agentloop(
                                 c["plan_id"].as_str().unwrap_or("?")
                             );
                             gated_plan = Some(c.clone());
-                            seat.ev(
+                            seat.record(
                                 "model_action_gated",
                                 json!({ "ref": r#ref, "plan_id": c["plan_id"], "risks": c["risks"] }),
-                            );
+                            )?;
                             break;
                         }
                         Ok(c) => {
@@ -935,18 +1034,18 @@ pub fn agentloop(
                                 r#ref,
                                 c["after"]["url"].as_str().unwrap_or("?")
                             );
-                            seat.ev(
+                            seat.record(
                                 "model_action_executed",
                                 json!({ "ref": r#ref, "result": "clicked" }),
-                            );
+                            )?;
                             break;
                         }
                         Err(e) => {
                             outcome_note = format!("click {} refused: {e}", r#ref);
-                            seat.ev(
+                            seat.record(
                                 "model_action_refused",
                                 json!({ "ref": r#ref, "reason": e.to_string() }),
-                            );
+                            )?;
                             conversation.push(json!({ "role": "assistant", "content": content }));
                             conversation.push(json!({
                                 "role": "user",
@@ -956,10 +1055,10 @@ pub fn agentloop(
                     }
                 } else {
                     outcome_note = format!("model picked nonexistent ref {}", r#ref);
-                    seat.ev(
+                    seat.record(
                         "model_choice",
                         json!({ "turn": turn, "ref": r#ref, "valid": false }),
-                    );
+                    )?;
                     conversation.push(json!({ "role": "assistant", "content": content }));
                     conversation.push(json!({
                         "role": "user",
@@ -969,15 +1068,15 @@ pub fn agentloop(
             }
             qwen::AgentAction::Done { reason } => {
                 outcome_note = format!("model declared done: {reason}");
-                seat.ev(
+                seat.record(
                     "model_choice",
                     json!({ "turn": turn, "done": true, "reason": reason }),
-                );
+                )?;
                 break;
             }
             qwen::AgentAction::Unparseable { raw } => {
                 outcome_note = "model output unparseable".into();
-                seat.ev("model_choice", json!({ "turn": turn, "parse": "failed" }));
+                seat.record("model_choice", json!({ "turn": turn, "parse": "failed" }));
                 conversation.push(json!({ "role": "assistant", "content": raw }));
                 conversation.push(json!({
                     "role": "user",
@@ -991,7 +1090,7 @@ pub fn agentloop(
         .as_ref()
         .and_then(|p| p["right_ref"].as_bool())
         .unwrap_or(false);
-    seat.ev(
+    seat.record(
         "agent_end",
         json!({
             "right_ref": right_ref,
@@ -999,7 +1098,7 @@ pub fn agentloop(
             "turns_taken": turns_taken,
             "outcome": outcome_note,
         }),
-    );
+    )?;
     let end = seat.handle(&json!({ "action": "end" }))?;
 
     let receipt = json!({
@@ -1028,4 +1127,114 @@ pub fn agentloop(
         "replay": end["replay"],
     });
     Ok(receipt)
+}
+
+#[cfg(test)]
+mod g2a_tests {
+    //! G2-A: recording failure halts the session, never lies, and cleanup
+    //! still runs. No browser needed — a read-only file handle is a
+    //! deterministically failing receipt writer.
+    use super::*;
+    use crate::replay::Replay;
+
+    fn tmp(name: &str) -> PathBuf {
+        let dir = std::env::temp_dir().join(format!("banchor-g2a-seat-{name}"));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        dir
+    }
+
+    fn failing_replay(dir: &Path) -> Replay {
+        let path = dir.join("refused.jsonl");
+        std::fs::write(&path, b"").unwrap();
+        let ro = std::fs::File::open(&path).unwrap();
+        Replay::attach(path, Box::new(ro))
+    }
+
+    #[test]
+    fn receipt_failure_halts_session_and_cleanup_still_runs() {
+        let dir = tmp("halt");
+        let mut seat = SeatState::new();
+        seat.replay = Some(failing_replay(&dir));
+        // a risky navigate records its GATE note first; that receipt fails
+        // → typed error, session halted
+        let risky = json!({ "action": "navigate", "url": "https://wallet.example/login" });
+        match seat.handle(&risky) {
+            Err(SeatError::Receipt { .. }) => {}
+            other => panic!("expected Receipt error, got {other:?}"),
+        }
+        // further actions are refused — only end/status are accepted
+        assert!(matches!(
+            seat.handle(&json!({ "action": "navigate", "url": "https://example.com" })),
+            Err(SeatError::Halted)
+        ));
+        assert!(matches!(
+            seat.handle(&json!({ "action": "snapshot" })),
+            Err(SeatError::Halted)
+        ));
+        let status = seat.handle(&json!({ "action": "status" })).unwrap();
+        assert_eq!(status["halted"], json!(true));
+        // end runs cleanup but CANNOT claim a complete receipt: the
+        // session_end write fails against the poisoned writer
+        let end_path = seat
+            .replay
+            .as_ref()
+            .map(|r| r.path.display().to_string())
+            .unwrap_or_default();
+        match seat.handle(&json!({ "action": "end" })) {
+            Err(SeatError::EndReceiptIncomplete { path, .. }) => {
+                assert_eq!(path, end_path);
+            }
+            other => panic!("expected EndReceiptIncomplete, got {other:?}"),
+        }
+        // cleanup ran regardless: everything is down
+        let status = seat.handle(&json!({ "action": "status" })).unwrap();
+        assert_eq!(status["browser_alive"], json!(false));
+        assert_eq!(status["page_open"], json!(false));
+        assert!(status["replay"].is_null());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn approve_receipt_failure_does_not_execute_the_action() {
+        let dir = tmp("approve");
+        let mut seat = SeatState::new();
+        // working writer first: the gate note records, the plan is proposed
+        let working = Replay::open(&dir, "approve").unwrap();
+        seat.replay = Some(working);
+        let risky = json!({ "action": "navigate", "url": "https://wallet.example/login" });
+        let gated = seat.handle(&risky).unwrap();
+        assert_eq!(gated["status"], json!("needs_approval"));
+        let plan_id = gated["plan_id"].as_str().unwrap().to_string();
+        // now the writer starts failing: swap in the refused handle
+        seat.replay = Some(failing_replay(&dir));
+        match seat.handle(&json!({ "action": "approve", "plan_id": plan_id })) {
+            // the approval receipt failed BEFORE the action ran — the
+            // approved navigation is never executed, never auto-retried
+            Err(SeatError::Receipt { .. }) => {}
+            other => panic!("expected Receipt error, got {other:?}"),
+        }
+        assert!(matches!(
+            seat.handle(&json!({ "action": "navigate", "url": "https://example.com" })),
+            Err(SeatError::Halted)
+        ));
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn gate_flow_positive_control_records_the_gate_note() {
+        let dir = tmp("positive");
+        let mut seat = SeatState::new();
+        seat.replay = Some(Replay::open(&dir, "positive").unwrap());
+        let risky = json!({ "action": "navigate", "url": "https://wallet.example/login" });
+        let gated = seat.handle(&risky).unwrap();
+        assert_eq!(gated["status"], json!("needs_approval"));
+        let replay_path = seat.replay.as_ref().unwrap().path.clone();
+        seat.handle(&json!({ "action": "end" })).unwrap();
+        let stored = std::fs::read_to_string(&replay_path).unwrap();
+        assert!(stored.contains("\"ev\":\"gated\""));
+        assert!(stored.contains("\"ev\":\"session_end\""));
+        assert!(stored.contains("\"receipt_complete\"") == false); // receipt_complete is the ACTION's return, not a stored line
+        let _ = std::fs::remove_dir_all(&dir);
+    }
 }
