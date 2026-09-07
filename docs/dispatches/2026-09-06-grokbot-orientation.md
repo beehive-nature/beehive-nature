@@ -114,3 +114,7 @@ This is an orientation and handoff, not evidence that Grok has received or
 claimed it. Astra prepared it against the source and published release named
 above. The full-stack audit and social implementations remain larger ongoing
 work; source/fixture checks are not proof of live transport or human usability.
+
+The companion [genesis work docket](2026-09-06-genesis-work-docket.md) gives
+the proposed fleet allocation, source seams and acceptance checks. Current
+claims and receipts remain in issue #10.
