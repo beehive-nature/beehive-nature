@@ -133,46 +133,81 @@
   details { margin: .7rem 0; }
   summary { cursor: pointer; font-family: ui-sans-serif, system-ui, sans-serif; min-height: 2.5rem; }
   .kind { font-family: ui-sans-serif, system-ui, sans-serif; font-size: .8rem; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
-  .compose {
-    position: relative;
-    background: #111;
-    border-radius: 1rem;
-    overflow: hidden;
-    min-height: 18rem;
-  }
-  .compose img.still { width: 100%; height: auto; display: block; }
-  .compose .rings {
-    position: absolute; inset: 8%;
-    pointer-events: none;
-  }
-  .compose .rings i {
-    position: absolute; inset: 0;
-    border: 2px solid rgba(255,255,255,.45);
-    border-radius: 50%;
-    opacity: .35;
-  }
-  .compose[data-expr="breathe"][data-playing="true"] .rings i:nth-child(1) { animation: breathe 4.8s ease-in-out infinite; }
-  .compose[data-expr="breathe"][data-playing="true"] .rings i:nth-child(2) { animation: breathe 4.8s ease-in-out infinite .6s; }
-  .compose[data-expr="connect"][data-playing="true"] .rings i:nth-child(1) { animation: connect 2.4s linear infinite; }
-  .compose[data-expr="connect"][data-playing="true"] .rings i:nth-child(2) { animation: connect 2.4s linear infinite 1.2s; }
-  .compose[data-expr="celebrate"][data-playing="true"] .rings i:nth-child(1) { animation: celebrate 1.1s ease-in-out infinite; }
-  .compose[data-expr="celebrate"][data-playing="true"] .rings i:nth-child(2) { animation: celebrate 1.1s ease-in-out infinite .35s; }
-  @keyframes breathe { 0%,100% { transform: scale(.92); opacity: .2; } 50% { transform: scale(1.06); opacity: .55; } }
-  @keyframes connect { 0% { transform: scale(.7) rotate(0deg); opacity: .15; } 50% { opacity: .5; } 100% { transform: scale(1.12) rotate(180deg); opacity: .15; } }
-  @keyframes celebrate { 0%,100% { transform: scale(.88); opacity: .2; } 40% { transform: scale(1.14); opacity: .7; } }
-  .compose[data-playing="false"] .rings i { animation: none !important; }
   .access a { display: inline-block; margin: .25rem .6rem .25rem 0; }
   .snaps { display: grid; grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr)); gap: .7rem; }
   .snaps img { width: 100%; height: auto; image-rendering: pixelated; background: #111; border-radius: .4rem; }
-  [data-view="bee"] .raver-only { display: none; }
-  [data-view="cypher"] .raver-only { display: none; }
-  [data-view="raver"] .bee-calm { opacity: .95; }
+  .bloom-board { margin-top: .6rem; }
+  .bloom-board .register-row { margin: 0 0 1rem; }
+  .bloom-workbench {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(16rem, .85fr);
+    gap: 1.25rem;
+    align-items: start;
+  }
+  .art-panel {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 1rem;
+    overflow: hidden;
+  }
+  .stage-top, .stage-bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: .5rem;
+    padding: .75rem 1rem;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: .85rem;
+    color: var(--muted);
+  }
+  .stage-top { border-bottom: 1px solid var(--line); font-weight: 600; }
+  .stage-bottom { border-top: 1px solid var(--line); font-size: .75rem; }
+  #bloom-stage {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    background: radial-gradient(ellipse at center, #fff 25%, #f8faf1 75%);
+  }
+  #bloom-stage svg { display: block; width: 92%; height: auto; }
+  #bloom-stage .fallback { width: 70%; height: auto; }
+  #play-pause { width: auto; min-height: 2.75rem; }
+  .bloom-controls .expressions { display: grid; gap: .5rem; }
+  .bloom-controls .expression {
+    display: flex; align-items: center; gap: .75rem;
+    width: 100%; text-align: left;
+  }
+  .bloom-controls .expression[aria-pressed="true"] { outline: 3px solid #e6b32e; }
+  .bloom-controls .expression strong { display: block; }
+  .bloom-controls .expression small { display: block; color: var(--muted); font-weight: 400; }
+  .bloom-controls .range-label, .bloom-controls .range-ends {
+    display: flex; justify-content: space-between;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+  }
+  .bloom-controls input[type="range"] { width: 100%; min-height: 2.75rem; }
+  .sound-note {
+    margin: .8rem 0 0;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    color: var(--muted);
+  }
+  .meaning-row {
+    display: flex; flex-wrap: wrap; gap: .6rem 1.2rem;
+    margin: 1rem 0; color: var(--muted);
+    font-family: ui-sans-serif, system-ui, sans-serif; font-size: .9rem;
+  }
+  @media (max-width: 720px) {
+    .bloom-workbench { grid-template-columns: 1fr; }
+    .stage-top, .stage-bottom { padding: .65rem .85rem; }
+  }
   @media (prefers-reduced-motion: reduce) {
-    * { animation: none !important; transition: none !important; }
+    .player, .beats, .controls { scroll-behavior: auto; }
+    #bloom-stage .bnr-bloom-cell { animation: none !important; transform: none !important; }
   }
 </style>
+<script src="../../surfaces/register.js" defer></script>
+<script src="assets/genesis-3d/motion/board.js" defer></script>
 </head>
-<body>
+<body data-reg="bee" data-bee-theme="custom">
 <header>
   <p class="banner"><strong>Internal review board — not a public campaign.</strong> Owned Home / Buzz / Bluesky are a proposed sequence only. This pack does not post, message recipients, buy ads, or purchase anything. The gift engine is live via Astra’s integration; this PR does not edit it.</p>
   <h1>Make a little color. Give it to someone.</h1>
@@ -180,7 +215,7 @@
   <nav class="toc" aria-label="Board sections">
     <a href="#marks">Genesis marks</a>
     <a href="#intro">Introduction</a>
-    <a href="#raver">Raver composition</a>
+    <a href="#raver">Feeling in bloom</a>
     <a href="#cuts">15s cuts</a>
     <a href="#plur">PLUR</a>
     <a href="#proof">Claim-to-proof</a>
@@ -228,8 +263,8 @@
   <h3>New 3D interpretation (stills)</h3>
   <p class="kind">Astra Blender study — depth and lighting are the interpretation, not the original files</p>
   <figure>
-    <img src="assets/genesis-3d/renders/original-blooms.png" alt="Three 3D relief stills of the original blooms: teal, green, and purple-led, photographed together.">
-    <figcaption>original-blooms.png — new 3D interpretation still (1.92 MB). Teal / green / purple-led studies together. Not the supplied originals. Not film.</figcaption>
+    <img src="assets/genesis-3d/renders/original-blooms.png" alt="Three 3D relief stills of the original blooms: teal, green, and purple-led, rendered together.">
+    <figcaption>original-blooms.png — new 3D interpretation still (1.92 MB). Teal / green / purple-led studies rendered together. Not the supplied originals. Not film.</figcaption>
   </figure>
   <div class="marks">
     <figure>
@@ -291,64 +326,57 @@
 </section>
 
 <section id="raver">
-  <h2>Raver composition — skaists + LOVErnment + sourced art</h2>
-  <p class="banner"><strong>Board prototype, not a shipped artist animation.</strong> Working CSS motion on one still plus two overlay rings. Not 3D. Not continuous PLUR film. No completed audio bed. Expression is <em>user chosen</em> — this page does not infer mood or share a feeling.</p>
-  <p>New bee is the default reading. The same people, art, and DAO doors stay available in every view. skaists and <a href="https://github.com/skaists/LOVErnment-DAO">LOVErnment DAO</a> are named here because the founder asked for them — this is not a claim that DAO features shipped.</p>
+  <h2>Feeling in bloom — skaists + LOVErnment DAO</h2>
+  <p>Choose how the bloom moves. skaists and <a href="https://github.com/skaists/LOVErnment-DAO">LOVErnment DAO</a> are the people and project around this art — Home, the gallery, and the public DAO source stay in every view. Expression is yours to pick. This page does not infer a mood or claim a live DAO feature.</p>
 
-  <div id="viewbox" data-view="bee">
-    <div class="controls" role="group" aria-label="Reading view">
-      <button type="button" id="viewBee" aria-pressed="true">New bee (default)</button>
-      <button type="button" id="viewRaver" aria-pressed="false">Raver</button>
-      <button type="button" id="viewCypher" aria-pressed="false">Cypherpunk</button>
-    </div>
-    <p class="bee-calm" data-view-copy>Same gift, same people, same art. Raver is where this still can move — only if you pick an expression.</p>
+  <div id="bloom-board" class="bloom-board">
+    <div class="register-row" data-register-host aria-label="Choose your view"></div>
+    <p data-reg="bee">Same gift, same people, same art. Pick a movement if you want the bloom to breathe.</p>
+    <p data-reg="raver">Empathic reading of the supplied green–teal–purple original. Softness, connection, or celebration — you choose.</p>
+    <p data-reg="cypherpunk">180 traced cells, one embedded original JPEG, CSS motion you control. Shared rhythm is local rings, not a cross-user link.</p>
 
-    <div class="compose" id="compose" data-expr="breathe" data-playing="false">
-      <img class="still" src="assets/genesis-3d/source/originals/green-teal%20BN%20logo.jpg" alt="Supplied original green-teal-purple bloom by LoVis and his mother. Used as the Raver still.">
-      <div class="rings" aria-hidden="true"><i></i><i></i></div>
-    </div>
-    <p class="muted">Still: supplied original <code>green-teal BN logo.jpg</code> (15.3 kB). Overlay: lightweight CSS rings in this HTML. 3D still of the same original is optional below.</p>
-
-    <fieldset class="card raver-only" style="margin-top:1rem">
-      <legend>Choose an expression</legend>
-      <label><input type="radio" name="expr" value="breathe" checked> Gentle breathing</label><br>
-      <label><input type="radio" name="expr" value="connect"> Connected / shared rhythm</label><br>
-      <label><input type="radio" name="expr" value="celebrate"> Celebration</label>
-      <div class="controls">
-        <button type="button" id="exprPlay" aria-pressed="false">Play motion</button>
-        <button type="button" id="exprPause">Pause</button>
-        <label>Intensity <input type="range" id="exprIntensity" min="0.4" max="1.6" step="0.1" value="1"></label>
-        <button type="button" id="exprSound">Enable sound</button>
-      </div>
-      <p id="soundNote" class="muted">Audio starts only after a deliberate tap. There is <strong>no audio asset</strong> on this board — Enable sound will say so instead of playing a fake bed.</p>
-      <p class="muted" id="reduceNote" hidden>Reduced motion is on. The still stays still. Pause and intensity remain available; motion will not run.</p>
-    </fieldset>
-
-    <div class="card" id="cypherSizes" hidden>
-      <h3>Measured delivery sizes (decimal)</h3>
-      <p class="muted">Cited from Astra’s #31 receipt and files copied onto this branch. 1 kB = 1,000 bytes.</p>
-      <div class="scroll">
-        <table>
-          <thead><tr><th>Representation</th><th>This board?</th><th>Measured</th><th>Limit</th></tr></thead>
-          <tbody>
-            <tr><td>green-teal BN logo.jpg (supplied original)</td><td>Yes — Raver still</td><td>15.3 kB</td><td>Original file, not 3D</td></tr>
-            <tr><td>Individual 3D PNG stills</td><td>Yes, marks section</td><td>1.06–1.14 MB</td><td>Interpretation, not original</td></tr>
-            <tr><td>original-blooms.png</td><td>Yes</td><td>1.92 MB</td><td>Trio still</td></tr>
-            <tr><td>GLB study exports (#31)</td><td>Not copied</td><td>5.41–6.09 MB</td><td>Optional until optimized</td></tr>
-            <tr><td>Blender master (#31)</td><td>Not copied</td><td>7.76 MB</td><td>Editable study</td></tr>
-            <tr><td>180-cell flat SVG probe</td><td>Not published as art</td><td>34.9 kB / 9.5 kB gzip</td><td>Size probe, not finished artwork</td></tr>
-            <tr><td>This composition’s CSS rings</td><td>Yes</td><td>in marketing.html</td><td>Working CSS, not film</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p>Recommend compact reproducible artwork (original JPEG or a later approved vector) plus optional rich 3D. Continuous PLUR film remains open.</p>
+    <div class="bloom-workbench">
+      <section class="art-panel" aria-label="Your bloom">
+        <div class="stage-top">
+          <span id="expression-name">Breathing bloom</span>
+          <button type="button" id="play-pause" class="primary" disabled>Loading artwork…</button>
+        </div>
+        <div id="bloom-stage" data-bloom-src="assets/genesis-3d/motion/green-teal-breathing.svg" aria-busy="true">
+          <img class="fallback" src="assets/genesis-3d/source/originals/green-teal%20BN%20logo.jpg" width="320" height="320" alt="Original green, teal and purple bloom by LoVis and his mother">
+        </div>
+        <div class="stage-bottom">
+          <span>Original artwork by LoVis and his mother</span>
+          <span>Motion study by Astra</span>
+        </div>
+      </section>
+      <section class="bloom-controls" aria-labelledby="choose-heading">
+        <h3 id="choose-heading">How shall it move?</h3>
+        <div class="expressions" role="group" aria-label="Expression">
+          <button type="button" class="expression" data-expression="breathing" aria-pressed="true"><span><strong>Breathing bloom</strong><small>A gentle rise. A little room to breathe.</small></span></button>
+          <button type="button" class="expression" data-expression="shared" aria-pressed="false"><span><strong>Shared rhythm</strong><small>A wave connecting the rings.</small></span></button>
+          <button type="button" class="expression" data-expression="celebration" aria-pressed="false"><span><strong>Celebration</strong><small>More lift. More energy. Your pace.</small></span></button>
+        </div>
+        <div class="motion-controls">
+          <div class="range-label"><label for="intensity">Movement</label><output id="intensity-value" for="intensity">50%</output></div>
+          <input id="intensity" type="range" min="0" max="100" value="50" step="5">
+          <div class="range-ends"><span>Still</span><span>Expressive</span></div>
+        </div>
+        <p id="motion-status" class="status" role="status">Preparing your bloom.</p>
+        <p class="sound-note">Sound is not available in this preview.</p>
+      </section>
     </div>
 
+    <div class="meaning-row" aria-label="What the colors mean">
+      <span>Purple · humans</span>
+      <span>Teal · AI</span>
+      <span>Green · biomass</span>
+    </div>
     <p class="access"><strong>Same doors in every view:</strong>
       <a href="../../surfaces/buzz-directory.html">People</a>
       <a href="../../surfaces/blight/gallery.html">Art gallery</a>
       <a href="../../surfaces/index.html">skaists Home</a>
       <a href="https://github.com/skaists/LOVErnment-DAO">LOVErnment DAO (source)</a>
+      <a href="assets/genesis-3d/motion/index.html">Artist studio</a>
     </p>
     <p class="muted">No simulated member counts. DAO participation beyond that public repository is <strong>not claimed</strong> here.</p>
   </div>
@@ -371,17 +399,33 @@
   </div>
 
   <details>
-    <summary>Optional 3D still of the same original (not a GLB viewer)</summary>
+    <summary>Review notes, sizes, and limits</summary>
+    <p><strong>What this board now plays:</strong> Astra’s self-contained 180-cell SVG from draft PR #31. Pause uses the SVG root <code>.is-paused</code> class so the current pose holds. Intensity is the 0–100 studio slider. Views use the shared <code>register.js</code> control; expression, intensity, and pause stay put when you change New bee / Raver / Cypherpunk. New bee remains the default when no preference is stored.</p>
+    <p>This is not a shipped artist animation, not a 3D/GLB viewer, and not continuous PLUR film. Shared rhythm is local rings. No audio bed is produced here.</p>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Representation</th><th>This board?</th><th>Measured</th><th>Limit</th></tr></thead>
+        <tbody>
+          <tr><td>green-teal-breathing.svg</td><td>Yes — inline bloom</td><td>83.3 kB / 29.1 kB gzip</td><td>Real CSS/SVG motion</td></tr>
+          <tr><td>green-teal-breathing-poster.jpg</td><td>Yes — film poster still</td><td>76.1 kB</td><td>Unloaded film face</td></tr>
+          <tr><td>green-teal BN logo.jpg (supplied original)</td><td>Yes — fallback still</td><td>15.3 kB</td><td>Original file, not 3D</td></tr>
+          <tr><td>Individual 3D PNG stills</td><td>Yes, marks section</td><td>1.06–1.14 MB</td><td>Interpretation, not original</td></tr>
+          <tr><td>original-blooms.png</td><td>Yes</td><td>1.92 MB</td><td>Trio still</td></tr>
+          <tr><td>Optional 6s MP4 / .blend / GLBs</td><td>Not copied</td><td>768 kB / 481 kB / 5.4–6.1 MB</td><td>Stay on #31</td></tr>
+        </tbody>
+      </table>
+    </div>
     <figure>
       <img src="assets/genesis-3d/renders/green-teal-original.png" alt="Astra 3D interpretation still of the green-teal-purple original.">
-      <figcaption>3D interpretation still only. GLB not loaded. Astra retains the model on PR #31.</figcaption>
+      <figcaption>Optional 3D interpretation still. GLB not loaded. Astra retains the model and film on PR #31.</figcaption>
     </figure>
+    <p><a href="assets/genesis-3d/motion/index.html">Open Astra’s artist studio</a> for save-SVG and the optional film control. The film file is not on this branch, so that button will report a failed load until you open #31.</p>
   </details>
 </section>
 
 <section id="cuts">
   <h2>15-second New bee cut and Raver adaptation</h2>
-  <p class="banner"><strong>Storyboard, not film.</strong> This is not a continuous two-person animation. No completed audio bed exists. One poster still stays on screen; only the captions change. The founder PLUR photograph is shown once, below — not replayed as fake motion.</p>
+  <p class="banner"><strong>Storyboard, not film.</strong> This is not a continuous two-person animation. No completed audio bed exists. One poster still stays on screen; only the captions change. The accepted PLUR concept still is shown once, below — not replayed as fake motion.</p>
   <p>Same action and destination; different spoken color. Reduced-motion visitors get the caption list without auto-advance.</p>
   <div class="player" id="player" data-voice="bee">
     <div class="controls" role="group" aria-label="Voice">
@@ -661,55 +705,6 @@
   if (reduce) {
     document.getElementById("play").textContent = "Captions only (reduced motion)";
   }
-
-  var viewbox = document.getElementById("viewbox");
-  var compose = document.getElementById("compose");
-  var copy = document.querySelector("[data-view-copy]");
-  var cypherSizes = document.getElementById("cypherSizes");
-  var reduceNote = document.getElementById("reduceNote");
-  var soundNote = document.getElementById("soundNote");
-  var copies = {
-    bee: "Same gift, same people, same art. Raver is where this still can move — only if you pick an expression.",
-    raver: "Empathic communication on the supplied green–teal–purple original. You choose the expression. Nothing is inferred.",
-    cypher: "Provenance and sizes. Motion is CSS on a still. GLBs stay on PR #31. Snapshots below are not changed chain art."
-  };
-  function setView(name) {
-    viewbox.setAttribute("data-view", name);
-    document.getElementById("viewBee").setAttribute("aria-pressed", name === "bee" ? "true" : "false");
-    document.getElementById("viewRaver").setAttribute("aria-pressed", name === "raver" ? "true" : "false");
-    document.getElementById("viewCypher").setAttribute("aria-pressed", name === "cypher" ? "true" : "false");
-    copy.textContent = copies[name];
-    cypherSizes.hidden = name !== "cypher";
-    if (name !== "raver") {
-      compose.setAttribute("data-playing", "false");
-      document.getElementById("exprPlay").setAttribute("aria-pressed", "false");
-    }
-  }
-  document.getElementById("viewBee").onclick = function () { setView("bee"); };
-  document.getElementById("viewRaver").onclick = function () { setView("raver"); };
-  document.getElementById("viewCypher").onclick = function () { setView("cypher"); };
-  document.querySelectorAll("input[name=expr]").forEach(function (r) {
-    r.addEventListener("change", function () {
-      compose.setAttribute("data-expr", this.value);
-    });
-  });
-  document.getElementById("exprPlay").onclick = function () {
-    if (reduce) { reduceNote.hidden = false; return; }
-    compose.setAttribute("data-playing", "true");
-    this.setAttribute("aria-pressed", "true");
-  };
-  document.getElementById("exprPause").onclick = function () {
-    compose.setAttribute("data-playing", "false");
-    document.getElementById("exprPlay").setAttribute("aria-pressed", "false");
-  };
-  document.getElementById("exprIntensity").addEventListener("input", function () {
-    compose.style.setProperty("--intensity", this.value);
-    compose.querySelector(".rings").style.transform = "scale(" + this.value + ")";
-  });
-  document.getElementById("exprSound").onclick = function () {
-    soundNote.textContent = "Enable sound was tapped. No audio file or generated bed exists on this board, so nothing played. That is the honest gate.";
-  };
-  if (reduce) reduceNote.hidden = false;
 })();
 </script>
 </body>

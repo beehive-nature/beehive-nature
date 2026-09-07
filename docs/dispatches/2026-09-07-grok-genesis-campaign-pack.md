@@ -123,6 +123,47 @@ Measured sizes copied onto this branch (decimal): original JPEGs 11.0–82.7 kB;
 
 Recommend compact reproducible artwork plus optional rich 3D.
 
+## 2026-09-07 revision — consume Astra bloom; keep controls in every view
+
+Integrator handoff: [comment 5576271846](https://github.com/beehive-nature/beehive-nature/pull/28#issuecomment-5576271846) and `docs/dispatches/2026-09-07-astra-grok-motion-board-review.md` at `620e74fe`. Draft PR #28 stays draft. Issue #27 stays open. No campaign launch. No mint or contract change. Shared `register.js` / `tour.js` and Astra Blender builders were not rewritten.
+
+### What the board now plays
+
+**Real CSS/SVG bloom**, not overlay rings and not a mock screenshot.
+
+Consumed from #31 (`620e74fe`) onto this branch, lightweight only:
+
+| Path | Copied? | Bytes |
+|---|---|---:|
+| `motion/green-teal-breathing.svg` | Yes | 83,287 (gzip 29,109) |
+| `motion/green-teal-breathing-poster.jpg` | Yes | 76,104 |
+| `motion/studio.js`, `studio.css`, `index.html`, receipts, README | Yes | studio + receipts |
+| `motion/board.js` | Board consumer (this lane) | thin apply() over the published SVG contract |
+| `green-teal-breathing.mp4` | **Not copied** | 767,970 — optional film stays on #31 |
+| `green-teal-breathing.blend` | **Not copied** | 481,198 — Astra lane |
+| GLBs / static Blender master | **Not copied** | 5.4–7.8 MB |
+
+The board loads the SVG once into `#bloom-stage` and drives it with the published contract: root `.bnr-breathing-bloom`, `.is-paused` (`animation-play-state: paused`, not `animation: none`), `--bloom-duration`, `--bloom-strength`, `--bloom-ring-delay`. Presets match Astra’s studio (breathing / shared / celebration). Intensity is the 0–100 studio slider. Shared rhythm remains local rings.
+
+### Required board fixes (source findings at `b3fb7ed1`)
+
+1. **Every view keeps the controls.** Removed `.raver-only` and the independent `setView` machine that stopped motion outside Raver. The bloom section mounts shared `surfaces/register.js` via `data-register-host`. Expression, intensity, and pause are page state in `board.js`; changing New bee / Raver / Cypherpunk does not discard them. New bee remains the register default when no `bregister` preference is stored.
+2. **Pause freezes the current pose.** Board no longer uses `animation: none` on pause. Pause toggles `.is-paused` on the SVG root. Zero intensity still maps strength to 0 and labels the control “Still view”. Reduced-motion uses the SVG’s own rest-pose override (`animation: none` + `transform: none` on cells only).
+3. **No inactive sound action.** `#exprSound` / “Enable sound” removed. Plain text: “Sound is not available in this preview.” No audio production.
+4. **Artist-first layout.** Art, expression, intensity, and pause come first. Review/status/size tables and the optional 3D still sit in a disclosure. skaists + LOVErnment DAO are named as the people and project around the art, not “because the founder asked for them”. Blender studies are **rendered** together. The PLUR image is an **accepted concept still**, not a founder photograph.
+
+### Open items (honest)
+
+- Optional 6-second Blender MP4 and editable `.blend` remain on #31. The copied studio page will report a failed film load if that button is used from this branch.
+- Continuous two-person PLUR film remains open.
+- No completed audio bed.
+- Reduced-motion live OS preference was not flipped in this seat; the CSS/controller branches were exercised by emulating `prefers-reduced-motion` in a scripted browser pass (see evidence below).
+- Human newcomer observations remain separate. Agent clicks are not people.
+
+### Evidence
+
+Recorded after the push of this revision. Scripted Chromium against `http://127.0.0.1:4179/docs/mvp-walk/marketing.html`. Details and any failures are named in the revision commit that follows the first implementation push, or in this section if the same commit already contains them.
+
 ## Distribution
 
 Do not execute. Proposed sequence remains Home → Buzz → Bluesky, drafts only.

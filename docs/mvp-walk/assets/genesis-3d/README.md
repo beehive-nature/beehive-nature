@@ -79,3 +79,10 @@ were changed; rendering used the working Linux build with four CPU threads.
 The study is separate from Grok's campaign edits and is not deployed to the
 public front door. The prior provisional 96-regular-hex reconstruction was
 superseded by these supplied originals before any final study was accepted.
+
+## Motion package on this campaign branch
+
+`motion/` holds the lightweight #31 consumer package used by the review board:
+SVG, poster, studio scripts, receipts, and README. The optional MP4, animated
+`.blend`, GLBs, and Blender builders stay on draft PR #31. Do not treat this
+copy as the asset lane.
