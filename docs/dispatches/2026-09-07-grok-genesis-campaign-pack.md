@@ -162,7 +162,28 @@ The board loads the SVG once into `#bloom-stage` and drives it with the publishe
 
 ### Evidence
 
-Recorded after the push of this revision. Scripted Chromium against `http://127.0.0.1:4179/docs/mvp-walk/marketing.html`. Details and any failures are named in the revision commit that follows the first implementation push, or in this section if the same commit already contains them.
+Local HTTP `http://127.0.0.1:4179/docs/mvp-walk/marketing.html`. Implementation landed at `2e91277`. This receipt names the later scripted/visual pass.
+
+**Scripted Chromium (puppeteer-core + `/usr/bin/google-chrome-stable`, `localStorage.bregister` cleared):** 19/19 after waiting two animation frames once `.is-paused` was set.
+
+| Check | Result |
+|---|---|
+| Default New bee, 180 cells, breathing @ 50% | Pass |
+| No `#exprSound`; text “Sound is not available in this preview.” | Pass |
+| Celebration + 75% → `--bloom-duration: 3.6s`, `--bloom-strength: 1.675` | Pass |
+| Pause = SVG `.is-paused` + `animation-play-state: paused` | Pass |
+| Phase hold 800 ms after pause | Pass — first-cell matrix `3.19594, -9.9514` unchanged (delta 0). Not rest (`none` / identity). |
+| Same matrix after New bee → Raver → Cypherpunk → New bee | Pass — expression Celebration, intensity 75, paused, controls visible |
+| Resume running | Pass — play-state `running`; matrix moved |
+| Intensity 0 | Pass — strength 0, control “Still view”, disabled |
+| 390 px | Pass — `scrollWidth === clientWidth === 390`; `#play-pause` stays in `.stage-top` |
+| `prefers-reduced-motion: reduce` (emulated; host OS preference not flipped) | Pass — “Still view”, `animation: none`, `transform: none` |
+
+One earlier scripted take sampled the transform in the same turn as the click and saw ~0.05 px compositor jitter. That is not `animation: none` resetting to rest. After two rAF the hold was exact. Agent clicks are not a newcomer observation.
+
+**Visual click-through:** Celebration, pause, three-view tour, resume, zero intensity. Controls stayed. No Enable sound button. A first 390 resize screenshot from the GUI agent was not trusted as the narrow receipt (layout still read wide); the Chromium 390 shot is the narrow receipt.
+
+**Named open items unchanged:** MP4/blend stay on #31; no audio bed; no continuous PLUR film; no human observation.
 
 ## Distribution
 
