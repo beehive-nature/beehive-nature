@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Genesis review board — New bee campaign pack</title>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f6f7f2;
+    --ink: #1f1c16;
+    --muted: #5c574c;
+    --line: #d7d3c6;
+    --card: #ffffff;
+    --invite: #8a2f6b;
+    --peace: #2a9d8f;
+    --love: #c94b8a;
+    --unity: #6b4ea2;
+    --respect: #3a6ea8;
+    --warn: #8a6d12;
+    --warn-bg: #fff8d6;
+  }
+  * { box-sizing: border-box; }
+  html { font-size: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 1rem/1.55 Georgia, "Times New Roman", serif;
+  }
+  header, main, footer { max-width: 68rem; margin: 0 auto; padding: 0 1.25rem; }
+  header { padding-top: 1.5rem; padding-bottom: 1rem; }
+  h1 { font-size: clamp(1.7rem, 3vw, 2.3rem); font-weight: 500; line-height: 1.2; margin: 0 0 .4rem; }
+  h2 { font-size: 1.45rem; font-weight: 500; margin: 2.4rem 0 .7rem; }
+  h3 { font-size: 1.1rem; font-weight: 600; margin: 1.2rem 0 .4rem; }
+  p, li, td, th, figcaption, label, button, a { font-size: 1rem; }
+  .sub, .muted, small { color: var(--muted); }
+  .banner {
+    background: var(--warn-bg);
+    border: 1px solid #c9b56a;
+    border-radius: .75rem;
+    padding: .85rem 1rem;
+    margin: 0 0 1.25rem;
+  }
+  nav.toc { display: flex; flex-wrap: wrap; gap: .5rem .9rem; margin: 1rem 0 0; }
+  nav.toc a { color: #1f4d4a; }
+  .intro {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 1rem;
+    padding: 1.4rem 1.5rem 1.5rem;
+  }
+  .intro .invite { font-size: 1.45rem; color: var(--invite); margin: .4rem 0 0; }
+  .marks { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1rem; }
+  figure {
+    margin: 0;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 1rem;
+    padding: .85rem;
+  }
+  figure img, figure object { width: 100%; height: auto; display: block; background: #fff; border-radius: .5rem; }
+  figcaption { margin-top: .65rem; color: var(--muted); }
+  .note {
+    background: var(--card);
+    border-left: 4px solid var(--unity);
+    padding: .7rem 1rem;
+    margin: 1rem 0;
+  }
+  .palettes { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1rem; }
+  .swatch { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .4rem; }
+  .swatch span {
+    display: inline-flex; align-items: center; gap: .35rem;
+    font-family: ui-sans-serif, system-ui, sans-serif; font-size: .875rem;
+  }
+  .dot { width: .9rem; height: .9rem; border-radius: 50%; border: 1px solid #0003; }
+  .player {
+    background: #111; color: #f4efe6;
+    border-radius: 1rem; padding: 1rem 1rem 1.1rem;
+  }
+  .player[data-voice="raver"] { background: #140816; }
+  .stage {
+    min-height: 16rem;
+    display: grid;
+    place-items: center;
+    background: #1a1a1a;
+    border-radius: .7rem;
+    overflow: hidden;
+    position: relative;
+  }
+  .stage img { max-width: 100%; max-height: 22rem; object-fit: contain; }
+  .stage .poster { width: 100%; max-height: 22rem; }
+  .caption-bar {
+    margin-top: .8rem;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 1.15rem;
+    min-height: 2.6rem;
+  }
+  .time { font-variant-numeric: tabular-nums; color: #c9c0b0; font-size: .95rem; }
+  .controls { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .75rem; }
+  button, .btn {
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 1rem;
+    min-height: 2.75rem;
+    padding: .45rem 1rem;
+    border-radius: .55rem;
+    border: 1px solid #c9c0b0;
+    background: #fff;
+    color: #1f1c16;
+    cursor: pointer;
+  }
+  button[aria-pressed="true"] { outline: 3px solid #e6b32e; }
+  .player button { background: #2a241c; color: #f4efe6; border-color: #5a5146; }
+  .beats { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .3rem; margin-top: .7rem; }
+  .beats button { min-height: 2.4rem; font-size: .8rem; padding: .3rem; }
+  .beats button.on { background: #e6b32e; color: #1f1c16; }
+  @media (max-width: 720px) { .beats { grid-template-columns: repeat(4, 1fr); } }
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 800px) { .split { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 1rem;
+    padding: 1rem 1.1rem;
+  }
+  .plur img { width: 100%; height: auto; border-radius: .6rem; background: #000; }
+  table { width: 100%; border-collapse: collapse; font-family: ui-sans-serif, system-ui, sans-serif; font-size: .92rem; }
+  th, td { border: 1px solid var(--line); padding: .55rem .5rem; text-align: left; vertical-align: top; }
+  th { background: #ece8dc; }
+  .scroll { overflow-x: auto; }
+  footer { padding: 2.5rem 1.25rem 3rem; color: var(--muted); }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .9em; }
+  details { margin: .7rem 0; }
+  summary { cursor: pointer; font-family: ui-sans-serif, system-ui, sans-serif; min-height: 2.5rem; }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <p class="banner"><strong>Internal review board — not a public campaign.</strong> Owned Home / Buzz / Bluesky are a proposed sequence only. This pack does not post, message recipients, buy ads, or purchase anything. Gift-code repairs are a separate PR.</p>
+  <h1>Make a little color. Give it to someone.</h1>
+  <p class="sub">Proposed New bee invitation — not a ratified slogan. One organism, three organizations, three reading views. The views do not belong to the organizations.</p>
+  <nav class="toc" aria-label="Board sections">
+    <a href="#marks">Genesis marks</a>
+    <a href="#intro">Introduction</a>
+    <a href="#cuts">15s cuts</a>
+    <a href="#plur">PLUR</a>
+    <a href="#proof">Claim-to-proof</a>
+    <a href="#learn">Learning</a>
+    <a href="index.html">Pack index</a>
+  </nav>
+</header>
+
+<main>
+<section id="intro">
+  <h2>One New bee introduction</h2>
+  <div class="intro">
+    <p>Today you can string a short word into a bracelet in this browser, keep it on a local arm, and hand a line of text to someone you already know how to reach. They can look at it before they keep it. You can look at Home for art, music, and people. Conversation, if you want it, still happens in Buzz — not inside this board.</p>
+    <p class="invite">Make a little color. Give it to someone.</p>
+    <p class="muted">Destination for this invitation: <a href="../../surfaces/kandi.html">the kandi bar</a>. A separate grand-opening door points only to <a href="../../surfaces/index.html">Home</a>. One destination per creative.</p>
+  </div>
+</section>
+
+<section id="marks">
+  <h2>Genesis marks</h2>
+  <p>Founder-supplied photographs, 2026-09-07. The JPEG bytes were not on this checkout or on origin, so the board shows <strong>honest reconstructions</strong> of geometry and palette. Replace them with the originals if recovered. Provenance: <a href="assets/genesis/PROVENANCE.md">PROVENANCE.md</a>.</p>
+  <div class="marks">
+    <figure>
+      <img src="assets/genesis/skaists-purple-center.svg" alt="skaists hex bloom reconstruction: magenta center through purple and cyan to a lime rim">
+      <figcaption><strong>skaists</strong> — purple-center bloom. Magenta core, cyan middle, lime rim. Reconstruction.</figcaption>
+    </figure>
+    <figure>
+      <img src="assets/genesis/beehive-biomass-solid-green.svg" alt="beehive biomass hex bloom reconstruction: solid lime honeycomb">
+      <figcaption><strong>beehive biomass</strong> — solid lime honeycomb. Reconstruction.</figcaption>
+    </figure>
+    <figure>
+      <img src="assets/genesis/beehive-nature-green-center.svg" alt="beehive nature hex bloom reconstruction: lime center through cyan to a magenta rim">
+      <figcaption><strong>beehive nature</strong> — green-center bloom, magenta rim. Reconstruction.</figcaption>
+    </figure>
+  </div>
+  <div class="palettes">
+    <div class="card">
+      <h3>Organization identity</h3>
+      <p class="muted">Derived from the founder marks. Not UI semantics. Not a view.</p>
+      <p>skaists</p>
+      <div class="swatch">
+        <span><i class="dot" style="background:#E01888"></i> core</span>
+        <span><i class="dot" style="background:#A02CC4"></i> purple</span>
+        <span><i class="dot" style="background:#2EC4E6"></i> cyan</span>
+        <span><i class="dot" style="background:#6EDC46"></i> rim</span>
+      </div>
+      <p>biomass</p>
+      <div class="swatch"><span><i class="dot" style="background:#9AD62E"></i> solid lime</span></div>
+      <p>nature</p>
+      <div class="swatch">
+        <span><i class="dot" style="background:#D4EC3A"></i> core</span>
+        <span><i class="dot" style="background:#2EC8E0"></i> cyan</span>
+        <span><i class="dot" style="background:#D040B8"></i> rim</span>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Semantic UI (separate)</h3>
+      <p class="muted">Used on kandi / PLUR surfaces for the four letters. Do not restyle an organization as a reading view.</p>
+      <div class="swatch">
+        <span><i class="dot" style="background:var(--peace)"></i> Peace</span>
+        <span><i class="dot" style="background:var(--love)"></i> Love</span>
+        <span><i class="dot" style="background:var(--unity)"></i> Unity</span>
+        <span><i class="dot" style="background:var(--respect)"></i> Respect</span>
+      </div>
+      <p class="muted" style="margin-top:.8rem">New bee, Raver, and Cypherpunk remain presentations of the same facts. A biomass page can be New bee. A skaists page can be Cypherpunk.</p>
+    </div>
+  </div>
+</section>
+
+<section id="cuts">
+  <h2>15-second New bee cut and Raver adaptation</h2>
+  <p><strong>Board, not film.</strong> No motion picture was produced. This player steps timed stills and captions. Same action and destination; different spoken color. Reduced-motion visitors get the static sequence — the player will not auto-advance if the system asks for less motion.</p>
+  <div class="player" id="player" data-voice="bee">
+    <div class="controls" role="group" aria-label="Voice">
+      <button type="button" id="voiceBee" aria-pressed="true">New bee</button>
+      <button type="button" id="voiceRaver" aria-pressed="false">Raver</button>
+    </div>
+    <div class="stage" id="stage" aria-live="polite"></div>
+    <p class="caption-bar"><span class="time" id="stamp">0.0s</span> · <span id="caption">A word. A little color.</span></p>
+    <div class="controls">
+      <button type="button" id="play">Play 15s</button>
+      <button type="button" id="pause">Pause</button>
+      <button type="button" id="replay">Replay</button>
+      <button type="button" id="static">Static sequence</button>
+    </div>
+    <div class="beats" id="beats" aria-label="Jump to a beat"></div>
+    <p class="muted" style="color:#c9c0b0;margin:.7rem 0 0">VO (New bee): “Make a little color. Give it to someone. Touch peace. Make one heart. Hold on. The gift leaves your arm.”</p>
+    <p class="muted" style="color:#c9c0b0;margin:.3rem 0 0">VO (Raver): “String it. Meet in the middle. The kandi crosses. What you give leaves your arm.”</p>
+  </div>
+  <p><a class="btn" href="assets/storyboard/newbee-15s-poster.svg">Open the poster / static alternative</a>
+     <a class="btn" href="assets/storyboard/BEATS.md">Beats and production notes</a>
+     <a class="btn" href="../../surfaces/kandi.html">Go to the kandi bar</a></p>
+
+  <div class="card" id="cypherpunk-card">
+    <h3>Cypherpunk — matching source and limits</h3>
+    <p>Same gift. Same destination. The card instead of a cut:</p>
+    <ul>
+      <li>Format <code>KND1|maker|for|ts36|beads|fnv</code> — FNV-1a/32 over the payload. A checksum catches a mistype. It is not a signature, not unique ownership, not verified identity.</li>
+      <li>State key <code>localStorage.bkandi</code> in this origin. No cookies, no inbox, no relay. Clearing site data, hitting quota, or another tab writing the same key ends the “forever” wording.</li>
+      <li>Gift / cross / show terminate at the OS clipboard (or selectable text if copy is refused). A person carries the line. Copied ≠ delivered ≠ kept.</li>
+      <li>Arrival preview does not write storage until Keep. Show uses a fragment, not proof of an exclusive transfer.</li>
+      <li>Source read: <code>surfaces/kandi.html</code> at <code>832bdf83</code>. Gift-identity defects in <code>gift(idx)</code> are assigned to the other worker.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="plur">
+  <h2>Founder-accepted PLUR continuity</h2>
+  <p>Two people throughout. One fluid movement. A fade between separate signs is not the demonstration.</p>
+  <figure class="plur">
+    <img src="assets/plur-paired-hands-v1.png" alt="Two partners demonstrate PLUR: touching peace signs, forming a heart together, interlocking fingers, and passing the pink-and-mint bracelet from the giver's wrist to the receiver's wrist.">
+    <figcaption>
+      Physical illustration (concept still). Peace: touch peace signs. Love: touching fingertips make one heart. Unity: interlocked fingers. Respect: the bracelet travels giver wrist → receiver wrist while fingers stay locked; the giver ends bare.
+      Source: <code>cf82f9ed</code>, <a href="assets/plur-paired-hands-prompt.md">edit prompts</a>, dispatch <a href="../dispatches/2026-09-07-plur-paired-hands.md">2026-09-07-plur-paired-hands.md</a>.
+    </figcaption>
+  </figure>
+  <div class="split">
+    <div class="card">
+      <h3>Physical illustration</h3>
+      <p>This PNG is a posed four-panel still. It is not motion capture and not a deployed animation. When anyone films it, interpolate the same two hands — do not dissolve cards.</p>
+    </div>
+    <div class="card">
+      <h3>Software handoff (different picture)</h3>
+      <p>The kandi page copies a text line. The person carries it in a chat they already have. There is no wrist, no inbox, and no proof the other person kept it until they preview and Keep in their browser. Do not use this still to claim remote delivery.</p>
+    </div>
+  </div>
+</section>
+
+<section id="proof">
+  <h2>Claim-to-proof</h2>
+  <p>Design still ≠ screen recording ≠ source publication ≠ human usability observation. Full table: <a href="claim-to-proof.md">claim-to-proof.md</a>. Last source verification for this board: 2026-09-07 against <code>832bdf83</code>.</p>
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Exact claim</th>
+          <th>Reader</th>
+          <th>Demonstrated action</th>
+          <th>Source / release</th>
+          <th>Proof type</th>
+          <th>Destination</th>
+          <th>Limit</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>You can string a bracelet in this browser today</td>
+          <td>Newcomer</td>
+          <td>Composer → right arm</td>
+          <td><code>kandi.html</code> <code>#stringit</code> @ 832bdf83</td>
+          <td>Source publication</td>
+          <td>kandi bar</td>
+          <td>Names limited by <code>NAMERE</code>; not a filmed completion</td>
+        </tr>
+        <tr>
+          <td>What you gift leaves your arm</td>
+          <td>Giver</td>
+          <td><code>gift(idx)</code> retires the piece and keeps a memory line</td>
+          <td>same file, gift ceremony</td>
+          <td>Source finding</td>
+          <td>kandi bar</td>
+          <td>Retirement currently runs on the animation timer, before a confirmed copy. Not proof a recipient kept anything. Repair is the other PR.</td>
+        </tr>
+        <tr>
+          <td>A received piece can be previewed, then kept</td>
+          <td>Receiver</td>
+          <td>Arrival Keep; leftover paste box</td>
+          <td>arrival / <code>#rcvgo</code></td>
+          <td>Source publication</td>
+          <td>kandi bar</td>
+          <td>Keep writes this browser only. Duplicate Keep can add copies.</td>
+        </tr>
+        <tr>
+          <td>The string “stays / forever”</td>
+          <td>Anyone who read the old copy</td>
+          <td>Corrected: lives in <code>localStorage.bkandi</code> until cleared, quota, or another tab overwrites</td>
+          <td><code>load</code> / <code>save</code></td>
+          <td>Source publication</td>
+          <td>—</td>
+          <td>Not permanent storage. Not cross-device. Not an archive.</td>
+        </tr>
+        <tr>
+          <td>KND1 checksum means the piece is yours</td>
+          <td>Cypherpunk reader</td>
+          <td>Refuse this claim</td>
+          <td>codec comment: checksum, not signature</td>
+          <td>Source publication</td>
+          <td>—</td>
+          <td>No unique ownership, verified identity, or delivery receipt</td>
+        </tr>
+        <tr>
+          <td>PLUR wrist-to-wrist transfer</td>
+          <td>Raver / floor</td>
+          <td>Founder still, four panels, giver ends bare</td>
+          <td>cf82f9ed PNG</td>
+          <td>Design still (concept)</td>
+          <td>this board</td>
+          <td>Not software delivery. Not film.</td>
+        </tr>
+        <tr>
+          <td>15-second New bee / Raver cuts exist</td>
+          <td>Reviewer</td>
+          <td>This storyboard player</td>
+          <td>this HTML</td>
+          <td>Board-not-film</td>
+          <td>kandi bar</td>
+          <td>No original video or cleared audio bed was produced</td>
+        </tr>
+        <tr>
+          <td>Home is the grand opening</td>
+          <td>Visitor</td>
+          <td>Art / music / people</td>
+          <td>surfaces/index.html live on skaists.dev @ 832bdf83</td>
+          <td>Source + served Pages (Astra receipt)</td>
+          <td>Home</td>
+          <td>Not this gift creative’s landing</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="learn">
+  <h2>Learning loop and festival</h2>
+  <div class="split">
+    <div class="card">
+      <h3>Observation</h3>
+      <p>Neutral goal, no coaching, distinguish a decline from a technical failure. Empty scorecard for about five willing newcomers. Agent fixtures are not people.</p>
+      <p><a href="observation-guide.md">Guide</a> · <a href="observation-scorecard.md">Scorecard</a></p>
+    </div>
+    <div class="card">
+      <h3>Festival hypothesis</h3>
+      <p>Attendee / artist-DJ-maker / promoter. Need, host commitment, costs, and willingness to pay remain <strong>UNKNOWN</strong> until observed. No scraped leads.</p>
+      <p><a href="festival-hypothesis-brief.md">One-page brief</a></p>
+    </div>
+  </div>
+  <div class="note">
+    <strong>Distribution (do not execute):</strong> proposed sequence is owned Home, then Buzz, then Bluesky. Draft previews live in <a href="../dispatches/2026-09-07-grok-beads-newbee-outreach.md">the outreach dispatch</a>. This assignment launches no post.
+  </div>
+  <details>
+    <summary>Production notes — choreography kept out of the spoken VO</summary>
+    <ol>
+      <li>Same two partners. Same skin, wrists, bracelet identities.</li>
+      <li>Peace: V-sign fingertips touch.</li>
+      <li>Love: half-hearts; index and thumb tips meet.</li>
+      <li>Unity: fingers interlock. Not prayer hands.</li>
+      <li>Respect: clasp held; bracelet slides wrist → wrist; giver ends bare.</li>
+    </ol>
+  </details>
+</section>
+</main>
+
+<footer>
+  <p>Grok medium-effort creative worker · issue #27 · branch <code>grok/genesis-campaign-pack-2026-09-07</code> · dispatch <a href="../dispatches/2026-09-07-grok-genesis-campaign-pack.md">2026-09-07-grok-genesis-campaign-pack.md</a></p>
+  <p><a href="index.html">Pack index</a> · <a href="../../surfaces/index.html">Home</a> · <a href="../../surfaces/kandi.html">Kandi</a></p>
+</footer>
+
+<script>
+(function () {
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var voice = "bee";
+  var i = 0;
+  var timer = null;
+  var playing = false;
+  var beats = [
+    { t: 0, end: 2, bee: "A word. A little color.", raver: "Spell it on your arm.", kind: "poster" },
+    { t: 2, end: 4, bee: "String it.", raver: "String it.", kind: "poster" },
+    { t: 4, end: 6, bee: "Touch peace.", raver: "Peace — we meet.", kind: "plur" },
+    { t: 6, end: 8.5, bee: "Make one heart.", raver: "Love — fingertips.", kind: "plur" },
+    { t: 8.5, end: 11, bee: "Hold on.", raver: "Unity — lock in.", kind: "plur" },
+    { t: 11, end: 13.5, bee: "The gift leaves your arm.", raver: "Respect — it crosses.", kind: "plur" },
+    { t: 13.5, end: 15, bee: "Give it to someone.", raver: "Your move.", kind: "poster" }
+  ];
+  var stage = document.getElementById("stage");
+  var caption = document.getElementById("caption");
+  var stamp = document.getElementById("stamp");
+  var beatBox = document.getElementById("beats");
+  var player = document.getElementById("player");
+
+  function frame(b) {
+    if (b.kind === "plur") {
+      stage.innerHTML = '<img src="assets/plur-paired-hands-v1.png" alt="Founder-accepted paired-hand PLUR still">';
+    } else {
+      stage.innerHTML = '<img class="poster" src="assets/storyboard/newbee-15s-poster.svg" alt="New bee 15 second poster, board not film">';
+    }
+    caption.textContent = voice === "raver" ? b.raver : b.bee;
+    stamp.textContent = b.t.toFixed(1) + "s";
+    var buttons = beatBox.querySelectorAll("button");
+    for (var n = 0; n < buttons.length; n++) buttons[n].classList.toggle("on", n === i);
+  }
+  function show(n) {
+    i = Math.max(0, Math.min(beats.length - 1, n));
+    frame(beats[i]);
+  }
+  function stop() {
+    playing = false;
+    if (timer) { clearTimeout(timer); timer = null; }
+  }
+  function next() {
+    if (i >= beats.length - 1) { stop(); return; }
+    show(i + 1);
+    if (playing) timer = setTimeout(next, (beats[i].end - beats[i].t) * 1000);
+  }
+  function playFrom(n) {
+    if (reduce) { show(n); return; }
+    stop();
+    playing = true;
+    show(n);
+    timer = setTimeout(next, (beats[i].end - beats[i].t) * 1000);
+  }
+
+  beats.forEach(function (b, idx) {
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = b.t.toFixed(1) + "s";
+    btn.addEventListener("click", function () { stop(); show(idx); });
+    beatBox.appendChild(btn);
+  });
+
+  document.getElementById("play").onclick = function () { playFrom(0); };
+  document.getElementById("pause").onclick = stop;
+  document.getElementById("replay").onclick = function () { playFrom(0); };
+  document.getElementById("static").onclick = function () { stop(); show(0); };
+
+  document.getElementById("voiceBee").onclick = function () {
+    voice = "bee";
+    player.setAttribute("data-voice", "bee");
+    this.setAttribute("aria-pressed", "true");
+    document.getElementById("voiceRaver").setAttribute("aria-pressed", "false");
+    frame(beats[i]);
+  };
+  document.getElementById("voiceRaver").onclick = function () {
+    voice = "raver";
+    player.setAttribute("data-voice", "raver");
+    this.setAttribute("aria-pressed", "true");
+    document.getElementById("voiceBee").setAttribute("aria-pressed", "false");
+    frame(beats[i]);
+  };
+
+  show(0);
+  if (reduce) {
+    document.getElementById("play").textContent = "Static (reduced motion)";
+  }
+})();
+</script>
+</body>
+</html>
