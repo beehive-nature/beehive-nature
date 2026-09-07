@@ -57,17 +57,19 @@ test('the social door New bee strip chooses the hive, people-agents and home', (
   assert.ok(links.includes('../buzz-directory.html#people-agents'), 'People and agents → directory fragment');
   assert.ok(links.includes('../index.html'), 'Home → hub');
   assert.match(startHere, /<a class="start-link act people" href="\.\.\/buzz-directory\.html"/);
-  assert.match(startHere, /<strong>Meet the hive<\/strong>/);
-  assert.match(startHere, /<strong>People and agents<\/strong>/);
-  assert.match(startHere, /<strong>Home<\/strong>/);
+  assert.match(startHere, /<strong data-i18n="social.arrival.hive">Meet the hive<\/strong>/);
+  assert.match(startHere, /<strong data-i18n="social.arrival.people">People and agents<\/strong>/);
+  assert.match(startHere, /<strong data-i18n="social.arrival.home">Home<\/strong>/);
   assert.match(startHere, /class="start-help"/);
+  assert.match(startHere, /data-i18n="social.arrival.kicker"/);
+  assert.match(startHere, /data-i18n="social.arrival.honesty.body"/);
 });
 
 test('the social door keeps a Buzz-app primary path and a this-browser-only room', () => {
   assert.match(startHere, /Buzz app/i);
   assert.match(startHere, /not this HTML page/i);
   assert.match(social, /<a class="act secondary" href="\.\.\/forge\/room\.html"/);
-  assert.match(social, /<em>this browser only<\/em>/);
+  assert.match(social, /<em data-i18n="social.arrival.browserOnly">this browser only<\/em>/);
   assert.match(social, /LIVE on this door means the page is published/);
   assert.match(startHere, /LIVE here means published pages/);
 });
@@ -77,17 +79,18 @@ test('the directory New bee intro chooses OUR HIVES, people-agents and Home', ()
   assert.ok(links.includes('#our-hives'), 'OUR HIVES fragment');
   assert.ok(links.includes('#people-agents'), 'people-agents fragment');
   assert.ok(links.includes('index.html'), 'Home → hub');
-  assert.match(newBee, /<h2>Find your people<\/h2>/);
+  assert.match(newBee, /<h2 data-i18n="social.arrival.dir.heading">Find your people<\/h2>/);
   assert.match(newBee, /This page lists doors/);
   assert.match(newBee, /Buzz app/i);
   assert.match(newBee, /class="home-controls"/);
+  assert.match(newBee, /data-i18n="social.arrival.dir.hives"/);
   assert.ok(extractById(directory, 'our-hives').includes('data-i18n="bd.hives.h2"'));
 });
 
 test('PEOPLE / AGENTS labels humans and machine seats without a live-room claim', () => {
   assert.match(peopleAgents, /PEOPLE\s*\/\s*AGENTS/);
-  assert.match(peopleAgents, /<span class="who">human<\/span>/);
-  assert.match(peopleAgents, /<span class="who">machine seat<\/span>/);
+  assert.match(peopleAgents, /data-i18n="social.arrival.who.human">human<\/span>/);
+  assert.match(peopleAgents, /data-i18n="social.arrival.who.machine">machine seat<\/span>/);
   assert.match(peopleAgents, /bQueenBee/);
   assert.match(peopleAgents, /loVis waTer/);
   assert.match(peopleAgents, /not a live roster|not proof that anyone is in a Buzz room/i);
@@ -100,7 +103,7 @@ test('hive door-lines stay honest and the closed door is a collapsed details', (
   assert.match(hives, /<b>fallback:<\/b>/);
   assert.match(hives, /<b>web door:<\/b>/);
   assert.match(hives, /join via the Buzz app/);
-  assert.match(directory, /<summary>If the door does not open<\/summary>/);
+  assert.match(directory, /<summary data-i18n="social.arrival.door.summary">If the door does not open<\/summary>/);
   assert.match(directory, /<details class="door-help">/);
 });
 
@@ -117,4 +120,23 @@ test('New bee blocks contain no numbered step instructions', () => {
   assertNoStepInstructions(newBee, '#new-bee');
   assert.doesNotMatch(startHere, /<ol[\s>]/i);
   assert.doesNotMatch(newBee, /<ol[\s>]/i);
+});
+
+test('additive social.arrival keys exist, are docked, and match page English', () => {
+  const corpus = JSON.parse(read('surfaces/lang-corpus.json'));
+  const langs = corpus._meta.langs;
+  const pages = social + directory;
+  const keys = [...new Set([...pages.matchAll(/data-i18n="(social\.arrival\.[^"]+)"/g)].map(m => m[1]))];
+  assert.ok(keys.length >= 20, 'arrival pages must wire a social.arrival set, got '+keys.length);
+  for (const key of keys) {
+    const row = corpus.strings[key];
+    assert.ok(row && typeof row.en === 'string' && row.en.trim(), key+' needs English');
+    for (const L of langs) {
+      assert.equal(typeof row[L], 'string', key+' missing docked cell '+L);
+      assert.ok(row[L].trim(), key+' empty docked cell '+L);
+    }
+  }
+  assert.equal(corpus._meta.langs.slice(0, 6).join(','), 'ru,lv,th,gd,tt,uk',
+    'six-priority language order must stay first in _meta.langs');
+  assert.deepEqual(corpus._meta.attested, {}, 'this slice must not add human attestation');
 });
