@@ -288,6 +288,59 @@ const st=p=>p.evaluate(()=>{const S=JSON.parse(localStorage.getItem('bkandi'));
   await p.close();
 }
 
+// ── 10. pipe in a name is refused, not stripped
+{
+  const p=await b.newPage();
+  await p.goto(`${BASE}/kandi.html`,{waitUntil:'load'}); await p.waitForTimeout(400);
+  await p.fill('#word','PLUR'); await p.click('#addword');
+  await p.fill('#maker','Ann|a');
+  await p.click('#stringit'); await p.waitForTimeout(200);
+  const pipe=await p.evaluate(()=>({
+    maker:document.getElementById('maker').value,
+    err:document.getElementById('cerr').textContent,
+    right:JSON.parse(localStorage.getItem('bkandi')).right.length
+  }));
+  ok('a | in a name is refused visibly and not saved as a silent strip',
+     pipe.maker==='Ann|a' && pipe.right===0 && /\|/.test(pipe.err) && /refused|not stripped/i.test(pipe.err),
+     JSON.stringify(pipe));
+  await p.close();
+}
+
+// ── 11. real 650ms timers: delayed cancel, delayed switch, leftover finish
+{
+  const p=await b.newPage();
+  await p.goto(`${BASE}/kandi.html`,{waitUntil:'load'}); await p.waitForTimeout(400);
+  await mk(p,'AAA','lovis');
+  await mk(p,'BBB','lovis');
+  await p.click('#right .kc:nth-child(1) .xrow button:nth-child(1)');
+  await p.evaluate(()=>document.getElementById('finishgift').click());
+  await p.waitForTimeout(150);
+  const early=await p.evaluate(()=>({
+    right:JSON.parse(localStorage.getItem('bkandi')).right.length,
+    given:JSON.parse(localStorage.getItem('bkandi')).given.length,
+    err:document.getElementById('gerr').textContent,
+    open:document.getElementById('giftout').classList.contains('open')
+  }));
+  ok('finish during the handshake is refused and does not retire',
+     early.right===2 && early.given===0 && !early.open && /preparing/.test(early.err), JSON.stringify(early));
+  await p.evaluate(()=>document.getElementById('donegift').click());
+  await p.waitForTimeout(2800);
+  const afterCancel=await st(p);
+  const lateErr=await p.textContent('#gerr');
+  ok('a leftover 650ms timer after cancel does not retire or claim a stale complete',
+     afterCancel.right===2 && afterCancel.given===0 && !/stale gift was not completed/.test(lateErr||''),
+     JSON.stringify(afterCancel)+' '+lateErr);
+  await p.click('#right .kc:nth-child(1) .xrow button:nth-child(1)');
+  await p.waitForTimeout(800);
+  await p.click('#right .kc:nth-child(2) .xrow button:nth-child(1)');
+  await p.waitForFunction(()=>/\|BBB\|/.test(document.getElementById('giftstr').value),null,{timeout:5000});
+  const switched=await st(p);
+  ok('a delayed target switch under 650ms timers leaves both pieces on the arm',
+     switched.right===2 && switched.given===0 && /\|BBB\|/.test(await p.inputValue('#giftstr')),
+     JSON.stringify(switched));
+  await p.close();
+}
+
 await b.close(); srv.close();
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail?1:0);

@@ -100,7 +100,17 @@ No `tour.js` / `register.js` cache bump. Loader stays `tour.js?v=40`.
   use ASCII `NAMERE`. A versioned payload, if wanted, is a separate follow-up.
   This PR does not reinterpret old strings.
 - `localStorage` is this browser, this origin. Another device is another arm.
+- `save()` re-reads before write, then `setItem`. Another tab can still write
+  in that window (TOCTOU). The race is named in source; it is not closed.
 - Machine-drafted corpus cells (7 keys × 28 tongues) are unattested.
 - Creative/campaign board assets stay out of this PR.
+
+## Independent review nits (`50c4c697`, session `bc-d507016e`)
+
+Taken in this descendant: leftover-timer guard (`completed` timeouts return;
+finish refused until `#giftout` is open with an export); `|` in a name is
+refused, not stripped; 650ms delayed cancel / switch / early-finish cases
+shipped; crossing "forever" copy pulled back to this-browser; TOCTOU named
+instead of claimed closed.
 
 No production box, wallet, DM or public post.

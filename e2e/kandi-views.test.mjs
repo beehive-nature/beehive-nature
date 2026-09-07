@@ -38,6 +38,15 @@ test('New bee uses the shared light canvas; raver and cypherpunk keep this page\
   assert.match(page, /data-reg="cypherpunk">Format: <code>KND1\|maker\|for\|ts36\|beads\|fnv<\/code>/);
 });
 
+test('names refuse a pipe instead of stripping it; leftover timers ignore a completed gift', () => {
+  assert.match(page, /if\(\/\\\|\/\.test\(s\)/);
+  assert.doesNotMatch(page, /\.replace\(\/\\\|\/g,''\)/);
+  assert.match(page, /if\(giving\.phase==='completed'\) return;/);
+  assert.match(page, /the handshake is still preparing/);
+  assert.match(page, /residual localStorage race is not closed/);
+  assert.doesNotMatch(extractById(page,'xpanel'), /forever/);
+});
+
 test('one gift engine: identity, token guard, animation does not splice', () => {
   assert.match(page, /function pieceKey\(k\)\{ return encode\(k\); \}/);
   assert.match(page, /var token=\+\+giftGen;/);

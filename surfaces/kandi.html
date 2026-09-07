@@ -153,7 +153,7 @@ body[data-reg="cypherpunk"] .law{font-size:11px}
   <h2>⚗ THE COMPOSER — string it</h2>
   <div class="law"><b>Beads:</b> tap colors, or type a word — letters become letter-beads.
   <b>Then name it:</b> who you are (optional), and who it's for (only if it's made <i>for</i>
-  someone — the dedication rides with it forever). Either way it strings onto your <b>right
+  someone — the dedication rides with the copy they receive). Either way it strings onto your <b>right
   arm</b>, because it is yours until you gift it; the made-FOR law binds the copy they receive.</div>
   <div class="pal" id="pal" aria-label="bead colors"></div>
   <div style="font-size:10px;color:var(--faint);margin-top:6px;line-height:1.6">Letters are white beads, like the
@@ -192,8 +192,8 @@ body[data-reg="cypherpunk"] .law{font-size:11px}
   instead: it stays yours until you paste their piece here. The swap happens in this browser only
   — there is no escrow and no one in the middle.</div>
   <div class="law" data-reg="raver">on respect, the kandi crosses. this is the arm for the piece you
-  would never hand over — it does not move until something lands. what comes back rides the left arm,
-  forever, because it was given to you.</div>
+  would never hand over — it does not move until something lands. what comes back rides the left arm
+  in this browser, because it was given to you.</div>
   <div class="law" data-reg="cypherpunk">Mechanics, stated plainly: a crossing is TWO one-way handoffs
   the page performs locally, not an escrow — there is no third party and nothing to trust but the floor.
   Your side completes at the instant you paste theirs: your piece retires to the memory line and theirs
@@ -203,7 +203,8 @@ body[data-reg="cypherpunk"] .law{font-size:11px}
   <div class="karm" id="cross"></div>
   <div class="xpanel" id="xpanel">
     <div class="law">Hand them <b>your</b> string, paste <b>theirs</b>. The swap happens the moment
-    you paste — yours retires to the memory line, theirs rides your left arm forever.</div>
+    you paste — yours retires to the memory line, theirs rides your left arm in this browser
+    and never re-trades.</div>
     <div style="font-size:10px;color:var(--faint);margin-top:8px">YOURS — hand this over</div>
     <textarea id="xmine" readonly style="width:100%;min-height:44px;resize:vertical"></textarea>
     <div style="font-size:10px;color:var(--faint);margin-top:8px">THEIRS — paste what they are crossing to you</div>
@@ -279,7 +280,7 @@ body[data-reg="cypherpunk"] .law{font-size:11px}
   <div class="gv" id="rcvprev">
     <div class="law">
       <span data-reg="bee" data-i18n="kandi.rcv.look">Look first, then keep</span>
-      <span data-reg="raver">this is the piece in your hands — keep it only if you want it forever on the left</span>
+      <span data-reg="raver">this is the piece in your hands — keep it only if you want it on the left</span>
       <span data-reg="cypherpunk">decode-only preview. Keep writes <code>rcv:true</code> to <code>S.left</code>. Same KND1 is idempotent. Show <code>#k=</code> is not exclusive title.</span>
     </div>
     <div id="rcvpiece" class="brace"></div>
@@ -404,6 +405,9 @@ function mergeStates(mine,theirs){
   return out;
 }
 function save(){
+  /* Re-reads before write so a missed storage event does not clobber blindly.
+     This is still a TOCTOU window: another tab can write between loadRaw()
+     and setItem. That residual localStorage race is not closed. */
   try{
     var now=loadRaw();
     if(now && lastSeen && now!==lastSeen){
@@ -458,7 +462,9 @@ function fnv(str){ var h=0x811c9dc5;
   for(var i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=(h+((h<<1)+(h<<4)+(h<<7)+(h<<8)+(h<<24)))>>>0; }
   return h.toString(36); }
 function clean(s){
-  s=String(s||'').replace(/\|/g,'').replace(/[\u0000-\u001F\u007F]/g,'').trim();
+  s=String(s==null?'':s);
+  if(/\|/.test(s) || /[\u0000-\u001F\u007F]/.test(s)) return null;
+  s=s.trim();
   if(s.length>NAMEMAX) return null;
   if(!s) return '';
   return NAME_OK.test(s)?s:null;
@@ -554,7 +560,7 @@ $('stringit').onclick=function(){
   if(!draft.length){ say('cerr','no beads yet'); return; }
   var maker=clean($('maker').value), madefor=clean($('madefor').value);
   if(maker===null||madefor===null){
-    say('cerr','names: letters from any language, digits, spaces, .·’- — max 24. Bead letters stay A–Z.');
+    say('cerr','names: letters from any language, digits, spaces, .·’- — max 24. A | or a control character is refused, not stripped. Bead letters stay A–Z.');
     return;
   }
   var k={maker:maker,madefor:madefor,beads:draft.join(''),ts:Date.now()};
@@ -750,7 +756,8 @@ function gift(k){
   $('giftstr').value='';
   $('giftstr').setAttribute('readonly','readonly');
   say('gerr','');
-  setPhase('prepared');
+  var box=$('giftphase'); if(box) box.setAttribute('data-phase','prepared');
+  var fin=$('finishgift'); if(fin) fin.style.display='';
   var steps=$('steps').children;
   for(var i=0;i<4;i++) steps[i].classList.remove('on');
   var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -761,13 +768,14 @@ function gift(k){
     if(i<3) setTimeout(function(){on(i+1);},delay);
     else setTimeout(function(){
       if(!giving || giving.token!==token) return;
+      if(giving.phase==='completed') return;
       if(findOn(S.right,key)<0){
         say('gerr','that piece is no longer on this arm — a stale gift was not completed');
         return;
       }
       $('giftstr').value=giving.export;
       $('giftout').classList.add('open');
-      setPhase('prepared');
+      if(giving.phase==='preparing') setPhase('prepared');
       $('ceremony').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'});
     },delay);
   }
@@ -788,6 +796,10 @@ $('copygift').onclick=function(){
 };
 $('finishgift').onclick=function(){
   if(!giving || giving.phase==='completed') return;
+  if(giving.phase==='preparing' || !$('giftout').classList.contains('open') || !$('giftstr').value){
+    say('gerr','the handshake is still preparing — the piece is still on your arm');
+    return;
+  }
   var idx=findOn(S.right,giving.key);
   if(idx<0){
     say('gerr','that piece is no longer on this arm — a stale gift was not completed');
