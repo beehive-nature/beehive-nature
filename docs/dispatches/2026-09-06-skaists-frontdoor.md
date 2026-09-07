@@ -5,6 +5,9 @@ seat's separate `wt-astra-frontdoor` worktree. Founder brief: redesign
 skaists.dev for scaling, with New bee, Raver and Cypherpunk on the same surface.
 The founder's matriarch is the primary design reference: a lifelong graphic
 artist who expects the clarity and familiarity she finds in Apple products.
+This priority is carried into `docs/DESIGN-CONSTRAINTS.md` as rule 13, using
+the founder's words and keeping it a design priority rather than an added
+approval or credential gate.
 
 ## What changes for a visitor
 
