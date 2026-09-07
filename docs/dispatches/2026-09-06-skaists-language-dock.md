@@ -45,10 +45,14 @@ dock it has just hidden.
 
 ## Receipts and boundary
 
-Local build, JavaScript syntax, registry parity and 16 tests pass. Five
+Local build, JavaScript syntax, registry parity and 17 tests pass. Six
 new tests execute the shipped dock against a small DOM boundary: a tall
 in-flow footer, fixed/no toolbar, short and keyboard-reduced viewports,
-focus/expanded state, and frame versus ordinary-panel scrolling mode.
+focus/expanded state, frame versus ordinary-panel scrolling mode, and
+installation-help insertion preserving the existing embedded agent session.
+The last case repairs a follow-up found during source review: assigning
+`innerHTML` to prepend help recreated the iframe, losing both its conversation
+and the new reading-style load handler. Help now inserts alongside it.
 They prove those decisions, not rendered-browser geometry. The existing
 browser CI remains required; no additional manual browser visual review
 or matriarch usability approval is claimed.

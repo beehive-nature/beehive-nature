@@ -12,6 +12,7 @@ function dock({height=650,position='static',barHeight=540,viewport=null}={}) {
     const attrs={}, classes=new Set(), listeners={}, children=[];
     const el={tag,style:{},children,listeners,attrs,
       appendChild(child){children.push(child);},
+      insertAdjacentHTML(where,html){this.inserted={where,html};},
       setAttribute(k,v){attrs[k]=v;},getAttribute(k){return attrs[k]??null;},
       addEventListener(k,fn){(listeners[k]??=[]).push(fn);},
       querySelector(s){return s==='iframe'?this.frame:ids.get(s==='.x'?'close':s.slice(1));},
@@ -79,4 +80,12 @@ test('frame and ordinary panels select their own scroll mode',()=>{
   assert.equal(body.classList.contains('has-frame'),true);
   chips[2].click();assert.equal(body.classList.contains('has-frame'),false);
   chips[0].click();assert.equal(body.classList.contains('has-frame'),true);
+});
+test('installation help preserves the embedded agent and its existing session',()=>{
+  const d=dock(), body=d.ids.get('adBody'), frame=body.frame;
+  d.ids.get('adPrompt').value='How do I install the app?';
+  d.ids.get('adSend').click();
+  assert.equal(body.frame,frame);
+  assert.equal(body.inserted.where,'afterbegin');
+  assert.match(body.inserted.html,/Add to Home/);
 });

@@ -254,7 +254,8 @@
     var meta = metaAnswer(v);
     if (meta) {
       var bodym = win.querySelector('#adBody');
-      if (cur === 'queen' || cur === 'hearth') { bodym.innerHTML = meta + bodym.innerHTML; }
+      // Add help without recreating the agent frame, its conversation or reading style.
+      if (cur === 'queen' || cur === 'hearth') { bodym.insertAdjacentHTML('afterbegin', meta); }
       else bodym.innerHTML = meta;
       var ib = win.querySelector('#adInst');
       if (ib) ib.onclick = function () { if (installEvt) { installEvt.prompt(); installEvt = null; } };
