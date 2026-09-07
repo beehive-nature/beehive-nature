@@ -32,6 +32,14 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-09-06` — **Astra PR identity check repaired after CI reproduced the
+  false rejection.** The PR job checked GitHub's synthetic merge author; push
+  static CI passed on the same contribution. The workflow now supplies actual
+  PR base/head refs to the existing fail-closed identity checker. Real author
+  violations and missing refs still refuse. Repro:
+  `bash e2e/identity-pr-range.test.sh` → 3 PASS cases. This changes range
+  selection, not founder authorship or co-author rules. Receipt:
+  `docs/dispatches/2026-09-06-astra-stack-audit.md`.
 - `2026-09-06` — **Astra continuity audit: seven primitives mapped; archive
   receiving seam added without changing v1 bytes.** `cargo test -p bnr-archive
   --locked` → 14 passed, 0 failed on Windows. Offline verification checks the

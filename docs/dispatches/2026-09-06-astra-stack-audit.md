@@ -170,6 +170,18 @@ metadata is unprotected and `rules/branches/main` returned an empty list.
 Branch-protection/PR-only policy remains the founder's decision, as the
 existing workflow's §7 comments explicitly require. No enforcement is claimed.
 
+**PR verification finding:** after audit commit `f5ccebcd`, push static
+[job 101597392565](https://github.com/beehive-nature/beehive-nature/actions/runs/34074323738/job/101597392565)
+passed, while PR static
+[job 101597397731](https://github.com/beehive-nature/beehive-nature/actions/runs/34074325462/job/101597397731)
+failed only the §7 identity step. The PR checkout includes GitHub's synthetic
+merge, whose author is not the contributing seat. The workflow now provides
+the actual PR base/head refs to the same checker; pushes retain before/sha.
+`bash e2e/identity-pr-range.test.sh` creates a real temporary merge graph and
+proves the valid contributed range passes, an invalid contributor is refused,
+and an unavailable head fails closed. The synthetic merge also fails when
+deliberately submitted as the contribution. No identity policy is relaxed.
+
 ## P2 — governance HEAD had inherited red formatting CI — FIXED, CI GREEN
 
 `skaists/LOVErnment-DAO` at `dca913306455` passed build and tests but failed

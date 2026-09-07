@@ -73,6 +73,9 @@ jobs:
       - name: Secret scanner — refused content stays out of logs
         if: always()
         run: bash e2e/secret-scan-output.test.sh
+      - name: Identity — PR head range excludes GitHub merge identity
+        if: always()
+        run: bash e2e/identity-pr-range.test.sh
       # Voucher/escrow engine battery (Seat-1 ledger core, merged 2026-08-29): tithe line,
       # refuse-before-write, derived balances, hash chain, tamper evidence
       - name: Voucher/escrow engine battery (moat ledger core)
@@ -157,11 +160,14 @@ jobs:
       # computed FAILS — the check fails closed. LIVES IN STATIC BY RULING;
       # the full-history checkout this job already carries (for dock-claims'
       # tree pin) is exactly what the range check needs.
-      - name: §7 identity — author is the founder on the pushed range
+      # A PR checkout is GitHub's synthetic merge, whose author is not the
+      # contributing seat. Check the real base..head commits, retaining the
+      # same founder-author/trailer rules and fail-closed ref resolution.
+      - name: §7 identity — author is the founder on the contributed range
         if: always()
         env:
-          S7_BEFORE: ${{ github.event.before }}
-          S7_SHA: ${{ github.sha }}
+          S7_BEFORE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          S7_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: sh scripts/identity-check.sh
 
   node:
