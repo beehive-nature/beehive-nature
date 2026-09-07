@@ -26,69 +26,98 @@
     '  background:radial-gradient(circle at 35% 30%,#3a2e08,#1a1405);border:1.5px solid #FFD700;color:#FFD700;',
     '  font-size:22px;cursor:pointer;display:grid;place-items:center;' + (reduce ? '' : 'animation:adPulse 3.4s ease-in-out infinite;'),
     '  transition:transform .2s} #adOrb:hover{transform:scale(1.09)}',
-    '#adWin{position:fixed;left:18px;bottom:82px;z-index:9991;width:min(440px,calc(100vw - 36px));max-height:min(600px,72vh);',
+    '#adOrb,#adWin,#adWin *{box-sizing:border-box}',
+    '#adWin{position:fixed;left:18px;bottom:82px;z-index:9999;width:min(440px,calc(100vw - 36px));height:min(600px,calc(100vh - 100px));min-height:0;',
     '  display:none;flex-direction:column;background:#0a0f0b;border:1px solid #243026;border-radius:14px;overflow:hidden;',
     '  box-shadow:0 14px 44px rgba(0,0,0,.55)} #adWin.on{display:flex;' + (reduce ? '' : 'animation:adIn .32s cubic-bezier(.2,.9,.3,1)') + '}',
     '#adHead{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid #243026;background:#0e1611}',
-    '#adHead .t{font:11px \'IBM Plex Mono\',monospace;color:#FFD700;letter-spacing:.08em}',
-    '#adHead .x{margin-left:auto;background:none;border:none;color:#8a9a8a;font-size:15px;cursor:pointer}',
+    '#adHead,#adAgents,#adFoot{flex-shrink:0}',
+    '#adHead .t{font:14px \'IBM Plex Mono\',monospace;color:#FFD700;letter-spacing:.04em}',
+    '#adHead .x{margin-left:auto;background:none;border:none;color:#8a9a8a;font-size:18px;cursor:pointer;min-width:44px;min-height:44px}',
     '#adAgents{display:flex;gap:5px;flex-wrap:wrap;padding:9px 12px;border-bottom:1px solid #243026}',
     '.adAg{background:#101a14;border:1px solid #243026;border-radius:99px;color:#8a9a8a;cursor:pointer;',
-    '  font:10px \'IBM Plex Mono\',monospace;padding:4px 11px;transition:all .18s} .adAg:hover{color:#00E5FF;border-color:#00E5FF}',
+    '  font:14px \'IBM Plex Mono\',monospace;min-height:44px;padding:6px 11px;transition:all .18s} .adAg:hover{color:#00E5FF;border-color:#00E5FF}',
     '.adAg[aria-pressed="true"]{color:#FFD700;border-color:#FFD700;box-shadow:0 0 10px rgba(255,215,0,.22)}',
-    '#adBody{flex:1;overflow:auto;min-height:120px}',
-    '#adBody iframe{width:100%;height:460px;border:none;background:#07090b}',
-    '.adPanel{padding:12px 14px;font:11px/1.75 \'IBM Plex Mono\',monospace;color:#8a9a8a}',
+    '#adBody{flex:1;overflow:auto;min-height:0;overscroll-behavior:contain}',
+    '#adBody.has-frame{display:flex;flex-direction:column;overflow:hidden}',
+    '#adBody iframe{display:block;flex:1;min-height:0;width:100%;height:100%;border:none;background:#07090b}',
+    '#adBody.has-frame>.adPanel{flex:none;max-height:45%;overflow:auto}',
+    '.adPanel{padding:12px 14px;font:14px/1.75 \'IBM Plex Mono\',monospace;color:#8a9a8a;overflow-wrap:anywhere}',
     '.adPanel b{color:#e2efdb} .adPanel a{color:#00E5FF;text-decoration:none}',
     '#adFoot{display:flex;gap:7px;padding:9px 12px;border-top:1px solid #243026}',
-    '#adPrompt{flex:1;background:#0d1a15;border:1px solid #243026;border-radius:8px;color:#e2efdb;',
-    '  font:11.5px \'IBM Plex Mono\',monospace;padding:8px 10px;outline:none} #adPrompt:focus{border-color:#FFD700}',
+    '#adPrompt{flex:1;min-width:0;background:#0d1a15;border:1px solid #243026;border-radius:8px;color:#e2efdb;',
+    '  font:16px \'IBM Plex Mono\',monospace;padding:8px 10px;min-height:44px} #adPrompt:focus{border-color:#FFD700}',
     '#adSend{background:#26123a;color:#c9a0ff;border:1px solid #243026;border-radius:8px;cursor:pointer;',
-    '  font:11px \'IBM Plex Mono\',monospace;padding:8px 13px} #adSend:hover{background:#c9a0ff;color:#000}'
+    '  font:14px \'IBM Plex Mono\',monospace;padding:8px 13px;min-height:44px} #adSend:hover{background:#c9a0ff;color:#000}',
+    '#adWin button:focus-visible,#adPrompt:focus-visible,#adOrb:focus-visible{outline:2px solid currentColor;outline-offset:-4px}',
+    'body[data-reg=bee] #adOrb{background:#fff;color:#326b39;border-color:#ccd7cf;animation:none;box-shadow:0 2px 12px #18362a18}',
+    'body[data-reg=bee] #adWin{color-scheme:light;background:#f6f7f2;color:#18362a;border-color:#ccd7cf;box-shadow:0 12px 36px #18362a26}',
+    'body[data-reg=bee] #adHead{background:#fff;border-color:#ccd7cf}',
+    'body[data-reg=bee] #adHead .t,body[data-reg=bee] #adHead .x{color:#18362a;font-family:system-ui,-apple-system,sans-serif;letter-spacing:0}',
+    'body[data-reg=bee] #adAgents,body[data-reg=bee] #adFoot{border-color:#ccd7cf}',
+    'body[data-reg=bee] .adAg,body[data-reg=bee] #adPrompt{font-family:system-ui,-apple-system,sans-serif;background:#fff;color:#18362a;border-color:#ccd7cf}',
+    'body[data-reg=bee] .adAg[aria-pressed=true],body[data-reg=bee] #adSend{background:#326b39;color:#fff;border-color:#326b39;box-shadow:none;font-family:system-ui,-apple-system,sans-serif}',
+    'body[data-reg=bee] #adPrompt::placeholder{color:#52695b;opacity:1}',
+    'body[data-reg=bee] .adPanel{font-family:system-ui,-apple-system,sans-serif;color:#435f4e}',
+    'body[data-reg=bee] .adPanel b{color:#18362a}body[data-reg=bee] .adPanel a{color:#29628f;text-decoration:underline}'
   ].join('\n');
   document.head.appendChild(css);
 
   var orb = document.createElement('button');
   orb.id = 'adOrb'; orb.title = '⚙ the machine — tap to summon · long-press to hide · Alt+/ · Alt+1..4';
+  orb.type = 'button';
+  orb.setAttribute('aria-label', 'Open the agent dock');
+  orb.setAttribute('aria-controls', 'adWin');
+  orb.setAttribute('aria-expanded', 'false');
   /* the founder's mobile screenshots caught the complex SVG paths rendering mangled.
      Fix: a simple, universally-safe centered gear — circle + spokes, no path data.
      display:grid + place-items:center on the button guarantees true centering. */
-  orb.style.cssText = 'position:fixed;left:18px;bottom:66px;z-index:9999;width:52px;height:52px;' +
-    'border-radius:50%;background:radial-gradient(circle at 35% 30%,#3a2e08,#1a1405);' +
-    'border:1.5px solid #FFD700;cursor:pointer;display:grid;place-items:center;' +
-    'font-size:26px;line-height:1;padding:0;color:#FFD700;text-align:center;' +
-    (reduce ? '' : 'animation:adPulse 3.4s ease-in-out infinite;transition:transform .2s;');
+  orb.style.cssText = 'font-size:26px;line-height:1;padding:0;text-align:center;';
   orb.innerHTML = '<span style="display:block;font-size:26px;line-height:1;transform:translateY(-1px)">⚙</span>';
   var win = document.createElement('div');
   win.id = 'adWin';
+  win.setAttribute('role', 'dialog');
+  win.setAttribute('aria-labelledby', 'adTitle');
   win.innerHTML =
-    '<div id="adHead"><span class="t">🐝 the agent dock</span><button class="x" title="close">✕</button></div>' +
+    '<div id="adHead"><span class="t" id="adTitle">🐝 the agent dock</span><button class="x" type="button" title="close" aria-label="Close the agent dock">✕</button></div>' +
     '<div id="adAgents"></div>' +
     '<div id="adBody"></div>' +
-    '<div id="adFoot"><input id="adPrompt" placeholder="ask the agents — or type /help"><button id="adSend">send</button></div>';
+    '<div id="adFoot"><input id="adPrompt" aria-label="Ask the agents" placeholder="ask the agents — or type /help"><button id="adSend" type="button">send</button></div>';
   document.body.appendChild(orb);
-  /* Seat the orb off the MEASURED #tbar height.
-     FAIL-SAFE LAW: tour.js injects the bar separately, so on the common
-     first-paint path there is NO #tbar yet. Writing a computed value then would
-     overwrite the 66px fail-safe with a MORE clipped 10px — worse than the
-     original 18px. So: no bar, or a bar not yet laid out (height 0), means we
-     write NOTHING and the fail-safe stands. */
+  document.body.appendChild(win);
+  /* A toolbar only occupies the viewport when it is fixed and visible.
+     The front door's in-flow footer can be tall even inside a closed details:
+     treating that height as a bottom obstruction pushed the orb above the screen.
+     Keep both controls within the viewport, including zoom/keyboard resizing. */
   (function(){
     function fit(){
-      var o = document.getElementById('adOrb') || orb; if(!o) return;
-      var bar = document.getElementById('tbar'); if(!bar) return;
-      var h = Math.ceil(bar.getBoundingClientRect().height);
-      if(!h) return;                       // bar present but unlaid — keep fail-safe
-      o.style.bottom = (h + 10) + 'px';    // 10px above the REAL bar
-      /* +22, not +6: the old hairline let a horizontal scrollbar or a zoom
-         step push the footer under the bar (founder-reported on kandi).
-         Never shrink what a page already reserved for itself. */
-      var need = h + 22;
-      var cur = parseFloat(getComputedStyle(document.body).paddingBottom) || 0;
-      if (cur < need) document.body.style.paddingBottom = need + 'px';
+      var viewport = window.visualViewport;
+      var vh = viewport ? viewport.height : window.innerHeight;
+      var keyboard = viewport ? Math.max(0, window.innerHeight - vh - viewport.offsetTop) : 0;
+      var bar = document.getElementById('tbar');
+      var fixed = bar && getComputedStyle(bar).position === 'fixed';
+      var rect = fixed ? bar.getBoundingClientRect() : null;
+      var h = rect && rect.height > 0 && rect.bottom > 0 && rect.top < window.innerHeight
+        ? Math.ceil(window.innerHeight - Math.max(0, rect.top)) : 0;
+      var floor = bar ? 18 : 66; // preserve the pre-toolbar fail-safe on legacy pages
+      var bottom = Math.min(Math.max(floor, h + 10 - keyboard), Math.max(12, vh - 64));
+      orb.style.bottom = (keyboard + bottom) + 'px';
+      // A very tall expanded toolbar must not leave the dialog unusably short.
+      var dialogBottom = Math.min(bottom + 64, Math.max(12, vh * .25));
+      win.style.bottom = (keyboard + dialogBottom) + 'px';
+      win.style.height = Math.max(0, Math.min(600, vh - dialogBottom - 12)) + 'px';
+      if (h) {
+        var need = h + 22;
+        var cur = parseFloat(getComputedStyle(document.body).paddingBottom) || 0;
+        if (cur < need) document.body.style.paddingBottom = need + 'px';
+      }
     }
     fit();
     addEventListener('resize', fit);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', fit);
+      window.visualViewport.addEventListener('scroll', fit);
+    }
     /* ResizeObserver refines a bar that already exists; MutationObserver catches
        the bar ARRIVING. The MO must NOT be nested inside a ResizeObserver check —
        a browser without RO would then get no bar-arrival handling at all. */
@@ -102,7 +131,7 @@
       });
       mo.observe(document.documentElement, {childList:true, subtree:true});
     }
-  })(); document.body.appendChild(win);
+  })();
 
   var AGENTS = [
     { id: 'queen', chip: '🐝 bQueenBee', kind: 'iframe', src: R + 'bqueenbee-live.html',
@@ -136,11 +165,39 @@
     agentsEl.appendChild(b);
   });
 
+  /* Same-origin embedded reading only; the standalone agent pages keep their
+     own presentation. No answers, disclosures or agent capabilities are changed. */
+  function syncFrame() {
+    var frame = win.querySelector('iframe');
+    if (!frame) return;
+    try {
+      var doc = frame.contentDocument;
+      if (!doc || !doc.head) return;
+      doc.documentElement.classList.toggle('ad-bee', document.body.getAttribute('data-reg') === 'bee');
+      if (doc.getElementById('adReading')) return;
+      var style = doc.createElement('style'); style.id = 'adReading';
+      style.textContent =
+        'html.ad-bee{color-scheme:light;--bg:#f6f7f2;--ink:#18362a;--dim:#435f4e;--line:#ccd7cf;--gold:#326b39;--cyan:#29628f;--violet:#65509a}' +
+        'html.ad-bee body{background:var(--bg);color:var(--ink);font:16px/1.7 system-ui,-apple-system,sans-serif;padding:20px 16px}' +
+        'html.ad-bee h1{font-size:24px;letter-spacing:0;text-shadow:none}' +
+        'html.ad-bee header p,html.ad-bee .law,html.ad-bee .msg,html.ad-bee .note{font-size:16px!important}' +
+        'html.ad-bee section,html.ad-bee .msg{background:#fff;color:var(--ink);border-color:var(--line)}' +
+        'html.ad-bee section h2,html.ad-bee .machine,html.ad-bee .badge,html.ad-bee footer,html.ad-bee .who,html.ad-bee .msg a{font-size:14px;letter-spacing:0}' +
+        'html.ad-bee input,html.ad-bee button{font-family:inherit!important;font-size:16px!important;min-width:0;min-height:44px}' +
+        'html.ad-bee input,html.ad-bee #seeds button,html.ad-bee #quick button{background:#fff!important;color:var(--ink)!important;border-color:var(--line)!important}';
+      doc.head.appendChild(style);
+      doc.addEventListener('keydown', function (e) { if (e.key === 'Escape') setOpen(false); });
+    } catch (e) { /* a navigated frame may leave our origin; never reach across it */ }
+  }
+  document.addEventListener('bregister', syncFrame);
+
   function render() {
     var body = win.querySelector('#adBody');
     var a = AGENTS.filter(function (x) { return x.id === cur; })[0];
+    body.classList.toggle('has-frame', a.kind === 'iframe');
     if (a.kind === 'iframe') {
       body.innerHTML = '<iframe src="' + a.src + '" title="' + a.chip + '"></iframe>';
+      body.querySelector('iframe').addEventListener('load', syncFrame);
     } else if (a.kind === 'panel') {
       body.innerHTML = '<div class="adPanel">' + a.note + '</div>';
     } else if (a.kind === 'compose') {
@@ -156,7 +213,18 @@
   }
   render();
 
-  orb.onclick = function () { win.classList.toggle('on'); if (win.classList.contains('on')) win.querySelector('#adPrompt').focus(); };
+  function setOpen(open) {
+    win.classList.toggle('on', open);
+    orb.setAttribute('aria-expanded', String(open));
+    orb.setAttribute('aria-label', open ? 'Close the agent dock' : 'Open the agent dock');
+    if (open) win.querySelector('#adPrompt').focus();
+    else orb.focus();
+  }
+  orb.onclick = function () {
+    if (lpFired) { lpFired = false; return; }
+    if (hidden) { unhide(); setOpen(true); }
+    else setOpen(!win.classList.contains('on'));
+  };
 
   /* ── mobile laws (no Alt keys down here): tap summons; LONG-PRESS the ⚙ hides the
      machine to its whisper; tap the whisper to summon again; the agent chips are
@@ -167,7 +235,7 @@
     lpTimer = setTimeout(function () {
       lpFired = true; hidden = true;
       orb.style.opacity = '.35'; orb.style.transform = 'scale(.6)';
-      win.classList.remove('on');
+      setOpen(false);
       orb.title = '⚙ hidden — tap the whisper to summon';
       if (navigator.vibrate) { try { navigator.vibrate(18); } catch (err) {} }
     }, 520);
@@ -175,11 +243,7 @@
   ['touchend', 'touchmove', 'touchcancel'].forEach(function (ev) {
     orb.addEventListener(ev, function () { clearTimeout(lpTimer); }, { passive: true });
   });
-  orb.addEventListener('click', function () {
-    if (lpFired) { lpFired = false; return; } /* the long-press already acted */
-    if (hidden) { unhide(); }
-  });
-  win.querySelector('.x').onclick = function () { win.classList.remove('on'); };
+  win.querySelector('.x').onclick = function () { setOpen(false); };
   function send() {
     var inp = win.querySelector('#adPrompt'); var v = (inp.value || '').trim(); if (!v) return;
     inp.value = '';
@@ -211,7 +275,7 @@
   var hidden = false;
   orb.addEventListener('dblclick', function () {
     hidden = true; orb.style.opacity = '.35'; orb.style.transform = 'scale(.6)';
-    win.classList.remove('on');
+    setOpen(false);
     orb.title = '⚙ hidden — Alt+H to summon the machine';
   });
   function unhide() { hidden = false; orb.style.opacity = ''; orb.style.transform = '';
@@ -219,18 +283,18 @@
   function switchAgent(i) {
     var chips = agentsEl.querySelectorAll('.adAg');
     if (chips[i]) chips[i].click();
-    if (!win.classList.contains('on')) win.classList.add('on');
+    setOpen(true);
   }
   document.addEventListener('keydown', function (e) {
     if (!e.altKey) return;
     if (e.key === '/' || e.key.toLowerCase() === 'm') { e.preventDefault();
-      if (hidden) { unhide(); win.classList.add('on'); win.querySelector('#adPrompt').focus(); }
-      else { win.classList.toggle('on'); if (win.classList.contains('on')) win.querySelector('#adPrompt').focus(); } }
-    else if (e.key.toLowerCase() === 'h') { e.preventDefault(); unhide(); win.classList.add('on'); }
+      if (hidden) { unhide(); setOpen(true); }
+      else setOpen(!win.classList.contains('on')); }
+    else if (e.key.toLowerCase() === 'h') { e.preventDefault(); unhide(); setOpen(true); }
     else if (['1','2','3','4'].indexOf(e.key) >= 0) { e.preventDefault(); if (hidden) unhide(); switchAgent(+e.key - 1); }
   });
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && win.classList.contains('on')) win.classList.remove('on');
+    if (e.key === 'Escape' && win.classList.contains('on')) setOpen(false);
   });
   /* the whisper hint rides the /help panel */
   var origRender = render;
