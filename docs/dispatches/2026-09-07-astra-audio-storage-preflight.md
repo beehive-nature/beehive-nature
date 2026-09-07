@@ -116,3 +116,46 @@ No new persistent test suite or storage integration test is claimed.
 The earlier kandi player verification is in
 `2026-09-07-astra-kandi-music.md`. Those surface files are unchanged by this
 follow-up; their tests were not rerun. No production deployment occurred.
+
+## Founder direction: a choice of media and listening services
+
+The founder asks for different ways to consume media and expects the YouTube
+embed to work when served from the public domain. Adopt user choice as the
+product direction; public-domain playback remains a hypothesis to test.
+
+Grok's draft #33 (`cursor/artist-audio-showcase-0ec3`, reviewed here only for
+its scope/dispatch at `35e4752f`) supplies an audio shell and a labeled local
+tone fixture. It has no stored artist recording. Extend that existing lane:
+
+- Lead New bee with one clear Play action and artist credit. Offer **Other
+  ways to listen** for available alternatives, naming the actual source.
+  Offer **Watch** when the artist has a video. Reading material, captions or
+  transcripts are further choices when they exist, never invented equivalents.
+- Keep the same capabilities in Raver and Cypherpunk. A skin change preserves
+  the current player, source, pause/play position and volume. Source changes
+  are explicit; stop the previous in-page player before starting another.
+  Do not promise synchronized positions across unrelated provider players.
+- Distinguish a medium (audio/video/text) from a delivery source (verified BNR
+  media, YouTube, or an artist-supplied external service). Keep the small
+  chooser readable; protocol names belong in available storage details.
+  A YouTube video retains its visible native video player and controls.
+- Offer only real, available sources. Empty ANT/AR receipts stay development
+  status, not selectable playback providers. No third-party player or media
+  request starts just because a visitor arrived or changed skins. External
+  app playback has its own account and controls; BNR cannot promise to pause it.
+- Keep the same credits and artwork association across media choices. Copies
+  of identical bytes on ANT and AR share a digest; separate encodings or video
+  editions need their own measured digests and an explicit relationship to the
+  original. This remains an artist release, not an automatic provider swap.
+
+The existing kandi iframe sets `strict-origin-when-cross-origin`, matching
+[YouTube's embedded-client guidance](https://developers.google.com/youtube/terms/required-minimum-functionality#api-client-identity-and-credentials).
+That guidance requires Referer/client identification and describes WebView
+differences. The [IFrame API error reference](https://developers.google.com/youtube/iframe_api_reference#onError)
+separately identifies missing client identity (153) and embedding disabled by
+the owner (101/150). No such code was captured in our failing embed, so neither
+cause is established. A normal public HTTPS page with valid referrer identity
+is a useful next test; DNS alone cannot prove or guarantee playback. Keep the
+external YouTube listening option available and report the actual hosted test
+result before closing #32's embed limitation. No hosting or production change
+was made for this direction update.
