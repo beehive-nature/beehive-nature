@@ -49,6 +49,24 @@
     @media(max-width:600px){#bregbar{gap:4px;padding:8px 10px}#bregbar [data-register-host]{flex:1 1 100%}#bregctl{gap:4px}#bregctl button{padding:8px;font-size:.875rem}}
     @media(forced-colors:active){#bregctl button[aria-pressed="true"]{outline:2px solid Highlight;outline-offset:-3px}}
 
+    /* Shared wayfinding for the five connected first-click experiences. */
+    [data-experience-nav]{display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;max-width:1440px;margin:0 auto;padding:0 clamp(14px,3vw,40px) 12px;border:0;font:1rem/1.5 system-ui,-apple-system,'Segoe UI',sans-serif}
+    [data-experience-nav] a{display:inline-flex;align-items:center;min-height:44px;padding:8px 12px;border:1px solid transparent;border-radius:8px;color:inherit;text-decoration:none;font:inherit;letter-spacing:normal;text-transform:none}
+    [data-experience-nav] a[aria-current="page"]{border-color:currentColor;font-weight:650;text-decoration:underline;text-underline-offset:5px}
+    [data-experience-nav] a:hover{text-decoration:underline;text-underline-offset:5px}
+    [data-experience-nav] a:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+    body[data-reg="cypherpunk"] [data-experience-nav]{font-family:ui-monospace,Consolas,monospace;font-size:.875rem}
+    body[data-reg="raver"] [data-experience-nav] a{border-radius:99px}
+    body[data-experience] #tbar{background:var(--bg,#0e1b19)!important;border-color:var(--line,#42574a)!important;font:500 .875rem/1.4 system-ui,sans-serif!important}
+    body[data-experience] #tbar a{color:var(--ink,#e9f2ec)!important;min-height:44px!important;box-shadow:none!important;background:transparent!important}
+    body[data-experience] #tbar a[aria-current="page"]{font-weight:700;text-decoration:underline!important;text-underline-offset:4px}
+    body[data-experience] #tbarMore{background:var(--panel,#0e1b19)!important;color:var(--ink,#e9f2ec)!important;border-color:var(--line,#42574a)!important;min-width:44px!important;min-height:44px!important;font-size:1rem!important}
+    body[data-experience][data-reg="bee"] #tbar,body[data-experience][data-reg="bee"] #tbarMore{background:#f6f7f2!important;color:#18362a!important;border-color:#ccd7cf!important}
+    body[data-experience][data-reg="bee"] #tbar a{color:#18362a!important}
+    body[data-experience] #tbar :is(a,button):focus-visible,body[data-experience] #tbarMore:focus-visible{outline:3px solid currentColor!important;outline-offset:-3px}
+    body[data-experience] [data-view]{display:none}
+    body[data-experience][data-reg="bee"] [data-view="bee"],body[data-experience][data-reg="raver"] [data-view="raver"],body[data-experience][data-reg="cypherpunk"] [data-view="cypherpunk"]{display:revert}
+
     /* New bee's page canvas. Neutral aliases bridge the older page families;
        categorical/semantic tokens, charts, images and canvas paint stay owned
        by their page. The hub already has its approved custom treatment. */
@@ -110,6 +128,11 @@
   function mount(){
     if(document.getElementById('bregctl')) return;
     var host=document.querySelector('[data-register-host]');
+    var experienceNav=document.querySelector('[data-experience-nav]');
+    if(experienceNav&&!experienceNav.children.length){
+      var stops=[['home','index.html','social.arrival.home','Home'],['gallery','blight/gallery.html','experience.gallery','Art gallery'],['music','blight/studio-music.html','experience.music','Music studio'],['directory','buzz-directory.html','social.arrival.hive','Meet the hive'],['profile','profile.html','experience.profile','People and names']];
+      stops.forEach(function(stop){var a=document.createElement('a');a.href=new URL(stop[1],home).href;a.setAttribute('data-i18n',stop[2]);a.textContent=stop[3];if(document.body.getAttribute('data-experience')===stop[0])a.setAttribute('aria-current','page');experienceNav.appendChild(a);});
+    }
     /* Migrate complete page families, not arbitrary dark widgets. A dark
        chart + its palette/HUD is one unit. Pending tools keep that unit until
        their adapter is reviewed. New pages can opt into the shared contract;

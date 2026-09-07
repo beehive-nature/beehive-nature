@@ -94,6 +94,9 @@ if(typeof document!=='undefined') (function(){
 
   function pref(){ try{ var v=localStorage.getItem('blang');
     return LANGS.some(function(L){return L[0]===v})?v:'en'; }catch(e){ return 'en'; } }
+  // Dynamic control labels use the same corpus and saved language as static text.
+  // Missing renderings keep their explicit English fallback; no attestation implied.
+  window.BNRLanguage={text:function(key,fallback){var c=pref(),row=corpus&&corpus.strings[key];return c!=='en'&&row&&typeof row[c]==='string'&&row[c].trim()?row[c]:fallback;}};
   function setPref(c){
     try{ localStorage.setItem('blang',c); }catch(e){}
     /* additive mirror into the tri-role language schema, so corpus surfaces can read
@@ -186,7 +189,7 @@ if(typeof document!=='undefined') (function(){
   }
   function load(cb){
     if(corpus) return cb();
-    fetch(R+'lang-corpus.json?v=14').then(function(r){return r.json()})
+    fetch(R+'lang-corpus.json?v=15').then(function(r){return r.json()})
       .then(function(j){ corpus=j;
         /* the withdrawal law reaches the renderer: a withdrawn tongue stops rendering
            estate-wide (history kept in the corpus file); its picker entry says so. */

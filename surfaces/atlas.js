@@ -54,17 +54,37 @@
   window.addEventListener('hashchange',revealHash);
   // Translated text also becomes searchable, without rewriting the corpus.
   new MutationObserver(apply).observe(document.getElementById('list'),{subtree:true,characterData:true,childList:true});
+function restoreVisibleFocus(focus){
+ if(!focus?.isConnected)return;let target=focus;
+ for(let node=focus.parentElement;node;node=node.parentElement)if(node.tagName==='DETAILS'&&!node.open)target=node.querySelector('summary');
+ target?.focus({preventScroll:true});
+}
+  let lastReading=null;
+  const readingChoices=new Map();
+  function labelFamilies(){
+    [...family.options].filter(o=>o.value).forEach(o=>{
+      const gloss=window.BNRLanguage?.text('hub.gl.'+o.value,o.dataset.familyGloss)||o.dataset.familyGloss;
+      o.textContent=lastReading==='cypherpunk'?o.value+' · '+gloss:gloss;
+    });
+  }
   function applyReading(event) {
     const reading = event?.detail?.reg || document.body.dataset.reg || 'bee';
-    // The same details remain available in every reading. The engineering
-    // view opens the evidence; switching back restores the compact view.
-    document.querySelectorAll('.row-trace,.architecture').forEach(details => { details.open = reading === 'cypherpunk'; });
+    if(reading===lastReading)return;
+    const focus=document.activeElement;
+    const details=[collection,...document.querySelectorAll('.row-trace,.architecture')];
+    if(lastReading)readingChoices.set(lastReading,details.map(d=>d.open));
+    const previous=readingChoices.get(reading);
+    details.forEach((d,i)=>d.open=previous?previous[i]:d===collection?reading!=='bee':reading==='cypherpunk');
+    document.getElementById(reading==='cypherpunk'?'technical-search-slot':'search-origin').appendChild(form);
     // Keep an active search or a linked section visible when changing skins.
-    collection.open = reading !== 'bee' || Boolean(q.value || family.value) || /^#(?:explore$|fam-|org-)/.test(location.hash);
+    if(q.value||family.value||/^#(?:explore$|fam-|org-)/.test(location.hash))collection.open=true;
+    restoreVisibleFocus(focus);
     const theme = document.querySelector('meta[name="theme-color"]');
     if (theme) theme.content = reading === 'bee' ? '#f6f7f2' : '#06110c';
+    lastReading=reading;labelFamilies();
   }
   document.addEventListener('bregister',applyReading);
+  document.addEventListener('blang',labelFamilies);
   applyReading();
   revealHash();
   const modeBar=document.querySelector('.mode-bar');

@@ -71,7 +71,7 @@ test('the founder masthead is copied byte for byte, including its CSS block', ()
   assert.ok(html.includes(doors.slice(start,end+1).map(l=>'  '+l.trim()).join('\n')));
 });
 test('the collection is a native disclosure and all destinations survive without JS', () => {
-  assert.match(html,/<body data-reg="bee">/);
+  assert.match(html,/<body data-reg="bee" data-experience="home">/);
   assert.match(html,/<details class="collection" id="collection"><summary>/);
   assert.equal((html.match(/data-register-host/g)||[]).length,1);
   const staticPart=html.split('<!--ATLAS-STATIC-START-->')[1].split('<!--ATLAS-STATIC-END-->')[0];

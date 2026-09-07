@@ -39,7 +39,7 @@
   b.innerHTML=L.map(function(x){
     if(x==='—')return '<span class="tsep" style="align-self:stretch;width:1px;background:#333;margin:0 4px;flex-shrink:0"></span>';
     var h=(R+x[1])===location.pathname.replace(/index.html$/,'');
-    return '<a href="'+R+x[1]+'" style="color:'+(h?'#6f6':'#888')+';background:'+(h?'#16241d':'transparent')+';box-shadow:'+(h?'inset 0 0 0 1px #2b4a3b':'none')+';border-radius:6px;text-decoration:none;padding:6px 9px;min-height:32px;display:inline-flex;align-items:center;flex-shrink:0">'+x[0]+'</a>';
+    return '<a'+(h?' aria-current="page"':'')+' href="'+R+x[1]+'" style="color:'+(h?'#6f6':'#888')+';background:'+(h?'#16241d':'transparent')+';box-shadow:'+(h?'inset 0 0 0 1px #2b4a3b':'none')+';border-radius:6px;text-decoration:none;padding:6px 9px;min-height:32px;display:inline-flex;align-items:center;flex-shrink:0">'+x[0]+'</a>';
   }).join('');
   if(inlineHost){
     b.style.cssText='display:flex;flex-wrap:wrap;gap:8px;padding:16px 0;font:14px/1.5 system-ui,sans-serif';
@@ -56,7 +56,7 @@
   /* MOBILE-FIRST: if the strip cannot fit, the grid is the DEFAULT, not a tap away.
      All 39 land on screen at 390px; the toggle then COLLAPSES to the strip. */
   var open=null;
-  function seatToggle(){ tg.style.bottom=Math.max(7,Math.round((b.getBoundingClientRect().height-32)/2))+'px'; }
+  function seatToggle(){ tg.style.bottom=Math.max(7,Math.round((b.getBoundingClientRect().height-(tg.getBoundingClientRect().height||32))/2))+'px'; }
   function overflowing(){ return b.scrollWidth>b.clientWidth+2; }
   function apply(){
     if(inlineHost){ tg.style.display='none'; return; }
@@ -109,6 +109,7 @@
   }
   if(!inlineHost) document.body.style.paddingBottom='69px'; /* fail-safe before measurement */
   fitPad();
+  document.addEventListener('bregister',function(){sync();fitPad();});
   setTimeout(fitPad,500);   /* after register/lang/rails mount into the bar */
   setTimeout(fitPad,1500);
   addEventListener('resize',fitPad);
@@ -133,14 +134,14 @@
   function loadLanguage(){
     if(document.getElementById('blangctl')) return;
     var s2=document.createElement('script');
-    s2.src=R+'lang.js?v=22';
+    s2.src=R+'lang.js?v=23';
     document.body.appendChild(s2);
   }
   /* Mount view labels before language scans them. Independent async loads
      could otherwise leave the newly inserted buttons in English. */
   if(!document.getElementById('bregctl')){
     var s=document.createElement('script');
-    s.src=R+'register.js?v=8';
+    s.src=R+'register.js?v=9';
     s.onload=loadLanguage; s.onerror=loadLanguage;
     document.body.appendChild(s);
   }else loadLanguage();

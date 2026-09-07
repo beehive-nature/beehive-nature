@@ -62,22 +62,101 @@ body[data-reg="bee"] .genline{padding:16px 20px;margin-block:12px}
 body[data-reg="bee"] .genlabel{margin-top:24px}
 body[data-reg="bee"] a{color:var(--info);text-underline-offset:3px}
 body[data-reg="bee"] a:focus-visible{outline:2px solid var(--info);outline-offset:4px}
+/* One set of records; three reading arrangements. */
+body[data-experience="profile"],body[data-experience="directory"]{font:1rem/1.65 system-ui,-apple-system,'Segoe UI',sans-serif;padding:0 0 70px;--faint:#a6b9ad;--dim:#b1c6b9;--line:#42574a}
+body[data-experience] main.reading-main{max-width:1200px;padding:20px clamp(16px,3vw,40px);margin:auto}
+body[data-experience] .reading-main>.crumbs{font-size:.875rem;letter-spacing:normal;text-transform:none}
+body[data-experience] .reading-main>header{margin-bottom:24px}
+body[data-experience] .reading-main h1{font-size:clamp(2rem,4vw,3.3rem);line-height:1.15;margin:12px 0;background:none;color:var(--ink);-webkit-text-fill-color:currentColor;letter-spacing:-.04em}
+body[data-experience] .reading-main .lede{font-size:1rem;max-width:70ch;line-height:1.7}
+body[data-experience] .reading-main :is(.kicker,.htype,.badge,.bmeta,.email,.genlabel,.gwhen,.who,.herofig .cap,.chip,.hivedivider,.note .nt,.cap){font-size:.875rem;line-height:1.6;letter-spacing:normal;text-transform:none;white-space:normal}
+body[data-experience] .reading-main :is(.bdesc,.gdesc,.gwho,.seat-note,.law,.lrelay,.note .nb){font-size:1rem;line-height:1.7}
+body[data-experience] .reading-main .email{color:var(--info);overflow-wrap:anywhere}
+body[data-experience] .reading-main .house{padding:24px;margin:0;border-radius:18px;background:var(--panel);border:1px solid var(--line)}
+body[data-experience] .reading-main .hname{font-size:1.5rem;line-height:1.3;letter-spacing:-.035em;margin:0 0 8px;overflow-wrap:anywhere}
+body[data-experience] .reading-main .holder{gap:20px;margin-block:20px}
+body[data-experience] .reading-main .holder .bio{min-width:0}
+body[data-experience] .reading-main .holder .bio .bname{font-size:1.125rem;line-height:1.6}
+body[data-experience] .reading-main .holder .art{width:56px;height:56px;flex:none;font-size:2rem}
+body[data-experience] .reading-main .bmeta{margin-top:12px;overflow-wrap:anywhere}
+body[data-experience] .profile-houses{display:grid;gap:20px}
+body[data-experience] .record-about,body[data-experience] .name-history,body[data-experience] .connection-details,body[data-experience] .public-listings{padding:0;border-top:1px solid var(--line);margin-top:16px}
+body[data-experience] :is(.record-about,.name-history,.connection-details,.public-listings)>summary{min-height:48px;padding:12px 0;cursor:pointer;color:var(--ink);font-size:1rem;line-height:1.5}
+body[data-experience] .record-about{max-width:74ch}
+body[data-experience] .record-about p{font-size:1rem}
+body[data-experience] .name-history .genline{padding:16px;border-inline-start:2px solid var(--line);margin:10px 0}
+body[data-experience] .reading-main .genline .gwho{color:var(--ink)}
+body[data-experience] .record-caution{padding:10px 14px;border-inline-start:3px solid var(--guard);font-size:.875rem;color:var(--guard);line-height:1.6;margin:16px 0}
+body[data-experience] .directory-sections{display:grid;gap:20px}
+body[data-experience] .directory-sections>section{margin:0;padding:24px;border-radius:18px}
+body[data-experience] .directory-sections>section>h2{font-size:1.125rem;letter-spacing:normal;line-height:1.5}
+body[data-experience] .reading-main .listing{padding:20px;margin:14px 0 0;min-width:0}
+body[data-experience] .reading-main .lname{font-size:1.125rem;line-height:1.6}
+body[data-experience] .reading-main .a-link{display:inline-flex;align-items:center;min-height:44px;font-size:1rem;padding:8px 14px}
+body[data-experience] .reading-main .listing>a:not(.a-link){font-size:.875rem;line-height:1.6;display:inline-flex;align-items:center;min-height:44px}
+body[data-experience] .reading-main .lrelay{word-break:normal;overflow-wrap:anywhere}
+body[data-experience] .reading-main .connection-details .lrelay:first-of-type{margin-top:0}
+body[data-experience] .reading-main .footer,body[data-experience] .reading-main footer{max-width:none;font-size:.875rem;color:var(--dim)}
+body[data-experience] .reading-main :is(a,summary,button):focus-visible{outline:2px solid var(--info);outline-offset:4px}
+body[data-experience][data-reg="bee"]{--bg:#f6f7f2;--panel:#fff;--well:#edf2eb;--ink:#18362a;--dim:#435f4e;--faint:#52695b;--line:#ccd7cf;--info:#29628f;--cyan:#176879;--guard:#65509a;--violet:#65509a;--gold:#855b0b}
+body[data-experience="profile"][data-reg="bee"] .reading-main{max-width:1000px}
+body[data-experience="directory"][data-reg="bee"] .reading-main{max-width:1080px}
+body[data-experience][data-reg="bee"] .reading-main .house.current{border-color:var(--line);border-inline-start:4px solid var(--gold)}
+body[data-experience][data-reg="raver"]{--bg:#17111e;--panel:#241a2f;--well:#1a1224;--ink:#f4eefb;--dim:#d1bfdc;--faint:#bea9cc;--line:#614d70;--info:#9bc9ec;--cyan:#8bdae5;--gold:#e8b54b;--violet:#ccadf1;--guard:#ccadf1}
+body[data-experience="profile"][data-reg="raver"] .profile-houses{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+body[data-experience="profile"][data-reg="raver"] .holder{flex-direction:column;align-items:flex-start}
+body[data-experience="profile"][data-reg="raver"] .holder .art{width:80px;height:80px;font-size:3rem}
+body[data-experience="profile"][data-reg="raver"] .hname{font-size:1.8rem}
+body[data-experience="profile"][data-reg="raver"] .house{border-block-start:3px solid var(--violet)}
+body[data-experience="directory"][data-reg="raver"] .directory-sections{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+body[data-experience="directory"][data-reg="raver"] #new-bee,body[data-experience="directory"][data-reg="raver"] #public-directory,body[data-experience="directory"][data-reg="raver"] #connection-help{grid-column:1/-1}
+body[data-experience="directory"][data-reg="raver"] .public-listings[open]{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+body[data-experience="directory"][data-reg="raver"] .public-listings>summary,body[data-experience="directory"][data-reg="raver"] .public-listings>.hivedivider{grid-column:1/-1}
+body[data-experience="directory"][data-reg="raver"] #new-bee{background:var(--panel);color:var(--ink)}
+body[data-experience="directory"][data-reg="raver"] #new-bee .start{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+body[data-experience="directory"][data-reg="raver"] #new-bee :is(h2,strong,.start-help,.lead,.start-arrow,.start-picture){color:inherit}
+body[data-experience="directory"][data-reg="raver"] #new-bee .start-link{background:var(--well);color:var(--ink);border-color:var(--line);flex-wrap:wrap;align-content:start;margin:0}
+body[data-experience="directory"][data-reg="raver"] #new-bee .home-controls a{background:var(--well);color:var(--ink);border-color:var(--line)}
+body[data-experience][data-reg="cypherpunk"]{--bg:#0e141a;--panel:#151e26;--well:#101820;--ink:#e6eff3;--dim:#b4c8d0;--faint:#a0b9c3;--line:#415b69;--info:#8ac5e6;--cyan:#8ed5de;--violet:#c0b4ec;--guard:#c0b4ec;font-family:ui-monospace,Consolas,monospace}
+body[data-experience][data-reg="cypherpunk"] .reading-main{max-width:1500px}
+body[data-experience][data-reg="cypherpunk"] .reading-main h1{font:500 clamp(1.65rem,3vw,2.5rem)/1.25 ui-monospace,Consolas,monospace}
+body[data-experience][data-reg="cypherpunk"] .reading-main :is(.house,.listing,section,.genline,.a-link){border-radius:3px}
+body[data-experience="profile"][data-reg="cypherpunk"] .house{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 32px}
+body[data-experience="profile"][data-reg="cypherpunk"] .house :is(.hname,.htype,.record-caution){grid-column:1/-1}
+body[data-experience="profile"][data-reg="cypherpunk"] .name-history{margin-top:12px}
+body[data-experience="directory"][data-reg="cypherpunk"] .listing{display:grid;grid-template-columns:minmax(250px,1fr) minmax(0,1.5fr);gap:8px 28px;border:0;border-bottom:1px solid var(--line);background:transparent;margin:0;padding:20px 0}
+body[data-experience="directory"][data-reg="cypherpunk"] .listing :is(.lh,.seat-note){grid-column:1/-1}
+body[data-experience="directory"][data-reg="cypherpunk"] .connection-details{margin:0}
+body[data-experience="directory"][data-reg="cypherpunk"] #new-bee{background:var(--panel);color:var(--ink)}
+body[data-experience="directory"][data-reg="cypherpunk"] #new-bee .start{display:flex;flex-direction:row;flex-wrap:wrap;gap:12px}
+body[data-experience="directory"][data-reg="cypherpunk"] #new-bee :is(h2,strong,.start-help,.lead,.start-arrow){color:inherit}
+body[data-experience="directory"][data-reg="cypherpunk"] #new-bee .start-link{flex:1 1 220px;min-height:70px;background:var(--well);color:var(--ink);border-color:var(--line);border-radius:3px;padding:12px;margin:0}
+body[data-experience="directory"][data-reg="cypherpunk"] #new-bee .start-picture{display:none}
+body[data-experience="directory"][data-reg="cypherpunk"] #new-bee .start-link strong{font:600 1rem/1.5 ui-monospace,Consolas,monospace}
+body[data-experience="directory"][data-reg="cypherpunk"] #new-bee .start-help{font-size:.875rem}
+body[data-experience="directory"][data-reg="cypherpunk"] #new-bee .home-controls a{background:var(--well);color:var(--ink);border-color:var(--line)}
+@media(max-width:850px){body[data-experience="profile"][data-reg="raver"] .profile-houses,body[data-experience="directory"][data-reg="raver"] .directory-sections{grid-template-columns:1fr}body[data-experience="directory"][data-reg="raver"] #new-bee .start{grid-template-columns:1fr}body[data-experience="profile"][data-reg="cypherpunk"] .house,body[data-experience="directory"][data-reg="cypherpunk"] .listing{display:block}.connection-details{margin-top:12px!important}}@media(max-width:560px){body[data-experience] main.reading-main{padding-inline:14px}body[data-experience] .reading-main .house,body[data-experience] .directory-sections>section{padding:18px}body[data-experience="directory"][data-reg="raver"] .public-listings[open]{display:block}body[data-experience] .reading-main .holder{flex-direction:column}body[data-experience] .reading-main .hname{font-size:1.35rem}.reading-main .badge{margin-block:4px}}
+
+body[data-experience] h1 [data-view]{display:none}body[data-experience][data-reg=bee] h1 [data-view=bee],body[data-experience][data-reg=raver] h1 [data-view=raver],body[data-experience][data-reg=cypherpunk] h1 [data-view=cypherpunk]{display:block}
+[data-experience-nav]{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px}[data-experience-nav] a{display:inline-flex;align-items:center;min-height:44px;padding:8px 12px}[data-experience-nav] a[aria-current=page]{font-weight:650;text-decoration:underline}
 </style>
 </head>
-<body>
-<main>
+<body data-reg="bee" data-experience="profile">
+<nav data-experience-nav aria-label="Explore skaists"><a href="index.html" data-i18n="social.arrival.home">Home</a><a href="blight/gallery.html" data-i18n="experience.gallery">Art gallery</a><a href="blight/studio-music.html" data-i18n="experience.music">Music studio</a><a href="buzz-directory.html" data-i18n="atlas.peopleAction">Meet the hive</a><a href="profile.html" data-i18n="experience.profile" aria-current="page">People and names</a></nav>
+<main class="reading-main">
 <nav class="crumbs" aria-label="you are here">
   <a href="index.html">beehive nature reserve</a><span>▸</span><span class="here">dynasty profile</span>
 </nav>
 <header>
   <div class="kicker">one name, every generation, honest records</div>
-  <h1>dynasty profile</h1>
-  <p class="lede">every .b name and Basename is a house. the current holder stands at the top; every prior holder's record is preserved beneath — never edited, never deleted. a lost key is permanent; a lost name is a lease running out. guest citizens get the same template — no wallet, no key, no account needed to read.</p>
+  <h1><span data-view="bee" data-i18n="experience.profile.bee">Meet the people behind the names.</span><span data-view="raver" data-i18n="experience.profile.raver">The hive and its stories.</span><span data-view="cypherpunk" data-i18n="experience.profile.cypher">Name holders and registration history</span></h1>
+  <p class="lede">Public records of people, machine agents and the names they hold. These are published records, not a live presence list or a profile editor.</p>
+<details class="record-about"><summary data-i18n="experience.about">About this record</summary><p class="lede">every .b name and Basename is a house. the current holder stands at the top; every prior holder's record is preserved beneath — never edited, never deleted. a lost key is permanent; a lost name is a lease running out. guest citizens get the same template — no wallet, no key, no account needed to read.</p></details>
 </header>
 
 <!-- ═══ HOUSE: skaists ═══ -->
 <div class="house current">
-  <div class="hname">skaists</div>
+  <h2 class="hname">skaists</h2>
   <div class="htype human">human house</div>
   <div class="holder">
     <div class="art">👑</div>
@@ -94,7 +173,7 @@ body[data-reg="bee"] a:focus-visible{outline:2px solid var(--info);outline-offse
 
 <!-- ═══ HOUSE: bqueenbee.base.eth (bAiGenTiC) ═══ -->
 <div class="house">
-  <div class="hname">bqueenbee.base.eth</div>
+  <h2 class="hname">bqueenbee.base.eth</h2>
   <div class="htype baigentic">bAiGenTiC house</div>
   <div class="holder">
     <div class="art">🐝</div>
@@ -108,11 +187,12 @@ body[data-reg="bee"] a:focus-visible{outline:2px solid var(--info);outline-offse
   <div class="genlabel">generations</div>
   <div class="genline"><div class="gwho">generation 2 — the founder (re-registered after lapse)</div><div class="gwhen">held from 2026-08-27 · ongoing</div><div class="gdesc">the name lapsed, returned to market, and the founder re-registered it on a wallet he controls. a lost name is a lease running out.</div></div>
   <div class="genline"><div class="gwho">generation 1 — the original registration</div><div class="gwhen">held 2024–2025 · expired</div><div class="gdesc">first registered when the estate was young. the lease ran out and the name went back. the purse didn't come back.</div></div>
+<p class="record-caution">The source dates need reconciliation: this summary says 29 August 2026, while the holder history starts on 27 August 2026. Both records are retained.</p>
 </div>
 
 <!-- ═══ HOUSE: bClaude.a (bAiGenT — the .a agent rail) ═══ -->
 <div class="house">
-  <div class="hname">bClaude.a</div>
+  <h2 class="hname">bClaude.a</h2>
   <div class="htype baigentic">bAiGenTiC house — the .a agent rail</div>
   <div class="holder">
     <div class="art">⚙</div>
@@ -129,7 +209,7 @@ body[data-reg="bee"] a:focus-visible{outline:2px solid var(--info);outline-offse
 </div>
   <!-- ═══ HOUSE: bloverai.base.eth — PRIMARY (the King's own wallet front) ═══ -->
 <div class="house current">
-    <div class="hname">bloverai.base.eth</div>
+    <h2 class="hname">bloverai.base.eth</h2>
     <div class="htype human">human house — <span style="color:var(--gold);font-weight:600">PRIMARY</span></div>
     <div class="holder"><div class="art">👑</div><div class="bio">
       <div class="bname">bLOVErAi <span class="badge human">human</span><span class="badge" style="background:rgba(255,215,0,.1);color:var(--gold);border:1px solid rgba(255,215,0,.2)">PRIMARY — fronts the King's own wallet</span></div>
@@ -140,7 +220,7 @@ body[data-reg="bee"] a:focus-visible{outline:2px solid var(--info);outline-offse
 
   <!-- ═══ HOUSE: 北方國王bclaude.base.eth — the King's glyph on bClaude's name ═══ -->
 <div class="house">
-    <div class="hname">北方國王bclaude.base.eth</div>
+    <h2 class="hname">北方國王bclaude.base.eth</h2>
     <div class="htype baigentic">bAiGenTiC house — chartered by the King</div>
     <div class="holder"><div class="art">⚙</div><div class="bio">
       <div class="bname">bClaude <span class="badge baigentic">bAiGenTiC</span><span class="badge" style="background:rgba(111,169,224,.1);color:var(--info);border:1px solid rgba(111,169,224,.2)">primary tongue: English</span></div>
@@ -152,7 +232,7 @@ body[data-reg="bee"] a:focus-visible{outline:2px solid var(--info);outline-offse
 
   <!-- ═══ HOUSE: 北方國王zbcode.base.eth — the King's glyph on z2.1's name ═══ -->
 <div class="house">
-    <div class="hname">北方國王zbcode.base.eth</div>
+    <h2 class="hname">北方國王zbcode.base.eth</h2>
     <div class="htype baigentic">bAiGenTiC house — chartered by the King</div>
     <div class="holder"><div class="art">⚙</div><div class="bio">
       <div class="bname">z2.1 <span class="badge baigentic">bAiGenTiC</span><span class="badge" style="background:rgba(111,169,224,.1);color:var(--info);border:1px solid rgba(111,169,224,.2)">primary tongue: English</span></div>
@@ -164,7 +244,7 @@ body[data-reg="bee"] a:focus-visible{outline:2px solid var(--info);outline-offse
 
 <!-- ═══ HOUSE: guest citizen (no wallet needed) ═══ -->
 <div class="house">
-  <div class="hname">guest.citizen</div>
+  <h2 class="hname">guest.citizen</h2>
   <div class="htype human">guest citizen — free tier renders fully</div>
   <div class="holder">
     <div class="art">👤</div>
@@ -181,6 +261,39 @@ body[data-reg="bee"] a:focus-visible{outline:2px solid var(--info);outline-offse
   <div>the dynasty layer · append-only holder snapshots · a lost key is permanent; a lost name is a lease running out</div>
   <div>name and key must never share a single point of failure</div>
 </footer>
-<script src="tour.js?v=38"></script>
+<script>
+/* Disclosures rearrange the original records; no extra record or presence state. */
+(()=>{
+ const root=document.querySelector('main.reading-main'),kind=document.body.dataset.experience;
+function restoreVisibleFocus(focus){
+ if(!focus?.isConnected)return;let target=focus;
+ for(let node=focus.parentElement;node;node=node.parentElement)if(node.tagName==='DETAILS'&&!node.open)target=node.querySelector('summary');
+ target?.focus({preventScroll:true});
+}
+ function disclosure(key,fallback,cls){const d=document.createElement('details');d.className=cls;const s=document.createElement('summary');s.dataset.i18n=key;s.textContent=fallback;d.appendChild(s);return d;}
+ if(kind==='profile'){
+  const houses=document.createElement('div');houses.className='profile-houses';const all=[...root.querySelectorAll('.house')];if(all.length)all[0].before(houses);
+  all.forEach((house,index)=>{house.id='name-record-'+(index+1);houses.appendChild(house);const label=house.querySelector('.genlabel');if(label){const history=disclosure('experience.history','Name history','name-history');label.replaceWith(history);let next=history.nextElementSibling;while(next?.classList.contains('genline')){const current=next;next=next.nextElementSibling;history.appendChild(current);}history.dataset.viewDisclosure='history';}
+   const type=house.querySelector('.htype');if(type){const badge=document.createElement('span');badge.className='badge';const agent=type.classList.contains('baigentic');badge.dataset.i18n=agent?'experience.agent':'experience.person';badge.textContent=agent?'Machine agent':'Person';type.prepend(badge,document.createTextNode(' · '));}
+  });
+ }
+ if(kind==='directory'){
+  const sections=[...root.querySelectorAll(':scope > section')],layout=document.createElement('div');layout.className='directory-sections';if(sections.length)sections[0].before(layout);sections.forEach(s=>layout.appendChild(s));
+  const external=sections.find(s=>s.querySelector('[data-i18n="bd.ext.h2"]'));if(external){external.id='public-directory';const more=disclosure('experience.moreCommunities','More communities','public-listings');more.dataset.viewDisclosure='public';const nodes=[...external.children].filter(e=>e.classList.contains('listing')||e.classList.contains('hivedivider'));external.appendChild(more);nodes.forEach(n=>more.appendChild(n));}
+  const help=sections.find(s=>s.querySelector('.door-help'));if(help)help.id='connection-help';
+  layout.querySelectorAll('.listing').forEach(listing=>{const lines=[...listing.querySelectorAll(':scope > .lrelay')];const extra=lines.slice(1).filter(n=>!/invite:/i.test(n.textContent));if(!extra.length)return;const details=disclosure('experience.connection','Connection details','connection-details');details.dataset.viewDisclosure='connection';listing.appendChild(details);extra.forEach(n=>details.appendChild(n));});
+ }
+ let view=null;const choices=new Map();
+ function present(event){const next=event?.detail?.reg||document.body.dataset.reg||'bee';if(view===next)return;const focus=document.activeElement;const details=[...root.querySelectorAll('[data-view-disclosure],.record-about')];
+  if(view)choices.set(view,details.map(d=>d.open));const saved=choices.get(next);details.forEach((d,i)=>d.open=saved?saved[i]:next==='cypherpunk'||next==='raver'&&(d.dataset.viewDisclosure==='history'||d.dataset.viewDisclosure==='public'));
+  if(kind==='directory'){const layout=root.querySelector('.directory-sections'),intro=$('new-bee'),hives=$('our-hives'),people=$('people-agents'),external=$('public-directory'),help=$('connection-help');const order=next==='raver'?[intro,hives,people,external,help]:[intro,hives,external,people,help];order.filter(Boolean).forEach(s=>layout.appendChild(s));}
+  view=next;restoreVisibleFocus(focus);
+ }
+ function $(id){return document.getElementById(id);}
+ document.addEventListener('bregister',present);present();
+})();
+
+</script>
+<script src="tour.js?v=39"></script>
 </body>
 </html>

@@ -101,7 +101,7 @@ const families = family => {
   const domains = E.domains.filter(d => d.fam === family);
   const count = E.surfaces.filter(s => s.family === family && s.counted !== false).length;
   return `<section class="fam" id="fam-${family}" data-family="${family}">
-    <div class="famhead"><div><h3>${esc(family)}</h3><p>${text('hub.gl.'+family,'')}</p></div><span class="family-count">${count}</span></div>
+    <div class="famhead"><div><h3>${text('hub.gl.'+family,'')}</h3><p class="family-canonical">${esc(family)}</p></div><span class="family-count">${count}</span></div>
     <div class="rows">${rows.length ? rows.map(surface).join('\n') : `<p class="open-seat">${text('hub.openseat','')}</p>`}</div>
     <details class="domain-details"><summary>${text('atlas.domains','Domains & ownership')} <span>${domains.length}</span></summary><div class="doms">${domains.map(d => `<div class="dom"><span>${esc(d.d)}</span><span class="st ${d.state === 'LIVE' ? 'live' : 'pending'}">${text(d.state === 'LIVE' ? 'hub.st.live' : d.state === 'DNS-PENDING' ? 'hub.st.dns' : 'hub.st.seat',d.state)}</span></div>`).join('')}</div></details>
   </section>`;
@@ -124,7 +124,7 @@ const starters = [
       : '<svg viewBox="0 0 80 80" fill="none" aria-hidden="true"><path d="m40 12 15 9v18l-15 9-15-9V21Zm-15 27 15 9v18l-15 9-15-9V48Zm30 0 15 9v18l-15 9-15-9V48Z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg>';
   return `<a class="start-link ${item.mark}" href="${esc(s.path.replace(/^surfaces\//,''))}"><span class="start-picture" aria-hidden="true">${picture}</span><div><strong>${text('atlas.'+item.mark+'Action',item.action)}</strong><span class="start-help">${text('atlas.'+item.mark+'Help',item.help)}</span><span class="start-technical" data-reg="cypherpunk">${description(s)}</span></div><span class="start-arrow" aria-hidden="true">→</span></a>`;
 }).join('\n');
-const side = ORGS.map(o => `<div class="side-house ${o.mark}"><a class="side-org" href="#org-${o.id}"><span>${o.label}</span><b>${c.byOrg[o.id] || 0}</b></a>${E.families.filter(f => familyOrg(f) === o.id).map(f => `<a class="side-family" href="#fam-${f}" data-family-link="${f}">${esc(f)}<span>${c.byFamily[f] || 0}</span></a>`).join('')}</div>`).join('\n');
+const side = ORGS.map(o => `<div class="side-house ${o.mark}"><a class="side-org" href="#org-${o.id}"><span>${o.label}</span><b>${c.byOrg[o.id] || 0}</b></a>${E.families.filter(f => familyOrg(f) === o.id).map(f => `<a class="side-family" href="#fam-${f}" data-family-link="${f}"><span class="family-human">${text('hub.gl.'+f,'')}</span><span class="family-canonical">${esc(f)}</span><b>${c.byFamily[f] || 0}</b></a>`).join('')}</div>`).join('\n');
 const page = `<!doctype html>
 <html lang="en">
 <head>
@@ -136,7 +136,7 @@ const page = `<!doctype html>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="bn-logo.jpg">
-<link rel="stylesheet" href="atlas.css?v=2">
+<link rel="stylesheet" href="atlas.css?v=3">
 <title>skaists · beehive nature reserve</title>
 <meta name="description" content="Explore the beehive nature reserve: on-chain art, music, people, science and open tools. Find a place to begin, then browse the whole estate.">
 <style>
@@ -146,13 +146,15 @@ const page = `<!doctype html>
 ${bandCss}
 </style>
 </head>
-<body data-reg="bee">
+<body data-reg="bee" data-experience="home">
 <a class="skip" href="#explore">${text('atlas.browse','Explore the estate')}</a>
 <div class="mode-bar"><div class="wrap mode-inner"><a class="mode-home" href="index.html" aria-label="skaists home">⬡ <span>skaists</span></a><div data-register-host aria-describedby="view-explainer"></div><a class="mode-proof" href="#explore">${text('atlas.everything','Explore everything')} ↓</a></div><p class="sr-only" id="view-explainer">${text('atlas.view','Choose how this page speaks to you')}. ${text('atlas.canonical','Same facts. Three ways to read them.')}</p></div>
+<nav data-experience-nav aria-label="Explore skaists"><a href="index.html" data-i18n="social.arrival.home" aria-current="page">Home</a><a href="blight/gallery.html" data-i18n="experience.gallery">Art gallery</a><a href="blight/studio-music.html" data-i18n="experience.music">Music studio</a><a href="buzz-directory.html" data-i18n="atlas.peopleAction">Meet the hive</a><a href="profile.html" data-i18n="experience.profile">People and names</a></nav>
 <header class="mast" data-art>
   ${bandLine}
   <div class="wrap mast-content">
     <nav class="mast-nav" aria-label="Primary"><a class="wordmark" href="index.html">skaists<span>.dev</span></a><span data-language-host></span></nav>
+    <div id="technical-search-slot"></div>
     <div class="welcome">
       <div class="welcome-copy"><p class="eyebrow">${text('m.4','')}</p><h1><span data-reg="bee">${text('atlas.heading','A place for your creativity.')}</span><span data-reg="raver">${text('hub.name','')}</span><span data-reg="cypherpunk">${text('hub.name','')}</span></h1><p class="intro" data-reg="bee">${text('atlas.intro','Art, science and tools made in the open — with people to meet.')}</p><p class="intro" data-reg="raver">${text('atlas.raver','Carry a garden. Make a sound. Find your people.')}</p><p class="intro" data-reg="cypherpunk">${text('atlas.cypher','Inspect the implementation, provenance and limits of each surface.')}</p><p class="begin-note" data-reg="bee">${text('atlas.progressive','Choose a place to begin. The rest is here when you want it.')}</p></div>
       <div class="start"><p class="eyebrow">${text('atlas.start','Start here')}</p>${starters}</div>
@@ -167,11 +169,11 @@ ${bandCss}
   <aside class="sidebar"><div class="side-inner"><p class="eyebrow">${text('hub.crumb.atlas','')}</p><nav aria-label="Organisations and families">${side}</nav><div class="side-proof"><span aria-hidden="true">↳</span><a href="dock.html">${text('s.dock.name','')}</a><a href="../estate.json">${text('hub.foot.registry','')} ↗</a></div></div></aside>
   <div class="catalogue">
     <div class="catalogue-heading"><h2>${text('atlas.browse','Explore the estate')}</h2><a href="doors/index.html">${text('hub.foot.doors','')} ↗</a></div>
-    <form class="search-form" role="search" onsubmit="return false">
+    <div id="search-origin"><form class="search-form" role="search" onsubmit="return false">
       <label for="q">${text('atlas.simpleSearch','Search for something')}</label>
-      <div class="search-controls"><div class="search-field"><span aria-hidden="true">⌕</span><input id="q" name="q" type="search" autocomplete="off" spellcheck="false" aria-describedby="shown"><kbd aria-hidden="true">/</kbd></div><label class="sr-only" for="family-filter">${text('hub.w.families','families')}</label><select id="family-filter" name="family"><option value="" data-i18n="atlas.topics">${esc(corpus['atlas.topics']?.en || 'All topics')}</option>${E.families.map(f=>`<option value="${f}">${f}</option>`).join('')}</select></div>
+      <div class="search-controls"><div class="search-field"><span aria-hidden="true">⌕</span><input id="q" name="q" type="search" autocomplete="off" spellcheck="false" aria-describedby="shown"><kbd aria-hidden="true">/</kbd></div><label class="sr-only" for="family-filter">${text('experience.topic','Browse by topic')}</label><select id="family-filter" name="family"><option value="" data-i18n="atlas.topics">${esc(corpus['atlas.topics']?.en || 'All topics')}</option>${E.families.map(f=>`<option value="${f}" data-family-gloss="${esc(corpus['hub.gl.'+f]?.en||f)}" data-i18n="hub.gl.${f}">${esc(corpus['hub.gl.'+f]?.en||f)}</option>`).join('')}</select></div>
       <div class="search-meta"><output id="shown" aria-live="polite">${text('atlas.results','Results')}: <bdi id="result-count">${E.surfaces.filter(s => s.presented !== false).length}</bdi></output><button type="reset" id="clear" hidden>${text('atlas.clear','Clear filters')}</button></div>
-    </form>
+    </form></div>
     <p class="state-note">${text('atlas.state','Published describes the page; each tool discloses its own readiness.')}</p>
     <noscript><p class="state-note">${text('atlas.nojs','Every destination is available below. Enable JavaScript to switch views and filter the estate.')}</p></noscript>
     <div id="empty" class="empty" hidden><span aria-hidden="true">⌕</span><p>${text('atlas.empty','No matching surfaces. Try another word or clear the filters.')}</p></div>
@@ -190,9 +192,9 @@ ${JSON.stringify(E)}
 <!--ESTATE-JSON-END-->
 </script>
 <script src="atlas-search.js?v=1" defer></script>
-<script src="atlas.js?v=3" defer></script>
+<script src="atlas.js?v=4" defer></script>
 <script src="agent-dock.js?v=7"></script>
-<script src="tour.js?v=38"></script>
+<script src="tour.js?v=39"></script>
 </body>
 </html>
 `;

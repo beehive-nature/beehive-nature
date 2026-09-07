@@ -8,7 +8,7 @@ import {listSurfacesOnDisk} from '../scripts/surface-count.mjs';
 const root=resolve(import.meta.dirname,'..');
 const read=p=>readFileSync(resolve(root,p),'utf8');
 const source=read('surfaces/register.js');
-function page({saved=null,denied=false,host=false,loading=false,display='block',direction='row',theme=null,url='https://skaists.dev/surfaces/profile.html',script='https://skaists.dev/surfaces/register.js?v=8'}={}){
+function page({saved=null,denied=false,host=false,loading=false,display='block',direction='row',theme=null,url='https://skaists.dev/surfaces/profile.html',script='https://skaists.dev/surfaces/register.js?v=9'}={}){
   const ids=new Map(), events={}, docEvents={}, storage=new Map();
   if(saved!==null) storage.set('bregister',saved);
   const on=(map,k,fn)=>(map[k]??=[]).push(fn);
@@ -88,7 +88,7 @@ test('native buttons cannot submit a surrounding form; labels use existing corpu
 });
 test('home resolves beside the loader on custom and GitHub project origins',()=>{
   for(const prefix of ['https://skaists.dev/surfaces/','https://beehive-nature.github.io/beehive-nature/surfaces/']){
-    const p=page({script:prefix+'register.js?v=8'});assert.equal(p.ids.get('bregbar').children[0].href,prefix+'index.html');
+    const p=page({script:prefix+'register.js?v=9'});assert.equal(p.ids.get('bregbar').children[0].href,prefix+'index.html');
   }
 });
 test('bregister retains the established event payload for page presentations',()=>{
@@ -155,10 +155,10 @@ test('every current estate HTML has one resolvable shared loader; frozen art sta
     assert.equal(tags.length,1,p+' must load the shared shell once');
     const target=resolve(dirname(resolve(root,p)),tags[0][1].split('?')[0]);
     assert.equal(target,resolve(root,'surfaces/tour.js'),p+' must resolve to the shared tour');
-    if(p!=='surfaces/forge/orbit.html')assert.match(tags[0][1],/tour\.js\?v=38$/,p);
+    if(p!=='surfaces/forge/orbit.html')assert.match(tags[0][1],/tour\.js\?v=39$/,p);
   }
   for(const p of ['scripts/build-atlas.mjs','tools/build-surfaces.mjs']){
-    assert.match(read(p),/tour\.js\?v=38/);assert.doesNotMatch(read(p),/tour\.js\?v=(?!38\b)\d+/);
+    assert.match(read(p),/tour\.js\?v=39/);assert.doesNotMatch(read(p),/tour\.js\?v=(?!39\b)\d+/);
   }
 });
 test('tour language bootstrap waits for view labels, with a script-error fallback',()=>{
