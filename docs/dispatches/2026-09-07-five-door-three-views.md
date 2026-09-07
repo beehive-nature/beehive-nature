@@ -116,3 +116,11 @@ the release. No live collection completeness, live invite availability,
 native translation attestation or matriarch usability approval is claimed.
 The public PR/CI and issue #10 release receipt record publication separately;
 this source dispatch does not assert a deployment that has not happened.
+
+Committed-source verification: the first estate-source run reported
+`4 drifted: bd.ext.h2: two Englishes` because its markup scanner interpreted
+an inline JavaScript selector as a keyed HTML element. The selector now uses
+single-quoted attribute values, with the same DOM behavior. The next run
+passed **11/11**, including regeneration, 680 used keys and 799 corpus keys
+across the 28 translated languages. No wording or translation was weakened
+to satisfy the check.

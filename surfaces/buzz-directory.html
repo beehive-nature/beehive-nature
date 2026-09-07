@@ -373,7 +373,7 @@ function restoreVisibleFocus(focus){
  }
  if(kind==='directory'){
   const sections=[...root.querySelectorAll(':scope > section')],layout=document.createElement('div');layout.className='directory-sections';if(sections.length)sections[0].before(layout);sections.forEach(s=>layout.appendChild(s));
-  const external=sections.find(s=>s.querySelector('[data-i18n="bd.ext.h2"]'));if(external){external.id='public-directory';const more=disclosure('experience.moreCommunities','More communities','public-listings');more.dataset.viewDisclosure='public';const nodes=[...external.children].filter(e=>e.classList.contains('listing')||e.classList.contains('hivedivider'));external.appendChild(more);nodes.forEach(n=>more.appendChild(n));}
+  const external=sections.find(s=>s.querySelector("[data-i18n='bd.ext.h2']"));if(external){external.id='public-directory';const more=disclosure('experience.moreCommunities','More communities','public-listings');more.dataset.viewDisclosure='public';const nodes=[...external.children].filter(e=>e.classList.contains('listing')||e.classList.contains('hivedivider'));external.appendChild(more);nodes.forEach(n=>more.appendChild(n));}
   const help=sections.find(s=>s.querySelector('.door-help'));if(help)help.id='connection-help';
   layout.querySelectorAll('.listing').forEach(listing=>{const lines=[...listing.querySelectorAll(':scope > .lrelay')];const extra=lines.slice(1).filter(n=>!/invite:/i.test(n.textContent)&&!n.querySelector('a'));if(!extra.length)return;const details=disclosure('experience.connection','Connection details','connection-details');details.dataset.viewDisclosure='connection';listing.appendChild(details);extra.forEach(n=>details.appendChild(n));});
  }
