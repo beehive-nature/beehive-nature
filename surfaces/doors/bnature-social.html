@@ -4,9 +4,9 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
-<meta name="color-scheme" content="dark">
+<meta name="color-scheme" content="light dark">
 <title>bnature.social — someone who wants people</title>
-<meta name="theme-color" content="#06110C">
+<meta name="theme-color" content="#f6f7f2">
 <style>:root{
   --void:#06110C; --panel:#0A1310; --tile:#0C1412; --inset:#08120E; --lift:#111C17;
   --ink:#E9F2EC; --dim:#8FA79A; --dimmer:#648176; --line:#1E2B26; --hot:#2F4A3C;
@@ -146,16 +146,66 @@ a.t.big s:not(.do){font-size:9.5px;color:var(--dimmer);margin-top:8px}
   #start-here{padding:16px 14px 12px}
   #start-here .start-link{min-height:92px;padding:14px;gap:12px}
   #start-here .start-picture{width:48px;height:48px}
-  #start-here .start-link strong{font-size:1.125rem}}</style>
+  #start-here .start-link strong{font-size:1.125rem}
+  body[data-reg="bee"] .eyebrow{padding-top:12px}
+}
+
+/* New bee strip and page chrome share one light island. Raver keeps the hex
+   band; cypherpunk keeps scanline density. Tour bar restyle is page-local. */
+details.density{margin-top:16px;border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:8px 16px 16px}
+details.density>summary{min-height:44px;cursor:pointer;font-size:1.125rem;color:var(--ink);list-style:none;display:flex;align-items:center}
+details.density>summary::-webkit-details-marker{display:none}
+details.density>summary:before{content:"+ ";color:var(--accent)}
+details.density[open]>summary:before{content:"− "}
+body[data-reg="bee"]{
+  --void:#f6f7f2;--panel:#fff;--tile:#fff;--inset:#edf2eb;--lift:#edf2eb;
+  --ink:#18362a;--dim:#435f4e;--dimmer:#52695b;--line:#ccd7cf;--hot:#8a9e90;
+  --accent:#176879;color-scheme:light;background:#f6f7f2;color:#18362a;
+  font:1.125rem/1.65 system-ui,-apple-system,"Segoe UI",sans-serif}
+body[data-reg="bee"] #veil,body[data-reg="bee"] #bandwrap{display:none}
+body[data-reg="bee"] .eyebrow{padding-top:12px;letter-spacing:normal;text-transform:none;font-size:.875rem;color:#435f4e}
+body[data-reg="bee"] h1{color:#18362a;letter-spacing:-.04em}
+body[data-reg="bee"] .what,body[data-reg="bee"] .live-note,body[data-reg="bee"] .intro{font-size:1.125rem;color:#435f4e}
+body[data-reg="bee"] #start-here{background:#fff;border-color:#ccd7cf}
+body[data-reg="bee"] section,body[data-reg="bee"] .act,body[data-reg="bee"] .notyet,body[data-reg="bee"] a.t{background:#fff;border-color:#ccd7cf;border-radius:16px;color:#18362a}
+body[data-reg="bee"] a.t b,body[data-reg="bee"] .act b,body[data-reg="bee"] .shead h2{color:#18362a;font-size:1.125rem}
+body[data-reg="bee"] a.t s,body[data-reg="bee"] .act s,body[data-reg="bee"] .notyet p,body[data-reg="bee"] .notyet li{color:#435f4e;font-size:1rem}
+body[data-reg="bee"] footer{font-size:.875rem;letter-spacing:normal;text-transform:none;color:#52695b}
+body[data-reg="bee"] #tbar{background:#f6f7f2!important;border-top-color:#ccd7cf!important;
+  color:#18362a!important;-webkit-mask-image:none!important;mask-image:none!important;
+  font:500 1rem/1.4 system-ui,-apple-system,"Segoe UI",sans-serif!important}
+body[data-reg="bee"] #tbar a{color:#18362a!important;background:#fff!important;box-shadow:inset 0 0 0 1px #ccd7cf!important}
+body[data-reg="bee"] #tbar .tsep{background:#ccd7cf!important}
+body[data-reg="bee"] #tbarMore{background:#fff!important;color:#326b39!important;border-color:#ccd7cf!important}
+
+body[data-reg="raver"] #start-here{background:var(--panel);color:var(--ink);border-color:var(--line)}
+body[data-reg="raver"] #start-here h2,body[data-reg="raver"] #start-here .start-link strong{color:var(--ink)}
+body[data-reg="raver"] #start-here .lead,body[data-reg="raver"] #start-here .kicker,body[data-reg="raver"] #start-here .start-help{color:var(--dim)}
+body[data-reg="raver"] #start-here .start-link,body[data-reg="raver"] #start-here .honesty{
+  background:var(--tile);border-color:var(--line);color:var(--ink)}
+
+body[data-reg="cypherpunk"]{color-scheme:dark}
+body[data-reg="cypherpunk"] #start-here{background:var(--panel);color:var(--ink);border-color:var(--line);
+  font-family:var(--mono);border-radius:0}
+body[data-reg="cypherpunk"] #start-here h2{font:800 19px/1.1 var(--mono);letter-spacing:-.01em;color:var(--accent)}
+body[data-reg="cypherpunk"] #start-here .lead,body[data-reg="cypherpunk"] #start-here .kicker,body[data-reg="cypherpunk"] #start-here .start-help{color:var(--dim);font-size:12px}
+body[data-reg="cypherpunk"] #start-here .start-link,body[data-reg="cypherpunk"] #start-here .honesty{
+  background:var(--tile);border-color:var(--line);color:var(--ink);border-radius:0;box-shadow:none}
+body[data-reg="cypherpunk"] #start-here .start-link strong{font-size:14px;color:var(--accent)}
+</style>
 </head>
 <body data-reg="bee">
 <div id="veil" aria-hidden="true"></div>
 <header style="--bandh:69px">
   <div id="bandwrap" aria-hidden="true"><div class="band" style="top:-14px;left:-80px;opacity:1.00;animation-duration:15s;animation-name:hexdrift;--step:52px"><i style="background:#D655BB;animation-duration:2.4s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:2.9s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:3.3s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:3.8s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:4.2s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:2.4s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:2.9s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:3.3s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:3.8s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:4.2s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:2.4s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:2.9s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:3.3s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:3.8s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:4.2s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:2.4s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:2.9s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:3.3s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:3.8s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:4.2s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:2.4s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:2.9s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:3.3s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:3.8s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:4.2s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:2.4s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:2.9s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:3.3s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:3.8s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:4.2s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:2.4s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:2.9s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:3.3s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:3.8s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:4.2s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:2.4s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:2.9s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:3.3s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:3.8s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:4.2s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:2.4s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:2.9s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:3.3s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:3.8s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:4.2s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:2.4s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:2.9s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:3.3s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:3.8s;animation-delay:1.14s"></i></div></div>
   <div class="wrap">
-    <p class="eyebrow" data-i18n="d.social.who">for someone who wants people</p>
+    <p class="eyebrow" data-reg="bee" data-i18n="d.social.who">for someone who wants people</p>
+    <p class="eyebrow" data-reg="raver">for someone who wants people</p>
+    <p class="eyebrow" data-reg="cypherpunk" data-i18n="d.social.who">for someone who wants people</p>
     <h1>bnature.social</h1>
-    <p class="what" data-i18n="d.social.what">The social layer: the feed, the meetings, the room. No marketplace — nothing here is for sale. Tongues dock as first-class passengers, and your name stays in your own language.</p>
+    <p class="what" data-reg="bee" data-i18n="d.social.what">The social layer: the feed, the meetings, the room. No marketplace — nothing here is for sale. Tongues dock as first-class passengers, and your name stays in your own language.</p>
+    <p class="what" data-reg="raver">The social layer: people, meetings, a room. Nothing here is for sale.</p>
+    <p class="what" data-reg="cypherpunk" data-i18n="d.social.what">The social layer: the feed, the meetings, the room. No marketplace — nothing here is for sale. Tongues dock as first-class passengers, and your name stays in your own language.</p>
     <div id="start-here">
       <p class="kicker">A place to begin</p>
       <h2>You belong here.</h2>
@@ -174,6 +224,8 @@ a.t.big s:not(.do){font-size:9.5px;color:var(--dimmer);margin-top:8px}
 
 <div class="wrap">
   <section class="d">
+    <details class="density" id="everything-box">
+    <summary>Everything behind this door</summary>
     <div class="shead"><span class="dot"></span><h2>Everything behind this door</h2><em>open now · ⚠ marks a named limit</em><span class="n">11</span></div>
     <div class="grid">
     <a class="t" href="../attest.html" data-dom="social" data-q="one tongue, one evening, signed  social"><b data-i18n="s.attest.name">one tongue, one evening, signed</b><s>attest.html</s></a>
@@ -188,6 +240,7 @@ a.t.big s:not(.do){font-size:9.5px;color:var(--dimmer);margin-top:8px}
     <a class="t p" href="../btranslated.html" data-dom="social" data-q="your name in your tongue section two carries its own demo badge social"><b data-i18n="s.btranslated.name">your name in your tongue</b><s>btranslated.html</s><u data-i18n="s.btranslated.caveat">⚠ section two carries its own DEMO badge</u></a>
     <a class="t p" href="../forge/huddle.html" data-dom="social" data-q="the same room, across machines you supply your own venue url — we ship no server social"><b data-i18n="s.forge-huddle.name">the same room, across machines</b><s>forge/huddle.html</s><u data-i18n="s.forge-huddle.caveat">⚠ you supply your own venue URL — we ship no server</u></a>
     </div>
+    </details>
   </section>
 
   <div class="notyet">
@@ -206,5 +259,17 @@ a.t.big s:not(.do){font-size:9.5px;color:var(--dimmer);margin-top:8px}
 </footer>
 
 <script src="../tour.js?v=38"></script>
+<script>
+(function(){
+  function syncDensity(){
+    var r=document.body.getAttribute('data-reg')||'bee';
+    document.querySelectorAll('details.density').forEach(function(d){
+      d.open = r==='cypherpunk' || r==='raver';
+    });
+  }
+  document.addEventListener('bregister',syncDensity);
+  syncDensity();
+})();
+</script>
 </body>
 </html>

@@ -4,6 +4,8 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>buzz directory — the estate's hives and the public directory, verified</title>
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f6f7f2">
 <style>
 /* SEMANTIC COLOUR — meanings picked FIRST, hues second (bound to docs/tokens.css). */
 :root{--verified:#86CC72;--guard:#B7A8F7;--info:#6FA9E0;--sem-harm:#B7A8F7;--sem-solution:#86CC72;--sem-value:#E8B54B;--sem-system:#6FA9E0;--sem-science:#45C2DC;--ink-dim:#648176;--rose:#C41E3A;
@@ -75,10 +77,72 @@ footer{max-width:860px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 .door-help>summary::-webkit-details-marker{display:none}
 .door-help>summary:before{content:"+ ";color:var(--gold)}
 .door-help[open]>summary:before{content:"− "}
+.hive-join-lead{margin:8px 0 10px;color:var(--dim);max-width:42ch}
+.listing .join-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:8px}
+details.density{margin-top:10px;border:1px solid var(--line);border-radius:12px;background:var(--well);padding:4px 12px 10px}
+details.density>summary{min-height:44px;cursor:pointer;font-size:1rem;color:var(--ink);list-style:none;display:flex;align-items:center}
+details.density>summary::-webkit-details-marker{display:none}
+details.density>summary:before{content:"+ ";color:var(--gold)}
+details.density[open]>summary:before{content:"− "}
+#public-directory-box>summary{font-size:1.125rem}
+
+/* New bee is one continuous light room: choose-cards, OUR HIVES, people-agents
+   and page chrome share the hub canvas. Relay-host density stays in details
+   (opened for raver/cypherpunk). Tour bar is inline-styled by the shared
+   shell — this page restyles it for New bee without editing tour.js. */
+body[data-reg="bee"]{
+  --bg:#f6f7f2;--panel:#fff;--well:#edf2eb;--ink:#18362a;--dim:#435f4e;
+  --faint:#52695b;--line:#ccd7cf;--cyan:#176879;--gold:#855b0b;--leaf:#326b39;
+  --violet:#65509a;--verified:#326b39;--guard:#65509a;--info:#29628f;
+  background:#f6f7f2;color:#18362a;color-scheme:light;
+  font:1.125rem/1.65 system-ui,-apple-system,"Segoe UI",sans-serif;
+  padding:28px clamp(16px,4vw,48px) 90px}
+body[data-reg="bee"] h1{background:none;color:#18362a;-webkit-text-fill-color:currentColor;
+  font-size:clamp(2.25rem,5vw,3.5rem);letter-spacing:-.04em}
+body[data-reg="bee"] .kicker,body[data-reg="bee"] .crumbs{letter-spacing:normal;text-transform:none;font-size:.875rem}
+body[data-reg="bee"] .lede{font-size:1.125rem;color:#435f4e}
+body[data-reg="bee"] section,body[data-reg="bee"] #new-bee,body[data-reg="bee"] #our-hives,body[data-reg="bee"] #people-agents{background:#fff;border-color:#ccd7cf;color:#18362a}
+body[data-reg="bee"] #new-bee{background:#fff}
+body[data-reg="bee"] h2{font:550 1.5rem/1.2 system-ui,-apple-system,"Segoe UI",sans-serif;
+  letter-spacing:-.03em;color:#18362a}
+body[data-reg="bee"] .listing{background:#edf2eb;border-color:#ccd7cf;border-radius:16px;padding:18px 20px}
+body[data-reg="bee"] .lname{font-size:1.25rem;font-weight:650;letter-spacing:-.025em}
+body[data-reg="bee"] .chip,body[data-reg="bee"] .who{font-size:.875rem;letter-spacing:normal;white-space:normal}
+body[data-reg="bee"] .a-link{display:inline-flex;align-items:center;min-height:44px;padding:8px 14px;
+  font-size:1rem;border-radius:12px;background:#fff;color:#18362a;border-color:#ccd7cf}
+body[data-reg="bee"] .a-link:hover,body[data-reg="bee"] .a-link:focus-visible{border-color:#326b39;background:#fff;outline:2px solid #326b39;outline-offset:3px}
+body[data-reg="bee"] .seat-note,body[data-reg="bee"] .law,body[data-reg="bee"] .lrelay,body[data-reg="bee"] .nb{font-size:1rem;line-height:1.7;color:#435f4e}
+body[data-reg="bee"] footer{font-size:.875rem;color:#52695b}
+body[data-reg="bee"] .density-hero{display:none}
+body[data-reg="bee"] #tbar{background:#f6f7f2!important;border-top-color:#ccd7cf!important;
+  color:#18362a!important;-webkit-mask-image:none!important;mask-image:none!important;
+  font:500 1rem/1.4 system-ui,-apple-system,"Segoe UI",sans-serif!important}
+body[data-reg="bee"] #tbar a{color:#18362a!important;background:#fff!important;box-shadow:inset 0 0 0 1px #ccd7cf!important}
+body[data-reg="bee"] #tbar .tsep{background:#ccd7cf!important}
+body[data-reg="bee"] #tbarMore{background:#fff!important;color:#326b39!important;border-color:#ccd7cf!important}
+
+body[data-reg="raver"]{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+body[data-reg="raver"] #new-bee{background:var(--panel);color:var(--ink);border-color:var(--line)}
+body[data-reg="raver"] #new-bee h2,body[data-reg="raver"] #new-bee .start-link strong{color:var(--ink)}
+body[data-reg="raver"] #new-bee .lead,body[data-reg="raver"] #new-bee .start-help{color:var(--dim)}
+body[data-reg="raver"] #new-bee .start-link,body[data-reg="raver"] #new-bee .home-controls a{
+  background:var(--well);border-color:var(--line);color:var(--ink)}
+
+body[data-reg="cypherpunk"]{color-scheme:dark}
+body[data-reg="cypherpunk"] #new-bee{background:var(--panel);color:var(--ink);border-color:var(--line);
+  font-family:ui-monospace,"Cascadia Mono",Consolas,monospace}
+body[data-reg="cypherpunk"] #new-bee h2{font:500 1.1rem/1.3 ui-monospace,"Cascadia Mono",Consolas,monospace;
+  letter-spacing:0;color:var(--violet)}
+body[data-reg="cypherpunk"] #new-bee .lead,body[data-reg="cypherpunk"] #new-bee .start-help{color:var(--dim);font-size:12px}
+body[data-reg="cypherpunk"] #new-bee .start-link,body[data-reg="cypherpunk"] #new-bee .home-controls a{
+  background:var(--well);border-color:var(--line);color:var(--ink);border-radius:6px;box-shadow:none}
+body[data-reg="cypherpunk"] #new-bee .start-link strong{font-size:14px;color:var(--ink)}
+
 @media (max-width:600px){body{padding:14px 10px 80px}section{padding:13px 12px}.listing{padding:10px 11px}
   #new-bee .start-link{min-height:92px;padding:14px;gap:12px}
   #new-bee .start-picture{width:48px;height:48px}
-  #new-bee .start-link strong{font-size:1.125rem}}
+  #new-bee .start-link strong{font-size:1.125rem}
+  body[data-reg="bee"]{padding:16px 12px 90px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -88,10 +152,14 @@ footer{max-width:860px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   <a href="index.html" data-i18n="hub.name">beehive nature reserve</a><span>▸</span><span class="here" data-i18n="bd.crumb">buzz directory</span>
 </nav>
 <header>
-  <div class="kicker" data-i18n="bd.kicker">the estate's hives and the public buzz directory, verified by hand</div>
+  <div class="kicker" data-reg="bee">People to meet</div>
+  <div class="kicker" data-reg="raver">hives, doors, people</div>
+  <div class="kicker" data-reg="cypherpunk" data-i18n="bd.kicker">the estate's hives and the public buzz directory, verified by hand</div>
   <h1 data-i18n="bd.h1">buzz directory</h1>
-  <p class="lede" data-i18n="bd.lede">every relay the estate knows about — ours first, then the public directory. each listing carries the relay host (check it before you join), the invite or join link, and a status chip that says what was verified and when. statuses are hand-verified receipts, not live API calls — the page fetches nothing.</p>
-  <div class="herofig"><span class="num" data-hero-number>22</span><span class="cap" data-hero-caption data-i18n="bd.hero.cap">listings · verified 2026-08-31 · hand-checked, not fetched</span></div>
+  <p class="lede" data-reg="bee">The estate's own communities, named so you can join them. Conversation lives in the Buzz app — this page is a directory of doors.</p>
+  <p class="lede" data-reg="raver">Find a hive. Carry the garden. Talk happens in the Buzz app, not in this HTML.</p>
+  <p class="lede" data-reg="cypherpunk" data-i18n="bd.lede">every relay the estate knows about — ours first, then the public directory. each listing carries the relay host (check it before you join), the invite or join link, and a status chip that says what was verified and when. statuses are hand-verified receipts, not live API calls — the page fetches nothing.</p>
+  <div class="herofig density-hero"><span class="num" data-hero-number>22</span><span class="cap" data-hero-caption data-i18n="bd.hero.cap">listings · verified 2026-08-31 · hand-checked, not fetched</span></div>
 </header>
 
 <section id="new-bee">
@@ -106,26 +174,44 @@ footer{max-width:860px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 </section>
 
 <section id="our-hives">
-  <h2 data-i18n="bd.hives.h2">OUR HIVES — the estate's own relays, dual-homed</h2>
-  <div class="law" data-i18n="bd.hives.law">The estate runs two relays on its own infrastructure, each with a primary and a fallback hostname. If the primary is filtered on your network, use the fallback — both serve the same relay and the same community.</div>
+  <h2 data-reg="bee">OUR HIVES</h2>
+  <h2 data-reg="raver">OUR HIVES — dual-homed estate relays</h2>
+  <h2 data-reg="cypherpunk" data-i18n="bd.hives.h2">OUR HIVES — the estate's own relays, dual-homed</h2>
+  <div class="law" data-reg="bee">Two estate communities. Join in the Buzz app. If one name is filtered, the other opens the same hive.</div>
+  <div class="law" data-reg="raver">Two hives, each with a fallback name. Same community either way.</div>
+  <div class="law" data-reg="cypherpunk" data-i18n="bd.hives.law">The estate runs two relays on its own infrastructure, each with a primary and a fallback hostname. If the primary is filtered on your network, use the fallback — both serve the same relay and the same community.</div>
 
-  <div class="listing pstat">
-    <div class="lh"><span class="lname">skaists.buzz — the founder's hive</span><span class="chip ok"><i></i>✓ dual-homed</span></div>
-    <div class="lrelay"><b>relay host:</b> wss://skaists.buzz</div>
-    <div class="lrelay"><b>fallback:</b> wss://relay.skaists.dev</div>
-    <div class="lrelay"><b>web door:</b> <a href="https://relay.skaists.dev/">relay.skaists.dev</a> — the same door on the clean name, for networks that filter .buzz</div>
-    <div class="lrelay"><b>invite:</b> join via the Buzz app — Add Community → paste the relay host</div>
+  <div class="listing pstat hive-card">
+    <div class="lh"><span class="lname">skaists.buzz — the founder's hive</span><span class="chip ok"><i></i>estate hive</span></div>
+    <p class="hive-join-lead">Join this community in the Buzz app.</p>
+    <p class="join-row"><a class="a-link" href="https://relay.skaists.dev/">Open the web door</a></p>
+    <details class="density">
+      <summary>Relay doors</summary>
+      <div class="lrelay"><b>status:</b> dual-homed — primary and fallback serve the same hive</div>
+      <div class="lrelay"><b>relay host:</b> wss://skaists.buzz</div>
+      <div class="lrelay"><b>fallback:</b> wss://relay.skaists.dev</div>
+      <div class="lrelay"><b>web door:</b> <a href="https://relay.skaists.dev/">relay.skaists.dev</a> — the same door on the clean name, for networks that filter .buzz</div>
+      <div class="lrelay"><b>invite:</b> join via the Buzz app — Add Community → paste the relay host</div>
+    </details>
   </div>
-  <div class="listing">
-    <div class="lh"><span class="lname">beehivenature.buzz — the science hive</span><span class="chip ok"><i></i>✓ dual-homed</span></div>
-    <div class="lrelay"><b>relay host:</b> wss://beehivenature.buzz</div>
-    <div class="lrelay"><b>fallback:</b> wss://relay2.skaists.dev</div>
-    <div class="lrelay"><b>web door:</b> <a href="https://relay2.skaists.dev/">relay2.skaists.dev</a> — the same door on the clean name, for networks that filter .buzz</div>
-    <div class="lrelay"><b>invite:</b> join via the Buzz app — Add Community → paste the relay host</div>
+  <div class="listing hive-card">
+    <div class="lh"><span class="lname">beehivenature.buzz — the science hive</span><span class="chip ok"><i></i>estate hive</span></div>
+    <p class="hive-join-lead">Join this community in the Buzz app.</p>
+    <p class="join-row"><a class="a-link" href="https://relay2.skaists.dev/">Open the web door</a></p>
+    <details class="density">
+      <summary>Relay doors</summary>
+      <div class="lrelay"><b>status:</b> dual-homed — primary and fallback serve the same hive</div>
+      <div class="lrelay"><b>relay host:</b> wss://beehivenature.buzz</div>
+      <div class="lrelay"><b>fallback:</b> wss://relay2.skaists.dev</div>
+      <div class="lrelay"><b>web door:</b> <a href="https://relay2.skaists.dev/">relay2.skaists.dev</a> — the same door on the clean name, for networks that filter .buzz</div>
+      <div class="lrelay"><b>invite:</b> join via the Buzz app — Add Community → paste the relay host</div>
+    </details>
   </div>
 </section>
 
-<section>
+<section id="public-directory">
+  <details class="density" id="public-directory-box">
+  <summary>More communities — public directory</summary>
   <h2 data-i18n="bd.ext.h2">THE PUBLIC DIRECTORY — buzz.directory pages 1–2, verified at publish</h2>
   <div class="law" data-i18n="bd.ext.law">These listings are from the public buzz.directory — hand-verified at publish (invite payload decodes, scheme intact, expiry checked). Each listing links to the source page on buzz.directory. The estate does not proxy or mirror the directory — it links to it.</div>
 
@@ -133,114 +219,164 @@ footer{max-width:860px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 
   <div class="listing">
     <div class="lh"><span class="lname">buzzbuild</span><span class="chip ok"><i></i>✓ verified 2026-08-31</span></div>
-    <div class="lrelay"><b>relay:</b> wss://buzzbuild.communities.buzz.xyz</div>
-    <div class="lrelay"><b>type:</b> join code (v2)</div>
-    <a class="a-link" href="buzz://join?relay=wss%3A%2F%2Fbuzzbuild.communities.buzz.xyz&code=v2.6-AGUNRVGlsJk7JlEPmw09NQuAOCFUmUBvoatGb-AuU">open in Buzz app</a> · <a href="https://buzz.directory/communities/buzzbuild" rel="noopener" style="font-size:10px;color:var(--faint)">source</a>
-  </div>
-  <div class="listing">
+    <p class="join-row"><a class="a-link" href="buzz://join?relay=wss%3A%2F%2Fbuzzbuild.communities.buzz.xyz&code=v2.6-AGUNRVGlsJk7JlEPmw09NQuAOCFUmUBvoatGb-AuU">open in Buzz app</a></p>
+    <details class="density">
+      <summary>Relay and source</summary>
+      <div class="lrelay"><b>relay:</b> wss://buzzbuild.communities.buzz.xyz</div>
+      <div class="lrelay"><b>type:</b> join code (v2)</div>
+      <a href="https://buzz.directory/communities/buzzbuild" rel="noopener">source</a>
+    </details>
+  </div><div class="listing">
     <div class="lh"><span class="lname">monero</span><span class="chip ok"><i></i>✓ verified 2026-08-31</span></div>
-    <div class="lrelay"><b>relay:</b> wss://monero.communities.buzz.xyz</div>
-    <div class="lrelay"><b>type:</b> open community (no code)</div>
-    <a class="a-link" href="buzz://add-community?relay=wss%3A%2F%2Fmonero.communities.buzz.xyz%2F&name=monero">open in Buzz app</a> · <a href="https://buzz.directory/communities/monero" rel="noopener" style="font-size:10px;color:var(--faint)">source</a>
-  </div>
-  <div class="listing">
+    <p class="join-row"><a class="a-link" href="buzz://add-community?relay=wss%3A%2F%2Fmonero.communities.buzz.xyz%2F&name=monero">open in Buzz app</a></p>
+    <details class="density">
+      <summary>Relay and source</summary>
+      <div class="lrelay"><b>relay:</b> wss://monero.communities.buzz.xyz</div>
+      <div class="lrelay"><b>type:</b> open community (no code)</div>
+      <a href="https://buzz.directory/communities/monero" rel="noopener">source</a>
+    </details>
+  </div><div class="listing">
     <div class="lh"><span class="lname">creatormagic</span><span class="chip ok"><i></i>✓ verified 2026-08-31</span></div>
-    <div class="lrelay"><b>relay:</b> wss://creatormagic.communities.buzz.xyz</div>
-    <div class="lrelay"><b>type:</b> join code (v2)</div>
-    <a class="a-link" href="buzz://join?relay=wss%3A%2F%2Fcreatormagic.communities.buzz.xyz&code=v2.r1LrcEXOs6uzB5EVVPgLnIUjcDiw3HmjM3byUVxGTjI">open in Buzz app</a> · <a href="https://buzz.directory/communities/creatormagic" rel="noopener" style="font-size:10px;color:var(--faint)">source</a>
-  </div>
-  <div class="listing">
+    <p class="join-row"><a class="a-link" href="buzz://join?relay=wss%3A%2F%2Fcreatormagic.communities.buzz.xyz&code=v2.r1LrcEXOs6uzB5EVVPgLnIUjcDiw3HmjM3byUVxGTjI">open in Buzz app</a></p>
+    <details class="density">
+      <summary>Relay and source</summary>
+      <div class="lrelay"><b>relay:</b> wss://creatormagic.communities.buzz.xyz</div>
+      <div class="lrelay"><b>type:</b> join code (v2)</div>
+      <a href="https://buzz.directory/communities/creatormagic" rel="noopener">source</a>
+    </details>
+  </div><div class="listing">
     <div class="lh"><span class="lname">malibu</span><span class="chip ok"><i></i>✓ verified 2026-08-31</span></div>
-    <div class="lrelay"><b>relay:</b> wss://malibu.communities.buzz.xyz</div>
-    <div class="lrelay"><b>type:</b> open community (no code)</div>
-    <a class="a-link" href="buzz://add-community?relay=wss%3A%2F%2Fmalibu.communities.buzz.xyz%2F&name=malibu">open in Buzz app</a> · <a href="https://buzz.directory/communities/malibu" rel="noopener" style="font-size:10px;color:var(--faint)">source</a>
-  </div>
-  <div class="listing">
+    <p class="join-row"><a class="a-link" href="buzz://add-community?relay=wss%3A%2F%2Fmalibu.communities.buzz.xyz%2F&name=malibu">open in Buzz app</a></p>
+    <details class="density">
+      <summary>Relay and source</summary>
+      <div class="lrelay"><b>relay:</b> wss://malibu.communities.buzz.xyz</div>
+      <div class="lrelay"><b>type:</b> open community (no code)</div>
+      <a href="https://buzz.directory/communities/malibu" rel="noopener">source</a>
+    </details>
+  </div><div class="listing">
     <div class="lh"><span class="lname">midd-relay</span><span class="chip ok"><i></i>✓ verified 2026-08-31</span></div>
-    <div class="lrelay"><b>relay:</b> wss://midd-relay.communities.buzz.xyz</div>
-    <div class="lrelay"><b>type:</b> open community (no code)</div>
-    <a class="a-link" href="buzz://add-community?relay=wss%3A%2F%2Fmidd-relay.communities.buzz.xyz%2F&name=midd-relay">open in Buzz app</a> · <a href="https://buzz.directory/communities/midd-relay" rel="noopener" style="font-size:10px;color:var(--faint)">source</a>
-  </div>
-  <div class="listing">
+    <p class="join-row"><a class="a-link" href="buzz://add-community?relay=wss%3A%2F%2Fmidd-relay.communities.buzz.xyz%2F&name=midd-relay">open in Buzz app</a></p>
+    <details class="density">
+      <summary>Relay and source</summary>
+      <div class="lrelay"><b>relay:</b> wss://midd-relay.communities.buzz.xyz</div>
+      <div class="lrelay"><b>type:</b> open community (no code)</div>
+      <a href="https://buzz.directory/communities/midd-relay" rel="noopener">source</a>
+    </details>
+  </div><div class="listing">
     <div class="lh"><span class="lname">milysec</span><span class="chip ok"><i></i>✓ verified 2026-08-31</span></div>
-    <div class="lrelay"><b>relay:</b> wss://milysec.communities.buzz.xyz</div>
-    <div class="lrelay"><b>type:</b> join code (v2)</div>
-    <a class="a-link" href="buzz://join?relay=wss%3A%2F%2Fmilysec.communities.buzz.xyz&code=v2.MOaixkJHxVG1gzJT_Yr0huBb97RDmEV7kp7sW117B68">open in Buzz app</a> · <a href="https://buzz.directory/communities/milysec" rel="noopener" style="font-size:10px;color:var(--faint)">source</a>
-  </div>
-  <div class="listing">
+    <p class="join-row"><a class="a-link" href="buzz://join?relay=wss%3A%2F%2Fmilysec.communities.buzz.xyz&code=v2.MOaixkJHxVG1gzJT_Yr0huBb97RDmEV7kp7sW117B68">open in Buzz app</a></p>
+    <details class="density">
+      <summary>Relay and source</summary>
+      <div class="lrelay"><b>relay:</b> wss://milysec.communities.buzz.xyz</div>
+      <div class="lrelay"><b>type:</b> join code (v2)</div>
+      <a href="https://buzz.directory/communities/milysec" rel="noopener">source</a>
+    </details>
+  </div><div class="listing">
     <div class="lh"><span class="lname">bitcoinplaintalk</span><span class="chip bad"><i></i>✗ failing: expired</span></div>
-    <div class="lrelay"><b>relay:</b> wss://bitcoinplaintalk.communities.buzz.xyz</div>
-    <div class="lrelay"><b>type:</b> join code — <span style="color:var(--guard)">invite code expired 2026-08-22</span></div>
-    <a class="a-link" href="https://buzz.directory/communities/bitcoinplaintalk" rel="noopener">check on buzz.directory</a>
-  </div>
-  <div class="listing">
+    <p class="join-row"><a class="a-link" href="https://buzz.directory/communities/bitcoinplaintalk" rel="noopener">check on buzz.directory</a></p>
+    <details class="density">
+      <summary>Relay and source</summary>
+      <div class="lrelay"><b>relay:</b> wss://bitcoinplaintalk.communities.buzz.xyz</div>
+      <div class="lrelay"><b>type:</b> join code — <span style="color:var(--guard)">invite code expired 2026-08-22</span></div>
+    </details>
+  </div><div class="listing">
     <div class="lh"><span class="lname">lightningdevkit (LDK)</span><span class="chip ok"><i></i>✓ verified 2026-08-31</span></div>
-    <div class="lrelay"><b>relay:</b> wss://lightningdevkit.communities.buzz.xyz</div>
-    <div class="lrelay"><b>type:</b> open community (no code)</div>
-    <a class="a-link" href="buzz://add-community?relay=wss%3A%2F%2Flightningdevkit.communities.buzz.xyz%2F&name=LDK">open in Buzz app</a> · <a href="https://buzz.directory/communities/lightningdevkit" rel="noopener" style="font-size:10px;color:var(--faint)">source</a>
-  </div>
-  <div class="listing">
+    <p class="join-row"><a class="a-link" href="buzz://add-community?relay=wss%3A%2F%2Flightningdevkit.communities.buzz.xyz%2F&name=LDK">open in Buzz app</a></p>
+    <details class="density">
+      <summary>Relay and source</summary>
+      <div class="lrelay"><b>relay:</b> wss://lightningdevkit.communities.buzz.xyz</div>
+      <div class="lrelay"><b>type:</b> open community (no code)</div>
+      <a href="https://buzz.directory/communities/lightningdevkit" rel="noopener">source</a>
+    </details>
+  </div><div class="listing">
     <div class="lh"><span class="lname">designers</span><span class="chip bad"><i></i>✗ failing: expired</span></div>
-    <div class="lrelay"><b>relay:</b> wss://designers.communities.buzz.xyz</div>
-    <div class="lrelay"><b>type:</b> join code — <span style="color:var(--guard)">invite code expired 2026-08-22</span></div>
-    <a class="a-link" href="https://buzz.directory/communities/designers" rel="noopener">check on buzz.directory</a>
-  </div>
-  <div class="listing">
+    <p class="join-row"><a class="a-link" href="https://buzz.directory/communities/designers" rel="noopener">check on buzz.directory</a></p>
+    <details class="density">
+      <summary>Relay and source</summary>
+      <div class="lrelay"><b>relay:</b> wss://designers.communities.buzz.xyz</div>
+      <div class="lrelay"><b>type:</b> join code — <span style="color:var(--guard)">invite code expired 2026-08-22</span></div>
+    </details>
+  </div><div class="listing">
     <div class="lh"><span class="lname">sec</span><span class="chip ok"><i></i>✓ verified 2026-08-31</span></div>
-    <div class="lrelay"><b>relay:</b> wss://sec.communities.buzz.xyz</div>
-    <div class="lrelay"><b>type:</b> open community (no code)</div>
-    <a class="a-link" href="buzz://add-community?relay=wss%3A%2F%2Fsec.communities.buzz.xyz%2F&name=sec">open in Buzz app</a> · <a href="https://buzz.directory/communities/sec" rel="noopener" style="font-size:10px;color:var(--faint)">source</a>
-  </div>
-  <div class="listing">
+    <p class="join-row"><a class="a-link" href="buzz://add-community?relay=wss%3A%2F%2Fsec.communities.buzz.xyz%2F&name=sec">open in Buzz app</a></p>
+    <details class="density">
+      <summary>Relay and source</summary>
+      <div class="lrelay"><b>relay:</b> wss://sec.communities.buzz.xyz</div>
+      <div class="lrelay"><b>type:</b> open community (no code)</div>
+      <a href="https://buzz.directory/communities/sec" rel="noopener">source</a>
+    </details>
+  </div><div class="listing">
     <div class="lh"><span class="lname">meshllm</span><span class="chip ok"><i></i>✓ verified 2026-08-31</span></div>
-    <div class="lrelay"><b>relay:</b> wss://meshllm.communities.buzz.xyz</div>
-    <div class="lrelay"><b>type:</b> join code (v2)</div>
-    <a class="a-link" href="buzz://join?relay=wss%3A%2F%2Fmeshllm.communities.buzz.xyz&code=v2.snrLPAfXbJqLeUs4xZObggIjTXGAElp5PSjn0DsIWt0">open in Buzz app</a> · <a href="https://buzz.directory/communities/meshllm" rel="noopener" style="font-size:10px;color:var(--faint)">source</a>
-  </div>
-  <div class="listing">
+    <p class="join-row"><a class="a-link" href="buzz://join?relay=wss%3A%2F%2Fmeshllm.communities.buzz.xyz&code=v2.snrLPAfXbJqLeUs4xZObggIjTXGAElp5PSjn0DsIWt0">open in Buzz app</a></p>
+    <details class="density">
+      <summary>Relay and source</summary>
+      <div class="lrelay"><b>relay:</b> wss://meshllm.communities.buzz.xyz</div>
+      <div class="lrelay"><b>type:</b> join code (v2)</div>
+      <a href="https://buzz.directory/communities/meshllm" rel="noopener">source</a>
+    </details>
+  </div><div class="listing">
     <div class="lh"><span class="lname">banking</span><span class="chip bad"><i></i>✗ failing: expired</span></div>
-    <div class="lrelay"><b>relay:</b> wss://banking.communities.buzz.xyz</div>
-    <div class="lrelay"><b>type:</b> join code — <span style="color:var(--guard)">invite code expired 2026-08-24</span></div>
-    <a class="a-link" href="https://buzz.directory/communities/banking" rel="noopener">check on buzz.directory</a>
-  </div>
-  <div class="listing">
+    <p class="join-row"><a class="a-link" href="https://buzz.directory/communities/banking" rel="noopener">check on buzz.directory</a></p>
+    <details class="density">
+      <summary>Relay and source</summary>
+      <div class="lrelay"><b>relay:</b> wss://banking.communities.buzz.xyz</div>
+      <div class="lrelay"><b>type:</b> join code — <span style="color:var(--guard)">invite code expired 2026-08-24</span></div>
+    </details>
+  </div><div class="listing">
     <div class="lh"><span class="lname">romeo-and-juliet</span><span class="chip bad"><i></i>✗ failing: expired</span></div>
-    <div class="lrelay"><b>relay:</b> wss://romeo-and-juliet.communities.buzz.xyz</div>
-    <div class="lrelay"><b>type:</b> join code — <span style="color:var(--guard)">invite code expired 2026-08-25</span></div>
-    <a class="a-link" href="https://buzz.directory/communities/romeo-and-juliet" rel="noopener">check on buzz.directory</a>
-  </div>
-  <div class="listing">
+    <p class="join-row"><a class="a-link" href="https://buzz.directory/communities/romeo-and-juliet" rel="noopener">check on buzz.directory</a></p>
+    <details class="density">
+      <summary>Relay and source</summary>
+      <div class="lrelay"><b>relay:</b> wss://romeo-and-juliet.communities.buzz.xyz</div>
+      <div class="lrelay"><b>type:</b> join code — <span style="color:var(--guard)">invite code expired 2026-08-25</span></div>
+    </details>
+  </div><div class="listing">
     <div class="lh"><span class="lname">openb</span><span class="chip bad"><i></i>✗ failing: expired</span></div>
-    <div class="lrelay"><b>relay:</b> wss://openb.communities.buzz.xyz</div>
-    <div class="lrelay"><b>type:</b> join code — <span style="color:var(--guard)">invite code expired 2026-08-24</span></div>
-    <a class="a-link" href="https://buzz.directory/communities/openb" rel="noopener">check on buzz.directory</a>
-  </div>
-  <div class="listing">
+    <p class="join-row"><a class="a-link" href="https://buzz.directory/communities/openb" rel="noopener">check on buzz.directory</a></p>
+    <details class="density">
+      <summary>Relay and source</summary>
+      <div class="lrelay"><b>relay:</b> wss://openb.communities.buzz.xyz</div>
+      <div class="lrelay"><b>type:</b> join code — <span style="color:var(--guard)">invite code expired 2026-08-24</span></div>
+    </details>
+  </div><div class="listing">
     <div class="lh"><span class="lname">oleiros</span><span class="chip ok"><i></i>✓ verified 2026-08-31</span></div>
-    <div class="lrelay"><b>relay:</b> wss://oleiros.communities.buzz.xyz</div>
-    <div class="lrelay"><b>type:</b> open community (no code)</div>
-    <a class="a-link" href="buzz://add-community?relay=wss%3A%2F%2Foleiros.communities.buzz.xyz%2F&name=oleiros">open in Buzz app</a> · <a href="https://buzz.directory/communities/oleiros" rel="noopener" style="font-size:10px;color:var(--faint)">source</a>
-  </div>
-
-  <div class="hivedivider">page 2</div>
+    <p class="join-row"><a class="a-link" href="buzz://add-community?relay=wss%3A%2F%2Foleiros.communities.buzz.xyz%2F&name=oleiros">open in Buzz app</a></p>
+    <details class="density">
+      <summary>Relay and source</summary>
+      <div class="lrelay"><b>relay:</b> wss://oleiros.communities.buzz.xyz</div>
+      <div class="lrelay"><b>type:</b> open community (no code)</div>
+      <a href="https://buzz.directory/communities/oleiros" rel="noopener">source</a>
+    </details>
+  </div><div class="hivedivider">page 2</div>
 
   <div class="listing">
     <div class="lh"><span class="lname">hermesagent</span><span class="chip ok"><i></i>✓ verified 2026-08-31</span></div>
-    <div class="lrelay"><b>relay:</b> wss://hermesagent.communities.buzz.xyz</div>
-    <div class="lrelay"><b>type:</b> join code (v2)</div>
-    <a class="a-link" href="buzz://join?relay=wss%3A%2F%2Fhermesagent.communities.buzz.xyz&code=v2.Dlbl-0km6g0i8Skliru9fGtk0hx_6SievFkilrKXuL8">open in Buzz app</a> · <a href="https://buzz.directory/communities/hermesagent" rel="noopener" style="font-size:10px;color:var(--faint)">source</a>
-  </div>
-  <div class="listing">
+    <p class="join-row"><a class="a-link" href="buzz://join?relay=wss%3A%2F%2Fhermesagent.communities.buzz.xyz&code=v2.Dlbl-0km6g0i8Skliru9fGtk0hx_6SievFkilrKXuL8">open in Buzz app</a></p>
+    <details class="density">
+      <summary>Relay and source</summary>
+      <div class="lrelay"><b>relay:</b> wss://hermesagent.communities.buzz.xyz</div>
+      <div class="lrelay"><b>type:</b> join code (v2)</div>
+      <a href="https://buzz.directory/communities/hermesagent" rel="noopener">source</a>
+    </details>
+  </div><div class="listing">
     <div class="lh"><span class="lname">hashie</span><span class="chip ok"><i></i>✓ verified 2026-08-31</span></div>
-    <div class="lrelay"><b>relay:</b> wss://hashie.communities.buzz.xyz</div>
-    <div class="lrelay"><b>type:</b> open community (no code)</div>
-    <a class="a-link" href="buzz://add-community?relay=wss%3A%2F%2Fhashie.communities.buzz.xyz%2F&name=hashie">open in Buzz app</a>
+    <p class="join-row"><a class="a-link" href="buzz://add-community?relay=wss%3A%2F%2Fhashie.communities.buzz.xyz%2F&name=hashie">open in Buzz app</a></p>
+    <details class="density">
+      <summary>Relay and source</summary>
+      <div class="lrelay"><b>relay:</b> wss://hashie.communities.buzz.xyz</div>
+      <div class="lrelay"><b>type:</b> open community (no code)</div>
+    </details>
   </div>
+  </details>
 </section>
 
 <section id="people-agents">
-  <h2>PEOPLE / AGENTS — named seats, not a live roster</h2>
-  <div class="law">Humans and machine seats are labeled on this page so you can tell them apart. This is the published roster, not proof that anyone is in a Buzz room right now. Conversation happens in the Buzz app.</div>
+  <h2 data-reg="bee">People and agents</h2>
+  <h2 data-reg="raver">People and agents</h2>
+  <h2 data-reg="cypherpunk">PEOPLE / AGENTS — named seats, not a live roster</h2>
+  <div class="law" data-reg="bee">Humans and labeled machine seats, named so you can tell them apart. This is the published roster — not proof that anyone is in a Buzz room right now. Conversation happens in the Buzz app.</div>
+  <div class="law" data-reg="raver">Named humans and machine seats. Presence in a room is not claimed here.</div>
+  <div class="law" data-reg="cypherpunk">Humans and machine seats are labeled on this page so you can tell them apart. This is the published roster, not proof that anyone is in a Buzz room right now. Conversation happens in the Buzz app.</div>
   <div class="listing">
     <div class="lh"><span class="lname">loVis waTer</span><span class="who">human</span><span class="chip ok"><i></i>founder</span></div>
     <div class="seat-note">The founder. Public names on the estate roster; this listing does not place him in a room.</div>
@@ -275,5 +411,17 @@ footer{max-width:860px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 </footer>
 </main>
 <script src="tour.js?v=38"></script>
+<script>
+(function(){
+  function syncDensity(){
+    var r=document.body.getAttribute('data-reg')||'bee';
+    document.querySelectorAll('details.density').forEach(function(d){
+      d.open = r==='cypherpunk' || r==='raver';
+    });
+  }
+  document.addEventListener('bregister',syncDensity);
+  syncDensity();
+})();
+</script>
 </body>
 </html>
