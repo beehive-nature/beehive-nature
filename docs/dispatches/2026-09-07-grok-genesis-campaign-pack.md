@@ -73,7 +73,7 @@ Addressed [comment 5575327549](https://github.com/beehive-nature/beehive-nature/
 
 ## Checks run in this lane
 
-- Local preview `http://127.0.0.1:4178/docs/mvp-walk/marketing.html`: three reconstructed blooms load; invitation present; 15s player advances captions, Raver toggle changes spoken color, beat jump and replay work; PLUR PNG loads; claim table has the localStorage correction; kandi-bar and pack-index links work; 390px stack stays readable. Agent fixture, not a newcomer.
+- Local preview `http://127.0.0.1:4178/docs/mvp-walk/marketing.html` after the Astra-gap revision: provisional-reconstruction copy on the marks; storyboard-not-film banner present; Step captions, 4.0s / 8.5s / 11.0s jumps, and Raver toggle keep one poster on the stage (the four-panel PLUR PNG never enters the player; it is shown once in `#plur`); claim table has separate arrival vs paste rows and the failed-write correction; festival card starts from experiences and names offline tolerance untested. First 390px pass showed a broken poster because `newbee-15s-poster.svg` had non-UTF-8 / control bytes; rewritten as well-formed UTF-8 XML and re-checked — poster paints, still does not swap. Agent fixture, not a newcomer.
 - §7 local commits: founder author, seat committer, Co-authored-by trailer parsed.
 - Issue comments on #27 and #10: **403** (named).
 - Repository CI: subscribed on this branch; result not claimed here until the check returns.

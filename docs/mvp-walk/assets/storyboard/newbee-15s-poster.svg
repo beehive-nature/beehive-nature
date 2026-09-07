@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" role="img" aria-labelledby="t d">
-  <title id="t">New bee 15s poster  static alternative (board-not-film)</title>
-  <desc id="d">Poster for the New bee gift-loop cut. Proposed copy, not a ratified slogan. Respect is a wrist-to-wrist transfer while fingers stay locked  not a conventional handshake. This is a static alternative, not filmed footage.</desc>
+  <title id="t">New bee 15s poster - static alternative (board-not-film)</title>
+  <desc id="d">Poster for the New bee gift-loop cut. Proposed copy, not a ratified slogan. Respect is a wrist-to-wrist transfer while fingers stay locked - not a conventional handshake. This is a static alternative, not filmed footage.</desc>
   <rect width="1080" height="1080" fill="#f6f7f2"/>
-  <text x="540" y="88" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="28" fill="#3d3a32" letter-spacing="6">NEW BEE</text>
+  <text x="540" y="88" text-anchor="middle" font-family="Georgia, Times New Roman, serif" font-size="28" fill="#3d3a32" letter-spacing="6">NEW BEE</text>
   <text x="540" y="130" text-anchor="middle" font-family="Georgia, serif" font-size="42" fill="#1f1c16">Make a little color.</text>
   <text x="540" y="184" text-anchor="middle" font-family="Georgia, serif" font-size="42" fill="#8a2f6b">Give it to someone.</text>
-
   <g transform="translate(180,250)">
     <rect width="720" height="420" rx="28" fill="#fff" stroke="#d7d3c6"/>
-    <text x="360" y="56" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif" font-size="20" fill="#5c574c">15 seconds · same gift · this browser</text>
-    <!-- simple bracelet -->
+    <text x="360" y="56" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif" font-size="20" fill="#5c574c">15 seconds / same gift / this browser</text>
     <g transform="translate(360,200)">
       <circle cx="-110" cy="0" r="18" fill="#39c5cf"/>
       <circle cx="-74" cy="0" r="18" fill="#fff" stroke="#1f1c16" stroke-width="2"/>
@@ -28,12 +26,11 @@
     </g>
     <text x="360" y="300" text-anchor="middle" font-family="ui-sans-serif, sans-serif" font-size="22" fill="#1f1c16">String a word. Two hands meet. The gift leaves your arm.</text>
     <text x="360" y="348" text-anchor="middle" font-family="ui-sans-serif, sans-serif" font-size="16" fill="#5c574c">Physical PLUR is not software delivery. Destination: the kandi bar.</text>
-    <text x="360" y="388" text-anchor="middle" font-family="ui-sans-serif, sans-serif" font-size="14" fill="#8a8070">BOARD, NOT FILM · no motion picture was produced for this cut</text>
+    <text x="360" y="388" text-anchor="middle" font-family="ui-sans-serif, sans-serif" font-size="14" fill="#8a8070">BOARD, NOT FILM - no motion picture was produced for this cut</text>
   </g>
-
-  <text x="540" y="760" text-anchor="middle" font-family="ui-sans-serif, sans-serif" font-size="18" fill="#3d3a32">Peace · Love · Unity · Respect</text>
+  <text x="540" y="760" text-anchor="middle" font-family="ui-sans-serif, sans-serif" font-size="18" fill="#3d3a32">Peace / Love / Unity / Respect</text>
   <text x="540" y="800" text-anchor="middle" font-family="ui-sans-serif, sans-serif" font-size="16" fill="#5c574c">Love = touching fingertips. Unity = interlocked fingers.</text>
   <text x="540" y="832" text-anchor="middle" font-family="ui-sans-serif, sans-serif" font-size="16" fill="#5c574c">Respect = the bracelet travels wrist to wrist. The giver ends bare.</text>
   <text x="540" y="900" text-anchor="middle" font-family="Georgia, serif" font-size="22" fill="#1f1c16">Open the kandi bar. Make one. Hand it over.</text>
-  <text x="540" y="980" text-anchor="middle" font-family="ui-sans-serif, sans-serif" font-size="15" fill="#8a8070">Proposed copy · not a ratified slogan · skaists.dev internal review</text>
+  <text x="540" y="980" text-anchor="middle" font-family="ui-sans-serif, sans-serif" font-size="15" fill="#8a8070">Proposed copy - not a ratified slogan - skaists.dev internal review</text>
 </svg>
