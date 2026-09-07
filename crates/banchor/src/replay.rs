@@ -26,14 +26,17 @@
 //!
 //! `sync` maps to `File::sync_all` (fsync on Unix, FlushFileBuffers on
 //! Windows): a request for storage synchronization the kernel/driver is
-//! expected to honor, NOT a proof against power loss. File-creation and
-//! metadata durability (the directory entry itself) is fsync-of-parent on
-//! Unix platforms and has no public equivalent on Windows — recorded here
-//! as UNPROVEN rather than claimed. No power-loss testing has been done.
-//! Process death between boundaries is likewise not emulated by tests: a
-//! killed process does not emulate storage loss, and what survives is
-//! reader-side (G2-B); the writer-side boundaries are covered
-//! deterministically via the injected [`fault`] battery.
+//! expected to honor, NOT a proof against power loss. At creation,
+//! `Replay::open` fsyncs the PARENT DIRECTORY on Unix so the new
+//! directory entry itself reaches storage (fail-closed: a refused dir
+//! sync fails the open); the directory's own creation is not recursively
+//! synced. Windows has no public equivalent for a directory fsync, so
+//! file-creation/metadata durability there is UNPROVEN, not claimed. No
+//! power-loss testing has been done. Process death between boundaries is
+//! likewise not emulated by tests: a killed process does not emulate
+//! storage loss (they are distinct failures; neither proves the other),
+//! and what survives is reader-side (G2-B); the writer-side boundaries
+//! are covered deterministically via the injected [`fault`] battery.
 
 use std::fs::{self, File, OpenOptions};
 use std::io::Write as IoWrite;
@@ -138,6 +141,13 @@ pub struct Replay {
 impl Replay {
     /// Create `<dir>/<stem>-<yyyymmdd-hhmmss>.jsonl`. Creates the dir.
     /// (Stamp is colon-free: Windows filenames.)
+    ///
+    /// A fresh open NEVER appends to an existing stream: the file is
+    /// created exclusively (`create_new`), and a name collision (same stem
+    /// in the same second, or a concurrent same-stem session) bumps a
+    /// `-N` suffix until an unused name wins the exclusive race. A
+    /// replacement session therefore cannot extend the torn tail of the
+    /// damaged file it replaces — that file stays untouched on disk.
     pub fn open(dir: &Path, stem: &str) -> std::io::Result<Replay> {
         fs::create_dir_all(dir)?;
         let (iso, _) = now_iso();
@@ -145,9 +155,46 @@ impl Replay {
             .split_once('T')
             .map(|(d, t)| format!("{}-{}", d.replace('-', ""), &t[..8].replace(':', "")))
             .unwrap_or_else(|| iso.replace(['-', ':', 'T'], ""));
-        let path = dir.join(format!("{stem}-{stamp}.jsonl"));
-        let file = OpenOptions::new().create(true).append(true).open(&path)?;
+        let (path, file) = Self::create_exclusive(dir, stem, &stamp)?;
+        // Creation/metadata durability per OS: on Unix, fsync the parent
+        // directory so the new directory entry itself reaches storage
+        // (fail-closed: a refused dir sync fails the open). Scope note:
+        // the directory's OWN creation by create_dir_all above is not
+        // recursively synced. Windows has no public equivalent — the
+        // durability docs state it as unproven there.
+        #[cfg(unix)]
+        {
+            let dir_file = File::open(dir)?;
+            dir_file.sync_all()?;
+        }
         Ok(Replay::attach(path, Box::new(file)))
+    }
+
+    /// Exclusive-create loop: `<stem>-<stamp>.jsonl`, then `-1`, `-2`, …
+    /// until an unused name wins. Exactly one racer holds each file.
+    fn create_exclusive(dir: &Path, stem: &str, stamp: &str) -> std::io::Result<(PathBuf, File)> {
+        let base = dir.join(format!("{stem}-{stamp}"));
+        let mut first_try = true;
+        for n in 0..=999u32 {
+            let path = if first_try {
+                first_try = false;
+                base.with_extension("jsonl")
+            } else {
+                base.with_file_name(format!(
+                    "{}-{}.jsonl",
+                    base.file_name().unwrap_or_default().to_string_lossy(),
+                    n
+                ))
+            };
+            match OpenOptions::new().create_new(true).append(true).open(&path) {
+                Ok(file) => return Ok((path, file)),
+                Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => continue,
+                Err(e) => return Err(e),
+            }
+        }
+        Err(std::io::Error::other(
+            "replay open: 1000 same-second name collisions without a free name",
+        ))
     }
 
     /// Build a replay over an injected sink. Instrumentation seam for the
@@ -512,6 +559,60 @@ mod tests {
             other => panic!("expected Closed, got {other:?}"),
         }
         assert!(!r.is_poisoned()); // closed is not damage
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Review P1-1: a fresh open must NEVER extend an existing stream —
+    /// same-stem reopen in the same second (or a concurrent racer) gets a
+    /// NEW exclusively-created file, and the old (possibly torn) file's
+    /// bytes stay untouched. Reproduces the reviewer's probe shape: a
+    /// 10-byte torn tail + a fresh open + an acknowledged append.
+    #[test]
+    fn fresh_open_never_extends_an_existing_stream() {
+        let dir = tmp_dir("reopen");
+        let mut first = Replay::open(&dir, "reopen").unwrap();
+        let first_path = first.path.clone();
+        first.ev("probe", json!({ "n": 1 })).unwrap();
+        first.close();
+        // tear the stream the way a partial write would leave it
+        let torn = b"0123456789"; // exactly the reviewer's 10 bytes
+        fs::write(&first_path, torn).unwrap();
+        // replacement session, same stem, immediately (same second or not:
+        // either the stamp repeats and the suffix bump avoids it, or the
+        // stamp differs — both must leave the torn file untouched)
+        let mut second = Replay::open(&dir, "reopen").unwrap();
+        assert_ne!(
+            second.path, first_path,
+            "a fresh session must never reuse the existing stream"
+        );
+        second.ev("probe", json!({ "n": 2 })).unwrap();
+        assert_eq!(
+            fs::read(&first_path).unwrap(),
+            torn.to_vec(),
+            "the damaged file must be left byte-identical"
+        );
+        assert!(fs::read_to_string(&second.path)
+            .unwrap()
+            .contains("\"ev\":\"probe\""));
+        // and the collision bump is bounded and honest under many racers
+        let mut paths = std::collections::HashSet::new();
+        for _ in 0..5 {
+            paths.insert(Replay::open(&dir, "reopen").unwrap().path);
+        }
+        assert!(!paths.contains(&first_path));
+        assert_eq!(paths.len(), 5, "every same-stem session owns its own file");
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Review P2: on Unix the parent directory is fsynced at creation
+    /// (fail-closed — a refusal fails the open). Smoke-level: a successful
+    /// open on a fresh directory implies the dir-sync step succeeded.
+    #[cfg(unix)]
+    #[test]
+    fn open_on_unix_syncs_the_parent_directory() {
+        let dir = tmp_dir("dirsync");
+        let mut r = Replay::open(&dir, "dirsync").unwrap();
+        r.ev("probe", json!({})).unwrap();
         let _ = std::fs::remove_dir_all(&dir);
     }
 

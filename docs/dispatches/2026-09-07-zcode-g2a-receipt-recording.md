@@ -31,15 +31,23 @@ claimed success regardless. Cure, in `crates/banchor/src/replay.rs`:
   envelope unchanged) → size-admission → `write_all` → `flush` → `sync`
   → only then `Ok`. `sync` is `File::sync_all` (fsync / FlushFileBuffers):
   a storage-synchronization REQUEST, not a power-loss proof — stated in
-  the module docs, along with creation/metadata durability being
-  fsync-of-parent on Unix and UNPROVEN on Windows. Process death between
-  boundaries is not emulated: a killed process does not emulate storage
-  loss, and what survives is the reader's (G2-B) problem; every writer
-  boundary IS covered deterministically by injected faults.
+  the module docs. Creation/metadata durability: `Replay::open` fsyncs
+  the PARENT DIRECTORY on Unix (fail-closed; the directory's own creation
+  is not recursively synced — scope stated); Windows has no public
+  directory-fsync equivalent, so it is UNPROVEN there (wording corrected
+  in review round 1 — the first draft claimed a Unix step the code did
+  not perform; §6/P2). Process death between boundaries is not emulated:
+  a killed process does not emulate storage loss (distinct failures;
+  neither proves the other), and what survives is the reader's (G2-B)
+  problem; every writer boundary IS covered deterministically by
+  injected faults.
 - **Poison law**: any write/flush/sync failure poisons the writer — later
   appends return `Poisoned`; a stream that may end mid-record is never
   quietly extended. The only explicit recovery is a fresh `Replay::open`
-  (new timestamped file). `close()`d writers refuse with `Closed`.
+  — which since review round 1 creates its file EXCLUSIVELY and bumps a
+  `-N` suffix on same-second/concurrent name collisions, so a replacement
+  session can never append to the damaged file it replaces (§6/P1-1).
+  `close()`d writers refuse with `Closed`.
 - **Size admission before storage**: `MAX_RECORD_BYTES = 4 MiB`, derived
   from the existing shapes (largest event = `snapshot`, embedding the
   1200-node-capped formatted tree ≈ low hundreds of KiB per line; 4 MiB
@@ -122,3 +130,61 @@ Unix). CI already runs `cargo test --workspace --locked` and
 - `MAX_RECORD_BYTES` is derived from current shapes, not a product of
   measurement on live replays (none exist on this seat); revisit if
   receipt shapes grow.
+
+## 6. Corrections after review round 1 (2026-09-07, same build session)
+
+[Review packet](2026-09-07-astra-g2a-review.md) — verdict "changes
+required", four findings; all confirmed real on inspection and fixed.
+Tests now **73 passed / 0 failed**; `cargo fmt -p banchor -- --check`
+clean; the `unused_must_use` compiler warning is gone. PR #18 and issue
+#16 remain open; the corrected head replaces `8d9fbbce` as the pinned
+candidate.
+
+- **P1-1 (fresh open could extend the torn stream it replaced)** —
+  `Replay::open` now creates EXCLUSIVELY (`create_new`) and bumps a `-N`
+  suffix on collision (same stem in the same second, or a concurrent
+  same-stem racer; bounded at 1000, fail-closed). A replacement session
+  owns a brand-new file and the damaged original stays byte-identical.
+  Regression `fresh_open_never_extends_an_existing_stream` reproduces the
+  reviewer's probe shape (10-byte torn tail + fresh open + acknowledged
+  append) and asserts a different path, untouched torn bytes, and five
+  same-stem sessions owning five distinct files.
+- **P1-2 (`end` could falsely report completeness)** — completeness is
+  now tracked independently of the sink: `receipt_gaps` latches on ANY
+  refused receipt (poison or admission), and a successful small
+  `session_end` write no longer retroactively completes the session —
+  `end` returns `receipt_complete:false, gaps:true` and the stored
+  `session_end` line itself carries `"gaps"`/`"halted"`. A FAILED end
+  stores its `(path, why)` disposition and a repeated `end` replays the
+  same `EndReceiptIncomplete` — cleanup can no longer erase the failure
+  evidence. A fresh `start` resets its own state (never the previous
+  session's). Regressions:
+  `end_reports_gaps_after_an_unrecordable_action_receipt` (the oversized
+  click-receipt case) and
+  `repeated_end_never_upgrades_an_incomplete_receipt`.
+- **P1-3 (agentloop dropped one receipt result and misclassified
+  post-action errors)** — the unparseable-branch `model_choice` record
+  now propagates (`?`; NOT silenced with `let _ =`; the miss was a bug in
+  my bulk-conversion script that only surfaced on single-line call sites
+  — the compiler warning was the tell and I failed to chase it). The
+  click `Err(e)` arm now distinguishes receipt failures
+  (`ReceiptAfterAction`/`Receipt`): those EXIT the loop immediately —
+  outcome preserved verbatim (executed-but-unreceipted vs recording
+  failure), no retry prompt (a second model pick could double-execute
+  the first action), no secondary record burying the original error. The
+  `agent_end` summary is skipped when halted, and the loop-level
+  invariant — no model request and no further action after a
+  receipt-failure exit, only cleanup — is asserted by structure and
+  named in a comment at the exit.
+- **P2 (Unix directory-sync claim exceeded the implementation)** — now
+  the code performs what the docs claimed: `Replay::open` fsyncs the
+  parent directory on Unix after exclusive creation, fail-closed (a
+  refused dir sync fails the open), with the scope stated (the
+  directory's own creation is not recursively synced); Windows remains
+  explicitly UNPROVEN. Module docs and §1 now describe exactly what is
+  done, and keep the process-death vs power-loss distinction. Smoke
+  regression `open_on_unix_syncs_the_parent_directory` (unix-only;
+  skipped on this Windows seat, runs in CI).
+
+Pre-existing dead-code warnings in axtree/cdp (unused `format`,
+`ClickOutcome`, …) are untouched by this lane and remain as on main.
