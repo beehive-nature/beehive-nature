@@ -41,3 +41,12 @@ studio remain Astra's theme-adapter lane and were not rewritten.
   room; hive cards show one estate-hive chip; cypherpunk opens relay density
   on the same URL. Triple-chip leak (page `display:inline-flex` beating the
   shared `[data-reg]` hide) was found and removed.
+
+## CI
+
+Pull-request checks on `363a6f9` are green (static, node, test, secret-scan).
+The matching push-event static job failed §7 because the force-with-lease
+that rewrote Cursor-as-author left `github.event.before` as a discarded
+tip that does not resolve in the checkout. This descendant is the cure:
+the next push range is parent..tip on the rewritten line. No identity
+change to `363a6f9` itself.
