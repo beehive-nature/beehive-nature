@@ -142,6 +142,18 @@ enjoyed or approved an interface. Record observed feedback and untested
 assumptions separately. This rule sets the design priority, not a new
 mandatory approval or credential gate.
 
+**FOUNDER CONTINUATION — 2026-09-07:** New bee backgrounds and text must keep
+matching the approved hub as the estate grows. Reuse the common page theme
+and its readable type scale; do not ship a new dark 9–13px reading surface
+under a light New bee toolbar. Migrate existing tool families with explicit
+adapters: background, text, controls and any chart/HUD palette form a unit.
+Keep semantic hue meanings and evidence intact. Record unconverted families
+as pending instead of calling a toolbar a completed skin. The original art
+and frozen-art rules still hold. The old density ceiling of 14px is not the
+New bee reading target; regular reading text is at least 16px, with 14px for
+secondary labels. This is a shared implementation standard, not a recurring
+agent job or a new approval gate.
+
 The first implementation and its verification limits are recorded in
 [`2026-09-06-skaists-frontdoor.md`](dispatches/2026-09-06-skaists-frontdoor.md).
 

@@ -140,7 +140,7 @@
      could otherwise leave the newly inserted buttons in English. */
   if(!document.getElementById('bregctl')){
     var s=document.createElement('script');
-    s.src=R+'register.js?v=7';
+    s.src=R+'register.js?v=8';
     s.onload=loadLanguage; s.onerror=loadLanguage;
     document.body.appendChild(s);
   }else loadLanguage();

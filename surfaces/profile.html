@@ -42,6 +42,26 @@ h1{font-size:clamp(28px,6vw,40px);line-height:1.1;margin:8px 0 6px;font-weight:6
 .email{font-size:9.5px;color:var(--info);margin-top:4px}
 footer{max-width:860px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:1.9;border-top:1px solid var(--line);padding-top:14px}
 @media (max-width:600px){body{padding:14px 10px 80px}.house{padding:13px 12px}.holder{flex-direction:column}.holder .art{width:44px;height:44px}}
+/* Profile-specific reading structure consumes the shared New bee canvas.
+   Honey/guard/verification text uses deeper stops of the same semantic ramps. */
+body[data-reg="bee"]{--gold:#855b0b;--b-value:#855b0b;--verified:#326b39;--leaf:#326b39;--violet:#65509a;--guard:#65509a;--info:#29628f;--cyan:#176879;padding:28px clamp(16px,4vw,48px) 90px}
+body[data-reg="bee"] main{max-width:960px}
+body[data-reg="bee"] h1{font-size:clamp(2.25rem,5vw,3.5rem);margin-block:12px 20px}
+body[data-reg="bee"] .lede{font-size:1.125rem;margin-bottom:32px}
+body[data-reg="bee"] .house{padding:clamp(20px,3vw,32px);margin-block:24px}
+body[data-reg="bee"] .house.current{border-color:var(--gold)}
+body[data-reg="bee"] .hname{font-size:1.5rem;overflow-wrap:anywhere}
+body[data-reg="bee"] .htype,body[data-reg="bee"] .badge{font-size:.875rem;line-height:1.5;letter-spacing:normal}
+body[data-reg="bee"] .badge{padding:4px 9px;margin-block:4px;white-space:normal}
+body[data-reg="bee"] .holder{gap:20px;margin-block:20px}
+body[data-reg="bee"] .holder .bio{min-width:0}
+body[data-reg="bee"] .holder .bio .bname{font-size:1.125rem}
+body[data-reg="bee"] .holder .bio .bdesc,body[data-reg="bee"] .genline .gwho,body[data-reg="bee"] .genline .gdesc{font-size:1rem}
+body[data-reg="bee"] .holder .bio .bmeta,body[data-reg="bee"] .genline .gwhen{font-size:.875rem;overflow-wrap:anywhere}
+body[data-reg="bee"] .genline{padding:16px 20px;margin-block:12px}
+body[data-reg="bee"] .genlabel{margin-top:24px}
+body[data-reg="bee"] a{color:var(--info);text-underline-offset:3px}
+body[data-reg="bee"] a:focus-visible{outline:2px solid var(--info);outline-offset:4px}
 </style>
 </head>
 <body>
@@ -161,6 +181,6 @@ footer{max-width:860px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   <div>the dynasty layer · append-only holder snapshots · a lost key is permanent; a lost name is a lease running out</div>
   <div>name and key must never share a single point of failure</div>
 </footer>
-<script src="tour.js?v=37"></script>
+<script src="tour.js?v=38"></script>
 </body>
 </html>

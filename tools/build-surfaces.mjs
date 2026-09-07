@@ -293,7 +293,7 @@ for (const d of E.domains) {
     + 'a door may not claim what the estate does not do</div>\n'
     + '  <div><a href="./">all six doors</a> · <a href="../">the hub</a> · '
     + '<a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/estate.json" rel="noopener">the registry</a></div>\n'
-    + '</footer>\n\n<script src="../tour.js?v=37"></' + 'script>\n</body>\n</html>\n';
+    + '</footer>\n\n<script src="../tour.js?v=38"></' + 'script>\n</body>\n</html>\n';
 
   writeFileSync(join(OUT, 'doors', (d.slug||d.id) + '.html'), html);
   built.push({ id: d.id, host: d.host, live: live.length, notYet: dead.length + d.notYet.length });
@@ -301,11 +301,14 @@ for (const d of E.domains) {
 
 /* the index of doors */
 {
+  // Keep title colors connected to the page palette when New bee deepens it.
+  const accentTokens = new Map([...BASE_TOKENS.matchAll(/--([\w-]+):(#[0-9A-Fa-f]+);/g)]
+    .map(([, name, value]) => [value.toUpperCase(), 'var(--' + name + ')']));
   let g = '';
   for (const d of E.domains) {
     const b = built.find(x => x.id === d.id);
     g += '      <a class="t" href="' + (d.slug||d.id) + '.html" style="border-left-color:' + d.accent + '">'
-      + '<b style="color:' + d.accent + '">' + esc(d.host) + '</b>'
+      + '<b style="color:' + (accentTokens.get(d.accent.toUpperCase()) || d.accent) + '">' + esc(d.host) + '</b>'
       + '<s data-i18n="d.' + d.id + '.who">' + esc(d.who) + '</s>'
       + '<s>' + b.live + ' open now</s></a>\n';
   }
@@ -322,7 +325,7 @@ for (const d of E.domains) {
     + '<footer>\n  <div>six doors · paths for now, no DNS · a door may not claim what the estate does not do</div>\n'
     + '  <div><a href="../">the hub</a> · '
     + '<a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/estate.json" rel="noopener">the registry</a></div>\n'
-    + '</footer>\n<script src="../tour.js?v=37"></' + 'script>\n</body>\n</html>\n';
+    + '</footer>\n<script src="../tour.js?v=38"></' + 'script>\n</body>\n</html>\n';
   writeFileSync(join(OUT, 'doors', 'index.html'), html);
 }
 
@@ -486,7 +489,7 @@ const hub = head('beehive nature · the surfaces — six domains, one organism',
   + '  });\n'
   + '})();\n</' + 'script>\n'
   + '<script src="agent-dock.js?v=5"></' + 'script>\n'
-  + '<script src="tour.js?v=37"></' + 'script>\n</body>\n</html>\n';
+  + '<script src="tour.js?v=38"></' + 'script>\n</body>\n</html>\n';
 
 writeFileSync(join(OUT, 'index.html'), hub);
 

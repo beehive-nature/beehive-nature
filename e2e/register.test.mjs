@@ -8,7 +8,7 @@ import {listSurfacesOnDisk} from '../scripts/surface-count.mjs';
 const root=resolve(import.meta.dirname,'..');
 const read=p=>readFileSync(resolve(root,p),'utf8');
 const source=read('surfaces/register.js');
-function page({saved=null,denied=false,host=false,loading=false,display='block',direction='row',script='https://skaists.dev/surfaces/register.js?v=7'}={}){
+function page({saved=null,denied=false,host=false,loading=false,display='block',direction='row',theme=null,url='https://skaists.dev/surfaces/profile.html',script='https://skaists.dev/surfaces/register.js?v=8'}={}){
   const ids=new Map(), events={}, docEvents={}, storage=new Map();
   if(saved!==null) storage.set('bregister',saved);
   const on=(map,k,fn)=>(map[k]??=[]).push(fn);
@@ -24,12 +24,13 @@ function page({saved=null,denied=false,host=false,loading=false,display='block',
     return e;
   }
   const body=element('body'),content=element('main');content.textContent='All facts, all actions';body.appendChild(content);
+  if(theme)body.setAttribute('data-bee-theme',theme);
   const explicit=host?element('div'):null;
   if(explicit){explicit.setAttribute('data-register-host','');explicit.setAttribute('aria-describedby','view-explainer');body.appendChild(explicit);}
-  const document={body,head:element('head'),readyState:loading?'loading':'complete',currentScript:{src:script},
+  const document={body,head:element('head'),documentElement:element('html'),readyState:loading?'loading':'complete',currentScript:{src:script},
     createElement:element,getElementById:k=>ids.get(k),querySelector:s=>s==='[data-register-host]'?explicit:s==='body > main'?content:null,
     addEventListener:(k,fn)=>on(docEvents,k,fn),dispatchEvent:e=>{for(const fn of docEvents[e.type]||[])fn(e);}};
-  const context={document,URL,getComputedStyle:()=>({display,flexDirection:direction}),location:{href:'https://skaists.dev/surfaces/doors/bnature-social.html'},
+  const context={document,URL,getComputedStyle:()=>({display,flexDirection:direction}),location:{href:url},
     CustomEvent:class{constructor(type,init){this.type=type;this.detail=init.detail;}},
     localStorage:{getItem:k=>{if(denied)throw Error('blocked');return storage.get(k)??null;},setItem:(k,v)=>{if(denied)throw Error('blocked');storage.set(k,v);}},
     addEventListener:(k,fn)=>on(events,k,fn)};
@@ -87,12 +88,63 @@ test('native buttons cannot submit a surrounding form; labels use existing corpu
 });
 test('home resolves beside the loader on custom and GitHub project origins',()=>{
   for(const prefix of ['https://skaists.dev/surfaces/','https://beehive-nature.github.io/beehive-nature/surfaces/']){
-    const p=page({script:prefix+'register.js?v=7'});assert.equal(p.ids.get('bregbar').children[0].href,prefix+'index.html');
+    const p=page({script:prefix+'register.js?v=8'});assert.equal(p.ids.get('bregbar').children[0].href,prefix+'index.html');
   }
 });
 test('bregister retains the established event payload for page presentations',()=>{
   const p=page();let observed;p.document.addEventListener('bregister',e=>observed=e.detail.reg);
   p.ids.get('breg-raver').click();assert.equal(observed,'raver');
+});
+test('shared New bee page theme follows the preference and yields to the custom hub',()=>{
+  const p=page();assert.equal(p.body.attrs['data-bee-theme'],'shared');
+  assert.equal(p.document.documentElement.attrs['data-bee-light'],'true');
+  for(const mode of ['raver','cypherpunk']){
+    p.ids.get('breg-'+mode).click();assert.equal(p.document.documentElement.attrs['data-bee-light'],'false');
+  }
+  p.ids.get('breg-bee').click();assert.equal(p.document.documentElement.attrs['data-bee-light'],'true');
+  assert.equal(page({host:true}).body.attrs['data-bee-theme'],'custom');
+  assert.equal(page({theme:'custom'}).body.attrs['data-bee-theme'],'custom');
+});
+test('preserved art and explicit preserve pages keep their own canvas in every view',()=>{
+  for(const path of ['fleet/gallery/original.html','fleet-hosted/gallery/acid-cascade.html','fleet-hosted/lab/flower-lab.html','forge/orbit.html','forge/orbit-v2.html']){
+    const p=page({url:'https://skaists.dev/surfaces/'+path});
+    assert.equal(p.body.attrs['data-bee-theme'],'preserve',path);
+    assert.equal(p.document.documentElement.attrs['data-bee-light'],'false',path);
+    assert.equal(p.ids.get('bregctl').children.length,3);
+  }
+  assert.equal(page({theme:'preserve'}).document.documentElement.attrs['data-bee-light'],'false');
+});
+test('reviewed reading families adopt the theme; dark tools wait for complete adapters',()=>{
+  const families={
+    'profile.html':'profile','buzz-directory.html':'directory',
+    'doors/index.html':'door','doors/skaists.html':'door','doors/beehivenature.html':'door',
+    'doors/beehivebiomass.html':'door','doors/bnature-bio.html':'door','doors/bnature-social.html':'door','doors/plur.html':'door',
+    'doors/skaists-buzz.html':'relay','doors/beehivenature-buzz.html':'relay'
+  };
+  for(const [path,adapter] of Object.entries(families)){
+    assert.ok(read('surfaces/'+path));
+    const p=page({url:'https://skaists.dev/surfaces/'+path});
+    assert.equal(p.body.attrs['data-bee-theme'],'shared',path);
+    assert.equal(p.body.attrs['data-bee-adapter'],adapter,path);
+  }
+  for(const path of ['bqueenbee-live.html','review.html','comb.html','forge/room.html']){
+    const p=page({url:'https://skaists.dev/surfaces/'+path});
+    assert.equal(p.body.attrs['data-bee-theme'],'pending',path);
+    assert.equal(p.document.documentElement.attrs['data-bee-light'],'false',path);
+  }
+});
+test('shared reading colors clear the text contrast floor without replacing data tokens',()=>{
+  const css=page().ids.get('bregstyle').textContent;
+  const rule=css.match(/body\[data-reg="bee"\]\[data-bee-theme="shared"\]\{([^}]+)\}/)[1];
+  const colors=Object.fromEntries([...rule.matchAll(/--([\w-]+):\s*(#[0-9a-f]+);/gi)].map(m=>[m[1],m[2]]));
+  function luminance(hex){const s=hex.slice(1);const full=s.length===3?[...s].map(c=>c+c).join(''):s;
+    return [0,2,4].map(i=>parseInt(full.slice(i,i+2),16)/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4).reduce((sum,v,i)=>sum+v*[.2126,.7152,.0722][i],0);}
+  for(const ink of ['ink','dim','faint'])for(const background of ['bg','panel','well']){
+    const values=[luminance(colors[ink]),luminance(colors[background])].sort((a,b)=>b-a);
+    assert.ok((values[0]+.05)/(values[1]+.05)>=4.5,ink+' on '+background);
+  }
+  assert.doesNotMatch(rule,/--(?:cat-[\w-]+|sem-[\w-]+|gold|guard|verified|ok|flag|b-value)\s*:/);
+  assert.doesNotMatch(rule,/filter\s*:/);
 });
 test('every current estate HTML has one resolvable shared loader; frozen art stays pinned separately',()=>{
   const estate=JSON.parse(read('estate.json'));
@@ -103,10 +155,10 @@ test('every current estate HTML has one resolvable shared loader; frozen art sta
     assert.equal(tags.length,1,p+' must load the shared shell once');
     const target=resolve(dirname(resolve(root,p)),tags[0][1].split('?')[0]);
     assert.equal(target,resolve(root,'surfaces/tour.js'),p+' must resolve to the shared tour');
-    if(p!=='surfaces/forge/orbit.html')assert.match(tags[0][1],/tour\.js\?v=37$/,p);
+    if(p!=='surfaces/forge/orbit.html')assert.match(tags[0][1],/tour\.js\?v=38$/,p);
   }
   for(const p of ['scripts/build-atlas.mjs','tools/build-surfaces.mjs']){
-    assert.match(read(p),/tour\.js\?v=37/);assert.doesNotMatch(read(p),/tour\.js\?v=(?!37\b)\d+/);
+    assert.match(read(p),/tour\.js\?v=38/);assert.doesNotMatch(read(p),/tour\.js\?v=(?!38\b)\d+/);
   }
 });
 test('tour language bootstrap waits for view labels, with a script-error fallback',()=>{
