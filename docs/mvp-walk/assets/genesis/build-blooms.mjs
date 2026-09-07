@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 /**
- * Reconstruct the three founder genesis marks as portable SVGs.
+ * Write three provisional SVG reconstructions of the founder genesis marks.
  *
- * These are geometry/color reconstructions from founder-supplied photographs
- * dated 2026-09-07 (session attachments). The original JPEG/PNG bytes were
- * not present on this checkout or in origin history. The SVGs are review
- * proxies for palette and structure — not the founder photographs.
+ * Geometry and color stops are chosen by this script so the review board can
+ * show portable marks. They do NOT establish the exact founder originals.
+ * The 2026-09-07 JPEG/PNG bytes were session attachments, absent from this
+ * checkout and from origin history. Replace these SVGs with the founder
+ * photographs when those files are recovered.
  *
  * Run: node docs/mvp-walk/assets/genesis/build-blooms.mjs
  */
@@ -124,22 +125,22 @@ const marks = [
   {
     file: "skaists-purple-center.svg",
     id: "skaists",
-    title: "skaists — purple-center hex bloom (reconstruction)",
-    note: "Reconstruction of the founder-supplied 2026-09-07 skaists mark: magenta/fuchsia core through purple and cyan to a lime rim. Not the original photograph.",
+    title: "skaists — purple-center hex bloom (provisional reconstruction; chosen stops)",
+    note: "Provisional reconstruction. Geometry and color stops were chosen by this script. They do not establish the exact founder original. Magenta/fuchsia core through purple and cyan to a lime rim. Replace with the founder JPEG when recovered.",
     fill: (c) => sampleStops(skaistsStops, c.t),
   },
   {
     file: "beehive-biomass-solid-green.svg",
     id: "biomass",
-    title: "beehive biomass — solid lime hex bloom (reconstruction)",
-    note: "Reconstruction of the founder-supplied 2026-09-07 beehive biomass mark: uniform lime honeycomb. Not the original photograph.",
+    title: "beehive biomass — solid lime hex bloom (provisional reconstruction; chosen fill)",
+    note: "Provisional reconstruction. Geometry and solid lime fill were chosen by this script. They do not establish the exact founder original. Replace with the founder JPEG when recovered.",
     fill: () => "#9AD62E",
   },
   {
     file: "beehive-nature-green-center.svg",
     id: "nature",
-    title: "beehive nature — green-center hex bloom (reconstruction)",
-    note: "Reconstruction of the founder-supplied 2026-09-07 beehive nature mark: pale-yellow/lime core through cyan to a magenta rim. Not the original photograph.",
+    title: "beehive nature — green-center hex bloom (provisional reconstruction; chosen stops)",
+    note: "Provisional reconstruction. Geometry and color stops were chosen by this script. They do not establish the exact founder original. Pale-yellow/lime core through cyan to a magenta rim. Replace with the founder JPEG when recovered.",
     fill: (c) => sampleStops(natureStops, c.t),
   },
 ];

@@ -1,65 +1,78 @@
 # Festival pilot brief — one page
 
-**Status:** hypothesis and proposed pilot, not a booking, not a commercial claim.  
+**Status:** discovery notes, not a booking, not a commercial claim.  
 **Date:** 2026-09-07 · **Lane:** Grok #27 creative pack · **No outreach executed.**
 
-Need, host commitment, costs, and willingness to pay remain **UNKNOWN** until someone who actually runs or attends a gathering says so. Do not scrape leads. Do not message promoters from this brief.
+Need, host commitment, costs, and willingness to pay remain **UNKNOWN**. This page does not invent a willing host, a booked table, or a budget. Do not scrape leads. Do not message promoters from this brief.
 
-## Hypotheses (to be evidenced)
+## Start with recent real experiences
 
-| Who | Hypothesis | What would change our mind |
+Before anyone proposes a table, a set length, or a booth plan, ask what actually happened the last time this person was at a gathering. The job is to hear problems in their words. A proposed pilot is a later step, and only if those conversations show a problem this page might touch.
+
+**Attendee — recent experience**
+
+1. When did you last trade or refuse kandi? What happened, in order?
+2. What made that easy or hard?
+3. If someone had handed you a line of text instead of beads, what would you have done *that night*?
+4. What would have made you walk away?
+
+**Artist / DJ / maker — recent experience**
+
+1. Last time you made or gave something on site, what got in the way?
+2. What must never appear next to your name?
+3. What help have people promised you that they did not have?
+
+**Promoter — recent experience**
+
+1. What is the last small, unpaid presence you allowed, and what went wrong?
+2. What would make you say no immediately?
+3. Who, if anyone, actually watched that presence? (If you do not know, say so.)
+
+Do not lead with “would you host a table for an evening.” That question comes only after problems are on paper, and it still does not create willingness.
+
+## Hypotheses only after those talks
+
+These remain unevidenced until someone answers from a real night:
+
+| Who | Later hypothesis (not a finding) | What would change our mind |
 |---|---|---|
-| Attendee | A person who already trades physical kandi will try a browser bracelet if a friend is next to them and the page does not ask for an account. | They bounce, ask for a booth worker, or refuse to paste a string. |
-| Artist / DJ / maker | A maker will offer a word-bracelet as a keepsake if it takes less attention than a set change and does not look like merch checkout. | They call it extra labor, want payment first, or need staff. |
-| Promoter | A promoter will host a quiet table if it costs them almost no money, needs one volunteer, and does not claim ticket or wallet features. | They ask for a fee, exclusive branding, or a data capture we will not do. |
+| Attendee | A person who already trades physical kandi might try a browser bracelet if a friend is next to them and the page does not ask for an account. | They bounce, ask for a booth worker, or refuse to paste a string. |
+| Artist / DJ / maker | A maker might offer a word-bracelet if it costs less attention than a set change and does not look like merch checkout. | They call it extra labor, want payment first, or need staff we do not have. |
+| Promoter | A promoter might allow a quiet presence if it costs them almost no money and does not claim ticket or wallet features. | They ask for a fee, exclusive branding, or data capture we will not do. |
 
-## Interview questions (ask; do not sell)
+## If evidence appears — a small proposed pilot (not scheduled)
 
-**Attendee**
+Only after interviews record a real problem:
 
-1. When you last traded kandi, what made you say yes?
-2. If a friend handed you a line of text instead of beads, what would you do?
-3. What would make you close the page?
+- A gathering someone in the estate already attends. No cold list.
+- One quiet presence, two devices, printed PLUR still, kandi bar open; Home QR only as the *other* card.
+- One observer with the scorecard. No hired street team.
+- **Success (pilot-scale, if it happens):** at least one unassisted make and one observed receiver Keep; the host, *if one exists*, would host again; no safety or consent incident.
+- **Failure:** nobody finishes a bracelet without coaching; people believe a wallet or identity is required; any paid spend happened (it must not).
 
-**Artist / DJ / maker**
+No host is named. No date is booked.
 
-1. Would you rather make a piece before the set or on the floor?
-2. What help would you need that we should not pretend we have?
-3. What must never appear next to your name?
+## Untested technical hypothesis
 
-**Promoter**
+“The kandi page works offline / without a chain refresh” is an **untested hypothesis**. It must not be treated as a field property until someone actually exercises it on a device with the network off and records the result. Same for battery, glare, and two-phone clipboard carry.
 
-1. What is the smallest table you have ever allowed with no ticket upsell?
-2. Who on site would actually watch that table?
-3. What would make you say no immediately?
+## Money and resources
 
-## Small proposed pilot
+Budget, host fee, and willingness to pay: **UNKNOWN**. Do not cite this brief as a forecast. People and kit are listed only as *what a later pilot would need*, not as assets we have:
 
-- **Where:** a gathering a founder or a known friend already attends. No cold list.
-- **What:** one quiet table, two devices, printed PLUR still, New bee page open on the kandi bar, Home QR as the *other* card (grand opening only).
-- **Who:** one host who already has a ticket; one observer with the scorecard; no hired street team.
-- **How long:** one evening or one afternoon.
-- **Success (pilot-scale):** at least one unassisted make + one observed receiver Keep; host would host again; no safety or consent incident.
-- **Failure:** nobody finishes a bracelet without coaching; host will not repeat; people believe a wallet or identity is required; any paid spend happened (it must not).
-
-## People and resources
-
-- Host with an existing relationship.
-- Observer who can keep quiet.
-- Two charged phones or a phone and a laptop. Offline-tolerant: the kandi page should not need a chain refresh.
+- A host with an existing relationship — **not yet identified**.
+- An observer who can keep quiet.
+- Two charged devices — untested in the field.
 - Printed still and one paper scorecard.
-- No ad budget. No purchased list. No booth fee unless a future evidence-backed decision says otherwise.
-
-## Money
-
-Budget, host fee, and willingness to pay: **UNKNOWN**. This brief must not be cited as a forecast.
+- No ad budget. No purchased list.
 
 ## Non-goals
 
 - No scraped promoter lists or cold outreach from this lane.
 - No public Home / Buzz / Bluesky posts, ads, or purchases.
 - No Festival Producer dApp and no rewrite of the attendee showcase wing.
-- No gift-code changes in the campaign PR.
+- No gift-code changes in this campaign PR.
 - No claim that five interviews prove demand.
+- No claim that a table or set time has been accepted.
 
-Same text is mirrored at `festival-hypothesis-brief.md` for earlier board links.
+Same discovery order is mirrored at `festival-hypothesis-brief.md` for earlier board links.

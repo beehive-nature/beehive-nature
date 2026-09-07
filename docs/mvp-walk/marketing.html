@@ -139,7 +139,7 @@
 </head>
 <body>
 <header>
-  <p class="banner"><strong>Internal review board — not a public campaign.</strong> Owned Home / Buzz / Bluesky are a proposed sequence only. This pack does not post, message recipients, buy ads, or purchase anything. Gift-code repairs are a separate PR.</p>
+  <p class="banner"><strong>Internal review board — not a public campaign.</strong> Owned Home / Buzz / Bluesky are a proposed sequence only. This pack does not post, message recipients, buy ads, or purchase anything. The gift engine is live via Astra’s integration; this PR does not edit it.</p>
   <h1>Make a little color. Give it to someone.</h1>
   <p class="sub">Proposed New bee invitation — not a ratified slogan. One organism, three organizations, three reading views. The views do not belong to the organizations.</p>
   <nav class="toc" aria-label="Board sections">
@@ -165,25 +165,25 @@
 
 <section id="marks">
   <h2>Genesis marks</h2>
-  <p>Founder-supplied photographs, 2026-09-07. The JPEG bytes were not on this checkout or on origin, so the board shows <strong>honest reconstructions</strong> of geometry and palette. Replace them with the originals if recovered. Provenance: <a href="assets/genesis/PROVENANCE.md">PROVENANCE.md</a>.</p>
+  <p>Founder-supplied photographs, 2026-09-07. The JPEG bytes were not on this checkout or on origin. The SVGs below are <strong>provisional reconstructions</strong> with <em>chosen</em> geometry and color stops — they do <strong>not</strong> establish the exact founder originals. Replace them with the founder JPEGs when those files are recovered. Provenance: <a href="assets/genesis/PROVENANCE.md">PROVENANCE.md</a>.</p>
   <div class="marks">
     <figure>
-      <img src="assets/genesis/skaists-purple-center.svg" alt="skaists hex bloom reconstruction: magenta center through purple and cyan to a lime rim">
-      <figcaption><strong>skaists</strong> — purple-center bloom. Magenta core, cyan middle, lime rim. Reconstruction.</figcaption>
+      <img src="assets/genesis/skaists-purple-center.svg" alt="Provisional skaists hex bloom reconstruction: chosen magenta-to-lime stops, not the founder photograph">
+      <figcaption><strong>skaists</strong> — purple-center bloom. Provisional reconstruction (chosen stops).</figcaption>
     </figure>
     <figure>
-      <img src="assets/genesis/beehive-biomass-solid-green.svg" alt="beehive biomass hex bloom reconstruction: solid lime honeycomb">
-      <figcaption><strong>beehive biomass</strong> — solid lime honeycomb. Reconstruction.</figcaption>
+      <img src="assets/genesis/beehive-biomass-solid-green.svg" alt="Provisional beehive biomass hex bloom reconstruction: chosen solid lime, not the founder photograph">
+      <figcaption><strong>beehive biomass</strong> — solid lime honeycomb. Provisional reconstruction (chosen fill).</figcaption>
     </figure>
     <figure>
-      <img src="assets/genesis/beehive-nature-green-center.svg" alt="beehive nature hex bloom reconstruction: lime center through cyan to a magenta rim">
-      <figcaption><strong>beehive nature</strong> — green-center bloom, magenta rim. Reconstruction.</figcaption>
+      <img src="assets/genesis/beehive-nature-green-center.svg" alt="Provisional beehive nature hex bloom reconstruction: chosen lime-to-magenta stops, not the founder photograph">
+      <figcaption><strong>beehive nature</strong> — green-center bloom, magenta rim. Provisional reconstruction (chosen stops).</figcaption>
     </figure>
   </div>
   <div class="palettes">
     <div class="card">
       <h3>Organization identity</h3>
-      <p class="muted">Derived from the founder marks. Not UI semantics. Not a view.</p>
+      <p class="muted">Chosen stops on provisional reconstructions. Not the founder originals. Not UI semantics. Not a view.</p>
       <p>skaists</p>
       <div class="swatch">
         <span><i class="dot" style="background:#E01888"></i> core</span>
@@ -216,7 +216,8 @@
 
 <section id="cuts">
   <h2>15-second New bee cut and Raver adaptation</h2>
-  <p><strong>Board, not film.</strong> No motion picture was produced. This player steps timed stills and captions. Same action and destination; different spoken color. Reduced-motion visitors get the static sequence — the player will not auto-advance if the system asks for less motion.</p>
+  <p class="banner"><strong>Storyboard, not film.</strong> This is not a continuous two-person animation. No completed audio bed exists. One poster still stays on screen; only the captions change. The founder PLUR photograph is shown once, below — not replayed as fake motion.</p>
+  <p>Same action and destination; different spoken color. Reduced-motion visitors get the caption list without auto-advance.</p>
   <div class="player" id="player" data-voice="bee">
     <div class="controls" role="group" aria-label="Voice">
       <button type="button" id="voiceBee" aria-pressed="true">New bee</button>
@@ -225,10 +226,10 @@
     <div class="stage" id="stage" aria-live="polite"></div>
     <p class="caption-bar"><span class="time" id="stamp">0.0s</span> · <span id="caption">A word. A little color.</span></p>
     <div class="controls">
-      <button type="button" id="play">Play 15s</button>
+      <button type="button" id="play">Step captions</button>
       <button type="button" id="pause">Pause</button>
-      <button type="button" id="replay">Replay</button>
-      <button type="button" id="static">Static sequence</button>
+      <button type="button" id="replay">Restart captions</button>
+      <button type="button" id="static">Show first caption</button>
     </div>
     <div class="beats" id="beats" aria-label="Jump to a beat"></div>
     <p class="muted" style="color:#c9c0b0;margin:.7rem 0 0">VO (New bee): “Make a little color. Give it to someone. Touch peace. Make one heart. Hold on. The gift leaves your arm.”</p>
@@ -245,15 +246,15 @@
       <li>Format <code>KND1|maker|for|ts36|beads|fnv</code> — FNV-1a/32 over the payload. A checksum catches a mistype. It is not a signature, not unique ownership, not verified identity.</li>
       <li>State key <code>localStorage.bkandi</code> in this origin. No cookies, no inbox, no relay. Clearing site data, hitting quota, or another tab writing the same key ends the “forever” wording.</li>
       <li>Gift / cross / show terminate at the OS clipboard (or selectable text if copy is refused). A person carries the line. Copied ≠ delivered ≠ kept.</li>
-      <li>Arrival preview does not write storage until Keep. Show uses a fragment, not proof of an exclusive transfer.</li>
-      <li>Source read: <code>surfaces/kandi.html</code> at <code>832bdf83</code>. Gift-identity defects in <code>gift(idx)</code> are assigned to the other worker.</li>
+      <li>Arrival Keep (Show <code>#k=</code>) has long been preview-first. At baseline <code>832bdf83</code> the leftover paste button <code>#rcvgo</code> saved immediately. After Astra’s integration (<code>a70dafe</code>), paste is also look-then-Keep (<code>#rcvgo</code> previews; <code>#rcvkeep</code> writes).</li>
+      <li>Live page: <a href="https://skaists.dev/surfaces/kandi.html">skaists.dev/surfaces/kandi.html</a>. Receipt: <code>docs/dispatches/2026-09-07-astra-kandi-integration.md</code>. Source checks and Pages publication are not human usability proof.</li>
     </ul>
   </div>
 </section>
 
 <section id="plur">
   <h2>Founder-accepted PLUR continuity</h2>
-  <p>Two people throughout. One fluid movement. A fade between separate signs is not the demonstration.</p>
+  <p>One posed four-panel still. It is <strong>not</strong> film and <strong>not</strong> a continuous two-person animation. A fade between signs would still not be the requested movement. Production notes below keep the founder canon for anyone who later films it.</p>
   <figure class="plur">
     <img src="assets/plur-paired-hands-v1.png" alt="Two partners demonstrate PLUR: touching peace signs, forming a heart together, interlocking fingers, and passing the pink-and-mint bracelet from the giver's wrist to the receiver's wrist.">
     <figcaption>
@@ -264,7 +265,7 @@
   <div class="split">
     <div class="card">
       <h3>Physical illustration</h3>
-      <p>This PNG is a posed four-panel still. It is not motion capture and not a deployed animation. When anyone films it, interpolate the same two hands — do not dissolve cards.</p>
+      <p>This PNG is a posed four-panel still. It is not motion capture, not deployed animation, and not completed film or audio. Show it once. Do not flip the same still on a timer and call that movement.</p>
     </div>
     <div class="card">
       <h3>Software handoff (different picture)</h3>
@@ -275,7 +276,7 @@
 
 <section id="proof">
   <h2>Claim-to-proof</h2>
-  <p>Design still ≠ screen recording ≠ source publication ≠ human usability observation. Full table: <a href="claim-to-proof.md">claim-to-proof.md</a>. Last source verification for this board: 2026-09-07 against <code>832bdf83</code>.</p>
+  <p>Design still ≠ screen recording ≠ source publication ≠ human usability observation. Full table: <a href="claim-to-proof.md">claim-to-proof.md</a>. Campaign-pack source read began at <code>832bdf83</code>. Gift engine now live via Astra integration <code>a70dafe</code> (2026-09-07).</p>
   <div class="scroll">
     <table>
       <thead>
@@ -294,37 +295,46 @@
           <td>You can string a bracelet in this browser today</td>
           <td>Newcomer</td>
           <td>Composer → right arm</td>
-          <td><code>kandi.html</code> <code>#stringit</code> @ 832bdf83</td>
-          <td>Source publication</td>
+          <td>Live <code>kandi.html</code> @ <code>a70dafe</code></td>
+          <td>Source publication + Pages</td>
           <td>kandi bar</td>
-          <td>Names limited by <code>NAMERE</code>; not a filmed completion</td>
+          <td>This board did not re-test the live composer. Not a filmed completion.</td>
         </tr>
         <tr>
           <td>What you gift leaves your arm</td>
           <td>Giver</td>
-          <td><code>gift(idx)</code> retires the piece and keeps a memory line</td>
-          <td>same file, gift ceremony</td>
-          <td>Source finding</td>
+          <td>Deliberate local completion; animation does not commit</td>
+          <td>Astra receipt @ <code>a70dafe</code></td>
+          <td>Source publication (integrator)</td>
           <td>kandi bar</td>
-          <td>Retirement currently runs on the animation timer, before a confirmed copy. Not proof a recipient kept anything. Repair is the other PR.</td>
+          <td>Not proof a recipient Keep. This creative PR did not edit the engine.</td>
         </tr>
         <tr>
-          <td>A received piece can be previewed, then kept</td>
-          <td>Receiver</td>
-          <td>Arrival Keep; leftover paste box</td>
-          <td>arrival / <code>#rcvgo</code></td>
+          <td>Arrival Keep is preview-first</td>
+          <td>Receiver via Show link</td>
+          <td>Arrival panel, then Keep</td>
+          <td>arrival <code>#arKeep</code> (true at 832bdf83 and now)</td>
           <td>Source publication</td>
           <td>kandi bar</td>
-          <td>Keep writes this browser only. Duplicate Keep can add copies.</td>
+          <td>Separate from the old paste path. This browser only.</td>
+        </tr>
+        <tr>
+          <td>Pasted string is preview-first</td>
+          <td>Receiver via paste</td>
+          <td>Look, then Keep</td>
+          <td>Now <code>#rcvgo</code> preview + <code>#rcvkeep</code>. At 832bdf83 <code>#rcvgo</code> saved immediately.</td>
+          <td>Source publication (post-integration)</td>
+          <td>kandi bar</td>
+          <td>Do not cite the baseline paste button as preview-first.</td>
         </tr>
         <tr>
           <td>The string “stays / forever”</td>
           <td>Anyone who read the old copy</td>
-          <td>Corrected: lives in <code>localStorage.bkandi</code> until cleared, quota, or another tab overwrites</td>
-          <td><code>load</code> / <code>save</code></td>
+          <td>Corrected: lives in <code>localStorage.bkandi</code> until cleared or another cooperating tab replaces it</td>
+          <td><code>commitChange</code> @ <code>a70dafe</code></td>
           <td>Source publication</td>
           <td>—</td>
-          <td>Not permanent storage. Not cross-device. Not an archive.</td>
+          <td>A failed new write does not erase previously committed storage. Not permanent. Not cross-device.</td>
         </tr>
         <tr>
           <td>KND1 checksum means the piece is yours</td>
@@ -345,19 +355,19 @@
           <td>Not software delivery. Not film.</td>
         </tr>
         <tr>
-          <td>15-second New bee / Raver cuts exist</td>
+          <td>15-second New bee / Raver cuts exist as film</td>
           <td>Reviewer</td>
-          <td>This storyboard player</td>
+          <td>Caption stepper + one poster</td>
           <td>this HTML</td>
-          <td>Board-not-film</td>
+          <td>Storyboard-not-film</td>
           <td>kandi bar</td>
-          <td>No original video or cleared audio bed was produced</td>
+          <td>No video. No completed audio. Not continuous two-person animation.</td>
         </tr>
         <tr>
           <td>Home is the grand opening</td>
           <td>Visitor</td>
           <td>Art / music / people</td>
-          <td>surfaces/index.html live on skaists.dev @ 832bdf83</td>
+          <td>surfaces/index.html live on skaists.dev</td>
           <td>Source + served Pages (Astra receipt)</td>
           <td>Home</td>
           <td>Not this gift creative’s landing</td>
@@ -372,12 +382,12 @@
   <div class="split">
     <div class="card">
       <h3>Observation</h3>
-      <p>Neutral goal, no coaching, distinguish a decline from a technical failure. Empty scorecard for about five willing newcomers. Agent fixtures are not people.</p>
+      <p>Anonymous attempt IDs and pair IDs. Not observed / Not applicable. Separate denominators. Keep and decline are separate outcomes — a decline is not gift-completion time. Agent fixtures are not people.</p>
       <p><a href="newcomer-observation-scorecard.md">Guide + empty scorecard</a></p>
     </div>
     <div class="card">
       <h3>Festival hypothesis</h3>
-      <p>Attendee / artist-DJ-maker / promoter. Need, host commitment, costs, and willingness to pay remain <strong>UNKNOWN</strong> until observed. No scraped leads.</p>
+      <p>Start from recent real experiences and problems. Tables and set times are later proposals. Offline tolerance is an <strong>untested hypothesis</strong>. Need, host, costs, and willingness to pay remain <strong>UNKNOWN</strong> — none invented here.</p>
       <p><a href="festival-pilot-brief.md">One-page brief</a></p>
     </div>
   </div>
@@ -387,11 +397,11 @@
   <details>
     <summary>Production notes — choreography kept out of the spoken VO</summary>
     <ol>
-      <li>Same two partners. Same skin, wrists, bracelet identities.</li>
+      <li>Same two partners. Same skin, wrists, bracelet identities. Notes for a later film — this board is not that film.</li>
       <li>Peace: V-sign fingertips touch.</li>
-      <li>Love: half-hearts; index and thumb tips meet.</li>
-      <li>Unity: fingers interlock. Not prayer hands.</li>
-      <li>Respect: clasp held; bracelet slides wrist → wrist; giver ends bare.</li>
+      <li>Love: touching fingertips. Each person makes half a heart; index and thumb tips meet.</li>
+      <li>Unity: interlocked fingers. Not prayer hands. Not a business handshake.</li>
+      <li>Respect: bracelet travels giver wrist → receiver wrist while fingers stay locked. The giver ends bare.</li>
     </ol>
   </details>
 </section>
@@ -410,13 +420,13 @@
   var timer = null;
   var playing = false;
   var beats = [
-    { t: 0, end: 2, bee: "A word. A little color.", raver: "Spell it on your arm.", kind: "poster" },
-    { t: 2, end: 4, bee: "String it.", raver: "String it.", kind: "poster" },
-    { t: 4, end: 6, bee: "Touch peace.", raver: "Peace — we meet.", kind: "plur" },
-    { t: 6, end: 8.5, bee: "Make one heart.", raver: "Love — fingertips.", kind: "plur" },
-    { t: 8.5, end: 11, bee: "Hold on.", raver: "Unity — lock in.", kind: "plur" },
-    { t: 11, end: 13.5, bee: "The gift leaves your arm.", raver: "Respect — it crosses.", kind: "plur" },
-    { t: 13.5, end: 15, bee: "Give it to someone.", raver: "Your move.", kind: "poster" }
+    { t: 0, end: 2, bee: "A word. A little color.", raver: "Spell it on your arm." },
+    { t: 2, end: 4, bee: "String it.", raver: "String it." },
+    { t: 4, end: 6, bee: "Touch peace.", raver: "Peace — we meet." },
+    { t: 6, end: 8.5, bee: "Make one heart.", raver: "Love — fingertips." },
+    { t: 8.5, end: 11, bee: "Hold on.", raver: "Unity — lock in." },
+    { t: 11, end: 13.5, bee: "The gift leaves your arm.", raver: "Respect — it crosses." },
+    { t: 13.5, end: 15, bee: "Give it to someone.", raver: "Your move." }
   ];
   var stage = document.getElementById("stage");
   var caption = document.getElementById("caption");
@@ -425,10 +435,8 @@
   var player = document.getElementById("player");
 
   function frame(b) {
-    if (b.kind === "plur") {
-      stage.innerHTML = '<img src="assets/plur-paired-hands-v1.png" alt="Founder-accepted paired-hand PLUR still">';
-    } else {
-      stage.innerHTML = '<img class="poster" src="assets/storyboard/newbee-15s-poster.svg" alt="New bee 15 second poster, board not film">';
+    if (!stage.querySelector("img")) {
+      stage.innerHTML = '<img class="poster" src="assets/storyboard/newbee-15s-poster.svg" alt="New bee 15 second poster. Storyboard, not film.">';
     }
     caption.textContent = voice === "raver" ? b.raver : b.bee;
     stamp.textContent = b.t.toFixed(1) + "s";
@@ -486,7 +494,7 @@
 
   show(0);
   if (reduce) {
-    document.getElementById("play").textContent = "Static (reduced motion)";
+    document.getElementById("play").textContent = "Captions only (reduced motion)";
   }
 })();
 </script>

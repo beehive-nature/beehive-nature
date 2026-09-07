@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 720" role="img" aria-labelledby="t d">
-  <title id="t">skaists — purple-center hex bloom (reconstruction)</title>
-  <desc id="d">Reconstruction of the founder-supplied 2026-09-07 skaists mark: magenta/fuchsia core through purple and cyan to a lime rim. Not the original photograph.</desc>
+  <title id="t">skaists — purple-center hex bloom (provisional reconstruction; chosen stops)</title>
+  <desc id="d">Provisional reconstruction. Geometry and color stops were chosen by this script. They do not establish the exact founder original. Magenta/fuchsia core through purple and cyan to a lime rim. Replace with the founder JPEG when recovered.</desc>
   <rect width="720" height="720" fill="#ffffff"/>
   <path d="M395.53,365.50L386.00,371.00L376.47,365.50L376.47,354.50L386.00,349.00L395.53,354.50Z" fill="#E01888" stroke="#ffffff" stroke-width="2.4" stroke-linejoin="round"/>
     <path d="M382.53,388.02L373.00,393.52L363.47,388.02L363.47,377.02L373.00,371.52L382.53,377.02Z" fill="#E01888" stroke="#ffffff" stroke-width="2.4" stroke-linejoin="round"/>
