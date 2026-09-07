@@ -127,11 +127,12 @@ test('reviewed reading families adopt the theme; dark tools wait for complete ad
     assert.equal(p.body.attrs['data-bee-theme'],'shared',path);
     assert.equal(p.body.attrs['data-bee-adapter'],adapter,path);
   }
-  for(const path of ['bqueenbee-live.html','review.html','comb.html','forge/room.html']){
+  for(const path of ['bqueenbee-live.html','review.html','comb.html']){
     const p=page({url:'https://skaists.dev/surfaces/'+path});
     assert.equal(p.body.attrs['data-bee-theme'],'pending',path);
     assert.equal(p.document.documentElement.attrs['data-bee-light'],'false',path);
   }
+  assert.match(read('surfaces/forge/room.html'),/<body data-reg="bee" data-bee-theme="custom">/);
 });
 test('shared reading colors clear the text contrast floor without replacing data tokens',()=>{
   const css=page().ids.get('bregstyle').textContent;

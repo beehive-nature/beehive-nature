@@ -2,73 +2,189 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f6f7f2">
+<meta name="color-scheme" content="light dark">
 <title>the two-tab room — forge multiplayer you can feel (fleet)</title>
 <style>
-:root{--bg:#0A0A0F;--crt:#00FF41;--cyan:#00E5FF;--pink:#FF3DB0;--dim:#5a6478}
+:root{--bg:#0A0A0F;--panel:#14141c;--well:#0d0d15;--ink:#cfe8d6;--dim:#8a93a6;--line:#262638;--accent:#00E5FF;--hot:#FF3DB0;--crt:#00FF41;--on:#102413;--font:system-ui,-apple-system,'Segoe UI',sans-serif;--mono:ui-monospace,'IBM Plex Mono','Cascadia Mono',Consolas,monospace}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:#cfe8d6;font:13px/1.6 'IBM Plex Mono',monospace;padding:26px 18px 60px;
-  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="97"><g fill="none" stroke="%231a1a2a"><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z"/><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z" transform="translate(28,48)"/></g></svg>')}
+body{background:var(--bg);color:var(--ink);font:1rem/1.6 var(--font);padding:28px 18px 80px;min-height:100vh}
 .wrap{max-width:860px;margin:0 auto}
-h1{color:var(--cyan);font-size:20px;text-shadow:0 0 10px rgba(0,229,255,.4)}
-h1 .gear{color:var(--pink);font-size:14px;vertical-align:middle}
-.sub{color:var(--dim);font-size:11.5px;margin:6px 0 18px;line-height:1.7}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
-input,button{font:inherit;background:#0d0d15;color:var(--crt);border:1px solid #262638;padding:7px 11px;border-radius:4px}
-input[type=text]{width:220px;color:var(--cyan)}
-input[type=range]{width:130px;accent-color:var(--cyan);padding:0}
-button{cursor:pointer;border-color:var(--crt)} button:hover{background:var(--crt);color:#000}
-button.ghost{border-color:#262638;color:var(--dim)} button.ghost:hover{background:#1a1a2a;color:var(--cyan)}
-label.ctl{display:flex;flex-direction:column;gap:2px;font-size:10.5px;color:var(--dim)}
-label.ctl span{color:#9fb2c4}
-canvas{background:#000;border:1px solid #1a1a2a;border-radius:6px;display:block;width:100%;margin-bottom:12px}
-.hint{color:var(--dim);font-size:11px;margin:10px 0;line-height:1.7}
-.hint b{color:#cfe8d6}
-.foot{margin-top:18px;color:var(--dim);font-size:10.5px;line-height:1.8}
-#meta{font-size:11.5px;color:#9fb2c4;margin-bottom:10px;min-height:18px}
-#room-bar{display:flex;gap:10px;align-items:center;font-size:11px;color:var(--dim);margin-bottom:10px;min-height:20px}
-.chip{display:inline-block;border:1px solid #2a2a3d;border-radius:4px;padding:2px 8px;margin:0 4px 0 0;font-size:11px}
-.chip.me{border-color:var(--cyan);color:var(--cyan)}
-#err{color:#ff5b6e;font-size:11.5px;display:none;margin-bottom:10px}
+.crumb{font-size:.875rem;margin:0 0 12px}
+.crumb a{color:var(--accent);min-height:44px;display:inline-flex;align-items:center;padding:0 4px}
+.eyebrow{color:var(--accent);font-size:.875rem;margin:0}
+h1{font-size:clamp(1.8rem,4vw,3rem);line-height:1.12;letter-spacing:-.04em;margin:8px 0 12px}
+[data-view]{display:none}
+body[data-reg=bee] [data-view=bee],body[data-reg=raver] [data-view=raver],body[data-reg=cypherpunk] [data-view=cypherpunk]{display:revert}
+body[data-reg=bee] h1 [data-view=bee],body[data-reg=raver] h1 [data-view=raver],body[data-reg=cypherpunk] h1 [data-view=cypherpunk]{display:block}
+h1 .gear{display:none}
+.lead{color:var(--dim);max-width:42ch;margin:0 0 16px;font-size:1.0625rem;line-height:1.65}
+.honesty{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin:0 0 18px;color:var(--dim);font-size:1rem;line-height:1.6;max-width:64ch}
+.honesty em{font-style:normal;display:inline-flex;align-items:center;min-height:32px;padding:4px 10px;border:1px solid var(--line);border-radius:99px;background:var(--panel);color:var(--ink);font-size:.875rem}
+#room-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:.875rem;color:var(--dim);margin-bottom:14px;min-height:20px}
+.chip{display:inline-block;border:1px solid var(--line);border-radius:8px;padding:4px 10px;margin:0 4px 0 0;font-size:.875rem}
+.chip.me{border-color:var(--accent);color:var(--accent)}
+#err{color:#8b3654;font-size:1rem;display:none;margin-bottom:12px}
+canvas#stage{background:#000;border:1px solid var(--line);border-radius:16px;display:block;width:100%;margin-bottom:16px}
+#meta{font-size:.875rem;color:var(--dim);margin-bottom:16px;min-height:18px}
+.knobs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:18px}
+label.ctl{display:flex;flex-direction:column;gap:8px;font-size:.875rem;color:var(--dim)}
+label.ctl span{color:var(--ink);font-size:1rem}
+input,button{font:inherit;background:var(--well);color:var(--ink);border:1px solid var(--line);padding:10px 14px;border-radius:10px;min-height:44px}
+input[type=text]{width:100%;color:var(--accent)}
+input[type=range]{width:100%;accent-color:var(--accent);padding:0;min-height:44px}
+button{cursor:pointer}button:hover{border-color:var(--accent)}
+button:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+button.ghost{color:var(--dim)}
+.seed-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}
+details.tool{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:0 16px 16px;margin:0 0 12px}
+details.tool:not([open]){padding-bottom:0}
+details.tool>summary{padding:14px 0;font-weight:600;min-height:44px;cursor:pointer;list-style:none}
+details.tool>summary::-webkit-details-marker{display:none}
+details.tool>summary:before{content:"+ ";color:var(--accent)}
+details.tool[open]>summary:before{content:"− "}
+.tool p,.foot{color:var(--dim);font-size:.875rem;line-height:1.7;margin:8px 0 0;max-width:72ch}
+.foot{margin-top:18px}
+#bnr-beta-badge{position:fixed;right:.6rem;bottom:calc(.6rem + 46px);z-index:9997;font:12px var(--mono);opacity:.75}
+#bnr-beta-badge a{color:var(--accent);text-decoration:none;border:1px solid var(--line);border-radius:99px;padding:.15rem .7rem;background:var(--panel)}
+
+/* New bee — Music-studio calm: cream canvas, readable type, few primary controls. */
+body[data-reg=bee]{
+  --bg:#f6f7f2;--panel:#fff;--well:#edf2eb;--ink:#18362a;--dim:#435f4e;--line:#ccd7cf;
+  --accent:#326b39;--hot:#65509a;--on:#fff;color-scheme:light;background:#f6f7f2;color:#18362a;
+  font:1.125rem/1.65 var(--font)}
+body[data-reg=bee] h1{color:#18362a}
+body[data-reg=bee] .lead{font-size:1.125rem;color:#435f4e}
+body[data-reg=bee] input,body[data-reg=bee] button{min-height:44px;font-size:1rem}
+body[data-reg=bee] input[type=range]{min-height:44px;accent-color:#326b39}
+body[data-reg=bee] canvas#stage{box-shadow:0 8px 28px #18362a16;border-radius:18px}
+body[data-reg=bee] .knobs{gap:18px}
+body[data-reg=bee] #tbar{background:#f6f7f2!important;border-top-color:#ccd7cf!important;
+  color:#18362a!important;-webkit-mask-image:none!important;mask-image:none!important;
+  font:500 1rem/1.4 system-ui,-apple-system,"Segoe UI",sans-serif!important}
+body[data-reg=bee] #tbar a{color:#18362a!important;background:#fff!important;box-shadow:inset 0 0 0 1px #ccd7cf!important}
+body[data-reg=bee] #tbar .tsep{background:#ccd7cf!important}
+body[data-reg=bee] #tbarMore{background:#fff!important;color:#326b39!important;border-color:#ccd7cf!important}
+body[data-reg=bee] #bnr-beta-badge{opacity:.45}
+
+/* Raver — instrument / art floor; same knobs, vivid accents. */
+body[data-reg=raver]{
+  --bg:#111018;--panel:#201a2b;--well:#16121f;--ink:#f2eff8;--dim:#b9b4cb;--line:#544362;
+  --accent:#ad91f0;--hot:#FF3DB0;color-scheme:dark}
+body[data-reg=raver]{
+  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="97"><g fill="none" stroke="%231a1a2a"><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z"/><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z" transform="translate(28,48)"/></g></svg>')}
+body[data-reg=raver] h1{font-size:clamp(2rem,5vw,4.4rem);color:#f2eff8}
+body[data-reg=raver] .knobs{padding-top:12px;border-block-start:3px solid var(--hot)}
+body[data-reg=raver] canvas#stage{border-color:var(--hot);box-shadow:0 12px 48px #0006}
+body[data-reg=raver] input[type=range]{accent-color:var(--hot)}
+body[data-reg=raver] button:hover{background:var(--hot);color:#100814;border-color:var(--hot)}
+
+/* Cypherpunk — dense mono source foot; tech subtext open by default. */
+body[data-reg=cypherpunk]{
+  --bg:#0e141a;--panel:#151e26;--well:#101820;--ink:#cfe8d6;--dim:#8aa0ad;--line:#3f5260;
+  --accent:#80cddd;--font:var(--mono);color-scheme:dark;
+  font:1rem/1.6 var(--mono);
+  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="97"><g fill="none" stroke="%231a1a2a"><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z"/><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z" transform="translate(28,48)"/></g></svg>')}
+body[data-reg=cypherpunk] h1{font-size:clamp(1.5rem,3vw,2.25rem);letter-spacing:-.03em}
+body[data-reg=cypherpunk] :is(canvas#stage,details.tool,input,button,.chip,.honesty em){border-radius:3px}
+body[data-reg=cypherpunk] .foot{font-size:.875rem;line-height:1.8;display:block}
+
+@media(max-width:600px){
+  .knobs{grid-template-columns:1fr}
+  .seed-row{grid-template-columns:1fr}
+  .wrap{padding:0}
+  body{padding:20px 12px 80px}
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 </style>
 </head>
-<body><div class="wrap">
-<h1>the two-tab room <span class="gear">⚙</span> <span style="color:var(--dim)">// multiplayer you can feel, zero servers</span></h1>
-<div class="sub">One shared composition, every tab a participant. Open this page in a second tab —
-turn a knob here, watch the field move there. The piece state travels over a
-<b>BroadcastChannel</b> (same browser, two tabs — no server, works on static Pages today);
-under it sits the forge's CRDT layer, Yjs — the same seam the LiveKit huddle will plug into.
-⚙ multiplayer slice scaffolded by an AI seat; the room is yours to jam in.</div>
+<body data-reg="bee" data-bee-theme="custom">
+<div class="wrap">
+<p class="crumb"><a href="../">Home</a> · <a href="./">Forge</a></p>
+<p class="eyebrow">Two-tab room</p>
+<h1>
+  <span data-view="bee">The two-tab room</span>
+  <span data-view="raver">Jam the field.</span>
+  <span data-view="cypherpunk">the two-tab room <span class="gear">⚙</span> // multiplayer you can feel, zero servers</span>
+</h1>
+<p class="lead">
+  <span data-view="bee">Open a second tab. Turn a knob. Watch it move.</span>
+  <span data-view="raver">One shared composition. Every tab is a hand on the same instrument.</span>
+  <span data-view="cypherpunk">One shared composition, every tab a participant. The piece state travels over a BroadcastChannel (same browser, two tabs — no server). Under it sits the forge's CRDT layer, Yjs — the same seam the LiveKit huddle will plug into.</span>
+</p>
+<p class="honesty" id="honesty-line"><em>this browser only</em> Shared with a BroadcastChannel in this browser — not a network room.</p>
 
 <div id="err"></div>
 <div id="room-bar"><span>in the room:</span><span id="peers"><span class="chip">listening…</span></span></div>
 
-<div class="row">
-  <input id="seed" type="text" value="hive-1000" title="the shared seed — anyone in the room can roll it">
-  <button id="roll" class="ghost" title="roll the seed for everyone">🎲 roll (room-wide)</button>
-</div>
-<div class="row">
-  <label class="ctl"><span>density</span><input id="pDensity" type="range" min="6" max="18" step="1" value="11"></label>
-  <label class="ctl"><span>hue base</span><input id="pHue" type="range" min="0" max="360" step="1" value="168"></label>
-  <label class="ctl"><span>hue drift</span><input id="pDrift" type="range" min="0" max="180" step="1" value="72"></label>
-  <label class="ctl"><span>symmetry</span><input id="pSym" type="range" min="0" max="1" step="1" value="1"></label>
-</div>
-
 <canvas id="stage" width="820" height="440"></canvas>
 <div id="meta"></div>
 
-<div class="hint"><b>Try it:</b> open a second tab of this page. Both tabs join the same room
-(browsers keep each tab's chips separate, so you can tell them apart). Turn <b>density</b> in
-one tab — the lattice tightens in both. Roll the seed in the other — everyone's field re-derives.
-Nobody's knob clobbers anyone else's: different knobs merge, same knob resolves last-write,
-identically for every participant (the CRDT layer's no-clobber law, tested 7/7 in-repo).</div>
+<div class="knobs" aria-label="Field controls">
+  <label class="ctl"><span>density</span><input id="pDensity" type="range" min="6" max="18" step="1" value="11"></label>
+  <label class="ctl"><span>hue</span><input id="pHue" type="range" min="0" max="360" step="1" value="168"></label>
+  <label class="ctl"><span>symmetry</span><input id="pSym" type="range" min="0" max="1" step="1" value="1"></label>
+</div>
 
-<div class="foot">Stack: forge/visual/shared.js (createSharedPiece — dependency-injected Yjs, transport-agnostic)
+<details class="tool" id="seed-panel" data-view-disclosure="seed">
+  <summary>Seed and hue drift</summary>
+  <div class="seed-row">
+    <input id="seed" type="text" value="hive-1000" title="the shared seed — anyone in the room can roll it">
+    <button id="roll" class="ghost" type="button" title="roll the seed for everyone">🎲 roll (room-wide)</button>
+  </div>
+  <label class="ctl" style="margin-top:12px"><span>hue drift</span><input id="pDrift" type="range" min="0" max="180" step="1" value="72"></label>
+</details>
+
+<details class="tool" id="how-panel" data-view-disclosure="how">
+  <summary>How the two tabs share</summary>
+  <p>Open this page in another tab. Turn density — the lattice tightens in both. Roll the seed and every tab redraws from it. Different knobs merge; the same knob keeps the last turn. Tabs stay labeled so you can tell them apart.</p>
+</details>
+
+<details class="tool" id="tech-panel" data-view-disclosure="tech">
+  <summary>
+    <span data-view="bee">More about this room</span>
+    <span data-view="raver">The seam</span>
+    <span data-view="cypherpunk">Stack · Yjs 13 · BroadcastChannel · LiveKit later</span>
+  </summary>
+  <p>CRDT layer: forge/visual/shared.js (<code>createSharedPiece</code> — dependency-injected Yjs, transport-agnostic) over Yjs 13 (MIT, Gate BS-1) loaded from jsDelivr, pinned. BroadcastChannel is the seam doc's dev transport — the LiveKit huddle adapter implements the same send/receive-bytes contract in a later lap. Same seed, same field, forever — now a room. Nobody's knob clobbers anyone else's (the CRDT no-clobber law, tested 7/7 in-repo).</p>
+</details>
+
+<div class="foot" data-view="cypherpunk">Stack: forge/visual/shared.js (createSharedPiece — dependency-injected Yjs, transport-agnostic)
 over Yjs 13 (MIT, Gate BS-1) loaded from jsDelivr, pinned; BroadcastChannel is the seam doc's dev
 transport — the LiveKit huddle adapter implements the same send/receive-bytes contract in a later lap.
 The hex composition is the hexfield CORE, unchanged: same seed, same field, forever — now a room.</div>
 
-<div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(.6rem + 46px);z-index:9997;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a> <a href="./" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">🐜 forge</a></div>
+<div id="bnr-beta-badge"><a href="../">⌂ hub</a> <a href="./">🐜 forge</a></div>
 <script src="../tour.js?v=39"></script>
+<script>
+function restoreVisibleFocus(focus){
+ if(!focus?.isConnected)return;let target=focus;
+ for(let node=focus.parentElement;node;node=node.parentElement)if(node.tagName==='DETAILS'&&!node.open)target=node.querySelector('summary');
+ target?.focus({preventScroll:true});
+}
+function defaultOpen(reading,kind){
+ if(reading==='cypherpunk') return kind==='tech'||kind==='how';
+ if(reading==='raver') return kind==='seed';
+ return false;
+}
+let lastReading=null;
+const readingChoices=new Map();
+function applyReading(event){
+  const reading=event?.detail?.reg||document.body.dataset.reg||'bee';
+  if(reading===lastReading)return;
+  const focus=document.activeElement;
+  const details=[...document.querySelectorAll('[data-view-disclosure]')];
+  if(lastReading)readingChoices.set(lastReading,details.map(d=>d.open));
+  const previous=readingChoices.get(reading);
+  details.forEach((d,i)=>d.open=previous?previous[i]:defaultOpen(reading,d.dataset.viewDisclosure));
+  const theme=document.querySelector('meta[name="theme-color"]');
+  if(theme) theme.content=reading==='bee'?'#f6f7f2':reading==='raver'?'#111018':'#0e141a';
+  restoreVisibleFocus(focus);
+  lastReading=reading;
+}
+document.addEventListener('bregister',applyReading);
+applyReading();
+</script>
 <script type="module">
 // ---- CORE START ----
 // (the hexfield composition, unchanged — fleet copy pinned in sync by the repo tests)
