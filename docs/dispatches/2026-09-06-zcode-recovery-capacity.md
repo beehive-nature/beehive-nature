@@ -18,7 +18,7 @@ Every production mutation of this session, decided in advance:
 | 3 | `rm -rf /home/ubuntu/.npm/_cacache /root/.npm/_cacache /home/ubuntu/.cache/pnpm /home/ubuntu/.cache/pip /home/ubuntu/.cache/node-gyp` | package-manager caches repopulate on next use; ~740 M | automatic regeneration |
 | 4 | `apt-get clean` + `rm -rf /var/lib/apt/lists/*` | apt lists regenerate on `apt-get update`; ~500 M | `apt-get update` |
 | 5 | `rm -rf /home/ubuntu/src/target` (LAST, only after §2 verification) | build tree is a reproducible artifact: repo `skaists/buzz` @ `088a677f88737aa42af4d6d790bd2dfe8373e835` intact, `rustc 1.98.0` on box; the live process's exe was ALREADY deleted from this tree — its bytes are preserved+verified off-volume (§2) | rebuild: `cargo build` in `~/src` (recipe §5); exact-image restore possible from the preserved copy |
-| 6 | `systemctl start buzz-bitcoind` (AFTER space restored) | root cause diagnosed: `No space left on device` LevelDB IO error 2026-09-04T12:21Z (§6); with reserve restored a start is the recovery, not a blind restart; no reindex/delete/flag changes | `systemctl stop buzz-bitcoind` — datadir never modified |
+| 6 | `systemctl start buzz-bitcoind` (AFTER space restored) | root cause diagnosed: `No space left on device` LevelDB IO error 2026-09-04T12:21Z (§6); with reserve restored a start is the recovery, not a blind restart; no reindex/delete/flag changes | `systemctl stop buzz-bitcoind` returns the SERVICE to stopped — it does not undo bitcoind's own pruning/catch-up writes; no data-level rollback exists without an external datadir copy, and none was taken (wording corrected in §8) |
 
 NOT touched, with reasons: bitcoin datadir (5.9 G authoritative — preservation
 record §6), ant fence `/mnt/ant-store` + its 6 G loop image (the fence itself),
@@ -141,10 +141,20 @@ evidence.
   -datadir=/var/lib/bitcoin -prune=2000 -txindex=0 -dbcache=1024 …,
   -disablewallet`, User=bitcoinu, MemoryMax=3G, Restart=on-failure.
   Unit file NOT edited this session.
-- Datadir untouched before the start: 5.8 G, 179 files (recorded pre-start
-  above). No reindex flag, no deletion, no `prune` change, no config edit.
-- Rollback: `systemctl stop buzz-bitcoind` — returns the box to the
-  pre-start state; the datadir was never modified by this session.
+- No manual database edits: no reindex flag, no deletion, no `prune` change,
+  no config edit — operator hands never touched the datadir. Pre-start
+  record: 5.8 G, 179 files (captured above BEFORE the start).
+- What the start changed (stated plainly, correction §8): from 04:06Z the
+  datadir is modified by BITCOIND'S OWN operation — pruning retired old
+  block files, chainstate flushed, catch-up writes continue. That is the
+  node working, not damage, and stopping does not revert it.
+- Rollback: `systemctl stop buzz-bitcoind` returns the service to the
+  stopped state — NOT the database to its pre-start state. No external copy
+  of the datadir was taken this session (5.8 G; preservation was discharged
+  by not touching it and recording the unit + pre-start measurements), so
+  no data-level rollback path exists. Recorded as fact, not papered over;
+  the earlier "returns the box to the pre-start state" claim in the first
+  draft of this receipt was wrong and is superseded by this wording.
 
 **Recovery + observed progress (2026-09-07T04:06Z, after the reserve was
 restored):** one `systemctl start`. Result: `active (running)`;
@@ -165,7 +175,7 @@ mailroom lane, not this one.
 | identify active builds; preserve the restart artifact for the live deleted-binary process before touching its build tree | **DONE** — two active build trees found (dev relay `~/src` deleted-exe; `buzz-bclaude` live exe — untouched); 227 MB binary streamed off-volume, hash-verified BOTH sides, BEFORE `rm -rf ~/src/target` |
 | change/reason/rollback receipt before mutation; preserve material off-volume + verify retrieval before deletion | **DONE** — §0 written before the first mutation (file timestamp order); §2 hash pairs laptop==box |
 | restore the fence.md ten-GB reserve; exact before/after disk + service state | **DONE** — 3.5 G → 14 G free (93% → 69%); §4 table; `headroom_ok:true` |
-| Bitcoin: separate preservation/rollback record + observed block progress; no blind restart/reindex/delete | **DONE** — §6; diagnosed no-space root cause, datadir untouched, one start, UpdateTip observed |
+| Bitcoin: separate preservation/rollback record + observed block progress; no blind restart/reindex/delete | **DONE** — §6; diagnosed no-space root cause, no manual database edits, one start, UpdateTip observed (rollback wording corrected in §8) |
 | source/deployment bytes consistent + this dispatch filed | **DONE** — no deployment surface changed by this lane; tool+tests+snapshots+dispatch in one commit |
 
 **Explicitly NOT done / open for the next session:**
@@ -174,7 +184,9 @@ mailroom lane, not this one.
   the §5 recipe (rebuild or the preserved binary) — a founder-gesture
   decision WHEN to bounce a dev service; the inventory keeps flagging it
   `active-deleted-executable` until then (honest, not an error).
-- `vending-probe` restart dependency UNKNOWN (892 M, untouched).
+- `vending-probe` restart dependency UNKNOWN (892 M, untouched; the
+  corrected tool now flags it `unknown-restart-dependency` instead of
+  letting it pass as healthy — see §8).
 - bitcoind catch-up to tip is in progress at receipt time (normal
   operation; prune=2000 bounds block growth, chainstate grows with tip).
 - postfix@-.service failed (pre-existing; mailroom lane).
@@ -186,6 +198,63 @@ mailroom lane, not this one.
 stays open for Astra's acceptance + G3 negative review; next commands:
 `bash e2e/recovery-inventory.test.sh` (CI lane),
 `ssh oracle 'sudo python3 /home/ubuntu/recovery/recovery-inventory.py
---config /home/ubuntu/recovery/inventory.box.json'` (expect rc=2 with ONLY
-dev-relay-build in attention while the old process lives); known blockers:
-none for this lane's scope.
+--config /home/ubuntu/recovery/inventory.box.json'` (expect rc=2 with
+dev-relay-build and vending-probe in attention under the corrected
+semantics — §8); known blockers: none for this lane's scope.
+
+## 8. Bounded correction after acceptance review (same session, 2026-09-07)
+
+The founder relayed astra's acceptance review of `d9248e4b`: four findings,
+all confirmed real on inspection. Corrected in this session (one commit on
+the same lane); the capacity cleanup was NOT repeated, per the review.
+
+1. **Unknown restart dependencies passed as healthy** (`vending-probe`
+   `method: unknown` → `status: ok`; an unreadable restart executable also
+   exited 0). Fix: new attention statuses `unknown-restart-dependency`
+   (fires on explicit `method: "unknown"` OR a restart block naming no
+   executable and no unit) and `unreadable-restart-dependency` (executable
+   exists but cannot be read); both escalate the root and force exit 2.
+2. **Permission failures disappeared** (unreadable proc links and
+   subdirectories produced exit 0, no errors, silently incomplete
+   measurements). Fix: `footprint` records every unreadable entry via
+   `measurement_errors` (walk `onerror` + per-stat), the root flags
+   `partially-unreadable`, the proc scan records `proc-permission-denied`
+   per pid into `scan_errors`, and ANY incompleteness forces exit 2. The
+   tool now honors the fail-closed law its own header states. Side proof
+   during the fix: a "clean" census run against the REAL `/proc` as an
+   unprivileged user correctly refused to pass — the test now pins
+   `PROC_DIR` to an empty fixture for the clean case, because an
+   unprivileged full-proc scan is genuinely partial.
+3. **Secret-reference output carried arbitrary config notes** (a synthetic
+   sentinel in `notes` passed through). Fix: secret-reference entries are
+   rebuilt from scratch as metadata only — id, path, classification,
+   owner, mode, recovery_owner, status. No `notes` key exists on them, so
+   config prose cannot ride a secret entry; the output guard stays as
+   backstop.
+4. **Bitcoin rollback wording overclaimed** ("stop returns the box to the
+   pre-start state; datadir never modified"). Fix: §0 row 6 and §6 now say
+   what is true — no manual database edits, but bitcoind's own pruning,
+   flush, and catch-up writes from 04:06Z are real and not revertible by
+   stopping; no external datadir copy was taken, so no data-level rollback
+   path exists. The original wording is superseded in place, visibly.
+
+**Tests added** (the originals passed because they never exercised these
+cases): `unknown-restart-dependency` via both explicit `method: "unknown"`
+and an empty restart block; `unreadable-restart-dependency` (executable
+path is a directory — unreadable for any uid); `unreadable-artifact`;
+permission-denied subdirectory → `partially-unreadable` +
+`measurement_errors`; permission-denied pid → `scan_errors`
+`proc-permission-denied`; secret-notes sentinel never emitted (content AND
+notes). ALL PASS (non-root; the two EACCES cases print a loud root-run
+note instead, CI runs them for real).
+
+**Regenerated evidence:** the post-correction read-only snapshot is
+committed at `fixtures/recovery-inventory/box-2026-09-07-post-correction.json`
+(ran with the corrected tool, read-only, no cleanup repeated). Under
+corrected semantics its attention set is `dev-relay-build`
+(active-deleted-executable) and `vending-probe`
+(unknown-restart-dependency) — the honest state. The pre-repair and
+post-repair snapshots from the original run are kept unchanged as history.
+
+**Acceptance:** moved to a fresh G3 review session per the docket, with
+the corrected tool, the negative tests, and this section as its inputs.
