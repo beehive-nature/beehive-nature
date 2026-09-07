@@ -10,7 +10,9 @@ T=$(mktemp -d /tmp/bnr-recovery-inventory-test.XXXXXXXX)
 trap 'rm -rf -- "$T"' EXIT
 
 # ---- the synthetic host -------------------------------------------------
-mkdir -p "$T/host/devrelay/target/debug" "$T/host/secrets" "$T/host/state" "$T/proc/42"
+mkdir -p "$T/host/devrelay/target/debug" "$T/host/secrets" "$T/host/state" \
+         "$T/host/probe" "$T/host/nodeps" "$T/host/badexe" "$T/host/badart" \
+         "$T/host/locked/inner" "$T/proc/42" "$T/proc/77"
 printf 'dev relay binary bytes\n' > "$T/host/devrelay/target/debug/buzz-relay"
 printf 'chainstate bytes\n' > "$T/host/state/chain.dat"
 # SECRET CONTENT: must never reach the inventory output in any form.
@@ -21,6 +23,12 @@ printf -- "-----BEGIN RSA %s-----\nSENTINEL-SECRET-CONTENT\n" "$guard_marker" \
   > "$T/host/secrets/founding.key"
 # A live process whose exe file was deleted, inside the declared build tree.
 ln -s "$T/host/devrelay/target/debug/buzz-relay (deleted)" "$T/proc/42/exe"
+# A pid directory the scanner CANNOT read (non-root): a partial scan that
+# must be recorded, never silently dropped.
+chmod 000 "$T/proc/77"
+# A subdirectory the walker CANNOT read (non-root): an incomplete
+# measurement that must surface as partially-unreadable.
+chmod 000 "$T/host/locked/inner"
 
 cat > "$T/config-defects.json" <<JSON
 {
@@ -36,7 +44,21 @@ cat > "$T/config-defects.json" <<JSON
     {"id": "nonsense-class", "path": "$T/host/state",
      "classification": "authoritative-wishful-thinking"},
     {"id": "founding-keys", "path": "$T/host/secrets",
-     "classification": "secret-reference", "recovery_owner": "founder"}
+     "classification": "secret-reference", "recovery_owner": "founder",
+     "notes": "SENTINEL-SECRET-NOTES-NEVER-EMIT"},
+    {"id": "probe-unknown", "path": "$T/host/probe",
+     "classification": "reproducible-artifact",
+     "restart": {"unit": null, "executable": null, "method": "unknown"}},
+    {"id": "no-deps-at-all", "path": "$T/host/nodeps",
+     "classification": "reproducible-artifact", "restart": {}},
+    {"id": "unreadable-exe", "path": "$T/host/badexe",
+     "classification": "reproducible-artifact",
+     "restart": {"executable": "$T/host/state", "method": "manual"}},
+    {"id": "dir-as-artifact", "path": "$T/host/badart",
+     "classification": "reproducible-artifact",
+     "artifacts": [{"path": "$T/host/state", "kind": "artifact"}]},
+    {"id": "locked-tree", "path": "$T/host/locked",
+     "classification": "rebuildable-index-cache"}
   ]
 }
 JSON
@@ -62,8 +84,14 @@ assert roots["nonsense-class"]["status"] == "unknown-classification"
 sec = roots["founding-keys"]
 assert sec["status"] == "secret-recorded"
 assert sec["recovery_owner"] == "founder"
-for forbidden in ("footprint_bytes", "artifacts", "sha256"):
+for forbidden in ("footprint_bytes", "artifacts", "sha256", "notes"):
     assert forbidden not in sec, (forbidden, sec)
+# Unknown/unreadable restart dependencies must surface, never pass as ok.
+assert roots["probe-unknown"]["status"] == "unknown-restart-dependency", roots["probe-unknown"]
+assert roots["no-deps-at-all"]["status"] == "unknown-restart-dependency", roots["no-deps-at-all"]
+assert roots["unreadable-exe"]["status"] == "unreadable-restart-dependency", roots["unreadable-exe"]
+assert str(roots["unreadable-exe"]["restart"].get("executable_status", "")).startswith("unreadable")
+assert roots["dir-as-artifact"]["status"] == "unreadable-artifact", roots["dir-as-artifact"]
 assert r["deleted_executables"][0]["pid"] == 42
 assert r["deleted_executables"][0]["inside_declared_roots"] == ["dev-build"], r["deleted_executables"]
 fs = r["filesystems"][0]
@@ -73,13 +101,37 @@ PY
 if grep -q 'SENTINEL-SECRET-CONTENT' "$T/out.json"; then
   echo 'FAIL secret content leaked into inventory output'; exit 1
 fi
+if grep -q 'SENTINEL-SECRET-NOTES-NEVER-EMIT' "$T/out.json"; then
+  echo 'FAIL secret-reference notes passed through into output'; exit 1
+fi
 if grep -q "$guard_marker" "$T/out.json"; then
   echo 'FAIL key material marker reached inventory output'; exit 1
 fi
-echo 'PASS missing/unknown dependencies, deleted-exe-under-build-tree, reserve breach, and secret-free output all detected'
+# Permission failures must become recorded errors, never silence. As root
+# these fixtures stay readable, so the assertions run only for unprivileged
+# invocations (CI and the WSL dev seat are non-root; root runs degrade to
+# the structural checks above).
+if [[ $(id -u) -eq 0 ]]; then
+  echo 'NOTE root-run: permission-denied fixtures are readable to root; skipping EACCES assertions (CI runs non-root)'
+else
+  python3 - "$T/out.json" <<'PY' || exit 1
+import json, sys
+r = json.load(open(sys.argv[1], encoding="utf-8"))
+roots = {x["id"]: x for x in r["roots"]}
+assert roots["locked-tree"]["status"] == "partially-unreadable", roots["locked-tree"]
+assert any(e.get("root") == "locked-tree" for e in r["measurement_errors"]), r["measurement_errors"]
+assert any(e.get("error") == "proc-permission-denied" for e in r["scan_errors"]), r["scan_errors"]
+print("permission-failure assertions ok")
+PY
+fi
+echo 'PASS missing/unknown/unreadable dependencies, deleted-exe-under-build-tree, reserve breach, permission failures recorded, and secret-free output (content AND notes) all detected'
 
 # ---- run 2: the clean census exits 0 -------------------------------------
-mkdir -p "$T/host/clean"
+# PROC_DIR is pinned to an EMPTY fixture: scanning the real /proc as an
+# unprivileged user is (correctly) a partial scan — permission-denied pids
+# are recorded and force exit 2 — so a clean run needs a fully readable
+# proc by construction.
+mkdir -p "$T/host/clean" "$T/proc-clean"
 printf 'healthy binary\n' > "$T/host/clean/daemon"
 mkdir -p "$T/units/etc/systemd/system"
 touch "$T/units/etc/systemd/system/clean.service"
@@ -95,7 +147,8 @@ cat > "$T/config-clean.json" <<JSON
 }
 JSON
 set +e
-UNIT_DIR="$T/units/etc/systemd/system" python3 "$tool" --config "$T/config-clean.json" > "$T/out2.json" 2>/dev/null
+UNIT_DIR="$T/units/etc/systemd/system" PROC_DIR="$T/proc-clean" \
+  python3 "$tool" --config "$T/config-clean.json" > "$T/out2.json" 2>/dev/null
 rc2=$?
 set -e
 [[ $rc2 -eq 0 ]] || { echo "FAIL clean census should exit 0, got $rc2"; exit 1; }

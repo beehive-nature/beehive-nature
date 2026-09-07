@@ -49,9 +49,26 @@ ATTENTION_STATUSES = (
     "missing",
     "missing-artifact",
     "missing-restart-dependency",
+    "unknown-restart-dependency",
+    "unreadable-restart-dependency",
+    "partially-unreadable",
     "unreadable-artifact",
     "unknown-classification",
     "active-deleted-executable",
+)
+# Which defect a root REPORTS when it has several: recovery-critical restart
+# defects outrank measurement gaps; the live-process flag stays dominant
+# (assigned in main over any of these, prior_status preserved).
+STATUS_PRECEDENCE = (
+    "active-deleted-executable",
+    "unknown-restart-dependency",
+    "missing-restart-dependency",
+    "unreadable-restart-dependency",
+    "partially-unreadable",
+    "missing-artifact",
+    "unreadable-artifact",
+    "unknown-classification",
+    "missing",
 )
 GUARD_MARKERS = (
     "PRIVATE KEY",
@@ -88,30 +105,36 @@ def digest_file(path):
     return h.hexdigest()
 
 
-def footprint(path):
-    """Sum st_size over a declared tree (or single file). Read-only."""
+def footprint(path, errors, root_id):
+    """Sum st_size over a declared tree (or single file). Read-only.
+    Unreadable entries are RECORDED, never silently skipped — a measurement
+    that cannot be computed is an error, not a smaller number."""
     st = os.lstat(path)
     if not os.path.isdir(path) or os.path.islink(path):
         return st.st_size
     total = 0
-    for dirpath, _dirnames, filenames in os.walk(path, followlinks=False):
-        try:
-            for name in filenames:
-                try:
-                    total += os.lstat(os.path.join(dirpath, name)).st_size
-                except OSError:
-                    continue
-        except OSError:
-            continue
+
+    def on_error(err):
+        errors.append({"root": root_id, "error": str(err)})
+
+    for dirpath, _dirnames, filenames in os.walk(path, followlinks=False,
+                                                 onerror=on_error):
+        for name in filenames:
+            try:
+                total += os.lstat(os.path.join(dirpath, name)).st_size
+            except OSError as err:
+                errors.append({"root": root_id, "error": str(err)})
     return total
 
 
 def scan_deleted_executables(roots):
     """Running processes whose binary file was deleted, keyed against the
     declared roots — the restart-path trap (a build tree that looks prunable
-    but still backs a live process)."""
+    but still backs a live process). Permission-denied reads make the scan
+    PARTIAL: recorded as errors, never silently dropped."""
     proc_dir = os.environ.get("PROC_DIR", "/proc")
     findings = []
+    errors = []
     entries = []
     try:
         entries = sorted(os.listdir(proc_dir))
@@ -123,12 +146,19 @@ def scan_deleted_executables(roots):
         exe = os.path.join(proc_dir, name, "exe")
         try:
             target = os.readlink(exe)
+        except PermissionError:
+            # A pid we cannot read = a PARTIAL scan, not an empty finding.
+            errors.append({"error": "proc-permission-denied", "pid": int(name)})
+            continue
         except OSError:
-            continue  # kernel thread, permission, or gone — not computable
+            continue  # kernel thread or gone — no exe is normal, not an error
         if not target.endswith(" (deleted)"):
             continue
         try:
             uid = os.stat(exe).st_uid
+        except PermissionError:
+            errors.append({"error": "proc-permission-denied", "pid": int(name)})
+            uid = None
         except OSError:
             uid = None
         findings.append({"pid": int(name), "exe": target, "uid": uid})
@@ -139,7 +169,7 @@ def scan_deleted_executables(roots):
             if os.path.abspath(r.get("path", "")) != ""
             and path.startswith(os.path.abspath(r["path"]) + os.sep)
         )
-    return findings, []
+    return findings, errors
 
 
 def check_filesystem(mount, reserve_bytes):
@@ -159,13 +189,14 @@ def check_filesystem(mount, reserve_bytes):
     }
 
 
-def inventory_root(root):
-    """Resolve one declared root. Never raises — failures become statuses."""
+def inventory_root(root, errors):
+    """Resolve one declared root. Never raises — failures become statuses,
+    every defect is recorded (a root with several reports the most
+    recovery-critical one and carries the full list in `defects`)."""
     out = {
         "id": root.get("id", "<unnamed>"),
         "path": root.get("path"),
         "classification": root.get("classification"),
-        "notes": root.get("notes"),
     }
     path = root.get("path")
     if not path or not os.path.exists(path):
@@ -182,13 +213,27 @@ def inventory_root(root):
     out["mode"] = format(stat_mode(st.st_mode), "04o")
 
     if root["classification"] == "secret-reference":
-        # Location, permissions, recovery owner ONLY. No digest, no footprint,
-        # no walk — a secret's size or shape is already more than needed.
-        out["recovery_owner"] = root.get("recovery_owner")
-        out["status"] = "secret-recorded"
-        return out
+        # Location, permissions, recovery owner ONLY. No digest, no
+        # footprint, no walk — and NO notes: config-supplied prose riding a
+        # secret entry is exactly how metadata-only output leaks. The entry
+        # is rebuilt from scratch so nothing else can ride along.
+        return {
+            "id": out["id"],
+            "path": out["path"],
+            "classification": out["classification"],
+            "owner_user": out["owner_user"],
+            "owner_uid": out["owner_uid"],
+            "owner_group": out["owner_group"],
+            "mode": out["mode"],
+            "recovery_owner": root.get("recovery_owner"),
+            "status": "secret-recorded",
+        }
 
-    out["footprint_bytes"] = footprint(path)
+    out["notes"] = root.get("notes")
+    defects = []
+    out["footprint_bytes"] = footprint(path, errors, out["id"])
+    if any(e.get("root") == out["id"] for e in errors):
+        defects.append("partially-unreadable")
 
     out["artifacts"] = []
     for artifact in root.get("artifacts", []):
@@ -196,6 +241,7 @@ def inventory_root(root):
         entry = {"path": apath, "kind": artifact.get("kind", "artifact")}
         if not apath or not os.path.exists(apath):
             entry["status"] = "missing-artifact"
+            defects.append("missing-artifact")
         else:
             try:
                 entry["sha256"] = digest_file(apath)
@@ -203,6 +249,7 @@ def inventory_root(root):
                 entry["status"] = "ok"
             except OSError as err:
                 entry["status"] = "unreadable: %s" % err
+                defects.append("unreadable-artifact")
         out["artifacts"].append(entry)
 
     restart = root.get("restart")
@@ -211,15 +258,22 @@ def inventory_root(root):
     else:
         rep = dict(restart)
         exe = restart.get("executable")
+        unit = restart.get("unit")
+        # An explicitly-unknown (or entirely absent) restart dependency is a
+        # defect to surface, never a healthy pass: "we cannot name how this
+        # restarts" is recovery attention by definition.
+        if restart.get("method") == "unknown" or (not exe and not unit):
+            defects.append("unknown-restart-dependency")
         if exe:
             if os.path.exists(exe):
                 try:
                     rep["executable_sha256"] = digest_file(exe)
                 except OSError as err:
                     rep["executable_status"] = "unreadable: %s" % err
+                    defects.append("unreadable-restart-dependency")
             else:
                 rep["executable_status"] = "missing-restart-dependency"
-        unit = restart.get("unit")
+                defects.append("missing-restart-dependency")
         if unit:
             unit_paths = (
                 os.path.join(os.environ.get("UNIT_DIR", "/etc/systemd/system"), unit),
@@ -229,18 +283,11 @@ def inventory_root(root):
             rep["unit_file_present"] = any(os.path.exists(p) for p in unit_paths)
             if not rep["unit_file_present"]:
                 rep["unit_status"] = "missing-restart-dependency"
+                defects.append("missing-restart-dependency")
         out["restart"] = rep
-        if rep.get("executable_status") == "missing-restart-dependency" or \
-                rep.get("unit_status") == "missing-restart-dependency":
-            out["status"] = "missing-restart-dependency"
-            return out
-    if any(a.get("status") == "missing-artifact" for a in out["artifacts"]):
-        out["status"] = "missing-artifact"
-        return out
-    if any(str(a.get("status", "")).startswith("unreadable") for a in out["artifacts"]):
-        out["status"] = "unreadable-artifact"
-        return out
-    out["status"] = "ok"
+
+    out["defects"] = defects
+    out["status"] = min(defects, key=STATUS_PRECEDENCE.index) if defects else "ok"
     return out
 
 
@@ -266,7 +313,8 @@ def main(argv=None):
         return 4
 
     roots = config["roots"]
-    resolved = [inventory_root(r) for r in roots]
+    measurement_errors = []
+    resolved = [inventory_root(r, measurement_errors) for r in roots]
 
     deleted, scan_errors = scan_deleted_executables(roots)
     deleted_paths = [f["exe"][: -len(" (deleted)")] for f in deleted]
@@ -296,6 +344,7 @@ def main(argv=None):
         "roots": resolved,
         "deleted_executables": deleted,
         "scan_errors": scan_errors,
+        "measurement_errors": measurement_errors,
     }
 
     text = json.dumps(report, indent=2, sort_keys=True)
@@ -311,7 +360,8 @@ def main(argv=None):
     if attention:
         print(json.dumps({"attention": attention}, indent=2), file=sys.stderr)
     print(text)
-    return 2 if (attention or scan_errors) else 0
+    incomplete = bool(attention or scan_errors or measurement_errors)
+    return 2 if incomplete else 0
 
 
 if __name__ == "__main__":
