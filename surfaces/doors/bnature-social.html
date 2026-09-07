@@ -103,14 +103,52 @@ a.t.big s:not(.do){font-size:9.5px;color:var(--dimmer);margin-top:8px}
 .notyet li::before{content:"\2014";position:absolute;left:0;color:var(--dimmer)}
 .notyet li b{color:var(--ink);font-weight:700}
 .notyet a{display:inline-flex;align-items:center;min-height:32px;padding:0 5px}
+
+/* New bee arrival: view / emotion / choose-click. Whole card is the click.
+   Light island matches the live hub's bee start-links (DESIGN-CONSTRAINTS §13). */
+#start-here{position:relative;margin-top:28px;max-width:62ch;background:#f6f7f2;color:#18362a;
+  border:1px solid #ccd7cf;border-radius:16px;padding:22px 20px 16px}
+#start-here .kicker{font:400 .875rem/1.6 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:0;
+  text-transform:none;color:#435f4e;margin:0 0 10px;padding:0}
+#start-here h2{font:550 clamp(1.65rem,4.2vw,2.25rem)/1.12 system-ui,-apple-system,"Segoe UI",sans-serif;
+  letter-spacing:-.04em;color:#18362a;margin:0}
+#start-here .lead{color:#435f4e;font:400 1.0625rem/1.6 system-ui,-apple-system,"Segoe UI",sans-serif;
+  margin:12px 0 8px;max-width:38ch}
+#start-here .start{display:flex;flex-direction:column}
+#start-here .start-link{display:flex;gap:16px;align-items:center;min-height:108px;padding:16px 20px;
+  margin:10px 0;border:1px solid #ccd7cf;border-radius:16px;background:#fff;color:#18362a;
+  box-shadow:0 2px 8px #18362a08;transition:border-color .15s,background .15s}
+#start-here .start-link:hover,#start-here .start-link:focus-visible{border-color:#326b39;background:#edf2eb;
+  outline:2px solid #326b39;outline-offset:3px;transform:none}
+#start-here .start-picture{display:grid;place-items:center;width:56px;height:56px;flex:none;color:#326b39}
+#start-here .start-picture svg{width:100%;height:100%}
+#start-here .start-link.people .start-picture{color:#29628f}
+#start-here .start-link>div{flex:1;min-width:0}
+#start-here .start-link strong{display:block;font-size:1.25rem;font-weight:650;letter-spacing:-.025em;color:#18362a}
+#start-here .start-help{display:block;font-size:1rem;color:#435f4e;margin-top:4px;line-height:1.5;text-decoration:none}
+#start-here .start-arrow{margin-inline-start:auto;font-size:1.5rem;color:#326b39;flex:none}
+#start-here .honesty{margin:12px 0 4px;border:1px solid #ccd7cf;border-radius:12px;background:#fff;color:#435f4e}
+#start-here .honesty>summary{min-height:44px;padding:10px 14px;cursor:pointer;font-size:1rem;color:#18362a;list-style:none}
+#start-here .honesty>summary::-webkit-details-marker{display:none}
+#start-here .honesty>summary:before{content:"+ ";color:#326b39}
+#start-here .honesty[open]>summary:before{content:"− "}
+#start-here .honesty p{margin:0;padding:0 14px 14px;font-size:.95rem;line-height:1.65;max-width:52ch}
+.act.secondary{margin-top:14px;border-left-color:var(--gold)}
+.act.secondary em{color:var(--gold)}
+.act.secondary b{color:var(--gold)}
+.live-note{position:relative;margin-top:14px;max-width:62ch;font-size:12px;color:var(--dim);line-height:1.75}
 @media (max-width:600px){
   .wrap{padding:0 14px}
   .eyebrow{padding-top:calc(var(--bandh,78px) + 4px);letter-spacing:.2em}
   .grid,.grid.verbs{grid-template-columns:1fr;gap:9px}
   section{padding:14px}.act{padding:16px}
-  a.t:hover,.act:hover{transform:none}}</style>
+  a.t:hover,.act:hover{transform:none}
+  #start-here{padding:16px 14px 12px}
+  #start-here .start-link{min-height:92px;padding:14px;gap:12px}
+  #start-here .start-picture{width:48px;height:48px}
+  #start-here .start-link strong{font-size:1.125rem}}</style>
 </head>
-<body>
+<body data-reg="bee">
 <div id="veil" aria-hidden="true"></div>
 <header style="--bandh:69px">
   <div id="bandwrap" aria-hidden="true"><div class="band" style="top:-14px;left:-80px;opacity:1.00;animation-duration:15s;animation-name:hexdrift;--step:52px"><i style="background:#D655BB;animation-duration:2.4s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:2.9s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:3.3s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:3.8s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:4.2s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:2.4s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:2.9s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:3.3s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:3.8s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:4.2s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:2.4s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:2.9s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:3.3s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:3.8s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:4.2s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:2.4s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:2.9s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:3.3s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:3.8s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:4.2s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:2.4s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:2.9s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:3.3s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:3.8s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:4.2s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:2.4s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:2.9s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:3.3s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:3.8s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:4.2s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:2.4s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:2.9s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:3.3s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:3.8s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:4.2s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:2.4s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:2.9s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:3.3s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:3.8s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:4.2s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:2.4s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:2.9s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:3.3s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:3.8s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:4.2s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:2.4s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:2.9s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:3.3s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:3.8s;animation-delay:1.14s"></i></div></div>
@@ -118,7 +156,19 @@ a.t.big s:not(.do){font-size:9.5px;color:var(--dimmer);margin-top:8px}
     <p class="eyebrow" data-i18n="d.social.who">for someone who wants people</p>
     <h1>bnature.social</h1>
     <p class="what" data-i18n="d.social.what">The social layer: the feed, the meetings, the room. No marketplace — nothing here is for sale. Tongues dock as first-class passengers, and your name stays in your own language.</p>
-    <a class="act" href="../forge/room.html"><em>one thing to do</em><b data-i18n="d.social.act">Open the room →</b><s data-i18n="d.social.actsub">Two tabs, one shared field — open it in a second tab and both hands move the same piece. No server holds it.</s></a>
+    <div id="start-here">
+      <p class="kicker">A place to begin</p>
+      <h2>You belong here.</h2>
+      <p class="lead">Find a community. Conversation lives in the Buzz app — this HTML page is a door, not a chat.</p>
+      <div class="start">
+        <a class="start-link act people" href="../buzz-directory.html"><span class="start-picture" aria-hidden="true"><svg viewBox="0 0 80 80" fill="none"><path d="m40 12 15 9v18l-15 9-15-9V21Zm-15 27 15 9v18l-15 9-15-9V48Zm30 0 15 9v18l-15 9-15-9V48Z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg></span><div><strong>Meet the hive</strong><span class="start-help">Find a community. Talk happens in the Buzz app, not this HTML page.</span></div><span class="start-arrow" aria-hidden="true">→</span></a>
+        <a class="start-link" href="../buzz-directory.html#people-agents"><span class="start-picture" aria-hidden="true"><svg viewBox="0 0 80 80" fill="none"><circle cx="28" cy="28" r="10" stroke="currentColor" stroke-width="2.5"/><path d="M12 58c2-10 10-16 16-16s14 6 16 16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="56" cy="30" r="8" stroke="currentColor" stroke-width="2.5"/><path d="M44 58c1.5-8 8-13 12-13s10.5 5 12 13" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></span><div><strong>People and agents</strong><span class="start-help">Humans and labeled machine seats, so you can tell who you are meeting.</span></div><span class="start-arrow" aria-hidden="true">→</span></a>
+        <a class="start-link" href="../index.html"><span class="start-picture" aria-hidden="true"><svg viewBox="0 0 80 80" fill="none"><path d="M14 38 40 16l26 22v30H14V38Z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><path d="M32 68V46h16v22" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg></span><div><strong>Home</strong><span class="start-help">Back to the studio whenever you want.</span></div><span class="start-arrow" aria-hidden="true">→</span></a>
+      </div>
+      <details class="honesty"><summary>What this page is</summary><p>LIVE here means published pages — the files you can open now. It is not a live social application. Across devices, talk happens in the Buzz app on a relay. The two-tab room below stays in this browser. This HTML page does not send or deliver messages.</p></details>
+    </div>
+    <a class="act secondary" href="../forge/room.html"><em>this browser only</em><b data-i18n="d.social.act">Open the room →</b><s data-i18n="d.social.actsub">Two tabs, one shared field — open it in a second tab and both hands move the same piece. No server holds it.</s></a>
+    <p class="live-note">LIVE on this door means the page is published. Each tool still names its own readiness. Conversation is in the Buzz app; paste a relay host with Add Community.</p>
   </div>
 </header>
 

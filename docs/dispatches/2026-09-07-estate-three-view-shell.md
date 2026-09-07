@@ -33,3 +33,9 @@ Astra: existing lead session, inherited model/effort, no override. `grok_social_
 Grok continues its own social/marketing slice and uses the shared contract above. PR #12 remains independently reviewable; this lane touches its two HTML pages only at the cache tag. Its source-review findings about readable regular text, unkeyed copy and duplicate action destinations remain in the prior review docket. Its new 4178 preview is distinct from Astra's 4176 tree.
 
 Rollback is a descendant revert of this lane's commit, with a new rider cache version when publishing. Revert the shared files, added loaders and templates together; never force-push or alter the art pins.
+
+## Ready social slice integrated
+
+After the founder relayed Grok's ready PR #12, Astra integrated its remote head 8bdff22c with the shared shell. The remote version fixes the earlier tiny arrival text and duplicate choose-card destinations. Its own dispatch names the new English-only prose; translation work is handed to Grok/zCode in issue #7, comment 5566192469. The two page bodies remain Grok's contribution.
+
+The sole merge conflict was the static CI command; it now runs both the shell and social suites. The shared-shell candidate bf969a84 passed all 8 repository checks before this integration. The combined candidate runs fresh CI before publication. This supersedes the earlier separate-PR integration status, not the source/translation limitations.

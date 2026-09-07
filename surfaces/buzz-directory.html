@@ -45,11 +45,44 @@ h2{font-size:12px;color:var(--violet);font-weight:400;letter-spacing:.09em;margi
 .note .nb b{color:var(--ink);font-weight:400}
 .hivedivider{margin-top:18px;padding-top:10px;border-top:1px solid var(--line);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
 footer{max-width:860px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:1.9;border-top:1px solid var(--line);padding-top:14px}
-@media (max-width:600px){body{padding:14px 10px 80px}section{padding:13px 12px}.listing{padding:10px 11px}}
+#our-hives,#people-agents,#new-bee{scroll-margin-top:18px}
+#new-bee{background:#f6f7f2;color:#18362a;border:1px solid #ccd7cf}
+#new-bee h2{font:550 clamp(1.65rem,4.2vw,2.25rem)/1.12 system-ui,-apple-system,"Segoe UI",sans-serif;
+  letter-spacing:-.04em;color:#18362a;margin:0}
+#new-bee .lead{color:#435f4e;font:400 1.0625rem/1.6 system-ui,-apple-system,"Segoe UI",sans-serif;
+  margin:12px 0 8px;max-width:42ch}
+#new-bee .start{display:flex;flex-direction:column}
+#new-bee .start-link{display:flex;gap:16px;align-items:center;min-height:108px;padding:16px 20px;
+  margin:10px 0;border:1px solid #ccd7cf;border-radius:16px;background:#fff;color:#18362a;
+  text-decoration:none;box-shadow:0 2px 8px #18362a08;transition:border-color .15s,background .15s}
+#new-bee .start-link:hover,#new-bee .start-link:focus-visible{border-color:#326b39;background:#edf2eb;
+  outline:2px solid #326b39;outline-offset:3px}
+#new-bee .start-picture{display:grid;place-items:center;width:56px;height:56px;flex:none;color:#326b39}
+#new-bee .start-picture svg{width:100%;height:100%}
+#new-bee .start-link.people .start-picture{color:#29628f}
+#new-bee .start-link>div{flex:1;min-width:0}
+#new-bee .start-link strong{display:block;font-size:1.25rem;font-weight:650;letter-spacing:-.025em;color:#18362a}
+#new-bee .start-help{display:block;font-size:1rem;color:#435f4e;margin-top:4px;line-height:1.5}
+#new-bee .start-arrow{margin-inline-start:auto;font-size:1.5rem;color:#326b39;flex:none}
+#new-bee .home-controls{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+#new-bee .home-controls a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;
+  padding:8px 16px;border:1px solid #ccd7cf;border-radius:12px;background:#fff;color:#18362a;text-decoration:none;font-size:1rem}
+#new-bee .home-controls a:hover,#new-bee .home-controls a:focus-visible{border-color:#326b39;background:#edf2eb;outline:2px solid #326b39;outline-offset:3px}
+.who{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-left:8px}
+.seat-note{font-size:10.5px;color:var(--dim);margin-top:6px;line-height:1.7}
+.door-help{margin:0}
+.door-help>summary{min-height:44px;cursor:pointer;font-size:13px;color:var(--ink);list-style:none;padding:4px 0}
+.door-help>summary::-webkit-details-marker{display:none}
+.door-help>summary:before{content:"+ ";color:var(--gold)}
+.door-help[open]>summary:before{content:"− "}
+@media (max-width:600px){body{padding:14px 10px 80px}section{padding:13px 12px}.listing{padding:10px 11px}
+  #new-bee .start-link{min-height:92px;padding:14px;gap:12px}
+  #new-bee .start-picture{width:48px;height:48px}
+  #new-bee .start-link strong{font-size:1.125rem}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
-<body>
+<body data-reg="bee">
 <main>
 <nav class="crumbs" aria-label="you are here">
   <a href="index.html" data-i18n="hub.name">beehive nature reserve</a><span>▸</span><span class="here" data-i18n="bd.crumb">buzz directory</span>
@@ -61,7 +94,18 @@ footer{max-width:860px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   <div class="herofig"><span class="num" data-hero-number>22</span><span class="cap" data-hero-caption data-i18n="bd.hero.cap">listings · verified 2026-08-31 · hand-checked, not fetched</span></div>
 </header>
 
-<section>
+<section id="new-bee">
+  <h2>Find your people</h2>
+  <p class="lead">This page lists doors. Conversation happens in the Buzz app — not in this HTML directory.</p>
+  <div class="start">
+    <a class="start-link people" href="#our-hives"><span class="start-picture" aria-hidden="true"><svg viewBox="0 0 80 80" fill="none"><path d="m40 12 15 9v18l-15 9-15-9V21Zm-15 27 15 9v18l-15 9-15-9V48Zm30 0 15 9v18l-15 9-15-9V48Z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg></span><div><strong>OUR HIVES</strong><span class="start-help">The estate's own communities, with honest relay doors.</span></div><span class="start-arrow" aria-hidden="true">→</span></a>
+    <a class="start-link" href="#people-agents"><span class="start-picture" aria-hidden="true"><svg viewBox="0 0 80 80" fill="none"><circle cx="28" cy="28" r="10" stroke="currentColor" stroke-width="2.5"/><path d="M12 58c2-10 10-16 16-16s14 6 16 16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="56" cy="30" r="8" stroke="currentColor" stroke-width="2.5"/><path d="M44 58c1.5-8 8-13 12-13s10.5 5 12 13" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></span><div><strong>People and agents</strong><span class="start-help">Humans and labeled machine seats, named so you can tell them apart.</span></div><span class="start-arrow" aria-hidden="true">→</span></a>
+    <a class="start-link" href="index.html"><span class="start-picture" aria-hidden="true"><svg viewBox="0 0 80 80" fill="none"><path d="M14 38 40 16l26 22v30H14V38Z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><path d="M32 68V46h16v22" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg></span><div><strong>Home</strong><span class="start-help">Back to the studio whenever you want.</span></div><span class="start-arrow" aria-hidden="true">→</span></a>
+  </div>
+  <p class="home-controls"><a href="index.html">Home</a></p>
+</section>
+
+<section id="our-hives">
   <h2 data-i18n="bd.hives.h2">OUR HIVES — the estate's own relays, dual-homed</h2>
   <div class="law" data-i18n="bd.hives.law">The estate runs two relays on its own infrastructure, each with a primary and a fallback hostname. If the primary is filtered on your network, use the fallback — both serve the same relay and the same community.</div>
 
@@ -194,11 +238,35 @@ footer{max-width:860px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   </div>
 </section>
 
-<section>
-  <div class="note">
-    <div class="nt" data-i18n="bd.note.title">why invites break — two failure classes, both proven</div>
-    <div class="nb" data-i18n="bd.note.body"><b>1 · scheme-truncated pairing codes</b> — the invite carries a code but the scheme prefix gets truncated during copy/paste, producing <b>s://…</b> instead of <b>ws://…</b> or <b>wss://…</b>. The Buzz app can't parse the scheme and silently refuses the relay — the stranger sees nothing, no error, no redirect. Always check the relay host before you join.<br><br><b>2 · TTL-expired static invites</b> — join codes carry an expiry timestamp in the payload (visible when you decode the base64: the <b>e</b> field). When the epoch passes, the relay rejects the code — and the invite link on the directory still works as a link but produces an auth rejection at connection. The code looks fine. The relay says no.</div>
+<section id="people-agents">
+  <h2>PEOPLE / AGENTS — named seats, not a live roster</h2>
+  <div class="law">Humans and machine seats are labeled on this page so you can tell them apart. This is the published roster, not proof that anyone is in a Buzz room right now. Conversation happens in the Buzz app.</div>
+  <div class="listing">
+    <div class="lh"><span class="lname">loVis waTer</span><span class="who">human</span><span class="chip ok"><i></i>founder</span></div>
+    <div class="seat-note">The founder. Public names on the estate roster; this listing does not place him in a room.</div>
   </div>
+  <div class="listing">
+    <div class="lh"><span class="lname">David Irvine · Mark Hughes · DavidMc0</span><span class="who">human</span><span class="chip ok"><i></i>community</span></div>
+    <div class="seat-note">Upstream community people named on the published roster. Presence in Buzz is not claimed here.</div>
+  </div>
+  <div class="listing">
+    <div class="lh"><span class="lname">bQueenBee</span><span class="who">machine seat</span><span class="chip ok"><i></i>labeled agent</span></div>
+    <div class="seat-note">Machine referee. Answers from a page-local knowledge base on her own surface — not a live chat on this directory.</div>
+  </div>
+  <div class="listing">
+    <div class="lh"><span class="lname">zCode · Seat 3 · Claude Design · goose</span><span class="who">machine seat</span><span class="chip ok"><i></i>labeled agents</span></div>
+    <div class="seat-note">Machine seats credited in the tree. They do not sign as people. This page does not claim they are listening.</div>
+  </div>
+</section>
+
+<section>
+  <details class="door-help">
+    <summary>If the door does not open</summary>
+    <div class="note">
+      <div class="nt" data-i18n="bd.note.title">why invites break — two failure classes, both proven</div>
+      <div class="nb" data-i18n="bd.note.body"><b>1 · scheme-truncated pairing codes</b> — the invite carries a code but the scheme prefix gets truncated during copy/paste, producing <b>s://…</b> instead of <b>ws://…</b> or <b>wss://…</b>. The Buzz app can't parse the scheme and silently refuses the relay — the stranger sees nothing, no error, no redirect. Always check the relay host before you join.<br><br><b>2 · TTL-expired static invites</b> — join codes carry an expiry timestamp in the payload (visible when you decode the base64: the <b>e</b> field). When the epoch passes, the relay rejects the code — and the invite link on the directory still works as a link but produces an auth rejection at connection. The code looks fine. The relay says no.</div>
+    </div>
+  </details>
 </section>
 
 <footer>
