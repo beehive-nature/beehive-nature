@@ -84,7 +84,7 @@ footer{max-width:820px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   <div class="qrow" id="quick"></div>
   <div id="ask">
     <input id="q" placeholder="ask the queen anything about the hive…" aria-label="ask bQueenBee">
-    <button id="micb" onclick="micTap()" title="speak to her — the browser's own speech recognition, nothing leaves this page">🎙️</button>
+    <button id="micb" onclick="micTap()" title="Speak using your browser microphone. Your browser may use an online speech service.">🎙️</button>
     <button onclick="ask()">ask</button>
     <button id="autov" class="vb" aria-pressed="false" onclick="VOICE.auto=!VOICE.auto;this.setAttribute('aria-pressed',VOICE.auto)" title="she speaks her answers aloud when on — using the mic turns this on for the conversation">🔊 auto</button>
   </div>
@@ -209,8 +209,8 @@ function md(t){
  out+=esc(t.slice(last));
  return out.replace(/\*([^*]{1,160}?)\*/g,'<span class="nk">$1</span>');
 }
-/* her voice: the browser's own speechSynthesis — local, nothing leaves the page,
-   and only ever on your tap (consent law). Honest when the browser carries no voice. */
+/* Browser speech synthesis is optional; voice availability and processing are
+   browser-controlled. The page does not establish a local-only voice service. */
 var V={pick:null};
 function pickVoice(){
  if(V.pick!==null)return V.pick;
@@ -229,6 +229,7 @@ function speakText(t){
 }
 function pickLv(){var vs=speechSynthesis.getVoices();return vs.find(function(v){return /^lv/i.test(v.lang)});}
 function speak(btn,text){
+ if(DOCK_SUSPENDED)return;
  if(!window.speechSynthesis){btn.nextSibling.textContent='this browser carries no voice — declared, not faked';return;}
  if(speechSynthesis.speaking){speechSynthesis.cancel();btn.setAttribute('aria-pressed','false');return;}
  var vv=pickVoice();
@@ -242,8 +243,8 @@ function speak(btn,text){
 }
 function bee(text){var d=document.createElement('div');d.className='msg bee';
  d.innerHTML='<div class="who">bQueenBee 🐝 <span class="machine">⚙ machine agent</span>'
-  +'<button class="vb" aria-pressed="false" title="hear this in the browser\'s own voice — nothing leaves this page">🔊 voice</button>'
-  +'<span class="vnote" data-reg="cypherpunk"> speechSynthesis · local · on your tap only</span></div>'+md(text);
+  +'<button class="vb" aria-pressed="false" title="Play or stop this reply using your browser voice">🔊 voice</button>'
+  +'<span class="vnote" data-reg="cypherpunk"> speechSynthesis · browser voice · on your tap</span></div>'+md(text);
  d.querySelector('.vb').onclick=function(){speak(this,text);};
  $('chat').appendChild(d);
  d.scrollIntoView({behavior:'smooth',block:'nearest'});}
@@ -426,9 +427,10 @@ var KBX=[
 ];
 /* ── the two-way voice lane (finish-lane, 2026-08-22): mic-in rides the browser's own
    SpeechRecognition; answers speak back in the asker's attributed tongue when a voice
-   exists (honest absence otherwise). Nothing leaves the page: recognition and synthesis
-   are both local browser APIs — the consent law holds (mic tap = consent to converse;
+   exists (honest absence otherwise). Recognition may use a browser vendor's online
+   service; using a browser API does not prove local processing. Mic tap enables it;
    the auto-voice toggle is always visible and always yours). ── */
+var DOCK_SUSPENDED=false;
 var VOICE={auto:false,lang:(navigator.language||'en').split(',')[0]};
 var SPEECHLANG={'nl-be':'nl-BE','nb':'nb-NO','zh':'zh-CN'};
 function voiceFor(lang){
@@ -440,7 +442,7 @@ function voiceFor(lang){
  return v||pickVoice();
 }
 function speakLang(text,lang){
- if(!window.speechSynthesis||!VOICE.auto)return;
+ if(DOCK_SUSPENDED||!window.speechSynthesis||!VOICE.auto)return;
  var vv=voiceFor(lang);
  if(vv===false)return;
  var u=new SpeechSynthesisUtterance(speakText(text));
@@ -448,14 +450,23 @@ function speakLang(text,lang){
  speechSynthesis.cancel();speechSynthesis.speak(u);
 }
 var SR=null,SRon=false;
+// Cached dock sessions keep text and preferences, but never keep a hidden microphone live.
+window.bnrDockSuspend=function(inactive){
+ DOCK_SUSPENDED=!!inactive;if(!DOCK_SUSPENDED)return;
+ if(SR&&SRon){try{SR.abort();}catch(e){}}
+ SRon=false;$('micb').textContent='🎙️';$('micb').setAttribute('aria-pressed','false');
+ if(window.speechSynthesis)speechSynthesis.cancel();
+ document.querySelectorAll('#chat .vb').forEach(function(b){b.setAttribute('aria-pressed','false');});
+};
 function micTap(){
+ if(DOCK_SUSPENDED)return;
  var R=window.SpeechRecognition||window.webkitSpeechRecognition;
  if(!R){var n=document.createElement('div');n.className='msg bee';
   n.innerHTML='<div class="who">bQueenBee 🐝 <span class="machine">⚙ machine agent</span></div>this browser carries no speech recognition — declared, not faked. typing still reaches me in every tongue.';
   $('chat').appendChild(n);return;}
  if(SRon){SR.stop();return;}
  SR=new R();SR.lang=SPEECHLANG[VOICE.lang]||VOICE.lang;SR.interimResults=false;
- SR.onresult=function(e){var t=e.results[0][0].transcript;$('q').value=t;ask();};
+ SR.onresult=function(e){if(DOCK_SUSPENDED)return;var t=e.results[0][0].transcript;$('q').value=t;ask();};
  SR.onend=function(){SRon=false;$('micb').textContent='🎙️';$('micb').setAttribute('aria-pressed','false');};
  SR.onerror=SR.onend;
  if(!VOICE.auto){VOICE.auto=true;$('autov').setAttribute('aria-pressed','true');}
@@ -553,10 +564,11 @@ bee('the queen is in. ask me anything about the hive — every answer carries it
   if (window.__dockBridge) return; window.__dockBridge = true;
   window.addEventListener('message', function (e) {
     var d = e.data || {};
-    if (!d.dockPrompt) return;
+    if (window.parent===window || e.source!==window.parent || e.origin!==location.origin) return;
+    if (typeof d.dockPrompt!=='string' || !d.dockPrompt.trim() || d.dockPrompt.length>4000) return;
     var q = document.getElementById('q');
     if (!q) return;
-    q.value = String(d.dockPrompt).slice(0, 300);
+    q.value = d.dockPrompt;
     try { window.ask(); } catch (err) {}
     setTimeout(function () {
       var c = document.getElementById('chat');

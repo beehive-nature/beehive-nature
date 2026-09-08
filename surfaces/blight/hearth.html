@@ -37,7 +37,7 @@ header p{color:var(--dim);font-size:11px;margin-top:6px}
 <body>
 <header>
   <h1>🔥 the hearth</h1>
-  <p>co-create with the hive's AI · every answer is an artifact with an address · TASK 10 of 10</p>
+  <p>Explore creative prompts with BNR’s existing generators.</p>
 </header>
 <div id="chat"></div>
 <div id="seeds">
@@ -51,6 +51,11 @@ header p{color:var(--dim);font-size:11px;margin-top:6px}
 toll) — every artifact addressable, honest, chain-backed. the living model docks behind this same window.</div>
 <script src="./pointers.js?v=2"></script>
 <script>
+var HEARTH_SUSPENDED=false,HEARTH_AUDIO=new Set();
+window.bnrDockSuspend=function(inactive){
+  HEARTH_SUSPENDED=!!inactive;
+  if(HEARTH_SUSPENDED){HEARTH_AUDIO.forEach(function(ac){ac.close().catch(function(){});});HEARTH_AUDIO.clear();}
+};
 /* THE HEARTH — TASK 10. The prompt window where AI co-creates with humans.
    v1 is the DETERMINISTIC hearth: it routes plain-language asks to the fleet's
    real engines and returns real artifacts with addresses. No backend — the
@@ -101,8 +106,8 @@ function route(q){
     return {kind:'song',scale:scale,seed:1000+Math.floor(Math.random()*99999),
       say:'composed for you \u2014 press the link, it plays in the organ:'};
   }
-  if(/help|what can/.test(q)) return {kind:'help',say:'i grow art, compose songs, show crowns, and draft deals. every answer is a link you can keep. try: grow me a mushroom \u00B7 play me a blues song \u00B7 show me the crown \u00B7 help me make a deal.'};
-  return {kind:'help',say:'i didn\u2019t catch that \u2014 but i can: grow art \u00B7 play songs \u00B7 show crowns \u00B7 draft deals. every answer carries an address.'};
+  if(/help|what can/.test(q)) return {kind:'help',say:'I route creative prompts to existing generators. Try: grow me a mushroom \u00B7 play me a blues song \u00B7 show me the crown \u00B7 help me make a deal.'};
+  return {kind:'help',say:'I did not recognize that prompt. Try art, songs, crowns or deal drafts, or choose one of the creative suggestions.'};
 }
 async function respond(q){
   const r=route(q);
@@ -130,7 +135,9 @@ async function respond(q){
     link.innerHTML='seed '+r.seed+' in '+r.scale+' \u00B7 <a href="'+ou+'">hear it \u2014 the organ</a>';
     m.appendChild(link);
     try{
+      if(!HEARTH_SUSPENDED){
       const ac=new (window.AudioContext||window.webkitAudioContext)();
+      HEARTH_AUDIO.add(ac);
       const iv=SCALES[r.scale]||SCALES['harmonic major'];
       const root=48+(r.seed%12);
       for(let i=0;i<8;i++){
@@ -143,6 +150,8 @@ async function respond(q){
         g.gain.exponentialRampToValueAtTime(0.18,t+0.015);
         g.gain.exponentialRampToValueAtTime(0.0001,t+0.28);
         o.connect(g).connect(ac.destination); o.start(t); o.stop(t+0.3);
+        if(i===7)o.onended=function(){HEARTH_AUDIO.delete(ac);if(ac.state!=='closed')ac.close().catch(function(){});};
+      }
       }
     }catch(e){}
   } else if(r.kind==='deal'){
