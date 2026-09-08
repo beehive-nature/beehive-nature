@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f6f7f2">
+<meta name="color-scheme" content="light">
+<title>Share card — green–teal–purple bloom (draft)</title>
+<style>
+:root{
+  --ink:#18362a;--dim:#435f4e;--line:#ccd7cf;--panel:#fffdf8;--bg:#f6f7f2;
+  --human:#65509a;--ai:#176879;--bio:#326b39;--warn:#855b0b;
+  --font:system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:1.125rem/1.6 var(--font)}
+a{color:inherit;text-underline-offset:4px}
+button,a{min-height:44px}
+:focus-visible{outline:3px solid var(--bio);outline-offset:3px}
+.page{max-width:40rem;margin:0 auto;padding:20px clamp(16px,3vw,28px) 64px}
+.banner{margin:0 0 14px;padding:12px 14px;border:1px solid #c9b56a;border-radius:12px;background:#fff8d6;color:#5c4a12;font-size:.95rem}
+.crumb{font-size:.875rem;margin:0 0 18px}
+.crumb a{display:inline-flex;align-items:center;min-height:44px;padding:0 4px}
+.card{
+  background:var(--panel);border:1px solid var(--line);border-radius:28px;
+  padding:22px 22px 26px;box-shadow:0 18px 40px rgba(24,54,42,.06);
+}
+.art{
+  margin:0 0 18px;display:grid;place-items:center;aspect-ratio:1;
+  background:radial-gradient(ellipse at 50% 42%,#fff 20%,#f3efe6 70%,#e7eee6 100%);
+  border-radius:22px;overflow:hidden;
+}
+.art img{width:86%;height:auto;display:block}
+.makers{margin:0 0 6px;font-size:.8rem;letter-spacing:.04em;text-transform:uppercase;color:var(--dim)}
+h1{margin:0 0 10px;font-size:clamp(1.6rem,4vw,2.15rem);line-height:1.2;letter-spacing:-.03em}
+.invite{margin:0 0 18px;font-size:1.2rem;max-width:28ch}
+.meaning{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px;padding:0;list-style:none}
+.meaning li{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:#fff;font-size:.95rem}
+.dot{width:12px;height:12px;border-radius:50%;flex:none}
+.dot.human{background:var(--human)}
+.dot.ai{background:var(--ai)}
+.dot.bio{background:var(--bio)}
+.meta{display:grid;gap:12px}
+.box{border:1px dashed var(--line);border-radius:16px;padding:14px 16px;background:#fff}
+.box h2{margin:0 0 6px;font-size:1rem}
+.box p{margin:0;color:var(--dim);font-size:.95rem}
+.box code{display:block;margin-top:8px;overflow-wrap:anywhere;font-size:.85rem}
+.qr{
+  min-height:148px;display:grid;place-items:center;text-align:center;
+  background:
+    repeating-linear-gradient(90deg,transparent,transparent 11px,rgba(24,54,42,.06) 11px,rgba(24,54,42,.06) 12px),
+    repeating-linear-gradient(0deg,transparent,transparent 11px,rgba(24,54,42,.06) 11px,rgba(24,54,42,.06) 12px);
+}
+.qr strong{display:block}
+.warn{color:var(--warn)}
+.bound{margin:16px 0 0;font-size:.95rem;color:var(--dim)}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 0}
+.actions a,.actions button{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:10px 16px;border:1px solid var(--line);border-radius:14px;
+  background:#fff;color:var(--ink);text-decoration:none;font:inherit;cursor:pointer;
+}
+#copy-status{margin:10px 0 0;color:var(--dim);font-size:.95rem;min-height:1.4em}
+footer{margin-top:24px;color:var(--dim);font-size:.875rem}
+@media print{
+  body{background:#fff}
+  .banner,.crumb,.actions,footer,#copy-status{display:none!important}
+  .page{padding:0}
+  .card{box-shadow:none;border-color:#bbb}
+}
+</style>
+</head>
+<body>
+<div class="page">
+<p class="banner"><strong>Draft share card.</strong> Local review only. The URL below is not public. A QR is reserved, not printed.</p>
+<p class="crumb">
+  <a href="bloom-genesis.html">Work page</a> ·
+  <a href="../index.html">MVP walk</a> ·
+  <a href="../../../surfaces/index.html">Home</a>
+</p>
+
+<article class="card" aria-labelledby="card-title">
+  <figure class="art">
+    <img src="../assets/genesis-3d/stills/green-teal-bloom.jpg" width="820" height="821" alt="Original green–teal–purple bloom by LoVis and his mother.">
+  </figure>
+  <p class="makers">LoVis and his mother</p>
+  <h1 id="card-title">Green–teal–purple bloom</h1>
+  <p class="invite">A piece of this bloom, for you to keep or to give.</p>
+  <ul class="meaning" aria-label="Colour meaning">
+    <li><span class="dot human" aria-hidden="true"></span>Purple — humans</li>
+    <li><span class="dot ai" aria-hidden="true"></span>Teal — AI</li>
+    <li><span class="dot bio" aria-hidden="true"></span>Green — biomass</li>
+  </ul>
+  <div class="meta">
+    <div class="box">
+      <h2>Public URL</h2>
+      <p>Draft / local until Astra ships a stable work URL. Do not treat this path as a live address.</p>
+      <code>docs/mvp-walk/works/bloom-genesis.html</code>
+    </div>
+    <div class="box qr" aria-label="QR reserved">
+      <div>
+        <strong>QR reserved</strong>
+        <p>A code here would send someone nowhere. Wait for the public work URL.</p>
+      </div>
+    </div>
+    <div class="box">
+      <h2>Reference, not ownership</h2>
+      <p>This card is a keepable preview with the makers’ names. It is not a licensed media copy, not a mint, and not proof that anyone received a gift.</p>
+    </div>
+  </div>
+  <p class="bound">Artist support: artist-selected destination pending. Motion study, when shown on the work page, is Astra’s — not a second authorship of the still.</p>
+  <div class="actions">
+    <a href="bloom-genesis.html">Open the work</a>
+    <button type="button" id="copy-draft">Copy the draft path</button>
+  </div>
+  <p id="copy-status" role="status">The path is local. Copying it does not publish the work.</p>
+</article>
+<footer>Print hides the review chrome. The card still says draft. No campaign.</footer>
+</div>
+<script>
+(function () {
+  const button = document.getElementById('copy-draft');
+  const status = document.getElementById('copy-status');
+  const text = 'Green–teal–purple bloom — LoVis and his mother. Draft/local path: docs/mvp-walk/works/bloom-genesis.html. A reference, not ownership. Public URL pending.';
+  if (!button || !status) return;
+  button.addEventListener('click', function () {
+    if (!navigator.clipboard || !navigator.clipboard.writeText) {
+      status.textContent = 'Copy is unavailable here. The draft path is on the card.';
+      return;
+    }
+    navigator.clipboard.writeText(text).then(function () {
+      status.textContent = 'Copied the draft path and credit. This is not a public URL and not a receive receipt.';
+    }, function () {
+      status.textContent = 'Copy was refused. The draft path is still on the card.';
+    });
+  });
+})();
+</script>
+</body>
+</html>
