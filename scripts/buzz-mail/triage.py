@@ -54,8 +54,16 @@ def extract(raw):
     message = BytesParser(policy=email.policy.default).parsebytes(raw)
     subject = str(message.get("Subject", ""))[:300]
     text = []
-    for part in message.walk():
-        if part.get_content_type() == "text/plain" and not part.get_filename() and part.get_content_disposition() != "attachment":
+    pending = [message]
+    while pending:
+        part = pending.pop()
+        if part.get_filename() or part.get_content_disposition() == "attachment":
+            continue
+        if part.get_content_type() == "message/rfc822":
+            continue
+        if part.get_content_maintype() == "multipart":
+            pending.extend(reversed(list(part.iter_parts())))
+        elif part.get_content_type() == "text/plain":
             text.append(part.get_content())
     body = "\n".join(text)
     if SENSITIVE.search(subject + "\n" + body):
@@ -63,7 +71,6 @@ def extract(raw):
     if not body.strip():
         return None, "format_review"
     return json.dumps({"subject": subject, "body": body[:3500]}, ensure_ascii=False), None
-
 
 def validate_result(value):
     if not isinstance(value, dict) or set(value) != {"category", "summary", "draft"}:
