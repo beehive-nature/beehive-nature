@@ -52,7 +52,31 @@ python3 -m http.server 4188
 
 ## Verification
 
-Source tests and the desktop + 390px browser walk are recorded below after
-the implementation commit and the walk.
+Implementation commit: `09b6d06`.
+`node --test e2e/artist-audio-showcase.test.mjs e2e/artist-audio-collection.test.mjs` — **14/14**.
 
-PR stays draft.
+Browser walk at `http://127.0.0.1:4188/docs/mvp-walk/artist-audio-showcase.html`
+(Python server, not `file://`):
+
+**Desktop**
+
+1. New bee: one Play, Watch not visible, Other ways closed. Pass.
+2. Fixture credit readable. Pass.
+3. Single draft/test-audio banner. Pass.
+4. Save for later sits after the stage, before the details stack. Pass.
+5. Play started the 1.5s fixture. Native controls visible. Pass.
+6. Other ways: YouTube labeled CJ Bolland / Sugar is sweeter, a different
+   recording. Autonomi/Arweave are slots. Pass.
+7. Raver: bloom first and larger; Play still present. Pass.
+8. Cypherpunk: storage receipts open with null Autonomi. Pass.
+9. Artist credits and storage reachable in every skin. Pass.
+
+**390px**
+
+10. Play full-width. Watch hidden. Other ways closed. Credit readable.
+    Collection findable. No overflow. Pass.
+
+Leftover `localStorage` from an earlier walk still showed a saved fixture
+row on Cypherpunk. That is prior-session state, not this HTML change.
+
+No JS, register, kandi, or midivault edits. No history rewrite. PR stays draft.
