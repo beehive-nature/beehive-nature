@@ -180,6 +180,53 @@
     };
   }
 
+  function previewImport(text) {
+    if (typeof text !== 'string' || text.length > MAX_TEXT) throw failure('invalid-entry', 'import');
+    let envelope;
+    try { envelope = JSON.parse(text); }
+    catch (_) { throw failure('invalid-entry', 'import'); }
+    record(envelope, ['schema', 'items', 'note', 'exportedAt']);
+    if (Object.prototype.hasOwnProperty.call(envelope, 'note')) scalar(envelope.note, 1000, true);
+    if (Object.prototype.hasOwnProperty.call(envelope, 'exportedAt')) scalar(envelope.exportedAt, 40, false);
+    if (envelope.schema !== SCHEMA || !Array.isArray(envelope.items)) throw failure('invalid-entry', 'import');
+    if (envelope.items.length > MAX_ITEMS) throw failure('collection-full', 'import');
+    const unique = new Map();
+    envelope.items.forEach(function (entry) {
+      const item = publicItem(entry);
+      if (unique.has(item.id) && JSON.stringify(unique.get(item.id)) !== JSON.stringify(item)) {
+        throw failure('conflicting-entry', 'import');
+      }
+      unique.set(item.id, item);
+    });
+    return { schema: SCHEMA, items: Array.from(unique.values()) };
+  }
+
+  async function importItems(storage, text, options) {
+    const incoming = previewImport(text);
+    return mutation(options, function () {
+      // The receiver's latest rows are read after acquiring the same lock as
+      // save/remove. Validate the whole merge before attempting a single write.
+      const before = readStore(storage);
+      const existing = new Map(before.items.map(function (item) { return [item.id, item]; }));
+      const additions = [];
+      let already = 0;
+      incoming.items.forEach(function (item) {
+        if (existing.has(item.id)) {
+          if (JSON.stringify(existing.get(item.id)) !== JSON.stringify(item)) {
+            throw failure('conflicting-entry', 'import');
+          }
+          already += 1;
+        } else {
+          additions.push(item);
+        }
+      });
+      if (before.items.length + additions.length > MAX_ITEMS) throw failure('collection-full', 'import');
+      const next = { schema: SCHEMA, items: before.items.concat(additions) };
+      if (additions.length) writeStore(storage, next);
+      return { store: next, added: additions.length, already: already };
+    });
+  }
+
   root.BNRListenLater = {
     STORE: STORE,
     SCHEMA: SCHEMA,
@@ -188,6 +235,8 @@
     readStore: readStore,
     saveItem: saveItem,
     removeItem: removeItem,
-    exportPublic: exportPublic
+    exportPublic: exportPublic,
+    previewImport: previewImport,
+    importItems: importItems
   };
 })(typeof window !== 'undefined' ? window : globalThis);
