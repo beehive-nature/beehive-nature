@@ -47,6 +47,27 @@ python3 -m http.server 4190
 
 ## Verification
 
-Recorded after the implementation commit and the desktop + 390px walk.
+Implementation: `a57d3c1`.
+`node --test e2e/first-work.test.mjs` — **13/13** (Astra’s controller tests, unchanged).
+
+Walk at `http://127.0.0.1:4190/docs/mvp-walk/first-work.html`:
+
+| Check | Result |
+|---|---|
+| Desktop bloom + credit before Keep | Pass. Skip-to-bloom present. |
+| Keep → reload | Pass. Button became “In your collection”. |
+| Share card + honesty caption | Pass. Card shows LoVis and his mother. Caption: not a proven public-platform preview or scanned QR. Copy: “Preview link copied. It opens on this machine.” |
+| Pause through bee/raver/cypherpunk | Pass. Stayed on Play motion. Raver glow. Cypherpunk mono. Keep retained. |
+| Export | Pass. `bnr-listen-later (1).json` 720 B, id `bnr-genesis-bloom-v1`, artist LoVis and his mother, note Not JAMS-compatible. |
+| Choose file → preview → Add | Pass as a real picker. The file chosen from Downloads was the older showcase export (`bnr-listen-later.json`, TEST AUDIO), not the just-downloaded bloom file. Preview appeared (“Nothing has been saved yet”) then Add merged it. The 720 B bloom export itself was not re-imported in this walk. |
+| 390×924 DevTools | Pass. Dimensions chip 390. No overflow. Keep/share/pause usable. |
+| prefers-reduced-motion | Pass. Control: “Motion reduced”. Bloom static. |
+
+**Untested / not claimed**
+- Dedicated click on Explore JAMS (markup has `target="_blank"` + `rel="noopener noreferrer"` + “new tab”; the walker clicked “Meet the hive”, which is same-origin).
+- Public skaists.dev OG/Twitter render.
+- QR scan.
+- Independent-phone observation.
+- Re-import of the 720 B Genesis bloom export into an empty store.
 
 No campaign, outreach, upload, or spend.
