@@ -52,8 +52,21 @@ body[data-reg=raver] .stage{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 .credit-line b{display:block;font-size:1.25rem}
 .credit-line small{display:block;color:var(--dim);font-size:1rem;margin-top:4px}
 .controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
-#play-pause{min-width:min(100%,220px);min-height:64px;padding:14px 28px;border:1px solid var(--accent);border-radius:16px;background:var(--accent);color:var(--on);font-size:1.25rem;font-weight:650}
+#play-pause,#watch{min-width:min(100%,160px);min-height:64px;padding:14px 22px;border:1px solid var(--accent);border-radius:16px;font-size:1.25rem;font-weight:650}
+#play-pause{background:var(--accent);color:var(--on)}
 #play-pause[aria-pressed=true]{background:var(--panel);color:var(--ink)}
+#watch{background:var(--well);color:var(--ink)}
+.actions{display:flex;flex-wrap:wrap;gap:12px;align-items:stretch}
+.sources{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.sources button,.sources .slot{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;min-height:44px;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:var(--well);text-align:left}
+.sources button[aria-pressed=true]{border-color:var(--accent);background:var(--wash);font-weight:650}
+.sources .slot{color:var(--dim);cursor:default}
+.sources small{display:block;font-weight:400;color:var(--dim)}
+#youtube-host{margin-top:8px}
+#youtube-player{width:100%;min-height:200px;border:0;border-radius:12px;background:#000}
+.collection-actions{display:flex;flex-wrap:wrap;gap:8px}
+.collection-actions button{min-height:44px;padding:8px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+#collection-list{margin:8px 0 0;padding-left:1.2rem}
 .vol{flex:1 1 180px;display:flex;flex-direction:column;gap:6px;min-width:160px}
 .vol span,.vol output{font-size:.875rem;color:var(--dim)}
 .vol .row{display:flex;justify-content:space-between;align-items:center}
@@ -111,6 +124,7 @@ body[data-reg=cypherpunk] :is(button,.panel,.receipts,details.tool,.banner,.ext)
 }
 </style>
 <script src="../../surfaces/register.js?v=9" defer></script>
+<script src="assets/artist-audio/collection.js" defer></script>
 <script src="assets/artist-audio/showcase.js" defer></script>
 </head>
 <body data-reg="bee" data-bee-theme="custom">
@@ -125,14 +139,14 @@ body[data-reg=cypherpunk] :is(button,.panel,.receipts,details.tool,.banner,.ext)
 
 <p class="eyebrow">Artist audio showcase · development fixture</p>
 <h1>
-  <span data-view="bee">Press play. Read who made it.</span>
-  <span data-view="raver">Listen beside the bloom.</span>
-  <span data-view="cypherpunk">Local fixture. Empty storage receipts.</span>
+  <span data-view="bee">Choose how it looks. Choose where it plays.</span>
+  <span data-view="raver">Same choices. The bloom stays beside them.</span>
+  <span data-view="cypherpunk">Same sources. Empty receipts stay empty.</span>
 </h1>
 <p class="lead">
-  <span data-view="bee">One large play button. Volume. A credit line you can actually read. This is a short generated tone for development — not the authorized recording.</span>
-  <span data-view="raver">Same player. Same credits. The green–teal–purple bloom moves next to it. Motion is visual only; sound starts only when you press Play.</span>
-  <span data-view="cypherpunk">Same listening controls. Autonomi and Arweave slots are null: prepared-local-only, upload not performed. midivault’s simulated 32 KiB path is not this archive.</span>
+  <span data-view="bee">Play the local test audio. Watch is off until a video exists. Other ways to listen names each source. Empty Autonomi and Arweave slots are not fake buttons.</span>
+  <span data-view="raver">Same Play, Watch, and named sources. The green–teal–purple bloom is visual only. Switching skins keeps your source and playhead.</span>
+  <span data-view="cypherpunk">Same three actions. Autonomi and Arweave remain not-uploaded. Changing the view does not restart or invent a provider.</span>
 </p>
 <p class="honesty"><em>this browser only</em> <span>Rights status: unconfirmed. Authorized recording not present.</span></p>
 
@@ -143,18 +157,34 @@ body[data-reg=cypherpunk] :is(button,.panel,.receipts,details.tool,.banner,.ext)
       <b>TEST AUDIO — not the authorized release</b>
       <small>Beehive Nature development fixture (not an artist release) · rights <code>unconfirmed</code></small>
     </p>
-    <div class="controls">
+    <div class="actions">
       <button type="button" id="play-pause" aria-pressed="false" aria-controls="fixture-audio">Play</button>
-      <label class="vol">
-        <span class="row">Volume <output id="volume-value" for="volume">80%</output></span>
-        <input id="volume" type="range" min="0" max="1" step="0.05" value="0.8" aria-label="Volume">
-      </label>
+      <button type="button" id="watch" disabled aria-disabled="true" title="No video on this board">Watch</button>
     </div>
+    <label class="vol">
+      <span class="row">Volume <output id="volume-value" for="volume">80%</output></span>
+      <input id="volume" type="range" min="0" max="1" step="0.05" value="0.8" aria-label="Volume">
+    </label>
     <audio id="fixture-audio" preload="none" controls src="assets/artist-audio/TEST-AUDIO-not-authorized-release.wav">
       Your browser cannot play this WAV fixture.
     </audio>
-    <p class="native">Native controls stay available. There is no autoplay.</p>
+    <p class="native">Play is the local test-audio action. Native controls stay available. There is no autoplay.</p>
     <p id="listen-status" role="status">Idle. Press Play to hear the 1.5 second development tone.</p>
+    <details class="tool" id="sources-panel" data-view-disclosure="sources" open>
+      <summary>Other ways to listen</summary>
+      <p class="note">Medium and source are different. Play is audio on this page. Watch would be video if one existed. Empty BNR slots are named and not selectable.</p>
+      <ul class="sources" role="group" aria-label="Listening sources">
+        <li><button type="button" data-source="local" data-available="true" aria-pressed="true">Local test audio <small>This page · development fixture · available</small></button></li>
+        <li><button type="button" data-source="youtube" data-available="true" aria-pressed="false">YouTube <small>External · named · uses YouTube’s own player</small></button></li>
+        <li><p class="slot" data-source="autonomi" data-available="false">Autonomi <small>Not uploaded / pending authorized release · not a playback source</small></p></li>
+        <li><p class="slot" data-source="arweave" data-available="false">Arweave <small>Not uploaded / pending authorized release · not a playback source</small></p></li>
+      </ul>
+      <p id="source-status" role="status">Source: local test audio on this page (development fixture).</p>
+      <div id="youtube-host" hidden>
+        <iframe id="youtube-player" hidden title="YouTube native player" allow="accelerometer; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        <p class="note">YouTube embed is not guaranteed on this host or on skaists.dev. A public HTTPS domain may help identification, but YouTube still needs a valid client/referrer and per-video embed permission. DNS alone cannot guarantee playback. <a href="https://www.youtube.com/watch?v=pb6OqIyyLAk" rel="noopener noreferrer" target="_blank">Open the named YouTube watch page</a>. BNR cannot control an external app.</p>
+      </div>
+    </details>
   </section>
 
   <section class="panel bloom-panel" id="bloom-board" aria-labelledby="bloom-heading">
@@ -184,8 +214,8 @@ body[data-reg=cypherpunk] :is(button,.panel,.receipts,details.tool,.banner,.ext)
     </dl>
   </section>
 
-  <section class="receipts" aria-labelledby="receipts-heading">
-    <h2 id="receipts-heading">Storage receipts</h2>
+  <details class="receipts tool" id="storage-panel" data-view-disclosure="storage" aria-labelledby="receipts-heading">
+    <summary id="receipts-heading">Storage receipts</summary>
     <p class="note">Empty on purpose. No fake transaction ids. Status language matches Astra’s <code>bnr-audio-release/1</code> preparation record.</p>
     <h3>Autonomi</h3>
     <dl class="kv">
@@ -202,8 +232,21 @@ body[data-reg=cypherpunk] :is(button,.panel,.receipts,details.tool,.banner,.ext)
       <dt>Status</dt><dd>not-uploaded</dd>
     </dl>
     <p class="note">Local fixture is 144044 bytes (within the current 256 KiB browser-inline plan). That does not mean an upload was quoted or signed. midivault’s simulated first-32-KiB local path is a different tool and was not used.</p>
-  </section>
+  </details>
 </div>
+
+<section class="panel" aria-labelledby="later-heading">
+  <h2 id="later-heading">Save for later</h2>
+  <p class="note">Saves this fixture’s public credit and the named YouTube link in this browser. Not a media download. Not offline audio. Not a wallet. Not JAMS-compatible.</p>
+  <div class="collection-actions">
+    <button type="button" id="save-later">Save this reference</button>
+    <button type="button" id="remove-later" disabled>Remove</button>
+    <button type="button" id="export-later" disabled>Export public JSON</button>
+  </div>
+  <ul id="collection-list"><li>Nothing saved yet.</li></ul>
+  <p id="collection-status" role="status">Nothing saved yet.</p>
+  <p class="note">Explore JAMS is a separate external site: <a href="https://jams.community/" rel="noopener noreferrer" target="_blank">jams.community</a>. That link is not a catalog, payment, or endorsement, and this export was not imported there.</p>
+</section>
 
 <details class="tool" id="credits-panel" data-view-disclosure="credits">
   <summary>Credit line in every view</summary>
@@ -219,15 +262,14 @@ body[data-reg=cypherpunk] :is(button,.panel,.receipts,details.tool,.banner,.ext)
 </details>
 <details class="tool" id="limits-panel" data-view-disclosure="limits">
   <summary>What this page does not do</summary>
-  <p class="note">It does not download or rip YouTube. It does not claim CJ Bolland / Sugar Is Sweeter as cleared. It does not call Autonomi or Arweave. It does not edit <code>surfaces/kandi.html</code> or midivault. Astra keeps the shared register/theme work and the audio-prep tool on draft #32.</p>
+  <p class="note">It does not download or rip YouTube. It does not claim CJ Bolland / Sugar Is Sweeter as cleared. It does not claim a YouTube embed will play on skaists.dev. It does not call Autonomi or Arweave. It does not edit <code>surfaces/kandi.html</code> or midivault. Astra keeps the shared register/theme work and the audio-prep tool on draft #32.</p>
 </details>
 
 <p class="ext">
-  <strong>Optional external listen — not this page’s audio.</strong>
-  YouTube may still be opened as a separate tab:
-  <a href="https://www.youtube.com/watch?v=pb6OqIyyLAk" rel="noopener noreferrer" target="_blank">watch on YouTube</a>
-  (upload identified by Astra as CJ Bolland — “Sugar is sweeter” (Sugar Daddy)).
-  That link is not an embed, not a republication, and not a rights clearance.
+  <strong>Named external listen — not this page’s audio, not a clearance.</strong>
+  YouTube watch page for the upload Astra identified as CJ Bolland — “Sugar is sweeter” (Sugar Daddy):
+  <a href="https://www.youtube.com/watch?v=pb6OqIyyLAk" rel="noopener noreferrer" target="_blank">open on YouTube</a>.
+  Choosing YouTube under Other ways to listen stops the local player and may show YouTube’s native player. That embed is not claimed to work here or on skaists.dev. Not a republication. Not a rights clearance.
 </p>
 
 <footer>Draft Grok lane · 2026-09-07 · open via a local HTTP server from the repository root. File URLs will not load the bloom SVG.</footer>

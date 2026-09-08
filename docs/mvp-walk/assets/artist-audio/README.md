@@ -9,5 +9,7 @@ Is Sweeter. Do not upload, mint, or treat as a cleared republication.
   manifest with null Autonomi/Arweave addresses and
   `prepared-local-only` / `not-uploaded`
 
-YouTube may be linked as a **separate external listen**. That link is
-not this file and is not permission to republish.
+YouTube may be offered as a **named external listen**. That is a
+separate source, not this file, and not permission to republish. An
+embed is not guaranteed on this host or on skaists.dev. Autonomi and
+Arweave remain empty until an authorized upload.
