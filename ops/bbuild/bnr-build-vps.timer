@@ -1,0 +1,10 @@
+[Unit]
+Description=Run prepared VPS jobs; laptop jobs await an explicit laptop session
+
+[Timer]
+OnBootSec=75s
+OnUnitInactiveSec=30s
+Unit=bnr-build-vps.service
+
+[Install]
+WantedBy=timers.target

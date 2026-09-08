@@ -1,0 +1,26 @@
+[Unit]
+Description=Prepare one authorized bBUILD job on local metered inference
+After=network-online.target buzz-meter-gate.service
+
+[Service]
+Type=oneshot
+User=ubuntu
+ExecStart=/usr/bin/python3 /opt/bnr-build/broker.py tick
+StateDirectory=bnr-build
+StateDirectoryMode=0700
+Environment=PYTHONPATH=/home/ubuntu/.local/lib/python3.12/site-packages
+LoadCredential=model.key:/etc/bnr-build/credentials/model.key
+LoadCredential=buzz.nsec:/etc/bnr-build/credentials/buzz.nsec
+UMask=0077
+TimeoutStartSec=240
+CPUQuota=30%
+MemoryMax=512M
+TasksMax=48
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes

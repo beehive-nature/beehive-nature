@@ -1,0 +1,22 @@
+[Unit]
+Description=Independently verify returned bBUILD code on the VPS
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+ExecStart=/usr/bin/python3 /opt/bnr-build/verify_return.py
+Environment=BBUILD_BWRAP=/opt/bnr-build/bwrap
+Environment=PYTHONPATH=/home/ubuntu/.local/lib/python3.12/site-packages
+UMask=0077
+TimeoutStartSec=240
+CPUQuota=150%
+CPUWeight=30
+Nice=10
+MemoryMax=2G
+TasksMax=128
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/var/lib/bnr-build
+PrivateTmp=yes

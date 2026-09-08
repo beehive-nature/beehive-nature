@@ -1,0 +1,9 @@
+# Ubuntu's per-application user-namespace admission, scoped to the root-owned
+# copy of the distro bubblewrap binary used by this worker. No global sysctl
+# or AppArmor disable. Worker children also use --disable-userns.
+abi <abi/4.0>,
+include <tunables/global>
+
+profile bnr-build-bwrap /opt/bnr-build/bwrap flags=(unconfined) {
+  userns,
+}

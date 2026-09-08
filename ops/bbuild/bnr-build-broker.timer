@@ -1,0 +1,10 @@
+[Unit]
+Description=Service the authenticated bBUILD queue
+
+[Timer]
+OnBootSec=45s
+OnUnitInactiveSec=30s
+Unit=bnr-build-broker.service
+
+[Install]
+WantedBy=timers.target

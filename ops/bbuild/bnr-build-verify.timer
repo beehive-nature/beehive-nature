@@ -1,0 +1,10 @@
+[Unit]
+Description=Verify returned jobs before publication
+
+[Timer]
+OnBootSec=90s
+OnUnitInactiveSec=30s
+Unit=bnr-build-verify.service
+
+[Install]
+WantedBy=timers.target

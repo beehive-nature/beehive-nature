@@ -1,0 +1,25 @@
+[Unit]
+Description=Run one queued VPS bBUILD job with isolated tests
+After=network-online.target bnr-build-broker.service
+
+[Service]
+Type=exec
+User=ubuntu
+ExecStart=/usr/bin/python3 /opt/bnr-build/worker.py --worker vps --once --lease 580
+Environment=BBUILD_WORKER_STATE=/var/lib/bnr-build/vps-worker
+Environment=BBUILD_BWRAP=/opt/bnr-build/bwrap
+Environment=PYTHONPATH=/home/ubuntu/.local/lib/python3.12/site-packages
+UMask=0077
+RuntimeMaxSec=600
+CPUQuota=150%
+CPUWeight=30
+Nice=10
+MemoryMax=2G
+TasksMax=128
+KillMode=control-group
+TimeoutStopSec=5
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/var/lib/bnr-build
+PrivateTmp=yes
