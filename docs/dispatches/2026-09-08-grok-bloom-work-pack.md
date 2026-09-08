@@ -116,4 +116,8 @@ acceptance.
 - 390px New bee: bloom, Keep, and chips reflow; no horizontal card overflow.
 - PR #31 link labeled “(opens in a new tab)”.
 
+Remote CI on `29405ce`: **8/8 green** (secret-scan, tests/static, tests/node,
+tests/test). That is repository CI, not matriarch acceptance, not a public
+URL, and not receive wiring.
+
 PR stays draft.
