@@ -27,11 +27,13 @@ test('New bee is the default; shared register host and custom theme', () => {
   assert.match(page, /data-view="cypherpunk"/);
 });
 
-test('every view keeps Play, Watch, named sources, credits, and storage details', () => {
+test('every view keeps Play, hidden Watch, named sources, credits, and storage details', () => {
   assert.match(page, /id="play-pause"/);
-  assert.match(page, /id="watch"[^>]*disabled/);
+  assert.match(page, /id="watch"[^>]*\bhidden\b[^>]*disabled/);
   assert.match(page, /title="No video on this board"/);
   assert.match(page, /Other ways to listen/);
+  assert.doesNotMatch(page, /id="sources-panel"[^>]*\bopen\b/);
+  assert.match(page, /id="later-heading">Save for later/);
   assert.match(page, /id="volume"/);
   assert.match(page, /id="fixture-audio"/);
   assert.match(page, /TEST AUDIO — not the authorized release/);
@@ -91,7 +93,7 @@ test('bloom is reused, not rebuilt; reduced motion and pause are honored', () =>
 test('Play, Watch, and Other ways to listen stay honest about availability', () => {
   assert.match(page, /Play is the local test-audio action/);
   assert.match(js, /applySource\('local'/);
-  assert.match(page, /id="watch"[^>]*disabled[^>]*aria-disabled="true"/);
+  assert.match(page, /id="watch"[^>]*hidden[^>]*disabled[^>]*aria-disabled="true"/);
   assert.match(js, /Watch is unavailable\. This board has no video file/);
   assert.match(page, /<button type="button" data-source="local" data-available="true"/);
   assert.match(page, /<button type="button" data-source="youtube" data-available="true"/);
@@ -103,8 +105,11 @@ test('Play, Watch, and Other ways to listen stay honest about availability', () 
   assert.match(js, /This is not a playback source yet/);
 });
 
-test('YouTube is a named external source; embed is not claimed on skaists.dev', () => {
+test('YouTube is a separate CJ Bolland listen, not another encoding of the fixture', () => {
   assert.match(page, /Named external listen — not this page’s audio/);
+  assert.match(page, /a different recording from the 1\.5 second TEST AUDIO fixture/);
+  assert.match(page, /CJ Bolland — “Sugar is sweeter”/);
+  assert.match(page, /YouTube — CJ Bolland/);
   assert.match(page, /https:\/\/www\.youtube\.com\/watch\?v=pb6OqIyyLAk/);
   assert.match(page, /YouTube embed is not guaranteed on this host or on skaists.dev/);
   assert.match(page, /DNS alone cannot guarantee playback/);
