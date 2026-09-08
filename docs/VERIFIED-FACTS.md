@@ -125,6 +125,20 @@ secret-scan shape rules before any future row carries a 64-hex hash.
 
 ---
 
+### A continuation — source review, 2026-09-07
+
+The founder-supplied earlier OmniVoice handoff references A90–A94 in an unlanded
+commit. Those rows are absent from the inspected origin/main and are not reproduced
+or treated as verified here. This continuation starts at A95 to avoid reusing those
+known referenced identifiers. Source study: `docs/raids/FACEPLUGIN-SORT-2026-09-07.md`.
+
+| # | Claim | Primary source | Notes |
+|---|---|---|---|
+| **A95** | Faceplugin SDK at `621718e7d3c6c708631e15bbaaedbd88ac1b439c`: complete recursive tree has 38 blobs and no LICENSE/COPYING/NOTICE file. `faceutil.py` loads `libFaceUtil.so` (84,088 bytes) / `FaceUtil.dll` (70,656 bytes); native source is absent | [Pinned tree](https://api.github.com/repos/Faceplugin-ltd/Open-Source-Face-Recognition-SDK/git/trees/621718e7d3c6c708631e15bbaaedbd88ac1b439c?recursive=1), [wrapper](https://github.com/Faceplugin-ltd/Open-Source-Face-Recognition-SDK/blob/621718e7d3c6c708631e15bbaaedbd88ac1b439c/face_util/faceutil.py), read 2026-09-07 | A bounded source inspection, not a claim of malware, pricing or exhaustive legal rights. No vendor binary executed |
+| **A96** | Linzaer detector source has MIT license, copyright 2019 linzai, at `dffdddda9794a50607cba8f318507a28c1c27cab`; raw LICENSE is 1,063 bytes | [Pinned LICENSE](https://github.com/Linzaer/Ultra-Light-Fast-Generic-Face-Detector-1MB/blob/dffdddda9794a50607cba8f318507a28c1c27cab/LICENSE); SHA-256 `21f0df2b54c9fef1b4f4061dd0b153bc72f071b5ce9fc04234f13ebfd093b44c` PUBLIC-CONSTANT | Code license verified; pretrained-weight clearance and BNR hardware performance not established. Faceplugin's `face_detect/vision/nn/mb_tiny.py` is byte-identical to upstream `vision/nn/mb_tiny.py` at these pins |
+| **A97** | OpenCV Zoo at `47534e27c9851bb1128ccc0102f1145e27f23f98`: YuNet directory files are explicitly MIT; SFace directory files explicitly Apache-2.0 | [YuNet README](https://github.com/opencv/opencv_zoo/blob/47534e27c9851bb1128ccc0102f1145e27f23f98/models/face_detection_yunet/README.md), [SFace README](https://github.com/opencv/opencv_zoo/blob/47534e27c9851bb1128ccc0102f1145e27f23f98/models/face_recognition_sface/README.md), each with its adjacent LICENSE, read 2026-09-07 | Raw license hashes: YuNet `c83b8120c50ccbd4c4f96edf53141bdd566ebb8f8e9227e415326aa1b1aba958` (1,085 bytes); SFace `cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30` (11,358 bytes), PUBLIC-CONSTANT. Corrects the attached shortlist's shared-MIT wording; no BNR adoption/accuracy claim |
+| **A98** | First-party model cards label `facebook/mms-1b-all` and `facebook/mms-tts-lav` weights **CC-BY-NC-4.0** | Pinned raw cards: [ASR](https://huggingface.co/facebook/mms-1b-all/raw/3d33597edbdaaba14a8e858e2c8caa76e3cec0cd/README.md), [Latvian TTS](https://huggingface.co/facebook/mms-tts-lav/raw/d11f5623e2f82aa18c4d1c9cb969e3839487b9dc/README.md), read 2026-09-07 | Language coverage does not establish eligibility for the metered voice sprint. No MMS model was served or benchmarked |
+
 ## B. UNVERIFIED REGISTER — label as such wherever used
 
 | # | Open question | Why it's load-bearing | Assigned |
