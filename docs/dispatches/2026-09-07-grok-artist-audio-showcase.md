@@ -84,8 +84,23 @@ Then open:
 
 ## Verification on this seat
 
-- `node --test e2e/artist-audio-showcase.test.mjs` — run before the PR summary.
-- Browser walk of the three views — recorded after push.
+**Commit SHA:** `35e4752f1ecba8a00ebd563f660c9217cb989d17` (first push of this branch).
+Draft PR: https://github.com/beehive-nature/beehive-nature/pull/33
+
+- `node --test e2e/artist-audio-showcase.test.mjs` — 7 passed, 0 failed.
+- Browser walk at `http://127.0.0.1:4188/docs/mvp-walk/artist-audio-showcase.html`
+  (Python `http.server`, not `file://`):
+  1. New bee default: large Play, volume 80%, credit line, idle until Play.
+     After Play the 1.5 s fixture finished; status asked to press Play again.
+  2. Raver: same player beside the green–teal–purple bloom. Credits and
+     empty receipts still reachable by scroll.
+  3. Cypherpunk: same listening. Autonomi address `null — not uploaded /
+     pending authorized release`, status `prepared-local-only`. Arweave
+     transaction id `null`, status `not-uploaded`. No fake TX ids.
+  4. MVP walk index crumb returned to this page. Kandi link left labeled
+     live/untouched; that file was not edited.
 - `surfaces/kandi.html` and `surfaces/blight/midivault.html` not in this diff.
+
+Remote CI for this head is subscribed, not claimed green in this receipt.
 
 No production box, wallet, upload, or campaign post.
