@@ -87,8 +87,33 @@ Share card: `http://127.0.0.1:4188/docs/mvp-walk/works/bloom-genesis-share.html`
 
 ## Verification
 
-Source tests run after the implementation commit. Browser walk of New bee,
-Raver, Cypherpunk, Keep, and the share card is recorded after that walk.
-No human usability acceptance is claimed.
+Source tests on this seat after the implementation commit:
+
+```sh
+node --test e2e/bloom-work-pack.test.mjs
+```
+
+**12/12** at `ec201b6`.
+
+### Browser walk — 2026-09-08, `127.0.0.1:4188`
+
+Opened via `python3 -m http.server 4188` from the repository root (not
+`file://`). This is a seat walk, not matriarch or human-observation
+acceptance.
+
+- New bee default. Bloom hero visible. “Rest the bloom” present; status
+  “A gentle breath inside this artwork. It is not a live connection.”
+  Credit “LoVis and his mother” unmarked. Colour chips named in words.
+  Keep is the large first action. No numbered how-to.
+- Keep a reference → button “Kept in this browser”. Status: a reference,
+  not ownership.
+- Raver: dark atmospheric canvas, same bloom, same credit, Keep stays kept.
+- Cypherpunk: mono canvas, same credit, nearby-path receipts name the
+  draft/local path and pending receive.
+- Share card: still, makers, invitation, draft path, QR reserved, copy
+  status “Copied the draft path and credit. This is not a public URL and
+  not a receive receipt.”
+- 390px New bee: bloom, Keep, and chips reflow; no horizontal card overflow.
+- PR #31 link labeled “(opens in a new tab)”.
 
 PR stays draft.
