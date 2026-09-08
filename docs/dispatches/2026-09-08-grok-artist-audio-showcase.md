@@ -83,19 +83,46 @@ python3 -m http.server 4188
 6. Fixture label remains on the page and in the export.
 
 Source tests: `node --test e2e/artist-audio-showcase.test.mjs e2e/artist-audio-collection.test.mjs`
+— **14/14** on this seat after `2ecf7cc`.
+
+## Browser walk (127.0.0.1:4188) — 2026-09-08
+
+Opened `http://127.0.0.1:4188/docs/mvp-walk/artist-audio-showcase.html` (existing
+Python server, not `file://`). Walk was 9/9.
+
+1. New bee default. Play + disabled Watch (“No video on this board”). Credits
+   labeled TEST AUDIO — not the authorized release. No autoplay.
+2. Play started the 1.5 s fixture. Status after end: “The short fixture
+   finished. Press Play to hear it again.”
+3. Other ways to listen: Local test audio and YouTube are buttons. Autonomi
+   and Arweave are `<p class="slot">` — click does not navigate or play.
+4. YouTube: local audio stopped. Honesty note present (skaists.dev, client/
+   referrer, DNS alone cannot guarantee). Watch-page link present. Embed area
+   showed unavailable, as the honesty copy allows.
+5. Play returned source to the local fixture and played it.
+6. Raver and Cypherpunk kept the same three actions, credits, and reachable
+   empty receipts. Local source stayed selected across skins.
+7. Save this reference once. Reload: still there. Save again: button disabled,
+   no duplicate. Remove cleared it. Save + Export downloaded
+   `bnr-listen-later.json` (743 B). Parsed on this seat:
+   schema `bnr-listen-later/1`, fixture true, rights `unconfirmed`, one
+   `https://www.youtube.com/watch?v=pb6OqIyyLAk` link, note says
+   “Not JAMS-compatible”, no local path / wallet / ANT / AR address.
+8. Explore JAMS is an ordinary `jams.community` link, named external.
+9. Receipts still `null — not uploaded / pending authorized release`.
 
 ## Astra integration checks (evidence)
 
+Head for this receipt: `2ecf7cc` (implementation `1d3f07b`, test wording
+`2ecf7cc`). Draft PR #33.
+
 | Check | How verified |
 |---|---|
-| Collections survive reload | `localStorage` key `bnr-listen-later`; `showCollection()` on load. Browser walk after reload. |
-| Duplicate saves idempotent | `saveItem` returns `{ already: true }`; source test. |
-| Failed writes never say Saved / never erase | `writeStore` throws; UI paints `before` and says refused. Source test with throwing `setItem`. |
-| Exports preserve credits, no private data | `exportPublic` + `publicItem` keep title/artist/rights and `kind === 'external'` `https://` only. Source test injects javascript/local/wallet links and expects them dropped. |
-| Skin changes preserve playback and collection | `applySource(source, { silent: true })`; no `currentTime = 0`; collection is storage, not view state. |
+| Collections survive reload | Browser: F5 after save; item still listed in New bee, Raver, Cypherpunk. `localStorage` key `bnr-listen-later`. |
+| Duplicate saves idempotent | Browser: Save disabled after first save. Source test: second `saveItem` returns `{ already: true }`, length 1. |
+| Failed writes never say Saved / never erase | Source test: throwing `setItem` leaves prior JSON. UI copy: “Save was refused. Earlier entries were not erased.” Browser cannot inject a quota error; that half is the unit test. |
+| Exports preserve credits, no private data | Downloaded `bnr-listen-later.json` has title/artist/rights/fixture + one https YouTube link. Source test drops `javascript:`, local WAV path, and wallet-kind links. |
+| Skin changes preserve playback and collection | Browser: local source stayed selected across Raver/Cypherpunk; saved item visible in all three views. JS re-applies `source` silently and does not zero `currentTime`. |
 | Listening stays simple, optional, wallet-free | Three actions. No wallet UI. Save is a public reference, not a download. |
-
-Browser walk receipts for this beat are recorded after the push, in a
-follow-on dispatch note if the walk happens after the first commit.
 
 No box, wallet, upload, or campaign post.
