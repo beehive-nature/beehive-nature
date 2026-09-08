@@ -3,8 +3,8 @@
   if(window.__agentDock)return;window.__agentDock=true;
   var R=location.pathname.indexOf('/beehive-nature/')===0?'/beehive-nature/surfaces/':'/surfaces/';
   var agents=[
-    {id:'queen',name:'bQueenBee',icon:'🐝',label:'Ask about BNR',src:R+'bqueenbee-live.html',note:'Machine agent · answers from BNR’s written knowledge and public sources.'},
-    {id:'hearth',name:'heARTh',icon:'🔥',label:'Explore a creative idea',src:R+'blight/hearth.html',note:'Creative prompt router · try a mushroom, a melody or a gallery idea.'},
+    {id:'queen',name:'bQueenBee',icon:'🐝',label:'Ask about BNR',src:R+'bqueenbee-live.html?dock=8',note:'Machine agent · answers from BNR’s written knowledge and public sources.'},
+    {id:'hearth',name:'heARTh',icon:'🔥',label:'Explore a creative idea',src:R+'blight/hearth.html?dock=8',note:'Creative prompt router · try a mushroom, a melody or a gallery idea.'},
     {id:'baigents',name:'bAigents',icon:'🤖',label:'See what is built',note:'Build status · this is a project overview, not a connected chat agent.'},
     {id:'bloverai',name:'bLOVErAi',icon:'💌',label:'Prepare an AI handoff',note:'Draft a prompt to take to your own AI. Nothing is sent to another service.'}
   ];
