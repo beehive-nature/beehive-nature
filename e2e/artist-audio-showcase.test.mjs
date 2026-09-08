@@ -113,7 +113,7 @@ test('YouTube is a named external source; embed is not claimed on skaists.dev', 
   assert.match(page, /id="youtube-player"/);
   assert.match(js, /unloadYouTube/);
   assert.match(js, /stopLocalAudio/);
-  assert.match(page, /not a rights clearance/);
+  assert.match(page, /[Nn]ot a rights clearance/);
   assert.match(page, /does not claim CJ Bolland/);
   assert.match(page, /does not claim a YouTube embed will play on skaists.dev/);
 });
