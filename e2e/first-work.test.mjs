@@ -57,6 +57,15 @@ test('one allowlisted work is resolved without accepting URL-supplied credits or
   assert.throws(()=>work.shareURL('file:///private/art.html'));
 });
 
+test('every local section link resolves to the visible work, including keyboard skip',()=>{
+  const markup=read('docs/mvp-walk/first-work.html');
+  const hashes=[...markup.matchAll(/href="(#[^"]+)"/g)].map(match=>match[1]);
+  assert.ok(hashes.includes('#work-content'));
+  const app=page();
+  for(const hash of hashes){app.choose(hash);assert.equal(app.el('work-content').hidden,false,hash);assert.equal(app.el('unknown-work').hidden,true,hash);}
+  assert.match(markup,/<article id="work-content" tabindex="-1">/);
+});
+
 test('a shared link previews before Keep; export can be deliberately restored in an independent store',async()=>{
   const sender=page();sender.el('keep-work').click();await tick();
   assert.equal(sender.count(),1);

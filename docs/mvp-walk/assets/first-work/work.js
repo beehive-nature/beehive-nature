@@ -15,7 +15,7 @@
     })])
   });
   function resolveHash(hash) {
-    if (['', '#', '#makers', '#collection', '#share'].includes(hash)) return id;
+    if (['', '#', '#work-content', '#makers', '#collection', '#share'].includes(hash)) return id;
     if (hash.length > 200 || !hash.startsWith('#work=')) return null;
     const params = new URLSearchParams(hash.slice(1));
     return [...params].length === 1 && params.get('work') === id ? id : null;

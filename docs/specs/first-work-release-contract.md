@@ -52,6 +52,8 @@ share-card presentation. Keep the IDs below while improving copy/layout.
 Shared `surfaces/register.js` owns the three-view toggle. Skin changes never
 recreate the work, input, import preview or collection. The known work is
 visible before any Keep. No save, autoplay, wallet or network node on arrival.
+Local section links, including the `#work-content` skip target, must resolve
+the same work. The skip target is focusable and never hides itself on arrival.
 External destinations carry a new-tab indication, `_blank`, and
 `noopener noreferrer`. Creator-supplied original JPG is retained unchanged.
 
