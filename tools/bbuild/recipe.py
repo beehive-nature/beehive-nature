@@ -66,4 +66,3 @@ def apply(worktree, old_hash, new):
     updated = source.replace(old, code, 1)
     ast.parse(updated)
     path.write_text(updated)
-
