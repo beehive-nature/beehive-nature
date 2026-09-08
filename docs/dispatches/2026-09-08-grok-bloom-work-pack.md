@@ -101,14 +101,43 @@ python3 -m http.server 4188
 
 ## Verification
 
-Source tests on this seat after the conversion:
+Source tests on this seat after the conversion and the print-chrome fix:
 
 ```sh
 node --test e2e/bloom-work-pack.test.mjs
 ```
 
-Browser walk, skin retention, and printed/card credit bounds are recorded
-after the conversion commit. Public QR and native import are not asserted.
+**13/13** at `9b566e1`.
+
+### Browser walk — companion conversion, 2026-09-08, `127.0.0.1:4188`
+
+Opened via `python3 -m http.server 4188` from the repository root. This is a
+seat walk, not matriarch or human-observation acceptance.
+
+- New bee work page: compact `Preview · not a live campaign`. Heading “The
+  bloom they made together.” Credit “LoVis and his mother.” Named colour
+  chips. Primary action is the link **Keep or share this bloom**. No
+  Keep-a-reference button. No empty Artist support slot.
+- After the breathing SVG loaded: `role="img"`, `aria-hidden` unset,
+  `aria-label` names LoVis and his mother and the three colour meanings.
+  The still is hidden and decorative. The figure caption stays visible.
+- Raver on the work page → **Keep or share this bloom** →
+  `first-work.html#work=bnr-genesis-bloom-v1`. Raver stayed selected.
+  Canonical **Keep this bloom** is on that page. Credit includes the mother.
+- Back, then **Open the printable card**: register present, Raver retained,
+  two-line credit “LoVis” / “and his mother” unclipped, origin-relative
+  link `../first-work.html#work=bnr-genesis-bloom-v1` visible. No QR image.
+- Cypherpunk on the share card (first pass): toggle remains; same credit
+  and same canonical link.
+- Print preview after hiding `#bregctl` / `[data-register-host]`: **1 page**,
+  view toggle hidden, “LoVis” and “and his mother” fully inside the card.
+  An earlier preview of the conversion, before that CSS fix, still drew the
+  toggle and ran to two pages.
+- 390px New bee: bloom, credit, chips, and the primary link reflowed. No
+  horizontal card overflow.
+
+Public social rendering, QR, and native re-import of a bloom export were
+**not** observed and are **not** claimed.
 
 Earlier #37 remote CI (8/8 green on `29405ce` / `b839d7e`) applied to the
 withdrawn Keep-wrapper draft, not this companion.
