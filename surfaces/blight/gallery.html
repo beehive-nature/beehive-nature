@@ -11,10 +11,24 @@ body[data-reg=cypherpunk]{--bg:#0e141a;--panel:#151e26;--well:#101820;--line:#3f
 @media(max-width:1100px){body[data-reg=cypherpunk] .gallery-work{grid-template-columns:minmax(0,1fr) 280px}body[data-reg=cypherpunk] .viewer{grid-column:1;grid-row:1}body[data-reg=cypherpunk] .record{grid-column:1/-1;grid-row:2}body[data-reg=cypherpunk] .collection-rail{grid-column:2;grid-row:1}body[data-reg=cypherpunk] #wingsGrid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}}@media(max-width:760px){.gallery-head,.gallery-work{padding-inline:14px}body[data-reg=raver] .gallery-work,body[data-reg=cypherpunk] .gallery-work{display:flex;flex-direction:column}.viewer{order:0}.collection-rail{order:1}.record{order:2}#stage,body[data-reg=raver] #stage,body[data-reg=cypherpunk] #stage{height:43vh;min-height:240px}body[data-reg=raver] #wingsGrid,body[data-reg=cypherpunk] #wingsGrid{grid-template-columns:repeat(2,minmax(0,1fr))}body[data-reg=raver] #collection-rail,body[data-reg=cypherpunk] #collection-rail{max-height:none}#actions{gap:8px}#actions button{flex:1;padding-inline:10px!important}.gallery-tools button{flex:1}.record{width:100%}.record dl{grid-template-columns:88px minmax(0,1fr)}.piece-title{font-size:1.125rem}}
 @media(prefers-reduced-motion:reduce){#frame{transition:none}.fade{opacity:1!important}}@media(forced-colors:active){#stage,.art-mat{forced-color-adjust:none}#dots button[aria-current=true]{outline:3px solid Highlight}}
 [data-experience-nav]{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px}[data-experience-nav] a{display:inline-flex;align-items:center;min-height:44px;padding:8px 12px}[data-experience-nav] a[aria-current=page]{font-weight:650;text-decoration:underline}
+/* Keep the full directory in the page flow, clear of artwork and controls. */
+.gallery-work{padding-bottom:24px}
+.gallery-navigation{max-width:1440px;margin:0 auto;padding:0 clamp(16px,3vw,40px) 32px}
+body[data-reg=bee] .gallery-navigation{max-width:1080px}
+body[data-reg=cypherpunk] .gallery-navigation{max-width:1700px}
+.gallery-navigation>details{border-top:1px solid var(--line)}
+.gallery-navigation summary{min-height:48px;padding:14px 0;font-weight:600}
+.gallery-navigation #railsbadge{flex:0 1 auto!important;min-width:0;max-width:100%;margin:0!important}
+.gallery-navigation #rb-txt{min-width:0;overflow-wrap:anywhere}
+.gallery-language{display:flex;margin-inline-start:auto;max-width:100%}
+.gallery-language #blangctl{margin:0!important;padding:0!important;border:0!important;flex-wrap:wrap}
+.gallery-language #blangsel{min-height:44px!important;max-width:100%!important;padding:8px 12px!important;background:var(--panel)!important;color:var(--ink)!important;border-color:var(--line)!important;font:inherit!important}
+.gallery-language #blangnote{white-space:normal!important;color:var(--dim)!important;font:.75rem/1.4 var(--font)!important}
+@media(max-width:760px){.gallery-navigation{padding-inline:14px}}
 </style>
 </head>
 <body data-reg="bee" data-bee-theme="custom" data-experience="gallery">
-<nav data-experience-nav aria-label="Explore skaists"><a href="../index.html" data-i18n="social.arrival.home">Home</a><a href="../blight/gallery.html" data-i18n="experience.gallery" aria-current="page">Art gallery</a><a href="../blight/studio-music.html" data-i18n="experience.music">Music studio</a><a href="../buzz-directory.html" data-i18n="atlas.peopleAction">Meet the hive</a><a href="../profile.html" data-i18n="experience.profile">People and names</a></nav>
+<nav data-experience-nav aria-label="Explore skaists"><a href="../index.html" data-i18n="social.arrival.home">Home</a><a href="../blight/gallery.html" data-i18n="experience.gallery" aria-current="page">Art gallery</a><a href="../blight/studio-music.html" data-i18n="experience.music">Music studio</a><a href="../buzz-directory.html" data-i18n="atlas.peopleAction">Meet the hive</a><a href="../profile.html" data-i18n="experience.profile">People and names</a><span class="gallery-language" data-language-host></span></nav>
 <header class="gallery-head"><p class="eyebrow" data-i18n="experience.gallery">Art gallery</p><h1><span data-view="bee" data-i18n="experience.gallery.bee">Take your time. Look around.</span><span data-view="raver" data-i18n="experience.gallery.raver">Your garden, in full color.</span><span data-view="cypherpunk" data-i18n="experience.gallery.cypher">Inspect the artwork and its source record.</span></h1><div id="wing">The founder’s garden</div></header>
 <noscript><p>Enable JavaScript to read the artwork from public collection contracts. The navigation and source link remain available.</p></noscript>
 <main class="gallery-work" id="gallery-work">
@@ -22,6 +36,7 @@ body[data-reg=cypherpunk]{--bg:#0e141a;--panel:#151e26;--well:#101820;--line:#3f
  <aside class="collection-rail" id="collection-rail" hidden aria-label="Collections"><h2 id="collection-heading" tabindex="-1" data-i18n="experience.collections">Browse collections</h2></aside>
  <details class="record" id="record-details"><summary data-i18n="experience.record">Record details</summary><dl><dt>Collection</dt><dd id="record-collection">Not loaded</dd><dt>Seed</dt><dd id="record-seed">Not loaded</dd><dt>Level</dt><dd id="record-level">Not loaded</dd><dt>Chain</dt><dd id="record-chain">Not loaded</dd><dt>Contract</dt><dd id="record-contract">Not loaded</dd><dt>Holder</dt><dd id="record-wallet">Not loaded</dd></dl><div id="dots" aria-label="Choose a piece"></div><div id="ask"><label for="addr" data-i18n="experience.wallet">Visit a collection by name or address</label><form id="wallet-form"><input id="addr" placeholder="0x… or name.base.eth" autocomplete="off" spellcheck="false"><button type="submit" id="go" data-i18n="experience.visit">Visit</button></form></div><p class="source-note">The artwork is returned by its collection contract. Collection notes are a static catalogue, not a live market quote. This page reads public data and never signs a transaction.</p><a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/blight/gallery.html" rel="noopener">Gallery source ↗</a></details>
 </main>
+<footer class="gallery-navigation"><details><summary data-i18n="atlas.browse">Explore the estate</summary><div data-tour-host></div></details></footer>
 <dialog id="wings" aria-labelledby="collections-title"><div class="dialog-head"><h2 id="collections-title" data-i18n="experience.collections">Browse collections</h2><button type="button" id="close-wings" data-i18n="experience.close">Close</button></div><div id="collections-content"><div id="wingsGrid"></div><div id="roomBack" hidden></div></div></dialog>
 
 <script>
