@@ -111,18 +111,24 @@ Python server, not `file://`). Walk was 9/9.
 8. Explore JAMS is an ordinary `jams.community` link, named external.
 9. Receipts still `null — not uploaded / pending authorized release`.
 
-## Astra integration checks (evidence)
+## Astra integration checks (acceptance)
 
-Head for this receipt: `2ecf7cc` (implementation `1d3f07b`, test wording
-`2ecf7cc`). Draft PR #33.
+**Acceptance head:** `e14ac7a6ac7f136f3efc78f970ecab201a469ecd`  
+Implementation: `1d3f07b`. Source tests 14/14: `2ecf7cc`. Walk + export
+receipt: `e14ac7a`. Draft PR #33. Functions named below are in
+`docs/mvp-walk/assets/artist-audio/collection.js` and `showcase.js`.
 
-| Check | How verified |
-|---|---|
-| Collections survive reload | Browser: F5 after save; item still listed in New bee, Raver, Cypherpunk. `localStorage` key `bnr-listen-later`. |
-| Duplicate saves idempotent | Browser: Save disabled after first save. Source test: second `saveItem` returns `{ already: true }`, length 1. |
-| Failed writes never say Saved / never erase | Source test: throwing `setItem` leaves prior JSON. UI copy: “Save was refused. Earlier entries were not erased.” Browser cannot inject a quota error; that half is the unit test. |
-| Exports preserve credits, no private data | Downloaded `bnr-listen-later.json` has title/artist/rights/fixture + one https YouTube link. Source test drops `javascript:`, local WAV path, and wallet-kind links. |
-| Skin changes preserve playback and collection | Browser: local source stayed selected across Raver/Cypherpunk; saved item visible in all three views. JS re-applies `source` silently and does not zero `currentTime`. |
-| Listening stays simple, optional, wallet-free | Three actions. No wallet UI. Save is a public reference, not a download. |
+| # | Check | How verified | Result |
+|---|---|---|---|
+| 1 | Collections survive reload | Browser at `127.0.0.1:4188`: Save this reference, F5, item still listed in New bee, Raver, and Cypherpunk. Store key `bnr-listen-later` via `BNRListenLater.readStore` / `showCollection`. | Pass |
+| 2 | Duplicate saves idempotent | Browser: Save disabled after first save; no second list row. Source test `save once is idempotent`: second `saveItem` returns `{ already: true }`, `items.length === 1`. | Pass |
+| 3 | Failed writes never say Saved / never erase | Source test `failed writes do not report saved`: seeded store, throwing `setItem`, prior JSON unchanged. UI (`showcase.js` save click) paints `before` and sets “Save was refused. Earlier entries were not erased.” A live browser cannot inject a quota error; that half is the unit test only. | Pass (test) / unforced in browser |
+| 4 | Exports preserve credits, no private data | Seat download `bnr-listen-later.json` (743 B): schema `bnr-listen-later/1`, title/artist/rights/fixture, one `https://www.youtube.com/watch?v=pb6OqIyyLAk` link, note “Not JAMS-compatible”. `publicItem` / `exportPublic` drop `javascript:`, local WAV paths, and wallet-kind links (`e2e/artist-audio-collection.test.mjs`). | Pass |
+| 5 | Skin changes preserve playback and collection | Browser: local source stayed selected across Raver/Cypherpunk; saved item visible in all three. `applyReading` calls `applySource(source, { silent: true })` and does not assign `audio.currentTime`. Collection is `localStorage`, not view state. | Pass |
+| 6 | Listening stays simple, optional, wallet-free | Play / disabled Watch / named sources. No wallet, sign-in, or background network. Save is a public reference, not a download. Explore JAMS is an ordinary https link. | Pass |
 
-No box, wallet, upload, or campaign post.
+Remote `static` is still red on inherited §7 authors `35e4752` and `1583818`
+(`Cursor Agent`). This beat does not rewrite those commits. Front door
+source tests on this seat were 14/14.
+
+No box, wallet, upload, or campaign post. PR stays draft.
