@@ -193,7 +193,7 @@ ${JSON.stringify(E)}
 </script>
 <script src="atlas-search.js?v=1" defer></script>
 <script src="atlas.js?v=4" defer></script>
-<script src="agent-dock.js?v=7"></script>
+<script src="agent-dock.js?v=8"></script>
 <script src="tour.js?v=41"></script>
 </body>
 </html>
