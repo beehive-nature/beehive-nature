@@ -162,7 +162,7 @@ async function respond(q){
     m.appendChild(pre);
   }
   document.getElementById('chat').appendChild(m);
-  window.scrollTo(0,document.body.scrollHeight);
+  m.scrollIntoView({block:'start'});
 }
 function ask(){
   const i=document.getElementById('q');

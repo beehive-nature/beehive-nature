@@ -4,7 +4,7 @@
   var R=location.pathname.indexOf('/beehive-nature/')===0?'/beehive-nature/surfaces/':'/surfaces/';
   var agents=[
     {id:'queen',name:'bQueenBee',icon:'🐝',label:'Ask about BNR',src:R+'bqueenbee-live.html?dock=8',note:'Machine agent · answers from BNR’s written knowledge and public sources.'},
-    {id:'hearth',name:'heARTh',icon:'🔥',label:'Explore a creative idea',src:R+'blight/hearth.html?dock=8',note:'Creative prompt router · try a mushroom, a melody or a gallery idea.'},
+    {id:'hearth',name:'heARTh',icon:'🔥',label:'Explore a creative idea',src:R+'blight/hearth.html?dock=9',note:'Creative prompt router · try a mushroom, a melody or a gallery idea.'},
     {id:'baigents',name:'bAigents',icon:'🤖',label:'See what is built',note:'Build status · this is a project overview, not a connected chat agent.'},
     {id:'bloverai',name:'bLOVErAi',icon:'💌',label:'Prepare an AI handoff',note:'Draft a prompt to take to your own AI. Nothing is sent to another service.'}
   ];
@@ -40,7 +40,7 @@
     body[data-reg=raver] #adHead{background:linear-gradient(110deg,#302045,#123339 70%,#19352c)}
     body[data-reg=cypherpunk] #adWin{--ad-bg:#0e141a;--ad-panel:#151e26;--ad-ink:#e4f2f4;--ad-dim:#adbecb;--ad-line:#526b7c;--ad-accent:#80cddd;--ad-on:#0e141a;--ad-font:ui-monospace,Consolas,monospace;border-radius:5px;font-size:14px}body[data-reg=cypherpunk] #adWin button{border-radius:3px}
     @media(max-width:520px){#adWin{left:8px;width:calc(100% - 16px);border-radius:12px}#adWin.is-expanded{width:calc(100% - 16px)}#adAgents{padding:6px 8px;gap:4px}#adHead,#adContext{padding-inline:8px}#adFoot{padding-inline:8px}#adContext{font-size:.6875rem}#adWin .adAg{padding:6px 8px}#adTitle{font-size:.9375rem}}
-    @media(max-height:500px){#adWin .adAg small{display:none}#adContext{display:none}#adAgents{padding-block:4px}#adStatus{padding-bottom:4px}#adPrompt{min-height:44px;max-height:64px}}
+    @media(max-height:600px){#adWin .adAg small{display:none}#adNote{display:none}#adContext{padding-block:0}#adAgents{padding-block:4px}#adStatus{padding-bottom:4px}#adPrompt{min-height:44px;max-height:64px}}
     @media(prefers-reduced-motion:reduce){#adWin,#adOrb,#adWin *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
   `;
   document.head.appendChild(css);
@@ -183,7 +183,7 @@
     var bar=$('tbar'),rect=bar&&getComputedStyle(bar).position==='fixed'?bar.getBoundingClientRect():null;
     var h=rect&&rect.height>0&&rect.bottom>0&&rect.top<window.innerHeight?Math.ceil(window.innerHeight-Math.max(0,rect.top)):0;
     var bottom=Math.min(Math.max(bar?18:66,h+10-keyboard),Math.max(12,vh-64));orb.style.bottom=(keyboard+bottom)+'px';
-    var tight=window.innerWidth<=520||vh<=500,dialogBottom=expanded||tight?8:Math.min(bottom+64,Math.max(12,vh*.25));
+    var tight=window.innerWidth<=520||vh<=600,dialogBottom=expanded||tight?8:Math.min(bottom+64,Math.max(12,vh*.25));
     win.style.bottom=(keyboard+dialogBottom)+'px';win.style.height=Math.max(0,Math.min(expanded?vh:680,vh-dialogBottom-12))+'px';
     if(h){var need=h+22,cur=parseFloat(getComputedStyle(document.body).paddingBottom)||0;if(cur<need)document.body.style.paddingBottom=need+'px';}
   };

@@ -39,6 +39,7 @@ function dock({height=650,width=1100,position='static',barHeight=540,viewport=nu
     get firstChild(){return this.childNodes[0]||null;}
     get lastChild(){return this.childNodes.at(-1)||null;}
     get isConnected(){let p=this;while(p.parentNode)p=p.parentNode;return p instanceof Document;}
+    scrollIntoView(options){this.ownerDocument.scrolledElement=this;this.ownerDocument.scrollOptions=options;}
     get id(){return this.getAttribute('id')||'';}set id(v){this.setAttribute('id',v);}
     get src(){return this.getAttribute('src')||'';}set src(v){this.setAttribute('src',v);}
     get className(){return this.getAttribute('class')||'';}set className(v){this.setAttribute('class',v);}
@@ -355,10 +356,14 @@ test('the shipped Hearth keeps hidden song text while stopping and releasing its
     createGain(){return {gain:{setValueAtTime(){},exponentialRampToValueAtTime(){}},connect(){return this;}};}
     createOscillator(){const osc={frequency:{},connect:g=>g,start(){},stop(){}};this.oscillators.push(osc);return osc;}
   }
-  const context={document:engine.document,location:engine.document.location,AudioContext,scrollTo(){},setTimeout,clearTimeout,AbortController,fetch:()=>Promise.reject(new Error('Network is not part of this test'))};context.window=context;
+  const context={document:engine.document,location:engine.document.location,AudioContext,scrollTo(){throw new Error('Scrolling to the page bottom can hide the reply behind suggestions');},setTimeout,clearTimeout,AbortController,fetch:()=>Promise.reject(new Error('Network is not part of this test'))};context.window=context;
   vm.runInNewContext(script,context);await context.respond('play a blues song');assert.equal(audio.length,1);assert.equal(audio[0].oscillators.length,8);
   context.bnrDockSuspend(true);assert.equal(audio[0].state,'closed');assert.equal(audio[0].closes,1);
   const before=engine.document.getElementById('chat').children.length;await context.respond('play another song');assert.equal(audio.length,1);assert.equal(engine.document.getElementById('chat').children.length,before+1);
   context.bnrDockSuspend(false);await context.respond('play another song');assert.equal(audio.length,2);audio[1].oscillators.at(-1).onended();assert.equal(audio[1].closes,1);
   context.bnrDockSuspend(true);assert.equal(audio[1].closes,1);await nextTick();
+  await context.respond('What can you do?');
+  assert.equal(engine.document.scrolledElement,engine.document.getElementById('chat').lastChild);
+  assert.equal(engine.document.scrollOptions.block,'start');
+  assert.match(engine.document.scrolledElement.textContent,/route creative prompts/);
 });
