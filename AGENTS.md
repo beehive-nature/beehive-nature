@@ -31,6 +31,14 @@ the `surfaces/review.html` SURFACES entry. CI (`estate-check`,
 - Crypto claims cite source file+function or stop at `UNVERIFIED`; wording
   caps at "sound by construction / isolated by design".
 
+## External navigation (FOUNDER ORDER, reaffirmed 2026-09-07)
+- External website links open a new tab so the current BNR page and session
+  remain available. Use user-activated links with `target="_blank"` and
+  `rel="noopener noreferrer"`, and tell the reader when a new tab will open.
+- Same-page and same-origin BNR navigation stays in the current tab.
+- The shared `surfaces/tour.js` click handler covers dynamically rendered
+  external links. Standalone review boards must carry these attributes too.
+
 ## The box (oracle)
 - Reach: `wsl -e ssh oracle` (Ubuntu 24.04 aarch64, OCI).
 - `ops/` in-tree is VERBATIM what runs on the box — change both together.
