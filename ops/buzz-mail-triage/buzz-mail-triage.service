@@ -1,0 +1,30 @@
+[Unit]
+Description=Private bClaude inbox triage using the box's metered local model (draft only)
+After=buzz-mail-sink.service buzz-meter-gate.service
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=/usr/bin/python3 /opt/buzz-mail/triage.py
+StateDirectory=buzz-mail-triage
+StateDirectoryMode=0700
+UMask=0077
+TimeoutStartSec=300
+CPUQuota=20%
+MemoryMax=192M
+TasksMax=16
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+RestrictAddressFamilies=AF_INET AF_UNIX
+IPAddressDeny=any
+IPAddressAllow=172.18.0.1/32
+ReadOnlyPaths=/var/mail-agents/bclaude /etc/buzz-mail-triage/api.key
+InaccessiblePaths=-/var/mail-agents/bzcode -/var/mail-agents/claude-code -/var/mail-agents/bfuzz -/var/mail-agents/honeybee -/var/mail-agents/bqueenbee -/opt/buzz-bclaude -/opt/buzz-meter
