@@ -1,77 +1,91 @@
-# Grok — first-work presentation pack (bloom genesis) — 2026-09-08
+# Grok — bloom presentation companion of the connected first work — 2026-09-08
 
 Seat: Grok / Cursor cloud agent (`bc-1bff87ae-0cd7-443f-a2fd-170dbc6e4439`).
-Lane: draft artist/fan pack for the first work — LoVis and his mother’s
-green–teal–purple bloom. Presentation only.
-Branch: `cursor/bloom-work-pack-4439` (cloud prefix; suggested name was
-`grok/bloom-work-pack-2026-09-08`).
-Base: `df895c7` (`origin/main` at start, after PR #34).
+Lane: printable/share companion for the first work, after Astra’s cold review
+of PR #37.
+Branch: `cursor/bloom-work-pack-4439`.
+Base for this companion: `codex/first-work-journey-2026-09-07` (PR #35 head
+`d96c159` at merge).
 
 No production deploy. No mint. No campaign. No recruitment. PR stays draft.
-`surfaces/kandi.html` was not edited. Autonomi/Arweave delivery is not claimed.
+This seat did not edit `docs/mvp-walk/first-work.html`,
+`docs/mvp-walk/assets/first-work/*`, `docs/mvp-walk/assets/artist-audio/collection.js`,
+or `surfaces/register.js`. Live kandi was not edited.
 
-## What landed
+## Supersession — one work identity, one receive path
+
+The original #37 draft at `b839d7e` shipped a second collection record,
+`bloom-genesis-lovis-mother`, with `links: []`, plus its own Keep/forget
+wrapper and a pending-receive slot. That identity is **withdrawn**.
+
+| | Withdrawn draft (#37 at `b839d7e`) | Canonical (PR #35) |
+|---|---|---|
+| Work id | `bloom-genesis-lovis-mother` | `bnr-genesis-bloom-v1` |
+| Keep / receive | Independent `BNRListenLater` save on the work page | `docs/mvp-walk/first-work.html#work=bnr-genesis-bloom-v1` |
+| Share | Cream card, no register | Connected page share + this printable companion |
+| Return link from collection | None (`links: []`) | Controller record on #35 |
+
+A browser that kept the withdrawn id during the earlier draft walk still holds
+a pointer this pack will not migrate. This seat does not edit the collection
+library. That leftover is not the receive path.
+
+Astra’s review of `b839d7e` named three P2s; this companion answers them
+without merging a second engine:
+
+1. Reuse the canonical record/controller by **linking** to it. No second save wrapper.
+2. Share card now mounts `surfaces/register.js?v=9` and authors three views.
+3. Loaded SVG is named (`role="img"` + `aria-label` from the still) instead of
+   `aria-hidden` while the original image is hidden. The figure also keeps a
+   visible `figcaption`.
+
+Useful visual direction kept: original bloom, cream canvas, named colours
+(purple = humans, teal = AI, green = biomass), and “the bloom they made
+together.” Astra already carried that phrase onto the connected page
+(receipt: `docs/dispatches/2026-09-07-astra-bloom-pack-integration.md`).
+
+## What this pack now is
 
 | Path | Role |
 |---|---|
-| `docs/mvp-walk/works/bloom-genesis.html` | Work page. New bee default. Hero still + optional Astra breath. Shared credits. One Keep action. Share card link. Empty support slot. |
-| `docs/mvp-walk/works/bloom-genesis-share.html` | Printable/OG-style card. Still, makers, invitation, draft path, reserved QR. |
-| `docs/mvp-walk/works/bloom-genesis.js` | SVG mount, reduced-motion pause, listen-later save of a visual pointer. |
-| `docs/mvp-walk/assets/genesis-3d/stills/green-teal-bloom.jpg` | 15 269-byte JPEG extracted from the packed original inside the breathing SVG. |
-| `e2e/bloom-work-pack.test.mjs` | Source checks wired into the static Front door job. |
-| this dispatch | Real vs pending. |
+| `docs/mvp-walk/works/bloom-genesis.html` | Visual entry. Sends Keep/share to the connected page. |
+| `docs/mvp-walk/works/bloom-genesis-share.html` | Printable/share card with full two-line maker credit and an origin-relative work link. |
+| `docs/mvp-walk/works/bloom-genesis.js` | Breathing SVG mount, reduced-motion pause, accessible naming, copy of this origin’s work link. No collection writes. |
+| `e2e/bloom-work-pack.test.mjs` | Source checks for identity, a11y naming, register-on-share, folded engineering notes. |
+| this dispatch | Supersession + real vs pending. |
 
-The walk index now points at both pages. Three views use the existing
-`surfaces/register.js?v=9` host. Credits, colour meaning, Keep, Share, and
-the empty support slot are unmarked shared facts.
+New bee’s first screen is the artwork, credit, colours, and one choose-click
+to the connected page. Preview labeling is a compact uppercase line.
+Engineering notes (canonical id, withdrawn id, kandi-not-this-receive) live
+under **About this preview**. There is no empty artist-support call-to-action.
+
+The share card prints light: view chrome, crumbs, and copy controls hide;
+the still, “LoVis” / “and his mother”, colour names, and
+`../first-work.html#work=bnr-genesis-bloom-v1` remain.
 
 ## Real vs pending
 
-**Real**
+**Real on this companion branch (after merging #35)**
 
-- Original artwork credit: LoVis and his mother.
-- Colour meaning in words and hue: purple = humans, teal = AI, green = biomass.
-- Lightweight still (packed original JPEG) plus optional breathing SVG already
-  on main from the artist-showcase lane. `#31` 1 MB Blender reliefs were not
-  copied.
-- Keep a reference writes `bnr-listen-later/1` in this browser via the
-  collection already shipped on main (PR #34). Empty `links`. Medium `visual`.
-  That is a credited pointer, not a file and not a license.
-- Share card is same-origin HTML. Invitation has no numbered how-to.
-- Kandi remains the live bracelet gift engine, labeled live and untouched.
+- Canonical work id `bnr-genesis-bloom-v1` on `docs/mvp-walk/first-work.html`.
+- Origin-relative link from `docs/mvp-walk/works/` to
+  `../first-work.html#work=bnr-genesis-bloom-v1`.
+- Original artwork credit: LoVis and his mother, complete on the card as two
+  lines so the mother’s name is not a clipped overflow.
+- Colour meaning in words and hue.
+- Lightweight still extracted from the packed original inside the breathing SVG.
+- Three views on both interactive HTML pages via the existing register.
+- Kandi remains the live bracelet gift engine, labeled not-this-work’s-receive.
 - External GitHub link to draft PR #31 uses `target="_blank"`
   `rel="noopener noreferrer"` and a visible new-tab label.
 
-**Pending — named, not invented**
+**Pending / not claimed**
 
-- Stable public work URL (Astra). The printed path is draft/local.
-- QR (reserved empty; a code now would send someone nowhere).
-- Connected receive for this work (Astra). Placeholder only. Kandi
-  copied ≠ received is a different gift, not this artwork’s receive path.
-- Artist-selected support/shop destination. Slot empty. No Bandcamp.
-- Human observation or matriarch acceptance. Source checks and a later
-  browser walk are not that.
-
-## How this keys to Astra’s adoption spine
-
-The promise on the page is the adoption order already in the estate:
-make something beautiful, give someone a piece, stay connected to its maker.
-
-| Beat | Where it already lives | What this pack does |
-|---|---|---|
-| View the work | `#31` studio / breathing SVG; showcase bloom on main | Puts the original still first. Motion optional. |
-| Keep a piece | `bnr-listen-later/1` (PR #34) | Reuses that store for a visual reference. |
-| Give a piece | Share card; later a public URL | Card now; URL marked draft. |
-| Person-to-person gift | Live `surfaces/kandi.html` | Linked, not edited. Labeled not-this-work’s-receive. |
-| Connected receive | Not shipped | Empty slot pointing at Astra’s future release. |
-| Stay with the maker | Credit line; future support URL | Credit real; support destination pending. |
-
-This follows the three-view journey dispatch
-(`docs/dispatches/2026-09-07-three-view-journeys.md`): New bee’s first
-outcome is to find something to enjoy; Raver may carry a gift; Cypherpunk
-sees empty receipts. Same facts in every skin. Choose-click, not a
-numbered procedure. Matriarch New bee law: view / emotion / one obvious
-action.
+- Stable public work URL beyond this origin’s preview path.
+- Public social rendering of the card. Not observed here.
+- QR. Not printed. A code is not invented.
+- Native re-import of a new bloom export. Not observed here.
+- Artist-selected support/shop destination. No empty CTA until one exists.
+- Human observation or matriarch acceptance.
 
 ## How to open
 
@@ -81,43 +95,20 @@ From the repository root (not `file://` if you want the optional breath):
 python3 -m http.server 4188
 ```
 
-`http://127.0.0.1:4188/docs/mvp-walk/works/bloom-genesis.html`
-
-Share card: `http://127.0.0.1:4188/docs/mvp-walk/works/bloom-genesis-share.html`
+- Presentation: `http://127.0.0.1:4188/docs/mvp-walk/works/bloom-genesis.html`
+- Share card: `http://127.0.0.1:4188/docs/mvp-walk/works/bloom-genesis-share.html`
+- Canonical Keep/receive: `http://127.0.0.1:4188/docs/mvp-walk/first-work.html#work=bnr-genesis-bloom-v1`
 
 ## Verification
 
-Source tests on this seat after the implementation commit:
+Source tests on this seat after the conversion:
 
 ```sh
 node --test e2e/bloom-work-pack.test.mjs
 ```
 
-**12/12** at `ec201b6`.
+Browser walk, skin retention, and printed/card credit bounds are recorded
+after the conversion commit. Public QR and native import are not asserted.
 
-### Browser walk — 2026-09-08, `127.0.0.1:4188`
-
-Opened via `python3 -m http.server 4188` from the repository root (not
-`file://`). This is a seat walk, not matriarch or human-observation
-acceptance.
-
-- New bee default. Bloom hero visible. “Rest the bloom” present; status
-  “A gentle breath inside this artwork. It is not a live connection.”
-  Credit “LoVis and his mother” unmarked. Colour chips named in words.
-  Keep is the large first action. No numbered how-to.
-- Keep a reference → button “Kept in this browser”. Status: a reference,
-  not ownership.
-- Raver: dark atmospheric canvas, same bloom, same credit, Keep stays kept.
-- Cypherpunk: mono canvas, same credit, nearby-path receipts name the
-  draft/local path and pending receive.
-- Share card: still, makers, invitation, draft path, QR reserved, copy
-  status “Copied the draft path and credit. This is not a public URL and
-  not a receive receipt.”
-- 390px New bee: bloom, Keep, and chips reflow; no horizontal card overflow.
-- PR #31 link labeled “(opens in a new tab)”.
-
-Remote CI on `29405ce`: **8/8 green** (secret-scan, tests/static, tests/node,
-tests/test). That is repository CI, not matriarch acceptance, not a public
-URL, and not receive wiring.
-
-PR stays draft.
+Earlier #37 remote CI (8/8 green on `29405ce` / `b839d7e`) applied to the
+withdrawn Keep-wrapper draft, not this companion.

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#f6f7f2">
 <meta name="color-scheme" content="light dark">
-<title>Green–teal–purple bloom — LoVis and his mother (draft work page)</title>
+<title>Green–teal–purple bloom — LoVis and his mother</title>
 <style>
 :root{
   --bg:#f6f7f2;--panel:#fff;--well:#edf2eb;--ink:#18362a;--dim:#435f4e;--line:#ccd7cf;
@@ -35,9 +35,7 @@ button,summary,a{min-height:44px}
 .wrap{max-width:44rem;margin:0 auto;padding:0 clamp(16px,3vw,32px) 72px}
 body[data-reg=raver] .wrap{max-width:56rem}
 body[data-reg=cypherpunk] .wrap{max-width:50rem}
-.banner{margin:0 0 16px;padding:12px 14px;border:1px solid #c9b56a;border-radius:12px;background:#fff8d6;color:#5c4a12}
-.banner strong{display:block;font-size:1rem}
-.banner span{display:block;font-size:.95rem;margin-top:4px}
+.preview{margin:0 0 12px;color:var(--dim);font-size:.8rem;letter-spacing:.04em;text-transform:uppercase}
 .crumb{font-size:.875rem;margin:0 0 10px}
 .crumb a{display:inline-flex;align-items:center;min-height:44px;padding:0 4px}
 .eyebrow{margin:0 0 6px;color:var(--dim);font-size:.8rem;letter-spacing:.04em;text-transform:uppercase}
@@ -58,10 +56,11 @@ body[data-reg=raver] .lead,body[data-reg=cypherpunk] .lead{max-width:62ch}
 }
 #bloom-stage img,#bloom-stage svg{display:block;width:88%;height:auto;max-width:520px}
 #bloom-still{position:relative;z-index:0}
-#motion-status{margin:10px 0 0;color:var(--dim);font-size:.95rem;min-height:1.4em}
+figcaption{margin:10px 0 0;color:var(--dim);font-size:.95rem}
+#motion-status{margin:8px 0 0;color:var(--dim);font-size:.95rem;min-height:1.4em}
 
 .credit{margin:0 0 20px}
-.credit b{display:block;font-size:1.35rem;line-height:1.3}
+.credit b{display:block;font-size:1.35rem;line-height:1.3;overflow:visible;white-space:normal}
 .credit small{display:block;color:var(--dim);margin-top:4px;font-size:1rem}
 
 .colors{display:grid;gap:10px;margin:0 0 22px;padding:0;list-style:none}
@@ -74,21 +73,17 @@ body[data-reg=raver] .lead,body[data-reg=cypherpunk] .lead{max-width:62ch}
 .colors span{display:block;color:var(--dim);font-size:.95rem}
 
 .act{display:flex;flex-direction:column;gap:10px;margin:0 0 22px}
-#keep-reference{
+.primary,.ghost{
+  min-height:48px;padding:12px 18px;border-radius:16px;text-decoration:none;
+  display:inline-flex;align-items:center;justify-content:center;text-align:center;
+}
+.primary{
   min-width:min(100%,280px);min-height:64px;padding:14px 22px;
-  border:1px solid var(--accent);border-radius:16px;font-size:1.25rem;font-weight:650;
+  border:1px solid var(--accent);font-size:1.25rem;font-weight:650;
   background:var(--accent);color:var(--on);
 }
-#forget-reference,.ghost{
-  min-height:48px;padding:10px 16px;border:1px solid var(--line);border-radius:14px;
-  background:var(--panel);color:var(--ink);text-decoration:none;display:inline-flex;
-  align-items:center;justify-content:center;text-align:center;
-}
-#keep-status{margin:0;color:var(--dim);font-size:.95rem;min-height:1.4em}
+.ghost{border:1px solid var(--line);background:var(--panel);color:var(--ink)}
 
-.slot,.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 20px;margin:0 0 14px}
-.slot h2,.panel h2{margin:0 0 8px;font-size:1.125rem}
-.empty{color:var(--warn)}
 .note{margin:8px 0 0;color:var(--dim);font-size:.95rem;max-width:72ch}
 details.tool{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:0 16px 16px;margin:0 0 12px}
 details.tool:not([open]){padding-bottom:0}
@@ -112,37 +107,37 @@ body[data-reg=raver] #bloom-stage{
   background:radial-gradient(ellipse at 50% 40%,#2a2038 10%,#16111f 80%);
   box-shadow:0 0 0 10px rgba(173,145,240,.14);
 }
-body[data-reg=raver] #keep-reference{border-radius:99px}
+body[data-reg=raver] .primary{border-radius:99px}
 body[data-reg=cypherpunk]{
   --bg:#081610;--panel:#0e211a;--well:#142d23;--ink:#e2f1e7;--dim:#acc4b5;--line:#4d6b59;
   --accent:#8fdbb0;--on:#062013;--warn:#e6c36a;--wash:#142d23;--font:var(--mono);
   color-scheme:dark;font:1rem/1.6 var(--mono);
 }
-body[data-reg=cypherpunk] :is(button,.panel,.slot,.banner,details.tool){border-radius:4px}
+body[data-reg=cypherpunk] :is(button,.primary,.ghost,.banner,details.tool){border-radius:4px}
 @media(max-width:640px){
-  #keep-reference{width:100%}
+  .primary{width:100%}
   .kv{grid-template-columns:1fr}
 }
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;transition:none!important}
   #bloom-stage .bnr-bloom-cell{animation:none!important;transform:none!important}
 }
+@media print{
+  #bregbar,.crumb,.act,details.tool,footer{display:none!important}
+  .wrap{padding:0}
+}
 </style>
 <script src="../../../surfaces/register.js?v=9" defer></script>
-<script src="../assets/artist-audio/collection.js" defer></script>
 <script src="bloom-genesis.js" defer></script>
 </head>
 <body data-reg="bee" data-bee-theme="custom">
 <div class="wrap">
-<p class="banner" role="status">
-  <strong>DRAFT WORK PAGE — not a live estate surface.</strong>
-  <span>Original bloom by LoVis and his mother. No mint, no upload, no campaign. Public URL and receive path are pending Astra.</span>
-</p>
+<p class="preview">Preview · not a live campaign</p>
 <p class="crumb">
   <a href="../index.html">MVP walk</a> ·
+  <a href="../first-work.html#work=bnr-genesis-bloom-v1">Connected bloom</a> ·
   <a href="bloom-genesis-share.html">Share card</a> ·
-  <a href="../../../surfaces/index.html">Home</a> ·
-  <a href="../../../surfaces/kandi.html">Kandi (live, untouched)</a>
+  <a href="../../../surfaces/index.html">Home</a>
 </p>
 <div data-register-host aria-describedby="view-explainer"></div>
 <p class="sr-only" id="view-explainer">Choose how this page speaks to you. Same work. Same credits. Three ways to read them.</p>
@@ -151,16 +146,16 @@ body[data-reg=cypherpunk] :is(button,.panel,.slot,.banner,details.tool){border-r
 <h1>
   <span data-view="bee">The bloom they made together.</span>
   <span data-view="raver">Green, teal, purple — still breathing.</span>
-  <span data-view="cypherpunk">Work id bloom-genesis. Credits stay put. Receipts stay empty.</span>
+  <span data-view="cypherpunk">One work. One receive path.</span>
 </h1>
 <p class="lead">
-  <span data-view="bee">Look as long as you like. If it stays with you, keep a reference or share the card. Nothing here is a how-to.</span>
-  <span data-view="raver">The original art leads. Motion is a study around it, not a replacement. Same keep and share as every view.</span>
-  <span data-view="cypherpunk">Local draft path only. Collection write is a browser pointer. Receive, QR and shop destination are unset.</span>
+  <span data-view="bee">Look as long as you like. If it stays with you, keep it on the connected page.</span>
+  <span data-view="raver">The original art leads. Motion is a study around it. Keep and share live next door.</span>
+  <span data-view="cypherpunk">Presentation only. Canonical Keep, share and import stay on the connected first-work page.</span>
 </p>
 <p class="promise">Make something beautiful. Give someone a piece of it. Stay connected to its maker.</p>
 
-<figure class="hero" aria-labelledby="bloom-heading">
+<figure class="hero" aria-labelledby="bloom-heading bloom-desc">
   <div class="hero-top">
     <h2 id="bloom-heading">Green–teal–purple bloom</h2>
     <button type="button" id="bloom-pause" hidden>Let it breathe</button>
@@ -168,6 +163,7 @@ body[data-reg=cypherpunk] :is(button,.panel,.slot,.banner,details.tool){border-r
   <div id="bloom-stage" data-bloom-src="../assets/genesis-3d/motion/green-teal-breathing.svg">
     <img id="bloom-still" src="../assets/genesis-3d/stills/green-teal-bloom.jpg" width="820" height="821" alt="Original green–teal–purple bloom by LoVis and his mother. Purple marks humans, teal marks AI, green marks biomass.">
   </div>
+  <figcaption id="bloom-desc">Original artwork by LoVis and his mother. Purple marks humans, teal marks AI, green marks biomass.</figcaption>
   <p id="motion-status" role="status">The resting artwork is here. Breathing motion is optional.</p>
 </figure>
 
@@ -183,52 +179,35 @@ body[data-reg=cypherpunk] :is(button,.panel,.slot,.banner,details.tool){border-r
 </ul>
 
 <div class="act">
-  <button type="button" id="keep-reference">Keep a reference</button>
-  <a class="ghost" href="bloom-genesis-share.html">Share with someone</a>
-  <button type="button" id="forget-reference" hidden>Remove this reference</button>
-  <p id="keep-status" role="status">Keep a credited pointer in this browser. It is not a copy of the artwork and not a license.</p>
+  <a class="primary" href="../first-work.html#work=bnr-genesis-bloom-v1">Keep or share this bloom</a>
+  <a class="ghost" href="bloom-genesis-share.html">Open the printable card</a>
 </div>
-
-<section class="slot" aria-labelledby="support-heading">
-  <h2 id="support-heading">Artist support</h2>
-  <p class="empty">Artist-selected destination pending.</p>
-  <p class="note">No shop link is invented here. No Bandcamp, no checkout, no tip jar until the makers name one.</p>
-</section>
-
-<details class="tool">
-  <summary>What keeping this is — and is not</summary>
-  <p class="note">A kept reference uses the same browser collection as the listening board (<code>bnr-listen-later/1</code>). It stores the title, the makers, and the rights line. It does not store the picture file. It is not ownership, not a license, and not a media download.</p>
-</details>
-
-<details class="tool">
-  <summary>Nearby paths — what is real, what is waiting</summary>
-  <dl class="kv">
-    <dt>This page</dt>
-    <dd>Draft / local: <code>docs/mvp-walk/works/bloom-genesis.html</code>. Not a public work URL.</dd>
-    <dt>Share card</dt>
-    <dd>Same-origin card with the still, the credit, and a reserved QR slot.</dd>
-    <dt>Listen-later</dt>
-    <dd>Real in this browser, from the artist audio showcase on main. Optional listen lives on that board. Visual-first journey does not require it.</dd>
-    <dt>Kandi</dt>
-    <dd>Live bracelet gift on this origin. Untouched by this pack. Copied is not received. It is not a receive path for this artwork.</dd>
-    <dt>Connected receive</dt>
-    <dd class="empty">Pending Astra’s connected receive release. Placeholder only.</dd>
-    <dt>Stable public URL</dt>
-    <dd class="empty">Pending Astra. Until then the path stays draft/local.</dd>
-  </dl>
-</details>
 
 <details class="tool">
   <summary>Optional listen</summary>
-  <p class="note">Sound is not required to meet this work. A separate draft board plays a labeled development tone and can save a listen-later pointer. <a href="../artist-audio-showcase.html">Open the artist audio showcase</a>. That page is still TEST AUDIO — not an authorized release.</p>
+  <p class="note">Sound is not required to meet this work. A separate draft board plays a labeled development tone. <a href="../artist-audio-showcase.html">Open the artist audio showcase</a>. That page is still TEST AUDIO — not an authorized release.</p>
 </details>
 
 <details class="tool" data-view-disclosure="receipts">
-  <summary>Limits kept visible</summary>
-  <p class="note">This pack does not edit <code>surfaces/kandi.html</code>. It does not claim Autonomi or Arweave delivery. It does not invent a shop. It does not invent human observation results. Motion, when shown, follows Astra’s SVG contract on draft <a href="https://github.com/beehive-nature/beehive-nature/pull/31" rel="noopener noreferrer" target="_blank">PR #31 (opens in a new tab)</a>. Your BNR page stays here.</p>
+  <summary>About this preview</summary>
+  <dl class="kv">
+    <dt>Work identity</dt>
+    <dd>One work: <code>bnr-genesis-bloom-v1</code>. This page does not save a second collection record.</dd>
+    <dt>Keep / receive</dt>
+    <dd>Canonical path: <a href="../first-work.html#work=bnr-genesis-bloom-v1"><code>docs/mvp-walk/first-work.html#work=bnr-genesis-bloom-v1</code></a>.</dd>
+    <dt>This page</dt>
+    <dd>Visual companion only: <code>docs/mvp-walk/works/bloom-genesis.html</code>.</dd>
+    <dt>Share card</dt>
+    <dd>Printable same-origin card with the still, the full maker credit, and that origin-relative work link.</dd>
+    <dt>Withdrawn draft id</dt>
+    <dd>The earlier pointer <code>bloom-genesis-lovis-mother</code> is superseded. It is not this work’s receive path.</dd>
+    <dt>Kandi</dt>
+    <dd>Live bracelet gift on this origin, linked from Home. Untouched here. Copied is not received. It is not this artwork’s receive path.</dd>
+  </dl>
+  <p class="note">This pack does not edit <code>surfaces/kandi.html</code>, the first-work controller, the collection library, or the shared register. It does not claim Autonomi or Arweave delivery, a public QR result, or a native import result. Motion, when shown, follows Astra’s SVG contract on draft <a href="https://github.com/beehive-nature/beehive-nature/pull/31" rel="noopener noreferrer" target="_blank">PR #31 (opens in a new tab)</a>. Your BNR page stays here.</p>
 </details>
 
-<footer>Draft Grok lane · 2026-09-08 · open via a local HTTP server from the repository root so the optional breath can load.</footer>
+<footer>Companion presentation · Keep lives on the connected first-work page · open via a local HTTP server from the repository root so the optional breath can load.</footer>
 </div>
 </body>
 </html>

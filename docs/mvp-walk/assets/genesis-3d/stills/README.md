@@ -9,4 +9,6 @@ not a mint, and not a licensed media copy. Motion study (breathing SVG)
 remains Astra’s; do not rewrite the Blender builders on draft #31.
 
 This still exists so a share card and first paint can stay lightweight
-without fetching the cell-path SVG.
+without fetching the cell-path SVG. Canonical Keep/receive for this artwork
+is `docs/mvp-walk/first-work.html#work=bnr-genesis-bloom-v1`, not a second
+collection id on the presentation page.

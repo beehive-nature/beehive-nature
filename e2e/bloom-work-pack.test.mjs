@@ -1,5 +1,6 @@
-/* Source checks for the draft bloom work pack.
-   Not a live work URL, receive path, mint, or human observation. */
+/* Companion bloom presentation checks.
+   Canonical work id is bnr-genesis-bloom-v1 on first-work.html.
+   This pack must not ship a second Keep identity or wrap the #35 controller. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -16,6 +17,12 @@ const index = read('docs/mvp-walk/index.html');
 const bloom = read('docs/mvp-walk/assets/genesis-3d/motion/green-teal-breathing.svg');
 const still = bin('docs/mvp-walk/assets/genesis-3d/stills/green-teal-bloom.jpg');
 const kandi = read('surfaces/kandi.html');
+const firstWork = read('docs/mvp-walk/first-work.html');
+const firstWorkJs = read('docs/mvp-walk/assets/first-work/work.js');
+const receiveJs = read('docs/mvp-walk/assets/first-work/receive.js');
+const collection = read('docs/mvp-walk/assets/artist-audio/collection.js');
+const register = read('surfaces/register.js');
+const CANONICAL = '../first-work.html#work=bnr-genesis-bloom-v1';
 
 function extractById(html, id) {
   const open = html.match(new RegExp(`<(?<tag>[a-z][a-z0-9]*)([^>]*\\sid="${id}"[^>]*)>`, 'i'));
@@ -34,25 +41,36 @@ function extractById(html, id) {
   return html.slice(start);
 }
 
-test('New bee is the default; shared register host; three authored views', () => {
-  assert.match(work, /<body data-reg="bee" data-bee-theme="custom">/);
-  assert.match(work, /data-register-host/);
-  assert.match(work, /surfaces\/register\.js\?v=9/);
-  assert.match(work, /data-view="bee"/);
-  assert.match(work, /data-view="raver"/);
-  assert.match(work, /data-view="cypherpunk"/);
-  assert.match(work, /<meta name="theme-color" content="#f6f7f2">/);
+function firstScreen(html) {
+  const details = html.indexOf('<details');
+  return details === -1 ? html : html.slice(0, details);
+}
+
+test('New bee is the default; shared register host; three authored views on both interactive pages', () => {
+  for (const page of [work, share]) {
+    assert.match(page, /<body data-reg="bee" data-bee-theme="custom">/);
+    assert.match(page, /data-register-host/);
+    assert.match(page, /surfaces\/register\.js\?v=9/);
+    assert.match(page, /data-view="bee"/);
+    assert.match(page, /data-view="raver"/);
+    assert.match(page, /data-view="cypherpunk"/);
+    assert.match(page, /body\[data-reg=raver\]/);
+    assert.match(page, /body\[data-reg=cypherpunk\]/);
+  }
 });
 
-test('the same work and credits sit in unmarked shared prose', () => {
+test('the same work and full maker credit sit in unmarked shared prose', () => {
   const credit = extractById(work, 'bloom-heading');
   assert.match(work, /<b>LoVis and his mother<\/b>/);
   assert.doesNotMatch(work.slice(work.indexOf('<p class="credit">'), work.indexOf('</p>', work.indexOf('<p class="credit">')) + 4), /data-view=/);
   assert.match(work, /Original artwork/);
   assert.match(work, /Motion study by Astra/);
-  assert.match(share, /LoVis and his mother/);
-  assert.match(share, /Green–teal–purple bloom/);
+  assert.match(share, /<strong>LoVis<\/strong>/);
+  assert.match(share, /<span>and his mother<\/span>/);
+  assert.match(share, /Genesis bloom/);
   assert.equal(credit.includes('Green–teal–purple bloom'), true);
+  assert.doesNotMatch(share, /text-overflow:\s*ellipsis/);
+  assert.match(share, /\.credit-block\{[\s\S]*overflow:\s*visible/);
 });
 
 test('colour meaning is named in words, not hue alone', () => {
@@ -65,15 +83,65 @@ test('colour meaning is named in words, not hue alone', () => {
   assert.match(work, /named in words as well as hue/);
 });
 
-test('New bee first action is Keep a reference; share is choose-click, not a numbered how-to', () => {
-  assert.match(work, /id="keep-reference">Keep a reference/);
-  assert.match(work, /href="bloom-genesis-share.html">Share with someone/);
+test('one canonical work identity; this pack does not wrap Keep or invent a second record', () => {
+  assert.match(work, new RegExp(CANONICAL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  assert.match(share, new RegExp(CANONICAL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  assert.match(js, /bnr-genesis-bloom-v1/);
+  assert.match(firstWorkJs, /const id = 'bnr-genesis-bloom-v1'/);
+  assert.doesNotMatch(js, /bloom-genesis-lovis-mother/);
+  assert.doesNotMatch(js, /WORK_REF/);
+  assert.doesNotMatch(js, /saveItem/);
+  assert.doesNotMatch(js, /BNRListenLater/);
+  assert.doesNotMatch(js, /removeItem/);
+  assert.doesNotMatch(work, /keep-reference/);
+  assert.doesNotMatch(work, /forget-reference/);
+  assert.doesNotMatch(work, /artist-audio\/collection\.js/);
+  assert.doesNotMatch(share, /artist-audio\/collection\.js/);
+  assert.doesNotMatch(work, /assets\/first-work\/work\.js/);
+  assert.doesNotMatch(work, /assets\/first-work\/receive\.js/);
+  assert.doesNotMatch(share, /assets\/first-work\/work\.js/);
+  assert.doesNotMatch(share, /assets\/first-work\/receive\.js/);
+  assert.match(work, /Keep or share this bloom/);
+  assert.match(share, /Open the connected bloom/);
+});
+
+test('loaded artwork keeps an accessible named image; SVG is not aria-hidden', () => {
+  assert.match(work, /aria-labelledby="bloom-heading bloom-desc"/);
+  assert.match(work, /id="bloom-desc"/);
+  assert.match(work, /alt="Original green–teal–purple bloom by LoVis and his mother/);
+  assert.match(js, /setAttribute\('role', 'img'\)/);
+  assert.match(js, /setAttribute\('aria-label', named\)/);
+  assert.match(js, /removeAttribute\('aria-hidden'\)/);
+  assert.doesNotMatch(js, /bloom\.setAttribute\(['"]aria-hidden['"]/);
+  assert.match(js, /nameLoadedArtwork/);
+});
+
+test('New bee first screen stays visual; engineering notes are folded', () => {
   const beeLead = work.match(/<span data-view="bee">([\s\S]*?)<\/span>/)[1];
+  const open = firstScreen(work);
   assert.doesNotMatch(beeLead, /<ol[\s>]/i);
   assert.doesNotMatch(beeLead, /<(p|div|li)[^>]*>\s*\d+[\.\)]\s/);
-  assert.doesNotMatch(work, /Three calm steps/i);
+  assert.doesNotMatch(open, /Pending Astra/i);
+  assert.doesNotMatch(open, /bnr-listen-later/);
+  assert.doesNotMatch(open, /PR #31/);
+  assert.doesNotMatch(open, /Artist support/i);
+  assert.doesNotMatch(open, /destination pending/i);
+  assert.match(open, /Preview · not a live campaign/);
+  assert.match(open, /The bloom they made together/);
+  assert.match(work, /<details[\s\S]*bnr-genesis-bloom-v1/);
+  assert.match(work, /<summary>About this preview<\/summary>/);
   assert.doesNotMatch(share, /<ol[\s>]/i);
-  assert.match(share, /A piece of this bloom, for you to keep or to give/);
+  assert.match(share, /The bloom they made together/);
+});
+
+test('no empty artist-support call-to-action; no invented shop', () => {
+  assert.doesNotMatch(work, /Artist-selected destination pending/);
+  assert.doesNotMatch(share, /artist-selected destination pending/i);
+  assert.doesNotMatch(work, /Artist support/);
+  assert.doesNotMatch(work, /href=["'][^"']*bandcamp/i);
+  assert.doesNotMatch(share, /href=["'][^"']*bandcamp/i);
+  assert.doesNotMatch(work, /bandcamp\.com/i);
+  assert.doesNotMatch(share, /bandcamp\.com/i);
 });
 
 test('hero reuses the original still and optional breathing SVG; Blender builders are untouched', () => {
@@ -90,41 +158,22 @@ test('hero reuses the original still and optional breathing SVG; Blender builder
   assert.ok(bloom.includes(still.toString('base64')));
 });
 
-test('keep is a browser reference, not ownership or a licensed copy', () => {
-  assert.match(js, /id: 'bloom-genesis-lovis-mother'/);
-  assert.match(js, /medium: 'visual'/);
-  assert.match(js, /links: \[\]/);
-  assert.match(js, /later\.saveItem/);
-  assert.match(work, /not a copy of the artwork and not a license/);
-  assert.match(share, /not a licensed media copy/);
-  assert.match(share, /Reference, not ownership/);
-});
-
-test('artist support is empty; no invented shop', () => {
-  assert.match(work, /Artist-selected destination pending/);
-  assert.match(share, /artist-selected destination pending/i);
-  assert.doesNotMatch(work, /href=["'][^"']*bandcamp/i);
-  assert.doesNotMatch(share, /href=["'][^"']*bandcamp/i);
-  assert.doesNotMatch(work, /bandcamp\.com/i);
-  assert.doesNotMatch(share, /bandcamp\.com/i);
-});
-
-test('public URL and QR stay draft until Astra ships a stable work URL', () => {
-  assert.match(work, /Not a public work URL/);
-  assert.match(work, /docs\/mvp-walk\/works\/bloom-genesis\.html/);
-  assert.match(share, /Draft \/ local until Astra ships a stable work URL/);
-  assert.match(share, /QR reserved/);
+test('share card print layout stays light; QR is not printed as a real code', () => {
+  assert.match(share, /@media print/);
+  assert.match(share, /#bregbar,\.preview,\.crumb,\.lead,\.actions,details\.tool,footer,#copy-status\{display:none/);
+  assert.match(share, /QR is not printed/);
   assert.doesNotMatch(share, /<img[^>]+qr/i);
-  assert.doesNotMatch(work, /https:\/\/skaists\.dev\/works\/bloom/);
+  assert.doesNotMatch(share, /native re-import/i);
+  assert.doesNotMatch(work, /native re-import/i);
+  assert.doesNotMatch(share, /public social rendering was observed/i);
 });
 
-test('receive, kandi, and listen-later are labeled real vs pending', () => {
-  assert.match(work, /Pending Astra’s connected receive release/);
-  assert.match(work, /Live bracelet gift on this origin/);
-  assert.match(work, /It is not a receive path for this artwork/);
-  assert.match(work, /Real in this browser, from the artist audio showcase on main/);
-  assert.match(work, /href="\.\.\/artist-audio-showcase.html"/);
-  assert.match(work, /href="\.\.\/\.\.\/\.\.\/surfaces\/kandi.html">Kandi \(live, untouched\)/);
+test('supersession is named: withdrawn draft id is not the receive path', () => {
+  assert.match(work, /bloom-genesis-lovis-mother/);
+  assert.match(work, /is superseded/);
+  assert.match(share, /withdrawn draft id/);
+  assert.match(firstWork, /bnr-genesis-bloom-v1/);
+  assert.doesNotMatch(firstWork, /bloom-genesis-lovis-mother/);
 });
 
 test('externals open in a new tab with a visible new-tab label; BNR stays here', () => {
@@ -145,10 +194,16 @@ test('optional media is folded; visual-first journey does not require sound', ()
   assert.match(work, /TEST AUDIO — not an authorized release/);
 });
 
-test('walk index lists the pack; live kandi gift engine is not this change', () => {
-  assert.match(index, /works\/bloom-genesis\.html/);
-  assert.match(index, /works\/bloom-genesis-share\.html/);
+test('walk index lists connected work then companion; live kandi and #35 controller bytes are not this change', () => {
+  assert.match(index, /first-work.html#work=bnr-genesis-bloom-v1/);
+  assert.match(index, /works\/bloom-genesis.html/);
+  assert.match(index, /works\/bloom-genesis-share.html/);
+  assert.match(index, /canonical receive path/);
   assert.doesNotMatch(kandi, /bloom-genesis/);
   assert.doesNotMatch(kandi, /Keep a reference/);
   assert.match(work, /does not edit <code>surfaces\/kandi\.html<\/code>/);
+  assert.match(firstWorkJs, /root\.BNRFirstWork/);
+  assert.match(receiveJs, /keep-work/);
+  assert.match(collection, /BNRListenLater/);
+  assert.match(register, /bregister/);
 });
