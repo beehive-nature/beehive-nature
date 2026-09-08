@@ -160,7 +160,7 @@ test('hero reuses the original still and optional breathing SVG; Blender builder
 
 test('share card print layout stays light; QR is not printed as a real code', () => {
   assert.match(share, /@media print/);
-  assert.match(share, /#bregbar,\.preview,\.crumb,\.lead,\.actions,details\.tool,footer,#copy-status\{display:none/);
+  assert.match(share, /#bregbar,#bregctl,\[data-register-host\],\.preview,\.crumb,\.lead,\.actions,\.bound,details\.tool,footer,#copy-status\{display:none/);
   assert.match(share, /QR is not printed/);
   assert.doesNotMatch(share, /<img[^>]+qr/i);
   assert.doesNotMatch(share, /native re-import/i);

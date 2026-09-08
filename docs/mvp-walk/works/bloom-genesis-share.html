@@ -98,10 +98,12 @@ body[data-reg=cypherpunk] :is(.card,.box,.actions a,.actions button,details.tool
 @media print{
   html,body{background:#fffdf8;color:#18362a}
   .card,.box,.meaning li{background:#fffdf8;color:#18362a;box-shadow:none}
-  .makers,.credit-block,.bound,.invite,h1{color:#18362a}
-  #bregbar,.preview,.crumb,.lead,.actions,details.tool,footer,#copy-status{display:none!important}
+  .makers,.credit-block,.invite,h1{color:#18362a}
+  #bregbar,#bregctl,[data-register-host],.preview,.crumb,.lead,.actions,.bound,details.tool,footer,#copy-status{display:none!important}
   .page{padding:0;max-width:none}
-  .card{box-shadow:none;border-color:#bbb;border-radius:0}
+  .card{box-shadow:none;border-color:#bbb;border-radius:0;padding:12px}
+  .art{aspect-ratio:auto;max-height:52vh;margin-bottom:12px}
+  .art img{width:auto;max-height:48vh}
   .credit-block strong,.credit-block span{overflow:visible;white-space:normal}
 }
 </style>
