@@ -124,6 +124,16 @@ button:disabled,input:disabled,textarea:disabled{opacity:.6;cursor:wait}
 .memory summary{min-height:44px;cursor:pointer;color:var(--ink)}
 .memory textarea{width:100%;min-height:88px;margin-block:12px;font-size:1rem}
 .field{flex:1;min-width:140px}.field label{display:block;margin-bottom:6px;font-size:1rem}.field input{width:100%}
+.kandi-music{padding:14px 17px}
+.music-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.kandi-music h2{margin:0;color:var(--ink);letter-spacing:normal}
+.music-track,.music-note,.music-help{font:inherit;font-size:.875rem;line-height:1.6;color:var(--dim)}
+.music-track{margin-top:4px}.music-note{margin-top:8px}
+.kandi-music button.act{font:inherit;min-height:44px}
+.music-player{margin-top:14px}
+.music-player iframe{display:block;width:100%;aspect-ratio:16/9;height:auto;min-height:200px;border:0;border-radius:10px;background:#000}
+.music-help{margin-top:10px}.music-help a{display:inline-flex;align-items:center;min-height:44px}
+body[data-reg="raver"] .kandi-music{border-color:var(--l);background:linear-gradient(115deg,var(--panel),#24102e)}
 </style></head><body data-reg="bee" data-bee-theme="shared">
 <main>
 <div class="arrival" id="arrival"></div>
@@ -151,18 +161,21 @@ button:disabled,input:disabled,textarea:disabled{opacity:.6;cursor:wait}
   bake advertises its own staleness; it POSTs <code>{}</code> to <code>eos.api.eosnation.io</code>
   (falling back to <code>eos.greymass.com</code>) <b>only when a reader taps ↻</b> — that request
   carries no kandi and no soul name, but your IP, User-Agent and its timing reach a third party, which
-  is why it is now yours to choose. The only other request is <code>lang.js</code> GETting
-  <code>lang-corpus.json</code> same-origin, and only when your language is not English. Receipt: a
-  network capture of this page records zero cross-origin requests on load, and exactly one after the
-  tap. State is <code>localStorage</code> only (<code>bkandi</code> written here; the riders own
+  is why it is now yours to choose. <code>lang.js</code> loads
+  <code>lang-corpus.json</code> same-origin when your language is not English.
+  Music is a separate choice: <b>Play music loads a YouTube player</b> from
+  <code>youtube-nocookie.com</code>. YouTube receives connection and playback data;
+  no player, thumbnail or YouTube script loads before that choice. Stop and close removes the
+  player. The embed receives the site origin as referrer, not the kandi URL or its fragment.
+  The kandi state is <code>localStorage</code> only (<code>bkandi</code> written here; the riders own
   <code>bregister</code>, <code>blang</code>, <code>btranslated_pref</code>, <code>bnr_rails_pin</code>),
-  no cookies, no sessionStorage, no IndexedDB, and no XHR, WebSocket, sendBeacon or analytics tag
-  anywhere in the chain.   Gift, cross and show all terminate in the OS clipboard — the carrying is done
+  with no analytics tag in the kandi engine. The optional YouTube player follows YouTube's
+  own data practices. Gift, cross and show all terminate in the OS clipboard — the carrying is done
   by the person, and <b>&quot;show it&quot; copies a <code>#k=</code> fragment, not a query</b>, so a
   shared piece never enters the host's request log; it does still put the maker and made-FOR names in
   the opener's address bar and history, because the piece IS its seed. Arriving with a fragment only
-  pre-fills the receive box and never writes storage. No DM transport, no relay, no inbox, no video:
-  open, not built, and said plainly. Clipboard write success is not a receive receipt. Animation
+  pre-fills the receive box and never writes storage. No DM transport, no relay, no inbox or video
+  calling is built here. Clipboard write success is not a receive receipt. Animation
   never retires a piece; a deliberate local handoff writes the full export to the memory line first.
   A Show link is a copyable preview, not exclusive gift evidence. Crossing is two local handoffs,
   never an escrow. Names may use letters from any language; bead letters stay <code>[0-9A-Z]</code>
@@ -170,6 +183,23 @@ button:disabled,input:disabled,textarea:disabled{opacity:.6;cursor:wait}
   copies — the culture's answer is the retirement rule, so a completed gift removes the piece from
   your arm and keeps a memory line, the same shape as the corpus's withdrawal law.</div>
 </header>
+
+<section class="kandi-music" aria-labelledby="music-title">
+  <div class="music-row">
+    <div>
+      <h2 id="music-title" data-i18n="kandi.music.title">Music while you make</h2>
+      <p class="music-track">CJ Bolland — “Sugar Is Sweeter” (Sugar Daddy)</p>
+    </div>
+    <button type="button" class="act" id="music-open" aria-controls="music-panel" aria-expanded="false" data-i18n="kandi.music.open" hidden>Play music</button>
+    <button type="button" class="act" id="music-close" aria-controls="music-panel" data-i18n="kandi.music.close" hidden>Stop and close</button>
+  </div>
+  <p class="music-note" data-i18n="kandi.music.note">Off until you choose. Play music connects to YouTube.</p>
+  <div id="music-panel" hidden>
+    <div id="music-player" class="music-player"></div>
+    <p class="music-help" data-i18n="kandi.music.help">Use the player for pause and volume. If it cannot play here, listen on YouTube.</p>
+  </div>
+  <p class="music-help"><a href="https://www.youtube.com/watch?v=pb6OqIyyLAk" target="_blank" rel="noopener noreferrer" data-i18n="kandi.music.link">Listen on YouTube</a></p>
+</section>
 
 <section>
   <h2>⚗ THE COMPOSER — string it</h2>
@@ -331,7 +361,7 @@ button:disabled,input:disabled,textarea:disabled{opacity:.6;cursor:wait}
 </main>
 <footer>
   🍬 your kandi lives in this browser — no server holds one · a kandi string is plain text: whoever
-  sees it reads the names in it · a checksum, not a signature · no outside request unless you tap ↻ ·
+  sees it reads the names in it · a checksum, not a signature · outside connections only when you choose music, an external link or ↻ ·
   <a href="plur.html">🪩 the mUseUm (Wing IV is this page's law)</a> ·
   <a href="hardware/build.html">🔧 the festival</a> ·
   <a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/kandi.html" rel="noopener">view source</a> ·
@@ -1090,6 +1120,50 @@ paint(); arms(); initializeStore();
   }
   requestAnimationFrame(frame);
   addEventListener('resize',build);
+})();
+</script>
+<script id="kandi-music-controller">
+(function(){
+  'use strict';
+  var open=document.getElementById('music-open');
+  var close=document.getElementById('music-close');
+  var panel=document.getElementById('music-panel');
+  var host=document.getElementById('music-player');
+  var frame=null;
+  function title(){
+    if(frame) frame.title=window.BNRLanguage?window.BNRLanguage.text('kandi.music.frame','YouTube music player'):'YouTube music player';
+  }
+  function stop(restoreFocus){
+    host.replaceChildren();
+    frame=null;
+    panel.hidden=true;
+    close.hidden=true;
+    open.hidden=false;
+    open.setAttribute('aria-expanded','false');
+    if(restoreFocus) open.focus();
+  }
+  open.addEventListener('click',function(){
+    if(frame) return;
+    frame=document.createElement('iframe');
+    title();
+    frame.width='560'; frame.height='315';
+    frame.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';
+    frame.referrerPolicy='strict-origin-when-cross-origin';
+    frame.allowFullscreen=true;
+    // No third-party request until this click; fixed video, no gift/user data.
+    frame.src='https://www.youtube-nocookie.com/embed/pb6OqIyyLAk?autoplay=1&playsinline=1&rel=0';
+    panel.hidden=false;
+    host.replaceChildren(frame);
+    open.hidden=true;
+    open.setAttribute('aria-expanded','true');
+    close.hidden=false;
+    close.focus();
+  });
+  close.addEventListener('click',function(){stop(true);});
+  document.addEventListener('blang',title);
+  // Back/forward restoration must never restart an old music choice.
+  window.addEventListener('pagehide',function(){stop(false);});
+  open.hidden=false;
 })();
 </script>
 <script src="blight/pointers.js"></script>

@@ -5,6 +5,27 @@ sources: [chat]
 aliases: ["candidates", "raid candidates", "pending targets", "candidate docket"]
 ---
 
+## 2026-09-07 JAMS / JAMStand — founder-requested artist ecosystem candidate
+
+- **Direction:** connect BNR discovery, optional playback, saved collections,
+  artist support links and PLUR sharing with the JAMS ecosystem. Add value for
+  artists and listeners across all three skins. Reference/link and independently
+  built BNR features now; cross-app playback/import remains unverified.
+- **Source check:** `JAMSplayer/jams-app` at `472d80381fe455005e2f4553a64adec475de5650`
+  is a Tauri application with playlist types and local-file playback;
+  `src-tauri/Cargo.toml` declares **UNLICENSED**. `JAMSplayer/safe` at
+  `b690c8e83a015f9a8952728e61e226fe6506807b` declares **GPL-3.0** in Cargo.toml.
+  `JAMSplayer/autowallet` at `a9a32dd257eeaf0e575650fddbc40d37a6ddc1e1`
+  also declares **UNLICENSED**. Complete recursive trees at those commits had
+  no LICENSE/COPYING/NOTICE-named files. **No code adopted; L-VERIFY adoption
+  not cleared.** Package declarations and observed code are not runtime proof.
+- **Next bounded feature:** Grok's existing showcase lane, after current player
+  controls settle: Save for later + remove + export a small local collection of
+  public links and credits. This saves references, not audio and not a JAMS
+  import. No new fleet launch required. Candidate track handoff needs a verified
+  supported JAMS entry path and current network-format compatibility first.
+- Receipt: [2026-09-07-astra-jams-artist-synergy.md](../dispatches/2026-09-07-astra-jams-artist-synergy.md).
+
 ## 2026-08-21 FREQLAB RAID — conversational plugin-forge (L-VERIFIED, Remotion-class) — FOUNDER WORD RECEIVED same day (GO + PF-1 CLAP-default); SPEC-BUZZFORGE-1 RATIFIED by zCode (LEAD), BF-1 open, BF-2 ruled
 
 - [verified] **freqlab** (`github.com/jamesontucker/freqlab`, Nanoshrine Interactive / jamesontucker) — **PolyForm Shield 1.0.0, VERIFIED (`package.json "license": "PolyForm-Shield-1.0.0"` + LICENSE + README).** Source-available, NOT OSI, explicit "**you cannot use it to create a competing product or service**" clause — **exact Remotion class (#30, 2026-08-11 batch): LEAVE the codebase, TAKE the pattern, clean-room only.** No freqlab line boards. What it is: a Tauri (Rust core + React/TS/Vite/Zustand front) macOS app that drives the **user's own Claude Code CLI** (BYO Pro/Max — ships zero inference) to write **nih-plug Rust**, one-click compiles **VST3 + CLAP**, hot-reloads to hear changes, publishes to the DAW. Per-project git-committed sessions, one-click revert, a plugin crash-guard, template output-limiters. 22★/4 forks, v0.2.8, TS 54% / Rust 46%, solo dev.

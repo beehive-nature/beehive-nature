@@ -80,7 +80,7 @@
     var r = document.getElementById('rb-recheck');
     if (r) r.onclick = recheck;
   }
-  var CHECK = ' <span id="rb-recheck" role="button" tabindex="0" title="ask a public chain node right now — the only outside request this page ever makes" style="color:#8a9a8a;cursor:pointer;display:inline-flex;align-items:center;min-height:32px;padding:0 6px;border-radius:6px">↻</span>';
+  var CHECK = ' <span id="rb-recheck" role="button" tabindex="0" title="ask a public chain node right now" style="color:#8a9a8a;cursor:pointer;display:inline-flex;align-items:center;min-height:32px;padding:0 6px;border-radius:6px">↻</span>';
   async function boot(justAsked) {
     var dot = document.getElementById('rb-dot'), txt = document.getElementById('rb-txt');
     if (!dot || !txt) return;
