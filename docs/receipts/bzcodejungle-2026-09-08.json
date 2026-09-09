@@ -1,0 +1,211 @@
+{
+  "account": "bzcodejungle",
+  "observations": [
+    {
+      "endpoint": "https://jungle4.cryptolions.io",
+      "verified_at": "2026-09-09T00:39:03.568Z",
+      "chain_id": "73e4385a2708e6d7048834fbc1079f2fabb17b3c125b146af438971e90716c4d", "note": "PUBLIC-CONSTANT Jungle4 chain id",
+      "head_block_num": 285885825,
+      "last_irreversible_block_num": 285885823,
+      "account": {
+        "account_name": "bzcodejungle",
+        "head_block_num": 285885827,
+        "head_block_time": "2026-09-09T00:39:01.500",
+        "privileged": false,
+        "last_code_update": "1970-01-01T00:00:00.000",
+        "created": "2026-09-09T00:33:07.500",
+        "core_liquid_balance": "100.0000 EOS",
+        "ram_quota": 5495,
+        "net_weight": 1980010000,
+        "cpu_weight": "7920010000",
+        "net_limit": {
+          "used": 0,
+          "available": 3052280859,
+          "max": 3052280859,
+          "last_usage_update_time": "2026-09-09T00:33:07.500",
+          "current_used": 0
+        },
+        "cpu_limit": {
+          "used": 0,
+          "available": 2270112,
+          "max": 2270112,
+          "last_usage_update_time": "2026-09-09T00:33:07.500",
+          "current_used": 0
+        },
+        "ram_usage": 3446,
+        "permissions": [
+          {
+            "perm_name": "active",
+            "parent": "owner",
+            "required_auth": {
+              "threshold": 1,
+              "keys": [
+                {
+                  "key": "EOS8gn6xFZq3eqXYUy7m9ph4p1uCuPA1AgpNCQTuhQkPNSdn4QRt6",
+                  "weight": 1
+                }
+              ],
+              "accounts": [],
+              "waits": []
+            },
+            "linked_actions": []
+          },
+          {
+            "perm_name": "owner",
+            "parent": "",
+            "required_auth": {
+              "threshold": 1,
+              "keys": [
+                {
+                  "key": "EOS6n9iELk8TDMXYUMXjCZwTQkvsPoeiogoRPYgPWR4st74RVyQNN",
+                  "weight": 1
+                }
+              ],
+              "accounts": [],
+              "waits": []
+            },
+            "linked_actions": []
+          }
+        ],
+        "total_resources": {
+          "owner": "bzcodejungle",
+          "net_weight": "198001.0000 EOS",
+          "cpu_weight": "792001.0000 EOS",
+          "ram_bytes": 4095
+        },
+        "self_delegated_bandwidth": {
+          "from": "bzcodejungle",
+          "to": "bzcodejungle",
+          "net_weight": "1.0000 EOS",
+          "cpu_weight": "1.0000 EOS"
+        },
+        "refund_request": null,
+        "voter_info": {
+          "owner": "bzcodejungle",
+          "proxy": "",
+          "producers": [],
+          "staked": 20000,
+          "last_vote_weight": "0.00000000000000000",
+          "proxied_vote_weight": "0.00000000000000000",
+          "is_proxy": 0,
+          "flags1": 0,
+          "reserved2": 0,
+          "reserved3": "0 "
+        },
+        "rex_info": null,
+        "subjective_cpu_bill_limit": {
+          "used": 0,
+          "available": 0,
+          "max": 0,
+          "last_usage_update_time": "2000-01-01T00:00:00.000",
+          "current_used": 0
+        },
+        "eosio_any_linked_actions": []
+      }
+    },
+    {
+      "endpoint": "https://jungle4.greymass.com",
+      "verified_at": "2026-09-09T00:39:04.426Z",
+      "chain_id": "73e4385a2708e6d7048834fbc1079f2fabb17b3c125b146af438971e90716c4d", "note": "PUBLIC-CONSTANT Jungle4 chain id",
+      "head_block_num": 285885829,
+      "last_irreversible_block_num": 285885827,
+      "account": {
+        "account_name": "bzcodejungle",
+        "head_block_num": 285885830,
+        "head_block_time": "2026-09-09T00:39:03.000",
+        "privileged": false,
+        "last_code_update": "1970-01-01T00:00:00.000",
+        "created": "2026-09-09T00:33:07.500",
+        "core_liquid_balance": "100.0000 EOS",
+        "ram_quota": 5495,
+        "net_weight": 1980010000,
+        "cpu_weight": "7920010000",
+        "net_limit": {
+          "used": 0,
+          "available": 3052280859,
+          "max": 3052280859,
+          "last_usage_update_time": "2026-09-09T00:33:07.500",
+          "current_used": 0
+        },
+        "cpu_limit": {
+          "used": 0,
+          "available": 2270112,
+          "max": 2270112,
+          "last_usage_update_time": "2026-09-09T00:33:07.500",
+          "current_used": 0
+        },
+        "ram_usage": 3446,
+        "permissions": [
+          {
+            "perm_name": "active",
+            "parent": "owner",
+            "required_auth": {
+              "threshold": 1,
+              "keys": [
+                {
+                  "key": "EOS8gn6xFZq3eqXYUy7m9ph4p1uCuPA1AgpNCQTuhQkPNSdn4QRt6",
+                  "weight": 1
+                }
+              ],
+              "accounts": [],
+              "waits": []
+            },
+            "linked_actions": []
+          },
+          {
+            "perm_name": "owner",
+            "parent": "",
+            "required_auth": {
+              "threshold": 1,
+              "keys": [
+                {
+                  "key": "EOS6n9iELk8TDMXYUMXjCZwTQkvsPoeiogoRPYgPWR4st74RVyQNN",
+                  "weight": 1
+                }
+              ],
+              "accounts": [],
+              "waits": []
+            },
+            "linked_actions": []
+          }
+        ],
+        "total_resources": {
+          "owner": "bzcodejungle",
+          "net_weight": "198001.0000 EOS",
+          "cpu_weight": "792001.0000 EOS",
+          "ram_bytes": 4095
+        },
+        "self_delegated_bandwidth": {
+          "from": "bzcodejungle",
+          "to": "bzcodejungle",
+          "net_weight": "1.0000 EOS",
+          "cpu_weight": "1.0000 EOS"
+        },
+        "refund_request": null,
+        "voter_info": {
+          "owner": "bzcodejungle",
+          "proxy": "",
+          "producers": [],
+          "staked": 20000,
+          "last_vote_weight": "0.00000000000000000",
+          "proxied_vote_weight": "0.00000000000000000",
+          "is_proxy": 0,
+          "flags1": 0,
+          "reserved2": 0,
+          "reserved3": "0 "
+        },
+        "rex_info": null,
+        "subjective_cpu_bill_limit": {
+          "used": 0,
+          "available": 0,
+          "max": 0,
+          "last_usage_update_time": "2000-01-01T00:00:00.000",
+          "current_used": 0
+        },
+        "eosio_any_linked_actions": []
+      }
+    }
+  ],
+  "creation": {},
+  "faucet": {}
+}
