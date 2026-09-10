@@ -130,6 +130,55 @@ resume. Record unreachable controls, lost focus and text that cannot be read fro
 normal TV distance. This is a coverage recommendation, not a claimed observed
 navigation failure. The release itself identifies TV support as an initial cut.
 
+## Option 2: build scope and laptop readiness
+
+The founder favored all three recommendations and asked what option 2's build
+would involve. This is a build assessment, not an instruction to start installing
+toolchains or a claim that a new APK has been built.
+
+Live read-only checks on September 10 found an Intel i7-1185G7, four cores/eight
+threads, 63.4 GiB total RAM with 43.3 GiB available, and 1471.6 GiB free disk.
+WSL has Rust/rustup with only the `x86_64-unknown-linux-gnu` target installed.
+Flutter, Dart, Java, adb and cargo-ndk were not on the checked command paths;
+the common Android SDK/Flutter locations checked were absent. This is sufficient
+hardware for a capped local cross-build, but the Android toolchain needs setup.
+
+The intended contribution is a selectable ARMv7 build alongside the existing
+ARM64 build. Keep the native Rust target, Flutter target and Gradle ABI filters/
+library exclusions consistent, then inspect the actual APK's native libraries.
+An Android-only entry point should avoid the existing release script's extra
+Linux AppImage build. Preserve the normal ARM64 release path.
+
+Provision a pinned Flutter version matching upstream CI (currently 3.44.6), a
+compatible JDK, Android command-line SDK/NDK/build tools, cargo-ndk and the Android
+Rust targets. Build in WSL's Linux filesystem with limited parallelism. The
+deliverable should include the repeatable build command, source/toolchain
+versions, APK digest, certificate report, native ABI checks, and a regression
+check for the existing ARM64 target. Repeatable commands and pinned inputs do
+not by themselves establish byte-for-byte reproducible output.
+
+Planning allowance, **not measured on this machine**: reserve about 50 GB for
+toolchains, dependencies and build caches, expect several GB of downloads, and
+allow half a day to one working day for initial setup, the patch, a cold build
+and artifact checks if the maintainer's ARMv7 result reproduces. Native dependency
+or linker failures can extend this. Later build timing must be measured after
+the caches exist. TV installation/playback is a separate acceptance step.
+
+Use the maintainer's existing test APK for the first device baseline once it is
+inspected. For our code changes, an independently signed test variant can use a
+separate application ID to coexist with the official install; an official update
+build needs the maintainer's signing process. Do not request or transfer their
+private signing key, and do not uninstall an existing app to work around signing.
+Android documents [per-ABI packaging](https://developer.android.com/ndk/guides/abis),
+Flutter documents [Android builds and release signing](https://docs.flutter.dev/deployment/android),
+and [apksigner](https://developer.android.com/tools/apksigner) supplies artifact
+signature verification. Their current pages were read for this assessment.
+
+Upstream main still resolved to the pinned `1691c491` source at recheck. GitHub's
+release API still listed five actual assets, including the same 152,716,486-byte
+TV candidate; the rendered release page's differing asset counter was not used
+as evidence. No new APK download, build, installation or service change occurred.
+
 ## First independent test session
 
 Record exact app asset/version, device model, OS/build and network conditions for
