@@ -8,6 +8,20 @@ function json(response, status, value) {
   response.writeHead(status, { 'content-type': 'application/json', 'cache-control': 'no-store' });
   response.end(encode(value));
 }
+const SOCKET_OUTPUT_LIMIT = 128 * 1024;
+function sendFrame(ws, value) {
+  if (ws.readyState !== 1) return false;
+  // Buffer payloads make the underlying writable queue count actual UTF-8
+  // bytes. Queued strings can be counted in code units instead by the stream.
+  const frame = encode(value);
+  // Include this frame before enqueueing it, including up to ten bytes of
+  // unmasked server framing. The close control frame has a separate fixed cap.
+  if (ws.bufferedAmount + frame.length + 10 > SOCKET_OUTPUT_LIMIT) {
+    ws.close(1008, 'consumer-lag'); return false;
+  }
+  ws.send(frame, { binary: false });
+  return true;
+}
 async function body(request, max) {
   requireThat(!request.headers['content-length'] || Number(request.headers['content-length']) <= max, 'body-limit', 413);
   const chunks = []; let total = 0;
@@ -28,7 +42,8 @@ export async function startGateway(channel) {
     const header = request.headers.authorization;
     requireThat(typeof header === 'string' && header.startsWith('Nostr ') && header.length <= 24000, 'authentication-required', 401);
     const event = checkedEvent(parse(Buffer.from(header.slice(6), 'base64'), LIMITS.event));
-    if (event.kind === 24242 && request.method === 'GET' && route.startsWith('/media/')) {
+    const blossomGet = event.kind === 24242 && request.method === 'GET' && route.startsWith('/media/');
+    if (blossomGet) {
       // Blossom GET tokens are reusable by design, unlike NIP-98 request events.
       requireThat(tag(event, 't') === 'get' && tag(event, 'server') === new URL(channel.policy.origin).host
         && /^\d+$/.test(tag(event, 'expiration')) && Number(tag(event, 'expiration')) > now()
@@ -37,12 +52,16 @@ export async function startGateway(channel) {
       requireThat(event.kind === 27235 && event.content === '' && Math.abs(now() - event.created_at) <= 60
         && tag(event, 'u') === channel.policy.origin + route && tag(event, 'method') === request.method
         && tag(event, 'payload') === hash(bytes), 'invalid-http-auth', 401);
+    }
+    // Reject nonmembers and expired policy before inspecting or mutating shared
+    // replay state: an outsider must not consume a member's admission capacity.
+    channel.authorize(event.pubkey);
+    if (!blossomGet) {
       for (const [id, expiry] of seen) if (expiry < now()) seen.delete(id);
       requireThat(!seen.has(event.id), 'auth-replay', 401);
       requireThat(seen.size < 1024, 'auth-capacity', 429);
       seen.set(event.id, event.created_at + 61);
     }
-    channel.authorize(event.pubkey);
     return event.pubkey;
   }
   const server = createServer(async (request, response) => {
@@ -82,7 +101,7 @@ export async function startGateway(channel) {
     const session = { ws, pubkey: null, subscriptions: new Map(), challenge: randomBytes(24).toString('hex'), pending: false };
     sockets.add(session);
     const deadline = setTimeout(() => ws.close(1008, 'authentication-required'), 10000);
-    ws.send(JSON.stringify(['AUTH', session.challenge]));
+    sendFrame(ws, ['AUTH', session.challenge]);
     ws.on('error', () => {});
     ws.on('close', () => { clearTimeout(deadline); sockets.delete(session); });
     ws.on('message', async raw => {
@@ -98,7 +117,7 @@ export async function startGateway(channel) {
           requireThat(e.kind === 22242 && e.content === '' && Math.abs(now() - e.created_at) <= 60
             && tag(e, 'relay') === wsOrigin && tag(e, 'challenge') === session.challenge, 'invalid-ws-auth', 401);
           channel.authorize(e.pubkey); session.pubkey = e.pubkey; clearTimeout(deadline);
-          ws.send(JSON.stringify(['OK', e.id, true, 'authenticated'])); return;
+          sendFrame(ws, ['OK', e.id, true, 'authenticated']); return;
         }
         requireThat(session.pubkey, 'authentication-required', 401);
         channel.authorize(session.pubkey);
@@ -106,18 +125,22 @@ export async function startGateway(channel) {
           requireThat(typeof frame[1] === 'string' && frame[1].length <= 64 && frame.length >= 3
             && (session.subscriptions.has(frame[1]) || session.subscriptions.size < 4), 'subscription-limit');
           const filters = frame.slice(2); const events = channel.query(session.pubkey, filters);
-          session.subscriptions.set(frame[1], { filters, sent: new Set(events.map(e => e.id)) });
-          for (const e of events) ws.send(JSON.stringify(['EVENT', frame[1], e]));
-          ws.send(JSON.stringify(['EOSE', frame[1]])); return;
+          const sub = { filters, sent: new Set() };
+          session.subscriptions.set(frame[1], sub);
+          for (const e of events) {
+            if (!sendFrame(ws, ['EVENT', frame[1], e])) return;
+            sub.sent.add(e.id);
+          }
+          sendFrame(ws, ['EOSE', frame[1]]); return;
         }
         if (frame[0] === 'CLOSE' && frame.length === 2) { session.subscriptions.delete(frame[1]); return; }
         if (frame[0] === 'EVENT' && frame.length === 2) {
           const result = await channel.publish(session.pubkey, frame[1]);
-          ws.send(JSON.stringify(['OK', result.event_id, true, 'stored and read back'])); return;
+          sendFrame(ws, ['OK', result.event_id, true, 'stored and read back']); return;
         }
         requireThat(false, 'unsupported-frame');
       } catch (err) {
-        ws.send(JSON.stringify(['NOTICE', failure(err).error]));
+        sendFrame(ws, ['NOTICE', failure(err).error]);
       } finally { if (acquired) session.pending = false; }
     });
   });
@@ -127,10 +150,11 @@ export async function startGateway(channel) {
       try {
         channel.authorize(session.pubkey);
         for (const [id, sub] of session.subscriptions) {
+          if (session.ws.readyState !== 1) break;
           for (const event of channel.query(session.pubkey, sub.filters)) {
             if (sub.sent.has(event.id)) continue;
-            if (session.ws.bufferedAmount > 128 * 1024) { session.ws.close(1008, 'consumer-lag'); break; }
-            session.ws.send(JSON.stringify(['EVENT', id, event])); sub.sent.add(event.id);
+            if (!sendFrame(session.ws, ['EVENT', id, event])) break;
+            sub.sent.add(event.id);
           }
         }
       } catch { session.ws.close(1008, 'authorization-ended'); }

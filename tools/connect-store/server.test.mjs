@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { randomBytes } from 'node:crypto';
 import { getPublicKey } from 'nostr-tools/pure';
+import WebSocket from 'ws';
 import { fixture, request, authorization, socket } from './test-support.mjs';
 import { hash, signed, now } from './core.mjs';
 import { startGateway } from './server.mjs';
@@ -61,4 +62,82 @@ test('WebSocket connection is not authentication: no subscription or event witho
   const outsider = await socket(g); t.after(() => outsider.close());
   assert.equal((await outsider.authenticate(f.outsider, c.policy.origin))[1], 'membership-required');
   assert.equal(c.pin, null);
+});
+
+function captureServerSocket(t) {
+  let captured;
+  const original = WebSocket.prototype.send;
+  t.mock.method(WebSocket.prototype, 'send', function (...args) {
+    if (this._isServer) captured ??= this;
+    return original.apply(this, args);
+  });
+  return () => captured;
+}
+async function waitFor(predicate) {
+  const deadline = Date.now() + 3000;
+  while (!predicate()) {
+    assert.ok(Date.now() < deadline, 'gateway did not close the stalled consumer');
+    await new Promise(resolve => setTimeout(resolve, 10));
+  }
+}
+async function checkStalledBurst(t, client, serverSocket, trigger) {
+  let receivedBytes = 0, events = 0, completed = false, binaryFrames = 0;
+  client.ws.on('message', (raw, binary) => {
+    if (binary) binaryFrames++;
+    const frame = JSON.parse(raw);
+    if (frame[0] === 'EVENT') { receivedBytes += raw.length; events++; }
+    if (frame[0] === 'EOSE') completed = true;
+  });
+  let closeResult;
+  client.ws.once('close', (code, reason) => { closeResult = { code, reason: reason.toString() }; });
+  // A paused reader alone can still fit the whole burst in the OS TCP buffers.
+  // Cork the real server stream as well to deterministically retain pending
+  // writes. The real ws bufferedAmount is used; no fake queue length or sender.
+  const stream = serverSocket._socket;
+  client.ws._socket.pause(); stream.cork();
+  t.after(() => { stream.uncork(); client.ws._socket?.resume(); });
+  await trigger();
+  await waitFor(() => serverSocket.readyState === WebSocket.CLOSING);
+  assert.ok(serverSocket.bufferedAmount <= 128 * 1024 + 125, 'data queue exceeded its ceiling plus bounded close frame');
+  stream.uncork(); client.ws._socket.resume();
+  await waitFor(() => closeResult !== undefined);
+  assert.deepEqual(closeResult, { code: 1008, reason: 'consumer-lag' });
+  assert.ok(events > 0 && events < 40, 'the full burst must not be admitted');
+  assert.ok(receivedBytes <= 128 * 1024, 'delivered data exceeded the admitted queue');
+  assert.equal(binaryFrames, 0, 'Nostr replies must remain WebSocket text frames');
+  assert.equal(completed, false, 'a refused history burst must not claim EOSE');
+}
+test('initial REQ enforces the output bound against a real stalled transport before enqueueing the full history', async t => {
+  const f = await fixture(); t.after(() => f.close()); const c = f.create();
+  for (let i = 0; i < 40; i++) await c.publish(getPublicKey(f.alice), f.message(f.alice,
+    `${i}:` + (i % 2 ? '🌹'.repeat(3500) : 'x'.repeat(15000))));
+  const capture = captureServerSocket(t), g = await startGateway(c); t.after(() => g.close());
+  const client = await socket(g); t.after(() => client.close()); await client.authenticate(f.bob, c.policy.origin);
+  client.send(['REQ', 'healthy', { '#h': [f.channel], limit: 4 }]);
+  for (let i = 0; i < 4; i++) await client.next(v => v[0] === 'EVENT' && v[1] === 'healthy');
+  await client.next(v => v[0] === 'EOSE' && v[1] === 'healthy');
+  client.send(['CLOSE', 'healthy']);
+  await checkStalledBurst(t, client, capture(), () => client.send(['REQ', 'burst', { '#h': [f.channel], limit: 40 }]));
+});
+test('post-restore live notifications use the same pre-enqueue output bound', async t => {
+  const f = await fixture(); t.after(() => f.close()); const writer = f.create();
+  for (let i = 0; i < 16; i++) await writer.publish(getPublicKey(f.alice), f.message(f.alice, `${i}:` + 'x'.repeat(15000)));
+  const reader = f.create({ writer: undefined });
+  const capture = captureServerSocket(t), g = await startGateway(reader); t.after(() => g.close());
+  const client = await socket(g); t.after(() => client.close()); await client.authenticate(f.bob, reader.policy.origin);
+  client.send(['REQ', 'live', { '#h': [f.channel] }]); await client.next(v => v[0] === 'EOSE');
+  await checkStalledBurst(t, client, capture(), () => reader.restore(writer.pin));
+});
+test('1024 authenticated nonmember refusals leave replay capacity available to a member and replay protection intact', async t => {
+  const f = await fixture(); t.after(() => f.close()); const c = f.create(), g = await startGateway(c); t.after(() => g.close());
+  const filters = [{ '#h': [f.channel] }];
+  for (let i = 0; i < 1024; i++) {
+    const denied = await request(g, f.outsider, c.policy.origin, '/query', filters);
+    assert.equal(denied.status, 403, `outsider attempt ${i}`); await denied.arrayBuffer();
+  }
+  const token = authorization(f.alice, 'POST', c.policy.origin + '/query', Buffer.from(JSON.stringify(filters)));
+  const member = await request(g, f.alice, c.policy.origin, '/query', filters, 'POST', token);
+  assert.equal(member.status, 200); assert.deepEqual(await member.json(), []);
+  const replay = await request(g, f.alice, c.policy.origin, '/query', filters, 'POST', token);
+  assert.equal(replay.status, 401); assert.equal((await replay.json()).error, 'auth-replay');
 });

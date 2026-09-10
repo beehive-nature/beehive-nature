@@ -52,7 +52,11 @@ cannot equivocate. Those require witness/discovery and handover work.
 
 Each mutation writes a complete bounded encrypted snapshot and a signed
 checkpoint, and reads both back before acknowledging. Checkpoint metadata remains
-visible to the storage provider; event/file content is encrypted. Encryption uses
+visible to the storage provider; event/file content is encrypted. The x0x group
+also receives checkpoint IDs, policy IDs, sequences and object references/sizes,
+revealing write cadence and size changes to that group's participants (and any
+additional readers its read policy permits). An encrypted channel's roster must
+not be assumed to limit that metadata audience. Encryption uses
 Node `createCipheriv('aes-256-gcm')` with a fresh random 96-bit nonce, 256-bit key,
 128-bit tag and policy-bound AAD in `core.mjs` `seal` / `unseal`. Signature checking
 uses pinned `nostr-tools/pure` `verifyEvent` in `checkedEvent`, with its verification
@@ -68,6 +72,14 @@ need an explicit versioned policy/key handover; v1 has a fixed expiring roster.
 fsync. Windows creation durability and power-loss persistence are unproven.
 Read-back proves availability at that moment, not permanent retention. Failed
 writes can leave unreferenced objects; garbage collection is deliberately absent.
+Every mutation re-encrypts and stores the entire history and file set: bytes
+written per mutation grow with the current snapshot, and cumulative writes can
+grow quadratically with a growing history. Fresh encryption also prevents relying
+on content-address deduplication across snapshots. Paid Autonomi storage would
+charge for this amplification, checkpoint storage, chunk/payment overhead and
+any admitted retry, not merely the new message's bytes. Payment admission must
+budget that complete cost before a canary; this prototype does not implement an
+incremental archive or claim an economical per-message price.
 Duplicate events are acknowledged without adding another event or notification.
 Only the existing writer can publish. A restored gateway has no writer key in the
 proof and refuses new writes, avoiding accidental concurrent writers.
@@ -103,14 +115,22 @@ No historical event can run code: kind 9 is the only admitted user event.
 Hard prototype bounds are 128 events, 16 KiB/event, 8 files, 1 MiB/file, 12 MiB
 snapshot, 16 members, 32 MiB attempted writes per gateway process, 8 concurrent HTTP
 requests, 8 WebSockets and 4 subscriptions/socket. Slow socket queues close at
-128 KiB buffered output. Only loopback listeners are available. The process-loss
+128 KiB of pending output: one pre-enqueue guard counts UTF-8 bytes plus framing
+for initial REQ history, live notifications, authentication and other replies.
+Overflow closes with `consumer-lag`, without an EOSE for an incomplete burst;
+the fixed close control frame is additional. This bounds the application's
+pending socket queue, not bytes already accepted into operating-system buffers.
+Only loopback listeners are available. The process-loss
 proof's child lifetime is 60 seconds. Adapter calls, bytes and body-read deadlines
 are bounded with no redirects, retry loops or implicit daemon startup.
 
 These are application/process limits, not a persistent b-meter spend ledger or a
 household bandwidth cap. Repeated process restarts can reset process budgets.
 NIP-98 replay tracking is bounded and process-local, not distributed/persistent;
-idempotent event and file identities provide separate duplicate protection here.
+membership and policy expiry are checked before replay-cache inspection/insertion,
+so rejected outsiders cannot consume its 1024 slots. Authorized members still
+share that capacity; per-member fair admission is not implemented.
+Idempotent event and file identities provide separate duplicate protection here.
 
 ## Network seams and next acceptance boundary
 
