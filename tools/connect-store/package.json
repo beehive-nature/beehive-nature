@@ -1,0 +1,9 @@
+{
+  "name": "@bnr/connect-store-channel",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": { "test": "node --test *.test.mjs", "prove": "node prove.mjs" },
+  "dependencies": { "nostr-tools": "2.25.2", "ws": "8.21.3" }
+}

@@ -81,6 +81,13 @@ jobs:
       - name: Box tunnel — renewable lease and scoped shutdown
         if: always()
         run: bash e2e/box-tunnel.test.sh
+      - name: Connect Store channel — auth and process-loss recovery
+        if: always()
+        working-directory: tools/connect-store
+        run: |
+          npm ci --ignore-scripts
+          npm test
+          npm run prove
       - name: Recovery inventory — missing dependency + secret-free output
         if: always()
         run: bash e2e/recovery-inventory.test.sh
