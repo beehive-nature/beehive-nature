@@ -76,6 +76,62 @@ Buzz chat/ticker and metered pause/resume. That historical receipt is not a
 fresh VPS-health check or proof of synchronized native W@tch playback. Its
 September 6 operations guide updates the laptop transport to scoped SSH.
 
+## Language corpus, captions and dubbed audio — founder follow-up
+
+Founder explicitly added the existing language corpora, captions and dubbed
+audio to the evaluation. Recommended small next feature: an accessible TV
+Audio & Captions selector, then one end-to-end Latvian sample before broader
+corpus or dubbing integration.
+
+Source inspection at `435c887` finds no explicit audio/subtitle selection in
+`app/lib/screens/player_screen.dart` or `app/lib/widgets/tv_player_controls.dart`.
+The TV path uses `Video(..., controls: null)` with the custom transport. The
+underlying media-kit engine documents native and external audio/subtitle track
+selection, but that capability is not a tested integration in this TV build.
+
+Proposed media package: retain the original video/audio; associate timed source
+captions, translated captions and optional alternate-language audio through
+versioned references. Corrections to a caption file should not require uploading
+the original video again. Support and test these references in personal bundles
+and public channel manifests; do not assume today's schema already carries them.
+
+The BNR corpus in `surfaces/lang-corpus.json` is principally text/localization
+data, not automatically a timestamp-aligned speech-training set. Use its
+terminology and existing review status as guidance. A speech corpus additionally
+needs permitted source audio, language/speaker provenance, reference transcripts,
+alignment and an evaluation split. Opt-in corrections may become corpus entries
+with provenance and review status; private media must not silently become
+training data or public Channels content.
+
+The earlier blind sense-check receipt explicitly marks machine translations as
+drafts until a speaker attests them; machine back-translation is a detector, not
+proof of correctness. Apply the same distinction to captions and translation.
+The Latvian sprint order prioritizes recognition and records the next tongues
+as lv → th → ru → uk; language coverage alone does not establish ASR quality.
+Measure held-out transcription errors and changed meaning, then review caption
+timing. Generated dubbing should be labelled, preserve access to the original,
+use an authorized/licensed voice and receive timing/meaning checks. Selecting
+a language whose track/model is absent must name that absence.
+
+First pilot: one short permitted Latvian clip → reviewed Latvian timed captions
+→ one translated caption track → TV language switching and seek/resume tests.
+Add a dub after that pipeline is proven. Personal language preferences can later
+map to the existing chosen mother/student roles, allowing original audio with a
+study-language caption track. The TV does playback; approved preparation or mesh
+jobs perform ASR, translation and voice generation.
+
+BNR social value: a public channel card links a specific media item/language
+version into a Buzz discussion; timestamped corrections, study sessions and
+creator conversation can improve the corpus when participants opt in. The
+existing HLS prototype is still distinct from this proposed native integration.
+
+Additional references:
+
+- [media-kit track support](https://github.com/media-kit/media-kit#select-video-audio-or-subtitle-track)
+- [Blind sense-check receipt](../receipts/RECEIPT_ROUNDTRIP_SENSE_2026-08-26.md)
+- [Prepared Latvian voice sprint](2026-09-07-order-latvian-voice-mesh.md)
+- [Language roles](RULING_LANGUAGE_ROLES_2026-08-20.md)
+
 ## References
 
 - [W@tch README](https://github.com/aautonomicc/Watch-It#how-it-works)
