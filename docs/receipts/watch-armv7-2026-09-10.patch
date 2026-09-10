@@ -1,0 +1,557 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 1a9c2ac..873528e 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -6,6 +6,13 @@ on:
+   pull_request:
+ 
+ jobs:
++  android-artifact-validator:
++    runs-on: ubuntu-latest
++    steps:
++      - uses: actions/checkout@v5
++      - run: bash -n scripts/build_android.sh native/build-android.sh
++      - run: python3 -m unittest discover -s scripts -p 'test_android_apk.py'
++
+   flutter:
+     runs-on: ubuntu-latest
+     defaults:
+diff --git a/.gitignore b/.gitignore
+index b9efd79..3e5f26b 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -11,3 +11,5 @@ squashfs-root/
+ 
+ # Pure-Dart package build state (cli/, packages/)
+ .dart_tool/
++# Offline Android artifact-validator bytecode cache.
++scripts/__pycache__/
+diff --git a/app/android/app/build.gradle.kts b/app/android/app/build.gradle.kts
+index 90cac7e..24beafe 100644
+--- a/app/android/app/build.gradle.kts
++++ b/app/android/app/build.gradle.kts
+@@ -14,6 +14,21 @@ if (keystorePropertiesFile.exists()) {
+     keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
+ }
+ 
++// scripts/build_android.sh supplies one explicit selection to all three
++// toolchains. The default stays ARM64 for existing release commands.
++val supportedWatchAbis = listOf("armeabi-v7a", "arm64-v8a")
++val watchAbis = providers.environmentVariable("WATCHIT_ANDROID_ABIS")
++    .orElse("arm64-v8a").get().split(",")
++require(watchAbis.isNotEmpty() && watchAbis.all { it in supportedWatchAbis }
++    && watchAbis.distinct().size == watchAbis.size) {
++    "WATCHIT_ANDROID_ABIS must contain unique armeabi-v7a and/or arm64-v8a entries"
++}
++val watchTestSetting = providers.environmentVariable("WATCHIT_TEST_APP").orElse("0").get()
++require(watchTestSetting in listOf("0", "1")) { "WATCHIT_TEST_APP must be 0 or 1" }
++val watchTestApp = watchTestSetting == "1"
++val watchSplitPerAbi = providers.gradleProperty("split-per-abi")
++    .orElse("false").get().toBoolean()
++
+ android {
+     namespace = "io.github.aautonomicc.watchit"
+     compileSdk = flutter.compileSdkVersion
+@@ -33,21 +48,22 @@ android {
+         targetSdk = flutter.targetSdkVersion
+         versionCode = flutter.versionCode
+         versionName = flutter.versionName
+-        // watchit_core (embedded Autonomi client) is built for arm64 only —
+-        // see native/build-android.sh. Keep the APK's ABI claim in sync so
+-        // 32-bit devices don't install a build whose native client is missing.
++        manifestPlaceholders["watchitAppLabel"] = if (watchTestApp) "W@tch Test" else "W@tch"
+         ndk {
+-            abiFilters += listOf("arm64-v8a")
++            // Flutter configures splits for --split-per-abi; AGP rejects
++            // combining those splits with defaultConfig's ndk.abiFilters.
++            if (!watchSplitPerAbi) abiFilters += watchAbis
+         }
+     }
+ 
+     packaging {
+         jniLibs {
+             // Plugin AARs (media_kit's libmpv etc.) ship other ABIs; the
+-            // Flutter plugin ignores abiFilters for those, so strip them
+-            // here — an APK claiming armeabi-v7a without libwatchit_core
+-            // would install on 32-bit devices and fail to stream.
+-            excludes += listOf("lib/armeabi-v7a/**", "lib/x86/**", "lib/x86_64/**")
++            // Flutter plugin ignores abiFilters for those, so strip
++            // unselected ABIs here as well. The artifact check then verifies
++            // the actual native library set, including watchit_core.
++            excludes += (supportedWatchAbis + listOf("x86", "x86_64"))
++                .filter { it !in watchAbis }.map { "lib/$it/**" }
+         }
+     }
+ 
+@@ -64,7 +80,8 @@ android {
+ 
+     buildTypes {
+         release {
+-            signingConfig = if (keystorePropertiesFile.exists()) {
++            if (watchTestApp) applicationIdSuffix = ".validation"
++            signingConfig = if (!watchTestApp && keystorePropertiesFile.exists()) {
+                 signingConfigs.getByName("release")
+             } else {
+                 signingConfigs.getByName("debug")
+diff --git a/app/android/app/src/main/AndroidManifest.xml b/app/android/app/src/main/AndroidManifest.xml
+index 6293445..a902a53 100644
+--- a/app/android/app/src/main/AndroidManifest.xml
++++ b/app/android/app/src/main/AndroidManifest.xml
+@@ -22,7 +22,7 @@
+         android:required="false"/>
+     <!-- AntTP gateways are plain HTTP (LAN/self-hosted), so allow cleartext. -->
+     <application
+-        android:label="W@tch"
++        android:label="${watchitAppLabel}"
+         android:name=".WatchItApplication"
+         android:icon="@mipmap/ic_launcher"
+         android:roundIcon="@mipmap/ic_launcher_round"
+diff --git a/docs/ANDROID-BUILDS.md b/docs/ANDROID-BUILDS.md
+new file mode 100644
+index 0000000..dfc732b
+--- /dev/null
++++ b/docs/ANDROID-BUILDS.md
+@@ -0,0 +1,91 @@
++# Repeatable Android builds
++
++`scripts/build_android.sh` builds Android artifacts without also building the
++Linux AppImage. Its default is the existing ARM64 release. It selects the same
++ABI for the embedded Rust client, Flutter and Gradle packaging, then checks the
++resulting APK rather than relying on its filename.
++
++## Toolchain
++
++Use Flutter 3.44.6 (Dart 3.12.2), JDK 17, Android platform 36, build-tools 36.0.0,
++NDK 28.2.13676358, cargo-ndk 4.1.2 and Python 3.11+. The Gradle wrapper and Cargo/
++pub lockfiles in the checkout define the other dependency inputs. Flutter 3.44.6
++sets minimum Android API 24; the native build uses the same minimum.
++
++Set `ANDROID_HOME` and `ANDROID_NDK_HOME` explicitly. Put Flutter, cargo/rustup,
++Java and Python on PATH, and install the selected Android Rust targets:
++
++```sh
++rustup target add armv7-linux-androideabi aarch64-linux-android
++cargo install cargo-ndk --version 4.1.2 --locked
++export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/28.2.13676358"
++export CARGO_BUILD_JOBS=3
++```
++
++Build inside a Linux filesystem (for example WSL's home directory), with space
++for the SDK, native dependencies and both target caches. Pin the Rust toolchain
++used for a release as well; the receipt records its actual version. Select only
++the ABIs you need on a first build to limit downloads and compile work.
++
++## Commands
++
++```sh
++# Separate test app for a device exposing only 32-bit app ABIs:
++scripts/build_android.sh --abis armeabi-v7a --test-app
++
++# Normal ARM64 release using the existing signing configuration:
++scripts/build_android.sh
++
++# Two separate APKs, each containing only its own native libraries:
++scripts/build_android.sh --abis armeabi-v7a,arm64-v8a
++```
++
++`--test-app` adds `.validation` to the application ID, shows `W@tch Test` as the
++launcher label, and uses the local Android debug certificate. It has separate
++app data and can coexist with the official app. This is for independent testing;
++it does not replace the maintainer's official signing identity. Without the flag,
++the existing `key.properties` signing behavior is preserved (including its
++existing debug fallback when that file is absent). Inspect the certificate report
++before distributing an artifact. Never include private signing material.
++
++The script serializes builds using a checkout-local lock, rebuilds the selected
++native library with Cargo's lockfile enforced, cleans Flutter's previous output,
++and uses the pub lockfile. Unselected JNI ABIs are excluded even when present in
++plugin AARs or left by a previous build. An `Invalid depfile` build log prevents
++the wrapper from labeling the result validated.
++
++For split APKs, Flutter's `split-per-abi` Gradle property supplies the ABI split
++configuration. The app sets `ndk.abiFilters` only for non-split builds: Android's
++Gradle plugin rejects both being set together. Packaging exclusions and the
++post-build artifact check still apply in both modes.
++
++Each selected ABI produces an APK, SHA-256 file and JSON receipt in `dist/`.
++The receipt records the source revision and dirty state, Flutter/Rust/cargo-ndk
++versions, package/minimum API, actual native libraries, and certificate report.
++Build from a clean committed checkout when preparing review artifacts. Pinned
++inputs and a repeatable command are not a claim of byte-for-byte reproducibility.
++
++## Checks and hardware acceptance
++
++The verifier rejects duplicate ZIP members, unexpected ABIs, missing client/
++Flutter/player libraries, and native files whose ELF architecture/type disagrees
++with their ABI directory. Android's `aapt2` checks the package, API 24 and TV
++launcher entry; `apksigner verify` checks the artifact signature. This does not
++attest who owns that certificate or prove runtime loader/playback compatibility.
++
++Offline checks:
++
++```sh
++bash -n scripts/build_android.sh native/build-android.sh
++python3 -m unittest discover -s scripts -p 'test_android_apk.py'
++```
++
++CI runs these packaging-regression checks alongside the existing Flutter tests.
++They use synthetic ELF headers to test rejection behavior; they do not substitute
++for a real cross-build. Independently check at least one built APK per selected
++ABI and compare the regular ARM64 result before accepting a build change.
++
++Record device model/OS/ABIs, install result, native-client connection, remote-only
++navigation, first picture, sound and sustained playback as separate observations.
++Keep casting and native playback results separate. No install, app launch,
++Autonomi client, wallet operation or publication is performed by the build script.
+diff --git a/native/build-android.sh b/native/build-android.sh
+index e450801..69d0fe0 100755
+--- a/native/build-android.sh
++++ b/native/build-android.sh
+@@ -1,10 +1,20 @@
+ #!/usr/bin/env bash
+ # Cross-compile watchit_core for Android and drop the .so where Gradle
+ # packages it. Run before `flutter build apk`. Needs: rustup target
+-# aarch64-linux-android, cargo-ndk, and ANDROID_NDK_HOME (or an SDK with
++# the matching Android Rust target, cargo-ndk, and ANDROID_NDK_HOME (or an SDK with
+ # ndk/ under ANDROID_HOME — source ~/Android/env.sh).
+ set -euo pipefail
+ 
++# No arguments preserves the regular ARM64 release. The Android-only
++# wrapper passes the same selection to Cargo, Flutter and Gradle.
++ABIS=("${@:-arm64-v8a}")
++for abi in "${ABIS[@]}"; do
++    case "$abi" in
++        arm64-v8a|armeabi-v7a) ;;
++        *) echo "Unsupported Android ABI: $abi" >&2; exit 2 ;;
++    esac
++done
++
+ cd "$(dirname "$0")/watchit_core"
+ 
+ export PATH="$HOME/.cargo/bin:$PATH"
+@@ -15,5 +25,10 @@ JNILIBS="../../app/android/app/src/main/jniLibs"
+ 
+ # --platform 24 matches the app's minSdk (Flutter's default): the x0x
+ # tree's if_addrs needs getifaddrs, which Android's libc gained in 24.
+-cargo ndk -t arm64-v8a --platform 24 -o "$JNILIBS" build --release
+-echo "Built: $JNILIBS/arm64-v8a/libwatchit_core.so"
++targets=()
++for abi in "${ABIS[@]}"; do targets+=(-t "$abi"); done
++cargo ndk "${targets[@]}" --platform 24 -o "$JNILIBS" build --locked --release --lib
++for abi in "${ABIS[@]}"; do
++    test -s "$JNILIBS/$abi/libwatchit_core.so"
++    echo "Built: $JNILIBS/$abi/libwatchit_core.so"
++done
+diff --git a/scripts/build_android.sh b/scripts/build_android.sh
+new file mode 100755
+index 0000000..11aa9eb
+--- /dev/null
++++ b/scripts/build_android.sh
+@@ -0,0 +1,77 @@
++#!/usr/bin/env bash
++# Android-only build; no AppImage, upload, wallet or network-client execution.
++set -euo pipefail
++REPO="$(cd "$(dirname "$0")/.." && pwd)"
++abis=arm64-v8a
++test_app=0
++usage() {
++    echo "Usage: $0 [--abis armeabi-v7a|arm64-v8a|armeabi-v7a,arm64-v8a] [--test-app]"
++    echo "Requires Flutter, Python 3, cargo-ndk, Android SDK/NDK and the selected Rust targets."
++    echo "--test-app: .validation application ID, W@tch Test label, local debug certificate."
++}
++while (($#)); do
++    case "$1" in
++        --abis) [[ $# -ge 2 ]] || { usage >&2; exit 2; }; abis=$2; shift 2 ;;
++        --test-app) test_app=1; shift ;;
++        --help|-h) usage; exit 0 ;;
++        *) usage >&2; exit 2 ;;
++    esac
++done
++case "$abis" in
++    arm64-v8a) platforms=android-arm64 ;;
++    armeabi-v7a) platforms=android-arm ;;
++    armeabi-v7a,arm64-v8a|arm64-v8a,armeabi-v7a) platforms=android-arm,android-arm64 ;;
++    *) echo "Unsupported or duplicate ABI selection: $abis" >&2; exit 2 ;;
++esac
++export WATCHIT_ANDROID_ABIS="$abis" WATCHIT_TEST_APP="$test_app"
++: "${ANDROID_HOME:?Set ANDROID_HOME to the Android SDK directory}"
++: "${ANDROID_NDK_HOME:?Set ANDROID_NDK_HOME to the NDK matching Flutter ndkVersion}"
++for tool in flutter python3 cargo; do command -v "$tool" >/dev/null; done
++# Refuse a native/Gradle NDK mismatch before starting an expensive build.
++python3 - <<'PY'
++import json, os, pathlib, re, subprocess
++info = json.loads(subprocess.check_output(['flutter', '--version', '--machine'], text=True))
++extension = pathlib.Path(info['flutterRoot']) / 'packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt'
++expected = re.search(r'val ndkVersion: String = "([^"]+)"', extension.read_text())
++props = pathlib.Path(os.environ['ANDROID_NDK_HOME']) / 'source.properties'
++actual = re.search(r'^Pkg.Revision\s*=\s*(\S+)', props.read_text(), re.M)
++if not expected or not actual or expected[1] != actual[1]:
++    raise SystemExit('Native NDK does not match Flutter/Gradle ndkVersion')
++PY
++build_tools="${WATCHIT_BUILD_TOOLS:-36.0.0}"
++aapt2="$ANDROID_HOME/build-tools/$build_tools/aapt2"
++apksigner="$ANDROID_HOME/build-tools/$build_tools/apksigner"
++test -x "$aapt2"
++test -x "$apksigner"
++mkdir -p "$REPO/dist"
++# Serialize all ABI builds sharing this checkout and its jniLibs/Gradle cache.
++exec 9>"$REPO/dist/android-build.lock"
++flock -n 9 || { echo "Another Android build owns this checkout" >&2; exit 1; }
++cd "$REPO"
++IFS=, read -r -a targets <<< "$abis"
++"$REPO/native/build-android.sh" "${targets[@]}"
++cd "$REPO/app"
++flutter clean
++flutter pub get --enforce-lockfile
++log="$REPO/dist/android-build.log"
++flutter build apk --release --target-platform "$platforms" --split-per-abi 2>&1 | tee "$log"
++if grep -q "Invalid depfile" "$log"; then
++    echo "Invalid depfile: refusing an artifact with possible stale Dart code" >&2
++    exit 1
++fi
++package=io.github.aautonomicc.watchit
++suffix=""
++if [[ $test_app == 1 ]]; then package+=.validation; suffix=-validation; fi
++revision=$(git -C "$REPO" rev-parse HEAD)
++for abi in "${targets[@]}"; do
++    apk="$REPO/app/build/app/outputs/flutter-apk/app-$abi-release.apk"
++    name="Watch-It-${revision:0:8}-$abi$suffix"
++    # No copy is called validated until both Android tools and the native
++    # library check have passed. Receipt states whether source was dirty.
++    python3 "$REPO/scripts/verify_android_apk.py" "$apk" \
++        --abis "$abi" --package "$package" --aapt2 "$aapt2" --apksigner "$apksigner" \
++        --source "$REPO" --output "$REPO/dist/$name.receipt.json"
++    cp "$apk" "$REPO/dist/$name.apk"
++    (cd "$REPO/dist" && sha256sum "$name.apk" > "$name.apk.sha256")
++    echo "Validated artifact: dist/$name.apk"
++done
+diff --git a/scripts/test_android_apk.py b/scripts/test_android_apk.py
+new file mode 100644
+index 0000000..6333a30
+--- /dev/null
++++ b/scripts/test_android_apk.py
+@@ -0,0 +1,104 @@
++"""Offline regression tests for rejecting incorrectly packaged native code."""
++import importlib.util
++from pathlib import Path
++import struct
++import subprocess
++import tempfile
++import unittest
++import warnings
++import zipfile
++
++SCRIPT = Path(__file__).with_name("verify_android_apk.py")
++SPEC = importlib.util.spec_from_file_location("verify_android_apk", SCRIPT)
++VERIFY = importlib.util.module_from_spec(SPEC)
++SPEC.loader.exec_module(VERIFY)
++
++
++def elf(bits=1, machine=40, kind=3):
++    header = bytearray(64)
++    header[:6] = b"\x7fELF" + bytes([bits, 1])
++    struct.pack_into("<HH", header, 16, kind, machine)
++    return header
++
++
++class ApkNativeTests(unittest.TestCase):
++    def setUp(self):
++        self.tmp = tempfile.TemporaryDirectory()
++        self.addCleanup(self.tmp.cleanup)
++        self.apk = Path(self.tmp.name) / "fixture.apk"
++
++    def write(self, abis=("armeabi-v7a",), missing=None, corrupt=None, extra=None):
++        with zipfile.ZipFile(self.apk, "w") as archive:
++            for abi in abis:
++                for lib in VERIFY.REQUIRED - set(missing or []):
++                    payload = elf(*VERIFY.MACHINES[abi])
++                    if lib == "libwatchit_core.so" and corrupt is not None:
++                        payload = corrupt
++                    archive.writestr(f"lib/{abi}/{lib}", payload)
++            if extra:
++                archive.writestr(*extra)
++
++    def test_complete_32_and_64_bit_sets(self):
++        for abis in [("armeabi-v7a",), ("arm64-v8a",), ("armeabi-v7a", "arm64-v8a")]:
++            with self.subTest(abis=abis):
++                self.write(abis)
++                self.assertEqual(set(VERIFY.inspect_native(self.apk, abis)), set(abis))
++
++    def test_missing_client_refused(self):
++        self.write(missing=["libwatchit_core.so"])
++        with self.assertRaisesRegex(ValueError, "missing"):
++            VERIFY.inspect_native(self.apk, ["armeabi-v7a"])
++
++    def test_arm64_hidden_under_armv7_refused(self):
++        self.write(corrupt=elf(2, 183))
++        with self.assertRaisesRegex(ValueError, "Wrong ELF"):
++            VERIFY.inspect_native(self.apk, ["armeabi-v7a"])
++
++    def test_stale_other_abi_refused(self):
++        self.write(extra=("lib/arm64-v8a/libmpv.so", elf(2, 183)))
++        with self.assertRaisesRegex(ValueError, "Unexpected native"):
++            VERIFY.inspect_native(self.apk, ["armeabi-v7a"])
++
++    def test_missing_entire_selected_abi_refused(self):
++        self.write()
++        with self.assertRaisesRegex(ValueError, "ABI set"):
++            VERIFY.inspect_native(self.apk, ["armeabi-v7a", "arm64-v8a"])
++
++    def test_truncated_or_non_library_elf_refused(self):
++        for payload in (b"\x7fELF", elf(kind=2), b"x" * 64):
++            with self.subTest(payload=payload[:6]):
++                self.write(corrupt=payload)
++                with self.assertRaisesRegex(ValueError, "Wrong ELF"):
++                    VERIFY.inspect_native(self.apk, ["armeabi-v7a"])
++
++    def test_duplicate_member_refused(self):
++        self.write()
++        with warnings.catch_warnings():
++            warnings.simplefilter("ignore", UserWarning)
++            with zipfile.ZipFile(self.apk, "a") as archive:
++                archive.writestr("lib/armeabi-v7a/libwatchit_core.so", elf())
++        with self.assertRaisesRegex(ValueError, "Duplicate ZIP"):
++            VERIFY.inspect_native(self.apk, ["armeabi-v7a"])
++
++    def test_invalid_build_selection_fails_before_tools(self):
++        script = str(Path(__file__).with_name("build_android.sh"))
++        for selection in ("x86", "", "armeabi-v7a,armeabi-v7a", "armeabi-v7a,"):
++            result = subprocess.run(["bash", script, "--abis", selection],
++                                    text=True, capture_output=True)
++            self.assertEqual(result.returncode, 2, result.stderr)
++            self.assertIn("Unsupported or duplicate", result.stderr)
++
++    def test_current_and_legacy_aapt2_minimum_api_fields(self):
++        for field in ("minSdkVersion", "sdkVersion"):
++            badging = ("package: name='io.github.aautonomicc.watchit' versionCode='95'\n"
++                       f"{field}:'24'\ntargetSdkVersion:'36'\n"
++                       "leanback-launchable-activity: name='example.MainActivity'\n")
++            self.assertEqual(VERIFY.manifest_fields(badging, "io.github.aautonomicc.watchit"),
++                             ("io.github.aautonomicc.watchit", 24))
++            with self.assertRaisesRegex(ValueError, "minimum Android API"):
++                VERIFY.manifest_fields(badging.replace(":'24'", ":'23'"),
++                                       "io.github.aautonomicc.watchit")
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/scripts/verify_android_apk.py b/scripts/verify_android_apk.py
+new file mode 100755
+index 0000000..5d75013
+--- /dev/null
++++ b/scripts/verify_android_apk.py
+@@ -0,0 +1,114 @@
++#!/usr/bin/env python3
++"""Inspect a release APK without installing it or running its native code."""
++import argparse
++import hashlib
++import json
++import os
++from pathlib import Path
++import re
++import struct
++import subprocess
++import tempfile
++import zipfile
++
++MACHINES = {"armeabi-v7a": (1, 40), "arm64-v8a": (2, 183)}
++REQUIRED = {"libapp.so", "libflutter.so", "libwatchit_core.so", "libmpv.so"}
++
++
++def inspect_native(apk, expected):
++    if not expected or set(expected) - MACHINES.keys() or len(set(expected)) != len(expected):
++        raise ValueError("Unsupported or duplicate expected ABI")
++    found = {}
++    with zipfile.ZipFile(apk) as archive:
++        names = archive.namelist()
++        if len(names) != len(set(names)):
++            raise ValueError("Duplicate ZIP members")
++        for item in archive.infolist():
++            if not item.filename.startswith("lib/") or item.is_dir():
++                continue
++            parts = item.filename.split("/")
++            if len(parts) != 3 or parts[1] not in expected or not parts[2].endswith(".so"):
++                raise ValueError(f"Unexpected native member: {item.filename}")
++            with archive.open(item) as stream:
++                header = stream.read(64)
++            elf_class, machine = MACHINES[parts[1]]
++            if (len(header) < 52 or header[:4] != b"\x7fELF" or
++                    header[4] != elf_class or header[5] != 1 or
++                    struct.unpack_from("<H", header, 18)[0] != machine or
++                    struct.unpack_from("<H", header, 16)[0] != 3):
++                raise ValueError(f"Wrong ELF architecture/type: {item.filename}")
++            found.setdefault(parts[1], {})[parts[2]] = item.file_size
++    if set(found) != set(expected):
++        raise ValueError("APK ABI set differs from the build selection")
++    for abi, libs in found.items():
++        if REQUIRED - libs.keys():
++            raise ValueError(f"{abi} is missing {sorted(REQUIRED - libs.keys())}")
++    return found
++
++
++def run(*args):
++    return subprocess.run(args, check=True, text=True, capture_output=True).stdout.strip()
++
++
++def manifest_fields(badging, expected_package):
++    package = re.search(r"^package: name='([^']+)'", badging, re.M)
++    # Build-tools 36 calls this minSdkVersion; older aapt2 uses sdkVersion.
++    sdk = re.search(r"^(?:minSdkVersion|sdkVersion):'(\d+)'", badging, re.M)
++    if not package or package[1] != expected_package:
++        raise ValueError("Manifest package does not match the requested build")
++    if not sdk or int(sdk[1]) != 24:
++        raise ValueError("Expected the pinned minimum Android API 24")
++    if "leanback-launchable-activity:" not in badging:
++        raise ValueError("Missing TV launcher entry")
++    return package[1], int(sdk[1])
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("apk", type=Path)
++    parser.add_argument("--abis", required=True)
++    parser.add_argument("--package", required=True)
++    parser.add_argument("--aapt2", required=True)
++    parser.add_argument("--apksigner", required=True)
++    parser.add_argument("--source", type=Path)
++    parser.add_argument("--output", type=Path, required=True)
++    args = parser.parse_args()
++    native = inspect_native(args.apk, args.abis.split(","))
++    badging = run(args.aapt2, "dump", "badging", str(args.apk))
++    package, min_sdk = manifest_fields(badging, args.package)
++    signature = run(args.apksigner, "verify", "--verbose", "--print-certs", str(args.apk))
++    certs = re.findall(r"^Signer #\d+ certificate SHA-256 digest: ([0-9a-fA-F]{64})$", signature, re.M)
++    if not certs:
++        raise ValueError("No verified signer certificate reported")
++    with args.apk.open("rb") as stream:
++        digest = hashlib.file_digest(stream, "sha256").hexdigest()
++    receipt = {
++        "artifact": args.apk.name, "bytes": args.apk.stat().st_size,
++        "sha256": digest, "package": package, "min_sdk": min_sdk,
++        "native_libraries": native, "signer_certificate_sha256": certs,
++        "signature_verification": signature, "manifest_badging": badging,
++        "hardware_test": "NOT RUN", "signer_ownership": "NOT ATTESTED",
++    }
++    if args.source:
++        receipt["source_commit"] = run("git", "-C", str(args.source), "rev-parse", "HEAD")
++        receipt["source_dirty"] = bool(run("git", "-C", str(args.source), "status", "--porcelain"))
++        receipt["flutter"] = json.loads(run("flutter", "--version", "--machine"))
++        receipt["rustc"] = run("rustc", "--version")
++        receipt["cargo_ndk"] = run("cargo", "ndk", "--version")
++        ndk = Path(os.environ["ANDROID_NDK_HOME"]) / "source.properties"
++        receipt["ndk_source_properties"] = ndk.read_text().strip()
++        receipt["android_build_tools"] = (Path(args.aapt2).parent / "source.properties").read_text().strip()
++        receipt["gradle_wrapper"] = (args.source / "app/android/gradle/wrapper/gradle-wrapper.properties").read_text().strip()
++        java = subprocess.run(["java", "-version"], check=True, text=True, capture_output=True)
++        receipt["java"] = (java.stdout + java.stderr).strip()
++    args.output.parent.mkdir(parents=True, exist_ok=True)
++    with tempfile.NamedTemporaryFile("w", dir=args.output.parent, delete=False) as tmp:
++        json.dump(receipt, tmp, indent=2)
++        tmp.write("\n")
++        temporary = Path(tmp.name)
++    temporary.replace(args.output)
++    print(f"APK structure/signature verified: {args.apk.name}; hardware test not run")
++
++
++if __name__ == "__main__":
++    main()
