@@ -60,3 +60,12 @@ synthetic state, followed by a separate-provider canary only after review.
 
 Source contract: x0x v0.41.3 API reference, `/ws` `subscribe` and `message`
 frames, and `x0x.groups.public.<group_id>` topic convention.
+
+## CI range receipt
+
+The review branch was amended once before this receipt, so the first hosted
+push supplied a prior tip that the workflow's shallow checkout could not
+resolve. The §7 job therefore failed closed on range computation, while the
+source and test jobs passed. This note is the ordinary descendant pushed after
+that observation; the next push range begins at the visible parent and is
+recheckable without force-updating the branch.
