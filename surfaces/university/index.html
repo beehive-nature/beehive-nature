@@ -62,8 +62,8 @@ footer{max-width:860px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
 </head>
 <body>
 <header>
-  <h1>🎓 Beehive University</h1>
-  <p>the curriculum is the receipts — every lesson this university teaches already exists in the
+  <h1>🎓 <span data-i18n="uni.title">Beehive University</span></h1>
+  <p data-i18n="uni.lede">the curriculum is the receipts — every lesson this university teaches already exists in the
   tree as a verified record, and every lesson ends in a verifiable act: a receipt <i>you</i> produce.
   a graduate holds signed receipts, not a certificate.</p>
 </header>
@@ -71,12 +71,12 @@ footer{max-width:860px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
 
 <section>
   <h2><span data-i18n="h.174">THE CHARTER — what this is, and what it is not</span></h2>
-  <div class="charter">founder, 2026-08-20, on the commission: <i>"yes to the fourth seat, and the
+  <div class="charter" data-i18n="uni.charter.quote">founder, 2026-08-20, on the commission: <i>"yes to the fourth seat, and the
   brief opens by naming what it is not: a content silo. The curriculum is the receipts. Every lesson
   ends in a verifiable act — you learn to read a COA by finding the panel undercount in our own
   material; you learn evidence grading by watching the funding flag fire on our own commissioned
   study. A graduate holds signed receipts, not a certificate."</i></div>
-  <div class="law">this surface is a <b>view</b>, not a store: the fifth dock over what has already
+  <div class="law" data-i18n="uni.charter.law">this surface is a <b>view</b>, not a store: the fifth dock over what has already
   been proven (after BlanguageDOCK over strings, the COA shape over foods, the adapter register over
   chains, the biomass river over products). no lesson exists here whose claim is not receipted
   in-tree — every section links its receipt, and a claim without one does not ship.
@@ -89,30 +89,30 @@ footer{max-width:860px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
 <section>
   <h2><span data-i18n="h.175">THE THREE REGISTERS — one set of facts, three densities</span></h2>
   <div class="tgl" role="group" aria-label="register">
-    <button id="rg-bee" aria-pressed="true" onclick="setReg('bee')">🐝 bee — guided, minimal, generous</button>
-    <button id="rg-raver" aria-pressed="false" onclick="setReg('raver')">🎛 raver — mid-density, vivid</button>
-    <button id="rg-cyper" aria-pressed="false" onclick="setReg('cypherpunk')">⚗ cypherpunk — dense, receipts-forward</button>
+    <button id="rg-bee" aria-pressed="true" onclick="setReg('bee')">🐝 <span data-i18n="uni.reg.bee">bee — guided, minimal, generous</span></button>
+    <button id="rg-raver" aria-pressed="false" onclick="setReg('raver')">🎛 <span data-i18n="uni.reg.raver">raver — mid-density, vivid</span></button>
+    <button id="rg-cyper" aria-pressed="false" onclick="setReg('cypherpunk')">⚗ <span data-i18n="uni.reg.cypher">cypherpunk — dense, receipts-forward</span></button>
   </div>
-  <div class="law">a register is a reading level, not a tier — nobody proves anything to get the bee
+  <div class="law" data-i18n="uni.reg.law">a register is a reading level, not a tier — nobody proves anything to get the bee
   version, and cypherpunk is not a reward. all three render from the same constants; numbers cannot
   diverge. the founder has ruled b-gating for the upper two registers <i>in late beta</i>; until
   gate U-1's reading lands, nothing here is gated — holding is not spending.</div>
-  <div class="law" style="margin-top:8px">▾ corpus law, live — the **three roles** (founder-ruled
+  <div class="law" style="margin-top:8px" data-i18n="uni.reg.corpus">▾ corpus law, live — the **three roles** (founder-ruled
   2026-08-20): father language (the pivot), mother language (**chosen** — adopted cultures count,
   young ones too), student language(s) (in active study — exposure is the point). the status labels
   below are corpus records: they render in every role you set, machine-drafted ⚙ until a community
   attests; a language with no docked rendering says so by name. local-first, shared with
   <a href="../btranslated.html">bTranslated</a>.</div>
   <div style="margin-top:6px">
-    <label style="font-size:10px;color:var(--dim)">father language
+    <label style="font-size:10px;color:var(--dim)"><span data-i18n="uni.father">father language</span>
       <select id="father" style="background:#0a0f0b;color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:5px 9px;font:11px 'IBM Plex Mono',monospace">
         <option value="en">English (en)</option><option value="es">Español (es)</option>
         <option value="hi">हिन्दी (hi)</option><option value="cmn">中文 · 普通话 (cmn)</option>
         <option value="ru">Русский (ru)</option><option value="ar">العربية (ar)</option>
       </select></label>
-    <label style="font-size:10px;color:var(--dim);margin-left:12px">mother language — chosen, not native
+    <label style="font-size:10px;color:var(--dim);margin-left:12px"><span data-i18n="uni.mother">mother language — chosen, not native</span>
       <input id="mother" placeholder="e.g. latviešu — any language, the corpus is gateless" size="26" style="background:#0a0f0b;color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:5px 9px;font:11px 'IBM Plex Mono',monospace"></label>
-    <label style="font-size:10px;color:var(--dim);margin-left:12px">student language(s) — comma-separated
+    <label style="font-size:10px;color:var(--dim);margin-left:12px"><span data-i18n="uni.students">student language(s) — comma-separated</span>
       <input id="students" placeholder="e.g. ru, th" size="14" style="background:#0a0f0b;color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:5px 9px;font:11px 'IBM Plex Mono',monospace"></label>
     <div id="corpusChips" style="margin-top:8px"></div>
   </div>
@@ -121,8 +121,8 @@ footer{max-width:860px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
 <div id="courses"></div>
 
 <section>
-  <h2>THE QUESTS — a meal plan for a day, a week, a month, a year <span class="badge">bFood §7 docked here</span></h2>
-  <div class="law">the <a href="../bfood.html">bFood Hexagon</a> promises its quests are "built and checked in
+  <h2><span data-i18n="uni.quests.h">THE QUESTS — a meal plan for a day, a week, a month, a year</span> <span class="badge" data-i18n="uni.quests.badge">bFood §7 docked here</span></h2>
+  <div class="law" data-i18n="uni.quests.law">the <a href="../bfood.html">bFood Hexagon</a> promises its quests are "built and checked in
   Beehive University" — this is that room. <b>Hemp hearts are hardwired and irreplacable</b> (founder
   ruling, on the basket card itself): the anchor serving is 1.25 g per kg of body weight (SERVING-BASIS-1,
   the house basis), and no quest exists without it. every rung is a different strength of evidence —
@@ -131,19 +131,19 @@ footer{max-width:860px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   <i>you</i> (tier 3). the ladder lives in full on the Hexagon; the receipts live here.</div>
   <div class="ex">
     <h3>🎯 <span data-i18n="h.176">COMPOSE A QUEST — the plan is arithmetic; anyone can recheck it</span></h3>
-    <div class="q">your body weight (kg): <input type="number" id="q-wt" value="80" style="background:#0d1410;color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:4px 7px;font:12px 'IBM Plex Mono',monospace;width:90px">
+    <div class="q"><span data-i18n="uni.q.wt">your body weight (kg):</span> <input type="number" id="q-wt" value="80" style="background:#0d1410;color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:4px 7px;font:12px 'IBM Plex Mono',monospace;width:90px">
     <div class="tgl" role="group" aria-label="quest span" style="margin-top:8px">
-      <button id="q-day" aria-pressed="true" onclick="setQ('day')">a day</button>
-      <button id="q-week" aria-pressed="false" onclick="setQ('week')">a week</button>
-      <button id="q-month" aria-pressed="false" onclick="setQ('month')">a month</button>
-      <button id="q-year" aria-pressed="false" onclick="setQ('year')">a year</button>
+      <button id="q-day" aria-pressed="true" onclick="setQ('day')" data-i18n="uni.q.day">a day</button>
+      <button id="q-week" aria-pressed="false" onclick="setQ('week')" data-i18n="uni.q.week">a week</button>
+      <button id="q-month" aria-pressed="false" onclick="setQ('month')" data-i18n="uni.q.month">a month</button>
+      <button id="q-year" aria-pressed="false" onclick="setQ('year')" data-i18n="uni.q.year">a year</button>
     </div></div>
     <div class="fb ok" id="q-out" style="display:block"></div>
     <div class="law" id="q-verify"></div>
-    <button class="gold" id="q-compose">compose quest receipt</button>
+    <button class="gold" id="q-compose" data-i18n="uni.q.compose">compose quest receipt</button>
     <div class="rline" id="q-line"></div>
   </div>
-  <div class="law" style="margin-top:10px"><b>how progress is documented, monitored, measured, and
+  <div class="law" style="margin-top:10px" data-i18n="uni.q.progress"><b>how progress is documented, monitored, measured, and
   independently verified:</b> <b>documented</b> — the plan is a receipt you compose and hold; this page
   has no account, no server, no database, and the hive never receives your food log.
   <b>monitored</b> — by nobody, by design; an operator who watches your intake is a party who can be
@@ -161,16 +161,16 @@ footer{max-width:860px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   <div class="prose" id="gradProse"></div>
   <div class="ex">
     <h3>🎯 <span data-i18n="h.178">THE FIFTH ACT — publish a review receipt on the Royal Review deck</span></h3>
-    <div class="q">this is bee-level graduation: you have read the page, run the acts, and now you
+    <div class="q" data-i18n="uni.grad.act">this is bee-level graduation: you have read the page, run the acts, and now you
     contribute a verifiable artefact. the button composes the review line below — take it to
     <a href="../review.html">the Royal Review</a>, bind a passkey, sign, and publish by whichever rail
     you already hold. this page holds no keys, posts nothing, and mints nothing: the signed receipt
     <b>is</b> the credential.</div>
-    <button class="gold" onclick="gradLine()">compose graduation review line</button>
+    <button class="gold" onclick="gradLine()" data-i18n="uni.grad.compose">compose graduation review line</button>
     <button id="gcp" style="display:none">📋 copy</button>
     <div class="rline" id="gradOut"></div>
   </div>
-  <div class="law" style="margin-top:8px">gate U-3, ruled by the founder's own words this session:
+  <div class="law" style="margin-top:8px" data-i18n="uni.grad.law">gate U-3, ruled by the founder's own words this session:
     a graduate holds signed receipts, not a certificate — nothing mints, because minting invites
     credential inflation and the receipt is already unforgeable. recorded in
     <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/RECEIPT_BEEHIVE_UNIVERSITY_LANDING_2026-08-20.md">the landing receipt</a>.</div>
@@ -178,7 +178,7 @@ footer{max-width:860px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
 
 <section id="transcript">
   <h2><span data-i18n="h.179">THE TRANSCRIPT — receipts you produced this session</span></h2>
-  <div class="law">five acts, five lines, one transcript — in the same <b>[bX review]</b> grammar
+  <div class="law" data-i18n="uni.trans.law">five acts, five lines, one transcript — in the same <b>[bX review]</b> grammar
   the Royal Guard already verifies. compose them above; they collect here. signing happens at the
   deck, not here. (the transcript lives in this browser only — localStorage, never a server.)</div>
   <div id="tlines"></div>
@@ -188,37 +188,49 @@ footer{max-width:860px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
 <section>
   <h2><span data-i18n="h.180">GATES — open questions are exhibits, not embarrassments</span></h2>
   <table class="gates">
-    <tr><th></th><th>question</th><th>state</th></tr>
-    <tr><td class="n">U-1</td><td>b-gating the upper two registers vs CD-29's "b is never a redemption
+    <tr><th></th><th data-i18n="uni.gates.q">question</th><th data-i18n="uni.gates.state">state</th></tr>
+    <tr><td class="n">U-1</td><td data-i18n="uni.gates.u1.q">b-gating the upper two registers vs CD-29's "b is never a redemption
       ticket" — holding is not spending, so it likely does not collide, but a seat may not decide it</td>
-      <td class="n" id="g-u1">OPEN — reading owed to the founder</td></tr>
-    <tr><td class="n">U-2</td><td>the seat's name (this page carries the founder's own name for the
+      <td class="n" id="g-u1" data-i18n="uni.gates.u1.s">OPEN — reading owed to the founder</td></tr>
+    <tr><td class="n">U-2</td><td data-i18n="uni.gates.u2.q">the seat's name (this page carries the founder's own name for the
       section, "Beehive University"; the seat label is his to give) · wing vs own repo — applied as a
       wing of <a href="../index.html">the surfaces</a> per the commission's recommendation, because a
       separate repo would tempt this into the content silo it exists not to be</td>
-      <td class="n" id="g-u2">OPEN — name owed to the founder</td></tr>
-    <tr><td class="n">U-3</td><td>does a completed course mint anything on-chain?</td>
-      <td class="n" id="g-u3">RULED — the receipt is the whole credential (founder, 2026-08-20)</td></tr>
+      <td class="n" id="g-u2" data-i18n="uni.gates.u2.s">OPEN — name owed to the founder</td></tr>
+    <tr><td class="n">U-3</td><td data-i18n="uni.gates.u3.q">does a completed course mint anything on-chain?</td>
+      <td class="n" id="g-u3" data-i18n="uni.gates.u3.s">RULED — the receipt is the whole credential (founder, 2026-08-20)</td></tr>
   </table>
-  <div class="law" style="margin-top:8px">collisions are flagged, never resolved silently — that is
+  <div class="law" style="margin-top:8px" data-i18n="uni.gates.law">collisions are flagged, never resolved silently — that is
   house law, and this table is it working.</div>
 </section>
 
 </main>
 <footer>
-  doctrine: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/COMMISSION_BEEHIVE_UNIVERSITY_2026-08-20.md">COMMISSION_BEEHIVE_UNIVERSITY_2026-08-20</a> ·
-  landing receipt: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/RECEIPT_BEEHIVE_UNIVERSITY_LANDING_2026-08-20.md">RECEIPT_BEEHIVE_UNIVERSITY_LANDING_2026-08-20</a> ·
-  inherited: <a href="../hardware/build.html">the producer ladder</a> · <a href="../hardware/lab.html">the lab charter</a> ·
-  <a href="../blight/museum.html">the museum's show-the-errors doctrine</a> · <a href="../bigen.html">BiGen's methodology</a><br>
-  built by zCode (GLM 5.3), the university seat by founder direction · Seat 3 verifies on landing · AGPL-3.0-only ·
-  <a href="../index.html">← the hive</a><br>
-  don't trust these pages either — every claim links its receipt. Verify.
+  <span data-i18n="uni.foot.doctrine">doctrine:</span> <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/COMMISSION_BEEHIVE_UNIVERSITY_2026-08-20.md">COMMISSION_BEEHIVE_UNIVERSITY_2026-08-20</a> ·
+  <span data-i18n="uni.foot.landing">landing receipt:</span> <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/RECEIPT_BEEHIVE_UNIVERSITY_LANDING_2026-08-20.md">RECEIPT_BEEHIVE_UNIVERSITY_LANDING_2026-08-20</a> ·
+  <span data-i18n="uni.foot.inherited">inherited:</span> <a href="../hardware/build.html" data-i18n="uni.foot.producer">the producer ladder</a> · <a href="../hardware/lab.html" data-i18n="uni.foot.lab">the lab charter</a> ·
+  <a href="../blight/museum.html" data-i18n="uni.foot.museum">the museum's show-the-errors doctrine</a> · <a href="../bigen.html" data-i18n="uni.foot.bigen">BiGen's methodology</a><br>
+  <span data-i18n="uni.foot.built">built by zCode (GLM 5.3), the university seat by founder direction · Seat 3 verifies on landing · AGPL-3.0-only ·</span>
+  <a href="../index.html" data-i18n="law.hive">← the hive</a><br>
+  <span data-i18n="uni.foot.verify">don't trust these pages either — every claim links its receipt. Verify.</span>
 </footer>
 
-<script src="../tour.js?v=41"></script>
+<script src="../tour.js?v=42"></script>
 <script>
 (function(){
 var $=function(i){return document.getElementById(i);};
+function langText(key, fallback){
+  return (window.BNRLanguage && window.BNRLanguage.text(key, fallback)) || fallback;
+}
+function bindKey(el, key, html){
+  if(!el || !key) return;
+  el.setAttribute('data-i18n', key);
+  delete el.dataset.i18nEn;
+  delete el.dataset.i18nRich;
+  var s=langText(key, html);
+  if(s.indexOf('<')!==-1 || (html&&html.indexOf('<')!==-1)) el.innerHTML=s;
+  else el.textContent=s;
+}
 
 /* ===== THE CONSTANTS — single source; every prose register interpolates these ===== */
 var K={
@@ -531,10 +543,10 @@ COURSES.forEach(function(c){
   }
   var status='<span id="st-'+c.id+'"></span>';
   var srcLink='<a href="'+c.srcl+'">'+c.src+'</a>';
-  var html='<h2>'+c.glyph+' '+c.name.toUpperCase()+' · '+status+'</h2>'
-    +'<div class="law">source of record: '+srcLink+'</div>'
+  var html='<h2>'+c.glyph+' <span class="cname">'+c.name.toUpperCase()+'</span> · '+status+'</h2>'
+    +'<div class="law"><span class="srclbl">source of record:</span> '+srcLink+'</div>'
     +'<div class="prose" id="prose-'+c.id+'"></div>'
-    +'<div class="acts"><div class="ex" id="ex-'+c.id+'"><h3>'+c.act.h+'</h3><div class="q">'+c.act.q+'</div>';
+    +'<div class="acts"><div class="ex" id="ex-'+c.id+'"><h3 class="acth">'+c.act.h+'</h3><div class="q actq">'+c.act.q+'</div>';
   var a=c.act;
   if(a.kind==='check'){
     html+='<div id="ex-'+c.id+'-opts">';
@@ -547,7 +559,7 @@ COURSES.forEach(function(c){
         +'<input type="number" id="ex-'+c.id+'-num" value="'+a.followInput+'"> mg/kg'
         +'<div class="fb" id="ex-'+c.id+'-fc"></div>';
     }
-    html+='<button class="gold" id="ex-'+c.id+'-go">check the panel</button>';
+    html+='<button class="gold" id="ex-'+c.id+'-go">check the panel</button>'; /* label bound after mount */
   }
   if(a.kind==='radio'||a.kind==='radio3'){
     html+='<div id="ex-'+c.id+'-opts">';
@@ -569,6 +581,15 @@ COURSES.forEach(function(c){
     +'<div class="rline" id="line-'+c.id+'"></div>'
     +'</div></div>';
   sec.innerHTML=html; host.appendChild(sec);
+  bindKey(sec.querySelector('.cname'), 'uni.'+c.id+'.name', c.name.toUpperCase());
+  bindKey(sec.querySelector('.srclbl'), 'uni.source', 'source of record:');
+  bindKey(sec.querySelector('.acth'), 'uni.'+c.id+'.act.h', c.act.h);
+  var go=$('ex-'+c.id+'-go');
+  if(go){
+    var goKey=a.kind==='check'?'uni.act.check':a.kind==='scale'?'uni.act.scale':a.kind==='palette'?'uni.act.palette':'uni.act.answer';
+    var goEn=a.kind==='check'?'check the panel':a.kind==='scale'?'log the scaling map':a.kind==='palette'?'restore validated order':'answer';
+    bindKey(go, goKey, goEn);
+  }
 
   /* wire the act */
   if(a.kind==='check'){
@@ -635,11 +656,10 @@ COURSES.forEach(function(c){
 
 /* ===== graduation ===== */
 function renderGrad(){
-  $('gradProse').innerHTML = REG==='bee'
-   ? 'You graduate by contributing, not by completing. Five acts taught you five ways to check a claim — panel, bar, brake, witness, pair. The graduation act is the smallest real contribution: <b>a review receipt, signed, published</b>. Nobody can print it for you and nobody can fake it — it is the same attestation grammar the Royal Guard already runs.'
-   : REG==='raver'
-   ? 'Five acts, five instruments: the panel (what was measured vs what the word implies), the bar (which kind of requirement, and whether it scales), the brake (the sentence that makes an alarm honest), the witness (two oracles or it did not happen), the pair (colour judged on its ground, as a set). Graduation = the smallest verifiable contribution: <b>sign a review receipt and publish it</b>. The receipt is the credential — nobody can print it, nobody can fake it.'
-   : 'Five instruments, receipted: panel-completeness (2 of a family inside the word "total"), requirement ontology (EAR/RDA/AI/UL/DV + the scaling split + definitional shortfalls), the brake law (intake-adequacy ≠ status; both true, both published), the witness law (two independent oracles; failed fetch ≠ value; truncation shapes known), the pair law (fg⊗bg composited; validated sets; reorder = revalidate). Graduation: emit a signed <b>[bX review]</b> on the deck — Ed25519 over the line, verifiable by arithmetic, publishable on any rail you hold. The signature <i>is</i> the diploma.';
+  var bee='You graduate by contributing, not by completing. Five acts taught you five ways to check a claim — panel, bar, brake, witness, pair. The graduation act is the smallest real contribution: <b>a review receipt, signed, published</b>. Nobody can print it for you and nobody can fake it — it is the same attestation grammar the Royal Guard already runs.';
+  var raver='Five acts, five instruments: the panel (what was measured vs what the word implies), the bar (which kind of requirement, and whether it scales), the brake (the sentence that makes an alarm honest), the witness (two oracles or it did not happen), the pair (colour judged on its ground, as a set). Graduation = the smallest verifiable contribution: <b>sign a review receipt and publish it</b>. The receipt is the credential — nobody can print it, nobody can fake it.';
+  var cypher='Five instruments, receipted: panel-completeness (2 of a family inside the word "total"), requirement ontology (EAR/RDA/AI/UL/DV + the scaling split + definitional shortfalls), the brake law (intake-adequacy ≠ status; both true, both published), the witness law (two independent oracles; failed fetch ≠ value; truncation shapes known), the pair law (fg⊗bg composited; validated sets; reorder = revalidate). Graduation: emit a signed <b>[bX review]</b> on the deck — Ed25519 over the line, verifiable by arithmetic, publishable on any rail you hold. The signature <i>is</i> the diploma.';
+  bindKey($('gradProse'), 'uni.grad.'+REG, REG==='bee'?bee:REG==='raver'?raver:cypher);
 }
 function gradLine(){
   var line='[bX review] ✅ works university/index.html — https://beehive-nature.github.io/beehive-nature/surfaces/university/index.html — from: fp:(bind at the deck) — note: graduate walk — '+(COURSES.filter(function(c){return done[c.id];}).length)+'/'+TOTAL_ACTS+' acts receipted, gates read';
@@ -686,6 +706,7 @@ window.setReg=setReg; window.gradLine=gradLine; window.setQ=setQ; // onclick-att
 $('q-wt').addEventListener('input',renderQ);
 $('q-compose').addEventListener('click',composeQuest);
 renderCorpus(); renderReg(); renderStatus(); renderGrad(); renderQ();
+document.addEventListener('blang', function(){ renderReg(); renderGrad(); });
 /* restore prior-session lines without re-marking done courses */
 COURSES.forEach(function(c){ if(done[c.id]) addTranscript(c.act.rline(),c); else { var l=$('line-'+c.id); if(l) l.style.display='none'; } });
 })();
