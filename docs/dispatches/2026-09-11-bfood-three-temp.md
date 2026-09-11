@@ -72,6 +72,32 @@ Existing `h.022`–`h.032` headings stay on the instrument.
 - `node e2e/estate-source.mjs`
 - browser first-paint screenshots of the three registers at the 8765 poke
 
+## Re-poke receipts (same day, 8765)
+
+Served `surfaces/` at `http://127.0.0.1:8765/bfood.html`. Confirmed
+`/surfaces/register.js` is 404 on that poke (the old alias) and
+`/register.js` + `/lang.js` are 200. Playwright-core against system
+Chrome, `localStorage` cleared, 1280×800:
+
+- New bee: `.sub[data-reg=cypherpunk]` `display:none`; instrument
+  `display:none`; above-fold ZERO Lancet / GRADE / PDCAAS / mortality /
+  height-cm dials; `#bregctl` and `#blangctl` painted; calm + takeaway
+  lead + Draw my hexagon.
+- Draw my hexagon: seven-cell calm drawing; still no dials / ledger /
+  GRADE.
+- Open the inputs: five body dials; instrument (hex/ledger/GRADE) still
+  hidden.
+- Raver: feeling line on; reverence / consciousness off; instrument
+  hidden.
+- Touch the drawing: consciousness on, then the New bee takeaway stack.
+- Cypherpunk: instrument + cypher masthead on; sources default open;
+  PDCAAS / Lancet / GRADE / 40-cell ledger intact.
+- Switch back to New bee: cypher masthead stays `display:none`. Beat
+  memory keeps the inputs layer when returning after that tap.
+
+40/40 poke assertions PASS. Browser walk New bee → draw → inputs →
+Raver → Touch the drawing → Cypherpunk → New bee matches.
+
 Skipped this beat: fleet attestation of the new keys, WELLness adapter,
 any health-outcome rewrite, live USDA / Lancet re-fetch (composition
 and GRADE rows are unchanged).
