@@ -56,7 +56,13 @@
 
 if(typeof document!=='undefined') (function(){
   if(document.getElementById('blangctl')) return;
-  var R=location.pathname.indexOf('/beehive-nature/')===0?'/beehive-nature/surfaces/':'/surfaces/';
+  /* Keep language assets usable in a checkout opened with file://.  Published
+     surfaces retain the estate-root route; local files resolve beside this
+     script, where the corpus is bundled. */
+  var current=document.currentScript;
+  var R=location.protocol==='file:'
+    ? new URL('.', current&&current.src||location.href).href
+    : (location.pathname.indexOf('/beehive-nature/')===0?'/beehive-nature/surfaces/':'/surfaces/');
   // Founder priority, 2026-09-06. Ordering does not change the saved/default language.
   var LANGS=[
     ["ru","Русский"],

@@ -24,7 +24,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SKAISTS watch room · skaists.buzz</title>
-<link rel="stylesheet" href="/tokens.css">
+<script>document.write('<link rel="stylesheet" href="' + (location.protocol === 'file:' ? 'tokens.css' : '/tokens.css') + '">');</script>
 <style>
   :root { color-scheme: dark; }
   * { box-sizing: border-box; margin: 0; }
@@ -245,7 +245,7 @@
   .hidden { display: none !important; }
 </style>
 </head>
-<body data-experience="watch" data-bee-theme="shared">
+<body data-experience="watch" data-bee-theme="shared" data-reg="bee">
 <header>
   <span class="hex">estate · live</span>
   <h1>SKAISTS watch room</h1>
@@ -380,7 +380,7 @@ ticker      curl -X POST http://127.0.0.1:18094/live/ticker/general \
 read-only · pause-not-kill · tokens.css only — the estate's own palette.
   </span><a href="jams.html" style="color:var(--gold)">join SKAISTS mUsiC · PLUR →</a></footer>
 
-<script src="/watch/hls.min.js"></script>
+<script>if (location.protocol !== 'file:') document.write('<script src="/watch/hls.min.js"><\/script>');</script>
 <script>
 'use strict';
 /* ── exact decimals on strings ("1.2000 A" → BigInt scale 1e4 for A) ———
@@ -398,7 +398,16 @@ function fmtA(n) { var s = fmtU(n); return s + ' A'; }
 
 const ROOM = 'general';
 const $ = (id) => document.getElementById(id);
+const LOCAL_PREVIEW = location.protocol === 'file:';
 const video = $('v'), veil = $('veil');
+/* A local file has no site-root /join/ route.  Keep the preview legible and
+   explicit instead of showing a browser error tile; the published dApp keeps
+   the real same-origin room iframe above. */
+if (location.protocol === 'file:') {
+  const frame = $('roomframe');
+  frame.srcdoc = '<!doctype html><meta charset="utf-8"><body style="margin:0;padding:28px;font:16px/1.5 ui-monospace,monospace;background:#111;color:#d9e4d6"><strong>room preview</strong><p style="color:#9eaaa0">Serve this surface from one of the estate domains to open the live room. The local file preview keeps the meter and audience views available.</p></body>';
+  frame.title = 'local room preview';
+}
 const state = {
   sess: null, hls: null, mode: 'idle', // idle|live|paused
   startedAt: 0, playedAt: 0, latSum: 0, latN: 0, latLast: null, kbps: null,
@@ -422,20 +431,25 @@ function watchManifest(envelope) {
   if (!m.admission || m.admission.policy_id !== cp.policy_id || !['disabled', 'capped'].includes(m.admission.payment) || !['none', 'trezor'].includes(m.admission.approval)) throw new Error('manifest admission refused');
   return envelope;
 }
-fetch('../fixtures/connect-store-manifest-envelope-v1.json', { cache: 'no-store' }).then((r) => { if (!r.ok) throw new Error('manifest fetch refused'); return r.json(); }).then(watchManifest).then((envelope) => {
-  const m = envelope.manifest;
-  $('manifest-state').textContent = 'verified';
-  $('manifest-state').className = 'manifest-state ok';
-  $('manifest-copy').textContent = 'checkpoint accepted; receiver handoff remains bounded and read-only';
-  $('manifest-channel').textContent = m.channel;
-  $('manifest-sequence').textContent = String(m.sequence);
-  $('manifest-checkpoint').textContent = watchManifestRef(m.checkpoint.id);
-  $('manifest-items').textContent = `${m.encrypted_items.length} encrypted`;
-}).catch((error) => {
-  $('manifest-state').textContent = 'refused';
-  $('manifest-state').className = 'manifest-state bad';
-  $('manifest-copy').textContent = error.message + '; no room state changed';
-});
+if (LOCAL_PREVIEW) {
+  $('manifest-state').textContent = 'offline preview';
+  $('manifest-copy').textContent = 'serve this surface from an estate domain to verify the shared checkpoint';
+} else {
+  fetch('../fixtures/connect-store-manifest-envelope-v1.json', { cache: 'no-store' }).then((r) => { if (!r.ok) throw new Error('manifest fetch refused'); return r.json(); }).then(watchManifest).then((envelope) => {
+    const m = envelope.manifest;
+    $('manifest-state').textContent = 'verified';
+    $('manifest-state').className = 'manifest-state ok';
+    $('manifest-copy').textContent = 'checkpoint accepted; receiver handoff remains bounded and read-only';
+    $('manifest-channel').textContent = m.channel;
+    $('manifest-sequence').textContent = String(m.sequence);
+    $('manifest-checkpoint').textContent = watchManifestRef(m.checkpoint.id);
+    $('manifest-items').textContent = `${m.encrypted_items.length} encrypted`;
+  }).catch((error) => {
+    $('manifest-state').textContent = 'refused';
+    $('manifest-state').className = 'manifest-state bad';
+    $('manifest-copy').textContent = error.message + '; no room state changed';
+  });
+}
 
 /* ── the four audit cells ────────────────────────────────────────────── */
 // 255 (and any unknown) = the record does not carry a verdict yet → nectar
@@ -449,6 +463,7 @@ function litAudit(a) {
 
 /* ── session read (through the door — the door is the read-only relay) ── */
 async function readSession(id) {
+  if (LOCAL_PREVIEW) return null;
   try {
     const r = await fetch('/live/session/' + id + '.json', { cache: 'no-store' });
     if (!r.ok) return null;
@@ -601,6 +616,7 @@ $('sess').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('go').cl
 
 /* stream health + ticker + session heartbeat */
 async function pollHealth() {
+  if (LOCAL_PREVIEW) { say('local preview — serve to connect', false); return; }
   try {
     const r = await fetch('/live/health', { cache: 'no-store' });
     const j = await r.json();
@@ -609,6 +625,7 @@ async function pollHealth() {
   } catch { say('the door is unreachable', true); }
 }
 async function pollTicker() {
+  if (LOCAL_PREVIEW) return;
   try {
     const r = await fetch('/live/ticker/' + ROOM + '.json', { cache: 'no-store' });
     if (!r.ok) return;

@@ -1,6 +1,12 @@
 (function(){
   if(document.getElementById('tbar'))return;
-  var R=location.pathname.indexOf('/beehive-nature/')===0?'/beehive-nature/surfaces/':'/surfaces/';
+  /* Published dApps live at a site-root path.  A developer can also open a
+     surface directly from its checkout with file://; in that mode the site
+     root does not exist, so riders must resolve beside this script instead. */
+  var current=document.currentScript;
+  var R=location.protocol==='file:'
+    ? new URL('.', current&&current.src||location.href).href
+    : (location.pathname.indexOf('/beehive-nature/')===0?'/beehive-nature/surfaces/':'/surfaces/');
   var L=[['⌂',''],
     ['beam','blight/demo.html'],['fLeeT','blight/index.html'],['museum','blight/museum.html'],
     '—',
