@@ -30,6 +30,23 @@ Re-poke criteria: New bee ZERO cypher masthead leak; `#bregctl` and
 `#blangctl` painted on first paint. Raver / Cypherpunk first paints
 unchanged in substance.
 
+## Re-poke receipts (same day, after the shell fix)
+
+Served `surfaces/` at `http://127.0.0.1:8765/bearth.html`. Confirmed
+`/surfaces/register.js` is 404 on that poke (the old alias) and
+`/register.js` + `/lang.js` are 200. Playwright-core against system
+Chrome, `localStorage` cleared, 1280×800:
+
+- New bee: `.sub[data-reg=cypherpunk]` `display:none`; above-fold
+  ZERO N₂O/IPCC/REFUTED; `#bregctl` 400×44 at top; `#blangctl` 181×44
+  inside `[data-language-host]`; fraction-led cropland + deepen gates.
+- Raver: feeling line on; consciousness off; breg+blang painted.
+- Cypherpunk: instrument + cypher masthead on; breg+blang painted.
+
+15/15 poke assertions. Browser walk (view switch New bee → Raver →
+Cypherpunk → New bee) matches. Skipped: live FAOSTAT pull, fleet
+attestation of the new keys.
+
 This is a presentation adapter, not a new model. The demand arithmetic,
 FAO cropland denominator (1,581 Mha), recovery/yield defaults, N₂O
 emission-factor dial, refutation tables and source list are the same
