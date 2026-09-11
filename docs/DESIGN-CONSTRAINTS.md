@@ -119,6 +119,46 @@
 
 ---
 
+## 13. The matriarch is the reference person for the default experience
+
+**FOUNDER RULING — 2026-09-06:** “my mother is the living matriarch queen so the
+frontend UI/UX is always going to be the most valuble thing to me.”
+
+She is a lifelong graphic artist who values the clarity and familiarity she
+finds in Apple products. **Frontend usability is the founder's highest product
+priority.** New bee starts with familiar words, a few meaningful choices,
+readable text, generous controls and a clear route home. Reveal the project's
+depth when someone wants it. Respect the reader's experience and artistic
+judgment; plain language must remain adult and dignified.
+
+Raver and Cypherpunk offer different expression and depth on the same surface,
+under rule 5's identical-facts and identical-access requirement. A simpler
+arrival page does not by itself make a difficult downstream tool usable.
+
+Judge the experience by whether a person can find something they value, take
+an intended action and return comfortably. Automated checks establish their
+named properties; they do not prove that the matriarch has understood,
+enjoyed or approved an interface. Record observed feedback and untested
+assumptions separately. This rule sets the design priority, not a new
+mandatory approval or credential gate.
+
+**FOUNDER CONTINUATION — 2026-09-07:** New bee backgrounds and text must keep
+matching the approved hub as the estate grows. Reuse the common page theme
+and its readable type scale; do not ship a new dark 9–13px reading surface
+under a light New bee toolbar. Migrate existing tool families with explicit
+adapters: background, text, controls and any chart/HUD palette form a unit.
+Keep semantic hue meanings and evidence intact. Record unconverted families
+as pending instead of calling a toolbar a completed skin. The original art
+and frozen-art rules still hold. The old density ceiling of 14px is not the
+New bee reading target; regular reading text is at least 16px, with 14px for
+secondary labels. This is a shared implementation standard, not a recurring
+agent job or a new approval gate.
+
+The first implementation and its verification limits are recorded in
+[`2026-09-06-skaists-frontdoor.md`](dispatches/2026-09-06-skaists-frontdoor.md).
+
+---
+
 ## The one-sentence version
 
 > **Show what is true, show what is missing and why, never let colour carry meaning alone, never let a purchase or a credential stand between a person and the commons — and everything else is yours.**

@@ -12,45 +12,91 @@
    - names are names (bzDiD, rust, Base, b4b) — the pointer principle: never translated.
    RTL: Arabic, Hebrew and Farsi set dir=rtl on the document. Full RTL layout mirroring
    remains the design seat's D-13 lane; text direction lands now, honestly labeled beta. */
-(function(){
+/* One census for the reader and CI. Node imports only this dependency-free API;
+   the UI bootstrap below runs only in a document. No extra browser request. */
+(function(root){
+  function measureVisibleText(doc) {
+    // The unit remains a laid-out leaf with lettered text, including short labels.
+    // This is not a census of attributes, canvas/iframe content or direct text
+    // alongside child elements. Do not turn this scoped count into a full-page claim.
+    var chrome='#tbar,#adOrb,#adPanel,#adWin,#tbarMore,#railsbadge,#bregbar,#bregctl,#blangctl,#veil,#bandwrap';
+    var out={visible:0,keyed:0,keys:[],unkeyedSamples:[]};
+    doc.querySelectorAll('body *').forEach(function(n){
+      if(n.children.length || n.closest(chrome)) return;
+      if(['SCRIPT','STYLE','NOSCRIPT','CANVAS','SVG','PATH','OPTION'].includes(n.tagName)) return;
+      var text=(n.textContent||'').trim();
+      if(!/\p{L}/u.test(text)) return;
+      var rect=n.getBoundingClientRect();
+      if(rect.width===0 && rect.height===0) return;
+      out.visible++;
+      var holder=n.closest('[data-i18n]');
+      if(holder){out.keyed++;out.keys.push(holder.getAttribute('data-i18n'));}
+      else if(out.unkeyedSamples.length<3) out.unkeyedSamples.push(text.slice(0,60));
+    });
+    return out;
+  }
+  function summarizeCoverage(measured, strings, lang) {
+    var out={visible:measured.visible,keyed:measured.keyed,filled:0,
+      unkeyed:measured.visible-measured.keyed,emptyCell:0,missingKey:0,emptySamples:[]};
+    measured.keys.forEach(function(key){
+      // English is the source already carried by the document, even offline.
+      if(lang==='en'){out.filled++;return;}
+      var row=strings && Object.prototype.hasOwnProperty.call(strings,key) ? strings[key] : null;
+      if(!row){out.missingKey++;return;}
+      var cell=row[lang];
+      if(typeof cell==='string' && cell.trim()) out.filled++;
+      else {out.emptyCell++;if(out.emptySamples.length<3) out.emptySamples.push(key);}
+    });
+    return out;
+  }
+  var api={measureVisibleText:measureVisibleText,summarizeCoverage:summarizeCoverage};
+  if(typeof module==='object' && module.exports) module.exports=api;
+  if(typeof window==='object') root.BNRLanguageCoverage=api;
+})(typeof window==='object'?window:globalThis);
+
+if(typeof document!=='undefined') (function(){
   if(document.getElementById('blangctl')) return;
   var R=location.pathname.indexOf('/beehive-nature/')===0?'/beehive-nature/surfaces/':'/surfaces/';
+  // Founder priority, 2026-09-06. Ordering does not change the saved/default language.
   var LANGS=[
-    ['en','English'],
-    ['ru','Русский'],
-    ['uk','Українська'],
-    ['tt','Татар теле','Tatar'],
-    ['cs','Čeština'],
-    ['de','Deutsch'],
-    ['nl','Nederlands'],
-    ['nl-be','Vlaams (België)'],
-    ['fr','Français'],
-    ['es','Español'],
-    ['gd','Gàidhlig'],
-    ['lv','Latviešu'],
-    ['zh','中文'],
-    ['ko','한국어'],
-    ['ja','日本語'],
-    ['ur','اردو'],
-    ['tr','Türkçe'],
-    ['hu','magyar'],
-    ['da','dansk'],
-    ['nb','norsk'],
-    ['sv','svenska'],
-    ['fi','suomi'],
-    ['th','ไทย'],
-    ['hi','हिन्दी'],
-    ['sa','संस्कृतम्','Sanskrit'],
-    ['bn','বাংলা'],
-    ['ar','العربية'],
-    ['he','עברית'],
-    ['fa','فارسی']
+    ["ru","Русский"],
+    ["lv","Latviešu"],
+    ["th","ไทย"],
+    ["gd","Gàidhlig"],
+    ["tt","Татар теле","Tatar"],
+    ["uk","Українська"],
+    ["en","English"],
+    ["cs","Čeština"],
+    ["zh","中文"],
+    ["ko","한국어"],
+    ["ar","العربية"],
+    ["nl-be","Vlaams (België)"],
+    ["es","Español"],
+    ["nl","Nederlands"],
+    ["de","Deutsch"],
+    ["fr","Français"],
+    ["he","עברית"],
+    ["hi","हिन्दी"],
+    ["bn","বাংলা"],
+    ["fa","فارسی"],
+    ["ur","اردو"],
+    ["ja","日本語"],
+    ["da","dansk"],
+    ["nb","norsk"],
+    ["sv","svenska"],
+    ["fi","suomi"],
+    ["tr","Türkçe"],
+    ["hu","magyar"],
+    ["sa","संस्कृतम्","Sanskrit"]
   ];
   var RTL={'ar':1,'he':1,'fa':1,'ur':1};
   var corpus=null;
 
   function pref(){ try{ var v=localStorage.getItem('blang');
     return LANGS.some(function(L){return L[0]===v})?v:'en'; }catch(e){ return 'en'; } }
+  // Dynamic control labels use the same corpus and saved language as static text.
+  // Missing renderings keep their explicit English fallback; no attestation implied.
+  window.BNRLanguage={text:function(key,fallback){var c=pref(),row=corpus&&corpus.strings[key];return c!=='en'&&row&&typeof row[c]==='string'&&row[c].trim()?row[c]:fallback;}};
   function setPref(c){
     try{ localStorage.setItem('blang',c); }catch(e){}
     /* additive mirror into the tri-role language schema, so corpus surfaces can read
@@ -78,32 +124,20 @@
       }
       if(code==='en'){ if(el.dataset.i18nRich) el.innerHTML=el.dataset.i18nEn; else el.textContent=el.dataset.i18nEn; hit++; return; }
       var s=corpus&&corpus.strings[k]&&corpus.strings[k][code];
-      if(s){ if(s.indexOf('<')!==-1) el.innerHTML=s; else el.textContent=s; hit++; }
+      if(typeof s==='string' && s.trim()){ if(s.indexOf('<')!==-1) el.innerHTML=s; else el.textContent=s; hit++; }
       else { if(el.dataset.i18nRich) el.innerHTML=el.dataset.i18nEn; else el.textContent=el.dataset.i18nEn; } /* honest fallback: English, counted */
     });
     /* THE COVERAGE COUNTER (founder defect order 2026-08-29): the old count was
        keys-present over [data-i18n] elements — a page reading English to every
        tongue showed a green 49/49. The carrier now counts VISIBLE STRINGS
-       covered: same walk as e2e/i18n-coverage.mjs (leaf elements, riders and
-       canvas excluded, on-screen, lettered text >= 3 chars). covered = the leaf
+       covered: the same exported census as e2e/i18n-coverage.mjs (laid-out leaf
+       elements, named riders and drawing tags excluded, letters in any script).
+       There is no minimum word length. Covered = the leaf
        sits inside a data-i18n holder whose cell for this tongue is non-empty
        (English counts keyed as covered — it is the source). */
-    var CHROME='#tbar,#adOrb,#adPanel,#tbarMore,#railsbadge,#bregctl,#blangctl,#veil,#bandwrap';
-    var vis=0, cov=0;
-    document.querySelectorAll('body *').forEach(function(n){
-      if(n.children.length) return;
-      if(n.closest && n.closest(CHROME)) return;
-      if(['SCRIPT','STYLE','NOSCRIPT','CANVAS','SVG','PATH','OPTION'].includes(n.tagName)) return;
-      var t=(n.textContent||'').trim();
-      if(t.length<3||!/[A-Za-zА-Яа-яЀ-ӿ]/.test(t)) return;
-      var r=n.getBoundingClientRect();
-      if(r.width===0&&r.height===0) return;
-      vis++;
-      var hold=n.closest('[data-i18n]');
-      if(hold){ var hk=hold.getAttribute('data-i18n');
-        if(code==='en'){ cov++; }
-        else if(corpus&&corpus.strings[hk]&&corpus.strings[hk][code]){ cov++; } }
-    });
+    var measure=window.BNRLanguageCoverage;
+    var coverage=measure.summarizeCoverage(measure.measureVisibleText(document),corpus&&corpus.strings,code);
+    var vis=coverage.visible, cov=coverage.filled;
     var sel=document.getElementById('blangsel');
     if(sel){ sel.value=code;
       var note=document.getElementById('blangnote');
@@ -116,14 +150,15 @@
               ' — a person who lives in this tongue signed these lines'; }
           else{ note.textContent = vis===0 ? '' : '⚙ '+cov+'/'+vis;
             note.title='machine-drafted ⚙ — human attestation upgrades it; '+
-              (vis-cov)+' of '+vis+' visible strings on this page are unkeyed — no tongue can reach them'; }
+              coverage.unkeyed+' unkeyed text blocks; '+coverage.emptyCell+' empty translations; '+
+              coverage.missingKey+' missing corpus keys. Counts laid-out text leaves, not every page label or sentence.'; }
         }
       }
     }
     try{ document.dispatchEvent(new CustomEvent('blang',{detail:{lang:code}})); }catch(e){}
   }
   function mount(){
-    var host=document.getElementById('tbar');
+    var host=document.querySelector('[data-language-host]')||document.getElementById('tbar');
     /* margin/min-height/height/box-sizing pinned on all three elements below:
        an inline style only wins the properties it SETS — any page's bare
        select{}/span{} rule reaches these controls through every property left
@@ -154,7 +189,7 @@
   }
   function load(cb){
     if(corpus) return cb();
-    fetch(R+'lang-corpus.json?v=11').then(function(r){return r.json()})
+    fetch(R+'lang-corpus.json?v=17').then(function(r){return r.json()})
       .then(function(j){ corpus=j;
         /* the withdrawal law reaches the renderer: a withdrawn tongue stops rendering
            estate-wide (history kept in the corpus file); its picker entry says so. */

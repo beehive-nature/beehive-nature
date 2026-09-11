@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f6f7f2">
+<meta name="color-scheme" content="light dark">
+<title>Artist audio showcase — draft review (TEST AUDIO)</title>
+<style>
+:root{
+  --bg:#f6f7f2;--panel:#fff;--well:#edf2eb;--ink:#18362a;--dim:#435f4e;--line:#ccd7cf;
+  --accent:#326b39;--on:#fff;--warn:#855b0b;--wash:#ecf1e8;
+  --font:system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:ui-monospace,'Cascadia Mono',Consolas,monospace;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+[data-view]{display:none}
+body[data-reg=bee] [data-view=bee],
+body[data-reg=raver] [data-view=raver],
+body[data-reg=cypherpunk] [data-view=cypherpunk]{display:revert}
+body[data-reg=bee] h1 [data-view=bee],
+body[data-reg=raver] h1 [data-view=raver],
+body[data-reg=cypherpunk] h1 [data-view=cypherpunk]{display:block}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:1.125rem/1.65 var(--font)}
+body{min-height:100vh}
+a{color:inherit;text-underline-offset:4px}
+button,input{font:inherit}
+button{cursor:pointer}
+button:disabled{opacity:.55;cursor:default}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+button,input[type=range],summary,a{min-height:44px}
+
+.wrap{max-width:42rem;margin:0 auto;padding:0 clamp(16px,3vw,32px) 64px}
+body[data-reg=raver] .wrap{max-width:1100px}
+body[data-reg=cypherpunk] .wrap{max-width:52rem}
+.banner{margin:0 0 16px;padding:12px 14px;border:1px solid #c9b56a;border-radius:12px;background:#fff8d6;color:#5c4a12}
+.banner strong{display:block;font-size:1rem}
+.banner span{display:block;font-size:.95rem;margin-top:4px}
+.crumb{font-size:.875rem;margin:0 0 10px}
+.crumb a{display:inline-flex;align-items:center;min-height:44px;padding:0 4px}
+.eyebrow{margin:0 0 6px;color:var(--dim);font-size:.8rem;letter-spacing:.04em;text-transform:uppercase}
+h1{font-size:clamp(1.7rem,4vw,2.4rem);line-height:1.15;letter-spacing:-.03em;margin:0 0 10px}
+.lead{max-width:40ch;margin:0 0 18px;color:var(--dim)}
+body[data-reg=raver] .lead,body[data-reg=cypherpunk] .lead{max-width:62ch}
+
+.stage{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;align-items:start;margin:0 0 18px}
+body[data-reg=raver] .stage{grid-template-columns:minmax(0,1.2fr) minmax(0,0.8fr)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px}
+.player{display:flex;flex-direction:column;gap:14px}
+.credit-line{margin:0;font-size:1.125rem;line-height:1.45}
+.credit-line b{display:block;font-size:1.35rem}
+.credit-line small{display:block;color:var(--dim);font-size:1rem;margin-top:4px}
+#play-pause{min-width:min(100%,180px);min-height:64px;padding:14px 22px;border:1px solid var(--accent);border-radius:16px;font-size:1.25rem;font-weight:650;background:var(--accent);color:var(--on)}
+#play-pause[aria-pressed=true]{background:var(--panel);color:var(--ink)}
+#watch{background:var(--well);color:var(--ink)}
+.sources{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.sources button,.sources .slot{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;min-height:44px;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:var(--well);text-align:left}
+.sources button[aria-pressed=true]{border-color:var(--accent);background:var(--wash);font-weight:650}
+.sources .slot{color:var(--dim);cursor:default}
+.sources small{display:block;font-weight:400;color:var(--dim)}
+.yt-credit{margin:10px 0 0;padding:10px 12px;border:1px dashed var(--line);border-radius:10px;background:var(--wash)}
+.yt-credit b{display:block}
+#youtube-host{margin-top:8px}
+#youtube-player{width:100%;min-height:200px;border:0;border-radius:12px;background:#000}
+.collection{margin:0 0 18px}
+.collection-actions{display:flex;flex-wrap:wrap;gap:8px}
+.collection-actions button{min-height:44px;padding:8px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+#collection-list{margin:8px 0 0;padding-left:1.2rem}
+.vol{display:flex;flex-direction:column;gap:6px}
+.vol span,.vol output{font-size:.875rem;color:var(--dim)}
+.vol .row{display:flex;justify-content:space-between;align-items:center}
+input[type=range]{width:100%;accent-color:var(--accent);padding:0}
+#listen-status,#motion-status,#collection-status,#source-status{margin:0;min-height:1.4em;color:var(--dim);font-size:.95rem}
+audio{width:100%}
+.native{margin:0;font-size:.875rem;color:var(--dim)}
+
+.bloom-panel .stage-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+#bloom-pause{min-height:44px;padding:8px 14px;border:1px solid var(--line);border-radius:99px;background:var(--well)}
+#bloom-stage{display:grid;place-items:center;aspect-ratio:1;min-height:180px;background:radial-gradient(ellipse at center,#fff 25%,#f8faf1 75%);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+#bloom-stage svg{display:block;width:88%;height:auto}
+#bloom-stage .fallback{padding:24px;color:var(--dim);text-align:center}
+body[data-reg=bee] .bloom-panel{order:2}
+body[data-reg=raver] .bloom-panel{order:-1}
+body[data-reg=raver] #bloom-stage{min-height:min(52vw,440px);background:radial-gradient(ellipse at center,#fffcff 18%,#eae5f3 100%);box-shadow:0 0 0 8px rgba(173,145,240,.12)}
+body[data-reg=raver] .bloom-panel h2{font-size:clamp(1.4rem,3vw,2rem)}
+body[data-reg=cypherpunk] .bloom-panel{order:2}
+
+.facts{display:grid;gap:12px;margin:0 0 18px}
+.kv{display:grid;grid-template-columns:8.5rem minmax(0,1fr);gap:6px 10px;margin:0;font-size:1rem}
+.kv dt{color:var(--dim)}
+.kv dd{margin:0;overflow-wrap:anywhere}
+.empty{color:var(--warn)}
+.receipts{border:1px dashed var(--line);border-radius:14px;padding:16px;background:var(--well)}
+body[data-reg=cypherpunk] .receipts{border-style:solid;border-width:2px}
+.note{margin:10px 0 0;color:var(--dim);font-size:.95rem;max-width:72ch}
+details.tool{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:0 16px 16px;margin:0 0 12px}
+details.tool:not([open]){padding-bottom:0}
+details.tool>summary{padding:14px 0;font-weight:600;cursor:pointer;list-style:none}
+details.tool>summary::-webkit-details-marker{display:none}
+details.tool>summary:before{content:"+ ";color:var(--accent)}
+details.tool[open]>summary:before{content:"− "}
+.ext{margin:12px 0 0;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--wash)}
+footer{margin-top:24px;color:var(--dim);font-size:.875rem}
+
+body[data-reg=raver]{
+  --bg:#111018;--panel:#201a2b;--well:#16121f;--ink:#f2eff8;--dim:#b9b4cb;--line:#544362;
+  --accent:#ad91f0;--on:#100814;--warn:#ecc4d7;--wash:#282338;color-scheme:dark;
+}
+body[data-reg=raver] #play-pause{border-radius:99px}
+body[data-reg=raver] h1{font-size:clamp(2rem,5vw,3.6rem)}
+body[data-reg=cypherpunk]{
+  --bg:#081610;--panel:#0e211a;--well:#142d23;--ink:#e2f1e7;--dim:#acc4b5;--line:#4d6b59;
+  --accent:#8fdbb0;--on:#062013;--warn:#e6c36a;--wash:#142d23;--font:var(--mono);color-scheme:dark;
+  font:1rem/1.6 var(--mono);
+}
+body[data-reg=cypherpunk] :is(button,.panel,.receipts,details.tool,.banner,.ext){border-radius:4px}
+@media(max-width:800px){
+  body[data-reg=raver] .stage{grid-template-columns:1fr}
+  body[data-reg=raver] .bloom-panel{order:0}
+  #play-pause{width:100%}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;transition:none!important}
+  #bloom-stage .bnr-bloom-cell{animation:none!important;transform:none!important}
+}
+</style>
+<script src="../../surfaces/register.js?v=9" defer></script>
+<script src="assets/artist-audio/collection.js" defer></script>
+<script src="assets/artist-audio/showcase.js" defer></script>
+</head>
+<body data-reg="bee" data-bee-theme="custom">
+<div class="wrap">
+<p class="banner" role="status">
+  <strong>DRAFT REVIEW — not a live estate surface.</strong>
+  <span>TEST AUDIO — not the authorized release. No Autonomi/Arweave upload, no mint, no campaign.</span>
+</p>
+<p class="crumb"><a href="index.html">MVP walk</a> · <a href="../../surfaces/index.html">Home</a> · <a href="../../surfaces/kandi.html">Kandi (live, untouched)</a></p>
+<div data-register-host aria-describedby="view-explainer"></div>
+<p class="sr-only" id="view-explainer">Choose how this page speaks to you. Same facts. Three ways to read them.</p>
+
+<p class="eyebrow">Artist audio showcase · development fixture</p>
+<h1>
+  <span data-view="bee">Play the test tone.</span>
+  <span data-view="raver">The bloom is the original art.</span>
+  <span data-view="cypherpunk">Two recordings. Empty receipts stay empty.</span>
+</h1>
+<p class="lead">
+  <span data-view="bee">One Play action. The credit is for this 1.5 second development tone. Other listens stay folded until you want them.</span>
+  <span data-view="raver">LoVis and his mother’s green–teal–purple bloom sits first. Play is still the test tone, not the YouTube track.</span>
+  <span data-view="cypherpunk">Autonomi and Arweave remain not-uploaded. Storage and source notes stay readable here.</span>
+</p>
+
+<div class="stage">
+  <section class="panel player" aria-labelledby="listen-heading">
+    <h2 id="listen-heading">Listen</h2>
+    <p class="credit-line">
+      <b>TEST AUDIO — not the authorized release</b>
+      <small>Beehive Nature development fixture (not an artist release) · rights <code>unconfirmed</code></small>
+    </p>
+    <button type="button" id="play-pause" aria-pressed="false" aria-controls="fixture-audio">Play</button>
+    <button type="button" id="watch" hidden disabled aria-disabled="true" title="No video on this board">Watch</button>
+    <label class="vol">
+      <span class="row">Volume <output id="volume-value" for="volume">80%</output></span>
+      <input id="volume" type="range" min="0" max="1" step="0.05" value="0.8" aria-label="Volume">
+    </label>
+    <audio id="fixture-audio" preload="none" controls src="assets/artist-audio/TEST-AUDIO-not-authorized-release.wav">
+      Your browser cannot play this WAV fixture.
+    </audio>
+    <p class="native">Play is the local test-audio action. Native controls stay available. There is no autoplay.</p>
+    <p id="listen-status" role="status">Idle. Press Play to hear the 1.5 second development tone.</p>
+    <details class="tool" id="sources-panel">
+      <summary>Other ways to listen</summary>
+      <p class="note">These are different listens, not encodings of the same recording. Play above is the generated test tone. YouTube is a separate CJ Bolland upload. Empty Autonomi and Arweave slots are not playback sources.</p>
+      <ul class="sources" role="group" aria-label="Listening sources">
+        <li><button type="button" data-source="local" data-available="true" aria-pressed="true">Local test audio <small>This page · 1.5s development fixture · available</small></button></li>
+        <li><button type="button" data-source="youtube" data-available="true" aria-pressed="false">YouTube — CJ Bolland <small>Sugar is sweeter (Sugar Daddy) · a different recording · external</small></button></li>
+        <li><p class="slot" data-source="autonomi" data-available="false">Autonomi <small>Not uploaded / pending authorized release · not a playback source</small></p></li>
+        <li><p class="slot" data-source="arweave" data-available="false">Arweave <small>Not uploaded / pending authorized release · not a playback source</small></p></li>
+      </ul>
+      <p id="source-status" role="status">Source: local test audio on this page (development fixture).</p>
+      <div id="youtube-host" hidden>
+        <p class="yt-credit">
+          <b>CJ Bolland — “Sugar is sweeter” (Sugar Daddy)</b>
+          <span>A different recording from the 1.5 second TEST AUDIO fixture. Not a clearance. Not this page’s generated tone.</span>
+        </p>
+        <iframe id="youtube-player" hidden title="YouTube native player for CJ Bolland — Sugar is sweeter" allow="accelerometer; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        <p class="note">YouTube embed is not guaranteed on this host or on skaists.dev. A public HTTPS domain may help identification, but YouTube still needs a valid client/referrer and per-video embed permission. DNS alone cannot guarantee playback. <a href="https://www.youtube.com/watch?v=pb6OqIyyLAk" rel="noopener noreferrer" target="_blank">Open the named YouTube watch page</a>. BNR cannot control an external app.</p>
+      </div>
+    </details>
+  </section>
+
+  <section class="panel bloom-panel" id="bloom-board" aria-labelledby="bloom-heading">
+    <div class="stage-top">
+      <h2 id="bloom-heading">Green–teal–purple bloom</h2>
+      <button type="button" id="bloom-pause">Pause bloom</button>
+    </div>
+    <div id="bloom-stage" data-bloom-src="assets/genesis-3d/motion/green-teal-breathing.svg" aria-busy="true">
+      <p class="fallback">Loading Astra’s breathing bloom…</p>
+    </div>
+    <p id="motion-status" role="status">Preparing the bloom. Reduced motion keeps it still.</p>
+    <p class="note">Original artwork by LoVis and his mother. Motion study by Astra. Visual only — bloom play is not audio play.</p>
+  </section>
+</div>
+
+<section class="panel collection" aria-labelledby="later-heading">
+  <h2 id="later-heading">Save for later</h2>
+  <p class="note">Save the selected listen and its artist credit in this browser. Export a copy of your collection to keep. This saves references, not audio. Not JAMS-compatible.</p>
+  <div class="collection-actions">
+    <button type="button" id="save-later">Save this reference</button>
+    <button type="button" id="remove-later" disabled>Remove</button>
+    <button type="button" id="export-later" disabled>Export public JSON</button>
+  </div>
+  <ul id="collection-list"><li>Nothing saved yet.</li></ul>
+  <p id="collection-status" role="status">Nothing saved yet.</p>
+  <p class="note">Explore <a href="https://jams.community/" rel="noopener noreferrer" target="_blank">JAMS community (opens in a new tab)</a>. Your BNR page stays here. That link is not a catalog, payment, or endorsement, and this export was not imported there.</p>
+</section>
+
+<div class="facts">
+  <details class="tool" aria-labelledby="credits-heading">
+    <summary id="credits-heading">Artist credits</summary>
+    <dl class="kv">
+      <dt>Fixture title</dt><dd>TEST AUDIO — not the authorized release</dd>
+      <dt>Fixture artist</dt><dd>Beehive Nature development fixture (not an artist release)</dd>
+      <dt>Fixture rights</dt><dd>unconfirmed · development fixture · not independently verified</dd>
+      <dt>Source file</dt><dd>TEST-AUDIO-not-authorized-release.wav</dd>
+      <dt>Duration</dt><dd>1.5 seconds · 48 kHz · mono PCM WAV</dd>
+      <dt>Bytes</dt><dd>144044</dd>
+      <dt>YouTube listen</dt><dd>CJ Bolland — “Sugar is sweeter” (Sugar Daddy) · a different recording · not a clearance</dd>
+      <dt>Artwork</dt><dd>LoVis and his mother (original bloom) · Astra (motion study)</dd>
+    </dl>
+  </details>
+
+  <details class="receipts tool" id="storage-panel" data-view-disclosure="storage" aria-labelledby="receipts-heading">
+    <summary id="receipts-heading">Storage receipts</summary>
+    <p class="note">Empty on purpose. No fake transaction ids. Status language matches Astra’s <code>bnr-audio-release/1</code> preparation record.</p>
+    <h3>Autonomi</h3>
+    <dl class="kv">
+      <dt>Address</dt><dd class="empty">null — not uploaded / pending authorized release</dd>
+      <dt>Retrieved hash</dt><dd class="empty">null</dd>
+      <dt>Bytes stored</dt><dd class="empty">0 · upload not performed</dd>
+      <dt>Status</dt><dd>prepared-local-only</dd>
+    </dl>
+    <h3>Arweave</h3>
+    <dl class="kv">
+      <dt>Transaction id</dt><dd class="empty">null — not uploaded / pending authorized release</dd>
+      <dt>Retrieved hash</dt><dd class="empty">null</dd>
+      <dt>Bytes stored</dt><dd class="empty">0 · upload not performed</dd>
+      <dt>Status</dt><dd>not-uploaded</dd>
+    </dl>
+    <p class="note">Local fixture is 144044 bytes (within the current 256 KiB browser-inline plan). That does not mean an upload was quoted or signed. midivault’s simulated first-32-KiB local path is a different tool and was not used.</p>
+  </details>
+</div>
+
+<details class="tool" id="credits-panel">
+  <summary>How the two listens differ</summary>
+  <p class="note">The Play control is the generated 1.5 second fixture. The YouTube option is CJ Bolland’s “Sugar is sweeter” (Sugar Daddy), identified by Astra as a separate upload. They are not two sources of one recording. Title, artist, and rights for the fixture stay on this page in New bee, Raver, and Cypherpunk. The authorized BNR recording is absent.</p>
+</details>
+<details class="tool" id="artwork-panel" data-view-disclosure="artwork">
+  <summary>Bloom motion notes</summary>
+  <p class="note">The SVG root is <code>.bnr-breathing-bloom</code>. Pause uses <code>.is-paused</code>. Ring phase uses <code>--bloom-ring-delay</code>. Hidden tabs pause the SVG. Reduced motion disables cell animation. Reused from <code>docs/mvp-walk/assets/genesis-3d/motion/</code>. Not rewritten here.</p>
+</details>
+<details class="tool" id="receipts-panel" data-view-disclosure="receipts">
+  <summary>How to read the empty receipts</summary>
+  <p class="note">Manifest: <a href="assets/artist-audio/TEST-AUDIO-not-authorized-release.json"><code>TEST-AUDIO-not-authorized-release.json</code></a>. Schema <code>bnr-audio-release/1</code>. <code>storage.autonomi.address</code> and <code>storage.arweave.transactionId</code> are JSON <code>null</code>. Fees not quoted. Publication not performed.</p>
+</details>
+<details class="tool" id="limits-panel" data-view-disclosure="limits">
+  <summary>What this page does not do</summary>
+  <p class="note">It does not download or rip YouTube. It does not claim CJ Bolland / Sugar Is Sweeter as cleared. It does not claim a YouTube embed will play on skaists.dev. It does not call Autonomi or Arweave. It does not edit <code>surfaces/kandi.html</code> or midivault. Astra keeps the shared register/theme work, the audio-prep tool on draft #32, and the JS identity split on <code>codex/artist-showcase-integration-2026-09-07</code>.</p>
+</details>
+
+<p class="ext">
+  <strong>Named external listen — not this page’s audio, not a clearance.</strong>
+  YouTube watch page for the upload Astra identified as CJ Bolland — “Sugar is sweeter” (Sugar Daddy):
+  <a href="https://www.youtube.com/watch?v=pb6OqIyyLAk" rel="noopener noreferrer" target="_blank">open on YouTube</a>.
+  That is a different recording from the 1.5 second TEST AUDIO fixture. Choosing YouTube under Other ways to listen stops the local player and may show YouTube’s native player. That embed is not claimed to work here or on skaists.dev. Not a republication. Not a rights clearance.
+</p>
+
+<footer>Draft Grok lane · 2026-09-08 · open via a local HTTP server from the repository root. File URLs will not load the bloom SVG.</footer>
+</div>
+</body>
+</html>

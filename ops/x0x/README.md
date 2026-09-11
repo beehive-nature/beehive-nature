@@ -1,5 +1,18 @@
 # ops/x0x — x0x agent daemon on the hive box (lane x0x, 2026-09-05)
 
+**Current laptop default (Astra, 2026-09-06):**
+[`LAPTOP-NETWORK.md`](LAPTOP-NETWORK.md) documents the shared-network outage,
+measurements and replacement helper. `x0x-tunnel.ps1 up` now uses scoped SSH
+forwarding and starts no laptop mesh daemon. The tailnet walkthroughs below
+are historical receipts. Box x0x stays on 0.41.3 with its identity and ACLs.
+
+**One canonical, leashed path:** `x0x-tunnel.ps1` delegates to WSL
+`box-tunnel.sh`; its `_watch` loop supplies the **10-minute auto-down**.
+Both entry points enforce a 600-second maximum per lease; explicit `up`
+renews it. API and `-Media` modes use that same transport and watcher.
+Use [the current operator guide](LAPTOP-NETWORK.md), not the retired direct
+tailnet-forward recipe below, for laptop startup.
+
 **What runs on the box** (verbatim in-tree: `x0x.service` + `x0xd.toml`):
 
 - `x0xd` v0.41.2 (saorsa-labs/x0x, pre-built linux-arm64-gnu, option A) at
@@ -60,7 +73,7 @@ pastes `x0x://invite/…`; group cards carry no join capability; the live public
 groups (Phase-B Fleet Dogfood etc.) have `request_access_enabled:false`.
 Public groups are world-READABLE, member-JOIN is invite-only.
 
-## Tailnet forward — PROVEN (round 4, 2026-09-05)
+## Historical receipt — direct tailnet forward (2026-09-05; retired laptop startup path)
 
 After the founder's OCI ingress **All-Protocols/all-ports stateful** rule
 landed (the only rule kind that matches non-initial IP fragments — the
@@ -109,13 +122,20 @@ token (`POST /auth/session`); the durable token is never accepted in a URL.
 
 ## UPGRADE RUNBOOK (box, founder-order swaps only — `[update] enabled=false`)
 
-v0.41.2 → v0.41.3 is STAGED (2026-09-06): 0.41.3 carries the GUI one-char fix
-(verified at tag) but NOT the ant-quic fragment fix — **the OCI any/any
-stateful ingress STAYS until a release ships ant-quic ≥0.27.49** (check:
-`gh release view <tag> -R saorsa-labs/x0x`, then Cargo.lock/notes). One paste
-over SSH when `wsl -e ssh oracle` answers (2026-09-06: port 22 filtered from
-the laptop — box itself healthy, QUIC-alive on 5483, HTTPS doors 200, daemon
-0.41.2 with 33 peers / ~39 h uptime receipted THROUGH the tailnet):
+**EXECUTED 2026-09-06 (SSH restored after the founder's console session):
+box is on v0.41.3** — tarball sha256+GPG verified, `.0.41.2.bak` binaries
+kept beside the new pair, and the full verification receipt: SAME agent
+identity (`1ca00a42…8df66367`, hive-box), hive-porch still seated, exec
+still disabled (`acl_missing`), peers 25 within 45 s of restart, and the
+tunnel cycle answered **`"version":"0.41.3"` through 127.0.0.1:18080** (29
+peers on the box at read time). The one-char GUI fix ships in this version —
+the served `/gui` now parses clean; `e2e/x0x-gui-proxy.mjs` stays as a
+harness, no longer needed. The helper's first-connection window was widened
+(15×4 s) — a fresh box restart can take ~60–90 s to pair the direct session.
+Retire-trigger unchanged: **the OCI any/any stateful ingress STAYS until a
+release ships ant-quic ≥0.27.49** (0.41.3 does not carry the fragment fix;
+check `gh release view <tag> -R saorsa-labs/x0x` before tightening). The
+commands below remain the template for the next swap:
 
 ```bash
 cd /tmp && rm -rf x0x-rel3 && mkdir x0x-rel3 && cd x0x-rel3

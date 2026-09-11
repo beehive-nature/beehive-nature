@@ -1,0 +1,18 @@
+{
+  "proof": "connect-store-isolated-process-loss-v1",
+  "passed": true,
+  "authenticated_clients": 2,
+  "preserved_signed_events": 2,
+  "verified_file_bytes": 307200,
+  "original_gateway_terminated": true,
+  "original_store_unavailable": true,
+  "recovery_from_object_copy_and_client_pin": true,
+  "unauthorized_history_status": 403,
+  "unauthorized_file_status": 403,
+  "public_x0x_transport": false,
+  "public_autonomi_retrieval": false,
+  "independent_operator": false,
+  "replacement_writable": false,
+  "real_buzz_app_tested": false,
+  "synthetic_identities_only": true
+}

@@ -1,63 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-<title>bLighT Studio — music creation MVP (interoperable with the ERC-20i family)</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f6f7f2">
+<title>Music studio · skaists</title>
 <style>
-:root{--bg:#0A0A0F;--crt:#00FF41;--cyan:#00E5FF;--pink:#FF3DB0;--dim:#5a6478}
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:#cfe8d6;font:13px/1.6 'IBM Plex Mono',monospace;padding:24px 16px 64px;
-  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="97"><g fill="none" stroke="%231a1a2a"><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z"/><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z" transform="translate(28,48)"/></g></svg>')}
-.wrap{max-width:940px;margin:0 auto}
-h1{color:var(--cyan);font-size:20px;text-shadow:0 0 10px rgba(0,229,255,.4)}
-.sub{color:var(--dim);font-size:11.5px;margin:6px 0 16px;line-height:1.7}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
-input,select,button{font:inherit;background:#0d0d15;color:var(--crt);border:1px solid #262638;padding:7px 10px;border-radius:4px}
-button{cursor:pointer;border-color:var(--crt)} button:hover{background:var(--crt);color:#000}
-button.stop{border-color:var(--pink);color:var(--pink)} button.stop:hover{background:var(--pink);color:#000}
-button.ghost{border-color:#262638;color:var(--dim)} button.ghost:hover{background:#1a1a2a;color:var(--cyan)}
-#grid{display:grid;grid-template-columns:repeat(18,1fr);gap:3px;margin:12px 0}
-.cell{aspect-ratio:1;border:1px solid #262638;background:#0d0d15;border-radius:3px;cursor:pointer;min-width:0}
-.cell.on{background:var(--crt);box-shadow:0 0 8px rgba(0,255,65,.5)}
-.cell.now{outline:2px solid var(--cyan)}
-.deg{grid-column:span 2;font-size:9px;color:var(--dim);align-self:center;text-align:left}
-#status{font-size:11.5px;min-height:20px;color:#7e8c85}
-.foot{margin-top:18px;color:var(--dim);font-size:10.5px;line-height:1.7}
-a{color:var(--cyan)}
+:root{--bg:#101018;--panel:#1a1925;--well:#13131d;--ink:#f2eff8;--dim:#b9b4cb;--line:#464153;--accent:#ad91f0;--active:#86cc72;--on-ink:#102413;--info:#80cddd;--harm:#eab1cb;--font:system-ui,-apple-system,'Segoe UI',sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:1rem/1.6 var(--font)}button,input,select,textarea{font:inherit}a{color:var(--info)}button,summary{cursor:pointer}button:disabled{opacity:.55;cursor:default}button,input,select,textarea{background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 14px;min-height:44px}button:hover:not(:disabled){border-color:var(--accent)}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid var(--info);outline-offset:3px}button.primary{background:var(--active);color:var(--on-ink);border-color:var(--active);font-weight:650}.stop{border-color:var(--harm)}[hidden]{display:none!important}.studio{max-width:1280px;margin:auto;padding:24px clamp(16px,3vw,40px) 60px}.studio-head{display:flex;justify-content:space-between;align-items:start;gap:20px;margin-bottom:20px}h1{font-size:clamp(1.8rem,4vw,3rem);line-height:1.12;letter-spacing:-.04em;margin:8px 0 14px}h1 span{display:none}body[data-reg=bee] h1 [data-view=bee],body[data-reg=raver] h1 [data-view=raver],body[data-reg=cypherpunk] h1 [data-view=cypherpunk]{display:block}.eyebrow{color:var(--accent);font-size:.875rem;margin:0}.sub{color:var(--dim);max-width:64ch;margin:0}.transport{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:16px;background:var(--panel);border:1px solid var(--line);border-radius:16px;margin-bottom:16px}.transport button{min-width:100px}.transport label{display:flex;align-items:center;gap:10px;color:var(--dim);flex-wrap:wrap}.transport input{width:100px}.transport output{margin-inline-start:auto;color:var(--dim);font-variant-numeric:tabular-nums;font-size:.875rem}.workspace{display:grid;grid-template-columns:minmax(0,1fr);gap:20px}.grid-panel{min-width:0;background:var(--panel);padding:16px;border:1px solid var(--line);border-radius:16px;align-self:start}.grid-scroll{overflow-x:auto;overscroll-behavior-x:contain;padding:4px 3px 12px}#grid{display:grid;grid-template-columns:60px repeat(16,minmax(40px,1fr));gap:4px;min-width:760px}.cell{position:relative;padding:0;min-height:40px;border-radius:5px;background:var(--well);border-color:var(--line)}.cell.on{background:var(--active);color:var(--on-ink);border-color:var(--active)}.cell.on:after{content:'●';font-size:16px}.cell.now{outline:2px solid var(--info);outline-offset:-2px}.cell.now:before{content:'';position:absolute;inset-inline:4px;inset-block-start:3px;border-top:3px solid currentColor}.pitch,.step-label{font-size:.875rem;align-self:center;text-align:center;color:var(--dim);font-variant-numeric:tabular-nums}.pitch{text-align:start}.grid-caption{font-size:.875rem;color:var(--dim);margin:8px 0 0}#status{min-height:28px;color:var(--dim);margin:12px 0 0;overflow-wrap:anywhere}#status[data-tone=error]{color:var(--harm)}.panels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-content:start}details.tool-panel{min-width:0;align-self:start;border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:0 16px 16px}details:not([open]).tool-panel{padding-bottom:0}.tool-panel>summary{padding:16px 0;font-weight:600;min-height:56px}.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.fields label{display:flex;flex-direction:column;gap:6px;min-width:0;font-size:.875rem;color:var(--dim)}.fields select,.fields input{width:100%;min-width:0}.fields .full{grid-column:1/-1}.actions{display:flex;gap:10px;flex-wrap:wrap}.actions>*{flex:1 1 130px}.small-note{font-size:.875rem;color:var(--dim);line-height:1.7;margin:12px 0 0}.source-facts{border-top:1px solid var(--line);margin-top:28px;padding-top:16px;font-size:.875rem;color:var(--dim)}.source-facts summary{min-height:44px}#score-preview{width:100%;height:230px;resize:vertical;font: .875rem/1.6 ui-monospace,Consolas,monospace}#share-fallback{margin-top:14px}#share-fallback textarea{width:100%;height:90px;overflow-wrap:anywhere}#import-palette{display:flex;gap:8px;margin-top:10px}#import-palette span{width:32px;height:24px;border:1px solid var(--line);border-radius:4px}.score-panel{grid-column:1/-1}
+body[data-reg=bee]{--bg:#f6f7f2;--panel:#fff;--well:#edf2eb;--ink:#18362a;--dim:#435f4e;--line:#ccd7cf;--accent:#65509a;--active:#326b39;--on-ink:#fff;--info:#29628f;--harm:#8b3654;color-scheme:light}body[data-reg=bee] .transport button{padding:12px 24px;font-size:1.125rem}body[data-reg=bee] .studio{max-width:1160px}body[data-reg=bee] .grid-panel{padding:20px}
+body[data-reg=raver]{--bg:#111018;--panel:#201a2b;--well:#16121f;--line:#544362}body[data-reg=raver] .workspace{grid-template-columns:minmax(0,1fr) 280px}body[data-reg=raver] .panels{grid-template-columns:1fr}body[data-reg=raver] .transport{border-block-start:3px solid var(--accent)}body[data-reg=raver] .transport .primary{font-size:1.25rem;min-width:150px}body[data-reg=raver] .grid-panel{border-color:var(--accent);box-shadow:0 12px 48px #0003}body[data-reg=raver] h1{font-size:clamp(2rem,5vw,4.4rem)}
+body[data-reg=cypherpunk]{--bg:#0e141a;--panel:#151e26;--well:#101820;--line:#3f5260;--accent:#80cddd;--font:ui-monospace,'Cascadia Mono',Consolas,monospace}body[data-reg=cypherpunk] .studio{max-width:1600px}body[data-reg=cypherpunk] .workspace{grid-template-columns:minmax(0,1fr) 340px}body[data-reg=cypherpunk] .panels{grid-template-columns:1fr}body[data-reg=cypherpunk] :is(.grid-panel,.transport,.tool-panel,button,input,select,textarea){border-radius:3px}body[data-reg=cypherpunk] h1{font-size:clamp(1.6rem,3vw,2.25rem);letter-spacing:-.03em}body[data-reg=cypherpunk] .transport{padding:12px}
+@media(max-width:1000px){body[data-reg=raver] .workspace,body[data-reg=cypherpunk] .workspace{grid-template-columns:1fr}body[data-reg=raver] .panels,body[data-reg=cypherpunk] .panels{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:600px){.studio{padding:20px 12px 70px}.studio-head{display:block}.panels,body[data-reg=raver] .panels,body[data-reg=cypherpunk] .panels{grid-template-columns:1fr}.transport{gap:10px;padding:12px}.transport output{margin-inline-start:0;flex-basis:100%}.transport label{flex:1}.grid-panel,body[data-reg=bee] .grid-panel{padding:10px}.fields{grid-template-columns:1fr}.transport button{flex:1}.source-facts{overflow-wrap:anywhere}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}@media(forced-colors:active){.cell.on{border:3px solid Highlight}.cell.now{outline:3px dashed CanvasText}}
+[data-experience-nav]{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px}[data-experience-nav] a{display:inline-flex;align-items:center;min-height:44px;padding:8px 12px}[data-experience-nav] a[aria-current=page]{font-weight:650;text-decoration:underline}
 </style>
 </head>
-<body><div class="wrap">
-<h1>bLighT Studio <span style="color:var(--dim)">// music creation MVP</span></h1>
-<div class="sub">A 16-step sequencer that speaks the ERC-20i family's language: import any piece's on-chain
-scale, compose, loop live, export the score as an inscription-ready payload. Console tiers (Beginner/
-Experienced/Pro, gated by your holdings) come with the booth — this MVP ships everything open with that noted.</div>
+<body data-reg="bee" data-bee-theme="custom" data-experience="music">
+<nav data-experience-nav aria-label="Explore skaists"><a href="../index.html" data-i18n="social.arrival.home">Home</a><a href="../blight/gallery.html" data-i18n="experience.gallery">Art gallery</a><a href="../blight/studio-music.html" data-i18n="experience.music" aria-current="page">Music studio</a><a href="../buzz-directory.html" data-i18n="atlas.peopleAction">Meet the hive</a><a href="../profile.html" data-i18n="experience.profile">People and names</a></nav>
+<noscript><p>Enable JavaScript to compose and play music in this browser.</p></noscript>
+<main class="studio">
+<header class="studio-head"><div><p class="eyebrow" data-i18n="experience.music">Music studio</p><h1><span data-view="bee" data-i18n="experience.music.bee">Make a little music.</span><span data-view="raver" data-i18n="experience.music.raver">Build your loop.</span><span data-view="cypherpunk" data-i18n="experience.music.cypher">16-step score workstation</span></h1><p class="sub" data-i18n="experience.compose">Choose squares, then press Play. Save your work before leaving this page.</p></div></header>
+<div class="transport" aria-label="Playback">
+ <button type="button" id="play" class="primary" aria-pressed="false"><span aria-hidden="true">▶ </span><span data-i18n="experience.play">Play</span></button>
+ <button type="button" id="stop" class="stop" disabled><span aria-hidden="true">■ </span><span data-i18n="experience.stop">Stop</span></button>
+ <label for="bpm"><span data-i18n="experience.tempo">Tempo (BPM)</span><input id="bpm" type="number" value="132" min="60" max="200" step="1" inputmode="numeric"></label>
+ <output id="transport-state" aria-live="off">Stopped · 16 steps</output>
+</div>
+<div class="workspace">
+ <section class="grid-panel" aria-label="Compose your loop">
+  <div class="grid-scroll" tabindex="0" role="region" aria-label="Eight pitch rows and sixteen steps; scroll horizontally on a small screen"><div id="grid" role="group" aria-label="Musical pattern"></div></div>
+  <p class="grid-caption">● = a note. Use arrow keys to move between squares; Space or Enter changes a note.</p>
+  <p id="status" role="status" aria-live="polite">Ready to compose.</p>
+ </section>
+ <aside class="panels" aria-label="Sound and score tools">
+  <details class="tool-panel" id="sound-panel" open><summary data-i18n="experience.soundSettings">Shape the sound</summary><div class="fields">
+   <label for="scale"><span data-i18n="experience.scale">Scale</span><select id="scale"></select></label>
+   <label for="root"><span data-i18n="experience.key">Key</span><select id="root"></select></label>
+   <label for="wave" class="full"><span data-i18n="experience.sound">Sound</span><select id="wave"><option>triangle</option><option>square</option><option>sawtooth</option><option>sine</option></select></label>
+  </div></details>
+  <details class="tool-panel" id="variation-panel" open><summary data-i18n="experience.variation">Try a variation</summary><div class="actions"><button type="button" id="dice" data-i18n="experience.random">Surprise me</button><button type="button" id="clear" data-i18n="experience.clear">Clear the notes</button><button type="button" id="undo" disabled data-i18n="experience.undo">Undo</button></div></details>
+  <details class="tool-panel" id="save-panel" open><summary data-i18n="experience.save">Save and share</summary><div class="actions"><button type="button" id="export" data-i18n="experience.download">Download score (JSON)</button><button type="button" id="link" data-i18n="experience.copy">Copy song link</button></div><p class="small-note">Saves the notes and settings, not an audio recording. A link carries the score; it does not publish an inscription.</p><div id="share-fallback" hidden><label for="share-text" data-i18n="experience.copyManually">Copy this link manually</label><textarea id="share-text" readonly></textarea></div></details>
+  <details class="tool-panel" id="import-panel"><summary data-i18n="experience.import">Import a collection’s scale</summary><div class="fields"><label for="impAddr" class="full"><span data-i18n="experience.contract">Contract address on Base</span><input id="impAddr" placeholder="0x…" spellcheck="false" autocomplete="off"></label><label for="impSeed"><span data-i18n="experience.seed">Seed</span><input id="impSeed" type="number" value="1000" min="1" step="1"></label><button type="button" id="import" data-i18n="experience.readScale">Read scale</button></div><p class="small-note" id="impnote">Optional, read-only lookup. Your notes stay in place. Some collections do not expose a compatible getMeta response.</p><div id="import-palette" aria-label="Imported collection colors"></div></details>
+  <details class="tool-panel score-panel" id="score-panel"><summary data-i18n="experience.score">Score data</summary><textarea id="score-preview" readonly aria-label="Current score JSON" spellcheck="false"></textarea><p class="small-note">Version 1 · eight pitch rows × sixteen steps. Imported metadata is retained separately from the current controls.</p></details>
+ </aside>
+</div>
+<details class="source-facts"><summary data-i18n="atlas.source">Source &amp; limits</summary><p>Audio is synthesized in this browser after you press Play. Import reads Base through public RPC services. The JSON download and song link preserve a score; no blockchain write, wallet signature or message delivery happens here. All controls are available in every view.</p><a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/blight/studio-music.html" rel="noopener">Studio source ↗</a></details>
+</main>
 
-<div class="row">
-  <select id="scale"></select>
-  <select id="root"></select>
-  <label style="color:var(--dim);font-size:11px">BPM <input id="bpm" type="number" value="132" min="60" max="200" style="width:70px"></label>
-  <select id="wave"><option>triangle</option><option>square</option><option>sawtooth</option><option>sine</option></select>
-  <button id="play">▶ play loop</button>
-  <button id="stop" class="stop">■</button>
-  <button id="clear" class="ghost">clear</button>
-  <button id="dice" class="ghost">🎲 randomize</button>
-  <button id="export" class="ghost">⬇ export score (JSON)</button>
-  <button id="link" class="ghost">🔗 copy song-link</button>
-</div>
-<div class="row">
-  <input id="impAddr" placeholder="import: any family contract 0x…" style="flex:1;min-width:240px;color:var(--cyan)">
-  <input id="impSeed" type="number" value="1000" min="1" style="width:110px;color:var(--cyan)" placeholder="seed">
-  <button id="import" class="ghost">⬆ pull its scale from chain</button>
-</div>
-<div id="status">ready — click cells to compose. rows are scale degrees (low → high).</div>
-<div id="grid"></div>
-<div class="foot">Interop: <b>import</b> reads getMeta from any ERC-20i family contract (MiDi, FUNGI, FROGGI, JELLI…) and
-adopts its scale + colors. <b>Export</b> writes the score as the JSON payload the encoder will inscribe:
-{scale, root, bpm, wave, steps[]}. Same score, same song, forever — the seed doctrine, now for your own music.
-<span id="impnote"></span></div>
 <script>
 const SCALES={'major':[0,2,4,5,7,9,11],'harmonic major':[0,2,4,5,7,8,11],'minor':[0,2,3,5,7,8,10],
  'harmonic minor':[0,2,3,5,7,8,11],'melodic minor':[0,2,3,5,7,9,11],'pentatonic':[0,3,5,7,10],
@@ -84,117 +72,116 @@ function dec(s){
   }
   try{ return decodeURIComponent(escape(out)); }catch(e){ return out; }
 }
+/* FIRST-CLICK ENGINE: one composition and one audio transport for every view. */
 const $=id=>document.getElementById(id);
-const DEGREES=8, STEPS=16;
+const DEGREES=8, STEPS=16, WAVES=['triangle','square','sawtooth','sine'];
 let pattern=Array.from({length:DEGREES},()=>Array(STEPS).fill(false));
-let ac=null, timer=null, playing=false, imported={};
+let ac=null, timer=null, playing=false, playTicket=0, imported={}, stepIndex=0, previous=null, focusedCell={d:0,s:0};
+const activeVoices=new Set();
 $('scale').innerHTML=Object.keys(SCALES).map(s=>'<option'+(s==='harmonic major'?' selected':'')+'>'+s+'</option>').join('');
 $('root').innerHTML=NOTES.map((n,i)=>'<option value="'+i+'"'+(i===9?' selected':'')+'>'+n+'</option>').join('');
+function status(message,error=false){$('status').textContent=message;$('status').dataset.tone=error?'error':'normal';}
+function tempo(){const n=Number($('bpm').value);return Number.isFinite(n)?Math.min(200,Math.max(60,Math.round(n))):132;}
+function pitch(d){const iv=SCALES[$('scale').value]||SCALES.major;return 48+(Number($('root').value)||0)+iv[d%iv.length]+12*Math.floor(d/iv.length);}
+function noteName(d){const n=pitch(d);return NOTES[n%12]+(Math.floor(n/12)-1);}
+function score(){return {v:1,scale:$('scale').value,root:NOTES[Number($('root').value)],bpm:tempo(),wave:$('wave').value,
+ steps:pattern.map(r=>r.map(c=>c?'1':'0').join('')).join('|'),imported:imported.meta||null};}
+function refreshScore(){$('score-preview').value=JSON.stringify(score(),null,2);}
+function snapshot(){previous=JSON.parse(JSON.stringify(score()));$('undo').disabled=false;}
+function applyPattern(s){$('scale').value=s.scale;$('root').value=String(NOTES.indexOf(s.root));$('bpm').value=s.bpm;$('wave').value=s.wave;
+ pattern=s.steps.split('|').map(row=>[...row].map(c=>c==='1'));imported=s.imported?{meta:s.imported}:{};renderPalette();buildGrid();refreshScore();}
+function validateScore(s){
+ if(!s||s.v!==1||!Object.hasOwn(SCALES,s.scale)||!NOTES.includes(s.root)||!WAVES.includes(s.wave)||!Number.isFinite(s.bpm)||s.bpm<60||s.bpm>200)throw Error('Invalid score settings');
+ if(typeof s.steps!=='string'||!/^([01]{16}\|){7}[01]{16}$/.test(s.steps))throw Error('Invalid pattern');
+ if(s.imported!==null&&s.imported!==undefined&&(typeof s.imported!=='object'||Array.isArray(s.imported)||JSON.stringify(s.imported).length>24000))throw Error('Invalid imported metadata');
+ return s;
+}
 function buildGrid(){
-  const g=$('grid'); g.innerHTML='';
-  for(let d=DEGREES-1;d>=0;d--){
-    const lab=document.createElement('div'); lab.className='deg'; lab.textContent='deg '+(d+1); g.appendChild(lab);
-    for(let s=0;s<STEPS;s++){
-      const c=document.createElement('div'); c.className='cell'+(pattern[d][s]?' on':'');
-      c.dataset.d=d; c.dataset.s=s;
-      if(imported.colors){ c.style.borderColor=(d%2?imported.colors[0]:imported.colors[1])+'55'; }
-      c.onclick=()=>{ pattern[d][s]=!pattern[d][s]; c.classList.toggle('on',pattern[d][s]); };
-      g.appendChild(c);
-    }
+ const g=$('grid'),hadFocus=g.contains(document.activeElement);g.innerHTML='';
+ const corner=document.createElement('span');corner.className='step-label';corner.textContent='♪';g.appendChild(corner);
+ for(let s=0;s<STEPS;s++){const n=document.createElement('span');n.className='step-label';n.textContent=String(s+1);g.appendChild(n);}
+ for(let d=DEGREES-1;d>=0;d--){
+  const lab=document.createElement('span');lab.className='pitch';lab.textContent=noteName(d);g.appendChild(lab);
+  for(let s=0;s<STEPS;s++){
+   const c=document.createElement('button');c.type='button';c.className='cell'+(pattern[d][s]?' on':'');c.dataset.d=d;c.dataset.s=s;
+   c.setAttribute('aria-label',noteName(d)+', step '+(s+1));c.setAttribute('aria-pressed',String(pattern[d][s]));c.tabIndex=d===focusedCell.d&&s===focusedCell.s?0:-1;
+   c.addEventListener('focus',()=>{focusedCell={d,s};g.querySelectorAll('.cell').forEach(n=>n.tabIndex=n===c?0:-1);});
+   c.onclick=()=>{snapshot();pattern[d][s]=!pattern[d][s];c.classList.toggle('on',pattern[d][s]);c.setAttribute('aria-pressed',String(pattern[d][s]));refreshScore();};
+   c.onkeydown=e=>{let nd=d,ns=s;if(e.key==='ArrowRight')ns=Math.min(15,s+1);else if(e.key==='ArrowLeft')ns=Math.max(0,s-1);else if(e.key==='ArrowUp')nd=Math.min(7,d+1);else if(e.key==='ArrowDown')nd=Math.max(0,d-1);else return;e.preventDefault();g.querySelector('.cell[data-d="'+nd+'"][data-s="'+ns+'"]').focus();};
+   g.appendChild(c);
   }
+ }
+ if(hadFocus)g.querySelector('.cell[data-d="'+focusedCell.d+'"][data-s="'+focusedCell.s+'"]').focus({preventScroll:true});
 }
-const freq=(semi)=>440*Math.pow(2,(semi-69)/12);
+const freq=semi=>440*Math.pow(2,(semi-69)/12);
 function step(){
-  const iv=SCALES[$('scale').value];
-  const root=48+(+$('root').value);
-  const stepIdx=+(timer?.dataset?.i||0);
-  document.querySelectorAll('.cell.now').forEach(e=>e.classList.remove('now'));
-  for(let d=0;d<DEGREES;d++){
-    const cell=document.querySelector('.cell[data-d="'+d+'"][data-s="'+stepIdx+'"]');
-    if(cell) cell.classList.add('now');
-    if(pattern[d][stepIdx]){
-      const semi=root+iv[d%iv.length]+12*Math.floor(d/iv.length);
-      const o=ac.createOscillator(), g=ac.createGain();
-      o.type=$('wave').value; o.frequency.value=freq(semi);
-      const T=ac.currentTime;
-      g.gain.setValueAtTime(0.0001,T);
-      g.gain.exponentialRampToValueAtTime(0.18,T+0.01);
-      g.gain.exponentialRampToValueAtTime(0.0001,T+60/ +$('bpm').value/4*0.9);
-      o.connect(g).connect(ac.destination); o.start(T); o.stop(T+60/ +$('bpm').value/4);
-    }
+ if(!playing)return;
+ document.querySelectorAll('.cell.now').forEach(e=>e.classList.remove('now'));
+ const beat=60/tempo()/4;
+ for(let d=0;d<DEGREES;d++){
+  const cell=document.querySelector('.cell[data-d="'+d+'"][data-s="'+stepIndex+'"]');if(cell)cell.classList.add('now');
+  if(pattern[d][stepIndex]){const o=ac.createOscillator(),g=ac.createGain();o.type=$('wave').value;o.frequency.value=freq(pitch(d));const T=ac.currentTime;
+   g.gain.setValueAtTime(.0001,T);g.gain.exponentialRampToValueAtTime(.12,T+.01);g.gain.exponentialRampToValueAtTime(.0001,T+beat*.9);
+   o.connect(g).connect(ac.destination);activeVoices.add(o);o.onended=()=>{activeVoices.delete(o);o.disconnect();g.disconnect();};o.start(T);o.stop(T+beat);
   }
-  timer.dataset.i=(stepIdx+1)%STEPS;
+ }
+ $('transport-state').textContent='Playing · '+(stepIndex+1)+' / 16';stepIndex=(stepIndex+1)%STEPS;
+ timer=setTimeout(step,60000/tempo()/4);
 }
-function play(){
-  if(playing) return;
-  ac=ac||new (window.AudioContext||window.webkitAudioContext)();
-  if(ac.state==='suspended') ac.resume();
-  playing=true;
-  timer=document.createElement('div'); timer.dataset.i=0; document.body.appendChild(timer);
-  const iv=()=>{ if(!playing) return; step(); setTimeout(iv,60000/ +$('bpm').value/4); };
-  iv();
+async function play(){
+ if(playing)return;const ticket=++playTicket;playing=true;$('play').disabled=true;$('stop').disabled=false;
+ try{const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)throw Error('Audio unavailable');ac=ac||new Audio();if(ac.state==='suspended')await ac.resume();if(!playing||ticket!==playTicket)return;
+  $('bpm').value=tempo();$('play').setAttribute('aria-pressed','true');$('stop').disabled=false;stepIndex=0;step();status('Playing your loop.');
+ }catch(e){if(ticket!==playTicket)return;stop();status('Audio could not start. Try Play again in a browser with audio enabled.',true);}
 }
-function stop(){ playing=false; if(timer) timer.remove(); document.querySelectorAll('.cell.now').forEach(e=>e.classList.remove('now')); }
-$('play').onclick=play; $('stop').onclick=stop;
-$('clear').onclick=()=>{ pattern=Array.from({length:DEGREES},()=>Array(STEPS).fill(false)); buildGrid(); };
-$('dice').onclick=()=>{
-  pattern=Array.from({length:DEGREES},()=>Array(STEPS).fill(false));
-  for(let s=0;s<STEPS;s++){ const d=Math.floor(Math.random()*DEGREES); if(Math.random()<0.45) pattern[d][s]=true; }
-  $('scale').selectedIndex=Math.floor(Math.random()*Object.keys(SCALES).length);
-  $('root').value=Math.floor(Math.random()*12);
-  buildGrid(); $('status').textContent='rolled a fresh song — press play';
-};
-function score(){ return {v:1,scale:$('scale').value,root:NOTES[+$('root').value],bpm:+$('bpm').value,
-  wave:$('wave').value,steps:pattern.map(r=>r.map(c=>c?1:0).join('')).join('|'),imported:imported.meta||null}; }
-$('export').onclick=()=>{
-  const b=new Blob([JSON.stringify(score(),null,2)],{type:'application/json'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(b);
-  a.download='blight-score-'+Date.now()+'.json'; a.click();
-  $('status').textContent='score exported — this JSON is the inscription payload';
-};
-$('link').onclick=()=>{
-  const b=btoa(JSON.stringify(score()));
-  const u=location.origin+location.pathname+'?score='+encodeURIComponent(b.slice(0,1800));
-  navigator.clipboard.writeText(u).then(()=>$('status').textContent='song-link copied');
-};
+function stop(){++playTicket;playing=false;clearTimeout(timer);timer=null;for(const o of activeVoices){try{o.stop();}catch{}}activeVoices.clear();
+ $('play').disabled=false;$('play').setAttribute('aria-pressed','false');$('stop').disabled=true;$('transport-state').textContent='Stopped · 16 steps';document.querySelectorAll('.cell.now').forEach(e=>e.classList.remove('now'));}
+$('play').onclick=play;$('stop').onclick=()=>{stop();status('Stopped. Your notes are still here.');};
+window.addEventListener('pagehide',stop);
+$('clear').onclick=()=>{snapshot();pattern=Array.from({length:DEGREES},()=>Array(STEPS).fill(false));buildGrid();refreshScore();status('Notes cleared. Undo restores your previous composition.');};
+$('dice').onclick=()=>{snapshot();pattern=Array.from({length:DEGREES},()=>Array(STEPS).fill(false));for(let s=0;s<STEPS;s++)if(Math.random()<.45)pattern[Math.floor(Math.random()*DEGREES)][s]=true;
+ $('scale').selectedIndex=Math.floor(Math.random()*Object.keys(SCALES).length);$('root').value=Math.floor(Math.random()*12);buildGrid();refreshScore();status('A new variation is ready. Undo restores the previous composition.');};
+$('undo').onclick=()=>{if(!previous)return;const saved=previous;previous=null;applyPattern(saved);$('undo').disabled=true;status('Previous composition restored.');};
+for(const id of ['scale','root','wave','bpm'])$(id).addEventListener('change',()=>{if(id==='bpm')$('bpm').value=tempo();buildGrid();refreshScore();});
+$('export').onclick=()=>{const b=new Blob([JSON.stringify(score(),null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='blight-score-'+Date.now()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);status('Score download requested. This is a JSON score, not an audio recording.');};
+function encodeScore(s){const bytes=new TextEncoder().encode(JSON.stringify(s));return btoa(Array.from(bytes,b=>String.fromCharCode(b)).join(''));}
+function decodeScore(s){if(s.length>48000)throw Error('Link too long');return validateScore(JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(Uint8Array.from(atob(s),c=>c.charCodeAt(0)))));}
+$('link').onclick=async()=>{const encoded=encodeScore(score());if(encoded.length>48000){status('This score is too large for a song link. Download the complete JSON instead.',true);return;}
+ const u=location.origin+location.pathname+'#score='+encodeURIComponent(encoded);$('share-text').value=u;
+ try{if(!navigator.clipboard)throw Error('Clipboard unavailable');await navigator.clipboard.writeText(u);$('share-fallback').hidden=true;status('Song link copied. Share it using the app of your choice.');}
+ catch{$('share-fallback').hidden=false;status('Clipboard access was unavailable. Copy the complete link below.',true);$('share-text').focus();$('share-text').select();}};
+function renderPalette(){const p=$('import-palette');p.replaceChildren();const m=imported.meta;if(!m)return;for(const color of [m.barColorTop,m.barColorBottom])if(/^#[0-9a-f]{6}$/i.test(color||'')){const s=document.createElement('span');s.style.backgroundColor=color;s.title=color;p.appendChild(s);}}
 $('import').onclick=async()=>{
-  const a=$('impAddr').value.trim().toLowerCase(), seed=Math.max(1,Math.floor(+$('impSeed').value||1));
-  const st=$('status');
-  if(!/^0x[0-9a-f]{40}$/.test(a)){ st.textContent='paste a full 0x… contract address'; return; }
-  st.textContent='reading chain…';
-  for(const h of HOSTS){
-    const ctl=new AbortController(); const kill=setTimeout(()=>ctl.abort(),8000);
-    try{
-      const r=await fetch(h,{method:'POST',headers:{'Content-Type':'application/json'},signal:ctl.signal,
-        body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_call',params:[{to:a,data:'0xc3f4552a'+W(seed)+W(0)},'latest']})});
-      const j=await r.json(); clearTimeout(kill);
-      if(j.result&&j.result!=='0x'){
-        const m=JSON.parse(dec(j.result));
-        const sc=String(m.scale||'').toLowerCase();
-        if(SCALES[sc]) $('scale').value=sc;
-        imported={meta:m,colors:[m.barColorTop||'#13451D',m.barColorBottom||'#2e7d32']};
-        KNOWN[a]&&($('impnote').textContent=' imported from '+KNOWN[a]+' ');
-        st.textContent='imported '+(KNOWN[a]||a.slice(0,10)+'…')+' seed '+seed+': scale "'+(m.scale||'?')+'" — grid retinted with its bar colors';
-        buildGrid(); return;
-      }
-      if(j.error) st.textContent='host: '+String(j.error.message).slice(0,50)+' — trying next';
-    }catch(e){ clearTimeout(kill); st.textContent='unreachable — trying next host'; }
-  }
-  st.style.color='#e8b84a'; st.textContent='import failed — that contract may not speak getMeta (TRUFFI and PEPI keep traits in their SVGs)';
+ const a=$('impAddr').value.trim().toLowerCase(),seed=Number($('impSeed').value);
+ if(!/^0x[0-9a-f]{40}$/.test(a)||!Number.isSafeInteger(seed)||seed<1){status('Enter a full contract address and a positive whole-number seed.',true);return;}
+ $('import').disabled=true;status('Reading the scale from Base…');
+ try{for(const h of HOSTS){const ctl=new AbortController(),kill=setTimeout(()=>ctl.abort(),8000);
+  try{const r=await fetch(h,{method:'POST',headers:{'Content-Type':'application/json'},signal:ctl.signal,body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_call',params:[{to:a,data:'0xc3f4552a'+W(seed)+W(0)},'latest']})});if(!r.ok)continue;
+   const j=await r.json();if(!j.result||j.result==='0x')continue;const m=JSON.parse(dec(j.result));if(!m||typeof m!=='object'||Array.isArray(m))continue;
+   validateScore({...score(),imported:m});const sc=String(m.scale||'').toLowerCase();snapshot();if(Object.hasOwn(SCALES,sc))$('scale').value=sc;imported={meta:m};renderPalette();buildGrid();refreshScore();
+   $('impnote').textContent='Imported '+(KNOWN[a]||a)+' · seed '+seed+' · metadata scale: '+String(m.scale||'not supplied')+'. Current sound controls remain editable.';
+   status(Object.hasOwn(SCALES,sc)?'Scale imported. Your notes are unchanged.':'Metadata loaded, but its scale is not supported. Your selected scale and notes are unchanged.');return;
+  }catch{}finally{clearTimeout(kill);}
+ }status('Import did not return compatible metadata. Check the address and connection, then try again. Your composition is unchanged.',true);
+ }finally{$('import').disabled=false;}
 };
-const q=new URLSearchParams(location.search);
-if(q.get('score')){ try{
-  const s=JSON.parse(atob(q.get('score')));
-  if(s.scale&&SCALES[s.scale]) $('scale').value=s.scale;
-  if(s.root) $('root').value=NOTES.indexOf(s.root);
-  if(s.bpm) $('bpm').value=s.bpm;
-  if(s.wave) $('wave').value=s.wave;
-  if(s.steps) s.steps.split('|').forEach((row,d)=>{ if(pattern[d]) pattern[d]=[...row].map(c=>c==='1'); });
-  $('status').textContent='song-link loaded — press play';
-}catch(e){ $('status').textContent='link score unreadable'; } }
-buildGrid();
+const q=new URLSearchParams(location.search),hash=new URLSearchParams(location.hash.slice(1)),sharedScore=hash.get('score')||q.get('score');
+if(sharedScore){try{applyPattern(decodeScore(sharedScore));status('Song link loaded. Press Play when you are ready.');}catch{status('This song link is incomplete or invalid. No part of it was applied.',true);}}
+buildGrid();refreshScore();
+/* Views change disclosure defaults only; composition/audio state is untouched. */
+const panelDefaults={bee:['save-panel'],raver:['sound-panel','variation-panel'],cypherpunk:['sound-panel','variation-panel','save-panel','import-panel','score-panel']};
+function restoreVisibleFocus(focus){
+ if(!focus?.isConnected)return;let target=focus;
+ for(let node=focus.parentElement;node;node=node.parentElement)if(node.tagName==='DETAILS'&&!node.open)target=node.querySelector('summary');
+ target?.focus({preventScroll:true});
+}
+const panelChoices=new Map();let lastView=null;
+function presentStudio(event){const view=event?.detail?.reg||document.body.dataset.reg||'bee';if(view===lastView)return;const focus=document.activeElement;
+ if(lastView)panelChoices.set(lastView,[...document.querySelectorAll('.tool-panel')].filter(p=>p.open).map(p=>p.id));
+ const open=panelChoices.get(view)||panelDefaults[view]||panelDefaults.bee;document.querySelectorAll('.tool-panel').forEach(p=>p.open=open.includes(p.id));lastView=view;restoreVisibleFocus(focus);}
+document.addEventListener('bregister',presentStudio);presentStudio();
+
 </script>
-</div><div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(.6rem + 46px);z-index:9997;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
-<script src="../tour.js?v=34"></script>
+<script src="../tour.js?v=41"></script>
 </body>
 </html>

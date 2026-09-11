@@ -10,13 +10,16 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable, reviewed 2026-09-06
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
       - name: Build workspace
         run: cargo build --workspace --locked
       - name: Test workspace
@@ -45,10 +48,10 @@ jobs:
     # gated nothing. This job carries the suites that need no browser.
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0   # dock-claims pins a git TREE hash; HEAD must resolve
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
       # SPRINT-2026-08-28 A1: the registry is the single source — every count
@@ -58,6 +61,42 @@ jobs:
       - name: Estate registry — counts computed, not written
         if: always()
         run: node scripts/estate-check.mjs
+      - name: Front door — search, source parity and accessible art
+        if: always()
+        run: node --test e2e/atlas.test.mjs e2e/agent-dock.test.mjs e2e/lang-coverage.test.mjs e2e/register.test.mjs e2e/social-arrival.test.mjs e2e/first-click.test.mjs e2e/social-three-view.test.mjs e2e/forge-room-views.test.mjs e2e/kandi-views.test.mjs e2e/kandi-state.test.mjs e2e/kandi-handlers.test.mjs e2e/artist-audio-showcase.test.mjs e2e/artist-audio-collection.test.mjs e2e/artist-audio-player.test.mjs
+      - name: Forge room — pinned Yjs convergence, late join and usable fallback
+        if: always()
+        working-directory: forge/visual/test
+        run: |
+          npm ci --ignore-scripts
+          node shared.test.mjs
+          node core.test.mjs
+          node --test room.test.mjs
+      - name: Voice worker — bounded queue and child lifetime
+        if: always()
+        working-directory: ops/voice-scribe
+        run: |
+          npm ci --ignore-scripts
+          npm test
+      - name: Box tunnel — renewable lease and scoped shutdown
+        if: always()
+        run: bash e2e/box-tunnel.test.sh
+      - name: Connect Store channel — auth and process-loss recovery
+        if: always()
+        working-directory: tools/connect-store
+        run: |
+          npm ci --ignore-scripts
+          npm test
+          npm run prove
+      - name: Recovery inventory — missing dependency + secret-free output
+        if: always()
+        run: bash e2e/recovery-inventory.test.sh
+      - name: Secret scanner — refused content stays out of logs
+        if: always()
+        run: bash e2e/secret-scan-output.test.sh
+      - name: Identity — PR head range excludes GitHub merge identity
+        if: always()
+        run: bash e2e/identity-pr-range.test.sh
       # Voucher/escrow engine battery (Seat-1 ledger core, merged 2026-08-29): tithe line,
       # refuse-before-write, derived balances, hash chain, tamper evidence
       - name: Voucher/escrow engine battery (moat ledger core)
@@ -142,11 +181,14 @@ jobs:
       # computed FAILS — the check fails closed. LIVES IN STATIC BY RULING;
       # the full-history checkout this job already carries (for dock-claims'
       # tree pin) is exactly what the range check needs.
-      - name: §7 identity — author is the founder on the pushed range
+      # A PR checkout is GitHub's synthetic merge, whose author is not the
+      # contributing seat. Check the real base..head commits, retaining the
+      # same founder-author/trailer rules and fail-closed ref resolution.
+      - name: §7 identity — author is the founder on the contributed range
         if: always()
         env:
-          S7_BEFORE: ${{ github.event.before }}
-          S7_SHA: ${{ github.sha }}
+          S7_BEFORE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          S7_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: sh scripts/identity-check.sh
 
   node:
@@ -159,10 +201,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Full history: the §7 pushed-range check needs origin/main..HEAD
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
       # The 26 include the pinned cross-implementation vector any Rust port
@@ -193,6 +235,26 @@ jobs:
           npx playwright --version
           npx playwright install --dry-run chromium
           npx playwright install --with-deps chromium
+      - name: Kandi — gift reliability and failure recovery
+        if: always()
+        working-directory: e2e
+        run: node kandi-gift.mjs
+      - name: Kandi — arm placement and legacy migration
+        if: always()
+        working-directory: e2e
+        run: node kandi-arms.mjs
+      - name: Kandi — two local handoffs
+        if: always()
+        working-directory: e2e
+        run: node kandi-crossing.mjs
+      - name: Kandi — preview and explicit keep
+        if: always()
+        working-directory: e2e
+        run: node kandi-arrival.mjs
+      - name: Kandi — bead composition
+        if: always()
+        working-directory: e2e
+        run: node kandi-thread.mjs
       - name: Onboarding e2e (Chromium + virtual authenticator w/ PRF)
         if: always()
         working-directory: e2e
