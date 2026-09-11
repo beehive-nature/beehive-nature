@@ -1,5 +1,13 @@
 # x0x #622 — pinned public-mesh Leaf egress capture: STAGED execution packet
 
+> **Review disposition: NOT ACCEPTED FOR EXECUTION.** Backend Astra's
+> independent review of `58aa4fc9` reproduced targeting and evidence failures,
+> identified an unscoped shutdown, and disproved the missing `message_kinds`
+> claim. Do not execute the commands below. See
+> [the review and correction requirements](../../docs/dispatches/2026-09-10-astra-x0x-622-packet-review.md).
+> The original proposal remains below as the record reviewed; it is not a
+> deployed runbook.
+
 Prepared by the zCode seat 2026-09-10 under the founder's measurement orders
 (`buzz-repair/2026-09-10/zcode-x0x-622-measurement-orders.md`). **NOT RUN.**
 No approved isolated measurement host exists: the oracle box is the
