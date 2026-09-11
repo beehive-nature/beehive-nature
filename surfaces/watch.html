@@ -150,6 +150,17 @@
   .roomhead .t { font-size: var(--t-micro); color: var(--faint);
     text-transform: uppercase; letter-spacing: .14em; }
   .roomhead b { color: var(--ink-hi); font-size: var(--t-small); }
+  .manifest-card { margin: var(--s2) var(--s3) 0; padding: var(--s2); border: 1px solid var(--line); border-radius: var(--r-md); background: var(--bg2); }
+  .manifest-top { display: flex; justify-content: space-between; gap: var(--s2); align-items: baseline; }
+  .manifest-card .t { color: var(--faint); font-size: var(--t-micro); text-transform: uppercase; letter-spacing: .12em; }
+  .manifest-state { color: var(--amber); font-size: var(--t-micro); text-transform: uppercase; }
+  .manifest-state.ok { color: var(--ok); }
+  .manifest-state.bad { color: var(--flag); }
+  .manifest-card p { margin-top: 5px; color: var(--dim); font-size: var(--t-law); }
+  .manifest-facts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: var(--s2); }
+  .manifest-facts div { min-width: 0; padding: 6px 8px; border-left: 2px solid var(--cyan); background: var(--well); }
+  .manifest-facts dt { color: var(--faint); font-size: var(--t-micro); text-transform: uppercase; }
+  .manifest-facts dd { overflow: hidden; color: var(--ink-hi); font-size: var(--t-small); text-overflow: ellipsis; white-space: nowrap; }
   #roomframe { flex: 1; width: 100%; border: 0; min-height: 340px;
     background: var(--bg0); }
   /* ── the ingest card (the streamer's register) ──────────────────────── */
@@ -252,6 +263,16 @@ ticker      curl -X POST http://127.0.0.1:18094/live/ticker/general \
     <div class="roomhead">
       <span class="t">the room</span> <b>#general · skaists.buzz</b>
     </div>
+    <section class="manifest-card" aria-live="polite" aria-label="shared room checkpoint">
+      <div class="manifest-top"><span class="t">shared checkpoint</span><span class="manifest-state" id="manifest-state">loading…</span></div>
+      <p id="manifest-copy">waiting for the verified Connect + Store envelope</p>
+      <dl class="manifest-facts">
+        <div><dt>channel</dt><dd id="manifest-channel">—</dd></div>
+        <div><dt>sequence</dt><dd id="manifest-sequence">—</dd></div>
+        <div><dt>checkpoint</dt><dd id="manifest-checkpoint">—</dd></div>
+        <div><dt>items</dt><dd id="manifest-items">—</dd></div>
+      </dl>
+    </section>
     <iframe id="roomframe" src="/join/" title="the skaists.buzz room"></iframe>
   </section>
 </div>
@@ -285,6 +306,38 @@ const state = {
   startedAt: 0, playedAt: 0, latSum: 0, latN: 0, latLast: null, kbps: null,
 };
 window.__watch = state; // the e2e reads its numbers here
+
+/* Shared manifest is a read-only room hint. It is validated before any
+   checkpoint fields are projected into the watch surface. This compact
+   browser copy mirrors surfaces/manifest-reader.js because watch.html is
+   deployed as a one-file surface. */
+function watchManifestRef(value) {
+  if (typeof value !== 'string' || value.length <= 16) return value;
+  return value.slice(0, 8) + '…' + value.slice(-6);
+}
+function watchManifest(envelope) {
+  if (!envelope || Array.isArray(envelope) || envelope.type !== 'bnr-manifest-envelope-v1' || envelope.version !== 1) throw new Error('manifest envelope refused');
+  const m = envelope.manifest, cp = m && m.checkpoint;
+  if (!m || Array.isArray(m) || !/^[a-z0-9-]{1,64}$/.test(m.channel) || !Number.isSafeInteger(m.epoch) || m.epoch < 0 || !Number.isSafeInteger(m.sequence) || m.sequence <= 0) throw new Error('manifest identity refused');
+  if (!cp || Array.isArray(cp) || !/^[0-9a-f]+$/.test(cp.id) || !/^[0-9a-f]+$/.test(cp.policy_id) || cp.sequence !== m.sequence || !cp.ref || cp.ref.address == null || cp.ref.sha256 == null || !Number.isSafeInteger(cp.ref.size) || cp.ref.size <= 0) throw new Error('manifest checkpoint refused');
+  if (!Array.isArray(m.encrypted_items) || m.encrypted_items.length < 1 || m.encrypted_items.length > 16 || new Set(m.encrypted_items.map(item => item && item.id)).size !== m.encrypted_items.length) throw new Error('manifest items refused');
+  if (!m.admission || m.admission.policy_id !== cp.policy_id || !['disabled', 'capped'].includes(m.admission.payment) || !['none', 'trezor'].includes(m.admission.approval)) throw new Error('manifest admission refused');
+  return envelope;
+}
+fetch('../fixtures/connect-store-manifest-envelope-v1.json', { cache: 'no-store' }).then((r) => { if (!r.ok) throw new Error('manifest fetch refused'); return r.json(); }).then(watchManifest).then((envelope) => {
+  const m = envelope.manifest;
+  $('manifest-state').textContent = 'verified';
+  $('manifest-state').className = 'manifest-state ok';
+  $('manifest-copy').textContent = 'checkpoint accepted; receiver handoff remains bounded and read-only';
+  $('manifest-channel').textContent = m.channel;
+  $('manifest-sequence').textContent = String(m.sequence);
+  $('manifest-checkpoint').textContent = watchManifestRef(m.checkpoint.id);
+  $('manifest-items').textContent = `${m.encrypted_items.length} encrypted`;
+}).catch((error) => {
+  $('manifest-state').textContent = 'refused';
+  $('manifest-state').className = 'manifest-state bad';
+  $('manifest-copy').textContent = error.message + '; no room state changed';
+});
 
 /* ── the four audit cells ────────────────────────────────────────────── */
 // 255 (and any unknown) = the record does not carry a verdict yet → nectar

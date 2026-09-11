@@ -235,6 +235,14 @@ jobs:
           npx playwright --version
           npx playwright install --dry-run chromium
           npx playwright install --with-deps chromium
+      # W@tch and PLUR consume the same language-neutral manifest. These
+      # browser proofs keep the adapter read-only: no relay, x0x, wallet,
+      # Autonomi write, or Trezor approval is opened by either surface.
+      - name: W@tch + PLUR manifest adapters — read-only browser proofs
+        if: always()
+        run: |
+          node e2e/zcode-jams-check.mjs
+          node e2e/zcode-watch-manifest-check.mjs
       - name: Kandi — gift reliability and failure recovery
         if: always()
         working-directory: e2e

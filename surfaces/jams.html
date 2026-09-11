@@ -159,8 +159,9 @@
 
 <footer>PLUR music jams · manifest-backed preview · <a href="plur.html">return to the floor</a> · <a href="../fixtures/connect-store-manifest-envelope-v1.json">inspect the shared envelope</a></footer>
 
-<script>
+<script type="module">
 'use strict';
+import { loadManifest, shortRef } from './manifest-reader.js';
 const $ = id => document.getElementById(id);
 const state = { manifest:null, joined:false, anim:null };
 const eventlog = $('eventlog');
@@ -171,23 +172,13 @@ function event(kind, message) {
   row.append(k,m); eventlog.prepend(row);
   while (eventlog.children.length > 4) eventlog.lastElementChild.remove();
 }
-function short(value) { return typeof value === 'string' ? (value.length > 16 ? value.slice(0,8)+'…'+value.slice(-6) : value) : '—'; }
-function validManifest(envelope) {
-  if (!envelope || envelope.type !== 'bnr-manifest-envelope-v1' || envelope.version !== 1) throw new Error('manifest envelope refused');
-  const m=envelope.manifest;
-  if (!m || !/^[a-z0-9-]{1,64}$/.test(m.channel) || !Number.isSafeInteger(m.epoch) || !Number.isSafeInteger(m.sequence)) throw new Error('manifest identity refused');
-  if (!m.checkpoint || m.checkpoint.sequence !== m.sequence || !m.admission || m.admission.policy_id !== m.checkpoint.policy_id) throw new Error('manifest policy refused');
-  if (!Array.isArray(m.encrypted_items) || !m.encrypted_items.length) throw new Error('manifest items refused');
-  const ids = new Set(); m.encrypted_items.forEach(item => { if (!item || ids.has(item.id)) throw new Error('manifest item refused'); ids.add(item.id); });
-  return envelope;
-}
 function paint(envelope) {
   const m=envelope.manifest, cp=m.checkpoint;
   state.manifest=envelope;
   $('status-dot').className='dot ok'; $('status').textContent='shared manifest verified'; $('status-note').textContent='· local preview';
-  $('room-title').textContent='PLUR · '+m.channel+' jam'; $('room-sub').textContent='checkpoint '+short(cp.id)+' · ready for a bounded late join';
+  $('room-title').textContent='PLUR · '+m.channel+' jam'; $('room-sub').textContent='checkpoint '+shortRef(cp.id)+' · ready for a bounded late join';
   $('f-channel').textContent=m.channel; $('f-epoch').textContent=m.epoch; $('f-sequence').textContent=m.sequence; $('f-items').textContent=m.encrypted_items.length;
-  $('m-id').textContent=short(cp.id); $('m-policy').textContent=short(cp.policy_id); $('m-address').textContent=short(cp.ref.address); $('m-size').textContent=cp.ref.size.toLocaleString()+' B';
+  $('m-id').textContent=shortRef(cp.id); $('m-policy').textContent=shortRef(cp.policy_id); $('m-address').textContent=shortRef(cp.ref.address); $('m-size').textContent=cp.ref.size.toLocaleString()+' B';
   $('g-payment').textContent=m.admission.payment; $('g-approval').textContent=m.admission.approval === 'trezor' ? 'Trezor downstream' : m.admission.approval; $('g-cap').textContent=m.admission.max_bytes.toLocaleString()+' B · '+m.admission.max_items+' items';
   $('creator').textContent=m.credits.creator[0]?.display_name || 'unnamed creator'; $('creator-key').textContent='creator credit · key verified by the reader';
   $('source-title').textContent=m.credits.source[0]?.title || 'source credit'; $('source-uri').textContent=m.credits.source[0]?.uri || '—';
@@ -203,7 +194,7 @@ function draw() {
 }
 $('join').addEventListener('click', () => { if(!state.manifest) return; state.joined=!state.joined; $('join').textContent=state.joined?'leave preview':'join this jam'; $('room-foot').textContent=state.joined?'you are in the local room preview · no write was attempted':'nothing has been joined yet'; event(state.joined?'JOIN':'LEAVE',state.joined?'local participant joined; receiver handoff remains pending':'local participant left'); });
 draw();
-fetch('../fixtures/connect-store-manifest-envelope-v1.json', {cache:'no-store'}).then(r => { if(!r.ok) throw new Error('manifest fetch refused'); return r.json(); }).then(validManifest).then(paint).catch(err => { $('status-dot').className='dot bad'; $('status').textContent='manifest unavailable'; $('status-note').textContent='· '+err.message; event('REFUSED','no room state changed'); });
+loadManifest().then(paint).catch(err => { $('status-dot').className='dot bad'; $('status').textContent='manifest unavailable'; $('status-note').textContent='· '+err.message; event('REFUSED','no room state changed'); });
 </script>
 <script src="tour.js?v=41"></script>
 </body>

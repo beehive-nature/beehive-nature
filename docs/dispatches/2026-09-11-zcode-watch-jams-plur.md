@@ -42,10 +42,29 @@ PLUR page has no `.rib` timeline markup, and this slice only adds one link to
 the existing hero; the failure is recorded as a pre-existing test/page drift,
 not silently called a Jam failure.
 
+## W@tch parity slice
+
+The existing W@tch page now projects the same manifest contract beside its
+room iframe. The page keeps its one-file deployment shape, so its small
+browser validator is inline; the shared module at
+`surfaces/manifest-reader.js` is used by the Jam page and carries the full
+strict shape checks. W@tch only reads the fixture, shows channel/sequence,
+bounded checkpoint identity, and encrypted item count, and leaves the live
+HLS, room, meter, and pause-not-kill paths unchanged.
+
+`node e2e/zcode-watch-manifest-check.mjs` — **6 passed, 0 failed** — proves
+the W@tch projection against a local fixture server and asserts that it emits
+no POST and opens no raw `/ws`. The Jam check remains **14 passed, 0 failed**.
+The hosted Node job runs both proofs after the pinned Playwright setup.
+
 ## Boundary and next build
 
 This is a client-facing contract slice, not a live Jam transport. The next
 bounded step is to add a browser adapter that receives one opaque checkpoint
 through the accepted receiver and follows it into a verified read-only channel
-snapshot. Payment admission must calculate a complete capped cost before any
-funded write is enabled; Trezor approval remains downstream of that decision.
+snapshot. The current W@tch production deployment is still the runbook's
+one-file `/srv/watch/index.html`; publishing the fixture endpoint alongside
+that file is part of the deployment step before the new card is expected to
+show `verified` on the live box. Payment admission must calculate a complete
+capped cost before any funded write is enabled; Trezor approval remains
+downstream of that decision.
