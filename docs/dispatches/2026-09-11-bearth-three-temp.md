@@ -30,6 +30,15 @@ Re-poke criteria: New bee ZERO cypher masthead leak; `#bregctl` and
 `#blangctl` painted on first paint. Raver / Cypherpunk first paints
 unchanged in substance.
 
+## Estate three-temperature pack (same day)
+
+Aligned to atlas / gallery chrome, forge/room `applyReading` +
+`data-view-disclosure`, and ant-door PR #44 (same facts; temperature
+is what is first). Locked LoVis copy unchanged. Remaining first-paint
+drift: the page footer said “every number here is a dial” on New bee
+arrival because the stack is short. Footer is now hidden on bee/raver
+arrival and stays on deepen / cypherpunk — same DOM, later proof.
+
 ## Re-poke receipts (same day, after the shell fix)
 
 Served `surfaces/` at `http://127.0.0.1:8765/bearth.html`. Confirmed
