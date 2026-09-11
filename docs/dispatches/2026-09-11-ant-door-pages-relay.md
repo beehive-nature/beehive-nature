@@ -46,14 +46,19 @@ Gallery chrome pattern: experience nav, visible language host, expandable
 connect-count are rewritten by `speak()` on load, paint, fail, and
 `bregister`.
 
-- **New bee:** commons-short. Look / Feel / Choose. No builder jargon
-  (no CORS, WASM, proxy, Pages, same-origin, daemon, DataMap, `/ant/v1`).
-  Hex address is hidden. Live badge is `Here`. Fail is “Not this time.”
-- **Raver:** garden / dusk / bloom / body / hunger. Celebration when the
-  public picture lands (`It bloomed`). Empathic imagery, not a protocol
-  lecture. No invented medical or dosing copy.
+- **New bee:** one image/bytes moment. Heading + picture + `Here` /
+  “It arrived.” No Look/Feel/Choose lecture cards. Rooms sit in a
+  closed disclosure. No builder jargon. Hex hidden. Sceptical commons,
+  short for 26 languages.
+- **Raver:** garden / dusk / bloom / body / hunger celebration when
+  the picture lands (`It bloomed`). Builder truth is optional
+  (`How it found you`, closed). No invented medical or dosing copy.
 - **Cypherpunk:** door vs WASM, `/ant` proxy, `relay.skaists.dev`,
-  network-tab story, hop badge `N BYTES · RELAY|SAME-ORIGIN · LIVE`.
+  network-tab story and atlas rooms open by default.
+
+Same `data-view-disclosure` / `defaultOpen` law as gallery and
+`forge/room.html`. bEarth’s pattern: one honest hero moment first;
+depth is a choice.
 
 Pages→relay fetch is unchanged (`doorBases`, `isPagesHtml`, `?door=`).
 
@@ -103,9 +108,10 @@ scripts/build-atlas.mjs` rebuilt the hub so the atlas card matches.
 
 ```
 node --test e2e/ant-door-pages.test.mjs
-# tests 8  pass 8  fail 0
-# (3 new: New bee jargon lock, Raver celebration lock,
-#  Cypherpunk door/WASM/relay/network-tab lock)
+# tests 9  pass 9  fail 0
+# (view-copy locks + progressive-disclosure lock:
+#  bee first paint is one image moment; raver road is optional;
+#  cypherpunk record+rooms default open)
 
 node e2e/ant-door-poke.mjs --check
 PASS proxied door HTTP 200

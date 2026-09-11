@@ -14,7 +14,7 @@ const articles = [...atlas.matchAll(/<article class="srf"[\s\S]*?<\/article>/g)]
 
 test("public Autonomi address stays the documented DataMap", () => {
   assert.match(page, new RegExp(ADDR + ".*PUBLIC-CONSTANT"));
-  assert.match(page, /autonomi:\/\/711c7e20006ff3e0ac6c1f3063286a0c1a3e4c409642e8c526173fa60bb7078a/);
+  assert.match(page, /autonomi:\/\/711c7e20006ff3e0ac6c1f3063286a0c1a3e4c409642e8c526173fa60bb7078a/); // PUBLIC-CONSTANT
 });
 
 test("Pages hosts use the relay door; local poke can stay same-origin", () => {
@@ -94,21 +94,35 @@ function speakBranches(html, view) {
 
 const JARGON = /CORS|WASM|\bproxy\b|GitHub Pages|same-origin|daemon|GET-only|DataMap|\/ant\/v1|\bantd\b|Caddy/i;
 
-test("New bee copy stays commons-short and free of builder jargon", () => {
+test("New bee first paint is one image moment — no protocol cards", () => {
   const markup = [
     collectAttrBlocks(page, "data-view", "bee"),
     collectAttrBlocks(page, "data-reg", "bee"),
   ].join("\n");
-  assert.match(markup, /Look/);
-  assert.match(markup, /Feel/);
-  assert.match(markup, /Choose/);
+  assert.match(markup, /Look first\./);
+  assert.doesNotMatch(markup, /<h2>Look<\/h2>|<h2>Feel<\/h2>|<h2>Choose<\/h2>/);
+  assert.doesNotMatch(page, /<section class="truth" data-reg="bee"/);
   assert.doesNotMatch(markup, JARGON);
   const beeSpeak = speakBranches(page, "bee");
-  assert.match(beeSpeak, /It arrived\. Look, then choose if you want\./);
-  assert.match(beeSpeak, /Not this time\. You can try again\./);
-  assert.match(page, /Many rooms\./);
+  assert.match(beeSpeak, /It arrived\./);
+  assert.match(beeSpeak, /Not this time\./);
   assert.doesNotMatch(beeSpeak, JARGON);
   assert.doesNotMatch(beeSpeak, /BYTES|UNREACHABLE|SAME-ORIGIN|RELAY/);
+});
+
+test("progressive disclosure: bee closed, raver optional road, cypherpunk full", () => {
+  assert.match(page, /data-view-disclosure="road"/);
+  assert.match(page, /data-view-disclosure="rooms"/);
+  assert.match(page, /data-view-disclosure="record"/);
+  assert.match(page, /function defaultOpen/);
+  assert.match(page, /reading === "cypherpunk"/);
+  assert.match(page, /How it found you/);
+  const start = page.indexOf("function defaultOpen");
+  const end = page.indexOf("function applyReading");
+  const fn = page.slice(start, end);
+  assert.match(fn, /kind === "record"/);
+  assert.match(fn, /kind === "rooms"/);
+  assert.match(fn, /return false/);
 });
 
 test("Raver copy celebrates the picture; no protocol lecture", () => {
