@@ -1,8 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
-import { BoundedHttp, AutonomiReadStore, X0xNotifications } from './adapters.mjs';
+import { once } from 'node:events';
+import { WebSocketServer } from 'ws';
+import { getPublicKey } from 'nostr-tools/pure';
+import { BoundedHttp, AutonomiReadStore, X0xNotifications, X0xCheckpointReceiver } from './adapters.mjs';
 import { hash, encode, fetchRef } from './core.mjs';
+import { fixture } from './test-support.mjs';
 
 async function spy(t, handler) {
   const calls = [];
@@ -15,6 +19,31 @@ async function spy(t, handler) {
   t.after(async () => { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); });
   return { calls, base: `http://127.0.0.1:${server.address().port}` };
 }
+
+async function x0xFixture(t, { group, message, origin }) {
+  const topic = `x0x.groups.public.${group}`;
+  const seen = { authorization: null, subscribe: null };
+  const wss = new WebSocketServer({ host: '127.0.0.1', port: 0 });
+  wss.on('connection', (ws, request) => {
+    seen.authorization = request.headers.authorization;
+    ws.send(JSON.stringify({ type: 'connected', session_id: 'synthetic-session', agent_id: 'a'.repeat(64) }));
+    ws.on('message', raw => {
+      const command = JSON.parse(raw.toString());
+      if (command.type !== 'subscribe') return;
+      seen.subscribe = command;
+      ws.send(JSON.stringify({ type: 'subscribed', topics: command.topics }));
+      const frame = { type: 'message', topic, payload: Buffer.from(JSON.stringify(message)).toString('base64') };
+      if (origin !== undefined) frame.origin = origin;
+      setImmediate(() => ws.send(JSON.stringify(frame)));
+    });
+  });
+  await once(wss, 'listening');
+  t.after(async () => {
+    for (const client of wss.clients) client.terminate();
+    await new Promise(resolve => wss.close(resolve));
+  });
+  return { url: `ws://127.0.0.1:${wss.address().port}`, seen };
+}
 test('production x0x adapter sends only the exact checkpoint notice and refuses extra plaintext fields', async t => {
   const api = await spy(t, (req, res) => { res.setHeader('content-type', 'application/json'); res.end('{"ok":true}'); });
   const http = new BoundedHttp(api.base, { token: 'synthetic-scoped-token' }); const group = hash('isolated group');
@@ -26,6 +55,51 @@ test('production x0x adapter sends only the exact checkpoint notice and refuses 
   assert.equal(api.calls[0].authorization, 'Bearer synthetic-scoped-token');
   await assert.rejects(bus.publish({ ...notice, content: 'private message' }), /invalid-fields/);
   assert.equal(api.calls.length, 1);
+});
+
+test('x0x receiver follows an opaque checkpoint from the actual WS protocol', async t => {
+  const f = await fixture(); t.after(() => f.close()); const writer = f.create();
+  const stored = await writer.publish(getPublicKey(f.alice), f.message(f.alice));
+  const group = hash('synthetic x0x group');
+  const message = { group_id: group, state_hash_at_send: 'state', revision_at_send: 1,
+    author_agent_id: 'a'.repeat(64), author_public_key: 'b'.repeat(128), author_user_id: null,
+    kind: 'announcement', body: JSON.stringify({ type: 'bnr-channel-checkpoint-v1', ...stored.checkpoint }),
+    timestamp: Date.now(), signature: 'c'.repeat(128) };
+  const daemon = await x0xFixture(t, { group, message }); const reader = f.create({ writer: undefined });
+  const receiver = new X0xCheckpointReceiver({ wsUrl: daemon.url, token: 'synthetic-bearer-token', group, channel: reader });
+  const result = await receiver.receiveOnce();
+  assert.deepEqual(result.checkpoint, stored.checkpoint); assert.deepEqual(reader.pin, stored.checkpoint);
+  assert.equal(reader.query(getPublicKey(f.alice), [{ '#h': [f.channel] }]).length, 1);
+  assert.equal(daemon.seen.authorization, 'Bearer synthetic-bearer-token');
+  assert.deepEqual(daemon.seen.subscribe, { type: 'subscribe', topics: [`x0x.groups.public.${group}`] });
+});
+
+test('x0x receiver exposes no state when a checkpoint hint fails Channel.follow', async t => {
+  const f = await fixture(); t.after(() => f.close()); const writer = f.create();
+  const stored = await writer.publish(getPublicKey(f.alice), f.message(f.alice));
+  const group = hash('synthetic x0x group with bad hint');
+  const badNotice = { type: 'bnr-channel-checkpoint-v1', ...stored.checkpoint,
+    ref: { ...stored.checkpoint.ref, sha256: hash('wrong object') } };
+  const message = { group_id: group, state_hash_at_send: 'state', revision_at_send: 1,
+    author_agent_id: 'a'.repeat(64), author_public_key: 'b'.repeat(128), author_user_id: null,
+    kind: 'announcement', body: JSON.stringify(badNotice), timestamp: Date.now(), signature: 'c'.repeat(128) };
+  const daemon = await x0xFixture(t, { group, message }); const reader = f.create({ writer: undefined });
+  const receiver = new X0xCheckpointReceiver({ wsUrl: daemon.url, token: 'synthetic-bearer-token', group, channel: reader });
+  await assert.rejects(receiver.receiveOnce(), /object-integrity/);
+  assert.equal(reader.pin, null);
+  assert.deepEqual(reader.query(getPublicKey(f.alice), [{ '#h': [f.channel] }]), []);
+});
+
+test('x0x receiver refuses unsafe endpoints and unbounded receive budgets', () => {
+  const channel = { follow() {} }; const group = hash('receiver validation');
+  for (const wsUrl of ['ws://remote.example', 'wss://user@remote.example', 'wss://remote.example/path',
+    'ws://127.0.0.1:12345?token=secret']) {
+    assert.throws(() => new X0xCheckpointReceiver({ wsUrl, token: 'token', group, channel }), /unsafe-x0x-endpoint/);
+  }
+  for (const options of [{ maxMessages: 0 }, { maxMessages: 999 }, { timeoutMs: 0 }, { timeoutMs: 30001 }]) {
+    assert.throws(() => new X0xCheckpointReceiver({ wsUrl: 'ws://127.0.0.1:12345', token: 'token', group, channel, ...options }),
+      /invalid-x0x-receiver-budget/);
+  }
 });
 test('production Autonomi read path validates retrieved bytes, and paid writes make zero requests', async t => {
   const bytes = Buffer.from('encrypted test object, no user content');

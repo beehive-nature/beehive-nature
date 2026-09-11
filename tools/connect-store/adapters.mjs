@@ -1,5 +1,6 @@
 import { mkdir, open, lstat } from 'node:fs/promises';
 import path from 'node:path';
+import WebSocket from 'ws';
 import { hash, hex, exact, requireThat, parse, encode, LIMITS } from './core.mjs';
 
 // A local content-addressed fixture, not an Autonomi implementation. Separate
@@ -120,5 +121,119 @@ export class X0xNotifications {
     const result = await this.http.request('POST', `/groups/${this.group}/send`, { body: JSON.stringify(notice), kind: 'announcement' });
     requireThat(result?.ok === true, 'x0x-not-accepted', 502);
     // x0xd acceptance is not evidence that a remote member received it.
+  }
+}
+
+function strictBase64(value) {
+  requireThat(typeof value === 'string' && value.length > 0 && value.length <= 4 * LIMITS.checkpoint,
+    'invalid-x0x-payload');
+  requireThat(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value),
+    'invalid-x0x-payload');
+  const bytes = Buffer.from(value, 'base64');
+  requireThat(bytes.length > 0 && bytes.length <= LIMITS.checkpoint, 'invalid-x0x-payload');
+  requireThat(bytes.toString('base64') === value, 'invalid-x0x-payload');
+  return bytes;
+}
+
+function parseCheckpointMessage(raw, group) {
+  const bytes = Buffer.isBuffer(raw) ? raw : Buffer.from(raw);
+  requireThat(bytes.length <= LIMITS.checkpoint * 4, 'x0x-frame-limit', 413);
+  const frame = parse(bytes, LIMITS.checkpoint * 4);
+  requireThat(frame && !Array.isArray(frame) && typeof frame === 'object'
+    && Object.keys(frame).every(k => ['type', 'topic', 'payload', 'origin'].includes(k))
+    && frame.type === 'message' && typeof frame.topic === 'string'
+    && typeof frame.payload === 'string' && frame.topic === `x0x.groups.public.${group}`,
+  'invalid-x0x-frame');
+  const payload = strictBase64(frame.payload);
+  const message = parse(payload, LIMITS.checkpoint);
+  requireThat(message && !Array.isArray(message) && typeof message === 'object'
+    && message.group_id === group && message.kind === 'announcement'
+    && typeof message.body === 'string'
+    && Buffer.byteLength(message.body, 'utf8') <= LIMITS.checkpoint
+    && typeof message.author_agent_id === 'string' && message.author_agent_id.length > 0
+    && typeof message.author_public_key === 'string' && message.author_public_key.length > 0
+    && typeof message.signature === 'string' && message.signature.length > 0,
+    'invalid-x0x-message');
+  const notice = parse(Buffer.from(message.body, 'utf8'), LIMITS.checkpoint);
+  exact(notice, ['type', 'id', 'sequence', 'policy_id', 'ref']);
+  exact(notice.ref, ['address', 'sha256', 'size']);
+  requireThat(notice.type === 'bnr-channel-checkpoint-v1', 'invalid-checkpoint-notice');
+  return notice;
+}
+
+// Receives only opaque checkpoint hints from the pinned x0x WS protocol. The
+// hint is never trusted as state: Channel.follow re-fetches the referenced
+// objects, verifies the checkpoint signature, decrypts and validates the full
+// snapshot, and changes visible state only after every check succeeds.
+export class X0xCheckpointReceiver {
+  constructor({ wsUrl, token, group, channel, maxMessages = 64, timeoutMs = 10000, WebSocketClass = WebSocket }) {
+    const url = new URL(wsUrl);
+    requireThat(url.origin === wsUrl && !url.username && !url.password && !url.search && !url.hash
+      && (url.protocol === 'wss:' || (url.protocol === 'ws:' && ['127.0.0.1', '[::1]'].includes(url.hostname))),
+    'unsafe-x0x-endpoint');
+    requireThat(typeof token === 'string' && token.length > 0 && token.length <= 4096, 'invalid-x0x-token');
+    requireThat(hex(group) && channel && typeof channel.follow === 'function', 'invalid-x0x-receiver');
+    requireThat(Number.isSafeInteger(maxMessages) && maxMessages >= 1 && maxMessages <= 256
+      && Number.isSafeInteger(timeoutMs) && timeoutMs >= 1 && timeoutMs <= 30000, 'invalid-x0x-receiver-budget');
+    requireThat(typeof WebSocketClass === 'function', 'invalid-x0x-websocket');
+    this.wsUrl = wsUrl; this.token = token; this.group = group; this.channel = channel;
+    this.maxMessages = maxMessages; this.timeoutMs = timeoutMs; this.WebSocketClass = WebSocketClass;
+    this.topic = `x0x.groups.public.${group}`;
+  }
+
+  async receiveOnce() {
+    const ws = new this.WebSocketClass(this.wsUrl, {
+      headers: { authorization: `Bearer ${this.token}` },
+      handshakeTimeout: this.timeoutMs,
+    });
+    return new Promise((resolve, reject) => {
+      let settled = false; let subscribed = false; let seen = 0; let processing = false;
+      const timer = setTimeout(() => finish(new Error('x0x-receive-timeout')), this.timeoutMs);
+      const finish = (err, value) => {
+        if (settled) return;
+        settled = true; clearTimeout(timer);
+        ws.removeAllListeners();
+        if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) ws.close();
+        if (err) reject(err); else resolve(value);
+      };
+      ws.on('open', () => {
+        try { ws.send(JSON.stringify({ type: 'subscribe', topics: [this.topic] })); }
+        catch { finish(new Error('x0x-subscribe-failed')); }
+      });
+      ws.on('error', () => finish(new Error('x0x-connection-failed')));
+      ws.on('close', () => { if (!settled) finish(new Error('x0x-connection-closed')); });
+      ws.on('message', async (raw, isBinary) => {
+        if (settled) return;
+        try {
+          requireThat(!isBinary && ++seen <= this.maxMessages, 'x0x-message-budget', 429);
+          const bytes = Buffer.isBuffer(raw) ? raw : Buffer.from(raw);
+          requireThat(bytes.length <= LIMITS.checkpoint * 4, 'x0x-frame-limit', 413);
+          const frame = parse(bytes, LIMITS.checkpoint * 4);
+          if (frame?.type === 'connected') exact(frame, ['type', 'session_id', 'agent_id']);
+          else if (frame?.type === 'subscribed') exact(frame, ['type', 'topics']);
+          else if (frame?.type === 'error') exact(frame, ['type', 'message']);
+          else requireThat(frame && !Array.isArray(frame) && typeof frame === 'object'
+            && Object.keys(frame).every(k => ['type', 'topic', 'payload', 'origin'].includes(k)),
+          'invalid-x0x-frame');
+          if (frame.type === 'connected') return;
+          if (frame.type === 'subscribed') {
+            requireThat(Array.isArray(frame.topics) && frame.topics.length === 1 && frame.topics[0] === this.topic,
+              'invalid-x0x-subscription');
+            subscribed = true; return;
+          }
+          if (frame.type === 'error') throw new Error('x0x-daemon-error');
+          requireThat(subscribed, 'x0x-protocol-order');
+          requireThat(frame && !Array.isArray(frame) && typeof frame === 'object'
+            && Object.keys(frame).every(k => ['type', 'topic', 'payload', 'origin'].includes(k))
+            && frame.type === 'message' && frame.topic === this.topic && typeof frame.payload === 'string',
+          'invalid-x0x-frame');
+          if (processing) throw new Error('x0x-concurrent-message');
+          processing = true;
+          const notice = parseCheckpointMessage(bytes, this.group);
+          const pin = await this.channel.follow(notice);
+          finish(null, { checkpoint: pin, notice });
+        } catch (err) { finish(err); }
+      });
+    });
   }
 }

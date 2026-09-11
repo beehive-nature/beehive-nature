@@ -107,6 +107,17 @@ and signatures before exposing its events.
 - An authenticated query response carries `x-bnr-checkpoint`; existing Buzz clients
   do not yet persist that header, so client recovery-pin support still needs work.
 
+`X0xCheckpointReceiver` is the first receive-side seam for a replacement gateway.
+It opens the pinned x0x `/ws` protocol with a bearer token in the HTTP header,
+subscribes to exactly `x0x.groups.public.<group_id>`, accepts only the documented
+JSON `message` frame and base64 payload, and extracts the announcement body's
+opaque checkpoint hint. The hint is passed directly to `Channel.follow`; the
+receiver never treats an x0x delivery acknowledgement as storage or recovery
+evidence. Socket frames, payload bytes, and message count are bounded, and a
+malformed or out-of-order frame fails closed. The caller tests use a real
+WebSocket server fixture matching the pinned x0x 0.41.3 frame shape, including
+the optional `origin` field.
+
 This does not implement Buzz onboarding, channel metadata/membership events,
 moderation, search, presence, huddle, workflows, agent execution or full Blossom
 upload semantics. The installed apps cannot yet use it as a complete workspace.
@@ -136,7 +147,8 @@ Idempotent event and file identities provide separate duplicate protection here.
 
 - `X0xNotifications` implements the 0.41.3 SignedPublic group send contract;
   production method is exercised against a capturing HTTP server. Receiving a
-  notice on another x0x participant and driving `follow` still needs a receiver.
+  notice on another x0x participant and driving `follow` is covered locally by
+  `X0xCheckpointReceiver`; public participant delivery is still unproven.
 - `AutonomiReadStore` implements antd 0.12.0 public data retrieval and independent
   hash verification. Tests exercise its actual HTTP caller. **Writes fail before
   any request**: auto-paying uploads do not accept an atomic operator cost ceiling.
