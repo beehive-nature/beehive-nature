@@ -4,6 +4,32 @@ Seat: Grok / Cursor cloud agent. Lane: adapter #1 in the estate
 order (bEarth → WELLness → Symposium → Hexagon → remaining doors).
 Branch: `cursor/bearth-three-temp-d797`.
 
+## Visual QA must-fix (same day, local poke `http://127.0.0.1:8765/bearth.html`)
+
+New bee soft-failed: the cypherpunk masthead `.sub[data-reg=cypherpunk]`
+leaked N₂O / IPCC prose above the fold. Root cause: `tour.js` loaded
+register/lang from the production `/surfaces/` alias, which 404s when
+the server root *is* `surfaces/`. `#bregctl` never mounted, so
+register scoping never applied; `#blangctl` stayed in the overflow
+`#tbar` (or never loaded).
+
+Cure, in tree:
+
+- `bearth.html` now carries the estate `[data-reg]:not(body){display:none}`
+  + matching revert **inline**, so a cypher-only leaf cannot FOUC if
+  register is late or fails.
+- Page-owned `#bregbar` with `data-register-host` and
+  `data-language-host` (atlas mast-nav / gallery top-nav). Language
+  picker mounts in first-paint chrome, not `#tbar`.
+- `tour.js` sibling riders (`register.js`, `lang.js`, `rails-badge.js`)
+  now resolve from `document.currentScript.src`. Tour-bar hrefs still
+  use `R`. Estate law still one `tour.js` loader — no extra register
+  script tag.
+
+Re-poke criteria: New bee ZERO cypher masthead leak; `#bregctl` and
+`#blangctl` painted on first paint. Raver / Cypherpunk first paints
+unchanged in substance.
+
 This is a presentation adapter, not a new model. The demand arithmetic,
 FAO cropland denominator (1,581 Mha), recovery/yield defaults, N₂O
 emission-factor dial, refutation tables and source list are the same

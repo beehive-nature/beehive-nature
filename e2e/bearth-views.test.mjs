@@ -111,6 +111,23 @@ test('keyed first-paint English matches the corpus; every tongue has a cell', ()
   }
 });
 
+test('language-first shell hosts register and language; cypher masthead cannot leak on New bee', () => {
+  assert.match(page, /<script src="tour\.js\?v=41"><\/script>/);
+  assert.match(page, /\[data-reg\]:not\(body\)\{display:none\}/);
+  assert.match(page, /body\[data-reg="bee"\] \[data-reg="bee"\],\s*body\[data-reg="raver"\] \[data-reg="raver"\],\s*body\[data-reg="cypherpunk"\] \[data-reg="cypherpunk"\]\{display:revert\}/);
+  assert.match(page, /class="sub" data-reg="cypherpunk"/);
+  assert.match(page, /N₂O emission-factor dial/);
+  const bee = extractById(page, 'first-bee');
+  assert.doesNotMatch(bee, /data-language-host|data-register-host|id="blangsel"/);
+  assert.doesNotMatch(bee, /N₂O|N2O|IPCC|REFUTED/);
+  const bar = extractById(page, 'bregbar');
+  assert.match(bar, /data-register-host/);
+  assert.match(bar, /data-language-host/);
+  assert.doesNotMatch(bar, /N₂O|IPCC|REFUTED/);
+  assert.match(tour, /assetBase\+'register\.js\?v=9'/);
+  assert.match(tour, /assetBase\+'lang\.js\?v=25'/);
+});
+
 test('beats and sources disclosure remember per view instead of resetting', () => {
   assert.match(page, /var readingChoices=new Map\(\)/);
   assert.match(page, /var beatChoices=new Map\(\)/);

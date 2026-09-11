@@ -23,8 +23,14 @@
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{overflow-x:hidden}
-body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;padding:26px 13px 80px}
-main{max-width:1000px;margin:0 auto}
+body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;padding:0 0 80px}
+main{max-width:1000px;margin:0 auto;padding-inline:13px}
+/* Estate register scoping — INLINE so a cypher-only leaf cannot FOUC or leak
+   if register.js is late or fails. Same contract as surfaces/register.js. */
+[data-reg]:not(body){display:none}
+body[data-reg="bee"] [data-reg="bee"],
+body[data-reg="raver"] [data-reg="raver"],
+body[data-reg="cypherpunk"] [data-reg="cypherpunk"]{display:revert}
 header{text-align:center}
 h1{font-size:clamp(19px,5vw,30px);color:var(--gold);font-weight:400;letter-spacing:.03em}
 .sub{color:var(--dim);font-size:11.5px;margin-top:8px;max-width:730px;margin-inline:auto;line-height:1.8}
@@ -82,7 +88,7 @@ td.n{color:var(--ink)}
 .card{background:var(--well);border:1px solid var(--line);border-radius:9px;padding:12px 13px}
 .card h4{font-size:10px;font-weight:400;letter-spacing:.06em;margin-bottom:7px}
 .card p{font-size:11px;line-height:1.85;color:var(--ink)}
-footer{max-width:1000px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
+footer{max-width:1000px;margin:22px auto 0;padding-inline:13px;color:var(--faint);font-size:10px;text-align:center;line-height:2}
 
 [hidden]{display:none!important}
 .door{appearance:none;display:inline-flex;align-items:center;justify-content:center;min-height:44px;
@@ -151,9 +157,28 @@ body[data-reg="cypherpunk"] #sources-panel{border:1px dashed var(--line);border-
 body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44px;display:flex;align-items:center}
 #sources-panel{margin-top:14px}
 #sources-panel summary{cursor:pointer;min-height:44px;display:flex;align-items:center;color:var(--violet)}
+
+/* Page-owned language+view chrome (atlas mast-nav / gallery top-nav).
+   lang.js mounts #blangctl into [data-language-host]; register.js mounts
+   #bregctl into [data-register-host]. Keep both out of #first-bee. */
+#bregdescription{position:absolute;display:block;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+.bearth-language[data-language-host]{display:flex;align-items:center;margin-inline-start:auto;max-width:100%}
+.bearth-language #blangctl{margin:0!important;padding:0!important;border:0!important;flex-wrap:wrap}
+.bearth-language #blangsel{
+  min-height:44px!important;min-width:11rem;max-width:100%!important;padding:8px 12px!important;
+  background:var(--reg-bg,var(--panel))!important;color:var(--reg-ink,var(--ink))!important;
+  border:1px solid var(--reg-line,var(--line))!important;font:inherit!important
+}
+.bearth-language #blangnote{white-space:normal!important;color:var(--reg-ink,var(--dim))!important;font:.75rem/1.4 inherit!important}
 </style>
 </head>
 <body data-reg="bee" data-bee-theme="custom" data-bearth-beat="arrival">
+<div id="bregbar">
+  <a class="breg-home" href="index.html" aria-label="skaists home">⬡ skaists</a>
+  <div data-register-host aria-describedby="bregdescription"></div>
+  <span id="bregdescription" data-i18n="atlas.view">Choose how this page speaks to you</span>
+  <span class="bearth-language" data-language-host></span>
+</div>
 <main>
 <header id="masthead">
   <h1>🜃 <span data-i18n="bearth.mark">bEarth</span></h1>
