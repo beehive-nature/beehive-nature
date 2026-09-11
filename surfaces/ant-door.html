@@ -348,7 +348,14 @@ function loadAtlasConnect(){
           cards.appendChild(card);
           n++;
         });
-        if(!cards.children.length) return;
+            if(!cards.children.length){
+              const openSeat = fam.querySelector(".open-seat");
+              if(!openSeat) return;
+              const p = document.createElement("p");
+              p.className = "connect-lead";
+              p.textContent = (openSeat.textContent || "").trim();
+              cards.appendChild(p);
+            }
         const famWrap = document.createElement("details");
         famWrap.className = "connect-fam";
         const reg = document.body.getAttribute("data-reg") || "bee";

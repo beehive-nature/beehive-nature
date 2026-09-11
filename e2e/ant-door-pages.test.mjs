@@ -40,6 +40,7 @@ test("post-success connect cards are parsed from the atlas, not invented", () =>
   assert.match(page, /fetch\(new URL\("index\.html"/);
   assert.match(page, /article\.srf/);
   assert.match(page, /a\.surface-link/);
+  assert.match(page, /\.open-seat/);
   assert.match(page, /ant-door omitted/);
   assert.match(page, /ant-door\\?\.html/);
   const published = estate.surfaces.filter((s) => s.presented !== false);
