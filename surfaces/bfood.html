@@ -111,19 +111,19 @@ footer{max-width:1000px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
 <body>
 <main>
 <header>
-  <h1>⬡ THE bFOOD HEXAGON</h1>
-  <div class="sub" data-reg="bee">This is your food, drawn honestly. Tell it your height and
+  <h1>⬡ <span data-i18n="bf.h1">THE bFOOD HEXAGON</span></h1>
+  <div class="sub" data-reg="bee" data-i18n="bf.bee">This is your food, drawn honestly. Tell it your height and
   weight, and every cell below fills up by how much of each nutrient today's food really gave
   <i>you</i> — not an average person, you. Where science doesn't know a number, the cell says so
   instead of pretending. <b style="color:var(--ink)">That's the whole trick: nothing unmeasured
   is ever drawn as zero.</b></div>
-  <div class="sub" data-reg="raver">The food pyramid drew <b style="color:var(--ink)">food
+  <div class="sub" data-reg="raver" data-i18n="bf.rav">The food pyramid drew <b style="color:var(--ink)">food
   groups</b> and drew the same picture for every human alive. This draws
   <b style="color:var(--ink)">the nutrients your body actually requires</b> — one cell per
   nutrient, computed from your height, weight, age, sex and activity — and fills each cell by
   how much of it today's food really delivered. <b style="color:var(--ink)">Nothing unmeasured
   is ever drawn as zero.</b></div>
-  <div class="sub" data-reg="cypherpunk">40 cells = the NASEM/IOM DRI set (EER via the 2023
+  <div class="sub" data-reg="cypherpunk" data-i18n="bf.cy">40 cells = the NASEM/IOM DRI set (EER via the 2023
   equations, protein 0.8 g/kg, nine EAAs in mg/kg — the only body-scaled rows) against USDA
   FoodData Central composition, per record ID, refetchable. Three render states, never
   collapsed: measured (solid rim) · NotMeasured (dashed, empty, n/m — never zero) · floor
@@ -140,16 +140,16 @@ footer{max-width:1000px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
 <section>
   <h2>1 · <span data-i18n="h.022">YOUR BODY — the five inputs that genuinely move a requirement</span></h2>
   <div id="you">
-    <div><label for="sex">sex</label><select id="sex"><option value="m">male</option><option value="f">female</option></select></div>
-    <div><label for="age">age</label><input id="age" type="number" min="19" max="110" value="49"></div>
-    <div><label for="ht">height cm</label><input id="ht" type="number" min="120" max="230" value="180"></div>
-    <div><label for="wt">weight kg</label><input id="wt" type="number" min="30" max="250" value="80"></div>
-    <div><label for="pal">activity</label><select id="pal">
-      <option value="0">inactive</option><option value="1" selected>low active</option>
-      <option value="2">active</option><option value="3">very active</option></select></div>
+    <div><label for="sex" data-i18n="bf.sex">sex</label><select id="sex"><option value="m" data-i18n="bf.male">male</option><option value="f" data-i18n="bf.female">female</option></select></div>
+    <div><label for="age" data-i18n="bf.age">age</label><input id="age" type="number" min="19" max="110" value="49"></div>
+    <div><label for="ht" data-i18n="bf.ht">height cm</label><input id="ht" type="number" min="120" max="230" value="180"></div>
+    <div><label for="wt" data-i18n="bf.wt">weight kg</label><input id="wt" type="number" min="30" max="250" value="80"></div>
+    <div><label for="pal" data-i18n="bf.pal">activity</label><select id="pal">
+      <option value="0" data-i18n="bf.pal.0">inactive</option><option value="1" selected data-i18n="bf.pal.1">low active</option>
+      <option value="2" data-i18n="bf.pal.2">active</option><option value="3" data-i18n="bf.pal.3">very active</option></select></div>
   </div>
   <div id="derived"></div>
-  <div class="law" style="margin-top:11px"><b>Only these four scale with your body, and this page
+  <div class="law" style="margin-top:11px" data-i18n="bf.body.law"><b>Only these four scale with your body, and this page
   will not pretend otherwise.</b> Energy uses the NASEM 2023 EER equation, where your height,
   weight, age and activity <i>are</i> the variables. Protein is an RDA in grams per kilogram, so
   your mass is the number. Fibre scales through energy at 14 g per 1,000 kcal.
@@ -169,7 +169,7 @@ footer{max-width:1000px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
 <section>
   <h2>3 · <span data-i18n="h.024">THE BASKET — three honest weights, never one implied</span></h2>
   <div id="basket"></div>
-  <div class="law" style="margin-top:10px"><b>The house serving is 1.25 g of hemp hearts per kg of
+  <div class="law" style="margin-top:10px" data-i18n="bf.basket.law"><b>The house serving is 1.25 g of hemp hearts per kg of
   body weight</b> — 100 g for an 80 kg adult, founder-set, and labelled a <i>house basis</i> rather
   than a published standard, because it is one. It moves when your weight moves. The reference
   intakes beside it do not. <b>Two numbers that share a unit but not a pedigree must never be
@@ -178,21 +178,21 @@ footer{max-width:1000px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
 
 <section>
   <h2>4 · <span data-i18n="h.025">THE LEDGER — every nutrient, the exact amount, and where it came from</span></h2>
-  <div class="law">Sorted by how well the basket covers it. The tick on each bar is 100% of your
+  <div class="law" data-i18n="bf.ledger.law">Sorted by how well the basket covers it. The tick on each bar is 100% of your
   requirement. <b>≥</b> means a food in your basket has no published row for that nutrient, so the
   total is a <b>floor, not a total</b> — the same law that forbids a lab's four-analyte panel from
   calling itself "total cannabinoids".</div>
   <div class="scroll"><table id="tab"><thead><tr>
-    <th>nutrient</th><th>coverage</th><th style="text-align:right">%</th>
-    <th style="text-align:right">you need</th><th style="text-align:right">basket gives</th>
-    <th>basis</th><th style="text-align:right">gap</th>
+    <th data-i18n="bf.th.nutrient">nutrient</th><th data-i18n="bf.th.coverage">coverage</th><th style="text-align:right" data-i18n="bf.th.pct">%</th>
+    <th style="text-align:right" data-i18n="bf.th.need">you need</th><th style="text-align:right" data-i18n="bf.th.gives">basket gives</th>
+    <th data-i18n="bf.th.basis">basis</th><th style="text-align:right" data-i18n="bf.th.gap">gap</th>
   </tr></thead><tbody></tbody></table></div>
   <div id="ulnote" class="law" style="margin-top:9px"></div>
 </section>
 
 <section>
   <h2>5 · <span data-i18n="h.026">PROTEIN QUALITY — why 31.6 grams of protein is not 31.6 grams of protein</span></h2>
-  <div class="law"><b>This is the fourth time this project has caught the same error class,
+  <div class="law" data-i18n="bf.prot.law"><b>This is the fourth time this project has caught the same error class,
   and this time it is caught on our own favourite food.</b> A lab's "total cannabinoids" is a sum
   over four analytes wearing a total's name. "Saturated fat" is two things a body routes
   differently, collapsed into one row. A basket total is a floor when a food has no published row.
@@ -278,7 +278,7 @@ footer{max-width:1000px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
 
 <section>
   <h2>6 · <span data-i18n="h.027">FIBRE — the outcome evidence, carrying the certainty its own authors assigned</span></h2>
-  <div class="law"><b>A correction this page owes on its own hero food first.</b> Hemp's fibre is
+  <div class="law" data-i18n="bf.fibre.law"><b>A correction this page owes on its own hero food first.</b> Hemp's fibre is
   overwhelmingly in the <i>hull</i> — hulls run 77–84% dietary fibre, whole seed 28–36%. <b>Hearts
   are the dehulled fraction, and measure 4.0 g per 100 g.</b> Whole-seed fibre figures must never be
   quoted for hearts, and this page uses the hearts number. Hemp hearts are an excellent protein and
@@ -368,13 +368,13 @@ footer{max-width:1000px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
 
 <section>
   <h2>9 · <span data-i18n="h.030">THE QUEST — a plan for a day, a week, a month, a year</span></h2>
-  <div class="law">Each rung is a real span of time and a <b>different strength of evidence</b>.
+  <div class="law" data-i18n="bf.quest.law">Each rung is a real span of time and a <b>different strength of evidence</b>.
   You cannot claim a year-scale result from a day of remembering what you ate, so the rungs do not
   let you. Every quest is built and checked in <a href="university/">Beehive University</a>.</div>
   <div id="quests"></div>
 
   <h2 style="margin-top:18px">…<span data-i18n="h.031">AND HOW ANY OF IT COULD BE BELIEVED</span></h2>
-  <div class="law"><b>Four different questions hide inside "how do we know it worked", and they have
+  <div class="law" data-i18n="bf.believe.law"><b>Four different questions hide inside "how do we know it worked", and they have
   four different answers.</b> Collapsing them is how wellness claims get made.</div>
   <div class="scroll"><table style="min-width:600px"><thead><tr>
     <th>the question</th><th>the honest answer here</th><th>who can check it</th></tr></thead><tbody>
@@ -437,12 +437,12 @@ footer{max-width:1000px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
 </main>
 
 <footer>
-  composition and published reference intakes only — what a nutrient <i>does</i> in a body lives
-  off-repo and graded · <a href="university/">learn to check this page</a> ·
+  <span data-i18n="bf.foot">composition and published reference intakes only — what a nutrient <i>does</i> in a body lives
+  off-repo and graded</span> · <a href="university/" data-i18n="bf.foot.learn">learn to check this page</a> ·
   <a href="bigen.html">the evidence deck</a> · <a href="index.html" data-i18n="law.hive">← the hive</a>
 </footer>
 
-<script src="tour.js?v=42"></script>
+<script src="tour.js?v=43"></script>
 <script>
 (function(){
 var $=function(i){return document.getElementById(i)};

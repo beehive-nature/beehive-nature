@@ -53,18 +53,18 @@ footer{max-width:900px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 <body>
 <main>
 <header>
-  <h1>🎧 the set I build to</h1>
-  <div style="font-size:11px;letter-spacing:.14em;margin-top:6px;color:var(--gold,#FFD700)">“10Ve the first ingredient” — the wOlf, 2026-08-22</div>
-  <div class="sub" data-reg="bee">What's in the founder's headphones while all of this gets made — his own playlist,
+  <h1>🎧 <span data-i18n="bst.h1">the set I build to</span></h1>
+  <div style="font-size:11px;letter-spacing:.14em;margin-top:6px;color:var(--gold,#FFD700)" data-i18n="bst.quote">“10Ve the first ingredient” — the wOlf, 2026-08-22</div>
+  <div class="sub" data-reg="bee" data-i18n="bst.bee">What's in the founder's headphones while all of this gets made — his own playlist,
   <b style="color:var(--ink)">“for the wOlf”</b>, docked verbatim: EDM for the festival heart,
   Russian tracks for the second tongue of the hive, and everything else he actually plays. Every track links
   out to <b style="color:var(--ink)">where the artist gets paid</b>, opens in a new tab so your
   session stays put, and wears a little comb-sigil grown from its own name.</div>
-  <div class="sub" data-reg="raver">the build soundtrack — EDM × русская музыка — each track wearing
+  <div class="sub" data-reg="raver" data-i18n="bst.rav">the build soundtrack — EDM × русская музыка — each track wearing
   a deterministic comb-sigil from its own title-seed: the exact grammar that renders our on-chain
   art, pointed at the music that powers the making of it. artist-paid links only, new-tab law, no
   players embedded without consent.</div>
-  <div class="sub" data-reg="cypherpunk">A dataset + renderer, not an embed farm: tracks are records
+  <div class="sub" data-reg="cypherpunk" data-i18n="bst.cy">A dataset + renderer, not an embed farm: tracks are records
   in <code>bset.json</code> (artist · title · lang · artist-paid URL), sigils are FNV-1a-seeded
   7-cell combs rendered client-side — the ERC-20i seed→art grammar applied to a playlist. No
   third-party iframes, no tracking pixels, no autoplay; external links measured and new-tabbed at
@@ -72,13 +72,13 @@ footer{max-width:900px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 </header>
 
 <section>
-  <h2>THE SET — <span id="setcount">…</span></h2>
-  <div class="law" style="margin-bottom:4px">source of record:
+  <h2><span data-i18n="bst.h.set">THE SET</span> — <span id="setcount">…</span></h2>
+  <div class="law" style="margin-bottom:4px" data-i18n="bst.source">source of record:
   <a href="https://youtube.com/playlist?list=PLkUQHd8CpZKngAYcM7R0Zy4d8cGfzzwL5" rel="noopener">“for the wOlf” — the founder's playlist ↗</a>
   · docked 2026-08-21 · <b>verbatim: no seat curates the founder's taste</b> — the histories,
   the mixes, the wolf at №21, all of it as he keeps it.</div>
   <div id="tracks" role="list"></div>
-  <div class="design" id="emptynote" style="display:none">🎧 <b>The chair is set; the set is the
+  <div class="design" id="emptynote" style="display:none" data-i18n="bst.empty">🎧 <b>The chair is set; the set is the
   founder's to drop.</b> This page refuses to fake a personal playlist — a made-up "his set" would
   be a false signal wearing headphones. The founder pastes his list below (or commits
   <code>bset.json</code>), and every track appears here with its sigil the moment it lands. That is
@@ -86,24 +86,24 @@ footer{max-width:900px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 </section>
 
 <section>
-  <h2>DROP THE SET — the one-paste composer</h2>
-  <div class="law">One track per line: <code>Artist — Title — url</code> (url optional; ru-language
+  <h2 data-i18n="bst.h.drop">DROP THE SET — the one-paste composer</h2>
+  <div class="law" data-i18n="bst.drop.law">One track per line: <code>Artist — Title — url</code> (url optional; ru-language
   tracks get auto-detected by Cyrillic, or force with <code>[ru]</code>). The composer renders a
   live preview above and emits the <code>bset.json</code> fragment for the commit — <b>this page
   composes; a person publishes.</b></div>
   <textarea id="paste" placeholder="Boris Brejcha — Purple Noise — https://…
 Нейромонах Феофан — Притоптать [ru] — https://…"></textarea>
   <div>
-    <button id="preview">preview above</button>
-    <button id="emit">emit bset.json</button>
-    <button id="share">📋 share as text</button>
+    <button id="preview" data-i18n="bst.preview">preview above</button>
+    <button id="emit" data-i18n="bst.emit">emit bset.json</button>
+    <button id="share" data-i18n="bst.share">📋 share as text</button>
   </div>
   <pre id="out" style="display:none"></pre>
 </section>
 
 <section>
-  <h2>THE DETAILS USUALLY CUT — shipped first here, on purpose</h2>
-  <div class="law">The founder's order, verbatim: <i>"buildout those details that are valuable for
+  <h2 data-i18n="bst.h.details">THE DETAILS USUALLY CUT — shipped first here, on purpose</h2>
+  <div class="law" data-i18n="bst.details">The founder's order, verbatim: <i>"buildout those details that are valuable for
   end users but left to the end of funded development and get missed or a gross compromise."</i>
   So this page ships them on day one, as a demonstration that the stack affords them:<br>
   <b>· keyboard-first</b> — ↑/↓ walks the set, Enter opens the artist link; every row focusable.<br>
@@ -121,7 +121,7 @@ footer{max-width:900px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 </section>
 </main>
 <footer>
-  the buzz studios' listening lane: <a href="listening.html">the Listening Room (on-chain sound)</a>
+  <span data-i18n="bst.foot">the buzz studios' listening lane:</span> <a href="listening.html">the Listening Room (on-chain sound)</a>
   · <a href="blight/midi-organ.html">the Organ</a> · <a href="index.html" data-i18n="law.hive">← the hive</a>
 </footer>
 <script type="application/json" id="setdata">{
@@ -739,7 +739,7 @@ footer{max-width:900px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   }
  ]
 }</script>
-<script src="tour.js?v=42"></script>
+<script src="tour.js?v=43"></script>
 <script>
 (function(){
 "use strict";

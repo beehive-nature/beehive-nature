@@ -194,7 +194,7 @@ ${JSON.stringify(E)}
 <script src="atlas-search.js?v=1" defer></script>
 <script src="atlas.js?v=4" defer></script>
 <script src="agent-dock.js?v=9"></script>
-<script src="tour.js?v=42"></script>
+<script src="tour.js?v=43"></script>
 </body>
 </html>
 `;

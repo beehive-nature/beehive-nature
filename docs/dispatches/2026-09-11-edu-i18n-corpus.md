@@ -1,53 +1,83 @@
-# DISPATCH — education-page corpus fill (university + BlanguageDOCK)
+# DISPATCH — education-page corpus fill (university + dock + New bee cluster)
 
 **Seat:** cloud education-i18n · **Founder order:** FIRE AT WILL — key education prose into
 `surfaces/lang-corpus.json` and fill every eco tongue · **Date:** 2026-09-11
 
-## What landed
+**Founder reminder (same day):** New bee must stay digestible by the general commons in all
+26 languages — short calm chrome/UI and readable education prose; no jargon dumps in keys
+New bee surfaces. Raver may carry emotional/spiritual/plant-medicine tone where those pages
+exist. Cypherpunk denser. Raise floors only (ratchet). Continue the fill.
 
-122 new keys (`uni.*` university chrome + course names/act headings; `bld.*` BlanguageDOCK
-education prose). Every docked tongue in `lang-corpus.json::_meta.langs` (28) has a non-empty
-cell. English matches the pages (`estate-source` stale-English check). All ⚙ machine drafts;
-no human attestation.
+## Beat 1 — university + BlanguageDOCK
 
-JS-rendered course *essays* (bee/raver/cypherpunk long form) and act option lists stay
-unkeyed this beat — no invented instructional copy. Names, act headings, static charter /
-quests / graduation / gates / footer, and the dock's teaching banners are keyed.
-
-## Cache / measurement
-
-- `lang-corpus.json?v=17` → `v=18` (`surfaces/lang.js`)
-- `lang.js?v=25` → `v=26` (`surfaces/tour.js`)
-- `tour.js?v=41` → `v=42` via `scripts/bump-rider.sh` (frozen orbit left alone)
-- Atlas generator + `tools/build-surfaces.mjs` templates bumped so the hub stays idempotent
-
-Astra measurement paths in `lang.js` (`measureVisibleText` / `summarizeCoverage`) were not
-edited.
-
-## keyedΔ (measured `i18n-coverage.mjs ru --set e2e/lang-coverage-set.json`)
+122 keys (`uni.*` / `bld.*`). JS-rendered course essays stay unkeyed. Cache then:
+`lang-corpus.json?v=18`, `lang.js?v=26`, `tour.js?v=42`.
 
 | surface | before (floor) | after (keyed / visible) | keyed% |
 |---|---|---|---|
 | `university/index.html` | 7 | **81 / 141** | **57%** (was 6%) |
 | `blanguage.html` | 12 | **68 / 368** | **18%** (was 3%) |
 
-Floors raised to those absolute keyed counts. Ratchet held (no page fell). Empty cells on new keys: 0. Missing corpus keys: 0. ru reach = keyed on both surfaces.
+## Beat 2 — New bee chrome + readable education (this continuation)
 
-Sanskrit 908/951 is a **pre-existing** `st.*` empty-cell backlog (43 cells), not this beat's keys — every new `uni.*`/`bld.*` cell is filled including `sa`.
+122 keys (`pl.*` / `d.plur.*` reserved rose/talk/stone set / `bst.*` / `bnm.*` / `bf.*`).
+Every docked tongue (28) has a non-empty cell. English matches the pages. All ⚙ machine
+drafts; no human attestation.
 
-## Gates (this revision)
+Tone split held:
+- **New bee** — short labels (search, sex, age, 3 roses, send) and calm register ledes
+  (`bf.bee`, `bst.bee`, `bnm.bee`). No NASEM/ABI jargon folded into bee keys.
+- **Raver** — PLUR floor notes, rose gate, stone pillars keep warmth; `*.rav` stays
+  soundtrack / constellation register.
+- **Cypherpunk** — `bf.cy` / `bst.cy` / `bnm.cy` stay dense (DRI/EER, FNV-1a, live ABI).
 
-- `node e2e/estate-source.mjs` — **11/11** (809 page keys exist; 28 tongues × 951 corpus keys; English matches pages; hub idempotent)
-- `node e2e/lang-coverage.test.mjs` — **9/9**
-- `node e2e/i18n-coverage.mjs ru --set e2e/lang-coverage-set.json --floors --set-floors --emit-md` — **PASS**; floors advanced; `docs/LANG-COVERAGE.md` regenerated 2026-09-11
-- `node e2e/university-smoke.mjs` — **78/78**
+Intentionally unkeyed this beat: bfood long biochemistry / fibre GRADE cards and evidence
+ladder (jargon-heavy, New bee sees them in English until a later readable pass);
+bnames consent dump and ABI workshop cards; JS-injected talk-status lines on plur;
+constellation native words (already in their own tongues).
+
+## Cache / measurement
+
+- `lang-corpus.json?v=18` → `v=19` (`surfaces/lang.js`)
+- `lang.js?v=26` → `v=27` (`surfaces/tour.js`)
+- `tour.js?v=42` → `v=43` via `scripts/bump-rider.sh` (frozen orbit left alone)
+- Atlas generator + `tools/build-surfaces.mjs` templates bumped; hub regenerated
+- Front-door tests pinned to `tour.js?v=43` (`e2e/register.test.mjs`,
+  `e2e/forge-room-views.test.mjs`) — this was the red `static` pin from beat 1's v=42 bump
+
+Astra measurement paths in `lang.js` (`measureVisibleText` / `summarizeCoverage`) were not
+edited.
+
+## keyedΔ beat 2 (measured after this commit)
+
+Floors for the new cluster are raised in the follow-on floors commit on this same branch.
+Ratchet only — no page may fall.
+
+## §7 identity
+
+Beat 1 commits had been published with the seat as author. That fails
+`scripts/identity-check.sh` (AUTHOR must be the founder). This branch's history was
+rewritten so those commits — and every later one — are founder-authored, seat-committed,
+with a `Co-authored-by` trailer. Force-push was required; a descendant commit cannot
+remove a bad author from the already-pushed range.
+
+## Gates
+
+Beat 1 local: estate-source 11/11 · lang-coverage.test 9/9 · floors PASS · university-smoke 78/78.
+Beat 2: estate-source English/key existence held before push (931 page keys; 1073 corpus
+keys × 28 tongues). Hub idempotent after atlas regen. Coverage floors + smoke re-run
+after the floors commit.
 
 ## Live poke (after merge)
 
 - https://skaists.dev/surfaces/university/index.html — picker → ru / lv / th
 - https://skaists.dev/surfaces/blanguage.html — same
+- https://skaists.dev/surfaces/plur.html — New bee default; roses / stone / floor
+- https://skaists.dev/surfaces/bfood.html — bee lede + body labels
+- https://skaists.dev/surfaces/bset.html — bee lede + chrome
+- https://skaists.dev/surfaces/bnames.html — bee lede + search chrome
 
 ## Not this beat
 
-bfood / bset / plur / stack / bigen / museum / bearth / bsymposium / blongevity / hardware
-education essays. Next stacked PR.
+stack remaining essays · bigen · museum · bearth · bsymposium · blongevity · hardware
+education · bfood science cards · bnames ABI workshop.
