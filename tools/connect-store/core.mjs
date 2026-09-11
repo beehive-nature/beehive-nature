@@ -94,15 +94,16 @@ async function putVerified(store, bytes) {
 export class Channel extends EventEmitter {
   #key; #writer; #state = { sequence: 0, events: [], files: [] }; #pin = null; #busy = false;
   #writeRemaining = LIMITS.writeBytesPerProcess;
-  constructor({ policy, owner, policyId, key, writer, store, live }) {
+  constructor({ policy, owner, policyId, key, writer, store, live, admission }) {
     super();
     this.policy = checkPolicy(policy, owner, policyId);
     // The parsed policy is private to this instance's admission decisions.
     Object.freeze(this.policy.members); Object.freeze(this.policy.event); Object.freeze(this.policy);
     requireThat(key instanceof Uint8Array && key.length === 32, 'invalid-channel-key');
     if (writer) requireThat(getPublicKey(writer) === this.policy.writer, 'writer-not-authorized', 403);
+    requireThat(!admission || typeof admission.checkMutation === 'function', 'invalid-admission-gate');
     this.#key = Buffer.from(key); this.#writer = writer && Uint8Array.from(writer);
-    this.store = store; this.live = live;
+    this.store = store; this.live = live; this.admission = admission;
   }
   get pin() { return this.#pin && structuredClone(this.#pin); }
   authorize(pubkey) {
@@ -125,7 +126,14 @@ export class Channel extends EventEmitter {
     next.sequence = this.#state.sequence + 1;
     const bytes = encode(next);
     requireThat(bytes.length <= LIMITS.snapshot, 'snapshot-limit', 413);
-    const data = await this.#put(seal(bytes, this.#key, this.policy.event.id));
+    const sealed = seal(bytes, this.#key, this.policy.event.id);
+    // Payment admission runs BEFORE any store write: the complete cost of
+    // the mutation (exact sealed snapshot + checkpoint/notification at their
+    // caps, times admitted retries) must fit the gate's remaining ceiling,
+    // or nothing is written at all. The gate never signs or pays.
+    let admissionReceipt;
+    if (this.admission) admissionReceipt = await this.admission.checkMutation({ sealedSnapshot: sealed });
+    const data = await this.#put(sealed);
     const checkpoint = signed(this.#writer, 30078, [['d', 'bnr-channel-checkpoint-v1']], JSON.stringify({
       version: 1, policy_id: this.policy.event.id, sequence: next.sequence,
       parent: this.#pin?.id ?? null, event_count: next.events.length, data,
@@ -139,7 +147,8 @@ export class Channel extends EventEmitter {
       try { await this.live.publish({ type: 'bnr-channel-checkpoint-v1', ...pin }); notificationAccepted = true; }
       catch { /* Stored acknowledgement stays true; live delivery is explicitly false. */ }
     }
-    return { checkpoint: this.pin, stored: true, notification_accepted: notificationAccepted };
+    return { checkpoint: this.pin, stored: true, notification_accepted: notificationAccepted,
+      ...(admissionReceipt ? { admission: admissionReceipt } : {}) };
   }
   async #put(bytes) {
     requireThat(bytes.length <= this.#writeRemaining, 'process-write-budget', 429);

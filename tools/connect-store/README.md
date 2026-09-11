@@ -168,6 +168,25 @@ Idempotent event and file identities provide separate duplicate protection here.
   any request**: auto-paying uploads do not accept an atomic operator cost ceiling.
   A quote is only an estimate; a capped payment/admission adapter must precede
   funded uploads. No funds were spent and no network objects uploaded.
+- `admission.mjs` is the synthetic payment/admission boundary that estimate now
+  feeds. `AntdQuoteSource` drives the real antd 0.12.0 `POST /v1/data/cost`
+  caller (validated against a capturing local server; the endpoint's quote is a
+  sampled extrapolation) and `SyntheticQuoteSource` provides deterministic
+  offline math with explicit per-chunk and per-record overhead.
+  `PaymentAdmissionGate` is the ENFORCER: a Channel constructed with it budgets
+  every mutation's complete cost — the exact sealed snapshot bytes (uploads
+  ride inside the snapshot) plus the checkpoint and x0x notice at their
+  validated caps, times an explicit admitted-retry factor (default none) —
+  against a cumulative lifetime ledger under a hard operator ceiling, and
+  REFUSES the mutation before any store write when it does not fit. Admitted
+  receipts are synthetic records (`funds_spent: "0"`, `signed: false`,
+  `approval: "pending-trezor-downstream"`); nothing signs, pays, or uploads.
+  A dead or malformed quote source fails closed (`quote-unavailable` /
+  `invalid-quote-response`) without consuming the ledger. The gate is process
+  state, not a persistent b-meter: restarts reset it, exactly like the write
+  budget above. This is the admission boundary a funded store must sit
+  behind — it is not itself payment, and the manifest's
+  `payment: "disabled"` stays until the funded lane is reviewed.
 - Autonomi is the proposed bulk snapshot/file substrate in this experiment.
   Existing estate identity anchoring and the Arweave/Autonomi routing law are
   unchanged; these experimental policy events are not a new canonical DID system.
