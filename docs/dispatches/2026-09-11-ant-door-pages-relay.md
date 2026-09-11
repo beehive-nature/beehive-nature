@@ -51,10 +51,17 @@ relay, door-vs-WASM, and the network-tab story.
 Founder correction: do not cherry-pick. After a successful paint, the
 page fetches same-origin `index.html` and renders **every** `article.srf`
 grouped by the atlas org/family sections (skaists, beehive-nature,
-beehive-biomass, buds, bnr, …). Names and hrefs come from the atlas
-markup. `ant-door.html` is omitted because you are on it. The atlas pin
-is `index.html`. No invented medical copy — bio surfaces keep their
-atlas glosses.
+beehive-biomass, buds, bnr, …). Empty atlas families (buds’ open seat)
+still appear from the atlas `.open-seat` copy. Names and hrefs come from
+the atlas markup. `ant-door.html` is omitted because you are on it. The
+atlas pin is `index.html`. No invented medical copy — bio surfaces keep
+their atlas glosses.
+
+Browser poke (Chrome against `e2e/ant-door-poke.mjs`): badge
+`138,931 BYTES · SAME-ORIGIN · LIVE`, image naturalWidth 782, **100**
+connect cards, all eight atlas families including buds. Confirmed names
+include bsymposium, bEarth, bFood, ERC20i gallery, Watch room, bantfarm,
+midivault, hearth, pulse.
 
 ## Poke path
 
