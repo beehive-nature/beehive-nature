@@ -205,5 +205,6 @@ $('join').addEventListener('click', () => { if(!state.manifest) return; state.jo
 draw();
 fetch('../fixtures/connect-store-manifest-envelope-v1.json', {cache:'no-store'}).then(r => { if(!r.ok) throw new Error('manifest fetch refused'); return r.json(); }).then(validManifest).then(paint).catch(err => { $('status-dot').className='dot bad'; $('status').textContent='manifest unavailable'; $('status-note').textContent='· '+err.message; event('REFUSED','no room state changed'); });
 </script>
+<script src="tour.js?v=41"></script>
 </body>
 </html>
