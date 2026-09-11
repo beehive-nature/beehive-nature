@@ -53,8 +53,14 @@ Chrome, `localStorage` cleared, 1280×800:
 - Cypherpunk: instrument + cypher masthead on; breg+blang painted.
 
 15/15 poke assertions. Browser walk (view switch New bee → Raver →
-Cypherpunk → New bee) matches. Skipped: live FAOSTAT pull, fleet
-attestation of the new keys.
+Cypherpunk → New bee) matches.
+
+Browser QA FAIL re-poke after footer gate (same URL, cleared
+localStorage): cypher masthead `display:none`; footer hidden on
+arrival; `#bregctl` + `#blangctl` painted; above-fold ZERO
+N₂O/IPCC/REFUTED/dial jargon. Locked copy + deepen gates only.
+
+Skipped: live FAOSTAT pull, fleet attestation of the new keys.
 
 This is a presentation adapter, not a new model. The demand arithmetic,
 FAO cropland denominator (1,581 Mha), recovery/yield defaults, N₂O
