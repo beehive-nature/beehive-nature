@@ -53,3 +53,13 @@ as synthetic narration, a future alignment fixture only. A16 startup stalls
 remain an unverified independent report. No credentials were printed.
 
 Result receipt: `C:\Users\travi\Downloads\Watch-TV-2026-09-10\ZCODE-RESULT.md`.
+
+## Installation completed — 2026-09-10
+
+Founder explicitly authorized interrupting TV playback for this work.
+Installed f3db9944 using adb install -r: Success. Activity launch returned
+Status: ok (1495 ms cold activity launch; not a media-start timing).
+A fresh screenshot confirms the home page rendered and the existing Big Buck
+Bunny Continue Watching entry remains. No current credits-editor or playback
+regression test is claimed by this installation check.
+This supersedes the earlier installation-pending status.
