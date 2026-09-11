@@ -31,6 +31,15 @@ the `surfaces/review.html` SURFACES entry. CI (`estate-check`,
 - Crypto claims cite source file+function or stop at `UNVERIFIED`; wording
   caps at "sound by construction / isolated by design".
 
+## Upstream priority (FOUNDER ORDER, 2026-09-10)
+- David Irvine's (`dirvine`) GitHub communications are priority one. Check
+  outstanding requests affecting our backend before starting new feature lanes.
+- x0x #504's remaining measurement work moved to **#622**; also track the
+  related #505 field-evidence request. Follow current discussion and acceptance
+  terms, not an issue's closed badge. Record replies and completed evidence.
+- Handoff: `docs/dispatches/2026-09-10-david-irvine-followup.md`. Synthetic
+  tests, send-attempt counters and a prepared capture are not a live result.
+
 ## External navigation (FOUNDER ORDER, reaffirmed 2026-09-07)
 - External website links open a new tab so the current BNR page and session
   remain available. Use user-activated links with `target="_blank"` and
