@@ -166,5 +166,7 @@ test('tour language bootstrap waits for view labels, with a script-error fallbac
   const tour=read('surfaces/tour.js');
   assert.match(tour,/s\.onload=loadLanguage; s\.onerror=loadLanguage/);
   assert.match(tour,/else loadLanguage\(\)/);
+  assert.match(tour,/assetBase\+'register\.js\?v=9'/);
+  assert.match(tour,/assetBase\+'lang\.js\?v=25'/);
   assert.match(read('surfaces/lang.js'),/#bregbar,#bregctl/);
 });
