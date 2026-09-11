@@ -48,10 +48,17 @@ constellation native words (already in their own tongues).
 Astra measurement paths in `lang.js` (`measureVisibleText` / `summarizeCoverage`) were not
 edited.
 
-## keyedΔ beat 2 (measured after this commit)
+## keyedΔ beat 2 (measured `i18n-coverage.mjs ru --set e2e/lang-coverage-set.json`)
 
-Floors for the new cluster are raised in the follow-on floors commit on this same branch.
-Ratchet only — no page may fall.
+| surface | before (floor) | after (keyed / visible) | keyed% |
+|---|---|---|---|
+| `plur.html` | 0 | **54 / 285** | **19%** |
+| `bnames.html` | 0 | **20 / 88** | **23%** |
+| `bfood.html` | 12 | **34 / 607** | **6%** |
+| `bset.html` | 1 | **14 / 317** | **4%** |
+
+University (81) and blanguage (68) held. Ratchet held — only those four floors rose.
+Empty cells on new keys: 0. Missing corpus keys: 0. ru reach = keyed on the set (1283).
 
 ## §7 identity
 
@@ -64,9 +71,13 @@ remove a bad author from the already-pushed range.
 ## Gates
 
 Beat 1 local: estate-source 11/11 · lang-coverage.test 9/9 · floors PASS · university-smoke 78/78.
-Beat 2: estate-source English/key existence held before push (931 page keys; 1073 corpus
-keys × 28 tongues). Hub idempotent after atlas regen. Coverage floors + smoke re-run
-after the floors commit.
+
+Beat 2 local (this tree):
+- `node e2e/estate-source.mjs` — **11/11** (931 page keys exist; 28 tongues × 1073 corpus keys; English matches pages; hub idempotent)
+- `node e2e/lang-coverage.test.mjs` — **9/9**
+- `node --test e2e/register.test.mjs e2e/forge-room-views.test.mjs` — **25/25** (tour.js?v=43 pin)
+- `node e2e/i18n-coverage.mjs ru --set e2e/lang-coverage-set.json --floors --set-floors --emit-md` — **PASS**; four floors advanced; `docs/LANG-COVERAGE.md` regenerated 2026-09-11
+- `node e2e/university-smoke.mjs` — **78/78** (bfood verdict + hexagon still hold)
 
 ## Live poke (after merge)
 

@@ -4,7 +4,7 @@
  "bantfarm.html": 7,
  "bearth.html": 9,
  "bfactory.html": 6,
- "bfood.html": 12,
+ "bfood.html": 34,
  "bigen.html": 12,
  "biq.html": 7,
  "blanguage.html": 68,
@@ -28,9 +28,9 @@
  "blight/workbench.html": 0,
  "blongevity.html": 9,
  "bmeshasi.html": 0,
- "bnames.html": 0,
+ "bnames.html": 20,
  "bqueenbee-live.html": 6,
- "bset.html": 1,
+ "bset.html": 14,
  "bsymposium.html": 10,
  "btranslated.html": 4,
  "buzz-studio.html": 15,
@@ -77,5 +77,5 @@
  "stack.html": 118,
  "university/index.html": 81,
  "wallet.html": 24,
- "plur.html": 0
+ "plur.html": 54
 }

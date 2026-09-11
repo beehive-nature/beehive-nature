@@ -5,11 +5,11 @@
 | surface | visible | keyed | keyed% |
 |---|---|---|---|
 | index.html | 1876 | 470 | 25% |
-| bfood.html | 618 | 12 | 2% |
+| bfood.html | 607 | 34 | 6% |
 | wallet.html | 459 | 24 | 5% |
 | blanguage.html | 368 | 68 | 18% |
-| bset.html | 327 | 1 | 0% |
-| plur.html | 307 | 0 | 0% |
+| bset.html | 317 | 14 | 4% |
+| plur.html | 285 | 54 | 19% |
 | stack.html | 244 | 118 | 48% |
 | blight/museum.html | 238 | 10 | 4% |
 | bigen.html | 223 | 12 | 5% |
@@ -24,12 +24,12 @@
 | design-system.html | 117 | 24 | 21% |
 | fleet-hosted/gallery/acid-cascade.html | 114 | 0 | 0% |
 | festival/index.html | 102 | 18 | 18% |
-| bnames.html | 101 | 0 | 0% |
 | fleet-hosted/gallery/indigo-index.html | 96 | 0 | 0% |
 | attest.html | 95 | 1 | 1% |
 | bantfarm.html | 93 | 7 | 8% |
 | dao-dashboard/index.html | 92 | 5 | 5% |
 | bqueenbee-live.html | 91 | 6 | 7% |
+| bnames.html | 88 | 20 | 23% |
 | doors/beehivenature.html | 87 | 38 | 44% |
 | blight/c1-aid.html | 83 | 4 | 5% |
 | dock.html | 67 | 0 | 0% |
@@ -88,33 +88,33 @@
 
 | tongue | cells non-empty |
 |---|---|
-| ru | 950 / 951 |
-| lv | 950 / 951 |
-| th | 950 / 951 |
-| gd | 950 / 951 |
-| tt | 950 / 951 |
-| uk | 950 / 951 |
-| cs | 950 / 951 |
-| zh | 950 / 951 |
-| ko | 950 / 951 |
-| ar | 950 / 951 |
-| nl-be | 950 / 951 |
-| es | 950 / 951 |
-| nl | 950 / 951 |
-| de | 950 / 951 |
-| fr | 950 / 951 |
-| he | 950 / 951 |
-| hi | 950 / 951 |
-| bn | 950 / 951 |
-| fa | 950 / 951 |
-| ur | 950 / 951 |
-| ja | 950 / 951 |
-| da | 950 / 951 |
-| nb | 950 / 951 |
-| sv | 950 / 951 |
-| fi | 950 / 951 |
-| tr | 950 / 951 |
-| hu | 950 / 951 |
-| sa | 908 / 951 |
+| ru | 1072 / 1073 |
+| lv | 1072 / 1073 |
+| th | 1072 / 1073 |
+| gd | 1072 / 1073 |
+| tt | 1072 / 1073 |
+| uk | 1072 / 1073 |
+| cs | 1072 / 1073 |
+| zh | 1072 / 1073 |
+| ko | 1072 / 1073 |
+| ar | 1072 / 1073 |
+| nl-be | 1072 / 1073 |
+| es | 1072 / 1073 |
+| nl | 1072 / 1073 |
+| de | 1072 / 1073 |
+| fr | 1072 / 1073 |
+| he | 1072 / 1073 |
+| hi | 1072 / 1073 |
+| bn | 1072 / 1073 |
+| fa | 1072 / 1073 |
+| ur | 1072 / 1073 |
+| ja | 1072 / 1073 |
+| da | 1072 / 1073 |
+| nb | 1072 / 1073 |
+| sv | 1072 / 1073 |
+| fi | 1072 / 1073 |
+| tr | 1072 / 1073 |
+| hu | 1072 / 1073 |
+| sa | 1030 / 1073 |
 
 the ratchet law: keyed counts may never fall (enforced in CI). unkeyed prose is the recorded backlog — honest absence, English fallback visible, counted by the picker.
