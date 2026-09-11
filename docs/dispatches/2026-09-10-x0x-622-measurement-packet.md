@@ -187,3 +187,108 @@ spec + founder host word); the per-peer delivery control (awaits a second
 approved instrumented peer; app-layer ID/timestamp comparison sketched;
 counter deltas never substitute); any public #622 posting (Astra owns; our
 readiness reply remains the last comment as of this round).
+
+---
+
+# CORRECTION ROUND 2 (zCode, 2026-09-10, after re-review f8b3cb46)
+
+Astra reproduced the fast suite 11/11 and then found three caller-level
+failures — all real, all owned. The runner was rewritten around them; the
+unchanged collector, the binary provenance, the R5 retraction and the
+artifact policy are untouched. New candidate pin: see the commit carrying
+this append.
+
+## F1 — helper failures now reach the runner's result
+
+- Sampler and log helpers are supervised: each helper's liveness is checked
+  at window end and its exit status captured and recorded in `ATTEMPT.json`
+  (`sampler_exit`, `log_exit`). A helper already dead before the runner's
+  stop died spontaneously → attempt failed (`failed-sampler` /
+  `failed-log-helper`); a helper alive at window end was stopped BY the
+  runner (its stop-time rc is our coercion, recorded but not a failure).
+- Coverage is validated across the actual interval, not endpoint-sampled:
+  the series must span the window (span vs `dt` from the saved epochs), no
+  interior gap beyond `3×interval+3`, zero error records, ≥2 samples, every
+  record carries `peers`+`uptime_secs`, uptime is monotonic and advances
+  with the window, no peer collapse. An empty `service.log` is failed
+  evidence (§5.2 continuity: a silent log proves nothing).
+- Receipts (real runner, real sampler where noted): TF1a — sampler exits 22
+  after one healthy record → `failed-sampler`, exit 1; TF1b — one healthy +
+  three error records, exit 21 → `failed-sampler`; TF1c — log helper
+  `exit 9` → `failed-log-helper`; TF1d — sampler TERM-clean but silent after
+  one full record → `failed-coverage` (the gap rule, not supervision, does
+  the rejecting — a clean-looking helper cannot fake coverage).
+
+## F2 — terminal receipt writes are checked
+
+`mark_attempt` now verifies the write: `ATTEMPT.json` must be written and
+nonempty, and the `FAILED` marker too on failed attempts. Any failure →
+`run-capture: TERMINAL RECEIPT WRITE FAILED` on stderr, run exits **6**,
+attempts abort (storage unreliable), evidence retained as-is, and no
+durable marker is promised on a full volume. Receipt: TF2 plants
+`ATTEMPT.json → /dev/full` (Astra's exact injection) — collector succeeds,
+measurement would be "accepted", the runner still exits 6 with the symlink
+retained untouched.
+
+## F3 — cleanup and deadline survive a blocked or dead runner
+
+- Node start/check/stop run through `run_bounded`: background `setsid
+  timeout` + interruptible `wait` — a TERM during a BLOCKED start is
+  honored immediately. Receipt TF3a: TERM mid-blocked-start → runner gone
+  within the 3 s probe budget (exit 130) and the blocked job (own group)
+  killed, nothing left behind.
+- Cleanup kills owned process GROUPS with bounded graceful-then-forced
+  escalation (`X0X_HELPER_GRACE`, then KILL); receipt TF3e: a
+  TERM-ignoring collector is force-killed and cancellation completes in 5 s
+  (exit 130).
+- Cleanup disposition is separate from measurement disposition: node
+  ownership is retained until a bounded stop completes; a failed graceful
+  stop escalates to `X0X_NODE_FORCE_STOP`. Receipts: TF3b — stop returns
+  failure → measurement `accepted` but run exits **8** with `CLEANUP
+  FAILED` on stderr; TF3c — stop blocks → graceful bounded at 4 s → forced
+  path completes cleanup → run stays accepted (6 s total).
+- The node's deadline now lives OUTSIDE the shell: the default lifecycle is
+  a `systemd-run` transient unit carrying `RuntimeMaxSec` (lease+600 s) —
+  systemd kills it even if the runner is SIGKILLed. Receipt TF3d: runner
+  SIGKILLed mid-window → the stub node's own runtime expiry removed it
+  within seconds, the unrelated sentinel survived, evidence retained.
+- The log helper is itself `timeout`-wrapped to the lease, so no helper
+  outlives the run's bounds if the shell dies.
+
+## Concrete lifecycle recipe (spec §3, replacing the ellipsis sketch)
+
+The spec now carries the exact one-time deploy (user, 2 GiB loop-image
+mount, config), the full `systemd-run` unit command (RuntimeMaxSec,
+MemoryMax/CPUQuota/TasksMax, hardening properties, `StandardOutput=append:`
+into the bounded volume — logs never touch the host journal), the
+stop/force-stop/check commands, the storage-ceiling proof commands
+(`findmnt` + path listing + `df` of the mount, every writable path inside),
+and the token bootstrap: fresh units mint `state/api-token` at first boot;
+the runner takes `X0X_TOKEN_FILE` and reads it internally after start —
+the token never appears on a command line (`X0X_API_TOKEN` env remains the
+alternative).
+
+## Regression receipts (exact commands)
+
+- `python3 scripts/x0x-622/test_runner.py --fast` → **21/21 pass** (the
+  round-1 eleven + TF1a-d, TF2, TF3a-e), ~3 min.
+- `python3 scripts/x0x-622/test_runner.py --slow` → receipts below (T7
+  scoped lease, T11 real-collector accept, T11b peer-collapse reject)
+  re-run against the rewritten runner.
+- `--offline` (T10) is unchanged by this round (no runner involvement) and
+  its round-1 receipt stands; the binary pin is untouched.
+
+Seat-testing defects found and fixed en route, recorded: the intentional-
+stop classification initially keyed on exit codes (a timeout-wrapped log
+follower legitimately dies with rc 15 under group-TERM — classification now
+keys on liveness-at-window-end, exit codes are recorded as evidence); the
+stub log follower was `tail -f /dev/null` (empty by construction) while the
+runner now requires a nonempty service log for §5.2 continuity — the stub
+now emits timestamped lines like the real daemon's log.
+
+## Unperformed (unchanged)
+
+The live public-mesh capture (awaits Astra re-acceptance + founder host
+word); the per-peer delivery control; any #622 posting. No production
+mutation, no cloud change, no laptop mesh run, no upstream comment this
+round.

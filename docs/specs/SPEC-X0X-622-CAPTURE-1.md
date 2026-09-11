@@ -1,8 +1,11 @@
 # SPEC-X0X-622-CAPTURE-1 — tested public-mesh Leaf egress capture (correction round)
 
-> **Re-review: NOT ACCEPTED for execution at `9b5df485`.** The fast suite
-> passes, but runner-level fault probes still return success after evidence
-> and cleanup failures. See the [independent re-review](../dispatches/2026-09-10-astra-x0x-622-runner-rereview.md).
+> **Re-review round 2 (this file, corrected):** candidate `9b5df485` was
+> returned by the [independent re-review](../dispatches/2026-09-10-astra-x0x-622-runner-rereview.md)
+> (F1 helper failures yielding "accepted", F2 unchecked terminal receipt
+> writes, F3 cooperative-runner-dependent cleanup/lease). This revision
+> corrects F1–F3 with new caller-boundary regressions (§2); it awaits Astra
+> re-acceptance. Nothing here is executed on any host before that.
 
 Status: STAGED for backend Astra re-review, 2026-09-10. Supersedes the
 executables of the returned proposal `ops/x0x/MEASUREMENT-622.md`
@@ -58,24 +61,43 @@ names the host.**
 ## 2. The tested wrapper (committed, unchanged collector)
 
 - `scripts/x0x-622/run-capture.sh` — the runner. Env contract and exit codes
-  documented in its header: 0 accepted; 1 attempts exhausted; 2 gate
-  refusal; 5 collision; 124 lease-interrupted; 130 cancelled; else the
-  collector's own exit. Node control defaults to the systemd TRANSIENT unit
-  `x0x-measure` (started/stopped, never enabled; `systemd-run` shape in §3).
+  documented in its header: 0 accepted with clean cleanup; 1 attempts
+  exhausted; 2 gate refusal; 5 collision; 6 terminal-receipt WRITE failure;
+  8 measurement accepted but CLEANUP FAILED; 124 lease-interrupted;
+  130 cancelled; else the collector's own exit. Re-review round-2 semantics
+  (f8b3cb46): sampler and log helpers are supervised — their exit statuses
+  are classified (intentional runner stop vs spontaneous death) and recorded
+  in `ATTEMPT.json`; a window is accepted only if the health series covers
+  the WHOLE interval (span vs window length, interior gap bound, zero error
+  records, per-record peers/uptime shape, uptime progression, no peer
+  collapse) and the log helper stayed alive through it; the terminal
+  receipt write is checked — ENOSPC or any failure writing `ATTEMPT.json`
+  (or the `FAILED` marker) fails the run with exit 6 and honest stderr, and
+  no durable marker is promised on a full volume; node start/check/stop run
+  bounded AND interruptibly (a TERM during a blocked start is honored
+  immediately), cleanup escalates owned process GROUPS graceful→forced with
+  bounds, node ownership is retained until a bounded stop (graceful, then
+  forced) completes, and the cleanup disposition is separate from the
+  measurement disposition (a failed cleanup fails the run even after an
+  accepted window). Token: `X0X_API_TOKEN` env or `X0X_TOKEN_FILE` read
+  internally after the node starts — fresh units mint it at first boot, and
+  the token never appears on a command line.
 - `scripts/x0x-622/sampler.py` — bounded honest health sampler (§R2).
 - `scripts/x0x-622/test_runner.py` — the regression suite:
-  `--fast` (11 checks, ~1 min), `--slow` (T7/T11/T11b, ~21 min: scoped lease
-  expiry, the 300 s real-collector accept path through the runner, and the
-  peer-collapse rejection path — a smoke, NOT the public measurement),
+  `--fast` (20 checks: the round-1 eleven plus TF1a-d, TF2, TF3a-e),
+  `--slow` (T7/T11/T11b, ~21 min: scoped lease expiry, the 300 s
+  real-collector accept path through the runner, and the peer-collapse
+  rejection path — a smoke, NOT the public measurement),
   `--offline` (T10: pinned real daemon + real collector inside an empty
   user+net namespace — loopback only, no route, bootstrap/peer-cache
   disabled, fresh temp state; never a mesh capture).
 - Runner receipt convention: every attempt directory keeps the collector's
   own raw JSON, `collector-console.txt`, `health-series.jsonl`,
-  `service.log`, node checks, window epochs, and `ATTEMPT.json`
-  (status/collector_exit/lease state). Failed attempts are immutable and
-  marked `FAILED`; nothing is ever overwritten (fresh exclusive dir per
-  attempt).
+  `service.log`, node checks, window epochs, `series-check.txt`, and
+  `ATTEMPT.json` (status, collector/sampler/log exits, dt, lease state),
+  plus `CLEANUP.json` when the node lifecycle ran. Failed attempts are
+  immutable and marked `FAILED`; nothing is ever overwritten (fresh
+  exclusive dir per attempt).
 
 ## 3. Host plan — scoped Oracle first, temporary VPS as fallback
 
@@ -96,23 +118,67 @@ Concrete shape (for Astra review; NOT executed here):
 
 1. Dedicated user `x0xm` (nologin) + `/opt/x0x-measure/bin` carrying the
    pinned binaries (digest-verified per §0). NEVER the production user,
-   dirs, identity or ports.
-2. Disk ceiling (enforced, not prose): a 2 GiB sparse ext4 image mounted at
-   `/var/lib/x0x-measure` — ALL test state, evidence and logs live inside
-   it; a full disk surfaces as write failures, which the runner records.
-3. Fresh throwaway identity minted at first run under that mount
-   (`x0xd.toml`: api `127.0.0.1:12710`, bind `0.0.0.0:5493`,
-   `zero_peer_restart_secs=600`, `[update] enabled=false`; default Leaf per
-   §5.1 — no `--relay`, `gossip.relay` unset).
-4. The node runs as a TRANSIENT systemd unit — `systemd-run --unit=x0x-measure
-   --property=MemoryMax=768M --property=CPUQuota=100% --property=TasksMax=64
-   ...` — never enabled at boot; the runner starts/stops it; stop removes
-   it. Combined with production's caps the test node can never exceed 1 of
-   4 cores and 768 MiB of ~16 GiB free.
+   dirs, identity or ports. One-time deploy (root):
+   ```bash
+   useradd --system --home /var/lib/x0x-measure --shell /usr/sbin/nologin x0xm
+   mkdir -p /opt/x0x-measure/bin /etc/x0x-measure /var/lib/x0x-measure/log
+   # pinned binaries into /opt/x0x-measure/bin (sha256 vs §0), then:
+   truncate -s 2G /var/lib/x0x-measure.img
+   mkfs.ext4 -q /var/lib/x0x-measure.img
+   mount -o loop,nodev,nosuid /var/lib/x0x-measure.img /var/lib/x0x-measure
+   chown x0xm:x0xm /var/lib/x0x-measure /var/lib/x0x-measure/log
+   # x0xd.toml at /etc/x0x-measure/x0xd.toml: api 127.0.0.1:12710,
+   # bind 0.0.0.0:5493, data_dir /var/lib/x0x-measure/state,
+   # identity_dir /var/lib/x0x-measure/identity, mdns_enabled=false,
+   # port_mapping_enabled=false, zero_peer_restart_secs=600,
+   # [update] enabled=false   (default Leaf: NO --relay, gossip.relay unset)
+   ```
+2. Disk ceiling (enforced, not prose): the 2 GiB loop-mounted ext4 at
+   `/var/lib/x0x-measure`. Every writable path the measurement touches
+   lands inside it — verify before launch:
+   ```bash
+   findmnt /var/lib/x0x-measure          # mounted ext4 from the image
+   ls -ld /var/lib/x0x-measure/{state,identity,evidence,log}
+   df -h /var/lib/x0x-measure            # the actual ceiling
+   ```
+   `state/` and `identity/` are created by first boot, `evidence/` by the
+   runner, `log/x0xd.log` by the unit (below). Binaries at `/opt` are
+   read-only in use (~170 MB, fixed size); the runner's scratch dir is a
+   few KB under `/tmp`. A full volume surfaces as checked write failures
+   (runner exit 6), never as silent success.
+3. Node lifecycle — a TRANSIENT systemd unit, never enabled at boot,
+   carrying its OWN runtime expiry so the node dies even if the runner is
+   killed outright (F3). This is exactly the runner's `X0X_NODE_START`
+   default (one line):
+   ```bash
+   systemd-run --unit=x0x-measure --collect \
+     --property=RuntimeMaxSec=11400 \
+     --property=MemoryMax=768M --property=CPUQuota=100% --property=TasksMax=64 \
+     --property=IPAccounting=yes --property=NoNewPrivileges=yes \
+     --property=ProtectSystem=strict --property=ProtectHome=yes \
+     --property=PrivateTmp=yes --property=StateDirectory=x0x-measure \
+     --property=ReadWritePaths=/var/lib/x0x-measure \
+     --property=StandardOutput=append:/var/lib/x0x-measure/log/x0xd.log \
+     --property=StandardError=append:/var/lib/x0x-measure/log/x0xd.log \
+     /opt/x0x-measure/bin/x0xd --config /etc/x0x-measure/x0xd.toml
+   ```
+   `X0X_NODE_STOP` = `systemctl stop x0x-measure`;
+   `X0X_NODE_FORCE_STOP` = `systemctl kill --signal=SIGKILL x0x-measure`;
+   `X0X_NODE_CHECK` = `systemctl show x0x-measure -p ActiveState -p Result
+   -p NRestarts --value`. `RuntimeMaxSec` defaults to the lease + 600 s —
+   an independent bound OUTSIDE the runner shell. Logs ride the unit's own
+   append-file inside the bounded volume (the runner's log helper follows
+   that file, not the host journal).
+4. Token bootstrap (chicken-and-egg solved): a FRESH unit mints its API
+   token at first boot under `/var/lib/x0x-measure/state/api-token`. The
+   runner is given `X0X_TOKEN_FILE=/var/lib/x0x-measure/state/api-token`
+   and reads it internally AFTER starting the node (bounded wait, never
+   printed, never on a command line); `X0X_API_TOKEN` env works instead on
+   hosts where the token is already known.
 5. Lease/bounds as in the runner defaults (3 h wall-clock over helpers+node
    only, ≤2 retries, exclusive evidence dirs). Cleanup = runner finish +
-   `umount` + `losetup -d` + image removal + user removal — scoped, no
-   production contact.
+   `umount /var/lib/x0x-measure` + `losetup -d` + image removal + user
+   removal — scoped, no production contact.
 6. Recorded trade-off: the test Leaf shares the box's public IP with the
    production node (two identities behind one address — an ordinary NAT
    shape, but if Astra rules it contaminating, §3b applies). No cloud
@@ -137,8 +203,8 @@ X0X_EVIDENCE_ROOT=/var/lib/x0x-measure/evidence \
 X0X_COLLECTOR=/opt/x0x-measure/capture-egress.py \
 X0X_EXPECT_SHA256_X0XD=<x0xd digest from §0> \
 X0X_EXPECT_SHA256_X0X=<x0x digest from §0> \
+X0X_TOKEN_FILE=/var/lib/x0x-measure/state/api-token \
 X0X_WINDOW_SECS=1200 X0X_ATTEMPTS_MAX=3 X0X_LEASE_SECS=10800 \
-X0X_API_TOKEN="$(cat /var/lib/x0x-measure/state/api-token)" \
 bash scripts/x0x-622/run-capture.sh
 ```
 

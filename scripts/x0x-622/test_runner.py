@@ -211,7 +211,11 @@ def base_env(bindir, d_cli, d_daemon, evidence_root, collector, **over):
         "X0X_COLLECTOR": collector,
         "X0X_EXPECT_SHA256_X0X": d_cli, "X0X_EXPECT_SHA256_X0XD": d_daemon,
         "X0X_API_TOKEN": STUB_TOKEN, "X0X_API": "127.0.0.1:12710",
-        "X0X_SAMPLER_INTERVAL": "0.3", "X0X_LOG_FOLLOW": "tail -f /dev/null",
+        "X0X_SAMPLER_INTERVAL": "0.3",
+        # a log follower that actually emits lines, like the real daemon's
+        # log file does — an empty service.log is failed evidence (§5.2)
+        "X0X_LOG_FOLLOW":
+            "while sleep 1; do date -u +%Y-%m-%dT%H:%M:%SZ; done",
         "X0X_PYTHON": sys.executable, "PYTHONPATH": PYDEPS})
     env.update({k: str(v) for k, v in over.items()})
     return env
@@ -478,6 +482,237 @@ def fast_suite(args):
                rc == 2 and "version" in out and os.path.exists(stopped9c),
                f"rc={rc}")
         reset_stub()
+
+        # ---- round-2 caller-boundary tests (re-review f8b3cb46 F1-F3) ----
+
+        def fake_sampler(name, body):
+            return write_script(os.path.join(tmp, name),
+                "#!/usr/bin/env python3\n"
+                "import json, sys, time, signal\n"
+                "out = sys.argv[sys.argv.index('--out') + 1]\n"
+                "f = open(out, 'a')\n" + body)
+
+        # TF1a: sampler dies exit 22 after one healthy record -> NOT accepted
+        reset_stub()
+        ev = os.path.join(tmp, "ev-tf1a"); os.makedirs(ev)
+        nenv, _, _, _ = node_stub(tmp, "tf1a")
+        s22 = fake_sampler("sampler22.py",
+            "f.write(json.dumps({'ts': time.time(), 'mono': time.monotonic(),"
+            " 'health': {'peers': 1}}) + '\\n')\n"
+            "raise SystemExit(22)\n")
+        env = base_env(bindir, d_cli, d_daemon, ev, coll_ok,
+                       X0X_WINDOW_SECS=300, X0X_ATTEMPTS_MAX=1,
+                       X0X_LEASE_SECS=700, X0X_SAMPLER=s22, **nenv)
+        rc, out = run_runner(env)
+        att, _ = load_attempt(ev)
+        record("TF1a-sampler-exit22-rejected", rc == 1 and att
+               and att["status"] == "failed-sampler"
+               and att["sampler_exit"] == "22",
+               f"rc={rc} attempt={att}")
+
+        # TF1b: one healthy + three error records, exit 21 -> NOT accepted
+        reset_stub()
+        ev = os.path.join(tmp, "ev-tf1b"); os.makedirs(ev)
+        nenv, _, _, _ = node_stub(tmp, "tf1b")
+        s21 = fake_sampler("sampler21.py",
+            "f.write(json.dumps({'ts': time.time(), 'mono': time.monotonic(),"
+            " 'health': {'peers': 1, 'uptime_secs': 5000}}) + '\\n')\n"
+            "for _ in range(3):\n"
+            "    f.write(json.dumps({'ts': time.time(),"
+            " 'error': 'request timeout'}) + '\\n')\n"
+            "raise SystemExit(21)\n")
+        env = base_env(bindir, d_cli, d_daemon, ev, coll_ok,
+                       X0X_WINDOW_SECS=300, X0X_ATTEMPTS_MAX=1,
+                       X0X_LEASE_SECS=700, X0X_SAMPLER=s21, **nenv)
+        rc, out = run_runner(env)
+        att, _ = load_attempt(ev)
+        record("TF1b-sampler-exit21-rejected", rc == 1 and att
+               and att["status"] == "failed-sampler",
+               f"rc={rc} attempt={att}")
+
+        # TF1c: log helper exits 9 immediately -> NOT accepted
+        reset_stub()
+        ev = os.path.join(tmp, "ev-tf1c"); os.makedirs(ev)
+        nenv, _, _, _ = node_stub(tmp, "tf1c")
+        env = base_env(bindir, d_cli, d_daemon, ev, coll_ok,
+                       X0X_WINDOW_SECS=300, X0X_ATTEMPTS_MAX=1,
+                       X0X_LEASE_SECS=700, X0X_LOG_FOLLOW="exit 9", **nenv)
+        rc, out = run_runner(env)
+        att, _ = load_attempt(ev)
+        record("TF1c-log-helper-exit9-rejected", rc == 1 and att
+               and att["status"] == "failed-log-helper",
+               f"rc={rc} attempt={att}")
+
+        # TF1d: sampler TERM-clean but silent after one full record ->
+        # coverage validation must reject it
+        reset_stub()
+        ev = os.path.join(tmp, "ev-tf1d"); os.makedirs(ev)
+        nenv, _, _, _ = node_stub(tmp, "tf1d")
+        s_gap = fake_sampler("sampler_gap.py",
+            "f.write(json.dumps({'ts': time.time(), 'mono': time.monotonic(),"
+            " 'health': {'peers': 1, 'uptime_secs': 5000}}) + '\\n')\n"
+            "f.flush()\n"
+            "signal.signal(signal.SIGTERM, lambda *a: sys.exit(0))\n"
+            "while True:\n    time.sleep(1)\n")
+        env = base_env(bindir, d_cli, d_daemon, ev, coll_ok,
+                       X0X_WINDOW_SECS=300, X0X_ATTEMPTS_MAX=1,
+                       X0X_LEASE_SECS=700, X0X_SAMPLER=s_gap, **nenv)
+        rc, out = run_runner(env)
+        att, _ = load_attempt(ev)
+        record("TF1d-coverage-gap-rejected", rc == 1 and att
+               and att["status"] == "failed-coverage",
+               f"rc={rc} attempt={att}")
+
+        # TF2: terminal receipt write faulted (ATTEMPT.json -> /dev/full)
+        reset_stub()
+        ev = os.path.join(tmp, "ev-tf2"); os.makedirs(ev)
+        nenv, _, _, _ = node_stub(tmp, "tf2")
+        coll_full = py_coll(os.path.join(tmp, "coll_full.py"),
+            "import os\n"
+            "os.symlink('/dev/full', a.out_dir + '/ATTEMPT.json')\n"
+            "time.sleep(1.2)\n")
+        env = base_env(bindir, d_cli, d_daemon, ev, coll_full,
+                       X0X_WINDOW_SECS=300, X0X_ATTEMPTS_MAX=1,
+                       X0X_LEASE_SECS=700, **nenv)
+        rc, out = run_runner(env)
+        att_path = None
+        for d in evidence_dirs(ev):
+            p = os.path.join(ev, d, "ATTEMPT.json")
+            if os.path.islink(p):
+                att_path = p
+        record("TF2-receipt-write-failure-fails-run",
+               rc == 6 and att_path is not None
+               and "RECEIPT" in out.upper(),
+               f"rc={rc} symlink_retained={att_path is not None}")
+
+        # TF3a: TERM during a BLOCKED node start is honored promptly; the
+        # blocked job (own group) is killed, not left behind
+        reset_stub()
+        ev = os.path.join(tmp, "ev-tf3a"); os.makedirs(ev)
+        marker = os.path.join(tmp, "tf3a-start-entered")
+        nenv, _, _, _ = node_stub(tmp, "tf3a")
+        nenv.update({
+            "X0X_NODE_START": f"touch {marker}; exec sleep 347",
+            "X0X_NODE_STOP": "true", "X0X_NODE_FORCE_STOP": "true"})
+        env = base_env(bindir, d_cli, d_daemon, ev, coll_ok,
+                       X0X_WINDOW_SECS=300, X0X_ATTEMPTS_MAX=1,
+                       X0X_LEASE_SECS=700, **nenv)
+        proc = subprocess.Popen(["bash", RUNNER], env=env,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT, text=True,
+                                start_new_session=True)
+        t0 = time.monotonic()
+        while not os.path.exists(marker) and time.monotonic() - t0 < 5:
+            time.sleep(0.05)
+        proc.send_signal(signal.SIGTERM)
+        try:
+            out, _ = proc.communicate(timeout=3)
+            prompt = True
+            rc = proc.returncode
+        except subprocess.TimeoutExpired:
+            prompt = False
+            proc.kill()
+            out, _ = proc.communicate()
+            rc = proc.returncode
+        time.sleep(0.5)
+        leftover = subprocess.run(["pgrep", "-f", "sleep 347"],
+                                  capture_output=True).returncode == 0
+        record("TF3a-term-during-blocked-start",
+               prompt and rc == 130 and not leftover,
+               f"prompt={prompt} rc={rc} blocked_job_left={leftover}")
+
+        # TF3b: node stop FAILS -> measurement may be accepted but the run
+        # cannot return success (cleanup disposition is separate)
+        reset_stub()
+        ev = os.path.join(tmp, "ev-tf3b"); os.makedirs(ev)
+        nenv, _, _, _ = node_stub(tmp, "tf3b")
+        nenv.update({"X0X_NODE_STOP": "false", "X0X_NODE_FORCE_STOP": "false"})
+        env = base_env(bindir, d_cli, d_daemon, ev, coll_ok,
+                       X0X_WINDOW_SECS=300, X0X_ATTEMPTS_MAX=1,
+                       X0X_LEASE_SECS=700, **nenv)
+        rc, out = run_runner(env)
+        att, _ = load_attempt(ev)
+        record("TF3b-node-stop-failure-fails-run",
+               rc == 8 and att and att["status"] == "accepted"
+               and "CLEANUP FAILED" in out,
+               f"rc={rc} attempt={att}")
+
+        # TF3c: node stop BLOCKS -> bounded graceful, then forced path saves
+        # cleanup; run stays accepted
+        reset_stub()
+        ev = os.path.join(tmp, "ev-tf3c"); os.makedirs(ev)
+        nenv, _, _, _ = node_stub(tmp, "tf3c")
+        nenv.update({"X0X_NODE_STOP": "sleep 25; false",
+                     "X0X_NODE_FORCE_STOP": "true"})
+        env = base_env(bindir, d_cli, d_daemon, ev, coll_ok,
+                       X0X_WINDOW_SECS=300, X0X_ATTEMPTS_MAX=1,
+                       X0X_LEASE_SECS=700, X0X_STOP_TIMEOUT=4, **nenv)
+        t0 = time.monotonic()
+        rc, out = run_runner(env, timeout=60)
+        took = time.monotonic() - t0
+        att, _ = load_attempt(ev)
+        record("TF3c-blocked-stop-bounded-forced",
+               rc == 0 and took < 15 and att and att["status"] == "accepted",
+               f"rc={rc} took={took:.0f}s attempt={att}")
+
+        # TF3d: runner KILLED outright -> the node's own runtime expiry still
+        # removes it; an unrelated sentinel survives; evidence retained
+        reset_stub()
+        ev = os.path.join(tmp, "ev-tf3d"); os.makedirs(ev)
+        nenv, _, _, _ = node_stub(tmp, "tf3d")
+        nenv.update({"X0X_NODE_START":
+                     "nohup timeout 6 sleep 311 >/dev/null 2>&1 & exit 0"})
+        coll_30b = py_coll(os.path.join(tmp, "coll_30b.py"), "time.sleep(30)\n")
+        env = base_env(bindir, d_cli, d_daemon, ev, coll_30b,
+                       X0X_WINDOW_SECS=300, X0X_ATTEMPTS_MAX=1,
+                       X0X_LEASE_SECS=700, **nenv)
+        sentinel = subprocess.Popen(["sleep", "300"], start_new_session=True)
+        proc = subprocess.Popen(["bash", RUNNER], env=env,
+                                stdout=subprocess.DEVNULL,
+                                stderr=subprocess.DEVNULL,
+                                start_new_session=True)
+        t0 = time.monotonic()   # wait until the window is actually running
+        while not evidence_dirs(ev) and time.monotonic() - t0 < 8:
+            time.sleep(0.25)
+        time.sleep(0.5)
+        proc.send_signal(signal.SIGKILL)
+        proc.wait(timeout=5)
+        t0 = time.monotonic()
+        while (subprocess.run(["pgrep", "-f", "sleep 311"],
+                              capture_output=True).returncode == 0
+               and time.monotonic() - t0 < 10):
+            time.sleep(0.5)
+        node_gone = subprocess.run(["pgrep", "-f", "sleep 311"],
+                                   capture_output=True).returncode != 0
+        sentinel_alive = sentinel.poll() is None
+        sentinel.terminate(); sentinel.wait()
+        subprocess.run(["pkill", "-f", "x0x-622/sampler.py"],
+                       capture_output=True)
+        record("TF3d-runner-death-independent-node-expiry",
+               node_gone and sentinel_alive and evidence_dirs(ev),
+               f"node_expired_on_its_own={node_gone} sentinel={sentinel_alive}"
+               f" evidence={evidence_dirs(ev)}")
+
+        # TF3e: uncooperative (TERM-ignoring) collector -> bounded
+        # graceful-then-FORCED cleanup; cancellation stays prompt
+        reset_stub()
+        ev = os.path.join(tmp, "ev-tf3e"); os.makedirs(ev)
+        nenv, _, _, _ = node_stub(tmp, "tf3e")
+        coll_stubborn = py_coll(os.path.join(tmp, "coll_stubborn.py"),
+            "import signal\n"
+            "signal.signal(signal.SIGTERM, signal.SIG_IGN)\n"
+            "import time\ntime.sleep(60)\n")
+        env = base_env(bindir, d_cli, d_daemon, ev, coll_stubborn,
+                       X0X_WINDOW_SECS=300, X0X_ATTEMPTS_MAX=1,
+                       X0X_LEASE_SECS=700, X0X_HELPER_GRACE=2, **nenv)
+        t0 = time.monotonic()
+        rc, out = run_runner(env, timeout=30, sig=signal.SIGINT, sig_after=2.0)
+        took = time.monotonic() - t0
+        stubborn_gone = subprocess.run(["pgrep", "-f", "coll_stubborn"],
+                                       capture_output=True).returncode != 0
+        record("TF3e-uncooperative-helper-forced",
+               rc == 130 and took < 10 and stubborn_gone,
+               f"rc={rc} took={took:.0f}s helper_gone={stubborn_gone}")
     finally:
         stub.shutdown(); stub.server_close()
         decoy.shutdown(); decoy.server_close()
