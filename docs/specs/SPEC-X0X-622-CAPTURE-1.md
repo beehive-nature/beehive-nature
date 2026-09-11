@@ -1,5 +1,9 @@
 # SPEC-X0X-622-CAPTURE-1 — tested public-mesh Leaf egress capture (correction round)
 
+> **Re-review: NOT ACCEPTED for execution at `9b5df485`.** The fast suite
+> passes, but runner-level fault probes still return success after evidence
+> and cleanup failures. See the [independent re-review](../dispatches/2026-09-10-astra-x0x-622-runner-rereview.md).
+
 Status: STAGED for backend Astra re-review, 2026-09-10. Supersedes the
 executables of the returned proposal `ops/x0x/MEASUREMENT-622.md`
 (`58aa4fc9`; review `b7076f86`, NOT ACCEPTED — its binary provenance stands,
