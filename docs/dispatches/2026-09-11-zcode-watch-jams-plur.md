@@ -36,6 +36,16 @@ policy. The visible gate says `payment: disabled` and `approval: Trezor
 downstream`. A local join toggles the preview and appends a local room event;
 it cannot POST, open a raw `/ws`, upload an object, or spend funds.
 
+The watch room now has three deliberate readings behind the shared New bee /
+Raver / Cypherpunk register. New bee gets the plain-language two-tab invitation
+and a quiet room welcome; Raver gets the shared-floor language and lighter
+density; Cypherpunk keeps the receipt, audit comb, checkpoint, ingest, and
+canonical-origin detail. The technical register is therefore available without
+making every reader parse it. Each view's authored copy is keyed into the
+estate language dock (`lang.js` + `lang-corpus.json`) so the saved language
+travels with the dApp across the estate's DNS surfaces; the view contract keeps
+the same facts and actions underneath the presentation.
+
 The page is registered as `jams` in `estate.json`, the atlas was regenerated
 from the registry, and the PLUR museum and watch room both link to it. The
 review deck includes `jams.html` in its walk list.
@@ -69,9 +79,10 @@ strict shape checks. W@tch only reads the fixture, shows channel/sequence,
 bounded checkpoint identity, and encrypted item count, and leaves the live
 HLS, room, meter, and pause-not-kill paths unchanged.
 
-`node e2e/zcode-watch-manifest-check.mjs` — **9 passed, 0 failed** — proves
-the W@tch projection against a local fixture server and asserts that it emits
-no POST and opens no raw `/ws`. The Jam check remains **17 passed, 0 failed**.
+`node e2e/zcode-watch-manifest-check.mjs` — **16 passed, 0 failed** — proves
+the W@tch projection against a local fixture server, exercises all three
+audience readings and their language-keyed copy, and asserts that it emits no
+POST and opens no raw `/ws`. The Jam check remains **17 passed, 0 failed**.
 The hosted Node job runs both projections and the encrypted Store proof after
 the pinned Playwright setup.
 

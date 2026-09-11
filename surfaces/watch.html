@@ -57,6 +57,20 @@
     color:var(--dim); font-size:var(--t-law); line-height:var(--lh-law); background:var(--bg1); overflow-wrap:anywhere; }
   .independent b { color:var(--ink-hi); }
   .independent a { color:var(--gold); text-decoration:none; border-bottom:1px dashed var(--gold); }
+  .view-lead { margin:var(--s2) var(--s3) 0; padding:var(--s3); border:1px solid var(--line);
+    border-radius:var(--r-md); background:var(--bg1); display:flex; flex-direction:column;
+    gap:var(--s1); }
+  .view-lead .view-kicker { color:var(--faint); font-size:var(--t-micro); text-transform:uppercase;
+    letter-spacing:.14em; }
+  .view-lead strong { color:var(--ink-hi); font-size:var(--t-h2); line-height:1.35; }
+  body[data-reg="bee"] .view-lead[data-view="bee"] { border-color:var(--line-hi); background:var(--panel, var(--bg1)); }
+  body[data-reg="bee"] .view-lead[data-view="bee"] .view-kicker { color:#326b39; }
+  body[data-reg="bee"] .view-lead[data-view="bee"] strong { color:var(--ink); font-family:var(--bee-font, ui-sans-serif, system-ui, sans-serif); }
+  body[data-reg="raver"] .view-lead[data-view="raver"] { border-color:var(--violet); background:color-mix(in srgb, var(--violet) 10%, var(--bg1)); }
+  body[data-reg="raver"] .view-lead[data-view="raver"] .view-kicker { color:var(--violet); }
+  body[data-reg="raver"] .view-lead[data-view="raver"] strong { font-family:ui-sans-serif, system-ui, sans-serif; }
+  body[data-reg="cypherpunk"] .view-lead[data-view="cypherpunk"] { border-color:var(--cyan); background:var(--bg1); }
+  body[data-reg="cypherpunk"] .view-lead[data-view="cypherpunk"] .view-kicker { color:var(--cyan); }
   /* ── the ticker line (streamer-updated) ─────────────────────────────── */
   #ticker {
     display: flex; gap: var(--s3); overflow-x: auto; white-space: nowrap;
@@ -108,6 +122,8 @@
   .meter .nums { font-size: var(--t-small); color: var(--dim);
     font-variant-numeric: tabular-nums; }
   .meter .nums b { color: var(--ink-hi); }
+  .meter-copy { margin-top:var(--s2); color:var(--dim); font-size:var(--t-small); line-height:1.5; }
+  .meter-copy strong { color:var(--ink-hi); font-weight:600; }
   .chip {
     display: inline-block; border-radius: var(--r-pill); padding: 2px 9px;
     font-size: var(--t-micro); letter-spacing: .1em; text-transform: uppercase;
@@ -165,6 +181,17 @@
   .manifest-facts div { min-width: 0; padding: 6px 8px; border-left: 2px solid var(--cyan); background: var(--well); }
   .manifest-facts dt { color: var(--faint); font-size: var(--t-micro); text-transform: uppercase; }
   .manifest-facts dd { overflow: hidden; color: var(--ink-hi); font-size: var(--t-small); text-overflow: ellipsis; white-space: nowrap; }
+  .room-welcome { margin:var(--s2) var(--s3) 0; padding:var(--s3); border:1px solid var(--line-hi);
+    border-radius:var(--r-md); background:var(--bg2); }
+  .room-welcome .t { display:block; color:var(--faint); font-size:var(--t-micro); text-transform:uppercase;
+    letter-spacing:.12em; }
+  .room-welcome strong { display:block; margin-top:var(--s1); color:var(--ink-hi); font-size:var(--t-h2); }
+  .room-welcome p { margin-top:var(--s1); color:var(--dim); font-size:var(--t-small); line-height:1.55; }
+  body[data-reg="bee"] .room-welcome[data-view="bee"] { border-color:var(--line-hi); background:var(--panel, var(--bg2)); }
+  body[data-reg="bee"] .room-welcome[data-view="bee"] strong { color:var(--ink); font-family:var(--bee-font, ui-sans-serif, system-ui, sans-serif); }
+  body[data-reg="raver"] .raver-welcome { border-color:var(--violet); background:color-mix(in srgb, var(--violet) 10%, var(--bg2)); }
+  body[data-reg="raver"] .raver-welcome .t { color:var(--violet); }
+  body[data-reg="raver"] .raver-welcome strong { font-family:ui-sans-serif, system-ui, sans-serif; }
   #roomframe { flex: 1; width: 100%; border: 0; min-height: 340px;
     background: var(--bg0); }
   .roomhead { flex-wrap: wrap; }
@@ -205,17 +232,31 @@
     .roomside { min-height: 520px; border-top: 1px solid var(--line); border-left: 0; }
     #roomframe { height: 340px; min-height: 340px; flex: none; }
     .meter .nums { flex-basis: 100%; }
+    .view-lead { margin-right:var(--s2); margin-left:var(--s2); }
   }
   .hidden { display: none !important; }
 </style>
 </head>
-<body>
+<body data-experience="watch" data-bee-theme="shared">
 <header>
   <span class="hex">estate · live</span>
   <h1>SKAISTS watch room</h1>
   <span class="dot" id="dot"></span>
   <span class="st" id="st">checking the stream…</span>
 </header>
+
+<section class="view-lead" data-view="bee" aria-label="new bee view">
+  <span class="view-kicker" data-i18n="room.title">The two-tab room</span>
+  <strong data-i18n="room.beeLead">Open a second tab. Turn a knob. Watch it move.</strong>
+</section>
+<section class="view-lead" data-view="raver" aria-label="raver view">
+  <span class="view-kicker" data-i18n="room.raverTitle">Jam the field.</span>
+  <strong data-i18n="room.raverLead">One shared composition. Every tab is a hand on the same instrument.</strong>
+</section>
+<section class="view-lead" data-view="cypherpunk" aria-label="cypherpunk view">
+  <span class="view-kicker" data-i18n="experience.connection">Connection details</span>
+  <strong data-i18n="experience.directory.cypher">Relay directory and published roster</strong>
+</section>
 
 <div class="independent" aria-label="independent project references">
   <b>Independent project references.</b> This SKAISTS room uses public examples from
@@ -246,13 +287,17 @@
 
     <div class="meter">
       <div class="row">
-        <label for="sess">receipt №</label>
+        <label for="sess" data-view="bee" data-i18n="room.open">open a room</label>
+        <label for="sess" data-view="raver" data-i18n="room.raverTitle">jam the field</label>
+        <label for="sess" data-view="cypherpunk">receipt №</label>
         <input id="sess" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="session №" aria-label="receipt session number">
         <button id="go">watch</button>
         <span class="chip nosess" id="chip">no session</span>
         <span class="nums" id="nums"></span>
       </div>
-      <div class="comb" id="comb" aria-label="the four audit states">
+      <div class="meter-copy" data-view="bee"><strong data-i18n="room.beeLead">Open a second tab. Turn a knob. Watch it move.</strong></div>
+      <div class="meter-copy" data-view="raver"><strong data-i18n="room.raverLead">One shared composition. Every tab is a hand on the same instrument.</strong></div>
+      <div class="comb" id="comb" data-view="cypherpunk" aria-label="the four audit states">
         <div class="cell" id="c-passed"><div class="h capped"><span class="seal">⬡</span></div>
           <div class="l">PASSED</div><div class="s">capped</div></div>
         <div class="cell" id="c-pending"><div class="h honey">◈</div>
@@ -262,13 +307,13 @@
         <div class="cell" id="c-inconclusive"><div class="h nectar">◇</div>
           <div class="l">INCONCLUSIVE</div><div class="s">nectar</div></div>
       </div>
-      <div class="care">the four audit states, z3.2's comb vocabulary: this is
+      <div class="care" data-view="cypherpunk">the four audit states, z3.2's comb vocabulary: this is
         topology and vocabulary, NEVER a security claim. the live session's own
         audit verdict is the lit cell; the verdict is recomputed by the pure
         audit (tool/x402audit.mjs), this surface only reads it.</div>
     </div>
 
-    <details class="ingest">
+    <details class="ingest" data-view="cypherpunk">
       <summary>go live — the streamer's line</summary>
       <div class="body">
         <div>OBS or ffmpeg, one RTMP line over the x0x tailnet forward
@@ -290,9 +335,22 @@ ticker      curl -X POST http://127.0.0.1:18094/live/ticker/general \
 
   <section class="roomside">
     <div class="roomhead">
-      <span class="t">the room</span> <b>#general · skaists.buzz</b>
+      <span class="t">the room</span>
+      <b data-view="bee" data-i18n="room.title">The two-tab room</b>
+      <b data-view="raver" data-i18n="room.raverTitle">Jam the field.</b>
+      <b data-view="cypherpunk">#general · skaists.buzz</b>
     </div>
-    <section class="manifest-card" aria-live="polite" aria-label="shared room checkpoint">
+    <section class="room-welcome" data-view="bee" aria-label="new bee room welcome">
+      <span class="t" data-i18n="room.ready">Sharing changes with other tabs in this browser.</span>
+      <strong data-i18n="room.open">Open a second tab</strong>
+      <p data-i18n="room.beeLead">Open a second tab. Turn a knob. Watch it move.</p>
+    </section>
+    <section class="room-welcome raver-welcome" data-view="raver" aria-label="raver room welcome">
+      <span class="t" data-i18n="room.raverTitle">Jam the field.</span>
+      <strong data-i18n="room.raverLead">One shared composition. Every tab is a hand on the same instrument.</strong>
+      <p data-i18n="room.tabs">Tabs in this room</p>
+    </section>
+    <section class="manifest-card" data-view="cypherpunk" aria-live="polite" aria-label="shared room checkpoint">
       <div class="manifest-top"><span class="t">shared checkpoint</span><span class="manifest-state" id="manifest-state">loading…</span></div>
       <p id="manifest-copy">waiting for the verified Connect + Store envelope</p>
       <dl class="manifest-facts">
@@ -307,9 +365,12 @@ ticker      curl -X POST http://127.0.0.1:18094/live/ticker/general \
 </div>
 </main>
 
-<footer>same relay · same origin (canonical-origin law) · the playlist door is
+<footer>
+  <span data-view="bee"><span data-i18n="room.beeLead">Open a second tab. Turn a knob. Watch it move.</span> · </span>
+  <span data-view="raver"><span data-i18n="room.raverLead">One shared composition. Every tab is a hand on the same instrument.</span> · </span>
+  <span data-view="cypherpunk">same relay · same origin (canonical-origin law) · the playlist door is
 read-only · pause-not-kill · tokens.css only — the estate's own palette.
-watch-room POC 2026-09-04 · <a href="jams.html" style="color:var(--gold)">join SKAISTS mUsiC · PLUR →</a></footer>
+  </span><a href="jams.html" style="color:var(--gold)">join SKAISTS mUsiC · PLUR →</a></footer>
 
 <script src="/watch/hls.min.js"></script>
 <script>

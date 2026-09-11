@@ -45,6 +45,30 @@ const watchRef = page.locator('a[href="https://relay.skaists.dev/watch/"]');
 ok('watch: independent references are explicit', await jamsRef.count() === 1 && await watchRef.count() === 1 && (await page.locator('.independent').innerText()).includes('separate projects'));
 ok('watch: independent references open safely in new tabs', await jamsRef.getAttribute('target') === '_blank' && await jamsRef.getAttribute('rel') === 'noopener noreferrer' && await watchRef.getAttribute('target') === '_blank' && await watchRef.getAttribute('rel') === 'noopener noreferrer');
 ok('watch: no write or raw transport was opened', !requests.some(r => r.method === 'POST' || r.url.includes('/ws')));
+await page.waitForSelector('#breg-bee');
+for (const mode of ['bee', 'raver', 'cypherpunk']) {
+  await page.locator(`#breg-${mode}`).click();
+  const view = await page.evaluate(() => {
+    const visible = selector => { const node = document.querySelector(selector); return !!node && getComputedStyle(node).display !== 'none'; };
+    return {
+      reg: document.body.dataset.reg,
+      leads: [...document.querySelectorAll('.view-lead[data-view]')].filter(node => getComputedStyle(node).display !== 'none').map(node => node.dataset.view),
+      leadKeys: [...document.querySelectorAll('.view-lead[data-view]')].map(node => node.dataset.i18n || node.querySelector('[data-i18n]')?.getAttribute('data-i18n')),
+      manifest: visible('.manifest-card'),
+      welcome: visible(`.room-welcome[data-view="${document.body.dataset.reg}"]`),
+    };
+  });
+  ok(`watch: ${mode} view selects its own reading`, view.reg === mode && view.leads.length === 1 && view.leads[0] === mode && view.welcome === (mode !== 'cypherpunk') && view.manifest === (mode === 'cypherpunk'));
+  ok(`watch: ${mode} view copy is translation-keyed`, view.leadKeys.every(Boolean));
+}
+await page.locator('#breg-bee').click();
+await page.waitForSelector('#blangsel');
+await page.evaluate(() => localStorage.setItem('blang', 'ru'));
+await page.reload();
+await page.waitForFunction(() => document.documentElement.lang === 'ru' && document.querySelector('#blangsel')?.value === 'ru');
+const translatedLead = await page.locator('.view-lead[data-view="bee"] [data-i18n="room.beeLead"]').innerText();
+const translatedLang = await page.evaluate(() => document.documentElement.lang);
+ok('watch: view copy travels through the language dock', translatedLead !== 'Open a second tab. Turn a knob. Watch it move.' && translatedLang === 'ru');
 
 console.log(`\n${pass} passed, ${fail} failed`);
 await browser.close();
