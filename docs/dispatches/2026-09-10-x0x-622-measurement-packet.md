@@ -387,3 +387,72 @@ The live public-mesh capture (awaits Astra re-acceptance + founder host
 word); the per-peer delivery control; any #622 posting. No production
 mutation, no cloud change, no purchase, no laptop mesh run, no upstream
 comment this round.
+
+---
+
+# CORRECTION ROUND 4 (zCode, 2026-09-10, after re-review 5e69d0f9)
+
+Astra independently reproduced fast 27/27 and race 8/8, confirmed the
+round-1..3 fixes hold, and found three structural gaps — all real, all
+owned. The binary pin, unchanged collector, and every prior fix stand
+untouched.
+
+## R4-1 — the packet's aggregate bounds are now HARD CEILINGS
+
+Prelaunch refusals (exit 2, node never started, no attempt dirs) for
+`X0X_LEASE_SECS > 10800` and `X0X_ATTEMPTS_MAX > 3`, beside the existing
+lower/relationship checks; `X0X_DIR_STAMP` must additionally be a single
+safe path segment (no `/`, no `..` — closing the traversal hole at the
+stamp itself). Receipts: TH1 — lease 10801 refused ("10800s" ceiling
+named), attempts 4 refused ("ceiling of 3" named), no node start, no dirs;
+TH1-boundary — lease exactly 10800 with attempts exactly 3 runs a healthy
+accepted window.
+
+## R4-2 — evidence is BOUND to the bounded filesystem
+
+With the storage gate on, the runner now resolves the required mount and
+the evidence root through their real paths and requires BOTH the realpath
+prefix (mount or beneath, pre- and post-creation, defeating symlink and
+`..` escapes) AND same-device identity (`stat -c %d`), before the node
+starts; the evidence root is only created after the prefix check passes,
+so a refused root is never created; the runner's own scratch subtree is
+relocated under the mount so every runner-created writable path lives on
+the bounded volume. Receipts: TH2a — gate `/dev/shm` with a `/tmp` evidence
+root refused prelaunch and the root NOT created; TH2b — a symlink escape
+and a `../../../` traversal both refused; TH2c — an unsafe
+`X0X_DIR_STAMP="../esc"` refused; the healthy mounted-root control
+(TG3b positive, now with its evidence root genuinely under the mount)
+still accepts. This also fixes the review's observation that the old TG3b
+positive leg itself wrote evidence on `/tmp` while gating `/dev/shm`.
+
+## R4-3 — every node-starting path leaves a checked terminal receipt
+
+The FIRST attempt directory is now reserved and owned BEFORE node launch:
+a collision becomes a PRELAUNCH refusal — exit 5, node never started,
+victim untouched, and a checked `REFUSED-<stamp>.json` receipt written in
+the evidence root (its own write is checked; failure escalates to exit 6).
+Post-start paths — token bootstrap, preflight health/gossip/shape — mark
+the RESERVED dir (`FAILED` + `ATTEMPT.json`) and `finish()` writes its
+checked `CLEANUP.json` there; later-attempt collisions (attempts ≥ 2) also
+leave a checked REFUSED receipt instead of a silent exit 5. Receipts:
+TH3a — Astra's exact probe shape (pre-created `fixed-attempt1`, same
+stamp): exit 5, victim byte-identical, node NEVER started, REFUSED receipt
+present and nonempty; TH3b — post-start preflight failure (wrong version
+through the shape gate): node started and stopped, and the reserved dir
+contains `FAILED`, `ATTEMPT.json`, and `CLEANUP.json`.
+
+## Regression receipts (exact commands)
+
+- `python3 scripts/x0x-622/test_runner.py --fast` → **34/34 pass**
+  (27 prior + TH1/TH1-boundary/TH2a/TH2b/TH2c/TH3a/TH3b), ~5 min.
+- `python3 scripts/x0x-622/race_repro.py 8` → 8/8 clean.
+- `python3 scripts/x0x-622/test_runner.py --slow` → re-run against this
+  candidate (T7/T11/T11b).
+- `bash -n`/`py_compile` clean; `--offline` T10 remains round-1 evidence.
+
+## Unperformed (unchanged)
+
+The live public-mesh capture (awaits Astra re-acceptance + founder host
+word); the per-peer delivery control; any #622 posting. No production
+mutation, no cloud change, no purchase, no laptop mesh run, no upstream
+comment this round.

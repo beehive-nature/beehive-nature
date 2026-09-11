@@ -837,7 +837,7 @@ def fast_suite(args):
                and out.returncode == 0, json.dumps(checks))
 
         # TG3b: the storage gate — refuse a non-mountpoint prelaunch; accept
-        # a real mountpoint with log/ present
+        # a real mountpoint with log/ present AND the evidence root beneath it
         reset_stub()
         plain = os.path.join(tmp, "not-a-mount"); os.makedirs(plain)
         ev = os.path.join(tmp, "ev-tg3b"); os.makedirs(ev)
@@ -849,7 +849,7 @@ def fast_suite(args):
         refused = rc == 2 and "not a real mountpoint" in out \
             and not os.path.exists(started3b)
         os.makedirs("/dev/shm/log", exist_ok=True)
-        ev2 = os.path.join(tmp, "ev-tg3b2"); os.makedirs(ev2)
+        ev2 = "/dev/shm/ev-tg3b-pos"
         env = base_env(bindir, d_cli, d_daemon, ev2, coll_ok,
                        X0X_WINDOW_SECS=300, X0X_ATTEMPTS_MAX=1,
                        X0X_LEASE_SECS=700, X0X_REQUIRE_MOUNT="/dev/shm", **nenv)
@@ -859,6 +859,139 @@ def fast_suite(args):
                refused and rc2 == 0 and att2 and att2["status"] == "accepted",
                f"refused={refused} mount_run_rc={rc2}"
                f" attempt={att2 and att2['status']}")
+
+        # ---- round-4 tests (re-review 5e69d0f9 R4-1..R4-3) ------------------
+
+        # TH1: hard ceilings just above the packet bounds are refused
+        # prelaunch (no node start, no attempt dirs); boundary values run
+        reset_stub()
+        ev = os.path.join(tmp, "ev-th1a"); os.makedirs(ev)
+        nenv, _, started_h1, _ = node_stub(tmp, "th1a")
+        env = base_env(bindir, d_cli, d_daemon, ev, coll_ok,
+                       X0X_WINDOW_SECS=300, X0X_ATTEMPTS_MAX=1,
+                       X0X_LEASE_SECS=10801, **nenv)
+        rc_lease, out_lease = run_runner(env)
+        env = base_env(bindir, d_cli, d_daemon, ev, coll_ok,
+                       X0X_WINDOW_SECS=300, X0X_ATTEMPTS_MAX=4,
+                       X0X_LEASE_SECS=700, **nenv)
+        rc_att, out_att = run_runner(env)
+        record("TH1-ceilings-refused-prelaunch",
+               rc_lease == 2 and "10800s" in out_lease and rc_att == 2
+               and "ceiling of 3" in out_att
+               and not os.path.exists(started_h1)
+               and not evidence_dirs(ev),
+               f"lease_rc={rc_lease} attempts_rc={rc_att}"
+               f" node_started={os.path.exists(started_h1)}")
+
+        reset_stub()
+        ev = os.path.join(tmp, "ev-th1b"); os.makedirs(ev)
+        nenv, _, _, _ = node_stub(tmp, "th1b")
+        env = base_env(bindir, d_cli, d_daemon, ev, coll_ok,
+                       X0X_WINDOW_SECS=300, X0X_ATTEMPTS_MAX=3,
+                       X0X_LEASE_SECS=10800, **nenv)
+        rc_b, out_b = run_runner(env)
+        att_b, _ = load_attempt(ev)
+        record("TH1-boundary-values-run",
+               rc_b == 0 and att_b and att_b["status"] == "accepted",
+               f"rc={rc_b} attempt={att_b and att_b['status']}")
+
+        # TH2a: different-device evidence root refused prelaunch, not created
+        reset_stub()
+        ev = os.path.join(tmp, "ev-th2a")          # deliberately NOT created
+        nenv, _, started_h2, _ = node_stub(tmp, "th2a")
+        env = base_env(bindir, d_cli, d_daemon, ev, coll_ok,
+                       X0X_WINDOW_SECS=300, X0X_ATTEMPTS_MAX=1,
+                       X0X_LEASE_SECS=700, X0X_REQUIRE_MOUNT="/dev/shm", **nenv)
+        rc, out = run_runner(env)
+        record("TH2a-cross-device-evidence-root-refused",
+               rc == 2 and "outside the required mount" in out
+               and not os.path.exists(ev)
+               and not os.path.exists(started_h2),
+               f"rc={rc} root_created={os.path.exists(ev)}")
+
+        # TH2b: symlink and traversal escapes refused prelaunch
+        reset_stub()
+        base2 = "/dev/shm/ev-th2b"
+        os.makedirs(base2, exist_ok=True)
+        os.makedirs("/tmp/th2b-evil", exist_ok=True)
+        lnk = os.path.join(base2, "lnk")
+        if not os.path.islink(lnk):
+            os.symlink("/tmp/th2b-evil", lnk)
+        nenv, _, started_h2b, _ = node_stub(tmp, "th2b")
+        env = base_env(bindir, d_cli, d_daemon, lnk, coll_ok,
+                       X0X_WINDOW_SECS=300, X0X_ATTEMPTS_MAX=1,
+                       X0X_LEASE_SECS=700, X0X_REQUIRE_MOUNT="/dev/shm", **nenv)
+        rc_l, out_l = run_runner(env)
+        trav = "/dev/shm/ev-th2b/../../../th2b-esc"
+        env = base_env(bindir, d_cli, d_daemon, trav, coll_ok,
+                       X0X_WINDOW_SECS=300, X0X_ATTEMPTS_MAX=1,
+                       X0X_LEASE_SECS=700, X0X_REQUIRE_MOUNT="/dev/shm", **nenv)
+        rc_t, out_t = run_runner(env)
+        record("TH2b-symlink-and-traversal-escapes-refused",
+               rc_l == 2 and "outside the required mount" in out_l
+               and rc_t == 2 and not os.path.exists("/dev/th2b-esc")
+               and not os.path.exists(started_h2b),
+               f"symlink_rc={rc_l} traversal_rc={rc_t}")
+
+        # TH2c: an unsafe X0X_DIR_STAMP is refused regardless of the gate
+        reset_stub()
+        ev = os.path.join(tmp, "ev-th2c"); os.makedirs(ev)
+        nenv, _, started_h2c, _ = node_stub(tmp, "th2c")
+        env = base_env(bindir, d_cli, d_daemon, ev, coll_ok,
+                       X0X_WINDOW_SECS=300, X0X_ATTEMPTS_MAX=1,
+                       X0X_LEASE_SECS=700, X0X_DIR_STAMP="../esc", **nenv)
+        rc, out = run_runner(env)
+        record("TH2c-unsafe-stamp-refused",
+               rc == 2 and "traversal" in out and not evidence_dirs(ev)
+               and not os.path.exists(started_h2c),
+               f"rc={rc}")
+
+        # TH3a: Astra's exact post-start-collision shape is now a PRELAUNCH
+        # refusal — node never starts, victim byte-identical, checked
+        # REFUSED receipt exists
+        reset_stub()
+        ev = os.path.join(tmp, "ev-th3a"); os.makedirs(ev)
+        victim = os.path.join(ev, "fixed-attempt1")
+        os.makedirs(victim)
+        with open(os.path.join(victim, "t0.json"), "w") as f:
+            f.write("ORIGINAL")
+        nenv, _, started_h3, _ = node_stub(tmp, "th3a")
+        env = base_env(bindir, d_cli, d_daemon, ev, coll_ok,
+                       X0X_WINDOW_SECS=300, X0X_ATTEMPTS_MAX=1,
+                       X0X_LEASE_SECS=700, X0X_DIR_STAMP="fixed", **nenv)
+        rc, out = run_runner(env)
+        refused_receipt = os.path.join(ev, "REFUSED-fixed-attempt1.json")
+        record("TH3a-collision-prelaunch-refusal-with-receipt",
+               rc == 5
+               and open(os.path.join(victim, "t0.json")).read() == "ORIGINAL"
+               and not os.path.exists(started_h3)
+               and os.path.exists(refused_receipt)
+               and os.path.getsize(refused_receipt) > 0,
+               f"rc={rc} node_started={os.path.exists(started_h3)}"
+               f" receipt={os.path.exists(refused_receipt)}")
+
+        # TH3b: post-start preflight failure leaves checked terminal records
+        # in the RESERVED dir (FAILED + ATTEMPT + CLEANUP) and stops the node
+        reset_stub()
+        ev3 = "/dev/shm/ev-th3b"
+        os.makedirs(ev3, exist_ok=True)
+        nenv, _, started_h3b, stopped_h3b = node_stub(tmp, "th3b")
+        env = base_env(bindir, d_cli, d_daemon, ev3, coll_ok,
+                       X0X_WINDOW_SECS=300, X0X_ATTEMPTS_MAX=1,
+                       X0X_LEASE_SECS=700, X0X_REQUIRE_MOUNT="/dev/shm", **nenv)
+        StubAPI.state["version"] = "0.41.3"
+        rc, out = run_runner(env)
+        reset_stub()
+        dirs = evidence_dirs(ev3)
+        d0 = os.path.join(ev3, dirs[0]) if dirs else ""
+        record("TH3b-poststart-preflight-failure-receipts",
+               rc == 2 and dirs and os.path.exists(started_h3b)
+               and os.path.exists(stopped_h3b)
+               and d0 and os.path.exists(os.path.join(d0, "FAILED"))
+               and os.path.exists(os.path.join(d0, "ATTEMPT.json"))
+               and os.path.exists(os.path.join(d0, "CLEANUP.json")),
+               f"rc={rc} dirs={dirs} node_started={os.path.exists(started_h3b)}"
+               f" stopped={os.path.exists(stopped_h3b)}")
     finally:
         stub.shutdown(); stub.server_close()
         decoy.shutdown(); decoy.server_close()

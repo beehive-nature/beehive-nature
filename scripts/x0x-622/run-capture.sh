@@ -117,21 +117,49 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 X0X_SAMPLER="${X0X_SAMPLER:-$SCRIPT_DIR/sampler.py}"
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/x0x-622-runner.XXXXXX")"
 
-# ---- R4: validate duration and bounds BEFORE anything launches -------------
+# ---- R4: validate duration, bounds and ceilings BEFORE anything launches --
 [[ "$X0X_WINDOW_SECS" =~ ^[0-9]+$ ]] || die "window must be integer seconds"
 [ "$X0X_WINDOW_SECS" -ge 300 ] \
   || die "window ${X0X_WINDOW_SECS}s < 300s floor; refusing before launch (>=300s is smoke-only; target 1200)"
 [[ "$X0X_LEASE_SECS" =~ ^[0-9]+$ ]] || die "lease must be integer seconds"
 [ "$X0X_LEASE_SECS" -gt $((X0X_WINDOW_SECS + 300)) ] \
   || die "lease must exceed the window by >=300s (got lease $X0X_LEASE_SECS, window $X0X_WINDOW_SECS)"
+# R4-1: the packet's aggregate bounds are HARD CEILINGS, not suggestions
+[ "$X0X_LEASE_SECS" -le 10800 ] \
+  || die "lease ${X0X_LEASE_SECS}s exceeds the 10800s (3h) wall-clock ceiling; refusing before launch"
+[ "$X0X_ATTEMPTS_MAX" -le 3 ] \
+  || die "attempts ${X0X_ATTEMPTS_MAX} exceeds the ceiling of 3 (one attempt + at most two retries); refusing before launch"
 [ "$X0X_ATTEMPTS_MAX" -ge 1 ] || die "X0X_ATTEMPTS_MAX must be >= 1"
+if [ -n "${X0X_DIR_STAMP:-}" ]; then
+  case "$X0X_DIR_STAMP" in
+    */*|*..*) die "X0X_DIR_STAMP must be a single path segment without traversal (got: $X0X_DIR_STAMP)" ;;
+  esac
+fi
 
-# ---- G3: storage gate — the bounded volume must actually be the mount ------
+# ---- G3/R4-2: storage gate — bind EVERY writable path to the bounded mount
 if [ -n "$X0X_REQUIRE_MOUNT" ]; then
   [ -n "$(findmnt -rn --mountpoint "$X0X_REQUIRE_MOUNT" 2>/dev/null)" ] \
     || die "X0X_REQUIRE_MOUNT=$X0X_REQUIRE_MOUNT is not a real mountpoint; refusing prelaunch"
   [ -d "$X0X_REQUIRE_MOUNT/log" ] \
     || die "$X0X_REQUIRE_MOUNT/log missing — create required subdirs AFTER mounting (spec §3); refusing prelaunch"
+  MOUNT_REAL="$(realpath "$X0X_REQUIRE_MOUNT")"
+  EVID_REAL="$(realpath -m "$X0X_EVIDENCE_ROOT")"
+  case "$EVID_REAL" in
+    "$MOUNT_REAL"|"$MOUNT_REAL"/*) : ;;
+    *) die "evidence root $X0X_EVIDENCE_ROOT resolves to $EVID_REAL, outside the required mount $MOUNT_REAL; refusing prelaunch" ;;
+  esac
+  mkdir -p "$X0X_EVIDENCE_ROOT" 2>/dev/null \
+    || die "cannot create evidence root $X0X_EVIDENCE_ROOT; refusing prelaunch"
+  EVID_REAL="$(realpath "$X0X_EVIDENCE_ROOT")"
+  case "$EVID_REAL" in
+    "$MOUNT_REAL"|"$MOUNT_REAL"/*) : ;;
+    *) die "evidence root $X0X_EVIDENCE_ROOT resolves to $EVID_REAL after creation, outside $MOUNT_REAL; refusing prelaunch" ;;
+  esac
+  [ "$(stat -c %d "$EVID_REAL" 2>/dev/null)" = "$(stat -c %d "$MOUNT_REAL")" ] \
+    || die "evidence root is on a different filesystem than the required mount (device mismatch); refusing prelaunch"
+  # the runner's own scratch subtree also lives on the bounded volume
+  rm -rf "$WORK"
+  WORK="$(mktemp -d "$MOUNT_REAL/.runner-work.XXXXXX")"
 fi
 
 # ---- R6/R1: digest gate — bytes on disk must equal the reviewed pin ---------
@@ -287,6 +315,28 @@ on_signal() {
 trap on_signal TERM INT HUP
 trap 'finish "$EXIT_RC"' EXIT
 
+# ---- R4-3: reserve the FIRST owned attempt directory BEFORE the node starts
+# A collision becomes a PRELAUNCH refusal (exit 5, node never started, victim
+# untouched, checked REFUSED receipt) — and every post-start path, preflight
+# failures included, has a receipt home because EVID is already owned.
+mkdir -p "$X0X_EVIDENCE_ROOT" 2>/dev/null \
+  || die "cannot create evidence root $X0X_EVIDENCE_ROOT; refusing prelaunch"
+RESERVED_STAMP="${X0X_DIR_STAMP:-$(date -u +%Y%m%dT%H%M%SZ)}-attempt1"
+EVID="$X0X_EVIDENCE_ROOT/$RESERVED_STAMP"
+if ! mkdir "$EVID" 2>/dev/null; then
+  if ! printf '{"status":"refused-collision","stamp":"%s","started":%s}\n' \
+       "$RESERVED_STAMP" "$(date +%s)" \
+       > "$X0X_EVIDENCE_ROOT/REFUSED-$RESERVED_STAMP.json" 2>/dev/null \
+     || ! [ -s "$X0X_EVIDENCE_ROOT/REFUSED-$RESERVED_STAMP.json" ]; then
+    printf 'run-capture: TERMINAL RECEIPT WRITE FAILED for REFUSED-%s.json; reporting failure\n' "$RESERVED_STAMP" >&2
+    EVID=""
+    finish 6
+  fi
+  note "evidence dir $EVID already exists; refusing prelaunch (victim untouched, node never started, REFUSED receipt written)"
+  EVID=""
+  finish 5
+fi
+
 # ---- F3/G1: node lifecycle — PROVISIONAL ownership BEFORE launch ------------
 # NODE_OWNED is set before the start command runs: a resource created before
 # it returns is still owned, and the reserved UNIQUE unit identity means the
@@ -304,19 +354,21 @@ if [ -z "${X0X_API_TOKEN:-}" ]; then
     sleep 0.25
     waited=$((waited + 1))
   done
-  [ -s "$X0X_TOKEN_FILE" ] || die "token file $X0X_TOKEN_FILE absent after node start"
+  [ -s "$X0X_TOKEN_FILE" ] || { mark_attempt "failed-token-bootstrap" "-" "-" "-" || true; die "token file $X0X_TOKEN_FILE absent after node start"; }
   X0X_API_TOKEN="$(cat "$X0X_TOKEN_FILE")"
   export X0X_API_TOKEN
 fi
 
 # ---- preflight: version + diagnostic shape gate, fail closed ----------------
+# (post-start failures land in the RESERVED attempt dir: FAILED marker now,
+#  CLEANUP.json at finish — the R4-3 receipt home)
 mkdir -p "$X0X_EVIDENCE_ROOT"
 PREFLIGHT="$WORK/preflight"
 mkdir "$PREFLIGHT"
 ( PATH="$BOUND_PATH" timeout 20 x0x health --json ) > "$PREFLIGHT/health.json" 2> "$PREFLIGHT/health.err" \
-  || die "preflight health call failed (see $PREFLIGHT/health.err)"
+  || { mark_attempt "failed-preflight" "-" "-" "-" || true; die "preflight health call failed (see $PREFLIGHT/health.err)"; }
 ( PATH="$BOUND_PATH" timeout 20 x0x diagnostics gossip --json ) > "$PREFLIGHT/gossip.json" 2> "$PREFLIGHT/gossip.err" \
-  || die "preflight gossip call failed"
+  || { mark_attempt "failed-preflight" "-" "-" "-" || true; die "preflight gossip call failed"; }
 cat > "$WORK/preflight_check.py" <<'PY'
 import json
 import sys
@@ -343,7 +395,7 @@ assert "outbound_by_topic" in stages, "pubsub_stages.outbound_by_topic missing"
 print("shape-ok")
 PY
 "$X0X_PYTHON" "$WORK/preflight_check.py" "$PREFLIGHT/health.json" "$PREFLIGHT/gossip.json" "$X0X_EXPECT_VERSION" \
-  > "$PREFLIGHT/shape.txt" 2>&1 || { cat "$PREFLIGHT/shape.txt" >&2; die "preflight shape gate failed"; }
+  > "$PREFLIGHT/shape.txt" 2>&1 || { cat "$PREFLIGHT/shape.txt" >&2; mark_attempt "failed-preflight-shape" "-" "-" "-" || true; die "preflight shape gate failed"; }
 
 # F1: coverage validator — the health series must prove the WHOLE interval
 cat > "$WORK/postcheck_series.py" <<'PY'
@@ -411,15 +463,29 @@ LAST_COLLECTOR_RC=0
 FINAL_STATUS="attempts-exhausted"
 while [ "$ATTEMPT" -lt "$X0X_ATTEMPTS_MAX" ]; do
   ATTEMPT=$((ATTEMPT + 1))
-  STAMP="${X0X_DIR_STAMP:-$(date -u +%Y%m%dT%H%M%SZ)}-attempt${ATTEMPT}"
-  EVID="$X0X_EVIDENCE_ROOT/$STAMP"
-  # R4: exclusive creation; a collision is refused without touching it
-  if ! mkdir "$EVID" 2>/dev/null; then
-    FINAL_STATUS="refused-collision"
-    EVID=""   # never point writes at a directory we do not own
-    note "evidence dir $X0X_EVIDENCE_ROOT/$STAMP already exists; refusing (earlier evidence untouched)"
-    EXIT_RC=5
-    break
+  if [ "$ATTEMPT" = 1 ]; then
+    # R4-3: attempt 1's directory was reserved and owned BEFORE node start
+    STAMP="$RESERVED_STAMP"
+  else
+    STAMP="${X0X_DIR_STAMP:-$(date -u +%Y%m%dT%H%M%SZ)}-attempt${ATTEMPT}"
+    EVID="$X0X_EVIDENCE_ROOT/$STAMP"
+    # exclusive creation; a later collision is refused WITHOUT touching the
+    # victim and still leaves a checked terminal refusal receipt (R4-3)
+    if ! mkdir "$EVID" 2>/dev/null; then
+      if ! printf '{"status":"refused-collision","stamp":"%s","started":%s}\n' \
+           "$STAMP" "$(date +%s)" \
+           > "$X0X_EVIDENCE_ROOT/REFUSED-$STAMP.json" 2>/dev/null \
+         || ! [ -s "$X0X_EVIDENCE_ROOT/REFUSED-$STAMP.json" ]; then
+        printf 'run-capture: TERMINAL RECEIPT WRITE FAILED for REFUSED-%s.json; reporting failure\n' "$STAMP" >&2
+        EXIT_RC=6
+      else
+        EXIT_RC=5
+      fi
+      FINAL_STATUS="refused-collision"
+      EVID=""   # never point writes at a directory we do not own
+      note "evidence dir $X0X_EVIDENCE_ROOT/$STAMP already exists; refusing (victim untouched, REFUSED receipt written)"
+      break
+    fi
   fi
   START_EPOCH="$(date +%s)"
   WINDOW_DT=0

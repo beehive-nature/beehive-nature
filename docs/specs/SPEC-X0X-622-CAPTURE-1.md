@@ -67,30 +67,31 @@ names the host.**
 
 - `scripts/x0x-622/run-capture.sh` — the runner. Env contract and exit codes
   documented in its header: 0 accepted with clean cleanup; 1 attempts
-  exhausted; 2 gate refusal; 5 collision; 6 terminal-receipt WRITE failure;
-  8 measurement accepted but CLEANUP FAILED; 124 lease-interrupted;
-  130 cancelled; else the collector's own exit. Re-review round-2 semantics
-  (f8b3cb46): sampler and log helpers are supervised — their exit statuses
-  are classified (intentional runner stop vs spontaneous death) and recorded
-  in `ATTEMPT.json`; a window is accepted only if the health series covers
-  the WHOLE interval (span vs window length, interior gap bound, zero error
-  records, per-record peers/uptime shape, uptime progression, no peer
-  collapse) and the log helper stayed alive through it; the terminal
-  receipt write is checked — ENOSPC or any failure writing `ATTEMPT.json`
-  (or the `FAILED` marker) fails the run with exit 6 and honest stderr, and
-  no durable marker is promised on a full volume; node start/check/stop run
-  bounded AND interruptibly (a TERM during a blocked start is honored
-  immediately), cleanup escalates owned process GROUPS graceful→forced with
-  bounds, node ownership is retained until a bounded stop (graceful, then
-  forced) completes, and the cleanup disposition is separate from the
-  measurement disposition (a failed cleanup fails the run even after an
-  accepted window). Token: `X0X_API_TOKEN` env or `X0X_TOKEN_FILE` read
-  internally after the node starts — fresh units mint it at first boot, and
-  the token never appears on a command line.
+  exhausted; 2 gate refusal; 5 collision; 6 terminal-receipt WRITE failure
+  (ATTEMPT.json, FAILED, or CLEANUP.json); 8 measurement accepted but
+  CLEANUP FAILED; 124 lease-interrupted; 130 cancelled; else the
+  collector's own exit. Round-4 laws: the packet's aggregate bounds are
+  HARD CEILINGS enforced prelaunch (lease ≤ 10800 s, attempts ≤ 3 — one
+  attempt plus at most two retries; `X0X_DIR_STAMP` must be a single safe
+  path segment); with the storage gate on, the evidence root and the
+  runner's scratch subtree are resolved and bound to the required mount
+  (realpath prefix + same-device, symlink/traversal escapes refused before
+  the node starts); the FIRST attempt directory is reserved and owned
+  BEFORE node launch, so a collision is a prelaunch refusal (exit 5, node
+  never started, victim untouched, checked `REFUSED-*.json` receipt) and
+  every post-start path — preflight failures included — has a receipt home
+  (`FAILED` + `ATTEMPT.json` + `CLEANUP.json` in the reserved dir). Token:
+  `X0X_API_TOKEN` env or `X0X_TOKEN_FILE` read internally after the node
+  starts — fresh units mint it at first boot, and the token never appears
+  on a command line. Earlier review rounds' semantics all stand: helper
+  supervision with whole-interval coverage validation (round 2), bounded
+  graceful→forced lifecycle with a reserved unique unit and independent
+  RuntimeMaxSec (round 3).
 - `scripts/x0x-622/sampler.py` — bounded honest health sampler (§R2).
 - `scripts/x0x-622/test_runner.py` — the regression suite:
-  `--fast` (27 checks: round-1's eleven, round-2's TF1a-d/TF2/TF3a-e, and
-  round-3's TG1a-b/TG2/TG3a-b), `--slow` (T7/T11/T11b, ~21 min: scoped
+  `--fast` (34 checks: round-1's eleven, round-2's TF1a-d/TF2/TF3a-e,
+  round-3's TG1a-b/TG2/TG3a-b, and round-4's TH1/TH1-boundary/TH2a-c/
+  TH3a-b), `--slow` (T7/T11/T11b, ~21 min: scoped
   lease expiry, the 300 s real-collector accept path through the runner,
   and the peer-collapse rejection path — a smoke, NOT the public
   measurement), `--offline` (T10: pinned real daemon + real collector
@@ -143,10 +144,14 @@ Concrete shape (for Astra review; NOT executed here):
    # [update] enabled=false   (default Leaf: NO --relay, gossip.relay unset)
    ```
 2. Disk ceiling (enforced, not prose): the 2 GiB loop-mounted ext4 at
-   `/var/lib/x0x-measure`. Every writable path the measurement touches
-   lands inside it — the runner gates launch on it when given
-   `X0X_REQUIRE_MOUNT=/var/lib/x0x-measure` (the path must BE a real
-   mountpoint and `log/` must exist inside it, both checked prelaunch):
+   `/var/lib/x0x-measure`. When the runner is given
+   `X0X_REQUIRE_MOUNT=/var/lib/x0x-measure` it binds EVERY writable path to
+   that filesystem prelaunch: the path must BE a real mountpoint
+   (`findmnt --mountpoint`) with `log/` inside, the evidence root must
+   resolve (realpath, symlink- and traversal-safe) to the mount or beneath
+   it AND sit on the same device, and the runner's own scratch subtree is
+   relocated under the mount — a typo, symlink or env override cannot send
+   evidence to the host filesystem while the gate reports success:
    ```bash
    findmnt /var/lib/x0x-measure          # mounted ext4 from the image
    ls -ld /var/lib/x0x-measure/{state,identity,evidence,log}
