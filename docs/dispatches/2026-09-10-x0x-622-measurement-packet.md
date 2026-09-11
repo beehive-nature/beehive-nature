@@ -292,3 +292,98 @@ The live public-mesh capture (awaits Astra re-acceptance + founder host
 word); the per-peer delivery control; any #622 posting. No production
 mutation, no cloud change, no laptop mesh run, no upstream comment this
 round.
+
+---
+
+# CORRECTION ROUND 3 (zCode, 2026-09-10, after re-review adcbcfc5)
+
+Astra reproduced the fast suite 21/21 in a properly reaped PID namespace
+and confirmed the F1/F2 fixes hold; three further groups were found — all
+real, all owned. The binary pin, unchanged collector, R5 retraction and
+artifact policy stand untouched.
+
+## G1 — bounded stop escalation + provisional ownership
+
+- `run_bounded` now runs `setsid timeout --kill-after=<X0X_KILL_AFTER>`
+  (default 5 s): every bounded node command escalates TERM→KILL — the KILL
+  is unblockable and group-wide, so a TERM-ignoring command cannot outlive
+  its bound even inside `finish()` where the watchdog and traps are already
+  disabled. A first-cut fix considered sweeping ALL spawned job pgids in
+  cleanup and was REJECTED in seat review: reaped pgids are recyclable and
+  a sweep could kill an innocent reused process; with `--kill-after` the
+  timeout provably kills the whole job group before `wait` returns, so
+  cleanup only ever touches still-live, still-attributable pids.
+- Receipt TG1a (Astra's exact shape): stop command `trap '' TERM; while :;
+  do sleep 1; done` with 1 s bounds — the FORCED path is actually reached
+  (both marker files exist), the runner completes in ~5 s with exit 8
+  (cleanup failed) instead of hanging past 10 s.
+- Provisional ownership: `NODE_OWNED=1` is set BEFORE the start command
+  runs, and the whole default lifecycle targets a reserved UNIQUE
+  per-run unit (`x0x-measure-<run-tag>`, default the runner's PID) — a
+  stop can never claim a pre-existing unit, and a resource created before
+  a pending start returns is still cleaned up on cancellation.
+  Receipt TG1b (Astra's exact shape): a start that creates a detached
+  sleeper then pends; TERM during the pending start → exit 130 promptly,
+  the stop callback RAN, and the created resource is gone.
+
+## G2 — CLEANUP.json under the checked-write law
+
+`finish()` now checks the `CLEANUP.json` write like `ATTEMPT.json`: failure
+prints `TERMINAL RECEIPT WRITE FAILED ... CLEANUP.json`, and an otherwise
+successful run exits 6 instead of 0 (nonzero error priority preserved).
+Receipts TG2: Astra's exact `CLEANUP.json → /dev/full` injection — healthy
+measurement, successful node stop, exit 6 — beside a healthy control that
+still exits 0.
+
+## G3 — the real unit command enforces the deployment promises
+
+- The default `X0X_NODE_START` (runner AND spec) now carries
+  `--property=User=x0xm --property=Group=x0xm` beside RuntimeMaxSec — the
+  dedicated identity is enforced by the command itself, not by directory
+  ownership.
+- The spec's one-time deploy creates every writable directory AFTER the
+  verified mount (the old order created `log/` and chowned it beneath the
+  mountpoint, hiding it under the fresh filesystem).
+- The runner gates launch on the storage shape when given
+  `X0X_REQUIRE_MOUNT=/var/lib/x0x-measure`: the path must BE a real
+  mountpoint (`findmnt --mountpoint`) with `log/` present inside, checked
+  prelaunch — the bounded volume is verified, not assumed.
+- Deploy-shape testing now drives the REAL generator: `run-capture.sh
+  --print-node-defaults` prints the resolved unit/stop/force/check
+  commands, and TG3a asserts the generated shape (unique unit names across
+  runs, User/Group, RuntimeMaxSec, bounded-log append path, stop targets
+  the reserved unit) — no handwritten substitute. TG3b proves the mount
+  gate refuses a non-mountpoint prelaunch (node never started) and accepts
+  a real mountpoint (`/dev/shm` in the test) through a full healthy window.
+
+## Seat-testing defect found and fixed this round (recorded)
+
+A teardown race, found while proving TG2/TG3b: the runner's group-TERM
+could reach the sampler's IN-FLIGHT CLI child, whose −15 death the sampler
+honestly recorded as an error sample — failing coverage only when the stop
+landed mid-request (the healthy control passed, the injected runs failed,
+nondeterministically). Fix is two-sided and mechanical: the sampler is now
+stopped by PID and allowed to drain its in-flight request (a group-kill
+follows only for stragglers), and `sampler.py` records no error sample
+once stopping — teardown is not window evidence. `race_repro.py` hammers
+the exact window shape repeatedly (8× in the receipt run: 8/8 clean, zero
+error records) because a single pass through a timing race proves nothing.
+
+## Regression receipts (exact commands)
+
+- `python3 scripts/x0x-622/test_runner.py --fast` → **27/27 pass**
+  (round-1's eleven + round-2's ten + TG1a/TG1b/TG2×2/TG3a/TG3b), ~4 min.
+- `python3 scripts/x0x-622/race_repro.py 8` → **8/8 clean** windows, zero
+  error records in any series.
+- `python3 scripts/x0x-622/test_runner.py --slow` → re-run against this
+  candidate (T7 scoped lease, T11 real-collector accept, T11b
+  peer-collapse reject).
+- `--offline` T10 remains round-1 evidence (no runner involvement); the
+  binary pin is untouched.
+
+## Unperformed (unchanged)
+
+The live public-mesh capture (awaits Astra re-acceptance + founder host
+word); the per-peer delivery control; any #622 posting. No production
+mutation, no cloud change, no purchase, no laptop mesh run, no upstream
+comment this round.

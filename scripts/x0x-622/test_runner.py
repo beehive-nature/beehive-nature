@@ -713,6 +713,152 @@ def fast_suite(args):
         record("TF3e-uncooperative-helper-forced",
                rc == 130 and took < 10 and stubborn_gone,
                f"rc={rc} took={took:.0f}s helper_gone={stubborn_gone}")
+
+        # ---- round-3 tests (re-review adcbcfc5 G1-G3) ----------------------
+
+        # TG1a: a TERM-IGNORING stop command cannot outlive its bound; the
+        # forced path is actually reached (marker files), bounded in time
+        reset_stub()
+        ev = os.path.join(tmp, "ev-tg1a"); os.makedirs(ev)
+        nenv, _, _, _ = node_stub(tmp, "tg1a")
+        stop_ran = os.path.join(tmp, "tg1a-graceful-attempted")
+        force_ran = os.path.join(tmp, "tg1a-forced-attempted")
+        nenv.update({
+            "X0X_NODE_STOP":
+                f"touch {stop_ran}; trap '' TERM; while :; do sleep 1; done",
+            "X0X_NODE_FORCE_STOP": f"touch {force_ran}; false",
+            "X0X_STOP_TIMEOUT": "1", "X0X_STOP_FORCE_TIMEOUT": "1",
+            "X0X_KILL_AFTER": "2", "X0X_HELPER_GRACE": "1"})
+        env = base_env(bindir, d_cli, d_daemon, ev, coll_ok,
+                       X0X_WINDOW_SECS=300, X0X_ATTEMPTS_MAX=1,
+                       X0X_LEASE_SECS=700, **nenv)
+        t0 = time.monotonic()
+        rc, out = run_runner(env, timeout=60)
+        took = time.monotonic() - t0
+        record("TG1a-term-ignoring-stop-bounded-forced-reached",
+               rc == 8 and took < 15
+               and os.path.exists(stop_ran) and os.path.exists(force_ran),
+               f"rc={rc} took={took:.0f}s graceful={os.path.exists(stop_ran)}"
+               f" forced={os.path.exists(force_ran)}")
+
+        # TG1b: cancellation DURING a pending start still cleans up the
+        # resource the start already created (provisional ownership)
+        reset_stub()
+        ev = os.path.join(tmp, "ev-tg1b"); os.makedirs(ev)
+        entered = os.path.join(tmp, "tg1b-start-entered")
+        stopped1b = os.path.join(tmp, "tg1b-node-stopped")
+        sleeper = os.path.join(tmp, "tg1b-owned-sleeper.sh")
+        write_script(sleeper, "#!/bin/sh\nsleep 300\n")
+        nenv, _, _, _ = node_stub(tmp, "tg1b")
+        nenv.update({
+            "X0X_NODE_START":
+                f"touch {entered}; nohup bash {sleeper} >/dev/null 2>&1 & "
+                "exec sleep 30",
+            # [-] so the pattern never matches this command's own cmdline
+            "X0X_NODE_STOP":
+                f"pkill -f 'tg1b[-]owned' ; touch {stopped1b}",
+            "X0X_NODE_FORCE_STOP": "pkill -9 -f 'tg1b[-]owned' || true"})
+        env = base_env(bindir, d_cli, d_daemon, ev, coll_ok,
+                       X0X_WINDOW_SECS=300, X0X_ATTEMPTS_MAX=1,
+                       X0X_LEASE_SECS=700, **nenv)
+        proc = subprocess.Popen(["bash", RUNNER], env=env,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT, text=True,
+                                start_new_session=True)
+        t0 = time.monotonic()
+        while not os.path.exists(entered) and time.monotonic() - t0 < 5:
+            time.sleep(0.05)
+        proc.send_signal(signal.SIGTERM)
+        try:
+            out, _ = proc.communicate(timeout=5)
+            prompt = True
+            rc = proc.returncode
+        except subprocess.TimeoutExpired:
+            prompt = False
+            proc.kill()
+            out, _ = proc.communicate()
+            rc = proc.returncode
+        time.sleep(0.5)
+        res_gone = subprocess.run(["pgrep", "-f", "tg1b[-]owned"],
+                                  capture_output=True).returncode != 0
+        record("TG1b-cancel-during-start-cleans-owned-resource",
+               prompt and rc == 130 and res_gone
+               and os.path.exists(stopped1b),
+               f"prompt={prompt} rc={rc} resource_gone={res_gone}"
+               f" stop_ran={os.path.exists(stopped1b)}")
+
+        # TG2: CLEANUP.json write faulted -> /dev/full (healthy control beside)
+        for case, inject in (("healthy", False), ("cleanup-full", True)):
+            reset_stub()
+            ev = os.path.join(tmp, f"ev-tg2-{case}"); os.makedirs(ev)
+            nenv, _, _, _ = node_stub(tmp, f"tg2{case}")
+            collector = coll_ok
+            if inject:
+                collector = py_coll(os.path.join(tmp, "coll_cleanup_full.py"),
+                    "import os\n"
+                    "os.symlink('/dev/full', a.out_dir + '/CLEANUP.json')\n"
+                    "time.sleep(1.2)\n")
+            env = base_env(bindir, d_cli, d_daemon, ev, collector,
+                           X0X_WINDOW_SECS=300, X0X_ATTEMPTS_MAX=1,
+                           X0X_LEASE_SECS=700, **nenv)
+            rc, out = run_runner(env)
+            att, _ = load_attempt(ev)
+            if inject:
+                record("TG2-cleanup-receipt-write-failure-fails-run",
+                       rc == 6 and att and att["status"] == "accepted"
+                       and "CLEANUP.json" in out,
+                       f"rc={rc} attempt={att and att['status']}")
+            else:
+                record("TG2-healthy-control-still-zero",
+                       rc == 0 and att and att["status"] == "accepted",
+                       f"rc={rc} attempt={att and att['status']}")
+
+        # TG3a: the ACTUAL generated node defaults carry the promised shape
+        # (unique unit, dedicated identity, runtime limit, bounded log volume)
+        out = subprocess.run(["bash", RUNNER, "--print-node-defaults"],
+                             capture_output=True, text=True,
+                             env={**os.environ, "X0X_RUN_TAG": "shape-a"})
+        text = out.stdout
+        out_b = subprocess.run(["bash", RUNNER, "--print-node-defaults"],
+                               capture_output=True, text=True,
+                               env={**os.environ, "X0X_RUN_TAG": "shape-b"})
+        unit_a = next(l for l in text.splitlines() if l.startswith("RUN_UNIT="))
+        unit_b = next(l for l in out_b.stdout.splitlines()
+                      if l.startswith("RUN_UNIT="))
+        checks = {
+            "unique-unit": unit_a != unit_b and "x0x-measure-shape-a" in unit_a,
+            "user-group": "User=x0xm" in text and "Group=x0xm" in text,
+            "runtime-max": "RuntimeMaxSec=" in text,
+            "bounded-log": "append:/var/lib/x0x-measure/log/x0xd.log" in text,
+            "stop-targets-unit": f"systemctl stop {unit_a.split('=', 1)[1]}" in text,
+            "collect": "--collect" in text,
+        }
+        record("TG3a-generated-unit-shape", all(checks.values())
+               and out.returncode == 0, json.dumps(checks))
+
+        # TG3b: the storage gate — refuse a non-mountpoint prelaunch; accept
+        # a real mountpoint with log/ present
+        reset_stub()
+        plain = os.path.join(tmp, "not-a-mount"); os.makedirs(plain)
+        ev = os.path.join(tmp, "ev-tg3b"); os.makedirs(ev)
+        nenv, _, started3b, _ = node_stub(tmp, "tg3b")
+        env = base_env(bindir, d_cli, d_daemon, ev, coll_ok,
+                       X0X_WINDOW_SECS=300, X0X_ATTEMPTS_MAX=1,
+                       X0X_LEASE_SECS=700, X0X_REQUIRE_MOUNT=plain, **nenv)
+        rc, out = run_runner(env)
+        refused = rc == 2 and "not a real mountpoint" in out \
+            and not os.path.exists(started3b)
+        os.makedirs("/dev/shm/log", exist_ok=True)
+        ev2 = os.path.join(tmp, "ev-tg3b2"); os.makedirs(ev2)
+        env = base_env(bindir, d_cli, d_daemon, ev2, coll_ok,
+                       X0X_WINDOW_SECS=300, X0X_ATTEMPTS_MAX=1,
+                       X0X_LEASE_SECS=700, X0X_REQUIRE_MOUNT="/dev/shm", **nenv)
+        rc2, out2 = run_runner(env)
+        att2, _ = load_attempt(ev2)
+        record("TG3b-storage-mount-gate",
+               refused and rc2 == 0 and att2 and att2["status"] == "accepted",
+               f"refused={refused} mount_run_rc={rc2}"
+               f" attempt={att2 and att2['status']}")
     finally:
         stub.shutdown(); stub.server_close()
         decoy.shutdown(); decoy.server_close()

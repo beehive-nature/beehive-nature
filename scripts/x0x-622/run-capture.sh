@@ -8,18 +8,20 @@
 #       rejected unless the health series covers the whole interval (first/last
 #       record bounds, gap bound, zero error records, health shape, uptime
 #       progression) and the log helper was alive through the window;
-#   F2  the terminal receipt write is CHECKED — ENOSPC or any failure writing
-#       ATTEMPT.json (or the FAILED marker) prevents overall success and is
-#       reported on stderr with a nonzero exit; no durable marker is promised
-#       on a full volume;
-#   F3  every node start/check/stop is bounded and runs interruptibly (a TERM
-#       during a blocked start is honored immediately); cleanup kills owned
-#       helper GROUPS with bounded graceful-then-forced escalation; node
-#       ownership is retained until a bounded stop (graceful, then forced)
-#       completes; cleanup disposition is separate from measurement
-#       disposition and a failed cleanup fails the run; the default node
-#       lifecycle is a systemd TRANSIENT unit carrying its own RuntimeMaxSec,
-#       so the node expires even if this shell dies.
+#   F2  the terminal receipt writes are CHECKED — ENOSPC or any failure
+#       writing ATTEMPT.json, the FAILED marker, or CLEANUP.json prevents
+#       overall success and is reported on stderr with a nonzero exit; no
+#       durable marker is promised on a full volume;
+#   F3  every node start/check/stop is bounded and interruptible, escalating
+#       TERM -> KILL at timeout+kill-after (a TERM-ignoring command cannot
+#       outlive its bound, even inside cleanup where traps are disabled);
+#       node ownership is PROVISIONAL from before launch, bound to a reserved
+#       UNIQUE unit identity, so cancelled partial starts are cleaned up and
+#       a stop can never claim a pre-existing unit; cleanup disposition is
+#       separate from measurement disposition and a failed cleanup fails the
+#       run; the default node lifecycle is a systemd TRANSIENT unit carrying
+#       its own RuntimeMaxSec (and User=/Group=x0xm), so the node expires
+#       even if this shell dies.
 #
 # Exit codes: 0 accepted with clean cleanup; 1 attempts exhausted; 2 usage or
 # gate refusal; 5 evidence collision; 6 terminal receipt write failure;
@@ -37,11 +39,23 @@
 #                         (RuntimeMaxSec = X0X_NODE_RUNTIME_MAX, default 11400)
 #   X0X_NODE_STOP         default: systemctl stop x0x-measure
 #   X0X_NODE_FORCE_STOP   default: systemctl kill --signal=SIGKILL x0x-measure
-#   X0X_NODE_CHECK        default: systemctl show x0x-measure -p ActiveState
+#   X0X_NODE_CHECK        default: systemctl show <unit> -p ActiveState
 #                         -p Result -p NRestarts --value
 #   X0X_LOG_FOLLOW        default: tail -n +1 -f /var/lib/x0x-measure/log/x0xd.log
-#   X0X_START_TIMEOUT/X0X_CHECK_TIMEOUT (20)/X0X_STOP_TIMEOUT (30)/
-#   X0X_STOP_FORCE_TIMEOUT (10)/X0X_HELPER_GRACE (10) — seconds
+#   X0X_START_TIMEOUT (30)/X0X_CHECK_TIMEOUT (20)/X0X_STOP_TIMEOUT (30)/
+#   X0X_STOP_FORCE_TIMEOUT (10)/X0X_KILL_AFTER (5)/X0X_HELPER_GRACE (10) —
+#   seconds; every bounded node command escalates TERM -> KILL at its
+#   timeout + kill-after, so a TERM-ignoring command cannot outlive its bound
+#   X0X_RUN_TAG           reserved UNIQUE unit identity (default: runner pid);
+#                         ownership is provisional from before launch, and a
+#                         unique name means cleanup can never claim a
+#                         pre-existing unit
+#   X0X_REQUIRE_MOUNT     optional storage gate: the path must BE a real
+#                         mountpoint whose log/ subdir exists (prelaunch check)
+#
+# `--print-node-defaults` prints the resolved node lifecycle commands and the
+# reserved unit name, then exits — deploy-shape tests drive the real
+# generator instead of a handwritten copy.
 set -euo pipefail
 umask 077
 
@@ -54,14 +68,6 @@ EVID=""
 RECEIPT_FAILED=0
 CLEANUP_STATUS="not-run"
 
-: "${X0X_BIN_DIR:?X0X_BIN_DIR (directory of the pinned binaries) required}"
-: "${X0X_EVIDENCE_ROOT:?X0X_EVIDENCE_ROOT required}"
-: "${X0X_COLLECTOR:?X0X_COLLECTOR (upstream capture-egress.py, unchanged) required}"
-: "${X0X_EXPECT_SHA256_X0XD:?X0X_EXPECT_SHA256_X0XD digest pin required}"
-: "${X0X_EXPECT_SHA256_X0X:?X0X_EXPECT_SHA256_X0X digest pin required}"
-if [ -z "${X0X_API_TOKEN:-}" ] && [ -z "${X0X_TOKEN_FILE:-}" ]; then
-  die "token source required: X0X_API_TOKEN (env) or X0X_TOKEN_FILE (read after node start)"
-fi
 X0X_API="${X0X_API:-127.0.0.1:12710}"
 X0X_PYTHON="${X0X_PYTHON:-python3}"
 X0X_WINDOW_SECS="${X0X_WINDOW_SECS:-1200}"
@@ -75,12 +81,38 @@ X0X_START_TIMEOUT="${X0X_START_TIMEOUT:-30}"
 X0X_CHECK_TIMEOUT="${X0X_CHECK_TIMEOUT:-20}"
 X0X_STOP_TIMEOUT="${X0X_STOP_TIMEOUT:-30}"
 X0X_STOP_FORCE_TIMEOUT="${X0X_STOP_FORCE_TIMEOUT:-10}"
+X0X_KILL_AFTER="${X0X_KILL_AFTER:-5}"
 X0X_HELPER_GRACE="${X0X_HELPER_GRACE:-10}"
-X0X_NODE_START="${X0X_NODE_START:-systemd-run --unit=x0x-measure --collect --property=RuntimeMaxSec=${X0X_NODE_RUNTIME_MAX} --property=MemoryMax=768M --property=CPUQuota=100% --property=TasksMax=64 --property=IPAccounting=yes --property=NoNewPrivileges=yes --property=ProtectSystem=strict --property=ProtectHome=yes --property=PrivateTmp=yes --property=StateDirectory=x0x-measure --property=ReadWritePaths=/var/lib/x0x-measure --property=StandardOutput=append:/var/lib/x0x-measure/log/x0xd.log --property=StandardError=append:/var/lib/x0x-measure/log/x0xd.log /opt/x0x-measure/bin/x0xd --config /etc/x0x-measure/x0xd.toml}"
-X0X_NODE_STOP="${X0X_NODE_STOP:-systemctl stop x0x-measure}"
-X0X_NODE_FORCE_STOP="${X0X_NODE_FORCE_STOP:-systemctl kill --signal=SIGKILL x0x-measure}"
-X0X_NODE_CHECK="${X0X_NODE_CHECK:-systemctl show x0x-measure -p ActiveState -p Result -p NRestarts --value}"
+
+# G1: reserve a UNIQUE owned run/unit identity prospectively. The default node
+# lifecycle below names only this unit; stopping it can never touch anyone
+# else's, and provisional ownership covers resources created before the start
+# command returns.
+RUN_UNIT="x0x-measure-${X0X_RUN_TAG:-run$$}"
+
+# G3: the default unit command itself enforces the dedicated identity —
+# User=/Group= x0xm — beside the runtime limit and the bounded log volume.
+X0X_NODE_START="${X0X_NODE_START:-systemd-run --unit=${RUN_UNIT} --collect --property=RuntimeMaxSec=${X0X_NODE_RUNTIME_MAX} --property=User=x0xm --property=Group=x0xm --property=MemoryMax=768M --property=CPUQuota=100% --property=TasksMax=64 --property=IPAccounting=yes --property=NoNewPrivileges=yes --property=ProtectSystem=strict --property=ProtectHome=yes --property=PrivateTmp=yes --property=StateDirectory=x0x-measure --property=ReadWritePaths=/var/lib/x0x-measure --property=StandardOutput=append:/var/lib/x0x-measure/log/x0xd.log --property=StandardError=append:/var/lib/x0x-measure/log/x0xd.log /opt/x0x-measure/bin/x0xd --config /etc/x0x-measure/x0xd.toml}"
+X0X_NODE_STOP="${X0X_NODE_STOP:-systemctl stop ${RUN_UNIT}}"
+X0X_NODE_FORCE_STOP="${X0X_NODE_FORCE_STOP:-systemctl kill --signal=SIGKILL ${RUN_UNIT}}"
+X0X_NODE_CHECK="${X0X_NODE_CHECK:-systemctl show ${RUN_UNIT} -p ActiveState -p Result -p NRestarts --value}"
 X0X_LOG_FOLLOW="${X0X_LOG_FOLLOW:-tail -n +1 -f /var/lib/x0x-measure/log/x0xd.log}"
+
+if [ "${1:-}" = "--print-node-defaults" ]; then
+  printf 'RUN_UNIT=%s\nX0X_NODE_START=%s\nX0X_NODE_STOP=%s\nX0X_NODE_FORCE_STOP=%s\nX0X_NODE_CHECK=%s\nX0X_LOG_FOLLOW=%s\n' \
+    "$RUN_UNIT" "$X0X_NODE_START" "$X0X_NODE_STOP" "$X0X_NODE_FORCE_STOP" "$X0X_NODE_CHECK" "$X0X_LOG_FOLLOW"
+  exit 0
+fi
+
+: "${X0X_BIN_DIR:?X0X_BIN_DIR (directory of the pinned binaries) required}"
+: "${X0X_EVIDENCE_ROOT:?X0X_EVIDENCE_ROOT required}"
+: "${X0X_COLLECTOR:?X0X_COLLECTOR (upstream capture-egress.py, unchanged) required}"
+: "${X0X_EXPECT_SHA256_X0XD:?X0X_EXPECT_SHA256_X0XD digest pin required}"
+: "${X0X_EXPECT_SHA256_X0X:?X0X_EXPECT_SHA256_X0X digest pin required}"
+if [ -z "${X0X_API_TOKEN:-}" ] && [ -z "${X0X_TOKEN_FILE:-}" ]; then
+  die "token source required: X0X_API_TOKEN (env) or X0X_TOKEN_FILE (read after node start)"
+fi
+X0X_REQUIRE_MOUNT="${X0X_REQUIRE_MOUNT:-}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 X0X_SAMPLER="${X0X_SAMPLER:-$SCRIPT_DIR/sampler.py}"
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/x0x-622-runner.XXXXXX")"
@@ -93,6 +125,14 @@ WORK="$(mktemp -d "${TMPDIR:-/tmp}/x0x-622-runner.XXXXXX")"
 [ "$X0X_LEASE_SECS" -gt $((X0X_WINDOW_SECS + 300)) ] \
   || die "lease must exceed the window by >=300s (got lease $X0X_LEASE_SECS, window $X0X_WINDOW_SECS)"
 [ "$X0X_ATTEMPTS_MAX" -ge 1 ] || die "X0X_ATTEMPTS_MAX must be >= 1"
+
+# ---- G3: storage gate — the bounded volume must actually be the mount ------
+if [ -n "$X0X_REQUIRE_MOUNT" ]; then
+  [ -n "$(findmnt -rn --mountpoint "$X0X_REQUIRE_MOUNT" 2>/dev/null)" ] \
+    || die "X0X_REQUIRE_MOUNT=$X0X_REQUIRE_MOUNT is not a real mountpoint; refusing prelaunch"
+  [ -d "$X0X_REQUIRE_MOUNT/log" ] \
+    || die "$X0X_REQUIRE_MOUNT/log missing — create required subdirs AFTER mounting (spec §3); refusing prelaunch"
+fi
 
 # ---- R6/R1: digest gate — bytes on disk must equal the reviewed pin ---------
 check_digest() {
@@ -148,12 +188,16 @@ kill_group_bounded() { # $1 = pid whose group we own, $2 = grace seconds
   fi
 }
 
-# run a node command bounded AND interruptibly: the job runs under setsid+timeout
-# in the background, so a trapped signal interrupts `wait` immediately (F3);
-# output is NOT redirected here — callers capture what they need
+# run a node command bounded AND interruptibly (G1): the job runs under
+# setsid + timeout WITH --kill-after, so a TERM-ignoring command gets TERM at
+# the timeout and KILL — unblockable, group-wide — at timeout+kill-after:
+# the forced deadline holds even inside finish() where the watchdog and
+# traps are already disabled, and the job group is provably dead once the
+# call returns (so cleanup never sweeps reaped, recyclable pids). Output is
+# NOT redirected here — callers capture what they need.
 run_bounded() { # $1 = timeout secs, $2 = command string
   local rc=0
-  setsid timeout "$1" bash -c "$2" &
+  setsid timeout --kill-after="$X0X_KILL_AFTER" "$1" bash -c "$2" &
   START_JOB_PID=$!
   set +e
   wait "$START_JOB_PID"
@@ -186,7 +230,7 @@ mark_attempt() { # $1 status, $2 collector exit, $3 sampler exit, $4 log exit
 }
 
 finish() { # $1 = intended exit code (measurement disposition)
-  local rc="$1"
+  local rc="$1" pid
   trap - TERM INT HUP EXIT
   kill -TERM -- "-$WATCHDOG_PID" 2>/dev/null || true
   wait "$WATCHDOG_PID" 2>/dev/null || true
@@ -194,7 +238,8 @@ finish() { # $1 = intended exit code (measurement disposition)
     [ -n "$pid" ] && kill_group_bounded "$pid" "$X0X_HELPER_GRACE"
   done
   COL_PGID=""; SAMPLER_PID=""; LOG_PID=""; START_JOB_PID=""
-  # F3: ownership retained until a bounded stop completes; graceful then forced
+  # F3/G1: ownership retained until a bounded stop completes; graceful then
+  # forced — both bounded by timeout+kill-after even with traps disabled
   if [ "$NODE_OWNED" = 1 ]; then
     if run_bounded "$X0X_STOP_TIMEOUT" "$X0X_NODE_STOP"; then
       CLEANUP_STATUS="ok"
@@ -207,9 +252,13 @@ finish() { # $1 = intended exit code (measurement disposition)
     fi
     NODE_OWNED=0
     if [ -n "$EVID" ]; then
-      printf '{"cleanup":"%s","ended":%s}\n' "$CLEANUP_STATUS" "$(date +%s)" \
-        > "$EVID/CLEANUP.json" 2>/dev/null \
-        || printf 'run-capture: cleanup receipt write failed for %s\n' "$EVID" >&2
+      # G2: the cleanup receipt obeys the same checked-write law as ATTEMPT
+      if ! printf '{"cleanup":"%s","ended":%s}\n' "$CLEANUP_STATUS" "$(date +%s)" \
+           > "$EVID/CLEANUP.json" 2>/dev/null \
+         || ! [ -s "$EVID/CLEANUP.json" ]; then
+        printf 'run-capture: TERMINAL RECEIPT WRITE FAILED for %s/CLEANUP.json (cleanup=%s); reporting failure\n' "$EVID" "$CLEANUP_STATUS" >&2
+        [ "$rc" -eq 0 ] && rc=6
+      fi
     fi
   else
     CLEANUP_STATUS="not-owned"
@@ -238,12 +287,15 @@ on_signal() {
 trap on_signal TERM INT HUP
 trap 'finish "$EXIT_RC"' EXIT
 
-# ---- F3: node lifecycle — bounded, interruptible start; ownership retained --
-if ! run_bounded "$X0X_START_TIMEOUT" "$X0X_NODE_START"; then
-  NODE_OWNED=1   # partial start may hold resources; retain ownership for cleanup
-  die "test node start failed or blocked (bounded ${X0X_START_TIMEOUT}s)"
-fi
+# ---- F3/G1: node lifecycle — PROVISIONAL ownership BEFORE launch ------------
+# NODE_OWNED is set before the start command runs: a resource created before
+# it returns is still owned, and the reserved UNIQUE unit identity means the
+# stop commands below can only ever target THIS run's unit — never a
+# possibly pre-existing one.
 NODE_OWNED=1
+if ! run_bounded "$X0X_START_TIMEOUT" "$X0X_NODE_START"; then
+  die "test node start failed or blocked (bounded ${X0X_START_TIMEOUT}s; reserved unit ${RUN_UNIT} stop attempted in cleanup)"
+fi
 
 # ---- token: env, or bounded internal read after first boot ------------------
 if [ -z "${X0X_API_TOKEN:-}" ]; then
@@ -413,11 +465,23 @@ while [ "$ATTEMPT" -lt "$X0X_ATTEMPTS_MAX" ]; do
   # F1: supervise helpers. A helper that was ALIVE at window end was stopped
   # BY US (its stop-time rc reflects our coercion, so any rc is intentional);
   # a helper already dead before our stop died on its own — spontaneous.
+  # The sampler is stopped by PID (not group) and allowed to DRAIN its
+  # in-flight request, so teardown never pollutes the series with a spurious
+  # error record; a group-kill follows only for stragglers.
   SAMPLER_EXIT="none"; SAMPLER_SPONTANEOUS=0
   if [ -n "$SAMPLER_PID" ]; then
     SAMPLER_ALIVE=0
     kill -0 "$SAMPLER_PID" 2>/dev/null && SAMPLER_ALIVE=1
-    kill_group_bounded "$SAMPLER_PID" "$X0X_HELPER_GRACE"
+    if [ "$SAMPLER_ALIVE" = 1 ]; then
+      kill -TERM "$SAMPLER_PID" 2>/dev/null || true
+      waited=0
+      while kill -0 "$SAMPLER_PID" 2>/dev/null \
+            && [ "$waited" -lt $((X0X_HELPER_GRACE * 5)) ]; do
+        sleep 0.2
+        waited=$((waited + 1))
+      done
+      kill_group_bounded "$SAMPLER_PID" "$X0X_HELPER_GRACE"
+    fi
     set +e
     wait "$SAMPLER_PID"
     SAMPLER_RC=$?

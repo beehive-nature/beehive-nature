@@ -66,6 +66,10 @@ def main() -> None:
                 rec["error"] = "request timeout"
             except json.JSONDecodeError as exc:
                 rec["error"] = f"invalid json: {exc}"
+            # Once stopping (SIGTERM), a failing in-flight request is our own
+            # teardown, not window evidence: drain without recording an error
+            if "error" in rec and stopping["flag"]:
+                break
             try:
                 out.write(json.dumps(rec, separators=(",", ":")) + "\n")
                 out.flush()

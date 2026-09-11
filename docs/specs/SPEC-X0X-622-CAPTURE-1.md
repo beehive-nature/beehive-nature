@@ -89,13 +89,13 @@ names the host.**
   the token never appears on a command line.
 - `scripts/x0x-622/sampler.py` — bounded honest health sampler (§R2).
 - `scripts/x0x-622/test_runner.py` — the regression suite:
-  `--fast` (20 checks: the round-1 eleven plus TF1a-d, TF2, TF3a-e),
-  `--slow` (T7/T11/T11b, ~21 min: scoped lease expiry, the 300 s
-  real-collector accept path through the runner, and the peer-collapse
-  rejection path — a smoke, NOT the public measurement),
-  `--offline` (T10: pinned real daemon + real collector inside an empty
-  user+net namespace — loopback only, no route, bootstrap/peer-cache
-  disabled, fresh temp state; never a mesh capture).
+  `--fast` (27 checks: round-1's eleven, round-2's TF1a-d/TF2/TF3a-e, and
+  round-3's TG1a-b/TG2/TG3a-b), `--slow` (T7/T11/T11b, ~21 min: scoped
+  lease expiry, the 300 s real-collector accept path through the runner,
+  and the peer-collapse rejection path — a smoke, NOT the public
+  measurement), `--offline` (T10: pinned real daemon + real collector
+  inside an empty user+net namespace — loopback only, no route,
+  bootstrap/peer-cache disabled, fresh temp state; never a mesh capture).
 - Runner receipt convention: every attempt directory keeps the collector's
   own raw JSON, `collector-console.txt`, `health-series.jsonl`,
   `service.log`, node checks, window epochs, `series-check.txt`, and
@@ -123,15 +123,19 @@ Concrete shape (for Astra review; NOT executed here):
 
 1. Dedicated user `x0xm` (nologin) + `/opt/x0x-measure/bin` carrying the
    pinned binaries (digest-verified per §0). NEVER the production user,
-   dirs, identity or ports. One-time deploy (root):
+   dirs, identity or ports. One-time deploy (root) — writable directories
+   are created AFTER the mount so nothing is hidden by it:
    ```bash
    useradd --system --home /var/lib/x0x-measure --shell /usr/sbin/nologin x0xm
-   mkdir -p /opt/x0x-measure/bin /etc/x0x-measure /var/lib/x0x-measure/log
+   mkdir -p /opt/x0x-measure/bin /etc/x0x-measure
    # pinned binaries into /opt/x0x-measure/bin (sha256 vs §0), then:
    truncate -s 2G /var/lib/x0x-measure.img
    mkfs.ext4 -q /var/lib/x0x-measure.img
+   mkdir -p /var/lib/x0x-measure
    mount -o loop,nodev,nosuid /var/lib/x0x-measure.img /var/lib/x0x-measure
-   chown x0xm:x0xm /var/lib/x0x-measure /var/lib/x0x-measure/log
+   # now, ON the mounted filesystem, create and own every writable path:
+   mkdir -p /var/lib/x0x-measure/{state,identity,evidence,log}
+   chown -R x0xm:x0xm /var/lib/x0x-measure
    # x0xd.toml at /etc/x0x-measure/x0xd.toml: api 127.0.0.1:12710,
    # bind 0.0.0.0:5493, data_dir /var/lib/x0x-measure/state,
    # identity_dir /var/lib/x0x-measure/identity, mdns_enabled=false,
@@ -140,24 +144,33 @@ Concrete shape (for Astra review; NOT executed here):
    ```
 2. Disk ceiling (enforced, not prose): the 2 GiB loop-mounted ext4 at
    `/var/lib/x0x-measure`. Every writable path the measurement touches
-   lands inside it — verify before launch:
+   lands inside it — the runner gates launch on it when given
+   `X0X_REQUIRE_MOUNT=/var/lib/x0x-measure` (the path must BE a real
+   mountpoint and `log/` must exist inside it, both checked prelaunch):
    ```bash
    findmnt /var/lib/x0x-measure          # mounted ext4 from the image
    ls -ld /var/lib/x0x-measure/{state,identity,evidence,log}
    df -h /var/lib/x0x-measure            # the actual ceiling
    ```
-   `state/` and `identity/` are created by first boot, `evidence/` by the
+   `state/` and `identity/` are used by first boot, `evidence/` by the
    runner, `log/x0xd.log` by the unit (below). Binaries at `/opt` are
    read-only in use (~170 MB, fixed size); the runner's scratch dir is a
    few KB under `/tmp`. A full volume surfaces as checked write failures
    (runner exit 6), never as silent success.
 3. Node lifecycle — a TRANSIENT systemd unit, never enabled at boot,
    carrying its OWN runtime expiry so the node dies even if the runner is
-   killed outright (F3). This is exactly the runner's `X0X_NODE_START`
-   default (one line):
+   killed outright (F3), enforcing the dedicated identity IN the command
+   itself (G3: `User=`/`Group=` x0xm), and named with a reserved UNIQUE
+   per-run unit identity (G1: `--unit=x0x-measure-<run-tag>`, default the
+   runner's PID — a stop can never claim a pre-existing unit). This is
+   exactly the runner's `X0X_NODE_START` default, and
+   `bash scripts/x0x-622/run-capture.sh --print-node-defaults` prints the
+   resolved commands so the generated shape is tested as-is (TG3a), not
+   via a handwritten copy:
    ```bash
-   systemd-run --unit=x0x-measure --collect \
+   systemd-run --unit=x0x-measure-<RUN_TAG> --collect \
      --property=RuntimeMaxSec=11400 \
+     --property=User=x0xm --property=Group=x0xm \
      --property=MemoryMax=768M --property=CPUQuota=100% --property=TasksMax=64 \
      --property=IPAccounting=yes --property=NoNewPrivileges=yes \
      --property=ProtectSystem=strict --property=ProtectHome=yes \
@@ -167,13 +180,18 @@ Concrete shape (for Astra review; NOT executed here):
      --property=StandardError=append:/var/lib/x0x-measure/log/x0xd.log \
      /opt/x0x-measure/bin/x0xd --config /etc/x0x-measure/x0xd.toml
    ```
-   `X0X_NODE_STOP` = `systemctl stop x0x-measure`;
-   `X0X_NODE_FORCE_STOP` = `systemctl kill --signal=SIGKILL x0x-measure`;
-   `X0X_NODE_CHECK` = `systemctl show x0x-measure -p ActiveState -p Result
-   -p NRestarts --value`. `RuntimeMaxSec` defaults to the lease + 600 s —
-   an independent bound OUTSIDE the runner shell. Logs ride the unit's own
-   append-file inside the bounded volume (the runner's log helper follows
-   that file, not the host journal).
+   `X0X_NODE_STOP` = `systemctl stop x0x-measure-<RUN_TAG>`;
+   `X0X_NODE_FORCE_STOP` = `systemctl kill --signal=SIGKILL
+   x0x-measure-<RUN_TAG>`; `X0X_NODE_CHECK` = `systemctl show
+   x0x-measure-<RUN_TAG> -p ActiveState -p Result -p NRestarts --value`.
+   Every bounded node command escalates TERM→KILL at its timeout plus
+   `X0X_KILL_AFTER` (default 5 s) — a TERM-ignoring command cannot outlive
+   its bound, including inside cleanup where traps are disabled (G1).
+   `RuntimeMaxSec` defaults to the lease + 600 s — an independent bound
+   OUTSIDE the runner shell, a backstop beside immediate cancellation
+   cleanup, not a substitute for it. Logs ride the unit's own append-file
+   inside the bounded volume (the runner's log helper follows that file,
+   not the host journal).
 4. Token bootstrap (chicken-and-egg solved): a FRESH unit mints its API
    token at first boot under `/var/lib/x0x-measure/state/api-token`. The
    runner is given `X0X_TOKEN_FILE=/var/lib/x0x-measure/state/api-token`
@@ -209,6 +227,7 @@ X0X_COLLECTOR=/opt/x0x-measure/capture-egress.py \
 X0X_EXPECT_SHA256_X0XD=<x0xd digest from §0> \
 X0X_EXPECT_SHA256_X0X=<x0x digest from §0> \
 X0X_TOKEN_FILE=/var/lib/x0x-measure/state/api-token \
+X0X_REQUIRE_MOUNT=/var/lib/x0x-measure \
 X0X_WINDOW_SECS=1200 X0X_ATTEMPTS_MAX=3 X0X_LEASE_SECS=10800 \
 bash scripts/x0x-622/run-capture.sh
 ```
