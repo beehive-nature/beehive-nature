@@ -1,5 +1,10 @@
 # SPEC-X0X-622-CAPTURE-1 — tested public-mesh Leaf egress capture (correction round)
 
+> **Independent review of `1df62813`: NOT ACCEPTED for launch.** The 21-test
+> fast suite passes; cleanup escalation/partial-start ownership, cleanup
+> receipt failure, and the actual deployment identity/layout still need
+> correction. See [the review](../dispatches/2026-09-10-astra-x0x-622-runner-r3-review.md).
+
 > **Re-review round 2 (this file, corrected):** candidate `9b5df485` was
 > returned by the [independent re-review](../dispatches/2026-09-10-astra-x0x-622-runner-rereview.md)
 > (F1 helper failures yielding "accepted", F2 unchecked terminal receipt
