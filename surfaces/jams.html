@@ -9,7 +9,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<title>PLUR · music jams</title>
+<title>SKAISTS mUsiC · PLUR</title>
 <link rel="stylesheet" href="tokens.css">
 <style>
   :root { --jam:#D655BB; --jam-soft:#F19BDD; --mint:#86CC72; --cyan:#45C2DC; --gold:#E8B54B; }
@@ -34,6 +34,10 @@
   .nav a, button { border:1px solid var(--line-hi); border-radius:999px; padding:8px 14px; color:var(--ink);
     background:var(--panel); font:600 11px var(--mono); cursor:pointer; }
   .nav a:hover, button:hover { border-color:var(--jam); background:var(--lift); }
+  .independent { position:relative; margin-top:14px; padding:10px 12px; border-left:2px solid var(--cyan);
+    color:var(--dim); font-size:10px; line-height:1.7; background:rgba(69,194,220,.05); }
+  .independent b { color:var(--ink); }
+  .independent a { color:var(--cyan); border-bottom:1px dashed var(--cyan); }
   .statusline { display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-top:24px; color:var(--dim); font-size:11px; }
   .dot { width:9px; height:9px; border-radius:50%; background:var(--gold); }
   .dot.ok { background:var(--mint); box-shadow:0 0 13px var(--mint); }
@@ -96,15 +100,21 @@
 <body>
 <header>
   <div class="wrap">
-    <div class="eyebrow">PLUR · peace · love · unity · respect</div>
+    <div class="eyebrow">SKAISTS mUsiC · PLUR · peace · love · unity · respect</div>
     <h1>music <span>jams</span></h1>
-    <p class="lede">A room where the floor can hear itself. Live room events arrive through the bounded Connect receiver; the encrypted set, stems, captions, and recording stay in the shared manifest until a reader verifies them.</p>
+    <p class="lede"><b>SKAISTS mUsiC</b> is our room for a floor that can hear itself. Live room events arrive through the bounded Connect receiver; the encrypted set, stems, captions, and recording stay in the shared manifest until a reader verifies them.</p>
     <nav class="nav" aria-label="PLUR room links">
       <a href="plur.html">← PLUR museum</a>
       <a href="watch.html">watch together</a>
       <a href="listening.html">listening room</a>
       <a href="blight/midiroom.html">bMiDi room</a>
     </nav>
+    <div class="independent" aria-label="independent project references">
+      <b>Independent project references.</b> We use public examples from
+      <a href="https://jams.community/" target="_blank" rel="noopener noreferrer">JAMS.community ↗</a>
+      and <a href="https://relay.skaists.dev/watch/" target="_blank" rel="noopener noreferrer">W@tch ↗</a>
+      when exploring media and multi-network behavior. They are separate projects; each link opens in a new tab.
+    </div>
     <div class="statusline"><span class="dot" id="status-dot"></span><span id="status">loading the shared room manifest…</span><span id="status-note"></span><span class="store-state" id="store-status">store adapter idle</span></div>
   </div>
 </header>
@@ -157,7 +167,7 @@
     </section>
   </div>
 
-  <div class="law"><b>Room law.</b> This page consumes one language-neutral manifest for W@tch, Music Jam, and future clients. It never implements a second raw x0x `/ws` path. Joining this preview records only a local event; the accepted receiver, read-only store, complete cost admission, and downstream Trezor approval remain the boundaries for a real room.</div>
+  <div class="law"><b>Room law.</b> This page consumes one language-neutral manifest for the independent <a href="https://relay.skaists.dev/watch/" target="_blank" rel="noopener noreferrer">W@tch project ↗</a>, this SKAISTS mUsiC room, and future clients. It never implements a second raw x0x `/ws` path. Joining this preview records only a local event; the accepted receiver, read-only store, complete cost admission, and downstream Trezor approval remain the boundaries for a real room.</div>
 </main>
 
 <footer>PLUR music jams · manifest-backed preview · <a href="plur.html">return to the floor</a> · <a href="../fixtures/connect-store-manifest-envelope-v1.json">inspect the shared envelope</a></footer>

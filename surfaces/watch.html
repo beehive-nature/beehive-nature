@@ -23,7 +23,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>watch — the skaists.buzz room</title>
+<title>SKAISTS watch room · skaists.buzz</title>
 <link rel="stylesheet" href="/tokens.css">
 <style>
   :root { color-scheme: dark; }
@@ -53,6 +53,10 @@
     @keyframes breathe { 50% { opacity: .5; } }
   }
   header .st { font-size: var(--t-small); color: var(--dim); }
+  .independent { margin:var(--s2) var(--s3) 0; padding:var(--s2) var(--s3); border-left:2px solid var(--gold);
+    color:var(--dim); font-size:var(--t-law); line-height:var(--lh-law); background:var(--bg1); }
+  .independent b { color:var(--ink-hi); }
+  .independent a { color:var(--gold); text-decoration:none; border-bottom:1px dashed var(--gold); }
   /* ── the ticker line (streamer-updated) ─────────────────────────────── */
   #ticker {
     display: flex; gap: var(--s3); overflow-x: auto; white-space: nowrap;
@@ -190,10 +194,17 @@
 <body>
 <header>
   <span class="hex">estate · live</span>
-  <h1>the watch room</h1>
+  <h1>SKAISTS watch room</h1>
   <span class="dot" id="dot"></span>
   <span class="st" id="st">checking the stream…</span>
 </header>
+
+<div class="independent" aria-label="independent project references">
+  <b>Independent project references.</b> This SKAISTS room uses public examples from
+  <a href="https://jams.community/" target="_blank" rel="noopener noreferrer">JAMS.community ↗</a>
+  and <a href="https://relay.skaists.dev/watch/" target="_blank" rel="noopener noreferrer">W@tch ↗</a>
+  for media and multi-network behavior. They are separate projects; each link opens in a new tab.
+</div>
 
 <div id="ticker" aria-live="polite">
   <span><span class="k">now </span><b id="tk-now" class="none">—</b></span>
@@ -280,7 +291,7 @@ ticker      curl -X POST http://127.0.0.1:18094/live/ticker/general \
 
 <footer>same relay · same origin (canonical-origin law) · the playlist door is
 read-only · pause-not-kill · tokens.css only — the estate's own palette.
-watch-room POC 2026-09-04 · <a href="jams.html" style="color:var(--gold)">join a PLUR music jam →</a></footer>
+watch-room POC 2026-09-04 · <a href="jams.html" style="color:var(--gold)">join SKAISTS mUsiC · PLUR →</a></footer>
 
 <script src="/watch/hls.min.js"></script>
 <script>

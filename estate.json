@@ -1275,9 +1275,9 @@
    "home": "skaists.dev",
    "path": "surfaces/watch.html",
    "state": "LIVE",
-   "gloss": "the watch room — one screen, the room shares it",
+   "gloss": "the SKAISTS watch room — one screen, the room shares it",
    "org": "beehive-nature",
-   "label": "Watch room"
+   "label": "SKAISTS watch room"
   },
   {
    "id": "jams",
@@ -1285,9 +1285,9 @@
    "home": "plur.earth",
    "path": "surfaces/jams.html",
    "state": "LIVE",
-   "gloss": "the PLUR music jam — shared room manifest, encrypted set",
+   "gloss": "SKAISTS mUsiC · PLUR jam — shared room manifest, encrypted set",
    "org": "skaists",
-   "label": "PLUR music jam"
+   "label": "SKAISTS mUsiC · PLUR jam"
   }
  ],
  "counts": {

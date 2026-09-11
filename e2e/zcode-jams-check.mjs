@@ -31,6 +31,7 @@ const ok = (label, condition, note='') => { if (condition) { pass++; console.log
 await page.goto(`${base}/surfaces/jams.html`);
 await page.waitForFunction(() => document.getElementById('status')?.textContent.includes('verified'));
 ok('jams: page has no errors', errors.length === 0, errors.join(' | '));
+ok('jams: page carries SKAISTS mUsiC identity', await page.title() === 'SKAISTS mUsiC · PLUR' && (await page.locator('h1').innerText()).includes('music jams'));
 ok('jams: shared manifest is verified', await page.locator('#status').innerText() === 'shared manifest verified');
 ok('jams: PLUR channel is selected', await page.locator('#f-channel').innerText() === 'plur');
 ok('jams: epoch and sequence are projected', await page.locator('#f-epoch').innerText() === '3' && await page.locator('#f-sequence').innerText() === '12');
@@ -44,6 +45,11 @@ await page.locator('#join').click();
 ok('jams: local join changes the room preview', await page.locator('#join').innerText() === 'leave preview' && (await page.locator('#room-foot').innerText()).includes('local room preview'));
 ok('jams: join receipt is local only', (await page.locator('#eventlog').innerText()).includes('local participant joined') && !requests.some(r => r.method === 'POST'));
 ok('jams: PLUR, watch and listening links are present', await page.locator('a[href="plur.html"]').count() === 2 && await page.locator('a[href="watch.html"]').count() === 1 && await page.locator('a[href="listening.html"]').count() === 1);
+const jamsRef = page.locator('a[href="https://jams.community/"]');
+const watchRef = page.locator('a[href="https://relay.skaists.dev/watch/"]');
+ok('jams: independent references are explicit', await jamsRef.count() === 1 && await watchRef.count() === 2 && (await page.locator('.independent').innerText()).includes('separate projects'));
+const safeExternal = async (locator) => { for (const i of await locator.all()) { if (await i.getAttribute('target') !== '_blank' || await i.getAttribute('rel') !== 'noopener noreferrer') return false; } return true; };
+ok('jams: independent references open safely in new tabs', await safeExternal(jamsRef) && await safeExternal(watchRef));
 ok('jams: no second raw transport is opened', requests.filter(r => r.url.includes('/ws') || r.method === 'POST').length === 0);
 
 console.log(`\n${pass} passed, ${fail} failed`);

@@ -35,10 +35,15 @@ const ok = (label, condition, note = '') => { if (condition) { pass++; console.l
 await page.goto(`${base}/surfaces/watch.html`);
 await page.waitForFunction(() => document.getElementById('manifest-state')?.textContent === 'verified');
 ok('watch: page has no errors', errors.length === 0, errors.join(' | '));
+ok('watch: page carries SKAISTS identity', await page.title() === 'SKAISTS watch room · skaists.buzz' && (await page.locator('h1').innerText()) === 'SKAISTS watch room');
 ok('watch: shared manifest is verified', (await page.locator('#manifest-state').innerText()).trim().toLowerCase() === 'verified');
 ok('watch: channel and sequence are projected', await page.locator('#manifest-channel').innerText() === 'plur' && await page.locator('#manifest-sequence').innerText() === '12');
 ok('watch: checkpoint remains a bounded reference', (await page.locator('#manifest-checkpoint').innerText()).includes('…'));
 ok('watch: encrypted item count is visible', await page.locator('#manifest-items').innerText() === '4 encrypted');
+const jamsRef = page.locator('a[href="https://jams.community/"]');
+const watchRef = page.locator('a[href="https://relay.skaists.dev/watch/"]');
+ok('watch: independent references are explicit', await jamsRef.count() === 1 && await watchRef.count() === 1 && (await page.locator('.independent').innerText()).includes('separate projects'));
+ok('watch: independent references open safely in new tabs', await jamsRef.getAttribute('target') === '_blank' && await jamsRef.getAttribute('rel') === 'noopener noreferrer' && await watchRef.getAttribute('target') === '_blank' && await watchRef.getAttribute('rel') === 'noopener noreferrer');
 ok('watch: no write or raw transport was opened', !requests.some(r => r.method === 'POST' || r.url.includes('/ws')));
 
 console.log(`\n${pass} passed, ${fail} failed`);

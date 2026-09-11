@@ -1,6 +1,9 @@
 # Connect + Store: shared manifest envelope
 
-Authorized by the founder's cross-pollination order for W@tch and Music Jam.
+Authorized by the founder's cross-pollination order for the independent
+[W@tch project](https://relay.skaists.dev/watch/) and
+[JAMS.community](https://jams.community/) examples. They remain separate
+projects; this contract only gives clients a shared envelope to consume.
 Base: receiver head `064adea5` on `codex/connect-store-receiver-2026-09-11`.
 The shared checkout, accepted integration worktrees, production relays, app
 profiles, wallet and paid Autonomi paths were untouched.
@@ -46,6 +49,6 @@ This is a shared metadata contract and caller test, not payment admission, a
 Music Jam implementation or a Buzz-compatible deployment. `payment:
 "disabled"` keeps the current write refusal explicit. The next payment lane
 must calculate and cap complete snapshot/checkpoint/chunk cost before a funded
-write; Trezor approval belongs after that admission decision. A W@tch or Music
-Jam client can consume the JSON fixture and the existing bounded receiver
+write; Trezor approval belongs after that admission decision. An independent
+W@tch or Music Jam client can consume the JSON fixture and the existing bounded receiver
 without implementing another raw x0x `/ws` path.

@@ -1,9 +1,26 @@
-# W@tch · Music Jams · PLUR — first integration slice
+# SKAISTS mUsiC · PLUR — shared media integration slice
 
 Branch: `codex/watch-jams-plur-2026-09-11`  
 Base: `856e5c09` (the existing watch-room registration repair)  
 Scope: a static, local-verifiable Jam room; no production relay, wallet,
 Autonomi write, Trezor action, or app profile was touched.
+
+## Identity and independent-project boundary
+
+The user-facing names in this slice are ours: the Jam surface is branded
+**SKAISTS mUsiC** and the watch surface is the **SKAISTS watch room**. The
+independent projects **JAMS.community** and **W@tch** are referenced as public
+examples for media and multi-network behavior, never presented as BNR-owned
+products or as competitors. Both surfaces link those names to their public
+pages with `target="_blank"` and `rel="noopener noreferrer"`, and tell the
+reader that the links open in a new tab. Same-origin BNR navigation remains
+same-tab. The findings ledger on `surfaces/devroom.html` follows the same rule
+for its W@tch credits.
+
+The public reference pages are [JAMS.community](https://jams.community/) and
+[W@tch](https://relay.skaists.dev/watch/). This is attribution and an
+optional route for readers who want to use those projects directly; it does
+not imply shared ownership, branding, or custody.
 
 ## What landed
 
@@ -25,7 +42,7 @@ review deck includes `jams.html` in its walk list.
 
 ## Verification
 
-- `node e2e/zcode-jams-check.mjs` — **14 passed, 0 failed**. This covers the
+- `node e2e/zcode-jams-check.mjs` — **17 passed, 0 failed**. This covers the
   real browser fetch of the shared fixture, policy binding, all four item
   kinds, the local join, and the no-POST/no-raw-transport invariant.
 - `npm test` in `tools/connect-store` — **30 passed, 0 failed**.
@@ -52,9 +69,9 @@ strict shape checks. W@tch only reads the fixture, shows channel/sequence,
 bounded checkpoint identity, and encrypted item count, and leaves the live
 HLS, room, meter, and pause-not-kill paths unchanged.
 
-`node e2e/zcode-watch-manifest-check.mjs` — **6 passed, 0 failed** — proves
+`node e2e/zcode-watch-manifest-check.mjs` — **9 passed, 0 failed** — proves
 the W@tch projection against a local fixture server and asserts that it emits
-no POST and opens no raw `/ws`. The Jam check remains **14 passed, 0 failed**.
+no POST and opens no raw `/ws`. The Jam check remains **17 passed, 0 failed**.
 The hosted Node job runs both projections and the encrypted Store proof after
 the pinned Playwright setup.
 
