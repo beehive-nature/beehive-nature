@@ -42,9 +42,20 @@ Public address unchanged (PUBLIC-CONSTANT on the same line as the 64-hex).
 
 Gallery chrome pattern: experience nav, visible language host, expandable
 `data-tour-host` footer, New bee / Raver / Cypherpunk via `tour.js` →
-`register.js`. New bee is calm (view / emotion / choose — no step list).
-Raver celebrates when bytes land. Cypherpunk carries endpoint, Pages vs
-relay, door-vs-WASM, and the network-tab story.
+`register.js`. Same facts in every view. Status, badge, plaque and
+connect-count are rewritten by `speak()` on load, paint, fail, and
+`bregister`.
+
+- **New bee:** commons-short. Look / Feel / Choose. No builder jargon
+  (no CORS, WASM, proxy, Pages, same-origin, daemon, DataMap, `/ant/v1`).
+  Hex address is hidden. Live badge is `Here`. Fail is “Not this time.”
+- **Raver:** garden / dusk / bloom / body / hunger. Celebration when the
+  public picture lands (`It bloomed`). Empathic imagery, not a protocol
+  lecture. No invented medical or dosing copy.
+- **Cypherpunk:** door vs WASM, `/ant` proxy, `relay.skaists.dev`,
+  network-tab story, hop badge `N BYTES · RELAY|SAME-ORIGIN · LIVE`.
+
+Pages→relay fetch is unchanged (`doorBases`, `isPagesHtml`, `?door=`).
 
 ## Connect cards — atlas as source of truth
 
@@ -85,7 +96,9 @@ scripts/build-atlas.mjs` rebuilt the hub so the atlas card matches.
 
 ```
 node --test e2e/ant-door-pages.test.mjs
-# tests 5  pass 5  fail 0
+# tests 8  pass 8  fail 0
+# (3 new: New bee jargon lock, Raver celebration lock,
+#  Cypherpunk door/WASM/relay/network-tab lock)
 
 node e2e/ant-door-poke.mjs --check
 PASS proxied door HTTP 200

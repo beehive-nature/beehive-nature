@@ -56,6 +56,90 @@ test("post-success connect cards are parsed from the atlas, not invented", () =>
   assert.match(atlas, /href="blight\/midivault.html"/);
 });
 
+function collectAttrBlocks(html, attr, view) {
+  const chunks = [];
+  const tagged = new RegExp(
+    `<([a-z0-9]+)([^>]*\\s(?:${attr})="${view}"[^>]*)>`,
+    "gi"
+  );
+  let m;
+  while ((m = tagged.exec(html))) {
+    const tag = m[1].toLowerCase();
+    if (tag === "body") continue;
+    const start = m.index;
+    const openEnd = tagged.lastIndex;
+    if (/\/>$/.test(m[0])) {
+      chunks.push(m[0]);
+      continue;
+    }
+    const close = new RegExp(`</${tag}>`, "i");
+    const rest = html.slice(openEnd);
+    const end = rest.search(close);
+    chunks.push(html.slice(start, end === -1 ? openEnd : openEnd + end + tag.length + 3));
+  }
+  return chunks.join("\n");
+}
+
+function speakBranches(html, view) {
+  const start = html.indexOf("function speak(");
+  const end = html.indexOf("function teachFailure(");
+  assert.ok(start >= 0 && end > start, "speak() must sit above teachFailure()");
+  const speak = html.slice(start, end);
+  const parts = speak.split(/v === "/);
+  return parts
+    .filter((p) => p.startsWith(view + "\""))
+    .map((p) => p.split(/}else/)[0])
+    .join("\n");
+}
+
+const JARGON = /CORS|WASM|\bproxy\b|GitHub Pages|same-origin|daemon|GET-only|DataMap|\/ant\/v1|\bantd\b|Caddy/i;
+
+test("New bee copy stays commons-short and free of builder jargon", () => {
+  const markup = [
+    collectAttrBlocks(page, "data-view", "bee"),
+    collectAttrBlocks(page, "data-reg", "bee"),
+  ].join("\n");
+  assert.match(markup, /Look/);
+  assert.match(markup, /Feel/);
+  assert.match(markup, /Choose/);
+  assert.doesNotMatch(markup, JARGON);
+  const beeSpeak = speakBranches(page, "bee");
+  assert.match(beeSpeak, /It arrived\. Look, then choose if you want\./);
+  assert.match(beeSpeak, /Not this time\. You can try again\./);
+  assert.match(page, /Many rooms\./);
+  assert.doesNotMatch(beeSpeak, JARGON);
+  assert.doesNotMatch(beeSpeak, /BYTES|UNREACHABLE|SAME-ORIGIN|RELAY/);
+});
+
+test("Raver copy celebrates the picture; no protocol lecture", () => {
+  const markup = [
+    collectAttrBlocks(page, "data-view", "raver"),
+    collectAttrBlocks(page, "data-reg", "raver"),
+  ].join("\n");
+  assert.match(markup, /garden|bloom|dusk|living/i);
+  assert.doesNotMatch(markup, JARGON);
+  const raverSpeak = speakBranches(page, "raver");
+  assert.match(raverSpeak, /It bloomed/);
+  assert.match(raverSpeak, /The garden just handed you a living picture\./);
+  assert.doesNotMatch(raverSpeak, JARGON);
+  assert.doesNotMatch(raverSpeak, /BYTES|UNREACHABLE|SAME-ORIGIN|\/ant/);
+});
+
+test("Cypherpunk keeps door vs WASM, /ant proxy, relay, network-tab truth", () => {
+  const markup = [
+    collectAttrBlocks(page, "data-view", "cypherpunk"),
+    collectAttrBlocks(page, "data-reg", "cypherpunk"),
+  ].join("\n");
+  assert.match(markup, /Door vs WASM/);
+  assert.match(markup, /\/ant/);
+  assert.match(markup, /relay\.skaists\.dev/);
+  assert.match(markup, /Network tab/);
+  assert.match(markup, /WASM/);
+  const punkSpeak = speakBranches(page, "cypherpunk");
+  assert.match(punkSpeak, /BYTES/);
+  assert.match(page, /ant-door omitted/);
+});
+
 test("registry gloss no longer claims Pages is same-origin", () => {
   const row = estate.surfaces.find((s) => s.id === "ant-door");
   assert.ok(row);

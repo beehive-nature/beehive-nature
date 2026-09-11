@@ -19,7 +19,10 @@ button:focus-visible,a:focus-visible,summary:focus-visible,select:focus-visible{
 .door-head{padding-block:20px 8px}
 .eyebrow{color:var(--accent);font-size:.875rem;margin:0}
 h1{font-size:clamp(1.65rem,4vw,2.75rem);line-height:1.15;letter-spacing:-.04em;margin:8px 0}
-h1 [data-view]{display:none}
+[data-reg]:not(body){display:none}
+body[data-reg=bee] [data-reg=bee],body[data-reg=raver] [data-reg=raver],body[data-reg=cypherpunk] [data-reg=cypherpunk]{display:revert}
+[data-view]{display:none}
+body[data-reg=bee] [data-view=bee],body[data-reg=raver] [data-view=raver],body[data-reg=cypherpunk] [data-view=cypherpunk]{display:revert}
 body[data-reg=bee] h1 [data-view=bee],body[data-reg=raver] h1 [data-view=raver],body[data-reg=cypherpunk] h1 [data-view=cypherpunk]{display:block}
 .lede{color:var(--dim);font-size:.875rem;max-width:70ch;overflow-wrap:anywhere}
 .door-work{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;padding-bottom:24px;flex:1}
@@ -39,6 +42,7 @@ body[data-reg=bee] h1 [data-view=bee],body[data-reg=raver] h1 [data-view=raver],
 #state-badge[data-tone=live]{border-color:var(--ok);color:var(--ok)}
 #state-badge[data-tone=error]{border-color:var(--warning);color:var(--warning)}
 .addr{font:0.8125rem/1.45 ui-monospace,Consolas,monospace;word-break:break-all;color:var(--dim);background:var(--well);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:12px 0}
+.addr-soft{color:var(--dim);font-size:1rem;margin:12px 0}
 .actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .truth{display:grid;gap:12px}
 .card{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:18px}
@@ -105,52 +109,78 @@ body[data-reg=bee] .cypher-only,body[data-reg=raver] .cypher-only{display:none}
 <header class="door-head">
   <p class="eyebrow">Autonomi door</p>
   <h1>
-    <span data-view="bee">A picture that does not live on our servers.</span>
-    <span data-view="raver">The network just handed you the bytes.</span>
+    <span data-view="bee">A picture that does not live here.</span>
+    <span data-view="raver">The garden just handed you a living picture.</span>
     <span data-view="cypherpunk">GET the public DataMap. Inspect the hop.</span>
   </h1>
-  <p class="lede" data-view="bee">Look first. If it lands, you can choose another room. Nothing to install.</p>
-  <p class="lede" data-view="raver">Public Autonomi bytes, painted in this tab — then the whole atlas if you still want to wander.</p>
+  <p class="lede" data-view="bee">Look first. If it arrives, you may choose another room.</p>
+  <p class="lede" data-view="raver">Not a file we kept. A public bloom that found this tab.</p>
   <p class="lede" data-view="cypherpunk">Pages has no <code>/ant/v1</code> proxy. The live door is <code>relay.skaists.dev</code> (Caddy → GET-only antd). WASM peer-to-peer is the retirement plan, not today.</p>
 </header>
-<noscript><p class="door-head">Enable JavaScript to ask the estate door for the public Autonomi bytes. The atlas and navigation stay available.</p></noscript>
+<noscript><p class="door-head">This page needs JavaScript to show the public picture. The map and links still work.</p></noscript>
 <main class="door-work">
-  <section class="viewer" aria-label="Public Autonomi data">
-    <div id="stage" aria-busy="true"><p id="placeholder" class="placeholder">Asking the estate door for public bytes…</p></div>
+  <section class="viewer" aria-label="Public picture">
+    <div id="stage" aria-busy="true"><p id="placeholder" class="placeholder">Looking…</p></div>
     <div class="deck">
       <div class="caption-row">
-        <div class="piece-title" id="plaque">Public Autonomi data</div>
-        <span class="badge" id="state-badge">· · ·</span>
+        <div class="piece-title" id="plaque">A public picture</div>
+        <span class="badge" id="state-badge">…</span>
       </div>
-      <p id="door-status" role="status" aria-live="polite">Opening the door.</p>
-      <p class="landed" data-reg="raver" id="landed" hidden>They landed. That image is not a file we host.</p>
-      <div class="addr" id="addr">autonomi://711c7e20006ff3e0ac6c1f3063286a0c1a3e4c409642e8c526173fa60bb7078a</div> <!-- PUBLIC-CONSTANT: mainnet public DataMap (docs example) -->
+      <p id="door-status" role="status" aria-live="polite">Looking…</p>
+      <p class="landed" data-reg="raver" id="landed" hidden>Look at it the way you look at dusk in a garden — it was already there.</p>
+      <p class="addr-soft" data-reg="bee">A public picture.</p>
+      <p class="addr-soft" data-reg="raver">It had a name before this page existed.</p>
+      <div class="addr" data-reg="cypherpunk" id="addr">autonomi://711c7e20006ff3e0ac6c1f3063286a0c1a3e4c409642e8c526173fa60bb7078a</div> <!-- PUBLIC-CONSTANT: mainnet public DataMap (docs example) -->
       <div class="actions">
         <button type="button" id="retry">Try again</button>
       </div>
     </div>
   </section>
 
-  <section class="truth" aria-label="Three audiences">
+  <section class="truth" data-reg="bee" aria-label="Look, feel, choose">
     <article class="card">
-      <h2 data-reg="bee">What you are seeing</h2>
-      <h2 data-reg="raver">For the neighbor</h2>
-      <h2 data-reg="cypherpunk">Neighbor</h2>
-      <p>This image lives on the Autonomi network. Your browser asked the estate’s door for public bytes. No plugin. No visitor-side daemon.</p>
+      <h2>Look</h2>
+      <p>A public picture. Nothing to install.</p>
     </article>
     <article class="card">
-      <h2 data-reg="bee">How the page asks</h2>
-      <h2 data-reg="raver">For the builder</h2>
-      <h2 data-reg="cypherpunk">Builder</h2>
-      <p>The page reads <code id="apiref">/ant/v1/data/public/&lt;address&gt;</code>. On the relay host that path is same-origin. On GitHub Pages the same path is a Pages 404, so the page uses the relay door (CORS grants <code>https://skaists.dev</code>). Local poke: <code>?door=same</code> behind a proxy, or <code>?door=relay</code>.</p>
+      <h2>Feel</h2>
+      <p>It does not live on our servers. It lives on the public network.</p>
     </article>
     <article class="card">
-      <h2 data-reg="bee">What this is not</h2>
-      <h2 data-reg="raver">For the cypherpunk</h2>
-      <h2 data-reg="cypherpunk">Cypherpunk</h2>
+      <h2>Choose</h2>
+      <p>Stay with it, or open another room.</p>
+    </article>
+  </section>
+
+  <section class="truth" data-reg="raver" aria-label="The gift">
+    <article class="card">
+      <h2>The gift</h2>
+      <p>A living picture found this tab. Celebrate that. We did not host it. The network carried it here, like weather, like dusk.</p>
+    </article>
+    <article class="card">
+      <h2>The seeing</h2>
+      <p>Let it land in the body before you name the road. A picture is enough. Stay with the feeling.</p>
+    </article>
+    <article class="card">
+      <h2>The wander</h2>
+      <p>If a next hunger is here, the garden still has rooms — art, sound, people, earth.</p>
+    </article>
+  </section>
+
+  <section class="truth" data-reg="cypherpunk" aria-label="Door, relay, WASM">
+    <article class="card">
+      <h2>Neighbor fact</h2>
+      <p>This image lives on Autonomi, not on our servers. The browser asked the estate door for public bytes. No plugin. No visitor-side daemon.</p>
+    </article>
+    <article class="card">
+      <h2>Door vs Pages</h2>
+      <p>The page reads <code id="apiref">/ant/v1/data/public/&lt;address&gt;</code>. On the relay host that path is same-origin. GitHub Pages has no <code>/ant</code> proxy, so <code>skaists.dev</code> uses <code>relay.skaists.dev</code> (CORS grants that origin). Local poke: <code>?door=same</code> behind a proxy, or <code>?door=relay</code>.</p>
+    </article>
+    <article class="card">
+      <h2>Door vs WASM</h2>
       <p>The door is a bridge, not the destination. Direct in-page protocol waits on Autonomi’s WASM client. Until then this is a GET-only read of public data. The estate holds no keys here.</p>
     </article>
-    <details class="record cypher-only" id="record-details" open>
+    <details class="record" id="record-details" open>
       <summary>Network tab story</summary>
       <dl>
         <dt>Address</dt><dd id="rec-addr">autonomi://711c7e20006ff3e0ac6c1f3063286a0c1a3e4c409642e8c526173fa60bb7078a</dd>
@@ -168,11 +198,13 @@ body[data-reg=bee] .cypher-only,body[data-reg=raver] .cypher-only{display:none}
     <h2 data-view="bee">Another room, if you want one</h2>
     <h2 data-view="raver">The garden keeps going</h2>
     <h2 data-view="cypherpunk">Atlas destinations (from surfaces/index.html)</h2>
-    <p class="connect-lead" data-view="bee">Optional. The estate map names every published room. Pick one, or stay here.</p>
-    <p class="connect-lead" data-view="raver">Every atlas card — skaists, the organism, biomass, buds, bnr — if you still have a next hunger.</p>
+    <p class="connect-lead" data-view="bee">Optional. Stay, or pick a room.</p>
+    <p class="connect-lead" data-view="raver">Walk only if you still want to. The picture already happened.</p>
     <p class="connect-lead" data-view="cypherpunk">Cards are parsed from the live atlas markup: <code>article.srf</code> names and same-origin <code>surfaces/*</code> hrefs. No invented destinations.</p>
     <a class="atlas-pin" href="index.html" data-i18n="atlas.browse">Explore the estate</a>
-    <p id="connect-count" class="lede"></p>
+    <p id="connect-count-bee" class="lede" data-view="bee"></p>
+    <p id="connect-count-raver" class="lede" data-view="raver"></p>
+    <p id="connect-count" class="lede" data-view="cypherpunk"></p>
     <div id="connect-atlas" class="connect-atlas"></div>
   </section>
 </main>
@@ -230,6 +262,21 @@ async function readDoor(base){
   return { json, url, base: base || location.origin };
 }
 
+const STATE = {
+  phase: "load",
+  bytes: 0,
+  hop: "",
+  usedUrl: "",
+  failKind: "",
+  failRaw: "",
+  failCypher: "",
+  cardCount: 0
+};
+
+function view(){
+  return document.body.getAttribute("data-reg") || "bee";
+}
+
 function statusLine(tone, badge, message){
   const badgeEl = document.getElementById("state-badge");
   const status = document.getElementById("door-status");
@@ -239,29 +286,87 @@ function statusLine(tone, badge, message){
   status.dataset.tone = tone === "live" ? "live" : (tone === "error" ? "error" : "");
 }
 
+function speak(){
+  const v = view();
+  const plaque = document.getElementById("plaque");
+  const placeholder = document.getElementById("placeholder");
+  const countBee = document.getElementById("connect-count-bee");
+  const countRaver = document.getElementById("connect-count-raver");
+  const countPunk = document.getElementById("connect-count");
+
+  if(STATE.phase === "load"){
+    if(v === "bee"){
+      statusLine("", "…", "Looking…");
+      plaque.textContent = "A public picture";
+      if(placeholder) placeholder.textContent = "Looking…";
+    }else if(v === "raver"){
+      statusLine("", "Listening", "A picture is on its way.");
+      plaque.textContent = "A living picture";
+      if(placeholder) placeholder.textContent = "The garden is still.";
+    }else if(v === "cypherpunk"){
+      statusLine("", "· · ·", "GET in flight…");
+      plaque.textContent = "public DataMap";
+      if(placeholder) placeholder.textContent = "listening…";
+    }
+  }else if(STATE.phase === "live"){
+    if(v === "bee"){
+      statusLine("live", "Here", "It arrived. Look, then choose if you want.");
+      plaque.textContent = "A public picture";
+    }else if(v === "raver"){
+      statusLine("live", "It bloomed", "The garden just handed you a living picture.");
+      plaque.textContent = "A living picture";
+    }else if(v === "cypherpunk"){
+      statusLine("live", STATE.bytes.toLocaleString() + " BYTES · " + STATE.hop + " · LIVE",
+        "Public bytes painted from " + STATE.hop.toLowerCase() + ".");
+      plaque.textContent = "public DataMap · JPEG";
+    }
+  }else if(v === "bee"){
+    statusLine("error", "Not now", "Not this time. You can try again.");
+    plaque.textContent = "A public picture";
+    if(placeholder) placeholder.textContent = "Not this time. You can try again.";
+  }else if(v === "raver"){
+    statusLine("error", "Quiet dusk", "The garden is quiet. The picture is still there, waiting.");
+    plaque.textContent = "A living picture";
+    if(placeholder) placeholder.textContent = "The garden is quiet. The picture is still there, waiting.";
+  }else if(v === "cypherpunk"){
+    const badge = STATE.failKind === "autonomi" ? "NETWORK QUIET" : "UNREACHABLE";
+    statusLine("error", badge, STATE.failRaw || "door quiet");
+    plaque.textContent = "public DataMap";
+    if(placeholder) placeholder.textContent = STATE.failCypher || STATE.failRaw || "the door did not answer";
+  }
+
+  if(STATE.cardCount > 0){
+    if(countBee) countBee.textContent = "Many rooms.";
+    if(countRaver) countRaver.textContent = "Every bloom on the estate, still growing.";
+    if(countPunk) countPunk.textContent = STATE.cardCount + " published atlas rooms (ant-door omitted — you are on it).";
+  }
+}
+
 function teachFailure(err){
   const stage = document.getElementById("stage");
   const placeholder = document.getElementById("placeholder") || stage;
   stage.classList.add("err");
   stage.setAttribute("aria-busy", "false");
   placeholder.classList.add("err");
+  STATE.phase = "fail";
   if(err && err.code === "pages-404"){
-    placeholder.textContent = "This host has no Autonomi door of its own. The page will try the estate relay next time, or open the poke proxy.";
-    statusLine("error", "UNREACHABLE", "Same-origin /ant/v1 returned Pages HTML. Relay is the live door.");
-    return;
+    STATE.failKind = "pages-404";
+    STATE.failRaw = "Same-origin /ant/v1 returned Pages HTML. Relay is the live door.";
+    STATE.failCypher = "This host has no Autonomi door of its own. The page will try the estate relay next time, or open the poke proxy.";
+  }else if(err && err.name === "TypeError"){
+    STATE.failKind = "cors";
+    STATE.failRaw = "Browser blocked the relay read from this origin.";
+    STATE.failCypher = "This preview origin is not on the door’s CORS grant. Open skaists.dev, or use the local poke proxy.";
+  }else if(err && err.code === "autonomi"){
+    STATE.failKind = "autonomi";
+    STATE.failRaw = err.message || "Autonomi read failed.";
+    STATE.failCypher = "The door answered. Autonomi did not return these bytes.";
+  }else{
+    STATE.failKind = "quiet";
+    STATE.failRaw = err && err.message ? err.message : "door quiet";
+    STATE.failCypher = "The door did not hand us bytes. The address is still public; the hop is quiet.";
   }
-  if(err && err.name === "TypeError"){
-    placeholder.textContent = "This preview origin is not on the door’s CORS grant. Open skaists.dev, or use the local poke proxy.";
-    statusLine("error", "UNREACHABLE", "Browser blocked the relay read from this origin.");
-    return;
-  }
-  if(err && err.code === "autonomi"){
-    placeholder.textContent = "The door answered. Autonomi did not return these bytes.";
-    statusLine("error", "NETWORK QUIET", err.message || "Autonomi read failed.");
-    return;
-  }
-  placeholder.textContent = "The door did not hand us bytes. The address is still public; the hop is quiet.";
-  statusLine("error", "UNREACHABLE", err && err.message ? err.message : "door quiet");
+  speak();
 }
 
 function paint(data, usedUrl){
@@ -274,26 +379,36 @@ function paint(data, usedUrl){
   stage.classList.remove("err");
   stage.replaceChildren(img);
   stage.setAttribute("aria-busy", "false");
-  const hop = usedUrl.startsWith(RELAY) ? "RELAY" : "SAME-ORIGIN";
-  statusLine("live", bytes.length.toLocaleString() + " BYTES · " + hop + " · LIVE", "Public bytes painted from " + hop.toLowerCase() + ".");
-  document.getElementById("plaque").textContent = "Live public bytes";
-  document.getElementById("rec-used").textContent = usedUrl;
+  STATE.phase = "live";
+  STATE.bytes = bytes.length;
+  STATE.hop = usedUrl.startsWith(RELAY) ? "RELAY" : "SAME-ORIGIN";
+  STATE.usedUrl = usedUrl;
+  const rec = document.getElementById("rec-used");
+  if(rec) rec.textContent = usedUrl;
   document.getElementById("landed").hidden = false;
   document.getElementById("connect").hidden = false;
+  speak();
   loadAtlasConnect();
 }
 
 async function openDoor(){
+  STATE.phase = "load";
+  STATE.failKind = "";
+  STATE.failRaw = "";
+  STATE.failCypher = "";
   const stage = document.getElementById("stage");
   if(!document.getElementById("placeholder")){
-    stage.replaceChildren(Object.assign(document.createElement("p"), {id:"placeholder", className:"placeholder", textContent:"Asking the estate door for public bytes…"}));
+    stage.replaceChildren(Object.assign(document.createElement("p"), {id:"placeholder", className:"placeholder"}));
   }
   stage.classList.remove("err");
+  const ph = document.getElementById("placeholder");
+  if(ph) ph.classList.remove("err");
   stage.setAttribute("aria-busy", "true");
   document.getElementById("connect").hidden = true;
   document.getElementById("landed").hidden = true;
-  statusLine("", "· · ·", "Opening the door.");
-  document.getElementById("apiref").textContent = DOOR_PATH;
+  const apiref = document.getElementById("apiref");
+  if(apiref) apiref.textContent = DOOR_PATH;
+  speak();
   const bases = doorBases();
   let last = null;
   for(const base of bases){
@@ -311,7 +426,6 @@ async function openDoor(){
 
 function loadAtlasConnect(){
   const root = document.getElementById("connect-atlas");
-  const countEl = document.getElementById("connect-count");
   if(root.dataset.loaded === "1") return;
   fetch(new URL("index.html", location.href)).then(function(res){
     if(!res.ok) throw new Error("atlas " + res.status);
@@ -348,14 +462,14 @@ function loadAtlasConnect(){
           cards.appendChild(card);
           n++;
         });
-            if(!cards.children.length){
-              const openSeat = fam.querySelector(".open-seat");
-              if(!openSeat) return;
-              const p = document.createElement("p");
-              p.className = "connect-lead";
-              p.textContent = (openSeat.textContent || "").trim();
-              cards.appendChild(p);
-            }
+        if(!cards.children.length){
+          const openSeat = fam.querySelector(".open-seat");
+          if(!openSeat) return;
+          const p = document.createElement("p");
+          p.className = "connect-lead";
+          p.textContent = (openSeat.textContent || "").trim();
+          cards.appendChild(p);
+        }
         const famWrap = document.createElement("details");
         famWrap.className = "connect-fam";
         const reg = document.body.getAttribute("data-reg") || "bee";
@@ -370,7 +484,8 @@ function loadAtlasConnect(){
       });
       if(orgSec.querySelector(".connect-fam")) root.appendChild(orgSec);
     });
-    countEl.textContent = n + " published atlas rooms (ant-door omitted — you are on it).";
+    STATE.cardCount = n;
+    speak();
     root.dataset.loaded = "1";
   }).catch(function(){
     root.replaceChildren();
@@ -387,9 +502,10 @@ document.getElementById("retry").addEventListener("click", function(){
 document.addEventListener("bregister", function(ev){
   const reg = ev.detail && ev.detail.reg;
   document.querySelectorAll(".connect-fam").forEach(function(d){ d.open = reg !== "bee"; });
+  speak();
 });
 openDoor();
-window.AntDoor = { ADDR, RELAY, DOOR_PATH, doorBases, isPagesHtml };
+window.AntDoor = { ADDR, RELAY, DOOR_PATH, doorBases, isPagesHtml, speak, STATE };
 </script>
 <script src="tour.js?v=41"></script>
 </body>
