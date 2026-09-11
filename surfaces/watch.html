@@ -63,6 +63,14 @@
   .view-lead .view-kicker { color:var(--faint); font-size:var(--t-micro); text-transform:uppercase;
     letter-spacing:.14em; }
   .view-lead strong { color:var(--ink-hi); font-size:var(--t-h2); line-height:1.35; }
+  body[data-experience="watch"] [data-view] { display:none; }
+  body[data-experience="watch"][data-reg="bee"] [data-view="bee"],
+  body[data-experience="watch"][data-reg="raver"] [data-view="raver"],
+  body[data-experience="watch"][data-reg="cypherpunk"] [data-view="cypherpunk"] { display:revert; }
+  body[data-reg="bee"] { color-scheme:light; }
+  body[data-reg="bee"] header h1, body[data-reg="raver"] header h1 { font-size:var(--t-h1); }
+  body[data-reg="bee"] header h1 { font-family:var(--bee-font, ui-sans-serif, system-ui, sans-serif); letter-spacing:-.035em; }
+  body[data-reg="raver"] header h1 { font-family:ui-sans-serif, system-ui, sans-serif; letter-spacing:-.02em; }
   body[data-reg="bee"] .view-lead[data-view="bee"] { border-color:var(--line-hi); background:var(--panel, var(--bg1)); }
   body[data-reg="bee"] .view-lead[data-view="bee"] .view-kicker { color:#326b39; }
   body[data-reg="bee"] .view-lead[data-view="bee"] strong { color:var(--ink); font-family:var(--bee-font, ui-sans-serif, system-ui, sans-serif); }
@@ -290,7 +298,7 @@
         <label for="sess" data-view="bee" data-i18n="room.open">open a room</label>
         <label for="sess" data-view="raver" data-i18n="room.raverTitle">jam the field</label>
         <label for="sess" data-view="cypherpunk">receipt №</label>
-        <input id="sess" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="session №" aria-label="receipt session number">
+        <input id="sess" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="room pass" aria-label="room pass">
         <button id="go">watch</button>
         <span class="chip nosess" id="chip">no session</span>
         <span class="nums" id="nums"></span>
@@ -565,6 +573,22 @@ function say(t, bad) {
   $('st').textContent = t;
   $('dot').className = 'dot ' + (bad ? 'off' : 'on');
 }
+
+/* The register changes presentation, so the one shared receipt control gets
+   the same plain-language name. Its value and behavior never change between
+   readings. */
+function applyAudienceInput() {
+  const mode = document.body.dataset.reg || 'bee';
+  const copy = mode === 'cypherpunk'
+    ? ['session №', 'receipt session number']
+    : mode === 'raver'
+      ? ['floor pass', 'floor pass']
+      : ['room pass', 'room pass'];
+  $('sess').placeholder = copy[0];
+  $('sess').setAttribute('aria-label', copy[1]);
+}
+document.addEventListener('bregister', applyAudienceInput);
+setTimeout(applyAudienceInput, 0);
 
 /* ── wiring ──────────────────────────────────────────────────────────── */
 $('go').addEventListener('click', () => {
