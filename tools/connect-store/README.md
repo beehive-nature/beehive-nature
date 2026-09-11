@@ -118,6 +118,20 @@ malformed or out-of-order frame fails closed. The caller tests use a real
 WebSocket server fixture matching the pinned x0x 0.41.3 frame shape, including
 the optional `origin` field.
 
+The language-neutral fixture
+[`fixtures/connect-store-manifest-envelope-v1.json`](../../fixtures/connect-store-manifest-envelope-v1.json)
+is the shared content contract for Node, W@tch and Music Jam clients. Its
+`bnr-manifest-envelope-v1` object carries the channel, epoch, sequence, exact
+checkpoint reference, encrypted item references, creator/source credits,
+component versions and an explicit admission policy. The fixture includes a
+channel snapshot plus recording, stems and captions so Music Jam can use the
+same envelope without adding a second x0x protocol. `parseManifestEnvelope`
+validates the exact JSON shape and binds the admission policy to the checkpoint;
+`checkpointNotice` projects only the opaque checkpoint subset onto the existing
+x0x announcement adapter. `payment: "disabled"` is deliberate: the parser is
+not payment admission, and Trezor approval remains downstream of a future
+capped payment boundary.
+
 This does not implement Buzz onboarding, channel metadata/membership events,
 moderation, search, presence, huddle, workflows, agent execution or full Blossom
 upload semantics. The installed apps cannot yet use it as a complete workspace.

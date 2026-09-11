@@ -2,10 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { once } from 'node:events';
+import { readFile } from 'node:fs/promises';
 import { WebSocketServer } from 'ws';
 import { getPublicKey } from 'nostr-tools/pure';
 import { BoundedHttp, AutonomiReadStore, X0xNotifications, X0xCheckpointReceiver } from './adapters.mjs';
 import { hash, encode, fetchRef } from './core.mjs';
+import { checkpointNotice, parseManifestEnvelope } from './manifest.mjs';
 import { fixture } from './test-support.mjs';
 
 async function spy(t, handler) {
@@ -44,6 +46,39 @@ async function x0xFixture(t, { group, message, origin }) {
   });
   return { url: `ws://127.0.0.1:${wss.address().port}`, seen };
 }
+test('shared manifest envelope carries channel and Music Jam references through the x0x notice adapter', async t => {
+  const raw = await readFile(new URL('../../fixtures/connect-store-manifest-envelope-v1.json', import.meta.url));
+  const manifest = parseManifestEnvelope(raw);
+  assert.equal(manifest.type, 'bnr-manifest-envelope-v1');
+  assert.equal(manifest.manifest.channel, 'plur');
+  assert.equal(manifest.manifest.epoch, 3);
+  assert.equal(manifest.manifest.sequence, manifest.manifest.checkpoint.sequence);
+  assert.deepEqual(manifest.manifest.encrypted_items.map(item => item.kind),
+    ['channel-snapshot', 'music-recording', 'music-stems', 'music-captions']);
+  assert.equal(manifest.manifest.credits.creator[0].display_name, 'LoVis waTer');
+  assert.equal(manifest.manifest.credits.source[0].uri, 'https://beehivenature.buzz');
+  assert.deepEqual(manifest.manifest.versions, { manifest: 1, channel: 1, items: 1 });
+  assert.deepEqual(manifest.manifest.admission, { policy_id: manifest.manifest.checkpoint.policy_id,
+    max_bytes: 12582912, max_items: 16, payment: 'disabled', approval: 'trezor' });
+
+  const api = await spy(t, (req, res) => { res.setHeader('content-type', 'application/json'); res.end('{"ok":true}'); });
+  const group = hash('shared manifest fixture group');
+  await new X0xNotifications(new BoundedHttp(api.base, { token: 'synthetic-scoped-token' }), group)
+    .publish(checkpointNotice(manifest));
+  assert.equal(api.calls.length, 1);
+  assert.deepEqual(JSON.parse(api.calls[0].body), { kind: 'announcement',
+    body: JSON.stringify(checkpointNotice(manifest)) });
+  assert.equal(JSON.parse(JSON.stringify(manifest)).manifest.channel, 'plur');
+
+  const unknown = structuredClone(manifest); unknown.manifest.extra = true;
+  assert.throws(() => parseManifestEnvelope(unknown), /invalid-fields/);
+  const mismatched = structuredClone(manifest); mismatched.manifest.checkpoint.sequence++;
+  assert.throws(() => parseManifestEnvelope(mismatched), /invalid-manifest-checkpoint/);
+  const duplicate = structuredClone(manifest); duplicate.manifest.encrypted_items[1].id = duplicate.manifest.encrypted_items[0].id;
+  assert.throws(() => parseManifestEnvelope(duplicate), /duplicate-manifest-item/);
+  const foreignPolicy = structuredClone(manifest); foreignPolicy.manifest.admission.policy_id = hash('foreign policy');
+  assert.throws(() => parseManifestEnvelope(foreignPolicy), /manifest-policy-mismatch/);
+});
 test('production x0x adapter sends only the exact checkpoint notice and refuses extra plaintext fields', async t => {
   const api = await spy(t, (req, res) => { res.setHeader('content-type', 'application/json'); res.end('{"ok":true}'); });
   const http = new BoundedHttp(api.base, { token: 'synthetic-scoped-token' }); const group = hash('isolated group');
