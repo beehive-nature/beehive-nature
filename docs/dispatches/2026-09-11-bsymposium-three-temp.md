@@ -65,6 +65,29 @@ still owed. Existing `h.101`–`h.109` headings stay on the instrument.
 - `node e2e/estate-source.mjs`
 - browser first-paint screenshots of the three registers at the 8765 poke
 
+## Re-poke receipts (same day, 8765)
+
+Served `surfaces/` at `http://127.0.0.1:8765/bsymposium.html`. Confirmed
+`/surfaces/register.js` is 404 on that poke (the old alias) and
+`/register.js` + `/lang.js` are 200. Puppeteer-core against system
+Chrome, `localStorage` cleared, 1280×800:
+
+- New bee: `.sub[data-reg=cypherpunk]` `display:none`; instrument
+  `display:none`; above-fold ZERO Federal Register / EO 14212 / Axis B /
+  five co-creations / ◐; `#bregctl` and `#blangctl` painted; calm +
+  takeaway lead + See where they meet.
+- Raver: feeling line on; Homeostasis off; instrument hidden.
+- Cypherpunk: instrument + cypher masthead on; sources default open;
+  charter / seven rows / co-creations / cite-or-silent intact.
+- Switch back to New bee: cypher masthead stays `display:none`.
+- See where they meet: two commons cards, still no table / EO.
+
+23/23 poke assertions (script labelled 15/15 at the banner; every named
+assert printed PASS). Browser walk New bee → meet → Raver → Sit with
+both sides → Cypherpunk → New bee matches. Beat memory keeps the meet
+layer when returning to New bee after that tap — same contract as
+forge/room.
+
 Skipped this beat: fleet attestation of the new keys, WELLness / Hexagon
 adapters, any health-outcome rewrite, live Federal Register re-fetch
 (the 2026-08-21 link-status table is unchanged).
