@@ -68,11 +68,18 @@ the atlas markup. `ant-door.html` is omitted because you are on it. The
 atlas pin is `index.html`. No invented medical copy — bio surfaces keep
 their atlas glosses.
 
-Browser poke (Chrome against `e2e/ant-door-poke.mjs`): badge
-`138,931 BYTES · SAME-ORIGIN · LIVE`, image naturalWidth 782, **100**
-connect cards, all eight atlas families including buds. Confirmed names
-include bsymposium, bEarth, bFood, ERC20i gallery, Watch room, bantfarm,
-midivault, hearth, pulse.
+Browser poke (Chrome against `e2e/ant-door-poke.mjs`) after the
+three-view lock:
+
+- Image naturalWidth **782**, **100** connect cards, eight families
+  including buds (bsymposium, bEarth, bFood, gallery, Watch room,
+  bantfarm, midivault, hearth, pulse still present).
+- **New bee** badge `Here` · “It arrived. Look, then choose if you
+  want.” · Look / Feel / Choose · hex hidden · no CORS/WASM/proxy.
+- **Raver** badge `It bloomed` · “The garden just handed you a living
+  picture.” · The gift / The seeing / The wander.
+- **Cypherpunk** badge `138,931 BYTES · SAME-ORIGIN · LIVE` ·
+  autonomi:// hex · Door vs Pages · Door vs WASM · Network tab story.
 
 ## Poke path
 
@@ -114,9 +121,11 @@ PASS estate-check — 93 counted · 102 listed · 26 domains
 
 Live relay GET from this seat: 200, 138,931 JPEG bytes, CORS
 `access-control-allow-origin: https://skaists.dev`. Playwright was not
-installed in this environment (`require('playwright')` failed); image
-paint is verified in the poke JSON envelope (`/9j/` JPEG) plus the
-browser walkthrough against the local poke URL.
+installed in this environment (`require('playwright')` failed). Headless
+Chrome against the poke URL (puppeteer-core, not in-tree) asserted the
+three-view lock: bee `Here` / no hex / no WASM, raver `It bloomed`,
+cypherpunk `138,931 BYTES · SAME-ORIGIN · LIVE` / hex / Door vs WASM,
+image 782×1600, 100 atlas cards. Manual headed walkthrough recorded.
 
 ## Not done
 
