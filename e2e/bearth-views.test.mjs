@@ -47,7 +47,7 @@ test('New bee first paint is one sentence, one fraction-led number, and one door
   assert.match(page, /<body data-reg="bee" data-bee-theme="custom" data-bearth-beat="arrival">/);
   assert.match(page, /body\[data-reg="bee"\]\[data-bearth-beat="arrival"\] #first-bee\{display:block\}/);
   assert.match(page, /#first-bee,#first-raver,#layer-figure,#layer-land,#instrument\{display:none\}/);
-  assert.match(page, /body\[data-reg="bee"\]\[data-bearth-beat="arrival"\] footer,\s*body\[data-reg="raver"\]\[data-bearth-beat="arrival"\] footer\{display:none\}/);
+  assert.match(page, /<span data-reg="cypherpunk">built for the environmental arm · every number here is a dial/);
 });
 
 test('Raver first paint is atmosphere, one feeling line, and one tap', () => {

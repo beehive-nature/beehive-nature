@@ -56,9 +56,15 @@ Chrome, `localStorage` cleared, 1280×800:
 Cypherpunk → New bee) matches.
 
 Browser QA FAIL re-poke after footer gate (same URL, cleared
-localStorage): cypher masthead `display:none`; footer hidden on
-arrival; `#bregctl` + `#blangctl` painted; above-fold ZERO
-N₂O/IPCC/REFUTED/dial jargon. Locked copy + deepen gates only.
+localStorage): cypher masthead `display:none`; `#bregctl` +
+`#blangctl` painted; above-fold ZERO N₂O/IPCC/REFUTED/dial jargon.
+
+CI `node` then failed `FAIL floor — bearth.html: 7 keyed, floor 9`.
+Hiding the whole footer dropped two keyed leaves (`s.bearth.name`,
+`law.hive`) that the first-paint floor was built on. Cure: footer
+stays laid out; only the dial-jargon clause and the unkeyed side
+links ride `data-reg="cypherpunk"` so New bee still cannot see them.
+Keyed count returns to 9. `static` §7 remains the Cursor Agent author.
 
 Skipped: live FAOSTAT pull, fleet attestation of the new keys.
 
