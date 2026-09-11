@@ -3,102 +3,386 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f6f7f2">
 <title>the Autonomi door — skaists</title>
 <link rel="stylesheet" href="tokens.css">
 <style>
-  :root { color-scheme: dark; }
-  * { box-sizing: border-box; margin: 0; }
-  body {
-    font: 16px/1.6 system-ui, sans-serif;
-    background: var(--bg, #101010); color: var(--fg, #eee4cf);
-    min-height: 100vh; display: flex; flex-direction: column;
-    padding: clamp(16px, 5vw, 48px); gap: 20px; max-width: 720px; margin: 0 auto;
-  }
-  h1 { font-size: clamp(20px, 6vw, 32px); font-weight: 650; letter-spacing: .3px; }
-  h1 .bee { color: var(--amber, #d9a441); }
-  .sub { color: var(--dim, #9a8f7a); font-size: 14px; }
-  .card {
-    border: 1px solid var(--line, #2c2822); border-radius: 12px;
-    padding: 18px; background: var(--panel, #181512);
-  }
-  .card h2 { font-size: 15px; color: var(--amber, #d9a441); margin-bottom: 10px; letter-spacing: .5px; }
-  img#content {
-    max-width: 100%; border-radius: 8px; display: block;
-    image-rendering: auto; min-height: 120px;
-  }
-  .placeholder {
-    display: grid; place-items: center; min-height: 140px;
-    color: var(--dim, #9a8f7a); font-size: 14px;
-    border: 1px dashed var(--line, #2c2822); border-radius: 8px;
-  }
-  .placeholder.err { color: var(--flag, #c07f1c); border-color: var(--flag, #c07f1c); }
-  .addr {
-    font: 12px/1.4 ui-monospace, monospace; word-break: break-all;
-    color: var(--dim, #9a8f7a); background: #0b0a09; border-radius: 6px;
-    padding: 8px 10px; margin-top: 10px;
-  }
-  .badge {
-    display: inline-block; font-size: 11px; letter-spacing: 1px;
-    border: 1px solid var(--amber, #d9a441); color: var(--amber, #d9a441);
-    border-radius: 4px; padding: 2px 8px; margin-top: 10px;
-  }
-  .note { font-size: 13.5px; color: var(--dim, #9a8f7a); }
-  .note b { color: var(--fg, #eee4cf); font-weight: 600; }
-  .three { display: grid; gap: 8px; margin-top: 8px; }
-  .three div { font-size: 13.5px; padding-left: 12px; border-left: 2px solid var(--line, #2c2822); }
-  .three b { color: var(--amber, #d9a441); font-weight: 600; }
-  footer { margin-top: auto; padding-top: 18px; font-size: 12px; color: var(--dim, #9a8f7a); }
-  footer a { color: var(--amber, #d9a441); }
+:root{--bg:#101018;--panel:#1c1926;--well:#14121d;--ink:#f4eff9;--dim:#bcb3ca;--line:#544963;--accent:#bb9aec;--info:#87d5e0;--warning:#ecc4d7;--ok:#86cc72;--font:system-ui,-apple-system,'Segoe UI',sans-serif;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:1rem/1.6 var(--font);min-height:100vh;display:flex;flex-direction:column}
+button,summary{cursor:pointer}
+button{min-height:44px;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 16px;font:inherit}
+button:hover:not(:disabled){border-color:var(--accent)}
+button:focus-visible,a:focus-visible,summary:focus-visible,select:focus-visible{outline:3px solid var(--info);outline-offset:3px}
+[hidden]{display:none!important}
+.door-head,.door-work,.door-navigation{max-width:1440px;margin:auto;padding-inline:clamp(16px,3vw,40px)}
+.door-head{padding-block:20px 8px}
+.eyebrow{color:var(--accent);font-size:.875rem;margin:0}
+h1{font-size:clamp(1.65rem,4vw,2.75rem);line-height:1.15;letter-spacing:-.04em;margin:8px 0}
+h1 [data-view]{display:none}
+body[data-reg=bee] h1 [data-view=bee],body[data-reg=raver] h1 [data-view=raver],body[data-reg=cypherpunk] h1 [data-view=cypherpunk]{display:block}
+.lede{color:var(--dim);font-size:.875rem;max-width:70ch;overflow-wrap:anywhere}
+.door-work{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;padding-bottom:24px;flex:1}
+.viewer,.truth,.connect{min-width:0}
+#stage{display:flex;align-items:center;justify-content:center;min-height:280px;height:42vh;max-height:560px;background:#050508;border-radius:18px;overflow:hidden;padding:20px}
+#stage.err{border:1px dashed var(--warning);background:var(--well)}
+#content{display:block;max-width:100%;max-height:100%;width:auto;height:auto;border-radius:8px}
+.placeholder{color:var(--dim);text-align:center;max-width:36ch}
+.placeholder.err{color:var(--warning)}
+.deck{padding:18px 0}
+.caption-row{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.piece-title{font-size:1.375rem;letter-spacing:-.025em;font-weight:600}
+#door-status{color:var(--dim);min-height:26px;margin:6px 0 14px;overflow-wrap:anywhere}
+#door-status[data-tone=live]{color:var(--ok)}
+#door-status[data-tone=error]{color:var(--warning)}
+#state-badge{display:inline-flex;align-items:center;min-height:32px;font-size:.75rem;letter-spacing:.06em;border:1px solid var(--line);border-radius:6px;padding:4px 10px;color:var(--accent)}
+#state-badge[data-tone=live]{border-color:var(--ok);color:var(--ok)}
+#state-badge[data-tone=error]{border-color:var(--warning);color:var(--warning)}
+.addr{font:0.8125rem/1.45 ui-monospace,Consolas,monospace;word-break:break-all;color:var(--dim);background:var(--well);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:12px 0}
+.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.truth{display:grid;gap:12px}
+.card{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:18px}
+.card h2{font-size:1rem;margin:0 0 8px}
+.card p{margin:0;color:var(--dim);font-size:.95rem}
+.card code{font:0.8125rem/1.4 ui-monospace,Consolas,monospace;overflow-wrap:anywhere}
+.connect{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:18px}
+.connect h2{margin:0 0 8px;font-size:1.125rem}
+.connect-lead{color:var(--dim);font-size:.95rem;margin:0 0 14px;max-width:70ch}
+.connect-atlas{display:grid;gap:18px}
+.connect-org>h3{margin:0 0 8px;font-size:1rem}
+.connect-fam{border:1px solid var(--line);border-radius:12px;background:var(--well);padding:0 14px 14px;margin:0 0 10px}
+.connect-fam:not([open]){padding-bottom:0}
+.connect-fam>summary{font-weight:600;padding:14px 0;min-height:48px}
+.connect-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.connect-card{display:flex;flex-direction:column;gap:4px;min-height:72px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:inherit;text-decoration:none}
+.connect-card:hover{border-color:var(--accent)}
+.connect-card strong{font-size:.95rem}
+.connect-card span{font-size:.8125rem;color:var(--dim);overflow-wrap:anywhere}
+.atlas-pin{display:inline-flex;align-items:center;min-height:44px;margin-bottom:12px}
+.record{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:0 18px 18px}
+.record:not([open]){padding-bottom:0}
+.record>summary{font-weight:600;padding:15px 0;min-height:54px}
+.record dl{display:grid;grid-template-columns:120px minmax(0,1fr);gap:8px 12px;font-size:.875rem;margin:12px 0}
+.record dt{color:var(--dim)}
+.record dd{margin:0;overflow-wrap:anywhere}
+.door-navigation{padding:0 clamp(16px,3vw,40px) 32px;width:100%;max-width:1440px}
+.door-navigation>details{border-top:1px solid var(--line)}
+.door-navigation summary{min-height:48px;padding:14px 0;font-weight:600}
+.door-language{display:flex;margin-inline-start:auto;max-width:100%}
+.door-language #blangctl{margin:0!important;padding:0!important;border:0!important;flex-wrap:wrap}
+.door-language #blangsel{min-height:44px!important;max-width:100%!important;padding:8px 12px!important;background:var(--panel)!important;color:var(--ink)!important;border-color:var(--line)!important;font:inherit!important}
+.door-language #blangnote{white-space:normal!important;color:var(--dim)!important;font:.75rem/1.4 var(--font)!important}
+[data-experience-nav]{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px}
+[data-experience-nav] a{display:inline-flex;align-items:center;min-height:44px;padding:8px 12px}
+[data-experience-nav] a[aria-current=page]{font-weight:650;text-decoration:underline}
+body[data-reg=bee]{--bg:#f6f7f2;--panel:#fff;--well:#edf2eb;--ink:#18362a;--dim:#435f4e;--line:#ccd7cf;--accent:#326b39;--info:#29628f;--warning:#8b3654;--ok:#326b39;color-scheme:light}
+body[data-reg=bee] .door-head,body[data-reg=bee] .door-work,body[data-reg=bee] .door-navigation{max-width:1080px}
+body[data-reg=bee] #stage{box-shadow:0 8px 28px #18362a16;background:#eef3ec}
+body[data-reg=raver] .door-work{grid-template-columns:minmax(0,1.4fr) minmax(260px,1fr)}
+body[data-reg=raver] .viewer{grid-column:1;grid-row:1 / span 2}
+body[data-reg=raver] .truth{grid-column:2;grid-row:1}
+body[data-reg=raver] .connect{grid-column:1/-1}
+body[data-reg=raver] #stage{height:56vh;max-height:720px;border:1px solid var(--line)}
+body[data-reg=raver] h1{font-size:clamp(2rem,4.5vw,3.6rem)}
+body[data-reg=raver] .landed{font-size:1.125rem;color:var(--accent)}
+body[data-reg=cypherpunk]{--bg:#0e141a;--panel:#151e26;--well:#101820;--line:#3f5260;--accent:#80cddd;--font:ui-monospace,'Cascadia Mono',Consolas,monospace}
+body[data-reg=cypherpunk] .door-work{grid-template-columns:minmax(0,1fr) 320px;max-width:1700px}
+body[data-reg=cypherpunk] .door-head,body[data-reg=cypherpunk] .door-navigation{max-width:1700px}
+body[data-reg=cypherpunk] .viewer{grid-column:1}
+body[data-reg=cypherpunk] .truth{grid-column:2}
+body[data-reg=cypherpunk] .connect{grid-column:1/-1}
+body[data-reg=cypherpunk] :is(#stage,.card,.connect,.connect-card,.record,button){border-radius:3px}
+body[data-reg=cypherpunk] h1{font-size:clamp(1.5rem,3vw,2rem)}
+body[data-reg=cypherpunk] .record dl{grid-template-columns:1fr;gap:2px}
+body[data-reg=cypherpunk] .record dd{margin-bottom:10px}
+body[data-reg=bee] .cypher-only,body[data-reg=raver] .cypher-only{display:none}
+@media(max-width:860px){body[data-reg=raver] .door-work,body[data-reg=cypherpunk] .door-work{display:flex;flex-direction:column}#stage,body[data-reg=raver] #stage{height:40vh;min-height:220px}.door-head,.door-work,.door-navigation{padding-inline:14px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
-<body>
-  <h1><span class="bee">⬡</span> the Autonomi door</h1>
-  <p class="sub">estate page · reads Autonomi bytes same-origin — no plugin, no visitor-side daemon</p>
-
-  <div class="card">
-    <h2>PUBLIC DATA FROM THE NETWORK</h2>
-    <div id="stage" class="placeholder">fetching through the estate's door…</div>
-    <div class="addr" id="addr">autonomi://711c7e20006ff3e0ac6c1f3063286a0c1a3e4c409642e8c526173fa60bb7078a</div> <!-- PUBLIC-CONSTANT: mainnet public DataMap (docs example) -->
-    <span class="badge" id="state-badge">· · ·</span>
-  </div>
-
-  <div class="card">
-    <h2>WHAT YOU ARE LOOKING AT — THREE AUDIENCES</h2>
-    <div class="three">
-      <div><b>the neighbor</b> — this image lives on the Autonomi network, not on our servers. Your browser fetched it through the estate's door, in one same-origin request. Nothing to install, nothing to configure.</div>
-      <div><b>the builder</b> — the page calls <span id="apiref">/ant/v1/data/public/&lt;address&gt;</span> on this origin; Caddy proxies to a local read-only antd gateway (GET-only, all other endpoints refused). Open your network tab: one request, this origin, no third parties.</div>
-      <div><b>the cypherpunk</b> — the door is a bridge, not the destination. Direct browser access — the page itself speaking the network's post-quantum protocol — lands when Autonomi's WASM client ships. When that day comes, this door retires and the fetch goes peer-to-peer. The estate holds no keys here: public data, public reads.</div>
+<body data-reg="bee" data-bee-theme="custom" data-experience="ant-door">
+<nav data-experience-nav aria-label="Explore skaists"><a href="index.html" data-i18n="social.arrival.home">Home</a><a href="blight/gallery.html" data-i18n="experience.gallery">Art gallery</a><a href="blight/studio-music.html" data-i18n="experience.music">Music studio</a><a href="buzz-directory.html" data-i18n="atlas.peopleAction">Meet the hive</a><a href="profile.html" data-i18n="experience.profile">People and names</a><span class="door-language" data-language-host></span></nav>
+<header class="door-head">
+  <p class="eyebrow">Autonomi door</p>
+  <h1>
+    <span data-view="bee">A picture that does not live on our servers.</span>
+    <span data-view="raver">The network just handed you the bytes.</span>
+    <span data-view="cypherpunk">GET the public DataMap. Inspect the hop.</span>
+  </h1>
+  <p class="lede" data-view="bee">Look first. If it lands, you can choose another room. Nothing to install.</p>
+  <p class="lede" data-view="raver">Public Autonomi bytes, painted in this tab — then the whole atlas if you still want to wander.</p>
+  <p class="lede" data-view="cypherpunk">Pages has no <code>/ant/v1</code> proxy. The live door is <code>relay.skaists.dev</code> (Caddy → GET-only antd). WASM peer-to-peer is the retirement plan, not today.</p>
+</header>
+<noscript><p class="door-head">Enable JavaScript to ask the estate door for the public Autonomi bytes. The atlas and navigation stay available.</p></noscript>
+<main class="door-work">
+  <section class="viewer" aria-label="Public Autonomi data">
+    <div id="stage" aria-busy="true"><p id="placeholder" class="placeholder">Asking the estate door for public bytes…</p></div>
+    <div class="deck">
+      <div class="caption-row">
+        <div class="piece-title" id="plaque">Public Autonomi data</div>
+        <span class="badge" id="state-badge">· · ·</span>
+      </div>
+      <p id="door-status" role="status" aria-live="polite">Opening the door.</p>
+      <p class="landed" data-reg="raver" id="landed" hidden>They landed. That image is not a file we host.</p>
+      <div class="addr" id="addr">autonomi://711c7e20006ff3e0ac6c1f3063286a0c1a3e4c409642e8c526173fa60bb7078a</div> <!-- PUBLIC-CONSTANT: mainnet public DataMap (docs example) -->
+      <div class="actions">
+        <button type="button" id="retry">Try again</button>
+      </div>
     </div>
-  </div>
+  </section>
 
-  <footer>
-    served via the estate's door · direct browser access lands when Autonomi's WASM client ships ·
-    <a href="https://relay.skaists.dev">relay.skaists.dev</a>
-  </footer>
+  <section class="truth" aria-label="Three audiences">
+    <article class="card">
+      <h2 data-reg="bee">What you are seeing</h2>
+      <h2 data-reg="raver">For the neighbor</h2>
+      <h2 data-reg="cypherpunk">Neighbor</h2>
+      <p>This image lives on the Autonomi network. Your browser asked the estate’s door for public bytes. No plugin. No visitor-side daemon.</p>
+    </article>
+    <article class="card">
+      <h2 data-reg="bee">How the page asks</h2>
+      <h2 data-reg="raver">For the builder</h2>
+      <h2 data-reg="cypherpunk">Builder</h2>
+      <p>The page reads <code id="apiref">/ant/v1/data/public/&lt;address&gt;</code>. On the relay host that path is same-origin. On GitHub Pages the same path is a Pages 404, so the page uses the relay door (CORS grants <code>https://skaists.dev</code>). Local poke: <code>?door=same</code> behind a proxy, or <code>?door=relay</code>.</p>
+    </article>
+    <article class="card">
+      <h2 data-reg="bee">What this is not</h2>
+      <h2 data-reg="raver">For the cypherpunk</h2>
+      <h2 data-reg="cypherpunk">Cypherpunk</h2>
+      <p>The door is a bridge, not the destination. Direct in-page protocol waits on Autonomi’s WASM client. Until then this is a GET-only read of public data. The estate holds no keys here.</p>
+    </article>
+    <details class="record cypher-only" id="record-details" open>
+      <summary>Network tab story</summary>
+      <dl>
+        <dt>Address</dt><dd id="rec-addr">autonomi://711c7e20006ff3e0ac6c1f3063286a0c1a3e4c409642e8c526173fa60bb7078a</dd>
+        <dt>Path</dt><dd><code>/ant/v1/data/public/&lt;64-hex&gt;</code></dd>
+        <dt>Pages</dt><dd><code>skaists.dev</code> is GitHub Pages — no Caddy <code>/ant</code> proxy</dd>
+        <dt>Door</dt><dd><code>https://relay.skaists.dev</code> · Caddy → antd · GET-only</dd>
+        <dt>Envelope</dt><dd><code>{data: base64}</code> · paint is a <code>data:image/jpeg</code> URL</dd>
+        <dt>Poke</dt><dd><code>node e2e/ant-door-poke.mjs</code> · <code>?door=relay</code> · <code>?door=same</code></dd>
+        <dt>Used</dt><dd id="rec-used">not asked yet</dd>
+      </dl>
+    </details>
+  </section>
+
+  <section class="connect" id="connect" hidden>
+    <h2 data-view="bee">Another room, if you want one</h2>
+    <h2 data-view="raver">The garden keeps going</h2>
+    <h2 data-view="cypherpunk">Atlas destinations (from surfaces/index.html)</h2>
+    <p class="connect-lead" data-view="bee">Optional. The estate map names every published room. Pick one, or stay here.</p>
+    <p class="connect-lead" data-view="raver">Every atlas card — skaists, the organism, biomass, buds, bnr — if you still have a next hunger.</p>
+    <p class="connect-lead" data-view="cypherpunk">Cards are parsed from the live atlas markup: <code>article.srf</code> names and same-origin <code>surfaces/*</code> hrefs. No invented destinations.</p>
+    <a class="atlas-pin" href="index.html" data-i18n="atlas.browse">Explore the estate</a>
+    <p id="connect-count" class="lede"></p>
+    <div id="connect-atlas" class="connect-atlas"></div>
+  </section>
+</main>
+<footer class="door-navigation"><details><summary data-i18n="atlas.browse">Explore the estate</summary><div data-tour-host></div></details></footer>
 
 <script>
-(async () => {
-  const ADDR = "711c7e20006ff3e0ac6c1f3063286a0c1a3e4c409642e8c526173fa60bb7078a"; // PUBLIC-CONSTANT: mainnet public DataMap
-  const stage = document.getElementById("stage");
-  const badge = document.getElementById("state-badge");
-  try {
-    const res = await fetch(`/ant/v1/data/public/${ADDR}`);   // SAME-ORIGIN: no CORS, no daemon
-    if (!res.ok) throw new Error(`door answered ${res.status}`);
-    const { data } = await res.json();          // the door answers a JSON envelope: {data: base64}
-    const bytes = Uint8Array.from(atob(data), c => c.charCodeAt(0));
-    const img = new Image();
-    img.id = "content"; img.alt = "public Autonomi data (JPEG)";
-    // data: URL, not a blob: object URL — Brave Shields (default ON) can refuse
-    // the blob: paint; a data: URL with the explicit MIME paints everywhere.
-    img.src = "data:image/jpeg;base64," + data;
-    stage.replaceWith(img);
-    badge.textContent = `${bytes.length.toLocaleString()} BYTES · SAME-ORIGIN · LIVE`;
-  } catch (e) {
-    stage.classList.add("err");
-    stage.textContent = "the door did not answer — " + e.message;
-    badge.textContent = "UNREACHABLE";
+const ADDR = "711c7e20006ff3e0ac6c1f3063286a0c1a3e4c409642e8c526173fa60bb7078a"; // PUBLIC-CONSTANT: mainnet public DataMap
+const RELAY = "https://relay.skaists.dev";
+const DOOR_PATH = "/ant/v1/data/public/" + ADDR;
+
+function doorBases(){
+  const q = new URLSearchParams(location.search).get("door");
+  if(q === "relay") return [RELAY];
+  if(q === "same" || q === "local") return [""];
+  const host = location.hostname;
+  if(host === "relay.skaists.dev") return [""];
+  if(host === "skaists.dev" || host === "www.skaists.dev") return [RELAY];
+  return ["", RELAY];
+}
+
+function isPagesHtml(res, body){
+  const ct = (res.headers.get("content-type") || "").toLowerCase();
+  if(ct.includes("text/html")) return true;
+  return /<!DOCTYPE html|<html[\s>]/i.test(String(body).slice(0, 240));
+}
+
+async function readDoor(base){
+  const url = base + DOOR_PATH;
+  const res = await fetch(url);
+  const text = await res.text();
+  if(isPagesHtml(res, text)){
+    const err = new Error("same-origin path is GitHub Pages HTML, not the door");
+    err.code = "pages-404";
+    err.status = res.status;
+    throw err;
   }
-})();
+  if(!res.ok){
+    const err = new Error((text || "").replace(/\s+/g, " ").slice(0, 180) || ("door answered " + res.status));
+    err.code = res.status >= 500 ? "autonomi" : "door-http";
+    err.status = res.status;
+    throw err;
+  }
+  let json;
+  try{ json = JSON.parse(text); }
+  catch(e){
+    const err = new Error("door answered non-JSON");
+    err.code = "door-shape";
+    throw err;
+  }
+  if(typeof json.data !== "string" || !json.data){
+    const err = new Error("door envelope missing data");
+    err.code = "door-shape";
+    throw err;
+  }
+  return { json, url, base: base || location.origin };
+}
+
+function statusLine(tone, badge, message){
+  const badgeEl = document.getElementById("state-badge");
+  const status = document.getElementById("door-status");
+  badgeEl.textContent = badge;
+  badgeEl.dataset.tone = tone;
+  status.textContent = message;
+  status.dataset.tone = tone === "live" ? "live" : (tone === "error" ? "error" : "");
+}
+
+function teachFailure(err){
+  const stage = document.getElementById("stage");
+  const placeholder = document.getElementById("placeholder") || stage;
+  stage.classList.add("err");
+  stage.setAttribute("aria-busy", "false");
+  placeholder.classList.add("err");
+  if(err && err.code === "pages-404"){
+    placeholder.textContent = "This host has no Autonomi door of its own. The page will try the estate relay next time, or open the poke proxy.";
+    statusLine("error", "UNREACHABLE", "Same-origin /ant/v1 returned Pages HTML. Relay is the live door.");
+    return;
+  }
+  if(err && err.name === "TypeError"){
+    placeholder.textContent = "This preview origin is not on the door’s CORS grant. Open skaists.dev, or use the local poke proxy.";
+    statusLine("error", "UNREACHABLE", "Browser blocked the relay read from this origin.");
+    return;
+  }
+  if(err && err.code === "autonomi"){
+    placeholder.textContent = "The door answered. Autonomi did not return these bytes.";
+    statusLine("error", "NETWORK QUIET", err.message || "Autonomi read failed.");
+    return;
+  }
+  placeholder.textContent = "The door did not hand us bytes. The address is still public; the hop is quiet.";
+  statusLine("error", "UNREACHABLE", err && err.message ? err.message : "door quiet");
+}
+
+function paint(data, usedUrl){
+  const bytes = Uint8Array.from(atob(data), c => c.charCodeAt(0));
+  const img = new Image();
+  img.id = "content";
+  img.alt = "public Autonomi data (JPEG)";
+  img.src = "data:image/jpeg;base64," + data;
+  const stage = document.getElementById("stage");
+  stage.classList.remove("err");
+  stage.replaceChildren(img);
+  stage.setAttribute("aria-busy", "false");
+  const hop = usedUrl.startsWith(RELAY) ? "RELAY" : "SAME-ORIGIN";
+  statusLine("live", bytes.length.toLocaleString() + " BYTES · " + hop + " · LIVE", "Public bytes painted from " + hop.toLowerCase() + ".");
+  document.getElementById("plaque").textContent = "Live public bytes";
+  document.getElementById("rec-used").textContent = usedUrl;
+  document.getElementById("landed").hidden = false;
+  document.getElementById("connect").hidden = false;
+  loadAtlasConnect();
+}
+
+async function openDoor(){
+  const stage = document.getElementById("stage");
+  if(!document.getElementById("placeholder")){
+    stage.replaceChildren(Object.assign(document.createElement("p"), {id:"placeholder", className:"placeholder", textContent:"Asking the estate door for public bytes…"}));
+  }
+  stage.classList.remove("err");
+  stage.setAttribute("aria-busy", "true");
+  document.getElementById("connect").hidden = true;
+  document.getElementById("landed").hidden = true;
+  statusLine("", "· · ·", "Opening the door.");
+  document.getElementById("apiref").textContent = DOOR_PATH;
+  const bases = doorBases();
+  let last = null;
+  for(const base of bases){
+    try{
+      const hit = await readDoor(base);
+      paint(hit.json.data, hit.url);
+      return;
+    }catch(err){
+      last = err;
+      if(err && err.code === "pages-404") continue;
+    }
+  }
+  teachFailure(last);
+}
+
+function loadAtlasConnect(){
+  const root = document.getElementById("connect-atlas");
+  const countEl = document.getElementById("connect-count");
+  if(root.dataset.loaded === "1") return;
+  fetch(new URL("index.html", location.href)).then(function(res){
+    if(!res.ok) throw new Error("atlas " + res.status);
+    return res.text();
+  }).then(function(html){
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    const list = doc.querySelector("#list");
+    if(!list) throw new Error("atlas markup moved");
+    root.replaceChildren();
+    let n = 0;
+    list.querySelectorAll(":scope > section.org").forEach(function(org){
+      const orgSec = document.createElement("section");
+      orgSec.className = "connect-org";
+      const h = document.createElement("h3");
+      h.textContent = (org.querySelector(".orghead h2") || {}).textContent || org.getAttribute("data-org") || "estate";
+      orgSec.appendChild(h);
+      org.querySelectorAll(":scope > section.fam").forEach(function(fam){
+        const cards = document.createElement("div");
+        cards.className = "connect-grid";
+        fam.querySelectorAll("article.srf").forEach(function(art){
+          const a = art.querySelector("a.surface-link");
+          if(!a) return;
+          const href = a.getAttribute("href") || "";
+          if(/(?:^|\/)ant-door\.html$/.test(href)) return;
+          const card = document.createElement("a");
+          card.className = "connect-card";
+          card.href = href;
+          const strong = document.createElement("strong");
+          strong.textContent = ((art.querySelector(".nm") || {}).textContent || href).trim();
+          const span = document.createElement("span");
+          span.textContent = ((art.querySelector(".gl") || {}).textContent || "").trim();
+          card.appendChild(strong);
+          card.appendChild(span);
+          cards.appendChild(card);
+          n++;
+        });
+        if(!cards.children.length) return;
+        const famWrap = document.createElement("details");
+        famWrap.className = "connect-fam";
+        const reg = document.body.getAttribute("data-reg") || "bee";
+        famWrap.open = reg !== "bee";
+        const sum = document.createElement("summary");
+        const famName = ((fam.querySelector(".famhead h3") || {}).textContent || fam.getAttribute("data-family") || "").trim();
+        const famCanon = ((fam.querySelector(".family-canonical") || {}).textContent || "").trim();
+        sum.textContent = famCanon ? famName + " · " + famCanon : famName;
+        famWrap.appendChild(sum);
+        famWrap.appendChild(cards);
+        orgSec.appendChild(famWrap);
+      });
+      if(orgSec.querySelector(".connect-fam")) root.appendChild(orgSec);
+    });
+    countEl.textContent = n + " published atlas rooms (ant-door omitted — you are on it).";
+    root.dataset.loaded = "1";
+  }).catch(function(){
+    root.replaceChildren();
+    const p = document.createElement("p");
+    p.textContent = "The atlas did not load here. Use Explore the estate in this tab.";
+    root.appendChild(p);
+  });
+}
+
+document.getElementById("retry").addEventListener("click", function(){
+  document.getElementById("connect-atlas").dataset.loaded = "";
+  openDoor();
+});
+document.addEventListener("bregister", function(ev){
+  const reg = ev.detail && ev.detail.reg;
+  document.querySelectorAll(".connect-fam").forEach(function(d){ d.open = reg !== "bee"; });
+});
+openDoor();
+window.AntDoor = { ADDR, RELAY, DOOR_PATH, doorBases, isPagesHtml };
 </script>
 <script src="tour.js?v=41"></script>
 </body>
