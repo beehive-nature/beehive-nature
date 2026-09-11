@@ -242,6 +242,7 @@ jobs:
         if: always()
         run: |
           node e2e/zcode-jams-check.mjs
+          node e2e/zcode-jams-store-reader-check.mjs
           node e2e/zcode-watch-manifest-check.mjs
       - name: Kandi — gift reliability and failure recovery
         if: always()

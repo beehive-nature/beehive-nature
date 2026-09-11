@@ -64,6 +64,10 @@
   .fact b { display:block; margin-top:4px; color:var(--ink); font-size:16px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .fact b.accent { color:var(--jam-soft); }
   .items { display:flex; flex-direction:column; gap:7px; margin-top:14px; }
+  .card-head { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+  .store-action { flex:none; padding:6px 10px; color:var(--cyan); border-color:var(--cyan); font-size:10px; }
+  .store-action:disabled { cursor:not-allowed; opacity:.55; }
+  .store-state { color:var(--dim); font-size:10px; }
   .item { display:grid; grid-template-columns:1fr auto; gap:12px; align-items:center; padding:11px 12px; border:1px solid var(--line); border-radius:9px; background:var(--well); }
   .item b { color:var(--ink); font-size:12px; font-weight:600; }
   .item small { display:block; color:var(--dim); font-size:10px; }
@@ -101,7 +105,7 @@
       <a href="listening.html">listening room</a>
       <a href="blight/midiroom.html">bMiDi room</a>
     </nav>
-    <div class="statusline"><span class="dot" id="status-dot"></span><span id="status">loading the shared room manifest…</span><span id="status-note"></span></div>
+    <div class="statusline"><span class="dot" id="status-dot"></span><span id="status">loading the shared room manifest…</span><span id="status-note"></span><span class="store-state" id="store-status">store adapter idle</span></div>
   </div>
 </header>
 
@@ -124,8 +128,7 @@
 
   <div class="grid" style="margin-top:14px">
     <section class="card half">
-      <h2>the set · encrypted items</h2>
-      <p class="sub">References are visible; plaintext and keys stay behind the channel verifier.</p>
+      <div class="card-head"><div><h2>the set · encrypted items</h2><p class="sub">References are visible; plaintext and keys stay behind the channel verifier.</p></div><button class="store-action" id="verify-store" type="button" disabled>verify encrypted refs</button></div>
       <div class="items" id="items"><div class="item"><span><b>loading manifest…</b><small>waiting for the shared envelope</small></span><span>—</span></div></div>
     </section>
     <section class="card half">
@@ -162,8 +165,12 @@
 <script type="module">
 'use strict';
 import { loadManifest, shortRef } from './manifest-reader.js';
+import { readEncryptedItems } from './store-reader.js';
 const $ = id => document.getElementById(id);
-const state = { manifest:null, joined:false, anim:null };
+const query = new URLSearchParams(location.search);
+const manifestUrl = query.get('manifest') ? new URL(query.get('manifest'), location.href) : undefined;
+const storeEndpoint = query.get('store') || '';
+const state = { manifest:null, joined:false, anim:null, storeEndpoint };
 const eventlog = $('eventlog');
 function event(kind, message) {
   const row = document.createElement('div'); row.className='event';
@@ -176,14 +183,31 @@ function paint(envelope) {
   const m=envelope.manifest, cp=m.checkpoint;
   state.manifest=envelope;
   $('status-dot').className='dot ok'; $('status').textContent='shared manifest verified'; $('status-note').textContent='· local preview';
+  $('store-status').textContent=state.storeEndpoint ? 'store adapter ready · endpoint supplied' : 'store adapter idle · endpoint not configured';
   $('room-title').textContent='PLUR · '+m.channel+' jam'; $('room-sub').textContent='checkpoint '+shortRef(cp.id)+' · ready for a bounded late join';
   $('f-channel').textContent=m.channel; $('f-epoch').textContent=m.epoch; $('f-sequence').textContent=m.sequence; $('f-items').textContent=m.encrypted_items.length;
   $('m-id').textContent=shortRef(cp.id); $('m-policy').textContent=shortRef(cp.policy_id); $('m-address').textContent=shortRef(cp.ref.address); $('m-size').textContent=cp.ref.size.toLocaleString()+' B';
   $('g-payment').textContent=m.admission.payment; $('g-approval').textContent=m.admission.approval === 'trezor' ? 'Trezor downstream' : m.admission.approval; $('g-cap').textContent=m.admission.max_bytes.toLocaleString()+' B · '+m.admission.max_items+' items';
   $('creator').textContent=m.credits.creator[0]?.display_name || 'unnamed creator'; $('creator-key').textContent='creator credit · key verified by the reader';
   $('source-title').textContent=m.credits.source[0]?.title || 'source credit'; $('source-uri').textContent=m.credits.source[0]?.uri || '—';
-  $('items').replaceChildren(...m.encrypted_items.map(item => { const row=document.createElement('div'); row.className='item'; const text=document.createElement('span'); const b=document.createElement('b'); b.textContent=item.kind; const s=document.createElement('small'); s.textContent='v'+item.version+' · '+item.ref.size.toLocaleString()+' B · encrypted reference'; text.append(b,s); const ok=document.createElement('span'); ok.className='ready'; ok.textContent='ready'; row.append(text,ok); return row; }));
+  $('items').replaceChildren(...m.encrypted_items.map(item => { const row=document.createElement('div'); row.className='item'; const text=document.createElement('span'); const b=document.createElement('b'); b.textContent=item.kind; const s=document.createElement('small'); s.textContent='v'+item.version+' · '+item.ref.size.toLocaleString()+' B · encrypted reference'; text.append(b,s); const ok=document.createElement('span'); ok.className='ready'; ok.dataset.storeState='pending'; ok.textContent='ready'; row.append(text,ok); return row; }));
+  $('verify-store').disabled=!state.storeEndpoint;
   $('join').disabled=false; event('READY','manifest accepted; no network write opened');
+}
+async function verifyStore() {
+  if (!state.manifest || !state.storeEndpoint) return;
+  const button=$('verify-store'); button.disabled=true; $('store-status').textContent='reading encrypted objects…';
+  document.querySelectorAll('#items .ready').forEach(node => { node.dataset.storeState='checking'; node.textContent='checking'; });
+  try {
+    const results=await readEncryptedItems(state.manifest, { endpoint:state.storeEndpoint, maxItems:state.manifest.manifest.encrypted_items.length });
+    results.forEach((_, index) => { const node=document.querySelectorAll('#items .ready')[index]; if (node) { node.dataset.storeState='verified'; node.textContent='verified'; } });
+    $('store-status').textContent=`${results.length} encrypted objects verified · decryption remains client-side`;
+    event('STORE','ciphertext fetched and hash-checked; no write opened');
+  } catch (error) {
+    document.querySelectorAll('#items .ready').forEach(node => { node.dataset.storeState='refused'; node.textContent='refused'; });
+    $('store-status').textContent='store verification refused · no room state changed';
+    event('REFUSED',`store read refused · ${error.message}`);
+  } finally { button.disabled=false; }
 }
 function draw() {
   const c=$('visualizer'), ctx=c.getContext('2d'), d=devicePixelRatio||1, w=c.width, h=c.height;
@@ -193,8 +217,9 @@ function draw() {
   ctx.globalAlpha=1; state.anim=requestAnimationFrame(draw); void d;
 }
 $('join').addEventListener('click', () => { if(!state.manifest) return; state.joined=!state.joined; $('join').textContent=state.joined?'leave preview':'join this jam'; $('room-foot').textContent=state.joined?'you are in the local room preview · no write was attempted':'nothing has been joined yet'; event(state.joined?'JOIN':'LEAVE',state.joined?'local participant joined; receiver handoff remains pending':'local participant left'); });
+$('verify-store').addEventListener('click', verifyStore);
 draw();
-loadManifest().then(paint).catch(err => { $('status-dot').className='dot bad'; $('status').textContent='manifest unavailable'; $('status-note').textContent='· '+err.message; event('REFUSED','no room state changed'); });
+loadManifest(manifestUrl).then(paint).catch(err => { $('status-dot').className='dot bad'; $('status').textContent='manifest unavailable'; $('status-note').textContent='· '+err.message; $('store-status').textContent='store adapter idle'; event('REFUSED','no room state changed'); });
 </script>
 <script src="tour.js?v=41"></script>
 </body>

@@ -55,16 +55,40 @@ HLS, room, meter, and pause-not-kill paths unchanged.
 `node e2e/zcode-watch-manifest-check.mjs` — **6 passed, 0 failed** — proves
 the W@tch projection against a local fixture server and asserts that it emits
 no POST and opens no raw `/ws`. The Jam check remains **14 passed, 0 failed**.
-The hosted Node job runs both proofs after the pinned Playwright setup.
+The hosted Node job runs both projections and the encrypted Store proof after
+the pinned Playwright setup.
+
+## Browser encrypted Store read slice
+
+The Jam now has an explicit browser adapter in `surfaces/store-reader.js`.
+Given an explicit gateway origin and one manifest reference, it performs only a
+bounded `GET /v1/data/public/:address`, rejects credentials, redirects, unsafe
+endpoints, oversized responses, malformed base64, size mismatches, and SHA-256
+mismatches, then returns the verified ciphertext bytes to the caller. It does
+not POST, upload, charge, open a raw x0x socket, or decrypt bytes itself; the
+future Autonomi WASM decryptor remains a separate client-side boundary.
+
+`surfaces/jams.html` exposes this only when a `store` endpoint is explicitly
+provided. The default page remains an offline manifest preview. The status
+distinguishes `manifest verified` from `N encrypted objects verified`; neither
+state claims plaintext access. This preserves the operator boundary: an HTTPS
+gateway may observe IP, object reference, timing, and traffic metadata, while
+the browser is responsible for decryption and final content use.
+
+`node e2e/zcode-jams-store-reader-check.mjs` — **9 passed, 0 failed** —
+proves four bounded object reads, browser-side digest verification, the
+no-write/no-raw-transport invariant, and a tampered response that fails closed
+without changing room state. The existing Jam and W@tch checks remain green.
 
 ## Boundary and next build
 
-This is a client-facing contract slice, not a live Jam transport. The next
-bounded step is to add a browser adapter that receives one opaque checkpoint
-through the accepted receiver and follows it into a verified read-only channel
-snapshot. The current W@tch production deployment is still the runbook's
-one-file `/srv/watch/index.html`; publishing the fixture endpoint alongside
-that file is part of the deployment step before the new card is expected to
-show `verified` on the live box. Payment admission must calculate a complete
-capped cost before any funded write is enabled; Trezor approval remains
-downstream of that decision.
+This is still a client-facing read slice, not a live Jam transport or a
+decrypted production media path. The next bounded step is to connect the
+browser adapter to one opaque checkpoint from the accepted receiver, follow it
+into a verified read-only snapshot, and then add the Autonomi-compatible WASM
+decryptor as a separately tested client boundary. The current W@tch production
+deployment is still the runbook's one-file `/srv/watch/index.html`; publishing
+the fixture endpoint and adapter module alongside that file is part of the
+deployment step before the new card is expected to show `verified` on the live
+box. Payment admission must calculate a complete capped cost before any funded
+write is enabled; Trezor approval remains downstream of that decision.

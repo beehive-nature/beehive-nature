@@ -21,7 +21,13 @@ function ref(value) {
   if (!HEX.test(value.address) || !HEX.test(value.sha256) || !Number.isSafeInteger(value.size)
     || value.size <= 0 || value.size > 12 * 1024 * 1024 + 64) fail('manifest reference refused');
 }
-function validate(envelope) {
+
+export function validateReference(value) {
+  ref(value);
+  return value;
+}
+
+export function validateManifestEnvelope(envelope) {
   exact(envelope, ['type', 'version', 'manifest'], 'manifest envelope refused');
   if (envelope.type !== 'bnr-manifest-envelope-v1' || envelope.version !== 1) fail('manifest envelope refused');
   const m = envelope.manifest;
@@ -67,7 +73,7 @@ function validate(envelope) {
 export async function loadManifest(url = new URL('../fixtures/connect-store-manifest-envelope-v1.json', import.meta.url)) {
   const response = await fetch(url, { cache: 'no-store' });
   if (!response.ok) fail('manifest fetch refused');
-  return validate(await response.json());
+  return validateManifestEnvelope(await response.json());
 }
 
 export function shortRef(value) {
