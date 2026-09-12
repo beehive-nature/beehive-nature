@@ -1,267 +1,82 @@
 <!doctype html>
-<!-- watch.html — THE WATCH-TOGETHER ROOM (POC, 2026-09-04).
-     One file. Three audiences in one surface:
-       · the STREAMER (founder) — the ingest card carries the one RTMP line
-         (OBS or ffmpeg, over the x0x tailnet forward to the box) + the
-         ticker curl that updates the now-playing line
-       · the MEMBER — the Buzz room beside the video, the /join view reused
-         verbatim in an iframe: SAME relay (skaists.buzz behind
-         relay.skaists.dev), SAME origin (canonical-origin law), SAME
-         identity (localStorage is shared by origin — join once, watch later)
-       · the GUEST/PAYER — the meter strip: a jungle4 session number is the
-         ticket; the playlist door on the box checks the live session
-         receipt READ-ONLY; when credit runs out the video PAUSES, nothing
-         is killed — chat keeps living; a top-up + resume un-pauses it.
-     The four audit states are drawn as comb cells in z3.2's verifier
-     vocabulary (surfaces/spend-audit.js): PASSED=capped ⬡ ·
-     PENDING_ANCHOR=honey · FAILED=flag · INCONCLUSIVE=nectar.
-     CARE (verbatim, wherever these states are drawn):
-     this is topology and vocabulary, NEVER a security claim.
-     Palette: tokens.css ONLY (served at /tokens.css from the relay origin).
-     390px first; ≥880px the room moves beside the video. -->
+<!-- SKAISTS watch room: independent web companion. Stock third-party apps stay separate.
+     Audience modes change presentation, never access, receipts or payment policy. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>watch — the skaists.buzz room</title>
-<link rel="stylesheet" href="/tokens.css">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="A SKAISTS room for watching together, with independent paths to W@tch and JAMS.community.">
+<title>SKAISTS watch room · skaists.buzz</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%2318362a'/%3E%3Cpath d='m13 9 11 7-11 7Z' fill='%23e2efdb'/%3E%3C/svg%3E">
+<script>const tokens=document.createElement('link');tokens.rel='stylesheet';tokens.href=location.protocol==='file:'?'tokens.css':'/tokens.css';document.head.append(tokens);</script>
 <style>
-  :root { color-scheme: dark; }
-  * { box-sizing: border-box; margin: 0; }
-  html, body { height: 100%; }
-  body {
-    background: var(--bg0); color: var(--ink);
-    font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
-    font-size: var(--t-body); line-height: var(--lh-body);
-    display: flex; flex-direction: column; min-height: 100dvh;
-  }
-  /* ── header ─────────────────────────────────────────────────────────── */
-  header {
-    display: flex; align-items: baseline; gap: var(--s2);
-    padding: var(--s2) var(--s3); border-bottom: 1px solid var(--line);
-    background: var(--bg1);
-  }
-  header .hex { color: var(--leaf); letter-spacing: .3em; font-size: var(--t-micro);
-    text-transform: uppercase; }
-  header h1 { font-size: var(--t-h2); font-weight: 600; color: var(--ink-hi); }
-  header .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--faint);
-    align-self: center; flex: none; }
-  header .dot.on { background: var(--ok); box-shadow: 0 0 10px var(--ok); }
-  header .dot.off { background: var(--flag); box-shadow: 0 0 10px var(--flag); }
-  @media (prefers-reduced-motion: no-preference) {
-    header .dot.on { animation: breathe 2.4s infinite; }
-    @keyframes breathe { 50% { opacity: .5; } }
-  }
-  header .st { font-size: var(--t-small); color: var(--dim); }
-  /* ── the ticker line (streamer-updated) ─────────────────────────────── */
-  #ticker {
-    display: flex; gap: var(--s3); overflow-x: auto; white-space: nowrap;
-    padding: var(--s2) var(--s3); border-bottom: 1px solid var(--line);
-    background: var(--bg2); font-size: var(--t-small); scrollbar-width: none;
-  }
-  #ticker::-webkit-scrollbar { display: none; }
-  #ticker .k { color: var(--faint); text-transform: uppercase; letter-spacing: .12em;
-    font-size: var(--t-micro); }
-  #ticker b { color: var(--gold); font-weight: 600; }
-  #ticker .none { color: var(--faint); }
-  /* ── layout: video column + room column ─────────────────────────────── */
-  main { flex: 1; display: flex; flex-direction: column; min-height: 0; }
-  .stage { display: flex; flex-direction: column; min-height: 0; flex: 1; }
-  @media (min-width: 880px) { .stage { flex-direction: row; } }
-  .left { display: flex; flex-direction: column; min-height: 0; flex: 1 1 58%; }
-  .roomside { display: flex; flex-direction: column; min-height: 0;
-    flex: 1 1 42%; border-left: 1px solid var(--line); background: var(--bg1); }
-  /* ── the video tile ─────────────────────────────────────────────────── */
-  .tile { position: relative; background: #000; aspect-ratio: 16 / 9; }
-  .tile video { width: 100%; height: 100%; object-fit: contain; display: block; }
-  .tile .veil {
-    position: absolute; inset: 0; display: none; place-items: center;
-    background: color-mix(in srgb, var(--bg0) 78%, transparent);
-    text-align: center; padding: var(--s4);
-  }
-  .tile .veil.show { display: grid; }
-  .tile .veil .big { font-size: var(--t-h1); color: var(--amber); font-weight: 600; }
-  .tile .veil .why { color: var(--dim); font-size: var(--t-small); margin-top: var(--s2);
-    max-width: 34ch; }
-  .tile .veil .hint { color: var(--faint); font-size: var(--t-law); margin-top: var(--s3); }
-  /* ── the meter strip (the guest's register) ─────────────────────────── */
-  .meter { padding: var(--s2) var(--s3) var(--s3); border-bottom: 1px solid var(--line);
-    background: var(--bg1); }
-  .meter .row { display: flex; gap: var(--s2); align-items: center; flex-wrap: wrap; }
-  .meter label { font-size: var(--t-micro); color: var(--faint);
-    text-transform: uppercase; letter-spacing: .12em; }
-  .meter input {
-    background: var(--bg0); border: 1px solid var(--line-hi); color: var(--gold);
-    border-radius: var(--r-sm); padding: 6px 8px; width: 9ch;
-    font: 600 var(--t-body) ui-monospace, monospace; text-align: center;
-  }
-  .meter button {
-    background: var(--gold); color: var(--bg0); border: none;
-    border-radius: var(--r-sm); padding: 7px 12px;
-    font: 600 var(--t-small) ui-monospace, monospace; cursor: pointer;
-  }
-  .meter button:hover { background: var(--ink-hi); }
-  .meter .nums { font-size: var(--t-small); color: var(--dim);
-    font-variant-numeric: tabular-nums; }
-  .meter .nums b { color: var(--ink-hi); }
-  .chip {
-    display: inline-block; border-radius: var(--r-pill); padding: 2px 9px;
-    font-size: var(--t-micro); letter-spacing: .1em; text-transform: uppercase;
-    border: 1px solid var(--line-hi); color: var(--dim);
-  }
-  .chip.active { color: var(--ok); border-color: var(--ok); }
-  .chip.paused { color: var(--amber); border-color: var(--amber); }
-  .chip.nosess { color: var(--flag); border-color: var(--flag); }
-  /* the four audit cells — z3.2's comb vocabulary (CARE line below them) */
-  .comb { display: flex; justify-content: space-between; gap: var(--s1);
-    padding: var(--s2) 0 2px; }
-  .cell { width: 25%; text-align: center; }
-  .cell .h {
-    width: 44px; height: 49px; margin: 0 auto 5px;
-    clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
-    display: grid; place-items: center; font-size: var(--t-micro);
-    background: var(--bg3); color: var(--faint);
-    transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
-  }
-  .cell .l { font-size: var(--t-micro); color: var(--dim); font-weight: 600;
-    letter-spacing: .04em; }
-  .cell .s { font-size: var(--t-micro); color: var(--faint); line-height: 1.4;
-    margin-top: 1px; }
-  .cell.lit .l { color: var(--ink-hi); }
-  .h.capped { background: var(--gold); color: var(--bg0); }
-  .h.capped .seal { font-size: 15px; line-height: 1; }
-  .h.honey { background: rgba(255, 179, 71, .14); color: var(--amber);
-    box-shadow: inset 0 0 0 1.5px var(--amber); }
-  .h.flag { background: rgba(192, 127, 28, .16); color: var(--cat-bug);
-    box-shadow: inset 0 0 0 1.5px var(--cat-bug); }
-  .h.nectar { background: rgba(0, 229, 255, .08); color: var(--cyan);
-    box-shadow: inset 0 0 0 1.5px var(--cyan); }
-  @media (prefers-reduced-motion: no-preference) {
-    .cell.lit .h.honey { animation: ripen 2.4s var(--ease) infinite; }
-    @keyframes ripen { 50% { background: rgba(255, 179, 71, .3); } }
-  }
-  .care { font-size: var(--t-law); color: var(--faint); line-height: var(--lh-law);
-    margin-top: var(--s2); }
-  /* ── the room (the member's register) ──────────────────────────────── */
-  .roomhead {
-    display: flex; align-items: baseline; gap: var(--s2);
-    padding: var(--s2) var(--s3); border-bottom: 1px solid var(--line);
-  }
-  .roomhead .t { font-size: var(--t-micro); color: var(--faint);
-    text-transform: uppercase; letter-spacing: .14em; }
-  .roomhead b { color: var(--ink-hi); font-size: var(--t-small); }
-  #roomframe { flex: 1; width: 100%; border: 0; min-height: 340px;
-    background: var(--bg0); }
-  /* ── the ingest card (the streamer's register) ──────────────────────── */
-  details.ingest { border-top: 1px solid var(--line); background: var(--bg1);
-    font-size: var(--t-small); }
-  details.ingest summary {
-    cursor: pointer; padding: var(--s2) var(--s3); color: var(--dim);
-    font-size: var(--t-micro); text-transform: uppercase; letter-spacing: .12em;
-    list-style: none;
-  }
-  details.ingest summary::before { content: "+ "; color: var(--gold); }
-  details.ingest[open] summary::before { content: "− "; }
-  details.ingest .body { padding: 0 var(--s3) var(--s3); }
-  details.ingest pre {
-    background: var(--well); border: 1px solid var(--line); border-radius: var(--r-md);
-    padding: var(--s2) var(--s3); color: var(--leaf); font-size: var(--t-micro);
-    overflow-x: auto; margin-top: var(--s2); line-height: 1.7;
-  }
-  details.ingest .law { color: var(--faint); font-size: var(--t-law);
-    margin-top: var(--s2); line-height: var(--lh-law); }
-  footer { padding: var(--s2) var(--s3); border-top: 1px solid var(--line);
-    color: var(--faint); font-size: var(--t-law); line-height: var(--lh-law);
-    background: var(--bg1); }
-  .hidden { display: none !important; }
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;--accent:var(--leaf,#7ddf8f);--on-accent:#102418;--panel:var(--bg1,#0d1410);--muted:var(--dim,#8a9a8a);background:var(--bg0,#07090b);color:var(--ink,#e2efdb);font:1rem/1.6 system-ui,-apple-system,'Segoe UI',sans-serif;min-height:100dvh}
+body[data-reg="bee"]{--accent:#326b39;--on-accent:#fff;--gold:#855b0b;--cyan:#176879;--violet:#65509a;--leaf:#326b39;--amber:#855b0b;--muted:#435f4e;--screen:#15271f;--screen-ink:#e8f1e8;--screen-muted:#bbcdbd}
+body[data-reg="raver"]{--bg0:#0b1414;--bg1:#11201e;--bg2:#192b29;--panel:#11201e;--line:#39534b;--ink:#e9f2ec;--ink-hi:#e9f2ec;--dim:#b8cbbf;--muted:#b8cbbf;--accent:#c9a0ff;--on-accent:#191124;--screen:#131a22;--screen-ink:#f2eafb;--screen-muted:#c7bfd4}
+body[data-reg="cypherpunk"]{--screen:#07150e;--screen-ink:#d8f0d9;--screen-muted:#a4c5a9;--line:#3d5644;--muted:#b4c9b4;--dim:#b4c9b4;font-family:ui-monospace,'Cascadia Mono',Consolas,monospace}
+a{color:inherit;text-underline-offset:.22em}button,input,select{font:inherit}button,a,input,summary{touch-action:manipulation}a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:4px}button{cursor:pointer}button:disabled,input:disabled{cursor:not-allowed;opacity:.6}button{min-height:46px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink);padding:10px 18px}button:hover:enabled{border-color:var(--accent)}p,h1,h2,h3{margin:0}p{max-inline-size:68ch}.hidden,[hidden]{display:none!important}
+body[data-experience="watch"] [data-view]{display:none}body[data-experience="watch"][data-reg="bee"] [data-view="bee"],body[data-experience="watch"][data-reg="raver"] [data-view="raver"],body[data-experience="watch"][data-reg="cypherpunk"] [data-view="cypherpunk"]{display:revert}
+.shell{max-width:1440px;margin-inline:auto;padding-inline:clamp(18px,4vw,56px)}.topbar{border-bottom:1px solid var(--line);background:var(--panel)}.topbar-inner{display:flex;align-items:center;justify-content:space-between;gap:18px;padding-block:16px;flex-wrap:wrap}.brand{display:flex;align-items:center;gap:12px;text-decoration:none;font-weight:750;letter-spacing:.08em;min-height:44px}.brand svg{width:30px;height:30px;color:var(--accent)}.top-controls{display:flex;align-items:center;gap:18px;flex-wrap:wrap}#bregctl{background:transparent!important}#bregctl button{border-radius:999px!important}.language-label{display:flex;align-items:center;gap:6px}#blangctl{border:0!important;padding:0!important;margin:0!important;gap:8px!important;flex-wrap:wrap}#blangsel{background:var(--panel)!important;color:var(--ink)!important;font:inherit!important;font-size:.875rem!important;border:1px solid var(--line)!important;min-height:44px!important;max-width:160px!important;padding:8px!important}#blangnote{font:.75rem/1.4 system-ui,sans-serif!important;color:var(--muted)!important}
+.local-nav{display:flex;align-items:center;gap:22px;flex-wrap:wrap;padding-block:16px;font-size:.875rem}.local-nav a{min-height:36px;display:inline-flex;align-items:center;text-decoration:none}.local-nav a[aria-current]{font-weight:750;border-bottom:2px solid var(--accent)}.local-nav a:hover{text-decoration:underline}.intro{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;padding-block:14px 30px}.eyebrow{font-size:.75rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}h1{font-size:clamp(2rem,4vw,3.2rem);line-height:1.14;letter-spacing:-.045em;margin-block:8px 12px}.view-lead{font-size:1.125rem;color:var(--muted)}.status{display:flex;gap:9px;align-items:center;border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:.875rem;flex-shrink:0}.dot{width:7px;height:7px;border:1px solid currentColor;border-radius:50%;flex-shrink:0}.dot.on{background:currentColor}.dot.off{border-radius:1px}.status:has(.off){color:var(--amber)}
+.stage{display:grid;grid-template-columns:minmax(0,1fr) minmax(290px,340px);gap:24px;align-items:start}.left,.roomside{min-width:0}.tile{width:100%;min-width:0;aspect-ratio:16/9;max-height:480px;position:relative;overflow:hidden;border:1px solid var(--line);border-radius:20px;background:var(--screen);color:var(--screen-ink)}.tile:before{content:'';pointer-events:none;position:absolute;inset:0;background:radial-gradient(ellipse at 50% 110%,color-mix(in srgb,var(--accent) 22%,transparent),transparent 65%)}body[data-reg="raver"] .tile:before{background:radial-gradient(ellipse at 20% 100%,#9a6ace38,transparent 65%),radial-gradient(ellipse at 90% 10%,#00e5ff19,transparent 55%)}.screen-caption{position:absolute;inset:22px 24px auto;display:flex;justify-content:space-between;gap:14px;font-size:.75rem;letter-spacing:.15em}.screen-caption .stamp{color:var(--screen-muted)}.screen-empty{position:absolute;inset:60px 24px 32px;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;gap:16px}.play-mark{display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--screen-ink) 35%,transparent);border-radius:50%;width:64px;height:64px}.play-mark svg{width:24px;height:24px}.screen-empty h2{font-size:clamp(1.4rem,2vw,2rem);letter-spacing:-.025em}.screen-empty p{font-size:1rem;color:var(--screen-muted);max-width:42ch}.screen-empty a{font-size:.875rem;color:var(--screen-ink)}#v{width:100%;height:100%;display:block;object-fit:contain;position:relative;background:#000}.tile:has(#v[hidden]){min-height:300px}.veil{position:absolute;inset:0;background:#06100df2;display:none;align-items:center;justify-content:center;padding:30px;text-align:center;color:#eef7e9}.veil.show{display:flex}.veil .big{font-size:1.5rem;font-weight:700}.veil .why,.veil .hint{margin-top:15px}.veil .hint{font-size:.875rem;color:#bbcdbd}
+#ticker{display:flex;gap:24px;flex-wrap:wrap;margin-block:16px 24px;font-size:.875rem;color:var(--muted)}#ticker b{font-weight:600;color:var(--ink)}#ticker .none{font-weight:400}.panel{border:1px solid var(--line);border-radius:16px;background:var(--panel);overflow:hidden}.pass-panel{padding:22px}.pass-panel h2,.roomside h2,.projects h2{font-size:1.125rem;font-weight:700}.pass-panel .row{display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin-top:18px}.field{display:grid;gap:8px;flex:1 1 150px;min-width:0}.field label{font-size:.875rem;color:var(--muted)}#sess{min-width:0;width:100%;max-width:100%;min-height:48px;padding:10px 14px;border:1px solid var(--line);border-radius:9px;background:var(--bg2);color:var(--ink)}.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:650}.helper{margin-top:8px;font-size:.875rem;color:var(--muted)}.gauges{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);margin-top:22px;padding-top:18px;gap:18px}.gauges>div{min-width:0;display:grid;gap:6px}.gauge-name{font-size:.75rem;color:var(--muted);letter-spacing:.04em}.chip{font-size:.875rem;font-weight:650}#nums{display:block;font-size:.875rem;overflow-wrap:anywhere;margin-top:12px}.roomside{padding:24px}.roomhead{display:flex;justify-content:space-between;align-items:center;gap:12px}.room-number{font-size:.875rem;color:var(--muted)}.room-welcome{padding-block:24px;display:grid;gap:14px}.room-welcome p{color:var(--muted);font-size:1rem}.room-placeholder{background:var(--bg2);border-radius:12px;padding:22px;display:grid;gap:16px;margin-block:20px}.room-placeholder svg{width:26px;height:26px;color:var(--accent)}.room-placeholder p{font-size:1rem}.roomside button{width:100%}#roomframe{width:100%;height:440px;border:0;border-radius:12px;margin-top:16px;background:var(--bg2)}.roomside .privacy{font-size:.875rem;color:var(--muted);margin-top:14px}.room-links{display:grid;gap:8px;border-top:1px solid var(--line);padding-top:20px;margin-top:24px}.room-links a{padding-block:8px;text-decoration:none;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:.875rem}.room-links a:hover{text-decoration:underline}
+.technical{margin-top:26px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}.technical>summary{cursor:pointer;padding:18px 22px;font-size:1rem;font-weight:650}.technical-body{padding:4px 22px 24px;display:grid;grid-template-columns:1fr 1fr;gap:24px}.manifest-top{display:flex;justify-content:space-between;align-items:center;gap:12px}.manifest-state{font-size:.75rem;color:var(--muted)}.manifest-card p,.care{font-size:.875rem;color:var(--muted);margin-block:14px}.manifest-facts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0}.manifest-facts div{min-width:0}dt{font-size:.75rem;color:var(--muted)}dd{margin:4px 0;overflow-wrap:anywhere;font-size:.875rem}.comb{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.cell{min-width:0;text-align:center;padding:12px 4px;border:1px dashed var(--line);border-radius:8px}.cell .h{font-size:1.5rem}.cell .l,.cell .s{font-size:.6875rem;overflow-wrap:anywhere}.cell.lit{border-style:solid;border-color:var(--accent)}.cell .s{color:var(--muted)}.ingest{grid-column:1/-1}.ingest summary{cursor:pointer;padding-block:12px}pre{overflow:auto;max-width:100%;padding:16px;border-radius:8px;background:var(--bg2);font:.8125rem/1.7 ui-monospace,monospace}.ingest .body{font-size:.875rem;color:var(--muted)}
+.projects{margin-block:32px 16px;padding-block:24px;border-top:1px solid var(--line)}.project-head{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}.project-head p{font-size:.875rem;color:var(--muted)}.project-links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:18px}.project-link{min-width:0;overflow-wrap:anywhere;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 20px;border:1px solid var(--line);border-radius:12px;text-decoration:none;background:var(--panel)}.project-link>span:first-child{min-width:0}.project-link:hover{border-color:var(--accent)}.project-link small{display:block;font-size:.8125rem;color:var(--muted);margin-top:3px}.project-link svg{width:20px;height:20px;flex-shrink:0}.foot{padding-block:20px 30px;display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;font-size:.875rem;color:var(--muted)}[data-tour-host]{border-top:1px solid var(--line);padding-block:14px}#tbar{font-size:.8125rem!important}body[data-reg="cypherpunk"] h1{font-size:clamp(1.8rem,3.7vw,2.7rem);letter-spacing:-.03em}body[data-reg="raver"] h1{letter-spacing:-.055em}body[data-reg="cypherpunk"] .tile,body[data-reg="cypherpunk"] .panel{border-radius:6px}
+@media(min-width:1050px){body[data-reg="cypherpunk"] .stage{grid-template-columns:minmax(0,1fr) 360px}}
+@media(max-width:850px){.stage{grid-template-columns:1fr}.intro{align-items:start;flex-direction:column;gap:18px}.roomside{margin-top:0}.technical-body{grid-template-columns:1fr}.tile{aspect-ratio:auto;height:330px}.topbar-inner,.top-controls{gap:12px}.top-controls{width:100%;justify-content:space-between}.project-links{grid-template-columns:minmax(0,1fr)}.shell{padding-inline:18px}.screen-caption{inset:18px 18px auto}.screen-empty{inset:52px 20px 20px;gap:12px}.screen-empty h2{font-size:1.4rem}.screen-empty p{font-size:.9375rem}.play-mark{height:46px;width:46px}.topbar-inner [data-register-host]{flex:1 1 100%}.topbar-inner #bregctl{justify-content:start}.tile:has(#v[hidden]){min-height:max(330px,20rem)}}
+.privacy-map{margin-top:26px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}.privacy-map summary{cursor:pointer;padding:18px 22px;font-size:1rem;font-weight:650}.privacy-intro{display:block;padding:0;margin-top:8px;font-weight:400;color:var(--muted);font-size:.9375rem}.privacy-body{padding:4px 22px 24px;min-width:0}.privacy-body h3{font-size:1rem;margin-bottom:10px}.privacy-grade{font-size:.75rem;letter-spacing:.05em;color:var(--muted);margin-bottom:16px}.privacy-route{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;list-style:none;padding:0;margin:16px 0 24px}.privacy-route li{padding:18px;border:1px solid var(--line);border-radius:10px;min-width:0;background:var(--bg2)}.privacy-route strong{display:block;font-size:1rem}.privacy-route span{display:block;margin-top:8px;font-size:.875rem;color:var(--muted)}.privacy-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.privacy-cards section{min-width:0;border-top:1px solid var(--line);padding-top:18px}.privacy-body p,.privacy-body li{font-size:.875rem;overflow-wrap:anywhere}.privacy-body code{font-size:.8125rem;overflow-wrap:anywhere}.privacy-limits{border-inline-start:3px solid var(--amber);padding:4px 0 4px 16px;margin-top:22px}.privacy-sources{display:flex;gap:20px;flex-wrap:wrap;margin-top:20px;font-size:.875rem}#privacy-context{color:var(--muted);margin-bottom:12px}@media(max-width:850px){.privacy-route,.privacy-cards{grid-template-columns:minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}@media(forced-colors:active){.tile{border:1px solid CanvasText}.primary{border:2px solid ButtonText}}
 </style>
 </head>
-<body>
-<header>
-  <span class="hex">estate · live</span>
-  <h1>the watch room</h1>
-  <span class="dot" id="dot"></span>
-  <span class="st" id="st">checking the stream…</span>
-</header>
-
-<div id="ticker" aria-live="polite">
-  <span><span class="k">now </span><b id="tk-now" class="none">—</b></span>
-  <span><span class="k">set time </span><b id="tk-set" class="none">—</b></span>
-  <span><span class="k">next </span><b id="tk-next" class="none">—</b></span>
-</div>
-
-<main>
+<body data-experience="watch" data-bee-theme="shared" data-reg="bee">
+<header class="topbar"><div class="shell topbar-inner">
+<a class="brand" href="index.html" aria-label="SKAISTS home"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="m16 3 11 6.5v13L16 29 5 22.5v-13Z" stroke="currentColor" stroke-width="2"/><path d="m13 10 10 6-10 6Z" fill="currentColor"/></svg>SKAISTS</a>
+<div class="top-controls"><div data-register-host aria-label="View"></div><div class="language-label" data-language-host></div></div>
+</div></header>
+<main class="shell">
+<nav class="local-nav" aria-label="Media rooms"><a href="watch.html" aria-current="page" data-i18n="watch.title">Watch together</a><a href="jams.html">SKAISTS mUsiC</a><a href="plur.html">PLUR</a><a href="#projects" data-i18n="watch.projects">Independent projects</a></nav>
+<section class="intro"><div><p class="eyebrow">SKAISTS · SOCIAL / MEDIA</p><h1 data-i18n="watch.title">Watch together</h1><p class="view-lead" data-view="bee" data-i18n="watch.beeLead">A shared screen. Good company.</p><p class="view-lead" data-view="raver" data-i18n="watch.raverLead">Find your people. Press play.</p><p class="view-lead" data-view="cypherpunk" data-i18n="watch.cypherLead">Inspect the stream, session and checkpoint.</p></div><div class="status" role="status"><span class="dot" id="dot"></span><span id="st" data-i18n="watch.checking">Checking connection</span></div></section>
 <div class="stage">
-  <section class="left">
-    <div class="tile">
-      <video id="v" playsinline controls preload="none"></video>
-      <div class="veil" id="veil">
-        <div>
-          <div class="big" id="veil-big">PAUSED — credit at zero</div>
-          <div class="why" id="veil-why">the session lives; nothing was killed. top up the receipt and the picture resumes.</div>
-          <div class="hint" id="veil-hint">polling the meter every 2s…</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="meter">
-      <div class="row">
-        <label for="sess">receipt №</label>
-        <input id="sess" inputmode="numeric" autocomplete="off" spellcheck="false">
-        <button id="go">watch</button>
-        <span class="chip nosess" id="chip">no session</span>
-        <span class="nums" id="nums"></span>
-      </div>
-      <div class="comb" id="comb" aria-label="the four audit states">
-        <div class="cell" id="c-passed"><div class="h capped"><span class="seal">⬡</span></div>
-          <div class="l">PASSED</div><div class="s">capped</div></div>
-        <div class="cell" id="c-pending"><div class="h honey">◈</div>
-          <div class="l">PENDING_ANCHOR</div><div class="s">honey</div></div>
-        <div class="cell" id="c-failed"><div class="h flag">▲</div>
-          <div class="l">FAILED</div><div class="s">flag</div></div>
-        <div class="cell" id="c-inconclusive"><div class="h nectar">◇</div>
-          <div class="l">INCONCLUSIVE</div><div class="s">nectar</div></div>
-      </div>
-      <div class="care">the four audit states, z3.2's comb vocabulary: this is
-        topology and vocabulary, NEVER a security claim. the live session's own
-        audit verdict is the lit cell; the verdict is recomputed by the pure
-        audit (tool/x402audit.mjs), this surface only reads it.</div>
-    </div>
-
-    <details class="ingest">
-      <summary>go live — the streamer's line</summary>
-      <div class="body">
-        <div>OBS or ffmpeg, one RTMP line over the x0x tailnet forward
-          (127.0.0.1:19350 → box :1935). Two renditions (480/288) are packed
-          on the box by ffmpeg; Caddy serves the segments same-origin.</div>
-        <pre id="obsline">stream URL  rtmp://127.0.0.1:19350/live
+<section class="left" aria-label="Watch">
+<div class="tile"><div class="screen-caption"><span>SKAISTS / 01</span><span class="stamp" id="screen-mode" data-i18n="watch.preview">Preview</span></div><video id="v" playsinline controls preload="none" hidden></video>
+<div class="screen-empty" id="screen-empty"><span class="play-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m8 4 12 8-12 8Z" stroke="currentColor" stroke-width="1.4"/></svg></span><h2 id="screen-title" data-i18n="watch.wait">No stream is playing.</h2><p id="screen-help" data-i18n="watch.previewBody">Live video and chat connect on the hosted room.</p><a href="jams.html">SKAISTS mUsiC →</a></div>
+<div class="veil" id="veil"><div><div class="big" id="veil-big"></div><div class="why" id="veil-why"></div><div class="hint" id="veil-hint"></div></div></div></div>
+<div id="ticker"><span><span data-i18n="watch.now">Now playing</span> <b id="tk-now" class="none">—</b></span><span><span data-i18n="watch.next">Up next</span> <b id="tk-next" class="none">—</b></span><span data-view="cypherpunk">set <b id="tk-set" class="none">—</b></span></div>
+<section class="panel pass-panel" id="access"><h2 data-i18n="watch.pass">Room pass</h2><p class="helper" id="pass-help" data-i18n="watch.passHelp">Use the session number supplied by your host.</p><div class="row"><div class="field"><label for="sess" data-i18n="watch.pass">Room pass</label><input id="sess" inputmode="numeric" dir="ltr" autocomplete="off" spellcheck="false" aria-describedby="pass-help" placeholder=""></div><button class="primary" id="go" data-i18n="watch.join">Watch</button></div><div class="gauges"><div><span class="gauge-name">b</span><span class="chip" data-i18n="watch.unquoted">Not quoted</span></div><div><span class="gauge-name" data-i18n="watch.money">Price</span><span class="chip" data-i18n="watch.unquoted">Not quoted</span></div></div><p class="helper"><span class="chip nosess" id="chip" data-i18n="watch.connection">Not connected</span></p><span id="nums"></span></section>
+</section>
+<aside class="panel roomside"><div class="roomhead"><h2 data-i18n="watch.chat">Conversation</h2><bdi class="room-number">#general</bdi></div><div class="room-placeholder" id="room-placeholder"><svg viewBox="0 0 28 28" fill="none" aria-hidden="true"><path d="M5 5h18v13H12l-7 5V5Z" stroke="currentColor" stroke-width="1.5"/><path d="M10 10h8m-8 4h5" stroke="currentColor" stroke-width="1.5"/></svg><p data-i18n="watch.chatHelp">Open the room to connect with Buzz.</p></div><button id="open-room" data-i18n="watch.openChat">Open chat</button><p class="privacy" id="room-privacy" data-i18n="watch.allow">Opening chat contacts this room’s server.</p><iframe id="roomframe" referrerpolicy="no-referrer" title="Buzz room · skaists.buzz" hidden></iframe><div class="room-links"><a href="jams.html"><span>SKAISTS mUsiC</span><span aria-hidden="true">↗</span></a><a href="plur.html"><span>PLUR</span><span aria-hidden="true">↗</span></a></div></aside>
+</div>
+<section class="privacy-map" aria-labelledby="privacy-heading">
+<details id="privacy-details"><summary><span id="privacy-heading" data-i18n="watch.privacyTitle">Privacy &amp; access</span><span class="privacy-intro" data-i18n="watch.privacyIntro">The host can see viewing activity. Private viewing is not established here.</span></summary><div class="privacy-body" lang="en" dir="ltr">
+<p class="privacy-grade">SOURCE-CHECKED ROUTES · LIVE CONFIGURATION UNVERIFIED</p><p id="privacy-context"></p>
+<h3>Where the hosted room connects</h3>
+<ol class="privacy-route" aria-label="Hosted data path"><li><strong>1 / Your browser</strong><span>Reads page assets and public room status. Video and chat wait for your action.</span></li><li><strong>2 / Room host</strong><span>Receives the playlist request and room pass. Serves video and reads the session receipt.</span></li><li><strong>3 / Separate services</strong><span>Chat connects through Buzz. Independent apps open only when you follow their links.</span></li></ol>
+<div class="privacy-cards">
+<section><h3>On arrival</h3><p>Hosted pages request <code>/live/health</code> and <code>/live/ticker/general.json</code> every 5 seconds, plus the example manifest once. The host can observe IP address, request paths, timing and ordinary browser headers. Actual logs, retention and proxy configuration have not been checked here.</p></section>
+<section><h3>When you press Watch</h3><p><code>attach()</code> requests <code>/live/general/master.m3u8?session=…</code>; child playlists and segments carry that session number too. <code>readSession()</code> polls <code>/live/session/…json</code> every 4 seconds, with an additional 2-second poll while paused. The operator can associate requests with that receipt. The number is not a private identity credential.</p></section>
+<section><h3>When you open chat</h3><p>The iframe loads <code>/join/</code> only after Open chat. It shares this page’s origin: this is not isolation from first-party scripts or storage. Buzz handles its own authentication and messages. Chat encryption, membership enforcement and its downstream requests are not verified by this page.</p></section>
+<section><h3>What stays in this browser</h3><p>The page remembers <code>watch.session</code>; the shared controls remember view and language choices. These are readable by scripts on the same origin. The shared rails badge can also read the saved public identity label and store an origin fingerprint. Those labels and fingerprints are not proof of authentication.</p></section>
+<section><h3>Encryption and metadata</h3><p>HTTPS protects the connection to its TLS endpoint; it does not hide playback from that endpoint’s operator. The current HLS path does not establish end-to-end encryption or anonymous viewing. Networks can still observe traffic timing and volume. The example checkpoint is a shape-checked fixture, not proof that video was encrypted or retrieved from Autonomi.</p></section>
+<section><h3>Independent apps and chain checks</h3><p>W@tch, JAMS.community and 3Speak receive a visit only when you follow their links; they then apply their own access and privacy rules. This page sends no Referer header on those links. The shared navigation’s ↻ rails check explicitly contacts <code>eos.api.eosnation.io</code>, with <code>eos.greymass.com</code> as fallback. Its initial badge is a dated snapshot, not a current security verdict.</p></section>
+</div>
+<div class="privacy-limits"><h3>Private viewing is not established</h3><p>The checked-in <code>live-door.mjs</code> gates playlists on active receipt credit, but its segment handler does not recheck the receipt and its receipt endpoint has no caller identity check. This demonstrator must not be treated as private media access. Backend access enforcement, key custody, retention, and any claim of transaction unlinkability still need evidence.</p><p>No wallet signing, payment, raw x0x socket or real Autonomi write is started by this watch page. The encryption and payment boundaries of future adapters must be verified separately before use.</p></div>
+<div class="privacy-sources"><a href="https://github.com/beehive-nature/beehive-nature/blob/codex/watch-jams-plur-2026-09-11/surfaces/watch.html" target="_blank" rel="noopener noreferrer">Page request code ↗</a><a href="https://github.com/beehive-nature/beehive-nature/blob/codex/watch-jams-plur-2026-09-11/ops/watch/live-door.mjs" target="_blank" rel="noopener noreferrer">Playlist / segment gate ↗</a><a href="https://github.com/beehive-nature/beehive-nature/blob/codex/watch-jams-plur-2026-09-11/surfaces/rails-badge.js" target="_blank" rel="noopener noreferrer">Shared rails requests ↗</a></div><p class="helper" data-i18n="watch.newTab">Opens in a new tab</p>
+</div></details></section>
+<details class="technical" id="room-details"><summary data-i18n="watch.details">Room details</summary><div class="technical-body"><section class="manifest-card"><div class="manifest-top"><h2 style="font-size:1rem" data-i18n="watch.example">Example checkpoint</h2><span class="manifest-state" id="manifest-state">loading…</span></div><p id="manifest-copy" data-i18n="watch.exampleHelp">Sample data only. This does not connect a live room.</p><dl class="manifest-facts"><div><dt>channel</dt><dd id="manifest-channel">—</dd></div><div><dt>sequence</dt><dd id="manifest-sequence">—</dd></div><div><dt>checkpoint</dt><dd id="manifest-checkpoint">—</dd></div><div><dt>items</dt><dd id="manifest-items">—</dd></div></dl></section>
+<section><h2 style="font-size:1rem;margin-bottom:14px">Session audit</h2><div class="comb" id="comb"><div class="cell" id="c-passed"><div class="h">⬡</div><div class="l">PASSED</div><div class="s">capped</div></div><div class="cell" id="c-pending"><div class="h">◈</div><div class="l">PENDING_ANCHOR</div><div class="s">honey</div></div><div class="cell" id="c-failed"><div class="h">▲</div><div class="l">FAILED</div><div class="s">flag</div></div><div class="cell" id="c-inconclusive"><div class="h">◇</div><div class="l">INCONCLUSIVE</div><div class="s">nectar</div></div></div><p class="care">Audit vocabulary only; no security assurance. A live session receipt supplies the verdict. An unread receipt has no verdict.</p></section>
+<details class="ingest"><summary>Stream setup · OBS / ffmpeg</summary><div class="body"><p>The hosted player reads the existing playlist and session endpoints. The b balance and local-currency price are not supplied here; session credit is denominated in A. No wallet or payment is opened here.</p><pre id="obsline">stream URL  rtmp://127.0.0.1:19350/live
 stream key  general?s=&lt;the standing stream key&gt;
 
 ticker      curl -X POST http://127.0.0.1:18094/live/ticker/general \
               -H "authorization: Bearer &lt;stream key&gt;" \
               -H "content-type: application/json" \
-              -d '{"now":"…","set":"21:00","next":"…"}'</pre>
-        <div class="law">the door never writes to the meter. it READS the live
-          session receipt (jungle4) and refuses the playlist when the credit is
-          out — pause, not kill. the room and the ticker stay alive either way.</div>
-      </div>
-    </details>
-  </section>
-
-  <section class="roomside">
-    <div class="roomhead">
-      <span class="t">the room</span> <b>#general · skaists.buzz</b>
-    </div>
-    <iframe id="roomframe" src="/join/" title="the skaists.buzz room"></iframe>
-  </section>
-</div>
+              -d '{"now":"…","set":"21:00","next":"…"}'</pre><p>Same-origin HTTP/HLS and Buzz room. Autonomi checkpoint shown above is a fixture, not a live subscription. Operator visibility includes IP, timing and requests on these hosted paths.</p></div></details></div></details>
+<section class="projects independent" id="projects" aria-label="independent project references"><div class="project-head"><h2 data-i18n="watch.projects">Independent projects</h2><p data-i18n="watch.projectsHelp">Use their original apps. This SKAISTS page is an independent companion.</p></div><div class="project-links"><a class="project-link" href="https://github.com/aautonomicc/Watch-It" target="_blank" rel="noopener noreferrer"><span><strong>W@tch</strong><small data-i18n="watch.newTab">Opens in a new tab</small></span><span aria-hidden="true">↗</span></a><a class="project-link" href="https://jams.community/" target="_blank" rel="noopener noreferrer"><span><strong>JAMS.community</strong><small data-i18n="watch.newTab">Opens in a new tab</small></span><span aria-hidden="true">↗</span></a><a class="project-link" href="https://3speak.tv/" target="_blank" rel="noopener noreferrer"><span><strong>3Speak</strong><small data-i18n="watch.newTab">Opens in a new tab</small></span><span aria-hidden="true">↗</span></a></div></section>
+<footer class="foot"><span>SKAISTS · PLUR</span><a href="index.html" data-i18n="social.arrival.home">Home</a></footer><details><summary data-i18n="experience.moreCommunities">More communities</summary><div data-tour-host></div></details>
 </main>
-
-<footer>same relay · same origin (canonical-origin law) · the playlist door is
-read-only · pause-not-kill · tokens.css only — the estate's own palette.
-watch-room POC 2026-09-04.</footer>
-
-<script src="/watch/hls.min.js"></script>
+<script id="bnr-language-bundle" type="application/json">{"_meta":{"law":"the corpus law applies: every rendering below is MACHINE-DRAFTED (⚙) until a human attestation upgrades it; a missing line falls back to English visibly, never silently; a machine draft never finalizes a consent","langs":["ru","lv","th","gd","tt","uk","cs","zh","ko","ar","nl-be","es","nl","de","fr","he","hi","bn","fa","ur","ja","da","nb","sv","fi","tr","hu","sa"],"rtl":["ar","he","fa","ur"],"attested":{},"withdrawn":{}},"strings":{"experience.moreCommunities":{"en":"More communities","ru":"Другие сообщества","lv":"Vairāk kopienu","th":"ชุมชนเพิ่มเติม","gd":"Barrachd choimhearsnachdan","tt":"Башка җәмгыятьләр","uk":"Інші спільноти","cs":"Další komunity","zh":"更多社群","ko":"더 많은 커뮤니티","ar":"المزيد من المجتمعات","nl-be":"Meer gemeenschappen","es":"Más comunidades","nl":"Meer gemeenschappen","de":"Weitere Gemeinschaften","fr":"Autres communautés","he":"קהילות נוספות","hi":"और समुदाय","bn":"আরও কমিউনিটি","fa":"جمع‌های بیشتر","ur":"مزید کمیونٹیز","ja":"ほかのコミュニティ","da":"Flere fællesskaber","nb":"Flere fellesskap","sv":"Fler gemenskaper","fi":"Lisää yhteisöjä","tr":"Diğer topluluklar","hu":"További közösségek","sa":"अन्ये समुदायाः"},"reg.bee":{"en":"new bee","ru":"новая пчела","cs":"nová včela","gd":"sheun ùr","es":"abeja nueva","nl":"nieuwe bij","de":"neue Biene","fr":"nouvelle abeille","zh":"新蜂","th":"ผึ้งใหม่","lv":"jauna bite","uk":"нова бджола","ar":"نحلة جديدة","he":"דבורה חדשה","hi":"नई मधुमक्खी","bn":"নতুন মৌমাছি","fa":"زنبور تازه","nl-be":"nieuwe bie","ko":"새 벌","ur":"نئی مکھی","ja":"新米蜂","da":"ny bi","nb":"ny bie","sv":"nytt bi","fi":"uusi mehiläinen","tr":"yeni arı","hu":"új méh","tt":"яңа бал корты","sa":"नव-मकरिका"},"reg.cypherpunk":{"en":"cypherpunk","ru":"шифрпанк","cs":"cypherpunk","gd":"cypherpunk","es":"cypherpunk","nl":"cypherpunk","de":"Cypherpunk","fr":"cypherpunk","zh":"密码朋克","th":"ไซเฟอร์พังก์","lv":"saiferpanks","uk":"кіберпанк-криптограф","ar":"سايفرپنك","he":"סייפרפאנק","hi":"साइफरपंक","bn":"সাইফারপাংক","fa":"سایفرپانک","nl-be":"cypherpunk","ko":"사이퍼펑크","ur":"سائفرپنک","ja":"サイファーパンク","da":"cypherpunk","nb":"cypherpunk","sv":"cypherpunk","fi":"kyberpunkkari","tr":"şifrepunk","hu":"cypherpunk","tt":"киберпанк","sa":"साइफरपंक"},"reg.intro":{"en":"three readings of every page — new bee: the apple of the decentralized OS eco · raver: everything expressed through art, graphics, animation · cypherpunk: everything a computer scientist/engineer will want. pick yours; it travels with you.","ru":"три прочтения каждой страницы — новая пчела: глазное яблоко децентрализованной ОС-экосистемы · рейвер: всё выражается через искусство, графику, анимацию · шифрпанк: всё, чего захочет компьютерный учёный/инженер. выберите своё — оно следует за вами.","cs":"tři čtení každé stránky — nová včela: jablko decentralizovaného OS eko · raver: vše vyjádřené uměním, grafikou, animací · cypherpunk: vše, co si bude přát informatik/inženýr. vyberte své; cestuje s vámi.","gd":"trì leughaidhean gach duilleag — sheun ùr: ubhal àrainn-eòlais an OS sgaoilte · raver: a h-uile càil air a chur an cèill tro ealain, grafaigeachd, beòthalachd · cypherpunk: a h-uile càil a mhias.inneal-eòlaiche/innleadair. tagh do sheorsa; siubhail e leat.","es":"tres lecturas de cada página — abeja nueva: la manzana del eco-SO descentralizado · raver: todo expresado mediante arte, gráficos, animación · cypherpunk: todo lo que un científico/ingeniero de computación querrá. elige la tuya; te acompaña.","nl":"drie lezingen van elke pagina — nieuwe bij: het paradepaardje van het gedecentraliseerde OS-eco · raver: alles uitgedrukt door kunst, graphics, animatie · cypherpunk: alles wat een computerwetenschapper/engineer wil. kies die van jou; hij reist met je mee.","de":"drei Lesarten jeder Seite — neue Biene: das Aushängeschild des dezentralen OS-Ökos · raver: alles durch Kunst, Grafik, Animation ausgedrückt · Cypherpunk: alles, was ein Informatiker/Ingenieur will. wähl deine; sie reist mit dir.","fr":"trois lectures de chaque page — nouvelle abeille : la pomme de l'éco-OS décentralisé · raver : tout exprimé par l'art, le graphisme, l'animation · cypherpunk : tout ce qu'un scientifique/ingénieur informatique voudra. choisis la tienne ; elle voyage avec toi.","zh":"每页三种读法 — 新蜂：去中心化 OS 生态的掌上明珠 · 锐舞者：一切透过艺术、图形、动画表达 · 密码朋克：计算机科学家/工程师想要的一切。选你的；它随你同行。","th":"สามแบบอ่านของทุกหน้า — ผึ้งใหม่: ดาวเด่นของระบบนิเวศ OS แบบกระจายศูนย์ · เรฟเวอร์: ทุกสิ่งสื่อผ่านศิลปะ กราฟิก แอนิเมชัน · ไซเฟอร์พังก์: ทุกสิ่งที่นักวิทยาการคอมพิวเตอร์/วิศวกรต้องการ เลือกของคุณ; มันเดินทางไปกับคุณ","lv":"trīs lasījumi katrai lapai — jauna bite: decentralizētā OS eko sistēmas lepnums · reiveris: viss izteikts caur mākslu, grafiku, animāciju · saiferpanks: viss, ko vēlas datorzinātnieks/inženieris. izvēlies savu; tas ceļo tev līdzi.","uk":"три читання кожної сторінки — нова бджола: оком децентралізованої ОС-екосистеми · рейвер: усе виражене через мистецтво, графіку, анімацію · кіберпанк: усе, чого забажає комп'ютерний науковець/інженер. обери своє; воно подорожує з тобою.","ar":"ثلاث قراءات لكل صفحة — نحلة جديدة: جوهرة منظومة التشغيل اللامركزية · ريفير: كل شيء مُعبَّر عنه بالفن والرسوم والتحريك · سايفرپنك: كل ما سيرغب فيه عالم/مهندس حاسوب. اختر قراءتك؛ إنها ترافقك.","he":"שלוש קריאות לכל עמוד — דבורה חדשה: התפוח של אקו-מערכת ה-OS המבוזרת · רייבר: הכל מובע באמנות, גרפיקה, אנימציה · סייפרפאנק: כל מה שמדען/מהנדס מחשבים ירצה. בחר את שלך; הוא נוסע איתך.","hi":"हर पृष्ठ की तीन पढ़ाइयाँ — नई मधुमक्खी: विकेंद्रीकृत OS पारिस्थितिकी का सेब · रेवर: सब कुछ कला, ग्राफिक्स, एनिमेशन से व्यक्त · साइफरपंक: वह सब जो कंप्यूटर वैज्ञानिक/इंजीनियर चाहेगा। अपना चुनें; यह आपके साथ चलता है।","bn":"প্রতিটি পাতার তিন পাঠ — নতুন মৌমাছি: বিকেন্দ্রীভূত OS বাস্তুতন্ত্রের রত্ন · রেভার: সবকিছু শিল্প, গ্রাফিক্স, অ্যানিমেশনে প্রকাশিত · সাইফারপাংক: কম্পিউটার বিজ্ঞানী/প্রকৌশলী যা চাইবে তার সবটা। আপনারটা বাছুন; এটি আপনার সঙ্গে যায়।","fa":"سه خوانش برای هر صفحه — زنبور تازه: سیب اکوسیستم OS غیرمتمرکز · ریور: همه‌چیز با هنر، گرافیک، انیمیشن بیان می‌شود · سایفرپانک: هر آنچه یک دانشمند/مهندس کامپیوتر بخواهد. خودت را برگزین؛ با تو سفر می‌کند.","nl-be":"drie lezingen van elke pagina — nieuwe bie: het paradepaardje van het gedecentraliseerde OS-eco · raver: alles uitgedrukt door kunst, graphics, animatie · cypherpunk: alles wat een computerwetenschapper/engineer wil. kies die van u; hij reist met u mee.","ko":"모든 페이지의 세 가지 읽기 — 새 벌: 탈중앙 OS 생태계의 자랑 · 레이버: 모든 것을 아트, 그래픽, 애니메이션으로 표현 · 사이퍼펑크: 컴퓨터 과학자/엔지니어가 원하는 모든 것. 당신의 것을 고르세요; 당신과 함께 다닙니다.","ur":"ہر صفحے کی تین قرأتیں — نئی مکھی: غیر مرکزی OS ماحول کا سیب · ریور: ہر چیز فن، گرافکس، اینیمیشن سے اظہار · سائفرپنک: وہ سب کچھ جو کمپیوٹر سائنسدان/انجینئر چاہے گا۔ اپنا منتخب کریں؛ یہ آپ کے ساتھ سفر کرتا ہے۔","ja":"すべてのページに三つの読み方 — 新米蜂：分散型OSエコの目玉 · レイバー：すべてをアート、グラフィックス、アニメーションで表現 · サイファーパンク：計算機科学者/エンジニアが欲しがるすべて。あなたのものを選んで；それはあなたと共に旅します。","da":"tre læsninger af hver side — ny bi: de centraliserede OS-økos pryd · raver: alt udtrykt gennem kunst, grafik, animation · cypherpunk: alt en datalog/ingeniør vil have. vælg din; den rejser med dig.","nb":"tre lesninger av hver side — ny bie: stjernen i det desentraliserte OS-økosystemet · raver: alt uttrykt gjennom kunst, grafikk, animasjon · cypherpunk: alt en informatiker/ingeniør vil ha. velg din; den reiser med deg.","sv":"tre läsningar av varje sida — nytt bi: stoltessen i det decentraliserade OS-ekot · raver: allt uttryckt genom konst, grafik, animation · cypherpunk: allt en datavetare/ingenjör vill ha. välj din; den reser med dig.","fi":"kolme lukutapaa jokaiselle sivulle — uusi mehiläinen: hajautetun OS-ekosysteemin helmi · raveaja: kaikki ilmaistaan taiteen, grafiikan, animaation kautta · kyberpunkkari: kaikki mitä tietojenkäsittelijä/insinööri haluaa. valitse omasi; se matkustaa mukanasi.","tr":"her sayfanın üç okuması — yeni arı: merkeziyetsiz OS ekosisteminin gözdesi · raver: her şey sanat, grafik, animasyonla ifade edilir · şifrepunk: bir bilgisayar bilimci/mühendisin isteyeceği her şey. seninkini seç; seninle seyahat eder.","hu":"minden oldal három olvasata — új méh: a decentralizált OS-ökoszisztéma büszkesége · rave-elő: minden művészet, grafika, animáció által kifejezve · cypherpunk: minden, amit egy számítótudós/mérnök akar. válaszd a magadét; veled utazik.","tt":"һәр битнең өч укылышы — яңа бал корты: үзәкләштерелмәгән ОС экосистемасының алмасы · рейвер: һәрнәрсә сәнгать, графика, анимация аша · киберпанк: компьютер галиме/инженер теләгән һәрнәрсә. Үзегезнекен сайлагыз; ул сез белән йөри.","sa":"प्रत्येकस्य पृष्ठस्य त्रीणि पठनानि — नव-मकरिका: विकेन्द्रित-OS-परिसरस्य फलम् · रेव-कर्मी: सर्वं कला-चित्र-सञ्चारमाध्यमेन प्रकटितम् · साइफरपंक: यत् कम्प्यूटर-वैज्ञानिक/अभियन्ता इच्छेत्। स्वकीयं वृणु; स भवता सह गच्छति।"},"reg.raver":{"en":"raver","ru":"рейвер","cs":"raver","gd":"raver","es":"raver","nl":"raver","de":"Raver","fr":"raver","zh":"锐舞者","th":"เรฟเวอร์","lv":"reiveris","uk":"рейвер","ar":"ريفر","he":"רייבר","hi":"रेवर","bn":"রেভার","fa":"ریور","nl-be":"raver","ko":"레이버","ur":"ریور","ja":"レイバー","da":"raver","nb":"raver","sv":"raver","fi":"raveaja","tr":"raver","hu":"rave-elő","tt":"рейвер","sa":"रेव-कर्मी"},"social.arrival.home":{"en":"Home","ru":"Домой","lv":"Mājup","th":"บ้าน","gd":"Dhachaigh","tt":"Өйгә","uk":"Додому","cs":"Domů","zh":"回家","ko":"홈","ar":"البيت","nl-be":"Naar huis","es":"Inicio","nl":"Naar huis","de":"Nach Hause","fr":"Accueil","he":"הביתה","hi":"घर","bn":"বাড়ি","fa":"خانه","ur":"گھر","ja":"ホーム","da":"Hjem","nb":"Hjem","sv":"Hem","fi":"Kotiin","tr":"Ana sayfa","hu":"Haza","sa":"गृहम्"},"watch.allow":{"en":"Opening chat contacts this room’s server.","ru":"При открытии чата выполняется подключение к серверу этой комнаты.","lv":"Atverot tērzēšanu, tiek izveidots savienojums ar šīs istabas serveri.","th":"การเปิดแชตจะติดต่อเซิร์ฟเวอร์ของห้องนี้","gd":"Nuair a dh’fhosglas tu cabadaich, thèid fios gu frithealaiche an t-seòmair seo.","tt":"Чатны ачу бу бүлмә серверына мөрәҗәгать итә.","uk":"Відкриття чату встановлює зв’язок із сервером цієї кімнати.","cs":"Otevření chatu kontaktuje server této místnosti.","zh":"打开聊天将联系此房间的服务器。","ko":"채팅을 열면 이 방의 서버에 접속합니다.","ar":"فتح الدردشة يتصل بخادم هذه الغرفة.","nl-be":"Door de chat te openen maak je contact met de server van deze kamer.","es":"Al abrir el chat se contacta con el servidor de esta sala.","nl":"Door de chat te openen maak je contact met de server van deze kamer.","de":"Beim Öffnen des Chats wird der Server dieses Raums kontaktiert.","fr":"Ouvrir le chat contacte le serveur de ce salon.","he":"פתיחת הצ׳אט יוצרת קשר עם השרת של חדר זה.","hi":"चैट खोलने पर इस कमरे के सर्वर से संपर्क होता है।","bn":"চ্যাট খুললে এই ঘরের সার্ভারের সঙ্গে যোগাযোগ হয়।","fa":"باز کردن گفتگو با سرور این اتاق تماس می‌گیرد.","ur":"چیٹ کھولنے پر اس کمرے کے سرور سے رابطہ ہوتا ہے۔","ja":"チャットを開くと、このルームのサーバーに接続します。","da":"Åbning af chat kontakter serveren for dette rum.","nb":"Når du åpner chat, kontaktes serveren til dette rommet.","sv":"När du öppnar chatten kontaktas rummets server.","fi":"Keskustelun avaaminen ottaa yhteyden tämän huoneen palvelimeen.","tr":"Sohbeti açmak bu odanın sunucusuyla iletişim kurar.","hu":"A csevegés megnyitása kapcsolatba lép a szoba szerverével.","sa":"संवादोद्घाटनं अस्य कक्षस्य सेवकेन सह सम्पर्कं करोति।"},"watch.beeLead":{"en":"A shared screen. Good company.","ru":"Общий экран. Хорошая компания.","lv":"Kopīgs ekrāns. Laba kompānija.","th":"หน้าจอร่วมกัน กับเพื่อนดี ๆ","gd":"Sgrìn cho-roinnte. Deagh chuideachd.","tt":"Уртак экран. Яхшы аралашу.","uk":"Спільний екран. Гарна компанія.","cs":"Společná obrazovka. Dobrá společnost.","zh":"共享屏幕，好友相伴。","ko":"화면은 함께, 좋은 사람들과.","ar":"شاشة مشتركة. صحبة طيبة.","nl-be":"Een gedeeld scherm. Goed gezelschap.","es":"Una pantalla compartida. Buena compañía.","nl":"Een gedeeld scherm. Goed gezelschap.","de":"Ein gemeinsamer Bildschirm. Gute Gesellschaft.","fr":"Un écran partagé. De la bonne compagnie.","he":"מסך משותף. חברה טובה.","hi":"साझा स्क्रीन। अच्छा साथ।","bn":"একটি ভাগ করা পর্দা। ভালো সঙ্গ।","fa":"یک صفحهٔ مشترک. همراهان خوب.","ur":"ایک مشترکہ اسکرین۔ اچھی صحبت۔","ja":"同じ画面で、気の合う仲間と。","da":"En fælles skærm. Godt selskab.","nb":"En felles skjerm. Godt selskap.","sv":"En gemensam skärm. Gott sällskap.","fi":"Yhteinen ruutu. Hyvää seuraa.","tr":"Ortak bir ekran. İyi arkadaşlık.","hu":"Közös képernyő. Jó társaság.","sa":"सामान्यः पटलः। उत्तमं साहचर्यम्।"},"watch.chat":{"en":"Conversation","ru":"Общение","lv":"Saruna","th":"การสนทนา","gd":"Còmhradh","tt":"Әңгәмә","uk":"Спілкування","cs":"Konverzace","zh":"交谈","ko":"대화","ar":"محادثة","nl-be":"Gesprek","es":"Conversación","nl":"Gesprek","de":"Unterhaltung","fr":"Conversation","he":"שיחה","hi":"बातचीत","bn":"কথোপকথন","fa":"گفتگو","ur":"گفتگو","ja":"会話","da":"Samtale","nb":"Samtale","sv":"Samtal","fi":"Keskustelu","tr":"Sohbet","hu":"Beszélgetés","sa":"संवादः"},"watch.chatHelp":{"en":"Open the room to connect with Buzz.","ru":"Откройте комнату для подключения к Buzz.","lv":"Atver istabu, lai pieslēgtos Buzz.","th":"เปิดห้องเพื่อเชื่อมต่อกับ Buzz","gd":"Fosgail an seòmar gus ceangal ri Buzz.","tt":"Buzz белән тоташу өчен бүлмәне ач.","uk":"Відкрийте кімнату, щоб підключитися до Buzz.","cs":"Otevřete místnost a připojte se přes Buzz.","zh":"打开房间以连接 Buzz。","ko":"방을 열어 Buzz에 연결하세요.","ar":"افتح الغرفة للاتصال عبر Buzz.","nl-be":"Open de kamer om met Buzz te verbinden.","es":"Abre la sala para conectar con Buzz.","nl":"Open de kamer om met Buzz te verbinden.","de":"Öffne den Raum, um dich mit Buzz zu verbinden.","fr":"Ouvrez le salon pour vous connecter à Buzz.","he":"פתחו את החדר כדי להתחבר ל-Buzz.","hi":"Buzz से जुड़ने के लिए कमरा खोलें।","bn":"Buzz-এ যুক্ত হতে ঘর খুলুন।","fa":"برای اتصال به Buzz اتاق را باز کنید.","ur":"Buzz سے جڑنے کے لیے کمرہ کھولیں۔","ja":"ルームを開いて Buzz に接続します。","da":"Åbn rummet for at forbinde med Buzz.","nb":"Åpne rommet for å koble til Buzz.","sv":"Öppna rummet för att ansluta till Buzz.","fi":"Avaa huone yhdistääksesi Buzziin.","tr":"Buzz'a bağlanmak için odayı açın.","hu":"Nyisd meg a szobát a Buzzhoz való csatlakozáshoz.","sa":"Buzz-संयोगाय कक्षम् उद्घाटय।"},"watch.checking":{"en":"Checking connection","ru":"Проверяем подключение","lv":"Pārbauda savienojumu","th":"กำลังตรวจสอบการเชื่อมต่อ","gd":"A’ sgrùdadh a’ cheangail","tt":"Тоташу тикшерелә","uk":"Перевірка підключення","cs":"Kontrola připojení","zh":"正在检查连接","ko":"연결 확인 중","ar":"جارٍ فحص الاتصال","nl-be":"Verbinding controleren","es":"Comprobando conexión","nl":"Verbinding controleren","de":"Verbindung wird geprüft","fr":"Vérification de la connexion","he":"בודק חיבור","hi":"कनेक्शन जाँचा जा रहा है","bn":"সংযোগ পরীক্ষা হচ্ছে","fa":"در حال بررسی اتصال","ur":"کنکشن کی جانچ جاری ہے","ja":"接続を確認中","da":"Kontrollerer forbindelse","nb":"Sjekker tilkobling","sv":"Kontrollerar anslutning","fi":"Tarkistetaan yhteyttä","tr":"Bağlantı kontrol ediliyor","hu":"Kapcsolat ellenőrzése","sa":"संयोगः परीक्ष्यते"},"watch.connection":{"en":"Not connected","ru":"Нет подключения","lv":"Nav savienojuma","th":"ยังไม่ได้เชื่อมต่อ","gd":"Gun cheangal","tt":"Тоташмаган","uk":"Не підключено","cs":"Nepřipojeno","zh":"未连接","ko":"연결되지 않음","ar":"غير متصل","nl-be":"Niet verbonden","es":"Sin conexión","nl":"Niet verbonden","de":"Nicht verbunden","fr":"Non connecté","he":"לא מחובר","hi":"जुड़ा नहीं है","bn":"সংযুক্ত নয়","fa":"متصل نیست","ur":"منسلک نہیں","ja":"未接続","da":"Ikke forbundet","nb":"Ikke tilkoblet","sv":"Inte ansluten","fi":"Ei yhteyttä","tr":"Bağlı değil","hu":"Nincs kapcsolat","sa":"असंयुक्तम्"},"watch.cypherLead":{"en":"Inspect the stream, session and checkpoint.","ru":"Проверьте поток, сеанс и контрольную точку.","lv":"Pārbaudi straumi, sesiju un kontrolpunktu.","th":"ตรวจสอบสตรีม เซสชัน และจุดตรวจสอบ","gd":"Sgrùd an sruth, an seisean agus am puing-dearbhaidh.","tt":"Агымны, сеансны һәм контроль ноктаны тикшер.","uk":"Перевірте потік, сеанс і контрольну точку.","cs":"Prohlédněte stream, relaci a kontrolní bod.","zh":"检查流、会话和检查点。","ko":"스트림, 세션, 체크포인트를 확인하세요.","ar":"افحص البث والجلسة ونقطة التحقق.","nl-be":"Bekijk de stream, sessie en het controlepunt.","es":"Inspecciona la transmisión, la sesión y el punto de control.","nl":"Bekijk de stream, sessie en het controlepunt.","de":"Prüfe Stream, Sitzung und Prüfpunkt.","fr":"Inspectez le flux, la session et le point de contrôle.","he":"בדקו את הזרם, ההפעלה ונקודת הביקורת.","hi":"स्ट्रीम, सत्र और जाँच-बिंदु देखें।","bn":"স্ট্রিম, সেশন ও চেকপয়েন্ট পরীক্ষা করুন।","fa":"جریان، نشست و نقطهٔ بررسی را وارسی کنید.","ur":"اسٹریم، سیشن اور جانچ نقطہ دیکھیں۔","ja":"ストリーム、セッション、チェックポイントを確認。","da":"Undersøg stream, session og kontrolpunkt.","nb":"Undersøk strømmen, økten og kontrollpunktet.","sv":"Granska strömmen, sessionen och kontrollpunkten.","fi":"Tarkasta lähetys, istunto ja tarkistuspiste.","tr":"Akışı, oturumu ve kontrol noktasını inceleyin.","hu":"Vizsgáld meg az adatfolyamot, a munkamenetet és az ellenőrzőpontot.","sa":"प्रवाहं सत्रं च परीक्षाबिन्दुं च निरीक्षस्व।"},"watch.details":{"en":"Room details","ru":"Сведения о комнате","lv":"Istabas informācija","th":"รายละเอียดห้อง","gd":"Fiosrachadh an t-seòmair","tt":"Бүлмә турында","uk":"Відомості про кімнату","cs":"Podrobnosti místnosti","zh":"房间详情","ko":"방 세부정보","ar":"تفاصيل الغرفة","nl-be":"Kamerdetails","es":"Detalles de la sala","nl":"Kamerdetails","de":"Raumdetails","fr":"Détails du salon","he":"פרטי החדר","hi":"कमरे का विवरण","bn":"ঘরের বিবরণ","fa":"جزئیات اتاق","ur":"کمرے کی تفصیل","ja":"ルームの詳細","da":"Rumoplysninger","nb":"Romdetaljer","sv":"Rumsinformation","fi":"Huoneen tiedot","tr":"Oda ayrıntıları","hu":"Szoba adatai","sa":"कक्षविवरणम्"},"watch.example":{"en":"Example checkpoint","ru":"Пример контрольной точки","lv":"Kontrolpunkta piemērs","th":"ตัวอย่างจุดตรวจสอบ","gd":"Eisimpleir de phuing-dearbhaidh","tt":"Контроль нокта үрнәге","uk":"Приклад контрольної точки","cs":"Ukázkový kontrolní bod","zh":"示例检查点","ko":"예제 체크포인트","ar":"نقطة تحقق نموذجية","nl-be":"Voorbeeldcontrolepunt","es":"Punto de control de ejemplo","nl":"Voorbeeldcontrolepunt","de":"Beispiel-Prüfpunkt","fr":"Point de contrôle d’exemple","he":"נקודת ביקורת לדוגמה","hi":"नमूना जाँच-बिंदु","bn":"নমুনা চেকপয়েন্ট","fa":"نقطهٔ بررسی نمونه","ur":"نمونہ جانچ نقطہ","ja":"サンプルのチェックポイント","da":"Eksempel på kontrolpunkt","nb":"Eksempel på kontrollpunkt","sv":"Exempel på kontrollpunkt","fi":"Esimerkkitarkistuspiste","tr":"Örnek kontrol noktası","hu":"Példa-ellenőrzőpont","sa":"परीक्षाबिन्दोः उदाहरणम्"},"watch.exampleHelp":{"en":"Sample data only. This does not connect a live room.","ru":"Только пример данных. Подключения к живой комнате нет.","lv":"Tikai parauga dati. Tas nepieslēdz tiešsaistes istabu.","th":"เป็นเพียงข้อมูลตัวอย่าง ไม่ได้เชื่อมต่อกับห้องจริง","gd":"Dàta eisimpleir a-mhàin. Chan eil seo a’ ceangal ri seòmar beò.","tt":"Болар бары тик үрнәк мәгълүмат. Чын бүлмәгә тоташу юк.","uk":"Лише зразок даних. Підключення до живої кімнати немає.","cs":"Pouze ukázková data. Nepřipojují živou místnost.","zh":"仅为示例数据，不会连接实际房间。","ko":"예제 데이터일 뿐이며 실제 방에 연결하지 않습니다.","ar":"بيانات نموذجية فقط. لا يتم الاتصال بغرفة حية.","nl-be":"Alleen voorbeeldgegevens. Dit verbindt geen live kamer.","es":"Solo datos de ejemplo. Esto no conecta una sala en vivo.","nl":"Alleen voorbeeldgegevens. Dit verbindt geen live kamer.","de":"Nur Beispieldaten. Es wird kein Live-Raum verbunden.","fr":"Données d’exemple uniquement. Aucun salon en direct n’est connecté.","he":"נתונים לדוגמה בלבד. אין כאן חיבור לחדר חי.","hi":"केवल नमूना डेटा। इससे लाइव कमरा नहीं जुड़ता।","bn":"শুধু নমুনা তথ্য। এতে কোনো লাইভ ঘর সংযুক্ত হয় না।","fa":"فقط دادهٔ نمونه است. به اتاق زنده متصل نمی‌شود.","ur":"صرف نمونہ ڈیٹا۔ اس سے لائیو کمرہ نہیں جڑتا۔","ja":"サンプルデータのみです。実際のルームには接続しません。","da":"Kun eksempeldata. Dette forbinder ikke et live-rum.","nb":"Kun eksempeldata. Dette kobler ikke til et aktivt rom.","sv":"Endast exempeldata. Detta ansluter inte till ett aktivt rum.","fi":"Vain esimerkkitietoja. Tämä ei yhdistä aktiiviseen huoneeseen.","tr":"Yalnızca örnek veri. Canlı bir odaya bağlanmaz.","hu":"Csak mintaadatok. Ez nem csatlakoztat élő szobát.","sa":"केवलम् उदाहरणदत्तांशाः। अनेन प्रत्यक्षकक्षः न संयुज्यते।"},"watch.join":{"en":"Watch","ru":"Смотреть","lv":"Skatīties","th":"รับชม","gd":"Coimhead","tt":"Карау","uk":"Дивитися","cs":"Sledovat","zh":"观看","ko":"보기","ar":"مشاهدة","nl-be":"Kijken","es":"Ver","nl":"Kijken","de":"Ansehen","fr":"Regarder","he":"צפייה","hi":"देखें","bn":"দেখুন","fa":"تماشا","ur":"دیکھیں","ja":"観る","da":"Se","nb":"Se","sv":"Titta","fi":"Katso","tr":"İzle","hu":"Megnézem","sa":"पश्य"},"watch.live":{"en":"Live stream available","ru":"Доступна прямая трансляция","lv":"Pieejama tiešraide","th":"มีสตรีมสดให้รับชม","gd":"Sruth beò ri fhaighinn","tt":"Туры трансляция бар","uk":"Доступна пряма трансляція","cs":"Živý stream je dostupný","zh":"有可用的直播流","ko":"실시간 스트림 이용 가능","ar":"البث المباشر متاح","nl-be":"Live stream beschikbaar","es":"Transmisión en directo disponible","nl":"Live stream beschikbaar","de":"Livestream verfügbar","fr":"Diffusion en direct disponible","he":"שידור חי זמין","hi":"लाइव स्ट्रीम उपलब्ध है","bn":"লাইভ স্ট্রিম উপলব্ধ","fa":"پخش زنده موجود است","ur":"لائیو اسٹریم دستیاب ہے","ja":"ライブ配信を利用できます","da":"Livestream tilgængelig","nb":"Direktesending tilgjengelig","sv":"Livesändning tillgänglig","fi":"Suora lähetys saatavilla","tr":"Canlı yayın mevcut","hu":"Élő közvetítés elérhető","sa":"प्रत्यक्षप्रसारणम् उपलब्धम्"},"watch.local":{"en":"Local preview","ru":"Локальный предпросмотр","lv":"Lokāls priekšskatījums","th":"ตัวอย่างในเครื่อง","gd":"Ro-shealladh ionadail","tt":"Җирле алдан карау","uk":"Локальний перегляд","cs":"Místní náhled","zh":"本地预览","ko":"로컬 미리보기","ar":"معاينة محلية","nl-be":"Lokaal voorbeeld","es":"Vista previa local","nl":"Lokaal voorbeeld","de":"Lokale Vorschau","fr":"Aperçu local","he":"תצוגה מקדימה מקומית","hi":"स्थानीय पूर्वावलोकन","bn":"স্থানীয় পূর্বরূপ","fa":"پیش‌نمایش محلی","ur":"مقامی پیش منظر","ja":"ローカルプレビュー","da":"Lokal forhåndsvisning","nb":"Lokal forhåndsvisning","sv":"Lokal förhandsvisning","fi":"Paikallinen esikatselu","tr":"Yerel önizleme","hu":"Helyi előnézet","sa":"स्थानीयपूर्वावलोकनम्"},"watch.money":{"en":"Price","ru":"Цена","lv":"Cena","th":"ราคา","gd":"Prìs","tt":"Бәя","uk":"Ціна","cs":"Cena","zh":"价格","ko":"가격","ar":"السعر","nl-be":"Prijs","es":"Precio","nl":"Prijs","de":"Preis","fr":"Prix","he":"מחיר","hi":"कीमत","bn":"মূল্য","fa":"قیمت","ur":"قیمت","ja":"価格","da":"Pris","nb":"Pris","sv":"Pris","fi":"Hinta","tr":"Fiyat","hu":"Ár","sa":"मूल्यम्"},"watch.newTab":{"en":"Opens in a new tab","ru":"Откроется в новой вкладке","lv":"Atveras jaunā cilnē","th":"เปิดในแท็บใหม่","gd":"Fosglaidh seo ann an taba ùr","tt":"Яңа кыстыргычта ачыла","uk":"Відкриється в новій вкладці","cs":"Otevře se na nové kartě","zh":"在新标签页中打开","ko":"새 탭에서 열림","ar":"يفتح في علامة تبويب جديدة","nl-be":"Opent in een nieuw tabblad","es":"Se abre en una pestaña nueva","nl":"Opent in een nieuw tabblad","de":"Öffnet in einem neuen Tab","fr":"S’ouvre dans un nouvel onglet","he":"נפתח בכרטיסייה חדשה","hi":"नए टैब में खुलता है","bn":"নতুন ট্যাবে খোলে","fa":"در زبانهٔ جدید باز می‌شود","ur":"نئے ٹیب میں کھلتا ہے","ja":"新しいタブで開きます","da":"Åbner i en ny fane","nb":"Åpnes i en ny fane","sv":"Öppnas i en ny flik","fi":"Avautuu uudelle välilehdelle","tr":"Yeni sekmede açılır","hu":"Új lapon nyílik meg","sa":"नूतने टैबे उद्घाट्यते"},"watch.next":{"en":"Up next","ru":"Далее","lv":"Nākamais","th":"ถัดไป","gd":"An ath rud","tt":"Алга таба","uk":"Далі","cs":"Následuje","zh":"接下来","ko":"다음","ar":"التالي","nl-be":"Hierna","es":"A continuación","nl":"Hierna","de":"Als Nächstes","fr":"À suivre","he":"הבא","hi":"अगला","bn":"এরপর","fa":"بعدی","ur":"اگلا","ja":"次へ","da":"Næste","nb":"Neste","sv":"Härnäst","fi":"Seuraavaksi","tr":"Sıradaki","hu":"Következő","sa":"अनन्तरम्"},"watch.now":{"en":"Now playing","ru":"Сейчас играет","lv":"Pašlaik atskaņo","th":"กำลังเล่น","gd":"A’ cluich an-dràsta","tt":"Хәзер уйнатыла","uk":"Зараз відтворюється","cs":"Právě hraje","zh":"正在播放","ko":"재생 중","ar":"يُشغّل الآن","nl-be":"Speelt nu","es":"Reproduciendo","nl":"Speelt nu","de":"Läuft gerade","fr":"En cours","he":"מתנגן כעת","hi":"अभी चल रहा है","bn":"এখন চলছে","fa":"در حال پخش","ur":"اب چل رہا ہے","ja":"再生中","da":"Afspilles nu","nb":"Spilles nå","sv":"Spelas nu","fi":"Nyt toistossa","tr":"Şimdi oynatılıyor","hu":"Most játszott","sa":"इदानीं प्रवर्तते"},"watch.offline":{"en":"No live stream","ru":"Нет прямой трансляции","lv":"Nav tiešraides","th":"ไม่มีสตรีมสด","gd":"Gun sruth beò","tt":"Туры трансляция юк","uk":"Немає прямої трансляції","cs":"Žádný živý stream","zh":"暂无直播流","ko":"실시간 스트림 없음","ar":"لا يوجد بث مباشر","nl-be":"Geen live stream","es":"Sin transmisión en directo","nl":"Geen live stream","de":"Kein Livestream","fr":"Aucune diffusion en direct","he":"אין שידור חי","hi":"कोई लाइव स्ट्रीम नहीं","bn":"কোনো লাইভ স্ট্রিম নেই","fa":"پخش زنده‌ای نیست","ur":"کوئی لائیو اسٹریم نہیں","ja":"ライブ配信なし","da":"Ingen livestream","nb":"Ingen direktesending","sv":"Ingen livesändning","fi":"Ei suoraa lähetystä","tr":"Canlı yayın yok","hu":"Nincs élő közvetítés","sa":"प्रत्यक्षप्रसारणं नास्ति"},"watch.openChat":{"en":"Open chat","ru":"Открыть чат","lv":"Atvērt tērzēšanu","th":"เปิดแชต","gd":"Fosgail cabadaich","tt":"Чатны ачу","uk":"Відкрити чат","cs":"Otevřít chat","zh":"打开聊天","ko":"채팅 열기","ar":"فتح الدردشة","nl-be":"Chat openen","es":"Abrir chat","nl":"Chat openen","de":"Chat öffnen","fr":"Ouvrir le chat","he":"פתיחת צ׳אט","hi":"चैट खोलें","bn":"চ্যাট খুলুন","fa":"باز کردن گفتگو","ur":"چیٹ کھولیں","ja":"チャットを開く","da":"Åbn chat","nb":"Åpne chat","sv":"Öppna chatt","fi":"Avaa keskustelu","tr":"Sohbeti aç","hu":"Csevegés megnyitása","sa":"संवादम् उद्घाटय"},"watch.pass":{"en":"Room pass","ru":"Пропуск в комнату","lv":"Istabas caurlaide","th":"รหัสเข้าห้อง","gd":"Cead a-steach don t-seòmar","tt":"Бүлмәгә керү коды","uk":"Перепустка до кімнати","cs":"Vstup do místnosti","zh":"房间通行码","ko":"방 이용 코드","ar":"رمز دخول الغرفة","nl-be":"Kamercode","es":"Pase de sala","nl":"Kamercode","de":"Raumzugang","fr":"Pass du salon","he":"קוד כניסה לחדר","hi":"कमरे का पास","bn":"ঘরের পাস","fa":"رمز ورود اتاق","ur":"کمرے کا پاس","ja":"ルームパス","da":"Adgangskode til rummet","nb":"Romkode","sv":"Rumskod","fi":"Huoneen pääsykoodi","tr":"Oda giriş kodu","hu":"Szobabelépő","sa":"कक्षप्रवेशसङ्केतः"},"watch.passHelp":{"en":"Use the session number supplied by your host.","ru":"Используйте номер сеанса, предоставленный организатором.","lv":"Izmanto rīkotāja izsniegto sesijas numuru.","th":"ใช้หมายเลขเซสชันที่ผู้จัดให้มา","gd":"Cleachd àireamh an t-seisein a thug an t-aoigh dhut.","tt":"Оештыручы биргән сеанс номерын куллан.","uk":"Використайте номер сеансу, наданий організатором.","cs":"Použijte číslo relace od pořadatele.","zh":"请输入房主提供的会话编号。","ko":"호스트가 제공한 세션 번호를 사용하세요.","ar":"استخدم رقم الجلسة الذي قدمه المضيف.","nl-be":"Gebruik het sessienummer van je host.","es":"Usa el número de sesión que te dio el anfitrión.","nl":"Gebruik het sessienummer van je host.","de":"Verwende die Sitzungsnummer deines Gastgebers.","fr":"Utilisez le numéro de session fourni par votre hôte.","he":"השתמשו במספר ההפעלה שסיפק המארח.","hi":"मेज़बान द्वारा दी गई सत्र संख्या इस्तेमाल करें।","bn":"আয়োজকের দেওয়া সেশন নম্বর ব্যবহার করুন।","fa":"از شمارهٔ نشستی که میزبان داده استفاده کنید.","ur":"میزبان کا دیا ہوا سیشن نمبر استعمال کریں۔","ja":"主催者から受け取ったセッション番号を入力してください。","da":"Brug sessionsnummeret fra din vært.","nb":"Bruk øktnummeret fra verten din.","sv":"Använd sessionsnumret från din värd.","fi":"Käytä isännän antamaa istuntonumeroa.","tr":"Ev sahibinizin verdiği oturum numarasını kullanın.","hu":"Használd a házigazdától kapott munkamenetszámot.","sa":"आयोजकेन दत्तां सत्रसङ्ख्यां प्रयुङ्क्ष्व।"},"watch.preview":{"en":"Preview","ru":"Предпросмотр","lv":"Priekšskatījums","th":"ตัวอย่าง","gd":"Ro-shealladh","tt":"Алдан карау","uk":"Попередній перегляд","cs":"Náhled","zh":"预览","ko":"미리보기","ar":"معاينة","nl-be":"Voorbeeld","es":"Vista previa","nl":"Voorbeeld","de":"Vorschau","fr":"Aperçu","he":"תצוגה מקדימה","hi":"पूर्वावलोकन","bn":"পূর্বরূপ","fa":"پیش‌نمایش","ur":"پیش منظر","ja":"プレビュー","da":"Forhåndsvisning","nb":"Forhåndsvisning","sv":"Förhandsvisning","fi":"Esikatselu","tr":"Önizleme","hu":"Előnézet","sa":"पूर्वावलोकनम्"},"watch.previewBody":{"en":"Live video and chat connect on the hosted room.","ru":"Видео и чат подключаются в размещённой на сервере комнате.","lv":"Tiešraides video un tērzēšana pieslēdzas serverī izvietotajā istabā.","th":"วิดีโอสดและแชตเชื่อมต่อได้ในห้องบนเซิร์ฟเวอร์","gd":"Ceanglaidh bhidio beò agus cabadaich san t-seòmar air an fhrithealaiche.","tt":"Туры видео һәм чат сервердагы бүлмәдә тоташа.","uk":"Відео наживо й чат підключаються в кімнаті на сервері.","cs":"Živé video a chat se připojí v místnosti na serveru.","zh":"直播视频和聊天需在服务器托管的房间中连接。","ko":"실시간 영상과 채팅은 서버에 호스팅된 방에서 연결됩니다.","ar":"يتصل الفيديو المباشر والدردشة في الغرفة المستضافة على الخادم.","nl-be":"Live video en chat verbinden in de gehoste kamer.","es":"El vídeo en directo y el chat se conectan en la sala alojada en el servidor.","nl":"Live video en chat verbinden in de gehoste kamer.","de":"Livevideo und Chat verbinden sich im gehosteten Raum.","fr":"La vidéo en direct et le chat se connectent dans le salon hébergé sur le serveur.","he":"וידאו חי וצ׳אט מתחברים בחדר המתארח בשרת.","hi":"लाइव वीडियो और चैट सर्वर पर होस्ट किए गए कमरे में जुड़ते हैं।","bn":"লাইভ ভিডিও ও চ্যাট সার্ভারে হোস্ট করা ঘরে সংযুক্ত হয়।","fa":"ویدیوی زنده و گفتگو در اتاق میزبانی‌شده روی سرور متصل می‌شوند.","ur":"لائیو ویڈیو اور چیٹ سرور پر موجود کمرے میں جڑتے ہیں۔","ja":"ライブ映像とチャットは、サーバー上のルームで接続します。","da":"Livevideo og chat forbindes i rummet på serveren.","nb":"Direktevideo og chat kobles til i rommet på serveren.","sv":"Livevideo och chatt ansluts i rummet på servern.","fi":"Suora video ja keskustelu yhdistyvät palvelimella olevaan huoneeseen.","tr":"Canlı video ve sohbet, sunucuda barındırılan odada bağlanır.","hu":"Az élő videó és a csevegés a szerveren tárolt szobában kapcsolódik.","sa":"प्रत्यक्षदृश्यं संवादश्च सेवकस्थे कक्षे संयुज्येते।"},"watch.privacyIntro":{"en":"The host can see viewing activity. Private viewing is not established here.","ru":"Хост может видеть активность просмотра. Приватность просмотра здесь не подтверждена.","lv":"Uzturētājs var redzēt skatīšanās aktivitāti. Privāta skatīšanās šeit nav nodrošināta.","th":"ผู้ให้บริการโฮสต์อาจเห็นกิจกรรมการรับชม ที่นี่ยังไม่ได้ยืนยันว่าการรับชมเป็นส่วนตัว","gd":"Chì an t-òstair gnìomhachd amhairc. Chan eil prìobhaideachd amhairc dearbhte an seo.","tt":"Хост карау эшчәнлеген күрә ала. Монда карау хосусыйлыгы расланмаган.","uk":"Хост може бачити активність перегляду. Приватність перегляду тут не підтверджено.","cs":"Provozovatel může vidět aktivitu sledování. Soukromé sledování zde není zajištěno.","zh":"托管方可以看到观看活动。此处尚未确认能提供私密观看。","ko":"호스트는 시청 활동을 볼 수 있습니다. 여기서는 비공개 시청이 보장되지 않습니다.","ar":"يمكن للمضيف رؤية نشاط المشاهدة. لم تثبت خصوصية المشاهدة هنا.","nl-be":"De host kan kijkactiviteit zien. Privé kijken is hier niet gewaarborgd.","es":"El anfitrión puede ver la actividad de visualización. Aquí no se garantiza una visualización privada.","nl":"De host kan kijkactiviteit zien. Privé kijken is hier niet gewaarborgd.","de":"Der Betreiber kann die Sehaktivität erkennen. Privates Ansehen ist hier nicht gewährleistet.","fr":"L’hébergeur peut voir l’activité de visionnage. La confidentialité du visionnage n’est pas assurée ici.","he":"המארח יכול לראות את פעילות הצפייה. פרטיות הצפייה אינה מובטחת כאן.","hi":"होस्ट देखने की गतिविधि देख सकता है। यहाँ निजी रूप से देखने की सुविधा सुनिश्चित नहीं है।","bn":"হোস্ট দেখার কার্যকলাপ দেখতে পারে। এখানে ব্যক্তিগতভাবে দেখার গোপনীয়তা নিশ্চিত নয়।","fa":"میزبان می‌تواند فعالیت تماشا را ببیند. خصوصی بودن تماشا در اینجا تضمین نشده است.","ur":"میزبان دیکھنے کی سرگرمی دیکھ سکتا ہے۔ یہاں نجی طور پر دیکھنے کی رازداری کی ضمانت نہیں ہے۔","ja":"ホストは視聴状況を把握できます。ここではプライベートな視聴は保証されていません。","da":"Værten kan se visningsaktivitet. Privat visning er ikke sikret her.","nb":"Verten kan se visningsaktivitet. Privat visning er ikke sikret her.","sv":"Värden kan se visningsaktivitet. Privat visning är inte säkerställd här.","fi":"Ylläpitäjä voi nähdä katselutoiminnan. Yksityistä katselua ei ole varmistettu täällä.","tr":"Barındırma sağlayıcısı izleme etkinliğini görebilir. Burada özel izleme güvence altına alınmamıştır.","hu":"Az üzemeltető láthatja a megtekintési tevékenységet. A privát megtekintés itt nem biztosított.","sa":"सेवाप्रदाता दर्शनक्रियां द्रष्टुं शक्नोति। अत्र दर्शनस्य गोपनीयता न सुनिश्चिता।"},"watch.privacyTitle":{"en":"Privacy & access","ru":"Конфиденциальность и доступ","lv":"Privātums un piekļuve","th":"ความเป็นส่วนตัวและการเข้าถึง","gd":"Prìobhaideachd is ruigsinneachd","tt":"Хосусыйлык һәм керү","uk":"Конфіденційність і доступ","cs":"Soukromí a přístup","zh":"隐私与访问","ko":"개인정보 보호 및 접근","ar":"الخصوصية والوصول","nl-be":"Privacy en toegang","es":"Privacidad y acceso","nl":"Privacy en toegang","de":"Datenschutz und Zugang","fr":"Confidentialité et accès","he":"פרטיות וגישה","hi":"गोपनीयता और पहुँच","bn":"গোপনীয়তা ও প্রবেশাধিকার","fa":"حریم خصوصی و دسترسی","ur":"رازداری اور رسائی","ja":"プライバシーとアクセス","da":"Privatliv og adgang","nb":"Personvern og tilgang","sv":"Integritet och åtkomst","fi":"Yksityisyys ja pääsy","tr":"Gizlilik ve erişim","hu":"Adatvédelem és hozzáférés","sa":"गोपनीयता प्रवेशश्च"},"watch.projects":{"en":"Independent projects","ru":"Независимые проекты","lv":"Neatkarīgi projekti","th":"โครงการอิสระ","gd":"Pròiseactan neo-eisimeileach","tt":"Бәйсез проектлар","uk":"Незалежні проєкти","cs":"Nezávislé projekty","zh":"独立项目","ko":"독립 프로젝트","ar":"مشاريع مستقلة","nl-be":"Onafhankelijke projecten","es":"Proyectos independientes","nl":"Onafhankelijke projecten","de":"Unabhängige Projekte","fr":"Projets indépendants","he":"פרויקטים עצמאיים","hi":"स्वतंत्र परियोजनाएँ","bn":"স্বাধীন প্রকল্প","fa":"پروژه‌های مستقل","ur":"آزاد منصوبے","ja":"独立したプロジェクト","da":"Uafhængige projekter","nb":"Uavhengige prosjekter","sv":"Oberoende projekt","fi":"Itsenäiset projektit","tr":"Bağımsız projeler","hu":"Független projektek","sa":"स्वतन्त्राः प्रकल्पाः"},"watch.projectsHelp":{"en":"Use their original apps. This SKAISTS page is an independent companion.","ru":"Используйте их оригинальные приложения. Эта страница SKAISTS — независимое дополнение.","lv":"Lieto viņu oriģinālās lietotnes. Šī SKAISTS lapa ir neatkarīgs papildinājums.","th":"ใช้แอปต้นฉบับของแต่ละโครงการ หน้า SKAISTS นี้เป็นส่วนเสริมอิสระ","gd":"Cleachd na h-aplacaidean tùsail aca. Tha an duilleag SKAISTS seo na companach neo-eisimeileach.","tt":"Аларның төп кушымталарын кулланыгыз. Бу SKAISTS бите — бәйсез өстәмә.","uk":"Користуйтеся їхніми оригінальними застосунками. Ця сторінка SKAISTS — незалежне доповнення.","cs":"Používejte jejich původní aplikace. Tato stránka SKAISTS je nezávislým doplňkem.","zh":"使用各项目的原版应用。此 SKAISTS 页面是独立的辅助页面。","ko":"각 프로젝트의 원래 앱을 이용하세요. 이 SKAISTS 페이지는 독립적인 보조 페이지입니다.","ar":"استخدم تطبيقاتهم الأصلية. صفحة SKAISTS هذه إضافة مستقلة.","nl-be":"Gebruik hun oorspronkelijke apps. Deze SKAISTS-pagina is een onafhankelijke aanvulling.","es":"Usa sus aplicaciones originales. Esta página de SKAISTS es un complemento independiente.","nl":"Gebruik hun oorspronkelijke apps. Deze SKAISTS-pagina is een onafhankelijke aanvulling.","de":"Nutze ihre Original-Apps. Diese SKAISTS-Seite ist eine unabhängige Ergänzung.","fr":"Utilisez leurs applications originales. Cette page SKAISTS est un complément indépendant.","he":"השתמשו באפליקציות המקוריות שלהם. דף SKAISTS זה הוא תוספת עצמאית.","hi":"उनके मूल ऐप इस्तेमाल करें। यह SKAISTS पृष्ठ एक स्वतंत्र सहयोगी पृष्ठ है।","bn":"তাদের মূল অ্যাপ ব্যবহার করুন। এই SKAISTS পৃষ্ঠাটি একটি স্বাধীন সহযোগী পৃষ্ঠা।","fa":"از برنامه‌های اصلی آن‌ها استفاده کنید. این صفحهٔ SKAISTS یک همراه مستقل است.","ur":"ان کی اصل ایپس استعمال کریں۔ یہ SKAISTS صفحہ ایک آزاد معاون صفحہ ہے۔","ja":"各プロジェクトのオリジナルアプリをご利用ください。この SKAISTS ページは独立した補助ページです。","da":"Brug deres oprindelige apps. Denne SKAISTS-side er et uafhængigt supplement.","nb":"Bruk deres opprinnelige apper. Denne SKAISTS-siden er et uavhengig tillegg.","sv":"Använd deras originalappar. Den här SKAISTS-sidan är ett oberoende komplement.","fi":"Käytä niiden alkuperäisiä sovelluksia. Tämä SKAISTS-sivu on itsenäinen lisä.","tr":"Orijinal uygulamalarını kullanın. Bu SKAISTS sayfası bağımsız bir tamamlayıcıdır.","hu":"Használd az eredeti alkalmazásaikat. Ez a SKAISTS-oldal független kiegészítő.","sa":"तेषां मूलानुप्रयोगान् प्रयुङ्क्ष्व। इदं SKAISTS-पृष्ठं स्वतन्त्रं सहायकम् अस्ति।"},"watch.raverLead":{"en":"Find your people. Press play.","ru":"Найдите своих. Нажмите «Воспроизвести».","lv":"Atrodi savējos. Sāc atskaņošanu.","th":"พบคนที่ใช่ แล้วกดเล่น","gd":"Lorg do dhaoine. Brùth Cluich.","tt":"Үз кешеләреңне тап. Уйнату төймәсенә бас.","uk":"Знайдіть своїх. Натисніть «Відтворити».","cs":"Najděte své lidi. Spusťte přehrávání.","zh":"找到同好，按下播放。","ko":"마음 맞는 사람들과 재생을 눌러 보세요.","ar":"اعثر على رفاقك. اضغط تشغيل.","nl-be":"Vind je mensen. Druk op afspelen.","es":"Encuentra a tu gente. Pulsa reproducir.","nl":"Vind je mensen. Druk op afspelen.","de":"Finde deine Leute. Drücke auf Wiedergabe.","fr":"Retrouvez les vôtres. Lancez la lecture.","he":"מצאו את האנשים שלכם. לחצו להפעלה.","hi":"अपने लोगों से मिलें। प्ले दबाएँ।","bn":"নিজের মানুষ খুঁজুন। চালু করুন।","fa":"آدم‌های خودتان را پیدا کنید. پخش را بزنید.","ur":"اپنے لوگوں کو تلاش کریں۔ پلے دبائیں۔","ja":"仲間を見つけて、再生しよう。","da":"Find dine folk. Tryk afspil.","nb":"Finn dine folk. Trykk på spill av.","sv":"Hitta ditt folk. Tryck på spela.","fi":"Löydä omat ihmiset. Paina toistoa.","tr":"Kendi insanlarını bul. Oynat'a bas.","hu":"Találd meg a társaid. Indítsd el a lejátszást.","sa":"स्वजनान् अन्विष्य प्रसारणम् आरभस्व।"},"watch.title":{"en":"Watch together","ru":"Смотрим вместе","lv":"Skatīties kopā","th":"รับชมด้วยกัน","gd":"Coimhead còmhla","tt":"Бергә карыйк","uk":"Дивимося разом","cs":"Sledujte společně","zh":"一起观看","ko":"함께 보기","ar":"شاهدوا معًا","nl-be":"Samen kijken","es":"Ver juntos","nl":"Samen kijken","de":"Gemeinsam schauen","fr":"Regarder ensemble","he":"צופים יחד","hi":"साथ देखें","bn":"একসঙ্গে দেখুন","fa":"با هم تماشا کنید","ur":"ساتھ دیکھیں","ja":"一緒に観る","da":"Se sammen","nb":"Se sammen","sv":"Titta tillsammans","fi":"Katso yhdessä","tr":"Birlikte izleyin","hu":"Nézzük együtt","sa":"सह पश्यामः"},"watch.unavailable":{"en":"Connection unavailable","ru":"Подключение недоступно","lv":"Savienojums nav pieejams","th":"ไม่สามารถเชื่อมต่อได้","gd":"Chan eil ceangal ri fhaighinn","tt":"Тоташу мөмкин түгел","uk":"Підключення недоступне","cs":"Připojení není dostupné","zh":"连接不可用","ko":"연결할 수 없음","ar":"الاتصال غير متاح","nl-be":"Verbinding niet beschikbaar","es":"Conexión no disponible","nl":"Verbinding niet beschikbaar","de":"Verbindung nicht verfügbar","fr":"Connexion indisponible","he":"החיבור אינו זמין","hi":"कनेक्शन उपलब्ध नहीं","bn":"সংযোগ উপলব্ধ নয়","fa":"اتصال در دسترس نیست","ur":"کنکشن دستیاب نہیں","ja":"接続できません","da":"Forbindelse utilgængelig","nb":"Tilkobling utilgjengelig","sv":"Anslutning saknas","fi":"Yhteys ei ole saatavilla","tr":"Bağlantı kullanılamıyor","hu":"A kapcsolat nem érhető el","sa":"संयोगो नोपलभ्यते"},"watch.unquoted":{"en":"Not quoted","ru":"Не указана","lv":"Nav norādīta","th":"ยังไม่ได้ระบุราคา","gd":"Gun phrìs air a toirt","tt":"Бәя күрсәтелмәгән","uk":"Не вказана","cs":"Neuvedena","zh":"暂无报价","ko":"견적 없음","ar":"لم يُحدد","nl-be":"Niet opgegeven","es":"Sin cotizar","nl":"Niet opgegeven","de":"Nicht angegeben","fr":"Non indiqué","he":"לא צוין","hi":"बताई नहीं गई","bn":"জানানো হয়নি","fa":"اعلام نشده","ur":"نہیں بتائی گئی","ja":"未提示","da":"Ikke oplyst","nb":"Ikke oppgitt","sv":"Inte angivet","fi":"Ei ilmoitettu","tr":"Belirtilmedi","hu":"Nincs megadva","sa":"अनुक्तम्"},"watch.wait":{"en":"No stream is playing.","ru":"Трансляция не идёт.","lv":"Pašlaik nekas netiek pārraidīts.","th":"ยังไม่มีสตรีมที่กำลังเล่น","gd":"Chan eil sruth ga chluich.","tt":"Әлегә трансляция юк.","uk":"Трансляція не відтворюється.","cs":"Žádný stream se nepřehrává.","zh":"暂无正在播放的流。","ko":"재생 중인 스트림이 없습니다.","ar":"لا يوجد بث قيد التشغيل.","nl-be":"Er speelt geen stream.","es":"No se está reproduciendo ninguna transmisión.","nl":"Er speelt geen stream.","de":"Es läuft kein Stream.","fr":"Aucun flux en cours de lecture.","he":"אין שידור שמתנגן כעת.","hi":"अभी कोई स्ट्रीम नहीं चल रही है।","bn":"কোনো স্ট্রিম চলছে না।","fa":"هیچ جریانی در حال پخش نیست.","ur":"کوئی اسٹریم نہیں چل رہی۔","ja":"再生中のストリームはありません。","da":"Ingen stream afspilles.","nb":"Ingen strøm spilles av.","sv":"Ingen ström spelas upp.","fi":"Yhtään lähetystä ei toisteta.","tr":"Oynatılan bir yayın yok.","hu":"Nincs lejátszott közvetítés.","sa":"किमपि प्रसारणं न प्रवर्तते।"}}}</script>
+<script>if(location.protocol!=='file:')document.write('<script src="/watch/hls.min.js"><\/script>');</script>
 <script>
 'use strict';
 /* ── exact decimals on strings ("1.2000 A" → BigInt scale 1e4 for A) ———
@@ -279,6 +94,7 @@ function fmtA(n) { var s = fmtU(n); return s + ' A'; }
 
 const ROOM = 'general';
 const $ = (id) => document.getElementById(id);
+const LOCAL_PREVIEW = location.protocol === 'file:';
 const video = $('v'), veil = $('veil');
 const state = {
   sess: null, hls: null, mode: 'idle', // idle|live|paused
@@ -286,11 +102,49 @@ const state = {
 };
 window.__watch = state; // the e2e reads its numbers here
 
+/* Shared manifest is a read-only room hint. It is validated before any
+   checkpoint fields are projected into the watch surface. This compact
+   browser copy mirrors surfaces/manifest-reader.js because watch.html is
+   deployed as a one-file surface. */
+function watchManifestRef(value) {
+  if (typeof value !== 'string' || value.length <= 16) return value;
+  return value.slice(0, 8) + '…' + value.slice(-6);
+}
+function watchManifest(envelope) {
+  if (!envelope || Array.isArray(envelope) || envelope.type !== 'bnr-manifest-envelope-v1' || envelope.version !== 1) throw new Error('manifest envelope refused');
+  const m = envelope.manifest, cp = m && m.checkpoint;
+  if (!m || Array.isArray(m) || !/^[a-z0-9-]{1,64}$/.test(m.channel) || !Number.isSafeInteger(m.epoch) || m.epoch < 0 || !Number.isSafeInteger(m.sequence) || m.sequence <= 0) throw new Error('manifest identity refused');
+  if (!cp || Array.isArray(cp) || !/^[0-9a-f]+$/.test(cp.id) || !/^[0-9a-f]+$/.test(cp.policy_id) || cp.sequence !== m.sequence || !cp.ref || cp.ref.address == null || cp.ref.sha256 == null || !Number.isSafeInteger(cp.ref.size) || cp.ref.size <= 0) throw new Error('manifest checkpoint refused');
+  if (!Array.isArray(m.encrypted_items) || m.encrypted_items.length < 1 || m.encrypted_items.length > 16 || new Set(m.encrypted_items.map(item => item && item.id)).size !== m.encrypted_items.length) throw new Error('manifest items refused');
+  if (!m.admission || m.admission.policy_id !== cp.policy_id || !['disabled', 'capped'].includes(m.admission.payment) || !['none', 'trezor'].includes(m.admission.approval)) throw new Error('manifest admission refused');
+  return envelope;
+}
+if (LOCAL_PREVIEW) {
+  $('manifest-state').textContent = 'offline preview';
+
+} else {
+  fetch('../fixtures/connect-store-manifest-envelope-v1.json', { cache: 'no-store' }).then((r) => { if (!r.ok) throw new Error('manifest fetch refused'); return r.json(); }).then(watchManifest).then((envelope) => {
+    const m = envelope.manifest;
+    $('manifest-state').textContent = 'shape checked';
+    $('manifest-state').className = 'manifest-state ok';
+
+    $('manifest-channel').textContent = m.channel;
+    $('manifest-sequence').textContent = String(m.sequence);
+    $('manifest-checkpoint').textContent = watchManifestRef(m.checkpoint.id);
+    $('manifest-items').textContent = `${m.encrypted_items.length} encrypted`;
+  }).catch((error) => {
+    $('manifest-state').textContent = 'refused';
+    $('manifest-state').className = 'manifest-state bad';
+    $('manifest-copy').removeAttribute('data-i18n');
+    $('manifest-copy').textContent = error.message + '; no room state changed';
+  });
+}
+
 /* ── the four audit cells ────────────────────────────────────────────── */
 // 255 (and any unknown) = the record does not carry a verdict yet → nectar
 const AUDIT = { 0: 'passed', 1: 'pending', 2: 'failed', 3: 'inconclusive' };
 function litAudit(a) {
-  const lit = AUDIT[a] ?? 'inconclusive';
+  const lit = a == null ? null : (AUDIT[a] ?? 'inconclusive');
   ['passed', 'pending', 'failed', 'inconclusive'].forEach(k => {
     $('c-' + k).classList.toggle('lit', k === lit);
   });
@@ -298,6 +152,7 @@ function litAudit(a) {
 
 /* ── session read (through the door — the door is the read-only relay) ── */
 async function readSession(id) {
+  if (LOCAL_PREVIEW) return null;
   try {
     const r = await fetch('/live/session/' + id + '.json', { cache: 'no-store' });
     if (!r.ok) return null;
@@ -310,16 +165,18 @@ async function readSession(id) {
 function paintStrip(j) {
   const chip = $('chip'), nums = $('nums');
   if (!j) {
-    chip.className = 'chip nosess'; chip.textContent = 'no session';
+    chip.className = 'chip nosess'; setCopy('chip','watch.connection','Not connected');
     nums.textContent = ''; litAudit(null); return;
   }
   const s = j.sess;
   const rem = units(s.credit) - units(s.burned);
   const live = s.state === 0 && rem > 0n;
+  chip.removeAttribute('data-i18n');
   chip.className = 'chip ' + (live ? 'active' : 'paused');
   chip.textContent = live ? 'ACTIVE' : 'PAUSED';
-  nums.innerHTML = 'credit <b>' + s.credit + '</b> · burned <b>' + s.burned +
-    '</b> · left <b>' + fmtA(rem) + '</b>' + (j.rate ? ' · ' + j.rate.basis + '/unit' : '');
+  // Receipt fields are data, never HTML supplied by the host.
+  nums.textContent = 'credit ' + s.credit + ' · burned ' + s.burned +
+    ' · left ' + fmtA(rem) + (j.rate ? ' · ' + j.rate.basis + '/unit' : '');
   litAudit(s.audit_state);
 }
 
@@ -333,6 +190,8 @@ function showVeil(big, why, hint) {
 }
 
 function attach(sess) {
+  if (LOCAL_PREVIEW) return;
+  video.hidden = false; $('screen-empty').hidden = true;
   if (state.hls) { try { state.hls.destroy(); } catch {} state.hls = null; }
   const src = '/live/' + ROOM + '/master.m3u8?session=' + encodeURIComponent(sess);
   state.startedAt = performance.now();
@@ -419,12 +278,46 @@ async function maybePaused() {
 }
 
 function say(t, bad) {
+  $('st').removeAttribute('data-i18n');
   $('st').textContent = t;
   $('dot').className = 'dot ' + (bad ? 'off' : 'on');
 }
 
+/* One shared session; a reading choice never changes a balance or connection. */
+function setCopy(id, key, fallback) {
+  const el=$(id); el.setAttribute('data-i18n',key); delete el.dataset.i18nEn;
+  el.textContent=window.BNRLanguage?.text(key,fallback)||fallback;
+  // Preserve source English when the language dock later switches back.
+  el.dataset.i18nEn=fallback;
+}
+function connectionCopy(key, fallback, stateName='idle') {
+  setCopy('st',key,fallback); $('dot').className='dot '+(stateName==='live'?'on':stateName==='error'?'off':'');
+}
+function applyAudienceInput() {
+  $('room-details').open=document.body.dataset.reg==='cypherpunk';
+  $('privacy-details').open=document.body.dataset.reg==='cypherpunk';
+}
+// Source disclosure, not a connection test. Never render a receipt or identity here.
+$('privacy-context').textContent=LOCAL_PREVIEW
+  ? 'This tab: local file preview. Room API, video and chat requests are disabled. Following a link or refreshing the shared rails badge can still contact another service.'
+  : location.protocol==='https:'
+    ? 'This tab: HTTPS page. The host still receives its requests; encryption beyond the TLS endpoint is not established here.'
+    : 'This tab: HTTP page. This connection has no TLS protection; use a trusted HTTPS host for real sessions.';
+document.addEventListener('bregister',applyAudienceInput);
+$('open-room').addEventListener('click',()=>{
+  if(LOCAL_PREVIEW) return;
+  const frame=$('roomframe'); frame.src='/join/'; frame.hidden=false;
+  $('room-placeholder').hidden=true; $('open-room').hidden=true;
+});
+if(LOCAL_PREVIEW){
+  $('sess').disabled=true; $('go').disabled=true; $('open-room').disabled=true;
+  setCopy('pass-help','watch.previewBody','Live video and chat connect on the hosted room.');
+  setCopy('room-privacy','watch.previewBody','Live video and chat connect on the hosted room.');
+}
+
 /* ── wiring ──────────────────────────────────────────────────────────── */
 $('go').addEventListener('click', () => {
+  if(LOCAL_PREVIEW) return;
   const v = $('sess').value.trim();
   if (!/^\d+$/.test(v)) { say('a receipt number is digits only', true); return; }
   teardownVeil(); attach(v);
@@ -434,14 +327,25 @@ $('sess').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('go').cl
 
 /* stream health + ticker + session heartbeat */
 async function pollHealth() {
+  if (LOCAL_PREVIEW) { connectionCopy('watch.local','Local preview'); return; }
   try {
     const r = await fetch('/live/health', { cache: 'no-store' });
     const j = await r.json();
-    if (j.publishing) { if (state.mode === 'idle') say('live — enter a receipt № to watch', false); }
-    else say('offline — the streamer is not publishing', true);
-  } catch { say('the door is unreachable', true); }
+    const publishing=j.publishing===true || (Array.isArray(j.rooms)&&j.rooms.some(r=>r.room===ROOM&&r.publishing===true));
+    if(publishing){
+      if(state.mode==='idle') connectionCopy('watch.live','Live stream available','live');
+      setCopy('screen-mode','watch.live','Live stream available');
+      setCopy('screen-title','watch.live','Live stream available');
+      setCopy('screen-help','watch.passHelp','Use the session number supplied by your host.');
+    } else {
+      connectionCopy('watch.offline','No live stream');
+      setCopy('screen-mode','watch.offline','No live stream');
+      setCopy('screen-title','watch.wait','No stream is playing.');
+    }
+  } catch { connectionCopy('watch.unavailable','Connection unavailable','error'); }
 }
 async function pollTicker() {
+  if (LOCAL_PREVIEW) return;
   try {
     const r = await fetch('/live/ticker/' + ROOM + '.json', { cache: 'no-store' });
     if (!r.ok) return;
@@ -454,7 +358,7 @@ setInterval(pollHealth, 5000); setInterval(pollTicker, 5000);
 pollHealth(); pollTicker();
 
 /* first paint: the receipt the phone remembers, or a fresh greeting */
-const saved = localStorage.getItem('watch.session');
+let saved=null; try { saved=localStorage.getItem('watch.session'); } catch {};
 if (saved) { $('sess').value = saved; }
 setInterval(async () => { if (state.sess) { const j = await readSession(state.sess); if (j) paintStrip(j); } }, 4000);
 litAudit(null);

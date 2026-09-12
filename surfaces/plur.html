@@ -82,16 +82,20 @@
   .note b{color:var(--ink);font-weight:600}
   .note .big{font-size:1.5rem;color:var(--ink);letter-spacing:.02em;display:block;margin:14px 0;text-align:center}
 
-  /* ── voice bar ── */
-  .vb{position:sticky;top:0;z-index:40;background:rgba(4,11,8,.9);backdrop-filter:blur(14px);
-    border-bottom:1px solid var(--line);padding:9px 20px}
-  .vb .in{max-width:1000px;margin:0 auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  .vb select{font:inherit;font-size:12px;background:#0A1410;color:var(--ink);border:1px solid var(--line);
-    border-radius:999px;padding:5px 11px;max-width:210px}
-  .vb button{font:inherit;font-size:12px;font-weight:600;background:none;color:var(--ink-mut);
-    border:1px solid var(--line);border-radius:999px;padding:5px 13px;cursor:pointer}
-  .vb button:hover{color:var(--ink);border-color:var(--ai)}
-  .vb .st{font-family:var(--mono);font-size:10px;color:var(--ink-dim);margin-left:auto;letter-spacing:.04em}
+  /* ── pronunciation example — OPTIONAL, in-flow beside the peace words,
+     never the page's first task. Plays nothing until pressed; disables
+     itself honestly when no Hebrew or Arabic voice exists. ── */
+  .voicebox{margin-top:22px;padding:16px 18px;border:1px solid var(--line);border-radius:14px;
+    display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:rgba(10,20,16,.35)}
+  .voicebox button{font:inherit;font-size:.92rem;font-weight:600;background:none;color:var(--ink);
+    border:1px solid var(--ai);border-radius:999px;padding:9px 16px;cursor:pointer;min-height:44px}
+  .voicebox button:hover:enabled{color:var(--ai);border-color:var(--ai)}
+  .voicebox button:disabled{cursor:not-allowed;opacity:.55;border-style:dashed}
+  .voicebox .vpick{display:flex;gap:6px;align-items:center;font-size:.8rem;color:var(--ink-mut)}
+  .voicebox select{font:inherit;font-size:12px;background:#0A1410;color:var(--ink);border:1px solid var(--line);
+    border-radius:999px;padding:5px 11px;max-width:230px}
+  .voicebox .st{font-family:var(--mono);font-size:10.5px;color:var(--ink-dim);letter-spacing:.04em;flex-basis:100%}
+  .voicebox .vnote{flex-basis:100%;margin:2px 0 0;font-size:.8rem;line-height:1.55;color:var(--ink-dim)}
 
   footer{text-align:center;padding:64px 22px 84px;border-top:1px solid var(--line);color:var(--ink-dim);font-size:.86rem}
   footer .m{font-family:var(--mono);letter-spacing:.16em;color:var(--sovereign-soft);margin-top:12px;font-size:.8rem}
@@ -206,29 +210,47 @@
     .petal{opacity:1;transform:scale(1) rotate(var(--pr,0deg))}
     .rp{opacity:1;transform:none}
   }
+
+  .view-title{font-size:clamp(1.8rem,5vw,3.7rem);margin:22px 0 0;letter-spacing:-.04em}
+  .plur-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin:30px auto 0;max-width:850px}
+  .plur-actions a{padding:14px 20px;border:1px solid var(--ink-mut);border-radius:999px;color:var(--ink);text-decoration:none;font-weight:650}
+  .plur-actions a:hover,.plur-actions a:focus-visible{background:var(--you);color:#fff;outline:2px solid currentColor;outline-offset:3px}
+  .entry-note{font-size:.85rem!important;max-width:60ch!important}
+  .w .r,.w.novoice .mute{opacity:1}.w .r{color:var(--ink-mut)}
+  .boundary{max-width:1120px;margin:auto;padding:48px 24px;font:15px/1.65 var(--mono)}
+  .boundary h2,.boundary h3{margin:0 0 20px}.flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:30px}
+  .flow>div{padding:20px;border:1px solid var(--ink-mut);border-top:3px solid var(--ai)}
+  .boundary dt{color:var(--ai);margin-top:18px}.boundary dd{margin:0;overflow-wrap:anywhere}
+  .privacy-note{padding:18px;margin-top:24px;border:1px solid var(--ink-mut);border-radius:12px;font-size:.9rem;line-height:1.6}.privacy-note span{display:block}
+  body[data-reg="bee"]{--bg:#f6f7ef;--ink:#18362a;--ink-mut:#425f50;--ink-dim:#52695b;--line:#ced8cc;--ai:#176578;--you:#89316f}
+  body[data-reg="bee"] .open{min-height:60vh}body[data-reg="bee"] .plur{background:none;color:#326b39;font-size:clamp(3rem,12vw,7rem)}
+  body[data-reg="bee"] .field .en{color:#326b39;text-shadow:none}body[data-reg="bee"] .note{display:none}
+  body[data-reg="bee"] .field{padding:45px 20px}body[data-reg="bee"] .voicebox{background:#fff}body[data-reg="bee"] .voicebox select{background:#fff;color:#18362a}
+  body[data-reg="raver"] .open{background:radial-gradient(ellipse at 20% 40%,#511d49 0,transparent 60%),radial-gradient(ellipse at 90% 60%,#12434b 0,transparent 60%)}
+  body[data-reg="raver"] .plur-actions a:nth-child(2){background:#d655bb;color:#110c18;border-color:#d655bb;order:-1}
+  body[data-reg="cypherpunk"] .open{min-height:0;padding:40px 22px;text-align:start}body[data-reg="cypherpunk"] .plur{font:700 2rem var(--mono);color:var(--biomass);background:none}
+  body[data-reg="cypherpunk"] .open p{max-width:80ch;margin-inline:0}body[data-reg="cypherpunk"] .glow{display:none}
+  @media(max-width:640px){.flow{grid-template-columns:1fr}.plur-actions a{flex:1 1 40%;font-size:.95rem}.expand{letter-spacing:.12em}.w{min-height:48px}.boundary{padding:30px 18px}}
 </style>
 </head>
-<body>
-
-<div class="vb"><div class="in">
-  <select id="vsel"><option>voices…</option></select>
-  <button id="vsalam" type="button">▶ shalom · salām</button>
-  <span class="st" id="vst">—</span>
-</div></div>
+<body data-reg="bee">
 
 <section class="open">
   <div class="glow"></div>
   <div class="inner">
     <div class="plur">PLUR</div>
-    <div class="expand">peace · love · unity · respect</div>
-    <p class="floor">Thirty years ago, first time on the floor, somebody said <b>come as you are — we accept you</b>.</p>
-    <p>Four words that were never anyone's property. Here they are in every tongue this house speaks. Touch one and hear it.</p>
-    <div class="hint" data-key="d.plur.hint">tap any word · then talk back with the hive ↓</div>
+<h1 class="view-title" data-reg="bee"><span data-i18n="plur.welcome">Come as you are.</span></h1>
+<h1 class="view-title" data-reg="raver"><span data-i18n="plur.floor">One floor. Every tongue.</span></h1>
+<h1 class="view-title" data-reg="cypherpunk">PLUR / interaction &amp; trust boundaries</h1>
+    <div class="expand" data-i18n="plur.values">peace · love · unity · respect</div>
+    <p class="floor" data-reg="raver">Thirty years ago, first time on the floor, somebody said <b>come as you are — we accept you</b>.</p>
+    <p data-reg="bee"><span data-i18n="plur.intro">Start with a word. Choose a language, listen when a voice is available, and find your way into the conversation.</span></p><p data-reg="raver"><span data-i18n="plur.raverIntro">Trade a greeting. Bring a friend. Carry the music across languages.</span></p><p data-reg="cypherpunk">Inspect the browser-to-provider boundary, voice dependencies and translation evidence. This page does not establish private messaging or encrypted media transport.</p>
+    <nav class="plur-actions" aria-label="Explore PLUR"><a href="#words"><span data-i18n="plur.words">Explore the words</span></a><a href="jams.html">SKAISTS mUsiC ↗</a><a href="#talk"><span data-i18n="plur.conversation">Try a conversation</span></a><a href="blanguage.html"><span data-i18n="plur.dock">Language dock</span></a></nav><p class="entry-note"><span data-i18n="plur.voice">Voices depend on your browser. Unavailable voices are labelled.</span></p>
   </div>
 </section>
 
-<section class="field f-peace">
-  <div class="en">peace</div>
+<section class="field f-peace" id="words">
+  <div class="en" data-i18n="plur.peace">peace</div>
   <div class="gloss">the first word</div>
   <div class="constellation">
     <button class="w root" data-sz="xl" data-say="शान्तिः" data-lang="sa"><span class="t">शान्तिः</span><span class="r">śāntiḥ · sanskrit</span><span class="mute">no voice</span></button>
@@ -254,17 +276,25 @@
     <button class="w" data-sz="m" data-say="paz" data-lang="es"><span class="t">paz</span><span class="r">spanish</span><span class="mute">no voice</span></button>
     <button class="w" data-sz="s" data-say="sìth" data-lang="gd"><span class="t">sìth</span><span class="r">gaelic</span><span class="mute">no voice</span></button>
   </div>
+  <div class="voicebox" role="group" aria-label="optional pronunciation example">
+    <button id="vsalam" type="button" aria-describedby="vnote"><span aria-hidden="true">🔊</span> <span data-i18n="plur.hearPair">Hear the Hebrew and Arabic greetings</span></button>
+    <label class="vpick" for="vsel"><span data-i18n="plur.voicePick">Voice used for listening</span>
+      <select id="vsel"></select>
+    </label>
+    <span class="st" id="vst" role="status">—</span>
+    <p class="vnote" id="vnote" data-i18n="plur.hearPairNote">Optional pronunciation example beside the words. It plays the two greetings in turn, only when you press it, and only if your browser offers a Hebrew or an Arabic voice. Nothing plays automatically.</p>
+  </div>
   <div class="note">
     <h3>the word two peoples share</h3>
     <span class="big">שלום · سلام</span>
-    <p><b>Shalom</b> and <b>salām</b> are the same word. One Semitic root — <b>S‑L‑M</b> — meaning whole, entire, unbroken. Not the absence of war; the state of nothing being missing.</p>
-    <p>Two peoples who have agreed on almost nothing for a century greet each other every day, in their own languages, with the same word. Nobody had to negotiate that. It was already true before anyone drew a border.</p>
-    <p>And <b>शान्तिः</b> travelled the other way — Sanskrit <i>śānti</i> walked east with the sutras into Thai <b>สันติภาพ</b> and stayed in Hindi as <b>शांति</b>. Peace has been crossing frontiers longer than the frontiers have existed.</p>
+    <p><b>Shalom</b> and <b>salām</b> are cognate greetings from the same Semitic root — <b>S‑L‑M</b> — a root long associated with wholeness and well-being. Not the absence of war; the sense of nothing being missing.</p>
+    <p>Two peoples who have agreed on almost nothing for a century greet each other every day, in their own languages, with words from that one root. Nobody had to negotiate that. It was already there before anyone drew a border.</p>
+    <p>And <b>शान्तिः</b> travelled the other way — Sanskrit <i>śānti</i> travelled east with the sutras into Thai <b>สันติภาพ</b> and stayed in Hindi as <b>शांति</b>. Peace has been crossing frontiers longer than the frontiers have existed.</p>
   </div>
 </section>
 
 <section class="field f-love">
-  <div class="en">love</div>
+  <div class="en" data-i18n="plur.love">love</div>
   <div class="gloss">mīlestība ir karalis</div>
   <div class="constellation">
     <button class="w root" data-sz="xl" data-say="mīlestība" data-lang="lv"><span class="t">mīlestība</span><span class="r">latvian</span><span class="mute">no voice</span></button>
@@ -294,7 +324,7 @@
 </section>
 
 <section class="field f-unity">
-  <div class="en">unity</div>
+  <div class="en" data-i18n="plur.unity">unity</div>
   <div class="gloss">the hive word</div>
   <div class="constellation">
     <button class="w root" data-sz="xl" data-say="एकता" data-lang="sa"><span class="t">एकता</span><span class="r">ekatā · sanskrit · one-ness</span><span class="mute">no voice</span></button>
@@ -324,7 +354,7 @@
 </section>
 
 <section class="field f-respect">
-  <div class="en">respect</div>
+  <div class="en" data-i18n="plur.respect">respect</div>
   <div class="gloss">the one that has to be given</div>
   <div class="constellation">
     <button class="w root" data-sz="xl" data-say="כבוד" data-lang="he"><span class="t">כבוד</span><span class="r">kavod · hebrew · weight, honour</span><span class="mute">no voice</span></button>
@@ -385,6 +415,7 @@
   </div>
 </section>
 
+<section class="boundary" data-reg="cypherpunk" id="privacy-map"><h2>Data flow / current implementation</h2><div class="flow"><div><b>01 · Browser</b><p>Word cards are embedded in this document. View and UI-language preferences are stored by the shared controls on this origin.</p></div><div><b>02 · Voice engine</b><p>Speech synthesis uses the browser's installed voices. Recognition may use a browser vendor service. Local-only audio processing is not established.</p></div><div><b>03 · AI provider</b><p>Send posts your text, selected languages and this tab's conversation history to api.anthropic.com/v1/messages. The provider receives plaintext; HTTPS is not end-to-end encryption against that provider.</p></div></div><h3>Evidence, not a privacy badge</h3><dl><dt>Source</dt><dd>surfaces/plur.html: ask(), renderHive(), SpeechRecognition; shared register.js and lang.js.</dd><dt>Tutor availability</dt><dd>The current direct request has no configured authentication header. A working authenticated service is not verified. Failed requests must show an unavailable state.</dd><dt>Translation</dt><dd>Interface corpus renderings are machine drafts until attested. English fallback remains visible in the shared coverage counter. Word-card provenance and voice coverage are separate from interface coverage.</dd><dt>Unverified</dt><dd>Provider retention, relay privacy, end-to-end chat encryption, live media performance and network anonymity. No measurements are fabricated here.</dd></dl></section>
 <section class="talk" id="talk" data-key="d.plur.talk">
   <div class="wrap">
     <h2 data-key="d.plur.talk.h">now say it back
@@ -411,7 +442,7 @@
       <button type="button" data-seed="Greet me, then teach me to answer politely.">✋ just greet me</button>
     </div>
 
-    <div class="thread" id="thread" aria-live="polite"></div>
+    <aside class="privacy-note"><span data-i18n="plur.privacy">Sending shares your text and this conversation with an external AI provider. Voice input may use your browser vendor’s service. Do not enter private information.</span> <span><span data-i18n="plur.draft">AI replies and translations can be wrong; community review matters.</span></span></aside><div class="thread" id="thread" aria-live="polite"></div>
 
     <div class="composer">
       <button type="button" class="mic" id="mic" title="hold to speak" aria-label="hold to speak">🎙</button>
@@ -423,7 +454,7 @@
   </div>
 </section>
 
-<section class="stone" data-key="d.plur.stone">
+<section data-reg="cypherpunk" class="stone" data-key="d.plur.stone">
   <div class="wrap">
     <h2 data-key="d.plur.stone.h">four words are the whole constitution</h2>
     <p class="sub" data-key="d.plur.stone.sub">Communication is the cornerstone of this estate.
@@ -478,6 +509,26 @@
     return;
   }
   function base(t){ return (t||'').toLowerCase().split(/[-_]/)[0]; }
+  /* the shared corpus lookup keeps script-written strings translatable with
+     a visible English fallback (corpus law) */
+  function T(key, fallback){
+    return (window.BNRLanguage && typeof window.BNRLanguage.text === 'function')
+      ? window.BNRLanguage.text(key, fallback) : fallback;
+  }
+  /* honest enable/disable for the optional pronunciation example: it is
+     usable exactly when a Hebrew OR an Arabic voice exists — never a mystery
+     button, never silent-on-click without an explanation */
+  function pairVoices(){
+    return words.filter(function(w){
+      return (w.dataset.say === 'שלום' || w.dataset.say === 'سلام') && !w.classList.contains('novoice');
+    });
+  }
+  function refreshSalam(){
+    var ok = pairVoices().length > 0;
+    salam.disabled = !ok;
+    st.textContent = ok ? T('plur.voiceReady', 'a Hebrew or Arabic voice is available for the example')
+                        : T('plur.voiceNone', 'No Hebrew or Arabic voice is installed in this browser, so this example stays silent; the written greetings remain.');
+  }
 
   function index(){
     voices = synth.getVoices() || [];
@@ -490,13 +541,16 @@
       ok ? have[b]=1 : miss[b]=1;
     });
     var h = Object.keys(have).length, m = Object.keys(miss).length;
-    st.textContent = h + ' tongues speak here · ' + m + ' have no voice on this machine';
+    /* the status line belongs to the pronunciation example (refreshSalam);
+       the general voice summary stays visible on the word cards themselves */
+    sel.title = h + ' tongues speak here · ' + m + ' have no voice on this machine';
     fill();
+    refreshSalam();
   }
   function fill(){
     sel.innerHTML = '';
     var a = document.createElement('option');
-    a.value=''; a.textContent='match each tongue'; sel.appendChild(a);
+    a.value=''; a.textContent = T('plur.voiceMatch', 'match each tongue'); sel.appendChild(a);
     voices.forEach(function(v,i){
       var o=document.createElement('option'); o.value=String(i);
       o.textContent = v.name + ' — ' + v.lang; sel.appendChild(o);
@@ -530,11 +584,9 @@
     w.addEventListener('click', function(){ if(!w.classList.contains('novoice')) say(w); });
   });
   salam.addEventListener('click', function(){
-    var pair = words.filter(function(w){
-      return (w.dataset.say === 'שלום' || w.dataset.say === 'سلام') && !w.classList.contains('novoice');
-    });
-    if(!pair.length){ st.textContent = 'no hebrew or arabic voice on this machine'; return; }
-    pair[0].scrollIntoView({block:'center'});
+    var pair = pairVoices();
+    if(!pair.length){ refreshSalam(); return; } /* honest disable makes this rare; the runtime check stays as a guard */
+    pair[0].scrollIntoView({block:'center',behavior:'auto'}); /* jump, not glide: reduced-motion safe */
     say(pair[0], function(){ if(pair[1]) setTimeout(function(){ say(pair[1]); }, 420); });
   });
   window.bvoice = {
@@ -810,8 +862,9 @@
     fetch('https://api.anthropic.com/v1/messages',{
       method:'POST', headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-6', max_tokens:1000, system:sys, messages:history})
-    }).then(function(r){ return r.json(); })
+    }).then(function(r){ if(!r.ok) throw new Error('provider-unavailable'); return r.json(); })
     .then(function(d){
+      if(!Array.isArray(d.content) || !d.content.some(function(c){return c.type==='text' && c.text && c.text.trim();})) throw new Error('empty-reply');
       think.remove();
       var txt=(d.content||[]).map(function(c){return c.type==='text'?c.text:''}).join('').trim()
         .replace(/```json|```/g,'').trim();
@@ -822,7 +875,7 @@
     })
     .catch(function(){
       think.remove();
-      bubble('sys').textContent='the tutor can\'t reach the hive from this copy — the words above still speak. try again, or open this page where the relay lives.';
+      bubble('sys').textContent='the tutor is unavailable in this copy. Your message was not answered. The word cards still work when a browser voice is available.';
       st.textContent='offline · honest about it';
       history.pop();
     })
