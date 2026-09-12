@@ -84,6 +84,32 @@ consciousness / deepen keys. Meaning review is still owed. Existing
   checks now enter via **Go deeper**)
 - browser first-paint screenshots of the three registers at the 8765 poke
 
+## Re-poke receipts (same day, 8765)
+
+Served `surfaces/` at `http://127.0.0.1:8765/blongevity.html`. Confirmed
+`/surfaces/register.js` is 404 on that poke (the old alias) and
+`/register.js` + `/lang.js` are 200. Playwright-core against system
+Chrome, `localStorage` cleared, 1280×800:
+
+- New bee: `.sub[data-reg=cypherpunk]` `display:none`; instrument
+  `display:none`; above-fold ZERO ACiD / CB1 / FLAGSHIP / PMID /
+  reversal; `#bregctl` and `#blangctl` painted; calm + takeaway +
+  See the fat story. Cannabinoid word absent from `#first-bee`.
+- See the fat story: two bricks + blank honesty; still no CB1 / ACiD /
+  reversal / mirror.
+- Raver: feeling line on; consciousness off; instrument hidden.
+  First-cut padding left **Touch the story** under the tour bar —
+  cured with `calc(14vh + 72px)` bottom padding; re-measured clearance
+  52px.
+- Touch the story: consciousness on, then the New bee takeaway stack.
+- Cypherpunk: instrument + cypher masthead on; sources default open;
+  walls / ACiD / FLAGSHIP / six stages / reverse intact.
+- Switch back to New bee: cypher masthead stays `display:none`. Beat
+  memory keeps the story layer when returning after that tap.
+
+29/29 poke assertions PASS. Browser walk New bee → story → Raver →
+Touch the story → Cypherpunk → New bee matches.
+
 Skipped this beat: fleet attestation of the new keys, any health-outcome
 rewrite, live USDA / PMID re-fetch (composition and ledger rows are
 unchanged), any David Irvine / x0x #622 measurement claim.
