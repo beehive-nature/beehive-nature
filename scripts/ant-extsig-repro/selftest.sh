@@ -111,6 +111,19 @@ phys_under() {
     case "$_p" in "$_b"/*) return 0 ;; *) return 1 ;; esac
 }
 
+# All suite removals validate the resolved target before invoking rm.
+# Failures count against the suite, including final cleanup failures.
+remove_owned() {
+    if ! phys_under "$1" "$2"; then
+        echo "selftest: cleanup validation failed — KEPT: $1" >&2
+        fail=$((fail+1)); return 1
+    fi
+    if ! rm -rf "$1"; then
+        echo "selftest: cleanup removal failed — RETAINED: $1" >&2
+        fail=$((fail+1)); return 1
+    fi
+}
+
 # ---- T1a: kit with the committed lock removed ------------------------------
 KIT1=$WORK/kit-missing-lock
 mkdir -p "$KIT1"
@@ -335,7 +348,7 @@ fi
 # legacy marker's 8-char suffix is never matched by the 6-char glob)
 for d in "$ISO"/ant-extsig-repro.??????; do
     [ -d "$d" ] || continue
-    case "$d" in "$ISO"/ant-extsig-repro.??????) rm -rf "$d" ;; esac
+    case "$d" in "$ISO"/ant-extsig-repro.??????) remove_owned "$d" "$ISO" ;; esac
 done
 PATH="$STUBBIN:$PATH" TMPDIR="$ISO" REPRO_SKIP_CHECK=1 sh "$RUN" >"$WORK/t10b.out" 2>&1
 t10b_rc=$?
@@ -355,7 +368,7 @@ fi
 # T9 asserts the final state of the isolated base
 for d in "$ISO"/ant-extsig-repro.??????; do
     [ -d "$d" ] || continue
-    case "$d" in "$ISO"/ant-extsig-repro.??????) rm -rf "$d" ;; esac
+    case "$d" in "$ISO"/ant-extsig-repro.??????) remove_owned "$d" "$ISO" ;; esac
 done
 
 # ---- T9: owned neighbor + pre-existing legacy survived everything ----------
@@ -387,16 +400,16 @@ if [ "$(sha256sum "$LEGACY/sentinel.txt" 2>/dev/null | cut -d' ' -f1)" != "$lega
 fi
 for d in "$ISO"/ant-extsig-repro.??????; do
     [ -d "$d" ] || continue
-    case "$d" in "$ISO"/ant-extsig-repro.??????) rm -rf "$d" || echo "selftest: could not remove retained scratch $d" >&2 ;; esac
+    case "$d" in "$ISO"/ant-extsig-repro.??????) remove_owned "$d" "$ISO" || echo "selftest: could not remove retained scratch $d" >&2 ;; esac
 done
 case "$NEIGHBOR" in
-    "$ISO"/ant-extsig-repro-neighb.*) phys_under "$NEIGHBOR" "$ISO" && rm -rf "$NEIGHBOR" \
+    "$ISO"/ant-extsig-repro-neighb.*) phys_under "$NEIGHBOR" "$ISO" && remove_owned "$NEIGHBOR" "$ISO" \
         || echo "selftest: NEIGHBOR failed physical validation — KEPT: $NEIGHBOR" >&2 ;;
     *) echo "selftest: NEIGHBOR path unexpected — KEPT: $NEIGHBOR" >&2 ;;
 esac
-rm -rf "$LEGACY"  # suite-owned fixture (planted by this suite), role complete
+remove_owned "$LEGACY" "$ISO"  # suite-owned fixture (planted by this suite), role complete
 case "$ISO" in
-    "$BASE"/ant-extsig-repro-selftest-iso.*) phys_under "$ISO" "$BASE" && rm -rf "$ISO" \
+    "$BASE"/ant-extsig-repro-selftest-iso.*) phys_under "$ISO" "$BASE" && remove_owned "$ISO" "$BASE" \
         || echo "selftest: ISO failed physical validation — KEPT: $ISO" >&2 ;;
     *) echo "selftest: ISO path unexpected — KEPT: $ISO" >&2 ;;
 esac
@@ -406,7 +419,7 @@ base_phys=$(cd "$BASE" 2>/dev/null && pwd -P) || base_phys=""
 case "$WORK" in
     "$BASE"/ant-extsig-repro-selftest.*)
         case "$work_phys" in
-            "$base_phys"/ant-extsig-repro-selftest.*) rm -rf "$WORK" ;;
+            "$base_phys"/ant-extsig-repro-selftest.*) remove_owned "$WORK" "$BASE" ;;
             *) echo "selftest: WORK failed physical validation — KEPT: $WORK" >&2 ;;
         esac ;;
     *) echo "selftest: WORK path unexpected — KEPT: $WORK" >&2 ;;
