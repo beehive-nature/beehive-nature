@@ -92,6 +92,9 @@ test('OUR HIVES beat is doors and stories — no raw host stack', () => {
   assert.match(hives, /relay\.skaists\.dev/);
   assert.match(hives, /relay2\.skaists\.dev/);
   assert.match(hives, /opens in a new tab/);
+  // F1: the mid-beat door-card sentence is keyed (renders translated, not English)
+  const cards = hives.match(/data-i18n="dir\.hives\.doorcard"/g) || [];
+  assert.equal(cards.length, 2, 'both door cards carry dir.hives.doorcard');
   assert.doesNotMatch(hives, FENCE);
   assert.match(page, /body:not\(\[data-reg="cypherpunk"\]\)\[data-dir-beat="hives"\] #layer-hives\{display:block\}/);
 });
@@ -134,6 +137,20 @@ test('Cypherpunk still reaches the full door instrument, same honesty', () => {
   assert.match(page, /if\(reading==='cypherpunk'\) beat='deeper'/);
   assert.match(page, /body\[data-reg="cypherpunk"\] #instrument\{display:block\}/);
   assert.match(page, /target="_blank" rel="noopener noreferrer"/);
+  // F5: every numbered section heading and every law div is keyed (translation hooks)
+  assert.doesNotMatch(instrument, /<h2>\d/, 'no unkeyed numbered instrument headings');
+  assert.doesNotMatch(instrument, /<div class="law">/, 'no unkeyed instrument law copy');
+  assert.match(instrument, /<span data-i18n="dir\.inst\.law5a">Named seats, not presence\. Published records deepen at<\/span>/);
+  assert.match(instrument, /data-i18n="experience\.profile">People and names<\/a>\.<\/p>/);
+});
+
+test('routine New bee labels read at 14px minimum, bee-scoped only (F4)', () => {
+  assert.match(page, /body\[data-reg="bee"\] \.listing \.lrelay\{font-size:\.875rem/);
+  assert.match(page, /body\[data-reg="bee"\] \.listing \.chip\{font-size:\.875rem\}/);
+  // the override is scoped: the compact instrument register survives for Cypherpunk
+  assert.doesNotMatch(page, /body\[data-reg="cypherpunk"\][^{]*\.lrelay/);
+  assert.match(page, /\.listing \.lrelay\{font-size:10\.5px/);
+  assert.match(page, /\.listing \.chip\{display:inline-flex[^}]*font-size:9\.5px/);
 });
 
 test('keyed first-paint English matches the corpus; every tongue has a cell', () => {
@@ -141,7 +158,11 @@ test('keyed first-paint English matches the corpus; every tongue has a cell', ()
     'dir.mark', 'dir.bee.calm', 'dir.bee.takeaway', 'dir.bee.support',
     'dir.raver.feel', 'dir.raver.tap', 'dir.raver.consciousness',
     'dir.hives.lead', 'dir.hives.skaists', 'dir.hives.science',
-    'dir.hives.visit', 'dir.hives.hosts', 'dir.opens', 'dir.foot.door'
+    'dir.hives.visit', 'dir.hives.hosts', 'dir.hives.doorcard',
+    'dir.inst.h1', 'dir.inst.law1', 'dir.inst.h2', 'dir.inst.h3', 'dir.inst.law3',
+    'dir.inst.h4', 'dir.inst.h5', 'dir.inst.law5a', 'dir.inst.h6', 'dir.inst.law6',
+    'dir.inst.h7', 'dir.inst.law7',
+    'dir.opens', 'dir.foot.door'
   ];
   for (const key of keys) {
     const idx = page.indexOf('data-i18n="'+key+'"');

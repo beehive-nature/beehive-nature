@@ -108,6 +108,10 @@ body[data-reg="bee"] .door.primary{background:#326b39;color:#fff;border-color:#3
 body[data-reg="bee"] #tbar{background:#f6f7f2!important;border-top-color:#ccd7cf!important}
 body[data-reg="bee"] #tbar a{color:#18362a!important}
 body[data-reg="bee"] section,.house{background:#fff;border-color:var(--line)}
+/* F4 (z1.a release patch): routine New bee labels read at ≥14px — relay lines
+   and status chips. Bee-scoped only; Cypherpunk keeps its compact instrument. */
+body[data-reg="bee"] .listing .lrelay{font-size:.875rem;line-height:1.7}
+body[data-reg="bee"] .listing .chip{font-size:.875rem}
 body[data-reg="raver"]{--bg:#0c1412;--ink:#e9f2ec;--dim:#b7c9be;--line:#2a3a34;--gold:#FFD700;--violet:#c9a0ff;--cyan:#7ee0d0;
  --leaf:#c9a0ff;--verified:#86CC72;--guard:#c9a0ff;color-scheme:dark;background:#0c1412}
 body[data-reg="raver"][data-dir-beat="arrival"],
@@ -265,7 +269,7 @@ th{color:var(--violet);font-weight:400} td.n{color:var(--ink)}
     <div class="art" aria-hidden="true">👑</div>
     <div>
       <strong data-i18n="dir.hives.skaists">skaists.buzz — the founder's hive</strong>
-      <p class="support">A published community door. The same hive has a clean-name web door if .buzz is filtered.</p>
+      <p class="support" data-i18n="dir.hives.doorcard">A published community door. The same hive has a clean-name web door if .buzz is filtered.</p>
       <a class="hive-action" href="https://relay.skaists.dev/" target="_blank" rel="noopener noreferrer"><span data-i18n="dir.hives.visit">Visit the web door</span> <span data-i18n="dir.opens">(opens in a new tab)</span></a>
     </div>
   </div>
@@ -273,7 +277,7 @@ th{color:var(--violet);font-weight:400} td.n{color:var(--ink)}
     <div class="art" aria-hidden="true">🔬</div>
     <div>
       <strong data-i18n="dir.hives.science">beehivenature.buzz — the science hive</strong>
-      <p class="support">A published community door. The same hive has a clean-name web door if .buzz is filtered.</p>
+      <p class="support" data-i18n="dir.hives.doorcard">A published community door. The same hive has a clean-name web door if .buzz is filtered.</p>
       <a class="hive-action" href="https://relay2.skaists.dev/" target="_blank" rel="noopener noreferrer"><span data-i18n="dir.hives.visit">Visit the web door</span> <span data-i18n="dir.opens">(opens in a new tab)</span></a>
     </div>
   </div>
@@ -285,12 +289,12 @@ th{color:var(--violet);font-weight:400} td.n{color:var(--ink)}
 
 <div id="instrument">
 <section>
-  <h2>1 · receipt law</h2>
-  <div class="law">This page <b>fetches nothing</b>. Status chips are hand-verified receipts at publish, not a live API. The estate does not proxy or mirror buzz.directory — it links. No online dots, last-seen, or who's-in-the-room theater. Cite, or silent: no invented uptime, member counts, or “online now”.</div>
+  <h2 data-i18n="dir.inst.h1">1 · receipt law</h2>
+  <div class="law" data-i18n="dir.inst.law1">This page <b>fetches nothing</b>. Status chips are hand-verified receipts at publish, not a live API. The estate does not proxy or mirror buzz.directory — it links. No online dots, last-seen, or who's-in-the-room theater. Cite, or silent: no invented uptime, member counts, or “online now”.</div>
   <div data-i18n="experience.directoryReceipt">Directory statuses are published records, not live availability checks.</div>
 </section>
 <section>
-  <h2>2 · estate dual-home table</h2>
+  <h2 data-i18n="dir.inst.h2">2 · estate dual-home table</h2>
   <div class="law" data-i18n="bd.hives.law">The estate runs two relays on its own infrastructure, each with a primary and a fallback hostname. If the primary is filtered on your network, use the fallback — both serve the same relay and the same community.</div>
   <table>
     <thead><tr><th>hive</th><th>primary</th><th>fallback</th><th>web door</th></tr></thead>
@@ -320,8 +324,8 @@ th{color:var(--violet);font-weight:400} td.n{color:var(--ink)}
   </div>
 </section>
 <section>
-  <h2>3 · public directory instrument</h2>
-  <div class="law">Relay host, join type, verified/failing + reason, buzz:// invite, and the source URL. Hand-checked 2026-08-31. The cards printed below are a published snapshot, not a live census.</div>
+  <h2 data-i18n="dir.inst.h3">3 · public directory instrument</h2>
+  <div class="law" data-i18n="dir.inst.law3">Relay host, join type, verified/failing + reason, buzz:// invite, and the source URL. Hand-checked 2026-08-31. The cards printed below are a published snapshot, not a live census.</div>
 </section>
 <section id="public-directory">
   <h2 data-i18n="bd.ext.h2">THE PUBLIC DIRECTORY — buzz.directory pages 1–2, verified at publish</h2>
@@ -487,7 +491,7 @@ th{color:var(--violet);font-weight:400} td.n{color:var(--ink)}
   </div>
 </section>
 <section>
-  <h2>4 · invite / expiry honesty</h2>
+  <h2 data-i18n="dir.inst.h4">4 · invite / expiry honesty</h2>
   <details class="door-help">
     <summary data-i18n="social.arrival.door.summary">If the door does not open</summary>
     <div class="note">
@@ -497,8 +501,8 @@ th{color:var(--violet);font-weight:400} td.n{color:var(--ink)}
   </details>
 </section>
 <section>
-  <h2>5 · people / agents roster</h2>
-  <p class="law">Named seats, not presence. Published records deepen at <a href="profile.html" data-i18n="experience.profile">People and names</a>.</p>
+  <h2 data-i18n="dir.inst.h5">5 · people / agents roster</h2>
+  <p class="law"><span data-i18n="dir.inst.law5a">Named seats, not presence. Published records deepen at</span> <a href="profile.html" data-i18n="experience.profile">People and names</a>.</p>
   <div id="people-agents">
   <h2 data-i18n="social.arrival.who.heading">PEOPLE / AGENTS — named seats, not a live roster</h2>
   <div class="law" data-i18n="social.arrival.who.law">Humans and machine seats are labeled on this page so you can tell them apart. This is the published roster, not proof that anyone is in a Buzz room right now. Conversation happens in the Buzz app.</div>
@@ -521,13 +525,13 @@ th{color:var(--violet);font-weight:400} td.n{color:var(--ink)}
 </div>
 </section>
 <section id="connection-help">
-  <h2>6 · connection details</h2>
-  <div class="law">Connection details on each public listing open by default in this view. New bee and Raver keep them behind deepen.</div>
+  <h2 data-i18n="dir.inst.h6">6 · connection details</h2>
+  <div class="law" data-i18n="dir.inst.law6">Connection details on each public listing open by default in this view. New bee and Raver keep them behind deepen.</div>
 </section>
 <section id="sources-panel">
-  <h2>7 · cite-or-silent</h2>
+  <h2 data-i18n="dir.inst.h7">7 · cite-or-silent</h2>
   <details data-view-disclosure="sources"><summary>sources</summary>
-    <div class="law">buzz.directory is linked, not mirrored. Invite codes are copied from that public directory at publish. No enrichment APIs. Agents on this page are labeled machine seats — not live chat.</div>
+    <div class="law" data-i18n="dir.inst.law7">buzz.directory is linked, not mirrored. Invite codes are copied from that public directory at publish. No enrichment APIs. Agents on this page are labeled machine seats — not live chat.</div>
   </details>
 </section>
 </div>

@@ -263,3 +263,78 @@ one Astra can integrate with a fully green board; the original PR #56
 stays as Grok's preserved work of record.
 
 
+
+---
+
+# z1.a release patch — Sprint 2: F1/F4/F5 + the vacuous assertion — 2026-09-12
+
+Seat: z1.a (zCode GLM 5.3), Medium, per Astra's #10 comment 5647899778.
+Base: `f19513c1` (PR #57 head, unchanged since Sprint 1). Descendant on the
+candidate branch only; shared chrome, CI wiring and the accepted F2/F3 work
+untouched. Sole shared-corpus writer this sprint.
+
+## F1 — the three mid-beat sentences are keyed
+
+- `dir.hives.doorcard` on BOTH estate door cards (buzz-directory, the two
+  story doors after OUR HIVES).
+- `prof.house.story` on the founder house card (profile house layer).
+Verified rendered equal to the corpus cell in lv (directory) and ar
+(profile) by the repaired walk.
+
+## F5 — instrument headings and law copy keyed
+
+Both pages' numbered section headings (directory 1–7, profile 1–7) and every
+unkeyed `.law` block now carry `data-i18n` — 27 new keys
+(`dir.inst.h1…h7` + `law1/law3/law5a/law6/law7`;
+`prof.inst.h1…h7` + `law1/law2/law3/law4/law5/law6/law7/law7src`).
+The roster law keeps its embedded profile link safe by splitting the
+sentence into a keyed span (`dir.inst.law5a`) + the already-keyed
+`experience.profile` anchor. Guarded structurally: both page suites now
+assert the instrument contains **no** unkeyed numbered heading and **no**
+unkeyed `.law` div. Directory section 2's law reuses the existing
+`bd.hives.law` key (identical text, zero new cells).
+
+All 29 new keys (F1+F5) populated across en + 28 tongues, ⚙ machine-draft
+provenance recorded in `_meta.drafted`; terminology aligned to the existing
+corpus anchors (улей/strops/รัง/seis/…). Meaning review remains #7 — no
+human attestation claimed. Pre-existing corpus gaps NOT widened and NOT
+fixed here (out of scope, observed): `bd.note.title` carries English text
+in 18 tongue-cells from the original adapter, and `bd.ext.law` and kin
+fall back to English in several tongues; named here so Astra can decide.
+
+## F4 — routine New bee labels ≥14px, bee-scoped
+
+`body[data-reg="bee"]`-scoped overrides lift directory `.lrelay`/`.chip`
+and profile `.bdesc`/`.bmeta` to .875rem (=14px at default root) with a
+1.7 line-height for the relay lines. Cypherpunk's compact instrument
+register is untouched (page suites assert the base sizes survive and no
+cypherpunk-scoped override exists). Walk-verified computed sizes (min ≥14)
+at 390 in English, with zero horizontal clipping and no page overflow, and
+again in the RTL pass.
+
+## Vacuous assertion repaired
+
+`e2e/people-journey-shot.mjs`'s language check (z1.b's cosmetic nit) now
+asserts the rendered `#first-bee .calm` equals the exact corpus cell for
+BOTH pages (lv + ar), the story sentence renders its corpus cell, the
+raver feel likewise, and a new instrument sweep asserts every rendered
+leaf keyed element matches its corpus cell (gated on rendered innerText so
+closed-details copy is skipped; compared via textContent so CSS
+`text-transform` on `.who` cannot distort). 97/97.
+
+## Verification (this patch)
+
+- Front-door line + page suites: **263/263** (two new F4 tests)
+- `estate-source` **11/11** · `estate-check` PASS (93 counted)
+- Reading-room browser suite: **1812/1812** (both pages, both sizes,
+  all-28-language sweep incl. RTL)
+- `people-journey-shot`: **97/97** — plus new receipts:
+  `*-bee-inst-390.png` (F4 labels), `*-lv/ar-bee-story-390.png`,
+  `*-lv/ar-instrument-390.png` (translated instrument incl. RTL)
+
+## Scope discipline
+
+No shared chrome rewrite, no CI wiring change, no key removal, no change
+to Cypherpunk behavior, accepted illustrations, beat paths, disclosure
+state retention or the honesty fence. The 390px Raver biomass crop stays
+a recorded refinement (per Astra), not this patch.

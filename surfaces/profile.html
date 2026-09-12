@@ -108,6 +108,11 @@ body[data-reg="bee"] .door.primary{background:#326b39;color:#fff;border-color:#3
 body[data-reg="bee"] #tbar{background:#f6f7f2!important;border-top-color:#ccd7cf!important}
 body[data-reg="bee"] #tbar a{color:#18362a!important}
 body[data-reg="bee"] section,.house{background:#fff;border-color:var(--line)}
+/* F4 (z1.a release patch): routine New bee labels read at ≥14px — house
+   descriptions and holder metadata. Bee-scoped only; Cypherpunk keeps its
+   compact instrument. */
+body[data-reg="bee"] .holder .bio .bdesc{font-size:.875rem;line-height:1.7}
+body[data-reg="bee"] .holder .bio .bmeta{font-size:.875rem}
 body[data-reg="raver"]{--bg:#0c1412;--ink:#e9f2ec;--dim:#b7c9be;--line:#2a3a34;--gold:#FFD700;--violet:#c9a0ff;--cyan:#7ee0d0;
  --leaf:#c9a0ff;--verified:#86CC72;--guard:#c9a0ff;color-scheme:dark;background:#0c1412}
 body[data-reg="raver"][data-dir-beat="arrival"],
@@ -254,7 +259,7 @@ th{color:var(--violet);font-weight:400} td.n{color:var(--ink)}
     <div>
       <strong>skaists</strong>
       <p class="support" data-i18n="prof.house.holder">Travis Mark Remington holds this house.</p>
-      <p class="support">Founder of the Beehive Nature Reserve. Builds dynasties. The holder ledger waits behind Go deeper.</p>
+      <p class="support" data-i18n="prof.house.story">Founder of the Beehive Nature Reserve. Builds dynasties. The holder ledger waits behind Go deeper.</p>
     </div>
   </div>
   <div class="choices">
@@ -265,17 +270,17 @@ th{color:var(--violet);font-weight:400} td.n{color:var(--ink)}
 
 <div id="instrument">
 <section>
-  <h2>1 · record law</h2>
-  <div class="law">Published snapshots of who holds a house. Not a live presence list. Not a profile editor. Guest can read with no wallet. No online dots, last-seen, or who's-in-the-room theater. Wallets and mailboxes are published holder fields only — no enrichment APIs, no scrape-to-complete.</div>
+  <h2 data-i18n="prof.inst.h1">1 · record law</h2>
+  <div class="law" data-i18n="prof.inst.law1">Published snapshots of who holds a house. Not a live presence list. Not a profile editor. Guest can read with no wallet. No online dots, last-seen, or who's-in-the-room theater. Wallets and mailboxes are published holder fields only — no enrichment APIs, no scrape-to-complete.</div>
   <details class="record-about" data-view-disclosure="about"><summary data-i18n="experience.about">About this record</summary><p>every .b name and Basename is a house. the current holder stands at the top; every prior holder's record is preserved beneath — never edited, never deleted. a lost key is permanent; a lost name is a lease running out. guest citizens get the same template — no wallet, no key, no account needed to read.</p></details>
 </section>
 <section>
-  <h2>2 · append-only holder ledger</h2>
-  <div class="law">Prior holders stay printed. A generation is never quietly rewritten. Name history opens by default in this view.</div>
+  <h2 data-i18n="prof.inst.h2">2 · append-only holder ledger</h2>
+  <div class="law" data-i18n="prof.inst.law2">Prior holders stay printed. A generation is never quietly rewritten. Name history opens by default in this view.</div>
 </section>
 <section>
-  <h2>3 · house instrument</h2>
-  <div class="law">Type, bio, wallet or mailbox when published, and generation timeline. Same facts as New bee and Raver — this view shows every house at once.</div>
+  <h2 data-i18n="prof.inst.h3">3 · house instrument</h2>
+  <div class="law" data-i18n="prof.inst.law3">Type, bio, wallet or mailbox when published, and generation timeline. Same facts as New bee and Raver — this view shows every house at once.</div>
   <div class="profile-houses">
 <!-- ═══ HOUSE: skaists ═══ -->
 <div class="house current" id="name-record-1">
@@ -387,22 +392,22 @@ th{color:var(--violet);font-weight:400} td.n{color:var(--ink)}
   </div>
 </section>
 <section>
-  <h2>4 · key / name separation</h2>
-  <div class="law">Name and key must never share a single point of failure. A lost key stays lost; a name is a lease running out.</div>
+  <h2 data-i18n="prof.inst.h4">4 · key / name separation</h2>
+  <div class="law" data-i18n="prof.inst.law4">Name and key must never share a single point of failure. A lost key stays lost; a name is a lease running out.</div>
 </section>
 <section>
-  <h2>5 · guest citizenship</h2>
-  <div class="law">The free citizenship tier renders fully. You do not need a wallet, a key, an account, or a name to read this page.</div>
+  <h2 data-i18n="prof.inst.h5">5 · guest citizenship</h2>
+  <div class="law" data-i18n="prof.inst.law5">The free citizenship tier renders fully. You do not need a wallet, a key, an account, or a name to read this page.</div>
 </section>
 <section>
-  <h2>6 · agent bounds — cite, or silent</h2>
-  <div class="law">Machine seats are labeled. bQueenBee answers from a page-local knowledge base on her own surface — not live chat on this directory. Bounded-authority claims stay on the house that cites them. This page invents no uptime, no “online now”, and no live roster API.</div>
+  <h2 data-i18n="prof.inst.h6">6 · agent bounds — cite, or silent</h2>
+  <div class="law" data-i18n="prof.inst.law6">Machine seats are labeled. bQueenBee answers from a page-local knowledge base on her own surface — not live chat on this directory. Bounded-authority claims stay on the house that cites them. This page invents no uptime, no “online now”, and no live roster API.</div>
 </section>
 <section id="sources-panel">
-  <h2>7 · date reconciliation honesty</h2>
-  <div class="law">Where two published dates disagree, both stay. This page does not smooth false certainty. See the bqueenbee.base.eth caution on the house instrument: the summary says 29 August 2026, while the holder history starts on 27 August 2026.</div>
+  <h2 data-i18n="prof.inst.h7">7 · date reconciliation honesty</h2>
+  <div class="law" data-i18n="prof.inst.law7">Where two published dates disagree, both stay. This page does not smooth false certainty. See the bqueenbee.base.eth caution on the house instrument: the summary says 29 August 2026, while the holder history starts on 27 August 2026.</div>
   <details data-view-disclosure="sources"><summary>sources</summary>
-    <div class="law">These houses are published estate snapshots. No enrichment APIs. No scrape-to-complete. Cite the printed field, or stay silent.</div>
+    <div class="law" data-i18n="prof.inst.law7src">These houses are published estate snapshots. No enrichment APIs. No scrape-to-complete. Cite the printed field, or stay silent.</div>
   </details>
 </section>
 </div>

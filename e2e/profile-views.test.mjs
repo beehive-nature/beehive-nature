@@ -84,6 +84,8 @@ test('founder house beat is one story door — not a multi-house wallet grid', (
   const house = extractById(page, 'layer-house');
   assert.match(house, /skaists — the founder house/);
   assert.match(house, /Travis Mark Remington holds this house/);
+  // F1: the mid-beat founder story sentence is keyed (renders translated, not English)
+  assert.match(house, /data-i18n="prof\.house\.story">Founder of the Beehive Nature Reserve\. Builds dynasties\./);
   assert.doesNotMatch(house, /0x[0-9A-Fa-f]{8}/);
   assert.doesNotMatch(house, /bqueenbee\.base\.eth|bClaude\.a|bloverai|guest\.citizen|北方國王/);
   assert.doesNotMatch(house, /generation 1|generation 2|Name history/);
@@ -135,13 +137,28 @@ test('Cypherpunk still reaches the full house instrument, same honesty', () => {
   assert.match(page, /reading==='cypherpunk' \? 'deeper' : 'arrival'/);
   assert.match(page, /if\(reading==='cypherpunk'\) beat='deeper'/);
   assert.match(page, /body\[data-reg="cypherpunk"\] #instrument\{display:block\}/);
+  // F5: every numbered section heading and every law div is keyed (translation hooks)
+  assert.doesNotMatch(instrument, /<h2>\d/, 'no unkeyed numbered instrument headings');
+  assert.doesNotMatch(instrument, /<div class="law">/, 'no unkeyed instrument law copy');
+});
+
+test('routine New bee labels read at 14px minimum, bee-scoped only (F4)', () => {
+  assert.match(page, /body\[data-reg="bee"\] \.holder \.bio \.bdesc\{font-size:\.875rem/);
+  assert.match(page, /body\[data-reg="bee"\] \.holder \.bio \.bmeta\{font-size:\.875rem\}/);
+  // the override is scoped: the compact instrument register survives for Cypherpunk
+  assert.doesNotMatch(page, /body\[data-reg="cypherpunk"\][^{]*\.bdesc/);
+  assert.match(page, /\.holder \.bio \.bdesc\{font-size:10\.5px/);
+  assert.match(page, /\.holder \.bio \.bmeta\{font-size:9\.5px/);
 });
 
 test('keyed first-paint English matches the corpus; every tongue has a cell', () => {
   const keys = [
     'prof.mark', 'prof.bee.calm', 'prof.bee.takeaway', 'prof.bee.support', 'prof.bee.house',
     'prof.bee.back', 'prof.raver.feel', 'prof.raver.tap', 'prof.raver.openhouse',
-    'prof.raver.consciousness', 'prof.house.lead', 'prof.house.holder',
+    'prof.raver.consciousness', 'prof.house.lead', 'prof.house.holder', 'prof.house.story',
+    'prof.inst.h1', 'prof.inst.law1', 'prof.inst.h2', 'prof.inst.law2', 'prof.inst.h3',
+    'prof.inst.law3', 'prof.inst.h4', 'prof.inst.law4', 'prof.inst.h5', 'prof.inst.law5',
+    'prof.inst.h6', 'prof.inst.law6', 'prof.inst.h7', 'prof.inst.law7', 'prof.inst.law7src',
     'prof.foot.door'
   ];
   for (const key of keys) {

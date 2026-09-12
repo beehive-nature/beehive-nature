@@ -10,10 +10,12 @@
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFile, stat, mkdir } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { resolve, extname, sep } from 'node:path';
 import assert from 'node:assert/strict';
 
 const root = resolve(import.meta.dirname, '..');
+const corpus = JSON.parse(readFileSync(resolve(root, 'surfaces/lang-corpus.json'), 'utf8'));
 const pages = ['buzz-directory.html', 'profile.html'];
 const beatAttr = { 'buzz-directory.html': 'data-dir-beat', 'profile.html': 'data-prof-beat' };
 const server = createServer(async (req, res) => {
@@ -73,6 +75,27 @@ try {
       ok(openConn !== null, path + ' cypherpunk disclosures open');
       ok(await overflow(page), path + ' instrument fits ' + size.width);
       await page.screenshot({ path: resolve(shots, stem + '-cypherpunk-' + size.width + '.png'), fullPage: size.width === 390 });
+      // ---- F4: New bee routine labels measure ≥14px computed, wrap, stay visible
+      if (size.width === 390) {
+        await page.locator('#breg-bee').click();
+        await page.locator('#first-bee .primary').first().click();
+        await page.locator('#layer-hives .door, #layer-house .door').last().click(); // Go deeper → instrument
+        ok(await page.locator('#instrument').isVisible(), path + ' bee reaches instrument');
+        const selectors = path === 'buzz-directory.html'
+          ? ['.listing .lrelay', '.listing .chip']
+          : ['.holder .bio .bdesc', '.holder .bio .bmeta'];
+        for (const sel of selectors) {
+          const sizes = await page.locator(sel).evaluateAll(nodes =>
+            nodes.filter(n => n.offsetParent !== null).map(n => parseFloat(getComputedStyle(n).fontSize)));
+          ok(sizes.length > 0, path + ' ' + sel + ' visible in bee instrument');
+          ok(Math.min(...sizes) >= 14, path + ' ' + sel + ' ≥14px computed (min ' + Math.min(...sizes) + ')');
+        }
+        const clipped = await page.locator(selectors.join(',')).evaluateAll(nodes =>
+          nodes.filter(n => n.offsetParent !== null && (n.scrollWidth > n.clientWidth + 1)).length);
+        ok(clipped === 0, path + ' bee labels wrap, none clip horizontally');
+        ok(await overflow(page), path + ' bee instrument fits 390');
+        await page.screenshot({ path: resolve(shots, stem + '-bee-inst-390.png'), fullPage: true });
+      }
       // ---- disclosure state survives view toggles (real DOM)
       await page.locator('#breg-bee').click();
       ok(await page.locator('.connection-details, .name-history').first().getAttribute('open') === null, path + ' bee collapses disclosures');
@@ -83,7 +106,7 @@ try {
       ok(!bad.length, path + ' external links are new-tab + noopener: ' + bad.join(', '));
       ok(!errors.length, path + ' no script errors: ' + errors.join('; '));
     }
-    // ---- language retention across view toggles (390 only, one page each way)
+    // ---- language retention across view toggles + rendered-translation receipts (390)
     if (size.width === 390) {
       for (const [path, lang] of [['buzz-directory.html', 'lv'], ['profile.html', 'ar']]) {
         await page.goto(base + '/surfaces/' + path); await page.locator('[data-reading-room]').waitFor();
@@ -92,18 +115,38 @@ try {
         await page.waitForFunction(l => document.documentElement.lang === l, lang);
         const rtl = await page.evaluate(() => document.documentElement.dir);
         if (lang === 'ar') ok(rtl === 'rtl', path + ' Arabic mirrors RTL');
-        const firstText = (await page.locator('#first-bee .calm').innerText()).trim();
-        ok(firstText.length > 0 && firstText !== 'Welcome. This page is the estate\'s front porch — the place to find our community rooms.' || path !== 'buzz-directory.html', path + ' translated calm renders');
+        // repaired assertion (was vacuous for profile): the rendered calm equals the corpus cell exactly
+        const calmKey = await page.locator('#first-bee .calm').getAttribute('data-i18n');
+        const calmText = (await page.locator('#first-bee .calm').innerText()).trim();
+        ok(calmText === corpus.strings[calmKey][lang].trim(), path + ' rendered calm equals corpus ' + lang);
         await page.screenshot({ path: resolve(shots, path.replace('.html', '') + '-' + lang + '-bee-390.png') });
+        // F1 receipt: the mid-beat story sentence renders translated (door card / founder story)
+        await page.locator('#first-bee .primary').first().click();
+        const storySel = path === 'buzz-directory.html' ? '[data-i18n="dir.hives.doorcard"]' : '[data-i18n="prof.house.story"]';
+        const storyKey = await page.locator(storySel).first().getAttribute('data-i18n');
+        const storyText = (await page.locator(storySel).first().innerText()).trim();
+        ok(storyText === corpus.strings[storyKey][lang].trim(), path + ' rendered story sentence equals corpus ' + lang);
+        await page.screenshot({ path: resolve(shots, path.replace('.html', '') + '-' + lang + '-bee-story-390.png') });
+        await page.locator('[data-room-overview]').click();
         await page.locator('#breg-raver').click();
         const kept = await page.locator('#blangsel').inputValue();
         ok(kept === lang, path + ' language select retained across view toggle');
         const feel = (await page.locator('#first-raver .feel').innerText()).trim();
-        ok(feel.length > 0, path + ' raver feel renders in ' + lang);
+        const feelKey = await page.locator('#first-raver .feel').getAttribute('data-i18n');
+        ok(feel === corpus.strings[feelKey][lang].trim(), path + ' raver feel equals corpus ' + lang);
         await page.screenshot({ path: resolve(shots, path.replace('.html', '') + '-' + lang + '-raver-390.png') });
         await page.locator('#breg-cypherpunk').click();
         ok(await page.locator('#blangsel').inputValue() === lang, path + ' language retained into cypherpunk');
         ok(await overflow(page), path + ' ' + lang + ' cypherpunk fits');
+        // F5 receipt: every leaf keyed element in the instrument renders its corpus cell
+        // (innerText gates on rendered — closed-details copy is skipped; textContent
+        // compares without CSS text-transform distortion, e.g. the uppercased .who)
+        const drift = await page.locator('#instrument [data-i18n]').evaluateAll((nodes, rows) =>
+          nodes.filter(n => !n.querySelector('[data-i18n]') && (n.innerText || '').trim())
+            .filter(n => { const k = n.dataset.i18n; const cell = rows.strings[k]?.[document.documentElement.lang]; return typeof cell === 'string' && cell.trim() && n.textContent.trim() !== cell.trim(); })
+            .map(n => n.dataset.i18n), corpus);
+        ok(!drift.length, path + ' instrument keyed leaves render ' + lang + ' (drift: ' + drift.join(',') + ')');
+        await page.screenshot({ path: resolve(shots, path.replace('.html', '') + '-' + lang + '-instrument-390.png'), fullPage: true });
       }
     }
     await context.close();
