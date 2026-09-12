@@ -14,7 +14,7 @@ The same record has three presentations:
 
 - **New bee:** the crest, a plain family story, consent-first lineage, and simple share/download actions.
 - **Raver:** an immersive crest stage, holder-authored symbolism, and audience-circle controls.
-- **Cypherpunk:** the exact artifact digest, disclosure manifest, privacy seam matrix, evidence states, and the separate `.a` authority/succession model.
+- **Cypherpunk:** the full ceremonial achievement with shield and nine quarters, exact artifact digests, disclosure manifest, privacy seam matrix, evidence states, and the separate `.a` authority/succession model.
 
 The founder's SKAISTS separator artwork now makes the two rails visible in the Cypherpunk view: `.a` is the cell — structure and the hive — while `.b` is the bond — love and the link. The supplied file is recorded accurately as a vector-path identity specimen, not an installable webfont.
 
@@ -39,6 +39,24 @@ The founder also supplied the brand separator specimen:
 
 The separator source is copied unchanged and byte-pinned beside the crest. It is displayed only in the Cypherpunk archive panel so the simpler New Bee and Raver paths keep their visual focus.
 
+The Cypherpunk crest now uses the existing house ceremonial master rather than the compact profile mark:
+
+- `assets/seals/house-crest-von-zutphen-DESIGN.svg`
+- SHA-256: `F9B2CE8428FFFC8FE215754858AB6F8DEB8691FB766CA16D226272F7A8331F40` (PUBLIC-CONSTANT)
+- full composition: shield, nine quarters, supporters, coronet, crest, motto, and compartment
+- the detailed source and evidence boundary remain in `docs/BLAZON.md`
+
+The profile also reuses the existing Beehive Nature breathing bloom rather than rebuilding or renaming it:
+
+- `docs/mvp-walk/assets/genesis-3d/motion/green-teal-breathing.svg`
+- SHA-256: `9971D2CA697797AF7430B062CA1842AB063BA3746418E8963A527BD4BF017FE3` (PUBLIC-CONSTANT)
+- original artwork by LoVis and his mother; purple represents people, teal AI, and green biomass
+- the six-second ring wave runs locally, signals no network presence, and becomes still under reduced-motion preferences
+
+## Profile customization boundary
+
+An “Edit your profile” disclosure previews four bounded fields: published display name, motto, Cypherpunk profile line, and house accent. Text lengths are capped, changes use text nodes rather than HTML, and Reset returns the published blueprint. This first editor intentionally retains values only in the open page: it creates no account, performs no upload, writes no browser storage, and does not alter the signed provenance manifest. Persistent profile editing belongs behind identity, consent, revision, and publication receipts.
+
 ## Honesty and privacy boundary
 
 The design notes contain family interpretations and historical or royal imagery. The page publishes them as **holder-authored interpretations**. It does not certify nobility, a legal title, or a genealogical relationship. A historical claim must carry a source or remain explicitly unverified.
@@ -57,10 +75,10 @@ The established profile shell still uses the Blanguage dock. The new archive is 
 
 ## Verification
 
-- `node --test e2e/profile-views.test.mjs` — 13/13 pass, including v2 crest and SKAISTS separator byte/hash parity, SVG safety, three-view content, consent defaults, `.a` lineage, and existing profile contracts.
-- Hosted front-door command from `.github/workflows/tests.yml` — 308/308 pass locally with the separator specimen included.
+- `node --test e2e/profile-views.test.mjs` — 15/15 pass, including compact and ceremonial crest parity, breathing-bloom parity, SKAISTS separator parity, SVG boundaries, local editor limits, three-view content, consent defaults, `.a` lineage, and existing profile contracts.
+- Hosted front-door command from `.github/workflows/tests.yml` — 310/310 pass locally with the full achievement, bloom, and editor included.
 - `node scripts/estate-check.mjs` — pass; 94 counted, 103 listed, registry and hub source remain consistent.
-- `node e2e/profile-house-archive-shot.mjs` — pass; all three 1280 px views, Raver at 390 px, no horizontal overflow, audience and `.a` controls, no page errors, no remote requests.
+- `node e2e/profile-house-archive-shot.mjs` — pass; all three 1280 px views, Raver at 390 px, full ceremonial image loading, editor apply/reset, audience and `.a` controls, no horizontal overflow, no page errors, no remote requests.
 - Visual receipts are written to the local temporary directory; derived screenshots are not committed.
 
 No live publication, genealogy upload, encryption, marketplace listing, sale, wallet action, or external network write occurred in this lane.

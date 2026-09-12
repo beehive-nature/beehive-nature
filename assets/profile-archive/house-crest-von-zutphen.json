@@ -16,6 +16,24 @@
       "saleTerms": null
     }
   },
+  "ceremonialMaster": {
+    "title": "House crest of von Zutphen · full achievement",
+    "file": "assets/seals/house-crest-von-zutphen-DESIGN.svg",
+    "mediaType": "image/svg+xml",
+    "sha256-PUBLIC-CONSTANT": "F9B2CE8428FFFC8FE215754858AB6F8DEB8691FB766CA16D226272F7A8331F40",
+    "source": "Existing byte-true founder-supplied ceremonial master",
+    "display": "Cypherpunk full achievement",
+    "blazon": "docs/BLAZON.md"
+  },
+  "natureMark": {
+    "title": "Beehive Nature green–teal breathing bloom",
+    "file": "docs/mvp-walk/assets/genesis-3d/motion/green-teal-breathing.svg",
+    "mediaType": "image/svg+xml",
+    "sha256-PUBLIC-CONSTANT": "9971D2CA697797AF7430B062CA1842AB063BA3746418E8963A527BD4BF017FE3",
+    "source": "Original artwork by LoVis and his mother; existing Astra breathing interpretation",
+    "motion": "local-six-second-ring-wave",
+    "reducedMotion": "resting-artwork"
+  },
   "brandSpecimen": {
     "title": "SKAISTS separators · .a cell / .b bond",
     "file": "assets/brand/skaists-separators.svg",

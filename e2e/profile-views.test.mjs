@@ -20,6 +20,9 @@ const crest = crestBytes.toString('utf8');
 const crestManifest = JSON.parse(read('assets/profile-archive/house-crest-von-zutphen.json'));
 const separatorsBytes = readFileSync(new URL('../assets/brand/skaists-separators.svg', import.meta.url));
 const separators = separatorsBytes.toString('utf8');
+const fullCrestBytes = readFileSync(new URL('../assets/seals/house-crest-von-zutphen-DESIGN.svg', import.meta.url));
+const fullCrest = fullCrestBytes.toString('utf8');
+const breathingBloomBytes = readFileSync(new URL('../docs/mvp-walk/assets/genesis-3d/motion/green-teal-breathing.svg', import.meta.url));
 
 function extractById(html, id) {
   const open = html.match(new RegExp(`<(?<tag>[a-z][a-z0-9]*)([^>]*\\sid="${id}"[^>]*)>`, 'i'));
@@ -118,7 +121,7 @@ test('house archive gives New bee, Raver, and Cypherpunk distinct value at the s
   const archive = extractById(page, 'house-archive');
   assert.match(archive, /data-reg="bee">A family profile can hold more than a name/);
   assert.match(archive, /data-reg="raver">A house mark made to travel/);
-  assert.match(archive, /data-reg="cypherpunk">Self-contained SVG with a pinned digest/);
+  assert.match(archive, /data-reg="cypherpunk" id="profile-display-bio">The full ceremonial master is shown here/);
   assert.match(archive, /data-reg="raver" aria-labelledby="symbol-title"/);
   assert.match(archive, /data-reg="cypherpunk" aria-labelledby="privacy-title"/);
   assert.match(archive, /Privacy seam matrix/);
@@ -142,6 +145,41 @@ test('SKAISTS separator specimen pins the .a cell and .b bond identity grammar',
   assert.match(separators, /the bond — love, the link/);
   assert.match(separators, /the header of the realm, both hands/);
   assert.doesNotMatch(separators, /<script\b|<foreignObject\b|\bon\w+\s*=|(?:href|xlink:href)\s*=/i);
+});
+
+test('Cypherpunk receives the full shield achievement and the house carries the breathing nature mark', () => {
+  const archive = extractById(page, 'house-archive');
+  const fullDigest = createHash('sha256').update(fullCrestBytes).digest('hex').toUpperCase();
+  const bloomDigest = createHash('sha256').update(breathingBloomBytes).digest('hex').toUpperCase();
+  assert.equal(fullDigest, crestManifest.ceremonialMaster['sha256-PUBLIC-CONSTANT']);
+  assert.equal(fullDigest, 'F9B2CE8428FFFC8FE215754858AB6F8DEB8691FB766CA16D226272F7A8331F40'); // PUBLIC-CONSTANT: full achievement digest
+  assert.equal(bloomDigest, crestManifest.natureMark['sha256-PUBLIC-CONSTANT']);
+  assert.equal(bloomDigest, '9971D2CA697797AF7430B062CA1842AB063BA3746418E8963A527BD4BF017FE3'); // PUBLIC-CONSTANT: breathing bloom digest
+  assert.match(fullCrest, /clipPath id="shieldClip"/);
+  assert.doesNotMatch(fullCrest, /<script\b|<foreignObject\b|\bon\w+\s*=/i);
+  assert.ok([...fullCrest.matchAll(/\bhref="([^"]+)"/gi)].every(match => match[1].startsWith('#')), 'full achievement references only its own SVG definitions');
+  assert.match(archive, /class="crest-full" data-reg="cypherpunk" src="\.\.\/assets\/seals\/house-crest-von-zutphen-DESIGN\.svg"/);
+  assert.match(archive, /shield, nine quarters, supporters, coronet, crest, motto, and compartment/);
+  assert.match(archive, /href="\.\.\/docs\/BLAZON\.md">Read the blazon/);
+  assert.match(archive, /data="\.\.\/docs\/mvp-walk\/assets\/genesis-3d\/motion\/green-teal-breathing\.svg"/);
+  assert.match(archive, /no network or presence signal/);
+  assert.match(archive, /reduced-motion preferences show the resting artwork/);
+});
+
+test('profile editor is a bounded local preview with no publication claim', () => {
+  const archive = extractById(page, 'house-archive');
+  assert.match(archive, /<summary>Edit your profile<\/summary>/);
+  assert.match(archive, /Changes remain in this open page, create no account, upload nothing/);
+  assert.match(archive, /maxlength="60"/);
+  assert.match(archive, /maxlength="120"/);
+  assert.match(archive, /maxlength="240"/);
+  assert.match(archive, /type="color" value="#E8B54B"/);
+  assert.match(page, /\.textContent=name/);
+  assert.match(page, /\.textContent=motto/);
+  assert.match(page, /\.textContent=bio/);
+  assert.match(page, /archive\.style\.setProperty\('--profile-accent'/);
+  assert.match(page, /Local preview applied · not saved or published/);
+  assert.match(page, /Preview reset to the published blueprint · not saved or published/);
 });
 
 test('disclosure preview is consent-first and .a lineage cannot impersonate family lineage', () => {

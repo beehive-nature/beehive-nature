@@ -167,6 +167,7 @@ body[data-reg="cypherpunk"] #house-archive{display:block}
 .crest-art-frame{position:relative;z-index:1;display:grid;place-items:center;min-height:320px;padding:16px;border:1px solid rgba(255,215,0,.28);
  border-radius:18px;background:rgba(1,8,4,.68);box-shadow:0 24px 80px rgba(0,0,0,.28)}
 .crest-art-frame img{display:block;width:100%;height:auto;max-height:470px;object-fit:contain}
+.crest-art-frame .crest-full{max-height:680px}
 .crest-copy{position:relative;z-index:1;align-self:center}
 .archive-kicker{font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:#e7c75b}
 .crest-copy h2{margin:8px 0 10px;font:650 clamp(1.8rem,5vw,3.5rem)/.98 var(--bee-font);letter-spacing:-.04em;color:#fff}
@@ -177,6 +178,7 @@ body[data-reg="cypherpunk"] #house-archive{display:block}
 .archive-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
 .archive-actions .door{border-color:rgba(255,255,255,.24);background:rgba(255,255,255,.05);color:#fff}
 .archive-actions .door.primary{background:#f1d055;border-color:#f1d055;color:#152016}
+.profile-byline{margin:0 0 6px;color:#fff;font:600 .9rem/1.4 var(--bee-font)}
 .archive-panel{margin-top:16px;padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--well)}
 .archive-panel h2{margin:0 0 5px;font:650 1.1rem/1.35 var(--bee-font);color:var(--ink);letter-spacing:0}
 .archive-panel>p{color:var(--dim);max-width:72ch}
@@ -214,6 +216,20 @@ body[data-reg="cypherpunk"] #house-archive{display:block}
 .separator-specimen img{display:block;width:100%;height:auto;max-height:360px;object-fit:contain}
 .separator-specimen figcaption{margin-top:10px;color:var(--dim);font-size:.7rem;line-height:1.6}
 .separator-specimen strong{color:var(--ink)}
+.nature-signature{display:grid;grid-template-columns:minmax(150px,.45fr) minmax(230px,1fr);gap:18px;align-items:center;overflow:hidden}
+.nature-signature object{display:block;width:100%;max-height:310px;aspect-ratio:1;background:#f6f7ef;border-radius:50%}
+.nature-signature h2{font-size:1.35rem}
+.nature-signature .motion-note{font-size:.72rem;color:var(--guard)}
+.profile-editor summary{cursor:pointer;color:var(--ink);font:650 1rem/1.4 var(--bee-font)}
+.profile-edit-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.profile-edit-grid label{display:grid;gap:6px;color:var(--dim);font-size:.72rem}
+.profile-edit-grid label.wide{grid-column:1/-1}
+.profile-edit-grid input{width:100%;min-height:44px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+.profile-edit-grid input[type="color"]{padding:4px;cursor:pointer}
+.profile-edit-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+#house-archive{--profile-accent:#E8B54B}
+#house-archive .claim-stamp,#house-archive .crest-art-frame{border-color:color-mix(in srgb,var(--profile-accent) 55%,transparent)}
+#house-archive .archive-kicker,#house-archive .lineage-node::before{color:var(--profile-accent)}
 .manifest-preview{margin-top:12px;max-height:250px;overflow:auto;padding:12px;border:1px solid var(--line);border-radius:10px;
  background:#07100b;color:#bfe9c8;font:11px/1.55 ui-monospace,'Cascadia Mono',monospace;white-space:pre-wrap}
 .archive-status{min-height:1.5em;margin-top:9px;color:var(--verified);font-size:.75rem}
@@ -232,7 +248,8 @@ body[data-reg="cypherpunk"] .archive-panel{border-radius:2px}
 body[data-reg="cypherpunk"] .claim-stamp{border-radius:2px}
 @media(max-width:720px){
  .crest-stage{grid-template-columns:1fr;padding:14px}.crest-art-frame{min-height:0}.crest-copy{padding:4px}
- .symbol-grid,.profile-rail-grid,.market-grid,.lineage{grid-template-columns:1fr}
+ .symbol-grid,.profile-rail-grid,.market-grid,.lineage,.nature-signature,.profile-edit-grid{grid-template-columns:1fr}
+ .profile-edit-grid label.wide{grid-column:auto}
  .privacy-table-wrap{overflow-x:auto}.archive-panel{padding:14px}
 }
 
@@ -353,24 +370,59 @@ body[data-reg="cypherpunk"] .claim-stamp{border-radius:2px}
 <article id="house-archive" data-audience="public" aria-labelledby="crest-title">
   <div class="crest-stage">
     <figure class="crest-art-frame">
-      <img src="../assets/profile-archive/house-crest-von-zutphen-DESIGN.svg" alt="Golden von Zutphen house crest on deep green, with paired serpents, a crowned bee and heart, sun and star forms, multilingual marks, and the motto love is king">
+      <img data-reg="bee" src="../assets/profile-archive/house-crest-von-zutphen-DESIGN.svg" alt="Golden von Zutphen compact house crest on deep green, with paired serpents, a crowned bee and heart, sun and star forms, multilingual marks, and the motto love is king">
+      <img data-reg="raver" src="../assets/profile-archive/house-crest-von-zutphen-DESIGN.svg" alt="Golden von Zutphen compact house crest on deep green, with paired serpents, a crowned bee and heart, sun and star forms, multilingual marks, and the motto love is king">
+      <img class="crest-full" data-reg="cypherpunk" src="../assets/seals/house-crest-von-zutphen-DESIGN.svg" alt="Full ceremonial achievement of the von Zutphen house, including the shield, nine quarters, supporters, coronet, crest, motto, and compartment">
     </figure>
     <div class="crest-copy">
       <p class="archive-kicker">skaists .b &middot; house archive &middot; v2</p>
+      <p class="profile-byline" id="profile-display-name">Travis Mark Remington</p>
       <h2 id="crest-title">von Zutphen house crest</h2>
-      <p class="motto">mīlestība ir karalis &middot; ความรักคือราชา &middot; love is king</p>
+      <p class="motto" id="profile-display-motto">mīlestība ir karalis &middot; ความรักคือราชา &middot; love is king</p>
       <p class="archive-lead" data-reg="bee">A family profile can hold more than a name. Keep the art, the story behind it, the family branches you choose to share, and the sources that help future generations understand what is known.</p>
       <p class="archive-lead" data-reg="raver">A house mark made to travel: gold, green, serpents, bee, heart, sun, star, and one promise spoken across languages. Open the symbols, follow the lineage, share only with your chosen circle.</p>
-      <p class="archive-lead" data-reg="cypherpunk">Self-contained SVG with a pinned digest and a portable manifest. Genealogy claims carry evidence states; living-person fields default private; `.a` succession is authority lineage, never synthetic blood lineage.</p>
+      <p class="archive-lead" data-reg="cypherpunk" id="profile-display-bio">The full ceremonial master is shown here: shield, nine quarters, supporters, coronet, crest, motto, and compartment. Genealogy claims carry evidence states; living-person fields default private; `.a` succession is authority lineage, never synthetic blood lineage.</p>
       <span class="claim-stamp">◇ family-authored interpretation &middot; not a title certificate</span>
       <div class="archive-actions">
         <button class="door primary" type="button" id="share-house">Share this profile</button>
         <a class="door" href="../assets/profile-archive/house-crest-von-zutphen-DESIGN.svg" download>Download original SVG</a>
+        <a class="door" data-reg="cypherpunk" href="../assets/seals/house-crest-von-zutphen-DESIGN.svg" download>Download full achievement</a>
+        <a class="door" data-reg="cypherpunk" href="../docs/BLAZON.md">Read the blazon</a>
         <a class="door" href="../assets/profile-archive/house-crest-von-zutphen.json">Open provenance</a>
       </div>
       <p class="archive-status" id="share-status" role="status" aria-live="polite"></p>
     </div>
   </div>
+
+  <section class="archive-panel nature-signature" aria-labelledby="nature-mark-title">
+    <object type="image/svg+xml" data="../docs/mvp-walk/assets/genesis-3d/motion/green-teal-breathing.svg" aria-label="Beehive Nature green, teal, and purple breathing bloom">
+      <img src="../docs/mvp-walk/assets/genesis-3d/motion/green-teal-breathing-poster.jpg" alt="Beehive Nature green, teal, and purple bloom at rest">
+    </object>
+    <div>
+      <p class="archive-kicker">beehive nature &middot; living signature</p>
+      <h2 id="nature-mark-title">A shared bloom for people, AI, and biomass</h2>
+      <p>Purple carries people, teal carries AI, and green carries biomass. The original artwork by LoVis and his mother breathes locally as a quiet house signature.</p>
+      <p class="motion-note">Six-second local ring wave · no network or presence signal · reduced-motion preferences show the resting artwork.</p>
+    </div>
+  </section>
+
+  <details class="archive-panel profile-editor" id="profile-editor">
+    <summary>Edit your profile</summary>
+    <p>Shape this page before publishing exists. Changes remain in this open page, create no account, upload nothing, and are excluded from the provenance receipt.</p>
+    <form id="profile-edit-form">
+      <div class="profile-edit-grid">
+        <label>Published display name<input id="profile-name-input" name="display-name" maxlength="60" value="Travis Mark Remington" autocomplete="off"></label>
+        <label>House accent<input id="profile-accent-input" name="accent" type="color" value="#E8B54B"></label>
+        <label class="wide">Motto<input id="profile-motto-input" name="motto" maxlength="120" value="mīlestība ir karalis · ความรักคือราชา · love is king" autocomplete="off"></label>
+        <label class="wide">Cypherpunk profile line<input id="profile-bio-input" name="profile-line" maxlength="240" value="The full ceremonial master is shown here: shield, nine quarters, supporters, coronet, crest, motto, and compartment." autocomplete="off"></label>
+      </div>
+      <div class="profile-edit-actions">
+        <button class="door primary" type="submit">Apply local preview</button>
+        <button class="door" type="reset">Reset preview</button>
+      </div>
+      <p class="archive-status" id="profile-edit-status" role="status" aria-live="polite">Local preview only · not saved or published.</p>
+    </form>
+  </details>
 
   <section class="archive-panel" data-reg="raver" aria-labelledby="symbol-title">
     <h2 id="symbol-title">Read the crest like a set list</h2>
@@ -688,6 +740,14 @@ function restoreVisibleFocus(focus){
         path:'assets/profile-archive/house-crest-von-zutphen-DESIGN.svg',
         sha256:'6303A84263857D62568613F9929B33E0F74076A6640CEDF0D643BEB30E579088' // PUBLIC-CONSTANT: v2 crest digest
       },
+      ceremonial_master:{
+        path:'assets/seals/house-crest-von-zutphen-DESIGN.svg',
+        sha256:'F9B2CE8428FFFC8FE215754858AB6F8DEB8691FB766CA16D226272F7A8331F40' // PUBLIC-CONSTANT: full achievement digest
+      },
+      nature_mark:{
+        path:'docs/mvp-walk/assets/genesis-3d/motion/green-teal-breathing.svg',
+        sha256:'9971D2CA697797AF7430B062CA1842AB063BA3746418E8963A527BD4BF017FE3' // PUBLIC-CONSTANT: breathing bloom digest
+      },
       fields:fields,
       living_people:'consent-required',
       title_claim:'not-certified',
@@ -731,6 +791,32 @@ function restoreVisibleFocus(focus){
       $('share-status').textContent='Sharing is unavailable here. Copy the page address from your browser.';
     }
   });
+  var editForm=$('profile-edit-form');
+  function applyProfilePreview(message){
+    if(!editForm) return false;
+    var name=$('profile-name-input').value.trim();
+    var motto=$('profile-motto-input').value.trim();
+    var bio=$('profile-bio-input').value.trim();
+    if(!name||!motto||!bio){
+      $('profile-edit-status').textContent='Name, motto, and profile line are required for this preview.';
+      return false;
+    }
+    $('profile-display-name').textContent=name;
+    $('profile-display-motto').textContent=motto;
+    $('profile-display-bio').textContent=bio;
+    archive.style.setProperty('--profile-accent',$('profile-accent-input').value);
+    $('profile-edit-status').textContent=message;
+    return true;
+  }
+  if(editForm){
+    editForm.addEventListener('submit',function(e){
+      e.preventDefault();
+      applyProfilePreview('Local preview applied · not saved or published.');
+    });
+    editForm.addEventListener('reset',function(){
+      setTimeout(function(){applyProfilePreview('Preview reset to the published blueprint · not saved or published.');},0);
+    });
+  }
   updateManifest();
   if(/#(people-agents|our-hives|public-directory|connection-help|name-record)/.test(location.hash)){
     if((document.body.getAttribute('data-reg')||'bee')!=='cypherpunk') setBeat('deeper');
