@@ -89,17 +89,28 @@ chrome, no jargon dumps. Meaning review is still owed. Existing
 
 ## Verification named here
 
-- `node --test e2e/university-views.test.mjs` 8/8 (wired into static front-door)
-- `node --test e2e/register.test.mjs` 15/15
-- `node scripts/estate-check.mjs` PASS
-- `node e2e/estate-source.mjs` 11/11
-- `node e2e/i18n-coverage.mjs` ru --set lang-coverage-set.json --floors PASS.
+- `node --test e2e/university-views.test.mjs e2e/register.test.mjs` **23/23**
+  (8 university first-paint + 15 register). Wired into the static front door.
+- `node scripts/estate-check.mjs` PASS (93 counted).
+- `node e2e/estate-source.mjs` 11/11 (corpus English matches the pages).
+- `node e2e/i18n-coverage.mjs ru --set lang-coverage-set.json --floors` PASS.
   Live census on university/index.html New bee first paint: **11 keyed
   / 11 visible / floor 11** (100% keyed; 28 tongues filled). Unkeyed
   samples: none. Floor raised 7 → 11.
-- university-smoke updated to walk New bee first paint → Start with a
-  lab report → shared `#breg-cypherpunk` (mid-page setReg gone) before
-  the existing instrument acts.
+- `cd e2e && node university-smoke.mjs` **85/85**. Walks New bee calm
+  door → Start with a lab report (one lesson beat, gates stay hidden)
+  → `enterCypherpunk()` via `#breg-cypherpunk` (mid-page setReg gone)
+  → the existing instrument acts, graduation `[bX review]`, quest
+  receipt, then the rest of the smoke atlas. Reloads re-enter
+  Cypherpunk because New bee hides the injected course DOM.
+- Visual poke, `python3 -m http.server 8765` with `surfaces/` as root:
+  `GET /university/index.html` 200; `GET /register.js` 200; `GET
+  /surfaces/register.js` 404. Sibling `assetBase` is what paints
+  `#bregctl`. Browser walk: New bee calm door → Start with a lab
+  report → one lesson beat; Raver atmosphere → Feel the first act;
+  Cypherpunk full instrument on contact; New bee remembers the lesson
+  beat on return (reload restores arrival). Mid-page setReg trio
+  absent. Top-bar hosts paint.
 
 Skipped this beat: fleet attestation of the new keys, any David
 Irvine / x0x #622 measurement claim, any medical-outcome rewrite,
