@@ -116,7 +116,10 @@ pub struct MerklePaymentMadeEvent {
 
 fn word_to_u64(w: &[u8], field: &'static str) -> Result<u64> {
     if w.len() != 32 || w[..24].iter().any(|&b| b != 0) {
-        return Err(Error::field(field, "word not a canonical right-aligned u64"));
+        return Err(Error::field(
+            field,
+            "word not a canonical right-aligned u64",
+        ));
     }
     let mut v = [0u8; 8];
     v.copy_from_slice(&w[24..]);
@@ -145,12 +148,18 @@ pub fn decode_merkle_payment_made(log: &SyntheticLog) -> Result<MerklePaymentMad
     if log.data.len() != 96 {
         return Err(Error::field(
             "data",
-            format!("event data must be exactly 96 bytes (uint8,uint256,uint64), got {}", log.data.len()),
+            format!(
+                "event data must be exactly 96 bytes (uint8,uint256,uint64), got {}",
+                log.data.len()
+            ),
         ));
     }
     let dw = &log.data[0..32];
     if dw[..31].iter().any(|&b| b != 0) {
-        return Err(Error::field("depth", "uint8 word not canonically zero-padded"));
+        return Err(Error::field(
+            "depth",
+            "uint8 word not canonically zero-padded",
+        ));
     }
     let depth = dw[31];
     let mut amt = [0u8; 32];
@@ -211,7 +220,10 @@ mod tests {
         // args: depth word, offset word (0x60), timestamp word
         assert_eq!(cd[4 + 31], 2);
         assert_eq!(u64::from_be_bytes(cd[60..68].try_into().unwrap()), 0x60);
-        assert_eq!(u64::from_be_bytes(cd[92..100].try_into().unwrap()), SYNTH_TS);
+        assert_eq!(
+            u64::from_be_bytes(cd[92..100].try_into().unwrap()),
+            SYNTH_TS
+        );
         // array length then pools; each pool = 32 + 16*64 = 1056 bytes
         assert_eq!(u64::from_be_bytes(cd[124..132].try_into().unwrap()), 2);
         assert_eq!(

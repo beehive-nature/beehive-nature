@@ -16,7 +16,9 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 fn is_lower_hex(s: &str, want: usize) -> bool {
     s.len() == 2 + want
         && s.starts_with("0x")
-        && s[2..].bytes().all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+        && s[2..]
+            .bytes()
+            .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
 }
 
 /// A 20-byte EVM address in canonical lowercase-hex string form.
@@ -36,7 +38,9 @@ impl EthAddr {
 
     pub fn from_lower_hex(s: &str) -> Result<Self, String> {
         if !is_lower_hex(s, 40) {
-            return Err(format!("address must be 0x + 40 lowercase hex chars, got {s:?}"));
+            return Err(format!(
+                "address must be 0x + 40 lowercase hex chars, got {s:?}"
+            ));
         }
         let mut out = [0u8; 20];
         hex::decode_to_slice(&s[2..], &mut out).map_err(|e| e.to_string())?;
@@ -84,7 +88,9 @@ impl Hex32 {
 
     pub fn from_lower_hex(s: &str) -> Result<Self, String> {
         if !is_lower_hex(s, 64) {
-            return Err(format!("hash must be 0x + 64 lowercase hex chars, got {s:?}"));
+            return Err(format!(
+                "hash must be 0x + 64 lowercase hex chars, got {s:?}"
+            ));
         }
         let mut out = [0u8; 32];
         hex::decode_to_slice(&s[2..], &mut out).map_err(|e| e.to_string())?;
@@ -139,7 +145,9 @@ impl Atto {
             return Err("amount string is empty".into());
         }
         if !s.bytes().all(|b| b.is_ascii_digit()) {
-            return Err(format!("amount string {s:?} is not canonical decimal (digits only)"));
+            return Err(format!(
+                "amount string {s:?} is not canonical decimal (digits only)"
+            ));
         }
         if s.len() > 1 && s.starts_with('0') {
             return Err(format!("amount string {s:?} has a leading zero"));
@@ -163,7 +171,11 @@ impl Atto {
     /// checked multiplication by 2^shift (uint 0.10 has no checked_shl).
     pub fn checked_shl(self, shift: u32) -> Option<Self> {
         if shift >= 256 {
-            return if self == Atto::ZERO { Some(Atto::ZERO) } else { None };
+            return if self == Atto::ZERO {
+                Some(Atto::ZERO)
+            } else {
+                None
+            };
         }
         let factor = Atto(U256::from(1u8) << shift);
         self.checked_mul(factor)
@@ -200,7 +212,10 @@ mod tests {
     #[test]
     fn addr_canonical_forms() {
         let a = EthAddr::from_lower_hex("0x00000000000000000000000000000000000000b2").unwrap();
-        assert_eq!(a.to_lower_hex(), "0x00000000000000000000000000000000000000b2");
+        assert_eq!(
+            a.to_lower_hex(),
+            "0x00000000000000000000000000000000000000b2"
+        );
         assert!(EthAddr::from_lower_hex("0x00000000000000000000000000000000000000B2").is_err());
         assert!(EthAddr::from_lower_hex("b2000000000000000000000000000000000000000").is_err());
         assert!(EthAddr::from_lower_hex("0x00").is_err());
@@ -221,14 +236,21 @@ mod tests {
         assert_eq!(Atto::parse_canonical("0").unwrap(), Atto::ZERO);
         assert_eq!(Atto::parse_canonical("4096").unwrap().to_decimal(), "4096");
         for bad in ["", "+1", "-1", "007", "0x1", "1 ", "1.5", "١٢٣", "1e3"] {
-            assert!(Atto::parse_canonical(bad).is_err(), "{bad:?} must be refused");
+            assert!(
+                Atto::parse_canonical(bad).is_err(),
+                "{bad:?} must be refused"
+            );
         }
         let too_long = "1".to_string() + &"0".repeat(78);
-        assert!(Atto::parse_canonical(&too_long).is_err(), "79 digits must be refused");
+        assert!(
+            Atto::parse_canonical(&too_long).is_err(),
+            "79 digits must be refused"
+        );
         // 78 nines exceed u256 (max has 78 digits starting with 1).
         assert!(Atto::parse_canonical(&"9".repeat(78)).is_err());
         // The exact u256 maximum parses (and equals Atto::MAX).
-        let max_str = "115792089237316195423570985008687907853269984665640564039457584007913129639935"; // PUBLIC-CONSTANT: upstream Amount::MAX default, receipted at the pin
+        let max_str =
+            "115792089237316195423570985008687907853269984665640564039457584007913129639935"; // PUBLIC-CONSTANT: upstream Amount::MAX default, receipted at the pin
         assert_eq!(Atto::parse_canonical(max_str).unwrap(), Atto::MAX);
     }
 
@@ -240,6 +262,9 @@ mod tests {
         }
         let ok: V = serde_json::from_str(r#"{"a":"4096"}"#).unwrap();
         assert_eq!(ok.a.to_decimal(), "4096");
-        assert!(serde_json::from_str::<V>(r#"{"a":4096}"#).is_err(), "JSON numbers must be refused");
+        assert!(
+            serde_json::from_str::<V>(r#"{"a":4096}"#).is_err(),
+            "JSON numbers must be refused"
+        );
     }
 }

@@ -135,7 +135,10 @@ fn review_require_readback() {
     assert_eq!(err.field_name(), Some("getCompletedMerklePayment"), "{err}");
 
     // HEALTHY CONTROL: the same receipt WITH the read-back validates Paid.
-    let rb = CompletedReadback { depth: 2, merkle_payment_timestamp: SYNTH_TS };
+    let rb = CompletedReadback {
+        depth: 2,
+        merkle_payment_timestamp: SYNTH_TS,
+    };
     assert!(matches!(
         watchpay::receipt::validate_receipt(&v, 0, &tx, &receipt, Some(&rb)).unwrap(),
         watchpay::receipt::ReceiptOutcome::Paid(_)
@@ -173,7 +176,9 @@ fn review_refuse_retry_fee_overrun() {
         let mut receipt = good_receipt(&tx);
         receipt.status = 0;
         receipt.logs.clear();
-        ledger.record_outcome(&v, 0, &receipt, None, SYNTH_NOW).unwrap();
+        ledger
+            .record_outcome(&v, 0, &receipt, None, SYNTH_NOW)
+            .unwrap();
         allowed += 1;
     }
     // The fence is not a blanket refusal (more than one attempt fit —
@@ -211,7 +216,9 @@ fn review_fee_evidence_reconciles_reservations() {
         receipt.logs.clear();
         receipt.gas_used = Some(60_000);
         receipt.effective_gas_price_wei = Some(90_000_000_000);
-        ledger.record_outcome(&v, 0, &receipt, None, SYNTH_NOW).unwrap();
+        ledger
+            .record_outcome(&v, 0, &receipt, None, SYNTH_NOW)
+            .unwrap();
         allowed += 1;
     }
     // retained 0.0054/attempt after evidence; the next intent's own
@@ -221,9 +228,9 @@ fn review_fee_evidence_reconciles_reservations() {
     // until retained + 0.05 > 0.1, i.e. retained > 0.05: attempt 11.
     assert_eq!(allowed, 10);
     let records = ledger.attempts(&v.plan().job_id, 0).unwrap();
-    let total: Atto = records
-        .iter()
-        .fold(Atto::ZERO, |a, r| a.checked_add(r.reserved_fee_wei).unwrap());
+    let total: Atto = records.iter().fold(Atto::ZERO, |a, r| {
+        a.checked_add(r.reserved_fee_wei).unwrap()
+    });
     // 10 evidence-backed attempts retained at actuals
     assert_eq!(total, Atto::from_u64(10 * 60_000 * 90_000_000_000u64));
     // evidence can never RAISE a reservation above the tx's own worst

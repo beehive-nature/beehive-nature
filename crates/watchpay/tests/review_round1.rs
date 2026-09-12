@@ -111,7 +111,11 @@ fn review_derived_approval_cannot_bypass_seal() {
     // `ValidatedPlan` is private behind immutable getters. The semantic
     // consequence the probe asserted, restated against the sealed value:
     let sealed_ceiling = v.approve_ceiling();
-    assert_eq!(sealed_ceiling, Atto::from_u64(36), "sealed base-plan approval is 36 atto");
+    assert_eq!(
+        sealed_ceiling,
+        Atto::from_u64(36),
+        "sealed base-plan approval is 36 atto"
+    );
 
     // An approval composed OUTSIDE the handle for 1,000,000 atto — the
     // mutated-derived-amount shape — is refused by the validator, which
@@ -130,11 +134,9 @@ fn review_derived_approval_cannot_bypass_seal() {
     // And Amount::MAX approvals stay refused regardless of composition.
     let mut maxd = lawful.clone();
     maxd.input = {
-        let mut bytes = watchpay::calldata::approve_calldata(
-            v.plan().network.payment_vault,
-            Atto::from_u64(1),
-        )
-        .unwrap();
+        let mut bytes =
+            watchpay::calldata::approve_calldata(v.plan().network.payment_vault, Atto::from_u64(1))
+                .unwrap();
         bytes[4 + 32..4 + 64].copy_from_slice(&Atto::MAX.0.to_big_endian());
         bytes
     };
@@ -168,9 +170,14 @@ fn review_impossible_fee_evidence_must_not_free_budget() {
     r.effective_gas_price_wei = Some(0);
     let err = ledger
         .record_outcome(&v, 0, &r, None, SYNTH_NOW)
-        .expect_err("gasUsed exceeds transaction limit but accepted and reservation shrunk to zero");
+        .expect_err(
+            "gasUsed exceeds transaction limit but accepted and reservation shrunk to zero",
+        );
     let msg = err.to_string();
-    assert!(msg.contains("gas_used") && msg.contains("impossible"), "{msg}");
+    assert!(
+        msg.contains("gas_used") && msg.contains("impossible"),
+        "{msg}"
+    );
 
     // The reservation on disk is untouched (still the tx's worst case)
     // and the attempt is still in the signed state.
@@ -179,7 +186,10 @@ fn review_impossible_fee_evidence_must_not_free_budget() {
         AttemptState::Signed { .. } => {}
         other => panic!("state must still be signed, got {}", other.kind()),
     }
-    assert_eq!(records[0].reserved_fee_wei, Atto::from_u64(400_000 * 90_000_000_000u64));
+    assert_eq!(
+        records[0].reserved_fee_wei,
+        Atto::from_u64(400_000 * 90_000_000_000u64)
+    );
 
     // HEALTHY CONTROL — legitimate evidence reconciles: gas within the
     // limit, price inside the envelope bounds shrinks the reservation to
@@ -189,9 +199,14 @@ fn review_impossible_fee_evidence_must_not_free_budget() {
     ok.logs.clear();
     ok.gas_used = Some(150_000);
     ok.effective_gas_price_wei = Some(90_000_000_000);
-    ledger.record_outcome(&v, 0, &ok, None, SYNTH_NOW + 1).unwrap();
+    ledger
+        .record_outcome(&v, 0, &ok, None, SYNTH_NOW + 1)
+        .unwrap();
     let records = ledger.attempts(&v.plan().job_id, 0).unwrap();
-    assert_eq!(records[0].reserved_fee_wei, Atto::from_u64(150_000 * 90_000_000_000u64));
+    assert_eq!(
+        records[0].reserved_fee_wei,
+        Atto::from_u64(150_000 * 90_000_000_000u64)
+    );
 
     // IMPOSSIBLE variant — price above the tx's own cap (1559 envelope:
     // effective must sit within [priority, maxFee]):
@@ -257,7 +272,9 @@ fn review_zero_price_testnet_behavior_stays_lawful() {
     br.logs.clear();
     br.gas_used = Some(lim.gas_limit); // exactly the limit
     br.effective_gas_price_wei = Some(0);
-    ledger.record_outcome(&v, 0, &br, None, SYNTH_NOW + 2).unwrap();
+    ledger
+        .record_outcome(&v, 0, &br, None, SYNTH_NOW + 2)
+        .unwrap();
 
     // but zero price on the priority-900Mwei envelope is impossible
     // (1559: effective >= priority) and refused:

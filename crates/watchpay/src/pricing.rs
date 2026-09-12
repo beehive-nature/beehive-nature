@@ -124,9 +124,9 @@ pub fn batch_sum_candidates(batch: &Batch) -> Result<Atto> {
     let mut sum = Atto::ZERO;
     for pool in &batch.commitments {
         for c in &pool.candidates {
-            sum = sum.checked_add(c.amount).ok_or_else(|| {
-                Error::field("amount", "sum of candidate amounts overflows u256")
-            })?;
+            sum = sum
+                .checked_add(c.amount)
+                .ok_or_else(|| Error::field("amount", "sum of candidate amounts overflows u256"))?;
         }
     }
     Ok(sum)
@@ -178,8 +178,14 @@ mod tests {
         // all ones -> 1
         assert_eq!(median16(&arr([1; 16])), at(1));
         // duplicates straddling the median
-        assert_eq!(median16(&arr([5, 5, 5, 5, 5, 5, 5, 5, 7, 7, 7, 7, 7, 7, 7, 7])), at(7));
-        assert_eq!(median16(&arr([0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 9])), at(2));
+        assert_eq!(
+            median16(&arr([5, 5, 5, 5, 5, 5, 5, 5, 7, 7, 7, 7, 7, 7, 7, 7])),
+            at(7)
+        );
+        assert_eq!(
+            median16(&arr([0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 9])),
+            at(2)
+        );
     }
 
     #[test]
@@ -191,13 +197,22 @@ mod tests {
             [1; 16],
             [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7],
             [9, 0, 5, 5, 5, 1, 2, 100, 4, 4, 4, 4, 4, 3, 3, 3],
-            [u64::MAX; 8].iter().copied().chain([1; 8]).collect::<Vec<_>>().try_into().unwrap(),
+            [u64::MAX; 8]
+                .iter()
+                .copied()
+                .chain([1; 8])
+                .collect::<Vec<_>>()
+                .try_into()
+                .unwrap(),
         ];
         for case in cases {
             let mut port_input = arr(case);
             let reference = median16(&arr(case));
             let ported = median16_contract_port(&mut port_input);
-            assert_eq!(reference, ported, "case {case:?}: reference {reference} vs port {ported}");
+            assert_eq!(
+                reference, ported,
+                "case {case:?}: reference {reference} vs port {ported}"
+            );
         }
     }
 

@@ -93,9 +93,7 @@
 use crate::error::{Error, Result};
 use crate::plan::ValidatedPlan;
 use crate::plan_model::Plan;
-use crate::receipt::{
-    validate_receipt, CompletedReadback, ReceiptOutcome, SyntheticReceipt,
-};
+use crate::receipt::{validate_receipt, CompletedReadback, ReceiptOutcome, SyntheticReceipt};
 use crate::tx::{validate_transaction, DecodedTransaction, TxDestination};
 use crate::types::{Atto, Hex32};
 use serde::{Deserialize, Serialize};
@@ -188,7 +186,9 @@ pub struct Ledger {
 impl Ledger {
     pub fn open(root: &Path) -> Result<Self> {
         std::fs::create_dir_all(root)?;
-        Ok(Ledger { root: root.to_path_buf() })
+        Ok(Ledger {
+            root: root.to_path_buf(),
+        })
     }
 
     fn batch_dir(&self, job_id: &str, batch_index: u32) -> Result<PathBuf> {
@@ -260,7 +260,10 @@ impl Ledger {
                     continue;
                 }
                 let raw = std::fs::read_to_string(f.path()).map_err(|e| {
-                    Error::Ledger(format!("attempt file unreadable {}: {e}", f.path().display()))
+                    Error::Ledger(format!(
+                        "attempt file unreadable {}: {e}",
+                        f.path().display()
+                    ))
                 })?;
                 let rec: AttemptRecord = serde_json::from_str(&raw).map_err(|e| {
                     Error::Ledger(format!(
@@ -346,7 +349,10 @@ impl Ledger {
                     continue;
                 }
                 let raw = std::fs::read_to_string(f.path()).map_err(|e| {
-                    Error::Ledger(format!("attempt file unreadable {}: {e}", f.path().display()))
+                    Error::Ledger(format!(
+                        "attempt file unreadable {}: {e}",
+                        f.path().display()
+                    ))
                 })?;
                 let rec: AttemptRecord = serde_json::from_str(&raw).map_err(|e| {
                     Error::Ledger(format!(
@@ -406,7 +412,11 @@ impl Ledger {
         }
     }
 
-    fn bind_plan(&self, vp: &ValidatedPlan, batch_index: usize) -> Result<crate::plan_model::Batch> {
+    fn bind_plan(
+        &self,
+        vp: &ValidatedPlan,
+        batch_index: usize,
+    ) -> Result<crate::plan_model::Batch> {
         let batch = vp
             .plan()
             .batches
@@ -457,7 +467,9 @@ impl Ledger {
         }
         for r in &existing {
             match &r.state {
-                AttemptState::Mined { winner_pool_hash, .. } => {
+                AttemptState::Mined {
+                    winner_pool_hash, ..
+                } => {
                     return Err(Error::Ledger(format!(
                         "batch {} of job {} is already paid (winner {}) — double payment refused",
                         batch.batch_index,
@@ -469,8 +481,7 @@ impl Ledger {
                     return Err(Error::Ledger(format!(
                         "batch {} has a signed transaction {} — never auto-re-sign; \
                          reconcile the outcome (possibly via the human gate) first",
-                        batch.batch_index,
-                        tx.tx_hash
+                        batch.batch_index, tx.tx_hash
                     )));
                 }
                 AttemptState::Unknown { since_unix, .. } => {
@@ -484,8 +495,7 @@ impl Ledger {
                     return Err(Error::Ledger(format!(
                         "batch {} already has an open intent (attempt {}) — cancel it \
                          explicitly before starting a new attempt",
-                        batch.batch_index,
-                        r.attempt_seq
+                        batch.batch_index, r.attempt_seq
                     )));
                 }
                 AttemptState::Cancelled { .. } | AttemptState::Reverted { .. } => {}
@@ -646,7 +656,9 @@ impl Ledger {
             .ok_or_else(|| Error::Ledger("no attempt on record".into()))?;
         match latest.state {
             AttemptState::Intent => {
-                latest.state = AttemptState::Cancelled { reason: reason.to_string() };
+                latest.state = AttemptState::Cancelled {
+                    reason: reason.to_string(),
+                };
                 latest.reserved_fee_wei = Atto::ZERO;
                 latest.updated_unix = now_unix;
                 self.persist(&latest)

@@ -19,22 +19,16 @@
 //! file — it can never silently downgrade to "never signed".
 
 use watchpay::calldata::pay_for_merkle_tree_calldata;
+use watchpay::calldata::MerklePaymentMadeEvent;
 use watchpay::ledger::{AttemptState, HumanGate, Ledger};
 use watchpay::plan::validate_plan;
-use watchpay::receipt::{
-    synth_receipt_with_event, CompletedReadback, ReceiptOutcome,
-};
-use watchpay::calldata::MerklePaymentMadeEvent;
+use watchpay::receipt::{synth_receipt_with_event, CompletedReadback, ReceiptOutcome};
 use watchpay::test_support::*;
 use watchpay::tx::{DecodedTransaction, TxEnvelope};
 use watchpay::types::{Atto, Hex32};
 
 fn tmp_root(tag: &str) -> std::path::PathBuf {
-    let dir = std::env::temp_dir().join(format!(
-        "watchpay-ledger-{}-{}",
-        tag,
-        std::process::id()
-    ));
+    let dir = std::env::temp_dir().join(format!("watchpay-ledger-{}-{}", tag, std::process::id()));
     let _ = std::fs::remove_dir_all(&dir);
     dir
 }
@@ -99,7 +93,10 @@ fn happy_path_intent_signed_mined() {
             &v,
             0,
             &good_receipt(&tx),
-            Some(&CompletedReadback { depth: 2, merkle_payment_timestamp: SYNTH_TS }),
+            Some(&CompletedReadback {
+                depth: 2,
+                merkle_payment_timestamp: SYNTH_TS,
+            }),
             SYNTH_NOW + 20,
         )
         .unwrap();
@@ -136,7 +133,14 @@ fn signed_state_blocks_new_intents_never_auto_resigns() {
     assert!(e.to_string().contains("never auto-re-sign"), "{e}");
 
     // evidence goes missing -> Unknown (synthetic trigger in this slice)
-    ledger.record_unknown(&v, 0, SYNTH_NOW + 5, "rpc unreachable after broadcast attempt").unwrap();
+    ledger
+        .record_unknown(
+            &v,
+            0,
+            SYNTH_NOW + 5,
+            "rpc unreachable after broadcast attempt",
+        )
+        .unwrap();
 
     // Unknown NEVER auto-re-signs
     let e = ledger.write_intent(&v, 0, 9, SYNTH_NOW + 6).unwrap_err();
@@ -151,7 +155,10 @@ fn signed_state_blocks_new_intents_never_auto_resigns() {
             &v,
             0,
             &good_receipt(&tx),
-            Some(&CompletedReadback { depth: 2, merkle_payment_timestamp: SYNTH_TS }),
+            Some(&CompletedReadback {
+                depth: 2,
+                merkle_payment_timestamp: SYNTH_TS,
+            }),
             SYNTH_NOW + 60,
         )
         .unwrap();
@@ -171,7 +178,9 @@ fn unknown_abandon_is_human_and_records_the_choice() {
     ledger.write_intent(&v, 0, 7, SYNTH_NOW).unwrap();
     let tx = signed_tx(7, 0x5A);
     ledger.record_signed(&v, 0, &tx, SYNTH_NOW).unwrap();
-    ledger.record_unknown(&v, 0, SYNTH_NOW + 5, "evidence ambiguous").unwrap();
+    ledger
+        .record_unknown(&v, 0, SYNTH_NOW + 5, "evidence ambiguous")
+        .unwrap();
 
     let gate = HumanGate::explicit_human_approval();
     ledger
@@ -201,14 +210,18 @@ fn open_intent_requires_explicit_cancel_before_new_attempt() {
     let e = ledger.write_intent(&v, 0, 8, SYNTH_NOW).unwrap_err();
     assert!(e.to_string().contains("open intent"), "{e}");
     // explicit cancel, then a new attempt with a new nonce
-    ledger.cancel_intent(&v, 0, SYNTH_NOW + 1, "composer re-ran, nonce bumped").unwrap();
+    ledger
+        .cancel_intent(&v, 0, SYNTH_NOW + 1, "composer re-ran, nonce bumped")
+        .unwrap();
     let seq = ledger.write_intent(&v, 0, 8, SYNTH_NOW + 2).unwrap();
     assert_eq!(seq, 2);
 
     // a Signed attempt cannot be cancelled outright
     let tx = signed_tx(8, 0x5B);
     ledger.record_signed(&v, 0, &tx, SYNTH_NOW + 3).unwrap();
-    let e = ledger.cancel_intent(&v, 0, SYNTH_NOW + 4, "nope").unwrap_err();
+    let e = ledger
+        .cancel_intent(&v, 0, SYNTH_NOW + 4, "nope")
+        .unwrap_err();
     assert!(e.to_string().contains("reconciled first"), "{e}");
     let _ = std::fs::remove_dir_all(&root);
 }
@@ -226,10 +239,14 @@ fn duplicate_tx_hash_refused_across_plan() {
     let mut reverted = good_receipt(&tx);
     reverted.status = 0;
     reverted.logs.clear();
-    ledger.record_outcome(&v, 0, &reverted, None, SYNTH_NOW + 5).unwrap();
+    ledger
+        .record_outcome(&v, 0, &reverted, None, SYNTH_NOW + 5)
+        .unwrap();
     ledger.write_intent(&v, 0, 8, SYNTH_NOW + 6).unwrap();
     let same_hash = signed_tx(8, 0x5A);
-    let e = ledger.record_signed(&v, 0, &same_hash, SYNTH_NOW + 7).unwrap_err();
+    let e = ledger
+        .record_signed(&v, 0, &same_hash, SYNTH_NOW + 7)
+        .unwrap_err();
     assert!(e.to_string().contains("already recorded"), "{e}");
     let _ = std::fs::remove_dir_all(&root);
 }

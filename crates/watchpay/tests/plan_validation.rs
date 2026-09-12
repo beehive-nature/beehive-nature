@@ -9,7 +9,8 @@ use watchpay::test_support::*;
 use watchpay::types::{Atto, EthAddr, Hex32};
 
 fn field_of(e: &watchpay::Error) -> &'static str {
-    e.field_name().unwrap_or_else(|| panic!("refusal lacks a field name: {e}"))
+    e.field_name()
+        .unwrap_or_else(|| panic!("refusal lacks a field name: {e}"))
 }
 
 #[test]
@@ -20,7 +21,7 @@ fn base_plan_validates_with_derived_figures() {
     assert_eq!(vp.batch_worst_case()[0], Atto::from_u64(36));
     assert_eq!(vp.approve_ceiling(), Atto::from_u64(36));
     assert_eq!(vp.planned_tx_count(), 2); // 1 batch + 1 approve
-    // worst-case native fee = 500k gas * 100 gwei * 2 txs
+                                          // worst-case native fee = 500k gas * 100 gwei * 2 txs
     assert_eq!(
         vp.worst_case_total_native_fee_wei(),
         Atto::from_u64(500_000 * 100_000_000_000u128 as u64 * 2)
@@ -36,7 +37,10 @@ fn depth_12_unit_price_counterexample() {
     // the arithmetic facts of the counterexample
     assert_eq!(batch.commitments.len(), 64);
     assert_eq!(batch_sum_candidates(&batch).unwrap(), Atto::from_u64(1024));
-    assert_eq!(batch_worst_case_charge(&batch).unwrap(), Atto::from_u64(4096));
+    assert_eq!(
+        batch_worst_case_charge(&batch).unwrap(),
+        Atto::from_u64(4096)
+    );
 
     // a plan that DECLARES the candidate sum as the ceiling is refused,
     // naming both numbers
@@ -50,7 +54,10 @@ fn depth_12_unit_price_counterexample() {
     let err = validate_plan(&plan, SYNTH_NOW).unwrap_err();
     assert_eq!(field_of(&err), "batch_amount_ceiling");
     let msg = err.to_string();
-    assert!(msg.contains("1024") && msg.contains("4096"), "refusal names both figures: {msg}");
+    assert!(
+        msg.contains("1024") && msg.contains("4096"),
+        "refusal names both figures: {msg}"
+    );
 
     // the correct derivation is accepted; approve ceiling is 4096, NOT MAX
     let mut good = base_plan();
@@ -67,7 +74,10 @@ fn wrong_schema_refused() {
     let mut p = base_plan();
     p.schema = "watch-pay-plan/2".into();
     p.plan_hash = watchpay::canonical::plan_hash(&p);
-    assert_eq!(field_of(&validate_plan(&p, SYNTH_NOW).unwrap_err()), "schema");
+    assert_eq!(
+        field_of(&validate_plan(&p, SYNTH_NOW).unwrap_err()),
+        "schema"
+    );
 }
 
 #[test]
@@ -86,7 +96,10 @@ fn expiry_laws() {
     let mut p = base_plan();
     p.expires_unix = SYNTH_NOW - 1;
     p.plan_hash = watchpay::canonical::plan_hash(&p);
-    assert_eq!(field_of(&validate_plan(&p, SYNTH_NOW).unwrap_err()), "expires_unix");
+    assert_eq!(
+        field_of(&validate_plan(&p, SYNTH_NOW).unwrap_err()),
+        "expires_unix"
+    );
     // window too long
     let mut p = base_plan();
     p.expires_unix = p.created_unix + MERKLE_PAYMENT_EXPIRATION_SECS + 1;
@@ -99,7 +112,10 @@ fn expiry_laws() {
     p.created_unix = SYNTH_NOW + 1;
     p.expires_unix = SYNTH_NOW + 60;
     p.plan_hash = watchpay::canonical::plan_hash(&p);
-    assert_eq!(field_of(&validate_plan(&p, SYNTH_NOW).unwrap_err()), "created_unix");
+    assert_eq!(
+        field_of(&validate_plan(&p, SYNTH_NOW).unwrap_err()),
+        "created_unix"
+    );
 }
 
 #[test]
@@ -107,11 +123,8 @@ fn batch_timestamp_expiry() {
     // future timestamp
     let mut p = base_plan();
     p.batches[0].merkle_payment_timestamp = SYNTH_NOW + 1;
-    p.batches[0].batch_id = watchpay::canonical::batch_id(
-        p.network.chain_id,
-        &p.network.payment_vault,
-        &p.batches[0],
-    );
+    p.batches[0].batch_id =
+        watchpay::canonical::batch_id(p.network.chain_id, &p.network.payment_vault, &p.batches[0]);
     p.plan_hash = watchpay::canonical::plan_hash(&p);
     assert_eq!(
         field_of(&validate_plan(&p, SYNTH_NOW).unwrap_err()),
@@ -120,11 +133,8 @@ fn batch_timestamp_expiry() {
     // aged beyond the 7-day window
     let mut p = base_plan();
     p.batches[0].merkle_payment_timestamp = SYNTH_NOW - MERKLE_PAYMENT_EXPIRATION_SECS - 1;
-    p.batches[0].batch_id = watchpay::canonical::batch_id(
-        p.network.chain_id,
-        &p.network.payment_vault,
-        &p.batches[0],
-    );
+    p.batches[0].batch_id =
+        watchpay::canonical::batch_id(p.network.chain_id, &p.network.payment_vault, &p.batches[0]);
     p.plan_hash = watchpay::canonical::plan_hash(&p);
     let e = validate_plan(&p, SYNTH_NOW).unwrap_err();
     assert_eq!(field_of(&e), "merkle_payment_timestamp");
@@ -137,7 +147,10 @@ fn depth_bounds() {
         let mut p = base_plan();
         p.batches[0].depth = depth;
         // pool count/ceiling re-derivation happens after depth check
-        assert_eq!(field_of(&validate_plan(&p, SYNTH_NOW).unwrap_err()), "depth");
+        assert_eq!(
+            field_of(&validate_plan(&p, SYNTH_NOW).unwrap_err()),
+            "depth"
+        );
     }
 }
 
@@ -148,7 +161,10 @@ fn pool_count_and_uniqueness() {
     let extra = pool(3, [1; 16]);
     p.batches[0].commitments.push(extra);
     p.plan_hash = watchpay::canonical::plan_hash(&p);
-    assert_eq!(field_of(&validate_plan(&p, SYNTH_NOW).unwrap_err()), "commitments");
+    assert_eq!(
+        field_of(&validate_plan(&p, SYNTH_NOW).unwrap_err()),
+        "commitments"
+    );
 
     // duplicate pool hash
     let mut p = base_plan();
@@ -166,13 +182,19 @@ fn declared_vs_derived_figures() {
     let mut p = base_plan();
     p.batches[0].batch_id = synth_hash(0x99);
     p.plan_hash = watchpay::canonical::plan_hash(&p);
-    assert_eq!(field_of(&validate_plan(&p, SYNTH_NOW).unwrap_err()), "batch_id");
+    assert_eq!(
+        field_of(&validate_plan(&p, SYNTH_NOW).unwrap_err()),
+        "batch_id"
+    );
 
     // approve ceiling not the sum
     let mut p = base_plan();
     p.approve_ceiling_total = Atto::from_u64(35);
     p.plan_hash = watchpay::canonical::plan_hash(&p);
-    assert_eq!(field_of(&validate_plan(&p, SYNTH_NOW).unwrap_err()), "approve_ceiling_total");
+    assert_eq!(
+        field_of(&validate_plan(&p, SYNTH_NOW).unwrap_err()),
+        "approve_ceiling_total"
+    );
 
     // approve ceiling exactly U256::MAX (E7 law) — construct via a huge
     // single-batch ceiling so the SUM equals MAX; sums overflow first in
@@ -198,13 +220,19 @@ fn gas_and_native_fee_ceilings() {
     let mut p = base_plan();
     p.gas_ceilings.per_tx_gas_limit = 20_999;
     p.plan_hash = watchpay::canonical::plan_hash(&p);
-    assert_eq!(field_of(&validate_plan(&p, SYNTH_NOW).unwrap_err()), "per_tx_gas_limit");
+    assert_eq!(
+        field_of(&validate_plan(&p, SYNTH_NOW).unwrap_err()),
+        "per_tx_gas_limit"
+    );
 
     // total gas cannot cover the plan
     let mut p = base_plan();
     p.gas_ceilings.max_total_gas = 999_999;
     p.plan_hash = watchpay::canonical::plan_hash(&p);
-    assert_eq!(field_of(&validate_plan(&p, SYNTH_NOW).unwrap_err()), "max_total_gas");
+    assert_eq!(
+        field_of(&validate_plan(&p, SYNTH_NOW).unwrap_err()),
+        "max_total_gas"
+    );
 
     // zero fee cap
     let mut p = base_plan();
@@ -231,7 +259,9 @@ fn gas_and_native_fee_ceilings() {
     p.plan_hash = watchpay::canonical::plan_hash(&p);
     let e = validate_plan(&p, SYNTH_NOW).unwrap_err();
     assert_eq!(field_of(&e), "max_total_native_fee_wei");
-    assert!(e.to_string().contains("gas units alone are not a native fee cap"));
+    assert!(e
+        .to_string()
+        .contains("gas units alone are not a native fee cap"));
 }
 
 #[test]
@@ -257,17 +287,26 @@ fn job_id_and_identity_fields() {
     let mut p = base_plan();
     p.network.payment_vault = p.network.payment_token;
     p.plan_hash = watchpay::canonical::plan_hash(&p);
-    assert_eq!(field_of(&validate_plan(&p, SYNTH_NOW).unwrap_err()), "payment_vault");
+    assert_eq!(
+        field_of(&validate_plan(&p, SYNTH_NOW).unwrap_err()),
+        "payment_vault"
+    );
     // non-public visibility
     let mut p = base_plan();
     p.upload.visibility = "private".into();
     p.plan_hash = watchpay::canonical::plan_hash(&p);
-    assert_eq!(field_of(&validate_plan(&p, SYNTH_NOW).unwrap_err()), "visibility");
+    assert_eq!(
+        field_of(&validate_plan(&p, SYNTH_NOW).unwrap_err()),
+        "visibility"
+    );
     // zero payer
     let mut p = base_plan();
     p.expected_payer = EthAddr::ZERO;
     p.plan_hash = watchpay::canonical::plan_hash(&p);
-    assert_eq!(field_of(&validate_plan(&p, SYNTH_NOW).unwrap_err()), "expected_payer");
+    assert_eq!(
+        field_of(&validate_plan(&p, SYNTH_NOW).unwrap_err()),
+        "expected_payer"
+    );
 }
 
 /// THE STRUCTURAL NO-PRIVATE-MATERIAL LAW: a JSON envelope carrying an

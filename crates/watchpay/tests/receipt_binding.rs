@@ -7,11 +7,11 @@ use watchpay::calldata::{
     SyntheticLog,
 };
 use watchpay::plan::validate_plan;
-use watchpay::receipt::{
-    synth_receipt_with_event, validate_receipt, ChainEvidence, CompletedReadback,
-    ReceiptOutcome, SyntheticReceipt,
-};
 use watchpay::plan_model::Batch;
+use watchpay::receipt::{
+    synth_receipt_with_event, validate_receipt, ChainEvidence, CompletedReadback, ReceiptOutcome,
+    SyntheticReceipt,
+};
 use watchpay::test_support::*;
 use watchpay::tx::{validate_transaction, DecodedTransaction, TxDestination, TxEnvelope};
 use watchpay::types::{Atto, Hex32};
@@ -50,14 +50,20 @@ fn winner_event(winner_tag: u8, amount: u64) -> MerklePaymentMadeEvent {
 }
 
 fn field_of(e: &watchpay::Error) -> &'static str {
-    e.field_name().unwrap_or_else(|| panic!("refusal lacks a field name: {e}"))
+    e.field_name()
+        .unwrap_or_else(|| panic!("refusal lacks a field name: {e}"))
 }
 
 #[test]
 fn valid_payment_tx_accepted() {
     let v = vp();
-    validate_transaction(&v, TxDestination::BatchPayment { batch_index: 0 }, &signed_batch_tx(), 7)
-        .unwrap();
+    validate_transaction(
+        &v,
+        TxDestination::BatchPayment { batch_index: 0 },
+        &signed_batch_tx(),
+        7,
+    )
+    .unwrap();
 }
 
 #[test]
@@ -73,8 +79,11 @@ fn valid_approve_tx_accepted() {
         gas_limit: 60_000,
         max_fee_per_gas_wei: 90_000_000_000,
         max_priority_fee_wei: 0,
-        input: watchpay::calldata::approve_calldata(v.plan().network.payment_vault, v.approve_ceiling())
-            .unwrap(),
+        input: watchpay::calldata::approve_calldata(
+            v.plan().network.payment_vault,
+            v.approve_ceiling(),
+        )
+        .unwrap(),
         tx_hash: synth_hash(0x6A),
     };
     validate_transaction(&v, TxDestination::Approve, &tx, 6).unwrap();
@@ -103,24 +112,41 @@ fn tx_negative_battery() {
             assert_eq!(field_of(&e), $field, "case {} -> {}", stringify!($name), e);
         }};
     }
-    refuse!(chain, "chain_id", |t: &mut DecodedTransaction| t.chain_id = 421614);
-    refuse!(payer, "from", |t: &mut DecodedTransaction| t.from = synth_addr(0xEE));
+    refuse!(chain, "chain_id", |t: &mut DecodedTransaction| t.chain_id =
+        421614);
+    refuse!(payer, "from", |t: &mut DecodedTransaction| t.from =
+        synth_addr(0xEE));
     refuse!(nonce, "nonce", |t: &mut DecodedTransaction| t.nonce = 8);
-    refuse!(value, "value", |t: &mut DecodedTransaction| t.value_wei = Atto::from_u64(1));
-    refuse!(gas, "gas_limit", |t: &mut DecodedTransaction| t.gas_limit = 500_001);
-    refuse!(fee, "max_fee_per_gas_wei", |t: &mut DecodedTransaction| t.max_fee_per_gas_wei = 100_000_000_001);
-    refuse!(zero_hash, "tx_hash", |t: &mut DecodedTransaction| t.tx_hash = Hex32::ZERO);
-    refuse!(dest_vault, "to", |t: &mut DecodedTransaction| t.to = synth_addr(0xDD));
-    refuse!(calldata_tampered, "input", |t: &mut DecodedTransaction| t.input[10] ^= 1);
+    refuse!(value, "value", |t: &mut DecodedTransaction| t.value_wei =
+        Atto::from_u64(1));
+    refuse!(gas, "gas_limit", |t: &mut DecodedTransaction| t.gas_limit =
+        500_001);
+    refuse!(fee, "max_fee_per_gas_wei", |t: &mut DecodedTransaction| t
+        .max_fee_per_gas_wei =
+        100_000_000_001);
+    refuse!(zero_hash, "tx_hash", |t: &mut DecodedTransaction| t
+        .tx_hash =
+        Hex32::ZERO);
+    refuse!(dest_vault, "to", |t: &mut DecodedTransaction| t.to =
+        synth_addr(0xDD));
+    refuse!(calldata_tampered, "input", |t: &mut DecodedTransaction| {
+        t.input[10] ^= 1
+    });
     // priority above the tx's own max fee
     let mut t = base.clone();
     t.max_priority_fee_wei = t.max_fee_per_gas_wei + 1;
-    assert_eq!(field_of(&validate_transaction(&v, dest, &t, 7).unwrap_err()), "max_priority_fee_wei");
+    assert_eq!(
+        field_of(&validate_transaction(&v, dest, &t, 7).unwrap_err()),
+        "max_priority_fee_wei"
+    );
     // legacy with a priority fee
     let mut t = base.clone();
     t.envelope = TxEnvelope::Legacy;
     t.max_priority_fee_wei = 1;
-    assert_eq!(field_of(&validate_transaction(&v, dest, &t, 7).unwrap_err()), "max_priority_fee_wei");
+    assert_eq!(
+        field_of(&validate_transaction(&v, dest, &t, 7).unwrap_err()),
+        "max_priority_fee_wei"
+    );
 
     // approve carrying Amount::MAX is refused even if a signer produced it:
     // the composer refuses MAX, so hand-encode the approve(…, MAX) bytes
@@ -135,9 +161,11 @@ fn tx_negative_battery() {
         max_fee_per_gas_wei: 90_000_000_000,
         max_priority_fee_wei: 0,
         input: {
-            let mut bytes =
-                watchpay::calldata::approve_calldata(v.plan().network.payment_vault, Atto::from_u64(1))
-                    .unwrap();
+            let mut bytes = watchpay::calldata::approve_calldata(
+                v.plan().network.payment_vault,
+                Atto::from_u64(1),
+            )
+            .unwrap();
             bytes[4 + 32..4 + 64].copy_from_slice(&Atto::MAX.0.to_big_endian());
             bytes
         },
@@ -146,8 +174,9 @@ fn tx_negative_battery() {
     let e = validate_transaction(&v, TxDestination::Approve, &ap, 6).unwrap_err();
     assert_eq!(field_of(&e), "input");
     assert!(e.to_string().contains("bounded approval"));
-    ap.input = watchpay::calldata::approve_calldata(v.plan().network.payment_vault, v.approve_ceiling())
-        .unwrap();
+    ap.input =
+        watchpay::calldata::approve_calldata(v.plan().network.payment_vault, v.approve_ceiling())
+            .unwrap();
     validate_transaction(&v, TxDestination::Approve, &ap, 6).unwrap();
 
     // payment calldata for a DIFFERENT batch: build a second batch in the
@@ -163,10 +192,9 @@ fn tx_negative_battery() {
     };
     second.batch_id = watchpay::canonical::batch_id(42161, &SYNTH_VAULT_ADDR, &second);
     two.batches.push(second);
-    two.approve_ceiling_total = two
-        .batches
-        .iter()
-        .fold(Atto::ZERO, |a, b| a.checked_add(b.batch_amount_ceiling).unwrap());
+    two.approve_ceiling_total = two.batches.iter().fold(Atto::ZERO, |a, b| {
+        a.checked_add(b.batch_amount_ceiling).unwrap()
+    });
     two.gas_ceilings.max_total_gas = two.gas_ceilings.per_tx_gas_limit * 3;
     two.native_fee_ceilings.max_total_native_fee_wei = Atto::from_u64(750_000_000_000_000_000);
     two.plan_hash = watchpay::canonical::plan_hash(&two);
@@ -180,8 +208,13 @@ fn tx_negative_battery() {
         .unwrap(),
         ..signed_batch_tx()
     };
-    let e = validate_transaction(&v2, TxDestination::BatchPayment { batch_index: 0 }, &wrong, 7)
-        .unwrap_err();
+    let e = validate_transaction(
+        &v2,
+        TxDestination::BatchPayment { batch_index: 0 },
+        &wrong,
+        7,
+    )
+    .unwrap_err();
     assert_eq!(field_of(&e), "input");
     assert!(e.to_string().contains("different batch"));
 }
@@ -194,8 +227,18 @@ fn receipt_valid_both_winner_pools() {
     let tx = signed_batch_tx();
     // winner pool2 (tag 2, all-ones pool): median 1 << 2 = 4
     let ev = winner_event(2, 4);
-    let r = synth_receipt_with_event(&tx, 42161, v.plan().expected_payer, v.plan().network.payment_vault, &ev, 12);
-    let rb = CompletedReadback { depth: 2, merkle_payment_timestamp: SYNTH_TS };
+    let r = synth_receipt_with_event(
+        &tx,
+        42161,
+        v.plan().expected_payer,
+        v.plan().network.payment_vault,
+        &ev,
+        12,
+    );
+    let rb = CompletedReadback {
+        depth: 2,
+        merkle_payment_timestamp: SYNTH_TS,
+    };
     match validate_receipt(&v, 0, &tx, &r, Some(&rb)).unwrap() {
         ReceiptOutcome::Paid(p) => {
             assert_eq!(p.winner_pool_hash, synth_hash(2));
@@ -208,8 +251,26 @@ fn receipt_valid_both_winner_pools() {
     // winner pool1 (tag 1, 1..=16 pool): median 9 << 2 = 36 — readback now
     // REQUIRED for the paid state; with it supplied the payment validates.
     let ev = winner_event(1, 36);
-    let r = synth_receipt_with_event(&tx, 42161, v.plan().expected_payer, v.plan().network.payment_vault, &ev, 12);
-    match validate_receipt(&v, 0, &tx, &r, Some(&CompletedReadback { depth: 2, merkle_payment_timestamp: SYNTH_TS })).unwrap() {
+    let r = synth_receipt_with_event(
+        &tx,
+        42161,
+        v.plan().expected_payer,
+        v.plan().network.payment_vault,
+        &ev,
+        12,
+    );
+    match validate_receipt(
+        &v,
+        0,
+        &tx,
+        &r,
+        Some(&CompletedReadback {
+            depth: 2,
+            merkle_payment_timestamp: SYNTH_TS,
+        }),
+    )
+    .unwrap()
+    {
         ReceiptOutcome::Paid(p) => assert_eq!(p.total_amount, Atto::from_u64(36)),
         _ => panic!("expected Paid"),
     }
@@ -223,10 +284,19 @@ fn receipt_wrong_batch_same_depth_and_timestamp() {
     let tx = signed_batch_tx();
     // forge: same depth/ts, foreign pool hash (tag 0x55 — not committed)
     let ev = winner_event(0x55, 36);
-    let r = synth_receipt_with_event(&tx, 42161, v.plan().expected_payer, v.plan().network.payment_vault, &ev, 1);
+    let r = synth_receipt_with_event(
+        &tx,
+        42161,
+        v.plan().expected_payer,
+        v.plan().network.payment_vault,
+        &ev,
+        1,
+    );
     let e = validate_receipt(&v, 0, &tx, &r, None).unwrap_err();
     assert_eq!(field_of(&e), "winnerPoolHash");
-    assert!(e.to_string().contains("different batch with identical depth/timestamp"));
+    assert!(e
+        .to_string()
+        .contains("different batch with identical depth/timestamp"));
 }
 
 #[test]
@@ -236,7 +306,14 @@ fn receipt_wrong_total_amount() {
     // pool2's lawful charge is 4; claim 5 (or the other pool's 36)
     for amount in [5u64, 36, 3, 4096] {
         let ev = winner_event(2, amount);
-        let r = synth_receipt_with_event(&tx, 42161, v.plan().expected_payer, v.plan().network.payment_vault, &ev, 1);
+        let r = synth_receipt_with_event(
+            &tx,
+            42161,
+            v.plan().expected_payer,
+            v.plan().network.payment_vault,
+            &ev,
+            1,
+        );
         let e = validate_receipt(&v, 0, &tx, &r, None).unwrap_err();
         assert_eq!(field_of(&e), "totalAmount", "amount {amount}");
         assert!(e.to_string().contains("pricing-rule recompute"));
@@ -266,8 +343,18 @@ fn receipt_duplicate_events_ambiguous() {
     let v = vp();
     let tx = signed_batch_tx();
     let ev = winner_event(2, 4);
-    let mut r = synth_receipt_with_event(&tx, 42161, v.plan().expected_payer, v.plan().network.payment_vault, &ev, 1);
-    r.logs.push(synth_merkle_payment_made_log(v.plan().network.payment_vault, &ev));
+    let mut r = synth_receipt_with_event(
+        &tx,
+        42161,
+        v.plan().expected_payer,
+        v.plan().network.payment_vault,
+        &ev,
+        1,
+    );
+    r.logs.push(synth_merkle_payment_made_log(
+        v.plan().network.payment_vault,
+        &ev,
+    ));
     let e = validate_receipt(&v, 0, &tx, &r, None).unwrap_err();
     assert_eq!(field_of(&e), "logs");
     assert!(e.to_string().contains("ambiguous"));
@@ -279,19 +366,59 @@ fn receipt_wrong_contract_emitter_and_fields() {
     let tx = signed_batch_tx();
     // event emitted by a DIFFERENT contract than the vault
     let ev = winner_event(2, 4);
-    let mut r = synth_receipt_with_event(&tx, 42161, v.plan().expected_payer, v.plan().network.payment_vault, &ev, 1);
+    let mut r = synth_receipt_with_event(
+        &tx,
+        42161,
+        v.plan().expected_payer,
+        v.plan().network.payment_vault,
+        &ev,
+        1,
+    );
     r.logs[0].address = synth_addr(0xE1);
-    assert_eq!(field_of(&validate_receipt(&v, 0, &tx, &r, None).unwrap_err()), "logs");
+    assert_eq!(
+        field_of(&validate_receipt(&v, 0, &tx, &r, None).unwrap_err()),
+        "logs"
+    );
     // receipt.to wrong
-    let mut r = synth_receipt_with_event(&tx, 42161, v.plan().expected_payer, v.plan().network.payment_vault, &ev, 1);
+    let mut r = synth_receipt_with_event(
+        &tx,
+        42161,
+        v.plan().expected_payer,
+        v.plan().network.payment_vault,
+        &ev,
+        1,
+    );
     r.to = synth_addr(0xE2);
-    assert_eq!(field_of(&validate_receipt(&v, 0, &tx, &r, None).unwrap_err()), "contract");
+    assert_eq!(
+        field_of(&validate_receipt(&v, 0, &tx, &r, None).unwrap_err()),
+        "contract"
+    );
     // payer wrong
-    let r = synth_receipt_with_event(&tx, 42161, synth_addr(0xE3), v.plan().network.payment_vault, &ev, 1);
-    assert_eq!(field_of(&validate_receipt(&v, 0, &tx, &r, None).unwrap_err()), "payer");
+    let r = synth_receipt_with_event(
+        &tx,
+        42161,
+        synth_addr(0xE3),
+        v.plan().network.payment_vault,
+        &ev,
+        1,
+    );
+    assert_eq!(
+        field_of(&validate_receipt(&v, 0, &tx, &r, None).unwrap_err()),
+        "payer"
+    );
     // chain wrong
-    let r = synth_receipt_with_event(&tx, 421614, v.plan().expected_payer, v.plan().network.payment_vault, &ev, 1);
-    assert_eq!(field_of(&validate_receipt(&v, 0, &tx, &r, None).unwrap_err()), "chain");
+    let r = synth_receipt_with_event(
+        &tx,
+        421614,
+        v.plan().expected_payer,
+        v.plan().network.payment_vault,
+        &ev,
+        1,
+    );
+    assert_eq!(
+        field_of(&validate_receipt(&v, 0, &tx, &r, None).unwrap_err()),
+        "chain"
+    );
 }
 
 #[test]
@@ -299,7 +426,14 @@ fn receipt_altered_transaction() {
     let v = vp();
     let tx = signed_batch_tx();
     let ev = winner_event(2, 4);
-    let r = synth_receipt_with_event(&tx, 42161, v.plan().expected_payer, v.plan().network.payment_vault, &ev, 1);
+    let r = synth_receipt_with_event(
+        &tx,
+        42161,
+        v.plan().expected_payer,
+        v.plan().network.payment_vault,
+        &ev,
+        1,
+    );
     // a receipt for a DIFFERENT tx hash than the recorded signed tx
     let mut foreign = r.clone();
     foreign.tx_hash = synth_hash(0x99);
@@ -313,9 +447,12 @@ fn receipt_altered_transaction() {
     let mut tx2 = tx.clone();
     let mut mutated = base_plan().batches[0].clone();
     mutated.commitments[0].candidates[3].amount = Atto::from_u64(777);
-    tx2.input =
-        pay_for_merkle_tree_calldata(mutated.depth, &mutated.commitments, mutated.merkle_payment_timestamp)
-            .unwrap();
+    tx2.input = pay_for_merkle_tree_calldata(
+        mutated.depth,
+        &mutated.commitments,
+        mutated.merkle_payment_timestamp,
+    )
+    .unwrap();
     let e2 = validate_receipt(&v, 0, &tx2, &r, None).unwrap_err();
     assert_eq!(field_of(&e2), "calldata");
 }
@@ -335,7 +472,10 @@ fn receipt_reverted_and_payment_already_exists() {
         revert_data: None,
         gas_used: None,
         effective_gas_price_wei: None,
-        evidence: ChainEvidence { chain_id: 42161, confirmations: 3 },
+        evidence: ChainEvidence {
+            chain_id: 42161,
+            confirmations: 3,
+        },
     };
     let r = base_r.clone();
     match validate_receipt(&v, 0, &tx, &r, None).unwrap() {
@@ -350,7 +490,11 @@ fn receipt_reverted_and_payment_already_exists() {
     let mut data = Vec::new();
     data.extend_from_slice(&watchpay::abi::payment_already_exists_selector());
     data.extend_from_slice(winner.as_bytes());
-    let r2 = SyntheticReceipt { revert_data: Some(data), status: 0, ..base_r.clone() };
+    let r2 = SyntheticReceipt {
+        revert_data: Some(data),
+        status: 0,
+        ..base_r.clone()
+    };
     match validate_receipt(&v, 0, &tx, &r2, None).unwrap() {
         ReceiptOutcome::Reverted(out) => {
             assert_eq!(out.payment_already_exists_winner, Some(winner));
@@ -358,7 +502,10 @@ fn receipt_reverted_and_payment_already_exists() {
         _ => panic!("expected Reverted"),
     }
     // garbage revert data classifies as plain revert (not an error)
-    let r3 = SyntheticReceipt { revert_data: Some(vec![1, 2, 3]), ..r };
+    let r3 = SyntheticReceipt {
+        revert_data: Some(vec![1, 2, 3]),
+        ..r
+    };
     assert!(matches!(
         validate_receipt(&v, 0, &tx, &r3, None).unwrap(),
         ReceiptOutcome::Reverted(_)
@@ -370,10 +517,23 @@ fn receipt_readback_mismatch() {
     let v = vp();
     let tx = signed_batch_tx();
     let ev = winner_event(2, 4);
-    let r = synth_receipt_with_event(&tx, 42161, v.plan().expected_payer, v.plan().network.payment_vault, &ev, 1);
+    let r = synth_receipt_with_event(
+        &tx,
+        42161,
+        v.plan().expected_payer,
+        v.plan().network.payment_vault,
+        &ev,
+        1,
+    );
     for bad in [
-        CompletedReadback { depth: 3, merkle_payment_timestamp: SYNTH_TS },
-        CompletedReadback { depth: 2, merkle_payment_timestamp: SYNTH_TS + 1 },
+        CompletedReadback {
+            depth: 3,
+            merkle_payment_timestamp: SYNTH_TS,
+        },
+        CompletedReadback {
+            depth: 2,
+            merkle_payment_timestamp: SYNTH_TS + 1,
+        },
     ] {
         let e = validate_receipt(&v, 0, &tx, &r, Some(&bad)).unwrap_err();
         assert_eq!(field_of(&e), "getCompletedMerklePayment");
@@ -387,12 +547,29 @@ fn receipt_event_depth_or_timestamp_mismatch() {
     // event depth differs from batch
     let mut ev = winner_event(2, 4);
     ev.depth = 3;
-    let r = synth_receipt_with_event(&tx, 42161, v.plan().expected_payer, v.plan().network.payment_vault, &ev, 1);
-    assert_eq!(field_of(&validate_receipt(&v, 0, &tx, &r, None).unwrap_err()), "depth");
+    let r = synth_receipt_with_event(
+        &tx,
+        42161,
+        v.plan().expected_payer,
+        v.plan().network.payment_vault,
+        &ev,
+        1,
+    );
+    assert_eq!(
+        field_of(&validate_receipt(&v, 0, &tx, &r, None).unwrap_err()),
+        "depth"
+    );
     // event timestamp differs from batch
     let mut ev = winner_event(2, 4);
     ev.merkle_payment_timestamp = SYNTH_TS + 2;
-    let r = synth_receipt_with_event(&tx, 42161, v.plan().expected_payer, v.plan().network.payment_vault, &ev, 1);
+    let r = synth_receipt_with_event(
+        &tx,
+        42161,
+        v.plan().expected_payer,
+        v.plan().network.payment_vault,
+        &ev,
+        1,
+    );
     assert_eq!(
         field_of(&validate_receipt(&v, 0, &tx, &r, None).unwrap_err()),
         "merklePaymentTimestamp"
@@ -400,7 +577,14 @@ fn receipt_event_depth_or_timestamp_mismatch() {
     // unrelated logs (other contracts/events) do not confuse the matcher
     let mut ev = winner_event(2, 4);
     ev.depth = 2;
-    let mut r = synth_receipt_with_event(&tx, 42161, v.plan().expected_payer, v.plan().network.payment_vault, &ev, 1);
+    let mut r = synth_receipt_with_event(
+        &tx,
+        42161,
+        v.plan().expected_payer,
+        v.plan().network.payment_vault,
+        &ev,
+        1,
+    );
     let noise = SyntheticLog {
         address: synth_addr(0x0F),
         topics: vec![Hex32([9u8; 32])],
@@ -413,7 +597,10 @@ fn receipt_event_depth_or_timestamp_mismatch() {
             0,
             &tx,
             &r,
-            Some(&CompletedReadback { depth: 2, merkle_payment_timestamp: SYNTH_TS })
+            Some(&CompletedReadback {
+                depth: 2,
+                merkle_payment_timestamp: SYNTH_TS
+            })
         )
         .unwrap(),
         ReceiptOutcome::Paid(_)

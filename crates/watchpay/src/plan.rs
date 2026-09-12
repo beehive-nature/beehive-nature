@@ -112,7 +112,10 @@ pub fn validate_plan(plan: &Plan, now_unix: u64) -> Result<ValidatedPlan> {
     if plan.schema != SCHEMA {
         return Err(refuse(
             "schema",
-            format!("expected {SCHEMA:?}, got {:?} — wrong or future schema", plan.schema),
+            format!(
+                "expected {SCHEMA:?}, got {:?} — wrong or future schema",
+                plan.schema
+            ),
         ));
     }
     if plan.arm != ARM_MERKLE {
@@ -130,13 +133,19 @@ pub fn validate_plan(plan: &Plan, now_unix: u64) -> Result<ValidatedPlan> {
     if plan.created_unix > now_unix {
         return Err(refuse(
             "created_unix",
-            format!("created_unix {} is in the future (now {now_unix})", plan.created_unix),
+            format!(
+                "created_unix {} is in the future (now {now_unix})",
+                plan.created_unix
+            ),
         ));
     }
     if plan.expires_unix < plan.created_unix {
         return Err(refuse(
             "expires_unix",
-            format!("expires_unix {} before created_unix {}", plan.expires_unix, plan.created_unix),
+            format!(
+                "expires_unix {} before created_unix {}",
+                plan.expires_unix, plan.created_unix
+            ),
         ));
     }
     if plan.expires_unix - plan.created_unix > MERKLE_PAYMENT_EXPIRATION_SECS {
@@ -153,7 +162,10 @@ pub fn validate_plan(plan: &Plan, now_unix: u64) -> Result<ValidatedPlan> {
     if plan.expires_unix <= now_unix {
         return Err(refuse(
             "expires_unix",
-            format!("plan expired at {} (now {now_unix}) — expired plans are refused everywhere", plan.expires_unix),
+            format!(
+                "plan expired at {} (now {now_unix}) — expired plans are refused everywhere",
+                plan.expires_unix
+            ),
         ));
     }
 
@@ -168,10 +180,16 @@ pub fn validate_plan(plan: &Plan, now_unix: u64) -> Result<ValidatedPlan> {
         ));
     }
     if plan.network.payment_token.is_zero() || plan.network.payment_vault.is_zero() {
-        return Err(refuse("payment_vault", "token and vault addresses must be nonzero"));
+        return Err(refuse(
+            "payment_vault",
+            "token and vault addresses must be nonzero",
+        ));
     }
     if plan.network.payment_token == plan.network.payment_vault {
-        return Err(refuse("payment_vault", "token and vault addresses must differ"));
+        return Err(refuse(
+            "payment_vault",
+            "token and vault addresses must differ",
+        ));
     }
     if plan.expected_payer.is_zero() {
         return Err(refuse("expected_payer", "expected_payer must be nonzero"));
@@ -179,7 +197,10 @@ pub fn validate_plan(plan: &Plan, now_unix: u64) -> Result<ValidatedPlan> {
     if plan.upload.visibility != VISIBILITY_PUBLIC {
         return Err(refuse(
             "visibility",
-            format!("visibility {:?} refused — this slice pays for public uploads only", plan.upload.visibility),
+            format!(
+                "visibility {:?} refused — this slice pays for public uploads only",
+                plan.upload.visibility
+            ),
         ));
     }
 
@@ -193,7 +214,10 @@ pub fn validate_plan(plan: &Plan, now_unix: u64) -> Result<ValidatedPlan> {
         if b.batch_index != i as u32 {
             return Err(refuse(
                 "batch_index",
-                format!("batch {} has batch_index {} — indices must be 0-based contiguous", i, b.batch_index),
+                format!(
+                    "batch {} has batch_index {} — indices must be 0-based contiguous",
+                    i, b.batch_index
+                ),
             ));
         }
         check_depth(b.depth)?;
@@ -214,7 +238,10 @@ pub fn validate_plan(plan: &Plan, now_unix: u64) -> Result<ValidatedPlan> {
             if !seen.insert(pool.pool_hash) {
                 return Err(refuse(
                     "pool_hash",
-                    format!("duplicate pool_hash {} — ambiguous winner identity", pool.pool_hash),
+                    format!(
+                        "duplicate pool_hash {} — ambiguous winner identity",
+                        pool.pool_hash
+                    ),
                 ));
             }
             for c in &pool.candidates {
@@ -230,7 +257,10 @@ pub fn validate_plan(plan: &Plan, now_unix: u64) -> Result<ValidatedPlan> {
         if b.merkle_payment_timestamp > now_unix {
             return Err(refuse(
                 "merkle_payment_timestamp",
-                format!("timestamp {} is in the future (now {now_unix})", b.merkle_payment_timestamp),
+                format!(
+                    "timestamp {} is in the future (now {now_unix})",
+                    b.merkle_payment_timestamp
+                ),
             ));
         }
         let age = now_unix - b.merkle_payment_timestamp;
@@ -260,13 +290,21 @@ pub fn validate_plan(plan: &Plan, now_unix: u64) -> Result<ValidatedPlan> {
         if b.batch_id != derived_id {
             return Err(refuse(
                 "batch_id",
-                format!("declared {} but derived {} — mis-derived or tampered", b.batch_id, derived_id),
+                format!(
+                    "declared {} but derived {} — mis-derived or tampered",
+                    b.batch_id, derived_id
+                ),
             ));
         }
         batch_worst.push(derived_ceiling);
-        approve_sum = approve_sum.checked_add(b.batch_amount_ceiling).ok_or_else(|| {
-            refuse("approve_ceiling_total", "sum of batch ceilings overflows u256")
-        })?;
+        approve_sum = approve_sum
+            .checked_add(b.batch_amount_ceiling)
+            .ok_or_else(|| {
+                refuse(
+                    "approve_ceiling_total",
+                    "sum of batch ceilings overflows u256",
+                )
+            })?;
     }
 
     // Approval law.
@@ -295,7 +333,10 @@ pub fn validate_plan(plan: &Plan, now_unix: u64) -> Result<ValidatedPlan> {
     if g.per_tx_gas_limit < MIN_GAS_LIMIT {
         return Err(refuse(
             "per_tx_gas_limit",
-            format!("gas limit {} below the intrinsic minimum {MIN_GAS_LIMIT}", g.per_tx_gas_limit),
+            format!(
+                "gas limit {} below the intrinsic minimum {MIN_GAS_LIMIT}",
+                g.per_tx_gas_limit
+            ),
         ));
     }
     let planned_tx_count = plan.batches.len() as u64 + 1; // batches + one approve
@@ -306,13 +347,19 @@ pub fn validate_plan(plan: &Plan, now_unix: u64) -> Result<ValidatedPlan> {
     if g.max_total_gas < derived_total_gas {
         return Err(refuse(
             "max_total_gas",
-            format!("declared {} but the plan needs {} (per_tx * {planned_tx_count} txs)", g.max_total_gas, derived_total_gas),
+            format!(
+                "declared {} but the plan needs {} (per_tx * {planned_tx_count} txs)",
+                g.max_total_gas, derived_total_gas
+            ),
         ));
     }
 
     let f = &plan.native_fee_ceilings;
     if f.per_tx_max_fee_per_gas_wei == 0 {
-        return Err(refuse("per_tx_max_fee_per_gas_wei", "zero fee cap is not a plan"));
+        return Err(refuse(
+            "per_tx_max_fee_per_gas_wei",
+            "zero fee cap is not a plan",
+        ));
     }
     if f.per_tx_max_priority_fee_wei > f.per_tx_max_fee_per_gas_wei {
         return Err(refuse(
@@ -345,7 +392,10 @@ pub fn validate_plan(plan: &Plan, now_unix: u64) -> Result<ValidatedPlan> {
     if plan.plan_hash != derived_hash {
         return Err(refuse(
             "plan_hash",
-            format!("declared {} but derived {} — tampered envelope", plan.plan_hash, derived_hash),
+            format!(
+                "declared {} but derived {} — tampered envelope",
+                plan.plan_hash, derived_hash
+            ),
         ));
     }
 
@@ -369,7 +419,10 @@ pub fn validate_job_id(job_id: &str) -> Result<()> {
             format!("length {} outside 1..={MAX_JOB_ID_LEN}", job_id.len()),
         ));
     }
-    if !job_id.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'.' || b == b'_' || b == b'-') {
+    if !job_id
+        .bytes()
+        .all(|b| b.is_ascii_alphanumeric() || b == b'.' || b == b'_' || b == b'-')
+    {
         return Err(refuse(
             "job_id",
             "only [A-Za-z0-9._-] allowed (the id becomes a ledger directory name)",
@@ -385,8 +438,7 @@ pub fn validate_job_id(job_id: &str) -> Result<()> {
 /// fields via the model's serde configuration — this is the structural
 /// no-private-material gate for anything re-loading a plan from disk.
 pub fn plan_from_json(json: &str) -> Result<Plan> {
-    serde_json::from_str(json)
-        .map_err(|e| Error::Malformed(format!("plan JSON: {e}")))
+    serde_json::from_str(json).map_err(|e| Error::Malformed(format!("plan JSON: {e}")))
 }
 
 pub fn plan_to_json(plan: &Plan) -> Result<String> {

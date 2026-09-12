@@ -113,10 +113,11 @@ pub fn base_plan() -> Plan {
         batches: vec![b],
         plan_hash: Hex32::ZERO,
     };
-    plan.approve_ceiling_total = plan.batches.iter().map(|b| b.batch_amount_ceiling).fold(
-        Atto::ZERO,
-        |acc, x| acc.checked_add(x).unwrap(),
-    );
+    plan.approve_ceiling_total = plan
+        .batches
+        .iter()
+        .map(|b| b.batch_amount_ceiling)
+        .fold(Atto::ZERO, |acc, x| acc.checked_add(x).unwrap());
     plan.gas_ceilings.max_total_gas = plan.gas_ceilings.per_tx_gas_limit * 2;
     plan.native_fee_ceilings.max_total_native_fee_wei = Atto::from_u64(
         plan.gas_ceilings.per_tx_gas_limit
@@ -135,66 +136,101 @@ pub type PlanMutation = Box<dyn Fn(&Plan) -> Plan>;
 
 pub fn plan_variants(_p: &Plan) -> Vec<(&'static str, PlanMutation)> {
     vec![
-        ("job_id", Box::new(|p: &Plan| {
-            let mut x = p.clone();
-            x.job_id = "other".into();
-            x
-        })),
-        ("created_unix", Box::new(|p: &Plan| {
-            let mut x = p.clone();
-            x.created_unix += 1;
-            x
-        })),
-        ("expires_unix", Box::new(|p: &Plan| {
-            let mut x = p.clone();
-            x.expires_unix += 1;
-            x
-        })),
-        ("chain_id", Box::new(|p: &Plan| {
-            let mut x = p.clone();
-            x.network.chain_id = 421614;
-            x
-        })),
-        ("payment_vault", Box::new(|p: &Plan| {
-            let mut x = p.clone();
-            x.network.payment_vault = synth_addr(9);
-            x
-        })),
-        ("expected_payer", Box::new(|p: &Plan| {
-            let mut x = p.clone();
-            x.expected_payer = synth_addr(8);
-            x
-        })),
-        ("data_map_address", Box::new(|p: &Plan| {
-            let mut x = p.clone();
-            x.upload.data_map_address = synth_hash(0xDD);
-            x
-        })),
-        ("arm", Box::new(|p: &Plan| {
-            let mut x = p.clone();
-            x.arm = "wave".into();
-            x
-        })),
-        ("candidate_amount", Box::new(|p: &Plan| {
-            let mut x = p.clone();
-            x.batches[0].commitments[0].candidates[0].amount =
-                Atto::from_u64(999);
-            x
-        })),
-        ("batch_timestamp", Box::new(|p: &Plan| {
-            let mut x = p.clone();
-            x.batches[0].merkle_payment_timestamp += 1;
-            x
-        })),
-        ("approve_ceiling_total", Box::new(|p: &Plan| {
-            let mut x = p.clone();
-            x.approve_ceiling_total = Atto::from_u64(1);
-            x
-        })),
-        ("gas", Box::new(|p: &Plan| {
-            let mut x = p.clone();
-            x.gas_ceilings.per_tx_gas_limit += 1;
-            x
-        })),
+        (
+            "job_id",
+            Box::new(|p: &Plan| {
+                let mut x = p.clone();
+                x.job_id = "other".into();
+                x
+            }),
+        ),
+        (
+            "created_unix",
+            Box::new(|p: &Plan| {
+                let mut x = p.clone();
+                x.created_unix += 1;
+                x
+            }),
+        ),
+        (
+            "expires_unix",
+            Box::new(|p: &Plan| {
+                let mut x = p.clone();
+                x.expires_unix += 1;
+                x
+            }),
+        ),
+        (
+            "chain_id",
+            Box::new(|p: &Plan| {
+                let mut x = p.clone();
+                x.network.chain_id = 421614;
+                x
+            }),
+        ),
+        (
+            "payment_vault",
+            Box::new(|p: &Plan| {
+                let mut x = p.clone();
+                x.network.payment_vault = synth_addr(9);
+                x
+            }),
+        ),
+        (
+            "expected_payer",
+            Box::new(|p: &Plan| {
+                let mut x = p.clone();
+                x.expected_payer = synth_addr(8);
+                x
+            }),
+        ),
+        (
+            "data_map_address",
+            Box::new(|p: &Plan| {
+                let mut x = p.clone();
+                x.upload.data_map_address = synth_hash(0xDD);
+                x
+            }),
+        ),
+        (
+            "arm",
+            Box::new(|p: &Plan| {
+                let mut x = p.clone();
+                x.arm = "wave".into();
+                x
+            }),
+        ),
+        (
+            "candidate_amount",
+            Box::new(|p: &Plan| {
+                let mut x = p.clone();
+                x.batches[0].commitments[0].candidates[0].amount = Atto::from_u64(999);
+                x
+            }),
+        ),
+        (
+            "batch_timestamp",
+            Box::new(|p: &Plan| {
+                let mut x = p.clone();
+                x.batches[0].merkle_payment_timestamp += 1;
+                x
+            }),
+        ),
+        (
+            "approve_ceiling_total",
+            Box::new(|p: &Plan| {
+                let mut x = p.clone();
+                x.approve_ceiling_total = Atto::from_u64(1);
+                x
+            }),
+        ),
+        (
+            "gas",
+            Box::new(|p: &Plan| {
+                let mut x = p.clone();
+                x.gas_ceilings.per_tx_gas_limit += 1;
+                x
+            }),
+        ),
     ]
 }

@@ -7,10 +7,7 @@ use thiserror::Error;
 pub enum Error {
     /// A validation refusal naming the offending plan/tx/receipt field.
     #[error("field `{field}`: {reason}")]
-    Field {
-        field: &'static str,
-        reason: String,
-    },
+    Field { field: &'static str, reason: String },
     /// Ledger (durable state machine) refusal. The message states the exact
     /// blocking state and the required explicit action.
     #[error("ledger: {0}")]
@@ -25,7 +22,10 @@ pub enum Error {
 
 impl Error {
     pub fn field(field: &'static str, reason: impl Into<String>) -> Error {
-        Error::Field { field, reason: reason.into() }
+        Error::Field {
+            field,
+            reason: reason.into(),
+        }
     }
 
     /// Convenience for tests and callers: the named field, if this is a field refusal.

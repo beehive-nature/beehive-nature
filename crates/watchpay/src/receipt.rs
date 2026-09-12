@@ -131,7 +131,9 @@ pub fn validate_fee_evidence(
                     }
                 }
                 TxEnvelope::Eip1559 => {
-                    if price < signed_tx.max_priority_fee_wei || price > signed_tx.max_fee_per_gas_wei {
+                    if price < signed_tx.max_priority_fee_wei
+                        || price > signed_tx.max_fee_per_gas_wei
+                    {
                         return Err(refuse(
                             "effective_gas_price_wei",
                             format!(
@@ -234,13 +236,19 @@ pub fn validate_receipt(
     if receipt.from != plan.expected_payer {
         return Err(refuse(
             "payer",
-            format!("receipt from {} != expected payer {}", receipt.from, plan.expected_payer),
+            format!(
+                "receipt from {} != expected payer {}",
+                receipt.from, plan.expected_payer
+            ),
         ));
     }
     if receipt.to != plan.network.payment_vault {
         return Err(refuse(
             "contract",
-            format!("receipt to {} != plan vault {}", receipt.to, plan.network.payment_vault),
+            format!(
+                "receipt to {} != plan vault {}",
+                receipt.to, plan.network.payment_vault
+            ),
         ));
     }
 
@@ -250,7 +258,10 @@ pub fn validate_receipt(
     if receipt.status > 1 {
         return Err(refuse(
             "status",
-            format!("receipt status {} outside the domain {{0,1}} — malformed evidence", receipt.status),
+            format!(
+                "receipt status {} outside the domain {{0,1}} — malformed evidence",
+                receipt.status
+            ),
         ));
     }
 
@@ -276,7 +287,9 @@ pub fn validate_receipt(
     let mut matches = receipt
         .logs
         .iter()
-        .filter(|l| l.address == plan.network.payment_vault && l.topics.first().map(|t| t.0) == Some(topic0))
+        .filter(|l| {
+            l.address == plan.network.payment_vault && l.topics.first().map(|t| t.0) == Some(topic0)
+        })
         .collect::<Vec<_>>();
     match matches.len() {
         0 => {
@@ -367,10 +380,7 @@ pub fn validate_receipt(
             "getCompletedMerklePayment",
             format!(
                 "read-back depth/ts ({}/{}) != event ({}/{})",
-                rb.depth,
-                rb.merkle_payment_timestamp,
-                event.depth,
-                event.merkle_payment_timestamp
+                rb.depth, rb.merkle_payment_timestamp, event.depth, event.merkle_payment_timestamp
             ),
         ));
     }
@@ -405,6 +415,9 @@ pub fn synth_receipt_with_event(
         revert_data: None,
         gas_used: None,
         effective_gas_price_wei: None,
-        evidence: ChainEvidence { chain_id, confirmations },
+        evidence: ChainEvidence {
+            chain_id,
+            confirmations,
+        },
     }
 }

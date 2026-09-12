@@ -99,8 +99,14 @@ pub fn plan_encoding(plan: &Plan) -> Vec<u8> {
     atto_be(&mut out, &plan.approve_ceiling_total);
     u64le(&mut out, plan.gas_ceilings.per_tx_gas_limit);
     u64le(&mut out, plan.gas_ceilings.max_total_gas);
-    u64le(&mut out, plan.native_fee_ceilings.per_tx_max_fee_per_gas_wei);
-    u64le(&mut out, plan.native_fee_ceilings.per_tx_max_priority_fee_wei);
+    u64le(
+        &mut out,
+        plan.native_fee_ceilings.per_tx_max_fee_per_gas_wei,
+    );
+    u64le(
+        &mut out,
+        plan.native_fee_ceilings.per_tx_max_priority_fee_wei,
+    );
     atto_be(&mut out, &plan.native_fee_ceilings.max_total_native_fee_wei);
     out
 }
@@ -131,9 +137,7 @@ mod tests {
         // identity law).
         let a = base_plan();
         let mut b = a.batches[0].clone();
-        b.commitments[0].candidates[0].amount = b
-            .commitments[0]
-            .candidates[0]
+        b.commitments[0].candidates[0].amount = b.commitments[0].candidates[0]
             .amount
             .checked_add(Atto::from_u64(1))
             .unwrap();

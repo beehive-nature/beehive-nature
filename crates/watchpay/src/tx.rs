@@ -97,13 +97,19 @@ pub fn validate_transaction(
     if tx.chain_id != plan.network.chain_id {
         return Err(refuse(
             "chain_id",
-            format!("tx chain {} != plan chain {}", tx.chain_id, plan.network.chain_id),
+            format!(
+                "tx chain {} != plan chain {}",
+                tx.chain_id, plan.network.chain_id
+            ),
         ));
     }
     if tx.from != plan.expected_payer {
         return Err(refuse(
             "from",
-            format!("payer {} != plan expected_payer {}", tx.from, plan.expected_payer),
+            format!(
+                "payer {} != plan expected_payer {}",
+                tx.from, plan.expected_payer
+            ),
         ));
     }
     if tx.nonce != expected_nonce {
@@ -188,7 +194,10 @@ pub fn validate_transaction(
             if tx.to != plan.network.payment_vault {
                 return Err(refuse(
                     "to",
-                    format!("payment tx destination {} != plan vault {}", tx.to, plan.network.payment_vault),
+                    format!(
+                        "payment tx destination {} != plan vault {}",
+                        tx.to, plan.network.payment_vault
+                    ),
                 ));
             }
             let want = calldata::pay_for_merkle_tree_calldata(
@@ -216,7 +225,8 @@ pub fn validate_transaction(
                     ),
                 ));
             }
-            let want = calldata::approve_calldata(plan.network.payment_vault, vp.approve_ceiling())?;
+            let want =
+                calldata::approve_calldata(plan.network.payment_vault, vp.approve_ceiling())?;
             if tx.input != want {
                 return Err(refuse(
                     "input",
