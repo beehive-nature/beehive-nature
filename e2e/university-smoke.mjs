@@ -201,20 +201,29 @@ ok('symposium: states legend + scope fence + symbiosis + scale note',
   && symTxt.includes('SYMBIOSIS') && symTxt.includes('THE SCALE NOTE'));
 ok('symposium: fetch honesty declared', symTxt.includes('fetch honesty'));
 
-// bLongevity Map — the mirror first: the reader sees themselves in the numbers
+// bLongevity Map — New bee first paint, then the instrument via deepen
 await page.goto(`${BASE}/surfaces/blongevity.html`);
 await page.waitForTimeout(500);
-const mir = await page.locator('#mirror').innerHTML();
-ok('mirror: personal tiles compute at 80 kg (5.4x n-3 brick, 1.6x n-6)', mir.includes('5.4') && mir.includes('100') && mir.includes('1.6'));
+const beePaint = await page.locator('#first-bee').innerText();
+ok('longevity New bee: calm sentence + takeaway + choice, no ACiD/CB walls',
+  beePaint.includes('Your body builds signaling from fats it cannot make')
+  && beePaint.includes('The two fats you cannot make write the language')
+  && beePaint.includes('See the fat story')
+  && !beePaint.includes('ACiD') && !beePaint.includes('CB1') && !/cannabinoid/i.test(beePaint));
+ok('longevity New bee: instrument hidden on first paint',
+  (await page.locator('#instrument').evaluate(el => getComputedStyle(el).display)) === 'none');
 const hasTokens = await page.locator('link[href="tokens.css"]').count();
 ok('longevity: consumes the living token sheet', hasTokens === 1);
+await page.locator('#first-bee [data-blong-go="deeper"]').click();
+await page.waitForTimeout(200);
+const mir = await page.locator('#mirror').innerHTML();
+ok('mirror: personal tiles compute at 80 kg (5.4x n-3 brick, 1.6x n-6)', mir.includes('5.4') && mir.includes('100') && mir.includes('1.6'));
 await page.fill('#m-wt', '60');
 ok('mirror: recomputes to the reader (60 kg)', (await page.locator('#mirror').innerHTML()).includes('4.1'));
 const mline = await page.locator('#m-line').innerHTML();
 ok('mirror: the permanent line + the quest join present', mline.includes('every day, for life') && mline.includes('quest'));
 
-// bLongevity Map — the animated upstream river
-await page.waitForTimeout(200);
+// bLongevity Map — the animated upstream river (deepen / Cypherpunk instrument)
 ok('longevity: fat assembly line renders six stages', (await page.locator('#line .stage').count()) === 6);
 ok('longevity: DIAAS demoted to the attention hook, 17 chips', (await page.locator('#diaas .dchip').count()) === 17);
 const longHtml = await page.locator('body').innerHTML();
