@@ -117,5 +117,41 @@ node e2e/estate-source.mjs
 node e2e/i18n-coverage.mjs ru --set e2e/lang-coverage-set.json --floors
 ```
 
+## Receipts (this seat, 2026-09-12)
+
+- UNION chrome probe: **PASS** — 47 listed New bee / `#first-bee` keys × 29 cells.
+- Every `#first-bee` `data-i18n` key on the eight tips is in the merged
+  corpus at 29/29. Onboarding `#first-bee` also carries `onb.mark` /
+  `onb.pair` (not invented).
+- Tip HTML (all eight remodeled pages) × UNION corpus: **174** unique
+  `data-i18n` keys, **0 missing**, **0 thin** cells.
+- `node scripts/estate-check.mjs` — PASS (93 counted).
+- `node e2e/estate-source.mjs` — 11/11 PASS (707 page keys exist; 28
+  tongues × 938 corpus keys; English matches current pages).
+- `node --test e2e/lang-coverage.test.mjs` — 9/9 PASS.
+- `node e2e/i18n-coverage.mjs --selftest` — PASS (29 languages).
+- Floors on **current main HTML** (this branch, no adapter pages):
+  seven remodeled doors excluding university **PASS**; the eight-door
+  set **FAIL** `university/index.html: 7 keyed, floor 11` — the
+  sequenced ratchet against pre-#51 HTML.
+- Floors on **tip HTML + this UNION corpus** (overlay, not committed):
+  **PASS**. Live keyed / floor:
+
+  | page | keyed | visible | floor |
+  |------|------:|--------:|------:|
+  | `bearth.html` | 9 | 9 | 9 |
+  | `bsymposium.html` | 10 | 10 | 10 |
+  | `bfood.html` | 12 | 12 | 12 |
+  | `blongevity.html` | 10 | 12 | 9 |
+  | `review.html` | 11 | 11 | 6 WATCH |
+  | `bigen.html` | 12 | 12 | 12 |
+  | `university/index.html` | 11 | 11 | 11 |
+  | `onboarding/index.html` | 8 | 9 | 0 honest |
+
+  Empty cells on that overlay: **0**. Missing corpus keys: **0**.
+
+Skipped: remodeling HTML, essay/`h.*` fill, fleet attestation of the
+new keys, any x0x #622 measurement claim.
+
 Machine drafts only. `_meta.attested` is unchanged. Passing these
 checks is not a human attestation and not a meaning review.
