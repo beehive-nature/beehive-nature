@@ -1,18 +1,23 @@
 # Autonomi fence readiness — the pinned runbook
 
 **Seat:** z1.c (BNR Autonomi dependency/readiness seat), 2026-09-12.
-**Docket:** assignment 3 of `docs/dispatches/2026-09-12-zcode-takeover.md`
-(e3373634). Returned to Astra on issue #10.
-**Law of this runbook:** everything below is READ-ONLY observation plus
-owner-executable candidates. This lane changed no systemd unit, upgrade
-channel, signing key, network door, or deployed binary. Every claim is
-either VERIFIED with a citation or explicitly marked UNTESTED/ASSUMPTION.
+**Revision 2** — corrections per Astra review of 305597f2
+([#10 comment 5647564848](https://github.com/beehive-nature/beehive-nature/issues/10#issuecomment-5647564848)):
+field-work closure corrected (§9), installed-version-vs-enforced-pin separated
+(§2–3), scheduling made conditional and bound to installed revisions,
+participation claims re-based on direct node diagnostics (§7), commands
+allowlisted via an observation script (§5), rollback hardened (§8), search
+and lockfile limits stated accurately (§6).
+**Law of this runbook:** READ-ONLY observation plus owner-executable
+candidates. No systemd, upgrade-channel, signing, network, or binary change
+was made by this lane. Every claim is VERIFIED with a citation bound to the
+installed source revision, or explicitly marked UNTESTED/ASSUMPTION.
 
 Why this exists: the takeover docket ruled the reported "v0.18.1 / 5fb04fd
 pin, v0.19 canary-only" policy a *candidate* policy, not installed-state
 evidence. This runbook converts that report into verified state, separates
-the version axes the report blurred, and gives the owner exact pins, tests,
-and rollback.
+the version axes, and gives the owner exact pins, tests, and rollback —
+with installed state kept strictly distinct from any tested hold.
 
 ---
 
@@ -20,250 +25,313 @@ and rollback.
 
 | axis | what it actually is | verified state (2026-09-12) |
 |---|---|---|
-| **Node** (production storage node on the box) | `ant-node`, the farmer/validator binary | **0.18.1**, running since 2026-09-04 (PID 15409), fenced at `/mnt/ant-store/data/node-2/` — see §2 |
-| **Node manager CLI + supervisor daemon** | `ant` 0.3.6 (`ant node daemon run`, PID 3889673) from the ant-node CLI distribution; the daemon in `ant-core` supervises and restarts nodes | manages node 2 via `~/.local/share/ant/node_registry.json`; registry `upgrade_channel: null` → node default = stable |
-| **Client/crate** (member-write harness `ops/ant-extsig`) | `ant-core` 0.8.1, git dep on `WithAutonomi/ant-client` | resolved at rev `969ed008` (2026-09-02, "promote rc" merge) in the box's `~/ant-lane/ant-extsig/Cargo.lock`; **in-tree `Cargo.toml` has NO rev pin** — HEAD has already drifted to `c63ca687` (§6) |
-| **Protocol** | `ant-protocol` (wire/storage semantics; carries the saorsa-core lineage) | **2.3.5** — harness pin, ant-node v0.18.1's own pin, AND the newest upstream release: the three agree today |
-| **Buzz Relay** (`relay.skaists.dev`) | our `skaists/buzz` fork (Nostr relay) | box checkout `088a677f`; the deployed prod binary's receipt is fork `@eeb252286` (order D, `2026-09-05-order-d-join-event.md`). **Zero autonomi/ant/saorsa deps** in its `Cargo.toml`/`Cargo.lock` (grep empty, verified on the box clone). The relay's version is INDEPENDENT of every ant-node version. `relay.skaists.dev` is not, and never was, an ant-node version oracle. |
+| **Node** (production storage node on the box) | `ant-node` binary | **0.18.1 observed running** since 2026-09-04 (PID 15409), fenced at `/mnt/ant-store/data/node-2/`. Provenance PROVEN: the running binary's sha256 equals the official `ant-node-cli-linux-arm64.tar.gz` asset of release tag `v0.18.1` (§4). Observation, not an enforced pin — see §3 |
+| **Node manager CLI + supervisor daemon** | `ant` 0.3.6 = the `ant-cli` crate in `WithAutonomi/ant-client` | running (PID 3889673, `ant node daemon run`); provenance PROVEN: box binary sha256 equals the official `ant-cli-v0.3.6` aarch64-musl release asset (§4). Daemon semantics cited at that release's source lineage (§3.5) |
+| **Client/crate** (member-write harness `ops/ant-extsig`) | `ant-core` 0.8.1, git dep on `WithAutonomi/ant-client` | resolved at rev `969ed008` in the BOX's `~/ant-lane/ant-extsig/Cargo.lock` (reproducible there: `cargo metadata --locked` exit 0). The IN-TREE copy has NO lockfile and floats — §6 |
+| **Protocol** | `ant-protocol` | 2.3.5 in the harness lock; ant-node v0.18.1 declares `ant-protocol = "2.3.5"` (Cargo.toml @ tag); latest upstream release is v2.3.5. The three agree today |
+| **Buzz Relay** (`relay.skaists.dev`) | our `skaists/buzz` fork (Nostr relay) | box checkout `088a677f`; deployed prod binary receipt `@eeb252286` (order D). ZERO autonomi/ant/saorsa deps in its Cargo.toml/lock (grep, box clone). Independent of every ant-node version; `relay.skaists.dev` is not an ant-node oracle |
 
-The browser read door `antd` (REST+gRPC gateway for Autonomi, `~/ant-lane/antd`,
-bound `172.18.0.1:8082` REST / `127.0.0.1:50051` gRPC) is a sixth, harness-side
-axis: **0.12.0, build_commit `8378338ca04d`**, `/health` → `status ok,
-evm_network arbitrum-one`, uptime ≈ 8 days (started with the lane, 2026-09-04).
+The browser read door `antd` (REST+gRPC gateway, `~/ant-lane/antd`, REST
+`172.18.0.1:8082` / gRPC `127.0.0.1:50051`) is a sixth, harness-side axis:
+**0.12.0, build_commit `8378338ca04d`** (its `/health`), supervised by an
+existing watchdog shell loop (observed PID 42487: `pgrep -x antd || setsid
+./antd …` — antd restarts if killed; relevant to §8).
 
-x0x transport (`ant-quic` 0.27.49/0.27.50, the RFC9000 §14 fix line) is a
-**separate stack** (saorsa-labs/x0x), tracked by the x0x lane — it shares
-lineage with the node's transport but no version coupling to ant-node 0.18.1.
+x0x transport (`ant-quic` 0.27.49/0.27.50) is a separate stack tracked by
+the x0x lane: shared lineage with the node's transport, no version coupling
+to ant-node 0.18.1.
 
 ## 2 · Reported policy vs verified state
 
 The reported candidate policy came from the founder's pasted summary of a
-Grok/Chief "newer Autonomi fence draft". **That draft was NOT FOUND** — this
-lane searched: all `grok/*` and `cursor/*` branches (git grep for fence /
-5fb04fd / ant-node markers), the Grok worktrees' untracked files
-(`wt-grok-social-slice`, `wt-grok-bloom-pack`, `wt-grok-campaign-pack` — they
-hold campaign art and a captured upstream ADR-0008 copy, no fence runbook),
-all commits on all branches since 2026-09-08, and the box home. The
-**actual, existing fence artifacts** are the committed pair:
-`ops/ant-node/fence.md` (the 2026-09-04 volume fence, @fb18e18f) and
-`ops/ant-extsig/` (the member-write harness, @147854c), plus the eco-sweep
-verdict (@8d42da28). Nothing newer exists to recover; recreating a "newer
-draft" would have fabricated it. The founder's summary is direction — and it
-happens to check out, as follows:
+Grok/Chief "newer Autonomi fence draft". **That draft was not found in the
+searched locations**: all `grok/*` and `cursor/*` branches (git grep for
+fence / 5fb04fd / ant-node markers), the Grok worktrees including untracked
+files (`wt-grok-social-slice`, `wt-grok-bloom-pack`, `wt-grok-campaign-pack`
+— campaign art and a captured upstream ADR-0008 copy, no fence runbook),
+every commit on all branches since 2026-09-08, and the box home. The
+existing fence artifacts are the committed `ops/ant-node/fence.md`
+(@fb18e18f) and `ops/ant-extsig/` (@147854c). Absence in those locations is
+not proof of nonexistence elsewhere; nothing was recreated either way.
 
-| reported | verdict | primary-source evidence |
+| reported | verdict | evidence |
 |---|---|---|
-| "v0.18.1 pin" | **VERIFIED as installed production state** | running process cmdline `/mnt/ant-store/data/node-2/ant-node --rewards-address 0x6797…386c … --stop-on-upgrade --evm-network arbitrum-one` (ps, PID 15409, start 2026-09-04); `ant-node --version` → `ant-node 0.18.1`; registry `"version": "0.18.1"`; running binary digest = `ac7e6ab133db12e9…` PUBLIC-CONSTANT (sha256, full value §4), byte-identical to the CLI cache copy |
-| "5fb04fd" | **VERIFIED — it is the commit the `v0.18.1` tag points at** | `WithAutonomi/ant-node` git ref `tags/v0.18.1` → commit `5fb04fde5fd1f32ac03a3a687c299ee6b12b93f3` (lightweight tag, ref type=commit; fetched via API 2026-09-12) |
-| "v0.19 canary-only" | **VERIFIED** | newest upstream release is `v0.19.0-rc.2` (published 2026-09-09T20:59Z, `prerelease: true`); latest STABLE is `v0.18.1` (2026-09-02T20:25Z). The rc.2 release notes state verbatim: *"This is a pre-release, so it is not installed by nodes on the default `stable` channel. Only `-beta.N` releases are installed automatically, and only by nodes started with `--upgrade-channel beta`. Release candidates (`-rc.N`) are not installed automatically on any channel."* The box's own upgrade monitor agrees: its `releases.json` (fetched 2026-09-12T17:06Z, epoch 1789232809) lists rc.2/rc.1/beta.1 all `prerelease: true`, and the node logged `No upgrade available` |
+| "v0.18.1 pin" | **VERIFIED as the installed version — NOT an enforced pin.** Nothing holds the node on 0.18.1 except the absence of a newer stable; see §3 | running process + registry `"version": "0.18.1"` + binary sha256 = official v0.18.1 release asset (§4) |
+| "5fb04fd" | **VERIFIED — the commit the `v0.18.1` tag points at** | `WithAutonomi/ant-node` ref `tags/v0.18.1` → commit `5fb04fde5fd1f32ac03a3a687c299ee6b12b93f3` (lightweight tag; API 2026-09-12) |
+| "v0.19 canary-only" | **VERIFIED** | newest upstream release `v0.19.0-rc.2` (2026-09-09T20:59Z, prerelease) vs latest stable `v0.18.1` (2026-09-02). rc.2 release notes verbatim: *"This is a pre-release, so it is not installed by nodes on the default `stable` channel. Only `-beta.N` releases are installed automatically, and only by nodes started with `--upgrade-channel beta`. Release candidates (`-rc.N`) are not installed automatically on any channel."* The box monitor's own `releases.json` (fetched 2026-09-12T17:06Z) lists all v0.19 entries `prerelease: true`; node logged `No upgrade available` |
 
-## 3 · The auto-upgrade law (source-cited, the load-bearing finding)
+## 3 · The auto-upgrade law — bound to the INSTALLED revisions
+
+All file:line citations in this section are at **ant-node tag v0.18.1**
+(commit 5fb04fd) unless noted; the supervisor at the **ant-cli-v0.3.6
+lineage** (the digest-proven installed manager; release tag → commit
+`dbc01ce8`, behavior cross-checked at rev `969ed008` whose ant-cli crate
+declares 0.3.6).
 
 **There is no disable switch.** `src/config.rs` (UpgradeConfig) exposes
 channel / check_interval_hours / github_repo / staged_rollout_hours /
-stop_on_upgrade — no `enabled` field. The README's own config example says it
-verbatim: *"Upgrades are always enabled; configure behavior here."* The
-`ANT_AUTO_UPGRADE=true` line in the README env-var list is documentation
-only — `AUTO_UPGRADE` appears nowhere in `src/`. The verified cycle, with
-every hop cited:
+stop_on_upgrade — no `enabled` field. README @ v0.18.1 line 1023: *"Upgrades
+are always enabled; configure behavior here."* The README's `ANT_AUTO_UPGRADE`
+env line (line 1006) is documentation only — no such env exists in src. The
+installed CLI reaches exactly two upgrade knobs: `--upgrade-channel` /
+`ANT_UPGRADE_CHANNEL` and `--stop-on-upgrade` (cli.rs @ v0.18.1:35-42, 131-135;
+`into_config` sets only those two, cli.rs:244-246).
 
-1. **Poll** — every 1h by default (`default_check_interval() = 1`, config.rs);
-   the box node's log receipts it live: check at 2026-09-12T17:06:49Z →
-   `No upgrade available` → next check 18:09:26Z.
-2. **Select** — GitHub releases of `github_repo` (default
-   `WithAutonomi/ant-node`); *"GitHub's own prerelease/latest flags are
-   ignored; selection is driven purely by semver on the tag"* (ADR-0010).
-   Stable filter = no pre-release component; beta = `-beta.*` only; **rc
-   rejected on both channels** (monitor.rs `version_matches_channel`,
-   ADR-0010). Our node: registry channel null → default stable.
-3. **Stage** — 24h rollout window (`default_staged_rollout_hours() = 24`);
-   each node waits a deterministic per-node-ID delay inside it.
-4. **Apply** — download platform asset, verify **ML-DSA-65 (FIPS 204)**
-   signature (`src/upgrade/signature.rs`; SHA256SUMS + `.sig` assets +
-   `ant-keygen` per release notes), replace the running binary **in place**
-   (ours lives inside the fence: `/mnt/ant-store/data/node-2/ant-node`),
-   exit — cleanly on Unix.
-5. **Restart** — the `ant` daemon supervisor detects the exit + on-disk
-   version drift vs registry and **respawns directly into the new binary —
-   "no backoff, no crash counter"** (ant-core
-   `src/node/daemon/supervisor.rs`, `monitor_node_inner`: the
-   `is_upgrade_restart_exit_code` → `extract_version(binary_path)` drift
-   check → `respawn_upgraded_node` path, incl. the RESTART_EXIT_CODE=100
-   const doc: Unix exits 0, Windows 100).
+The verified cycle, hop by hop:
 
-**Consequence (the readiness clock):** when v0.19.0 (or any newer STABLE)
-lands on GitHub, this box upgrades itself — no sign-off, no seat in the loop
-— within ≤ ~25h of the tag. `--stop-on-upgrade` on our cmdline does NOT
-prevent this; it only selects who restarts (the ant daemon, which does,
-verified above). The member-write harness pins ant-node 0.18.1 +
-ant-protocol 2.3.5 + ant-core@969ed008: after any node auto-upgrade the
-harness MUST be re-receipted before its proofs are cited (ADR-0004/0008
-moved pricing to commitment-bound quotes — the eco sweep's "never mix old
-client + new nodes, payments destroyed" law).
+1. **Poll — jittered ~1h.** Base `default_check_interval() = 1` hour
+   (config.rs @ tag:395-397); the loop schedules each next check via
+   `jittered_interval(check_interval())` (node.rs @ tag:648-654) — observed
+   gaps 16:06→17:06→next 18:09. Check errors log a warning and ride the
+   same sleep (node.rs @ tag: `Err(e) => warn!(…)` arm).
+2. **Select — semver-only, channel-filtered.** GitHub releases of
+   `github_repo` (default `WithAutonomi/ant-node`); *"GitHub's own
+   prerelease/latest flags are ignored; selection is driven purely by
+   semver on the tag"* (ADR-0010, present at the tag). Stable = no
+   pre-release component; beta = `-beta.*` only; **rc rejected on both
+   channels** (monitor.rs @ tag:182-185 `version_matches_channel`).
+   Registry `upgrade_channel: null` → the daemon's default stable.
+3. **Stage — deterministic per-node delay inside a 24h window**
+   (`default_staged_rollout_hours() = 24`, config.rs @ tag:399-401;
+   rollout.rs @ tag: delay derived from node-ID hash, consistent across
+   restarts). While the delay remains, checks log "Upgrade pending,
+   rollout delay remaining" (node.rs @ tag).
+4. **Apply — ML-DSA-65 (FIPS 204) verified binary self-replacement**
+   (upgrade/mod.rs + signature.rs @ tag; release assets carry `.sig` +
+   SHA256SUMS, verified with `ant-keygen` per release notes). If the apply
+   FAILS, the upgrader **rolls itself back** — `UpgradeResult::RolledBack`
+   (node.rs @ tag loop; apply.rs @ tag:155-158: *"Returns an error only for
+   critical failures where rollback also fails"*) — and retries on later
+   checks with a backoff of at least one jittered interval (node.rs @ tag:
+   656-665, "avoid a tight loop").
+5. **Restart — the `ant` daemon respawns the upgraded binary.** ant-node
+   exits cleanly after applying (Unix exit 0; Windows RESTART_EXIT_CODE=100,
+   apply.rs @ tag:25-30). The daemon's supervisor treats exit 0-or-100 as an
+   upgrade-restart candidate **only if the on-disk binary version drifted
+   from the registry** — `is_upgrade_restart_exit_code` matches
+   `Some(0) | Some(100)`; "A matching code is necessary but not sufficient —
+   the caller additionally confirms the on-disk binary version drifted"
+   (supervisor.rs @ ant-client 969ed008:954-962). On drift it respawns
+   directly into the new binary, "no backoff, no crash counter". The
+   supervisor doc also notes the daemon itself **always passes
+   `--stop-on-upgrade`** when spawning nodes (supervisor.rs @ 969ed008:957,
+   1037-1039) — which is why the flag appears on the box cmdline.
 
-**Owner options for holding 0.18.1 (candidates only — none executed):**
-- **A. Accept-and-receipt:** do nothing; on the first stable drop, re-run
-  §5's battery + the harness devnet proof against the new node. Zero
-  action now, silent breakage risk later.
-- **B. Supported hold via release-source pin (cleanest):** point
-  `[upgrade] github_repo` at an estate-controlled fork that never publishes
-  a newer stable (e.g. `beehive-nature/ant-node-hold`, containing only the
-  v0.18.1 release). Field is first-class in UpgradeConfig; the monitor then
-  polls our fork hourly and finds nothing. Change shape: add
-  `/mnt/ant-store/data/node-2/config.toml` with `[upgrade]` section (or a
-  registry `env_variables` entry) + node restart — a production change for
-  the responsible owner under the receipt/rollback process, not this docket.
-- **C. Accept-and-freeze via supervision:** stop_on_upgrade is already
-  true; a variant is moving the node out of `ant node daemon` supervision
-  into a plain systemd unit WITHOUT `Restart=` on upgrade exits. Most
+**Consequence — CONDITIONAL, not a guaranteed deadline.** When a newer
+STABLE tag publishes, the upgrade lands on this box at the first ready check
+after the tag (≈ ≤1h+jitter polling) plus this node's deterministic rollout
+delay (∈ the 24h window) plus apply time — **if** every check, download, and
+signature verification succeeds along the way. Failed checks push to the
+next jittered interval; failed applies roll back and back off ≥ one
+interval. So "typically within ~1 day of a stable tag, conditions
+permitting; no upper bound under persistent failures." No seat is in the
+loop; the harness compatibility consequence is unchanged (any node version
+change ⇒ re-receipt the member-write harness before citing its proofs —
+ADR-0004/0008 pricing moved to commitment-bound quotes).
+
+**Owner options for holding 0.18.1 — candidates, none executed:**
+- **A. Accept-and-receipt:** do nothing; on the first stable drop re-run §5
+  + the harness devnet proof against the new node. Zero action now.
+- **B. Release-source redirection via `github_repo` — UNTESTED** on the
+  installed version, and its reachability is narrower than main suggests:
+  `github_repo` exists only as a serde field in UpgradeConfig (config.rs @
+  tag:157-158) — there is **no CLI arg and no env var** for it at v0.18.1.
+  The only path is launching the node with `--config <file>` whose TOML
+  carries `[upgrade] github_repo = "<fork>"` (`NodeConfig::from_file` loads
+  the full config, cli.rs @ tag `into_config`) — and today's daemon-spawned
+  cmdline passes no `--config`. Whether `ant` 0.3.6's node-add supports
+  passing one is unverified. A hold via B requires a disposable test first:
+  on a throwaway host/container, launch the OFFICIAL v0.18.1 binary with a
+  `--config` pointing `github_repo` at a repo with no newer stable, and
+  observe "No upgrade available" against it (protocol: bounded, no
+  production contact, no fork creation needed from this lane). Until that
+  test passes for the installed version, B is classified UNTESTED.
+- **C. Supervision freeze:** run the node outside `ant node daemon`
+  supervision in a unit that does not restart on upgrade exits. Most
   invasive; listed for completeness.
 
-## 4 · Exact artifact pins
+## 4 · Exact artifact pins and provenance
 
-Upstream (fetched 2026-09-12 via GitHub API):
+Upstream (GitHub API, 2026-09-12):
 
-- tag `v0.18.1` → commit `5fb04fde5fd1f32ac03a3a687c299ee6b12b93f3`
-- release assets: `ant-node-cli-linux-arm64.tar.gz` (+`.sig`, ML-DSA-65),
-  `SHA256SUMS.txt` — artifact-verify path: `ant-keygen verify` with the
-  release-signing key (release notes, v0.18.1/v0.19.0-rc.2)
-- `ant-protocol` latest release: `v2.3.5`
-- `ant-client` HEAD: `c63ca68793bfc7e6348fcbe5812ceba21e0f1cb8` (drifted
-  past the harness rev, §6)
+- ant-node tag `v0.18.1` → commit `5fb04fde5fd1f32ac03a3a687c299ee6b12b93f3`
+- ant-cli release tag `ant-cli-v0.3.6` → commit `dbc01ce8fdbdfe9ac4d064d35f36b4684bf6a616`
+- `ant-protocol` latest release `v2.3.5`; `ant-client` HEAD `c63ca687…`
+  (drifted past the harness's banked rev — §6)
 
-On-box installed binaries (sha256, read-only):
+On-box digests vs official release assets (PROVEN equal this lane — the
+tarballs were downloaded and hashed locally, no execution):
 
 ```
-ac7e6ab133db12e9b1b98a2315a67c3f775813aa08f04da905809bc7e24c28af  /mnt/ant-store/data/node-2/ant-node        PUBLIC-CONSTANT (running node 0.18.1)
-ac7e6ab133db12e9b1b98a2315a67c3f775813aa08f04da905809bc7e24c28af  ~/.local/share/ant/bin/ant-node-0.18.1      PUBLIC-CONSTANT (CLI cache copy — byte-identical)
-1cc3b4b9997e7344b92ed17cccf44324fa1aa1d8ac6e4d891fa7f3a0eab32cd8  ~/ant-lane/antd                            PUBLIC-CONSTANT (gateway 0.12.0, build 8378338ca04d)
-f66ad25076a50ce471a94220dfcd239e78b7adbe12781cef010b56adfca75086  ~/.local/bin/ant                           PUBLIC-CONSTANT (manager CLI 0.3.6)
+ac7e6ab133db12e9b1b98a2315a67c3f775813aa08f04da905809bc7e24c28af  box /mnt/ant-store/data/node-2/ant-node == ant-node-cli-linux-arm64.tar.gz(v0.18.1)::ant-node   PUBLIC-CONSTANT (sha256)
+ac7e6ab133db12e9b1b98a2315a67c3f775813aa08f04da905809bc7e24c28af  box ~/.local/share/ant/bin/ant-node-0.18.1 (same asset)                                          PUBLIC-CONSTANT (sha256)
+f66ad25076a50ce471a94220dfcd239e78b7adbe12781cef010b56adfca75086  box ~/.local/bin/ant == ant-0.3.6-aarch64-unknown-linux-musl.tar.gz(ant-cli-v0.3.6)::ant          PUBLIC-CONSTANT (sha256)
+1cc3b4b9997e7344b92ed17cccf44324fa1aa1d8ac6e4d891fa7f3a0eab32cd8  box ~/ant-lane/antd (0.12.0 build 8378338ca04d per /health; release not re-derived this pass)     PUBLIC-CONSTANT (sha256)
 ```
 
-Harness crate pins (box `~/ant-lane/ant-extsig/Cargo.lock`, the honest pin
-until the in-tree pin lands): `ant-core 0.8.1` @ git
-`969ed008d9cd39bbfe6466bc5ff7943914565994`, `ant-node 0.18.1`,
-`ant-protocol 2.3.5`.
+Harness crate pins (box `~/ant-lane/ant-extsig/Cargo.lock`): `ant-core 0.8.1`
+@ git `969ed008d9cd39bbfe6466bc5ff7943914565994` (ant-cli crate at that rev
+declares 0.3.6), `ant-node 0.18.1`, `ant-protocol 2.3.5`.
 
-## 5 · Readiness observation battery (bounded, read-only, box)
+## 5 · Readiness observation battery (allowlisted, read-only)
 
-Every command below was run this lane; expected shapes are from today's
-receipts. `wsl -e ssh oracle` first; no command mutates.
+Use `docs/runbooks/autonomi-observe.sh` (this repo; syntax-checked and
+receipted against the box this lane — output shapes below). It prints only
+nonsecret fields: processes with the rewards address redacted, versions,
+digests, the registry's version/channel/path/evm fields (rewards address
+excluded), the monitor's newest/latest-stable + fetch time, today's
+upgrade-check and PUT-refusal lines with chunk addresses truncated,
+today's replication-ingress total, antd `/health`, and the two disk floors.
+Run: `ssh oracle bash -s < docs/runbooks/autonomi-observe.sh`.
+Key shapes from the 2026-09-12 receipt: registry node 2 → version 0.18.1,
+channel null; monitor newest `v0.19.0-rc.2` prerelease / latest stable
+`v0.18.1`; `No upgrade available` + jittered next checks; PUT rejections
+(§7).
 
-```
-ps aux | grep -E 'ant-node|antd' | grep -v grep        # node + daemon cmdlines (channel/flags are ON the cmdline)
-/mnt/ant-store/data/node-2/ant-node --version          # -> ant-node 0.18.1
-cat ~/.local/share/ant/node_registry.json              # version, upgrade_channel, binary_path, data_dir
-cat ~/.local/share/ant/upgrades/releases.json | head -c 400   # what the monitor fetched + when (fetched_at_epoch_secs)
-grep -h -E 'upgrade' /mnt/ant-store/logs/node-2/logs/ant-node.$(date +%F).log | tail -5
-                                                        # -> "No upgrade available" + next-check time
-curl -s -m 3 http://172.18.0.1:8082/health              # -> antd version/build/evm_network/uptime
-df -h / /mnt/ant-store                                  # fence + root floors (see §7)
-sha256sum /mnt/ant-store/data/node-2/ant-node ~/.local/share/ant/bin/ant-node-0.18.1   # pin equality
-git ls-remote https://github.com/WithAutonomi/ant-client HEAD   # client drift vs 969ed008
-```
+## 6 · Compatibility checks, lockfile reality, and the in-tree harness
 
-## 6 · Compatibility checks and bounded tests
+- **Lockfile behavior (inspected, with receipts):** the IN-TREE
+  `ops/ant-extsig/` has **no committed Cargo.lock**, and `cargo build`
+  there resolves `ant-core` from ant-client HEAD — already drifted
+  (`969ed008` → `c63ca687`). `cargo metadata --locked` in a workspace-free
+  copy of the in-tree harness FAILS: *"cannot create the lock file …
+  because --locked was passed to prevent this"* (cargo 1.98.1) — `--locked`
+  guards nothing until a lockfile exists. The BOX copy
+  (`~/ant-lane/ant-extsig`) HAS the lockfile and passes
+  `cargo metadata --locked` (exit 0) — the banked pins are reproducible
+  there and only there today. Additionally the in-tree copy sits under the
+  repo-root workspace without being a member ("current package believes
+  it's in a workspace when it is not" — cargo error, receipted), which
+  breaks plain builds from the repo tree independently of the pin.
+- **Candidate fix (separately reviewable; NOT applied — this pass is
+  documentation-only):** commit a rev-pinned `Cargo.toml`
+  (`ant-core = { git = …, rev = "969ed008d9cd39bbfe6466bc5ff7943914565994" }`)
+  plus the resulting `Cargo.lock`, and a workspace exclusion or explicit
+  membership so standalone builds work. Any change must respect the
+  ops-verbatim law (in-tree = what runs on the box) before deployment.
+- **Member-write proof (banked, NOT re-run this pass — named skip):** the
+  2026-09-04 LocalDevnet + Anvil external-signer flow (receipts @147854c).
+  Re-run trigger: any node-version change on the box, any ant-core bump, or
+  the first v0.19 stable. Needs `anvil` + ~1.2 GB free — not on the box
+  today (§7).
+- **Read-path probe:** `curl http://172.18.0.1:8082/v1/data/public/<hex>`;
+  the `--cors` origin-echo law and the browser-client nonexistence stand
+  unchanged (eco sweep + `ops/ant-extsig/BROWSER-PATTERN.md`).
 
-- **Client-drift check (ran this lane):** `git ls-remote …/ant-client HEAD`
-  → `c63ca687…` ≠ banked `969ed008…`. The in-tree
-  `ops/ant-extsig/Cargo.toml` declares `ant-core = { git = … }` with **no
-  rev** — a fresh `cargo` resolution today silently pulls different client
-  code. Recommended fix for Astra (one line): add
-  `rev = "969ed008d9cd39bbfe6466bc5ff7943914565994"` to the ant-core dep,
-  re-lock, commit the lockfile. Until then the box's Cargo.lock is the only
-  pin — never delete `~/ant-lane/ant-extsig/Cargo.lock`.
-- **Member-write proof (banked, NOT re-run this lane — named skip):** the
-  8-node LocalDevnet + Anvil external-signer flow (`ops/ant-extsig/src/main.rs`)
-  was proven 2026-09-04 (PREPARE → member pays → client destroyed → fresh
-  client resumes with NO new quote; receipts @147854c). Re-run trigger: any
-  node-version change on the box, any ant-core bump, or the first v0.19
-  stable. Command shape is in `ops/ant-extsig/README.md`; needs `anvil` on
-  PATH + ~1.2 GB free disk — **do not run on the box today** (root is below
-  its floor, §7).
-- **Read-path probe:** `curl http://172.18.0.1:8082/v1/data/public/<hex>` —
-  the lane's genesis DataMap address is in the @147854c receipt; unknown
-  addresses return the typed "DataMap chunk not found" after a real network
-  query. The `--cors` origin-echo law and the browser-client nonexistence
-  (ant-browser-sdk empty; five vendor PRs pending since 2026-09-01) stand
-  unchanged — see the eco sweep and `ops/ant-extsig/BROWSER-PATTERN.md`.
+## 7 · Disk and participation state (measured; corrected per review)
 
-## 7 · New risks found (owner attention; NO action taken this lane)
+1. **Root free 8.4 G (82% used) — below the fence's ≥10 G floor.** Down from
+   22 G on 2026-09-04. Visible same-day sizes: `/tmp` 1.1 G, `/var/lib/docker`
+   2.9 G, home ≈ 7.5 G (incl. the dense 5.3 G fence image). **Today's
+   directory sizes do not attribute the ~13.6 G historical growth** — that
+   needs the separate bounded capacity inventory the review ordered,
+   coordinated with the Watch/media owner (candidate recoverable items with
+   ownership/retention evidence; nothing deleted).
+2. **Fence volume 93% full; storage-PUT acceptance is REFUSED — direct
+   diagnostics, not file metadata.** Today's node log carries recurring
+   `ant_node::storage::disk_precheck: Rejecting PUT before payment
+   verification: storage error: Insufficient disk space: 0.40 GiB
+   available, 0.49 GiB reserve required…` (16:33–17:38Z receipt window).
+   These rejections are ABSENT from the 09-04/05 logs; the exact onset date
+   is not bounded this pass. The `data.mdb` size/mtime (5.37 G, 2026-09-04
+   16:08) is retained as a measurement only — it is NOT itself a
+   participation signal.
+3. **Participation is NOT paused overall.** The same logs show daily
+   replication-verification and first-audit activity (thousands of pending
+   verifications, nonzero ingress-received totals in every daily log
+   examined, `capacity_deferred_*=0`), i.e. the node still serves and
+   verifies its records while refusing NEW chunks for space. Net: the fence
+   bounds new storage exactly as designed; whether that trade stays
+   acceptable (vs. an owner-approved resize, per fence.md law) is a founder
+   decision. Logs (93 M, 9 daily files) share the fenced volume.
+4. **The auto-upgrade clock (§3)** and the **unpinned in-tree ant-core
+   (§6)** stand as before.
 
-1. **Root free space is BELOW the fence's own floor.** The fence was ruled
-   "≥ 10 GB stays free for the hive" (fence.md). Today: `/` has **8.4 G
-   free (82% used)**, down from 22 G on 2026-09-04 (~13.6 G growth). Visible
-   contributors: `/tmp` 1.1 G, `/var/lib/docker` 2.9 G (watch-room
-   renditions era), home ≈ 7.5 G of which the dense 5.3 G `ant-store.img`
-   is the fence itself. This feeds issue #4 (recovery inventory + disk
-   capacity). UNTESTED: what specifically grew — not attributed this lane.
-2. **The fence volume is 93% full and node participation has PAUSED.**
-   `data.mdb` = 5.37 G with mtime 2026-09-04 16:08 (no growth since install
-   day; `lock.mdb` is actively written) — the store filled the 5.9 G volume
-   and the node's ~0.49 G reserve law stopped further PUTs. The fence is
-   doing its job (the hive is protected); "participation, not revenue"
-   simply means the 6 G fence is too small for the store's appetite.
-   Owner options per fence.md law: resize upward (unmount + `truncate` +
-   `resize2fs`) or accept the pause. Logs (93 M, daily-rotated, 9 files)
-   share the volume — keep an eye on them.
-3. **The auto-upgrade clock (§3)** — no disable switch exists upstream; a
-   hold requires option B (or C) as a deliberate production change.
-4. **The unpinned ant-core git dep (§6)** — one-line fix recommended.
+## 8 · Rollback (owner-executed; UNAPPROVED and UNEXECUTED as written)
 
-## 8 · Rollback (owner-executed; nothing here requires this lane)
+- **Binary-only downgrade is NOT a complete rollback.** The store
+  (`chunks.mdb`, `paid_list.mdb`) may carry version-coupled format state;
+  whether a given downgrade pair is store-compatible is UNVERIFIED per
+  pair. A complete rollback needs a **named compatible recovery point**: a
+  pre-upgrade copy of the fence's `data/` (and the node identity) taken by
+  the owner at approved-upgrade time — none exists today — plus the pinned
+  old binary (verified restore sources: the official v0.18.1 release asset
+  and the byte-identical CLI cache `~/.local/share/ant/bin/ant-node-0.18.1`,
+  §4).
+- **Validation requirements after any rollback:** node starts and opens the
+  store (no LMDB/format errors in `stderr.log`), `--version` matches,
+  routing recovery (close-group cache rewritten, peers), replication cycles
+  resume in the daily log, antd `/health` ok, and the harness devnet proof
+  re-receipted before any custody claim.
+- **Mitigating fact:** a FAILED auto-apply already self-rolls-back
+  (`UpgradeResult::RolledBack`, §3.4) — the dangerous window is a
+  SUCCESSFUL upgrade followed by incompatibility, which is exactly the case
+  that needs the pre-upgrade recovery point.
+- **antd:** standalone binary with an observed watchdog loop (§1) — killing
+  it will be undone by the watchdog; rollback = replace the binary and let
+  the watchdog restart it, or stop the watchdog first (owner action).
+- **Never:** delete `/mnt/ant-store`, its store files, or the `ant-store.img`
+  fstab entry (loop,nosuid); delete the BOX harness `Cargo.lock`; run
+  `ant update` casually (CLI self-update path UNVERIFIED — treat as a
+  production change). The hex-named directories under
+  `~/.local/share/ant/nodes/` are documented by the harness lane as
+  LocalDevnet leftovers, but **names do not establish ownership** — any
+  deletion requires owner confirmation of origin, not name-matching.
+- **Resize/deletion/downgrade procedures remain unapproved and unexecuted.**
 
-- **Node binary rollback:** the CLI cache copy
-  `~/.local/share/ant/bin/ant-node-0.18.1` is byte-identical to today's
-  running binary (digest §4) — a verified restore source. Rollback shape:
-  stop node via `ant` CLI → copy the cached 0.18.1 binary over
-  `/mnt/ant-store/data/node-2/ant-node` (or point the registry
-  `binary_path` at the cache) → restart. Identity is preserved by NOT
-  touching `/mnt/ant-store/data/node-2/node_identity.key` or any store
-  file. The upgrader's own cache lives in `~/.local/share/ant/upgrades/`
-  (releases.json + locks); prior binaries may also exist there after a
-  future upgrade.
-- **Never:** delete `/mnt/ant-store` or the `ant-store.img` fstab entry
-  (loop,nosuid — survives reboot); delete
-  `~/ant-lane/ant-extsig/Cargo.lock`; run `ant update` casually (CLI
-  self-update path — its exact behavior UNVERIFIED this lane; treat as a
-  production change); delete devnet spills under
-  `~/.local/share/ant/nodes/` only (64-hex dirs — those ARE safe on sight,
-  per fence.md).
-- **antd rollback:** standalone binary `~/ant-lane/antd`, no systemd unit —
-  restart shape is the live ps cmdline (`--cors --rest-addr
-  172.18.0.1:8082 --grpc-addr 127.0.0.1:50051`), digest banked in §4.
-- **Buzz Relay:** no Autonomi coupling (§1) — nothing in this runbook can
-  affect it; its own rollback lane is order D's.
+## 9 · x0x field-work separation (corrected per review)
 
-## 9 · x0x field-work separation (per docket)
+David Irvine's #505/#622 are **OPEN upstream and still request field
+evidence** — the estate's lane exit was a local decision, not upstream
+acceptance:
 
-David Irvine's #505/#622 field requests are a DIFFERENT lane with an
-existing owner — the zCode measurement seat — and are **closed as of
-2026-09-11 by the founder's read**: David's ask was satisfied via upstream
-saorsa-labs/x0x **#651 (merged 2026-09-11T16:30Z)**; our fork PR was
-superseded; no outstanding request remains. Current upstream state
-(read-only, this lane): #505 open, last activity 2026-09-11T14:39Z (before
-the #651 merge); #622 open, last activity 2026-09-11T00:16Z; both quiet
-since. The runner tooling (`scripts/x0x-622/`, @e1a8d3c6) and
-SPEC-X0X-622-CAPTURE-1 remain reusable if the founder ever orders a live
-capture. This Autonomi lane ran NO mesh node, NO capture, and NO laptop
-daemon — coordination = this paragraph.
+- **#505** (open): dirvine's latest comment (2026-09-11T14:39:22Z) reports
+  x0x 0.42.0 shipped with ant-quic 0.27.50 and asks the founder
+  (@loviswaternakamoto) to *"re-run the OCI / fragment-filtering workload
+  against the current bootstraps and report reassembly failures + handshake
+  success — that field result is what closes this; the dependency fix alone
+  is not accepted as proof."* **An outstanding field request, addressed to
+  the founder.**
+- **#622** (open): gated on a live public-mesh Leaf capture (human-with-a-
+  daemon task; parked by David until Ben/Winston return, 2026-09-10). The
+  founder's latest reply (2026-09-11T00:16Z) reports the box healthy on
+  0.41.3 with 27 peers, notes `/diagnostics/gossip` lacks the §5
+  eligibility fields on that version, and states intent to prepare a
+  separate pinned instrumented capture. **No capture has been performed by
+  any estate seat** as of this pass.
+- **What actually closed:** upstream **#651** (merged 2026-09-11T16:30Z)
+  fixed the LOCAL test suites (#641/#642/#648) — related help, NOT the
+  field evidence; the earlier framing of it as satisfying #505/#622 was
+  wrong and is retracted. The founder's 2026-09-11 pause of OUR measurement
+  lane (fork PR superseded, runner tooling `scripts/x0x-622/` @e1a8d3c6 and
+  SPEC-X0X-622-CAPTURE-1 preserved) was a local sequencing decision that
+  does not close the upstream requests.
+- This Autonomi lane ran NO mesh node, NO capture, NO laptop daemon. Any
+  future capture is a founder-ordered, separately-owned action.
 
 ## 10 · Sources
 
-- Box receipts (this lane, 2026-09-12 ~17:0x UTC): ps/cmdlines, registry,
-  releases.json, node logs, `/health`, digests, df/du — quoted in-line.
-- `WithAutonomi/ant-node` @ main + tag v0.18.1 (5fb04fd…): `src/config.rs`
-  (UpgradeConfig, defaults 1h/24h/stable, "always enabled" README section),
-  `src/upgrade/monitor.rs` (`version_matches_channel`: rc rejected on both
-  channels), `src/upgrade/mod.rs` (auto-apply pipeline, ML-DSA, RESTART
-  exit), `README.md` (--stop-on-upgrade semantics, exit 100, config
-  example), `docs/adr/ADR-0010-beta-upgrade-channel-semantics.md`
-  (semver-only selection), v0.18.1 + v0.19.0-rc.1/rc.2/beta.1 release pages
-  (dates, prerelease flags, Auto-Upgrade note).
-- `WithAutonomi/ant-client` @ main: `ant-core/src/node/daemon/supervisor.rs`
-  (RESTART_EXIT_CODE const; `monitor_node_inner` upgrade-drift respawn).
+- Box receipts (2026-09-12, via `autonomi-observe.sh` + direct probes):
+  processes, registry, releases.json, node logs (upgrade lines, PUT
+  rejections, replication summaries), `/health`, digests, df/du.
+- `WithAutonomi/ant-node` **@ v0.18.1** (= 5fb04fd): src/config.rs
+  (UpgradeConfig, defaults, github_repo field), src/bin/ant-node/cli.rs
+  (upgrade args/envs, into_config, `--config` file load),
+  src/upgrade/monitor.rs (channel filter), src/upgrade/apply.rs
+  (RESTART_EXIT_CODE, rollback-on-failure doc), src/upgrade/rollout.rs
+  (deterministic delay), src/node.rs (jittered check loop, RolledBack/
+  backoff arms), README.md:814/966/1006/1023, docs/adr/ADR-0010, release
+  workflow (.github/workflows/release.yml — tarball = ant-node +
+  bootstrap_peers.toml ONLY), release v0.18.1 assets (SHA256SUMS, .sig).
+- `WithAutonomi/ant-client`: ant-cli crate (name=ant, version 0.3.6) @
+  969ed008; ant-core/src/node/daemon/supervisor.rs @ 969ed008
+  (is_upgrade_restart_exit_code, version-drift confirmation, daemon always
+  sets --stop-on-upgrade); releases ant-cli-v0.3.6 (assets incl.
+  aarch64-musl tarball); ant-quic lineage via ant-protocol pins.
 - Estate: `ops/ant-node/fence.md`, `ops/ant-extsig/` (README, Cargo.toml,
   BROWSER-PATTERN.md), `docs/specs/SPEC-AUTONOMI-TREZOR-1.md`,
   `docs/dispatches/2026-09-12-eco-adaptor-sweep.md`, order-D dispatch,
-  `2026-09-10-david-irvine-followup.md`, takeover docket e3373634.
-- saorsa-labs/x0x issues #505/#622/#651 (states + timestamps via API).
+  `2026-09-10-david-irvine-followup.md`, takeover docket e3373634, Astra
+  review #10/5647564848.
+- saorsa-labs/x0x issues #505/#622 + PR #651 (states, timestamps, latest
+  comment text via API, 2026-09-12).
