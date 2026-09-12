@@ -31,7 +31,7 @@ const ok = (label, condition, note='') => { if (condition) { pass++; console.log
 await page.goto(`${base}/surfaces/jams.html`);
 await page.waitForFunction(() => document.getElementById('status')?.textContent.includes('verified'));
 ok('jams: page has no errors', errors.length === 0, errors.join(' | '));
-ok('jams: page carries SKAISTS mUsiC identity', await page.title() === 'SKAISTS mUsiC · PLUR' && (await page.locator('h1').innerText()).includes('music jams'));
+ok('jams: page carries SKAISTS mUsiC identity', await page.title() === 'SKAISTS mUsiC · PLUR' && (await page.locator('h1').innerText()) === 'SKAISTS mUsiC');
 ok('jams: shared manifest is verified', await page.locator('#status').innerText() === 'shared manifest verified');
 ok('jams: PLUR channel is selected', await page.locator('#f-channel').innerText() === 'plur');
 ok('jams: epoch and sequence are projected', await page.locator('#f-epoch').innerText() === '3' && await page.locator('#f-sequence').innerText() === '12');

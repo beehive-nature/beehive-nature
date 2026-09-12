@@ -137,3 +137,32 @@ view/state retention, reduced motion and denied preference storage). The worktre
 is clean after the receipt commit. PR #42 is updated and mergeable; hosted
 checks were still running when this receipt was written. No merge or live
 deployment is claimed.
+
+## Music-page identity correction and W@tch release check
+
+The founder's screenshot exposed a remaining hierarchy error: `jams.html`
+had our name in small copy but its hero still read "music jams". Its h1 now
+reads **SKAISTS mUsiC**, matching the document title and registry. The footer
+uses the same identity; JAMS.community and W@tch remain separate, named links
+to their original projects. The room-law copy no longer implies W@tch already
+consumes our manifest. This is a presentation correction; adapters, identifiers
+and URLs are unchanged.
+
+Verified W@tch's new [v0.1.0-alpha.98 release](https://github.com/aautonomicc/Watch-It/releases/tag/v0.1.0-alpha.98)
+against its GitHub release API and published notes (2026-09-12 16:39:44 UTC).
+The notes report mixed movie/episode/music playlists with sequential playback,
+album editing, sharded library sync, playlist-order sync, an Android TV focus
+fix and one dual-ABI Android APK for phones and supported TV devices. The
+network dependency moves to x0x 0.42.1. These are upstream release claims,
+not tests of our adapters or proof of reduced bandwidth on our network.
+
+This supports the founder's stock-device-app plus independent-web-companion
+direction. No upstream asset was downloaded or installed in this lane.
+Before this correction, the previous PR pin `fd4ec88f` had all eight hosted
+checks green. The updated candidate must obtain its own check results.
+
+Correction validation: the existing music-page check now requires the exact
+visible h1 `SKAISTS mUsiC` and passes **17/17**; the Store reader remains **9/9**.
+The heading was visually checked in Chromium from the founder's local-file
+path. This does not resolve that page's existing file-protocol module-loading
+limitation; its functional adapter battery runs on an isolated HTTP server.
