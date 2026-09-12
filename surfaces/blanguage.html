@@ -50,33 +50,33 @@ footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
 </head>
 <body data-reg="bee">
 <header>
-  <h1 data-reg="bee"><span data-i18n="plur.dockWelcome">A place for your language.</span></h1><h1 data-reg="raver"><span data-i18n="plur.dockFloor">Your words belong on this floor.</span></h1><h1 data-reg="cypherpunk">🌐 the BlanguageDOCK</h1><div class="dock-start" data-reg="bee"><p><span data-i18n="plur.dockIntro">Explore a word, hear a greeting, or help a language find its place here.</span></p><a href="plur.html#words"><span data-i18n="plur.words">Explore the words</span> →</a><a href="plur.html#talk"><span data-i18n="plur.conversation">Try a conversation</span> →</a><a href="#skaists">skaists · beautiful</a></div><div class="dock-start" data-reg="raver"><p><span data-i18n="plur.raverIntro">Trade a greeting. Bring a friend. Carry the music across languages.</span></p><a href="plur.html">PLUR →</a><a href="jams.html">SKAISTS mUsiC →</a></div>
-  <p data-reg="cypherpunk">the organism's language corpus, run as a permissionless dock — decentralized, self-healing, and read by
+  <h1 data-reg="bee"><span data-i18n="plur.dockWelcome">A place for your language.</span></h1><h1 data-reg="raver"><span data-i18n="plur.dockFloor">Your words belong on this floor.</span></h1><h1 data-reg="cypherpunk">🌐 <span data-i18n="bld.title">the BlanguageDOCK</span></h1><div class="dock-start" data-reg="bee"><p><span data-i18n="plur.dockIntro">Explore a word, hear a greeting, or help a language find its place here.</span></p><a href="plur.html#words"><span data-i18n="plur.words">Explore the words</span> →</a><a href="plur.html#talk"><span data-i18n="plur.conversation">Try a conversation</span> →</a><a href="#skaists">skaists · beautiful</a></div><div class="dock-start" data-reg="raver"><p><span data-i18n="plur.raverIntro">Trade a greeting. Bring a friend. Carry the music across languages.</span></p><a href="plur.html">PLUR →</a><a href="jams.html">SKAISTS mUsiC →</a></div>
+  <p data-reg="cypherpunk" data-i18n="bld.lede">the organism's language corpus, run as a permissionless dock — decentralized, self-healing, and read by
   every user-visible text surface. tribal, indigenous, rare and endangered languages dock without asking anyone.
   alpha MVP: the mechanism, the register, and the honest empty cells. steward seat: zCode.</p>
 </header>
 <main>
 
 <section data-reg="cypherpunk"><h2><span data-i18n="h.050">WHY A DOCK, NOT A LOCALE LIST</span></h2>
-  <div class="banner">UNESCO: no less than <b>40% of some 6,700 languages</b> are in danger of disappearing
+  <div class="banner" data-i18n="bld.unesco">UNESCO: no less than <b>40% of some 6,700 languages</b> are in danger of disappearing
   (<a href="https://www.unesco.org/en/articles/towards-world-atlas-languages">unesco.org</a>); the Atlas's last edition
   counted 538 critically + 502 severely + 632 definitely endangered + 607 vulnerable
   (<a href="https://en.wikipedia.org/wiki/Atlas_of_the_World%27s_Languages_in_Danger">Atlas record</a>).
   a locale list adds languages when a market justifies them. a dock lets a language board because it exists.</div>
   <div class="wrap"><table>
-    <tr><th></th><th>traditional i18n</th><th>BlanguageDOCK</th></tr>
-    <tr><td class="cl">locales</td><td>a product decision</td><td>a language docks itself — no gatekeeper decides worthiness</td></tr>
-    <tr><td class="cl">strings</td><td>en first, the rest are translation tasks</td><td>records with parents: who, when, which sweep passed</td></tr>
-    <tr><td class="cl">absence</td><td>silent fallback to English, unmarked</td><td>absent renders as absent — machine renders as machine, labeled</td></tr>
-    <tr><td class="cl">removal</td><td>an editor deletes a file</td><td>withdrawal with a receipt; history chain-anchored — the dock forgets nothing, it honors withdrawals</td></tr>
-    <tr><td class="cl">improvement</td><td>a release cycle</td><td>standing sweeps + git deliberation; forks are dissent</td></tr>
+    <tr><th></th><th data-i18n="bld.cmp.trad">traditional i18n</th><th data-i18n="bld.cmp.dock">BlanguageDOCK</th></tr>
+    <tr><td class="cl" data-i18n="bld.cmp.locales">locales</td><td data-i18n="bld.cmp.locales.t">a product decision</td><td data-i18n="bld.cmp.locales.d">a language docks itself — no gatekeeper decides worthiness</td></tr>
+    <tr><td class="cl" data-i18n="bld.cmp.strings">strings</td><td data-i18n="bld.cmp.strings.t">en first, the rest are translation tasks</td><td data-i18n="bld.cmp.strings.d">records with parents: who, when, which sweep passed</td></tr>
+    <tr><td class="cl" data-i18n="bld.cmp.absence">absence</td><td data-i18n="bld.cmp.absence.t">silent fallback to English, unmarked</td><td data-i18n="bld.cmp.absence.d">absent renders as absent — machine renders as machine, labeled</td></tr>
+    <tr><td class="cl" data-i18n="bld.cmp.removal">removal</td><td data-i18n="bld.cmp.removal.t">an editor deletes a file</td><td data-i18n="bld.cmp.removal.d">withdrawal with a receipt; history chain-anchored — the dock forgets nothing, it honors withdrawals</td></tr>
+    <tr><td class="cl" data-i18n="bld.cmp.improve">improvement</td><td data-i18n="bld.cmp.improve.t">a release cycle</td><td data-i18n="bld.cmp.improve.d">standing sweeps + git deliberation; forks are dissent</td></tr>
   </table></div>
-  <div class="law" style="margin-top:8px">spec: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/DESIGN-BRIEF-04-blanguagedock.md">DESIGN-BRIEF-04</a>
+  <div class="law" style="margin-top:8px" data-i18n="bld.spec">spec: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/DESIGN-BRIEF-04-blanguagedock.md">DESIGN-BRIEF-04</a>
   — the Claude Design handoff ships at the alpha→beta transition, by founder order.</div>
 </section>
 
 <section data-reg="cypherpunk"><h2><span data-i18n="h.051">THE CONSENT LAYER — measurement, never decoration</span></h2>
-  <div class="law">the sibling of BiGen's integrity layer, with the same symmetry law: consent blocks apply to
+  <div class="law" data-i18n="bld.consent.law">the sibling of BiGen's integrity layer, with the same symmetry law: consent blocks apply to
   <b>English, to our own hub strings, to a fluent elder and to a machine draft — identically</b>. the failure mode this
   layer exists to prevent is appropriation theater: a warm veneer over heritage extraction.
   anchored in <a href="https://doi.org/10.5334/dsj-2020-043">CARE — Carroll et al. 2020, Data Science Journal</a>
@@ -94,7 +94,7 @@ footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
     effective:         YYYY-MM-DD                 # no one may remove another's, or the history
     history:           preserved, chain-anchored   # the dock forgets nothing; it honors withdrawals
   machine_generated:   true | false                # if true, renders LABELED — never silently</pre>
-  <div class="law">three negative controls: the consent block rendering softer on our own material → fail ·
+  <div class="law" data-i18n="bld.consent.neg">three negative controls: the consent block rendering softer on our own material → fail ·
   a withdrawn string still rendering → fail · a withdrawal erasing history → also fail ·
   a machine-drafted string rendering unlabeled → fail. (machine is never silent about being machine —
   the unmeasured-never-zero law, translated.)</div>
@@ -103,7 +103,7 @@ footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
 <section>
   <h2><span data-i18n="h.052">THE DOCK — seed register, every status source-linked</span></h2>
   <div class="wrap"><table id="dock"></table></div>
-  <div class="law" style="margin-top:8px">vitality categories cite the
+  <div class="law" style="margin-top:8px" data-i18n="bld.dock.law">vitality categories cite the
   <a href="https://en.wikipedia.org/wiki/Atlas_of_the_World%27s_Languages_in_Danger">UNESCO Atlas record</a> (2010, Moseley ed.)
   and its methodology <a href="https://unesdoc.unesco.org/ark:/48223/pf0000183699">Language Vitality and Endangerment, 2003</a>;
   the successor platform is the <a href="https://www.unesco.org/en/articles/unesco-hosts-ad-hoc-expert-meeting-world-atlas-languages">World Atlas of Languages</a>.
@@ -115,28 +115,28 @@ footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   a currency docks for a jurisdiction the way a father tongue docks for a speech community, and the pointer principle holds:
   a currency rendering never owns the value it expresses (gate T-8: the EU/EUR/VAT lane).</div>
   <div class="card">
-    <h3>the control specimen — <span class="end">English · eng</span> · consent flags apply identically</h3>
+    <h3 data-i18n="bld.control.h">the control specimen — <span class="end">English · eng</span> · consent flags apply identically</h3>
     <div class="cb">
       <div>community_attested<br><b>not_sought</b> — rendered, not hidden</div>
       <div>machine_generated<br><b>true</b> (baseline authored by the hive, not a community of speakers)</div>
       <div>withdrawal<br><b>none</b> · provenance: this repo</div>
       <div>vitality<br><b>safe</b> — and irrelevant to its standing in the dock</div>
     </div>
-    <div class="law" style="margin-top:6px">if the consent block looks like a formality here, it is wrong everywhere
+    <div class="law" style="margin-top:6px" data-i18n="bld.control.law">if the consent block looks like a formality here, it is wrong everywhere
     (BRIEF-04 §5 — the same specimen-first lesson as BiGen's manufacturer-funded LiBBY block).</div>
   </div>
 </section>
 
 <section>
   <h2><span data-i18n="h.053">THE STRING CORPUS — the hub's own strings, and the honest empty cells</span></h2>
-  <div class="banner">the corpus genesis: the dock starts by eating the organism's own UI. three lawful states per cell:
+  <div class="banner" data-i18n="bld.corpus.banner">the corpus genesis: the dock starts by eating the organism's own UI. three lawful states per cell:
   <b>community-attested</b> (none yet), <b>⚙ machine-draft labeled</b> (the father-tongue bridge, ruled 2026-08-20 —
   BLAI drafts through the pivot and the label never comes off until a community attests), or <b>absent</b> (never silently
   filled, never a silent English fallback pretending to be translation). the father column renders Русский; the genesis
   mother tongue latviešu enters through its pivots — the bridge's first live span, per
   <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/register/FATHER-SET-1.md">FATHER-SET-1</a>.</div>
   <div class="wrap"><table class="gm" id="strings"></table></div>
-  <div class="law" style="margin-top:8px">a string absent in a language renders absent <b>on every surface</b>, labeled —
+  <div class="law" style="margin-top:8px" data-i18n="bld.corpus.law">a string absent in a language renders absent <b>on every surface</b>, labeled —
   never a silent fallback to English pretending to be the reader's language. a string record never displays
   dock-entry furniture (vitality badges): a category error the brief forbids.</div>
 </section>
@@ -155,7 +155,7 @@ footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   schedule: weekly
   last_run: 2026-08-19
   on_change: open_amendment  # a violation is an AMENDMENTS event, never a silent fix</pre>
-  <div class="law" style="margin-top:6px">the corpus improves the BiGen way: standing queries, receipts in git history,
+  <div class="law" style="margin-top:6px" data-i18n="bld.sweeps.law">the corpus improves the BiGen way: standing queries, receipts in git history,
   dissent by fork. a stranger can run the sweeps and check us.</div>
 </section>
 
@@ -167,21 +167,21 @@ footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
 
 <section id="skaists">
   <h2><span data-i18n="w.skaists.h">THE WORD ENTRY — skaists · Latvian · adjective</span></h2>
-  <div class="law" data-reg="bee">One of our six doors is called <b>skaists.social</b>. It is a real
+  <div class="law" data-reg="bee" data-i18n="bld.sk.bee">One of our six doors is called <b>skaists.social</b>. It is a real
   Latvian word, and it means <b>beautiful</b>. This is its dictionary entry, laid out the way a
   dictionary lays one out — where the word came from, what it means (it means four things), and how it
   changes shape in a sentence.</div>
-  <div class="law" data-reg="raver">skaists — Latvian for beautiful. it started out meaning <i>hot</i>.
+  <div class="law" data-reg="raver" data-i18n="bld.sk.raver">skaists — Latvian for beautiful. it started out meaning <i>hot</i>.
   hot → flushed → bright → beautiful. a word that walked from a fever to a face.</div>
-  <div class="law" data-reg="cypherpunk">Entry shape follows en.wiktionary.org: language as the heading,
+  <div class="law" data-reg="cypherpunk" data-i18n="bld.sk.cypher">Entry shape follows en.wiktionary.org: language as the heading,
   not the interface; etymology, IPA, numbered senses, inflection, cognates, source. Every string below is
   quoted from the cited source. The IPA cell is deliberately empty — the source's transcription could not
   be read cleanly through this seat's fetch, and this page does not print a phonetic string it cannot
   vouch for (SOURCES: cite or the cell stays silent).</div>
 
   <div class="card">
-    <h3>Etymology <span class="end">— quoted, Wiktionary after Karulis (1992, 2001)</span></h3>
-    <div class="law" style="margin-top:6px">&ldquo;This word results from the merging of two different
+    <h3 data-i18n="bld.sk.etym.h">Etymology <span class="end">— quoted, Wiktionary after Karulis (1992, 2001)</span></h3>
+    <div class="law" style="margin-top:6px" data-i18n="bld.sk.etym">&ldquo;This word results from the merging of two different
     lines: (a) a derivation from the same stem as <b>skaidrs</b> (&ldquo;clear&rdquo;): *skaid-tas &gt;
     *skaista &gt; <b>skaists</b>; the older &ldquo;clear, pure&rdquo; meaning can be found in examples up
     to the beginning of the 19th century; and (b) the past participle of <b>kaist</b> (&ldquo;to be hot,
@@ -195,24 +195,24 @@ footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   </div>
 
   <div class="card">
-    <h3>Senses <span class="end">— four, numbered as the source numbers them</span></h3>
+    <h3 data-i18n="bld.sk.senses.h">Senses <span class="end">— four, numbered as the source numbers them</span></h3>
     <div class="wrap"><table>
-      <tr><th>1</th><td class="cl">beautiful (having beauty; corresponding to certain aesthetic ideals,
+      <tr><th>1</th><td class="cl" data-i18n="bld.sk.s1">beautiful (having beauty; corresponding to certain aesthetic ideals,
         provoking certain aesthetic feelings)</td></tr>
-      <tr><th>2</th><td class="cl">beautiful, pleasant (which causes, gives pleasure)</td></tr>
-      <tr><th>3</th><td class="cl">beautiful, good (having good moral value, being socially useful)</td></tr>
-      <tr><th>4</th><td class="cl">(of animals, plants) beautiful, good (well kept, having desirable
+      <tr><th>2</th><td class="cl" data-i18n="bld.sk.s2">beautiful, pleasant (which causes, gives pleasure)</td></tr>
+      <tr><th>3</th><td class="cl" data-i18n="bld.sk.s3">beautiful, good (having good moral value, being socially useful)</td></tr>
+      <tr><th>4</th><td class="cl" data-i18n="bld.sk.s4">(of animals, plants) beautiful, good (well kept, having desirable
         characteristics, e.g., for breeding)</td></tr>
     </table></div>
-    <div class="law" style="margin-top:8px">Sense 3 is the one the domain is named for: <b>beautiful</b>
+    <div class="law" style="margin-top:8px" data-i18n="bld.sk.s3.law">Sense 3 is the one the domain is named for: <b>beautiful</b>
     and <b>good</b> are the same word here — a thing is beautiful because it is socially useful. That is
     not a pun this estate invented; it is the third sense in the dictionary.</div>
   </div>
 
   <div class="card">
-    <h3>Declension <span class="end">— indefinite, singular</span></h3>
+    <h3 data-i18n="bld.sk.decl.h">Declension <span class="end">— indefinite, singular</span></h3>
     <div class="wrap"><table>
-      <tr><th>case</th><th>masculine</th><th>feminine</th></tr>
+      <tr><th data-i18n="bld.sk.case">case</th><th data-i18n="bld.sk.masc">masculine</th><th data-i18n="bld.sk.fem">feminine</th></tr>
       <tr><th>nominative</th><td class="cl">skaists</td><td class="cl">skaista</td></tr>
       <tr><th>genitive</th><td class="cl">skaista</td><td class="cl">skaistas</td></tr>
       <tr><th>dative</th><td class="cl">skaistam</td><td class="cl">skaistai</td></tr>
@@ -220,13 +220,13 @@ footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
       <tr><th>instrumental</th><td class="cl">skaistu</td><td class="cl">skaistu</td></tr>
       <tr><th>locative</th><td class="cl">skaistā</td><td class="cl">skaistā</td></tr>
     </table></div>
-    <div class="law" style="margin-top:8px">The definite forms and the plural exist and are not
+    <div class="law" style="margin-top:8px" data-i18n="bld.sk.decl.law">The definite forms and the plural exist and are not
     reproduced here — the full paradigm is at the source, linked below. A partial table that does not say
     it is partial is the same defect as a claim without a receipt.</div>
   </div>
 
   <div class="card">
-    <h3>Around the word</h3>
+    <h3 data-i18n="bld.sk.around">Around the word</h3>
     <div class="wrap"><table>
       <tr><th>pronunciation</th><td class="cl" style="font-style:italic;color:var(--dim)">not printed —
         the source's transcription did not survive this seat's fetch cleanly, and a phonetic string that
@@ -237,7 +237,7 @@ footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
     </table></div>
   </div>
 
-  <div class="banner">SOURCE — Karulis, Konstantīns. 1992, 2001. <i>Latviešu etimoloģijas vārdnīca</i>.
+  <div class="banner" data-i18n="bld.sk.source">SOURCE — Karulis, Konstantīns. 1992, 2001. <i>Latviešu etimoloģijas vārdnīca</i>.
   Rīga: AVOTS, as carried by
   <a href="https://en.wiktionary.org/wiki/skaists" rel="noopener">en.wiktionary.org/wiki/skaists</a>.
   Read through a fetch on 2026-08-26; the etymology and senses above are quoted, not paraphrased, so a
@@ -252,7 +252,7 @@ footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
 
 <section id="workshop">
   <h2><span data-i18n="h.056">THE WORKSHOP — dock your tongue: create · merge · migrate · remove</span></h2>
-  <div class="banner">the four verbs, live against the estate's real corpus (<code>lang-corpus.json</code> —
+  <div class="banner" data-i18n="bld.ws.banner">the four verbs, live against the estate's real corpus (<code>lang-corpus.json</code> —
   the file the 🌐 picker on every page reads). <b>this page composes; a person publishes.</b> your export is a
   ready-to-carry fragment for a repo PR or a signed [bX lang] pointer — the page never posts, never holds a key,
   and a machine draft never finalizes a consent.</div>
@@ -271,10 +271,10 @@ footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   <div class="card">
     <h3><span data-i18n="h.058">pick your verb</span></h3>
     <div class="cb" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr))">
-      <div style="cursor:pointer" data-verb="create"><b>➕ create</b><br>dock a tongue the corpus lacks</div>
-      <div style="cursor:pointer" data-verb="merge"><b>🔀 merge</b><br>improve lines in a docked tongue</div>
-      <div style="cursor:pointer" data-verb="migrate"><b>🚚 migrate</b><br>carry lines to a truer code — history kept</div>
-      <div style="cursor:pointer" data-verb="remove"><b>🕊 remove</b><br>withdraw — honored, never erased</div>
+      <div style="cursor:pointer" data-verb="create"><b>➕ <span data-i18n="bld.ws.create">create</span></b><br><span data-i18n="bld.ws.create.d">dock a tongue the corpus lacks</span></div>
+      <div style="cursor:pointer" data-verb="merge"><b>🔀 <span data-i18n="bld.ws.merge">merge</span></b><br><span data-i18n="bld.ws.merge.d">improve lines in a docked tongue</span></div>
+      <div style="cursor:pointer" data-verb="migrate"><b>🚚 <span data-i18n="bld.ws.migrate">migrate</span></b><br><span data-i18n="bld.ws.migrate.d">carry lines to a truer code — history kept</span></div>
+      <div style="cursor:pointer" data-verb="remove"><b>🕊 <span data-i18n="bld.ws.remove">remove</span></b><br><span data-i18n="bld.ws.remove.d">withdraw — honored, never erased</span></div>
     </div>
 
     <div id="ws-editor" style="display:none;margin-top:10px">
@@ -326,7 +326,7 @@ footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   alpha MVP — mechanism + register + honest absence; the string layer reaches every surface at beta ·
   AGPL-3.0-only · <a href="https://github.com/beehive-nature/beehive-nature">source tree</a> ·
   this page: surfaces/blanguage.html · <a href="index.html" data-i18n="law.hive">← the hive</a><br>
-  a traditional locale is a product decision; a docked language is a passenger.
+  <span data-i18n="bld.foot.dock">a traditional locale is a product decision; a docked language is a passenger.</span>
 </footer>
 
 <script src="tour.js?v=42"></script>
