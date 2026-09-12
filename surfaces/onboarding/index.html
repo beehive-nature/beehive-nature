@@ -245,6 +245,7 @@ body[data-reg="cypherpunk"] #instrument>.foot{margin-block-start:0;margin-block-
 }
 .onb-language #blangnote{white-space:normal!important;color:var(--reg-ink,var(--ink-mut))!important;font:.75rem/1.4 inherit!important}
 #bregbar{width:100%;max-width:none;box-sizing:border-box}
+#onboarding-room{width:100%}
 #first-bee,#layer-choice,#layer-figure{width:100%;max-width:40rem;margin:0 auto;padding:8px var(--s3) 24px;text-align:center}
 #instrument-map{display:none;flex-wrap:wrap;gap:6px;width:100%;max-width:29rem;margin:0 0 var(--s3)}
 #instrument-map button{appearance:none;font:inherit;font-size:.72rem;min-height:44px;padding:6px 10px;
@@ -263,6 +264,7 @@ body[data-onb-beat="deeper"] #foot-quiet{display:none}
   <span class="onb-language" data-language-host></span>
 </div>
 
+<main id="onboarding-room">
 <article id="first-bee">
   <p class="eyebrow" data-i18n="onb.mark">BNR · Get started</p>
   <p class="calm" data-i18n="onb.bee.calm">A place to begin, at your own pace.</p>
@@ -366,8 +368,9 @@ body[data-onb-beat="deeper"] #foot-quiet{display:none}
   skaists.dev static host does not complete WebAuthn/Trezor native.
 </div>
 
-<main class="stage" id="stage"><!-- screens injected here --></main>
+<div class="stage" id="stage"><!-- screens injected here --></div>
 </div>
+</main>
 
 <script src="vendor/qrcodegen.js"></script>
 <script src="bzdid-key.js"></script> <!-- vendored key engine: PRF→master_prk→Ed25519, BIP39, fingerprints -->

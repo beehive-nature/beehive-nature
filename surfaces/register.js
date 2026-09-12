@@ -130,7 +130,7 @@
     body[data-reading-room]:not([data-reg="cypherpunk"]) #masthead{text-align:start;margin:clamp(28px,5vw,64px) 0 24px}
     body[data-reading-room]:not([data-reg="cypherpunk"]) #masthead h1{font:650 1.2rem/1.4 system-ui,sans-serif;letter-spacing:0;color:var(--ink)}
     body[data-reading-room]:not([data-reg="cypherpunk"]) #masthead .eyebrow{margin:4px 0 0;text-align:start;font-size:.9375rem}
-    body[data-reading-room][data-reg="bee"] #first-bee{gap:12px 48px;text-align:start;align-content:center;padding:12px 0 40px;min-height:420px}
+    body[data-reading-room][data-reg="bee"] #first-bee{gap:12px 48px;text-align:start;align-content:center;padding:12px 0 40px;min-height:420px;max-width:none}
     body[data-reading-room][data-reg="bee"][data-room-arrival="true"] #first-bee{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}
     body[data-reading-room][data-reg="bee"] #first-bee>:not(.room-art){grid-column:1;max-width:36rem;margin:0}
     body[data-reading-room][data-reg="bee"] #first-bee .take{grid-row:1;font:600 clamp(2rem,3.5vw,3.4rem)/1.14 system-ui,sans-serif;letter-spacing:-.04em;color:#18362a;text-wrap:balance;overflow-wrap:anywhere}
@@ -164,7 +164,9 @@
     body[data-reading-room] [data-room-pause]{margin-inline-start:auto}
     body[data-reading-room][data-reg="bee"] [data-room-pause]{display:none}
     body[data-reading-room][data-room-arrival="true"] [data-room-overview]{visibility:hidden}
-    body[data-reading-room][data-motion-paused="true"] #first-raver svg *,body[data-reading-room]:not([data-reg="raver"]) #first-raver svg *{animation-play-state:paused!important}
+    /* Pause continuous illustration motion through deeper Raver content too.
+       Entrance animations and functional spinners must still complete. */
+    body[data-reading-room][data-reg="raver"][data-motion-paused="true"] :is(#first-raver svg *,.flowline path,.brick .dot,.cgroup.ess,.qr),body[data-reading-room]:not([data-reg="raver"]) #first-raver svg *{animation-play-state:paused!important}
     body[data-reading-room] .room-navigation{max-width:1112px;margin:36px auto 16px;padding:0 clamp(20px,4vw,64px);font:1rem/1.5 system-ui,sans-serif}
     body[data-reading-room] .room-navigation summary{min-height:48px;cursor:pointer;padding:16px 0;border-top:1px solid var(--line);color:var(--ink)}
     body[data-reading-room]:not([data-reg="cypherpunk"]) .room-navigation #tbar a{font:500 1rem/1.5 system-ui,sans-serif!important;color:var(--ink)!important;min-height:44px!important;border:1px solid var(--line);white-space:normal;max-width:100%;box-sizing:border-box}
@@ -209,7 +211,8 @@
     var tools=document.createElement('div');tools.className='room-tools';
     var back=document.createElement('button');back.type='button';back.setAttribute('data-room-overview','');
     var pause=document.createElement('button');pause.type='button';pause.setAttribute('data-room-pause','');
-    tools.append(back,pause);var main=bee.closest('main')||bee.parentElement;main.before(tools);
+    tools.append(back,pause);var main=bee.closest('main')||bee.parentElement;
+    if(main===document.body)bee.before(tools);else main.before(tools);
     var reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
     var paused=reduced.matches;try{paused=paused||localStorage.getItem('bnr.motion.paused')==='true';}catch(e){}
     function label(node,key,fallback){node.setAttribute('data-i18n',key);node.textContent=window.BNRLanguage?window.BNRLanguage.text(key,fallback):fallback;node.dataset.i18nEn=fallback;}

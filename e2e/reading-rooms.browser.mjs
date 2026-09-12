@@ -36,6 +36,9 @@ try{
       ok(await page.locator('#first-bee').isVisible(),path+' New bee arrival');
       ok(!await page.locator('#instrument').isVisible(),path+' instrument waits');
       ok(!await page.locator('#tbar').isVisible(),path+' navigation waits');
+      ok(await page.locator('.room-navigation').isVisible(),path+' directory available from arrival');
+      ok(await page.locator('.room-tools').evaluate(node=>document.body.contains(node)),path+' tools remain inside body');
+      ok(!await page.locator('.room-tools').isVisible(),path+' New bee arrival has no stray motion controls');
       const overflow=()=>page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1);
       ok(await overflow(),path+' no New bee overflow '+size.width);
       await page.screenshot({path:resolve(shots,path.replaceAll('/','-')+'-bee-'+size.width+'.png')});
@@ -77,6 +80,21 @@ try{
       ok(!errors.length,path+' no script errors: '+errors.join('; '));
       console.log('PASS',path,size.width);
     }
+    // Pause also covers continuous motion in a deeper Raver diagram, without
+    // freezing its entrance at opacity zero or changing Cypherpunk's instrument.
+    await page.goto(base+'/surfaces/blongevity.html');await page.locator('#breg-raver').click();
+    await page.locator('#first-raver .primary').click();await page.locator('#layer-figure [data-blong-go="deeper"]').click();
+    if(await page.locator('body').getAttribute('data-motion-paused')!=='true')await page.locator('[data-room-pause]').click();
+    const loops=page.locator('.flowline path,.brick .dot,.cgroup.ess');
+    ok(await loops.count()>0,'instrument has motion to check');
+    ok(await loops.evaluateAll(nodes=>nodes.every(n=>getComputedStyle(n).animationPlayState==='paused')),'deep Raver diagram paused');
+    ok(await page.locator('#instrument .stage').evaluateAll(nodes=>nodes.every(n=>getComputedStyle(n).animationPlayState==='running')),'entrance transitions can finish');
+    await page.locator('#breg-cypherpunk').click();
+    ok(await loops.evaluateAll(nodes=>nodes.every(n=>getComputedStyle(n).animationPlayState==='running')),'Cypherpunk motion unchanged');
+    await page.locator('#breg-raver').click();
+    ok(await loops.evaluateAll(nodes=>nodes.every(n=>getComputedStyle(n).animationPlayState==='paused')),'deep pause survives toggle');
+    await page.locator('[data-room-pause]').click();
+    ok(await loops.evaluateAll(nodes=>nodes.every(n=>getComputedStyle(n).animationPlayState==='running')),'deep Raver motion resumes');
     // Changed model values must update every headline and survive presentation switches.
     await page.goto(base+'/surfaces/bearth.html');await page.locator('#breg-cypherpunk').click();
     await page.locator('#gday').fill('30');await page.locator('#gday').dispatchEvent('input');

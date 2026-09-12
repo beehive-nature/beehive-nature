@@ -34,7 +34,8 @@
     var directory=document.createElement('details');directory.className='room-navigation';
     var summary=document.createElement('summary');summary.setAttribute('data-i18n','atlas.browse');summary.textContent='Explore the estate';
     inlineHost=document.createElement('div');inlineHost.setAttribute('data-tour-host','');directory.append(summary,inlineHost);
-    (document.querySelector('main')||document.body).after(directory);
+    var content=document.getElementById('first-bee').closest('main')||document.getElementById('instrument');
+    if(content)content.after(directory);else document.body.appendChild(directory);
   }
   var b=document.createElement('nav');b.id='tbar';
   /* THE BAR HAS TWO SHAPES (founder order, 2026-08-25).
