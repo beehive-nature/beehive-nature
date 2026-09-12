@@ -93,17 +93,17 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
 <canvas id="sky"></canvas>
 <main>
 <header>
-  <h1>👑 the .b name desk</h1>
-  <p data-reg="bee">Names on our chain, for humans and the things they love. Type any name and
+  <h1>👑 <span data-i18n="bnm.h1">the .b name desk</span></h1>
+  <p data-reg="bee" data-i18n="bnm.bee">Names on our chain, for humans and the things they love. Type any name and
   watch the desk check it — live, right now, from the chain itself. Reserving costs
   <b>zero fee</b> today; you only pay the chain's memory it sits in, and it's
   <b style="color:var(--gold)">yours to sell back</b>. This desk never holds keys — it writes
   nothing; it composes what <b>you</b> sign.
         <span style="display:block;margin-top:8px;color:var(--dim,#8a9a8a)">What the desk cannot vouch for is the registry behind it: every <b>.b</b> name answers to the keys behind <code>kingbeelovis</code> — today <b>three independent single-key paths</b> to full control (either <code>active</code> key, or the <code>owner</code> key that outranks it). Any one alone can replace the contract (<code>setcode</code>). <b style="color:var(--amber,#ffb347)">Hardening and reproducible source are not yet published</b> — until they are, a <b>.b</b> name is <b>operator-trusted, not trustless</b>.</span></p>
-  <p data-reg="raver">the .b desk — reserve · transfer · trade · resolve: a living constellation
+  <p data-reg="raver" data-i18n="bnm.rav">the .b desk — reserve · transfer · trade · resolve: a living constellation
   of the registry, animated availability, paste-ready actions with the REAL ABI shape, one-year
   terms, renew/repoint/multi-chain resolve lanes — all keyless reads in your browser.</p>
-  <p data-reg="cypherpunk">Registry <code>kingbeelovis</code> on Vaulta (aca376f2…): tables
+  <p data-reg="cypherpunk" data-i18n="bnm.cy">Registry <code>kingbeelovis</code> on Vaulta (aca376f2…): tables
   <code>domains</code> / <code>config</code> / <code>chainaddrs</code>. Actions (live ABI,
   2026-08-22): <code>registeracc(registrant,domain_name,target)</code> ·
   <code>transfer</code> · <code>renew</code> · <code>release</code> · <code>setaccount</code> ·
@@ -113,8 +113,8 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
 
 
 <section>
-  <h2>🌌 THE REGISTRY, ALIVE — every name on chain, drawn live</h2>
-  <div class="law">The constellation below is not a picture of the registry — it <b>is</b> the
+  <h2>🌌 <span data-i18n="bnm.h.live">THE REGISTRY, ALIVE — every name on chain, drawn live</span></h2>
+  <div class="law" data-i18n="bnm.live.law">The constellation below is not a picture of the registry — it <b>is</b> the
   registry, read live from the chain as this page opened and drawn as it answered. The crowned
   node is <b>king.b</b>; the pulsing ghosts are the open crown jewels. Touch any node.</div>
   <div id="constwrap">
@@ -124,11 +124,11 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
 </section>
 
 <section style="border-color:var(--gold)">
-  <h2>🔑 SECURE YOUR .b NAME — search, consent, sign</h2>
-  <div class="law">Three steps. One name per soul.</div>
+  <h2>🔑 <span data-i18n="bnm.h.secure">SECURE YOUR .b NAME — search, consent, sign</span></h2>
+  <div class="law" data-i18n="bnm.secure.law">Three steps. One name per soul.</div>
   <div class="row" style="margin-top:10px">
     <input id="q" placeholder="type your name — e.g. k" value="k" spellcheck="false" style="flex:1;font-size:16px;padding:12px 14px">
-    <button id="go" style="font-size:14px;padding:12px 20px">search</button>
+    <button id="go" style="font-size:14px;padding:12px 20px" data-i18n="bnm.search">search</button>
   </div>
   <div class="verdict" id="vwrap"><div class="vtext" style="color:var(--dim)">—</div></div>
 
@@ -168,10 +168,10 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
   </div>
 
   <div class="readout" style="margin-top:12px">
-    <div class="rd"><div class="k">NAMES ON REGISTRY (live)</div><div class="v" id="count">—</div></div>
-    <div class="rd"><div class="k">FEE</div><div class="v" id="fee">—</div></div>
-    <div class="rd"><div class="k">RAM COST (live)</div><div class="v" id="ram">—</div></div>
-    <div class="rd"><div class="k">TERM</div><div class="v" id="days">—</div></div>
+    <div class="rd"><div class="k" data-i18n="bnm.k.names">NAMES ON REGISTRY (live)</div><div class="v" id="count">—</div></div>
+    <div class="rd"><div class="k" data-i18n="bnm.k.fee">FEE</div><div class="v" id="fee">—</div></div>
+    <div class="rd"><div class="k" data-i18n="bnm.k.ram">RAM COST (live)</div><div class="v" id="ram">—</div></div>
+    <div class="rd"><div class="k" data-i18n="bnm.k.term">TERM</div><div class="v" id="days">—</div></div>
   </div>
 
   <div id="soul-strip" style="display:none;margin-top:10px">
@@ -186,7 +186,7 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
 </section>
 
 <section>
-  <h2>👑 THE CROWN JEWELS — king · k · q, breathing live</h2>
+  <h2>👑 <span data-i18n="bnm.h.jewels">THE CROWN JEWELS — king · k · q, breathing live</span></h2>
   <div class="jewels">
     <div class="jewel" id="j-king"><div class="jn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 8l4 4 5-7 5 7 4-4-2 12H5L3 8z" fill="#FFD700"/></svg>king.b</div><div class="st">checking…</div><div class="meta"></div></div>
     <div class="jewel" id="j-k"><div class="jn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#7ddf8f" stroke-width="2"/><circle cx="12" cy="12" r="3.5" fill="#7ddf8f"/></svg>k.b</div><div class="st">checking…</div><div class="meta"></div></div>
@@ -195,8 +195,8 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
 </section>
 
 <section>
-  <h2>🧾 THE COMPOSER — paste-ready, REAL action shape, you sign it (never this page)</h2>
-  <div class="law">Fields from the registry's live ABI — not invented, not approximated.
+  <h2>🧾 <span data-i18n="bnm.h.composer">THE COMPOSER — paste-ready, REAL action shape, you sign it (never this page)</span></h2>
+  <div class="law" data-i18n="bnm.composer.law">Fields from the registry's live ABI — not invented, not approximated.
   The desk composes; <b>signing is founder hands or the wallet-gate lane</b> (MX-5).</div>
   <div class="row">
     <input id="cname" placeholder="name (suffix stripped)" value="k" spellcheck="false">
@@ -208,8 +208,8 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
 </section>
 
 <section>
-  <h2>🛠 THE FULL WORKSHOP — tap any action to compose it (live ABI, 2026-08-22)</h2>
-  <div class="law">Every card is now an instrument — tap to expand, fill the fields
+  <h2>🛠 <span data-i18n="bnm.h.workshop">THE FULL WORKSHOP — tap any action to compose it (live ABI, 2026-08-22)</span></h2>
+  <div class="law" data-i18n="bnm.workshop.law">Every card is now an instrument — tap to expand, fill the fields
   (pre-filled from your connected soul where possible), compose the paste-ready action.
   You sign it; this page never does.</div>
   <div class="acts" id="workshop">
@@ -248,8 +248,8 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
 </section>
 
 <section>
-  <h2>🌍 THE 10-BILLION-USER · 1,000-YEAR DESIGN — ruled after testing every option</h2>
-  <div class="law">We tested every architecture against the chain's real arithmetic and
+  <h2>🌍 <span data-i18n="bnm.h.scale">THE 10-BILLION-USER · 1,000-YEAR DESIGN — ruled after testing every option</span></h2>
+  <div class="law" data-i18n="bnm.scale.law">We tested every architecture against the chain's real arithmetic and
   <b>only one way scales</b> —
   <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/bdomain-scaling.md">the full analysis</a>:</div>
   <div class="acts">
@@ -269,14 +269,14 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
 </section>
 
 <section>
-  <h2>🎁 WHY THIS IS CHRISTMAS FOR DEVS</h2>
-  <div class="law" data-reg="bee">One name, every chain, no subscription server in sight — and
+  <h2>🎁 <span data-i18n="bnm.h.devs">WHY THIS IS CHRISTMAS FOR DEVS</span></h2>
+  <div class="law" data-reg="bee" data-i18n="bnm.devs.bee">One name, every chain, no subscription server in sight — and
   every number on this page is live from the chain with its source printed. Free to check,
   nearly free to hold, yours to sell back.</div>
-  <div class="law" data-reg="raver">a living constellation, animated availability, names that
+  <div class="law" data-reg="raver" data-i18n="bnm.devs.rav">a living constellation, animated availability, names that
   resolve everywhere, trade on-chain, cost coffee-money once — the desk composes, you sign,
   the chain remembers.</div>
-  <div class="law" data-reg="cypherpunk">public-RPC failover; compose-only (zero write paths);
+  <div class="law" data-reg="cypherpunk" data-i18n="bnm.devs.cy">public-RPC failover; compose-only (zero write paths);
   live ABI pinned 2026-08-22; two-track law rides (A = mainnet reads, b = Jungle per MX-7);
   name cost cross-validated crate↔page (0.8421).</div>
 </section>
