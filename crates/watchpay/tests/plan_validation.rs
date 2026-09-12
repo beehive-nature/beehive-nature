@@ -15,14 +15,14 @@ fn field_of(e: &watchpay::Error) -> &'static str {
 #[test]
 fn base_plan_validates_with_derived_figures() {
     let vp = validate_plan(&base_plan(), SYNTH_NOW).unwrap();
-    assert_eq!(vp.batch_worst_case.len(), 1);
+    assert_eq!(vp.batch_worst_case().len(), 1);
     // pool1 median 9 << 2 = 36; pool2 median 1 << 2 = 4; max = 36.
-    assert_eq!(vp.batch_worst_case[0], Atto::from_u64(36));
-    assert_eq!(vp.approve_ceiling, Atto::from_u64(36));
-    assert_eq!(vp.planned_tx_count, 2); // 1 batch + 1 approve
+    assert_eq!(vp.batch_worst_case()[0], Atto::from_u64(36));
+    assert_eq!(vp.approve_ceiling(), Atto::from_u64(36));
+    assert_eq!(vp.planned_tx_count(), 2); // 1 batch + 1 approve
     // worst-case native fee = 500k gas * 100 gwei * 2 txs
     assert_eq!(
-        vp.worst_case_total_native_fee_wei,
+        vp.worst_case_total_native_fee_wei(),
         Atto::from_u64(500_000 * 100_000_000_000u128 as u64 * 2)
     );
 }
@@ -58,8 +58,8 @@ fn depth_12_unit_price_counterexample() {
     good.approve_ceiling_total = Atto::from_u64(4096);
     good.plan_hash = watchpay::canonical::plan_hash(&good);
     let vp = validate_plan(&good, SYNTH_NOW).unwrap();
-    assert_eq!(vp.approve_ceiling, Atto::from_u64(4096));
-    assert_ne!(vp.approve_ceiling, Atto::MAX);
+    assert_eq!(vp.approve_ceiling(), Atto::from_u64(4096));
+    assert_ne!(vp.approve_ceiling(), Atto::MAX);
 }
 
 #[test]
@@ -289,42 +289,48 @@ fn plan_json_round_trip() {
     let back = plan_from_json(&json).unwrap();
     assert_eq!(back, p);
     let vp = validate_plan(&back, SYNTH_NOW).unwrap();
-    assert_eq!(vp.plan.plan_hash, p.plan_hash);
+    assert_eq!(vp.plan().plan_hash, p.plan_hash);
     let _ = Hex32::ZERO;
 }
 
-/// The validation seal (z2.b review P1): a `ValidatedPlan` whose inner
-/// plan is mutated in place — even with the declared hash recomputed to
-/// match the mutation — no longer revalidates. A changed plan is a
-/// DIFFERENT plan and must be re-validated from scratch; the ledger also
-/// refuses it against persisted attempt identity (see review_adversarial).
+/// The validation seal, R2 form (z2.b R1 review P1): the R0/R1 tests
+/// exercised in-place mutation of the handle — `vp.plan.job_id = …`,
+/// `vp.approve_ceiling = …`. After hardening, ALL fields of
+/// `ValidatedPlan` (inner plan AND derived figures) are private behind
+/// immutable getters, so those mutation shapes NO LONGER COMPILE — the
+/// reviewer-sanctioned fix form ("compile-time immutability is
+/// acceptable if the mutation API is eliminated"). What remains to test
+/// behaviorally: a handle stays consistent, revalidation re-derives the
+/// same sealed figures, and a genuinely different plan gets a different
+/// seal. The changed-plan-under-an-intent fence stays covered by
+/// review_adversarial::review_refuse_changed_plan_after_intent.
 #[test]
-fn validated_plan_seal_refuses_in_place_mutation() {
-    let mut vp = validate_plan(&base_plan(), SYNTH_NOW).unwrap();
+fn validated_plan_is_compile_time_immutable() {
+    let vp = validate_plan(&base_plan(), SYNTH_NOW).unwrap();
     assert!(vp.is_internally_consistent());
-    assert_eq!(vp.sealed_hash(), vp.plan.plan_hash);
-    // fresh revalidation of the untouched handle is fine
-    vp.revalidate(SYNTH_NOW + 1).unwrap();
+    assert_eq!(vp.sealed_hash(), vp.plan().plan_hash);
+    assert_eq!(vp.approve_ceiling(), Atto::from_u64(36));
+    assert_eq!(vp.planned_tx_count(), 2);
+    assert_eq!(vp.batch_worst_case().len(), 1);
+    assert_eq!(vp.batch_worst_case()[0], Atto::from_u64(36));
 
-    // mutation WITHOUT rehashing: internal consistency is already broken
-    vp.plan.job_id = "mutated-job".into();
-    assert!(!vp.is_internally_consistent());
-    let e = vp.revalidate(SYNTH_NOW).unwrap_err();
-    assert_eq!(field_of(&e), "plan_hash");
+    // revalidation at a later (still unexpired) time re-derives the same
+    // sealed figures and succeeds
+    let fresh = vp.revalidate(SYNTH_NOW + 1).unwrap();
+    assert_eq!(fresh.sealed_hash(), vp.sealed_hash());
+    assert_eq!(fresh.approve_ceiling(), vp.approve_ceiling());
 
-    // mutation WITH rehashing: the declared hash now matches the mutated
-    // bytes, but NOT the seal — consistency includes the seal, and
-    // revalidate refuses the substitution
-    vp.plan.job_id = "synthetic-job-001".into(); // restore
-    vp.plan.job_id = "honest-new-job".into();
-    vp.plan.plan_hash = watchpay::canonical::plan_hash(&vp.plan);
-    assert!(!vp.is_internally_consistent(), "seal must diverge from a rehashed mutation");
-    let e = vp.revalidate(SYNTH_NOW).unwrap_err();
-    assert_eq!(field_of(&e), "plan_hash");
-    assert!(e.to_string().contains("refusing the substitution"), "{e}");
+    // a genuinely different plan is a different validation result with a
+    // different seal — there is no path from one handle to the other
+    let mut other = base_plan();
+    other.job_id = "honest-new-job".into();
+    other.plan_hash = watchpay::canonical::plan_hash(&other);
+    let other_vp = validate_plan(&other, SYNTH_NOW).unwrap();
+    assert_ne!(other_vp.sealed_hash(), vp.sealed_hash());
+    assert!(other_vp.is_internally_consistent());
 
-    // and the honest path works: validate the changed plan from scratch
-    let fresh = validate_plan(&vp.plan, SYNTH_NOW).unwrap();
-    assert_eq!(fresh.sealed_hash(), fresh.plan.plan_hash);
-    assert_ne!(fresh.sealed_hash(), validate_plan(&base_plan(), SYNTH_NOW).unwrap().sealed_hash());
+    // expiry freshness still bites through revalidation (R0 finding 2
+    // stays covered at the boundary)
+    let e = vp.revalidate(vp.plan().expires_unix + 1).unwrap_err();
+    assert_eq!(field_of(&e), "expires_unix");
 }

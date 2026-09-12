@@ -65,15 +65,15 @@ fn valid_approve_tx_accepted() {
     let v = vp();
     let tx = DecodedTransaction {
         envelope: TxEnvelope::Legacy,
-        chain_id: v.plan.network.chain_id,
-        from: v.plan.expected_payer,
-        to: v.plan.network.payment_token,
+        chain_id: v.plan().network.chain_id,
+        from: v.plan().expected_payer,
+        to: v.plan().network.payment_token,
         value_wei: Atto::ZERO,
         nonce: 6,
         gas_limit: 60_000,
         max_fee_per_gas_wei: 90_000_000_000,
         max_priority_fee_wei: 0,
-        input: watchpay::calldata::approve_calldata(v.plan.network.payment_vault, v.approve_ceiling)
+        input: watchpay::calldata::approve_calldata(v.plan().network.payment_vault, v.approve_ceiling())
             .unwrap(),
         tx_hash: synth_hash(0x6A),
     };
@@ -126,9 +126,9 @@ fn tx_negative_battery() {
     // the composer refuses MAX, so hand-encode the approve(…, MAX) bytes
     let mut ap = DecodedTransaction {
         envelope: TxEnvelope::Legacy,
-        chain_id: v.plan.network.chain_id,
-        from: v.plan.expected_payer,
-        to: v.plan.network.payment_token,
+        chain_id: v.plan().network.chain_id,
+        from: v.plan().expected_payer,
+        to: v.plan().network.payment_token,
         value_wei: Atto::ZERO,
         nonce: 6,
         gas_limit: 60_000,
@@ -136,7 +136,7 @@ fn tx_negative_battery() {
         max_priority_fee_wei: 0,
         input: {
             let mut bytes =
-                watchpay::calldata::approve_calldata(v.plan.network.payment_vault, Atto::from_u64(1))
+                watchpay::calldata::approve_calldata(v.plan().network.payment_vault, Atto::from_u64(1))
                     .unwrap();
             bytes[4 + 32..4 + 64].copy_from_slice(&Atto::MAX.0.to_big_endian());
             bytes
@@ -146,7 +146,7 @@ fn tx_negative_battery() {
     let e = validate_transaction(&v, TxDestination::Approve, &ap, 6).unwrap_err();
     assert_eq!(field_of(&e), "input");
     assert!(e.to_string().contains("bounded approval"));
-    ap.input = watchpay::calldata::approve_calldata(v.plan.network.payment_vault, v.approve_ceiling)
+    ap.input = watchpay::calldata::approve_calldata(v.plan().network.payment_vault, v.approve_ceiling())
         .unwrap();
     validate_transaction(&v, TxDestination::Approve, &ap, 6).unwrap();
 
@@ -194,7 +194,7 @@ fn receipt_valid_both_winner_pools() {
     let tx = signed_batch_tx();
     // winner pool2 (tag 2, all-ones pool): median 1 << 2 = 4
     let ev = winner_event(2, 4);
-    let r = synth_receipt_with_event(&tx, 42161, v.plan.expected_payer, v.plan.network.payment_vault, &ev, 12);
+    let r = synth_receipt_with_event(&tx, 42161, v.plan().expected_payer, v.plan().network.payment_vault, &ev, 12);
     let rb = CompletedReadback { depth: 2, merkle_payment_timestamp: SYNTH_TS };
     match validate_receipt(&v, 0, &tx, &r, Some(&rb)).unwrap() {
         ReceiptOutcome::Paid(p) => {
@@ -208,7 +208,7 @@ fn receipt_valid_both_winner_pools() {
     // winner pool1 (tag 1, 1..=16 pool): median 9 << 2 = 36 — readback now
     // REQUIRED for the paid state; with it supplied the payment validates.
     let ev = winner_event(1, 36);
-    let r = synth_receipt_with_event(&tx, 42161, v.plan.expected_payer, v.plan.network.payment_vault, &ev, 12);
+    let r = synth_receipt_with_event(&tx, 42161, v.plan().expected_payer, v.plan().network.payment_vault, &ev, 12);
     match validate_receipt(&v, 0, &tx, &r, Some(&CompletedReadback { depth: 2, merkle_payment_timestamp: SYNTH_TS })).unwrap() {
         ReceiptOutcome::Paid(p) => assert_eq!(p.total_amount, Atto::from_u64(36)),
         _ => panic!("expected Paid"),
@@ -223,7 +223,7 @@ fn receipt_wrong_batch_same_depth_and_timestamp() {
     let tx = signed_batch_tx();
     // forge: same depth/ts, foreign pool hash (tag 0x55 — not committed)
     let ev = winner_event(0x55, 36);
-    let r = synth_receipt_with_event(&tx, 42161, v.plan.expected_payer, v.plan.network.payment_vault, &ev, 1);
+    let r = synth_receipt_with_event(&tx, 42161, v.plan().expected_payer, v.plan().network.payment_vault, &ev, 1);
     let e = validate_receipt(&v, 0, &tx, &r, None).unwrap_err();
     assert_eq!(field_of(&e), "winnerPoolHash");
     assert!(e.to_string().contains("different batch with identical depth/timestamp"));
@@ -236,7 +236,7 @@ fn receipt_wrong_total_amount() {
     // pool2's lawful charge is 4; claim 5 (or the other pool's 36)
     for amount in [5u64, 36, 3, 4096] {
         let ev = winner_event(2, amount);
-        let r = synth_receipt_with_event(&tx, 42161, v.plan.expected_payer, v.plan.network.payment_vault, &ev, 1);
+        let r = synth_receipt_with_event(&tx, 42161, v.plan().expected_payer, v.plan().network.payment_vault, &ev, 1);
         let e = validate_receipt(&v, 0, &tx, &r, None).unwrap_err();
         assert_eq!(field_of(&e), "totalAmount", "amount {amount}");
         assert!(e.to_string().contains("pricing-rule recompute"));
@@ -250,8 +250,8 @@ fn receipt_missing_event_no_fallback() {
     let mut r = synth_receipt_with_event(
         &tx,
         42161,
-        v.plan.expected_payer,
-        v.plan.network.payment_vault,
+        v.plan().expected_payer,
+        v.plan().network.payment_vault,
         &winner_event(2, 4),
         1,
     );
@@ -266,8 +266,8 @@ fn receipt_duplicate_events_ambiguous() {
     let v = vp();
     let tx = signed_batch_tx();
     let ev = winner_event(2, 4);
-    let mut r = synth_receipt_with_event(&tx, 42161, v.plan.expected_payer, v.plan.network.payment_vault, &ev, 1);
-    r.logs.push(synth_merkle_payment_made_log(v.plan.network.payment_vault, &ev));
+    let mut r = synth_receipt_with_event(&tx, 42161, v.plan().expected_payer, v.plan().network.payment_vault, &ev, 1);
+    r.logs.push(synth_merkle_payment_made_log(v.plan().network.payment_vault, &ev));
     let e = validate_receipt(&v, 0, &tx, &r, None).unwrap_err();
     assert_eq!(field_of(&e), "logs");
     assert!(e.to_string().contains("ambiguous"));
@@ -279,18 +279,18 @@ fn receipt_wrong_contract_emitter_and_fields() {
     let tx = signed_batch_tx();
     // event emitted by a DIFFERENT contract than the vault
     let ev = winner_event(2, 4);
-    let mut r = synth_receipt_with_event(&tx, 42161, v.plan.expected_payer, v.plan.network.payment_vault, &ev, 1);
+    let mut r = synth_receipt_with_event(&tx, 42161, v.plan().expected_payer, v.plan().network.payment_vault, &ev, 1);
     r.logs[0].address = synth_addr(0xE1);
     assert_eq!(field_of(&validate_receipt(&v, 0, &tx, &r, None).unwrap_err()), "logs");
     // receipt.to wrong
-    let mut r = synth_receipt_with_event(&tx, 42161, v.plan.expected_payer, v.plan.network.payment_vault, &ev, 1);
+    let mut r = synth_receipt_with_event(&tx, 42161, v.plan().expected_payer, v.plan().network.payment_vault, &ev, 1);
     r.to = synth_addr(0xE2);
     assert_eq!(field_of(&validate_receipt(&v, 0, &tx, &r, None).unwrap_err()), "contract");
     // payer wrong
-    let r = synth_receipt_with_event(&tx, 42161, synth_addr(0xE3), v.plan.network.payment_vault, &ev, 1);
+    let r = synth_receipt_with_event(&tx, 42161, synth_addr(0xE3), v.plan().network.payment_vault, &ev, 1);
     assert_eq!(field_of(&validate_receipt(&v, 0, &tx, &r, None).unwrap_err()), "payer");
     // chain wrong
-    let r = synth_receipt_with_event(&tx, 421614, v.plan.expected_payer, v.plan.network.payment_vault, &ev, 1);
+    let r = synth_receipt_with_event(&tx, 421614, v.plan().expected_payer, v.plan().network.payment_vault, &ev, 1);
     assert_eq!(field_of(&validate_receipt(&v, 0, &tx, &r, None).unwrap_err()), "chain");
 }
 
@@ -299,7 +299,7 @@ fn receipt_altered_transaction() {
     let v = vp();
     let tx = signed_batch_tx();
     let ev = winner_event(2, 4);
-    let r = synth_receipt_with_event(&tx, 42161, v.plan.expected_payer, v.plan.network.payment_vault, &ev, 1);
+    let r = synth_receipt_with_event(&tx, 42161, v.plan().expected_payer, v.plan().network.payment_vault, &ev, 1);
     // a receipt for a DIFFERENT tx hash than the recorded signed tx
     let mut foreign = r.clone();
     foreign.tx_hash = synth_hash(0x99);
@@ -329,8 +329,8 @@ fn receipt_reverted_and_payment_already_exists() {
         tx_hash: tx.tx_hash,
         chain_id: 42161,
         status: 0,
-        from: v.plan.expected_payer,
-        to: v.plan.network.payment_vault,
+        from: v.plan().expected_payer,
+        to: v.plan().network.payment_vault,
         logs: vec![],
         revert_data: None,
         gas_used: None,
@@ -370,7 +370,7 @@ fn receipt_readback_mismatch() {
     let v = vp();
     let tx = signed_batch_tx();
     let ev = winner_event(2, 4);
-    let r = synth_receipt_with_event(&tx, 42161, v.plan.expected_payer, v.plan.network.payment_vault, &ev, 1);
+    let r = synth_receipt_with_event(&tx, 42161, v.plan().expected_payer, v.plan().network.payment_vault, &ev, 1);
     for bad in [
         CompletedReadback { depth: 3, merkle_payment_timestamp: SYNTH_TS },
         CompletedReadback { depth: 2, merkle_payment_timestamp: SYNTH_TS + 1 },
@@ -387,12 +387,12 @@ fn receipt_event_depth_or_timestamp_mismatch() {
     // event depth differs from batch
     let mut ev = winner_event(2, 4);
     ev.depth = 3;
-    let r = synth_receipt_with_event(&tx, 42161, v.plan.expected_payer, v.plan.network.payment_vault, &ev, 1);
+    let r = synth_receipt_with_event(&tx, 42161, v.plan().expected_payer, v.plan().network.payment_vault, &ev, 1);
     assert_eq!(field_of(&validate_receipt(&v, 0, &tx, &r, None).unwrap_err()), "depth");
     // event timestamp differs from batch
     let mut ev = winner_event(2, 4);
     ev.merkle_payment_timestamp = SYNTH_TS + 2;
-    let r = synth_receipt_with_event(&tx, 42161, v.plan.expected_payer, v.plan.network.payment_vault, &ev, 1);
+    let r = synth_receipt_with_event(&tx, 42161, v.plan().expected_payer, v.plan().network.payment_vault, &ev, 1);
     assert_eq!(
         field_of(&validate_receipt(&v, 0, &tx, &r, None).unwrap_err()),
         "merklePaymentTimestamp"
@@ -400,7 +400,7 @@ fn receipt_event_depth_or_timestamp_mismatch() {
     // unrelated logs (other contracts/events) do not confuse the matcher
     let mut ev = winner_event(2, 4);
     ev.depth = 2;
-    let mut r = synth_receipt_with_event(&tx, 42161, v.plan.expected_payer, v.plan.network.payment_vault, &ev, 1);
+    let mut r = synth_receipt_with_event(&tx, 42161, v.plan().expected_payer, v.plan().network.payment_vault, &ev, 1);
     let noise = SyntheticLog {
         address: synth_addr(0x0F),
         topics: vec![Hex32([9u8; 32])],

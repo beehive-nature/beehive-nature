@@ -59,8 +59,8 @@ fn good_receipt(tx: &DecodedTransaction) -> watchpay::receipt::SyntheticReceipt 
     synth_receipt_with_event(
         tx,
         42161,
-        v.plan.expected_payer,
-        v.plan.network.payment_vault,
+        v.plan().expected_payer,
+        v.plan().network.payment_vault,
         &good_event(),
         10,
     )
@@ -99,7 +99,7 @@ fn review_refuse_expired_cached_plan() {
     let ledger = Ledger::open(&tmp_root("review-expiry")).unwrap();
     let v = vp();
     let err = ledger
-        .write_intent(&v, 0, 7, v.plan.expires_unix + 1)
+        .write_intent(&v, 0, 7, v.plan().expires_unix + 1)
         .expect_err("expired cached plan starts new signing intent");
     assert!(err.to_string().contains("expired"), "{err}");
 
@@ -113,12 +113,12 @@ fn review_refuse_expired_cached_plan() {
     receipt.status = 0;
     receipt.logs.clear();
     ledger
-        .record_outcome(&v, 0, &receipt, None, v.plan.expires_unix + 10)
+        .record_outcome(&v, 0, &receipt, None, v.plan().expires_unix + 10)
         .unwrap();
     // while a NEW intent after expiry stays refused even after the
     // reverted (retryable) terminal state:
     let e2 = ledger
-        .write_intent(&v, 0, 8, v.plan.expires_unix + 11)
+        .write_intent(&v, 0, 8, v.plan().expires_unix + 11)
         .expect_err("expired plan must refuse new signing attempts");
     assert!(e2.to_string().contains("expired"), "{e2}");
 }
@@ -220,7 +220,7 @@ fn review_fee_evidence_reconciles_reservations() {
     // (attempt 3 ok); 0.0162 + 0.05 = 0.0662 <= 0.1 … attempts continue
     // until retained + 0.05 > 0.1, i.e. retained > 0.05: attempt 11.
     assert_eq!(allowed, 10);
-    let records = ledger.attempts(&v.plan.job_id, 0).unwrap();
+    let records = ledger.attempts(&v.plan().job_id, 0).unwrap();
     let total: Atto = records
         .iter()
         .fold(Atto::ZERO, |a, r| a.checked_add(r.reserved_fee_wei).unwrap());

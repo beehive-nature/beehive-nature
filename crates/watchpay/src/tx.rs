@@ -93,7 +93,7 @@ pub fn validate_transaction(
     tx: &DecodedTransaction,
     expected_nonce: u64,
 ) -> Result<()> {
-    let plan = &vp.plan;
+    let plan = &vp.plan();
     if tx.chain_id != plan.network.chain_id {
         return Err(refuse(
             "chain_id",
@@ -216,7 +216,7 @@ pub fn validate_transaction(
                     ),
                 ));
             }
-            let want = calldata::approve_calldata(plan.network.payment_vault, vp.approve_ceiling)?;
+            let want = calldata::approve_calldata(plan.network.payment_vault, vp.approve_ceiling())?;
             if tx.input != want {
                 return Err(refuse(
                     "input",

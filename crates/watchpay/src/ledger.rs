@@ -304,21 +304,21 @@ impl Ledger {
             return Err(Error::Ledger(format!(
                 "validated plan {} is not internally consistent (mutated after \
                  validation?) — refusing",
-                vp.plan.plan_hash
+                vp.plan().plan_hash
             )));
         }
         for r in existing {
-            if r.plan_hash != vp.plan.plan_hash || r.batch_id != batch.batch_id {
+            if r.plan_hash != vp.plan().plan_hash || r.batch_id != batch.batch_id {
                 return Err(Error::Ledger(format!(
                     "plan identity changed under job {} batch {}: attempt {} was recorded \
                      under plan {}/batch {}, but the supplied plan is {}/{} — a changed \
                      vault/payer/chain/commitments/budget/expiry cannot ride an old intent",
-                    vp.plan.job_id,
+                    vp.plan().job_id,
                     batch.batch_index,
                     r.attempt_seq,
                     r.plan_hash,
                     r.batch_id,
-                    vp.plan.plan_hash,
+                    vp.plan().plan_hash,
                     batch.batch_id
                 )));
             }
@@ -328,7 +328,7 @@ impl Ledger {
 
     /// Plan-wide sum of current fee reservations across ALL batches.
     fn plan_reserved_total(&self, vp: &ValidatedPlan) -> Result<Atto> {
-        let job_dir = self.root.join(&vp.plan.job_id);
+        let job_dir = self.root.join(&vp.plan().job_id);
         if !job_dir.exists() {
             return Ok(Atto::ZERO);
         }
@@ -365,9 +365,9 @@ impl Ledger {
     /// The per-tx worst-case native fee reserved for a NEW attempt (the
     /// plan's own per-tx ceiling product).
     fn plan_per_tx_worst_case(vp: &ValidatedPlan) -> Atto {
-        Atto::from_u64(vp.plan.gas_ceilings.per_tx_gas_limit)
+        Atto::from_u64(vp.plan().gas_ceilings.per_tx_gas_limit)
             .checked_mul(Atto::from_u64(
-                vp.plan.native_fee_ceilings.per_tx_max_fee_per_gas_wei,
+                vp.plan().native_fee_ceilings.per_tx_max_fee_per_gas_wei,
             ))
             .expect("plan validation bounds this product within u256")
     }
@@ -381,33 +381,34 @@ impl Ledger {
 
     /// Reconcile a reservation down using receipt fee evidence when
     /// available; NEVER raise. Without evidence the reservation stands
-    /// (a failed call does not free unknown exposure).
-    fn reconcile_reservation(current: Atto, tx: &DecodedTransaction, receipt: &SyntheticReceipt) -> Atto {
-        match (receipt.gas_used, receipt.effective_gas_price_wei) {
-            (Some(gas), Some(price)) => {
+    /// (a failed call does not free unknown exposure). Evidence is
+    /// consumed ONLY through `validate_fee_evidence` (complete pair, gas
+    /// within the signed limit, price within the signed envelope) —
+    /// impossible evidence refuses the whole transition before any
+    /// mutation; the worst-case clamp stays as defense in depth.
+    fn reconcile_reservation(
+        current: Atto,
+        tx: &DecodedTransaction,
+        receipt: &SyntheticReceipt,
+    ) -> Result<Atto> {
+        match crate::receipt::validate_fee_evidence(tx, receipt)? {
+            None => Ok(current),
+            Some((gas, price)) => {
                 let actual = Atto::from_u64(gas)
                     .checked_mul(Atto::from_u64(price))
                     .expect("u64 × u64 fits u256");
                 // Evidence cannot raise exposure beyond the tx's own
-                // worst case (also guards forged evidence).
-                let clamped = if actual > Self::tx_worst_case_fee(tx) {
-                    Self::tx_worst_case_fee(tx)
-                } else {
-                    actual
-                };
-                if clamped < current {
-                    clamped
-                } else {
-                    current
-                }
+                // worst case (defense in depth against forged evidence).
+                let worst = Self::tx_worst_case_fee(tx);
+                let clamped = if actual > worst { worst } else { actual };
+                Ok(if clamped < current { clamped } else { current })
             }
-            _ => current,
         }
     }
 
     fn bind_plan(&self, vp: &ValidatedPlan, batch_index: usize) -> Result<crate::plan_model::Batch> {
         let batch = vp
-            .plan
+            .plan()
             .batches
             .get(batch_index)
             .cloned()
@@ -435,13 +436,13 @@ impl Ledger {
         // FRESHNESS: a cached validation cannot outlive expiry (review P1).
         vp.revalidate(now_unix)?;
         let batch = self.bind_plan(vp, batch_index)?;
-        let existing = self.attempts(&vp.plan.job_id, batch.batch_index)?;
+        let existing = self.attempts(&vp.plan().job_id, batch.batch_index)?;
         // IDENTITY: bind to every persisted attempt of this batch.
         self.bind_attempt_identity(vp, &batch, &existing)?;
         // BUDGET: reserve this attempt's worst case against the plan total.
         let reserve = Self::plan_per_tx_worst_case(vp);
         let reserved = self.plan_reserved_total(vp)?;
-        let ceiling = vp.plan.native_fee_ceilings.max_total_native_fee_wei;
+        let ceiling = vp.plan().native_fee_ceilings.max_total_native_fee_wei;
         let projected = reserved
             .checked_add(reserve)
             .ok_or_else(|| Error::Ledger("reservation projection overflow".into()))?;
@@ -460,7 +461,7 @@ impl Ledger {
                     return Err(Error::Ledger(format!(
                         "batch {} of job {} is already paid (winner {}) — double payment refused",
                         batch.batch_index,
-                        vp.plan.job_id,
+                        vp.plan().job_id,
                         winner_pool_hash
                     )));
                 }
@@ -493,8 +494,8 @@ impl Ledger {
         let seq = existing.iter().map(|r| r.attempt_seq).max().unwrap_or(0) + 1;
         let rec = AttemptRecord {
             record_version: RECORD_VERSION,
-            job_id: vp.plan.job_id.clone(),
-            plan_hash: vp.plan.plan_hash,
+            job_id: vp.plan().job_id.clone(),
+            plan_hash: vp.plan().plan_hash,
             batch_index: batch.batch_index,
             batch_id: batch.batch_id,
             attempt_seq: seq,
@@ -522,7 +523,7 @@ impl Ledger {
         // FRESHNESS at the signing boundary (review P1).
         vp.revalidate(now_unix)?;
         let batch = self.bind_plan(vp, batch_index)?;
-        let existing = self.attempts(&vp.plan.job_id, batch.batch_index)?;
+        let existing = self.attempts(&vp.plan().job_id, batch.batch_index)?;
         self.bind_attempt_identity(vp, &batch, &existing)?;
         let latest = match existing.into_iter().next_back() {
             Some(r) => r,
@@ -548,7 +549,7 @@ impl Ledger {
             tx,
             latest.nonce,
         )?;
-        for h in self.recorded_tx_hashes(&vp.plan)? {
+        for h in self.recorded_tx_hashes(vp.plan())? {
             if h == tx.tx_hash {
                 return Err(Error::Ledger(format!(
                     "transaction hash {} already recorded for this plan — duplicate refused",
@@ -583,7 +584,7 @@ impl Ledger {
     ) -> Result<ReceiptOutcome> {
         let (mut rec, tx) = self.require_signed(vp, batch_index)?;
         let outcome = validate_receipt(vp, batch_index, &tx, receipt, readback)?;
-        rec.reserved_fee_wei = Self::reconcile_reservation(rec.reserved_fee_wei, &tx, receipt);
+        rec.reserved_fee_wei = Self::reconcile_reservation(rec.reserved_fee_wei, &tx, receipt)?;
         rec.updated_unix = now_unix;
         match &outcome {
             ReceiptOutcome::Paid(p) => {
@@ -637,7 +638,7 @@ impl Ledger {
         reason: &str,
     ) -> Result<()> {
         let batch = self.bind_plan(vp, batch_index)?;
-        let existing = self.attempts(&vp.plan.job_id, batch.batch_index)?;
+        let existing = self.attempts(&vp.plan().job_id, batch.batch_index)?;
         self.bind_attempt_identity(vp, &batch, &existing)?;
         let mut latest = existing
             .into_iter()
@@ -674,7 +675,7 @@ impl Ledger {
     ) -> Result<ReceiptOutcome> {
         let _ = gate; // presence is the authorization; nothing else is derived from it
         let batch = self.bind_plan(vp, batch_index)?;
-        let existing = self.attempts(&vp.plan.job_id, batch.batch_index)?;
+        let existing = self.attempts(&vp.plan().job_id, batch.batch_index)?;
         self.bind_attempt_identity(vp, &batch, &existing)?;
         let mut latest = existing
             .into_iter()
@@ -692,7 +693,7 @@ impl Ledger {
         };
         let outcome = validate_receipt(vp, batch_index, &signed, receipt, readback)?;
         latest.reserved_fee_wei =
-            Self::reconcile_reservation(latest.reserved_fee_wei, &signed, receipt);
+            Self::reconcile_reservation(latest.reserved_fee_wei, &signed, receipt)?;
         latest.updated_unix = now_unix;
         match &outcome {
             ReceiptOutcome::Paid(p) => {
@@ -728,7 +729,7 @@ impl Ledger {
     ) -> Result<()> {
         let _ = gate;
         let batch = self.bind_plan(vp, batch_index)?;
-        let existing = self.attempts(&vp.plan.job_id, batch.batch_index)?;
+        let existing = self.attempts(&vp.plan().job_id, batch.batch_index)?;
         self.bind_attempt_identity(vp, &batch, &existing)?;
         let mut latest = existing
             .into_iter()
@@ -753,7 +754,7 @@ impl Ledger {
         batch_index: usize,
     ) -> Result<(AttemptRecord, DecodedTransaction)> {
         let batch = self.bind_plan(vp, batch_index)?;
-        let existing = self.attempts(&vp.plan.job_id, batch.batch_index)?;
+        let existing = self.attempts(&vp.plan().job_id, batch.batch_index)?;
         self.bind_attempt_identity(vp, &batch, &existing)?;
         let latest = existing
             .into_iter()

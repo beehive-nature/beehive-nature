@@ -16,50 +16,78 @@ pub const MAX_RPC_HINT_LEN: usize = 256;
 /// figures are the ONLY lawful amounts/gas/fee bases downstream (approve
 /// composition, tx validation, receipt ceilings).
 ///
-/// MUTATION CONTRACT (z2.b negative review P1): the public fields are
-/// readable for composition and display, but this value is a VALIDATION
-/// RESULT, not a mutable input. `sealed_plan_hash` (private, set once at
-/// construction) pins the plan exactly as validated. Every ledger signing
-/// boundary calls [`ValidatedPlan::revalidate`], which re-runs the full
-/// validation and refuses divergence from the seal — a mutated-and-rehashed
-/// plan is a DIFFERENT plan, and the ledger additionally refuses it against
-/// the persisted attempt identity. A stale validation can never be carried
-/// forward, and no public path can mint a `ValidatedPlan` without
-/// `validate_plan`.
+/// MUTATION CONTRACT (z2.b negative review P1, hardened in R2): ALL
+/// fields are PRIVATE — including the derived figures (`approve_ceiling`
+/// and friends), which are validation OUTPUTS, not inputs. Read access is
+/// via immutable getters only. There is no public mutation API at all:
+/// a caller cannot alter the inner plan, the derived approval, or any
+/// budget figure on a live handle; the only way to obtain a
+/// `ValidatedPlan` is `validate_plan`, and [`ValidatedPlan::revalidate`]
+/// re-runs the full validation against the construction-time seal at
+/// every ledger signing boundary. (The R1 probe's
+/// `v.approve_ceiling = …` shape no longer compiles — the
+/// reviewer-sanctioned compile-time immutability form.)
 #[derive(Debug, Clone)]
 pub struct ValidatedPlan {
-    pub plan: Plan,
+    plan: Plan,
     /// Per batch: derived worst-case charge (max over pools of
     /// median16<<depth). Index-aligned with `plan.batches`.
-    pub batch_worst_case: Vec<Atto>,
+    batch_worst_case: Vec<Atto>,
     /// Sum of batch ceilings = the only lawful approval amount.
-    pub approve_ceiling: Atto,
+    approve_ceiling: Atto,
     /// Batches + one approval transaction.
-    pub planned_tx_count: u64,
+    planned_tx_count: u64,
     /// per_tx_gas_limit * per_tx_max_fee_per_gas_wei * planned_tx_count.
-    pub worst_case_total_native_fee_wei: Atto,
-    /// Private seal: the plan hash exactly as validated. No mutator.
+    worst_case_total_native_fee_wei: Atto,
+    /// The plan hash exactly as validated (the seal). No mutator.
     sealed_plan_hash: Hex32,
 }
 
 impl ValidatedPlan {
+    /// Immutable read of the validated plan.
+    pub fn plan(&self) -> &Plan {
+        &self.plan
+    }
+
+    /// Sum of batch ceilings — the only lawful approval amount.
+    pub fn approve_ceiling(&self) -> Atto {
+        self.approve_ceiling
+    }
+
+    /// Per-batch derived worst-case charges, index-aligned with
+    /// `plan().batches`.
+    pub fn batch_worst_case(&self) -> &[Atto] {
+        &self.batch_worst_case
+    }
+
+    /// Batches + one approval transaction.
+    pub fn planned_tx_count(&self) -> u64 {
+        self.planned_tx_count
+    }
+
+    /// per_tx_gas_limit * per_tx_max_fee_per_gas_wei * planned_tx_count.
+    pub fn worst_case_total_native_fee_wei(&self) -> Atto {
+        self.worst_case_total_native_fee_wei
+    }
+
     /// The plan hash pinned at validation time (the seal).
     pub fn sealed_hash(&self) -> Hex32 {
         self.sealed_plan_hash
     }
 
     /// Does the inner plan still hash to its declared hash AND to the
-    /// seal (no field mutated since validation)?
+    /// seal (no field mutated since validation)? The derived fields are
+    /// private, so they cannot drift from the seal by construction.
     pub fn is_internally_consistent(&self) -> bool {
         canonical::plan_hash(&self.plan) == self.plan.plan_hash
             && self.plan.plan_hash == self.sealed_plan_hash
     }
 
     /// Re-run the FULL validation (all bounds, derivations, expiry
-    /// including the batch payment-timestamp window) at `now_unix` and
-    /// require the result to match the seal. Called at every signing
-    /// boundary — a cached validation cannot outlive expiry or absorb a
-    /// mutation.
+    /// including the batch payment-timestamp window) at `now_unix`,
+    /// RE-DERIVING every figure, and require the result to match the
+    /// seal. Called at every signing boundary — a cached validation
+    /// cannot outlive expiry or absorb a mutation of the plan.
     pub fn revalidate(&self, now_unix: u64) -> Result<ValidatedPlan> {
         let fresh = validate_plan(&self.plan, now_unix)?;
         if fresh.plan.plan_hash != self.sealed_plan_hash {

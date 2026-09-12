@@ -35,7 +35,7 @@ use crate::calldata::{decode_merkle_payment_made, decode_payment_already_exists,
 use crate::error::{Error, Result};
 use crate::plan::ValidatedPlan;
 use crate::pricing::charge_for_pool;
-use crate::tx::DecodedTransaction;
+use crate::tx::{DecodedTransaction, TxEnvelope};
 use crate::types::{Atto, EthAddr, Hex32};
 
 fn refuse(field: &'static str, reason: impl Into<String>) -> Error {
@@ -82,6 +82,73 @@ pub struct CompletedReadback {
     pub merkle_payment_timestamp: u64,
 }
 
+/// Locally-detectable fee-evidence consistency (z2.b R1 review P1).
+///
+/// Fee evidence is OPTIONAL — missing evidence never releases a
+/// reservation — but when SUPPLIED it must be a complete pair that is
+/// possible for THIS signed transaction. Impossible evidence refuses the
+/// whole receipt (the caller re-fetches proper evidence); clamping is
+/// not validation. Checks:
+/// - `gas_used <= tx.gas_limit` (a receipt cannot record more gas than
+///   the transaction allowed — impossible even under a trusted RPC);
+/// - effective price within the signed envelope: legacy — exactly the
+///   gasPrice; EIP-1559 — `max_priority_fee <= effective <= max_fee`
+///   (zero effective price is legitimate only when the envelope's own
+///   priority floor is zero: zero-basefee + zero-priority test networks).
+pub fn validate_fee_evidence(
+    signed_tx: &DecodedTransaction,
+    receipt: &SyntheticReceipt,
+) -> Result<Option<(u64, u64)>> {
+    match (receipt.gas_used, receipt.effective_gas_price_wei) {
+        (None, None) => Ok(None),
+        (Some(_), None) | (None, Some(_)) => Err(refuse(
+            "gas_used",
+            "incomplete fee-evidence pair — supply both gas_used and \
+             effective_gas_price_wei or neither; half-evidence is contradictory",
+        )),
+        (Some(gas), Some(price)) => {
+            if gas > signed_tx.gas_limit {
+                return Err(refuse(
+                    "gas_used",
+                    format!(
+                        "impossible fee evidence: gas_used {gas} exceeds the signed \
+                         transaction's gas limit {} — refusing the receipt",
+                        signed_tx.gas_limit
+                    ),
+                ));
+            }
+            match signed_tx.envelope {
+                TxEnvelope::Legacy => {
+                    if price != signed_tx.max_fee_per_gas_wei {
+                        return Err(refuse(
+                            "effective_gas_price_wei",
+                            format!(
+                                "impossible fee evidence: legacy effective price {price} != \
+                                 the signed gasPrice {}",
+                                signed_tx.max_fee_per_gas_wei
+                            ),
+                        ));
+                    }
+                }
+                TxEnvelope::Eip1559 => {
+                    if price < signed_tx.max_priority_fee_wei || price > signed_tx.max_fee_per_gas_wei {
+                        return Err(refuse(
+                            "effective_gas_price_wei",
+                            format!(
+                                "impossible fee evidence: effective price {price} outside the \
+                                 signed EIP-1559 bounds [priority {}, maxFee {}] (zero price is \
+                                 legitimate only with a zero-priority envelope)",
+                                signed_tx.max_priority_fee_wei, signed_tx.max_fee_per_gas_wei
+                            ),
+                        ));
+                    }
+                }
+            }
+            Ok(Some((gas, price)))
+        }
+    }
+}
+
 /// A validated payment: the receipt, its tx, and the batch are now one fact.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ValidatedPayment {
@@ -123,7 +190,7 @@ pub fn validate_receipt(
     receipt: &SyntheticReceipt,
     readback: Option<&CompletedReadback>,
 ) -> Result<ReceiptOutcome> {
-    let plan = &vp.plan;
+    let plan = &vp.plan();
     let batch = plan
         .batches
         .get(batch_index)
@@ -176,6 +243,22 @@ pub fn validate_receipt(
             format!("receipt to {} != plan vault {}", receipt.to, plan.network.payment_vault),
         ));
     }
+
+    // Status domain: a receipt status outside {0,1} is malformed
+    // evidence (previously anything != 1 silently classified as
+    // reverted) — refuse it outright.
+    if receipt.status > 1 {
+        return Err(refuse(
+            "status",
+            format!("receipt status {} outside the domain {{0,1}} — malformed evidence", receipt.status),
+        ));
+    }
+
+    // Fee-evidence consistency BEFORE any outcome classification or
+    // state mutation: impossible evidence (gas above the signed limit,
+    // price outside the signed envelope, half-pairs) refuses the whole
+    // receipt; missing evidence stays legal and never releases anything.
+    validate_fee_evidence(signed_tx, receipt)?;
 
     if receipt.status != 1 {
         let winner = match &receipt.revert_data {

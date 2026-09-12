@@ -76,8 +76,8 @@ fn good_receipt(tx: &DecodedTransaction) -> watchpay::receipt::SyntheticReceipt 
     synth_receipt_with_event(
         tx,
         42161,
-        v.plan.expected_payer,
-        v.plan.network.payment_vault,
+        v.plan().expected_payer,
+        v.plan().network.payment_vault,
         &good_event(),
         10,
     )
@@ -116,7 +116,7 @@ fn happy_path_intent_signed_mined() {
     assert!(e.to_string().contains("already paid"), "{e}");
 
     // the record on disk is Mined with the winner bound
-    let attempts = ledger.attempts(&v.plan.job_id, 0).unwrap();
+    let attempts = ledger.attempts(&v.plan().job_id, 0).unwrap();
     assert_eq!(attempts.len(), 1);
     assert!(matches!(attempts[0].state, AttemptState::Mined { .. }));
     let _ = std::fs::remove_dir_all(&root);
@@ -177,7 +177,7 @@ fn unknown_abandon_is_human_and_records_the_choice() {
     ledger
         .abandon_unknown(&gate, &v, 0, SYNTH_NOW + 90, "founder chose to walk away")
         .unwrap();
-    let attempts = ledger.attempts(&v.plan.job_id, 0).unwrap();
+    let attempts = ledger.attempts(&v.plan().job_id, 0).unwrap();
     match &attempts[0].state {
         AttemptState::Cancelled { reason } => {
             assert!(reason.contains("human abandon"), "{reason}");
@@ -257,13 +257,13 @@ fn torn_attempt_file_fails_closed() {
     ledger.record_signed(&v, 0, &tx, SYNTH_NOW).unwrap();
 
     // simulate a torn write: truncate the attempt file mid-JSON
-    let dir = root.join(&v.plan.job_id).join("0");
+    let dir = root.join(&v.plan().job_id).join("0");
     let path = dir.join("attempt-0001.json");
     let raw = std::fs::read_to_string(&path).unwrap();
     std::fs::write(&path, &raw[..raw.len() / 2]).unwrap();
 
     let reopened = Ledger::open(&root).unwrap();
-    let e = reopened.attempts(&v.plan.job_id, 0).unwrap_err();
+    let e = reopened.attempts(&v.plan().job_id, 0).unwrap_err();
     assert!(e.to_string().contains("corrupt/torn"), "{e}");
     assert!(e.to_string().contains("refusing to guess state"), "{e}");
     // the fail-closed refusal also blocks new intents (write_intent reads
@@ -279,13 +279,13 @@ fn unknown_state_name_fails_closed() {
     let ledger = Ledger::open(&root).unwrap();
     let v = vp();
     ledger.write_intent(&v, 0, 7, SYNTH_NOW).unwrap();
-    let dir = root.join(&v.plan.job_id).join("0");
+    let dir = root.join(&v.plan().job_id).join("0");
     std::fs::write(
         dir.join("attempt-0002.json"),
         r#"{"record_version":1,"job_id":"synthetic-job-001","plan_hash":"0x00","batch_index":0,"batch_id":"0x00","attempt_seq":2,"nonce":8,"state":"teleported","updated_unix":0}"#,
     )
     .unwrap();
-    let e = ledger.attempts(&v.plan.job_id, 0).unwrap_err();
+    let e = ledger.attempts(&v.plan().job_id, 0).unwrap_err();
     assert!(e.to_string().contains("corrupt/torn") || e.to_string().contains("unknown variant"));
     let _ = std::fs::remove_dir_all(&root);
 }
@@ -296,10 +296,10 @@ fn stray_tmp_files_ignored() {
     let ledger = Ledger::open(&root).unwrap();
     let v = vp();
     ledger.write_intent(&v, 0, 7, SYNTH_NOW).unwrap();
-    let dir = root.join(&v.plan.job_id).join("0");
+    let dir = root.join(&v.plan().job_id).join("0");
     std::fs::write(dir.join(".attempt-0001.json.tmp9999"), b"garbage").unwrap();
     std::fs::write(dir.join("notes.txt"), b"not an attempt").unwrap();
-    let attempts = ledger.attempts(&v.plan.job_id, 0).unwrap();
+    let attempts = ledger.attempts(&v.plan().job_id, 0).unwrap();
     assert_eq!(attempts.len(), 1);
     let _ = std::fs::remove_dir_all(&root);
 }
@@ -318,7 +318,7 @@ fn written_states_survive_process_relaunch() {
     {
         // C1: crash after intent write — intent survives relaunch
         let ledger = Ledger::open(&root).unwrap();
-        let attempts = ledger.attempts(&v.plan.job_id, 0).unwrap();
+        let attempts = ledger.attempts(&v.plan().job_id, 0).unwrap();
         assert_eq!(attempts.len(), 1);
         assert_eq!(attempts[0].state, AttemptState::Intent);
         assert_eq!(attempts[0].nonce, 7);
@@ -334,7 +334,7 @@ fn written_states_survive_process_relaunch() {
     }
     {
         let ledger = Ledger::open(&root).unwrap();
-        let attempts = ledger.attempts(&v.plan.job_id, 0).unwrap();
+        let attempts = ledger.attempts(&v.plan().job_id, 0).unwrap();
         match &attempts[0].state {
             AttemptState::Signed { tx } => assert_eq!(tx.nonce, 7),
             other => panic!("expected Signed, got {}", other.kind()),
@@ -347,12 +347,23 @@ fn written_states_survive_process_relaunch() {
 
 #[test]
 fn job_id_traversal_refused_at_ledger_boundary() {
+    // Since ValidatedPlan became compile-time immutable, an evil job_id
+    // can no longer ride a validated handle at all (validate_plan
+    // refuses it at the plan boundary). The ledger's defense-in-depth
+    // re-check stays armed for direct callers of the path-taking APIs.
     let root = tmp_root("traversal");
     let ledger = Ledger::open(&root).unwrap();
-    let mut v = vp();
-    v.plan.job_id = "..\\evil".to_string();
-    let e = ledger.write_intent(&v, 0, 7, SYNTH_NOW).unwrap_err();
+
+    // the plan boundary refuses the traversal shape outright
+    let mut p = base_plan();
+    p.job_id = "..\\evil".to_string();
+    let e = watchpay::plan::validate_plan(&p, SYNTH_NOW).unwrap_err();
     assert!(e.to_string().contains("job_id"), "{e}");
+
+    // the ledger boundary (path join) refuses it too, both spellings
+    let e2 = ledger.attempts("../evil", 0).unwrap_err();
+    assert!(e2.to_string().contains("job_id"), "{e2}");
+    let _ = ledger.attempts("..\\evil", 0).unwrap_err();
     // nothing was created outside the root
     assert!(!root.join("..").join("evil").exists());
     let _ = std::fs::remove_dir_all(&root);
