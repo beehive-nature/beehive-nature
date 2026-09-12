@@ -44,15 +44,18 @@ const FENCE = /wss:\/\/|buzz:\/\/|✓ verified|✗ failing|online now|last-seen|
 
 test('New bee first paint is one calm sentence, one takeaway, and three doors', () => {
   const bee = extractById(page, 'first-bee');
-  assert.match(bee, /This page lists community doors\. Talk happens in the Buzz app — not on this list\./);
-  assert.match(bee, /Hand-checked receipts — not who's online\./);
-  assert.match(bee, /If \.buzz is filtered, a clean-name door still opens the same hive\./);
+  assert.match(bee, /Welcome\. This page is the estate's front porch — the place to find our community rooms\./);
+  assert.match(bee, /Come meet the hive\./);
+  assert.match(bee, /The doors here were checked by hand when this page was published\. This list cannot see who is online, and it does not pretend to\. If \.buzz is filtered, a clean-name door opens the same hive\./);
   assert.match(bee, /data-dir-go="hives"/);
   assert.match(bee, /data-i18n="social\.arrival\.dir\.hives">OUR HIVES</);
   assert.match(bee, /href="profile\.html"/);
   assert.match(bee, /data-i18n="experience\.profile">People and names</);
   assert.match(bee, /data-dir-go="deeper"/);
   assert.match(bee, /Go deeper/);
+  // the receipts warning is support-sized, never the largest first-screen promise
+  const take = bee.match(/class="take"[^>]*>([^<]+)</)[1];
+  assert.ok(!/receipt|online|checked/i.test(take), 'takeaway leads with purpose, not the warning');
   assert.doesNotMatch(bee, FENCE);
   assert.doesNotMatch(bee, /<table/i);
   assert.match(page, /<body data-reg="bee" data-bee-theme="custom" data-dir-beat="arrival" data-experience="directory">/);
@@ -67,6 +70,13 @@ test('Raver first paint is atmosphere, one feeling line, and one tap', () => {
   assert.match(raver, /id="hive-scene"/);
   assert.match(raver, /Find your people\. The floor already has doors\./);
   assert.match(raver, /Step into OUR HIVES/);
+  // people/relationship composition: humans purple and linked, machine companions teal and tethered, green biomass
+  assert.match(raver, /class="people"/);
+  assert.match(raver, /class="person"/);
+  assert.match(raver, /class="kin"/);
+  assert.match(raver, /class="machine"/);
+  assert.match(raver, /class="tether"/);
+  assert.match(raver, /url\(#biomass\)/);
   assert.doesNotMatch(raver, FENCE);
   assert.doesNotMatch(raver, /<table/i);
   assert.match(page, /prefers-reduced-motion:reduce/);
@@ -86,11 +96,17 @@ test('OUR HIVES beat is doors and stories — no raw host stack', () => {
   assert.match(page, /body:not\(\[data-reg="cypherpunk"\]\)\[data-dir-beat="hives"\] #layer-hives\{display:block\}/);
 });
 
-test('Raver tap opens the dual-home picture first; hosts one tap away', () => {
+test('Raver tap opens the relationship picture first; hosts one tap away', () => {
   const figure = extractById(page, 'layer-figure');
-  assert.match(figure, /Two estate hives, then human and machine seats named honestly/);
-  assert.match(figure, /Presence is not claimed/);
-  assert.match(figure, /See the hosts/);
+  assert.match(figure, /People and their machine companions, named honestly, around two estate hives\. Presence is not claimed — connection is\./);
+  // the raver path reaches the estate's own story doors, not only the ledger
+  assert.match(figure, /data-dir-go="hives"/);
+  assert.match(figure, /Meet the hosts/);
+  // relationship portrait: two hives, humans linked, machine companion tethered, green floor
+  assert.match(figure, /class="person"/);
+  assert.match(figure, /class="kin"/);
+  assert.match(figure, /class="machine"/);
+  assert.match(figure, /class="tether"/);
   assert.doesNotMatch(figure, FENCE);
   assert.match(page, /body\[data-reg="raver"\]\[data-dir-beat="figure"\] #layer-figure,/);
   assert.match(page, /#layer-figure\{display:block\}/);

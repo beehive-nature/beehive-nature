@@ -167,9 +167,9 @@ th{color:var(--violet);font-weight:400} td.n{color:var(--ink)}
 </header>
 
 <article id="first-bee">
-  <p class="calm" data-i18n="dir.bee.calm">This page lists community doors. Talk happens in the Buzz app — not on this list.</p>
-  <p class="take" data-i18n="dir.bee.takeaway">Hand-checked receipts — not who's online.</p>
-  <p class="support" data-i18n="dir.bee.support">If .buzz is filtered, a clean-name door still opens the same hive.</p>
+  <p class="calm" data-i18n="dir.bee.calm">Welcome. This page is the estate's front porch — the place to find our community rooms.</p>
+  <p class="take" data-i18n="dir.bee.takeaway">Come meet the hive.</p>
+  <p class="support" data-i18n="dir.bee.support">The doors here were checked by hand when this page was published. This list cannot see who is online, and it does not pretend to. If .buzz is filtered, a clean-name door opens the same hive.</p>
   <div class="choices">
     <button type="button" class="door primary" data-dir-go="hives" data-i18n="social.arrival.dir.hives">OUR HIVES</button>
     <a class="door" href="profile.html" data-i18n="experience.profile">People and names</a>
@@ -191,18 +191,45 @@ th{color:var(--violet);font-weight:400} td.n{color:var(--ink)}
         <stop offset="46%" stop-color="#45c2dc" stop-opacity=".14"/>
         <stop offset="100%" stop-color="#0c1412" stop-opacity="0"/>
       </radialGradient>
+      <linearGradient id="biomass" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#2c4a2e" stop-opacity=".85"/>
+        <stop offset="100%" stop-color="#0c1412" stop-opacity="0"/>
+      </linearGradient>
     </defs>
     <rect class="wash" width="800" height="900" fill="url(#hive-wash)"/>
     <ellipse class="wash" cx="400" cy="340" rx="300" ry="230" fill="url(#hive-glow)"/>
     <g class="living">
-      <path d="M248 250 340 198l92 52v104l-92 52-92-52Z" fill="#754d96" stroke="#c9a0ff" stroke-width="3"/>
+      <!-- the two estate hives: founder (gold on purple), science (teal) -->
+      <path d="M248 250 340 198l92 52v104l-92 52-92-52Z" fill="#754d96" stroke="#FFD700" stroke-width="3"/>
       <path d="M460 268 552 216l92 52v104l-92 52-92-52Z" fill="#1f4a3a" stroke="#45c2dc" stroke-width="3"/>
-      <circle cx="286" cy="430" r="14" fill="#c9a0ff"/>
-      <circle cx="332" cy="438" r="11" fill="#d7c5ef"/>
-      <circle cx="548" cy="448" r="13" fill="#45c2dc"/>
-      <circle cx="594" cy="436" r="10" fill="#8ddcdf"/>
-      <path d="M220 560h360" stroke="#c9a0ff" stroke-width="4" opacity=".35"/>
-      <path d="M260 560v70h80V560m120 0v70h80V560" fill="none" stroke="#86cc72" stroke-width="3"/>
+      <!-- threads from the hives down to the people -->
+      <path class="kin" d="M300 402C310 460 330 500 352 536" fill="none" stroke="#FFD700" stroke-width="2" opacity=".4"/>
+      <path class="kin" d="M520 424C510 470 500 510 490 566" fill="none" stroke="#45c2dc" stroke-width="2" opacity=".4"/>
+      <!-- people (purple), held together by warm lines -->
+      <g class="people">
+        <circle class="person" cx="352" cy="556" r="16" fill="#c9a0ff"/>
+        <circle class="person" cx="308" cy="606" r="10" fill="#d7c5ef"/>
+        <circle class="person" cx="472" cy="592" r="13" fill="#c9a0ff"/>
+        <circle class="person" cx="524" cy="624" r="13" fill="#a97fd4"/>
+        <circle class="person" cx="628" cy="556" r="12" fill="#d7c5ef"/>
+        <path class="kin" d="M340 566 316 596" stroke="#c9a0ff" stroke-width="3" opacity=".7"/>
+        <path class="kin" d="M484 600 512 616" stroke="#c9a0ff" stroke-width="3" opacity=".7"/>
+        <path class="kin" d="M373 560C420 552 448 570 459 586" fill="none" stroke="#c9a0ff" stroke-width="2" opacity=".45"/>
+        <path class="kin" d="M540 614C570 596 594 580 616 564" fill="none" stroke="#c9a0ff" stroke-width="2" opacity=".45"/>
+      </g>
+      <!-- machine companions (teal), tethered beside their people -->
+      <g class="companions">
+        <path class="tether" d="M366 566 396 586" stroke="#45c2dc" stroke-width="2" stroke-dasharray="4 5" opacity=".8"/>
+        <path class="machine" d="M396 578 410 570l14 8v16l-14 8-14-8Z" fill="#1f4a3a" stroke="#45c2dc" stroke-width="2"/>
+        <path class="tether" d="M498 604 522 588" stroke="#45c2dc" stroke-width="2" stroke-dasharray="4 5" opacity=".8"/>
+        <path class="machine" d="M522 580 536 572l14 8v16l-14 8-14-8Z" fill="#1f4a3a" stroke="#45c2dc" stroke-width="2"/>
+      </g>
+      <!-- green biomass: the floor everything roots into -->
+      <path d="M0 676c130-26 250 18 400 6s270-44 400-10v238H0Z" fill="url(#biomass)"/>
+      <path d="M220 700v56m360-64v64m-180 20v52" stroke="#86cc72" stroke-width="3" opacity=".5"/>
+      <circle cx="222" cy="238" r="3" fill="#FFD700" opacity=".8"/>
+      <circle cx="586" cy="224" r="3" fill="#FFD700" opacity=".8"/>
+      <circle cx="662" cy="420" r="3" fill="#FFD700" opacity=".6"/>
     </g>
   </svg>
   <p class="feel" data-i18n="dir.raver.feel">Find your people. The floor already has doors.</p>
@@ -212,16 +239,22 @@ th{color:var(--violet);font-weight:400} td.n{color:var(--ink)}
 </article>
 
 <article id="layer-figure">
-  <p class="consciousness" data-i18n="dir.raver.consciousness">Two estate hives, then human and machine seats named honestly. Presence is not claimed.</p>
-  <svg class="portrait" viewBox="0 0 320 160" aria-hidden="true" focusable="false">
-    <rect width="320" height="160" rx="20" fill="currentColor" opacity=".06"/>
-    <path d="M70 70 110 46l40 24v48l-40 24-40-24Z" fill="#c9a0ff" opacity=".8"/>
-    <path d="M170 78 210 54l40 24v48l-40 24-40-24Z" fill="#45c2dc" opacity=".7"/>
-    <circle cx="96" cy="132" r="7" fill="#c9a0ff"/><circle cx="224" cy="132" r="7" fill="#45c2dc"/>
+  <p class="consciousness" data-i18n="dir.raver.consciousness">People and their machine companions, named honestly, around two estate hives. Presence is not claimed — connection is.</p>
+  <svg class="portrait" viewBox="0 0 320 180" aria-hidden="true" focusable="false">
+    <rect width="320" height="180" rx="20" fill="currentColor" opacity=".06"/>
+    <path d="M58 36 92 16l34 20v40l-34 20-34-20Z" fill="#754d96" stroke="#FFD700" stroke-width="2"/>
+    <path d="M212 36 246 16l34 20v40l-34 20-34-20Z" fill="#1f4a3a" stroke="#45c2dc" stroke-width="2"/>
+    <path class="kin" d="M126 96C152 112 172 116 196 100" fill="none" stroke="#FFD700" stroke-width="2" opacity=".4"/>
+    <path class="kin" d="M220 100C238 112 250 118 262 122" fill="none" stroke="#45c2dc" stroke-width="2" opacity=".4"/>
+    <circle class="person" cx="140" cy="128" r="17" fill="#c9a0ff"/>
+    <circle class="person" cx="188" cy="140" r="13" fill="#a97fd4"/>
+    <path class="kin" d="M154 134 176 138" stroke="#c9a0ff" stroke-width="3" opacity=".8"/>
+    <path class="tether" d="M155 120 172 104" stroke="#45c2dc" stroke-width="2" stroke-dasharray="4 5" opacity=".85"/>
+    <path class="machine" d="M172 96 182 90l10 6v12l-10 6-10-6Z" fill="#1f4a3a" stroke="#45c2dc" stroke-width="2"/>
+    <path d="M28 160h264" stroke="#86cc72" stroke-width="4" opacity=".5"/>
   </svg>
-  <p class="support" data-i18n="dir.bee.support">If .buzz is filtered, a clean-name door still opens the same hive.</p>
   <div class="choices">
-    <button type="button" class="door primary" data-dir-go="deeper" data-i18n="dir.hives.hosts">See the hosts</button>
+    <button type="button" class="door primary" data-dir-go="hives" data-i18n="dir.hives.hosts">Meet the hosts</button>
     <button type="button" class="door" data-dir-go="deeper" data-i18n="review.bee.deeper">Go deeper</button>
   </div>
 </article>

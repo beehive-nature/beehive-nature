@@ -44,13 +44,17 @@ const FENCE = /0x[0-9A-Fa-f]{8}|online now|last-seen|who's in the room|profile e
 
 test('New bee first paint is one calm sentence, one takeaway, and three doors', () => {
   const bee = extractById(page, 'first-bee');
-  assert.match(bee, /These are published name records — who holds a house — not a chat list and not a profile editor\./);
-  assert.match(bee, /You can read as a guest with no wallet\. A lost key stays lost; a name is a lease\./);
+  assert.match(bee, /Welcome\. Every name on this page is a house — a story kept in public\./);
+  assert.match(bee, /Start with one house: the founder's\./);
+  assert.match(bee, /These are published records, not a live guest list and not an editor\. You can read as a guest with no wallet\. A lost key stays lost; a name is a lease\./);
   assert.match(bee, /data-prof-go="house"/);
   assert.match(bee, /Read the founder house/);
   assert.match(bee, /href="buzz-directory\.html"/);
   assert.match(bee, /People journey/);
   assert.match(bee, /Go deeper/);
+  // the honesty caveat is support-sized, never the largest first-screen promise
+  const take = bee.match(/class="take"[^>]*>([^<]+)</)[1];
+  assert.ok(!/guest|wallet|lease|records/i.test(take), 'takeaway leads with purpose, not the caveat');
   assert.doesNotMatch(bee, /0x[0-9A-Fa-f]{8}/);
   assert.doesNotMatch(bee, /bqueenbee\.base\.eth|bClaude\.a|bloverai|guest\.citizen/);
   assert.match(page, /<body data-reg="bee" data-bee-theme="custom" data-prof-beat="arrival" data-experience="profile">/);
@@ -63,6 +67,13 @@ test('Raver first paint is atmosphere, one feeling line, and one tap', () => {
   assert.match(raver, /id="lantern-scene"/);
   assert.match(raver, /One name, every generation kept\. Nothing quietly rewritten\./);
   assert.match(raver, /Open a house story/);
+  // dynasty lineage composition: one thread, generations, a human holder, a machine companion, roots
+  assert.match(raver, /id="name-thread"/);
+  assert.match(raver, /class="lantern gen"/);
+  assert.match(raver, /class="person"/);
+  assert.match(raver, /class="machine"/);
+  assert.match(raver, /class="tether"/);
+  assert.match(raver, /url\(#lineage-roots\)/);
   assert.doesNotMatch(raver, /0x[0-9A-Fa-f]{8}/);
   assert.doesNotMatch(raver, /<table/i);
   assert.match(page, /prefers-reduced-motion:reduce/);
@@ -83,6 +94,14 @@ test('Raver tap opens art first; ledger one tap away', () => {
   const figure = extractById(page, 'layer-figure');
   assert.match(figure, /Names are stories\. Holders are portraits/);
   assert.match(figure, /The ledger waits one tap away/);
+  // the raver path reaches the founder house story layer, not only the ledger
+  assert.match(figure, /data-prof-go="house"/);
+  assert.match(figure, /Open the founder house/);
+  // lineage portrait: generations held by a human, machine companion tethered
+  assert.match(figure, /class="thread"/);
+  assert.match(figure, /class="person"/);
+  assert.match(figure, /class="machine"/);
+  assert.match(figure, /class="tether"/);
   assert.doesNotMatch(figure, /0x[0-9A-Fa-f]{8}/);
   assert.match(page, /body\[data-reg="raver"\]\[data-prof-beat="figure"\] #layer-figure\{display:block\}/);
 });
@@ -120,8 +139,8 @@ test('Cypherpunk still reaches the full house instrument, same honesty', () => {
 
 test('keyed first-paint English matches the corpus; every tongue has a cell', () => {
   const keys = [
-    'prof.mark', 'prof.bee.calm', 'prof.bee.takeaway', 'prof.bee.house',
-    'prof.bee.back', 'prof.raver.feel', 'prof.raver.tap',
+    'prof.mark', 'prof.bee.calm', 'prof.bee.takeaway', 'prof.bee.support', 'prof.bee.house',
+    'prof.bee.back', 'prof.raver.feel', 'prof.raver.tap', 'prof.raver.openhouse',
     'prof.raver.consciousness', 'prof.house.lead', 'prof.house.holder',
     'prof.foot.door'
   ];
