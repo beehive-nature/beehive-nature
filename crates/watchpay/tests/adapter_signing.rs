@@ -531,12 +531,43 @@ fn assert_stays_intent(ledger: &Ledger, vp: &watchpay::plan::ValidatedPlan) {
     );
 }
 
+/// Deterministic step clock for the driver: returns `t0` on the first
+/// observation and `t0 + step` on the second (intent time vs post-
+/// transport completion time) — advancing a plan across expiry without
+/// sleeping.
+struct StepClock {
+    t0: u64,
+    step: u64,
+    calls: usize,
+}
+
+impl StepClock {
+    fn at(t0: u64) -> Self {
+        StepClock {
+            t0,
+            step: 0,
+            calls: 0,
+        }
+    }
+    fn stepping(t0: u64, step: u64) -> Self {
+        StepClock { t0, step, calls: 0 }
+    }
+}
+
+impl watchpay::connect::ConnectClock for StepClock {
+    fn now_unix(&mut self) -> u64 {
+        let t = self.t0 + self.step * self.calls as u64;
+        self.calls += 1;
+        t
+    }
+}
+
 fn run_driver(
     tag: &str,
     envelope: TxEnvelope,
     mutation: Mutation,
 ) -> (
-    watchpay::Result<watchpay::connect::VerifiedSigned>,
+    std::result::Result<watchpay::connect::VerifiedSigned, watchpay::connect::SignAttemptError>,
     Ledger,
     watchpay::plan::ValidatedPlan,
     FakeConnectTransport,
@@ -544,6 +575,7 @@ fn run_driver(
     let ledger = Ledger::open(&tmp_root(tag)).unwrap();
     let vp = payer_vp();
     let mut transport = FakeConnectTransport::new(mutation);
+    let mut clock = StepClock::at(SYNTH_NOW);
     let result = sign_batch_payment(
         &ledger,
         &vp,
@@ -551,7 +583,7 @@ fn run_driver(
         7,
         &path(),
         envelope,
-        SYNTH_NOW,
+        &mut clock,
         &mut transport,
     );
     (result, ledger, vp, transport)
@@ -665,6 +697,7 @@ fn composed_request_matches_the_signed_fixture_fields() {
             TxDestination::BatchPayment { batch_index: 0 },
             envelope,
             7,
+            1,
             path(),
             SYNTH_NOW,
         )
@@ -883,6 +916,7 @@ fn high_s_twin_refused_by_eip2() {
         TxDestination::BatchPayment { batch_index: 0 },
         TxEnvelope::Eip1559,
         7,
+        1,
         path(),
         SYNTH_NOW,
     )
@@ -931,6 +965,7 @@ fn malformed_serialized_refused() {
         TxDestination::BatchPayment { batch_index: 0 },
         TxEnvelope::Eip1559,
         7,
+        1,
         path(),
         SYNTH_NOW,
     )
@@ -982,6 +1017,7 @@ fn oversized_inputs_refused_before_parsing() {
         TxDestination::BatchPayment { batch_index: 0 },
         TxEnvelope::Eip1559,
         7,
+        1,
         path(),
         SYNTH_NOW,
     )
@@ -1034,6 +1070,7 @@ fn unsupported_envelope_types_refused() {
         TxDestination::BatchPayment { batch_index: 0 },
         TxEnvelope::Eip1559,
         7,
+        1,
         path(),
         SYNTH_NOW,
     )
@@ -1062,7 +1099,7 @@ fn transport_refusal_never_retries_and_keeps_reservation() {
         7,
         &path(),
         TxEnvelope::Eip1559,
-        SYNTH_NOW,
+        &mut StepClock::at(SYNTH_NOW),
         &mut transport,
     )
     .unwrap_err();
@@ -1077,7 +1114,7 @@ fn transport_refusal_never_retries_and_keeps_reservation() {
         8,
         &path(),
         TxEnvelope::Eip1559,
-        SYNTH_NOW,
+        &mut StepClock::at(SYNTH_NOW),
         &mut transport,
     )
     .unwrap_err();
@@ -1101,7 +1138,7 @@ fn transport_refusal_never_retries_and_keeps_reservation() {
         9,
         &path(),
         TxEnvelope::Eip1559,
-        SYNTH_NOW,
+        &mut StepClock::at(SYNTH_NOW),
         &mut transport,
     )
     .unwrap();
@@ -1129,7 +1166,7 @@ fn invalid_request_never_reaches_transport() {
         7,
         &path(),
         TxEnvelope::Eip1559,
-        expired,
+        &mut StepClock::at(expired),
         &mut transport
     )
     .is_err());
@@ -1141,7 +1178,7 @@ fn invalid_request_never_reaches_transport() {
         7,
         &path(),
         TxEnvelope::Eip1559,
-        SYNTH_NOW,
+        &mut StepClock::at(SYNTH_NOW),
         &mut transport
     )
     .is_err());
@@ -1182,7 +1219,7 @@ fn stale_result_for_cancelled_attempt_refused() {
         7,
         &path(),
         TxEnvelope::Eip1559,
-        SYNTH_NOW,
+        &mut StepClock::at(SYNTH_NOW),
         &mut transport
     )
     .is_err());
@@ -1196,6 +1233,7 @@ fn stale_result_for_cancelled_attempt_refused() {
         TxDestination::BatchPayment { batch_index: 0 },
         TxEnvelope::Eip1559,
         7,
+        1,
         path(),
         SYNTH_NOW,
     )
@@ -1235,7 +1273,7 @@ fn interruption_after_intent_recovers_fail_closed() {
         7,
         &path(),
         TxEnvelope::Eip1559,
-        SYNTH_NOW,
+        &mut StepClock::at(SYNTH_NOW),
         &mut transport
     )
     .is_err());
@@ -1250,7 +1288,7 @@ fn interruption_after_intent_recovers_fail_closed() {
         8,
         &path(),
         TxEnvelope::Eip1559,
-        SYNTH_NOW,
+        &mut StepClock::at(SYNTH_NOW),
         &mut transport,
     )
     .unwrap();
@@ -1273,7 +1311,7 @@ fn interruption_after_signed_leaves_durable_signed_record() {
         7,
         &path(),
         TxEnvelope::Legacy,
-        SYNTH_NOW,
+        &mut StepClock::at(SYNTH_NOW),
         &mut transport,
     )
     .unwrap();
@@ -1291,7 +1329,7 @@ fn interruption_after_signed_leaves_durable_signed_record() {
         9,
         &path(),
         TxEnvelope::Legacy,
-        SYNTH_NOW,
+        &mut StepClock::at(SYNTH_NOW),
         &mut transport
     )
     .is_err());
@@ -1311,6 +1349,7 @@ fn connect_payload_wire_shape_matches_pinned_contract() {
         TxDestination::BatchPayment { batch_index: 0 },
         TxEnvelope::Legacy,
         7,
+        1,
         path(),
         SYNTH_NOW,
     )
@@ -1331,6 +1370,7 @@ fn connect_payload_wire_shape_matches_pinned_contract() {
         TxDestination::BatchPayment { batch_index: 0 },
         TxEnvelope::Eip1559,
         7,
+        1,
         path(),
         SYNTH_NOW,
     )
@@ -1358,11 +1398,12 @@ fn review_summary_derives_from_the_same_request() {
         TxDestination::BatchPayment { batch_index: 0 },
         TxEnvelope::Eip1559,
         7,
+        1,
         path(),
         SYNTH_NOW,
     )
     .unwrap();
-    let rs = req.review_summary(&vp);
+    let rs = req.review_summary();
     assert_eq!(rs.operation, "batch_payment");
     assert_eq!(rs.plan_hash, vp.plan().plan_hash);
     assert_eq!(rs.batch_id, Some(vp.plan().batches[0].batch_id));
@@ -1382,11 +1423,12 @@ fn review_summary_derives_from_the_same_request() {
         TxDestination::Approve,
         TxEnvelope::Eip1559,
         0,
+        1,
         path(),
         SYNTH_NOW,
     )
     .unwrap();
-    let ars = areq.review_summary(&vp);
+    let ars = areq.review_summary();
     assert_eq!(ars.operation, "approve");
     assert_eq!(ars.token_ceiling, vp.approve_ceiling());
     assert_eq!(ars.batch_id, None);
@@ -1430,6 +1472,7 @@ fn approve_composes_and_verifies_purely_without_orchestration() {
         TxDestination::Approve,
         TxEnvelope::Eip1559,
         0,
+        1,
         path(),
         SYNTH_NOW,
     )
@@ -1461,6 +1504,7 @@ fn verified_result_not_constructible_from_unchecked_fields() {
         TxDestination::BatchPayment { batch_index: 0 },
         TxEnvelope::Eip1559,
         7,
+        1,
         path(),
         SYNTH_NOW,
     )
@@ -1471,4 +1515,293 @@ fn verified_result_not_constructible_from_unchecked_fields() {
     // outside the crate (private fields, private constructor).
     assert_eq!(verified.request_plan_hash(), vp.plan().plan_hash);
     assert_eq!(verified.request_envelope(), TxEnvelope::Eip1559);
+}
+
+// ---------- z2.c review corrections: regressions for the probed sequences ----------
+
+#[test]
+fn actual_connect_wire_response_decodes_and_verifies_end_to_end() {
+    // Proves (review P2, adapted probe): a response JSON carrying
+    // Connect's ACTUAL camelCase `serializedTx` field name decodes at the
+    // production boundary (`decode_wire`) and the decoded value passes the
+    // full verification — the Rust-side `serialized_tx` naming can no
+    // longer hide the wire mismatch.
+    let vp = payer_vp();
+    let req = SignRequest::compose(
+        &vp,
+        TxDestination::BatchPayment { batch_index: 0 },
+        TxEnvelope::Eip1559,
+        7,
+        1,
+        path(),
+        SYNTH_NOW,
+    )
+    .unwrap();
+    let raw = fake_sign(&req.connect_payload(), Mutation::None);
+    let wire = serde_json::json!({
+        "serializedTx": raw.serialized_tx,
+        "v": raw.v,
+        "r": raw.r,
+        "s": raw.s
+    });
+    let decoded = ConnectSignedTxRaw::decode_wire(&wire.to_string()).unwrap();
+    assert_eq!(decoded, raw);
+    let verified = verify_signed_result(&req, &vp, &decoded).unwrap();
+    assert_eq!(verified.signer(), fixture_payer());
+}
+
+#[test]
+fn wire_boundary_refuses_missing_unknown_malformed_oversized() {
+    // Proves: the decode_wire boundary fails closed — a missing field, an
+    // unknown field (the whole outer {success, payload} envelope is the
+    // TRANSPORT's concern and must not half-decode here), a non-object,
+    // garbage, and an oversized document are all refused BEFORE any
+    // signature parsing.
+    let vp = payer_vp();
+    let req = SignRequest::compose(
+        &vp,
+        TxDestination::BatchPayment { batch_index: 0 },
+        TxEnvelope::Eip1559,
+        7,
+        1,
+        path(),
+        SYNTH_NOW,
+    )
+    .unwrap();
+    let raw = fake_sign(&req.connect_payload(), Mutation::None);
+    // Missing serializedTx.
+    let missing = serde_json::json!({"v": raw.v, "r": raw.r, "s": raw.s});
+    assert!(ConnectSignedTxRaw::decode_wire(&missing.to_string()).is_err());
+    // The outer Connect envelope shape: unknown fields refuse loudly
+    // rather than half-decoding the payload.
+    let envelope = serde_json::json!({
+        "success": true,
+        "payload": {"serializedTx": raw.serialized_tx, "v": raw.v, "r": raw.r, "s": raw.s}
+    });
+    let err = ConnectSignedTxRaw::decode_wire(&envelope.to_string()).unwrap_err();
+    assert!(
+        err.to_string().contains("unknown field") || err.to_string().contains("JSON"),
+        "{err}"
+    );
+    // Not an object / garbage.
+    assert!(ConnectSignedTxRaw::decode_wire("42").is_err());
+    assert!(ConnectSignedTxRaw::decode_wire("not json").is_err());
+    // Oversized document: refused before parsing.
+    let big = format!(
+        "{{\"serializedTx\":\"0x{}\",\"v\":\"0x0\",\"r\":\"0x1\",\"s\":\"0x1\"}}",
+        "00".repeat(200_000)
+    );
+    let err = ConnectSignedTxRaw::decode_wire(&big).unwrap_err();
+    assert!(err.to_string().contains("char bound"), "{err}");
+}
+
+#[test]
+fn review_summary_is_single_sourced_from_the_composing_plan() {
+    // Proves (review P1, adapted probe): the summary API takes NO plan
+    // argument — `review_summary(&other_plan)` no longer compiles, so the
+    // substitution the probe demonstrated is eliminated by construction.
+    // The payer and approve ceiling are pinned at composition and are
+    // asserted here against the composing plan, with the new
+    // full-identity fields (path, envelope, attempt, value, calldata
+    // commitment).
+    let vp = payer_vp();
+    let req = SignRequest::compose(
+        &vp,
+        TxDestination::BatchPayment { batch_index: 0 },
+        TxEnvelope::Eip1559,
+        7,
+        1,
+        path(),
+        SYNTH_NOW,
+    )
+    .unwrap();
+    let rs = req.review_summary();
+    assert_eq!(rs.payer, vp.plan().expected_payer);
+    assert_eq!(rs.approve_ceiling_total, vp.approve_ceiling());
+    assert_eq!(rs.path, "m/44'/60'/0'/0/0");
+    assert_eq!(rs.envelope, TxEnvelope::Eip1559);
+    assert_eq!(rs.attempt_seq, 1);
+    assert_eq!(rs.value_wei, Atto::ZERO);
+    assert_eq!(rs.calldata_keccak.0, watchpay::abi::keccak256(req.data()));
+    assert_eq!(rs.calldata_len, req.data().len() as u64);
+    // Healthy control: a DIFFERENT plan's payer cannot appear through any
+    // remaining path — compose a request under that other plan and note
+    // its summary disagrees (both summaries are self-derived).
+    let other = validate_plan(&base_plan(), SYNTH_NOW).unwrap();
+    assert_ne!(other.plan().expected_payer, vp.plan().expected_payer);
+    let other_req = SignRequest::compose(
+        &other,
+        TxDestination::BatchPayment { batch_index: 0 },
+        TxEnvelope::Eip1559,
+        7,
+        1,
+        path(),
+        SYNTH_NOW,
+    )
+    .unwrap();
+    let other_rs = other_req.review_summary();
+    assert_ne!(rs.payer, other_rs.payer);
+    assert_eq!(other_rs.payer, other.plan().expected_payer);
+}
+
+#[test]
+fn cancelled_result_cannot_attach_to_replacement_attempt() {
+    // Proves (review P1, adapted probe — the exact reviewer sequence): a
+    // verified result for a CANCELLED attempt cannot attach to a
+    // replacement attempt even when the nonce and every transaction field
+    // are identical; the refusal is the attempt binding, and the
+    // replacement attempt's Intent state and reservation are preserved.
+    let ledger = Ledger::open(&tmp_root("replacement-binding")).unwrap();
+    let vp = payer_vp();
+    ledger.write_intent(&vp, 0, 7, SYNTH_NOW).unwrap();
+    let req = SignRequest::compose(
+        &vp,
+        TxDestination::BatchPayment { batch_index: 0 },
+        TxEnvelope::Eip1559,
+        7,
+        1, // the persisted attempt this response belongs to
+        path(),
+        SYNTH_NOW,
+    )
+    .unwrap();
+    let raw = fake_sign(&req.connect_payload(), Mutation::None);
+    let verified = verify_signed_result(&req, &vp, &raw).unwrap();
+    ledger
+        .cancel_intent(&vp, 0, SYNTH_NOW + 1, "cancelled before callback")
+        .unwrap();
+    let seq2 = ledger.write_intent(&vp, 0, 7, SYNTH_NOW + 2).unwrap();
+    assert_eq!(seq2, 2, "the replacement is a NEW attempt sequence");
+    let err = record_verified_signed(&ledger, &vp, 0, &verified, SYNTH_NOW + 3).unwrap_err();
+    assert!(
+        err.to_string().contains("attempt binding"),
+        "refusal must be the attempt binding: {err}"
+    );
+    // The replacement attempt is untouched: still Intent, reservation held.
+    let recs = ledger.attempts(&vp.plan().job_id, 0).unwrap();
+    assert_eq!(recs.len(), 2);
+    match (&recs[0].state, &recs[1].state) {
+        (AttemptState::Cancelled { .. }, AttemptState::Intent) => {}
+        pair => panic!("unexpected states {pair:?}"),
+    }
+    let reserve = Atto::from_u64(vp.plan().gas_ceilings.per_tx_gas_limit)
+        .checked_mul(Atto::from_u64(
+            vp.plan().native_fee_ceilings.per_tx_max_fee_per_gas_wei,
+        ))
+        .unwrap();
+    assert_eq!(recs[1].reserved_fee_wei, reserve);
+    // Healthy control: the SAME response recorded for the attempt it was
+    // verified for (before any cancellation) succeeds.
+    let ledger2 = Ledger::open(&tmp_root("replacement-binding-control")).unwrap();
+    ledger2.write_intent(&vp, 0, 7, SYNTH_NOW).unwrap();
+    record_verified_signed(&ledger2, &vp, 0, &verified, SYNTH_NOW).unwrap();
+}
+
+#[test]
+fn synthetic_record_signed_door_documented_as_unenforced() {
+    // Documents honestly (review P1 correction): the PRESERVED z2.b
+    // offline-synthetic API `Ledger::record_signed` does NOT bind the
+    // attempt sequence — the replacement-attachment the adapter forbids
+    // remains possible through that synthetic door, which is exactly why
+    // the adapter boundary never uses it and the crate does not claim
+    // bypass prevention while it stays open.
+    let ledger = Ledger::open(&tmp_root("synthetic-door")).unwrap();
+    let vp = payer_vp();
+    ledger.write_intent(&vp, 0, 7, SYNTH_NOW).unwrap();
+    let req = SignRequest::compose(
+        &vp,
+        TxDestination::BatchPayment { batch_index: 0 },
+        TxEnvelope::Eip1559,
+        7,
+        1,
+        path(),
+        SYNTH_NOW,
+    )
+    .unwrap();
+    let raw = fake_sign(&req.connect_payload(), Mutation::None);
+    let verified = verify_signed_result(&req, &vp, &raw).unwrap();
+    ledger
+        .cancel_intent(&vp, 0, SYNTH_NOW + 1, "cancelled before callback")
+        .unwrap();
+    ledger.write_intent(&vp, 0, 7, SYNTH_NOW + 2).unwrap();
+    // The synthetic API attaches it (no attempt binding) — pinned here as
+    // the documented limitation, NOT as desired behavior.
+    ledger
+        .record_signed(&vp, 0, verified.decoded_tx(), SYNTH_NOW + 3)
+        .unwrap();
+}
+
+#[test]
+fn expiry_during_bridge_call_refused_and_reservation_kept() {
+    // Proves (review freshness gap): a plan that expires DURING the
+    // transport call is refused at the post-transport completion
+    // observation — the step clock advances t1 past expiry without
+    // sleeping; the refusal is AFTER-dispatch (the bridge was called),
+    // the intent stays open with its reservation, and the late result is
+    // never recorded.
+    let ledger = Ledger::open(&tmp_root("expiry-during-call")).unwrap();
+    let vp = payer_vp();
+    let step = vp.plan().expires_unix + 1 - SYNTH_NOW; // t1 = expiry + 1
+    let mut clock = StepClock::stepping(SYNTH_NOW, step);
+    let mut transport = FakeConnectTransport::new(Mutation::None);
+    let err = sign_batch_payment(
+        &ledger,
+        &vp,
+        0,
+        7,
+        &path(),
+        TxEnvelope::Eip1559,
+        &mut clock,
+        &mut transport,
+    )
+    .unwrap_err();
+    assert!(!err.is_before_dispatch(), "the bridge WAS called");
+    assert!(
+        err.to_string().contains("expired"),
+        "refusal must name expiry: {err}"
+    );
+    assert_eq!(transport.calls, 1);
+    assert_stays_intent(&ledger, &vp);
+    // The healthy control at a small step still succeeds.
+    let ledger2 = Ledger::open(&tmp_root("expiry-during-call-ok")).unwrap();
+    let mut clock2 = StepClock::stepping(SYNTH_NOW, 10);
+    let mut transport2 = FakeConnectTransport::new(Mutation::None);
+    sign_batch_payment(
+        &ledger2,
+        &vp,
+        0,
+        7,
+        &path(),
+        TxEnvelope::Eip1559,
+        &mut clock2,
+        &mut transport2,
+    )
+    .unwrap();
+}
+
+#[test]
+fn pre_dispatch_expiry_is_phase_distinguished() {
+    // Proves: callers can distinguish a refusal BEFORE dispatch (nothing
+    // sent, cleanly cancellable) from an after-dispatch refusal — an
+    // already-expired plan at t0 fails BeforeDispatch with ZERO transport
+    // invocations, while a valid t0 reaches the bridge exactly once.
+    let ledger = Ledger::open(&tmp_root("phase")).unwrap();
+    let vp = payer_vp();
+    let expired = vp.plan().expires_unix + 1;
+    let mut transport = FakeConnectTransport::new(Mutation::None);
+    let err = sign_batch_payment(
+        &ledger,
+        &vp,
+        0,
+        7,
+        &path(),
+        TxEnvelope::Eip1559,
+        &mut StepClock::at(expired),
+        &mut transport,
+    )
+    .unwrap_err();
+    assert!(err.is_before_dispatch());
+    assert!(err.to_string().contains("expired"));
+    assert_eq!(transport.calls, 0, "the bridge was never called");
+    // The intent write itself was refused pre-dispatch: nothing persisted.
+    assert!(ledger.attempts(&vp.plan().job_id, 0).unwrap().is_empty());
 }

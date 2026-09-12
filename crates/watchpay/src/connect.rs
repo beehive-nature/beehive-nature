@@ -48,17 +48,33 @@
 //!
 //! # Signing lifecycle (this slice)
 //! [`sign_batch_payment`] persists the attempt intent FIRST, composes the
-//! request, calls the transport ONCE, verifies, records. Refusal,
-//! cancellation, timeout or a duplicate/stale/late result never
-//! auto-retries and never releases an uncertain reservation: the transport
-//! error propagates with the open intent left in place (explicitly
-//! cancellable via [`crate::ledger::Ledger::cancel_intent`]); a SECOND
-//! result for the same attempt is refused by the ledger (latest state is
-//! no longer `Intent`); a result presented for a cancelled/superseded
-//! attempt likewise fails. A "late" response is defined as one arriving
-//! after `record_verified_signed` persisted the Signed record (or after
-//! the attempt left `Intent`) — it carries no authorization and can only
-//! be logged by the caller.
+//! request FOR THAT ATTEMPT SEQUENCE, calls the transport ONCE, verifies,
+//! records through the attempt-bound transition. Refusal, cancellation,
+//! timeout or a duplicate/stale/late result never auto-retries and never
+//! releases an uncertain reservation: the transport error propagates with
+//! the open intent left in place (explicitly cancellable via
+//! [`crate::ledger::Ledger::cancel_intent`]); a SECOND result for the
+//! same attempt is refused (latest state is no longer `Intent`); a result
+//! for a CANCELLED OR REPLACED attempt is refused by the attempt binding
+//! (the ledger's latest attempt must be exactly the sequence the result
+//! was verified for — identical nonce and fields do not reopen it).
+//! A "late" response is defined as one arriving after the attempt left
+//! `Intent` (recorded, cancelled, or superseded) — it carries no
+//! authorization and can only be logged by the caller.
+//!
+//! # Dispatch phases (z2.c review, freshness gap)
+//! Failures are phase-typed by [`SignAttemptError`]: BEFORE the bridge is
+//! called (plan/identity/budget validation) nothing was dispatched and a
+//! pending intent is cleanly cancellable; AFTER the call the outcome is
+//! uncertain on the device side even when the transport errors — the
+//! driver reads the injected [`ConnectClock`] again at completion, and a
+//! plan that expired DURING the call is refused at the recording boundary
+//! with the intent and reservation preserved. Cancelling an attempt whose
+//! request was already dispatched is an explicit operator choice, lawful
+//! only because nothing signed-and-returned is in our hands and nothing
+//! was broadcast — it is never an automatic rollback, and the attempt
+//! binding guarantees the cancelled attempt's late response cannot
+//! attach to its replacement.
 //!
 //! # Approval scope law
 //! Approval requests can be COMPOSED and VERIFIED purely
@@ -151,21 +167,43 @@ pub struct SignRequest {
     /// batch's amount ceiling).
     token_ceiling: Atto,
     path: DerivationPath,
+    /// The persisted attempt this request was composed for (z2.c review
+    /// P1: the attempt identity rides composition → verification → the
+    /// atomic ledger transition, so a stale callback cannot attach to a
+    /// replacement attempt even when nonce and transaction fields are
+    /// identical).
+    attempt_seq: u32,
+    /// Review figures pinned AT COMPOSITION from the composing plan
+    /// (z2.c review P1: the summary is single-sourced — there is no
+    /// external plan parameter to substitute).
+    payer: EthAddr,
+    approve_ceiling_total: Atto,
 }
 
 impl SignRequest {
-    /// Compose a request for `dest` under `vp`, binding the plan hash,
-    /// batch identity, chain, payer destination, zero value, calldata,
-    /// nonce, gas and fee ceilings. Revalidates plan freshness at
-    /// `now_unix` (a cached validation cannot outlive expiry).
+    /// Compose a request for `dest` under `vp` FOR A SPECIFIC PERSISTED
+    /// ATTEMPT (`attempt_seq` — the sequence `Ledger::write_intent`
+    /// returned; attempt 0 is refused as never-persisted), binding the
+    /// plan hash, batch identity, chain, payer destination, zero value,
+    /// calldata, nonce, gas and fee ceilings. Revalidates plan freshness
+    /// at `now_unix` (a cached validation cannot outlive expiry). The
+    /// review figures (payer, approve ceiling) are pinned here, from THIS
+    /// plan, and never re-derived from an external argument.
     pub fn compose(
         vp: &ValidatedPlan,
         dest: TxDestination,
         envelope: TxEnvelope,
         nonce: u64,
+        attempt_seq: u32,
         path: DerivationPath,
         now_unix: u64,
     ) -> Result<Self> {
+        if attempt_seq == 0 {
+            return Err(Error::field(
+                "attempt_seq",
+                "attempt sequence 0 was never persisted — ledger sequences start at 1",
+            ));
+        }
         vp.revalidate(now_unix)?;
         if !vp.is_internally_consistent() {
             return Err(Error::field(
@@ -221,6 +259,9 @@ impl SignRequest {
             max_priority_fee_wei,
             token_ceiling,
             path,
+            attempt_seq,
+            payer: plan.expected_payer,
+            approve_ceiling_total: vp.approve_ceiling(),
         })
     }
 
@@ -257,12 +298,17 @@ impl SignRequest {
         }
     }
 
-    /// The review summary, derived from THIS request plus the sealed plan
-    /// figures. Describes approval/payment, token ceiling and worst-case
-    /// native fee — the numbers the payer approves are the numbers that
-    /// get signed (`compose` pinned them); there is no recomposition after
-    /// review for the verifier to miss.
-    pub fn review_summary(&self, vp: &ValidatedPlan) -> ReviewSummary {
+    /// The review summary, derived ONLY from THIS immutable request
+    /// (z2.c review P1: single-sourced — the payer and approve ceiling
+    /// were pinned at composition from the composing plan; there is no
+    /// external plan argument that could substitute a different payer).
+    /// Describes approval/payment, derivation path, full transaction
+    /// identity (destination, nonce, chain, envelope, calldata
+    /// commitment), token ceiling and worst-case native fee — the numbers
+    /// the payer approves are the numbers that get signed (`compose`
+    /// pinned them); there is no recomposition after review for the
+    /// verifier to miss.
+    pub fn review_summary(&self) -> ReviewSummary {
         let worst_case_native_fee_wei = Atto::from_u64(self.gas_limit)
             .checked_mul(Atto::from_u64(self.max_fee_per_gas_wei))
             .expect("plan validation bounds this product within u256");
@@ -274,11 +320,17 @@ impl SignRequest {
             plan_hash: self.plan_hash,
             batch_id: self.batch_id,
             chain_id: self.chain_id,
-            payer: vp.plan().expected_payer,
+            payer: self.payer,
             destination: self.to,
             nonce: self.nonce,
+            envelope: self.envelope,
+            path: self.path.as_str().to_string(),
+            attempt_seq: self.attempt_seq,
+            value_wei: self.value_wei,
+            calldata_keccak: Hex32(crate::abi::keccak256(&self.data)),
+            calldata_len: self.data.len() as u64,
             token_ceiling: self.token_ceiling,
-            approve_ceiling_total: vp.approve_ceiling(),
+            approve_ceiling_total: self.approve_ceiling_total,
             gas_limit: self.gas_limit,
             max_fee_per_gas_wei: self.max_fee_per_gas_wei,
             max_priority_fee_wei: self.max_priority_fee_wei,
@@ -318,9 +370,16 @@ impl SignRequest {
     pub fn max_priority_fee_wei(&self) -> u64 {
         self.max_priority_fee_wei
     }
+    /// The persisted attempt this request was composed for.
+    pub fn attempt_seq(&self) -> u32 {
+        self.attempt_seq
+    }
 }
 
 /// The review summary a human approves before any device interaction.
+/// Every field is pinned in the immutable request at composition — the
+/// summary cannot disagree with what is signed, and no external plan can
+/// be substituted into it.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ReviewSummary {
     pub operation: &'static str,
@@ -330,6 +389,17 @@ pub struct ReviewSummary {
     pub payer: EthAddr,
     pub destination: EthAddr,
     pub nonce: u64,
+    pub envelope: TxEnvelope,
+    /// The derivation path the request signs under (the path never selects
+    /// the payer — recovery does; it is shown for review completeness).
+    pub path: String,
+    /// The persisted attempt this signature belongs to.
+    pub attempt_seq: u32,
+    /// Native value — always zero for these contract calls.
+    pub value_wei: Atto,
+    /// keccak256 commitment over the exact calldata bytes.
+    pub calldata_keccak: Hex32,
+    pub calldata_len: u64,
     /// Token atto ceiling THIS transaction covers (batch ceiling, or the
     /// plan's approve ceiling for an approve request).
     pub token_ceiling: Atto,
@@ -402,12 +472,52 @@ pub trait ConnectTransport {
 /// returns them (legacy `v` already in EIP-155 form; 1559 `v` = yParity
 /// `{0,1}`). No sender, no hash, no status: Connect supplies none, and
 /// none would be trusted anyway.
+///
+/// WIRE SHAPE (z2.c review P2): the field maps to Connect's camelCase
+/// `serializedTx` ([`ConnectSignedTxRaw::decode_wire`] is the production
+/// decoding boundary). The OUTER Connect envelope —
+/// `{success: boolean, payload: EthereumSignedTx}` — is deliberately NOT
+/// modeled here: unwrapping it is the transport layer's concern (a real
+/// transport checks `success` and hands over `payload`); this struct is
+/// exactly the payload. `deny_unknown_fields` makes an accidentally
+/// whole-envelope object fail loudly instead of half-decoding.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
 pub struct ConnectSignedTxRaw {
+    #[serde(rename = "serializedTx")]
     pub serialized_tx: String,
     pub v: String,
     pub r: String,
     pub s: String,
+}
+
+/// Bound on the whole response JSON document BEFORE parsing (covers the
+/// serialized tx hex, the three quantity strings, key names and padding
+/// with headroom over the byte-bound-derived serialized-tx string cap).
+const MAX_RESPONSE_JSON_CHARS: usize =
+    2 + 2 * crate::signed_tx::MAX_SERIALIZED_TX_BYTES + 4 * 8192 + 1024;
+
+impl ConnectSignedTxRaw {
+    /// The production decoding boundary: parse Connect's response payload
+    /// JSON into the untrusted raw type, bounding the document BEFORE any
+    /// parsing. Per-field hex/length strictness runs later, inside
+    /// [`verify_signed_result`]; this boundary only refuses
+    /// non-objects, unknown fields, missing fields and oversized
+    /// documents.
+    pub fn decode_wire(json: &str) -> Result<Self> {
+        if json.len() > MAX_RESPONSE_JSON_CHARS {
+            return Err(Error::field(
+                "response",
+                format!(
+                    "response document {} chars exceeds the {} char bound — refused before \
+                     parsing",
+                    json.len(),
+                    MAX_RESPONSE_JSON_CHARS
+                ),
+            ));
+        }
+        serde_json::from_str(json).map_err(|e| Error::Malformed(format!("response JSON: {e}")))
+    }
 }
 
 /// Bound response-string lengths BEFORE any parsing (dispatch law).
@@ -514,12 +624,18 @@ fn hex_quantity_to_scalar(s: &str, field: &'static str) -> Result<[u8; 32]> {
 /// [`verify_signed_result`] — every field below was checked against the
 /// pending request, the sealed plan and the signature math before the
 /// struct could exist. This is the only input the ledger's signed-result
-/// boundary accepts from the adapter.
+/// boundary accepts from the adapter, and it carries the ATTEMPT
+/// IDENTITY it was verified for: [`record_verified_signed`] rejects it
+/// unless the ledger's latest attempt for the batch is exactly that
+/// sequence in the `Intent` state (z2.c review P1 — a stale callback
+/// cannot attach to a replacement attempt even when nonce and
+/// transaction fields are identical).
 #[derive(Debug, Clone)]
 pub struct VerifiedSigned {
     request_envelope: TxEnvelope,
     request_operation: TxDestination,
     request_plan_hash: Hex32,
+    request_attempt_seq: u32,
     decoded: DecodedTransaction,
     signer: EthAddr,
     serialized: Vec<u8>,
@@ -546,6 +662,11 @@ impl VerifiedSigned {
     }
     pub fn request_plan_hash(&self) -> Hex32 {
         self.request_plan_hash
+    }
+    /// The persisted attempt this result was verified for (binding token
+    /// for the ledger's expected-attempt transition).
+    pub fn request_attempt_seq(&self) -> u32 {
+        self.request_attempt_seq
     }
 }
 
@@ -683,6 +804,7 @@ pub fn verify_signed_result(
         request_envelope: request.envelope(),
         request_operation: request.operation(),
         request_plan_hash: request.plan_hash(),
+        request_attempt_seq: request.attempt_seq(),
         decoded,
         signer,
         serialized: signed.canonical_bytes(),
@@ -819,10 +941,13 @@ fn build_decoded(
 
 /// Record a verified result into the ledger — the adapter's ONLY
 /// signed-result recording boundary. Accepts [`VerifiedSigned`] (which
-/// only [`verify_signed_result`] can construct) and re-runs the ledger's
-/// own validation/freshness/duplicate-hash checks. Returns the ledger's
-/// refusal verbatim (e.g. a late duplicate: latest state is no longer
-/// `Intent`).
+/// only [`verify_signed_result`] can construct) and performs the ledger's
+/// ATTEMPT-BOUND transition: the batch's latest attempt must be exactly
+/// the sequence the result was verified for, in the `Intent` state, and
+/// the plan must still be fresh at `now_unix` (the POST-TRANSPORT
+/// observation time — expiry during the bridge call refuses HERE, with
+/// the intent and reservation preserved). Refusals return verbatim (a
+/// late duplicate, a cancelled/replaced attempt, expiry during the call).
 pub fn record_verified_signed(
     ledger: &Ledger,
     vp: &ValidatedPlan,
@@ -830,20 +955,96 @@ pub fn record_verified_signed(
     verified: &VerifiedSigned,
     now_unix: u64,
 ) -> Result<()> {
-    ledger.record_signed(vp, batch_index, verified.decoded_tx(), now_unix)
+    ledger.record_signed_at_attempt(
+        vp,
+        batch_index,
+        verified.request_attempt_seq(),
+        verified.decoded_tx(),
+        now_unix,
+    )
 }
+
+/// Injectable time source for the signing driver. The driver reads it
+/// exactly twice — once before persisting the intent, once AFTER the
+/// transport returns (the completion observation) — so expiry during the
+/// bridge call is enforced at the recording boundary instead of being
+/// invisible behind a stale pre-call timestamp. No implementation ships
+/// in this crate (callers inject; tests use deterministic step clocks).
+pub trait ConnectClock {
+    fn now_unix(&mut self) -> u64;
+}
+
+/// Which side of the bridge dispatch a signing failure happened on.
+///
+/// The distinction the caller must act on (z2.c review, freshness gap):
+/// - [`SignAttemptError::BeforeDispatch`] — the bridge was NEVER called
+///   (plan/identity/budget validation failed). Nothing was dispatched;
+///   any intent written is a clean pre-dispatch intent and cancelling it
+///   releases its reservation with no uncertainty.
+/// - [`SignAttemptError::AfterDispatch`] — the bridge WAS called (and
+///   completed, with a result or an error). Even a transport
+///   error (user refusal, timeout) leaves the attempt's outcome
+///   uncertain on the device side; a POST-DISPATCH expiry refusal keeps
+///   the open intent and its reservation held. Cancelling such an intent
+///   is an explicit operator choice, not an automatic "safe" rollback:
+///   it is lawful only because nothing signed-and-returned is in our
+///   hands and nothing was broadcast; the attempt binding then
+///   guarantees any late response for the cancelled attempt cannot
+///   attach to its replacement.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum SignAttemptError {
+    BeforeDispatch(Error),
+    AfterDispatch(Error),
+}
+
+impl SignAttemptError {
+    /// The underlying refusal.
+    pub fn error(&self) -> &Error {
+        match self {
+            SignAttemptError::BeforeDispatch(e) | SignAttemptError::AfterDispatch(e) => e,
+        }
+    }
+    /// True when the bridge was never called.
+    pub fn is_before_dispatch(&self) -> bool {
+        matches!(self, SignAttemptError::BeforeDispatch(_))
+    }
+    /// The named field of the underlying refusal, if any.
+    pub fn field_name(&self) -> Option<&'static str> {
+        self.error().field_name()
+    }
+}
+
+impl std::fmt::Display for SignAttemptError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            SignAttemptError::BeforeDispatch(e) => write!(f, "before dispatch: {e}"),
+            SignAttemptError::AfterDispatch(e) => write!(f, "after dispatch: {e}"),
+        }
+    }
+}
+
+impl std::error::Error for SignAttemptError {}
 
 /// Deterministic one-shot signing driver (this slice's harness shape):
 /// persist intent → compose → ONE transport call → verify → record.
 ///
-/// Refusal/cancellation/timeout (transport `Err`) propagates with the open
-/// intent retained: nothing retried, nothing released — the operator
-/// cancels explicitly or retries from a NEW human-reviewed decision. A
-/// duplicate or late result for the same attempt fails at
-/// `record_verified_signed` (state no longer `Intent`). No approval
-/// orchestration exists here (see the module's scope law).
+/// Time comes from the injected [`ConnectClock`]: `t0` (intent/compose)
+/// and `t1` (post-transport completion) are separate observations, so a
+/// plan expiring DURING the bridge call is refused at the recording
+/// boundary with the intent and reservation preserved — the late result
+/// is discarded, never recorded, never retried.
+///
+/// Every failure is phase-typed ([`SignAttemptError`]): before-dispatch
+/// failures never touched the bridge; after-dispatch failures (transport
+/// error, verification refusal, recording refusal — including expiry at
+/// `t1` and duplicate/stale/superseded attempts) leave the open intent
+/// retained, nothing retried, nothing released. The operator cancels
+/// explicitly or retries from a NEW human-reviewed decision. A duplicate
+/// or late result for the same attempt fails at the attempt-bound
+/// recording transition. No approval orchestration exists here (see the
+/// module's scope law).
 // The argument count is the boundary's own shape (ledger, plan, attempt
-// identity, path, envelope, time, bridge) — collapsing it would hide a
+// identity, path, envelope, clock, bridge) — collapsing it would hide a
 // binding the review summary names field by field.
 #[allow(clippy::too_many_arguments)]
 pub fn sign_batch_payment(
@@ -853,20 +1054,35 @@ pub fn sign_batch_payment(
     nonce: u64,
     path: &DerivationPath,
     envelope: TxEnvelope,
-    now_unix: u64,
+    clock: &mut dyn ConnectClock,
     transport: &mut dyn ConnectTransport,
-) -> Result<VerifiedSigned> {
-    ledger.write_intent(vp, batch_index, nonce, now_unix)?;
+) -> std::result::Result<VerifiedSigned, SignAttemptError> {
+    let t0 = clock.now_unix();
+    let seq = ledger
+        .write_intent(vp, batch_index, nonce, t0)
+        .map_err(SignAttemptError::BeforeDispatch)?;
     let request = SignRequest::compose(
         vp,
         TxDestination::BatchPayment { batch_index },
         envelope,
         nonce,
+        seq,
         path.clone(),
-        now_unix,
-    )?;
-    let raw = transport.ethereum_sign_transaction(&request.connect_payload())?;
-    let verified = verify_signed_result(&request, vp, &raw)?;
-    record_verified_signed(ledger, vp, batch_index, &verified, now_unix)?;
+        t0,
+    )
+    .map_err(SignAttemptError::BeforeDispatch)?;
+    // From here the bridge is invoked; every failure below is
+    // after-dispatch (the request left our hands).
+    let raw = transport
+        .ethereum_sign_transaction(&request.connect_payload())
+        .map_err(SignAttemptError::AfterDispatch)?;
+    let verified =
+        verify_signed_result(&request, vp, &raw).map_err(SignAttemptError::AfterDispatch)?;
+    // t1: the completion observation — expiry during the call refuses at
+    // this boundary (revalidate inside the ledger transition), keeping
+    // the intent and reservation.
+    let t1 = clock.now_unix();
+    record_verified_signed(ledger, vp, batch_index, &verified, t1)
+        .map_err(SignAttemptError::AfterDispatch)?;
     Ok(verified)
 }

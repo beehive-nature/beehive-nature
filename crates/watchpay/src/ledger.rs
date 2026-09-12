@@ -523,10 +523,50 @@ impl Ledger {
     /// Signing boundaries revalidate plan freshness (review P1); the
     /// reservation is tightened to THIS transaction's own worst case.
     /// Refuses a tx hash already recorded anywhere under this plan.
+    ///
+    /// SYNTHETIC/OFFLINE-ONLY z2.b API: this method does NOT bind the
+    /// result to a specific persisted attempt sequence — it accepts the
+    /// batch's latest Intent whatever its sequence. The adapter's verified
+    /// boundary ([`crate::connect::record_verified_signed`]) uses
+    /// [`Ledger::record_signed_at_attempt`] instead; compatibility with
+    /// the preserved offline tests is the only reason this remains public,
+    /// and it does not enforce the adapter's stale-callback rules.
     pub fn record_signed(
         &self,
         vp: &ValidatedPlan,
         batch_index: usize,
+        tx: &DecodedTransaction,
+        now_unix: u64,
+    ) -> Result<()> {
+        self.record_signed_inner(vp, batch_index, None, tx, now_unix)
+    }
+
+    /// The ATTEMPT-BOUND recording transition (z2.c review P1): identical
+    /// validation to [`Ledger::record_signed`], plus the requirement that
+    /// the batch's latest attempt is EXACTLY `expected_attempt_seq` in the
+    /// `Intent` state — the state check and the write happen in one
+    /// transition with no observable getter step between them. A verified
+    /// result for attempt N therefore cannot attach to a replacement
+    /// attempt M (even with the same nonce and identical transaction
+    /// fields), to a cancelled attempt, or to a batch whose latest
+    /// attempt is already Signed. Refusal leaves the persisted state and
+    /// reservation untouched.
+    pub fn record_signed_at_attempt(
+        &self,
+        vp: &ValidatedPlan,
+        batch_index: usize,
+        expected_attempt_seq: u32,
+        tx: &DecodedTransaction,
+        now_unix: u64,
+    ) -> Result<()> {
+        self.record_signed_inner(vp, batch_index, Some(expected_attempt_seq), tx, now_unix)
+    }
+
+    fn record_signed_inner(
+        &self,
+        vp: &ValidatedPlan,
+        batch_index: usize,
+        expected_attempt_seq: Option<u32>,
         tx: &DecodedTransaction,
         now_unix: u64,
     ) -> Result<()> {
@@ -543,11 +583,22 @@ impl Ledger {
                 ))
             }
         };
+        if let Some(expected) = expected_attempt_seq {
+            if latest.attempt_seq != expected {
+                return Err(Error::Ledger(format!(
+                    "attempt binding: this result was verified for attempt {expected} but the \
+                     batch's latest attempt is {} — a stale or superseded callback cannot \
+                     attach to a different attempt (state and reservation untouched)",
+                    latest.attempt_seq
+                )));
+            }
+        }
         match &latest.state {
             AttemptState::Intent => {}
             other => {
                 return Err(Error::Ledger(format!(
-                    "latest attempt for batch {} is {} — record_signed requires intent",
+                    "latest attempt for batch {} is {} — recording a signed result requires \
+                     intent",
                     batch.batch_index,
                     other.kind()
                 )));
