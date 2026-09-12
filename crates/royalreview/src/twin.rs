@@ -62,8 +62,21 @@ pub fn build_twin(
     validate_pubkey(pubkey)?;
     let created_at =
         validate_datetime(&review.created_at).map_err(|e| format!("createdAt: {e}"))?;
+    // The NOSTR-TWIN policy (not Lexicon grammar): NIP-01 created_at is
+    // u64 seconds, so a pre-1970 createdAt — grammar-valid as a record
+    // field — cannot be twinned. Refused HERE, at the layer that needs it.
+    if created_at < 0 {
+        return Err(format!(
+            "createdAt: instant {} is before 1970 — the Nostr twin's created_at is u64 \
+             seconds; the record's datetime is grammar-valid but cannot be twinned",
+            created_at
+        ));
+    }
 
-    // Canonical content: the record JSON itself, compact + sorted-map.
+    // Canonical content: the record JSON itself, compact + sorted-map. The
+    // ORIGINAL createdAt string travels verbatim into the content and thus
+    // the event id's hash input — it is never round-tripped through the
+    // whole-second nostr representation (which is derived, not substituted).
     let value = serde_json::to_value(review).map_err(|e| e.to_string())?;
     let content = serde_json::to_string(&value).map_err(|e| e.to_string())?;
 
@@ -211,5 +224,45 @@ mod tests {
         let mut bad = r.clone();
         bad.verdict = "amazing".into();
         assert!(build_twin(&bad, None, "3jzfcijpj2z2a", &sample_pubkey()).is_err());
+    }
+
+    #[test]
+    fn pre1970_created_at_is_grammar_valid_but_cannot_be_twinned() {
+        // The grammar admits pre-1970 instants; the NON-NEGATIVE rule is
+        // this layer's policy (NIP-01 created_at is u64 seconds). The
+        // split is asserted both ways: validate passes, twin refuses.
+        let mut r = sample_review();
+        r.created_at = "1969-12-31T23:59:59Z".into();
+        assert!(
+            crate::validate::validate_review(&r, None).is_ok(),
+            "record-level validation is grammar-only"
+        );
+        let err = build_twin(&r, None, "3jzfcijpj2z2a", &sample_pubkey())
+            .expect_err("the twin must refuse a pre-1970 instant");
+        assert!(err.contains("u64"), "got: {err}");
+    }
+
+    #[test]
+    fn fractional_created_at_is_preserved_verbatim_in_content_and_hash_input() {
+        // The ORIGINAL datetime string travels byte-for-byte into the twin
+        // content (and therefore the event id's hash input); it is never
+        // round-tripped through the whole-second nostr representation.
+        // That representation exists only as the derived event field.
+        let mut r = sample_review();
+        r.created_at = "1985-04-12T23:20:50.123456Z".into();
+        let e = build_twin(&r, None, "3jzfcijpj2z2a", &sample_pubkey()).unwrap();
+        assert!(
+            e.content.contains("1985-04-12T23:20:50.123456Z"),
+            "content must preserve the original string verbatim: {}",
+            e.content
+        );
+        assert_eq!(
+            e.created_at,
+            crate::validate::validate_datetime("1985-04-12T23:20:50.123456Z").unwrap(),
+            "event.created_at is the derived whole-second instant"
+        );
+        // Determinism still holds with the fraction present.
+        let e2 = build_twin(&r, None, "3jzfcijpj2z2a", &sample_pubkey()).unwrap();
+        assert_eq!(e.id, e2.id);
     }
 }

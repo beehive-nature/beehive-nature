@@ -54,7 +54,7 @@
           "createdAt": {
             "type": "string",
             "format": "datetime",
-            "description": "RFC 3339 with uppercase T, timezone required, at most 3 fractional digits, 'Z' preferred — the atproto datetime intersection."
+            "description": "RFC 3339 with uppercase T, timezone required, ARBITRARY fractional precision (official example 1985-04-12T23:20:50.123456Z), and -00:00 explicitly REJECTED (negative zero = unknown local offset) — the atproto Lexicon datetime grammar. The Nostr twin additionally requires a non-negative instant (created_at is u64 seconds), a twin policy distinct from the record grammar; the original string travels verbatim into the twin content and hash input."
           }
         }
       }

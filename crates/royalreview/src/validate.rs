@@ -121,11 +121,16 @@ pub fn validate_review(
 }
 
 /// Cross-validate the referenced receipt record: the reference agrees with
-/// the fetched record on BOTH coordinates (uri + cid), the uri's collection
-/// is `com.beehivenature.receipt`, the value parses as the atmirror
-/// `Receipt` type, and SPEC_LEXICON-1 §5's binding law holds
-/// (`contentCid == subject.cid`). Reuses `atmirror::receipt::Receipt` —
-/// this lane grows no second receipt parser.
+/// the fetched record on BOTH coordinates (uri + cid) — each cid PARSED as
+/// a CID, not merely string-equal (matching `not-a-cid` values do not pass)
+/// — the uri addresses a receipt RECORD under a DID authority in the
+/// `com.beehivenature.receipt` collection, the value parses as the atmirror
+/// `Receipt` type, SPEC_LEXICON-1 §5's binding law holds (`contentCid ==
+/// subject.cid`, both PARSED as CIDs — `binding_ok` alone only string-
+/// compares), and the receipt's own string fields satisfy the datetime /
+/// at-uri / DID grammars. All of this is L0 syntax + L1 claimed-identity
+/// consistency — none of it is L2 retrieval-and-hash verification. Reuses
+/// `atmirror::receipt::Receipt` — this lane grows no second receipt parser.
 fn validate_referenced_receipt(
     reference: &StrongRef,
     fetched: FetchedReceipt<'_>,
@@ -136,6 +141,10 @@ fn validate_referenced_receipt(
             reference.uri, fetched.uri
         ));
     }
+    // L0 for both coordinates: equality of two garbage strings is not a
+    // CID check — parse each side independently.
+    Cid::parse_str(&reference.cid).map_err(|e| format!("receipt cid (reference): {e}"))?;
+    Cid::parse_str(fetched.cid).map_err(|e| format!("receipt cid (fetched): {e}"))?;
     if reference.cid != fetched.cid {
         return Err(format!(
             "receipt: reference cid {:?} != fetched record cid {:?}",
@@ -143,6 +152,10 @@ fn validate_referenced_receipt(
         ));
     }
     let parts = at_uri_parts(fetched.uri).map_err(|e| format!("receipt.uri: {e}"))?;
+    // The contract's DID-authority rule applies to the receipt RECORD's own
+    // uri too — collection equality alone does not establish an authority.
+    validate_did(parts.authority)
+        .map_err(|e| format!("receipt.uri authority {:?}: {e}", parts.authority))?;
     if parts.collection != Some(RECEIPT_NSID) {
         return Err(format!(
             "receipt.uri: collection {:?} is not {RECEIPT_NSID}",
@@ -168,6 +181,10 @@ fn validate_referenced_receipt(
                 .into(),
         );
     }
+    // binding_ok only STRING-COMPARES the inner cids — parse them as CIDs
+    // so two matching garbage strings cannot ride the binding law.
+    Cid::parse_str(&receipt.subject.cid).map_err(|e| format!("receipt record subject.cid: {e}"))?;
+    Cid::parse_str(&receipt.content_cid).map_err(|e| format!("receipt record contentCid: {e}"))?;
     // Grammar parity the atmirror type does not check itself: the receipt's
     // own createdAt must satisfy the same atproto datetime grammar, and its
     // subject uri must be a well-formed at-uri with a DID authority — where
@@ -332,11 +349,15 @@ pub fn at_uri_parts(uri: &str) -> Result<AtUriParts<'_>, String> {
 }
 
 /// Collection grammar = the full NSID grammar (atproto NSID spec): at
-/// least 3 segments, total length ≤ 317; every DOMAIN-AUTHORITY segment
-/// (all but the last) is 1..=63 chars of [a-z0-9-] with no leading or
+/// least 3 segments, total length ≤ 317, DOMAIN AUTHORITY (all but the
+/// last segment, joined) ≤ 253 chars including periods; authority
+/// segments are 1..=63 chars of [a-zA-Z0-9-] — CASE-INSENSITIVE per the
+/// spec (mixed case is legal input; normalization is the emitter's job,
+/// never a repair applied to signed records) — with no leading or
 /// trailing hyphen, and the first (TLD) must not start with a digit; the
-/// NAME segment (last) is 1..=63 chars of [a-zA-Z0-9] with no hyphens and
-/// must not start with a digit (uppercase is legal — `strongRef`).
+/// NAME segment (last) is 1..=63 chars of [a-zA-Z0-9] with no hyphens,
+/// must not start with a digit, and is CASE-SENSITIVE (uppercase legal —
+/// `strongRef`, `royalReview`).
 fn validate_nsid_collection(s: &str) -> Result<(), String> {
     let segments: Vec<&str> = s.split('.').collect();
     let fail = |why: &str| Err(format!("{s:?} is not a valid collection NSID: {why}"));
@@ -345,6 +366,12 @@ fn validate_nsid_collection(s: &str) -> Result<(), String> {
     }
     if s.len() > 317 {
         return fail("total length exceeds 317");
+    }
+    let authority_len: usize = s.len() - segments[segments.len() - 1].len() - 1;
+    if authority_len > 253 {
+        return fail(&format!(
+            "domain authority is {authority_len} chars, exceeds 253"
+        ));
     }
     let name = segments[segments.len() - 1];
     if name.is_empty()
@@ -357,9 +384,7 @@ fn validate_nsid_collection(s: &str) -> Result<(), String> {
     for (i, seg) in segments[..segments.len() - 1].iter().enumerate() {
         if seg.is_empty()
             || seg.len() > 63
-            || !seg
-                .bytes()
-                .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-')
+            || !seg.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-')
             || seg.starts_with('-')
             || seg.ends_with('-')
             || (i == 0 && seg.starts_with(|c: char| c.is_ascii_digit()))
@@ -370,11 +395,18 @@ fn validate_nsid_collection(s: &str) -> Result<(), String> {
     Ok(())
 }
 
-/// The atproto datetime: RFC 3339 ∩ ISO 8601 —
-/// `YYYY-MM-DDTHH:MM:SS[.fff](Z|±HH:MM)`, uppercase T, seconds 00–59 (no
-/// leap second 60 — the intersection drops it), at most 3 fractional
-/// digits, timezone REQUIRED. Returns the instant in Unix seconds
-/// (offset-normalized) for the Nostr twin's created_at.
+/// The atproto datetime grammar: RFC 3339 ∩ ISO 8601 —
+/// `YYYY-MM-DDTHH:MM:SS[.fff…](Z|±HH:MM)`, uppercase T, seconds 00–59 (no
+/// leap second 60 — the intersection drops it), ARBITRARY fractional
+/// precision (official example `1985-04-12T23:20:50.123456Z`), timezone
+/// REQUIRED, `-00:00` explicitly REJECTED (negative zero = unknown local
+/// offset). Returns the whole-second instant (fraction truncated, not
+/// rounded) in Unix seconds — possibly NEGATIVE: the grammar admits
+/// pre-1970 instants; the non-negative requirement is the Nostr twin's
+/// policy (created_at is u64) and is enforced in `twin::build_twin`, not
+/// here. Callers that need the original string (record fields, hash
+/// input) keep it verbatim — this function only derives the instant and
+/// must never be round-tripped through it.
 pub fn validate_datetime(s: &str) -> Result<i64, String> {
     let b = s.as_bytes();
     let digits = |r: std::ops::Range<usize>| -> Option<u32> {
@@ -427,19 +459,18 @@ pub fn validate_datetime(s: &str) -> Result<i64, String> {
         ));
     }
     let mut i = 19;
-    // Optional fraction: '.' + 1..=3 digits.
+    // Optional fraction: '.' + one or more digits — the Lexicon datetime
+    // syntax allows ARBITRARY fractional precision (official example:
+    // `1985-04-12T23:20:50.123456Z`). The fraction does not participate in
+    // the returned whole-second instant.
     if b.get(i) == Some(&b'.') {
         let frac_start = i + 1;
         let mut j = frac_start;
         while j < b.len() && b[j].is_ascii_digit() {
             j += 1;
         }
-        let n = j - frac_start;
-        if n == 0 {
+        if j == frac_start {
             return Err("fraction: no digits after '.'".into());
-        }
-        if n > 3 {
-            return Err(format!("fraction: {n} digits, at most 3 allowed"));
         }
         i = j;
     }
@@ -459,6 +490,16 @@ pub fn validate_datetime(s: &str) -> Result<i64, String> {
             if mm > 59 {
                 return Err(format!("tz minute {mm} outside 0..=59"));
             }
+            // Lexicon datetime syntax explicitly rejects `-00:00`: RFC 3339
+            // reserves negative zero for "unknown local offset", which the
+            // atproto grammar does not admit. `+00:00` remains valid.
+            if *sign == b'-' && hh == 0 && mm == 0 {
+                return Err(
+                    "timezone -00:00 is rejected by the Lexicon datetime syntax \
+                     (negative zero = unknown local offset); use +00:00 or Z"
+                        .into(),
+                );
+            }
             let v = hh * 3600 + mm * 60;
             if *sign == b'+' {
                 v
@@ -470,13 +511,9 @@ pub fn validate_datetime(s: &str) -> Result<i64, String> {
     };
     let days = days_from_civil(year, month, day);
     let epoch = days * 86400 + (hour as i64) * 3600 + (min as i64) * 60 + sec as i64 - offset;
-    if epoch < 0 {
-        return Err(
-            "instant is before 1970 — the Nostr twin's created_at is u64; refusing rather \
-             than wrapping"
-                .into(),
-        );
-    }
+    // Grammar accepts pre-1970 instants (negative epoch). The
+    // NON-NEGATIVE requirement is a Nostr-twin policy (created_at is u64),
+    // enforced where the twin is built — see `twin::build_twin` — not here.
     Ok(epoch)
 }
 
@@ -558,7 +595,25 @@ mod tests {
             validate_datetime("2026-09-12T12:00:00Z").unwrap(),
             validate_datetime("2026-09-12T06:00:00-06:00").unwrap()
         );
-        assert!(validate_datetime("2026-09-12T12:34:56.123Z").is_ok());
+        // Arbitrary fractional precision (official example) — the fraction
+        // is truncated from the returned whole-second instant, not rounded.
+        assert_eq!(
+            validate_datetime("1985-04-12T23:20:50.123456Z").unwrap(),
+            validate_datetime("1985-04-12T23:20:50Z").unwrap()
+        );
+        assert_eq!(
+            validate_datetime("1985-04-12T23:20:50.999999Z").unwrap(),
+            validate_datetime("1985-04-12T23:20:50Z").unwrap()
+        );
+        // +00:00 is a valid explicit zero offset.
+        assert_eq!(
+            validate_datetime("2026-09-12T12:00:00+00:00").unwrap(),
+            validate_datetime("2026-09-12T12:00:00Z").unwrap()
+        );
+        // Pre-1970 is GRAMMAR-VALID with a negative instant — the
+        // non-negative requirement is the Nostr twin's policy, not this
+        // grammar (enforced in twin::build_twin).
+        assert_eq!(validate_datetime("1969-12-31T23:59:59Z").unwrap(), -1);
     }
 
     #[test]
@@ -568,14 +623,15 @@ mod tests {
             "2026-09-12T00:00:00z",      // lowercase z
             "2026-09-12 00:00:00Z",      // space separator
             "2026-09-12T00:00:00",       // no timezone
-            "2026-09-12T00:00:00.1234Z", // 4 fractional digits
+            "2026-09-12T00:00:00.Z",     // fraction with no digits
+            "2026-09-12T00:00:00-00:00", // negative zero (unknown local offset)
+            "2026-09-12T00:00:00-0000",  // tz without colon
             "2026-13-01T00:00:00Z",      // month 13
             "2026-09-31T00:00:00Z",      // day 31 of September
             "2023-02-29T00:00:00Z",      // non-leap Feb 29
             "2026-09-12T24:00:00Z",      // hour 24
             "2026-09-12T00:60:00Z",      // minute 60
             "2026-09-12T00:00:60Z",      // leap second (not in intersection)
-            "1969-12-31T23:59:59Z",      // pre-1970
             "2026-9-12T00:00:00Z",       // non-padded month
             "2026-09-12T00:00:00+0600",  // tz without colon
         ] {

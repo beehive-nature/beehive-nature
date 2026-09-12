@@ -185,6 +185,50 @@ fn collection_segment_follows_the_full_nsid_grammar() {
 }
 
 #[test]
+fn nsid_authority_has_its_own_253_bound_and_is_case_insensitive() {
+    // Mixed-case AUTHORITY is legal input (the NSID authority is
+    // case-insensitive; normalization is the emitter's job — we never
+    // rewrite signed records as a repair). The NAME stays case-sensitive.
+    assert!(at_uri_parts("at://did:plc:x/Com.Example.name/r").is_ok());
+    assert!(at_uri_parts("at://did:plc:x/com.beehivenature.temp.royalReview/r").is_ok());
+
+    // The authority carries its OWN ≤253 bound, independent of the 317
+    // total: four 63-char segments = 63*4 + 3 dots = 255 → refused (it
+    // would otherwise fit the total limit once '.name' is appended).
+    let four63 = format!(
+        "{}.{}.{}.{}",
+        "a".repeat(63),
+        "b".repeat(63),
+        "c".repeat(63),
+        "d".repeat(63)
+    );
+    assert_eq!(four63.len(), 255);
+    assert!(at_uri_parts(&format!("at://did:plc:x/{four63}.name/r")).is_err());
+
+    // Exactly 253 (three 63s + a 61) → accepted.
+    let auth253 = format!(
+        "{}.{}.{}.{}",
+        "a".repeat(63),
+        "b".repeat(63),
+        "c".repeat(63),
+        "d".repeat(61)
+    );
+    assert_eq!(auth253.len(), 253);
+    assert!(at_uri_parts(&format!("at://did:plc:x/{auth253}.name/r")).is_ok());
+
+    // 254 → refused at the seam.
+    let auth254 = format!(
+        "{}.{}.{}.{}",
+        "a".repeat(63),
+        "b".repeat(63),
+        "c".repeat(63),
+        "d".repeat(62)
+    );
+    assert_eq!(auth254.len(), 254);
+    assert!(at_uri_parts(&format!("at://did:plc:x/{auth254}.name/r")).is_err());
+}
+
+#[test]
 fn rkey_follows_the_record_key_charset() {
     // Good: the spec's own valid examples that our grammar admits.
     for good in ["self", "example.com", "~1.2-3_", "dHJ1ZQ", "pre:fix", "_"] {
@@ -383,10 +427,29 @@ fn receipt_reference_without_rkey_is_refused() {
 
 #[test]
 fn datetime_fraction_and_offset_boundaries() {
-    assert!(validate_datetime("2026-09-12T10:20:30.1Z").is_ok());
-    assert!(validate_datetime("2026-09-12T10:20:30.12Z").is_ok());
-    assert!(validate_datetime("2026-09-12T10:20:30.123Z").is_ok());
-    assert!(validate_datetime("2026-09-12T10:20:30.1234Z").is_err());
+    // ARBITRARY fractional precision (Lexicon datetime grammar; official
+    // example 1985-04-12T23:20:50.123456Z) — no digit-count cap.
+    for frac in ["1", "12", "123", "1234", "123456", "123456789012"] {
+        let s = format!("2026-09-12T10:20:30.{frac}Z");
+        assert!(
+            validate_datetime(&s).is_ok(),
+            "{s} should pass (arbitrary precision)"
+        );
+    }
+    // The official example itself, and the same instant regardless of
+    // fraction spelling (truncated whole-second instant, not rounded).
+    assert!(validate_datetime("1985-04-12T23:20:50.123456Z").is_ok());
+    assert_eq!(
+        validate_datetime("1985-04-12T23:20:50.123456Z").unwrap(),
+        validate_datetime("1985-04-12T23:20:50Z").unwrap()
+    );
+    // Negative-zero timezone is EXPLICITLY REJECTED (unknown local
+    // offset); positive zero remains valid.
+    assert!(validate_datetime("2026-09-12T10:20:30+00:00").is_ok());
+    assert!(validate_datetime("1985-04-12T23:20:50.123456-00:00").is_err());
+    assert!(validate_datetime("2026-09-12T10:20:30-00:00").is_err());
+    assert!(validate_datetime("2026-09-12T10:20:30-00:01").is_ok());
+    // Empty fraction and offset seams.
     assert!(validate_datetime("2026-09-12T10:20:30.Z").is_err());
     assert!(validate_datetime("2026-09-12T10:20:30+23:59").is_ok());
     assert!(validate_datetime("2026-09-12T10:20:30+24:00").is_err());
@@ -396,4 +459,88 @@ fn datetime_fraction_and_offset_boundaries() {
         validate_datetime("2026-09-12T10:20:30Z").unwrap(),
         validate_datetime("2026-09-12T16:20:30+06:00").unwrap()
     );
+    // Pre-1970 instants are grammar-valid (negative epoch); the
+    // non-negative requirement lives in the twin, not the grammar.
+    assert_eq!(validate_datetime("1969-12-31T23:59:59Z").unwrap(), -1);
+}
+
+// ------------------------------------------- receipt CID / authority ----
+// Astra review 5648079333 finding 1: equality is not parsing — matching
+// garbage must not pass the receipt gates. All L0 syntax checks.
+
+#[test]
+fn receipt_with_matching_malformed_outer_cids_is_refused() {
+    // reference.cid == fetched.cid == "not-a-cid": the strings match, so
+    // the old equality-only gate passed them. Parsing each side first
+    // refuses the pair.
+    let value = receipt_value(
+        "at://did:plc:reviewer/app.bsky.feed.post/3jzfcijpj2z2a",
+        "bafyreihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku",
+    );
+    let mut r = base_review();
+    r.receipt = Some(StrongRef {
+        uri: RECEIPT_URI.into(),
+        cid: "not-a-cid".into(),
+    });
+    let fetched = FetchedReceipt {
+        uri: RECEIPT_URI,
+        cid: "not-a-cid",
+        value: &value,
+    };
+    let err =
+        validate_review(&r, Some(fetched)).expect_err("matching malformed outer cids refused");
+    assert!(err.contains("receipt cid"), "got: {err}");
+}
+
+#[test]
+fn receipt_with_matching_malformed_inner_cids_is_refused() {
+    // subject.cid == contentCid == "garbage-but-equal": the §5 binding
+    // law (string equality inside binding_ok) is satisfied by two
+    // identical non-CIDs. Parsing the inner cids refuses what the binding
+    // law alone would wave through.
+    let mut value = receipt_value(
+        "at://did:plc:reviewer/app.bsky.feed.post/3jzfcijpj2z2a",
+        "garbage-but-equal",
+    );
+    value["contentCid"] = serde_json::json!("garbage-but-equal");
+    let mut r = base_review();
+    r.receipt = Some(StrongRef {
+        uri: RECEIPT_URI.into(),
+        cid: RECEIPT_CID.into(),
+    });
+    let fetched = FetchedReceipt {
+        uri: RECEIPT_URI,
+        cid: RECEIPT_CID,
+        value: &value,
+    };
+    let err =
+        validate_review(&r, Some(fetched)).expect_err("matching malformed inner cids refused");
+    assert!(
+        err.contains("subject.cid") || err.contains("contentCid"),
+        "got: {err}"
+    );
+}
+
+#[test]
+fn receipt_with_malformed_authority_is_refused() {
+    // Collection equality alone does not establish a valid authority: the
+    // receipt record's own uri must sit under a DID authority like every
+    // other at-uri in this contract.
+    let uri = "at://handle.example/com.beehivenature.receipt/3jzfcijpj2z2a";
+    let value = receipt_value(
+        "at://did:plc:reviewer/app.bsky.feed.post/3jzfcijpj2z2a",
+        RECEIPT_CID,
+    );
+    let mut r = base_review();
+    r.receipt = Some(StrongRef {
+        uri: uri.into(),
+        cid: RECEIPT_CID.into(),
+    });
+    let fetched = FetchedReceipt {
+        uri,
+        cid: RECEIPT_CID,
+        value: &value,
+    };
+    let err = validate_review(&r, Some(fetched)).expect_err("non-DID receipt authority refused");
+    assert!(err.contains("authority"), "got: {err}");
 }
