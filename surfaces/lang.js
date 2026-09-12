@@ -193,21 +193,34 @@ if(typeof document!=='undefined') (function(){
     if(c==='en'){ sel.value='en'; apply('en'); return; }
     load(function(){ apply(c); });
   }
+  function acceptCorpus(j,cb){
+    corpus=j;
+    /* the withdrawal law reaches the renderer: a withdrawn tongue stops rendering
+       estate-wide (history kept in the corpus file); its picker entry says so. */
+    try{ var wd=(j._meta&&j._meta.withdrawn)||{};
+      var sel=document.getElementById("blangsel");
+      Object.keys(wd).forEach(function(code){
+        if(sel){ var o=sel.querySelector('option[value="'+code+'"]');
+          if(o){ o.disabled=true; o.textContent+=" 🕊"; } }
+        if(corpus.strings) Object.keys(corpus.strings).forEach(function(k){ delete corpus.strings[k][code]; });
+      });
+    }catch(e){}
+    cb();
+  }
   function load(cb){
     if(corpus) return cb();
+    // Standalone dApps may carry a generated subset of the same corpus.
+    // file:// cannot fetch JSON; the bundle preserves reviewed source keys,
+    // machine-draft labels and the normal English fallback.
+    var bundle=document.getElementById('bnr-language-bundle');
+    if(bundle){
+      try{
+        var bundled=JSON.parse(bundle.textContent);
+        if(bundled&&bundled.strings&&bundled._meta){acceptCorpus(bundled,cb);return;}
+      }catch(e){} // malformed bundle uses the normal loader/fallback
+    }
     fetch(R+'lang-corpus.json?v=17').then(function(r){return r.json()})
-      .then(function(j){ corpus=j;
-        /* the withdrawal law reaches the renderer: a withdrawn tongue stops rendering
-           estate-wide (history kept in the corpus file); its picker entry says so. */
-        try{ var wd=(j._meta&&j._meta.withdrawn)||{};
-          var sel=document.getElementById("blangsel");
-          Object.keys(wd).forEach(function(code){
-            if(sel){ var o=sel.querySelector('option[value="'+code+'"]');
-              if(o){ o.disabled=true; o.textContent+=" 🕊"; } }
-            if(corpus.strings) Object.keys(corpus.strings).forEach(function(k){ delete corpus.strings[k][code]; });
-          });
-        }catch(e){}
-        cb(); })
+      .then(function(j){ acceptCorpus(j,cb); })
       .catch(function(){ corpus={strings:{}}; cb(); }); /* fetch failure = full English fallback, counter shows 0/N */
   }
   var _setPref=setPref;

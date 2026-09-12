@@ -46,7 +46,7 @@ ok('jams: local join changes the room preview', await page.locator('#join').inne
 ok('jams: join receipt is local only', (await page.locator('#eventlog').innerText()).includes('local participant joined') && !requests.some(r => r.method === 'POST'));
 ok('jams: PLUR, watch and listening links are present', await page.locator('a[href="plur.html"]').count() === 2 && await page.locator('a[href="watch.html"]').count() === 1 && await page.locator('a[href="listening.html"]').count() === 1);
 const jamsRef = page.locator('a[href="https://jams.community/"]');
-const watchRef = page.locator('a[href="https://relay.skaists.dev/watch/"]');
+const watchRef = page.locator('a[href="https://github.com/aautonomicc/Watch-It"]');
 ok('jams: independent references are explicit', await jamsRef.count() === 1 && await watchRef.count() === 2 && (await page.locator('.independent').innerText()).includes('separate projects'));
 const safeExternal = async (locator) => { for (const i of await locator.all()) { if (await i.getAttribute('target') !== '_blank' || await i.getAttribute('rel') !== 'noopener noreferrer') return false; } return true; };
 ok('jams: independent references open safely in new tabs', await safeExternal(jamsRef) && await safeExternal(watchRef));
