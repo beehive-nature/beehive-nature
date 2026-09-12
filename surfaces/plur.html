@@ -82,16 +82,20 @@
   .note b{color:var(--ink);font-weight:600}
   .note .big{font-size:1.5rem;color:var(--ink);letter-spacing:.02em;display:block;margin:14px 0;text-align:center}
 
-  /* ── voice bar ── */
-  .vb{position:sticky;top:0;z-index:40;background:rgba(4,11,8,.9);backdrop-filter:blur(14px);
-    border-bottom:1px solid var(--line);padding:9px 20px}
-  .vb .in{max-width:1000px;margin:0 auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  .vb select{font:inherit;font-size:12px;background:#0A1410;color:var(--ink);border:1px solid var(--line);
-    border-radius:999px;padding:5px 11px;max-width:210px}
-  .vb button{font:inherit;font-size:12px;font-weight:600;background:none;color:var(--ink-mut);
-    border:1px solid var(--line);border-radius:999px;padding:5px 13px;cursor:pointer}
-  .vb button:hover{color:var(--ink);border-color:var(--ai)}
-  .vb .st{font-family:var(--mono);font-size:10px;color:var(--ink-dim);margin-left:auto;letter-spacing:.04em}
+  /* ── pronunciation example — OPTIONAL, in-flow beside the peace words,
+     never the page's first task. Plays nothing until pressed; disables
+     itself honestly when no Hebrew or Arabic voice exists. ── */
+  .voicebox{margin-top:22px;padding:16px 18px;border:1px solid var(--line);border-radius:14px;
+    display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:rgba(10,20,16,.35)}
+  .voicebox button{font:inherit;font-size:.92rem;font-weight:600;background:none;color:var(--ink);
+    border:1px solid var(--ai);border-radius:999px;padding:9px 16px;cursor:pointer;min-height:44px}
+  .voicebox button:hover:enabled{color:var(--ai);border-color:var(--ai)}
+  .voicebox button:disabled{cursor:not-allowed;opacity:.55;border-style:dashed}
+  .voicebox .vpick{display:flex;gap:6px;align-items:center;font-size:.8rem;color:var(--ink-mut)}
+  .voicebox select{font:inherit;font-size:12px;background:#0A1410;color:var(--ink);border:1px solid var(--line);
+    border-radius:999px;padding:5px 11px;max-width:230px}
+  .voicebox .st{font-family:var(--mono);font-size:10.5px;color:var(--ink-dim);letter-spacing:.04em;flex-basis:100%}
+  .voicebox .vnote{flex-basis:100%;margin:2px 0 0;font-size:.8rem;line-height:1.55;color:var(--ink-dim)}
 
   footer{text-align:center;padding:64px 22px 84px;border-top:1px solid var(--line);color:var(--ink-dim);font-size:.86rem}
   footer .m{font-family:var(--mono);letter-spacing:.16em;color:var(--sovereign-soft);margin-top:12px;font-size:.8rem}
@@ -221,7 +225,7 @@
   body[data-reg="bee"]{--bg:#f6f7ef;--ink:#18362a;--ink-mut:#425f50;--ink-dim:#52695b;--line:#ced8cc;--ai:#176578;--you:#89316f}
   body[data-reg="bee"] .open{min-height:60vh}body[data-reg="bee"] .plur{background:none;color:#326b39;font-size:clamp(3rem,12vw,7rem)}
   body[data-reg="bee"] .field .en{color:#326b39;text-shadow:none}body[data-reg="bee"] .note{display:none}
-  body[data-reg="bee"] .field{padding:45px 20px}body[data-reg="bee"] .vb{background:#f6f7ef}body[data-reg="bee"] .vb select{background:#fff;color:#18362a}
+  body[data-reg="bee"] .field{padding:45px 20px}body[data-reg="bee"] .voicebox{background:#fff}body[data-reg="bee"] .voicebox select{background:#fff;color:#18362a}
   body[data-reg="raver"] .open{background:radial-gradient(ellipse at 20% 40%,#511d49 0,transparent 60%),radial-gradient(ellipse at 90% 60%,#12434b 0,transparent 60%)}
   body[data-reg="raver"] .plur-actions a:nth-child(2){background:#d655bb;color:#110c18;border-color:#d655bb;order:-1}
   body[data-reg="cypherpunk"] .open{min-height:0;padding:40px 22px;text-align:start}body[data-reg="cypherpunk"] .plur{font:700 2rem var(--mono);color:var(--biomass);background:none}
@@ -230,12 +234,6 @@
 </style>
 </head>
 <body data-reg="bee">
-
-<div class="vb"><div class="in">
-  <select id="vsel"><option>voices…</option></select>
-  <button id="vsalam" type="button">▶ shalom · salām</button>
-  <span class="st" id="vst">—</span>
-</div></div>
 
 <section class="open">
   <div class="glow"></div>
@@ -278,12 +276,20 @@
     <button class="w" data-sz="m" data-say="paz" data-lang="es"><span class="t">paz</span><span class="r">spanish</span><span class="mute">no voice</span></button>
     <button class="w" data-sz="s" data-say="sìth" data-lang="gd"><span class="t">sìth</span><span class="r">gaelic</span><span class="mute">no voice</span></button>
   </div>
+  <div class="voicebox" role="group" aria-label="optional pronunciation example">
+    <button id="vsalam" type="button" aria-describedby="vnote"><span aria-hidden="true">🔊</span> <span data-i18n="plur.hearPair">Hear the Hebrew and Arabic greetings</span></button>
+    <label class="vpick" for="vsel"><span data-i18n="plur.voicePick">Voice used for listening</span>
+      <select id="vsel"></select>
+    </label>
+    <span class="st" id="vst" role="status">—</span>
+    <p class="vnote" id="vnote" data-i18n="plur.hearPairNote">Optional pronunciation example beside the words. It plays the two greetings in turn, only when you press it, and only if your browser offers a Hebrew or an Arabic voice. Nothing plays automatically.</p>
+  </div>
   <div class="note">
     <h3>the word two peoples share</h3>
     <span class="big">שלום · سلام</span>
-    <p><b>Shalom</b> and <b>salām</b> are the same word. One Semitic root — <b>S‑L‑M</b> — meaning whole, entire, unbroken. Not the absence of war; the state of nothing being missing.</p>
-    <p>Two peoples who have agreed on almost nothing for a century greet each other every day, in their own languages, with the same word. Nobody had to negotiate that. It was already true before anyone drew a border.</p>
-    <p>And <b>शान्तिः</b> travelled the other way — Sanskrit <i>śānti</i> walked east with the sutras into Thai <b>สันติภาพ</b> and stayed in Hindi as <b>शांति</b>. Peace has been crossing frontiers longer than the frontiers have existed.</p>
+    <p><b>Shalom</b> and <b>salām</b> are cognate greetings from the same Semitic root — <b>S‑L‑M</b> — a root long associated with wholeness and well-being. Not the absence of war; the sense of nothing being missing.</p>
+    <p>Two peoples who have agreed on almost nothing for a century greet each other every day, in their own languages, with words from that one root. Nobody had to negotiate that. It was already there before anyone drew a border.</p>
+    <p>And <b>शान्तिः</b> travelled the other way — Sanskrit <i>śānti</i> travelled east with the sutras into Thai <b>สันติภาพ</b> and stayed in Hindi as <b>शांति</b>. Peace has been crossing frontiers longer than the frontiers have existed.</p>
   </div>
 </section>
 
@@ -503,6 +509,26 @@
     return;
   }
   function base(t){ return (t||'').toLowerCase().split(/[-_]/)[0]; }
+  /* the shared corpus lookup keeps script-written strings translatable with
+     a visible English fallback (corpus law) */
+  function T(key, fallback){
+    return (window.BNRLanguage && typeof window.BNRLanguage.text === 'function')
+      ? window.BNRLanguage.text(key, fallback) : fallback;
+  }
+  /* honest enable/disable for the optional pronunciation example: it is
+     usable exactly when a Hebrew OR an Arabic voice exists — never a mystery
+     button, never silent-on-click without an explanation */
+  function pairVoices(){
+    return words.filter(function(w){
+      return (w.dataset.say === 'שלום' || w.dataset.say === 'سلام') && !w.classList.contains('novoice');
+    });
+  }
+  function refreshSalam(){
+    var ok = pairVoices().length > 0;
+    salam.disabled = !ok;
+    st.textContent = ok ? T('plur.voiceReady', 'a Hebrew or Arabic voice is available for the example')
+                        : T('plur.voiceNone', 'No Hebrew or Arabic voice is installed in this browser, so this example stays silent; the written greetings remain.');
+  }
 
   function index(){
     voices = synth.getVoices() || [];
@@ -515,13 +541,16 @@
       ok ? have[b]=1 : miss[b]=1;
     });
     var h = Object.keys(have).length, m = Object.keys(miss).length;
-    st.textContent = h + ' tongues speak here · ' + m + ' have no voice on this machine';
+    /* the status line belongs to the pronunciation example (refreshSalam);
+       the general voice summary stays visible on the word cards themselves */
+    sel.title = h + ' tongues speak here · ' + m + ' have no voice on this machine';
     fill();
+    refreshSalam();
   }
   function fill(){
     sel.innerHTML = '';
     var a = document.createElement('option');
-    a.value=''; a.textContent='match each tongue'; sel.appendChild(a);
+    a.value=''; a.textContent = T('plur.voiceMatch', 'match each tongue'); sel.appendChild(a);
     voices.forEach(function(v,i){
       var o=document.createElement('option'); o.value=String(i);
       o.textContent = v.name + ' — ' + v.lang; sel.appendChild(o);
@@ -555,11 +584,9 @@
     w.addEventListener('click', function(){ if(!w.classList.contains('novoice')) say(w); });
   });
   salam.addEventListener('click', function(){
-    var pair = words.filter(function(w){
-      return (w.dataset.say === 'שלום' || w.dataset.say === 'سلام') && !w.classList.contains('novoice');
-    });
-    if(!pair.length){ st.textContent = 'no hebrew or arabic voice on this machine'; return; }
-    pair[0].scrollIntoView({block:'center'});
+    var pair = pairVoices();
+    if(!pair.length){ refreshSalam(); return; } /* honest disable makes this rare; the runtime check stays as a guard */
+    pair[0].scrollIntoView({block:'center',behavior:'auto'}); /* jump, not glide: reduced-motion safe */
     say(pair[0], function(){ if(pair[1]) setTimeout(function(){ say(pair[1]); }, 420); });
   });
   window.bvoice = {
