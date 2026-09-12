@@ -70,13 +70,15 @@ headings stay on the instrument.
 
 ## Verification named here
 
-- `node --test e2e/review-views.test.mjs`
-- `node --test e2e/register.test.mjs`
-- `node scripts/estate-check.mjs`
-- `node e2e/estate-source.mjs`
-- `node e2e/university-smoke.mjs` (the review deck `#surf` roster still
+- `node --test e2e/review-views.test.mjs` 8/8
+- `node --test e2e/register.test.mjs` 15/15
+- `node scripts/estate-check.mjs` PASS
+- `node e2e/estate-source.mjs` 11/11
+- `node e2e/university-smoke.mjs` 78/78 (review deck `#surf` roster still
   populates; instrument checks enter via **Go deeper** / Cypherpunk)
-- browser first-paint screenshots of the three registers at the 8765 poke
+- `node e2e/i18n-coverage.mjs` on review.html ru --floors: live census
+  **10 keyed / floor 6** PASS (100% keyed, 28 tongues filled)
+- live 8765 poke 39/39 PASS (Chrome, localStorage cleared, 1280×800)
 
 Skipped this beat: fleet attestation of the new keys, wiring TASK 6b
 in-page publish, any David Irvine / x0x #622 measurement claim, any

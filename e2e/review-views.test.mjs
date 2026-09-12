@@ -100,7 +100,8 @@ test('Leave a receipt is one calm compose beat — not passkey, rails, verify, o
   assert.match(page, /body\[data-review-beat="compose"\] #tally,/);
   assert.match(page, /body\[data-review-beat="compose"\] #bind,/);
   assert.match(page, /body\[data-review-beat="compose"\] #guard,/);
-  assert.match(page, /body\[data-review-beat="compose"\] #ai\{display:none\}/);
+  assert.match(page, /body\[data-review-beat="compose"\] #ai,/);
+  assert.match(page, /body\[data-review-beat="compose"\] #sources-panel\{display:none\}/);
 });
 
 test('Cypherpunk still reaches the full attestation instrument, same grammar and honesty', () => {
