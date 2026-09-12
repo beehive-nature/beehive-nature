@@ -5,7 +5,8 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="color-scheme" content="dark">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f6f7f2">
 <title>bEarth — what it would actually cost the planet</title>
 <style>
 :root{
@@ -18,11 +19,18 @@
     why every verdict also carries its word in text and is never colour alone. */
  --v-signed:#3f9c55;--v-steel:#a476ec;--v-refuted:#c07f1c;--v-open:#0092a6;
  --land:#c07f1c;--n2o:#a476ec;
+ --bee-font:system-ui,-apple-system,'Segoe UI',sans-serif;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{overflow-x:hidden}
-body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;padding:26px 13px 80px}
-main{max-width:1000px;margin:0 auto}
+body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;padding:0 0 80px}
+main{max-width:1000px;margin:0 auto;padding-inline:13px}
+/* Estate register scoping — INLINE so a cypher-only leaf cannot FOUC or leak
+   if register.js is late or fails. Same contract as surfaces/register.js. */
+[data-reg]:not(body){display:none}
+body[data-reg="bee"] [data-reg="bee"],
+body[data-reg="raver"] [data-reg="raver"],
+body[data-reg="cypherpunk"] [data-reg="cypherpunk"]{display:revert}
 header{text-align:center}
 h1{font-size:clamp(19px,5vw,30px);color:var(--gold);font-weight:400;letter-spacing:.03em}
 .sub{color:var(--dim);font-size:11.5px;margin-top:8px;max-width:730px;margin-inline:auto;line-height:1.8}
@@ -37,7 +45,7 @@ a{color:var(--cyan)}
 #hbig{font-size:clamp(32px,10vw,58px);line-height:1.05;color:var(--land)}
 #hbig small{display:block;font-size:13px;color:var(--dim);margin-top:8px;line-height:1.7}
 #hsub{font-size:11px;color:var(--dim);margin-top:14px;max-width:600px;margin-inline:auto;line-height:1.8}
-#combs{display:flex;flex-wrap:wrap;gap:26px;justify-content:center;margin-top:18px}
+#combs,#land-comb{display:flex;flex-wrap:wrap;gap:26px;justify-content:center;margin-top:18px}
 .cw{max-width:240px}
 .cw svg{display:block;width:100%;height:auto}
 .cw .cap{font-size:9.5px;color:var(--dim);margin-top:8px;line-height:1.7;text-align:center}
@@ -80,23 +88,101 @@ td.n{color:var(--ink)}
 .card{background:var(--well);border:1px solid var(--line);border-radius:9px;padding:12px 13px}
 .card h4{font-size:10px;font-weight:400;letter-spacing:.06em;margin-bottom:7px}
 .card p{font-size:11px;line-height:1.85;color:var(--ink)}
-footer{max-width:1000px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
+footer{max-width:1000px;margin:22px auto 0;padding-inline:13px;color:var(--faint);font-size:10px;text-align:center;line-height:2}
+
+[hidden]{display:none!important}
+.door{appearance:none;display:inline-flex;align-items:center;justify-content:center;min-height:44px;
+ padding:10px 18px;border-radius:8px;border:1px solid var(--line);background:var(--well);color:var(--ink);
+ font:inherit;cursor:pointer;text-decoration:none}
+.door.primary{background:var(--land);color:#1a1004;border-color:var(--land);font-weight:650}
+.door:focus-visible,summary:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{
+ outline:3px solid var(--cyan);outline-offset:3px}
+.choices{display:flex;flex-wrap:wrap;gap:10px 14px;justify-content:center;margin-top:22px}
+.calm{max-width:40rem;margin:18px auto 0;font-size:1.05rem;line-height:1.7}
+.take{font-size:clamp(1.7rem,6vw,2.6rem);line-height:1.15;color:var(--land);margin-top:18px;font-weight:550}
+.support{font-size:.875rem;color:var(--dim);margin-top:8px}
+.eyebrow{color:var(--dim);font-size:.875rem;margin-top:8px}
+#first-bee,#first-raver,#layer-figure,#layer-land,#instrument{display:none}
+body[data-reg="bee"][data-bearth-beat="arrival"] #first-bee{display:block}
+body[data-reg="raver"][data-bearth-beat="figure"] #layer-figure{display:block}
+body[data-bearth-beat="land"] #layer-land,
+body[data-bearth-beat="deeper"] #layer-land,
+body[data-reg="cypherpunk"] #layer-land{display:block}
+body[data-bearth-beat="deeper"] #instrument,
+body[data-reg="cypherpunk"] #instrument{display:block}
+body[data-reg="raver"][data-bearth-beat="arrival"] #masthead{display:none}
+body[data-reg="cypherpunk"] #land-live-wrap,
+body[data-reg="cypherpunk"] #land-comb{display:none}
+
+/* New bee — language-first calm room. */
+body[data-reg="bee"]{
+  --bg:#f6f7f2;--panel:#fff;--well:#edf2eb;--ink:#18362a;--dim:#435f4e;--faint:#52695b;
+  --line:#ccd7cf;--gold:#855b0b;--violet:#65509a;--cyan:#176879;--warn:#9f362c;
+  --land:#8a4b12;--n2o:#65509a;color-scheme:light;
+  background:#f6f7f2;color:#18362a;font:1.125rem/1.65 var(--bee-font);
+}
+body[data-reg="bee"] h1{color:var(--ink);letter-spacing:-.03em}
+body[data-reg="bee"] .calm,.take,.support,.eyebrow{font-family:var(--bee-font)}
+body[data-reg="bee"] .door{font:500 1rem/1.4 var(--bee-font);border-radius:16px;min-width:11rem}
+body[data-reg="bee"] .door.primary{background:#326b39;color:#fff;border-color:#326b39}
+body[data-reg="bee"] #tbar{background:#f6f7f2!important;border-top-color:#ccd7cf!important}
+body[data-reg="bee"] #tbar a{color:#18362a!important}
+
+/* Raver — atmosphere first, then one feeling line. */
+body[data-reg="raver"]{--bg:#0c120e;--panel:#121a14;--well:#0a100c;color-scheme:dark}
+body[data-reg="raver"][data-bearth-beat="arrival"]{padding:0 0 80px;background:#0c120e}
+body[data-reg="raver"][data-bearth-beat="arrival"] main{max-width:none}
+#first-raver{position:relative;min-height:100svh;flex-direction:column;align-items:center;
+ justify-content:flex-end;padding:12vh 22px 14vh;text-align:center;overflow:hidden}
+body[data-reg="raver"][data-bearth-beat="arrival"] #first-raver{display:flex}
+#plant-scene{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#plant-scene .glow{transform-origin:50% 78%}
+.feel{position:relative;z-index:1;max-width:22ch;font-size:clamp(1.6rem,6vw,2.8rem);line-height:1.25;
+ color:#f3efe4;font-weight:400;text-wrap:balance}
+#first-raver .choices{position:relative;z-index:1}
+body[data-reg="raver"] .door.primary{background:#c9a0ff;color:#141018;border-color:#c9a0ff;
+ font:600 1.05rem/1.4 var(--bee-font);border-radius:99px;padding:12px 26px}
+.consciousness{max-width:36rem;margin:0 auto 18px;font-size:1.15rem;line-height:1.7;color:var(--ink)}
+@keyframes stalk-breathe{0%,100%{transform:scale(1) translateY(0)}50%{transform:scale(1.015) translateY(-6px)}}
+@keyframes glow-shift{0%,100%{opacity:.55}50%{opacity:.85}}
+#plant-scene .glow{animation:stalk-breathe 9s ease-in-out infinite}
+#plant-scene .light{animation:glow-shift 11s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){
+ #plant-scene .glow,#plant-scene .light{animation:none}
+}
+
+/* Cypherpunk keeps the current instrument density. */
+body[data-reg="cypherpunk"]{font-family:ui-monospace,'Cascadia Mono',Consolas,monospace}
+body[data-reg="cypherpunk"] #sources-panel{border:1px dashed var(--line);border-radius:11px;padding:10px 12px;margin-top:14px}
+body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44px;display:flex;align-items:center}
+#sources-panel{margin-top:14px}
+#sources-panel summary{cursor:pointer;min-height:44px;display:flex;align-items:center;color:var(--violet)}
+
+/* Page-owned language+view chrome (atlas mast-nav / gallery top-nav).
+   lang.js mounts #blangctl into [data-language-host]; register.js mounts
+   #bregctl into [data-register-host]. Keep both out of #first-bee. */
+#bregdescription{position:absolute;display:block;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+.bearth-language[data-language-host]{display:flex;align-items:center;margin-inline-start:auto;max-width:100%}
+.bearth-language #blangctl{margin:0!important;padding:0!important;border:0!important;flex-wrap:wrap}
+.bearth-language #blangsel{
+  min-height:44px!important;min-width:11rem;max-width:100%!important;padding:8px 12px!important;
+  background:var(--reg-bg,var(--panel))!important;color:var(--reg-ink,var(--ink))!important;
+  border:1px solid var(--reg-line,var(--line))!important;font:inherit!important
+}
+.bearth-language #blangnote{white-space:normal!important;color:var(--reg-ink,var(--dim))!important;font:.75rem/1.4 inherit!important}
 </style>
 </head>
-<body>
+<body data-reg="bee" data-bee-theme="custom" data-bearth-beat="arrival">
+<div id="bregbar">
+  <a class="breg-home" href="index.html" aria-label="skaists home">⬡ skaists</a>
+  <div data-register-host aria-describedby="bregdescription"></div>
+  <span id="bregdescription" data-i18n="atlas.view">Choose how this page speaks to you</span>
+  <span class="bearth-language" data-language-host></span>
+</div>
 <main>
-<header>
-  <h1>🜃 bEarth</h1>
-  <div class="sub" data-reg="bee">A big question, answered with honest math: if every person on
-  Earth ate <b style="color:var(--ink)">100 g of hemp hearts a day</b>, how much land and
-  fertiliser would it take? Every slider below is yours to move — and along the way this page
-  admits <b style="color:var(--ink)">three places our own side's favourite claims turned out
-  wrong</b>, because checking only other people's numbers isn't checking.</div>
-  <div class="sub" data-reg="raver">If every living human ate <b style="color:var(--ink)">100 g
-  of hemp hearts a day</b>, what would the planet actually have to give up? This page answers
-  that with arithmetic you can redo, and it <b style="color:var(--ink)">refutes three of this
-  project's own favourite claims</b> on the way — because a page that only checks other
-  people's numbers is advocacy wearing a lab coat.</div>
+<header id="masthead">
+  <h1>🜃 <span data-i18n="bearth.mark">bEarth</span></h1>
+  <p class="eyebrow" data-i18n="s.bearth.name">what one food would cost the planet</p>
   <div class="sub" data-reg="cypherpunk">Demand model: population × g/day ÷ measured hull-recovery
   (34–38%) ÷ yield (0.67–1.0 t/ha Manitoba) against FAO's ~1,581 Mha cropland; N demand × the
   N₂O emission-factor dial (measured hemp EF 0.16–0.20% vs IPCC Tier 1 1.00% — a fivefold swing,
@@ -105,6 +191,79 @@ footer{max-width:1000px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
   species collision). Redo the arithmetic; the page will not choose a flattering value for you.</div>
 </header>
 
+<article id="first-bee">
+  <p class="calm" data-i18n="bearth.bee.calm">If everyone ate a small handful of hemp hearts each day, the land bill would be real — and you can redo the math.</p>
+  <p class="take" data-i18n="bearth.bee.takeaway">about half of Earth's cropland</p>
+  <p class="support" data-i18n="bearth.bee.support">~830 Mha</p>
+  <div class="choices">
+    <button type="button" class="door primary" data-bearth-go="land" data-i18n="bearth.bee.land">See the land cost</button>
+    <button type="button" class="door" data-bearth-go="deeper" data-i18n="bearth.bee.deeper">Go deeper</button>
+  </div>
+</article>
+
+<article id="first-raver">
+  <svg id="plant-scene" viewBox="0 0 800 900" preserveAspectRatio="xMidYMax slice" role="img" aria-label="Soil, a seed, and a green stalk in soft earth light">
+    <defs>
+      <linearGradient id="earth-light" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#2a2214"/>
+        <stop offset="42%" stop-color="#1a1810"/>
+        <stop offset="70%" stop-color="#241c12"/>
+        <stop offset="100%" stop-color="#3a2a18"/>
+      </linearGradient>
+      <radialGradient id="soft-sun" cx="50%" cy="28%" r="45%">
+        <stop offset="0%" stop-color="#f0d48a" stop-opacity=".55"/>
+        <stop offset="55%" stop-color="#c4a056" stop-opacity=".12"/>
+        <stop offset="100%" stop-color="#0c120e" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect width="800" height="900" fill="url(#earth-light)"/>
+    <ellipse class="light" cx="400" cy="250" rx="280" ry="180" fill="url(#soft-sun)"/>
+    <path d="M0 620 C 160 580, 280 640, 400 610 C 540 575, 660 640, 800 600 L 800 900 L 0 900 Z" fill="#2b2116"/>
+    <path d="M0 670 C 180 640, 300 700, 430 668 C 560 636, 680 690, 800 658 L 800 900 L 0 900 Z" fill="#3a2c1c"/>
+    <path d="M0 780 C 200 750, 340 810, 500 776 C 640 748, 720 800, 800 770 L 800 900 L 0 900 Z" fill="#4a3824"/>
+    <g class="glow">
+      <ellipse cx="392" cy="668" rx="16" ry="10" fill="#6b4a22"/>
+      <ellipse cx="394" cy="664" rx="8" ry="5" fill="#c4a46a"/>
+      <path d="M396 662 C 400 560, 388 430, 404 250" fill="none" stroke="#6fbf6a" stroke-width="7" stroke-linecap="round"/>
+      <path d="M400 520 C 460 500, 510 530, 548 500" fill="none" stroke="#5aaa58" stroke-width="4" stroke-linecap="round"/>
+      <path d="M398 430 C 340 410, 300 440, 268 404" fill="none" stroke="#7dcc74" stroke-width="4" stroke-linecap="round"/>
+      <ellipse cx="556" cy="494" rx="36" ry="16" transform="rotate(-18 556 494)" fill="#8fd484"/>
+      <ellipse cx="262" cy="398" rx="34" ry="15" transform="rotate(20 262 398)" fill="#9ae08d"/>
+      <ellipse cx="410" cy="236" rx="22" ry="28" fill="#b6f0a8"/>
+    </g>
+  </svg>
+  <p class="feel" data-i18n="bearth.raver.feel">What would it cost the planet to feed every body a little more of this plant?</p>
+  <div class="choices">
+    <button type="button" class="door primary" data-bearth-go="figure" data-i18n="bearth.raver.touch">Touch the numbers</button>
+  </div>
+</article>
+
+<article id="layer-figure">
+  <p class="consciousness" data-i18n="bearth.raver.consciousness">The earth answers in hectares and honesty — not slogans.</p>
+  <p class="take" data-i18n="bearth.bee.takeaway">about half of Earth's cropland</p>
+  <p class="support" data-i18n="bearth.bee.support">~830 Mha</p>
+  <div class="choices">
+    <button type="button" class="door primary" data-bearth-go="land" data-i18n="bearth.bee.land">See the land cost</button>
+    <button type="button" class="door" data-bearth-go="deeper" data-i18n="bearth.bee.deeper">Go deeper</button>
+  </div>
+</article>
+
+<section id="layer-land">
+  <div id="land-live-wrap">
+    <p class="take" id="land-live">about half of Earth's cropland</p>
+    <p class="support" id="land-support">~830 Mha</p>
+  </div>
+  <div id="land-comb"></div>
+  <div class="cmp" id="cmp"></div>
+  <div class="choices" data-reg="bee">
+    <button type="button" class="door" data-bearth-go="deeper" data-i18n="bearth.bee.deeper">Go deeper</button>
+  </div>
+  <div class="choices" data-reg="raver">
+    <button type="button" class="door" data-bearth-go="deeper" data-i18n="bearth.bee.deeper">Go deeper</button>
+  </div>
+</section>
+
+<div id="instrument">
 <div id="hero">
   <div id="hbig">—</div>
   <div id="combs"></div>
@@ -135,7 +294,6 @@ footer{max-width:1000px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
 
 <section>
   <h2>2 · <span data-i18n="h.010">THE LAND — against real denominators</span></h2>
-  <div class="cmp" id="cmp"></div>
   <div class="law" style="margin-top:10px"><b>The denominator is FAO's ~1,581 Mha of arable and
   permanent cropland</b> — all of it, everywhere, already growing everything humanity eats. This
   page shows the human arm only. <b>And the FAOSTAT hemp area total is a floor, not a total:</b>
@@ -157,7 +315,7 @@ footer{max-width:1000px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
     <td class="n">"hemp sequesters CO₂ — double rainforest"</td>
     <td><span class="vd refuted">REFUTED</span></td>
     <td>Fails on three independent grounds. <b>(a) The word "rainforest" was never in the source.</b>
-      It traces to a single 2021 <a href="https://www.dezeen.com/2021/06/30/carbon-sequestering-hemp-darshil-shah-interview/">Dezeen
+      It traces to a single 2021 <a href="https://www.dezeen.com/2021/06/30/carbon-sequestering-hemp-darshil-shah-interview/" target="_blank" rel="noopener noreferrer">Dezeen
       interview</a> with Darshil Shah of Cambridge's Centre for Natural Material Innovation, who
       said hemp is "more effective than <i>trees</i>" — a generic young/temperate forest baseline.
       Rainforest is the substitution hemp loses worst against.
@@ -167,7 +325,7 @@ footer{max-width:1000px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
       <b>(c) Under IPCC methodology the number is zero.</b> The 2006 Guidelines, Vol. 4 Ch. 5, set an
       annual crop's biomass stock change equal to its harvest loss in the same year — net zero by
       construction. And the institution that would profit from disagreeing agrees:
-      <b><a href="https://verra.org/methodologies/methodology-for-carbon-sequestration-through-cultivating-hemp/">Verra
+      <b><a href="https://verra.org/methodologies/methodology-for-carbon-sequestration-through-cultivating-hemp/" target="_blank" rel="noopener noreferrer">Verra
       placed its hemp sequestration methodology on hold in December 2023 for non-permanence</a></b>,
       still on hold today. If field sequestration were creditable, the largest carbon standard on
       earth would be crediting it.</td>
@@ -324,27 +482,27 @@ footer{max-width:1000px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
   </div>
 </section>
 
-<section>
-  <h2>8 · <span data-i18n="h.016">SOURCES</span></h2>
+<details id="sources-panel" data-view-disclosure="sources">
+  <summary><h2 style="margin:0">8 · <span data-i18n="h.016">SOURCES</span></h2></summary>
   <div class="law">
-  <b>Carbon</b> — <a href="https://www.ipcc-nggip.iges.or.jp/public/2006gl/pdf/4_Volume4/V4_05_Ch5_Cropland.pdf">IPCC
+  <b>Carbon</b> — <a href="https://www.ipcc-nggip.iges.or.jp/public/2006gl/pdf/4_Volume4/V4_05_Ch5_Cropland.pdf" target="_blank" rel="noopener noreferrer">IPCC
   2006 Guidelines Vol. 4 Ch. 5 (Cropland)</a> ·
-  <a href="https://verra.org/methodologies/methodology-for-carbon-sequestration-through-cultivating-hemp/">Verra
+  <a href="https://verra.org/methodologies/methodology-for-carbon-sequestration-through-cultivating-hemp/" target="_blank" rel="noopener noreferrer">Verra
   M0187, on hold for non-permanence</a> ·
-  <a href="https://www.nature.com/articles/s41586-020-2035-0">Hubau et al. 2020, <i>Nature</i></a> ·
-  <a href="https://www.frontiersin.org/journals/environmental-science/articles/10.3389/fenvs.2024.1342330/full">Frontiers
+  <a href="https://www.nature.com/articles/s41586-020-2035-0" target="_blank" rel="noopener noreferrer">Hubau et al. 2020, <i>Nature</i></a> ·
+  <a href="https://www.frontiersin.org/journals/environmental-science/articles/10.3389/fenvs.2024.1342330/full" target="_blank" rel="noopener noreferrer">Frontiers
   2024, hemp cultivation and seed-based foods LCA</a> ·
-  <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10672900/">hemp board LCA</a>.
-  <b>Nitrogen</b> — <a href="https://mdpi-res.com/d_attachment/agriculture/agriculture-10-00240/article_deploy/agriculture-10-00240.pdf">Tedeschi
+  <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10672900/" target="_blank" rel="noopener noreferrer">hemp board LCA</a>.
+  <b>Nitrogen</b> — <a href="https://mdpi-res.com/d_attachment/agriculture/agriculture-10-00240/article_deploy/agriculture-10-00240.pdf" target="_blank" rel="noopener noreferrer">Tedeschi
   et al. 2020, <i>Agriculture</i> 10(6):240 — the only published field N₂O measurement on hemp</a> ·
-  <a href="https://www.omafra.gov.on.ca/CropOp/en/indus_misc/fibre/hemp.html">OMAFRA hemp agronomy</a> ·
-  <a href="https://www.hemptrade.ca/content.aspx?page_id=22&amp;club_id=950211&amp;module_id=409582">Canadian
+  <a href="https://www.omafra.gov.on.ca/CropOp/en/indus_misc/fibre/hemp.html" target="_blank" rel="noopener noreferrer">OMAFRA hemp agronomy</a> ·
+  <a href="https://www.hemptrade.ca/content.aspx?page_id=22&amp;club_id=950211&amp;module_id=409582" target="_blank" rel="noopener noreferrer">Canadian
   Hemp Trade Alliance, nutrient use</a> ·
-  <a href="https://www.nrcs.usda.gov/sites/default/files/2023-04/nrcs142p2_053283.pdf">USDA NRCS
+  <a href="https://www.nrcs.usda.gov/sites/default/files/2023-04/nrcs142p2_053283.pdf" target="_blank" rel="noopener noreferrer">USDA NRCS
   Agronomy Tech Note 10 — Sunn Hemp, the species this is confused with</a> ·
-  <a href="https://www.nrcs.usda.gov/sites/default/files/2022-09/SoilTechNote23A.pdf">NRCS Soil Tech
+  <a href="https://www.nrcs.usda.gov/sites/default/files/2022-09/SoilTechNote23A.pdf" target="_blank" rel="noopener noreferrer">NRCS Soil Tech
   Note 23A — the C:N immobilisation threshold</a>.
-  <b>Feed approval</b> — <a href="https://hempfeedcoalition.org/2024/08/13/hemp-seed-meal-achieves-monumental-milestone-through-aafco-and-fda-cvm/">AAFCO/FDA-CVM
+  <b>Feed approval</b> — <a href="https://hempfeedcoalition.org/2024/08/13/hemp-seed-meal-achieves-monumental-milestone-through-aafco-and-fda-cvm/" target="_blank" rel="noopener noreferrer">AAFCO/FDA-CVM
   hemp seed meal for laying hens, August 2024</a>.
   <br><br><b>Declared failures, not filled from memory:</b> the original Dezeen page returned 403 and
   the quotation above is reconstructed from surviving mirrors — <b>the exact time-unit wording is
@@ -353,12 +511,14 @@ footer{max-width:1000px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
   PDFs returned 403 or paywalls. One source returned two different indoor N₂O values on two fetches
   and <b>that figure has been excluded entirely</b> rather than averaged.
   </div>
-</section>
+</details>
+</div>
 </main>
 
 <footer>
-  built for the environmental arm · every number here is a dial you can move and an arithmetic you
-  can redo · <a href="bfood.html">the nutrition side</a> · <a href="bigen.html">the evidence deck</a>
+  <span data-reg="cypherpunk">built for the environmental arm · every number here is a dial you can move and an arithmetic you
+  can redo · </span><span data-i18n="s.bearth.name">what one food would cost the planet</span>
+  <span data-reg="cypherpunk"> · <a href="bfood.html">the nutrition side</a> · <a href="bigen.html">the evidence deck</a></span>
   · <a href="index.html" data-i18n="law.hive">← the hive</a>
 </footer>
 
@@ -374,6 +534,57 @@ function commas(x){ return num(x,0).replace(/\B(?=(\d{3})+(?!\d))/g,','); }
 var CROPLAND=1581;      /* Mha arable + permanent crops, FAO */
 var WORLD_N=110;        /* Mt N/yr — BADGED UNSOURCED, see section 5 */
 var GWP_N2O=273;        /* AR6, 100-year */
+
+function restoreVisibleFocus(focus){
+ if(!focus||!focus.isConnected)return;var target=focus;
+ for(var node=focus.parentElement;node;node=node.parentElement)if(node.tagName==='DETAILS'&&!node.open){
+  target=node.querySelector('summary'); break;
+ }
+ if(target&&target.focus) target.focus({preventScroll:true});
+}
+function defaultOpen(reading,kind){
+ return reading==='cypherpunk' && kind==='sources';
+}
+function defaultBeat(reading){
+ return reading==='cypherpunk' ? 'deeper' : 'arrival';
+}
+var lastReading=null;
+var readingChoices=new Map();
+var beatChoices=new Map();
+function setBeat(beat){
+  var reading=document.body.getAttribute('data-reg')||'bee';
+  document.body.setAttribute('data-bearth-beat',beat);
+  beatChoices.set(reading,beat);
+  var focusId=beat==='figure'?'layer-figure':beat==='land'?'layer-land':beat==='deeper'?'instrument':null;
+  var node=focusId && $(focusId);
+  if(node) node.scrollIntoView({block:'start'});
+}
+function applyReading(event){
+  var reading=event&&event.detail&&event.detail.reg||document.body.dataset.reg||'bee';
+  if(reading===lastReading) return;
+  var focus=document.activeElement;
+  var details=[].slice.call(document.querySelectorAll('[data-view-disclosure]'));
+  if(lastReading){
+    readingChoices.set(lastReading, details.map(function(d){ return d.open; }));
+    beatChoices.set(lastReading, document.body.getAttribute('data-bearth-beat')||'arrival');
+  }
+  var previous=readingChoices.get(reading);
+  details.forEach(function(d,i){
+    d.open=previous ? previous[i] : defaultOpen(reading, d.getAttribute('data-view-disclosure'));
+  });
+  document.body.setAttribute('data-bearth-beat', beatChoices.get(reading)||defaultBeat(reading));
+  var theme=document.querySelector('meta[name="theme-color"]');
+  if(theme) theme.content=reading==='bee'?'#f6f7f2':reading==='raver'?'#0c120e':'#0d1410';
+  restoreVisibleFocus(focus);
+  lastReading=reading;
+}
+document.addEventListener('bregister',applyReading);
+document.addEventListener('click',function(e){
+  var btn=e.target&&e.target.closest&&e.target.closest('[data-bearth-go]');
+  if(!btn) return;
+  setBeat(btn.getAttribute('data-bearth-go'));
+});
+applyReading();
 
 function calc(){
   var pop=+$('pop').value*1e9, g=+$('gday').value, rec=+$('rec').value/100,
@@ -431,11 +642,12 @@ function comb(pct,colour,title,cap){
 
 function render(){
   var c=calc();
-  $('combs').innerHTML=
-    comb(c.pctCrop,'var(--land)','share of world cropland',
-      'every cell is one per cent of <b>all the arable and permanent cropland on Earth</b>. This is what one food, for one species, would occupy.')
-   +comb(c.pctWorldN,'var(--n2o)','share of world nitrogen fertiliser',
+  var landComb=comb(c.pctCrop,'var(--land)','share of world cropland',
+      'every cell is one per cent of <b>all the arable and permanent cropland on Earth</b>. This is what one food, for one species, would occupy.');
+  var nComb=comb(c.pctWorldN,'var(--n2o)','share of world nitrogen fertiliser',
       'every cell is one per cent of <b>world nitrogen fertiliser use</b>. Denominator not yet primary-verified — see §5.');
+  if($('land-comb')) $('land-comb').innerHTML=landComb;
+  $('combs').innerHTML=landComb+nComb;
   $('hbig').innerHTML=commas(c.mha)+' <small>million hectares of farmland — '
     +'<b style="color:var(--warn)">'+num(c.pctCrop,0)+'% of all the cropland on Earth</b>, '
     +'for the human arm alone</small>';
@@ -444,6 +656,8 @@ function render(){
     +'<b style="color:var(--ink)">Every one of those four numbers is a dial below</b>, because every '
     +'one is contested — and the honest version of this page is the one where you can move them '
     +'against us.';
+  if($('land-live')) $('land-live').textContent=num(c.pctCrop,0)+'% of all the cropland on Earth';
+  if($('land-support')) $('land-support').textContent='~'+Math.round(c.mha/10)*10+' Mha';
 
   var efPct=num(c.ef*100,2)+'%';
   $('out').innerHTML=[
