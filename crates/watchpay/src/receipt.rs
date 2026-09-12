@@ -14,7 +14,8 @@
 //!   pinned pricing rule `median16(winner pool) << depth` recomputed
 //!   locally (under- and over-payment both refused);
 //! - a `getCompletedMerklePayment(winner)` read-back matching the event's
-//!   depth+timestamp.
+//!   depth+timestamp — REQUIRED for the paid state (missing read-back is
+//!   a named refusal, never a silently-accepted `Paid`).
 //!
 //! Missing event, wrong contract, malformed/ambiguous logs, or multiple
 //! candidate events ⇒ REFUSE. The transaction hash is NEVER accepted as
@@ -62,6 +63,14 @@ pub struct SyntheticReceipt {
     /// From an eth_call/trace re-run of the reverted tx — NOT part of
     /// `eth_getTransactionReceipt`; optional.
     pub revert_data: Option<Vec<u8>>,
+    /// Actual gas consumed (receipt `gasUsed`), when the serving RPC
+    /// supplied it. Fee-budget reconciliation uses this as EVIDENCE —
+    /// externally supplied, same trust class as every other field here.
+    pub gas_used: Option<u64>,
+    /// Effective gas price paid (wei), when supplied. Same evidence class
+    /// as `gas_used`; reconciliation clamps the product to the tx's own
+    /// worst case so evidence can never RAISE an exposure estimate.
+    pub effective_gas_price_wei: Option<u64>,
     pub evidence: ChainEvidence,
 }
 
@@ -102,6 +111,11 @@ pub enum ReceiptOutcome {
 
 /// Validate a receipt against the plan, the batch, the recorded signed
 /// transaction's hash, and that transaction's decoded calldata.
+///
+/// `readback` is the `getCompletedMerklePayment(winner)` evidence. It is
+/// REQUIRED for the `Paid` outcome (a status-1 receipt without it is
+/// refused — incomplete evidence cannot unlock a validated payment);
+/// reverted outcomes do not consult it.
 pub fn validate_receipt(
     vp: &ValidatedPlan,
     batch_index: usize,
@@ -253,20 +267,29 @@ pub fn validate_receipt(
         ));
     }
 
-    // Read-back cross-check (getCompletedMerklePayment), when supplied.
-    if let Some(rb) = readback {
-        if rb.depth != event.depth || rb.merkle_payment_timestamp != event.merkle_payment_timestamp {
-            return Err(refuse(
-                "getCompletedMerklePayment",
-                format!(
-                    "read-back depth/ts ({}/{}) != event ({}/{})",
-                    rb.depth,
-                    rb.merkle_payment_timestamp,
-                    event.depth,
-                    event.merkle_payment_timestamp
-                ),
-            ));
-        }
+    // Read-back cross-check (getCompletedMerklePayment) is REQUIRED for
+    // the paid state (z2.b negative review P1): the receipt log alone is
+    // one leg of evidence; the vault's own completed-payment record bound
+    // to this winner is the second. Missing read-back cannot produce
+    // `Paid` — refuse, naming the missing evidence.
+    let rb = readback.ok_or_else(|| {
+        refuse(
+            "getCompletedMerklePayment",
+            "completed-payment read-back is REQUIRED for the paid state — \
+             a receipt without it is incomplete evidence, not a validated payment",
+        )
+    })?;
+    if rb.depth != event.depth || rb.merkle_payment_timestamp != event.merkle_payment_timestamp {
+        return Err(refuse(
+            "getCompletedMerklePayment",
+            format!(
+                "read-back depth/ts ({}/{}) != event ({}/{})",
+                rb.depth,
+                rb.merkle_payment_timestamp,
+                event.depth,
+                event.merkle_payment_timestamp
+            ),
+        ));
     }
 
     Ok(ReceiptOutcome::Paid(ValidatedPayment {
@@ -297,6 +320,8 @@ pub fn synth_receipt_with_event(
         to,
         logs: vec![crate::calldata::synth_merkle_payment_made_log(to, event)],
         revert_data: None,
+        gas_used: None,
+        effective_gas_price_wei: None,
         evidence: ChainEvidence { chain_id, confirmations },
     }
 }

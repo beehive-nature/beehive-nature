@@ -17,6 +17,41 @@
 //!   nonce are persisted BEFORE anything is signed (the caller writes the
 //!   intent, hands the nonce to the composer/signer, and only then may
 //!   call `record_signed`).
+//! - **PLAN-IDENTITY BINDING (z2.b review P1):** every transition binds to
+//!   the persisted identity. All existing attempts for the batch must
+//!   carry the SAME plan_hash and batch_id as the supplied validated plan
+//!   (which must itself still hash to its seal) — a different plan under
+//!   the same job/index (changed vault, payer, chain, commitments,
+//!   budgets, expiry) is refused at every boundary.
+//! - **FRESHNESS AT SIGNING BOUNDARIES (z2.b review P1):** `write_intent`
+//!   and `record_signed` re-run the full plan validation at their
+//!   `now_unix` — a cached validation cannot outlive the plan's expiry
+//!   (or the batch payment-timestamp window). Outcome reconciliation
+//!   (`record_outcome`, `record_unknown`, `resolve_unknown`, abandon,
+//!   cancel) deliberately does NOT re-check expiry: evidence of
+//!   already-submitted payments is reconciled after expiry — expiry
+//!   blocks NEW signing, it does not discard old evidence.
+//! - **FEE BUDGET (z2.b review P1):** each attempt durably reserves
+//!   worst-case native fee exposure (`reserved_fee_wei`): the plan's
+//!   per-tx worst case at intent time, re-reserved to the transaction's
+//!   own worst case (gas_limit × fee cap) at signing. A new intent is
+//!   refused when the plan-wide sum of reservations plus the new
+//!   reservation would exceed `max_total_native_fee_wei`. Reservations
+//!   are reconciled DOWN only with receipt fee evidence
+//!   (`gas_used`/`effective_gas_price_wei`, clamped to the tx's own
+//!   worst case); a failed call NEVER frees unknown exposure — a reverted
+//!   attempt without fee evidence keeps its full reservation, and
+//!   `unknown` keeps it until human resolution. Cancelling an open
+//!   (unsigned) intent releases its reservation; human-abandoning an
+//!   unknown (signed) attempt does NOT.
+//!   **SCOPE LAW:** this budget governs BATCH-PAYMENT attempts only.
+//!   The approval transaction's lifecycle (allowance grant/decay) is
+//!   OUTSIDE this ledger; this crate does NOT claim a complete
+//!   plan-wide spend-enforcement boundary. Replacement semantics are
+//!   explicit: there is no in-place replacement — every attempt is a new
+//!   nonce with its own reservation; same-nonce higher-fee replacement
+//!   is unsupported in this slice and would need its own reviewed
+//!   reservation treatment.
 //! - `record_signed` validates the decoded transaction against the plan
 //!   and the attempt's own nonce, and refuses a transaction hash already
 //!   recorded anywhere in this plan.
@@ -32,6 +67,9 @@
 //!   broadcast in a later slice); cancellation from Signed is refused —
 //!   reconcile the outcome first (possibly to `unknown`, then human
 //!   abandon).
+//! - A paid outcome requires the completed-payment read-back evidence
+//!   (`record_outcome`/`resolve_unknown` pass it to the receipt
+//!   validator, which refuses `Paid` without it).
 //!
 //! DURABILITY — precisely what is claimed:
 //! - Writes are temp-file + `write_all` + `flush` + `sync_all` (file
@@ -135,6 +173,10 @@ pub struct AttemptRecord {
     pub batch_id: Hex32,
     pub attempt_seq: u32,
     pub nonce: u64,
+    /// Worst-case native fee this attempt currently reserves against the
+    /// plan's `max_total_native_fee_wei` budget (see module docs for the
+    /// reservation/reconciliation law).
+    pub reserved_fee_wei: Atto,
     pub state: AttemptState,
     pub updated_unix: u64,
 }
@@ -248,8 +290,119 @@ impl Ledger {
         Ok(())
     }
 
-    fn latest(&self, plan: &Plan, batch_index: u32) -> Result<Option<AttemptRecord>> {
-        Ok(self.attempts(&plan.job_id, batch_index)?.pop())
+    /// PLAN-IDENTITY BINDING (review P1): the supplied validated plan must
+    /// still hash to its seal, and every existing attempt for this batch
+    /// must carry exactly its plan_hash and batch_id. A different plan
+    /// under the same job/index is refused at every boundary.
+    fn bind_attempt_identity(
+        &self,
+        vp: &ValidatedPlan,
+        batch: &crate::plan_model::Batch,
+        existing: &[AttemptRecord],
+    ) -> Result<()> {
+        if !vp.is_internally_consistent() {
+            return Err(Error::Ledger(format!(
+                "validated plan {} is not internally consistent (mutated after \
+                 validation?) — refusing",
+                vp.plan.plan_hash
+            )));
+        }
+        for r in existing {
+            if r.plan_hash != vp.plan.plan_hash || r.batch_id != batch.batch_id {
+                return Err(Error::Ledger(format!(
+                    "plan identity changed under job {} batch {}: attempt {} was recorded \
+                     under plan {}/batch {}, but the supplied plan is {}/{} — a changed \
+                     vault/payer/chain/commitments/budget/expiry cannot ride an old intent",
+                    vp.plan.job_id,
+                    batch.batch_index,
+                    r.attempt_seq,
+                    r.plan_hash,
+                    r.batch_id,
+                    vp.plan.plan_hash,
+                    batch.batch_id
+                )));
+            }
+        }
+        Ok(())
+    }
+
+    /// Plan-wide sum of current fee reservations across ALL batches.
+    fn plan_reserved_total(&self, vp: &ValidatedPlan) -> Result<Atto> {
+        let job_dir = self.root.join(&vp.plan.job_id);
+        if !job_dir.exists() {
+            return Ok(Atto::ZERO);
+        }
+        let mut total = Atto::ZERO;
+        for entry in std::fs::read_dir(&job_dir)? {
+            let batch_dir = entry?.path();
+            if !batch_dir.is_dir() {
+                continue;
+            }
+            for f in std::fs::read_dir(&batch_dir)? {
+                let f = f?;
+                let name = f.file_name();
+                let name = name.to_string_lossy();
+                if !name.starts_with("attempt-") || !name.ends_with(".json") {
+                    continue;
+                }
+                let raw = std::fs::read_to_string(f.path()).map_err(|e| {
+                    Error::Ledger(format!("attempt file unreadable {}: {e}", f.path().display()))
+                })?;
+                let rec: AttemptRecord = serde_json::from_str(&raw).map_err(|e| {
+                    Error::Ledger(format!(
+                        "attempt file corrupt/torn {}: {e}",
+                        f.path().display()
+                    ))
+                })?;
+                total = total.checked_add(rec.reserved_fee_wei).ok_or_else(|| {
+                    Error::Ledger("reserved-fee sum overflows u256 — ledger inconsistent".into())
+                })?;
+            }
+        }
+        Ok(total)
+    }
+
+    /// The per-tx worst-case native fee reserved for a NEW attempt (the
+    /// plan's own per-tx ceiling product).
+    fn plan_per_tx_worst_case(vp: &ValidatedPlan) -> Atto {
+        Atto::from_u64(vp.plan.gas_ceilings.per_tx_gas_limit)
+            .checked_mul(Atto::from_u64(
+                vp.plan.native_fee_ceilings.per_tx_max_fee_per_gas_wei,
+            ))
+            .expect("plan validation bounds this product within u256")
+    }
+
+    /// The transaction's own worst-case native fee (gas_limit × fee cap).
+    fn tx_worst_case_fee(tx: &DecodedTransaction) -> Atto {
+        Atto::from_u64(tx.gas_limit)
+            .checked_mul(Atto::from_u64(tx.max_fee_per_gas_wei))
+            .expect("u64 × u64 fits u256")
+    }
+
+    /// Reconcile a reservation down using receipt fee evidence when
+    /// available; NEVER raise. Without evidence the reservation stands
+    /// (a failed call does not free unknown exposure).
+    fn reconcile_reservation(current: Atto, tx: &DecodedTransaction, receipt: &SyntheticReceipt) -> Atto {
+        match (receipt.gas_used, receipt.effective_gas_price_wei) {
+            (Some(gas), Some(price)) => {
+                let actual = Atto::from_u64(gas)
+                    .checked_mul(Atto::from_u64(price))
+                    .expect("u64 × u64 fits u256");
+                // Evidence cannot raise exposure beyond the tx's own
+                // worst case (also guards forged evidence).
+                let clamped = if actual > Self::tx_worst_case_fee(tx) {
+                    Self::tx_worst_case_fee(tx)
+                } else {
+                    actual
+                };
+                if clamped < current {
+                    clamped
+                } else {
+                    current
+                }
+            }
+            _ => current,
+        }
     }
 
     fn bind_plan(&self, vp: &ValidatedPlan, batch_index: usize) -> Result<crate::plan_model::Batch> {
@@ -264,6 +417,10 @@ impl Ledger {
 
     /// Persist the attempt identity + nonce BEFORE any signing.
     /// Refusals (each names the blocking state):
+    /// - plan expired / timestamp-aged at `now_unix` → revalidated freshness
+    /// - plan identity changed vs existing attempts → identity binding
+    /// - fee budget: plan-wide reservations + this attempt's worst case
+    ///   would exceed `max_total_native_fee_wei`
     /// - mined  → local double-payment fence
     /// - signed → a signed tx exists; never auto-re-sign
     /// - unknown → outcome unknown; never auto-re-sign; human resolution first
@@ -275,8 +432,28 @@ impl Ledger {
         nonce: u64,
         now_unix: u64,
     ) -> Result<u32> {
+        // FRESHNESS: a cached validation cannot outlive expiry (review P1).
+        vp.revalidate(now_unix)?;
         let batch = self.bind_plan(vp, batch_index)?;
         let existing = self.attempts(&vp.plan.job_id, batch.batch_index)?;
+        // IDENTITY: bind to every persisted attempt of this batch.
+        self.bind_attempt_identity(vp, &batch, &existing)?;
+        // BUDGET: reserve this attempt's worst case against the plan total.
+        let reserve = Self::plan_per_tx_worst_case(vp);
+        let reserved = self.plan_reserved_total(vp)?;
+        let ceiling = vp.plan.native_fee_ceilings.max_total_native_fee_wei;
+        let projected = reserved
+            .checked_add(reserve)
+            .ok_or_else(|| Error::Ledger("reservation projection overflow".into()))?;
+        if projected > ceiling {
+            return Err(Error::Ledger(format!(
+                "fee budget exhausted: plan-wide reservations {reserved} + this attempt's \
+                 worst-case {reserve} = {projected} exceeds max_total_native_fee_wei \
+                 {ceiling} — retrying reverted attempts cannot multiply worst-case \
+                 exposure (evidence-backed reconciliation shrinks reservations; a failed \
+                 call frees nothing)",
+            )));
+        }
         for r in &existing {
             match &r.state {
                 AttemptState::Mined { winner_pool_hash, .. } => {
@@ -322,6 +499,7 @@ impl Ledger {
             batch_id: batch.batch_id,
             attempt_seq: seq,
             nonce,
+            reserved_fee_wei: reserve,
             state: AttemptState::Intent,
             updated_unix: now_unix,
         };
@@ -331,6 +509,8 @@ impl Ledger {
 
     /// Validate a signer-returned decoded transaction against the plan and
     /// the attempt's persisted nonce, then persist the Signed record.
+    /// Signing boundaries revalidate plan freshness (review P1); the
+    /// reservation is tightened to THIS transaction's own worst case.
     /// Refuses a tx hash already recorded anywhere under this plan.
     pub fn record_signed(
         &self,
@@ -339,10 +519,19 @@ impl Ledger {
         tx: &DecodedTransaction,
         now_unix: u64,
     ) -> Result<()> {
+        // FRESHNESS at the signing boundary (review P1).
+        vp.revalidate(now_unix)?;
         let batch = self.bind_plan(vp, batch_index)?;
-        let latest = self
-            .latest(&vp.plan, batch.batch_index)?
-            .ok_or_else(|| Error::Ledger("no intent on record — persist the intent first".into()))?;
+        let existing = self.attempts(&vp.plan.job_id, batch.batch_index)?;
+        self.bind_attempt_identity(vp, &batch, &existing)?;
+        let latest = match existing.into_iter().next_back() {
+            Some(r) => r,
+            None => {
+                return Err(Error::Ledger(
+                    "no intent on record — persist the intent first".into(),
+                ))
+            }
+        };
         match &latest.state {
             AttemptState::Intent => {}
             other => {
@@ -367,14 +556,23 @@ impl Ledger {
                 )));
             }
         }
+        // Budget tighten: the tx's own worst case (validate_transaction
+        // already bounds gas/fee by the plan ceilings, so this never
+        // exceeds the reserved plan-per-tx figure).
+        let tx_worst = Self::tx_worst_case_fee(tx);
+        debug_assert!(tx_worst <= latest.reserved_fee_wei);
         let mut rec = latest;
+        rec.reserved_fee_wei = tx_worst;
         rec.state = AttemptState::Signed { tx: tx.clone() };
         rec.updated_unix = now_unix;
         self.persist(&rec)
     }
 
     /// Reconcile a Signed attempt against a receipt: persists Mined or
-    /// Reverted. Returns the validated outcome.
+    /// Reverted. Returns the validated outcome. Deliberately NOT expiry-
+    /// gated (evidence of already-submitted payments reconciles after
+    /// expiry); plan identity IS bound. Fee evidence on the receipt
+    /// reconciles the reservation down (never up, never without evidence).
     pub fn record_outcome(
         &self,
         vp: &ValidatedPlan,
@@ -385,6 +583,7 @@ impl Ledger {
     ) -> Result<ReceiptOutcome> {
         let (mut rec, tx) = self.require_signed(vp, batch_index)?;
         let outcome = validate_receipt(vp, batch_index, &tx, receipt, readback)?;
+        rec.reserved_fee_wei = Self::reconcile_reservation(rec.reserved_fee_wei, &tx, receipt);
         rec.updated_unix = now_unix;
         match &outcome {
             ReceiptOutcome::Paid(p) => {
@@ -407,7 +606,8 @@ impl Ledger {
 
     /// Mark a Signed attempt's outcome as UNKNOWN (evidence unavailable or
     /// ambiguous). No automatic path leaves Unknown; only the human gate
-    /// resolves it. (In this offline slice the trigger is synthetic.)
+    /// resolves it. (In this offline slice the trigger is synthetic.) The
+    /// fee reservation is NOT released — unknown exposure is never freed.
     pub fn record_unknown(
         &self,
         vp: &ValidatedPlan,
@@ -425,9 +625,10 @@ impl Ledger {
         self.persist(&rec)
     }
 
-    /// Explicitly cancel an OPEN INTENT. Cancelling a Signed attempt is
-    /// refused (it may still be broadcast in a later slice) — reconcile
-    /// the outcome first.
+    /// Explicitly cancel an OPEN INTENT (releases its fee reservation —
+    /// nothing was signed, nothing can be spent). Cancelling a Signed
+    /// attempt is refused (it may still be broadcast in a later slice) —
+    /// reconcile the outcome first.
     pub fn cancel_intent(
         &self,
         vp: &ValidatedPlan,
@@ -436,12 +637,16 @@ impl Ledger {
         reason: &str,
     ) -> Result<()> {
         let batch = self.bind_plan(vp, batch_index)?;
-        let mut latest = self
-            .latest(&vp.plan, batch.batch_index)?
+        let existing = self.attempts(&vp.plan.job_id, batch.batch_index)?;
+        self.bind_attempt_identity(vp, &batch, &existing)?;
+        let mut latest = existing
+            .into_iter()
+            .next_back()
             .ok_or_else(|| Error::Ledger("no attempt on record".into()))?;
         match latest.state {
             AttemptState::Intent => {
                 latest.state = AttemptState::Cancelled { reason: reason.to_string() };
+                latest.reserved_fee_wei = Atto::ZERO;
                 latest.updated_unix = now_unix;
                 self.persist(&latest)
             }
@@ -456,6 +661,8 @@ impl Ledger {
     /// Human-gated resolution of an Unknown outcome: re-run receipt
     /// validation with the supplied evidence and persist the terminal
     /// state (Mined/Reverted), or abandon with a recorded human decision.
+    /// Not expiry-gated (reconciliation of old evidence); plan identity IS
+    /// bound; fee evidence on the receipt reconciles the reservation down.
     pub fn resolve_unknown(
         &self,
         gate: &HumanGate,
@@ -467,8 +674,11 @@ impl Ledger {
     ) -> Result<ReceiptOutcome> {
         let _ = gate; // presence is the authorization; nothing else is derived from it
         let batch = self.bind_plan(vp, batch_index)?;
-        let mut latest = self
-            .latest(&vp.plan, batch.batch_index)?
+        let existing = self.attempts(&vp.plan.job_id, batch.batch_index)?;
+        self.bind_attempt_identity(vp, &batch, &existing)?;
+        let mut latest = existing
+            .into_iter()
+            .next_back()
             .ok_or_else(|| Error::Ledger("no attempt on record".into()))?;
         let signed = match latest.state {
             AttemptState::Unknown { ref tx, .. } => tx.clone(),
@@ -481,6 +691,8 @@ impl Ledger {
             }
         };
         let outcome = validate_receipt(vp, batch_index, &signed, receipt, readback)?;
+        latest.reserved_fee_wei =
+            Self::reconcile_reservation(latest.reserved_fee_wei, &signed, receipt);
         latest.updated_unix = now_unix;
         match &outcome {
             ReceiptOutcome::Paid(p) => {
@@ -504,6 +716,8 @@ impl Ledger {
     /// Human-gated abandon of an Unknown outcome: records the human
     /// decision as Cancelled. A new attempt MAY follow; the abandon does
     /// not (and cannot) un-broadcast anything — it records the choice.
+    /// The fee reservation is deliberately KEPT: the signed transaction
+    /// may still land, so its exposure is not freed by the abandon.
     pub fn abandon_unknown(
         &self,
         gate: &HumanGate,
@@ -514,8 +728,11 @@ impl Ledger {
     ) -> Result<()> {
         let _ = gate;
         let batch = self.bind_plan(vp, batch_index)?;
-        let mut latest = self
-            .latest(&vp.plan, batch.batch_index)?
+        let existing = self.attempts(&vp.plan.job_id, batch.batch_index)?;
+        self.bind_attempt_identity(vp, &batch, &existing)?;
+        let mut latest = existing
+            .into_iter()
+            .next_back()
             .ok_or_else(|| Error::Ledger("no attempt on record".into()))?;
         if !matches!(latest.state, AttemptState::Unknown { .. }) {
             return Err(Error::Ledger(format!(
@@ -536,8 +753,11 @@ impl Ledger {
         batch_index: usize,
     ) -> Result<(AttemptRecord, DecodedTransaction)> {
         let batch = self.bind_plan(vp, batch_index)?;
-        let latest = self
-            .latest(&vp.plan, batch.batch_index)?
+        let existing = self.attempts(&vp.plan.job_id, batch.batch_index)?;
+        self.bind_attempt_identity(vp, &batch, &existing)?;
+        let latest = existing
+            .into_iter()
+            .next_back()
             .ok_or_else(|| Error::Ledger("no attempt on record".into()))?;
         let tx = match &latest.state {
             AttemptState::Signed { tx } => tx.clone(),

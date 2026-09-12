@@ -7,7 +7,7 @@ use crate::canonical;
 use crate::error::{Error, Result};
 use crate::plan_model::*;
 use crate::pricing::{batch_worst_case_charge, check_depth, expected_reward_pools};
-use crate::types::Atto;
+use crate::types::{Atto, Hex32};
 
 pub const MIN_GAS_LIMIT: u64 = 21_000;
 pub const MAX_RPC_HINT_LEN: usize = 256;
@@ -15,6 +15,17 @@ pub const MAX_RPC_HINT_LEN: usize = 256;
 /// A fully validated plan plus everything derived from it. The derived
 /// figures are the ONLY lawful amounts/gas/fee bases downstream (approve
 /// composition, tx validation, receipt ceilings).
+///
+/// MUTATION CONTRACT (z2.b negative review P1): the public fields are
+/// readable for composition and display, but this value is a VALIDATION
+/// RESULT, not a mutable input. `sealed_plan_hash` (private, set once at
+/// construction) pins the plan exactly as validated. Every ledger signing
+/// boundary calls [`ValidatedPlan::revalidate`], which re-runs the full
+/// validation and refuses divergence from the seal — a mutated-and-rehashed
+/// plan is a DIFFERENT plan, and the ledger additionally refuses it against
+/// the persisted attempt identity. A stale validation can never be carried
+/// forward, and no public path can mint a `ValidatedPlan` without
+/// `validate_plan`.
 #[derive(Debug, Clone)]
 pub struct ValidatedPlan {
     pub plan: Plan,
@@ -27,6 +38,42 @@ pub struct ValidatedPlan {
     pub planned_tx_count: u64,
     /// per_tx_gas_limit * per_tx_max_fee_per_gas_wei * planned_tx_count.
     pub worst_case_total_native_fee_wei: Atto,
+    /// Private seal: the plan hash exactly as validated. No mutator.
+    sealed_plan_hash: Hex32,
+}
+
+impl ValidatedPlan {
+    /// The plan hash pinned at validation time (the seal).
+    pub fn sealed_hash(&self) -> Hex32 {
+        self.sealed_plan_hash
+    }
+
+    /// Does the inner plan still hash to its declared hash AND to the
+    /// seal (no field mutated since validation)?
+    pub fn is_internally_consistent(&self) -> bool {
+        canonical::plan_hash(&self.plan) == self.plan.plan_hash
+            && self.plan.plan_hash == self.sealed_plan_hash
+    }
+
+    /// Re-run the FULL validation (all bounds, derivations, expiry
+    /// including the batch payment-timestamp window) at `now_unix` and
+    /// require the result to match the seal. Called at every signing
+    /// boundary — a cached validation cannot outlive expiry or absorb a
+    /// mutation.
+    pub fn revalidate(&self, now_unix: u64) -> Result<ValidatedPlan> {
+        let fresh = validate_plan(&self.plan, now_unix)?;
+        if fresh.plan.plan_hash != self.sealed_plan_hash {
+            return Err(Error::field(
+                "plan_hash",
+                format!(
+                    "plan changed under a validated handle: sealed {} but now {} — \
+                     refusing the substitution",
+                    self.sealed_plan_hash, fresh.plan.plan_hash
+                ),
+            ));
+        }
+        Ok(fresh)
+    }
 }
 
 fn refuse(field: &'static str, reason: impl Into<String>) -> Error {
@@ -274,12 +321,14 @@ pub fn validate_plan(plan: &Plan, now_unix: u64) -> Result<ValidatedPlan> {
         ));
     }
 
+    let sealed = plan.plan_hash;
     Ok(ValidatedPlan {
         plan: plan.clone(),
         batch_worst_case: batch_worst,
         approve_ceiling: approve_sum,
         planned_tx_count,
         worst_case_total_native_fee_wei: derived_total_fee,
+        sealed_plan_hash: sealed,
     })
 }
 

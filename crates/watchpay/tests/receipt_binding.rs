@@ -205,10 +205,11 @@ fn receipt_valid_both_winner_pools() {
         }
         _ => panic!("expected Paid"),
     }
-    // winner pool1 (tag 1, 1..=16 pool): median 9 << 2 = 36
+    // winner pool1 (tag 1, 1..=16 pool): median 9 << 2 = 36 — readback now
+    // REQUIRED for the paid state; with it supplied the payment validates.
     let ev = winner_event(1, 36);
     let r = synth_receipt_with_event(&tx, 42161, v.plan.expected_payer, v.plan.network.payment_vault, &ev, 12);
-    match validate_receipt(&v, 0, &tx, &r, None).unwrap() {
+    match validate_receipt(&v, 0, &tx, &r, Some(&CompletedReadback { depth: 2, merkle_payment_timestamp: SYNTH_TS })).unwrap() {
         ReceiptOutcome::Paid(p) => assert_eq!(p.total_amount, Atto::from_u64(36)),
         _ => panic!("expected Paid"),
     }
@@ -332,6 +333,8 @@ fn receipt_reverted_and_payment_already_exists() {
         to: v.plan.network.payment_vault,
         logs: vec![],
         revert_data: None,
+        gas_used: None,
+        effective_gas_price_wei: None,
         evidence: ChainEvidence { chain_id: 42161, confirmations: 3 },
     };
     let r = base_r.clone();
@@ -405,7 +408,14 @@ fn receipt_event_depth_or_timestamp_mismatch() {
     };
     r.logs.push(noise);
     assert!(matches!(
-        validate_receipt(&v, 0, &tx, &r, None).unwrap(),
+        validate_receipt(
+            &v,
+            0,
+            &tx,
+            &r,
+            Some(&CompletedReadback { depth: 2, merkle_payment_timestamp: SYNTH_TS })
+        )
+        .unwrap(),
         ReceiptOutcome::Paid(_)
     ));
 }

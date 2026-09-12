@@ -292,3 +292,39 @@ fn plan_json_round_trip() {
     assert_eq!(vp.plan.plan_hash, p.plan_hash);
     let _ = Hex32::ZERO;
 }
+
+/// The validation seal (z2.b review P1): a `ValidatedPlan` whose inner
+/// plan is mutated in place — even with the declared hash recomputed to
+/// match the mutation — no longer revalidates. A changed plan is a
+/// DIFFERENT plan and must be re-validated from scratch; the ledger also
+/// refuses it against persisted attempt identity (see review_adversarial).
+#[test]
+fn validated_plan_seal_refuses_in_place_mutation() {
+    let mut vp = validate_plan(&base_plan(), SYNTH_NOW).unwrap();
+    assert!(vp.is_internally_consistent());
+    assert_eq!(vp.sealed_hash(), vp.plan.plan_hash);
+    // fresh revalidation of the untouched handle is fine
+    vp.revalidate(SYNTH_NOW + 1).unwrap();
+
+    // mutation WITHOUT rehashing: internal consistency is already broken
+    vp.plan.job_id = "mutated-job".into();
+    assert!(!vp.is_internally_consistent());
+    let e = vp.revalidate(SYNTH_NOW).unwrap_err();
+    assert_eq!(field_of(&e), "plan_hash");
+
+    // mutation WITH rehashing: the declared hash now matches the mutated
+    // bytes, but NOT the seal — consistency includes the seal, and
+    // revalidate refuses the substitution
+    vp.plan.job_id = "synthetic-job-001".into(); // restore
+    vp.plan.job_id = "honest-new-job".into();
+    vp.plan.plan_hash = watchpay::canonical::plan_hash(&vp.plan);
+    assert!(!vp.is_internally_consistent(), "seal must diverge from a rehashed mutation");
+    let e = vp.revalidate(SYNTH_NOW).unwrap_err();
+    assert_eq!(field_of(&e), "plan_hash");
+    assert!(e.to_string().contains("refusing the substitution"), "{e}");
+
+    // and the honest path works: validate the changed plan from scratch
+    let fresh = validate_plan(&vp.plan, SYNTH_NOW).unwrap();
+    assert_eq!(fresh.sealed_hash(), fresh.plan.plan_hash);
+    assert_ne!(fresh.sealed_hash(), validate_plan(&base_plan(), SYNTH_NOW).unwrap().sealed_hash());
+}
