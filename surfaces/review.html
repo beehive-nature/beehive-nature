@@ -60,15 +60,25 @@ a{color:var(--cyan)}
 #first-bee,#first-raver,#layer-figure,#instrument{display:none}
 body[data-reg="bee"][data-review-beat="arrival"] #first-bee{display:block}
 body[data-reg="raver"][data-review-beat="figure"] #layer-figure{display:block}
-body[data-review-beat="compose"] #instrument{display:block}
-body[data-review-beat="compose"] #tally,
-body[data-review-beat="compose"] #bind,
-body[data-review-beat="compose"] #guard,
-body[data-review-beat="compose"] #ai,
-body[data-review-beat="compose"] #sources-panel{display:none}
-body[data-review-beat="compose"] #layer-compose{display:block}
+body:not([data-reg="cypherpunk"])[data-review-beat="compose"] #instrument{display:block}
+body:not([data-reg="cypherpunk"])[data-review-beat="compose"] #tally,
+body:not([data-reg="cypherpunk"])[data-review-beat="compose"] #bind,
+body:not([data-reg="cypherpunk"])[data-review-beat="compose"] #guard,
+body:not([data-reg="cypherpunk"])[data-review-beat="compose"] #ai,
+body:not([data-reg="cypherpunk"])[data-review-beat="compose"] #sources-panel{display:none}
+body:not([data-reg="cypherpunk"])[data-review-beat="compose"] #layer-compose{display:block}
 body[data-review-beat="deeper"] #instrument,
 body[data-reg="cypherpunk"] #instrument{display:block}
+/* FOUNDER LOCK: Cypherpunk is the full attestation instrument on contact.
+   Compose-beat progressive disclosure is New bee / Raver only. A compose
+   memory must not strip tally / bind / guard / AI / sources from this view. */
+body[data-reg="cypherpunk"] #tally,
+body[data-reg="cypherpunk"] #bind,
+body[data-reg="cypherpunk"] #layer-compose,
+body[data-reg="cypherpunk"] #compose,
+body[data-reg="cypherpunk"] #guard,
+body[data-reg="cypherpunk"] #ai,
+body[data-reg="cypherpunk"] #sources-panel{display:revert}
 body[data-reg="raver"][data-review-beat="arrival"] #masthead{display:none}
 
 /* New bee — language-first calm room. */
@@ -466,6 +476,7 @@ $('w1go').onclick=async function(){
   var beatChoices=new Map();
   function setBeat(beat){
     var reading=document.body.getAttribute('data-reg')||'bee';
+    if(reading==='cypherpunk') beat='deeper';
     document.body.setAttribute('data-review-beat',beat);
     beatChoices.set(reading,beat);
     var focusId=beat==='figure'?'layer-figure':beat==='compose'?'layer-compose':beat==='deeper'?'instrument':null;
@@ -485,7 +496,7 @@ $('w1go').onclick=async function(){
     details.forEach(function(d,i){
       d.open=previous ? previous[i] : defaultOpen(reading, d.getAttribute('data-view-disclosure'));
     });
-    document.body.setAttribute('data-review-beat', beatChoices.get(reading)||defaultBeat(reading));
+    document.body.setAttribute('data-review-beat', reading==='cypherpunk' ? 'deeper' : (beatChoices.get(reading)||defaultBeat(reading)));
     var theme=document.querySelector('meta[name="theme-color"]');
     if(theme) theme.content=reading==='bee'?'#f6f7f2':reading==='raver'?'#0c1412':'#0d1410';
     restoreVisibleFocus(focus);

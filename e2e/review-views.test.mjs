@@ -96,12 +96,12 @@ test('Leave a receipt is one calm compose beat — not passkey, rails, verify, o
   assert.match(compose, /TASK/);
   assert.doesNotMatch(compose, /id="listen"|id="bindBtn"|id="gCheck"|id="w1wake"|id="tallySt"/);
   assert.doesNotMatch(compose, /passkey|Ed25519|WebLLM|wake the pocket|bLOVErAi|listen to the rails|\bidle\b/);
-  assert.match(page, /body\[data-review-beat="compose"\] #layer-compose\{display:block\}/);
-  assert.match(page, /body\[data-review-beat="compose"\] #tally,/);
-  assert.match(page, /body\[data-review-beat="compose"\] #bind,/);
-  assert.match(page, /body\[data-review-beat="compose"\] #guard,/);
-  assert.match(page, /body\[data-review-beat="compose"\] #ai,/);
-  assert.match(page, /body\[data-review-beat="compose"\] #sources-panel\{display:none\}/);
+  assert.match(page, /body:not\(\[data-reg="cypherpunk"\]\)\[data-review-beat="compose"\] #layer-compose\{display:block\}/);
+  assert.match(page, /body:not\(\[data-reg="cypherpunk"\]\)\[data-review-beat="compose"\] #tally,/);
+  assert.match(page, /body:not\(\[data-reg="cypherpunk"\]\)\[data-review-beat="compose"\] #bind,/);
+  assert.match(page, /body:not\(\[data-reg="cypherpunk"\]\)\[data-review-beat="compose"\] #guard,/);
+  assert.match(page, /body:not\(\[data-reg="cypherpunk"\]\)\[data-review-beat="compose"\] #ai,/);
+  assert.match(page, /body:not\(\[data-reg="cypherpunk"\]\)\[data-review-beat="compose"\] #sources-panel\{display:none\}/);
 });
 
 test('Cypherpunk still reaches the full attestation instrument, same grammar and honesty', () => {
@@ -122,6 +122,11 @@ test('Cypherpunk still reaches the full attestation instrument, same grammar and
   assert.match(instrument, /data-view-disclosure="sources"/);
   assert.match(page, /target="_blank" rel="noopener noreferrer"/);
   assert.match(page, /reading==='cypherpunk' \? 'deeper' : 'arrival'/);
+  assert.match(page, /if\(reading==='cypherpunk'\) beat='deeper'/);
+  assert.match(page, /reading==='cypherpunk' \? 'deeper' : \(beatChoices\.get\(reading\)\|\|defaultBeat\(reading\)\)/);
+  assert.match(page, /body\[data-reg="cypherpunk"\] #tally,/);
+  assert.match(page, /body\[data-reg="cypherpunk"\] #guard,/);
+  assert.match(page, /body\[data-reg="cypherpunk"\] #ai,/);
   assert.match(page, /opens in a new tab/);
 });
 
@@ -182,6 +187,12 @@ test('beats and sources disclosure remember per view instead of resetting', () =
       },
       appendChild(n) { n.parentElement = this; this.children.push(n); return n; },
       addEventListener(k, fn) { (this.listeners[k] ??= []).push(fn); },
+      closest(s) {
+        for (let n = this; n; n = n.parentElement) {
+          if (matches(n, s)) return n;
+        }
+        return null;
+      },
       getAttribute(name) {
         if (name === 'data-reg') return this.dataset.reg;
         if (name === 'data-review-beat') return this.dataset.reviewBeat;
@@ -233,6 +244,9 @@ test('beats and sources disclosure remember per view instead of resetting', () =
     n.attrs.id = id;
     document.body.appendChild(n);
   }
+  const goCompose = element('button');
+  goCompose.attrs['data-review-go'] = 'compose';
+  document.body.appendChild(goCompose);
   const ctx = { document, Map, Math, URL, location: { href: 'http://127.0.0.1:8765/review.html' }, window: {} };
   vm.createContext(ctx);
   vm.runInContext(inline(page), ctx);
@@ -244,6 +258,8 @@ test('beats and sources disclosure remember per view instead of resetting', () =
   assert.equal(sources.open, true, 'cypherpunk default: sources open');
   assert.equal(document.body.getAttribute('data-review-beat'), 'deeper');
   assert.equal(theme.content, '#0d1410');
+  for (const fn of events.click || []) fn({ target: goCompose });
+  assert.equal(document.body.getAttribute('data-review-beat'), 'deeper', 'cypherpunk refuses a compose trim');
   sources.open = false;
   document.body.dataset.reg = 'raver';
   document.body.setAttribute('data-reg', 'raver');

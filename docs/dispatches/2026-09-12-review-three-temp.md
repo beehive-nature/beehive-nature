@@ -54,7 +54,12 @@ Cure, copied from #45 / #46 / #47 / #48:
 - **Cypherpunk:** today’s full instrument on contact — tally rails,
   passkey / guest bind, compose, guard verify, bLOVErAi / WebLLM, TASK
   6b honesty, cite-or-silent. Sources use `data-view-disclosure` and
-  default open in this view.
+  default open in this view. FOUNDER LOCK (privacy-maximalist target):
+  this view is never a trimmed New bee twin. Compose-beat CSS is
+  scoped `body:not([data-reg="cypherpunk"])`. Switching into
+  Cypherpunk, and any Leave-a-receipt click while already there,
+  force `data-review-beat="deeper"` so tally / bind / guard / AI /
+  sources cannot be stripped.
 
 Footer keyed leaves (`review.foot.attest`, `review.foot.learn`,
 `law.hive`) stay laid out so the first-paint floor of 6 does not drop.
@@ -78,8 +83,14 @@ headings stay on the instrument.
   populates; instrument checks enter via **Go deeper** / Cypherpunk)
 - `node e2e/i18n-coverage.mjs` on review.html ru --floors: live census
   **10 keyed / floor 6** PASS (100% keyed, 28 tongues filled)
-- live 8765 poke 39/39 PASS (Chrome, localStorage cleared, 1280×800)
+- live 8765 poke 46/46 PASS (Chrome, localStorage cleared, 1280×800),
+  including FOUNDER LOCK: forcing `data-review-beat="compose"` on
+  Cypherpunk still shows tally, bind, compose, guard, AI, sources
 
 Skipped this beat: fleet attestation of the new keys, wiring TASK 6b
 in-page publish, any David Irvine / x0x #622 measurement claim, any
 medical-advice rewrite (the page is not a treatment instrument).
+
+FOUNDER LOCK applied before marking the PR ready: Cypherpunk first
+paint stays the complete attestation instrument. The compose-beat
+progressive door is New bee / Raver only.
