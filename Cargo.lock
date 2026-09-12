@@ -2392,6 +2392,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "royalreview"
+version = "0.1.0"
+dependencies = [
+ "atmirror",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+]
+
+[[package]]
 name = "rsa"
 version = "0.9.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"

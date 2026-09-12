@@ -38,6 +38,7 @@ members = [
     "crates/onboarding",
     "crates/price-feed",
     "crates/reputation-engine",
+    "crates/royalreview",
     "crates/sense-atproto",
     "crates/shared-types",
     "crates/treasury-t0",
