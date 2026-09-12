@@ -5,8 +5,9 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="color-scheme" content="dark">
-<title>BiGen — the evidence library · cannabis &amp; cancer, exhibit 001</title>
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f6f7f2">
+<title>BiGen — the evidence library</title>
 <style>
 :root{--bg:#0d1410;--ink:#e2efdb;--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--dim:#8a9a8a;--line:#243026;--leaf:#7ddf8f;--amber:#ffb347;
 /* tier set = the six-checks-validated categorical set for surface #0d1410
@@ -15,16 +16,28 @@
    validator run (3a0be7b); normal 22.7, contrast ≥3:1 — receipt in review.html).
    Identity never rides color alone: marker + label always.
    REFUTED and REFUTED-AS-UNIVERSAL share a hue BY DESIGN and differ by marker ✗/⊘. */
---t-sup:#3f9c55;--t-mix:#c07f1c;--t-unt:#0092a6;--t-ref:#a476ec}
+--t-sup:#3f9c55;--t-mix:#c07f1c;--t-unt:#0092a6;--t-ref:#a476ec;
+--well:#0a0f0b;--bee-font:system-ui,-apple-system,'Segoe UI',sans-serif}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:36px 16px 90px}
-header{text-align:center;margin-bottom:10px}
+html,body{overflow-x:hidden}
+body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:0 0 90px}
+main{max-width:880px;margin:0 auto;padding-inline:16px}
+/* Estate register scoping — INLINE so a cypher-only leaf cannot FOUC or leak
+   if register.js is late or fails. Same contract as surfaces/register.js.
+   Copied from bEarth #45 / Symposium #46 / Hexagon #47 / bLongevity #48 / Review #49. */
+[data-reg]:not(body){display:none}
+body[data-reg="bee"] [data-reg="bee"],
+body[data-reg="raver"] [data-reg="raver"],
+body[data-reg="cypherpunk"] [data-reg="cypherpunk"]{display:revert}
+header{text-align:center;margin-bottom:12px;padding-bottom:14px;position:relative}
+header::after{content:'';position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:min(520px,80%);height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.5}
 h1{font-size:clamp(17px,4vw,24px);color:var(--gold);font-weight:400;letter-spacing:.05em}
-header p{color:var(--dim);font-size:11px;margin-top:6px;max-width:720px;margin-left:auto;margin-right:auto}
-main{max-width:880px;margin:0 auto}
+.sub{color:var(--dim);font-size:11px;margin-top:8px;max-width:780px;margin-left:auto;margin-right:auto;line-height:1.85}
 section{background:#111a14;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:16px}
 section h2{font-size:12px;color:var(--violet);font-weight:400;letter-spacing:.08em;margin-bottom:8px}
 .law{color:var(--dim);font-size:10px;line-height:1.7}
+.law b{color:var(--ink)}
 .banner{border:1px dashed #3d3410;background:#141207;border-radius:8px;padding:9px 12px;font-size:10.5px;color:var(--gold);line-height:1.7;margin-bottom:10px}
 a{color:var(--cyan)}
 .wrap{overflow-x:auto}
@@ -53,21 +66,208 @@ td.cl{color:var(--ink)}
 .flag-true{color:var(--amber)} .flag-gap{color:var(--violet)}
 .rcg{background:#0d1410;border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin-top:8px;font-size:10.5px;line-height:1.8}
 .rcg .m{color:var(--ink)} .rcg .n{color:var(--dim)}
+.cb{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-top:8px;font-size:10.5px;color:var(--dim)}
+.cb b{color:var(--ink);font-weight:400}
 details{margin-top:10px}
 summary{cursor:pointer;color:var(--violet);font-size:10.5px}
 pre{background:#0a0f0b;border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:8px;font-size:9.5px;line-height:1.6;overflow-x:auto;color:var(--dim)}
-footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
+footer{max-width:880px;margin:22px auto 0;padding-inline:16px;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
+
+[hidden]{display:none!important}
+.door{appearance:none;display:inline-flex;align-items:center;justify-content:center;min-height:44px;
+ padding:10px 18px;border-radius:8px;border:1px solid var(--line);background:var(--well);color:var(--ink);
+ font:inherit;cursor:pointer;text-decoration:none}
+.door.primary{background:var(--leaf);color:#102214;border-color:var(--leaf);font-weight:650}
+.door:focus-visible,summary:focus-visible,a:focus-visible,.tgl button:focus-visible{
+ outline:3px solid var(--cyan);outline-offset:3px}
+.choices{display:flex;flex-wrap:wrap;gap:10px 14px;justify-content:center;margin-top:22px}
+.calm{max-width:40rem;margin:18px auto 0;font-size:1.05rem;line-height:1.7}
+.take{font-size:clamp(1.5rem,5.4vw,2.4rem);line-height:1.2;color:var(--gold);margin-top:18px;font-weight:550;text-wrap:balance}
+.support{font-size:.875rem;color:var(--dim);margin-top:8px;max-width:36rem;margin-inline:auto}
+.eyebrow{color:var(--dim);font-size:.875rem;margin-top:8px}
+.pair{color:var(--ink);font-size:.95rem;margin-top:6px;letter-spacing:.04em}
+.fence{font-size:.875rem;color:var(--dim);margin-top:14px;max-width:36rem;margin-inline:auto}
+.map-caption{max-width:36rem;margin:16px auto 0;font-size:1.05rem;line-height:1.7;color:var(--dim)}
+#first-bee,#first-raver,#layer-figure,#layer-map,#instrument{display:none}
+body[data-reg="bee"][data-bigen-beat="arrival"] #first-bee{display:block}
+body[data-reg="raver"][data-bigen-beat="figure"] #layer-figure{display:block}
+body:not([data-reg="cypherpunk"])[data-bigen-beat="map"] #layer-map{display:block}
+body[data-bigen-beat="deeper"] #instrument,
+body[data-reg="cypherpunk"] #instrument{display:block}
+body[data-reg="raver"][data-bigen-beat="arrival"] #masthead{display:none}
+
+/* New bee — language-first calm room. */
+body[data-reg="bee"]{
+  --bg:#f6f7f2;--panel:#fff;--well:#edf2eb;--ink:#18362a;--dim:#435f4e;--faint:#52695b;
+  --line:#ccd7cf;--gold:#855b0b;--violet:#65509a;--cyan:#176879;--leaf:#326b39;--amber:#9f362c;
+  --t-sup:#326b39;--t-mix:#855b0b;--t-unt:#176879;--t-ref:#65509a;
+  color-scheme:light;
+  background:#f6f7f2;color:#18362a;font:1.125rem/1.65 var(--bee-font);
+}
+body[data-reg="bee"] h1{color:var(--ink);letter-spacing:-.03em}
+body[data-reg="bee"] header::after{opacity:.25}
+body[data-reg="bee"] .calm,.take,.support,.eyebrow,.pair,.fence,.map-caption{font-family:var(--bee-font)}
+body[data-reg="bee"] .take{color:#326b39}
+body[data-reg="bee"] .door{font:500 1rem/1.4 var(--bee-font);border-radius:16px;min-width:11rem;background:#fff;border-color:#8a9e90}
+body[data-reg="bee"] .door.primary{background:#326b39;color:#fff;border-color:#326b39}
+body[data-reg="bee"] #tbar{background:#f6f7f2!important;border-top-color:#ccd7cf!important}
+body[data-reg="bee"] #tbar a{color:#18362a!important}
+body[data-reg="bee"] section{background:#fff;border-color:var(--line)}
+body[data-reg="bee"] .banner{background:#f3efe2;border-color:#d4c4a0;color:#855b0b}
+body[data-reg="bee"] .card,.ib div,.rcg,pre{background:#edf2eb;border-color:var(--line)}
+
+/* Raver — library-as-garden, not a courtroom. Feeling first; the map one tap away. */
+body[data-reg="raver"]{--bg:#0c1412;--ink:#e9f2ec;--dim:#b7c9be;--line:#2a3a34;--gold:#c9a0ff;--violet:#c9a0ff;--cyan:#7ee0d0;
+ --leaf:#c9a0ff;color-scheme:dark;background:#0c1412}
+body[data-reg="raver"][data-bigen-beat="arrival"]{padding:0 0 90px;background:#0c1412}
+body[data-reg="raver"][data-bigen-beat="arrival"] main{max-width:none}
+#first-raver{position:relative;min-height:100svh;flex-direction:column;align-items:center;
+ justify-content:flex-end;padding:12vh 22px calc(14vh + 72px);text-align:center;overflow:hidden}
+body[data-reg="raver"][data-bigen-beat="arrival"] #first-raver{display:flex}
+#mark-scene{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.feel{position:relative;z-index:1;max-width:22ch;font-size:clamp(1.6rem,6vw,2.8rem);line-height:1.25;
+ color:#e9f2ec;font-weight:400;text-wrap:balance}
+#first-raver .choices{position:relative;z-index:1}
+body[data-reg="raver"] .door.primary{background:#c9a0ff;color:#141018;border-color:#c9a0ff;
+ font:600 1.05rem/1.4 var(--bee-font);border-radius:99px;padding:12px 26px}
+.consciousness{max-width:36rem;margin:0 auto 18px;font-size:1.15rem;line-height:1.7;color:var(--ink)}
+@keyframes mark-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+@keyframes wash-shift{0%,100%{opacity:.55}50%{opacity:.9}}
+@keyframes mark-glow{0%,100%{opacity:.35}50%{opacity:.8}}
+#mark-scene .living{animation:mark-breathe 10s ease-in-out infinite;transform-origin:50% 48%}
+#mark-scene .wash{animation:wash-shift 12s ease-in-out infinite}
+#mark-scene .glow{animation:mark-glow 8s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){
+ #mark-scene .living,#mark-scene .wash,#mark-scene .glow{animation:none}
+}
+
+/* Cypherpunk keeps today's full evidence-library instrument. */
+body[data-reg="cypherpunk"]{font-family:ui-monospace,'Cascadia Mono',Consolas,monospace}
+body[data-reg="cypherpunk"] #sources-panel{border:1px dashed var(--line);border-radius:11px;padding:10px 12px;margin-top:14px}
+body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44px;display:flex;align-items:center}
+#sources-panel{margin-top:14px}
+#sources-panel summary{cursor:pointer;min-height:44px;display:flex;align-items:center;color:var(--violet)}
+
+/* Page-owned language+view chrome (atlas mast-nav / gallery top-nav).
+   lang.js mounts #blangctl into [data-language-host]; register.js mounts
+   #bregctl into [data-register-host]. Keep both out of #first-bee. */
+#bregdescription{position:absolute;display:block;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+.bigen-language[data-language-host]{display:flex;align-items:center;margin-inline-start:auto;max-width:100%}
+.bigen-language #blangctl{margin:0!important;padding:0!important;border:0!important;flex-wrap:wrap}
+.bigen-language #blangsel{
+  min-height:44px!important;min-width:11rem;max-width:100%!important;padding:8px 12px!important;
+  background:var(--reg-bg,var(--panel,var(--bg)))!important;color:var(--reg-ink,var(--ink))!important;
+  border:1px solid var(--reg-line,var(--line))!important;font:inherit!important
+}
+.bigen-language #blangnote{white-space:normal!important;color:var(--reg-ink,var(--dim))!important;font:.75rem/1.4 inherit!important}
 </style>
 </head>
-<body>
-<header>
-  <h1>⌕ BiGen — the evidence library</h1>
-  <p>systematic review in the Cochrane tradition, as a public repo: standing queries instead of
+<body data-reg="bee" data-bee-theme="custom" data-bigen-beat="arrival">
+<div id="bregbar">
+  <a class="breg-home" href="index.html" aria-label="skaists home">⬡ skaists</a>
+  <div data-register-host aria-describedby="bregdescription"></div>
+  <span id="bregdescription" data-i18n="atlas.view">Choose how this page speaks to you</span>
+  <span class="bigen-language" data-language-host></span>
+</div>
+<main>
+<header id="masthead">
+  <h1>⌕ <span data-i18n="bigen.mark">BiGen — the evidence library</span></h1>
+  <p class="eyebrow pair" data-i18n="bigen.pair">graded evidence, not a brochure</p>
+  <div class="sub" data-reg="cypherpunk">systematic review in the Cochrane tradition, as a public repo: standing queries instead of
   stale searches, plots as YAML instead of PDF images, judgments in git history instead of editorial
   memory. this surface is exhibit 001 — the cannabis &amp; cancer corpus as an
-  <b style="color:var(--gold);font-weight:400">evidence map</b>: mechanistic and early-phase, honestly not poolable.</p>
+  <b style="color:var(--gold);font-weight:400">evidence map</b>: mechanistic and early-phase, honestly not poolable.
+  not medical advice. preclinical strength is not clinical proof in either direction.</div>
 </header>
-<main>
+
+<article id="first-bee">
+  <p class="calm" data-i18n="bigen.bee.calm">This is an evidence library you can re-run — not a brochure you have to trust.</p>
+  <p class="take" data-i18n="bigen.bee.takeaway">Empty cells are findings — not failures.</p>
+  <p class="support" data-i18n="bigen.bee.support">exhibit 001 is early-phase and honestly not poolable — cannabis &amp; cancer, named once.</p>
+  <p class="fence" data-i18n="bigen.bee.fence">Claims arrive graded or not at all — not medical advice.</p>
+  <div class="choices">
+    <button type="button" class="door primary" data-bigen-go="map" data-i18n="bigen.bee.map">Open the map</button>
+    <button type="button" class="door" data-bigen-go="deeper" data-i18n="bigen.bee.deeper">Go deeper</button>
+  </div>
+</article>
+
+<article id="first-raver">
+  <svg id="mark-scene" viewBox="0 0 800 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A soft search and mark glow — library as garden, not a courtroom">
+    <defs>
+      <linearGradient id="garden-wash" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#1a2a18"/>
+        <stop offset="32%" stop-color="#123028"/>
+        <stop offset="62%" stop-color="#142838"/>
+        <stop offset="88%" stop-color="#1c1830"/>
+        <stop offset="100%" stop-color="#0c1412"/>
+      </linearGradient>
+      <radialGradient id="mark-glow" cx="50%" cy="40%" r="52%">
+        <stop offset="0%" stop-color="#d8c46a" stop-opacity=".38"/>
+        <stop offset="42%" stop-color="#63c97c" stop-opacity=".16"/>
+        <stop offset="74%" stop-color="#7ee0d0" stop-opacity=".12"/>
+        <stop offset="100%" stop-color="#0c1412" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect class="wash" width="800" height="900" fill="url(#garden-wash)"/>
+    <ellipse class="wash" cx="400" cy="360" rx="320" ry="260" fill="url(#mark-glow)"/>
+    <g class="living">
+      <ellipse cx="250" cy="280" rx="70" ry="110" fill="#63c97c" opacity=".18" transform="rotate(-28 250 280)"/>
+      <ellipse cx="560" cy="320" rx="64" ry="100" fill="#7ee0d0" opacity=".16" transform="rotate(18 560 320)"/>
+      <ellipse cx="400" cy="520" rx="90" ry="50" fill="#c9a0ff" opacity=".14"/>
+    </g>
+    <g class="glow" fill="none" stroke="#d8c46a" stroke-width="2.2">
+      <circle cx="400" cy="390" r="28" opacity=".55"/>
+      <path d="M420 410 L456 446" opacity=".5"/>
+    </g>
+    <g class="glow" fill="#c9a0ff" opacity=".28">
+      <rect x="210" y="560" width="54" height="36" rx="4"/>
+      <rect x="280" y="560" width="54" height="36" rx="4"/>
+      <rect x="466" y="560" width="54" height="36" rx="4" fill="none" stroke="#7ee0d0" stroke-width="1.6"/>
+      <rect x="536" y="560" width="54" height="36" rx="4" fill="none" stroke="#7ee0d0" stroke-width="1.6"/>
+    </g>
+  </svg>
+  <p class="feel" data-i18n="bigen.raver.feel">What if the empty cells were the most honest answer?</p>
+  <div class="choices">
+    <button type="button" class="door primary" data-bigen-go="figure" data-i18n="bigen.raver.walk">Walk the map</button>
+  </div>
+</article>
+
+<article id="layer-figure">
+  <p class="consciousness" data-i18n="bigen.raver.consciousness">A pooled number on an evidence map is a category error — this page refuses it.</p>
+  <p class="take" data-i18n="bigen.bee.takeaway">Empty cells are findings — not failures.</p>
+  <p class="support" data-i18n="bigen.bee.support">exhibit 001 is early-phase and honestly not poolable — cannabis &amp; cancer, named once.</p>
+  <div class="choices">
+    <button type="button" class="door primary" data-bigen-go="map" data-i18n="bigen.bee.map">Open the map</button>
+    <button type="button" class="door" data-bigen-go="deeper" data-i18n="bigen.bee.deeper">Go deeper</button>
+  </div>
+</article>
+
+<article id="layer-map">
+  <p class="take" data-i18n="bigen.bee.takeaway">Empty cells are findings — not failures.</p>
+  <div class="banner">this corpus is mechanistic + early-phase: nothing in it is poolable — a pooled number on an evidence map is a category error.</div>
+  <div class="wrap"><div class="gm" id="calm-gapmap">
+    <div class="h"></div>
+    <div class="h">plant combination</div>
+    <div class="h">synthetic isolate</div>
+    <div class="h">CBD isolate</div>
+    <div class="r">supportive care</div>
+    <div class="cell full">occupied</div>
+    <div class="cell full">occupied</div>
+    <div class="cell empty">— empty · the finding</div>
+    <div class="r">antitumour intent</div>
+    <div class="cell early">early-phase</div>
+    <div class="cell empty">— empty · the finding</div>
+    <div class="cell empty">— empty · the finding</div>
+  </div></div>
+  <p class="map-caption" data-i18n="bigen.map.caption">Empty cells are the finding — this corpus is early-phase and honestly not poolable.</p>
+  <div class="law" style="margin-top:8px">three of six cells empty — no synthetic-isolate antitumour trial, and no CBD-isolate oncology trial of any intent. that absence is the finding, not a hole in the library.</div>
+  <div class="choices">
+    <button type="button" class="door" data-bigen-go="deeper" data-i18n="bigen.bee.deeper">Go deeper</button>
+  </div>
+</article>
+
+<div id="instrument">
+<div class="law">honest seams, visible on contact: not medical advice · not poolable · preclinical strength is not clinical proof in either direction.</div>
 
 <section>
   <h2><span data-i18n="h.033">WHY THIS EXISTS — the four things Cochrane cannot retrofit</span></h2>
@@ -79,9 +279,9 @@ footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
     <tr><td class="cl">dissent</td><td>write a letter to the editor</td><td>fork, change the rating, show your work</td></tr>
   </table></div>
   <div class="law" style="margin-top:8px">a Cochrane forest plot is an assertion you trust; a BiGen plot is a computation
-  you re-run. architecture: <a href="https://github.com/skaists/LOVErnment-DAO/blob/main/bigen/ARCHITECTURE.md">bigen/ARCHITECTURE.md</a> ·
-  integrity schema: <a href="https://github.com/skaists/LOVErnment-DAO/blob/main/bigen/integrity/SCHEMA.md">bigen/integrity/SCHEMA.md</a> ·
-  design law: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/DESIGN-BRIEF-02-bigen-library.md">DESIGN-BRIEF-02</a>.
+  you re-run. architecture: <a href="https://github.com/skaists/LOVErnment-DAO/blob/main/bigen/ARCHITECTURE.md" target="_blank" rel="noopener noreferrer">bigen/ARCHITECTURE.md</a> ·
+  integrity schema: <a href="https://github.com/skaists/LOVErnment-DAO/blob/main/bigen/integrity/SCHEMA.md" target="_blank" rel="noopener noreferrer">bigen/integrity/SCHEMA.md</a> ·
+  design law: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/DESIGN-BRIEF-02-bigen-library.md" target="_blank" rel="noopener noreferrer">DESIGN-BRIEF-02</a>.
   every record below was verified against PubMed via E-utilities on <span id="vdate">2026-08-19</span> — not against recollection.</div>
 </section>
 
@@ -124,7 +324,7 @@ footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   against <b>~160 cannabinoids identified in the plant</b> — a COA's "Total Cannabinoids" line is a panel floor
   wearing a total's name. this corpus is regulatory tables + same-sample assays: <b>not poolable — no pooled
   estimate will ever render here.</b> source of record:
-  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/RECEIPT_CANNABINOID_PANEL_UNDERCOUNT_2026-08-20.md">RECEIPT_CANNABINOID_PANEL_UNDERCOUNT</a> (Seat 3, 37a432f; Canada IHR figure corrected same-day at 72661ef in the sibling receipt).</div>
+  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/RECEIPT_CANNABINOID_PANEL_UNDERCOUNT_2026-08-20.md" target="_blank" rel="noopener noreferrer">RECEIPT_CANNABINOID_PANEL_UNDERCOUNT</a> (Seat 3, 37a432f; Canada IHR figure corrected same-day at 72661ef in the sibling receipt).</div>
   <div class="wrap"><table id="tiers2">
     <tr><th>claim</th><th>verdict</th><th class="cite">sources</th></tr>
   </table></div>
@@ -171,10 +371,10 @@ footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   </table></div>
   <div class="law" style="margin-top:8px">read rows 3 and 4 together: sponsored studies score <i>better</i> on standard
   methodology — the bias is not in the method section, it is in the sentence after the table. that sentence is what
-  <b>results_conclusions_gap</b> measures. <a href="https://doi.org/10.1002/14651858.MR000033.pub3">Lundh et al. 2017, MR000033</a>.</div>
+  <b>results_conclusions_gap</b> measures. <a href="https://doi.org/10.1002/14651858.MR000033.pub3" target="_blank" rel="noopener noreferrer">Lundh et al. 2017, MR000033</a>.</div>
   <div class="rcg"><span class="m">the instrument pointed at ourselves first:</span> <span class="n">BiGen's own ECS map
   attributed CBD's stem-cell effect to an "AMPK→SIRT1/autophagy pathway." AMPK appears nowhere in the source's
-  abstract, keywords, or MeSH terms (<a href="https://doi.org/10.21873/invivo.14186">In Vivo 2026;40(1):222–234</a>, PMID 41482390).
+  abstract, keywords, or MeSH terms (<a href="https://doi.org/10.21873/invivo.14186" target="_blank" rel="noopener noreferrer">In Vivo 2026;40(1):222–234</a>, PMID 41482390).
   logged as CORRECTIONS-01 EDIT 1 — a library that only runs its instruments on other people's work has not implemented them.</span></div>
 </section>
 
@@ -185,47 +385,104 @@ footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   </details>
 </section>
 
-<section>
-  <h2><span data-i18n="h.043">SOURCES — cite or the cell stays silent</span></h2>
+<details id="sources-panel" data-view-disclosure="sources">
+  <summary><h2 style="margin:0"><span data-i18n="h.043">SOURCES — cite or the cell stays silent</span></h2></summary>
+  <div class="law">External citations — each link opens in a new tab so this page and session stay put.</div>
   <div class="wrap"><table id="srctab"></table></div>
-</section>
+</details>
 
+</div>
 </main>
 <footer>
-  an evidence map, not medical advice · preclinical strength is not clinical proof in either direction ·
-  AGPL-3.0-only · <a href="https://github.com/beehive-nature/beehive-nature">source tree</a> ·
-  this page: surfaces/bigen.html · <a href="index.html" data-i18n="law.hive">← the hive</a><br>
-  don't trust these pages either — every claim links its source. Verify.
+  <span data-i18n="bigen.foot.library">an evidence map, not medical advice</span>
+  <span data-reg="cypherpunk"> · preclinical strength is not clinical proof in either direction
+  · AGPL-3.0-only · <a href="https://github.com/beehive-nature/beehive-nature" target="_blank" rel="noopener noreferrer">source tree</a>
+  · this page: surfaces/bigen.html</span>
+  · <a href="university/index.html" data-i18n="bigen.foot.learn">learn to check this page</a>
+  · <a href="index.html" data-i18n="law.hive">← the hive</a><br>
+  <span data-i18n="bigen.foot.verify">don't trust these pages either — every claim links its source. Verify.</span>
 </footer>
 
 <script src="tour.js?v=41"></script>
 <script>
 (function(){
 var $=function(i){return document.getElementById(i);};
+function restoreVisibleFocus(focus){
+ if(!focus||!focus.isConnected)return;var target=focus;
+ for(var node=focus.parentElement;node;node=node.parentElement)if(node.tagName==='DETAILS'&&!node.open){
+  target=node.querySelector('summary'); break;
+ }
+ if(target&&target.focus) target.focus({preventScroll:true});
+}
+function defaultOpen(reading,kind){
+ return reading==='cypherpunk' && kind==='sources';
+}
+function defaultBeat(reading){
+ return reading==='cypherpunk' ? 'deeper' : 'arrival';
+}
+var lastReading=null;
+var readingChoices=new Map();
+var beatChoices=new Map();
+function setBeat(beat){
+  var reading=document.body.getAttribute('data-reg')||'bee';
+  if(reading==='cypherpunk') beat='deeper';
+  document.body.setAttribute('data-bigen-beat',beat);
+  beatChoices.set(reading,beat);
+  var focusId=beat==='figure'?'layer-figure':beat==='map'?'layer-map':beat==='deeper'?'instrument':null;
+  var node=focusId && $(focusId);
+  if(node) node.scrollIntoView({block:'start'});
+}
+function applyReading(event){
+  var reading=event&&event.detail&&event.detail.reg||document.body.dataset.reg||'bee';
+  if(reading===lastReading) return;
+  var focus=document.activeElement;
+  var details=[].slice.call(document.querySelectorAll('[data-view-disclosure]'));
+  if(lastReading){
+    readingChoices.set(lastReading, details.map(function(d){ return d.open; }));
+    beatChoices.set(lastReading, document.body.getAttribute('data-bigen-beat')||'arrival');
+  }
+  var previous=readingChoices.get(reading);
+  details.forEach(function(d,i){
+    d.open=previous ? previous[i] : defaultOpen(reading, d.getAttribute('data-view-disclosure'));
+  });
+  document.body.setAttribute('data-bigen-beat', reading==='cypherpunk' ? 'deeper' : (beatChoices.get(reading)||defaultBeat(reading)));
+  var theme=document.querySelector('meta[name="theme-color"]');
+  if(theme) theme.content=reading==='bee'?'#f6f7f2':reading==='raver'?'#0c1412':'#0d1410';
+  restoreVisibleFocus(focus);
+  lastReading=reading;
+}
+document.addEventListener('bregister',applyReading);
+document.addEventListener('click',function(e){
+  var btn=e.target&&e.target.closest&&e.target.closest('[data-bigen-go]');
+  if(!btn) return;
+  setBeat(btn.getAttribute('data-bigen-go'));
+});
+applyReading();
 
 /* ===== receipts: everything below was verified live via PubMed E-utilities, 2026-08-19 ===== */
 
-var P=function(id){return '<a href="https://pubmed.ncbi.nlm.nih.gov/'+id+'/">PMID '+id+'</a>';};
+var P=function(id){return '<a href="https://pubmed.ncbi.nlm.nih.gov/'+id+'/" target="_blank" rel="noopener noreferrer">PMID '+id+'</a>';};
+var XA=function(href,label){return '<a href="'+href+'" target="_blank" rel="noopener noreferrer">'+label+'</a>';};
 
 var SRC={
  R01:{c:'Guzmán 2003 · Nat Rev Cancer 3(10)',t:'landmark review — the preclinical case',l:P('14570037')},
  R02:{c:'Velasco, Sánchez, Guzmán 2012 · Nat Rev Cancer 12(6)',t:'the mechanisms-by-cancer-type review',l:P('22555283')},
  R03:{c:'Guzmán et al. 2006 · Br J Cancer 95(2)',t:'pilot: intratumoral Δ9-THC, recurrent glioblastoma, n=9',l:P('16804518')},
- R04:{c:'ASCO/JCO 2017 · 35(15s):2046',t:'phase 2 randomised: nabiximols (1:1 CBD:THC) + temozolomide, recurrent GBM',l:'<a href="https://ascopubs.org/doi/10.1200/JCO.2017.35.15_suppl.2046">JCO abstract</a>'},
+ R04:{c:'ASCO/JCO 2017 · 35(15s):2046',t:'phase 2 randomised: nabiximols (1:1 CBD:THC) + temozolomide, recurrent GBM',l:XA('https://ascopubs.org/doi/10.1200/JCO.2017.35.15_suppl.2046','JCO abstract')},
  R05:{c:'Johnson et al. 2010 · J Pain Symptom Manage 39(2)',t:'RCT: THC:CBD extract, intractable cancer pain',l:P('19896326')},
  R06:{c:'CINV systematic review 2020 · Support Care Cancer',t:'oral cannabinoids for chemotherapy nausea/vomiting prophylaxis',l:P('31916006')},
  R07:{c:'Strasser et al. 2006 · J Clin Oncol',t:'RCT: cannabis extract vs THC vs placebo, cancer cachexia — null',l:P('16849753')},
- R08:{c:'Zhang et al. 2015 · Int J Cancer',t:'pooled analysis, ILCC: cannabis smoking & lung cancer (2,159 cases)',l:P('24947688')+' · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4262725/">PMC</a>'},
+ R08:{c:'Zhang et al. 2015 · Int J Cancer',t:'pooled analysis, ILCC: cannabis smoking & lung cancer (2,159 cases)',l:P('24947688')+' · '+XA('https://pmc.ncbi.nlm.nih.gov/articles/PMC4262725/','PMC')},
  R09:{c:'Doherty et al. 2021 · Br J Cancer',t:'"hype or hope?" — the sober read on glioblastoma evidence',l:P('33623077')},
- R10:{c:'NASEM 2017 · the Health Effects of Cannabis and Cannabinoids',t:'the congressionally-mandated evidence review',l:'<a href="https://nap.nationalacademies.org/catalog/24625/">NAP 24625</a>'},
+ R10:{c:'NASEM 2017 · the Health Effects of Cannabis and Cannabinoids',t:'the congressionally-mandated evidence review',l:XA('https://nap.nationalacademies.org/catalog/24625/','NAP 24625')},
  R11:{c:'Bint Faiz et al. 2024',t:'current review: therapeutic potential in cancer',l:P('39331301')},
  R12:{c:'Castle et al. 2025',t:'meta-analysis: medical cannabis in cancer populations',l:P('40303989')},
  R13:{c:'Creangă-Murariu et al. 2026',t:'antitumour activity + interaction with oncology treatments',l:P('42198443')},
- R14:{c:'Javid et al. 2025',t:'glioma immune modulation review',l:'<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12334796/">PMC12334796</a>'},
+ R14:{c:'Javid et al. 2025',t:'glioma immune modulation review',l:XA('https://pmc.ncbi.nlm.nih.gov/articles/PMC12334796/','PMC12334796')},
  R15:{c:'Alghamdi et al. 2025',t:'systematic review: synthetic cannabinoids, CB2 agonists',l:P('40483537')},
- R16:{c:'Feng et al. 2024 · J Transl Med',t:'CBD + THC/CBG synergy, radiosensitisation — bench to bedside',l:'<a href="https://doi.org/10.1186/s12967-024-05477-0">DOI</a>'},
- R17:{c:'Baumeister et al. 2021',t:'Mendelian randomisation: cannabis-use genetic liability &amp; squamous cell carcinoma',l:'<a href="https://www.sciencedirect.com/science/article/pii/S1556086421021055">eBioMedicine</a>'},
- R18:{c:'Hussein et al. 2014 · Alexandria J Med',t:'cannabis extract &amp; hepatic TERT mRNA in mice (not PubMed-indexed)',l:'<a href="https://doi.org/10.1016/j.ajme.2014.02.003">DOI</a>'},
+ R16:{c:'Feng et al. 2024 · J Transl Med',t:'CBD + THC/CBG synergy, radiosensitisation — bench to bedside',l:XA('https://doi.org/10.1186/s12967-024-05477-0','DOI')},
+ R17:{c:'Baumeister et al. 2021',t:'Mendelian randomisation: cannabis-use genetic liability &amp; squamous cell carcinoma',l:XA('https://www.sciencedirect.com/science/article/pii/S1556086421021055','eBioMedicine')},
+ R18:{c:'Hussein et al. 2014 · Alexandria J Med',t:'cannabis extract &amp; hepatic TERT mRNA in mice (not PubMed-indexed)',l:XA('https://doi.org/10.1016/j.ajme.2014.02.003','DOI')},
  R19:{c:'Chueaphromsri et al. 2026 · In Vivo 40(1)',t:'CBD &amp; senescence in normal human mesenchymal stem cells',l:P('41482390')}
 };
 var S=function(){var a=[];for(var i=0;i<arguments.length;i++)a.push(SRC[arguments[i]].l);return a.join(' ');};
@@ -271,7 +528,7 @@ ROWS.forEach(function(r){
 });
 
 /* ===== EXHIBIT 002 — the COA panel undercount; source of record: docs/receipts/RECEIPT_CANNABINOID_PANEL_UNDERCOUNT_2026-08-20.md ===== */
-var REC='<a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/RECEIPT_CANNABINOID_PANEL_UNDERCOUNT_2026-08-20.md">receipt §</a>';
+var REC=XA('https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/RECEIPT_CANNABINOID_PANEL_UNDERCOUNT_2026-08-20.md','receipt §');
 var ROWS2=[
  {cl:'a lab\'s "total cannabinoids" is its own panel\'s sum, not a total',
   t:'sup',s:[REC+'1'],note:'regulator floors: Health Canada 4 · Oregon 4 · California 6 · Colorado 8 · AOAC 12 · commercial ceiling 15–16 · USDA hemp compliance one analyte pair — against ~160 identified'},
@@ -282,7 +539,7 @@ var ROWS2=[
  {cl:'"10–30% of extract mass is unidentified on a typical COA"',
   t:'ref',s:[REC+'4a'],note:'traces only to trade press that 403\'d, no primary citation — the gap is proven in compound count, never mass'},
  {cl:'"there are 113 cannabinoids"',
-  t:'ref',s:[REC+'2'],note:'no primary source exists behind cannabis writing\'s most-quoted number; the Mississippi series runs 70 → 104 → 120 → 125; current: ~160 identified (Gandlevskiy 2025, PMID <a href="https://pubmed.ncbi.nlm.nih.gov/41321142/">41321142</a>) or 125 isolated-and-characterised (Radwan 2021) — detected ≠ characterised'},
+  t:'ref',s:[REC+'2'],note:'no primary source exists behind cannabis writing\'s most-quoted number; the Mississippi series runs 70 → 104 → 120 → 125; current: ~160 identified (Gandlevskiy 2025, PMID <a href="https://pubmed.ncbi.nlm.nih.gov/41321142/" target="_blank" rel="noopener noreferrer">41321142</a>) or 125 isolated-and-characterised (Radwan 2021) — detected ≠ characterised'},
  {cl:'panel width is what limits seed cannabinoid content',
   t:'unt',s:[REC+'4b'],note:'no source in the corpus describes seed — hull-on, dehulled, or oil; the seed ceiling is the contamination mechanism (no glandular trichomes), not the analyte count'},
  {cl:'a reference method exists for true total-cannabinoid content',
@@ -430,6 +687,7 @@ function setLevel(v){
  });
 }
 setLevel('p');
+window.setLevel=setLevel;
 })();
 </script>
 </body>
