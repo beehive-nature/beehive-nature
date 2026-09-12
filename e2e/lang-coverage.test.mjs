@@ -73,21 +73,23 @@ test('browser exports exist even when the picker is already mounted',()=>{
   assert.equal(typeof context.BNRLanguageCoverage.summarizeCoverage,'function');
 });
 
-async function render(strings) {
+async function render(strings, bundle) {
   const nodes=Object.keys(strings).map(key=>leaf('Source '+key,{key}));
   const ids=new Map();
   function element(){
-    const el={style:{},appendChild(){},setAttribute(){},addEventListener(){}};
+    const el={style:{},appendChild(){},setAttribute(){},addEventListener(){},querySelector(){return null;}};
     Object.defineProperty(el,'id',{set(id){ids.set(id,el);}});return el;
   }
   const document={readyState:'complete',body:element(),documentElement:{},
     querySelector:()=>null,getElementById:id=>ids.get(id),createElement:element,dispatchEvent(){},addEventListener(){},
     querySelectorAll:selector=>selector==='[data-i18n]'||selector==='body *'?nodes:[]};
+  if(bundle!==undefined)ids.set('bnr-language-bundle',{textContent:bundle});
+  let fetches=0;
   const context={document,location:{pathname:'/surfaces/'},localStorage:{getItem:()=> 'ru'},
-    fetch:async()=>({json:async()=>({strings,_meta:{}})}),addEventListener(){},CustomEvent:class{}};
+    fetch:async()=>{fetches++;return {json:async()=>({strings,_meta:{}})};},addEventListener(){},CustomEvent:class{}};
   context.window=context;vm.runInNewContext(source,context);
   await new Promise(resolve=>setImmediate(resolve));
-  return {nodes,note:ids.get('blangnote')};
+  return {nodes,note:ids.get('blangnote'),fetches};
 }
 
 test('the actual renderer preserves English for whitespace and non-string cells',async()=>{
@@ -95,6 +97,26 @@ test('the actual renderer preserves English for whitespace and non-string cells'
   assert.deepEqual(nodes.map(n=>n.textContent),['Я','Source blank','Source invalid','Source missing']);
   assert.equal(note.textContent,'⚙ 1/4');
   assert.match(note.title,/3 empty translations/);
+});
+
+test('bundled corpus renders without a fetch and keeps draft attribution',async()=>{
+  const {nodes,note,fetches}=await render({valid:{}},JSON.stringify({_meta:{},strings:{valid:{ru:'Привет'}}}));
+  assert.equal(nodes[0].textContent,'Привет');
+  assert.equal(fetches,0);
+  assert.equal(note.textContent,'⚙ 1/1');
+});
+
+test('bundled withdrawn translations retain the English fallback',async()=>{
+  const {nodes,note,fetches}=await render({valid:{}},JSON.stringify({_meta:{withdrawn:{ru:{}}},strings:{valid:{ru:'Привет'}}}));
+  assert.equal(nodes[0].textContent,'Source valid');
+  assert.equal(fetches,0);
+  assert.equal(note.textContent,'⚙ 0/1');
+});
+
+test('malformed language bundle uses the normal corpus loader',async()=>{
+  const {nodes,fetches}=await render({valid:{ru:'Привет'}},'{broken');
+  assert.equal(nodes[0].textContent,'Привет');
+  assert.equal(fetches,1);
 });
 
 test('empty, malformed and duplicate requested page sets fail instead of disappearing',()=>{

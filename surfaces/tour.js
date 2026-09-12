@@ -1,6 +1,12 @@
 (function(){
   if(document.getElementById('tbar'))return;
-  var R=location.pathname.indexOf('/beehive-nature/')===0?'/beehive-nature/surfaces/':'/surfaces/';
+  /* Published dApps live at a site-root path.  A developer can also open a
+     surface directly from its checkout with file://; in that mode the site
+     root does not exist, so riders must resolve beside this script instead. */
+  var current=document.currentScript;
+  var R=location.protocol==='file:'
+    ? new URL('.', current&&current.src||location.href).href
+    : (location.pathname.indexOf('/beehive-nature/')===0?'/beehive-nature/surfaces/':'/surfaces/');
   /* Sibling riders (register / lang / rails-badge) follow THIS file, not the
      /surfaces/ alias. A poke at http://127.0.0.1:8765/bearth.html (surfaces as
      server root) 404s /surfaces/register.js and never applies data-reg scoping.

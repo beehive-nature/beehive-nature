@@ -206,9 +206,30 @@
     .petal{opacity:1;transform:scale(1) rotate(var(--pr,0deg))}
     .rp{opacity:1;transform:none}
   }
+
+  .view-title{font-size:clamp(1.8rem,5vw,3.7rem);margin:22px 0 0;letter-spacing:-.04em}
+  .plur-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin:30px auto 0;max-width:850px}
+  .plur-actions a{padding:14px 20px;border:1px solid var(--ink-mut);border-radius:999px;color:var(--ink);text-decoration:none;font-weight:650}
+  .plur-actions a:hover,.plur-actions a:focus-visible{background:var(--you);color:#fff;outline:2px solid currentColor;outline-offset:3px}
+  .entry-note{font-size:.85rem!important;max-width:60ch!important}
+  .w .r,.w.novoice .mute{opacity:1}.w .r{color:var(--ink-mut)}
+  .boundary{max-width:1120px;margin:auto;padding:48px 24px;font:15px/1.65 var(--mono)}
+  .boundary h2,.boundary h3{margin:0 0 20px}.flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:30px}
+  .flow>div{padding:20px;border:1px solid var(--ink-mut);border-top:3px solid var(--ai)}
+  .boundary dt{color:var(--ai);margin-top:18px}.boundary dd{margin:0;overflow-wrap:anywhere}
+  .privacy-note{padding:18px;margin-top:24px;border:1px solid var(--ink-mut);border-radius:12px;font-size:.9rem;line-height:1.6}.privacy-note span{display:block}
+  body[data-reg="bee"]{--bg:#f6f7ef;--ink:#18362a;--ink-mut:#425f50;--ink-dim:#52695b;--line:#ced8cc;--ai:#176578;--you:#89316f}
+  body[data-reg="bee"] .open{min-height:60vh}body[data-reg="bee"] .plur{background:none;color:#326b39;font-size:clamp(3rem,12vw,7rem)}
+  body[data-reg="bee"] .field .en{color:#326b39;text-shadow:none}body[data-reg="bee"] .note{display:none}
+  body[data-reg="bee"] .field{padding:45px 20px}body[data-reg="bee"] .vb{background:#f6f7ef}body[data-reg="bee"] .vb select{background:#fff;color:#18362a}
+  body[data-reg="raver"] .open{background:radial-gradient(ellipse at 20% 40%,#511d49 0,transparent 60%),radial-gradient(ellipse at 90% 60%,#12434b 0,transparent 60%)}
+  body[data-reg="raver"] .plur-actions a:nth-child(2){background:#d655bb;color:#110c18;border-color:#d655bb;order:-1}
+  body[data-reg="cypherpunk"] .open{min-height:0;padding:40px 22px;text-align:start}body[data-reg="cypherpunk"] .plur{font:700 2rem var(--mono);color:var(--biomass);background:none}
+  body[data-reg="cypherpunk"] .open p{max-width:80ch;margin-inline:0}body[data-reg="cypherpunk"] .glow{display:none}
+  @media(max-width:640px){.flow{grid-template-columns:1fr}.plur-actions a{flex:1 1 40%;font-size:.95rem}.expand{letter-spacing:.12em}.w{min-height:48px}.boundary{padding:30px 18px}}
 </style>
 </head>
-<body>
+<body data-reg="bee">
 
 <div class="vb"><div class="in">
   <select id="vsel"><option>voices…</option></select>
@@ -220,15 +241,18 @@
   <div class="glow"></div>
   <div class="inner">
     <div class="plur">PLUR</div>
-    <div class="expand">peace · love · unity · respect</div>
-    <p class="floor">Thirty years ago, first time on the floor, somebody said <b>come as you are — we accept you</b>.</p>
-    <p>Four words that were never anyone's property. Here they are in every tongue this house speaks. Touch one and hear it.</p>
-    <div class="hint" data-key="d.plur.hint">tap any word · then talk back with the hive ↓</div>
+<h1 class="view-title" data-reg="bee"><span data-i18n="plur.welcome">Come as you are.</span></h1>
+<h1 class="view-title" data-reg="raver"><span data-i18n="plur.floor">One floor. Every tongue.</span></h1>
+<h1 class="view-title" data-reg="cypherpunk">PLUR / interaction &amp; trust boundaries</h1>
+    <div class="expand" data-i18n="plur.values">peace · love · unity · respect</div>
+    <p class="floor" data-reg="raver">Thirty years ago, first time on the floor, somebody said <b>come as you are — we accept you</b>.</p>
+    <p data-reg="bee"><span data-i18n="plur.intro">Start with a word. Choose a language, listen when a voice is available, and find your way into the conversation.</span></p><p data-reg="raver"><span data-i18n="plur.raverIntro">Trade a greeting. Bring a friend. Carry the music across languages.</span></p><p data-reg="cypherpunk">Inspect the browser-to-provider boundary, voice dependencies and translation evidence. This page does not establish private messaging or encrypted media transport.</p>
+    <nav class="plur-actions" aria-label="Explore PLUR"><a href="#words"><span data-i18n="plur.words">Explore the words</span></a><a href="jams.html">SKAISTS mUsiC ↗</a><a href="#talk"><span data-i18n="plur.conversation">Try a conversation</span></a><a href="blanguage.html"><span data-i18n="plur.dock">Language dock</span></a></nav><p class="entry-note"><span data-i18n="plur.voice">Voices depend on your browser. Unavailable voices are labelled.</span></p>
   </div>
 </section>
 
-<section class="field f-peace">
-  <div class="en">peace</div>
+<section class="field f-peace" id="words">
+  <div class="en" data-i18n="plur.peace">peace</div>
   <div class="gloss">the first word</div>
   <div class="constellation">
     <button class="w root" data-sz="xl" data-say="शान्तिः" data-lang="sa"><span class="t">शान्तिः</span><span class="r">śāntiḥ · sanskrit</span><span class="mute">no voice</span></button>
@@ -264,7 +288,7 @@
 </section>
 
 <section class="field f-love">
-  <div class="en">love</div>
+  <div class="en" data-i18n="plur.love">love</div>
   <div class="gloss">mīlestība ir karalis</div>
   <div class="constellation">
     <button class="w root" data-sz="xl" data-say="mīlestība" data-lang="lv"><span class="t">mīlestība</span><span class="r">latvian</span><span class="mute">no voice</span></button>
@@ -294,7 +318,7 @@
 </section>
 
 <section class="field f-unity">
-  <div class="en">unity</div>
+  <div class="en" data-i18n="plur.unity">unity</div>
   <div class="gloss">the hive word</div>
   <div class="constellation">
     <button class="w root" data-sz="xl" data-say="एकता" data-lang="sa"><span class="t">एकता</span><span class="r">ekatā · sanskrit · one-ness</span><span class="mute">no voice</span></button>
@@ -324,7 +348,7 @@
 </section>
 
 <section class="field f-respect">
-  <div class="en">respect</div>
+  <div class="en" data-i18n="plur.respect">respect</div>
   <div class="gloss">the one that has to be given</div>
   <div class="constellation">
     <button class="w root" data-sz="xl" data-say="כבוד" data-lang="he"><span class="t">כבוד</span><span class="r">kavod · hebrew · weight, honour</span><span class="mute">no voice</span></button>
@@ -385,6 +409,7 @@
   </div>
 </section>
 
+<section class="boundary" data-reg="cypherpunk" id="privacy-map"><h2>Data flow / current implementation</h2><div class="flow"><div><b>01 · Browser</b><p>Word cards are embedded in this document. View and UI-language preferences are stored by the shared controls on this origin.</p></div><div><b>02 · Voice engine</b><p>Speech synthesis uses the browser's installed voices. Recognition may use a browser vendor service. Local-only audio processing is not established.</p></div><div><b>03 · AI provider</b><p>Send posts your text, selected languages and this tab's conversation history to api.anthropic.com/v1/messages. The provider receives plaintext; HTTPS is not end-to-end encryption against that provider.</p></div></div><h3>Evidence, not a privacy badge</h3><dl><dt>Source</dt><dd>surfaces/plur.html: ask(), renderHive(), SpeechRecognition; shared register.js and lang.js.</dd><dt>Tutor availability</dt><dd>The current direct request has no configured authentication header. A working authenticated service is not verified. Failed requests must show an unavailable state.</dd><dt>Translation</dt><dd>Interface corpus renderings are machine drafts until attested. English fallback remains visible in the shared coverage counter. Word-card provenance and voice coverage are separate from interface coverage.</dd><dt>Unverified</dt><dd>Provider retention, relay privacy, end-to-end chat encryption, live media performance and network anonymity. No measurements are fabricated here.</dd></dl></section>
 <section class="talk" id="talk" data-key="d.plur.talk">
   <div class="wrap">
     <h2 data-key="d.plur.talk.h">now say it back
@@ -411,7 +436,7 @@
       <button type="button" data-seed="Greet me, then teach me to answer politely.">✋ just greet me</button>
     </div>
 
-    <div class="thread" id="thread" aria-live="polite"></div>
+    <aside class="privacy-note"><span data-i18n="plur.privacy">Sending shares your text and this conversation with an external AI provider. Voice input may use your browser vendor’s service. Do not enter private information.</span> <span><span data-i18n="plur.draft">AI replies and translations can be wrong; community review matters.</span></span></aside><div class="thread" id="thread" aria-live="polite"></div>
 
     <div class="composer">
       <button type="button" class="mic" id="mic" title="hold to speak" aria-label="hold to speak">🎙</button>
@@ -423,7 +448,7 @@
   </div>
 </section>
 
-<section class="stone" data-key="d.plur.stone">
+<section data-reg="cypherpunk" class="stone" data-key="d.plur.stone">
   <div class="wrap">
     <h2 data-key="d.plur.stone.h">four words are the whole constitution</h2>
     <p class="sub" data-key="d.plur.stone.sub">Communication is the cornerstone of this estate.
@@ -810,8 +835,9 @@
     fetch('https://api.anthropic.com/v1/messages',{
       method:'POST', headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-6', max_tokens:1000, system:sys, messages:history})
-    }).then(function(r){ return r.json(); })
+    }).then(function(r){ if(!r.ok) throw new Error('provider-unavailable'); return r.json(); })
     .then(function(d){
+      if(!Array.isArray(d.content) || !d.content.some(function(c){return c.type==='text' && c.text && c.text.trim();})) throw new Error('empty-reply');
       think.remove();
       var txt=(d.content||[]).map(function(c){return c.type==='text'?c.text:''}).join('').trim()
         .replace(/```json|```/g,'').trim();
@@ -822,7 +848,7 @@
     })
     .catch(function(){
       think.remove();
-      bubble('sys').textContent='the tutor can\'t reach the hive from this copy — the words above still speak. try again, or open this page where the relay lives.';
+      bubble('sys').textContent='the tutor is unavailable in this copy. Your message was not answered. The word cards still work when a browser voice is available.';
       st.textContent='offline · honest about it';
       history.pop();
     })

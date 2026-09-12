@@ -45,19 +45,19 @@ pre{background:#0a0f0b;border:1px solid var(--line);border-radius:8px;padding:10
 details{margin-top:10px}
 summary{cursor:pointer;color:var(--violet);font-size:10.5px}
 footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
+.dock-start{font:1.1rem/1.7 system-ui;max-width:700px;margin:24px auto}.dock-start a{display:inline-block;padding:12px 18px;margin:8px;border:1px solid currentColor;border-radius:24px;color:inherit}body[data-reg="bee"] header h1,body[data-reg="raver"] header h1{font:700 clamp(2rem,5vw,3.5rem)/1.2 system-ui}body[data-reg="bee"]{--ink:#18362a;--dim:#425f50;--gold:#6b5400;--violet:#643b89;background:#f6f7ef;font:16px/1.65 system-ui}body[data-reg="bee"] section,body[data-reg="bee"] .card,body[data-reg="bee"] .cb div{background:#fff}body[data-reg="bee"] .law,body[data-reg="bee"] p{font-size:15px}body[data-reg="raver"] header{padding:40px 20px;background:radial-gradient(ellipse at center,#422140,transparent)}
 </style>
 </head>
-<body>
+<body data-reg="bee">
 <header>
-  <h1>🌐 the BlanguageDOCK</h1>
-  <p>the organism's language corpus, run as a permissionless dock — decentralized, self-healing, and read by
+  <h1 data-reg="bee"><span data-i18n="plur.dockWelcome">A place for your language.</span></h1><h1 data-reg="raver"><span data-i18n="plur.dockFloor">Your words belong on this floor.</span></h1><h1 data-reg="cypherpunk">🌐 the BlanguageDOCK</h1><div class="dock-start" data-reg="bee"><p><span data-i18n="plur.dockIntro">Explore a word, hear a greeting, or help a language find its place here.</span></p><a href="plur.html#words"><span data-i18n="plur.words">Explore the words</span> →</a><a href="#skaists">skaists · beautiful</a></div><div class="dock-start" data-reg="raver"><p><span data-i18n="plur.raverIntro">Trade a greeting. Bring a friend. Carry the music across languages.</span></p><a href="plur.html">PLUR →</a><a href="jams.html">SKAISTS mUsiC →</a></div>
+  <p data-reg="cypherpunk">the organism's language corpus, run as a permissionless dock — decentralized, self-healing, and read by
   every user-visible text surface. tribal, indigenous, rare and endangered languages dock without asking anyone.
   alpha MVP: the mechanism, the register, and the honest empty cells. steward seat: zCode.</p>
 </header>
 <main>
 
-<section>
-  <h2><span data-i18n="h.050">WHY A DOCK, NOT A LOCALE LIST</span></h2>
+<section data-reg="cypherpunk"><h2><span data-i18n="h.050">WHY A DOCK, NOT A LOCALE LIST</span></h2>
   <div class="banner">UNESCO: no less than <b>40% of some 6,700 languages</b> are in danger of disappearing
   (<a href="https://www.unesco.org/en/articles/towards-world-atlas-languages">unesco.org</a>); the Atlas's last edition
   counted 538 critically + 502 severely + 632 definitely endangered + 607 vulnerable
@@ -75,8 +75,7 @@ footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   — the Claude Design handoff ships at the alpha→beta transition, by founder order.</div>
 </section>
 
-<section>
-  <h2><span data-i18n="h.051">THE CONSENT LAYER — measurement, never decoration</span></h2>
+<section data-reg="cypherpunk"><h2><span data-i18n="h.051">THE CONSENT LAYER — measurement, never decoration</span></h2>
   <div class="law">the sibling of BiGen's integrity layer, with the same symmetry law: consent blocks apply to
   <b>English, to our own hub strings, to a fluent elder and to a machine draft — identically</b>. the failure mode this
   layer exists to prevent is appropriation theater: a warm veneer over heritage extraction.
@@ -142,8 +141,7 @@ footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   dock-entry furniture (vitality badges): a category error the brief forbids.</div>
 </section>
 
-<section>
-  <h2><span data-i18n="h.054">THE SWEEPS — self-healing as visible machinery, not a claim</span></h2>
+<section data-reg="cypherpunk"><h2><span data-i18n="h.054">THE SWEEPS — self-healing as visible machinery, not a claim</span></h2>
   <pre>- id: missing-key-sweep      # every UI key on every surface exists in the corpus, or renders Absent{reason}
   schedule: weekly
   last_run: 2026-08-19        # corpus seeded this run — zero violations, by construction
@@ -161,8 +159,7 @@ footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   dissent by fork. a stranger can run the sweeps and check us.</div>
 </section>
 
-<section>
-  <h2><span data-i18n="h.055">THE DOCK AS DATA — clone it, fork the verdicts, show your work</span></h2>
+<section data-reg="cypherpunk"><h2><span data-i18n="h.055">THE DOCK AS DATA — clone it, fork the verdicts, show your work</span></h2>
   <details><summary>the seed register as YAML (lives in-repo; this page renders it)</summary>
 <pre id="yaml">loading…</pre>
   </details>
