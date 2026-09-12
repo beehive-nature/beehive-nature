@@ -92,4 +92,3 @@ fn review_refuse_retry_fee_overrun() {
  ledger.record_outcome(&v,0,&receipt,None,SYNTH_NOW).unwrap(); }
  assert!(ledger.write_intent(&v,0,10,SYNTH_NOW).is_err(),"ten reverted attempts exhausted total fee budget but another is allowed");
 }
-
