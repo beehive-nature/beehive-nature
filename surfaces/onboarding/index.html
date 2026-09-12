@@ -6,6 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6f7f2">
 <title>BNR · Get started</title>
 <!--
   BNR ONBOARDING WIZARD — beta-test preview.
@@ -159,10 +160,182 @@ select.lang{font:inherit;font-size:.72rem;background:var(--bg-card);color:var(--
 @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .stage>*{animation:rise .22s ease both}
 @media (prefers-reduced-motion:reduce){.qr,.spin,.stage>*{animation:none}}
+
+/* Estate register scoping — INLINE so a cypher-only leaf cannot FOUC or leak
+   if register.js is late or fails. Same contract as surfaces/register.js.
+   Copied from bEarth #45 / Symposium #46 / Hexagon #47 / bLongevity #48 /
+   Review #49 / BiGen #50 / University #51. */
+[data-reg]:not(body){display:none}
+body[data-reg="bee"] [data-reg="bee"],
+body[data-reg="raver"] [data-reg="raver"],
+body[data-reg="cypherpunk"] [data-reg="cypherpunk"]{display:revert}
+
+.door{appearance:none;display:inline-flex;align-items:center;justify-content:center;min-height:44px;
+ padding:10px 18px;border-radius:12px;border:1px solid var(--line);background:var(--bg-card);color:var(--ink);
+ font:inherit;font-weight:650;cursor:pointer;text-decoration:none}
+.door.primary{background:var(--primary);color:#150512;border-color:transparent}
+.door:focus-visible{outline:3px solid var(--info);outline-offset:3px}
+.choices{display:flex;flex-wrap:wrap;gap:10px 14px;justify-content:center;margin-top:22px}
+.calm{max-width:40rem;margin:18px auto 0;font-size:1.05rem;line-height:1.7;color:var(--ink)}
+.take{font-size:clamp(1.5rem,5.4vw,2.4rem);line-height:1.2;color:var(--ink);margin-top:18px;font-weight:550;text-wrap:balance}
+.support{font-size:.875rem;color:var(--ink-mut);margin-top:8px;max-width:36rem;margin-inline:auto}
+.eyebrow{color:var(--ink-mut);font-size:.875rem;margin-top:8px}
+.pair{color:var(--ink);font-size:.95rem;margin-top:6px;letter-spacing:.04em}
+.consciousness{max-width:36rem;margin:0 auto 18px;font-size:1.15rem;line-height:1.7;color:var(--ink)}
+.vivid{max-width:40rem;margin:16px auto 0;font-size:1.08rem;line-height:1.75;color:var(--ink-mut)}
+.honest{max-width:40rem;margin:14px auto 0;font-size:.95rem;line-height:1.65;color:var(--ink-mut)}
+#first-bee,#first-raver,#layer-choice,#layer-figure,#instrument{display:none}
+body[data-reg="bee"][data-onb-beat="arrival"] #first-bee{display:block}
+body[data-reg="raver"][data-onb-beat="figure"] #layer-figure{display:block}
+body:not([data-reg="cypherpunk"])[data-onb-beat="choice"] #layer-choice{display:block}
+body[data-onb-beat="deeper"] #instrument,
+body[data-reg="cypherpunk"] #instrument{display:flex;flex-direction:column;align-items:center;width:100%}
+body[data-reg="raver"][data-onb-beat="arrival"] #first-raver{display:flex}
+
+/* New bee — language-first calm room. */
+body[data-reg="bee"]{
+  --bg:#f6f7f2;--bg-card:#fff;--ink:#18362a;--ink-mut:#435f4e;--ink-dim:#52695b;
+  --line:#ccd7cf;--primary:#326b39;--info:#176879;--verified:#326b39;--guard:#65509a;
+  --you:#326b39;--biomass:#326b39;--sovereign:#65509a;--b-value:#855b0b;
+  color-scheme:light;background:#f6f7f2;color:#18362a;
+}
+body[data-reg="bee"] .take{color:#326b39}
+body[data-reg="bee"] .door{font:500 1rem/1.4 var(--font-ui);border-radius:16px;min-width:11rem;background:#fff;border-color:#8a9e90;color:#18362a}
+body[data-reg="bee"] .door.primary{background:#326b39;color:#fff;border-color:#326b39}
+body[data-reg="bee"] #tbar{background:#f6f7f2!important;border-top-color:#ccd7cf!important}
+body[data-reg="bee"] #tbar a{color:#18362a!important}
+
+/* Raver — quiet threshold; the floor already said accept you. */
+body[data-reg="raver"]{--bg:#0c1412;--bg-card:#101916;--ink:#e9f2ec;--ink-mut:#b7c9be;--ink-dim:#8aa396;
+ --line:#2a3a34;--primary:#c9a0ff;--you:#c9a0ff;color-scheme:dark;background:#0c1412}
+body[data-reg="raver"][data-onb-beat="arrival"]{padding:0 0 90px;align-items:stretch}
+#first-raver{position:relative;min-height:calc(100svh - 90px - 3.2rem);flex-direction:column;align-items:center;
+ justify-content:flex-end;padding:12vh 22px calc(10vh + 24px);text-align:center;overflow:hidden;width:100%}
+body[data-reg="raver"][data-onb-beat="arrival"] #foot-quiet{
+  position:relative;z-index:2;margin:0;max-width:none;padding:0 22px 10px;border-top:0;color:#8aa396}
+.feel{position:relative;z-index:1;max-width:22ch;font-size:clamp(1.6rem,6vw,2.8rem);line-height:1.25;
+ color:#e9f2ec;font-weight:400;text-wrap:balance}
+#first-raver .choices{position:relative;z-index:1}
+#threshold-scene{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+body[data-reg="raver"] .door.primary{background:#c9a0ff;color:#141018;border-color:#c9a0ff;
+ font:600 1.05rem/1.4 var(--font-ui);border-radius:99px;padding:12px 26px}
+@keyframes floor-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+@keyframes wash-shift{0%,100%{opacity:.55}50%{opacity:.9}}
+@keyframes slip-glow{0%,100%{opacity:.35}50%{opacity:.8}}
+#threshold-scene .living{animation:floor-breathe 10s ease-in-out infinite;transform-origin:50% 48%}
+#threshold-scene .wash{animation:wash-shift 12s ease-in-out infinite}
+#threshold-scene .glow{animation:slip-glow 8s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){
+ #threshold-scene .living,#threshold-scene .wash,#threshold-scene .glow{animation:none}
+}
+
+/* Cypherpunk keeps today's full ceremony instrument. */
+body[data-reg="cypherpunk"]{font-family:var(--font-mono);padding-bottom:110px}
+body[data-reg="cypherpunk"] #instrument-map{display:flex}
+body[data-reg="cypherpunk"] #instrument>.foot{margin-block-start:0;margin-block-end:var(--s3)}
+
+/* Page-owned language+view chrome. Keep both out of #first-bee. */
+#bregdescription{position:absolute;display:block;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+.onb-language[data-language-host]{display:flex;align-items:center;margin-inline-start:auto;max-width:100%}
+.onb-language #blangctl{margin:0!important;padding:0!important;border:0!important;flex-wrap:wrap}
+.onb-language #blangsel{
+  min-height:44px!important;min-width:11rem;max-width:100%!important;padding:8px 12px!important;
+  background:var(--reg-bg,var(--bg-card,var(--bg)))!important;color:var(--reg-ink,var(--ink))!important;
+  border:1px solid var(--reg-line,var(--line))!important;font:inherit!important
+}
+.onb-language #blangnote{white-space:normal!important;color:var(--reg-ink,var(--ink-mut))!important;font:.75rem/1.4 inherit!important}
+#bregbar{width:100%;max-width:none;box-sizing:border-box}
+#first-bee,#layer-choice,#layer-figure{width:100%;max-width:40rem;margin:0 auto;padding:8px var(--s3) 24px;text-align:center}
+#instrument-map{display:none;flex-wrap:wrap;gap:6px;width:100%;max-width:29rem;margin:0 0 var(--s3)}
+#instrument-map button{appearance:none;font:inherit;font-size:.72rem;min-height:44px;padding:6px 10px;
+  border:1px dashed var(--line);border-radius:8px;background:transparent;color:var(--ink-mut);cursor:pointer}
+#instrument-map button:focus-visible{outline:2px solid var(--verified);outline-offset:2px}
+#foot-quiet{display:block}
+body[data-reg="cypherpunk"] #foot-quiet,
+body[data-onb-beat="deeper"] #foot-quiet{display:none}
 </style>
 </head>
-<body>
+<body data-reg="bee" data-bee-theme="custom" data-onb-beat="arrival">
+<div id="bregbar">
+  <a class="breg-home" href="../index.html" aria-label="skaists home">⬡ skaists</a>
+  <div data-register-host aria-describedby="bregdescription"></div>
+  <span id="bregdescription" data-i18n="atlas.view">Choose how this page speaks to you</span>
+  <span class="onb-language" data-language-host></span>
+</div>
 
+<article id="first-bee">
+  <p class="eyebrow" data-i18n="onb.mark">BNR · Get started</p>
+  <p class="calm" data-i18n="onb.bee.calm">A place to begin, at your own pace.</p>
+  <h1 class="take" data-i18n="onb.bee.takeaway">Try joining the hive.</h1>
+  <p class="support" data-i18n="onb.bee.support">This is a preview. It does not create an account here.</p>
+  <div class="choices">
+    <button type="button" class="door primary" data-onb-go="choice" data-i18n="onb.bee.start">Try the preview</button>
+    <button type="button" class="door" data-onb-go="deeper" data-i18n="onb.bee.deeper">Go deeper</button>
+  </div>
+</article>
+
+<article id="first-raver">
+  <svg id="threshold-scene" viewBox="0 0 800 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="threshold-wash" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#142018"/>
+        <stop offset="36%" stop-color="#123028"/>
+        <stop offset="68%" stop-color="#1a2438"/>
+        <stop offset="100%" stop-color="#0c1412"/>
+      </linearGradient>
+      <radialGradient id="door-glow" cx="50%" cy="46%" r="48%">
+        <stop offset="0%" stop-color="#d8c46a" stop-opacity=".32"/>
+        <stop offset="46%" stop-color="#63c97c" stop-opacity=".12"/>
+        <stop offset="78%" stop-color="#c9a0ff" stop-opacity=".14"/>
+        <stop offset="100%" stop-color="#0c1412" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect class="wash" width="800" height="900" fill="url(#threshold-wash)"/>
+    <ellipse class="wash" cx="400" cy="400" rx="280" ry="240" fill="url(#door-glow)"/>
+    <g class="living">
+      <ellipse cx="400" cy="622" rx="222" ry="36" fill="#86cc72" opacity=".13"/>
+      <path d="M224 588V354a176 176 0 0 1 352 0v234" fill="#172e29" stroke="#86cc72" stroke-width="3"/>
+      <path d="M259 587V356a141 141 0 0 1 282 0v231" fill="#203139" stroke="#45c2dc" stroke-width="2" opacity=".9"/>
+      <path d="M294 588V360a106 106 0 0 1 212 0v228" fill="#382b4c" stroke="#c9a0ff" stroke-width="4"/>
+      <path d="M322 588V364a78 78 0 0 1 156 0v224" fill="#c9a0ff" opacity=".21"/>
+      <path d="M332 583 226 765M468 583l106 182M400 584v179" fill="none" stroke="#c9a0ff" stroke-width="2" opacity=".5"/>
+      <path d="M340 602h120m-139 39h158m-178 40h198" stroke="#45c2dc" stroke-width="2" opacity=".45"/>
+      <path d="M177 563c-39-69-16-112 15-132 19 64 14 94-15 132Zm444 0c39-69 16-112-15-132-19 64-14 94 15 132Z" fill="#86cc72" opacity=".56"/>
+      <path d="m177 563 16-88m428 88-16-88" stroke="#bde4ac" stroke-width="3"/>
+    </g>
+    <g class="glow" fill="none" stroke="#d8c46a" stroke-width="1.6">
+      <circle cx="400" cy="412" r="38" stroke="#c9a0ff" opacity=".9"/>
+      <circle cx="400" cy="412" r="61" stroke="#45c2dc" opacity=".4"/>
+      <path d="M385 412h30m-9-9 9 9-9 9" stroke="#f5e9ff" stroke-width="3"/>
+    </g>
+  </svg>
+  <p class="feel" data-i18n="onb.raver.feel">Come as you are. There is room for you here.</p>
+  <div class="choices">
+    <button type="button" class="door primary" data-onb-go="figure" data-i18n="onb.raver.tap">Step in</button>
+  </div>
+</article>
+
+<article id="layer-choice">
+  <h2 data-i18n="onb.bee.choice">Use this device to hold your keys.</h2>
+  <p class="honest" data-i18n="onb.bee.preview">On this site, the next screen is a preview. No account is created. A connected wallet host is needed for a real join.</p>
+  <div class="choices">
+    <button type="button" class="door primary" data-onb-enter="passkey" data-i18n="onb.bee.continue">Explore the device option</button>
+    <button type="button" class="door" data-onb-go="deeper" data-i18n="onb.bee.deeper">Go deeper</button>
+  </div>
+</article>
+
+<article id="layer-figure">
+  <p class="consciousness" data-i18n="onb.raver.choice">Your place in the hive. Your keys stay with you.</p>
+  <p class="honest" data-i18n="onb.raver.preview">Explore the joining ritual. This site shows a preview; it does not create an account.</p>
+  <div class="choices">
+    <button type="button" class="door primary" data-onb-enter="passkey" data-i18n="onb.bee.continue">Explore the device option</button>
+    <button type="button" class="door" data-onb-go="deeper" data-i18n="onb.bee.deeper">Go deeper</button>
+  </div>
+</article>
+
+<div class="foot" id="foot-quiet"><span data-i18n="onb.foot.door">Your keys stay yours. Nobody here holds them.</span></div>
+
+<div id="instrument">
 <div class="top">
   <span class="mark" aria-hidden="true"></span>
   <span class="brand">BNR</span>
@@ -170,20 +343,30 @@ select.lang{font:inherit;font-size:.72rem;background:var(--bg-card);color:var(--
   <button class="chip" id="net" onclick="APP.toggleNet()" title="Works with or without a network">
     <span class="dot"></span><span id="net-t">Online</span>
   </button>
-  <select class="lang" id="lang" onchange="APP.setLang(this.value)" aria-label="Language">
-    <option value="en">EN</option><option value="es">ES</option><option value="pt">PT</option>
-    <option value="fr">FR</option><option value="de">DE</option><option value="ar">العربية ‏</option>
-    <option value="zh">简体</option><option value="hi">हिन्दी</option>
-    <option value="new">＋ yours</option>
-  </select>
 </div>
 
-<main class="stage" id="stage"><!-- screens injected here --></main>
+<nav id="instrument-map" data-reg="cypherpunk" aria-label="Ceremony instrument">
+  <button type="button" data-onb-jump="welcome">1 Welcome doors</button>
+  <button type="button" data-onb-jump="returning">2 Returning</button>
+  <button type="button" data-onb-jump="custody">3 8e ladder</button>
+  <button type="button" data-onb-jump="passkey">4 Passkey</button>
+  <button type="button" data-onb-jump="optical">5 Optical</button>
+  <button type="button" data-onb-jump="trezor">6 Trezor</button>
+  <button type="button" data-onb-jump="recovery">7 Phrase floor</button>
+  <button type="button" data-onb-jump="ready">8 Ready</button>
+  <button type="button" data-onb-jump="net">9 Net + offline</button>
+  <button type="button" data-onb-jump="seams">10–11 Engines + seams</button>
+</nav>
 
-<div class="foot">
+<div class="foot" data-reg="cypherpunk">
   UX preview · zero-network by construction · auth steps here are <b>SIMULATED, labeled
   honestly</b> (house law: PLANNED/REFUSED, never mock) — they bind real when served from
   <span class="mono">wallet-relay</span>. Seat prepares UNSIGNED only; no key ever enters this page.
+  Cite-or-silent: WebAuthn/PRF, Trezor bridge, optical reply, BIP-39/ENGINE readiness.
+  skaists.dev static host does not complete WebAuthn/Trezor native.
+</div>
+
+<main class="stage" id="stage"><!-- screens injected here --></main>
 </div>
 
 <script src="vendor/qrcodegen.js"></script>
@@ -212,20 +395,12 @@ const APP = {
 
   toggleNet(){ this.ctx.online=!this.ctx.online;
     const on=this.ctx.online;
-    document.getElementById('net').classList.toggle('off',!on);
-    document.getElementById('net-t').textContent = on?'Online':'Offline · mesh';
+    const chip=document.getElementById('net');
+    const label=document.getElementById('net-t');
+    if(chip) chip.classList.toggle('off',!on);
+    if(label) label.textContent = on?'Online':'Offline · mesh';
     // re-render custody so the offline-native option is highlighted
     if(this.current==='custody') render('custody');
-  },
-  setLang(v){
-    if(v==='new'){
-      // the tribal-corpus breadcrumb: every language belongs, incl. ones no
-      // corporation would ever localize. Voluntary corpus, AI-guided.
-      const f=document.querySelector('.foot');
-      f.innerHTML='🌍 <b style="color:var(--ink)">Your language belongs here.</b> BNR is building a voluntary language corpus — including tribal and uncommon languages the big platforms skip — so this page can one day greet everyone in their own words. Ask us how to contribute yours.';
-      return;
-    }
-    document.documentElement.setAttribute('dir', v==='ar'?'rtl':'ltr');
   },
 };
 
@@ -568,6 +743,38 @@ const SCREENS = {
     <button class="btn primary" onclick="alert('→ hands off to the dashboard surface (crates/wallet-relay/src/dashboard.html)')">Enter dashboard →</button>
     <button class="btn link" onclick="APP.restart()">Start the walkthrough over</button>
   `; },
+
+  netlaw(){ return `
+    <div class="grow">
+      <h2>Net + offline law</h2>
+      <p>The Online chip is a local switch, not a server heartbeat. Offline · mesh keeps
+         the spare-phone optical path first. Nothing here implies skaists.dev static
+         host can complete WebAuthn or Trezor native.</p>
+      <button class="chip" type="button" onclick="APP.toggleNet()">
+        <span class="dot"></span> Toggle online / offline · mesh
+      </button>
+      <p class="muted" style="margin-top:var(--s3)">Same facts at every temperature. First paint only changes.</p>
+      <button class="btn link" onclick="APP.go('welcome')">← Welcome doors</button>
+    </div>`; },
+
+  seams(){ return `
+    <div class="grow">
+      <h2>Vendored engines + honest seams</h2>
+      <div class="panel">
+        <div class="gauge ${ENGINE?'g-known':'g-absent'}"><span class="s">${ENGINE?'ENGINE':'PREVIEW'}</span>
+          <span class="mono">bzdid-key.js</span> ${ENGINE?'present — PRF→master_prk→Ed25519, BIP-39, fingerprints':'absent — keys are not real on this walk'}</div>
+        <div class="gauge ${window.qrcodegen?'g-known':'g-absent'}"><span class="s">${window.qrcodegen?'ENGINE':'PREVIEW'}</span>
+          <span class="mono">qrcodegen</span> ${window.qrcodegen?'present — pairing QR is encoded here':'absent — no code is faked'}</div>
+        <div class="gauge g-stale"><span class="s">Cite-or-silent</span>
+          WebAuthn/PRF capability, Trezor bridge reachability, optical reply verification,
+          BIP-39/ENGINE readiness — named only when probed, never guessed.</div>
+        <div class="gauge g-absent"><span class="s">SIMULATED</span>
+          Auth binds real when served from <span class="mono">wallet-relay</span>.
+          Seat prepares UNSIGNED only. PLANNED / REFUSED / Declared vs Known — never mock success.</div>
+      </div>
+      <p class="muted">Preview prop words are not a backup. ZERO b is the self-funded law, not a starter grant.</p>
+      <button class="btn link" onclick="APP.go('welcome')">← Welcome doors</button>
+    </div>`; },
 };
 
 /* ---------- key build (engine-backed) ----------
@@ -984,8 +1191,79 @@ function render(screen){
 }
 APP.current='welcome';
 render('welcome');
+
+/* ===== three-temperature beats — first paint is what changes ===== */
+function restoreVisibleFocus(focus){
+  if(!focus||!focus.isConnected)return;var target=focus;
+  for(var node=focus.parentElement;node;node=node.parentElement)if(node.tagName==='DETAILS'&&!node.open){
+    target=node.querySelector('summary'); break;
+  }
+  if(target&&target.focus) target.focus({preventScroll:true});
+}
+function defaultBeat(reading){
+  return reading==='cypherpunk' ? 'deeper' : 'arrival';
+}
+var lastReading=null;
+var readingChoices=new Map();
+var beatChoices=new Map();
+function setBeat(beat){
+  var reading=document.body.getAttribute('data-reg')||'bee';
+  if(reading==='cypherpunk') beat='deeper';
+  document.body.setAttribute('data-onb-beat',beat);
+  beatChoices.set(reading,beat);
+  var focusId=beat==='figure'?'layer-figure':beat==='choice'?'layer-choice':beat==='deeper'?'instrument':null;
+  var node=focusId && document.getElementById(focusId);
+  if(node) node.scrollIntoView({block:'start'});
+}
+function applyReading(event){
+  var reading=event&&event.detail&&event.detail.reg||document.body.dataset.reg||'bee';
+  if(reading===lastReading) return;
+  var focus=document.activeElement;
+  if(lastReading){
+    beatChoices.set(lastReading, document.body.getAttribute('data-onb-beat')||'arrival');
+  }
+  document.body.setAttribute('data-onb-beat', reading==='cypherpunk' ? 'deeper' : (beatChoices.get(reading)||defaultBeat(reading)));
+  var theme=document.querySelector('meta[name="theme-color"]');
+  if(theme) theme.content=reading==='bee'?'#f6f7f2':reading==='raver'?'#0c1412':'#06110C';
+  restoreVisibleFocus(focus);
+  lastReading=reading;
+}
+function jumpInstrument(id){
+  setBeat('deeper');
+  if(id==='net') return APP.go('netlaw');
+  if(id==='seams') return APP.go('seams');
+  if(id==='trezor'){ APP.ctx.persona='hw'; APP.ctx.custody='trezor'; APP.hist.push(APP.current); APP.current='hardware'; return render(function(){ return SCREENS.hardware('trezor'); }); }
+  if(id==='ready') return APP.go('ready');
+  if(typeof SCREENS[id]==='function') return APP.go(id);
+}
+function enterPlain(id){
+  setBeat('deeper');
+  APP.ctx.persona='new';
+  APP.pick(id);
+}
+document.addEventListener('bregister',applyReading);
+document.addEventListener('click',function(e){
+  var t=e.target&&e.target.closest&&e.target.closest('[data-onb-go],[data-onb-enter],[data-onb-jump]');
+  if(!t) return;
+  if(t.hasAttribute('data-onb-go')){
+    var beat=t.getAttribute('data-onb-go');
+    setBeat(beat);
+    if(beat==='deeper' && (APP.current==='welcome'||!APP.current)) APP.go('welcome',false);
+    return;
+  }
+  if(t.hasAttribute('data-onb-enter')) return enterPlain(t.getAttribute('data-onb-enter'));
+  if(t.hasAttribute('data-onb-jump')) return jumpInstrument(t.getAttribute('data-onb-jump'));
+});
+applyReading();
+(function bootHash(){
+  var h=(location.hash||'').replace(/^#/,'');
+  if(!h) return;
+  var reading=document.body.getAttribute('data-reg')||'bee';
+  if(reading!=='cypherpunk' && (document.body.getAttribute('data-onb-beat')||'')!=='deeper') return;
+  jumpInstrument(h);
+})();
 </script>
 <div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(.6rem + 46px);z-index:9997;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
-<script src="../tour.js?v=41"></script>
+<script src="../tour.js?v=42"></script>
 </body>
 </html>

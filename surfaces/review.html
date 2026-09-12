@@ -5,16 +5,26 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="color-scheme" content="dark">
-<title>the Royal Review — receipts, never telemetry</title>
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f6f7f2">
+<title>the Royal Review — a signed receipt you choose to publish</title>
 <style>
-:root{--bg:#0d1410;--ink:#e2efdb;--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--dim:#8a9a8a;--line:#243026;--leaf:#7ddf8f;--amber:#ffb347}
+:root{--bg:#0d1410;--ink:#e2efdb;--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--dim:#8a9a8a;--line:#243026;--leaf:#7ddf8f;--amber:#ffb347;--well:#0a0f0b;
+--bee-font:system-ui,-apple-system,'Segoe UI',sans-serif}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:36px 16px 90px}
-header{text-align:center;margin-bottom:8px}
+html,body{overflow-x:hidden}
+body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:0 0 90px}
+/* Estate register scoping — INLINE so a cypher-only leaf cannot FOUC or leak
+   if register.js is late or fails. Same contract as surfaces/register.js.
+   Copied from bEarth #45 / bSymposium #46 / Hexagon #47 / bLongevity #48. */
+[data-reg]:not(body){display:none}
+body[data-reg="bee"] [data-reg="bee"],
+body[data-reg="raver"] [data-reg="raver"],
+body[data-reg="cypherpunk"] [data-reg="cypherpunk"]{display:revert}
+header{text-align:center;margin-bottom:8px;padding-bottom:12px;position:relative}
 h1{font-size:clamp(17px,4vw,24px);color:var(--gold);font-weight:400;letter-spacing:.05em}
-header p{color:var(--dim);font-size:11px;margin-top:6px;max-width:680px;margin-left:auto;margin-right:auto}
-main{max-width:720px;margin:0 auto}
+header p,.sub{color:var(--dim);font-size:11px;margin-top:6px;max-width:680px;margin-left:auto;margin-right:auto}
+main{max-width:720px;margin:0 auto;padding-inline:16px}
 section{background:#111a14;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:16px}
 section h2{font-size:12px;color:var(--violet);font-weight:400;letter-spacing:.08em;margin-bottom:8px}
 section .law{color:var(--dim);font-size:10px;line-height:1.7;margin-bottom:10px}
@@ -31,8 +41,122 @@ td,th{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;color:
 th{color:var(--violet);font-weight:400} td.n{color:var(--ink)}
 .note{background:#0a0f0b;border:1px solid var(--line);border-radius:8px;padding:9px 11px;margin-top:8px;font-size:10.5px;line-height:1.7}
 .note .t{color:var(--violet);font-size:9.5px}
-footer{max-width:720px;margin:22px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
+footer{max-width:720px;margin:22px auto 0;padding-inline:16px;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
 a{color:var(--cyan)}
+[hidden]{display:none!important}
+.door{appearance:none;display:inline-flex;align-items:center;justify-content:center;min-height:44px;
+ padding:10px 18px;border-radius:8px;border:1px solid var(--line);background:var(--well);color:var(--ink);
+ font:inherit;cursor:pointer;text-decoration:none}
+.door.primary{background:var(--leaf);color:#102214;border-color:var(--leaf);font-weight:650}
+.door:focus-visible,summary:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,button:focus-visible{
+ outline:3px solid var(--cyan);outline-offset:3px}
+.choices{display:flex;flex-wrap:wrap;gap:10px 14px;justify-content:center;margin-top:22px}
+.calm{max-width:40rem;margin:18px auto 0;font-size:1.05rem;line-height:1.7}
+.take{font-size:clamp(1.5rem,5.4vw,2.4rem);line-height:1.2;color:var(--gold);margin-top:18px;font-weight:550;text-wrap:balance}
+.support{font-size:.875rem;color:var(--dim);margin-top:8px;max-width:36rem;margin-inline:auto}
+.marks-line{font-size:1rem;color:var(--ink);margin-top:12px;max-width:36rem;margin-inline:auto;line-height:1.6}
+.eyebrow{color:var(--dim);font-size:.875rem;margin-top:8px}
+.pair{color:var(--ink);font-size:.95rem;margin-top:6px;letter-spacing:.04em}
+.story-caption{max-width:36rem;margin:16px auto 0;font-size:1.05rem;line-height:1.7;color:var(--dim)}
+#first-bee,#first-raver,#layer-figure,#instrument{display:none}
+body[data-reg="bee"][data-review-beat="arrival"] #first-bee{display:block}
+body[data-reg="raver"][data-review-beat="figure"] #layer-figure{display:block}
+body:not([data-reg="cypherpunk"])[data-review-beat="compose"] #instrument{display:block}
+body:not([data-reg="cypherpunk"])[data-review-beat="compose"] #tally,
+body:not([data-reg="cypherpunk"])[data-review-beat="compose"] #bind,
+body:not([data-reg="cypherpunk"])[data-review-beat="compose"] #guard,
+body:not([data-reg="cypherpunk"])[data-review-beat="compose"] #ai,
+body:not([data-reg="cypherpunk"])[data-review-beat="compose"] #sources-panel{display:none}
+body:not([data-reg="cypherpunk"])[data-review-beat="compose"] #layer-compose{display:block}
+/* New bee / Raver compose: four human marks first, surface picker second.
+   Cypherpunk keeps today's select order (surface then verdict). */
+#mark-words{display:none;flex-wrap:wrap;gap:10px;justify-content:center;margin:18px auto 0;max-width:40rem}
+body:not([data-reg="cypherpunk"])[data-review-beat="compose"] #mark-words{display:flex}
+body:not([data-reg="cypherpunk"])[data-review-beat="compose"] label[for="verdict"],
+body:not([data-reg="cypherpunk"])[data-review-beat="compose"] #verdict{
+ position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%)
+}
+.mark{appearance:none;display:flex;flex-direction:column;align-items:flex-start;gap:2px;
+ min-height:44px;min-width:7.5rem;flex:1 1 7.5rem;padding:10px 14px;border-radius:12px;border:1px solid var(--line);
+ background:var(--well,#edf2eb);color:var(--ink);font:inherit;cursor:pointer;text-align:left}
+.mark b{font-weight:650}
+.mark span{font-size:.8rem;color:var(--dim)}
+.mark[aria-pressed="true"]{border-color:var(--leaf);background:var(--leaf);color:#102214}
+.mark[aria-pressed="true"] span{color:#16301c}
+body[data-review-beat="deeper"] #instrument,
+body[data-reg="cypherpunk"] #instrument{display:block}
+/* FOUNDER LOCK: Cypherpunk is the full attestation instrument on contact.
+   Compose-beat progressive disclosure is New bee / Raver only. A compose
+   memory must not strip tally / bind / guard / AI / sources from this view. */
+body[data-reg="cypherpunk"] #tally,
+body[data-reg="cypherpunk"] #bind,
+body[data-reg="cypherpunk"] #layer-compose,
+body[data-reg="cypherpunk"] #compose,
+body[data-reg="cypherpunk"] #guard,
+body[data-reg="cypherpunk"] #ai,
+body[data-reg="cypherpunk"] #sources-panel{display:revert}
+body[data-reg="cypherpunk"] #mark-words{display:none}
+body[data-reg="raver"][data-review-beat="arrival"] #masthead{display:none}
+
+/* New bee — language-first calm room. */
+body[data-reg="bee"]{
+  --bg:#f6f7f2;--panel:#fff;--well:#edf2eb;--ink:#18362a;--dim:#435f4e;--faint:#52695b;
+  --line:#ccd7cf;--gold:#855b0b;--violet:#65509a;--cyan:#176879;--leaf:#326b39;--amber:#9f362c;
+  color-scheme:light;
+  background:#f6f7f2;color:#18362a;font:1.125rem/1.65 var(--bee-font);
+}
+body[data-reg="bee"] h1{color:var(--ink);letter-spacing:-.03em;text-shadow:none}
+body[data-reg="bee"] .calm,.take,.support,.marks-line,.eyebrow,.pair,.story-caption,.mark{font-family:var(--bee-font)}
+body[data-reg="bee"] .take{color:#326b39}
+body[data-reg="bee"] .door{font:500 1rem/1.4 var(--bee-font);border-radius:16px;min-width:11rem;background:#fff;border-color:#8a9e90}
+body[data-reg="bee"] .door.primary{background:#326b39;color:#fff;border-color:#326b39}
+body[data-reg="bee"] #tbar{background:#f6f7f2!important;border-top-color:#ccd7cf!important}
+body[data-reg="bee"] #tbar a{color:#18362a!important}
+body[data-reg="bee"] section{background:#fff;border-color:var(--line)}
+body[data-reg="bee"] button{font-family:var(--bee-font)}
+
+/* Raver — soft crown/receipt glow. Keep/share energy, not a control room. */
+body[data-reg="raver"]{--bg:#0c1412;--ink:#e9f2ec;--dim:#b7c9be;--line:#2a3a34;--gold:#FFD700;--violet:#c9a0ff;--cyan:#7ee0d0;
+ --leaf:#c9a0ff;color-scheme:dark;background:#0c1412}
+body[data-reg="raver"][data-review-beat="arrival"]{padding:0 0 90px;background:#0c1412}
+body[data-reg="raver"][data-review-beat="arrival"] main{max-width:none}
+#first-raver{position:relative;min-height:100svh;flex-direction:column;align-items:center;
+ justify-content:flex-end;padding:12vh 22px calc(14vh + 72px);text-align:center;overflow:hidden}
+body[data-reg="raver"][data-review-beat="arrival"] #first-raver{display:flex}
+#crown-scene{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.feel{position:relative;z-index:1;max-width:22ch;font-size:clamp(1.6rem,6vw,2.8rem);line-height:1.25;
+ color:#e9f2ec;font-weight:400;text-wrap:balance}
+#first-raver .choices{position:relative;z-index:1}
+body[data-reg="raver"] .door.primary{background:#c9a0ff;color:#141018;border-color:#c9a0ff;
+ font:600 1.05rem/1.4 var(--bee-font);border-radius:99px;padding:12px 26px}
+.consciousness{max-width:36rem;margin:0 auto 18px;font-size:1.15rem;line-height:1.7;color:var(--ink)}
+@keyframes crown-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+@keyframes wash-shift{0%,100%{opacity:.55}50%{opacity:.9}}
+#crown-scene .living{animation:crown-breathe 10s ease-in-out infinite;transform-origin:50% 38%}
+#crown-scene .wash{animation:wash-shift 12s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){
+ #crown-scene .living,#crown-scene .wash{animation:none}
+}
+
+/* Cypherpunk keeps today's full attestation instrument. */
+body[data-reg="cypherpunk"]{font-family:ui-monospace,'Cascadia Mono',Consolas,monospace}
+body[data-reg="cypherpunk"] #sources-panel{border:1px dashed var(--line);border-radius:11px;padding:10px 12px;margin-top:14px}
+body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44px;display:flex;align-items:center}
+#sources-panel{margin-top:14px}
+#sources-panel summary{cursor:pointer;min-height:44px;display:flex;align-items:center;color:var(--violet)}
+
+/* Page-owned language+view chrome.
+   lang.js mounts #blangctl into [data-language-host]; register.js mounts
+   #bregctl into [data-register-host]. Keep both out of #first-bee. */
+#bregdescription{position:absolute;display:block;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+.review-language[data-language-host]{display:flex;align-items:center;margin-inline-start:auto;max-width:100%}
+.review-language #blangctl{margin:0!important;padding:0!important;border:0!important;flex-wrap:wrap}
+.review-language #blangsel{
+  min-height:44px!important;min-width:11rem;max-width:100%!important;padding:8px 12px!important;
+  background:var(--reg-bg,var(--panel,var(--bg)))!important;color:var(--reg-ink,var(--ink))!important;
+  border:1px solid var(--reg-line,var(--line))!important;font:inherit!important
+}
+.review-language #blangnote{white-space:normal!important;color:var(--reg-ink,var(--dim))!important;font:.75rem/1.4 inherit!important}
 /* THE TALLY — verdict palette validated against this surface (#0d1410), dark mode:
    lightness band 0.48–0.67 PASS · CVD worst adjacent ΔE 12.5 (idea⊗bug, tritan) PASS — 17.1 is the worst PROTAN pair, corrected 2026-08-20 by the design seat 
    normal-vision 22.7 PASS · contrast ≥3:1 PASS (dataviz six-checks validator).
@@ -55,15 +179,95 @@ a{color:var(--cyan)}
 .brow .seg:last-child{margin-right:0}
 .brow .bc{flex:0 0 26px;font-size:10px;color:var(--dim)}
 #tip{position:fixed;display:none;background:#0a0f0b;border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-size:10px;color:var(--ink);pointer-events:none;z-index:9}
+/* The same review composer stays readable after the first choice. */
+body:not([data-reg="cypherpunk"])[data-review-beat="compose"] #verdict,
+body:not([data-reg="cypherpunk"])[data-review-beat="compose"] label[for="verdict"]{display:none}
+body[data-reg="cypherpunk"] .reader-label{display:none}
+body:not([data-reg="cypherpunk"]) #compose{padding:clamp(20px,4vw,36px);border-radius:24px}
+body:not([data-reg="cypherpunk"]) #compose h2{font:600 1.5rem/1.3 var(--bee-font);letter-spacing:-.02em;color:var(--ink)}
+body:not([data-reg="cypherpunk"]) #compose label{font:500 1rem/1.5 var(--bee-font);margin:20px 0 8px;color:var(--ink)}
+body:not([data-reg="cypherpunk"]) #compose :is(select,textarea){min-height:52px;font:1rem/1.6 var(--bee-font);background:var(--well);color:var(--ink);padding:14px;border-radius:12px}
+body:not([data-reg="cypherpunk"]) #compose button{min-height:48px;font:600 1rem/1.4 var(--bee-font);border-radius:12px}
+body[data-reg="bee"] #mkReview{background:#326b39;color:white}
+body:not([data-reg="cypherpunk"]) #reviewOut{font:1rem/1.6 var(--bee-font);background:var(--well);padding:20px;overflow-wrap:anywhere;word-break:normal}
+body:not([data-reg="cypherpunk"]) #review-result,.review-share{font:1rem/1.6 var(--bee-font);margin-top:16px;color:var(--dim)}
+#mark-words .mark{align-items:center;text-align:center;min-height:110px;justify-content:center;margin:0}
+#mark-words .mark-glyph{font-size:1.8rem;color:inherit}
+body[data-reg="raver"] #mark-words .mark{background:linear-gradient(145deg,#312040,#152d29)}
+body[data-reg="raver"] #mark-words .mark[aria-pressed="true"]{background:#c9a0ff;color:#241431}
 </style>
 </head>
-<body>
-<header>
-  <h1>👑 the Royal Review</h1>
-  <p>guards reviewing the peer reviewers · a review is a signed receipt you choose to publish —
-  nothing on any page observes you. attestation, never telemetry.</p>
-</header>
+<body data-reg="bee" data-bee-theme="custom" data-review-beat="arrival">
+<div id="bregbar">
+  <a class="breg-home" href="index.html" aria-label="skaists home">⬡ skaists</a>
+  <div data-register-host aria-describedby="bregdescription"></div>
+  <span id="bregdescription" data-i18n="atlas.view">Choose how this page speaks to you</span>
+  <span class="review-language" data-language-host></span>
+</div>
 <main>
+<header id="masthead">
+  <h1>👑 <span data-i18n="review.mark">the Royal Review</span></h1>
+  <p class="eyebrow pair" data-reg="cypherpunk" data-i18n="review.pair">a signed receipt you choose to publish</p>
+  <div class="sub" data-reg="cypherpunk">guards reviewing the peer reviewers · a review is a signed receipt you choose to publish —
+  nothing on any page observes you. attestation, never telemetry.</div>
+</header>
+
+<article id="first-bee">
+  <p class="calm" data-i18n="review.bee.calm">Help make this place better.</p>
+  <p class="take" data-i18n="review.bee.takeaway">Tell us what you noticed.</p>
+  <p class="support" data-i18n="review.bee.support">Your draft stays on this page until you choose to copy and share it.</p>
+  <div class="choices">
+    <button type="button" class="door primary" data-review-go="compose" data-i18n="review.bee.leave">Write a review</button>
+    <button type="button" class="door" data-review-go="deeper" data-i18n="review.bee.deeper">Go deeper</button>
+  </div>
+</article>
+
+<article id="first-raver">
+  <svg id="crown-scene" viewBox="0 0 800 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="keep-wash" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#2a2410"/>
+        <stop offset="32%" stop-color="#1a2a1c"/>
+        <stop offset="62%" stop-color="#142028"/>
+        <stop offset="100%" stop-color="#1a1428"/>
+      </linearGradient>
+      <radialGradient id="crown-glow" cx="50%" cy="32%" r="48%">
+        <stop offset="0%" stop-color="#FFD700" stop-opacity=".38"/>
+        <stop offset="42%" stop-color="#c9a0ff" stop-opacity=".16"/>
+        <stop offset="100%" stop-color="#0c1412" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect class="wash" width="800" height="900" fill="url(#keep-wash)"/>
+    <ellipse class="wash" cx="400" cy="300" rx="280" ry="220" fill="url(#crown-glow)"/>
+    <g class="living">
+      <circle cx="400" cy="396" r="188" fill="none" stroke="#86cc72" stroke-width="2" opacity=".45"/>
+      <circle cx="400" cy="396" r="152" fill="none" stroke="#45c2dc" stroke-dasharray="3 14" stroke-width="3" opacity=".6"/>
+      <path d="M292 272h166l54 56v213a12 12 0 0 1-12 12H292a12 12 0 0 1-12-12V284a12 12 0 0 1 12-12Z" fill="#d7c5ef" stroke="#f1e6ff" stroke-width="2"/>
+      <path d="M458 274v54h52" fill="#a77ecd" stroke="#c9a0ff" stroke-width="2"/>
+      <path d="M321 348h86m-86 35h144m-144 35h144m-144 35h98" stroke="#63517d" stroke-width="8" stroke-linecap="round" opacity=".6"/>
+      <path d="M173 605 272 512q15-13 29-3l56 42h126q30 0 30 23 0 16-25 24l-105 34q-41 13-73 4l-89 62" fill="#754d96" stroke="#c9a0ff" stroke-width="3"/>
+      <path d="m357 551 43 32h74" fill="none" stroke="#dfc8f4" stroke-width="3" stroke-linecap="round"/>
+      <path d="M555 268v24m-12-12h24m-346 80v16m-8-8h16m287 227v20m-10-10h20" stroke="#45c2dc" stroke-width="3"/>
+    </g>
+  </svg>
+  <p class="feel" data-i18n="review.raver.feel">What if your feedback were a gift?</p>
+  <div class="choices">
+    <button type="button" class="door primary" data-review-go="compose" data-i18n="review.raver.offer">Give your feedback</button>
+  </div>
+</article>
+
+<article id="layer-figure">
+  <p class="consciousness" data-i18n="review.raver.consciousness">A walker who publishes nothing appears nowhere — that is the design.</p>
+  <p class="take" data-i18n="review.bee.takeaway">Tell us what you noticed.</p>
+  <p class="marks-line" data-i18n="review.bee.marks">One page you visited. One mark: works, idea, bug, or gap. Only if you publish.</p>
+  <p class="support" data-i18n="review.bee.support">Your draft stays on this page until you choose to copy and share it.</p>
+  <div class="choices">
+    <button type="button" class="door primary" data-review-go="compose" data-i18n="review.bee.leave">Write a review</button>
+    <button type="button" class="door" data-review-go="deeper" data-i18n="review.bee.deeper">Go deeper</button>
+  </div>
+</article>
+
+<div id="instrument">
 
 <section id="tally">
   <h2>1 · <span data-i18n="h.169">THE TALLY — only what was deliberately published</span></h2>
@@ -108,9 +312,17 @@ a{color:var(--cyan)}
   <div class="st" id="bindSt">unbound — receipts compose as UNSIGNED</div>
 </section>
 
+<div id="layer-compose">
+<p class="story-caption" id="review-choice-title" data-i18n="review.compose.caption">Choose the page, say what happened, then copy your review if you want to share it.</p>
+<div id="mark-words" role="group" aria-labelledby="review-choice-title">
+  <button type="button" class="mark" data-verdict="✅ works" aria-pressed="true"><span class="mark-glyph" aria-hidden="true">✓</span><b data-i18n="review.mark.works">It worked</b></button>
+  <button type="button" class="mark" data-verdict="💡 idea" aria-pressed="false"><span class="mark-glyph" aria-hidden="true">✧</span><b data-i18n="review.mark.idea">I have an idea</b></button>
+  <button type="button" class="mark" data-verdict="🐛 bug" aria-pressed="false"><span class="mark-glyph" aria-hidden="true">!</span><b data-i18n="review.mark.bug">Something broke</b></button>
+  <button type="button" class="mark" data-verdict="🕳 gap" aria-pressed="false"><span class="mark-glyph" aria-hidden="true">○</span><b data-i18n="review.mark.gap">Something is missing</b></button>
+</div>
 <section id="compose">
-  <h2>3 · <span data-i18n="h.166">REVIEW RECEIPT — one surface, one verdict, ≤140 chars</span></h2>
-  <label for="surf">surface</label>
+  <h2><span data-reg="cypherpunk">3 · <span data-i18n="h.166">REVIEW RECEIPT — one surface, one verdict, ≤140 chars</span></span><span class="reader-label" data-i18n="review.compose.heading">What did you notice?</span></h2>
+  <label for="surf" data-i18n="review.compose.page">Page you visited</label>
   <select id="surf"></select>
   <label for="verdict">verdict</label>
   <select id="verdict">
@@ -119,16 +331,23 @@ a{color:var(--cyan)}
     <option value="🕳 gap">🕳 gap — something missing</option>
     <option value="💡 idea">💡 idea — an improvement</option>
   </select>
-  <label for="rnote">note (≤140)</label>
-  <input id="rnote" maxlength="140" placeholder="what you saw, in one line">
-  <button id="mkReview" class="gold">compose receipt — sign in to add yours</button>
-  <button id="cpReview" style="display:none">📋 copy</button>
-  <div class="out" id="reviewOut"></div>
-  <div class="law" style="margin-top:8px">publishing rides any client you already hold — paste it
-  as a Nostr note or a Bluesky post (the feed below reads both), or hand it to the founder
+  <label for="rnote" data-i18n="review.compose.note">Your note — up to 140 characters</label>
+  <textarea id="rnote" maxlength="140" rows="3"></textarea>
+  <button id="mkReview" class="gold"><span data-i18n="review.compose.make">Preview my review</span></button>
+  <button id="cpReview" style="display:none"><span data-i18n="review.compose.copy">Copy review</span></button>
+  <div class="out" id="reviewOut" tabindex="0" aria-live="polite"></div>
+  <div id="review-result" role="status">
+    <p id="review-ready" hidden data-i18n="review.compose.ready">Your draft is ready. Nothing has been published.</p>
+    <p id="review-copied" hidden data-i18n="review.compose.copied">Copied. You can now paste and share it.</p>
+    <p id="review-copy-failed" hidden data-i18n="review.compose.copyFailed">Copy did not work. Select the review text and copy it yourself.</p>
+  </div>
+  <p class="reader-label review-share" data-i18n="review.compose.share">Copy your review into a Nostr note or Bluesky post, or share it directly with the team. This page does not publish for you.</p>
+  <div class="law" data-reg="cypherpunk" style="margin-top:8px">publishing rides any client you already hold — paste it
+  as a Nostr note or a Bluesky post (the tally reads both), or hand it to the founder
   directly. the in-page publish path docks with TASK&nbsp;6b (E2E), and pretending it is wired
   before then would be a lie.</div>
 </section>
+</div>
 
 <section id="guard">
   <h2>4 · <span data-i18n="h.167">GUARD VERDICT — verify a receipt, then weigh it</span></h2>
@@ -187,13 +406,24 @@ a{color:var(--cyan)}
   </div>
 </section>
 
+<details id="sources-panel" data-view-disclosure="sources">
+  <summary>doctrine — cite or stay silent</summary>
+  <div class="law">the grammar lives in <a href="blight/pointers.js">pointers.js</a> ·
+  DISPATCH_BMESSENGER_GUARDS_BLOVERAI_2026-08-19 §2–§4 · P-8 holds: no AI and no page decides
+  who is real — people attest, arithmetic verifies. recovery phrases never enter this page.
+  guest unsigned receipts are marked unverified. nothing here observes a visitor.
+  External citations open in a new tab so this page and session stay put.
+  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/DISPATCH_BMESSENGER_GUARDS_BLOVERAI_2026-08-19.md" target="_blank" rel="noopener noreferrer">the guards dispatch (opens in a new tab)</a>.</div>
+</details>
 
-
+</div>
 </main>
 <footer>
-  the grammar lives in <a href="blight/pointers.js">pointers.js</a> · doctrine:
-  DISPATCH_BMESSENGER_GUARDS_BLOVERAI_2026-08-19 §2–§4 · P-8 holds: no AI and no page decides
-  who is real — people attest, arithmetic verifies · <a href="index.html" data-i18n="law.hive">← the hive</a>
+  <span data-i18n="review.foot.attest">attestation, never telemetry — not medical advice</span>
+  · <a href="university/index.html" data-i18n="review.foot.learn">learn to check this page</a>
+  · <a href="index.html" data-i18n="law.hive">← the hive</a><br>
+  <span data-reg="cypherpunk">the grammar lives in <a href="blight/pointers.js">pointers.js</a> ·
+  people attest, arithmetic verifies. Verify.</span>
 </footer>
 
 <script>
@@ -272,7 +502,63 @@ $('w1go').onclick=async function(){
 };
 })();
 </script>
-<script src="tour.js?v=41"></script>
+<script src="tour.js?v=42"></script>
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i);};
+  function restoreVisibleFocus(focus){
+    if(!focus||!focus.isConnected)return;var target=focus;
+    for(var node=focus.parentElement;node;node=node.parentElement)if(node.tagName==='DETAILS'&&!node.open){
+      target=node.querySelector('summary'); break;
+    }
+    if(target&&target.focus) target.focus({preventScroll:true});
+  }
+  function defaultOpen(reading,kind){
+    return reading==='cypherpunk' && kind==='sources';
+  }
+  function defaultBeat(reading){
+    return reading==='cypherpunk' ? 'deeper' : 'arrival';
+  }
+  var lastReading=null;
+  var readingChoices=new Map();
+  var beatChoices=new Map();
+  function setBeat(beat){
+    var reading=document.body.getAttribute('data-reg')||'bee';
+    if(reading==='cypherpunk') beat='deeper';
+    document.body.setAttribute('data-review-beat',beat);
+    beatChoices.set(reading,beat);
+    var focusId=beat==='figure'?'layer-figure':beat==='compose'?'layer-compose':beat==='deeper'?'instrument':null;
+    var node=focusId && $(focusId);
+    if(node) node.scrollIntoView({block:'start'});
+  }
+  function applyReading(event){
+    var reading=event&&event.detail&&event.detail.reg||document.body.dataset.reg||'bee';
+    if(reading===lastReading) return;
+    var focus=document.activeElement;
+    var details=[].slice.call(document.querySelectorAll('[data-view-disclosure]'));
+    if(lastReading){
+      readingChoices.set(lastReading, details.map(function(d){ return d.open; }));
+      beatChoices.set(lastReading, document.body.getAttribute('data-review-beat')||'arrival');
+    }
+    var previous=readingChoices.get(reading);
+    details.forEach(function(d,i){
+      d.open=previous ? previous[i] : defaultOpen(reading, d.getAttribute('data-view-disclosure'));
+    });
+    document.body.setAttribute('data-review-beat', reading==='cypherpunk' ? 'deeper' : (beatChoices.get(reading)||defaultBeat(reading)));
+    var theme=document.querySelector('meta[name="theme-color"]');
+    if(theme) theme.content=reading==='bee'?'#f6f7f2':reading==='raver'?'#0c1412':'#0d1410';
+    restoreVisibleFocus(focus);
+    lastReading=reading;
+  }
+  document.addEventListener('bregister',applyReading);
+  document.addEventListener('click',function(e){
+    var btn=e.target&&e.target.closest&&e.target.closest('[data-review-go]');
+    if(!btn) return;
+    setBeat(btn.getAttribute('data-review-go'));
+  });
+  applyReading();
+})();
+</script>
 <script src="onboarding/bzdid-key.js"></script>
 <script src="blight/pointers.js?v=2"></script>
 <script src="blight/relay.js?v=1"></script>
@@ -307,6 +593,22 @@ $('w1go').onclick=async function(){
     });
   });
 
+  var markBtns=document.querySelectorAll('#mark-words [data-verdict]');
+  function syncMarks(){
+    var v=$('verdict').value;
+    markBtns.forEach(function(b){
+      b.setAttribute('aria-pressed', b.getAttribute('data-verdict')===v ? 'true' : 'false');
+    });
+  }
+  markBtns.forEach(function(b){
+    b.addEventListener('click', function(){
+      $('verdict').value=b.getAttribute('data-verdict');
+      syncMarks();
+    });
+  });
+  $('verdict').addEventListener('change', syncMarks);
+  syncMarks();
+
   var ID=null; // {record:{sign,publicKey}, fingerprint}
   var ENGINE=(typeof BZDIDKEY!=='undefined')?BZDIDKEY:null;
   var enc=new TextEncoder();
@@ -338,7 +640,23 @@ $('w1go').onclick=async function(){
       var sig=ID.record.sign(enc.encode(line));
       block=line+'\npub: '+toHex(ID.record.publicKey)+'\nsig: '+toHex(sig);
     } else { block=line+'\nUNSIGNED — bind a passkey above to sign'; }
-    show('reviewOut',block); copyBtn('cpReview','reviewOut');
+    show('reviewOut',block);
+    $('review-ready').hidden=false;
+    $('review-copied').hidden=true;
+    $('review-copy-failed').hidden=true;
+    $('cpReview').style.display='inline-block';
+  };
+
+  $('cpReview').onclick=async function(){
+    $('review-copied').hidden=true;
+    $('review-copy-failed').hidden=true;
+    try{
+      await navigator.clipboard.writeText($('reviewOut').textContent);
+      $('review-copied').hidden=false;
+    }catch(e){
+      $('review-copy-failed').hidden=false;
+      $('reviewOut').focus();
+    }
   };
 
   var lastVerified=null;

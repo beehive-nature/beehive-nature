@@ -5,10 +5,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="color-scheme" content="dark">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f6f7f2">
 <title>Beehive University — the curriculum is the receipts</title>
 <style>
-:root{--bg:#0d1410;--ink:#e2efdb;--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--dim:#8a9a8a;--line:#243026;--leaf:#7ddf8f;--amber:#ffb347;
+:root{--bg:#0d1410;--ink:#e2efdb;--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--dim:#8a9a8a;--line:#243026;--leaf:#7ddf8f;--amber:#ffb347;--bee-font:system-ui,-apple-system,'Segoe UI',sans-serif;
 /* university set = the six-checks-validated categorical set for surface #0d1410,
    REUSED in its validated order (works, idea, bug, gap) — not reordered, not extended.
    Receipt: lightness band 0.48–0.67, CVD worst adjacent ΔE 12.5 (tritan, idea⊗bug);
@@ -18,10 +19,20 @@
    alone: glyph + label always. */
 --c-works:#3f9c55;--c-idea:#a476ec;--c-bug:#c07f1c;--c-gap:#0092a6}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:36px 16px 90px}
+html,body{overflow-x:hidden}
+body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:0 0 90px}
+main{max-width:860px;margin:0 auto;padding:36px 16px 0}
+/* Estate register scoping — INLINE so a cypher-only leaf cannot FOUC or leak
+   if register.js is late or fails. Same contract as surfaces/register.js.
+   Copied from bEarth #45 / Symposium #46 / Hexagon #47 / bLongevity #48 /
+   Review #49 / BiGen #50. */
+[data-reg]:not(body){display:none}
+body[data-reg="bee"] [data-reg="bee"],
+body[data-reg="raver"] [data-reg="raver"],
+body[data-reg="cypherpunk"] [data-reg="cypherpunk"]{display:revert}
 header{text-align:center;margin-bottom:10px}
 h1{font-size:clamp(17px,4vw,24px);color:var(--gold);font-weight:400;letter-spacing:.05em}
-header p{color:var(--dim);font-size:11px;margin-top:6px;max-width:720px;margin-left:auto;margin-right:auto}
+header p,.sub{color:var(--dim);font-size:11px;margin-top:6px;max-width:720px;margin-left:auto;margin-right:auto;line-height:1.85}
 main{max-width:860px;margin:0 auto}
 section{background:#111a14;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:16px}
 section h2{font-size:12px;color:var(--violet);font-weight:400;letter-spacing:.08em;margin-bottom:8px}
@@ -57,18 +68,222 @@ th{color:var(--violet);font-weight:400} td.n{color:var(--ink)}
 .dE b{color:var(--ink);font-weight:400}
 #transcript .rline{display:block}
 .gates td{vertical-align:top}
-footer{max-width:860px;margin:22px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
+footer{max-width:860px;margin:22px auto 0;padding-inline:16px;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
+
+[hidden]{display:none!important}
+.door{appearance:none;display:inline-flex;align-items:center;justify-content:center;min-height:44px;
+ padding:10px 18px;border-radius:8px;border:1px solid var(--line);background:#0a0f0b;color:var(--ink);
+ font:inherit;cursor:pointer;text-decoration:none}
+.door.primary{background:var(--leaf);color:#102214;border-color:var(--leaf);font-weight:650}
+.door:focus-visible,summary:focus-visible,a:focus-visible,.tgl button:focus-visible,.ex button:focus-visible{
+ outline:3px solid var(--cyan);outline-offset:3px}
+.choices{display:flex;flex-wrap:wrap;gap:10px 14px;justify-content:center;margin-top:22px}
+.calm{max-width:40rem;margin:18px auto 0;font-size:1.05rem;line-height:1.7}
+.take{font-size:clamp(1.5rem,5.4vw,2.4rem);line-height:1.2;color:var(--gold);margin-top:18px;font-weight:550;text-wrap:balance}
+.support{font-size:.875rem;color:var(--dim);margin-top:8px;max-width:36rem;margin-inline:auto}
+.eyebrow{color:var(--dim);font-size:.875rem;margin-top:8px}
+.pair{color:var(--ink);font-size:.95rem;margin-top:6px;letter-spacing:.04em}
+.lesson-q{font-size:1.05rem;line-height:1.75;margin-top:14px;max-width:40rem}
+.lesson-q b{font-weight:550}
+.consciousness{max-width:36rem;margin:0 auto 18px;font-size:1.15rem;line-height:1.7;color:var(--ink)}
+.vivid{max-width:40rem;margin:16px auto 0;font-size:1.08rem;line-height:1.75}
+#first-bee,#first-raver,#layer-figure,#layer-lesson,#instrument{display:none}
+body[data-reg="bee"][data-uni-beat="arrival"] #first-bee{display:block}
+body[data-reg="raver"][data-uni-beat="figure"] #layer-figure{display:block}
+body:not([data-reg="cypherpunk"])[data-uni-beat="lesson"] #layer-lesson{display:block}
+body[data-uni-beat="deeper"] #instrument,
+body[data-reg="cypherpunk"] #instrument{display:block}
+body[data-reg="raver"][data-uni-beat="arrival"] #masthead{display:none}
+/* Injected course acts render after load — hide them unless the instrument
+   is the open beat. data-uni-injected is the FOUC belt for JS-built cards. */
+#courses > [data-uni-injected]{display:none}
+body[data-uni-beat="deeper"] #courses > [data-uni-injected],
+body[data-reg="cypherpunk"] #courses > [data-uni-injected]{display:revert}
+
+/* New bee — language-first calm room. */
+body[data-reg="bee"]{
+  --bg:#f6f7f2;--panel:#fff;--well:#edf2eb;--ink:#18362a;--dim:#435f4e;--faint:#52695b;
+  --line:#ccd7cf;--gold:#855b0b;--violet:#65509a;--cyan:#176879;--leaf:#326b39;--amber:#9f362c;
+  --c-works:#326b39;--c-idea:#65509a;--c-bug:#855b0b;--c-gap:#176879;
+  color-scheme:light;
+  background:#f6f7f2;color:#18362a;font:1.125rem/1.65 var(--bee-font);
+}
+body[data-reg="bee"] h1{color:var(--ink);letter-spacing:-.03em}
+body[data-reg="bee"] .calm,.take,.support,.eyebrow,.pair,.lesson-q,.consciousness,.vivid{font-family:var(--bee-font)}
+body[data-reg="bee"] .take{color:#326b39}
+body[data-reg="bee"] .door{font:500 1rem/1.4 var(--bee-font);border-radius:16px;min-width:11rem;background:#fff;border-color:#8a9e90}
+body[data-reg="bee"] .door.primary{background:#326b39;color:#fff;border-color:#326b39}
+body[data-reg="bee"] #tbar{background:#f6f7f2!important;border-top-color:#ccd7cf!important}
+body[data-reg="bee"] #tbar a{color:#18362a!important}
+body[data-reg="bee"] section{background:#fff;border-color:var(--line)}
+body[data-reg="bee"] .charter{background:#f3efe2;border-color:#d4c4a0;color:#855b0b}
+body[data-reg="bee"] .ex,.rline{background:#edf2eb;border-color:var(--line)}
+body[data-reg="bee"] .ex input[type=number],body[data-reg="bee"] select,body[data-reg="bee"] input[type=text]{background:#fff;color:var(--ink);border-color:var(--line)}
+
+/* Raver — quiet floor; checking our own material is the dance. */
+body[data-reg="raver"]{--bg:#0c1412;--ink:#e9f2ec;--dim:#b7c9be;--line:#2a3a34;--gold:#c9a0ff;--violet:#c9a0ff;--cyan:#7ee0d0;
+ --leaf:#c9a0ff;color-scheme:dark;background:#0c1412}
+body[data-reg="raver"][data-uni-beat="arrival"]{padding:0 0 90px;background:#0c1412}
+body[data-reg="raver"][data-uni-beat="arrival"] main{max-width:none;padding:0}
+#first-raver{position:relative;min-height:100svh;flex-direction:column;align-items:center;
+ justify-content:flex-end;padding:12vh 22px calc(14vh + 72px);text-align:center;overflow:hidden}
+body[data-reg="raver"][data-uni-beat="arrival"] #first-raver{display:flex}
+#floor-scene{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.feel{position:relative;z-index:1;max-width:22ch;font-size:clamp(1.6rem,6vw,2.8rem);line-height:1.25;
+ color:#e9f2ec;font-weight:400;text-wrap:balance}
+#first-raver .choices{position:relative;z-index:1}
+body[data-reg="raver"] .door.primary{background:#c9a0ff;color:#141018;border-color:#c9a0ff;
+ font:600 1.05rem/1.4 var(--bee-font);border-radius:99px;padding:12px 26px}
+@keyframes floor-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+@keyframes wash-shift{0%,100%{opacity:.55}50%{opacity:.9}}
+@keyframes slip-glow{0%,100%{opacity:.35}50%{opacity:.8}}
+#floor-scene .living{animation:floor-breathe 10s ease-in-out infinite;transform-origin:50% 48%}
+#floor-scene .wash{animation:wash-shift 12s ease-in-out infinite}
+#floor-scene .glow{animation:slip-glow 8s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){
+ #floor-scene .living,#floor-scene .wash,#floor-scene .glow{animation:none}
+}
+
+/* Cypherpunk keeps today's full literacy instrument. */
+body[data-reg="cypherpunk"]{font-family:ui-monospace,'Cascadia Mono',Consolas,monospace}
+body[data-reg="cypherpunk"] #sources-panel{border:1px dashed var(--line);border-radius:11px;padding:10px 12px;margin-top:14px}
+body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44px;display:flex;align-items:center}
+#sources-panel{margin-top:14px}
+#sources-panel summary{cursor:pointer;min-height:44px;display:flex;align-items:center;color:var(--violet)}
+
+/* Page-owned language+view chrome. Keep both out of #first-bee. */
+#bregdescription{position:absolute;display:block;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+.uni-language[data-language-host]{display:flex;align-items:center;margin-inline-start:auto;max-width:100%}
+.uni-language #blangctl{margin:0!important;padding:0!important;border:0!important;flex-wrap:wrap}
+.uni-language #blangsel{
+  min-height:44px!important;min-width:11rem;max-width:100%!important;padding:8px 12px!important;
+  background:var(--reg-bg,var(--panel,var(--bg)))!important;color:var(--reg-ink,var(--ink))!important;
+  border:1px solid var(--reg-line,var(--line))!important;font:inherit!important
+}
+.uni-language #blangnote{white-space:normal!important;color:var(--reg-ink,var(--dim))!important;font:.75rem/1.4 inherit!important}
+/* A small local exercise: illustrative marks, never a medical result. */
+.lesson-example{margin:24px auto;padding:24px;border:1px solid var(--line);border-radius:24px;max-width:42rem;background:var(--well,var(--bg))}
+.lesson-sample{display:block;width:min(100%,320px);height:auto;margin:8px auto;color:var(--ink)}
+.lesson-check{border:0;min-width:0;padding:16px 0 0}
+.lesson-check legend{font:600 1.15rem/1.5 var(--bee-font,system-ui)}
+.lesson-check .choices{margin-top:12px}
+.lesson-check button[aria-pressed="true"]{outline:3px solid var(--leaf,#326b39);outline-offset:3px}
+#lesson-answer{margin-top:24px;padding:20px;border-inline-start:3px solid var(--leaf,#326b39);text-align:start;font:1rem/1.7 var(--bee-font,system-ui)}
+#lesson-answer[hidden]{display:none}
+.lesson-context{max-width:42rem;margin:20px auto;text-align:start;border:1px solid var(--line);border-radius:16px;padding:16px 20px}
+.lesson-context summary{cursor:pointer;min-height:44px;display:flex;align-items:center}
+body[data-reg="raver"] .lesson-example{background:linear-gradient(135deg,#281b36,#102c28)}
 </style>
 </head>
-<body>
-<header>
-  <h1>🎓 Beehive University</h1>
-  <p>the curriculum is the receipts — every lesson this university teaches already exists in the
-  tree as a verified record, and every lesson ends in a verifiable act: a receipt <i>you</i> produce.
-  a graduate holds signed receipts, not a certificate.</p>
-</header>
+<body data-reg="bee" data-bee-theme="custom" data-uni-beat="arrival">
+<div id="bregbar">
+  <a class="breg-home" href="../index.html" aria-label="skaists home">⬡ skaists</a>
+  <div data-register-host aria-describedby="bregdescription"></div>
+  <span id="bregdescription" data-i18n="atlas.view">Choose how this page speaks to you</span>
+  <span class="uni-language" data-language-host></span>
+</div>
 <main>
+<header id="masthead">
+  <h1>🎓 <span data-i18n="uni.mark">Beehive University</span></h1>
+  <p class="eyebrow pair" data-reg="cypherpunk" data-i18n="uni.pair">the curriculum is the receipts</p>
+  <div class="sub" data-reg="cypherpunk">every lesson this university teaches already exists in the
+  tree as a verified record, and every lesson ends in a verifiable act: a receipt <i>you</i> produce.
+  a graduate holds signed receipts, not a certificate. this surface is a <b>view</b>, not a store —
+  education / cite-or-silent only. open gates stay exhibits.</div>
+</header>
 
+<article id="first-bee">
+  <p class="calm" data-i18n="uni.bee.calm">Make sense of the claims around you.</p>
+  <p class="take" data-i18n="uni.bee.takeaway">Learn to ask one good question.</p>
+  <p class="support" data-i18n="uni.bee.support">Begin with a small example. Explore the evidence when you are ready.</p>
+  <div class="choices">
+    <button type="button" class="door primary" data-uni-go="lesson" data-i18n="uni.bee.start">Start with a lab report</button>
+    <button type="button" class="door" data-uni-go="deeper" data-i18n="uni.bee.deeper">Go deeper</button>
+  </div>
+</article>
+
+<article id="first-raver">
+  <svg id="floor-scene" viewBox="0 0 800 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="floor-wash" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#142018"/>
+        <stop offset="32%" stop-color="#123028"/>
+        <stop offset="62%" stop-color="#1a2438"/>
+        <stop offset="88%" stop-color="#1c1830"/>
+        <stop offset="100%" stop-color="#0c1412"/>
+      </linearGradient>
+      <radialGradient id="slip-glow" cx="50%" cy="42%" r="52%">
+        <stop offset="0%" stop-color="#d8c46a" stop-opacity=".34"/>
+        <stop offset="42%" stop-color="#63c97c" stop-opacity=".14"/>
+        <stop offset="74%" stop-color="#c9a0ff" stop-opacity=".12"/>
+        <stop offset="100%" stop-color="#0c1412" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect class="wash" width="800" height="900" fill="url(#floor-wash)"/>
+    <ellipse class="wash" cx="400" cy="380" rx="320" ry="260" fill="url(#slip-glow)"/>
+    <g class="living">
+      <ellipse cx="400" cy="607" rx="242" ry="43" fill="#c9a0ff" opacity=".13"/>
+      <path d="M176 385q112-52 224 19 112-71 224-19v196q-112-52-224 19-112-71-224-19Z" fill="#172b2b" stroke="#45c2dc" stroke-width="3"/>
+      <path d="M192 365q104-39 208 35v176q-104-74-208-35Z" fill="#b79fe0" opacity=".72"/>
+      <path d="M608 365q-104-39-208 35v176q104-74 208-35Z" fill="#dfeedd" opacity=".83"/>
+      <path d="M224 418q66-8 138 36m-138 2q66-8 138 36m-138 2q66-8 102 17" fill="none" stroke="#43305f" stroke-width="6" stroke-linecap="round" opacity=".6"/>
+      <path d="M448 452q38-77 105-63-7 61-71 72-31 19-34 43" fill="#326b39" stroke="#86cc72" stroke-width="2"/>
+      <path d="m468 451 53-39m-21 19v-18m0 18 19 3" fill="none" stroke="#cde7bd" stroke-width="2"/>
+      <path d="M400 356V215m0 91-61-41m61 12 72-61m-72 17-27-41" fill="none" stroke="#45c2dc" stroke-width="2" opacity=".75"/>
+      <circle cx="339" cy="265" r="11" fill="#c9a0ff"/><circle cx="472" cy="216" r="14" fill="#86cc72"/><circle cx="373" cy="192" r="8" fill="#45c2dc"/>
+    </g>
+    <g class="glow" fill="none" stroke="#d8c46a" stroke-width="1.8">
+      <circle cx="400" cy="214" r="29" stroke="#c9a0ff" opacity=".8"/>
+      <path d="M297 330h16m-8-8v16m211-47h22m-11-11v22m-81-139h16m-8-8v16" stroke="#dfeedd" stroke-width="2"/>
+    </g>
+  </svg>
+  <p class="feel" data-i18n="uni.raver.feel">Stay curious. Let wonder lead you closer.</p>
+  <div class="choices">
+    <button type="button" class="door primary" data-uni-go="lesson" data-i18n="uni.raver.tap">Explore a small mystery</button>
+  </div>
+</article>
+
+<article id="layer-figure">
+  <p class="consciousness" data-i18n="uni.raver.consciousness">Not a content silo — a room where checking our own material is the dance.</p>
+  <p class="vivid">Three moves on one of <i>our</i> lab panels: what was measured, how low the test can see, and what material was in the vial. A “total” line is a panel wearing a total’s name. Below the floor the honest word is “below the floor”, never “0”.</p>
+  <p class="support">source of record: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/RECEIPT_CANNABINOID_PANEL_UNDERCOUNT_2026-08-20.md" target="_blank" rel="noopener noreferrer">RECEIPT_CANNABINOID_PANEL_UNDERCOUNT_2026-08-20</a> <span data-i18n="uni.opens">(opens in a new tab)</span></p>
+  <div class="choices">
+    <button type="button" class="door" data-uni-go="deeper" data-i18n="uni.bee.deeper">Go deeper</button>
+  </div>
+</article>
+
+<article id="layer-lesson">
+  <h2>🔬 <span data-i18n="uni.lesson.name">how to read a lab report</span></h2>
+  <p class="lesson-q" data-i18n="uni.lesson.lead">A lab report is a photograph of one sample, taken by one method, at one sensitivity.</p>
+  <div class="lesson-example">
+    <p class="support" data-i18n="uni.lesson.example">Practice example</p>
+    <svg viewBox="0 0 320 140" class="lesson-sample" aria-hidden="true" focusable="false">
+      <rect x="40" y="14" width="240" height="112" rx="20" fill="currentColor" opacity=".06"/>
+      <path d="M77 42v55m0 0h170" fill="none" stroke="currentColor" stroke-width="2" opacity=".4"/>
+      <path d="M78 65h166" stroke="currentColor" stroke-dasharray="5 5" stroke-width="2" opacity=".6"/>
+      <circle cx="109" cy="82" r="5" fill="#326b39"/><circle cx="142" cy="90" r="5" fill="#326b39"/><circle cx="175" cy="76" r="5" fill="#326b39"/>
+      <path d="M219 72v15m-5-5 5 5 5-5" fill="none" stroke="currentColor" stroke-width="2"/>
+    </svg>
+    <p class="lesson-q" data-i18n="uni.lesson.result">The report says: below the detection limit.</p>
+    <fieldset class="lesson-check">
+      <legend data-i18n="uni.lesson.question">Does that mean there is none?</legend>
+      <div class="choices">
+        <button type="button" class="door" data-lesson-answer="yes" aria-pressed="false" aria-controls="lesson-answer"><span data-i18n="uni.lesson.yes">Yes, it means zero</span></button>
+        <button type="button" class="door" data-lesson-answer="no" aria-pressed="false" aria-controls="lesson-answer"><span data-i18n="uni.lesson.no">No, the test cannot tell</span></button>
+      </div>
+    </fieldset>
+    <div id="lesson-answer" hidden role="status"><p data-i18n="uni.lesson.answer">Below the detection limit means this test cannot reliably detect the amount. It does not prove that the amount is zero.</p></div>
+  </div>
+  <details class="lesson-context"><summary><span data-i18n="uni.lesson.inspect">What else should I check?</span></summary>
+    <p class="lesson-q" data-i18n="uni.lesson.questions">Check what was measured, which sample was tested, and how sensitive the method was.</p>
+    <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/RECEIPT_CANNABINOID_PANEL_UNDERCOUNT_2026-08-20.md" target="_blank" rel="noopener noreferrer"><span data-i18n="uni.lesson.source">Read the supporting evidence</span> <span data-i18n="uni.opens">(opens in a new tab)</span></a>
+  </details>
+  <div class="choices">
+    <button type="button" class="door" data-uni-go="deeper" data-i18n="uni.bee.deeper">Go deeper</button>
+  </div>
+</article>
+
+<div id="instrument">
 <section>
   <h2><span data-i18n="h.174">THE CHARTER — what this is, and what it is not</span></h2>
   <div class="charter">founder, 2026-08-20, on the commission: <i>"yes to the fourth seat, and the
@@ -88,15 +303,11 @@ footer{max-width:860px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
 
 <section>
   <h2><span data-i18n="h.175">THE THREE REGISTERS — one set of facts, three densities</span></h2>
-  <div class="tgl" role="group" aria-label="register">
-    <button id="rg-bee" aria-pressed="true" onclick="setReg('bee')">🐝 bee — guided, minimal, generous</button>
-    <button id="rg-raver" aria-pressed="false" onclick="setReg('raver')">🎛 raver — mid-density, vivid</button>
-    <button id="rg-cyper" aria-pressed="false" onclick="setReg('cypherpunk')">⚗ cypherpunk — dense, receipts-forward</button>
-  </div>
   <div class="law">a register is a reading level, not a tier — nobody proves anything to get the bee
   version, and cypherpunk is not a reward. all three render from the same constants; numbers cannot
   diverge. the founder has ruled b-gating for the upper two registers <i>in late beta</i>; until
-  gate U-1's reading lands, nothing here is gated — holding is not spending.</div>
+  gate U-1's reading lands, nothing here is gated — holding is not spending. the view switcher
+  lives in the shared bar — this page does not keep a second mid-page register.</div>
   <div class="law" style="margin-top:8px">▾ corpus law, live — the **three roles** (founder-ruled
   2026-08-20): father language (the pivot), mother language (**chosen** — adopted cultures count,
   young ones too), student language(s) (in active study — exposure is the point). the status labels
@@ -204,18 +415,30 @@ footer{max-width:860px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   house law, and this table is it working.</div>
 </section>
 
+<details id="sources-panel" data-view-disclosure="sources">
+  <summary>cite-or-silent sources</summary>
+  <div class="law">commission: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/COMMISSION_BEEHIVE_UNIVERSITY_2026-08-20.md" target="_blank" rel="noopener noreferrer">COMMISSION_BEEHIVE_UNIVERSITY_2026-08-20</a> <span data-i18n="uni.opens">(opens in a new tab)</span>
+  · landing: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/RECEIPT_BEEHIVE_UNIVERSITY_LANDING_2026-08-20.md" target="_blank" rel="noopener noreferrer">RECEIPT_BEEHIVE_UNIVERSITY_LANDING_2026-08-20</a>
+  · presentation law: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/DISPATCH_SERVING_BASIS_1.md" target="_blank" rel="noopener noreferrer">SERVING-BASIS-1 §2</a>
+  — nutrition and method first; composition and definitions only. effect clauses stay Axis B / off-repo.
+  open gates stay exhibits. a claim without a receipt does not ship.</div>
+</details>
+</div>
+
 </main>
 <footer>
-  doctrine: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/COMMISSION_BEEHIVE_UNIVERSITY_2026-08-20.md">COMMISSION_BEEHIVE_UNIVERSITY_2026-08-20</a> ·
-  landing receipt: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/RECEIPT_BEEHIVE_UNIVERSITY_LANDING_2026-08-20.md">RECEIPT_BEEHIVE_UNIVERSITY_LANDING_2026-08-20</a> ·
+  <span data-i18n="uni.foot.door">Education — cite, or silent.</span>
+  · <span data-reg="cypherpunk">doctrine: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/COMMISSION_BEEHIVE_UNIVERSITY_2026-08-20.md" target="_blank" rel="noopener noreferrer">COMMISSION_BEEHIVE_UNIVERSITY_2026-08-20</a> ·
+  landing receipt: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/RECEIPT_BEEHIVE_UNIVERSITY_LANDING_2026-08-20.md" target="_blank" rel="noopener noreferrer">RECEIPT_BEEHIVE_UNIVERSITY_LANDING_2026-08-20</a> ·
   inherited: <a href="../hardware/build.html">the producer ladder</a> · <a href="../hardware/lab.html">the lab charter</a> ·
-  <a href="../blight/museum.html">the museum's show-the-errors doctrine</a> · <a href="../bigen.html">BiGen's methodology</a><br>
-  built by zCode (GLM 5.3), the university seat by founder direction · Seat 3 verifies on landing · AGPL-3.0-only ·
-  <a href="../index.html">← the hive</a><br>
-  don't trust these pages either — every claim links its receipt. Verify.
+  <a href="../blight/museum.html">the museum's show-the-errors doctrine</a> · <a href="../bigen.html">BiGen's methodology</a>
+  · AGPL-3.0-only · this page: surfaces/university/index.html</span>
+  · <a href="../bigen.html" data-i18n="uni.foot.learn">learn to check this page</a>
+  · <a href="../index.html" data-i18n="law.hive">← the hive</a><br>
+  <span data-i18n="uni.foot.verify">don't trust these pages either — every claim links its receipt. Verify.</span>
 </footer>
 
-<script src="../tour.js?v=41"></script>
+<script src="../tour.js?v=42"></script>
 <script>
 (function(){
 var $=function(i){return document.getElementById(i);};
@@ -426,15 +649,14 @@ var COURSES=[
 var REG='bee', done={};
 try{ done=JSON.parse(localStorage.getItem('buni_progress')||'{}'); }catch(e){ done={}; }
 function saveDone(){ try{ localStorage.setItem('buni_progress',JSON.stringify(done)); }catch(e){}}
+function currentReg(){ return document.body.getAttribute('data-reg')||'bee'; }
 function renderReg(){
+  REG=currentReg();
   COURSES.forEach(function(c){
-    var p=$('prose-'+c.id); if(p) p.innerHTML=c.prose[REG];
+    var p=$('prose-'+c.id); if(p) p.innerHTML=c.prose[REG]||c.prose.bee;
   });
-  [['bee','rg-bee'],['raver','rg-raver'],['cypherpunk','rg-cyper']].forEach(function(x){
-    $(x[1]).setAttribute('aria-pressed', REG===x[0]?'true':'false');
-  });
+  renderGrad();
 }
-function setReg(r){ REG=r; renderReg(); }
 
 function okLab(hex){
   var r=parseInt(hex.substr(1,2),16)/255,g=parseInt(hex.substr(3,2),16)/255,b=parseInt(hex.substr(5,2),16)/255;
@@ -524,13 +746,15 @@ var TOTAL_ACTS=COURSES.filter(function(c){return !c.stub;}).length;
 COURSES.forEach(function(c){
   var sec=document.createElement('section');
   if(c.stub){ /* a stub is a promise with its source of record, never a fake lesson */
+    sec.setAttribute('data-uni-injected','course');
     sec.innerHTML='<h2>'+c.glyph+' '+c.name.toUpperCase()+' · <span class="badge">STUB</span></h2>'
       +'<div class="law">source of record: <a href="'+c.srcl+'">'+c.srcl.replace(/^.*\/blob\/main\//,'')+'</a></div>'
       +'<div class="prose">'+c.stubNote+'</div>';
     host.appendChild(sec); return;
   }
+  sec.setAttribute('data-uni-injected','course');
   var status='<span id="st-'+c.id+'"></span>';
-  var srcLink='<a href="'+c.srcl+'">'+c.src+'</a>';
+  var srcLink='<a href="'+c.srcl+'" target="_blank" rel="noopener noreferrer">'+c.src+'</a>';
   var html='<h2>'+c.glyph+' '+c.name.toUpperCase()+' · '+status+'</h2>'
     +'<div class="law">source of record: '+srcLink+'</div>'
     +'<div class="prose" id="prose-'+c.id+'"></div>'
@@ -681,11 +905,74 @@ function composeQuest(){
   addTranscript(line,{id:'quest'});
 }
 
+/* ===== three-temperature beats — first paint is what changes ===== */
+function restoreVisibleFocus(focus){
+ if(!focus||!focus.isConnected)return;var target=focus;
+ for(var node=focus.parentElement;node;node=node.parentElement)if(node.tagName==='DETAILS'&&!node.open){
+  target=node.querySelector('summary'); break;
+ }
+ if(target&&target.focus) target.focus({preventScroll:true});
+}
+function defaultOpen(reading,kind){
+ return reading==='cypherpunk' && kind==='sources';
+}
+function defaultBeat(reading){
+ return reading==='cypherpunk' ? 'deeper' : 'arrival';
+}
+var lastReading=null;
+var readingChoices=new Map();
+var beatChoices=new Map();
+function setBeat(beat){
+  var reading=document.body.getAttribute('data-reg')||'bee';
+  if(reading==='cypherpunk') beat='deeper';
+  document.body.setAttribute('data-uni-beat',beat);
+  beatChoices.set(reading,beat);
+  var focusId=beat==='figure'?'layer-figure':beat==='lesson'?'layer-lesson':beat==='deeper'?'instrument':null;
+  var node=focusId && $(focusId);
+  if(node) node.scrollIntoView({block:'start'});
+}
+function applyReading(event){
+  var reading=event&&event.detail&&event.detail.reg||document.body.dataset.reg||'bee';
+  if(reading===lastReading) return;
+  var focus=document.activeElement;
+  var details=[].slice.call(document.querySelectorAll('[data-view-disclosure]'));
+  if(lastReading){
+    readingChoices.set(lastReading, details.map(function(d){ return d.open; }));
+    beatChoices.set(lastReading, document.body.getAttribute('data-uni-beat')||'arrival');
+  }
+  var previous=readingChoices.get(reading);
+  details.forEach(function(d,i){
+    d.open=previous ? previous[i] : defaultOpen(reading, d.getAttribute('data-view-disclosure'));
+  });
+  document.body.setAttribute('data-uni-beat', reading==='cypherpunk' ? 'deeper' : (beatChoices.get(reading)||defaultBeat(reading)));
+  var theme=document.querySelector('meta[name="theme-color"]');
+  if(theme) theme.content=reading==='bee'?'#f6f7f2':reading==='raver'?'#0c1412':'#0d1410';
+  renderReg();
+  restoreVisibleFocus(focus);
+  lastReading=reading;
+}
+document.addEventListener('bregister',applyReading);
+document.addEventListener('click',function(e){
+  var btn=e.target&&e.target.closest&&e.target.closest('[data-uni-go]');
+  if(!btn) return;
+  setBeat(btn.getAttribute('data-uni-go'));
+});
+
+/* This practice creates no grade, credential, or network request. */
+document.querySelectorAll('[data-lesson-answer]').forEach(function(button){
+  button.addEventListener('click',function(){
+    document.querySelectorAll('[data-lesson-answer]').forEach(function(other){
+      other.setAttribute('aria-pressed',String(other===button));
+    });
+    document.getElementById('lesson-answer').hidden=false;
+  });
+});
 /* boot */
-window.setReg=setReg; window.gradLine=gradLine; window.setQ=setQ; // onclick-attribute handlers
+window.gradLine=gradLine; window.setQ=setQ; // onclick-attribute handlers
 $('q-wt').addEventListener('input',renderQ);
 $('q-compose').addEventListener('click',composeQuest);
-renderCorpus(); renderReg(); renderStatus(); renderGrad(); renderQ();
+renderCorpus(); renderStatus(); renderGrad(); renderQ();
+applyReading();
 /* restore prior-session lines without re-marking done courses */
 COURSES.forEach(function(c){ if(done[c.id]) addTranscript(c.act.rline(),c); else { var l=$('line-'+c.id); if(l) l.style.display='none'; } });
 })();

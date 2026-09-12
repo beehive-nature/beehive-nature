@@ -5,21 +5,31 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="color-scheme" content="dark">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f6f7f2">
 <link rel="stylesheet" href="tokens.css">
-<title>the fat education — your body builds its own cannabinoids out of essential fat</title>
+<title>the fat education — two fats your body cannot make</title>
 <style>
 :root{--bg:#0d1410;--ink:#e2efdb;--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--dim:#8a9a8a;--line:#243026;--leaf:#7ddf8f;--amber:#ffb347;
---n6:#c07f1c;--n3:#0092a6;--ess:#3f9c55;--cb:#a476ec;--acid:#ffb347}
+--n6:#c07f1c;--n3:#0092a6;--ess:#3f9c55;--cb:#a476ec;--acid:#ffb347;--well:#0a0f0b;
+--bee-font:system-ui,-apple-system,'Segoe UI',sans-serif}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:36px 16px 90px}
+html,body{overflow-x:hidden}
+body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:0 0 90px}
+main{max-width:920px;margin:0 auto;padding-inline:16px}
+/* Estate register scoping — INLINE so a cypher-only leaf cannot FOUC or leak
+   if register.js is late or fails. Same contract as surfaces/register.js.
+   Copied from bEarth #45 / bSymposium #46 / Hexagon #47. */
+[data-reg]:not(body){display:none}
+body[data-reg="bee"] [data-reg="bee"],
+body[data-reg="raver"] [data-reg="raver"],
+body[data-reg="cypherpunk"] [data-reg="cypherpunk"]{display:revert}
 header{text-align:center;margin-bottom:12px;padding-bottom:14px;position:relative}
 header::after{content:'';position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:min(520px,80%);height:2px;
   background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.5}
 h1{font-size:clamp(19px,4.5vw,27px);color:var(--gold);font-weight:400;letter-spacing:.04em;
   text-shadow:0 0 18px rgba(255,215,0,.22)}
-header p{color:var(--dim);font-size:11px;margin-top:8px;max-width:780px;margin-left:auto;margin-right:auto;line-height:1.85}
-main{max-width:920px;margin:0 auto}
+.sub{color:var(--dim);font-size:11px;margin-top:8px;max-width:780px;margin-left:auto;margin-right:auto;line-height:1.85}
 section{background:#111a14;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:16px}
 section h2{font-size:12px;color:var(--violet);font-weight:400;letter-spacing:.08em;margin-bottom:8px}
 .law{color:var(--dim);font-size:10px;line-height:1.7}
@@ -95,19 +105,188 @@ body.reversed .stage .hyp{display:inline}
   .flowline path,.brick .dot,.cgroup.ess{animation:none}
   body.reversed .flowline path{stroke:var(--amber)}
 }
-footer{max-width:920px;margin:22px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
+footer{max-width:920px;margin:22px auto 0;padding-inline:16px;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
+
+[hidden]{display:none!important}
+.door{appearance:none;display:inline-flex;align-items:center;justify-content:center;min-height:44px;
+ padding:10px 18px;border-radius:8px;border:1px solid var(--line);background:var(--well);color:var(--ink);
+ font:inherit;cursor:pointer;text-decoration:none}
+.door.primary{background:var(--leaf);color:#102214;border-color:var(--leaf);font-weight:650}
+.door:focus-visible,summary:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,#revBtn:focus-visible{
+ outline:3px solid var(--cyan);outline-offset:3px}
+.choices{display:flex;flex-wrap:wrap;gap:10px 14px;justify-content:center;margin-top:22px}
+.calm{max-width:40rem;margin:18px auto 0;font-size:1.05rem;line-height:1.7}
+.take{font-size:clamp(1.5rem,5.4vw,2.4rem);line-height:1.2;color:var(--gold);margin-top:18px;font-weight:550;text-wrap:balance}
+.support{font-size:.875rem;color:var(--dim);margin-top:8px;max-width:36rem;margin-inline:auto}
+.eyebrow{color:var(--dim);font-size:.875rem;margin-top:8px}
+.pair{color:var(--ink);font-size:.95rem;margin-top:6px;letter-spacing:.04em}
+.story-caption{max-width:36rem;margin:16px auto 0;font-size:1.05rem;line-height:1.7;color:var(--dim)}
+#first-bee,#first-raver,#layer-figure,#layer-story,#instrument{display:none}
+body[data-reg="bee"][data-blong-beat="arrival"] #first-bee{display:block}
+body[data-reg="raver"][data-blong-beat="figure"] #layer-figure{display:block}
+body[data-blong-beat="story"] #layer-story{display:block}
+body[data-blong-beat="deeper"] #instrument,
+body[data-reg="cypherpunk"] #instrument{display:block}
+body[data-reg="raver"][data-blong-beat="arrival"] #masthead{display:none}
+
+/* New bee — language-first calm room. */
+body[data-reg="bee"]{
+  --bg:#f6f7f2;--panel:#fff;--well:#edf2eb;--ink:#18362a;--dim:#435f4e;--faint:#52695b;
+  --line:#ccd7cf;--gold:#855b0b;--violet:#65509a;--cyan:#176879;--leaf:#326b39;--amber:#9f362c;
+  --n6:#855b0b;--n3:#176879;--ess:#326b39;--cb:#65509a;--acid:#9f362c;
+  color-scheme:light;
+  background:#f6f7f2;color:#18362a;font:1.125rem/1.65 var(--bee-font);
+}
+body[data-reg="bee"] h1{color:var(--ink);letter-spacing:-.03em;text-shadow:none}
+body[data-reg="bee"] header::after{opacity:.25}
+body[data-reg="bee"] .calm,.take,.support,.eyebrow,.pair,.story-caption{font-family:var(--bee-font)}
+body[data-reg="bee"] .take{color:#326b39}
+body[data-reg="bee"] .door{font:500 1rem/1.4 var(--bee-font);border-radius:16px;min-width:11rem;background:#fff;border-color:#8a9e90}
+body[data-reg="bee"] .door.primary{background:#326b39;color:#fff;border-color:#326b39}
+body[data-reg="bee"] #tbar{background:#f6f7f2!important;border-top-color:#ccd7cf!important}
+body[data-reg="bee"] #tbar a{color:#18362a!important}
+body[data-reg="bee"] section{background:#fff;border-color:var(--line)}
+body[data-reg="bee"] .brick.n6{background:#f6efe2;border-color:#d4c4a0}
+body[data-reg="bee"] .brick.n3{background:#e6f2f0;border-color:#8ab8b8}
+body[data-reg="bee"] .stat{background:#f3efe2;border-color:#d4c4a0;color:#855b0b}
+
+/* Raver — soft fat/plant wash. Feeling first; the story one tap away. */
+body[data-reg="raver"]{--bg:#0c1412;--ink:#e9f2ec;--dim:#b7c9be;--line:#2a3a34;--gold:#c9a0ff;--violet:#c9a0ff;--cyan:#7ee0d0;
+ --leaf:#c9a0ff;color-scheme:dark;background:#0c1412}
+body[data-reg="raver"][data-blong-beat="arrival"]{padding:0 0 90px;background:#0c1412}
+body[data-reg="raver"][data-blong-beat="arrival"] main{max-width:none}
+#first-raver{position:relative;min-height:100svh;flex-direction:column;align-items:center;
+ justify-content:flex-end;padding:12vh 22px calc(14vh + 72px);text-align:center;overflow:hidden}
+body[data-reg="raver"][data-blong-beat="arrival"] #first-raver{display:flex}
+#oil-scene{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.feel{position:relative;z-index:1;max-width:22ch;font-size:clamp(1.6rem,6vw,2.8rem);line-height:1.25;
+ color:#e9f2ec;font-weight:400;text-wrap:balance}
+#first-raver .choices{position:relative;z-index:1}
+body[data-reg="raver"] .door.primary{background:#c9a0ff;color:#141018;border-color:#c9a0ff;
+ font:600 1.05rem/1.4 var(--bee-font);border-radius:99px;padding:12px 26px}
+.consciousness{max-width:36rem;margin:0 auto 18px;font-size:1.15rem;line-height:1.7;color:var(--ink)}
+@keyframes oil-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+@keyframes wash-shift{0%,100%{opacity:.55}50%{opacity:.9}}
+#oil-scene .living{animation:oil-breathe 10s ease-in-out infinite;transform-origin:50% 48%}
+#oil-scene .wash{animation:wash-shift 12s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){
+ #oil-scene .living,#oil-scene .wash{animation:none}
+}
+
+/* Cypherpunk keeps today's full fat-education instrument. */
+body[data-reg="cypherpunk"]{font-family:ui-monospace,'Cascadia Mono',Consolas,monospace}
+body[data-reg="cypherpunk"] #sources-panel{border:1px dashed var(--line);border-radius:11px;padding:10px 12px;margin-top:14px}
+body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44px;display:flex;align-items:center}
+#sources-panel{margin-top:14px}
+#sources-panel summary{cursor:pointer;min-height:44px;display:flex;align-items:center;color:var(--violet)}
+
+/* Page-owned language+view chrome (atlas mast-nav / gallery top-nav).
+   lang.js mounts #blangctl into [data-language-host]; register.js mounts
+   #bregctl into [data-register-host]. Keep both out of #first-bee. */
+#bregdescription{position:absolute;display:block;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+.blong-language[data-language-host]{display:flex;align-items:center;margin-inline-start:auto;max-width:100%}
+.blong-language #blangctl{margin:0!important;padding:0!important;border:0!important;flex-wrap:wrap}
+.blong-language #blangsel{
+  min-height:44px!important;min-width:11rem;max-width:100%!important;padding:8px 12px!important;
+  background:var(--reg-bg,var(--panel,var(--bg)))!important;color:var(--reg-ink,var(--ink))!important;
+  border:1px solid var(--reg-line,var(--line))!important;font:inherit!important
+}
+.blong-language #blangnote{white-space:normal!important;color:var(--reg-ink,var(--dim))!important;font:.75rem/1.4 inherit!important}
 </style>
 </head>
-<body>
-<header>
-  <h1>🧬 the fat education</h1>
-  <p><b style="color:var(--gold)">Your body builds its own cannabinoids out of essential fat.</b>
+<body data-reg="bee" data-bee-theme="custom" data-blong-beat="arrival">
+<div id="bregbar">
+  <a class="breg-home" href="index.html" aria-label="skaists home">⬡ skaists</a>
+  <div data-register-host aria-describedby="bregdescription"></div>
+  <span id="bregdescription" data-i18n="atlas.view">Choose how this page speaks to you</span>
+  <span class="blong-language" data-language-host></span>
+</div>
+<main>
+<header id="masthead">
+  <h1>🧬 <span data-i18n="blong.mark">the fat education</span></h1>
+  <p class="eyebrow" data-i18n="blong.pair">two fats your body cannot make</p>
+  <div class="sub" data-reg="cypherpunk">Your body builds its own cannabinoids out of essential fat.
   anandamide and 2-AG are fatty-acid molecules. the omega-3 family writes its own endocannabinoid
   dialect. the whole signaling language — CB1, CB2, the inflammatory tone, and the telomere's long
   horizon — is written in the two fats your body cannot make. <b style="color:var(--ink)">this is the page
-  nobody in the industry shows you, because there is no pill to sell at the end of it.</b></p>
+  nobody in the industry shows you, because there is no pill to sell at the end of it.</b></div>
 </header>
-<main>
+
+<article id="first-bee">
+  <p class="calm" data-i18n="blong.bee.calm">Your body needs two fats it gets from food. Explore what they do.</p>
+  <p class="take" data-i18n="blong.bee.takeaway">Two essential fats. One starting point.</p>
+  <p class="support" data-i18n="blong.bee.support">The research has limits.</p>
+  <div class="choices">
+    <button type="button" class="door primary" data-blong-go="story" data-i18n="blong.bee.story">See the fat story</button>
+    <button type="button" class="door" data-blong-go="deeper" data-i18n="blong.bee.deeper">Go deeper</button>
+  </div>
+</article>
+
+<article id="first-raver">
+  <svg id="oil-scene" viewBox="0 0 800 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A soft fat and plant wash from seed-oil light through green and teal into purple">
+    <defs>
+      <linearGradient id="seed-wash" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#2a3a18"/>
+        <stop offset="28%" stop-color="#1a3a28"/>
+        <stop offset="58%" stop-color="#123838"/>
+        <stop offset="82%" stop-color="#1a2438"/>
+        <stop offset="100%" stop-color="#261830"/>
+      </linearGradient>
+      <radialGradient id="oil-glow" cx="50%" cy="42%" r="54%">
+        <stop offset="0%" stop-color="#d8c46a" stop-opacity=".42"/>
+        <stop offset="40%" stop-color="#63c97c" stop-opacity=".18"/>
+        <stop offset="72%" stop-color="#7ee0d0" stop-opacity=".12"/>
+        <stop offset="100%" stop-color="#0c1412" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect class="wash" width="800" height="900" fill="url(#seed-wash)"/>
+    <ellipse class="wash" cx="400" cy="390" rx="340" ry="280" fill="url(#oil-glow)"/>
+    <g class="living">
+      <path d="M355 270 C348 347 276 381 282 450 C291 550 427 552 442 466 C453 402 395 358 355 270Z" fill="#83ca87" fill-opacity=".65" stroke="#ceeea1" stroke-width="3"/>
+      <path d="M459 320 C448 382 397 415 402 475 C409 547 514 553 532 490 C549 435 487 388 459 320Z" fill="#b09ada" fill-opacity=".45" stroke="#dac4f1" stroke-width="3"/>
+      <path d="M315 438 C321 397 341 386 351 364 M435 459 C438 432 450 418 458 407" stroke="#f3f2dd" stroke-width="7" stroke-linecap="round" fill="none" opacity=".8"/>
+      <ellipse cx="400" cy="604" rx="170" ry="34" stroke="#b5c993" stroke-width="2" fill="none" opacity=".6"/>
+      <ellipse cx="400" cy="410" rx="88" ry="118" fill="#c9b056" opacity=".28" transform="rotate(-18 400 410)"/>
+      <ellipse cx="318" cy="360" rx="46" ry="62" fill="#7ee0d0" opacity=".22" transform="rotate(14 318 360)"/>
+      <ellipse cx="490" cy="470" rx="54" ry="74" fill="#63c97c" opacity=".24" transform="rotate(-8 490 470)"/>
+      <ellipse cx="250" cy="520" rx="36" ry="48" fill="#b7a8f7" opacity=".2" transform="rotate(22 250 520)"/>
+      <ellipse cx="560" cy="300" rx="40" ry="56" fill="#9ad7c4" opacity=".2" transform="rotate(-24 560 300)"/>
+      <ellipse cx="400" cy="560" rx="70" ry="36" fill="#c9a0ff" opacity=".16"/>
+    </g>
+  </svg>
+  <p class="feel" data-i18n="blong.raver.feel">What if bliss chemistry started in the plate, not the pill?</p>
+  <div class="choices">
+    <button type="button" class="door primary" data-blong-go="figure" data-i18n="blong.raver.touch">Touch the story</button>
+  </div>
+</article>
+
+<article id="layer-figure">
+  <p class="consciousness" data-i18n="blong.raver.consciousness">Cannabinoid receptors did not evolve for plants — plants happened to speak the language your fats built.</p>
+  <p class="take" data-i18n="blong.bee.takeaway">Two essential fats. One starting point.</p>
+  <p class="support" data-i18n="blong.bee.support">The research has limits.</p>
+  <div class="choices">
+    <button type="button" class="door primary" data-blong-go="story" data-i18n="blong.bee.story">See the fat story</button>
+    <button type="button" class="door" data-blong-go="deeper" data-i18n="blong.bee.deeper">Go deeper</button>
+  </div>
+</article>
+
+<article id="layer-story">
+  <p class="take" data-i18n="blong.bee.takeaway">Two essential fats. One starting point.</p>
+  <div class="bricks">
+    <div class="brick n6"><span class="dot"></span><div class="bt"><b data-i18n="blong.story.la">Linoleic acid</b> · LA</div>
+      <div class="bs">n-6</div></div>
+    <div class="brick n3"><span class="dot"></span><div class="bt"><b data-i18n="blong.story.ala">Alpha-linolenic acid</b> · ALA</div>
+      <div class="bs">n-3</div></div>
+  </div>
+  <p data-i18n="blong.story.food">Your body needs both from food.</p>
+  <p data-i18n="blong.story.seed">Both are found in hemp hearts.</p>
+  <p class="story-caption" data-i18n="blong.story.caption">Both fats are essential. This page does not establish a target ratio.</p>
+  <div class="choices">
+    <button type="button" class="door" data-blong-go="deeper" data-i18n="blong.bee.deeper">Go deeper</button>
+  </div>
+</article>
+
+<div id="instrument">
 
 <section>
   <h2>0 · <span data-i18n="h.088">THE WALLS, ON THE FACE</span></h2>
@@ -117,7 +296,7 @@ footer{max-width:920px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   <a href="bigen.html">BiGen</a> lane, never asserted as found · <span class="badge">interpretation lane</span>
   "exponential longevity in all planes" — recorded verbatim, fenced off the science surfaces.
   <b style="color:var(--acid)">ACiD = Artificial Chronic Inflammatory Disease</b> — the made disease,
-  the downstream presentation <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/RULING_ACID_DEFINED_2026-08-20.md">(the ruling)</a>.
+  the downstream presentation <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/RULING_ACID_DEFINED_2026-08-20.md" target="_blank" rel="noopener noreferrer">(the ruling)</a>.
   dose never renders (CB-2).</div>
 </section>
 
@@ -143,18 +322,18 @@ footer{max-width:920px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
       arachidonic acid, ALA toward EPA/DHA</div>
       <div class="sc">the honest brake, carried with the chemistry: conversion is <b>rate-limited and
       inefficient</b> — lowering dietary LA alone does not simply re-set arachidonic acid or the
-      endocannabinoids built from it (<a href="https://pubmed.ncbi.nlm.nih.gov/38100748/">Lipids 2023</a>).
+      endocannabinoids built from it (<a href="https://pubmed.ncbi.nlm.nih.gov/38100748/" target="_blank" rel="noopener noreferrer">Lipids 2023</a>).
       the workshop exists; it is not a firehose.</div></div>
     <div class="flowline"><svg viewBox="0 0 16 24"><path d="M8 1 L8 16 M3 11 L8 17 L13 11"/></svg></div>
     <div class="stage"><div class="sn">STAGE 3 · TWO DIALECTS OF ONE LANGUAGE — the body's own cannabinoids</div>
       <div class="bricks">
         <div class="brick n6"><div class="bt"><b>n-6 dialect: anandamide + 2-AG</b></div>
           <div class="bs">your endocannabinoids are <b>arachidonoyl-class molecules — fat-derived
-          cannabinoids your body makes itself</b> (<a href="https://pubmed.ncbi.nlm.nih.gov/41167310/">JBC 2025</a>).
+          cannabinoids your body makes itself</b> (<a href="https://pubmed.ncbi.nlm.nih.gov/41167310/" target="_blank" rel="noopener noreferrer">JBC 2025</a>).
           anandamide is named for <i>ananda</i> — bliss — because that is what the molecule does to CB1</div></div>
         <div class="brick n3"><div class="bt"><b>n-3 dialect: omega-3 endocannabinoids</b></div>
           <div class="bs">the omega-3 family writes its own endocannabinoid class — <b>modulating T-cell
-          activity</b>, the immune seam (<a href="https://pubmed.ncbi.nlm.nih.gov/36626985/">JBC 2023</a>)</div></div>
+          activity</b>, the immune seam (<a href="https://pubmed.ncbi.nlm.nih.gov/36626985/" target="_blank" rel="noopener noreferrer">JBC 2023</a>)</div></div>
       </div>
       <div class="stat">the sentence the industry never says: cannabinoid receptors did not evolve for plants — plants happened to speak the language your fats built</div></div>
     <div class="flowline"><svg viewBox="0 0 16 24"><path d="M8 1 L8 16 M3 11 L8 17 L13 11"/></svg></div>
@@ -162,12 +341,12 @@ footer{max-width:920px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
       <div class="rx">
         <div class="stn cb1"><div class="rt"><b>CB1 — central</b></div>
           <div class="rs">Δ9-THC's unique cell: partial agonist, BBB-crossing
-          (<a href="https://pubmed.ncbi.nlm.nih.gov/14570037/">Guzmán 2003</a>). CBD is a
+          (<a href="https://pubmed.ncbi.nlm.nih.gov/14570037/" target="_blank" rel="noopener noreferrer">Guzmán 2003</a>). CBD is a
           <b>negative allosteric modulator</b> here — CB1-negative without antagonism
-          (<a href="https://pubmed.ncbi.nlm.nih.gov/36153039/">Mol Pharmacol 2022</a>)</div></div>
+          (<a href="https://pubmed.ncbi.nlm.nih.gov/36153039/" target="_blank" rel="noopener noreferrer">Mol Pharmacol 2022</a>)</div></div>
         <div class="stn cb2"><div class="rt"><b>CB2 — the peripheral-class receptor</b></div>
           <div class="rs">the CB2 half of the agonist pharmacology
-          (<a href="https://pubmed.ncbi.nlm.nih.gov/36397993/">eCAM 2022</a>) — the immune-seam receptor
+          (<a href="https://pubmed.ncbi.nlm.nih.gov/36397993/" target="_blank" rel="noopener noreferrer">eCAM 2022</a>) — the immune-seam receptor
           where the n-3 dialect's T-cell modulation lands. the severity ladder (10:1 · 5:1 · 3:1)
           reads on these two axes</div></div>
       </div></div>
@@ -176,16 +355,16 @@ footer{max-width:920px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
       <div class="st"><b>ACiD — Artificial Chronic Inflammatory Disease</b></div>
       <div class="sc">the inflammatory tone, run chronically by artificial inputs — the ultra-processed
       class, petrochemical adulterants (the exact material class the
-      <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/DISPATCH_CONTAMINATION_VOID_LAW_2026-08-20.md">contamination-void
+      <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/DISPATCH_CONTAMINATION_VOID_LAW_2026-08-20.md" target="_blank" rel="noopener noreferrer">contamination-void
       law</a> strikes from the literature). <b>made, therefore in principle unmakeable</b> — remove the
       artificial, supply the essential. <span class="hyp badge">🧪 the unmaking is the graded hypothesis</span></div></div>
     <div class="flowline"><svg viewBox="0 0 16 24"><path d="M8 1 L8 16 M3 11 L8 17 L13 11"/></svg></div>
     <div class="stage"><div class="sn">STAGE 5 · THE LONG HORIZON — machinery, then the readout</div>
       <div class="st"><b>TERT → telomerase → telomere maintenance</b> — universal eukaryotic biology
-      (<a href="https://pubmed.ncbi.nlm.nih.gov/3907856/">Greider &amp; Blackburn 1985</a>)</div>
+      (<a href="https://pubmed.ncbi.nlm.nih.gov/3907856/" target="_blank" rel="noopener noreferrer">Greider &amp; Blackburn 1985</a>)</div>
       <div class="sc"><b style="color:var(--gold)">THE FLAGSHIP STUDY</b> — founder-designated, and the
       one measurement where this page's two arms meet: <b>Hussein et al. 2014</b> (Alexandria J Med,
-      <a href="https://doi.org/10.1016/j.ajme.2014.02.003">10.1016/j.ajme.2014.02.003</a> — in vivo,
+      <a href="https://doi.org/10.1016/j.ajme.2014.02.003" target="_blank" rel="noopener noreferrer">10.1016/j.ajme.2014.02.003</a> — in vivo,
       mouse, hepatic TERT mRNA: <b>116.13 → 2.29 / 3.08 / 9.60 copies</b> after a ~2:1 THC-dominant
       cannabis extract; in-tree as BiGen's card C). <b>the flagship carries its flags, as flagships
       must in this house:</b> mRNA was measured, telomerase <i>activity</i> was inferred — no TRAP assay;
@@ -194,10 +373,10 @@ footer{max-width:920px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
       dialect and TERT in normal cells) is <b>UNTESTED, and that open cell is the founder's thesis
       wearing its honest name</b>. and the association that closes the epic arc: <b>higher marine
       omega-3 levels, slower telomeric aging</b> — CHD patients, co-authored by Blackburn herself
-      (<a href="https://pubmed.ncbi.nlm.nih.gov/20085953/">JAMA 2010</a>; association class — one
-      randomized diet→telomere trial exists, <a href="https://pubmed.ncbi.nlm.nih.gov/39861449/">Nutrients 2025</a>).
+      (<a href="https://pubmed.ncbi.nlm.nih.gov/20085953/" target="_blank" rel="noopener noreferrer">JAMA 2010</a>; association class — one
+      randomized diet→telomere trial exists, <a href="https://pubmed.ncbi.nlm.nih.gov/39861449/" target="_blank" rel="noopener noreferrer">Nutrients 2025</a>).
       the assay brake ships beside it: qPCR telomere measurement's own review says reproducibility is
-      still being standardized (<a href="https://pubmed.ncbi.nlm.nih.gov/30343983/">Lin 2019</a>) —
+      still being standardized (<a href="https://pubmed.ncbi.nlm.nih.gov/30343983/" target="_blank" rel="noopener noreferrer">Lin 2019</a>) —
       single timepoints are hypothesis-grade.
       <span class="hyp badge">🧪 nutrition preserving the readout = the thesis, pre-registered</span></div></div>
   </div>
@@ -257,36 +436,93 @@ footer{max-width:920px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   <div id="diaas"></div>
 </section>
 
-<section>
-  <h2>4 · <span data-i18n="h.095">THE EVIDENCE LEDGER — every receipt on this page</span></h2>
-  <div class="law">fat→cannabinoid chemistry (arachidonoyl class) — <a href="https://pubmed.ncbi.nlm.nih.gov/41167310/">JBC 2025, PMID 41167310</a> ·
-  dietary-LA brake — <a href="https://pubmed.ncbi.nlm.nih.gov/38100748/">Lipids 2023, PMID 38100748</a> ·
-  omega-3 endocannabinoid dialect, T-cell modulation — <a href="https://pubmed.ncbi.nlm.nih.gov/36626985/">JBC 2023, PMID 36626985</a> ·
-  receptor pharmacology — <a href="https://pubmed.ncbi.nlm.nih.gov/14570037/">Guzmán 2003</a> ·
-  <a href="https://pubmed.ncbi.nlm.nih.gov/36153039/">Mol Pharmacol 2022</a> ·
-  <a href="https://pubmed.ncbi.nlm.nih.gov/36397993/">eCAM 2022</a> ·
-  omega-3 ↔ telomeric aging — <a href="https://pubmed.ncbi.nlm.nih.gov/20085953/">JAMA 2010, PMID 20085953</a> ·
-  telomerase discovery — <a href="https://pubmed.ncbi.nlm.nih.gov/3907856/">Greider &amp; Blackburn 1985</a> ·
-  assay honesty — <a href="https://pubmed.ncbi.nlm.nih.gov/30343983/">Lin 2019</a> ·
-  diet→telomere RCT — <a href="https://pubmed.ncbi.nlm.nih.gov/39861449/">Nutrients 2025</a> ·
+<details id="sources-panel" data-view-disclosure="sources">
+  <summary><h2 style="margin:0">4 · <span data-i18n="h.095">THE EVIDENCE LEDGER — every receipt on this page</span></h2></summary>
+  <div class="law">External citations open in a new tab so this page and session stay put.</div>
+  <div class="law">fat→cannabinoid chemistry (arachidonoyl class) — <a href="https://pubmed.ncbi.nlm.nih.gov/41167310/" target="_blank" rel="noopener noreferrer">JBC 2025, PMID 41167310</a> ·
+  dietary-LA brake — <a href="https://pubmed.ncbi.nlm.nih.gov/38100748/" target="_blank" rel="noopener noreferrer">Lipids 2023, PMID 38100748</a> ·
+  omega-3 endocannabinoid dialect, T-cell modulation — <a href="https://pubmed.ncbi.nlm.nih.gov/36626985/" target="_blank" rel="noopener noreferrer">JBC 2023, PMID 36626985</a> ·
+  receptor pharmacology — <a href="https://pubmed.ncbi.nlm.nih.gov/14570037/" target="_blank" rel="noopener noreferrer">Guzmán 2003</a> ·
+  <a href="https://pubmed.ncbi.nlm.nih.gov/36153039/" target="_blank" rel="noopener noreferrer">Mol Pharmacol 2022</a> ·
+  <a href="https://pubmed.ncbi.nlm.nih.gov/36397993/" target="_blank" rel="noopener noreferrer">eCAM 2022</a> ·
+  omega-3 ↔ telomeric aging — <a href="https://pubmed.ncbi.nlm.nih.gov/20085953/" target="_blank" rel="noopener noreferrer">JAMA 2010, PMID 20085953</a> ·
+  telomerase discovery — <a href="https://pubmed.ncbi.nlm.nih.gov/3907856/" target="_blank" rel="noopener noreferrer">Greider &amp; Blackburn 1985</a> ·
+  assay honesty — <a href="https://pubmed.ncbi.nlm.nih.gov/30343983/" target="_blank" rel="noopener noreferrer">Lin 2019</a> ·
+  diet→telomere RCT — <a href="https://pubmed.ncbi.nlm.nih.gov/39861449/" target="_blank" rel="noopener noreferrer">Nutrients 2025</a> ·
   hemp's two bricks — USDA FDC 170148 (in-tree) · ACiD + upstream medicine —
-  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/RULING_ACID_DEFINED_2026-08-20.md">RULING_ACID_DEFINED_2026-08-20</a>.
+  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/RULING_ACID_DEFINED_2026-08-20.md" target="_blank" rel="noopener noreferrer">RULING_ACID_DEFINED_2026-08-20</a>.
   <br><b>standing gates:</b> reversal → pre-registration (CB-1 pattern) · contamination applies both
   ways (the void law) · "all planes" → interpretation lane · <b>dose never renders</b> (CB-2).</div>
-</section>
+</details>
 
+</div>
 </main>
 <footer>
-  cannabinoid receptors did not evolve for plants — plants happened to speak the language your fats built ·
-  upstream medicine since 2016 · AGPL-3.0-only · <a href="bfood.html">bFood</a> ·
-  <a href="bigen.html">BiGen</a> · <a href="university/index.html">the university</a> ·
+  <span data-i18n="blong.foot.measure">receipted composition and published reference intakes only — not medical advice</span>
+  <span data-reg="cypherpunk"> · <span data-i18n="s.blongevity.name">your body builds its own cannabinoids</span>
+  · cannabinoid receptors did not evolve for plants — plants happened to speak the language your fats built
+  · upstream medicine since 2016 · AGPL-3.0-only</span>
+  · <a href="bfood.html">bFood</a> ·
+  <a href="bigen.html">BiGen</a> · <a href="university/index.html" data-i18n="blong.foot.learn">learn to check this page</a> ·
   <a href="index.html" data-i18n="law.hive">← the hive</a><br>
-  don't trust these pages either — every stage links its receipt. Verify.
+  <span data-reg="cypherpunk">don't trust these pages either — every stage links its receipt. Verify.</span>
 </footer>
 
-<script src="tour.js?v=41"></script>
+<script src="tour.js?v=42"></script>
 <script>
 (function(){
+var $=function(i){return document.getElementById(i)};
+function restoreVisibleFocus(focus){
+ if(!focus||!focus.isConnected)return;var target=focus;
+ for(var node=focus.parentElement;node;node=node.parentElement)if(node.tagName==='DETAILS'&&!node.open){
+  target=node.querySelector('summary'); break;
+ }
+ if(target&&target.focus) target.focus({preventScroll:true});
+}
+function defaultOpen(reading,kind){
+ return reading==='cypherpunk' && kind==='sources';
+}
+function defaultBeat(reading){
+ return reading==='cypherpunk' ? 'deeper' : 'arrival';
+}
+var lastReading=null;
+var readingChoices=new Map();
+var beatChoices=new Map();
+function setBeat(beat){
+  var reading=document.body.getAttribute('data-reg')||'bee';
+  document.body.setAttribute('data-blong-beat',beat);
+  beatChoices.set(reading,beat);
+  var focusId=beat==='figure'?'layer-figure':beat==='story'?'layer-story':beat==='deeper'?'instrument':null;
+  var node=focusId && $(focusId);
+  if(node) node.scrollIntoView({block:'start'});
+}
+function applyReading(event){
+  var reading=event&&event.detail&&event.detail.reg||document.body.dataset.reg||'bee';
+  if(reading===lastReading) return;
+  var focus=document.activeElement;
+  var details=[].slice.call(document.querySelectorAll('[data-view-disclosure]'));
+  if(lastReading){
+    readingChoices.set(lastReading, details.map(function(d){ return d.open; }));
+    beatChoices.set(lastReading, document.body.getAttribute('data-blong-beat')||'arrival');
+  }
+  var previous=readingChoices.get(reading);
+  details.forEach(function(d,i){
+    d.open=previous ? previous[i] : defaultOpen(reading, d.getAttribute('data-view-disclosure'));
+  });
+  document.body.setAttribute('data-blong-beat', beatChoices.get(reading)||defaultBeat(reading));
+  var theme=document.querySelector('meta[name="theme-color"]');
+  if(theme) theme.content=reading==='bee'?'#f6f7f2':reading==='raver'?'#0c1412':'#0d1410';
+  restoreVisibleFocus(focus);
+  lastReading=reading;
+}
+document.addEventListener('bregister',applyReading);
+document.addEventListener('click',function(e){
+  var btn=e.target&&e.target.closest&&e.target.closest('[data-blong-go]');
+  if(!btn) return;
+  setBeat(btn.getAttribute('data-blong-go'));
+});
+applyReading();
+
 /* ── the mirror: the reader's own line, from the same receipted records as the Hexagon ──
    FDC 170148 per 100 g: LA 27.358 · ALA 8.684 · protein 31.56 · AI (NASEM): ALA 1.6 m / 1.1 f,
    LA 17 m / 12 f · DGA 2025-2030 protein 1.2–1.6 g/kg · house serving 1.25 g/kg (SERVING-BASIS-1) */

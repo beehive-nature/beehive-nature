@@ -81,7 +81,7 @@ async function render(strings) {
     Object.defineProperty(el,'id',{set(id){ids.set(id,el);}});return el;
   }
   const document={readyState:'complete',body:element(),documentElement:{},
-    querySelector:()=>null,getElementById:id=>ids.get(id),createElement:element,dispatchEvent(){},
+    querySelector:()=>null,getElementById:id=>ids.get(id),createElement:element,dispatchEvent(){},addEventListener(){},
     querySelectorAll:selector=>selector==='[data-i18n]'||selector==='body *'?nodes:[]};
   const context={document,location:{pathname:'/surfaces/'},localStorage:{getItem:()=> 'ru'},
     fetch:async()=>({json:async()=>({strings,_meta:{}})}),addEventListener(){},CustomEvent:class{}};

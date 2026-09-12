@@ -5,12 +5,14 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="color-scheme" content="dark">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f6f7f2">
 <title>bFood Hexagon — the successor to the food pyramid</title>
 <style>
 :root{
  --bg:#0d1410;--panel:#111a14;--well:#0a0f0b;--ink:#e6f2df;--dim:#93a493;--faint:#7a8c7c;
  --line:#243026;--gold:#FFD700;--violet:#c9a0ff;--cyan:#00E5FF;
+ --bee-font:system-ui,-apple-system,'Segoe UI',sans-serif;
  /* COVERAGE IS ENCODED BY FILL HEIGHT, NOT BY COLOUR STEP.
     A ramp fails here: on a surface this dark its lowest step sits at 1.3:1 against
     the card, so a cell at 5% would be indistinguishable from a cell that was never
@@ -29,8 +31,15 @@
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{overflow-x:hidden}
-body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;padding:26px 13px 80px}
-main{max-width:1000px;margin:0 auto}
+body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;padding:0 0 80px}
+main{max-width:1000px;margin:0 auto;padding-inline:13px}
+/* Estate register scoping — INLINE so a cypher-only leaf cannot FOUC or leak
+   if register.js is late or fails. Same contract as surfaces/register.js.
+   Copied from bEarth #45 / bSymposium #46: cypher masthead cannot paint on New bee. */
+[data-reg]:not(body){display:none}
+body[data-reg="bee"] [data-reg="bee"],
+body[data-reg="raver"] [data-reg="raver"],
+body[data-reg="cypherpunk"] [data-reg="cypherpunk"]{display:revert}
 header{text-align:center;margin-bottom:6px}
 h1{font-size:clamp(19px,5vw,30px);color:var(--gold);font-weight:400;letter-spacing:.03em}
 .sub{color:var(--dim);font-size:11.5px;margin-top:7px;max-width:720px;margin-inline:auto;line-height:1.75}
@@ -105,24 +114,109 @@ td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;col
 .arb .big s{font-size:11px;color:var(--dim);text-decoration:none}
 .arb .sm{font-size:10px;color:var(--dim);margin-top:4px;line-height:1.75}
 .brake{border-left:3px solid var(--warn);padding-left:11px;margin-top:10px}
-footer{max-width:1000px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
+footer{max-width:1000px;margin:22px auto 0;padding-inline:13px;color:var(--faint);font-size:10px;text-align:center;line-height:2}
+
+[hidden]{display:none!important}
+.door{appearance:none;display:inline-flex;align-items:center;justify-content:center;min-height:44px;
+ padding:10px 18px;border-radius:8px;border:1px solid var(--line);background:var(--well);color:var(--ink);
+ font:inherit;cursor:pointer;text-decoration:none}
+.door.primary{background:var(--fill);color:#102214;border-color:var(--fill);font-weight:650}
+.door:focus-visible,summary:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{
+ outline:3px solid var(--cyan);outline-offset:3px}
+.choices{display:flex;flex-wrap:wrap;gap:10px 14px;justify-content:center;margin-top:22px}
+.calm{max-width:40rem;margin:18px auto 0;font-size:1.05rem;line-height:1.7}
+.take{font-size:clamp(1.5rem,5.4vw,2.4rem);line-height:1.2;color:var(--fillfull);margin-top:18px;font-weight:550;text-wrap:balance}
+.support{font-size:.875rem;color:var(--dim);margin-top:8px;max-width:36rem;margin-inline:auto}
+.eyebrow{color:var(--dim);font-size:.875rem;margin-top:8px}
+.pair{color:var(--ink);font-size:.95rem;margin-top:6px;letter-spacing:.04em}
+#first-bee,#first-raver,#layer-figure,#layer-draw,#layer-inputs,#instrument{display:none}
+body[data-reg="bee"][data-bfood-beat="arrival"] #first-bee{display:block}
+body[data-reg="raver"][data-bfood-beat="figure"] #layer-figure{display:block}
+body[data-bfood-beat="draw"] #layer-draw{display:block}
+body[data-bfood-beat="inputs"] #layer-inputs{display:block}
+body[data-bfood-beat="deeper"] #layer-inputs,
+body[data-bfood-beat="deeper"] #instrument,
+body[data-reg="cypherpunk"] #layer-inputs,
+body[data-reg="cypherpunk"] #instrument{display:block}
+body[data-reg="raver"][data-bfood-beat="arrival"] #masthead{display:none}
+
+/* New bee — language-first calm room. */
+body[data-reg="bee"]{
+  --bg:#f6f7f2;--panel:#fff;--well:#edf2eb;--ink:#18362a;--dim:#435f4e;--faint:#52695b;
+  --line:#ccd7cf;--gold:#855b0b;--violet:#65509a;--cyan:#176879;--warn:#9f362c;
+  --cellbg:#edf2eb;--cellrim:#8a9e90;--fill:#326b39;--fillfull:#326b39;--over:#9f362c;
+  color-scheme:light;
+  background:#f6f7f2;color:#18362a;font:1.125rem/1.65 var(--bee-font);
+}
+body[data-reg="bee"] h1{color:var(--ink);letter-spacing:-.03em}
+body[data-reg="bee"] .calm,.take,.support,.eyebrow,.pair{font-family:var(--bee-font)}
+body[data-reg="bee"] .take{color:#326b39}
+body[data-reg="bee"] .door{font:500 1rem/1.4 var(--bee-font);border-radius:16px;min-width:11rem;background:#fff;border-color:#8a9e90}
+body[data-reg="bee"] .door.primary{background:#326b39;color:#fff;border-color:#326b39}
+body[data-reg="bee"] #tbar{background:#f6f7f2!important;border-top-color:#ccd7cf!important}
+body[data-reg="bee"] #tbar a{color:#18362a!important}
+body[data-reg="bee"] section{background:#fff;border-color:var(--line)}
+
+/* Raver — living hex, plant–body wash. Feeling first; math one tap away. */
+body[data-reg="raver"]{--bg:#0c1412;--panel:#121a18;--well:#0a100e;--ink:#e9f2ec;--dim:#b7c9be;
+ --line:#2a3a34;--gold:#c9a0ff;--violet:#c9a0ff;--cyan:#7ee0d0;--fill:#63c97c;--fillfull:#a6f2b8;
+ --leaf:#c9a0ff;color-scheme:dark;background:#0c1412}
+body[data-reg="raver"][data-bfood-beat="arrival"]{padding:0 0 80px;background:#0c1412}
+body[data-reg="raver"][data-bfood-beat="arrival"] main{max-width:none}
+#first-raver{position:relative;min-height:100svh;flex-direction:column;align-items:center;
+ justify-content:flex-end;padding:12vh 22px 14vh;text-align:center;overflow:hidden}
+body[data-reg="raver"][data-bfood-beat="arrival"] #first-raver{display:flex}
+#hex-scene{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.feel{position:relative;z-index:1;max-width:22ch;font-size:clamp(1.6rem,6vw,2.8rem);line-height:1.25;
+ color:#e9f2ec;font-weight:400;text-wrap:balance}
+#first-raver .choices{position:relative;z-index:1}
+body[data-reg="raver"] .door.primary{background:#c9a0ff;color:#141018;border-color:#c9a0ff;
+ font:600 1.05rem/1.4 var(--bee-font);border-radius:99px;padding:12px 26px}
+.consciousness{max-width:36rem;margin:0 auto 18px;font-size:1.15rem;line-height:1.7;color:var(--ink)}
+@keyframes hex-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
+@keyframes wash-shift{0%,100%{opacity:.55}50%{opacity:.9}}
+#hex-scene .living{animation:hex-breathe 9s ease-in-out infinite;transform-origin:50% 48%}
+#hex-scene .wash{animation:wash-shift 12s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){
+ #hex-scene .living,#hex-scene .wash{animation:none}
+}
+
+/* Cypherpunk keeps today's full Hexagon instrument. */
+body[data-reg="cypherpunk"]{font-family:ui-monospace,'Cascadia Mono',Consolas,monospace}
+body[data-reg="cypherpunk"] #sources-panel{border:1px dashed var(--line);border-radius:11px;padding:10px 12px;margin-top:14px}
+body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44px;display:flex;align-items:center}
+#sources-panel{margin-top:14px}
+#sources-panel summary{cursor:pointer;min-height:44px;display:flex;align-items:center;color:var(--violet)}
+
+.draw-caption{max-width:36rem;margin:16px auto 0;font-size:1.05rem;line-height:1.7;color:var(--dim)}
+#calm-hex{display:block;width:min(420px,90vw);height:auto;margin:18px auto 0}
+
+/* Page-owned language+view chrome (atlas mast-nav / gallery top-nav).
+   lang.js mounts #blangctl into [data-language-host]; register.js mounts
+   #bregctl into [data-register-host]. Keep both out of #first-bee. */
+#bregdescription{position:absolute;display:block;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+.bfood-language[data-language-host]{display:flex;align-items:center;margin-inline-start:auto;max-width:100%}
+.bfood-language #blangctl{margin:0!important;padding:0!important;border:0!important;flex-wrap:wrap}
+.bfood-language #blangsel{
+  min-height:44px!important;min-width:11rem;max-width:100%!important;padding:8px 12px!important;
+  background:var(--reg-bg,var(--panel))!important;color:var(--reg-ink,var(--ink))!important;
+  border:1px solid var(--reg-line,var(--line))!important;font:inherit!important
+}
+.bfood-language #blangnote{white-space:normal!important;color:var(--reg-ink,var(--dim))!important;font:.75rem/1.4 inherit!important}
 </style>
 </head>
-<body>
+<body data-reg="bee" data-bee-theme="custom" data-bfood-beat="arrival">
+<div id="bregbar">
+  <a class="breg-home" href="index.html" aria-label="skaists home">⬡ skaists</a>
+  <div data-register-host aria-describedby="bregdescription"></div>
+  <span id="bregdescription" data-i18n="atlas.view">Choose how this page speaks to you</span>
+  <span class="bfood-language" data-language-host></span>
+</div>
 <main>
-<header>
-  <h1>⬡ THE bFOOD HEXAGON</h1>
-  <div class="sub" data-reg="bee">This is your food, drawn honestly. Tell it your height and
-  weight, and every cell below fills up by how much of each nutrient today's food really gave
-  <i>you</i> — not an average person, you. Where science doesn't know a number, the cell says so
-  instead of pretending. <b style="color:var(--ink)">That's the whole trick: nothing unmeasured
-  is ever drawn as zero.</b></div>
-  <div class="sub" data-reg="raver">The food pyramid drew <b style="color:var(--ink)">food
-  groups</b> and drew the same picture for every human alive. This draws
-  <b style="color:var(--ink)">the nutrients your body actually requires</b> — one cell per
-  nutrient, computed from your height, weight, age, sex and activity — and fills each cell by
-  how much of it today's food really delivered. <b style="color:var(--ink)">Nothing unmeasured
-  is ever drawn as zero.</b></div>
+<header id="masthead">
+  <h1>⬡ <span data-i18n="bfood.mark">bFood Hexagon</span></h1>
+  <p class="eyebrow" data-i18n="s.bfood.name">your nutrients, drawn honestly, never zero</p>
+  <p class="pair" data-i18n="bfood.pair">for your body, not an average</p>
   <div class="sub" data-reg="cypherpunk">40 cells = the NASEM/IOM DRI set (EER via the 2023
   equations, protein 0.8 g/kg, nine EAAs in mg/kg — the only body-scaled rows) against USDA
   FoodData Central composition, per record ID, refetchable. Three render states, never
@@ -132,23 +226,94 @@ footer{max-width:1000px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
   its sources and catch us.</div>
 </header>
 
-<div id="verdict">
-  <div id="vbig">—</div>
-  <div id="vtxt"></div>
-</div>
+<article id="first-bee">
+  <p class="calm" data-i18n="bfood.bee.calm">This is your food, drawn honestly — for your body, not an average person.</p>
+  <p class="take" data-i18n="bfood.bee.takeaway">A blank stays blank — never drawn as zero.</p>
+  <p class="support" data-i18n="bfood.bee.support">Where science doesn't know a number, the cell says so.</p>
+  <div class="choices">
+    <button type="button" class="door primary" data-bfood-go="draw" data-i18n="bfood.bee.draw">Draw my hexagon</button>
+    <button type="button" class="door" data-bfood-go="deeper" data-i18n="bfood.bee.deeper">Go deeper</button>
+  </div>
+</article>
 
+<article id="first-raver">
+  <svg id="hex-scene" viewBox="0 0 800 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A living hexagon in a soft plant-body wash from biomass green through teal into purple">
+    <defs>
+      <linearGradient id="plant-wash" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#1a3a28"/>
+        <stop offset="45%" stop-color="#123838"/>
+        <stop offset="78%" stop-color="#1a2438"/>
+        <stop offset="100%" stop-color="#261830"/>
+      </linearGradient>
+      <radialGradient id="hex-glow" cx="50%" cy="46%" r="52%">
+        <stop offset="0%" stop-color="#7ee0d0" stop-opacity=".45"/>
+        <stop offset="55%" stop-color="#63c97c" stop-opacity=".16"/>
+        <stop offset="100%" stop-color="#0c1412" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect class="wash" width="800" height="900" fill="url(#plant-wash)"/>
+    <ellipse class="wash" cx="400" cy="420" rx="320" ry="260" fill="url(#hex-glow)"/>
+    <g class="living">
+      <polygon points="400,250 488,301 488,403 400,454 312,403 312,301" fill="none" stroke="#63c97c" stroke-width="5"/>
+      <polygon points="488,403 576,454 576,556 488,607 400,556 400,454" fill="none" stroke="#7ee0d0" stroke-width="4" opacity=".9"/>
+      <polygon points="312,403 400,454 400,556 312,607 224,556 224,454" fill="none" stroke="#9ad7c4" stroke-width="4" opacity=".9"/>
+      <polygon points="400,454 488,505 488,607 400,658 312,607 312,505" fill="#1a2e28" stroke="#c9a0ff" stroke-width="4"/>
+      <polygon points="400,556 488,607 488,709 400,760 312,709 312,607" fill="none" stroke="#b7a8f7" stroke-width="4" stroke-dasharray="8 7"/>
+      <polygon points="576,301 664,352 664,454 576,505 488,454 488,352" fill="none" stroke="#63c97c" stroke-width="3" opacity=".55"/>
+      <polygon points="224,301 312,352 312,454 224,505 136,454 136,352" fill="none" stroke="#7ee0d0" stroke-width="3" opacity=".55"/>
+    </g>
+  </svg>
+  <p class="feel" data-i18n="bfood.raver.feel">What if the plate told the truth — including the blanks?</p>
+  <div class="choices">
+    <button type="button" class="door primary" data-bfood-go="figure" data-i18n="bfood.raver.touch">Touch the drawing</button>
+  </div>
+</article>
+
+<article id="layer-figure">
+  <p class="consciousness" data-i18n="bfood.raver.consciousness">A blank that stayed blank is reverence — not a zero.</p>
+  <p class="take" data-i18n="bfood.bee.takeaway">A blank stays blank — never drawn as zero.</p>
+  <p class="support" data-i18n="bfood.bee.support">Where science doesn't know a number, the cell says so.</p>
+  <div class="choices">
+    <button type="button" class="door primary" data-bfood-go="draw" data-i18n="bfood.bee.draw">Draw my hexagon</button>
+    <button type="button" class="door" data-bfood-go="deeper" data-i18n="bfood.bee.deeper">Go deeper</button>
+  </div>
+</article>
+
+<article id="layer-draw">
+  <p class="take" data-i18n="bfood.bee.takeaway">A blank stays blank — never drawn as zero.</p>
+  <svg id="calm-hex" viewBox="0 0 360 310" role="img" aria-label="Seven cells: some filled, one blank on purpose, never drawn as zero">
+    <polygon points="180,36 222,60 222,108 180,132 138,108 138,60" fill="#63c97c" stroke="#4d6553" stroke-width="2"/>
+    <polygon points="222,108 264,132 264,180 222,204 180,180 180,132" fill="#a6f2b8" stroke="#4d6553" stroke-width="2"/>
+    <polygon points="138,108 180,132 180,180 138,204 96,180 96,132" fill="#63c97c" stroke="#4d6553" stroke-width="2" opacity=".7"/>
+    <polygon points="180,132 222,156 222,204 180,228 138,204 138,156" fill="none" stroke="#7a8c7c" stroke-width="2" stroke-dasharray="5 4"/>
+    <text x="180" y="188" text-anchor="middle" fill="#7a8c7c" font-size="11" font-family="system-ui,sans-serif">?</text>
+    <polygon points="264,60 306,84 306,132 264,156 222,132 222,84" fill="#63c97c" stroke="#4d6553" stroke-width="2" stroke-dasharray="5 4" opacity=".55"/>
+    <text x="264" y="116" text-anchor="middle" fill="#326b39" font-size="11" font-family="system-ui,sans-serif">≥</text>
+    <polygon points="96,60 138,84 138,132 96,156 54,132 54,84" fill="#63c97c" stroke="#4d6553" stroke-width="2" opacity=".45"/>
+    <polygon points="180,204 222,228 222,276 180,300 138,276 138,228" fill="none" stroke="#7a8c7c" stroke-width="1.5" opacity=".35"/>
+  </svg>
+  <p class="draw-caption" data-i18n="bfood.draw.caption">Seven cells. Some filled. One blank on purpose.</p>
+  <p class="draw-caption"><span aria-hidden="true">? · </span><span data-i18n="bfood.draw.blank">Not measured</span></p>
+  <div class="choices">
+    <button type="button" class="door primary" data-bfood-go="inputs" data-i18n="bfood.draw.continue">Open the inputs</button>
+    <button type="button" class="door" data-bfood-go="deeper" data-i18n="bfood.bee.deeper">Go deeper</button>
+  </div>
+</article>
+
+<div id="layer-inputs">
 <section>
   <h2>1 · <span data-i18n="h.022">YOUR BODY — the five inputs that genuinely move a requirement</span></h2>
   <div id="you">
-    <div><label for="sex">sex</label><select id="sex"><option value="m">male</option><option value="f">female</option></select></div>
-    <div><label for="age">age</label><input id="age" type="number" min="19" max="110" value="49"></div>
-    <div><label for="ht">height cm</label><input id="ht" type="number" min="120" max="230" value="180"></div>
-    <div><label for="wt">weight kg</label><input id="wt" type="number" min="30" max="250" value="80"></div>
-    <div><label for="pal">activity</label><select id="pal">
-      <option value="0">inactive</option><option value="1" selected>low active</option>
-      <option value="2">active</option><option value="3">very active</option></select></div>
+    <div><label for="sex" data-i18n="bfood.input.sex">Sex used for reference values</label><select id="sex"><option value="m" data-i18n="bfood.input.male">Male</option><option value="f" data-i18n="bfood.input.female">Female</option></select></div>
+    <div><label for="age" data-i18n="bfood.input.age">Age</label><input id="age" type="number" min="19" max="110" value="49"></div>
+    <div><label for="ht" data-i18n="bfood.input.height">Height (cm)</label><input id="ht" type="number" min="120" max="230" value="180"></div>
+    <div><label for="wt" data-i18n="bfood.input.weight">Weight (kg)</label><input id="wt" type="number" min="30" max="250" value="80"></div>
+    <div><label for="pal" data-i18n="bfood.input.activity">Activity</label><select id="pal">
+      <option value="0" data-i18n="bfood.input.inactive">Inactive</option><option value="1" selected data-i18n="bfood.input.low">Lightly active</option>
+      <option value="2" data-i18n="bfood.input.active">Active</option><option value="3" data-i18n="bfood.input.very">Very active</option></select></div>
   </div>
   <div id="derived"></div>
+  <details data-view-disclosure="input-help"><summary data-i18n="bfood.input.why">How these values are used</summary>
   <div class="law" style="margin-top:11px"><b>Only these four scale with your body, and this page
   will not pretend otherwise.</b> Energy uses the NASEM 2023 EER equation, where your height,
   weight, age and activity <i>are</i> the variables. Protein is an RDA in grams per kilogram, so
@@ -157,8 +322,21 @@ footer{max-width:1000px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
   uses reference weights inside the committee's derivation, never as a coefficient in the published
   value. Inventing a weight curve for zinc to make this page feel more personal would be the exact
   fake precision this project exists to refuse, so the cells say <span class="tag">👥 group</span>
-  and mean it.</div>
+  and mean it.</div></details>
+  <div class="choices" data-reg="bee">
+    <button type="button" class="door primary" data-bfood-go="deeper" data-i18n="bfood.bee.deeper">Go deeper</button>
+  </div>
+  <div class="choices" data-reg="raver">
+    <button type="button" class="door primary" data-bfood-go="deeper" data-i18n="bfood.bee.deeper">Go deeper</button>
+  </div>
 </section>
+</div>
+
+<div id="instrument">
+<div id="verdict">
+  <div id="vbig">—</div>
+  <div id="vtxt"></div>
+</div>
 
 <section>
   <h2>2 · <span data-i18n="h.023">THE HEXAGON — 40 cells, one per nutrient, filled by what you actually got</span></h2>
@@ -430,22 +608,78 @@ footer{max-width:1000px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
   intake statistic as a health finding.</div>
 </section>
 
-<section>
-  <h2>10 · <span data-i18n="h.032">SOURCES — cite, or the cell stays silent</span></h2>
+<details id="sources-panel" data-view-disclosure="sources">
+  <summary><h2 style="margin:0">10 · <span data-i18n="h.032">SOURCES — cite, or the cell stays silent</span></h2></summary>
+  <div class="law">External citations open in a new tab so this page and session stay put.</div>
   <div class="law" id="src"></div>
-</section>
+</details>
+</div>
 </main>
 
 <footer>
-  composition and published reference intakes only — what a nutrient <i>does</i> in a body lives
-  off-repo and graded · <a href="university/">learn to check this page</a> ·
-  <a href="bigen.html">the evidence deck</a> · <a href="index.html" data-i18n="law.hive">← the hive</a>
+  <span data-i18n="s.bfood.name">your nutrients, drawn honestly, never zero</span>
+  · <span data-i18n="bfood.foot.measure">composition and published reference intakes only</span>
+  <span data-reg="cypherpunk"> — what a nutrient <i>does</i> in a body lives
+  off-repo and graded · <a href="bigen.html">the evidence deck</a></span>
+  · <a href="university/" data-i18n="bfood.foot.learn">learn to check this page</a>
+  · <a href="index.html" data-i18n="law.hive">← the hive</a>
 </footer>
 
-<script src="tour.js?v=41"></script>
+<script src="tour.js?v=42"></script>
 <script>
 (function(){
 var $=function(i){return document.getElementById(i)};
+function restoreVisibleFocus(focus){
+ if(!focus||!focus.isConnected)return;var target=focus;
+ for(var node=focus.parentElement;node;node=node.parentElement)if(node.tagName==='DETAILS'&&!node.open){
+  target=node.querySelector('summary'); break;
+ }
+ if(target&&target.focus) target.focus({preventScroll:true});
+}
+function defaultOpen(reading,kind){
+ return reading==='cypherpunk' && (kind==='sources'||kind==='input-help');
+}
+function defaultBeat(reading){
+ return reading==='cypherpunk' ? 'deeper' : 'arrival';
+}
+var lastReading=null;
+var readingChoices=new Map();
+var beatChoices=new Map();
+function setBeat(beat){
+  var reading=document.body.getAttribute('data-reg')||'bee';
+  document.body.setAttribute('data-bfood-beat',beat);
+  beatChoices.set(reading,beat);
+  var focusId=beat==='figure'?'layer-figure':beat==='draw'?'layer-draw':beat==='inputs'?'layer-inputs':beat==='deeper'?'instrument':null;
+  var node=focusId && $(focusId);
+  if(node) node.scrollIntoView({block:'start'});
+}
+function applyReading(event){
+  var reading=event&&event.detail&&event.detail.reg||document.body.dataset.reg||'bee';
+  if(reading===lastReading) return;
+  var focus=document.activeElement;
+  var details=[].slice.call(document.querySelectorAll('[data-view-disclosure]'));
+  if(lastReading){
+    readingChoices.set(lastReading, details.map(function(d){ return d.open; }));
+    beatChoices.set(lastReading, document.body.getAttribute('data-bfood-beat')||'arrival');
+  }
+  var previous=readingChoices.get(reading);
+  details.forEach(function(d,i){
+    d.open=previous ? previous[i] : defaultOpen(reading, d.getAttribute('data-view-disclosure'));
+  });
+  document.body.setAttribute('data-bfood-beat', beatChoices.get(reading)||defaultBeat(reading));
+  var theme=document.querySelector('meta[name="theme-color"]');
+  if(theme) theme.content=reading==='bee'?'#f6f7f2':reading==='raver'?'#0c1412':'#0d1410';
+  restoreVisibleFocus(focus);
+  lastReading=reading;
+}
+document.addEventListener('bregister',applyReading);
+document.addEventListener('click',function(e){
+  var btn=e.target&&e.target.closest&&e.target.closest('[data-bfood-go]');
+  if(!btn) return;
+  setBeat(btn.getAttribute('data-bfood-go'));
+});
+applyReading();
+
 function num(x,d){ if(x===null||x===undefined||isNaN(x)) return '—';
   var a=Math.abs(x); if(d===undefined) d = a>=100?0 : a>=10?1 : a>=1?2 : 3;
   var s=x.toFixed(d); if(s.indexOf('.')>-1) s=s.replace(/0+$/,'').replace(/\.$/,''); return s; }
@@ -852,9 +1086,9 @@ function render(){
   }).join('');
 
   $('src').innerHTML='<b>requirements</b> — the NASEM/IOM Dietary Reference Intakes as restated by '
-   +'<a href="https://ods.od.nih.gov/factsheets/">NIH Office of Dietary Supplements</a>, and '
-   +'<a href="https://www.ncbi.nlm.nih.gov/books/NBK591021/table/tab_5_16/?report=objectonly">the NASEM 2023 EER equations</a>'
-   +' · <b>composition</b> — '+FOODS.map(function(f){return '<a href="'+f.url+'">'+f.n+': '+f.src+'</a>';}).join(' · ')
+   +'<a href="https://ods.od.nih.gov/factsheets/" target="_blank" rel="noopener noreferrer">NIH Office of Dietary Supplements</a>, and '
+   +'<a href="https://www.ncbi.nlm.nih.gov/books/NBK591021/table/tab_5_16/?report=objectonly" target="_blank" rel="noopener noreferrer">the NASEM 2023 EER equations</a>'
+   +' · <b>composition</b> — '+FOODS.map(function(f){return '<a href="'+f.url+'" target="_blank" rel="noopener noreferrer">'+f.n+': '+f.src+'</a>';}).join(' · ')
    +' · <b>shortfall</b> — NHANES 2017–March 2020 Prepandemic, ages 1+'
    +' · <b>Daily Values</b> — FDA 21 CFR 101.9.<br>'
    +'Every food figure here is a <b>published composition value, labelled as such</b>. A commissioned '
