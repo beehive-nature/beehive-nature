@@ -109,10 +109,39 @@ chrome, no jargon dumps. Meaning review is still owed.
 
 ## Verification named here
 
-Named after the local poke and suites in this lane. Skipped this
-beat: fleet attestation of the new keys, any David Irvine / x0x
-#622 measurement claim, any funded-balance or verified-device
-theater when Declared/Preview.
+Local poke at `http://127.0.0.1:8765/onboarding/index.html` with
+`surfaces/` as the server root:
+
+- `GET /onboarding/index.html` 200
+- `GET /register.js` 200
+- `GET /surfaces/register.js` 404 (the intended poke)
+
+Suites this seat ran:
+
+- `node --test e2e/onboarding-views.test.mjs e2e/register.test.mjs` 23/23
+- `node scripts/estate-check.mjs` PASS (93 counted)
+- `node e2e/estate-source.mjs` 11/11
+
+Browser walk (Playwright + screenshots): New bee calm door → Start
+free → one plain custody choice + real-vs-preview; Raver threshold →
+Step in → one vivid custody + real-vs-preview; Cypherpunk instrument
+map + welcome doors + loud SIMULATED/PLANNED/REFUSED foot under the
+map; 8e ladder on jump; New bee remembers the Start free beat.
+`#bregctl` + `#blangctl` paint. Local `#lang` gone. No funded-balance
+or verified-device theater.
+
+CI `tests / static` is red on §7 identity for the Cursor-cloud
+author (`Cursor Agent <cursoragent@cursor.com>`). Same detection as
+University #51. Seats are committers + trailers, never authors —
+this checkout's git `user.*` is the cloud seat. Cure attempted on
+later commits by exporting founder `GIT_AUTHOR_*` without rewriting
+the already-pushed parent (no force). The identity-check script
+itself names this DETECTED, not prevention.
+
+Skipped this beat: fleet attestation of the new `onb.*` keys (floor
+for `onboarding/index.html` stays 0 until a live census), any David
+Irvine / x0x #622 measurement claim, any funded-balance or
+verified-device theater when Declared/Preview.
 
 FOUNDER LOCK applied: Cypherpunk first paint stays the complete
 ceremony instrument. The one-choice progressive door is New bee /

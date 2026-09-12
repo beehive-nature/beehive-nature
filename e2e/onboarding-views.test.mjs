@@ -84,6 +84,7 @@ test('Step in opens one vivid custody choice behind the tap, not on first paint'
 test('Cypherpunk still reaches the full ceremony instrument, same honesty', () => {
   const instrument = extractById(page, 'instrument');
   assert.match(instrument, /id="instrument-map"/);
+  assert.match(instrument, /data-reg="cypherpunk"/);
   assert.match(instrument, /data-onb-jump="welcome"/);
   assert.match(instrument, /data-onb-jump="returning"/);
   assert.match(instrument, /data-onb-jump="custody"/);
@@ -99,6 +100,10 @@ test('Cypherpunk still reaches the full ceremony instrument, same honesty', () =
   assert.match(instrument, /SIMULATED/);
   assert.match(instrument, /PLANNED\/REFUSED/);
   assert.match(instrument, /skaists\.dev static host does not complete WebAuthn\/Trezor native/);
+  const mapAt = instrument.indexOf('id="instrument-map"');
+  const footAt = instrument.indexOf('SIMULATED, labeled');
+  const stageAt = instrument.indexOf('id="stage"');
+  assert.ok(mapAt > -1 && footAt > mapAt && stageAt > footAt, 'loud cypher foot sits under the map, before the stage');
   assert.doesNotMatch(instrument, /id="lang"/);
   assert.match(page, /I'm new here — start free →/);
   assert.match(page, /const LADDER = \[/);

@@ -209,8 +209,10 @@ body[data-reg="bee"] #tbar a{color:#18362a!important}
 body[data-reg="raver"]{--bg:#0c1412;--bg-card:#101916;--ink:#e9f2ec;--ink-mut:#b7c9be;--ink-dim:#8aa396;
  --line:#2a3a34;--primary:#c9a0ff;--you:#c9a0ff;color-scheme:dark;background:#0c1412}
 body[data-reg="raver"][data-onb-beat="arrival"]{padding:0 0 90px;align-items:stretch}
-#first-raver{position:relative;min-height:100svh;flex-direction:column;align-items:center;
- justify-content:flex-end;padding:12vh 22px calc(14vh + 72px);text-align:center;overflow:hidden;width:100%}
+#first-raver{position:relative;min-height:calc(100svh - 90px - 3.2rem);flex-direction:column;align-items:center;
+ justify-content:flex-end;padding:12vh 22px calc(10vh + 24px);text-align:center;overflow:hidden;width:100%}
+body[data-reg="raver"][data-onb-beat="arrival"] #foot-quiet{
+  position:relative;z-index:2;margin:0;max-width:none;padding:0 22px 10px;border-top:0;color:#8aa396}
 .feel{position:relative;z-index:1;max-width:22ch;font-size:clamp(1.6rem,6vw,2.8rem);line-height:1.25;
  color:#e9f2ec;font-weight:400;text-wrap:balance}
 #first-raver .choices{position:relative;z-index:1}
@@ -228,8 +230,9 @@ body[data-reg="raver"] .door.primary{background:#c9a0ff;color:#141018;border-col
 }
 
 /* Cypherpunk keeps today's full ceremony instrument. */
-body[data-reg="cypherpunk"]{font-family:var(--font-mono)}
+body[data-reg="cypherpunk"]{font-family:var(--font-mono);padding-bottom:110px}
 body[data-reg="cypherpunk"] #instrument-map{display:flex}
+body[data-reg="cypherpunk"] #instrument>.foot{margin-block-start:0;margin-block-end:var(--s3)}
 
 /* Page-owned language+view chrome. Keep both out of #first-bee. */
 #bregdescription{position:absolute;display:block;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
@@ -348,8 +351,6 @@ body[data-onb-beat="deeper"] #foot-quiet{display:none}
   <button type="button" data-onb-jump="seams">10–11 Engines + seams</button>
 </nav>
 
-<main class="stage" id="stage"><!-- screens injected here --></main>
-
 <div class="foot" data-reg="cypherpunk">
   UX preview · zero-network by construction · auth steps here are <b>SIMULATED, labeled
   honestly</b> (house law: PLANNED/REFUSED, never mock) — they bind real when served from
@@ -357,6 +358,8 @@ body[data-onb-beat="deeper"] #foot-quiet{display:none}
   Cite-or-silent: WebAuthn/PRF, Trezor bridge, optical reply, BIP-39/ENGINE readiness.
   skaists.dev static host does not complete WebAuthn/Trezor native.
 </div>
+
+<main class="stage" id="stage"><!-- screens injected here --></main>
 </div>
 
 <script src="vendor/qrcodegen.js"></script>
