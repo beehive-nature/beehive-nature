@@ -157,3 +157,62 @@ above (playwright, headless, local static server; no outbound requests).
 - Corpus meaning (28 tongues) unreviewed here — machine drafts by law.
 - No two-device or live-Buzz behavior was tested — none is claimed by the
   candidate.
+
+---
+
+# z1.b Sprint 2 delta addendum — PR #57 at 0bfa4054 — 2026-09-12
+
+Astra handoff #10@5648234510 executed (range `f19513c1..0bfa4054`, one rider
+commit). §7 green on the full `8d42da28..0bfa4054` range (4/4
+founder-authored · z1.a seat-committed · trailered). Verdict per finding:
+
+- **F1 CLOSED.** The three mid-beat sentences are keyed (`dir.hives.doorcard`
+  ×2, `prof.house.story`) with cells in en+28. Rendered proof: lv shows the
+  door-card sentence in Latvian beside the keyed lead, and Hebrew flips it
+  RTL (`v3-dir-hives-he.png`, `v3-prof-house-lv.png`); the shot walk asserts
+  exact corpus equality for both.
+- **F5 CLOSED.** All numbered instrument headings + their law blocks keyed
+  (29 new corpus keys total, none removed, floors untouched, ⚙ provenance
+  recorded). Page suites now structurally forbid unkeyed `<h2>\d` headings
+  and `<div class="law">` copy. Rendered: "1 · kvītu likums…" in lv
+  (`v3-dir-instrument-lv.png`). lang.js's rich-content path (`i18nRich` +
+  innerHTML restore) keeps `<b>fetches nothing</b>` bold in English while
+  plain cells render as text — verified. The embedded profile link is
+  preserved by splitting the sentence (`dir.inst.law5a` span + separate
+  keyed `experience.profile` anchor): href intact, label renders "Cilvēki
+  un vārdi" in lv. Remaining unkeyed instrument *content* labels (table
+  `<th>`, `relay host:`/`invite:`/`type:` field labels, roster notes,
+  Buzz-app link verbs) are the pre-#56 layer — verified already unkeyed at
+  `4342cce8` — kept as the disclosed limitation per Astra, not a delta
+  regression.
+- **F4 CLOSED.** Bee-scoped `.875rem` (14px) overrides; measured computed
+  minimums at 390px: `.lrelay`/`.chip` 14px across 42+23 visible elements
+  (en **and** he-RTL, both fit), `.bdesc`/`.bmeta` 14px on profile; the
+  shared reading-room `.law`/table lifts (16/15px) unchanged; Cypherpunk
+  scoping preserved (10.5/9.5px + mono font) and asserted in the suites.
+  Visually confirmed readable (`v3-dir-instrument-lv.png`,
+  `v3-prof-instrument-390.png`).
+- **Assertion repair VERIFIED.** The vacuous profile-language line is now
+  exact corpus equality on both pages. Negative-gating tested empirically:
+  fully removing the door-card elements or the `.calm` element makes the
+  assertion **fail loudly** (locator timeout), not pass. One hardening note
+  (non-blocking): inside the language loop, the instrument drift sweep
+  itself has no `#instrument` visibility pre-assert, so an emptied
+  instrument passes that single assertion vacuously on that load (the main
+  pass asserts instrument visibility on its own load). A one-line
+  `isVisible` pre-assert closes it.
+- F2/F3 acceptance preserved (no regression in the delta); state retention
+  re-verified (beat/disclosure/language across toggles).
+
+Checks rerun at 0bfa4054: five page suites **49/49** (two new F4 tests) ·
+estate-source **11/11** · estate-check **93/93** · reading-rooms browser
+**1812/1812** · people-journey-shot **97/97**. Note: the shot script's PNG
+regeneration is not byte-deterministic across runs (three raver PNGs
+differed on my rerun) — worth an out-dir or .gitignore decision if Astra
+wires it into CI.
+
+**Verdict: acceptance-ready.** Machine-draft meaning review stays in #7;
+the disclosed legacy corpus gaps (`bd.note.title` etc.) remain release-note
+material per Astra. New evidence in `e2e/shots-z1b-review/`:
+`v3-dir-instrument-lv.png`, `v3-dir-hives-he.png`, `v3-prof-house-lv.png`,
+`v3-prof-instrument-390.png`.
