@@ -228,3 +228,38 @@ Co-authored-by trailers crediting Cursor Agent's original work**. §7
 checks the PUSHED range (`before..sha`), so the new push's range contains
 only the convention-shaped commit and passes on its own merits.
 
+## Addendum — the pull_request range and the two lineages
+
+After pushing the descendant (`c6239180` on the original branch), CI
+showed the structural remainder honestly: the **push-event** static job
+went green (range `4342cce8..c6239180` = only the convention-shaped
+rider), while the **pull_request-event** static job stays red **by
+construction** — in that context §7 scans `origin/main..HEAD`, which
+contains Grok's Cursor-authored `4342cce8` for as long as it remains an
+ancestor. No descendant can cure that on the same branch, and the cure
+is NOT a force-push or a weakened check.
+
+So the docket's own instruction completes the shape — "start from
+fetched main … import its patch with provenance. Preserve the original
+branch":
+
+1. **`cursor/people-journey-three-temp-7af5` (original, preserved):**
+   now carries `4342cce8` (untouched) + descendant `c6239180` (the
+   finished journeys). History intact; push-range §7 green; its
+   pull_request-range red is the inherited Cursor author, documented
+   here, not hidden.
+2. **`zcode/people-journey-candidate-2026-09-12` (the merge-ready
+   candidate):** `8d42da28` (main) + `4b5aadd1` (Grok's exact patch,
+   imported byte-for-byte — all nine files hash-verified against
+   `4342cce8` — re-committed founder-authored with Cursor credited by
+   trailer and provenance in the message) + `444663bb` (the journey
+   rider). The full `origin/main..HEAD` range satisfies §7 on **every**
+   event kind — verified locally with `S7_RANGE="8d42da28..HEAD"`, both
+   commits founder-authored · seat-committed · trailered.
+
+The reading-room browser suite was re-run at the candidate head:
+**1812/1812**. The candidate PR carries the two-lineage map and is the
+one Astra can integrate with a fully green board; the original PR #56
+stays as Grok's preserved work of record.
+
+
