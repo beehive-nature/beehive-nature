@@ -231,6 +231,6 @@ $('verify-store').addEventListener('click', verifyStore);
 draw();
 loadManifest(manifestUrl).then(paint).catch(err => { $('status-dot').className='dot bad'; $('status').textContent='manifest unavailable'; $('status-note').textContent='· '+err.message; $('store-status').textContent='store adapter idle'; event('REFUSED','no room state changed'); });
 </script>
-<script src="tour.js?v=41"></script>
+<script src="tour.js?v=42"></script>
 </body>
 </html>

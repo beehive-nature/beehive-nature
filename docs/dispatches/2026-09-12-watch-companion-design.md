@@ -112,3 +112,20 @@ Before integrating the newer main branch:
 Hosted checks and final integration validation are recorded below once run.
 The existing public live-media and funded-session exercises were not run:
 those perform writes and operational changes outside this presentation repair.
+
+## Bringing main into the review branch
+
+Integrated `origin/main` at `8d42da28` locally into this PR branch; main itself
+is not changed. Five textual conflicts were resolved by retaining both CI
+suites, both corpus additions and drafting histories, main's current-language
+and coverage refresh fixes, and its sibling-asset resolution alongside our
+file-protocol paths. Both media pages now use the shared v42 loader. The corpus
+has 1,027 keys after composition; no other session's translation was discarded.
+
+The combined watch/Jams/Store browser battery passes **29 + 17 + 9**. The
+shared unit battery initially named Jams' older v41 loader; updating it to v42
+restored **27/27**. The source gate compares against committed HEAD and restores
+HEAD on drift, so running it during a pending merge named the old generated hub.
+The atlas was regenerated for the combined registry and is committed with the
+merge; its final committed-tree gate follows. CI shape is **42/42** guarded
+suite steps. Hosted review checks remain the authority for the final pushed pin.

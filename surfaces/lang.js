@@ -96,13 +96,14 @@ if(typeof document!=='undefined') (function(){
     ["sa","संस्कृतम्","Sanskrit"]
   ];
   var RTL={'ar':1,'he':1,'fa':1,'ur':1};
-  var corpus=null;
+  var corpus=null,currentCode='en';
 
   function pref(){ try{ var v=localStorage.getItem('blang');
     return LANGS.some(function(L){return L[0]===v})?v:'en'; }catch(e){ return 'en'; } }
-  // Dynamic control labels use the same corpus and saved language as static text.
+  // Dynamic control labels use the same corpus and current language as static text,
+  // including when the browser refuses preference storage.
   // Missing renderings keep their explicit English fallback; no attestation implied.
-  window.BNRLanguage={text:function(key,fallback){var c=pref(),row=corpus&&corpus.strings[key];return c!=='en'&&row&&typeof row[c]==='string'&&row[c].trim()?row[c]:fallback;}};
+  window.BNRLanguage={text:function(key,fallback){var c=currentCode,row=corpus&&corpus.strings[key];return c!=='en'&&row&&typeof row[c]==='string'&&row[c].trim()?row[c]:fallback;}};
   function setPref(c){
     try{ localStorage.setItem('blang',c); }catch(e){}
     /* additive mirror into the tri-role language schema, so corpus surfaces can read
@@ -112,6 +113,7 @@ if(typeof document!=='undefined') (function(){
     apply(c);
   }
   function apply(code){
+    currentCode=code;
     document.documentElement.lang=code;
     document.documentElement.dir=RTL[code]?'rtl':'ltr';
     var nodes=document.querySelectorAll('[data-i18n]');
@@ -133,6 +135,10 @@ if(typeof document!=='undefined') (function(){
       if(typeof s==='string' && s.trim()){ if(s.indexOf('<')!==-1) el.innerHTML=s; else el.textContent=s; hit++; }
       else { if(el.dataset.i18nRich) el.innerHTML=el.dataset.i18nEn; else el.textContent=el.dataset.i18nEn; } /* honest fallback: English, counted */
     });
+    updateCoverage(code);
+    try{ document.dispatchEvent(new CustomEvent('blang',{detail:{lang:code}})); }catch(e){}
+  }
+  function updateCoverage(code){
     /* THE COVERAGE COUNTER (founder defect order 2026-08-29): the old count was
        keys-present over [data-i18n] elements — a page reading English to every
        tongue showed a green 49/49. The carrier now counts VISIBLE STRINGS
@@ -161,8 +167,15 @@ if(typeof document!=='undefined') (function(){
         }
       }
     }
-    try{ document.dispatchEvent(new CustomEvent('blang',{detail:{lang:code}})); }catch(e){}
   }
+  var coverageQueued=false;
+  function refreshCoverage(){
+    if(coverageQueued)return;coverageQueued=true;
+    requestAnimationFrame(function(){coverageQueued=false;updateCoverage(currentCode);});
+  }
+  document.addEventListener("bregister",refreshCoverage);
+  document.addEventListener("click",refreshCoverage);
+  document.addEventListener("toggle",refreshCoverage,true);
   function mount(){
     var host=document.querySelector('[data-language-host]')||document.getElementById('tbar');
     /* margin/min-height/height/box-sizing pinned on all three elements below:
@@ -219,7 +232,7 @@ if(typeof document!=='undefined') (function(){
         if(bundled&&bundled.strings&&bundled._meta){acceptCorpus(bundled,cb);return;}
       }catch(e){} // malformed bundle uses the normal loader/fallback
     }
-    fetch(R+'lang-corpus.json?v=17').then(function(r){return r.json()})
+    fetch(R+'lang-corpus.json?v=18').then(function(r){return r.json()})
       .then(function(j){ acceptCorpus(j,cb); })
       .catch(function(){ corpus={strings:{}}; cb(); }); /* fetch failure = full English fallback, counter shows 0/N */
   }

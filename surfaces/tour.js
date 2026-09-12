@@ -7,6 +7,12 @@
   var R=location.protocol==='file:'
     ? new URL('.', current&&current.src||location.href).href
     : (location.pathname.indexOf('/beehive-nature/')===0?'/beehive-nature/surfaces/':'/surfaces/');
+  /* Sibling riders (register / lang / rails-badge) follow THIS file, not the
+     /surfaces/ alias. A poke at http://127.0.0.1:8765/bearth.html (surfaces as
+     server root) 404s /surfaces/register.js and never applies data-reg scoping.
+     Tour-bar hrefs keep R — that is the production path both deployments use. */
+  var tourScript=document.currentScript;
+  var assetBase=(tourScript&&tourScript.src)?tourScript.src.replace(/tour\.js(?:\?.*)?$/i,''):R;
   var L=[['⌂',''],
     ['beam','blight/demo.html'],['fLeeT','blight/index.html'],['museum','blight/museum.html'],
     '—',
@@ -30,6 +36,13 @@
       ['dash','fleet-hosted/lab/bnr-dashboard.html'],['flower','fleet-hosted/lab/flower-lab.html'],['spliff','fleet-hosted/lab/spliff-lab.html'],
       ['blend','fleet-hosted/lab/blend-lab.html'],['intake','fleet-hosted/lab/intake-tracker.html'],['edible','fleet-hosted/lab/edible-tracker.html']];
   var inlineHost=document.querySelector('[data-tour-host]');
+  if(!inlineHost&&document.getElementById('first-bee')&&document.getElementById('first-raver')){
+    var directory=document.createElement('details');directory.className='room-navigation';
+    var summary=document.createElement('summary');summary.setAttribute('data-i18n','atlas.browse');summary.textContent='Explore the estate';
+    inlineHost=document.createElement('div');inlineHost.setAttribute('data-tour-host','');directory.append(summary,inlineHost);
+    var content=document.getElementById('first-bee').closest('main')||document.getElementById('instrument');
+    if(content)content.after(directory);else document.body.appendChild(directory);
+  }
   var b=document.createElement('nav');b.id='tbar';
   /* THE BAR HAS TWO SHAPES (founder order, 2026-08-25).
      A 39-link horizontal strip was 2,272px wide: SIX links reachable at 390px,
@@ -140,14 +153,14 @@
   function loadLanguage(){
     if(document.getElementById('blangctl')) return;
     var s2=document.createElement('script');
-    s2.src=R+'lang.js?v=25';
+    s2.src=assetBase+'lang.js?v=26';
     document.body.appendChild(s2);
   }
   /* Mount view labels before language scans them. Independent async loads
      could otherwise leave the newly inserted buttons in English. */
   if(!document.getElementById('bregctl')){
     var s=document.createElement('script');
-    s.src=R+'register.js?v=9';
+    s.src=assetBase+'register.js?v=10';
     s.onload=loadLanguage; s.onerror=loadLanguage;
     document.body.appendChild(s);
   }else loadLanguage();
@@ -156,7 +169,7 @@
      LIVE rails (founder word, 2026-08-22). Rides the tbar like the registers. */
   if(!document.getElementById('railsbadge')){
     var s3=document.createElement('script');
-    s3.src=R+'rails-badge.js?v=4';
+    s3.src=assetBase+'rails-badge.js?v=4';
     document.body.appendChild(s3);
   }
 })();

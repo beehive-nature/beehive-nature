@@ -81,7 +81,7 @@ async function render(strings, bundle) {
     Object.defineProperty(el,'id',{set(id){ids.set(id,el);}});return el;
   }
   const document={readyState:'complete',body:element(),documentElement:{},
-    querySelector:()=>null,getElementById:id=>ids.get(id),createElement:element,dispatchEvent(){},
+    querySelector:()=>null,getElementById:id=>ids.get(id),createElement:element,dispatchEvent(){},addEventListener(){},
     querySelectorAll:selector=>selector==='[data-i18n]'||selector==='body *'?nodes:[]};
   if(bundle!==undefined)ids.set('bnr-language-bundle',{textContent:bundle});
   let fetches=0;
