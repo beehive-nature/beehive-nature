@@ -129,3 +129,11 @@ HEAD on drift, so running it during a pending merge named the old generated hub.
 The atlas was regenerated for the combined registry and is committed with the
 merge; its final committed-tree gate follows. CI shape is **42/42** guarded
 suite steps. Hosted review checks remain the authority for the final pushed pin.
+
+Final local validation on the composed tree: the committed atlas/source gate
+passes **11/11**, registry and bundle checks pass, and the inherited reading-room
+browser suite passes **1,454 assertions** (both viewport sizes, translations,
+view/state retention, reduced motion and denied preference storage). The worktree
+is clean after the receipt commit. PR #42 is updated and mergeable; hosted
+checks were still running when this receipt was written. No merge or live
+deployment is claimed.
