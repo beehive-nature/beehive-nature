@@ -1,0 +1,18 @@
+[package]
+name = "watchpay"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "OFFLINE Merkle payment-contract slice for the watch lane: pure plan validation, deterministic canonical hashing, calldata composition, decoded-transaction validation, strict receipt-to-batch binding, and a durable per-batch attempt ledger. No RPC calls, no device, no signing, no broadcast — synthetic tests only. The referenced vault contract is a local-Anvil shape at the pinned source; deployment parity to any verified mainnet deployment is UNVERIFIED."
+
+[dependencies]
+sha3 = { workspace = true }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+hex = "0.4"
+thiserror = "2"
+primitive-types = { version = "0.13", default-features = false, features = ["std"] }
+
+[dev-dependencies]
+hex = "0.4"
+serde_json = "1"
