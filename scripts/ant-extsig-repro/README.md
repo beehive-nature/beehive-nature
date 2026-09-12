@@ -92,11 +92,19 @@ child accepted; `/`, empty, foreign prefix, `..`-traversal, not-a-dir,
 nested subpath rejected), T5b the symlink-escape regression (logically
 under the base, physically outside — rejected via `pwd -P`; a NAMED SKIP
 where the platform cannot create a true symlink, e.g. Git Bash without
-native-symlink privileges), T7/T8/T8b the finalizer regressions (injected
+native-symlink privileges — coverage is attributed to hosts that can create
+true symlinks (Linux), never to CI unless a CI job actually executes this
+test), T7/T8/T8b the finalizer regressions (injected
 staging failure, injected cargo failure via stub, TERM interruption
 mid-run — each must clean the validated scratch or name a kept path, keep
-the canonical baseline, and never touch unrelated neighbors), T9 the
-unrelated-neighbor survivor, T6 the canonical tree still byte-identical.
+the canonical baseline, and never touch unrelated neighbors), T10 the
+removal-failure regressions (a no-op stub `rm` — no real permission change
+— must yield an honest RETAINED-path receipt, preserve an original nonzero
+status, and escalate a successful run's exit 0 to 1), T9 the owned-neighbor
+survivor and the pre-existing legacy marker that must stay byte-identical
+(all suite-created paths are exclusive mktemp allocations inside an
+isolated per-test base, so concurrent runs never collide), T6 the canonical
+tree still byte-identical.
 
 ## Files
 

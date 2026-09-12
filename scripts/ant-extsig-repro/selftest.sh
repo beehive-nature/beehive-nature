@@ -4,18 +4,20 @@
 # harness, nothing in ops/ or the repo root modified; cargo cases use
 # ordinary dependency fetching, the stub controls are fully offline).
 #
-# r2 (Astra review #10 5648317459):
-#   T2b now REQUIRES the expected lock-update refusal text — any unrelated
-#   cargo failure no longer passes; T2c proves it with an offline stub whose
-#   failure is unrelated (the matcher must NOT match it).
-#   T5b adds the symlink-escape regression: a path logically under the base
-#   but physically outside must be REJECTED (the review's false-acceptance
-#   probe; skipped with a named SKIP only where the platform cannot create a
-#   true symlink). T5a keeps the traversal/valid controls.
-#   T7/T8/T8b drive the failure/interruption finalizer: injected staging
-#   failure, injected cargo failure, and a TERM mid-run — each must clean
-#   the validated scratch (or name a kept path), keep the canonical tree at
-#   its pre-staging baseline, and never remove unrelated neighbors (T9).
+# r3 (Astra review #10 5648424593, cleanup corrections):
+#   Every neighbor the selftest creates is an EXCLUSIVE mktemp allocation —
+#   no fixed shared paths, no mkdir -p over unknown state. The runner
+#   invocations that own scratch (T7/T8/T8b/T10) run against an ISOLATED
+#   per-test base (unique mktemp dir passed as TMPDIR), so leftover counting
+#   sees only this run's allocations, never another run's. A PRE-EXISTING
+#   legacy marker with content sits in that base for the whole suite and
+#   must remain byte-identical (the runner removes only the exact scratch
+#   paths it created). The finalizer now CHECKS each rm -rf's status: T10
+#   proves with a no-op stub rm that a failed removal produces an honest
+#   RETAINED-path terminal receipt, preserves an original nonzero status,
+#   and escalates a successful run's exit 0 to 1. Wording law from the same
+#   review: true-symlink coverage is attributed to hosts that can create
+#   them (Linux), never to CI unless a CI job actually executes the test.
 #
 #   T1a missing COMMITTED lock   -> runner refuses before any cargo run
 #   T1b missing BUILD lock       -> cargo --locked refuses to create one
@@ -31,15 +33,18 @@
 #   T4  source drift (canonical copy tampered, fed via REPRO_SRC_DIR)
 #       -> runner's manifest check refuses
 #   T5a cleanup path guard: accepts only the validated direct-child scratch
-#       shape; rejects /, empty, foreign prefixes, ..-traversal, not-a-dir
+#       shape; rejects /, empty, foreign prefixes, ..-traversal, not-a-dir,
+#       nested subpath
 #   T5b symlink escape -> rejected via physical canonicalization (SKIP
 #       named where no true symlink can be created)
-#   T7  injected staging failure -> finalizer cleans scratch, nonzero exit,
-#       canonical baseline intact
+#   T7  injected staging failure -> finalizer cleans the isolated scratch,
+#       nonzero exit, neighbors + legacy intact
 #   T8  injected cargo failure (stub) -> same contract
 #   T8b TERM interruption mid-cargo -> same contract (cleanup or explicit
 #       kept-path receipt), original status nonzero
-#   T9  unrelated neighbors survive every cleanup path
+#   T9  owned neighbor and pre-existing legacy marker survive every path
+#   T10 stubbed removal failure -> RETAINED-path receipt, original nonzero
+#       preserved (fail-after-stage case) and success-path 0 escalated to 1
 #   T6  canonical ops/ant-extsig still equals the committed manifest
 #
 # Usage: sh scripts/ant-extsig-repro/selftest.sh
@@ -76,12 +81,35 @@ if command -v rustup >/dev/null 2>&1 && [ -f "$REPO_ROOT/rust-toolchain.toml" ];
 fi
 
 WORK=$(mktemp -d "$BASE/ant-extsig-repro-selftest.XXXXXX") || exit 1
-# an UNRELATED neighbor that must survive every cleanup path (T9 asserts it)
-SURVIVOR="$BASE/z1c-selftest-unrelated-marker.dir"
-mkdir -p "$SURVIVOR"
-printf 'unrelated\n' > "$SURVIVOR/payload.txt"
-# runner-shaped scratch leftovers, if any (mktemp suffix = 6 chars)
-leftovers() { ls -d "$BASE"/ant-extsig-repro.?????? 2>/dev/null | wc -l; }
+
+# ISOLATED per-test base for every runner invocation that owns scratch, so
+# leftover counting sees only this run's allocations (concurrent runs never
+# collide). Exclusive allocations only; nothing here pre-exists.
+ISO=$(mktemp -d "$BASE/ant-extsig-repro-selftest-iso.XXXXXX") || exit 1
+# OWNED neighbor — exclusive mktemp allocation with a payload
+NEIGHBOR=$(mktemp -d "$ISO/ant-extsig-repro-neighb.XXXXXX") || exit 1
+printf 'owned-neighbor-payload\n' > "$NEIGHBOR/payload.txt"
+# PRE-EXISTING legacy marker WITH CONTENT: name-shaped like runner scratch
+# but planted by the suite before any runner invocation; the runner must
+# never touch what it did not allocate. Must stay byte-identical throughout.
+LEGACY="$ISO/ant-extsig-repro.legacy01"
+mkdir -p "$LEGACY"
+printf 'pre-existing legacy payload — not allocated by the runner\n' > "$LEGACY/sentinel.txt"
+legacy_digest_before=$(sha256sum "$LEGACY/sentinel.txt" | cut -d' ' -f1)
+# runner-shaped scratch leftovers inside the isolated base (mktemp suffix
+# is exactly 6 chars; the legacy suffix is 8, so it is never counted)
+leftovers() { ls -d "$ISO"/ant-extsig-repro.?????? 2>/dev/null | wc -l; }
+neighbors_intact() {
+    [ -f "$NEIGHBOR/payload.txt" ] || return 1
+    [ "$(sha256sum "$LEGACY/sentinel.txt" 2>/dev/null | cut -d' ' -f1)" = "$legacy_digest_before" ] || return 1
+    return 0
+}
+# physical prefix check for the suite's own cleanup (mirrors the runner law)
+phys_under() {
+    _p=$(cd "$1" 2>/dev/null && pwd -P) || return 1
+    _b=$(cd "$2" 2>/dev/null && pwd -P) || return 1
+    case "$_p" in "$_b"/*) return 0 ;; *) return 1 ;; esac
+}
 
 # ---- T1a: kit with the committed lock removed ------------------------------
 KIT1=$WORK/kit-missing-lock
@@ -212,7 +240,9 @@ done
 # the review's false-acceptance shape: logical path under the base, physical
 # target outside it. True-symlink detection: Git Bash's ln -s silently COPIES
 # unless native symlinks are enabled — a copy resolves physically INSIDE the
-# base and would prove nothing, so it is a named SKIP, not a pass.
+# base and would prove nothing, so it is a named SKIP, not a pass. Coverage
+# attribution: hosts that can create true symlinks (e.g. Linux); NOT called
+# CI coverage unless a CI job actually executes this test.
 SB=$WORK/symtest
 mkdir -p "$SB/allowed" "$SB/outside"
 ln -s "$SB/outside" "$SB/allowed/ant-extsig-repro.link" 2>/dev/null || true
@@ -224,45 +254,46 @@ if [ -L "$SB/allowed/ant-extsig-repro.link" ] \
         ok 5b "symlink escape rejected — the guard canonicalizes physically (this probe demonstrates false acceptance was possible BEFORE the fix, not that deletion ever happened)"
     fi
 else
-    skipd 5b "this platform cannot create a true symlink (Git Bash copies by default); exercised on Linux/CI"
+    skipd 5b "this platform cannot create a true symlink (Git Bash copies by default); exercised on hosts that can (e.g. Linux)"
 fi
 
 # ---- T7: injected staging failure -> finalizer -----------------------------
-if REPRO_INJECT=fail-after-stage REPRO_SKIP_CHECK=1 sh "$RUN" >"$WORK/t7.out" 2>&1; then
+# TMPDIR points the runner's scratch base at the ISOLATED per-test base
+if TMPDIR="$ISO" REPRO_INJECT=fail-after-stage REPRO_SKIP_CHECK=1 sh "$RUN" >"$WORK/t7.out" 2>&1; then
     bad 7 "injected staging failure did not fail the run"
 else
     if ! grep -q "INJECTED failure after staging" "$WORK/t7.out"; then
         bad 7 "failure was not the injected one: $(tail -1 "$WORK/t7.out")"
     elif [ "$(leftovers)" != "0" ]; then
-        bad 7 "staging failure left scratch behind: $(ls -d "$BASE"/ant-extsig-repro.?????? 2>/dev/null | tr '\n' ' ')"
-    elif [ ! -f "$SURVIVOR/payload.txt" ]; then
-        bad 7 "an unrelated neighbor was removed by the failure path"
+        bad 7 "staging failure left scratch behind: $(ls -d "$ISO"/ant-extsig-repro.?????? 2>/dev/null | tr '\n' ' ')"
+    elif ! neighbors_intact; then
+        bad 7 "an owned neighbor or the pre-existing legacy marker was damaged by the failure path"
     else
-        ok 7 "staging failure: nonzero exit, scratch cleaned by the finalizer, unrelated neighbors intact"
+        ok 7 "staging failure: nonzero exit, isolated scratch cleaned by the finalizer, neighbors + legacy intact"
     fi
 fi
 
 # ---- T8: injected cargo failure (stub) -> finalizer ------------------------
 printf '#!/bin/sh\necho "cargo-stub: simulated unrelated cargo failure" >&2\nexit 1\n' > "$STUBBIN/cargo-fail"
 chmod +x "$STUBBIN/cargo-fail"
-if REPRO_SKIP_CHECK=1 CARGO="$STUBBIN/cargo-fail" sh "$RUN" >"$WORK/t8.out" 2>&1; then
+if TMPDIR="$ISO" REPRO_SKIP_CHECK=1 CARGO="$STUBBIN/cargo-fail" sh "$RUN" >"$WORK/t8.out" 2>&1; then
     bad 8 "stub cargo failure did not fail the run"
 else
     if ! grep -q "cargo metadata --locked failed" "$WORK/t8.out"; then
         bad 8 "failure was not at the metadata phase: $(tail -1 "$WORK/t8.out")"
     elif [ "$(leftovers)" != "0" ]; then
-        bad 8 "cargo failure left scratch behind: $(ls -d "$BASE"/ant-extsig-repro.?????? 2>/dev/null | tr '\n' ' ')"
-    elif [ ! -f "$SURVIVOR/payload.txt" ]; then
-        bad 8 "an unrelated neighbor was removed by the failure path"
+        bad 8 "cargo failure left scratch behind: $(ls -d "$ISO"/ant-extsig-repro.?????? 2>/dev/null | tr '\n' ' ')"
+    elif ! neighbors_intact; then
+        bad 8 "an owned neighbor or the pre-existing legacy marker was damaged by the failure path"
     else
-        ok 8 "cargo failure: nonzero exit, scratch cleaned by the finalizer, unrelated neighbors intact"
+        ok 8 "cargo failure: nonzero exit, isolated scratch cleaned by the finalizer, neighbors + legacy intact"
     fi
 fi
 
 # ---- T8b: TERM interruption mid-cargo -> finalizer -------------------------
 printf '#!/bin/sh\nsleep 10\nexit 0\n' > "$STUBBIN/cargo-slow"
 chmod +x "$STUBBIN/cargo-slow"
-REPRO_SKIP_CHECK=1 CARGO="$STUBBIN/cargo-slow" sh "$RUN" >"$WORK/t8b.out" 2>&1 &
+TMPDIR="$ISO" REPRO_SKIP_CHECK=1 CARGO="$STUBBIN/cargo-slow" sh "$RUN" >"$WORK/t8b.out" 2>&1 &
 t8b_pid=$!
 sleep 2
 kill -TERM "$t8b_pid" 2>/dev/null
@@ -270,18 +301,68 @@ wait "$t8b_pid"; t8b_rc=$?
 if [ "$t8b_rc" = "0" ]; then
     bad 8b "interrupted run exited 0 (original status not retained as nonzero)"
 elif [ "$(leftovers)" != "0" ] && ! grep -q "finalizer:" "$WORK/t8b.out"; then
-    bad 8b "interruption left scratch behind with NO kept-path receipt: $(ls -d "$BASE"/ant-extsig-repro.?????? 2>/dev/null | tr '\n' ' ')"
-elif [ ! -f "$SURVIVOR/payload.txt" ]; then
-    bad 8b "an unrelated neighbor was removed by the interruption path"
+    bad 8b "interruption left scratch behind with NO kept-path receipt: $(ls -d "$ISO"/ant-extsig-repro.?????? 2>/dev/null | tr '\n' ' ')"
+elif ! neighbors_intact; then
+    bad 8b "an owned neighbor or the pre-existing legacy marker was damaged by the interruption path"
 else
-    ok 8b "TERM mid-cargo: exit $t8b_rc, scratch released (or explicitly named) by the finalizer, neighbors intact"
+    ok 8b "TERM mid-cargo: exit $t8b_rc, isolated scratch released (or explicitly named) by the finalizer, neighbors + legacy intact"
 fi
 
-# ---- T9: unrelated neighbors survived everything ---------------------------
-if [ -f "$SURVIVOR/payload.txt" ] && grep -q unrelated "$SURVIVOR/payload.txt"; then
-    ok 9 "unrelated neighbor $SURVIVOR survived all cleanup paths"
+# ---- T10: stubbed removal failure -> honest terminal receipt ---------------
+# A no-op stub rm (exit 1, removes nothing) makes the finalizer's rm -rf
+# fail WITHOUT any real permission change. Two contracts:
+#   (a) with an original NONZERO status (injected staging failure), the
+#       failure stays nonzero and the RETAINED owned path is named;
+#   (b) on an otherwise SUCCESSFUL run, the failed removal escalates the
+#       exit 0 to 1 and names the RETAINED owned path.
+printf '#!/bin/sh\necho "rm-stub: simulated removal failure" >&2\nexit 1\n' > "$STUBBIN/rm"
+chmod +x "$STUBBIN/rm"
+PATH="$STUBBIN:$PATH" TMPDIR="$ISO" REPRO_INJECT=fail-after-stage REPRO_SKIP_CHECK=1 sh "$RUN" >"$WORK/t10a.out" 2>&1
+t10a_rc=$?
+if [ "$t10a_rc" = "0" ]; then
+    bad 10 "removal failure on a failing run let the run exit 0"
+elif ! grep -q "removal FAILED — owned scratch RETAINED" "$WORK/t10a.out"; then
+    bad 10 "no honest RETAINED-path receipt on failed removal: $(tail -1 "$WORK/t10a.out")"
+elif [ "$(leftovers)" != "1" ]; then
+    bad 10 "expected exactly the one RETAINED scratch from the stub rm, found $(leftovers)"
+elif ! neighbors_intact; then
+    bad 10 "neighbors or legacy damaged during the removal-failure path"
 else
-    bad 9 "the unrelated neighbor did not survive"
+    ok 10a "failed removal on a nonzero run: exit $t10a_rc preserved, RETAINED owned path named, scratch actually retained"
+fi
+# reset the isolated base between the two removal-failure cases so T10b
+# counts exactly its own retained scratch (validated shapes only; the
+# legacy marker's 8-char suffix is never matched by the 6-char glob)
+for d in "$ISO"/ant-extsig-repro.??????; do
+    [ -d "$d" ] || continue
+    case "$d" in "$ISO"/ant-extsig-repro.??????) rm -rf "$d" ;; esac
+done
+PATH="$STUBBIN:$PATH" TMPDIR="$ISO" REPRO_SKIP_CHECK=1 sh "$RUN" >"$WORK/t10b.out" 2>&1
+t10b_rc=$?
+if [ "$t10b_rc" != "1" ]; then
+    bad 10 "failed removal on a SUCCESSFUL run must escalate exit 0 to 1, got $t10b_rc"
+elif ! grep -q "removal FAILED — owned scratch RETAINED" "$WORK/t10b.out"; then
+    bad 10 "no honest RETAINED-path receipt on the success-path removal failure: $(tail -1 "$WORK/t10b.out")"
+elif [ "$(leftovers)" != "1" ]; then
+    bad 10 "expected exactly the one RETAINED scratch from the stub rm, found $(leftovers)"
+elif ! neighbors_intact; then
+    bad 10 "neighbors or legacy damaged during the success-path removal failure"
+else
+    ok 10b "failed removal on a successful run: exit escalated 0 -> 1, RETAINED owned path named"
+fi
+
+# reclaim the stub-rm cases' retained scratches (validated shapes only) so
+# T9 asserts the final state of the isolated base
+for d in "$ISO"/ant-extsig-repro.??????; do
+    [ -d "$d" ] || continue
+    case "$d" in "$ISO"/ant-extsig-repro.??????) rm -rf "$d" ;; esac
+done
+
+# ---- T9: owned neighbor + pre-existing legacy survived everything ----------
+if neighbors_intact && [ "$(leftovers)" = "0" ]; then
+    ok 9 "owned neighbor intact and pre-existing legacy marker byte-identical through every path; no scratch left in the isolated base"
+else
+    bad 9 "final state wrong: leftovers=$(leftovers), neighbors_intact=$(neighbors_intact && echo yes || echo no)"
 fi
 
 # ---- T6: canonical tree untouched by everything above ----------------------
@@ -297,7 +378,29 @@ done < "$REPRO_ROOT/source-manifest.sha256"
 [ "$t6" = "yes" ] && ok 6 "canonical ops/ant-extsig still matches the manifest byte-for-byte" \
     || bad 6 "canonical tree drifted: $t6"
 
-# cleanup with the same physical discipline as the runner's guard
+# ---- suite cleanup: every removal is of an OWNED allocation, physically
+# validated; the legacy marker's integrity is asserted one final time
+# BEFORE anything of ours that could theoretically touch the base is removed
+# (the runner never touches it — this asserts the suite's own discipline too)
+if [ "$(sha256sum "$LEGACY/sentinel.txt" 2>/dev/null | cut -d' ' -f1)" != "$legacy_digest_before" ]; then
+    echo "selftest: LEGACY MARKER CHANGED — this is a suite bug" >&2; fail=$((fail+1))
+fi
+for d in "$ISO"/ant-extsig-repro.??????; do
+    [ -d "$d" ] || continue
+    case "$d" in "$ISO"/ant-extsig-repro.??????) rm -rf "$d" || echo "selftest: could not remove retained scratch $d" >&2 ;; esac
+done
+case "$NEIGHBOR" in
+    "$ISO"/ant-extsig-repro-neighb.*) phys_under "$NEIGHBOR" "$ISO" && rm -rf "$NEIGHBOR" \
+        || echo "selftest: NEIGHBOR failed physical validation — KEPT: $NEIGHBOR" >&2 ;;
+    *) echo "selftest: NEIGHBOR path unexpected — KEPT: $NEIGHBOR" >&2 ;;
+esac
+rm -rf "$LEGACY"  # suite-owned fixture (planted by this suite), role complete
+case "$ISO" in
+    "$BASE"/ant-extsig-repro-selftest-iso.*) phys_under "$ISO" "$BASE" && rm -rf "$ISO" \
+        || echo "selftest: ISO failed physical validation — KEPT: $ISO" >&2 ;;
+    *) echo "selftest: ISO path unexpected — KEPT: $ISO" >&2 ;;
+esac
+# WORK cleanup with the same physical discipline as the runner's guard
 work_phys=$(cd "$WORK" 2>/dev/null && pwd -P) || work_phys=""
 base_phys=$(cd "$BASE" 2>/dev/null && pwd -P) || base_phys=""
 case "$WORK" in
@@ -308,7 +411,6 @@ case "$WORK" in
         esac ;;
     *) echo "selftest: WORK path unexpected — KEPT: $WORK" >&2 ;;
 esac
-rm -rf "$SURVIVOR"
 echo "selftest: $pass passed, $fail failed, $skip skipped"
 [ "$fail" = "0" ] || exit 1
 exit 0

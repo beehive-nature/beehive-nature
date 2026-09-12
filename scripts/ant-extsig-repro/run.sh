@@ -147,12 +147,16 @@ stage_dir() {
 # ---- the finalizer (law 6) -------------------------------------------------
 # Installed the moment scratch ownership is acquired. Retains the original
 # status (signal traps force the conventional nonzero), validates every
-# scratch path PHYSICALLY before cleanup, honors REPRO_KEEP with an explicit
-# kept-path receipt, and asserts the canonical baseline on every exit.
+# scratch path PHYSICALLY before cleanup, CHECKS EACH REMOVAL's status (a
+# failed rm -rf is reported with the retained owned path and escalates a
+# zero exit to failure — an existing nonzero status is never overwritten or
+# hidden), honors REPRO_KEEP with an explicit kept-path receipt, and asserts
+# the canonical baseline on every exit.
 SCRATCH=""
 SCRATCH2=""
 CANON_BASELINE=""
 canon_intact() { [ "$(tree_digest)" = "$CANON_BASELINE" ]; }
+_escalate_on_zero() { [ "$_rc" = "0" ] && _rc=1; return 0; }
 _finalizer() {
     _rc=$?          # MUST be the first command: any earlier command clobbers it
     _forced_rc=${1:-}
@@ -164,16 +168,19 @@ _finalizer() {
         for _d in "$SCRATCH" "$SCRATCH2"; do
             [ -n "$_d" ] || continue
             if validate_scratch_path "$_d"; then
-                rm -rf "$_d"
+                if ! rm -rf "$_d"; then
+                    echo "ant-extsig-repro: finalizer: removal FAILED — owned scratch RETAINED, remove manually after inspection: $_d" >&2
+                    _escalate_on_zero
+                fi
             else
                 echo "ant-extsig-repro: finalizer: scratch failed physical validation — KEPT (inspect manually): $_d" >&2
-                _rc=1
+                _escalate_on_zero
             fi
         done
     fi
     if ! canon_intact; then
         echo "ant-extsig-repro: finalizer: CANONICAL TREE CHANGED vs pre-staging baseline — ops/ant-extsig must never be modified" >&2
-        _rc=1
+        _escalate_on_zero
     fi
     exit "$_rc"
 }
@@ -267,6 +274,7 @@ tree_digest() { (cd "$SRC_DIR" && find . -type f -exec sha256sum {} \; | LC_ALL=
 CANON_BASELINE=$(tree_digest) || die "cannot digest the canonical tree"
 
 REPRO_TMP_BASE=${TMPDIR:-/tmp}
+[ -n "$REPRO_TMP_BASE" ] || REPRO_TMP_BASE=/tmp
 REPRO_TMP_BASE_RESOLVED=$(cd "$REPRO_TMP_BASE" 2>/dev/null && pwd) \
     || die "scratch base unusable: $REPRO_TMP_BASE"
 REPRO_TMP_BASE_PHYS=$(phys_pwd "$REPRO_TMP_BASE") \
