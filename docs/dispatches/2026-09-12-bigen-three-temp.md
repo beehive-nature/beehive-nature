@@ -83,17 +83,26 @@ headings stay on the instrument.
 
 ## Verification named here
 
-- `node --test e2e/bigen-views.test.mjs` (wired into static front-door)
-- `node --test e2e/register.test.mjs`
-- `node scripts/estate-check.mjs`
-- `node e2e/estate-source.mjs`
-- `node e2e/i18n-coverage.mjs` on bigen.html ru --floors (floor 12)
-- live 8765 poke of New bee / Raver / Cypherpunk first paints
+- `node --test e2e/bigen-views.test.mjs` 8/8 (wired into static front-door)
+- `node --test e2e/register.test.mjs` 15/15
+- `node scripts/estate-check.mjs` PASS
+- `node e2e/estate-source.mjs` 11/11
+- `node e2e/i18n-coverage.mjs` ru --set lang-coverage-set.json --floors PASS.
+  Live census on bigen.html New bee first paint: **12 keyed / 12 visible /
+  floor 12** (100% keyed; 28 tongues filled). Unkeyed samples: none.
+- live 8765 poke (Chrome, localStorage cleared, 1280×800): New bee first
+  paint → Open the map (one empty-cell beat) → Raver first paint →
+  Walk the map (consciousness layer 2) → Cypherpunk full instrument
+  (Cochrane contrast on first viewport; scroll shows verdicts, gap map,
+  study cards, Lundh) → New bee first paint restored. `#bregctl` and
+  `#blangctl` painted. `/surfaces/register.js` 404s; sibling
+  `register.js` 200 — the assetBase cure held.
 
 Skipped this beat: fleet attestation of the new keys, any David
 Irvine / x0x #622 measurement claim, any medical-advice rewrite
 (the page is an evidence map, not a treatment instrument), any
-new pooled estimate (the negative control still holds).
+new pooled estimate (the negative control still holds). university-smoke
+was not re-run: it does not assert this page.
 
 FOUNDER LOCK applied before marking the PR ready: Cypherpunk first
 paint stays the complete evidence-library instrument. The map-beat
