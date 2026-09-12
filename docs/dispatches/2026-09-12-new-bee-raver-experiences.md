@@ -44,9 +44,9 @@ English was simplified before translation. Corrections include Tatar hemp termin
 - Full frontend Node suite: **245 passed, zero failed**. This includes existing art, music, social, gift and audio behavior as well as the eight remodel suites.
 - Whole-estate browser load: **102 registered pages, zero page errors**. This proves script loading, not usability or full translations on all 102.
 - University smoke: **87 passed, zero failed**; includes registry-following surface checks and established page behavior.
-- New [reading-room browser suite](../../e2e/reading-rooms.browser.mjs): desktop and 390px first actions, focus, return, state retention, all 29 language layouts, actual rendered translations, changed land-model headline, reduced motion and blocked preference storage. Wired into CI after the existing pinned Playwright setup.
+- New [reading-room browser suite](../../e2e/reading-rooms.browser.mjs): **1,394 assertions passed** covering desktop and 390px first actions, focus, return, state retention, all 29 language layouts, actual rendered translations, changed land-model headline, reduced motion and blocked preference storage. Wired into CI after the existing pinned Playwright setup.
 - Rendered screenshots were inspected for both experiences, including mobile New bee Review and desktop Raver University. These are agent checks; the mother's usability walk and native-speaker review are still human work.
-- Estate registry and workflow shape checks pass. Corpus/source parity and the committed generated hub are checked by `estate-source.mjs` after committing the generated output.
+- Estate registry and workflow shape checks pass. Corpus/source parity and the committed generated hub: **11/11 passed** in `estate-source.mjs` after committing the generated output (995 corpus keys; 864 referenced keys; all 28 non-English languages populated).
 
 Failures found during integration: stale scientific headline after editing inputs; repeated dense fixed navigation; unusable first-action copy; untranslated compact evidence labels; coverage count remaining at the arrival count; and literal old cache-version assertions in sibling tests. These were repaired. The new blocked-storage test initially read before its first asynchronous corpus load completed; it now waits for the selected language, then verifies both pause and resume labels.
 
