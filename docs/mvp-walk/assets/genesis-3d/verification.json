@@ -1,0 +1,35 @@
+{
+  "blender_file_bytes": 7764280,
+  "source_files": 6,
+  "renders": 5,
+  "models": {
+    "teal-original": {
+      "bytes": 6086320,
+      "cells": 180,
+      "triangles": 110016,
+      "original_texture_bytes_embedded": true,
+      "external_dependencies": 0
+    },
+    "green-original": {
+      "bytes": 5406620,
+      "cells": 180,
+      "triangles": 110016,
+      "original_texture_bytes_embedded": true,
+      "external_dependencies": 0
+    },
+    "purple-original": {
+      "bytes": 5413272,
+      "cells": 180,
+      "triangles": 110016,
+      "original_texture_bytes_embedded": true,
+      "external_dependencies": 0
+    },
+    "green-teal-original": {
+      "bytes": 5413660,
+      "cells": 180,
+      "triangles": 110016,
+      "original_texture_bytes_embedded": true,
+      "external_dependencies": 0
+    }
+  }
+}

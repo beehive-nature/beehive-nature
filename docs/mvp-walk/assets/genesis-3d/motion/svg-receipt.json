@@ -1,0 +1,125 @@
+{
+  "schema_version": 1,
+  "asset": "motion/green-teal-breathing.svg",
+  "builder": "build-breathing-svg.py",
+  "authorship": "Original artwork coauthored by LoVis and his mother; breathing is a new motion interpretation.",
+  "source_artwork": {
+    "path": "source/originals/green-teal BN logo.jpg",
+    "bytes": 15269,
+    "width": 320,
+    "height": 320,
+    "sha256_PUBLIC-CONSTANT": "64f35bee7a3a2275771ba75ce7356fcd86b6ee93baba674d0b9caa2a620b1d16",
+    "embedding": "Exact JPEG bytes embedded once as data URI; one shared user-space image pattern. No image resampling or recompression in this asset."
+  },
+  "source_geometry": {
+    "path": "source/cells.json",
+    "sha256_PUBLIC-CONSTANT": "b0dcaaca4cc0fdd412e0304ab2cebcf57553f0dbfa89d54a2fd5aa065d0d46e1",
+    "digest_encoding": "UTF-8 with LF line endings",
+    "selection_rule": "area_px < 40: contour; otherwise: model_contour",
+    "cell_count": 180,
+    "selection_counts": {
+      "reference": 20,
+      "model": 160
+    },
+    "vertices": 2635,
+    "normalized_uv_mapping": "Original image mapped to the common 820 × 821 source coordinate system. Each group translates its face and pattern together.",
+    "limitations": "Raster-traced polygons; original tiny-cell subpixel corners remain uncertain. This is not the original vector master."
+  },
+  "colors": {
+    "purple": "humans",
+    "teal": "AI",
+    "green": "biomass",
+    "handling": "Exact embedded continuous source gradients; no sampled solid fills, organizational mapping or three-view recoloring."
+  },
+  "motion": {
+    "default_duration_seconds": 6,
+    "duration_limits_seconds": [
+      3,
+      24
+    ],
+    "radial_fraction_at_crest": 0.018,
+    "strength_limits": [
+      0,
+      2
+    ],
+    "maximum_default_centroid_displacement_source_px": 6.364099,
+    "default_ring_delay_seconds": -0.14,
+    "phase_formula": "animation-delay = ring index × --bloom-ring-delay",
+    "translation_formula": "crest translation = 0.018 × (source centroid − artwork center) × clamp(--bloom-strength,0,2)",
+    "wave": "0%/100% resting position; 50% radial crest; cubic-bezier(.45,0,.55,1) on each half; infinite seamless cycle.",
+    "viewbox": [
+      -20,
+      -20,
+      860,
+      861
+    ],
+    "maximum_motion_bounds_source_px": [
+      -12.7174,
+      -11.7068,
+      832.7186,
+      833.7278
+    ],
+    "ring_rhythm_scope": "Local rings within this artwork, not cross-user synchronization."
+  },
+  "inline_preview_contract": {
+    "root_selector": "svg.bnr-breathing-bloom",
+    "pause_class": "is-paused",
+    "pause_behavior": "Toggle the class on the SVG root to freeze/resume all CSS animation at the current phase.",
+    "variables": {
+      "--bloom-duration": "CSS time; default 6s, clamped to 3s–24s",
+      "--bloom-strength": "Unitless; default 1, clamped to 0–2",
+      "--bloom-ring-delay": "CSS time per ring; default -.14s; zero synchronizes all local rings"
+    },
+    "reduced_motion": "Authoritative: animation:none and transform:none !important; static original rest pose even when presets change.",
+    "preset_examples": {
+      "breathing": {
+        "duration": "6s",
+        "strength": 1,
+        "ring_delay": "-.14s"
+      },
+      "shared_rhythm": {
+        "duration": "6s",
+        "strength": 0.85,
+        "ring_delay": "-.28s"
+      },
+      "celebration": {
+        "duration": "3.6s",
+        "strength": 1.35,
+        "ring_delay": "-.10s"
+      }
+    },
+    "color_note": "Timing presets do not brighten, filter or recolor the embedded artwork.",
+    "instance_note": "One inline instance per document; prefix IDs if duplicating inline. An img embedding is self-contained but its internal pause class cannot be reached from the parent DOM."
+  },
+  "output": {
+    "bytes": 83287,
+    "gzip_bytes_level_9_mtime_0": 29109,
+    "sha256_PUBLIC-CONSTANT": "9971d2ca697797af7430b062ca1842ab063ba3746418e8963a527bd4bf017fe3",
+    "gzip_sha256_PUBLIC-CONSTANT": "4a3ab34723c45158470b7c70ae7d6271ddab8d29988caa88e6b0a5d3535972a8"
+  },
+  "verification": {
+    "xml_parses": true,
+    "cell_groups": 180,
+    "cell_paths": 180,
+    "cell_order_and_ids_match_source": true,
+    "unique_dom_ids": true,
+    "shared_images": 1,
+    "shared_patterns": 1,
+    "embedded_jpeg_bytes_identical": true,
+    "all_cells_use_shared_image_pattern": true,
+    "all_paths_closed": true,
+    "external_asset_references": [],
+    "no_script_foreign_object_filters_or_smil": true,
+    "accessible_static_title_description": true,
+    "root_pause_rule_present": true,
+    "reduced_motion_override_present": true,
+    "seam_endpoints_identical": true,
+    "no_color_opacity_or_filter_animation": true,
+    "motion_fits_viewbox_at_maximum_strength": true,
+    "gzip_roundtrip": true
+  },
+  "visual_qa": {
+    "performed": false,
+    "scope": "Structural XML, source-byte, geometry-bound and CSS contract checks only. No browser rendering, playback inspection or visual QA was performed."
+  }
+}
