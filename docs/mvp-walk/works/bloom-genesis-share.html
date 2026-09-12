@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f6f7f2">
+<meta name="color-scheme" content="light dark">
+<title>Share card — Genesis bloom (LoVis and his mother)</title>
+<style>
+:root{
+  --bg:#f6f7f2;--panel:#fffdf8;--ink:#18362a;--dim:#435f4e;--line:#ccd7cf;
+  --accent:#326b39;--on:#fff;--warn:#855b0b;--well:#edf2eb;
+  --human:#65509a;--ai:#176879;--bio:#326b39;
+  --font:system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:ui-monospace,'Cascadia Mono',Consolas,monospace;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+[data-view]{display:none}
+body[data-reg=bee] [data-view=bee],
+body[data-reg=raver] [data-view=raver],
+body[data-reg=cypherpunk] [data-view=cypherpunk]{display:revert}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:1.125rem/1.6 var(--font)}
+a{color:inherit;text-underline-offset:4px}
+button,a{min-height:44px}
+:focus-visible{outline:3px solid var(--bio);outline-offset:3px}
+.page{max-width:40rem;margin:0 auto;padding:20px clamp(16px,3vw,28px) 64px}
+.preview{margin:0 0 10px;color:var(--dim);font-size:.8rem;letter-spacing:.04em;text-transform:uppercase}
+.crumb{font-size:.875rem;margin:0 0 18px}
+.crumb a{display:inline-flex;align-items:center;min-height:44px;padding:0 4px}
+.lead{margin:0 0 16px;color:var(--dim);max-width:46ch}
+.card{
+  background:var(--panel);border:1px solid var(--line);border-radius:28px;
+  padding:22px 22px 26px;box-shadow:0 18px 40px rgba(24,54,42,.06);
+}
+.art{
+  margin:0 0 18px;display:grid;place-items:center;aspect-ratio:1;
+  background:radial-gradient(ellipse at 50% 42%,#fff 20%,#f3efe6 70%,#e7eee6 100%);
+  border-radius:22px;overflow:hidden;
+}
+.art img{width:86%;height:auto;display:block}
+.makers{
+  margin:0 0 8px;font-size:.8rem;letter-spacing:.04em;text-transform:uppercase;color:var(--dim);
+}
+.credit-block{
+  margin:0 0 12px;overflow:visible;white-space:normal;
+}
+.credit-block strong{
+  display:block;font-size:clamp(1.55rem,4.4vw,2.2rem);line-height:1.2;letter-spacing:-.03em;
+  font-weight:700;overflow:visible;white-space:normal;
+}
+.credit-block span{display:block;margin-top:4px;font-size:1.15rem;line-height:1.35;overflow:visible}
+h1{margin:0 0 10px;font-size:clamp(1.6rem,4vw,2.15rem);line-height:1.2;letter-spacing:-.03em}
+.invite{margin:0 0 18px;font-size:1.2rem;max-width:28ch}
+.meaning{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px;padding:0;list-style:none}
+.meaning li{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--well);font-size:.95rem}
+.dot{width:12px;height:12px;border-radius:50%;flex:none}
+.dot.human{background:var(--human)}
+.dot.ai{background:var(--ai)}
+.dot.bio{background:var(--bio)}
+.meta{display:grid;gap:12px}
+.box{border:1px dashed var(--line);border-radius:16px;padding:14px 16px;background:var(--panel)}
+.box h2{margin:0 0 6px;font-size:1rem}
+.box p{margin:0;color:var(--dim);font-size:.95rem}
+.box a,.box code{display:block;margin-top:8px;overflow-wrap:anywhere;font-size:.95rem}
+.bound{margin:16px 0 0;font-size:.95rem;color:var(--dim)}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 0}
+.actions a,.actions button{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:10px 16px;border:1px solid var(--line);border-radius:14px;
+  background:var(--panel);color:var(--ink);text-decoration:none;font:inherit;cursor:pointer;
+}
+.actions .primary{border-color:var(--accent);background:var(--accent);color:var(--on);font-weight:650}
+#copy-status{margin:10px 0 0;color:var(--dim);font-size:.95rem;min-height:1.4em}
+details.tool{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:0 16px 16px;margin:22px 0 0}
+details.tool:not([open]){padding-bottom:0}
+details.tool>summary{padding:14px 0;font-weight:600;cursor:pointer;list-style:none;min-height:44px}
+details.tool>summary::-webkit-details-marker{display:none}
+details.tool>summary:before{content:"+ ";color:var(--accent)}
+details.tool[open]>summary:before{content:"− "}
+.note{margin:8px 0 0;color:var(--dim);font-size:.95rem}
+footer{margin-top:24px;color:var(--dim);font-size:.875rem}
+
+body[data-reg=raver]{
+  --bg:#16111f;--panel:#231c30;--well:#1a1524;--ink:#f4eef8;--dim:#c3b7d4;--line:#564566;
+  --accent:#ad91f0;--on:#120816;--warn:#ecc4d7;color-scheme:dark;
+}
+body[data-reg=raver] .card{box-shadow:0 0 0 8px rgba(173,145,240,.14)}
+body[data-reg=raver] .art{background:radial-gradient(ellipse at 50% 40%,#2a2038 10%,#16111f 80%)}
+body[data-reg=raver] .meaning li,.actions a,.actions button{border-radius:99px}
+body[data-reg=cypherpunk]{
+  --bg:#081610;--panel:#0e211a;--well:#142d23;--ink:#e2f1e7;--dim:#acc4b5;--line:#4d6b59;
+  --accent:#8fdbb0;--on:#062013;--warn:#e6c36a;--font:var(--mono);
+  color-scheme:dark;font:1rem/1.6 var(--mono);
+}
+body[data-reg=cypherpunk] :is(.card,.box,.actions a,.actions button,details.tool){border-radius:4px}
+@media print{
+  body[data-reg]{
+    --bg:#fffdf8;--panel:#fffdf8;--well:#edf2eb;--ink:#18362a;--dim:#435f4e;--line:#ccd7cf;
+    --human:#65509a;--ai:#176879;--bio:#326b39;color-scheme:light;
+  }
+  html,body{background:#fffdf8;color:#18362a}
+  .card,.box,.meaning li{background:#fffdf8;color:#18362a;box-shadow:none}
+  .makers,.credit-block,.invite,h1{color:#18362a}
+  #bregbar,#bregctl,[data-register-host],.preview,.crumb,.lead,.actions,.bound,details.tool,footer,#copy-status{display:none!important}
+  .page{padding:0;max-width:none}
+  .card{box-shadow:none;border-color:#bbb;border-radius:0;padding:12px}
+  .art{aspect-ratio:auto;max-height:52vh;margin-bottom:12px}
+  .art img{width:auto;max-height:48vh}
+  .credit-block strong,.credit-block span{overflow:visible;white-space:normal}
+}
+</style>
+<script src="../../../surfaces/register.js?v=9" defer></script>
+<script src="bloom-genesis.js" defer></script>
+</head>
+<body data-reg="bee" data-bee-theme="custom">
+<div class="page">
+<p class="preview">Preview · printable card</p>
+<p class="crumb">
+  <a href="bloom-genesis.html">Work page</a> ·
+  <a href="../first-work.html#work=bnr-genesis-bloom-v1">Connected bloom</a> ·
+  <a href="../index.html">MVP walk</a> ·
+  <a href="../../../surfaces/index.html">Home</a>
+</p>
+<div data-register-host aria-describedby="view-explainer"></div>
+<p class="sr-only" id="view-explainer">Choose how this page speaks to you. Same work. Same credits. Three ways to read them.</p>
+<p class="lead">
+  <span data-view="bee">A card to print or pass on. The makers’ names stay with the bloom.</span>
+  <span data-view="raver">Carry the still. The connected page is where Keep lives.</span>
+  <span data-view="cypherpunk">Origin-relative link to bnr-genesis-bloom-v1. QR is not printed. No second collection id.</span>
+</p>
+
+<article class="card" aria-labelledby="card-title">
+  <figure class="art">
+    <img src="../assets/genesis-3d/stills/green-teal-bloom.jpg" width="820" height="821" alt="Original green–teal–purple bloom by LoVis and his mother.">
+  </figure>
+  <p class="makers">Original artwork by</p>
+  <p class="credit-block">
+    <strong>LoVis</strong>
+    <span>and his mother</span>
+  </p>
+  <h1 id="card-title">Genesis bloom</h1>
+  <p class="invite">The bloom they made together. A piece of it, for you to keep or to give.</p>
+  <ul class="meaning" aria-label="Colour meaning">
+    <li><span class="dot human" aria-hidden="true"></span>Purple — humans</li>
+    <li><span class="dot ai" aria-hidden="true"></span>Teal — AI</li>
+    <li><span class="dot bio" aria-hidden="true"></span>Green — biomass</li>
+  </ul>
+  <div class="meta">
+    <div class="box">
+      <h2>Work link</h2>
+      <p>Origin-relative path to the canonical work. Keep, share and import live there.</p>
+      <a href="../first-work.html#work=bnr-genesis-bloom-v1">../first-work.html#work=bnr-genesis-bloom-v1</a>
+      <code>docs/mvp-walk/first-work.html#work=bnr-genesis-bloom-v1</code>
+    </div>
+    <div class="box">
+      <h2>Reference, not ownership</h2>
+      <p>This card is a keepable preview with the makers’ names. It is not a licensed media copy, not a mint, and not proof that anyone received a gift.</p>
+    </div>
+  </div>
+  <p class="bound">QR is not printed. Public social rendering was not observed here. Motion study, when shown on the work page, is Astra’s — not a second authorship of the still.</p>
+  <div class="actions">
+    <a class="primary" href="../first-work.html#work=bnr-genesis-bloom-v1">Open the connected bloom</a>
+    <a href="bloom-genesis.html">Open the work page</a>
+    <button type="button" id="copy-work-link">Copy this origin’s work link</button>
+  </div>
+  <p id="copy-status" role="status">Copy sends the origin-relative work link. It does not publish a QR or a receive receipt.</p>
+</article>
+
+<details class="tool" data-view-disclosure="receipts">
+  <summary>About this preview</summary>
+  <p class="note">Work identity: <code>bnr-genesis-bloom-v1</code>. The withdrawn draft id <code>bloom-genesis-lovis-mother</code> is not this work’s receive path. This page does not write the collection. Print hides the view chrome; the card still names LoVis and his mother.</p>
+</details>
+<footer>Print keeps the still, the credit, and the origin-relative link. No campaign.</footer>
+</div>
+</body>
+</html>
