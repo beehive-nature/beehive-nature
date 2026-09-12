@@ -104,7 +104,7 @@ footer a{color:var(--dim)}
 
 <div class="hero">
   <div class="pstat hero"><div class="n proven">35</div><div class="l">seconds from nothing to a proof on your machine</div></div>
-  <div class="pstat hero"><div class="n gate">3</div><div class="l">held tests, each naming its own blocker</div></div>
+  <div class="pstat hero"><div class="n gate">4</div><div class="l">held tests, each naming its own blocker</div></div>
   <div class="pstat hero"><div class="n unbuilt">2</div><div class="l">lanes unstarted before any user's money</div></div>
 </div>
 
@@ -126,8 +126,8 @@ cargo test -p chain-zano</code></pre>
 
 <section>
   <h2 class="gate">not proven — and the code says so out loud</h2>
-  <p class="dim"><b>Three tests are held shut across the workspace, and every one states why in its own <code>#[ignore]</code> reason</b> — none is skipped quietly:</p>
-  <p class="dim"><code>chain-zano/slip0010.rs</code> waits on a verified end-to-end <code>(seed&nbsp;→&nbsp;view_public)</code> vector, and no tool currently produces one because that derivation is Trezor/Beehive-specific. <code>adapter-lti</code> waits on a real LTI 1.3 AGS capture. <code>mastery-ledger</code> waits on the L2 commons ledger. A green test on a fabricated vector would be worse than a held one, so they stay held.</p>
+  <p class="dim"><b>Four tests are held shut across the workspace, and every one states why in its own <code>#[ignore]</code> reason</b> — none is skipped quietly:</p>
+  <p class="dim"><code>chain-zano/slip0010.rs</code> waits on a verified end-to-end <code>(seed&nbsp;→&nbsp;view_public)</code> vector, and no tool currently produces one because that derivation is Trezor/Beehive-specific. <code>adapter-lti</code> waits on a real LTI 1.3 AGS capture. <code>mastery-ledger</code> waits on the L2 commons ledger. <code>watchpay/tests/ledger_contention.rs</code> is the child arm of the cross-process lock proof — it exists to be spawned by its own parent test, never to run alone. A green test on a fabricated vector would be worse than a held one, so they stay held.</p>
   <p class="dim">The wire contract sits at proto v0.3 — and the file itself reads <b>AUTHORITATIVE DRAFT</b>, not "frozen". This page quotes the artifact rather than the README, because the artifact is the receipt.</p>
 </section>
 
