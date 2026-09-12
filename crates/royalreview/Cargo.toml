@@ -1,0 +1,17 @@
+# royalreview — the experimental Royal Review record + Nostr twin (z1.d lane).
+# Order 4 of the 2026-09-12 zCode takeover docket: one locally testable
+# vertical slice; NO PDS write, NO public posting, NO new deployment.
+# Reuses atmirror (StrongRef, Cid::parse_str, Receipt::binding_ok, hex_lower)
+# rather than growing a second mirror engine.
+[package]
+name = "royalreview"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "com.beehivenature.temp.royalReview: experimental Review record, local Lexicon validation, Nostr twin events, two-rail publish orchestrator with partial-success/retry/duplicate-prevention semantics"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+atmirror = { path = "../atmirror" }
