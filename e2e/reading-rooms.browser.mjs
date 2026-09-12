@@ -9,7 +9,7 @@ import { tmpdir } from 'node:os';
 import assert from 'node:assert/strict';
 const root=resolve(import.meta.dirname,'..');
 const corpus=JSON.parse(readFileSync(resolve(root,'surfaces/lang-corpus.json'),'utf8'));
-const pages=['bearth.html','bfood.html','bsymposium.html','blongevity.html','bigen.html','university/index.html','onboarding/index.html','review.html'];
+const pages=['bearth.html','bfood.html','bsymposium.html','blongevity.html','bigen.html','university/index.html','onboarding/index.html','review.html','buzz-directory.html','profile.html'];
 const server=createServer(async(req,res)=>{
   try{
     let file=resolve(root,'.'+decodeURIComponent(req.url.split('?')[0]));
