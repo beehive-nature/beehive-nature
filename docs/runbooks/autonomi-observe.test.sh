@@ -133,6 +133,88 @@ else
 fi
 assert_lacks    "T5 zero canaries incl. changed-shape line"
 
+echo "== T6 registry: canary NESTED in a selected field + wrong scalar type =="
+cat > "$WORK/reg-nested.json" <<'EOF'
+{"schema_version":1,"nodes":{"2":{"id":2,"rewards_address":"0xZCANARY",
+  "version":{"private_note":"ZCANARY_REG_NESTED"},"upgrade_channel":null,
+  "binary_path":"/mnt/z","data_dir":"/mnt/x","evm_network":"arbitrum-one"}},"next_id":3}
+EOF
+cat > "$WORK/reg-wrongtype.json" <<'EOF'
+{"schema_version":1,"nodes":{"2":{"id":2,"rewards_address":"0xZCANARY",
+  "version":12345,"upgrade_channel":null,
+  "binary_path":"/mnt/z","data_dir":"/mnt/x","evm_network":"arbitrum-one"}},"next_id":3}
+EOF
+run_case T6a -- "${ENVOK[@]}" "OBS_REG=$WORK/reg-nested.json"
+assert_rc_non0  "T6a nested object in selected field rejected (rc!=0)"
+assert_has      "T6a generic diagnostic"      'registry: approved-field extraction failed'
+assert_lacks    "T6a nested canary never printed"
+run_case T6b -- "${ENVOK[@]}" "OBS_REG=$WORK/reg-wrongtype.json"
+assert_rc_non0  "T6b wrong scalar type rejected"
+assert_lacks    "T6b no canary"
+
+echo "== T7 monitor: canary nested in tag_name + wrong prerelease type =="
+cat > "$WORK/rel-nested.json" <<'EOF'
+{"repo":"WithAutonomi/ant-node","fetched_at_epoch_secs":1789232809,
+ "releases":[{"tag_name":{"x":"ZCANARY_REL_NESTED"},"prerelease":true},
+             {"tag_name":"v0.18.1","prerelease":false}]}
+EOF
+cat > "$WORK/rel-wrongtype.json" <<'EOF'
+{"repo":"WithAutonomi/ant-node","fetched_at_epoch_secs":1789232809,
+ "releases":[{"tag_name":"v0.19.0-rc.2","prerelease":"ZCANARY_REL_WRONGTYPE"},
+             {"tag_name":"v0.18.1","prerelease":false}]}
+EOF
+run_case T7a -- "${ENVOK[@]}" "OBS_REL=$WORK/rel-nested.json"
+assert_rc_non0  "T7a nested object in selected field rejected"
+assert_has      "T7a generic diagnostic"      'upgrade-monitor: approved-field extraction failed'
+assert_lacks    "T7a nested canary never printed"
+run_case T7b -- "${ENVOK[@]}" "OBS_REL=$WORK/rel-wrongtype.json"
+assert_rc_non0  "T7b wrong scalar type rejected"
+assert_lacks    "T7b no canary"
+
+echo "== T8 health: canary nested in build_commit + wrong uptime type =="
+cat > "$WORK/health-nested.json" <<'EOF'
+{"status":"ok","version":"0.12.0","build_commit":{"private_note":"ZCANARY_HEALTH_NESTED"},
+ "evm_network":"arbitrum-one","uptime_seconds":696499}
+EOF
+cat > "$WORK/health-wrongtype.json" <<'EOF'
+{"status":"ok","version":"0.12.0","build_commit":"8378338ca04d",
+ "evm_network":"arbitrum-one","uptime_seconds":{"x":"ZCANARY_HEALTH_WRONGTYPE"}}
+EOF
+run_case T8a -- "${ENVOK[@]}" "OBS_HEALTH=$WORK/health-nested.json"
+assert_rc_non0  "T8a nested object in selected field rejected"
+assert_has      "T8a generic diagnostic"      'health: approved-field extraction failed'
+assert_lacks    "T8a nested canary never printed"
+run_case T8b -- "${ENVOK[@]}" "OBS_HEALTH=$WORK/health-wrongtype.json"
+assert_rc_non0  "T8b wrong scalar type rejected"
+assert_lacks    "T8b no canary"
+
+echo "== T9 valid nulls preserved (observed channel null + absent field -> null) =="
+cat > "$WORK/reg-nulls.json" <<'EOF'
+{"schema_version":1,"nodes":{"2":{"id":2,"rewards_address":"0xZCANARY",
+  "version":"0.18.1","upgrade_channel":null,
+  "data_dir":"/mnt/x","evm_network":"arbitrum-one"}},"next_id":3}
+EOF
+run_case T9 -- "${ENVOK[@]}" "OBS_REG=$WORK/reg-nulls.json"
+assert_rc0      "T9 exit status"
+assert_has      "T9 observed null preserved"  '"upgrade_channel": null'
+assert_has      "T9 absent field reads null"  '"binary_path": null'
+assert_lacks    "T9 no canary"
+
+echo "== T10 process rows: malformed pid/elapsed tokens omitted, valid survive =="
+cat > "$WORK/ps-bad.txt" <<'EOF'
+ZCANARY_PID ant-node 1:00:00 --arg x
+31337 ant-node ZCANARY_ETIME --arg x
+42489 antd 8-07:10:11 --token ZCANARY_PS_OK
+EOF
+run_case T10 -- "${ENVOK[@]}" "OBS_PS_FILE=$WORK/ps-bad.txt"
+assert_rc0      "T10 exit status"
+assert_has      "T10 valid row survives"      'pid=42489 comm=antd elapsed=8-07:10:11'
+if printf '%s' "$BOTH" | grep -qE 'ZCANARY_(PID|ETIME|PS_OK)'; then
+  bad "T10 malformed-row tokens leaked"
+else
+  ok "T10 malformed rows omitted, nothing leaked"
+fi
+
 echo
 echo "RESULT: $pass passed, $failed failed"
 [ "$failed" -eq 0 ]

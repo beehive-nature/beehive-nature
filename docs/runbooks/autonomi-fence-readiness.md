@@ -1,11 +1,13 @@
 # Autonomi fence readiness — the pinned runbook
 
 **Seat:** z1.c (BNR Autonomi dependency/readiness seat), 2026-09-12.
-**Revision 3** — observation script made FAIL-CLOSED per Astra integration
-review of e220dfcc ([#10 comment 5647673959](https://github.com/beehive-nature/beehive-nature/issues/10#issuecomment-5647673959)):
-raw fallbacks and argv output removed, all output through schema-validated
-projections, local secret-canary test suite added (28/28). Revision 2
-([#10 comment 5647564848](https://github.com/beehive-nature/beehive-nature/issues/10#issuecomment-5647564848))
+**Revision 4** — every projected value TYPE-CHECKED before output per
+Astra's r3 review ([#10 comment 5647905430](https://github.com/beehive-nature/beehive-nature/issues/10#issuecomment-5647905430)):
+scalar-or-null with bounded formats, nested objects/arrays in selected
+fields rejected, valid nulls preserved, process tokens validated; canary
+suite at 50/50. Revision 3 ([#10 comment 5647673959](https://github.com/beehive-nature/beehive-nature/issues/10#issuecomment-5647673959))
+made the script fail-closed (no raw fallbacks, no argv, projections only).
+Revision 2 ([#10 comment 5647564848](https://github.com/beehive-nature/beehive-nature/issues/10#issuecomment-5647564848))
 corrected: field-work closure (§9), installed-version-vs-enforced-pin
 separation (§2–3), conditional scheduling bound to installed revisions,
 participation claims re-based on direct node diagnostics (§7), rollback
@@ -177,25 +179,36 @@ declares 0.3.6), `ant-node 0.18.1`, `ant-protocol 2.3.5`.
 
 ## 5 · Readiness observation battery (fail-closed, allowlisted, read-only)
 
-Use `docs/runbooks/autonomi-observe.sh` (revision 3, hardened per Astra
-review #10/5647673959). Its output law: **only explicitly approved fields
-are printed — process identity as pid/comm/elapsed with argv and
-environment never read into output; registry/monitor/health values only
-through schema-validated jq projections that drop unknown fields by
-construction; log signals only as extracted named values (counts, a
-timestamp, the two refusal numbers), with unparseable lines omitted rather
-than echoed; no raw fallbacks — any parse/schema failure or missing tool
-yields one generic diagnostic and a nonzero exit, never the source input
-or parser errors.** Input locations are env-overridable for local tests
-only (`OBS_*`; `OBS_JQ` exists solely to exercise the missing-tool path).
+Use `docs/runbooks/autonomi-observe.sh` (revision 4, hardened per Astra
+reviews #10/5647673959 and #10/5647905430). Its output law: **only
+explicitly approved fields are printed, and every projected value is
+TYPE-CHECKED before output — scalar-or-null against a bounded expected
+format (version/tag shapes, absolute paths, hex commit, network name,
+numeric/boolean where applicable); nested objects or arrays substituted
+into a SELECTED field fail closed with a generic diagnostic and nonzero
+exit; observed valid nulls (e.g. `upgrade_channel: null`) are preserved.**
+Process identity prints pid/comm/elapsed only, with argv/environment never
+read into output and each printed token validated (numeric pid, bounded
+comm, elapsed-time shape — malformed rows omitted, never echoed).
+Registry/monitor/health values pass only through schema-validated jq
+projections that drop unknown fields by construction; log signals appear
+only as extracted named values (counts, a regex-validated timestamp, the
+two refusal numbers), with unparseable lines omitted rather than echoed;
+no raw fallbacks — any parse/schema failure or missing tool yields one
+generic diagnostic and a nonzero exit, never the source input or parser
+errors. Input locations are env-overridable for local tests only
+(`OBS_*`; `OBS_JQ` exists solely to exercise the missing-tool path).
 
 The companion suite `docs/runbooks/autonomi-observe.test.sh` proves the
 law locally with synthetic fixtures and secret canaries (ZCANARY…) planted
-in unknown registry/health/release fields, process arguments, `--version`
-output junk, malformed registry/health JSON, a missing jq, and a changed
-log shape — asserting canaries never reach stdout/stderr, failures are
-visible and nonzero, and approved fields survive: **28/28 pass** (receipt
-in the r3 dispatch). Run it anywhere bash+jq exist:
+in unknown registry/health/release fields, NESTED INSIDE SELECTED FIELDS
+(registry version, monitor tag_name, health build_commit/uptime), as
+wrong scalar types, in process arguments and malformed pid/elapsed tokens,
+in `--version` output junk, in malformed registry/health JSON, in a
+missing jq, and in a changed log shape — asserting canaries never reach
+stdout/stderr, failures are visible and nonzero, valid nulls are
+preserved, and approved fields survive: **50/50 pass** (receipts in the
+r3/r4 dispatches). Run it anywhere bash+jq exist:
 `bash docs/runbooks/autonomi-observe.test.sh`.
 
 Rev 2 of the script was also receipted against the box (read-only) before

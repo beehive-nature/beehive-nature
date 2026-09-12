@@ -31,16 +31,21 @@ CACHE_BIN="${OBS_CACHE_BIN:-$HOME/.local/share/ant/bin/ant-node-0.18.1}"
 GATEWAY_BIN="${OBS_GATEWAY_BIN:-$HOME/ant-lane/antd}"
 DF_TARGETS="${OBS_DF_TARGETS:-/ /mnt/ant-store}"
 
-# ---- processes: identity/status only. argv/env are never read into output.
+# ---- processes: identity/status only. argv/env are never read into output,
+# and each printed token is validated: numeric pid, bounded comm, elapsed
+# token shape. Rows failing validation are omitted, never echoed.
 echo "== processes (pid/comm/elapsed only; argv/env never printed) =="
+ps_proj() {
+  awk '$1 ~ /^[0-9]+$/ && $2 ~ /^[a-zA-Z0-9_.-]+$/ \
+        && $3 ~ /^([0-9]+-)?([0-9]{1,2}:)?[0-9]{1,2}:[0-9]{2}$/ \
+        && ($2=="ant-node"||$2=="antd"||$2=="ant") \
+        {printf "pid=%s comm=%s elapsed=%s\n",$1,$2,$3}'
+}
 if [ -n "$PS_FILE" ]; then
   [ -f "$PS_FILE" ] || fail "process fixture unreadable"
-  ps_out=$(awk '$2=="ant-node"||$2=="antd"||$2=="ant" {printf "pid=%s comm=%s elapsed=%s\n",$1,$2,$3}' "$PS_FILE") \
-    || fail "process listing unparseable"
+  ps_out=$(ps_proj < "$PS_FILE") || fail "process listing unparseable"
 else
-  ps_out=$(ps -eo pid=,comm=,etime= 2>/dev/null \
-    | awk '$2=="ant-node"||$2=="antd"||$2=="ant" {printf "pid=%s comm=%s elapsed=%s\n",$1,$2,$3}') \
-    || fail "process listing unparseable"
+  ps_out=$(ps -eo pid=,comm=,etime= 2>/dev/null | ps_proj) || fail "process listing unparseable"
 fi
 if [ -n "$ps_out" ]; then printf '%s\n' "$ps_out"; else echo "(no ant processes listed)"; fi
 
@@ -67,28 +72,45 @@ for f in "$NODE_BIN" "$CACHE_BIN" "$CLI_BIN" "$GATEWAY_BIN"; do
   fi
 done
 
-# ---- daemon registry: schema-validated, explicit field selection.
-# Unknown fields (however secret) are dropped by the projection itself.
+# ---- daemon registry: schema-validated, explicit field selection, and
+# EVERY projected value type-checked (scalar-or-null with a bounded format).
+# Unknown fields are dropped by the projection; nested objects/arrays or
+# wrongly-typed values in SELECTED fields fail closed — never printed.
 echo "== daemon registry (approved fields only) =="
 reg=$("$JQ_BIN" -e '
+  def scalar_str($v; $re):
+    if ($v | type) == "null" then null
+    elif ($v | type) == "string" and ($v | test($re)) then $v
+    else error("field") end;
+  def channel($v):
+    if $v == null or $v == "stable" or $v == "beta" then $v else error("field") end;
   if (type != "object") or (.nodes | type) != "object" then error("schema") else . end
   | .nodes | to_entries
-  | map({id: .key,
-         version:          (.value.version // null),
-         upgrade_channel:  (.value.upgrade_channel // null),
-         binary_path:      (.value.binary_path // null),
-         data_dir:         (.value.data_dir // null),
-         evm_network:      (.value.evm_network // null)})
+  | map({id:             (if (.key | test("^[0-9]+$")) then .key else error("field") end),
+         version:         scalar_str(.value.version // null;         "^[0-9]+(\\.[0-9]+){0,3}([-+][0-9A-Za-z.]+)?$"),
+         upgrade_channel: channel(.value.upgrade_channel // null),
+         binary_path:     scalar_str(.value.binary_path // null;     "^/"),
+         data_dir:        scalar_str(.value.data_dir // null;        "^/"),
+         evm_network:     scalar_str(.value.evm_network // null;     "^[a-z0-9][a-z0-9-]*$")})
 ' "$REG" 2>/dev/null) || fail "registry: approved-field extraction failed"
 printf '%s\n' "$reg"
 
-# ---- upgrade-monitor view: same law (schema check + projection).
+# ---- upgrade-monitor view: same law — every projected value type-checked.
 echo "== upgrade-monitor view (approved fields only) =="
 rel=$("$JQ_BIN" -e '
+  def scalar_str($v; $re):
+    if ($v | type) == "null" then null
+    elif ($v | type) == "string" and ($v | test($re)) then $v
+    else error("field") end;
+  def scalar_num($v):
+    if ($v | type) == "null" or ($v | type) == "number" then $v else error("field") end;
+  def scalar_bool($v):
+    if ($v | type) == "null" or ($v | type) == "boolean" then $v else error("field") end;
   if (type != "object") or (.releases | type) != "array" or (.releases[0] | type) != "object" then error("schema") else . end
-  | {fetched_at_epoch_secs,
-     newest:        {tag_name: .releases[0].tag_name, prerelease: .releases[0].prerelease},
-     latest_stable: {tag_name: ([.releases[] | select(.prerelease | not)][0].tag_name)}}
+  | {fetched_at_epoch_secs: scalar_num(.fetched_at_epoch_secs),
+     newest:        {tag_name:  scalar_str(.releases[0].tag_name // null; "^v?[0-9][0-9A-Za-z.+-]*$"),
+                     prerelease: scalar_bool(.releases[0].prerelease)},
+     latest_stable: {tag_name:  scalar_str([.releases[] | select(.prerelease | not)][0].tag_name // null; "^v?[0-9][0-9A-Za-z.+-]*$")}}
 ' "$REL" 2>/dev/null) || fail "upgrade-monitor: approved-field extraction failed"
 printf '%s\n' "$rel"
 
@@ -122,9 +144,19 @@ case "$HEALTH_SRC" in
                       health=$(cat "$HEALTH_SRC" 2>/dev/null) || fail "health: source unreadable" ;;
 esac
 h=$(printf '%s' "$health" | "$JQ_BIN" -e '
+  def scalar_str($v; $re):
+    if ($v | type) == "null" then null
+    elif ($v | type) == "string" and ($v | test($re)) then $v
+    else error("field") end;
+  def scalar_num($v):
+    if ($v | type) == "null" or ($v | type) == "number" then $v else error("field") end;
   if (type != "object") or (.status | type) != "string" or (.version | type) != "string"
      then error("schema") else . end
-  | {status, version, build_commit, evm_network, uptime_seconds}
+  | {status:        scalar_str(.status;        "^[a-z][a-z0-9_-]*$"),
+     version:       scalar_str(.version;       "^[0-9]+(\\.[0-9]+){0,3}([-+][0-9A-Za-z.]+)?$"),
+     build_commit:  scalar_str(.build_commit // null;  "^[0-9a-f]{7,40}$"),
+     evm_network:   scalar_str(.evm_network // null;   "^[a-z0-9][a-z0-9-]*$"),
+     uptime_seconds: scalar_num(.uptime_seconds)}
 ' 2>/dev/null) || fail "health: approved-field extraction failed"
 printf '%s\n' "$h"
 
