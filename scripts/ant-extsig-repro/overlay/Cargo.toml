@@ -1,0 +1,36 @@
+# ant-extsig — OVERLAY manifest for the isolated reproducible build.
+# Applied by scripts/ant-extsig-repro/run.sh as a FULL replacement of the
+# canonical ops/ant-extsig/Cargo.toml inside the throwaway build copy — the
+# canonical ops tree is never modified. Semantic delta vs canonical (the
+# whole reviewable diff):
+#   1. ant-core git dep gains the banked rev pin
+#      969ed008d9cd39bbfe6466bc5ff7943914565994 (the revision recorded in
+#      the box lockfile ~/ant-lane/ant-extsig/Cargo.lock, receipted by the
+#      fence-readiness runbook §4/§6) — the canonical manifest floats at
+#      ant-client HEAD and has already drifted past it.
+#   2. ant-node / ant-protocol become EXACT requirements (=) — the canonical
+#      "0.18.1"/"2.3.5" are caret ranges.
+#   3. [workspace] empty table — detaches the build copy from any parent
+#      workspace (the runbook §6 orphan-workspace error: "current package
+#      believes it's in a workspace when it is not"). This same table is
+#      what an eventual ops/ migration would carry; migrating ops/ is
+#      Astra's patch to receipt, not this runner's.
+# Everything else — comments, crate list, features, profile — is carried
+# verbatim from the canonical manifest.
+[package]
+name = "ant-extsig"
+version = "0.2.0"
+edition = "2021"
+
+[dependencies]
+ant-core = { git = "https://github.com/WithAutonomi/ant-client", rev = "969ed008d9cd39bbfe6466bc5ff7943914565994", features = ["devnet"] }
+ant-node = "=0.18.1"
+ant-protocol = "=2.3.5"
+tokio = { version = "1", features = ["full"] }
+serde_json = "1"
+hex = "0.4"
+
+[profile.dev]
+debug = 0
+
+[workspace]
