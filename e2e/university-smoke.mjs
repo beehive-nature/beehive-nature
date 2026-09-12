@@ -41,6 +41,40 @@ if (errors.length) console.log('LOAD ERRORS:\n' + errors.join('\n'));
 
 ok('title', (await page.title()).includes('Beehive University'));
 ok('no page/console errors on load', errors.length === 0);
+ok('New bee first paint shows the calm door', await page.locator('#first-bee').isVisible());
+ok('New bee CTA is Start with a lab report, not a catalog title',
+  (await page.locator('#first-bee [data-uni-go="lesson"]').textContent()).trim() === 'Start with a lab report');
+ok('mid-page setReg trio is gone', (await page.locator('#rg-bee, #rg-raver, #rg-cyper').count()) === 0);
+ok('charter / quests / gates stay off New bee first paint',
+  !(await page.locator('#instrument').isVisible()) && !(await page.locator('.gates').isVisible()));
+await page.locator('#first-bee [data-uni-go="lesson"]').click();
+ok('Start with a lab report opens one lesson beat', await page.locator('#layer-lesson').isVisible());
+ok('lesson beat is how to read a lab report, not the gates table',
+  (await page.locator('#layer-lesson').innerText()).includes('how to read a lab report')
+  && !(await page.locator('.gates').isVisible()));
+
+const enterCypherpunk = async () => {
+  await page.waitForSelector('#breg-cypherpunk', { timeout: 15000 });
+  await page.click('#breg-cypherpunk');
+  await page.waitForFunction(() => document.body.getAttribute('data-reg') === 'cypherpunk');
+  await page.waitForFunction(() => {
+    const el = document.getElementById('instrument');
+    return el && getComputedStyle(el).display !== 'none';
+  });
+};
+
+await enterCypherpunk();
+await page.click('#breg-bee');
+const bee = await page.locator('#prose-c1').innerHTML();
+await page.click('#breg-cypherpunk');
+const cyper = await page.locator('#prose-c1').innerHTML();
+const c5cyp = await page.locator('#prose-c5').innerHTML();
+ok('shared register switch changes prose (bee→cypherpunk)', bee !== cyper && c5cyp.includes('3a0be7b'));
+ok('Cypherpunk first paint is the full instrument', await page.locator('#instrument').isVisible());
+await page.click('#breg-bee');
+ok('bee prose restored', (await page.locator('#prose-c1').innerHTML()) === bee);
+await enterCypherpunk();
+
 /* the course count is THE SURFACE'S OWN dynamic: sections render including
    stubs (a stub is a promise with its source of record), but acts — and the
    graduation arithmetic — count NON-STUB courses only (the surface's
@@ -53,15 +87,6 @@ const nonStubCourses = courseSections - stubSections;
 ok(`${courseSections} courses render (${nonStubCourses} non-stub, ${stubSections} stub)`,
    courseSections >= nonStubCourses && stubSections >= 0);
 ok('gates table states', (await page.locator('.gates td').allTextContents()).join(' ').includes('RULED'));
-
-// register toggle
-const bee = await page.locator('#prose-c1').innerHTML();
-await page.click('#rg-cyper');
-const cyper = await page.locator('#prose-c1').innerHTML();
-const c5cyp = await page.locator('#prose-c5').innerHTML();
-ok('register switch changes prose (bee→cypherpunk)', bee !== cyper && c5cyp.includes('3a0be7b'));
-await page.click('#rg-bee');
-ok('bee prose restored', (await page.locator('#prose-c1').innerHTML()) === bee);
 
 // corpus law
 await page.selectOption('#father', 'ru');
@@ -90,10 +115,12 @@ ok('c1 status verified', (await page.locator('#st-c1').innerHTML()).includes('�
 
 // c1 wrong-answer control
 await page.reload(); await page.waitForTimeout(300);
+await enterCypherpunk();
 await page.locator('#ex-c1-opts input[data-i="2"]').check();
 await page.click('#ex-c1-go');
 ok('c1 wrong answer refused honestly', (await page.locator('#ex-c1-fb').getAttribute('class')).includes('bad'));
 await page.reload(); await page.waitForTimeout(300);
+await enterCypherpunk();
 
 // c2: scaling
 await page.fill('#ex-c2-w', '80');
@@ -115,10 +142,12 @@ ok('c4 witness A accepted, B/C refused in prose', (await page.locator('#ex-c4-fb
 
 // c4 wrong-answer control
 await page.reload(); await page.waitForTimeout(300);
+await enterCypherpunk();
 await page.locator('#ex-c4-opts input[data-i="2"]').check();
 await page.click('#ex-c4-go');
 ok('c4 failed-fetch option refused', (await page.locator('#ex-c4-fb').getAttribute('class')).includes('bad'));
 await page.reload(); await page.waitForTimeout(300);
+await enterCypherpunk();
 
 // c5: reorder trap then restore
 const c5btnCount = await page.locator('#act-c5-pal button').count();
