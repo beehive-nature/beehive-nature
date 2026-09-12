@@ -1,0 +1,7 @@
+# ant-extsig canonical-source digest set — scripts/ant-extsig-repro/run.sh refuses to build if ANY file under ops/ant-extsig differs from this set (content drift on a listed file, or any file added/removed). Regenerate ONLY with a dispatch that re-receipts the banked pins.
+# format: <sha256>  <repo-relative path>  # PUBLIC-CONSTANT (sha256 of public source)
+b8991c1669d42e079f6a404c35a2539407fb9c3acccd384180bf6b76ff285ced  ops/ant-extsig/BROWSER-PATTERN.md  # PUBLIC-CONSTANT (sha256 of public source)
+a1c49c1c21f8884fecdd9a9227488da45556934a260c1dd0f50aa4c632bad1fb  ops/ant-extsig/Cargo.toml  # PUBLIC-CONSTANT (sha256 of public source)
+6d3603dac52eea5ae3631c01a40ef1d872dafe4f22274b595ce57f0d7b08da64  ops/ant-extsig/README.md  # PUBLIC-CONSTANT (sha256 of public source)
+ed34b335d9ac84abcf3909f65a5fa213359c36ce6965d75c645408b1abca291f  ops/ant-extsig/member-pay.mjs  # PUBLIC-CONSTANT (sha256 of public source)
+ad50aa028469bd19bd40fca9480ba456334215adc922c74f609eeb88ecf05144  ops/ant-extsig/src/main.rs  # PUBLIC-CONSTANT (sha256 of public source)
