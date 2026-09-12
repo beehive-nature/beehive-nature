@@ -154,6 +154,84 @@ th{color:var(--violet);font-weight:400} td.n{color:var(--ink)}
 [data-experience-nav]{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px}
 [data-experience-nav] a{display:inline-flex;align-items:center;min-height:44px;padding:8px 12px}
 
+/* House archive · crest, lineage, consent, and portable provenance. */
+#house-archive{display:none;margin-top:18px}
+body:not([data-reg="cypherpunk"])[data-prof-beat="house"] #house-archive,
+body[data-reg="cypherpunk"] #house-archive{display:block}
+.crest-stage{position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(220px,.84fr) minmax(260px,1.16fr);gap:22px;
+ padding:22px;border:1px solid var(--line);border-radius:20px;background:
+ radial-gradient(circle at 18% 15%,rgba(255,215,0,.13),transparent 31%),
+ linear-gradient(135deg,#07130d 0%,#12251b 58%,#101912 100%);color:#edf5e6}
+.crest-stage::after{content:"";position:absolute;inset:auto -8% -48% 38%;height:75%;border-radius:50%;
+ background:radial-gradient(circle,rgba(0,229,255,.1),transparent 68%);pointer-events:none}
+.crest-art-frame{position:relative;z-index:1;display:grid;place-items:center;min-height:320px;padding:16px;border:1px solid rgba(255,215,0,.28);
+ border-radius:18px;background:rgba(1,8,4,.68);box-shadow:0 24px 80px rgba(0,0,0,.28)}
+.crest-art-frame img{display:block;width:100%;height:auto;max-height:470px;object-fit:contain}
+.crest-copy{position:relative;z-index:1;align-self:center}
+.archive-kicker{font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:#e7c75b}
+.crest-copy h2{margin:8px 0 10px;font:650 clamp(1.8rem,5vw,3.5rem)/.98 var(--bee-font);letter-spacing:-.04em;color:#fff}
+.crest-copy .motto{font:500 clamp(1rem,2.4vw,1.45rem)/1.45 Georgia,serif;color:#f4dfa0;max-width:36ch}
+.crest-copy .archive-lead{margin-top:14px;max-width:58ch;color:#bed0c2;font-size:.92rem;line-height:1.75}
+.claim-stamp{display:inline-flex;align-items:center;gap:7px;margin-top:16px;padding:7px 10px;border:1px solid rgba(255,215,0,.35);
+ border-radius:99px;color:#f4dfa0;background:rgba(255,215,0,.06);font-size:.72rem;letter-spacing:.04em}
+.archive-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.archive-actions .door{border-color:rgba(255,255,255,.24);background:rgba(255,255,255,.05);color:#fff}
+.archive-actions .door.primary{background:#f1d055;border-color:#f1d055;color:#152016}
+.archive-panel{margin-top:16px;padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--well)}
+.archive-panel h2{margin:0 0 5px;font:650 1.1rem/1.35 var(--bee-font);color:var(--ink);letter-spacing:0}
+.archive-panel>p{color:var(--dim);max-width:72ch}
+.symbol-grid,.profile-rail-grid,.market-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+.symbol-card,.rail-card,.market-card{padding:13px;border:1px solid var(--line);border-radius:12px;background:color-mix(in srgb,var(--well) 90%,var(--gold) 10%)}
+.symbol-card strong,.rail-card strong,.market-card strong{display:block;color:var(--ink);font-size:.9rem}
+.symbol-card span,.rail-card span,.market-card span{display:block;color:var(--dim);font-size:.78rem;line-height:1.6;margin-top:4px}
+.evidence-chip{display:inline-flex!important;width:max-content;margin-top:8px!important;padding:3px 7px;border-radius:99px;
+ border:1px solid var(--line);color:var(--guard)!important;font-size:.66rem!important;text-transform:uppercase;letter-spacing:.07em}
+.audience-controls,.kind-controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px}
+.audience-controls button,.kind-controls button{appearance:none;min-height:44px;padding:8px 13px;border:1px solid var(--line);border-radius:99px;
+ background:transparent;color:var(--ink);font:600 .8rem/1.2 var(--bee-font);cursor:pointer}
+.audience-controls button[aria-pressed="true"],.kind-controls button[aria-pressed="true"]{background:var(--leaf);border-color:var(--leaf);color:#102214}
+.audience-note{margin-top:9px!important;font-size:.75rem;color:var(--guard)!important}
+.lineage{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px;align-items:stretch}
+.lineage-node{position:relative;min-height:116px;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.lineage-node::before{content:attr(data-mark);display:block;margin-bottom:7px;color:var(--gold);font-size:1.1rem}
+.lineage-node strong{display:block;color:var(--ink)}
+.lineage-node p{margin-top:5px;color:var(--dim);font-size:.73rem;line-height:1.55}
+#house-archive[data-audience="public"] [data-scope="circle"],
+#house-archive[data-audience="public"] [data-scope="private"],
+#house-archive[data-audience="circle"] [data-scope="private"]{display:none}
+.scope-tag{display:inline-flex;margin-top:8px;padding:2px 6px;border:1px solid var(--line);border-radius:5px;color:var(--dim);font-size:.62rem;text-transform:uppercase;letter-spacing:.08em}
+.privacy-matrix{width:100%;min-width:620px}
+.privacy-matrix td:first-child{color:var(--ink)}
+.privacy-matrix .yes{color:var(--verified)}
+.privacy-matrix .guarded{color:var(--guard)}
+.privacy-matrix .no{color:var(--amber)}
+.profile-schema{margin-top:14px;padding:14px;border:1px dashed var(--line);border-radius:12px}
+.profile-schema[hidden]{display:none}
+.profile-schema dl{display:grid;grid-template-columns:minmax(110px,.35fr) 1fr;gap:7px 14px;margin-top:10px}
+.profile-schema dt{color:var(--violet)}
+.profile-schema dd{color:var(--dim);overflow-wrap:anywhere}
+.manifest-preview{margin-top:12px;max-height:250px;overflow:auto;padding:12px;border:1px solid var(--line);border-radius:10px;
+ background:#07100b;color:#bfe9c8;font:11px/1.55 ui-monospace,'Cascadia Mono',monospace;white-space:pre-wrap}
+.archive-status{min-height:1.5em;margin-top:9px;color:var(--verified);font-size:.75rem}
+.translation-caveat{margin-top:14px;padding:9px 11px;border-inline-start:3px solid var(--guard);color:var(--dim);font-size:.72rem}
+body[data-reg="bee"] .crest-stage{background:linear-gradient(145deg,#183b28,#0b1f14);border-color:#1d4a31}
+body[data-reg="bee"] .archive-panel{background:#fff}
+body[data-reg="bee"] #house-archive .archive-actions .door:not(.primary){color:#fff;background:#123020;border-color:#8aaa91}
+body[data-reg="raver"] .crest-stage{min-height:72svh;background:
+ radial-gradient(circle at 21% 18%,rgba(255,215,0,.22),transparent 28%),
+ radial-gradient(circle at 82% 64%,rgba(201,160,255,.2),transparent 36%),
+ linear-gradient(135deg,#190b19,#071a17 62%,#10100a)}
+body[data-reg="raver"] .crest-art-frame{transform:rotate(-1deg);box-shadow:0 30px 110px rgba(199,61,177,.18)}
+body[data-reg="raver"] .crest-copy h2{color:#fff4ce;text-shadow:0 0 32px rgba(255,215,0,.22)}
+body[data-reg="cypherpunk"] .crest-stage{border-radius:2px;background:#050a07;border-color:#2a5f3e}
+body[data-reg="cypherpunk"] .archive-panel{border-radius:2px}
+body[data-reg="cypherpunk"] .claim-stamp{border-radius:2px}
+@media(max-width:720px){
+ .crest-stage{grid-template-columns:1fr;padding:14px}.crest-art-frame{min-height:0}.crest-copy{padding:4px}
+ .symbol-grid,.profile-rail-grid,.market-grid,.lineage{grid-template-columns:1fr}
+ .privacy-table-wrap{overflow-x:auto}.archive-panel{padding:14px}
+}
+
 </style>
 </head>
 <body data-reg="bee" data-bee-theme="custom" data-prof-beat="arrival" data-experience="profile">
@@ -266,6 +344,122 @@ th{color:var(--violet);font-weight:400} td.n{color:var(--ink)}
     <a class="door" href="buzz-directory.html" data-i18n="prof.bee.back">People journey</a>
     <button type="button" class="door" data-prof-go="deeper" data-i18n="review.bee.deeper">Go deeper</button>
   </div>
+</article>
+
+<article id="house-archive" data-audience="public" aria-labelledby="crest-title">
+  <div class="crest-stage">
+    <figure class="crest-art-frame">
+      <img src="../assets/profile-archive/house-crest-von-zutphen-DESIGN.svg" alt="Golden von Zutphen house crest on deep green, with paired serpents, a crowned bee and heart, sun and star forms, multilingual marks, and the motto love is king">
+    </figure>
+    <div class="crest-copy">
+      <p class="archive-kicker">skaists .b &middot; house archive &middot; v2</p>
+      <h2 id="crest-title">von Zutphen house crest</h2>
+      <p class="motto">mīlestība ir karalis &middot; ความรักคือราชา &middot; love is king</p>
+      <p class="archive-lead" data-reg="bee">A family profile can hold more than a name. Keep the art, the story behind it, the family branches you choose to share, and the sources that help future generations understand what is known.</p>
+      <p class="archive-lead" data-reg="raver">A house mark made to travel: gold, green, serpents, bee, heart, sun, star, and one promise spoken across languages. Open the symbols, follow the lineage, share only with your chosen circle.</p>
+      <p class="archive-lead" data-reg="cypherpunk">Self-contained SVG with a pinned digest and a portable manifest. Genealogy claims carry evidence states; living-person fields default private; `.a` succession is authority lineage, never synthetic blood lineage.</p>
+      <span class="claim-stamp">◇ family-authored interpretation &middot; not a title certificate</span>
+      <div class="archive-actions">
+        <button class="door primary" type="button" id="share-house">Share this profile</button>
+        <a class="door" href="../assets/profile-archive/house-crest-von-zutphen-DESIGN.svg" download>Download original SVG</a>
+        <a class="door" href="../assets/profile-archive/house-crest-von-zutphen.json">Open provenance</a>
+      </div>
+      <p class="archive-status" id="share-status" role="status" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <section class="archive-panel" data-reg="raver" aria-labelledby="symbol-title">
+    <h2 id="symbol-title">Read the crest like a set list</h2>
+    <p>These meanings come from the holder’s design notes. They are invitations into the family story, clearly labeled so symbolism and archival proof never blur together.</p>
+    <div class="symbol-grid">
+      <div class="symbol-card"><strong>🐝 Bee + heart</strong><span>Love at the center of the house.</span><span class="evidence-chip">holder-authored</span></div>
+      <div class="symbol-card"><strong>〰 Paired serpents</strong><span>Protection, continuity, renewal.</span><span class="evidence-chip">holder-authored</span></div>
+      <div class="symbol-card"><strong>☀ Sun + morning star</strong><span>Light, direction, and stewardship.</span><span class="evidence-chip">holder-authored</span></div>
+      <div class="symbol-card"><strong>◈ Many tongues</strong><span>One motto carried across languages: love is king.</span><span class="evidence-chip">holder-authored</span></div>
+    </div>
+  </section>
+
+  <section class="archive-panel" aria-labelledby="lineage-title">
+    <h2 id="lineage-title"><span data-reg="bee">Your family, at your pace</span><span data-reg="raver">Choose who enters the family circle</span><span data-reg="cypherpunk">Disclosure projection · local preview</span></h2>
+    <p data-reg="bee">Start with yourself. Living relatives stay private until each person says yes. Older family stories can become public when a source travels with them.</p>
+    <p data-reg="raver">Preview the public floor, a trusted circle, or your private archive. The preview changes what is shown here; publishing comes later and needs each person’s consent.</p>
+    <p data-reg="cypherpunk">This control filters a disclosure projection in the browser. It does not publish, encrypt, authorize, or persist policy. Enforcement belongs at the signed record and storage boundary.</p>
+    <div class="audience-controls" role="group" aria-label="Preview audience">
+      <button type="button" data-audience-choice="public" aria-pressed="true">Public profile</button>
+      <button type="button" data-audience-choice="circle" aria-pressed="false">Trusted circle</button>
+      <button type="button" data-audience-choice="private" aria-pressed="false">Private archive</button>
+    </div>
+    <p class="audience-note" id="audience-note">Preview only: public fields, cited history, and the crest. No living-relative details.</p>
+    <div class="lineage" aria-live="polite">
+      <div class="lineage-node" data-mark="◆" data-scope="public"><strong>House holder</strong><p>Travis Mark Remington &middot; skaists .b. Holder-published name and crest.</p><span class="scope-tag">public</span></div>
+      <div class="lineage-node" data-mark="◇" data-scope="circle"><strong>Living relations</strong><p>Names, dates, portraits, and relationships remain placeholders until each person consents.</p><span class="scope-tag">trusted circle</span></div>
+      <div class="lineage-node" data-mark="⌁" data-scope="private"><strong>Private archive</strong><p>Unpublished research notes, uncertain links, and sensitive records stay on the holder’s device.</p><span class="scope-tag">private</span></div>
+      <div class="lineage-node" data-mark="△" data-scope="public"><strong>Historical lineage</strong><p>Family interpretations may be shared as stories. Genealogical assertions need a citation or an explicit unverified label.</p><span class="scope-tag">public with source</span></div>
+    </div>
+  </section>
+
+  <section class="archive-panel" aria-labelledby="rails-title">
+    <h2 id="rails-title">Two profile rails, two honest kinds of lineage</h2>
+    <p>A person and an agent may share a house archive. Their records do not pretend to be the same thing.</p>
+    <div class="kind-controls" role="group" aria-label="Profile record example">
+      <button type="button" data-kind-choice="person" aria-pressed="true">.b person</button>
+      <button type="button" data-kind-choice="agent" aria-pressed="false">.a agent</button>
+    </div>
+    <div class="profile-schema" data-profile-schema="person">
+      <strong>.b person record</strong>
+      <dl>
+        <dt>holder</dt><dd>the person who controls the published house name</dd>
+        <dt>lineage</dt><dd>relationships shared with consent and evidence status</dd>
+        <dt>art</dt><dd>creator, source package, digest, license, and version</dd>
+        <dt>privacy</dt><dd>living people private by default; DNA and health never public by default</dd>
+      </dl>
+    </div>
+    <div class="profile-schema" data-profile-schema="agent" hidden>
+      <strong>.a agent record</strong>
+      <dl>
+        <dt>charter</dt><dd>the person or house that grants the seat’s purpose</dd>
+        <dt>succession</dt><dd>model/runtime changes and handoffs recorded as generations</dd>
+        <dt>authority</dt><dd>signed scope, spending cap, expiry, and revocation receipts</dd>
+        <dt>inheritance</dt><dd>may carry licensed house art; never claims a blood relationship</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="archive-panel" data-reg="cypherpunk" aria-labelledby="privacy-title">
+    <h2 id="privacy-title">Privacy seam matrix</h2>
+    <p>The public page is the last step. Consent, encryption, and authorization must be enforced before records leave the holder’s device.</p>
+    <div class="privacy-table-wrap">
+      <table class="privacy-matrix">
+        <thead><tr><th>field</th><th>public</th><th>circle</th><th>private</th><th>law</th></tr></thead>
+        <tbody>
+          <tr><td>crest + motto</td><td class="yes">yes</td><td class="yes">yes</td><td class="yes">yes</td><td>license travels with bytes</td></tr>
+          <tr><td>living relative</td><td class="no">no</td><td class="guarded">consent</td><td class="yes">yes</td><td>each subject approves</td></tr>
+          <tr><td>dates + locations</td><td class="no">no</td><td class="guarded">minimized</td><td class="yes">yes</td><td>precision is opt-in</td></tr>
+          <tr><td>historical claim</td><td class="guarded">source</td><td class="guarded">status</td><td class="yes">yes</td><td>no silent certainty</td></tr>
+          <tr><td>DNA + health</td><td class="no">never default</td><td class="no">never default</td><td class="guarded">local</td><td>separate explicit consent</td></tr>
+          <tr><td>.a secret or key</td><td class="no">never</td><td class="no">never</td><td class="no">never</td><td>publish authority receipts only</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="archive-panel" aria-labelledby="market-title">
+    <h2 id="market-title">Art and marketplace record</h2>
+    <p>The work can be admired, shared, licensed, or listed later. This release makes no sale or reuse promise on the holder’s behalf.</p>
+    <div class="market-grid">
+      <div class="market-card"><strong>Release</strong><span>v2 &middot; founder-supplied source package</span></div>
+      <div class="market-card"><strong>Marketplace</strong><span>Not listed &middot; no price &middot; no buy action</span></div>
+      <div class="market-card"><strong>Rights</strong><span>Reserved until the holder publishes a license</span></div>
+      <div class="market-card"><strong>Evidence</strong><span>Exact SVG + portable JSON provenance manifest</span></div>
+    </div>
+    <p class="translation-caveat">Language note: the established profile shell remains translated through the Blanguage dock. This new house-archive copy is the English blueprint; translations must be reviewed before it claims multilingual coverage.</p>
+  </section>
+
+  <section class="archive-panel" data-reg="cypherpunk" aria-labelledby="manifest-title">
+    <h2 id="manifest-title">Portable disclosure manifest</h2>
+    <p>Generated locally from the selected audience. It contains no hidden names, private research, seed phrases, keys, or DNA data.</p>
+    <pre class="manifest-preview" id="profile-manifest" tabindex="0"></pre>
+  </section>
 </article>
 
 <div id="instrument">
@@ -465,6 +659,71 @@ function restoreVisibleFocus(focus){
     if(!btn) return;
     setBeat(btn.getAttribute('data-dir-go')||btn.getAttribute('data-prof-go'));
   });
+  var archive=$('house-archive');
+  var audienceNotes={
+    public:'Preview only: public fields, cited history, and the crest. No living-relative details.',
+    circle:'Preview only: adds consented living-relative placeholders. Dates and locations stay minimized.',
+    private:'Preview only: shows private archive categories on this device. It does not publish their contents.'
+  };
+  function updateManifest(){
+    if(!archive||!$('profile-manifest')) return;
+    var audience=archive.getAttribute('data-audience')||'public';
+    var fields=['house-name','holder-published-name','crest-art','motto','cited-or-labeled-history'];
+    if(audience==='circle'||audience==='private') fields.push('consent-gated-living-relations');
+    if(audience==='private') fields.push('local-research-categories-only');
+    $('profile-manifest').textContent=JSON.stringify({
+      schema:'skaists.house-disclosure/1',
+      house:'skaists',
+      rail:'.b',
+      audience:audience,
+      artifact:{
+        path:'assets/profile-archive/house-crest-von-zutphen-DESIGN.svg',
+        sha256:'6303A84263857D62568613F9929B33E0F74076A6640CEDF0D643BEB30E579088' // PUBLIC-CONSTANT: v2 crest digest
+      },
+      fields:fields,
+      living_people:'consent-required',
+      title_claim:'not-certified',
+      marketplace:'not-listed',
+      enforcement:'preview-only'
+    },null,2);
+  }
+  document.addEventListener('click',function(e){
+    var audience=e.target&&e.target.closest&&e.target.closest('[data-audience-choice]');
+    if(audience&&archive){
+      var choice=audience.getAttribute('data-audience-choice');
+      archive.setAttribute('data-audience',choice);
+      document.querySelectorAll('[data-audience-choice]').forEach(function(button){
+        button.setAttribute('aria-pressed',String(button===audience));
+      });
+      if($('audience-note')) $('audience-note').textContent=audienceNotes[choice];
+      updateManifest();
+      return;
+    }
+    var kind=e.target&&e.target.closest&&e.target.closest('[data-kind-choice]');
+    if(kind){
+      var selected=kind.getAttribute('data-kind-choice');
+      document.querySelectorAll('[data-kind-choice]').forEach(function(button){
+        button.setAttribute('aria-pressed',String(button===kind));
+      });
+      document.querySelectorAll('[data-profile-schema]').forEach(function(panel){
+        panel.hidden=panel.getAttribute('data-profile-schema')!==selected;
+      });
+    }
+  });
+  var shareButton=$('share-house');
+  if(shareButton) shareButton.addEventListener('click',async function(){
+    var target=new URL(location.href);target.hash='house-archive';
+    var payload={title:'skaists · von Zutphen house crest',text:'A consent-first house archive from skaists.',url:target.href};
+    try{
+      if(navigator.share){await navigator.share(payload);$('share-status').textContent='Share sheet opened.';return;}
+      if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(payload.url);$('share-status').textContent='Profile link copied.';return;}
+      $('share-status').textContent='Copy this address: '+payload.url;
+    }catch(err){
+      if(err&&err.name==='AbortError'){$('share-status').textContent='Share cancelled.';return;}
+      $('share-status').textContent='Sharing is unavailable here. Copy the page address from your browser.';
+    }
+  });
+  updateManifest();
   if(/#(people-agents|our-hives|public-directory|connection-help|name-record)/.test(location.hash)){
     if((document.body.getAttribute('data-reg')||'bee')!=='cypherpunk') setBeat('deeper');
   }

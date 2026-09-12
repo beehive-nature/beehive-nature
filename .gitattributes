@@ -6,3 +6,6 @@
 
 # ORDER FLEET-1: founder art preserved byte-exact — no eol/encoding conversion, ever
 surfaces/fleet/** -text
+
+# HOUSE ARCHIVE: founder-supplied crest is a byte-pinned release artifact.
+assets/profile-archive/house-crest-von-zutphen-DESIGN.svg -text -diff

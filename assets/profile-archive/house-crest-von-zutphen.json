@@ -1,0 +1,87 @@
+{
+  "schema": "skaists.house-profile/1",
+  "release": "v2",
+  "artifact": {
+    "title": "House crest · von Zutphen",
+    "file": "house-crest-von-zutphen-DESIGN.svg",
+    "mediaType": "image/svg+xml",
+    "sha256-PUBLIC-CONSTANT": "6303A84263857D62568613F9929B33E0F74076A6640CEDF0D643BEB30E579088",
+    "source": "Founder-supplied Family crest millennial design v2.zip",
+    "submittedBy": "Travis Mark Remington",
+    "creator": "Not independently verified",
+    "license": "Rights reserved until the holder publishes a license",
+    "marketplace": {
+      "listed": false,
+      "price": null,
+      "saleTerms": null
+    }
+  },
+  "house": {
+    "name": "skaists",
+    "rail": ".b",
+    "recordType": "person",
+    "holder": "Travis Mark Remington"
+  },
+  "distribution": {
+    "targets": [
+      ".b person profiles",
+      ".a agent profiles",
+      ".social domains",
+      "estate marketplaces"
+    ],
+    "rule": "The provenance, rights, claim status, and privacy policy travel with every copy"
+  },
+  "privacyDefaults": {
+    "livingPeople": "private-until-each-person-consents",
+    "datesAndLocations": "private",
+    "historicalPeople": "public-only-with-a-cited-source",
+    "dnaAndHealth": "never-public-by-default",
+    "agentSecrets": "never-publish",
+    "audiencePreviewOnly": true
+  },
+  "claimPolicy": {
+    "familyStory": "May be published as a holder-authored interpretation",
+    "genealogy": "Must carry a source or an unverified label",
+    "titleOrRoyalStatus": "Artwork and family story are not proof of a legal or hereditary title",
+    "evidenceStates": [
+      "holder-authored",
+      "source-linked",
+      "independently-verified",
+      "disputed",
+      "withdrawn"
+    ]
+  },
+  "symbolism": [
+    {
+      "name": "Bee and heart",
+      "interpretation": "Love at the center of the house",
+      "status": "holder-authored"
+    },
+    {
+      "name": "Paired serpents",
+      "interpretation": "Protection, continuity, and renewal",
+      "status": "holder-authored"
+    },
+    {
+      "name": "Sun, star, and crown",
+      "interpretation": "Light, direction, and stewardship",
+      "status": "holder-authored"
+    },
+    {
+      "name": "Multilingual motto",
+      "interpretation": "Love is king across languages",
+      "status": "holder-authored"
+    }
+  ],
+  "agentLineage": {
+    "rail": ".a",
+    "rule": "Agents inherit a charter and authority receipts, never a fabricated blood relationship",
+    "requiredFields": [
+      "charter-holder",
+      "runtime-or-model",
+      "authority-bounds",
+      "succession-record",
+      "artifact-provenance"
+    ]
+  }
+}
