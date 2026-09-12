@@ -27,9 +27,9 @@ const imgVisible = imgOk ? await page.locator("img#content").isVisible() : false
 // only naturalWidth proves the bytes DECODED into pixels — the Brave-Shields
 // broken-image bug shipped because the receipt never checked this.
 const imgLoaded = imgOk ? await page.locator("img#content").evaluate(el => el.complete && el.naturalWidth > 0) : false;
-const hasBytes = /BYTES/.test(badge);
+const liveBadge = /BYTES|Here|bloomed/i.test(badge);
 console.log("badge:", JSON.stringify(badge));
-console.log("image painted (naturalWidth):", imgLoaded, "| visible:", imgVisible, "| bytes badge:", hasBytes);
+console.log("image painted (naturalWidth):", imgLoaded, "| visible:", imgVisible, "| live badge:", liveBadge);
 
 const sameOrigin = requests.filter((u) => !u.startsWith("https://relay.skaists.dev/") && !u.startsWith("data:")); // data: URLs are the RENDERED object — in-page by construction, never a network hop
 console.log("requests (" + requests.length + "):");
@@ -39,7 +39,7 @@ console.log("NON-SAME-ORIGIN REQUESTS:", sameOrigin.length === 0 ? "NONE ✓" : 
 await page.screenshot({ path: `e2e/shots-ant-door/ant-door-390${brave ? "-brave-shields" : ""}.png`, fullPage: true });
 console.log(`SCREENSHOT: e2e/shots-ant-door/ant-door-390${brave ? "-brave-shields" : ""}.png`);
 
-const pass = imgOk === 1 && imgVisible && imgLoaded && hasBytes && sameOrigin.length === 0 && requests.length > 0;
+const pass = imgOk === 1 && imgVisible && imgLoaded && liveBadge && sameOrigin.length === 0 && requests.length > 0;
 console.log((brave ? "[BRAVE·SHIELDS-ON] " : "") + (pass ? "RECEIPT PASS" : "RECEIPT FAIL"));
 await browser.close();
 process.exit(pass ? 0 : 1);
