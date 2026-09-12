@@ -54,16 +54,39 @@
 //! - [`receipt`] — strict receipt→transaction→batch binding, no fallbacks.
 //! - [`ledger`] — durable intent/signed/outcome states with explicit crash
 //!   semantics; Unknown never auto-re-signs.
+//! - [`eth`] — secp256k1 recovery + the EIP-2 low-s law (k256; no signing).
+//! - [`signed_tx`] — strict SIGNED legacy/EIP-1559 envelope decode
+//!   (alloy-rlp framing; canonical re-encode equality; replay protection).
+//! - [`connect`] — the Trezor Connect adapter: plan-bound request
+//!   composition, the injected (fake-in-this-slice) transport trait,
+//!   full cryptographic verification of bridge results, the private
+//!   [`connect::VerifiedSigned`] type, and the one-shot signing driver.
+//!
+//! ## z2.c scope statement (2026-09-12)
+//! The Connect adapter is OFFLINE: the transport is an injected trait with
+//! NO implementation in this crate (no SDK init, no iframe, no
+//! auto-connect, no network signer); tests sign with clearly labelled
+//! public synthetic keys only. The z2.b synthetic API
+//! ([`tx::DecodedTransaction`] public fields +
+//! [`ledger::Ledger::record_signed`]) remains public for the preserved
+//! offline tests and is OFFLINE-ONLY — the adapter path through
+//! [`connect::verify_signed_result`] is the verified boundary, and this
+//! crate does NOT claim the ledger alone prevents bypass while the
+//! synthetic door stays open (see `connect` module docs for the honest
+//! limitation).
 
 pub mod abi;
 pub mod calldata;
 pub mod canonical;
+pub mod connect;
 pub mod error;
+pub mod eth;
 pub mod ledger;
 pub mod plan;
 pub mod plan_model;
 pub mod pricing;
 pub mod receipt;
+pub mod signed_tx;
 pub mod tx;
 pub mod types;
 

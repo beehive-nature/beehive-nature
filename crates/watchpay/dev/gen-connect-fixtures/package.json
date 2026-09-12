@@ -1,0 +1,12 @@
+{
+  "name": "gen-connect-fixtures",
+  "private": true,
+  "description": "Signed-fixture generator for the watchpay Connect adapter tests. Pins @trezor/connect 9.7.3 (the bridge contract this adapter models) and uses @ethereumjs/tx — the exact serialization family @trezor/connect itself depends on ('@ethereumjs/tx': '^10.1.0' in its package.json) — to sign deterministic synthetic transactions offline. No SDK initialization, no device, no network calls of any kind: npm install fetches the packages, then the script runs purely locally.",
+  "type": "commonjs",
+  "scripts": {
+    "gen": "node gen.js"
+  },
+  "dependencies": {
+    "@trezor/connect": "9.7.3"
+  }
+}

@@ -3,7 +3,7 @@ name = "watchpay"
 version = "0.1.0"
 edition.workspace = true
 license.workspace = true
-description = "OFFLINE Merkle payment-contract slice for the watch lane: pure plan validation, deterministic canonical hashing, calldata composition, decoded-transaction validation, strict receipt-to-batch binding, and a durable per-batch attempt ledger. No RPC calls, no device, no signing, no broadcast — synthetic tests only. The referenced vault contract is a local-Anvil shape at the pinned source; deployment parity to any verified mainnet deployment is UNVERIFIED."
+description = "OFFLINE Merkle payment-contract slice for the watch lane: pure plan validation, deterministic canonical hashing, calldata composition, decoded-transaction validation, strict receipt-to-batch binding, a durable per-batch attempt ledger, and (z2.c) an offline Trezor Connect adapter — plan-bound request composition plus full cryptographic verification of bridge-returned signed transactions against an injected fake transport. No RPC calls, no device, no SDK init, no broadcast — synthetic tests only. The referenced vault contract is a local-Anvil shape at the pinned source; deployment parity to any verified mainnet deployment is UNVERIFIED."
 
 [dependencies]
 sha3 = { workspace = true }
@@ -12,7 +12,17 @@ serde_json = "1"
 hex = "0.4"
 thiserror = "2"
 primitive-types = { version = "0.13", default-features = false, features = ["std"] }
+# z2.c adapter: RLP framing (strict header decode/encode, maintained by
+# alloy-rs — no hand-rolled length math) and secp256k1 recovery (RustCrypto
+# k256, same family the workspace already uses in bnr-keys/bswap). k256 is
+# RECOVERY-only here; the crate still signs nothing.
+alloy-rlp = "0.3"
+k256 = { version = "0.13", default-features = false, features = ["ecdsa", "alloc", "arithmetic"] }
 
 [dev-dependencies]
 hex = "0.4"
 serde_json = "1"
+# Integration tests (adapter harness) encode RLP and sign with the synthetic
+# test key directly — declared as dev-deps so the test target can name them.
+alloy-rlp = "0.3"
+k256 = { version = "0.13", default-features = false, features = ["ecdsa", "alloc", "arithmetic"] }
