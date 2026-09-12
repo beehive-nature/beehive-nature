@@ -1,12 +1,15 @@
 #!/bin/sh
 # ant-extsig-repro — the isolated reproducible-build runner for the
 # ops/ant-extsig member-write harness (Sprint 2, z1.c; assignment
-# beehive-nature/beehive-nature#10 comment 5647975452).
+# beehive-nature/beehive-nature#10 comment 5647975452; r2 corrections per
+# Astra's review #10 comment 5648317459).
 #
 # LAW OF THIS RUNNER (all fail-closed, one generic diagnostic + nonzero exit):
 #   1. The canonical ops/ant-extsig tree is READ-ONLY: the source is COPIED
-#      into a throwaway scratch directory; the canonical digests are asserted
-#      UNCHANGED after every run. It never builds in ops/ or the repo root.
+#      into a throwaway scratch directory; a baseline digest taken BEFORE
+#      staging is asserted UNCHANGED on EVERY exit — success, failure, or
+#      trapped signal (the finalizer, law 6). It never builds in ops/ or the
+#      repo root.
 #   2. Source drift refuses the run: every file under ops/ant-extsig must
 #      match scripts/ant-extsig-repro/source-manifest.sha256 (content AND
 #      file set) — the committed candidate lock/overlay are only meaningful
@@ -17,12 +20,22 @@
 #      969ed008d9cd39bbfe6466bc5ff7943914565994, ant-node 0.18.1,
 #      ant-protocol 2.3.5 — exact); every cargo invocation runs --locked
 #      with the staged lock's sha256 asserted unchanged afterwards.
-#   4. Scratch cleanup VALIDATES THE PATH before any rm -rf: the scratch dir
-#      must resolve under the mktemp base with this runner's name prefix;
-#      on any doubt the directory is KEPT and named, never deleted.
+#   4. PHYSICAL scratch cleanup, validated before any rm -rf (Astra r2-1):
+#      the scratch dir must be an OWNED DIRECT child of the mktemp base —
+#      matching this runner's name prefix with no further path segment —
+#      and must resolve PHYSICALLY (pwd -P, symlink-transparent) under the
+#      physically-canonicalized base. A symlink whose logical path sits
+#      under the base but physically escapes it is REJECTED (the review's
+#      false-acceptance probe). On any doubt the directory is KEPT and
+#      named, never deleted.
 #   5. No execution of the built harness: cargo check/build only. The
 #      harness main() starts an 8-node LocalDevnet + Anvil — running it is
 #      outside this lane (no node/devnet/listener).
+#   6. Failure/interruption finalization (Astra r2-2): the moment scratch
+#      ownership is acquired, an EXIT/HUP/INT/TERM finalizer is installed.
+#      It retains the original failure status, validates every scratch path
+#      physically before cleanup, honors REPRO_KEEP (explicit kept-path
+#      receipt), and asserts the canonical baseline on failure paths too.
 #
 # THE LOCK AND ITS ONE-LINE ALIGNMENT: the committed candidate lock is the
 # box lockfile ~/ant-lane/ant-extsig/Cargo.lock pulled read-only 2026-09-12
@@ -43,8 +56,15 @@
 #                        REPRO_SKIP_CHECK=1 — skip the cargo check phase
 #                                   (selftest speed; main receipt must not)
 #                        REPRO_BUILD=1  — also run cargo build --locked
-#                        REPRO_KEEP=1   — keep the scratch dir (receipt
-#                                   artifacts: graph-metadata.json, logs)
+#                        REPRO_KEEP=1   — finalizer keeps scratch, printing
+#                                   an explicit kept-path receipt
+#                        CARGO          — cargo binary override (preflight
+#                                   still requires a real cargo on PATH)
+#                        REPRO_INJECT   — TEST-ONLY failure injection for
+#                                   the finalizer regressions:
+#                                   'fail-after-stage' dies right after
+#                                   staging; 'fail-cargo' dies at the first
+#                                   cargo invocation. Never set in real runs.
 # Internal hooks:        run.sh --test-validate-path <path>
 #                                   (cleanup-guard verdict for selftest T5)
 #                        run.sh --stage <empty-or-missing-dir>
@@ -67,24 +87,39 @@ LOCK=$REPRO_ROOT/lock/Cargo.lock
 die() { echo "ant-extsig-repro: $1" >&2; exit 1; }
 need() { command -v "$1" >/dev/null 2>&1 || die "missing tool: $1"; }
 
+# physical canonicalization (Astra r2-1): pwd -P resolves symlinks; logical
+# pwd preserves them and let a base-external target pass as base-internal.
+phys_pwd() { (cd "$1" 2>/dev/null && pwd -P) || return 1; }
+
 # ---- the cleanup guard (law 4) -------------------------------------------
-# Accepts a scratch dir only if it is non-empty, resolves (symlinks etc.) to
-# a path under REPRO_TMP_BASE and carries this runner's mktemp prefix.
+# Accepts a scratch dir only if it is non-empty, is an OWNED DIRECT child of
+# the mktemp base (this runner's prefix, no deeper path segment), carries no
+# .. traversal, and PHYSICALLY resolves under the physically-resolved base.
+REPRO_TMP_BASE_RESOLVED=""
+REPRO_TMP_BASE_PHYS=""
 validate_scratch_path() {
     p=${1:-}
     [ -n "$p" ] || return 1
+    [ "$p" != "/" ] || return 1
     case "$p" in
         "$REPRO_TMP_BASE"/ant-extsig-repro.*) ;;
         *) return 1 ;;
     esac
     case "$p" in */../*|*..) return 1 ;; esac
-    [ "$p" != "/" ] || return 1
+    # owned DIRECT scratch child: nothing after the mktemp segment
+    tail=${p#"$REPRO_TMP_BASE"/}
+    case "$tail" in ant-extsig-repro.*/*) return 1 ;; esac
     [ -d "$p" ] || return 1
-    resolved=$(cd "$p" 2>/dev/null && pwd) || return 1
+    resolved=$(phys_pwd "$p") || return 1
+    [ -n "$REPRO_TMP_BASE_PHYS" ] || return 1
     case "$resolved" in
-        "$REPRO_TMP_BASE_RESOLVED"/ant-extsig-repro.*) ;;
+        "$REPRO_TMP_BASE_PHYS"/ant-extsig-repro.*) ;;
         *) return 1 ;;
     esac
+    # physical resolution may land deeper through symlinks — still must be
+    # a direct child shape of the physical base
+    ptail=${resolved#"$REPRO_TMP_BASE_PHYS"/}
+    case "$ptail" in ant-extsig-repro.*/*) return 1 ;; esac
     return 0
 }
 
@@ -109,12 +144,53 @@ stage_dir() {
     sha256sum "$target/Cargo.lock" | cut -d' ' -f1
 }
 
+# ---- the finalizer (law 6) -------------------------------------------------
+# Installed the moment scratch ownership is acquired. Retains the original
+# status (signal traps force the conventional nonzero), validates every
+# scratch path PHYSICALLY before cleanup, honors REPRO_KEEP with an explicit
+# kept-path receipt, and asserts the canonical baseline on every exit.
+SCRATCH=""
+SCRATCH2=""
+CANON_BASELINE=""
+canon_intact() { [ "$(tree_digest)" = "$CANON_BASELINE" ]; }
+_finalizer() {
+    _rc=$?          # MUST be the first command: any earlier command clobbers it
+    _forced_rc=${1:-}
+    trap - EXIT HUP INT TERM
+    [ -n "$_forced_rc" ] && _rc=$_forced_rc
+    if [ "${REPRO_KEEP:-0}" = "1" ]; then
+        echo "ant-extsig-repro: finalizer: scratch KEPT (REPRO_KEEP):${SCRATCH:+ $SCRATCH}${SCRATCH2:+ $SCRATCH2}" >&2
+    else
+        for _d in "$SCRATCH" "$SCRATCH2"; do
+            [ -n "$_d" ] || continue
+            if validate_scratch_path "$_d"; then
+                rm -rf "$_d"
+            else
+                echo "ant-extsig-repro: finalizer: scratch failed physical validation — KEPT (inspect manually): $_d" >&2
+                _rc=1
+            fi
+        done
+    fi
+    if ! canon_intact; then
+        echo "ant-extsig-repro: finalizer: CANONICAL TREE CHANGED vs pre-staging baseline — ops/ant-extsig must never be modified" >&2
+        _rc=1
+    fi
+    exit "$_rc"
+}
+install_finalizer() {
+    trap '_finalizer' EXIT
+    trap '_finalizer 129' HUP
+    trap '_finalizer 130' INT
+    trap '_finalizer 143' TERM
+}
+
 # hidden test hooks (selftest only)
 case "${1:-}" in
 --test-validate-path)
     REPRO_TMP_BASE=${REPRO_TMP_BASE:-${TMPDIR:-/tmp}}
     REPRO_TMP_BASE_RESOLVED=$(cd "$REPRO_TMP_BASE" 2>/dev/null && pwd) \
         || die "bad REPRO_TMP_BASE"
+    REPRO_TMP_BASE_PHYS=$(phys_pwd "$REPRO_TMP_BASE") || die "bad REPRO_TMP_BASE (physical)"
     validate_scratch_path "${2:-}" && exit 0 || exit 1
     ;;
 --stage)
@@ -129,7 +205,6 @@ esac
 
 # ---- phase 0: preflight ---------------------------------------------------
 need sha256sum; need cargo; need awk; need sed; need find; need diff
-command -v cargo >/dev/null 2>&1 || die "missing tool: cargo"
 CARGO=${CARGO:-cargo}
 # The scratch build dir sits OUTSIDE the repo, so rustup's directory walk
 # cannot see the estate's rust-toolchain.toml pin (1.98.1 — what CI and the
@@ -186,22 +261,27 @@ n_git=$(grep -c 'git+https://github.com/WithAutonomi/ant-client' "$LOCK")
 [ "$n_git" = "1" ] || die "candidate lock must reference ant-client git exactly once (found $n_git)"
 n_pkgs=$(grep -c '^name = ' "$LOCK")
 
-# ---- phase 3: scratch + staging (laws 1 and 4) -----------------------------
+# ---- phase 3: scratch + staging (laws 1, 4, 6) -----------------------------
+tree_digest() { (cd "$SRC_DIR" && find . -type f -exec sha256sum {} \; | LC_ALL=C sort); }
+# baseline BEFORE any scratch write — the finalizer asserts it on every exit
+CANON_BASELINE=$(tree_digest) || die "cannot digest the canonical tree"
+
 REPRO_TMP_BASE=${TMPDIR:-/tmp}
 REPRO_TMP_BASE_RESOLVED=$(cd "$REPRO_TMP_BASE" 2>/dev/null && pwd) \
     || die "scratch base unusable: $REPRO_TMP_BASE"
+REPRO_TMP_BASE_PHYS=$(phys_pwd "$REPRO_TMP_BASE") \
+    || die "scratch base unusable (physical): $REPRO_TMP_BASE"
 SCRATCH=$(mktemp -d "$REPRO_TMP_BASE/ant-extsig-repro.XXXXXX") \
     || die "mktemp failed under $REPRO_TMP_BASE"
 validate_scratch_path "$SCRATCH" || die "scratch path failed its own validation guard"
+install_finalizer
 BUILD=$SCRATCH/build/ant-extsig
 mkdir -p "$BUILD" || die "cannot create build dir"
 staged_lock_sha=$(stage_dir "$BUILD") \
     || die "staging failed (source copy, overlay, or the one-line lock alignment)"
 [ -n "$staged_lock_sha" ] || die "staging produced no lock digest"
-
-# the canonical tree must be untouched by staging (asserted again post-run)
-tree_digest() { (cd "$SRC_DIR" && find . -type f -exec sha256sum {} \; | LC_ALL=C sort); }
-canon_before=$(tree_digest)
+[ "${REPRO_INJECT:-}" = "fail-after-stage" ] \
+    && die "INJECTED failure after staging (selftest finalizer regression)"
 
 assert_lock_unchanged() {
     now=$(sha256sum "$BUILD/Cargo.lock" | cut -d' ' -f1)
@@ -209,6 +289,8 @@ assert_lock_unchanged() {
 }
 
 # ---- phase A: the explicit Cargo graph receipt (locked) --------------------
+[ "${REPRO_INJECT:-}" = "fail-cargo" ] \
+    && die "INJECTED cargo failure (selftest finalizer regression)"
 graph_out=$SCRATCH/graph-metadata.json
 ( cd "$BUILD" && "$CARGO" metadata --locked --format-version 1 >"$graph_out" 2>"$SCRATCH/graph.stderr" ) \
     || { tail -5 "$SCRATCH/graph.stderr" >&2; die "cargo metadata --locked failed"; }
@@ -251,9 +333,9 @@ second_lock_sha=$(sha256sum "$BUILD2/Cargo.lock" | cut -d' ' -f1)
 [ "$second_lock_sha" = "$staged_lock_sha" ] \
     || die "LOCK DRIFT: the second locked resolution rewrote the lock"
 
-# ---- phase 4: canonical-untouched assertion (law 1) ------------------------
-canon_after=$(tree_digest)
-[ "$canon_before" = "$canon_after" ] \
+# ---- phase 4: canonical-untouched assertion (law 1; also enforced on every
+# failure path by the finalizer) ---------------------------------------------
+canon_intact \
     || die "CANONICAL TREE CHANGED during the run — ops/ant-extsig must never be modified"
 
 # ---- phase 5: receipt ------------------------------------------------------
@@ -277,17 +359,10 @@ graph:            cargo metadata --locked OK -> $SCRATCH/graph-metadata.json
 second resolve:   fresh copy, cargo metadata --locked OK, staged lock sha UNCHANGED
 check (--locked):  $check_status
 build (--locked):  $build_status
-ops tree:         UNCHANGED (digest set identical before/after)
+ops tree:         UNCHANGED (pre-staging baseline identical; finalizer enforces on every exit)
 direct graph (cargo tree --locked --depth 1):
 $direct_graph
 == end receipt ==
 EOF
-if [ "${REPRO_KEEP:-0}" = "1" ]; then
-    echo "ant-extsig-repro: scratch KEPT for receipts: $SCRATCH (and second: $SCRATCH2)" >&2
-else
-    if validate_scratch_path "$SCRATCH"; then rm -rf "$SCRATCH"; else
-        echo "ant-extsig-repro: scratch path failed validation — KEPT: $SCRATCH" >&2; fi
-    if validate_scratch_path "$SCRATCH2"; then rm -rf "$SCRATCH2"; else
-        echo "ant-extsig-repro: second scratch path failed validation — KEPT: $SCRATCH2" >&2; fi
-fi
-echo "ant-extsig-repro: ALL PHASES OK"
+echo "ant-extsig-repro: ALL PHASES OK (finalizer will release scratch unless REPRO_KEEP=1)"
+exit 0

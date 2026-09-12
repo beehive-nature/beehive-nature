@@ -1,8 +1,11 @@
 # ant-extsig-repro — the isolated reproducible-build harness
 
 **Seat:** z1.c, Sprint 2 (assignment
-[#10 comment 5647975452](https://github.com/beehive-nature/beehive-nature/issues/10#issuecomment-5647975452)).
-Inherits the accepted fence-readiness runbook + acceptance receipt
+[#10 comment 5647975452](https://github.com/beehive-nature/beehive-nature/issues/10#issuecomment-5647975452);
+**r2 corrections** per Astra's review
+[#10 comment 5648317459](https://github.com/beehive-nature/beehive-nature/issues/10#issuecomment-5648317459)
+(physical path guard, failure/interruption finalizer, strict lock-refusal
+test). Inherits the accepted fence-readiness runbook + acceptance receipt
 (`9557aaeb`: `docs/runbooks/autonomi-fence-readiness.md` rev 4, 50/50) —
 this is NEW work on top of it, not a reopening of the observer.
 
@@ -60,9 +63,18 @@ creating a second maintained copy of the harness source.
 5. **Second locked resolution** — a fresh scratch copy, same overlay + same
    committed lock, another `cargo metadata --locked`; the lock must come out
    byte-identical. Lock sha is asserted unchanged after EVERY cargo call.
-6. **Validated cleanup** — scratch dirs are removed only after passing the
-   path guard (non-empty, resolves under the mktemp base, this runner's name
-   prefix, no `..` traversal). On any doubt the directory is KEPT and named.
+6. **Validated PHYSICAL cleanup + finalizer** (Astra r2) — scratch dirs are
+   removed only after passing the path guard, which canonicalizes BOTH the
+   mktemp base and the target PHYSICALLY (`pwd -P`, symlink-transparent),
+   restricts cleanup to OWNED DIRECT scratch children of the base (this
+   runner's name prefix, no deeper path segment, no `..` traversal), and
+   rejects a symlink whose logical path sits under the base but physically
+   escapes it. An EXIT/HUP/INT/TERM finalizer is installed the moment
+   scratch ownership is acquired: it retains the original failure status,
+   validates before cleanup, honors `REPRO_KEEP` with an explicit kept-path
+   receipt, and asserts a canonical-tree baseline taken BEFORE staging on
+   every exit — success, failure, or interruption. On any doubt the
+   directory is KEPT and named, never deleted.
 
 The runner also honors the estate's `rust-toolchain.toml` pin inside the
 scratch dir (where rustup's directory walk can't see it), so the isolated
@@ -70,10 +82,21 @@ build rides the same toolchain as CI and the box.
 
 `sh scripts/ant-extsig-repro/selftest.sh` — T1a/T1b missing lock (runner
 refusal + cargo `--locked` refusal), T2a/T2b tampered lock (banked-sha
-refusal + cargo refusal with the lock left byte-unchanged), T3a/T3b
-orphan-workspace error reproduced verbatim then cured by the overlay's
-`[workspace]` table, T4 source drift refused, T5 the cleanup path guard's
-accept/reject verdicts, T6 the canonical tree still byte-identical.
+refusal + cargo refusal REQUIRING the expected lock-update text — an
+unrelated tool/network failure fails the case — with the lock left
+byte-unchanged), T2c an offline stub-cargo control proving an unrelated
+failure does NOT satisfy that matcher, T3a/T3b orphan-workspace error
+reproduced verbatim then cured by the overlay's `[workspace]` table, T4
+source drift refused, T5a the cleanup path guard's verdict set (valid direct
+child accepted; `/`, empty, foreign prefix, `..`-traversal, not-a-dir,
+nested subpath rejected), T5b the symlink-escape regression (logically
+under the base, physically outside — rejected via `pwd -P`; a NAMED SKIP
+where the platform cannot create a true symlink, e.g. Git Bash without
+native-symlink privileges), T7/T8/T8b the finalizer regressions (injected
+staging failure, injected cargo failure via stub, TERM interruption
+mid-run — each must clean the validated scratch or name a kept path, keep
+the canonical baseline, and never touch unrelated neighbors), T9 the
+unrelated-neighbor survivor, T6 the canonical tree still byte-identical.
 
 ## Files
 
