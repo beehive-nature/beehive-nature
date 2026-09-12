@@ -48,7 +48,7 @@ function assertNoDeliveryClaims(html, name) {
 }
 
 const startHere = extractById(social, 'start-here');
-const newBee = extractById(directory, 'new-bee');
+const newBee = extractById(directory, 'first-bee');
 const peopleAgents = extractById(directory, 'people-agents');
 
 test('the social door New bee strip chooses the hive, people-agents and home', () => {
@@ -74,16 +74,20 @@ test('the social door keeps a Buzz-app primary path and a this-browser-only room
   assert.match(startHere, /LIVE here means published pages/);
 });
 
-test('the directory New bee intro chooses OUR HIVES, people-agents and Home', () => {
+test('the directory New bee intro chooses OUR HIVES, People and names and Go deeper', () => {
   const links = hrefs(newBee);
-  assert.ok(links.includes('#our-hives'), 'OUR HIVES fragment');
-  assert.ok(links.includes('#people-agents'), 'people-agents fragment');
-  assert.ok(links.includes('index.html'), 'Home → hub');
-  assert.match(newBee, /<h2 data-i18n="social.arrival.dir.heading">Find your people<\/h2>/);
-  assert.match(newBee, /This page lists doors/);
-  assert.match(newBee, /Buzz app/i);
-  assert.match(newBee, /class="home-controls"/);
+  assert.ok(links.includes('profile.html'), 'People and names → profile');
+  assert.match(newBee, /data-dir-go="hives"/);
   assert.match(newBee, /data-i18n="social.arrival.dir.hives"/);
+  // z1.a rider 2026-09-12: New bee leads with the visitor's purpose (welcome +
+  // meet the hive); the receipts/online honesty lives support-sized — the intro
+  // still says plainly the list cannot see who is online and does not pretend.
+  assert.match(newBee, /Welcome\. This page is the estate's front porch/);
+  assert.match(newBee, /Come meet the hive\./);
+  assert.match(newBee, /This list cannot see who is online, and it does not pretend to/);
+  assert.match(newBee, /data-i18n="review.bee.deeper"/);
+  assert.doesNotMatch(newBee, /wss:\/\//);
+  assert.doesNotMatch(newBee, /buzz:\/\//);
   assert.ok(extractById(directory, 'our-hives').includes('data-i18n="bd.hives.h2"'));
 });
 
@@ -111,13 +115,13 @@ test('neither landing claims a message was sent or delivered', () => {
   assertNoDeliveryClaims(social, 'bnature-social');
   assertNoDeliveryClaims(directory, 'buzz-directory');
   assertNoDeliveryClaims(startHere, '#start-here');
-  assertNoDeliveryClaims(newBee, '#new-bee');
+  assertNoDeliveryClaims(newBee, '#first-bee');
   assertNoDeliveryClaims(peopleAgents, '#people-agents');
 });
 
 test('New bee blocks contain no numbered step instructions', () => {
   assertNoStepInstructions(startHere, '#start-here');
-  assertNoStepInstructions(newBee, '#new-bee');
+  assertNoStepInstructions(newBee, '#first-bee');
   assert.doesNotMatch(startHere, /<ol[\s>]/i);
   assert.doesNotMatch(newBee, /<ol[\s>]/i);
 });
