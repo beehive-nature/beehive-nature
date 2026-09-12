@@ -184,5 +184,5 @@ test('this lane does not rewrite Astra gallery, studio, directory or the shared 
   assert.match(directory, /data-view-disclosure/);
   assert.doesNotMatch(directory, /d\.open = r==='cypherpunk' \|\| r==='raver'/);
   assert.equal(register.includes("route==='buzz-directory.html'?'directory'"), true);
-  assert.match(tour, /register\.js\?v=9/);
+  assert.match(tour, /register\.js\?v=\d+/);
 });

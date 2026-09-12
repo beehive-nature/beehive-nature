@@ -161,6 +161,18 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
   border:1px solid var(--reg-line,var(--line))!important;font:inherit!important
 }
 .uni-language #blangnote{white-space:normal!important;color:var(--reg-ink,var(--dim))!important;font:.75rem/1.4 inherit!important}
+/* A small local exercise: illustrative marks, never a medical result. */
+.lesson-example{margin:24px auto;padding:24px;border:1px solid var(--line);border-radius:24px;max-width:42rem;background:var(--well,var(--bg))}
+.lesson-sample{display:block;width:min(100%,320px);height:auto;margin:8px auto;color:var(--ink)}
+.lesson-check{border:0;min-width:0;padding:16px 0 0}
+.lesson-check legend{font:600 1.15rem/1.5 var(--bee-font,system-ui)}
+.lesson-check .choices{margin-top:12px}
+.lesson-check button[aria-pressed="true"]{outline:3px solid var(--leaf,#326b39);outline-offset:3px}
+#lesson-answer{margin-top:24px;padding:20px;border-inline-start:3px solid var(--leaf,#326b39);text-align:start;font:1rem/1.7 var(--bee-font,system-ui)}
+#lesson-answer[hidden]{display:none}
+.lesson-context{max-width:42rem;margin:20px auto;text-align:start;border:1px solid var(--line);border-radius:16px;padding:16px 20px}
+.lesson-context summary{cursor:pointer;min-height:44px;display:flex;align-items:center}
+body[data-reg="raver"] .lesson-example{background:linear-gradient(135deg,#281b36,#102c28)}
 </style>
 </head>
 <body data-reg="bee" data-bee-theme="custom" data-uni-beat="arrival">
@@ -173,7 +185,7 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
 <main>
 <header id="masthead">
   <h1>🎓 <span data-i18n="uni.mark">Beehive University</span></h1>
-  <p class="eyebrow pair" data-i18n="uni.pair">the curriculum is the receipts</p>
+  <p class="eyebrow pair" data-reg="cypherpunk" data-i18n="uni.pair">the curriculum is the receipts</p>
   <div class="sub" data-reg="cypherpunk">every lesson this university teaches already exists in the
   tree as a verified record, and every lesson ends in a verifiable act: a receipt <i>you</i> produce.
   a graduate holds signed receipts, not a certificate. this surface is a <b>view</b>, not a store —
@@ -181,9 +193,9 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
 </header>
 
 <article id="first-bee">
-  <p class="calm" data-i18n="uni.bee.calm">Beehive University teaches you to read this estate’s own receipts — every lesson ends in a signed act you hold, not a certificate.</p>
-  <p class="take" data-i18n="uni.bee.takeaway">You learn evidence literacy by checking <i>our</i> lab panels, requirement bars, and chain reads — with sources, or silence.</p>
-  <p class="support" data-i18n="uni.bee.support">Sources, or silence — never a certificate.</p>
+  <p class="calm" data-i18n="uni.bee.calm">Make sense of the claims around you.</p>
+  <p class="take" data-i18n="uni.bee.takeaway">Learn to ask one good question.</p>
+  <p class="support" data-i18n="uni.bee.support">Begin with a small example. Explore the evidence when you are ready.</p>
   <div class="choices">
     <button type="button" class="door primary" data-uni-go="lesson" data-i18n="uni.bee.start">Start with a lab report</button>
     <button type="button" class="door" data-uni-go="deeper" data-i18n="uni.bee.deeper">Go deeper</button>
@@ -191,7 +203,7 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
 </article>
 
 <article id="first-raver">
-  <svg id="floor-scene" viewBox="0 0 800 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A quiet floor where every lesson ends in something you can hold">
+  <svg id="floor-scene" viewBox="0 0 800 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
     <defs>
       <linearGradient id="floor-wash" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stop-color="#142018"/>
@@ -210,18 +222,24 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
     <rect class="wash" width="800" height="900" fill="url(#floor-wash)"/>
     <ellipse class="wash" cx="400" cy="380" rx="320" ry="260" fill="url(#slip-glow)"/>
     <g class="living">
-      <rect x="230" y="300" width="120" height="72" rx="8" fill="#e2efdb" opacity=".12"/>
-      <rect x="460" y="340" width="110" height="66" rx="8" fill="#c9a0ff" opacity=".14"/>
-      <rect x="340" y="500" width="130" height="70" rx="8" fill="#7ee0d0" opacity=".12"/>
+      <ellipse cx="400" cy="607" rx="242" ry="43" fill="#c9a0ff" opacity=".13"/>
+      <path d="M176 385q112-52 224 19 112-71 224-19v196q-112-52-224 19-112-71-224-19Z" fill="#172b2b" stroke="#45c2dc" stroke-width="3"/>
+      <path d="M192 365q104-39 208 35v176q-104-74-208-35Z" fill="#b79fe0" opacity=".72"/>
+      <path d="M608 365q-104-39-208 35v176q104-74 208-35Z" fill="#dfeedd" opacity=".83"/>
+      <path d="M224 418q66-8 138 36m-138 2q66-8 138 36m-138 2q66-8 102 17" fill="none" stroke="#43305f" stroke-width="6" stroke-linecap="round" opacity=".6"/>
+      <path d="M448 452q38-77 105-63-7 61-71 72-31 19-34 43" fill="#326b39" stroke="#86cc72" stroke-width="2"/>
+      <path d="m468 451 53-39m-21 19v-18m0 18 19 3" fill="none" stroke="#cde7bd" stroke-width="2"/>
+      <path d="M400 356V215m0 91-61-41m61 12 72-61m-72 17-27-41" fill="none" stroke="#45c2dc" stroke-width="2" opacity=".75"/>
+      <circle cx="339" cy="265" r="11" fill="#c9a0ff"/><circle cx="472" cy="216" r="14" fill="#86cc72"/><circle cx="373" cy="192" r="8" fill="#45c2dc"/>
     </g>
     <g class="glow" fill="none" stroke="#d8c46a" stroke-width="1.8">
-      <rect x="250" y="318" width="80" height="10" rx="2" opacity=".45"/>
-      <rect x="250" y="336" width="56" height="8" rx="2" opacity=".35"/>
+      <circle cx="400" cy="214" r="29" stroke="#c9a0ff" opacity=".8"/>
+      <path d="M297 330h16m-8-8v16m211-47h22m-11-11v22m-81-139h16m-8-8v16" stroke="#dfeedd" stroke-width="2"/>
     </g>
   </svg>
-  <p class="feel" data-i18n="uni.raver.feel">the curriculum is the receipts — a quiet floor where every lesson ends in something you can hold</p>
+  <p class="feel" data-i18n="uni.raver.feel">Stay curious. Let wonder lead you closer.</p>
   <div class="choices">
-    <button type="button" class="door primary" data-uni-go="figure" data-i18n="uni.raver.tap">Feel the first act</button>
+    <button type="button" class="door primary" data-uni-go="lesson" data-i18n="uni.raver.tap">Explore a small mystery</button>
   </div>
 </article>
 
@@ -237,8 +255,29 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
 <article id="layer-lesson">
   <h2>🔬 <span data-i18n="uni.lesson.name">how to read a lab report</span></h2>
   <p class="lesson-q" data-i18n="uni.lesson.lead">A lab report is a photograph of one sample, taken by one method, at one sensitivity.</p>
-  <p class="lesson-q">Three questions get you most of the way: <b>what was measured</b> (a “total” line is a panel wearing a total’s name), <b>how low can it see</b> (below that line the honest word is “below the floor”, never “0”), and <b>what material was tested</b> (the same seed hulled and unhulled are different materials).</p>
-  <p class="support">source of record: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/RECEIPT_CANNABINOID_PANEL_UNDERCOUNT_2026-08-20.md" target="_blank" rel="noopener noreferrer">RECEIPT_CANNABINOID_PANEL_UNDERCOUNT_2026-08-20</a> <span data-i18n="uni.opens">(opens in a new tab)</span></p>
+  <div class="lesson-example">
+    <p class="support" data-i18n="uni.lesson.example">Practice example</p>
+    <svg viewBox="0 0 320 140" class="lesson-sample" aria-hidden="true" focusable="false">
+      <rect x="40" y="14" width="240" height="112" rx="20" fill="currentColor" opacity=".06"/>
+      <path d="M77 42v55m0 0h170" fill="none" stroke="currentColor" stroke-width="2" opacity=".4"/>
+      <path d="M78 65h166" stroke="currentColor" stroke-dasharray="5 5" stroke-width="2" opacity=".6"/>
+      <circle cx="109" cy="82" r="5" fill="#326b39"/><circle cx="142" cy="90" r="5" fill="#326b39"/><circle cx="175" cy="76" r="5" fill="#326b39"/>
+      <path d="M219 72v15m-5-5 5 5 5-5" fill="none" stroke="currentColor" stroke-width="2"/>
+    </svg>
+    <p class="lesson-q" data-i18n="uni.lesson.result">The report says: below the detection limit.</p>
+    <fieldset class="lesson-check">
+      <legend data-i18n="uni.lesson.question">Does that mean there is none?</legend>
+      <div class="choices">
+        <button type="button" class="door" data-lesson-answer="yes" aria-pressed="false" aria-controls="lesson-answer"><span data-i18n="uni.lesson.yes">Yes, it means zero</span></button>
+        <button type="button" class="door" data-lesson-answer="no" aria-pressed="false" aria-controls="lesson-answer"><span data-i18n="uni.lesson.no">No, the test cannot tell</span></button>
+      </div>
+    </fieldset>
+    <div id="lesson-answer" hidden role="status"><p data-i18n="uni.lesson.answer">Below the detection limit means this test cannot reliably detect the amount. It does not prove that the amount is zero.</p></div>
+  </div>
+  <details class="lesson-context"><summary><span data-i18n="uni.lesson.inspect">What else should I check?</span></summary>
+    <p class="lesson-q" data-i18n="uni.lesson.questions">Check what was measured, which sample was tested, and how sensitive the method was.</p>
+    <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/receipts/RECEIPT_CANNABINOID_PANEL_UNDERCOUNT_2026-08-20.md" target="_blank" rel="noopener noreferrer"><span data-i18n="uni.lesson.source">Read the supporting evidence</span> <span data-i18n="uni.opens">(opens in a new tab)</span></a>
+  </details>
   <div class="choices">
     <button type="button" class="door" data-uni-go="deeper" data-i18n="uni.bee.deeper">Go deeper</button>
   </div>
@@ -399,7 +438,7 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
   <span data-i18n="uni.foot.verify">don't trust these pages either — every claim links its receipt. Verify.</span>
 </footer>
 
-<script src="../tour.js?v=41"></script>
+<script src="../tour.js?v=42"></script>
 <script>
 (function(){
 var $=function(i){return document.getElementById(i);};
@@ -919,6 +958,15 @@ document.addEventListener('click',function(e){
   setBeat(btn.getAttribute('data-uni-go'));
 });
 
+/* This practice creates no grade, credential, or network request. */
+document.querySelectorAll('[data-lesson-answer]').forEach(function(button){
+  button.addEventListener('click',function(){
+    document.querySelectorAll('[data-lesson-answer]').forEach(function(other){
+      other.setAttribute('aria-pressed',String(other===button));
+    });
+    document.getElementById('lesson-answer').hidden=false;
+  });
+});
 /* boot */
 window.gradLine=gradLine; window.setQ=setQ; // onclick-attribute handlers
 $('q-wt').addEventListener('input',renderQ);

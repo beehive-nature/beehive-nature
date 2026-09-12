@@ -216,6 +216,11 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
       <ellipse cx="400" cy="520" rx="90" ry="50" fill="#c9a0ff" opacity=".14"/>
     </g>
     <g class="glow" fill="none" stroke="#d8c46a" stroke-width="2.2">
+      <path d="M213 304 L292 258 L371 304 L371 396 L292 442 L213 396Z" fill="#70b989" fill-opacity=".25" stroke="#a5ddb2" stroke-width="3"/>
+      <path d="M371 304 L450 258 L529 304 L529 396 L450 442 L371 396Z" stroke="#d1c2e8" stroke-width="3" stroke-dasharray="7 9"/>
+      <path d="M292 442 L371 396 L450 442 L450 534 L371 580 L292 534Z" stroke="#c7b2e2" stroke-width="3" stroke-dasharray="7 9"/>
+      <circle cx="463" cy="470" r="85" stroke="#c8ece7" stroke-width="5" fill="#123c36" fill-opacity=".4"/>
+      <path d="M526 534 L590 601" stroke="#c8ece7" stroke-width="14" stroke-linecap="round"/>
       <circle cx="400" cy="390" r="28" opacity=".55"/>
       <path d="M420 410 L456 446" opacity=".5"/>
     </g>
@@ -244,23 +249,22 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
 
 <article id="layer-map">
   <p class="take" data-i18n="bigen.bee.takeaway">Empty cells are findings — not failures.</p>
-  <div class="banner">this corpus is mechanistic + early-phase: nothing in it is poolable — a pooled number on an evidence map is a category error.</div>
+  <p class="banner" data-i18n="bigen.map.limit">This collection contains early research. It does not show that a treatment works.</p>
   <div class="wrap"><div class="gm" id="calm-gapmap">
     <div class="h"></div>
-    <div class="h">plant combination</div>
-    <div class="h">synthetic isolate</div>
-    <div class="h">CBD isolate</div>
-    <div class="r">supportive care</div>
-    <div class="cell full">occupied</div>
-    <div class="cell full">occupied</div>
-    <div class="cell empty">— empty · the finding</div>
-    <div class="r">antitumour intent</div>
-    <div class="cell early">early-phase</div>
-    <div class="cell empty">— empty · the finding</div>
-    <div class="cell empty">— empty · the finding</div>
+    <div class="h" data-i18n="bigen.map.plant">Plant combination</div>
+    <div class="h" data-i18n="bigen.map.synthetic">Synthetic isolate</div>
+    <div class="h" data-i18n="bigen.map.cbd">CBD isolate</div>
+    <div class="r" data-i18n="bigen.map.support">Supportive care</div>
+    <div class="cell full" data-i18n="bigen.map.present">Evidence present</div>
+    <div class="cell full" data-i18n="bigen.map.present">Evidence present</div>
+    <div class="cell empty" data-i18n="bigen.map.empty">No evidence in this collection</div>
+    <div class="r" data-i18n="bigen.map.tumour">Antitumour research</div>
+    <div class="cell early" data-i18n="bigen.map.early">Early research</div>
+    <div class="cell empty" data-i18n="bigen.map.empty">No evidence in this collection</div>
+    <div class="cell empty" data-i18n="bigen.map.empty">No evidence in this collection</div>
   </div></div>
   <p class="map-caption" data-i18n="bigen.map.caption">Empty cells are the finding — this corpus is early-phase and honestly not poolable.</p>
-  <div class="law" style="margin-top:8px">three of six cells empty — no synthetic-isolate antitumour trial, and no CBD-isolate oncology trial of any intent. that absence is the finding, not a hole in the library.</div>
   <div class="choices">
     <button type="button" class="door" data-bigen-go="deeper" data-i18n="bigen.bee.deeper">Go deeper</button>
   </div>
@@ -403,7 +407,7 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
   <span data-i18n="bigen.foot.verify">don't trust these pages either — every claim links its source. Verify.</span>
 </footer>
 
-<script src="tour.js?v=41"></script>
+<script src="tour.js?v=42"></script>
 <script>
 (function(){
 var $=function(i){return document.getElementById(i);};

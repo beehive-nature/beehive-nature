@@ -36,10 +36,10 @@ const FENCE = /SIMULATED|PLANNED|REFUSED|wallet-relay|LARVA|PUPA|ROYAL GUARD|T-F
 
 test('New bee first paint is one calm sentence, one takeaway, and one short CTA', () => {
   const bee = extractById(page, 'first-bee');
-  assert.match(bee, /This is how you join the hive — your keys stay yours; nobody in between holds them for you\./);
-  assert.match(bee, /Start free in this browser in about two minutes\. You can add stronger custody later; your identity does not restart\./);
-  assert.match(bee, /I'm new/);
-  assert.match(bee, />Start free</);
+  assert.match(bee, /A place to begin, at your own pace\./);
+  assert.match(bee, /Try joining the hive\./);
+  assert.match(bee, /This is a preview\. It does not create an account here\./);
+  assert.match(bee, />Try the preview</);
   assert.match(bee, /Go deeper/);
   assert.doesNotMatch(bee, /I'm new here — start free/);
   assert.doesNotMatch(bee, FENCE);
@@ -53,7 +53,7 @@ test('New bee first paint is one calm sentence, one takeaway, and one short CTA'
 test('Raver first paint is atmosphere, one feeling line, and Step in', () => {
   const raver = extractById(page, 'first-raver');
   assert.match(raver, /id="threshold-scene"/);
-  assert.match(raver, /come as you are — the floor already said accept you/);
+  assert.match(raver, /Come as you are\. There is room for you here\./);
   assert.match(raver, /Step in/);
   assert.doesNotMatch(raver, /One soft door into your own keys/);
   assert.doesNotMatch(raver, /<select|id="lang"/i);
@@ -64,19 +64,19 @@ test('Raver first paint is atmosphere, one feeling line, and Step in', () => {
 
 test('Start free discloses one plain custody choice and one real-vs-preview line', () => {
   const choice = extractById(page, 'layer-choice');
-  assert.match(choice, /Hold your keys on this device — face, fingerprint, or Windows Hello/);
-  assert.match(choice, /labeled preview on a static host/);
-  assert.match(choice, /Preview is not a completed join/);
-  assert.match(choice, /Continue with this device/);
+  assert.match(choice, /Use this device to hold your keys\./);
+  assert.match(choice, /On this site, the next screen is a preview/);
+  assert.match(choice, /No account is created/);
+  assert.match(choice, /Explore the device option/);
   assert.doesNotMatch(choice, /LARVA|PUPA|ROYAL GUARD|T-F|AIR-GAP|FIDO2|Trezor|did:webvh|recovery phrase|bchip/i);
   assert.match(page, /body:not\(\[data-reg="cypherpunk"\]\)\[data-onb-beat="choice"\] #layer-choice\{display:block\}/);
 });
 
 test('Step in opens one vivid custody choice behind the tap, not on first paint', () => {
   const figure = extractById(page, 'layer-figure');
-  assert.match(figure, /One soft door into your own keys — no app store, no account desk, no one holding the bag\./);
-  assert.match(figure, /labeled preview unless a live wallet host is serving it/);
-  assert.match(figure, /Preview is not a completed join/);
+  assert.match(figure, /Your place in the hive\. Your keys stay with you\./);
+  assert.match(figure, /This site shows a preview/);
+  assert.match(figure, /does not create an account/);
   assert.doesNotMatch(figure, /LARVA|PUPA|ROYAL GUARD|id="lang"|wallet-relay/i);
   assert.match(page, /body\[data-reg="raver"\]\[data-onb-beat="figure"\] #layer-figure\{display:block\}/);
 });
@@ -124,12 +124,13 @@ test('Cypherpunk still reaches the full ceremony instrument, same honesty', () =
 
 test('keyed first-paint English matches the corpus; every tongue has a cell', () => {
   const keys = [
-    'onb.mark', 'onb.pair', 'onb.bee.calm', 'onb.bee.takeaway', 'onb.bee.support',
+    'onb.mark', 'onb.bee.calm', 'onb.bee.takeaway', 'onb.bee.support',
     'onb.bee.start', 'onb.bee.deeper', 'onb.bee.choice', 'onb.bee.preview',
     'onb.bee.continue', 'onb.raver.feel', 'onb.raver.tap', 'onb.raver.choice',
     'onb.raver.preview', 'onb.foot.door'
   ];
-  for (const key of keys) {
+  keys.push("onb.bee.calm","onb.bee.takeaway","onb.bee.support","onb.bee.start","onb.raver.feel","onb.raver.choice","onb.bee.choice","onb.bee.preview","onb.bee.continue","onb.raver.preview");
+  for (const key of new Set(keys)) {
     const idx = page.indexOf('data-i18n="'+key+'"');
     assert.notEqual(idx, -1, key+' missing on the page');
     const en = extractKeyedText(page, page.lastIndexOf('<', idx));
@@ -141,7 +142,7 @@ test('keyed first-paint English matches the corpus; every tongue has a cell', ()
 });
 
 test('language-first shell hosts register and language; local #lang is retired', () => {
-  assert.match(page, /<script src="\.\.\/tour\.js\?v=41"><\/script>/);
+  assert.match(page, /<script src="\.\.\/tour\.js\?v=\d+"><\/script>/);
   assert.match(page, /\[data-reg\]:not\(body\)\{display:none\}/);
   assert.match(page, /body\[data-reg="bee"\] \[data-reg="bee"\],\s*body\[data-reg="raver"\] \[data-reg="raver"\],\s*body\[data-reg="cypherpunk"\] \[data-reg="cypherpunk"\]\{display:revert\}/);
   assert.doesNotMatch(page, /id="lang"|APP\.setLang|onchange="APP\.setLang/);
@@ -152,8 +153,8 @@ test('language-first shell hosts register and language; local #lang is retired',
   assert.match(bar, /data-register-host/);
   assert.match(bar, /data-language-host/);
   assert.doesNotMatch(bar, FENCE);
-  assert.match(tour, /assetBase\+'register\.js\?v=9'/);
-  assert.match(tour, /assetBase\+'lang\.js\?v=25'/);
+  assert.match(tour, /assetBase\+'register\.js\?v=\d+'/);
+  assert.match(tour, /assetBase\+'lang\.js\?v=\d+'/);
   assert.match(register, /an authored theme can use data-bee-theme="custom"/);
 });
 

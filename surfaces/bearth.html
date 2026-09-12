@@ -192,9 +192,9 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
 </header>
 
 <article id="first-bee">
-  <p class="calm" data-i18n="bearth.bee.calm">If everyone ate a small handful of hemp hearts each day, the land bill would be real — and you can redo the math.</p>
-  <p class="take" data-i18n="bearth.bee.takeaway">about half of Earth's cropland</p>
-  <p class="support" data-i18n="bearth.bee.support">~830 Mha</p>
+  <p class="calm" data-i18n="bearth.bee.calm">If everyone ate a small handful of hemp hearts each day, how much farmland would we need?</p>
+  <p class="take"><span data-land-value>53%</span> <span data-i18n="bearth.land.share">of Earth's cropland</span></p>
+  <p class="support" data-i18n="bearth.bee.support">A scenario you can change</p>
   <div class="choices">
     <button type="button" class="door primary" data-bearth-go="land" data-i18n="bearth.bee.land">See the land cost</button>
     <button type="button" class="door" data-bearth-go="deeper" data-i18n="bearth.bee.deeper">Go deeper</button>
@@ -222,6 +222,16 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
     <path d="M0 670 C 180 640, 300 700, 430 668 C 560 636, 680 690, 800 658 L 800 900 L 0 900 Z" fill="#3a2c1c"/>
     <path d="M0 780 C 200 750, 340 810, 500 776 C 640 748, 720 800, 800 770 L 800 900 L 0 900 Z" fill="#4a3824"/>
     <g class="glow">
+      <g fill="none" stroke="#baa27a" stroke-linecap="round" opacity=".7">
+        <path d="M397 671 C386 714 424 753 398 827 M395 701 C354 717 353 756 311 772 M404 720 C451 735 447 780 490 796 M402 751 C372 775 376 798 350 825" stroke-width="3"/>
+        <path d="M360 732 L325 721 M348 752 L351 779 M443 750 L478 742 M454 775 L451 805 M396 793 L426 817" stroke-width="1.5"/>
+      </g>
+      <g fill="#6ebd7c" stroke="#a3dd9b" stroke-width="1.3">
+        <path d="M403 341 C465 259 504 267 542 236 C535 307 497 359 403 341Z"/>
+        <path d="M400 393 C352 308 302 331 274 287 C265 362 316 409 400 393Z"/>
+        <path d="M400 507 C451 443 484 459 521 425 C521 487 480 527 400 507Z"/>
+      </g>
+      <g fill="none" stroke="#d5edb4" stroke-width="1.3" opacity=".75"><path d="M403 341 L513 270 M400 393 L300 321 M400 507 L499 451"/></g>
       <ellipse cx="392" cy="668" rx="16" ry="10" fill="#6b4a22"/>
       <ellipse cx="394" cy="664" rx="8" ry="5" fill="#c4a46a"/>
       <path d="M396 662 C 400 560, 388 430, 404 250" fill="none" stroke="#6fbf6a" stroke-width="7" stroke-linecap="round"/>
@@ -240,8 +250,8 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
 
 <article id="layer-figure">
   <p class="consciousness" data-i18n="bearth.raver.consciousness">The earth answers in hectares and honesty — not slogans.</p>
-  <p class="take" data-i18n="bearth.bee.takeaway">about half of Earth's cropland</p>
-  <p class="support" data-i18n="bearth.bee.support">~830 Mha</p>
+  <p class="take"><span data-land-value>53%</span> <span data-i18n="bearth.land.share">of Earth's cropland</span></p>
+  <p class="support" data-i18n="bearth.bee.support">A scenario you can change</p>
   <div class="choices">
     <button type="button" class="door primary" data-bearth-go="land" data-i18n="bearth.bee.land">See the land cost</button>
     <button type="button" class="door" data-bearth-go="deeper" data-i18n="bearth.bee.deeper">Go deeper</button>
@@ -250,10 +260,11 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
 
 <section id="layer-land">
   <div id="land-live-wrap">
-    <p class="take" id="land-live">about half of Earth's cropland</p>
-    <p class="support" id="land-support">~830 Mha</p>
+    <p class="take" id="land-live"><span data-land-value>53%</span> <span data-i18n="bearth.land.share">of Earth's cropland</span></p>
+    <p class="support" id="land-support" data-i18n="bearth.bee.support">A scenario you can change</p>
   </div>
   <div id="land-comb"></div>
+  <p class="support" data-i18n="bearth.land.caption">Each cell represents one percent of the world’s cropland.</p>
   <div class="cmp" id="cmp"></div>
   <div class="choices" data-reg="bee">
     <button type="button" class="door" data-bearth-go="deeper" data-i18n="bearth.bee.deeper">Go deeper</button>
@@ -522,7 +533,7 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
   · <a href="index.html" data-i18n="law.hive">← the hive</a>
 </footer>
 
-<script src="tour.js?v=41"></script>
+<script src="tour.js?v=42"></script>
 <script>
 (function(){
 var $=function(i){return document.getElementById(i)};
@@ -646,7 +657,7 @@ function render(){
       'every cell is one per cent of <b>all the arable and permanent cropland on Earth</b>. This is what one food, for one species, would occupy.');
   var nComb=comb(c.pctWorldN,'var(--n2o)','share of world nitrogen fertiliser',
       'every cell is one per cent of <b>world nitrogen fertiliser use</b>. Denominator not yet primary-verified — see §5.');
-  if($('land-comb')) $('land-comb').innerHTML=landComb;
+  if($('land-comb')) {var chart=document.createElement('div');chart.innerHTML=landComb;var drawing=chart.querySelector('svg');if(drawing){drawing.setAttribute('aria-hidden','true');$('land-comb').replaceChildren(drawing);}}
   $('combs').innerHTML=landComb+nComb;
   $('hbig').innerHTML=commas(c.mha)+' <small>million hectares of farmland — '
     +'<b style="color:var(--warn)">'+num(c.pctCrop,0)+'% of all the cropland on Earth</b>, '
@@ -656,8 +667,7 @@ function render(){
     +'<b style="color:var(--ink)">Every one of those four numbers is a dial below</b>, because every '
     +'one is contested — and the honest version of this page is the one where you can move them '
     +'against us.';
-  if($('land-live')) $('land-live').textContent=num(c.pctCrop,0)+'% of all the cropland on Earth';
-  if($('land-support')) $('land-support').textContent='~'+Math.round(c.mha/10)*10+' Mha';
+  document.querySelectorAll('[data-land-value]').forEach(function(node){node.textContent=new Intl.NumberFormat(document.documentElement.lang||'en',{style:'percent',maximumFractionDigits:0}).format(c.pctCrop/100);});
 
   var efPct=num(c.ef*100,2)+'%';
   $('out').innerHTML=[
@@ -699,6 +709,7 @@ function o(v,u,l,w,alarm){ return '<div class="o'+(alarm?' alarm':'')+'"><div cl
 ['pop','gday','rec','yld','nrate','ef'].forEach(function(i){
   $(i).addEventListener('input',render); $(i).addEventListener('change',render); });
 render();
+document.addEventListener('blang',render);
 })();
 </script>
 </body>

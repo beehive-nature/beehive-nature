@@ -56,7 +56,7 @@ test('Raver first paint is atmosphere, one feeling line, and one tap', () => {
   const raver = extractById(page, 'first-raver');
   assert.match(raver, /id="listen-scene"/);
   assert.match(raver, /Two voices at one shared plate in a soft room/);
-  assert.match(raver, /What if the argument about food became a listening\?/);
+  assert.match(raver, /What if we listened to each other about food\?/);
   assert.match(raver, /Sit with both sides/);
   assert.doesNotMatch(raver, /Homeostasis — each protocol making the other stronger/);
   assert.doesNotMatch(raver, /<table/i);
@@ -108,7 +108,7 @@ test('keyed first-paint English matches the corpus; every tongue has a cell', ()
 });
 
 test('language-first shell hosts register and language; cypher masthead cannot leak on New bee', () => {
-  assert.match(page, /<script src="tour\.js\?v=41"><\/script>/);
+  assert.match(page, /<script src="tour\.js\?v=42"><\/script>/);
   assert.match(page, /\[data-reg\]:not\(body\)\{display:none\}/);
   assert.match(page, /body\[data-reg="bee"\] \[data-reg="bee"\],\s*body\[data-reg="raver"\] \[data-reg="raver"\],\s*body\[data-reg="cypherpunk"\] \[data-reg="cypherpunk"\]\{display:revert\}/);
   assert.match(page, /class="sub" data-reg="cypherpunk"/);
@@ -120,8 +120,8 @@ test('language-first shell hosts register and language; cypher masthead cannot l
   assert.match(bar, /data-register-host/);
   assert.match(bar, /data-language-host/);
   assert.doesNotMatch(bar, DENSE);
-  assert.match(tour, /assetBase\+'register\.js\?v=9'/);
-  assert.match(tour, /assetBase\+'lang\.js\?v=25'/);
+  assert.match(tour, /assetBase\+'register\.js\?v=10'/);
+  assert.match(tour, /assetBase\+'lang\.js\?v=26'/);
 });
 
 test('beats and sources disclosure remember per view instead of resetting', () => {
@@ -130,7 +130,7 @@ test('beats and sources disclosure remember per view instead of resetting', () =
   assert.match(page, /function restoreVisibleFocus\(focus\)/);
   assert.match(page, /function applyReading\(event\)/);
   assert.match(page, /document\.addEventListener\('bregister',applyReading\)/);
-  assert.match(tour, /register\.js\?v=9/);
+  assert.match(tour, /register\.js\?v=10/);
   assert.match(register, /an authored theme can use data-bee-theme="custom"/);
 
   const all = [];

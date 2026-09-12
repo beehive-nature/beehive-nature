@@ -156,17 +156,17 @@ test('every current estate HTML has one resolvable shared loader; frozen art sta
     assert.equal(tags.length,1,p+' must load the shared shell once');
     const target=resolve(dirname(resolve(root,p)),tags[0][1].split('?')[0]);
     assert.equal(target,resolve(root,'surfaces/tour.js'),p+' must resolve to the shared tour');
-    if(p!=='surfaces/forge/orbit.html')assert.match(tags[0][1],/tour\.js\?v=41$/,p);
+    if(p!=='surfaces/forge/orbit.html')assert.match(tags[0][1],/tour\.js\?v=42$/,p);
   }
   for(const p of ['scripts/build-atlas.mjs','tools/build-surfaces.mjs']){
-    assert.match(read(p),/tour\.js\?v=41/);assert.doesNotMatch(read(p),/tour\.js\?v=(?!41\b)\d+/);
+    assert.match(read(p),/tour\.js\?v=42/);assert.doesNotMatch(read(p),/tour\.js\?v=(?!42\b)\d+/);
   }
 });
 test('tour language bootstrap waits for view labels, with a script-error fallback',()=>{
   const tour=read('surfaces/tour.js');
   assert.match(tour,/s\.onload=loadLanguage; s\.onerror=loadLanguage/);
   assert.match(tour,/else loadLanguage\(\)/);
-  assert.match(tour,/assetBase\+'register\.js\?v=9'/);
-  assert.match(tour,/assetBase\+'lang\.js\?v=25'/);
+  assert.match(tour,/assetBase\+'register\.js\?v=10'/);
+  assert.match(tour,/assetBase\+'lang\.js\?v=26'/);
   assert.match(read('surfaces/lang.js'),/#bregbar,#bregctl/);
 });

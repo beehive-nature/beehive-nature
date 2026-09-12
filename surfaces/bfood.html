@@ -286,13 +286,14 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
     <polygon points="222,108 264,132 264,180 222,204 180,180 180,132" fill="#a6f2b8" stroke="#4d6553" stroke-width="2"/>
     <polygon points="138,108 180,132 180,180 138,204 96,180 96,132" fill="#63c97c" stroke="#4d6553" stroke-width="2" opacity=".7"/>
     <polygon points="180,132 222,156 222,204 180,228 138,204 138,156" fill="none" stroke="#7a8c7c" stroke-width="2" stroke-dasharray="5 4"/>
-    <text x="180" y="188" text-anchor="middle" fill="#7a8c7c" font-size="11" font-family="system-ui,sans-serif">blank</text>
+    <text x="180" y="188" text-anchor="middle" fill="#7a8c7c" font-size="11" font-family="system-ui,sans-serif">?</text>
     <polygon points="264,60 306,84 306,132 264,156 222,132 222,84" fill="#63c97c" stroke="#4d6553" stroke-width="2" stroke-dasharray="5 4" opacity=".55"/>
     <text x="264" y="116" text-anchor="middle" fill="#326b39" font-size="11" font-family="system-ui,sans-serif">≥</text>
     <polygon points="96,60 138,84 138,132 96,156 54,132 54,84" fill="#63c97c" stroke="#4d6553" stroke-width="2" opacity=".45"/>
     <polygon points="180,204 222,228 222,276 180,300 138,276 138,228" fill="none" stroke="#7a8c7c" stroke-width="1.5" opacity=".35"/>
   </svg>
   <p class="draw-caption" data-i18n="bfood.draw.caption">Seven cells. Some filled. One blank on purpose.</p>
+  <p class="draw-caption"><span aria-hidden="true">? · </span><span data-i18n="bfood.draw.blank">Not measured</span></p>
   <div class="choices">
     <button type="button" class="door primary" data-bfood-go="inputs" data-i18n="bfood.draw.continue">Open the inputs</button>
     <button type="button" class="door" data-bfood-go="deeper" data-i18n="bfood.bee.deeper">Go deeper</button>
@@ -303,15 +304,16 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
 <section>
   <h2>1 · <span data-i18n="h.022">YOUR BODY — the five inputs that genuinely move a requirement</span></h2>
   <div id="you">
-    <div><label for="sex">sex</label><select id="sex"><option value="m">male</option><option value="f">female</option></select></div>
-    <div><label for="age">age</label><input id="age" type="number" min="19" max="110" value="49"></div>
-    <div><label for="ht">height cm</label><input id="ht" type="number" min="120" max="230" value="180"></div>
-    <div><label for="wt">weight kg</label><input id="wt" type="number" min="30" max="250" value="80"></div>
-    <div><label for="pal">activity</label><select id="pal">
-      <option value="0">inactive</option><option value="1" selected>low active</option>
-      <option value="2">active</option><option value="3">very active</option></select></div>
+    <div><label for="sex" data-i18n="bfood.input.sex">Sex used for reference values</label><select id="sex"><option value="m" data-i18n="bfood.input.male">Male</option><option value="f" data-i18n="bfood.input.female">Female</option></select></div>
+    <div><label for="age" data-i18n="bfood.input.age">Age</label><input id="age" type="number" min="19" max="110" value="49"></div>
+    <div><label for="ht" data-i18n="bfood.input.height">Height (cm)</label><input id="ht" type="number" min="120" max="230" value="180"></div>
+    <div><label for="wt" data-i18n="bfood.input.weight">Weight (kg)</label><input id="wt" type="number" min="30" max="250" value="80"></div>
+    <div><label for="pal" data-i18n="bfood.input.activity">Activity</label><select id="pal">
+      <option value="0" data-i18n="bfood.input.inactive">Inactive</option><option value="1" selected data-i18n="bfood.input.low">Lightly active</option>
+      <option value="2" data-i18n="bfood.input.active">Active</option><option value="3" data-i18n="bfood.input.very">Very active</option></select></div>
   </div>
   <div id="derived"></div>
+  <details data-view-disclosure="input-help"><summary data-i18n="bfood.input.why">How these values are used</summary>
   <div class="law" style="margin-top:11px"><b>Only these four scale with your body, and this page
   will not pretend otherwise.</b> Energy uses the NASEM 2023 EER equation, where your height,
   weight, age and activity <i>are</i> the variables. Protein is an RDA in grams per kilogram, so
@@ -320,7 +322,7 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
   uses reference weights inside the committee's derivation, never as a coefficient in the published
   value. Inventing a weight curve for zinc to make this page feel more personal would be the exact
   fake precision this project exists to refuse, so the cells say <span class="tag">👥 group</span>
-  and mean it.</div>
+  and mean it.</div></details>
   <div class="choices" data-reg="bee">
     <button type="button" class="door primary" data-bfood-go="deeper" data-i18n="bfood.bee.deeper">Go deeper</button>
   </div>
@@ -623,7 +625,7 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
   · <a href="index.html" data-i18n="law.hive">← the hive</a>
 </footer>
 
-<script src="tour.js?v=41"></script>
+<script src="tour.js?v=42"></script>
 <script>
 (function(){
 var $=function(i){return document.getElementById(i)};
@@ -635,7 +637,7 @@ function restoreVisibleFocus(focus){
  if(target&&target.focus) target.focus({preventScroll:true});
 }
 function defaultOpen(reading,kind){
- return reading==='cypherpunk' && kind==='sources';
+ return reading==='cypherpunk' && (kind==='sources'||kind==='input-help');
 }
 function defaultBeat(reading){
  return reading==='cypherpunk' ? 'deeper' : 'arrival';

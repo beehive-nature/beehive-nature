@@ -35,9 +35,9 @@ function inline(html) {
 
 test('New bee first paint is one sentence, one fraction-led number, and one door', () => {
   const bee = extractById(page, 'first-bee');
-  assert.match(bee, /If everyone ate a small handful of hemp hearts each day, the land bill would be real — and you can redo the math\./);
-  assert.match(bee, /about half of Earth's cropland/);
-  assert.match(bee, /~830 Mha/);
+  assert.match(bee, /If everyone ate a small handful of hemp hearts each day, how much farmland would we need\?/);
+  assert.match(bee, /data-land-value>53%/i);
+  assert.match(bee, /A scenario you can change/);
   assert.match(bee, /See the land cost/);
   assert.match(bee, /Go deeper/);
   assert.doesNotMatch(bee, /<input|<select|type="range"/i);
@@ -66,7 +66,7 @@ test('Raver first paint is atmosphere, one feeling line, and one tap', () => {
 test('consciousness beat and New bee choice sit behind the Raver tap, not on first paint', () => {
   const figure = extractById(page, 'layer-figure');
   assert.match(figure, /The earth answers in hectares and honesty — not slogans\./);
-  assert.match(figure, /about half of Earth's cropland/);
+  assert.match(figure, /data-land-value>53%/i);
   assert.match(figure, /See the land cost/);
   assert.match(figure, /Go deeper/);
   assert.match(page, /body\[data-reg="raver"\]\[data-bearth-beat="figure"\] #layer-figure\{display:block\}/);
@@ -97,7 +97,7 @@ test('Cypherpunk still reaches the full instrument, same constants and sources',
 
 test('keyed first-paint English matches the corpus; every tongue has a cell', () => {
   const keys = [
-    'bearth.mark', 'bearth.bee.calm', 'bearth.bee.takeaway', 'bearth.bee.support',
+    'bearth.mark', 'bearth.bee.calm', 'bearth.land.share', 'bearth.bee.support',
     'bearth.bee.land', 'bearth.bee.deeper', 'bearth.raver.feel', 'bearth.raver.touch',
     'bearth.raver.consciousness'
   ];
@@ -113,7 +113,7 @@ test('keyed first-paint English matches the corpus; every tongue has a cell', ()
 });
 
 test('language-first shell hosts register and language; cypher masthead cannot leak on New bee', () => {
-  assert.match(page, /<script src="tour\.js\?v=41"><\/script>/);
+  assert.match(page, /<script src="tour\.js\?v=42"><\/script>/);
   assert.match(page, /\[data-reg\]:not\(body\)\{display:none\}/);
   assert.match(page, /body\[data-reg="bee"\] \[data-reg="bee"\],\s*body\[data-reg="raver"\] \[data-reg="raver"\],\s*body\[data-reg="cypherpunk"\] \[data-reg="cypherpunk"\]\{display:revert\}/);
   assert.match(page, /class="sub" data-reg="cypherpunk"/);
@@ -125,8 +125,8 @@ test('language-first shell hosts register and language; cypher masthead cannot l
   assert.match(bar, /data-register-host/);
   assert.match(bar, /data-language-host/);
   assert.doesNotMatch(bar, /N₂O|IPCC|REFUTED/);
-  assert.match(tour, /assetBase\+'register\.js\?v=9'/);
-  assert.match(tour, /assetBase\+'lang\.js\?v=25'/);
+  assert.match(tour, /assetBase\+'register\.js\?v=10'/);
+  assert.match(tour, /assetBase\+'lang\.js\?v=26'/);
 });
 
 test('beats and sources disclosure remember per view instead of resetting', () => {
@@ -135,7 +135,7 @@ test('beats and sources disclosure remember per view instead of resetting', () =
   assert.match(page, /function restoreVisibleFocus\(focus\)/);
   assert.match(page, /function applyReading\(event\)/);
   assert.match(page, /document\.addEventListener\('bregister',applyReading\)/);
-  assert.match(tour, /register\.js\?v=9/);
+  assert.match(tour, /register\.js\?v=10/);
   assert.match(register, /an authored theme can use data-bee-theme="custom"/);
 
   const all = [];
@@ -180,6 +180,7 @@ test('beats and sources disclosure remember per view instead of resetting', () =
     querySelectorAll: s => all.filter(e => matches(e, s)),
     querySelector: s => all.find(e => matches(e, s)) || null,
     getElementById: id => all.find(e => e.attrs.id === id) || null,
+    createElement: element,
     addEventListener: (k, fn) => { (events[k] ??= []).push(fn); }
   };
   document.body.dataset.reg = 'bee';

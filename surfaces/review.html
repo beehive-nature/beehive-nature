@@ -179,6 +179,22 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
 .brow .seg:last-child{margin-right:0}
 .brow .bc{flex:0 0 26px;font-size:10px;color:var(--dim)}
 #tip{position:fixed;display:none;background:#0a0f0b;border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-size:10px;color:var(--ink);pointer-events:none;z-index:9}
+/* The same review composer stays readable after the first choice. */
+body:not([data-reg="cypherpunk"])[data-review-beat="compose"] #verdict,
+body:not([data-reg="cypherpunk"])[data-review-beat="compose"] label[for="verdict"]{display:none}
+body[data-reg="cypherpunk"] .reader-label{display:none}
+body:not([data-reg="cypherpunk"]) #compose{padding:clamp(20px,4vw,36px);border-radius:24px}
+body:not([data-reg="cypherpunk"]) #compose h2{font:600 1.5rem/1.3 var(--bee-font);letter-spacing:-.02em;color:var(--ink)}
+body:not([data-reg="cypherpunk"]) #compose label{font:500 1rem/1.5 var(--bee-font);margin:20px 0 8px;color:var(--ink)}
+body:not([data-reg="cypherpunk"]) #compose :is(select,textarea){min-height:52px;font:1rem/1.6 var(--bee-font);background:var(--well);color:var(--ink);padding:14px;border-radius:12px}
+body:not([data-reg="cypherpunk"]) #compose button{min-height:48px;font:600 1rem/1.4 var(--bee-font);border-radius:12px}
+body[data-reg="bee"] #mkReview{background:#326b39;color:white}
+body:not([data-reg="cypherpunk"]) #reviewOut{font:1rem/1.6 var(--bee-font);background:var(--well);padding:20px;overflow-wrap:anywhere;word-break:normal}
+body:not([data-reg="cypherpunk"]) #review-result,.review-share{font:1rem/1.6 var(--bee-font);margin-top:16px;color:var(--dim)}
+#mark-words .mark{align-items:center;text-align:center;min-height:110px;justify-content:center;margin:0}
+#mark-words .mark-glyph{font-size:1.8rem;color:inherit}
+body[data-reg="raver"] #mark-words .mark{background:linear-gradient(145deg,#312040,#152d29)}
+body[data-reg="raver"] #mark-words .mark[aria-pressed="true"]{background:#c9a0ff;color:#241431}
 </style>
 </head>
 <body data-reg="bee" data-bee-theme="custom" data-review-beat="arrival">
@@ -191,24 +207,23 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
 <main>
 <header id="masthead">
   <h1>👑 <span data-i18n="review.mark">the Royal Review</span></h1>
-  <p class="eyebrow pair" data-i18n="review.pair">a signed receipt you choose to publish</p>
+  <p class="eyebrow pair" data-reg="cypherpunk" data-i18n="review.pair">a signed receipt you choose to publish</p>
   <div class="sub" data-reg="cypherpunk">guards reviewing the peer reviewers · a review is a signed receipt you choose to publish —
   nothing on any page observes you. attestation, never telemetry.</div>
 </header>
 
 <article id="first-bee">
-  <p class="calm" data-i18n="review.bee.calm">A review is a signed receipt you choose to publish — nothing on this page watches you.</p>
-  <p class="take" data-i18n="review.bee.takeaway">Only what you choose to publish shows in the tally.</p>
-  <p class="marks-line" data-i18n="review.bee.marks">One page you visited. One mark: works, idea, bug, or gap. Only if you publish.</p>
-  <p class="support" data-i18n="review.bee.support">nothing here watches a silent walker.</p>
+  <p class="calm" data-i18n="review.bee.calm">Help make this place better.</p>
+  <p class="take" data-i18n="review.bee.takeaway">Tell us what you noticed.</p>
+  <p class="support" data-i18n="review.bee.support">Your draft stays on this page until you choose to copy and share it.</p>
   <div class="choices">
-    <button type="button" class="door primary" data-review-go="compose" data-i18n="review.bee.leave">Leave a receipt</button>
+    <button type="button" class="door primary" data-review-go="compose" data-i18n="review.bee.leave">Write a review</button>
     <button type="button" class="door" data-review-go="deeper" data-i18n="review.bee.deeper">Go deeper</button>
   </div>
 </article>
 
 <article id="first-raver">
-  <svg id="crown-scene" viewBox="0 0 800 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A soft crown and receipt glow — keep and share energy, not a control room">
+  <svg id="crown-scene" viewBox="0 0 800 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
     <defs>
       <linearGradient id="keep-wash" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stop-color="#2a2410"/>
@@ -225,27 +240,29 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
     <rect class="wash" width="800" height="900" fill="url(#keep-wash)"/>
     <ellipse class="wash" cx="400" cy="300" rx="280" ry="220" fill="url(#crown-glow)"/>
     <g class="living">
-      <path d="M250 250 L320 210 L400 240 L480 210 L550 250 L520 290 L280 290 Z" fill="#FFD700" opacity=".22"/>
-      <rect x="300" y="360" width="200" height="260" rx="14" fill="#e9f2ec" opacity=".12"/>
-      <rect x="328" y="400" width="144" height="8" rx="3" fill="#FFD700" opacity=".28"/>
-      <rect x="328" y="428" width="144" height="8" rx="3" fill="#c9a0ff" opacity=".22"/>
-      <rect x="328" y="456" width="108" height="8" rx="3" fill="#e9f2ec" opacity=".16"/>
-      <circle cx="400" cy="540" r="22" fill="#FFD700" opacity=".24"/>
+      <circle cx="400" cy="396" r="188" fill="none" stroke="#86cc72" stroke-width="2" opacity=".45"/>
+      <circle cx="400" cy="396" r="152" fill="none" stroke="#45c2dc" stroke-dasharray="3 14" stroke-width="3" opacity=".6"/>
+      <path d="M292 272h166l54 56v213a12 12 0 0 1-12 12H292a12 12 0 0 1-12-12V284a12 12 0 0 1 12-12Z" fill="#d7c5ef" stroke="#f1e6ff" stroke-width="2"/>
+      <path d="M458 274v54h52" fill="#a77ecd" stroke="#c9a0ff" stroke-width="2"/>
+      <path d="M321 348h86m-86 35h144m-144 35h144m-144 35h98" stroke="#63517d" stroke-width="8" stroke-linecap="round" opacity=".6"/>
+      <path d="M173 605 272 512q15-13 29-3l56 42h126q30 0 30 23 0 16-25 24l-105 34q-41 13-73 4l-89 62" fill="#754d96" stroke="#c9a0ff" stroke-width="3"/>
+      <path d="m357 551 43 32h74" fill="none" stroke="#dfc8f4" stroke-width="3" stroke-linecap="round"/>
+      <path d="M555 268v24m-12-12h24m-346 80v16m-8-8h16m287 227v20m-10-10h20" stroke="#45c2dc" stroke-width="3"/>
     </g>
   </svg>
-  <p class="feel" data-i18n="review.raver.feel">What if a review were a gift you signed, not a trail you left?</p>
+  <p class="feel" data-i18n="review.raver.feel">What if your feedback were a gift?</p>
   <div class="choices">
-    <button type="button" class="door primary" data-review-go="figure" data-i18n="review.raver.offer">Offer a receipt</button>
+    <button type="button" class="door primary" data-review-go="compose" data-i18n="review.raver.offer">Give your feedback</button>
   </div>
 </article>
 
 <article id="layer-figure">
   <p class="consciousness" data-i18n="review.raver.consciousness">A walker who publishes nothing appears nowhere — that is the design.</p>
-  <p class="take" data-i18n="review.bee.takeaway">Only what you choose to publish shows in the tally.</p>
+  <p class="take" data-i18n="review.bee.takeaway">Tell us what you noticed.</p>
   <p class="marks-line" data-i18n="review.bee.marks">One page you visited. One mark: works, idea, bug, or gap. Only if you publish.</p>
-  <p class="support" data-i18n="review.bee.support">nothing here watches a silent walker.</p>
+  <p class="support" data-i18n="review.bee.support">Your draft stays on this page until you choose to copy and share it.</p>
   <div class="choices">
-    <button type="button" class="door primary" data-review-go="compose" data-i18n="review.bee.leave">Leave a receipt</button>
+    <button type="button" class="door primary" data-review-go="compose" data-i18n="review.bee.leave">Write a review</button>
     <button type="button" class="door" data-review-go="deeper" data-i18n="review.bee.deeper">Go deeper</button>
   </div>
 </article>
@@ -296,16 +313,16 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
 </section>
 
 <div id="layer-compose">
-<p class="story-caption" data-i18n="review.compose.caption">One surface, one verdict, one line — only if you choose to publish it.</p>
-<div id="mark-words" role="radiogroup" aria-label="One mark: works, idea, bug, or gap">
-  <button type="button" class="mark" data-verdict="✅ works" aria-pressed="true"><b>works</b><span>you walked it and it held</span></button>
-  <button type="button" class="mark" data-verdict="💡 idea" aria-pressed="false"><b>idea</b><span>an improvement</span></button>
-  <button type="button" class="mark" data-verdict="🐛 bug" aria-pressed="false"><b>bug</b><span>something broke</span></button>
-  <button type="button" class="mark" data-verdict="🕳 gap" aria-pressed="false"><b>gap</b><span>something missing</span></button>
+<p class="story-caption" id="review-choice-title" data-i18n="review.compose.caption">Choose the page, say what happened, then copy your review if you want to share it.</p>
+<div id="mark-words" role="group" aria-labelledby="review-choice-title">
+  <button type="button" class="mark" data-verdict="✅ works" aria-pressed="true"><span class="mark-glyph" aria-hidden="true">✓</span><b data-i18n="review.mark.works">It worked</b></button>
+  <button type="button" class="mark" data-verdict="💡 idea" aria-pressed="false"><span class="mark-glyph" aria-hidden="true">✧</span><b data-i18n="review.mark.idea">I have an idea</b></button>
+  <button type="button" class="mark" data-verdict="🐛 bug" aria-pressed="false"><span class="mark-glyph" aria-hidden="true">!</span><b data-i18n="review.mark.bug">Something broke</b></button>
+  <button type="button" class="mark" data-verdict="🕳 gap" aria-pressed="false"><span class="mark-glyph" aria-hidden="true">○</span><b data-i18n="review.mark.gap">Something is missing</b></button>
 </div>
 <section id="compose">
-  <h2>3 · <span data-i18n="h.166">REVIEW RECEIPT — one surface, one verdict, ≤140 chars</span></h2>
-  <label for="surf">surface</label>
+  <h2><span data-reg="cypherpunk">3 · <span data-i18n="h.166">REVIEW RECEIPT — one surface, one verdict, ≤140 chars</span></span><span class="reader-label" data-i18n="review.compose.heading">What did you notice?</span></h2>
+  <label for="surf" data-i18n="review.compose.page">Page you visited</label>
   <select id="surf"></select>
   <label for="verdict">verdict</label>
   <select id="verdict">
@@ -314,12 +331,18 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
     <option value="🕳 gap">🕳 gap — something missing</option>
     <option value="💡 idea">💡 idea — an improvement</option>
   </select>
-  <label for="rnote">note (≤140)</label>
-  <input id="rnote" maxlength="140" placeholder="what you saw, in one line">
-  <button id="mkReview" class="gold">compose receipt — sign in to add yours</button>
-  <button id="cpReview" style="display:none">📋 copy</button>
-  <div class="out" id="reviewOut"></div>
-  <div class="law" style="margin-top:8px">publishing rides any client you already hold — paste it
+  <label for="rnote" data-i18n="review.compose.note">Your note — up to 140 characters</label>
+  <textarea id="rnote" maxlength="140" rows="3"></textarea>
+  <button id="mkReview" class="gold"><span data-i18n="review.compose.make">Preview my review</span></button>
+  <button id="cpReview" style="display:none"><span data-i18n="review.compose.copy">Copy review</span></button>
+  <div class="out" id="reviewOut" tabindex="0" aria-live="polite"></div>
+  <div id="review-result" role="status">
+    <p id="review-ready" hidden data-i18n="review.compose.ready">Your draft is ready. Nothing has been published.</p>
+    <p id="review-copied" hidden data-i18n="review.compose.copied">Copied. You can now paste and share it.</p>
+    <p id="review-copy-failed" hidden data-i18n="review.compose.copyFailed">Copy did not work. Select the review text and copy it yourself.</p>
+  </div>
+  <p class="reader-label review-share" data-i18n="review.compose.share">Copy your review into a Nostr note or Bluesky post, or share it directly with the team. This page does not publish for you.</p>
+  <div class="law" data-reg="cypherpunk" style="margin-top:8px">publishing rides any client you already hold — paste it
   as a Nostr note or a Bluesky post (the tally reads both), or hand it to the founder
   directly. the in-page publish path docks with TASK&nbsp;6b (E2E), and pretending it is wired
   before then would be a lie.</div>
@@ -479,7 +502,7 @@ $('w1go').onclick=async function(){
 };
 })();
 </script>
-<script src="tour.js?v=41"></script>
+<script src="tour.js?v=42"></script>
 <script>
 (function(){
   var $=function(i){return document.getElementById(i);};
@@ -617,7 +640,23 @@ $('w1go').onclick=async function(){
       var sig=ID.record.sign(enc.encode(line));
       block=line+'\npub: '+toHex(ID.record.publicKey)+'\nsig: '+toHex(sig);
     } else { block=line+'\nUNSIGNED — bind a passkey above to sign'; }
-    show('reviewOut',block); copyBtn('cpReview','reviewOut');
+    show('reviewOut',block);
+    $('review-ready').hidden=false;
+    $('review-copied').hidden=true;
+    $('review-copy-failed').hidden=true;
+    $('cpReview').style.display='inline-block';
+  };
+
+  $('cpReview').onclick=async function(){
+    $('review-copied').hidden=true;
+    $('review-copy-failed').hidden=true;
+    try{
+      await navigator.clipboard.writeText($('reviewOut').textContent);
+      $('review-copied').hidden=false;
+    }catch(e){
+      $('review-copy-failed').hidden=false;
+      $('reviewOut').focus();
+    }
   };
 
   var lastVerified=null;

@@ -41,9 +41,9 @@ const REVERSAL = /run the reversal hypothesis|body\.reversed|#revBtn/;
 
 test('New bee first paint is one calm sentence, one takeaway, and one choice', () => {
   const bee = extractById(page, 'first-bee');
-  assert.match(bee, /Your body builds signaling from fats it cannot make — and this page shows the receipts\./);
-  assert.match(bee, /The two fats you cannot make write the language\./);
-  assert.match(bee, /hypotheses stay labeled — never sold as found\./);
+  assert.match(bee, /Your body needs two fats it gets from food\. Explore what they do\./);
+  assert.match(bee, /Two essential fats\. One starting point\./);
+  assert.match(bee, /The research has limits\./);
   assert.match(bee, /See the fat story/);
   assert.match(bee, /Go deeper/);
   assert.doesNotMatch(bee, /[Cc]annabinoid/);
@@ -74,7 +74,7 @@ test('Raver first paint is atmosphere, one feeling line, and one tap', () => {
 test('consciousness beat and New bee choice sit behind the Raver tap, not on first paint', () => {
   const figure = extractById(page, 'layer-figure');
   assert.match(figure, /Cannabinoid receptors did not evolve for plants — plants happened to speak the language your fats built\./);
-  assert.match(figure, /The two fats you cannot make write the language\./);
+  assert.match(figure, /Two essential fats\. One starting point\./);
   assert.match(figure, /See the fat story/);
   assert.match(figure, /Go deeper/);
   assert.doesNotMatch(figure, FENCE);
@@ -84,11 +84,11 @@ test('consciousness beat and New bee choice sit behind the Raver tap, not on fir
 
 test('See the fat story is one calm beat — two bricks and blank honesty, not the six-stage line', () => {
   const story = extractById(page, 'layer-story');
-  assert.match(story, /linoleic acid · n-6/);
-  assert.match(story, /α-linolenic acid · n-3/);
-  assert.match(story, /no authoritative n-6:n-3 target exists/);
-  assert.match(story, /Two bricks\. Both essential\. No official ratio/);
-  assert.match(story, /USDA FDC 170148/);
+  assert.match(story, /Linoleic acid/);
+  assert.match(story, /Alpha-linolenic acid/);
+  assert.match(story, /Your body needs both from food/);
+  assert.match(story, /Both fats are essential\. This page does not establish a target ratio/);
+  assert.match(story, /Both are found in hemp hearts/);
   assert.doesNotMatch(story, /<input|<select/i);
   assert.doesNotMatch(story, /<table/i);
   assert.doesNotMatch(story, FENCE);
@@ -137,7 +137,7 @@ test('keyed first-paint English matches the corpus; every tongue has a cell', ()
 });
 
 test('language-first shell hosts register and language; cypher masthead cannot leak on New bee', () => {
-  assert.match(page, /<script src="tour\.js\?v=41"><\/script>/);
+  assert.match(page, /<script src="tour\.js\?v=42"><\/script>/);
   assert.match(page, /\[data-reg\]:not\(body\)\{display:none\}/);
   assert.match(page, /body\[data-reg="bee"\] \[data-reg="bee"\],\s*body\[data-reg="raver"\] \[data-reg="raver"\],\s*body\[data-reg="cypherpunk"\] \[data-reg="cypherpunk"\]\{display:revert\}/);
   assert.match(page, /class="sub" data-reg="cypherpunk"/);
@@ -149,8 +149,8 @@ test('language-first shell hosts register and language; cypher masthead cannot l
   assert.match(bar, /data-register-host/);
   assert.match(bar, /data-language-host/);
   assert.doesNotMatch(bar, FENCE);
-  assert.match(tour, /assetBase\+'register\.js\?v=9'/);
-  assert.match(tour, /assetBase\+'lang\.js\?v=25'/);
+  assert.match(tour, /assetBase\+'register\.js\?v=10'/);
+  assert.match(tour, /assetBase\+'lang\.js\?v=26'/);
 });
 
 test('beats and sources disclosure remember per view instead of resetting', () => {
@@ -159,7 +159,7 @@ test('beats and sources disclosure remember per view instead of resetting', () =
   assert.match(page, /function restoreVisibleFocus\(focus\)/);
   assert.match(page, /function applyReading\(event\)/);
   assert.match(page, /document\.addEventListener\('bregister',applyReading\)/);
-  assert.match(tour, /register\.js\?v=9/);
+  assert.match(tour, /register\.js\?v=10/);
   assert.match(register, /an authored theme can use data-bee-theme="custom"/);
 
   const all = [];

@@ -42,11 +42,34 @@ function inline(html) {
 
 const FENCE = /THE CHARTER|father language|mother language|student language|#q-wt|id="gradProse"|id="transcript"|U-1|U-2|U-3|\bLOQ\b|\bEAR\b|ΔE|Poseidon|cannabis|#rg-bee|#rg-raver|#rg-cyper|function setReg|healthier|prove-adequacy|graduate holds/i;
 
+test('both first actions reach the local exercise; choosing either answer explains uncertainty', () => {
+  for (const id of ['first-bee','first-raver']) {
+    assert.match(extractById(page, id), /data-uni-go="lesson"/);
+  }
+  const answer = { hidden: true };
+  const choices = ['yes','no'].map(value => ({
+    value, pressed:'false', addEventListener(type, callback){this.click=callback;},
+    setAttribute(name, value){if(name==='aria-pressed')this.pressed=value;}
+  }));
+  const document = { querySelectorAll: () => choices, getElementById: () => answer };
+  const start = page.indexOf('/* This practice creates no grade, credential, or network request. */');
+  const end = page.indexOf('/* boot */', start);
+  assert.ok(start > 0 && end > start);
+  vm.runInNewContext(page.slice(start,end), {document});
+  choices[0].click();
+  assert.equal(answer.hidden,false);
+  assert.equal(choices[0].pressed,'true');
+  choices[1].click();
+  assert.equal(choices[0].pressed,'false');
+  assert.equal(choices[1].pressed,'true');
+  assert.match(extractById(page,'lesson-answer'), /does not prove that the amount is zero/);
+});
+
 test('New bee first paint is one calm sentence, one takeaway, and one choice', () => {
   const bee = extractById(page, 'first-bee');
-  assert.match(bee, /Beehive University teaches you to read this estate.s own receipts — every lesson ends in a signed act you hold, not a certificate\./);
-  assert.match(bee, /You learn evidence literacy by checking <i>our<\/i> lab panels, requirement bars, and chain reads — with sources, or silence\./);
-  assert.match(bee, /Sources, or silence — never a certificate\./);
+  assert.match(bee, /Make sense of the claims around you\./);
+  assert.match(bee, /Learn to ask one good question\./);
+  assert.match(bee, /Begin with a small example\. Explore the evidence when you are ready\./);
   assert.match(bee, /Start with a lab report/);
   assert.match(bee, /Go deeper/);
   assert.doesNotMatch(bee, /how to read a lab report \(/);
@@ -62,8 +85,8 @@ test('New bee first paint is one calm sentence, one takeaway, and one choice', (
 test('Raver first paint is atmosphere, one feeling line, and one tap', () => {
   const raver = extractById(page, 'first-raver');
   assert.match(raver, /id="floor-scene"/);
-  assert.match(raver, /the curriculum is the receipts — a quiet floor where every lesson ends in something you can hold/);
-  assert.match(raver, /Feel the first act/);
+  assert.match(raver, /Stay curious\. Let wonder lead you closer\./);
+  assert.match(raver, /Explore a small mystery/);
   assert.doesNotMatch(raver, /Not a content silo/);
   assert.doesNotMatch(raver, /<input|<select|type="range"/i);
   assert.doesNotMatch(raver, /<table/i);
@@ -88,7 +111,7 @@ test('Start with a lab report is one first-lesson beat — not charter, quests, 
   assert.match(lesson, /how to read a lab report/);
   assert.match(lesson, /A lab report is a photograph of one sample, taken by one method, at one sensitivity\./);
   assert.match(lesson, /what was measured/);
-  assert.match(lesson, /below the floor/);
+  assert.match(lesson, /below the detection limit/);
   assert.match(lesson, /RECEIPT_CANNABINOID_PANEL_UNDERCOUNT_2026-08-20/);
   assert.doesNotMatch(lesson, /THE CHARTER|father language|#q-wt|GRADUATION|THE TRANSCRIPT|U-1|U-2|U-3|\bLOQ\b|\bEAR\b|ΔE|Poseidon/);
   assert.doesNotMatch(lesson, /id="rg-bee"|function setReg/);
@@ -135,7 +158,8 @@ test('keyed first-paint English matches the corpus; every tongue has a cell', ()
     'uni.raver.consciousness', 'uni.lesson.name', 'uni.lesson.lead', 'uni.opens',
     'uni.foot.door', 'uni.foot.learn', 'uni.foot.verify'
   ];
-  for (const key of keys) {
+  keys.push("uni.bee.calm","uni.bee.takeaway","uni.bee.support","uni.raver.feel","uni.raver.tap","uni.lesson.example","uni.lesson.result","uni.lesson.question","uni.lesson.yes","uni.lesson.no","uni.lesson.answer","uni.lesson.inspect","uni.lesson.questions","uni.lesson.source");
+  for (const key of new Set(keys)) {
     const idx = page.indexOf('data-i18n="'+key+'"');
     assert.notEqual(idx, -1, key+' missing on the page');
     const en = extractKeyedText(page, page.lastIndexOf('<', idx));
@@ -147,7 +171,7 @@ test('keyed first-paint English matches the corpus; every tongue has a cell', ()
 });
 
 test('language-first shell hosts register and language; cypher masthead cannot leak on New bee', () => {
-  assert.match(page, /<script src="\.\.\/tour\.js\?v=41"><\/script>/);
+  assert.match(page, /<script src="\.\.\/tour\.js\?v=\d+"><\/script>/);
   assert.match(page, /\[data-reg\]:not\(body\)\{display:none\}/);
   assert.match(page, /body\[data-reg="bee"\] \[data-reg="bee"\],\s*body\[data-reg="raver"\] \[data-reg="raver"\],\s*body\[data-reg="cypherpunk"\] \[data-reg="cypherpunk"\]\{display:revert\}/);
   assert.match(page, /class="sub" data-reg="cypherpunk"/);
@@ -159,8 +183,8 @@ test('language-first shell hosts register and language; cypher masthead cannot l
   assert.match(bar, /data-register-host/);
   assert.match(bar, /data-language-host/);
   assert.doesNotMatch(bar, FENCE);
-  assert.match(tour, /assetBase\+'register\.js\?v=9'/);
-  assert.match(tour, /assetBase\+'lang\.js\?v=25'/);
+  assert.match(tour, /assetBase\+'register\.js\?v=\d+'/);
+  assert.match(tour, /assetBase\+'lang\.js\?v=\d+'/);
 });
 
 test('beats and sources disclosure remember per view instead of resetting', () => {
@@ -169,7 +193,7 @@ test('beats and sources disclosure remember per view instead of resetting', () =
   assert.match(page, /function restoreVisibleFocus\(focus\)/);
   assert.match(page, /function applyReading\(event\)/);
   assert.match(page, /document\.addEventListener\('bregister',applyReading\)/);
-  assert.match(tour, /register\.js\?v=9/);
+  assert.match(tour, /register\.js\?v=\d+/);
   assert.match(register, /an authored theme can use data-bee-theme="custom"/);
 
   const all = [];

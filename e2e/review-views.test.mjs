@@ -42,13 +42,47 @@ function inline(html) {
 const FENCE = /passkey|Ed25519|WebLLM|wake the pocket|bLOVErAi|listen to the rails|\bidle\b|unbound — receipts compose as UNSIGNED|recovery phrases/;
 const TELEMETRY = /attestation, never telemetry|telemetry/;
 
+test('review preview stays local and a failed clipboard write never reports success', async () => {
+  const fields = Object.fromEntries(['surf','verdict','rnote','reviewOut','review-ready','review-copied','review-copy-failed','cpReview','mkReview'].map(id => [id, {
+    value: '', textContent: '', style: {}, hidden: true, focus(){ this.focused=true; }
+  }]));
+  fields.surf.value = 'university/index.html';
+  fields.verdict.value = '💡 idea';
+  fields.rnote.value = 'Make the next step clearer.';
+  let copied;
+  const context = {
+    $: id => fields[id], ID: null,
+    PTR: { review: (surface, verdict, note) => `[bX review] ${verdict} ${surface} — note: ${note}` },
+    show: (id, text) => { fields[id].textContent=text; fields[id].style.display='block'; },
+    navigator: { clipboard: { async writeText(){ throw new Error('denied'); } } }
+  };
+  const start = page.indexOf("  $('mkReview').onclick=async function(){");
+  const end = page.indexOf('  var lastVerified=null;', start);
+  assert.ok(start > 0 && end > start);
+  vm.runInNewContext(page.slice(start, end), context);
+  await fields.mkReview.onclick();
+  assert.match(fields.reviewOut.textContent, /💡 idea university\/index.html/);
+  assert.match(fields.reviewOut.textContent, /UNSIGNED/);
+  assert.equal(fields['review-ready'].hidden, false);
+  await fields.cpReview.onclick();
+  assert.equal(fields['review-copied'].hidden, true);
+  assert.equal(fields['review-copy-failed'].hidden, false);
+  assert.equal(fields.reviewOut.focused, true);
+  context.navigator.clipboard.writeText = async text => { copied=text; };
+  await fields.cpReview.onclick();
+  assert.equal(copied, fields.reviewOut.textContent);
+  assert.equal(fields['review-copied'].hidden, false);
+  assert.equal(fields['review-copy-failed'].hidden, true);
+  assert.equal(fields.rnote.value, 'Make the next step clearer.');
+});
+
 test('New bee first paint is one calm sentence, one takeaway, and one choice', () => {
   const bee = extractById(page, 'first-bee');
-  assert.match(bee, /A review is a signed receipt you choose to publish — nothing on this page watches you\./);
-  assert.match(bee, /Only what you choose to publish shows in the tally\./);
-  assert.match(bee, /One page you visited\. One mark: works, idea, bug, or gap\. Only if you publish\./);
-  assert.match(bee, /nothing here watches a silent walker\./);
-  assert.match(bee, /Leave a receipt/);
+  assert.match(bee, /Help make this place better\./);
+  assert.match(bee, /Tell us what you noticed\./);
+
+  assert.match(bee, /Your draft stays on this page until you choose to copy and share it\./);
+  assert.match(bee, /Write a review/);
   assert.match(bee, /Go deeper/);
   assert.doesNotMatch(bee, /nothing on this page watches you[\s\S]*nothing on this page watches you/);
   assert.doesNotMatch(bee, TELEMETRY);
@@ -66,9 +100,9 @@ test('New bee first paint is one calm sentence, one takeaway, and one choice', (
 test('Raver first paint is atmosphere, one feeling line, and one tap', () => {
   const raver = extractById(page, 'first-raver');
   assert.match(raver, /id="crown-scene"/);
-  assert.match(raver, /A soft crown and receipt glow — keep and share energy, not a control room/);
-  assert.match(raver, /What if a review were a gift you signed, not a trail you left\?/);
-  assert.match(raver, /Offer a receipt/);
+  assert.match(raver, /aria-hidden="true"/);
+  assert.match(raver, /What if your feedback were a gift\?/);
+  assert.match(raver, /Give your feedback/);
   assert.doesNotMatch(raver, /A walker who publishes nothing appears nowhere/);
   assert.doesNotMatch(raver, /<input|<select|type="range"/i);
   assert.doesNotMatch(raver, /<table/i);
@@ -80,23 +114,23 @@ test('Raver first paint is atmosphere, one feeling line, and one tap', () => {
 test('consciousness beat and New bee choice sit behind the Raver tap, not on first paint', () => {
   const figure = extractById(page, 'layer-figure');
   assert.match(figure, /A walker who publishes nothing appears nowhere — that is the design\./);
-  assert.match(figure, /Only what you choose to publish shows in the tally\./);
+  assert.match(figure, /Tell us what you noticed\./);
   assert.match(figure, /One page you visited\. One mark: works, idea, bug, or gap\. Only if you publish\./);
-  assert.match(figure, /Leave a receipt/);
+  assert.match(figure, /Write a review/);
   assert.match(figure, /Go deeper/);
   assert.doesNotMatch(figure, FENCE);
   assert.doesNotMatch(figure, /id="listen"|id="bindBtn"|id="gCheck"|id="w1wake"/);
   assert.match(page, /body\[data-reg="raver"\]\[data-review-beat="figure"\] #layer-figure\{display:block\}/);
 });
 
-test('Leave a receipt is one calm compose beat — not passkey, rails, verify, or WebLLM', () => {
+test('Write a review is one calm compose beat — not passkey, rails, verify, or WebLLM', () => {
   const compose = extractById(page, 'layer-compose');
-  assert.match(compose, /One surface, one verdict, one line — only if you choose to publish it\./);
+  assert.match(compose, /Choose the page, say what happened, then copy your review if you want to share it\./);
   assert.match(compose, /id="mark-words"/);
-  assert.match(compose, />works</);
-  assert.match(compose, />idea</);
-  assert.match(compose, />bug</);
-  assert.match(compose, />gap</);
+  assert.match(compose, />It worked</);
+  assert.match(compose, />I have an idea</);
+  assert.match(compose, />Something broke</);
+  assert.match(compose, />Something is missing</);
   assert.ok(compose.indexOf('id="mark-words"') < compose.indexOf('id="surf"'), 'human marks come before the surface picker');
   assert.match(compose, /id="surf"/);
   assert.match(compose, /id="verdict"/);
@@ -149,7 +183,8 @@ test('keyed first-paint English matches the corpus; every tongue has a cell', ()
     'review.raver.consciousness', 'review.compose.caption',
     'review.foot.attest', 'review.foot.learn'
   ];
-  for (const key of keys) {
+  keys.push("review.bee.calm","review.bee.takeaway","review.bee.support","review.bee.leave","review.raver.offer","review.compose.caption","review.compose.heading","review.compose.page","review.compose.note","review.compose.make","review.compose.copy","review.compose.copied","review.compose.copyFailed","review.compose.ready","review.compose.share","review.mark.works","review.mark.idea","review.mark.bug","review.mark.gap","review.raver.feel");
+  for (const key of new Set(keys)) {
     const idx = page.indexOf('data-i18n="'+key+'"');
     assert.notEqual(idx, -1, key+' missing on the page');
     const en = extractKeyedText(page, page.lastIndexOf('<', idx));
@@ -161,7 +196,7 @@ test('keyed first-paint English matches the corpus; every tongue has a cell', ()
 });
 
 test('language-first shell hosts register and language; cypher masthead cannot leak on New bee', () => {
-  assert.match(page, /<script src="tour\.js\?v=41"><\/script>/);
+  assert.match(page, /<script src="tour\.js\?v=\d+"><\/script>/);
   assert.match(page, /\[data-reg\]:not\(body\)\{display:none\}/);
   assert.match(page, /body\[data-reg="bee"\] \[data-reg="bee"\],\s*body\[data-reg="raver"\] \[data-reg="raver"\],\s*body\[data-reg="cypherpunk"\] \[data-reg="cypherpunk"\]\{display:revert\}/);
   assert.match(page, /class="sub" data-reg="cypherpunk"/);
@@ -173,8 +208,8 @@ test('language-first shell hosts register and language; cypher masthead cannot l
   assert.match(bar, /data-register-host/);
   assert.match(bar, /data-language-host/);
   assert.doesNotMatch(bar, FENCE);
-  assert.match(tour, /assetBase\+'register\.js\?v=9'/);
-  assert.match(tour, /assetBase\+'lang\.js\?v=25'/);
+  assert.match(tour, /assetBase\+'register\.js\?v=\d+'/);
+  assert.match(tour, /assetBase\+'lang\.js\?v=\d+'/);
 });
 
 test('beats and sources disclosure remember per view instead of resetting', () => {
@@ -183,7 +218,7 @@ test('beats and sources disclosure remember per view instead of resetting', () =
   assert.match(page, /function restoreVisibleFocus\(focus\)/);
   assert.match(page, /function applyReading\(event\)/);
   assert.match(page, /document\.addEventListener\('bregister',applyReading\)/);
-  assert.match(tour, /register\.js\?v=9/);
+  assert.match(tour, /register\.js\?v=\d+/);
   assert.match(register, /an authored theme can use data-bee-theme="custom"/);
 
   const all = [];

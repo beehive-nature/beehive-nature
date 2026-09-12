@@ -232,11 +232,11 @@ ok('symposium: fetch honesty declared', symTxt.includes('fetch honesty'));
 
 // bLongevity Map — New bee first paint, then the instrument via deepen
 await page.goto(`${BASE}/surfaces/blongevity.html`);
-await page.waitForTimeout(500);
+await page.locator('#breg-bee').click();
 const beePaint = await page.locator('#first-bee').innerText();
 ok('longevity New bee: calm sentence + takeaway + choice, no ACiD/CB walls',
-  beePaint.includes('Your body builds signaling from fats it cannot make')
-  && beePaint.includes('The two fats you cannot make write the language')
+  beePaint.includes('Your body needs two fats it gets from food')
+  && beePaint.includes('Two essential fats. One starting point.')
   && beePaint.includes('See the fat story')
   && !beePaint.includes('ACiD') && !beePaint.includes('CB1') && !/cannabinoid/i.test(beePaint));
 ok('longevity New bee: instrument hidden on first paint',

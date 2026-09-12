@@ -265,18 +265,17 @@ body[data-onb-beat="deeper"] #foot-quiet{display:none}
 
 <article id="first-bee">
   <p class="eyebrow" data-i18n="onb.mark">BNR · Get started</p>
-  <p class="pair" data-i18n="onb.pair">held-hand join</p>
-  <p class="calm" data-i18n="onb.bee.calm">This is how you join the hive — your keys stay yours; nobody in between holds them for you.</p>
-  <p class="take" data-i18n="onb.bee.takeaway">Start free in this browser in about two minutes. You can add stronger custody later; your identity does not restart.</p>
-  <p class="support" data-i18n="onb.bee.support">I'm new</p>
+  <p class="calm" data-i18n="onb.bee.calm">A place to begin, at your own pace.</p>
+  <h1 class="take" data-i18n="onb.bee.takeaway">Try joining the hive.</h1>
+  <p class="support" data-i18n="onb.bee.support">This is a preview. It does not create an account here.</p>
   <div class="choices">
-    <button type="button" class="door primary" data-onb-go="choice" data-i18n="onb.bee.start">Start free</button>
+    <button type="button" class="door primary" data-onb-go="choice" data-i18n="onb.bee.start">Try the preview</button>
     <button type="button" class="door" data-onb-go="deeper" data-i18n="onb.bee.deeper">Go deeper</button>
   </div>
 </article>
 
 <article id="first-raver">
-  <svg id="threshold-scene" viewBox="0 0 800 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A quiet threshold — come as you are; the floor already said accept you">
+  <svg id="threshold-scene" viewBox="0 0 800 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
     <defs>
       <linearGradient id="threshold-wash" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stop-color="#142018"/>
@@ -294,34 +293,42 @@ body[data-onb-beat="deeper"] #foot-quiet{display:none}
     <rect class="wash" width="800" height="900" fill="url(#threshold-wash)"/>
     <ellipse class="wash" cx="400" cy="400" rx="280" ry="240" fill="url(#door-glow)"/>
     <g class="living">
-      <rect x="330" y="250" width="140" height="220" rx="70" fill="#e9f2ec" opacity=".08"/>
-      <rect x="355" y="310" width="90" height="140" rx="12" fill="#c9a0ff" opacity=".16"/>
+      <ellipse cx="400" cy="622" rx="222" ry="36" fill="#86cc72" opacity=".13"/>
+      <path d="M224 588V354a176 176 0 0 1 352 0v234" fill="#172e29" stroke="#86cc72" stroke-width="3"/>
+      <path d="M259 587V356a141 141 0 0 1 282 0v231" fill="#203139" stroke="#45c2dc" stroke-width="2" opacity=".9"/>
+      <path d="M294 588V360a106 106 0 0 1 212 0v228" fill="#382b4c" stroke="#c9a0ff" stroke-width="4"/>
+      <path d="M322 588V364a78 78 0 0 1 156 0v224" fill="#c9a0ff" opacity=".21"/>
+      <path d="M332 583 226 765M468 583l106 182M400 584v179" fill="none" stroke="#c9a0ff" stroke-width="2" opacity=".5"/>
+      <path d="M340 602h120m-139 39h158m-178 40h198" stroke="#45c2dc" stroke-width="2" opacity=".45"/>
+      <path d="M177 563c-39-69-16-112 15-132 19 64 14 94-15 132Zm444 0c39-69 16-112-15-132-19 64-14 94 15 132Z" fill="#86cc72" opacity=".56"/>
+      <path d="m177 563 16-88m428 88-16-88" stroke="#bde4ac" stroke-width="3"/>
     </g>
     <g class="glow" fill="none" stroke="#d8c46a" stroke-width="1.6">
-      <path d="M370 360 Q400 330 430 360" opacity=".5"/>
-      <path d="M360 420 Q400 390 440 420" opacity=".35"/>
+      <circle cx="400" cy="412" r="38" stroke="#c9a0ff" opacity=".9"/>
+      <circle cx="400" cy="412" r="61" stroke="#45c2dc" opacity=".4"/>
+      <path d="M385 412h30m-9-9 9 9-9 9" stroke="#f5e9ff" stroke-width="3"/>
     </g>
   </svg>
-  <p class="feel" data-i18n="onb.raver.feel">come as you are — the floor already said accept you</p>
+  <p class="feel" data-i18n="onb.raver.feel">Come as you are. There is room for you here.</p>
   <div class="choices">
     <button type="button" class="door primary" data-onb-go="figure" data-i18n="onb.raver.tap">Step in</button>
   </div>
 </article>
 
 <article id="layer-choice">
-  <h2 data-i18n="onb.bee.choice">Hold your keys on this device — face, fingerprint, or Windows Hello. Nobody here holds them for you.</h2>
-  <p class="honest" data-i18n="onb.bee.preview">This walk is a labeled preview on a static host. It binds for real when a live wallet host serves the page. Preview is not a completed join.</p>
+  <h2 data-i18n="onb.bee.choice">Use this device to hold your keys.</h2>
+  <p class="honest" data-i18n="onb.bee.preview">On this site, the next screen is a preview. No account is created. A connected wallet host is needed for a real join.</p>
   <div class="choices">
-    <button type="button" class="door primary" data-onb-enter="passkey" data-i18n="onb.bee.continue">Continue with this device</button>
+    <button type="button" class="door primary" data-onb-enter="passkey" data-i18n="onb.bee.continue">Explore the device option</button>
     <button type="button" class="door" data-onb-go="deeper" data-i18n="onb.bee.deeper">Go deeper</button>
   </div>
 </article>
 
 <article id="layer-figure">
-  <p class="consciousness" data-i18n="onb.raver.choice">One soft door into your own keys — no app store, no account desk, no one holding the bag.</p>
-  <p class="honest" data-i18n="onb.raver.preview">This walk is a labeled preview unless a live wallet host is serving it. Preview is not a completed join.</p>
+  <p class="consciousness" data-i18n="onb.raver.choice">Your place in the hive. Your keys stay with you.</p>
+  <p class="honest" data-i18n="onb.raver.preview">Explore the joining ritual. This site shows a preview; it does not create an account.</p>
   <div class="choices">
-    <button type="button" class="door primary" data-onb-enter="passkey" data-i18n="onb.bee.continue">Continue with this device</button>
+    <button type="button" class="door primary" data-onb-enter="passkey" data-i18n="onb.bee.continue">Explore the device option</button>
     <button type="button" class="door" data-onb-go="deeper" data-i18n="onb.bee.deeper">Go deeper</button>
   </div>
 </article>
@@ -1257,6 +1264,6 @@ applyReading();
 })();
 </script>
 <div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(.6rem + 46px);z-index:9997;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
-<script src="../tour.js?v=41"></script>
+<script src="../tour.js?v=42"></script>
 </body>
 </html>
