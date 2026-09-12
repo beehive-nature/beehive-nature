@@ -3,11 +3,14 @@
 //! `tests/`) so both the unit suites here and the future deliberate-
 //! publication/OAuth slice can drive the orchestrator without sockets.
 //!
-//! Failure injection is explicit: `fail_nostr` / `fail_atproto` make the
-//! NEXT write fail; `lose_nostr_response` stores the event/record and then
-//! returns a transport error — modeling the crash window where the write
-//! landed but the caller never learned.
+//! Failure injection is explicit: `fail_next` makes the NEXT write fail
+//! (nothing stored — a definite non-landing); `lose_next_response` stores
+//! the event/record and THEN returns a transport error — the crash window
+//! where the write landed but the caller never learned; and
+//! `fail_probe_on_nth` / `fail_get_on_nth` fail a chosen (Nth) probe call
+//! so UNCONFIRMED paths are deterministically reachable.
 
+use std::cell::Cell;
 use std::collections::BTreeMap;
 
 use sha2::Digest;
@@ -21,9 +24,17 @@ pub struct MemNostrSink {
     by_dtag: BTreeMap<(String, String), String>,
     pub events: BTreeMap<String, TwinEvent>,
     pub publish_calls: usize,
+    /// Probe call counter — `Cell` because the sink trait's probe takes
+    /// `&self` (an honest rail's read path has no business mutating).
+    pub probe_calls: Cell<usize>,
     pub fail_next: Option<SinkError>,
     /// Store, then report transport failure (response lost).
     pub lose_next_response: bool,
+    /// Fail the Nth (1-based) find_by_dtag call — models an unavailable
+    /// probe at a chosen point (e.g. the reconcile probe after a lost
+    /// acknowledgement) so the orchestrator's UNCONFIRMED paths are
+    /// deterministically testable.
+    pub fail_probe_on_nth: Option<(usize, SinkError)>,
 }
 
 impl MemNostrSink {
@@ -67,6 +78,13 @@ impl NostrSink for MemNostrSink {
     }
 
     fn find_by_dtag(&self, pubkey: &str, d: &str) -> Result<Option<String>, SinkError> {
+        let n = self.probe_calls.get() + 1;
+        self.probe_calls.set(n);
+        if let Some((fail_at, e)) = &self.fail_probe_on_nth {
+            if *fail_at == n {
+                return Err(e.clone());
+            }
+        }
         Ok(self
             .by_dtag
             .get(&(pubkey.to_string(), d.to_string()))
@@ -79,8 +97,16 @@ pub struct MemAtprotoSink {
     /// (did, collection, rkey) -> (cid, record value)
     records: BTreeMap<(String, String, String), (String, serde_json::Value)>,
     pub create_calls: usize,
+    /// Read call counter — `Cell` because the sink trait's read takes
+    /// `&self`.
+    pub get_calls: Cell<usize>,
     pub fail_next: Option<SinkError>,
     pub lose_next_response: bool,
+    /// Fail the Nth (1-based) get_record call — models an unavailable
+    /// probe at a chosen point (e.g. the reconcile read after a lost
+    /// acknowledgement) so the orchestrator's UNCONFIRMED paths are
+    /// deterministically testable.
+    pub fail_get_on_nth: Option<(usize, SinkError)>,
 }
 
 impl MemAtprotoSink {
@@ -137,6 +163,13 @@ impl AtprotoSink for MemAtprotoSink {
         collection: &str,
         rkey: &str,
     ) -> Result<Option<(String, serde_json::Value)>, SinkError> {
+        let n = self.get_calls.get() + 1;
+        self.get_calls.set(n);
+        if let Some((fail_at, e)) = &self.fail_get_on_nth {
+            if *fail_at == n {
+                return Err(e.clone());
+            }
+        }
         Ok(self
             .records
             .get(&(did.to_string(), collection.to_string(), rkey.to_string()))

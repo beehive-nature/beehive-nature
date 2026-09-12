@@ -2,17 +2,30 @@
 //! prevention semantics. THE LAW OF THIS MODULE: **never report both rails
 //! successful when only one succeeded** — `TwinReport::both_published()`
 //! is derived structurally from the two per-rail outcomes, and the summary
-//! line names every failed or unattempted rail.
+//! line names every failed, unconfirmed or unattempted rail.
 //!
 //! Rail order follows mirror-by-law: the Nostr rail (BNR-owned, the record
 //! of truth) publishes FIRST; the atproto record (the broadcast mirror) is
-//! not attempted while the owned rail is down. The one partial state this
-//! ordering can produce is `nostr OK, atproto failed/not-attempted` — the
-//! reverse is impossible by construction.
+//! not attempted while the owned rail's landing is not CONFIRMED. The one
+//! partial state this ordering can produce is `nostr landed, atproto
+//! failed/unconfirmed/not-attempted` — the reverse is impossible by
+//! construction.
+//!
+//! Epistemics of outcomes (Astra review 2026-09-12, comment 5647664844):
+//! a **lost acknowledgement is unknown, not definitely unpublished**. A
+//! transport error after a possible store, and an unavailable probe, both
+//! yield [`RailOutcome::Unconfirmed`] — never `Failed`, which is reserved
+//! for definite non-landing (an explicit rejection, an expired session).
+//! After a lost acknowledgement the orchestrator makes ONE best-effort
+//! reconcile probe: if it confirms the expected content the run reports
+//! `Published`; otherwise `Unconfirmed`, and a later run's
+//! probe-before-write settles it without ever re-publishing blindly.
 //!
 //! Per-rail idempotency is two-layered, like atmirror's State:
 //! 1. **Local state** (`TwinState`) short-circuits a rail already ledgered
-//!    as published, after a confirming probe.
+//!    as published — but ONLY when the rail's probe answer ALSO equals the
+//!    locally computed expected id: a stale or inconsistent ledger can
+//!    never approve content we would not mint ourselves.
 //! 2. **Rail probes** recover the crash window between a successful write
 //!    and the state save: an identical record/event already on the rail is
 //!    `Already` (adopted into state), a DIFFERENT one under the same
@@ -94,18 +107,27 @@ pub trait NostrSink {
 /// One rail's outcome for one publish run.
 #[derive(Debug, Clone, PartialEq)]
 pub enum RailOutcome {
-    /// This run wrote it (and the rail's answer matched what we computed).
+    /// This run wrote it, and the rail's answer (or an immediate
+    /// post-lost-ack reconcile probe) matched the locally computed id.
     Published { id: String },
-    /// Provably already on the rail — by probe or confirmed state. No
+    /// Provably already on the rail — by probe against the expected id. No
     /// write happened this run.
     Already { id: String },
-    /// The identity is taken by DIFFERENT content. Refused; never
+    /// The identity is taken by DIFFERENT content (a probe answer or a
+    /// ledger that disagrees with the locally computed id). Refused; never
     /// overwritten. Human decision required.
     Conflict { detail: String },
-    /// Attempted this run; did not land. Retryable.
+    /// Attempted this run and DEFINITELY did not land (explicit rejection
+    /// or expired session). Retryable.
     Failed { error: String },
+    /// Attempted (or probed) and the outcome is UNKNOWN: a transport
+    /// error after a possible store, a lost acknowledgement whose
+    /// reconcile probe was also unavailable, or a probe that cannot
+    /// answer. The write may have landed — never re-publish blindly;
+    /// settle by probe.
+    Unconfirmed { detail: String },
     /// Not tried this run, and why (e.g. mirror blocked by owned-rail
-    /// failure).
+    /// failure/unconfirmed state).
     NotAttempted { reason: String },
 }
 
@@ -115,6 +137,9 @@ impl RailOutcome {
             self,
             RailOutcome::Published { .. } | RailOutcome::Already { .. }
         )
+    }
+    fn is_unconfirmed(&self) -> bool {
+        matches!(self, RailOutcome::Unconfirmed { .. })
     }
 }
 
@@ -135,7 +160,9 @@ impl TwinReport {
     }
 
     /// The honest one-line status. A partial or failed run can never be
-    /// summarized as success: every non-landed rail is named.
+    /// summarized as success: every non-landed rail is named, and a rail
+    /// whose outcome is UNKNOWN reads UNRESOLVED — never "NOT PUBLISHED",
+    /// which would claim an absence nobody observed.
     pub fn summary(&self) -> String {
         match (self.nostr.landed(), self.atproto.landed()) {
             (true, true) => format!("BOTH RAILS OK (rkey {})", self.rkey),
@@ -149,6 +176,13 @@ impl TwinReport {
                  unreachable (mirror never precedes the record of truth) — investigate",
                 self.nostr
             ),
+            (false, false) if self.nostr.is_unconfirmed() || self.atproto.is_unconfirmed() => {
+                format!(
+                    "UNRESOLVED — nostr: {}; atproto: {} — an unconfirmed write may \
+                     have landed; settle by probe before any retry, never re-publish blindly",
+                    self.nostr, self.atproto
+                )
+            }
             (false, false) => format!(
                 "NOT PUBLISHED — nostr: {}; atproto: {}",
                 self.nostr, self.atproto
@@ -164,6 +198,10 @@ impl std::fmt::Display for RailOutcome {
             RailOutcome::Already { id } => write!(f, "ALREADY id {id} (no write)"),
             RailOutcome::Conflict { detail } => write!(f, "CONFLICT — {detail}"),
             RailOutcome::Failed { error } => write!(f, "FAILED — {error}"),
+            RailOutcome::Unconfirmed { detail } => write!(
+                f,
+                "UNCONFIRMED — {detail} (the write may have landed; probe before retrying)"
+            ),
             RailOutcome::NotAttempted { reason } => write!(f, "NOT ATTEMPTED — {reason}"),
         }
     }
@@ -249,19 +287,30 @@ pub fn publish(
              review needs a new rkey; refusing to mutate an existing identity"
         ));
     }
+    // Nor may one rkey be published under a second Nostr identity: the
+    // twin binding (one atproto record ↔ one (pubkey, d-tag) event) would
+    // silently fork. Checked BEFORE any write.
+    if entry.nostr_pubkey != pubkey {
+        return Err(format!(
+            "rkey {rkey} is ledgered under a different publishing pubkey — refusing to \
+             mint a second Nostr identity for one review (retry with the original key, \
+             or use a new rkey)"
+        ));
+    }
 
     // ---- Rail 1: Nostr (the owned rail — record of truth, first). ----
     let nostr_outcome = nostr_leg(event.clone(), entry, nostr)?;
 
-    // ---- Rail 2: atproto (the mirror — never before the original). ----
+    // ---- Rail 2: atproto (the mirror — never before the original, and
+    //      never while the original's landing is unconfirmed). ----
     let atproto_outcome = match &nostr_outcome {
         RailOutcome::Published { .. } | RailOutcome::Already { .. } => {
             atproto_leg(review, rkey, entry, atproto)?
         }
         other => RailOutcome::NotAttempted {
             reason: format!(
-                "nostr rail not landed ({other}) — the mirror never precedes the \
-                 record of truth"
+                "nostr rail not confirmed landed ({other}) — the mirror never \
+                 precedes the record of truth, and not while its landing is unknown",
             ),
         },
     };
@@ -280,10 +329,27 @@ fn nostr_leg(
 ) -> Result<RailOutcome, String> {
     let expected_id = event.id.clone();
 
-    // 1. State short-circuit, confirmed by probe.
+    // 1. State short-circuit — confirmed by probe AND against the locally
+    //    computed expected id. The ledger agreeing with the rail is NOT
+    //    enough: both could be stale or foreign. Every success path in
+    //    this leg requires agreement with expected_id.
     if let Some(ledgered) = &entry.nostr_event_id {
         match nostr.find_by_dtag(&event.pubkey, &d_tag(&event)?) {
-            Ok(Some(found)) if &found == ledgered => return Ok(RailOutcome::Already { id: found }),
+            Ok(Some(found)) if found == *ledgered && found == expected_id => {
+                return Ok(RailOutcome::Already { id: found })
+            }
+            Ok(Some(found)) if found == *ledgered => {
+                // Ledger and rail agree — with an id this run would NOT
+                // mint. The ledger cannot vouch for content we would not
+                // publish ourselves.
+                return Ok(RailOutcome::Conflict {
+                    detail: format!(
+                        "ledger and rail both hold event {found}, but the locally \
+                         computed id for this review+rkey+pubkey is {expected_id} — \
+                         stale or foreign identity; refusing"
+                    ),
+                });
+            }
             Ok(Some(_)) => {
                 return Ok(RailOutcome::Conflict {
                     detail: format!(
@@ -293,15 +359,16 @@ fn nostr_leg(
             }
             Ok(None) => { /* ledgered but gone (e.g. relay reset) — re-publish */ }
             Err(e) => {
-                return Ok(RailOutcome::Failed {
-                    error: format!("probe: {e}"),
+                return Ok(RailOutcome::Unconfirmed {
+                    detail: format!("ledgered but probe unavailable: {e}"),
                 })
             }
         }
     }
 
     // 2. Probe-before-write: recover the crash window between a landed
-    //    write and the state save without duplicating.
+    //    write and the state save without duplicating. An unavailable
+    //    probe is UNCONFIRMED — it must not assert the event is absent.
     match nostr.find_by_dtag(&event.pubkey, &d_tag(&event)?) {
         Ok(Some(found)) if found == expected_id => {
             entry.nostr_event_id = Some(found.clone());
@@ -317,8 +384,8 @@ fn nostr_leg(
         }
         Ok(None) => {}
         Err(e) => {
-            return Ok(RailOutcome::Failed {
-                error: format!("probe: {e}"),
+            return Ok(RailOutcome::Unconfirmed {
+                detail: format!("pre-write probe unavailable: {e}"),
             })
         }
     }
@@ -336,12 +403,39 @@ fn nostr_leg(
                  refusing to ledger a rail that disagrees with the source hash"
             ),
         }),
-        Err(SinkError::ExpiredSession) => Ok(RailOutcome::Failed {
-            error: SinkError::ExpiredSession.to_string(),
-        }),
-        Err(e) => Ok(RailOutcome::Failed {
-            error: e.to_string(),
-        }),
+        // Definite non-landing — never a write.
+        Err(e @ (SinkError::Rejected { .. } | SinkError::ExpiredSession)) => {
+            Ok(RailOutcome::Failed {
+                error: e.to_string(),
+            })
+        }
+        // Transport error: the write MAY have landed. One best-effort
+        // reconcile probe settles it; anything short of a confirmed
+        // expected id stays UNCONFIRMED.
+        Err(e) => match nostr.find_by_dtag(&event.pubkey, &d_tag(&event)?) {
+            Ok(Some(found)) if found == expected_id => {
+                entry.nostr_event_id = Some(expected_id.clone());
+                Ok(RailOutcome::Published { id: expected_id })
+            }
+            Ok(Some(other)) => Ok(RailOutcome::Conflict {
+                detail: format!(
+                    "lost acknowledgement; probe shows event {other} under this \
+                     d-tag but expected {expected_id} — refusing"
+                ),
+            }),
+            Ok(None) => Ok(RailOutcome::Unconfirmed {
+                detail: format!(
+                    "acknowledgement lost ({e}); reconcile probe found \
+nothing yet — replication lag is possible"
+                ),
+            }),
+            Err(probe_err) => Ok(RailOutcome::Unconfirmed {
+                detail: format!(
+                    "acknowledgement lost ({e}); reconcile probe \
+unavailable ({probe_err})"
+                ),
+            }),
+        },
     }
 }
 
@@ -354,33 +448,44 @@ fn atproto_leg(
     let did = review.author.clone();
     let record = serde_json::to_value(review).map_err(|e| e.to_string())?;
 
-    let mut check_stored = |stored: &(String, serde_json::Value)| -> RailOutcome {
-        if stored.1 == record {
-            entry.atproto_cid = Some(stored.0.clone());
-            RailOutcome::Already {
-                id: stored.0.clone(),
+    // Classify what a probe found at our coordinates. `was_write_this_run`
+    // separates Already (probe-only) from Published (this run's write,
+    // confirmed after a lost acknowledgement by value equality).
+    let mut confirm_stored =
+        |stored: &(String, serde_json::Value), was_write_this_run: bool| -> RailOutcome {
+            if stored.1 == record {
+                entry.atproto_cid = Some(stored.0.clone());
+                if was_write_this_run {
+                    RailOutcome::Published {
+                        id: stored.0.clone(),
+                    }
+                } else {
+                    RailOutcome::Already {
+                        id: stored.0.clone(),
+                    }
+                }
+            } else {
+                RailOutcome::Conflict {
+                    detail: format!(
+                        "at://{did}/{REVIEW_NSID}/{rkey} already holds different content \
+                         (cid {}) — never overwritten",
+                        stored.0
+                    ),
+                }
             }
-        } else {
-            RailOutcome::Conflict {
-                detail: format!(
-                    "at://{did}/{REVIEW_NSID}/{rkey} already holds different content \
-                     (cid {}) — never overwritten",
-                    stored.0
-                ),
-            }
-        }
-    };
+        };
 
     // 1. Probe-before-write (getRecord): covers both the crash window and
     //    the state-short-circuit check in one round trip — duplicate
     //    detection here is record-VALUE equality, which needs no CID
-    //    computation (see the crate-doc asymmetry).
+    //    computation (see the crate-doc asymmetry). An unavailable probe
+    //    is UNCONFIRMED — it must not assert the record is absent.
     match atproto.get_record(&did, REVIEW_NSID, rkey) {
-        Ok(Some(stored)) => return Ok(check_stored(&stored)),
+        Ok(Some(stored)) => return Ok(confirm_stored(&stored, false)),
         Ok(None) => {}
         Err(e) => {
-            return Ok(RailOutcome::Failed {
-                error: format!("getRecord probe: {e}"),
+            return Ok(RailOutcome::Unconfirmed {
+                detail: format!("getRecord probe unavailable: {e}"),
             })
         }
     }
@@ -391,12 +496,29 @@ fn atproto_leg(
             entry.atproto_cid = Some(cid.clone());
             Ok(RailOutcome::Published { id: cid })
         }
-        Err(SinkError::ExpiredSession) => Ok(RailOutcome::Failed {
-            error: SinkError::ExpiredSession.to_string(),
-        }),
-        Err(e) => Ok(RailOutcome::Failed {
-            error: e.to_string(),
-        }),
+        // Definite non-landing.
+        Err(e @ (SinkError::Rejected { .. } | SinkError::ExpiredSession)) => {
+            Ok(RailOutcome::Failed {
+                error: e.to_string(),
+            })
+        }
+        // Transport error: the write MAY have landed (the fixture proves
+        // this shape: store, then lose the response). One best-effort
+        // reconcile getRecord settles it by value equality.
+        Err(e) => match atproto.get_record(&did, REVIEW_NSID, rkey) {
+            Ok(Some(stored)) => Ok(confirm_stored(&stored, true)),
+            Ok(None) => Ok(RailOutcome::Unconfirmed {
+                detail: format!(
+                    "acknowledgement lost ({e}); reconcile probe found nothing yet — \
+                     the write may still land; settle by probe before retrying"
+                ),
+            }),
+            Err(probe_err) => Ok(RailOutcome::Unconfirmed {
+                detail: format!(
+                    "acknowledgement lost ({e}); reconcile probe unavailable ({probe_err})"
+                ),
+            }),
+        },
     }
 }
 
