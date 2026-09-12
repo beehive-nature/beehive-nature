@@ -47,10 +47,21 @@ pub fn validate_review(
     }
     validate_did(&review.author).map_err(|e| format!("author: {e}"))?;
 
-    // subject: at-uri syntax + DID authority + cid syntax.
+    // subject: at-uri syntax + DID authority + RECORD form (collection and
+    // rkey present — a strongRef subject must address a record; official
+    // strongRef permits any at-uri, this contract is stricter) + cid syntax.
     let parts = at_uri_parts(&review.subject.uri).map_err(|e| format!("subject.uri: {e}"))?;
     validate_did(parts.authority)
         .map_err(|e| format!("subject.uri authority {:?}: {e}", parts.authority))?;
+    if parts.collection.is_none() || parts.rkey.is_none() {
+        return Err(format!(
+            "subject.uri {:?}: a review subject must address a RECORD \
+             (at://did/collection/rkey); repo-root or collection-only uris are \
+             legal at-uris but not a reviewable subject here (repo-root strongRefs \
+             remain legal INSIDE receipt records, per SPEC_LEXICON-1 §5.1)",
+            review.subject.uri
+        ));
+    }
     Cid::parse_str(&review.subject.cid).map_err(|e| format!("subject.cid: {e}"))?;
 
     if !VERDICTS.contains(&review.verdict.as_str()) {
@@ -75,10 +86,14 @@ pub fn validate_review(
     }
 
     if let Some(comment) = &review.comment {
-        if comment.chars().count() > 20000 {
+        // Lexicon maxLength counts UTF-8 BYTES, not code points ("maximum
+        // length of value, in UTF-8 bytes" — atproto Lexicon spec, String
+        // type). `str::len` in Rust is exactly that.
+        if comment.len() > 20000 {
             return Err(format!(
-                "comment: {} chars exceeds maxLength 20000",
-                comment.chars().count()
+                "comment: {} UTF-8 bytes exceeds maxLength 20000 (bytes, not \
+                 characters — the Lexicon counting rule)",
+                comment.len()
             ));
         }
     }
@@ -134,6 +149,13 @@ fn validate_referenced_receipt(
             parts.collection
         ));
     }
+    if parts.rkey.is_none() {
+        return Err(format!(
+            "receipt.uri: must address a receipt RECORD \
+             (at://did/{RECEIPT_NSID}/<rkey>), got {:?}",
+            fetched.uri
+        ));
+    }
     if fetched.value.get("$type").and_then(|v| v.as_str()) != Some(RECEIPT_NSID) {
         return Err("receipt record $type is not com.beehivenature.receipt".into());
     }
@@ -146,6 +168,20 @@ fn validate_referenced_receipt(
                 .into(),
         );
     }
+    // Grammar parity the atmirror type does not check itself: the receipt's
+    // own createdAt must satisfy the same atproto datetime grammar, and its
+    // subject uri must be a well-formed at-uri with a DID authority — where
+    // repo-root subjects (no collection) are TOLERATED, because SPEC_LEXICON-1
+    // §5.1's repo-state receipts carry exactly that shape.
+    validate_datetime(&receipt.created_at).map_err(|e| format!("receipt record createdAt: {e}"))?;
+    let subject_parts = at_uri_parts(&receipt.subject.uri)
+        .map_err(|e| format!("receipt record subject.uri: {e}"))?;
+    validate_did(subject_parts.authority).map_err(|e| {
+        format!(
+            "receipt record subject.uri authority {:?}: {e}",
+            subject_parts.authority
+        )
+    })?;
     Ok(receipt)
 }
 
@@ -185,10 +221,11 @@ fn validate_storage_ref(sr: &StorageRef) -> Result<(), String> {
         }
     }
     if let Some(label) = &sr.label {
-        if label.chars().count() > 64 {
+        // UTF-8 BYTES per the Lexicon counting rule (see comment check).
+        if label.len() > 64 {
             return Err(format!(
-                "label: {} chars exceeds maxLength 64",
-                label.chars().count()
+                "label: {} UTF-8 bytes exceeds maxLength 64 (bytes, not characters)",
+                label.len()
             ));
         }
     }
@@ -265,11 +302,26 @@ pub fn at_uri_parts(uri: &str) -> Result<AtUriParts<'_>, String> {
         return Err("more than three path segments".into());
     }
     if let Some(c) = collection {
-        validate_collection_charset(c).map_err(|e| format!("collection: {e}"))?;
+        validate_nsid_collection(c).map_err(|e| format!("collection: {e}"))?;
     }
     if let Some(r) = rkey {
-        if r.len() > 512 {
-            return Err("rkey longer than 512".into());
+        // Record-key spec: 1..=512 chars, restricted ASCII — alphanumeric,
+        // period, dash, underscore, colon, tilde — and the values "." and
+        // ".." are forbidden. Case-sensitive.
+        let charset_ok = !r.is_empty()
+            && r.len() <= 512
+            && r.bytes().all(|b| {
+                b.is_ascii_alphanumeric() || matches!(b, b'.' | b'-' | b'_' | b':' | b'~')
+            });
+        if !charset_ok {
+            return Err(format!(
+                "rkey {:?}: charset is A-Za-z0-9 and .-_:~ per the record-key spec, \
+                 length 1..=512",
+                r
+            ));
+        }
+        if r == "." || r == ".." {
+            return Err("rkey: '.' and '..' are forbidden record keys".into());
         }
     }
     Ok(AtUriParts {
@@ -279,26 +331,43 @@ pub fn at_uri_parts(uri: &str) -> Result<AtUriParts<'_>, String> {
     })
 }
 
-/// Collection charset check: dotted segments, each 1–63 chars of
-/// [a-z0-9-] with no leading/trailing hyphen, total ≤ 317 (NSID shape —
-/// enough to refuse garbage deterministically; the receipt collection is
-/// compared exactly where it matters).
-fn validate_collection_charset(s: &str) -> Result<(), String> {
-    let ok = !s.is_empty()
-        && s.len() <= 317
-        && s.split('.').all(|seg| {
-            (1..=63).contains(&seg.len())
-                && seg
-                    .bytes()
-                    .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-')
-                && !seg.starts_with('-')
-                && !seg.ends_with('-')
-        });
-    if ok {
-        Ok(())
-    } else {
-        Err(format!("{s:?} is not a plausible collection NSID"))
+/// Collection grammar = the full NSID grammar (atproto NSID spec): at
+/// least 3 segments, total length ≤ 317; every DOMAIN-AUTHORITY segment
+/// (all but the last) is 1..=63 chars of [a-z0-9-] with no leading or
+/// trailing hyphen, and the first (TLD) must not start with a digit; the
+/// NAME segment (last) is 1..=63 chars of [a-zA-Z0-9] with no hyphens and
+/// must not start with a digit (uppercase is legal — `strongRef`).
+fn validate_nsid_collection(s: &str) -> Result<(), String> {
+    let segments: Vec<&str> = s.split('.').collect();
+    let fail = |why: &str| Err(format!("{s:?} is not a valid collection NSID: {why}"));
+    if segments.len() < 3 {
+        return fail("fewer than 3 segments (authority must carry at least two)");
     }
+    if s.len() > 317 {
+        return fail("total length exceeds 317");
+    }
+    let name = segments[segments.len() - 1];
+    if name.is_empty()
+        || name.len() > 63
+        || !name.bytes().all(|b| b.is_ascii_alphanumeric())
+        || name.starts_with(|c: char| c.is_ascii_digit())
+    {
+        return fail("name segment must be letters+digits, no hyphens, not digit-first");
+    }
+    for (i, seg) in segments[..segments.len() - 1].iter().enumerate() {
+        if seg.is_empty()
+            || seg.len() > 63
+            || !seg
+                .bytes()
+                .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-')
+            || seg.starts_with('-')
+            || seg.ends_with('-')
+            || (i == 0 && seg.starts_with(|c: char| c.is_ascii_digit()))
+        {
+            return fail("bad authority segment");
+        }
+    }
+    Ok(())
 }
 
 /// The atproto datetime: RFC 3339 ∩ ISO 8601 —
@@ -439,14 +508,27 @@ fn days_from_civil(y: i64, m: u32, d: u32) -> i64 {
 
 /// TID record-key syntax: exactly 13 chars from the base32-sortable
 /// alphabet `234567abcdefghijklmnopqrstuvwxyz` (digits 2–7 then a–z; 0/1/8/9
-/// excluded) per the AT Protocol TID spec. Real 2020s TIDs (leading '3')
-/// pass. A first-character restriction beyond the alphabet is NOT enforced
-/// here (UNVERIFIED which sub-range the current spec pins — ledgered in
-/// the dispatch).
+/// excluded), with the FIRST character restricted to the alphabet's first
+/// half `234567abcdefghij` — the reference implementation's exact rule
+/// (`TID_REGEX = /^[234567abcdefghij][234567abcdefghijklmnopqrstuvwxyz]{12}$/`,
+/// packages/syntax/src/tid.ts; the restriction pins the identifier's top
+/// bit to zero). Real 2020s TIDs (leading '2'/'3') pass. This resolves the
+/// first-character range previously left UNVERIFIED.
 pub fn validate_tid(s: &str) -> Result<(), String> {
     const ALPHABET: &[u8] = b"234567abcdefghijklmnopqrstuvwxyz";
+    const FIRST_HALF: &[u8] = b"234567abcdefghij";
     if s.len() != 13 {
         return Err(format!("rkey: {} chars, expected 13 (TID)", s.len()));
+    }
+    if !s.as_bytes()[0].is_ascii_lowercase() && !s.as_bytes()[0].is_ascii_digit() {
+        return Err("rkey: TID must be ASCII".into());
+    }
+    if !FIRST_HALF.contains(&s.as_bytes()[0]) {
+        return Err(
+            "rkey: TID first character outside 234567abcdefghij (the reference TID_REGEX \
+             first-half restriction; pins the top bit of the 64-bit identifier)"
+                .into(),
+        );
     }
     if !s.bytes().all(|c| ALPHABET.contains(&c)) {
         return Err("rkey: character outside the base32-sortable alphabet 234567a-z".into());
