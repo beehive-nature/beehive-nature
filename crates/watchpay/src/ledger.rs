@@ -71,6 +71,35 @@
 //!   (`record_outcome`/`resolve_unknown` pass it to the receipt
 //!   validator, which refuses `Paid` without it).
 //!
+//! EXCLUSIVE-WRITER CONTRACT (z2.c R1 review P1) — what is actually
+//! enforced, and how:
+//! - Every PUBLIC mutating operation (`write_intent`, `record_signed`,
+//!   `record_signed_at_attempt`, `record_outcome`, `record_unknown`,
+//!   `cancel_intent`, `resolve_unknown`, `abandon_unknown`) holds an
+//!   EXCLUSIVE OS file lock on `<root>/.lock` across its ENTIRE
+//!   read/check/write sequence — the check and the write are one
+//!   lock-covered transition, not a getter followed by an unlocked write.
+//!   The public read `attempts` holds a SHARED lock (consistent
+//!   multi-file snapshots; loaders never observe a half-committed
+//!   transition).
+//! - The lock is std `File::lock`/`lock_shared` (stable Rust 1.89):
+//!   `flock(2)` on Unix, `LockFileEx` on Windows — advisory KERNEL locks
+//!   attached to an open file description / handle. They contend across
+//!   independent `Ledger` handles AND across processes (two `open()`s of
+//!   the same lock file in one process are two distinct descriptions and
+//!   contend exactly like two processes; every competing mutation in
+//!   this crate participates — there are NO lock-free public mutation
+//!   paths).
+//! - PROVEN SCOPE, stated precisely: mutual exclusion and lock-covered
+//!   transition atomicity are proven across independent handles and
+//!   across separate processes (deterministic contention tests, no sleep
+//!   races); a process that dies holding the lock has it released by the
+//!   KERNEL automatically (no stale locks after process death — that is
+//!   a flock/LockFileEx property, not our code). NOT claimed: any
+//!   power-loss/fs-journaling guarantee (see DURABILITY below), and any
+//!   exclusion against writers that bypass this crate and write the
+//!   ledger files directly (the files are plain JSON by design).
+//!
 //! DURABILITY — precisely what is claimed:
 //! - Writes are temp-file + `write_all` + `flush` + `sync_all` (file
 //!   content durable) + `rename` over the target (+ directory `sync_all`
@@ -183,6 +212,28 @@ pub struct Ledger {
     root: PathBuf,
 }
 
+/// The exclusive-writer contract's lock guard (z2.c R1 review P1).
+///
+/// Every PUBLIC ledger operation acquires an OS file lock on
+/// `<root>/.lock` for the ENTIRE conflicting read/check/write operation:
+/// mutations take an exclusive lock, reads take a shared lock. The lock
+/// is std's `File::lock`/`File::lock_shared` (stable since Rust 1.89) —
+/// `flock(2)` on Unix and `LockFileEx` on Windows — advisory kernel
+/// locks held by an open file description / handle, so they contend
+/// across independent handles AND across processes, and are released
+/// AUTOMATICALLY by the kernel if the holding process dies (crash
+/// scope: no stale locks after process death; whatever was last durably
+/// written stands — see the durability section below for what is and is
+/// not claimed).
+struct LedgerLock(std::fs::File);
+
+impl Drop for LedgerLock {
+    fn drop(&mut self) {
+        // Explicit for clarity; closing the handle releases the lock too.
+        let _ = self.0.unlock();
+    }
+}
+
 impl Ledger {
     pub fn open(root: &Path) -> Result<Self> {
         std::fs::create_dir_all(root)?;
@@ -191,14 +242,55 @@ impl Ledger {
         })
     }
 
+    /// The contract's lock file path (`<root>/.lock` — never parsed as an
+    /// attempt record; the loader only reads `attempt-*.json`).
+    pub fn lock_path(&self) -> PathBuf {
+        self.root.join(".lock")
+    }
+
+    fn open_lock_file(&self) -> Result<std::fs::File> {
+        std::fs::OpenOptions::new()
+            .create(true)
+            .read(true)
+            .write(true)
+            .open(self.lock_path())
+            .map_err(|e| Error::Ledger(format!("opening ledger lock file: {e}")))
+    }
+
+    /// Exclusive lock for the whole mutation. Dropping the guard (or the
+    /// process dying) releases it.
+    fn acquire_exclusive(&self) -> Result<LedgerLock> {
+        let f = self.open_lock_file()?;
+        f.lock()
+            .map_err(|e| Error::Ledger(format!("acquiring exclusive ledger lock: {e}")))?;
+        Ok(LedgerLock(f))
+    }
+
+    /// Shared lock for reads (consistent multi-file snapshots).
+    fn acquire_shared(&self) -> Result<LedgerLock> {
+        let f = self.open_lock_file()?;
+        f.lock_shared()
+            .map_err(|e| Error::Ledger(format!("acquiring shared ledger lock: {e}")))?;
+        Ok(LedgerLock(f))
+    }
+
     fn batch_dir(&self, job_id: &str, batch_index: u32) -> Result<PathBuf> {
         crate::plan::validate_job_id(job_id)?;
         Ok(self.root.join(job_id).join(batch_index.to_string()))
     }
 
-    /// All attempts for a batch, ordered by seq. Fails closed on any
-    /// unparseable attempt file (names the path); ignores stray tmp files.
+    /// All attempts for a batch, ordered by seq (shared-locked read —
+    /// never observes a half-committed multi-file transition). Fails
+    /// closed on any unparseable attempt file (names the path); ignores
+    /// stray tmp files.
     pub fn attempts(&self, job_id: &str, batch_index: u32) -> Result<Vec<AttemptRecord>> {
+        let _guard = self.acquire_shared()?;
+        self.attempts_unlocked(job_id, batch_index)
+    }
+
+    /// The lock-free core of [`Ledger::attempts`] — MUST only be called
+    /// while holding the ledger lock.
+    fn attempts_unlocked(&self, job_id: &str, batch_index: u32) -> Result<Vec<AttemptRecord>> {
         let dir = self.batch_dir(job_id, batch_index)?;
         if !dir.exists() {
             return Ok(Vec::new());
@@ -443,10 +535,25 @@ impl Ledger {
         nonce: u64,
         now_unix: u64,
     ) -> Result<u32> {
+        let _guard = self.acquire_exclusive()?;
+        self.write_intent_unlocked(vp, batch_index, nonce, now_unix)
+    }
+
+    /// The lock-free core of [`Ledger::write_intent`] — MUST only be
+    /// called while holding the exclusive ledger lock (the budget
+    /// read/project/write below is exactly the multi-file transition the
+    /// lock serializes).
+    fn write_intent_unlocked(
+        &self,
+        vp: &ValidatedPlan,
+        batch_index: usize,
+        nonce: u64,
+        now_unix: u64,
+    ) -> Result<u32> {
         // FRESHNESS: a cached validation cannot outlive expiry (review P1).
         vp.revalidate(now_unix)?;
         let batch = self.bind_plan(vp, batch_index)?;
-        let existing = self.attempts(&vp.plan().job_id, batch.batch_index)?;
+        let existing = self.attempts_unlocked(&vp.plan().job_id, batch.batch_index)?;
         // IDENTITY: bind to every persisted attempt of this batch.
         self.bind_attempt_identity(vp, &batch, &existing)?;
         // BUDGET: reserve this attempt's worst case against the plan total.
@@ -538,6 +645,7 @@ impl Ledger {
         tx: &DecodedTransaction,
         now_unix: u64,
     ) -> Result<()> {
+        let _guard = self.acquire_exclusive()?;
         self.record_signed_inner(vp, batch_index, None, tx, now_unix)
     }
 
@@ -545,7 +653,8 @@ impl Ledger {
     /// validation to [`Ledger::record_signed`], plus the requirement that
     /// the batch's latest attempt is EXACTLY `expected_attempt_seq` in the
     /// `Intent` state — the state check and the write happen in one
-    /// transition with no observable getter step between them. A verified
+    /// lock-covered transition with no observable getter step between
+    /// them. A verified
     /// result for attempt N therefore cannot attach to a replacement
     /// attempt M (even with the same nonce and identical transaction
     /// fields), to a cancelled attempt, or to a batch whose latest
@@ -559,6 +668,7 @@ impl Ledger {
         tx: &DecodedTransaction,
         now_unix: u64,
     ) -> Result<()> {
+        let _guard = self.acquire_exclusive()?;
         self.record_signed_inner(vp, batch_index, Some(expected_attempt_seq), tx, now_unix)
     }
 
@@ -573,7 +683,7 @@ impl Ledger {
         // FRESHNESS at the signing boundary (review P1).
         vp.revalidate(now_unix)?;
         let batch = self.bind_plan(vp, batch_index)?;
-        let existing = self.attempts(&vp.plan().job_id, batch.batch_index)?;
+        let existing = self.attempts_unlocked(&vp.plan().job_id, batch.batch_index)?;
         self.bind_attempt_identity(vp, &batch, &existing)?;
         let latest = match existing.into_iter().next_back() {
             Some(r) => r,
@@ -643,7 +753,8 @@ impl Ledger {
         readback: Option<&CompletedReadback>,
         now_unix: u64,
     ) -> Result<ReceiptOutcome> {
-        let (mut rec, tx) = self.require_signed(vp, batch_index)?;
+        let _guard = self.acquire_exclusive()?;
+        let (mut rec, tx) = self.require_signed_unlocked(vp, batch_index)?;
         let outcome = validate_receipt(vp, batch_index, &tx, receipt, readback)?;
         rec.reserved_fee_wei = Self::reconcile_reservation(rec.reserved_fee_wei, &tx, receipt)?;
         rec.updated_unix = now_unix;
@@ -677,7 +788,8 @@ impl Ledger {
         now_unix: u64,
         note: &str,
     ) -> Result<()> {
-        let (mut rec, tx) = self.require_signed(vp, batch_index)?;
+        let _guard = self.acquire_exclusive()?;
+        let (mut rec, tx) = self.require_signed_unlocked(vp, batch_index)?;
         rec.state = AttemptState::Unknown {
             tx,
             since_unix: now_unix,
@@ -698,8 +810,9 @@ impl Ledger {
         now_unix: u64,
         reason: &str,
     ) -> Result<()> {
+        let _guard = self.acquire_exclusive()?;
         let batch = self.bind_plan(vp, batch_index)?;
-        let existing = self.attempts(&vp.plan().job_id, batch.batch_index)?;
+        let existing = self.attempts_unlocked(&vp.plan().job_id, batch.batch_index)?;
         self.bind_attempt_identity(vp, &batch, &existing)?;
         let mut latest = existing
             .into_iter()
@@ -737,8 +850,9 @@ impl Ledger {
         now_unix: u64,
     ) -> Result<ReceiptOutcome> {
         let _ = gate; // presence is the authorization; nothing else is derived from it
+        let _guard = self.acquire_exclusive()?;
         let batch = self.bind_plan(vp, batch_index)?;
-        let existing = self.attempts(&vp.plan().job_id, batch.batch_index)?;
+        let existing = self.attempts_unlocked(&vp.plan().job_id, batch.batch_index)?;
         self.bind_attempt_identity(vp, &batch, &existing)?;
         let mut latest = existing
             .into_iter()
@@ -791,8 +905,9 @@ impl Ledger {
         justification: &str,
     ) -> Result<()> {
         let _ = gate;
+        let _guard = self.acquire_exclusive()?;
         let batch = self.bind_plan(vp, batch_index)?;
-        let existing = self.attempts(&vp.plan().job_id, batch.batch_index)?;
+        let existing = self.attempts_unlocked(&vp.plan().job_id, batch.batch_index)?;
         self.bind_attempt_identity(vp, &batch, &existing)?;
         let mut latest = existing
             .into_iter()
@@ -811,13 +926,13 @@ impl Ledger {
         self.persist(&latest)
     }
 
-    fn require_signed(
+    fn require_signed_unlocked(
         &self,
         vp: &ValidatedPlan,
         batch_index: usize,
     ) -> Result<(AttemptRecord, DecodedTransaction)> {
         let batch = self.bind_plan(vp, batch_index)?;
-        let existing = self.attempts(&vp.plan().job_id, batch.batch_index)?;
+        let existing = self.attempts_unlocked(&vp.plan().job_id, batch.batch_index)?;
         self.bind_attempt_identity(vp, &batch, &existing)?;
         let latest = existing
             .into_iter()

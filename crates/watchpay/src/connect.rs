@@ -941,13 +941,26 @@ fn build_decoded(
 
 /// Record a verified result into the ledger — the adapter's ONLY
 /// signed-result recording boundary. Accepts [`VerifiedSigned`] (which
-/// only [`verify_signed_result`] can construct) and performs the ledger's
-/// ATTEMPT-BOUND transition: the batch's latest attempt must be exactly
-/// the sequence the result was verified for, in the `Intent` state, and
-/// the plan must still be fresh at `now_unix` (the POST-TRANSPORT
-/// observation time — expiry during the bridge call refuses HERE, with
-/// the intent and reservation preserved). Refusals return verbatim (a
-/// late duplicate, a cancelled/replaced attempt, expiry during the call).
+/// only [`verify_signed_result`] can construct) and enforces, BEFORE any
+/// write:
+/// - VERIFIED PLAN IDENTITY (z2.c R1 review P1): the result's
+///   `request_plan_hash` must equal the supplied plan's seal — a result
+///   verified under a different plan (a different job, even with
+///   byte-identical calldata, nonce and transaction fields) is refused;
+///   equivalent calldata is NEVER the authorization.
+/// - VERIFIED OPERATION/BATCH IDENTITY: the result must have been
+///   verified for exactly `TxDestination::BatchPayment { batch_index }`
+///   — an approve result or another batch's result cannot record here.
+/// - The ledger's ATTEMPT-BOUND transition: the batch's latest attempt
+///   must be exactly the sequence the result was verified for, in the
+///   `Intent` state, and the plan must still be fresh at `now_unix` (the
+///   POST-TRANSPORT observation time — expiry during the bridge call
+///   refuses HERE, with the intent and reservation preserved).
+///
+/// Every refusal leaves the destination ledger's bytes, state and
+/// reservations untouched. Refusals return verbatim (a cross-plan or
+/// cross-operation result, a late duplicate, a cancelled/replaced
+/// attempt, expiry during the call).
 pub fn record_verified_signed(
     ledger: &Ledger,
     vp: &ValidatedPlan,
@@ -955,6 +968,35 @@ pub fn record_verified_signed(
     verified: &VerifiedSigned,
     now_unix: u64,
 ) -> Result<()> {
+    // PLAN IDENTITY: the supplied plan must still be internally
+    // consistent and must BE the plan the result was verified under.
+    if !vp.is_internally_consistent() || verified.request_plan_hash() != vp.sealed_hash() {
+        return Err(Error::field(
+            "plan_hash",
+            format!(
+                "verified result was produced under plan {} but the supplied plan's seal is {} \
+                 — cross-plan recording refused (equivalent calldata is not authorization)",
+                verified.request_plan_hash(),
+                vp.sealed_hash()
+            ),
+        ));
+    }
+    // OPERATION/BATCH IDENTITY: the result must belong to exactly this
+    // batch-payment destination.
+    match verified.request_operation() {
+        TxDestination::BatchPayment {
+            batch_index: verified_batch,
+        } if verified_batch as usize == batch_index => {}
+        other => {
+            return Err(Error::field(
+                "batch_index",
+                format!(
+                    "verified result was produced for {other:?} but recording was requested for \
+                     batch payment {batch_index} — cross-operation recording refused"
+                ),
+            ))
+        }
+    }
     ledger.record_signed_at_attempt(
         vp,
         batch_index,

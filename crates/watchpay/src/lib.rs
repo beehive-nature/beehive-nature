@@ -53,7 +53,11 @@
 //!   result (chain/payer/destination/value/nonce/gas/fees/calldata).
 //! - [`receipt`] — strict receipt→transaction→batch binding, no fallbacks.
 //! - [`ledger`] — durable intent/signed/outcome states with explicit crash
-//!   semantics; Unknown never auto-re-signs.
+//!   semantics; Unknown never auto-re-signs; every public operation is
+//!   covered by the EXCLUSIVE-WRITER file lock (std `File::lock` on
+//!   `<root>/.lock` — the whole read/check/write transition is
+//!   lock-covered, across handles and processes; see the module's
+//!   precise proven-scope statement).
 //! - [`eth`] — secp256k1 recovery + the EIP-2 low-s law (k256; no signing).
 //! - [`signed_tx`] — strict SIGNED legacy/EIP-1559 envelope decode
 //!   (alloy-rlp framing; canonical re-encode equality; replay protection).

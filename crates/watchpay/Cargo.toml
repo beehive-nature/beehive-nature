@@ -15,7 +15,8 @@ primitive-types = { version = "0.13", default-features = false, features = ["std
 # z2.c adapter: RLP framing (strict header decode/encode, maintained by
 # alloy-rs — no hand-rolled length math) and secp256k1 recovery (RustCrypto
 # k256, same family the workspace already uses in bnr-keys/bswap). k256 is
-# RECOVERY-only here; the crate still signs nothing.
+# RECOVERY-only here; the crate still signs nothing. The ledger's
+# exclusive-writer lock uses std's File::lock (stable 1.89) — no extra dep.
 alloy-rlp = "0.3"
 k256 = { version = "0.13", default-features = false, features = ["ecdsa", "alloc", "arithmetic"] }
 

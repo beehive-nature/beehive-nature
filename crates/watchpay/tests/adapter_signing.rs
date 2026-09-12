@@ -1805,3 +1805,132 @@ fn pre_dispatch_expiry_is_phase_distinguished() {
     // The intent write itself was refused pre-dispatch: nothing persisted.
     assert!(ledger.attempts(&vp.plan().job_id, 0).unwrap().is_empty());
 }
+// ---------- z2.c R1 review corrections: identity + exclusive-writer regressions ----------
+
+/// base_plan with a second batch (index 1, own ceiling), totals recomputed.
+fn two_batch_vp() -> watchpay::plan::ValidatedPlan {
+    let mut p = base_plan();
+    p.expected_payer = fixture_payer();
+    let mut b1 = base_batch();
+    b1.batch_index = 1;
+    b1.batch_id = watchpay::canonical::batch_id(p.network.chain_id, &p.network.payment_vault, &b1);
+    p.batches.push(b1);
+    p.approve_ceiling_total = p
+        .batches
+        .iter()
+        .map(|b| b.batch_amount_ceiling)
+        .fold(Atto::ZERO, |a, x| a.checked_add(x).unwrap());
+    p.gas_ceilings.max_total_gas = p.gas_ceilings.per_tx_gas_limit * 3;
+    p.native_fee_ceilings.max_total_native_fee_wei = Atto::from_u64(
+        p.gas_ceilings.per_tx_gas_limit * p.native_fee_ceilings.per_tx_max_fee_per_gas_wei * 3,
+    );
+    p.plan_hash = watchpay::canonical::plan_hash(&p);
+    validate_plan(&p, SYNTH_NOW).unwrap()
+}
+
+/// Compose + fake-sign + verify for `vp` batch `batch_index`, attempt 1, nonce 7.
+fn verified_for(
+    vp: &watchpay::plan::ValidatedPlan,
+    batch_index: usize,
+) -> watchpay::connect::VerifiedSigned {
+    let req = SignRequest::compose(
+        vp,
+        TxDestination::BatchPayment { batch_index },
+        TxEnvelope::Eip1559,
+        7,
+        1,
+        path(),
+        SYNTH_NOW,
+    )
+    .unwrap();
+    let raw = fake_sign(&req.connect_payload(), Mutation::None);
+    verify_signed_result(&req, vp, &raw).unwrap()
+}
+
+#[test]
+fn verified_result_cannot_cross_plan_identity() {
+    // Proves (R1 probe, permanent regression): a verified result from
+    // plan A cannot record into plan B ledger — even when job B's
+    // intent carries the SAME nonce and attempt sequence and every
+    // transaction field is byte-identical. The refusal is plan-HASH
+    // identity, never equivalent calldata; B's ledger state and
+    // reservation are preserved; the matching-plan control succeeds.
+    let vp = payer_vp();
+    let verified = verified_for(&vp, 0);
+    // Plan B: another job_id, everything else identical, revalidated.
+    let mut other_plan = vp.plan().clone();
+    other_plan.job_id = "astra-other-job".into();
+    other_plan.plan_hash = watchpay::canonical::plan_hash(&other_plan);
+    let other = validate_plan(&other_plan, SYNTH_NOW).unwrap();
+    assert_ne!(other.sealed_hash(), verified.request_plan_hash());
+    let root = tmp_root("r1-cross-plan");
+    let ledger = Ledger::open(&root).unwrap();
+    ledger.write_intent(&other, 0, 7, SYNTH_NOW).unwrap();
+    let err = record_verified_signed(&ledger, &other, 0, &verified, SYNTH_NOW + 1).unwrap_err();
+    assert_eq!(err.field_name(), Some("plan_hash"));
+    assert!(err.to_string().contains("cross-plan"), "{err}");
+    // B's ledger is untouched: one Intent with its reservation held.
+    let recs = ledger.attempts(&other.plan().job_id, 0).unwrap();
+    assert_eq!(recs.len(), 1);
+    assert!(matches!(recs[0].state, AttemptState::Intent));
+    let reserve = Atto::from_u64(other.plan().gas_ceilings.per_tx_gas_limit)
+        .checked_mul(Atto::from_u64(
+            other.plan().native_fee_ceilings.per_tx_max_fee_per_gas_wei,
+        ))
+        .unwrap();
+    assert_eq!(recs[0].reserved_fee_wei, reserve);
+    // Matching-plan control: the SAME result records under ITS plan.
+    let root_ok = tmp_root("r1-cross-plan-control");
+    let ledger_ok = Ledger::open(&root_ok).unwrap();
+    ledger_ok.write_intent(&vp, 0, 7, SYNTH_NOW).unwrap();
+    record_verified_signed(&ledger_ok, &vp, 0, &verified, SYNTH_NOW + 1).unwrap();
+}
+
+#[test]
+fn wrong_operation_result_cannot_record_as_batch_payment() {
+    // Proves: a result verified for the APPROVE operation cannot
+    // record through the batch-payment boundary (wrong-operation
+    // rejection); the ledger is untouched.
+    let vp = payer_vp();
+    let areq = SignRequest::compose(
+        &vp,
+        TxDestination::Approve,
+        TxEnvelope::Eip1559,
+        0,
+        1,
+        path(),
+        SYNTH_NOW,
+    )
+    .unwrap();
+    let mut fake = FakeConnectTransport::new(Mutation::None);
+    let raw = fake
+        .ethereum_sign_transaction(&areq.connect_payload())
+        .unwrap();
+    let approve_verified = verify_signed_result(&areq, &vp, &raw).unwrap();
+    let root = tmp_root("r1-wrong-op");
+    let ledger = Ledger::open(&root).unwrap();
+    ledger.write_intent(&vp, 0, 7, SYNTH_NOW).unwrap();
+    let err =
+        record_verified_signed(&ledger, &vp, 0, &approve_verified, SYNTH_NOW + 1).unwrap_err();
+    assert_eq!(err.field_name(), Some("batch_index"));
+    assert!(err.to_string().contains("cross-operation"), "{err}");
+    let recs = ledger.attempts(&vp.plan().job_id, 0).unwrap();
+    assert!(matches!(recs.last().unwrap().state, AttemptState::Intent));
+}
+
+#[test]
+fn batch_mismatched_result_cannot_record_under_other_batch() {
+    // Proves: a result verified for batch 1 cannot record under
+    // batch 0 of the same plan — operation/batch identity, not
+    // calldata equivalence, is the authorization.
+    let vp = two_batch_vp();
+    let verified_b1 = verified_for(&vp, 1);
+    let root = tmp_root("r1-batch-mismatch");
+    let ledger = Ledger::open(&root).unwrap();
+    ledger.write_intent(&vp, 0, 7, SYNTH_NOW).unwrap();
+    let err = record_verified_signed(&ledger, &vp, 0, &verified_b1, SYNTH_NOW + 1).unwrap_err();
+    assert_eq!(err.field_name(), Some("batch_index"));
+    assert!(err.to_string().contains("cross-operation"), "{err}");
+    let recs = ledger.attempts(&vp.plan().job_id, 0).unwrap();
+    assert!(matches!(recs.last().unwrap().state, AttemptState::Intent));
+}
