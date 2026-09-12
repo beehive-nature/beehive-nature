@@ -18,6 +18,8 @@ const corpus = JSON.parse(read('surfaces/lang-corpus.json'));
 const crestBytes = readFileSync(new URL('../assets/profile-archive/house-crest-von-zutphen-DESIGN.svg', import.meta.url));
 const crest = crestBytes.toString('utf8');
 const crestManifest = JSON.parse(read('assets/profile-archive/house-crest-von-zutphen.json'));
+const separatorsBytes = readFileSync(new URL('../assets/brand/skaists-separators.svg', import.meta.url));
+const separators = separatorsBytes.toString('utf8');
 
 function extractById(html, id) {
   const open = html.match(new RegExp(`<(?<tag>[a-z][a-z0-9]*)([^>]*\\sid="${id}"[^>]*)>`, 'i'));
@@ -123,6 +125,23 @@ test('house archive gives New bee, Raver, and Cypherpunk distinct value at the s
   assert.match(page, /body:not\(\[data-reg="cypherpunk"\]\)\[data-prof-beat="house"\] #house-archive/);
   assert.match(page, /body\[data-reg="cypherpunk"\] #house-archive\{display:block\}/);
   assert.match(page, /@media\(max-width:720px\)/);
+});
+
+test('SKAISTS separator specimen pins the .a cell and .b bond identity grammar', () => {
+  const archive = extractById(page, 'house-archive');
+  const digest = createHash('sha256').update(separatorsBytes).digest('hex').toUpperCase();
+  assert.equal(digest, crestManifest.brandSpecimen['sha256-PUBLIC-CONSTANT']);
+  assert.equal(digest, 'B0D7BA18BA028A6313A29288EBDAC0E77EEE73153344CD866756D3006329EE75'); // PUBLIC-CONSTANT: SKAISTS separator specimen digest
+  assert.equal(crestManifest.brandSpecimen.kind, 'vector-path-specimen');
+  assert.equal(crestManifest.brandSpecimen.webfont, false);
+  assert.equal(crestManifest.brandSpecimen.semantics['.a'], 'the cell · structure, the hive');
+  assert.equal(crestManifest.brandSpecimen.semantics['.b'], 'the bond · love, the link');
+  assert.match(archive, /data-reg="cypherpunk">\s*<img src="\.\.\/assets\/brand\/skaists-separators\.svg"/);
+  assert.match(archive, /identity specimen, not an installable webfont/);
+  assert.match(separators, /the cell — structure, the hive/);
+  assert.match(separators, /the bond — love, the link/);
+  assert.match(separators, /the header of the realm, both hands/);
+  assert.doesNotMatch(separators, /<script\b|<foreignObject\b|\bon\w+\s*=|(?:href|xlink:href)\s*=/i);
 });
 
 test('disclosure preview is consent-first and .a lineage cannot impersonate family lineage', () => {

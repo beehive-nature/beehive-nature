@@ -9,3 +9,6 @@ surfaces/fleet/** -text
 
 # HOUSE ARCHIVE: founder-supplied crest is a byte-pinned release artifact.
 assets/profile-archive/house-crest-von-zutphen-DESIGN.svg -text -diff
+
+# BRAND SPECIMEN: founder-supplied SKAISTS vector paths remain byte-exact.
+assets/brand/skaists-separators.svg -text -diff

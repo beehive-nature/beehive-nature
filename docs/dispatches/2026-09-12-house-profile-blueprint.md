@@ -16,6 +16,8 @@ The same record has three presentations:
 - **Raver:** an immersive crest stage, holder-authored symbolism, and audience-circle controls.
 - **Cypherpunk:** the exact artifact digest, disclosure manifest, privacy seam matrix, evidence states, and the separate `.a` authority/succession model.
 
+The founder's SKAISTS separator artwork now makes the two rails visible in the Cypherpunk view: `.a` is the cell — structure and the hive — while `.b` is the bond — love and the link. The supplied file is recorded accurately as a vector-path identity specimen, not an installable webfont.
+
 ## Artifact receipt
 
 Source package: `Family crest millennial design v2.zip`, supplied by the founder outside the repository.
@@ -27,6 +29,15 @@ The v2 package was compared with the previously supplied package. Every included
 - self-contained scan: no script, `foreignObject`, event handler, external URL, `href`, or `xlink:href`
 
 The source SVG is copied unchanged. The companion JSON records the v2 label, digest, source package, holder, rights state, marketplace state, disclosure defaults, claim policy, symbolism, distribution targets, and `.a` lineage rule.
+
+The founder also supplied the brand separator specimen:
+
+- `assets/brand/skaists-separators.svg`
+- SHA-256: `B0D7BA18BA028A6313A29288EBDAC0E77EEE73153344CD866756D3006329EE75` (PUBLIC-CONSTANT)
+- self-contained scan: no script, `foreignObject`, event handler, external URL, `href`, or `xlink:href`
+- semantics: `.a` cell / structure / hive; `.b` bond / love / link; both hands in the realm header
+
+The separator source is copied unchanged and byte-pinned beside the crest. It is displayed only in the Cypherpunk archive panel so the simpler New Bee and Raver paths keep their visual focus.
 
 ## Honesty and privacy boundary
 
@@ -46,7 +57,8 @@ The established profile shell still uses the Blanguage dock. The new archive is 
 
 ## Verification
 
-- `node --test e2e/profile-views.test.mjs` — 12/12 pass, including v2 byte/hash parity, SVG safety, three-view content, consent defaults, `.a` lineage, and existing profile contracts.
+- `node --test e2e/profile-views.test.mjs` — 13/13 pass, including v2 crest and SKAISTS separator byte/hash parity, SVG safety, three-view content, consent defaults, `.a` lineage, and existing profile contracts.
+- Hosted front-door command from `.github/workflows/tests.yml` — 308/308 pass locally with the separator specimen included.
 - `node scripts/estate-check.mjs` — pass; 94 counted, 103 listed, registry and hub source remain consistent.
 - `node e2e/profile-house-archive-shot.mjs` — pass; all three 1280 px views, Raver at 390 px, no horizontal overflow, audience and `.a` controls, no page errors, no remote requests.
 - Visual receipts are written to the local temporary directory; derived screenshots are not committed.

@@ -16,6 +16,20 @@
       "saleTerms": null
     }
   },
+  "brandSpecimen": {
+    "title": "SKAISTS separators · .a cell / .b bond",
+    "file": "assets/brand/skaists-separators.svg",
+    "mediaType": "image/svg+xml",
+    "sha256-PUBLIC-CONSTANT": "B0D7BA18BA028A6313A29288EBDAC0E77EEE73153344CD866756D3006329EE75",
+    "source": "Founder-supplied skaists-separators.svg",
+    "kind": "vector-path-specimen",
+    "webfont": false,
+    "semantics": {
+      ".a": "the cell · structure, the hive",
+      ".b": "the bond · love, the link",
+      "realmHeader": "the header of the realm, both hands"
+    }
+  },
   "house": {
     "name": "skaists",
     "rail": ".b",
