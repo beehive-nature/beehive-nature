@@ -1,0 +1,20 @@
+{
+  "file": "green-teal-breathing.mp4",
+  "bytes": 767970,
+  "streams": [
+    {
+      "codec_name": "h264",
+      "codec_type": "video",
+      "width": 720,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "r_frame_rate": "24/1",
+      "duration": "6.000000",
+      "nb_read_frames": "144"
+    }
+  ],
+  "fast_start": true,
+  "audio_streams": 0,
+  "blender_file_bytes": 481198,
+  "poster_bytes": 76104
+}
