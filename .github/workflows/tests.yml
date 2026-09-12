@@ -91,6 +91,9 @@ jobs:
       - name: Recovery inventory — missing dependency + secret-free output
         if: always()
         run: bash e2e/recovery-inventory.test.sh
+      - name: Autonomi observations — approved fields and secret canaries
+        if: always()
+        run: bash docs/runbooks/autonomi-observe.test.sh
       - name: Secret scanner — refused content stays out of logs
         if: always()
         run: bash e2e/secret-scan-output.test.sh
