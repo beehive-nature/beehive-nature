@@ -1,13 +1,15 @@
 # Autonomi fence readiness — the pinned runbook
 
 **Seat:** z1.c (BNR Autonomi dependency/readiness seat), 2026-09-12.
-**Revision 2** — corrections per Astra review of 305597f2
-([#10 comment 5647564848](https://github.com/beehive-nature/beehive-nature/issues/10#issuecomment-5647564848)):
-field-work closure corrected (§9), installed-version-vs-enforced-pin separated
-(§2–3), scheduling made conditional and bound to installed revisions,
-participation claims re-based on direct node diagnostics (§7), commands
-allowlisted via an observation script (§5), rollback hardened (§8), search
-and lockfile limits stated accurately (§6).
+**Revision 3** — observation script made FAIL-CLOSED per Astra integration
+review of e220dfcc ([#10 comment 5647673959](https://github.com/beehive-nature/beehive-nature/issues/10#issuecomment-5647673959)):
+raw fallbacks and argv output removed, all output through schema-validated
+projections, local secret-canary test suite added (28/28). Revision 2
+([#10 comment 5647564848](https://github.com/beehive-nature/beehive-nature/issues/10#issuecomment-5647564848))
+corrected: field-work closure (§9), installed-version-vs-enforced-pin
+separation (§2–3), conditional scheduling bound to installed revisions,
+participation claims re-based on direct node diagnostics (§7), rollback
+hardened (§8), search and lockfile limits (§6).
 **Law of this runbook:** READ-ONLY observation plus owner-executable
 candidates. No systemd, upgrade-channel, signing, network, or binary change
 was made by this lane. Every claim is VERIFIED with a citation bound to the
@@ -173,20 +175,36 @@ Harness crate pins (box `~/ant-lane/ant-extsig/Cargo.lock`): `ant-core 0.8.1`
 @ git `969ed008d9cd39bbfe6466bc5ff7943914565994` (ant-cli crate at that rev
 declares 0.3.6), `ant-node 0.18.1`, `ant-protocol 2.3.5`.
 
-## 5 · Readiness observation battery (allowlisted, read-only)
+## 5 · Readiness observation battery (fail-closed, allowlisted, read-only)
 
-Use `docs/runbooks/autonomi-observe.sh` (this repo; syntax-checked and
-receipted against the box this lane — output shapes below). It prints only
-nonsecret fields: processes with the rewards address redacted, versions,
-digests, the registry's version/channel/path/evm fields (rewards address
-excluded), the monitor's newest/latest-stable + fetch time, today's
-upgrade-check and PUT-refusal lines with chunk addresses truncated,
-today's replication-ingress total, antd `/health`, and the two disk floors.
-Run: `ssh oracle bash -s < docs/runbooks/autonomi-observe.sh`.
-Key shapes from the 2026-09-12 receipt: registry node 2 → version 0.18.1,
-channel null; monitor newest `v0.19.0-rc.2` prerelease / latest stable
-`v0.18.1`; `No upgrade available` + jittered next checks; PUT rejections
-(§7).
+Use `docs/runbooks/autonomi-observe.sh` (revision 3, hardened per Astra
+review #10/5647673959). Its output law: **only explicitly approved fields
+are printed — process identity as pid/comm/elapsed with argv and
+environment never read into output; registry/monitor/health values only
+through schema-validated jq projections that drop unknown fields by
+construction; log signals only as extracted named values (counts, a
+timestamp, the two refusal numbers), with unparseable lines omitted rather
+than echoed; no raw fallbacks — any parse/schema failure or missing tool
+yields one generic diagnostic and a nonzero exit, never the source input
+or parser errors.** Input locations are env-overridable for local tests
+only (`OBS_*`; `OBS_JQ` exists solely to exercise the missing-tool path).
+
+The companion suite `docs/runbooks/autonomi-observe.test.sh` proves the
+law locally with synthetic fixtures and secret canaries (ZCANARY…) planted
+in unknown registry/health/release fields, process arguments, `--version`
+output junk, malformed registry/health JSON, a missing jq, and a changed
+log shape — asserting canaries never reach stdout/stderr, failures are
+visible and nonzero, and approved fields survive: **28/28 pass** (receipt
+in the r3 dispatch). Run it anywhere bash+jq exist:
+`bash docs/runbooks/autonomi-observe.test.sh`.
+
+Rev 2 of the script was also receipted against the box (read-only) before
+hardening; its observed values stand as the 2026-09-12 receipts quoted in
+this runbook (registry node 2 → version 0.18.1, channel null; monitor
+newest `v0.19.0-rc.2` prerelease / latest stable `v0.18.1`; `No upgrade
+available` + jittered next checks; PUT rejections §7). Rev 3 has not been
+box-run (not required for this patch); next box run re-receipts the new
+output shape.
 
 ## 6 · Compatibility checks, lockfile reality, and the in-tree harness
 
@@ -227,15 +245,20 @@ channel null; monitor newest `v0.19.0-rc.2` prerelease / latest stable
    needs the separate bounded capacity inventory the review ordered,
    coordinated with the Watch/media owner (candidate recoverable items with
    ownership/retention evidence; nothing deleted).
-2. **Fence volume 93% full; storage-PUT acceptance is REFUSED — direct
-   diagnostics, not file metadata.** Today's node log carries recurring
-   `ant_node::storage::disk_precheck: Rejecting PUT before payment
-   verification: storage error: Insufficient disk space: 0.40 GiB
+2. **Fence volume 93% full; storage-PUT offers are being REFUSED in the
+   observed sample windows — direct diagnostics, not file metadata, and
+   not a claim about every write path.** Today's node log carries
+   recurring `ant_node::storage::disk_precheck: Rejecting PUT before
+   payment verification: storage error: Insufficient disk space: 0.40 GiB
    available, 0.49 GiB reserve required…` (16:33–17:38Z receipt window).
    These rejections are ABSENT from the 09-04/05 logs; the exact onset date
-   is not bounded this pass. The `data.mdb` size/mtime (5.37 G, 2026-09-04
-   16:08) is retained as a measurement only — it is NOT itself a
-   participation signal.
+   is not bounded this pass. The reported refusals are observations of
+   offered PUTs in sampled windows only — they are not generalized into
+   proof of zero writes on any path. The `data.mdb` size/mtime (5.37 G,
+   2026-09-04 16:08) is retained as a measurement only — it is NOT itself
+   a participation signal. The refusal is an operational follow-up for the
+   owner (capacity/recovery planning keeps production boundaries and
+   coordinates with the Watch/media owner); it is not authority to resize.
 3. **Participation is NOT paused overall.** The same logs show daily
    replication-verification and first-audit activity (thousands of pending
    verifications, nonzero ingress-received totals in every daily log
