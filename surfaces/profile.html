@@ -167,8 +167,9 @@ th{color:var(--violet);font-weight:400} td.n{color:var(--ink)}
 </header>
 
 <article id="first-bee">
-  <p class="calm" data-i18n="prof.bee.calm">These are published name records — who holds a house — not a chat list and not a profile editor.</p>
-  <p class="take" data-i18n="prof.bee.takeaway">You can read as a guest with no wallet. A lost key stays lost; a name is a lease.</p>
+  <p class="calm" data-i18n="prof.bee.calm">Welcome. Every name on this page is a house — a story kept in public.</p>
+  <p class="take" data-i18n="prof.bee.takeaway">Start with one house: the founder's.</p>
+  <p class="support" data-i18n="prof.bee.support">These are published records, not a live guest list and not an editor. You can read as a guest with no wallet. A lost key stays lost; a name is a lease.</p>
   <div class="choices">
     <button type="button" class="door primary" data-prof-go="house" data-i18n="prof.bee.house">Read the founder house</button>
     <a class="door" href="buzz-directory.html" data-i18n="prof.bee.back">People journey</a>
@@ -189,20 +190,35 @@ th{color:var(--violet);font-weight:400} td.n{color:var(--ink)}
         <stop offset="50%" stop-color="#c9a0ff" stop-opacity=".16"/>
         <stop offset="100%" stop-color="#0c1412" stop-opacity="0"/>
       </radialGradient>
+      <linearGradient id="lineage-roots" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#2c4a2e" stop-opacity=".85"/>
+        <stop offset="100%" stop-color="#0c1412" stop-opacity="0"/>
+      </linearGradient>
     </defs>
     <rect class="wash" width="800" height="900" fill="url(#lantern-wash)"/>
     <ellipse class="wash" cx="400" cy="260" rx="260" ry="200" fill="url(#lantern-glow)"/>
     <g class="living">
-      <path d="M250 90v80m300-80v80" stroke="#d8c46a" stroke-width="3"/>
-      <rect x="214" y="170" width="72" height="96" rx="12" fill="#d7c5ef" stroke="#FFD700" stroke-width="2"/>
-      <rect x="514" y="170" width="72" height="96" rx="12" fill="#754d96" stroke="#c9a0ff" stroke-width="2"/>
-      <circle cx="250" cy="218" r="10" fill="#FFD700"/>
-      <circle cx="550" cy="218" r="10" fill="#c9a0ff"/>
-      <circle cx="330" cy="470" r="46" fill="#C41E3A"/>
+      <!-- one name, one golden thread, three generations of lanterns -->
+      <path id="name-thread" d="M398 56C360 110 312 140 300 186m2 24c-4 34 22 52 66 62m28 6c40 10 74 26 96 52" fill="none" stroke="#FFD700" stroke-width="3" opacity=".8"/>
+      <path d="M300 90v86" stroke="#d8c46a" stroke-width="3" opacity=".5"/>
+      <path d="M560 96v80" stroke="#d8c46a" stroke-width="3" opacity=".5"/>
+      <rect class="lantern gen" x="266" y="176" width="68" height="90" rx="12" fill="#754d96" stroke="#c9a0ff" stroke-width="2" opacity=".75"/>
+      <rect class="lantern gen" x="344" y="262" width="72" height="96" rx="12" fill="#d7c5ef" stroke="#FFD700" stroke-width="2"/>
+      <circle class="lantern gen" cx="508" cy="348" r="34" fill="#FFD700" opacity=".92"/>
+      <!-- the human holder (purple) reaching for the newest lantern -->
+      <circle class="person" cx="330" cy="470" r="46" fill="#754d96"/>
       <path d="M304 458c10-16 40-16 52 0" fill="none" stroke="#fff" stroke-width="3"/>
-      <circle cx="470" cy="486" r="40" fill="#65509a"/>
-      <path d="M250 610h300" stroke="#c9a0ff" stroke-width="3" opacity=".4"/>
-      <path d="M280 610v90m80-90v70m80 20v70m80-90v90" stroke="#86cc72" stroke-width="4"/>
+      <path class="kin" d="M366 448C400 420 448 396 484 378" fill="none" stroke="#FFD700" stroke-width="2" opacity=".6"/>
+      <!-- a machine companion (teal) keeps the record beside the holder -->
+      <path class="tether" d="M372 486 452 490" stroke="#45c2dc" stroke-width="2" stroke-dasharray="4 5" opacity=".8"/>
+      <path class="machine" d="M452 478 466 470l14 8v16l-14 8-14-8Z" fill="#1f4a3a" stroke="#45c2dc" stroke-width="2"/>
+      <!-- green roots: what the whole house stands in -->
+      <path d="M0 640c140-24 260 16 400 6s260-40 400-8v262H0Z" fill="url(#lineage-roots)"/>
+      <path d="M250 640v90m300-96v90m-150 26v70" stroke="#86cc72" stroke-width="3" opacity=".5"/>
+      <path d="M200 616h400" stroke="#c9a0ff" stroke-width="3" opacity=".4"/>
+      <circle cx="302" cy="152" r="3" fill="#FFD700" opacity=".8"/>
+      <circle cx="562" cy="330" r="3" fill="#FFD700" opacity=".7"/>
+      <circle cx="596" cy="170" r="3" fill="#FFD700" opacity=".6"/>
     </g>
   </svg>
   <p class="feel" data-i18n="prof.raver.feel">One name, every generation kept. Nothing quietly rewritten.</p>
@@ -215,13 +231,19 @@ th{color:var(--violet);font-weight:400} td.n{color:var(--ink)}
   <p class="consciousness" data-i18n="prof.raver.consciousness">Names are stories. Holders are portraits. The ledger waits one tap away.</p>
   <svg class="portrait" viewBox="0 0 280 200" aria-hidden="true" focusable="false">
     <rect width="280" height="200" rx="20" fill="currentColor" opacity=".06"/>
-    <rect x="36" y="18" width="36" height="48" rx="8" fill="#FFD700" opacity=".85"/>
-    <rect x="208" y="18" width="36" height="48" rx="8" fill="#c9a0ff" opacity=".85"/>
-    <circle cx="140" cy="118" r="42" fill="#C41E3A"/>
-    <path d="M118 108c8-12 36-12 44 0" fill="none" stroke="#fff" stroke-width="3"/>
+    <path class="thread" d="M140 16C124 34 108 40 98 52m4 14c-4 12 4 20 18 26m16 6c14 6 26 14 34 24" fill="none" stroke="#FFD700" stroke-width="2.5" opacity=".85"/>
+    <rect x="74" y="52" width="30" height="40" rx="8" fill="#754d96" stroke="#c9a0ff" stroke-width="2" opacity=".8"/>
+    <rect x="112" y="92" width="32" height="44" rx="8" fill="#d7c5ef" stroke="#FFD700" stroke-width="2"/>
+    <circle cx="180" cy="142" r="16" fill="#FFD700" opacity=".92"/>
+    <circle class="person" cx="140" cy="146" r="30" fill="#754d96"/>
+    <path d="M122 138c6-10 28-10 34 0" fill="none" stroke="#fff" stroke-width="3"/>
+    <path class="tether" d="M168 152 194 158" stroke="#45c2dc" stroke-width="2" stroke-dasharray="4 5" opacity=".85"/>
+    <path class="machine" d="M194 150 204 144l10 6v12l-10 6-10-6Z" fill="#1f4a3a" stroke="#45c2dc" stroke-width="2"/>
+    <path d="M20 184h240" stroke="#86cc72" stroke-width="4" opacity=".5"/>
   </svg>
   <div class="choices">
-    <button type="button" class="door primary" data-prof-go="deeper" data-i18n="review.bee.deeper">Go deeper</button>
+    <button type="button" class="door primary" data-prof-go="house" data-i18n="prof.raver.openhouse">Open the founder house</button>
+    <button type="button" class="door" data-prof-go="deeper" data-i18n="review.bee.deeper">Go deeper</button>
   </div>
 </article>
 

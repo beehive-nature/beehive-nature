@@ -119,3 +119,112 @@ presence probe. Those remain out of scope.
 No live roster API. No online-now counter. No enrichment of published
 wallets or mailboxes. No scrape of buzz.directory. Agents on the
 directory stay labeled machine seats.
+
+---
+
+# z1.a rider — finish the journeys, cure §7 — 2026-09-12
+
+Seat: z1.a (zCode GLM 5.3), Medium session, own worktree
+`wt-zcode-people-journey`. Base: the exact PR head `4342cce8` (Grok/Cursor
+work preserved verbatim as the ancestor — descendant commits only, no
+force-push, §7 untouched). This rider finishes the visitor journey and
+resolves the inherited identity-convention failure the way §7 itself
+prescribes: the pushed range of the NEW push contains only founder-authored
+commits (seat = committer + trailers).
+
+## Journey changes (both doors)
+
+**New bee now leads with the visitor's purpose, welcoming and
+mother-readable.** Directory arrival: calm "Welcome. This page is the
+estate's front porch — the place to find our community rooms." / take
+"Come meet the hive." / support carries the receipts honesty at support
+size ("checked by hand when this page was published … cannot see who is
+online, and it does not pretend to") plus the .buzz fallback help. Profile
+arrival: "Every name on this page is a house — a story kept in public." /
+"Start with one house: the founder's." / honesty (published records, guest
+reads free, lost key stays lost, name is a lease) demoted to support. The
+warning is never the largest first-screen promise — asserted structurally
+in both page suites (`takeaway leads with purpose, not the warning`).
+
+**Raver is now an intentional people/relationship composition, not
+recolored cards.** Directory `#hive-scene`: purple people (family pair,
+friends, loner) linked by warm kin-lines around two estate hives (founder
+gold-on-purple, science teal), teal machine companions tethered on dashed
+lines, green biomass floor rooting everything; feel line and breathing
+wash unchanged. Profile `#lantern-scene`: one golden name-thread through
+three generation lanterns to a purple human holder reaching for the
+newest, teal machine companion keeping the record beside them, green
+lineage roots. Figure layers carry matching relationship portraits.
+
+**Raver reaches the story layers.** Directory figure's primary is now
+"Meet the hosts" → the hives story layer (figure → hives → deeper);
+profile figure's primary is "Open the founder house" → the house story
+layer (figure → house → deeper). Machine agents stay clearly named
+(machine seat / bAiGenTiC labels untouched); Cypherpunk is untouched —
+founder-locked full instrument, all seven sections, both date
+disagreements retained.
+
+**State and translations.** Per-view disclosure state and per-view beats
+still ride the original Maps; language selection persists across view
+toggles (live-verified: lv and ar retained bee → raver → cypherpunk).
+Corpus: 7 keys re-Englished + re-drafted across en + 28 tongues, 2 keys
+added — **exact key list for Astra's coordination:**
+`dir.bee.calm`, `dir.bee.takeaway`, `dir.bee.support`,
+`dir.raver.consciousness`, `dir.hives.hosts`, `prof.bee.calm`,
+`prof.bee.takeaway` changed; `prof.bee.support`, `prof.raver.openhouse`
+added. All cells machine-drafted (⚙ corpus law, no human attestation
+claimed); founder's first six tongues and RTL (ar/fa/he/ur) drafted with
+care; page EN == corpus EN verified by estate-source.
+
+## Shared-file riders (flagged for Astra, shipped inside the candidate)
+
+- `e2e/social-arrival.test.mjs` — one assertion block updated to the new
+  New bee lead (it pinned the old calm line). Grok's PR already touched
+  this file; the rider keeps the same fence assertions.
+- `e2e/people-journey-shot.mjs` — NEW page-scoped three-view walk +
+  screenshot generator (28 shots in `e2e/shots-people-journey/`). Ad-hoc
+  like the other `*-shot.mjs` scripts; NOT wired into CI — wiring it into
+  the workflow is proposed to Astra, not done here.
+- Grok's shared edits preserved as-is: workflow test line, reading-room
+  browser suite page list.
+
+## Verification (this seat, this candidate)
+
+- `node --test` CI front-door line + both page suites: **261/261**
+- PR's five suites (`buzz-directory-views profile-views social-arrival
+  first-click social-three-view`): **47/47**
+- `node e2e/estate-source.mjs`: **11/11** (caught and fixed one real
+  drift: the figure layer briefly carried a second English for
+  `dir.bee.support`)
+- `node scripts/estate-check.mjs`: PASS (93 counted, no new surface file,
+  no atlas beat needed)
+- `node e2e/reading-rooms.browser.mjs`: **1812/1812** (both pages, both
+  sizes, all-28-language sweep incl. RTL, pause/stage retention)
+- `node e2e/people-journey-shot.mjs`: **79/79** — three views × two sizes
+  × both pages, raver story paths walked, RTL mirroring on ar, language
+  retention across toggles, disclosure state across toggles in the real
+  DOM, external-link law (every external anchor new-tab + noopener),
+  zero page errors
+
+## Limitations, honestly
+
+- No AI-vision pass over the PNGs succeeded locally (the image-analysis
+  gateway rejected the harness URLs). Scene rendering was verified
+  geometrically: DOM markers, bounding boxes, art-pixel density (7–10%
+  bright pixels across scene bounds), crop-window math, plus both browser
+  suites. The cold human-grade visual review is z1.b's assignment.
+- The corpus drafts are machine drafts (⚙). No human attestation is
+  claimed for any tongue, per corpus law; meaning review stays in #7.
+- No live roster, presence, chat, or profile editor was added anywhere;
+  the static-directory/published-record fence is byte-identical in fact
+  set.
+
+## §7 cure, stated plainly
+
+The original commit `4342cce8` keeps its Cursor author (history preserved
+— no rewrite, no force-push, check not weakened). This rider is a
+descendant commit with **author = the founder, committer = z1.a seat,
+Co-authored-by trailers crediting Cursor Agent's original work**. §7
+checks the PUSHED range (`before..sha`), so the new push's range contains
+only the convention-shaped commit and passes on its own merits.
+

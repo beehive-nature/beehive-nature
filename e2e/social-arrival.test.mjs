@@ -79,8 +79,12 @@ test('the directory New bee intro chooses OUR HIVES, People and names and Go dee
   assert.ok(links.includes('profile.html'), 'People and names → profile');
   assert.match(newBee, /data-dir-go="hives"/);
   assert.match(newBee, /data-i18n="social.arrival.dir.hives"/);
-  assert.match(newBee, /This page lists community doors/);
-  assert.match(newBee, /Buzz app/i);
+  // z1.a rider 2026-09-12: New bee leads with the visitor's purpose (welcome +
+  // meet the hive); the receipts/online honesty lives support-sized — the intro
+  // still says plainly the list cannot see who is online and does not pretend.
+  assert.match(newBee, /Welcome\. This page is the estate's front porch/);
+  assert.match(newBee, /Come meet the hive\./);
+  assert.match(newBee, /This list cannot see who is online, and it does not pretend to/);
   assert.match(newBee, /data-i18n="review.bee.deeper"/);
   assert.doesNotMatch(newBee, /wss:\/\//);
   assert.doesNotMatch(newBee, /buzz:\/\//);
