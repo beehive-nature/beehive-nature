@@ -54,6 +54,7 @@ a{color:var(--cyan)}
 .calm{max-width:40rem;margin:18px auto 0;font-size:1.05rem;line-height:1.7}
 .take{font-size:clamp(1.5rem,5.4vw,2.4rem);line-height:1.2;color:var(--gold);margin-top:18px;font-weight:550;text-wrap:balance}
 .support{font-size:.875rem;color:var(--dim);margin-top:8px;max-width:36rem;margin-inline:auto}
+.marks-line{font-size:1rem;color:var(--ink);margin-top:12px;max-width:36rem;margin-inline:auto;line-height:1.6}
 .eyebrow{color:var(--dim);font-size:.875rem;margin-top:8px}
 .pair{color:var(--ink);font-size:.95rem;margin-top:6px;letter-spacing:.04em}
 .story-caption{max-width:36rem;margin:16px auto 0;font-size:1.05rem;line-height:1.7;color:var(--dim)}
@@ -67,6 +68,21 @@ body:not([data-reg="cypherpunk"])[data-review-beat="compose"] #guard,
 body:not([data-reg="cypherpunk"])[data-review-beat="compose"] #ai,
 body:not([data-reg="cypherpunk"])[data-review-beat="compose"] #sources-panel{display:none}
 body:not([data-reg="cypherpunk"])[data-review-beat="compose"] #layer-compose{display:block}
+/* New bee / Raver compose: four human marks first, surface picker second.
+   Cypherpunk keeps today's select order (surface then verdict). */
+#mark-words{display:none;flex-wrap:wrap;gap:10px;justify-content:center;margin:18px auto 0;max-width:40rem}
+body:not([data-reg="cypherpunk"])[data-review-beat="compose"] #mark-words{display:flex}
+body:not([data-reg="cypherpunk"])[data-review-beat="compose"] label[for="verdict"],
+body:not([data-reg="cypherpunk"])[data-review-beat="compose"] #verdict{
+ position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%)
+}
+.mark{appearance:none;display:flex;flex-direction:column;align-items:flex-start;gap:2px;
+ min-height:44px;min-width:7.5rem;flex:1 1 7.5rem;padding:10px 14px;border-radius:12px;border:1px solid var(--line);
+ background:var(--well,#edf2eb);color:var(--ink);font:inherit;cursor:pointer;text-align:left}
+.mark b{font-weight:650}
+.mark span{font-size:.8rem;color:var(--dim)}
+.mark[aria-pressed="true"]{border-color:var(--leaf);background:var(--leaf);color:#102214}
+.mark[aria-pressed="true"] span{color:#16301c}
 body[data-review-beat="deeper"] #instrument,
 body[data-reg="cypherpunk"] #instrument{display:block}
 /* FOUNDER LOCK: Cypherpunk is the full attestation instrument on contact.
@@ -79,6 +95,7 @@ body[data-reg="cypherpunk"] #compose,
 body[data-reg="cypherpunk"] #guard,
 body[data-reg="cypherpunk"] #ai,
 body[data-reg="cypherpunk"] #sources-panel{display:revert}
+body[data-reg="cypherpunk"] #mark-words{display:none}
 body[data-reg="raver"][data-review-beat="arrival"] #masthead{display:none}
 
 /* New bee — language-first calm room. */
@@ -89,7 +106,7 @@ body[data-reg="bee"]{
   background:#f6f7f2;color:#18362a;font:1.125rem/1.65 var(--bee-font);
 }
 body[data-reg="bee"] h1{color:var(--ink);letter-spacing:-.03em;text-shadow:none}
-body[data-reg="bee"] .calm,.take,.support,.eyebrow,.pair,.story-caption{font-family:var(--bee-font)}
+body[data-reg="bee"] .calm,.take,.support,.marks-line,.eyebrow,.pair,.story-caption,.mark{font-family:var(--bee-font)}
 body[data-reg="bee"] .take{color:#326b39}
 body[data-reg="bee"] .door{font:500 1rem/1.4 var(--bee-font);border-radius:16px;min-width:11rem;background:#fff;border-color:#8a9e90}
 body[data-reg="bee"] .door.primary{background:#326b39;color:#fff;border-color:#326b39}
@@ -182,6 +199,7 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
 <article id="first-bee">
   <p class="calm" data-i18n="review.bee.calm">A review is a signed receipt you choose to publish — nothing on this page watches you.</p>
   <p class="take" data-i18n="review.bee.takeaway">Only what you choose to publish shows in the tally.</p>
+  <p class="marks-line" data-i18n="review.bee.marks">One page you visited. One mark: works, idea, bug, or gap. Only if you publish.</p>
   <p class="support" data-i18n="review.bee.support">nothing here watches a silent walker.</p>
   <div class="choices">
     <button type="button" class="door primary" data-review-go="compose" data-i18n="review.bee.leave">Leave a receipt</button>
@@ -224,6 +242,7 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
 <article id="layer-figure">
   <p class="consciousness" data-i18n="review.raver.consciousness">A walker who publishes nothing appears nowhere — that is the design.</p>
   <p class="take" data-i18n="review.bee.takeaway">Only what you choose to publish shows in the tally.</p>
+  <p class="marks-line" data-i18n="review.bee.marks">One page you visited. One mark: works, idea, bug, or gap. Only if you publish.</p>
   <p class="support" data-i18n="review.bee.support">nothing here watches a silent walker.</p>
   <div class="choices">
     <button type="button" class="door primary" data-review-go="compose" data-i18n="review.bee.leave">Leave a receipt</button>
@@ -278,6 +297,12 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
 
 <div id="layer-compose">
 <p class="story-caption" data-i18n="review.compose.caption">One surface, one verdict, one line — only if you choose to publish it.</p>
+<div id="mark-words" role="radiogroup" aria-label="One mark: works, idea, bug, or gap">
+  <button type="button" class="mark" data-verdict="✅ works" aria-pressed="true"><b>works</b><span>you walked it and it held</span></button>
+  <button type="button" class="mark" data-verdict="💡 idea" aria-pressed="false"><b>idea</b><span>an improvement</span></button>
+  <button type="button" class="mark" data-verdict="🐛 bug" aria-pressed="false"><b>bug</b><span>something broke</span></button>
+  <button type="button" class="mark" data-verdict="🕳 gap" aria-pressed="false"><b>gap</b><span>something missing</span></button>
+</div>
 <section id="compose">
   <h2>3 · <span data-i18n="h.166">REVIEW RECEIPT — one surface, one verdict, ≤140 chars</span></h2>
   <label for="surf">surface</label>
@@ -544,6 +569,22 @@ $('w1go').onclick=async function(){
       var o=document.createElement('option'); o.value=s; o.textContent=s; sel.appendChild(o);
     });
   });
+
+  var markBtns=document.querySelectorAll('#mark-words [data-verdict]');
+  function syncMarks(){
+    var v=$('verdict').value;
+    markBtns.forEach(function(b){
+      b.setAttribute('aria-pressed', b.getAttribute('data-verdict')===v ? 'true' : 'false');
+    });
+  }
+  markBtns.forEach(function(b){
+    b.addEventListener('click', function(){
+      $('verdict').value=b.getAttribute('data-verdict');
+      syncMarks();
+    });
+  });
+  $('verdict').addEventListener('change', syncMarks);
+  syncMarks();
 
   var ID=null; // {record:{sign,publicKey}, fingerprint}
   var ENGINE=(typeof BZDIDKEY!=='undefined')?BZDIDKEY:null;

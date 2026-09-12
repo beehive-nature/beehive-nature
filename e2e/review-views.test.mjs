@@ -46,6 +46,7 @@ test('New bee first paint is one calm sentence, one takeaway, and one choice', (
   const bee = extractById(page, 'first-bee');
   assert.match(bee, /A review is a signed receipt you choose to publish — nothing on this page watches you\./);
   assert.match(bee, /Only what you choose to publish shows in the tally\./);
+  assert.match(bee, /One page you visited\. One mark: works, idea, bug, or gap\. Only if you publish\./);
   assert.match(bee, /nothing here watches a silent walker\./);
   assert.match(bee, /Leave a receipt/);
   assert.match(bee, /Go deeper/);
@@ -53,6 +54,7 @@ test('New bee first paint is one calm sentence, one takeaway, and one choice', (
   assert.doesNotMatch(bee, TELEMETRY);
   assert.doesNotMatch(bee, /attestation/);
   assert.doesNotMatch(bee, FENCE);
+  assert.doesNotMatch(bee, /star|score|rating|telemetry/i);
   assert.doesNotMatch(bee, /id="listen"|id="bindBtn"|id="gCheck"|id="w1wake"|id="tallySt"/);
   assert.doesNotMatch(bee, /<table/i);
   assert.match(page, /<body data-reg="bee" data-bee-theme="custom" data-review-beat="arrival">/);
@@ -79,6 +81,7 @@ test('consciousness beat and New bee choice sit behind the Raver tap, not on fir
   const figure = extractById(page, 'layer-figure');
   assert.match(figure, /A walker who publishes nothing appears nowhere — that is the design\./);
   assert.match(figure, /Only what you choose to publish shows in the tally\./);
+  assert.match(figure, /One page you visited\. One mark: works, idea, bug, or gap\. Only if you publish\./);
   assert.match(figure, /Leave a receipt/);
   assert.match(figure, /Go deeper/);
   assert.doesNotMatch(figure, FENCE);
@@ -89,6 +92,12 @@ test('consciousness beat and New bee choice sit behind the Raver tap, not on fir
 test('Leave a receipt is one calm compose beat — not passkey, rails, verify, or WebLLM', () => {
   const compose = extractById(page, 'layer-compose');
   assert.match(compose, /One surface, one verdict, one line — only if you choose to publish it\./);
+  assert.match(compose, /id="mark-words"/);
+  assert.match(compose, />works</);
+  assert.match(compose, />idea</);
+  assert.match(compose, />bug</);
+  assert.match(compose, />gap</);
+  assert.ok(compose.indexOf('id="mark-words"') < compose.indexOf('id="surf"'), 'human marks come before the surface picker');
   assert.match(compose, /id="surf"/);
   assert.match(compose, /id="verdict"/);
   assert.match(compose, /id="rnote"/);
@@ -96,6 +105,9 @@ test('Leave a receipt is one calm compose beat — not passkey, rails, verify, o
   assert.match(compose, /TASK/);
   assert.doesNotMatch(compose, /id="listen"|id="bindBtn"|id="gCheck"|id="w1wake"|id="tallySt"/);
   assert.doesNotMatch(compose, /passkey|Ed25519|WebLLM|wake the pocket|bLOVErAi|listen to the rails|\bidle\b/);
+  assert.doesNotMatch(compose, /star|score|rating/i);
+  assert.match(page, /body:not\(\[data-reg="cypherpunk"\]\)\[data-review-beat="compose"\] #mark-words\{display:flex\}/);
+  assert.match(page, /body\[data-reg="cypherpunk"\] #mark-words\{display:none\}/);
   assert.match(page, /body:not\(\[data-reg="cypherpunk"\]\)\[data-review-beat="compose"\] #layer-compose\{display:block\}/);
   assert.match(page, /body:not\(\[data-reg="cypherpunk"\]\)\[data-review-beat="compose"\] #tally,/);
   assert.match(page, /body:not\(\[data-reg="cypherpunk"\]\)\[data-review-beat="compose"\] #bind,/);
@@ -132,7 +144,7 @@ test('Cypherpunk still reaches the full attestation instrument, same grammar and
 
 test('keyed first-paint English matches the corpus; every tongue has a cell', () => {
   const keys = [
-    'review.mark', 'review.pair', 'review.bee.calm', 'review.bee.takeaway', 'review.bee.support',
+    'review.mark', 'review.pair', 'review.bee.calm', 'review.bee.takeaway', 'review.bee.marks', 'review.bee.support',
     'review.bee.leave', 'review.bee.deeper', 'review.raver.feel', 'review.raver.offer',
     'review.raver.consciousness', 'review.compose.caption',
     'review.foot.attest', 'review.foot.learn'

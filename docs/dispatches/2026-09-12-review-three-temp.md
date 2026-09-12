@@ -37,14 +37,19 @@ Cure, copied from #45 / #46 / #47 / #48:
 
 - **New bee:** calm sentence (“A review is a signed receipt you choose
   to publish — nothing on this page watches you.”), takeaway lead
-  (“Only what you choose to publish shows in the tally.”), quieter
-  support (“nothing here watches a silent walker.”). The support line
-  does not twin the calm’s attestation / telemetry wording. Choice:
-  **Leave a receipt**. **Go deeper**. ZERO rails idle dashboard,
-  passkey wall, verify panel, WebLLM wake.
-- After **Leave a receipt:** one calm compose beat — surface, verdict,
-  note, compose. Passkey bind / rails dashboard / Ed25519 verify /
-  WebLLM wake stay deepen or Cypherpunk — not the same first gift beat.
+  (“Only what you choose to publish shows in the tally.”), product
+  support (“One page you visited. One mark: works, idea, bug, or gap.
+  Only if you publish.”), quieter walker line (“nothing here watches a
+  silent walker.”). The walker line does not twin the calm’s
+  attestation / telemetry wording. Choice: **Leave a receipt**. **Go
+  deeper**. ZERO rails idle dashboard, passkey wall, verify panel,
+  WebLLM wake. A receipt is a short signed note about one surface you
+  walked (≤140). Marks are works · idea · bug · gap only — not stars,
+  scores, or browse telemetry. A silent walker stays invisible.
+- After **Leave a receipt:** one calm compose beat — four human-word
+  marks first, surface picker second, then the ≤140 note. Passkey bind
+  / rails dashboard / Ed25519 verify / WebLLM wake stay deepen or
+  Cypherpunk — not the same first gift beat.
 - **Raver:** soft crown / receipt glow — keep/share energy, not a
   control room; reduced-motion = one frame. Feeling: “What if a review
   were a gift you signed, not a trail you left?” Tap: **Offer a
@@ -67,7 +72,7 @@ Cypher masthead clauses ride `data-reg="cypherpunk"`.
 
 ## Language
 
-Thirteen `review.*` keys were machine-drafted across English plus the 28
+Fourteen `review.*` keys were machine-drafted across English plus the 28
 docked tongues and marked ⚙. `receipt` means a signed published review.
 `tally` is the published count. `walker` is one who walks pages and may
 publish nothing. Meaning review is still owed. Existing `h.165`–`h.169`
@@ -82,10 +87,11 @@ headings stay on the instrument.
 - `node e2e/university-smoke.mjs` 78/78 (review deck `#surf` roster still
   populates; instrument checks enter via **Go deeper** / Cypherpunk)
 - `node e2e/i18n-coverage.mjs` on review.html ru --floors: live census
-  **10 keyed / floor 6** PASS (100% keyed, 28 tongues filled)
-- live 8765 poke 46/46 PASS (Chrome, localStorage cleared, 1280×800),
-  including FOUNDER LOCK: forcing `data-review-beat="compose"` on
-  Cypherpunk still shows tally, bind, compose, guard, AI, sources
+  **11 keyed / floor 6** PASS (100% keyed, 28 tongues filled)
+- live 8765 poke 59/59 PASS (Chrome, localStorage cleared, 1280×800),
+  including four-mark first paint, compose marks-above-surface, and
+  FOUNDER LOCK: Cypherpunk hides `#mark-words`, keeps the verdict
+  select, and still shows tally / bind / guard / AI / sources
 
 Skipped this beat: fleet attestation of the new keys, wiring TASK 6b
 in-page publish, any David Irvine / x0x #622 measurement claim, any
