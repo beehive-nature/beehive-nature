@@ -7,6 +7,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { extractKeyedText } from './i18n-extract.mjs';
 
 const read = path => readFileSync(new URL('../'+path, import.meta.url), 'utf8');
@@ -14,6 +15,14 @@ const page = read('surfaces/profile.html');
 const register = read('surfaces/register.js');
 const tour = read('surfaces/tour.js');
 const corpus = JSON.parse(read('surfaces/lang-corpus.json'));
+const crestBytes = readFileSync(new URL('../assets/profile-archive/house-crest-von-zutphen-DESIGN.svg', import.meta.url));
+const crest = crestBytes.toString('utf8');
+const crestManifest = JSON.parse(read('assets/profile-archive/house-crest-von-zutphen.json'));
+const separatorsBytes = readFileSync(new URL('../assets/brand/skaists-separators.svg', import.meta.url));
+const separators = separatorsBytes.toString('utf8');
+const fullCrestBytes = readFileSync(new URL('../assets/seals/house-crest-von-zutphen-DESIGN.svg', import.meta.url));
+const fullCrest = fullCrestBytes.toString('utf8');
+const breathingBloomBytes = readFileSync(new URL('../docs/mvp-walk/assets/genesis-3d/motion/green-teal-breathing.svg', import.meta.url));
 
 function extractById(html, id) {
   const open = html.match(new RegExp(`<(?<tag>[a-z][a-z0-9]*)([^>]*\\sid="${id}"[^>]*)>`, 'i'));
@@ -90,6 +99,103 @@ test('founder house beat is one story door — not a multi-house wallet grid', (
   assert.doesNotMatch(house, /bqueenbee\.base\.eth|bClaude\.a|bloverai|guest\.citizen|北方國王/);
   assert.doesNotMatch(house, /generation 1|generation 2|Name history/);
   assert.match(page, /body:not\(\[data-reg="cypherpunk"\]\)\[data-prof-beat="house"\] #layer-house\{display:block\}/);
+});
+
+test('house archive uses the founder-supplied v2 crest bytes with portable provenance', () => {
+  const archive = extractById(page, 'house-archive');
+  const digest = createHash('sha256').update(crestBytes).digest('hex').toUpperCase();
+  assert.equal(digest, crestManifest.artifact['sha256-PUBLIC-CONSTANT']);
+  assert.equal(digest, '6303A84263857D62568613F9929B33E0F74076A6640CEDF0D643BEB30E579088'); // PUBLIC-CONSTANT: v2 crest digest
+  assert.equal(crestManifest.release, 'v2');
+  assert.equal(crestManifest.artifact.marketplace.listed, false);
+  assert.equal(crestManifest.artifact.license, 'Rights reserved until the holder publishes a license');
+  assert.match(archive, /\.\.\/assets\/profile-archive\/house-crest-von-zutphen-DESIGN\.svg/);
+  assert.match(archive, /\.\.\/assets\/profile-archive\/house-crest-von-zutphen\.json/);
+  assert.match(archive, /href="\.\.\/assets\/profile-archive\/house-crest-von-zutphen\.json">Open provenance/);
+  assert.doesNotMatch(archive, /house-crest-von-zutphen\.json" target="_blank"/);
+  assert.match(archive, /family-authored interpretation &middot; not a title certificate/);
+  assert.doesNotMatch(crest, /<script\b|<foreignObject\b|\bon\w+\s*=|(?:href|xlink:href)\s*=/i);
+});
+
+test('house archive gives New bee, Raver, and Cypherpunk distinct value at the same record', () => {
+  const archive = extractById(page, 'house-archive');
+  assert.match(archive, /data-reg="bee">A family profile can hold more than a name/);
+  assert.match(archive, /data-reg="raver">A house mark made to travel/);
+  assert.match(archive, /data-reg="cypherpunk" id="profile-display-bio">The full ceremonial master is shown here/);
+  assert.match(archive, /data-reg="raver" aria-labelledby="symbol-title"/);
+  assert.match(archive, /data-reg="cypherpunk" aria-labelledby="privacy-title"/);
+  assert.match(archive, /Privacy seam matrix/);
+  assert.match(page, /body:not\(\[data-reg="cypherpunk"\]\)\[data-prof-beat="house"\] #house-archive/);
+  assert.match(page, /body\[data-reg="cypherpunk"\] #house-archive\{display:block\}/);
+  assert.match(page, /@media\(max-width:720px\)/);
+});
+
+test('SKAISTS separator specimen pins the .a cell and .b bond identity grammar', () => {
+  const archive = extractById(page, 'house-archive');
+  const digest = createHash('sha256').update(separatorsBytes).digest('hex').toUpperCase();
+  assert.equal(digest, crestManifest.brandSpecimen['sha256-PUBLIC-CONSTANT']);
+  assert.equal(digest, 'B0D7BA18BA028A6313A29288EBDAC0E77EEE73153344CD866756D3006329EE75'); // PUBLIC-CONSTANT: SKAISTS separator specimen digest
+  assert.equal(crestManifest.brandSpecimen.kind, 'vector-path-specimen');
+  assert.equal(crestManifest.brandSpecimen.webfont, false);
+  assert.equal(crestManifest.brandSpecimen.semantics['.a'], 'the cell · structure, the hive');
+  assert.equal(crestManifest.brandSpecimen.semantics['.b'], 'the bond · love, the link');
+  assert.match(archive, /data-reg="cypherpunk">\s*<img src="\.\.\/assets\/brand\/skaists-separators\.svg"/);
+  assert.match(archive, /identity specimen, not an installable webfont/);
+  assert.match(separators, /the cell — structure, the hive/);
+  assert.match(separators, /the bond — love, the link/);
+  assert.match(separators, /the header of the realm, both hands/);
+  assert.doesNotMatch(separators, /<script\b|<foreignObject\b|\bon\w+\s*=|(?:href|xlink:href)\s*=/i);
+});
+
+test('Cypherpunk receives the full shield achievement and the house carries the breathing nature mark', () => {
+  const archive = extractById(page, 'house-archive');
+  const fullDigest = createHash('sha256').update(fullCrestBytes).digest('hex').toUpperCase();
+  const bloomDigest = createHash('sha256').update(breathingBloomBytes).digest('hex').toUpperCase();
+  assert.equal(fullDigest, crestManifest.ceremonialMaster['sha256-PUBLIC-CONSTANT']);
+  assert.equal(fullDigest, 'F9B2CE8428FFFC8FE215754858AB6F8DEB8691FB766CA16D226272F7A8331F40'); // PUBLIC-CONSTANT: full achievement digest
+  assert.equal(bloomDigest, crestManifest.natureMark['sha256-PUBLIC-CONSTANT']);
+  assert.equal(bloomDigest, '9971D2CA697797AF7430B062CA1842AB063BA3746418E8963A527BD4BF017FE3'); // PUBLIC-CONSTANT: breathing bloom digest
+  assert.match(fullCrest, /clipPath id="shieldClip"/);
+  assert.doesNotMatch(fullCrest, /<script\b|<foreignObject\b|\bon\w+\s*=/i);
+  assert.ok([...fullCrest.matchAll(/\bhref="([^"]+)"/gi)].every(match => match[1].startsWith('#')), 'full achievement references only its own SVG definitions');
+  assert.match(archive, /class="crest-full" data-reg="cypherpunk" src="\.\.\/assets\/seals\/house-crest-von-zutphen-DESIGN\.svg"/);
+  assert.match(archive, /shield, nine quarters, supporters, coronet, crest, motto, and compartment/);
+  assert.match(archive, /href="\.\.\/docs\/BLAZON\.md">Read the blazon/);
+  assert.match(archive, /data="\.\.\/docs\/mvp-walk\/assets\/genesis-3d\/motion\/green-teal-breathing\.svg"/);
+  assert.match(archive, /no network or presence signal/);
+  assert.match(archive, /reduced-motion preferences show the resting artwork/);
+});
+
+test('profile editor is a bounded local preview with no publication claim', () => {
+  const archive = extractById(page, 'house-archive');
+  assert.match(archive, /<summary>Edit your profile<\/summary>/);
+  assert.match(archive, /Changes remain in this open page, create no account, upload nothing/);
+  assert.match(archive, /maxlength="60"/);
+  assert.match(archive, /maxlength="120"/);
+  assert.match(archive, /maxlength="240"/);
+  assert.match(archive, /type="color" value="#E8B54B"/);
+  assert.match(page, /\.textContent=name/);
+  assert.match(page, /\.textContent=motto/);
+  assert.match(page, /\.textContent=bio/);
+  assert.match(page, /archive\.style\.setProperty\('--profile-accent'/);
+  assert.match(page, /Local preview applied · not saved or published/);
+  assert.match(page, /Preview reset to the published blueprint · not saved or published/);
+});
+
+test('disclosure preview is consent-first and .a lineage cannot impersonate family lineage', () => {
+  const archive = extractById(page, 'house-archive');
+  assert.match(archive, /data-audience="public"/);
+  assert.match(archive, /Living relatives stay private until each person says yes/);
+  assert.match(archive, /data-scope="circle"/);
+  assert.match(archive, /data-scope="private"/);
+  assert.match(archive, /DNA \+ health/);
+  assert.match(archive, /\.a secret or key/);
+  assert.match(archive, /never claims a blood relationship/);
+  assert.match(archive, /preview changes what is shown here; publishing comes later/);
+  assert.match(page, /archive\.setAttribute\('data-audience',choice\)/);
+  assert.match(page, /panel\.hidden=panel\.getAttribute\('data-profile-schema'\)!==selected/);
+  assert.equal(crestManifest.privacyDefaults.livingPeople, 'private-until-each-person-consents');
+  assert.match(crestManifest.agentLineage.rule, /never a fabricated blood relationship/);
 });
 
 test('Raver tap opens art first; ledger one tap away', () => {
