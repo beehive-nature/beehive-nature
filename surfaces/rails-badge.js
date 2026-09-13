@@ -120,7 +120,14 @@
       state = '⚠ fingerprint CHANGED — possible spoof'; col = '#ffb347';
       dot.style.background = '#ffb347';
     }
-    txt.innerHTML = '<b style="color:#7ddf8f">' + soul + '.b</b> · <span title="origin-bound public fingerprint — sha256(bnr.b/evm/' + soul + '@' + location.origin + '), pinned on first verified visit (TOFU); an identifier, never a key; a spoofed origin shows a different 0x" style="color:#e2efdb;cursor:help">' + ox + '</span> · rails <b style="color:#7ddf8f">LIVE</b> · <span title="' + state + '" style="color:' + col + ';cursor:pointer" id="rb-trust">' + state + '</span>' + CHECK + ' <span style="color:#5f6f61">' + when + '</span>';
+    /* the soul renders in HTML contexts — escape it (z2.sec S3): storage is
+       same-origin trust, but the badge must not turn a stored value into markup */
+    var esc = function (s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    };
+    var soulSafe = esc(soul);
+    txt.innerHTML = '<b style="color:#7ddf8f">' + soulSafe + '.b</b> · <span title="origin-bound public fingerprint — sha256(bnr.b/evm/' + soulSafe + '@' + location.origin + '), pinned on first verified visit (TOFU); an identifier, never a key; a spoofed origin shows a different 0x" style="color:#e2efdb;cursor:help">' + ox + '</span> · rails <b style="color:#7ddf8f">LIVE</b> · <span title="' + state + '" style="color:' + col + ';cursor:pointer" id="rb-trust">' + state + '</span>' + CHECK + ' <span style="color:#5f6f61">' + when + '</span>';
     txt.title = 'bDiD + crypto rails connected · keyless · origin-pinned · ' + when;
     wireRecheck();
     var tp = document.getElementById('rb-trust');

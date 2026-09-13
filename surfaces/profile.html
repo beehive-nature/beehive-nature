@@ -252,7 +252,30 @@ body[data-reg="cypherpunk"] .claim-stamp{border-radius:2px}
  .profile-edit-grid label.wide{grid-column:auto}
  .privacy-table-wrap{overflow-x:auto}.archive-panel{padding:14px}
 }
-
+/* ── the rails band — one capability set, three registers (z2.profile) ── */
+.caps .capintro{font-size:11px;color:var(--dim);margin:2px 0 10px;line-height:1.85;max-width:74ch}
+.capgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}
+.cap{background:var(--well);border:1px solid var(--line);border-left:3px solid var(--leaf);border-radius:9px;padding:12px 13px;position:relative}
+.cap.soon{border:1.5px dashed var(--violet);border-left:1.5px dashed var(--violet)}
+.cap .glyph{font-size:22px;line-height:1;margin-bottom:8px}
+.cap h3{font-size:12.5px;color:var(--ink);font-weight:600;margin-bottom:5px;padding-right:64px}
+.cap p{font-size:11px;color:var(--dim);line-height:1.8}
+.cap .tag{position:absolute;top:12px;right:12px;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--line);border-radius:99px;padding:2px 8px;color:var(--dim)}
+.cap.live .tag{color:var(--leaf);border-color:var(--leaf)}
+.cap.soon .tag{color:var(--violet);border-color:var(--violet)}
+.cap a{color:var(--cyan);font-size:10.5px;text-decoration:none;border-bottom:1px dashed var(--cyan)}
+.railcheck{margin-top:12px;background:var(--well);border:1px solid var(--line);border-radius:9px;padding:12px 14px}
+.railcheck .rlab{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
+.railcheck .rrow{display:flex;gap:8px;flex-wrap:wrap}
+.railcheck input{flex:1;min-width:180px;background:var(--bg);border:1px solid var(--line);border-radius:7px;color:var(--ink);font:12.5px 'IBM Plex Mono',monospace;padding:9px 11px}
+.railcheck input:focus{outline:none;border-color:var(--cyan)}
+.railcheck button{background:none;border:1px solid var(--leaf);color:var(--leaf);border-radius:7px;padding:9px 16px;font:11.5px 'IBM Plex Mono',monospace;cursor:pointer;min-height:38px}
+.railcheck button:hover{background:var(--leaf);color:var(--bg)}
+.rverdict{margin-top:9px;font-size:11.5px;line-height:1.75;color:var(--dim);min-height:1.2em}
+.rverdict b{color:var(--ink)}
+.rverdict.ok{color:var(--verified)}
+.rverdict.no{color:var(--gold)}
+.rlaw{margin-top:10px;font-size:10px;color:var(--dim);line-height:1.8}
 </style>
 </head>
 <body data-reg="bee" data-bee-theme="custom" data-prof-beat="arrival" data-experience="profile">
@@ -664,7 +687,113 @@ body[data-reg="cypherpunk"] .claim-stamp{border-radius:2px}
     <div class="law" data-i18n="prof.inst.law7src">These houses are published estate snapshots. No enrichment APIs. No scrape-to-complete. Cite the printed field, or stay silent.</div>
   </details>
 </section>
+
 </div>
+
+<!-- ═══ THE RAILS BAND — verified capabilities, three registers (z2.profile) ═══ -->
+<section class="caps" id="rails">
+  <h2>the rails a house can ride</h2>
+  <p class="capintro" data-reg="bee">every house on this page stands on rails the estate has already
+  built and checked — names for beings and agents you can query right here, token holdings read
+  from the chain, the estate's own address scheme, and one more door on its way.</p>
+  <p class="capintro" data-reg="raver">the rails under the roof — names for beings, names for
+  agents, the inscriptions the holder page paints, the estate's own road signs, and a private
+  bitcoin door on its way in. the door price stays zero.</p>
+  <p class="capintro" data-reg="cypherpunk">verified capability set on this surface: .b — the
+  kingbeelovis registry on Vaulta, read live below · .a — same contract, suffix convention,
+  minting lives on the vending surface (jungle4 rehearsal) · silent payments — BIP-352,
+  unconfigured, display-only when it lands · ERC20i — Base read on the holder surface ·
+  bnr:// — tier-1 address scheme, resolver at r/.</p>
+  <div class="capgrid">
+    <div class="cap live">
+      <span class="tag">live</span>
+      <div class="glyph">👑</div>
+      <h3>the .b rail — names for beings</h3>
+      <p data-reg="bee">a .b name is a house's own name on our chain — one name per person, renewable
+      every year, yours to sell back. reserving is a gesture you sign in your own wallet; this page
+      never holds keys.</p>
+      <p data-reg="raver">every being gets a name on the floor — .b, yours, renewable, tradeable
+      on-chain. the desk composes, you sign, the chain remembers. check any name live right below.</p>
+      <p data-reg="cypherpunk">registry kingbeelovis on Vaulta: registeracc · transfer · renew ·
+      setaccount · setchain · release (live ABI). names stored suffixless, 365-day term. keyless
+      reads from this page; compose-only — zero write paths.</p>
+      <p><a href="bnames.html">the .b name desk →</a></p>
+    </div>
+    <div class="cap live">
+      <span class="tag">live</span>
+      <div class="glyph">⚙</div>
+      <h3>the .a rail — names for agents</h3>
+      <p data-reg="bee">agents get names too — same registry, a different suffix. a .a name marks an
+      agent house acting for a being, with limits the chain itself enforces.</p>
+      <p data-reg="raver">the agents ride the same rail with their own tag — .a. bounded authority,
+      chain-enforced: the name says who acts, the limits say how far.</p>
+      <p data-reg="cypherpunk">same contract, same table — domain_name is a plain string, the .a
+      suffix is a resolution/display convention, not a contract constraint. agent houses root under
+      a being's .b bDiD; authority bounded on-chain (linkauth, spend caps).
+      <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/specs/SPEC-A-NAMES-1.md">SPEC-A-NAMES-1 →</a></p>
+      <p><a href="vending.html">mint an agent on the .a rail ↗</a> — jungle4 rehearsal today:
+      <b>testnet money, real law rows</b>.</p>
+    </div>
+    <div class="cap live">
+      <span class="tag">live · holder surface</span>
+      <div class="glyph">⬡</div>
+      <h3>ERC20i — the token family</h3>
+      <p data-reg="bee">the estate's token family on Base — what a wallet holds, read straight off
+      the chain. the holder profile paints each piece from chain bytes; this page holds nothing
+      and reads nothing.</p>
+      <p data-reg="raver">the inscriptions live on Base, and the holder page paints them from the
+      chain's own bytes — no server, no keys, the art arrives whole.</p>
+      <p data-reg="cypherpunk">ERC20i family on Base: FUNGI · $FROGGI · PEPI v1/v2 · JELLI ·
+      JEDI · MiDi · TRUFFI — balances + holder-seeded + enumerated inscriptions, keyless
+      public-RPC reads on the holder surface. JEDI law: the profile reads; the market sells;
+      never the twain.</p>
+      <p><a href="blight/profile.html">the holder profile's wall →</a></p>
+    </div>
+    <div class="cap live">
+      <span class="tag">live · resolver</span>
+      <div class="glyph">◈</div>
+      <h3>bnr:// — the estate's address scheme</h3>
+      <p data-reg="bee">the estate's own address scheme — bnr:// names that open estate pages,
+      resolved right in your browser.</p>
+      <p data-reg="raver">our own road signs — bnr:// links that resolve to the pages themselves,
+      one scheme for the whole estate.</p>
+      <p data-reg="cypherpunk">bnr:// tier 1 live: registered from the hub footer (web+),
+      resolver at r/, round-trips receipted. this card links the resolver; it registers nothing.</p>
+      <p><a href="../r/index.html?u=bnr%3A%2F%2Fskaists.dev">try bnr://skaists.dev in the resolver →</a></p>
+    </div>
+    <div class="cap soon">
+      <span class="tag">coming soon</span>
+      <div class="glyph">₿</div>
+      <h3>Private Bitcoin support — coming soon</h3>
+      <p data-reg="bee">this artist can also receive bitcoin privately. that support isn't set up
+      here yet — when it is, you'll get an address to copy into your own wallet. nothing else
+      changes on this page.</p>
+      <p data-reg="raver">private bitcoin support, coming soon. the door price is zero, the address
+      will be yours to take to whatever wallet you already love, and nobody watching the chain can
+      tell who tipped the artist. PLUR all the way down.</p>
+      <p data-reg="cypherpunk">BIP-352 silent payments: not enabled for this profile. when enabled,
+      this card displays a static sp1q bech32m address (B_scan ‖ B_spend — two public keys) and
+      nothing else: no key material, no scanning, no indexer traffic, no receipt claims.</p>
+      <p style="font-size:10px;color:var(--dim);margin-top:6px">until the artist brings their own
+      address, this card shows none — this page never invents one, never holds keys, never scans,
+      never confirms.</p>
+    </div>
+  </div>
+  <div class="railcheck">
+    <div class="rlab">check any name on the live registry — .b or .a</div>
+    <div class="rrow">
+      <input id="rail-name" type="text" spellcheck="false" autocomplete="off"
+        placeholder="a name, with or without the .b / .a suffix — e.g. king or king.b"
+        aria-label="a name to check on the kingbeelovis registry">
+      <button id="rail-go">check the chain</button>
+    </div>
+    <div class="rverdict" id="rail-verdict">the registry is one read away — keyless, nothing sent but the question.</div>
+    <div class="rlaw">the read is live and keyless: the full name table comes from the same public
+    endpoints the .b desk uses, matched in your browser — bounded string queries return empty on
+    these APIs, so the whole walk is the truth. this page composes nothing, signs nothing, stores
+    nothing.</div>
+  </div>
+</section>
 
 <footer>
   <span data-i18n="prof.foot.door">Published records. A guest can read with no wallet.</span>
@@ -846,6 +975,59 @@ function restoreVisibleFocus(focus){
   applyReading();
 })();
 </script>
+<script>
+/* ── the rails checker — keyless, read-only, whole-walk (z2.profile) ──────
+   The registry's domains table is tiny (one row per name), so the truthful
+   client read is the FULL table + an in-browser exact match — a bounded
+   lower_bound/upper_bound string query on these public APIs returns empty
+   even for names that exist (measured 2026-09-12), and an empty bounded
+   answer must never be shown as "not registered". Failover mirrors the
+   healed .b desk host list (the dead eosn endpoint is dropped). */
+(function(){
+  var HOSTS=['https://eos.api.eosnation.io','https://eos.greymass.com'];
+  var cache=null;
+  var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  function strip(n){return (n||'').trim().toLowerCase().replace(/\.[ab]$/,'');}
+  async function rows(){
+    if(cache)return cache;
+    for(var i=0;i<HOSTS.length;i++){
+      try{
+        var r=await fetch(HOSTS[i]+'/v1/chain/get_table_rows',{method:'POST',
+          body:JSON.stringify({json:true,code:'kingbeelovis',scope:'kingbeelovis',table:'domains',limit:500})});
+        if(r.ok){var d=await r.json();if(d&&d.rows){cache=d.rows;return cache;}}
+      }catch(e){}
+    }
+    return null;
+  }
+  async function check(){
+    var v=document.getElementById('rail-name');
+    var out=document.getElementById('rail-verdict');
+    var asTyped=(v.value||'').trim();
+    var rail=/\.a$/i.test(asTyped)?'a':'b';
+    var n=strip(asTyped);
+    if(!n){out.className='rverdict';out.textContent='type a name first — with or without the .b / .a suffix';return;}
+    out.className='rverdict';out.textContent='asking the registry…';
+    var rs=await rows();
+    if(!rs){out.className='rverdict';
+      out.textContent='couldn\u2019t reach the registry from your network — public endpoints can be blocked; the rails are fine, the read isn\u2019t';return;}
+    var row=null;
+    for(var i=0;i<rs.length;i++){if(rs[i].domain_name===n){row=rs[i];break;}}
+    if(row){
+      out.className='rverdict ok';
+      out.innerHTML='<b>'+esc(n)+'.'+rail+' is HELD</b> — owner '+esc(row.owner)+
+        ' \u00b7 resolves \u2192 '+esc(row.account||'(no account set)')+
+        ' \u00b7 expires '+esc(String(row.expires||'').slice(0,10));
+    }else{
+      out.className='rverdict no';
+      out.innerHTML='<b>'+esc(n)+'.'+rail+' is not on the registry today</b> — names live at '+
+        '<a href="bnames.html" style="color:var(--cyan)">the .b desk</a>, where availability, fee and term are read live.';
+    }
+  }
+  document.getElementById('rail-go').addEventListener('click',check);
+  document.getElementById('rail-name').addEventListener('keydown',function(e){if(e.key==='Enter')check();});
+})();
+</script>
+<script src="agent-dock.js?v=5"></script>
 <script src="tour.js?v=42"></script>
 </body>
 </html>

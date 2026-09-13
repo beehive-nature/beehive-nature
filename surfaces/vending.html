@@ -232,8 +232,11 @@ main{max-width:462px;margin:0 auto}
   <div class="line"><span>its birth certificate<small>Arweave · permanent · Turbo free tier carries it today</small></span><b>$0.00</b></div>
   <div class="total"><span class="sub" id="v-total-sub">you pay, once</span><span class="big" id="v-total">—</span></div>
   <button class="btn" id="vmintbtn" disabled>Mint — reading the live price…</button>
-  <p class="note">Pay with your card, PayPal, or any wallet — <b>one tap, no network
-  switch.</b> Nothing moves until you approve the plan on the next screen.</p>
+  <p class="note">Rehearsal is free today — <b>testnet A, memo-bound</b>. The paid rails
+  (<b>USDC on Base, PYUSD on its official chains</b>) are <b>held</b> until the founder names
+  the machine's payment seat. <b>Card and PayPal are not available</b> — no card processor is
+  wired, and nothing here touches a PayPal account (PYUSD is PayPal-issued, but it rides its
+  own chains). Nothing moves until you approve the plan on the next screen.</p>
   <div class="lawline" id="afterplan" style="display:none;margin-top:8px"></div>
 </section>
 
@@ -341,14 +344,15 @@ main{max-width:462px;margin:0 auto}
           <b>bnrapolltest</b>, memo-bound — <b>the memo is the binding</b>.
           Testnet money, real law rows.</span></span></label>
         <label class="rail"><input type="radio" name="vrail" value="usdc">
-          <span><span class="rn">USDC · Base — the estate's proven rail</span>
-          <span class="rd">native USDC on Base. PayPal's PYUSD is
+          <span><span class="rn">USDC · Base — <b>held</b> until the founder names the seat</span>
+          <span class="rd">native USDC on Base, one tap when the seat is named. PayPal's PYUSD is
           <b>not issued on Base</b> (read at docs.paxos.com, 2026-09-03 — Ethereum,
           Arbitrum, Polygon, X Layer only); on Base the door takes USDC.</span></span></label>
         <label class="rail"><input type="radio" name="vrail" value="pyusd">
-          <span><span class="rn">PYUSD — its official chains</span>
+          <span><span class="rn">PYUSD — <b>held</b> until the founder names the seat</span>
           <span class="rd">PYUSD rides Ethereum, Arbitrum, Polygon or X Layer —
-          Paxos-issued, address cited in-source. One tap, same plan.</span></span></label>
+          Paxos-issued, address cited in-source. Not a PayPal checkout: the stablecoin,
+          not the account.</span></span></label>
       </div>
       <div id="doorstate"></div>
       <div class="btns">

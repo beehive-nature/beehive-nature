@@ -137,15 +137,19 @@
      opens in a NEW tab, so the reader's BNRoSe session stays handy and fully functional.
      Enforced at click time by delegation — covering links rendered after load (several
      surfaces build their citation lists from JS) — with rel=noopener so the opened page
-     gets no handle back into the dApp. In-estate links keep the same tab: the tour IS
-     the session. */
+     gets no handle back into the dApp, and noreferrer so the page URL does not travel
+     to the destination as a Referer (the z2.sec cluster fix; surfaces that hand-wrote
+     rel="noopener noreferrer" already carried both). In-estate links keep the same tab:
+     the tour IS the session. */
   document.addEventListener('click',function(e){
     var a=e.target && e.target.closest ? e.target.closest('a[href]') : null;
     if(!a) return;
     var u; try{ u=new URL(a.getAttribute('href'), location.href); }catch(err){ return; }
     if((u.protocol==='http:'||u.protocol==='https:') && u.host!==location.host){
       a.target='_blank';
-      a.rel=((a.rel||'')+' noopener').trim();
+      var rel=(a.rel||'').split(/\s+/).filter(Boolean);
+      ['noopener','noreferrer'].forEach(function(t){ if(rel.indexOf(t)===-1) rel.push(t); });
+      a.rel=rel.join(' ');
     }
   },true);
 
