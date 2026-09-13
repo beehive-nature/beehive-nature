@@ -67,7 +67,7 @@ async function pageAt(path, { lang = 'ru', reg = 'bee' } = {}) {
        dock line keeps both links through the swap */
 {
   const { ctx, p, errs } = await pageAt('plur.html', { lang: 'ru', reg: 'bee' });
-  ok('plur data-key renders ru (talk sub)', await p.locator('[data-key="d.plur.talk.sub"]').textContent() === cell('d.plur.talk.sub', 'ru'));
+  ok('plur data-key renders ru (talk sub)', await p.locator('[data-i18n="d.plur.talk.sub"],[data-key="d.plur.talk.sub"]').textContent() === cell('d.plur.talk.sub', 'ru'));
   ok('plur novoice renders ru', (await p.locator('[data-i18n="plur.novoice"]').first().textContent()) === cell('plur.novoice', 'ru'));
   const dock = p.locator('.dock');
   const dockTxt = await dock.textContent();
