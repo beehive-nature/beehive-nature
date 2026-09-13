@@ -52,7 +52,7 @@ Legacy strings on the page (room law paragraph, set/checkpoint prose, independen
 | zcode-watch-manifest-check | 29/29 |
 | university-smoke | 87/87 (deck covers 95, jams.html exemption honest) |
 | register.test + atlas.test | 26/26 |
-| i18n-coverage --floors | PASS |
+| i18n-coverage --floors | PASS (one observed flake: stack.html measured 112 vs its floor 118 on a single run, then passed twice consecutively — pre-existing timing sensitivity in the laid-out-leaf measurement, not this lane; recorded for the floors owner) |
 | reachability | 1 fail = the pre-existing `web+bnr:` scheme finding (identical on origin/main) |
 | estate-review | 3 fails = identical trio on origin/main (bnr link, tour-bar strip height, footer-reconcile parse) — pre-existing, only the footer number moved 94→95 with the new counted row |
 | zcode-plur-festival-check | 1 fail = "17 ribbon cells", identical on origin/main (festival lane mid-flight) |
