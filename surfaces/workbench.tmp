@@ -299,7 +299,7 @@ function u64ToName(v){
 }
 async function resolveDotB(label, wantChainId){
   // Same rule as the EVM pool: one Vaulta API is a single point of failure, so rotate.
-  const VAPI=['https://eos.greymass.com','https://api.eosn.io','https://eos.api.eosnation.io'];
+  const VAPI=['https://eos.greymass.com','https://eos.api.eosnation.io'];
   const post=async(body)=>{ let last;
     for(const h of VAPI){ try{
       const r=await fetch(h+'/v1/chain/get_table_rows',{method:'POST',
