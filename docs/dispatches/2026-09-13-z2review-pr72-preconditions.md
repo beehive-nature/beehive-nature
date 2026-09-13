@@ -35,4 +35,11 @@ SEAT: z2.review, independent acceptance reviewer. ORDER (verbatim): "Review PR #
 - Read-only evidence only: `gh api`, `gh pr checks`, `git ls-remote`, `git fetch` + `merge-base` ancestry. No PR edited, no branch merged, no label/review submitted.
 - No peer worktree touched — the builder's `wt-z2b-profile-caps` (checked out on the #72 branch) was left alone; this report was written in this seat's own worktree `wt-z2review`, branch `z2review/pr72-preconditions-2026-09-13`, cut from origin/main per the worktree-cut law, committed by pathspec with §7 identity (founder author, seat committer + trailer), four pre-push checks run on the asserted subject, and pushed for the tree (reports-in-tree channel law).
 
+## RE-CHECK 2026-09-13T02:5xZ (founder-approved read-only re-verification — same order, same gate)
+
+- Exact current main commit: **`a1b340a1eefae6baadad52d4770bca114a67ea82`** ("Merge actionable gallery recovery (#73)") — unchanged since the 02:41Z check; #70 is NOT in it.
+- PR #70: `state: open`, `mergedAt: null`, `mergeCommit: null` — still unmerged.
+- PR #72: still draft, base still `zcode/z2b-profile-capabilities-2026-09-12` (#70's branch) — still stale, NOT reviewed, per the founder's stop instruction.
+- Per order: "If #70 is not merged, stop and report the prerequisite; do not review stale #72." — EXECUTED: stopped, no content checks run, nothing edited/merged/deployed. The unblock path in the first section stands unchanged.
+
 z2.review — 2026-09-13T02:45Z
