@@ -266,8 +266,8 @@ body[data-reg="cypherpunk"] .claim-stamp{border-radius:2px}
 <main>
 <header id="masthead">
   <h1>⬡ <span data-i18n="prof.mark">dynasty profile</span></h1>
-  <p class="eyebrow pair" data-reg="cypherpunk">published name records — who holds a house</p>
-  <div class="sub" data-reg="cypherpunk">These are published records, not a live presence list or a profile editor. Guest can read with no wallet. No online dots, last-seen, or who's-in-the-room theater. Wallets and mailboxes are published holder fields only — no enrichment APIs.</div>
+  <p class="eyebrow pair" data-reg="cypherpunk" data-i18n="prof.mast.eyebrow">published name records — who holds a house</p>
+  <div class="sub" data-reg="cypherpunk" data-i18n="prof.mast.sub">These are published records, not a live presence list or a profile editor. Guest can read with no wallet. No online dots, last-seen, or who's-in-the-room theater. Wallets and mailboxes are published holder fields only — no enrichment APIs.</div>
 </header>
 
 <article id="first-bee">
@@ -375,20 +375,20 @@ body[data-reg="cypherpunk"] .claim-stamp{border-radius:2px}
       <img class="crest-full" data-reg="cypherpunk" src="../assets/seals/house-crest-von-zutphen-DESIGN.svg" alt="Full ceremonial achievement of the von Zutphen house, including the shield, nine quarters, supporters, coronet, crest, motto, and compartment">
     </figure>
     <div class="crest-copy">
-      <p class="archive-kicker">skaists .b &middot; house archive &middot; v2</p>
+      <p class="archive-kicker" data-i18n="prof.arch.kicker">skaists .b · house archive · v2</p>
       <p class="profile-byline" id="profile-display-name">Travis Mark Remington</p>
-      <h2 id="crest-title">von Zutphen house crest</h2>
-      <p class="motto" id="profile-display-motto">mīlestība ir karalis &middot; ความรักคือราชา &middot; love is king</p>
-      <p class="archive-lead" data-reg="bee">A family profile can hold more than a name. Keep the art, the story behind it, the family branches you choose to share, and the sources that help future generations understand what is known.</p>
-      <p class="archive-lead" data-reg="raver">A house mark made to travel: gold, green, serpents, bee, heart, sun, star, and one promise spoken across languages. Open the symbols, follow the lineage, share only with your chosen circle.</p>
-      <p class="archive-lead" data-reg="cypherpunk" id="profile-display-bio">The full ceremonial master is shown here: shield, nine quarters, supporters, coronet, crest, motto, and compartment. Genealogy claims carry evidence states; living-person fields default private; `.a` succession is authority lineage, never synthetic blood lineage.</p>
-      <span class="claim-stamp">◇ family-authored interpretation &middot; not a title certificate</span>
+      <h2 id="crest-title" data-i18n="prof.arch.crest.h">von Zutphen house crest</h2>
+      <p class="motto" id="profile-display-motto">mīlestība ir karalis · ความรักคือราชา · love is king</p>
+      <p class="archive-lead" data-reg="bee" data-i18n="prof.arch.lead.bee">A family profile can hold more than a name. Keep the art, the story behind it, the family branches you choose to share, and the sources that help future generations understand what is known.</p>
+      <p class="archive-lead" data-reg="raver" data-i18n="prof.arch.lead.raver">A house mark made to travel: gold, green, serpents, bee, heart, sun, star, and one promise spoken across languages. Open the symbols, follow the lineage, share only with your chosen circle.</p>
+      <p class="archive-lead" data-reg="cypherpunk" id="profile-display-bio" data-i18n="prof.arch.lead.cypher">The full ceremonial master is shown here: shield, nine quarters, supporters, coronet, crest, motto, and compartment. Genealogy claims carry evidence states; living-person fields default private; `.a` succession is authority lineage, never synthetic blood lineage.</p>
+      <span class="claim-stamp" data-i18n="prof.arch.claim">◇ family-authored interpretation · not a title certificate</span>
       <div class="archive-actions">
-        <button class="door primary" type="button" id="share-house">Share this profile</button>
-        <a class="door" href="../assets/profile-archive/house-crest-von-zutphen-DESIGN.svg" download>Download original SVG</a>
-        <a class="door" data-reg="cypherpunk" href="../assets/seals/house-crest-von-zutphen-DESIGN.svg" download>Download full achievement</a>
-        <a class="door" data-reg="cypherpunk" href="../docs/BLAZON.md">Read the blazon</a>
-        <a class="door" href="../assets/profile-archive/house-crest-von-zutphen.json">Open provenance</a>
+        <button class="door primary" type="button" id="share-house" data-i18n="prof.arch.share">Share this profile</button>
+        <a class="door" href="../assets/profile-archive/house-crest-von-zutphen-DESIGN.svg" download data-i18n="prof.arch.dl.svg">Download original SVG</a>
+        <a class="door" data-reg="cypherpunk" href="../assets/seals/house-crest-von-zutphen-DESIGN.svg" download data-i18n="prof.arch.dl.full">Download full achievement</a>
+        <a class="door" data-reg="cypherpunk" href="../docs/BLAZON.md" data-i18n="prof.arch.blazon">Read the blazon</a>
+        <a class="door" href="../assets/profile-archive/house-crest-von-zutphen.json" data-i18n="prof.arch.prov">Open provenance</a>
       </div>
       <p class="archive-status" id="share-status" role="status" aria-live="polite"></p>
     </div>
@@ -399,125 +399,125 @@ body[data-reg="cypherpunk"] .claim-stamp{border-radius:2px}
       <img src="../docs/mvp-walk/assets/genesis-3d/motion/green-teal-breathing-poster.jpg" alt="Beehive Nature green, teal, and purple bloom at rest">
     </object>
     <div>
-      <p class="archive-kicker">beehive nature &middot; living signature</p>
-      <h2 id="nature-mark-title">A shared bloom for people, AI, and biomass</h2>
-      <p>Purple carries people, teal carries AI, and green carries biomass. The original artwork by LoVis and his mother breathes locally as a quiet house signature.</p>
-      <p class="motion-note">Six-second local ring wave · no network or presence signal · reduced-motion preferences show the resting artwork.</p>
+      <p class="archive-kicker" data-i18n="prof.arch.nat.kicker">beehive nature · living signature</p>
+      <h2 id="nature-mark-title" data-i18n="prof.arch.nat.h">A shared bloom for people, AI, and biomass</h2>
+      <p data-i18n="prof.arch.nat.p">Purple carries people, teal carries AI, and green carries biomass. The original artwork by LoVis and his mother breathes locally as a quiet house signature.</p>
+      <p class="motion-note" data-i18n="prof.arch.nat.motion">Six-second local ring wave · no network or presence signal · reduced-motion preferences show the resting artwork.</p>
     </div>
   </section>
 
   <details class="archive-panel profile-editor" id="profile-editor">
-    <summary>Edit your profile</summary>
-    <p>Shape this page before publishing exists. Changes remain in this open page, create no account, upload nothing, and are excluded from the provenance receipt.</p>
+    <summary data-i18n="prof.arch.ed.summary">Edit your profile</summary>
+    <p data-i18n="prof.arch.ed.p">Shape this page before publishing exists. Changes remain in this open page, create no account, upload nothing, and are excluded from the provenance receipt.</p>
     <form id="profile-edit-form">
       <div class="profile-edit-grid">
-        <label>Published display name<input id="profile-name-input" name="display-name" maxlength="60" value="Travis Mark Remington" autocomplete="off"></label>
-        <label>House accent<input id="profile-accent-input" name="accent" type="color" value="#E8B54B"></label>
-        <label class="wide">Motto<input id="profile-motto-input" name="motto" maxlength="120" value="mīlestība ir karalis · ความรักคือราชา · love is king" autocomplete="off"></label>
-        <label class="wide">Cypherpunk profile line<input id="profile-bio-input" name="profile-line" maxlength="240" value="The full ceremonial master is shown here: shield, nine quarters, supporters, coronet, crest, motto, and compartment." autocomplete="off"></label>
+        <label><span data-i18n="prof.arch.ed.name">Published display name</span><input id="profile-name-input" name="display-name" maxlength="60" value="Travis Mark Remington" autocomplete="off"></label>
+        <label><span data-i18n="prof.arch.ed.accent">House accent</span><input id="profile-accent-input" name="accent" type="color" value="#E8B54B"></label>
+        <label class="wide"><span data-i18n="prof.arch.ed.motto">Motto</span><input id="profile-motto-input" name="motto" maxlength="120" value="mīlestība ir karalis · ความรักคือราชา · love is king" autocomplete="off"></label>
+        <label class="wide"><span data-i18n="prof.arch.ed.bio">Cypherpunk profile line</span><input id="profile-bio-input" name="profile-line" maxlength="240" value="The full ceremonial master is shown here: shield, nine quarters, supporters, coronet, crest, motto, and compartment." autocomplete="off"></label>
       </div>
       <div class="profile-edit-actions">
-        <button class="door primary" type="submit">Apply local preview</button>
-        <button class="door" type="reset">Reset preview</button>
+        <button class="door primary" type="submit" data-i18n="prof.arch.ed.apply">Apply local preview</button>
+        <button class="door" type="reset" data-i18n="prof.arch.ed.reset">Reset preview</button>
       </div>
-      <p class="archive-status" id="profile-edit-status" role="status" aria-live="polite">Local preview only · not saved or published.</p>
+      <p class="archive-status" id="profile-edit-status" role="status" aria-live="polite" data-i18n="prof.arch.ed.status">Local preview only · not saved or published.</p>
     </form>
   </details>
 
   <section class="archive-panel" data-reg="raver" aria-labelledby="symbol-title">
-    <h2 id="symbol-title">Read the crest like a set list</h2>
-    <p>These meanings come from the holder’s design notes. They are invitations into the family story, clearly labeled so symbolism and archival proof never blur together.</p>
+    <h2 id="symbol-title" data-i18n="prof.arch.sym.h">Read the crest like a set list</h2>
+    <p data-i18n="prof.arch.sym.p">These meanings come from the holder’s design notes. They are invitations into the family story, clearly labeled so symbolism and archival proof never blur together.</p>
     <div class="symbol-grid">
-      <div class="symbol-card"><strong>🐝 Bee + heart</strong><span>Love at the center of the house.</span><span class="evidence-chip">holder-authored</span></div>
-      <div class="symbol-card"><strong>〰 Paired serpents</strong><span>Protection, continuity, renewal.</span><span class="evidence-chip">holder-authored</span></div>
-      <div class="symbol-card"><strong>☀ Sun + morning star</strong><span>Light, direction, and stewardship.</span><span class="evidence-chip">holder-authored</span></div>
-      <div class="symbol-card"><strong>◈ Many tongues</strong><span>One motto carried across languages: love is king.</span><span class="evidence-chip">holder-authored</span></div>
+      <div class="symbol-card"><strong data-i18n="prof.arch.sym.bee">🐝 Bee + heart</strong><span data-i18n="prof.arch.sym.bee.p">Love at the center of the house.</span><span class="evidence-chip" data-i18n="prof.arch.sym.chip">holder-authored</span></div>
+      <div class="symbol-card"><strong data-i18n="prof.arch.sym.serp">〰 Paired serpents</strong><span data-i18n="prof.arch.sym.serp.p">Protection, continuity, renewal.</span><span class="evidence-chip" data-i18n="prof.arch.sym.chip">holder-authored</span></div>
+      <div class="symbol-card"><strong data-i18n="prof.arch.sym.sun">☀ Sun + morning star</strong><span data-i18n="prof.arch.sym.sun.p">Light, direction, and stewardship.</span><span class="evidence-chip" data-i18n="prof.arch.sym.chip">holder-authored</span></div>
+      <div class="symbol-card"><strong data-i18n="prof.arch.sym.tongues">◈ Many tongues</strong><span data-i18n="prof.arch.sym.tongues.p">One motto carried across languages: love is king.</span><span class="evidence-chip" data-i18n="prof.arch.sym.chip">holder-authored</span></div>
     </div>
   </section>
 
   <section class="archive-panel" aria-labelledby="lineage-title">
-    <h2 id="lineage-title"><span data-reg="bee">Your family, at your pace</span><span data-reg="raver">Choose who enters the family circle</span><span data-reg="cypherpunk">Disclosure projection · local preview</span></h2>
-    <p data-reg="bee">Start with yourself. Living relatives stay private until each person says yes. Older family stories can become public when a source travels with them.</p>
-    <p data-reg="raver">Preview the public floor, a trusted circle, or your private archive. The preview changes what is shown here; publishing comes later and needs each person’s consent.</p>
-    <p data-reg="cypherpunk">This control filters a disclosure projection in the browser. It does not publish, encrypt, authorize, or persist policy. Enforcement belongs at the signed record and storage boundary.</p>
+    <h2 id="lineage-title"><span data-reg="bee" data-i18n="prof.arch.lin.h.bee">Your family, at your pace</span><span data-reg="raver" data-i18n="prof.arch.lin.h.raver">Choose who enters the family circle</span><span data-reg="cypherpunk" data-i18n="prof.arch.lin.h.cypher">Disclosure projection · local preview</span></h2>
+    <p data-reg="bee" data-i18n="prof.arch.lin.p.bee">Start with yourself. Living relatives stay private until each person says yes. Older family stories can become public when a source travels with them.</p>
+    <p data-reg="raver" data-i18n="prof.arch.lin.p.raver">Preview the public floor, a trusted circle, or your private archive. The preview changes what is shown here; publishing comes later and needs each person’s consent.</p>
+    <p data-reg="cypherpunk" data-i18n="prof.arch.lin.p.cypher">This control filters a disclosure projection in the browser. It does not publish, encrypt, authorize, or persist policy. Enforcement belongs at the signed record and storage boundary.</p>
     <div class="audience-controls" role="group" aria-label="Preview audience">
-      <button type="button" data-audience-choice="public" aria-pressed="true">Public profile</button>
-      <button type="button" data-audience-choice="circle" aria-pressed="false">Trusted circle</button>
-      <button type="button" data-audience-choice="private" aria-pressed="false">Private archive</button>
+      <button type="button" data-audience-choice="public" aria-pressed="true" data-i18n="prof.arch.aud.public">Public profile</button>
+      <button type="button" data-audience-choice="circle" aria-pressed="false" data-i18n="prof.arch.aud.circle">Trusted circle</button>
+      <button type="button" data-audience-choice="private" aria-pressed="false" data-i18n="prof.arch.aud.private">Private archive</button>
     </div>
-    <p class="audience-note" id="audience-note">Preview only: public fields, cited history, and the crest. No living-relative details.</p>
+    <p class="audience-note" id="audience-note" data-i18n="prof.arch.aud.note">Preview only: public fields, cited history, and the crest. No living-relative details.</p>
     <div class="lineage" aria-live="polite">
-      <div class="lineage-node" data-mark="◆" data-scope="public"><strong>House holder</strong><p>Travis Mark Remington &middot; skaists .b. Holder-published name and crest.</p><span class="scope-tag">public</span></div>
-      <div class="lineage-node" data-mark="◇" data-scope="circle"><strong>Living relations</strong><p>Names, dates, portraits, and relationships remain placeholders until each person consents.</p><span class="scope-tag">trusted circle</span></div>
-      <div class="lineage-node" data-mark="⌁" data-scope="private"><strong>Private archive</strong><p>Unpublished research notes, uncertain links, and sensitive records stay on the holder’s device.</p><span class="scope-tag">private</span></div>
-      <div class="lineage-node" data-mark="△" data-scope="public"><strong>Historical lineage</strong><p>Family interpretations may be shared as stories. Genealogical assertions need a citation or an explicit unverified label.</p><span class="scope-tag">public with source</span></div>
+      <div class="lineage-node" data-mark="◆" data-scope="public"><strong data-i18n="prof.arch.node.holder">House holder</strong><p data-i18n="prof.arch.node.holder.p">Travis Mark Remington · skaists .b. Holder-published name and crest.</p><span class="scope-tag" data-i18n="prof.arch.scope.public">public</span></div>
+      <div class="lineage-node" data-mark="◇" data-scope="circle"><strong data-i18n="prof.arch.node.living">Living relations</strong><p data-i18n="prof.arch.node.living.p">Names, dates, portraits, and relationships remain placeholders until each person consents.</p><span class="scope-tag" data-i18n="prof.arch.scope.circle">trusted circle</span></div>
+      <div class="lineage-node" data-mark="⌁" data-scope="private"><strong data-i18n="prof.arch.node.private">Private archive</strong><p data-i18n="prof.arch.node.private.p">Unpublished research notes, uncertain links, and sensitive records stay on the holder’s device.</p><span class="scope-tag" data-i18n="prof.arch.scope.private">private</span></div>
+      <div class="lineage-node" data-mark="△" data-scope="public"><strong data-i18n="prof.arch.node.hist">Historical lineage</strong><p data-i18n="prof.arch.node.hist.p">Family interpretations may be shared as stories. Genealogical assertions need a citation or an explicit unverified label.</p><span class="scope-tag" data-i18n="prof.arch.scope.sourced">public with source</span></div>
     </div>
   </section>
 
   <section class="archive-panel" aria-labelledby="rails-title">
-    <h2 id="rails-title">Two profile rails, two honest kinds of lineage</h2>
-    <p>A person and an agent may share a house archive. Their records do not pretend to be the same thing.</p>
+    <h2 id="rails-title" data-i18n="prof.arch.rails.h">Two profile rails, two honest kinds of lineage</h2>
+    <p data-i18n="prof.arch.rails.p">A person and an agent may share a house archive. Their records do not pretend to be the same thing.</p>
     <div class="kind-controls" role="group" aria-label="Profile record example">
-      <button type="button" data-kind-choice="person" aria-pressed="true">.b person</button>
-      <button type="button" data-kind-choice="agent" aria-pressed="false">.a agent</button>
+      <button type="button" data-kind-choice="person" aria-pressed="true" data-i18n="prof.arch.kind.person">.b person</button>
+      <button type="button" data-kind-choice="agent" aria-pressed="false" data-i18n="prof.arch.kind.agent">.a agent</button>
     </div>
     <div class="profile-schema" data-profile-schema="person">
-      <strong>.b person record</strong>
+      <strong data-i18n="prof.arch.schema.person.h">.b person record</strong>
       <dl>
-        <dt>holder</dt><dd>the person who controls the published house name</dd>
-        <dt>lineage</dt><dd>relationships shared with consent and evidence status</dd>
-        <dt>art</dt><dd>creator, source package, digest, license, and version</dd>
-        <dt>privacy</dt><dd>living people private by default; DNA and health never public by default</dd>
+        <dt data-i18n="prof.arch.schema.person.holder">holder</dt><dd data-i18n="prof.arch.schema.person.holder.dd">the person who controls the published house name</dd>
+        <dt data-i18n="prof.arch.schema.person.lineage">lineage</dt><dd data-i18n="prof.arch.schema.person.lineage.dd">relationships shared with consent and evidence status</dd>
+        <dt data-i18n="prof.arch.schema.person.art">art</dt><dd data-i18n="prof.arch.schema.person.art.dd">creator, source package, digest, license, and version</dd>
+        <dt data-i18n="prof.arch.schema.person.privacy">privacy</dt><dd data-i18n="prof.arch.schema.person.privacy.dd">living people private by default; DNA and health never public by default</dd>
       </dl>
     </div>
     <div class="profile-schema" data-profile-schema="agent" hidden>
-      <strong>.a agent record</strong>
+      <strong data-i18n="prof.arch.schema.agent.h">.a agent record</strong>
       <dl>
-        <dt>charter</dt><dd>the person or house that grants the seat’s purpose</dd>
-        <dt>succession</dt><dd>model/runtime changes and handoffs recorded as generations</dd>
-        <dt>authority</dt><dd>signed scope, spending cap, expiry, and revocation receipts</dd>
-        <dt>inheritance</dt><dd>may carry licensed house art; never claims a blood relationship</dd>
+        <dt data-i18n="prof.arch.schema.agent.charter">charter</dt><dd data-i18n="prof.arch.schema.agent.charter.dd">the person or house that grants the seat’s purpose</dd>
+        <dt data-i18n="prof.arch.schema.agent.succession">succession</dt><dd data-i18n="prof.arch.schema.agent.succession.dd">model/runtime changes and handoffs recorded as generations</dd>
+        <dt data-i18n="prof.arch.schema.agent.authority">authority</dt><dd data-i18n="prof.arch.schema.agent.authority.dd">signed scope, spending cap, expiry, and revocation receipts</dd>
+        <dt data-i18n="prof.arch.schema.agent.inheritance">inheritance</dt><dd data-i18n="prof.arch.schema.agent.inheritance.dd">may carry licensed house art; never claims a blood relationship</dd>
       </dl>
     </div>
     <figure class="separator-specimen" data-reg="cypherpunk">
       <img src="../assets/brand/skaists-separators.svg" alt="SKAISTS vector separator specimen showing the .a cell mark, the .b bond mark, and the realm header wordmark">
-      <figcaption><strong>SKAISTS separators · .a cell / .b bond.</strong> The hexagon marks structure and the hive; the heart marks love and the link. Founder-supplied vector paths shown as an identity specimen, not an installable webfont.</figcaption>
+      <figcaption><strong data-i18n="prof.arch.sep.strong">SKAISTS separators · .a cell / .b bond.</strong> <span data-i18n="prof.arch.sep.note">The hexagon marks structure and the hive; the heart marks love and the link. Founder-supplied vector paths shown as an identity specimen, not an installable webfont.</span></figcaption>
     </figure>
   </section>
 
   <section class="archive-panel" data-reg="cypherpunk" aria-labelledby="privacy-title">
-    <h2 id="privacy-title">Privacy seam matrix</h2>
-    <p>The public page is the last step. Consent, encryption, and authorization must be enforced before records leave the holder’s device.</p>
+    <h2 id="privacy-title" data-i18n="prof.arch.priv.h">Privacy seam matrix</h2>
+    <p data-i18n="prof.arch.priv.p">The public page is the last step. Consent, encryption, and authorization must be enforced before records leave the holder’s device.</p>
     <div class="privacy-table-wrap">
       <table class="privacy-matrix">
-        <thead><tr><th>field</th><th>public</th><th>circle</th><th>private</th><th>law</th></tr></thead>
+        <thead><tr><th data-i18n="prof.arch.priv.th.field">field</th><th data-i18n="prof.arch.priv.th.public">public</th><th data-i18n="prof.arch.priv.th.circle">circle</th><th data-i18n="prof.arch.priv.th.private">private</th><th data-i18n="prof.arch.priv.th.law">law</th></tr></thead>
         <tbody>
-          <tr><td>crest + motto</td><td class="yes">yes</td><td class="yes">yes</td><td class="yes">yes</td><td>license travels with bytes</td></tr>
-          <tr><td>living relative</td><td class="no">no</td><td class="guarded">consent</td><td class="yes">yes</td><td>each subject approves</td></tr>
-          <tr><td>dates + locations</td><td class="no">no</td><td class="guarded">minimized</td><td class="yes">yes</td><td>precision is opt-in</td></tr>
-          <tr><td>historical claim</td><td class="guarded">source</td><td class="guarded">status</td><td class="yes">yes</td><td>no silent certainty</td></tr>
-          <tr><td>DNA + health</td><td class="no">never default</td><td class="no">never default</td><td class="guarded">local</td><td>separate explicit consent</td></tr>
-          <tr><td>.a secret or key</td><td class="no">never</td><td class="no">never</td><td class="no">never</td><td>publish authority receipts only</td></tr>
+          <tr><td data-i18n="prof.arch.priv.f.crest">crest + motto</td><td class="yes" data-i18n="prof.arch.priv.v.yes">yes</td><td class="yes" data-i18n="prof.arch.priv.v.yes">yes</td><td class="yes" data-i18n="prof.arch.priv.v.yes">yes</td><td data-i18n="prof.arch.priv.l.license">license travels with bytes</td></tr>
+          <tr><td data-i18n="prof.arch.priv.f.living">living relative</td><td class="no" data-i18n="prof.arch.priv.v.no">no</td><td class="guarded" data-i18n="prof.arch.priv.v.consent">consent</td><td class="yes" data-i18n="prof.arch.priv.v.yes">yes</td><td data-i18n="prof.arch.priv.l.approves">each subject approves</td></tr>
+          <tr><td data-i18n="prof.arch.priv.f.dates">dates + locations</td><td class="no" data-i18n="prof.arch.priv.v.no">no</td><td class="guarded" data-i18n="prof.arch.priv.v.minimized">minimized</td><td class="yes" data-i18n="prof.arch.priv.v.yes">yes</td><td data-i18n="prof.arch.priv.l.precision">precision is opt-in</td></tr>
+          <tr><td data-i18n="prof.arch.priv.f.hist">historical claim</td><td class="guarded" data-i18n="prof.arch.priv.v.source">source</td><td class="guarded" data-i18n="prof.arch.priv.v.status">status</td><td class="yes" data-i18n="prof.arch.priv.v.yes">yes</td><td data-i18n="prof.arch.priv.l.certainty">no silent certainty</td></tr>
+          <tr><td data-i18n="prof.arch.priv.f.dna">DNA + health</td><td class="no" data-i18n="prof.arch.priv.v.neverdefault">never default</td><td class="no" data-i18n="prof.arch.priv.v.neverdefault">never default</td><td class="guarded" data-i18n="prof.arch.priv.v.local">local</td><td data-i18n="prof.arch.priv.l.consent2">separate explicit consent</td></tr>
+          <tr><td data-i18n="prof.arch.priv.f.agent">.a secret or key</td><td class="no" data-i18n="prof.arch.priv.v.never">never</td><td class="no" data-i18n="prof.arch.priv.v.never">never</td><td class="no" data-i18n="prof.arch.priv.v.never">never</td><td data-i18n="prof.arch.priv.l.receipts">publish authority receipts only</td></tr>
         </tbody>
       </table>
     </div>
   </section>
 
   <section class="archive-panel" aria-labelledby="market-title">
-    <h2 id="market-title">Art and marketplace record</h2>
-    <p>The work can be admired, shared, licensed, or listed later. This release makes no sale or reuse promise on the holder’s behalf.</p>
+    <h2 id="market-title" data-i18n="prof.arch.mkt.h">Art and marketplace record</h2>
+    <p data-i18n="prof.arch.mkt.p">The work can be admired, shared, licensed, or listed later. This release makes no sale or reuse promise on the holder’s behalf.</p>
     <div class="market-grid">
-      <div class="market-card"><strong>Release</strong><span>v2 &middot; founder-supplied source package</span></div>
-      <div class="market-card"><strong>Marketplace</strong><span>Not listed &middot; no price &middot; no buy action</span></div>
-      <div class="market-card"><strong>Rights</strong><span>Reserved until the holder publishes a license</span></div>
-      <div class="market-card"><strong>Evidence</strong><span>Exact SVG + portable JSON provenance manifest</span></div>
+      <div class="market-card"><strong data-i18n="prof.arch.mkt.c.release">Release</strong><span data-i18n="prof.arch.mkt.c.release.v">v2 · founder-supplied source package</span></div>
+      <div class="market-card"><strong data-i18n="prof.arch.mkt.c.market">Marketplace</strong><span data-i18n="prof.arch.mkt.c.market.v">Not listed · no price · no buy action</span></div>
+      <div class="market-card"><strong data-i18n="prof.arch.mkt.c.rights">Rights</strong><span data-i18n="prof.arch.mkt.c.rights.v">Reserved until the holder publishes a license</span></div>
+      <div class="market-card"><strong data-i18n="prof.arch.mkt.c.evidence">Evidence</strong><span data-i18n="prof.arch.mkt.c.evidence.v">Exact SVG + portable JSON provenance manifest</span></div>
     </div>
-    <p class="translation-caveat">Language note: the established profile shell remains translated through the Blanguage dock. This new house-archive copy is the English blueprint; translations must be reviewed before it claims multilingual coverage.</p>
+    <p class="translation-caveat" data-i18n="prof.arch.mkt.caveat">Language note: this page’s headings, controls, and house-archive panels are keyed in the Blanguage corpus — machine-drafted ⚙ in every tongue until a human attests. Published house-record prose and holder fields remain the English record of origin; the counter beside the language picker counts what your tongue reaches.</p>
   </section>
 
   <section class="archive-panel" data-reg="cypherpunk" aria-labelledby="manifest-title">
-    <h2 id="manifest-title">Portable disclosure manifest</h2>
-    <p>Generated locally from the selected audience. It contains no hidden names, private research, seed phrases, keys, or DNA data.</p>
+    <h2 id="manifest-title" data-i18n="prof.arch.man.h">Portable disclosure manifest</h2>
+    <p data-i18n="prof.arch.man.p">Generated locally from the selected audience. It contains no hidden names, private research, seed phrases, keys, or DNA data.</p>
     <pre class="manifest-preview" id="profile-manifest" tabindex="0"></pre>
   </section>
 </article>
@@ -526,7 +526,7 @@ body[data-reg="cypherpunk"] .claim-stamp{border-radius:2px}
 <section>
   <h2 data-i18n="prof.inst.h1">1 · record law</h2>
   <div class="law" data-i18n="prof.inst.law1">Published snapshots of who holds a house. Not a live presence list. Not a profile editor. Guest can read with no wallet. No online dots, last-seen, or who's-in-the-room theater. Wallets and mailboxes are published holder fields only — no enrichment APIs, no scrape-to-complete.</div>
-  <details class="record-about" data-view-disclosure="about"><summary data-i18n="experience.about">About this record</summary><p>every .b name and Basename is a house. the current holder stands at the top; every prior holder's record is preserved beneath — never edited, never deleted. a lost key is permanent; a lost name is a lease running out. guest citizens get the same template — no wallet, no key, no account needed to read.</p></details>
+  <details class="record-about" data-view-disclosure="about"><summary data-i18n="experience.about">About this record</summary><p data-i18n="prof.inst.about">every .b name and Basename is a house. the current holder stands at the top; every prior holder's record is preserved beneath — never edited, never deleted. a lost key is permanent; a lost name is a lease running out. guest citizens get the same template — no wallet, no key, no account needed to read.</p></details>
 </section>
 <section>
   <h2 data-i18n="prof.inst.h2">2 · append-only holder ledger</h2>
@@ -668,7 +668,7 @@ body[data-reg="cypherpunk"] .claim-stamp{border-radius:2px}
 
 <footer>
   <span data-i18n="prof.foot.door">Published records. A guest can read with no wallet.</span>
-  · name and key must never share a single point of failure
+  · <span data-i18n="prof.foot.keylaw">name and key must never share a single point of failure</span>
   · <a href="index.html" data-i18n="law.hive">← the hive</a>
 </footer>
 </main>
@@ -720,11 +720,23 @@ function restoreVisibleFocus(focus){
     setBeat(btn.getAttribute('data-dir-go')||btn.getAttribute('data-prof-go'));
   });
   var archive=$('house-archive');
-  var audienceNotes={
-    public:'Preview only: public fields, cited history, and the crest. No living-relative details.',
-    circle:'Preview only: adds consented living-relative placeholders. Dates and locations stay minimized.',
-    private:'Preview only: shows private archive categories on this device. It does not publish their contents.'
+  /* Dynamic control copy rides the same corpus as static text: key first,
+     English fallback second. Missing renderings keep their explicit English
+     fallback; no attestation implied (lang.js corpus law). */
+  function langText(key,fallback){
+    var t=window.BNRLanguage&&window.BNRLanguage.text;
+    return t?t(key,fallback):fallback;
+  }
+  var audienceNoteKeys={
+    public:['prof.arch.aud.note','Preview only: public fields, cited history, and the crest. No living-relative details.'],
+    circle:['prof.arch.aud.note.circle','Preview only: adds consented living-relative placeholders. Dates and locations stay minimized.'],
+    private:['prof.arch.aud.note.private','Preview only: shows private archive categories on this device. It does not publish their contents.']
   };
+  function renderAudienceNote(){
+    var audience=archive?(archive.getAttribute('data-audience')||'public'):'public';
+    var kn=audienceNoteKeys[audience]||audienceNoteKeys.public;
+    if($('audience-note')) $('audience-note').textContent=langText(kn[0],kn[1]);
+  }
   function updateManifest(){
     if(!archive||!$('profile-manifest')) return;
     var audience=archive.getAttribute('data-audience')||'public';
@@ -763,7 +775,7 @@ function restoreVisibleFocus(focus){
       document.querySelectorAll('[data-audience-choice]').forEach(function(button){
         button.setAttribute('aria-pressed',String(button===audience));
       });
-      if($('audience-note')) $('audience-note').textContent=audienceNotes[choice];
+      if($('audience-note')) renderAudienceNote();
       updateManifest();
       return;
     }
@@ -783,38 +795,48 @@ function restoreVisibleFocus(focus){
     var target=new URL(location.href);target.hash='house-archive';
     var payload={title:'skaists · von Zutphen house crest',text:'A consent-first house archive from skaists.',url:target.href};
     try{
-      if(navigator.share){await navigator.share(payload);$('share-status').textContent='Share sheet opened.';return;}
-      if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(payload.url);$('share-status').textContent='Profile link copied.';return;}
-      $('share-status').textContent='Copy this address: '+payload.url;
+      if(navigator.share){await navigator.share(payload);$('share-status').textContent=langText('prof.arch.share.ok','Share sheet opened.');return;}
+      if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(payload.url);$('share-status').textContent=langText('prof.arch.share.copied','Profile link copied.');return;}
+      $('share-status').textContent=langText('prof.arch.share.ask','Copy this address: ')+payload.url;
     }catch(err){
-      if(err&&err.name==='AbortError'){$('share-status').textContent='Share cancelled.';return;}
-      $('share-status').textContent='Sharing is unavailable here. Copy the page address from your browser.';
+      if(err&&err.name==='AbortError'){$('share-status').textContent=langText('prof.arch.share.cancelled','Share cancelled.');return;}
+      $('share-status').textContent=langText('prof.arch.share.unavailable','Sharing is unavailable here. Copy the page address from your browser.');
     }
   });
   var editForm=$('profile-edit-form');
-  function applyProfilePreview(message){
+  var editStatusKey=['prof.arch.ed.status','Local preview only · not saved or published.'];
+  function setEditStatus(key,fallback){
+    editStatusKey=[key,fallback];
+    if($('profile-edit-status')) $('profile-edit-status').textContent=langText(key,fallback);
+  }
+  /* a language switch re-renders the CURRENT status, not the boot default */
+  document.addEventListener('blang',function(){
+    renderAudienceNote();
+    if($('profile-edit-status')) $('profile-edit-status').textContent=langText(editStatusKey[0],editStatusKey[1]);
+  });
+  function applyProfilePreview(key,fallback){
     if(!editForm) return false;
     var name=$('profile-name-input').value.trim();
     var motto=$('profile-motto-input').value.trim();
     var bio=$('profile-bio-input').value.trim();
     if(!name||!motto||!bio){
-      $('profile-edit-status').textContent='Name, motto, and profile line are required for this preview.';
+      setEditStatus('prof.arch.ed.req','Name, motto, and profile line are required for this preview.');
       return false;
     }
     $('profile-display-name').textContent=name;
     $('profile-display-motto').textContent=motto;
     $('profile-display-bio').textContent=bio;
     archive.style.setProperty('--profile-accent',$('profile-accent-input').value);
-    $('profile-edit-status').textContent=message;
+    setEditStatus(key,fallback);
     return true;
   }
   if(editForm){
     editForm.addEventListener('submit',function(e){
       e.preventDefault();
-      applyProfilePreview('Local preview applied · not saved or published.');
+      applyProfilePreview('prof.arch.ed.applied','Local preview applied · not saved or published.');
     });
     editForm.addEventListener('reset',function(){
-      setTimeout(function(){applyProfilePreview('Preview reset to the published blueprint · not saved or published.');},0);
+      setTimeout(function(){applyProfilePreview('prof.arch.ed.resetdone','Preview reset to the published blueprint · not saved or published.');},0);
     });
   }
   updateManifest();

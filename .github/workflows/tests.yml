@@ -305,6 +305,15 @@ jobs:
         if: always()
         working-directory: e2e
         run: node i18n-coverage.mjs --set lang-coverage-set.json ru --floors
+      # Profile three-mode translation regression (2026-09-12 lane): the
+      # dynasty profile's house-archive chrome is corpus-keyed across New bee,
+      # Raver and Cypherpunk, while published record data stays the English
+      # record of origin. Rendered-side proof: corpus-exact cells per
+      # register, corpus-ridden dynamic statuses, RTL, honest fallback.
+      - name: Profile — three-mode translation regression (rendered)
+        if: always()
+        working-directory: e2e
+        run: node profile-i18n.mjs
       # fleet-pixels: every chart-bearing hosted surface must DRAW (pixels
       # read back from the canvas, not merely load). fleet-bus: the
       # localStorage data bus asserted both directions (same origin reads;

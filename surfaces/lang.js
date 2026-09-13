@@ -232,7 +232,7 @@ if(typeof document!=='undefined') (function(){
         if(bundled&&bundled.strings&&bundled._meta){acceptCorpus(bundled,cb);return;}
       }catch(e){} // malformed bundle uses the normal loader/fallback
     }
-    fetch(R+'lang-corpus.json?v=18').then(function(r){return r.json()})
+    fetch(R+'lang-corpus.json?v=19').then(function(r){return r.json()})
       .then(function(j){ acceptCorpus(j,cb); })
       .catch(function(){ corpus={strings:{}}; cb(); }); /* fetch failure = full English fallback, counter shows 0/N */
   }
