@@ -10,11 +10,13 @@ const {measureVisibleText,summarizeCoverage}=createRequire(import.meta.url)('../
 const source=readFileSync(new URL('../surfaces/lang.js',import.meta.url),'utf8');
 const corpus=JSON.parse(readFileSync(new URL('../surfaces/lang-corpus.json',import.meta.url),'utf8'));
 
-function leaf(text,{key=null,holder=null,chrome=false,tag='P',children=[],box={width:10,height:10}}={}) {
+function leaf(text,{key=null,keyAttr='data-i18n',holder=null,chrome=false,tag='P',children=[],box={width:10,height:10}}={}) {
   const element={tagName:tag,children,dataset:key===null?{}:{i18n:key},
     textContent:text,get innerHTML(){return this.textContent;},set innerHTML(v){this.textContent=v;},
-    closest(selector){return selector==='[data-i18n]'?(key===null?holder:element):(chrome?{}:null);},
-    getAttribute(name){return name==='data-i18n'?key:null;},getBoundingClientRect(){return box;}};
+    closest(selector){return selector==='[data-i18n]'||selector==='[data-i18n],[data-key]'
+      ?(key===null?holder:element):(chrome?{}:null);},
+    getAttribute(name){return name===keyAttr?key:null;},
+    hasAttribute(name){return name===keyAttr&&key!==null;},getBoundingClientRect(){return box;}};
   return element;
 }
 const doc=nodes=>({querySelectorAll:()=>nodes});
@@ -66,6 +68,24 @@ test('missing keys and blank or invalid cells are distinct from unkeyed text',()
   assert.equal(english.missingKey,0);
 });
 
+test('the data-key twin counts only holders the corpus actually filled',()=>{
+  /* plur-style reserved keys: a data-key holder with a row is keyed and fills;
+     a reserved-but-never-filled row stays honestly unkeyed — no green paint
+     for a page no tongue can reach (surface polish lane, 2026-09-13). */
+  const strings={filled:{ru:'Да'}};
+  const measured=measureVisibleText(doc([
+    leaf('A',{key:'filled',keyAttr:'data-key'}),
+    leaf('B',{key:'reserved',keyAttr:'data-key'}),
+    leaf('C',{key:'plain'})
+  ]),strings);
+  assert.deepEqual(measured.keys,['filled','plain']);
+  const counts=summarizeCoverage(measured,strings,'ru');
+  assert.equal(counts.visible,3);
+  assert.equal(counts.keyed,2);
+  assert.equal(counts.filled,1);
+  assert.equal(counts.unkeyed,1);
+});
+
 test('browser exports exist even when the picker is already mounted',()=>{
   const context={document:{getElementById:()=>({})}};context.window=context;
   vm.runInNewContext(source,context);
@@ -82,7 +102,7 @@ async function render(strings, bundle) {
   }
   const document={readyState:'complete',body:element(),documentElement:{},
     querySelector:()=>null,getElementById:id=>ids.get(id),createElement:element,dispatchEvent(){},addEventListener(){},
-    querySelectorAll:selector=>selector==='[data-i18n]'||selector==='body *'?nodes:[]};
+    querySelectorAll:selector=>selector==='[data-i18n]'||selector==='[data-i18n],[data-key]'||selector==='body *'?nodes:[]};
   if(bundle!==undefined)ids.set('bnr-language-bundle',{textContent:bundle});
   let fetches=0;
   const context={document,location:{pathname:'/surfaces/'},localStorage:{getItem:()=> 'ru'},
