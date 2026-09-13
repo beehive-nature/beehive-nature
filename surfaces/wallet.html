@@ -140,6 +140,107 @@ pre b{color:var(--ink)}
 .qr-pulse{animation:qr-pulse-k 2.4s ease-in-out infinite}
 @keyframes qr-pulse-k{0%,100%{opacity:.85}50%{opacity:.25}}
 footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
+/* ═══ PERSONA LAYER — three registers, three hierarchies, one set of facts
+   (founder canon 2026-08-28). Machinery is NEVER hidden in any register —
+   the behavioral gates read innerText — so hierarchy changes ride on ORDER
+   (flex reflow), persona panels, and per-register density. The cypherpunk
+   register carries the OR COMMAND board: this surface's own live statuses
+   mapped onto a trauma-level-1 operating-room readout — an interface
+   concept, labeled as such on its face, never clinical advice, never a
+   medical-care tool. */
+main{display:flex;flex-direction:column}
+.pcard{background:var(--panel);border:1px solid var(--line2);border-radius:12px;
+  padding:16px;margin-top:14px;position:relative}
+.pcard h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
+.pcard .plaw{color:var(--dim);font-size:11px;line-height:1.85}
+.pcard .plaw b{color:var(--ink)}
+.pcard a{color:#86CC72}
+.p-or{display:none;border-color:rgba(69,194,220,.35)}
+body[data-reg="cypherpunk"] .p-or{display:block}
+/* per-register ORDER — DESKTOP ONLY (≥701px): the wallet's own phone fold
+   law (the balance and keychain ring above EVERYTHING, max-width:700px)
+   keeps ruling every register on a phone — a hero balance below the crease
+   is a hero nobody saw, whatever persona is driving, so on a phone no
+   persona chrome outranks it and the panels fall in below the fold heroes.
+   On desktop the personas reorder freely: bee leads connect→balances→pay;
+   raver lifts the garden and the voucher; cypherpunk leads with receipts,
+   matrix, balances and the composer behind its command board. Visual order
+   only — never hiding. */
+@media (min-width:701px){
+ main > nav.crumbs{order:-9}
+ main > header{order:-8}
+ .pcard{order:-7}
+ .p-or{order:-6}
+ body[data-reg="bee"] #conn-sec{order:-5}
+ body[data-reg="bee"] #bal-sec{order:-4}
+ body[data-reg="bee"] #pay-sec{order:-3}
+ body[data-reg="raver"] #insc-sec{order:-5}
+ body[data-reg="raver"] #voucher-sec{order:-4}
+ body[data-reg="raver"] #conn-sec{order:-3}
+ body[data-reg="cypherpunk"] #receipts-sec{order:-5}
+ body[data-reg="cypherpunk"] #matrix-sec{order:-4}
+ body[data-reg="cypherpunk"] #bal-sec{order:-3}
+ body[data-reg="cypherpunk"] #cmp-sec{order:-2}
+}
+/* bee reads calmer: more air, larger law text; raver warms the chrome;
+   cypherpunk densifies toward the terminal read-out */
+body[data-reg="bee"] section{padding:18px 16px}
+body[data-reg="bee"] .law{font-size:11.5px;line-height:1.95}
+body[data-reg="raver"] .pcard.p-raver{border-color:rgba(201,160,255,.35);
+  background:linear-gradient(160deg,rgba(201,160,255,.07),var(--panel) 55%)}
+.plurb{display:none;gap:8px 18px;flex-wrap:wrap;margin-top:10px;font-size:10px;color:var(--dim)}
+.plurb b{font:700 clamp(1.1rem,3vw,1.6rem)/1 'IBM Plex Mono',monospace}
+.plurb b:nth-of-type(1){color:#00E5FF} .plurb b:nth-of-type(2){color:#c9a0ff}
+.plurb b:nth-of-type(3){color:#6FA9E0} .plurb b:nth-of-type(4){color:#FFD700}
+body[data-reg="raver"] .plurb{display:flex}
+body[data-reg="cypherpunk"]{font-size:12.5px}
+body[data-reg="cypherpunk"] section{padding:13px 14px}
+body[data-reg="cypherpunk"] .law{font-size:10.5px}
+/* the recovery bar — one tap, friendly words (bee + raver) */
+.recov{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;padding:10px 12px;
+  border:1px dashed var(--line2);border-radius:10px;font-size:11px;color:var(--dim)}
+.recov .rdot{width:9px;height:9px;border-radius:50%;background:var(--amber);flex:none}
+.recov.ok .rdot{background:#86CC72;box-shadow:0 0 10px #86CC72}
+.recov.down .rdot{background:#c07f1c}
+.recov button{background:transparent;color:#86CC72;border:1.5px solid #86CC72;border-radius:10px;
+  padding:9px 16px;font:600 12px 'IBM Plex Mono',monospace;cursor:pointer;min-height:40px}
+.recov button:hover{background:#86CC72;color:#06110C}
+/* the OR command board (cypherpunk) */
+.orbanner{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 12px;margin-bottom:10px;
+  border:1px solid rgba(232,181,75,.5);border-radius:10px;background:rgba(232,181,75,.06);
+  font-size:10.5px;color:#ffb347;letter-spacing:.06em}
+.orbanner .tri{width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;
+  border-bottom:12px solid #ffb347;flex:none}
+.orbanner .cpt{font-weight:600;letter-spacing:.14em;color:#FFD700}
+.ortracks{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+@media(max-width:560px){.ortracks{grid-template-columns:1fr}}
+.ortrack{border:1px solid var(--line2);border-radius:10px;padding:8px 10px;font-size:10px;color:var(--faint);line-height:1.6}
+.ortrack b{display:block;color:var(--ink);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
+.ortrack.in b{color:#45C2DC} .ortrack.out b{color:#B7A8F7}
+.orgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:8px}
+.orphase{border:1px solid var(--line2);border-radius:10px;padding:9px 10px;background:var(--well)}
+.orphase h4{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+.orphase .orow{display:flex;justify-content:space-between;gap:8px;align-items:baseline;padding:3.5px 0;
+  border-bottom:1px dashed var(--line2);font-size:10px}
+.orphase .orow:last-child{border-bottom:none}
+.orphase .orow .lbl{color:var(--dim);white-space:nowrap}
+.orphase .orow .ev{color:var(--faint);text-align:right;overflow-wrap:anywhere;max-width:60%}
+.orchip{display:inline-block;min-width:34px;text-align:center;font-size:8.5px;letter-spacing:.08em;
+  border-radius:99px;padding:1px 6px;border:1px solid var(--line2);color:var(--faint)}
+.orchip.ok{color:#3f9c55;border-color:rgba(63,156,85,.5)}
+.orchip.warn{color:#ffb347;border-color:rgba(255,179,71,.5)}
+.orchip.down{color:#c07f1c;border-color:rgba(192,127,28,.6)}
+.ordiag{margin-top:10px;border-top:1px solid var(--line2);padding-top:9px}
+.ordiag summary{cursor:pointer;font-size:10px;color:#45C2DC;letter-spacing:.1em;text-transform:uppercase}
+.ordiag table{width:100%;border-collapse:collapse;margin-top:7px;font-size:10px}
+.ordiag th{text-align:left;color:var(--faint);font-weight:400;font-size:8.5px;text-transform:uppercase;
+  letter-spacing:.12em;padding:4px 6px;border-bottom:1px solid var(--line2)}
+.ordiag td{padding:4.5px 6px;border-bottom:1px dashed var(--line2);color:var(--dim);vertical-align:top}
+.ordiag td code{color:#FFD700;font-size:9.5px}
+.ordiag td .d{color:var(--faint);overflow-wrap:anywhere}
+.ordiag button{background:transparent;border:1px solid var(--line2);color:var(--dim);border-radius:6px;
+  padding:3px 9px;font:600 9px 'IBM Plex Mono',monospace;cursor:pointer;min-height:26px}
+.ordiag button:hover{color:var(--ink);border-color:var(--dim)}
 </style>
 <script>
 /* ══ THE KIT PROFILE — every estate-only fact this surface carries lives HERE,
@@ -192,7 +293,61 @@ var WALLET_PROFILE = {
   New accounts are forged bzDiD-native — no exports, no imports, no manual keys, ever.</p>
 </header>
 
-<section style="border-color:var(--gold)">
+<!-- ═══ PERSONA PANELS — one wallet, three ways in (same facts, same laws) ═══ -->
+
+<!-- NEW BEE — the first minute, and the trust contract -->
+<section class="pcard p-bee" data-reg="bee" aria-label="your first minute and live status">
+  <h3 data-i18n="wp.beeTitle">your first minute</h3>
+  <p class="plaw" data-i18n="wp.beeBody">Start safe: connect your name and just <b>look</b> — balances are read-only and nothing can move. When you want to act, every signature shows you exactly what it does before you agree. Your keys never leave this browser tab, and closing it wipes everything.</p>
+  <p class="plaw" style="margin-top:6px"><a href="or-board.html" data-i18n="p.orLink">the estate's OR board — live roster</a></p>
+  <div class="recov" id="wrecov" data-reg="bee">
+    <span class="rdot" aria-hidden="true"></span>
+    <span id="wrecov-txt" data-i18n="p.checking">checking the live reads…</span>
+    <button type="button" id="wrecov-btn" data-i18n="p.retryAll">try the live reads again</button>
+  </div>
+</section>
+
+<!-- RAVER — the floor banner: translation-forward, social, warm -->
+<section class="pcard p-raver" data-reg="raver" aria-label="the floor banner">
+  <h3 data-i18n="wp.raverTitle">the floor's wallet</h3>
+  <p class="plaw" data-i18n="wp.raverBody">One soul for every chain — connect it once, watch every balance arrive keyless, sign with derived keys when the moment asks. Zero custody, zero storage: the tab is the wallet, and the night is yours.</p>
+  <div class="plurb" aria-label="PLUR">
+    <b data-i18n="plur.peace">peace</b><b data-i18n="plur.love">love</b><b data-i18n="plur.unity">unity</b><b data-i18n="plur.respect">respect</b>
+  </div>
+  <p class="plaw" style="margin-top:8px"><span data-i18n="wp.tongues">this floor speaks 28 tongues — the corpus rides every door.</span>
+    <a href="or-board.html" style="margin-left:6px" data-i18n="p.orLink">the estate's OR board — live roster</a></p>
+  <div class="recov" id="wrecov-r" data-reg="raver">
+    <span class="rdot" aria-hidden="true"></span>
+    <span id="wrecov-rtxt" data-i18n="p.checking">checking the live reads…</span>
+    <button type="button" id="wrecov-rbtn" data-i18n="p.retryAll">try the live reads again</button>
+  </div>
+</section>
+
+<!-- CYPHERPUNK — the OR COMMAND board. An interface concept mapping THIS
+     surface's own live statuses onto a trauma-level-1 operating-room
+     readout: inpatient (custodial, keyed) and outpatient (observe-only,
+     keyless) tracks across five phases. Every cell quotes a real status
+     line the page already rendered — no new claim is made here. Not
+     clinical advice, not a medical-care tool — labeled on its face. -->
+<section class="pcard p-or" id="worboard" data-reg="cypherpunk" aria-label="OR command board — interface concept">
+  <div class="orbanner">
+    <span class="tri" aria-hidden="true"></span>
+    <span class="cpt" data-i18n="p.orBanner">OR-1 COMMAND · TRAUMA LEVEL 1</span>
+    <span data-i18n="p.orConcept">interface concept · systems visualization — not clinical advice, not a medical-care tool</span>
+  </div>
+  <div class="ortracks">
+    <div class="ortrack in"><b data-i18n="p.trackIn">inpatient track</b><span data-i18n="wp.trackInBody">custodial: bzDiD soul connected, keychain derived, vault sealed — the signing theater runs under consent gates</span></div>
+    <div class="ortrack out"><b data-i18n="p.trackOut">outpatient track</b><span data-i18n="wp.trackOutBody">observe-only: keyless reads — balances, matrix, receipts — nothing connects, nothing signs</span></div>
+  </div>
+  <div class="orgrid" id="worgrid"></div>
+  <details class="ordiag" id="wordiag">
+    <summary data-i18n="p.diag">diagnostics</summary>
+    <table><thead><tr><th data-i18n="p.dCode">code</th><th data-i18n="p.dRead">read</th><th data-i18n="p.evLabel">evidence</th><th></th></tr></thead>
+    <tbody id="wordiag-body"></tbody></table>
+  </details>
+</section>
+
+<section id="conn-sec" style="border-color:var(--gold)">
   <h2>🔗 CONNECT — your bzDiD is the wallet</h2>
   <div class="law">Connect your soul (your .b name or account). New here?
   <a href="./onboarding/">Create your bzDiD</a> — the held-hand ceremony takes 2 minutes.</div>
@@ -487,7 +642,7 @@ var WALLET_PROFILE = {
   <div class="law" id="forge-stat" style="margin-top:6px;min-height:20px">— the forge is unlimited; contexts are names, keys derive on demand —</div>
 </section>
 
-<section>
+<section id="bal-sec">
   <h2>⚡ BALANCES — every chain, keyless, live</h2>
   <div class="law">Read from public RPCs in your browser. Nothing stored, nothing sent.
   The chain is the source of truth.</div>
@@ -1402,7 +1557,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   </script>
 </section>
 
-<section>
+<section id="cmp-sec">
   <h2>✍ COMPOSER — the BNR contract surface, no Unicove</h2>
   <div class="law" id="sign-law">Give it contract + action and it fetches the live ABI, renders
   one field per argument, and <b>shows you exactly what you will sign</b> — action, authorization,
@@ -1468,7 +1623,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   <pre id="tx-out" style="display:none"></pre>
 </section>
 
-<section>
+<section id="out-sec">
   <h2>📤 OUTBOX — signed bytes persist here BEFORE they submit</h2>
   <div class="law">The order is law: <b>build → sign → persist → submit → confirm by reading the
   rail</b>. A retry resubmits the identical stored bytes — it never re-signs, never rebuilds.
@@ -1476,7 +1631,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   <div id="outbox-list"></div>
 </section>
 
-<section>
+<section id="matrix-sec">
   <h2>🗺 CHAIN MATRIX — the sixteen rails, from data</h2>
   <div class="law">Every rail the wallet will ever owe you, one row each: <b>how it's read</b>
   (first-party path first), <b>how it's signed</b> (custody tier), and <b>tonight's honest state</b>.
@@ -1487,7 +1642,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   <div id="matrix-body"></div>
 </section>
 
-<section>
+<section id="sum-sec">
   <h2>📊 SUMMARY</h2>
   <div class="readout">
     <div class="rd"><div class="k">SOUL</div><div class="v" id="sum-soul" style="font-size:13px">—</div></div>
@@ -4688,6 +4843,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       } else { $('h-stat').textContent='account not found on Hive'; $('h-stat').className='stat err'; }
     }catch(e){ $('h-stat').textContent='read failed'; $('h-stat').className='stat err'; }
   }
+  /* the persona layer's one-tap recovery seam — same hook pattern as
+     __EVM_RAILS/__CHAIN_MATRIX: exposes ONLY a re-run of the keyless
+     balance reads when a soul is connected. Nothing else is reachable. */
+  window.__walletRefreshBalances = function(){
+    if(!SOUL) return false;
+    readVaulta(SOUL); readHive(SOUL);
+    return true;
+  };
 
   async function readAll(){
     if(!SOUL)return;
@@ -5288,5 +5451,143 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 </script>
 <script src="spend-audit.js?v=1"></script>
 <script>if (window.SpendAudit) SpendAudit.mountPanel(document.getElementById('receiptsBody'));</script>
+<script>
+/* ═══ THE PERSONA LAYER — three registers, one wallet ═════════════════
+   Reads ONLY what the page already rendered (status lines, badges, panels):
+   no second transport, no new claim, no custody change. Bee and raver get
+   one-tap recovery over the keyless balance reads (via the page's own
+   __walletRefreshBalances seam — a no-op until a soul is connected);
+   cypherpunk gets the OR COMMAND board: the surface's own statuses mapped
+   onto a trauma-level-1 readout as an interface concept — never clinical
+   advice, never a medical-care tool, labeled on its face in every tongue. */
+'use strict';
+(function () {
+  var $p = function (i) { return document.getElementById(i); };
+  function T(k, fb) { return (window.BNRLanguage && BNRLanguage.text) ? BNRLanguage.text(k, fb) : fb; }
+  function txt(id) { var el = $p(id); return el ? (el.textContent || '').trim() : ''; }
+  function escp(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function short(s, n) { s = String(s || ''); return s.length > n ? s.slice(0, n - 1) + '…' : s; }
+
+  /* classification — negatives first ('not connected' contains 'connected') */
+  function classify(t) {
+    if (/not connected|not loaded|waiting|nothing |not run|—/.test(t)) return 'nm';
+    if (/failed|unreach|refused|could not|error/.test(t)) return 'down';
+    if (/✓|live|done|connected|sealed|resolved|liquid/.test(t)) return 'ok';
+    return 'nm';
+  }
+
+  /* the five phases — labels keyed; evidence quotes the page's own lines */
+  function phases() {
+    return [
+      [T('p.phPreop', 'pre-operative assessment'), [
+        [T('wp.gConnect', 'identity · connect'), classify(txt('wstat')), short(txt('wstat'), 30)],
+        [T('wp.gRegistry', 'name registry'), classify(txt('dm-stat')), short(txt('dm-stat'), 30)],
+        [T('wp.gKeychain', 'keychain'), classify(txt('kc-stat')), short(txt('kc-stat'), 30)],
+        [T('wp.gVault', 'the vault'), classify(txt('vlt-stat')), short(txt('vlt-stat'), 30)]
+      ]],
+      [T('p.phReady', 'procedure readiness'), [
+        [T('wp.gPay', 'pay lanes'), classify(txt('pay-stat')), short(txt('pay-stat'), 30)],
+        [T('wp.gInsc', 'inscriptions'), classify(txt('insc-stat')), short(txt('insc-stat'), 30)],
+        [T('wp.gArw', 'arweave anchor'), classify(txt('arw-stat')), short(txt('arw-stat'), 30)],
+        [T('wp.gForge', 'account forge'), classify(txt('ac-stat')), short(txt('ac-stat'), 30)]
+      ]],
+      [T('p.phProc', 'the procedure'), [
+        [T('wp.gConsent', 'consent theater'), 'ok', T('wp.gConsentEv', 'one field per argument — you see exactly what you will sign')],
+        [T('wp.gLadder', 'build · sign · persist'), 'ok', T('wp.gLadderEv', 'persist precedes submit — the order is law')],
+        [T('wp.gOutbox', 'the outbox'), 'ok', T('wp.gOutboxEv', 'signed bytes land before any network')]
+      ]],
+      [T('p.phPost', 'post-operative recovery'), [
+        [T('wp.gReceipts', 'receipts re-audit'), 'ok', T('wp.gReceiptsEv', 'every bill recomputed in this page')],
+        [T('wp.gSwap', 'swap lane'), classify(txt('sw-stat')), short(txt('sw-stat'), 30)]
+      ]],
+      [T('p.phDischarge', 'discharge & follow-up'), [
+        [T('wp.gVaulta', 'vaulta balance'), classify(txt('v-stat')), short(txt('v-stat'), 24)],
+        [T('wp.gHive', 'hive balance'), classify(txt('h-stat')), short(txt('h-stat'), 24)],
+        [T('wp.gMatrix', 'chain matrix'), classify(txt('matrix-summary')), short(txt('matrix-summary'), 30)],
+        [T('wp.gFiat', 'fiat-in funnel'), classify(txt('peer-stat')), short(txt('peer-stat'), 24)]
+      ]]
+    ];
+  }
+  function chip(st) { return '<span class="orchip ' + st + '">' + (st === 'ok' ? 'OK' : st === 'warn' ? 'HELD' : st === 'down' ? 'DN' : 'N/M') + '</span>'; }
+  function row(label, st, ev) {
+    return '<div class="orow"><span class="lbl">' + label + '</span><span class="ev">' + escp(ev || '') + ' ' + chip(st) + '</span></div>';
+  }
+  function paintOR() {
+    var grid = $p('worgrid'); if (!grid) return;
+    grid.innerHTML = phases().map(function (ph) {
+      return '<div class="orphase"><h4>' + ph[0] + '</h4>' +
+        ph[1].map(function (r) { return row(r[0], r[1], r[2]); }).join('') + '</div>';
+    }).join('');
+    /* diagnostics — the same reads, detailed, with locate + retry */
+    var D = [
+      ['CONNECT', '#wstat', T('wp.gConnect', 'identity · connect')],
+      ['KEYCHAIN', '#kc-stat', T('wp.gKeychain', 'keychain')],
+      ['VAULT', '#vlt-stat', T('wp.gVault', 'the vault')],
+      ['PAY', '#pay-stat', T('wp.gPay', 'pay lanes')],
+      ['BAL-V', '#v-stat', T('wp.gVaulta', 'vaulta balance')],
+      ['BAL-H', '#h-stat', T('wp.gHive', 'hive balance')],
+      ['MATRIX', '#matrix-summary', T('wp.gMatrix', 'chain matrix')]
+    ];
+    var tb = $p('wordiag-body');
+    tb.innerHTML = D.map(function (d) {
+      var t = txt(d[1].slice(1));
+      return '<tr><td><code>' + d[0] + '</code></td><td>' + d[2] + '</td><td class="d">' + escp(short(t, 44)) + '</td>' +
+        '<td><button type="button" data-locate="' + d[1] + '">' + T('p.locate', 'locate') + '</button></td></tr>';
+    }).join('') +
+      '<tr><td><code>BALANCES</code></td><td>' + T('wp.dRetry', 're-run the keyless balance reads') + '</td><td class="d">' +
+      (window.__walletRefreshBalances ? T('wp.dRetryNote', 'requires a connected soul') : '—') + '</td>' +
+      '<td><button type="button" id="wdiag-retry">' + T('p.retry', 'retry') + '</button></td></tr>';
+    tb.querySelectorAll('[data-locate]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var el = document.querySelector(b.getAttribute('data-locate'));
+        if (!el) return;
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.style.outline = '2px solid #45C2DC'; el.style.outlineOffset = '3px';
+        setTimeout(function () { el.style.outline = ''; el.style.outlineOffset = ''; }, 2200);
+      });
+    });
+    var rb = $p('wdiag-retry');
+    if (rb) rb.addEventListener('click', function () {
+      if (window.__walletRefreshBalances) window.__walletRefreshBalances();
+      setTimeout(paint, 900);
+    });
+  }
+
+  /* the recovery bars — one tap, friendly words; honest about the connect
+     precondition (never imply a read ran when it could not) */
+  function balState() {
+    var v = txt('v-stat'), h = txt('h-stat');
+    var downs = [v, h].filter(function (t) { return /failed|unreach|refused|could not/.test(t); }).length;
+    var oks = [v, h].filter(function (t) { return /✓ live/.test(t); }).length;
+    if (downs) return 'down';
+    if (oks === 2) return 'ok';
+    return 'checking';
+  }
+  function connected() { return !/not connected/.test(txt('wstat')); }
+  function paintRecov(barId, txtId) {
+    var bar = $p(barId), el = $p(txtId);
+    if (!bar || !el) return;
+    var st = balState();
+    bar.className = 'recov' + (st === 'ok' ? ' ok' : (st === 'down' ? ' down' : ''));
+    if (!connected()) el.textContent = T('p.connectFirst', 'connect your soul first — then one tap re-reads your balances');
+    else el.textContent = st === 'ok' ? T('p.allWell', 'everything read live — prices, law rows, ledger')
+      : st === 'down' ? T('p.someDown', 'some reads did not answer — one tap tries again')
+      : T('p.checking', 'checking the live reads…');
+  }
+  ['wrecov-btn', 'wrecov-rbtn'].forEach(function (id) {
+    var b = $p(id);
+    if (b) b.addEventListener('click', function () {
+      if (window.__walletRefreshBalances) window.__walletRefreshBalances();
+      paint();
+    });
+  });
+
+  function paint() { paintRecov('wrecov', 'wrecov-txt'); paintRecov('wrecov-r', 'wrecov-rtxt'); paintOR(); }
+  document.addEventListener('bregister', paint);
+  document.addEventListener('blang', paint);
+  paint();
+  setInterval(function () { if (!document.hidden) paint(); }, 2500);
+})();
+</script>
 </body>
 </html>

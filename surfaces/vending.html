@@ -177,6 +177,77 @@ main{max-width:462px;margin:0 auto}
 #doorstate .held{color:var(--amber);font-weight:600}
 #doorstate code{color:var(--gold);word-break:break-all;font-size:10.5px}
 .dotted{border-bottom:1px dashed var(--faint)}
+/* ═══ PERSONA LAYER — three registers, three hierarchies (one set of facts).
+   New panels use .pcard (never .card/.step) so the vending-shot lane's
+   nth-of-type contracts cannot shift. The cypherpunk register carries the
+   OR-1 command board: an interface concept mapping this machine's own
+   live states onto a trauma-level-1 operating-room readout — labeled as a
+   concept on its face, never as clinical advice or a medical-care tool. */
+.pcard{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:14px;margin-top:14px;position:relative}
+.pcard h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
+.pcard .plaw{font-size:11.5px;color:var(--dim);line-height:1.7}
+.pcard .plaw b{color:var(--ink)}
+.pcard a{color:var(--gold);text-decoration:none;border-bottom:1px dashed var(--gold)}
+/* the recovery bar — one tap, friendly words, never a dead end */
+.recov{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;padding:10px 12px;
+  border:1px dashed var(--line);border-radius:var(--r-md);font-size:11.5px;color:var(--dim)}
+.recov .rdot{width:9px;height:9px;border-radius:50%;background:var(--amber);flex:none}
+.recov.ok .rdot{background:var(--ok);box-shadow:0 0 10px var(--ok)}
+.recov.down .rdot{background:var(--flag)}
+.recov button{background:transparent;color:var(--gold);border:1.5px solid var(--gold);
+  border-radius:var(--r-lg);padding:9px 16px;font:600 12px 'IBM Plex Mono',monospace;
+  cursor:pointer;min-height:40px}
+.recov button:hover{color:var(--ink-hi);border-color:var(--ink-hi)}
+/* raver's floor banner — translation-forward, social, gold-hearted */
+.plurb{display:none;gap:8px 18px;flex-wrap:wrap;margin-top:10px;font-size:10px;color:var(--dim)}
+.plurb b{font:700 clamp(1.1rem,3vw,1.6rem)/1 'IBM Plex Mono',monospace;letter-spacing:-.01em}
+.plurb b:nth-of-type(1){color:var(--cyan)} .plurb b:nth-of-type(2){color:var(--violet)}
+.plurb b:nth-of-type(3){color:#6FA9E0} .plurb b:nth-of-type(4){color:var(--gold)}
+body[data-reg="raver"] .plurb{display:flex}
+body[data-reg="raver"] .p-raver{border-color:rgba(201,160,255,.35);
+  background:linear-gradient(160deg,rgba(201,160,255,.07),var(--bg2) 55%)}
+body[data-reg="raver"] .vtongue-hi{outline:2px solid var(--violet);outline-offset:2px;border-radius:var(--r-md)}
+body[data-reg="bee"] .step{letter-spacing:.1em}
+body[data-reg="bee"] .pcard{border-radius:var(--r-lg)}
+/* ── the OR-1 command board (cypherpunk only) ─────────────────────────── */
+body[data-reg="cypherpunk"] .p-or{display:block}
+.p-or{display:none;border-color:rgba(69,194,220,.35)}
+.orbanner{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 12px;margin-bottom:10px;
+  border:1px solid rgba(232,181,75,.5);border-radius:var(--r-md);
+  background:rgba(232,181,75,.06);font-size:10.5px;color:var(--amber);letter-spacing:.06em}
+.orbanner .tri{width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;
+  border-bottom:12px solid var(--amber);flex:none}
+.orbanner .cpt{font-weight:600;letter-spacing:.14em;color:var(--gold)}
+.ortracks{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+@media(max-width:560px){.ortracks{grid-template-columns:1fr}}
+.ortrack{border:1px solid var(--line);border-radius:var(--r-md);padding:8px 10px;font-size:10px;color:var(--faint);line-height:1.6}
+.ortrack b{display:block;color:var(--ink);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
+.ortrack.in b{color:var(--cyan)} .ortrack.out b{color:var(--violet)}
+.orgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}
+.orphase{border:1px solid var(--line);border-radius:var(--r-md);padding:9px 10px;background:var(--well)}
+.orphase h4{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+.orphase .orow{display:flex;justify-content:space-between;gap:8px;align-items:baseline;padding:3.5px 0;
+  border-bottom:1px dashed var(--line);font-size:10px}
+.orphase .orow:last-child{border-bottom:none}
+.orphase .orow .lbl{color:var(--dim);white-space:nowrap}
+.orphase .orow .ev{color:var(--faint);text-align:right;overflow-wrap:anywhere;max-width:60%}
+.orchip{display:inline-block;min-width:34px;text-align:center;font-size:8.5px;letter-spacing:.08em;
+  border-radius:99px;padding:1px 6px;border:1px solid var(--line);color:var(--faint)}
+.orchip.ok{color:var(--ok);border-color:rgba(63,156,85,.5)}
+.orchip.warn{color:var(--amber);border-color:rgba(255,179,71,.5)}
+.orchip.down{color:var(--flag);border-color:rgba(192,127,28,.6)}
+.ordiag{margin-top:10px;border-top:1px solid var(--line);padding-top:9px}
+.ordiag summary{cursor:pointer;font-size:10px;color:var(--cyan);letter-spacing:.1em;text-transform:uppercase}
+.ordiag table{width:100%;border-collapse:collapse;margin-top:7px;font-size:10px}
+.ordiag th{text-align:left;color:var(--faint);font-weight:400;font-size:8.5px;text-transform:uppercase;
+  letter-spacing:.12em;padding:4px 6px;border-bottom:1px solid var(--line)}
+.ordiag td{padding:4.5px 6px;border-bottom:1px dashed var(--line);color:var(--dim);vertical-align:top}
+.ordiag td code{color:var(--gold);font-size:9.5px}
+.ordiag td .d{color:var(--faint);overflow-wrap:anywhere}
+.ordiag button{background:transparent;border:1px solid var(--line);color:var(--dim);border-radius:6px;
+  padding:3px 9px;font:600 9px 'IBM Plex Mono',monospace;cursor:pointer;min-height:26px}
+.ordiag button:hover{color:var(--ink);border-color:var(--dim)}
 @media (max-width:390px){.cell .s{font-size:9px}}
 @media (prefers-reduced-motion:reduce){.hex.nectar.live,.hex.honey.live,.sep{animation:none}}
 </style>
@@ -194,6 +265,60 @@ main{max-width:462px;margin:0 auto}
     <small>skaists vending · keep what you make</small>
   </div>
 </header>
+
+<!-- ═══ PERSONA PANELS — one machine, three ways in (same facts, same law) ═══ -->
+
+<!-- NEW BEE — the welcome and the trust contract, before any step -->
+<section class="pcard p-bee" data-reg="bee" aria-label="welcome and live status">
+  <h3 data-i18n="vp.beeTitle">welcome — how this works</h3>
+  <p class="plaw" data-i18n="vp.beeBody">You are about to make a little AI that belongs to you. Naming it is free, watching it land is free, and nothing is ever paid until you approve a plan that shows the whole price first. Today everything runs on rehearsal money — a test network — so you can try the whole thing safely.</p>
+  <div class="recov" id="precov" data-reg="bee">
+    <span class="rdot" aria-hidden="true"></span>
+    <span id="precov-txt" data-i18n="p.checking">checking the live reads…</span>
+    <button type="button" id="precov-btn" data-i18n="p.retryAll">try the live reads again</button>
+  </div>
+</section>
+
+<!-- RAVER — the floor banner: translation-forward, social, gold-hearted -->
+<section class="pcard p-raver" data-reg="raver" aria-label="the floor banner">
+  <h3 data-i18n="vp.raverTitle">the floor is open</h3>
+  <p class="plaw" data-i18n="vp.raverBody">Mint a soul for the floor — any name your tongue writes, the rail accepts whole. It gets a house, speaks your tongue, and stays yours: come as you are, keep what you make.</p>
+  <div class="plurb" aria-label="PLUR">
+    <b data-i18n="plur.peace">peace</b><b data-i18n="plur.love">love</b><b data-i18n="plur.unity">unity</b><b data-i18n="plur.respect">respect</b>
+  </div>
+  <p class="plaw" style="margin-top:8px"><span data-i18n="vp.tongues">this rail speaks 28 tongues —</span>
+    <button type="button" class="vtongue-hi" id="plang-btn" style="background:transparent;border:none;color:var(--violet);font:600 11px 'IBM Plex Mono',monospace;cursor:pointer;padding:2px 4px;min-height:32px" data-i18n="vp.pickTongue">pick yours for the name</button>
+    <span id="psocial" style="color:var(--faint)"></span></p>
+  <div class="recov" id="precov-r" data-reg="raver">
+    <span class="rdot" aria-hidden="true"></span>
+    <span id="precov-rtxt" data-i18n="p.checking">checking the live reads…</span>
+    <button type="button" id="precov-rbtn" data-i18n="p.retryAll">try the live reads again</button>
+  </div>
+</section>
+
+<!-- CYPHERPUNK — the OR-1 command board. An interface concept mapping this
+     machine's OWN live states onto a trauma-level-1 operating-room readout:
+     inpatient/outpatient tracks, five phases, every cell quoting a real
+     read. Not clinical advice, not a medical-care tool — labeled as such on
+     its face, in every tongue the corpus carries. -->
+<section class="pcard p-or" id="orboard" data-reg="cypherpunk" aria-label="OR-1 command board — interface concept">
+  <div class="orbanner">
+    <span class="tri" aria-hidden="true"></span>
+    <span class="cpt" data-i18n="p.orBanner">OR-1 COMMAND · TRAUMA LEVEL 1</span>
+    <span data-i18n="p.orConcept">interface concept · systems visualization — not clinical advice, not a medical-care tool</span>
+  </div>
+  <div class="ortracks">
+    <div class="ortrack in"><b data-i18n="p.trackIn">inpatient track</b><span data-i18n="vp.trackInBody">keyed stay: memory on autonomi, your key, deletable — the agent lives inside the estate's care</span></div>
+    <div class="ortrack out"><b data-i18n="p.trackOut">outpatient track</b><span data-i18n="vp.trackOutBody">walk-out: the certificate carries the recipe — anyone can re-stand the agent, no account needed</span></div>
+  </div>
+  <div class="orgrid" id="orgrid"></div>
+  <details class="ordiag" id="ordiag">
+    <summary data-i18n="p.diag">diagnostics</summary>
+    <table><thead><tr><th data-i18n="p.dCode">code</th><th data-i18n="p.dRead">read</th><th data-i18n="p.evLabel">evidence</th><th></th></tr></thead>
+    <tbody id="ordiag-body"></tbody></table>
+  </details>
+</section>
+
 
 <!-- ── 1 · NAME IT ─────────────────────────────────────────────── -->
 <div class="step" id="s1">1 · name it</div>
@@ -303,7 +428,8 @@ main{max-width:462px;margin:0 auto}
   law rows read live from the vending contract on jungle4 (bnrapolltest · rehearsal
   net) · A price <span id="vpricedate">live</span> · spec
   <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/specs/SPEC-VENDING-1.md">SPEC-VENDING-1/2 in the estate tree</a> ·
-  the meter receipt <a href="#x402-sec">audited in your page</a>
+  the meter receipt <a href="#x402-sec">audited in your page</a> ·
+  <a href="or-board.html" data-i18n="p.orLink">the estate's OR board — live roster</a>
 </footer>
 </main>
 
@@ -779,6 +905,154 @@ $('papprove').addEventListener('click', async () => {
    rate and nonce rows are re-read LIVE from the rehearsal chain when it
    answers, and the pure 9-check audit runs either way — keylessly. Failure
    degrades to a named state, never a fake verdict. */
+</script>
+<script>
+/* ═══ THE PERSONA LAYER — three registers, one machine ═════════════════
+   Reads ONLY what the page already holds (window.__vending + the live DOM):
+   no second transport, no stored snapshot, no new claim. Bee and raver get
+   one-tap recovery over the same live reads the page boots; cypherpunk gets
+   the OR-1 command board — this machine's own states, mapped onto a
+   trauma-level-1 readout as an interface concept (never clinical advice,
+   never a medical-care tool — the banner says so in every tongue). */
+'use strict';
+(function () {
+  var $p = function (i) { return document.getElementById(i); };
+  function T(k, fb) { return (window.BNRLanguage && BNRLanguage.text) ? BNRLanguage.text(k, fb) : fb; }
+  var S = window.__vending;
+
+  /* read-completion flags, set by wrapping the page's own boots (writable
+     function bindings — the originals stay the truth, we only listen) */
+  var PS = { law: null, price: null, certs: null, hist: null, info: null };
+  function watch(name, flag, truthy) {
+    if (typeof window[name] !== 'function') return;
+    var orig = window[name];
+    window[name] = function () {
+      return Promise.resolve(orig.apply(null, arguments)).then(
+        function (r) { PS[flag] = truthy ? !!truthy() : true; return r; },
+        function (e) { PS[flag] = false; throw e; });
+    };
+  }
+  watch('readLaw', 'law', function () { return !!S.law; });
+  watch('readPrice', 'price', function () { return S.priceKind === 'live'; });
+  watch('readCerts', 'certs');
+  watch('walkMints', 'hist');
+  watch('tickInfo', 'info', function () { return !!S.info; });
+
+  function retryReads() {
+    if (typeof readLaw === 'function') readLaw().catch(function () {});
+    if (typeof readPrice === 'function') readPrice().catch(function () {});
+    if (typeof readCerts === 'function') readCerts().catch(function () {});
+    if (typeof walkMints === 'function') walkMints().catch(function () {});
+    if (typeof tickInfo === 'function') tickInfo();
+  }
+  ['precov-btn', 'precov-rbtn'].forEach(function (id) {
+    var b = $p(id); if (b) b.addEventListener('click', function () { retryReads(); paint(); });
+  });
+
+  /* the recovery bars — friendly words, one tap, never a dead end */
+  function recovState() {
+    var vals = Object.keys(PS).map(function (k) { return PS[k]; });
+    if (vals.some(function (v) { return v === null; })) return 'checking';
+    if (vals.some(function (v) { return v === false; })) return 'down';
+    return 'ok';
+  }
+  function paintRecov(barId, txtId) {
+    var bar = $p(barId), txt = $p(txtId);
+    if (!bar || !txt) return;
+    var st = recovState();
+    bar.className = 'recov' + (st === 'ok' ? ' ok' : (st === 'down' ? ' down' : ''));
+    txt.textContent = st === 'ok' ? T('p.allWell', 'everything read live — prices, law rows, ledger')
+      : st === 'down' ? T('p.someDown', 'some reads did not answer — one tap tries again')
+      : T('p.checking', 'checking the live reads…');
+  }
+  /* raver's social line — real numbers from the machine, never stored */
+  function paintSocial() {
+    var el = $p('psocial'); if (!el) return;
+    var n = S.law && S.law.count != null ? S.law.count + '/' + (S.law.max != null ? S.law.max : '6⁵') : '—';
+    var last = S.cert && S.cert.agent_name ? S.cert.agent_name : '';
+    el.textContent = ' · ' + T('vp.holds', 'the machine holds') + ' ' + n +
+      (last ? ' · ' + T('vp.latest', 'latest mint') + ': ' + last : '');
+  }
+  $p('plang-btn').addEventListener('click', function () {
+    var s = $p('vtongue');
+    s.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    s.focus({ preventScroll: true });
+  });
+
+  /* ── the OR-1 command board — every cell quotes a real read ─────────── */
+  function txt(id) { var el = $p(id); return el ? el.textContent.trim() : ''; }
+  function chip(st) { return '<span class="orchip ' + st + '">' + (st === 'ok' ? 'OK' : st === 'warn' ? 'HELD' : st === 'down' ? 'DN' : 'N/M') + '</span>'; }
+  function row(label, st, ev) {
+    return '<div class="orow"><span class="lbl">' + label + '</span><span class="ev">' + (ev || '') + ' ' + chip(st) + '</span></div>';
+  }
+  function escp(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function phases() {
+    var nc = txt('vnamechk');
+    var nameSt = /free to mint/.test(nc) ? 'ok' : /already minted/.test(nc) ? 'warn' : /refused|needed/.test(nc) ? 'down' : 'nm';
+    var capped = txt('c-capped-l');
+    var res = S.resurrected;
+    var x4 = txt('x402body');
+    return [
+      [T('p.phPreop', 'pre-operative assessment'), [
+        [T('vp.gName', 'name canon screen'), nameSt, /refused/.test(nc) ? 'contraindication refused' : (nc.replace(/^ — /, '').slice(0, 34) || '—')],
+        [T('vp.gLaw', 'law rows'), S.law ? 'ok' : 'down', S.law ? 'rate ' + S.law.basisTxt + ' A · tithe ' + (S.law.titheBp / 100) + '%' : 'chain unread — n/m'],
+        [T('vp.gPrice', 'price basis'), S.priceKind === 'live' ? 'ok' : 'warn', S.priceKind === 'live' ? 'live read' : 'unreachable — labeled basis']
+      ]],
+      [T('p.phReady', 'procedure readiness'), [
+        [T('vp.gRailA', 'rail A · rehearsal'), 'ok', 'armed · memo-bound · jungle4'],
+        [T('vp.gRails', 'USDC / PYUSD rails'), 'warn', 'held — the founder names the seat'],
+        [T('vp.gCap', 'machine capacity'), S.law && S.law.count != null ? 'ok' : 'nm', S.law && S.law.count != null ? S.law.count + ' / ' + S.law.max : '—']
+      ]],
+      [T('p.phProc', 'the procedure'), [
+        [T('vp.gConsent', 'consent gate'), 'ok', 'the plan — nothing moves before approve'],
+        [T('vp.gMemo', 'binding memo'), S.canonName ? 'ok' : 'nm', S.canonName ? 'vending:' + escp(S.canonName) : '—']
+      ]],
+      [T('p.phPost', 'post-operative recovery'), [
+        [T('vp.gNectar', 'sent · nectar'), 'ok', 'it was sent'],
+        [T('vp.gHoney', 'block · honey'), /—/.test(txt('c-honey-s')) ? 'nm' : 'ok', txt('c-honey-s') || '—'],
+        [T('vp.gCapped', 'final · capped'), /✓/.test(capped) ? 'ok' : /sealing/.test(capped) ? 'warn' : 'nm', capped || '—'],
+        [T('vp.gChain', 'chain check'), S.info ? 'ok' : 'down', S.info ? 'head ' + S.info.head_block_num : 'unreachable — n/m']
+      ]],
+      [T('p.phDischarge', 'discharge & follow-up'), [
+        [T('vp.gCert', 'discharge record'), S.cert ? 'ok' : 'nm', S.cert ? 'ar://' + String(S.cert.ar_id || '').slice(0, 8) + '…' : '—'],
+        [T('vp.gRes', 'discharge criteria'), res ? (res.fail === 0 ? 'ok' : 'down') : 'nm', res ? res.pass + ' passed · ' + res.fail + ' failed' : 'not run yet — scroll to the certificate'],
+        [T('vp.gX402', 'meter audit'), /unreadable/.test(x4) ? 'down' : /audited|passed|ok/i.test(x4) ? 'ok' : 'nm', x4.slice(0, 30) || '—'],
+        [T('vp.gCadence', 'follow-up cadence'), 'ok', 'history walk 45s · chain check 15s']
+      ]]
+    ];
+  }
+  function paintOR() {
+    var grid = $p('orgrid'); if (!grid) return;
+    grid.innerHTML = phases().map(function (ph) {
+      return '<div class="orphase"><h4>' + ph[0] + '</h4>' +
+        ph[1].map(function (r) { return row(r[0], r[1], r[2]); }).join('') + '</div>';
+    }).join('');
+    /* the diagnostics table — cypherpunk's detailed view of the same reads */
+    var tb = $p('ordiag-body');
+    tb.innerHTML = [
+      ['LAW-ROWS', T('vp.gLaw', 'law rows'), PS.law === false ? 'unread' : PS.law ? 'read live' : 'pending', 'readLaw'],
+      ['PRICE', T('vp.gPrice', 'price basis'), PS.price === false || S.priceKind !== 'live' ? (S.priceKind === 'live' ? 'live' : 'labeled fallback') : 'live', 'readPrice'],
+      ['CERTS', T('vp.gCert', 'discharge record'), PS.certs ? S.certs.length + ' row(s)' : 'unread', 'readCerts'],
+      ['HISTORY', T('vp.gCadence', 'follow-up cadence'), PS.hist ? S.mints.length + ' mint(s)' : 'unread', 'walkMints'],
+      ['CHAININFO', T('vp.gChain', 'chain check'), PS.info ? 'head ' + (S.info && S.info.head_block_num) : 'unreachable', 'tickInfo']
+    ].map(function (d) {
+      return '<tr><td><code>' + d[0] + '</code></td><td>' + d[1] + '</td><td class="d">' + d[2] + '</td>' +
+        '<td><button type="button" data-retry="' + d[3] + '">' + T('p.retry', 'retry') + '</button></td></tr>';
+    }).join('');
+    tb.querySelectorAll('[data-retry]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var fn = window[b.getAttribute('data-retry')];
+        if (typeof fn === 'function') Promise.resolve(fn()).catch(function () {});
+        setTimeout(paint, 900);
+      });
+    });
+  }
+  function paint() { paintRecov('precov', 'precov-txt'); paintRecov('precov-r', 'precov-rtxt'); paintSocial(); paintOR(); }
+  document.addEventListener('bregister', paint);
+  document.addEventListener('blang', paint);
+  paint();
+  setInterval(function () { if (!document.hidden) paint(); }, 2000);
+})();
 </script>
 <script src="x402-meter.js?v=1"></script>
 <script>
